@@ -50,6 +50,9 @@ static inline void shm_exit_ns(struct ipc_namespace *ns) { }
 struct ipc_rcu {
 	struct rcu_head rcu;
 	atomic_t refcount;
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	void *data[0];
+#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 } ____cacheline_aligned_in_smp;
 
 #define ipc_rcu_to_struct(p)  ((void *)(p+1))

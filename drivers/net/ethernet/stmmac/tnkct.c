@@ -977,7 +977,7 @@ static void tnk_ct_rx_callback(struct sk_buff *skb, unsigned cindex,
 	bh_lock_sock(sk);
 	/*  The following function should not be called with irqs disabled */
 	if (!skb_queue_empty(&e->receive_queue) && !full_pkt_recved)
-		sk->sk_data_ready(sk, 0);
+		sk->sk_data_ready(sk);
 
 	bh_unlock_sock(sk);
 
@@ -1220,7 +1220,7 @@ void tnk_ct_ofo_queue(unsigned cindex)
 
 	/*  The following function should not be called with irqs disabled */
 	if (!skb_queue_empty(&e->receive_queue) && !full_pkt_recved)
-		sk->sk_data_ready(sk, 0);
+		sk->sk_data_ready(sk);
 
 	bh_unlock_sock(sk);
 
@@ -1845,6 +1845,12 @@ int tnk_ct_init(unsigned int max_connections)
 		spin_lock_init(&e->tx_q_lock);
 		spin_lock_init(&e->adv_wnd_lock);
 
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if SWITCH_RECV_LRO
+		setup_timer(&e->remove_timer, tnk_ct_remove_rx_timer,
+			(unsigned long)e);
+#endif
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 		skb_queue_head_init(&e->receive_queue);
 		skb_queue_head_init(&e->transmit_queue);
 		skb_queue_head_init(&e->out_of_order_queue);
@@ -1910,6 +1916,30 @@ void tnk_ct_close_active_connections(int graceful)
 	}
 }
 
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if SWITCH_RECV_LRO
+static void tnk_ct_clear_remove_entry_list(void)
+{
+	struct tnkentry *e;
+	int i;
+
+	for (i = 2; i < tnk_max_connections; i++) {
+		e = &tnk_entry_list[i];
+		del_timer_sync(&e->remove_timer);
+	}
+
+	spin_lock(&tnk_ct_lock);
+	while ((e = tnk_remove_entry_list)) {
+		tnkhw_rx_lro_cleanup(e->index);
+		ct_list_del(&tnk_remove_entry_list, e);
+		ct_list_add(&tnk_free_entry_list, e);
+		module_put(THIS_MODULE);
+	}
+	spin_unlock(&tnk_ct_lock);
+}
+#endif
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+
 void tnk_ct_shutdown(void)
 {
 	unregister_inetaddr_notifier(&tnk_ct_inetaddr_notifier);
@@ -1936,6 +1966,11 @@ void tnk_ct_shutdown(void)
 #endif
 #endif
 
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if SWITCH_RECV_LRO
+	tnk_ct_clear_remove_entry_list();
+#endif
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 	kfree(tnk_entry_list);
 	tnk_entry_list = NULL;
 }
@@ -2343,10 +2378,14 @@ struct tnkentry *tnk_ct_create(struct sock *sk, struct tnkentry *e)
 	setup_timer(&e->check_keepalive_timer, tnk_check_alive_timer,
 			(unsigned long)e);
 #endif
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 #if SWITCH_RECV_LRO
 	setup_timer(&e->remove_timer, tnk_ct_remove_rx_timer,
 			(unsigned long)e);
 #endif
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 
 	/*  Now that the entry struct is initialised, add it to the list */
 	spin_lock(&tnk_ct_lock);
@@ -2507,10 +2546,18 @@ int tnk_ct_stop(struct tnkentry *e, int tx_done_timeout)
 		skb_queue_len(&e->sk->sk_write_queue));
 #endif
 #if !SWITCH_ZERO_PROBE
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+	del_timer_sync(&e->zero_window_probe_timer);
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 	del_timer(&e->zero_window_probe_timer);
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 #endif
 #if SWITCH_KEEPALIVE
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+	del_timer_sync(&e->check_keepalive_timer);
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 	del_timer(&e->check_keepalive_timer);
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 #endif
 	return err;
 }
@@ -2526,7 +2573,11 @@ void tnk_ct_remove(struct tnkentry *e)
 	atomic_dec(&tnk_num_active_connections);
 #if SWITCH_RECV_LRO
 	if (atomic_read(&tnk_num_active_connections) == 0)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+		del_timer_sync(&tnk_zero_wnd_check_timer);
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 		del_timer(&tnk_zero_wnd_check_timer);
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 #endif
 	spin_unlock(&tnk_ct_lock);
 

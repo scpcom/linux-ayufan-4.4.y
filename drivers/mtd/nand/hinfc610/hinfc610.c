@@ -1,10 +1,20 @@
-/******************************************************************************
- *    COPYRIGHT (C) 2013 Czyong. Hisilicon
- *    All rights reserved.
- * ***
- *    Create by Czyong 2013-02-07
+/*
+ * Copyright (c) 2016 HiSilicon Technologies Co., Ltd.
  *
-******************************************************************************/
+ * This program is free software; you can redistribute  it and/or modify it
+ * under  the terms of  the GNU General Public License as published by the
+ * Free Software Foundation;  either version 2 of the  License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 
 #define pr_fmt(fmt) "hinfc610: " fmt
 
@@ -726,15 +736,59 @@ void hinfc610_write_buf(struct mtd_info *mtd, const uint8_t *buf,
 	memcpy(host->buffer + host->column + host->offset, buf, len);
 	host->offset += len;
 }
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+/*****************************************************************************/
+static void hinfc610_ecc_err_num_count(struct mtd_info *mtd,
+		uint8_t ecc_st, int reg)
+{
+	u_char err_num;
+
+	if (ecc_st > 4)
+		ecc_st = 4;
+
+	while (ecc_st) {
+		err_num = GET_ECC_ERR_NUM(--ecc_st, reg);
+		if (err_num == 0xff)
+			mtd->ecc_stats.failed++;
+		else
+			mtd->ecc_stats.corrected += err_num;
+	}
+}
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
+
 /*****************************************************************************/
 
 void hinfc610_read_buf(struct mtd_info *mtd, uint8_t *buf, int len)
 {
 	struct nand_chip *chip = mtd->priv;
 	struct hinfc_host *host = chip->priv;
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+	int reg;
+	uint8_t ecc_step = host->pagesize >> 10;
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 
 	memcpy(buf, host->buffer + host->column + host->offset, len);
 	host->offset += len;
+
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+	/* 2K or 4K or 8K(1) or 16K(1-1) pagesize */
+	reg = hinfc_read(host, HINFC_ECC_ERR_NUM0_BUF0);
+	hinfc610_ecc_err_num_count(mtd, ecc_step, reg);
+
+	if (ecc_step > 4) {
+		/* 8K(2) or 16K(1-2) pagesize */
+		reg = hinfc_read(host, HINFC_ECC_ERR_NUM1_BUF0);
+		hinfc610_ecc_err_num_count(mtd, ecc_step, reg);
+		if (ecc_step > 8) {
+			/* 16K(2-1) pagesize */
+			reg = hinfc_read(host, HINFC_ECC_ERR_NUM0_BUF1);
+			hinfc610_ecc_err_num_count(mtd, ecc_step, reg);
+			/* 16K(2-2) pagesize */
+			reg = hinfc_read(host, HINFC_ECC_ERR_NUM1_BUF1);
+			hinfc610_ecc_err_num_count(mtd, ecc_step, reg);
+		}
+	}
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 }
 /*****************************************************************************/
 /*

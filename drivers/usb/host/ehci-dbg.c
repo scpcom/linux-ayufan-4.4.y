@@ -725,7 +725,7 @@ static ssize_t fill_registers_buffer(struct debug_buffer *buf)
 	size -= temp;
 	next += temp;
 
-#if defined(CONFIG_PCI) && (!defined(CONFIG_SYNO_LSP_HI3536) || (defined(CONFIG_SYNO_LSP_HI3536) && !defined(CONFIG_ARCH_HI3536)))
+#if defined(CONFIG_PCI)
 	/* EHCI 0.96 and later may have "extended capabilities" */
 	if (hcd->self.controller->bus == &pci_bus_type) {
 		struct pci_dev	*pdev;

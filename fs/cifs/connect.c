@@ -415,11 +415,12 @@ allocate_buffers(struct TCP_Server_Info *server)
 static bool
 server_unresponsive(struct TCP_Server_Info *server)
 {
-	 
-	if (server->tcpStatus == CifsGood &&
-	    time_after(jiffies, server->lstrp + 2 * SMB_ECHO_INTERVAL)) {
-		cifs_dbg(VFS, "Server %s has not responded in %d seconds. Reconnecting...\n",
-			 server->hostname, (2 * SMB_ECHO_INTERVAL) / HZ);
+	if (echo_retries > 0 && server->tcpStatus == CifsGood &&
+	    time_after(jiffies, server->lstrp +
+				(echo_retries * SMB_ECHO_INTERVAL))) {
+		cifs_dbg(VFS, "Server %s has not responded in %d seconds. "
+			  "Reconnecting...", server->hostname,
+			  (echo_retries * SMB_ECHO_INTERVAL / HZ));
 		cifs_reconnect(server);
 		wake_up(&server->response_q);
 		return true;

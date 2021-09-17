@@ -68,6 +68,8 @@ struct btrfs_ordered_sum;
 
 #define BTRFS_UUID_TREE_OBJECTID 9ULL
 
+#define BTRFS_FREE_SPACE_TREE_OBJECTID 10ULL
+
 #ifdef MY_ABC_HERE
 #define BTRFS_BLOCK_GROUP_HINT_TREE_OBJECTID 202ULL
 #endif
@@ -363,6 +365,10 @@ struct btrfs_super_block {
 	struct btrfs_root_backup super_roots[BTRFS_NUM_BACKUP_ROOTS];
 } __attribute__ ((__packed__));
 
+#define BTRFS_FEATURE_COMPAT_RO_FREE_SPACE_TREE	(1ULL << 0)
+
+#define BTRFS_FEATURE_COMPAT_RO_FREE_SPACE_TREE_VALID	(1ULL << 1)
+
 #define BTRFS_FEATURE_INCOMPAT_MIXED_BACKREF	(1ULL << 0)
 #define BTRFS_FEATURE_INCOMPAT_DEFAULT_SUBVOL	(1ULL << 1)
 #define BTRFS_FEATURE_INCOMPAT_MIXED_GROUPS	(1ULL << 2)
@@ -380,7 +386,11 @@ struct btrfs_super_block {
 #define BTRFS_FEATURE_COMPAT_SUPP		0ULL
 #define BTRFS_FEATURE_COMPAT_SAFE_SET		0ULL
 #define BTRFS_FEATURE_COMPAT_SAFE_CLEAR		0ULL
-#define BTRFS_FEATURE_COMPAT_RO_SUPP		0ULL
+
+#define BTRFS_FEATURE_COMPAT_RO_SUPP			\
+	(BTRFS_FEATURE_COMPAT_RO_FREE_SPACE_TREE |	\
+	 BTRFS_FEATURE_COMPAT_RO_FREE_SPACE_TREE_VALID)
+
 #define BTRFS_FEATURE_COMPAT_RO_SAFE_SET	0ULL
 #define BTRFS_FEATURE_COMPAT_RO_SAFE_CLEAR	0ULL
 
@@ -780,6 +790,13 @@ struct btrfs_block_group_item {
 	__le64 flags;
 } __attribute__ ((__packed__));
 
+struct btrfs_free_space_info {
+	__le32 extent_count;
+	__le32 flags;
+} __attribute__ ((__packed__));
+
+#define BTRFS_FREE_SPACE_USING_BITMAPS (1ULL << 0)
+
 #define BTRFS_QGROUP_STATUS_FLAG_ON		(1ULL << 0)
  
 #define BTRFS_QGROUP_STATUS_FLAG_RESCAN		(1ULL << 1)
@@ -929,6 +946,8 @@ struct btrfs_caching_control {
 	atomic_t count;
 };
 
+#define CACHING_CTL_WAKE_UP (1024 * 1024 * 2)
+
 struct btrfs_io_ctl {
 	void *cur, *orig;
 	struct page *page;
@@ -954,8 +973,12 @@ struct btrfs_block_group_cache {
 	u64 delalloc_bytes;
 	u64 bytes_super;
 	u64 flags;
-	u64 sectorsize;
 	u64 cache_generation;
+	u32 sectorsize;
+
+	u32 bitmap_high_thresh;
+
+	u32 bitmap_low_thresh;
 
 	struct rw_semaphore data_rwsem;
 
@@ -994,6 +1017,10 @@ struct btrfs_block_group_cache {
 	struct list_head io_list;
 
 	struct btrfs_io_ctl io_ctl;
+
+	struct mutex free_space_lock;
+
+	int needs_free_space;
 };
 
 struct seq_list {
@@ -1040,6 +1067,7 @@ struct btrfs_fs_info {
 	struct btrfs_root *csum_root;
 	struct btrfs_root *quota_root;
 	struct btrfs_root *uuid_root;
+	struct btrfs_root *free_space_root;
 #ifdef MY_ABC_HERE
 	struct btrfs_root *block_group_hint_root;
 #endif
@@ -1324,6 +1352,8 @@ struct btrfs_fs_info {
 
 	struct list_head pinned_chunks;
 
+	int creating_free_space_tree;
+
 #ifdef MY_ABC_HERE
 	atomic_t reada_block_group_threads;  
 	spinlock_t block_group_hint_tree_lock;  
@@ -1407,9 +1437,7 @@ struct btrfs_root {
 
 	u64 highest_objectid;
 
-#ifdef CONFIG_BTRFS_FS_RUN_SANITY_TESTS
 	u64 alloc_bytenr;
-#endif
 
 	u64 defrag_trans_start;
 	struct btrfs_key defrag_progress;
@@ -1541,6 +1569,12 @@ struct btrfs_snapshot_size_ctx {
 
 #define BTRFS_BLOCK_GROUP_ITEM_KEY 192
 
+#define BTRFS_FREE_SPACE_INFO_KEY 198
+
+#define BTRFS_FREE_SPACE_EXTENT_KEY 199
+
+#define BTRFS_FREE_SPACE_BITMAP_KEY 200
+
 #define BTRFS_DEV_EXTENT_KEY	204
 #define BTRFS_DEV_ITEM_KEY	216
 #define BTRFS_CHUNK_ITEM_KEY	228
@@ -1592,6 +1626,7 @@ struct btrfs_snapshot_size_ctx {
 #define BTRFS_MOUNT_PANIC_ON_FATAL_ERROR	(1 << 22)
 #define BTRFS_MOUNT_RESCAN_UUID_TREE	(1 << 23)
 #define	BTRFS_MOUNT_CHANGE_INODE_CACHE	(1 << 24)
+#define BTRFS_MOUNT_FREE_SPACE_TREE	(1 << 26)
 
 #define BTRFS_DEFAULT_COMMIT_INTERVAL	(30)
 
@@ -1848,6 +1883,10 @@ BTRFS_SETGET_FUNCS(disk_block_group_flags,
 		   struct btrfs_block_group_item, flags, 64);
 BTRFS_SETGET_STACK_FUNCS(block_group_flags,
 			struct btrfs_block_group_item, flags, 64);
+
+BTRFS_SETGET_FUNCS(free_space_extent_count, struct btrfs_free_space_info,
+		   extent_count, 32);
+BTRFS_SETGET_FUNCS(free_space_flags, struct btrfs_free_space_info, flags, 32);
 
 BTRFS_SETGET_FUNCS(inode_ref_name_len, struct btrfs_inode_ref, name_len, 16);
 BTRFS_SETGET_FUNCS(inode_ref_index, struct btrfs_inode_ref, index, 64);
@@ -2903,7 +2942,9 @@ void check_system_chunk(struct btrfs_trans_handle *trans,
 			struct btrfs_root *root,
 			const u64 type,
 			const bool is_allocation);
- 
+u64 add_new_free_space(struct btrfs_block_group_cache *block_group,
+		       struct btrfs_fs_info *info, u64 start, u64 end);
+
 int btrfs_bin_search(struct extent_buffer *eb, struct btrfs_key *key,
 		     int level, int *slot);
 int btrfs_comp_cpu_keys(struct btrfs_key *k1, struct btrfs_key *k2);
@@ -3068,6 +3109,7 @@ static inline void free_fs_info(struct btrfs_fs_info *fs_info)
 	kfree(fs_info->csum_root);
 	kfree(fs_info->quota_root);
 	kfree(fs_info->uuid_root);
+	kfree(fs_info->free_space_root);
 	kfree(fs_info->super_copy);
 	kfree(fs_info->super_for_commit);
 	kfree(fs_info);
@@ -3467,6 +3509,30 @@ static inline void __btrfs_set_fs_incompat(struct btrfs_fs_info *fs_info,
 	}
 }
 
+#define btrfs_clear_fs_incompat(__fs_info, opt) \
+	__btrfs_clear_fs_incompat((__fs_info), BTRFS_FEATURE_INCOMPAT_##opt)
+
+static inline void __btrfs_clear_fs_incompat(struct btrfs_fs_info *fs_info,
+					     u64 flag)
+{
+	struct btrfs_super_block *disk_super;
+	u64 features;
+
+	disk_super = fs_info->super_copy;
+	features = btrfs_super_incompat_flags(disk_super);
+	if (features & flag) {
+		spin_lock(&fs_info->super_lock);
+		features = btrfs_super_incompat_flags(disk_super);
+		if (features & flag) {
+			features &= ~flag;
+			btrfs_set_super_incompat_flags(disk_super, features);
+			btrfs_info(fs_info, "clearing %llu feature flag",
+					 flag);
+		}
+		spin_unlock(&fs_info->super_lock);
+	}
+}
+
 #define btrfs_fs_incompat(fs_info, opt) \
 	__btrfs_fs_incompat((fs_info), BTRFS_FEATURE_INCOMPAT_##opt)
 
@@ -3475,6 +3541,64 @@ static inline int __btrfs_fs_incompat(struct btrfs_fs_info *fs_info, u64 flag)
 	struct btrfs_super_block *disk_super;
 	disk_super = fs_info->super_copy;
 	return !!(btrfs_super_incompat_flags(disk_super) & flag);
+}
+
+#define btrfs_set_fs_compat_ro(__fs_info, opt) \
+	__btrfs_set_fs_compat_ro((__fs_info), BTRFS_FEATURE_COMPAT_RO_##opt)
+
+static inline void __btrfs_set_fs_compat_ro(struct btrfs_fs_info *fs_info,
+					    u64 flag)
+{
+	struct btrfs_super_block *disk_super;
+	u64 features;
+
+	disk_super = fs_info->super_copy;
+	features = btrfs_super_compat_ro_flags(disk_super);
+	if (!(features & flag)) {
+		spin_lock(&fs_info->super_lock);
+		features = btrfs_super_compat_ro_flags(disk_super);
+		if (!(features & flag)) {
+			features |= flag;
+			btrfs_set_super_compat_ro_flags(disk_super, features);
+			btrfs_info(fs_info, "setting %llu ro feature flag",
+				   flag);
+		}
+		spin_unlock(&fs_info->super_lock);
+	}
+}
+
+#define btrfs_clear_fs_compat_ro(__fs_info, opt) \
+	__btrfs_clear_fs_compat_ro((__fs_info), BTRFS_FEATURE_COMPAT_RO_##opt)
+
+static inline void __btrfs_clear_fs_compat_ro(struct btrfs_fs_info *fs_info,
+					      u64 flag)
+{
+	struct btrfs_super_block *disk_super;
+	u64 features;
+
+	disk_super = fs_info->super_copy;
+	features = btrfs_super_compat_ro_flags(disk_super);
+	if (features & flag) {
+		spin_lock(&fs_info->super_lock);
+		features = btrfs_super_compat_ro_flags(disk_super);
+		if (features & flag) {
+			features &= ~flag;
+			btrfs_set_super_compat_ro_flags(disk_super, features);
+			btrfs_info(fs_info, "clearing %llu ro feature flag",
+				   flag);
+		}
+		spin_unlock(&fs_info->super_lock);
+	}
+}
+
+#define btrfs_fs_compat_ro(fs_info, opt) \
+	__btrfs_fs_compat_ro((fs_info), BTRFS_FEATURE_COMPAT_RO_##opt)
+
+static inline int __btrfs_fs_compat_ro(struct btrfs_fs_info *fs_info, u64 flag)
+{
+	struct btrfs_super_block *disk_super;
+	disk_super = fs_info->super_copy;
+	return !!(btrfs_super_compat_ro_flags(disk_super) & flag);
 }
 
 #define btrfs_abort_transaction(trans, root, errno)		\
@@ -3592,5 +3716,14 @@ void btrfs_test_destroy_inode(struct inode *inode);
 int btrfs_verify_qgroup_counts(struct btrfs_fs_info *fs_info, u64 qgroupid,
 			       u64 rfer, u64 excl);
 #endif
+
+static inline int btrfs_test_is_dummy_root(struct btrfs_root *root)
+{
+#ifdef CONFIG_BTRFS_FS_RUN_SANITY_TESTS
+	if (unlikely(test_bit(BTRFS_ROOT_DUMMY_ROOT, &root->state)))
+		return 1;
+#endif
+	return 0;
+}
 
 #endif

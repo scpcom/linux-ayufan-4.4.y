@@ -48,6 +48,9 @@ struct inet_peer {
 	union {
 		struct {
 			atomic_t			rid;		/* Frag reception counter */
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+			atomic_t			ip_id_count;
+#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 		};
 		struct rcu_head         rcu;
 		struct inet_peer	*gc_next;

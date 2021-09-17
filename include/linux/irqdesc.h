@@ -24,8 +24,12 @@ struct irq_desc {
 	unsigned int		irq_count;	 
 	unsigned long		last_unhandled;	 
 	unsigned int		irqs_unhandled;
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 	atomic_t		threads_handled;
 	int			threads_handled_last;
+#endif  
 	raw_spinlock_t		lock;
 	struct cpumask		*percpu_enabled;
 #ifdef CONFIG_SMP
@@ -44,6 +48,10 @@ struct irq_desc {
 	int			parent_irq;
 	struct module		*owner;
 	const char		*name;
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	atomic_t		threads_handled;
+	int			threads_handled_last;
+#endif  
 } ____cacheline_internodealigned_in_smp;
 
 #ifndef CONFIG_SPARSE_IRQ

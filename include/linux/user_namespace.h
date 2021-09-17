@@ -27,13 +27,25 @@ struct user_namespace {
 	struct uid_gid_map	projid_map;
 	atomic_t		count;
 	struct user_namespace	*parent;
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	// do nothing
+#else /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 	int			level;
+#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 	kuid_t			owner;
 	kgid_t			group;
 	unsigned int		proc_inum;
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	// do nothing
+#else /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 	unsigned long		flags;
+#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 	bool			may_mount_sysfs;
 	bool			may_mount_proc;
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	int			level;
+	unsigned long		flags;
+#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 };
 
 extern struct user_namespace init_user_ns;

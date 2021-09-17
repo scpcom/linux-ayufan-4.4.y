@@ -1017,6 +1017,8 @@ struct backref_ctx {
 
 	u64 extent_len;
 
+	u64 data_offset;
+
 	int found_itself;
 };
 
@@ -1070,7 +1072,7 @@ static int __iterate_backrefs(u64 ino, u64 offset, u64 root, void *ctx_)
 	if (ret < 0)
 		return ret;
 
-	if (offset + bctx->extent_len > i_size)
+	if (offset + bctx->data_offset + bctx->extent_len > i_size)
 		return 0;
 
 	if (found->root == bctx->sctx->send_root) {
@@ -1184,6 +1186,11 @@ static int find_extent_clone(struct send_ctx *sctx,
 	backref_ctx->cur_offset = data_offset;
 	backref_ctx->found_itself = 0;
 	backref_ctx->extent_len = num_bytes;
+	 
+	if (compressed == BTRFS_COMPRESS_NONE)
+		backref_ctx->data_offset = 0;
+	else
+		backref_ctx->data_offset = btrfs_file_extent_offset(eb, fi);
 
 	if (data_offset + num_bytes >= ino_size)
 		backref_ctx->extent_len = ino_size - data_offset;
@@ -1230,11 +1237,6 @@ verbose_printk(KERN_DEBUG "btrfs: find_extent_clone: data_offset=%llu, "
 	}
 
 	if (cur_clone_root) {
-		if (compressed != BTRFS_COMPRESS_NONE) {
-			 
-			cur_clone_root->offset += btrfs_file_extent_offset(eb,
-									   fi);
-		}
 		*found = cur_clone_root;
 		ret = 0;
 	} else {
@@ -4571,6 +4573,145 @@ tlv_put_failure:
 	return ret;
 }
 
+static int send_extent_data(struct send_ctx *sctx,
+			    const u64 offset,
+			    const u64 len)
+{
+	u64 sent = 0;
+
+	if (sctx->flags & BTRFS_SEND_FLAG_NO_FILE_DATA)
+		return send_update_extent(sctx, offset, len);
+
+	while (sent < len) {
+		u64 size = len - sent;
+		int ret;
+
+		if (size > BTRFS_SEND_READ_SIZE)
+			size = BTRFS_SEND_READ_SIZE;
+		ret = send_write(sctx, offset + sent, size);
+		if (ret < 0)
+			return ret;
+		if (!ret)
+			break;
+		sent += ret;
+	}
+	return 0;
+}
+
+static int clone_range(struct send_ctx *sctx,
+		       struct clone_root *clone_root,
+		       const u64 disk_byte,
+		       u64 data_offset,
+		       u64 offset,
+		       u64 len)
+{
+	struct btrfs_path *path;
+	struct btrfs_key key;
+	int ret;
+
+	path = alloc_path_for_send();
+	if (!path)
+		return -ENOMEM;
+
+	key.objectid = clone_root->ino;
+	key.type = BTRFS_EXTENT_DATA_KEY;
+	key.offset = clone_root->offset;
+	ret = btrfs_search_slot(NULL, clone_root->root, &key, path, 0, 0);
+	if (ret < 0)
+		goto out;
+	if (ret > 0 && path->slots[0] > 0) {
+		btrfs_item_key_to_cpu(path->nodes[0], &key, path->slots[0] - 1);
+		if (key.objectid == clone_root->ino &&
+		    key.type == BTRFS_EXTENT_DATA_KEY)
+			path->slots[0]--;
+	}
+
+	while (true) {
+		struct extent_buffer *leaf = path->nodes[0];
+		int slot = path->slots[0];
+		struct btrfs_file_extent_item *ei;
+		u8 type;
+		u64 ext_len;
+		u64 clone_len;
+
+		if (slot >= btrfs_header_nritems(leaf)) {
+			ret = btrfs_next_leaf(clone_root->root, path);
+			if (ret < 0)
+				goto out;
+			else if (ret > 0)
+				break;
+			continue;
+		}
+
+		btrfs_item_key_to_cpu(leaf, &key, slot);
+
+		if (key.objectid != clone_root->ino ||
+		    key.type != BTRFS_EXTENT_DATA_KEY)
+			break;
+
+		ei = btrfs_item_ptr(leaf, slot, struct btrfs_file_extent_item);
+		type = btrfs_file_extent_type(leaf, ei);
+		if (type == BTRFS_FILE_EXTENT_INLINE) {
+			ext_len = btrfs_file_extent_inline_len(leaf, slot, ei);
+			ext_len = PAGE_CACHE_ALIGN(ext_len);
+		} else {
+			ext_len = btrfs_file_extent_num_bytes(leaf, ei);
+		}
+
+		if (key.offset + ext_len <= clone_root->offset)
+			goto next;
+
+		if (key.offset > clone_root->offset) {
+			 
+			u64 hole_len = key.offset - clone_root->offset;
+
+			if (hole_len > len)
+				hole_len = len;
+			ret = send_extent_data(sctx, offset, hole_len);
+			if (ret < 0)
+				goto out;
+
+			len -= hole_len;
+			if (len == 0)
+				break;
+			offset += hole_len;
+			clone_root->offset += hole_len;
+			data_offset += hole_len;
+		}
+
+		if (key.offset >= clone_root->offset + len)
+			break;
+
+		clone_len = min_t(u64, ext_len, len);
+
+		if (btrfs_file_extent_disk_bytenr(leaf, ei) == disk_byte &&
+		    btrfs_file_extent_offset(leaf, ei) == data_offset)
+			ret = send_clone(sctx, offset, clone_len, clone_root);
+		else
+			ret = send_extent_data(sctx, offset, clone_len);
+
+		if (ret < 0)
+			goto out;
+
+		len -= clone_len;
+		if (len == 0)
+			break;
+		offset += clone_len;
+		clone_root->offset += clone_len;
+		data_offset += clone_len;
+next:
+		path->slots[0]++;
+	}
+
+	if (len > 0)
+		ret = send_extent_data(sctx, offset, len);
+	else
+		ret = 0;
+out:
+	btrfs_free_path(path);
+	return ret;
+}
+
 static int send_write_or_clone(struct send_ctx *sctx,
 			       struct btrfs_path *path,
 			       struct btrfs_key *key,
@@ -4579,9 +4720,7 @@ static int send_write_or_clone(struct send_ctx *sctx,
 	int ret = 0;
 	struct btrfs_file_extent_item *ei;
 	u64 offset = key->offset;
-	u64 pos = 0;
 	u64 len;
-	u32 l;
 	u8 type;
 	u64 bs = sctx->send_root->fs_info->sb->s_blocksize;
 
@@ -4618,22 +4757,15 @@ static int send_write_or_clone(struct send_ctx *sctx,
 #endif
 
 	if (clone_root && IS_ALIGNED(offset + len, bs)) {
-		ret = send_clone(sctx, offset, len, clone_root);
-	} else if (sctx->flags & BTRFS_SEND_FLAG_NO_FILE_DATA) {
-		ret = send_update_extent(sctx, offset, len);
+		u64 disk_byte;
+		u64 data_offset;
+
+		disk_byte = btrfs_file_extent_disk_bytenr(path->nodes[0], ei);
+		data_offset = btrfs_file_extent_offset(path->nodes[0], ei);
+		ret = clone_range(sctx, clone_root, disk_byte, data_offset,
+				  offset, len);
 	} else {
-		while (pos < len) {
-			l = len - pos;
-			if (l > BTRFS_SEND_READ_SIZE)
-				l = BTRFS_SEND_READ_SIZE;
-			ret = send_write(sctx, pos + offset, l);
-			if (ret < 0)
-				goto out;
-			if (!ret)
-				break;
-			pos += ret;
-		}
-		ret = 0;
+		ret = send_extent_data(sctx, offset, len);
 	}
 out:
 	return ret;

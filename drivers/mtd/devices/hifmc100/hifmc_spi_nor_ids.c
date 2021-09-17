@@ -1,12 +1,22 @@
-/******************************************************************************
- *	Flash Memory Controller Device Driver
- *	Copyright (c) 2014 - 2015 by Hisilicon
- *	All rights reserved.
- * ***
- *	Create by hisilicon
+/*
+ * The Flash Memory Controller v100 Device Driver for hisilicon
  *
- *****************************************************************************/
-
+ * Copyright (c) 2016 HiSilicon Technologies Co., Ltd.
+ *
+ * This program is free software; you can redistribute  it and/or modify it
+ * under  the terms of  the GNU General  Public License as published by the
+ * Free Software Foundation;  either version 2 of the  License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 /*****************************************************************************/
 #include <asm/setup.h>
 #include <linux/module.h>
@@ -42,7 +52,9 @@ SET_READ_STD(0, INFINITE, 33);
 SET_READ_STD(0, INFINITE, 40);
 SET_READ_STD(0, INFINITE, 50);
 SET_READ_STD(0, INFINITE, 54);
+SET_READ_STD(0, INFINITE, 55);
 SET_READ_STD(0, INFINITE, 66);
+SET_READ_STD(0, INFINITE, 80);
 
 SET_READ_FAST(1, INFINITE, 50);
 SET_READ_FAST(1, INFINITE, 64);
@@ -53,38 +65,49 @@ SET_READ_FAST(1, INFINITE, 86);
 SET_READ_FAST(1, INFINITE, 100);
 SET_READ_FAST(1, INFINITE, 104);
 SET_READ_FAST(1, INFINITE, 108);
+SET_READ_FAST(1, INFINITE, 133);
 
 SET_READ_DUAL(1, INFINITE, 64);
 SET_READ_DUAL(1, INFINITE, 75);
 SET_READ_DUAL(1, INFINITE, 80);
+SET_READ_DUAL(1, INFINITE, 84);
 SET_READ_DUAL(1, INFINITE, 104);
 SET_READ_DUAL(2, INFINITE, 104);
 SET_READ_DUAL(1, INFINITE, 108);
+SET_READ_DUAL(1, INFINITE, 133);
 
 SET_READ_DUAL_ADDR(2, INFINITE, 64);
 SET_READ_DUAL_ADDR(0, INFINITE, 80);
 SET_READ_DUAL_ADDR(1, INFINITE, 80);
 SET_READ_DUAL_ADDR(1, INFINITE, 84);
+SET_READ_DUAL_ADDR(2, INFINITE, 84);
 SET_READ_DUAL_ADDR(1, INFINITE, 104);
-SET_READ_DUAL_ADDR(2, INFINITE, 108);
-
-SET_READ_QUAD(1, INFINITE, 80);
+SET_READ_DUAL_ADDR(1, INFINITE, 108);
+SET_READ_DUAL_ADDR(1, INFINITE, 133);
+SET_READ_DUAL_ADDR(2, INFINITE, 133);
 
 #ifndef CONFIG_CLOSE_SPI_8PIN_4IO
 SET_READ_QUAD(1, INFINITE, 64);
+SET_READ_QUAD(1, INFINITE, 80);
+SET_READ_QUAD(1, INFINITE, 84);
 SET_READ_QUAD(1, INFINITE, 104);
 SET_READ_QUAD(1, INFINITE, 108);
+SET_READ_QUAD(1, INFINITE, 133);
 
 SET_READ_QUAD_ADDR(2, INFINITE, 80);
-SET_READ_QUAD_ADDR(3, INFINITE, 50);
+/* SET_READ_QUAD_ADDR(3, INFINITE, 50); */
 SET_READ_QUAD_ADDR(3, INFINITE, 75);
 SET_READ_QUAD_ADDR(3, INFINITE, 80);
 SET_READ_QUAD_ADDR(5, INFINITE, 64);
+SET_READ_QUAD_ADDR(5, INFINITE, 84);
 SET_READ_QUAD_ADDR(3, INFINITE, 104);
-SET_READ_QUAD_ADDR(5, INFINITE, 108);
+SET_READ_QUAD_ADDR(3, INFINITE, 108);
+SET_READ_QUAD_ADDR(5, INFINITE, 125);
+SET_READ_QUAD_ADDR(3, INFINITE, 133);
 #endif
 /*****************************************************************************/
 SET_WRITE_STD(0, 256, 0);
+SET_WRITE_STD(0, 256, 33);
 SET_WRITE_STD(0, 256, 50);
 SET_WRITE_STD(0, 256, 64);
 SET_WRITE_STD(0, 256, 66);
@@ -94,27 +117,38 @@ SET_WRITE_STD(0, 256, 86);
 SET_WRITE_STD(0, 256, 100);
 SET_WRITE_STD(0, 256, 104);
 SET_WRITE_STD(0, 256, 108);
+SET_WRITE_STD(0, 256, 133);
 
 SET_WRITE_DUAL(0, 256, 64);
 SET_WRITE_DUAL(0, 256, 75);
 SET_WRITE_DUAL(0, 256, 108);
+SET_WRITE_DUAL(0, 256, 133);
 
 SET_WRITE_DUAL_ADDR(0, 256, 64);
+SET_WRITE_DUAL_ADDR(0, 256, 75);
 SET_WRITE_DUAL_ADDR(0, 256, 108);
-
-SET_WRITE_QUAD(0, 256, 80);
+SET_WRITE_DUAL_ADDR(0, 256, 133);
 
 #ifndef CONFIG_CLOSE_SPI_8PIN_4IO
 SET_WRITE_QUAD(0, 256, 64);
+SET_WRITE_QUAD(0, 256, 80);
 SET_WRITE_QUAD(0, 256, 108);
+SET_WRITE_QUAD(0, 256, 133);
 
-SET_WRITE_QUAD_ADDR(0, 256, 64);
-SET_WRITE_QUAD_ADDR(0, 256, 108);
+/* FIXME: As Micron MT25Q(and MIXC) and N25Q have different QUAD I/O write code,
+ * but they have the same ID, so we cannot compatiable it. User can open
+ * by theirselves. */
+SET_WRITE_QUAD_ADDR(0, 256, 33);
+/* SET_WRITE_QUAD_ADDR(0, 256, 64); */
+SET_WRITE_QUAD_ADDR(0, 256, 80);
+SET_WRITE_QUAD_ADDR(0, 256, 104);
+SET_WRITE_QUAD_ADDR(0, 256, 133);
 #endif
 /*****************************************************************************/
 SET_ERASE_SECTOR_32K(0, _32K, 0);
 
 SET_ERASE_SECTOR_64K(0, _64K, 0);
+SET_ERASE_SECTOR_64K(0, _64K, 33);
 SET_ERASE_SECTOR_64K(0, _64K, 50);
 SET_ERASE_SECTOR_64K(0, _64K, 64);
 SET_ERASE_SECTOR_64K(0, _64K, 66);
@@ -124,6 +158,7 @@ SET_ERASE_SECTOR_64K(0, _64K, 86);
 SET_ERASE_SECTOR_64K(0, _64K, 100);
 SET_ERASE_SECTOR_64K(0, _64K, 104);
 SET_ERASE_SECTOR_64K(0, _64K, 108);
+SET_ERASE_SECTOR_64K(0, _64K, 133);
 
 SET_ERASE_SECTOR_256K(0, _256K, 50);
 SET_ERASE_SECTOR_256K(0, _256K, 104);
@@ -181,6 +216,14 @@ static struct spi_drv spi_driver_gd25qxxx = {
 	.write_enable = spi_general_write_enable,
 	.entry_4addr = spi_general_entry_4addr,
 	.qe_enable = spi_gd25qxxx_qe_enable,
+};
+
+#include "hifmc100_spi_micron.c"
+static struct spi_drv spi_driver_micron = {
+	.wait_ready = spi_general_wait_ready,
+	.write_enable = spi_general_write_enable,
+	.entry_4addr = spi_micron_entry_4addr,
+	.qe_enable = spi_do_not_qe_enable,
 };
 
 /*****************************************************************************/
@@ -322,7 +365,7 @@ static struct spi_nor_info hifmc_spi_nor_info_table[] = {
 		&spi_driver_general,
 	},
 
-	/* Macronix */
+	/* Macronix/MXIC */
 	{
 		"mx25l4005a",  {0xc2, 0x20, 0x13}, 3, _512K,  _64K, 3,
 		{
@@ -396,24 +439,122 @@ static struct spi_nor_info hifmc_spi_nor_info_table[] = {
 	},
 
 	{
-		"MX25L6406E",  {0xc2, 0x20, 0x17}, 3, _8M,    _64K, 3,
+		"MX25L6436F",  {0xc2, 0x20, 0x17}, 3, _8M,    _64K, 3,
+		{
+			&READ_STD(0, INFINITE, 50),
+			&READ_FAST(1, INFINITE, 133),
+			&READ_DUAL(1, INFINITE, 133),
+			&READ_DUAL_ADDR(1, INFINITE, 133),
+#ifndef CONFIG_CLOSE_SPI_8PIN_4IO
+			&READ_QUAD(1, INFINITE, 133),
+			&READ_QUAD_ADDR(3, INFINITE, 133),
+#endif
+			0
+		},
+
+		{
+			&WRITE_STD(0, 256, 133),
+#ifndef CONFIG_CLOSE_SPI_8PIN_4IO
+			&WRITE_QUAD_ADDR(0, 256, 133),
+#endif
+			0
+		},
+
+		{
+			&ERASE_SECTOR_64K(0, _64K, 133),
+			0
+		},
+		&spi_driver_mx25l25635e,
+	},
+
+	/* MX25R6435F Wide Voltage Range 1.65~3.6V */
+	{
+		"MX25R6435F", {0xc2, 0x28, 0x17}, 3, _8M, _64K, 3,
 		{
 			&READ_STD(0, INFINITE, 33),
-			&READ_FAST(1, INFINITE, 86),
+			&READ_FAST(1, INFINITE, 80),
 			&READ_DUAL(1, INFINITE, 80),
+			&READ_DUAL_ADDR(1, INFINITE, 80),
+#ifndef CONFIG_CLOSE_SPI_8PIN_4IO
+			&READ_QUAD(1, INFINITE, 80),
+			&READ_QUAD_ADDR(3, INFINITE, 80),
+#endif
 			0
 		},
 
 		{
-			&WRITE_STD(0, 256, 86),
+			&WRITE_STD(0, 256, 33),
+#ifndef CONFIG_CLOSE_SPI_8PIN_4IO
+			&WRITE_QUAD_ADDR(0, 256, 33),
+#endif
 			0
 		},
 
 		{
-			&ERASE_SECTOR_64K(0, _64K, 86),
+			&ERASE_SECTOR_64K(0, _64K, 33),
 			0
 		},
-		&spi_driver_no_qe,
+		&spi_driver_mx25l25635e,
+	},
+
+	/* MX25U6435F, 1.65-2.0V */
+	{
+		"MX25U6435F", {0xc2, 0x25, 0x37}, 3, _8M, _64K, 3,
+		{
+			&READ_STD(0, INFINITE, 50),
+			&READ_FAST(1, INFINITE, 80),
+			&READ_DUAL(1, INFINITE, 84),
+			&READ_DUAL_ADDR(1, INFINITE, 84),
+#ifndef CONFIG_CLOSE_SPI_8PIN_4IO
+			&READ_QUAD(1, INFINITE, 80),
+			&READ_QUAD_ADDR(3, INFINITE, 80),
+#endif
+			0
+		},
+
+		{
+			&WRITE_STD(0, 256, 80),
+#ifndef CONFIG_CLOSE_SPI_8PIN_4IO
+			&WRITE_QUAD_ADDR(0, 256, 80),
+#endif
+			0
+		},
+
+		{
+			&ERASE_SECTOR_64K(0, _64K, 80),
+			0
+		},
+		&spi_driver_mx25l25635e,
+	},
+
+	/* MX25U12835F, 1.65-2.0V */
+	{
+		"MX25U12835F", {0xc2, 0x25, 0x38}, 3, _16M, _64K, 3,
+		{
+			&READ_STD(0, INFINITE, 55),
+			&READ_FAST(1, INFINITE, 80),
+			&READ_DUAL(1, INFINITE, 84),
+			&READ_DUAL_ADDR(1, INFINITE, 84),
+#ifndef CONFIG_CLOSE_SPI_8PIN_4IO
+			&READ_QUAD(1, INFINITE, 80),
+			&READ_QUAD_ADDR(3, INFINITE, 80),
+#endif
+			0
+		},
+
+		{
+			&WRITE_STD(0, 256, 80),
+#ifndef CONFIG_CLOSE_SPI_8PIN_4IO
+			&WRITE_QUAD_ADDR(0, 256, 80),
+#endif
+			0
+		},
+
+		{
+			&ERASE_SECTOR_64K(0, _64K, 80),
+			0
+		},
+		&spi_driver_mx25l25635e,
 	},
 
 	{
@@ -432,6 +573,9 @@ static struct spi_nor_info hifmc_spi_nor_info_table[] = {
 
 		{
 			&WRITE_STD(0, 256, 104),
+#ifndef CONFIG_CLOSE_SPI_8PIN_4IO
+			&WRITE_QUAD_ADDR(0, 256, 104),
+#endif
 			0
 		},
 
@@ -460,8 +604,38 @@ static struct spi_nor_info hifmc_spi_nor_info_table[] = {
 		{&ERASE_SECTOR_64K(0, _64K, 108), 0}},
 	*/
 
+	/* MX25U25635F, 1.65-2.0V */
 	{
-		"MX25L(256/257)35(E/F)",
+		"MX25U25635F", {0xc2, 0x25, 0x39}, 3, _32M, _64K, 4,
+		{
+			&READ_STD(0, INFINITE, 55),
+			&READ_FAST(1, INFINITE, 80),
+			&READ_DUAL(1, INFINITE, 84),
+			&READ_DUAL_ADDR(1, INFINITE, 84),
+#ifndef CONFIG_CLOSE_SPI_8PIN_4IO
+			&READ_QUAD(1, INFINITE, 80),
+			&READ_QUAD_ADDR(3, INFINITE, 80),
+#endif
+			0
+		},
+
+		{
+			&WRITE_STD(0, 256, 80),
+#ifndef CONFIG_CLOSE_SPI_8PIN_4IO
+			&WRITE_QUAD_ADDR(0, 256, 80),
+#endif
+			0
+		},
+
+	{
+			&ERASE_SECTOR_64K(0, _64K, 80),
+			0
+		},
+		&spi_driver_mx25l25635e,
+	},
+
+	{
+		"MX25L(256/257)XX",
 		{0xc2, 0x20, 0x19}, 3, _32M, _64K, 4,
 		{
 			&READ_STD(0, INFINITE, 40/*50*/),
@@ -476,6 +650,9 @@ static struct spi_nor_info hifmc_spi_nor_info_table[] = {
 
 		{
 			&WRITE_STD(0, 256, 75),
+#ifndef CONFIG_CLOSE_SPI_8PIN_4IO
+			&WRITE_QUAD_ADDR(0, 256, 104),
+#endif
 			0
 		},
 
@@ -624,6 +801,7 @@ static struct spi_nor_info hifmc_spi_nor_info_table[] = {
 		},
 		&spi_driver_general,
 	},
+
 	/* Spansion */
 
 	{
@@ -1268,7 +1446,7 @@ static struct spi_nor_info hifmc_spi_nor_info_table[] = {
 			&WRITE_DUAL_ADDR(0, 256, 64/*108*/),
 #ifndef CONFIG_CLOSE_SPI_8PIN_4IO
 			&WRITE_QUAD(0, 256, 64/*108*/),
-			&WRITE_QUAD_ADDR(0, 256, 64/*108*/),
+			/* &WRITE_QUAD_ADDR(0, 256, 64), */
 #endif
 			0
 		},
@@ -1280,16 +1458,114 @@ static struct spi_nor_info hifmc_spi_nor_info_table[] = {
 		&spi_driver_general,
 	},
 
+	/* Micron  N25Q064A 1.8V */
 	{
-		"N25Q128",   {0x20, 0xba, 0x18}, 3, (_64K * 256), _64K, 3,
+		"N25Q064A",   {0x20, 0xbb, 0x17}, 3, (_64K * 128), _64K, 3,
+		{
+			&READ_STD(0, INFINITE, 54),
+			&READ_FAST(1, INFINITE, 80),
+			&READ_DUAL(1, INFINITE, 80),
+			&READ_DUAL_ADDR(2, INFINITE, 84),
+#ifndef CONFIG_CLOSE_SPI_8PIN_4IO
+			&READ_QUAD(1, INFINITE, 80),
+#endif
+			0
+		},
+
+		{
+			&WRITE_STD(0, 256, 80),
+			&WRITE_DUAL(0, 256, 75),
+			&WRITE_DUAL_ADDR(0, 256, 75),
+#ifndef CONFIG_CLOSE_SPI_8PIN_4IO
+			&WRITE_QUAD(0, 256, 80),
+#endif
+			0
+		},
+
+		{
+			&ERASE_SECTOR_64K(0, _64K, 80),
+			0
+		},
+		&spi_driver_general,
+	},
+
+	/* Micron "N25Q128A11/MT25QU128AB" 1.8V */
+	{
+		"MT(N)25Q128(AB)A11",   {0x20, 0xbb, 0x18}, 3,
+		(_64K * 256), _64K, 3,
+		{
+			&READ_STD(0, INFINITE, 54),
+			&READ_FAST(1, INFINITE, 80),
+			&READ_DUAL(1, INFINITE, 80),
+			&READ_DUAL_ADDR(2, INFINITE, 84),
+#ifndef CONFIG_CLOSE_SPI_8PIN_4IO
+			&READ_QUAD(1, INFINITE, 80),
+			&READ_QUAD_ADDR(5, INFINITE, 84),
+#endif
+			0
+		},
+
+		{
+			&WRITE_STD(0, 256, 80),
+			&WRITE_DUAL(0, 256, 75),
+			&WRITE_DUAL_ADDR(0, 256, 75),
+#ifndef CONFIG_CLOSE_SPI_8PIN_4IO
+			&WRITE_QUAD(0, 256, 80),
+			/* &WRITE_QUAD_ADDR(0, 256, 108), */
+#endif
+			0
+		},
+
+		{
+			&ERASE_SECTOR_64K(0, _64K, 80),
+			0
+		},
+		&spi_driver_micron,
+	},
+
+	/* Micron  N25QL064A 3.3V */
+	{
+		"N25QL064A",   {0x20, 0xba, 0x17}, 3, (_64K * 128), _64K, 3,
+		{
+			&READ_STD(0, INFINITE, 54),
+			&READ_FAST(1, INFINITE, 80),
+			&READ_DUAL(1, INFINITE, 80),
+			&READ_DUAL_ADDR(2, INFINITE, 84),
+#ifndef CONFIG_CLOSE_SPI_8PIN_4IO
+			&READ_QUAD(1, INFINITE, 80),
+			&READ_QUAD_ADDR(5, INFINITE, 84),
+#endif
+			0
+		},
+
+		{
+			&WRITE_STD(0, 256, 80),
+			&WRITE_DUAL(0, 256, 75),
+			&WRITE_DUAL_ADDR(0, 256, 75),
+#ifndef CONFIG_CLOSE_SPI_8PIN_4IO
+			&WRITE_QUAD(0, 256, 80),
+#endif
+			0
+		},
+
+		{
+			&ERASE_SECTOR_64K(0, _64K, 50),
+			0
+		},
+		&spi_driver_micron,
+	},
+
+	/* Micron  MT(N)25QL128A 3.3V */
+	{
+		"N25QL128A",   {0x20, 0xba, 0x18}, 3, (_64K * 256), _64K, 3,
 		{
 			&READ_STD(0, INFINITE, 54),
 			&READ_FAST(1, INFINITE, 108),
-			&READ_DUAL(1, INFINITE, 108),
-			&READ_DUAL_ADDR(2, INFINITE, 108),
+			&READ_DUAL(1, INFINITE, 84),
+			&READ_DUAL_ADDR(2, INFINITE, 84),
 #ifndef CONFIG_CLOSE_SPI_8PIN_4IO
-			&READ_QUAD(1, INFINITE, 108),
-			&READ_QUAD_ADDR(5, INFINITE, 108),
+			&READ_QUAD(1, INFINITE, 84),
+			&READ_QUAD_ADDR(5, INFINITE, 84),
 #endif
 			0
 		},
@@ -1300,7 +1576,6 @@ static struct spi_nor_info hifmc_spi_nor_info_table[] = {
 			&WRITE_DUAL_ADDR(0, 256, 108),
 #ifndef CONFIG_CLOSE_SPI_8PIN_4IO
 			&WRITE_QUAD(0, 256, 108),
-			&WRITE_QUAD_ADDR(0, 256, 108),
 #endif
 			0
 		},
@@ -1309,7 +1584,40 @@ static struct spi_nor_info hifmc_spi_nor_info_table[] = {
 			&ERASE_SECTOR_64K(0, _64K, 108),
 			0
 		},
-		&spi_driver_general,
+		&spi_driver_micron,
+	},
+
+	/* Micron MT25QL256A 3.3V */
+	{
+		"MT25QL256A",   {0x20, 0xba, 0x19}, 3, (_64K * 512), _64K, 4,
+		{
+			&READ_STD(0, INFINITE, 54),
+			&READ_FAST(1, INFINITE, 133),
+			&READ_DUAL(1, INFINITE, 133),
+			&READ_DUAL_ADDR(2, INFINITE, 133),
+#ifndef CONFIG_CLOSE_SPI_8PIN_4IO
+			&READ_QUAD(1, INFINITE, 133),
+			&READ_QUAD_ADDR(5, INFINITE, 125),
+#endif
+			0
+		},
+
+		{
+			&WRITE_STD(0, 256, 133),
+			&WRITE_DUAL(0, 256, 133),
+			&WRITE_DUAL_ADDR(0, 256, 133),
+#ifndef CONFIG_CLOSE_SPI_8PIN_4IO
+			&WRITE_QUAD(0, 256, 133),
+			/* &WRITE_QUAD_ADDR(0, 256, 133), */
+#endif
+			0
+		},
+
+		{
+			&ERASE_SECTOR_64K(0, _64K, 133),
+			0
+		},
+		&spi_driver_micron,
 	},
 
 	{
@@ -1373,6 +1681,39 @@ static struct spi_nor_info hifmc_spi_nor_info_table[] = {
 			0
 		},
 		&spi_driver_general,
+	},
+
+	/* Micron "MT25QU256A" 1.8V */
+	{
+		"MT25QU256A",   {0x20, 0xbb, 0x19}, 3, (_64K * 512), _64K, 4,
+		{
+			&READ_STD(0, INFINITE, 54),
+			&READ_FAST(1, INFINITE, 80),
+			&READ_DUAL(1, INFINITE, 80),
+			&READ_DUAL_ADDR(2, INFINITE, 84),
+#ifndef CONFIG_CLOSE_SPI_8PIN_4IO
+			&READ_QUAD(1, INFINITE, 80),
+			&READ_QUAD_ADDR(5, INFINITE, 84),
+#endif
+			0
+		},
+
+		{
+			&WRITE_STD(0, 256, 80),
+			&WRITE_DUAL(0, 256, 75),
+			&WRITE_DUAL_ADDR(0, 256, 75),
+#ifndef CONFIG_CLOSE_SPI_8PIN_4IO
+			&WRITE_QUAD(0, 256, 80),
+			/* &WRITE_QUAD_ADDR(0, 256, 80), */
+#endif
+			0
+		},
+
+		{
+			&ERASE_SECTOR_64K(0, _64K, 80),
+			0
+		},
+		&spi_driver_micron,
 	},
 
 	/* Winbond -- w25x "blocks" are 64K, "sectors" are 4KiB */
@@ -1654,6 +1995,65 @@ static struct spi_nor_info hifmc_spi_nor_info_table[] = {
 		&spi_driver_general,
 	},
 
+	/* winbond w25q64fw is 1.8v */
+	{
+		"W25Q64FW",  {0xef, 0x60, 0x17}, 3, _8M,   _64K, 3,
+		{
+			&READ_STD(0, INFINITE, 50),
+			&READ_FAST(1, INFINITE, 80),
+			&READ_DUAL(1, INFINITE, 80),
+#ifndef CONFIG_CLOSE_SPI_8PIN_4IO
+			&READ_QUAD(1, INFINITE, 80),
+			&READ_QUAD_ADDR(3, INFINITE, 80),
+#endif
+			0
+		},
+
+		{
+			&WRITE_STD(0, 256, 80),
+#ifndef CONFIG_CLOSE_SPI_8PIN_4IO
+			&WRITE_QUAD(0, 256, 80),
+#endif
+			0
+		},
+
+		{
+			&ERASE_SECTOR_64K(0, _64K, 80),
+			0
+		},
+		&spi_driver_w25q256fv,
+	},
+
+	/* winbond w25q128fw is 1.8v */
+	{
+		"W25Q128FW",  {0xef, 0x60, 0x18}, 3, _16M,   _64K, 3,
+		{
+			&READ_STD(0, INFINITE, 50),
+			&READ_FAST(1, INFINITE, 80),
+			&READ_DUAL(1, INFINITE, 80),
+			&READ_DUAL_ADDR(1, INFINITE, 80),
+#ifndef CONFIG_CLOSE_SPI_8PIN_4IO
+			&READ_QUAD(1, INFINITE, 80),
+			&READ_QUAD_ADDR(3, INFINITE, 80),
+#endif
+			0
+		},
+
+		{
+			&WRITE_STD(0, 256, 80),
+#ifndef CONFIG_CLOSE_SPI_8PIN_4IO
+			&WRITE_QUAD(0, 256, 80),
+#endif
+			0
+		},
+
+		{
+			&ERASE_SECTOR_64K(0, _64K, 80),
+			0
+		},
+		&spi_driver_w25q256fv,
+	},
+
 	{
 		"W25Q128(B/F)V", {0xEF, 0x40, 0x18}, 3, _16M, _64K, 3,
 		{
@@ -1678,7 +2078,7 @@ static struct spi_nor_info hifmc_spi_nor_info_table[] = {
 			&ERASE_SECTOR_64K(0, _64K, 104),
 			0
 		},
-		&spi_driver_general,
+		&spi_driver_w25q256fv,
 	},
 
 	{
@@ -1687,13 +2087,17 @@ static struct spi_nor_info hifmc_spi_nor_info_table[] = {
 			&READ_STD(0, INFINITE, 50),
 			&READ_FAST(1, INFINITE, 80),
 			&READ_DUAL(1, INFINITE, 80),
+#ifndef CONFIG_CLOSE_SPI_8PIN_4IO
 			&READ_QUAD(1, INFINITE, 80),
+#endif
 			0
 		},
 
 		{
 			&WRITE_STD(0, 256, 104),
+#ifndef CONFIG_CLOSE_SPI_8PIN_4IO
 			&WRITE_QUAD(0, 256, 80),
+#endif
 			0
 		},
 
@@ -1775,9 +2179,6 @@ static struct spi_nor_info hifmc_spi_nor_info_table[] = {
 			&READ_FAST(1, INFINITE, 100),
 			&READ_DUAL(1, INFINITE, 80),
 			&READ_DUAL_ADDR(1, INFINITE, 80),
-#ifndef CONFIG_CLOSE_SPI_8PIN_4IO
-			&READ_QUAD_ADDR(3, INFINITE, 50),
-#endif
 			0
 		},
 
@@ -1800,7 +2201,6 @@ static struct spi_nor_info hifmc_spi_nor_info_table[] = {
 			&READ_FAST(1, INFINITE, 104),
 			&READ_DUAL(1, INFINITE, 80),
 			&READ_DUAL_ADDR(1, INFINITE, 80),
-			/* &READ_QUAD_ADDR(3, INFINITE, 50), */
 			0
 		},
 
@@ -1840,6 +2240,54 @@ static struct spi_nor_info hifmc_spi_nor_info_table[] = {
 			0
 		},
 		&spi_driver_f25l64q,
+	},
+
+	/* GD */
+	{
+		"GD25Q256", {0xC8, 0x40, 0x19}, 3, _32M,  _64K, 3,
+		{
+			&READ_STD(0, INFINITE, 66),
+			&READ_FAST(1, INFINITE, 104),
+			&READ_DUAL(1, INFINITE, 104),
+			&READ_DUAL_ADDR(1, INFINITE, 104),
+			0
+		},
+		{
+			&WRITE_STD(0, 256, 104),
+		},
+		{
+			&ERASE_SECTOR_64K(0, _64K, 104),
+			0
+		},
+		&spi_driver_gd25qxxx,
+	},
+
+	/* GD GD25LQ128 1.8V*/
+	{
+		"GD25LQ128", {0xC8, 0x60, 0x18}, 3, _16M,  _64K, 3,
+		{
+			&READ_STD(0, INFINITE, 80),
+			&READ_FAST(1, INFINITE, 80),
+			&READ_DUAL(1, INFINITE, 80),
+			&READ_DUAL_ADDR(1, INFINITE, 80),
+#ifndef CONFIG_CLOSE_SPI_8PIN_4IO
+			&READ_QUAD(1, INFINITE, 80),
+			&READ_QUAD_ADDR(3, INFINITE, 80),
+#endif
+			0
+		},
+		{
+			&WRITE_STD(0, 256, 80),
+#ifndef CONFIG_CLOSE_SPI_8PIN_4IO
+			&WRITE_QUAD(0, 256, 80),
+#endif
+			0
+		},
+		{
+			&ERASE_SECTOR_64K(0, _64K, 80),
+			0
+		},
+		&spi_driver_gd25qxxx,
 	},
 
 	{
@@ -1887,6 +2335,35 @@ static struct spi_nor_info hifmc_spi_nor_info_table[] = {
 		},
 		&spi_driver_gd25qxxx,
 	},
+
+	/* GD GD25LQ64C 1.8V */
+	{
+		"GD25LQ64C", {0xC8, 0x60, 0x17}, 3, _8M,  _64K, 3,
+		{
+			&READ_STD(0, INFINITE, 80),
+			&READ_FAST(1, INFINITE, 80),
+			&READ_DUAL(1, INFINITE, 80),
+			&READ_DUAL_ADDR(1, INFINITE, 80),
+#ifndef CONFIG_CLOSE_SPI_8PIN_4IO
+			&READ_QUAD(1, INFINITE, 80),
+			&READ_QUAD_ADDR(3, INFINITE, 80),
+#endif
+			0
+		},
+		{
+			&WRITE_STD(0, 256, 80),
+#ifndef CONFIG_CLOSE_SPI_8PIN_4IO
+			&WRITE_QUAD(0, 256, 80),
+#endif
+			0
+		},
+		{
+			&ERASE_SECTOR_64K(0, _64K, 80),
+			0
+		},
+		&spi_driver_gd25qxxx,
+	},
+
 	{
 		"GD25Q32", {0xC8, 0x40, 0x16}, 3, _4M,  _64K, 3,
 		{
@@ -1905,6 +2382,51 @@ static struct spi_nor_info hifmc_spi_nor_info_table[] = {
 		},
 		{
 			&ERASE_SECTOR_64K(0, _64K, 100),
+			0
+		},
+		&spi_driver_gd25qxxx,
+	},
+
+	/* Paragon 3.3V */
+	{
+		"PN25F16S", {0xe0, 0x40, 0x15}, 3, _2M,  _64K, 3,
+		{
+			&READ_STD(0, INFINITE, 55),
+			&READ_FAST(1, INFINITE, 108),
+			&READ_DUAL(1, INFINITE, 108),
+			&READ_DUAL_ADDR(1, INFINITE, 108),
+			0
+		},
+		{
+			&WRITE_STD(0, 256, 108),
+			0
+		},
+		{
+			&ERASE_SECTOR_64K(0, _64K, 108),
+			0
+		},
+		&spi_driver_general,
+	},
+
+	{
+		"PN25F32S", {0xe0, 0x40, 0x16}, 3, _4M,  _64K, 3,
+		{
+			&READ_STD(0, INFINITE, 55),
+			&READ_FAST(1, INFINITE, 108),
+			&READ_DUAL(1, INFINITE, 108),
+			&READ_DUAL_ADDR(1, INFINITE, 108),
+#ifndef CONFIG_CLOSE_SPI_8PIN_4IO
+			&READ_QUAD(1, INFINITE, 108),
+			&READ_QUAD_ADDR(3, INFINITE, 108),
+#endif
+			0
+		},
+		{
+			&WRITE_STD(0, 256, 108),
+			0
+		},
+		{
+			&ERASE_SECTOR_64K(0, _64K, 108),
 			0
 		},
 		&spi_driver_general,

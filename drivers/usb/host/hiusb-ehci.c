@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * EHCI HCD (Host Controller Driver) for USB.
  *
@@ -8,6 +11,11 @@
 
 #include <linux/platform_device.h>
 #include "hiusb.h"
+#if defined(MY_ABC_HERE)
+#include <linux/synobios.h>
+
+char* syno_get_hw_version(void);
+#endif /* MY_ABC_HERE */
 
 static int hiusb_ehci_setup(struct usb_hcd *hcd)
 {
@@ -76,6 +84,9 @@ static int hiusb_ehci_hcd_drv_probe(struct platform_device *pdev)
 	struct ehci_hcd *ehci;
 	struct resource *res;
 	int ret;
+#if defined(MY_ABC_HERE)
+	int i;
+#endif /* MY_ABC_HERE */
 
 	if (usb_disabled())
 		return -ENODEV;
@@ -87,6 +98,22 @@ static int hiusb_ehci_hcd_drv_probe(struct platform_device *pdev)
 	hcd = usb_create_hcd(&hiusb_ehci_hc_driver, &pdev->dev, "hiusb-ehci");
 	if (!hcd)
 		return -ENOMEM;
+
+#if defined(MY_ABC_HERE)
+	for (i = 0; i < CONFIG_SYNO_USB_POWER_RESET_PIN_NUMBER + 1; ++i) {
+		hcd->vbus_gpio_pin[i] = -1;
+	}
+
+	if (syno_is_hw_version(HW_VS960hd)) {
+		hcd->power_control_support = 1;
+		hcd->vbus_gpio_pin[1] = 41;
+		hcd->vbus_gpio_pin[2] = 43;
+		dev_info(&pdev->dev, "%s set Vbus gpio %d %d for USB2.0\n", syno_get_hw_version(), hcd->vbus_gpio_pin[1], hcd->vbus_gpio_pin[2]);
+	} else {
+		dev_warn(&pdev->dev, "%s no Vbus gpio specified!\n", syno_get_hw_version());
+	}
+	dev_info(&pdev->dev, "power control %s\n", hcd->power_control_support ? "enabled" : "disabled");
+#endif /* MY_ABC_HERE */
 
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 	hcd->rsrc_start = res->start;

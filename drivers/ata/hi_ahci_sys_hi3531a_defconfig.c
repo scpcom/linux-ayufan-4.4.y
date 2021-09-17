@@ -112,7 +112,11 @@ static void hi_sata_phy_reset(void)
 		if (mplx_port0)
 			tmp_val |= HI_SATA_PHY1A_RST | HI_SATA_PHY0_RST;
 		else
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+			tmp_val |= HI_SATA_PHY1_RST | HI_SATA_PHY0B_RST;
+#else /* CONFIG_SYNO_LSP_HI3536_V2050 */
 			tmp_val |= HI_SATA_PHY1_RST | HI_SATA_PHY0A_RST;
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 	}
 	if (nport == 2) {
 		if (mplx_port0)
@@ -140,7 +144,11 @@ static void hi_sata_phy_unreset(void)
 		if (mplx_port0)
 			tmp_val &= ~(HI_SATA_PHY1A_RST | HI_SATA_PHY0_RST);
 		else
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+			tmp_val &= ~(HI_SATA_PHY1_RST | HI_SATA_PHY0B_RST);
+#else /* CONFIG_SYNO_LSP_HI3536_V2050 */
 			tmp_val &= ~(HI_SATA_PHY1_RST | HI_SATA_PHY0A_RST);
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 	}
 	if (nport == 2) {
 		if (mplx_port0)

@@ -472,7 +472,7 @@ int mtd_device_parse_register(struct mtd_info *mtd, const char * const *types,
 		err = add_mtd_partitions(mtd, real_parts, err);
 		kfree(real_parts);
 	} else if (err == 0) {
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(CONFIG_SYNO_LSP_HI3536) && !defined(CONFIG_SYNO_HI3536)
 		 
 #else  
 		err = add_mtd_device(mtd);

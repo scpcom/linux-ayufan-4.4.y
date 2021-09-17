@@ -578,7 +578,7 @@ int genphy_config_aneg(struct phy_device *phydev)
 #ifdef MY_DEF_HERE
 	int reg_val = 0;
 
-	if (!syno_is_hw_version(HW_DS2015xs)) {
+	if (!syno_is_hw_version(HW_DS2015xs) && !syno_is_hw_version(HW_DS1817)) {
 		phy_write(phydev, 31, 0x0);
 		reg_val = phy_read(phydev, MII_BMCR);
 		reg_val |= BMCR_RESET;

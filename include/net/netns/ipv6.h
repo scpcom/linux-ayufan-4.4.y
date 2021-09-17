@@ -39,6 +39,9 @@ struct netns_ipv6 {
 	struct ipv6_devconf	*devconf_dflt;
 	struct inet_peer_base	*peers;
 	struct netns_frags	frags;
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	// do nothing
+#else /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 #ifdef CONFIG_NETFILTER
 	struct xt_table		*ip6table_filter;
 	struct xt_table		*ip6table_mangle;
@@ -48,6 +51,7 @@ struct netns_ipv6 {
 #endif
 	struct xt_table		*ip6table_nat;
 #endif
+#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 	struct rt6_info         *ip6_null_entry;
 	struct rt6_statistics   *rt6_stats;
 	struct timer_list       ip6_fib_timer;
@@ -56,16 +60,23 @@ struct netns_ipv6 {
 	struct dst_ops		ip6_dst_ops;
 	unsigned int		 ip6_rt_gc_expire;
 	unsigned long		 ip6_rt_last_gc;
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	// do nothing
+#else /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 #ifdef CONFIG_IPV6_MULTIPLE_TABLES
 	struct rt6_info         *ip6_prohibit_entry;
 	struct rt6_info         *ip6_blk_hole_entry;
 	struct fib6_table       *fib6_local_tbl;
 	struct fib_rules_ops    *fib6_rules_ops;
 #endif
+#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 	struct sock		**icmp_sk;
 	struct sock             *ndisc_sk;
 	struct sock             *tcp_sk;
 	struct sock             *igmp_sk;
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	// do nothing
+#else /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 #ifdef CONFIG_IPV6_MROUTE
 #ifndef CONFIG_IPV6_MROUTE_MULTIPLE_TABLES
 	struct mr6_table	*mrt6;
@@ -74,7 +85,33 @@ struct netns_ipv6 {
 	struct fib_rules_ops	*mr6_rules_ops;
 #endif
 #endif
+#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 	atomic_t		dev_addr_genid;
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#ifdef CONFIG_NETFILTER
+	struct xt_table		*ip6table_filter;
+	struct xt_table		*ip6table_mangle;
+	struct xt_table		*ip6table_raw;
+#ifdef CONFIG_SECURITY
+	struct xt_table		*ip6table_security;
+#endif
+	struct xt_table		*ip6table_nat;
+#endif
+#ifdef CONFIG_IPV6_MULTIPLE_TABLES
+	struct rt6_info         *ip6_prohibit_entry;
+	struct rt6_info         *ip6_blk_hole_entry;
+	struct fib6_table       *fib6_local_tbl;
+	struct fib_rules_ops    *fib6_rules_ops;
+#endif
+#ifdef CONFIG_IPV6_MROUTE
+#ifndef CONFIG_IPV6_MROUTE_MULTIPLE_TABLES
+	struct mr6_table	*mrt6;
+#else
+	struct list_head	mr6_tables;
+	struct fib_rules_ops	*mr6_rules_ops;
+#endif
+#endif
+#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 };
 
 #if IS_ENABLED(CONFIG_NF_DEFRAG_IPV6)

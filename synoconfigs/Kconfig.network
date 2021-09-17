@@ -119,13 +119,23 @@ config SYNO_NF_NAT_WORKAROUND
        bool "Fix BUG_ON on nf_nat_setup_info when HA is running"
        default y
 
-config SYNO_ALPINE_AQR105_PHY
-	bool "Drivers for Aqantia aqr105 phy"
+config SYNO_ALPINE_AQR107_PHY
+	bool "Drivers for Aqantia aqr107 phy"
 	depends on SYNO_LSP_ALPINE
 
 config SYNO_ALPINE_SKB_TRUESIZE_ADJUST
 	bool "Adjust truesize_of skb avoild warnon"
 	depends on SYNO_ALPINE
 	default y
+
+config SYNO_HI3536_CHANGE_PHY_BEHAVIOR
+	bool "Adjust Hi3536 GMAC behavior"
+	default y
+	depends on SYNO_HI3536
+
+config SYNO_HI3536_DISABLE_GMAC_WHEN_STOPPING
+	bool "Hi3536 disable GMAC when halting or rebooting"
+	default y
+	depends on SYNO_HI3536
 
 endmenu #Network

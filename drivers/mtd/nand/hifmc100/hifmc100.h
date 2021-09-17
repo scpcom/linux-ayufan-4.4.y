@@ -1,11 +1,22 @@
-/******************************************************************************
- *	Flash Memory Controller v100 Device Driver
- *	Copyright (c) 2014 - 2015 by Hisilicon
- *	All rights reserved.
- * ***
- *	Create by hisilicon
+/*
+ * The Flash Memory Controller v100 Device Driver for hisilicon
  *
- *****************************************************************************/
+ * Copyright (c) 2016 HiSilicon Technologies Co., Ltd.
+ *
+ * This program is free software; you can redistribute  it and/or modify it
+ * under  the terms of  the GNU General  Public License as published by the
+ * Free Software Foundation;  either version 2 of the  License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 
 #ifndef __HIFMC100_H__
 #define __HIFMC100_H__
@@ -22,6 +33,12 @@
 
 #undef HIFMC100_SPI_NAND_SUPPORT_REG_WRITE
 /* #define HIFMC100_SPI_NAND_SUPPORT_REG_WRITE */
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+/*****************************************************************************/
+#define HIFMC100_ECC_ERR_NUM0_BUF0		0xc0
+
+#define GET_ECC_ERR_NUM(_i, _reg)		(((_reg) >> ((_i) * 8)) & 0xff)
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 
 /*****************************************************************************/
 #define REG_CNT_HIGH_BLOCK_NUM_SHIFT		10

@@ -1,9 +1,21 @@
-/*****************************************************************************
- *    Copyright (c) 2009-2011 by HiC
- *    All rights reserved.
- *****************************************************************************/
+/*
+ * Copyright (c) 2016 HiSilicon Technologies Co., Ltd.
+ *
+ * This program is free software; you can redistribute  it and/or modify it
+ * under  the terms of  the GNU General Public License as published by the
+ * Free Software Foundation;  either version 2 of the  License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 
-/*****************************************************************************/
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/device.h>
@@ -1268,6 +1280,18 @@ static int hisfc350_probe(struct hisfc_host *host)
 	return 0;
 }
 
+#if defined(CONFIG_SYNO_HI3536)
+static int hisfc350_unlock_dummy(struct mtd_info *mtd, loff_t ofs, uint64_t len)
+{
+	return 0;
+}
+
+static int hisfc350_lock_dummy(struct mtd_info *mtd, loff_t ofs, uint64_t len)
+{
+	return 0;
+}
+#endif /* CONFIG_SYNO_HI3536 */
+
 static int hisfc350_driver_probe(struct platform_device *plat_dev)
 {
 	int result = -EIO;
@@ -1327,6 +1351,10 @@ static int hisfc350_driver_probe(struct platform_device *plat_dev)
 	mtd->writesize = 1;
 	mtd->flags = MTD_CAP_NORFLASH;
 	mtd->owner = THIS_MODULE;
+#if defined(CONFIG_SYNO_HI3536)
+	mtd->_unlock = hisfc350_unlock_dummy;
+	mtd->_lock = hisfc350_lock_dummy;
+#endif /* CONFIG_SYNO_HI3536 */
 
 	if (hisfc350_probe(host)) {
 		result = -ENODEV;
@@ -1338,7 +1366,11 @@ static int hisfc350_driver_probe(struct platform_device *plat_dev)
 	if (mtd_has_partitions()) {
 
 		static char const *part_probes[] = {
+#if defined(CONFIG_SYNO_HI3536)
+			"RedBoot",
+#else /* CONFIG_SYNO_HI3536 */
 			"cmdlinepart",
+#endif /* CONFIG_SYNO_HI3536 */
 			NULL,
 		};
 

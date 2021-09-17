@@ -1274,5 +1274,16 @@ config RTC_DRV_HID_SENSOR_TIME
 	  If this driver is compiled as a module, it will be named
 	  rtc-hid-sensor-time.
 
+config SYNO_HI3536_RTC
+	tristate "Hisilicon Hi3536 RTC driver"
+	depends on SYNO_HI3536
+	default y
+
+config SYNO_HI3536_RTC_HCTOSYS
+	tristate "Hisilicon Hi3536 RTC HCTOSYS"
+	depends on SYNO_HI3536_RTC
+	default y
+	help
+	  Hi3536 set system time from RTC on startup
 
 endif # RTC_CLASS

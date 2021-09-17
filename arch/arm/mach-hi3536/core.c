@@ -315,6 +315,24 @@ void hi3536_restart(char mode, const char *cmd)
 	writel(~0, __io_address(REG_BASE_SCTL + REG_SC_SYSRES));
 }
 
+#if defined(CONFIG_SYNO_HI3536_HARD_RESET_CPU)
+void hi3536_hard_restart(char mode, const char *cmd)
+{
+	/* unlock watchdog registers */
+	writel(REG_WDG_UNLOCK_MAGIC, __io_address(REG_BASE_WDG + REG_WDG_LOCK));
+	/* set countdown value */
+	writel(0x10000, __io_address(REG_BASE_WDG + REG_WDG_LOAD));
+	/* start countdown and enable reset interrupt */
+	writel(0x3, __io_address(REG_BASE_WDG + REG_WDG_CONTROL));
+	/* lock watchdog registers */
+	writel(0x0, __io_address(REG_BASE_WDG + REG_WDG_LOCK));
+
+	msleep(3000);
+	pr_err("Failed to hard reset CPU!\n");
+	hi3536_restart(mode, cmd);
+}
+#endif /* CONFIG_SYNO_HI3536_HARD_RESET_CPU */
+
 extern void __init hi3536_timer_init(void);
 #ifdef CONFIG_HI3536_SYSCNT
 extern void __init arch_timer_init(void);
@@ -333,5 +351,9 @@ MACHINE_START(HI3536, "hi3536")
 	.init_machine = hi3536_init,
 	.smp          = smp_ops(hi3536_smp_ops),
 	.reserve      = hi3536_reserve,
+#if defined(CONFIG_SYNO_HI3536_HARD_RESET_CPU)
+	.restart      = hi3536_hard_restart,
+#else /* CONFIG_SYNO_HI3536_HARD_RESET_CPU */
 	.restart      = hi3536_restart,
+#endif /* CONFIG_SYNO_HI3536_HARD_RESET_CPU */
 	MACHINE_END

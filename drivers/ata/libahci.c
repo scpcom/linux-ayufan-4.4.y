@@ -2092,6 +2092,11 @@ static void ahci_qc_prep(struct ata_queued_cmd *qc)
 	ahci_fill_cmd_slot(pp, qc->tag, opts);
 }
 
+#if !defined(CONFIG_SYNO_LSP_HI3536_V2050) || \
+	(defined(CONFIG_SYNO_LSP_HI3536_V2050) && \
+	 (!defined(CONFIG_ARCH_HI3536) \
+	  && !defined(CONFIG_ARCH_HI3531A) \
+	  && !defined(CONFIG_ARCH_HI3521A)))
 static void ahci_fbs_dec_intr(struct ata_port *ap)
 {
 	struct ahci_port_priv *pp = ap->private_data;
@@ -2112,6 +2117,7 @@ static void ahci_fbs_dec_intr(struct ata_port *ap)
 	if (fbs & PORT_FBS_DEC)
 		dev_err(ap->host->dev, "failed to clear device error\n");
 }
+#endif
 
 static void ahci_error_intr(struct ata_port *ap, u32 irq_stat)
 {
@@ -2223,7 +2229,13 @@ static void ahci_error_intr(struct ata_port *ap, u32 irq_stat)
 	if (irq_stat & PORT_IRQ_FREEZE) {
 		if ((irq_stat & PORT_IRQ_IF_ERR) && fbs_need_dec) {
 			ata_link_abort(link);
+#if !defined(CONFIG_SYNO_LSP_HI3536_V2050) || \
+	(defined(CONFIG_SYNO_LSP_HI3536_V2050) && \
+	 (!defined(CONFIG_ARCH_HI3536) \
+	  && !defined(CONFIG_ARCH_HI3531A) \
+	  && !defined(CONFIG_ARCH_HI3521A)))
 			ahci_fbs_dec_intr(ap);
+#endif
 		} else
 			ata_port_freeze(ap);
 	} else if (fbs_need_dec) {
@@ -2233,7 +2245,13 @@ static void ahci_error_intr(struct ata_port *ap, u32 irq_stat)
 	else if (fbs_need_dec) {
 #endif  
 		ata_link_abort(link);
+#if !defined(CONFIG_SYNO_LSP_HI3536_V2050) || \
+	(defined(CONFIG_SYNO_LSP_HI3536_V2050) && \
+	 (!defined(CONFIG_ARCH_HI3536) \
+	  && !defined(CONFIG_ARCH_HI3531A) \
+	  && !defined(CONFIG_ARCH_HI3521A)))
 		ahci_fbs_dec_intr(ap);
+#endif
 	} else
 		ata_port_abort(ap);
 }

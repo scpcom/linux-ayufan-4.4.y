@@ -720,7 +720,9 @@ struct ext4_inode_info {
 	struct inode vfs_inode;
 	struct jbd2_inode *jinode;
 
+#if !defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	spinlock_t i_raw_lock;	 
+#endif
 
 	struct timespec i_crtime;
 
@@ -762,6 +764,9 @@ struct ext4_inode_info {
 	tid_t i_datasync_tid;
 
 	__u32 i_csum_seed;
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	spinlock_t i_raw_lock;	 
+#endif
 };
 
 #define	EXT4_VALID_FS			0x0001	 
@@ -936,12 +941,18 @@ struct ext4_super_block {
 	__le32	s_overhead_clusters;	 
 #ifdef MY_ABC_HERE 
 	__le32	s_reserved[106];	 
+#if !defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	__le32	s_archive_version;	 
 	__le32  s_archive_version_obsoleted;
+#endif
 #else
 	__le32	s_reserved[108];	 
 #endif  
 	__le32	s_checksum;		 
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES) && defined(MY_ABC_HERE)
+	__le32	s_archive_version;	 
+	__le32  s_archive_version_obsoleted;
+#endif
 };
 
 #define EXT4_S_ERR_LEN (EXT4_S_ERR_END - EXT4_S_ERR_START)
@@ -1071,6 +1082,9 @@ struct ext4_sb_info {
 	struct flex_groups *s_flex_groups;
 	ext4_group_t s_flex_groups_allocated;
 
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 #ifdef MY_ABC_HERE
 	int s_new_error_fs_event_flag;
 	char *s_mount_path;
@@ -1079,14 +1093,17 @@ struct ext4_sb_info {
 #ifdef CONFIG_SYNO_EXT4_CREATE_TIME_BIG_ENDIAN_SWAP
 	int s_swap_create_time;
 #endif
+#endif  
 
 	struct workqueue_struct *dio_unwritten_wq;
 
+#if !defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 #ifdef MY_ABC_HERE
 	atomic_t reada_group_desc_threads;  
 	struct workqueue_struct *group_desc_readahead_wq;
 #endif  
-
+#endif
+	 
 	struct timer_list s_err_report;
 
 	struct ext4_li_request *s_li_request;
@@ -1105,6 +1122,22 @@ struct ext4_sb_info {
 	struct list_head s_es_lru;
 	struct percpu_counter s_extent_cache_cnt;
 	spinlock_t s_es_lru_lock ____cacheline_aligned_in_smp;
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#ifdef MY_ABC_HERE
+	int s_new_error_fs_event_flag;
+	char *s_mount_path;
+	unsigned long s_last_notify_time;
+#endif
+#ifdef CONFIG_SYNO_EXT4_CREATE_TIME_BIG_ENDIAN_SWAP
+	int s_swap_create_time;
+#endif
+#endif  
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#ifdef MY_ABC_HERE
+	atomic_t reada_group_desc_threads;  
+	struct workqueue_struct *group_desc_readahead_wq;
+#endif  
+#endif
 };
 
 static inline struct ext4_sb_info *EXT4_SB(struct super_block *sb)

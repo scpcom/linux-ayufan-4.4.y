@@ -24,9 +24,13 @@
 struct neighbour;
 
 struct neigh_parms {
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 #ifdef CONFIG_NET_NS
 	struct net *net;
 #endif
+#endif  
 	struct net_device *dev;
 	struct neigh_parms *next;
 	int	(*neigh_setup)(struct neighbour *);
@@ -53,6 +57,11 @@ struct neigh_parms {
 	int	proxy_delay;
 	int	proxy_qlen;
 	int	locktime;
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#ifdef CONFIG_NET_NS
+	struct net *net;
+#endif
+#endif  
 };
 
 struct neigh_statistics {
@@ -113,12 +122,21 @@ struct neigh_ops {
 
 struct pneigh_entry {
 	struct pneigh_entry	*next;
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 #ifdef CONFIG_NET_NS
 	struct net		*net;
 #endif
+#endif  
 	struct net_device	*dev;
 	u8			flags;
 	u8			key[0];
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#ifdef CONFIG_NET_NS
+	struct net		*net;
+#endif
+#endif  
 };
 
 #define NEIGH_NUM_HASH_RND	4

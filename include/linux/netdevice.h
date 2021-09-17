@@ -637,12 +637,16 @@ struct net_device {
 	struct net_device_stats	stats;
 	atomic_long_t		rx_dropped;  
 
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 #ifdef CONFIG_WIRELESS_EXT
 	 
 	const struct iw_handler_def *	wireless_handlers;
 	 
 	struct iw_public_data *	wireless_data;
 #endif
+#endif  
 	 
 	const struct net_device_ops *netdev_ops;
 	const struct ethtool_ops *ethtool_ops;
@@ -685,9 +689,13 @@ struct net_device {
 	unsigned int		promiscuity;
 	unsigned int		allmulti;
 
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 #if IS_ENABLED(CONFIG_VLAN_8021Q)
 	struct vlan_info __rcu	*vlan_info;	 
 #endif
+#endif  
 #if IS_ENABLED(CONFIG_NET_DSA)
 	struct dsa_switch_tree	*dsa_ptr;	 
 #endif
@@ -770,10 +778,14 @@ struct net_device {
 	struct netpoll_info __rcu	*npinfo;
 #endif
 
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 #ifdef CONFIG_NET_NS
 	 
 	struct net		*nd_net;
 #endif
+#endif  
 
 	union {
 		void				*ml_priv;
@@ -821,6 +833,21 @@ struct net_device {
 	int group;
 
 	struct pm_qos_request	pm_qos_req;
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#ifdef CONFIG_WIRELESS_EXT
+	 
+	const struct iw_handler_def *	wireless_handlers;
+	 
+	struct iw_public_data *	wireless_data;
+#endif
+#if IS_ENABLED(CONFIG_VLAN_8021Q)
+	struct vlan_info __rcu	*vlan_info;	 
+#endif
+#ifdef CONFIG_NET_NS
+	 
+	struct net		*nd_net;
+#endif
+#endif  
 };
 #define to_net_dev(d) container_of(d, struct net_device, dev)
 

@@ -1,13 +1,23 @@
-/******************************************************************************
- *	Flash Memory Controller v100 Device Driver
- *	Copyright (c) 2014 - 2015 by Hisilicon
- *	All rights reserved.
- * ***
- *	Create by hisilicon
+/*
+ * The Flash Memory Controller v100 Device Driver for hisilicon
  *
- *****************************************************************************/
+ * Copyright (c) 2016 HiSilicon Technologies Co., Ltd.
+ *
+ * This program is free software; you can redistribute  it and/or modify it
+ * under  the terms of  the GNU General  Public License as published by the
+ * Free Software Foundation;  either version 2 of the  License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 
-/*****************************************************************************/
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/io.h>
@@ -491,6 +501,24 @@ static void hifmc100_read_buf(struct mtd_info *mtd, u_char *buf, int len)
 	else
 		memcpy(buf, (char *)host->buffer, len);
 #endif
+
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+	if (buf != chip->oob_poi) {
+		u_int reg, ecc_step = host->pagesize >> 10;
+
+		reg = hifmc_read(host, HIFMC100_ECC_ERR_NUM0_BUF0);
+		while (ecc_step) {
+			u_char err_num;
+
+			err_num = GET_ECC_ERR_NUM(--ecc_step, reg);
+			if (err_num == 0xff)
+				mtd->ecc_stats.failed++;
+			else
+				mtd->ecc_stats.corrected += err_num;
+		}
+	}
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
+
 	return;
 }
 

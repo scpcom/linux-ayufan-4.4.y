@@ -182,8 +182,12 @@ struct vm_area_struct {
 	unsigned long vm_pgoff;		 
 #endif  
 	struct file * vm_file;		 
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 #ifdef CONFIG_AUFS_FHSM
 	struct file *vm_prfile;		 
+#endif  
 #endif  
 	void * vm_private_data;		 
 
@@ -193,6 +197,11 @@ struct vm_area_struct {
 #ifdef CONFIG_NUMA
 	struct mempolicy *vm_policy;	 
 #endif
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#ifdef CONFIG_AUFS_FHSM
+	struct file *vm_prfile;		 
+#endif  
+#endif  
 };
 
 struct core_thread {
@@ -237,7 +246,11 @@ struct mm_struct {
 	void (*unmap_area) (struct mm_struct *mm, unsigned long addr);
 #endif
 	unsigned long mmap_base;		 
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 	unsigned long mmap_legacy_base;          
+#endif  
 	unsigned long task_size;		 
 	unsigned long cached_hole_size; 	 
 	unsigned long free_area_cache;		 

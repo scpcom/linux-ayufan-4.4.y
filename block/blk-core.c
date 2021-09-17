@@ -2144,7 +2144,7 @@ void syno_flashcache_return_error(struct bio *bio)
 		printk(KERN_DEBUG "Get flashcache access md error, return error code\n");
 		bio_endio(bio, 1);
 	} else {
-		bio_endio(bio, 0);
+		bio_endio(bio, -EIO);
 	}
 }
 EXPORT_SYMBOL(syno_flashcache_return_error);

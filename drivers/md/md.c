@@ -24,9 +24,6 @@
 #ifdef MY_ABC_HERE
 #include <linux/list_sort.h>
 #endif  
-#ifdef CONFIG_SYNO_MD_DATA_CORRECTION
-#include <crypto/hash.h>
-#endif
 #include "md.h"
 #include "bitmap.h"
 
@@ -66,11 +63,6 @@ EXPORT_SYMBOL(SYNORaidRdevUnplug);
 int SYNORaidDiskUnplug(char *szArgDiskName);
 void SYNORaidUnplugTask(struct work_struct *);
 #endif   
-
-#ifdef CONFIG_SYNO_MD_DATA_CORRECTION
- 
-static struct crypto_shash *tfm;
-#endif
 
 static LIST_HEAD(pers_list);
 static DEFINE_SPINLOCK(pers_lock);
@@ -7439,6 +7431,9 @@ void md_do_sync(struct md_thread *thread)
 #else  
 	printk(KERN_INFO "md: %s of RAID array %s\n", desc, mdname(mddev));
 #endif  
+#ifdef MY_ABC_HERE
+	SynoReportSyncStatus(desc, 0, 0, mddev->md_minor);
+#endif  
 	printk(KERN_INFO "md: minimum _guaranteed_  speed:"
 		" %d KB/sec/disk.\n", speed_min(mddev));
 	printk(KERN_INFO "md: using maximum available idle IO bandwidth "
@@ -7585,6 +7580,10 @@ void md_do_sync(struct md_thread *thread)
  out:
 	blk_finish_plug(&plug);
 	wait_event(mddev->recovery_wait, !atomic_read(&mddev->recovery_active));
+
+#ifdef MY_ABC_HERE
+	SynoReportSyncStatus(desc, 1, (test_bit(MD_RECOVERY_INTR, &mddev->recovery) ? 1 : 0), mddev->md_minor);
+#endif  
 
 	mddev->pers->sync_request(mddev, max_sectors, &skipped, 1);
 
@@ -8460,10 +8459,6 @@ static int __init md_init(void)
 	funcSYNORaidDiskUnplug = SYNORaidDiskUnplug;
 #endif  
 
-#ifdef CONFIG_SYNO_MD_DATA_CORRECTION
-	tfm = NULL;
-#endif
-
 	return 0;
 
 #ifdef MY_ABC_HERE
@@ -8653,10 +8648,6 @@ static __exit void md_exit(void)
 #ifdef MY_ABC_HERE
 	kmem_cache_destroy(syno_mdio_cache);
 #endif  
-#ifdef CONFIG_SYNO_MD_DATA_CORRECTION
-	if (!IS_ERR_OR_NULL(tfm))
-		crypto_free_shash(tfm);
-#endif
 
 	blk_unregister_region(MKDEV(MD_MAJOR,0), 1U << MINORBITS);
 	blk_unregister_region(MKDEV(mdp_major,0), 1U << MINORBITS);

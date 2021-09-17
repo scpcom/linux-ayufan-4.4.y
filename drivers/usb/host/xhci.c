@@ -140,7 +140,7 @@ int xhci_reset(struct xhci_hcd *xhci)
 	return ret;
 }
 
-#if defined(CONFIG_PCI) && (!defined(CONFIG_SYNO_LSP_HI3536) || (defined(CONFIG_SYNO_LSP_HI3536) && !defined(CONFIG_ARCH_HI3536)))
+#if defined(CONFIG_PCI)
 static int xhci_free_msi(struct xhci_hcd *xhci)
 {
 	int i;
@@ -548,7 +548,7 @@ int xhci_run(struct usb_hcd *hcd)
 {
 	u32 temp;
 	u64 temp_64;
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(CONFIG_SYNO_LSP_HI3536) && !defined(CONFIG_SYNO_LSP_HI3536_V2050)
 	 
 #else  
 	int ret;
@@ -562,11 +562,11 @@ int xhci_run(struct usb_hcd *hcd)
 	xhci_dbg(xhci, "xhci_run\n");
 
 #if defined(CONFIG_SYNO_LSP_HI3536)
-#if 0
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 	ret = xhci_try_enable_msi(hcd);
 	if (ret)
 		return ret;
-#endif
+#endif  
 #else  
 	ret = xhci_try_enable_msi(hcd);
 	if (ret)
@@ -2838,7 +2838,11 @@ int xhci_discover_or_reset_device(struct usb_hcd *hcd, struct usb_device *udev)
 
 	timeleft = wait_for_completion_interruptible_timeout(
 			reset_device_cmd->completion,
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+			XHCI_CMD_DEFAULT_TIMEOUT);
+#else  
 			USB_CTRL_SET_TIMEOUT);
+#endif  
 	if (timeleft <= 0) {
 		xhci_warn(xhci, "%s while waiting for reset device command\n",
 				timeleft == 0 ? "Timeout" : "Signal");

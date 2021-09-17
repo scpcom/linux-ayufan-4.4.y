@@ -74,11 +74,15 @@ struct scsi_device {
 	unsigned long last_queue_ramp_up;	 
 
 	unsigned int id, lun, channel;
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 #ifdef MY_ABC_HERE
 	char syno_disk_name[BDEVNAME_SIZE];		 
 #endif  
 #ifdef MY_ABC_HERE
 	unsigned char auto_remap;
+#endif  
 #endif  
 
 	unsigned int manufacturer;	 
@@ -155,11 +159,15 @@ struct scsi_device {
 	atomic_t iodone_cnt;
 	atomic_t ioerr_cnt;
 
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 #ifdef MY_ABC_HERE
 	unsigned long   idle;    
 	unsigned char	spindown;
 	unsigned char   nospindown;
 	unsigned char   do_standby_syncing;
+#endif  
 #endif  
 
 	struct device		sdev_gendev,
@@ -171,6 +179,9 @@ struct scsi_device {
 	struct scsi_dh_data	*scsi_dh_data;
 	enum scsi_device_state sdev_state;
 
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 #ifdef MY_DEF_HERE
 	 
 	unsigned int	    spinup_queue_id;
@@ -188,8 +199,43 @@ struct scsi_device {
 #ifdef MY_ABC_HERE
 	unsigned int        scmd_timeout_sec;
 #endif  
+#endif  
 
 	unsigned long		sdev_data[0];
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#ifdef MY_ABC_HERE
+	char syno_disk_name[BDEVNAME_SIZE];		 
+#endif  
+#ifdef MY_ABC_HERE
+	unsigned char auto_remap;
+#endif  
+#ifdef CONFIG_SYNO_SATA_COMPATIBILITY
+	int iResetPwrCount;   
+#endif  
+#ifdef MY_ABC_HERE
+	unsigned long   idle;    
+	unsigned char	spindown;
+	unsigned char   nospindown;
+	unsigned char   do_standby_syncing;
+#endif  
+#ifdef MY_DEF_HERE
+	 
+	unsigned int	    spinup_queue_id;
+	 
+	struct SpinupQueue *spinup_queue;
+	 
+	struct list_head    spinup_list;
+	 
+	unsigned int	    spinup_in_process;
+	 
+	unsigned long		spinup_timer;
+#define SYNO_SPINUP_RESEND_TIMER 20 * HZ
+#endif  
+
+#ifdef MY_ABC_HERE
+	unsigned int        scmd_timeout_sec;
+#endif  
+#endif  
 #ifdef MY_ABC_HERE
 #define SERIAL_NUM_SIZE	36	 
 	char syno_disk_serial[SERIAL_NUM_SIZE + 1];
@@ -268,6 +314,9 @@ struct scsi_target {
 #define SCSI_DEFAULT_TARGET_BLOCKED	3
 
 	char			scsi_level;
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	struct execute_work	ew;
+#endif  
 	enum scsi_target_state	state;
 	void 			*hostdata;  
 	unsigned long		starget_data[0];  

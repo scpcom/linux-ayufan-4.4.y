@@ -3249,7 +3249,12 @@ static void clone_update_extent_map(struct inode *inode,
 		fi = btrfs_item_ptr(path->nodes[0], path->slots[0],
 				    struct btrfs_file_extent_item);
 		btrfs_extent_item_to_extent_map(inode, path, fi, false, em);
+#ifdef MY_ABC_HERE
+		 
+		em->generation = trans->transid;
+#else
 		em->generation = -1;
+#endif  
 		if (btrfs_file_extent_type(path->nodes[0], fi) ==
 		    BTRFS_FILE_EXTENT_INLINE)
 			set_bit(BTRFS_INODE_NEEDS_FULL_SYNC,
@@ -3281,6 +3286,103 @@ static void clone_update_extent_map(struct inode *inode,
 	if (unlikely(ret))
 		set_bit(BTRFS_INODE_NEEDS_FULL_SYNC,
 			&BTRFS_I(inode)->runtime_flags);
+}
+
+static int clone_copy_inline_extent(struct inode *src,
+				    struct inode *dst,
+				    struct btrfs_trans_handle *trans,
+				    struct btrfs_path *path,
+				    struct btrfs_key *new_key,
+				    const u64 drop_start,
+				    const u64 datal,
+				    const u64 skip,
+				    const u64 size,
+				    char *inline_data)
+{
+	struct btrfs_root *root = BTRFS_I(dst)->root;
+	const u64 aligned_end = ALIGN(new_key->offset + datal,
+				      root->sectorsize);
+	int ret;
+	struct btrfs_key key;
+
+	if (new_key->offset > 0)
+		return -EOPNOTSUPP;
+
+	key.objectid = btrfs_ino(dst);
+	key.type = BTRFS_EXTENT_DATA_KEY;
+	key.offset = 0;
+	ret = btrfs_search_slot(NULL, root, &key, path, 0, 0);
+	if (ret < 0) {
+		return ret;
+	} else if (ret > 0) {
+		if (path->slots[0] >= btrfs_header_nritems(path->nodes[0])) {
+			ret = btrfs_next_leaf(root, path);
+			if (ret < 0)
+				return ret;
+			else if (ret > 0)
+				goto copy_inline_extent;
+		}
+		btrfs_item_key_to_cpu(path->nodes[0], &key, path->slots[0]);
+		if (key.objectid == btrfs_ino(dst) &&
+		    key.type == BTRFS_EXTENT_DATA_KEY) {
+			ASSERT(key.offset > 0);
+			return -EOPNOTSUPP;
+		}
+	} else if (i_size_read(dst) <= datal) {
+		struct btrfs_file_extent_item *ei;
+		u64 ext_len;
+
+		ei = btrfs_item_ptr(path->nodes[0], path->slots[0],
+				    struct btrfs_file_extent_item);
+		 
+		if (btrfs_file_extent_type(path->nodes[0], ei) ==
+		    BTRFS_FILE_EXTENT_INLINE)
+			goto copy_inline_extent;
+
+		ext_len = btrfs_file_extent_num_bytes(path->nodes[0], ei);
+		if (ext_len > aligned_end)
+			return -EOPNOTSUPP;
+
+		ret = btrfs_next_item(root, path);
+		if (ret < 0) {
+			return ret;
+		} else if (ret == 0) {
+			btrfs_item_key_to_cpu(path->nodes[0], &key,
+					      path->slots[0]);
+			if (key.objectid == btrfs_ino(dst) &&
+			    key.type == BTRFS_EXTENT_DATA_KEY)
+				return -EOPNOTSUPP;
+		}
+	}
+
+copy_inline_extent:
+	 
+	if (i_size_read(dst) > datal) {
+		 
+		return -EOPNOTSUPP;
+	}
+
+	btrfs_release_path(path);
+	ret = btrfs_drop_extents(trans, root, dst, drop_start, aligned_end, 1);
+	if (ret)
+		return ret;
+	ret = btrfs_insert_empty_item(trans, root, path, new_key, size);
+	if (ret)
+		return ret;
+
+	if (skip) {
+		const u32 start = btrfs_file_extent_calc_inline_size(0);
+
+		memmove(inline_data + start, inline_data + start + skip, datal);
+	}
+
+	write_extent_buffer(path->nodes[0], inline_data,
+			    btrfs_item_ptr_offset(path->nodes[0],
+						  path->slots[0]),
+			    size);
+	inode_add_bytes(dst, datal);
+
+	return 0;
 }
 
 static int btrfs_clone(struct inode *src, struct inode *inode,
@@ -3324,7 +3426,8 @@ static int btrfs_clone(struct inode *src, struct inode *inode,
 	key.offset = off;
 
 	while (1) {
-		 
+		u64 next_key_min_offset = key.offset + 1;
+
 		path->leave_spinning = 1;
 		ret = btrfs_search_slot(NULL, BTRFS_I(src)->root, &key, path,
 				0, 0);
@@ -3392,7 +3495,7 @@ process_slot:
 			} else if (key.offset >= off + len) {
 				break;
 			}
-
+			next_key_min_offset = key.offset + datal;
 			size = btrfs_item_size_nr(leaf, slot);
 			read_extent_buffer(leaf, buf,
 					   btrfs_item_ptr_offset(leaf, slot),
@@ -3513,7 +3616,6 @@ process_slot:
 			} else if (type == BTRFS_FILE_EXTENT_INLINE) {
 				u64 skip = 0;
 				u64 trim = 0;
-				u64 aligned_end = 0;
 
 				if (off > key.offset) {
 					skip = off - key.offset;
@@ -3531,42 +3633,22 @@ process_slot:
 				size -= skip + trim;
 				datal -= skip + trim;
 
-				aligned_end = ALIGN(new_key.offset + datal,
-						    root->sectorsize);
-				ret = btrfs_drop_extents(trans, root, inode,
-							 drop_start,
-							 aligned_end,
-							 1);
+				ret = clone_copy_inline_extent(src, inode,
+							       trans, path,
+							       &new_key,
+							       drop_start,
+							       datal,
+							       skip, size, buf);
 				if (ret) {
 					if (ret != -EOPNOTSUPP)
 						btrfs_abort_transaction(trans,
-							root, ret);
+									root,
+									ret);
 					btrfs_end_transaction(trans, root);
 					goto out;
 				}
-
-				ret = btrfs_insert_empty_item(trans, root, path,
-							      &new_key, size);
-				if (ret) {
-					btrfs_abort_transaction(trans, root,
-								ret);
-					btrfs_end_transaction(trans, root);
-					goto out;
-				}
-
-				if (skip) {
-					u32 start =
-					  btrfs_file_extent_calc_inline_size(0);
-					memmove(buf+start, buf+start+skip,
-						datal);
-				}
-
 				leaf = path->nodes[0];
 				slot = path->slots[0];
-				write_extent_buffer(leaf, buf,
-					    btrfs_item_ptr_offset(leaf, slot),
-					    size);
-				inode_add_bytes(inode, datal);
 			}
 
 			if (drop_start < new_key.offset)
@@ -3590,7 +3672,7 @@ process_slot:
 				break;
 		}
 		btrfs_release_path(path);
-		key.offset++;
+		key.offset = next_key_min_offset;
 	}
 	ret = 0;
 

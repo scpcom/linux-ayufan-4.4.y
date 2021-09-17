@@ -200,6 +200,7 @@ struct btrfs_dir_item *btrfs_lookup_dir_item(struct btrfs_trans_handle *trans,
 	int cow = mod != 0;
 
 	key.objectid = dir;
+
 	btrfs_set_key_type(&key, BTRFS_DIR_ITEM_KEY);
 
 	key.offset = btrfs_name_hash(name, name_len);

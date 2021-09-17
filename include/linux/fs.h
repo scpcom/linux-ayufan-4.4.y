@@ -212,6 +212,7 @@ enum positive_aop_returns {
 #ifdef MY_ABC_HERE
 #define AOP_FLAG_RECVFILE		0x0008
 #define AOP_FLAG_RECVFILE_NONDA		0x0010
+#define AOP_FLAG_RECVFILE_ECRYPTFS_NO_TRUNCATE		0x0020
 #endif  
 
 struct page;
@@ -280,10 +281,14 @@ struct address_space_operations {
 	int (*write_end)(struct file *, struct address_space *mapping,
 				loff_t pos, unsigned len, unsigned copied,
 				struct page *page, void *fsdata);
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 #ifdef MY_ABC_HERE
 	int (*aggregate_write_end)(struct file *, struct address_space *mapping,
 				loff_t pos, unsigned len, unsigned copied,
 				struct page **page, void *fsdata, unsigned page_num);
+#endif  
 #endif  
 
 	sector_t (*bmap)(struct address_space *, sector_t);
@@ -305,6 +310,13 @@ struct address_space_operations {
 	int (*swap_activate)(struct swap_info_struct *sis, struct file *file,
 				sector_t *span);
 	void (*swap_deactivate)(struct file *file);
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#ifdef MY_ABC_HERE
+	int (*aggregate_write_end)(struct file *, struct address_space *mapping,
+				loff_t pos, unsigned len, unsigned copied,
+				struct page **page, void *fsdata, unsigned page_num);
+#endif  
+#endif  
 #ifdef MY_ABC_HERE
 	int (*recvfile_da_check)(struct super_block *sb);
 #endif  
@@ -427,9 +439,13 @@ struct inode {
 	struct super_block	*i_sb;
 	struct address_space	*i_mapping;
 
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 #ifdef CONFIG_SECURITY
 	void			*i_security;
 #endif
+#endif  
 
 	unsigned long		i_ino;
 	 
@@ -465,6 +481,9 @@ struct inode {
 		struct rcu_head		i_rcu;
 	};
 	u64			i_version;
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 #ifdef MY_ABC_HERE
 	__u32			i_archive_bit;
 	struct mutex		i_syno_mutex;    
@@ -475,6 +494,7 @@ struct inode {
 #ifdef MY_ABC_HERE
 	struct timespec		i_create_time;
 #endif
+#endif  
 	atomic_t		i_count;
 	atomic_t		i_dio_count;
 	atomic_t		i_writecount;
@@ -501,13 +521,38 @@ struct inode {
 #ifdef CONFIG_IMA
 	atomic_t		i_readcount;  
 #endif
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 #ifdef MY_ABC_HERE
 	struct syno_acl		*i_syno_acl;
 #endif  
 #ifdef MY_ABC_HERE
 	u8	aggregate_flag;
 #endif  
+#endif  
 	void			*i_private;  
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#ifdef CONFIG_SECURITY
+	void			*i_security;
+#endif
+#ifdef MY_ABC_HERE
+	__u32			i_archive_bit;
+	struct mutex		i_syno_mutex;    
+#endif
+#ifdef MY_ABC_HERE
+	__u32			i_archive_version;
+#endif
+#ifdef MY_ABC_HERE
+	struct timespec		i_create_time;
+#endif
+#ifdef MY_ABC_HERE
+	struct syno_acl		*i_syno_acl;
+#endif  
+#ifdef MY_ABC_HERE
+	u8	aggregate_flag;
+#endif  
+#endif  
 };
 
 #ifdef MY_ABC_HERE
@@ -653,9 +698,13 @@ struct file {
 	struct file_ra_state	f_ra;
 
 	u64			f_version;
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 #ifdef CONFIG_SECURITY
 	void			*f_security;
 #endif
+#endif  
 	 
 	void			*private_data;
 
@@ -668,6 +717,11 @@ struct file {
 #ifdef CONFIG_DEBUG_WRITECOUNT
 	unsigned long f_mnt_write_state;
 #endif
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#ifdef CONFIG_SECURITY
+	void			*f_security;
+#endif
+#endif  
 };
 
 struct file_handle {
@@ -1082,9 +1136,13 @@ struct super_block {
 	struct rw_semaphore	s_umount;
 	int			s_count;
 	atomic_t		s_active;
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 #ifdef CONFIG_SECURITY
 	void                    *s_security;
 #endif
+#endif  
 	const struct xattr_handler **s_xattr;
 
 	struct list_head	s_inodes;	 
@@ -1127,12 +1185,16 @@ struct super_block {
 	char __rcu *s_options;
 	const struct dentry_operations *s_d_op;  
 
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 #ifdef MY_ABC_HERE
 	 
 	struct mutex s_archive_mutex;   
 	u32		s_archive_version;
 #ifdef MY_ABC_HERE
 	u32		s_archive_version1;
+#endif  
 #endif  
 #endif  
 
@@ -1146,6 +1208,17 @@ struct super_block {
 #ifdef MY_ABC_HERE
 	 
 	long relatime_period;
+#endif  
+
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	void                    *s_security;
+#ifdef MY_ABC_HERE
+	struct mutex s_archive_mutex;
+	u32		s_archive_version;
+#ifdef MY_ABC_HERE
+	u32		s_archive_version1;
+#endif  
+#endif  
 #endif  
 };
 
@@ -1281,9 +1354,13 @@ struct file_operations {
 };
 
 struct inode_operations {
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 #ifdef MY_ABC_HERE
 	int (*syno_getattr)(struct dentry *, struct kstat *, int flags);
 #endif
+#endif  
 	struct dentry * (*lookup) (struct inode *,struct dentry *, unsigned int);
 	void * (*follow_link) (struct dentry *, struct nameidata *);
 	int (*permission) (struct inode *, int);
@@ -1301,6 +1378,9 @@ struct inode_operations {
 	int (*mknod) (struct inode *,struct dentry *,umode_t,dev_t);
 	int (*rename) (struct inode *, struct dentry *,
 			struct inode *, struct dentry *);
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 #ifdef MY_ABC_HERE
 	struct syno_acl * (*syno_acl_get)(struct inode *);
 	int (*syno_acl_set)(struct inode *, struct syno_acl *);
@@ -1330,6 +1410,7 @@ struct inode_operations {
 #ifdef MY_ABC_HERE
 	int (*syno_set_crtime)(struct dentry *, struct timespec *);
 #endif
+#endif  
 	int (*setattr) (struct dentry *, struct iattr *);
 	int (*getattr) (struct vfsmount *mnt, struct dentry *, struct kstat *);
 	int (*setxattr) (struct dentry *, const char *,const void *,size_t,int);
@@ -1342,6 +1423,40 @@ struct inode_operations {
 	int (*atomic_open)(struct inode *, struct dentry *,
 			   struct file *, unsigned open_flag,
 			   umode_t create_mode, int *opened);
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#ifdef MY_ABC_HERE
+	int (*syno_getattr)(struct dentry *, struct kstat *, int flags);
+#endif
+#ifdef MY_ABC_HERE
+	struct syno_acl * (*syno_acl_get)(struct inode *);
+	int (*syno_acl_set)(struct inode *, struct syno_acl *);
+	int (*syno_acl_xattr_get)(struct dentry *, int, void *, size_t);
+	int (*syno_permission)(struct dentry *, int);
+	int (*syno_exec_permission)(struct dentry *);
+	int (*syno_acl_access)(struct dentry *, int, int);
+	int (*syno_may_delete)(struct dentry *, struct inode *);
+	int (*syno_inode_change_ok)(struct dentry *, struct iattr *);
+	int (*syno_arbit_chg_ok)(struct dentry *, unsigned int cmd, int tag, int mask);
+	int (*syno_setattr_post)(struct dentry *, struct iattr *);
+	int (*syno_acl_init)(struct dentry *, struct inode *);
+	void (*syno_acl_to_mode)(struct dentry *, struct kstat *);
+	int (*syno_acl_sys_get_perm)(struct dentry *, int *mask);
+	int (*syno_acl_sys_check_perm)(struct dentry *, int mask);
+	int (*syno_acl_sys_is_support)(struct dentry *, int tag);
+	int (*syno_bypass_is_synoacl)(struct dentry *, int cmd, int reterr);
+#endif  
+#ifdef MY_ABC_HERE
+	int (*syno_get_archive_bit)(struct dentry *, unsigned int *);
+	int (*syno_set_archive_bit)(struct dentry *, unsigned int);
+#endif
+#ifdef MY_ABC_HERE
+	int (*syno_get_archive_ver)(struct dentry *, u32 *);
+	int (*syno_set_archive_ver)(struct dentry *, u32);
+#endif
+#ifdef MY_ABC_HERE
+	int (*syno_set_crtime)(struct dentry *, struct timespec *);
+#endif
+#endif  
 } ____cacheline_aligned;
 
 ssize_t rw_copy_check_uvector(int type, const struct iovec __user * uvector,
@@ -1357,12 +1472,16 @@ extern ssize_t vfs_writev(struct file *, const struct iovec __user *,
 		unsigned long, loff_t *);
 
 struct super_operations {
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 #ifdef MY_ABC_HERE
 	int (*syno_get_sb_archive_ver)(struct super_block *sb, u32 *version);
 	int (*syno_set_sb_archive_ver)(struct super_block *sb, u32 version);
 #ifdef MY_ABC_HERE
 	int (*syno_get_sb_archive_ver1)(struct super_block *sb, u32 *version);
 	int (*syno_set_sb_archive_ver1)(struct super_block *sb, u32 version);
+#endif  
 #endif  
 #endif  
    	struct inode *(*alloc_inode)(struct super_block *sb);
@@ -1391,6 +1510,16 @@ struct super_operations {
 	int (*bdev_try_to_free_page)(struct super_block*, struct page*, gfp_t);
 	int (*nr_cached_objects)(struct super_block *);
 	void (*free_cached_objects)(struct super_block *, int);
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#ifdef MY_ABC_HERE
+	int (*syno_get_sb_archive_ver)(struct super_block *sb, u32 *version);
+	int (*syno_set_sb_archive_ver)(struct super_block *sb, u32 version);
+#ifdef MY_ABC_HERE
+	int (*syno_get_sb_archive_ver1)(struct super_block *sb, u32 *version);
+	int (*syno_set_sb_archive_ver1)(struct super_block *sb, u32 version);
+#endif  
+#endif  
+#endif  
 };
 
 #define S_SYNC		1	 
@@ -1532,10 +1661,19 @@ struct file_system_type {
 
 	struct lock_class_key i_lock_key;
 	struct lock_class_key i_mutex_key;
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 #ifdef MY_ABC_HERE
 	struct lock_class_key i_syno_mutex_key;
 #endif
+#endif  
 	struct lock_class_key i_mutex_dir_key;
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#ifdef MY_ABC_HERE
+	struct lock_class_key i_syno_mutex_key;
+#endif
+#endif  
 };
 
 #define MODULE_ALIAS_FS(NAME) MODULE_ALIAS("fs-" NAME)

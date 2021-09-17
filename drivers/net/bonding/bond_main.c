@@ -165,7 +165,11 @@ MODULE_PARM_DESC(resend_igmp, "Number of IGMP membership reports to send on "
 
 #if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef TNK_BONDING
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+static int select_slave_dev(struct net_device *dev)
+#else  
 int select_slave_dev(struct net_device *dev)
+#endif  
 {
 	int i;
 	char name[2][5] = {"eth0", "eth1"};
@@ -180,6 +184,18 @@ int select_slave_dev(struct net_device *dev)
 			__func__);
 	return -1;
 }
+
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+static void tnk_bonding_set_slave_link_status(struct slave *slave, bool link_up)
+{
+	if (hitoe) {
+		 
+		int slave_dev_id;
+		slave_dev_id = select_slave_dev(slave->dev);
+		tnkhw_bonding_setstatus_slave(slave_dev_id, link_up);
+	}
+}
+#endif  
 #endif
 #endif  
 
@@ -919,6 +935,11 @@ void bond_change_active_slave(struct bonding *bond, struct slave *new_active)
 
 			new_active->delay = 0;
 			new_active->link = BOND_LINK_UP;
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#ifdef TNK_BONDING
+			tnk_bonding_set_slave_link_status(new_active, true);
+#endif
+#endif  
 
 			if (bond->params.mode == BOND_MODE_8023AD)
 				bond_3ad_handle_link_change(new_active, BOND_LINK_UP);
@@ -2181,12 +2202,16 @@ static void bond_miimon_commit(struct bonding *bond)
 
 #if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef TNK_BONDING
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+			tnk_bonding_set_slave_link_status(slave, true);
+#else  
 			if (hitoe) {
 				 
 				int slave_dev_id;
 				slave_dev_id = select_slave_dev(slave->dev);
 				tnkhw_bonding_setstatus_slave(slave_dev_id, 1);
 			}
+#endif  
 #endif
 #endif  
 			if (bond->params.mode == BOND_MODE_8023AD) {
@@ -2241,12 +2266,16 @@ static void bond_miimon_commit(struct bonding *bond)
 
 #if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef TNK_BONDING
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+			tnk_bonding_set_slave_link_status(slave, false);
+#else  
 			if (hitoe) {
 				 
 				int slave_dev_id;
 				slave_dev_id = select_slave_dev(slave->dev);
 				tnkhw_bonding_setstatus_slave(slave_dev_id, 0);
 			}
+#endif  
 #endif
 #endif  
 			if (bond->params.mode == BOND_MODE_ACTIVEBACKUP ||
@@ -2574,6 +2603,9 @@ void bond_loadbalance_arp_mon(struct work_struct *work)
 				bond_set_active_slave(slave);
 #if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef TNK_BONDING
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+				tnk_bonding_set_slave_link_status(slave, true);
+#else  
 				if (hitoe) {
 					 
 					int slave_dev_id;
@@ -2582,6 +2614,7 @@ void bond_loadbalance_arp_mon(struct work_struct *work)
 					tnkhw_bonding_setstatus_slave
 						(slave_dev_id, 1);
 				}
+#endif  
 #endif
 #endif  
 
@@ -2609,6 +2642,9 @@ void bond_loadbalance_arp_mon(struct work_struct *work)
 				bond_set_backup_slave(slave);
 #if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef TNK_BONDING
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+				tnk_bonding_set_slave_link_status(slave, false);
+#else  
 				if (hitoe) {
 					 
 					int slave_dev_id;
@@ -2617,6 +2653,7 @@ void bond_loadbalance_arp_mon(struct work_struct *work)
 					tnkhw_bonding_setstatus_slave
 						(slave_dev_id, 0);
 				}
+#endif  
 #endif
 #endif  
 
@@ -2723,12 +2760,16 @@ static void bond_ab_arp_commit(struct bonding *bond, int delta_in_ticks)
 		case BOND_LINK_UP:
 #if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef TNK_BONDING
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+			tnk_bonding_set_slave_link_status(slave, true);
+#else  
 			if (hitoe) {
 				 
 				int slave_dev_id;
 				slave_dev_id = select_slave_dev(slave->dev);
 				tnkhw_bonding_setstatus_slave(slave_dev_id, 1);
 			}
+#endif  
 #endif
 #endif  
 			trans_start = dev_trans_start(slave->dev);
@@ -2762,12 +2803,16 @@ static void bond_ab_arp_commit(struct bonding *bond, int delta_in_ticks)
 			slave->link = BOND_LINK_DOWN;
 #if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef TNK_BONDING
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+			tnk_bonding_set_slave_link_status(slave, false);
+#else  
 			if (hitoe) {
 				 
 				int slave_dev_id;
 				slave_dev_id = select_slave_dev(slave->dev);
 				tnkhw_bonding_setstatus_slave(slave_dev_id, 0);
 			}
+#endif  
 #endif
 #endif  
 			bond_set_slave_inactive_flags(slave);
@@ -3841,6 +3886,20 @@ void bond_set_mode_ops(struct bonding *bond, int mode)
 {
 	struct net_device *bond_dev = bond->dev;
 
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+#ifdef TNK_BONDING
+	if (hitoe) {
+		 
+		if ((mode == BOND_MODE_ACTIVEBACKUP) ||
+				(mode == BOND_MODE_ROUNDROBIN)) {
+			tnkhw_bonding_setmode(mode);
+		} else {
+			pr_err("Error: Invalid bonding mode in TOE\n");
+			return;
+		}
+	}
+#endif
+#endif  
 	switch (mode) {
 	case BOND_MODE_ROUNDROBIN:
 		break;

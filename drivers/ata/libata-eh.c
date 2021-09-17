@@ -2286,8 +2286,12 @@ int ata_eh_reset(struct ata_link *link, int classify,
 		sata_down_spd_limit(link, 0);
 		if (slave)
 			sata_down_spd_limit(slave, 0);
+#ifdef MY_ABC_HERE
+	}
+#else
 	} else if (rc == -EPIPE)
 		sata_down_spd_limit(failed_link, 0);
+#endif   
 
 	if (hardreset)
 		reset = hardreset;

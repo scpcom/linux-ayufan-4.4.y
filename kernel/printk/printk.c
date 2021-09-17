@@ -139,7 +139,11 @@ static struct console *exclusive_console;
  */
 struct console_cmdline
 {
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	char	name[8];			/* Name of the driver	    */
+#else /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 	char	name[16];			/* Name of the driver	    */
+#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 	int	index;				/* Minor dev. to use	    */
 	char	*options;			/* Options for the driver   */
 #ifdef CONFIG_A11Y_BRAILLE_CONSOLE
@@ -2362,8 +2366,12 @@ void register_console(struct console *newcon)
 	 */
 	for (i = 0; i < MAX_CMDLINECONSOLES && console_cmdline[i].name[0];
 			i++) {
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+		// do nothing
+#else /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 		BUILD_BUG_ON(sizeof(console_cmdline[i].name) !=
 			     sizeof(newcon->name));
+#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 		if (strcmp(console_cmdline[i].name, newcon->name) != 0)
 			continue;
 		if (newcon->index >= 0 &&

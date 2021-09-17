@@ -11,6 +11,15 @@ ifdef CONFIG_CROSS_MEMORY_ATTACH
 mmu-$(CONFIG_MMU)	+= process_vm_access.o
 endif
 
+ifeq ($(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES),y)
+obj-y			:= filemap.o mempool.o oom_kill.o fadvise.o \
+			   maccess.o page_alloc.o page-writeback.o \
+			   readahead.o swap.o truncate.o vmscan.o shmem.o \
+			   util.o mmzone.o vmstat.o backing-dev.o \
+			   mm_init.o mmu_context.o percpu.o slab_common.o \
+			   compaction.o balloon_compaction.o \
+			   interval_tree.o $(mmu-y)
+else
 obj-y			:= filemap.o mempool.o oom_kill.o fadvise.o \
 			   maccess.o page_alloc.o page-writeback.o \
 			   readahead.o swap.o truncate.o vmscan.o shmem.o \
@@ -18,6 +27,7 @@ obj-y			:= filemap.o mempool.o oom_kill.o fadvise.o \
 			   mm_init.o mmu_context.o percpu.o slab_common.o \
 			   compaction.o balloon_compaction.o \
 			   interval_tree.o prfile.o $(mmu-y)
+endif
 
 obj-y += init-mm.o
 

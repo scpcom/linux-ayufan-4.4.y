@@ -1009,8 +1009,7 @@ static int __init ehci_hcd_init(void)
 	if (test_bit(USB_UHCI_LOADED, &usb_hcds_loaded) ||
 			test_bit(USB_OHCI_LOADED, &usb_hcds_loaded))
 #if defined(CONFIG_SYNO_LSP_HI3536)
-		pr_info("Warning! ehci_hcd should always be loaded");
-		pr_info(" before uhci_hcd and ohci_hcd, not after\n");
+		pr_info("Warning! ehci_hcd should always be loaded before uhci_hcd and ohci_hcd, not after\n");
 #else  
 		printk(KERN_WARNING "Warning! ehci_hcd should always be loaded"
 				" before uhci_hcd and ohci_hcd, not after\n");

@@ -171,16 +171,30 @@ struct nand_manufacturers nand_manuf_ids[] = {
 	{NAND_MFR_FUJITSU,	"Fujitsu"},
 	{NAND_MFR_NATIONAL,	"National"},
 	{NAND_MFR_RENESAS,	"Renesas"},
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+	{NAND_MFR_ST_MICRO,	"ST/Micro"},
+#else  
 	{NAND_MFR_STMICRO,	"ST Micro"},
+#endif  
 	{NAND_MFR_HYNIX,	"Hynix"},
 	{NAND_MFR_MICRON,	"Micron"},
 	{NAND_MFR_AMD,		"AMD/Spansion"},
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+	{NAND_MFR_GD_ESMT,	"GD/ESMT"},
+	{NAND_MFR_EON,		"Eon"},
+#else  
 	{NAND_MFR_MACRONIX,	"Macronix"},
 	{NAND_MFR_GD,		"GD"},
 	{NAND_MFR_EON,		"Eon"},
 	{NAND_MFR_ESMT,		"ESMT"},
+#endif  
 	{NAND_MFR_WINBOND,	"Winbond"},
 	{NAND_MFR_ATO,		"ATO"},
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+	{NAND_MFR_MXIC,		"MXIC"},
+	{NAND_MFR_ALL_FLASH,	"All-flash"},
+	{NAND_MFR_PARAGON,	"Paragon"},
+#endif  
 	{0x0,			"Unknown"}
 #else  
 	{NAND_MFR_TOSHIBA, "Toshiba"},

@@ -153,6 +153,9 @@ struct scsi_host_template {
 
 	struct list_head legacy_hosts;
 
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	u64 vendor_id;
+#endif  
 #ifdef MY_ABC_HERE
 	 
 	int  (* syno_index_get)(struct Scsi_Host *host, uint channel, uint id, uint lun);
@@ -165,7 +168,11 @@ struct scsi_host_template {
 	int  syno_port_type;
 #endif  
 
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 	u64 vendor_id;
+#endif  
 #ifdef MY_DEF_HERE
 	unsigned char (* syno_get_disk_speed)(struct Scsi_Host *host, unsigned int phy_id);
 #endif  
@@ -264,7 +271,10 @@ struct Scsi_Host {
 
 	unsigned eh_noresume:1;
 
+#if !defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
 	unsigned no_write_same:1;
+#endif
 
 	char work_q_name[20];
 	struct workqueue_struct *work_q;
@@ -293,7 +303,6 @@ struct Scsi_Host {
 	void *shost_data;
 
 	struct device *dma_dev;
-
 #ifdef MY_DEF_HERE
 	 
 	int isCacheSSD;
@@ -301,6 +310,10 @@ struct Scsi_Host {
 
 	unsigned long hostdata[0]   
 		__attribute__ ((aligned (sizeof(unsigned long))));
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+	unsigned no_write_same:1;
+#endif
 };
 
 #define		class_to_shost(d)	\

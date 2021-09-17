@@ -95,7 +95,12 @@ static inline int __arch_check_pcie_link(struct pcie_info *info)
 {
 	int val;
 
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 	udelay(2000);
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+
 	val = readl(misc_ctrl_virt + PCIE_SYS_STATE0);
 	return ((val & (1 << PCIE_XMLH_LINK_UP))
 			&& (val & (1 << PCIE_RDLH_LINK_UP))) ? 1 : 0;

@@ -352,8 +352,10 @@ repeat:
 		return;
 	}
 
+#if defined(CONFIG_SYNO_HI3536)
 	if (unlikely(dentry->d_flags & DCACHE_DISCONNECTED))
 		goto kill_it;
+#endif  
 
 	if (dentry->d_flags & DCACHE_OP_DELETE) {
 		if (dentry->d_op->d_delete(dentry))
@@ -753,6 +755,7 @@ ascend:
 
 		if (!locked && read_seqretry(&rename_lock, seq))
 			goto rename_retry;
+#if defined(CONFIG_SYNO_HI3536)
 		 
 		do {
 			next = child->d_child.next;
@@ -760,6 +763,15 @@ ascend:
 				goto ascend;
 			child = list_entry(next, struct dentry, d_child);
 		} while (unlikely(child->d_flags & DCACHE_DENTRY_KILLED));
+#else  
+		next = child->d_child.next;
+		while (unlikely(child->d_flags & DCACHE_DENTRY_KILLED)) {
+			if (next == &this_parent->d_subdirs)
+				goto ascend;
+			child = list_entry(next, struct dentry, d_child);
+			next = next->next;
+		}
+#endif  
 		rcu_read_unlock();
 		goto resume;
 	}
@@ -847,6 +859,7 @@ ascend:
 
 		if (!locked && read_seqretry(&rename_lock, seq))
 			goto rename_retry;
+#if defined(CONFIG_SYNO_HI3536)
 		 
 		do {
 			next = child->d_child.next;
@@ -854,6 +867,15 @@ ascend:
 				goto ascend;
 			child = list_entry(next, struct dentry, d_child);
 		} while (unlikely(child->d_flags & DCACHE_DENTRY_KILLED));
+#else  
+		next = child->d_child.next;
+		while (unlikely(child->d_flags & DCACHE_DENTRY_KILLED)) {
+			if (next == &this_parent->d_subdirs)
+				goto ascend;
+			child = list_entry(next, struct dentry, d_child);
+			next = next->next;
+		}
+#endif  
 		rcu_read_unlock();
 		goto resume;
 	}
@@ -945,6 +967,9 @@ struct dentry *d_alloc(struct dentry * parent, const struct qstr *name)
 	if (!dentry)
 		return NULL;
 
+#if defined(CONFIG_SYNO_HI3536)
+	dentry->d_flags |= DCACHE_RCUACCESS;
+#endif  
 	spin_lock(&parent->d_lock);
 	 
 	__dget_dlock(parent);
@@ -1539,7 +1564,11 @@ static void __d_rehash(struct dentry * entry, struct hlist_bl_head *b)
 {
 	BUG_ON(!d_unhashed(entry));
 	hlist_bl_lock(b);
+#if defined(CONFIG_SYNO_HI3536)
+	 
+#else  
 	entry->d_flags |= DCACHE_RCUACCESS;
+#endif  
 	hlist_bl_add_head_rcu(&entry->d_hash, b);
 	hlist_bl_unlock(b);
 }
@@ -1660,6 +1689,9 @@ static void __d_move(struct dentry * dentry, struct dentry * target)
 	swap(dentry->d_name.hash, target->d_name.hash);
 
 	if (IS_ROOT(dentry)) {
+#if defined(CONFIG_SYNO_HI3536)
+		dentry->d_flags |= DCACHE_RCUACCESS;
+#endif  
 		dentry->d_parent = target->d_parent;
 		target->d_parent = target;
 		INIT_LIST_HEAD(&target->d_child);
@@ -1742,6 +1774,9 @@ static void __d_materialise_dentry(struct dentry *dentry, struct dentry *anon)
 	switch_names(dentry, anon);
 	swap(dentry->d_name.hash, anon->d_name.hash);
 
+#if defined(CONFIG_SYNO_HI3536)
+	dentry->d_flags |= DCACHE_RCUACCESS;
+#endif  
 	dentry->d_parent = dentry;
 	list_del_init(&dentry->d_child);
 	anon->d_parent = dparent;
@@ -1888,8 +1923,10 @@ static int prepend_path(const struct path *path,
 	struct dentry *dentry = path->dentry;
 	struct vfsmount *vfsmnt = path->mnt;
 	struct mount *mnt = real_mount(vfsmnt);
+#if defined(CONFIG_SYNO_HI3536)
 	char *orig_buffer = *buffer;
 	int orig_len = *buflen;
+#endif  
 	bool slash = false;
 	int error = 0;
 
@@ -1897,6 +1934,7 @@ static int prepend_path(const struct path *path,
 		struct dentry * parent;
 
 		if (dentry == vfsmnt->mnt_root || IS_ROOT(dentry)) {
+#if defined(CONFIG_SYNO_HI3536)
 			 
 			if (dentry != vfsmnt->mnt_root) {
 				*buffer = orig_buffer;
@@ -1905,6 +1943,7 @@ static int prepend_path(const struct path *path,
 				error = 3;
 				goto global_root;
 			}
+#endif  
 			 
 			if (!mnt_has_parent(mnt))
 				goto global_root;
@@ -1933,6 +1972,16 @@ static int prepend_path(const struct path *path,
 	return error;
 
 global_root:
+#if defined(CONFIG_SYNO_HI3536)
+	 
+#else  
+	 
+	if (IS_ROOT(dentry) &&
+	    (dentry->d_name.len != 1 || dentry->d_name.name[0] != '/')) {
+		WARN(1, "Root dentry has weird name <%.*s>\n",
+		     (int) dentry->d_name.len, dentry->d_name.name);
+	}
+#endif  
 	if (!slash)
 		error = prepend(buffer, buflen, "/", 1);
 	if (!error)
@@ -2244,6 +2293,7 @@ ascend:
 
 		if (!locked && read_seqretry(&rename_lock, seq))
 			goto rename_retry;
+#if defined(CONFIG_SYNO_HI3536)
 		 
 		do {
 			next = child->d_child.next;
@@ -2251,6 +2301,15 @@ ascend:
 				goto ascend;
 			child = list_entry(next, struct dentry, d_child);
 		} while (unlikely(child->d_flags & DCACHE_DENTRY_KILLED));
+#else  
+		next = child->d_child.next;
+		while (unlikely(child->d_flags & DCACHE_DENTRY_KILLED)) {
+			if (next == &this_parent->d_subdirs)
+				goto ascend;
+			child = list_entry(next, struct dentry, d_child);
+			next = next->next;
+		}
+#endif  
 		rcu_read_unlock();
 		goto resume;
 	}

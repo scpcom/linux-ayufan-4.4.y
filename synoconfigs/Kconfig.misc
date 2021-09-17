@@ -81,6 +81,11 @@ config SYNO_MONACO_SDK_BUILD_FAILED_FIX
 	depends on SYNO_MONACO
 	default y
 
+config SYNO_AUTO_INSTALL_ABILITY
+	bool "Add the ability to trigger auto install mode"
+	default y
+	depends on SYNO_HI3536
+
 endmenu #MISC Features
 
 menu "Encryption"

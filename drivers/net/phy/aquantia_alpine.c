@@ -13,7 +13,7 @@
 #include <linux/timer.h>
 #include <linux/of.h>
 
-#define AQUANTIA_AQR105_ID			0x3a1b501
+#define AQUANTIA_AQR107_ID			0x3a1b4e2
 
 #define AQ_PHY_ADDR(device, reg) (MII_ADDR_C45 | (device * 0x10000) | reg)
 
@@ -33,8 +33,8 @@
 
 static int aq_config_init(struct phy_device *phydev)
 {
-	phydev->supported = ADVERTISED_100baseT_Full | ADVERTISED_1000baseT_Full;
-	phydev->advertising = ADVERTISED_100baseT_Full | ADVERTISED_1000baseT_Full;
+	phydev->supported = ADVERTISED_100baseT_Full | ADVERTISED_1000baseT_Full | ADVERTISED_10000baseT_Full;
+	phydev->advertising = ADVERTISED_100baseT_Full | ADVERTISED_1000baseT_Full | ADVERTISED_10000baseT_Full;
 	phydev->state = PHY_NOLINK;
 	phydev->autoneg = AUTONEG_ENABLE;
 
@@ -89,7 +89,7 @@ no_link:
 
 static int aq_match_phy_device(struct phy_device *phydev)
 {
-	if (phydev->c45_ids.device_ids[4] == AQUANTIA_AQR105_ID)
+	if (phydev->c45_ids.device_ids[4] == AQUANTIA_AQR107_ID)
 		return 1;
 
 	return 0;
@@ -97,9 +97,9 @@ static int aq_match_phy_device(struct phy_device *phydev)
 
 static struct phy_driver aq_driver[] = {
 {
-	.phy_id		= AQUANTIA_AQR105_ID,
+	.phy_id		= AQUANTIA_AQR107_ID,
 	.phy_id_mask	= 0xffffffff,
-	.name		= "Aquantia AQR105 phy driver",
+	.name		= "Aquantia AQR107 phy driver",
 	.flags		= PHY_HAS_INTERRUPT,
 	.config_init	= aq_config_init,
 	.read_status	= aq_read_status,

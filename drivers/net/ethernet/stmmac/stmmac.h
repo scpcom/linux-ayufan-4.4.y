@@ -119,4 +119,8 @@ void stmmac_proc(struct seq_file *s);
 
 extern struct net_device *stmmac_device_list[];
 
+#if defined(CONFIG_SYNO_HI3536_CHANGE_PHY_BEHAVIOR)
+void syno_update_rtl8211e_led_behavior(struct phy_device *phydev);
+#endif /* CONFIG_SYNO_HI3536_CHANGE_PHY_BEHAVIOR */
+
 #endif /* __STMMAC_H__ */

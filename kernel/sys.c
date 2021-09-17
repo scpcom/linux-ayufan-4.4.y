@@ -64,6 +64,17 @@
 #include <asm/uaccess.h>
 #include <asm/io.h>
 #include <asm/unistd.h>
+#ifdef MY_DEF_HERE
+#include <linux/gpio.h>
+#ifdef MY_ABC_HERE
+extern u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite);
+#elif defined(MY_ABC_HERE)
+extern void SYNO_GPIO_WRITE(int pin, int pValue);
+#endif  
+extern char gSynoUsbVbusHostAddr[CONFIG_SYNO_USB_VBUS_NUM_GPIO][13];
+extern int gSynoUsbVbusPort[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
+extern unsigned gSynoUsbVbusGpp[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
+#endif  
 
 #ifndef SET_UNALIGN_CTL
 # define SET_UNALIGN_CTL(a,b)	(-EINVAL)
@@ -276,6 +287,27 @@ out_unlock:
 	return retval;
 }
 
+#ifdef MY_DEF_HERE
+static void syno_turnoff_all_usb_vbus_gpio(void)
+{
+	int gpio_off_value = 0;
+	int i = 0;
+	for (i = 0; i < CONFIG_SYNO_USB_VBUS_NUM_GPIO; i++) {
+		if (0 != gSynoUsbVbusGpp[i]) {
+#ifdef MY_ABC_HERE
+			syno_pch_lpc_gpio_pin(gSynoUsbVbusGpp[i],
+					      &gpio_off_value, 1);
+#elif defined(MY_ABC_HERE)
+			SYNO_GPIO_WRITE(gSynoUsbVbusGpp[i],
+				gpio_off_value);
+#endif  
+			printk(KERN_INFO "Turned off USB vbus gpio %u\n",
+			       gSynoUsbVbusGpp[i]);
+		}
+	}
+}
+#endif  
+
 void emergency_restart(void)
 {
 	kmsg_dump(KMSG_DUMP_EMERG);
@@ -283,12 +315,19 @@ void emergency_restart(void)
 }
 EXPORT_SYMBOL_GPL(emergency_restart);
 
+#if defined(CONFIG_SYNO_HI3536_DISABLE_GMAC_WHEN_STOPPING)
+void syno_stmmac_release(void);
+#endif  
+
 void kernel_restart_prepare(char *cmd)
 {
 	blocking_notifier_call_chain(&reboot_notifier_list, SYS_RESTART, cmd);
 	system_state = SYSTEM_RESTART;
 	usermodehelper_disable();
 	device_shutdown();
+#if defined(CONFIG_SYNO_HI3536_DISABLE_GMAC_WHEN_STOPPING)
+	syno_stmmac_release();
+#endif  
 #if defined(MY_DEF_HERE)
 	syscore_shutdown();
 #endif  
@@ -346,8 +385,15 @@ static void kernel_shutdown_prepare(enum system_states state)
 	system_state = state;
 	usermodehelper_disable();
 	device_shutdown();
+#ifdef MY_DEF_HERE
+	if (SYSTEM_POWER_OFF == system_state)
+		syno_turnoff_all_usb_vbus_gpio();
+#endif  
+#if defined(CONFIG_SYNO_HI3536_DISABLE_GMAC_WHEN_STOPPING)
+	syno_stmmac_release();
+#endif  
 }
- 
+
 void kernel_halt(void)
 {
 	kernel_shutdown_prepare(SYSTEM_HALT);

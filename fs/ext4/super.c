@@ -70,13 +70,7 @@ static void ext4_clear_request_list(void);
 static int ext4_reserve_clusters(struct ext4_sb_info *, ext4_fsblk_t);
 
 #ifdef MY_ABC_HERE
-struct kmem_cache *ext4_syno_caseless_cachep;
 extern struct dentry_operations ext4_dentry_operations;
-
-spinlock_t ext4_namei_buf_lock;   
-spinlock_t ext4_hash_buf_lock;    
-static int ext4_namei_lock_init = 0;
-static int ext4_hash_lock_init = 0;
 #endif  
 
 #if !defined(CONFIG_EXT2_FS) && !defined(CONFIG_EXT2_FS_MODULE) && defined(CONFIG_EXT4_USE_FOR_EXT23)
@@ -3834,6 +3828,15 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 			(EXT4_MAX_BLOCK_FILE_PHYS / EXT4_BLOCKS_PER_GROUP(sb)));
 	db_count = (sbi->s_groups_count + EXT4_DESC_PER_BLOCK(sb) - 1) /
 		   EXT4_DESC_PER_BLOCK(sb);
+	if (EXT4_HAS_INCOMPAT_FEATURE(sb, EXT4_FEATURE_INCOMPAT_META_BG)) {
+		if (le32_to_cpu(es->s_first_meta_bg) >= db_count) {
+			ext4_msg(sb, KERN_WARNING,
+				 "first meta block group too large: %u "
+				 "(group descriptor block count %u)",
+				 le32_to_cpu(es->s_first_meta_bg), db_count);
+			goto failed_mount;
+		}
+	}
 	sbi->s_group_desc = ext4_kvmalloc(db_count *
 					  sizeof(struct buffer_head *),
 					  GFP_KERNEL);
@@ -4155,16 +4158,6 @@ no_journal:
 	} else
 		descr = "out journal";
 
-#ifdef MY_ABC_HERE
-	if (!ext4_namei_lock_init) {
-		spin_lock_init(&ext4_namei_buf_lock);
-		ext4_namei_lock_init=1;
-	}
-	if (!ext4_hash_lock_init) {
-		spin_lock_init(&ext4_hash_buf_lock);
-		ext4_hash_lock_init=1;
-	}
-#endif  
 #ifdef CONFIG_SYNO_EXT4_CREATE_TIME_BIG_ENDIAN_SWAP
 	{
 		char szDsmVersion[8] = {'\0'};
@@ -5404,13 +5397,6 @@ static int __init ext4_init_fs(void)
 	register_as_ext3();
 	register_as_ext2();
 
-#ifdef MY_ABC_HERE
-	ext4_syno_caseless_cachep = kmem_cache_create("ext4_syno_caseless",
-			(NAME_MAX+1)*2, 0,
-			SLAB_RECLAIM_ACCOUNT | SLAB_MEM_SPREAD, NULL);
-	if (!ext4_syno_caseless_cachep)
-		goto out;
-#endif
 	err = register_filesystem(&ext4_fs_type);
 	if (err)
 		goto out;
@@ -5418,9 +5404,6 @@ static int __init ext4_init_fs(void)
 	return 0;
 out:
 
-#ifdef MY_ABC_HERE
-	kmem_cache_destroy(ext4_syno_caseless_cachep);
-#endif
 	unregister_as_ext2();
 	unregister_as_ext3();
 	destroy_inodecache();
@@ -5447,9 +5430,6 @@ out7:
 static void __exit ext4_exit_fs(void)
 {
 	ext4_destroy_lazyinit_thread();
-#ifdef MY_ABC_HERE
-	kmem_cache_destroy(ext4_syno_caseless_cachep);
-#endif
 	unregister_as_ext2();
 	unregister_as_ext3();
 	unregister_filesystem(&ext4_fs_type);

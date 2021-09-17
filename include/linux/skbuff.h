@@ -245,12 +245,16 @@ struct sk_buff {
 	__u32			hw_cookie;
 #endif  
 
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 #if defined(CONFIG_NF_CONNTRACK) || defined(CONFIG_NF_CONNTRACK_MODULE)
 	struct nf_conntrack	*nfct;
 #endif
 #ifdef CONFIG_BRIDGE_NETFILTER
 	struct nf_bridge_info	*nf_bridge;
 #endif
+#endif  
 
 	int			skb_iif;
 
@@ -259,12 +263,16 @@ struct sk_buff {
 	__be16			vlan_proto;
 	__u16			vlan_tci;
 
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 #ifdef CONFIG_NET_SCHED
 	__u16			tc_index;	 
 #ifdef CONFIG_NET_CLS_ACT
 	__u16			tc_verd;	 
 #endif
 #endif
+#endif  
 
 	__u16			queue_mapping;
 	kmemcheck_bitfield_begin(flags2);
@@ -301,6 +309,20 @@ struct sk_buff {
 	sk_buff_data_t		transport_header;
 	sk_buff_data_t		network_header;
 	sk_buff_data_t		mac_header;
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(CONFIG_NF_CONNTRACK) || defined(CONFIG_NF_CONNTRACK_MODULE)
+	struct nf_conntrack	*nfct;
+#endif
+#ifdef CONFIG_BRIDGE_NETFILTER
+	struct nf_bridge_info	*nf_bridge;
+#endif
+#ifdef CONFIG_NET_SCHED
+	__u16			tc_index;	 
+#ifdef CONFIG_NET_CLS_ACT
+	__u16			tc_verd;	 
+#endif
+#endif
+#endif  
 	 
 	sk_buff_data_t		tail;
 	sk_buff_data_t		end;

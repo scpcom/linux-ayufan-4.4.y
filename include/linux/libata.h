@@ -771,6 +771,9 @@ struct ata_port {
 	unsigned int		uiStsFlags;  
 #endif  
 	unsigned int		print_id;  
+#ifdef MY_DEF_HERE
+	unsigned int		local_port_no;  
+#endif  
 	unsigned int		port_no;  
 
 #ifdef CONFIG_ATA_SFF

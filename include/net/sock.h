@@ -117,9 +117,13 @@ struct sock_common {
 		struct hlist_nulls_node skc_portaddr_node;
 	};
 	struct proto		*skc_prot;
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 #ifdef CONFIG_NET_NS
 	struct net	 	*skc_net;
 #endif
+#endif  
 	 
 	int			skc_dontcopy_begin[0];
 	 
@@ -132,6 +136,11 @@ struct sock_common {
 	 
 	int                     skc_dontcopy_end[0];
 	 
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#ifdef CONFIG_NET_NS
+	struct net	 	*skc_net;
+#endif
+#endif  
 };
 
 struct cg_proto;
@@ -203,7 +212,11 @@ struct sock {
 #if defined(MY_DEF_HERE)
 	 
 #else  
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 	u32			sk_pacing_rate;  
+#endif  
 #endif  
 	netdev_features_t	sk_route_caps;
 	netdev_features_t	sk_route_nocaps;
@@ -236,9 +249,13 @@ struct sock {
 	struct sk_buff		*sk_send_head;
 	__s32			sk_peek_off;
 	int			sk_write_pending;
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 #ifdef CONFIG_SECURITY
 	void			*sk_security;
 #endif
+#endif  
 	__u32			sk_mark;
 	u32			sk_classid;
 	struct cg_proto		*sk_cgrp;
@@ -253,6 +270,12 @@ struct sock {
 #if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_TNK
 	struct tnkinfo		sk_tnkinfo;
+#endif
+#endif  
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	u32			sk_pacing_rate;  
+#ifdef CONFIG_SECURITY
+	void			*sk_security;
 #endif
 #endif  
 };
@@ -746,6 +769,9 @@ struct proto {
 						struct sk_buff *skb);
 
 	void		(*release_cb)(struct sock *sk);
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	void		(*mtu_reduced)(struct sock *sk);
+#endif  
 
 	void			(*hash)(struct sock *sk);
 	void			(*unhash)(struct sock *sk);

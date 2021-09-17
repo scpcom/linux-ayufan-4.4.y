@@ -122,6 +122,9 @@ struct cred {
 	kernel_cap_t	cap_permitted;	/* caps we're permitted */
 	kernel_cap_t	cap_effective;	/* caps we can actually use */
 	kernel_cap_t	cap_bset;	/* capability bounding set */
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	// do nothing
+#else /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 #ifdef CONFIG_KEYS
 	unsigned char	jit_keyring;	/* default keyring to attach requested
 					 * keys to */
@@ -133,10 +136,24 @@ struct cred {
 #ifdef CONFIG_SECURITY
 	void		*security;	/* subjective LSM security */
 #endif
+#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 	struct user_struct *user;	/* real user ID subscription */
 	struct user_namespace *user_ns; /* user_ns the caps and keyrings are relative to. */
 	struct group_info *group_info;	/* supplementary groups for euid/fsgid */
 	struct rcu_head	rcu;		/* RCU deletion hook */
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#ifdef CONFIG_KEYS
+	unsigned char	jit_keyring;	/* default keyring to attach requested
+					 * keys to */
+	struct key __rcu *session_keyring; /* keyring inherited over fork */
+	struct key	*process_keyring; /* keyring private to this process */
+	struct key	*thread_keyring; /* keyring private to this thread */
+	struct key	*request_key_auth; /* assumed request_key authority */
+#endif
+#ifdef CONFIG_SECURITY
+	void		*security;	/* subjective LSM security */
+#endif
+#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 };
 
 extern void __put_cred(struct cred *);

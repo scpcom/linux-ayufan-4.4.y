@@ -492,19 +492,36 @@ struct nand_chip {
 #define NAND_MFR_FUJITSU	0x04
 #define NAND_MFR_NATIONAL	0x8f
 #define NAND_MFR_RENESAS	0x07
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+#define NAND_MFR_ST_MICRO	0x20
+#else  
 #define NAND_MFR_STMICRO	0x20
+#endif  
 #define NAND_MFR_HYNIX		0xad
 #define NAND_MFR_MICRON		0x2c
 #define NAND_MFR_AMD		0x01
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+#define NAND_MFR_GD_ESMT	0xc8
+#else  
 #define NAND_MFR_MACRONIX	0xc2
 #if defined(CONFIG_SYNO_LSP_HI3536)
 #define NAND_MFR_GD		0xc8
 #endif  
+#endif  
 #define NAND_MFR_EON		0x92
 #if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+ 
+#else  
 #define NAND_MFR_ESMT		0xC8
+#endif  
 #define NAND_MFR_WINBOND	0xef
 #define NAND_MFR_ATO		0x9b
+#endif  
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+#define NAND_MFR_MXIC		0xc2
+#define NAND_MFR_ALL_FLASH	0xc1
+#define NAND_MFR_PARAGON	0xa1
 #endif  
 
 #define NAND_MAX_ID_LEN 8

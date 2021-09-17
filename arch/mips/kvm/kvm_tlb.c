@@ -19,7 +19,6 @@
 #include <linux/kvm_host.h>
 #include <linux/srcu.h>
 
-
 #include <asm/cpu.h>
 #include <asm/bootinfo.h>
 #include <asm/mmu_context.h>
@@ -56,7 +55,6 @@ uint32_t kvm_mips_get_kernel_asid(struct kvm_vcpu *vcpu)
 	return vcpu->arch.guest_kernel_asid[smp_processor_id()] & ASID_MASK;
 }
 
-
 uint32_t kvm_mips_get_user_asid(struct kvm_vcpu *vcpu)
 {
 	return vcpu->arch.guest_user_asid[smp_processor_id()] & ASID_MASK;
@@ -66,7 +64,6 @@ inline uint32_t kvm_mips_get_commpage_asid (struct kvm_vcpu *vcpu)
 {
 	return vcpu->kvm->arch.commpage_tlb;
 }
-
 
 /*
  * Structure defining an tlb entry data set.
@@ -234,7 +231,6 @@ kvm_mips_host_tlb_write(struct kvm_vcpu *vcpu, unsigned long entryhi,
 
 	local_irq_save(flags);
 
-
 	old_entryhi = read_c0_entryhi();
 	write_c0_entryhi(entryhi);
 	mtc0_tlbw_hazard();
@@ -291,7 +287,6 @@ kvm_mips_host_tlb_write(struct kvm_vcpu *vcpu, unsigned long entryhi,
 	return 0;
 }
 
-
 /* XXXKYMA: Must be called with interrupts disabled */
 int kvm_mips_handle_kseg0_tlb_fault(unsigned long badvaddr,
 	struct kvm_vcpu *vcpu)
@@ -303,7 +298,6 @@ int kvm_mips_handle_kseg0_tlb_fault(unsigned long badvaddr,
 	int even;
 	struct kvm *kvm = vcpu->kvm;
 	const int flush_dcache_mask = 0;
-
 
 	if (KVM_GUEST_KSEGX(badvaddr) != KVM_GUEST_KSEG0) {
 		kvm_err("%s: Invalid BadVaddr: %#lx\n", __func__, badvaddr);
@@ -352,7 +346,6 @@ int kvm_mips_handle_commpage_tlb_fault(unsigned long badvaddr,
 	unsigned long flags, old_entryhi = 0, vaddr = 0;
 	unsigned long entrylo0 = 0, entrylo1 = 0;
 
-
 	pfn0 = CPHYSADDR(vcpu->arch.kseg0_commpage) >> PAGE_SHIFT;
 	pfn1 = 0;
 	entrylo0 = mips3_paddr_to_tlbpfn(pfn0 << PAGE_SHIFT) | (0x3 << 3) | (1 << 2) |
@@ -398,7 +391,6 @@ kvm_mips_handle_mapped_seg_tlb_fault(struct kvm_vcpu *vcpu,
 	struct kvm *kvm = vcpu->kvm;
 	pfn_t pfn0, pfn1;
 
-
 	if ((tlb->tlb_hi & VPN2_MASK) == 0) {
 		pfn0 = 0;
 		pfn1 = 0;
@@ -442,7 +434,6 @@ int kvm_mips_guest_tlb_lookup(struct kvm_vcpu *vcpu, unsigned long entryhi)
 	int index = -1;
 	struct kvm_mips_tlb *tlb = vcpu->arch.guest_tlb;
 
-
 	for (i = 0; i < KVM_MIPS_GUEST_TLB_SIZE; i++) {
 		if (((TLB_VPN2(tlb[i]) & ~tlb[i].tlb_mask) == ((entryhi & VPN2_MASK) & ~tlb[i].tlb_mask)) &&
 			(TLB_IS_GLOBAL(tlb[i]) || (TLB_ASID(tlb[i]) == (entryhi & ASID_MASK)))) {
@@ -463,7 +454,6 @@ int kvm_mips_host_tlb_lookup(struct kvm_vcpu *vcpu, unsigned long vaddr)
 {
 	unsigned long old_entryhi, flags;
 	volatile int idx;
-
 
 	local_irq_save(flags);
 
@@ -501,7 +491,6 @@ int kvm_mips_host_tlb_inv(struct kvm_vcpu *vcpu, unsigned long va)
 	unsigned long flags, old_entryhi;
 
 	local_irq_save(flags);
-
 
 	old_entryhi = read_c0_entryhi();
 
@@ -555,7 +544,6 @@ int kvm_mips_host_tlb_inv_index(struct kvm_vcpu *vcpu, int index)
 
 	local_irq_save(flags);
 
-
 	old_entryhi = read_c0_entryhi();
 
 	write_c0_entryhi(UNIQUE_ENTRYHI(index));
@@ -590,7 +578,6 @@ void kvm_mips_flush_host_tlb(int skip_kseg0)
 	unsigned long old_pagemask;
 	int entry = 0;
 	int maxentry = current_cpu_data.tlbsize;
-
 
 	local_irq_save(flags);
 
@@ -719,7 +706,6 @@ void kvm_shadow_tlb_load(struct kvm_vcpu *vcpu)
 	mtc0_tlbw_hazard();
 	local_irq_restore(flags);
 }
-
 
 void kvm_local_flush_tlb_all(void)
 {
@@ -858,7 +844,6 @@ void kvm_arch_vcpu_put(struct kvm_vcpu *vcpu)
 	local_irq_save(flags);
 
 	cpu = smp_processor_id();
-
 
 	vcpu->arch.preempt_entryhi = read_c0_entryhi();
 	vcpu->arch.last_sched_cpu = cpu;

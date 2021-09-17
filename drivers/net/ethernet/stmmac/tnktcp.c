@@ -354,6 +354,11 @@ int tnk_tcp_prepare(struct sock *sk, struct sk_buff *skb)
 	TNK_DBG("tcp connection prepared\n");
 
 out:
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+	if (err)
+		sk->sk_tnkinfo.not_capable = TNK_SOCK_SET_TOE_OFF;
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
+
 	spin_unlock_irqrestore(&tnk_tcp_lock, flags);
 	if (neigh)
 		neigh_release(neigh);
@@ -564,7 +569,11 @@ int tnk_tcp_close(struct sock *sk, int graceful)
 
 				while (before(tcp_sk(sk)->rcv_nxt,
 					conn.next_rx_seq_num)) {
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+					msleep(100);
+#else /* CONFIG_SYNO_LSP_HI3536_V2050 */
 					cond_resched();
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 					time_now = sched_clock();
 					if (unlikely((long long)time_now -
 						(long long)time_limit >= 0))
@@ -649,7 +658,7 @@ int tnk_tcp_close(struct sock *sk, int graceful)
 
 		/*  If the socket is waiting for Rx data, wake it up */
 		if (test_bit(SOCK_ASYNC_WAITDATA, &sk->sk_socket->flags))
-			sk->sk_data_ready(sk, 0);
+			sk->sk_data_ready(sk);
 
 		TNK_DBG("%s done\n", __func__);
 
@@ -757,7 +766,7 @@ int tnk_tcp_reset(struct sock *sk)
 
 		/*  If the socket is waiting for Rx data, wake it up */
 		if (test_bit(SOCK_ASYNC_WAITDATA, &sk->sk_socket->flags))
-			sk->sk_data_ready(sk, 0);
+			sk->sk_data_ready(sk);
 
 		TNK_DBG("%s done\n", __func__);
 
@@ -1187,7 +1196,23 @@ int tnk_tcp_receive(struct sock *sk, uint32_t *seq,
 		TNK_DBG
 			("%s sk_receive_queue not yet empty, do slowpath\n",
 			 __func__);
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+		/* Deal with MSG_PEEK.
+		 * "*seq" may after "skb->end_seq" when MSG_PEEK enabled.
+		 */
+		skb = skb_peek_tail(&sk->sk_receive_queue);
+		if (before(*seq, TCP_SKB_CB(skb)->end_seq)) {
+			err = -EINVAL;
+		} else {
+			WARN(!(sk_flags & MSG_PEEK),
+			     "bug: copied %X seq %X rcvnxt %X fl %X bl %p\n",
+			     *seq, TCP_SKB_CB(skb)->end_seq,
+			     tcp_sk(sk)->rcv_nxt, sk_flags,
+			     sk->sk_backlog.tail);
+		}
+#else /* CONFIG_SYNO_LSP_HI3536_V2050 */
 		err = -EINVAL;
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 	}
 
 	if (err)
@@ -1971,16 +1996,24 @@ out:
 int tnk_tcp_check_connect_state(struct sock *sk)
 {
 	struct tnkinfo *t = &sk->sk_tnkinfo;
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+	int tnk_state = 0;
+#else /* CONFIG_SYNO_LSP_HI3536_V2050 */
 	unsigned long flags;
 	int tnk_state = 0;
 
 	spin_lock_irqsave(&tnk_tcp_lock, flags);
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 	if (t->state != TNKINFO_STATE_ACTIVE)
 		goto out;
 
 	tnk_state = 1;
 out:
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_HI3536_V2050 */
 	spin_unlock_irqrestore(&tnk_tcp_lock, flags);
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 	return tnk_state;
 }
 

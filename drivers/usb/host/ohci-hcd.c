@@ -58,11 +58,11 @@ static void ohci_dump (struct ohci_hcd *ohci, int verbose);
 static int ohci_init (struct ohci_hcd *ohci);
 static void ohci_stop (struct usb_hcd *hcd);
 
-#if defined(CONFIG_PM) || (defined(CONFIG_PCI) && (!defined(CONFIG_SYNO_LSP_HI3536) || (defined(CONFIG_SYNO_LSP_HI3536) && !defined(CONFIG_ARCH_HI3536))))
+#if defined(CONFIG_PM) || defined(CONFIG_PCI)
 static int ohci_restart (struct ohci_hcd *ohci);
 #endif
 
-#if defined(CONFIG_PCI) && (!defined(CONFIG_SYNO_LSP_HI3536) || (defined(CONFIG_SYNO_LSP_HI3536) && !defined(CONFIG_ARCH_HI3536)))
+#if defined(CONFIG_PCI)
 static void sb800_prefetch(struct ohci_hcd *ohci, int on);
 #else
 static inline void sb800_prefetch(struct ohci_hcd *ohci, int on)
@@ -761,7 +761,7 @@ static void ohci_stop (struct usb_hcd *hcd)
 	}
 }
 
-#if defined(CONFIG_PM) || (defined(CONFIG_PCI) && (!defined(CONFIG_SYNO_LSP_HI3536) || (defined(CONFIG_SYNO_LSP_HI3536) && !defined(CONFIG_ARCH_HI3536))))
+#if defined(CONFIG_PM) || defined(CONFIG_PCI)
 
 static int ohci_restart (struct ohci_hcd *ohci)
 {
@@ -893,7 +893,7 @@ MODULE_LICENSE ("GPL");
 #define PLATFORM_DRIVER		hiusb_ohci_hcd_driver
 #endif
 #endif  
-#if defined(CONFIG_PCI) && (!defined(CONFIG_SYNO_LSP_HI3536) || (defined(CONFIG_SYNO_LSP_HI3536) && !defined(CONFIG_ARCH_HI3536)))
+#if defined(CONFIG_PCI)
 #include "ohci-pci.c"
 #define PCI_DRIVER		ohci_pci_driver
 #endif

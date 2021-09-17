@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * drivers/crypto/al_crypto_alg.c
  *
@@ -1223,7 +1226,11 @@ static inline int aead_prepare_xaction(enum al_crypto_dir dir,
 		/* set signature buffer for auth */
 		sg = req->dst;
 		while (!sg_is_last(sg))
+#ifdef MY_DEF_HERE
+			sg = sg_next(sg);
+#else /* MY_DEF_HERE */
 			sg_next(sg);
+#endif /* MY_DEF_HERE */
 
 		/* assume that auth result is not scattered */
 		BUG_ON(sg_dma_len(sg) < authsize);
@@ -1237,7 +1244,11 @@ static inline int aead_prepare_xaction(enum al_crypto_dir dir,
 	} else {
 		sg = req->src;
 		while (!sg_is_last(sg))
+#ifdef MY_DEF_HERE
+			sg = sg_next(sg);
+#else /* MY_DEF_HERE */
 			sg_next(sg);
+#endif /* MY_DEF_HERE */
 
 		/* assume that auth result is not scattered */
 		BUG_ON(sg_dma_len(sg) < authsize);

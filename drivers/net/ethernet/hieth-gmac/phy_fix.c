@@ -124,6 +124,11 @@ int KSZ8051MNL_phy_fix(struct phy_device *phy_dev)
 {
 	u32 v;
 
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+	if (phy_dev->interface != PHY_INTERFACE_MODE_RMII)
+		return 0;
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
+
 	v = phy_read(phy_dev, 0x1F);
 	v |= (1 << 7);       /* set phy RMII 50MHz clk; */
 	phy_write(phy_dev, 0x1F, v);
@@ -139,6 +144,11 @@ int KSZ8051MNL_phy_fix(struct phy_device *phy_dev)
 int KSZ8081RNB_phy_fix(struct phy_device *phy_dev)
 {
 	u32 v;
+
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+	if (phy_dev->interface != PHY_INTERFACE_MODE_RMII)
+		return 0;
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 
 	v = phy_read(phy_dev, 0x1F);
 	v |= (1 << 7);       /* set phy RMII 50MHz clk; */

@@ -188,6 +188,46 @@ int hi_i2c_wait_idle(struct hi_i2c *pinfo)
 	unsigned int dmac_finish;
 #endif
 
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+	auto_status = readl(pinfo->regbase + I2C_AUTO_REG);
+	while (!IS_FIFO_EMPTY(auto_status)) {
+		if (i > I2C_WAIT_IDLE_TIME_OUT) {
+			hi_err("wait last i2c fifo empty timeout!"\
+					"auto_status: 0x%x\n",
+					auto_status);
+			ret = -1;
+			break;
+		}
+
+		i++;
+
+		hi_msg("===== i: %d, last auto_status: 0x%x\n",
+				i, auto_status);
+
+		auto_status = readl(pinfo->regbase + I2C_AUTO_REG);
+	};
+
+	udelay(10);
+
+	i = 0;
+	work_status = readl(pinfo->regbase + I2C_STATUS_REG);
+	while (!IS_I2C_IDLE(work_status)) {
+		if (i > I2C_WAIT_IDLE_TIME_OUT) {
+			hi_err("wait last i2c idle timeout!"\
+					" work_status: 0x%x\n",
+					work_status);
+			ret = -1;
+			break;
+		}
+
+		i++;
+
+		hi_msg("===== i: %d, last work_status: 0x%x.\n",
+				i, work_status);
+
+		work_status = readl(pinfo->regbase + I2C_STATUS_REG);
+	};
+#else /* CONFIG_SYNO_LSP_HI3536_V2050 */
 	work_status = readl(pinfo->regbase + I2C_STATUS_REG);
 	auto_status = readl(pinfo->regbase + I2C_AUTO_REG);
 
@@ -208,8 +248,12 @@ int hi_i2c_wait_idle(struct hi_i2c *pinfo)
 		work_status = readl(pinfo->regbase + I2C_STATUS_REG);
 		auto_status = readl(pinfo->regbase + I2C_AUTO_REG);
 	};
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 
 #ifdef CONFIG_HI_DMAC
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+	i = 0;
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 	dmac_finish = readl((volatile void *)(IO_ADDRESS(0x10060000) + 0x010c));
 	while (dmac_finish & 0xfff) {
 		if (i > 0x10000)
@@ -223,10 +267,17 @@ int hi_i2c_wait_idle(struct hi_i2c *pinfo)
 	int_raw_status = readl(pinfo->regbase + I2C_INTR_RAW_REG);
 
 	if ((int_raw_status & I2C_RAW_TX_ABORT) == I2C_RAW_TX_ABORT) {
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+		hi_err("last transmit error, int_raw_status: 0x%x!\n",
+				int_raw_status);
+		hi_i2c_abortprocess(pinfo);
+		ret = 0;
+#else /* CONFIG_SYNO_LSP_HI3536_V2050 */
 		hi_err("transmit error, int_raw_status: 0x%x!\n",
 				int_raw_status);
 		hi_i2c_abortprocess(pinfo);
 		ret = -1;
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 	}
 
 	return ret;
@@ -245,7 +296,11 @@ int hi_i2c_wait_txfifo_notfull(struct hi_i2c *pinfo)
 	while ((auto_status & I2c_AUTO_TX_FIFO_NOT_FULL)
 			!= I2c_AUTO_TX_FIFO_NOT_FULL) {
 		if (i > I2C_WAIT_TIME_OUT) {
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+			hi_err("wait timeout, last auto_status: 0x%x!\n",
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 			hi_err("wait timeout, auto_status: 0x%x!\n",
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 					auto_status);
 			ret = -1;
 			break;
@@ -253,7 +308,11 @@ int hi_i2c_wait_txfifo_notfull(struct hi_i2c *pinfo)
 
 		i++;
 
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+		hi_msg("===== i: %d, last auto_status: 0x%x\n", i, auto_status);
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 		hi_msg("===== i: %d, auto_status: 0x%x\n", i, auto_status);
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 
 		auto_status = readl(pinfo->regbase + I2C_AUTO_REG);
 	};
@@ -261,12 +320,21 @@ int hi_i2c_wait_txfifo_notfull(struct hi_i2c *pinfo)
 	int_raw_status = readl(pinfo->regbase + I2C_INTR_RAW_REG);
 
 	if ((int_raw_status & I2C_RAW_TX_ABORT) == I2C_RAW_TX_ABORT) {
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+		hi_err("last transmit error, int_raw_status: 0x%x!\n",
+				int_raw_status);
+		hi_err("last tx_abrt_cause is %x.\n",
+				readl(pinfo->regbase + I2C_TX_ABRT_SRC));
+		hi_i2c_abortprocess(pinfo);
+		ret = 0;
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 		hi_err("transmit error, int_raw_status: 0x%x!\n",
 				int_raw_status);
 		hi_err("tx_abrt_cause is %x.\n",
 				readl(pinfo->regbase + I2C_TX_ABRT_SRC));
 		hi_i2c_abortprocess(pinfo);
 		ret = -1;
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 	}
 
 	return ret;
@@ -589,6 +657,22 @@ int i2c_to_dma(unsigned int src, unsigned int dst, unsigned int length)
 	return chan;
 }
 
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+/**
+ * i2c_trylock_adapter - Try to get exclusive access to an I2C bus segment
+ * @adapter: Target I2C bus segment
+ */
+static int i2c_trylock_adapter(struct i2c_adapter *adapter)
+{
+	struct i2c_adapter *parent = i2c_parent_is_i2c_adapter(adapter);
+
+	if (parent)
+		return i2c_trylock_adapter(parent);
+	else
+		return rt_mutex_trylock(&adapter->bus_lock);
+}
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
+
 int hi_i2c_dma_write(const struct i2c_client *client, unsigned int data_addr,
 		unsigned int reg_addr, unsigned int reg_addr_num,
 		unsigned int length)
@@ -599,6 +683,16 @@ int hi_i2c_dma_write(const struct i2c_client *client, unsigned int data_addr,
 	int chan;
 
 	struct i2c_msg msg;
+
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+	if (in_atomic() || irqs_disabled()) {
+		if (!i2c_trylock_adapter(adap))
+			/* I2C activity is ongoing. */
+			return -EAGAIN;
+	} else {
+		i2c_lock_adapter(adap);
+	}
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 
 	memset(&msg, 0x0, sizeof(struct i2c_msg));
 	msg.addr = client->addr;
@@ -638,6 +732,10 @@ int hi_i2c_dma_write(const struct i2c_client *client, unsigned int data_addr,
 
 	dmac_channel_free(chan);
 
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+	i2c_unlock_adapter(adap);
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
+
 	return 0;
 }
 EXPORT_SYMBOL(hi_i2c_dma_write);
@@ -652,6 +750,16 @@ int hi_i2c_dma_read(const struct i2c_client *client, unsigned int data_addr,
 	int chan;
 
 	struct i2c_msg msg;
+
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+	if (in_atomic() || irqs_disabled()) {
+		if (!i2c_trylock_adapter(adap))
+			/* I2C activity is ongoing. */
+			return -EAGAIN;
+	} else {
+		i2c_lock_adapter(adap);
+	}
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 
 	memset(&msg, 0x0, sizeof(struct i2c_msg));
 	msg.addr = client->addr;
@@ -687,6 +795,10 @@ int hi_i2c_dma_read(const struct i2c_client *client, unsigned int data_addr,
 		return -1;
 
 	dmac_channel_free(chan);
+
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+	i2c_unlock_adapter(adap);
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 
 	return 0;
 }

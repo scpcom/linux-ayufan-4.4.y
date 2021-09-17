@@ -4,6 +4,10 @@
  
 #include "ext3.h"
 #include <linux/cryptohash.h>
+#ifdef MY_ABC_HERE
+#include <linux/ratelimit.h>
+#include <linux/printk.h>
+#endif  
 
 #define DELTA 0x9E3779B9
 
@@ -112,11 +116,6 @@ static void str2hashbuf_unsigned(const char *msg, int len, __u32 *buf, int num)
 		*buf++ = pad;
 }
 
-#ifdef MY_ABC_HERE
-static unsigned char ext3_utf8_hash_buf[UNICODE_UTF8_BUFSIZE];
-extern spinlock_t ext3_hash_buf_lock;   
-#endif  
- 
 int ext3fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 {
 	__u32	hash;
@@ -127,12 +126,17 @@ int ext3fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 	void		(*str2hashbuf)(const char *, int, __u32 *, int) =
 				str2hashbuf_signed;
 #ifdef MY_ABC_HERE
-
-	spin_lock(&ext3_hash_buf_lock);
+	 
+	char hash_buf[EXT3_NAME_LEN + 1];
 
 	if (name && (len > 0)) {
-		len = syno_utf8_toupper(ext3_utf8_hash_buf, name, UNICODE_UTF8_BUFSIZE-1 , len, NULL);
-		name = ext3_utf8_hash_buf;
+		if (len > EXT3_NAME_LEN) {
+			hinfo->hash = 0;
+			printk_ratelimited(KERN_ERR "SynoCaseless Stat name too long\n");
+			return -ENAMETOOLONG;
+		}
+		len = syno_utf8_toupper(hash_buf, name, EXT3_NAME_LEN , len, NULL);
+		name = hash_buf;
 	}
 #endif  
 
@@ -185,9 +189,6 @@ int ext3fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 		break;
 	default:
 		hinfo->hash = 0;
-#ifdef MY_ABC_HERE
-		spin_unlock(&ext3_hash_buf_lock);
-#endif  
 		return -1;
 	}
 	hash = hash & ~1;
@@ -195,8 +196,5 @@ int ext3fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 		hash = (EXT3_HTREE_EOF_32BIT - 1) << 1;
 	hinfo->hash = hash;
 	hinfo->minor_hash = minor_hash;
-#ifdef MY_ABC_HERE
-	spin_unlock(&ext3_hash_buf_lock);
-#endif  
 	return 0;
 }

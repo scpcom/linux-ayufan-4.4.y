@@ -425,7 +425,7 @@ struct ohci_hcd {
 #endif
 };
 
-#if defined(CONFIG_PCI) && (!defined(CONFIG_SYNO_LSP_HI3536) || (defined(CONFIG_SYNO_LSP_HI3536) && !defined(CONFIG_ARCH_HI3536)))
+#if defined(CONFIG_PCI)
 static inline int quirk_nec(struct ohci_hcd *ohci)
 {
 	return ohci->flags & OHCI_QUIRK_NEC;

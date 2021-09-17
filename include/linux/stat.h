@@ -24,12 +24,16 @@ struct kstat {
 	u64		ino;
 	dev_t		dev;
 	umode_t		mode;
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 #ifdef MY_ABC_HERE
 	__u32		syno_archive_bit;
 #endif
 #ifdef MY_ABC_HERE
 	__u32		syno_archive_version;
 #endif
+#endif  
 	unsigned int	nlink;
 	kuid_t		uid;
 	kgid_t		gid;
@@ -38,11 +42,26 @@ struct kstat {
 	struct timespec  atime;
 	struct timespec	mtime;
 	struct timespec	ctime;
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 #ifdef MY_ABC_HERE
 	struct timespec syno_create_time;
 #endif
+#endif  
 	unsigned long	blksize;
 	unsigned long long	blocks;
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#ifdef MY_ABC_HERE
+	struct timespec syno_create_time;
+#endif
+#ifdef MY_ABC_HERE
+	__u32		syno_archive_bit;
+#endif
+#ifdef MY_ABC_HERE
+	__u32		syno_archive_version;
+#endif
+#endif  
 };
 
 #endif

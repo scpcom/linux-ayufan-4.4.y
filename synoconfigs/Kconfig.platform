@@ -84,4 +84,19 @@ config SYNO_LSP_HI3536
 	bool "Apply Hisilicon Hi3536 LSP"
 	depends on SYNO_HI3536
 
+config SYNO_LSP_HI3536_V2050
+	bool "Apply Hi3536 LSP v2.0.5.0"
+	depends on SYNO_LSP_HI3536
+	default y
+
+config SYNO_LSP_HI3536_V2060
+	bool "Apply Hi3536 LSP v2.0.6.0"
+	depends on SYNO_LSP_HI3536
+	default y
+
+config SYNO_HI3536_ALIGN_STRUCTURES
+	bool "Align kernel structures to SDK"
+	depends on SYNO_HI3536
+	default y
+
 endmenu #Platform Selection

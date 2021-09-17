@@ -44,6 +44,19 @@
 #define SPI_DEVICE_TYPE_NAND_FLASH		1
 #define SPI_DEVICE_TYPE_MASK			(0x1 << 2)
 
+#if defined(CONFIG_SYNO_HI3536_HARD_RESET_CPU)
+/* -------------------------------------------------------------------- */
+/* Watchdog REG */
+/* -------------------------------------------------------------------- */
+#define REG_BASE_WDG				0x12070000
+
+#define REG_WDG_LOAD				0x0000
+#define REG_WDG_CONTROL				0x0008
+#define REG_WDG_LOCK				0x0c00
+
+#define REG_WDG_UNLOCK_MAGIC		0x1acce551
+#endif /* CONFIG_SYNO_HI3536_HARD_RESET_CPU */
+
 /* -------------------------------------------------------------------- */
 /* UART Control REG */
 /* -------------------------------------------------------------------- */

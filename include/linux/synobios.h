@@ -198,6 +198,11 @@
 #define HW_DS3017xs    "DS3017xs"      //"DS3017xs"
 #define HW_DS1517      "DS1517"        //"DS1517"
 #define HW_DS1817      "DS1817"        //"DS1817"
+#define HW_RS818p      "RS818+"        //"RS818+"
+#define HW_RS818rpp    "RS818rp+"      //"RS818rp+"
+#define HW_NVR3218       "NVR3218"
+#define HW_VS960hd     "VS960HD"
+#define HW_DS218j      "DS218j"        //"DS218j"
 #define HW_UNKNOWN     "DSUnknown"
 
 #define EBOX_INFO_UNIQUE_RX410  "RX410"

@@ -441,11 +441,15 @@ struct signal_struct {
 #ifdef CONFIG_TASKSTATS
 	struct taskstats *stats;
 #endif
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 #ifdef CONFIG_AUDIT
 	unsigned audit_tty;
 	unsigned audit_tty_log_passwd;
 	struct tty_audit_buf *tty_audit_buf;
 #endif
+#endif  
 #ifdef CONFIG_CGROUPS
 	 
 	struct rw_semaphore group_rwsem;
@@ -456,6 +460,13 @@ struct signal_struct {
 	short oom_score_adj_min;	 
 
 	struct mutex cred_guard_mutex;	 
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#ifdef CONFIG_AUDIT
+	unsigned audit_tty;
+	unsigned audit_tty_log_passwd;
+	struct tty_audit_buf *tty_audit_buf;
+#endif
+#endif  
 };
 
 #define SIGNAL_STOP_STOPPED	0x00000001  
@@ -484,26 +495,38 @@ struct user_struct {
 	atomic_t inotify_watches;  
 	atomic_t inotify_devs;	 
 #endif
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 #ifdef MY_ABC_HERE
 	atomic_t synotify_instances;
 #endif
+#endif  
 #ifdef CONFIG_FANOTIFY
 	atomic_t fanotify_listeners;
 #endif
 #ifdef CONFIG_EPOLL
 	atomic_long_t epoll_watches;  
 #endif
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 #ifdef CONFIG_POSIX_MQUEUE
 	 
 	unsigned long mq_bytes;	 
 #endif
+#endif  
 	unsigned long locked_shm;  
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 	unsigned long unix_inflight;	 
 
 #ifdef CONFIG_KEYS
 	struct key *uid_keyring;	 
 	struct key *session_keyring;	 
 #endif
+#endif  
 
 	struct hlist_node uidhash_node;
 	kuid_t uid;
@@ -511,6 +534,20 @@ struct user_struct {
 #ifdef CONFIG_PERF_EVENTS
 	atomic_long_t locked_vm;
 #endif
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#ifdef MY_ABC_HERE
+	atomic_t synotify_instances;
+#endif
+#ifdef CONFIG_POSIX_MQUEUE
+	 
+	unsigned long mq_bytes;	 
+#endif
+	unsigned long unix_inflight;	 
+#ifdef CONFIG_KEYS
+	struct key *uid_keyring;	 
+	struct key *session_keyring;	 
+#endif
+#endif  
 };
 
 extern int uids_sysfs_init(void);
@@ -629,6 +666,7 @@ struct sched_domain {
 
 	u64 last_update;
 
+#if !defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 #ifdef CONFIG_SCHEDSTATS
 	 
 	unsigned int lb_count[CPU_MAX_IDLE_TYPES];
@@ -656,6 +694,7 @@ struct sched_domain {
 	unsigned int ttwu_move_affine;
 	unsigned int ttwu_move_balance;
 #endif
+#endif
 #ifdef CONFIG_SCHED_DEBUG
 	char *name;
 #endif
@@ -667,6 +706,35 @@ struct sched_domain {
 	unsigned int span_weight;
 	 
 	unsigned long span[0];
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#ifdef CONFIG_SCHEDSTATS
+	 
+	unsigned int lb_count[CPU_MAX_IDLE_TYPES];
+	unsigned int lb_failed[CPU_MAX_IDLE_TYPES];
+	unsigned int lb_balanced[CPU_MAX_IDLE_TYPES];
+	unsigned int lb_imbalance[CPU_MAX_IDLE_TYPES];
+	unsigned int lb_gained[CPU_MAX_IDLE_TYPES];
+	unsigned int lb_hot_gained[CPU_MAX_IDLE_TYPES];
+	unsigned int lb_nobusyg[CPU_MAX_IDLE_TYPES];
+	unsigned int lb_nobusyq[CPU_MAX_IDLE_TYPES];
+
+	unsigned int alb_count;
+	unsigned int alb_failed;
+	unsigned int alb_pushed;
+
+	unsigned int sbe_count;
+	unsigned int sbe_balanced;
+	unsigned int sbe_pushed;
+
+	unsigned int sbf_count;
+	unsigned int sbf_balanced;
+	unsigned int sbf_pushed;
+
+	unsigned int ttwu_wake_remote;
+	unsigned int ttwu_move_affine;
+	unsigned int ttwu_move_balance;
+#endif
+#endif
 };
 
 static inline struct cpumask *sched_domain_span(struct sched_domain *sd)

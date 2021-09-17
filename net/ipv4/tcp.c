@@ -1536,7 +1536,7 @@ tnk_tcp_recv:
 		}
 
 		tcp_cleanup_rbuf(sk, copied);
-#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(CONFIG_SYNO_LSP_HI3536) && !defined(CONFIG_SYNO_LSP_HI3536_V2050)
 #ifdef CONFIG_TNK
 		if (tnk) {
 			if (tnk->tcp_check_connect_state(sk))
@@ -1573,6 +1573,15 @@ tnk_tcp_recv:
 				dma_async_issue_pending(tp->ucopy.dma_chan);
 		}
 #endif
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+#ifdef CONFIG_TNK
+		if (tnk) {
+			 
+			if (tnk->tcp_check_connect_state(sk))
+				goto tnk_tcp_recv;
+		}
+#endif
+#endif  
 		if (copied >= target) {
 			 
 			release_sock(sk);

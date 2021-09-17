@@ -3,8 +3,20 @@
 #endif
  
 #include <linux/usb/otg.h>
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#ifdef CONFIG_ARCH_HI3531A
+#include <mach/hardware.h>
+#endif
+#endif  
 
 #define	PORT_WAKE_BITS	(PORT_WKOC_E|PORT_WKDISC_E|PORT_WKCONN_E)
+
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#ifdef CONFIG_ARCH_HI3531A
+#define CRG_REG_BASE                    0x12040000
+#define REG_CRG77                       0x0134
+#endif
+#endif  
 
 #ifdef	CONFIG_PM
 
@@ -889,7 +901,30 @@ static int ehci_hub_control (
 				ehci->reset_done [wIndex] = jiffies
 						+ msecs_to_jiffies (50);
 			}
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#ifdef CONFIG_ARCH_HI3531A
+			if (ehci_readl(ehci, status_reg) == 0x1005) {
+				unsigned int reg, reg1, base_reg;
+
 			ehci_writel(ehci, temp, status_reg);
+
+				base_reg =
+					__io_address(CRG_REG_BASE + REG_CRG77);
+				reg = reg1 = ehci_readl(ehci,
+						(u32 __iomem *)base_reg);
+				reg1 |= (1 << 9);  
+				ehci_writel(ehci, reg1,
+						(u32 __iomem *)base_reg);
+				ehci_writel(ehci, reg, (u32 __iomem *)base_reg);
+			} else
+				ehci_writel(ehci, temp, status_reg);
+
+#else
+			ehci_writel(ehci, temp, status_reg);
+#endif
+#else  
+			ehci_writel(ehci, temp, status_reg);
+#endif  
 			break;
 
 		case USB_PORT_FEAT_TEST:

@@ -207,7 +207,11 @@ static int xhci_stop_device(struct xhci_hcd *xhci, int slot_id, int suspend)
 
 	timeleft = wait_for_completion_interruptible_timeout(
 			cmd->completion,
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+			XHCI_CMD_DEFAULT_TIMEOUT);
+#else  
 			USB_CTRL_SET_TIMEOUT);
+#endif  
 	if (timeleft <= 0) {
 		xhci_warn(xhci, "%s while waiting for stop endpoint command\n",
 				timeleft == 0 ? "Timeout" : "Signal");

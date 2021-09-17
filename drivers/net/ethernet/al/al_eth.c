@@ -36,6 +36,7 @@
 #include <linux/cache.h>
 #include <linux/i2c.h>
 #if defined(MY_DEF_HERE) || \
+	defined(MY_DEF_HERE) || \
 	defined(MY_DEF_HERE)
 #include <linux/synobios.h>
 #endif  
@@ -123,6 +124,70 @@ struct al_udma *al_eth_udma_get(struct al_eth_adapter *adapter, int tx)
 #define AL_ETH_MDIO_C45_DEV_SHIFT	16
 #define AL_ETH_MDIO_C45_REG_MASK	0xffff
 
+#ifdef MY_DEF_HERE
+static struct mii_bus *BUS_P = NULL;
+#endif  
+
+#ifdef MY_DEF_HERE
+static int
+__al_mdio_read(struct mii_bus *bp, int mii_id, int reg)
+{
+	struct al_eth_adapter *adapter = bp->priv;
+	u16 value = 0;
+	int rc;
+	int timeout = MDIO_TIMEOUT_MSEC;
+
+	while (timeout > 0) {
+		if (reg & MII_ADDR_C45) {
+			al_dbg("%s [c45]: dev %x reg %x val %x\n",
+				__func__,
+				((reg & AL_ETH_MDIO_C45_DEV_MASK) >> AL_ETH_MDIO_C45_DEV_SHIFT),
+				(reg & AL_ETH_MDIO_C45_REG_MASK), value);
+			rc = al_eth_mdio_read(&adapter->hal_adapter, adapter->phy_addr,
+				((reg & AL_ETH_MDIO_C45_DEV_MASK) >> AL_ETH_MDIO_C45_DEV_SHIFT),
+				(reg & AL_ETH_MDIO_C45_REG_MASK), &value);
+		} else if ((adapter->phy_if == AL_ETH_BOARD_PHY_IF_XMDIO) && (mii_id & 0x8000)) {
+			 
+			al_dbg("%s [c45]: dev %x reg %x val %x\n", __func__, (mii_id & 0x1f), reg, value);
+			rc = al_eth_mdio_read(&adapter->hal_adapter, adapter->phy_addr,
+				(mii_id & 0x1f), reg, &value);
+		} else {
+			rc = al_eth_mdio_read(&adapter->hal_adapter, adapter->phy_addr,
+					      MDIO_DEVAD_NONE, reg, &value);
+		}
+
+		if (rc == 0)
+			return value;
+
+		netdev_dbg(adapter->netdev,
+			   "mdio read failed. try again in 10 msec\n");
+
+		timeout -= 10;
+		msleep(10);
+	}
+
+	if (rc)
+		netdev_err(adapter->netdev, "MDIO read failed on timeout\n");
+
+	return value;
+}
+
+int al_mdio_read(struct mii_bus *bp, int mii_id, int reg)
+{
+    struct al_eth_adapter *adapter = bp->priv;
+
+    if(false == adapter->up)
+    {
+        printk_ratelimited("### Error(%s): al_eth is not up\n", __FUNCTION__);
+        return 1;
+    }
+
+    adapter->phy_addr = mii_id;
+
+    return __al_mdio_read(bp, mii_id, reg);
+}
+EXPORT_SYMBOL(al_mdio_read);
+#else  
 static int
 al_mdio_read(struct mii_bus *bp, int mii_id, int reg)
 {
@@ -160,7 +225,67 @@ al_mdio_read(struct mii_bus *bp, int mii_id, int reg)
 
 	return value;
 }
+#endif  
 
+#ifdef MY_DEF_HERE
+static int
+__al_mdio_write(struct mii_bus *bp, int mii_id, int reg, u16 val)
+{
+	struct al_eth_adapter *adapter = bp->priv;
+	int rc;
+	int timeout = MDIO_TIMEOUT_MSEC;
+
+	while (timeout > 0) {
+		if (reg & MII_ADDR_C45) {
+			al_dbg("%s [c45]: device %x reg %x val %x\n",
+				__func__,
+				((reg & AL_ETH_MDIO_C45_DEV_MASK) >> AL_ETH_MDIO_C45_DEV_SHIFT),
+				(reg & AL_ETH_MDIO_C45_REG_MASK), val);
+			rc = al_eth_mdio_write(&adapter->hal_adapter, adapter->phy_addr,
+				((reg & AL_ETH_MDIO_C45_DEV_MASK) >> AL_ETH_MDIO_C45_DEV_SHIFT),
+				(reg & AL_ETH_MDIO_C45_REG_MASK), val);
+		} else if ((adapter->phy_if == AL_ETH_BOARD_PHY_IF_XMDIO) && (mii_id & 0x8000)) {
+			 
+			al_dbg("%s [c45]: dev %x reg %x val %x\n", __func__, (mii_id & 0x1f), reg, val);
+			rc = al_eth_mdio_write(&adapter->hal_adapter, adapter->phy_addr,
+				(mii_id & 0x1f), reg, val);
+		} else {
+			rc = al_eth_mdio_write(&adapter->hal_adapter, adapter->phy_addr,
+				       MDIO_DEVAD_NONE, reg, val);
+		}
+
+		if (rc == 0)
+			return 0;
+
+		netdev_err(adapter->netdev,
+			   "mdio write failed. try again in 10 msec\n");
+
+		timeout -= 10;
+		msleep(10);
+	}
+
+	if (rc)
+		netdev_err(adapter->netdev, "MDIO write failed on timeout\n");
+
+	return rc;
+}
+
+int al_mdio_write(struct mii_bus *bp, int mii_id, int reg, u16 val)
+{
+	struct al_eth_adapter *adapter = bp->priv;
+
+	if(false == adapter->up)
+	{
+		printk_ratelimited("### Error(%s): al_eth is not up\n", __FUNCTION__);
+		return 1;
+	}
+
+	adapter->phy_addr = mii_id;
+
+	return __al_mdio_write(bp, mii_id, reg, val);
+}
+EXPORT_SYMBOL(al_mdio_write);
+#else  
 static int
 al_mdio_write(struct mii_bus *bp, int mii_id, int reg, u16 val)
 {
@@ -197,6 +322,7 @@ al_mdio_write(struct mii_bus *bp, int mii_id, int reg, u16 val)
 
 	return rc;
 }
+#endif  
 
 static int al_eth_ioctl(struct net_device *netdev, struct ifreq *ifr, int cmd)
 {
@@ -204,7 +330,11 @@ static int al_eth_ioctl(struct net_device *netdev, struct ifreq *ifr, int cmd)
 	struct mii_ioctl_data *mdio = if_mii(ifr);
 	struct phy_device *phydev;
 
+#ifdef MY_DEF_HERE
+	al_dbg("ioctl: phy id 0x%x, reg 0x%x, val_in 0x%x\n",
+#else  
 	netdev_info(adapter->netdev, "ioctl: phy id 0x%x, reg 0x%x, val_in 0x%x\n",
+#endif  
 			mdio->phy_id, mdio->reg_num, mdio->val_in);
 
 #if defined(MY_DEF_HERE)
@@ -230,6 +360,30 @@ static void al_eth_serdes_mode_set(struct al_eth_adapter *adapter);
 
 #ifdef MY_DEF_HERE
  
+static void syno_update_rtl8211e_led(struct phy_device *phydev, enum al_eth_mac_mode mac_mode_needed)
+{
+	int temp = 0;
+
+	if (AL_ETH_MAC_MODE_RGMII != mac_mode_needed) {
+		goto END;
+	}
+
+	phy_write(phydev, 0x1f, 0x07);
+	phy_write(phydev, 0x1e, 0x2c);
+
+	temp = phy_read(phydev, 0x1c) & 0xF888;
+	temp |= 0x742;
+	phy_write(phydev, 0x1c, temp);
+
+	temp = phy_read(phydev, 0x1a) & 0xFF8F;
+	temp |= 0x40;
+	phy_write(phydev, 0x1a, temp);
+
+	phy_write(phydev, 0x1f, 0x00);
+END:
+	return;
+}
+
 static void syno_update_rtl8211dn_led(struct phy_device *phydev, int speed)
 {
 	 
@@ -250,6 +404,9 @@ static void al_eth_adjust_link(struct net_device *dev)
 	enum al_eth_mac_mode mac_mode_needed = AL_ETH_MAC_MODE_RGMII;
 	int new_state = 0;
 	int force_1000_base_x = false;
+#ifdef MY_DEF_HERE
+	enum al_eth_mac_mode syno_mac_mode_needed = AL_ETH_MAC_MODE_SGMII;
+#endif  
 
 	if (phydev->link) {
 		if (phydev->duplex != link_config->active_duplex) {
@@ -263,12 +420,29 @@ static void al_eth_adjust_link(struct net_device *dev)
 			case SPEED_1000:
 			case SPEED_100:
 			case SPEED_10:
+#ifdef MY_DEF_HERE
+				if (syno_is_hw_version(HW_DS1817)) {
+					syno_mac_mode_needed = AL_ETH_MAC_MODE_10GbE_Serial;
+				} else {
+					syno_mac_mode_needed = AL_ETH_MAC_MODE_SGMII;
+				}
+#endif  
 				mac_mode_needed = (adapter->mac_mode == AL_ETH_MAC_MODE_RGMII) ?
 							AL_ETH_MAC_MODE_RGMII:
-							AL_ETH_MAC_MODE_SGMII;
 #ifdef MY_DEF_HERE
-				if (!syno_is_hw_version(HW_DS2015xs))
-					syno_update_rtl8211dn_led(phydev, phydev->speed);
+							syno_mac_mode_needed;
+#else  
+							AL_ETH_MAC_MODE_SGMII;
+#endif  
+
+#ifdef MY_DEF_HERE
+				if (!syno_is_hw_version(HW_DS2015xs)) {
+					if (syno_is_hw_version(HW_DS1817)) {
+						syno_update_rtl8211e_led(phydev, mac_mode_needed);
+					} else {
+						syno_update_rtl8211dn_led(phydev, phydev->speed);
+					}
+				}
 #endif
 				break;
 			case SPEED_10000:
@@ -341,6 +515,29 @@ static void al_eth_adjust_link(struct net_device *dev)
 		phy_print_status(phydev);
 }
 
+#ifdef MY_DEF_HERE
+static void syno_update_aqr107_led(struct phy_device *phydev)
+{
+	u32 temp = 0;
+
+	temp = phy_read(phydev, (MII_ADDR_C45 | (0x1 << 16) | 0x3));
+	 
+	if (0xb4e2 != temp) {
+		goto END;
+	}
+	 
+	temp = phy_read(phydev, (MII_ADDR_C45 | (0x1e << 16) | 0xc430));
+	 
+	temp &= 0x3000;
+	 
+	temp |= 0xc0ee;
+	phy_write(phydev, (MII_ADDR_C45 | (0x1e << 16) | 0xc430), temp);
+
+END:
+	return;
+}
+#endif  
+
 static int al_eth_phy_init(struct al_eth_adapter *adapter)
 {
 	struct phy_device *phydev = adapter->mdio_bus->phy_map[adapter->phy_addr];
@@ -367,7 +564,12 @@ static int al_eth_phy_init(struct al_eth_adapter *adapter)
 
 	phydev->supported &= (PHY_GBIT_FEATURES |
 				SUPPORTED_Pause |
+#ifdef MY_DEF_HERE
+				SUPPORTED_Asym_Pause |
+				SUPPORTED_10000baseT_Full);
+#else  
 				SUPPORTED_Asym_Pause);
+#endif  
 
 	phydev->advertising = phydev->supported;
 
@@ -377,7 +579,11 @@ static int al_eth_phy_init(struct al_eth_adapter *adapter)
 	adapter->phydev = phydev;
 	 
 	phy_start(adapter->phydev);
-
+#ifdef MY_DEF_HERE
+	if (syno_is_hw_version(HW_DS1817)) {
+		syno_update_aqr107_led(phydev);
+	}
+#endif  
 	return 0;
 }
 
@@ -396,8 +602,13 @@ static int al_eth_mdiobus_setup(struct al_eth_adapter *adapter)
 		 (adapter->pdev->bus->number << 8) | adapter->pdev->devfn);
 	adapter->mdio_bus->priv     = adapter;
 	adapter->mdio_bus->parent   = &adapter->pdev->dev;
+#ifdef MY_DEF_HERE
+	adapter->mdio_bus->read     = &__al_mdio_read;
+	adapter->mdio_bus->write    = &__al_mdio_write;
+#else  
 	adapter->mdio_bus->read     = &al_mdio_read;
 	adapter->mdio_bus->write    = &al_mdio_write;
+#endif  
 	adapter->mdio_bus->phy_mask = ~(1 << adapter->phy_addr);
 
 	adapter->mdio_bus->irq = kmalloc(sizeof(int) * PHY_MAX_ADDR, GFP_KERNEL);
@@ -3797,7 +4008,7 @@ void syno_alpine_wol_set(void)
 {
 	syno_alpine_wol_set_wrapper(PCI_DEVICE_ID_AL_ETH);
 
-	if (syno_is_hw_version(HW_DS2015xs)) {
+	if (syno_is_hw_version(HW_DS2015xs) || syno_is_hw_version(HW_DS1817)) {
 		 
 	} else {
 		syno_alpine_wol_set_wrapper(PCI_DEVICE_ID_AL_ETH_ADVANCED);
@@ -4085,6 +4296,43 @@ static const struct net_device_ops al_eth_netdev_ops = {
 	.ndo_set_features       = al_set_features,
 };
 
+#ifdef MY_DEF_HERE
+struct mii_bus *al_get_mdiobus_by_name(const char *ethname)
+{
+	struct mii_bus *bus_p = BUS_P;
+	struct net_device *netdev_p;
+	struct al_eth_adapter *adapter;
+
+	netdev_p = dev_get_by_name(&init_net, ethname);
+	if (NULL == netdev_p)
+	{
+		printk("Couldn't find eth by name\n");
+		return NULL;
+	}
+	adapter = netdev_priv(netdev_p);
+	if (NULL == adapter->mdio_bus)
+	{
+		printk("need alloc mdiobus now!\n");
+		if(BUS_P == NULL)
+			bus_p = BUS_P = mdiobus_alloc();
+		if (NULL == bus_p)
+		{
+			printk("Couldn't alloc mdio bus\n");
+			return NULL;
+		}
+		bus_p->name = "mdio_on_al";
+		strncpy(bus_p->id, bus_p->name, strlen(bus_p->name));
+		bus_p->priv = netdev_priv(netdev_p);
+		bus_p->read = &al_mdio_read;
+		bus_p->write = &al_mdio_write;
+		mutex_init(&bus_p->mdio_lock);
+		 
+	}
+	return BUS_P;
+}
+EXPORT_SYMBOL(al_get_mdiobus_by_name);
+#endif  
+
 static int
 al_eth_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 {
@@ -4288,7 +4536,14 @@ al_eth_remove(struct pci_dev *pdev)
 		writel(0, adapter->internal_pcie_base + 0x1800000 + 0x1210);
 
 	al_eth_hw_stop(adapter);
-
+#ifdef MY_DEF_HERE
+	if (adapter->mdio_bus)
+	{
+		if (adapter->mdio_bus->irq)
+			kfree(adapter->mdio_bus->irq);
+		mdiobus_free(adapter->mdio_bus);
+	}
+#endif  
 	unregister_netdev(dev);
 
 	al_eth_sysfs_terminate(&pdev->dev);

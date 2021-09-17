@@ -1,19 +1,32 @@
-/******************************************************************************
- *	Flash Memory Controller v100 Device Driver
- *	Copyright (c) 2014 - 2015 by Hisilicon
- *	All rights reserved.
- * ***
- *	Create by hisilicon
+/*
+ * The Flash Memory Controller v100 Device Driver for hisilicon
  *
- *****************************************************************************/
+ * Copyright (c) 2016 HiSilicon Technologies Co., Ltd.
+ *
+ * This program is free software; you can redistribute  it and/or modify it
+ * under  the terms of  the GNU General  Public License as published by the
+ * Free Software Foundation;  either version 2 of the  License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 
-/*****************************************************************************/
 #include <linux/kernel.h>
 #include <linux/slab.h>
 #include <linux/module.h>
 #include <linux/platform_device.h>
 #include <linux/dma-mapping.h>
 #include <linux/mtd/nand.h>
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#include <linux/delay.h>
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 #include <linux/mtd/partitions.h>
 
 #include <asm/setup.h>
@@ -71,6 +84,32 @@ static int __init parse_nand_partitions(const struct tag *tag)
 /* turn to ascii is "HiNp" */
 __tagtable(0x48694E70, parse_nand_partitions);
 
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+/*****************************************************************************/
+static int hifmc100_spi_nand_pre_probe(struct nand_chip *chip)
+{
+	uint8_t nand_maf_id;
+	struct hifmc_host *host = chip->priv;
+
+	/* Reset the chip first */
+	host->send_cmd_reset(host);
+	udelay(1000);
+
+	/* Check the ID */
+	host->offset = 0;
+	memset((unsigned char *)(chip->IO_ADDR_R), 0, 0x10);
+	host->send_cmd_readid(host);
+	nand_maf_id = readb(chip->IO_ADDR_R);
+
+	if (nand_maf_id == 0x00 || nand_maf_id == 0xff) {
+		printk("Cannot found a valid SPI Nand Device\n");
+		return 1;
+	}
+
+	return 0;
+}
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+
 /*****************************************************************************/
 static int hifmc_nand_scan(struct mtd_info *mtd)
 {
@@ -81,13 +120,27 @@ static int hifmc_nand_scan(struct mtd_info *mtd)
 
 	for (cs = 0; chip_num && (cs < CONFIG_HIFMC_MAX_CS_NUM); cs++) {
 		if (hifmc_cs_user[cs]) {
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+			result = -ENODEV;
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 			FMC_PR(BT_DBG, "\t\t*-Current CS(%d) is occupied.\n",
 					cs);
 			continue;
 		}
 
 		host->cmd_op.cs = cs;
+
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+		if (hifmc100_spi_nand_pre_probe(chip)) {
+			result = -ENODEV;
+			goto fail;
+		}
+
+		result = nand_scan(mtd, chip_num);
+		if (result) {
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 		if (nand_scan(mtd, chip_num)) {
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 			result = -ENXIO;
 			goto fail;
 		}
@@ -178,6 +231,9 @@ static int hifmc100_os_probe(struct platform_device *pltdev)
 	rs_reg = platform_get_resource_byname(pltdev, IORESOURCE_MEM, "base");
 	if (!rs_reg) {
 		DB_MSG("Error: Can't get resource for reg address.\n");
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+		result = -EIO;
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 		goto fail;
 	}
 
@@ -185,13 +241,21 @@ static int hifmc100_os_probe(struct platform_device *pltdev)
 	host->regbase = ioremap_nocache(rs_reg->start, len);
 	if (!host->regbase) {
 		DB_MSG("Error: SPI nand reg base-address ioremap failed.\n");
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+		result = -EIO;
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 		goto fail;
 	}
 
 	FMC_PR(BT_DBG, "\t|-Get SPI nand driver resource for iobase\n");
 	rs_io = platform_get_resource_byname(pltdev, IORESOURCE_MEM, "buffer");
 	if (!rs_io) {
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+		DB_MSG("Error: Can't get resource for buffer address.\n");
+		result = -EIO;
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 		DB_MSG("Error: Can't get resource for buffer address\n");
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 		goto fail;
 	}
 
@@ -199,6 +263,9 @@ static int hifmc100_os_probe(struct platform_device *pltdev)
 	host->iobase = ioremap_nocache(rs_io->start, len);
 	if (!host->iobase) {
 		DB_MSG("Error: SPI nand buffer base-address ioremap failed.\n");
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+		result = -EIO;
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 		goto fail;
 	}
 	memset((char *)host->iobase, 0xff, SPI_NAND_BUFFER_LEN);
@@ -209,6 +276,9 @@ static int hifmc100_os_probe(struct platform_device *pltdev)
 			&host->dma_buffer, GFP_KERNEL);
 	if (!host->buffer) {
 		DB_MSG("Error: Can't allocate memory for dma buffer.");
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+		result = -EIO;
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 		goto fail;
 	}
 	memset(host->buffer, 0xff, SPI_NAND_BUFFER_LEN);
@@ -228,7 +298,11 @@ static int hifmc100_os_probe(struct platform_device *pltdev)
 	result = hifmc100_spi_nand_init(chip);
 	if (result) {
 		FMC_PR(BT_DBG, "\t|-SPI Nand init failed, ret: %d\n", result);
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+		// do nothing
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 		result = -ENODEV;
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 		goto fail;
 	}
 
@@ -251,9 +325,12 @@ static int hifmc100_os_probe(struct platform_device *pltdev)
 	}
 
 	DB_MSG("Error: MTD partition register failed! result: %d\n", result);
-
 	result = -ENODEV;
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 	nand_release(mtd);
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 
 fail:
 	if (host->buffer) {
@@ -271,8 +348,21 @@ fail:
 	if (rs_reg)
 		release_resource(rs_reg);
 
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#ifdef CONFIG_HIFMC_SWITCH_DEV_TYPE
+	FMC_PR(BT_DBG, "\t|-Switch device type to default.\n");
+	mtd->type = MTD_ABSENT;
+	mtd_switch_spi_type(mtd);
+	mtd->type = MTD_NANDFLASH;
+#endif
+	nand_release(host->mtd);
+	kfree(host);
+	platform_set_drvdata(pltdev, NULL);
+	return result;
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 	platform_set_drvdata(pltdev, NULL);
 	kfree(host);
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 
 end:
 #ifdef CONFIG_HIFMC_SWITCH_DEV_TYPE

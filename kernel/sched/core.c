@@ -1147,11 +1147,19 @@ try_to_wake_up(struct task_struct *p, unsigned int state, int wake_flags)
 	success = 1;  
 	cpu = task_cpu(p);
 
+#if defined(CONFIG_SYNO_HI3536)
+	 
+	smp_rmb();
+#endif  
 	if (p->on_rq && ttwu_remote(p, wake_flags))
 		goto stat;
 
 #ifdef CONFIG_SMP
+#if defined(CONFIG_SYNO_HI3536)
 	 
+	smp_rmb();
+#endif  
+
 	while (p->on_cpu)
 		cpu_relax();
 	 

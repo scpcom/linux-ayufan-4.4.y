@@ -275,6 +275,21 @@ static inline unsigned int to_pcie_address(struct pci_bus *bus,
 	return address;
 }
 
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+static inline int is_pcie_link_up(struct pcie_info *info)
+{
+	int i;
+
+	 for (i = 0; i < 10000; i++) {
+		if (__arch_check_pcie_link(info))
+			break;
+		udelay(100);
+	}
+
+	return (i < 10000);
+}
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
+
 static int pcie_read_from_device(struct pci_bus *bus, unsigned int devfn,
 		int where, int size, u32 *value)
 {
@@ -283,12 +298,16 @@ static int pcie_read_from_device(struct pci_bus *bus, unsigned int devfn,
 	void __iomem *addr;
 	int i = 0;
 
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+	if (!is_pcie_link_up(info)) {
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 	for (i = 0; i < 1000; i++) {
 		if (__arch_check_pcie_link(info))
 			break;
 		udelay(1000);
 	}
 	if (i >= 1000) {
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 		pcie_debug(PCIE_DBG_MODULE, "pcie %d not link up!",
 				info->controller);
 		return -1;
@@ -382,7 +401,11 @@ static int pcie_write_to_device(struct pci_bus *bus, unsigned int devfn,
 	unsigned int org;
 	unsigned long flag;
 
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+	if (!is_pcie_link_up(info)) {
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 	if (!__arch_check_pcie_link(info)) {
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 		pcie_debug(PCIE_DBG_MODULE, "pcie %d not link up!",
 				info->controller);
 		return -1;
@@ -489,9 +512,14 @@ void pci_set_max_rd_req_size(const struct pci_bus *bus)
 			pci_read_config_word(dev, pos + PCI_EXP_DEVCTL,
 					&dev_contrl_reg_val);
 			max_rd_req_size = (dev_contrl_reg_val >> 12) & 0x7;
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+			if (max_rd_req_size > 0x0) {
+				dev_contrl_reg_val &= ~(max_rd_req_size << 12);
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 			if (max_rd_req_size > 0x1) {
 				dev_contrl_reg_val &= ~(max_rd_req_size << 12);
 				dev_contrl_reg_val |= (0x1 << 12);
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 				pci_write_config_word(dev, pos + PCI_EXP_DEVCTL,
 						dev_contrl_reg_val);
 			}

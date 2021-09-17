@@ -665,7 +665,11 @@ int tnk_proc_init(unsigned int max_connections)
 
 int tnk_proc_shutdown(void)
 {
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+	del_timer_sync(&tnk_rate_timer);
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 	del_timer(&tnk_rate_timer);
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 	if (proc_tnk_dir) {
 		if (tnk_max_connections > 0) {
 			remove_proc_entry(TNK_SUMMARY_PROC, proc_tnk_dir);

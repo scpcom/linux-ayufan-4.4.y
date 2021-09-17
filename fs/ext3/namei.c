@@ -17,8 +17,6 @@
 #define NAMEI_RA_SIZE        (NAMEI_RA_CHUNKS * NAMEI_RA_BLOCKS)
 
 #ifdef MY_ABC_HERE
-static unsigned char ext3_utf8_namei_buf[UNICODE_UTF8_BUFSIZE];
-extern spinlock_t ext3_namei_buf_lock;   
 
 unsigned int ext3_strhash(const unsigned char *name, unsigned int len)
 {
@@ -31,17 +29,16 @@ unsigned int ext3_strhash(const unsigned char *name, unsigned int len)
 
 static int ext3_dentry_hash(const struct dentry *dentry, const struct inode *inode, struct qstr *this)
 {
+	 
+	char hash_buf[EXT3_NAME_LEN+1];
 	unsigned int upperlen;
 
-	spin_lock(&ext3_namei_buf_lock);
+	if (this->len > EXT3_NAME_LEN) {
+		return -ENAMETOOLONG;
+	}
 
-	upperlen = syno_utf8_toupper(ext3_utf8_namei_buf,this->name,
-									  UNICODE_UTF8_BUFSIZE - 1 , this->len, NULL);
-
-	this->hash = ext3_strhash(ext3_utf8_namei_buf, upperlen);
-
-	spin_unlock(&ext3_namei_buf_lock);
-
+	upperlen = syno_utf8_toupper(hash_buf, this->name, EXT3_NAME_LEN, this->len, NULL);
+	this->hash = ext3_strhash(hash_buf, upperlen);
 	return 0;
 }
 

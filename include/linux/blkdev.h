@@ -129,8 +129,10 @@ struct request {
 #endif
 	 
 	unsigned short nr_phys_segments;
+#if !defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 #if defined(CONFIG_BLK_DEV_INTEGRITY)
 	unsigned short nr_integrity_segments;
+#endif
 #endif
 
 	unsigned short ioprio;
@@ -161,6 +163,11 @@ struct request {
 	void *end_io_data;
 
 	struct request *next_rq;
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#if defined(CONFIG_BLK_DEV_INTEGRITY)
+	unsigned short nr_integrity_segments;
+#endif
+#endif
 };
 
 static inline unsigned short req_get_ioprio(struct request *req)

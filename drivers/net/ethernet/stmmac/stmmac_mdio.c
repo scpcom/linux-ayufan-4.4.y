@@ -212,6 +212,18 @@ static int stmmac_mdio_reset(struct mii_bus *bus)
 	return 0;
 }
 
+#if defined(CONFIG_SYNO_HI3536_CHANGE_PHY_BEHAVIOR)
+static void syno_disable_rtl8211e_clk125(struct phy_device *phydev)
+{
+	unsigned int clock;
+	phy_write(phydev, 0x1f, 0x00);
+	clock = phy_read(phydev, 0x10) | 0x10;
+	phy_write(phydev, 0x10, clock);
+	phy_write(phydev, 0x1f, 0x00);
+	syno_update_rtl8211e_led_behavior(phydev);
+}
+#endif /* CONFIG_SYNO_HI3536_CHANGE_PHY_BEHAVIOR */
+
 /**
  * stmmac_mdio_register
  * @ndev: net device structure
@@ -279,6 +291,9 @@ int stmmac_mdio_register(struct net_device *ndev)
 				phydev->irq = priv->phy_irq;
 				irqlist[addr] = priv->phy_irq;
 			}
+#if defined(CONFIG_SYNO_HI3536_CHANGE_PHY_BEHAVIOR)
+			syno_disable_rtl8211e_clk125(phydev);
+#endif /* CONFIG_SYNO_HI3536_CHANGE_PHY_BEHAVIOR */
 
 			pr_info("%s: PHY ID %08x at %d IRQ %d (%s)%s\n",
 				ndev->name, phydev->phy_id, addr,

@@ -85,7 +85,11 @@ struct audit_names {
 
 	struct filename		*name;
 	int			name_len;	/* number of chars to log */
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	// do nothing
+#else /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 	bool			hidden;		/* don't log this record */
+#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 	bool			name_put;	/* call __putname()? */
 
 	unsigned long		ino;
@@ -104,6 +108,9 @@ struct audit_names {
 	 * should be freed on syscall exit.
 	 */
 	bool			should_free;
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	bool			hidden;		/* don't log this record */
+#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 };
 
 /* The per-task audit context. */

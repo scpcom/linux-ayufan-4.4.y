@@ -624,7 +624,7 @@ void phy_state_machine(struct work_struct *work)
 				phydev->state = PHY_CHANGELINK;
 
 #ifdef MY_DEF_HERE
-			if (!syno_is_hw_version(HW_DS2015xs)) {
+			if (!syno_is_hw_version(HW_DS2015xs) && !syno_is_hw_version(HW_DS1817)) {
 				if (0 == phydev->is_phyerr_reset) {
 					stats = dev_get_stats(phydev->attached_dev, &temp);
 					pkt_error = stats->rx_errors;

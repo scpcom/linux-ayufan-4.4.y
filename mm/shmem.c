@@ -85,11 +85,18 @@ static struct vfsmount *shm_mnt;
  * a time): we would prefer not to enlarge the shmem inode just for that.
  */
 struct shmem_falloc {
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	// do nothing
+#else /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 	wait_queue_head_t *waitq; /* faults into hole wait for punch to end */
+#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 	pgoff_t start;		/* start of range currently being fallocated */
 	pgoff_t next;		/* the next page offset to be fallocated */
 	pgoff_t nr_falloced;	/* how many new pages have been fallocated */
 	pgoff_t nr_unswapped;	/* how often writepage refused to swap out */
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	wait_queue_head_t *waitq; /* faults into hole wait for punch to end */
+#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 };
 
 /* Flag allocation requirements to shmem_getpage */

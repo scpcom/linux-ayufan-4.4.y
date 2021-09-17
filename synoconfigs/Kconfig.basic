@@ -94,6 +94,11 @@ config SYNO_ISCSI_DEVICE_PREFIX
 	default "isd"
 	depends on SYNO_ISCSI_DEVICE
 
+config SYNO_ISCSI_REVERT_SUPPORT_PFMALLOC
+	bool "Revert iscsi initiator support PF_MALLOC"
+	default y
+	depends on ISCSI_TCP
+
 config SYNO_SATA_DEVICE_PREFIX
 	string "The prefix of sata device"
 	default "sd"
@@ -158,6 +163,10 @@ config SYNO_EXPORT_GET_CMDLINE
 config SYNO_GPIO
 	  bool "Employ refactored GPIO-functions"
 	  default n
+
+config SYNO_DISK_EH_FLAG
+	bool "report to userspace if kernel is in SCSI error handling"
+	default y
 
 endmenu #System Features
 
@@ -285,5 +294,10 @@ config SYNO_PULL_UP_MIN_FREE_KBYTES
 	bool "Pull Up min_free_kbytes value at monaco platform"
 	depends on SYNO_MONACO
 	default y
+
+config SYNO_HI3536_HARD_RESET_CPU
+	bool "Use hardware watchdog to hard reset CPU"
+	default y
+	depends on SYNO_HI3536
 
 endmenu #Kernel Core Enhancements

@@ -6,6 +6,9 @@ KBUILD_AFLAGS	:=$(KBUILD_AFLAGS:-msoft-float=-Wa,-mfpu=softvfp+vfp)
 LDFLAGS		+=--no-warn-mismatch
 
 obj-y					:= core.o clock.o timer.o setup.o
+ifdef CONFIG_SYNO_HI3536
+obj-y					+= synology-gpio.o
+endif
 obj-$(CONFIG_HW_PERF_EVENTS)		+= pmu.o
 obj-$(CONFIG_SMP)			+= platsmp.o headsmp.o
 obj-$(CONFIG_HOTPLUG_CPU)		+= hotplug.o

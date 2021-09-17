@@ -64,5 +64,10 @@ struct tnkentry *tnk_ct_get_next_used(struct tnkentry *e);
 void tnk_ct_link_state_update(int gmac_id, int link_up);
 
 void tnk_ct_proc(struct seq_file *s);
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if SWITCH_RECV_LRO
+void tnk_ct_remove_rx_timer(unsigned long data);
+#endif
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 
 #endif /*  __TNKCT_H__ */

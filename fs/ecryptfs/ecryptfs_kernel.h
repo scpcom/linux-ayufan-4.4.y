@@ -674,4 +674,8 @@ int ecryptfs_set_f_namelen(long *namelen, long lower_namelen,
 int ecryptfs_derive_iv(char *iv, struct ecryptfs_crypt_stat *crypt_stat,
 		       loff_t offset);
 
+#ifdef MY_ABC_HERE
+loff_t upper_size_to_lower_size(struct ecryptfs_crypt_stat *crypt_stat, loff_t upper_size);
+#endif  
+
 #endif  

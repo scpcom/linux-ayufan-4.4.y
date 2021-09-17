@@ -112,6 +112,7 @@ static int ehci_orion_drv_probe(struct platform_device *pdev)
 #if defined (MY_ABC_HERE)
 	struct device_node	*node = pdev->dev.of_node;
 	u32 vbus_gpio_pin = 0;
+	int i;
 #endif  
 
 	if (usb_disabled())
@@ -179,12 +180,16 @@ static int ehci_orion_drv_probe(struct platform_device *pdev)
 		} else {
 			hcd->power_control_support = 0;
 		}
+
+		for (i = 0; i < CONFIG_SYNO_USB_POWER_RESET_PIN_NUMBER + 1; ++i) {
+			hcd->vbus_gpio_pin[i] = -1;
+		}
+
 		if (of_property_read_bool(node, "vbus-gpio")) {
 			of_property_read_u32(node, "vbus-gpio", &vbus_gpio_pin);
 			 
-			hcd->vbus_gpio_pin = vbus_gpio_pin;
+			hcd->vbus_gpio_pin[1] = vbus_gpio_pin;
 		} else {
-			hcd->vbus_gpio_pin = -1;
 			dev_warn(&pdev->dev, "failed to get Vbus gpio\n");
 		}
 	}
@@ -219,7 +224,7 @@ static int ehci_orion_drv_probe(struct platform_device *pdev)
 		printk(KERN_WARNING "Orion ehci -USB phy version isn't supported.\n");
 	}
 #if defined (MY_ABC_HERE)
-	dev_info(&pdev->dev, "USB2 Vbus gpio %d\n", hcd->vbus_gpio_pin);
+	dev_info(&pdev->dev, "USB2 Vbus gpio %d\n", hcd->vbus_gpio_pin[1]);
 	dev_info(&pdev->dev, "power control %s\n", hcd->power_control_support ? "enabled" : "disabled");
 #endif  
 	err = usb_add_hcd(hcd, irq, IRQF_SHARED);

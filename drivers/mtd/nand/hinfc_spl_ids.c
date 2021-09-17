@@ -1,9 +1,20 @@
-/******************************************************************************
- *    Copyright (c) 2009-2010 by  Hisilicon Tech. Co., Ltd.
- *    All rights reserved.
- * ***
- *    Create By Czyong
-******************************************************************************/
+/*
+ * Copyright (c) 2016 HiSilicon Technologies Co., Ltd.
+ *
+ * This program is free software; you can redistribute  it and/or modify it
+ * under  the terms of  the GNU General Public License as published by the
+ * Free Software Foundation;  either version 2 of the  License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 
 #include "../hifmc_common.h"
 #include "hinfc_gen.h"
@@ -32,8 +43,6 @@ struct nand_flash_special_dev {
 /*****************************************************************************/
 /*                    this is nand probe function.                           */
 /*****************************************************************************/
-
-#define DRV_VERSION     "1.36"
 
 static struct nand_flash_dev *hynix_probe_v02(
 	struct nand_dev_t *nand_dev)
@@ -79,14 +88,107 @@ static struct nand_flash_dev *samsung_probe_v02(
 	return type;
 }
 /*****************************************************************************/
+
+#define DRV_VERSION     "1.38"
+
+/*****************************************************************************/
 /*
  * samsung:  27nm need randomizer, 21nm need read retry;
  * micron:   25nm need read retry, datasheet will explain read retry.
  * toshaba   32nm need randomizer, 24nm need read retry.
  * hynix:    2xnm need read retry.
+ *
+ *		The special nand flash ID table version 1.37
+ *
+ * manufactory  |  type  |       name 	     |   ecc_type  | version_tag
+ * Micron		|  MLC	 |  MT29F64G08CBABA  |   40bit/1k  |  1.36
+ * Micron		|  MLC	 |  MT29F32G08CBADA  |   40bit/1k  |
+ * Micron		|  SLC	 |  MT29F8G08ABxBA   |   4bit/512  |
+ * Micron		|  MLC	 |  MT29F16G08CBABx  |   12bit/512 |
+ * Micron		|  MLC	 |  MT29F16G08CBACA  |   24bit/1k  |
+ * Micron		|  MLC	 |  MT29F32G08CBACA  |   24bit/1k  |
+ * Micron		|  MLC	 |  MT29F64G08CxxAA  |   24bit/1k  |
+ * Micron		|  MLC	 |  MT29F256G08CJAAA |   24bit/1k  |   2CE
+ * Micron		|  MLC	 |  MT29F256G08CMCBB |   24bit/1k  |
+ * Micron		|  SLC	 |  MT29F8G08ABACA   |   8bit/512  |
+ * Micron		|  SLC	 |  MT29F4G08ABAEA   |   8bit/512  |
+ * Micron		|  SLC	 |  MT29F2G08ABAFA   |   8bit/512  |
+ * Micron		|  SLC	 |  MT29F16G08ABACA  |   8bit/512  |
+ * Toshiba		|  MLC   |  TC58NVG4D2FTA00  |   24bit/1k  |
+ * Toshiba		|  MLC   |  TH58NVG6D2FTA20  |   24bit/1k  |   2CE
+ * Toshiba		|  MLC   |  TC58NVG5D2HTA00  |   40bit/1k  |
+ * Toshiba		|  MLC   |  TC58NVG6D2GTA00  |   40bit/1k  |
+ * Toshiba		|  MLC   |  TC58NVG6DCJTA00  |			   |
+ * Toshiba		|  MLC   |  TC58TEG5DCJTA00  |			   |
+ * Toshiba		|  SLC   |  TC58NVG0S3HTA00  |   8bit/512  |
+ * Toshiba		|  SLC   |  TC58NVG1S3HTA00  |   8bit/512  |
+ * Toshiba		|  SLC   |  TC58NVG1S3ETA00  |   4bit/512  |
+ * Toshiba		|  SLC   |  TC58NVG3S0FTA00  |   4bit/512  |
+ * Toshiba		|  SLC   |  TC58NVG2S0FTA00  |   4bit/512  |
+ * Toshiba		|  SLC   |  TH58NVG2S3HTA00  |   4bit/512  |
+ * Toshiba		|  TLC   |  TC58NVG5T2JTA00  |   60bit/1k  |
+ * Toshiba		|  TLC   |  TC58TEG5DCKTAx0  |   60bit/1k  |
+ * Toshiba		|  MLC   |  Tx58TEGxDDKTAx0  |			   |
+ * Samsung		|  MLC   |  K9LB(HC/PD/MD)G08U0(1)D  |   8bit/512B  |
+ * Samsung		|  MLC   |  K9GAG08U0E	     |   24bit/1KB |
+ * Samsung		|  MLC   |  K9LBG08U0E	     |   24bit/1KB |
+ * Samsung		|  MLC   |  K9G8G08U0C	     |   24bit/1KB |
+ * Samsung		|  MLC   |  K9GAG08U0F	     |   24bit/1KB |
+ * Samsung		|  MLC   |  K9LBG08U0M	     |             |
+ * Samsung		|  MLC   |  K9GBG08U0A	     |   24bit/1KB |
+ * Samsung		|  MLC   |  K9GBG08U0B	     |   40bit/1KB |
+ * Hynix		|  MLC   |  H27UAG8T2A	     |			   |
+ * Hynix		|  MLC   |  H27UAG8T2B	     |			   |
+ * Hynix		|  MLC   |  H27UBG8T2A	     |			   |
+ * Hynix		|  MLC   |  H27UBG8T2BTR	 |	 24bit/1KB |
+ * Hynix		|  MLC   |  H27UCG8T2A		 |	 40bit/1KB |
+ * Hynix		|  MLC   |  H27UBG8T2C		 |	 40bit/1KB |
+ * MISC			|  MLC   |  P1UAGA30AT-GCA	 |	 8bit/512  |
+ * MISC			|  MLC   |  PSU8GA30AT-GIA/ASU8GA30IT-G30CA	 |	 4bit/512  |
+ * MISC			|  SLC   |  PSU2GA30AT   	 |	 1bit/512  |   1.36
+ * Toshiba		|  SLC   |  TC58NVG2S0HTA00  |	 24bit/1K  |   1.37
+ * Toshiba		|  SLC   |  TC58NVG3S0HTA00  |   24bit/1K  |   1.37
+ * Micron		|  SLC	 |  MT29F2G08ABAEA   |   4bit/512 |
+ * Spansion		|  SLC	 | S34ML02G200TFI000	 | 24bit/1K |
+ * Spansion		|  SLC	 | S34ML04G200TFI000	 | 24bit/1K |  1.38
+ *
  */
 
 static struct nand_flash_special_dev nand_flash_special_dev[] = {
+
+	/****************************** Spansion *******************************/
+
+	{		/* SLC S34ML02G200TFI000 */
+		.name      = "S34ML02G200TFI000",
+		.id        = {0x01, 0xDA, 0x90, 0x95, 0x46, 0x00, 0x00, 0x00},
+		.length    = 5,
+		.chipsize  = _256M,
+		.probe     = NULL,
+		.pagesize  = SZ_2K,
+		.erasesize = SZ_128K,
+		.oobsize   = 128,
+		.options   = 0,
+		.read_retry_type = NAND_RR_NONE,
+		.badblock_pos    = BBP_FIRST_PAGE,
+		.flags = 0,
+	},
+
+	{		/* SLC S34ML04G200TFI000 */
+		.name      = "S34ML04G200TFI000",
+		.id        = {0x01, 0xDC, 0x90, 0x95, 0x56, 0x00, 0x00, 0x00},
+		.length    = 5,
+		.chipsize  = _512M,
+		.probe     = NULL,
+		.pagesize  = SZ_2K,
+		.erasesize = SZ_128K,
+		.oobsize   = 128,
+		.options   = 0,
+		.read_retry_type = NAND_RR_NONE,
+		.badblock_pos    = BBP_FIRST_PAGE,
+		.flags = 0,
+	},
+
+	/****************************** Micron *******************************/
 	{        /* MLC 40bit/1k */
 		.name      = "MT29F64G08CBABA",
 		.id        = {0x2C, 0x64, 0x44, 0x4B, 0xA9, 0x00, 0x00, 0x00},
@@ -255,6 +357,20 @@ static struct nand_flash_special_dev nand_flash_special_dev[] = {
 		.badblock_pos    = BBP_FIRST_PAGE,
 		.flags = 0,
 	},
+	{		/* SLC MT29F2G08ABAEA */
+		.name      = "MT29F2G08ABAEA",
+		.id        = {0x2C, 0xDA, 0x90, 0x95, 0x06, 0x00, 0x00, 0x00},
+		.length    = 5,
+		.chipsize  = _256M,
+		.probe     = NULL,
+		.pagesize  = SZ_2K,
+		.erasesize = SZ_128K,
+		.oobsize   = 64,
+		.options   = 0,
+		.read_retry_type = NAND_RR_NONE,
+		.badblock_pos    = BBP_FIRST_PAGE,
+		.flags = 0,
+	},
 	{        /* SLC 8bit/512 */
 		.name      = "MT29F16G08ABACA",
 		.id        = {0x2C, 0x48, 0x00, 0x26, 0xA9, 0x00, 0x00, 0x00},
@@ -379,10 +495,10 @@ static struct nand_flash_special_dev nand_flash_special_dev[] = {
 		.name      = "TC58NVG1S3HTA00",
 		.id        = {0x98, 0xDA, 0x90, 0x15, 0x76, 0x16, 0x08, 0x00},
 		.length    = 7,
-		.chipsize  = _256M,
+		.chipsize  = SZ_256M,
 		.probe     = NULL,
-		.pagesize  = _2K,
-		.erasesize = _128K,
+		.pagesize  = SZ_2K,
+		.erasesize = SZ_128K,
 		.oobsize   = 128,
 		.options   = 0,
 		.read_retry_type = NAND_RR_NONE,
@@ -393,10 +509,10 @@ static struct nand_flash_special_dev nand_flash_special_dev[] = {
 		.name      = "TC58NVG1S3ETA00",
 		.id        = {0x98, 0xDA, 0x90, 0x15, 0x76, 0x14, 0x03, 0x00},
 		.length    = 7,
-		.chipsize  = _256M,
+		.chipsize  = SZ_256M,
 		.probe     = NULL,
-		.pagesize  = _2K,
-		.erasesize = _128K,
+		.pagesize  = SZ_2K,
+		.erasesize = SZ_128K,
 		.oobsize   = 64,
 		.options   = 0,
 		.read_retry_type = NAND_RR_NONE,
@@ -407,11 +523,39 @@ static struct nand_flash_special_dev nand_flash_special_dev[] = {
 		.name      = "TC58NVG3S0FTA00",
 		.id        = {0x98, 0xD3, 0x90, 0x26, 0x76, 0x15, 0x02, 0x08},
 		.length    = 8,
-		.chipsize  = _1G,
+		.chipsize  = SZ_1G,
 		.probe     = NULL,
-		.pagesize  = _4K,
-		.erasesize = _256K,
+		.pagesize  = SZ_4K,
+		.erasesize = SZ_256K,
 		.oobsize   = 232,
+		.options   = 0,
+		.read_retry_type = NAND_RR_NONE,
+		.badblock_pos    = BBP_FIRST_PAGE,
+		.flags = 0,
+	},
+	{       /* SLC 4bit/512 */
+		.name      = "TC58NVG3S0HTA00",
+		.id        = {0x98, 0xD3, 0x91, 0x26, 0x76, 0x16, 0x08, 0x00},
+		.length    = 8,
+		.chipsize  = SZ_1G,
+		.probe     = NULL,
+		.pagesize  = SZ_4K,
+		.erasesize = SZ_256K,
+		.oobsize   = 256,
+		.options   = 0,
+		.read_retry_type = NAND_RR_NONE,
+		.badblock_pos    = BBP_FIRST_PAGE,
+		.flags = 0,
+	},
+	{       /* SLC 24bit/1k */
+		.name      = "TC58NVG2S0HTA00",
+		.id        = {0x98, 0xDC, 0x90, 0x26, 0x76, 0x16, 0x08, 0x00},
+		.length    = 8,
+		.chipsize  = SZ_512M,
+		.probe     = NULL,
+		.pagesize  = SZ_4K,
+		.erasesize = SZ_256K,
+		.oobsize   = 256,
 		.options   = 0,
 		.read_retry_type = NAND_RR_NONE,
 		.badblock_pos    = BBP_FIRST_PAGE,
@@ -421,10 +565,10 @@ static struct nand_flash_special_dev nand_flash_special_dev[] = {
 		.name      = "TC58NVG2S0FTA00",
 		.id        = {0x98, 0xDC, 0x90, 0x26, 0x76, 0x15, 0x01, 0x08},
 		.length    = 8,
-		.chipsize  = _512M,
+		.chipsize  = SZ_512M,
 		.probe     = NULL,
-		.pagesize  = _4K,
-		.erasesize = _256K,
+		.pagesize  = SZ_4K,
+		.erasesize = SZ_256K,
 		.oobsize   = 224,
 		.options   = 0,
 		.read_retry_type = NAND_RR_NONE,
@@ -435,10 +579,10 @@ static struct nand_flash_special_dev nand_flash_special_dev[] = {
 		.name      = "TH58NVG2S3HTA00",
 		.id        = {0x98, 0xDC, 0x91, 0x15, 0x76},
 		.length    = 5,
-		.chipsize  = _512M,
+		.chipsize  = SZ_512M,
 		.probe     = NULL,
-		.pagesize  = _2K,
-		.erasesize = _128K,
+		.pagesize  = SZ_2K,
+		.erasesize = SZ_128K,
 		.oobsize   = 128,
 		.options   = 0,
 		.read_retry_type = NAND_RR_NONE,
@@ -466,8 +610,8 @@ static struct nand_flash_special_dev nand_flash_special_dev[] = {
 		.length    = 6,
 		.chipsize  = _4G,
 		.probe	   = NULL,
-		.pagesize  = _16K,
-		.erasesize = _4M,
+		.pagesize  = SZ_16K,
+		.erasesize = SZ_4M,
 		.oobsize   = 1280,
 		.options   = 0,
 		.read_retry_type = NAND_RR_TOSHIBA_19nm,
@@ -480,8 +624,8 @@ static struct nand_flash_special_dev nand_flash_special_dev[] = {
 		.length    = 6,
 		.chipsize  = _4G,
 		.probe	   = NULL,
-		.pagesize  = _16K,
-		.erasesize = _4M,
+		.pagesize  = SZ_16K,
+		.erasesize = SZ_4M,
 		.oobsize   = 1280,
 		.options   = 0,
 		.read_retry_type = NAND_RR_TOSHIBA_19nm,
@@ -735,6 +879,8 @@ static struct nand_flash_dev *hinfc_nand_probe(struct mtd_info *mtd,
 	for (spl_dev = nand_flash_special_dev; spl_dev->length; spl_dev++) {
 		if (memcmp(byte, spl_dev->id, spl_dev->length))
 			continue;
+
+		hinfc_pr_msg("The Special NAND id table Version: %s\n", DRV_VERSION);
 
 		if (spl_dev->probe) {
 			type = spl_dev->probe(nand_dev);

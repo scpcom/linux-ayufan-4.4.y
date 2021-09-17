@@ -93,6 +93,7 @@ static int xhci_plat_probe(struct platform_device *pdev)
 #if defined (MY_ABC_HERE)
 	struct device_node	*node = pdev->dev.of_node;
 	u32 vbus_gpio_pin = 0;
+	int i;
 #endif  
 	const struct hc_driver	*driver;
 	struct xhci_hcd		*xhci;
@@ -153,12 +154,16 @@ static int xhci_plat_probe(struct platform_device *pdev)
 		} else {
 			hcd->power_control_support = 0;
 		}
+
+		for (i = 0; i < CONFIG_SYNO_USB_POWER_RESET_PIN_NUMBER + 1; ++i) {
+			hcd->vbus_gpio_pin[i] = -1;
+		}
+
 		if (of_property_read_bool(node, "vbus-gpio")) {
 			of_property_read_u32(node, "vbus-gpio", &vbus_gpio_pin);
 			 
-			hcd->vbus_gpio_pin = vbus_gpio_pin;
+			hcd->vbus_gpio_pin[1] = vbus_gpio_pin;
 		} else {
-			hcd->vbus_gpio_pin = -1;
 			dev_warn(&pdev->dev, "failed to get Vbus gpio\n");
 		}
 	}
@@ -169,7 +174,7 @@ static int xhci_plat_probe(struct platform_device *pdev)
 	set_bit(7, hcd->regs + 0x380c);
 #endif  
 #if defined (MY_ABC_HERE)
-	dev_info(&pdev->dev, "USB2 Vbus gpio %d\n", hcd->vbus_gpio_pin);
+	dev_info(&pdev->dev, "USB2 Vbus gpio %d\n", hcd->vbus_gpio_pin[1]);
 	dev_info(&pdev->dev, "power control %s\n", hcd->power_control_support ? "enabled" : "disabled");
 #endif  
 	ret = usb_add_hcd(hcd, irq, IRQF_SHARED);
@@ -211,9 +216,9 @@ static int xhci_plat_probe(struct platform_device *pdev)
 	}
 #endif  
 #if defined (MY_ABC_HERE)
-	xhci->shared_hcd->vbus_gpio_pin = hcd->vbus_gpio_pin;
+	xhci->shared_hcd->vbus_gpio_pin[1] = hcd->vbus_gpio_pin[1];
 	xhci->shared_hcd->power_control_support = hcd->power_control_support;
-	dev_info(&pdev->dev, "USB3 Vbus gpio %d\n", xhci->shared_hcd->vbus_gpio_pin);
+	dev_info(&pdev->dev, "USB3 Vbus gpio %d\n", xhci->shared_hcd->vbus_gpio_pin[1]);
 	dev_info(&pdev->dev, "power control %s\n", hcd->power_control_support ? "enabled" : "disabled");
 #endif  
 	 

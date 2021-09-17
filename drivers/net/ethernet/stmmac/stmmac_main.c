@@ -364,6 +364,36 @@ static inline u32 stmmac_tx_avail(struct stmmac_priv *priv)
 	return priv->dirty_tx + priv->dma_tx_size - priv->cur_tx - 1;
 }
 
+#if defined(CONFIG_SYNO_HI3536_CHANGE_PHY_BEHAVIOR)
+void syno_update_rtl8211e_led_behavior(struct phy_device *phydev)
+{
+	/* To change LED behavior, switch to extension Page first:
+	 * Write Register 31 Data=0x0007
+	 */
+	phy_write(phydev, 0x1f, 0x07);
+
+	/* Disable EEE */
+	phy_write(phydev, 0x1e, 0x20);
+	phy_write(phydev, 0x15, 0x0);
+	phy_write(phydev, 0x15, 0x1008);
+
+	/* Switch to extension Page 44:
+	 * Write Register 30 Data=0x002c
+	 */
+	phy_write(phydev, 0x1e, 0x2c);
+
+	/* Write Register 26 and 28 to change link speed LED */
+	/* Green LED on only when 1000Mbps. Orange LED on when 100Mbps or 10Mbps */
+	phy_write(phydev, 0x1a, 0x50);
+	phy_write(phydev, 0x1c, 0x304);
+
+	/* After LED setting, switch to PHY's Page0:
+	 * Write Register 31 Data=0x0000
+	 */
+	phy_write(phydev, 0x1f, 0x00);
+}
+#endif /* CONFIG_SYNO_HI3536_CHANGE_PHY_BEHAVIOR */
+
 /* On some ST platforms, some HW system configuraton registers have to be
  * set according to the link speed negotiated.
  */
@@ -427,14 +457,22 @@ static void stmmac_adjust_link(struct net_device *dev)
 {
 	struct stmmac_priv *priv = netdev_priv(dev);
 	struct phy_device *phydev = priv->phydev;
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_HI3536_V2050 */
 	unsigned long flags;
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 	int new_state = 0;
 	unsigned int fc = priv->flow_ctrl, pause_time = priv->pause;
 
 	if (phydev == NULL)
 		return;
 
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+	spin_lock(&priv->lock);
+#else /* CONFIG_SYNO_LSP_HI3536_V2050 */
 	spin_lock_irqsave(&priv->lock, flags);
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 
 	if (phydev->link) {
 		u32 ctrl = readl(priv->ioaddr + MAC_CTRL_REG);
@@ -507,11 +545,23 @@ static void stmmac_adjust_link(struct net_device *dev)
 		if (netif_msg_link(priv))
 			phy_print_status(phydev);
 	}
+#if defined(CONFIG_SYNO_HI3536_CHANGE_PHY_BEHAVIOR)
+	syno_update_rtl8211e_led_behavior(phydev);
+#endif /* CONFIG_SYNO_HI3536_CHANGE_PHY_BEHAVIOR */
 
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+	spin_unlock(&priv->lock);
+#else /* CONFIG_SYNO_LSP_HI3536_V2050 */
 	spin_unlock_irqrestore(&priv->lock, flags);
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 
 	DBG(probe, DEBUG, "stmmac_adjust_link: exiting\n");
 }
+
+#if defined(CONFIG_SYNO_HI3536_DISABLE_GMAC_WHEN_STOPPING)
+#define SYNO_GMAC_NUM 2
+struct net_device *gmac_netdevs[SYNO_GMAC_NUM];
+#endif /* CONFIG_SYNO_HI3536_DISABLE_GMAC_WHEN_STOPPING */
 
 /**
  * stmmac_init_phy - PHY initialization
@@ -527,6 +577,14 @@ static int stmmac_init_phy(struct net_device *dev)
 	struct phy_device *phydev;
 	char phy_id[MII_BUS_ID_SIZE + 3];
 	char bus_id[MII_BUS_ID_SIZE];
+
+#if defined(CONFIG_SYNO_HI3536_DISABLE_GMAC_WHEN_STOPPING)
+	if (dev->dev_id < SYNO_GMAC_NUM) {
+		gmac_netdevs[dev->dev_id] = dev;
+	} else {
+		WARN_ON(1);
+	}
+#endif /* CONFIG_SYNO_HI3536_DISABLE_GMAC_WHEN_STOPPING */
 
 	priv->oldlink = 0;
 	priv->speed = 0;
@@ -1359,6 +1417,13 @@ static int stmmac_open(struct net_device *dev)
 static int stmmac_release(struct net_device *dev)
 {
 	struct stmmac_priv *priv = netdev_priv(dev);
+#if defined(CONFIG_SYNO_HI3536_DISABLE_GMAC_WHEN_STOPPING)
+	if (dev->dev_id < SYNO_GMAC_NUM) {
+		gmac_netdevs[dev->dev_id] = NULL;
+	} else {
+		WARN_ON(1);
+	}
+#endif /* CONFIG_SYNO_HI3536_DISABLE_GMAC_WHEN_STOPPING */
 
 #ifdef TNK_BONDING
 	if (hitoe)
@@ -1393,6 +1458,20 @@ static int stmmac_release(struct net_device *dev)
 
 	return 0;
 }
+
+#if defined(CONFIG_SYNO_HI3536_DISABLE_GMAC_WHEN_STOPPING)
+void syno_stmmac_release(void)
+{
+	int i;
+	for (i = 0; i < SYNO_GMAC_NUM; ++i) {
+		if (gmac_netdevs[i]) {
+			pr_info("Disabling GMAC %s...\n", gmac_netdevs[i]->name);
+			stmmac_release(gmac_netdevs[i]);
+		}
+	}
+}
+EXPORT_SYMBOL(syno_stmmac_release);
+#endif /* CONFIG_SYNO_HI3536_DISABLE_GMAC_WHEN_STOPPING */
 
 static void stmmac_proc_gmac(struct seq_file *s, int index, char *dir,
 			     unsigned int curr,
@@ -2106,6 +2185,9 @@ static int stmmac_change_mtu(struct net_device *dev, int new_mtu)
 	return 0;
 }
 
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+// do nothing
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 #define TNK_INTR_STAT_GMAC0_DATA \
 	(TNK_MASK_INTR_STAT_DMA_CH0 << TNK_OFFSET_INTR_STAT_DMA_CH0)
 #define TNK_INTR_STAT_GMAC0_CTRL \
@@ -2118,6 +2200,7 @@ static int stmmac_change_mtu(struct net_device *dev, int new_mtu)
 	(TNK_INTR_STAT_GMAC0_DATA | TNK_INTR_STAT_GMAC0_CTRL)
 #define TNK_INTR_GROUP_GMAC1 \
 	(TNK_INTR_STAT_GMAC1_DATA | TNK_INTR_STAT_GMAC1_CTRL)
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 
 #if SWITCH_RECV_LRO
 #define TNK_INTR_GROUP_TOE \
@@ -2135,6 +2218,96 @@ static int stmmac_change_mtu(struct net_device *dev, int new_mtu)
 	 | (TNK_MASK_INTR_STAT_TOE << TNK_OFFSET_INTR_STAT_TOE))
 #endif
 
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+static void stmmac_mac_irq(enum tnk_gmac_id mac_id,
+			   bool data_irq, bool ctrl_irq)
+{
+	struct net_device *dev;
+	struct stmmac_priv *priv;
+
+	stm_proc.gmac[mac_id].interrupts++;
+	dev = stmmac_device_list[mac_id];
+	if (unlikely(!dev)) {
+		pr_err("GMAC%d dev not yet initialised\n", mac_id);
+		return;
+	}
+
+	priv = netdev_priv(dev);
+	if (unlikely(!priv)) {
+		pr_err("GMAC%d priv not yet initialised\n", mac_id);
+		return;
+	}
+
+	if (data_irq)
+		stmmac_dma_interrupt(priv);
+
+	if (ctrl_irq && likely(priv->plat->has_gmac))
+		priv->hw->mac->host_irq_status((void __iomem *)dev->base_addr);
+}
+
+static irqreturn_t stmmac_interrupt(int irq, void *arg)
+{
+	bool data_irq, ctrl_irq;
+
+#if SWITCH_MULTI_INTR
+	if (irq == SYNOP_GMAC_IRQNUM) {
+#endif
+		uint32_t int_status;
+
+		int_status = readl(stmmac_base_ioaddr + TNK_REG_INTR_STAT);
+		stm_proc.interrupts++;
+		/*  GMAC 0 */
+		if (int_status & TNK_INTR_GROUP_GMAC0) {
+			data_irq = !!(int_status & TNK_INTR_STAT_GMAC0_DATA);
+			ctrl_irq = !!(int_status & TNK_INTR_STAT_GMAC0_CTRL);
+			stmmac_mac_irq(TNK_GMAC0_ID, data_irq, ctrl_irq);
+		}
+
+#ifdef CONFIG_STMMAC_DUAL_MAC
+		/*  GMAC 1 */
+		if (int_status & TNK_INTR_GROUP_GMAC1) {
+			data_irq = !!(int_status & TNK_INTR_STAT_GMAC1_DATA);
+			ctrl_irq = !!(int_status & TNK_INTR_STAT_GMAC1_CTRL);
+			stmmac_mac_irq(TNK_GMAC1_ID, data_irq, ctrl_irq);
+		}
+#endif
+
+		if (hitoe && (int_status & TNK_INTR_GROUP_TOE))
+			/*  TOE */
+			tnkhw_interrupt(int_status & TNK_INTR_GROUP_TOE);
+#if SWITCH_MULTI_INTR
+	}
+
+	if (irq == CONFIG_STMMAC_IRQ1NUM) {
+		uint32_t int_status;
+
+		int_status = readl(stmmac_base_ioaddr + TNK_REG_INTR1_STAT);
+#ifdef CONFIG_STMMAC_DUAL_MAC
+		/*  GMAC 1 */
+		if (int_status & TNK_INTR_GROUP_GMAC1) {
+			stm_proc.interrupts++;
+			data_irq = !!(int_status & TNK_INTR_STAT_GMAC1_DATA);
+			ctrl_irq = !!(int_status & TNK_INTR_STAT_GMAC1_CTRL);
+			stmmac_mac_irq(TNK_GMAC1_ID, data_irq, ctrl_irq);
+		}
+#endif
+	}
+
+	if (hitoe) {
+		uint32_t int_status;
+		int i;
+		for (i = 1; i < TOE_MULTI_INTR_NUM; i++) {
+			if (irq == stmmac_irq_num[i]) {
+				int_status = readl(stmmac_base_ioaddr +
+					TNK_REG_INTR1_STAT + (i-1) * 0x8);
+				tnkhw_channel_interrupt(i, int_status);
+			}
+		}
+	}
+#endif
+	return IRQ_HANDLED;
+}
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 static irqreturn_t stmmac_interrupt(int irq, void *arg)
 {
 	struct net_device *dev;
@@ -2214,6 +2387,7 @@ static irqreturn_t stmmac_interrupt(int irq, void *arg)
 handled:
 	return IRQ_HANDLED;
 }
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 
 #ifdef CONFIG_NET_POLL_CONTROLLER
 /* Polling receive - used by NETCONSOLE and other diagnostic tools
@@ -2315,8 +2489,13 @@ static int stmmac_probe(struct net_device *dev)
 	dev->netdev_ops = &stmmac_netdev_ops;
 	stmmac_set_ethtool_ops(dev);
 
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+	dev->hw_features |= NETIF_F_SG | NETIF_F_IP_CSUM | NETIF_F_IPV6_CSUM;
+	dev->features |= dev->hw_features | NETIF_F_HIGHDMA;
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 	dev->features |= NETIF_F_SG | NETIF_F_HIGHDMA | NETIF_F_IP_CSUM
 				| NETIF_F_IPV6_CSUM;
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 
 	dev->watchdog_timeo = msecs_to_jiffies(watchdog);
 #ifdef STMMAC_VLAN_TAG_USED
@@ -2626,6 +2805,19 @@ static int stmmac_dvr_remove(struct platform_device *pdev)
 
 	/*  Disable all interrupts */
 	writel(0, stmmac_base_ioaddr + TNK_REG_INTR_EN);
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#if SWITCH_MULTI_INTR
+#if (TOE_MULTI_INTR_NUM > 1)
+	writel(0, stmmac_base_ioaddr + TNK_REG_INTR1_EN);
+#endif
+#if (TOE_MULTI_INTR_NUM > 2)
+	writel(0, stmmac_base_ioaddr + TNK_REG_INTR2_EN);
+#endif
+#if (TOE_MULTI_INTR_NUM > 3)
+	writel(0, stmmac_base_ioaddr + TNK_REG_INTR3_EN);
+#endif
+#endif
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 
 	/* Free the IRQ lines */
 	free_irq(SYNOP_GMAC_IRQNUM, pdev);
@@ -2856,6 +3048,9 @@ static int stmmac_dvr_probe(struct platform_device *pdev)
 		}
 
 		stmmac_external_phy_reset(i, syscfg_base_ioaddr);
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+		stmmac_syscfg_phy_cfg(priv, SPEED_100, DUPLEX_FULL, 0);
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 
 		pr_info("\t%s - (dev. name: %s - id: %d, IRQ #%d\n"
 			"\tIO base addr: 0x%p)\n", ndev->name, pdev->name,

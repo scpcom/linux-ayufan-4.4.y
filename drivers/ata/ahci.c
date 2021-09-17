@@ -33,6 +33,10 @@
 #include "al_hal_iofic_regs.h"
 #endif  
 
+#ifdef MY_DEF_HERE
+#include <linux/synolib.h>
+#endif  
+
 #define DRV_NAME	"ahci"
 #define DRV_VERSION	"3.0"
 
@@ -906,6 +910,30 @@ void syno_mv_9xxx_amp_adjust(struct ata_host *host, struct pci_dev *pdev)
 			port = 1;
 			syno_mv_9xxx_amp_adjust_by_port(host, 0xD7F, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
 		}
+	} else if (syno_is_hw_version(HW_DS1817)) {
+		port = 0;
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xFFF, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xAFFE, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xCFFE, mv_port_addr[port], mv_port_data[port], mv_sata_gen[0]);
+		port = 1;
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xE7F, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xAFFE, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xCFFE, mv_port_addr[port], mv_port_data[port], mv_sata_gen[0]);
+	} else if (syno_is_hw_version(HW_RS818p) || syno_is_hw_version(HW_RS818rpp)) {
+		if (0x02 == PCI_SLOT(pdev->bus->self->devfn)) {
+			 
+			port = 2;
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xFFF, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xAE7E, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+			port = 3;
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xE75, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xAA62, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+		} else if (0x03 == PCI_SLOT(pdev->bus->self->devfn)) {
+			 
+			port = 1;
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xB75, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xAA62, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+		}
 	}
 }
 
@@ -1769,6 +1797,10 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 #endif  
 	int n_ports, n_msis, i, rc;
 	int ahci_pci_bar = AHCI_PCI_BAR_STANDARD;
+#ifdef MY_DEF_HERE
+	char szPciAddress[PCI_ADDR_LEN_MAX + 1];
+	struct pci_dev *pdev_cur = NULL;
+#endif
 
 	VPRINTK("ENTER\n");
 
@@ -1778,6 +1810,54 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 		return 0;
 	}
 
+#endif  
+
+#ifdef MY_DEF_HERE
+	 
+	pdev_cur = pdev;
+	while (NULL != pdev_cur) {
+		if (pdev_cur->vendor == 0x111d && pdev_cur->device == 0x806e) {
+#ifdef MY_DEF_HERE
+			if (0 == gPciAddrNum) {
+				printk("No optional PCIe slot Information. Skip this AHCI device.\n");
+				return -ENODEV;
+			} else {
+				int disableDriver = 1;
+
+				while (NULL != pdev_cur) {
+					snprintf(szPciAddress, sizeof(szPciAddress),"%04x%02x%02x%x",
+							pci_domain_nr(pdev_cur->bus), pdev_cur->bus->number,
+							PCI_SLOT(pdev_cur->devfn), PCI_FUNC(pdev_cur->devfn));
+
+					for (i = 0; i < gPciAddrNum; i++) {
+						if (0 == strncmp(szPciAddress, gszPciAddrList[i], PCI_ADDR_LEN_MAX)) {
+							disableDriver = 0;
+							break;
+						}
+					}
+
+					if (!disableDriver) {
+						break;
+					}
+					pdev_cur = pdev_cur->bus->self;
+				}
+
+				if (!disableDriver) {
+					 
+					break;
+				} else {
+					 
+					printk("Not found in optional PCIe slot. Skip this AHCI device.\n");
+					return -ENODEV;
+				}
+			}
+#else  
+			printk("SYNO_PCI_HOST_SATA_CACHE is disable. Skip this AHCI device on\n");
+			return -ENODEV;
+#endif  
+		}
+		pdev_cur = pdev_cur->bus->self;
+	}
 #endif  
 
 	WARN_ON((int)ATA_MAX_QUEUE > AHCI_MAX_CMDS);
@@ -1990,6 +2070,47 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 			ap->ops->qc_defer = &ahci_syno_pmp_3x26_qc_defer;
 		}
 	}
+#endif  
+
+#ifdef MY_ABC_HERE
+	if (syno_is_hw_version(HW_RS815p) || syno_is_hw_version(HW_RS815rpp)) {
+		if (0x1b4b == pdev->vendor && 0x9170 == pdev->device) {
+			host->ports[0]->flags &= ~ATA_FLAG_NCQ;
+			host->ports[0]->flags &= ~ATA_FLAG_FPDMA_AA;
+			host->ports[1]->flags &= ~ATA_FLAG_NCQ;
+			host->ports[1]->flags &= ~ATA_FLAG_FPDMA_AA;
+		}
+	}
+	if (syno_is_hw_version(HW_DS1817)) {
+		if (0x1b4b == pdev->vendor && 0x9235 == pdev->device) {
+			host->ports[0]->flags &= ~ATA_FLAG_NCQ;
+			host->ports[0]->flags &= ~ATA_FLAG_FPDMA_AA;
+			host->ports[1]->flags &= ~ATA_FLAG_NCQ;
+			host->ports[1]->flags &= ~ATA_FLAG_FPDMA_AA;
+		}
+	}
+#ifdef MY_DEF_HERE
+	if (syno_is_hw_version(HW_DS1517p)) {
+		if (0x1b4b == pdev->vendor && 0x9235 == pdev->device && 0x02 == PCI_SLOT(pdev->bus->self->devfn)) {
+			 
+			host->ports[0]->flags &= ~ATA_FLAG_NCQ;
+			host->ports[0]->flags &= ~ATA_FLAG_FPDMA_AA;
+		}
+		if (0x1b4b == pdev->vendor && 0x9170 == pdev->device && 0x03 == PCI_SLOT(pdev->bus->self->devfn)) {
+			host->ports[0]->flags &= ~ATA_FLAG_NCQ;
+			host->ports[0]->flags &= ~ATA_FLAG_FPDMA_AA;
+		}
+	}
+	if (syno_is_hw_version(HW_DS1817p)) {
+		if (0x1b4b == pdev->vendor && 0x9235 == pdev->device) {
+			if (NULL == pdev_cur) {
+				 
+				host->ports[0]->flags &= ~ATA_FLAG_NCQ;
+				host->ports[0]->flags &= ~ATA_FLAG_FPDMA_AA;
+			}
+		}
+	}
+#endif  
 #endif  
 
 #ifdef MY_ABC_HERE

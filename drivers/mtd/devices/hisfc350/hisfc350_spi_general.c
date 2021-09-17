@@ -1,7 +1,20 @@
-/*****************************************************************************
-*    Copyright (c) 2009-2014 by Hisilicon.
-*    All rights reserved.
- *****************************************************************************/
+/*
+ * Copyright (c) 2016 HiSilicon Technologies Co., Ltd.
+ *
+ * This program is free software; you can redistribute  it and/or modify it
+ * under  the terms of  the GNU General Public License as published by the
+ * Free Software Foundation;  either version 2 of the  License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 
 #include <linux/io.h>
 #include <linux/delay.h>
@@ -82,6 +95,10 @@ static int spi_general_write_enable(struct hisfc_spi *spi)
 			| HISFC350_CMD_CONFIG_START);
 
 	HISFC350_CMD_WAIT_CPU_FINISH(host);
+
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+	spi->driver->wait_ready(spi);
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 
 	return 0;
 }
@@ -224,7 +241,11 @@ static int spi_general_qe_enable(struct hisfc_spi *spi)
 
 	HISFC350_CMD_WAIT_CPU_FINISH(host);
 
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 	if (DEBUG_SPI_QE) {
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 		spi->driver->wait_ready(spi);
 
 		config = spi_general_get_flash_register(spi, SPI_CMD_RDCR);
@@ -234,7 +255,21 @@ static int spi_general_qe_enable(struct hisfc_spi *spi)
 					str[op], config);
 		else
 			DBG_MSG("%s Quad failed! [%#x]\n", str[op], config);
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 	}
-
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 	return op;
 }
+
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+/*****************************************************************************/
+/*
+  some chip don't QUAD enable
+*/
+static int spi_do_not_qe_enable(struct hisfc_spi *spi)
+{
+	return 0;
+}
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */

@@ -91,13 +91,24 @@ struct dentry {
 	void *d_fsdata;			 
 
 	struct list_head d_lru;		 
-	struct list_head d_child;	 
-	struct list_head d_subdirs;	 
-	 
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	union {
 		struct hlist_node d_alias;	 
 	 	struct rcu_head d_rcu;
 	} d_u;
+#else
+	struct list_head d_child;	 
+#endif
+	struct list_head d_subdirs;	 
+	 
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	struct list_head d_child;	 
+#else
+	union {
+		struct hlist_node d_alias;	 
+	 	struct rcu_head d_rcu;
+	} d_u;
+#endif
 };
 
 enum dentry_d_lock_class
@@ -114,9 +125,13 @@ struct dentry_operations {
 	int (*d_compare)(const struct dentry *, const struct inode *,
 			const struct dentry *, const struct inode *,
 			unsigned int, const char *, const struct qstr *);
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 #ifdef MY_ABC_HERE
 	int (*d_compare_case)(const struct dentry *, unsigned int, const char *,
 			const struct qstr *, int caseless);
+#endif  
 #endif  
 	int (*d_delete)(const struct dentry *);
 	void (*d_release)(struct dentry *);
@@ -125,6 +140,12 @@ struct dentry_operations {
 	char *(*d_dname)(struct dentry *, char *, int);
 	struct vfsmount *(*d_automount)(struct path *);
 	int (*d_manage)(struct dentry *, bool);
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#ifdef MY_ABC_HERE
+	int (*d_compare_case)(const struct dentry *, unsigned int, const char *,
+			const struct qstr *, int caseless);
+#endif  
+#endif  
 } ____cacheline_aligned;
 
 #define DCACHE_OP_HASH		0x0001

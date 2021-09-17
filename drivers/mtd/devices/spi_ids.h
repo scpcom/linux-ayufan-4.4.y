@@ -98,7 +98,12 @@
 #define SPI_CMD_WRITE_DUAL		0xA2   /* fast program dual input */
 #define SPI_CMD_WRITE_QUAD		0x32   /* fast program quad input */
 #define SPI_CMD_WRITE_DUAL_ADDR	0xD2   /* Dual I/O High Performance Write */
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
+#define SPI_CMD_WRITE_QUAD_ADDR	0x38   /* Quad I/O High Performance Write */
+/* #define SPI_CMD_WRITE_QUAD_ADDR	0x12   Quad I/O High Performance Write */
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 #define SPI_CMD_WRITE_QUAD_ADDR	0x12   /* Quad I/O High Performance Write */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 /*****************************************************************************/
 #define SPI_CMD_PAGE_READ		0x13   /* Page Read to Cache */
 #define SPI_CMD_READ			0x03   /* Read Data bytes */

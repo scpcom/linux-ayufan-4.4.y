@@ -4436,6 +4436,9 @@ struct ata_port *ata_port_alloc(struct ata_host *host)
 	ap->pflags |= ATA_PFLAG_INITIALIZING | ATA_PFLAG_FROZEN;
 	ap->lock = &host->lock;
 	ap->print_id = -1;
+#ifdef MY_DEF_HERE
+	ap->local_port_no = -1;
+#endif  
 	ap->host = host;
 	ap->dev = host->dev;
 
@@ -4895,7 +4898,14 @@ int ata_host_register(struct ata_host *host, struct scsi_host_template *sht)
 		kfree(host->ports[i]);
 
 	for (i = 0; i < host->n_ports; i++)
+#ifdef MY_DEF_HERE
+	{
+#endif  
 		host->ports[i]->print_id = atomic_inc_return(&ata_print_id);
+#ifdef MY_DEF_HERE
+		host->ports[i]->local_port_no = i + 1;
+	}
+#endif  
 
 	for (i = 0; i < host->n_ports; i++) {
 		rc = ata_tport_add(host->dev,host->ports[i]);

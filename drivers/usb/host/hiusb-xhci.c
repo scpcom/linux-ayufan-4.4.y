@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * xhci-plat.c - xHCI host controller driver platform Bus Glue.
  *
@@ -17,6 +20,11 @@
 
 #include "xhci.h"
 #include "hiusb.h"
+#if defined (MY_ABC_HERE)
+#include <linux/synobios.h>
+
+char* syno_get_hw_version(void);
+#endif /* MY_ABC_HERE */
 
 static void xhci_plat_quirks(struct device *dev, struct xhci_hcd *xhci)
 {
@@ -25,7 +33,12 @@ static void xhci_plat_quirks(struct device *dev, struct xhci_hcd *xhci)
 	 * here that the generic code does not try to make a pci_dev from our
 	 * dev struct in order to setup MSI
 	 */
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+	/* xhci->quirks |= XHCI_BROKEN_MSI; */
+	xhci->quirks |= XHCI_PLAT;
+#else /* CONFIG_SYNO_LSP_HI3536_V2050 */
 	xhci->quirks |= XHCI_BROKEN_MSI;
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 }
 
 /* called during probe() after chip reset completes */
@@ -91,6 +104,10 @@ static int xhci_plat_probe(struct platform_device *pdev)
 	struct usb_hcd *hcd;
 	int ret;
 	int irq;
+#if defined (MY_ABC_HERE)
+	int i;
+	struct usb_hcd *shared_hcd;
+#endif /* MY_ABC_HERE */
 
 	if (usb_disabled())
 		return -ENODEV;
@@ -126,6 +143,21 @@ static int xhci_plat_probe(struct platform_device *pdev)
 		goto release_mem_region;
 	}
 
+#if defined (MY_ABC_HERE)
+	for (i = 0; i < CONFIG_SYNO_USB_POWER_RESET_PIN_NUMBER + 1; ++i) {
+		hcd->vbus_gpio_pin[i] = -1;
+	}
+
+	if (syno_is_hw_version(HW_VS960hd)) {
+		hcd->power_control_support = 1;
+		hcd->vbus_gpio_pin[1] = 45;
+		dev_info(&pdev->dev, "%s set Vbus gpio %d for USB3.0\n", syno_get_hw_version(), hcd->vbus_gpio_pin[1]);
+	} else {
+		dev_warn(&pdev->dev, "%s no Vbus gpio specified!\n", syno_get_hw_version());
+	}
+	dev_info(&pdev->dev, "power control %s\n", hcd->power_control_support ? "enabled" : "disabled");
+#endif /* MY_ABC_HERE */
+
 	hiusb3_start_hcd(hcd->regs);
 
 	ret = usb_add_hcd(hcd, irq, IRQF_SHARED);
@@ -147,6 +179,22 @@ static int xhci_plat_probe(struct platform_device *pdev)
 	 * is called by usb_add_hcd().
 	 */
 	*((struct xhci_hcd **) xhci->shared_hcd->hcd_priv) = xhci;
+
+#if defined (MY_ABC_HERE)
+	if (syno_is_hw_version(HW_VS960hd)) {
+		shared_hcd = xhci->shared_hcd;
+
+		for (i = 0; i < CONFIG_SYNO_USB_POWER_RESET_PIN_NUMBER + 1; ++i) {
+			shared_hcd->vbus_gpio_pin[i] = -1;
+		}
+
+		shared_hcd->power_control_support = 1;
+		shared_hcd->vbus_gpio_pin[1] = 45;
+		dev_info(&pdev->dev, "%s set Vbus gpio %d for USB3.0\n", syno_get_hw_version(), shared_hcd->vbus_gpio_pin[1]);
+
+		dev_info(&pdev->dev, "power control %s\n", shared_hcd->power_control_support ? "enabled" : "disabled");
+	}
+#endif /* MY_ABC_HERE */
 
 	ret = usb_add_hcd(xhci->shared_hcd, irq, IRQF_SHARED);
 	if (ret)

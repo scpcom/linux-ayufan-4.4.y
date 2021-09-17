@@ -53,14 +53,14 @@ config PCIE0_DEVICES_CONFIG_SIZE
 
 config LIMIT_MAX_RD_REQ_SIZE
 	bool "limit pcie max read request size"
-	default n
-	depends on PCI && ARCH_HI3536
+	default y if SYNO_LSP_HI3536_V2060
+	depends on PCI && (ARCH_HI3536 || ARCH_HI3531A)
 	help
-	The default max read request size of pcie device is 512 Byte. When hi3536 use
+	The default max read request size of pcie device is 512 Byte. When you use
 	the card of pcie-to-sata to connect to the sata disk, with the default max read
 	request size value of 512 byte, would cause the low bandwidth of VDP. If you enable
 	the LIMIT_MAX_RD_REQ_SIZE config, the max read request size of pcie device would be
-	set to 256 byte, and the problem of VDP low band width also be avoided.
+	set to 128 byte, and the problem of VDP low band width also be avoided.
 
 config PCIE1_SEL
 	bool "PCI Express controller 1 sel"

@@ -40,7 +40,8 @@ struct usb_hcd {
 
 	struct timer_list	rh_timer;	 
 	struct urb		*status_urb;	 
-#ifdef CONFIG_PM_RUNTIME
+#if (defined(CONFIG_SYNO_LSP_HI3536_V2060) && defined(CONFIG_USB_SUSPEND)) || \
+	(!defined(CONFIG_SYNO_LSP_HI3536_V2060) && defined(CONFIG_PM_RUNTIME))
 	struct work_struct	wakeup_work;	 
 #endif
 
@@ -110,8 +111,7 @@ struct usb_hcd {
 #endif  
 
 #if defined (MY_ABC_HERE)
-	 
-	int vbus_gpio_pin;
+	int vbus_gpio_pin[CONFIG_SYNO_USB_POWER_RESET_PIN_NUMBER + 1];
 	 
 	int power_control_support;
 #endif  
@@ -426,14 +426,15 @@ extern int hcd_bus_suspend(struct usb_device *rhdev, pm_message_t msg);
 extern int hcd_bus_resume(struct usb_device *rhdev, pm_message_t msg);
 #endif  
 
-#ifdef CONFIG_PM_RUNTIME
+#if (defined(CONFIG_SYNO_LSP_HI3536_V2060) && defined(CONFIG_USB_SUSPEND)) || \
+	(!defined(CONFIG_SYNO_LSP_HI3536_V2060) && defined(CONFIG_PM_RUNTIME))
 extern void usb_hcd_resume_root_hub(struct usb_hcd *hcd);
 #else
 static inline void usb_hcd_resume_root_hub(struct usb_hcd *hcd)
 {
 	return;
 }
-#endif  
+#endif
 
 #if defined(CONFIG_USB_MON) || defined(CONFIG_USB_MON_MODULE)
 

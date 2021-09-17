@@ -1247,6 +1247,8 @@ GLOBAL_EXTERN unsigned int cifs_min_rcv;
 GLOBAL_EXTERN unsigned int cifs_min_small;   
 GLOBAL_EXTERN unsigned int cifs_max_pending;  
 
+GLOBAL_EXTERN unsigned short echo_retries;
+
 #ifdef CONFIG_CIFS_ACL
 GLOBAL_EXTERN struct rb_root uidtree;
 GLOBAL_EXTERN struct rb_root gidtree;

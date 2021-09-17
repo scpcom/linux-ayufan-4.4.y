@@ -870,7 +870,11 @@ static void hi_mci_request(struct mmc_host *mmc, struct mmc_request *mrq)
 	struct himci_host *host = mmc_priv(mmc);
 	unsigned int rw = 0;
 	unsigned int ofblk = 0, nrblk = 0;
+#if defined(CONFIG_SYNO_HI3536) && defined(CONFIG_SEND_AUTO_STOP)
 	unsigned int byte_cnt = 0, trans_cnt;
+#else /* CONFIG_SYNO_HI3536 && CONFIG_SEND_AUTO_STOP */
+	unsigned int byte_cnt = 0;
+#endif /* CONFIG_SYNO_HI3536 && CONFIG_SEND_AUTO_STOP */
 	unsigned int tmp_reg, fifo_count = 0;
 	int ret = 0;
 	unsigned long flags;

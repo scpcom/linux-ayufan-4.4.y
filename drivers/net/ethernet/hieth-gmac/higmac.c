@@ -405,8 +405,7 @@ void higmac_reclaim_rx_tx_resource(struct higmac_netdev_local *ld)
 	int rd_offset, wr_offset;
 	int i;
 
-	higmac_irq_disable(ld, RX_BQ_IN_INT | RX_BQ_IN_TIMEOUT_INT
-				| TX_RQ_IN_INT | TX_RQ_IN_TIMEOUT_INT);
+	higmac_irq_disable(ld, DEF_INT_MASK);
 	higmac_hw_desc_disable(ld);
 	higmac_port_disable(ld);
 	higmac_writel(ld, STOP_RX_TX, STOP_CMD);
@@ -484,6 +483,7 @@ void higmac_restart(struct higmac_netdev_local *ld)
 	for (i = 0; i < ld->rx_fq.count; i++) {
 		skb = ld->rx_fq.skb[i];
 		if (skb) {
+			ld->rx_skb[i] = NULL;
 			ld->rx_fq.skb[i] = NULL;
 			if (skb == SKB_MAGIC)
 				continue;
@@ -501,6 +501,7 @@ void higmac_restart(struct higmac_netdev_local *ld)
 	for (i = 0; i < ld->tx_bq.count; i++) {
 		skb = ld->tx_bq.skb[i];
 		if (skb) {
+			ld->tx_skb[i] = NULL;
 			ld->tx_bq.skb[i] = NULL;
 			if (skb == SKB_MAGIC)
 				continue;
@@ -522,8 +523,7 @@ void higmac_restart(struct higmac_netdev_local *ld)
 
 	higmac_hw_desc_enable(ld);
 	higmac_port_enable(ld);
-	higmac_irq_enable(ld, RX_BQ_IN_INT | RX_BQ_IN_TIMEOUT_INT
-				| TX_RQ_IN_INT | TX_RQ_IN_TIMEOUT_INT);
+	higmac_irq_enable(ld, DEF_INT_MASK);
 	spin_unlock_irqrestore(&ld->txlock, txflags);
 	spin_unlock_irqrestore(&ld->rxlock, rxflags);
 }
@@ -590,6 +590,7 @@ static void higmac_adjust_link(struct net_device *dev)
 
 static void higmac_destroy_hw_desc_queue(struct higmac_netdev_local *ld)
 {
+	struct sk_buff *skb;
 	int i;
 
 	for (i = 0; i < QUEUE_NUMS; i++) {
@@ -602,6 +603,36 @@ static void higmac_destroy_hw_desc_queue(struct higmac_netdev_local *ld)
 		}
 	}
 
+	for (i = 0; i < ld->rx_fq.count; i++) {
+		skb = ld->rx_fq.skb[i];
+		if (skb) {
+			ld->rx_skb[i] = NULL;
+			ld->rx_fq.skb[i] = NULL;
+			if (skb == SKB_MAGIC)
+				continue;
+			dev_kfree_skb_any(skb);
+			/* TODO: need to unmap the skb here
+			 * but there is no way to get the dma_addr here,
+			 * and unmap(TO_DEVICE) ops do nothing in fact,
+			 * so we ignore to call
+			 * dma_unmap_single(dev, dma_addr, skb->len,
+			 *	DMA_TO_DEVICE)
+			 */
+		}
+	}
+
+	for (i = 0; i < ld->tx_bq.count; i++) {
+		skb = ld->tx_bq.skb[i];
+		if (skb) {
+			ld->tx_skb[i] = NULL;
+			ld->tx_bq.skb[i] = NULL;
+			if (skb == SKB_MAGIC)
+				continue;
+			dev_kfree_skb_any(skb);
+			/* TODO: unmap the skb */
+		}
+	}
+
 	kfree(ld->rx_fq.skb);
 	kfree(ld->tx_bq.skb);
 	ld->rx_fq.skb = NULL;
@@ -610,6 +641,12 @@ static void higmac_destroy_hw_desc_queue(struct higmac_netdev_local *ld)
 	kfree(ld->tx_bq.sg_desc_offset);
 	ld->tx_bq.sg_desc_offset = NULL;
 #endif
+
+	kfree(ld->tx_skb);
+	ld->tx_skb = NULL;
+
+	kfree(ld->rx_skb);
+	ld->rx_skb = NULL;
 }
 
 static int higmac_init_hw_desc_queue(struct higmac_netdev_local *ld)
@@ -647,10 +684,24 @@ static int higmac_init_hw_desc_queue(struct higmac_netdev_local *ld)
 		goto error_free_pool;
 	}
 
+	ld->rx_skb = kzalloc(ld->rx_fq.count
+			* sizeof(struct sk_buff *), GFP_KERNEL);
+	if (ld->rx_skb == NULL) {
+		pr_err("alloc gmac%d rx_skb array failed!\n", ld->index);
+		goto error_free_pool;
+	}
+
 	ld->tx_bq.skb = kzalloc(ld->tx_bq.count
 			* sizeof(struct sk_buff *), GFP_KERNEL);
 	if (ld->tx_bq.skb == NULL) {
 		pr_err("alloc gmac%d tx_bq skb array failed!\n", ld->index);
+		goto error_free_pool;
+	}
+
+	ld->tx_skb = kzalloc(ld->tx_bq.count
+			* sizeof(struct sk_buff *), GFP_KERNEL);
+	if (ld->tx_skb == NULL) {
+		pr_err("alloc gmac%d tx_skb array failed!\n", ld->index);
 		goto error_free_pool;
 	}
 #ifdef HIGMAC_TSO_SUPPORTED
@@ -717,9 +768,8 @@ static void higmac_destroy_sg_desc_queue(struct higmac_netdev_local *ld)
 }
 #endif
 
-static void higmac_bfproc_recv(unsigned long data)
+static int higmac_rx(struct net_device *dev, int limit)
 {
-	struct net_device *dev = (void *)data;
 	struct higmac_netdev_local *ld = netdev_priv(dev);
 	struct sk_buff *skb = NULL;
 	int rx_bq_wr_offset = 0;
@@ -727,15 +777,10 @@ static void higmac_bfproc_recv(unsigned long data)
 	struct higmac_desc *rx_bq_desc;
 	dma_addr_t dma_addr;
 	unsigned int rlen;
-	unsigned long flags;
-	int ret = 0;
 	int start, end;
+	int num = 0;
 
-	spin_lock_irqsave(&ld->txlock, flags);
-	higmac_xmit_release_skb(ld);
-	spin_unlock_irqrestore(&ld->txlock, flags);
-
-	spin_lock_irqsave(&ld->rxlock, flags);
+	spin_lock(&ld->rxlock);
 
 	rx_bq_wr_offset = higmac_readl_bits(ld, RX_BQ_WR_ADDR,
 			BITS_RX_BQ_WR_ADDR);/* logic write pointer */
@@ -751,7 +796,7 @@ static void higmac_bfproc_recv(unsigned long data)
 
 		rx_bq_desc = ld->rx_bq.desc + pos;
 
-		skb = rx_bq_desc->skb_buff_addr;
+		skb = ld->rx_skb[pos];
 		while (!skb) {
 			pr_err("rx_bq: desc consistent warning:");
 			pr_err("rx_bq_wr_offset = 0x%x, ", rx_bq_wr_offset);
@@ -767,7 +812,7 @@ static void higmac_bfproc_recv(unsigned long data)
 			 */
 			rx_bq_desc = ld->rx_bq.desc + pos;
 
-			skb = rx_bq_desc->skb_buff_addr;
+			skb = ld->rx_skb[pos];
 		}
 
 		/* data consistent check */
@@ -780,11 +825,7 @@ static void higmac_bfproc_recv(unsigned long data)
 		} else
 			ld->rx_fq.skb[pos] = NULL;
 
-#ifdef HIGMAC_TSO_SUPPORTED
-		rlen = rx_bq_desc->desc1.rx.data_len;
-#else
 		rlen = rx_bq_desc->data_len;
-#endif
 		dma_addr = rx_bq_desc->data_buff_addr;
 
 		dma_unmap_single(ld->dev, dma_addr, HIETH_MAX_FRAME_SIZE,
@@ -805,13 +846,13 @@ static void higmac_bfproc_recv(unsigned long data)
 #ifdef HIGMAC_RXCSUM_SUPPORTED
 		if (dev->features & NETIF_F_RXCSUM) {
 			int hdr_csum_done =
-				rx_bq_desc->desc1.rx.header_csum_done;
+				rx_bq_desc->header_csum_done;
 			int payload_csum_done =
-				rx_bq_desc->desc1.rx.payload_csum_done;
+				rx_bq_desc->payload_csum_done;
 			int hdr_csum_err =
-				rx_bq_desc->desc1.rx.header_csum_err;
+				rx_bq_desc->header_csum_err;
 			int payload_csum_err =
-				rx_bq_desc->desc1.rx.payload_csum_err;
+				rx_bq_desc->payload_csum_err;
 
 			if (hdr_csum_done && payload_csum_done) {
 				if (unlikely(hdr_csum_err ||
@@ -826,16 +867,12 @@ static void higmac_bfproc_recv(unsigned long data)
 		}
 #endif
 
+		napi_gro_receive(&ld->napi, skb);
 		dev->stats.rx_packets++;
 		dev->stats.rx_bytes += skb->len;
 		dev->last_rx = jiffies;
-
-		skb->dev = dev;
-		ret = netif_rx(skb);
-		if (ret)
-			dev->stats.rx_dropped++;
 next:
-		rx_bq_desc->skb_buff_addr = 0;
+		ld->rx_skb[pos] = NULL;
 
 		rx_bq_rd_offset += DESC_SIZE;
 		if (rx_bq_rd_offset >=
@@ -844,43 +881,70 @@ next:
 
 		higmac_writel_bits(ld, rx_bq_rd_offset, RX_BQ_RD_ADDR,
 				BITS_RX_BQ_RD_ADDR);
+		num++;
+		if (num >= limit)
+			break;
 	}
 	end = rx_bq_rd_offset >> DESC_BYTE_SHIFT;
 	if (debug(HW_RX_DESC))
 		pr_info("gmac%d reclaim skb[%d-%d)\n", ld->index, start, end);
 	higmac_feed_hw(ld);
-	spin_unlock_irqrestore(&ld->rxlock, flags);
+	spin_unlock(&ld->rxlock);
+
+	return num;
+}
+
+static int higmac_poll(struct napi_struct *napi, int budget)
+{
+	struct higmac_netdev_local *priv = container_of(napi,
+			struct higmac_netdev_local, napi);
+	struct net_device *dev = priv->netdev;
+	int work_done = 0, task = budget;
+	int ints, num;
+
+	do {
+		higmac_xmit_release_skb(priv);
+		num = higmac_rx(dev, task);
+		work_done += num;
+		task -= num;
+		if (work_done >= budget)
+			break;
+
+		ints = readl(priv->gmac_iobase + RAW_PMU_INT);
+		writel(ints, priv->gmac_iobase + RAW_PMU_INT);
+	} while (ints & DEF_INT_MASK);
+
+	if (work_done < budget) {
+		napi_complete(napi);
+		higmac_irq_enable(priv, DEF_INT_MASK);
+	}
+
+	return work_done;
 }
 
 static irqreturn_t hieth_net_isr(int irq, void *dev_id)
 {
 	/* TODO: remove debug code */
-	struct higmac_netdev_local *ld = get_netdev_local((int)dev_id);
+	struct net_device *ndev = (struct net_device *)dev_id;
+	struct higmac_netdev_local *ld = netdev_priv(ndev);
 	int ints;
-
-	higmac_irq_disable(ld, RX_BQ_IN_INT | RX_BQ_IN_TIMEOUT_INT
-				| TX_RQ_IN_INT | TX_RQ_IN_TIMEOUT_INT);
 
 	ints = higmac_read_irqstatus(ld);
 
 	if (debug(HW_IRQ))
 		pr_info("gmac%d irq status=0x%x\n", ld->index, ints);
 
-	if (likely(ints & (RX_BQ_IN_INT | RX_BQ_IN_TIMEOUT_INT |
-			TX_RQ_IN_INT | TX_RQ_IN_TIMEOUT_INT))) {
-		tasklet_schedule(&ld->bf_recv);
+	if (likely(ints & DEF_INT_MASK)) {
+		napi_schedule(&ld->napi);
 		higmac_clear_irqstatus(ld, ints);
-		ints &= ~(RX_BQ_IN_INT | RX_BQ_IN_TIMEOUT_INT
-				| TX_RQ_IN_INT | TX_RQ_IN_TIMEOUT_INT);
+		ints &= ~DEF_INT_MASK;
+		higmac_irq_disable(ld, DEF_INT_MASK);
 	}
 
 	if (unlikely(ints)) {
 		higmac_trace(7, "unknown ints=0x%.8x\n", ints);
 		higmac_clear_irqstatus(ld, ints);
 	}
-
-	higmac_irq_enable(ld, RX_BQ_IN_INT | RX_BQ_IN_TIMEOUT_INT
-				| TX_RQ_IN_INT | TX_RQ_IN_TIMEOUT_INT);
 
 #if	0	/* debug_pmt and eee */
 	ints = readl(ld->gmac_iobase + 0xa00);
@@ -903,16 +967,15 @@ static void higmac_monitor_func(unsigned long arg)
 {
 	struct net_device *dev = (struct net_device *)arg;
 	struct higmac_netdev_local *ld = netdev_priv(dev);
-	unsigned long flags;
 
 	if (!ld || !netif_running(dev)) {
 		higmac_trace(7, "network driver is stoped.");
 		return;
 	}
 
-	spin_lock_irqsave(&ld->rxlock, flags);
+	spin_lock(&ld->rxlock);
 	higmac_feed_hw(ld);
-	spin_unlock_irqrestore(&ld->rxlock, flags);
+	spin_unlock(&ld->rxlock);
 
 	ld->monitor.expires = jiffies + HIGMAC_MONITOR_TIMER;
 	mod_timer(&ld->monitor, ld->monitor.expires);
@@ -927,11 +990,11 @@ static int higmac_net_open(struct net_device *dev)
 	phy_start(ld->phy);
 
 	netif_carrier_off(dev);
+	napi_enable(&ld->napi);
 
 	higmac_hw_desc_enable(ld);
 	higmac_port_enable(ld);
-	higmac_irq_enable(ld, RX_BQ_IN_INT | RX_BQ_IN_TIMEOUT_INT
-				| TX_RQ_IN_INT | TX_RQ_IN_TIMEOUT_INT);
+	higmac_irq_enable(ld, DEF_INT_MASK);
 
 	spin_lock_irqsave(&ld->rxlock, flags);
 	higmac_feed_hw(ld);
@@ -949,9 +1012,10 @@ static int higmac_net_close(struct net_device *dev)
 {
 	struct higmac_netdev_local *ld = netdev_priv(dev);
 
-	higmac_irq_disable(ld, RX_BQ_IN_INT | RX_BQ_IN_TIMEOUT_INT
-				| TX_RQ_IN_INT | TX_RQ_IN_TIMEOUT_INT);
+	higmac_irq_disable(ld, DEF_INT_MASK);
 	higmac_hw_desc_disable(ld);
+
+	napi_disable(&ld->napi);
 
 	netif_carrier_off(dev);
 	netif_stop_queue(dev);
@@ -1357,12 +1421,8 @@ static int  higmac_dev_probe(struct platform_device *platdev)
 				higmac_board_info[i].macaddr.sa_data,
 				netdev[i]->addr_len);
 
-		/* init tasklet */
-		ld->bf_recv.next = NULL;
-		ld->bf_recv.state = 0;
-		ld->bf_recv.func = higmac_bfproc_recv;
-		ld->bf_recv.data = (unsigned long)netdev[i];
-		atomic_set(&ld->bf_recv.count, 0);
+		netif_napi_add(ld->netdev, &ld->napi, higmac_poll,
+				NAPI_POLL_WEIGHT);
 
 		init_timer(&ld->monitor);
 		ld->monitor.function = higmac_monitor_func;
@@ -1477,7 +1537,7 @@ static int  higmac_dev_probe(struct platform_device *platdev)
 
 		ret = request_irq(netdev[i]->irq, hieth_net_isr, 0,
 				higmac_board_info[ld->index].gmac_name,
-				(void *)ld->index);
+				ld->netdev);
 		if (ret) {
 			pr_err("request irq for gmac%d failed!\n", ld->index);
 			goto _error_request_irq;
@@ -1543,7 +1603,7 @@ _error_request_irq:
 		if (!ld->phy)
 			continue;
 
-		free_irq(netdev[i]->irq, (void *)ld->index);
+		free_irq(netdev[i]->irq, ld->netdev);
 		phy_disconnect(ld->phy);
 	}
 
@@ -1559,6 +1619,9 @@ _error_sg_desc_queue:
 _error_hw_desc_queue:
 	for_each_gmac_netdev_local_priv(ld, i)
 		higmac_destroy_hw_desc_queue(ld);
+
+	for_each_gmac_netdev_local_priv(ld, i)
+		netif_napi_del(&ld->napi);
 
 _error_alloc_netdev:
 	for (i = 0; i < CONFIG_GMAC_NUMS; i++) {
@@ -1591,10 +1654,10 @@ static int  higmac_dev_remove(struct platform_device *pdev)
 		ld = netdev_priv(netdev);
 
 		del_timer_sync(&ld->monitor);
-		tasklet_disable(&ld->bf_recv);
+		netif_napi_del(&ld->napi);
 
 		if (ld->phy) {
-			free_irq(netdev->irq, (void *)ld->index);
+			free_irq(netdev->irq, ld->netdev);
 			unregister_netdev(netdev);
 			phy_disconnect(ld->phy);
 		}
@@ -1661,7 +1724,7 @@ static int higmac_dev_suspend(struct platform_device *dev, pm_message_t state)
 		 * the stopped queue occasionally
 		 */
 		del_timer_sync(&ld->monitor);
-		tasklet_disable(&ld->bf_recv);
+		napi_disable(&ld->napi);
 		netif_device_detach(ld->netdev);
 
 		netif_carrier_off(ld->netdev);
@@ -1739,7 +1802,7 @@ static int higmac_dev_resume(struct platform_device *dev)
 		ld->monitor.expires = jiffies + HIGMAC_MONITOR_TIMER;
 		mod_timer(&ld->monitor, ld->monitor.expires);
 		ld->link_stat = DEFAULT_LINK_STAT;
-		tasklet_enable(&ld->bf_recv);
+		napi_enable(&ld->napi);
 		netif_device_attach(ld->netdev);
 		phy_start(ld->phy);
 		enable_irq(ld->netdev->irq);

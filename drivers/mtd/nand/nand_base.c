@@ -2832,7 +2832,11 @@ static void nand_decode_bbm_options(struct mtd_info *mtd,
 				 maf_id == NAND_MFR_HYNIX ||
 				 maf_id == NAND_MFR_TOSHIBA ||
 				 maf_id == NAND_MFR_AMD ||
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+				 maf_id == NAND_MFR_MXIC)) ||
+#else  
 				 maf_id == NAND_MFR_MACRONIX)) ||
+#endif  
 			(mtd->writesize == 2048 &&
 			 maf_id == NAND_MFR_MICRON))
 		chip->bbt_options |= NAND_BBT_SCAN2NDPAGE;

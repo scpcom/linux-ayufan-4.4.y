@@ -383,7 +383,6 @@ smb2_read_data_length(char *buf)
 	return le32_to_cpu(rsp->DataLength);
 }
 
-
 static int
 smb2_sync_read(const unsigned int xid, struct cifsFileInfo *cfile,
 	       struct cifs_io_parms *parms, unsigned int *bytes_read,
@@ -630,7 +629,6 @@ struct smb_version_operations smb21_operations = {
 	.calc_signature = smb2_calc_signature,
 	.dir_needs_close = smb2_dir_needs_close,
 };
-
 
 struct smb_version_operations smb30_operations = {
 	.compare_fids = smb2_compare_fids,

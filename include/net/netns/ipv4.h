@@ -43,8 +43,15 @@ struct netns_ipv4 {
 	struct inet_peer_base	*peers;
 	struct tcpm_hash_bucket	*tcp_metrics_hash;
 	unsigned int		tcp_metrics_hash_log;
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	// do nothing
+#else /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 	struct sock  * __percpu	*tcp_sk;
+#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 	struct netns_frags	frags;
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	// do nothing
+#else /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 #ifdef CONFIG_NETFILTER
 	struct xt_table		*iptable_filter;
 	struct xt_table		*iptable_mangle;
@@ -55,6 +62,7 @@ struct netns_ipv4 {
 #endif
 	struct xt_table		*nat_table;
 #endif
+#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 
 	int sysctl_icmp_echo_ignore_all;
 	int sysctl_icmp_echo_ignore_broadcasts;
@@ -83,5 +91,18 @@ struct netns_ipv4 {
 	struct fib_rules_ops	*mr_rules_ops;
 #endif
 #endif
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	struct sock  * __percpu	*tcp_sk;
+#ifdef CONFIG_NETFILTER
+	struct xt_table		*iptable_filter;
+	struct xt_table		*iptable_mangle;
+	struct xt_table		*iptable_raw;
+	struct xt_table		*arptable_filter;
+#ifdef CONFIG_SECURITY
+	struct xt_table		*iptable_security;
+#endif
+	struct xt_table		*nat_table;
+#endif
+#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 };
 #endif

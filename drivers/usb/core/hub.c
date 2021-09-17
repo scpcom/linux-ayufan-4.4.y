@@ -769,42 +769,55 @@ static int hub_port_disable(struct usb_hub *hub, int port1, int set_state)
 #endif  
 
 #if defined (MY_ABC_HERE)
+#if defined(MY_ABC_HERE)
  
-#define A38X_A38X_POWER_ON_TIME	(10)
-#define A38X_A38X_POWER_OFF_TIME	(1000)
+#define PLATFORM_USB_POWER_ON_TIME	(10)
+#define PLATFORM_USB_POWER_OFF_TIME	(1000)
  
 #define SYNO_HUB_POWER_CYCLE_EXTRA_DELAY_TIME	(14000)		 
+#elif defined(CONFIG_SYNO_HI3536)
+void syno_gpio_write(int gpio, int value);
+
+#define PLATFORM_USB_POWER_ON_TIME	(10)
+#define PLATFORM_USB_POWER_OFF_TIME	(200)
+#define SYNO_HUB_POWER_CYCLE_EXTRA_DELAY_TIME	(10000)		 
+#else
+#error "Must specify by-platform USB power parameters!"
+#endif
 
 static inline int get_vbus_gpio(struct usb_hcd *hcd, int port) {
-	 
-	if (0 <= hcd->vbus_gpio_pin) {
-		return hcd->vbus_gpio_pin;
+	if (0 <= hcd->vbus_gpio_pin[port]) {
+		return hcd->vbus_gpio_pin[port];
 	}
 	return -EINVAL;
 }
 
 static inline int
-syno_a38x_usb_set_power(struct usb_hcd *hcd, int enable, int port) {
+syno_usb_set_power(struct usb_hcd *hcd, int enable, int port) {
 	int usb_vbus_gpio = get_vbus_gpio(hcd, port);
 
 	if (0 <= usb_vbus_gpio) {
+#if defined(CONFIG_SYNO_HI3536)
+		syno_gpio_write(usb_vbus_gpio, enable);
+#else  
 		gpio_set_value(usb_vbus_gpio, enable);
+#endif  
 	} else {
 		return -EINVAL;
 	}
 	return 0;
 }
- 
+
 static inline unsigned int
-syno_get_a38x_power_off_time_ms(struct usb_hcd *hcd) {
-	unsigned int power_off_time = A38X_A38X_POWER_OFF_TIME;
+syno_get_usb_power_off_time_ms(struct usb_hcd *hcd) {
+	unsigned int power_off_time = PLATFORM_USB_POWER_OFF_TIME;
 	unsigned int power_off_extra_delay = SYNO_HUB_POWER_CYCLE_EXTRA_DELAY_TIME;
 	return power_off_time + power_off_extra_delay;
 }
 
 static inline unsigned int
-syno_get_a38x_power_on_time_ms(struct usb_hcd *hcd) {
-	return A38X_A38X_POWER_ON_TIME;
+syno_get_usb_power_on_time_ms(struct usb_hcd *hcd) {
+	return PLATFORM_USB_POWER_ON_TIME;
 }
 
 static int
@@ -822,24 +835,24 @@ __syno_usb_power_cycle(struct usb_hub *hub, int port) {
 	}
 	 
 	power_cycle_delay_time =
-		syno_get_a38x_power_off_time_ms(hcd);
+		syno_get_usb_power_off_time_ms(hcd);
 	dev_info(hub->intfdev,
 		"[%u/%u] Disabling USB power and waiting %u ms for port %d\n",
 		hub->ports[port - 1]->power_cycle_counter,
 		SYNO_POWER_CYCLE_TRIES,
 		power_cycle_delay_time, port);
-	ret = syno_a38x_usb_set_power(hcd, 0, port);
+	ret = syno_usb_set_power(hcd, 0, port);
 	if (0 > ret)
 		return -EINVAL;
 	msleep(power_cycle_delay_time);
 
-	power_cycle_delay_time = syno_get_a38x_power_on_time_ms(hcd);
+	power_cycle_delay_time = syno_get_usb_power_on_time_ms(hcd);
 	dev_info(hub->intfdev,
 		"[%u/%u] Enabling USB power and waiting %u ms for port %d\n",
 		hub->ports[port - 1]->power_cycle_counter,
 		SYNO_POWER_CYCLE_TRIES,
 		power_cycle_delay_time, port);
-	ret = syno_a38x_usb_set_power(hcd, 1, port);
+	ret = syno_usb_set_power(hcd, 1, port);
 	if (0 > ret)
 		return -EINVAL;
 	msleep(power_cycle_delay_time);
@@ -855,7 +868,11 @@ syno_usb_power_cycle(struct usb_hub *hub, int port, int status) {
 	if (hub->hdev->parent)
 		return -EINVAL;
 
+#if defined(CONFIG_SYNO_HI3536)
+	if (status == -ENODEV)
+#else  
 	if ((status == -ENODEV) || (status == -ENOTCONN))
+#endif  
 		return -EINVAL;
 
 	if (hcd->power_control_support) {
@@ -4622,8 +4639,26 @@ static void hub_events(void)
 					usb_lock_device(udev);
 					status = usb_reset_device(udev);
 					usb_unlock_device(udev);
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+					 
+#else  
 					connect_change = 0;
+#endif  
 				}
+
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+				ret = hub_port_status(hub, i,
+						&portstatus, &portchange);
+				if (ret < 0)
+					continue;
+
+				if ((portstatus & USB_PORT_STAT_CONNECTION) &&
+					!udev &&
+					(portstatus & USB_PORT_STAT_ENABLE))
+					connect_change = 1;
+				else
+					connect_change = 0;
+#endif  
 			}
 
 			if (connect_change)

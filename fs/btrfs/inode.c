@@ -3724,6 +3724,38 @@ out:
 	return err;
 }
 
+static int truncate_inline_extent(struct inode *inode,
+				  struct btrfs_path *path,
+				  struct btrfs_key *found_key,
+				  const u64 item_end,
+				  const u64 new_size)
+{
+	struct extent_buffer *leaf = path->nodes[0];
+	int slot = path->slots[0];
+	struct btrfs_file_extent_item *fi;
+	u32 size = (u32)(new_size - found_key->offset);
+	struct btrfs_root *root = BTRFS_I(inode)->root;
+
+	fi = btrfs_item_ptr(leaf, slot, struct btrfs_file_extent_item);
+
+	if (btrfs_file_extent_compression(leaf, fi) != BTRFS_COMPRESS_NONE) {
+		loff_t offset = new_size;
+		loff_t page_end = ALIGN(offset, PAGE_CACHE_SIZE);
+
+		btrfs_release_path(path);
+		return btrfs_truncate_page(inode, offset, page_end - offset, 0);
+	}
+
+	btrfs_set_file_extent_ram_bytes(leaf, fi, size);
+	size = btrfs_file_extent_calc_inline_size(size);
+	btrfs_truncate_item(root, path, size, 1);
+
+	if (test_bit(BTRFS_ROOT_REF_COWS, &root->state))
+		inode_sub_bytes(inode, item_end + 1 - new_size);
+
+	return 0;
+}
+
 int btrfs_truncate_inode_items(struct btrfs_trans_handle *trans,
 			       struct btrfs_root *root,
 			       struct inode *inode,
@@ -3879,23 +3911,35 @@ search_again:
 		} else if (extent_type == BTRFS_FILE_EXTENT_INLINE) {
 			 
 			if (!del_item &&
-			    btrfs_file_extent_compression(leaf, fi) == 0 &&
 			    btrfs_file_extent_encryption(leaf, fi) == 0 &&
 			    btrfs_file_extent_other_encoding(leaf, fi) == 0) {
-				u32 size = new_size - found_key.offset;
 
-				if (test_bit(BTRFS_ROOT_REF_COWS, &root->state))
-					inode_sub_bytes(inode, item_end + 1 -
-							new_size);
+				if (btrfs_file_extent_compression(leaf, fi) !=
+				    BTRFS_COMPRESS_NONE && pending_del_nr) {
+					err = btrfs_del_items(trans, root, path,
+							      pending_del_slot,
+							      pending_del_nr);
+					if (err) {
+						btrfs_abort_transaction(trans,
+									root,
+									err);
+						goto error;
+					}
+					pending_del_nr = 0;
+				}
 
-				btrfs_set_file_extent_ram_bytes(leaf, fi, size);
-				size =
-				    btrfs_file_extent_calc_inline_size(size);
-				btrfs_truncate_item(root, path, size, 1);
+				err = truncate_inline_extent(inode, path,
+							     &found_key,
+							     item_end,
+							     new_size);
+				if (err) {
+					btrfs_abort_transaction(trans,
+								root, err);
+					goto error;
+				}
 			} else if (test_bit(BTRFS_ROOT_REF_COWS,
 					    &root->state)) {
-				inode_sub_bytes(inode, item_end + 1 -
-						found_key.offset);
+				inode_sub_bytes(inode, item_end + 1 - new_size);
 			}
 		}
 delete:
@@ -4381,49 +4425,29 @@ static void evict_inode_truncate_pages(struct inode *inode)
 	while (!RB_EMPTY_ROOT(&io_tree->state)) {
 		struct extent_state *state;
 		struct extent_state *cached_state = NULL;
+		u64 start;
+		u64 end;
 
 		node = rb_first(&io_tree->state);
 		state = rb_entry(node, struct extent_state, rb_node);
-		atomic_inc(&state->refs);
-#ifdef MY_ABC_HERE
-		if (state->state & EXTENT_LOCKED) {
-			free_extent_state(state);
-#ifdef MY_ABC_HERE
-			 
-			if (unlikely(test_bit(BTRFS_FS_STATE_ERROR, &fs_info->fs_state))) {
-				rb_erase(node, &io_tree->state);
-				free_extent_state(state);
-				continue;
-			}
-#endif  
-			spin_unlock(&io_tree->lock);
-			schedule();
-			spin_lock(&io_tree->lock);
-			continue;
-		}
-		state->state |= EXTENT_LOCKED;
-		spin_unlock(&io_tree->lock);
-#else
 #ifdef MY_ABC_HERE
 		 
 		if (unlikely(test_bit(BTRFS_FS_STATE_ERROR, &fs_info->fs_state))) {
 			rb_erase(node, &io_tree->state);
 			free_extent_state(state);
-			free_extent_state(state);
 			continue;
 		}
 #endif  
+		start = state->start;
+		end = state->end;
 		spin_unlock(&io_tree->lock);
 
-		lock_extent_bits(io_tree, state->start, state->end,
-				 0, &cached_state);
-#endif  
-		clear_extent_bit(io_tree, state->start, state->end,
+		lock_extent_bits(io_tree, start, end, 0, &cached_state);
+		clear_extent_bit(io_tree, start, end,
 				 EXTENT_LOCKED | EXTENT_DIRTY |
 				 EXTENT_DELALLOC | EXTENT_DO_ACCOUNTING |
 				 EXTENT_DEFRAG, 1, 1,
 				 &cached_state, GFP_NOFS);
-		free_extent_state(state);
 
 		spin_lock(&io_tree->lock);
 	}
@@ -5076,7 +5100,7 @@ static int btrfs_real_readdir(struct file *filp, void *dirent,
 #ifdef MY_ABC_HERE
 			if (location.type == BTRFS_ROOT_ITEM_KEY) {
 				struct btrfs_root *subvol_root = btrfs_read_fs_root_no_name(root->fs_info, &location);
-				if (IS_ERR(subvol_root) || btrfs_root_hide(subvol_root)) {
+				if (!IS_ERR(subvol_root) && btrfs_root_hide(subvol_root)) {
 					over = 0;
 					goto skip;
 				}

@@ -171,20 +171,44 @@ struct fsnotify_event {
 
 	u32 sync_cookie;	 
 	const unsigned char *file_name;
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 #ifdef MY_ABC_HERE
 	const unsigned char *full_name;
 #endif
+#endif  
 	size_t name_len;
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 #ifdef MY_ABC_HERE
 	size_t full_name_len;
 #endif
+#endif  
 	struct pid *tgid;
 
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+	 
+#else  
 #ifdef CONFIG_FANOTIFY_ACCESS_PERMISSIONS
 	__u32 response;	 
 #endif  
+#endif  
 
 	struct list_head private_data_list;	 
+
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+#ifdef MY_ABC_HERE
+	const unsigned char *full_name;
+#endif
+#ifdef MY_ABC_HERE
+	size_t full_name_len;
+#endif
+#ifdef CONFIG_FANOTIFY_ACCESS_PERMISSIONS
+	__u32 response;	 
+#endif  
+#endif  
 };
 
 struct fsnotify_inode_mark {

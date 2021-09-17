@@ -1,11 +1,20 @@
-/******************************************************************************
- *    NAND Flash Controller V610 Device Driver
- *    Copyright (c) 2009-2010 by Hisilicon.
- *    All rights reserved.
- * ***
- *    Create By Czyong.
+/*
+ * Copyright (c) 2016 HiSilicon Technologies Co., Ltd.
  *
-******************************************************************************/
+ * This program is free software; you can redistribute  it and/or modify it
+ * under  the terms of  the GNU General Public License as published by the
+ * Free Software Foundation;  either version 2 of the  License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 
 #ifndef HINFCV610H
 #define HINFCV610H
@@ -40,6 +49,15 @@
 	#warning NOT config CONFIG_HINFC610_MAX_CHIP, \
 	used default value, maybe invalid.
 #endif /* CONFIG_HINFC610_MAX_CHIP */
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
+/*****************************************************************************/
+#define HINFC_ECC_ERR_NUM0_BUF0			0xa0
+#define HINFC_ECC_ERR_NUM1_BUF0			0xa4
+#define HINFC_ECC_ERR_NUM0_BUF1			0xa8
+#define HINFC_ECC_ERR_NUM1_BUF1			0xcc
+
+#define GET_ECC_ERR_NUM(_i, _reg)		(((_reg) >> ((_i) * 8)) & 0xff)
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 
 /*****************************************************************************/
 #define HINFC610_REG_BASE_ADDRESS_LEN                 (0x100)
