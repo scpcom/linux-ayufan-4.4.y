@@ -1,14 +1,11 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /* Freezer declarations */
 
 #ifndef FREEZER_H_INCLUDED
 #define FREEZER_H_INCLUDED
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #include <linux/debug_locks.h>
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 #include <linux/sched.h>
 #include <linux/wait.h>
 #include <linux/atomic.h>
@@ -52,15 +49,15 @@ extern int freeze_kernel_threads(void);
 extern void thaw_processes(void);
 extern void thaw_kernel_threads(void);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 /*
  * DO NOT ADD ANY NEW CALLERS OF THIS FUNCTION
  * If try_to_freeze causes a lockdep warning it means the caller may deadlock
  */
 static inline bool try_to_freeze_unsafe(void)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 static inline bool try_to_freeze(void)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 {
 	might_sleep();
 	if (likely(!freezing(current)))
@@ -68,14 +65,14 @@ static inline bool try_to_freeze(void)
 	return __refrigerator(false);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 static inline bool try_to_freeze(void)
 {
 	if (!(current->flags & PF_NOFREEZE))
 		debug_check_no_locks_held();
 	return try_to_freeze_unsafe();
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 extern bool freeze_task(struct task_struct *p);
 extern bool set_freezable(void);
@@ -138,7 +135,7 @@ static inline void freezer_count(void)
 	try_to_freeze();
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 /* DO NOT ADD ANY NEW CALLERS OF THIS FUNCTION */
 static inline void freezer_count_unsafe(void)
 {
@@ -146,7 +143,7 @@ static inline void freezer_count_unsafe(void)
 	smp_mb();
 	try_to_freeze_unsafe();
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 /**
  * freezer_should_skip - whether to skip a task when determining frozen
@@ -171,22 +168,22 @@ static inline bool freezer_should_skip(struct task_struct *p)
 	return p->flags & PF_FREEZER_SKIP;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 /*
  * These functions are intended to be used whenever you want allow a sleeping
  */
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 /*
  * These macros are intended to be used whenever you want allow a sleeping
  */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 /*
  * task to be frozen. Note that neither return any clear indication of
  * whether a freeze event happened while in this function.
  */
 
 /* Like schedule(), but should not block the freezer. */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 static inline void freezable_schedule(void)
 {
 	freezer_do_not_count();
@@ -261,7 +258,7 @@ static inline int freezable_schedule_hrtimeout_range(ktime_t *expires,
 	freezer_count();
 	return __retval;
 }
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 #define freezable_schedule()						\
 ({									\
 	freezer_do_not_count();						\
@@ -278,7 +275,7 @@ static inline int freezable_schedule_hrtimeout_range(ktime_t *expires,
 	freezer_count();						\
 	__retval;							\
 })
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 /*
  * Freezer-friendly wrappers around wait_event_interruptible(),
@@ -295,7 +292,7 @@ static inline int freezable_schedule_hrtimeout_range(ktime_t *expires,
 	__retval;							\
 })
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 /* DO NOT ADD ANY NEW CALLERS OF THIS FUNCTION */
 #define wait_event_freezekillable_unsafe(wq, condition)			\
 ({									\
@@ -333,7 +330,7 @@ static inline int freezable_schedule_hrtimeout_range(ktime_t *expires,
 	freezer_count();						\
 	__retval;							\
 })
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 #define wait_event_freezable(wq, condition)				\
 ({									\
 	int __retval;							\
@@ -360,7 +357,7 @@ static inline int freezable_schedule_hrtimeout_range(ktime_t *expires,
 	}								\
 	__retval;							\
 })
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 #else /* !CONFIG_FREEZER */
 static inline bool frozen(struct task_struct *p) { return false; }
@@ -383,25 +380,25 @@ static inline void set_freezable(void) {}
 
 #define freezable_schedule()  schedule()
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #define freezable_schedule_unsafe()  schedule()
 
 #define freezable_schedule_timeout(timeout)  schedule_timeout(timeout)
 
 #define freezable_schedule_timeout_interruptible(timeout)		\
 	schedule_timeout_interruptible(timeout)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 #define freezable_schedule_timeout_killable(timeout)			\
 	schedule_timeout_killable(timeout)
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #define freezable_schedule_timeout_killable_unsafe(timeout)		\
 	schedule_timeout_killable(timeout)
 
 #define freezable_schedule_hrtimeout_range(expires, delta, mode)	\
 	schedule_hrtimeout_range(expires, delta, mode)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 #define wait_event_freezable(wq, condition)				\
 		wait_event_interruptible(wq, condition)
@@ -409,18 +406,18 @@ static inline void set_freezable(void) {}
 #define wait_event_freezable_timeout(wq, condition, timeout)		\
 		wait_event_interruptible_timeout(wq, condition, timeout)
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #define wait_event_freezable_exclusive(wq, condition)			\
 		wait_event_interruptible_exclusive(wq, condition)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 #define wait_event_freezekillable(wq, condition)		\
 		wait_event_killable(wq, condition)
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #define wait_event_freezekillable_unsafe(wq, condition)			\
 		wait_event_killable(wq, condition)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 #endif /* !CONFIG_FREEZER */
 

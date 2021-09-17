@@ -153,7 +153,7 @@ struct scsi_host_template {
 
 	struct list_head legacy_hosts;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	u64 vendor_id;
 #endif  
 #ifdef MY_ABC_HERE
@@ -164,11 +164,16 @@ struct scsi_host_template {
 	 
 	int  (* syno_host_power_ctl)(struct Scsi_Host *host, u8 blPowerOn);
 #endif  
+
+	int  (* syno_set_dbg)(struct Scsi_Host *host, unsigned int uiDbglvl);
+	int  (* syno_get_dbg)(struct Scsi_Host *host, unsigned int *uiDbglvl);
+	int  (* syno_dbg_info)(struct Scsi_Host *host);
+
 #ifdef MY_ABC_HERE
 	int  syno_port_type;
 #endif  
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	 
 #else  
 	u64 vendor_id;
@@ -271,7 +276,7 @@ struct Scsi_Host {
 
 	unsigned eh_noresume:1;
 
-#if !defined(MY_DEF_HERE)
+#if !defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	 
 	unsigned no_write_same:1;
 #endif
@@ -310,7 +315,7 @@ struct Scsi_Host {
 
 	unsigned long hostdata[0]   
 		__attribute__ ((aligned (sizeof(unsigned long))));
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	 
 	unsigned no_write_same:1;
 #endif

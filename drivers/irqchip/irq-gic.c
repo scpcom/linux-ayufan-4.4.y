@@ -75,7 +75,7 @@ struct irq_chip gic_arch_extn = {
 
 static struct gic_chip_data gic_data[MAX_GIC_NR] __read_mostly;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
  
 struct gic_sgi_handle {
 	unsigned int irq;
@@ -280,7 +280,7 @@ static asmlinkage void __exception_irq_entry gic_handle_irq(struct pt_regs *regs
 		if (irqnr < 16) {
 			writel_relaxed(irqstat, cpu_base + GIC_CPU_EOI);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 			 
 			if ((irqnr == ipc_irq_handle.irq)
 				&& (ipc_irq_handle.handle)) {
@@ -367,7 +367,7 @@ static u8 gic_get_cpumask(struct gic_chip_data *gic)
 	return mask;
 }
 
-#if defined(MY_DEF_HERE) && \
+#if defined(CONFIG_SYNO_LSP_HI3536) && \
 	(defined(CONFIG_ARCH_HI3536) \
 	|| defined(CONFIG_ARCH_HI3521A) \
 	|| defined(CONFIG_ARCH_HI3531A))
@@ -868,8 +868,8 @@ void __init gic_init_bases(unsigned int gic_nr, int irq_start,
 	set_handle_irq(gic_handle_irq);
 
 	gic_chip.flags |= gic_arch_extn.flags;
-#if !defined(MY_DEF_HERE) || \
-	(defined(MY_DEF_HERE) && \
+#if !defined(CONFIG_SYNO_LSP_HI3536) || \
+	(defined(CONFIG_SYNO_LSP_HI3536) && \
 	 (defined(CONFIG_ARCH_HI3536) \
 	 || defined(CONFIG_ARCH_HI3521A) \
 	 || defined(CONFIG_ARCH_HI3531A)))

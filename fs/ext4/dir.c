@@ -18,10 +18,7 @@ static int is_dx_dir(struct inode *inode)
 	struct super_block *sb = inode->i_sb;
 
 #ifdef MY_ABC_HERE
-	if ((EXT4_SB(inode->i_sb)->s_es->s_syno_hash_magic != 
-		     cpu_to_le32(SYNO_HASH_MAGIC)) &&
-		!EXT4_HAS_COMPAT_FEATURE(inode->i_sb,
-		     EXT4_FEATURE_COMPAT_DIR_INDEX) &&
+	if (is_syno_ext(inode->i_sb) &&
 #else
 	if (EXT4_HAS_COMPAT_FEATURE(inode->i_sb,
 		     EXT4_FEATURE_COMPAT_DIR_INDEX) &&
@@ -163,12 +160,20 @@ static int ext4_readdir(struct file *filp,
 		if (!buffer_verified(bh) &&
 		    !ext4_dirent_csum_verify(inode,
 				(struct ext4_dir_entry *)bh->b_data)) {
+#ifdef MY_ABC_HERE
+			ext4_msg(inode->i_sb, KERN_CRIT,
+				" %s:%d: inode #%lu: block %lu: comm %s: "
+				"directory fails checksum at offset %llu\n",
+			    __func__, __LINE__, inode->i_ino, (unsigned long)0,
+				current->comm, (unsigned long long)filp->f_pos);
+#else
 			EXT4_ERROR_FILE(filp, 0, "directory fails checksum "
 					"at offset %llu",
 					(unsigned long long)filp->f_pos);
 			filp->f_pos += sb->s_blocksize - offset;
 			brelse(bh);
 			continue;
+#endif  
 		}
 		set_buffer_verified(bh);
 

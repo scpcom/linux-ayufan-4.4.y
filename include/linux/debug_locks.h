@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef __LINUX_DEBUG_LOCKING_H
 #define __LINUX_DEBUG_LOCKING_H
 
@@ -54,11 +51,11 @@ struct task_struct;
 extern void debug_show_all_locks(void);
 extern void debug_show_held_locks(struct task_struct *task);
 extern void debug_check_no_locks_freed(const void *from, unsigned long len);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 extern void debug_check_no_locks_held(void);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 extern void debug_check_no_locks_held(struct task_struct *task);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 #else
 static inline void debug_show_all_locks(void)
 {
@@ -74,11 +71,11 @@ debug_check_no_locks_freed(const void *from, unsigned long len)
 }
 
 static inline void
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 debug_check_no_locks_held(void)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 debug_check_no_locks_held(struct task_struct *task)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 {
 }
 #endif

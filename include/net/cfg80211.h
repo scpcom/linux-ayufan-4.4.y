@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef __NET_CFG80211_H
 #define __NET_CFG80211_H
 /*
@@ -2257,7 +2254,7 @@ struct cfg80211_ops {
  * enum wiphy_flags - wiphy capability flags
  *
  */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 /*
  * @WIPHY_FLAG_CUSTOM_REGULATORY:  tells us the driver for this device
  *	has its own custom regulatory domain and cannot identify the
@@ -2283,7 +2280,7 @@ struct cfg80211_ops {
  *	domain is set, and all other regulatory hints will be ignored
  *	until their own regulatory domain gets programmed.
  */
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 /*
  * @WIPHY_FLAG_CUSTOM_REGULATORY:  tells us the driver for this device
  * 	has its own custom regulatory domain and cannot identify the
@@ -2303,7 +2300,7 @@ struct cfg80211_ops {
  *	WIPHY_FLAG_CUSTOM_REGULATORY the inspected country IE power settings
  *	will be followed.
  */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 /*
  * @WIPHY_FLAG_DISABLE_BEACON_HINTS: enable this if your driver needs to ensure
  *	that passive scan flags and beaconing flags may not be lifted by
@@ -2501,7 +2498,7 @@ struct wiphy_wowlan_support {
 	const struct wiphy_wowlan_tcp_support *tcp;
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 /**
  * enum wiphy_vendor_command_flags - validation flags for vendor commands
  * @WIPHY_VENDOR_CMD_NEED_WDEV: vendor command requires wdev
@@ -2529,7 +2526,7 @@ struct wiphy_vendor_command {
 	int (*doit)(struct wiphy *wiphy, struct wireless_dev *wdev,
 		    const void *data, int data_len);
 };
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 /**
  * struct wiphy - wireless hardware description
@@ -2639,7 +2636,7 @@ struct wiphy_vendor_command {
  * @extended_capabilities_mask: mask of the valid values
  * @extended_capabilities_len: length of the extended capabilities
  */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 /*
  * @country_ie_pref: country IE processing preferences specified
  *	by enum nl80211_country_ie_pref
@@ -2648,7 +2645,7 @@ struct wiphy_vendor_command {
  * @vendor_events: array of vendor events supported by the hardware
  * @n_vendor_events: number of vendor events
  */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 struct wiphy {
 	/* assign these fields before you register the wiphy */
 
@@ -2717,9 +2714,9 @@ struct wiphy {
 	const u8 *extended_capabilities, *extended_capabilities_mask;
 	u8 extended_capabilities_len;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	u8 country_ie_pref;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	/* If multiple wiphys are registered and you're handed e.g.
 	 * a regular netdev with assigned ieee80211_ptr, you won't
@@ -2760,11 +2757,11 @@ struct wiphy {
 	const struct iw_handler_def *wext;
 #endif
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	const struct wiphy_vendor_command *vendor_commands;
 	const struct nl80211_vendor_cmd_info *vendor_events;
 	int n_vendor_commands, n_vendor_events;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	char priv[0] __aligned(NETDEV_ALIGN);
 };
@@ -3676,7 +3673,7 @@ void wiphy_rfkill_start_polling(struct wiphy *wiphy);
  */
 void wiphy_rfkill_stop_polling(struct wiphy *wiphy);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 /**
  * DOC: Vendor commands
  *
@@ -3791,7 +3788,7 @@ static inline void cfg80211_vendor_event(struct sk_buff *skb, gfp_t gfp)
 {
 	__cfg80211_send_event_skb(skb, gfp);
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 #ifdef CONFIG_NL80211_TESTMODE
 /**
@@ -3828,17 +3825,17 @@ static inline void cfg80211_vendor_event(struct sk_buff *skb, gfp_t gfp)
  *
  * Return: An allocated and pre-filled skb. %NULL if any errors happen.
  */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 static inline struct sk_buff *
 cfg80211_testmode_alloc_reply_skb(struct wiphy *wiphy, int approxlen)
 {
 	return __cfg80211_alloc_reply_skb(wiphy, NL80211_CMD_TESTMODE,
 					  NL80211_ATTR_TESTDATA, approxlen);
 }
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 struct sk_buff *cfg80211_testmode_alloc_reply_skb(struct wiphy *wiphy,
 						  int approxlen);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 /**
  * cfg80211_testmode_reply - send the reply skb
@@ -3852,14 +3849,14 @@ struct sk_buff *cfg80211_testmode_alloc_reply_skb(struct wiphy *wiphy,
  *
  * Return: An error code or 0 on success.
  */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 static inline int cfg80211_testmode_reply(struct sk_buff *skb)
 {
 	return cfg80211_vendor_cmd_reply(skb);
 }
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 int cfg80211_testmode_reply(struct sk_buff *skb);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 /**
  * cfg80211_testmode_alloc_event_skb - allocate testmode event
@@ -3882,7 +3879,7 @@ int cfg80211_testmode_reply(struct sk_buff *skb);
  *
  * Return: An allocated and pre-filled skb. %NULL if any errors happen.
  */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 static inline struct sk_buff *
 cfg80211_testmode_alloc_event_skb(struct wiphy *wiphy, int approxlen, gfp_t gfp)
 {
@@ -3890,10 +3887,10 @@ cfg80211_testmode_alloc_event_skb(struct wiphy *wiphy, int approxlen, gfp_t gfp)
 					  NL80211_ATTR_TESTDATA, -1,
 					  approxlen, gfp);
 }
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 struct sk_buff *cfg80211_testmode_alloc_event_skb(struct wiphy *wiphy,
 						  int approxlen, gfp_t gfp);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 /**
  * cfg80211_testmode_event - send the event
@@ -3905,14 +3902,14 @@ struct sk_buff *cfg80211_testmode_alloc_event_skb(struct wiphy *wiphy,
  * by cfg80211_testmode_alloc_event_skb(), as an event. It always
  * consumes it.
  */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 static inline void cfg80211_testmode_event(struct sk_buff *skb, gfp_t gfp)
 {
 	__cfg80211_send_event_skb(skb, gfp);
 }
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 void cfg80211_testmode_event(struct sk_buff *skb, gfp_t gfp);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 #define CFG80211_TESTMODE_CMD(cmd)	.testmode_cmd = (cmd),
 #define CFG80211_TESTMODE_DUMP(cmd)	.testmode_dump = (cmd),

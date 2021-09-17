@@ -2369,7 +2369,7 @@ static int prepare_ring(struct xhci_hcd *xhci, struct xhci_ring *ep_ring,
 	}
 
 	while (1) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 		if (room_on_ring(xhci, ep_ring, num_trbs)) {
 			union xhci_trb *trb = ep_ring->enqueue;
 			unsigned int usable = ep_ring->enq_seg->trbs +

@@ -379,7 +379,7 @@ static struct audit_entry *audit_data_to_entry(struct audit_rule_data *data,
 		f->lsm_str = NULL;
 		f->lsm_rule = NULL;
 
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE) || defined(CONFIG_SYNO_HI3536)
 		if ((f->type == AUDIT_LOGINUID) && (f->val == 4294967295U)) {
 #else  
 		if ((f->type == AUDIT_LOGINUID) && (f->val == 4294967295)) {

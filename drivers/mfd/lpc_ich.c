@@ -968,7 +968,7 @@ gpe0_done:
 	syno_gpio_init(dev);
 #ifdef MY_DEF_HERE
 	 
-	if (syno_is_hw_version(HW_DS415p)) {
+	if (syno_is_hw_version(HW_DS415p) || syno_is_hw_version(HW_RS1219p)) {
 		susWellGpio = 0x640000;
 	} else {
 		susWellGpio = 0x440000;

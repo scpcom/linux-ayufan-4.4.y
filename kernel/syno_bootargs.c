@@ -111,7 +111,7 @@ extern unsigned int gSynoCastratedXhcPortBitmap[CONFIG_SYNO_NUM_CASTRATED_XHC];
 #endif  
 
 #ifdef MY_DEF_HERE
-extern char gSynoUsbVbusHostAddr[CONFIG_SYNO_USB_VBUS_NUM_GPIO][13];
+extern char gSynoUsbVbusHostAddr[CONFIG_SYNO_USB_VBUS_NUM_GPIO][20];
 extern int gSynoUsbVbusPort[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
 extern unsigned gSynoUsbVbusGpp[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
 #endif  
@@ -487,7 +487,7 @@ static int __init early_opt_pci_slot(char *p)
 		if (',' ==  *ptr) {
 			index = 0;
 			gPciAddrNum ++;
-			if (PCI_ADDR_NUM_MAX >= gPciAddrNum){
+			if (PCI_ADDR_NUM_MAX <= gPciAddrNum){
 				goto FMT_ERR;
 			}
 		} else {

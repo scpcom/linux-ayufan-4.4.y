@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Copyright (C) 2012 ARM Ltd.
  *
@@ -95,8 +92,8 @@
 #define TCR_TG1_64K		(UL(1) << 30)
 #define TCR_IPS_40BIT		(UL(2) << 32)
 #define TCR_ASID16		(UL(1) << 36)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #define TCR_TBI0		(UL(1) << 37)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 #endif

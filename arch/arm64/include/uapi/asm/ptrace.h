@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Based on arch/arm/include/asm/ptrace.h
  *
@@ -26,9 +23,9 @@
 
 #include <asm/hwcap.h>
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #define PTRACE_SET_SYSCALL	23
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 /*
  * PSR bits

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  *  linux/arch/arm/kernel/iwmmxt.S
  *
@@ -65,15 +62,15 @@
  * lr  = undefined instr exit
  *
  */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
 /*
  * called from prefetch exception handler with interrupts enabled
  */
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 /*
  * called from prefetch exception handler with interrupts disabled
  */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 
 ENTRY(iwmmxt_task_enable)
 

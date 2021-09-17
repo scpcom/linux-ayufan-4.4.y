@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Low-level user helpers placed in the vectors page for AArch32.
  * Based on the kuser helpers in arch/arm/kernel/entry-armv.S.
@@ -31,9 +28,9 @@
  * See Documentation/arm/kernel_user_helpers.txt for formal definitions.
  */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #include <asm/unistd.h>
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	.align	5
 	.globl	__kuser_helper_start

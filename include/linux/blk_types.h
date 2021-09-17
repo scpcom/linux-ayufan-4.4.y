@@ -50,7 +50,7 @@ struct bio {
 	struct io_context	*bi_ioc;
 	struct cgroup_subsys_state *bi_css;
 #endif
-#if !defined(MY_DEF_HERE)
+#if !defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 #if defined(CONFIG_BLK_DEV_INTEGRITY)
 	struct bio_integrity_payload *bi_integrity;   
 #endif
@@ -65,7 +65,7 @@ struct bio {
 	struct bio_set		*bi_pool;
 
 	struct bio_vec		bi_inline_vecs[0];
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 #if defined(CONFIG_BLK_DEV_INTEGRITY)
 	struct bio_integrity_payload *bi_integrity;   
 #endif
@@ -165,7 +165,7 @@ enum rq_flag_bits {
 #define REQ_COMMON_MASK \
 	(REQ_WRITE | REQ_FAILFAST_MASK | REQ_SYNC | REQ_META | REQ_PRIO | \
 	 REQ_DISCARD | REQ_WRITE_SAME | REQ_NOIDLE | REQ_FLUSH | REQ_FUA | \
-	 REQ_SECURE)
+	 REQ_SECURE | REQ_NOMERGE)
 #define REQ_CLONE_MASK		REQ_COMMON_MASK
 
 #define BIO_NO_ADVANCE_ITER_MASK	(REQ_DISCARD|REQ_WRITE_SAME)

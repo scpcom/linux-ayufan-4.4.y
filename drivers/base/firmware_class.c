@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * firmware_class.c - Multi purpose firmware loading support
  *
@@ -30,9 +27,9 @@
 #include <linux/pm.h>
 #include <linux/suspend.h>
 #include <linux/syscore_ops.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #include <linux/reboot.h>
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 #include <generated/utsrelease.h>
 
@@ -136,9 +133,9 @@ struct firmware_buf {
 	struct page **pages;
 	int nr_pages;
 	int page_array_size;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	struct list_head pending_list;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 #endif
 	char fw_id[];
 };
@@ -180,11 +177,11 @@ static struct firmware_buf *__allocate_fw_buf(const char *fw_name,
 	strcpy(buf->fw_id, fw_name);
 	buf->fwc = fwc;
 	init_completion(&buf->completion);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_FW_LOADER_USER_HELPER
 	INIT_LIST_HEAD(&buf->pending_list);
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	pr_debug("%s: fw-%s buf=%p\n", __func__, fw_name, buf);
 
@@ -460,7 +457,7 @@ static struct firmware_priv *to_firmware_priv(struct device *dev)
 	return container_of(dev, struct firmware_priv, dev);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 static void __fw_load_abort(struct firmware_buf *buf)
 {
 	/*
@@ -484,7 +481,7 @@ static void fw_load_abort(struct firmware_priv *fw_priv)
 	/* avoid user action after loading abort */
 	fw_priv->buf = NULL;
 }
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 static void fw_load_abort(struct firmware_priv *fw_priv)
 {
 	struct firmware_buf *buf = fw_priv->buf;
@@ -502,12 +499,12 @@ static void fw_load_abort(struct firmware_priv *fw_priv)
 	/* avoid user action after loading abort */
 	fw_priv->buf = NULL;
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 #define is_fw_load_aborted(buf)	\
 	test_bit(FW_STATUS_ABORT, &(buf)->status)
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 static LIST_HEAD(pending_fw_head);
 
 /* reboot notifier for avoid deadlock with usermode_lock */
@@ -526,7 +523,7 @@ static int fw_shutdown_notify(struct notifier_block *unused1,
 static struct notifier_block fw_shutdown_nb = {
 	.notifier_call = fw_shutdown_notify,
 };
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 static ssize_t firmware_timeout_show(struct class *class,
 				     struct class_attribute *attr,
@@ -690,9 +687,9 @@ static ssize_t firmware_loading_store(struct device *dev,
 			 * is completed.
 			 * */
 			fw_map_pages_buf(fw_buf);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 			list_del_init(&fw_buf->pending_list);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 			complete_all(&fw_buf->completion);
 			break;
 		}
@@ -927,19 +924,19 @@ static int _request_firmware_load(struct firmware_priv *fw_priv, bool uevent,
 		goto err_del_dev;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	mutex_lock(&fw_lock);
 	list_add(&buf->pending_list, &pending_fw_head);
 	mutex_unlock(&fw_lock);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	retval = device_create_file(f_dev, &dev_attr_loading);
 	if (retval) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 		mutex_lock(&fw_lock);
 		list_del_init(&buf->pending_list);
 		mutex_unlock(&fw_lock);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		dev_err(f_dev, "%s: device_create_file failed\n", __func__);
 		goto err_del_bin_attr;
 	}
@@ -1614,9 +1611,9 @@ static int __init firmware_class_init(void)
 {
 	fw_cache_init();
 #ifdef CONFIG_FW_LOADER_USER_HELPER
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	register_reboot_notifier(&fw_shutdown_nb);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	return class_register(&firmware_class);
 #else
 	return 0;
@@ -1630,9 +1627,9 @@ static void __exit firmware_class_exit(void)
 	unregister_pm_notifier(&fw_cache.pm_notify);
 #endif
 #ifdef CONFIG_FW_LOADER_USER_HELPER
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	unregister_reboot_notifier(&fw_shutdown_nb);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	class_unregister(&firmware_class);
 #endif
 }

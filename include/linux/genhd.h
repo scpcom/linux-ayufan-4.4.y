@@ -178,7 +178,7 @@ struct gendisk {
 	struct timer_rand_state *random;
 	atomic_t sync_io;		 
 	struct disk_events *ev;
-#if !defined(MY_DEF_HERE)
+#if !defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 #ifdef  CONFIG_BLK_DEV_INTEGRITY
 	struct blk_integrity *integrity;
 #endif
@@ -187,7 +187,7 @@ struct gendisk {
 #ifdef MY_ABC_HERE
 	int systemDisk;
 #endif  
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 #ifdef  CONFIG_BLK_DEV_INTEGRITY
 	struct blk_integrity *integrity;
 #endif
@@ -560,7 +560,7 @@ struct unixware_disklabel {
 #define ADDPART_FLAG_NONE	0
 #define ADDPART_FLAG_RAID	1
 #define ADDPART_FLAG_WHOLEDISK	2
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #define ADDPART_FLAG_READONLY   4
 #endif  
 

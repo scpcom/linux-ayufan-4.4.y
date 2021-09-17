@@ -41,9 +41,17 @@
 #include "libata-transport.h"
 
 #ifdef MY_DEF_HERE
+#ifdef MY_ABC_HERE
+#define ATA_PORT_ATTRS		4
+#else /* MY_ABC_HERE */
 #define ATA_PORT_ATTRS		3
+#endif /* MY_ABC_HERE */
 #else /* MY_DEF_HERE */
+#ifdef MY_ABC_HERE
+#define ATA_PORT_ATTRS		3
+#else /* MY_ABC_HERE */
 #define ATA_PORT_ATTRS		2
+#endif /* MY_ABC_HERE */
 #endif /* MY_DEF_HERE */
 
 #define ATA_LINK_ATTRS		3
@@ -227,6 +235,9 @@ ata_port_simple_attr(stats.idle_irq, idle_irq, "%ld\n", unsigned long);
 #ifdef MY_DEF_HERE
 ata_port_simple_attr(local_port_no, port_no, "%u\n", unsigned int);
 #endif /* MY_DEF_HERE */
+#ifdef MY_ABC_HERE
+ata_port_simple_attr(error_handling, error_handling, "%u\n", unsigned int);
+#endif /* MY_ABC_HERE */
 
 static DECLARE_TRANSPORT_CLASS(ata_port_class,
 			       "ata_port", NULL, NULL, NULL);
@@ -723,6 +734,9 @@ struct scsi_transport_template *ata_attach_transport(void)
 #ifdef MY_DEF_HERE
 	SETUP_PORT_ATTRIBUTE(port_no);
 #endif /* MY_DEF_HERE */
+#ifdef MY_ABC_HERE
+	SETUP_PORT_ATTRIBUTE(error_handling);
+#endif /* MY_ABC_HERE */
 	BUG_ON(count > ATA_PORT_ATTRS);
 	i->port_attrs[count] = NULL;
 

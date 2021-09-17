@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * linux/include/linux/sunrpc/svc.h
  *
@@ -18,6 +21,10 @@
 #include <linux/sunrpc/svcauth.h>
 #include <linux/wait.h>
 #include <linux/mm.h>
+#ifdef MY_ABC_HERE
+#include <linux/atomic.h>
+#include <linux/hrtimer.h>
+#endif
 
 /*
  * This is the RPC server thread function prototype
@@ -214,6 +221,26 @@ static inline void svc_putu32(struct kvec *iov, __be32 val)
 	iov->iov_len += sizeof(__be32);
 }
 
+#ifdef MY_ABC_HERE
+struct svc_lat {
+	atomic64_t accu;	// accumulated latency (us)
+	atomic_t max;		// max latency (us)
+};
+
+static inline bool svc_update_lat(struct svc_lat *lat, ktime_t start)
+{
+	s64 diff = ktime_to_us(ktime_sub(ktime_get(), start));
+	atomic64_add(diff, &lat->accu);
+
+	if (atomic_read(&lat->max) < diff) {
+		/* TODO: if we need a spinlock here? */
+		atomic_set(&lat->max, (int)diff);
+		return true;
+	}
+	return false;
+}
+#endif /* MY_ABC_HERE */
+
 /*
  * The context of a single thread, including the request currently being
  * processed.
@@ -278,6 +305,9 @@ struct svc_rqst {
 						 * cache pages */
 	wait_queue_head_t	rq_wait;	/* synchronization */
 	struct task_struct	*rq_task;	/* service thread */
+#ifdef MY_ABC_HERE
+	ktime_t			rq_stime;	/* start time */
+#endif
 };
 
 #define SVC_NET(svc_rqst)	(svc_rqst->rq_xprt->xpt_net)
@@ -411,6 +441,9 @@ struct svc_procedure {
 	unsigned int		pc_count;	/* call count */
 	unsigned int		pc_cachetype;	/* cache info (NFS) */
 	unsigned int		pc_xdrressize;	/* maximum size of XDR reply */
+#ifdef MY_ABC_HERE
+	struct svc_lat		pc_latency;	/* latency record */
+#endif
 };
 
 /*

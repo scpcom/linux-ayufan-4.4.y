@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * OHCI HCD (Host Controller Driver) for USB.
  *
@@ -44,13 +41,13 @@ finish_urb(struct ohci_hcd *ohci, struct urb *urb, int status)
 __releases(ohci->lock)
 __acquires(ohci->lock)
 {
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(CONFIG_SYNO_HI3536)
 	// do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_HI3536 */
 	struct device *dev = ohci_to_hcd(ohci)->self.controller;
-#endif /* MY_DEF_HERE */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_HI3536 */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	struct usb_host_endpoint *ep = urb->ep;
 	struct urb_priv *urb_priv;
 

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Functions for working with the Flattened Device Tree data format
  *
@@ -664,7 +661,7 @@ int __init early_init_dt_scan_memory(unsigned long node, const char *uname,
 	return 0;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 /*
  * Convert configs to something easy to use in C code
  */
@@ -687,33 +684,33 @@ static const char *config_cmdline = CONFIG_CMDLINE;
 #else
 static const char *config_cmdline = "";
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 int __init early_init_dt_scan_chosen(unsigned long node, const char *uname,
 				     int depth, void *data)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	unsigned long l = 0;
 	char *p = NULL;
 	char *cmdline = data;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	unsigned long l;
 	char *p;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	pr_debug("search \"chosen\", depth: %d, uname: %s\n", depth, uname);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	if (depth != 1 || !cmdline ||
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	if (depth != 1 || !data ||
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	    (strcmp(uname, "chosen") != 0 && strcmp(uname, "chosen@0") != 0))
 		return 0;
 
 	early_init_dt_check_for_initrd(node);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	/* Put CONFIG_CMDLINE in if forced or if data had nothing in it to start */
 	if (overwrite_incoming_cmdline || !cmdline[0])
 		strlcpy(cmdline, config_cmdline, COMMAND_LINE_SIZE);
@@ -736,7 +733,7 @@ int __init early_init_dt_scan_chosen(unsigned long node, const char *uname,
 			strlcpy(cmdline, p, min((int)l, COMMAND_LINE_SIZE));
 		}
 	}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	/* Retrieve command line */
 	p = of_get_flat_dt_prop(node, "bootargs", &l);
 	if (p != NULL && l > 0)
@@ -753,7 +750,7 @@ int __init early_init_dt_scan_chosen(unsigned long node, const char *uname,
 #endif
 		strlcpy(data, CONFIG_CMDLINE, COMMAND_LINE_SIZE);
 #endif /* CONFIG_CMDLINE */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	pr_debug("Command line is: %s\n", (char*)data);
 

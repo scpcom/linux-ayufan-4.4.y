@@ -23,7 +23,7 @@
 
 #include "cpufreq_governor.h"
 
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_LSP_HI3536)
  
 #else  
 static struct kobject *get_governor_parent_kobj(struct cpufreq_policy *policy)
@@ -417,7 +417,7 @@ int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 
 		mutex_lock(&dbs_data->mutex);
 		mutex_destroy(&cpu_cdbs->timer_mutex);
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_LSP_HI3536)
 		cpu_cdbs->cur_policy = NULL;
 #endif  
 

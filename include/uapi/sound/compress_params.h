@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  *  compress_params.h - codec types and parameters for compressed data
  *  streaming interface
@@ -60,9 +57,9 @@
 #define MAX_NUM_CODECS 32
 #define MAX_NUM_CODEC_DESCRIPTORS 32
 #define MAX_NUM_BITRATES 32
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #define MAX_NUM_SAMPLE_RATES 32
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 /* Codecs are listed linearly to allow for extensibility */
 #define SND_AUDIOCODEC_PCM                   ((__u32) 0x00000001)
@@ -331,16 +328,16 @@ union snd_codec_options {
 /** struct snd_codec_desc - description of codec capabilities
  * @max_ch: Maximum number of audio channels
  */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 /*
  * @sample_rates: Sampling rates in Hz, use values like 48000 for this
  * @num_sample_rates: Number of valid values in sample_rates array
  */
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 /*
  * @sample_rates: Sampling rates in Hz, use SNDRV_PCM_RATE_xxx for this
  */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 /*
  * @bit_rate: Indexed array containing supported bit rates
  * @num_bitrates: Number of valid values in bit_rate array
@@ -363,12 +360,12 @@ union snd_codec_options {
 
 struct snd_codec_desc {
 	__u32 max_ch;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	__u32 sample_rates[MAX_NUM_SAMPLE_RATES];
 	__u32 num_sample_rates;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	__u32 sample_rates;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	__u32 bit_rate[MAX_NUM_BITRATES];
 	__u32 num_bitrates;
 	__u32 rate_control;
@@ -387,16 +384,16 @@ struct snd_codec_desc {
  *		this field and the channelMode field, the channelMode field
  *		overrides.
  */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 /*
  * @sample_rate: Audio sample rate of input data in Hz, use values like 48000
  *		for this.
  */
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 /*
  * @sample_rate: Audio sample rate of input data
  */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 /*
  * @bit_rate: Bitrate of encoded data. May be ignored by decoders
  * @rate_control: Encoding rate control. See SND_RATECONTROLMODE defines.

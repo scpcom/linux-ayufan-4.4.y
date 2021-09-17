@@ -38,6 +38,13 @@ struct r1conf {
 	int			nr_queued;
 	int			barrier;
 
+#ifdef MY_ABC_HERE
+	int                     flush_threshold;
+#endif  
+#ifdef MY_ABC_HERE
+	int                     read_target;
+#endif  
+
 	int			fullsync;
 
 	int			recovery_disabled;

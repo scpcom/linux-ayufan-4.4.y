@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Resizable virtual memory filesystem for Linux.
  *
@@ -88,18 +85,18 @@ static struct vfsmount *shm_mnt;
  * a time): we would prefer not to enlarge the shmem inode just for that.
  */
 struct shmem_falloc {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	// do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 	wait_queue_head_t *waitq; /* faults into hole wait for punch to end */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 	pgoff_t start;		/* start of range currently being fallocated */
 	pgoff_t next;		/* the next page offset to be fallocated */
 	pgoff_t nr_falloced;	/* how many new pages have been fallocated */
 	pgoff_t nr_unswapped;	/* how often writepage refused to swap out */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	wait_queue_head_t *waitq; /* faults into hole wait for punch to end */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 };
 
 /* Flag allocation requirements to shmem_getpage */
@@ -3038,7 +3035,7 @@ put_memory:
 }
 EXPORT_SYMBOL_GPL(shmem_file_setup);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 void shmem_set_file(struct vm_area_struct *vma, struct file *file)
 {
 	if (vma->vm_file)
@@ -3046,7 +3043,7 @@ void shmem_set_file(struct vm_area_struct *vma, struct file *file)
 	vma->vm_file = file;
 	vma->vm_ops = &shmem_vm_ops;
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 /**
  * shmem_zero_setup - setup a shared anonymous mapping
@@ -3061,14 +3058,14 @@ int shmem_zero_setup(struct vm_area_struct *vma)
 	if (IS_ERR(file))
 		return PTR_ERR(file);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	shmem_set_file(vma, file);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	if (vma->vm_file)
 		fput(vma->vm_file);
 	vma->vm_file = file;
 	vma->vm_ops = &shmem_vm_ops;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	return 0;
 }
 

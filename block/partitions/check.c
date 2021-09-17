@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  *  fs/partitions/check.c
  *
@@ -37,9 +34,9 @@
 #include "efi.h"
 #include "karma.h"
 #include "sysv68.h"
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #include "cmdline.h"
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 int warn_no_part = 1; /*This is ugly: should make genhd removable media aware*/
 
@@ -71,11 +68,11 @@ static int (*check_part[])(struct parsed_partitions *) = {
 	adfspart_check_ADFS,
 #endif
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_CMDLINE_PARTITION
 	cmdline_partition,
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 #ifdef CONFIG_EFI_PARTITION
 	efi_partition,		/* this must come before msdos */
 #endif

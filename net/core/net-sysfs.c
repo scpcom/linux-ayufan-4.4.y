@@ -148,9 +148,15 @@ static ssize_t show_speed(struct device *dev,
 		return restart_syscall();
 
 	if (netif_running(netdev)) {
+#if defined(MY_ABC_HERE)
+		struct ethtool_link_ksettings cmd;
+		if (!__ethtool_get_link_ksettings(netdev, &cmd))
+			ret = sprintf(buf, fmt_dec, cmd.base.speed);
+#else  
 		struct ethtool_cmd cmd;
 		if (!__ethtool_get_settings(netdev, &cmd))
-			ret = sprintf(buf, fmt_udec, ethtool_cmd_speed(&cmd));
+			ret = sprintf(buf, fmt_dec, ethtool_cmd_speed(&cmd));
+#endif  
 	}
 	rtnl_unlock();
 	return ret;
@@ -166,6 +172,26 @@ static ssize_t show_duplex(struct device *dev,
 		return restart_syscall();
 
 	if (netif_running(netdev)) {
+#if defined(MY_ABC_HERE)
+		struct ethtool_link_ksettings cmd;
+
+		if (!__ethtool_get_link_ksettings(netdev, &cmd)) {
+			const char *duplex;
+
+			switch (cmd.base.duplex) {
+			case DUPLEX_HALF:
+				duplex = "half";
+				break;
+			case DUPLEX_FULL:
+				duplex = "full";
+				break;
+			default:
+				duplex = "unknown";
+				break;
+			}
+			ret = sprintf(buf, "%s\n", duplex);
+		}
+#else  
 		struct ethtool_cmd cmd;
 		if (!__ethtool_get_settings(netdev, &cmd)) {
 			const char *duplex;
@@ -182,6 +208,7 @@ static ssize_t show_duplex(struct device *dev,
 			}
 			ret = sprintf(buf, "%s\n", duplex);
 		}
+#endif  
 	}
 	rtnl_unlock();
 	return ret;

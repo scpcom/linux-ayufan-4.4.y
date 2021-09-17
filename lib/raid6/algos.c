@@ -52,7 +52,7 @@ const struct raid6_calls * const raid6_algos[] = {
 	&raid6_altivec4,
 	&raid6_altivec8,
 #endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
 #if defined(CONFIG_TILEGX)
 	&raid6_tilegx8,
 #endif
@@ -61,7 +61,7 @@ const struct raid6_calls * const raid6_algos[] = {
 	&raid6_intx2,
 	&raid6_intx4,
 	&raid6_intx8,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
 #ifdef CONFIG_KERNEL_MODE_NEON
 	&raid6_neonx1,
 	&raid6_neonx2,

@@ -1,15 +1,12 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef _CRYPTO_XTS_H
 #define _CRYPTO_XTS_H
 
 #include <crypto/b128ops.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
 #include <linux/crypto.h>
 #include <crypto/algapi.h>
 #include <linux/fips.h>
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 
 struct scatterlist;
 struct blkcipher_desc;
@@ -32,7 +29,7 @@ int xts_crypt(struct blkcipher_desc *desc, struct scatterlist *dst,
 	      struct scatterlist *src, unsigned int nbytes,
 	      struct xts_crypt_req *req);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
 static inline int xts_check_key(struct crypto_tfm *tfm,
 				const u8 *key, unsigned int keylen)
 {
@@ -56,6 +53,6 @@ static inline int xts_check_key(struct crypto_tfm *tfm,
 
 	return 0;
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 
 #endif  /* _CRYPTO_XTS_H */

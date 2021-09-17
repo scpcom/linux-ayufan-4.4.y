@@ -16,7 +16,7 @@
 #include <linux/regulator/consumer.h>
 #include <linux/clk.h>
 #include <linux/slab.h>
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_HI3536)
 #include <linux/regmap.h>
 #endif  
 #include <sound/core.h>
@@ -800,7 +800,7 @@ static int is_connected_output_ep(struct snd_soc_dapm_widget *widget,
 		if (path->walked)
 			continue;
 
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_HI3536)
 		 
 #else  
 		trace_snd_soc_dapm_output_path(widget, path);
@@ -902,7 +902,7 @@ static int is_connected_input_ep(struct snd_soc_dapm_widget *widget,
 		if (path->walked)
 			continue;
 
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_HI3536)
 		 
 #else  
 		trace_snd_soc_dapm_input_path(widget, path);
@@ -954,7 +954,7 @@ int snd_soc_dapm_dai_get_connected_widgets(struct snd_soc_dai *dai, int stream,
 				      &dai->capture_widget->sources);
 	}
 
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_HI3536)
 	 
 #else  
 	trace_snd_soc_dapm_connected(paths, stream);

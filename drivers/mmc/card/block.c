@@ -20,7 +20,7 @@
 #include <linux/capability.h>
 #include <linux/compat.h>
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #define CREATE_TRACE_POINTS
 #include <trace/events/mmc.h>
 #endif  
@@ -139,7 +139,7 @@ static struct mmc_blk_data *mmc_blk_get(struct gendisk *disk)
 
 static inline int mmc_get_devidx(struct gendisk *disk)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	int devidx = disk->first_minor / perdev_minors;
 #else  
 	int devmaj = MAJOR(disk_devt(disk));
@@ -564,7 +564,7 @@ cmd_err:
 	return err;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 static int mmc_blk_erase_cmd(struct block_device *bdev, void __user *arg)
 {
 	int err = 0;
@@ -621,7 +621,7 @@ static int mmc_blk_ioctl(struct block_device *bdev, fmode_t mode,
 {
 	int ret = -EINVAL;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	switch (cmd) {
 	case MMC_IOC_CMD:
 		ret = mmc_blk_ioctl_cmd(bdev, (struct mmc_ioc_cmd __user *)arg);
@@ -788,7 +788,7 @@ static int mmc_blk_cmd_error(struct request *req, const char *name, int error,
 		pr_err("%s: %s sending %s command, card status %#x\n",
 			req->rq_disk->disk_name, "timed out", name, status);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 		if (!status_valid) {
 			pr_err("%s: status not valid, retrying timeout\n", req->rq_disk->disk_name);
 			return ERR_RETRY;
@@ -798,7 +798,7 @@ static int mmc_blk_cmd_error(struct request *req, const char *name, int error,
 			return ERR_RETRY;
 #endif  
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 		if (status & (R1_COM_CRC_ERROR | R1_ILLEGAL_COMMAND)) {
 			pr_err("%s: command error, retrying timeout\n", req->rq_disk->disk_name);
 			return ERR_RETRY;
@@ -1074,7 +1074,7 @@ retry:
 
 #ifdef MY_DEF_HERE
 	 
-#elif defined(MY_DEF_HERE)
+#elif defined(CONFIG_SYNO_LSP_HI3536)
 	if (mmc_can_sanitize(card)) {
 		trace_mmc_blk_erase_start(EXT_CSD_SANITIZE_START, 0, 0);
 		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
@@ -1886,7 +1886,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
 	unsigned long flags;
 	unsigned int cmd_flags = req ? req->cmd_flags : 0;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_MMC_BLOCK_DEFERRED_RESUME
 	if (mmc_bus_needs_resume(card->host))
 		mmc_resume_bus(card->host);
@@ -2000,7 +2000,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
 	md->disk->queue = md->queue.queue;
 	md->disk->driverfs_dev = parent;
 	set_disk_ro(md->disk, md->read_only || default_ro);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	md->disk->flags = GENHD_FL_EXT_DEVT;
 #endif  
 	if (area_type & MMC_BLK_DATA_AREA_RPMB)
@@ -2123,7 +2123,7 @@ static void mmc_blk_remove_req(struct mmc_blk_data *md)
 	struct mmc_card *card;
 
 	if (md) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 		 
 		mmc_cleanup_queue(&md->queue);
 		if (md->flags & MMC_BLK_PACKED_CMD)
@@ -2140,7 +2140,7 @@ static void mmc_blk_remove_req(struct mmc_blk_data *md)
 			del_gendisk(md->disk);
 		}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 		 
 #else  
 		 
@@ -2285,7 +2285,7 @@ static int mmc_blk_probe(struct mmc_card *card)
 	mmc_set_drvdata(card, md);
 	mmc_fixup_device(card, blk_fixups);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_MMC_BLOCK_DEFERRED_RESUME
 	mmc_set_bus_resume_policy(card->host, 1);
 #endif
@@ -2315,14 +2315,14 @@ static void mmc_blk_remove(struct mmc_card *card)
 	mmc_release_host(card->host);
 	mmc_blk_remove_req(md);
 	mmc_set_drvdata(card, NULL);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_MMC_BLOCK_DEFERRED_RESUME
 	mmc_set_bus_resume_policy(card->host, 0);
 #endif
 #endif  
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 static int _mmc_blk_suspend(struct mmc_card *card)
 {
 	struct mmc_blk_data *part_md;
@@ -2360,7 +2360,7 @@ static int mmc_blk_suspend(struct mmc_card *card)
 #endif  
 
 #ifdef CONFIG_PM
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 static int mmc_blk_suspend(struct mmc_card *card)
 {
 	return _mmc_blk_suspend(card);
@@ -2395,7 +2395,7 @@ static struct mmc_driver mmc_driver = {
 	.remove		= mmc_blk_remove,
 	.suspend	= mmc_blk_suspend,
 	.resume		= mmc_blk_resume,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	.shutdown	= mmc_blk_shutdown,
 #endif  
 };

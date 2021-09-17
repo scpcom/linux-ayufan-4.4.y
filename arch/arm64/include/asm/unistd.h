@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Copyright (C) 2012 ARM Ltd.
  *
@@ -29,7 +26,7 @@
 #define __ARCH_WANT_SYS_FORK
 #define __ARCH_WANT_SYS_VFORK
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 /*
  * Compat syscall numbers used by the AArch64 kernel.
  */
@@ -48,7 +45,7 @@
 #define __ARM_NR_compat_set_tls		(__ARM_NR_COMPAT_BASE+5)
 
 #define __NR_compat_syscalls		384
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 #endif
 
 #define __ARCH_WANT_SYS_CLONE

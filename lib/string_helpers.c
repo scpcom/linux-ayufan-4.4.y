@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Helpers for formatting and printing strings
  *
@@ -203,7 +200,7 @@ int string_unescape(char *src, char *dst, size_t size, unsigned int flags)
 }
 EXPORT_SYMBOL(string_unescape);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 char *ultohstr(u64 size, char *str, int len)
 {
 	char *unit = "";
@@ -244,4 +241,4 @@ char *ultohstr(u64 size, char *str, int len)
 	return str;
 }
 EXPORT_SYMBOL(ultohstr);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * ring buffer based function tracer
  *
@@ -733,9 +730,9 @@ static const char *trace_options[] = {
 	"irq-info",
 	"markers",
 	"function-trace",
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	"print-tgid",
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	NULL
 };
 
@@ -1248,9 +1245,9 @@ void tracing_reset_all_online_cpus(void)
 static unsigned map_pid_to_cmdline[PID_MAX_DEFAULT+1];
 static unsigned map_cmdline_to_pid[SAVED_CMDLINES];
 static char saved_cmdlines[SAVED_CMDLINES][TASK_COMM_LEN];
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 static unsigned saved_tgids[SAVED_CMDLINES];
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 static int cmdline_idx;
 static arch_spinlock_t trace_cmdline_lock = __ARCH_SPIN_LOCK_UNLOCKED;
 
@@ -1452,9 +1449,9 @@ static int trace_save_cmdline(struct task_struct *tsk)
 	}
 
 	memcpy(&saved_cmdlines[idx], tsk->comm, TASK_COMM_LEN);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	saved_tgids[idx] = tsk->tgid;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	arch_spin_unlock(&trace_cmdline_lock);
 
@@ -1492,7 +1489,7 @@ void trace_find_cmdline(int pid, char comm[])
 	preempt_enable();
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 int trace_find_tgid(int pid)
 {
 	unsigned map;
@@ -1511,7 +1508,7 @@ int trace_find_tgid(int pid)
 
 	return tgid;
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 void tracing_record_cmdline(struct task_struct *tsk)
 {
@@ -2468,14 +2465,14 @@ static void print_func_help_header(struct trace_buffer *buf, struct seq_file *m)
 	seq_puts(m, "#              | |       |          |         |\n");
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 static void print_func_help_header_tgid(struct trace_buffer *buf, struct seq_file *m)
 {
 	print_event_info(buf, m);
 	seq_puts(m, "#           TASK-PID    TGID   CPU#      TIMESTAMP  FUNCTION\n");
 	seq_puts(m, "#              | |        |      |          |         |\n");
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 static void print_func_help_header_irq(struct trace_buffer *buf, struct seq_file *m)
 {
@@ -2489,7 +2486,7 @@ static void print_func_help_header_irq(struct trace_buffer *buf, struct seq_file
 	seq_puts(m, "#              | |       |   ||||       |         |\n");
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 static void print_func_help_header_irq_tgid(struct trace_buffer *buf, struct seq_file *m)
 {
 	print_event_info(buf, m);
@@ -2501,7 +2498,7 @@ static void print_func_help_header_irq_tgid(struct trace_buffer *buf, struct seq
 	seq_puts(m, "#           TASK-PID    TGID   CPU#  ||||    TIMESTAMP  FUNCTION\n");
 	seq_puts(m, "#              | |        |      |   ||||       |         |\n");
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 void
 print_trace_header(struct seq_file *m, struct trace_iterator *iter)
@@ -2803,23 +2800,23 @@ void trace_default_header(struct seq_file *m)
 	} else {
 		if (!(trace_flags & TRACE_ITER_VERBOSE)) {
 			if (trace_flags & TRACE_ITER_IRQ_INFO)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 				if (trace_flags & TRACE_ITER_TGID)
 					print_func_help_header_irq_tgid(iter->trace_buffer, m);
 				else
 					print_func_help_header_irq(iter->trace_buffer, m);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 				print_func_help_header_irq(iter->trace_buffer, m);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 			else
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 				if (trace_flags & TRACE_ITER_TGID)
 					print_func_help_header_tgid(iter->trace_buffer, m);
 				else
 					print_func_help_header(iter->trace_buffer, m);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 				print_func_help_header(iter->trace_buffer, m);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		}
 	}
 }
@@ -3676,7 +3673,7 @@ static const struct file_operations tracing_saved_cmdlines_fops = {
 	.llseek	= generic_file_llseek,
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 static ssize_t
 tracing_saved_tgids_read(struct file *file, char __user *ubuf,
 				size_t cnt, loff_t *ppos)
@@ -3720,7 +3717,7 @@ static const struct file_operations tracing_saved_tgids_fops = {
 	.read	= tracing_saved_tgids_read,
 	.llseek	= generic_file_llseek,
 };
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 static ssize_t
 tracing_set_trace_read(struct file *filp, char __user *ubuf,
@@ -6278,10 +6275,10 @@ init_tracer_debugfs(struct trace_array *tr, struct dentry *d_tracer)
 	trace_create_file("trace_marker", 0220, d_tracer,
 			  tr, &tracing_mark_fops);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	trace_create_file("saved_tgids", 0444, d_tracer,
 			  tr, &tracing_saved_tgids_fops);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	trace_create_file("trace_clock", 0644, d_tracer, tr,
 			  &trace_clock_fops);

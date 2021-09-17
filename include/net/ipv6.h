@@ -76,7 +76,7 @@ struct frag_hdr {
 
 #define	IP6_MF	0x0001
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #define IP6_REPLY_MARK(net, mark) \
 	((net)->ipv6.sysctl.fwmark_reflect ? (mark) : 0)
 #endif  
@@ -217,7 +217,7 @@ static inline void fl6_sock_release(struct ip6_flowlabel *fl)
 
 extern void icmpv6_notify(struct sk_buff *skb, u8 type, u8 code, __be32 info);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 int icmpv6_push_pending_frames(struct sock *sk, struct flowi6 *fl6,
 			       struct icmp6hdr *thdr, int len);
 
@@ -258,8 +258,8 @@ static inline int ip6_frag_mem(struct net *net)
 }
 #endif
 
-#define IPV6_FRAG_HIGH_THRESH	(4 * 1024*1024)	 
-#define IPV6_FRAG_LOW_THRESH	(3 * 1024*1024)	 
+#define IPV6_FRAG_HIGH_THRESH	(256 * 1024)	 
+#define IPV6_FRAG_LOW_THRESH	(192 * 1024)	 
 #define IPV6_FRAG_TIMEOUT	(60 * HZ)	 
 
 extern int __ipv6_addr_type(const struct in6_addr *addr);

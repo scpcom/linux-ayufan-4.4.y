@@ -46,7 +46,11 @@ static struct svc_pool_map {
 	unsigned int *to_pool;		 
 } svc_pool_map = {
 	.count = 0,
+#ifdef MY_DEF_HERE
+	.mode = SVC_POOL_PERNODE
+#else
 	.mode = SVC_POOL_DEFAULT
+#endif  
 };
 static DEFINE_MUTEX(svc_pool_map_mutex); 
 
@@ -1098,6 +1102,9 @@ svc_process(struct svc_rqst *rqstp)
 	rqstp->rq_res.buflen = PAGE_SIZE;
 	rqstp->rq_res.tail[0].iov_base = NULL;
 	rqstp->rq_res.tail[0].iov_len = 0;
+#ifdef MY_ABC_HERE
+	rqstp->rq_procinfo = NULL;
+#endif
 
 	rqstp->rq_xid = svc_getu32(argv);
 

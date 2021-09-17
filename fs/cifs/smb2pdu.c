@@ -229,6 +229,13 @@ smb2_reconnect(__le16 smb2_command, struct cifs_tcon *tcon)
 		}
 	}
 
+#ifdef MY_ABC_HERE
+	if (SMB20_PROT_ID > server->dialect) {
+		cifs_dbg(FYI, "(%s) origin_dialect=0x%x, server->dialect=0x%x\n", __func__, origin_dialect, server->dialect);
+		return -EAGAIN;
+	}
+	origin_dialect = server->dialect;
+#endif /* MY_ABC_HERE */
 	if (!tcon->ses->need_reconnect && !tcon->need_reconnect)
 		return rc;
 
@@ -242,9 +249,13 @@ smb2_reconnect(__le16 smb2_command, struct cifs_tcon *tcon)
 	 * need to prevent multiple threads trying to simultaneously reconnect
 	 * the same SMB session
 	 */
-	mutex_lock(&tcon->ses->session_mutex);
 #ifdef MY_ABC_HERE
-	origin_dialect = server->dialect;
+	if (!mutex_trylock(&tcon->ses->session_mutex)) {
+		rc = -EINPROGRESS;
+		goto out;
+	}
+#else
+	mutex_lock(&tcon->ses->session_mutex);
 #endif /* MY_ABC_HERE */
 	rc = cifs_negotiate_protocol(0, tcon->ses);
 	if (!rc && tcon->ses->need_reconnect)
@@ -271,7 +282,9 @@ smb2_reconnect(__le16 smb2_command, struct cifs_tcon *tcon)
 	 * smb buffer size shrinking.
 	 */
 #ifdef MY_ABC_HERE
-	if (server->dialect != origin_dialect) {
+	if (server->dialect != origin_dialect ||
+	    SMB20_PROT_ID > server->dialect) {
+		cifs_dbg(FYI, "(%s) SMB2 reconnect dialect not match! origin=0x%x, current=0x%x\n", __func__, origin_dialect, server->dialect);
 		rc = -EAGAIN;
 	}
 #endif /* MY_ABC_HERE */
@@ -491,7 +504,11 @@ SMB2_negotiate(const unsigned int xid, struct cifs_ses *ses)
 
 	/* SMB2 only has an extended negflavor */
 	server->negflavor = CIFS_NEGFLAVOR_EXTENDED;
+#ifdef MY_ABC_HERE
+	// CID 413509: Unused value. the store value is overwritten at next line.
+#else
 	server->maxBuf = le32_to_cpu(rsp->MaxTransactSize);
+#endif /* MY_ABC_HERE */
 	/* set it to the maximum buffer size value we can send with 1 credit */
 	server->maxBuf = min_t(unsigned int, le32_to_cpu(rsp->MaxTransactSize),
 			       SMB2_MAX_BUFFER_SIZE);
@@ -1944,7 +1961,12 @@ SMB2_flush(const unsigned int xid, struct cifs_tcon *tcon, u64 persistent_fid,
 {
 	struct smb2_flush_req *req;
 	struct TCP_Server_Info *server;
+#ifdef MY_ABC_HERE
+	// CID 413508: Dereference before NULL check
+	struct cifs_ses *ses = tcon ? tcon->ses : NULL;
+#else
 	struct cifs_ses *ses = tcon->ses;
+#endif /* MY_ABC_HERE */
 	struct kvec iov[1];
 	int resp_buftype;
 	int rc = 0;

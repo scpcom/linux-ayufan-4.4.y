@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * ARMv8 single-step debug support and mdscr context switching.
  *
@@ -27,9 +24,9 @@
 #include <linux/init.h>
 #include <linux/ptrace.h>
 #include <linux/stat.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #include <linux/uaccess.h>
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 #include <asm/debug-monitors.h>
 #include <asm/local.h>
@@ -232,7 +229,7 @@ static int single_step_handler(unsigned long addr, unsigned int esr,
 	return 0;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 static int brk_handler(unsigned long addr, unsigned int esr,
 		       struct pt_regs *regs)
 {
@@ -301,7 +298,7 @@ static int __init debug_traps_init(void)
 	return 0;
 }
 arch_initcall(debug_traps_init);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 static int __init single_step_init(void)
 {
 	hook_debug_fault_code(DBG_ESR_EVT_HWSS, single_step_handler, SIGTRAP,
@@ -309,7 +306,7 @@ static int __init single_step_init(void)
 	return 0;
 }
 arch_initcall(single_step_init);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 /* Re-enable single step for syscall restarting. */
 void user_rewind_single_step(struct task_struct *task)

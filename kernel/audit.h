@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /* audit -- definition of audit_context structure and supporting types 
  *
  * Copyright 2003-2004 Red Hat, Inc.
@@ -88,11 +85,11 @@ struct audit_names {
 
 	struct filename		*name;
 	int			name_len;	/* number of chars to log */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	// do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 	bool			hidden;		/* don't log this record */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 	bool			name_put;	/* call __putname()? */
 
 	unsigned long		ino;
@@ -111,9 +108,9 @@ struct audit_names {
 	 * should be freed on syscall exit.
 	 */
 	bool			should_free;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	bool			hidden;		/* don't log this record */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 };
 
 /* The per-task audit context. */

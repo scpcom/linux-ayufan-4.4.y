@@ -367,7 +367,11 @@ END:
 	return iRet;
 }
 
+#if defined(MY_ABC_HERE)
+u8 SYNO_GET_HDD_PRESENT_PIN(const int index)
+#else  
 static u8 SYNO_GET_HDD_PRESENT_PIN(const int index)
+#endif  
 {
 	u8 ret = GPIO_UNDEF;
 
@@ -383,9 +387,7 @@ static u8 SYNO_GET_HDD_PRESENT_PIN(const int index)
 		goto END;
 	}
 
-	if (1 > index || (0 < g_syno_hdd_powerup_seq && g_syno_hdd_powerup_seq < index)) {
-		printk("SYNO_GET_HDD_PRESENT_PIN(%d) is illegal", index);
-		WARN_ON(1);
+	if (1 > index || (0 == g_syno_hdd_powerup_seq) || (0 < g_syno_hdd_powerup_seq && g_syno_hdd_powerup_seq < index)) {
 		goto END;
 	}
 
@@ -456,6 +458,9 @@ END:
 
 EXPORT_SYMBOL(SYNO_CTRL_HDD_POWERON);
 EXPORT_SYMBOL(SYNO_CHECK_HDD_PRESENT);
+#if defined(MY_ABC_HERE)
+EXPORT_SYMBOL(SYNO_GET_HDD_PRESENT_PIN);
+#endif  
 EXPORT_SYMBOL(SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER);
 #endif  
 

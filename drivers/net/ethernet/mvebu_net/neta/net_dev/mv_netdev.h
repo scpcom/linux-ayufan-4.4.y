@@ -184,6 +184,9 @@ struct port_stats {
 	u32 ext_stack_full;
 	u32 netif_wake;
 	u32 state_err;
+#ifdef MY_ABC_HERE
+	u32 refill_failed;
+#endif  
 #endif  
 
 #ifdef CONFIG_MV_ETH_STAT_INF

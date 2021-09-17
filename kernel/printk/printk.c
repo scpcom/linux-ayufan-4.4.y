@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  *  linux/kernel/printk.c
  *
@@ -54,11 +51,11 @@
 #define CREATE_TRACE_POINTS
 #include <trace/events/printk.h>
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_EARLY_PRINTK_DIRECT
 extern void printascii(char *);
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 /* printk's without a loglevel use this.. */
 #define DEFAULT_MESSAGE_LOGLEVEL CONFIG_DEFAULT_MESSAGE_LOGLEVEL
@@ -142,11 +139,11 @@ static struct console *exclusive_console;
  */
 struct console_cmdline
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	char	name[8];			/* Name of the driver	    */
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 	char	name[16];			/* Name of the driver	    */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 	int	index;				/* Minor dev. to use	    */
 	char	*options;			/* Options for the driver   */
 #ifdef CONFIG_A11Y_BRAILLE_CONSOLE
@@ -1566,11 +1563,11 @@ asmlinkage int vprintk_emit(int facility, int level,
 		}
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_EARLY_PRINTK_DIRECT
 	printascii(text);
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	if (level == -1)
 		level = default_message_loglevel;
@@ -2369,12 +2366,12 @@ void register_console(struct console *newcon)
 	 */
 	for (i = 0; i < MAX_CMDLINECONSOLES && console_cmdline[i].name[0];
 			i++) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 		// do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 		BUILD_BUG_ON(sizeof(console_cmdline[i].name) !=
 			     sizeof(newcon->name));
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 		if (strcmp(console_cmdline[i].name, newcon->name) != 0)
 			continue;
 		if (newcon->index >= 0 &&

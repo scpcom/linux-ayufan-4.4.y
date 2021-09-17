@@ -647,13 +647,13 @@ const char *disk_spd_string(unsigned char spd)
 	};
 
 	if (spd > (ARRAY_SIZE(spd_str) - 1)){
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536)
 		szRet = (char *)spd_str[0];
 #else  
 		szRet = spd_str[0];
 #endif  
 	}else{
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536)
 		szRet = (char *)spd_str[spd];
 #else  
 		szRet = spd_str[spd];
@@ -668,7 +668,7 @@ sdev_show_syno_disk_spd(struct device *dev, struct device_attribute *attr, char 
 {
 	        struct scsi_device *sdev = to_scsi_device(dev);
 		int iRet = -EFAULT;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536)
 		int iDiskSpd = 0;
 #else  
 		int iDiskSpd = NULL;

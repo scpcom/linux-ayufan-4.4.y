@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Access to user system call parameters and results
  *
@@ -93,12 +90,12 @@ static inline void syscall_set_arguments(struct task_struct *task,
 	memcpy(&regs->bx + i, args, n * sizeof(args[0]));
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 static inline int syscall_get_arch(void)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 static inline int syscall_get_arch(struct task_struct *task,
 				   struct pt_regs *regs)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 {
 	return AUDIT_ARCH_I386;
 }
@@ -227,12 +224,12 @@ static inline void syscall_set_arguments(struct task_struct *task,
 		}
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 static inline int syscall_get_arch(void)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 static inline int syscall_get_arch(struct task_struct *task,
 				   struct pt_regs *regs)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 {
 #ifdef CONFIG_IA32_EMULATION
 	/*
@@ -244,11 +241,11 @@ static inline int syscall_get_arch(struct task_struct *task,
 	 *
 	 * x32 tasks should be considered AUDIT_ARCH_X86_64.
 	 */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	if (task_thread_info(current)->status & TS_COMPAT)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	if (task_thread_info(task)->status & TS_COMPAT)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		return AUDIT_ARCH_I386;
 #endif
 	/* Both x32 and x86_64 are considered "64-bit". */

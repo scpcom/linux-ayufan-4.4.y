@@ -74,7 +74,7 @@ struct scsi_device {
 	unsigned long last_queue_ramp_up;	 
 
 	unsigned int id, lun, channel;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	 
 #else  
 #ifdef MY_ABC_HERE
@@ -83,6 +83,7 @@ struct scsi_device {
 #ifdef MY_ABC_HERE
 	unsigned char auto_remap;
 #endif  
+	int reverved;
 #endif  
 
 	unsigned int manufacturer;	 
@@ -159,7 +160,7 @@ struct scsi_device {
 	atomic_t iodone_cnt;
 	atomic_t ioerr_cnt;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	 
 #else  
 #ifdef MY_ABC_HERE
@@ -179,7 +180,7 @@ struct scsi_device {
 	struct scsi_dh_data	*scsi_dh_data;
 	enum scsi_device_state sdev_state;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	 
 #else  
 #ifdef MY_DEF_HERE
@@ -202,13 +203,14 @@ struct scsi_device {
 #endif  
 
 	unsigned long		sdev_data[0];
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 #ifdef MY_ABC_HERE
 	char syno_disk_name[BDEVNAME_SIZE];		 
 #endif  
 #ifdef MY_ABC_HERE
 	unsigned char auto_remap;
 #endif  
+	int reverved;
 #ifdef MY_ABC_HERE
 	unsigned long   idle;    
 	unsigned char	spindown;
@@ -311,7 +313,7 @@ struct scsi_target {
 #define SCSI_DEFAULT_TARGET_BLOCKED	3
 
 	char			scsi_level;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	struct execute_work	ew;
 #endif  
 	enum scsi_target_state	state;

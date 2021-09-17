@@ -76,6 +76,10 @@ config SYNO_ELEVATE_LOG_LEVEL
 	bool "Elevate log level of kernel log"
 	default y
 
+config SYNO_DEGRADE_LOG_LEVEL
+	bool "degrade log level"
+	default y
+
 config SYNO_MONACO_SDK_BUILD_FAILED_FIX
 	bool "Monaco SDK 3.10.77 build failed fix"
 	depends on SYNO_MONACO
@@ -128,6 +132,11 @@ config SYNO_ALPINE_TUNING_CRYPTO_PERFORMANCE
 config SYNO_BACKPORT_ARM_CRYPTO
 	bool "Use ARM related crypto patches packported from upstream kernel 4.7"
 	default n
+
+config SYNO_OCF_PERMISSION
+	bool "Adjust /dev/crypto permission to 666"
+	depends on OCF_CRYPTODEV
+	default y
 
 if MODULES
 

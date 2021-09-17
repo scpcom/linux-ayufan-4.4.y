@@ -122,10 +122,6 @@ config SYNO_MD_ROOT_SWAP_PARALLEL_RESYNC
 	bool "Let md0 and md1 can do resync without waiting for other mds."
 	default y
 
-config SYNO_MD_RESHAPE_AND_MOUNT_DEADLOCK_WORKAROUND
-	bool "Fix when md call finish_reshape and mount deadlock workaround."
-	default y
-
 config SYNO_MD_SB_RETRY
 	bool "Add an one-time retry for EIO error when updating superblock"
 	default y
@@ -136,6 +132,40 @@ config SYNO_MD_RAID5D_PROXY
 
 config SYNO_MD_SYNC_STATUS_REPORT
 	bool "Report sync status to user space"
+	default y
+
+config SYNO_MD_FIX_RESHAPE_AND_MOUNT_DEADLOCK
+	bool "Prevent deadlock between raid5d and mount thread"
+	default y
+
+config SYNO_MD_RAID1_SYSFS_INTERFACE
+	bool "Add sysfs interface to raid1"
+	default y
+
+config SYNO_MD_RAID1_FLUSH_THRESHOLD
+        bool "Add threshold for raid1 plug"
+        default y
+	depends on SYNO_MD_RAID1_SYSFS_INTERFACE
+
+config SYNO_MD_FORCE_SB_EVENT_INCREASED
+	bool "Forcely increase sb event during starting and stopping array."
+	default y
+
+config SYNO_MD_RAID1_ADD_DISK_CHECK
+	bool "check if raid1 is crash when add disk"
+	default y
+
+config SYNO_MD_RAID1_ASSIGN_READ_TARGET
+	bool "Assign read target to raid1"
+	default y
+	depends on SYNO_MD_RAID1_SYSFS_INTERFACE
+
+config SYNO_MD_SKIP_RESYNC_WHEN_SB_NOT_CLEAN
+	bool "Skip resync after assemble md when super block is not clean"
+	default y
+
+config SYNO_MD_ALLOW_MD_RUN_WHEN_RESHAPE_POSITION_IS_ZERO
+	bool "Allow md run when its reshape position is zero"
 	default y
 
 endmenu #MD
@@ -230,6 +260,11 @@ config SYNO_ATA_PWR_CTRL
 	depends on SYNO_INTERNAL_HD_NUM && SYNO_HW_VERSION
 	default y
 
+config SYNO_ATA_DISK_PRESENT_CHECK
+	bool "Disk Present Pin Check for Disk Fail"
+	depends on SYNO_ATA_PWR_CTRL
+	default y
+
 config SYNO_INCREASE_DISK_MODEL_NAME_LENGTH
 	bool "Increase disk model name size up to 24 characters"
 	depends on SYNO_SCSI_GET_ATA_IDENTITY && SYNO_INQUIRY_STANDARD
@@ -279,6 +314,10 @@ config SYNO_MV_9170_GPIO_CTRL
 
 config SYNO_SCSI_DEVICE_INDEX
 	bool "Get device index from scsi layer"
+	default y
+
+config SYNO_DISK_MONITOR_TOOL
+	bool "Disk performance monitor tool"
 	default y
 
 config SYNO_PM_DISABLE_LINK_LIMIT
@@ -453,11 +492,6 @@ config SYNO_SATA_PM_FIRST_PORT_DELAY
 	bool "Delay 2 secs for port multiplier first port reset"
 	default n
 
-config SYNO_EUNIT_DEADLOCK_FIX
-	bool "Prevent eunit find master deadlock"
-	default y
-	depends on SYNO_SATA_PM_DEVICE_GPIO
-
 config SYNO_CUSTOM_SCMD_TIMEOUT
 	bool "Customize SCSI commands timeout value per disk"
 	default y
@@ -520,6 +554,10 @@ config SYNO_AHCI_IMPL_WORKAROUND
 	bool "Force enable PORTS_IMPL workaround"
 	default n
 
+config SYNO_EXTERNAL_SPEED_LIMIT
+	bool "Force limit external sata link speed for models"
+	default y
+
 config SYNO_DS1815P_SPEED_LIMIT
 	bool "Force limit sata link speed for DS1815+"
 	default y
@@ -546,6 +584,23 @@ config SYNO_WAKEUPCMD_IDLEIMMED
 config SYNO_NONCQ_BASH_ERROR_FIX
 	bool "Fix error return while setting devices which is not supported ncq"
 	default y
+
+config SYNO_SATA_ERROR_HANDLING_FLAG
+	bool "Raise error handling flag while ata port dealing with error"
+	default y
+
+config SYNO_SATA_INTEL_SSD_COMPATIBILITY
+    bool "Solution of Intel S4500 3.84TB Hotplug 100% failed on Marvell 88SE9235"
+    default y
+
+config SYNO_LP3943_PRESENT
+    bool "LP3943 HDD present pin"
+    default y
+	depends on GPIO_LP3943
+
+config SYNO_ATA_PRINT_SN
+    bool "Add log for disk serial number"
+    default y
 
 endmenu #SATA
 
@@ -662,6 +717,11 @@ config SYNO_MPT3_SATA_DEFAULT_NCQ_OFF
 	bool "Disable SATA NCQ on SAS3 controller by default"
 	depends on SCSI_MPT3SAS
 	default n
+
+config SYNO_MPT3_SKIP_ADD_WHEN_SES_DEVICE_BUSY
+	bool "Requeueu event when SES device busy"
+	depends on SCSI_MPT3SAS
+	default y
 
 endmenu #SAS
 
@@ -869,6 +929,11 @@ config SYNO_USB_FIX_SET_INTERFACE
 	bool "Fix usb_set_interface hang"
 	default y
 
+config SYNO_USB_HAS_EXTERNAL_ETRON_CONTROLLER
+	bool "Apply Syno USB Features On External USB3.0 Controller"
+	depends on SYNO_USB_VBUS_GPIO_CONTROL
+	default n
+
 endmenu #USB
 
 menu "Hardware Monitor"
@@ -938,6 +1003,11 @@ config SYNO_MTD_LOCK_UNLOCK
 	bool "add mtd->lock and mtd->unlock function"
 	default n
 
+config SYNO_MTD_ACCESS_LOG
+	bool "add log for mtd device open/close"
+	default y
+	depends on !X86_64
+
 config SYNO_MONACO_SPI_WITHOUT_LOCK
 	bool "Disable the lock of spi flash in kernel of the monaco"
 	default y
@@ -959,6 +1029,10 @@ config SYNO_ARMADA_RTC_WORKAROUND
 	bool "Workaround wrong RTC behavior"
 	default y
 	depends on SYNO_ARMADA
+
+config SYNO_DISABLE_NTP_UPDATE_RTC
+	bool "Disable NTP update RTC"
+	default y
 
 endmenu #RTC
 
@@ -1044,6 +1118,11 @@ config SYNO_MAX_PCI_SLOT
 	depends on SYNO_OPTIONAL_PCI_SLOT
 
 	default "1"
+
+config SYNO_PCIE_BUS_SAFE
+	bool "Set the PCIe bus configuration to PCIE_BUS_SAFE"
+	depends on PCI
+	default n
 
 endmenu #PCI
 

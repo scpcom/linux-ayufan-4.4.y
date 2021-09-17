@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Copyright (c) 2016 HiSilicon Technologies Co., Ltd.
  *
@@ -54,14 +51,14 @@ static int spi_s25fl256s_entry_4addr(struct hisfc_spi *spi, int enable)
 
 	HISFC350_CMD_WAIT_CPU_FINISH(host);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
 		regval = hisfc_read(host, HISFC350_CMD_DATABUF0);
 		if (!(regval & SPI_EN4B)) {
 			pr_info("Err, now is 3-byte address mode\n");
 			pr_info("regval_read_SPI : 0x%x\n", regval);
 	} else if (DEBUG_SPI)
 			pr_info("now is 4-byte address mode\n");
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 	if (DEBUG_SPI) {
 		regval = hisfc_read(host, HISFC350_CMD_DATABUF0);
 		if (!(regval & SPI_EN4B)) {
@@ -70,7 +67,7 @@ static int spi_s25fl256s_entry_4addr(struct hisfc_spi *spi, int enable)
 		} else
 			pr_info("now is 4-byte address mode\n");
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 
 	host->set_host_addr_mode(host, enable);
 

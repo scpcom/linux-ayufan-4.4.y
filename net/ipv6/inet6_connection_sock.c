@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * INET        An implementation of the TCP/IP protocol suite for the LINUX
  *             operating system.  INET is implemented using the  BSD Socket
@@ -84,16 +81,16 @@ struct dst_entry *inet6_csk_route_req(struct sock *sk,
 	final_p = fl6_update_dst(fl6, np->opt, &final);
 	fl6->saddr = treq->loc_addr;
 	fl6->flowi6_oif = treq->iif;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	fl6->flowi6_mark = inet_rsk(req)->ir_mark;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	fl6->flowi6_mark = sk->sk_mark;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	fl6->fl6_dport = inet_rsk(req)->rmt_port;
 	fl6->fl6_sport = inet_rsk(req)->loc_port;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	fl6->flowi6_uid = sock_i_uid(sk);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	security_req_classify_flow(req, flowi6_to_flowi(fl6));
 
 	dst = ip6_dst_lookup_flow(sk, fl6, final_p, false);
@@ -221,9 +218,9 @@ static struct dst_entry *inet6_csk_route_socket(struct sock *sk,
 	fl6->flowi6_mark = sk->sk_mark;
 	fl6->fl6_sport = inet->inet_sport;
 	fl6->fl6_dport = inet->inet_dport;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	fl6->flowi6_uid = sock_i_uid(sk);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	security_sk_classify_flow(sk, flowi6_to_flowi(fl6));
 
 	final_p = fl6_update_dst(fl6, np->opt, &final);

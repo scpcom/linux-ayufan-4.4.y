@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * g_ffs.c -- user mode file system API for USB composite function controllers
  *
@@ -389,11 +386,11 @@ static int gfs_bind(struct usb_composite_dev *cdev)
 			goto error_unbind;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	/* add adb idvendor and adb device name */
 	coverwrite.idVendor = 0x18d1;
 	coverwrite.serial_number = "0123456789";
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	usb_composite_overwrite_options(cdev, &coverwrite);
 	return 0;

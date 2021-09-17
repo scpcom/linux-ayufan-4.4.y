@@ -485,9 +485,6 @@ found:
 
 	down_write((&EXT4_I(inode)->i_data_sem));
 
-	if (flags & EXT4_GET_BLOCKS_DELALLOC_RESERVE)
-		ext4_set_inode_state(inode, EXT4_STATE_DELALLOC_RESERVED);
-	 
 	if (ext4_test_inode_flag(inode, EXT4_INODE_EXTENTS)) {
 		retval = ext4_ext_map_blocks(handle, inode, map, flags);
 	} else {
@@ -502,8 +499,6 @@ found:
 			(flags & EXT4_GET_BLOCKS_DELALLOC_RESERVE))
 			ext4_da_update_reserve_space(inode, retval, 1);
 	}
-	if (flags & EXT4_GET_BLOCKS_DELALLOC_RESERVE)
-		ext4_clear_inode_state(inode, EXT4_STATE_DELALLOC_RESERVED);
 
 	if (retval > 0) {
 		int ret;
@@ -542,6 +537,18 @@ has_zeroout:
 		int ret = check_block_validity(inode, map);
 		if (ret != 0)
 			return ret;
+
+		if (map->m_flags & EXT4_MAP_NEW &&
+		    !(map->m_flags & EXT4_MAP_UNWRITTEN) &&
+		    !IS_NOQUOTA(inode) &&
+#ifdef MY_ABC_HERE
+			ext4_test_inode_state(inode, EXT4_STATE_ORDERED_MODE) &&
+#endif  
+		    ext4_should_order_data(inode)) {
+			ret = ext4_jbd2_file_inode(handle, inode);
+			if (ret)
+				return ret;
+		}
 	}
 	return retval;
 }
@@ -844,14 +851,6 @@ static int ext4_write_end(struct file *file,
 	int i_size_changed = 0;
 
 	trace_ext4_write_end(inode, pos, len, copied);
-	if (ext4_test_inode_state(inode, EXT4_STATE_ORDERED_MODE)) {
-		ret = ext4_jbd2_file_inode(handle, inode);
-		if (ret) {
-			unlock_page(page);
-			page_cache_release(page);
-			goto errout;
-		}
-	}
 
 	if (ext4_has_inline_data(inode)) {
 		ret = ext4_write_inline_data_end(inode, pos, len,
@@ -2273,7 +2272,7 @@ static void ext4_end_io_dio(struct kiocb *iocb, loff_t offset,
 	if (!(io_end->flag & EXT4_IO_END_UNWRITTEN)) {
 		ext4_free_io_end(io_end);
 out:
-		inode_dio_done(inode);
+		inode_dio_end(inode);
 		if (is_async)
 			aio_complete(iocb, ret, 0);
 		return;
@@ -2310,7 +2309,7 @@ static ssize_t ext4_ext_direct_IO(int rw, struct kiocb *iocb,
 	overwrite = *((int *)iocb->private);
 
 	if (overwrite) {
-		atomic_inc(&inode->i_dio_count);
+		inode_dio_begin(inode);
 		down_read(&EXT4_I(inode)->i_data_sem);
 		mutex_unlock(&inode->i_mutex);
 	}
@@ -2363,7 +2362,7 @@ static ssize_t ext4_ext_direct_IO(int rw, struct kiocb *iocb,
 retake_lock:
 	 
 	if (overwrite) {
-		inode_dio_done(inode);
+		inode_dio_end(inode);
 		up_read(&EXT4_I(inode)->i_data_sem);
 		mutex_lock(&inode->i_mutex);
 	}
@@ -3105,9 +3104,15 @@ struct inode *ext4_iget(struct super_block *sb, unsigned long ino)
 	}
 
 	if (!ext4_inode_csum_verify(inode, raw_inode, ei)) {
+#ifdef MY_ABC_HERE
+		ext4_msg(inode->i_sb, KERN_CRIT,
+			" %s:%d: inode #%lu: comm %s: checksum invalid\n",
+		    __func__, __LINE__, inode->i_ino, current->comm);
+#else
 		EXT4_ERROR_INODE(inode, "checksum invalid");
 		ret = -EIO;
 		goto bad_inode;
+#endif  
 	}
 
 	inode->i_mode = le16_to_cpu(raw_inode->i_mode);
@@ -3202,9 +3207,7 @@ struct inode *ext4_iget(struct super_block *sb, unsigned long ino)
 #endif  
 #endif  
 #ifdef MY_ABC_HERE
-	if (!EXT4_HAS_RO_COMPAT_FEATURE(sb, EXT4_FEATURE_RO_COMPAT_METADATA_CSUM)) {
-		inode->i_archive_bit = le16_to_cpu(raw_inode->ext4_archive_bit);
-	}
+	EXT4_INODE_GET_SYNO_ARCHIVE_BIT(inode, raw_inode);
 #endif
 
 	inode->i_version = le32_to_cpu(raw_inode->i_disk_version);
@@ -3384,9 +3387,7 @@ static int ext4_do_update_inode(handle_t *handle,
 	EXT4_EINODE_SET_XTIME(i_crtime, ei, raw_inode);
 #endif  
 #ifdef MY_ABC_HERE
-	if (!EXT4_HAS_RO_COMPAT_FEATURE(inode->i_sb, EXT4_FEATURE_RO_COMPAT_METADATA_CSUM)) {
-		raw_inode->ext4_archive_bit = cpu_to_le16(inode->i_archive_bit);  
-	}
+	EXT4_INODE_SET_SYNO_ARCHIVE_BIT(inode, raw_inode);
 #endif
 
 	if (ext4_inode_blocks_set(handle, raw_inode, ei)) {
@@ -3568,9 +3569,10 @@ int ext4_setattr(struct dentry *dentry, struct iattr *attr)
 		ext4_journal_stop(handle);
 	}
 
-	if (attr->ia_valid & ATTR_SIZE && attr->ia_size != inode->i_size) {
+	if (attr->ia_valid & ATTR_SIZE) {
 		handle_t *handle;
 		loff_t oldsize = inode->i_size;
+		int shrink = (attr->ia_size <= inode->i_size);
 
 		if (!(ext4_test_inode_flag(inode, EXT4_INODE_EXTENTS))) {
 			struct ext4_sb_info *sbi = EXT4_SB(inode->i_sb);
@@ -3578,26 +3580,33 @@ int ext4_setattr(struct dentry *dentry, struct iattr *attr)
 			if (attr->ia_size > sbi->s_bitmap_maxbytes)
 				return -EFBIG;
 		}
+		if (!S_ISREG(inode->i_mode))
+			return -EINVAL;
 
 		if (IS_I_VERSION(inode) && attr->ia_size != inode->i_size)
 			inode_inc_iversion(inode);
 
-		if (S_ISREG(inode->i_mode) &&
+		if (ext4_should_order_data(inode) &&
 		    (attr->ia_size < inode->i_size)) {
-			if (ext4_should_order_data(inode)) {
-				error = ext4_begin_ordered_truncate(inode,
+			error = ext4_begin_ordered_truncate(inode,
 							    attr->ia_size);
-				if (error)
-					goto err_out;
-			}
+			if (error)
+				goto err_out;
+		}
+		if (attr->ia_size != inode->i_size) {
 			handle = ext4_journal_start(inode, EXT4_HT_INODE, 3);
 			if (IS_ERR(handle)) {
 				error = PTR_ERR(handle);
 				goto err_out;
 			}
-			if (ext4_handle_valid(handle)) {
+			if (ext4_handle_valid(handle) && shrink) {
 				error = ext4_orphan_add(handle, inode);
 				orphan = 1;
+			}
+			 
+			if (!shrink) {
+				inode->i_mtime = ext4_current_time(inode);
+				inode->i_ctime = inode->i_mtime;
 			}
 #ifdef MY_ABC_HERE
 			down_write(&EXT4_I(inode)->i_data_sem);
@@ -3614,16 +3623,14 @@ int ext4_setattr(struct dentry *dentry, struct iattr *attr)
 #endif  
 			ext4_journal_stop(handle);
 			if (error) {
-				ext4_orphan_del(NULL, inode);
+				if (orphan)
+					ext4_orphan_del(NULL, inode);
 				goto err_out;
 			}
 		}
-#ifdef MY_ABC_HERE
-		else
-#endif
+		if (!shrink)
+			pagecache_isize_extended(inode, oldsize, inode->i_size);
 
-		i_size_write(inode, attr->ia_size);
-		 
 		if (orphan) {
 			if (!ext4_should_journal_data(inode)) {
 				ext4_inode_block_unlocked_dio(inode);
@@ -3634,10 +3641,9 @@ int ext4_setattr(struct dentry *dentry, struct iattr *attr)
 		}
 		 
 		truncate_pagecache(inode, oldsize, inode->i_size);
+		if (shrink)
+			ext4_truncate(inode);
 	}
-	 
-	if (attr->ia_valid & ATTR_SIZE)
-		ext4_truncate(inode);
 
 	if (!rc) {
 		setattr_copy(inode, attr);
@@ -3882,8 +3888,6 @@ int ext4_mark_inode_dirty(handle_t *handle, struct inode *inode)
 						      sbi->s_want_extra_isize,
 						      iloc, handle);
 			if (ret) {
-				ext4_set_inode_state(inode,
-						     EXT4_STATE_NO_EXPAND);
 				if (mnt_count !=
 					le16_to_cpu(sbi->s_es->s_mnt_count)) {
 					ext4_warning(inode->i_sb,

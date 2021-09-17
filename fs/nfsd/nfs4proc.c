@@ -166,9 +166,9 @@ do_open_lookup(struct svc_rqst *rqstp, struct nfsd4_compound_state *cstate, stru
 					(u32 *)open->op_verf.data,
 					&open->op_truncate, &open->op_created);
 
-		if (open->op_createmode == NFS4_CREATE_EXCLUSIVE && status == 0)
-			open->op_bmval[1] = (FATTR4_WORD1_TIME_ACCESS |
-							FATTR4_WORD1_TIME_MODIFY);
+		if (nfsd_create_is_exclusive(open->op_createmode) && status == 0)
+			open->op_bmval[1] |= (FATTR4_WORD1_TIME_ACCESS |
+						FATTR4_WORD1_TIME_MODIFY);
 	} else {
 		status = nfsd_lookup(rqstp, current_fh,
 				     open->op_fname.data, open->op_fname.len, resfh);
@@ -720,6 +720,7 @@ nfsd4_secinfo(struct svc_rqst *rqstp, struct nfsd4_compound_state *cstate,
 				    &exp, &dentry);
 	if (err)
 		return err;
+	fh_unlock(&cstate->current_fh);
 	if (dentry->d_inode == NULL) {
 		exp_put(exp);
 		err = nfserr_noent;
@@ -1071,6 +1072,10 @@ nfsd4_proc_compound(struct svc_rqst *rqstp,
 	}
 
 	while (!status && resp->opcnt < args->opcnt) {
+#ifdef MY_ABC_HERE
+		ktime_t stime = ktime_get();
+#endif
+
 		op = &args->ops[resp->opcnt++];
 
 		dprintk("nfsv4 compound op #%d/%d: %d (%s)\n",
@@ -1159,6 +1164,10 @@ encode_op:
 			fput(op->u.read.rd_filp);
 
 		nfsd4_increment_op_stats(op->opnum);
+#ifdef MY_ABC_HERE
+		if (op->opnum >= FIRST_NFS4_OP && op->opnum <= LAST_NFS4_OP)
+			svc_update_lat(&nfsdstats.nfs4_oplatency[op->opnum], stime);
+#endif
 	}
 
 	resp->cstate.status = status;

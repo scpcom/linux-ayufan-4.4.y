@@ -203,6 +203,14 @@
 #define HW_NVR3218       "NVR3218"
 #define HW_VS960hd     "VS960HD"
 #define HW_DS218j      "DS218j"        //"DS218j"
+#define HW_RS1219p     "RS1219+"       //"RS1219+"
+#define HW_SA3400      "SA3400"        //"SA3400"
+#define HW_SA3600      "SA3600"        //"SA3600"
+#define HW_DS419slim   "DS419slim"     //DS419slim
+#define HW_RS1219      "RS1219"        //"RS1219"
+#define HW_FS3400      "FS3400"        //"FS3400"
+#define HW_FS3600      "FS3600"        //"FS3600"
+#define HW_HD3400      "HD3400"        //"HD3400"
 #define HW_UNKNOWN     "DSUnknown"
 
 #define EBOX_INFO_UNIQUE_RX410  "RX410"
@@ -292,6 +300,11 @@ typedef struct _SynoCpuTemp {
 	int cpu_num;
 	int cpu_temp[MAX_CPU];
 } SYNOCPUTEMP;
+
+typedef struct _SynoThermalTemp {
+	unsigned char blSurface;
+	int temperature;
+} SYNO_THERMAL_TEMP;
 
 enum {
     MD_SECTOR_READ_ERROR = 0,

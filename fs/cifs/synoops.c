@@ -509,12 +509,11 @@ syno_check_smb2_nego_rsp(struct cifs_ses *ses, struct smb2_negotiate_rsp *rsp)
 	}
 	server->dialect = le16_to_cpu(rsp->DialectRevision);
 	if (rsp->DialectRevision == cpu_to_le16(0x02ff)) {
-		server->dialect = cpu_to_le16(SMB20_PROT_ID);
+		server->dialect = cpu_to_le16(SMB21_PROT_ID);
 	}
 
 	/* SMB2 only has an extended negflavor */
 	server->negflavor = CIFS_NEGFLAVOR_EXTENDED;
-	server->maxBuf = le32_to_cpu(rsp->MaxTransactSize);
 	/* set it to the maximum buffer size value we can send with 1 credit */
 	server->maxBuf = min_t(unsigned int, le32_to_cpu(rsp->MaxTransactSize),
 			       SMB2_MAX_BUFFER_SIZE);
@@ -626,8 +625,8 @@ SYNO_negotiate_SMB1_start(const unsigned int xid, struct cifs_ses *ses)
 		//extract from the cifssmb.c CIFSSMBNegotiate response process
 		rc = syno_check_smb1_nego_rsp(ses, iov[0].iov_base);
 		if (0 != rc) {
-			//force dialect to SMB2.02 for retry
-			server->dialect = SMB20_PROT_ID;
+			//force dialect to SMB2.1 for retry SMB2 negotiate
+			server->dialect = SMB21_PROT_ID;
 		}
 	} else {
 		//check smb2 response
@@ -736,7 +735,7 @@ syno_negotiate(const unsigned int xid, struct cifs_ses *ses)
 	rc = SYNO_negotiate_SMB1_start(xid, ses);
 	if (0 != rc) {
 		ses->server->CurrentMid = 0;
-	} else if (SMB20_PROT_ID > ses->server->dialect) {
+	} else if (SMB20_PROT_ID >= ses->server->dialect) {
 		goto END;
 	}
 	rc = syno_SMB2_negotiate(xid, ses);
@@ -816,11 +815,22 @@ syno_get_dfs_refer(const unsigned int xid, struct cifs_ses *ses,
 		unsigned int *num_of_nodes,
 		const struct nls_table *nls_codepage, int remap)
 {
-	if (ses && ses->server && SMB20_PROT_ID > ses->server->dialect) {
-		return smb1_operations.get_dfs_refer(xid, ses, search_name, target_nodes,
-			num_of_nodes, nls_codepage, remap);
+	int rc = -EINVAL;
+	u16 origin_dialect = SMB20_PROT_ID;
+	if (ses || !ses->server) {
+		goto END;
 	}
-	return -EOPNOTSUPP;
+	do {
+		origin_dialect = ses->server->dialect;
+		if (SMB20_PROT_ID > origin_dialect) {
+			rc = smb1_operations.get_dfs_refer(xid, ses, search_name, target_nodes,
+					num_of_nodes, nls_codepage, remap);
+		} else {
+			rc = -EOPNOTSUPP;
+		}
+	} while (-EAGAIN == rc && origin_dialect != ses->server->dialect);
+END:
+	return rc;
 }
 
 //	void (*qfs_tcon)(const unsigned int, struct cifs_tcon *);
@@ -844,10 +854,21 @@ static int
 syno_is_path_accessible(const unsigned int xid, struct cifs_tcon *tcon,
 			struct cifs_sb_info *cifs_sb, const char *full_path)
 {
-	if (tcon && tcon->ses && tcon->ses->server && SMB20_PROT_ID > tcon->ses->server->dialect) {
-		return smb1_operations.is_path_accessible(xid, tcon, cifs_sb, full_path);
+	int rc = -EINVAL;
+	u16 origin_dialect = SMB20_PROT_ID;
+	if (!tcon || !tcon->ses || !tcon->ses->server) {
+		goto END;
 	}
-	return smb20_operations.is_path_accessible(xid, tcon, cifs_sb, full_path);
+	do {
+		origin_dialect = tcon->ses->server->dialect;
+		if (SMB20_PROT_ID > origin_dialect) {
+			rc = smb1_operations.is_path_accessible(xid, tcon, cifs_sb, full_path);
+		} else {
+			rc = smb20_operations.is_path_accessible(xid, tcon, cifs_sb, full_path);
+		}
+	} while (-EAGAIN == rc && origin_dialect != tcon->ses->server->dialect);
+END:
+	return rc;
 }
 
 //	int (*query_path_info)(const unsigned int, struct cifs_tcon *, struct cifs_sb_info *, const char *, FILE_ALL_INFO *, bool *, bool *);
@@ -856,10 +877,21 @@ syno_query_path_info(const unsigned int xid, struct cifs_tcon *tcon,
 		     struct cifs_sb_info *cifs_sb, const char *full_path,
 		     FILE_ALL_INFO *data, bool *adjustTZ, bool *symlink)
 {
-	if (tcon && tcon->ses && tcon->ses->server && SMB20_PROT_ID > tcon->ses->server->dialect) {
-		return smb1_operations.query_path_info(xid, tcon, cifs_sb, full_path, data, adjustTZ, symlink);
+	int rc = -EINVAL;
+	u16 origin_dialect = SMB20_PROT_ID;
+	if (!tcon || !tcon->ses || !tcon->ses->server) {
+		goto END;
 	}
-	return smb20_operations.query_path_info(xid, tcon, cifs_sb, full_path, data, adjustTZ, symlink);
+	do {
+		origin_dialect = tcon->ses->server->dialect;
+		if (SMB20_PROT_ID > origin_dialect) {
+			rc = smb1_operations.query_path_info(xid, tcon, cifs_sb, full_path, data, adjustTZ, symlink);
+		} else {
+			rc = smb20_operations.query_path_info(xid, tcon, cifs_sb, full_path, data, adjustTZ, symlink);
+		}
+	} while (-EAGAIN == rc && origin_dialect != tcon->ses->server->dialect);
+END:
+	return rc;
 }
 
 //	int (*query_file_info)(const unsigned int, struct cifs_tcon *, struct cifs_fid *, FILE_ALL_INFO *);
@@ -867,10 +899,21 @@ static int
 syno_query_file_info(const unsigned int xid, struct cifs_tcon *tcon,
 		     struct cifs_fid *fid, FILE_ALL_INFO *data)
 {
-	if (tcon && tcon->ses && tcon->ses->server && SMB20_PROT_ID > tcon->ses->server->dialect) {
-		return smb1_operations.query_file_info(xid, tcon, fid, data);
+	int rc = -EINVAL;
+	u16 origin_dialect = SMB20_PROT_ID;
+	if (!tcon || !tcon->ses || !tcon->ses->server) {
+		goto END;
 	}
-	return smb20_operations.query_file_info(xid, tcon, fid, data);
+	do {
+		origin_dialect = tcon->ses->server->dialect;
+		if (SMB20_PROT_ID > origin_dialect) {
+			rc = smb1_operations.query_file_info(xid, tcon, fid, data);
+		} else {
+			rc = smb20_operations.query_file_info(xid, tcon, fid, data);
+		}
+	} while (-EAGAIN == rc && origin_dialect != tcon->ses->server->dialect);
+END:
+	return rc;
 }
 
 //	int (*get_srv_inum)(const unsigned int, struct cifs_tcon *, struct cifs_sb_info *, const char *, u64 *uniqueid, FILE_ALL_INFO *);
@@ -879,10 +922,21 @@ syno_get_srv_inum(const unsigned int xid, struct cifs_tcon *tcon,
 		  struct cifs_sb_info *cifs_sb, const char *full_path,
 		  u64 *uniqueid, FILE_ALL_INFO *data)
 {
-	if (tcon && tcon->ses && tcon->ses->server && SMB20_PROT_ID > tcon->ses->server->dialect) {
-		return smb1_operations.get_srv_inum(xid, tcon, cifs_sb, full_path, uniqueid, data);
+	int rc = -EINVAL;
+	u16 origin_dialect = SMB20_PROT_ID;
+	if (!tcon || !tcon->ses || !tcon->ses->server) {
+		goto END;
 	}
-	return smb20_operations.get_srv_inum(xid, tcon, cifs_sb, full_path, uniqueid, data);
+	do {
+		origin_dialect = tcon->ses->server->dialect;
+		if (SMB20_PROT_ID > origin_dialect) {
+			rc = smb1_operations.get_srv_inum(xid, tcon, cifs_sb, full_path, uniqueid, data);
+		} else {
+			rc = smb20_operations.get_srv_inum(xid, tcon, cifs_sb, full_path, uniqueid, data);
+		}
+	} while (-EAGAIN == rc && origin_dialect != tcon->ses->server->dialect);
+END:
+	return rc;
 }
 
 //	int (*set_path_size)(const unsigned int, struct cifs_tcon *, const char *, __u64, struct cifs_sb_info *, bool);
@@ -891,10 +945,21 @@ syno_set_path_size(const unsigned int xid, struct cifs_tcon *tcon,
 		   const char *full_path, __u64 size,
 		   struct cifs_sb_info *cifs_sb, bool set_alloc)
 {
-	if (tcon && tcon->ses && tcon->ses->server && SMB20_PROT_ID > tcon->ses->server->dialect) {
-		return smb1_operations.set_path_size(xid, tcon, full_path, size, cifs_sb, set_alloc);
+	int rc = -EINVAL;
+	u16 origin_dialect = SMB20_PROT_ID;
+	if (!tcon || !tcon->ses || !tcon->ses->server) {
+		goto END;
 	}
-	return smb20_operations.set_path_size(xid, tcon, full_path, size, cifs_sb, set_alloc);
+	do {
+		origin_dialect = tcon->ses->server->dialect;
+		if (SMB20_PROT_ID > origin_dialect) {
+			rc = smb1_operations.set_path_size(xid, tcon, full_path, size, cifs_sb, set_alloc);
+		} else {
+			rc = smb20_operations.set_path_size(xid, tcon, full_path, size, cifs_sb, set_alloc);
+		}
+	} while (-EAGAIN == rc && origin_dialect != tcon->ses->server->dialect);
+END:
+	return rc;
 }
 
 //	int (*set_file_size)(const unsigned int, struct cifs_tcon *, struct cifsFileInfo *, __u64, bool);
@@ -913,6 +978,8 @@ static int
 syno_set_file_info(struct inode *inode, const char *full_path,
 		   FILE_BASIC_INFO *buf, const unsigned int xid)
 {
+	int rc = -EINVAL;
+	u16 origin_dialect = SMB20_PROT_ID;
 	struct cifs_sb_info *cifs_sb = CIFS_SB(inode->i_sb);
 	struct tcon_link *tlink = NULL;
 	struct cifs_tcon *tcon = NULL;
@@ -922,10 +989,20 @@ syno_set_file_info(struct inode *inode, const char *full_path,
 		return PTR_ERR(tlink);
 
 	tcon = tlink_tcon(tlink);
-	if (tcon && tcon->ses && tcon->ses->server && SMB20_PROT_ID > tcon->ses->server->dialect) {
-		return smb1_operations.set_file_info(inode, full_path, buf, xid);
+	if (!tcon || !tcon->ses || !tcon->ses->server) {
+		goto END;
 	}
-	return smb20_operations.set_file_info(inode, full_path, buf, xid);
+	do {
+		origin_dialect = tcon->ses->server->dialect;
+		if (SMB20_PROT_ID > origin_dialect) {
+			rc = smb1_operations.set_file_info(inode, full_path, buf, xid);
+		} else {
+			rc = smb20_operations.set_file_info(inode, full_path, buf, xid);
+		}
+	} while (-EAGAIN == rc && origin_dialect != tcon->ses->server->dialect);
+END:
+	cifs_put_tlink(tlink);
+	return rc;
 }
 
 //	int (*set_compression)(const unsigned int, struct cifs_tcon *, struct cifsFileInfo *);
@@ -960,10 +1037,21 @@ static int
 syno_mkdir(const unsigned int xid, struct cifs_tcon *tcon, const char *name,
 	   struct cifs_sb_info *cifs_sb)
 {
-	if (tcon && tcon->ses && tcon->ses->server && SMB20_PROT_ID > tcon->ses->server->dialect) {
-		return smb1_operations.mkdir(xid, tcon, name, cifs_sb);
+	int rc = -EINVAL;
+	u16 origin_dialect = SMB20_PROT_ID;
+	if (!tcon || !tcon->ses || !tcon->ses->server) {
+		goto END;
 	}
-	return smb20_operations.mkdir(xid, tcon, name, cifs_sb);
+	do {
+		origin_dialect = tcon->ses->server->dialect;
+		if (SMB20_PROT_ID > origin_dialect) {
+			rc = smb1_operations.mkdir(xid, tcon, name, cifs_sb);
+		} else {
+			rc = smb20_operations.mkdir(xid, tcon, name, cifs_sb);
+		}
+	} while (-EAGAIN == rc && origin_dialect != tcon->ses->server->dialect);
+END:
+	return rc;
 }
 
 //	void (*mkdir_setinfo)(struct inode *, const char *, struct cifs_sb_info *, struct cifs_tcon *, const unsigned int);
@@ -983,10 +1071,21 @@ static int
 syno_rmdir(const unsigned int xid, struct cifs_tcon *tcon, const char *name,
 	   struct cifs_sb_info *cifs_sb)
 {
-	if (tcon && tcon->ses && tcon->ses->server && SMB20_PROT_ID > tcon->ses->server->dialect) {
-		return smb1_operations.rmdir(xid, tcon, name, cifs_sb);
+	int rc = -EINVAL;
+	u16 origin_dialect = SMB20_PROT_ID;
+	if (!tcon || !tcon->ses || !tcon->ses->server) {
+		goto END;
 	}
-	return smb20_operations.rmdir(xid, tcon, name, cifs_sb);
+	do {
+		origin_dialect = tcon->ses->server->dialect;
+		if (SMB20_PROT_ID > origin_dialect) {
+			rc = smb1_operations.rmdir(xid, tcon, name, cifs_sb);
+		} else {
+			rc = smb20_operations.rmdir(xid, tcon, name, cifs_sb);
+		}
+	} while (-EAGAIN == rc && origin_dialect != tcon->ses->server->dialect);
+END:
+	return rc;
 }
 
 //	int (*unlink)(const unsigned int, struct cifs_tcon *, const char *, struct cifs_sb_info *);
@@ -994,10 +1093,21 @@ static int
 syno_unlink(const unsigned int xid, struct cifs_tcon *tcon, const char *name,
 	    struct cifs_sb_info *cifs_sb)
 {
-	if (tcon && tcon->ses && tcon->ses->server && SMB20_PROT_ID > tcon->ses->server->dialect) {
-		return smb1_operations.unlink(xid, tcon, name, cifs_sb);
+	int rc = -EINVAL;
+	u16 origin_dialect = SMB20_PROT_ID;
+	if (!tcon || !tcon->ses || !tcon->ses->server) {
+		goto END;
 	}
-	return smb20_operations.unlink(xid, tcon, name, cifs_sb);
+	do {
+		origin_dialect = tcon->ses->server->dialect;
+		if (SMB20_PROT_ID > origin_dialect) {
+			rc = smb1_operations.unlink(xid, tcon, name, cifs_sb);
+		} else {
+			rc = smb20_operations.unlink(xid, tcon, name, cifs_sb);
+		}
+	} while (-EAGAIN == rc && origin_dialect != tcon->ses->server->dialect);
+END:
+	return rc;
 }
 
 //	int (*rename_pending_delete)(const char *, struct dentry *, const unsigned int);
@@ -1005,6 +1115,7 @@ static int
 syno_rename_pending_delete(const char *full_path, struct dentry *dentry,
 			   const unsigned int xid)
 {
+	int rc = 0;
 	struct inode *inode = dentry->d_inode;
 	struct cifs_sb_info *cifs_sb = CIFS_SB(inode->i_sb);
 	struct tcon_link *tlink = NULL;
@@ -1015,9 +1126,13 @@ syno_rename_pending_delete(const char *full_path, struct dentry *dentry,
 		return PTR_ERR(tlink);
 	tcon = tlink_tcon(tlink);
 	if (tcon && tcon->ses && tcon->ses->server && SMB20_PROT_ID > tcon->ses->server->dialect) {
-		return smb1_operations.rename_pending_delete(full_path, dentry, xid);
+		rc = smb1_operations.rename_pending_delete(full_path, dentry, xid);
+		goto END;
 	}
-	return -EOPNOTSUPP;;
+	rc = -EOPNOTSUPP;;
+END:
+	cifs_put_tlink(tlink);
+	return rc;
 }
 
 //	int (*rename)(const unsigned int, struct cifs_tcon *, const char *, const char *, struct cifs_sb_info *);
@@ -1026,10 +1141,21 @@ syno_rename(const unsigned int xid, struct cifs_tcon *tcon,
 		 const char *from_name, const char *to_name,
 		 struct cifs_sb_info *cifs_sb)
 {
-	if (tcon && tcon->ses && tcon->ses->server && SMB20_PROT_ID > tcon->ses->server->dialect) {
-		return smb1_operations.rename(xid, tcon, from_name, to_name, cifs_sb);
+	int rc = -EINVAL;
+	u16 origin_dialect = SMB20_PROT_ID;
+	if (!tcon || !tcon->ses || !tcon->ses->server) {
+		goto END;
 	}
-	return smb20_operations.rename(xid, tcon, from_name, to_name, cifs_sb);
+	do {
+		origin_dialect = tcon->ses->server->dialect;
+		if (SMB20_PROT_ID > origin_dialect) {
+			rc = smb1_operations.rename(xid, tcon, from_name, to_name, cifs_sb);
+		} else {
+			rc = smb20_operations.rename(xid, tcon, from_name, to_name, cifs_sb);
+		}
+	} while (-EAGAIN == rc && origin_dialect != tcon->ses->server->dialect);
+END:
+	return rc;
 }
 
 //	int (*create_hardlink)(const unsigned int, struct cifs_tcon *, const char *, const char *, struct cifs_sb_info *);
@@ -1038,10 +1164,21 @@ syno_create_hardlink(const unsigned int xid, struct cifs_tcon *tcon,
 		     const char *from_name, const char *to_name,
 		     struct cifs_sb_info *cifs_sb)
 {
-	if (tcon && tcon->ses && tcon->ses->server && SMB20_PROT_ID > tcon->ses->server->dialect) {
-		return smb1_operations.create_hardlink(xid, tcon, from_name, to_name, cifs_sb);
+	int rc = -EINVAL;
+	u16 origin_dialect = SMB20_PROT_ID;
+	if (!tcon || !tcon->ses || !tcon->ses->server) {
+		goto END;
 	}
-	return smb20_operations.create_hardlink(xid, tcon, from_name, to_name, cifs_sb);
+	do {
+		origin_dialect = tcon->ses->server->dialect;
+		if (SMB20_PROT_ID > origin_dialect) {
+			rc = smb1_operations.create_hardlink(xid, tcon, from_name, to_name, cifs_sb);
+		} else {
+			rc = smb20_operations.create_hardlink(xid, tcon, from_name, to_name, cifs_sb);
+		}
+	} while (-EAGAIN == rc && origin_dialect != tcon->ses->server->dialect);
+END:
+	return rc;
 }
 
 //	int (*query_symlink)(const unsigned int, struct cifs_tcon *, const char *, char **, struct cifs_sb_info *);
@@ -1061,11 +1198,21 @@ static int
 syno_open(const unsigned int xid, struct cifs_open_parms *oparms,
 	       __u32 *oplock, FILE_ALL_INFO *buf)
 {
-	if (oparms && oparms->tcon && oparms->tcon->ses && oparms->tcon->ses->server &&
-		SMB20_PROT_ID > oparms->tcon->ses->server->dialect) {
-		return smb1_operations.open(xid, oparms, oplock, buf);
+	int rc = -EINVAL;
+	u16 origin_dialect = SMB20_PROT_ID;
+	if (!oparms || !oparms->tcon || !oparms->tcon->ses || !oparms->tcon->ses->server) {
+		goto END;
 	}
-	return smb20_operations.open(xid, oparms, oplock, buf);
+	do {
+		origin_dialect = oparms->tcon->ses->server->dialect;
+		if (SMB20_PROT_ID > origin_dialect) {
+			rc = smb1_operations.open(xid, oparms, oplock, buf);
+		} else {
+			rc = smb20_operations.open(xid, oparms, oplock, buf);
+		}
+	} while (-EAGAIN == rc && origin_dialect != oparms->tcon->ses->server->dialect);
+END:
+	return rc;
 }
 
 //	void (*set_fid)(struct cifsFileInfo *, struct cifs_fid *, __u32);
@@ -1158,10 +1305,21 @@ syno_query_dir_first(const unsigned int xid, struct cifs_tcon *tcon,
 		     struct cifs_fid *fid, __u16 search_flags,
 		     struct cifs_search_info *srch_inf)
 {
-	if (tcon && tcon->ses && tcon->ses->server && SMB20_PROT_ID > tcon->ses->server->dialect) {
-		return smb1_operations.query_dir_first(xid, tcon, path, cifs_sb, fid, search_flags, srch_inf);
+	int rc = -EINVAL;
+	u16 origin_dialect = SMB20_PROT_ID;
+	if (!tcon || !tcon->ses || !tcon->ses->server) {
+		goto END;
 	}
-	return smb20_operations.query_dir_first(xid, tcon, path, cifs_sb, fid, search_flags, srch_inf);
+	do {
+		origin_dialect = tcon->ses->server->dialect;
+		if (SMB20_PROT_ID > origin_dialect) {
+			rc = smb1_operations.query_dir_first(xid, tcon, path, cifs_sb, fid, search_flags, srch_inf);
+		} else {
+			rc = smb20_operations.query_dir_first(xid, tcon, path, cifs_sb, fid, search_flags, srch_inf);
+		}
+	} while (-EAGAIN == rc && origin_dialect != tcon->ses->server->dialect);
+END:
+	return rc;
 }
 
 //	int (*query_dir_next)(const unsigned int, struct cifs_tcon *, struct cifs_fid *, __u16, struct cifs_search_info *srch_inf);
@@ -1216,10 +1374,21 @@ static int
 syno_queryfs(const unsigned int xid, struct cifs_tcon *tcon,
 	     struct kstatfs *buf)
 {
-	if (tcon && tcon->ses && tcon->ses->server && SMB20_PROT_ID > tcon->ses->server->dialect) {
-		return smb1_operations.queryfs(xid, tcon, buf);
+	int rc = -EINVAL;
+	u16 origin_dialect = SMB20_PROT_ID;
+	if (!tcon || !tcon->ses || !tcon->ses->server) {
+		goto END;
 	}
-	return smb20_operations.queryfs(xid, tcon, buf);
+	do {
+		origin_dialect = tcon->ses->server->dialect;
+		if (SMB20_PROT_ID > origin_dialect) {
+			rc = smb1_operations.queryfs(xid, tcon, buf);
+		} else {
+			rc = smb20_operations.queryfs(xid, tcon, buf);
+		}
+	} while (-EAGAIN == rc && origin_dialect != tcon->ses->server->dialect);
+END:
+	return rc;
 }
 
 //	int (*mand_lock)(const unsigned int, struct cifsFileInfo *, __u64, __u64, __u32, int, int, bool);
@@ -1271,8 +1440,9 @@ syno_get_lease_key(struct inode *inode, struct cifs_fid *fid)
 
 	tcon = tlink_tcon(tlink);
 	if (tcon && tcon->ses && tcon->ses->server && SMB20_PROT_ID <= tcon->ses->server->dialect) {
-		return smb20_operations.get_lease_key(inode, fid);
+		smb20_operations.get_lease_key(inode, fid);
 	}
+	cifs_put_tlink(tlink);
 }
 
 //	void (*set_lease_key)(struct inode *, struct cifs_fid *);
@@ -1289,8 +1459,9 @@ syno_set_lease_key(struct inode *inode, struct cifs_fid *fid)
 
 	tcon = tlink_tcon(tlink);
 	if (tcon && tcon->ses && tcon->ses->server && SMB20_PROT_ID <= tcon->ses->server->dialect) {
-		return smb20_operations.set_lease_key(inode, fid);
+		smb20_operations.set_lease_key(inode, fid);
 	}
+	cifs_put_tlink(tlink);
 }
 
 //	void (*new_lease_key)(struct cifs_fid *);

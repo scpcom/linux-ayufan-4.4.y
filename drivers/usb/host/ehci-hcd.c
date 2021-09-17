@@ -68,7 +68,7 @@ MODULE_PARM_DESC (ignore_oc, "ignore bogus hardware overcurrent indications");
 
 #define	INTR_MASK (STS_IAA | STS_FATAL | STS_PCD | STS_ERR | STS_INT)
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_HIUSB_DEVICE2_0
 extern void set_usbhost_connect(int index, int online);
 #endif
@@ -569,7 +569,7 @@ static irqreturn_t ehci_irq (struct usb_hcd *hcd)
 			pstatus = ehci_readl(ehci,
 					 &ehci->regs->port_status[i]);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_HIUSB_DEVICE2_0
 			set_usbhost_connect(i, pstatus & PORT_CONNECT);
 #endif
@@ -911,7 +911,7 @@ EXPORT_SYMBOL_GPL(ehci_init_driver);
 MODULE_DESCRIPTION(DRIVER_DESC);
 MODULE_AUTHOR (DRIVER_AUTHOR);
 MODULE_LICENSE ("GPL");
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_HIUSB_EHCI
 #include "hiusb-ehci.c"
 #define	PLATFORM_DRIVER		hiusb_ehci_hcd_driver
@@ -989,7 +989,7 @@ static int __init ehci_hcd_init(void)
 
 	if (usb_disabled())
 		return -ENODEV;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_HIUSB_EHCI
 	retval = platform_device_register(&hiusb_ehci_platdev);
 	if (retval < 0) {
@@ -1000,7 +1000,7 @@ static int __init ehci_hcd_init(void)
 #endif
 #endif  
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	pr_info("%s: " DRIVER_DESC "\n", hcd_name);
 #else  
 	printk(KERN_INFO "%s: " DRIVER_DESC "\n", hcd_name);
@@ -1008,7 +1008,7 @@ static int __init ehci_hcd_init(void)
 	set_bit(USB_EHCI_LOADED, &usb_hcds_loaded);
 	if (test_bit(USB_UHCI_LOADED, &usb_hcds_loaded) ||
 			test_bit(USB_OHCI_LOADED, &usb_hcds_loaded))
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 		pr_info("Warning! ehci_hcd should always be loaded before uhci_hcd and ohci_hcd, not after\n");
 #else  
 		printk(KERN_WARNING "Warning! ehci_hcd should always be loaded"
@@ -1075,7 +1075,7 @@ clean0:
 err_debug:
 #endif
 	clear_bit(USB_EHCI_LOADED, &usb_hcds_loaded);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_HIUSB_EHCI
 	platform_device_unregister(&hiusb_ehci_platdev);
 #endif
@@ -1102,7 +1102,7 @@ static void __exit ehci_hcd_cleanup(void)
 	debugfs_remove(ehci_debug_root);
 #endif
 	clear_bit(USB_EHCI_LOADED, &usb_hcds_loaded);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_HIUSB_EHCI
 	platform_device_unregister(&hiusb_ehci_platdev);
 #endif

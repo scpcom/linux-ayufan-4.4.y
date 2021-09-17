@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  *  Capabilities Linux Security Module
  *
@@ -15,7 +12,7 @@
 
 #include <linux/security.h>
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 static int cap_binder_set_context_mgr(struct task_struct *mgr)
 {
 	return 0;
@@ -35,7 +32,7 @@ static int cap_binder_transfer_file(struct task_struct *from, struct task_struct
 {
 	return 0;
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 static int cap_syslog(int type)
 {
@@ -928,12 +925,12 @@ static void cap_audit_rule_free(void *lsmrule)
 
 void __init security_fixup_ops(struct security_operations *ops)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	set_to_cap_if_null(ops, binder_set_context_mgr);
 	set_to_cap_if_null(ops, binder_transaction);
 	set_to_cap_if_null(ops, binder_transfer_binder);
 	set_to_cap_if_null(ops, binder_transfer_file);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	set_to_cap_if_null(ops, ptrace_access_check);
 	set_to_cap_if_null(ops, ptrace_traceme);
 	set_to_cap_if_null(ops, capget);

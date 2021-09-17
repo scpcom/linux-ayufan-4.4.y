@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /******************************************************************************
  *	Flash Memory Controller Device Driver
  *	Copyright (c) 2014 - 2015 by Hisilicon
@@ -69,11 +66,11 @@
 #define CONFIG_HIFMC_MAX_CS_NUM			2
 
 /*****************************************************************************/
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 #define FMC_MAX_READY_WAIT_JIFFIES		(2 * HZ)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536_V2050 */
 #define FMC_MAX_READY_WAIT_JIFFIES		(40 * HZ)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 
 /*****************************************************************************/
 /* HIFMC REG */

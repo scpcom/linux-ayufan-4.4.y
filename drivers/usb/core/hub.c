@@ -776,7 +776,7 @@ static int hub_port_disable(struct usb_hub *hub, int port1, int set_state)
 #define PLATFORM_USB_POWER_OFF_TIME	(1000)
  
 #define SYNO_HUB_POWER_CYCLE_EXTRA_DELAY_TIME	(14000)		 
-#elif defined(MY_DEF_HERE)
+#elif defined(CONFIG_SYNO_HI3536)
 void syno_gpio_write(int gpio, int value);
 
 #define PLATFORM_USB_POWER_ON_TIME	(10)
@@ -798,7 +798,7 @@ syno_usb_set_power(struct usb_hcd *hcd, int enable, int port) {
 	int usb_vbus_gpio = get_vbus_gpio(hcd, port);
 
 	if (0 <= usb_vbus_gpio) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536)
 		syno_gpio_write(usb_vbus_gpio, enable);
 #else  
 		gpio_set_value(usb_vbus_gpio, enable);
@@ -861,7 +861,7 @@ __syno_usb_power_cycle(struct usb_hub *hub, int port) {
 	return 0;
 }
 
-static int
+int
 syno_usb_power_cycle(struct usb_hub *hub, int port, int status) {
 	struct usb_device *hdev = hub->hdev;
 	struct usb_hcd *hcd = bus_to_hcd(hdev->bus);
@@ -869,7 +869,7 @@ syno_usb_power_cycle(struct usb_hub *hub, int port, int status) {
 	if (hub->hdev->parent)
 		return -EINVAL;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536)
 	if (status == -ENODEV)
 #else  
 	if ((status == -ENODEV) || (status == -ENOTCONN))
@@ -2693,7 +2693,7 @@ void usb_enable_ltm(struct usb_device *udev)
 }
 EXPORT_SYMBOL_GPL(usb_enable_ltm);
 
-#if (defined(CONFIG_PM) && !defined(MY_DEF_HERE)) || (defined(MY_DEF_HERE) && defined(CONFIG_USB_SUSPEND))
+#if (defined(CONFIG_PM) && !defined(CONFIG_SYNO_LSP_HI3536)) || (defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_USB_SUSPEND))
  
 static int usb_disable_function_remotewakeup(struct usb_device *udev)
 {
@@ -3035,7 +3035,7 @@ int usb_port_resume(struct usb_device *udev, pm_message_t msg)
 
 #endif  
 
-#if (defined(CONFIG_PM_RUNTIME) && !defined(MY_DEF_HERE)) || (defined(MY_DEF_HERE) && defined(CONFIG_USB_SUSPEND))
+#if (defined(CONFIG_PM_RUNTIME) && !defined(CONFIG_SYNO_LSP_HI3536)) || (defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_USB_SUSPEND))
 
 int usb_remote_wakeup(struct usb_device *udev)
 {
@@ -3059,7 +3059,7 @@ int usb_remote_wakeup(struct usb_device *udev)
 
 #endif  
 
-#if defined(MY_DEF_HERE) && !defined(CONFIG_USB_SUSPEND)
+#if defined(CONFIG_SYNO_LSP_HI3536) && !defined(CONFIG_USB_SUSPEND)
 
 int usb_port_suspend(struct usb_device *udev, pm_message_t msg)
 {
@@ -4107,7 +4107,7 @@ static void hub_port_connect_change(struct usb_hub *hub, int port1,
 			}
 #endif  
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_USB_SUSPEND
 		} else if (udev->state == USB_STATE_SUSPENDED &&
 				udev->persist_enabled) {
@@ -4655,14 +4655,14 @@ static void hub_events(void)
 					usb_lock_device(udev);
 					status = usb_reset_device(udev);
 					usb_unlock_device(udev);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 					 
 #else  
 					connect_change = 0;
 #endif  
 				}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 				ret = hub_port_status(hub, i,
 						&portstatus, &portchange);
 				if (ret < 0)

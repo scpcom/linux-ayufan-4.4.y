@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * 2.5 block I/O model
  *
@@ -212,7 +209,7 @@ struct bio_integrity_payload {
 struct bio_pair {
 	struct bio			bio1, bio2;
 	struct bio_vec			bv1, bv2;
-#if !defined(MY_DEF_HERE)
+#if !defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 #if defined(CONFIG_BLK_DEV_INTEGRITY)
 	struct bio_integrity_payload	bip1, bip2;
 	struct bio_vec			iv1, iv2;
@@ -220,7 +217,7 @@ struct bio_pair {
 #endif
 	atomic_t			cnt;
 	int				error;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 #if defined(CONFIG_BLK_DEV_INTEGRITY)
 	struct bio_integrity_payload	bip1, bip2;
 	struct bio_vec			iv1, iv2;
@@ -538,7 +535,7 @@ struct bio_set {
 
 	mempool_t *bio_pool;
 	mempool_t *bvec_pool;
-#if !defined(MY_DEF_HERE)
+#if !defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 #if defined(CONFIG_BLK_DEV_INTEGRITY)
 	mempool_t *bio_integrity_pool;
 	mempool_t *bvec_integrity_pool;
@@ -553,7 +550,7 @@ struct bio_set {
 	struct bio_list		rescue_list;
 	struct work_struct	rescue_work;
 	struct workqueue_struct	*rescue_workqueue;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 #if defined(CONFIG_BLK_DEV_INTEGRITY)
 	mempool_t *bio_integrity_pool;
 	mempool_t *bvec_integrity_pool;

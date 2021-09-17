@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #include <asm/bitsperlong.h>
 
 /*
@@ -696,7 +693,7 @@ __SYSCALL(__NR_kcmp, sys_kcmp)
 #define __NR_finit_module 273
 __SYSCALL(__NR_finit_module, sys_finit_module)
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 /* Backporting seccomp, skip a few ...
  * #define __NR_sched_setattr 274
 __SYSCALL(__NR_sched_setattr, sys_sched_setattr)
@@ -710,10 +707,10 @@ __SYSCALL(__NR_seccomp, sys_seccomp)
 
 #undef __NR_syscalls
 #define __NR_syscalls 278
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 #undef __NR_syscalls
 #define __NR_syscalls 274
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 #define __NR_copy_file_range 285
 __SYSCALL(__NR_copy_file_range, sys_copy_file_range)

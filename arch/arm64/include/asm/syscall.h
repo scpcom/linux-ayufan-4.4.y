@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Copyright (C) 2012 ARM Ltd.
  *
@@ -19,10 +16,10 @@
 #ifndef __ASM_SYSCALL_H
 #define __ASM_SYSCALL_H
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #include <uapi/linux/audit.h>
 #include <linux/compat.h>
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 #include <linux/err.h>
 
 static inline int syscall_get_nr(struct task_struct *task,
@@ -109,7 +106,7 @@ static inline void syscall_set_arguments(struct task_struct *task,
 	memcpy(&regs->regs[i], args, n * sizeof(args[0]));
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 /*
  * We don't care about endianness (__AUDIT_ARCH_LE bit) here because
  * AArch64 has the same system calls both on little- and big- endian.
@@ -121,6 +118,6 @@ static inline int syscall_get_arch(void)
 
 	return AUDIT_ARCH_AARCH64;
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 #endif	/* __ASM_SYSCALL_H */

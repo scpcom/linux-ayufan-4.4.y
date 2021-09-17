@@ -31,6 +31,10 @@
 #include <linux/pm_runtime.h>
 #include <linux/platform_device.h>
 
+#ifdef MY_ABC_HERE
+#include <linux/math64.h>
+#endif  
+
 #include "libata.h"
 #include "libata-transport.h"
 
@@ -230,7 +234,12 @@ int SYNO_CTRL_HDD_POWERON(int index, int value)
 		return -EINVAL;
 	}
 
-	gpio_set_value(HDD_ENABLE_PIN(index), value);
+	if (gpio_cansleep(HDD_ENABLE_PIN(index))) {
+		gpio_set_value_cansleep(HDD_ENABLE_PIN(index), value);
+	} else {
+		gpio_set_value(HDD_ENABLE_PIN(index), value);
+	}
+
 	return 0;
 }
 EXPORT_SYMBOL(SYNO_CTRL_HDD_POWERON);
@@ -243,8 +252,13 @@ int SYNO_CHECK_HDD_DETECT(int index)
 		 
 		return 1;
 	}
-	ret = gpio_get_value(HDD_DETECT_PIN(index));
-	 
+
+	if (gpio_cansleep(HDD_DETECT_PIN(index))) {
+		ret = gpio_get_value_cansleep(HDD_DETECT_PIN(index));
+	} else {
+		ret = gpio_get_value(HDD_DETECT_PIN(index));
+	}
+
 	if (ACTIVE_LOW == HDD_DETECT_POLARITY()) {
 		return !ret;
 	}
@@ -285,6 +299,10 @@ EXPORT_SYMBOL(SYNO_CTRL_HDD_ACT_NOTIFY);
 extern int SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER(void);
 extern int SYNO_CTRL_HDD_POWERON(int index, int value);
 extern int SYNO_CHECK_HDD_PRESENT(int index);
+#if defined(MY_ABC_HERE)
+extern u8 SYNO_GET_HDD_PRESENT_PIN(int index);
+#define GPIO_UNDEF 0xFF
+#endif  
 #endif
 
 #ifndef MY_ABC_HERE
@@ -489,6 +507,13 @@ static void ata_force_link_limits(struct ata_link *link)
 					fe->param.lflags, link->flags);
 		}
 	}
+
+#ifdef MY_ABC_HERE
+	if ((syno_is_hw_version(HW_DS216p) || syno_is_hw_version(HW_DS216pII)) && 3 == link->ap->print_id) {
+		link->hw_sata_spd_limit = 0x3;
+		ata_link_notice(link, "FORCE: PHY spd limit set to 3.0 Gbps\n");
+	}
+#endif  
 }
 
 static void ata_force_xfermask(struct ata_device *dev)
@@ -1940,6 +1965,9 @@ int ata_dev_configure(struct ata_device *dev)
 	char revbuf[7];		 
 	char fwrevbuf[ATA_ID_FW_REV_LEN+1];
 	char modelbuf[ATA_ID_PROD_LEN+1];
+#ifdef MY_ABC_HERE
+	char snbuf[ATA_ID_SERNO_LEN+1];
+#endif  
 	int rc;
 #ifdef MY_ABC_HERE
 	struct pci_dev *pdev = NULL;
@@ -2080,6 +2108,10 @@ int ata_dev_configure(struct ata_device *dev)
 
 	ata_id_c_string(dev->id, modelbuf, ATA_ID_PROD,
 			sizeof(modelbuf));
+#ifdef MY_ABC_HERE
+	ata_id_c_string(dev->id, snbuf, ATA_ID_SERNO,
+			sizeof(snbuf));
+#endif  
 
 #ifdef MY_ABC_HERE
 	 
@@ -2087,6 +2119,18 @@ int ata_dev_configure(struct ata_device *dev)
 	if (pdev != NULL && pdev->device == 0x9215) {
 		if (!glob_match(modelbuf, "WDC WD7500BPKX-*") ||
 		    !glob_match(modelbuf, "WDC WD5000BPKX-*")) {
+			dev->horkage |= ATA_HORKAGE_NONCQ;
+		}
+	}
+	 
+	if (pdev->vendor == 0x1095 && pdev->device == 0x3132) {
+		if (syno_is_hw_version(HW_DS1815p)) {
+			if (ap && (ap->print_id == 9 || ap->print_id == 10)) {
+				dev->horkage |= ATA_HORKAGE_NONCQ;
+			}
+		} else if (syno_is_hw_version(HW_DS1515p)) {
+			dev->horkage |= ATA_HORKAGE_NONCQ;
+		} else if (syno_is_hw_version(HW_DS415p)) {
 			dev->horkage |= ATA_HORKAGE_NONCQ;
 		}
 	}
@@ -2145,6 +2189,11 @@ int ata_dev_configure(struct ata_device *dev)
 					     "%llu sectors, multi %u: %s %s\n",
 					(unsigned long long)dev->n_sectors,
 					dev->multi_count, lba_desc, ncq_desc);
+#ifdef MY_ABC_HERE
+				ata_dev_info(dev,
+					     "SN:%s\n",
+					     snbuf);
+#endif  
 			}
 		} else {
 			 
@@ -2168,8 +2217,19 @@ int ata_dev_configure(struct ata_device *dev)
 					     (unsigned long long)dev->n_sectors,
 					     dev->multi_count, dev->cylinders,
 					     dev->heads, dev->sectors);
+#ifdef MY_ABC_HERE
+				ata_dev_info(dev,
+					     "SN:%s\n",
+					     snbuf);
+#endif  
 			}
 		}
+
+#ifdef MY_DEF_HERE
+		if (!glob_match(modelbuf, "SATADOM-SH TYPE D 3SE")) {
+			dev->id[ATA_ID_FEATURE_SUPP] &= cpu_to_le16(~(1 << 8));
+		}
+#endif  
 
 		if (ata_id_has_devslp(dev->id)) {
 			u8 *sata_setting = ap->sector_buf;
@@ -2435,6 +2495,49 @@ int ata_bus_probe(struct ata_port *ap)
 	goto retry;
 }
 
+#if defined(MY_ABC_HERE)
+static int syno_ata_present_print_check(void)
+{
+	int iRet = 1;
+	 
+	if (syno_is_hw_version(HW_RS816) || syno_is_hw_version(HW_RS217)) {
+		iRet = 0;
+	}
+	return iRet;
+}
+
+void syno_ata_present_print(struct ata_port *ap, const char *eventlog)
+{
+	int iHavePres = 0;
+	if (ap->nr_pmp_links == 0) {
+#ifdef MY_ABC_HERE
+		if (syno_ata_present_print_check() && HAVE_HDD_DETECT(ap->syno_disk_index + 1)) {
+			if (SYNO_CHECK_HDD_DETECT(ap->syno_disk_index + 1)) {
+				ata_port_printk(ap, KERN_ERR, "Disk is present for %s event\n", eventlog);
+			} else {
+				ata_port_printk(ap, KERN_ERR, "Disk is not present for %s event\n", eventlog);
+			}
+			iHavePres = 1;
+		}
+#else  
+		if (GPIO_UNDEF != SYNO_GET_HDD_PRESENT_PIN(ap->syno_disk_index + 1)) {
+			if (SYNO_CHECK_HDD_PRESENT(ap->syno_disk_index + 1)) {
+				ata_port_printk(ap, KERN_ERR, "Disk is present for %s event\n", eventlog);
+			} else {
+				ata_port_printk(ap, KERN_ERR, "Disk is not present for %s event\n", eventlog);
+			}
+			iHavePres = 1;
+		}
+#endif  
+	}
+
+	if (!iHavePres) {
+		ata_port_printk(ap, KERN_ERR, "No present pin info for %s event\n", eventlog);
+	}
+}
+EXPORT_SYMBOL(syno_ata_present_print);
+#endif  
+ 
 #ifdef MY_ABC_HERE
 void sata_print_link_status(struct ata_link *link)
 #else  
@@ -2454,6 +2557,11 @@ static void sata_print_link_status(struct ata_link *link)
 	} else {
 		ata_link_info(link, "SATA link down (SStatus %X SControl %X)\n",
 			      sstatus, scontrol);
+#if defined(MY_ABC_HERE)
+		if (link->ap) {
+			syno_ata_present_print(link->ap, "SATA link down");
+		}
+#endif  
 	}
 }
 
@@ -3232,7 +3340,12 @@ int sata_link_hardreset(struct ata_link *link, const unsigned long *timing,
 
 			pmp_deadline = ata_deadline(jiffies,
 						    ATA_TMOUT_PMP_SRST_WAIT);
+#ifdef MY_ABC_HERE
+			 
+			if (time_before(pmp_deadline, deadline))
+#else
 			if (time_after(pmp_deadline, deadline))
+#endif  
 				pmp_deadline = deadline;
 			ata_wait_ready(link, pmp_deadline, check_ready);
 		}
@@ -3907,6 +4020,61 @@ void ata_qc_free(struct ata_queued_cmd *qc)
 	}
 }
 
+#ifdef MY_ABC_HERE
+static inline unsigned int syno_ata_latency_bucket_offset_get(const u64 u64Latency)
+{
+	unsigned int uOffset = 0;
+
+	if ( 0x1F < u64Latency) {
+		uOffset += 1;
+	}
+
+	if (unlikely( 0x3FF < u64Latency)) {
+		uOffset += 1;
+	}
+
+	return uOffset;
+}
+
+static void syno_ata_cmd_latency_preprocess(struct ata_queued_cmd *qc,
+											struct ata_link *link,
+											u64 u64AtaIntrTime)
+{
+	u8 u8QcType = 0;
+	unsigned int uBucketOffset = 0;
+	u64 u64StepOffset = 0;
+	u64 u64CmdRespTime = 0;
+
+	u8QcType = qc->qc_stat.u8QcType;
+	if (unlikely(2 < u8QcType)) {
+		u8QcType = 0;
+	}
+
+	u64CmdRespTime = (u64AtaIntrTime - qc->qc_stat.u64IssueTime);;
+
+	link->ata_latency.u16TotalCplCmdCnt += 1;
+	link->ata_latency.u16CplCmdCnt[u8QcType] += 1;
+	link->latency_stat.u64TotalCount[u8QcType] += 1;
+	link->latency_stat.u64TotalBytes[u8QcType] += qc->nbytes;
+	link->latency_stat.u64TotalRespTime[u8QcType] += u64CmdRespTime;
+	if ((0 == link->ata_latency.u64FirstCmdStartTime)
+			|| (qc->qc_stat.u64IssueTime < link->ata_latency.u64FirstCmdStartTime)) {
+		link->ata_latency.u64FirstCmdStartTime = qc->qc_stat.u64IssueTime;
+	}
+
+	u64StepOffset = (u64CmdRespTime >> 15);
+	 
+	uBucketOffset = syno_ata_latency_bucket_offset_get(u64StepOffset);
+	u64StepOffset >>= (5 * uBucketOffset);
+	if (unlikely(31 < u64StepOffset)) {
+		uBucketOffset = 2;
+		u64StepOffset = 31;
+	}
+	link->ata_latency.u32RespTimeBuckets[u8QcType][uBucketOffset][u64StepOffset] += 1;
+	return;
+}
+#endif  
+
 void __ata_qc_complete(struct ata_queued_cmd *qc)
 {
 	struct ata_port *ap;
@@ -3932,6 +4100,10 @@ void __ata_qc_complete(struct ata_queued_cmd *qc)
 	if (unlikely(qc->flags & ATA_QCFLAG_CLEAR_EXCL &&
 		     ap->excl_link == link))
 		ap->excl_link = NULL;
+
+#ifdef MY_ABC_HERE
+	syno_ata_cmd_latency_preprocess(qc, link, ap->u64AtaIntrTime);
+#endif  
 
 	qc->flags &= ~ATA_QCFLAG_ACTIVE;
 	ap->qc_active &= ~(1 << qc->tag);
@@ -4036,12 +4208,74 @@ void ata_qc_complete(struct ata_queued_cmd *qc)
 		__ata_qc_complete(qc);
 	}
 }
+#ifdef MY_ABC_HERE
+ 
+static void syno_ata_latency_calculate(struct ata_link *link, u64 u64AtaIntrTime)
+{
+	int iType					= 0;
+	unsigned int uBucketOffset	= 0;
+	u64 u64CmdStartTime			= 0;
+	u64 u64CmdLatencyTime		= 0;
+	u64 u64StepOffset			= 0;
+
+	if (0 == link->ata_latency.u16TotalCplCmdCnt) {
+		goto END;
+	}
+
+	u64CmdStartTime = (link->ata_latency.u64FirstCmdStartTime
+						> link->ata_latency.u64LastIntrTime)
+									? link->ata_latency.u64FirstCmdStartTime
+									: link->ata_latency.u64LastIntrTime;
+	u64CmdLatencyTime = div_u64((u64AtaIntrTime - u64CmdStartTime),
+										link->ata_latency.u16TotalCplCmdCnt);
+	 
+	u64StepOffset = (u64CmdLatencyTime >> 15);
+	 
+	uBucketOffset = syno_ata_latency_bucket_offset_get(u64StepOffset);
+	u64StepOffset >>= (5 * uBucketOffset);
+	if (unlikely(31 < u64StepOffset)) {
+		uBucketOffset = 2;
+		u64StepOffset = 31;
+	}
+
+	for (iType = 0 ; iType < SYNO_LATENCY_TYPE_COUNT; iType++) {
+		link->latency_stat.u64TotalTime[iType]
+				+= (u64CmdLatencyTime * link->ata_latency.u16CplCmdCnt[iType]);
+
+		link->ata_latency.u32TimeBuckets[iType][uBucketOffset][u64StepOffset]
+									+= link->ata_latency.u16CplCmdCnt[iType];
+	}
+
+	if (!link->sactive) {
+		 
+		link->ata_latency.u64BatchComplete = u64AtaIntrTime;
+		link->latency_stat.u64TotalBatchCount += 1;
+		link->latency_stat.u64TotalBatchTime +=
+					(u64AtaIntrTime - link->ata_latency.u64BatchIssue);
+	}
+
+	link->ata_latency.u64LastIntrTime = u64AtaIntrTime;
+END:
+	 
+	link->ata_latency.u64FirstCmdStartTime = 0;
+	link->ata_latency.u16TotalCplCmdCnt = 0;
+	for (iType = 0 ; iType < SYNO_LATENCY_TYPE_COUNT; iType++) {
+		link->ata_latency.u16CplCmdCnt[iType] = 0;
+	}
+	return;
+}
+#endif  
 
 int ata_qc_complete_multiple(struct ata_port *ap, u32 qc_active)
 {
 	int nr_done = 0;
 	u32 done_mask;
 
+#ifdef MY_ABC_HERE
+	struct ata_link *link = NULL;
+
+	ap->u64AtaIntrTime = cpu_clock(0);
+#endif  
 	done_mask = ap->qc_active ^ qc_active;
 
 	if (unlikely(done_mask & qc_active)) {
@@ -4061,15 +4295,39 @@ int ata_qc_complete_multiple(struct ata_port *ap, u32 qc_active)
 		}
 		done_mask &= ~(1 << tag);
 	}
+#ifdef MY_ABC_HERE
+	ata_for_each_link(link, ap, HOST_FIRST) {
+		syno_ata_latency_calculate(link, ap->u64AtaIntrTime);
+	}
+#endif  
 
 	return nr_done;
 }
+
+#ifdef MY_ABC_HERE
+static inline void syno_ata_latency_start(struct ata_queued_cmd *qc, u8 blIsBatchHead)
+{
+	struct ata_link *link = qc->dev->link;
+
+	qc->qc_stat.u64IssueTime = cpu_clock(0);
+
+	if (1 == blIsBatchHead) {
+		 
+		link->ata_latency.u64BatchIssue = qc->qc_stat.u64IssueTime;
+	}
+
+	return;
+}
+#endif  
 
 void ata_qc_issue(struct ata_queued_cmd *qc)
 {
 	struct ata_port *ap = qc->ap;
 	struct ata_link *link = qc->dev->link;
 	u8 prot = qc->tf.protocol;
+#ifdef MY_ABC_HERE
+	u8 blIsBatchHead = 0;
+#endif  
 
 	WARN_ON_ONCE(ap->ops->error_handler && ata_tag_valid(link->active_tag));
 
@@ -4077,9 +4335,20 @@ void ata_qc_issue(struct ata_queued_cmd *qc)
 		WARN_ON_ONCE(link->sactive & (1 << qc->tag));
 
 		if (!link->sactive)
+#ifdef MY_ABC_HERE
+		{
+			 
+#endif  
 			ap->nr_active_links++;
+#ifdef MY_ABC_HERE
+			blIsBatchHead = 1;
+		}
+#endif  
 		link->sactive |= 1 << qc->tag;
 	} else {
+#ifdef MY_ABC_HERE
+		blIsBatchHead = 1;
+#endif  
 		WARN_ON_ONCE(link->sactive);
 
 		ap->nr_active_links++;
@@ -4106,6 +4375,10 @@ void ata_qc_issue(struct ata_queued_cmd *qc)
 	}
 
 	ap->ops->qc_prep(qc);
+
+#ifdef MY_ABC_HERE
+	syno_ata_latency_start(qc, blIsBatchHead);
+#endif  
 
 	qc->err_mask |= ap->ops->qc_issue(qc);
 	if (unlikely(qc->err_mask))
@@ -4417,6 +4690,11 @@ void ata_link_init(struct ata_port *ap, struct ata_link *link, int pmp)
 	link->pmp = pmp;
 	link->active_tag = ATA_TAG_POISON;
 	link->hw_sata_spd_limit = UINT_MAX;
+#ifdef MY_ABC_HERE
+	memset(&(link->ata_latency), 0, sizeof(struct syno_ata_latency));
+	memset(&(link->latency_stat), 0, sizeof(struct syno_latency_stat));
+	memset(&(link->prev_latency_stat), 0, sizeof(struct syno_latency_stat));
+#endif  
 
 	for (i = 0; i < ATA_MAX_DEVICES; i++) {
 		struct ata_device *dev = &link->device[i];
@@ -4505,6 +4783,10 @@ struct ata_port *ata_port_alloc(struct ata_host *host)
 	ap->stats.idle_irq = 1;
 #endif
 
+#ifdef MY_ABC_HERE
+	ap->error_handling = 0;
+#endif  
+
 	ata_sff_port_init(ap);
 
 	return ap;
@@ -4567,7 +4849,7 @@ struct ata_host *ata_host_alloc(struct device *dev, int max_ports)
 
 		ap->port_no = i;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_ARCH_HI3531A
 		if (mplx_port0)
 			ap->port_no += 1;

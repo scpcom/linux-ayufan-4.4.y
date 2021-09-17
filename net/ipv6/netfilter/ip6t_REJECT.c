@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * IP6 tables REJECT target module
  * Linux INET6 implementation
@@ -183,7 +180,7 @@ send_unreach(struct net *net, struct sk_buff *skb_in, unsigned char code,
 		skb_in->dev = net->loopback_dev;
 
 	icmpv6_send(skb_in, ICMPV6_DEST_UNREACH, code, 0);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_IP6_NF_TARGET_REJECT_SKERR
 	if (skb_in->sk) {
 		icmpv6_err_convert(ICMPV6_DEST_UNREACH, code,
@@ -193,7 +190,7 @@ send_unreach(struct net *net, struct sk_buff *skb_in, unsigned char code,
 			skb_in->sk->sk_err, skb_in, skb_in->sk);
 	}
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 }
 
 static unsigned int

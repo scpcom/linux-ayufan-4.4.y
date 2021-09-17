@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -96,6 +99,18 @@ static int __ethtool_get_settings(struct net_device *dev, void __user *useraddr)
 *	0 for success
 *
 *******************************************************************************/
+#if defined(MY_ABC_HERE)
+int mv_mux_tool_get_link_ksettings(struct net_device *netdev, struct ethtool_link_ksettings *cmd)
+{
+	struct mux_netdev *pmux_priv = MV_MUX_PRIV(netdev);
+	struct net_device *root = mux_eth_shadow[pmux_priv->port].root;
+
+	if (!root)
+		return -ENETUNREACH;
+
+	return __ethtool_get_link_ksettings(root, cmd);
+}
+#else
 int mv_mux_tool_get_settings(struct net_device *netdev, struct ethtool_cmd *cmd)
 {
 	struct mux_netdev *pmux_priv = MV_MUX_PRIV(netdev);
@@ -106,6 +121,7 @@ int mv_mux_tool_get_settings(struct net_device *netdev, struct ethtool_cmd *cmd)
 
 	return __ethtool_get_settings(root, cmd);
 }
+#endif /* MY_ABC_HERE */
 /******************************************************************************
 *mv_mux_tool_get_drvinfo
 *Description:
@@ -226,7 +242,11 @@ u32 mv_mux_tool_get_link(struct net_device *mux_dev)
 #endif
 
 const struct ethtool_ops mv_mux_tool_ops = {
+#if defined(MY_ABC_HERE)
+	.get_link_ksettings	= mv_mux_tool_get_link_ksettings,
+#else
 	.get_settings	= mv_mux_tool_get_settings,
+#endif
 	.get_pauseparam	= mv_mux_tool_get_pauseparam,
 	.get_coalesce	= mv_mux_tool_get_coalesce,
 	.get_link	= ethtool_op_get_link,

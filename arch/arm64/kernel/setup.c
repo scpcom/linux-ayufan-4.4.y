@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Based on arch/arm/kernel/setup.c
  *
@@ -61,14 +58,14 @@
 unsigned int processor_id;
 EXPORT_SYMBOL(processor_id);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 unsigned long elf_hwcap __read_mostly;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 unsigned int elf_hwcap __read_mostly;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 EXPORT_SYMBOL_GPL(elf_hwcap);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_COMPAT
 #define COMPAT_ELF_HWCAP_DEFAULT	\
 				(COMPAT_HWCAP_HALF|COMPAT_HWCAP_THUMB|\
@@ -79,7 +76,7 @@ EXPORT_SYMBOL_GPL(elf_hwcap);
 unsigned int compat_elf_hwcap __read_mostly = COMPAT_ELF_HWCAP_DEFAULT;
 unsigned int compat_elf_hwcap2 __read_mostly;
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 static const char *cpu_name;
 static const char *machine_name;
@@ -134,9 +131,9 @@ void cpuinfo_store_cpu(void)
 static void __init setup_processor(void)
 {
 	struct cpu_info *cpu_info;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	u64 features, block;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	/*
 	 * locate processor in the list of supported processor
@@ -158,7 +155,7 @@ static void __init setup_processor(void)
 	sprintf(init_utsname()->machine, "aarch64");
 	elf_hwcap = 0;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	/*
 	 * ID_AA64ISAR0_EL1 contains 4-bit wide signed feature blocks.
 	 * The blocks we test below represent incremental functionality
@@ -221,7 +218,7 @@ static void __init setup_processor(void)
 	if (block && !(block & 0x8))
 		compat_elf_hwcap2 |= COMPAT_HWCAP2_CRC32;
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 }
 
 static void __init setup_machine_fdt(phys_addr_t dt_phys)
@@ -411,14 +408,14 @@ subsys_initcall(topology_init);
 static const char *hwcap_str[] = {
 	"fp",
 	"asimd",
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	"evtstrm",
 	"aes",
 	"pmull",
 	"sha1",
 	"sha2",
 	"crc32",
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	NULL
 };
 
@@ -486,7 +483,7 @@ static int c_show(struct seq_file *m, void *v)
 			for (j = 0; hwcap_str[j]; j++)
 				if (elf_hwcap & (1 << j))
 					seq_printf(m, " %s", hwcap_str[j]);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_ARMV7_COMPAT_CPUINFO
 			if (is_compat_task()) {
 				/* Print out the non-optional ARMv8 HW capabilities */
@@ -494,20 +491,20 @@ static int c_show(struct seq_file *m, void *v)
 				seq_printf(m, "vfpv4 idiva idivt ");
 			}
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		}
 		seq_puts(m, "\n");
 
 		seq_printf(m, "CPU implementer\t: 0x%02x\n", (midr >> 24));
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 		seq_printf(m, "CPU architecture: %s\n",
 #if IS_ENABLED(CONFIG_ARMV7_COMPAT_CPUINFO)
 				is_compat_task() ? "8" :
 #endif
 				"AArch64");
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 		seq_printf(m, "CPU architecture: 8\n");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		seq_printf(m, "CPU variant\t: 0x%x\n", ((midr >> 20) & 0xf));
 		seq_printf(m, "CPU part\t: 0x%03x\n", ((midr >> 4) & 0xfff));
 		seq_printf(m, "CPU revision\t: %d\n\n", (midr & 0xf));

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /* sha1-armv7-neon.S - ARM/NEON accelerated SHA-1 transform function
  *
  * Copyright © 2013-2014 Jussi Kivilinna <jussi.kivilinna@iki.fi>
@@ -282,11 +279,11 @@
 #define WPRECALC_32_79_9(i,W,W_m04,W_m08,W_m12,W_m16,W_m20,W_m24,W_m28) \
 	vst1.32 {tmp0}, [RWK];
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
 #ifdef push
 #undef push
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 
 /*
  * Transform nblks*64 bytes (nblks*16 32-bit words) at DATA.

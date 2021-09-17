@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * The Flash Memory Controller v100 Device Driver for hisilicon
  *
@@ -505,7 +502,7 @@ static void hifmc100_read_buf(struct mtd_info *mtd, u_char *buf, int len)
 		memcpy(buf, (char *)host->buffer, len);
 #endif
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 	if (buf != chip->oob_poi) {
 		u_int reg, ecc_step = host->pagesize >> 10;
 
@@ -520,7 +517,7 @@ static void hifmc100_read_buf(struct mtd_info *mtd, u_char *buf, int len)
 				mtd->ecc_stats.corrected += err_num;
 		}
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 
 	return;
 }

@@ -296,6 +296,279 @@ static int __ethtool_set_flags(struct net_device *dev, u32 data)
 	return 0;
 }
 
+#if defined(MY_ABC_HERE)
+static void convert_legacy_u32_to_link_mode(unsigned long *dst, u32 legacy_u32)
+{
+	bitmap_zero(dst, __ETHTOOL_LINK_MODE_MASK_NBITS);
+	dst[0] = legacy_u32;
+}
+
+static bool convert_link_mode_to_legacy_u32(u32 *legacy_u32,
+					    const unsigned long *src)
+{
+	bool retval = true;
+
+	if (__ETHTOOL_LINK_MODE_MASK_NBITS > 32) {
+		__ETHTOOL_DECLARE_LINK_MODE_MASK(ext);
+
+		bitmap_zero(ext, __ETHTOOL_LINK_MODE_MASK_NBITS);
+		bitmap_fill(ext, 32);
+		bitmap_complement(ext, ext, __ETHTOOL_LINK_MODE_MASK_NBITS);
+		if (bitmap_intersects(ext, src,
+				      __ETHTOOL_LINK_MODE_MASK_NBITS)) {
+			 
+			retval = false;
+		}
+	}
+	*legacy_u32 = src[0];
+	return retval;
+}
+
+static bool
+convert_legacy_settings_to_link_ksettings(
+	struct ethtool_link_ksettings *link_ksettings,
+	const struct ethtool_cmd *legacy_settings)
+{
+	bool retval = true;
+
+	memset(link_ksettings, 0, sizeof(*link_ksettings));
+
+	if (legacy_settings->transceiver ||
+	    legacy_settings->maxtxpkt ||
+	    legacy_settings->maxrxpkt)
+		retval = false;
+
+	convert_legacy_u32_to_link_mode(
+		link_ksettings->link_modes.supported,
+		legacy_settings->supported);
+	convert_legacy_u32_to_link_mode(
+		link_ksettings->link_modes.advertising,
+		legacy_settings->advertising);
+	convert_legacy_u32_to_link_mode(
+		link_ksettings->link_modes.lp_advertising,
+		legacy_settings->lp_advertising);
+	link_ksettings->base.speed
+		= ethtool_cmd_speed(legacy_settings);
+	link_ksettings->base.duplex
+		= legacy_settings->duplex;
+	link_ksettings->base.port
+		= legacy_settings->port;
+	link_ksettings->base.phy_address
+		= legacy_settings->phy_address;
+	link_ksettings->base.autoneg
+		= legacy_settings->autoneg;
+	link_ksettings->base.mdio_support
+		= legacy_settings->mdio_support;
+	link_ksettings->base.eth_tp_mdix
+		= legacy_settings->eth_tp_mdix;
+	link_ksettings->base.eth_tp_mdix_ctrl
+		= legacy_settings->eth_tp_mdix_ctrl;
+	return retval;
+}
+
+static bool
+convert_link_ksettings_to_legacy_settings(
+	struct ethtool_cmd *legacy_settings,
+	const struct ethtool_link_ksettings *link_ksettings)
+{
+	bool retval = true;
+
+	memset(legacy_settings, 0, sizeof(*legacy_settings));
+	 
+	retval &= convert_link_mode_to_legacy_u32(
+		&legacy_settings->supported,
+		link_ksettings->link_modes.supported);
+	retval &= convert_link_mode_to_legacy_u32(
+		&legacy_settings->advertising,
+		link_ksettings->link_modes.advertising);
+	retval &= convert_link_mode_to_legacy_u32(
+		&legacy_settings->lp_advertising,
+		link_ksettings->link_modes.lp_advertising);
+	ethtool_cmd_speed_set(legacy_settings, link_ksettings->base.speed);
+	legacy_settings->duplex
+		= link_ksettings->base.duplex;
+	legacy_settings->port
+		= link_ksettings->base.port;
+	legacy_settings->phy_address
+		= link_ksettings->base.phy_address;
+	legacy_settings->autoneg
+		= link_ksettings->base.autoneg;
+	legacy_settings->mdio_support
+		= link_ksettings->base.mdio_support;
+	legacy_settings->eth_tp_mdix
+		= link_ksettings->base.eth_tp_mdix;
+	legacy_settings->eth_tp_mdix_ctrl
+		= link_ksettings->base.eth_tp_mdix_ctrl;
+	return retval;
+}
+
+#define __ETHTOOL_LINK_MODE_MASK_NU32			\
+	DIV_ROUND_UP(__ETHTOOL_LINK_MODE_MASK_NBITS, 32)
+
+struct ethtool_link_usettings {
+	struct ethtool_link_settings base;
+	struct {
+		__u32 supported[__ETHTOOL_LINK_MODE_MASK_NU32];
+		__u32 advertising[__ETHTOOL_LINK_MODE_MASK_NU32];
+		__u32 lp_advertising[__ETHTOOL_LINK_MODE_MASK_NU32];
+	} link_modes;
+};
+
+int __ethtool_get_link_ksettings(struct net_device *dev,
+				 struct ethtool_link_ksettings *link_ksettings)
+{
+	int err;
+	struct ethtool_cmd cmd;
+
+	ASSERT_RTNL();
+
+	if (dev->ethtool_ops->get_link_ksettings) {
+		memset(link_ksettings, 0, sizeof(*link_ksettings));
+		return dev->ethtool_ops->get_link_ksettings(dev,
+							    link_ksettings);
+	}
+
+	if (!dev->ethtool_ops->get_settings)
+		return -EOPNOTSUPP;
+
+	memset(&cmd, 0, sizeof(cmd));
+	cmd.cmd = ETHTOOL_GSET;
+	err = dev->ethtool_ops->get_settings(dev, &cmd);
+	if (err < 0)
+		return err;
+
+	convert_legacy_settings_to_link_ksettings(link_ksettings, &cmd);
+	return err;
+}
+EXPORT_SYMBOL(__ethtool_get_link_ksettings);
+
+static int load_link_ksettings_from_user(struct ethtool_link_ksettings *to,
+					 const void __user *from)
+{
+	struct ethtool_link_usettings link_usettings;
+
+	if (copy_from_user(&link_usettings, from, sizeof(link_usettings)))
+		return -EFAULT;
+
+	memcpy(&to->base, &link_usettings.base, sizeof(to->base));
+	bitmap_from_u32array(to->link_modes.supported,
+			     __ETHTOOL_LINK_MODE_MASK_NBITS,
+			     link_usettings.link_modes.supported,
+			     __ETHTOOL_LINK_MODE_MASK_NU32);
+	bitmap_from_u32array(to->link_modes.advertising,
+			     __ETHTOOL_LINK_MODE_MASK_NBITS,
+			     link_usettings.link_modes.advertising,
+			     __ETHTOOL_LINK_MODE_MASK_NU32);
+	bitmap_from_u32array(to->link_modes.lp_advertising,
+			     __ETHTOOL_LINK_MODE_MASK_NBITS,
+			     link_usettings.link_modes.lp_advertising,
+			     __ETHTOOL_LINK_MODE_MASK_NU32);
+
+	return 0;
+}
+
+static int
+store_link_ksettings_for_user(void __user *to,
+			      const struct ethtool_link_ksettings *from)
+{
+	struct ethtool_link_usettings link_usettings;
+
+	memcpy(&link_usettings.base, &from->base, sizeof(link_usettings));
+	bitmap_to_u32array(link_usettings.link_modes.supported,
+			   __ETHTOOL_LINK_MODE_MASK_NU32,
+			   from->link_modes.supported,
+			   __ETHTOOL_LINK_MODE_MASK_NBITS);
+	bitmap_to_u32array(link_usettings.link_modes.advertising,
+			   __ETHTOOL_LINK_MODE_MASK_NU32,
+			   from->link_modes.advertising,
+			   __ETHTOOL_LINK_MODE_MASK_NBITS);
+	bitmap_to_u32array(link_usettings.link_modes.lp_advertising,
+			   __ETHTOOL_LINK_MODE_MASK_NU32,
+			   from->link_modes.lp_advertising,
+			   __ETHTOOL_LINK_MODE_MASK_NBITS);
+
+	if (copy_to_user(to, &link_usettings, sizeof(link_usettings)))
+		return -EFAULT;
+
+	return 0;
+}
+
+static int ethtool_get_link_ksettings(struct net_device *dev,
+				      void __user *useraddr)
+{
+	int err = 0;
+	struct ethtool_link_ksettings link_ksettings;
+
+	ASSERT_RTNL();
+
+	if (!dev->ethtool_ops->get_link_ksettings)
+		return -EOPNOTSUPP;
+
+	if (copy_from_user(&link_ksettings.base, useraddr,
+			   sizeof(link_ksettings.base)))
+		return -EFAULT;
+
+	if (__ETHTOOL_LINK_MODE_MASK_NU32
+	    != link_ksettings.base.link_mode_masks_nwords) {
+		 
+		memset(&link_ksettings, 0, sizeof(link_ksettings));
+		link_ksettings.base.cmd = ETHTOOL_GLINKSETTINGS;
+		 
+		compiletime_assert(__ETHTOOL_LINK_MODE_MASK_NU32 <= S8_MAX,
+				   "need too many bits for link modes!");
+		link_ksettings.base.link_mode_masks_nwords
+			= -((s8)__ETHTOOL_LINK_MODE_MASK_NU32);
+
+		if (copy_to_user(useraddr, &link_ksettings.base,
+				 sizeof(link_ksettings.base)))
+			return -EFAULT;
+
+		return 0;
+	}
+
+	memset(&link_ksettings, 0, sizeof(link_ksettings));
+	err = dev->ethtool_ops->get_link_ksettings(dev, &link_ksettings);
+	if (err < 0)
+		return err;
+
+	link_ksettings.base.cmd = ETHTOOL_GLINKSETTINGS;
+	link_ksettings.base.link_mode_masks_nwords
+		= __ETHTOOL_LINK_MODE_MASK_NU32;
+
+	return store_link_ksettings_for_user(useraddr, &link_ksettings);
+}
+
+static int ethtool_set_link_ksettings(struct net_device *dev,
+				      void __user *useraddr)
+{
+	int err;
+	struct ethtool_link_ksettings link_ksettings;
+
+	ASSERT_RTNL();
+
+	if (!dev->ethtool_ops->set_link_ksettings)
+		return -EOPNOTSUPP;
+
+	if (copy_from_user(&link_ksettings.base, useraddr,
+			   sizeof(link_ksettings.base)))
+		return -EFAULT;
+
+	if (__ETHTOOL_LINK_MODE_MASK_NU32
+	    != link_ksettings.base.link_mode_masks_nwords)
+		return -EINVAL;
+
+	err = load_link_ksettings_from_user(&link_ksettings, useraddr);
+	if (err)
+		return err;
+
+	if (__ETHTOOL_LINK_MODE_MASK_NU32
+	    != link_ksettings.base.link_mode_masks_nwords)
+		return -EINVAL;
+
+	return dev->ethtool_ops->set_link_ksettings(dev, &link_ksettings);
+}
+#endif  
+
 int __ethtool_get_settings(struct net_device *dev, struct ethtool_cmd *cmd)
 {
 	ASSERT_RTNL();
@@ -309,6 +582,61 @@ int __ethtool_get_settings(struct net_device *dev, struct ethtool_cmd *cmd)
 }
 EXPORT_SYMBOL(__ethtool_get_settings);
 
+#if defined(MY_ABC_HERE)
+static void
+warn_incomplete_ethtool_legacy_settings_conversion(const char *details)
+{
+	char name[sizeof(current->comm)];
+
+	pr_info_once("warning: `%s' uses legacy ethtool link settings API, %s\n",
+		     get_task_comm(name, current), details);
+}
+#endif  
+
+#if defined(MY_ABC_HERE)
+ 
+static int ethtool_get_settings(struct net_device *dev, void __user *useraddr)
+{
+	struct ethtool_cmd cmd;
+
+	ASSERT_RTNL();
+
+	if (dev->ethtool_ops->get_link_ksettings) {
+		 
+		int err;
+		struct ethtool_link_ksettings link_ksettings;
+
+		memset(&link_ksettings, 0, sizeof(link_ksettings));
+		err = dev->ethtool_ops->get_link_ksettings(dev,
+							   &link_ksettings);
+		if (err < 0)
+			return err;
+		if (!convert_link_ksettings_to_legacy_settings(&cmd,
+							       &link_ksettings))
+			warn_incomplete_ethtool_legacy_settings_conversion(
+				"link modes are only partially reported");
+
+		cmd.cmd = ETHTOOL_GSET;
+	} else {
+		 
+		int err;
+
+		if (!dev->ethtool_ops->get_settings)
+			return -EOPNOTSUPP;
+
+		memset(&cmd, 0, sizeof(cmd));
+		cmd.cmd = ETHTOOL_GSET;
+		err = dev->ethtool_ops->get_settings(dev, &cmd);
+		if (err < 0)
+			return err;
+	}
+
+	if (copy_to_user(useraddr, &cmd, sizeof(cmd)))
+		return -EFAULT;
+
+	return 0;
+}
+#else  
 static int ethtool_get_settings(struct net_device *dev, void __user *useraddr)
 {
 	int err;
@@ -322,7 +650,39 @@ static int ethtool_get_settings(struct net_device *dev, void __user *useraddr)
 		return -EFAULT;
 	return 0;
 }
+#endif  
 
+#if defined(MY_ABC_HERE)
+ 
+static int ethtool_set_settings(struct net_device *dev, void __user *useraddr)
+{
+	struct ethtool_cmd cmd;
+
+	ASSERT_RTNL();
+
+	if (copy_from_user(&cmd, useraddr, sizeof(cmd)))
+		return -EFAULT;
+
+	if (dev->ethtool_ops->set_link_ksettings) {
+		struct ethtool_link_ksettings link_ksettings;
+
+		if (!convert_legacy_settings_to_link_ksettings(&link_ksettings,
+							       &cmd))
+			return -EINVAL;
+
+		link_ksettings.base.cmd = ETHTOOL_SLINKSETTINGS;
+		link_ksettings.base.link_mode_masks_nwords
+			= __ETHTOOL_LINK_MODE_MASK_NU32;
+		return dev->ethtool_ops->set_link_ksettings(dev,
+							    &link_ksettings);
+	}
+
+	if (!dev->ethtool_ops->set_settings)
+		return -EOPNOTSUPP;
+
+	return dev->ethtool_ops->set_settings(dev, &cmd);
+}
+#else  
 static int ethtool_set_settings(struct net_device *dev, void __user *useraddr)
 {
 	struct ethtool_cmd cmd;
@@ -335,6 +695,7 @@ static int ethtool_set_settings(struct net_device *dev, void __user *useraddr)
 
 	return dev->ethtool_ops->set_settings(dev, &cmd);
 }
+#endif  
 
 static noinline_for_stack int ethtool_get_drvinfo(struct net_device *dev,
 						  void __user *useraddr)
@@ -1410,6 +1771,9 @@ int dev_ethtool(struct net *net, struct ifreq *ifr)
 	case ETHTOOL_GCHANNELS:
 	case ETHTOOL_GET_TS_INFO:
 	case ETHTOOL_GEEE:
+#if defined(MY_ABC_HERE)
+	case ETHTOOL_GLINKSETTINGS:
+#endif  
 		break;
 	default:
 		if (!ns_capable(net->user_ns, CAP_NET_ADMIN))
@@ -1591,6 +1955,14 @@ int dev_ethtool(struct net *net, struct ifreq *ifr)
 	case ETHTOOL_GMODULEEEPROM:
 		rc = ethtool_get_module_eeprom(dev, useraddr);
 		break;
+#if defined(MY_ABC_HERE)
+	case ETHTOOL_GLINKSETTINGS:
+		rc = ethtool_get_link_ksettings(dev, useraddr);
+		break;
+	case ETHTOOL_SLINKSETTINGS:
+		rc = ethtool_set_link_ksettings(dev, useraddr);
+		break;
+#endif  
 	default:
 		rc = -EOPNOTSUPP;
 	}

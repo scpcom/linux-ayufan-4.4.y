@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * IP Payload Compression Protocol (IPComp) for IPv6 - RFC3173
  *
@@ -81,11 +78,11 @@ static void ipcomp6_err(struct sk_buff *skb, struct inet6_skb_parm *opt,
 	if (type == NDISC_REDIRECT)
 		ip6_redirect(skb, net, 0, 0);
 	else
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 		ip6_update_pmtu(skb, net, info, 0, 0, INVALID_UID);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 		ip6_update_pmtu(skb, net, info, 0, 0);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	xfrm_state_put(x);
 }
 

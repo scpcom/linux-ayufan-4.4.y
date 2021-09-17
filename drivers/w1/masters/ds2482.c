@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /**
  * ds2482.c - provides i2c to w1-master bridge(s)
  * Copyright (C) 2005  Ben Gardner <bgardner@wabtec.com>
@@ -21,10 +18,10 @@
 #include <linux/slab.h>
 #include <linux/i2c.h>
 #include <linux/delay.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #include <linux/gpio.h>
 #include <linux/platform_data/ds2482.h>
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 #include <asm/delay.h>
 
 #include "../w1.h"
@@ -88,10 +85,10 @@ static const u8 ds2482_chan_rd[8] =
 static int ds2482_probe(struct i2c_client *client,
 			const struct i2c_device_id *id);
 static int ds2482_remove(struct i2c_client *client);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 static int ds2482_suspend(struct device *dev);
 static int ds2482_resume(struct device *dev);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 /**
  * Driver data (common to all clients)
@@ -101,20 +98,20 @@ static const struct i2c_device_id ds2482_id[] = {
 	{ }
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 static const struct dev_pm_ops ds2482_pm_ops = {
 	.suspend = ds2482_suspend,
 	.resume = ds2482_resume,
 };
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 static struct i2c_driver ds2482_driver = {
 	.driver = {
 		.owner	= THIS_MODULE,
 		.name	= "ds2482",
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 		.pm = &ds2482_pm_ops,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	},
 	.probe		= ds2482_probe,
 	.remove		= ds2482_remove,
@@ -136,9 +133,9 @@ struct ds2482_w1_chan {
 struct ds2482_data {
 	struct i2c_client	*client;
 	struct mutex		access_lock;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	int			slpz_gpio;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	/* 1-wire interface(s) */
 	int			w1_count;	/* 1 or 8 */
@@ -459,7 +456,7 @@ static u8 ds2482_w1_set_pullup(void *data, int delay)
 	return retval;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 static int ds2482_suspend(struct device *dev)
 {
 	struct i2c_client *client = to_i2c_client(dev);
@@ -479,15 +476,15 @@ static int ds2482_resume(struct device *dev)
 		gpio_set_value(data->slpz_gpio, 1);
 	return 0;
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 static int ds2482_probe(struct i2c_client *client,
 			const struct i2c_device_id *id)
 {
 	struct ds2482_data *data;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	struct ds2482_platform_data *pdata;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	int err = -ENODEV;
 	int temp1;
 	int idx;
@@ -554,7 +551,7 @@ static int ds2482_probe(struct i2c_client *client,
 		}
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	pdata = client->dev.platform_data;
 	data->slpz_gpio = pdata ? pdata->slpz_gpio : -1;
 
@@ -564,7 +561,7 @@ static int ds2482_probe(struct i2c_client *client,
 		if (err < 0)
 			goto exit_w1_remove;
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	return 0;
 
@@ -590,12 +587,12 @@ static int ds2482_remove(struct i2c_client *client)
 			w1_remove_master_device(&data->w1_ch[idx].w1_bm);
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	if (data->slpz_gpio >= 0) {
 		gpio_set_value(data->slpz_gpio, 0);
 		gpio_free(data->slpz_gpio);
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	/* Free the memory */
 	kfree(data);

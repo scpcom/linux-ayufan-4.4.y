@@ -69,6 +69,9 @@ struct blk_plug;
 
 extern unsigned long avenrun[];		 
 extern void get_avenrun(unsigned long *loads, unsigned long offset, int shift);
+#ifdef MY_ABC_HERE
+extern void get_avenrun_split(unsigned long *io_loads, unsigned long *cpu_loads, unsigned long offset, int shift);
+#endif  
 
 #define FSHIFT		11		 
 #define FIXED_1		(1<<FSHIFT)	 
@@ -441,7 +444,7 @@ struct signal_struct {
 #ifdef CONFIG_TASKSTATS
 	struct taskstats *stats;
 #endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	 
 #else  
 #ifdef CONFIG_AUDIT
@@ -460,7 +463,7 @@ struct signal_struct {
 	short oom_score_adj_min;	 
 
 	struct mutex cred_guard_mutex;	 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 #ifdef CONFIG_AUDIT
 	unsigned audit_tty;
 	unsigned audit_tty_log_passwd;
@@ -495,7 +498,7 @@ struct user_struct {
 	atomic_t inotify_watches;  
 	atomic_t inotify_devs;	 
 #endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	 
 #else  
 #ifdef MY_ABC_HERE
@@ -508,7 +511,7 @@ struct user_struct {
 #ifdef CONFIG_EPOLL
 	atomic_long_t epoll_watches;  
 #endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	 
 #else  
 #ifdef CONFIG_POSIX_MQUEUE
@@ -517,7 +520,7 @@ struct user_struct {
 #endif
 #endif  
 	unsigned long locked_shm;  
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	 
 #else  
 	unsigned long unix_inflight;	 
@@ -535,7 +538,7 @@ struct user_struct {
 #ifdef CONFIG_PERF_EVENTS
 	atomic_long_t locked_vm;
 #endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 #ifdef MY_ABC_HERE
 	atomic_t synotify_instances;
 #endif
@@ -668,7 +671,7 @@ struct sched_domain {
 
 	u64 last_update;
 
-#if !defined(MY_DEF_HERE)
+#if !defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 #ifdef CONFIG_SCHEDSTATS
 	 
 	unsigned int lb_count[CPU_MAX_IDLE_TYPES];
@@ -708,7 +711,7 @@ struct sched_domain {
 	unsigned int span_weight;
 	 
 	unsigned long span[0];
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 #ifdef CONFIG_SCHEDSTATS
 	 
 	unsigned int lb_count[CPU_MAX_IDLE_TYPES];
@@ -962,7 +965,7 @@ struct task_struct {
 	unsigned in_execve:1;	 
 	unsigned in_iowait:1;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	 
 #else  
 	 
@@ -972,7 +975,7 @@ struct task_struct {
 	unsigned sched_reset_on_fork:1;
 	unsigned sched_contributes_to_load:1;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	unsigned long atomic_flags;  
 #endif  
 
@@ -1392,7 +1395,7 @@ static inline cputime_t task_gtime(struct task_struct *t)
 extern void task_cputime_adjusted(struct task_struct *p, cputime_t *ut, cputime_t *st);
 extern void thread_group_cputime_adjusted(struct task_struct *p, cputime_t *ut, cputime_t *st);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 extern int task_free_register(struct notifier_block *n);
 extern int task_free_unregister(struct notifier_block *n);
 #endif  
@@ -1460,7 +1463,7 @@ static inline void memalloc_noio_restore(unsigned int flags)
 	current->flags = (current->flags & ~PF_MEMALLOC_NOIO) | flags;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
  
 #define PFA_NO_NEW_PRIVS 0x00000001	 
 

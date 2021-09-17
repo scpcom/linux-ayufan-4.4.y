@@ -1652,6 +1652,11 @@ int fuse_do_setattr(struct inode *inode, struct iattr *attr,
 	spin_unlock(&fc->lock);
 
 	if (S_ISREG(inode->i_mode) && oldsize != outarg.attr.size) {
+#ifdef MY_ABC_HERE
+		if (AGGREGATE_RECVFILE_DOING & inode->aggregate_flag) {
+			flush_aggregate_recvfile(-1);
+		}
+#endif  
 		truncate_pagecache(inode, oldsize, outarg.attr.size);
 		invalidate_inode_pages2(inode->i_mapping);
 	}
@@ -2049,8 +2054,6 @@ static int fuse_syno_set_archive_bit(struct dentry *dentry, unsigned int arbit)
 
 	if (!IS_GLUSTER_FS(inode)) {
 		inode->i_archive_bit = arbit;
-		inode->i_ctime = CURRENT_TIME;
-		mark_inode_dirty_sync(inode);
 		return 0;
 	}
 

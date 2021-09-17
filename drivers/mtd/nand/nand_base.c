@@ -30,7 +30,7 @@ EXPORT_SYMBOL_GPL(nand_erasebb);
 
 #endif  
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #include "hinfc_gen.h"
 #endif  
 
@@ -110,7 +110,7 @@ static int check_offs_len(struct mtd_info *mtd,
 	return ret;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
  
 #else  
  
@@ -123,7 +123,7 @@ static void nand_release_device(struct mtd_info *mtd)
 {
 	struct nand_chip *chip = mtd->priv;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	 
 	chip->select_chip(mtd, -1);
 #endif  
@@ -190,7 +190,7 @@ static void nand_read_buf(struct mtd_info *mtd, uint8_t *buf, int len)
 		buf[i] = readb(chip->IO_ADDR_R);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
  
 static int nand_verify_buf(struct mtd_info *mtd, const uint8_t *buf, int len)
 {
@@ -227,7 +227,7 @@ static void nand_read_buf16(struct mtd_info *mtd, uint8_t *buf, int len)
 		p[i] = readw(chip->IO_ADDR_R);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
  
 static int nand_verify_buf16(struct mtd_info *mtd, const uint8_t *buf, int len)
 {
@@ -259,7 +259,7 @@ static int nand_block_bad(struct mtd_info *mtd, loff_t ofs, int getchip)
 		chipnr = (int)(ofs >> chip->chip_shift);
 
 		nand_get_device(mtd, FL_READING);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_SPI_TYPE_SWITCH
 		mutex_lock(&spi_type_mutex);
 		mtd_switch_spi_type(mtd);
@@ -294,7 +294,7 @@ static int nand_block_bad(struct mtd_info *mtd, loff_t ofs, int getchip)
 	} while (!res && i < 2 && (chip->bbt_options & NAND_BBT_SCAN2NDPAGE));
 
 	if (getchip) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_SPI_TYPE_SWITCH
 		mutex_unlock(&spi_type_mutex);
 #endif
@@ -333,7 +333,7 @@ static int nand_default_block_markbad(struct mtd_info *mtd, loff_t ofs)
 		loff_t wr_ofs = ofs;
 
 		nand_get_device(mtd, FL_WRITING);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_SPI_TYPE_SWITCH
 		mutex_lock(&spi_type_mutex);
 		mtd_switch_spi_type(mtd);
@@ -362,7 +362,7 @@ static int nand_default_block_markbad(struct mtd_info *mtd, loff_t ofs)
 			wr_ofs += mtd->writesize;
 		} while ((chip->bbt_options & NAND_BBT_SCAN2NDPAGE) && i < 2);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_SPI_TYPE_SWITCH
 		mutex_unlock(&spi_type_mutex);
 #endif
@@ -443,7 +443,7 @@ void nand_wait_ready(struct mtd_info *mtd)
 }
 EXPORT_SYMBOL_GPL(nand_wait_ready);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
  
 #else  
  
@@ -536,7 +536,7 @@ static void nand_command_lp(struct mtd_info *mtd, unsigned int command,
 		command = NAND_CMD_READ0;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	chip->cmd_ctrl(mtd, command & 0xff,
 		       NAND_NCE | NAND_CLE | NAND_CTRL_CHANGE);
 #else  
@@ -575,7 +575,7 @@ static void nand_command_lp(struct mtd_info *mtd, unsigned int command,
 	case NAND_CMD_SEQIN:
 	case NAND_CMD_RNDIN:
 	case NAND_CMD_STATUS:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	case NAND_CMD_DEPLETE1:
 		return;
 
@@ -695,7 +695,7 @@ static void panic_nand_wait(struct mtd_info *mtd, struct nand_chip *chip,
 static int nand_wait(struct mtd_info *mtd, struct nand_chip *chip)
 {
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	unsigned long timeo = jiffies;
 	int status, state = chip->state;
 
@@ -712,7 +712,7 @@ static int nand_wait(struct mtd_info *mtd, struct nand_chip *chip)
 
 	ndelay(100);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	if ((state == FL_ERASING) && (chip->options & NAND_IS_AND))
 		chip->cmdfunc(mtd, NAND_CMD_STATUS_MULTI, -1, -1);
 	else
@@ -740,7 +740,7 @@ static int nand_wait(struct mtd_info *mtd, struct nand_chip *chip)
 
 	status = (int)chip->read_byte(mtd);
 	 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	 
 #else  
 	WARN_ON(!(status & NAND_STATUS_READY));
@@ -1330,7 +1330,7 @@ static int nand_read(struct mtd_info *mtd, loff_t from, size_t len,
 	int ret;
 
 	nand_get_device(mtd, FL_READING);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_SPI_TYPE_SWITCH
 	mutex_lock(&spi_type_mutex);
 	mtd_switch_spi_type(mtd);
@@ -1342,7 +1342,7 @@ static int nand_read(struct mtd_info *mtd, loff_t from, size_t len,
 	ops.mode = MTD_OPS_PLACE_OOB;
 	ret = nand_do_read_ops(mtd, from, &ops);
 	*retlen = ops.retlen;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_SPI_TYPE_SWITCH
 	mutex_unlock(&spi_type_mutex);
 #endif
@@ -1564,7 +1564,7 @@ static int nand_read_oob(struct mtd_info *mtd, loff_t from,
 	}
 
 	nand_get_device(mtd, FL_READING);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_SPI_TYPE_SWITCH
 	mutex_lock(&spi_type_mutex);
 	mtd_switch_spi_type(mtd);
@@ -1587,7 +1587,7 @@ static int nand_read_oob(struct mtd_info *mtd, loff_t from,
 		ret = nand_do_read_ops(mtd, from, ops);
 
 out:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_SPI_TYPE_SWITCH
 	mutex_unlock(&spi_type_mutex);
 #endif
@@ -1808,7 +1808,7 @@ static int nand_write_page(struct mtd_info *mtd, struct nand_chip *chip,
 		status = chip->waitfunc(mtd, chip);
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_MTD_NAND_VERIFY_WRITE
 	 
 	chip->cmdfunc(mtd, NAND_CMD_READ0, 0, page);
@@ -1893,7 +1893,7 @@ static int nand_do_write_ops(struct mtd_info *mtd, loff_t to,
 
 	uint8_t *oob = ops->oobbuf;
 	uint8_t *buf = ops->datbuf;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	int ret, subpage;
 #else  
 	int ret;
@@ -1911,7 +1911,7 @@ static int nand_do_write_ops(struct mtd_info *mtd, loff_t to,
 	}
 
 	column = to & (mtd->writesize - 1);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	subpage = column || (writelen & (mtd->writesize - 1));
 
 	if (subpage && oob)
@@ -2025,7 +2025,7 @@ static int nand_write(struct mtd_info *mtd, loff_t to, size_t len,
 	int ret;
 
 	nand_get_device(mtd, FL_WRITING);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_SPI_TYPE_SWITCH
 	mutex_lock(&spi_type_mutex);
 	mtd_switch_spi_type(mtd);
@@ -2037,7 +2037,7 @@ static int nand_write(struct mtd_info *mtd, loff_t to, size_t len,
 	ops.mode = MTD_OPS_PLACE_OOB;
 	ret = nand_do_write_ops(mtd, to, &ops);
 	*retlen = ops.retlen;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_SPI_TYPE_SWITCH
 	mutex_unlock(&spi_type_mutex);
 #endif
@@ -2135,7 +2135,7 @@ static int nand_write_oob(struct mtd_info *mtd, loff_t to,
 	}
 
 	nand_get_device(mtd, FL_WRITING);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_SPI_TYPE_SWITCH
 	mutex_lock(&spi_type_mutex);
 	mtd_switch_spi_type(mtd);
@@ -2158,7 +2158,7 @@ static int nand_write_oob(struct mtd_info *mtd, loff_t to,
 		ret = nand_do_write_ops(mtd, to, ops);
 
 out:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_SPI_TYPE_SWITCH
 	mutex_unlock(&spi_type_mutex);
 #endif
@@ -2175,7 +2175,7 @@ static void single_erase_cmd(struct mtd_info *mtd, int page)
 	chip->cmdfunc(mtd, NAND_CMD_ERASE2, -1, -1);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
  
 void multi_erase_cmd(struct mtd_info *mtd, int page)
 {
@@ -2194,7 +2194,7 @@ static int nand_erase(struct mtd_info *mtd, struct erase_info *instr)
 	return nand_erase_nand(mtd, instr, 0);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #define BBT_PAGE_MASK	0xffffff3f
 #endif  
  
@@ -2203,7 +2203,7 @@ int nand_erase_nand(struct mtd_info *mtd, struct erase_info *instr,
 {
 	int page, status, pages_per_block, ret, chipnr;
 	struct nand_chip *chip = mtd->priv;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	loff_t rewrite_bbt[NAND_MAX_CHIPS] = {0};
 	unsigned int bbt_masked_page = 0xffffffff;
 #endif  
@@ -2217,7 +2217,7 @@ int nand_erase_nand(struct mtd_info *mtd, struct erase_info *instr,
 		return -EINVAL;
 
 	nand_get_device(mtd, FL_ERASING);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_SPI_TYPE_SWITCH
 	mutex_lock(&spi_type_mutex);
 	mtd_switch_spi_type(mtd);
@@ -2238,7 +2238,7 @@ int nand_erase_nand(struct mtd_info *mtd, struct erase_info *instr,
 		goto erase_exit;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	 
 	if (chip->options & BBT_AUTO_REFRESH && !allowbbt)
 		bbt_masked_page = chip->bbt_td->pages[chipnr] & BBT_PAGE_MASK;
@@ -2285,7 +2285,7 @@ int nand_erase_nand(struct mtd_info *mtd, struct erase_info *instr,
 			goto erase_exit;
 		}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 		 
 		if ((bbt_masked_page != 0xffffffff)
 			&& ((page & BBT_PAGE_MASK) == bbt_masked_page))
@@ -2301,7 +2301,7 @@ int nand_erase_nand(struct mtd_info *mtd, struct erase_info *instr,
 			chip->select_chip(mtd, -1);
 			chip->select_chip(mtd, chipnr);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 			 
 			if (bbt_masked_page != 0xffffffff &&
 			    (chip->bbt_td->options & NAND_BBT_PERCHIP))
@@ -2316,7 +2316,7 @@ erase_exit:
 
 	ret = instr->state == MTD_ERASE_DONE ? 0 : -EIO;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_SPI_TYPE_SWITCH
 	mutex_unlock(&spi_type_mutex);
 #endif
@@ -2328,7 +2328,7 @@ erase_exit:
 	if (!ret)
 		mtd_erase_callback(instr);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	 
 	if (bbt_masked_page == 0xffffffff || ret)
 		return ret;
@@ -2464,7 +2464,7 @@ static void nand_set_defaults(struct nand_chip *chip, int busw)
 		chip->write_buf = busw ? nand_write_buf16 : nand_write_buf;
 	if (!chip->read_buf || chip->read_buf == nand_read_buf)
 		chip->read_buf = busw ? nand_read_buf16 : nand_read_buf;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	if (!chip->verify_buf)
 		chip->verify_buf = busw ? nand_verify_buf16 : nand_verify_buf;
 #endif  
@@ -2609,7 +2609,7 @@ static int nand_flash_detect_onfi(struct mtd_info *mtd, struct nand_chip *chip,
 		chip->onfi_version = 20;
 	else if (val & (1 << 1))
 		chip->onfi_version = 10;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	else
 		chip->onfi_version = 0;
 #endif  
@@ -2652,7 +2652,7 @@ static int nand_flash_detect_onfi(struct mtd_info *mtd, struct nand_chip *chip,
 	}
 #endif  
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	chip->options |= NAND_NEED_READRDY | NAND_NO_AUTOINCR;
 #endif  
 
@@ -2832,7 +2832,7 @@ static void nand_decode_bbm_options(struct mtd_info *mtd,
 				 maf_id == NAND_MFR_HYNIX ||
 				 maf_id == NAND_MFR_TOSHIBA ||
 				 maf_id == NAND_MFR_AMD ||
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 				 maf_id == NAND_MFR_MXIC)) ||
 #else  
 				 maf_id == NAND_MFR_MACRONIX)) ||
@@ -2874,7 +2874,7 @@ static struct nand_flash_dev *nand_get_flash_type(struct mtd_info *mtd,
 {
 	int i, maf_idx;
 	u8 id_data[8];
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	struct nand_dev_t nand_dev = {{0}, 0};
 #endif  
 
@@ -2890,7 +2890,7 @@ static struct nand_flash_dev *nand_get_flash_type(struct mtd_info *mtd,
 	chip->cmdfunc(mtd, NAND_CMD_READID, 0x00, -1);
 
 	for (i = 0; i < 8; i++)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 		nand_dev.ids[i] = id_data[i] = chip->read_byte(mtd);
 #else  
 		id_data[i] = chip->read_byte(mtd);
@@ -2903,7 +2903,7 @@ static struct nand_flash_dev *nand_get_flash_type(struct mtd_info *mtd,
 		return ERR_PTR(-ENODEV);
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	 
 #ifdef CONFIG_HIFMC_SPI_NAND
 	if (get_spi_nand_flash_type_hook)
@@ -2969,7 +2969,7 @@ static struct nand_flash_dev *nand_get_flash_type(struct mtd_info *mtd,
 	if (*maf_id != NAND_MFR_SAMSUNG && !type->pagesize)
 		chip->options &= ~NAND_SAMSUNG_LP_OPTIONS;
 ident_done:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	hinfc_nand_param_adjust(mtd, chip);
 #endif  
 
@@ -3014,7 +3014,7 @@ ident_done:
 	if (mtd->writesize > 512 && chip->cmdfunc == nand_command)
 		chip->cmdfunc = nand_command_lp;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	hinfc_show_info(mtd, nand_manuf_ids[maf_idx].name, type->name);
 #else  
 	pr_info("NAND device: Manufacturer ID: 0x%02x, Chip ID: 0x%02x (%s %s),"
@@ -3070,7 +3070,7 @@ int nand_scan_ident(struct mtd_info *mtd, int maxchips,
 	chip->numchips = i;
 	mtd->size = i * chip->chipsize;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	hinfc_show_chipsize(chip);
 #endif  
 
@@ -3292,7 +3292,7 @@ int nand_scan_tail(struct mtd_info *mtd)
 
 	chip->state = FL_READY;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	 
 	chip->select_chip(mtd, -1);
 #endif  
@@ -3323,7 +3323,7 @@ int nand_scan_tail(struct mtd_info *mtd)
 	mtd->writebufsize = mtd->writesize;
 
 	mtd->ecclayout = chip->ecc.layout;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	mtd->ecc_strength = chip->ecc.strength * chip->ecc.steps;
 #else  
 	mtd->ecc_strength = chip->ecc.strength;

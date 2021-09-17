@@ -33,7 +33,7 @@
 #include <net/udp.h>
 #include <net/udplite.h>
 #include <net/tcp.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #include <net/ping.h>
 #endif  
 #include <net/protocol.h>
@@ -49,7 +49,7 @@
 #include <asm/uaccess.h>
 #include <linux/mroute6.h>
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_ANDROID_PARANOID_NETWORK
 #include <linux/android_aid.h>
 
@@ -108,7 +108,7 @@ static int inet6_create(struct net *net, struct socket *sock, int protocol,
 	int try_loading_module = 0;
 	int err;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	if (!current_has_network())
 		return -EACCES;
 #endif  
@@ -160,7 +160,7 @@ lookup_protocol:
 	}
 
 	err = -EPERM;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	if (sock->type == SOCK_RAW && !kern && !capable(CAP_NET_RAW))
 #else  
 	if (sock->type == SOCK_RAW && !kern &&
@@ -459,7 +459,7 @@ int inet6_getname(struct socket *sock, struct sockaddr *uaddr,
 }
 EXPORT_SYMBOL(inet6_getname);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 int inet6_killaddr_ioctl(struct net *net, void __user *arg) {
 	struct in6_ifreq ireq;
 	struct sockaddr_in6 sin6;
@@ -499,7 +499,7 @@ int inet6_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
 		return addrconf_del_ifaddr(net, (void __user *) arg);
 	case SIOCSIFDSTADDR:
 		return addrconf_set_dstaddr(net, (void __user *) arg);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	case SIOCKILLADDR:
 		return inet6_killaddr_ioctl(net, (void __user *) arg);
 #endif  
@@ -655,7 +655,7 @@ int inet6_sk_rebuild_header(struct sock *sk)
 		fl6.flowi6_mark = sk->sk_mark;
 		fl6.fl6_dport = inet->inet_dport;
 		fl6.fl6_sport = inet->inet_sport;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 		fl6.flowi6_uid = sock_i_uid(sk);
 #endif  
 		security_sk_classify_flow(sk, flowi6_to_flowi(&fl6));
@@ -837,7 +837,7 @@ static int __init inet6_init(void)
 	if (err)
 		goto out_unregister_udplite_proto;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	err = proto_register(&pingv6_prot, 1);
 	if (err)
 		goto out_unregister_ping_proto;
@@ -920,7 +920,7 @@ static int __init inet6_init(void)
 	if (err)
 		goto ipv6_packet_fail;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	err = pingv6_init();
 	if (err)
 		goto pingv6_fail;
@@ -938,7 +938,7 @@ out:
 sysctl_fail:
 	ipv6_packet_cleanup();
 #endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 pingv6_fail:
 	pingv6_exit();
 #endif  
@@ -987,7 +987,7 @@ register_pernet_fail:
 	rtnl_unregister_all(PF_INET6);
 out_sock_register_fail:
 	rawv6_exit();
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 out_unregister_ping_proto:
 	proto_unregister(&pingv6_prot);
 #endif  

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Common values for SHA algorithms
  */
@@ -68,35 +65,35 @@
 #define SHA512_H7	0x5be0cd19137e2179ULL
 
 struct sha1_state {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
 	u32 state[SHA1_DIGEST_SIZE / 4];
 	u64 count;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 	u64 count;
 	u32 state[SHA1_DIGEST_SIZE / 4];
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 	u8 buffer[SHA1_BLOCK_SIZE];
 };
 
 struct sha256_state {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
 	u32 state[SHA256_DIGEST_SIZE / 4];
 	u64 count;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 	u64 count;
 	u32 state[SHA256_DIGEST_SIZE / 4];
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 	u8 buf[SHA256_BLOCK_SIZE];
 };
 
 struct sha512_state {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
 	u64 state[SHA512_DIGEST_SIZE / 8];
 	u64 count[2];
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 	u64 count[2];
 	u64 state[SHA512_DIGEST_SIZE / 8];
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 	u8 buf[SHA512_BLOCK_SIZE];
 };
 

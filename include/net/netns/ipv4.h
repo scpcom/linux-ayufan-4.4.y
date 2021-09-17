@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * ipv4 in net namespaces
  */
@@ -46,15 +43,15 @@ struct netns_ipv4 {
 	struct inet_peer_base	*peers;
 	struct tcpm_hash_bucket	*tcp_metrics_hash;
 	unsigned int		tcp_metrics_hash_log;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	// do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 	struct sock  * __percpu	*tcp_sk;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 	struct netns_frags	frags;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	// do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 #ifdef CONFIG_NETFILTER
 	struct xt_table		*iptable_filter;
 	struct xt_table		*iptable_mangle;
@@ -65,7 +62,7 @@ struct netns_ipv4 {
 #endif
 	struct xt_table		*nat_table;
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 
 	int sysctl_icmp_echo_ignore_all;
 	int sysctl_icmp_echo_ignore_broadcasts;
@@ -76,10 +73,10 @@ struct netns_ipv4 {
 
 	int sysctl_tcp_ecn;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	int sysctl_fwmark_reflect;
 	int sysctl_tcp_fwmark_accept;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	kgid_t sysctl_ping_group_range[2];
 	long sysctl_tcp_mem[3];
@@ -94,7 +91,7 @@ struct netns_ipv4 {
 	struct fib_rules_ops	*mr_rules_ops;
 #endif
 #endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	struct sock  * __percpu	*tcp_sk;
 #ifdef CONFIG_NETFILTER
 	struct xt_table		*iptable_filter;
@@ -106,6 +103,6 @@ struct netns_ipv4 {
 #endif
 	struct xt_table		*nat_table;
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 };
 #endif

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Copyright (C) 2008 Google, Inc.
  *
@@ -23,13 +20,13 @@
 #ifndef _LINUX_BINDER_H
 #define _LINUX_BINDER_H
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_ANDROID_BINDER_IPC_32BIT
 #define BINDER_IPC_32BIT 1
 #endif
 
 #include "uapi/binder.h"
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 #include <linux/ioctl.h>
 
 #define B_PACK_CHARS(c1, c2, c3, c4) \
@@ -335,7 +332,7 @@ enum binder_driver_command_protocol {
 	 * void *: cookie
 	 */
 };
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 #endif /* _LINUX_BINDER_H */
 

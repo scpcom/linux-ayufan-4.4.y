@@ -50,6 +50,9 @@ void btrfs_##name(struct work_struct *arg)				\
 BTRFS_WORK_HELPER(worker_helper);
 BTRFS_WORK_HELPER(delalloc_helper);
 BTRFS_WORK_HELPER(flush_delalloc_helper);
+#ifdef MY_DEF_HERE
+BTRFS_WORK_HELPER(flush_meta_helper);
+#endif  
 BTRFS_WORK_HELPER(cache_helper);
 BTRFS_WORK_HELPER(submit_helper);
 BTRFS_WORK_HELPER(fixup_helper);

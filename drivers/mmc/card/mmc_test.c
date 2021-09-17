@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  *  linux/drivers/mmc/card/mmc_test.c
  *
@@ -3028,11 +3025,11 @@ static void mmc_test_remove(struct mmc_card *card)
 	mmc_test_free_dbgfs_file(card);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 static void mmc_test_shutdown(struct mmc_card *card)
 {
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 static struct mmc_driver mmc_driver = {
 	.drv		= {
@@ -3040,9 +3037,9 @@ static struct mmc_driver mmc_driver = {
 	},
 	.probe		= mmc_test_probe,
 	.remove		= mmc_test_remove,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	.shutdown	= mmc_test_shutdown,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 };
 
 static int __init mmc_test_init(void)

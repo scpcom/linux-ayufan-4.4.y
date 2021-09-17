@@ -44,6 +44,7 @@
 /* Armada A38x Revision */
 #define MV88F68xx_Z1_REV	0x0
 #define MV88F68xx_A0_REV	0x4
+#define MV88F68xx_B0_REV	0xA
 
 /* Armada KW2 ID */
 #define MV88F6510_DEV_ID	0x6510

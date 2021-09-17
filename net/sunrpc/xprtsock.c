@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * linux/net/sunrpc/xprtsock.c
  *
@@ -728,12 +725,12 @@ static int xs_tcp_send_request(struct rpc_task *task)
 		dprintk("RPC:       xs_tcp_send_request(%u) = %d\n",
 				xdr->len - req->rq_bytes_sent, status);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_TNK
 		if (unlikely(status == -EAGAIN))
 			goto check_nospace;
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		if (unlikely(status < 0))
 			break;
 
@@ -748,7 +745,7 @@ static int xs_tcp_send_request(struct rpc_task *task)
 
 		if (status != 0)
 			continue;
-#if defined(MY_DEF_HERE) && defined(CONFIG_TNK)
+#if defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_TNK)
 check_nospace:
 		/*  MGB 20-AUG-11
 		 *
@@ -764,9 +761,9 @@ check_nospace:
 			/* looping\n", __func__);*/
 			continue;
 		}
-#else /* MY_DEF_HERE && CONFIG_TNK */
+#else /* CONFIG_SYNO_LSP_HI3536 && CONFIG_TNK */
 		status = -EAGAIN;
-#endif /* MY_DEF_HERE && CONFIG_TNK */
+#endif /* CONFIG_SYNO_LSP_HI3536 && CONFIG_TNK */
 		break;
 	}
 
@@ -776,15 +773,15 @@ check_nospace:
 		/* Should we call xs_close() here? */
 		break;
 	case -EAGAIN:
-#if defined(MY_DEF_HERE) && defined(CONFIG_TNK)
+#if defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_TNK)
 		/*  MGB 20-AUG-11
 		 *
 		 *  dealt with above
 		 */
 		/* status = xs_nospace(task); */
-#else /* MY_DEF_HERE && CONFIG_TNK */
+#else /* CONFIG_SYNO_LSP_HI3536 && CONFIG_TNK */
 		status = xs_nospace(task);
-#endif /* MY_DEF_HERE && CONFIG_TNK */
+#endif /* CONFIG_SYNO_LSP_HI3536 && CONFIG_TNK */
 		break;
 	default:
 		dprintk("RPC:       sendmsg returned unrecognized error %d\n",
@@ -902,11 +899,16 @@ static void xs_tcp_close(struct rpc_xprt *xprt)
 		xs_tcp_shutdown(xprt);
 }
 
+static void xs_xprt_free(struct rpc_xprt *xprt)
+{
+	xs_free_peer_addresses(xprt);
+	xprt_free(xprt);
+}
+
 static void xs_local_destroy(struct rpc_xprt *xprt)
 {
 	xs_close(xprt);
-	xs_free_peer_addresses(xprt);
-	xprt_free(xprt);
+	xs_xprt_free(xprt);
 	module_put(THIS_MODULE);
 }
 
@@ -2526,6 +2528,10 @@ static void bc_close(struct rpc_xprt *xprt)
 
 static void bc_destroy(struct rpc_xprt *xprt)
 {
+	dprintk("RPC:       bc_destroy xprt %p\n", xprt);
+
+	xs_xprt_free(xprt);
+	module_put(THIS_MODULE);
 }
 
 static struct rpc_xprt_ops xs_local_ops = {
@@ -2724,7 +2730,7 @@ static struct rpc_xprt *xs_setup_local(struct xprt_create *args)
 		return xprt;
 	ret = ERR_PTR(-EINVAL);
 out_err:
-	xprt_free(xprt);
+	xs_xprt_free(xprt);
 	return ret;
 }
 
@@ -2802,7 +2808,7 @@ static struct rpc_xprt *xs_setup_udp(struct xprt_create *args)
 		return xprt;
 	ret = ERR_PTR(-EINVAL);
 out_err:
-	xprt_free(xprt);
+	xs_xprt_free(xprt);
 	return ret;
 }
 
@@ -2882,7 +2888,7 @@ static struct rpc_xprt *xs_setup_tcp(struct xprt_create *args)
 		return xprt;
 	ret = ERR_PTR(-EINVAL);
 out_err:
-	xprt_free(xprt);
+	xs_xprt_free(xprt);
 	return ret;
 }
 
@@ -2899,15 +2905,6 @@ static struct rpc_xprt *xs_setup_bc_tcp(struct xprt_create *args)
 	struct svc_sock *bc_sock;
 	struct rpc_xprt *ret;
 
-	if (args->bc_xprt->xpt_bc_xprt) {
-		/*
-		 * This server connection already has a backchannel
-		 * export; we can't create a new one, as we wouldn't be
-		 * able to match replies based on xid any more.  So,
-		 * reuse the already-existing one:
-		 */
-		 return args->bc_xprt->xpt_bc_xprt;
-	}
 	xprt = xs_setup_xprt(args, xprt_tcp_slot_table_entries,
 			xprt_tcp_slot_table_entries);
 	if (IS_ERR(xprt))
@@ -2969,10 +2966,12 @@ static struct rpc_xprt *xs_setup_bc_tcp(struct xprt_create *args)
 
 	if (try_module_get(THIS_MODULE))
 		return xprt;
+
+	args->bc_xprt->xpt_bc_xprt = NULL;
 	xprt_put(xprt);
 	ret = ERR_PTR(-EINVAL);
 out_err:
-	xprt_free(xprt);
+	xs_xprt_free(xprt);
 	return ret;
 }
 

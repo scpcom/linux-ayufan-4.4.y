@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * linux/arch/arm64/crypto/aes-glue.c - wrapper code for ARMv8 AES
  *
@@ -18,9 +15,9 @@
 #include <crypto/algapi.h>
 #include <linux/module.h>
 #include <linux/cpufeature.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
 #include <crypto/xts.h>
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 
 #ifdef USE_V8_CRYPTO_EXTENSIONS
 #define MODE			"ce"
@@ -85,15 +82,15 @@ static int xts_set_key(struct crypto_tfm *tfm, const u8 *in_key,
 	struct crypto_aes_xts_ctx *ctx = crypto_tfm_ctx(tfm);
 	int ret;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
 	ret = xts_check_key(tfm, in_key, key_len);
 	if (ret)
 		return ret;
 
 	ret = aes_expandkey(&ctx->key1, in_key, key_len / 2);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 	ret = crypto_aes_expand_key(&ctx->key1, in_key, key_len / 2);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 	if (!ret)
 		ret = crypto_aes_expand_key(&ctx->key2, &in_key[key_len / 2],
 					    key_len / 2);
@@ -301,13 +298,13 @@ static struct crypto_alg aes_algs[] = { {
 	.cra_blkcipher = {
 		.min_keysize	= AES_MIN_KEY_SIZE,
 		.max_keysize	= AES_MAX_KEY_SIZE,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
 		.ivsize		= 0,
 		.setkey		= aes_setkey,
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 		.ivsize		= AES_BLOCK_SIZE,
 		.setkey		= crypto_aes_set_key,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 		.encrypt	= ecb_encrypt,
 		.decrypt	= ecb_decrypt,
 	},
@@ -380,11 +377,11 @@ static struct crypto_alg aes_algs[] = { {
 	.cra_ablkcipher = {
 		.min_keysize	= AES_MIN_KEY_SIZE,
 		.max_keysize	= AES_MAX_KEY_SIZE,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
 		.ivsize		= 0,
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 		.ivsize		= AES_BLOCK_SIZE,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 		.setkey		= ablk_set_key,
 		.encrypt	= ablk_encrypt,
 		.decrypt	= ablk_decrypt,

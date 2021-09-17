@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * include/linux/sync.h
  *
@@ -17,7 +14,7 @@
 #define _LINUX_SYNC_H
 
 #include <linux/types.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #include <linux/kref.h>
 #include <linux/ktime.h>
 #include <linux/list.h>
@@ -345,7 +342,7 @@ int sync_fence_cancel_async(struct sync_fence *fence,
  */
 int sync_fence_wait(struct sync_fence *fence, long timeout);
 
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 #ifdef __KERNEL__
 
 #include <linux/kref.h>
@@ -754,6 +751,6 @@ struct sync_fence_info_data {
  */
 #define SYNC_IOC_FENCE_INFO	_IOWR(SYNC_IOC_MAGIC, 2,\
 	struct sync_fence_info_data)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 #endif /* _LINUX_SYNC_H */

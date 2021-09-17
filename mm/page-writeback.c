@@ -156,6 +156,9 @@ void global_dirty_limits(unsigned long *pbackground, unsigned long *pdirty)
 	*pdirty = dirty;
 	trace_global_dirty_state(background, dirty);
 }
+#ifdef MY_DEF_HERE
+EXPORT_SYMBOL(global_dirty_limits);
+#endif  
 
 static unsigned long zone_dirty_limit(struct zone *zone)
 {

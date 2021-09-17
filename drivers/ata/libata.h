@@ -39,7 +39,7 @@ enum {
 	ATA_DNXFER_QUIET	= (1 << 31),
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_ARCH_HI3531A
 extern unsigned int mplx_port0;
 #endif

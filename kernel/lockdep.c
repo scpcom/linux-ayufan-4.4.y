@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * kernel/lockdep.c
  *
@@ -4093,11 +4090,11 @@ void debug_check_no_locks_freed(const void *mem_from, unsigned long mem_len)
 }
 EXPORT_SYMBOL_GPL(debug_check_no_locks_freed);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 static void print_held_locks_bug(void)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 static void print_held_locks_bug(struct task_struct *curr)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 {
 	if (!debug_locks_off())
 		return;
@@ -4106,40 +4103,40 @@ static void print_held_locks_bug(struct task_struct *curr)
 
 	printk("\n");
 	printk("=====================================\n");
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	printk("[ BUG: %s/%d still has locks held! ]\n",
 	       current->comm, task_pid_nr(current));
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	printk("[ BUG: lock held at task exit time! ]\n");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	print_kernel_ident();
 	printk("-------------------------------------\n");
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	lockdep_print_held_locks(current);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	printk("%s/%d is exiting with locks still held!\n",
 		curr->comm, task_pid_nr(curr));
 	lockdep_print_held_locks(curr);
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	printk("\nstack backtrace:\n");
 	dump_stack();
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 void debug_check_no_locks_held(void)
 {
 	if (unlikely(current->lockdep_depth > 0))
 		print_held_locks_bug();
 }
 EXPORT_SYMBOL_GPL(debug_check_no_locks_held);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 void debug_check_no_locks_held(struct task_struct *task)
 {
 	if (unlikely(task->lockdep_depth > 0))
 		print_held_locks_bug(task);
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 void debug_show_all_locks(void)
 {

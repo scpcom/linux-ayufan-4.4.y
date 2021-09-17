@@ -90,7 +90,7 @@ int __init register_security(struct security_operations *ops)
 	return 0;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 int security_binder_set_context_mgr(struct task_struct *mgr)
 {
 	return security_ops->binder_set_context_mgr(mgr);

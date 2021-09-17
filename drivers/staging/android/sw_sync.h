@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * include/linux/sw_sync.h
  *
@@ -22,7 +19,7 @@
 
 #include <linux/types.h>
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #include <linux/kconfig.h>
 #include "sync.h"
 #include "uapi/sw_sync.h"
@@ -60,7 +57,7 @@ static inline struct sync_pt *sw_sync_pt_create(struct sw_sync_timeline *obj,
 	return NULL;
 }
 #endif /* IS_ENABLED(CONFIG_SW_SYNC) */
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 #ifdef __KERNEL__
 
 #include "sync.h"
@@ -96,6 +93,6 @@ struct sw_sync_create_fence_data {
 		struct sw_sync_create_fence_data)
 #define SW_SYNC_IOC_INC			_IOW(SW_SYNC_IOC_MAGIC, 1, __u32)
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 #endif /* _LINUX_SW_SYNC_H */

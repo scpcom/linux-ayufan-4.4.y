@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*****************************************************************************
  *  This is the driver for the CreVinn TOE-NK-2G TCP Offload Engine.
  *  TOE-NK-2G incorporates a Synopsys Ethernet MAC core.
@@ -668,11 +665,11 @@ int tnk_proc_init(unsigned int max_connections)
 
 int tnk_proc_shutdown(void)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
 	del_timer_sync(&tnk_rate_timer);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 	del_timer(&tnk_rate_timer);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 	if (proc_tnk_dir) {
 		if (tnk_max_connections > 0) {
 			remove_proc_entry(TNK_SUMMARY_PROC, proc_tnk_dir);

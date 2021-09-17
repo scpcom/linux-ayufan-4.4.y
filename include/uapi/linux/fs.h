@@ -133,7 +133,7 @@ struct inodes_stat_t {
 #define FICLONE		_IOW(0x94, 9, int)
 #define FICLONERANGE	_IOW(0x94, 13, struct file_clone_range)
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #define FIDTRIM	_IOWR('f', 128, struct fstrim_range)	 
 #endif  
 

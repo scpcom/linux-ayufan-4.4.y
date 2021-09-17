@@ -552,7 +552,7 @@ int device_create_file(struct device *dev,
 	int error = 0;
 
 	if (dev) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 		 
 #else  
 		WARN(((attr->attr.mode & S_IWUGO) && !attr->store),

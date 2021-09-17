@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Cryptographic API for algorithms (i.e., low-level API).
  *
@@ -103,18 +100,18 @@ struct blkcipher_walk {
 	void *page;
 	u8 *buffer;
 	u8 *iv;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	unsigned int ivsize;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	int flags;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	unsigned int walk_blocksize;
 	unsigned int cipher_blocksize;
 	unsigned int alignmask;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	unsigned int blocksize;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 };
 
 struct ablkcipher_walk {
@@ -204,12 +201,12 @@ int blkcipher_walk_phys(struct blkcipher_desc *desc,
 int blkcipher_walk_virt_block(struct blkcipher_desc *desc,
 			      struct blkcipher_walk *walk,
 			      unsigned int blocksize);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 int blkcipher_aead_walk_virt_block(struct blkcipher_desc *desc,
 				   struct blkcipher_walk *walk,
 				   struct crypto_aead *tfm,
 				   unsigned int blocksize);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 int ablkcipher_walk_done(struct ablkcipher_request *req,
 			 struct ablkcipher_walk *walk, int err);
@@ -404,7 +401,7 @@ static inline int crypto_requires_sync(u32 type, u32 mask)
 	return (type ^ CRYPTO_ALG_ASYNC) & mask & CRYPTO_ALG_ASYNC;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
 noinline unsigned long __crypto_memneq(const void *a, const void *b, size_t size);
 
 /**
@@ -421,7 +418,7 @@ static inline int crypto_memneq(const void *a, const void *b, size_t size)
 {
 	return __crypto_memneq(a, b, size) != 0UL ? 1 : 0;
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 
 #endif	/* _CRYPTO_ALGAPI_H */
 

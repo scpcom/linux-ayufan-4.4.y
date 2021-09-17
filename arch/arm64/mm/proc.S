@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Based on arch/arm/mm/proc.S
  *
@@ -149,13 +146,13 @@ ENTRY(__cpu_setup)
 	 * Set/prepare TCR and TTBR. We use 512GB (39-bit) address range for
 	 * both user and kernel.
 	 */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	ldr	x10, =TCR_TxSZ(VA_BITS) | TCR_FLAGS | TCR_IPS_40BIT | \
 		      TCR_ASID16 | TCR_TBI0 | (1 << 31)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	ldr	x10, =TCR_TxSZ(VA_BITS) | TCR_FLAGS | TCR_IPS_40BIT | \
 		      TCR_ASID16 | (1 << 31)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 #ifdef CONFIG_ARM64_64K_PAGES
 	orr	x10, x10, TCR_TG0_64K
 	orr	x10, x10, TCR_TG1_64K
@@ -164,7 +161,7 @@ ENTRY(__cpu_setup)
 	ret					// return to head.S
 ENDPROC(__cpu_setup)
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARMV7_COMPAT)
+#if defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_ARMV7_COMPAT)
 	/*
 	 *                 n n            T
 	 *       U E      WT T UD     US IHBS
@@ -177,7 +174,7 @@ ENDPROC(__cpu_setup)
 crval:
 	.word	0x030802e2			// clear
 	.word	0x0405d03d			// set
-#else /* MY_DEF_HERE && CONFIG_ARMV7_COMPAT */
+#else /* CONFIG_SYNO_LSP_HI3536 && CONFIG_ARMV7_COMPAT */
 	/*
 	 *                 n n            T
 	 *       U E      WT T UD     US IHBS
@@ -190,4 +187,4 @@ crval:
 crval:
 	.word	0x030802e2			// clear
 	.word	0x0405d11d			// set
-#endif /* MY_DEF_HERE && CONFIG_ARMV7_COMPAT */
+#endif /* CONFIG_SYNO_LSP_HI3536 && CONFIG_ARMV7_COMPAT */

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #include <linux/init.h>
 #include <linux/device.h>
 #include <linux/dma-mapping.h>
@@ -318,7 +315,7 @@ void hi3536_restart(char mode, const char *cmd)
 	writel(~0, __io_address(REG_BASE_SCTL + REG_SC_SYSRES));
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_HARD_RESET_CPU)
 void hi3536_hard_restart(char mode, const char *cmd)
 {
 	/* unlock watchdog registers */
@@ -334,7 +331,7 @@ void hi3536_hard_restart(char mode, const char *cmd)
 	pr_err("Failed to hard reset CPU!\n");
 	hi3536_restart(mode, cmd);
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_HI3536_HARD_RESET_CPU */
 
 extern void __init hi3536_timer_init(void);
 #ifdef CONFIG_HI3536_SYSCNT
@@ -354,9 +351,9 @@ MACHINE_START(HI3536, "hi3536")
 	.init_machine = hi3536_init,
 	.smp          = smp_ops(hi3536_smp_ops),
 	.reserve      = hi3536_reserve,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_HARD_RESET_CPU)
 	.restart      = hi3536_hard_restart,
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_HI3536_HARD_RESET_CPU */
 	.restart      = hi3536_restart,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_HI3536_HARD_RESET_CPU */
 	MACHINE_END

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  *	scsi_pm.c	Copyright (C) 2010 Alan Stern
  *
@@ -58,16 +55,16 @@ scsi_bus_suspend_common(struct device *dev, int (*cb)(struct device *))
 		 * All the high-level SCSI drivers that implement runtime
 		 * PM treat runtime suspend, system suspend, and system
 		 */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 		/*
 		 * hibernate nearly identically. In all cases the requirements
 		 * for runtime suspension are stricter.
 		 */
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 		/*
 		 * hibernate identically.
 		 */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		if (pm_runtime_suspended(dev))
 			return 0;
 

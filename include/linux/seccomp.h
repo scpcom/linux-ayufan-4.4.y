@@ -1,14 +1,11 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef _LINUX_SECCOMP_H
 #define _LINUX_SECCOMP_H
 
 #include <uapi/linux/seccomp.h>
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #define SECCOMP_FILTER_FLAG_MASK	(SECCOMP_FILTER_FLAG_TSYNC)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 #ifdef CONFIG_SECCOMP
 
@@ -22,7 +19,7 @@ struct seccomp_filter;
  * @mode:  indicates one of the valid values above for controlled
  *         system calls available to a process.
  */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 /*
  * @filter: must always point to a valid seccomp-filter or NULL as it is
  *          accessed without locking during system call entry.
@@ -30,7 +27,7 @@ struct seccomp_filter;
  *          @filter must only be accessed from the context of current as there
  *          is no read locking.
  */
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 /*
  * @filter: The metadata and ruleset for determining what system calls
  *          are allowed for a task.
@@ -38,7 +35,7 @@ struct seccomp_filter;
  *          @filter must only be accessed from the context of current as there
  *          is no locking.
  */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 struct seccomp {
 	int mode;
 	struct seccomp_filter *filter;

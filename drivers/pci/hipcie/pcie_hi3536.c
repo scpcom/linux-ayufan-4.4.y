@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 
 #include "pcie_hi3536.h"
 
@@ -98,11 +95,11 @@ static inline int __arch_check_pcie_link(struct pcie_info *info)
 {
 	int val;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
 	// do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 	udelay(2000);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 
 	val = readl(misc_ctrl_virt + PCIE_SYS_STATE0);
 	return ((val & (1 << PCIE_XMLH_LINK_UP))

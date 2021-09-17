@@ -24,7 +24,7 @@ struct bug_entry {
 #else
 	signed int	bug_addr_disp;
 #endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	unsigned short	flags;
 #endif  
 #ifdef CONFIG_DEBUG_BUGVERBOSE
@@ -35,7 +35,7 @@ struct bug_entry {
 #endif
 	unsigned short	line;
 #endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	 
 #else  
 	unsigned short	flags;

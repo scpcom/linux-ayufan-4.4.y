@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Kernel Debugger Architecture Independent Console I/O handler
  *
@@ -219,9 +216,9 @@ static char *kdb_read(char *buffer, size_t bufsize)
 	int i;
 	int diag, dtab_count;
 	int key;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	static int last_crlf;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	diag = kdbgetintenv("DTABCOUNT", &dtab_count);
 	if (diag)
@@ -242,10 +239,10 @@ poll_again:
 		return buffer;
 	if (key != 9)
 		tab = 0;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	if (key != 10 && key != 13)
 		last_crlf = 0;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	switch (key) {
 	case 8: /* backspace */
@@ -264,16 +261,16 @@ poll_again:
 			*cp = tmp;
 		}
 		break;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	case 10: /* new line */
 	case 13: /* carriage return */
 		/* handle \n after \r */
 		if (last_crlf && last_crlf != key)
 			break;
 		last_crlf = key;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	case 13: /* enter */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		*lastchar++ = '\n';
 		*lastchar++ = '\0';
 		if (!KDB_STATE(KGDB_TRANS)) {

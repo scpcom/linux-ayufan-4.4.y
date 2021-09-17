@@ -211,7 +211,7 @@ void __btrfs_abort_transaction(struct btrfs_trans_handle *trans,
 	}
 	trans->aborted = errno;
 	 
-	if (!trans->blocks_used && list_empty(&trans->new_bgs)) {
+	if (!trans->dirty && list_empty(&trans->new_bgs)) {
 		const char *errstr;
 
 		errstr = btrfs_decode_error(errno);
@@ -273,12 +273,22 @@ enum {
 	Opt_commit_interval, Opt_barrier, Opt_nodefrag, Opt_nodiscard,
 	Opt_noenospc_debug, Opt_noflushoncommit, Opt_acl, Opt_datacow,
 	Opt_datasum, Opt_treelog, Opt_noinode_cache,
+	Opt_nologreplay,
 #ifdef MY_DEF_HERE
-	Opt_flushoncommit_threshold,
-#endif
+	Opt_ordered_extent_throttle,
+#endif  
 #ifdef MY_DEF_HERE
 	Opt_no_block_group_hint,
 #endif
+#ifdef MY_DEF_HERE
+	Opt_reclaim_space, Opt_noreclaim_space,
+#endif  
+#ifdef MY_DEF_HERE
+	Opt_no_block_group,
+#endif  
+#ifdef MY_DEF_HERE
+	Opt_no_quota_tree,
+#endif  
 	Opt_err,
 };
 
@@ -307,11 +317,12 @@ static match_table_t tokens = {
 	{Opt_noacl, "noacl"},
 	{Opt_notreelog, "notreelog"},
 	{Opt_treelog, "treelog"},
+	{Opt_nologreplay, "nologreplay"},
 	{Opt_flushoncommit, "flushoncommit"},
 	{Opt_noflushoncommit, "noflushoncommit"},
 #ifdef MY_DEF_HERE
-	{Opt_flushoncommit_threshold, "flushoncommit_threshold=%d"},
-#endif
+	{Opt_ordered_extent_throttle, "ordered_extent_throttle=%d"},
+#endif  
 	{Opt_ratio, "metadata_ratio=%d"},
 	{Opt_discard, "discard"},
 	{Opt_nodiscard, "nodiscard"},
@@ -338,10 +349,21 @@ static match_table_t tokens = {
 #ifdef MY_DEF_HERE
 	{Opt_no_block_group_hint, "no_block_group_hint"},
 #endif
+#ifdef MY_DEF_HERE
+	{Opt_reclaim_space, "auto_reclaim_space"},
+	{Opt_noreclaim_space, "noauto_reclaim_space"},
+#endif  
+#ifdef MY_DEF_HERE
+	{Opt_no_block_group, "no_block_group"},
+#endif  
+#ifdef MY_DEF_HERE
+	{Opt_no_quota_tree, "no_quota_tree"},
+#endif  
 	{Opt_err, NULL},
 };
 
-int btrfs_parse_options(struct btrfs_root *root, char *options)
+int btrfs_parse_options(struct btrfs_root *root, char *options,
+			unsigned long new_flags)
 {
 	struct btrfs_fs_info *info = root->fs_info;
 	substring_t args[MAX_OPT_ARGS];
@@ -371,7 +393,7 @@ int btrfs_parse_options(struct btrfs_root *root, char *options)
 #endif  
 
 	if (!options)
-		goto out;
+		goto check;
 
 	options = kstrdup(options, GFP_NOFS);
 	if (!options)
@@ -558,13 +580,17 @@ int btrfs_parse_options(struct btrfs_root *root, char *options)
 			btrfs_clear_and_info(root, NOTREELOG,
 					     "enabling tree log");
 			break;
+		case Opt_nologreplay:
+			btrfs_set_and_info(root, NOLOGREPLAY,
+					   "disabling log replay at mount time");
+			break;
 #ifdef MY_DEF_HERE
-		case Opt_flushoncommit_threshold:
+		case Opt_ordered_extent_throttle:
 			ret = match_int(&args[0], &intarg);
 			if (ret) {
 				goto out;
 			} else if (intarg >= 0) {
-				info->flushoncommit_threshold = intarg;
+				info->ordered_extent_throttle = intarg;
 			} else {
 				ret = -EINVAL;
 				goto out;
@@ -660,6 +686,16 @@ int btrfs_parse_options(struct btrfs_root *root, char *options)
 			btrfs_clear_and_info(root, AUTO_DEFRAG,
 					     "disabling auto defrag");
 			break;
+#ifdef MY_DEF_HERE
+		case Opt_reclaim_space:
+			btrfs_set_and_info(root, AUTO_RECLAIM_SPACE,
+					   "enabling auto syno reclaim space");
+			break;
+		case Opt_noreclaim_space:
+			btrfs_clear_and_info(root, AUTO_RECLAIM_SPACE,
+					   "disabling auto syno reclaim space");
+			break;
+#endif  
 		case Opt_recovery:
 			btrfs_info(root->fs_info, "enabling auto recovery");
 			btrfs_set_opt(info->mount_opt, RECOVERY);
@@ -738,6 +774,27 @@ int btrfs_parse_options(struct btrfs_root *root, char *options)
 			info->no_block_group_hint = 1;
 			break;
 #endif
+#ifdef MY_DEF_HERE
+		case Opt_no_block_group:
+			if (!(info->sb->s_flags & MS_RDONLY)) {
+				btrfs_info(info, "mount option '%s' cannot use without read-only", p);
+				ret = -EINVAL;
+				goto out;
+			}
+			btrfs_set_opt(info->mount_opt, NO_BLOCK_GROUP);
+			break;
+#endif  
+#ifdef MY_DEF_HERE
+		case Opt_no_quota_tree:
+			if (test_bit(BTRFS_FS_STATE_REMOUNTING, &info->fs_state)) {
+				btrfs_info(info, "mount option '%s' cannot be used in remount", p);
+				ret = -EINVAL;
+				goto out;
+			}
+			btrfs_set_opt(info->mount_opt, NO_QUOTA_TREE);
+			break;
+#endif  
+
 		case Opt_err:
 			btrfs_info(root->fs_info, "unrecognized mount option '%s'", p);
 			ret = -EINVAL;
@@ -746,6 +803,23 @@ int btrfs_parse_options(struct btrfs_root *root, char *options)
 			break;
 		}
 	}
+check:
+#ifdef MY_DEF_HERE
+	if (btrfs_test_opt(root, NO_BLOCK_GROUP) && !btrfs_test_opt(root, NOLOGREPLAY)) {
+		btrfs_err(root->fs_info,
+			  "no_block_group must be used with nologreplay option");
+		ret = -EINVAL;
+	}
+#endif  
+#ifdef MY_DEF_HERE
+#else
+	 
+	if (btrfs_test_opt(root, NOLOGREPLAY) && !(new_flags & MS_RDONLY)) {
+		btrfs_err(root->fs_info,
+			  "nologreplay must be used with ro mount option");
+		ret = -EINVAL;
+	}
+#endif  
 out:
 	if (btrfs_fs_compat_ro(root->fs_info, FREE_SPACE_TREE) &&
 	    !btrfs_test_opt(root, FREE_SPACE_TREE) &&
@@ -1049,6 +1123,8 @@ static int btrfs_show_options(struct seq_file *seq, struct dentry *dentry)
 		seq_puts(seq, ",ssd");
 	if (btrfs_test_opt(root, NOTREELOG))
 		seq_puts(seq, ",notreelog");
+	if (btrfs_test_opt(root, NOLOGREPLAY))
+		seq_puts(seq, ",nologreplay");
 	if (btrfs_test_opt(root, FLUSHONCOMMIT))
 		seq_puts(seq, ",flushoncommit");
 	if (btrfs_test_opt(root, DISCARD))
@@ -1071,6 +1147,10 @@ static int btrfs_show_options(struct seq_file *seq, struct dentry *dentry)
 		seq_puts(seq, ",enospc_debug");
 	if (btrfs_test_opt(root, AUTO_DEFRAG))
 		seq_puts(seq, ",autodefrag");
+#ifdef MY_DEF_HERE
+	if (btrfs_test_opt(root, AUTO_RECLAIM_SPACE))
+		seq_puts(seq, ",auto_reclaim_space");
+#endif  
 	if (btrfs_test_opt(root, INODE_MAP_CACHE))
 		seq_puts(seq, ",inode_cache");
 	if (btrfs_test_opt(root, SKIP_BALANCE))
@@ -1087,10 +1167,10 @@ static int btrfs_show_options(struct seq_file *seq, struct dentry *dentry)
 				info->check_integrity_print_mask);
 #endif
 #ifdef MY_DEF_HERE
-	if (info->flushoncommit_threshold)
-		seq_printf(seq, ",flushoncommit_threshold=%d",
-				info->flushoncommit_threshold);
-#endif
+	if (info->ordered_extent_throttle)
+		seq_printf(seq, ",ordered_extent_throttle=%d",
+				info->ordered_extent_throttle);
+#endif  
 	if (info->metadata_ratio)
 		seq_printf(seq, ",metadata_ratio=%d",
 				info->metadata_ratio);
@@ -1102,6 +1182,15 @@ static int btrfs_show_options(struct seq_file *seq, struct dentry *dentry)
 	if (info->no_block_group_hint)
 		seq_puts(seq, ",no_block_group_hint");
 #endif
+#ifdef MY_DEF_HERE
+	if (btrfs_test_opt(root, NO_BLOCK_GROUP))
+		seq_puts(seq, ",no_block_group");
+#endif
+#ifdef MY_DEF_HERE
+	if (btrfs_test_opt(root, NO_QUOTA_TREE))
+		seq_puts(seq, ",no_quota_tree");
+#endif  
+
 	return 0;
 }
 
@@ -1348,9 +1437,18 @@ static inline void btrfs_remount_prepare(struct btrfs_fs_info *fs_info)
 static inline void btrfs_remount_begin(struct btrfs_fs_info *fs_info,
 				       unsigned long old_opts, int flags)
 {
+#ifdef MY_DEF_HERE
+	if ((btrfs_raw_test_opt(old_opts, AUTO_DEFRAG) &&
+	     (!btrfs_raw_test_opt(fs_info->mount_opt, AUTO_DEFRAG) ||
+	      (flags & MS_RDONLY))) ||
+	    (btrfs_raw_test_opt(old_opts, AUTO_RECLAIM_SPACE) &&
+	     (!btrfs_raw_test_opt(fs_info->mount_opt, AUTO_RECLAIM_SPACE) ||
+	      (flags & MS_RDONLY)))) {
+#else
 	if (btrfs_raw_test_opt(old_opts, AUTO_DEFRAG) &&
 	    (!btrfs_raw_test_opt(fs_info->mount_opt, AUTO_DEFRAG) ||
 	     (flags & MS_RDONLY))) {
+#endif  
 		 
 		wait_event(fs_info->transaction_wait,
 			   (atomic_read(&fs_info->defrag_running) == 0));
@@ -1363,9 +1461,18 @@ static inline void btrfs_remount_cleanup(struct btrfs_fs_info *fs_info,
 					 unsigned long old_opts)
 {
 	 
+#ifdef MY_DEF_HERE
+	if ((btrfs_raw_test_opt(old_opts, AUTO_DEFRAG) &&
+	     (!btrfs_raw_test_opt(fs_info->mount_opt, AUTO_DEFRAG) ||
+	      (fs_info->sb->s_flags & MS_RDONLY))) ||
+	    (btrfs_raw_test_opt(old_opts, AUTO_RECLAIM_SPACE) &&
+	     (!btrfs_raw_test_opt(fs_info->mount_opt, AUTO_RECLAIM_SPACE) ||
+	      (fs_info->sb->s_flags & MS_RDONLY)))) {
+#else
 	if (btrfs_raw_test_opt(old_opts, AUTO_DEFRAG) &&
 	    (!btrfs_raw_test_opt(fs_info->mount_opt, AUTO_DEFRAG) ||
 	     (fs_info->sb->s_flags & MS_RDONLY))) {
+#endif  
 		btrfs_cleanup_defrag_inodes(fs_info);
 	}
 
@@ -1388,7 +1495,7 @@ static int btrfs_remount(struct super_block *sb, int *flags, char *data)
 	sync_filesystem(sb);
 	btrfs_remount_prepare(fs_info);
 
-	ret = btrfs_parse_options(root, data);
+	ret = btrfs_parse_options(root, data, *flags);
 	if (ret) {
 		ret = -EINVAL;
 		goto restore;
@@ -1473,6 +1580,8 @@ static int btrfs_remount(struct super_block *sb, int *flags, char *data)
 			}
 		}
 		sb->s_flags &= ~MS_RDONLY;
+
+		fs_info->open = 1;
 	}
 out:
 	wake_up_process(fs_info->transaction_kthread);
@@ -1760,6 +1869,8 @@ static int btrfs_freeze(struct super_block *sb)
 	struct btrfs_trans_handle *trans;
 	struct btrfs_root *root = btrfs_sb(sb)->tree_root;
 
+	root->fs_info->fs_frozen = 1;
+	 
 	trans = btrfs_attach_transaction_barrier(root);
 	if (IS_ERR(trans)) {
 		 
@@ -1772,6 +1883,9 @@ static int btrfs_freeze(struct super_block *sb)
 
 static int btrfs_unfreeze(struct super_block *sb)
 {
+	struct btrfs_root *root = btrfs_sb(sb)->tree_root;
+
+	root->fs_info->fs_frozen = 0;
 	return 0;
 }
 
@@ -1783,11 +1897,11 @@ static int btrfs_show_devname(struct seq_file *m, struct dentry *root)
 	struct list_head *head;
 	struct rcu_string *name;
 
-	mutex_lock(&fs_info->fs_devices->device_list_mutex);
+	rcu_read_lock();
 	cur_devices = fs_info->fs_devices;
 	while (cur_devices) {
 		head = &cur_devices->devices;
-		list_for_each_entry(dev, head, dev_list) {
+		list_for_each_entry_rcu(dev, head, dev_list) {
 			if (dev->missing)
 				continue;
 			if (!dev->name)
@@ -1799,14 +1913,12 @@ static int btrfs_show_devname(struct seq_file *m, struct dentry *root)
 	}
 
 	if (first_dev) {
-		rcu_read_lock();
 		name = rcu_dereference(first_dev->name);
 		seq_escape(m, name->str, " \t\n\\");
-		rcu_read_unlock();
 	} else {
 		WARN_ON(1);
 	}
-	mutex_unlock(&fs_info->fs_devices->device_list_mutex);
+	rcu_read_unlock();
 	return 0;
 }
 
@@ -1888,25 +2000,26 @@ static int btrfs_drop_extent_maps(struct inode *inode, int nr_to_drop)
 		if (next_em == NULL) {
 			if (list_empty(head)) {
 				write_unlock(&em_tree->lock);
+				cond_resched();
 				continue;
 			}
 			em = list_entry(head->next, struct extent_map, free_list);
 			atomic_inc(&em->refs);
-			next_em = list_entry(em->free_list.next, struct extent_map, free_list);
 		} else {
 			em = next_em;
-			next_em = list_entry(em->free_list.next, struct extent_map, free_list);
 		}
-
-		if (&next_em->free_list == head) {
+		if (list_is_last(&em->free_list, &em_tree->not_modified_extents) ||
+			list_is_last(&em->free_list, &em_tree->syno_modified_extents) || list_empty(&em->free_list)) {
 			next_em = NULL;
-		}
-		if (next_em) {
+		} else {
+			next_em = list_entry(em->free_list.next, struct extent_map, free_list);
 			atomic_inc(&next_em->refs);
 		}
+
 		if (test_bit(EXTENT_FLAG_PINNED, &em->flags)) {
 			free_extent_map(em);
 			write_unlock(&em_tree->lock);
+			cond_resched();
 			continue;
 		}
 		if (!list_empty(&em->list) && em->generation > test_gen) {
@@ -1915,6 +2028,7 @@ static int btrfs_drop_extent_maps(struct inode *inode, int nr_to_drop)
 			if (stage == LOOP_FREE_EXTENT_MODIFIED) {
 				break;
 			} else {
+				cond_resched();
 				continue;
 			}
 		}
@@ -1926,6 +2040,7 @@ static int btrfs_drop_extent_maps(struct inode *inode, int nr_to_drop)
 		free_extent_map(em);
 		dropped++;
 		nr_to_drop--;
+		cond_resched();
 	}
 	if (next_em) {
 		 
@@ -1967,6 +2082,7 @@ static void btrfs_free_cached_objects(struct super_block *sb, int nr_to_drop)
 
 		iput(toput_inode);
 		toput_inode = inode;
+		cond_resched();
 		spin_lock(&fs_info->extent_map_inode_list_lock);
 		WARN_ON(atomic_read(&binode->free_extent_map_counts) == 0);
 		atomic_dec(&binode->free_extent_map_counts);

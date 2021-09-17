@@ -114,6 +114,14 @@ config SYNO_CIFS_SMB_OPS
 	default y
 	depends on SYNO_CIFS_REPLACE_NATIVE_OS
 
+config SYNO_CIFS_COVERITY
+	bool "fix cifs coverity"
+	default y
+
+config SYNO_CIFS_RECONNECT
+	bool "modify cifs reconnect behavior to prevent wait mutex lock cause hung task"
+	default y
+
 endmenu #CIFS
 
 menu "FAT"
@@ -286,6 +294,11 @@ config SYNO_EXT4_PARALLEL_GROUP_DESC_PREFETCH_WHEN_MOUNT
 	default y
 	depends on EXT4_FS
 
+config SYNO_EXT4_METADATA_CSUM_SMOOTH_ERR_HANDLING
+	bool "Smooth ext4 checksum err handling to prevent users from losing new volume data"
+	default y
+	depends on EXT4_FS
+
 endmenu #EXT4
 
 menu "BTRFS"
@@ -332,11 +345,6 @@ config SYNO_BTRFS_FIX_PAGE_LEAK_WHILE_CLONE_EXTENT_BUFFER
 
 config SYNO_BTRFS_ADD_MISSING_FINISH_PLUG_FOR_TREE_LOG
 	bool "Add missing finish plug for btrfs tree log."
-	default y
-	depends on BTRFS_FS
-
-config SYNO_BTRFS_CLONE_CHECK_QUOTA
-	bool "Add quota check for IOC_CLONE ioctl command"
 	default y
 	depends on BTRFS_FS
 
@@ -525,6 +533,11 @@ config SYNO_BTRFS_CHECK_INTEGRITY
 	default y
 	depends on BTRFS_FS
 
+config SYNO_BTRFS_MULTIPLE_WRITEBACK
+	bool "improve grantley random write performance."
+	default y
+	depends on BTRFS_FS
+
 config SYNO_BTRFS_TREE_LOG_RECOVER_FIX
 	bool "Fix tree log recovery"
 	default y
@@ -592,6 +605,116 @@ config SYNO_BTRFS_FIX_MOUNT_OPTION_COMMIT_1S_NO_EFFECT
 
 config SYNO_BTRFS_FIX_TRIM_ENOSPC
 	bool "Fix trim will lead to ENOSPC and lose data."
+	default y
+	depends on BTRFS_FS
+
+config SYNO_BTRFS_ENHANCE_PERFORMANCE_AND_LATENCY
+	bool "enhance random write performance and latency"
+	default y
+	depends on BTRFS_FS
+
+config SYNO_BTRFS_IOC_SYNC_SYNO
+	bool "add a new ioctl BTRFS_IOC_SYNC_SYNO for iscsi"
+	default y
+	depends on BTRFS_FS
+
+config SYNO_BTRFS_SEND_SKIP_FIND_CLONE
+	bool "add a send flag to skip find_extent_clone process"
+	default y
+	depends on BTRFS_FS
+
+config SYNO_BTRFS_SEND_ENHANCE_SMALL_FILE
+	bool "enhance send/receive for small file"
+	default y
+	depends on BTRFS_FS
+
+config SYNO_BTRFS_SEND_FALLOCATE_SUPPORT
+	bool "to fallocate to pre-allocate file extents as sending subvols"
+	default y
+	depends on BTRFS_FS
+
+config SYNO_BTRFS_AVOID_NULL_POINTER_DEREFERENCE_WHEN_MOUNT
+	bool "avoid null pointer dereference when mount"
+	default y
+	depends on BTRFS_FS
+
+config SYNO_BTRFS_FIX_FIEMAP_RESULT_NOT_CORRECTED
+	bool "fix fiemap result not corrected"
+	default y
+	depends on BTRFS_FS
+
+config SYNO_BTRFS_SEND_SOFT_LOCKUP_AVOIDANCE
+	bool "avoid soft lock-up during sending"
+	default y
+	depends on BTRFS_FS
+
+config SYNO_BTRFS_CLONE_RANGE_V2
+	bool "clone range v2 version"
+	default y
+	depends on BTRFS_FS
+
+config SYNO_BTRFS_SYSFS_BLOCK_GROUP_CNT
+	bool "add sysfs interface about block group count information"
+	default y
+	depends on BTRFS_FS
+
+config SYNO_BTRFS_SYSFS_FREE_SPACE_TREE
+	bool "add sysfs interface about free space tree"
+	default y
+	depends on BTRFS_FS
+
+config SYNO_BTRFS_FIX_JOURNAL_INFO_BUG
+	bool "fix btrfs journal_info bug"
+	default y
+	depends on BTRFS_FS
+
+config SYNO_BTRFS_AVOID_FALLOCATE_RUN_BLOCKING_DELAYEDREF
+	bool "Not running blocking async delayed ref for fallocate"
+	default y
+	depends on BTRFS_FS
+
+config SYNO_BTRFS_SKIP_BLOCK_GROUP
+	bool "add mount option to skip block group"
+	default y
+	depends on BTRFS_FS
+
+config SYNO_BTRFS_SKIP_QUOTA_TREE
+	bool "Skip reading qgroup tree during mount"
+	default y
+	depends on BTRFS_FS
+
+config SYNO_BTRFS_ALLOW_SNAPSHOT_DELETE_STOP
+	bool "Support btrfs cleaner stop deleting snapshot"
+	default y
+	depends on BTRFS_FS
+
+config SYNO_BTRFS_FIX_RENAME_DIR_ITEM_COLLISION_ERROR
+	bool "Fix dir item collision in rename would cause abort transaction"
+	default y
+	depends on BTRFS_FS
+
+config SYNO_BTRFS_FIX_ERROR_PAGE_DOUBLE_CLEAR
+	bool "Fix page double clear in the error case for nocow"
+	default y
+	depends on BTRFS_FS
+
+config SYNO_BTRFS_PERF_STATS
+	bool "Btrfs performance stats"
+	default y
+	depends on BTRFS_FS && DEBUG_FS
+
+config SYNO_BTRFS_FIX_CRASH_WITH_ANON_BDEV_WHEN_MEMORY_ALLOCATE_FAILED
+	bool "Fix snapshot create failed when memory allocate failed"
+	default y
+	depends on BTRFS_FS
+
+config SYNO_BTRFS_FIX_RANDOM_WRITE_OOM
+	bool "fix random write OOM"
+	default y
+	depends on BTRFS_FS
+
+config SYNO_BTRFS_NO_LOG_REPLAY
+	bool "Allow nologreplay mount option on rw volume mount path"
 	default y
 	depends on BTRFS_FS
 
@@ -669,6 +792,11 @@ config SYNO_ECRYPTFS_FAST_LOOKUP
 	default y
 	depends on ECRYPT_FS
 
+config SYNO_ECRYPTFS_SKIP_EQUAL_ISIZE_UPDATE
+	bool "Update ecryptfs i_size only when they are different"
+	default y
+	depends on ECRYPT_FS
+
 endmenu #ECRYPT
 menu "NFS"
 
@@ -709,6 +837,15 @@ config SYNO_NFSD_HIDDEN_FILE
 
 config SYNO_NFSD_AVOID_HUNG_TASK_WHEN_UNLINK_BIG_FILE
 	bool "Avoid parent mutex hung task when unlink big file"
+	default y
+
+config SYNO_NFSD_NUMA_SVC_POOL_PERNODE
+	bool "Enhance NFS performance for numa model"
+	default y
+	depends on NUMA
+
+config SYNO_NFSD_LATENCY_REPORT
+	bool "Add /proc/net/rpc/nfsd_lat to monitor nfsd latency"
 	default y
 
 endmenu #NFS
@@ -757,6 +894,11 @@ config SYNO_HFSPLUS_EA
 
 config SYNO_HFSPLUS_BREC_FIND_RET_CHECK
 	bool "Check brec_find return value while update parent"
+	default y
+	depends on HFSPLUS_FS
+
+config SYNO_HFSPLUS_NODE_DEBUG
+	bool "Print info if have invalid offset"
 	default y
 	depends on HFSPLUS_FS
 

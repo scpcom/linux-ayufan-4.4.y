@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * menu.c - the menu idle governor
  *
@@ -176,16 +173,16 @@ static inline int performance_multiplier(void)
 
 	/* for higher loadavg, we are more reluctant */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	/*
 	 * this doesn't work as intended - it is almost always 0, but can
 	 * sometimes, depending on workload, spike very high into the hundreds
 	 * even when the average cpu load is under 10%.
 	 */
 	/* mult += 2 * get_loadavg(); */
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	mult += 2 * get_loadavg();
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	/* for IO wait tasks (per cpu!) we add 5x each */
 	mult += 10 * nr_iowait_cpu(smp_processor_id());

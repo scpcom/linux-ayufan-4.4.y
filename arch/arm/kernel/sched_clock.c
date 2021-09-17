@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * sched_clock.c: support for extending counters to full 64-bit ns counter
  *
@@ -30,9 +27,9 @@ struct clock_data {
 	bool needs_suspend;
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 static DEFINE_SPINLOCK(sched_clock_lock);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 static void sched_clock_poll(unsigned long wrap_ticks);
 static DEFINE_TIMER(sched_clock_timer, sched_clock_poll, 0, 0);
@@ -58,7 +55,7 @@ static inline u64 notrace cyc_to_ns(u64 cyc, u32 mult, u32 shift)
 	return (cyc * mult) >> shift;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536)
 static unsigned long long notrace cyc_to_sched_clock(u32 cyc, u32 mask)
 {
 	u64 epoch_ns;
@@ -83,11 +80,11 @@ static unsigned long long notrace cyc_to_sched_clock(u32 cyc, u32 mask)
 
 	return epoch_ns + cyc_to_ns((cyc - epoch_cyc) & mask, cd.mult, cd.shift);
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_HI3536 */
 
 static unsigned long long notrace sched_clock_32(void)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	unsigned long long t_clk;
 	u32 cyc;
 #ifndef CONFIG_LOCKDEP
@@ -105,7 +102,7 @@ static unsigned long long notrace sched_clock_32(void)
 #endif
 
 	return t_clk;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	u64 epoch_ns;
 	u32 epoch_cyc;
 	u32 cyc;
@@ -130,7 +127,7 @@ static unsigned long long notrace sched_clock_32(void)
 	cyc = read_sched_clock();
 	cyc = (cyc - epoch_cyc) & sched_clock_mask;
 	return epoch_ns + cyc_to_ns(cyc, cd.mult, cd.shift);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 }
 
 /*
@@ -139,15 +136,15 @@ static unsigned long long notrace sched_clock_32(void)
 static void notrace update_sched_clock(void)
 {
 	unsigned long flags;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	unsigned long lock_flags;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	u32 cyc;
 	u64 ns;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	spin_lock_irqsave(&sched_clock_lock, lock_flags);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	cyc = read_sched_clock();
 	ns = cd.epoch_ns +
 		cyc_to_ns((cyc - cd.epoch_cyc) & sched_clock_mask,
@@ -163,9 +160,9 @@ static void notrace update_sched_clock(void)
 	smp_wmb();
 	cd.epoch_cyc = cyc;
 	raw_local_irq_restore(flags);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	spin_unlock_irqrestore(&sched_clock_lock, lock_flags);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 }
 
 static void sched_clock_poll(unsigned long wrap_ticks)

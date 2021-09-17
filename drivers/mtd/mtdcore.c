@@ -18,7 +18,7 @@
 #include <linux/backing-dev.h>
 #include <linux/gfp.h>
 #include <linux/slab.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #include <linux/io.h>
 #include <mach/platform.h>
 #endif  
@@ -58,7 +58,7 @@ static DEFINE_IDR(mtd_idr);
 DEFINE_MUTEX(mtd_table_mutex);
 EXPORT_SYMBOL_GPL(mtd_table_mutex);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_SPI_TYPE_SWITCH
 DEFINE_MUTEX(spi_type_mutex);
 EXPORT_SYMBOL_GPL(spi_type_mutex);
@@ -472,7 +472,7 @@ int mtd_device_parse_register(struct mtd_info *mtd, const char * const *types,
 		err = add_mtd_partitions(mtd, real_parts, err);
 		kfree(real_parts);
 	} else if (err == 0) {
-#if defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536) && !defined(CONFIG_SYNO_HI3536)
 		 
 #else  
 		err = add_mtd_device(mtd);

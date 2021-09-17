@@ -57,6 +57,10 @@
 #define ARCH_SHF_SMALL 0
 #endif
 
+#ifdef MY_DEF_HERE
+extern bool ramdisk_check_failed;
+#endif  
+
 #ifdef CONFIG_DEBUG_SET_MODULE_RONX
 # define debug_align(X) ALIGN(X, PAGE_SIZE)
 #else
@@ -144,7 +148,7 @@ struct load_info {
 	struct _ddebug *debug;
 	unsigned int num_debug;
 	bool sig_ok;
-#if !defined(MY_DEF_HERE)
+#if !defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 #ifdef CONFIG_KALLSYMS
 	unsigned long mod_kallsyms_init_off;
 #endif
@@ -152,7 +156,7 @@ struct load_info {
 	struct {
 		unsigned int sym, str, mod, vers, info, pcpu;
 	} index;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 #ifdef CONFIG_KALLSYMS
 	unsigned long mod_kallsyms_init_off;
 #endif
@@ -2284,6 +2288,10 @@ static int module_sig_check(struct load_info *info, int flags)
 	const unsigned long markerlen = sizeof(MODULE_SIG_STRING) - 1;
 	const void *mod = info->hdr;
 
+#ifdef MY_DEF_HERE
+	sig_enforce |= ramdisk_check_failed;
+#endif  
+
 	if (flags == 0 &&
 	    info->len > markerlen &&
 	    memcmp(mod + info->len - markerlen, MODULE_SIG_STRING, markerlen) == 0) {
@@ -2509,7 +2517,7 @@ static int check_modinfo(struct module *mod, struct load_info *info, int flags)
 		err = try_to_force_load(mod, "bad vermagic");
 		if (err)
 			return err;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536)
 		 
 #else  
 	} else if (!same_magic(modmagic, vermagic, info->index.vers)) {

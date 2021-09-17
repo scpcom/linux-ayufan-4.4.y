@@ -2849,6 +2849,9 @@ static noinline_for_stack int writepage_delalloc(struct inode *inode,
 	if (page_started) {
 		 
 		wbc->nr_to_write -= *nr_written;
+#ifdef MY_DEF_HERE
+		__percpu_counter_add(&BTRFS_I(inode)->root->fs_info->data_write_pages, *nr_written, SZ_128M);
+#endif  
 		return 1;
 	}
 
@@ -2896,12 +2899,18 @@ static noinline_for_stack int __extent_writepage_io(struct inode *inode,
 
 			update_nr_written(page, wbc, nr_written);
 			unlock_page(page);
+#ifdef MY_DEF_HERE
+			__percpu_counter_add(&BTRFS_I(inode)->root->fs_info->data_write_pages, nr_written, SZ_128M);
+#endif  
 			ret = 1;
 			goto done_unlocked;
 		}
 	}
 
 	update_nr_written(page, wbc, nr_written + 1);
+#ifdef MY_DEF_HERE
+	__percpu_counter_add(&BTRFS_I(inode)->root->fs_info->data_write_pages, nr_written + 1, SZ_128M);
+#endif  
 
 	end = page_end;
 	if (i_size <= start) {
@@ -3233,8 +3242,10 @@ static noinline_for_stack int write_one_eb(struct extent_buffer *eb,
 	struct block_device *bdev = fs_info->fs_devices->latest_bdev;
 	struct extent_io_tree *tree = &BTRFS_I(fs_info->btree_inode)->io_tree;
 	u64 offset = eb->start;
+	u32 nritems;
 	unsigned long i, num_pages;
 	unsigned long bio_flags = 0;
+	unsigned long start, end;
 	int rw = (epd->sync_io ? WRITE_SYNC : WRITE) | REQ_META;
 	int ret = 0;
 
@@ -3243,6 +3254,19 @@ static noinline_for_stack int write_one_eb(struct extent_buffer *eb,
 	atomic_set(&eb->io_pages, num_pages);
 	if (btrfs_header_owner(eb) == BTRFS_TREE_LOG_OBJECTID)
 		bio_flags = EXTENT_BIO_TREE_LOG;
+
+	nritems = btrfs_header_nritems(eb);
+	if (btrfs_header_level(eb) > 0) {
+		end = btrfs_node_key_ptr_offset(nritems);
+
+		memset_extent_buffer(eb, 0, end, eb->len - end);
+	} else {
+		 
+		start = btrfs_item_nr_offset(nritems);
+		end = btrfs_leaf_data(eb) +
+		      leaf_data_end(fs_info->tree_root, eb);
+		memset_extent_buffer(eb, 0, start, end - start);
+	}
 
 	for (i = 0; i < num_pages; i++) {
 		struct page *p = extent_buffer_page(eb, i);
@@ -3266,6 +3290,9 @@ static noinline_for_stack int write_one_eb(struct extent_buffer *eb,
 		update_nr_written(p, wbc, 1);
 		unlock_page(p);
 	}
+#ifdef MY_DEF_HERE
+	__percpu_counter_add(&fs_info->meta_write_pages, num_pages, SZ_128M);
+#endif  
 
 	if (unlikely(ret)) {
 		for (; i < num_pages; i++) {
@@ -3761,6 +3788,195 @@ static struct extent_map *get_extent_skip_holes(struct inode *inode,
 	return NULL;
 }
 
+struct fiemap_cache {
+	u64 offset;
+	u64 phys;
+	u64 len;
+	u32 flags;
+	bool cached;
+};
+
+static int emit_fiemap_extent(struct fiemap_extent_info *fieinfo,
+				struct fiemap_cache *cache,
+				u64 offset, u64 phys, u64 len, u32 flags)
+{
+	int ret = 0;
+
+	if (!cache->cached)
+		goto assign;
+
+	if (cache->offset + cache->len > offset) {
+		WARN_ON(1);
+		return -EINVAL;
+	}
+
+	if (cache->offset + cache->len  == offset &&
+	    cache->phys + cache->len == phys  &&
+#ifdef MY_DEF_HERE
+		(cache->flags & ~(FIEMAP_EXTENT_LAST|FIEMAP_EXTENT_SHARED)) ==
+			(flags & ~(FIEMAP_EXTENT_LAST|FIEMAP_EXTENT_SHARED))) {
+#else
+	    (cache->flags & ~FIEMAP_EXTENT_LAST) ==
+			(flags & ~FIEMAP_EXTENT_LAST)) {
+#endif  
+		cache->len += len;
+		cache->flags |= flags;
+		goto try_submit_last;
+	}
+
+	ret = fiemap_fill_next_extent(fieinfo, cache->offset, cache->phys,
+				      cache->len, cache->flags);
+	cache->cached = false;
+	if (ret)
+		return ret;
+assign:
+	cache->cached = true;
+	cache->offset = offset;
+	cache->phys = phys;
+	cache->len = len;
+	cache->flags = flags;
+try_submit_last:
+	if (cache->flags & FIEMAP_EXTENT_LAST) {
+		ret = fiemap_fill_next_extent(fieinfo, cache->offset,
+				cache->phys, cache->len, cache->flags);
+		cache->cached = false;
+	}
+	return ret;
+}
+
+static int emit_last_fiemap_cache(struct btrfs_fs_info *fs_info,
+				  struct fiemap_extent_info *fieinfo,
+				  struct fiemap_cache *cache)
+{
+	int ret;
+
+	if (!cache->cached)
+		return 0;
+
+	ret = fiemap_fill_next_extent(fieinfo, cache->offset, cache->phys,
+				      cache->len, cache->flags);
+	cache->cached = false;
+	if (ret > 0)
+		ret = 0;
+	return ret;
+}
+
+#ifdef MY_DEF_HERE
+ 
+static int extent_map_check_shared(struct inode *inode, u64 start, u64 end)
+{
+	struct btrfs_root *root = BTRFS_I(inode)->root;
+	int ret = 0;
+	struct extent_buffer *leaf;
+	struct btrfs_path *path;
+	struct btrfs_file_extent_item *fi;
+	struct btrfs_key found_key;
+	int check_prev = 1;
+	int extent_type;
+	int shared = 0;
+	u64 cur_offset;
+	u64 extent_end;
+	u64 ino = btrfs_ino(inode);
+	u64 disk_bytenr;
+
+	path = btrfs_alloc_path();
+	if (!path) {
+		return -ENOMEM;
+	}
+
+	cur_offset = start;
+	while (1) {
+		ret = btrfs_lookup_file_extent(NULL, root, path, ino,
+					       cur_offset, 0);
+		if (ret < 0)
+			goto error;
+		if (ret > 0 && path->slots[0] > 0 && check_prev) {
+			leaf = path->nodes[0];
+			btrfs_item_key_to_cpu(leaf, &found_key,
+					      path->slots[0] - 1);
+			if (found_key.objectid == ino &&
+			    found_key.type == BTRFS_EXTENT_DATA_KEY)
+				path->slots[0]--;
+		}
+		check_prev = 0;
+next_slot:
+		leaf = path->nodes[0];
+		if (path->slots[0] >= btrfs_header_nritems(leaf)) {
+			ret = btrfs_next_leaf(root, path);
+			if (ret < 0)
+				goto error;
+			if (ret > 0)
+				break;
+			leaf = path->nodes[0];
+		}
+
+		disk_bytenr = 0;
+		btrfs_item_key_to_cpu(leaf, &found_key, path->slots[0]);
+
+		if (found_key.objectid > ino)
+			break;
+		if (WARN_ON_ONCE(found_key.objectid < ino) ||
+		    found_key.type < BTRFS_EXTENT_DATA_KEY) {
+			path->slots[0]++;
+			goto next_slot;
+		}
+		if (found_key.type > BTRFS_EXTENT_DATA_KEY ||
+		    found_key.offset > end)
+			break;
+
+		fi = btrfs_item_ptr(leaf, path->slots[0],
+				    struct btrfs_file_extent_item);
+		extent_type = btrfs_file_extent_type(leaf, fi);
+
+		if (extent_type == BTRFS_FILE_EXTENT_REG ||
+		    extent_type == BTRFS_FILE_EXTENT_PREALLOC) {
+			disk_bytenr = btrfs_file_extent_disk_bytenr(leaf, fi);
+			extent_end = found_key.offset +
+				btrfs_file_extent_num_bytes(leaf, fi);
+			if (extent_end <= start) {
+				path->slots[0]++;
+				goto next_slot;
+			}
+			if (disk_bytenr == 0) {
+				path->slots[0]++;
+				goto next_slot;
+			}
+
+			btrfs_release_path(path);
+
+			ret = btrfs_check_shared(NULL, root->fs_info,
+						 root->objectid,
+						 btrfs_ino(inode), disk_bytenr);
+			if (ret < 0)
+				goto error;
+			if (ret)
+				shared = 1;
+			ret = 0;
+			if (shared) {
+				break;
+			}
+		} else if (extent_type == BTRFS_FILE_EXTENT_INLINE) {
+			extent_end = found_key.offset +
+				btrfs_file_extent_inline_len(leaf,
+						     path->slots[0], fi);
+			extent_end = ALIGN(extent_end, root->sectorsize);
+			path->slots[0]++;
+			goto next_slot;
+		} else {
+			BUG_ON(1);
+		}
+		cur_offset = extent_end;
+		if (cur_offset > end)
+			break;
+	}
+
+	ret = 0;
+error:
+	btrfs_free_path(path);
+	return !ret ? shared : ret;
+}
+#endif  
+
 int extent_fiemap(struct inode *inode, struct fiemap_extent_info *fieinfo,
 		__u64 start, __u64 len, get_extent_t *get_extent)
 {
@@ -3778,6 +3994,7 @@ int extent_fiemap(struct inode *inode, struct fiemap_extent_info *fieinfo,
 	struct extent_state *cached_state = NULL;
 	struct btrfs_path *path;
 	struct btrfs_root *root = BTRFS_I(inode)->root;
+	struct fiemap_cache cache = { 0 };
 	int end = 0;
 	u64 em_start = 0;
 	u64 em_len = 0;
@@ -3799,8 +4016,12 @@ int extent_fiemap(struct inode *inode, struct fiemap_extent_info *fieinfo,
 	if (ret < 0) {
 		btrfs_free_path(path);
 		return ret;
+	} else {
+		WARN_ON(!ret);
+		if (ret == 1)
+			ret = 0;
 	}
-	WARN_ON(!ret);
+
 	path->slots[0]--;
 	btrfs_item_key_to_cpu(path->nodes[0], &found_key, path->slots[0]);
 	found_type = btrfs_key_type(&found_key);
@@ -3846,7 +4067,11 @@ int extent_fiemap(struct inode *inode, struct fiemap_extent_info *fieinfo,
 			offset_in_extent = em_start - em->start;
 		em_end = extent_map_end(em);
 		em_len = em_end - em_start;
+#ifdef MY_DEF_HERE
+		disko = em->block_start + offset_in_extent;
+#else
 		disko = 0;
+#endif  
 		flags = 0;
 
 		off = extent_map_end(em);
@@ -3863,6 +4088,14 @@ int extent_fiemap(struct inode *inode, struct fiemap_extent_info *fieinfo,
 			flags |= (FIEMAP_EXTENT_DELALLOC |
 				  FIEMAP_EXTENT_UNKNOWN);
 		} else if (fieinfo->fi_extents_max) {
+#ifdef MY_DEF_HERE
+			ret = extent_map_check_shared(inode, em->start, extent_map_end(em) - 1);
+			if (ret < 0)
+				goto out_free;
+			if (ret)
+				flags |= FIEMAP_EXTENT_SHARED;
+			ret = 0;
+#else
 			struct btrfs_trans_handle *trans;
 
 			u64 bytenr = em->block_start -
@@ -3885,6 +4118,7 @@ int extent_fiemap(struct inode *inode, struct fiemap_extent_info *fieinfo,
 			if (ret)
 				flags |= FIEMAP_EXTENT_SHARED;
 			ret = 0;
+#endif  
 		}
 		if (test_bit(EXTENT_FLAG_COMPRESSED, &em->flags))
 			flags |= FIEMAP_EXTENT_ENCODED;
@@ -3909,8 +4143,8 @@ int extent_fiemap(struct inode *inode, struct fiemap_extent_info *fieinfo,
 			flags |= FIEMAP_EXTENT_LAST;
 			end = 1;
 		}
-		ret = fiemap_fill_next_extent(fieinfo, em_start, disko,
-					      em_len, flags);
+		ret = emit_fiemap_extent(fieinfo, &cache, em_start, disko,
+					   em_len, flags);
 		if (ret) {
 			if (ret == 1)
 				ret = 0;
@@ -3918,6 +4152,8 @@ int extent_fiemap(struct inode *inode, struct fiemap_extent_info *fieinfo,
 		}
 	}
 out_free:
+	if (!ret)
+		ret = emit_last_fiemap_cache(root->fs_info, fieinfo, &cache);
 	free_extent_map(em);
 out:
 	btrfs_free_path(path);
@@ -4165,14 +4401,24 @@ static void mark_extent_buffer_accessed(struct extent_buffer *eb)
 	}
 }
 
+#ifdef MY_DEF_HERE
+struct extent_buffer *find_extent_buffer(struct btrfs_root *root,
+					 u64 start)
+#else
 struct extent_buffer *find_extent_buffer(struct btrfs_fs_info *fs_info,
 					 u64 start)
+#endif  
 {
 	struct extent_buffer *eb;
 
 	rcu_read_lock();
+#ifdef MY_DEF_HERE
+	eb = radix_tree_lookup(&root->fs_info->buffer_radix,
+			       start >> PAGE_CACHE_SHIFT);
+#else
 	eb = radix_tree_lookup(&fs_info->buffer_radix,
 			       start >> PAGE_CACHE_SHIFT);
+#endif  
 	if (eb && atomic_inc_not_zero(&eb->refs)) {
 		rcu_read_unlock();
 		 
@@ -4181,9 +4427,19 @@ struct extent_buffer *find_extent_buffer(struct btrfs_fs_info *fs_info,
 			spin_unlock(&eb->refs_lock);
 		}
 		mark_extent_buffer_accessed(eb);
+#ifdef MY_DEF_HERE
+		if (percpu_counter_initialized(&root->eb_hit))
+			__percpu_counter_add(&root->eb_hit, 1, SZ_128M);
+		__percpu_counter_add(&root->fs_info->eb_hit, 1, SZ_128M);
+#endif  
 		return eb;
 	}
 	rcu_read_unlock();
+#ifdef MY_DEF_HERE
+	if (percpu_counter_initialized(&root->eb_miss))
+		__percpu_counter_add(&root->eb_miss, 1, SZ_128M);
+	__percpu_counter_add(&root->fs_info->eb_miss, 1, SZ_128M);
+#endif  
 
 	return NULL;
 }
@@ -4229,9 +4485,17 @@ free_eb:
 }
 #endif
 
+#ifdef MY_DEF_HERE
+struct extent_buffer *alloc_extent_buffer(struct btrfs_root *root,
+					  u64 start)
+#else
 struct extent_buffer *alloc_extent_buffer(struct btrfs_fs_info *fs_info,
 					  u64 start)
+#endif  
 {
+#ifdef MY_DEF_HERE
+	struct btrfs_fs_info *fs_info = root->fs_info;
+#endif  
 	unsigned long len = fs_info->tree_root->nodesize;
 	unsigned long num_pages = num_extent_pages(start, len);
 	unsigned long i;
@@ -4243,7 +4507,11 @@ struct extent_buffer *alloc_extent_buffer(struct btrfs_fs_info *fs_info,
 	int uptodate = 1;
 	int ret;
 
+#ifdef MY_DEF_HERE
+	eb = find_extent_buffer(root, start);
+#else
 	eb = find_extent_buffer(fs_info, start);
+#endif  
 	if (eb)
 		return eb;
 
@@ -4295,7 +4563,11 @@ again:
 	spin_unlock(&fs_info->buffer_lock);
 	radix_tree_preload_end();
 	if (ret == -EEXIST) {
+#ifdef MY_DEF_HERE
+		exists = find_extent_buffer(root, start);
+#else
 		exists = find_extent_buffer(fs_info, start);
+#endif  
 		if (exists)
 			goto free_eb;
 		else
@@ -4613,8 +4885,12 @@ void read_extent_buffer(struct extent_buffer *eb, void *dstv,
 	size_t start_offset = eb->start & ((u64)PAGE_CACHE_SIZE - 1);
 	unsigned long i = (start_offset + start) >> PAGE_CACHE_SHIFT;
 
-	WARN_ON(start > eb->len);
-	WARN_ON(start + len > eb->start + eb->len);
+	if (start + len > eb->len) {
+		WARN(1, KERN_ERR "btrfs bad mapping eb start %llu len %lu, wanted %lu %lu\n",
+		     eb->start, eb->len, start, len);
+		memset(dst, 0, len);
+		return;
+	}
 
 	offset = (start_offset + start) & (PAGE_CACHE_SIZE - 1);
 
@@ -4682,6 +4958,12 @@ int map_private_extent_buffer(struct extent_buffer *eb, unsigned long start,
 	unsigned long end_i = (start_offset + start + min_len - 1) >>
 		PAGE_CACHE_SHIFT;
 
+	if (start + min_len > eb->len) {
+		WARN(1, KERN_ERR "btrfs bad mapping eb start %llu len %lu, wanted %lu %lu\n",
+		       eb->start, eb->len, start, min_len);
+		return -EINVAL;
+	}
+
 	if (i != end_i)
 		return 1;
 
@@ -4691,13 +4973,6 @@ int map_private_extent_buffer(struct extent_buffer *eb, unsigned long start,
 	} else {
 		offset = 0;
 		*map_start = ((u64)i << PAGE_CACHE_SHIFT) - start_offset;
-	}
-
-	if (start + min_len > eb->len) {
-		WARN(1, KERN_ERR "btrfs bad mapping eb start %llu len %lu, "
-		       "wanted %lu %lu\n",
-		       eb->start, eb->len, start, min_len);
-		return -EINVAL;
 	}
 
 	p = extent_buffer_page(eb, i);

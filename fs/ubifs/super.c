@@ -98,7 +98,7 @@ struct inode *ubifs_iget(struct super_block *sb, unsigned long inum)
 	inode->i_ctime.tv_sec  = (int64_t)le64_to_cpu(ino->ctime_sec);
 	inode->i_ctime.tv_nsec = le32_to_cpu(ino->ctime_nsec);
 	inode->i_mode = le32_to_cpu(ino->mode);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	if (c->mount_opts.share)
 		inode->i_mode |= S_IRWXUGO;
 #endif  
@@ -392,7 +392,7 @@ static int ubifs_show_options(struct seq_file *s, struct dentry *root)
 			   ubifs_compr_name(c->mount_opts.compr_type));
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	if (c->mount_opts.share)
 		seq_printf(s, ",share");
 #endif  
@@ -720,7 +720,7 @@ enum {
 	Opt_chk_data_crc,
 	Opt_no_chk_data_crc,
 	Opt_override_compr,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	Opt_share,
 #endif  
 	Opt_err,
@@ -734,7 +734,7 @@ static const match_table_t tokens = {
 	{Opt_chk_data_crc, "chk_data_crc"},
 	{Opt_no_chk_data_crc, "no_chk_data_crc"},
 	{Opt_override_compr, "compr=%s"},
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	{Opt_share, "share"},
 #endif  
 	{Opt_err, NULL},
@@ -772,7 +772,7 @@ static int ubifs_parse_options(struct ubifs_info *c, char *options,
 		case Opt_norm_unmount:
 			c->mount_opts.unmount_mode = 1;
 			break;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 		case Opt_share:
 			c->mount_opts.share = 1;
 			break;

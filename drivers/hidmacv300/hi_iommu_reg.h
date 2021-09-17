@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef HI_IOMMU_REG_H
 #define HI_IOMMU_REG_H
 
@@ -133,18 +130,18 @@
 #define SCTLR_TRE                       (1 << 1)
 #define SCTLR_M                         (1 << 0)
 #define SCTLR_EAE_SBOP                  (SCTLR_AFE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 // do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536_V2050 */
 #define ARM_SMMU_CB_CONTEXTIDR		0x34
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 #define ARM_SMMU_CB_TTBCR2              0x10
 #define ARM_SMMU_CB_PRRR		0x38
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 // do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536_V2050 */
 #define ARM_SMMU_CB_NMRR		0x3C
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 
 /* Common definitions for PASize and SEP fields */
 #define TTBCR2_ADDR_32                  0

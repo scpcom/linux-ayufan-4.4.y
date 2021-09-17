@@ -458,7 +458,7 @@ static int apparmor_file_mprotect(struct vm_area_struct *vma,
 			   !(vma->vm_flags & VM_SHARED) ? MAP_PRIVATE : 0);
 }
 
-#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE) || defined(CONFIG_SYNO_HI3536)
 static int apparmor_sb_mount(const char *dev_name, struct path *path, const char *type,
 #else  
 static int apparmor_sb_mount(char *dev_name, struct path *path, char *type,

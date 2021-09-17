@@ -609,13 +609,21 @@ static DEFINE_IDA(unnamed_dev_ida);
 static DEFINE_SPINLOCK(unnamed_dev_lock); 
 static int unnamed_dev_start = 0;  
 
+#ifdef MY_DEF_HERE
+int get_anon_bdev_with_gfp(dev_t *p, gfp_t gfp_mask)
+#else
 int get_anon_bdev(dev_t *p)
+#endif  
 {
 	int dev;
 	int error;
 
  retry:
+#ifdef MY_DEF_HERE
+	if (ida_pre_get(&unnamed_dev_ida, gfp_mask) == 0)
+#else
 	if (ida_pre_get(&unnamed_dev_ida, GFP_ATOMIC) == 0)
+#endif  
 		return -ENOMEM;
 	spin_lock(&unnamed_dev_lock);
 	error = ida_get_new_above(&unnamed_dev_ida, unnamed_dev_start, &dev);
@@ -639,6 +647,13 @@ int get_anon_bdev(dev_t *p)
 	*p = MKDEV(0, dev & MINORMASK);
 	return 0;
 }
+#ifdef MY_DEF_HERE
+EXPORT_SYMBOL(get_anon_bdev_with_gfp);
+int get_anon_bdev(dev_t *p)
+{
+	return get_anon_bdev_with_gfp(p, GFP_ATOMIC);
+}
+#endif  
 EXPORT_SYMBOL(get_anon_bdev);
 
 void free_anon_bdev(dev_t dev)

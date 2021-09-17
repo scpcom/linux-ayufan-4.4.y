@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * drivers/power/process.c - Functions for starting/stopping processes on 
  *                           suspend transitions.
@@ -20,9 +17,9 @@
 #include <linux/delay.h>
 #include <linux/workqueue.h>
 #include <linux/kmod.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #include <linux/wakeup_reason.h>
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 /* 
  * Timeout for stopping processes
@@ -36,17 +33,17 @@ static int try_to_freeze_tasks(bool user_only)
 	unsigned int todo;
 	bool wq_busy = false;
 	struct timeval start, end;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	u64 elapsed_msecs64;
 	unsigned int elapsed_msecs;
 	bool wakeup = false;
 	int sleep_usecs = USEC_PER_MSEC;
 	char suspend_abort[MAX_SUSPEND_ABORT_LEN];
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	u64 elapsed_csecs64;
 	unsigned int elapsed_csecs;
 	bool wakeup = false;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	do_gettimeofday(&start);
 
@@ -76,16 +73,16 @@ static int try_to_freeze_tasks(bool user_only)
 			break;
 
 		if (pm_wakeup_pending()) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 			pm_get_active_wakeup_sources(suspend_abort,
 				MAX_SUSPEND_ABORT_LEN);
 			log_suspend_abort_reason(suspend_abort);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 			wakeup = true;
 			break;
 		}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 		/*
 		 * We need to retry, but first give the freezing tasks some
 		 * time to enter the refrigerator.  Start with an initial
@@ -94,17 +91,17 @@ static int try_to_freeze_tasks(bool user_only)
 		usleep_range(sleep_usecs / 2, sleep_usecs);
 		if (sleep_usecs < 8 * USEC_PER_MSEC)
 			sleep_usecs *= 2;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 		/*
 		 * We need to retry, but first give the freezing tasks some
 		 * time to enter the refrigerator.
 		 */
 		msleep(10);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	}
 
 	do_gettimeofday(&end);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	elapsed_msecs64 = timeval_to_ns(&end) - timeval_to_ns(&start);
 	do_div(elapsed_msecs64, NSEC_PER_MSEC);
 	elapsed_msecs = elapsed_msecs64;
@@ -131,7 +128,7 @@ static int try_to_freeze_tasks(bool user_only)
 		printk("(elapsed %d.%03d seconds) ", elapsed_msecs / 1000,
 			elapsed_msecs % 1000);
 	}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	elapsed_csecs64 = timeval_to_ns(&end) - timeval_to_ns(&start);
 	do_div(elapsed_csecs64, NSEC_PER_SEC / 100);
 	elapsed_csecs = elapsed_csecs64;
@@ -157,7 +154,7 @@ static int try_to_freeze_tasks(bool user_only)
 		printk("(elapsed %d.%02d seconds) ", elapsed_csecs / 100,
 			elapsed_csecs % 100);
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	return todo ? -EBUSY : 0;
 }

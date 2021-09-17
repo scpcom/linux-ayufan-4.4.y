@@ -154,7 +154,7 @@ static struct gpio_desc *gpiochip_offset_to_desc(struct gpio_chip *chip,
  
 static int desc_to_gpio(const struct gpio_desc *desc)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	return desc - &gpio_desc[0];
 #else  
 	return desc->chip->base + gpio_chip_hwgpio(desc);
@@ -1117,7 +1117,7 @@ int gpiochip_add(struct gpio_chip *chip)
 		}
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	spin_unlock_irqrestore(&gpio_lock, flags);
 #endif  
 
@@ -1127,7 +1127,7 @@ int gpiochip_add(struct gpio_chip *chip)
 
 	of_gpiochip_add(chip);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	 
 #else  
 unlock:
@@ -1146,7 +1146,7 @@ unlock:
 		chip->label ? : "generic");
 
 	return 0;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 unlock:
 	spin_unlock_irqrestore(&gpio_lock, flags);
 #endif  

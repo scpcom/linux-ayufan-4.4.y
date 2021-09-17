@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 	.arch armv7-a
 	.fpu softvfp
 	.eabi_attribute 20, 1
@@ -132,7 +129,7 @@ hi_dmac_module_exit:
 	bl	__arm_iounmap
 	mov	r0, r5
 	bl	platform_driver_unregister
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 	add	r0, r5, #88
 	bl	platform_device_unregister
 	mov	r3, #0
@@ -2145,7 +2142,7 @@ vdma_reg_lock:
 	.space	4
 	.type	irq_flag, %object
 	.size	irq_flag, 4
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536_V2050 */
 	add	r0, r5, #376
 	bl	platform_driver_unregister
 	mov	r3, #0
@@ -4160,7 +4157,7 @@ reg_lock:
 	.space	4
 	.type	irq_flag, %object
 	.size	irq_flag, 4
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 irq_flag:
 	.space	4
 	.section	___ksymtab+hi_memcpy,"a",%progbits

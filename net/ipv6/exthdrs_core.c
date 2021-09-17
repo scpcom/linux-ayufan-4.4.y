@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * IPv6 library code, needed by static components when full IPv6 support is
  * not configured or static.
@@ -170,15 +167,15 @@ EXPORT_SYMBOL_GPL(ipv6_find_tlv);
  *
  * If target header is found, its offset is set in *offset and return protocol
  */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 /*
  * number. Otherwise, return -ENOENT or -EBADMSG.
  */
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 /*
  * number. Otherwise, return -1.
  */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 /*
  *
  * If the first fragment doesn't contain the final protocol header or
@@ -187,17 +184,17 @@ EXPORT_SYMBOL_GPL(ipv6_find_tlv);
  * Note that non-1st fragment is special case that "the protocol number
  * of last header" is "next header" field in Fragment header. In this case,
  */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 /*
  * *offset is meaningless. If fragoff is not NULL, the fragment offset is
  * stored in *fragoff; if it is NULL, return -EINVAL.
  */
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 /*
  * *offset is meaningless and fragment offset is stored in *fragoff if fragoff
  * isn't NULL.
  */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 /*
  *
  * if flags is not NULL and it's a fragment, then the frag flag
@@ -277,18 +274,18 @@ int ipv6_find_hdr(const struct sk_buff *skb, unsigned int *offset,
 				if (target < 0 &&
 				    ((!ipv6_ext_hdr(hp->nexthdr)) ||
 				     hp->nexthdr == NEXTHDR_NONE)) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 					if (fragoff) {
 						*fragoff = _frag_off;
 						return hp->nexthdr;
 					} else {
 						return -EINVAL;
 					}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 					if (fragoff)
 						*fragoff = _frag_off;
 					return hp->nexthdr;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 				}
 				if (!found)
 					return -ENOENT;

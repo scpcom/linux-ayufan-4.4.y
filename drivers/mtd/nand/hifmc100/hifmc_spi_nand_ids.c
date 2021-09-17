@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * The Flash Memory Controller v100 Device Driver for hisilicon
  *
@@ -790,7 +787,7 @@ struct spi_nand_info hifmc_spi_nand_flash_table[] = {
 		.driver    = &spi_driver_no_qe,
 	},
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
 	/* TOSHIBA TC58CYG0S3H 1.8V 1Gbit */
 	{
 		.name      = "TC58CYG0S3H",
@@ -874,13 +871,13 @@ struct spi_nand_info hifmc_spi_nand_flash_table[] = {
 		},
 		.driver    = &spi_driver_no_qe,
 	},
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 	/* TOSHIBA TC58CVG2S0H 4Gbit */
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536_V2050 */
 	/* TOSHIBA TC58CVG2S0H 1Gbit */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 	{
 		.name      = "TC58CVG2S0H",
 		.id        = {0x98, 0xcd},

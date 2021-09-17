@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #include <linux/kbuild.h>
 #include <linux/mod_devicetable.h>
 
@@ -177,10 +174,10 @@ int main(void)
 	DEVID_FIELD(x86_cpu_id, model);
 	DEVID_FIELD(x86_cpu_id, vendor);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	DEVID(cpu_feature);
 	DEVID_FIELD(cpu_feature, feature);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	DEVID(mei_cl_device_id);
 	DEVID_FIELD(mei_cl_device_id, name);

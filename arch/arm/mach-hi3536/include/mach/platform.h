@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef __HI_CHIP_REGS_H__
 #define __HI_CHIP_REGS_H__
 
@@ -47,7 +44,7 @@
 #define SPI_DEVICE_TYPE_NAND_FLASH		1
 #define SPI_DEVICE_TYPE_MASK			(0x1 << 2)
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_HARD_RESET_CPU)
 /* -------------------------------------------------------------------- */
 /* Watchdog REG */
 /* -------------------------------------------------------------------- */
@@ -58,7 +55,7 @@
 #define REG_WDG_LOCK				0x0c00
 
 #define REG_WDG_UNLOCK_MAGIC		0x1acce551
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_HI3536_HARD_RESET_CPU */
 
 /* -------------------------------------------------------------------- */
 /* UART Control REG */

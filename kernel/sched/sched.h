@@ -492,6 +492,10 @@ struct rq {
 	/* calc_load related fields */
 	unsigned long calc_load_update;
 	long calc_load_active;
+#ifdef MY_ABC_HERE
+	long calc_io_load_active;
+	long calc_cpu_load_active;
+#endif /* MY_ABC_HERE */
 
 #ifdef CONFIG_SCHED_HRTICK
 #ifdef CONFIG_SMP
@@ -501,7 +505,7 @@ struct rq {
 	struct hrtimer hrtick_timer;
 #endif
 
-#if !defined(MY_DEF_HERE)
+#if !defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 #ifdef CONFIG_SCHEDSTATS
 	/* latency stats */
 	struct sched_info rq_sched_info;
@@ -526,7 +530,7 @@ struct rq {
 #endif
 
 	struct sched_avg avg;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 #ifdef CONFIG_SCHEDSTATS
 	/* latency stats */
 	struct sched_info rq_sched_info;

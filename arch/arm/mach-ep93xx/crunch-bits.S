@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * arch/arm/kernel/crunch-bits.S
  * Cirrus MaverickCrunch context switching and handling
@@ -66,15 +63,15 @@
  * lr  = undefined instr exit
  *
  */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
 /*
  * called from prefetch exception handler with interrupts enabled
  */
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 /*
  * called from prefetch exception handler with interrupts disabled
  */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 ENTRY(crunch_task_enable)
 	ldr	r8, =(EP93XX_APB_VIRT_BASE + 0x00130000)	@ syscon addr
 

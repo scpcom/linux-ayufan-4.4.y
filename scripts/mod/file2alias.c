@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /* Simple code to turn various tables in an ELF file into alias definitions.
  * This deals with kernel datastructures where they should be
  * dealt with: in the kernel source.
@@ -1136,7 +1133,7 @@ static int do_x86cpu_entry(const char *filename, void *symval,
 }
 ADD_TO_DEVTABLE("x86cpu", x86_cpu_id, do_x86cpu_entry);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 /* LOOKS like cpu:type:*:feature:*FEAT* */
 static int do_cpu_entry(const char *filename, void *symval, char *alias)
 {
@@ -1146,7 +1143,7 @@ static int do_cpu_entry(const char *filename, void *symval, char *alias)
 	return 1;
 }
 ADD_TO_DEVTABLE("cpu", cpu_feature, do_cpu_entry);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 /* Looks like: mei:S */
 static int do_mei_entry(const char *filename, void *symval,

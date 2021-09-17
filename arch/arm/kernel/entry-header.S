@@ -128,9 +128,9 @@
 	movs	pc, lr				@ return & move spsr_svc into cpsr
 	.endm
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
 	// do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 	.macro	get_thread_info, rd
 #if defined(MY_DEF_HERE)
 	mov	\rd, sp, lsr #(PAGE_SHIFT + THREAD_SIZE_ORDER)
@@ -140,7 +140,7 @@
 	mov	\rd, \rd, lsl #13
 #endif /* MY_DEF_HERE */
 	.endm
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 
 	@
 	@ 32-bit wide "mov pc, reg"
@@ -194,15 +194,15 @@
 	movs	pc, lr				@ return & move spsr_svc into cpsr
 	.endm
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
 	// do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 	.macro	get_thread_info, rd
 	mov	\rd, sp
 	lsr	\rd, \rd, #13
 	mov	\rd, \rd, lsl #13
 	.endm
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 
 	@
 	@ 32-bit wide "mov pc, reg"

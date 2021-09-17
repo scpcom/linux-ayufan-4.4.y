@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Copyright (c) 2014 Hisilicon Co., Ltd.
  *
@@ -158,9 +155,9 @@ irqreturn_t dmac_isr(int irq, void *dev_id)
 /*
  *	update the state of channels
  */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
 #define HI_DMA_UPDATE_TIMEOUT  (5 * HZ)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 static int dma_update_status(unsigned int channel)
 {
 
@@ -168,19 +165,19 @@ static int dma_update_status(unsigned int channel)
 	unsigned int channel_tc_status[3];
 	unsigned int channel_err_status[3];
 	unsigned int i = channel, j;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
 	unsigned long update_jiffies_timeout;
 
 	update_jiffies_timeout = jiffies + HI_DMA_UPDATE_TIMEOUT;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 	unsigned int timeout = 0x10000000;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
 	while (1) {
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 	while (timeout--) {
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 		for (j = 0; j < 3; j++) {
 			dmac_readw(DMAC_INTTCSTATUS, channel_status);
 			channel_tc_status[j] = (channel_status >> i) & 0x01;
@@ -203,13 +200,13 @@ static int dma_update_status(unsigned int channel)
 			break;
 		}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
 		if (!time_before(jiffies, update_jiffies_timeout)) {
 			dma_err("Timeout in DMAC %d!\n", i);
 			g_channel_status[i] = -DMAC_CHN_TIMEOUT;
 			break;
 		}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 	}
 
 	return g_channel_status[i];

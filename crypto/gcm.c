@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * GCM: Galois/Counter Mode.
  *
@@ -585,11 +582,11 @@ static int crypto_gcm_verify(struct aead_request *req,
 
 	crypto_xor(auth_tag, iauth_tag, 16);
 	scatterwalk_map_and_copy(iauth_tag, req->src, cryptlen, authsize, 0);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
 	return crypto_memneq(iauth_tag, auth_tag, authsize) ? -EBADMSG : 0;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 	return memcmp(iauth_tag, auth_tag, authsize) ? -EBADMSG : 0;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 }
 
 static void gcm_decrypt_done(struct crypto_async_request *areq, int err)

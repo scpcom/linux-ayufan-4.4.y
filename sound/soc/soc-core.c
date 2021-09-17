@@ -13,7 +13,7 @@
 #include <linux/ctype.h>
 #include <linux/slab.h>
 #include <linux/of.h>
-#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(CONFIG_SYNO_HI3536)
 #include <linux/regmap.h>
 #endif  
 #include <sound/ac97_codec.h>

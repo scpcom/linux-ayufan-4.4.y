@@ -352,7 +352,7 @@ case "$BUILD_TARGET" in
 		ModuleList=`echo ${ModuleList} | sed -e "s=${KernelDir}/crypto/des_generic.ko==g"`
 		;;
 	STM_MONACO)
-		MediaModuleList=`find ${KernelDir}/drivers/media -name '*.ko'`
+		MediaModuleList=`find ${KernelDir}/scripts/DVB/3.10.x -name '*.ko'`
 		ModuleList="${ModuleList} ${KernelDir}/net/ipv4/netfilter/ipt_MASQUERADE.ko"
 		ModuleList="${ModuleList} ${KernelDir}/lib/zlib_deflate/zlib_deflate.ko"
 		ModuleList="${ModuleList} ${KernelDir}/crypto/arc4.ko"
@@ -513,11 +513,10 @@ do
 	fi
 done
 
-# MONACO need media directory for backport modules install
 case "$BUILD_TARGET" in
 	STM_MONACO)
-		mkdir -p ${DebDevBuild}/image/modules/media/
-		cp -f ${MediaModuleList} ${DebDevBuild}/image/modules/media/
+		mkdir -p ${DebDevBuild}/image/modules/backports_dvb/
+		cp -f ${MediaModuleList} ${DebDevBuild}/image/modules/backports_dvb/
 		;;
 esac
 

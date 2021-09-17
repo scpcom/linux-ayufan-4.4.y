@@ -19,7 +19,7 @@ static void __iomem *l2x0_base;
 static DEFINE_RAW_SPINLOCK(l2x0_lock);
 static u32 l2x0_way_mask;	 
 static u32 l2x0_size;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 static u32 l2x0_cache_id;
 static unsigned int l2x0_sets;
 static unsigned int l2x0_ways;
@@ -38,7 +38,7 @@ struct l2x0_of_data {
 
 static bool of_init = false;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 static inline bool is_pl310_rev(int rev)
 {
 	return (l2x0_cache_id &
@@ -134,7 +134,7 @@ static void l2x0_cache_sync(void)
 	raw_spin_unlock_irqrestore(&l2x0_lock, flags);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_PL310_ERRATA_727915
 static void l2x0_for_each_set_way(void __iomem *reg)
 {
@@ -166,7 +166,7 @@ static void l2x0_flush_all(void)
 {
 	unsigned long flags;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_PL310_ERRATA_727915
 	if (is_pl310_rev(REV_PL310_R2P0)) {
 		l2x0_for_each_set_way(l2x0_base + L2X0_CLEAN_INV_LINE_IDX);
@@ -184,7 +184,7 @@ static void l2x0_clean_all(void)
 {
 	unsigned long flags;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #ifdef CONFIG_PL310_ERRATA_727915
 	if (is_pl310_rev(REV_PL310_R2P0)) {
 		l2x0_for_each_set_way(l2x0_base + L2X0_CLEAN_LINE_IDX);
@@ -194,13 +194,13 @@ static void l2x0_clean_all(void)
 #endif  
 
 	raw_spin_lock_irqsave(&l2x0_lock, flags);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	debug_writel(0x03);
 #endif  
 	writel_relaxed(l2x0_way_mask, l2x0_base + L2X0_CLEAN_WAY);
 	cache_wait_way(l2x0_base + L2X0_CLEAN_WAY, l2x0_way_mask);
 	cache_sync();
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	debug_writel(0x00);
 #endif  
 	raw_spin_unlock_irqrestore(&l2x0_lock, flags);
@@ -380,7 +380,7 @@ static void l2x0_unlock(u32 cache_id)
 void __init l2x0_init(void __iomem *base, u32 aux_val, u32 aux_mask)
 {
 	u32 aux;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	u32 way_size = 0;
 #else  
 	u32 cache_id;
@@ -397,7 +397,7 @@ void __init l2x0_init(void __iomem *base, u32 aux_val, u32 aux_mask)
 #endif   
 
 	l2x0_base = base;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	if (cache_id_part_number_from_dt)
 		l2x0_cache_id = cache_id_part_number_from_dt;
 	else
@@ -413,13 +413,13 @@ void __init l2x0_init(void __iomem *base, u32 aux_val, u32 aux_mask)
 	aux &= aux_mask;
 	aux |= aux_val;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	switch (l2x0_cache_id & L2X0_CACHE_ID_PART_MASK) {
 #else  
 	switch (cache_id & L2X0_CACHE_ID_PART_MASK) {
 #endif  
 	case L2X0_CACHE_ID_PART_L310:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 		if (aux & (1 << 16))
 			l2x0_ways = 16;
 		else
@@ -435,7 +435,7 @@ void __init l2x0_init(void __iomem *base, u32 aux_val, u32 aux_mask)
 		 
 		sync_reg_offset = L2X0_DUMMY_REG;
 #endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 		if ((l2x0_cache_id & L2X0_CACHE_ID_RTL_MASK) <= L2X0_CACHE_ID_RTL_R3P0)
 #else  
 		if ((cache_id & L2X0_CACHE_ID_RTL_MASK) <= L2X0_CACHE_ID_RTL_R3P0)
@@ -443,7 +443,7 @@ void __init l2x0_init(void __iomem *base, u32 aux_val, u32 aux_mask)
 			outer_cache.set_debug = pl310_set_debug;
 		break;
 	case L2X0_CACHE_ID_PART_L210:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 		l2x0_ways = (aux >> 13) & 0xf;
 #else  
 		ways = (aux >> 13) & 0xf;
@@ -453,7 +453,7 @@ void __init l2x0_init(void __iomem *base, u32 aux_val, u32 aux_mask)
 
 	case AURORA_CACHE_ID:
 		sync_reg_offset = AURORA_SYNC_REG;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 		l2x0_ways = (aux >> 13) & 0xf;
 		l2x0_ways = 2 << ((l2x0_ways + 1) >> 2);
 #else  
@@ -465,7 +465,7 @@ void __init l2x0_init(void __iomem *base, u32 aux_val, u32 aux_mask)
 		break;
 	default:
 		 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 		l2x0_ways = 8;
 #else  
 		ways = 8;
@@ -474,14 +474,14 @@ void __init l2x0_init(void __iomem *base, u32 aux_val, u32 aux_mask)
 		break;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	l2x0_way_mask = (1 << l2x0_ways) - 1;
 #else  
 	l2x0_way_mask = (1 << ways) - 1;
 #endif  
 
 	way_size = (aux & L2X0_AUX_CTRL_WAY_SIZE_MASK) >> 17;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	way_size = SZ_1K << (way_size + way_size_shift);
 
 	l2x0_size = l2x0_ways * way_size;
@@ -504,7 +504,7 @@ void __init l2x0_init(void __iomem *base, u32 aux_val, u32 aux_mask)
 #endif  
 	if (!(readl_relaxed(l2x0_base + L2X0_CTRL) & L2X0_CTRL_EN)) {
 		 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 		l2x0_unlock(l2x0_cache_id);
 #else  
 		l2x0_unlock(cache_id);
@@ -548,7 +548,7 @@ void __init l2x0_init(void __iomem *base, u32 aux_val, u32 aux_mask)
 
 	printk(KERN_INFO "%s cache controller enabled\n", type);
 	printk(KERN_INFO "l2x0: %d ways, CACHE_ID 0x%08x, AUX_CTRL 0x%08x, Cache size: %d B\n",
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 			l2x0_ways, l2x0_cache_id, aux, l2x0_size);
 #else  
 			ways, cache_id, aux, l2x0_size);

@@ -30,6 +30,10 @@
 #define BTRFS_INODE_BTREE_LOG1_ERR		13
 #define BTRFS_INODE_BTREE_LOG2_ERR		14
 
+#ifdef MY_DEF_HERE
+#define BTRFS_INODE_SYNO_WRITEBACK		31
+#endif  
+
 struct btrfs_inode {
 	 
 	struct btrfs_root *root;

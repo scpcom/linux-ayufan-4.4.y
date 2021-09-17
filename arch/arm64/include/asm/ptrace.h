@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Based on arch/arm/include/asm/ptrace.h
  *
@@ -64,7 +61,7 @@
 #define COMPAT_PT_DATA_ADDR		0x10004
 #define COMPAT_PT_TEXT_END_ADDR		0x10008
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 /*
  * used to skip a system call when tracer changes its number to -1
  * with ptrace(PTRACE_SET_SYSCALL)
@@ -72,7 +69,7 @@
 #define RET_SKIP_SYSCALL	-1
 #define RET_SKIP_SYSCALL_TRACE	-2
 #define IS_SKIP_SYSCALL(no)	((int)(no & 0xffffffff) == -1)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 #ifndef __ASSEMBLY__
 
@@ -144,7 +141,7 @@ struct pt_regs {
 #define fast_interrupts_enabled(regs) \
 	(!((regs)->pstate & PSR_F_BIT))
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #define user_stack_pointer(regs) \
 	(!compat_user_mode(regs) ? (regs)->sp : (regs)->compat_sp)
 
@@ -152,10 +149,10 @@ static inline unsigned long regs_return_value(struct pt_regs *regs)
 {
 	return regs->regs[0];
 }
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 #define user_stack_pointer(regs) \
 	((regs)->sp)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 /*
  * Are the current registers suitable for user mode? (used to maintain
@@ -195,7 +192,7 @@ extern unsigned long profile_pc(struct pt_regs *regs);
 #define profile_pc(regs) instruction_pointer(regs)
 #endif
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 /*
  * True if instr is a 32-bit thumb instruction. This works if instr
  * is the first or only half-word of a thumb instruction. It also works
@@ -203,9 +200,9 @@ extern unsigned long profile_pc(struct pt_regs *regs);
  * in the form (first_half<<16)|(second_half)
  */
 #define is_wide_instruction(instr)	((unsigned)(instr) >= 0xe800)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 extern int aarch32_break_trap(struct pt_regs *regs);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 #endif /* __ASSEMBLY__ */
 #endif

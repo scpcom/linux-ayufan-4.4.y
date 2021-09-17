@@ -134,4 +134,13 @@ config SYNO_HI3536_DISABLE_GMAC_WHEN_STOPPING
 	default y
 	depends on SYNO_HI3536
 
+config SYNO_BACKPORT_GLINKSETTINGS
+	bool "ethtool get_link_ksettings/set_link_ksettings"
+	default y
+
+config SYNO_ARMADA38X_LOG_REDUCE
+	bool "Remove Armada38x unnecessary logs"
+	default y
+	depends on SYNO_LSP_ARMADA_2015_T1_1p4
+
 endmenu #Network

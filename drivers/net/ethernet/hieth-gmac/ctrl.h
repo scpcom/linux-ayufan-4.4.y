@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef __HIGMAC_CTRL_H
 #define __HIGMAC_CTRL_H
 
@@ -68,11 +65,11 @@
 #define BIT_TX_MAX_PACKET		MK_BITS(16, 11)
 
 #define CRF_MIN_PACKET			0x0210
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
 #define BIT_TSO_VERSION			MK_BITS(28, 2)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 #define BIT_TSO_VERSION			MK_BITS(20, 12)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 #define BIT_MTU_STEP			MK_BITS(16, 1)
 
 #define CONTROL_WORD			0x0214
@@ -353,21 +350,21 @@ void higmac_rx_port_disable(struct higmac_netdev_local *ld);
 void higmac_rx_port_enable(struct higmac_netdev_local *ld);
 
 #ifdef HIGMAC_TSO_SUPPORTED
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
 int higmac_get_pkt_info(struct higmac_netdev_local *ld,
 		struct sk_buff *skb, struct higmac_tso_desc *tx_bq_desc);
 int higmac_xmit_gso(struct higmac_netdev_local *ld, struct sk_buff *skb,
 		struct higmac_tso_desc *tx_bq_desc, int desc_pos);
 int higmac_xmit_release_gso(struct higmac_netdev_local *ld,
 		struct higmac_tso_desc *tx_bq_desc, int desc_pos);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 int higmac_get_pkt_info(struct higmac_netdev_local *ld,
 		struct sk_buff *skb, struct higmac_desc *tx_bq_desc);
 int higmac_xmit_gso(struct higmac_netdev_local *ld, struct sk_buff *skb,
 		struct higmac_desc *tx_bq_desc, int desc_pos);
 int higmac_xmit_release_gso(struct higmac_netdev_local *ld,
 		struct higmac_desc *tx_bq_desc, int desc_pos);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 #endif
 int higmac_xmit_release_skb(struct higmac_netdev_local *ld);
 int higmac_xmit_real_send(struct higmac_netdev_local *ld, struct sk_buff *skb);

@@ -189,7 +189,7 @@ not_angel:
 		ldr	r4, =zreladdr
 #endif
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #if defined(CONFIG_ARCH_HI3536) \
 	|| defined(CONFIG_ARCH_HI3536_SLAVE) \
 	|| defined(CONFIG_ARCH_HI3521A)
@@ -200,7 +200,7 @@ not_angel:
                 orr     r0, #(1 << 6)
                 mcr     p15, 0, r0, c1, c0, 1
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 		bl	cache_on
 
@@ -744,10 +744,10 @@ __armv7_mmu_cache_on:
 		bic     r6, r6, #1 << 31        @ 32-bit translation system
 		bic     r6, r6, #(7 << 0) | (1 << 4)	@ use only ttbr0
 		mcrne	p15, 0, r3, c2, c0, 0	@ load page table pointer
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 		mcrne	p15, 0, r0, c8, c7, 0	@ flush I,D TLBs
 		mcr	p15, 0, r0, c7, c5, 4	@ ISB
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		mcrne	p15, 0, r1, c3, c0, 0	@ load domain access control
 		mcrne   p15, 0, r6, c2, c0, 2   @ load ttb control
 #endif

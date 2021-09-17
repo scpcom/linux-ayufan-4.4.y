@@ -27,7 +27,7 @@ struct mmu_gather {
 	struct mm_struct	*mm;
 	unsigned int		fullmm;
 	struct vm_area_struct	*vma;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	 
 #else  
 	unsigned long		start, end;
@@ -38,7 +38,7 @@ struct mmu_gather {
 	unsigned int		max;
 	struct page		**pages;
 	struct page		*local[MMU_GATHER_BUNDLE];
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	unsigned long		start, end;
 #endif  
 };

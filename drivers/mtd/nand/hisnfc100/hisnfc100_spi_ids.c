@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Copyright (c) 2016 HiSilicon Technologies Co., Ltd.
  *
@@ -104,62 +101,62 @@ SET_READ_STD(1, INFINITE, 24);
 
 SET_READ_FAST(1, INFINITE, 50);
 SET_READ_FAST(1, INFINITE, 104);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 SET_READ_FAST(1, INFINITE, 108);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 SET_READ_FAST(1, INFINITE, 120);
 
 SET_READ_DUAL(1, INFINITE, 50);
 SET_READ_DUAL(1, INFINITE, 104);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 SET_READ_DUAL(1, INFINITE, 108);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 SET_READ_DUAL(1, INFINITE, 120);
 
 SET_READ_DUAL_ADDR(1, INFINITE, 104);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 SET_READ_DUAL_ADDR(1, INFINITE, 108);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 SET_READ_DUAL_ADDR(1, INFINITE, 120);
 
 SET_READ_QUAD(1, INFINITE, 50);
 SET_READ_QUAD(1, INFINITE, 104);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 SET_READ_QUAD(1, INFINITE, 108);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 SET_READ_QUAD(1, INFINITE, 120);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 SET_READ_QUAD_ADDR(1, INFINITE, 104);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 SET_READ_QUAD_ADDR(2, INFINITE, 104);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 SET_READ_QUAD_ADDR(1, INFINITE, 108);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 SET_READ_QUAD_ADDR(1, INFINITE, 120);
 
 /*****************************************************************************/
 SET_WRITE_STD(0, 256, 24);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 SET_WRITE_STD(0, 256, 104);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 
 SET_WRITE_QUAD(0, 256, 104);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 SET_WRITE_QUAD(0, 256, 108);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 SET_WRITE_QUAD(0, 256, 120);
 
 /*****************************************************************************/
 SET_ERASE_SECTOR_128K(0, _128K, 24);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 SET_ERASE_SECTOR_128K(0, _128K, 104);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 
 SET_ERASE_SECTOR_256K(0, _256K, 24);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 SET_ERASE_SECTOR_256K(0, _256K, 104);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 
 /*****************************************************************************/
 static struct spi_nand_driver spi_nand_driver_general = {
@@ -183,13 +180,13 @@ static struct spi_nand_driver  spi_nand_driver_micron = {
 };
 
 /*****************************************************************************/
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 #define SPI_NAND_ID_TAB_VER		"1.8"
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536_V2050 */
 #define SPI_NAND_ID_TAB_VER		"1.5"
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 /******* SPI Nand ID Table ***************************************************
 * Version	Manufacturer	Chip Name	Size		Operation
 * 1.0		ESMT		F50L512M41A	64MB		Add 5 chip
@@ -214,7 +211,7 @@ static struct spi_nand_driver  spi_nand_driver_micron = {
 * 1.8		ALL-flash	AFS2GQ4UAD	256MB		Add 2 chip
 *		Paragon		PN26G02A	256MB
 ******************************************************************************/
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536_V2050 */
 /******* SPI Nand ID Table ***************************************************
 * Version	Manufacturer	Chip Name	Size		Operation
 * 1.0		ESMT		F50L512M41A	64MB		Add 5 chip
@@ -232,7 +229,7 @@ static struct spi_nand_driver  spi_nand_driver_micron = {
 *		Micron		MT29F4G01	512MB
 * 1.5		MXIC		MX35LF1GE4AB	128MB		Add 1 chip
 ******************************************************************************/
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 struct hisnfc_chip_info hisnfc_spi_nand_flash_table[] = {
 	/* ESMT F50L512M41A 512Mbit */
 	{
@@ -295,11 +292,11 @@ struct hisnfc_chip_info hisnfc_spi_nand_flash_table[] = {
 	/* GD 5F1GQ4UAYIG 1Gbit */
 	{
 		.name      = "5F1GQ4UAYIG",
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 		.id        = {0xc8, 0xf1},
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536_V2050 */
 		.id        = {0xC8, 0xF1},
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 		.id_len    = 2,
 		.chipsize  = _128M,
 		.erasesize = _128K,
@@ -330,11 +327,11 @@ struct hisnfc_chip_info hisnfc_spi_nand_flash_table[] = {
 	/* GD 5F1GQ4UBYIG 1Gbit */
 	{
 		.name      = "5F1GQ4UBYIG",
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 		.id        = {0xc8, 0xd1},
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536_V2050 */
 		.id        = {0xC8, 0xD1},
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 		.id_len    = 2,
 		.chipsize  = _128M,
 		.erasesize = _128K,
@@ -365,11 +362,11 @@ struct hisnfc_chip_info hisnfc_spi_nand_flash_table[] = {
 	/* GD 5F2GQ4UAYIG 2Gbit */
 	{
 		.name      = "5F2GQ4UAYIG",
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 		.id        = {0xc8, 0xf2},
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536_V2050 */
 		.id        = {0xC8, 0xF2},
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 		.id_len    = 2,
 		.chipsize  = _256M,
 		.erasesize = _128K,
@@ -400,11 +397,11 @@ struct hisnfc_chip_info hisnfc_spi_nand_flash_table[] = {
 	/* GD 5F2GQ4UBYIG 2Gbit */
 	{
 		.name      = "5F2GQ4UBYIG",
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 		.id        = {0xc8, 0xd2},
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536_V2050 */
 		.id        = {0xC8, 0xD2},
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 		.id_len    = 2,
 		.chipsize  = _256M,
 		.erasesize = _128K,
@@ -435,11 +432,11 @@ struct hisnfc_chip_info hisnfc_spi_nand_flash_table[] = {
 	/* GD 5F4GQ4UAYIG 4Gbit */
 	{
 		.name      = "5F4GQ4UAYIG",
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 		.id        = {0xc8, 0xf4},
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536_V2050 */
 		.id        = {0xC8, 0xF4},
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 		.id_len    = 2,
 		.chipsize  = _512M,
 		.erasesize = _128K,
@@ -470,11 +467,11 @@ struct hisnfc_chip_info hisnfc_spi_nand_flash_table[] = {
 	/* GD 5F4GQ4UBYIG 4Gbit */
 	{
 		.name      = "5F4GQ4UBYIG",
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 		.id        = {0xc8, 0xd4},
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536_V2050 */
 		.id        = {0xC8, 0xD4},
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 		.id_len    = 2,
 		.chipsize  = _512M,
 		.erasesize = _256K,
@@ -673,7 +670,7 @@ struct hisnfc_chip_info hisnfc_spi_nand_flash_table[] = {
 		.driver    = &spi_nand_driver_general,
 	},
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 	/* MXIC MX35LF2GE4AB 2Gbit */
 	{
 		.name      = "MX35LF2GE4AB",
@@ -881,7 +878,7 @@ struct hisnfc_chip_info hisnfc_spi_nand_flash_table[] = {
 		},
 		.driver    = &spi_nand_driver_esmt,
 	},
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 
 	{	.id_len    = 0,	},
 };

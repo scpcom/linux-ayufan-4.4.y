@@ -344,11 +344,11 @@ void bdi_wakeup_thread_delayed(struct backing_dev_info *bdi)
 
 	timeout = msecs_to_jiffies(dirty_writeback_interval * 10);
 	spin_lock_bh(&bdi->wb_lock);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536)
 	if (test_bit(BDI_REGISTERED, &bdi->state))
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_HI3536 */
 	if (test_bit(BDI_registered, &bdi->state))
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_HI3536 */
 		queue_delayed_work(bdi_wq, &bdi->wb.dwork, timeout);
 	spin_unlock_bh(&bdi->wb_lock);
 }
@@ -383,11 +383,11 @@ int bdi_register(struct backing_dev_info *bdi, struct device *parent,
 	bdi->dev = dev;
 
 	bdi_debug_register(bdi, dev_name(dev));
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	set_bit(BDI_REGISTERED, &bdi->state);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	set_bit(BDI_registered, &bdi->state);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	spin_lock_bh(&bdi_lock);
 	list_add_tail_rcu(&bdi->bdi_list, &bdi_list);
@@ -419,11 +419,11 @@ static void bdi_wb_shutdown(struct backing_dev_info *bdi)
 
 	/* Make sure nobody queues further work */
 	spin_lock_bh(&bdi->wb_lock);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536)
 	clear_bit(BDI_REGISTERED, &bdi->state);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_HI3536 */
 	clear_bit(BDI_registered, &bdi->state);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_HI3536 */
 	spin_unlock_bh(&bdi->wb_lock);
 
 	/*

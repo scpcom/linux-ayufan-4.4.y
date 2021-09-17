@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Copyright (c) 2016 HiSilicon Technologies Co., Ltd.
  *
@@ -90,11 +87,11 @@ static int spi_gd25qxxx_qe_enable(struct hisfc_spi *spi)
 
 	spi->driver->wait_ready(spi);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
 	// do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 	if (DEBUG_SPI) {
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 		hisfc_write(host, HISFC350_CMD_INS, SPI_CMD_RDSR2);
 
 		hisfc_write(host, HISFC350_CMD_CONFIG,
@@ -107,20 +104,20 @@ static int spi_gd25qxxx_qe_enable(struct hisfc_spi *spi)
 
 		regval = hisfc_read(host, HISFC350_CMD_DATABUF0);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
 	if (DEBUG_SPI)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 		pr_info("QEbit = 0x2? : 0x%x\n", regval);
 
 		if ((regval & GD_SPI_CMD_SR_QE))
 			pr_info("QE bit enable success\n");
 		else
 			pr_info("QE bit enable failed\n");
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
 	// do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 
 	return 0;
 }

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #include "higmac.h"
 #include "phy_fix.h"
 
@@ -127,10 +124,10 @@ int KSZ8051MNL_phy_fix(struct phy_device *phy_dev)
 {
 	u32 v;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 	if (phy_dev->interface != PHY_INTERFACE_MODE_RMII)
 		return 0;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 
 	v = phy_read(phy_dev, 0x1F);
 	v |= (1 << 7);       /* set phy RMII 50MHz clk; */
@@ -148,10 +145,10 @@ int KSZ8081RNB_phy_fix(struct phy_device *phy_dev)
 {
 	u32 v;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 	if (phy_dev->interface != PHY_INTERFACE_MODE_RMII)
 		return 0;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 
 	v = phy_read(phy_dev, 0x1F);
 	v |= (1 << 7);       /* set phy RMII 50MHz clk; */

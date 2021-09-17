@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Access vector cache interface for object managers.
  *
@@ -105,11 +102,11 @@ static inline u32 avc_audit_required(u32 requested,
 }
 
 int slow_avc_audit(u32 ssid, u32 tsid, u16 tclass,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 		   u32 requested, u32 audited, u32 denied, int result,
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 		   u32 requested, u32 audited, u32 denied,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		   struct common_audit_data *a,
 		   unsigned flags);
 
@@ -144,11 +141,11 @@ static inline int avc_audit(u32 ssid, u32 tsid,
 	if (likely(!audited))
 		return 0;
 	return slow_avc_audit(ssid, tsid, tclass,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 			      requested, audited, denied, result,
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 			      requested, audited, denied,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 			      a, flags);
 }
 

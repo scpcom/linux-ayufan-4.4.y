@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * NET		Generic infrastructure for INET connection oriented protocols.
  *
@@ -166,11 +163,11 @@ extern void inet_csk_init_xmit_timers(struct sock *sk,
 				      void (*delack_handler)(unsigned long),
 				      void (*keepalive_handler)(unsigned long));
 extern void inet_csk_clear_xmit_timers(struct sock *sk);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #if defined(CONFIG_TNK) && defined(SWITCH_KEEPALIVE)
 extern void inet_csk_clear_xmit_timers_except_keepalive(struct sock *sk);
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 static inline void inet_csk_schedule_ack(struct sock *sk)
 {

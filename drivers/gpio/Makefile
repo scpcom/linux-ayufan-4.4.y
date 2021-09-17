@@ -88,3 +88,4 @@ obj-$(CONFIG_GPIO_WM8350)	+= gpio-wm8350.o
 obj-$(CONFIG_GPIO_WM8994)	+= gpio-wm8994.o
 obj-$(CONFIG_GPIO_XILINX)	+= gpio-xilinx.o
 obj-$(CONFIG_GPIO_ST_WAKEUP) 	+= gpio-st-wakeup.o
+obj-$(CONFIG_GPIO_LP3943)	+= gpio-lp3943.o

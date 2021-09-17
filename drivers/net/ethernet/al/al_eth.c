@@ -3995,7 +3995,7 @@ void syno_alpine_wol_set_wrapper(unsigned int device)
 		phy_write(priv->phydev, 21, 0x1000);
 		phy_write(priv->phydev, 31, 0x0000);  
 #ifdef MY_DEF_HERE
-		if (syno_is_hw_version(HW_DS1515) || syno_is_hw_version(HW_DS1517)) {
+		if (syno_is_hw_version(HW_DS1515) || syno_is_hw_version(HW_DS1517) || syno_is_hw_version(HW_RS1219)) {
 			phy_write(priv->phydev, 31, 0x0003);  
 		}
 #endif

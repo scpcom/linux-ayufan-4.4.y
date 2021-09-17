@@ -24,7 +24,7 @@
 struct neighbour;
 
 struct neigh_parms {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	 
 #else  
 #ifdef CONFIG_NET_NS
@@ -57,7 +57,7 @@ struct neigh_parms {
 	int	proxy_delay;
 	int	proxy_qlen;
 	int	locktime;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 #ifdef CONFIG_NET_NS
 	struct net *net;
 #endif
@@ -122,7 +122,7 @@ struct neigh_ops {
 
 struct pneigh_entry {
 	struct pneigh_entry	*next;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	 
 #else  
 #ifdef CONFIG_NET_NS
@@ -132,7 +132,7 @@ struct pneigh_entry {
 	struct net_device	*dev;
 	u8			flags;
 	u8			key[0];
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 #ifdef CONFIG_NET_NS
 	struct net		*net;
 #endif

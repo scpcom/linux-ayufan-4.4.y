@@ -24,7 +24,7 @@ struct irq_desc {
 	unsigned int		irq_count;	 
 	unsigned long		last_unhandled;	 
 	unsigned int		irqs_unhandled;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	 
 #else  
 	atomic_t		threads_handled;
@@ -48,7 +48,7 @@ struct irq_desc {
 	int			parent_irq;
 	struct module		*owner;
 	const char		*name;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	atomic_t		threads_handled;
 	int			threads_handled_last;
 #endif  

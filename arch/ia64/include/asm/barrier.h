@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Memory barrier definitions.  This is based on information published
  * in the Processor Abstraction Layer and the System Abstraction Layer
@@ -55,7 +52,7 @@
 # define smp_read_barrier_depends()	do { } while(0)
 #endif
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 /*
  * IA64 GCC turns volatile stores into st.rel and volatile loads into ld.acq no
  * need for asm trickery!
@@ -75,7 +72,7 @@ do {									\
 	barrier();							\
 	___p1;								\
 })
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 /*
  * XXX check on this ---I suspect what Linus really wants here is

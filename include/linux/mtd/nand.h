@@ -30,7 +30,7 @@ extern int nand_unlock(struct mtd_info *mtd, loff_t ofs, uint64_t len);
 
 #define NAND_MAX_CHIPS		8
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #define NAND_MAX_OOBSIZE	4800
 #define NAND_MAX_PAGESIZE	32768
 #else  
@@ -55,7 +55,7 @@ extern int nand_unlock(struct mtd_info *mtd, loff_t ofs, uint64_t len);
 #define NAND_CMD_READOOB	0x50
 #define NAND_CMD_ERASE1		0x60
 #define NAND_CMD_STATUS		0x70
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #define NAND_CMD_STATUS_MULTI	0x71
 #endif  
 #define NAND_CMD_SEQIN		0x80
@@ -65,7 +65,7 @@ extern int nand_unlock(struct mtd_info *mtd, loff_t ofs, uint64_t len);
 #define NAND_CMD_PARAM		0xec
 #define NAND_CMD_GET_FEATURES	0xee
 #define NAND_CMD_SET_FEATURES	0xef
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #define NAND_CMD_SYNC_RESET	0xfc
 #endif  
 #define NAND_CMD_RESET		0xff
@@ -78,7 +78,7 @@ extern int nand_unlock(struct mtd_info *mtd, loff_t ofs, uint64_t len);
 #define NAND_CMD_RNDOUTSTART	0xE0
 #define NAND_CMD_CACHEDPROG	0x15
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
  
 #define NAND_CMD_DEPLETE1	0x100
 #define NAND_CMD_DEPLETE2	0x38
@@ -129,26 +129,26 @@ typedef enum {
 
 #define NAND_GET_DEVICE		0x80
 
-#if defined (MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined (MY_DEF_HERE) || defined(CONFIG_SYNO_LSP_HI3536)
  
 #define NAND_NO_AUTOINCR	0x00000001
 #endif  
  
 #define NAND_BUSWIDTH_16	0x00000002
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
  
 #define NAND_NO_PADDING		0x00000004
 #endif  
 
 #define NAND_CACHEPRG		0x00000008
-#if defined (MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined (MY_DEF_HERE) || defined(CONFIG_SYNO_LSP_HI3536)
 
 #define NAND_COPYBACK		0x00000010
 
 #endif  
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
  
 #define NAND_IS_AND		0x00000020
  
@@ -406,7 +406,7 @@ struct nand_chip {
 	u16 (*read_word)(struct mtd_info *mtd);
 	void (*write_buf)(struct mtd_info *mtd, const uint8_t *buf, int len);
 	void (*read_buf)(struct mtd_info *mtd, uint8_t *buf, int len);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	int (*verify_buf)(struct mtd_info *mtd, const uint8_t *buf, int len);
 #endif  
 	void (*select_chip)(struct mtd_info *mtd, int chip);
@@ -492,7 +492,7 @@ struct nand_chip {
 #define NAND_MFR_FUJITSU	0x04
 #define NAND_MFR_NATIONAL	0x8f
 #define NAND_MFR_RENESAS	0x07
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 #define NAND_MFR_ST_MICRO	0x20
 #else  
 #define NAND_MFR_STMICRO	0x20
@@ -500,17 +500,17 @@ struct nand_chip {
 #define NAND_MFR_HYNIX		0xad
 #define NAND_MFR_MICRON		0x2c
 #define NAND_MFR_AMD		0x01
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 #define NAND_MFR_GD_ESMT	0xc8
 #else  
 #define NAND_MFR_MACRONIX	0xc2
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #define NAND_MFR_GD		0xc8
 #endif  
 #endif  
 #define NAND_MFR_EON		0x92
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
  
 #else  
 #define NAND_MFR_ESMT		0xC8
@@ -518,7 +518,7 @@ struct nand_chip {
 #define NAND_MFR_WINBOND	0xef
 #define NAND_MFR_ATO		0x9b
 #endif  
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 #define NAND_MFR_MXIC		0xc2
 #define NAND_MFR_ALL_FLASH	0xc1
 #define NAND_MFR_PARAGON	0xa1

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * include/asm-arm/unified.h - Unified Assembler Syntax helper macros
  *
@@ -57,9 +54,9 @@
 
 #endif	/* CONFIG_THUMB2_KERNEL */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 // do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 #ifndef CONFIG_ARM_ASM_UNIFIED
 
 /*
@@ -132,6 +129,6 @@ __asm__(
 #endif	/* __ASSEMBLY__ */
 
 #endif	/* CONFIG_ARM_ASM_UNIFIED */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 #endif	/* !__ASM_UNIFIED_H */

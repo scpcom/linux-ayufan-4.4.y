@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef __LINUX_NL80211_H
 #define __LINUX_NL80211_H
 /*
@@ -650,7 +647,7 @@
  *	return back to normal.
  *
  */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 /*
  * @NL80211_CMD_GET_COALESCE: Get currently supported coalesce rules.
  * @NL80211_CMD_SET_COALESCE: Configure coalesce rules or clear existing rules.
@@ -674,7 +671,7 @@
  *	(&struct nl80211_vendor_cmd_info) of the supported vendor commands.
  *	This may also be sent as an event with the same attributes.
  */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 /*
  *
  * @NL80211_CMD_MAX: highest used command number
@@ -839,14 +836,14 @@ enum nl80211_commands {
 	NL80211_CMD_CRIT_PROTOCOL_START,
 	NL80211_CMD_CRIT_PROTOCOL_STOP,
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	NL80211_CMD_GET_COALESCE,
 	NL80211_CMD_SET_COALESCE,
 
 	NL80211_CMD_CHANNEL_SWITCH,
 
 	NL80211_CMD_VENDOR,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	/* add new commands above here */
 
@@ -1470,7 +1467,7 @@ enum nl80211_commands {
  *      the connection should have increased reliability (u16).
  *
  */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 /*
  * @NL80211_ATTR_PEER_AID: Association ID for the peer TDLS station (u16).
  *	This is similar to @NL80211_ATTR_STA_AID but with a difference of being
@@ -1514,7 +1511,7 @@ enum nl80211_commands {
  * @NL80211_ATTR_VENDOR_EVENTS: used for event list advertising in the wiphy
  *	info, containing a nested array of possible events
  */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 /*
  *
  * @NL80211_ATTR_MAX: highest attribute number currently defined
@@ -1815,7 +1812,7 @@ enum nl80211_attrs {
 	NL80211_ATTR_CRIT_PROT_ID,
 	NL80211_ATTR_MAX_CRIT_PROT_DURATION,
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	NL80211_ATTR_PEER_AID,
 
 	NL80211_ATTR_COALESCE_RULE,
@@ -1844,7 +1841,7 @@ enum nl80211_attrs {
 	NL80211_ATTR_VENDOR_DATA,
 
 	NL80211_ATTR_VENDOR_EVENTS,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	/* add attributes here, update the policy in nl80211.c */
 
@@ -2400,7 +2397,7 @@ enum nl80211_reg_rule_attr {
  * only report BSS with matching SSID.
  * @NL80211_SCHED_SCAN_MATCH_ATTR_RSSI: RSSI threshold (in dBm) for reporting a
  */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 /*
  *	BSS in scan results. Filtering is turned off if not specified. Note that
  *	if this attribute is in a match set of its own, then it is treated as
@@ -2410,11 +2407,11 @@ enum nl80211_reg_rule_attr {
  *	the only way to create a matchset with only an RSSI filter (with this
  *	attribute) is if there's only a single matchset with the RSSI attribute.
  */
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 /*
  *	BSS in scan results. Filtering is turned off if not specified.
  */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 /*
  * @NL80211_SCHED_SCAN_MATCH_ATTR_MAX: highest scheduled scan filter
  *	attribute number currently defined
@@ -3856,7 +3853,7 @@ enum nl80211_crit_proto_id {
 /* maximum duration for critical protocol measures */
 #define NL80211_CRIT_PROTO_MAX_DURATION		5000 /* msec */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 /*
  * If this flag is unset, the lower 24 bits are an OUI, if set
  * a Linux nl80211 vendor ID is used (no such IDs are allocated
@@ -3876,6 +3873,6 @@ struct nl80211_vendor_cmd_info {
 	__u32 vendor_id;
 	__u32 subcmd;
 };
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 #endif /* __LINUX_NL80211_H */

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * linux/kernel/irq/pm.c
  *
@@ -13,9 +10,9 @@
 #include <linux/module.h>
 #include <linux/interrupt.h>
 #include <linux/syscore_ops.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #include <linux/wakeup_reason.h>
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 #include "internals.h"
 
@@ -109,7 +106,7 @@ int check_wakeup_irqs(void)
 	int irq;
 
 	for_each_irq_desc(irq, desc) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 		if (irqd_is_wakeup_set(&desc->irq_data)) {
 			if (desc->istate & IRQS_PENDING) {
 				log_suspend_abort_reason("Wakeup IRQ %d %s pending",
@@ -124,7 +121,7 @@ int check_wakeup_irqs(void)
 			}
 			continue;
 		}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 		/*
 		 * Only interrupts which are marked as wakeup source
 		 * and have not been disabled before the suspend check
@@ -135,7 +132,7 @@ int check_wakeup_irqs(void)
 				return -EBUSY;
 			continue;
 		}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		/*
 		 * Check the non wakeup interrupts whether they need
 		 * to be masked before finally going into suspend

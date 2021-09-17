@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Based on arch/arm/kernel/traps.c
  *
@@ -36,9 +33,9 @@
 #include <linux/syscalls.h>
 
 #include <asm/atomic.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #include <asm/debug-monitors.h>
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 #include <asm/traps.h>
 #include <asm/stacktrace.h>
 #include <asm/exception.h>
@@ -263,7 +260,7 @@ void arm64_notify_die(const char *str, struct pt_regs *regs,
 		die(str, regs, err);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 static LIST_HEAD(undef_hook);
 
 void register_undef_hook(struct undef_hook *hook)
@@ -283,17 +280,17 @@ static int call_undef_hook(struct pt_regs *regs, unsigned int instr)
 
 	return fn ? fn(regs, instr) : 1;
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 asmlinkage void __exception do_undefinstr(struct pt_regs *regs)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	u32 instr;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	siginfo_t info;
 	void __user *pc = (void __user *)instruction_pointer(regs);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	/* check for AArch32 breakpoint instructions */
 	if (!aarch32_break_handler(regs))
 		return;
@@ -320,13 +317,13 @@ asmlinkage void __exception do_undefinstr(struct pt_regs *regs)
 		return;
 
 die_sig:
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 #ifdef CONFIG_COMPAT
 	/* check for AArch32 breakpoint instructions */
 	if (compat_user_mode(regs) && aarch32_break_trap(regs) == 0)
 		return;
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	if (show_unhandled_signals && unhandled_signal(current, SIGILL) &&
 	    printk_ratelimit()) {

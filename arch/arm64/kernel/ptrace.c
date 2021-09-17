@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Based on arch/arm/kernel/ptrace.c
  *
@@ -22,19 +19,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #include <linux/audit.h>
 #include <linux/compat.h>
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 #include <linux/kernel.h>
 #include <linux/sched.h>
 #include <linux/mm.h>
 #include <linux/smp.h>
 #include <linux/ptrace.h>
 #include <linux/user.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #include <linux/seccomp.h>
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 #include <linux/security.h>
 #include <linux/init.h>
 #include <linux/signal.h>
@@ -48,9 +45,9 @@
 #include <asm/compat.h>
 #include <asm/debug-monitors.h>
 #include <asm/pgtable.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #include <asm/syscall.h>
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 #include <asm/traps.h>
 #include <asm/system_misc.h>
 
@@ -72,9 +69,9 @@ void ptrace_disable(struct task_struct *child)
 	user_disable_single_step(child);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 // do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 /*
  * Handle hitting a breakpoint.
  */
@@ -96,7 +93,7 @@ static int arm64_break_trap(unsigned long addr, unsigned int esr,
 {
 	return ptrace_break(regs);
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 #ifdef CONFIG_HAVE_HW_BREAKPOINT
 /*
@@ -563,9 +560,9 @@ static int fpr_set(struct task_struct *target, const struct user_regset *regset,
 		return ret;
 
 	target->thread.fpsimd_state.user_fpsimd = newstate;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	fpsimd_flush_task_state(target);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	return ret;
 }
 
@@ -815,9 +812,9 @@ static int compat_vfp_set(struct task_struct *target,
 		uregs->fpcr = fpscr & VFP_FPSCR_CTRL_MASK;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	fpsimd_flush_task_state(target);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	return ret;
 }
 
@@ -845,9 +842,9 @@ static const struct user_regset_view user_aarch32_view = {
 	.regsets = aarch32_regsets, .n = ARRAY_SIZE(aarch32_regsets)
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 // do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 int aarch32_break_trap(struct pt_regs *regs)
 {
 	unsigned int instr;
@@ -874,7 +871,7 @@ int aarch32_break_trap(struct pt_regs *regs)
 		return ptrace_break(regs);
 	return 1;
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 static int compat_ptrace_read_user(struct task_struct *tsk, compat_ulong_t off,
 				   compat_ulong_t __user *ret)
@@ -1144,7 +1141,7 @@ const struct user_regset_view *task_user_regset_view(struct task_struct *task)
 long arch_ptrace(struct task_struct *child, long request,
 		 unsigned long addr, unsigned long data)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	int ret;
 
 	switch (request) {
@@ -1158,12 +1155,12 @@ long arch_ptrace(struct task_struct *child, long request,
 	}
 
 	return ret;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	return ptrace_request(child, request, addr, data);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 enum ptrace_syscall_dir {
 	PTRACE_SYSCALL_ENTER = 0,
 	PTRACE_SYSCALL_EXIT,
@@ -1233,7 +1230,7 @@ asmlinkage void syscall_trace_exit(struct pt_regs *regs)
 	if (test_thread_flag(TIF_SYSCALL_TRACE))
 		tracehook_report_syscall(regs, PTRACE_SYSCALL_EXIT);
 }
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 static int __init ptrace_break_init(void)
 {
 	hook_debug_fault_code(DBG_ESR_EVT_BRK, arm64_break_trap, SIGTRAP,
@@ -1274,4 +1271,4 @@ asmlinkage int syscall_trace(int dir, struct pt_regs *regs)
 
 	return regs->syscallno;
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */

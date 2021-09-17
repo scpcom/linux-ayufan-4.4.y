@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * linux/arch/arm/kernel/etm.c
  *
@@ -18,9 +15,9 @@
 #include <linux/init.h>
 #include <linux/types.h>
 #include <linux/io.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #include <linux/slab.h>
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 #include <linux/sysrq.h>
 #include <linux/device.h>
 #include <linux/clk.h>
@@ -43,16 +40,16 @@ MODULE_AUTHOR("Alexander Shishkin");
 struct tracectx {
 	unsigned int	etb_bufsz;
 	void __iomem	*etb_regs;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	void __iomem	**etm_regs;
 	int		etm_regs_count;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	void __iomem	*etm_regs;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	unsigned long	flags;
 	int		ncmppairs;
 	int		etm_portsz;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	int		etm_contextid_size;
 	u32		etb_fc;
 	unsigned long	range_start;
@@ -60,40 +57,40 @@ struct tracectx {
 	unsigned long	data_range_start;
 	unsigned long	data_range_end;
 	bool		dump_initial_etb;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	struct device	*dev;
 	struct clk	*emu_clk;
 	struct mutex	mutex;
 };
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 static struct tracectx tracer = {
 	.range_start = (unsigned long)_stext,
 	.range_end = (unsigned long)_etext,
 };
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 static struct tracectx tracer;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 static inline bool trace_isrunning(struct tracectx *t)
 {
 	return !!(t->flags & TRACER_RUNNING);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 static int etm_setup_address_range(struct tracectx *t, int id, int n,
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 static int etm_setup_address_range(struct tracectx *t, int n,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		unsigned long start, unsigned long end, int exclude, int data)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	u32 flags = ETMAAT_ARM | ETMAAT_IGNCONTEXTID | ETMAAT_IGNSECURITY |
 		    ETMAAT_NOVALCMP;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	u32 flags = ETMAAT_ARM | ETMAAT_IGNCONTEXTID | ETMAAT_NSONLY | \
 		    ETMAAT_NOVALCMP;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	if (n < 1 || n > t->ncmppairs)
 		return -EINVAL;
@@ -108,16 +105,16 @@ static int etm_setup_address_range(struct tracectx *t, int n,
 		flags |= ETMAAT_IEXEC;
 
 	/* first comparator for the range */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	etm_writel(t, id, flags, ETMR_COMP_ACC_TYPE(n * 2));
 	etm_writel(t, id, start, ETMR_COMP_VAL(n * 2));
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	etm_writel(t, flags, ETMR_COMP_ACC_TYPE(n * 2));
 	etm_writel(t, start, ETMR_COMP_VAL(n * 2));
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	/* second comparator is right next to it */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	etm_writel(t, id, flags, ETMR_COMP_ACC_TYPE(n * 2 + 1));
 	etm_writel(t, id, end, ETMR_COMP_VAL(n * 2 + 1));
 
@@ -130,30 +127,30 @@ static int etm_setup_address_range(struct tracectx *t, int n,
 		flags = exclude ? ETMTE_INCLEXCL : 0;
 		etm_writel(t, id, flags | (1 << n), ETMR_TRACEENCTRL);
 	}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	etm_writel(t, flags, ETMR_COMP_ACC_TYPE(n * 2 + 1));
 	etm_writel(t, end, ETMR_COMP_VAL(n * 2 + 1));
 
 	flags = exclude ? ETMTE_INCLEXCL : 0;
 	etm_writel(t, flags | (1 << n), ETMR_TRACEENCTRL);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	return 0;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 static int trace_start_etm(struct tracectx *t, int id)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 static int trace_start(struct tracectx *t)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 {
 	u32 v;
 	unsigned long timeout = TRACER_TIMEOUT;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	v = ETMCTRL_OPTS | ETMCTRL_PROGRAM | ETMCTRL_PORTSIZE(t->etm_portsz);
 	v |= ETMCTRL_CONTEXTIDSIZE(t->etm_contextid_size);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	etb_unlock(t);
 
 	etb_writel(t, 0, ETBR_FORMATTERCTRL);
@@ -163,12 +160,12 @@ static int trace_start(struct tracectx *t)
 
 	/* configure etm */
 	v = ETMCTRL_OPTS | ETMCTRL_PROGRAM | ETMCTRL_PORTSIZE(t->etm_portsz);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	if (t->flags & TRACER_CYCLE_ACC)
 		v |= ETMCTRL_CYCLEACCURATE;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	if (t->flags & TRACER_BRANCHOUTPUT)
 		v |= ETMCTRL_BRANCH_OUTPUT;
 
@@ -187,25 +184,25 @@ static int trace_start(struct tracectx *t)
 
 	while (!(etm_readl(t, id, ETMR_CTRL) & ETMCTRL_PROGRAM) && --timeout)
 		;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	etm_unlock(t);
 
 	etm_writel(t, v, ETMR_CTRL);
 
 	while (!(etm_readl(t, ETMR_CTRL) & ETMCTRL_PROGRAM) && --timeout)
 		;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	if (!timeout) {
 		dev_dbg(t->dev, "Waiting for progbit to assert timed out\n");
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 		etm_lock(t, id);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 		etm_lock(t);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		return -EFAULT;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	if (t->range_start || t->range_end)
 		etm_setup_address_range(t, id, 1,
 					t->range_start, t->range_end, 0, 0);
@@ -226,53 +223,53 @@ static int trace_start(struct tracectx *t)
 		etm_writel(t, id, ETMVDC3_EXCLONLY, ETMR_VIEWDATACTRL3);
 
 	etm_writel(t, id, 0x6f, ETMR_VIEWDATAEVT);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	etm_setup_address_range(t, 1, (unsigned long)_stext,
 			(unsigned long)_etext, 0, 0);
 	etm_writel(t, 0, ETMR_TRACEENCTRL2);
 	etm_writel(t, 0, ETMR_TRACESSCTRL);
 	etm_writel(t, 0x6f, ETMR_TRACEENEVT);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	v &= ~ETMCTRL_PROGRAM;
 	v |= ETMCTRL_PORTSEL;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	etm_writel(t, id, v, ETMR_CTRL);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	etm_writel(t, v, ETMR_CTRL);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	timeout = TRACER_TIMEOUT;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	while (etm_readl(t, id, ETMR_CTRL) & ETMCTRL_PROGRAM && --timeout)
 		;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	while (etm_readl(t, ETMR_CTRL) & ETMCTRL_PROGRAM && --timeout)
 		;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	if (!timeout) {
 		dev_dbg(t->dev, "Waiting for progbit to deassert timed out\n");
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 		etm_lock(t, id);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 		etm_lock(t);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		return -EFAULT;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	etm_lock(t, id);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	etm_lock(t);
 
 	t->flags |= TRACER_RUNNING;
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	return 0;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 static int trace_start(struct tracectx *t)
 {
 	int ret;
@@ -339,11 +336,11 @@ static int trace_power_down_etm(struct tracectx *t, int id)
 	etm_lock(t, id);
 	return 0;
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 static int trace_stop(struct tracectx *t)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	int id;
 	unsigned long timeout = TRACER_TIMEOUT;
 	u32 etb_fc = t->etb_fc;
@@ -360,7 +357,7 @@ static int trace_stop(struct tracectx *t)
 		etb_writel(t, t->etb_fc, ETBR_FORMATTERCTRL);
 	}
 	etb_writel(t, etb_fc | ETBFF_MANUAL_FLUSH, ETBR_FORMATTERCTRL);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	unsigned long timeout = TRACER_TIMEOUT;
 
 	etm_unlock(t);
@@ -378,7 +375,7 @@ static int trace_stop(struct tracectx *t)
 
 	etb_unlock(t);
 	etb_writel(t, ETBFF_MANUAL_FLUSH, ETBR_FORMATTERCTRL);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	timeout = TRACER_TIMEOUT;
 	while (etb_readl(t, ETBR_FORMATTERCTRL) &
@@ -403,21 +400,21 @@ static int trace_stop(struct tracectx *t)
 static int etb_getdatalen(struct tracectx *t)
 {
 	u32 v;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	int wp;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	int rp, wp;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	v = etb_readl(t, ETBR_STATUS);
 
 	if (v & 1)
 		return t->etb_bufsz;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	wp = etb_readl(t, ETBR_WRITEADDR);
 	return wp;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	rp = etb_readl(t, ETBR_READADDR);
 	wp = etb_readl(t, ETBR_WRITEADDR);
 
@@ -429,7 +426,7 @@ static int etb_getdatalen(struct tracectx *t)
 	}
 
 	return wp - rp;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 }
 
 /* sysrq+v will always stop the running trace and leave it at that */
@@ -462,9 +459,9 @@ static void etm_dump(void)
 		printk("%08x", cpu_to_be32(etb_readl(t, ETBR_READMEM)));
 	printk(KERN_INFO "\n--- ETB buffer end ---\n");
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	// do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	/* deassert the overflow bit */
 	etb_writel(t, 1, ETBR_CTRL);
 	etb_writel(t, 0, ETBR_CTRL);
@@ -472,24 +469,24 @@ static void etm_dump(void)
 	etb_writel(t, 0, ETBR_TRIGGERCOUNT);
 	etb_writel(t, 0, ETBR_READADDR);
 	etb_writel(t, 0, ETBR_WRITEADDR);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	etb_lock(t);
 }
 
 static void sysrq_etm_dump(int key)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	if (!mutex_trylock(&tracer.mutex)) {
 		printk(KERN_INFO "Tracing hardware busy\n");
 		return;
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	dev_dbg(tracer.dev, "Dumping ETB buffer\n");
 	etm_dump();
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	mutex_unlock(&tracer.mutex);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 }
 
 static struct sysrq_key_op sysrq_etm_op = {
@@ -516,12 +513,12 @@ static ssize_t etb_read(struct file *file, char __user *data,
 	struct tracectx *t = file->private_data;
 	u32 first = 0;
 	u32 *buf;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	int wpos;
 	int skip;
 	long wlength;
 	loff_t pos = *ppos;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	mutex_lock(&t->mutex);
 
@@ -533,14 +530,14 @@ static ssize_t etb_read(struct file *file, char __user *data,
 	etb_unlock(t);
 
 	total = etb_getdatalen(t);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	if (total == 0 && t->dump_initial_etb)
 		total = t->etb_bufsz;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	if (total == t->etb_bufsz)
 		first = etb_readl(t, ETBR_WRITEADDR);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	if (pos > total * 4) {
 		skip = 0;
 		wpos = total;
@@ -550,11 +547,11 @@ static ssize_t etb_read(struct file *file, char __user *data,
 	}
 	total -= wpos;
 	first = (first + wpos) % t->etb_bufsz;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	etb_writel(t, first, ETBR_READADDR);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	wlength = min(total, DIV_ROUND_UP(skip + (int)len, 4));
 	length = min(total * 4 - skip, (int)len);
 	buf = vmalloc(wlength * 4);
@@ -571,7 +568,7 @@ static ssize_t etb_read(struct file *file, char __user *data,
 	length -= copy_to_user(data, (u8 *)buf + skip, length);
 	vfree(buf);
 	*ppos = pos + length;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	length = min(total * 4, (int)len);
 	buf = vmalloc(length);
 
@@ -592,7 +589,7 @@ static ssize_t etb_read(struct file *file, char __user *data,
 
 	length -= copy_to_user(data, buf, length);
 	vfree(buf);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 out:
 	mutex_unlock(&t->mutex);
@@ -629,24 +626,24 @@ static int etb_probe(struct amba_device *dev, const struct amba_id *id)
 	if (ret)
 		goto out;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	mutex_lock(&t->mutex);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	t->etb_regs = ioremap_nocache(dev->res.start, resource_size(&dev->res));
 	if (!t->etb_regs) {
 		ret = -ENOMEM;
 		goto out_release;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	t->dev = &dev->dev;
 	t->dump_initial_etb = true;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	amba_set_drvdata(dev, t);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	// do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	etb_miscdev.parent = &dev->dev;
 
 	ret = misc_register(&etb_miscdev);
@@ -661,7 +658,7 @@ static int etb_probe(struct amba_device *dev, const struct amba_id *id)
 
 	clk_enable(t->emu_clk);
 
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	etb_unlock(t);
 	t->etb_bufsz = etb_readl(t, ETBR_DEPTH);
 	dev_dbg(&dev->dev, "Size: %x\n", t->etb_bufsz);
@@ -670,7 +667,7 @@ static int etb_probe(struct amba_device *dev, const struct amba_id *id)
 	etb_writel(t, 0, ETBR_CTRL);
 	etb_writel(t, 0x1000, ETBR_FORMATTERCTRL);
 	etb_lock(t);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	mutex_unlock(&t->mutex);
 
 	etb_miscdev.parent = &dev->dev;
@@ -685,7 +682,7 @@ static int etb_probe(struct amba_device *dev, const struct amba_id *id)
 		dev_dbg(&dev->dev, "Failed to obtain emu_src_ck.\n");
 	else
 		clk_enable(t->emu_clk);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	dev_dbg(&dev->dev, "ETB AMBA driver initialized.\n");
 
@@ -693,19 +690,19 @@ out:
 	return ret;
 
 out_unmap:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	mutex_lock(&t->mutex);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	amba_set_drvdata(dev, NULL);
 	iounmap(t->etb_regs);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	t->etb_regs = NULL;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 out_release:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	mutex_unlock(&t->mutex);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	amba_release_regions(dev);
 
 	return ret;
@@ -720,15 +717,15 @@ static int etb_remove(struct amba_device *dev)
 	iounmap(t->etb_regs);
 	t->etb_regs = NULL;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	if (!IS_ERR(t->emu_clk)) {
 		clk_disable(t->emu_clk);
 		clk_put(t->emu_clk);
 	}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	clk_disable(t->emu_clk);
 	clk_put(t->emu_clk);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	amba_release_regions(dev);
 
@@ -772,14 +769,14 @@ static ssize_t trace_running_store(struct kobject *kobj,
 		return -EINVAL;
 
 	mutex_lock(&tracer.mutex);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	if (!tracer.etb_regs)
 		ret = -ENODEV;
 	else
 		ret = value ? trace_start(&tracer) : trace_stop(&tracer);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	ret = value ? trace_start(&tracer) : trace_stop(&tracer);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	mutex_unlock(&tracer.mutex);
 
 	return ret ? : n;
@@ -794,7 +791,7 @@ static ssize_t trace_info_show(struct kobject *kobj,
 {
 	u32 etb_wa, etb_ra, etb_st, etb_fc, etm_ctrl, etm_st;
 	int datalen;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	int id;
 	int ret;
 
@@ -839,7 +836,7 @@ static ssize_t trace_info_show(struct kobject *kobj,
 	mutex_unlock(&tracer.mutex);
 
 	return ret;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 
 	etb_unlock(&tracer);
 	datalen = etb_getdatalen(&tracer);
@@ -870,7 +867,7 @@ static ssize_t trace_info_show(struct kobject *kobj,
 			etm_ctrl,
 			etm_st
 			);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 }
 
 static struct kobj_attribute trace_info_attr =
@@ -909,7 +906,7 @@ static ssize_t trace_mode_store(struct kobject *kobj,
 static struct kobj_attribute trace_mode_attr =
 	__ATTR(trace_mode, 0644, trace_mode_show, trace_mode_store);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 static ssize_t trace_contextid_size_show(struct kobject *kobj,
 					 struct kobj_attribute *attr,
 					 char *buf)
@@ -1105,13 +1102,13 @@ static ssize_t trace_data_range_store(struct kobject *kobj,
 static struct kobj_attribute trace_data_range_attr =
 	__ATTR(trace_data_range, 0644,
 		trace_data_range_show, trace_data_range_store);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 static int etm_probe(struct amba_device *dev, const struct amba_id *id)
 {
 	struct tracectx *t = &tracer;
 	int ret = 0;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	void __iomem **new_regs;
 	int new_count;
 	u32 etmccr;
@@ -1130,20 +1127,20 @@ static int etm_probe(struct amba_device *dev, const struct amba_id *id)
 		goto out;
 	}
 	t->etm_regs = new_regs;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 
 	if (t->etm_regs) {
 		dev_dbg(&dev->dev, "ETM already initialized\n");
 		ret = -EBUSY;
 		goto out;
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	ret = amba_request_regions(dev, NULL);
 	if (ret)
 		goto out;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	t->etm_regs[t->etm_regs_count] =
 		ioremap_nocache(dev->res.start, resource_size(&dev->res));
 	if (!t->etm_regs[t->etm_regs_count]) {
@@ -1173,7 +1170,7 @@ static int etm_probe(struct amba_device *dev, const struct amba_id *id)
 	etm_writel(t, t->etm_regs_count, 0x441, ETMR_CTRL);
 	etm_writel(t, t->etm_regs_count, new_count, ETMR_TRACEIDR);
 	etm_lock(t, t->etm_regs_count);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	t->etm_regs = ioremap_nocache(dev->res.start, resource_size(&dev->res));
 	if (!t->etm_regs) {
 		ret = -ENOMEM;
@@ -1195,7 +1192,7 @@ static int etm_probe(struct amba_device *dev, const struct amba_id *id)
 	t->ncmppairs = etm_readl(t, ETMR_CONFCODE) & 0xf;
 	etm_writel(t, 0x440, ETMR_CTRL);
 	etm_lock(t);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	ret = sysfs_create_file(&dev->dev.kobj,
 			&trace_running_attr.attr);
@@ -1211,7 +1208,7 @@ static int etm_probe(struct amba_device *dev, const struct amba_id *id)
 	if (ret)
 		dev_dbg(&dev->dev, "Failed to create trace_mode in sysfs\n");
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	ret = sysfs_create_file(&dev->dev.kobj,
 				&trace_contextid_size_attr.attr);
 	if (ret)
@@ -1261,40 +1258,40 @@ static int etm_probe(struct amba_device *dev, const struct amba_id *id)
 		t->etb_fc = ETBFF_ENFCONT | ETBFF_ENFTC;
 
 	t->etm_regs_count = new_count;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	dev_dbg(t->dev, "ETM AMBA driver initialized.\n");
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 out:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	mutex_unlock(&t->mutex);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	return ret;
 
 out_unmap:
 	amba_set_drvdata(dev, NULL);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	iounmap(t->etm_regs[t->etm_regs_count]);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	iounmap(t->etm_regs);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 out_release:
 	amba_release_regions(dev);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	mutex_unlock(&t->mutex);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	return ret;
 }
 
 static int etm_remove(struct amba_device *dev)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	int i;
 	struct tracectx *t = &tracer;
 	void __iomem	*etm_regs = amba_get_drvdata(dev);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	struct tracectx *t = amba_get_drvdata(dev);
 
 	amba_set_drvdata(dev, NULL);
@@ -1303,12 +1300,12 @@ static int etm_remove(struct amba_device *dev)
 	t->etm_regs = NULL;
 
 	amba_release_regions(dev);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	sysfs_remove_file(&dev->dev.kobj, &trace_running_attr.attr);
 	sysfs_remove_file(&dev->dev.kobj, &trace_info_attr.attr);
 	sysfs_remove_file(&dev->dev.kobj, &trace_mode_attr.attr);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	sysfs_remove_file(&dev->dev.kobj, &trace_range_attr.attr);
 	sysfs_remove_file(&dev->dev.kobj, &trace_data_range_attr.attr);
 
@@ -1329,7 +1326,7 @@ static int etm_remove(struct amba_device *dev)
 
 	iounmap(etm_regs);
 	amba_release_regions(dev);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	return 0;
 }
@@ -1339,12 +1336,12 @@ static struct amba_id etm_ids[] = {
 		.id	= 0x0003b921,
 		.mask	= 0x0007ffff,
 	},
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	{
 		.id	= 0x0003b950,
 		.mask	= 0x0007ffff,
 	},
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	{ 0, 0 },
 };
 
@@ -1362,9 +1359,9 @@ static int __init etm_init(void)
 {
 	int retval;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	mutex_init(&tracer.mutex);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	retval = amba_driver_register(&etb_driver);
 	if (retval) {

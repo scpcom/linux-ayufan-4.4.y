@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Device tables which are exported to userspace via
  * scripts/mod/file2alias.c.  You must keep that file in sync with this
@@ -572,7 +569,7 @@ struct x86_cpu_id {
 #define X86_MODEL_ANY  0
 #define X86_FEATURE_ANY 0	/* Same as FPU, you can't test for that */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 /*
  * Generic table type for matching CPU features.
  * @feature:	the bit number of the feature (0 - 65535)
@@ -581,7 +578,7 @@ struct x86_cpu_id {
 struct cpu_feature {
 	__u16	feature;
 };
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 #define IPACK_ANY_FORMAT 0xff
 #define IPACK_ANY_ID (~0)

@@ -31,7 +31,13 @@ int SYNO_GPIO_READ(int pin)
 	syno_gpio_value_get(pin, &iVal);
 	return iVal;
 #else
-	return gpio_get_value(pin);
+	int iVal = 0;
+	if (gpio_cansleep(pin)) {
+		iVal = gpio_get_value_cansleep(pin);
+	} else {
+		iVal = gpio_get_value(pin);
+	}
+	return iVal;
 #endif
 }
 EXPORT_SYMBOL(SYNO_GPIO_READ);
@@ -41,7 +47,11 @@ void SYNO_GPIO_WRITE(int pin, int pValue)
 #if defined(MY_DEF_HERE)
 	syno_gpio_value_set(pin, pValue);
 #else
-	gpio_set_value(pin, pValue);
+	if (gpio_cansleep(pin)) {
+		gpio_set_value_cansleep(pin, pValue);
+	} else {
+		gpio_set_value(pin, pValue);
+	}
 #endif
 }
 EXPORT_SYMBOL(SYNO_GPIO_WRITE);

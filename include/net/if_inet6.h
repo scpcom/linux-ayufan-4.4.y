@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  *	inet6 interface/address list definitions
  *	Linux INET6 implementation 
@@ -188,15 +185,15 @@ struct inet6_dev {
 	__u32			if_flags;
 	int			dead;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	// do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 #ifdef CONFIG_IPV6_PRIVACY
 	u8			rndid[8];
 	struct timer_list	regen_timer;
 	struct list_head	tempaddr_list;
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 
 	struct in6_addr		token;
 
@@ -205,16 +202,16 @@ struct inet6_dev {
 	struct ipv6_devconf	cnf;
 	struct ipv6_devstat	stats;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	// do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 	struct timer_list	rs_timer;
 	__u8			rs_probes;
 #endif
 
 	unsigned long		tstamp; /* ipv6InterfaceTable update timestamp */
 	struct rcu_head		rcu;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 #ifdef CONFIG_IPV6_PRIVACY
 	u8			rndid[8];
 	struct timer_list	regen_timer;
@@ -222,7 +219,7 @@ struct inet6_dev {
 #endif
 	struct timer_list	rs_timer;
 	__u8			rs_probes;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_HI3536_ALIGN_STRUCTURES */
 };
 
 static inline void ipv6_eth_mc_map(const struct in6_addr *addr, char *buf)

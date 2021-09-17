@@ -166,7 +166,7 @@ struct vm_area_struct {
 			unsigned long rb_subtree_last;
 		} linear;
 		struct list_head nonlinear;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 		const char __user *anon_name;
 #endif  
 	} shared;
@@ -182,7 +182,7 @@ struct vm_area_struct {
 	unsigned long vm_pgoff;		 
 #endif  
 	struct file * vm_file;		 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	 
 #else  
 #ifdef CONFIG_AUFS_FHSM
@@ -197,7 +197,7 @@ struct vm_area_struct {
 #ifdef CONFIG_NUMA
 	struct mempolicy *vm_policy;	 
 #endif
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 #ifdef CONFIG_AUFS_FHSM
 	struct file *vm_prfile;		 
 #endif  
@@ -246,7 +246,7 @@ struct mm_struct {
 	void (*unmap_area) (struct mm_struct *mm, unsigned long addr);
 #endif
 	unsigned long mmap_base;		 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	 
 #else  
 	unsigned long mmap_legacy_base;          
@@ -346,7 +346,7 @@ static inline cpumask_t *mm_cpumask(struct mm_struct *mm)
 	return mm->cpu_vm_mask_var;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
  
 static inline const char __user *vma_get_anon_name(struct vm_area_struct *vma)
 {

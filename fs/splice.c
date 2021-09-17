@@ -593,6 +593,9 @@ static int pipe_to_sendpage(struct pipe_inode_info *pipe,
 #if defined(MY_ABC_HERE)
 	int ret;
 
+	if (!likely(file->f_op && file->f_op->sendpage))
+		return -EINVAL;
+
 	ret = buf->ops->confirm(pipe, buf);
 	if (!ret) {
 		more = (sd->flags & SPLICE_F_MORE) ? MSG_MORE : 0;

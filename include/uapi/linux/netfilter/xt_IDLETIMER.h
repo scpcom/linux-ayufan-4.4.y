@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * linux/include/linux/netfilter/xt_IDLETIMER.h
  *
@@ -35,22 +32,22 @@
 #include <linux/types.h>
 
 #define MAX_IDLETIMER_LABEL_SIZE 28
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #define NLMSG_MAX_SIZE 64
 
 #define NL_EVENT_TYPE_INACTIVE 0
 #define NL_EVENT_TYPE_ACTIVE 1
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 struct idletimer_tg_info {
 	__u32 timeout;
 
 	char label[MAX_IDLETIMER_LABEL_SIZE];
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	/* Use netlink messages for notification in addition to sysfs */
 	__u8 send_nl_msg;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	/* for kernel module internal use only */
 	struct idletimer_tg *timer __attribute__((aligned(8)));

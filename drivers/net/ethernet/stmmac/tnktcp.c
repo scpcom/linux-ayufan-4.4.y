@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*****************************************************************************
  * This is the driver for the CreVinn TOE-NK-2G TCP Offload Engine.
  * TOE-NK-2G incorporates a Synopsys Ethernet MAC core.
@@ -357,10 +354,10 @@ int tnk_tcp_prepare(struct sock *sk, struct sk_buff *skb)
 	TNK_DBG("tcp connection prepared\n");
 
 out:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 	if (err)
 		sk->sk_tnkinfo.not_capable = TNK_SOCK_SET_TOE_OFF;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 
 	spin_unlock_irqrestore(&tnk_tcp_lock, flags);
 	if (neigh)
@@ -572,11 +569,11 @@ int tnk_tcp_close(struct sock *sk, int graceful)
 
 				while (before(tcp_sk(sk)->rcv_nxt,
 					conn.next_rx_seq_num)) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 					msleep(100);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536_V2050 */
 					cond_resched();
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 					time_now = sched_clock();
 					if (unlikely((long long)time_now -
 						(long long)time_limit >= 0))
@@ -1199,7 +1196,7 @@ int tnk_tcp_receive(struct sock *sk, uint32_t *seq,
 		TNK_DBG
 			("%s sk_receive_queue not yet empty, do slowpath\n",
 			 __func__);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 		/* Deal with MSG_PEEK.
 		 * "*seq" may after "skb->end_seq" when MSG_PEEK enabled.
 		 */
@@ -1213,9 +1210,9 @@ int tnk_tcp_receive(struct sock *sk, uint32_t *seq,
 			     tcp_sk(sk)->rcv_nxt, sk_flags,
 			     sk->sk_backlog.tail);
 		}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536_V2050 */
 		err = -EINVAL;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 	}
 
 	if (err)
@@ -1999,24 +1996,24 @@ out:
 int tnk_tcp_check_connect_state(struct sock *sk)
 {
 	struct tnkinfo *t = &sk->sk_tnkinfo;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 	int tnk_state = 0;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536_V2050 */
 	unsigned long flags;
 	int tnk_state = 0;
 
 	spin_lock_irqsave(&tnk_tcp_lock, flags);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 	if (t->state != TNKINFO_STATE_ACTIVE)
 		goto out;
 
 	tnk_state = 1;
 out:
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2050)
 	// do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536_V2050 */
 	spin_unlock_irqrestore(&tnk_tcp_lock, flags);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2050 */
 	return tnk_state;
 }
 

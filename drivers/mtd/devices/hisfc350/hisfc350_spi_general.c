@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Copyright (c) 2016 HiSilicon Technologies Co., Ltd.
  *
@@ -99,9 +96,9 @@ static int spi_general_write_enable(struct hisfc_spi *spi)
 
 	HISFC350_CMD_WAIT_CPU_FINISH(host);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
 	spi->driver->wait_ready(spi);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 
 	return 0;
 }
@@ -244,11 +241,11 @@ static int spi_general_qe_enable(struct hisfc_spi *spi)
 
 	HISFC350_CMD_WAIT_CPU_FINISH(host);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
 	// do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 	if (DEBUG_SPI_QE) {
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 		spi->driver->wait_ready(spi);
 
 		config = spi_general_get_flash_register(spi, SPI_CMD_RDCR);
@@ -258,15 +255,15 @@ static int spi_general_qe_enable(struct hisfc_spi *spi)
 					str[op], config);
 		else
 			DBG_MSG("%s Quad failed! [%#x]\n", str[op], config);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
 	// do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 	return op;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
 /*****************************************************************************/
 /*
   some chip don't QUAD enable
@@ -275,4 +272,4 @@ static int spi_do_not_qe_enable(struct hisfc_spi *spi)
 {
 	return 0;
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */

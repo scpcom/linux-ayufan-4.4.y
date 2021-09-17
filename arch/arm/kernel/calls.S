@@ -392,7 +392,7 @@
 		CALL(sys_process_vm_writev)
 		CALL(sys_kcmp)
 		CALL(sys_finit_module)
-#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536) && defined(MY_ABC_HERE)
 /* 380 */	CALL(sys_ni_syscall)		/* reserved sys_sched_setattr */
 		CALL(sys_ni_syscall)		/* reserved sys_sched_getattr */
 		CALL(sys_ni_syscall)		/* reserved sys_renameat2     */
@@ -402,7 +402,7 @@
 		CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)
-#endif /* MY_DEF_HERE && defined(MY_ABC_HERE) */ 
+#endif /* CONFIG_SYNO_LSP_HI3536 && defined(MY_ABC_HERE) */ 
 		CALL(sys_ni_syscall)
 /* 385 */	CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)

@@ -134,7 +134,7 @@ static int ipv4_ping_group_range(ctl_table *table, int write,
 	return ret;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
  
 static int proc_tcp_default_init_rwnd(ctl_table *ctl, int write,
 				      void __user *buffer,
@@ -420,7 +420,7 @@ static struct ctl_table ipv4_table[] = {
 		.data		= &sysctl_tcp_retries2,
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
-#if defined(MY_DEF_HERE) && defined(CONFIG_TNK)
+#if defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_TNK)
 		.proc_handler	= proc_tnk_cfg_tcp_retries2
 #else  
 		.proc_handler	= proc_dointvec
@@ -558,7 +558,7 @@ static struct ctl_table ipv4_table[] = {
 		.data		= &sysctl_tcp_reordering,
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
-#if defined(MY_DEF_HERE) && defined(CONFIG_TNK) && defined(SWITCH_DUPACK_NUM)
+#if defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_TNK) && defined(SWITCH_DUPACK_NUM)
 		.proc_handler	= proc_tnk_cfg_tcp_dupack_cnt
 #else  
 		.proc_handler	= proc_dointvec
@@ -756,7 +756,7 @@ static struct ctl_table ipv4_table[] = {
 		.data           = &sysctl_tcp_thin_linear_timeouts,
 		.maxlen         = sizeof(int),
 		.mode           = 0644,
-#if defined(MY_DEF_HERE) && defined(CONFIG_TNK)
+#if defined(CONFIG_SYNO_LSP_HI3536) && defined(CONFIG_TNK)
 		.proc_handler   = proc_tnk_thin_linear_timeouts
 #else  
 		.proc_handler   = proc_dointvec
@@ -795,7 +795,7 @@ static struct ctl_table ipv4_table[] = {
 		.extra2		= &gso_max_segs,
 #endif  
 	},
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	{
 		.procname       = "tcp_default_init_rwnd",
 		.data           = &sysctl_tcp_default_init_rwnd,
@@ -893,7 +893,7 @@ static struct ctl_table ipv4_net_table[] = {
 		.mode		= 0644,
 		.proc_handler	= ipv4_tcp_mem,
 	},
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	{
 		.procname	= "fwmark_reflect",
 		.data		= &init_net.ipv4.sysctl_fwmark_reflect,

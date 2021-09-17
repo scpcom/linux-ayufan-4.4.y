@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Copyright (c) 2016 HiSilicon Technologies Co., Ltd.
  *
@@ -130,7 +127,7 @@ static int hinfc_os_add_paratitions(struct hinfc_host *host)
 }
 /*****************************************************************************/
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
 static int hinfc610_nand_pre_probe(struct nand_chip *chip)
 {
 	uint8_t nand_maf_id;
@@ -153,7 +150,7 @@ static int hinfc610_nand_pre_probe(struct nand_chip *chip)
 	return 0;
 }
 /*****************************************************************************/
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 
 static int hinfc610_os_probe(struct platform_device *pltdev)
 {
@@ -162,11 +159,11 @@ static int hinfc610_os_probe(struct platform_device *pltdev)
 	struct hinfc_host *host;
 	struct nand_chip *chip;
 	struct mtd_info *mtd;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
 	struct resource *rs_reg, *rs_io = NULL;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 	struct resource *res;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 
 	size = sizeof(struct hinfc_host) + sizeof(struct nand_chip)
 		+ sizeof(struct mtd_info);
@@ -184,7 +181,7 @@ static int hinfc610_os_probe(struct platform_device *pltdev)
 
 	hinfc610_controller_enable(host, ENABLE);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
 	rs_reg = platform_get_resource_byname(pltdev, IORESOURCE_MEM, "base");
 	if (!rs_reg) {
 		PR_BUG("Error: Can't get resource for reg address.\n");
@@ -198,7 +195,7 @@ static int hinfc610_os_probe(struct platform_device *pltdev)
 		result = -EIO;
 		goto fail;
 	}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 	res = platform_get_resource_byname(pltdev, IORESOURCE_MEM, "base");
 	if (!res) {
 		PR_BUG("Can't get resource.\n");
@@ -211,13 +208,13 @@ static int hinfc610_os_probe(struct platform_device *pltdev)
 		kfree(host);
 		return -EIO;
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 
 	mtd->priv  = chip;
 	mtd->owner = THIS_MODULE;
 	mtd->name  = (char *)(pltdev->name);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
 	rs_io = platform_get_resource_byname(pltdev, IORESOURCE_MEM, "buffer");
 	if (!rs_io) {
 		PR_BUG("Error: Can't get resource for buffer address.\n");
@@ -232,7 +229,7 @@ static int hinfc610_os_probe(struct platform_device *pltdev)
 		result = -EIO;
 		goto fail;
 	}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 	res = platform_get_resource_byname(pltdev, IORESOURCE_MEM, "buffer");
 	if (!res) {
 		PR_BUG("Can't get resource.\n");
@@ -245,19 +242,19 @@ static int hinfc610_os_probe(struct platform_device *pltdev)
 		PR_BUG("ioremap failed\n");
 		return -EIO;
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 
 	host->buffer = dma_alloc_coherent(host->dev,
 		(NAND_MAX_PAGESIZE + NAND_MAX_OOBSIZE),
 		&host->dma_buffer, GFP_KERNEL);
 	if (!host->buffer) {
 		PR_BUG("Can't malloc memory for NAND driver.");
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
 		result = -EIO;
 		goto fail;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 		return -EIO;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 	}
 
 	chip->priv        = host;
@@ -280,20 +277,20 @@ static int hinfc610_os_probe(struct platform_device *pltdev)
 
 	if (hinfc610_nand_init(host, chip)) {
 		PR_BUG("failed to allocate device buffer.\n");
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
 		result = -EIO;
 		goto fail;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 		return -EIO;
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
 	if (hinfc610_nand_pre_probe(chip)) {
 		result = -EXDEV;
 		goto fail;
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 
 	if (nand_otp_len) {
 		PR_MSG("Copy Nand read retry parameter from boot,");
@@ -314,11 +311,11 @@ static int hinfc610_os_probe(struct platform_device *pltdev)
 		return 0;
 
 	result = -ENODEV;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
 	// do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 	nand_release(mtd);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 
 fail:
 	if (host->buffer) {
@@ -328,7 +325,7 @@ fail:
 			host->dma_buffer);
 		host->buffer = NULL;
 	}
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536_V2060)
 	if (chip->IO_ADDR_W)
 	iounmap(chip->IO_ADDR_W);
 	if (rs_io)
@@ -338,10 +335,10 @@ fail:
 	if (rs_reg)
 		release_resource(rs_reg);
 	nand_release(host->mtd);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536_V2060 */
 	iounmap(chip->IO_ADDR_W);
 	iounmap(host->iobase);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536_V2060 */
 	kfree(host);
 	platform_set_drvdata(pltdev, NULL);
 

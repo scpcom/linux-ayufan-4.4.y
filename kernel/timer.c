@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  *  linux/kernel/timer.c
  *
@@ -926,17 +923,17 @@ EXPORT_SYMBOL(add_timer);
  */
 void add_timer_on(struct timer_list *timer, int cpu)
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536)
 	struct tvec_base *new_base = per_cpu(tvec_bases, cpu);
 	struct tvec_base *base;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_HI3536 */
 	struct tvec_base *base = per_cpu(tvec_bases, cpu);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_HI3536 */
 	unsigned long flags;
 
 	timer_stats_timer_set_start_info(timer);
 	BUG_ON(timer_pending(timer) || !timer->function);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536)
 
 	/*
 	 * If @timer was on a different CPU, it should be migrated with the
@@ -951,10 +948,10 @@ void add_timer_on(struct timer_list *timer, int cpu)
 		spin_lock(&base->lock);
 		timer_set_base(timer, base);
 	}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_HI3536 */
 	spin_lock_irqsave(&base->lock, flags);
 	timer_set_base(timer, base);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_HI3536 */
 
 	debug_activate(timer, timer->expires);
 	internal_add_timer(base, timer);

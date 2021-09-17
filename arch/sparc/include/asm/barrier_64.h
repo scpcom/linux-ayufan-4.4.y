@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #ifndef __SPARC64_BARRIER_H
 #define __SPARC64_BARRIER_H
 
@@ -56,7 +53,7 @@ do {	__asm__ __volatile__("ba,pt	%%xcc, 1f\n\t" \
 
 #define smp_read_barrier_depends()	do { } while(0)
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #define smp_store_release(p, v)						\
 do {									\
 	compiletime_assert_atomic_type(*p);				\
@@ -71,6 +68,6 @@ do {									\
 	barrier();							\
 	___p1;								\
 })
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 #endif /* !(__SPARC64_BARRIER_H) */

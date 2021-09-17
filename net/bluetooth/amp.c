@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
    Copyright (c) 2011,2012 Intel Corp.
 
@@ -116,11 +113,11 @@ struct hci_conn *phylink_add(struct hci_dev *hdev, struct amp_mgr *mgr,
 	bdaddr_t *dst = mgr->l2cap_conn->dst;
 	struct hci_conn *hcon;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	hcon = hci_conn_add(hdev, AMP_LINK, 0, dst);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	hcon = hci_conn_add(hdev, AMP_LINK, dst);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	if (!hcon)
 		return NULL;
 

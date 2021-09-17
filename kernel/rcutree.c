@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Read-Copy Update mechanism for mutual exclusion
  *
@@ -56,9 +53,9 @@
 #include <linux/delay.h>
 #include <linux/stop_machine.h>
 #include <linux/random.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536)
 #include <linux/suspend.h>
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_HI3536 */
 
 #include "rcutree.h"
 #include <trace/events/rcu.h>
@@ -3115,7 +3112,7 @@ static int __cpuinit rcu_cpu_notify(struct notifier_block *self,
 	return NOTIFY_OK;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536)
 static int rcu_pm_notify(struct notifier_block *self,
 			 unsigned long action, void *hcpu)
 {
@@ -3134,7 +3131,7 @@ static int rcu_pm_notify(struct notifier_block *self,
 	}
 	return NOTIFY_OK;
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_HI3536 */
 
 /*
  * Spawn the kthread that handles this RCU flavor's grace periods.
@@ -3363,9 +3360,9 @@ void __init rcu_init(void)
 	 * or the scheduler are operational.
 	 */
 	cpu_notifier(rcu_cpu_notify, 0);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536)
 	pm_notifier(rcu_pm_notify, 0);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_HI3536 */
 	for_each_online_cpu(cpu)
 		rcu_cpu_notify(NULL, CPU_UP_PREPARE, (void *)(long)cpu);
 }

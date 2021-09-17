@@ -1878,7 +1878,11 @@ static inline int mv_eth_rx(struct eth_port *pp, int rx_todo, int rxq, struct na
 		if (mv_eth_pool_bm(pool)) { 
 			err = mv_eth_refill(pp, rxq, pool, rx_desc);
 			if (err) {
+#ifdef MY_ABC_HERE
+				STAT_ERR(pp->stats.refill_failed++);
+#else  
 				pr_warn("Linux processing - Can't refill, try to allocate again in cleanup timer\n");
+#endif  
 				atomic_inc(&pool->missed);
 				 
 				mv_eth_add_cleanup_timer(pp->cpu_config[smp_processor_id()]);
@@ -4345,7 +4349,7 @@ static int mv_eth_neta_cap_verify(unsigned int neta_cap_bm)
 	case MV88F6W22_DEV_ID:
 	case MV88F6W23_DEV_ID:
 		if (((rev == MV88F68xx_Z1_REV) && (neta_cap_bm == MV_ETH_CAP_BM || neta_cap_bm == 0)) ||
-		    ((rev == MV88F68xx_A0_REV) && (neta_cap_bm == (MV_ETH_CAP_PNC | MV_ETH_CAP_BM) ||
+		    (((rev == MV88F68xx_A0_REV) || rev == MV88F68xx_B0_REV) && (neta_cap_bm == (MV_ETH_CAP_PNC | MV_ETH_CAP_BM) ||
 						neta_cap_bm == MV_ETH_CAP_PNC ||
 						neta_cap_bm == MV_ETH_CAP_BM ||
 						neta_cap_bm == 0)))
@@ -6797,6 +6801,9 @@ void mv_eth_port_stats_print(unsigned int port)
 	printk(KERN_ERR "ext_stack_empty...............%10u\n", stat->ext_stack_empty);
 	printk(KERN_ERR "ext_stack_full ...............%10u\n", stat->ext_stack_full);
 	printk(KERN_ERR "state_err.....................%10u\n", stat->state_err);
+#ifdef MY_ABC_HERE
+	printk(KERN_ERR "refill_failed.................%10u\n", stat->refill_failed);
+#endif  
 #endif  
 
 #ifdef CONFIG_MV_ETH_STAT_INF

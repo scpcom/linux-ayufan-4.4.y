@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  *  arch/arm/include/asm/xor.h
  *
@@ -10,14 +7,14 @@
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
  */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
 #include <linux/hardirq.h>
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 #include <asm-generic/xor.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
 #include <asm/hwcap.h>
 #include <asm/neon.h>
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 
 #define __XOR(a1, a2) a1 ^= a2
 
@@ -143,7 +140,7 @@ static struct xor_block_template xor_block_arm4regs = {
 };
 
 #undef XOR_TRY_TEMPLATES
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
 #define XOR_TRY_TEMPLATES			\
 	do {					\
 		xor_speed(&xor_block_arm4regs);	\
@@ -151,16 +148,16 @@ static struct xor_block_template xor_block_arm4regs = {
 		xor_speed(&xor_block_32regs);	\
 		NEON_TEMPLATES;			\
 	} while (0)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 #define XOR_TRY_TEMPLATES			\
 	do {					\
 		xor_speed(&xor_block_arm4regs);	\
 		xor_speed(&xor_block_8regs);	\
 		xor_speed(&xor_block_32regs);	\
 	} while (0)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
 #ifdef CONFIG_KERNEL_MODE_NEON
 
 extern struct xor_block_template const xor_block_neon_inner;
@@ -229,4 +226,4 @@ static struct xor_block_template xor_block_neon = {
 #else
 #define NEON_TEMPLATES
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */

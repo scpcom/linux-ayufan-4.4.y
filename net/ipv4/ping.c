@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * INET		An implementation of the TCP/IP protocol suite for the LINUX
  *		operating system.  INET is implemented using the  BSD Socket
@@ -36,11 +33,11 @@
 #include <linux/netdevice.h>
 #include <net/snmp.h>
 #include <net/ip.h>
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 // do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 #include <net/ipv6.h>
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 #include <net/icmp.h>
 #include <net/protocol.h>
 #include <linux/skbuff.h>
@@ -53,7 +50,7 @@
 #include <net/inet_common.h>
 #include <net/checksum.h>
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #if IS_ENABLED(CONFIG_IPV6)
 #include <linux/in6.h>
 #include <linux/icmpv6.h>
@@ -65,9 +62,9 @@
 struct ping_table ping_table;
 struct pingv6_ops pingv6_ops;
 EXPORT_SYMBOL_GPL(pingv6_ops);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 static struct ping_table ping_table;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 static u16 ping_port_rover;
 
@@ -78,9 +75,9 @@ static inline int ping_hashfn(struct net *net, unsigned int num, unsigned int ma
 	pr_debug("hash(%d) = %d\n", num, res);
 	return res;
 }
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 EXPORT_SYMBOL_GPL(ping_hash);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 static inline struct hlist_nulls_head *ping_hashslot(struct ping_table *table,
 					     struct net *net, unsigned int num)
@@ -88,11 +85,11 @@ static inline struct hlist_nulls_head *ping_hashslot(struct ping_table *table,
 	return &table->hash[ping_hashfn(net, num, PING_HTABLE_MASK)];
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 int ping_get_port(struct sock *sk, unsigned short ident)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 static int ping_v4_get_port(struct sock *sk, unsigned short ident)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 {
 	struct hlist_nulls_node *node;
 	struct hlist_nulls_head *hlist;
@@ -130,12 +127,12 @@ next_port:
 		ping_portaddr_for_each_entry(sk2, node, hlist) {
 			isk2 = inet_sk(sk2);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 			/* BUG? Why is this reuse and not reuseaddr? ping.c
 			 * doesn't turn off SO_REUSEADDR, and it doesn't expect
 			 * that other ping processes can steal its packets.
 			 */
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 			if ((isk2->inet_num == ident) &&
 			    (sk2 != sk) &&
 			    (!sk2->sk_reuse || !sk->sk_reuse))
@@ -158,31 +155,31 @@ fail:
 	write_unlock_bh(&ping_table.lock);
 	return 1;
 }
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 EXPORT_SYMBOL_GPL(ping_get_port);
 
 void ping_hash(struct sock *sk)
 {
 	pr_debug("ping_hash(sk->port=%u)\n", inet_sk(sk)->inet_num);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 static void ping_v4_hash(struct sock *sk)
 {
 	pr_debug("ping_v4_hash(sk->port=%u)\n", inet_sk(sk)->inet_num);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	BUG(); /* "Please do not press this button again." */
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 void ping_unhash(struct sock *sk)
 {
 	struct inet_sock *isk = inet_sk(sk);
 	pr_debug("ping_unhash(isk=%p,isk->num=%u)\n", isk, isk->inet_num);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 static void ping_v4_unhash(struct sock *sk)
 {
 	struct inet_sock *isk = inet_sk(sk);
 	pr_debug("ping_v4_unhash(isk=%p,isk->num=%u)\n", isk, isk->inet_num);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	if (sk_hashed(sk)) {
 		write_lock_bh(&ping_table.lock);
 		hlist_nulls_del(&sk->sk_nulls_node);
@@ -194,20 +191,20 @@ static void ping_v4_unhash(struct sock *sk)
 		write_unlock_bh(&ping_table.lock);
 	}
 }
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 EXPORT_SYMBOL_GPL(ping_unhash);
 
 static struct sock *ping_lookup(struct net *net, struct sk_buff *skb, u16 ident)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 static struct sock *ping_v4_lookup(struct net *net, __be32 saddr, __be32 daddr,
 				   u16 ident, int dif)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 {
 	struct hlist_nulls_head *hslot = ping_hashslot(&ping_table, net, ident);
 	struct sock *sk = NULL;
 	struct inet_sock *isk;
 	struct hlist_nulls_node *hnode;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	int dif = skb->dev->ifindex;
 
 	if (skb->protocol == htons(ETH_P_IP)) {
@@ -219,29 +216,29 @@ static struct sock *ping_v4_lookup(struct net *net, __be32 saddr, __be32 daddr,
 			 (int)ident, &ipv6_hdr(skb)->daddr, dif);
 #endif
 	}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 
 	pr_debug("try to find: num = %d, daddr = %pI4, dif = %d\n",
 		 (int)ident, &daddr, dif);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	read_lock_bh(&ping_table.lock);
 
 	ping_portaddr_for_each_entry(sk, hnode, hslot) {
 		isk = inet_sk(sk);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 		// do nothing
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 		pr_debug("found: %p: num = %d, daddr = %pI4, dif = %d\n", sk,
 			 (int)isk->inet_num, &isk->inet_rcv_saddr,
 			 sk->sk_bound_dev_if);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 		pr_debug("iterate\n");
 		if (isk->inet_num != ident)
 			continue;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 
 		if (skb->protocol == htons(ETH_P_IP) &&
 		    sk->sk_family == AF_INET) {
@@ -268,10 +265,10 @@ static struct sock *ping_v4_lookup(struct net *net, __be32 saddr, __be32 daddr,
 				continue;
 #endif
 		}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 		if (isk->inet_rcv_saddr && isk->inet_rcv_saddr != daddr)
 			continue;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		if (sk->sk_bound_dev_if && sk->sk_bound_dev_if != dif)
 			continue;
 
@@ -300,11 +297,11 @@ static void inet_get_ping_group_range_net(struct net *net, kgid_t *low,
 	} while (read_seqretry(&sysctl_local_ports.lock, seq));
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 int ping_init_sock(struct sock *sk)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 static int ping_init_sock(struct sock *sk)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 {
 	struct net *net = sock_net(sk);
 	kgid_t group = current_egid();
@@ -336,13 +333,13 @@ out_release_group:
 	put_group_info(group_info);
 	return ret;
 }
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 EXPORT_SYMBOL_GPL(ping_init_sock);
 
 void ping_close(struct sock *sk, long timeout)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 static void ping_close(struct sock *sk, long timeout)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 {
 	pr_debug("ping_close(sk=%p,sk->num=%u)\n",
 		 inet_sk(sk), inet_sk(sk)->inet_num);
@@ -350,7 +347,7 @@ static void ping_close(struct sock *sk, long timeout)
 
 	sk_common_release(sk);
 }
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 EXPORT_SYMBOL_GPL(ping_close);
 
 /* Checks the bind address and possibly modifies sk->sk_bound_dev_if. */
@@ -452,20 +449,20 @@ void ping_clear_saddr(struct sock *sk, int dif)
 #endif
 	}
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 /*
  * We need our own bind because there are no privileged id's == local ports.
  * Moreover, we don't allow binding to multi- and broadcast addresses.
  */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 int ping_bind(struct sock *sk, struct sockaddr *uaddr, int addr_len)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 static int ping_bind(struct sock *sk, struct sockaddr *uaddr, int addr_len)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	struct inet_sock *isk = inet_sk(sk);
 	unsigned short snum;
 	int err;
@@ -474,7 +471,7 @@ static int ping_bind(struct sock *sk, struct sockaddr *uaddr, int addr_len)
 	err = ping_check_bind_addr(sk, isk, uaddr, addr_len);
 	if (err)
 		return err;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	struct sockaddr_in *addr = (struct sockaddr_in *)uaddr;
 	struct inet_sock *isk = inet_sk(sk);
 	unsigned short snum;
@@ -497,7 +494,7 @@ static int ping_bind(struct sock *sk, struct sockaddr *uaddr, int addr_len)
 	    chk_addr_ret == RTN_MULTICAST ||
 	    chk_addr_ret == RTN_BROADCAST)
 		return -EADDRNOTAVAIL;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	lock_sock(sk);
 
@@ -506,21 +503,21 @@ static int ping_bind(struct sock *sk, struct sockaddr *uaddr, int addr_len)
 		goto out;
 
 	err = -EADDRINUSE;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	ping_set_saddr(sk, uaddr);
 	snum = ntohs(((struct sockaddr_in *)uaddr)->sin_port);
 	if (ping_get_port(sk, snum) != 0) {
 		ping_clear_saddr(sk, dif);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	isk->inet_rcv_saddr = isk->inet_saddr = addr->sin_addr.s_addr;
 	snum = ntohs(addr->sin_port);
 	if (ping_v4_get_port(sk, snum) != 0) {
 		isk->inet_saddr = isk->inet_rcv_saddr = 0;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		goto out;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	pr_debug("after bind(): num = %d, dif = %d\n",
 		 (int)isk->inet_num,
 		 (int)sk->sk_bound_dev_if);
@@ -530,7 +527,7 @@ static int ping_bind(struct sock *sk, struct sockaddr *uaddr, int addr_len)
 	    (sk->sk_family == AF_INET6 &&
 	     !ipv6_addr_any(&inet6_sk(sk)->rcv_saddr)))
 		sk->sk_userlocks |= SOCK_BINDADDR_LOCK;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	pr_debug("after bind(): num = %d, daddr = %pI4, dif = %d\n",
 		 (int)isk->inet_num,
 		 &isk->inet_rcv_saddr,
@@ -539,19 +536,19 @@ static int ping_bind(struct sock *sk, struct sockaddr *uaddr, int addr_len)
 	err = 0;
 	if (isk->inet_rcv_saddr)
 		sk->sk_userlocks |= SOCK_BINDADDR_LOCK;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	if (snum)
 		sk->sk_userlocks |= SOCK_BINDPORT_LOCK;
 	isk->inet_sport = htons(isk->inet_num);
 	isk->inet_daddr = 0;
 	isk->inet_dport = 0;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #if IS_ENABLED(CONFIG_IPV6)
 	if (sk->sk_family == AF_INET6)
 		memset(&inet6_sk(sk)->daddr, 0, sizeof(inet6_sk(sk)->daddr));
 #endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	sk_dst_reset(sk);
 out:
@@ -559,35 +556,35 @@ out:
 	pr_debug("ping_v4_bind -> %d\n", err);
 	return err;
 }
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 EXPORT_SYMBOL_GPL(ping_bind);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 /*
  * Is this a supported type of ICMP message?
  */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 static inline int ping_supported(int family, int type, int code)
 {
 	return (family == AF_INET && type == ICMP_ECHO && code == 0) ||
 	       (family == AF_INET6 && type == ICMPV6_ECHO_REQUEST && code == 0);
 }
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 static inline int ping_supported(int type, int code)
 {
 	if (type == ICMP_ECHO && code == 0)
 		return 1;
 	return 0;
 }
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 /*
  * This routine is called by the ICMP module when it gets some
  * sort of error condition.
  */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 void ping_err(struct sk_buff *skb, int offset, u32 info)
 {
 	int family;
@@ -595,7 +592,7 @@ void ping_err(struct sk_buff *skb, int offset, u32 info)
 	struct inet_sock *inet_sock;
 	int type;
 	int code;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 static int ping_queue_rcv_skb(struct sock *sk, struct sk_buff *skb);
 
 void ping_err(struct sk_buff *skb, u32 info)
@@ -605,13 +602,13 @@ void ping_err(struct sk_buff *skb, u32 info)
 	struct inet_sock *inet_sock;
 	int type = icmp_hdr(skb)->type;
 	int code = icmp_hdr(skb)->code;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	struct net *net = dev_net(skb->dev);
 	struct sock *sk;
 	int harderr;
 	int err;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	if (skb->protocol == htons(ETH_P_IP)) {
 		family = AF_INET;
 		type = icmp_hdr(skb)->type;
@@ -625,11 +622,11 @@ void ping_err(struct sk_buff *skb, u32 info)
 	} else {
 		BUG();
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	/* We assume the packet has already been checked by icmp_unreach */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	if (!ping_supported(family, icmph->type, icmph->code))
 		return;
 
@@ -638,7 +635,7 @@ void ping_err(struct sk_buff *skb, u32 info)
 		 ntohs(icmph->un.echo.sequence));
 
 	sk = ping_lookup(net, skb, ntohs(icmph->un.echo.id));
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	if (!ping_supported(icmph->type, icmph->code))
 		return;
 
@@ -647,7 +644,7 @@ void ping_err(struct sk_buff *skb, u32 info)
 
 	sk = ping_v4_lookup(net, iph->daddr, iph->saddr,
 			    ntohs(icmph->un.echo.id), skb->dev->ifindex);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	if (sk == NULL) {
 		pr_debug("no socket, dropping\n");
 		return;	/* No socket for error */
@@ -658,7 +655,7 @@ void ping_err(struct sk_buff *skb, u32 info)
 	harderr = 0;
 	inet_sock = inet_sk(sk);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	if (skb->protocol == htons(ETH_P_IP)) {
 		switch (type) {
 		default:
@@ -701,7 +698,7 @@ void ping_err(struct sk_buff *skb, u32 info)
 	} else if (skb->protocol == htons(ETH_P_IPV6)) {
 		harderr = pingv6_ops.icmpv6_err_convert(type, code, &err);
 #endif
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	switch (type) {
 	default:
 	case ICMP_TIME_EXCEEDED:
@@ -737,23 +734,23 @@ void ping_err(struct sk_buff *skb, u32 info)
 		ipv4_sk_redirect(skb, sk);
 		err = EREMOTEIO;
 		break;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	}
 
 	/*
 	 *      RFC1122: OK.  Passes ICMP errors back to application, as per
 	 *	4.1.3.3.
 	 */
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	if ((family == AF_INET && !inet_sock->recverr) ||
 	    (family == AF_INET6 && !inet6_sk(sk)->recverr)) {
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	if (!inet_sock->recverr) {
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 		if (!harderr || sk->sk_state != TCP_ESTABLISHED)
 			goto out;
 	} else {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 		if (family == AF_INET) {
 			ip_icmp_error(sk, skb, err, 0 /* no remote port */,
 				      info, (u8 *)icmph);
@@ -763,24 +760,24 @@ void ping_err(struct sk_buff *skb, u32 info)
 						   info, (u8 *)icmph);
 #endif
 		}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 		ip_icmp_error(sk, skb, err, 0 /* no remote port */,
 			 info, (u8 *)icmph);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	}
 	sk->sk_err = err;
 	sk->sk_error_report(sk);
 out:
 	sock_put(sk);
 }
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 EXPORT_SYMBOL_GPL(ping_err);
 
 /*
  *	Copy and checksum an ICMP Echo packet from user space into a buffer
  *	starting from the payload.
  */
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 /*
  *	Copy and checksum an ICMP Echo packet from user space into a buffer.
  */
@@ -790,15 +787,15 @@ struct pingfakehdr {
 	struct iovec *iov;
 	__wsum wcheck;
 };
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 int ping_getfrag(void *from, char *to,
 		 int offset, int fraglen, int odd, struct sk_buff *skb)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 static int ping_getfrag(void *from, char *to,
 			int offset, int fraglen, int odd, struct sk_buff *skb)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 {
 	struct pingfakehdr *pfh = (struct pingfakehdr *)from;
 
@@ -809,7 +806,7 @@ static int ping_getfrag(void *from, char *to,
 			    pfh->iov, 0, fraglen - sizeof(struct icmphdr),
 			    &pfh->wcheck))
 			return -EFAULT;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	} else if (offset < sizeof(struct icmphdr)) {
 			BUG();
 	} else {
@@ -830,7 +827,7 @@ static int ping_getfrag(void *from, char *to,
 		pfh->wcheck = 0;
 	}
 #endif
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 		return 0;
 	}
 	if (offset < sizeof(struct icmphdr))
@@ -839,18 +836,18 @@ static int ping_getfrag(void *from, char *to,
 			(to, pfh->iov, offset - sizeof(struct icmphdr),
 			 fraglen, &pfh->wcheck))
 		return -EFAULT;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	return 0;
 }
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 EXPORT_SYMBOL_GPL(ping_getfrag);
 
 static int ping_v4_push_pending_frames(struct sock *sk, struct pingfakehdr *pfh,
 				       struct flowi4 *fl4)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 static int ping_push_pending_frames(struct sock *sk, struct pingfakehdr *pfh,
 				    struct flowi4 *fl4)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 {
 	struct sk_buff *skb = skb_peek(&sk->sk_write_queue);
 
@@ -862,7 +859,7 @@ static int ping_push_pending_frames(struct sock *sk, struct pingfakehdr *pfh,
 	return ip_push_pending_frames(sk, fl4);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 int ping_common_sendmsg(int family, struct msghdr *msg, size_t len,
 			void *user_icmph, size_t icmph_len) {
 	u8 type, code;
@@ -906,10 +903,10 @@ EXPORT_SYMBOL_GPL(ping_common_sendmsg);
 
 int ping_v4_sendmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 		    size_t len)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 static int ping_sendmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 			size_t len)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 {
 	struct net *net = sock_net(sk);
 	struct flowi4 fl4;
@@ -924,14 +921,14 @@ static int ping_sendmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 	u8  tos;
 	int err;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	pr_debug("ping_v4_sendmsg(sk=%p,sk->num=%u)\n", inet, inet->inet_num);
 
 	err = ping_common_sendmsg(AF_INET, msg, len, &user_icmph,
 				  sizeof(user_icmph));
 	if (err)
 		return err;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	pr_debug("ping_sendmsg(sk=%p,sk->num=%u)\n", inet, inet->inet_num);
 
 	if (len > 0xFFFF)
@@ -955,7 +952,7 @@ static int ping_sendmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 		return -EFAULT;
 	if (!ping_supported(user_icmph.type, user_icmph.code))
 		return -EINVAL;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	/*
 	 *	Get and verify the address.
@@ -1028,12 +1025,12 @@ static int ping_sendmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 
 	flowi4_init_output(&fl4, ipc.oif, sk->sk_mark, tos,
 			   RT_SCOPE_UNIVERSE, sk->sk_protocol,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 			   inet_sk_flowi_flags(sk), faddr, saddr, 0, 0,
 			   sock_i_uid(sk));
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 			   inet_sk_flowi_flags(sk), faddr, saddr, 0, 0);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	security_sk_classify_flow(sk, flowi4_to_flowi(&fl4));
 	rt = ip_route_output_flow(net, &fl4, sk);
@@ -1066,20 +1063,20 @@ back_from_confirm:
 	pfh.icmph.un.echo.sequence = user_icmph.un.echo.sequence;
 	pfh.iov = msg->msg_iov;
 	pfh.wcheck = 0;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	pfh.family = AF_INET;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	err = ip_append_data(sk, &fl4, ping_getfrag, &pfh, len,
 			0, &ipc, &rt, msg->msg_flags);
 	if (err)
 		ip_flush_pending_frames(sk);
 	else
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 		err = ping_v4_push_pending_frames(sk, &pfh, &fl4);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 		err = ping_push_pending_frames(sk, &pfh, &fl4);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	release_sock(sk);
 
 out:
@@ -1100,20 +1097,20 @@ do_confirm:
 	goto out;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 int ping_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 		 size_t len, int noblock, int flags, int *addr_len)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 static int ping_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 			size_t len, int noblock, int flags, int *addr_len)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 {
 	struct inet_sock *isk = inet_sk(sk);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	int family = sk->sk_family;
 	struct sockaddr_in *sin;
 	struct sockaddr_in6 *sin6;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	struct sk_buff *skb;
 	int copied, err;
 
@@ -1123,7 +1120,7 @@ static int ping_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 	if (flags & MSG_OOB)
 		goto out;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	if (addr_len) {
 		if (family == AF_INET)
 			*addr_len = sizeof(*sin);
@@ -1133,25 +1130,25 @@ static int ping_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 
 	if (flags & MSG_ERRQUEUE) {
 		if (family == AF_INET) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536)
 			return ip_recv_error(sk, msg, len, addr_len);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_HI3536 */
 			return ip_recv_error(sk, msg, len);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_HI3536 */
 #if IS_ENABLED(CONFIG_IPV6)
 		} else if (family == AF_INET6) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536)
 			return pingv6_ops.ipv6_recv_error(sk, msg, len, addr_len);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_HI3536 */
 			return pingv6_ops.ipv6_recv_error(sk, msg, len);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_HI3536 */
 #endif
 		}
 	}
 #else
 	if (flags & MSG_ERRQUEUE)
 		return ip_recv_error(sk, msg, len, addr_len);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	skb = skb_recv_datagram(sk, flags, noblock, &err);
 	if (!skb)
@@ -1170,7 +1167,7 @@ static int ping_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 
 	sock_recv_timestamp(msg, sk, skb);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	/* Copy the address and add cmsg data. */
 	if (family == AF_INET) {
 		sin = (struct sockaddr_in *) msg->msg_name;
@@ -1208,7 +1205,7 @@ static int ping_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 	} else {
 		BUG();
 	}
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	/* Copy the address. */
 	if (msg->msg_name) {
 		struct sockaddr_in *sin = (struct sockaddr_in *)msg->msg_name;
@@ -1221,7 +1218,7 @@ static int ping_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 	}
 	if (isk->cmsg_flags)
 		ip_cmsg_recv(msg, skb);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	err = copied;
 
 done:
@@ -1230,13 +1227,13 @@ out:
 	pr_debug("ping_recvmsg -> %d\n", err);
 	return err;
 }
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 EXPORT_SYMBOL_GPL(ping_recvmsg);
 
 int ping_queue_rcv_skb(struct sock *sk, struct sk_buff *skb)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 static int ping_queue_rcv_skb(struct sock *sk, struct sk_buff *skb)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 {
 	pr_debug("ping_queue_rcv_skb(sk=%p,sk->num=%d,skb=%p)\n",
 		 inet_sk(sk), inet_sk(sk)->inet_num, skb);
@@ -1247,9 +1244,9 @@ static int ping_queue_rcv_skb(struct sock *sk, struct sk_buff *skb)
 	}
 	return 0;
 }
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 EXPORT_SYMBOL_GPL(ping_queue_rcv_skb);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 /*
  *	All we need to do is get the socket.
@@ -1259,14 +1256,14 @@ void ping_rcv(struct sk_buff *skb)
 {
 	struct sock *sk;
 	struct net *net = dev_net(skb->dev);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	struct icmphdr *icmph = icmp_hdr(skb);
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	struct iphdr *iph = ip_hdr(skb);
 	struct icmphdr *icmph = icmp_hdr(skb);
 	__be32 saddr = iph->saddr;
 	__be32 daddr = iph->daddr;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	/* We assume the packet has already been checked by icmp_rcv */
 
@@ -1276,12 +1273,12 @@ void ping_rcv(struct sk_buff *skb)
 	/* Push ICMP header back */
 	skb_push(skb, skb->data - (u8 *)icmph);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	sk = ping_lookup(net, skb, ntohs(icmph->un.echo.id));
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	sk = ping_v4_lookup(net, saddr, daddr, ntohs(icmph->un.echo.id),
 			    skb->dev->ifindex);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	if (sk != NULL) {
 		struct sk_buff *skb2 = skb_clone(skb, GFP_ATOMIC);
 
@@ -1295,9 +1292,9 @@ void ping_rcv(struct sk_buff *skb)
 
 	/* We're called from icmp_rcv(). kfree_skb() is done there. */
 }
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 EXPORT_SYMBOL_GPL(ping_rcv);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 struct proto ping_prot = {
 	.name =		"PING",
@@ -1308,24 +1305,24 @@ struct proto ping_prot = {
 	.disconnect =	udp_disconnect,
 	.setsockopt =	ip_setsockopt,
 	.getsockopt =	ip_getsockopt,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	.sendmsg =	ping_v4_sendmsg,
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	.sendmsg =	ping_sendmsg,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	.recvmsg =	ping_recvmsg,
 	.bind =		ping_bind,
 	.backlog_rcv =	ping_queue_rcv_skb,
 	.release_cb =	ip4_datagram_release_cb,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	.hash =		ping_hash,
 	.unhash =	ping_unhash,
 	.get_port =	ping_get_port,
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 	.hash =		ping_v4_hash,
 	.unhash =	ping_v4_unhash,
 	.get_port =	ping_v4_get_port,
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 	.obj_size =	sizeof(struct inet_sock),
 };
 EXPORT_SYMBOL(ping_prot);

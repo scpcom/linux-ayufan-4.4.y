@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Authenc: Simple AEAD wrapper for IPsec
  *
@@ -191,11 +188,11 @@ static void authenc_verify_ahash_update_done(struct crypto_async_request *areq,
 	scatterwalk_map_and_copy(ihash, areq_ctx->sg, areq_ctx->cryptlen,
 				 authsize, 0);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
 	err = crypto_memneq(ihash, ahreq->result, authsize) ? -EBADMSG : 0;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 	err = memcmp(ihash, ahreq->result, authsize) ? -EBADMSG : 0;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 	if (err)
 		goto out;
 
@@ -234,11 +231,11 @@ static void authenc_verify_ahash_done(struct crypto_async_request *areq,
 	scatterwalk_map_and_copy(ihash, areq_ctx->sg, areq_ctx->cryptlen,
 				 authsize, 0);
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
 	err = crypto_memneq(ihash, ahreq->result, authsize) ? -EBADMSG : 0;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 	err = memcmp(ihash, ahreq->result, authsize) ? -EBADMSG : 0;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 	if (err)
 		goto out;
 
@@ -474,11 +471,11 @@ static int crypto_authenc_verify(struct aead_request *req,
 	ihash = ohash + authsize;
 	scatterwalk_map_and_copy(ihash, areq_ctx->sg, areq_ctx->cryptlen,
 				 authsize, 0);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_BACKPORT_ARM_CRYPTO)
 	return crypto_memneq(ihash, ohash, authsize) ? -EBADMSG : 0;
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 	return memcmp(ihash, ohash, authsize) ? -EBADMSG : 0;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_BACKPORT_ARM_CRYPTO */
 }
 
 static int crypto_authenc_iverify(struct aead_request *req, u8 *iv,

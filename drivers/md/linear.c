@@ -187,7 +187,9 @@ static struct linear_conf *linear_conf(struct mddev *mddev, int raid_disks)
 		 
 		mddev->degraded = mddev->raid_disks - cnt;
 #ifdef MY_ABC_HERE
-		mddev->nodev_and_crashed = 1;
+		if (MD_CRASHED_ASSEMBLE != mddev->nodev_and_crashed) {
+			mddev->nodev_and_crashed = MD_CRASHED;
+		}
 #endif  
 		printk(KERN_ERR "md/linear:%s: not enough drives present.\n",
 		       mdname(mddev));
@@ -501,12 +503,18 @@ END:
 static void
 SynoLinearError(struct mddev *mddev, struct md_rdev *rdev)
 {
+	char b[BDEVNAME_SIZE];
+	printk(KERN_ALERT
+		"md/raid:%s: Disk failure on %s, disabling device.\n",
+		mdname(mddev), bdevname(rdev->bdev, b));
 	if (test_and_clear_bit(In_sync, &rdev->flags)) {
 		if (mddev->degraded < mddev->raid_disks) {
 			SYNO_UPDATE_SB_WORK *update_sb = NULL;
 			mddev->degraded++;
 #ifdef MY_ABC_HERE
-			mddev->nodev_and_crashed = 1;
+			if (MD_CRASHED_ASSEMBLE != mddev->nodev_and_crashed) {
+				mddev->nodev_and_crashed = MD_CRASHED;
+			}
 #endif  
 			set_bit(Faulty, &rdev->flags);
 #ifdef MY_ABC_HERE
@@ -531,6 +539,10 @@ END:
 static void
 SynoLinearErrorInternal(struct mddev *mddev, struct md_rdev *rdev)
 {
+	char b[BDEVNAME_SIZE];
+	printk(KERN_ALERT
+		"md/raid:%s: Disk failure on %s, disabling device.\n",
+		mdname(mddev), bdevname(rdev->bdev, b));
 #ifdef MY_ABC_HERE
 	if (!test_bit(DiskError, &rdev->flags)) {
 		SYNO_UPDATE_SB_WORK *update_sb = NULL;

@@ -323,6 +323,9 @@ int btrfs_dev_replace_start(struct btrfs_root *root,
 		goto leave_no_lock;
 	}
 
+#ifdef MY_DEF_HERE
+	fs_info->dev_replace_may_start = 1;
+#endif  
 	btrfs_dev_replace_lock(dev_replace);
 	switch (dev_replace->replace_state) {
 	case BTRFS_IOCTL_DEV_REPLACE_STATE_NEVER_STARTED:

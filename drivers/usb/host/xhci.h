@@ -1297,9 +1297,9 @@ static inline void xhci_unregister_pci(void) {}
 
 #if defined(CONFIG_USB_XHCI_PLATFORM) \
 	|| defined(CONFIG_USB_XHCI_PLATFORM_MODULE) \
-	|| (defined(MY_DEF_HERE) && \
-			(defined(MY_DEF_HERE) && defined(CONFIG_HIUSB_XHCI)) || \
-			(!defined(MY_DEF_HERE) && defined(CONFIG_HIUSB_HOST)) \
+	|| (defined(CONFIG_SYNO_LSP_HI3536) && \
+			(defined(CONFIG_SYNO_LSP_HI3536_V2060) && defined(CONFIG_HIUSB_XHCI)) || \
+			(!defined(CONFIG_SYNO_LSP_HI3536_V2060) && defined(CONFIG_HIUSB_HOST)) \
 		)
 int xhci_register_plat(void);
 void xhci_unregister_plat(void);

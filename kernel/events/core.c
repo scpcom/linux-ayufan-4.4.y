@@ -239,16 +239,29 @@ static void perf_duration_warn(struct irq_work *w)
 	local_samples_len = __get_cpu_var(running_sample_length);
 	avg_local_sample_len = local_samples_len/NR_ACCUMULATED_SAMPLES;
 
+#ifdef MY_ABC_HERE
+	printk_ratelimited(KERN_INFO
+			"perf interrupt took too long (%lld > %lld), lowering "
+			"kernel.perf_event_max_sample_rate to %d\n",
+			avg_local_sample_len,
+#if defined(CONFIG_SYNO_HI3536)
+			(u64) atomic_read(&perf_sample_allowed_ns),
+#else /* CONFIG_SYNO_HI3536 */
+			atomic_read(&perf_sample_allowed_ns),
+#endif /* CONFIG_SYNO_HI3536 */
+			sysctl_perf_event_sample_rate);
+#else /* MY_ABC_HERE */
 	printk_ratelimited(KERN_WARNING
 			"perf interrupt took too long (%lld > %lld), lowering "
 			"kernel.perf_event_max_sample_rate to %d\n",
 			avg_local_sample_len,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536)
 			(u64) atomic_read(&perf_sample_allowed_ns),
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_HI3536 */
 			atomic_read(&perf_sample_allowed_ns),
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_HI3536 */
 			sysctl_perf_event_sample_rate);
+#endif /* MY_ABC_HERE */
 }
 
 static DEFINE_IRQ_WORK(perf_duration_work, perf_duration_warn);

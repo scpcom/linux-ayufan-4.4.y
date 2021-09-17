@@ -2095,7 +2095,7 @@ int ext4_mb_release(struct super_block *sb)
 }
 
 static inline int ext4_issue_discard(struct super_block *sb,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 		ext4_group_t block_group, ext4_grpblk_t cluster, int count,
 		unsigned long flags)
 #else  
@@ -2109,7 +2109,7 @@ static inline int ext4_issue_discard(struct super_block *sb,
 	count = EXT4_C2B(EXT4_SB(sb), count);
 	trace_ext4_discard_blocks(sb,
 			(unsigned long long) discard_block, count);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	return sb_issue_discard(sb, discard_block, count, GFP_NOFS, flags);
 #else  
 	return sb_issue_discard(sb, discard_block, count, GFP_NOFS, 0);
@@ -2131,7 +2131,7 @@ static void ext4_free_data_callback(struct super_block *sb,
 	if (test_opt(sb, DISCARD)) {
 		err = ext4_issue_discard(sb, entry->efd_group,
 					 entry->efd_start_cluster,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 					 entry->efd_count, 0);
 #else  
 					 entry->efd_count);
@@ -3497,9 +3497,7 @@ ext4_fsblk_t ext4_mb_new_blocks(handle_t *handle,
 	if (IS_NOQUOTA(ar->inode))
 		ar->flags |= EXT4_MB_USE_ROOT_BLOCKS;
 
-	if (ext4_test_inode_state(ar->inode, EXT4_STATE_DELALLOC_RESERVED))
-		ar->flags |= EXT4_MB_DELALLOC_RESERVED;
-	else {
+	if ((ar->flags & EXT4_MB_DELALLOC_RESERVED) == 0) {
 		 
 		while (ar->len &&
 			ext4_claim_free_clusters(sbi, ar->len, ar->flags)) {
@@ -3589,8 +3587,7 @@ out:
 	if (inquota && ar->len < inquota)
 		dquot_free_block(ar->inode, EXT4_C2B(sbi, inquota - ar->len));
 	if (!ar->len) {
-		if (!ext4_test_inode_state(ar->inode,
-					   EXT4_STATE_DELALLOC_RESERVED))
+		if ((ar->flags & EXT4_MB_DELALLOC_RESERVED) == 0)
 			 
 			percpu_counter_sub(&sbi->s_dirtyclusters_counter,
 						reserv_clstrs);
@@ -3837,7 +3834,7 @@ do_more:
 	} else {
 		 
 		if (test_opt(sb, DISCARD)) {
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 			err = ext4_issue_discard(sb, block_group, bit, count,
 						 0);
 #else  
@@ -4008,7 +4005,7 @@ error_return:
 }
 
 static int ext4_trim_extent(struct super_block *sb, int start, int count,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 			    ext4_group_t group, struct ext4_buddy *e4b,
 			    unsigned long blkdev_flags)
 #else  
@@ -4028,7 +4025,7 @@ static int ext4_trim_extent(struct super_block *sb, int start, int count,
 
 	mb_mark_used(e4b, &ex);
 	ext4_unlock_group(sb, group);
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	ret = ext4_issue_discard(sb, group, start, count, blkdev_flags);
 #else  
 	ret = ext4_issue_discard(sb, group, start, count);
@@ -4041,7 +4038,7 @@ static int ext4_trim_extent(struct super_block *sb, int start, int count,
 static ext4_grpblk_t
 ext4_trim_all_free(struct super_block *sb, ext4_group_t group,
 		   ext4_grpblk_t start, ext4_grpblk_t max,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 		   ext4_grpblk_t minblocks, unsigned long blkdev_flags)
 #else  
 		   ext4_grpblk_t minblocks)
@@ -4078,7 +4075,7 @@ ext4_trim_all_free(struct super_block *sb, ext4_group_t group,
 
 		if ((next - start) >= minblocks) {
 			ret = ext4_trim_extent(sb, start,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 					       next - start, group, &e4b,
 					       blkdev_flags);
 #else  
@@ -4121,7 +4118,7 @@ out:
 	return ret;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 int ext4_trim_fs(struct super_block *sb, struct fstrim_range *range,
 			unsigned long blkdev_flags)
 #else  
@@ -4174,7 +4171,7 @@ int ext4_trim_fs(struct super_block *sb, struct fstrim_range *range)
 
 		if (grp->bb_free >= minlen) {
 			cnt = ext4_trim_all_free(sb, group, first_cluster,
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 						end, minlen, blkdev_flags);
 #else  
 						end, minlen);

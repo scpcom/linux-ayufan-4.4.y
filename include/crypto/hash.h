@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Hash: Hash algorithms under the crypto API
  * 
@@ -97,11 +94,11 @@ struct crypto_ahash {
 		      unsigned int keylen);
 
 	unsigned int reqsize;
-#if !defined(MY_DEF_HERE)
+#if !defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	bool has_setkey;
 #endif
 	struct crypto_tfm base;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
 	bool has_setkey;
 #endif
 };

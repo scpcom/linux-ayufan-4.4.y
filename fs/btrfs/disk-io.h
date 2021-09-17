@@ -69,6 +69,9 @@ btrfs_read_fs_root_no_name(struct btrfs_fs_info *fs_info,
 int btrfs_cleanup_fs_roots(struct btrfs_fs_info *fs_info);
 void btrfs_btree_balance_dirty(struct btrfs_root *root);
 void btrfs_btree_balance_dirty_nodelay(struct btrfs_root *root);
+#ifdef MY_DEF_HERE
+void btrfs_async_btree_balance_dirty(struct btrfs_fs_info *fs_info);
+#endif  
 void btrfs_drop_and_free_fs_root(struct btrfs_fs_info *fs_info,
 				 struct btrfs_root *root);
 void btrfs_free_fs_root(struct btrfs_root *root);
@@ -84,10 +87,30 @@ static inline struct btrfs_root *btrfs_grab_fs_root(struct btrfs_root *root)
 	return NULL;
 }
 
+#ifdef MY_DEF_HERE
+static inline void btrfs_free_root_eb_monitor(struct btrfs_root *root)
+{
+	if (root) {
+		percpu_counter_destroy(&root->eb_hit);
+		percpu_counter_destroy(&root->eb_miss);
+	}
+}
+
+void debugfs_remove_root_hook(struct btrfs_root *root);
+#endif  
+
 static inline void btrfs_put_fs_root(struct btrfs_root *root)
 {
+#ifdef MY_DEF_HERE
+	if (atomic_dec_and_test(&root->refs)) {
+		debugfs_remove_root_hook(root);
+		btrfs_free_root_eb_monitor(root);
+		kfree(root);
+	}
+#else
 	if (atomic_dec_and_test(&root->refs))
 		kfree(root);
+#endif  
 }
 
 void btrfs_mark_buffer_dirty(struct extent_buffer *buf);

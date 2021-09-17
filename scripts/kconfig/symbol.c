@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * Copyright (C) 2002 Roman Zippel <zippel@linux-m68k.org>
  * Released under the terms of the GNU GPL v2.0.
@@ -304,14 +301,14 @@ void sym_calc_value(struct symbol *sym)
 	if (sym->flags & SYMBOL_VALID)
 		return;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	if (sym_is_choice_value(sym) &&
 	    sym->flags & SYMBOL_NEED_SET_CHOICE_VALUES) {
 		sym->flags &= ~SYMBOL_NEED_SET_CHOICE_VALUES;
 		prop = sym_get_choice_prop(sym);
 		sym_calc_value(prop_get_symbol(prop));
 	}
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 
 	sym->flags |= SYMBOL_VALID;
 
@@ -439,10 +436,10 @@ void sym_calc_value(struct symbol *sym)
 	if (sym->flags & SYMBOL_AUTO)
 		sym->flags &= ~SYMBOL_WRITE;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 	if (sym->flags & SYMBOL_NEED_SET_CHOICE_VALUES)
 		set_all_choice_values(sym);
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
 }
 
 void sym_clear_all_valid(void)

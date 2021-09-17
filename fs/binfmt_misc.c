@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  *  binfmt_misc.c
  *
@@ -405,10 +402,10 @@ static int parse_command(const char __user *buffer, size_t count)
 		return -EINVAL;
 	if (copy_from_user(s, buffer, count))
 		return -EFAULT;
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_HI3536)
 	if (count == 0)
 		return 0;
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_HI3536 */
 	if (s[count-1] == '\n')
 		count--;
 	if (count == 1 && s[0] == '0')

@@ -1027,10 +1027,6 @@ static ssize_t do_sendfile(int out_fd, int in_fd, loff_t *ppos,
 	if (!(out.file->f_mode & FMODE_WRITE))
 		goto fput_out;
 	retval = -EINVAL;
-#if defined(MY_ABC_HERE)
-	if (!out.file->f_op || !out.file->f_op->sendpage)
-		goto fput_out;
-#endif  
 	in_inode = file_inode(in.file);
 	out_inode = file_inode(out.file);
 	out_pos = out.file->f_pos;
@@ -1243,6 +1239,7 @@ SYSCALL_DEFINE5(recvfile, int, fd, int, s, loff_t *, offset, size_t, nbytes, siz
 	static loff_t   next_offset = 0;
 	unsigned short  blAggregate = 0;
 	unsigned short  blBufferWrite = 0;
+	bool            blNeedFileEndWrite = false;
 
 	if (!offset) {
 		ret = -EINVAL;
@@ -1279,14 +1276,15 @@ SYSCALL_DEFINE5(recvfile, int, fd, int, s, loff_t *, offset, size_t, nbytes, siz
 
 	inode = file->f_dentry->d_inode->i_mapping->host;
 
+	file_start_write(file);
+	blNeedFileEndWrite = true;
+
 	mutex_lock(&inode->i_mutex);
 	ret = generic_write_checks(file, &pos, &nbytes, S_ISBLK(inode->i_mode));
 	if (ret != 0) {
 		goto out;
 	}
 
-	sb_start_write(inode->i_sb);
-	 
 	current->backing_dev_info = file->f_mapping->backing_dev_info;
 	file_remove_suid(file);
 	file_update_time(file);
@@ -1348,9 +1346,6 @@ SYSCALL_DEFINE5(recvfile, int, fd, int, s, loff_t *, offset, size_t, nbytes, siz
 			} while(nbytes > 0);
 		}
 	}
-	sb_end_write(inode->i_sb);
-	current->backing_dev_info = NULL;
-
 	mutex_unlock(&inode->i_mutex);
 
 	if(ret >= 0) {
@@ -1368,6 +1363,10 @@ SYSCALL_DEFINE5(recvfile, int, fd, int, s, loff_t *, offset, size_t, nbytes, siz
 	}
 
 out:
+	if (blNeedFileEndWrite) {
+		file_end_write(file);
+	}
+	current->backing_dev_info = NULL;
 	if(file)
 		fput(file);
 	if(sock)

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * AArch32 (compat) system call definitions.
  *
@@ -24,7 +21,7 @@
 #define __SYSCALL(x, y)
 #endif
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_LSP_HI3536)
 #define __NR_restart_syscall 0
 __SYSCALL(__NR_restart_syscall, sys_restart_syscall)
 #define __NR_exit 1
@@ -793,7 +790,7 @@ __SYSCALL(381, sys_ni_syscall)
 __SYSCALL(382, sys_ni_syscall)
 #define __NR_seccomp 383
 __SYSCALL(__NR_seccomp, sys_seccomp)
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_HI3536 */
 __SYSCALL(0,   sys_restart_syscall)
 __SYSCALL(1,   sys_exit)
 __SYSCALL(2,   sys_fork)
@@ -1190,4 +1187,4 @@ __SYSCALL(378, sys_ni_syscall)			/* 378 for kcmp */
 #define __ARM_NR_COMPAT_BASE		0x0f0000
 #define __ARM_NR_compat_cacheflush	(__ARM_NR_COMPAT_BASE+2)
 #define __ARM_NR_compat_set_tls		(__ARM_NR_COMPAT_BASE+5)
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_SYNO_LSP_HI3536 */
