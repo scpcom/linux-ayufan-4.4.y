@@ -1051,6 +1051,26 @@ static int ubifs_set_page_dirty(struct page *page)
 	return ret;
 }
 
+#ifdef CONFIG_MIGRATION
+static int ubifs_migrate_page(struct address_space *mapping,
+		struct page *newpage, struct page *page, enum migrate_mode mode)
+{
+	int rc;
+
+	rc = migrate_page_move_mapping(mapping, newpage, page, NULL, mode);
+	if (rc != MIGRATEPAGE_SUCCESS)
+		return rc;
+
+	if (PagePrivate(page)) {
+		ClearPagePrivate(page);
+		SetPagePrivate(newpage);
+	}
+
+	migrate_page_copy(newpage, page);
+	return MIGRATEPAGE_SUCCESS;
+}
+#endif
+
 static int ubifs_releasepage(struct page *page, gfp_t unused_gfp_flags)
 {
 #if defined(MY_DEF_HERE)
@@ -1169,6 +1189,9 @@ const struct address_space_operations ubifs_file_address_operations = {
 	.write_end      = ubifs_write_end,
 	.invalidatepage = ubifs_invalidatepage,
 	.set_page_dirty = ubifs_set_page_dirty,
+#ifdef CONFIG_MIGRATION
+	.migratepage	= ubifs_migrate_page,
+#endif
 	.releasepage    = ubifs_releasepage,
 };
 

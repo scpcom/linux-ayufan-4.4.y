@@ -235,11 +235,14 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_S3,	PCI_DEVICE_ID_S3_968,		quirk_s3_64M);
 
 static void quirk_cs5536_vsa(struct pci_dev *dev)
 {
+	static char *name = "CS5536 ISA bridge";
+
 	if (pci_resource_len(dev, 0) != 8) {
-		struct resource *res = &dev->resource[0];
-		res->end = res->start + 8 - 1;
-		dev_info(&dev->dev, "CS5536 ISA bridge bug detected "
-				"(incorrect header); workaround applied.\n");
+		quirk_io(dev, 0,   8, name);	/* SMB */
+		quirk_io(dev, 1, 256, name);	/* GPIO */
+		quirk_io(dev, 2,  64, name);	/* MFGPT */
+		dev_info(&dev->dev, "%s bug detected (incorrect header); workaround applied\n",
+			 name);
 	}
 }
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_AMD, PCI_DEVICE_ID_AMD_CS5536_ISA, quirk_cs5536_vsa);

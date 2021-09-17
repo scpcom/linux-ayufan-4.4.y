@@ -1075,11 +1075,9 @@ handle_cmd:
 				scsi_print_sense("", cmd);
 			scsi_print_command(cmd);
 		}
-		if (blk_end_request_err(req, error))
-			scsi_requeue_command(q, cmd);
-		else
-			scsi_next_command(cmd);
-		break;
+		if (!blk_end_request_err(req, error))
+			goto next_command;
+		/*FALLTHRU*/
 	case ACTION_REPREP:
 		 
 		scsi_release_buffers(cmd);
@@ -1094,6 +1092,11 @@ handle_cmd:
 		__scsi_queue_insert(cmd, SCSI_MLQUEUE_DEVICE_BUSY, 0);
 		break;
 	}
+	return;
+
+next_command:
+	__scsi_release_buffers(cmd, 0);
+	scsi_next_command(cmd);
 }
 
 static int scsi_init_sgtable(struct request *req, struct scsi_data_buffer *sdb,

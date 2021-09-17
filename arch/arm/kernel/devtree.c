@@ -87,6 +87,8 @@ void __init arm_dt_init_cpu_maps(void)
 		return;
 
 	for_each_child_of_node(cpus, cpu) {
+		const __be32 *cell;
+		int prop_bytes;
 		u32 hwid;
 
 		if (of_node_cmp(cpu->type, "cpu"))
