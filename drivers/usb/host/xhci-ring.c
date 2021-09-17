@@ -2147,8 +2147,12 @@ static int handle_tx_event(struct xhci_hcd *xhci,
 						 ep, &status);
 
 cleanup:
-		 
-		if (trb_comp_code == COMP_MISSED_INT || !ep->skip) {
+
+		handling_skipped_tds = ep->skip &&
+			trb_comp_code != COMP_MISSED_INT &&
+			trb_comp_code != COMP_PING_ERR;
+
+		if (!handling_skipped_tds)
 			inc_deq(xhci, xhci->event_ring);
 
 		if (ret) {
@@ -2181,7 +2185,7 @@ cleanup:
 			spin_lock(&xhci->lock);
 		}
 
-	} while (ep->skip && trb_comp_code != COMP_MISSED_INT);
+	} while (handling_skipped_tds);
 
 	return 0;
 }
@@ -2650,6 +2654,7 @@ static int queue_bulk_sg_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
 		trb_buff_len = urb->transfer_buffer_length;
 
 	first_trb = true;
+	last_trb_num = zero_length_needed ? 2 : 1;
 	 
 	do {
 		u32 field = 0;
@@ -2663,10 +2668,9 @@ static int queue_bulk_sg_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
 		} else
 			field |= ep_ring->cycle_state;
 
-		if (num_trbs > 1) {
+		if (num_trbs > last_trb_num) {
 			field |= TRB_CHAIN;
-		} else {
-			 
+		} else if (num_trbs == last_trb_num) {
 			td->last_trb = ep_ring->enqueue;
 			field |= TRB_IOC;
 		} else if (zero_length_needed && num_trbs == 1) {
@@ -2776,7 +2780,7 @@ int xhci_queue_bulk_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
 		num_trbs++;
 		running_total += TRB_MAX_BUFF_SIZE;
 	}
-	 
+
 	ret = prepare_transfer(xhci, xhci->devs[slot_id],
 			ep_index, urb->stream_id,
 			num_trbs, urb, 0, mem_flags);
@@ -2785,7 +2789,6 @@ int xhci_queue_bulk_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
 
 	urb_priv = urb->hcpriv;
 
-	/* Deal with URB_ZERO_PACKET - need one more td/trb */
 	zero_length_needed = urb->transfer_flags & URB_ZERO_PACKET &&
 		urb_priv->length == 2;
 	if (zero_length_needed) {
@@ -2814,7 +2817,8 @@ int xhci_queue_bulk_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
 		trb_buff_len = urb->transfer_buffer_length;
 
 	first_trb = true;
-
+	last_trb_num = zero_length_needed ? 2 : 1;
+	 
 	do {
 		u32 remainder = 0;
 		field = 0;
@@ -2826,10 +2830,9 @@ int xhci_queue_bulk_tx(struct xhci_hcd *xhci, gfp_t mem_flags,
 		} else
 			field |= ep_ring->cycle_state;
 
-		if (num_trbs > 1) {
+		if (num_trbs > last_trb_num) {
 			field |= TRB_CHAIN;
-		} else {
-			 
+		} else if (num_trbs == last_trb_num) {
 			td->last_trb = ep_ring->enqueue;
 			field |= TRB_IOC;
 		} else if (zero_length_needed && num_trbs == 1) {

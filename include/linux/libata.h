@@ -191,6 +191,7 @@ enum {
 	ATA_LFLAG_SW_ACTIVITY	= (1 << 7),  
 	ATA_LFLAG_NO_LPM	= (1 << 8),  
 	ATA_LFLAG_RST_ONCE	= (1 << 9),  
+	ATA_LFLAG_CHANGED	= (1 << 10),  
 
 	ATA_FLAG_SLAVE_POSS	= (1 << 0),  
 					     
@@ -732,6 +733,7 @@ struct ata_link {
 
 	struct ata_device	device[ATA_MAX_DEVICES];
 
+	unsigned long		last_lpm_change;  
 #if defined(MY_ABC_HERE) || \
 	defined(MY_ABC_HERE) || \
 	defined(MY_ABC_HERE) || \

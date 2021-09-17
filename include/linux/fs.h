@@ -624,6 +624,7 @@ static inline int ra_has_index(struct file_ra_state *ra, pgoff_t index)
 struct file {
 	 
 	union {
+		struct list_head	fu_list;
 		struct llist_node	fu_llist;
 		struct rcu_head 	fu_rcuhead;
 	} f_u;
@@ -633,6 +634,9 @@ struct file {
 	const struct file_operations	*f_op;
 
 	spinlock_t		f_lock;
+#ifdef CONFIG_SMP
+	int			f_sb_list_cpu;
+#endif
 	atomic_long_t		f_count;
 	unsigned int 		f_flags;
 	fmode_t			f_mode;

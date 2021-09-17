@@ -498,6 +498,7 @@ struct user_struct {
 	unsigned long mq_bytes;	 
 #endif
 	unsigned long locked_shm;  
+	unsigned long unix_inflight;	 
 
 #ifdef CONFIG_KEYS
 	struct key *uid_keyring;	 

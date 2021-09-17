@@ -202,7 +202,14 @@ radix_tree_iter_init(struct radix_tree_iter *iter, unsigned long start)
 void **radix_tree_next_chunk(struct radix_tree_root *root,
 			     struct radix_tree_iter *iter, unsigned flags);
 
-static __always_inline unsigned
+static inline __must_check
+void **radix_tree_iter_retry(struct radix_tree_iter *iter)
+{
+	iter->next_index = iter->index;
+	return NULL;
+}
+
+static __always_inline long
 radix_tree_chunk_size(struct radix_tree_iter *iter)
 {
 	return iter->next_index - iter->index;

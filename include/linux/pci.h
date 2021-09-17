@@ -271,6 +271,7 @@ struct pci_dev {
 	unsigned int	__aer_firmware_first:1;
 	unsigned int	broken_intx_masking:1;
 	unsigned int	io_window_1k:1;	 
+	unsigned int	non_compliant_bars:1;	 
 	pci_dev_flags_t dev_flags;
 	atomic_t	enable_cnt;	 
 

@@ -83,6 +83,34 @@ out_noerr:
 	goto out;
 }
 
+static struct sk_buff *skb_set_peeked(struct sk_buff *skb)
+{
+	struct sk_buff *nskb;
+
+	if (skb->peeked)
+		return skb;
+
+	if (!skb_shared(skb))
+		goto done;
+
+	nskb = skb_clone(skb, GFP_ATOMIC);
+	if (!nskb)
+		return ERR_PTR(-ENOMEM);
+
+	skb->prev->next = nskb;
+	skb->next->prev = nskb;
+	nskb->prev = skb->prev;
+	nskb->next = skb->next;
+
+	consume_skb(skb);
+	skb = nskb;
+
+done:
+	skb->peeked = 1;
+
+	return skb;
+}
+
 #if defined(MY_ABC_HERE)
  
 int skb_copy_datagram_to_kernel_iovec(const struct sk_buff *skb, int offset,
@@ -153,8 +181,6 @@ struct sk_buff *__skb_recv_datagram(struct sock *sk, unsigned int flags,
 
 	do {
 		 
-		unsigned long cpu_flags;
-		struct sk_buff_head *queue = &sk->sk_receive_queue;
 		int _off = *off;
 
 		last = (struct sk_buff *)queue;

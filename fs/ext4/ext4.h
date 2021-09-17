@@ -719,6 +719,12 @@ do {									       \
 
 #include "extents_status.h"
 
+enum {
+	I_DATA_SEM_NORMAL = 0,
+	I_DATA_SEM_OTHER,
+	I_DATA_SEM_QUOTA,
+};
+
 struct ext4_inode_info {
 	__le32	i_data[15];	 
 	__u32	i_dtime;

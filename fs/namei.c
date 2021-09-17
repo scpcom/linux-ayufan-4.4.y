@@ -540,6 +540,16 @@ void path_put(const struct path *path)
 }
 EXPORT_SYMBOL(path_put);
 
+static bool path_connected(const struct path *path)
+{
+	struct vfsmount *mnt = path->mnt;
+
+	if (mnt->mnt_root == mnt->mnt_sb->s_root)
+		return true;
+
+	return is_subdir(path->dentry, mnt->mnt_root);
+}
+
 static inline void lock_rcu_walk(void)
 {
 	br_read_lock(&vfsmount_lock);

@@ -911,6 +911,16 @@ int pci_setup_device(struct pci_dev *dev)
 	 
 	class = dev->class >> 8;
 
+	if (dev->non_compliant_bars) {
+		pci_read_config_word(dev, PCI_COMMAND, &cmd);
+		if (cmd & (PCI_COMMAND_IO | PCI_COMMAND_MEMORY)) {
+			dev_info(&dev->dev, "device has non-compliant BARs; disabling IO/MEM decoding\n");
+			cmd &= ~PCI_COMMAND_IO;
+			cmd &= ~PCI_COMMAND_MEMORY;
+			pci_write_config_word(dev, PCI_COMMAND, cmd);
+		}
+	}
+
 	switch (dev->hdr_type) {		     
 	case PCI_HEADER_TYPE_NORMAL:		     
 		if (class == PCI_CLASS_BRIDGE_PCI)

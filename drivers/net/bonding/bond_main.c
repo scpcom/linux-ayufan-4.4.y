@@ -697,6 +697,23 @@ static void bond_mc_swap(struct bonding *bond, struct slave *new_active,
 	}
 }
 
+static struct slave *bond_get_old_active(struct bonding *bond,
+					 struct slave *new_active)
+{
+	struct slave *slave;
+	int i;
+
+	bond_for_each_slave(bond, slave, i) {
+		if (slave == new_active)
+			continue;
+
+		if (ether_addr_equal(bond->dev->dev_addr, slave->dev->dev_addr))
+			return slave;
+	}
+
+	return NULL;
+}
+
 static void bond_do_fail_over_mac(struct bonding *bond,
 				  struct slave *new_active,
 				  struct slave *old_active)
