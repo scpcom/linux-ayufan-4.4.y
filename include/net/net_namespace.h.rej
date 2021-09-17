@@ -1,0 +1,39 @@
+--- include/net/net_namespace.h
++++ include/net/net_namespace.h
+@@ -94,6 +94,7 @@ struct net {
+ #if defined(CONFIG_IP_DCCP) || defined(CONFIG_IP_DCCP_MODULE)
+ 	struct netns_dccp	dccp;
+ #endif
++#if !defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+ #ifdef CONFIG_NETFILTER
+ 	struct netns_nf		nf;
+ 	struct netns_xt		xt;
+@@ -106,6 +107,7 @@ struct net {
+ 	struct sock		*nfnl;
+ 	struct sock		*nfnl_stash;
+ #endif
++#endif
+ #ifdef CONFIG_WEXT_CORE
+ 	struct sk_buff_head	wext_nlevents;
+ #endif
+@@ -118,6 +120,20 @@ struct net {
+ 	struct netns_ipvs	*ipvs;
+ 	struct sock		*diag_nlsk;
+ 	atomic_t		rt_genid;
++#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
++#ifdef CONFIG_NETFILTER
++	struct netns_nf		nf;
++	struct netns_xt		xt;
++#if defined(CONFIG_NF_CONNTRACK) || defined(CONFIG_NF_CONNTRACK_MODULE)
++	struct netns_ct		ct;
++#endif
++#if IS_ENABLED(CONFIG_NF_DEFRAG_IPV6)
++	struct netns_nf_frag	nf_frag;
++#endif
++	struct sock		*nfnl;
++	struct sock		*nfnl_stash;
++#endif
++#endif
+ };
+ 
+ /*

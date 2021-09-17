@@ -1,0 +1,22 @@
+--- kernel/module.c
++++ kernel/module.c
+@@ -179,12 +179,19 @@ struct load_info {
+ 	struct _ddebug *debug;
+ 	unsigned int num_debug;
+ 	bool sig_ok;
++#if !defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+ #ifdef CONFIG_KALLSYMS
+ 	unsigned long mod_kallsyms_init_off;
+ #endif
++#endif
+ 	struct {
+ 		unsigned int sym, str, mod, vers, info, pcpu;
+ 	} index;
++#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
++#ifdef CONFIG_KALLSYMS
++	unsigned long mod_kallsyms_init_off;
++#endif
++#endif
+ };
+ 
+ /* We require a truly strong try_module_get(): 0 means failure due to

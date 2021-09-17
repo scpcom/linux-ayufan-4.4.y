@@ -1,0 +1,28 @@
+--- include/linux/bio.h
++++ include/linux/bio.h
+@@ -527,10 +527,12 @@ struct bio_set {
+ 
+ 	mempool_t *bio_pool;
+ 	mempool_t *bvec_pool;
++#if !defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
+ #if defined(CONFIG_BLK_DEV_INTEGRITY)
+ 	mempool_t *bio_integrity_pool;
+ 	mempool_t *bvec_integrity_pool;
+ #endif
++#endif
+ 
+ 	/*
+ 	 * Deadlock avoidance for stacking block drivers: see comments in
+@@ -540,6 +542,12 @@ struct bio_set {
+ 	struct bio_list		rescue_list;
+ 	struct work_struct	rescue_work;
+ 	struct workqueue_struct	*rescue_workqueue;
++#if defined(CONFIG_SYNO_HI3536_ALIGN_STRUCTURES)
++#if defined(CONFIG_BLK_DEV_INTEGRITY)
++	mempool_t *bio_integrity_pool;
++	mempool_t *bvec_integrity_pool;
++#endif
++#endif
+ };
+ 
+ struct biovec_slab {
