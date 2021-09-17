@@ -109,6 +109,19 @@ config MTD_SPEAR_SMI
 	help
 	  This enable SNOR support on SPEAR platforms using SMI controller
 
+config MTD_STM_SPI_FSM
+	tristate "ST Microelectronics SPI-FSM Serial Flash Controller"
+	help
+	  This provides a MTD device driver for the ST Microelectronics SPI
+	  FSM Serial Flash Controller, and connected Serial Flash device.
+
+config STM_SPI_FSM_DEBUG
+	bool "STM SPI FSM debug support"
+	depends on MTD_STM_SPI_FSM
+	default n
+	help
+	  Display debug messages on the console.
+
 config MTD_SST25L
 	tristate "Support SST25L (non JEDEC) SPI Flash chips"
 	depends on SPI_MASTER

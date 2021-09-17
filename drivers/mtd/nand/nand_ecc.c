@@ -499,6 +499,10 @@ int __nand_correct_data(unsigned char *buf,
 		bit_addr = addressbits[b2 >> 2];
 		/* flip the bit */
 		buf[byte_addr] ^= (1 << bit_addr);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+		printk(KERN_DEBUG "%s: correcting bit [bit %d, byte %d, ",
+		       __func__, bit_addr, byte_addr);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 		return 1;
 
 	}
@@ -506,7 +510,17 @@ int __nand_correct_data(unsigned char *buf,
 	if ((bitsperbyte[b0] + bitsperbyte[b1] + bitsperbyte[b2]) == 1)
 		return 1;	/* error in ECC data; no action needed */
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	if ((bitsperbyte[b0] + bitsperbyte[b1] + bitsperbyte[b2]) == 1) {
+		printk(KERN_DEBUG "%s: ignoring error in ECC, data ok: [",
+		       __func__);
+		return 1;	/* error in ecc data; no action needed */
+	}
+
+	printk(KERN_ERR "%s: uncorrectable error: [", __func__);
+#else /* CONFIG_SYNO_LSP_MONACO */
 	pr_err("%s: uncorrectable ECC error", __func__);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	return -1;
 }
 EXPORT_SYMBOL(__nand_correct_data);

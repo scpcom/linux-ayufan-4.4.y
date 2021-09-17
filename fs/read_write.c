@@ -338,6 +338,9 @@ int rw_verify_area(int read_write, struct file *file, loff_t *ppos, size_t count
 		return retval;
 	return count > MAX_RW_COUNT ? MAX_RW_COUNT : count;
 }
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4) && defined(CONFIG_SYNO_ARMADA)
+EXPORT_SYMBOL(rw_verify_area);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 && CONFIG_SYNO_ARMADA */
 
 ssize_t do_sync_read(struct file *filp, char __user *buf, size_t len, loff_t *ppos)
 {
@@ -1121,6 +1124,10 @@ static ssize_t do_sendfile(int out_fd, int in_fd, loff_t *ppos,
 	if (!(out.file->f_mode & FMODE_WRITE))
 		goto fput_out;
 	retval = -EINVAL;
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	if (!out.file->f_op || !out.file->f_op->sendpage)
+		goto fput_out;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	in_inode = file_inode(in.file);
 	out_inode = file_inode(out.file);
 	out_pos = out.file->f_pos;
@@ -1411,11 +1418,19 @@ SYSCALL_DEFINE5(recvfile, int, fd, int, s, loff_t *, offset, size_t, nbytes, siz
 		rwbytes[0]=total_received;
 		rwbytes[1]=total_written;
 #else
+#if defined(CONFIG_ARM)
+		if (copy_to_user(&rwbytes[0], &total_received, sizeof(size_t)) != 0) {
+#else /* CONFIG_ARM */
 		if (copy_to_user(&rwbytes[0], &total_received, sizeof(size_t)) < 0) {
+#endif /* CONFIG_ARM */
 			ret = -ENOMEM;
 			goto out;
 		}
+#if defined(CONFIG_ARM)
+		if (copy_to_user(&rwbytes[1], &total_written, sizeof(size_t)) != 0) {
+#else /* CONFIG_ARM */
 		if (copy_to_user(&rwbytes[1], &total_written, sizeof(size_t)) < 0) {
+#endif /* CONFIG_ARM */
 			ret = -ENOMEM;
 			goto out;
 		}

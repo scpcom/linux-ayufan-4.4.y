@@ -13,7 +13,11 @@
 #include <linux/init.h>
 #include <linux/io.h>
 #include <linux/err.h>
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#include <linux/pm_opp.h>
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 #include <linux/opp.h>
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 #include <linux/export.h>
 #include <linux/suspend.h>
 #include <linux/cpu.h>
@@ -131,7 +135,11 @@ static int __init omap2_set_init_voltage(char *vdd_name, char *clk_name,
 {
 	struct voltagedomain *voltdm;
 	struct clk *clk;
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	struct dev_pm_opp *opp;
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	struct opp *opp;
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	unsigned long freq, bootup_volt;
 	struct device *dev;
 
@@ -172,7 +180,11 @@ static int __init omap2_set_init_voltage(char *vdd_name, char *clk_name,
 	clk_put(clk);
 
 	rcu_read_lock();
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	opp = dev_pm_opp_find_freq_ceil(dev, &freq);
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	opp = opp_find_freq_ceil(dev, &freq);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	if (IS_ERR(opp)) {
 		rcu_read_unlock();
 		pr_err("%s: unable to find boot up OPP for vdd_%s\n",
@@ -180,7 +192,11 @@ static int __init omap2_set_init_voltage(char *vdd_name, char *clk_name,
 		goto exit;
 	}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	bootup_volt = dev_pm_opp_get_voltage(opp);
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	bootup_volt = opp_get_voltage(opp);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	rcu_read_unlock();
 	if (!bootup_volt) {
 		pr_err("%s: unable to find voltage corresponding to the bootup OPP for vdd_%s\n",

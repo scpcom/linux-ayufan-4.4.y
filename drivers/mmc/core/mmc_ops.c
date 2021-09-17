@@ -430,6 +430,10 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
 		cmd.flags |= MMC_RSP_SPI_R1 | MMC_RSP_R1;
 
 	cmd.cmd_timeout_ms = timeout_ms;
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+	if (index == EXT_CSD_SANITIZE_START)
+		cmd.sanitize_busy = true;
+#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
 
 	err = mmc_wait_for_cmd(card->host, &cmd, MMC_CMD_RETRIES);
 	if (err)

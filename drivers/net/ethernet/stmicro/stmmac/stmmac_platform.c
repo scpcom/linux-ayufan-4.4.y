@@ -242,7 +242,11 @@ struct platform_driver stmmac_pltfr_driver = {
 	.driver = {
 		   .name = STMMAC_RESOURCE_NAME,
 		   .owner = THIS_MODULE,
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
 		   .pm = &stmmac_pltfr_pm_ops,
+#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+		   .pm = DEV_PM_OPS,
+#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
 		   .of_match_table = of_match_ptr(stmmac_dt_ids),
 		   },
 };

@@ -8,6 +8,12 @@
 #include <linux/pci.h>
 #include <linux/ioport.h>
 #include <linux/io.h>
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#include <linux/of.h>
+#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 unsigned long vga_base;
 EXPORT_SYMBOL(vga_base);
@@ -34,6 +40,16 @@ EXPORT_SYMBOL(pcibios_min_mem);
 
 void pci_iounmap(struct pci_dev *dev, void __iomem *addr)
 {
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#ifdef CONFIG_STM_PCIE_TRACKER_BUG
+	if (of_machine_is_compatible("st,stih407")
+	    || of_machine_is_compatible("st,stih410"))
+		addr = __stm_unfrob(addr);
+#endif
+#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	if ((unsigned long)addr >= VMALLOC_START &&
 	    (unsigned long)addr < VMALLOC_END)
 		iounmap(addr);

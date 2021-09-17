@@ -267,8 +267,13 @@ void ubifs_dump_inode(struct ubifs_info *c, const struct inode *inode)
 	       (unsigned long long)ui->ui_size);
 	pr_err("\tflags          %d\n", ui->flags);
 	pr_err("\tcompr_type     %d\n", ui->compr_type);
+#ifdef CONFIG_SYNO_LSP_ALPINE
+	pr_err("\tlast_page_read %llu\n", (unsigned long long)ui->last_page_read);
+	pr_err("\tread_in_a_row  %llu\n", (unsigned long long)ui->read_in_a_row);
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	pr_err("\tlast_page_read %lu\n", ui->last_page_read);
 	pr_err("\tread_in_a_row  %lu\n", ui->read_in_a_row);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	pr_err("\tdata_len       %d\n", ui->data_len);
 
 	if (!S_ISDIR(inode->i_mode))

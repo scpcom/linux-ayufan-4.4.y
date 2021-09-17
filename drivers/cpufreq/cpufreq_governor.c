@@ -16,6 +16,11 @@
 
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#include <linux/export.h>
+#include <linux/kernel_stat.h>
+#include <linux/slab.h>
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 #include <asm/cputime.h>
 #include <linux/cpufreq.h>
 #include <linux/cpumask.h>
@@ -26,9 +31,13 @@
 #include <linux/tick.h>
 #include <linux/types.h>
 #include <linux/workqueue.h>
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
 #include "cpufreq_governor.h"
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 static struct kobject *get_governor_parent_kobj(struct cpufreq_policy *policy)
 {
 	if (have_governor_per_policy())
@@ -36,6 +45,7 @@ static struct kobject *get_governor_parent_kobj(struct cpufreq_policy *policy)
 	else
 		return cpufreq_global_kobject;
 }
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
 static struct attribute_group *get_sysfs_attr(struct dbs_data *dbs_data)
 {
@@ -45,6 +55,9 @@ static struct attribute_group *get_sysfs_attr(struct dbs_data *dbs_data)
 		return dbs_data->cdata->attr_group_gov_sys;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 static inline u64 get_cpu_idle_time_jiffy(unsigned int cpu, u64 *wall)
 {
 	u64 idle_time;
@@ -79,6 +92,7 @@ u64 get_cpu_idle_time(unsigned int cpu, u64 *wall, int io_busy)
 	return idle_time;
 }
 EXPORT_SYMBOL_GPL(get_cpu_idle_time);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
 void dbs_check_cpu(struct dbs_data *dbs_data, int cpu)
 {
@@ -172,6 +186,34 @@ static inline void __gov_queue_work(int cpu, struct dbs_data *dbs_data,
 	mod_delayed_work_on(cpu, system_wq, &cdbs->work, delay);
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+void gov_queue_work(struct dbs_data *dbs_data, struct cpufreq_policy *policy,
+		unsigned int delay, bool all_cpus)
+{
+	int i;
+
+	mutex_lock(&cpufreq_governor_lock);
+	if (!policy->governor_enabled)
+		goto out_unlock;
+
+	if (!all_cpus) {
+		/*
+		 * Use raw_smp_processor_id() to avoid preemptible warnings.
+		 * We know that this is only called with all_cpus == false from
+		 * works that have been queued with *_work_on() functions and
+		 * those works are canceled during CPU_DOWN_PREPARE so they
+		 * can't possibly run on any other CPU.
+		 */
+		__gov_queue_work(raw_smp_processor_id(), dbs_data, delay);
+	} else {
+		for_each_cpu(i, policy->cpus)
+			__gov_queue_work(i, dbs_data, delay);
+	}
+
+out_unlock:
+	mutex_unlock(&cpufreq_governor_lock);
+}
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 void gov_queue_work(struct dbs_data *dbs_data, struct cpufreq_policy *policy,
 		unsigned int delay, bool all_cpus)
 {
@@ -184,6 +226,7 @@ void gov_queue_work(struct dbs_data *dbs_data, struct cpufreq_policy *policy,
 			__gov_queue_work(i, dbs_data, delay);
 	}
 }
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 EXPORT_SYMBOL_GPL(gov_queue_work);
 
 static inline void gov_cancel_work(struct dbs_data *dbs_data,
@@ -275,6 +318,11 @@ int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 			return rc;
 		}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+		if (!have_governor_per_policy())
+			WARN_ON(cpufreq_get_global_kobject());
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+
 		rc = sysfs_create_group(get_governor_parent_kobj(policy),
 				get_sysfs_attr(dbs_data));
 		if (rc) {
@@ -285,7 +333,7 @@ int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 
 		policy->governor_data = dbs_data;
 
-		/* policy latency is in nS. Convert it to uS first */
+		/* policy latency is in ns. Convert it to us first */
 		latency = policy->cpuinfo.transition_latency / 1000;
 		if (latency == 0)
 			latency = 1;
@@ -312,6 +360,11 @@ int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 		if (!--dbs_data->usage_count) {
 			sysfs_remove_group(get_governor_parent_kobj(policy),
 					get_sysfs_attr(dbs_data));
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+			if (!have_governor_per_policy())
+				cpufreq_put_global_kobject();
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
 			if ((dbs_data->cdata->governor == GOV_CONSERVATIVE) &&
 				(policy->governor->initialized == 1)) {
@@ -370,10 +423,14 @@ int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 					     dbs_data->cdata->gov_dbs_timer);
 		}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+		// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 		/*
 		 * conservative does not implement micro like ondemand
 		 * governor, thus we are bound to jiffes/HZ
 		 */
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 		if (dbs_data->cdata->governor == GOV_CONSERVATIVE) {
 			cs_dbs_info->down_skip = 0;
 			cs_dbs_info->enable = 1;
@@ -401,12 +458,22 @@ int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 
 		mutex_lock(&dbs_data->mutex);
 		mutex_destroy(&cpu_cdbs->timer_mutex);
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+		cpu_cdbs->cur_policy = NULL;
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
 		mutex_unlock(&dbs_data->mutex);
 
 		break;
 
 	case CPUFREQ_GOV_LIMITS:
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+		mutex_lock(&dbs_data->mutex);
+		if (!cpu_cdbs->cur_policy) {
+			mutex_unlock(&dbs_data->mutex);
+			break;
+		}
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 		mutex_lock(&cpu_cdbs->timer_mutex);
 		if (policy->max < cpu_cdbs->cur_policy->cur)
 			__cpufreq_driver_target(cpu_cdbs->cur_policy,
@@ -416,6 +483,9 @@ int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 					policy->min, CPUFREQ_RELATION_L);
 		dbs_check_cpu(dbs_data, cpu);
 		mutex_unlock(&cpu_cdbs->timer_mutex);
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+		mutex_unlock(&dbs_data->mutex);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 		break;
 	}
 	return 0;

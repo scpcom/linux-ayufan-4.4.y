@@ -2284,7 +2284,10 @@ static int smsc911x_drv_remove(struct platform_device *pdev)
 	mdiobus_unregister(pdata->mii_bus);
 	mdiobus_free(pdata->mii_bus);
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#else /* CONFIG_SYNO_LSP_MONACO */
 	platform_set_drvdata(pdev, NULL);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	unregister_netdev(dev);
 	free_irq(dev->irq, dev);
 	res = platform_get_resource_byname(pdev, IORESOURCE_MEM,
@@ -2539,7 +2542,10 @@ out_disable_resources:
 out_enable_resources_fail:
 	smsc911x_free_resources(pdev);
 out_request_resources_fail:
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#else /* CONFIG_SYNO_LSP_MONACO */
 	platform_set_drvdata(pdev, NULL);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	iounmap(pdata->ioaddr);
 	free_netdev(dev);
 out_release_io_1:

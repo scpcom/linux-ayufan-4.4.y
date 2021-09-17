@@ -17,6 +17,16 @@ config PINCTRL_ARMADA_370
 	bool
 	select PINCTRL_MVEBU
 
+config PINCTRL_ARMADA_375
+	bool
+	select PINCTRL_MVEBU
+	depends on SYNO_LSP_ARMADA
+
+config PINCTRL_ARMADA_38X
+	bool
+	select PINCTRL_MVEBU
+	depends on SYNO_LSP_ARMADA
+
 config PINCTRL_ARMADA_XP
 	bool
 	select PINCTRL_MVEBU

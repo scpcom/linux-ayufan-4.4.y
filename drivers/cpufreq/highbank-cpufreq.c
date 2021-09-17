@@ -6,7 +6,17 @@
  * published by the Free Software Foundation.
  *
  * This driver provides the clk notifier callbacks that are used when
+ */
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+/**
+ * the cpufreq-dt driver changes to frequency to alert the highbank
+ */
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+/**
  * the cpufreq-cpu0 driver changes to frequency to alert the highbank
+ */
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+/**
  * EnergyCore Management Engine (ECME) about the need to change
  * voltage. The ECME interfaces with the actual voltage regulators.
  */
@@ -60,7 +70,11 @@ static struct notifier_block hb_cpufreq_clk_nb = {
 
 static int hb_cpufreq_driver_init(void)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	struct platform_device_info devinfo = { .name = "cpufreq-dt", };
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	struct platform_device_info devinfo = { .name = "cpufreq-cpu0", };
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	struct device *cpu_dev;
 	struct clk *cpu_clk;
 	struct device_node *np;
@@ -101,7 +115,11 @@ static int hb_cpufreq_driver_init(void)
 		goto out_put_node;
 	}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	/* Instantiate cpufreq-dt */
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	/* Instantiate cpufreq-cpu0 */
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	platform_device_register_full(&devinfo);
 
 out_put_node:

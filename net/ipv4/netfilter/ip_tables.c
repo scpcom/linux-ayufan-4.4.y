@@ -39,6 +39,14 @@ MODULE_DESCRIPTION("IPv4 packet filter");
 /*#define DEBUG_ALLOW_ALL*/ /* Useful for remote debugging */
 /*#define DEBUG_IP_FIREWALL_USER*/
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+static bool allow_inaccurate_counters = false;
+module_param(allow_inaccurate_counters, bool, 0644);
+MODULE_PARM_DESC(
+	allow_inaccurate_counters,
+	"allow inaccurate iptable counters which enables faster packet processing (default: false)");
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
 #ifdef DEBUG_IP_FIREWALL
 #define dprintf(format, args...) pr_info(format , ## args)
 #else
@@ -324,7 +332,15 @@ ipt_do_table(struct sk_buff *skb,
 
 	IP_NF_ASSERT(table->valid_hooks & (1 << hook));
 	local_bh_disable();
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	addend = 0;
+        if (!allow_inaccurate_counters)
+		addend = xt_write_recseq_begin();
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	addend = xt_write_recseq_begin();
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
 	private = table->private;
 	cpu        = smp_processor_id();
 	table_base = private->entries[cpu];
@@ -422,8 +438,15 @@ ipt_do_table(struct sk_buff *skb,
 	pr_debug("Exiting %s; resetting sp from %u to %u\n",
 		 __func__, *stackptr, origptr);
 	*stackptr = origptr;
- 	xt_write_recseq_end(addend);
- 	local_bh_enable();
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	if (!allow_inaccurate_counters || addend)
+		xt_write_recseq_end(addend);
+#else /* CONFIG_SYNO_LSP_ALPINE */
+	xt_write_recseq_end(addend);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
+	local_bh_enable();
 
 #ifdef DEBUG_ALLOW_ALL
 	return NF_ACCEPT;

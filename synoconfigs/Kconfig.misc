@@ -83,9 +83,37 @@ config SYNO_FIX_DM_DISK_ALIGNMENT
 	  <DSM> #62671
 	  Tune the chunk size from dmsetup input to fit the disk alignment
 
+config SYNO_OOM_DUMP_MODULE
+	bool "Dump modules and occupied memory sizes while OOM"
+	default y
+	help
+	  <DSM> #77534
+	  Dump modules and occupied memory sizes while OOM to help debug
+
 endmenu #MISC Features
 
 menu "Encryption"
+
+config SYNO_FIX_OCF_CRYPTODEV_RACE
+	bool "Fix OCF's race in cryptodev interface"
+	depends on OCF_OCF
+	default y
+	help
+	  Fix OCF race in cryptodev interface
+
+config SYNO_FIX_OCF_CRYPTOSOFT_RACE
+	bool "Fix OCF's race in cryptosoft interface"
+	depends on OCF_CRYPTOSOFT
+	default y
+	help
+	  Fix OCF race in cryptosoft interface
+
+config SYNO_FIX_MV_CESA_RACE
+	bool "Fix Marvell's crypto driver race"
+	depends on MV_CESA
+	default y
+	help
+	  Fix Marvell crypto driver race condition
 
 endmenu #Encryption
 

@@ -17,11 +17,18 @@
 #include <linux/clk/mvebu.h>
 #include <linux/of.h>
 #include <linux/of_address.h>
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+#include <linux/syscore_ops.h>
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 struct mvebu_gating_ctrl {
 	spinlock_t lock;
 	struct clk **gates;
 	int num_gates;
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	void __iomem *base;
+	u32 saved_reg;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 };
 
 struct mvebu_soc_descr {
@@ -32,10 +39,18 @@ struct mvebu_soc_descr {
 
 #define to_clk_gate(_hw) container_of(_hw, struct clk_gate, hw)
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+static struct mvebu_gating_ctrl *ctrl;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
 static struct clk *mvebu_clk_gating_get_src(
 	struct of_phandle_args *clkspec, void *data)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	struct mvebu_gating_ctrl *ctrl = (struct mvebu_gating_ctrl *)data;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	int n;
 
 	if (clkspec->args_count < 1)
@@ -50,14 +65,43 @@ static struct clk *mvebu_clk_gating_get_src(
 	return ERR_PTR(-ENODEV);
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+static int mvebu_clk_gating_suspend(void)
+{
+	ctrl->saved_reg = readl(ctrl->base);
+	return 0;
+}
+
+static void mvebu_clk_gating_resume(void)
+{
+	writel(ctrl->saved_reg, ctrl->base);
+}
+
+static struct syscore_ops clk_gate_syscore_ops = {
+	.suspend = mvebu_clk_gating_suspend,
+	.resume = mvebu_clk_gating_resume,
+};
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
 static void __init mvebu_clk_gating_setup(
 	struct device_node *np, const struct mvebu_soc_descr *descr)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	struct mvebu_gating_ctrl *ctrl;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	struct clk *clk;
 	void __iomem *base;
 	const char *default_parent = NULL;
 	int n;
+
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	if (ctrl) {
+		pr_err("mvebu-clk-gating: cannot instantiate more than one gatable clock device\n");
+		return;
+	}
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 	base = of_iomap(np, 0);
 
@@ -72,6 +116,10 @@ static void __init mvebu_clk_gating_setup(
 		return;
 
 	spin_lock_init(&ctrl->lock);
+
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	ctrl->base = base;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 	/*
 	 * Count, allocate, and register clock gates
@@ -106,6 +154,10 @@ static void __init mvebu_clk_gating_setup(
 		WARN_ON(IS_ERR(ctrl->gates[n]));
 	}
 	of_clk_add_provider(np, mvebu_clk_gating_get_src, ctrl);
+
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	register_syscore_ops(&clk_gate_syscore_ops);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 }
 
 /*
@@ -119,8 +171,13 @@ static const struct mvebu_soc_descr __initconst armada_370_gating_descr[] = {
 	{ "pex1_en", NULL,  2 },
 	{ "ge1", NULL, 3 },
 	{ "ge0", NULL, 4 },
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	{ "pex0", "pex0_en", 5 },
+	{ "pex1", "pex1_en", 9 },
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	{ "pex0", NULL, 5 },
 	{ "pex1", NULL, 9 },
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	{ "sata0", NULL, 15 },
 	{ "sdio", NULL, 17 },
 	{ "tdm", NULL, 25 },
@@ -130,6 +187,74 @@ static const struct mvebu_soc_descr __initconst armada_370_gating_descr[] = {
 };
 #endif
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+#ifdef CONFIG_MACH_ARMADA_375
+static const struct mvebu_soc_descr __initconst armada_375_gating_descr[] = {
+	{ "tdmmc", NULL, 0 },
+	{ "xpon", NULL, 1 },
+	{ "mu", NULL, 2 },
+	{ "pp", NULL, 3 },
+	{ "ptp", NULL, 4 },
+	{ "pex0", NULL, 5 },
+	{ "pex1", NULL, 6 },
+	{ "audio", NULL, 8 },
+	{ "isi_slic", NULL, 9 },
+	{ "zsi_slic", NULL, 10 },
+	{ "nd_clk", "nand", 11 },
+	{ "switch", NULL, 12 },
+	{ "ssi_slic", NULL, 13 },
+	{ "sata0_link", "sata0_core", 14 },
+	{ "sata0_core", NULL, 15 },
+	{ "usb3", NULL, 16 },
+	{ "sdio", NULL, 17 },
+	{ "usb", NULL, 18 },
+	{ "gop", NULL, 19 },
+	{ "sata1_link", "sata1_core", 20 },
+	{ "sata1_core", NULL, 21 },
+	{ "xor0", NULL, 22 },
+	{ "xor1", NULL, 23 },
+	{ "copro", NULL, 24 },
+	{ "tdm", NULL, 25 },
+	{ "usb_p1", NULL, 26 },
+	{ "crypto0_enc", NULL, 28 },
+	{ "crypto0_core", NULL, 29 },
+	{ "crypto1_enc", NULL, 30 },
+	{ "crypto1_core", NULL, 31 },
+	{ }
+};
+#endif
+
+#ifdef CONFIG_MACH_ARMADA_380
+static const struct mvebu_soc_descr __initconst armada_380_gating_descr[] = {
+	{ "audio", NULL, 0 },
+	{ "ge2", NULL, 2 },
+	{ "ge1", NULL, 3 },
+	{ "ge0", NULL, 4 },
+	{ "pex1", NULL, 5 },
+	{ "pex2", NULL, 6 },
+	{ "pex3", NULL, 7 },
+	{ "pex0", NULL, 8 },
+	{ "usb3h0", NULL, 9 },
+	{ "usb3h1", NULL, 10 },
+	{ "usb3d", NULL, 11 },
+	{ "bm", NULL, 13 },
+	{ "crypto0z", NULL, 14 },
+	{ "sata0", NULL, 15 },
+	{ "crypto1z", NULL, 16 },
+	{ "sdio", NULL, 17 },
+	{ "usb2", NULL, 18 },
+	{ "crypto1", NULL, 21 },
+	{ "xor0", NULL, 22 },
+	{ "crypto0", NULL, 23 },
+	{ "tdm", NULL, 25 },
+	{ "xor1", NULL, 28 },
+	{ "pnc", NULL, 29 },
+	{ "sata1", NULL, 30 },
+	{ }
+};
+#endif
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
 #ifdef CONFIG_MACH_ARMADA_XP
 static const struct mvebu_soc_descr __initconst armada_xp_gating_descr[] = {
 	{ "audio", NULL, 0 },
@@ -137,10 +262,21 @@ static const struct mvebu_soc_descr __initconst armada_xp_gating_descr[] = {
 	{ "ge2", NULL,  2 },
 	{ "ge1", NULL, 3 },
 	{ "ge0", NULL, 4 },
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	{ "pex00", NULL, 5 },
+	{ "pex01", NULL, 6 },
+	{ "pex02", NULL, 7 },
+	{ "pex03", NULL, 8 },
+	{ "pex10", NULL, 9 },
+	{ "pex11", NULL, 10 },
+	{ "pex12", NULL, 11 },
+	{ "pex13", NULL, 12 },
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	{ "pex0", NULL, 5 },
 	{ "pex1", NULL, 6 },
 	{ "pex2", NULL, 7 },
 	{ "pex3", NULL, 8 },
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	{ "bp", NULL, 13 },
 	{ "sata0lnk", NULL, 14 },
 	{ "sata0", "sata0lnk", 15 },
@@ -152,6 +288,10 @@ static const struct mvebu_soc_descr __initconst armada_xp_gating_descr[] = {
 	{ "xor0", NULL, 22 },
 	{ "crypto", NULL, 23 },
 	{ "tdm", NULL, 25 },
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	{ "pex20", NULL, 26 },
+	{ "pex30", NULL, 27 },
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	{ "xor1", NULL, 28 },
 	{ "sata1lnk", NULL, 29 },
 	{ "sata1", "sata1lnk", 30 },
@@ -212,6 +352,22 @@ static const __initdata struct of_device_id clk_gating_match[] = {
 		.data = armada_370_gating_descr,
 	},
 #endif
+
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+#ifdef CONFIG_MACH_ARMADA_375
+	{
+		.compatible = "marvell,armada-375-gating-clock",
+		.data = armada_375_gating_descr,
+	},
+#endif
+
+#ifdef CONFIG_MACH_ARMADA_380
+	{
+		.compatible = "marvell,armada-380-gating-clock",
+		.data = armada_380_gating_descr,
+	},
+#endif
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 #ifdef CONFIG_MACH_ARMADA_XP
 	{

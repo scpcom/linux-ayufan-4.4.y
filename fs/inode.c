@@ -119,6 +119,12 @@ int proc_nr_inodes(ctl_table *table, int write,
 }
 #endif
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#include <linux/moduleparam.h>
+static int fshighmem = 1;
+core_param(fshighmem, fshighmem, int, 0444);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
 /**
  * inode_init_always - perform inode structure intialisation
  * @sb: superblock inode belongs to
@@ -184,7 +190,14 @@ int inode_init_always(struct super_block *sb, struct inode *inode)
 	mapping->a_ops = &empty_aops;
 	mapping->host = inode;
 	mapping->flags = 0;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	if (fshighmem)
+		mapping_set_gfp_mask(mapping, GFP_HIGHUSER_MOVABLE);
+	else
+		mapping_set_gfp_mask(mapping, GFP_USER | __GFP_MOVABLE);
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	mapping_set_gfp_mask(mapping, GFP_HIGHUSER_MOVABLE);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	mapping->private_data = NULL;
 	mapping->backing_dev_info = &default_backing_dev_info;
 	mapping->writeback_index = 0;

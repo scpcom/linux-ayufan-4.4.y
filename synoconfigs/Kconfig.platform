@@ -35,15 +35,48 @@ config SYNO_BRASWELL
 	depends on X86_64
 	help
 
+config SYNO_ALPINE
+	bool "AnnapurnaLabs Alpine"
+	depends on ARCH_ALPINE
+	select SYNO_LSP_ALPINE
+	help
+
+config SYNO_LSP_ALPINE
+	bool "Apply AnnapurnaLabs Alpine LSP"
+	depends on ARCH_ALPINE
+	help
+
+config SYNO_ARMADA
+	bool "Marvell SoC"
+	depends on ARCH_MVEBU
+	select SYNO_LSP_ARMADA
+	help
+
+config SYNO_LSP_ARMADA
+	bool "Apply Marvell LSP"
+	depends on ARCH_MVEBU
+	help
+
+config SYNO_LSP_ARMADA_2015_T1_1p4
+	bool "Apply Marvell LSP 2015_T1.1p4"
+	depends on SYNO_LSP_ARMADA
+	default y
+	help
+
 config SYNO_KVMX64
 	bool "KVM X64 Virtual machine"
+	depends on X86_64
+	help
+
+config SYNO_BROADWELL
+	bool "Intel-Broadwell"
 	depends on X86_64
 	help
 
 config SYNO_DUAL_HEAD
 	bool "Synology Dual Head Host"
 	default n
-	depends on SYNO_BROMOLOW && SYNO_USB_FLASH_BOOT
+	depends on (SYNO_BROMOLOW || SYNO_BROADWELL) && SYNO_USB_FLASH_BOOT
 	help
 		Dual head host use SATA DOM as the synoboot device. In this model SATA
 		controller & SAS expander exist simultaneously.
@@ -51,7 +84,7 @@ config SYNO_DUAL_HEAD
 config SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
 	bool "Let kernel panic if sas reservation write conflict"
 	default n
-	depends on SYNO_BROMOLOW
+	depends on SYNO_BROMOLOW || SYNO_BROADWELL
 	help
 		Check if sas reservation write conflict. If yes, kernel panic and then reboot.
 

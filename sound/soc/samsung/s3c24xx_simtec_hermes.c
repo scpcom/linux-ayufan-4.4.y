@@ -63,6 +63,9 @@ static const struct snd_soc_dapm_route base_map[] = {
 */
 static int simtec_hermes_init(struct snd_soc_pcm_runtime *rtd)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	struct snd_soc_codec *codec = rtd->codec;
 	struct snd_soc_dapm_context *dapm = &codec->dapm;
 
@@ -70,6 +73,7 @@ static int simtec_hermes_init(struct snd_soc_pcm_runtime *rtd)
 	snd_soc_dapm_enable_pin(dapm, "Line In");
 	snd_soc_dapm_enable_pin(dapm, "Line Out");
 	snd_soc_dapm_enable_pin(dapm, "Mic Jack");
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 	simtec_audio_init(rtd);
 

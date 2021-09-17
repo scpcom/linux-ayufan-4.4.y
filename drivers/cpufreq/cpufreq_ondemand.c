@@ -12,6 +12,12 @@
 
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#include <linux/cpu.h>
+#include <linux/percpu-defs.h>
+#include <linux/slab.h>
+#include <linux/tick.h>
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 #include <linux/cpufreq.h>
 #include <linux/init.h>
 #include <linux/kernel.h>
@@ -26,6 +32,7 @@
 #include <linux/types.h>
 #include <linux/cpu.h>
 
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 #include "cpufreq_governor.h"
 
 /* On-demand governor macros */
@@ -144,6 +151,22 @@ static void ondemand_powersave_bias_init(void)
 	}
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+static void dbs_freq_increase(struct cpufreq_policy *policy, unsigned int freq)
+{
+	struct dbs_data *dbs_data = policy->governor_data;
+	struct od_dbs_tuners *od_tuners = dbs_data->tuners;
+
+	if (od_tuners->powersave_bias)
+		freq = od_ops.powersave_bias_target(policy, freq,
+				CPUFREQ_RELATION_H);
+	else if (policy->cur == policy->max)
+		return;
+
+	__cpufreq_driver_target(policy, freq, od_tuners->powersave_bias ?
+			CPUFREQ_RELATION_L : CPUFREQ_RELATION_H);
+}
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 static void dbs_freq_increase(struct cpufreq_policy *p, unsigned int freq)
 {
 	struct dbs_data *dbs_data = p->governor_data;
@@ -158,6 +181,7 @@ static void dbs_freq_increase(struct cpufreq_policy *p, unsigned int freq)
 	__cpufreq_driver_target(p, freq, od_tuners->powersave_bias ?
 			CPUFREQ_RELATION_L : CPUFREQ_RELATION_H);
 }
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
 /*
  * Every sampling_rate, we check, if current idle time is less than 20%
@@ -184,7 +208,11 @@ static void od_check_cpu(int cpu, unsigned int load_freq)
 			dbs_info->rate_mult =
 				od_tuners->sampling_down_factor;
 		dbs_freq_increase(policy, policy->max);
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+		// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 		return;
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	}
 
 	/* Check for frequency decrease */
@@ -205,8 +233,12 @@ static void od_check_cpu(int cpu, unsigned int load_freq)
 		/* No longer fully busy, reset rate_mult */
 		dbs_info->rate_mult = 1;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+		// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 		if (freq_next < policy->min)
 			freq_next = policy->min;
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
 		if (!od_tuners->powersave_bias) {
 			__cpufreq_driver_target(policy, freq_next,
@@ -513,7 +545,11 @@ static int od_init(struct dbs_data *dbs_data)
 	u64 idle_time;
 	int cpu;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	tuners = kzalloc(sizeof(*tuners), GFP_KERNEL);
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	tuners = kzalloc(sizeof(struct od_dbs_tuners), GFP_KERNEL);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	if (!tuners) {
 		pr_err("%s: kzalloc failed\n", __func__);
 		return -ENOMEM;

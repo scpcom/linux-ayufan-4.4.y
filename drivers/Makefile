@@ -8,6 +8,8 @@
 obj-y				+= irqchip/
 obj-y				+= bus/
 
+obj-$(CONFIG_GENERIC_PHY)	+= phy/
+
 # GPIO must come after pinctrl as gpios may need to mux pins etc
 obj-y				+= pinctrl/
 obj-y				+= gpio/
@@ -131,6 +133,9 @@ obj-$(CONFIG_VHOST_RING)	+= vhost/
 obj-$(CONFIG_VLYNQ)		+= vlynq/
 obj-$(CONFIG_STAGING)		+= staging/
 obj-y				+= platform/
+ifeq ($(CONFIG_SYNO_LSP_ARMADA),y)
+obj-$(CONFIG_PHONE)		+= telephony/
+endif
 #common clk code
 obj-y				+= clk/
 
@@ -152,3 +157,7 @@ obj-$(CONFIG_IIO)		+= iio/
 obj-$(CONFIG_VME_BUS)		+= vme/
 obj-$(CONFIG_IPACK_BUS)		+= ipack/
 obj-$(CONFIG_NTB)		+= ntb/
+
+#LPM Support
+obj-$(CONFIG_PM)		+= lpm/
+obj-$(CONFIG_ST_LPM)		+= lpm/

@@ -686,9 +686,11 @@ asmlinkage long compat_sys_fanotify_mark(int, unsigned int, __u32, __u32,
 
 #define is_compat_task() (0)
 
+#if defined(CONFIG_X86_32)
 #ifdef CONFIG_SYNO_SYSTEM_CALL
 asmlinkage long compat_sys_SYNOUtime(char __user *filename, struct compat_timespec __user *ctime);
 #endif /* CONFIG_SYNO_SYSTEM_CALL */
+#endif /* CONFIG_X86_32 */
 
 #endif /* CONFIG_COMPAT */
 #endif /* _LINUX_COMPAT_H */

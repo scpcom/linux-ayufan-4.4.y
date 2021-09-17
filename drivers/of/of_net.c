@@ -22,6 +22,9 @@ static const char *phy_modes[] = {
 	[PHY_INTERFACE_MODE_GMII]	= "gmii",
 	[PHY_INTERFACE_MODE_SGMII]	= "sgmii",
 	[PHY_INTERFACE_MODE_TBI]	= "tbi",
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	[PHY_INTERFACE_MODE_REVMII]	= "rev-mii",
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	[PHY_INTERFACE_MODE_RMII]	= "rmii",
 	[PHY_INTERFACE_MODE_RGMII]	= "rgmii",
 	[PHY_INTERFACE_MODE_RGMII_ID]	= "rgmii-id",

@@ -283,7 +283,11 @@ static int __init exynos_cpufreq_init(void)
 {
 	int ret = -EINVAL;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	exynos_info = kzalloc(sizeof(*exynos_info), GFP_KERNEL);
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	exynos_info = kzalloc(sizeof(struct exynos_dvfs_info), GFP_KERNEL);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	if (!exynos_info)
 		return -ENOMEM;
 

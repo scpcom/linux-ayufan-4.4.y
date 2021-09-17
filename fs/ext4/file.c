@@ -639,6 +639,9 @@ const struct file_operations ext4_file_operations = {
 	.fsync		= ext4_sync_file,
 	.splice_read	= generic_file_splice_read,
 	.splice_write	= generic_file_splice_write,
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	.splice_from_socket = generic_splice_from_socket,
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	.fallocate	= ext4_fallocate,
 };
 

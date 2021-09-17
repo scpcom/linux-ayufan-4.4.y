@@ -12,10 +12,17 @@
 
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#include <linux/cpufreq.h>
+#include <linux/init.h>
+#include <linux/module.h>
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/cpufreq.h>
 #include <linux/init.h>
+
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
 static int cpufreq_governor_performance(struct cpufreq_policy *policy,
 					unsigned int event)

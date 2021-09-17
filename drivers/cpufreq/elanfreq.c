@@ -265,7 +265,11 @@ static struct cpufreq_driver elanfreq_driver = {
 	.init		= elanfreq_cpu_init,
 	.exit		= elanfreq_cpu_exit,
 	.name		= "elanfreq",
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	.owner		= THIS_MODULE,
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	.attr		= elanfreq_attr,
 };
 

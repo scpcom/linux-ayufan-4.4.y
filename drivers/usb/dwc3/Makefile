@@ -32,10 +32,17 @@ endif
 # PCI doesn't provide nops if CONFIG_PCI isn't enabled.
 ##
 
+ifeq ($(CONFIG_ARCH_STI),y)
+obj-$(CONFIG_USB_DWC3_OMAP)		+= dwc3-omap.o
+obj-$(CONFIG_USB_DWC3_EXYNOS)		+= dwc3-exynos.o
+obj-$(CONFIG_USB_DWC3_PCI)		+= dwc3-pci.o
+obj-$(CONFIG_USB_DWC3_ST)		+= dwc3-st.o
+else
 obj-$(CONFIG_USB_DWC3)		+= dwc3-omap.o
 obj-$(CONFIG_USB_DWC3)		+= dwc3-exynos.o
 
 ifneq ($(CONFIG_PCI),)
 	obj-$(CONFIG_USB_DWC3)		+= dwc3-pci.o
+endif
 endif
 

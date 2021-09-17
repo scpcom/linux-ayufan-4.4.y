@@ -74,10 +74,17 @@ static int __init gcov_persist_setup(char *str)
 {
 	unsigned long val;
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	if (kstrtoul(str, 0, &val)) {
+		pr_warn("invalid gcov_persist parameter '%s'\n", str);
+		return 0;
+	}
+#else /* CONFIG_SYNO_LSP_MONACO */
 	if (strict_strtoul(str, 0, &val)) {
 		pr_warning("invalid gcov_persist parameter '%s'\n", str);
 		return 0;
 	}
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	gcov_persist = val;
 	pr_info("setting gcov_persist to %d\n", gcov_persist);
 
@@ -242,8 +249,13 @@ static struct gcov_node *get_node_by_name(const char *name)
 
 	list_for_each_entry(node, &all_head, all) {
 		info = get_node_info(node);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+		if (info && (strcmp(gcov_info_filename(info), name) == 0))
+			return node;
+#else /* CONFIG_SYNO_LSP_MONACO */
 		if (info && (strcmp(info->filename, name) == 0))
 			return node;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	}
 
 	return NULL;
@@ -279,7 +291,11 @@ static ssize_t gcov_seq_write(struct file *file, const char __user *addr,
 	seq = file->private_data;
 	info = gcov_iter_get_info(seq->private);
 	mutex_lock(&node_lock);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	node = get_node_by_name(gcov_info_filename(info));
+#else /* CONFIG_SYNO_LSP_MONACO */
 	node = get_node_by_name(info->filename);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	if (node) {
 		/* Reset counts or remove node for unloaded modules. */
 		if (node->num_loaded == 0)
@@ -376,8 +392,14 @@ static void add_links(struct gcov_node *node, struct dentry *parent)
 	if (!node->links)
 		return;
 	for (i = 0; i < num; i++) {
+#if defined (CONFIG_SYNO_LSP_MONACO)
+		target = get_link_target(
+				gcov_info_filename(get_node_info(node)),
+					 &gcov_link[i]);
+#else /* CONFIG_SYNO_LSP_MONACO */
 		target = get_link_target(get_node_info(node)->filename,
 					 &gcov_link[i]);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 		if (!target)
 			goto out_err;
 		basename = strrchr(target, '/');
@@ -450,7 +472,11 @@ static struct gcov_node *new_node(struct gcov_node *parent,
 	} else
 		node->dentry = debugfs_create_dir(node->name, parent->dentry);
 	if (!node->dentry) {
+#if defined (CONFIG_SYNO_LSP_MONACO)
+		pr_warn("could not create file\n");
+#else /* CONFIG_SYNO_LSP_MONACO */
 		pr_warning("could not create file\n");
+#endif /* CONFIG_SYNO_LSP_MONACO */
 		kfree(node);
 		return NULL;
 	}
@@ -463,7 +489,11 @@ static struct gcov_node *new_node(struct gcov_node *parent,
 
 err_nomem:
 	kfree(node);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	pr_warn("out of memory\n");
+#else /* CONFIG_SYNO_LSP_MONACO */
 	pr_warning("out of memory\n");
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	return NULL;
 }
 
@@ -576,7 +606,11 @@ static void add_node(struct gcov_info *info)
 	struct gcov_node *parent;
 	struct gcov_node *node;
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	filename = kstrdup(gcov_info_filename(info), GFP_KERNEL);
+#else /* CONFIG_SYNO_LSP_MONACO */
 	filename = kstrdup(info->filename, GFP_KERNEL);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	if (!filename)
 		return;
 	parent = &root_node;
@@ -630,8 +664,13 @@ static void add_info(struct gcov_node *node, struct gcov_info *info)
 	 */
 	loaded_info = kcalloc(num + 1, sizeof(struct gcov_info *), GFP_KERNEL);
 	if (!loaded_info) {
+#if defined (CONFIG_SYNO_LSP_MONACO)
+		pr_warn("could not add '%s' (out of memory)\n",
+			gcov_info_filename(info));
+#else /* CONFIG_SYNO_LSP_MONACO */
 		pr_warning("could not add '%s' (out of memory)\n",
 			   info->filename);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 		return;
 	}
 	memcpy(loaded_info, node->loaded_info,
@@ -644,8 +683,13 @@ static void add_info(struct gcov_node *node, struct gcov_info *info)
 		 * data set replaces the copy of the last one.
 		 */
 		if (!gcov_info_is_compatible(node->unloaded_info, info)) {
+#if defined (CONFIG_SYNO_LSP_MONACO)
+			pr_warn("discarding saved data for %s (incompatible version)\n",
+				gcov_info_filename(info));
+#else /* CONFIG_SYNO_LSP_MONACO */
 			pr_warning("discarding saved data for %s "
 				   "(incompatible version)\n", info->filename);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 			gcov_info_free(node->unloaded_info);
 			node->unloaded_info = NULL;
 		}
@@ -655,8 +699,13 @@ static void add_info(struct gcov_node *node, struct gcov_info *info)
 		 * The initial one takes precedence.
 		 */
 		if (!gcov_info_is_compatible(node->loaded_info[0], info)) {
+#if defined (CONFIG_SYNO_LSP_MONACO)
+			pr_warn("could not add '%s' (incompatible version)\n",
+					gcov_info_filename(info));
+#else /* CONFIG_SYNO_LSP_MONACO */
 			pr_warning("could not add '%s' (incompatible "
 				   "version)\n", info->filename);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 			kfree(loaded_info);
 			return;
 		}
@@ -691,8 +740,13 @@ static void save_info(struct gcov_node *node, struct gcov_info *info)
 	else {
 		node->unloaded_info = gcov_info_dup(info);
 		if (!node->unloaded_info) {
+#if defined (CONFIG_SYNO_LSP_MONACO)
+			pr_warn("could not save data for '%s' (out of memory)\n",
+				gcov_info_filename(info));
+#else /* CONFIG_SYNO_LSP_MONACO */
 			pr_warning("could not save data for '%s' "
 				   "(out of memory)\n", info->filename);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 		}
 	}
 }
@@ -707,8 +761,13 @@ static void remove_info(struct gcov_node *node, struct gcov_info *info)
 
 	i = get_info_index(node, info);
 	if (i < 0) {
+#if defined (CONFIG_SYNO_LSP_MONACO)
+		pr_warn("could not remove '%s' (not found)\n",
+			gcov_info_filename(info));
+#else /* CONFIG_SYNO_LSP_MONACO */
 		pr_warning("could not remove '%s' (not found)\n",
 			   info->filename);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 		return;
 	}
 	if (gcov_persist)
@@ -735,7 +794,11 @@ void gcov_event(enum gcov_action action, struct gcov_info *info)
 	struct gcov_node *node;
 
 	mutex_lock(&node_lock);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	node = get_node_by_name(gcov_info_filename(info));
+#else /* CONFIG_SYNO_LSP_MONACO */
 	node = get_node_by_name(info->filename);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	switch (action) {
 	case GCOV_ADD:
 		if (node)
@@ -747,8 +810,13 @@ void gcov_event(enum gcov_action action, struct gcov_info *info)
 		if (node)
 			remove_info(node, info);
 		else {
+#if defined (CONFIG_SYNO_LSP_MONACO)
+			pr_warn("could not remove '%s' (not found)\n",
+				gcov_info_filename(info));
+#else /* CONFIG_SYNO_LSP_MONACO */
 			pr_warning("could not remove '%s' (not found)\n",
 				   info->filename);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 		}
 		break;
 	}

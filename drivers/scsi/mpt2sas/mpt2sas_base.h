@@ -989,6 +989,9 @@ struct MPT2SAS_ADAPTER {
 	u8		mfg_pg10_hide_flag;
 	u8		hide_drives;
 
+#ifdef CONFIG_SYNO_SAS_MPT2_RESET_ON_REBOOT
+	u8		shutdown;
+#endif /* CONFIG_SYNO_SAS_MPT2_RESET_ON_REBOOT */
 };
 
 typedef u8 (*MPT_CALLBACK)(struct MPT2SAS_ADAPTER *ioc, u16 smid, u8 msix_index,

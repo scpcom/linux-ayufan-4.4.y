@@ -22,13 +22,17 @@
 #define SCU_INVALIDATE		0x0c
 #define SCU_FPGA_REVISION	0x10
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP) || defined(CONFIG_SYNO_LSP_ARMADA)
 /*
  * Get the number of CPU cores from the SCU configuration
  */
 unsigned int __init scu_get_core_count(void __iomem *scu_base)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	unsigned int ncores = readl_relaxed(scu_base + SCU_CONFIG);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	unsigned int ncores = __raw_readl(scu_base + SCU_CONFIG);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	return (ncores & 0x03) + 1;
 }
 
@@ -42,19 +46,39 @@ void scu_enable(void __iomem *scu_base)
 #ifdef CONFIG_ARM_ERRATA_764369
 	/* Cortex-A9 only */
 	if ((read_cpuid_id() & 0xff0ffff0) == 0x410fc090) {
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+		scu_ctrl = readl_relaxed(scu_base + 0x30);
+		if (!(scu_ctrl & 1))
+			writel_relaxed(scu_ctrl | 0x1, scu_base + 0x30);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 		scu_ctrl = __raw_readl(scu_base + 0x30);
 		if (!(scu_ctrl & 1))
 			__raw_writel(scu_ctrl | 0x1, scu_base + 0x30);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	}
 #endif
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	scu_ctrl = readl_relaxed(scu_base + SCU_CTRL);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	scu_ctrl = __raw_readl(scu_base + SCU_CTRL);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	/* Enable SCU standby mode To allow L2 cache controller idle mode */
+	scu_ctrl |= BIT(5);
+	__raw_writel(scu_ctrl, scu_base + SCU_CTRL);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	/* already enabled? */
 	if (scu_ctrl & 1)
 		return;
 
 	scu_ctrl |= 1;
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	writel_relaxed(scu_ctrl, scu_base + SCU_CTRL);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	__raw_writel(scu_ctrl, scu_base + SCU_CTRL);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 	/*
 	 * Ensure that the data accessed by CPU0 before the SCU was
@@ -80,9 +104,15 @@ int scu_power_mode(void __iomem *scu_base, unsigned int mode)
 	if (mode > 3 || mode == 1 || cpu > 3)
 		return -EINVAL;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	val = readb_relaxed(scu_base + SCU_CPU_STATUS + cpu) & ~0x03;
+	val |= mode;
+	writeb_relaxed(val, scu_base + SCU_CPU_STATUS + cpu);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	val = __raw_readb(scu_base + SCU_CPU_STATUS + cpu) & ~0x03;
 	val |= mode;
 	__raw_writeb(val, scu_base + SCU_CPU_STATUS + cpu);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 	return 0;
 }

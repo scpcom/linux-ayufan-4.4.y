@@ -293,7 +293,11 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
 	}
 
 	card->ext_csd.rev = ext_csd[EXT_CSD_REV];
+#if defined (CONFIG_SYNO_LSP_MONACO) || defined(CONFIG_SYNO_LSP_ARMADA)
+	if (card->ext_csd.rev > 7) {
+#else /* CONFIG_SYNO_LSP_MONACO || CONFIG_SYNO_LSP_ARMADA */
 	if (card->ext_csd.rev > 6) {
+#endif /* CONFIG_SYNO_LSP_MONACO || CONFIG_SYNO_LSP_ARMADA */
 		pr_err("%s: unrecognised EXT_CSD revision %d\n",
 			mmc_hostname(card->host), card->ext_csd.rev);
 		err = -EINVAL;
@@ -906,6 +910,14 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
 		memcpy(card->raw_cid, cid, sizeof(card->raw_cid));
 	}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	/*
+	 * Call the optional init_card function to handle quirks.
+	 */
+	if (host->ops->init_card)
+		host->ops->init_card(host, card);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
 	/*
 	 * For native busses:  set card RCA and quit open drain mode.
 	 */
@@ -1085,6 +1097,14 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
 	 * Indicate DDR mode (if supported).
 	 */
 	if (mmc_card_highspeed(card)) {
+#if defined (CONFIG_SYNO_LSP_MONACO)
+		if ((card->ext_csd.card_type & EXT_CSD_CARD_TYPE_DDR_1_8V)
+			&& (host->caps & MMC_CAP_1_8V_DDR))
+				ddr = MMC_1_8V_DDR_MODE;
+		else if ((card->ext_csd.card_type & EXT_CSD_CARD_TYPE_DDR_1_2V)
+			&& (host->caps & MMC_CAP_1_2V_DDR))
+				ddr = MMC_1_2V_DDR_MODE;
+#else /* CONFIG_SYNO_LSP_MONACO */
 		if ((card->ext_csd.card_type & EXT_CSD_CARD_TYPE_DDR_1_8V)
 			&& ((host->caps & (MMC_CAP_1_8V_DDR |
 			     MMC_CAP_UHS_DDR50))
@@ -1095,6 +1115,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
 			     MMC_CAP_UHS_DDR50))
 				== (MMC_CAP_1_2V_DDR | MMC_CAP_UHS_DDR50)))
 				ddr = MMC_1_2V_DDR_MODE;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	}
 
 	/*
@@ -1234,7 +1255,11 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
 					goto err;
 			}
 			mmc_card_set_ddr_mode(card);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+			mmc_set_timing(card->host, MMC_TIMING_MMC_DDR52);
+#else /* CONFIG_SYNO_LSP_MONACO */
 			mmc_set_timing(card->host, MMC_TIMING_UHS_DDR50);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 			mmc_set_bus_width(card->host, bus_width);
 		}
 	}

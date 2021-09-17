@@ -80,6 +80,9 @@ void pm_vt_switch_unregister(struct device *dev)
 	list_for_each_entry(tmp, &pm_vt_switch_list, head) {
 		if (tmp->dev == dev) {
 			list_del(&tmp->head);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+			kfree(tmp);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 			break;
 		}
 	}

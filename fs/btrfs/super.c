@@ -44,6 +44,9 @@
 #include <linux/btrfs.h>
 #include "delayed-inode.h"
 #include "ctree.h"
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#include "csum.h"
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 #include "disk-io.h"
 #include "transaction.h"
 #include "btrfs_inode.h"
@@ -65,6 +68,9 @@
 
 static const struct super_operations btrfs_super_ops;
 static struct file_system_type btrfs_fs_type;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+static unsigned long btrfs_csum_initialized;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 static int btrfs_remount(struct super_block *sb, int *flags, char *data);
 
@@ -330,6 +336,12 @@ enum {
 	Opt_commit_interval, Opt_barrier, Opt_nodefrag, Opt_nodiscard,
 	Opt_noenospc_debug, Opt_noflushoncommit, Opt_acl, Opt_datacow,
 	Opt_datasum, Opt_treelog, Opt_noinode_cache,
+#ifdef CONFIG_SYNO_BTRFS_FLUSHONCOMMIT_THRESHOLD
+	Opt_flushoncommit_threshold,
+#endif
+#ifdef CONFIG_SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+	Opt_no_block_group_hint,
+#endif
 	Opt_err,
 };
 
@@ -360,6 +372,9 @@ static match_table_t tokens = {
 	{Opt_treelog, "treelog"},
 	{Opt_flushoncommit, "flushoncommit"},
 	{Opt_noflushoncommit, "noflushoncommit"},
+#ifdef CONFIG_SYNO_BTRFS_FLUSHONCOMMIT_THRESHOLD
+	{Opt_flushoncommit_threshold, "flushoncommit_threshold=%d"},
+#endif
 	{Opt_ratio, "metadata_ratio=%d"},
 	{Opt_discard, "discard"},
 	{Opt_nodiscard, "nodiscard"},
@@ -382,6 +397,9 @@ static match_table_t tokens = {
 	{Opt_rescan_uuid_tree, "rescan_uuid_tree"},
 	{Opt_fatal_errors, "fatal_errors=%s"},
 	{Opt_commit_interval, "commit=%d"},
+#ifdef CONFIG_SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+	{Opt_no_block_group_hint, "no_block_group_hint"},
+#endif
 	{Opt_err, NULL},
 };
 
@@ -601,6 +619,19 @@ int btrfs_parse_options(struct btrfs_root *root, char *options)
 			btrfs_clear_and_info(root, NOTREELOG,
 					     "enabling tree log");
 			break;
+#ifdef CONFIG_SYNO_BTRFS_FLUSHONCOMMIT_THRESHOLD
+		case Opt_flushoncommit_threshold:
+			ret = match_int(&args[0], &intarg);
+			if (ret) {
+				goto out;
+			} else if (intarg >= 0) {
+				info->flushoncommit_threshold = intarg;
+			} else {
+				ret = -EINVAL;
+				goto out;
+			}
+			break;
+#endif
 		case Opt_flushoncommit:
 			btrfs_set_and_info(root, FLUSHONCOMMIT,
 					   "turning on flush-on-commit");
@@ -743,6 +774,11 @@ int btrfs_parse_options(struct btrfs_root *root, char *options)
 				info->commit_interval = BTRFS_DEFAULT_COMMIT_INTERVAL;
 			}
 			break;
+#ifdef CONFIG_SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+		case Opt_no_block_group_hint:
+			info->no_block_group_hint = 1;
+			break;
+#endif
 		case Opt_err:
 			btrfs_info(root->fs_info, "unrecognized mount option '%s'", p);
 			ret = -EINVAL;
@@ -1099,6 +1135,11 @@ static int btrfs_show_options(struct seq_file *seq, struct dentry *dentry)
 		seq_printf(seq, ",check_int_print_mask=%d",
 				info->check_integrity_print_mask);
 #endif
+#ifdef CONFIG_SYNO_BTRFS_FLUSHONCOMMIT_THRESHOLD
+	if (info->flushoncommit_threshold)
+		seq_printf(seq, ",flushoncommit_threshold=%d",
+				info->flushoncommit_threshold);
+#endif
 	if (info->metadata_ratio)
 		seq_printf(seq, ",metadata_ratio=%d",
 				info->metadata_ratio);
@@ -1106,6 +1147,10 @@ static int btrfs_show_options(struct seq_file *seq, struct dentry *dentry)
 		seq_puts(seq, ",fatal_errors=panic");
 	if (info->commit_interval != BTRFS_DEFAULT_COMMIT_INTERVAL)
 		seq_printf(seq, ",commit=%d", info->commit_interval);
+#ifdef CONFIG_SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+	if (info->no_block_group_hint)
+		seq_puts(seq, ",no_block_group_hint");
+#endif
 	return 0;
 }
 
@@ -1261,6 +1306,19 @@ static struct dentry *btrfs_mount(struct file_system_type *fs_type, int flags,
 
 	if (!(flags & MS_RDONLY))
 		mode |= FMODE_WRITE;
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	/* Initialize the data structures needed for
+	 * Btrfs checksum calculation- this is only
+	 * performed once and is freed on module exit
+	 */
+	if (!test_and_set_bit(1, &btrfs_csum_initialized)) {
+		error = btrfs_csum_init();
+
+		if (error)
+			return ERR_PTR(error);
+	}
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 	error = btrfs_parse_early_options(data, mode, fs_type,
 					  &subvol_name, &subvol_objectid,
@@ -1700,6 +1758,9 @@ static int btrfs_statfs(struct dentry *dentry, struct kstatfs *buf)
 	int bits = dentry->d_sb->s_blocksize_bits;
 	__be32 *fsid = (__be32 *)fs_info->fsid;
 	int ret;
+#ifdef CONFIG_SYNO_BTRFS_METADATA_RESERVE
+	u64 total_metadata = 0;
+#endif
 
 	/* holding chunk_muext to avoid allocating new chunks */
 	mutex_lock(&fs_info->chunk_mutex);
@@ -1710,6 +1771,11 @@ static int btrfs_statfs(struct dentry *dentry, struct kstatfs *buf)
 			total_free_data -=
 				btrfs_account_ro_block_groups_free_space(found);
 		}
+#ifdef CONFIG_SYNO_BTRFS_METADATA_RESERVE
+		if (found->flags & BTRFS_BLOCK_GROUP_METADATA) {
+			total_metadata += found->disk_total;
+		}
+#endif
 
 		total_used += found->disk_used;
 	}
@@ -1727,6 +1793,31 @@ static int btrfs_statfs(struct dentry *dentry, struct kstatfs *buf)
 		return ret;
 	}
 	buf->f_bavail += total_free_data;
+#ifdef CONFIG_SYNO_BTRFS_METADATA_RESERVE
+	if (fs_info->metadata_ratio) {
+		u64 reserved_for_metadata = btrfs_super_total_bytes(disk_super);
+
+		do_div(reserved_for_metadata, fs_info->metadata_ratio);
+		if (fs_info->avail_metadata_alloc_bits & BTRFS_BLOCK_GROUP_DUP)
+			reserved_for_metadata *= 2;
+		if (total_metadata < reserved_for_metadata) {
+			if ((reserved_for_metadata-total_metadata) < buf->f_bavail)
+				buf->f_bavail -= reserved_for_metadata-total_metadata;
+			else
+				buf->f_bavail = 0;
+		}
+		buf->f_blocks -= reserved_for_metadata >> bits;
+		if (buf->f_bfree >= reserved_for_metadata >> bits) {
+			buf->f_bfree -= reserved_for_metadata >> bits;
+		} else {
+			buf->f_bfree = 0;
+		}
+		if (buf->f_bfree > buf->f_blocks)
+			buf->f_bfree = buf->f_blocks;
+		else if (buf->f_bfree < (buf->f_bavail >> bits))
+			buf->f_bfree = buf->f_bavail >> bits;
+	}
+#endif
 	buf->f_bavail = buf->f_bavail >> bits;
 	mutex_unlock(&fs_info->chunk_mutex);
 
@@ -2158,6 +2249,9 @@ static void __exit exit_btrfs_fs(void)
 	extent_map_exit();
 	extent_io_exit();
 	btrfs_interface_exit();
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	btrfs_csum_exit();
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	unregister_filesystem(&btrfs_fs_type);
 	btrfs_exit_sysfs();
 	btrfs_cleanup_fs_uuids();

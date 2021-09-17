@@ -119,12 +119,25 @@ struct nand_bbt_descr {
  */
 #define NAND_BBT_NO_OOB_BBM	0x00080000
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+/* Handle STMicroelectronics H/W ECC schemes (boot-mode, AFM4) */
+#define NAND_BBT_SCANSTMBOOTECC	0x00080000
+#define NAND_BBT_SCANSTMAFMECC	0x00100000
+
+#endif /* CONFIG_SYNO_LSP_MONACO */
 /*
  * Flag set by nand_create_default_bbt_descr(), marking that the nand_bbt_descr
  * was allocated dynamicaly and must be freed in nand_release(). Has no meaning
  * in nand_chip.bbt_options.
  */
 #define NAND_BBT_DYNAMICSTRUCT	0x80000000
+
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+#ifdef CONFIG_MTD_NAND_NFC_MLC_SUPPORT
+/* Search the bad block indicators according to Marvell's Naked symantics */
+#define NAND_BBT_SCANMVCUSTOM	0x10000000
+#endif
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 /* The maximum number of blocks to scan for a bbt */
 #define NAND_BBT_SCAN_MAXBLOCKS	4
@@ -135,6 +148,21 @@ struct nand_bbt_descr {
 #define NAND_SMALL_BADBLOCK_POS		5
 #define NAND_LARGE_BADBLOCK_POS		0
 #define ONENAND_BADBLOCK_POS		0
+#if defined (CONFIG_SYNO_LSP_MONACO)
+
+/*
+ * Factory-programmed bad-block marker (BBM) flags
+ */
+#define NAND_BBM_PAGE_0		0x00000001
+#define NAND_BBM_PAGE_1		0x00000002
+#define NAND_BBM_PAGE_LAST	0x00000004
+#define NAND_BBM_PAGE_LMIN2	0x00000008
+#define NAND_BBM_PAGE_ALL	0x00000010
+#define NAND_BBM_BYTE_OOB_0	0x00000020
+#define NAND_BBM_BYTE_OOB_5	0x00000040
+#define NAND_BBM_BYTE_OOB_ALL	0x00000080
+#define NAND_BBM_BYTE_ALL	0x00000100
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 /*
  * Bad block scanning errors

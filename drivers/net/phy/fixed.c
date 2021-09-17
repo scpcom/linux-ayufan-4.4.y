@@ -195,6 +195,10 @@ int fixed_phy_add(unsigned int irq, int phy_id,
 
 	list_add_tail(&fp->node, &fmb->phys);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	mdiobus_scan(fmb->mii_bus, phy_id);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
 	return 0;
 
 err_regs:

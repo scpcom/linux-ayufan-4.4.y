@@ -371,6 +371,17 @@ int phy_device_register(struct phy_device *phydev)
 		goto out;
 	}
 
+#if defined(CONFIG_SYNO_PHY_INIT)
+	/* Init phy config if config_init is exist */
+	if (phydev->drv && phydev->drv->config_init) {
+		err = phydev->drv->config_init(phydev);
+		if (err) {
+			pr_err("PHY %d failed to initialize config\n", phydev->addr);
+			goto out;
+		}
+	}
+#endif /* CONFIG_SYNO_PHY_INIT */
+
 	return 0;
 
  out:

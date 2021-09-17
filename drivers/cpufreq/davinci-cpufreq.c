@@ -50,9 +50,13 @@ static int davinci_verify_speed(struct cpufreq_policy *policy)
 	if (policy->cpu)
 		return -EINVAL;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	cpufreq_verify_within_cpu_limits(policy);
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	cpufreq_verify_within_limits(policy, policy->cpuinfo.min_freq,
 				     policy->cpuinfo.max_freq);
 
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	policy->min = clk_round_rate(armclk, policy->min * 1000) / 1000;
 	policy->max = clk_round_rate(armclk, policy->max * 1000) / 1000;
 	cpufreq_verify_within_limits(policy, policy->cpuinfo.min_freq,

@@ -64,7 +64,11 @@ void kvm_clear_hyp_idmap(void);
 
 static inline void kvm_set_pte(pte_t *pte, pte_t new_pte)
 {
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	pte_val(*pte) = pte_val(new_pte);
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	pte_val(*pte) = new_pte;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	/*
 	 * flush_pmd_entry just takes a void pointer and cleans the necessary
 	 * cache entries, so we can reuse the function for ptes.

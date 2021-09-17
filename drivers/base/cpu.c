@@ -13,6 +13,9 @@
 #include <linux/gfp.h>
 #include <linux/slab.h>
 #include <linux/percpu.h>
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#include <linux/of.h>
+#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
 
 #include "base.h"
 
@@ -296,6 +299,9 @@ int __cpuinit register_cpu(struct cpu *cpu, int num)
 	cpu->dev.id = num;
 	cpu->dev.bus = &cpu_subsys;
 	cpu->dev.release = cpu_device_release;
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+	cpu->dev.of_node = of_get_cpu_node(num, NULL);
+#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
 #ifdef CONFIG_ARCH_HAS_CPU_AUTOPROBE
 	cpu->dev.bus->uevent = arch_cpu_uevent;
 #endif

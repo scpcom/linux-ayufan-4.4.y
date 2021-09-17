@@ -202,8 +202,15 @@ static void __init mv2120_init(void)
 	orion5x_uart0_init();
 	orion5x_xor_init();
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	mvebu_mbus_add_window_by_id(ORION_MBUS_DEVBUS_BOOT_TARGET,
+				    ORION_MBUS_DEVBUS_BOOT_ATTR,
+				    MV2120_NOR_BOOT_BASE,
+				    MV2120_NOR_BOOT_SIZE);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	mvebu_mbus_add_window("devbus-boot", MV2120_NOR_BOOT_BASE,
 			      MV2120_NOR_BOOT_SIZE);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	platform_device_register(&mv2120_nor_flash);
 
 	platform_device_register(&mv2120_button_device);

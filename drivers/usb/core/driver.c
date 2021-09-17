@@ -1473,7 +1473,17 @@ int usb_resume(struct device *dev, pm_message_t msg)
  */
 void usb_enable_autosuspend(struct usb_device *udev)
 {
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+	/*
+	 * FIXME: This patch is a WA to avoid issue when a hub is used and PM_RUNTIME
+	 * is enabled. So we keep system PM_runtime ON and only prevent usb to autosuspend
+	 * up to find a clean fix for this issue.
+	 */
+
+/*        pm_runtime_allow(&udev->dev);*/
+#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
 	pm_runtime_allow(&udev->dev);
+#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
 }
 EXPORT_SYMBOL_GPL(usb_enable_autosuspend);
 

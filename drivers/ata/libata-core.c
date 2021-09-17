@@ -135,6 +135,10 @@ extern int SYNO_CTRL_HDD_POWERON(int index, int value);
 extern int SYNO_CHECK_HDD_PRESENT(int index);
 #endif /* CONFIG_SYNO_ATA_PWR_CTRL */
 
+#ifndef CONFIG_SYNO_SATA_WCACHE_DISABLE
+static int glob_match (const char *text, const char *pattern);
+#endif
+
 /* param_buf is thrown away after initialization, disallow read */
 module_param_string(force, ata_force_param_buf, sizeof(ata_force_param_buf), 0);
 MODULE_PARM_DESC(force, "Force ATA configurations including cable type, link speed and transfer mode (see Documentation/kernel-parameters.txt for details)");
@@ -2350,6 +2354,9 @@ int ata_dev_configure(struct ata_device *dev)
 	char fwrevbuf[ATA_ID_FW_REV_LEN+1];
 	char modelbuf[ATA_ID_PROD_LEN+1];
 	int rc;
+#ifdef CONFIG_SYNO_DISK_NCQ_COMPATIBILITY
+	struct pci_dev *pdev = NULL;
+#endif
 
 	if (!ata_dev_enabled(dev) && ata_msg_info(ap)) {
 		ata_dev_info(dev, "%s: ENTER/EXIT -- nodev\n", __func__);
@@ -2496,6 +2503,16 @@ int ata_dev_configure(struct ata_device *dev)
 
 	ata_id_c_string(dev->id, modelbuf, ATA_ID_PROD,
 			sizeof(modelbuf));
+
+#ifdef CONFIG_SYNO_DISK_NCQ_COMPATIBILITY
+	/* We disable ncq cmd of WD7500BPKX on 88SE9215 ports to avoid ata error*/
+	pdev = to_pci_dev(ap->host->dev);
+	if (pdev != NULL && pdev->device == 0x9215) {
+		if (!glob_match(modelbuf, "WDC WD7500BPKX-*")) {
+			dev->horkage |= ATA_HORKAGE_NONCQ;
+		}
+	}
+#endif
 
 	/* ATA-specific feature tests */
 	if (dev->class == ATA_DEV_ATA) {

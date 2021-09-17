@@ -904,6 +904,9 @@ int snd_pcm_start(struct snd_pcm_substream *substream)
 	return snd_pcm_action(&snd_pcm_action_start, substream,
 			      SNDRV_PCM_STATE_RUNNING);
 }
+#if defined (CONFIG_SYNO_LSP_MONACO)
+EXPORT_SYMBOL_GPL(snd_pcm_start);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 /*
  * stop callbacks

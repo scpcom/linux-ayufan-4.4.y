@@ -1853,7 +1853,7 @@ void bond_alb_info_show(struct seq_file *seq)
 	seq_puts(seq, "  Index Slave    Assigned Client-MAC"
 		      "         Server -> Client\n");
 
-	_lock_rx_hashtbl(bond);
+	_lock_rx_hashtbl_bh(bond);
 
 	index = bond_info->rx_hashtbl_used_head;
 	for (; index != RLB_NULL_INDEX;
@@ -1879,7 +1879,7 @@ void bond_alb_info_show(struct seq_file *seq)
 		}
 	}
 
-	_unlock_rx_hashtbl(bond);
+	_unlock_rx_hashtbl_bh(bond);
 
 	seq_puts(seq, "\n Transmit Load Balancing table:\n");
 	seq_printf(seq,	"  Unbalanced load: %u\n"
@@ -1887,7 +1887,7 @@ void bond_alb_info_show(struct seq_file *seq)
 			bond_info->unbalanced_load,
 			BOND_TLB_REBALANCE_INTERVAL);
 
-	_lock_tx_hashtbl(bond);
+	_lock_tx_hashtbl_bh(bond);
 
 	/* Process each slave */
 	bond_for_each_slave(bond, slave, i) {
@@ -1922,6 +1922,6 @@ void bond_alb_info_show(struct seq_file *seq)
 		}
 	}
 
-	_unlock_tx_hashtbl(bond);
+	_unlock_tx_hashtbl_bh(bond);
 }
 #endif /* CONFIG_SYNO_NET_BOND_ALB_INFO */

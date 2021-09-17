@@ -61,6 +61,11 @@ struct mtd_part_parser_data {
 	struct device_node *of_node;
 };
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+struct mtd_info *get_mtd_partition_slave(struct mtd_info *master, char *name,
+					 uint64_t *offset);
+
+#endif /* CONFIG_SYNO_LSP_MONACO */
 /*
  * Functions dealing with the various ways of partitioning the space
  */

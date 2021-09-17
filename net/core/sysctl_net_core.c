@@ -153,6 +153,15 @@ static struct ctl_table net_core_table[] = {
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec
 	},
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	{
+		.procname	= "hh_output_relaxed",
+		.data		= &hh_output_relaxed,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= proc_dointvec
+	},
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	{
 		.procname	= "message_cost",
 		.data		= &net_ratelimit_state.interval,
@@ -174,6 +183,15 @@ static struct ctl_table net_core_table[] = {
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec
 	},
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	{
+		.procname	= "netdev_skb_tstamp",
+		.data		= &netdev_skb_tstamp,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= proc_dointvec
+	},
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 #ifdef CONFIG_RPS
 	{
 		.procname	= "rps_sock_flow_entries",

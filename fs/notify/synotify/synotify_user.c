@@ -17,6 +17,7 @@
 #include <linux/mount.h> /* struct vfsmount */
 
 #include <asm/ioctls.h>
+#include <asm-generic/bitsperlong.h>
 #include "../../mount.h"
 
 #define SYNOTIFY_DEFAULT_MAX_EVENTS	16384 /* per group */
@@ -364,9 +365,6 @@ SYSCALL_DEFINE1(SYNONotifyInit, unsigned int, flags)
 	int fd = 0;
 	struct user_struct *user;
 
-	if (!capable(CAP_SYS_ADMIN))
-		return -EPERM;
-
 	pr_debug("%s: flags=%x\n",__func__, flags);
 
 	if(flags & ~(SYNO_NONBLOCK | SYNO_CLOEXEC))
@@ -380,6 +378,9 @@ SYSCALL_DEFINE1(SYNONotifyInit, unsigned int, flags)
 	}
 
 	user = get_current_user();
+	if (user->uid != 0) {
+		return -EPERM;
+	}
 	if (atomic_read(&user->synotify_instances) > SYNOTIFY_DEFAULT_MAX_INSTANCES) {
 		free_uid(user);
 		return -EMFILE;
@@ -511,6 +512,18 @@ fput_and_out:
 	fput_light(filp, fput_needed);
 	return ret;
 }
+
+#if BITS_PER_LONG == 32
+SYSCALL_DEFINE3(SYNONotifyRemoveWatch32, int, synotify_fd, const char __user *, pathname, __u32, mask){
+	__u64 mask64 = ((__u64)mask & 0xffffffffULL);
+	return sys_SYNONotifyRemoveWatch(synotify_fd, pathname, mask64);
+}
+
+SYSCALL_DEFINE3(SYNONotifyAddWatch32, int, synotify_fd, const char __user *, pathname, __u32, mask){
+	__u64 mask64 = ((__u64)mask & 0xffffffffULL);
+	return sys_SYNONotifyAddWatch(synotify_fd, pathname, mask64);
+}
+#endif /* BITS_PER_LONG == 32 */
 
 static int __init synotify_user_setup(void)
 {

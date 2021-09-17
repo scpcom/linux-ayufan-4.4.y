@@ -21,11 +21,15 @@
 #include <linux/linkage.h>
 #include <linux/init.h>
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+#include <asm/assembler.h>
+#else /* CONFIG_SYNO_LSP_ARMADA */
 /*
  * At this stage the secondary CPUs don't have acces yet to the MMU, so
  * we have to provide physical addresses
  */
 #define ARMADA_XP_CFB_BASE	     0xD0020200
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 	__CPUINIT
 
@@ -35,6 +39,13 @@
  * startup
  */
 ENTRY(armada_xp_secondary_startup)
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+ ARM_BE8(setend	be )			@ go BE8 if entered LE
+
+	bl	ll_add_cpu_to_smp_group
+
+	bl	ll_enable_coherency
+#else /* CONFIG_SYNO_LSP_ARMADA */
 
 	/* Read CPU id */
 	mrc     p15, 0, r1, c0, c0, 5
@@ -44,6 +55,7 @@ ENTRY(armada_xp_secondary_startup)
 	ldr     r0, =ARMADA_XP_CFB_BASE
 
 	bl	ll_set_cpu_coherent
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	b	secondary_startup
 
 ENDPROC(armada_xp_secondary_startup)

@@ -3318,9 +3318,14 @@ SiSSetMode(struct SiS_Private *SiS_Pr, unsigned short ModeNo)
 }
 
 #ifndef GETBITSTR
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#define GENBITSMASK(mask)   	GENMASK(1?mask,0?mask)
+#define GETBITS(var,mask)   	(((var) & GENBITSMASK(mask)) >> (0?mask))
+#else /* CONFIG_SYNO_LSP_MONACO */
 #define BITMASK(h,l)    	(((unsigned)(1U << ((h)-(l)+1))-1)<<(l))
 #define GENMASK(mask)   	BITMASK(1?mask,0?mask)
 #define GETBITS(var,mask)   	(((var) & GENMASK(mask)) >> (0?mask))
+#endif /* CONFIG_SYNO_LSP_MONACO */
 #define GETBITSTR(val,from,to)  ((GETBITS(val,from)) << (0?to))
 #endif
 

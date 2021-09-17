@@ -866,6 +866,10 @@ static void of_register_spi_devices(struct spi_master *master)
 			spi->mode |= SPI_CS_HIGH;
 		if (of_find_property(nc, "spi-3wire", NULL))
 			spi->mode |= SPI_3WIRE;
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+		if (of_find_property(nc, "spi-1byte-cs", NULL))
+			spi->mode |= SPI_1BYTE_CS;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 		/* Device speed */
 		prop = of_get_property(nc, "spi-max-frequency", &len);
@@ -1327,13 +1331,20 @@ int spi_setup(struct spi_device *spi)
 	if (spi->master->setup)
 		status = spi->master->setup(spi);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	dev_dbg(&spi->dev, "setup mode %d, %s%s%s%s%s"
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	dev_dbg(&spi->dev, "setup mode %d, %s%s%s%s"
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 				"%u bits/w, %u Hz max --> %d\n",
 			(int) (spi->mode & (SPI_CPOL | SPI_CPHA)),
 			(spi->mode & SPI_CS_HIGH) ? "cs_high, " : "",
 			(spi->mode & SPI_LSB_FIRST) ? "lsb, " : "",
 			(spi->mode & SPI_3WIRE) ? "3wire, " : "",
 			(spi->mode & SPI_LOOP) ? "loopback, " : "",
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+			(spi->mode & SPI_1BYTE_CS) ? "single_cs_byte, " : "",
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 			spi->bits_per_word, spi->max_speed_hz,
 			status);
 
@@ -1382,6 +1393,26 @@ static int __spi_async(struct spi_device *spi, struct spi_message *message)
 					BIT(xfer->bits_per_word - 1)))
 				return -EINVAL;
 		}
+
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+		if (!xfer->speed_hz)
+			xfer->speed_hz = spi->max_speed_hz;
+		if (master->min_speed_hz &&
+		    xfer->speed_hz < master->min_speed_hz)
+			return -EINVAL;
+		if (master->max_speed_hz &&
+		    xfer->speed_hz > master->max_speed_hz)
+			xfer->speed_hz = master->max_speed_hz;
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+		if (xfer->speed_hz && master->min_speed_hz &&
+		    xfer->speed_hz < master->min_speed_hz)
+			return -EINVAL;
+		if (xfer->speed_hz && master->max_speed_hz &&
+		    xfer->speed_hz > master->max_speed_hz)
+			return -EINVAL;
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	}
 
 	message->spi = spi;

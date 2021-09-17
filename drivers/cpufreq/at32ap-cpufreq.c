@@ -108,7 +108,11 @@ static int __init at32_cpufreq_driver_init(struct cpufreq_policy *policy)
 
 static struct cpufreq_driver at32_driver = {
 	.name		= "at32ap",
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	.owner		= THIS_MODULE,
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	.init		= at32_cpufreq_driver_init,
 	.verify		= at32_verify_speed,
 	.target		= at32_set_target,

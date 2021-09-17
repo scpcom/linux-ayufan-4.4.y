@@ -100,6 +100,9 @@ static inline void set_fs(mm_segment_t fs)
 extern int __get_user_1(void *);
 extern int __get_user_2(void *);
 extern int __get_user_4(void *);
+#ifdef CONFIG_SYNO_EXT4_FIX_RESIZE_16TB_IN_32BIT
+extern int __get_user_8(void *);
+#endif /* CONFIG_SYNO_EXT4_FIX_RESIZE_16TB_IN_32BIT */
 
 #define __GUP_CLOBBER_1	"lr", "cc"
 #ifdef CONFIG_CPU_USE_DOMAINS
@@ -108,6 +111,9 @@ extern int __get_user_4(void *);
 #define __GUP_CLOBBER_2 "lr", "cc"
 #endif
 #define __GUP_CLOBBER_4	"lr", "cc"
+#ifdef CONFIG_SYNO_EXT4_FIX_RESIZE_16TB_IN_32BIT
+#define __GUP_CLOBBER_8	"lr", "cc"
+#endif /* CONFIG_SYNO_EXT4_FIX_RESIZE_16TB_IN_32BIT */
 
 #define __get_user_x(__r2,__p,__e,__l,__s)				\
 	   __asm__ __volatile__ (					\
@@ -118,6 +124,43 @@ extern int __get_user_4(void *);
 		: "0" (__p), "r" (__l)					\
 		: __GUP_CLOBBER_##__s)
 
+#ifdef CONFIG_CPU_BIG_ENDIAN
+#define __get_user_xb(__r2,__p,__e,__l,__s)				\
+	   __get_user_x(__r2,(uintptr_t)__p + 4,__e,__l,__s)
+#else
+#define __get_user_xb __get_user_x
+#endif
+
+#ifdef CONFIG_SYNO_EXT4_FIX_RESIZE_16TB_IN_32BIT
+#define __get_user_check(x,p)							\
+	({								\
+		unsigned long __limit = current_thread_info()->addr_limit - 1; \
+		register const typeof(*(p)) __user *__p asm("r0") = (p);\
+		register typeof(x) __r2 asm("r2");					\
+		register unsigned long __l asm("r1") = __limit;		\
+		register int __e asm("r0");				\
+		switch (sizeof(*(__p))) {				\
+		case 1:							\
+			__get_user_x(__r2, __p, __e, __l, 1);		\
+			break;						\
+		case 2:							\
+			__get_user_x(__r2, __p, __e, __l, 2);		\
+			break;						\
+		case 4:							\
+			__get_user_x(__r2, __p, __e, __l, 4);		\
+			break;						\
+		case 8:							\
+			if (sizeof((x)) < 8)		\
+				__get_user_xb(__r2, __p, __e, __l, 4);	\
+			else						\
+				__get_user_x(__r2, __p, __e, __l, 8);	\
+			break;						\
+		default: __e = __get_user_bad(); break;			\
+		}							\
+		x = (typeof(*(p))) __r2;				\
+		__e;							\
+	})
+#else /* CONFIG_SYNO_EXT4_FIX_RESIZE_16TB_IN_32BIT */
 #define __get_user_check(x,p)							\
 	({								\
 		unsigned long __limit = current_thread_info()->addr_limit - 1; \
@@ -140,6 +183,7 @@ extern int __get_user_4(void *);
 		x = (typeof(*(p))) __r2;				\
 		__e;							\
 	})
+#endif /* CONFIG_SYNO_EXT4_FIX_RESIZE_16TB_IN_32BIT */
 
 #define get_user(x,p)							\
 	({								\
@@ -274,6 +318,25 @@ do {									\
 	: "cc")
 
 #ifndef __ARMEB__
+#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_VHOST_NET)
+#define __get_user_asm_half(x,addr,err)				\
+	__asm__ __volatile__(					\
+	"1:	" TUSER(ldrh) "	%1,[%2],#0\n"			\
+	"2:\n"							\
+	"	.pushsection .fixup,\"ax\"\n"			\
+	"	.align	2\n"					\
+	"3:	mov	%0, %3\n"				\
+	"	mov	%1, #0\n"				\
+	"	b	2b\n"					\
+	"	.popsection\n"					\
+	"	.pushsection __ex_table,\"a\"\n"		\
+	"	.align	3\n"					\
+	"	.long	1b, 3b\n"				\
+	"	.popsection"					\
+	: "+r" (err), "=&r" (x)					\
+	: "r" (addr), "i" (-EFAULT)				\
+	: "cc")
+#else /* CONFIG_SYNO_LSP_ALPINE && CONFIG_VHOST_NET */
 #define __get_user_asm_half(x,__gu_addr,err)			\
 ({								\
 	unsigned long __b1, __b2;				\
@@ -281,7 +344,8 @@ do {									\
 	__get_user_asm_byte(__b2, __gu_addr + 1, err);		\
 	(x) = __b1 | (__b2 << 8);				\
 })
-#else
+#endif /* CONFIG_SYNO_LSP_ALPINE && CONFIG_VHOST_NET */
+#else /* ARMEB */
 #define __get_user_asm_half(x,__gu_addr,err)			\
 ({								\
 	unsigned long __b1, __b2;				\
@@ -355,13 +419,32 @@ do {									\
 	: "cc")
 
 #ifndef __ARMEB__
+#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_VHOST_NET)
+#define __put_user_asm_half(x,__pu_addr,err)			\
+	__asm__ __volatile__(					\
+	"1:	" TUSER(strh) "	%1,[%2],#0\n"			\
+	"2:\n"							\
+	"	.pushsection .fixup,\"ax\"\n"			\
+	"	.align	2\n"					\
+	"3:	mov	%0, %3\n"				\
+	"	b	2b\n"					\
+	"	.popsection\n"					\
+	"	.pushsection __ex_table,\"a\"\n"		\
+	"	.align	3\n"					\
+	"	.long	1b, 3b\n"				\
+	"	.popsection"					\
+	: "+r" (err)						\
+	: "r" (x), "r" (__pu_addr), "i" (-EFAULT)		\
+	: "cc")
+#else /* CONFIG_SYNO_LSP_ALPINE && CONFIG_VHOST_NET */
 #define __put_user_asm_half(x,__pu_addr,err)			\
 ({								\
 	unsigned long __temp = (unsigned long)(x);		\
 	__put_user_asm_byte(__temp, __pu_addr, err);		\
 	__put_user_asm_byte(__temp >> 8, __pu_addr + 1, err);	\
 })
-#else
+#endif /* CONFIG_SYNO_LSP_ALPINE && CONFIG_VHOST_NET */
+#else /* ARMEB */
 #define __put_user_asm_half(x,__pu_addr,err)			\
 ({								\
 	unsigned long __temp = (unsigned long)(x);		\

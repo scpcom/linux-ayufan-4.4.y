@@ -43,6 +43,10 @@
 #include <linux/device.h>
 #include <linux/dmi.h>
 #include <linux/gfp.h>
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#include <linux/gpio.h>
+#include <linux/of_gpio.h>
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 #include <scsi/scsi_host.h>
 #include <scsi/scsi_cmnd.h>
 #ifdef CONFIG_SYNO_ATA_AHCI_LED_SGPIO
@@ -54,6 +58,10 @@
 #endif /* CONFIG_SYNO_ATA_AHCI_LED_SGPIO */
 #include <linux/libata.h>
 #include "ahci.h"
+#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_ARCH_ALPINE)
+#include "al_hal_iofic.h"
+#include "al_hal_iofic_regs.h"
+#endif /* CONFIG_SYNO_LSP_ALPINE && CONFIG_ARCH_ALPINE */
 
 #define DRV_NAME	"ahci"
 #define DRV_VERSION	"3.0"
@@ -87,6 +95,9 @@ enum board_ids {
 	board_ahci_sb600,
 	board_ahci_sb700,	/* for SB700 and SB800 */
 	board_ahci_vt8251,
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	board_ahci_alpine,
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 	/* aliases */
 	board_ahci_mcp_linux	= board_ahci_mcp65,
@@ -126,6 +137,16 @@ static struct ata_port_operations ahci_p5wdh_ops = {
 	.inherits		= &ahci_ops,
 	.hardreset		= ahci_p5wdh_hardreset,
 };
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+ssize_t al_ahci_transmit_led_message(struct ata_port *ap, u32 state,
+					    ssize_t size);
+
+static struct ata_port_operations ahci_al_ops = {
+	.inherits		= &ahci_ops,
+	.transmit_led_message   = al_ahci_transmit_led_message,
+};
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 static const struct ata_port_info ahci_port_info[] = {
 	/* by features */
@@ -231,6 +252,15 @@ static const struct ata_port_info ahci_port_info[] = {
 		.udma_mask	= ATA_UDMA6,
 		.port_ops	= &ahci_vt8251_ops,
 	},
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	[board_ahci_alpine] = {
+		AHCI_HFLAGS	(AHCI_HFLAG_NO_PMP | AHCI_HFLAG_MSIX),
+		.flags		= AHCI_FLAG_COMMON,
+		.pio_mask	= ATA_PIO4,
+		.udma_mask	= ATA_UDMA6,
+		.port_ops	= &ahci_al_ops,
+	},
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 };
 
 static const struct pci_device_id ahci_pci_tbl[] = {
@@ -356,6 +386,11 @@ static const struct pci_device_id ahci_pci_tbl[] = {
 	{ PCI_VDEVICE(ATI, 0x4393), board_ahci_sb700 }, /* ATI SB700/800 */
 	{ PCI_VDEVICE(ATI, 0x4394), board_ahci_sb700 }, /* ATI SB700/800 */
 	{ PCI_VDEVICE(ATI, 0x4395), board_ahci_sb700 }, /* ATI SB700/800 */
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	/* Annapurna Labs */
+	{ PCI_VDEVICE(ANNAPURNA_LABS, 0x0031), board_ahci_alpine }, /* 0031 */
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 	/* AMD */
 	{ PCI_VDEVICE(AMD, 0x7800), board_ahci }, /* AMD Hudson-2 */
@@ -484,12 +519,12 @@ static const struct pci_device_id ahci_pci_tbl[] = {
 	  .driver_data = board_ahci_yes_fbs },
 	{ PCI_DEVICE(PCI_VENDOR_ID_MARVELL_EXT, 0x9230),
 	  .driver_data = board_ahci_yes_fbs },
-#ifdef CONFIG_SYNO_MV_9235_PORTING
+#if defined(CONFIG_SYNO_MV_9235_PORTING) || defined(CONFIG_SYNO_LSP_ALPINE)
 	{ PCI_DEVICE(PCI_VENDOR_ID_MARVELL_EXT, 0x9235),
 	  .driver_data = board_ahci_yes_fbs },			/* 88se9235 */
 	{ PCI_DEVICE(PCI_VENDOR_ID_MARVELL_EXT, 0x9215),
 	  .driver_data = board_ahci_yes_fbs },			/* 88se9215 */
-#endif /* CONFIG_SYNO_MV_9235_PORTING */
+#endif /* CONFIG_SYNO_MV_9235_PORTING || CONFIG_SYNO_LSP_ALPINE */
 #ifdef CONFIG_SYNO_SATA_AHCI_FBS_NONCQ
 	{ PCI_DEVICE(PCI_VENDOR_ID_MARVELL_EXT, 0x9170),
 	  .driver_data = board_ahci_yes_fbs_no_ncq },   /* 88se9170 */
@@ -521,6 +556,13 @@ static const struct pci_device_id ahci_pci_tbl[] = {
 };
 
 #ifdef CONFIG_SYNO_MV_9235_GPIO_CTRL
+
+#define MV_GEN 3
+#define MV_PORT 4
+/* The register addrs are provided by Marvell and no description on spec */
+const unsigned int mv_sata_gen[MV_GEN] = {0x8D, 0x8F, 0x91};
+const unsigned mv_port_addr[MV_PORT] = {0x178, 0x1f8, 0x278, 0x2f8};
+const unsigned mv_port_data[MV_PORT] = {0x17c, 0x1fc, 0x27c, 0x2fc};
 
 /*
  * 9235 gpio mmio address, to control 9235 GPIO, please read register manual section 1.6
@@ -577,6 +619,45 @@ END:
 }
 
 /*
+ *	Get value from 9xxx vendor spec register2
+ */
+static u32 syno_mv_9xxx_reg_get(struct ata_host *host, const unsigned int reg_addr, unsigned int addr_offset, unsigned int data_offset)
+{
+	void __iomem *host_mmio = NULL;
+	u32 value = 0;
+
+	if(NULL == (host_mmio = ahci_host_base(host))) {
+		goto END;
+	}
+
+	// write to 9xxx from register
+	writel(reg_addr, host_mmio + addr_offset);
+	// read original value from register
+	value = readl(host_mmio + data_offset);
+END:
+	return value;
+}
+
+/*
+ *	Set value to 9xxx vendor spec register2
+ */
+static void syno_mv_9xxx_reg_set(struct ata_host *host, const unsigned int reg_addr, u32 value, const unsigned int addr_offset, const unsigned int data_offset)
+{
+	void __iomem *host_mmio = NULL;
+
+	if(NULL == (host_mmio = ahci_host_base(host))) {
+		goto END;
+	}
+
+	// set 9xxx register for writting
+	writel(reg_addr, host_mmio + addr_offset);
+	// then write value to it
+	writel(value, host_mmio + data_offset);
+END:
+	return;
+}
+
+/*
  *	9235 GPIO init
  */
 void syno_mv_9235_gpio_active_init(struct ata_host *host)
@@ -586,6 +667,50 @@ void syno_mv_9235_gpio_active_init(struct ata_host *host)
 	syno_mv_9235_gpio_reg_set(host, MV_9235_GPIO_DATA_OUT, 0x0);
 	// set the lower 4 GPIO as link/active to disk 1~4 and upper 4 GPIO as faulty to disk 1~4
 	syno_mv_9235_gpio_reg_set(host, MV_9235_GPIO_ACTIVE, 0x00B6D8D1);
+}
+
+void syno_mv_9xxx_amp_adjust_by_port(struct ata_host *host, u32 val, unsigned int addr_offset, const unsigned int data_offset, const unsigned int reg_addr)
+{
+	u32 reg_val = 0;
+
+	reg_val = syno_mv_9xxx_reg_get(host, 0x0E, addr_offset, data_offset);
+	syno_mv_9xxx_reg_set(host, 0xE, reg_val & ~0x100, addr_offset, data_offset);
+	reg_val = syno_mv_9xxx_reg_get(host, reg_addr, addr_offset, data_offset);
+	reg_val &= ~0xFBE;
+	reg_val |= val;
+	syno_mv_9xxx_reg_set(host, reg_addr, reg_val, addr_offset, data_offset);
+}
+
+void syno_mv_9xxx_amp_adjust(struct ata_host *host)
+{
+	int port = 0;
+
+	if (syno_is_hw_version(HW_RS2416p) || syno_is_hw_version(HW_RS2416rpp)) {
+		for (port = 0; port < 4; port++) {
+			// set G3_TX_EMPH_EN = 1, G3_TX_EMPH_AMP = 0xF, G3_TX_AMP = 0x1F
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xFBE, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+		}
+	} else if (syno_is_hw_version(HW_DS416p)) {
+		// set port1 & port2 G3_TX_EMPH_EN = 1, G3_TX_EMPH_AMP = 0xF, G3_TX_AMP = 0x1F
+		port = 1;
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xFBE, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+
+		// ESATA port
+		port = 2;
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xFBE, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+	} else if (syno_is_hw_version(HW_DS716p)) {
+		// set port0  GX_TX_EMPH_EN = 1, GX_TX_EMPH_AMP = 0xF, GX_TX_AMP = 0x1F
+		port = 0;
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xFBE, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xFBE, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xFBE, mv_port_addr[port], mv_port_data[port], mv_sata_gen[0]);
+	} else if (syno_is_hw_version(HW_DS1616p)) {
+		// set port0 port1 G2_TX_EMPH_EN = 1, G2_TX_EMPH_AMP = 0xC, G2_TX_AMP = 0x1F
+		port = 0;
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xE3E, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+		port = 1;
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xE3E, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+	}
 }
 
 int syno_mv_9235_disk_led_get(const unsigned short hostnum)
@@ -1298,10 +1423,161 @@ static inline void ahci_gtf_filter_workaround(struct ata_host *host)
 {}
 #endif
 
+#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_ARCH_ALPINE)
+#define al_ahci_iofic_base(base)	((base) + 0x2000)
+
+static ssize_t al_ahci_show_msix_moder(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	struct ata_host *host = dev_get_drvdata(dev);
+	struct ahci_host_priv *hpriv = host->private_data;
+	ssize_t rc = 0;
+
+	rc = sprintf(buf, "%d\n", hpriv->int_moderation);
+
+	return rc;
+}
+
+static ssize_t al_ahci_store_msix_moder(struct device *dev,
+		struct device_attribute *attr,
+		const char *buf, size_t len)
+{
+	struct ata_host *host = dev_get_drvdata(dev);
+	struct ahci_host_priv *hpriv = host->private_data;
+	unsigned long interval;
+	int err;
+	int i;
+
+	err = kstrtoul(buf, 10, &interval);
+	if (err < 0)
+		return err;
+
+	for (i = 0; i < ahci_nr_ports(hpriv->cap); i++)
+		al_iofic_msix_moder_interval_config(
+				al_ahci_iofic_base(hpriv->mmio),
+				1 /*GROUP_B*/,
+				i,
+				interval);
+
+	hpriv->int_moderation = interval;
+
+	return len;
+}
+
+static struct device_attribute dev_attr_moder = {
+	.attr = {.name = "msix_moder", .mode = (S_IRUGO | S_IWUSR)},
+	.show = al_ahci_show_msix_moder,
+	.store = al_ahci_store_msix_moder,
+};
+
+int al_ahci_sysfs_init(
+	struct device *dev)
+{
+	if (device_create_file(dev, &dev_attr_moder))
+		dev_err(dev, "failed to create msix interrupt moderation sysfs entry");
+
+	return 0;
+}
+
+/******************************************************************************
+ *****************************************************************************/
+void al_ahci_sysfs_terminate(
+	struct device *dev)
+{
+	device_remove_file(dev, &dev_attr_moder);
+}
+
+irqreturn_t ahci_hw_port_interrupt_handler(int irq, void *dev_instance)
+{
+	struct ata_port *ap_this = dev_instance;
+	struct ata_host *host = ap_this->host;
+	struct ahci_host_priv *hpriv = host->private_data;
+	void __iomem *iofic_base = al_ahci_iofic_base(hpriv->mmio);
+	VPRINTK("ENTER\n");
+
+	spin_lock(ap_this->lock);
+	ahci_port_intr(ap_this);
+
+	spin_unlock(ap_this->lock);
+
+	spin_lock(&host->lock);
+	/* clean host cause */
+	writel(1 << ap_this->port_no, hpriv->mmio + HOST_IRQ_STAT);
+
+	/* unmask the interrupt in the iofic (auto-masked) */
+	al_iofic_unmask(iofic_base, 1, 1 << ap_this->port_no);
+	spin_unlock(&host->lock);
+
+	VPRINTK("EXIT\n");
+
+	return IRQ_HANDLED;
+}
+
+int al_ahci_init_msix(struct pci_dev *pdev, struct ahci_host_priv *hpriv)
+{
+	unsigned int msix_vecs = ahci_nr_ports(readl(hpriv->mmio + HOST_CAP));
+	int i;
+	int rc;
+	void __iomem *iofic_base = al_ahci_iofic_base(hpriv->mmio);
+
+	hpriv->msix_entries = NULL;
+
+	dev_info(&pdev->dev, "use MSIX for ahci controller. vectors: %u\n",
+			msix_vecs);
+	hpriv->msix_entries = kcalloc(msix_vecs, sizeof(struct msix_entry), GFP_KERNEL);
+
+	if (!hpriv->msix_entries) {
+		dev_err(&pdev->dev, "failed to allocate msix_entries, vectors %d\n",
+				msix_vecs);
+		return -ENOMEM;
+	}
+
+	for (i = 0; i < msix_vecs; i++) {
+		hpriv->msix_entries[i].entry = 3 + i;
+		hpriv->msix_entries[i].vector = 0;
+	}
+
+	rc = pci_enable_msix(pdev, hpriv->msix_entries, msix_vecs);
+
+	if (rc) {
+		dev_info(&pdev->dev,"failed to enable MSIX, vectors %d rc %d\n",
+				msix_vecs, rc);
+		kfree(hpriv->msix_entries);
+		hpriv->msix_entries = NULL;
+		/* maybe we shoudl fall back to intx*/
+		return -EPERM;
+	}
+
+	/* we use only group B */
+	al_iofic_config(iofic_base, 1 /*GROUP_B*/,
+			INT_CONTROL_GRP_SET_ON_POSEDGE |
+			INT_CONTROL_GRP_AUTO_CLEAR |
+			INT_CONTROL_GRP_AUTO_MASK |
+			INT_CONTROL_GRP_CLEAR_ON_READ);
+
+	al_iofic_moder_res_config(iofic_base, 1, 15);
+
+        al_iofic_unmask(iofic_base, 1, (1 << msix_vecs) - 1);
+
+	hpriv->msix_vecs = msix_vecs;
+
+	al_ahci_sysfs_init(&pdev->dev);
+
+	return 0;
+}
+#endif /* CONFIG_SYNO_LSP_ALPINE && CONFIG_ARCH_ALPINE */
+
 int ahci_init_interrupts(struct pci_dev *pdev, struct ahci_host_priv *hpriv)
 {
 	int rc;
 	unsigned int maxvec;
+
+#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_ARCH_ALPINE)
+	if (hpriv->flags & AHCI_HFLAG_MSIX) {
+		if (!al_ahci_init_msix(pdev, hpriv))
+			return hpriv->msix_vecs;
+	}
+#endif /* CONFIG_SYNO_LSP_ALPINE && CONFIG_ARCH_ALPINE */
 
 	if (!(hpriv->flags & AHCI_HFLAG_NO_MSI)) {
 		rc = pci_enable_msi_block_auto(pdev, &maxvec);
@@ -1343,6 +1619,10 @@ int ahci_init_interrupts(struct pci_dev *pdev, struct ahci_host_priv *hpriv)
 int ahci_host_activate(struct ata_host *host, int irq, unsigned int n_msis)
 {
 	int i, rc;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	struct ahci_host_priv *hpriv = host->private_data;
+	int port_irq;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 	/* Sharing Last Message among several ports is not supported */
 	if (n_msis < host->n_ports)
@@ -1353,15 +1633,56 @@ int ahci_host_activate(struct ata_host *host, int irq, unsigned int n_msis)
 		return rc;
 
 	for (i = 0; i < host->n_ports; i++) {
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+		struct ata_port *ap = host->ports[i];
+		struct ahci_port_priv *pp = ap->private_data;
+
+		if (hpriv->msix_entries) {
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#ifdef CONFIG_ARCH_ALPINE
+			port_irq = hpriv->msix_entries[i].vector;
+			snprintf(pp->msix_name, sizeof(pp->msix_name), "ahci_%u",
+					ap->port_no);
+			rc = devm_request_irq(host->dev,
+					port_irq, ahci_hw_port_interrupt_handler,
+					0, pp->msix_name, ap);
+#else /* CONFIG_ARCH_ALPINE */
+			BUG();
+#endif /* CONFIG_ARCH_ALPINE */
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+		} else {
+			port_irq = irq + i;
+			rc = devm_request_threaded_irq(host->dev,
+					port_irq, ahci_hw_interrupt,
+					ahci_thread_fn, IRQF_SHARED,
+					dev_driver_string(host->dev), host->ports[i]);
+		}
+#else /* CONFIG_SYNO_LSP_ALPINE */
 		rc = devm_request_threaded_irq(host->dev,
 			irq + i, ahci_hw_interrupt, ahci_thread_fn, IRQF_SHARED,
 			dev_driver_string(host->dev), host->ports[i]);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
 		if (rc)
 			goto out_free_irqs;
 	}
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	for (i = 0; i < host->n_ports; i++) {
+		if (hpriv->msix_entries)
+#ifdef CONFIG_ARCH_ALPINE
+			port_irq = hpriv->msix_entries[i].vector;
+#else /* CONFIG_ARCH_ALPINE */
+			BUG();
+#endif /* CONFIG_ARCH_ALPINE */
+		else
+			port_irq = irq + i;
+		ata_port_desc(host->ports[i], "irq %d", port_irq);
+	}
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	for (i = 0; i < host->n_ports; i++)
 		ata_port_desc(host->ports[i], "irq %d", irq + i);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 	rc = ata_host_register(host, &ahci_sht);
 	if (rc)
@@ -1372,9 +1693,22 @@ int ahci_host_activate(struct ata_host *host, int irq, unsigned int n_msis)
 out_free_all_irqs:
 	i = host->n_ports;
 out_free_irqs:
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	for (i--; i >= 0; i--) {
+		if (hpriv->msix_entries)
+#ifdef CONFIG_ARCH_ALPINE
+			port_irq = hpriv->msix_entries[i].vector;
+#else /* CONFIG_ARCH_ALPINE */
+			BUG();
+#endif /* CONFIG_ARCH_ALPINE */
+		else
+			port_irq = irq + i;
+		devm_free_irq(host->dev, port_irq, host->ports[i]);
+	}
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	for (i--; i >= 0; i--)
 		devm_free_irq(host->dev, irq + i, host->ports[i]);
-
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	return rc;
 }
 
@@ -1386,6 +1720,9 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	struct device *dev = &pdev->dev;
 	struct ahci_host_priv *hpriv;
 	struct ata_host *host;
+#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_ARCH_ALPINE)
+	struct device_node *np;
+#endif /* CONFIG_SYNO_LSP_ALPINE && CONFIG_ARCH_ALPINE */
 	int n_ports, n_msis, i, rc;
 	int ahci_pci_bar = AHCI_PCI_BAR_STANDARD;
 
@@ -1508,6 +1845,63 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 
 	ahci_set_em_messages(hpriv, &pi);
 
+#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_ARCH_ALPINE)
+	for (i = 0; i < AHCI_MAX_PORTS; i++)
+		hpriv->led_gpio[i] = -1;
+
+	np = of_find_compatible_node(NULL, NULL, "annapurna-labs,al-sata-sw-leds");
+	if (np) {
+		int err;
+		struct device_node *child;
+		u32	domain;
+		u32	pci_bus;
+		u32	pci_dev;
+		u32	port;
+
+		for_each_child_of_node(np, child) {
+			err = of_property_read_u32(child, "pci_domain", &domain);
+			if (err)
+				continue;
+
+			if (domain != pci_domain_nr(pdev->bus))
+				continue;
+
+			err = of_property_read_u32(child, "pci_bus", &pci_bus);
+			if (err)
+				continue;
+
+			if (pci_bus != pdev->bus->number)
+				continue;
+
+			err = of_property_read_u32(child, "pci_dev", &pci_dev);
+			if (err)
+				continue;
+
+			if (pci_dev != PCI_SLOT(pdev->devfn))
+				continue;
+
+			err = of_property_read_u32(child, "port", &port);
+			if (err)
+				continue;
+
+			err = of_get_named_gpio(child, "gpios", 0);
+			if (IS_ERR_VALUE(err))
+				continue;
+
+			hpriv->led_gpio[port] = err;
+			err = gpio_request(hpriv->led_gpio[port], "sata led gpio");
+			if (err) {
+				dev_err(&pdev->dev, "al ahci gpio_request %d failed: %d\n",
+						hpriv->led_gpio[port], err);
+				continue;
+			}
+			gpio_direction_output(hpriv->led_gpio[port], 1);
+			hpriv->em_msg_type = EM_MSG_TYPE_LED;
+			pi.flags |= ATA_FLAG_EM | ATA_FLAG_SW_ACTIVITY;
+		}
+	}
+#endif /* CONFIG_SYNO_LSP_ALPINE && CONFIG_ARCH_ALPINE */
+
 	if (ahci_broken_system_poweroff(pdev)) {
 		pi.flags |= ATA_FLAG_NO_POWEROFF_SPINDOWN;
 		dev_info(&pdev->dev,
@@ -1581,6 +1975,19 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 			ap->ops = &ata_dummy_port_ops;
 	}
 
+#ifdef CONFIG_SYNO_AHCI_PMP_SII3x26_DEFER_CMD
+	if (syno_is_hw_version(HW_DS1616p) ||
+			syno_is_hw_version(HW_DS1515) ||
+			syno_is_hw_version(HW_DS416p) ||
+			syno_is_hw_version(HW_DS716p)) {
+		for (i = 0; i < host->n_ports; i++) {
+			printk("Change defer qc mode on external port for compatibility\n", i);
+			struct ata_port *ap = host->ports[i];
+			ap->ops->qc_defer = &ahci_syno_pmp_3x26_qc_defer;
+		}
+	}
+#endif /* CONFIG_SYNO_AHCI_PMP_SII3x26_DEFER_CMD */
+
 	/* apply workaround for ASUS P5W DH Deluxe mainboard */
 	ahci_p5wdh_workaround(host);
 
@@ -1603,6 +2010,9 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 #ifdef CONFIG_SYNO_MV_9235_GPIO_CTRL
 	if (pdev->vendor == 0x1b4b && (pdev->device == 0x9235 || pdev->device == 0x9215)) {
 		syno_mv_9235_gpio_active_init(host);
+	}
+	if (pdev->vendor == 0x1b4b && (pdev->device == 0x9235 || pdev->device == 0x9215 || pdev->device == 0x9170)) {
+		syno_mv_9xxx_amp_adjust(host);
 	}
 #endif /* CONFIG_SYNO_MV_9235_GPIO_CTRL */
 

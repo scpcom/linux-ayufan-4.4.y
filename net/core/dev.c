@@ -778,6 +778,10 @@ __setup("netdev=", netdev_boot_setup);
 
 *******************************************************************************/
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+int netdev_skb_tstamp __read_mostly = 1;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
 /**
  *	__dev_get_by_name	- find a device by its name
  *	@net: the applicable net namespace
@@ -1728,15 +1732,32 @@ EXPORT_SYMBOL(net_disable_timestamp);
 static inline void net_timestamp_set(struct sk_buff *skb)
 {
 	skb->tstamp.tv64 = 0;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	if (static_key_false(&netstamp_needed)) {
+		if (netdev_skb_tstamp)
+			__net_timestamp(skb);
+	}
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	if (static_key_false(&netstamp_needed))
 		__net_timestamp(skb);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 }
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#define net_timestamp_check(COND, SKB)			\
+	if (static_key_false(&netstamp_needed)) {		\
+		if (netdev_skb_tstamp && (COND) && !(SKB)->tstamp.tv64)	\
+			__net_timestamp(SKB);		\
+	}						\
+
+#else /* CONFIG_SYNO_LSP_ALPINE */
 #define net_timestamp_check(COND, SKB)			\
 	if (static_key_false(&netstamp_needed)) {		\
 		if ((COND) && !(SKB)->tstamp.tv64)	\
 			__net_timestamp(SKB);		\
 	}						\
+
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 static inline bool is_skb_forwardable(struct net_device *dev,
 				      struct sk_buff *skb)
@@ -3979,8 +4000,22 @@ static gro_result_t napi_skb_finish(gro_result_t ret, struct sk_buff *skb)
 		break;
 
 	case GRO_MERGED_FREE:
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+		if (NAPI_GRO_CB(skb)->free == NAPI_GRO_FREE_STOLEN_HEAD) {
+#ifdef CONFIG_NET_SKB_RECYCLE
+			/* Workaround for the cases when recycle callback was not called */
+			if (skb->skb_recycle) {
+				/* Sign that skb is not available for recycle */
+				skb->hw_cookie |= BIT(0);
+				skb->skb_recycle(skb);
+			}
+#endif /* CONFIG_NET_SKB_RECYCLE */
+			kmem_cache_free(skbuff_head_cache, skb);
+		}
+#else /* CONFIG_SYNO_LSP_ARMADA */
 		if (NAPI_GRO_CB(skb)->free == NAPI_GRO_FREE_STOLEN_HEAD)
 			kmem_cache_free(skbuff_head_cache, skb);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 		else
 			__kfree_skb(skb);
 		break;

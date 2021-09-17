@@ -26,12 +26,20 @@
 #include <linux/mpage.h>
 #include <linux/aio.h>
 #include <linux/falloc.h>
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#include <linux/socket.h>
+#include <net/sock.h>
+#include <linux/net.h>
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 #include <linux/swap.h>
 #include <linux/writeback.h>
 #include <linux/statfs.h>
 #include <linux/compat.h>
 #include <linux/slab.h>
 #include <linux/btrfs.h>
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#include <net/sock.h>
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 #include "ctree.h"
 #include "disk-io.h"
 #include "transaction.h"
@@ -1496,11 +1504,6 @@ static noinline ssize_t __btrfs_buffered_write(struct file *file,
 
 	first_index = pos >> PAGE_CACHE_SHIFT;
 
-#ifdef CONFIG_SYNO_BTRFS_SHRINK_ORDERED_EXTENT
-	// FIXME: It's prevent OOM. The value should be tunable in sysfs.
-	if (root->nr_ordered_extents > 100000)
-		btrfs_wait_ordered_roots(root->fs_info, 10000);
-#endif /* CONFIG_SYNO_BTRFS_SHRINK_ORDERED_EXTENT */
 	while (iov_iter_count(i) > 0) {
 		size_t offset = pos & (PAGE_CACHE_SIZE - 1);
 		size_t write_bytes = min(iov_iter_count(i),
@@ -1831,22 +1834,10 @@ static ssize_t btrfs_file_aio_write(struct kiocb *iocb,
 	mutex_unlock(&inode->i_mutex);
 
 	/*
-	 * we want to make sure fsync finds this change
-	 * but we haven't joined a transaction running right now.
-	 *
-	 * Later on, someone is sure to update the inode and get the
-	 * real transid recorded.
-	 *
-	 * We set last_trans now to the fs_info generation + 1,
-	 * this will either be one more than the running transaction
-	 * or the generation used for the next transaction if there isn't
-	 * one running right now.
-	 *
 	 * We also have to set last_sub_trans to the current log transid,
 	 * otherwise subsequent syncs to a file that's been synced in this
 	 * transaction will appear to have already occured.
 	 */
-	BTRFS_I(inode)->last_trans = root->fs_info->generation + 1;
 	BTRFS_I(inode)->last_sub_trans = root->log_transid;
 	if (num_written > 0 || num_written == -EIOCBQUEUED) {
 		err = generic_write_sync(file, pos, num_written);
@@ -1950,25 +1941,37 @@ int btrfs_sync_file(struct file *file, loff_t start, loff_t end, int datasync)
 	atomic_inc(&root->log_batch);
 
 	/*
-	 * check the transaction that last modified this inode
-	 * and see if its already been committed
-	 */
-	if (!BTRFS_I(inode)->last_trans) {
-		mutex_unlock(&inode->i_mutex);
-		goto out;
-	}
-
-	/*
-	 * if the last transaction that changed this file was before
-	 * the current transaction, we can bail out now without any
-	 * syncing
+	 * If the last transaction that changed this file was before the current
+	 * transaction and we have the full sync flag set in our inode, we can
+	 * bail out now without any syncing.
+	 *
+	 * Note that we can't bail out if the full sync flag isn't set. This is
+	 * because when the full sync flag is set we start all ordered extents
+	 * and wait for them to fully complete - when they complete they update
+	 * the inode's last_trans field through:
+	 *
+	 *     btrfs_finish_ordered_io() ->
+	 *         btrfs_update_inode_fallback() ->
+	 *             btrfs_update_inode() ->
+	 *                 btrfs_set_inode_last_trans()
+	 *
+	 * So we are sure that last_trans is up to date and can do this check to
+	 * bail out safely. For the fast path, when the full sync flag is not
+	 * set in our inode, we can not do it because we start only our ordered
+	 * extents and don't wait for them to complete (that is when
+	 * btrfs_finish_ordered_io runs), so here at this point their last_trans
+	 * value might be less than or equals to fs_info->last_trans_committed,
+	 * and setting a speculative last_trans for an inode when a buffered
+	 * write is made (such as fs_info->generation + 1 for example) would not
+	 * be reliable since after setting the value and before fsync is called
+	 * any number of transactions can start and commit (transaction kthread
+	 * commits the current transaction periodically), and a transaction
+	 * commit does not start nor waits for ordered extents to complete.
 	 */
 	smp_mb();
 	if (btrfs_inode_in_log(inode, root->fs_info->generation) ||
-	    BTRFS_I(inode)->last_trans <=
-	    root->fs_info->last_trans_committed) {
-		BTRFS_I(inode)->last_trans = 0;
-
+	    (full_sync && BTRFS_I(inode)->last_trans <=
+	     root->fs_info->last_trans_committed)) {
 		/*
 		 * We'v had everything committed since the last time we were
 		 * modified so clear this flag in case it was set for whatever
@@ -2649,17 +2652,8 @@ static long btrfs_fallocate(struct file *file, int mode,
 			     &cached_state, GFP_NOFS);
 out:
 	mutex_unlock(&inode->i_mutex);
-#ifdef CONFIG_SYNO_BTRFS_FIX_QGROUP_OVERRUN
-	if (root->fs_info->quota_enabled) {
-		if (ret)
-			btrfs_qgroup_free(root, alloc_end - alloc_start, 1);
-		else
-			btrfs_qgroup_free(root, alloc_end - alloc_start, 0);
-	}
-#else
 	if (root->fs_info->quota_enabled)
 		btrfs_qgroup_free(root, alloc_end - alloc_start);
-#endif
 out_reserve_fail:
 	/* Let go of our reservation. */
 	btrfs_free_reserved_data_space(inode, alloc_end - alloc_start);
@@ -2769,11 +2763,403 @@ out:
 	return offset;
 }
 
+#if defined(CONFIG_SYNO_LSP_ALPINE) && !defined(CONFIG_SYNO_ALPINE)
+#define MSG_KERNSPACE       0x1000000
+#define MSG_NOCATCHSIG   0x2000000
+
+static ssize_t btrfs_splice_from_socket(struct file *file, struct socket *sock,
+					loff_t __user *ppos, size_t count)
+{
+#if defined(CONFIG_SYNO_ALPINE)
+	struct inode *inode = file_inode(file);
+#else /* CONFIG_SYNO_ALPINE */
+	struct inode *inode = fdentry(file)->d_inode;
+#endif /* CONFIG_SYNO_ALPINE */
+	struct btrfs_root *root = BTRFS_I(inode)->root;
+	struct page **pages = NULL;
+	struct kvec *iov = NULL;
+	struct msghdr msg;
+	long recvtimeo;
+	ssize_t copied = 0;
+	size_t offset, offset_tmp;
+	int num_pages, dirty_pages;
+	int err = 0;
+	loff_t start_pos;
+	loff_t pos = file->f_pos;
+	int i;
+	unsigned count_tmp = count;
+	bool sync = (file->f_flags & O_DSYNC) || IS_SYNC(file->f_mapping->host);
+
+#define ERROR_OUT do {mutex_unlock(&inode->i_mutex); goto out;} while(0)
+
+	if (!count)
+		return 0;
+
+	if (ppos && copy_from_user(&pos, ppos, sizeof pos))
+		return -EFAULT;
+	offset = pos & (PAGE_CACHE_SIZE - 1);
+	num_pages = (offset + count + PAGE_CACHE_SIZE - 1) >> PAGE_CACHE_SHIFT;
+	start_pos = round_down(pos, root->sectorsize);
+
+	if (!(pages = kmalloc(num_pages * sizeof(struct page *), GFP_KERNEL)) ||
+		!(iov = kmalloc(num_pages * sizeof(*iov), GFP_KERNEL)))
+		ERROR_OUT;
+
+	//vfs_check_frozen(inode->i_sb, SB_FREEZE_WRITE);
+	current->backing_dev_info = inode->i_mapping->backing_dev_info;
+
+	mutex_lock(&inode->i_mutex);
+
+	if ((err = generic_write_checks(file, &pos, &count,
+					S_ISBLK(inode->i_mode))))
+		ERROR_OUT;
+
+	if ((err = file_remove_suid(file)))
+		ERROR_OUT;
+
+	if (root->fs_info->fs_state & BTRFS_SUPER_FLAG_ERROR) {
+                err = -EROFS;
+		ERROR_OUT;
+	}
+
+	update_time_for_write(inode);
+
+	if (start_pos > i_size_read(inode) &&
+		(err = btrfs_cont_expand(inode, i_size_read(inode), start_pos)))
+		ERROR_OUT;
+
+	if ((err = btrfs_delalloc_reserve_space(inode,
+					num_pages << PAGE_CACHE_SHIFT)))
+		goto out_free;
+
+#if defined(CONFIG_SYNO_ALPINE)
+	if ((err = prepare_pages(file_inode(file), pages, num_pages,
+					pos, count, false))) {
+#else /* CONFIG_SYNO_ALPINE */
+	if ((err = prepare_pages(root, file, pages, num_pages,
+					pos, pos >> PAGE_CACHE_SHIFT,
+					count, false))) {
+#endif /* CONFIG_SYNO_ALPINE */
+		btrfs_delalloc_release_space(inode,
+					num_pages << PAGE_CACHE_SHIFT);
+		goto out_free;
+	}
+
+	for (i = 0, offset_tmp = offset; i < num_pages; i++) {
+		unsigned bytes = PAGE_CACHE_SIZE - offset_tmp;
+
+		if (bytes > count_tmp)
+			bytes = count_tmp;
+		iov[i].iov_base = kmap(pages[i]) + offset_tmp;
+		iov[i].iov_len = bytes;
+		offset_tmp = 0;
+		count_tmp -= bytes;
+	}
+
+        /* IOV is ready, receive the date from socket now */
+	msg.msg_name = NULL;
+	msg.msg_namelen = 0;
+	msg.msg_iov = (struct iovec *)&iov[0];
+	msg.msg_iovlen = num_pages;
+	msg.msg_control = NULL;
+	msg.msg_controllen = 0;
+	msg.msg_flags = MSG_KERNSPACE;
+
+	recvtimeo = sock->sk->sk_rcvtimeo;
+	sock->sk->sk_rcvtimeo = 8 * HZ;
+	copied = kernel_recvmsg(sock, &msg, iov, num_pages, count,
+#if defined(CONFIG_SYNO_ALPINE)
+                             MSG_WAITALL | MSG_NOCATCHSIGNAL);
+#else /* CONFIG_SYNO_ALPINE */
+                             MSG_WAITALL | MSG_NOCATCHSIG);
+#endif /* CONFIG_SYNO_ALPINE */
+	sock->sk->sk_rcvtimeo = recvtimeo;
+
+	if (copied < 0) {
+		err = copied;
+		copied = 0;
+	}
+
+	/* FIXME:
+	 * The following results in at least one dirty_page even for copied==0
+	 * unless offset==0, but otherwise the first page would be corrupted
+	 * for an unknown reason.
+	 */
+	dirty_pages = (copied + offset + PAGE_CACHE_SIZE - 1) >>
+					PAGE_CACHE_SHIFT;
+
+	for (i = 0; i < num_pages; i++)
+		kunmap(pages[i]);
+	if (dirty_pages < num_pages) {
+		if (dirty_pages) {
+			spin_lock(&BTRFS_I(inode)->lock);
+			BTRFS_I(inode)->outstanding_extents++;
+			spin_unlock(&BTRFS_I(inode)->lock);
+		}
+		btrfs_delalloc_release_space(inode,
+                                        (num_pages - dirty_pages) <<
+                                        PAGE_CACHE_SHIFT);
+	}
+
+	if (dirty_pages) {
+		if ((err = btrfs_dirty_pages(root, inode, pages,
+					dirty_pages, pos, copied, NULL))) {
+			btrfs_delalloc_release_space(inode,
+					dirty_pages << PAGE_CACHE_SHIFT);
+			btrfs_drop_pages(pages, num_pages);
+			goto out_free;
+                }
+	}
+
+	btrfs_drop_pages(pages, num_pages);
+	cond_resched();
+
+	balance_dirty_pages_ratelimited(inode->i_mapping);
+	if (dirty_pages < (root->leafsize >> PAGE_CACHE_SHIFT) + 1)
+		btrfs_btree_balance_dirty(root);
+
+	pos += copied;
+
+out_free:
+	mutex_unlock(&inode->i_mutex);
+
+	if (copied > 0) {
+		file->f_pos = pos;
+		if (ppos && copy_to_user(ppos, &pos, sizeof *ppos))
+			err = -EFAULT;
+	}
+
+	BTRFS_I(inode)->last_trans = root->fs_info->generation + 1;
+	BTRFS_I(inode)->last_sub_trans = root->log_transid;
+	if (copied > 0 || err == -EIOCBQUEUED)
+		err = generic_write_sync(file, pos, copied);
+	if (sync)
+		atomic_dec(&BTRFS_I(inode)->sync_writers);
+out:
+	kfree(iov);
+	kfree(pages);
+	current->backing_dev_info = NULL;
+
+	return err ? err : copied;
+}
+#endif /* CONFIG_SYNO_LSP_ALPINE && !CONFIG_SYNO_ALPINE */
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(CONFIG_SYNO_ARMADA)
+extern int rw_verify_area(int read_write, struct file *file, loff_t *ppos, size_t count);
+#endif /* CONFIG_SYNO_ARMADA */
+
+static ssize_t btrfs_splice_from_socket(struct file *file, struct socket *sock,
+					loff_t __user *ppos, size_t count)
+{
+	struct inode *inode = file_inode(file);
+	struct btrfs_root *root = BTRFS_I(inode)->root;
+	struct page **pages = NULL;
+	struct kvec *iov = NULL;
+	struct msghdr msg = { 0 };
+	size_t offset, offset_tmp, remaining;
+	size_t num_pages, dirty_pages;
+	size_t copied = 0;
+	u64 start_pos;
+	int ret = 0;
+	loff_t pos;
+	int i;
+	bool sync = (file->f_flags & O_DSYNC) || IS_SYNC(file->f_mapping->host);
+
+	if (ppos && copy_from_user(&pos, ppos, sizeof(pos)))
+		return -EFAULT;
+
+	ret = rw_verify_area(WRITE, file, &pos, count);
+	if (ret < 0)
+		return ret;
+
+	/* limit the splice to 128K */
+	count = min_t(size_t, ret, SZ_128K);
+
+	mutex_lock(&inode->i_mutex);
+
+	current->backing_dev_info = inode->i_mapping->backing_dev_info;
+	ret = generic_write_checks(file, &pos, &count, S_ISBLK(inode->i_mode));
+	if (ret) {
+		mutex_unlock(&inode->i_mutex);
+		goto out;
+	}
+
+	if (count == 0) {
+		mutex_unlock(&inode->i_mutex);
+		goto out;
+	}
+
+	ret = file_remove_suid(file);
+	if (ret) {
+		mutex_unlock(&inode->i_mutex);
+		goto out;
+	}
+
+	/*
+	 * If BTRFS flips readonly due to some impossible error
+	 * (fs_info->fs_state now has BTRFS_SUPER_FLAG_ERROR),
+	 * although we have opened a file as writable, we have
+	 * to stop this write operation to ensure FS consistency.
+	 */
+	if (test_bit(BTRFS_FS_STATE_ERROR, &root->fs_info->fs_state)) {
+		ret = -EROFS;
+		mutex_unlock(&inode->i_mutex);
+		goto out;
+	}
+
+	/*
+	 * We reserve space for updating the inode when we reserve space for the
+	 * extent we are going to write, so we will enospc out there.  We don't
+	 * need to start yet another transaction to update the inode as we will
+	 * update the inode when we finish writing whatever data we write.
+	 */
+	update_time_for_write(inode);
+
+	start_pos = round_down(pos, root->sectorsize);
+	if (start_pos > i_size_read(inode)) {
+		ret = btrfs_cont_expand(inode, i_size_read(inode), start_pos);
+		if (ret) {
+			mutex_unlock(&inode->i_mutex);
+			goto out;
+		}
+	}
+
+	if (sync)
+		atomic_inc(&BTRFS_I(inode)->sync_writers);
+
+	offset = pos & (PAGE_CACHE_SIZE - 1);
+	num_pages = (offset + count + PAGE_CACHE_SIZE - 1) >> PAGE_CACHE_SHIFT;
+
+	ret = btrfs_delalloc_reserve_space(inode,
+					   num_pages << PAGE_CACHE_SHIFT);
+	if (ret)
+		goto out_free;
+
+	pages = kmalloc(num_pages * sizeof(*pages), GFP_NOFS);
+	if (!pages) {
+		ret = -ENOMEM;
+		goto out_free;
+	}
+
+	iov = kmalloc(num_pages * sizeof(*iov), GFP_NOFS);
+	if (!iov) {
+		ret = -ENOMEM;
+		goto out_free;
+	}
+
+	/*
+	 * This is going to setup the pages array with the number of
+	 * pages we want, so we don't really need to worry about the
+	 * contents of pages from loop to loop
+	 */
+#if defined(CONFIG_SYNO_ARMADA)
+	ret = prepare_pages(file_inode(file), pages, num_pages,
+			    pos, count, false);
+#else /* CONFIG_SYNO_ARMADA */
+	ret = prepare_pages(root, file, pages, num_pages,
+			    pos, 0, count, false);
+#endif /* CONFIG_SYNO_ARMADA */
+	if (ret) {
+		btrfs_delalloc_release_space(inode,
+					     num_pages << PAGE_CACHE_SHIFT);
+		goto out_free;
+	}
+
+	remaining = count;
+	offset_tmp = offset;
+	for (i = 0; i < num_pages; i++) {
+		unsigned int bytes = min_t(unsigned int,
+					   PAGE_CACHE_SIZE - offset_tmp, remaining);
+
+		iov[i].iov_base = kmap(pages[i]) + offset_tmp;
+		iov[i].iov_len = bytes;
+		offset_tmp = 0;
+		remaining -= bytes;
+	}
+
+	/* receive the data from socket now */
+	copied = kernel_recvmsg(sock, &msg, iov, num_pages, count, MSG_WAITALL);
+
+	for (i = 0; i < num_pages; i++)
+		kunmap(pages[i]);
+
+	if (copied <= 0) {
+		ret = copied;
+		dirty_pages = copied = 0;
+	} else
+		dirty_pages = (copied + offset + PAGE_CACHE_SIZE - 1) >>
+			PAGE_CACHE_SHIFT;
+
+	/*
+	 * If we had a short copy we need to release the excess delaloc
+	 * bytes we reserved.  We need to increment outstanding_extents
+	 * because btrfs_delalloc_release_space will decrement it, but
+	 * we still have an outstanding extent for the chunk we actually
+	 * managed to copy.
+	 */
+	if (num_pages > dirty_pages) {
+		if (copied > 0) {
+			spin_lock(&BTRFS_I(inode)->lock);
+			BTRFS_I(inode)->outstanding_extents++;
+			spin_unlock(&BTRFS_I(inode)->lock);
+		}
+		btrfs_delalloc_release_space(inode,
+			     (num_pages - dirty_pages) << PAGE_CACHE_SHIFT);
+	}
+
+	if (copied > 0) {
+		ret = btrfs_dirty_pages(root, inode, pages,
+				dirty_pages, pos, copied,
+				NULL);
+		if (ret) {
+			btrfs_delalloc_release_space(inode,
+				     dirty_pages << PAGE_CACHE_SHIFT);
+			btrfs_drop_pages(pages, num_pages);
+			goto out_free;
+		}
+	}
+
+	btrfs_drop_pages(pages, num_pages);
+
+	cond_resched();
+
+	balance_dirty_pages_ratelimited(inode->i_mapping);
+	if (dirty_pages < (root->leafsize >> PAGE_CACHE_SHIFT) + 1)
+		btrfs_btree_balance_dirty(root);
+
+out_free:
+	kfree(iov);
+	kfree(pages);
+
+	mutex_unlock(&inode->i_mutex);
+
+	BTRFS_I(inode)->last_trans = root->fs_info->generation + 1;
+	BTRFS_I(inode)->last_sub_trans = root->log_transid;
+	if (copied > 0 || ret == -EIOCBQUEUED)
+		ret = generic_write_sync(file, pos, copied);
+
+	if (sync)
+		atomic_dec(&BTRFS_I(inode)->sync_writers);
+
+	pos += copied;
+	if (ppos && copy_to_user(ppos, &pos, sizeof(*ppos)))
+		ret = -EFAULT;
+out:
+	current->backing_dev_info = NULL;
+	return ret ? ret : copied;
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+
 const struct file_operations btrfs_file_operations = {
 	.llseek		= btrfs_file_llseek,
 	.read		= do_sync_read,
 	.write		= do_sync_write,
 	.aio_read       = generic_file_aio_read,
+#if (defined(CONFIG_SYNO_LSP_ALPINE) && !defined(CONFIG_SYNO_ALPINE)) || \
+	defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	.splice_from_socket	= btrfs_splice_from_socket,
+#endif /* (CONFIG_SYNO_LSP_ALPINE && !CONFIG_SYNO_ALPINE) || CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	.splice_read	= generic_file_splice_read,
 	.aio_write	= btrfs_file_aio_write,
 	.mmap		= btrfs_file_mmap,

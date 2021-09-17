@@ -60,6 +60,10 @@ struct pmu_hw_events {
 	 * read/modify/write sequences.
 	 */
 	raw_spinlock_t		pmu_lock;
+#if defined (CONFIG_SYNO_LSP_MONACO)
+
+	struct pmu		*pmu;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 };
 
 struct arm_pmu {

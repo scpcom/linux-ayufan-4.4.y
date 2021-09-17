@@ -28,6 +28,9 @@
 #define DVB_PLL_SAMSUNG_TBMU24112      17
 #define DVB_PLL_TDEE4		       18
 #define DVB_PLL_THOMSON_DTT7520X       19
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#define DVB_PLL_THOMSON_DTT7546X       20
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 /**
  * Attach a dvb-pll to the supplied frontend structure.

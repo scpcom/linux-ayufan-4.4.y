@@ -561,6 +561,145 @@ void xhci_del_comp_mod_timer(struct xhci_hcd *xhci, u32 status, u16 wIndex)
 	}
 }
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+/*
+ * Converts a raw xHCI port status into the format that external USB 2.0 or USB
+ * 3.0 hubs use.
+ *
+ * Possible side effects:
+ *  - Mark a port as being done with device resume,
+ *    and ring the endpoint doorbells.
+ *  - Stop the Synopsys redriver Compliance Mode polling.
+ *  - Drop and reacquire the xHCI lock, in order to wait for port resume.
+ */
+static u32 xhci_get_port_status(struct usb_hcd *hcd,
+		struct xhci_bus_state *bus_state,
+		__le32 __iomem **port_array,
+		u16 wIndex, u32 raw_port_status,
+		unsigned long flags)
+	__releases(&xhci->lock)
+	__acquires(&xhci->lock)
+{
+	struct xhci_hcd *xhci = hcd_to_xhci(hcd);
+	u32 status = 0;
+	int slot_id;
+
+	/* wPortChange bits */
+	if (raw_port_status & PORT_CSC)
+		status |= USB_PORT_STAT_C_CONNECTION << 16;
+	if (raw_port_status & PORT_PEC)
+		status |= USB_PORT_STAT_C_ENABLE << 16;
+	if ((raw_port_status & PORT_OCC))
+		status |= USB_PORT_STAT_C_OVERCURRENT << 16;
+	if ((raw_port_status & PORT_RC))
+		status |= USB_PORT_STAT_C_RESET << 16;
+	/* USB3.0 only */
+	if (hcd->speed == HCD_USB3) {
+		if ((raw_port_status & PORT_PLC))
+			status |= USB_PORT_STAT_C_LINK_STATE << 16;
+		if ((raw_port_status & PORT_WRC))
+			status |= USB_PORT_STAT_C_BH_RESET << 16;
+	}
+
+	if (hcd->speed != HCD_USB3) {
+		if ((raw_port_status & PORT_PLS_MASK) == XDEV_U3
+				&& (raw_port_status & PORT_POWER))
+			status |= USB_PORT_STAT_SUSPEND;
+	}
+	if ((raw_port_status & PORT_PLS_MASK) == XDEV_RESUME &&
+			!DEV_SUPERSPEED(raw_port_status)) {
+		if ((raw_port_status & PORT_RESET) ||
+				!(raw_port_status & PORT_PE))
+			return 0xffffffff;
+		if (time_after_eq(jiffies,
+					bus_state->resume_done[wIndex])) {
+			int time_left;
+
+			xhci_dbg(xhci, "Resume USB2 port %d\n",
+					wIndex + 1);
+			bus_state->resume_done[wIndex] = 0;
+			clear_bit(wIndex, &bus_state->resuming_ports);
+
+			set_bit(wIndex, &bus_state->rexit_ports);
+			xhci_set_link_state(xhci, port_array, wIndex,
+					XDEV_U0);
+
+			spin_unlock_irqrestore(&xhci->lock, flags);
+			time_left = wait_for_completion_timeout(
+					&bus_state->rexit_done[wIndex],
+					msecs_to_jiffies(
+						XHCI_MAX_REXIT_TIMEOUT));
+			spin_lock_irqsave(&xhci->lock, flags);
+
+			if (time_left) {
+				slot_id = xhci_find_slot_id_by_port(hcd,
+						xhci, wIndex + 1);
+				if (!slot_id) {
+					xhci_dbg(xhci, "slot_id is zero\n");
+					return 0xffffffff;
+				}
+				xhci_ring_device(xhci, slot_id);
+			} else {
+				int port_status = xhci_readl(xhci,
+						port_array[wIndex]);
+				xhci_warn(xhci, "Port resume took longer than %i msec, port status = 0x%x\n",
+						XHCI_MAX_REXIT_TIMEOUT,
+						port_status);
+				status |= USB_PORT_STAT_SUSPEND;
+				clear_bit(wIndex, &bus_state->rexit_ports);
+			}
+
+			bus_state->port_c_suspend |= 1 << wIndex;
+			bus_state->suspended_ports &= ~(1 << wIndex);
+		} else {
+			/*
+			 * The resume has been signaling for less than
+			 * 20ms. Report the port status as SUSPEND,
+			 * let the usbcore check port status again
+			 * and clear resume signaling later.
+			 */
+			status |= USB_PORT_STAT_SUSPEND;
+		}
+	}
+	if ((raw_port_status & PORT_PLS_MASK) == XDEV_U0
+			&& (raw_port_status & PORT_POWER)
+			&& (bus_state->suspended_ports & (1 << wIndex))) {
+		bus_state->suspended_ports &= ~(1 << wIndex);
+		if (hcd->speed != HCD_USB3)
+			bus_state->port_c_suspend |= 1 << wIndex;
+	}
+	if (raw_port_status & PORT_CONNECT) {
+		status |= USB_PORT_STAT_CONNECTION;
+		status |= xhci_port_speed(raw_port_status);
+	}
+	if (raw_port_status & PORT_PE)
+		status |= USB_PORT_STAT_ENABLE;
+	if (raw_port_status & PORT_OC)
+		status |= USB_PORT_STAT_OVERCURRENT;
+	if (raw_port_status & PORT_RESET)
+		status |= USB_PORT_STAT_RESET;
+	if (raw_port_status & PORT_POWER) {
+		if (hcd->speed == HCD_USB3)
+			status |= USB_SS_PORT_STAT_POWER;
+		else
+			status |= USB_PORT_STAT_POWER;
+	}
+	/* Update Port Link State for super speed ports*/
+	if (hcd->speed == HCD_USB3) {
+		xhci_hub_report_link_state(&status, raw_port_status);
+		/*
+		 * Verify if all USB3 Ports Have entered U0 already.
+		 * Delete Compliance Mode Timer if so.
+		 */
+		xhci_del_comp_mod_timer(xhci, raw_port_status, wIndex);
+	}
+	if (bus_state->port_c_suspend & (1 << wIndex))
+		status |= 1 << USB_PORT_FEAT_C_SUSPEND;
+
+	return status;
+}
+
+#endif /* CONFIG_SYNO_LSP_MONACO */
 int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		u16 wIndex, char *buf, u16 wLength)
 {
@@ -570,7 +709,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 	u32 temp, status;
 #ifdef CONFIG_SYNO_USB3_WD_FIX
 	u32 temp_map;
-	__le32 __iomem **port_array_map;
+	__le32 __iomem **port_array_map = NULL;
 	struct pci_dev *pdev = to_pci_dev(hcd->self.controller);
 #endif /* CONFIG_SYNO_USB3_WD_FIX */
 	int retval = 0;
@@ -635,12 +774,25 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		if (!wIndex || wIndex > max_ports)
 			goto error;
 		wIndex--;
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#else /* CONFIG_SYNO_LSP_MONACO */
 		status = 0;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 		temp = xhci_readl(xhci, port_array[wIndex]);
 		if (temp == 0xffffffff) {
 			retval = -ENODEV;
 			break;
 		}
+#if defined (CONFIG_SYNO_LSP_MONACO)
+		status = xhci_get_port_status(hcd, bus_state, port_array,
+				wIndex, temp, flags);
+		if (status == 0xffffffff)
+					goto error;
+
+		xhci_dbg(xhci, "get port status, actual port %d status  = 0x%x\n",
+				wIndex, temp);
+		xhci_dbg(xhci, "Get port status returned 0x%x\n", status);
+#else /* CONFIG_SYNO_LSP_MONACO */
 		xhci_dbg(xhci, "get port status, actual port %d status  = 0x%x\n", wIndex, temp);
 
 		/* wPortChange bits */
@@ -733,6 +885,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		if (bus_state->port_c_suspend & (1 << wIndex))
 			status |= 1 << USB_PORT_FEAT_C_SUSPEND;
 		xhci_dbg(xhci, "Get port status returned 0x%x\n", status);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 		put_unaligned(cpu_to_le32(status), (__le32 *) buf);
 		break;
 	case SetPortFeature:
@@ -799,6 +952,9 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		case USB_PORT_FEAT_LINK_STATE:
 			temp = xhci_readl(xhci, port_array[wIndex]);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+			// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA */
 			/* Disable port */
 			if (link_state == USB_SS_PORT_LS_SS_DISABLED) {
 				xhci_dbg(xhci, "Disable port %d\n", wIndex);
@@ -824,13 +980,25 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 				temp = xhci_readl(xhci, port_array[wIndex]);
 				break;
 			}
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+			/* Software should not attempt to set
+			 * port link state above '5' (Rx.Detect) and the port
+			 * must be enabled.
+			 */
+#else /* CONFIG_SYNO_LSP_ARMADA */
 			/* Software should not attempt to set
 			 * port link state above '3' (U3) and the port
 			 * must be enabled.
 			 */
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 			if ((temp & PORT_PE) == 0 ||
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+				(link_state > USB_SS_PORT_LS_RX_DETECT)) {
+#else /* CONFIG_SYNO_LSP_ARMADA */
 				(link_state > USB_SS_PORT_LS_U3)) {
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 				xhci_warn(xhci, "Cannot set link state.\n");
 				goto error;
 			}
@@ -866,7 +1034,8 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 			 * However, khubd will ignore the roothub events until
 			 * the roothub is registered.
 			 */
-#ifdef CONFIG_SYNO_FACTORY_USB3_DISABLE
+#if defined(CONFIG_SYNO_FACTORY_USB3_DISABLE) \
+			&& !defined(CONFIG_SYNO_DISABLE_USB3_DOWNGRADE)
 			xhci_dbg(xhci, "set port power. hcd->speed:%d.\n",hcd->speed);
 			if (1 == gSynoFactoryUSB3Disable && hcd->speed == HCD_USB3) {
 				xhci_writel(xhci, temp & ~PORT_POWER,
@@ -878,7 +1047,8 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 #endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
 			xhci_writel(xhci, temp | PORT_POWER,
 					port_array[wIndex]);
-#ifdef CONFIG_SYNO_FACTORY_USB3_DISABLE
+#if defined(CONFIG_SYNO_FACTORY_USB3_DISABLE) \
+			&& !defined(CONFIG_SYNO_DISABLE_USB3_DOWNGRADE)
 			}
 #endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
 
@@ -890,7 +1060,8 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 					wIndex);
 
 			if (temp)
-#ifdef CONFIG_SYNO_FACTORY_USB3_DISABLE
+#if defined(CONFIG_SYNO_FACTORY_USB3_DISABLE) \
+			&& !defined(CONFIG_SYNO_DISABLE_USB3_DOWNGRADE)
 			{
 				if (1 == gSynoFactoryUSB3Disable && hcd->speed == HCD_USB3) {
 					usb_acpi_set_power_state(hcd->self.root_hub,
@@ -899,7 +1070,8 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 #endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
 				usb_acpi_set_power_state(hcd->self.root_hub,
 					wIndex, true);
-#ifdef CONFIG_SYNO_FACTORY_USB3_DISABLE
+#if defined(CONFIG_SYNO_FACTORY_USB3_DISABLE) \
+			&& !defined(CONFIG_SYNO_DISABLE_USB3_DOWNGRADE)
 				}
 			}
 #endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */

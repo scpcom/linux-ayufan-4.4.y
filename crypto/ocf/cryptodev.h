@@ -65,12 +65,10 @@
 #include <linux/in.h>
 #endif
 
-#ifdef CONFIG_SYNO_ARMADA_V2
-#ifdef CONFIG_OF
+#if defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_OF) && defined(CONFIG_MV_INCLUDE_CESA)
 #include "../../arch/arm/mach-mvebu/include/mach/mvTypes.h"
 #include "../../drivers/crypto/mvebu_cesa/mvSysCesaConfig.h"
-#endif
-#endif
+#endif /* CONFIG_SYNO_LSP_ARMADA && CONFIG_OF && CONFIG_MV_INCLUDE_CESA */
 
 /* Some initial values */
 #define CRYPTO_DRIVERS_INITIAL	4
@@ -510,7 +508,11 @@ struct cryptkop {
 	int		(*krp_callback)(struct cryptkop *);
 };
 
+#if defined(CONFIG_SYNO_ARMADA)
+#include "ocf-compat.h"
+#else /* CONFIG_SYNO_ARMADA */
 #include <ocf-compat.h>
+#endif /* CONFIG_SYNO_ARMADA */
 
 /*
  * Session ids are 64 bits.  The lower 32 bits contain a "local id" which

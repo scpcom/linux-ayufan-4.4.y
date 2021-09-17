@@ -22,6 +22,9 @@
 #include <linux/slab.h>
 #include <linux/spi/spi.h>
 #include <linux/module.h>
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#include <linux/of.h>
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 #include "spi-dw.h"
 
@@ -39,6 +42,9 @@ static int spi_pci_probe(struct pci_dev *pdev,
 	struct dw_spi *dws;
 	int pci_bar = 0;
 	int ret;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	int num_cs, bus_num;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 	printk(KERN_INFO "DW: found PCI SPI controller(ID: %04x:%04x)\n",
 		pdev->vendor, pdev->device);
@@ -71,9 +77,25 @@ static int spi_pci_probe(struct pci_dev *pdev,
 		goto err_release_reg;
 	}
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	ret = of_property_read_u32(pdev->dev.of_node, "bus-num", &bus_num);
+	if (ret < 0)
+		dws->bus_num = 0;
+	else
+		dws->bus_num = bus_num;
+
+	ret = of_property_read_u32(pdev->dev.of_node, "num-chipselect", &num_cs);
+	if (ret < 0)
+		dws->num_cs = 4;
+	else
+		dws->num_cs = num_cs;
+
+	dws->parent_dev = &pdev->dev;
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	dws->parent_dev = &pdev->dev;
 	dws->bus_num = 0;
 	dws->num_cs = 4;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	dws->irq = pdev->irq;
 
 	/*
@@ -155,6 +177,14 @@ static DEFINE_PCI_DEVICE_TABLE(pci_ids) = {
 	{},
 };
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+static struct of_device_id dw_spi_pci_of_match[] = {
+		{ .compatible = "snps,dw-spi-pci", },
+		{ /* sentinel */}
+};
+MODULE_DEVICE_TABLE(of, dw_spi_pci_of_match);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
 static struct pci_driver dw_spi_driver = {
 	.name =		DRIVER_NAME,
 	.id_table =	pci_ids,
@@ -162,6 +192,13 @@ static struct pci_driver dw_spi_driver = {
 	.remove =	spi_pci_remove,
 	.suspend =	spi_suspend,
 	.resume	=	spi_resume,
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	.driver		= {
+		.name	= DRIVER_NAME,
+		.owner	= THIS_MODULE,
+		.of_match_table = dw_spi_pci_of_match,
+	},
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 };
 
 module_pci_driver(dw_spi_driver);

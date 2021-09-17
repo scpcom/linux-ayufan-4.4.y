@@ -1146,8 +1146,11 @@ static int ethoc_remove(struct platform_device *pdev)
 	struct net_device *netdev = platform_get_drvdata(pdev);
 	struct ethoc *priv = netdev_priv(netdev);
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#else /* CONFIG_SYNO_LSP_MONACO */
 	platform_set_drvdata(pdev, NULL);
 
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	if (netdev) {
 		netif_napi_del(&priv->napi);
 		phy_disconnect(priv->phy);

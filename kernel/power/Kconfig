@@ -240,10 +240,11 @@ config APM_EMULATION
 
 config ARCH_HAS_OPP
 	bool
+	depends on !SYNO_LSP_ARMADA_2015_T1_1p4
 
 config PM_OPP
 	bool "Operating Performance Point (OPP) Layer library"
-	depends on ARCH_HAS_OPP
+	depends on (ARCH_HAS_OPP && !SYNO_LSP_ARMADA_2015_T1_1p4) || SYNO_LSP_ARMADA_2015_T1_1p4
 	---help---
 	  SOCs have a standard set of tuples consisting of frequency and
 	  voltage pairs that the device will support per voltage domain. This

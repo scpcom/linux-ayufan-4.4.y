@@ -524,7 +524,11 @@ static struct freq_attr *s3c2416_cpufreq_attr[] = {
 };
 
 static struct cpufreq_driver s3c2416_cpufreq_driver = {
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	.owner		= THIS_MODULE,
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	.flags          = 0,
 	.verify		= s3c2416_cpufreq_verify_speed,
 	.target		= s3c2416_cpufreq_set_target,

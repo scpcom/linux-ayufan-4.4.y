@@ -305,6 +305,9 @@ int snd_pcm_update_state(struct snd_pcm_substream *substream,
 		wake_up(&runtime->sleep);
 	return 0;
 }
+#if defined (CONFIG_SYNO_LSP_MONACO)
+EXPORT_SYMBOL_GPL(snd_pcm_update_state);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 static int snd_pcm_update_hw_ptr0(struct snd_pcm_substream *substream,
 				  unsigned int in_interrupt)
@@ -559,6 +562,9 @@ int snd_pcm_update_hw_ptr(struct snd_pcm_substream *substream)
 {
 	return snd_pcm_update_hw_ptr0(substream, 0);
 }
+#if defined (CONFIG_SYNO_LSP_MONACO)
+EXPORT_SYMBOL_GPL(snd_pcm_update_hw_ptr);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 /**
  * snd_pcm_set_ops - set the PCM operators

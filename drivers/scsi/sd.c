@@ -1669,8 +1669,11 @@ static int sd_ioctl(struct block_device *bdev, fmode_t mode,
 		}
 		case SD_IOCTL_SUPPORT_SLEEP:
 		{
-			int *pCanSleep = (int *)arg;
-			*pCanSleep = sdp->nospindown ? 0 : 1;
+			int iCanSleep = 0;
+			iCanSleep = sdp->nospindown ? 0 : 1;
+			if (copy_to_user(arg, &iCanSleep, sizeof(int))) {
+				return -EINVAL;
+			}
 			return 0;
 		}
 #endif /* CONFIG_SYNO_DISK_HIBERNATION */
@@ -3585,7 +3588,12 @@ static int sd_probe(struct device *dev)
 #endif /* CONFIG_SYNO_SAS_DISK_NAME */
 				if (sdp->host->hostt->syno_index_get) {
 					want_idx = sdp->host->hostt->syno_index_get(sdp->host, sdp->channel, sdp->id, sdp->lun);
-				}else{
+#ifdef CONFIG_SYNO_FIXED_DISK_NAME_MV14XX
+					/* FIXME:  If disk order change, adjust here with gszDiskIdxMapMv14xx */
+					ap = ata_shost_to_port(sdp->host);
+					ap->syno_disk_index = want_idx;
+#endif /* CONFIG_SYNO_FIXED_DISK_NAME_MV14XX */
+				} else {
 					want_idx = sdp->host->host_no;
 				}
 				break;

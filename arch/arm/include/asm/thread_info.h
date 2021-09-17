@@ -14,9 +14,20 @@
 
 #include <linux/compiler.h>
 #include <asm/fpstate.h>
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#include <asm/page.h>
 
+#if (PAGE_SHIFT > 12)
+#define THREAD_SIZE_ORDER	0
+#else /* PAGE_SHIFT > 12 */
+#define THREAD_SIZE_ORDER	1
+#endif /* PAGE_SHIFT > 12 */
+
+#define THREAD_SIZE		(PAGE_SIZE << THREAD_SIZE_ORDER)
+#else /* CONFIG_SYNO_LSP_ALPINE */
 #define THREAD_SIZE_ORDER	1
 #define THREAD_SIZE		8192
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 #define THREAD_START_SP		(THREAD_SIZE - 8)
 
 #ifndef __ASSEMBLY__

@@ -167,9 +167,12 @@ static void flush_context(unsigned int cpu)
 	}
 
 	/* Queue a TLB invalidate and flush the I-cache if necessary. */
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#else /* CONFIG_SYNO_LSP_MONACO */
 	if (!tlb_ops_need_broadcast())
 		cpumask_set_cpu(cpu, &tlb_flush_pending);
 	else
+#endif /* CONFIG_SYNO_LSP_MONACO */
 		cpumask_setall(&tlb_flush_pending);
 
 	if (icache_is_vivt_asid_tagged())
@@ -250,7 +253,10 @@ void check_and_switch_context(struct mm_struct *mm, struct task_struct *tsk)
 	if (cpumask_test_and_clear_cpu(cpu, &tlb_flush_pending)) {
 		local_flush_bp_all();
 		local_flush_tlb_all();
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#else /* CONFIG_SYNO_LSP_MONACO */
 		dummy_flush_tlb_a15_erratum();
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	}
 
 	atomic64_set(&per_cpu(active_asids, cpu), asid);

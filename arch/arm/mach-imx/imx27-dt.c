@@ -20,7 +20,11 @@
 
 static void __init imx27_dt_init(void)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	struct platform_device_info devinfo = { .name = "cpufreq-dt", };
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	struct platform_device_info devinfo = { .name = "cpufreq-cpu0", };
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
 	of_platform_populate(NULL, of_default_bus_match_table, NULL, NULL);
 

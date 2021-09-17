@@ -45,6 +45,11 @@ static int nf_ct_tcp_loose __read_mostly = 1;
    will be started. */
 static int nf_ct_tcp_max_retrans __read_mostly = 3;
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+/* Disable window tracking in conntrack */
+static int nf_ct_tcp_window_tracking __read_mostly = 1;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
   /* FIXME: Examine ipfilter's timeouts and conntrack transitions more
      closely.  They're more complex. --RR */
 
@@ -998,11 +1003,21 @@ static int tcp_packet(struct nf_conn *ct,
 		break;
 	}
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	if (tn->tcp_window_tracking > 0) {
+		if (!tcp_in_window(ct, &ct->proto.tcp, dir, index,
+				   skb, dataoff, th, pf)) {
+			spin_unlock_bh(&ct->lock);
+			return -NF_ACCEPT;
+		}
+	}
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	if (!tcp_in_window(ct, &ct->proto.tcp, dir, index,
 			   skb, dataoff, th, pf)) {
 		spin_unlock_bh(&ct->lock);
 		return -NF_ACCEPT;
 	}
+#endif /* CONFIG_SYNO_LSP_ALPINE */
      in_window:
 	/* From now on we have got in-window packets */
 	ct->proto.tcp.last_index = index;
@@ -1440,6 +1455,14 @@ static struct ctl_table tcp_sysctl_table[] = {
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec,
 	},
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	{
+		.procname	= "nf_conntrack_tcp_window_tracking",
+		.maxlen		= sizeof(unsigned int),
+		.mode		= 0644,
+		.proc_handler	= proc_dointvec,
+	},
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	{ }
 };
 
@@ -1523,6 +1546,14 @@ static struct ctl_table tcp_compat_sysctl_table[] = {
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec,
 	},
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	{
+		.procname	= "ip_conntrack_tcp_window_tracking",
+		.maxlen		= sizeof(unsigned int),
+		.mode		= 0644,
+		.proc_handler	= proc_dointvec,
+	},
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	{ }
 };
 #endif /* CONFIG_NF_CONNTRACK_PROC_COMPAT */
@@ -1554,6 +1585,9 @@ static int tcp_kmemdup_sysctl_table(struct nf_proto_net *pn,
 	pn->ctl_table[10].data = &tn->tcp_loose;
 	pn->ctl_table[11].data = &tn->tcp_be_liberal;
 	pn->ctl_table[12].data = &tn->tcp_max_retrans;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	pn->ctl_table[13].data = &tn->tcp_window_tracking;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 #endif
 	return 0;
 }
@@ -1582,6 +1616,9 @@ static int tcp_kmemdup_compat_sysctl_table(struct nf_proto_net *pn,
 	pn->ctl_compat_table[10].data = &tn->tcp_loose;
 	pn->ctl_compat_table[11].data = &tn->tcp_be_liberal;
 	pn->ctl_compat_table[12].data = &tn->tcp_max_retrans;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	pn->ctl_compat_table[13].data = &tn->tcp_window_tracking;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 #endif
 #endif
 	return 0;
@@ -1602,6 +1639,9 @@ static int tcp_init_net(struct net *net, u_int16_t proto)
 		tn->tcp_loose = nf_ct_tcp_loose;
 		tn->tcp_be_liberal = nf_ct_tcp_be_liberal;
 		tn->tcp_max_retrans = nf_ct_tcp_max_retrans;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+		tn->tcp_window_tracking = nf_ct_tcp_window_tracking;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	}
 
 	if (proto == AF_INET) {

@@ -24,6 +24,10 @@
 #include <linux/usb/hcd.h>
 #include "usb.h"
 
+#ifdef CONFIG_SYNO_USB_CONNECT_DEBOUNCER
+#define SYNO_CONNECT_BOUNCE 0x400
+#endif /* CONFIG_SYNO_USB_CONNECT_DEBOUNCER */
+
 struct usb_hub {
 	struct device		*intfdev;	/* the "interface" device */
 	struct usb_device	*hdev;
@@ -78,6 +82,12 @@ struct usb_hub {
 	struct delayed_work	leds;
 	struct delayed_work	init_work;
 	struct usb_port		**ports;
+
+#ifdef CONFIG_SYNO_USB_UPS_DISCONNECT_FILTER
+	struct timer_list	ups_discon_flt_timer;
+	int			ups_discon_flt_port;
+	unsigned long		ups_discon_flt_last; /* last filtered time */
+#endif /* CONFIG_SYNO_USB_UPS_DISCONNECT_FILTER */
 };
 
 /**
@@ -98,7 +108,17 @@ struct usb_port {
 	u8 portnum;
 	unsigned power_is_on:1;
 	unsigned did_runtime_put:1;
+#if defined (CONFIG_SYNO_USB_POWER_RESET)
+	unsigned int power_cycle_counter;
+#endif /* CONFIG_SYNO_USB_POWER_RESET */
+#ifdef CONFIG_SYNO_CASTRATED_XHC
+#define SYNO_USB_PORT_CASTRATED_XHC 0x01
+	unsigned int flag;
+#endif /* CONFIG_SYNO_CASTRATED_XHC */
 };
+#if defined (CONFIG_SYNO_USB_POWER_RESET)
+#define SYNO_POWER_CYCLE_TRIES	(3)
+#endif /* CONFIG_SYNO_USB_POWER_RESET */
 
 #define to_usb_port(_dev) \
 	container_of(_dev, struct usb_port, dev)
@@ -114,6 +134,9 @@ extern int hub_port_debounce(struct usb_hub *hub, int port1,
 		bool must_be_connected);
 extern int usb_clear_port_feature(struct usb_device *hdev,
 		int port1, int feature);
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+extern void root_hub_recovery(struct usb_hub *hub);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
 static inline int hub_port_debounce_be_connected(struct usb_hub *hub,
 		int port1)

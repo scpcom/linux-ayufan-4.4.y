@@ -577,6 +577,11 @@ void debugfs_remove_recursive(struct dentry *dentry)
 }
 EXPORT_SYMBOL_GPL(debugfs_remove_recursive);
 
+#ifdef CONFIG_SYNO_FS_NOTIFY
+extern struct synotify_rename_path * get_rename_path_list(struct dentry *old_dentry, struct dentry *new_dentry);
+extern void free_rename_path_list(struct synotify_rename_path * rename_path_list);
+#endif
+
 /**
  * debugfs_rename - rename a file/directory in the debugfs filesystem
  * @old_dir: a pointer to the parent dentry for the renamed object. This
@@ -603,10 +608,7 @@ struct dentry *debugfs_rename(struct dentry *old_dir, struct dentry *old_dentry,
 	struct dentry *dentry = NULL, *trap;
 	const char *old_name;
 #ifdef CONFIG_SYNO_FS_NOTIFY
-	char *tmp_old_full = NULL;
-	char *tmp_new_full = NULL;
-	char *tmp_old_buff = NULL;
-	char *tmp_new_buff = NULL;
+	struct synotify_rename_path *rename_path_list = NULL;
 #endif
 
 	trap = lock_rename(new_dir, old_dir);
@@ -623,13 +625,7 @@ struct dentry *debugfs_rename(struct dentry *old_dir, struct dentry *old_dentry,
 		goto exit;
 
 #ifdef CONFIG_SYNO_FS_NOTIFY
-	tmp_old_buff = kmalloc(PATH_MAX, GFP_NOFS);
-	tmp_new_buff = kmalloc(PATH_MAX, GFP_NOFS);
-	if (!tmp_old_buff || !tmp_new_buff) {
-		goto exit;
-	}
-	tmp_old_full = dentry_path_raw(old_dentry, tmp_old_buff, PATH_MAX-1);
-	tmp_new_full = dentry_path_raw(dentry, tmp_new_buff, PATH_MAX-1);
+	rename_path_list = get_rename_path_list(old_dentry, dentry);
 #endif
 	old_name = fsnotify_oldname_init(old_dentry->d_name.name);
 
@@ -643,7 +639,8 @@ struct dentry *debugfs_rename(struct dentry *old_dir, struct dentry *old_dentry,
 #ifdef CONFIG_SYNO_FS_NOTIFY
 	fsnotify_move(old_dir->d_inode, new_dir->d_inode, old_name,
 		S_ISDIR(old_dentry->d_inode->i_mode),
-		NULL, old_dentry, tmp_old_full, tmp_new_full);
+		NULL, old_dentry, rename_path_list);
+
 #else
 	fsnotify_move(old_dir->d_inode, new_dir->d_inode, old_name,
 		S_ISDIR(old_dentry->d_inode->i_mode),
@@ -652,11 +649,13 @@ struct dentry *debugfs_rename(struct dentry *old_dir, struct dentry *old_dentry,
 	fsnotify_oldname_free(old_name);
 	unlock_rename(new_dir, old_dir);
 	dput(dentry);
+
+	free_rename_path_list(rename_path_list);
+	rename_path_list = NULL;
 	return old_dentry;
 exit:
 #ifdef CONFIG_SYNO_FS_NOTIFY
-	kfree(tmp_old_buff);
-	kfree(tmp_new_buff);
+	free_rename_path_list(rename_path_list);
 #endif
 	if (dentry && !IS_ERR(dentry))
 		dput(dentry);

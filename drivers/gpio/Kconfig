@@ -718,3 +718,9 @@ config GPIO_VIPERBOARD
           of the module parameters.
 
 endif
+
+config GPIO_ST_WAKEUP
+	bool "ST Wakeup GPIO support"
+	depends on ARCH_STI && ST_LPM
+	help
+	  Enable support of ST LPM PIO wakeup configuration

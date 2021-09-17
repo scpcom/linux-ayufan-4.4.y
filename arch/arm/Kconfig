@@ -100,6 +100,15 @@ config ARM_DMA_IOMMU_ALIGNMENT
 
 endif
 
+config ARM_HWCC_FLAG
+	bool
+	depends on ARCH_ALPINE
+	default n
+	help
+	  Select if you want the ARM specific device structure to inclue a flag
+	  for determining whether HW cache coherency is enabled.
+	  If unsure, say 'N'.
+
 config HAVE_PWM
 	bool
 
@@ -167,8 +176,14 @@ config ARCH_HAS_ILOG2_U32
 config ARCH_HAS_ILOG2_U64
 	bool
 
+config ARCH_LONG_LONG_ATOMIC
+	bool
+	depends on ARCH_ALPINE
+	default n
+
 config ARCH_HAS_CPUFREQ
 	bool
+	depends on !SYNO_LSP_ARMADA_2015_T1_1p4
 	help
 	  Internal node to signify that the ARCH has CPUFREQ support
 	  and that the relevant menu configurations are displayed for
@@ -291,7 +306,7 @@ config ARCH_MULTIPLATFORM
 	bool "Allow multiple platforms to be selected"
 	depends on MMU
 	select ARM_PATCH_PHYS_VIRT
-	select AUTO_ZRELADDR
+	select AUTO_ZRELADDR if !ARCH_STI
 	select COMMON_CLK
 	select MULTI_IRQ_HANDLER
 	select SPARSE_IRQ
@@ -299,7 +314,7 @@ config ARCH_MULTIPLATFORM
 
 config ARCH_INTEGRATOR
 	bool "ARM Ltd. Integrator family"
-	select ARCH_HAS_CPUFREQ
+	select ARCH_HAS_CPUFREQ if !SYNO_LSP_ARMADA_2015_T1_1p4
 	select ARM_AMBA
 	select COMMON_CLK
 	select COMMON_CLK_VERSATILE
@@ -435,7 +450,7 @@ config ARCH_NETX
 config ARCH_IOP13XX
 	bool "IOP13xx-based"
 	depends on MMU
-	select ARCH_SUPPORTS_MSI
+	select ARCH_SUPPORTS_MSI if !SYNO_LSP_ARMADA || (SYNO_LSP_ARMADA && !ARCH_MVEBU)
 	select CPU_XSC3
 	select NEED_MACH_MEMORY_H
 	select NEED_RET_TO_USER
@@ -474,6 +489,7 @@ config ARCH_IXP4XX
 	bool "IXP4xx-based"
 	depends on MMU
 	select ARCH_HAS_DMA_SET_COHERENT_MASK
+	select ARCH_SUPPORTS_BIG_ENDIAN if ARCH_ALPINE || (SYNO_LSP_ARMADA && ARCH_MVEBU)
 	select ARCH_REQUIRE_GPIOLIB
 	select CLKSRC_MMIO
 	select CPU_XSCALE
@@ -602,7 +618,7 @@ config ARCH_LPC32XX
 config ARCH_PXA
 	bool "PXA2xx/PXA3xx-based"
 	depends on MMU
-	select ARCH_HAS_CPUFREQ
+	select ARCH_HAS_CPUFREQ if !SYNO_LSP_ARMADA_2015_T1_1p4
 	select ARCH_MTD_XIP
 	select ARCH_REQUIRE_GPIOLIB
 	select ARM_CPU_SUSPEND if PM
@@ -671,7 +687,7 @@ config ARCH_RPC
 
 config ARCH_SA1100
 	bool "SA1100-based"
-	select ARCH_HAS_CPUFREQ
+	select ARCH_HAS_CPUFREQ if !SYNO_LSP_ARMADA_2015_T1_1p4
 	select ARCH_MTD_XIP
 	select ARCH_REQUIRE_GPIOLIB
 	select ARCH_SPARSEMEM_ENABLE
@@ -690,7 +706,7 @@ config ARCH_SA1100
 
 config ARCH_S3C24XX
 	bool "Samsung S3C24XX SoCs"
-	select ARCH_HAS_CPUFREQ
+	select ARCH_HAS_CPUFREQ if !SYNO_LSP_ARMADA_2015_T1_1p4
 	select ARCH_REQUIRE_GPIOLIB
 	select CLKDEV_LOOKUP
 	select CLKSRC_MMIO
@@ -710,7 +726,7 @@ config ARCH_S3C24XX
 
 config ARCH_S3C64XX
 	bool "Samsung S3C64XX"
-	select ARCH_HAS_CPUFREQ
+	select ARCH_HAS_CPUFREQ if !SYNO_LSP_ARMADA_2015_T1_1p4
 	select ARCH_REQUIRE_GPIOLIB
 	select ARM_VIC
 	select CLKDEV_LOOKUP
@@ -765,7 +781,7 @@ config ARCH_S5PC100
 
 config ARCH_S5PV210
 	bool "Samsung S5PV210/S5PC110"
-	select ARCH_HAS_CPUFREQ
+	select ARCH_HAS_CPUFREQ if !SYNO_LSP_ARMADA_2015_T1_1p4
 	select ARCH_HAS_HOLES_MEMORYMODEL
 	select ARCH_SPARSEMEM_ENABLE
 	select CLKDEV_LOOKUP
@@ -783,7 +799,7 @@ config ARCH_S5PV210
 
 config ARCH_EXYNOS
 	bool "Samsung EXYNOS"
-	select ARCH_HAS_CPUFREQ
+	select ARCH_HAS_CPUFREQ if !SYNO_LSP_ARMADA_2015_T1_1p4
 	select ARCH_HAS_HOLES_MEMORYMODEL
 	select ARCH_SPARSEMEM_ENABLE
 	select CLKDEV_LOOKUP
@@ -848,7 +864,7 @@ config ARCH_DAVINCI
 config ARCH_OMAP1
 	bool "TI OMAP1"
 	depends on MMU
-	select ARCH_HAS_CPUFREQ
+	select ARCH_HAS_CPUFREQ if !SYNO_LSP_ARMADA_2015_T1_1p4
 	select ARCH_HAS_HOLES_MEMORYMODEL
 	select ARCH_OMAP
 	select ARCH_REQUIRE_GPIOLIB
@@ -863,6 +879,35 @@ config ARCH_OMAP1
 	select NEED_MACH_MEMORY_H
 	help
 	  Support for older TI OMAP1 (omap7xx, omap15xx or omap16xx)
+
+config ARCH_ALPINE
+	bool "AnnapurnaLabs Alpine SOCs with Device Tree support"
+	select ARCH_WANT_OPTIONAL_GPIOLIB
+	select ARM_AMBA
+	select SPARSE_IRQ
+	select ARM_TIMER_SP804
+	select CLKDEV_LOOKUP
+	select GENERIC_CLOCKEVENTS
+	select GENERIC_IRQ_CHIP
+	select HAVE_CLK
+	select HAVE_SMP
+	select HAVE_ARM_ARCH_TIMER
+	select HAVE_SCHED_CLOCK
+	select ARCH_SCHED_CLOCK
+	select ICST
+	select CPU_V7
+	select ARM_GIC
+	select HAVE_ARCH_TIMERS
+	select COMMON_CLK
+	select PCI
+	select PCI_DOMAINS
+	select ARCH_SUPPORTS_MSI
+	select ARM_HWCC_FLAG
+	select ARCH_LONG_LONG_ATOMIC
+	select ARM_HAS_SG_CHAIN
+	select ARCH_SUPPORTS_BIG_ENDIAN
+	help
+	  This enables support for the AnnapurnaLabs SoC Gen1 boards.
 
 endchoice
 
@@ -989,6 +1034,8 @@ source "arch/arm/mach-socfpga/Kconfig"
 
 source "arch/arm/mach-spear/Kconfig"
 
+source "arch/arm/mach-sti/Kconfig"
+
 source "arch/arm/mach-s3c24xx/Kconfig"
 
 if ARCH_S3C64XX
@@ -1023,6 +1070,8 @@ source "arch/arm/plat-versatile/Kconfig"
 source "arch/arm/mach-virt/Kconfig"
 
 source "arch/arm/mach-vt8500/Kconfig"
+
+source "arch/arm/mach-alpine/Kconfig"
 
 source "arch/arm/mach-w90x900/Kconfig"
 
@@ -1538,6 +1587,17 @@ choice
 		bool "1G/3G user/kernel split"
 endchoice
 
+config FUNC_REORDER
+	bool "Function reordering support"
+	depends on ARCH_ALPINE
+	default n
+	help
+	  Support for function reordering based on functionlist found in
+	  arch/arm/kernel/functionlist.
+	  Function reordering can be used to increase locality on the I-cache.
+	  This option add the flag -ffunction-sections to the compilation
+	  flags.
+
 config PAGE_OFFSET
 	hex
 	default 0x40000000 if VMSPLIT_1G
@@ -1730,6 +1790,14 @@ config HW_PERF_EVENTS
 	help
 	  Enable hardware performance counter support for perf events. If
 	  disabled, perf events will use software events only.
+
+config SYS_SUPPORTS_HUGETLBFS
+       def_bool y
+       depends on ARM_LPAE && ARCH_ALPINE
+
+config HAVE_ARCH_TRANSPARENT_HUGEPAGE
+       def_bool y
+       depends on ARM_LPAE && ARCH_ALPINE
 
 source "mm/Kconfig"
 
@@ -2076,7 +2144,7 @@ endmenu
 
 menu "CPU Power Management"
 
-if ARCH_HAS_CPUFREQ
+if ARCH_HAS_CPUFREQ && !SYNO_LSP_ARMADA_2015_T1_1p4
 source "drivers/cpufreq/Kconfig"
 
 config CPU_FREQ_S3C

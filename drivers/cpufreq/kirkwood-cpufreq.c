@@ -158,7 +158,11 @@ static struct cpufreq_driver kirkwood_cpufreq_driver = {
 	.init	= kirkwood_cpufreq_cpu_init,
 	.exit	= kirkwood_cpufreq_cpu_exit,
 	.name	= "kirkwood-cpufreq",
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	.owner	= THIS_MODULE,
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	.attr	= kirkwood_cpufreq_attr,
 };
 

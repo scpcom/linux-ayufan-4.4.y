@@ -197,7 +197,6 @@ enum reconstruct_states {
 struct stripe_head {
 	struct hlist_node	hash;
 	struct list_head	lru;	      /* inactive_list or handle_list */
-	struct llist_node	release_list;
 	struct r5conf		*raid_conf;
 	short			generation;	/* increments with every
 						 * reshape */
@@ -212,8 +211,6 @@ struct stripe_head {
 	enum check_states	check_state;
 	enum reconstruct_states reconstruct_state;
 	spinlock_t		stripe_lock;
-	int			cpu;
-	struct r5worker_group	*group;
 	/**
 	 * struct stripe_operations
 	 * @target - STRIPE_OP_COMPUTE_BLK target
@@ -231,7 +228,11 @@ struct stripe_head {
 		 */
 		struct bio	req, rreq;
 		struct bio_vec	vec, rvec;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+		struct page	*page, *orig_page;
+#else /* CONFIG_SYNO_LSP_ALPINE */
 		struct page	*page;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 		struct bio	*toread, *read, *towrite, *written;
 		sector_t	sector;			/* sector of this page */
 		unsigned long	flags;
@@ -298,6 +299,9 @@ enum r5dev_flags {
 			 * data in, and now is a good time to write it out.
 			 */
 	R5_Discard,	/* Discard the stripe */
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	R5_SkipCopy, /* Don't copy data from bio to stripe cache */
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 };
 
 /*
@@ -324,7 +328,6 @@ enum {
 	STRIPE_OPS_REQ_PENDING,
 	STRIPE_ON_UNPLUG_LIST,
 	STRIPE_DISCARD,
-	STRIPE_ON_RELEASE_LIST,
 #ifdef CONFIG_SYNO_MD_STATUS_DISKERROR
 	STRIPE_NORETRY,
 #endif /* CONFIG_SYNO_MD_STATUS_DISKERROR */
@@ -369,19 +372,6 @@ struct disk_info {
 	struct md_rdev	*rdev, *replacement;
 };
 
-struct r5worker {
-	struct work_struct work;
-	struct r5worker_group *group;
-	bool working;
-};
-
-struct r5worker_group {
-	struct list_head handle_list;
-	struct r5conf *conf;
-	struct r5worker *workers;
-	int stripes_cnt;
-};
-
 struct r5conf {
 	struct hlist_head	*stripe_hashtbl;
 	struct mddev		*mddev;
@@ -405,7 +395,6 @@ struct r5conf {
 	int			prev_chunk_sectors;
 	int			prev_algo;
 	short			generation; /* increments with every reshape */
-	seqcount_t		gen_lock;	/* lock against generation changes */
 	unsigned long		reshape_checkpoint; /* Time we last updated
 						     * metadata */
 	long long		min_offset_diff; /* minimum difference between
@@ -426,6 +415,9 @@ struct r5conf {
 	atomic_t		pending_full_writes; /* full write backlog */
 	int			bypass_count; /* bypassed prereads */
 	int			bypass_threshold; /* preread nice */
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	int			skip_copy;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	struct list_head	*last_hold; /* detect hold_list promotions */
 
 	atomic_t		reshape_stripes; /* stripes with pending writes for reshape */
@@ -465,7 +457,6 @@ struct r5conf {
 	 */
 	atomic_t		active_stripes;
 	struct list_head	inactive_list;
-	struct llist_head	released_stripes;
 	wait_queue_head_t	wait_for_stripe;
 	wait_queue_head_t	wait_for_overlap;
 	int			inactive_blocked;	/* release of inactive stripes blocked,
@@ -479,9 +470,6 @@ struct r5conf {
 	 * the new thread here until we fully activate the array.
 	 */
 	struct md_thread	*thread;
-	struct r5worker_group	*worker_groups;
-	int			group_cnt;
-	int			worker_cnt_per_group;
 };
 
 /*

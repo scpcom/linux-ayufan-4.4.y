@@ -314,7 +314,11 @@ cifs_strtoUTF16(__le16 *to, const char *from, int len,
 #endif /* CONFIG_SYNO_CIFS_SPECIAL_CHAR_CONVER */
 	}
 
+#ifdef CONFIG_SYNO_CIFS_SPECIAL_CHAR_CONVER
+	// do nothing
+#else /* CONFIG_SYNO_CIFS_SPECIAL_CHAR_CONVER */
 success:
+#endif /* CONFIG_SYNO_CIFS_SPECIAL_CHAR_CONVER */
 	put_unaligned_le16(0, &to[i]);
 	return i;
 }

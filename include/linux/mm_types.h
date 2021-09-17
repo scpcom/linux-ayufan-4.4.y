@@ -281,8 +281,13 @@ struct vm_area_struct {
 	const struct vm_operations_struct *vm_ops;
 
 	/* Information about our backing store: */
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	pgoff_t vm_pgoff;		/* Offset (within vm_file) in PAGE_SIZE
+					   units, *not* PAGE_CACHE_SIZE */
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	unsigned long vm_pgoff;		/* Offset (within vm_file) in PAGE_SIZE
 					   units, *not* PAGE_CACHE_SIZE */
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	struct file * vm_file;		/* File we map to (can be NULL). */
 #ifdef CONFIG_AUFS_FHSM
 	struct file *vm_prfile;		/* shadow of vm_file */

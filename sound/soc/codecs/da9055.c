@@ -482,7 +482,11 @@ static int da9055_get_alc_data(struct snd_soc_codec *codec, u8 reg_val)
 static int da9055_put_alc_sw(struct snd_kcontrol *kcontrol,
 			     struct snd_ctl_elem_value *ucontrol)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	u8 reg_val, adc_left, adc_right, mic_left, mic_right;
 	int avg_left_data, avg_right_data, offset_l, offset_r;
 

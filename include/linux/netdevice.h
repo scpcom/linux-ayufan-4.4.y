@@ -2452,9 +2452,21 @@ static inline void __netif_tx_unlock_bh(struct netdev_queue *txq)
 	spin_unlock_bh(&txq->_xmit_lock);
 }
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+static inline bool netif_supports_mq_tx_lock_opt(struct net_device *dev)
+{
+	return  !!(dev->features & NETIF_F_MQ_TX_LOCK_OPT);
+}
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
 static inline void txq_trans_update(struct netdev_queue *txq)
 {
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	if ((txq->xmit_lock_owner != -1) ||
+	    (netif_supports_mq_tx_lock_opt(txq->dev)))
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	if (txq->xmit_lock_owner != -1)
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 		txq->trans_start = jiffies;
 }
 
@@ -2660,10 +2672,16 @@ extern struct rtnl_link_stats64 *dev_get_stats(struct net_device *dev,
 extern void netdev_stats_to_stats64(struct rtnl_link_stats64 *stats64,
 				    const struct net_device_stats *netdev_stats);
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+extern int		netdev_skb_tstamp;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 extern int		netdev_max_backlog;
 extern int		netdev_tstamp_prequeue;
 extern int		weight_p;
 extern int		bpf_jit_enable;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+extern int		hh_output_relaxed;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 extern bool netdev_has_upper_dev(struct net_device *dev,
 				 struct net_device *upper_dev);

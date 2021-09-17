@@ -475,6 +475,15 @@ config SYNO_EXT4_MBALLOC_RANDOM
 	  due to old alloc algorithm.
 	  Previous naming: SYNO_MBALLOC_RANDOM
 
+config SYNO_EXT4_FIX_RESIZE_16TB_IN_32BIT
+	bool "Support on-line resize over 16TB on 32-bit platform"
+	depends on SYNO_ALPINE || SYNO_ARMADA
+	default y
+	help
+	  32-bit platforms with 4K page size are bounded to UINT32_MAX*4K=16TB volume size.
+	  With larger page size, it is possible to use and resize volumes larger than 16TB;
+	  but some numeric overflows must be cleaned up first by using 64-bit API.
+
 config SYNO_EXT4_PROTECT_DISKSIZE_WRITE
 	bool "Add lock on i_disksize update for writeback race"
 	default y
@@ -563,7 +572,7 @@ config SYNO_BTRFS_METADATA_OVERCOMMIT_POLICY
 	  Because of btrfs metadata delayed allocation,
 	  space_info may keep pinned data too much. It will strictly make overcommit check failed.
 
-config SYNO_BTRFS_SHRINK_ORDERED_EXTENT
+config SYNO_BTRFS_FLUSHONCOMMIT_THRESHOLD
 	bool "Release btrfs ordered extent to prevent OOM"
 	default y
 	help
@@ -608,13 +617,6 @@ config SYNO_BTRFS_CLUSTER_RESERVE
 	help
 	  <DSM> #71147
 	  Reserve meta block to suppress problem of extent tree loop.
-
-config SYNO_BTRFS_FIX_INVALID_OWNER
-	bool "Fix wrong qgropu accounting due to invalid extent owner"
-	default y
-	help
-	  <FS Snapshot> #156
-	  Fix wrong qgropu accounting due to invalid extent owner
 
 config SYNO_BTRFS_CREATE_TIME
 	bool "Add syno create time for btrfs"
@@ -719,14 +721,6 @@ config SYNO_BTRFS_CORRECT_SPACEINFO_LOCK
 	  use wrong spinlock to protect block group list.
 	  see also:80eb234a
 
-config SYNO_BTRFS_FIX_QGROUP_OVERRUN
-	bool "Fix qgroup exceed problem"
-	default y
-	depends on BTRFS_FS
-	help
-	  <DSM> #73072
-	  Fix qgroup can be easily overrun.
-
 config SYNO_BTRFS_FIX_ALLOC_CHUNK
 	bool "Chunk allocation may fail if device tree has hole"
 	default y
@@ -805,6 +799,110 @@ config SYNO_BTRFS_UMOUNT_ERROR_VOLUME
 	  <DSM> #76402
 	  Fix a infinite loop and a null pointer dereference bug so that umount
 	  process will not stuck or killed when unmount a error Btrfs volume.
+
+config SYNO_BTRFS_REMOVE_RAID_CRASH_QGROUP_BUG_ON
+	bool "Remove qgroup bug on when raid crashes"
+	default y
+	depends on BTRFS_FS
+	help
+	  <DSM> #77718
+	  qgroup wil bug_on when raid crash. This patch add additional check on whether
+	  filesystem is already readonly. If filesystem is already changed to readonly,
+	  skip bug_on.
+
+config SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT
+	bool "Avoid NULL pointer dereference at create_pending_snapshots"
+	default y
+	depends on BTRFS_FS
+	help
+	  <DSM> #78512
+	  During stress, NULL pointer dereference might happen on create_pending_snapshots
+	  when trying to delete pending_snapshot from list. If last ioctl of creating snapshot
+	  failed at commit transaction before it is deleted from pending snapshot list, the entry
+	  would be freed while it was still in the list. This causes call trace on next commit
+	  transctioncall to create_pending_snapshots. This patch add a check: If this entry has
+	  not been deleted from list right before it is about to free, delete it.
+
+config SYNO_BTRFS_ALLOC_EXTENT_STATE_RETRY
+	bool "Retry kmalloc if alloc extent state failed"
+	default y
+	depends on BTRFS_FS
+	help
+	  <DSM> #72318
+	  Btrfs will trigger BUG_ON if kmalloc failed on alloc extent state. We make it by retry.
+
+config SYNO_BTRFS_METADATA_RESERVE
+	bool "Pre-allocate btrfs metadata chunk with metadata_ratio."
+	default y
+	depends on BTRFS_FS
+	help
+	  <DSM> #76547
+	  Btrfs may be run out of free chunk by data chunk
+	  We allocate metadata chunk in ratio if data chunk allocated.
+
+config SYNO_BTRFS_FIX_PAGE_WRITEBACK
+	bool "Fix page writeback BUG_ON on release extent buffer code"
+	default y
+	depends on BTRFS_FS
+	help
+	  <DSM> #75451
+	  Use memory barrier to fix page writeback BUG_ON. We don't know
+	  exactly why it works but it passed our stress and the fix has no
+	  harm.
+
+config SYNO_BTRFS_REMOVE_RAID_CRASH_QGROUP_BUG_ON
+	bool "Remove qgroup bug on when raid crashes"
+	default y
+	depends on BTRFS_FS
+	help
+	  <DSM> #77718
+	  qgroup wil bug_on when raid crash. This patch add additional check on whether
+	  filesystem is already readonly. If filesystem is already changed to readonly,
+	  skip bug_on.
+
+config SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT
+	bool "Avoid NULL pointer dereference at create_pending_snapshots"
+	default y
+	depends on BTRFS_FS
+	help
+	  <DSM> #78512
+	  During stress, NULL pointer dereference might happen on create_pending_snapshots
+	  when trying to delete pending_snapshot from list. If last ioctl of creating snapshot
+	  failed at commit transaction before it is deleted from pending snapshot list, the entry
+	  would be freed while it was still in the list. This causes call trace on next commit
+	  transctioncall to create_pending_snapshots. This patch add a check: If this entry has
+	  not been deleted from list right before it is about to free, delete it.
+
+config SYNO_BTRFS_ADD_LOCK_ON_FLUSH_ORDERED_EXTENT
+	bool "Add mutex lock on btrfs ordered extent flush to prevent memory leak."
+	default y
+	depends on BTRFS_FS
+	help
+	  <DSM> #78861
+	  During dbench stress, it will be memory leak on run_ordered_extent. The function
+	  will be called on sync and btrfs transaction commit. The attribute "Inactive(file)"
+	  in meminfo will be increase all the time, even we drop all cache. We add a lock to
+	  prevent race condition from run_ordered_extent hold the pages forever.
+
+config SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+	bool "Add a block group hint tree to speedup volume mount."
+	default y
+	depends on BTRFS_FS
+	help
+	  <DSM> #75730
+	  Add a block group hint tree to collect block group items from extent tree. When
+	  mounting volume, we can lookup this tree, knowing the keys of following block
+	  group items, and readahead theses items to speedup mounting time.
+
+config SYNO_BTRFS_AVOID_TRIM_SYS_CHUNK
+	bool "Avoid trim system chunk."
+	default y
+	depends on BTRFS_FS
+	help
+	  <DSM> #84616
+	  Btrfs trimming doesn't check block reserve, leading ENOSPC if we do chunk item
+	  operation while trimming system chunk. Since system chunk is usually small and
+	  seldom updates, we avoid trimming system chunk to workarond this problem.
 
 endmenu #BTRFS
 
@@ -1098,5 +1196,17 @@ config SYNO_ISOFS_UINT_UID_GID
 	  module to parse unsigned long type options.
 
 endmenu #ISOFS
+
+menu "ZRAM"
+
+config SYNO_ZRAM_32KB_PAGE_SUPPORT
+	bool "Support ZRAM for 32KB Page Size"
+	default y
+	depends on ARM_PAGE_SIZE_32KB
+	help
+	  <DSM> #61642
+	  Make ZRAM workable on Alpine platform with 32KB page size.
+
+endmenu #ZRAM
 
 endmenu #File Systems

@@ -16,6 +16,9 @@ struct pxa3xx_nand_timing {
 	unsigned int	tAR;  /* ND_ALE low to ND_nRE low delay */
 };
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA */
 struct pxa3xx_nand_cmdset {
 	uint16_t	read1;
 	uint16_t	read2;
@@ -28,6 +31,7 @@ struct pxa3xx_nand_cmdset {
 	uint16_t	unlock;
 	uint16_t	lock_status;
 };
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 struct pxa3xx_nand_flash {
 	char		*name;
@@ -67,6 +71,11 @@ struct pxa3xx_nand_platform_data {
 
 	/* indicate how many chip selects will be used */
 	int	num_cs;
+
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	/* use an flash-based bad block table */
+	bool	flash_bbt;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 	const struct mtd_partition		*parts[NUM_CHIP_SELECT];
 	unsigned int				nr_parts[NUM_CHIP_SELECT];

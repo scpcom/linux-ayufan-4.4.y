@@ -226,4 +226,9 @@
 /* Rocketport EXPRESS/INFINITY */
 #define PORT_RP2	102
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+/* ST ASC type numbers */
+#define PORT_ASC       105
+
+#endif /* CONFIG_SYNO_LSP_MONACO */
 #endif /* _UAPILINUX_SERIAL_CORE_H */

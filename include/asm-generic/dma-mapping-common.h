@@ -44,11 +44,22 @@ static inline int dma_map_sg_attrs(struct device *dev, struct scatterlist *sg,
 				   struct dma_attrs *attrs)
 {
 	struct dma_map_ops *ops = get_dma_ops(dev);
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	int ents;
+
+#ifdef CONFIG_KMEMCHECK
+	struct scatterlist *s;
+	int i;
+	for_each_sg(sg, s, nents, i)
+		kmemcheck_mark_initialized(sg_virt(s), s->length);
+#endif /* CONFIG_KMEMCHECK */
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	int i, ents;
 	struct scatterlist *s;
 
 	for_each_sg(sg, s, nents, i)
 		kmemcheck_mark_initialized(sg_virt(s), s->length);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	BUG_ON(!valid_dma_direction(dir));
 	ents = ops->map_sg(dev, sg, nents, dir, attrs);
 	debug_dma_map_sg(dev, sg, nents, ents, dir);
@@ -75,7 +86,13 @@ static inline dma_addr_t dma_map_page(struct device *dev, struct page *page,
 	struct dma_map_ops *ops = get_dma_ops(dev);
 	dma_addr_t addr;
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#ifdef CONFIG_KMEMCHECK
 	kmemcheck_mark_initialized(page_address(page) + offset, size);
+#endif /* CONFIG_KMEMCHECK */
+#else /* CONFIG_SYNO_LSP_ALPINE */
+	kmemcheck_mark_initialized(page_address(page) + offset, size);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	BUG_ON(!valid_dma_direction(dir));
 	addr = ops->map_page(dev, page, offset, size, dir, NULL);
 	debug_dma_map_page(dev, page, offset, size, dir, addr, false);

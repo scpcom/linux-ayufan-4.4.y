@@ -218,6 +218,9 @@ static int snd_pcm_hw_param_mask(struct snd_pcm_substream *pcm,
 	}
 	return 0;
 }
+#if defined (CONFIG_SYNO_LSP_MONACO)
+EXPORT_SYMBOL_GPL(snd_pcm_hw_param_mask);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 static int _snd_pcm_hw_param_min(struct snd_pcm_hw_params *params,
 				 snd_pcm_hw_param_t var, unsigned int val,
@@ -249,6 +252,9 @@ static int _snd_pcm_hw_param_min(struct snd_pcm_hw_params *params,
 	}
 	return changed;
 }
+#if defined (CONFIG_SYNO_LSP_MONACO)
+EXPORT_SYMBOL_GPL(_snd_pcm_hw_param_min);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 /**
  * snd_pcm_hw_param_min
@@ -468,6 +474,9 @@ static int snd_pcm_hw_param_near(struct snd_pcm_substream *pcm,
 	snd_BUG_ON(v < 0);
 	return v;
 }
+#if defined (CONFIG_SYNO_LSP_MONACO)
+EXPORT_SYMBOL_GPL(snd_pcm_hw_param_near);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 static int _snd_pcm_hw_param_set(struct snd_pcm_hw_params *params,
 				 snd_pcm_hw_param_t var, unsigned int val,
@@ -544,6 +553,9 @@ static int snd_pcm_hw_param_set(struct snd_pcm_substream *pcm,
 	}
 	return snd_pcm_hw_param_value(params, var, NULL);
 }
+#if defined (CONFIG_SYNO_LSP_MONACO)
+EXPORT_SYMBOL_GPL(snd_pcm_hw_param_set);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 static int _snd_pcm_hw_param_setinteger(struct snd_pcm_hw_params *params,
 					snd_pcm_hw_param_t var)
@@ -556,6 +568,9 @@ static int _snd_pcm_hw_param_setinteger(struct snd_pcm_hw_params *params,
 	}
 	return changed;
 }
+#if defined (CONFIG_SYNO_LSP_MONACO)
+EXPORT_SYMBOL_GPL(_snd_pcm_hw_param_setinteger);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	
 /*
  * plugin

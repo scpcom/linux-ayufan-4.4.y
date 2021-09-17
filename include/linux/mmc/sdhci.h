@@ -95,6 +95,10 @@ struct sdhci_host {
 /* The system physically doesn't support 1.8v, even if the host does */
 #define SDHCI_QUIRK2_NO_1_8_V				(1<<2)
 #define SDHCI_QUIRK2_PRESET_VALUE_BROKEN		(1<<3)
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+/* Do not disable internal clk on power-off */
+#define SDHCI_QUIRK2_KEEP_INT_CLK_ON			(1<<4)
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 	int irq;		/* Device IRQ */
 	void __iomem *ioaddr;	/* Mapped address */
@@ -126,7 +130,11 @@ struct sdhci_host {
 #define SDHCI_AUTO_CMD23	(1<<7)	/* Auto CMD23 support */
 #define SDHCI_PV_ENABLED	(1<<8)	/* Preset value enabled */
 #define SDHCI_SDIO_IRQ_ENABLED	(1<<9)	/* SDIO irq enabled */
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#define SDHCI_SDR104_NEEDS_TUNING (1<<10)	/* SDR104/HS200 needs tuning */
+#else /* CONFIG_SYNO_LSP_MONACO */
 #define SDHCI_HS200_NEEDS_TUNING (1<<10)	/* HS200 needs tuning */
+#endif /* CONFIG_SYNO_LSP_MONACO */
 #define SDHCI_USING_RETUNING_TIMER (1<<11)	/* Host is using a retuning timer for the card */
 
 	unsigned int version;	/* SDHCI spec. version */
@@ -144,6 +152,9 @@ struct sdhci_host {
 	struct mmc_command *cmd;	/* Current command */
 	struct mmc_data *data;	/* Current data request */
 	unsigned int data_early:1;	/* Data finished before cmd */
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	unsigned int busy_handle:1;	/* Handling the order of Busy-end */
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 	struct sg_mapping_iter sg_miter;	/* SG state for PIO */
 	unsigned int blocks;	/* remaining PIO blocks */

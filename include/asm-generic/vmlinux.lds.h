@@ -494,6 +494,9 @@
 #define KERNEL_CTORS()	. = ALIGN(8);			   \
 			VMLINUX_SYMBOL(__ctors_start) = .; \
 			*(.ctors)			   \
+#if defined (CONFIG_SYNO_LSP_MONACO)
+			*(.init_array)			   \
+#endif /* CONFIG_SYNO_LSP_MONACO */
 			VMLINUX_SYMBOL(__ctors_end) = .;
 #else
 #define KERNEL_CTORS()

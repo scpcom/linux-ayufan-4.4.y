@@ -412,32 +412,86 @@
 		CALL(sys_ni_syscall)
 /* 400 */	CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)
-		CALL(sys_ni_syscall)	
+#ifdef CONFIG_SYNO_FS_CREATE_TIME
+		CALL(sys_SYNOUtime)               /* 402 */
+#else
+		CALL(sys_ni_syscall)
+#endif /* CONFIG_SYNO_FS_CREATE_TIME */
+#ifdef CONFIG_SYNO_FS_ARCHIVE_BIT
+		CALL(sys_SYNOArchiveBit)          /* 403 */
+#else
+		CALL(sys_ni_syscall)
+#endif /* CONFIG_SYNO_FS_ARCHIVE_BIT */
+#ifdef CONFIG_SYNO_FS_RECVFILE
+		CALL(sys_recvfile)                /* 404 */
+#else
+		CALL(sys_ni_syscall)
+#endif /* CONFIG_SYNO_FS_RECVFILE */
+#ifdef CONFIG_SYNO_MTD_ALLOC
+		CALL(sys_SYNOMTDAlloc)            /* 405 */
+#else
+		CALL(sys_ni_syscall)
+#endif /* CONFIG_SYNO_MTD_ALLOC */
+#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+		CALL(sys_SYNOCaselessStat64)      /* 406 */
+		CALL(sys_SYNOCaselessLStat64)     /* 407 */
+#else
 		CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)
-/* 405 */	CALL(sys_ni_syscall)
+#endif /* CONFIG_SYNO_FS_CASELESS_STAT */
+		CALL(sys_ni_syscall)              /* 408 */
+		CALL(sys_ni_syscall)              /* 409 */
+#ifdef CONFIG_SYNO_ECRYPTFS_FILENAME_SYSCALL
+		CALL(sys_SYNOEcryptName)          /* 410 */
+		CALL(sys_SYNODecryptName)         /* 411 */
+#else
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+#endif /* CONFIG_SYNO_ECRYPTFS_FILENAME_SYSCALL */
+#ifdef CONFIG_SYNO_FS_WINACL
+		CALL(sys_SYNOACLCheckPerm)        /* 412 */
+		CALL(sys_SYNOACLIsSupport)        /* 413 */
+		CALL(sys_SYNOACLGetPerm)          /* 414 */
+#else
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+#endif /* CONFIG_SYNO_FS_WINACL */
+#ifdef CONFIG_SYNO_FS_RECVFILE
+		CALL(sys_SYNOFlushAggregate)      /* 415 */
+#else
+		CALL(sys_ni_syscall)
+#endif /* CONFIG_SYNO_FS_RECVFILE */
+		CALL(sys_ni_syscall)              /* 416 */
+		CALL(sys_ni_syscall)              /* 417 */
+		CALL(sys_ni_syscall)              /* 418 */
+#ifdef CONFIG_SYNO_FS_STAT
+		CALL(sys_SYNOStat64)              /* 419 */
+		CALL(sys_SYNOFStat64)             /* 420 */
+		CALL(sys_SYNOLStat64)             /* 421 */
+#else
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+		CALL(sys_ni_syscall)
+#endif /* CONFIG_SYNO_FS_STAT */
+#ifdef CONFIG_SYNO_FS_NOTIFY
+		CALL(sys_SYNONotifyInit)          /* 422 */
+		CALL(sys_SYNONotifyAddWatch)      /* 423 */
+		CALL(sys_SYNONotifyRemoveWatch)   /* 424 */
+		CALL(sys_SYNONotifyAddWatch32)    /* 425 */
+		CALL(sys_SYNONotifyRemoveWatch32) /* 426 */
+#else
 		CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)
-/* 410 */	CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)
+#endif /* CONFIG_SYNO_FS_NOTIFY */
+#ifdef CONFIG_SYNO_FS_ARCHIVE_BIT
+		CALL(sys_SYNOArchiveOverwrite)    /* 427 */
+#else
 		CALL(sys_ni_syscall)
-		CALL(sys_ni_syscall)
-		CALL(sys_ni_syscall)
-/* 415 */	CALL(sys_ni_syscall)
-		CALL(sys_ni_syscall)
-		CALL(sys_ni_syscall)
-		CALL(sys_ni_syscall)
-		CALL(sys_ni_syscall)
-/* 420 */	CALL(sys_ni_syscall)
-		CALL(sys_ni_syscall)
-		CALL(sys_ni_syscall)
-		CALL(sys_ni_syscall)
-		CALL(sys_ni_syscall)
-/* 425 */	CALL(sys_ni_syscall)
-		CALL(sys_ni_syscall)
-		CALL(sys_ni_syscall)
+#endif /* CONFIG_SYNO_FS_ARCHIVE_BIT */
 #endif /* CONFIG_SYNO_SYSTEM_CALL */
 
 #ifndef syscalls_counted

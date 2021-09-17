@@ -111,8 +111,12 @@ static struct pcc_cpu __percpu *pcc_cpu_info;
 
 static int pcc_cpufreq_verify(struct cpufreq_policy *policy)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	cpufreq_verify_within_cpu_limits(policy);
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	cpufreq_verify_within_limits(policy, policy->cpuinfo.min_freq,
 				     policy->cpuinfo.max_freq);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	return 0;
 }
 
@@ -585,7 +589,11 @@ static struct cpufreq_driver pcc_cpufreq_driver = {
 	.init = pcc_cpufreq_cpu_init,
 	.exit = pcc_cpufreq_cpu_exit,
 	.name = "pcc-cpufreq",
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	.owner = THIS_MODULE,
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 };
 
 static int __init pcc_cpufreq_init(void)

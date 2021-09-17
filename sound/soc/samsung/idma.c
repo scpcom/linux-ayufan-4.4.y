@@ -384,7 +384,11 @@ static int preallocate_idma_buffer(struct snd_pcm *pcm, int stream)
 	return 0;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA */
 static u64 idma_mask = DMA_BIT_MASK(32);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 static int idma_new(struct snd_soc_pcm_runtime *rtd)
 {
@@ -392,10 +396,16 @@ static int idma_new(struct snd_soc_pcm_runtime *rtd)
 	struct snd_pcm *pcm = rtd->pcm;
 	int ret = 0;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	ret = dma_coerce_mask_and_coherent(card->dev, DMA_BIT_MASK(32));
+	if (ret)
+		return ret;
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	if (!card->dev->dma_mask)
 		card->dev->dma_mask = &idma_mask;
 	if (!card->dev->coherent_dma_mask)
 		card->dev->coherent_dma_mask = DMA_BIT_MASK(32);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 	if (pcm->streams[SNDRV_PCM_STREAM_PLAYBACK].substream) {
 		ret = preallocate_idma_buffer(pcm,

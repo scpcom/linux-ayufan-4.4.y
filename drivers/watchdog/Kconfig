@@ -291,7 +291,7 @@ config DAVINCI_WATCHDOG
 
 config ORION_WATCHDOG
 	tristate "Orion watchdog"
-	depends on ARCH_ORION5X || ARCH_KIRKWOOD
+	depends on ARCH_ORION5X || ARCH_KIRKWOOD || (SYNO_LSP_ARMADA && ARCH_MVEBU)
 	select WATCHDOG_CORE
 	help
 	  Say Y here if to include support for the watchdog timer
@@ -390,6 +390,21 @@ config RETU_WATCHDOG
 
 	  To compile this driver as a module, choose M here: the
 	  module will be called retu_wdt.
+
+config ST_LPC_WATCHDOG
+	tristate "STMicroelectronics LPC watchdog"
+	depends on ARCH_STI
+	select WATCHDOG_CORE
+	help
+	  Say Y here to include Watchdog timer support for the watchdog
+	  existing in the LPC of STMicroelectronics SOCs.
+	  !!! BE CARREFUL !!!
+	  This driver shares hardware resources with RTC Alarm part of the
+	  LPC. Both lpc watchdog driver and lpc rtc driver cannot be
+	  used together.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called st-lpc-wdt.
 
 # AVR32 Architecture
 

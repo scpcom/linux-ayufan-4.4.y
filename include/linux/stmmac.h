@@ -80,6 +80,12 @@ struct stmmac_mdio_bus_data {
 	unsigned int phy_mask;
 	int *irqs;
 	int probed_phy_irq;
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#ifdef CONFIG_OF
+	int reset_gpio, active_low;
+	u32 delays[3];
+#endif
+#endif /* CONFIG_SYNO_LSP_MONACO */
 };
 
 struct stmmac_dma_cfg {
@@ -104,13 +110,50 @@ struct plat_stmmacenet_data {
 	int bugged_jumbo;
 	int pmt;
 	int force_sf_dma_mode;
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	int force_thresh_dma_mode;
 	int riwt_off;
+	int max_speed;
+	int maxmtu;
+#else /* CONFIG_SYNO_LSP_MONACO */
+	int riwt_off;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	void (*fix_mac_speed)(void *priv, unsigned int speed);
 	void (*bus_setup)(void __iomem *ioaddr);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	void *(*setup)(struct platform_device *pdev);
+	void (*free)(struct platform_device *pdev, void *priv);
+	int (*init)(struct platform_device *pdev, void *priv);
+	void (*exit)(struct platform_device *pdev, void *priv);
+#else /* CONFIG_SYNO_LSP_MONACO */
 	int (*init)(struct platform_device *pdev);
 	void (*exit)(struct platform_device *pdev);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	void *custom_cfg;
 	void *custom_data;
 	void *bsp_priv;
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	int eee_force_disable;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 };
+#if defined (CONFIG_SYNO_LSP_MONACO)
+
+/* of_data for SoC glue layer device tree bindings */
+
+struct stmmac_of_data {
+	int has_gmac;
+	int enh_desc;
+	int tx_coe;
+	int rx_coe;
+	int bugged_jumbo;
+	int pmt;
+	int riwt_off;
+	void (*fix_mac_speed)(void *priv, unsigned int speed);
+	void (*bus_setup)(void __iomem *ioaddr);
+	void *(*setup)(struct platform_device *pdev);
+	void (*free)(struct platform_device *pdev, void *priv);
+	int (*init)(struct platform_device *pdev, void *priv);
+	void (*exit)(struct platform_device *pdev, void *priv);
+};
+#endif /* CONFIG_SYNO_LSP_MONACO */
 #endif

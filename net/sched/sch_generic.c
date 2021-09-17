@@ -116,16 +116,34 @@ int sch_direct_xmit(struct sk_buff *skb, struct Qdisc *q,
 {
 	int ret = NETDEV_TX_BUSY;
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	if (!netif_supports_mq_tx_lock_opt(dev)) {
+		/* And release qdisc */
+		spin_unlock(root_lock);
+
+		HARD_TX_LOCK(dev, txq, smp_processor_id());
+	}
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	/* And release qdisc */
 	spin_unlock(root_lock);
 
 	HARD_TX_LOCK(dev, txq, smp_processor_id());
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
 	if (!netif_xmit_frozen_or_stopped(txq))
 		ret = dev_hard_start_xmit(skb, dev, txq);
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	if (!netif_supports_mq_tx_lock_opt(dev)) {
+		HARD_TX_UNLOCK(dev, txq);
+
+		spin_lock(root_lock);
+	}
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	HARD_TX_UNLOCK(dev, txq);
 
 	spin_lock(root_lock);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 	if (dev_xmit_complete(ret)) {
 		/* Driver sent out skb successfully or skb was consumed */

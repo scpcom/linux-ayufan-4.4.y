@@ -117,7 +117,11 @@ static int wm8731_set_deemph(struct snd_soc_codec *codec)
 static int wm8731_get_deemph(struct snd_kcontrol *kcontrol,
 			     struct snd_ctl_elem_value *ucontrol)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	struct wm8731_priv *wm8731 = snd_soc_codec_get_drvdata(codec);
 
 	ucontrol->value.enumerated.item[0] = wm8731->deemph;
@@ -128,7 +132,11 @@ static int wm8731_get_deemph(struct snd_kcontrol *kcontrol,
 static int wm8731_put_deemph(struct snd_kcontrol *kcontrol,
 			     struct snd_ctl_elem_value *ucontrol)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	struct wm8731_priv *wm8731 = snd_soc_codec_get_drvdata(codec);
 	int deemph = ucontrol->value.enumerated.item[0];
 	int ret = 0;

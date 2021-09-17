@@ -435,7 +435,10 @@ static int at91ether_remove(struct platform_device *pdev)
 	unregister_netdev(dev);
 	clk_disable(lp->pclk);
 	free_netdev(dev);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#else /* CONFIG_SYNO_LSP_MONACO */
 	platform_set_drvdata(pdev, NULL);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 	return 0;
 }

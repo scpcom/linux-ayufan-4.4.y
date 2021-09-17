@@ -319,6 +319,53 @@ extern struct cpu_tlb_fns cpu_tlb;
 #define tlb_op(f, regs, arg)	__tlb_op(f, "p15, 0, %0, " regs, arg)
 #define tlb_l2_op(f, regs, arg)	__tlb_op(f, "p15, 1, %0, " regs, arg)
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+static inline void __local_flush_tlb_all(void)
+{
+	const int zero = 0;
+	const unsigned int __tlb_flag = __cpu_tlb_flags;
+
+	tlb_op(TLB_V4_U_FULL | TLB_V6_U_FULL, "c8, c7, 0", zero);
+	tlb_op(TLB_V4_D_FULL | TLB_V6_D_FULL, "c8, c6, 0", zero);
+	tlb_op(TLB_V4_I_FULL | TLB_V6_I_FULL, "c8, c5, 0", zero);
+}
+#endif /* CONFIG_SYNO_LSP_MONACO */
+
+#if defined (CONFIG_SYNO_LSP_MONACO)
+static inline void local_flush_tlb_all(void)
+{
+	const int zero = 0;
+	const unsigned int __tlb_flag = __cpu_tlb_flags;
+
+	if (tlb_flag(TLB_WB))
+		dsb(nshst);
+
+	__local_flush_tlb_all();
+	tlb_op(TLB_V7_UIS_FULL, "c8, c7, 0", zero);
+
+	if (tlb_flag(TLB_BARRIER)) {
+		dsb(nsh);
+		isb();
+	}
+}
+
+static inline void __flush_tlb_all(void)
+{
+	const int zero = 0;
+	const unsigned int __tlb_flag = __cpu_tlb_flags;
+
+	if (tlb_flag(TLB_WB))
+		dsb(ishst);
+
+	__local_flush_tlb_all();
+	tlb_op(TLB_V7_UIS_FULL, "c8, c3, 0", zero);
+
+	if (tlb_flag(TLB_BARRIER)) {
+		dsb(ish);
+		isb();
+	}
+}
+#else /* CONFIG_SYNO_LSP_MONACO */
 static inline void local_flush_tlb_all(void)
 {
 	const int zero = 0;
@@ -337,7 +384,61 @@ static inline void local_flush_tlb_all(void)
 		isb();
 	}
 }
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+static inline void __local_flush_tlb_mm(struct mm_struct *mm)
+{
+	const int zero = 0;
+	const int asid = ASID(mm);
+	const unsigned int __tlb_flag = __cpu_tlb_flags;
+
+	if (possible_tlb_flags & (TLB_V4_U_FULL|TLB_V4_D_FULL|TLB_V4_I_FULL)) {
+		if (cpumask_test_cpu(smp_processor_id(), mm_cpumask(mm))) {
+			tlb_op(TLB_V4_U_FULL, "c8, c7, 0", zero);
+			tlb_op(TLB_V4_D_FULL, "c8, c6, 0", zero);
+			tlb_op(TLB_V4_I_FULL, "c8, c5, 0", zero);
+		}
+	}
+
+	tlb_op(TLB_V6_U_ASID, "c8, c7, 2", asid);
+	tlb_op(TLB_V6_D_ASID, "c8, c6, 2", asid);
+	tlb_op(TLB_V6_I_ASID, "c8, c5, 2", asid);
+}
+
+static inline void local_flush_tlb_mm(struct mm_struct *mm)
+{
+	const int asid = ASID(mm);
+	const unsigned int __tlb_flag = __cpu_tlb_flags;
+
+	if (tlb_flag(TLB_WB))
+		dsb(nshst);
+
+	__local_flush_tlb_mm(mm);
+	tlb_op(TLB_V7_UIS_ASID, "c8, c7, 2", asid);
+
+	if (tlb_flag(TLB_BARRIER))
+		dsb(nsh);
+}
+
+static inline void __flush_tlb_mm(struct mm_struct *mm)
+{
+	const unsigned int __tlb_flag = __cpu_tlb_flags;
+
+	if (tlb_flag(TLB_WB))
+		dsb(ishst);
+
+	__local_flush_tlb_mm(mm);
+#ifdef CONFIG_ARM_ERRATA_720789
+	tlb_op(TLB_V7_UIS_ASID, "c8, c3, 0", 0);
+#else
+	tlb_op(TLB_V7_UIS_ASID, "c8, c3, 2", ASID(mm));
+#endif
+
+	if (tlb_flag(TLB_BARRIER))
+		dsb(ish);
+}
+#else /* CONFIG_SYNO_LSP_MONACO */
 static inline void local_flush_tlb_mm(struct mm_struct *mm)
 {
 	const int zero = 0;
@@ -368,13 +469,86 @@ static inline void local_flush_tlb_mm(struct mm_struct *mm)
 	if (tlb_flag(TLB_BARRIER))
 		dsb();
 }
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
 static inline void
-local_flush_tlb_page(struct vm_area_struct *vma, unsigned long uaddr)
+__local_flush_tlb_page(struct vm_area_struct *vma, unsigned long uaddr)
 {
 	const int zero = 0;
 	const unsigned int __tlb_flag = __cpu_tlb_flags;
 
+	uaddr = (uaddr & PAGE_MASK) | ASID(vma->vm_mm);
+
+	if (possible_tlb_flags & (TLB_V4_U_PAGE|TLB_V4_D_PAGE|TLB_V4_I_PAGE|TLB_V4_I_FULL) &&
+	    cpumask_test_cpu(smp_processor_id(), mm_cpumask(vma->vm_mm))) {
+		tlb_op(TLB_V4_U_PAGE, "c8, c7, 1", uaddr);
+		tlb_op(TLB_V4_D_PAGE, "c8, c6, 1", uaddr);
+		tlb_op(TLB_V4_I_PAGE, "c8, c5, 1", uaddr);
+		if (!tlb_flag(TLB_V4_I_PAGE) && tlb_flag(TLB_V4_I_FULL))
+			asm("mcr p15, 0, %0, c8, c5, 0" : : "r" (zero) : "cc");
+	}
+
+	tlb_op(TLB_V6_U_PAGE, "c8, c7, 1", uaddr);
+	tlb_op(TLB_V6_D_PAGE, "c8, c6, 1", uaddr);
+	tlb_op(TLB_V6_I_PAGE, "c8, c5, 1", uaddr);
+}
+
+static inline void
+local_flush_tlb_page(struct vm_area_struct *vma, unsigned long uaddr)
+{
+	const unsigned int __tlb_flag = __cpu_tlb_flags;
+
+	uaddr = (uaddr & PAGE_MASK) | ASID(vma->vm_mm);
+
+	if (tlb_flag(TLB_WB))
+		dsb(nshst);
+
+	__local_flush_tlb_page(vma, uaddr);
+	tlb_op(TLB_V7_UIS_PAGE, "c8, c7, 1", uaddr);
+
+	if (tlb_flag(TLB_BARRIER))
+		dsb(nsh);
+}
+
+static inline void
+__flush_tlb_page(struct vm_area_struct *vma, unsigned long uaddr)
+{
+	const unsigned int __tlb_flag = __cpu_tlb_flags;
+
+	uaddr = (uaddr & PAGE_MASK) | ASID(vma->vm_mm);
+
+	if (tlb_flag(TLB_WB))
+		dsb(ishst);
+
+	__local_flush_tlb_page(vma, uaddr);
+#ifdef CONFIG_ARM_ERRATA_720789
+	tlb_op(TLB_V7_UIS_PAGE, "c8, c3, 3", uaddr & PAGE_MASK);
+#else
+	tlb_op(TLB_V7_UIS_PAGE, "c8, c3, 1", uaddr);
+#endif
+
+	if (tlb_flag(TLB_BARRIER))
+		dsb(ish);
+}
+#else /* CONFIG_SYNO_LSP_MONACO */
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+static inline void
+local_flush_tlb_page(struct vm_area_struct *vma, unsigned long uaddr)
+{
+#if !defined(CONFIG_MV_LARGE_PAGE_SUPPORT) || defined(CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT)
+	const int zero = 0;
+#endif
+	const unsigned int __tlb_flag = __cpu_tlb_flags;
+
+#if defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && !defined(CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT)
+	if (tlb_flag(TLB_WB))
+		dsb();
+
+	uaddr = (uaddr & PAGE_MASK);
+	__cpu_flush_user_tlb_range(uaddr, uaddr + PAGE_SIZE, vma);
+
+#else
 	uaddr = (uaddr & PAGE_MASK) | ASID(vma->vm_mm);
 
 	if (tlb_flag(TLB_WB))
@@ -398,16 +572,131 @@ local_flush_tlb_page(struct vm_area_struct *vma, unsigned long uaddr)
 	tlb_op(TLB_V7_UIS_PAGE, "c8, c3, 1", uaddr);
 #endif
 
+#endif /* CONFIG_MV_LARGE_PAGE_SUPPORT && !CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT */
 	if (tlb_flag(TLB_BARRIER))
 		dsb();
 }
+#else /* CONFIG_SYNO_LSP_ARMADA */
+static inline void
+local_flush_tlb_page(struct vm_area_struct *vma, unsigned long uaddr)
+{
+	const int zero = 0;
+	const unsigned int __tlb_flag = __cpu_tlb_flags;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	unsigned long uaddr_last;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
-static inline void local_flush_tlb_kernel_page(unsigned long kaddr)
+	uaddr = (uaddr & PAGE_MASK) | ASID(vma->vm_mm);
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	uaddr_last = uaddr+PAGE_SIZE;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
+	if (tlb_flag(TLB_WB))
+		dsb();
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	/*
+	 * normal case is HW_PAGE_SIZE==PAGE_SIZE,
+	 * After optimization, the for-loop will be gone
+	 */
+	for (; uaddr < uaddr_last; uaddr += HW_PAGE_SIZE) {
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+	if (possible_tlb_flags & (TLB_V4_U_PAGE|TLB_V4_D_PAGE|TLB_V4_I_PAGE|TLB_V4_I_FULL) &&
+	    cpumask_test_cpu(smp_processor_id(), mm_cpumask(vma->vm_mm))) {
+		tlb_op(TLB_V4_U_PAGE, "c8, c7, 1", uaddr);
+		tlb_op(TLB_V4_D_PAGE, "c8, c6, 1", uaddr);
+		tlb_op(TLB_V4_I_PAGE, "c8, c5, 1", uaddr);
+		if (!tlb_flag(TLB_V4_I_PAGE) && tlb_flag(TLB_V4_I_FULL))
+			asm("mcr p15, 0, %0, c8, c5, 0" : : "r" (zero) : "cc");
+	}
+
+	tlb_op(TLB_V6_U_PAGE, "c8, c7, 1", uaddr);
+	tlb_op(TLB_V6_D_PAGE, "c8, c6, 1", uaddr);
+	tlb_op(TLB_V6_I_PAGE, "c8, c5, 1", uaddr);
+#ifdef CONFIG_ARM_ERRATA_720789
+	tlb_op(TLB_V7_UIS_PAGE, "c8, c3, 3", uaddr & PAGE_MASK);
+#else
+	tlb_op(TLB_V7_UIS_PAGE, "c8, c3, 1", uaddr);
+#endif
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	}
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
+	if (tlb_flag(TLB_BARRIER))
+		dsb();
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* CONFIG_SYNO_LSP_MONACO */
+
+#if defined (CONFIG_SYNO_LSP_MONACO)
+static inline void __local_flush_tlb_kernel_page(unsigned long kaddr)
 {
 	const int zero = 0;
 	const unsigned int __tlb_flag = __cpu_tlb_flags;
 
+	tlb_op(TLB_V4_U_PAGE, "c8, c7, 1", kaddr);
+	tlb_op(TLB_V4_D_PAGE, "c8, c6, 1", kaddr);
+	tlb_op(TLB_V4_I_PAGE, "c8, c5, 1", kaddr);
+	if (!tlb_flag(TLB_V4_I_PAGE) && tlb_flag(TLB_V4_I_FULL))
+		asm("mcr p15, 0, %0, c8, c5, 0" : : "r" (zero) : "cc");
+
+	tlb_op(TLB_V6_U_PAGE, "c8, c7, 1", kaddr);
+	tlb_op(TLB_V6_D_PAGE, "c8, c6, 1", kaddr);
+	tlb_op(TLB_V6_I_PAGE, "c8, c5, 1", kaddr);
+}
+
+static inline void local_flush_tlb_kernel_page(unsigned long kaddr)
+{
+	const unsigned int __tlb_flag = __cpu_tlb_flags;
+
 	kaddr &= PAGE_MASK;
+
+	if (tlb_flag(TLB_WB))
+		dsb(nshst);
+
+	__local_flush_tlb_kernel_page(kaddr);
+	tlb_op(TLB_V7_UIS_PAGE, "c8, c7, 1", kaddr);
+
+	if (tlb_flag(TLB_BARRIER)) {
+		dsb(nsh);
+		isb();
+	}
+}
+
+static inline void __flush_tlb_kernel_page(unsigned long kaddr)
+{
+	const unsigned int __tlb_flag = __cpu_tlb_flags;
+
+	kaddr &= PAGE_MASK;
+
+	if (tlb_flag(TLB_WB))
+		dsb(ishst);
+
+	__local_flush_tlb_kernel_page(kaddr);
+	tlb_op(TLB_V7_UIS_PAGE, "c8, c3, 1", kaddr);
+
+	if (tlb_flag(TLB_BARRIER)) {
+		dsb(ish);
+		isb();
+	}
+}
+#else /* CONFIG_SYNO_LSP_MONACO */
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+static inline void local_flush_tlb_kernel_page(unsigned long kaddr)
+{
+#if !defined(CONFIG_MV_LARGE_PAGE_SUPPORT) || defined(CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT)
+	const int zero = 0;
+#endif
+	const unsigned int __tlb_flag = __cpu_tlb_flags;
+
+	kaddr &= PAGE_MASK;
+
+#if defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && !defined(CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT)
+	if (tlb_flag(TLB_WB))
+		dsb();
+
+	__cpu_flush_kern_tlb_range(kaddr, kaddr + PAGE_SIZE);
+#else
 
 	if (tlb_flag(TLB_WB))
 		dsb();
@@ -422,12 +711,53 @@ static inline void local_flush_tlb_kernel_page(unsigned long kaddr)
 	tlb_op(TLB_V6_D_PAGE, "c8, c6, 1", kaddr);
 	tlb_op(TLB_V6_I_PAGE, "c8, c5, 1", kaddr);
 	tlb_op(TLB_V7_UIS_PAGE, "c8, c3, 1", kaddr);
+#endif /* CONFIG_MV_LARGE_PAGE_SUPPORT && !CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT */
 
 	if (tlb_flag(TLB_BARRIER)) {
 		dsb();
 		isb();
 	}
 }
+#else /* CONFIG_SYNO_LSP_ARMADA */
+static inline void local_flush_tlb_kernel_page(unsigned long kaddr)
+{
+	const int zero = 0;
+	const unsigned int __tlb_flag = __cpu_tlb_flags;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	unsigned long kaddr_last;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
+	kaddr &= PAGE_MASK;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	kaddr_last = kaddr+PAGE_SIZE;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
+	if (tlb_flag(TLB_WB))
+		dsb();
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	for (; kaddr < kaddr_last; kaddr += HW_PAGE_SIZE) {
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+	tlb_op(TLB_V4_U_PAGE, "c8, c7, 1", kaddr);
+	tlb_op(TLB_V4_D_PAGE, "c8, c6, 1", kaddr);
+	tlb_op(TLB_V4_I_PAGE, "c8, c5, 1", kaddr);
+	if (!tlb_flag(TLB_V4_I_PAGE) && tlb_flag(TLB_V4_I_FULL))
+		asm("mcr p15, 0, %0, c8, c5, 0" : : "r" (zero) : "cc");
+
+	tlb_op(TLB_V6_U_PAGE, "c8, c7, 1", kaddr);
+	tlb_op(TLB_V6_D_PAGE, "c8, c6, 1", kaddr);
+	tlb_op(TLB_V6_I_PAGE, "c8, c5, 1", kaddr);
+	tlb_op(TLB_V7_UIS_PAGE, "c8, c3, 1", kaddr);
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	}
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
+	if (tlb_flag(TLB_BARRIER)) {
+		dsb();
+		isb();
+	}
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 static inline void local_flush_bp_all(void)
 {
@@ -442,6 +772,42 @@ static inline void local_flush_bp_all(void)
 	if (tlb_flag(TLB_BARRIER))
 		isb();
 }
+#endif /* CONFIG_SYNO_LSP_MONACO */
+
+#if defined (CONFIG_SYNO_LSP_MONACO)
+/*
+ * Branch predictor maintenance is paired with full TLB invalidation, so
+ * there is no need for any barriers here.
+ */
+static inline void __local_flush_bp_all(void)
+{
+	const int zero = 0;
+	const unsigned int __tlb_flag = __cpu_tlb_flags;
+
+	if (tlb_flag(TLB_V6_BP))
+		asm("mcr p15, 0, %0, c7, c5, 6" : : "r" (zero));
+}
+
+static inline void local_flush_bp_all(void)
+{
+	const int zero = 0;
+	const unsigned int __tlb_flag = __cpu_tlb_flags;
+
+	__local_flush_bp_all();
+	if (tlb_flag(TLB_V7_UIS_BP))
+		asm("mcr p15, 0, %0, c7, c5, 6" : : "r" (zero));
+}
+
+static inline void __flush_bp_all(void)
+{
+	const int zero = 0;
+	const unsigned int __tlb_flag = __cpu_tlb_flags;
+
+	__local_flush_bp_all();
+	if (tlb_flag(TLB_V7_UIS_BP))
+		asm("mcr p15, 0, %0, c7, c1, 6" : : "r" (zero));
+}
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 #ifdef CONFIG_ARM_ERRATA_798181
 static inline void dummy_flush_tlb_a15_erratum(void)
@@ -450,7 +816,11 @@ static inline void dummy_flush_tlb_a15_erratum(void)
 	 * Dummy TLBIMVAIS. Using the unmapped address 0 and ASID 0.
 	 */
 	asm("mcr p15, 0, %0, c8, c3, 1" : : "r" (0));
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	dsb(ish);
+#else /* CONFIG_SYNO_LSP_MONACO */
 	dsb();
+#endif /* CONFIG_SYNO_LSP_MONACO */
 }
 #else
 static inline void dummy_flush_tlb_a15_erratum(void)
@@ -479,7 +849,11 @@ static inline void flush_pmd_entry(void *pmd)
 	tlb_l2_op(TLB_L2CLEAN_FR, "c15, c9, 1  @ L2 flush_pmd", pmd);
 
 	if (tlb_flag(TLB_WB))
+#if defined (CONFIG_SYNO_LSP_MONACO)
+		dsb(ishst);
+#else /* CONFIG_SYNO_LSP_MONACO */
 		dsb();
+#endif /* CONFIG_SYNO_LSP_MONACO */
 }
 
 static inline void clean_pmd_entry(void *pmd)
@@ -534,6 +908,10 @@ static inline void update_mmu_cache(struct vm_area_struct *vma,
 {
 }
 #endif
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#define update_mmu_cache_pmd(vma, address, pmd) do { } while (0)
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 #endif
 

@@ -27,9 +27,9 @@
 #include <linux/percpu-rwsem.h>
 #include <linux/blk_types.h>
 
-#ifdef CONFIG_SYNO_FS_RECVFILE
+#if defined(CONFIG_SYNO_FS_RECVFILE) || defined(CONFIG_SYNO_LSP_ALPINE)
 #include <linux/net.h>
-#endif /* CONFIG_SYNO_FS_RECVFILE */
+#endif /* CONFIG_SYNO_FS_RECVFILE || CONFIG_SYNO_LSP_ALPINE */
 
 #include <asm/byteorder.h>
 #include <uapi/linux/fs.h>
@@ -48,6 +48,9 @@ struct vfsmount;
 struct cred;
 struct swap_info_struct;
 struct seq_file;
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+struct socket;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 extern void __init inode_init(void);
 extern void __init inode_init_early(void);
@@ -1611,6 +1614,11 @@ struct file_operations {
 	int (*flock) (struct file *, int, struct file_lock *);
 	ssize_t (*splice_write)(struct pipe_inode_info *, struct file *, loff_t *, size_t, unsigned int);
 	ssize_t (*splice_read)(struct file *, loff_t *, struct pipe_inode_info *, size_t, unsigned int);
+
+#if defined(CONFIG_SYNO_LSP_ALPINE) || defined(CONFIG_SYNO_LSP_ARMADA)
+	ssize_t (*splice_from_socket)(struct file *file, struct socket *sock,
+					loff_t __user *ppos, size_t count);
+#endif /* CONFIG_SYNO_LSP_ALPINE || CONFIG_SYNO_LSP_ARMADA */
 	int (*setlease)(struct file *, long, struct file_lock **);
 	long (*fallocate)(struct file *file, int mode, loff_t offset,
 			  loff_t len);
@@ -2533,6 +2541,14 @@ extern int do_recvfile(struct file *, struct socket *, loff_t , size_t , size_t 
 extern void aggregate_recvfile_flush_only(struct file *file);
 extern int do_aggregate_recvfile(struct file *file, struct socket *sock, loff_t pos, size_t count, size_t *rbytes , size_t *wbytes, unsigned flush_only);
 extern int flush_aggregate_recvfile(int fd);
+#else /* CONFIG_SYNO_FS_RECVFILE */
+#if defined(CONFIG_SYNO_ALPINE)
+#ifdef CONFIG_ARM_PAGE_SIZE_32KB
+#define MAX_PAGES_PER_RECVFILE (SZ_1M / PAGE_SIZE)
+#else /* CONFIG_ARM_PAGE_SIZE_32KB */
+#define MAX_PAGES_PER_RECVFILE (SZ_128K / PAGE_SIZE)
+#endif /* CONFIG_ARM_PAGE_SIZE_32KB */
+#endif /* CONFIG_SYNO_ALPINE */
 #endif /* CONFIG_SYNO_FS_RECVFILE */
 extern ssize_t generic_file_aio_read(struct kiocb *, const struct iovec *, unsigned long, loff_t);
 extern ssize_t __generic_file_aio_write(struct kiocb *, const struct iovec *, unsigned long,
@@ -2563,6 +2579,10 @@ extern ssize_t generic_file_splice_write(struct pipe_inode_info *,
 		struct file *, loff_t *, size_t, unsigned int);
 extern ssize_t generic_splice_sendpage(struct pipe_inode_info *pipe,
 		struct file *out, loff_t *, size_t len, unsigned int flags);
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+extern ssize_t generic_splice_from_socket(struct file *file, struct socket *sock,
+				     loff_t __user *ppos, size_t count);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 extern void
 file_ra_state_init(struct file_ra_state *ra, struct address_space *mapping);
@@ -2641,6 +2661,7 @@ extern void generic_fillattr(struct inode *, struct kstat *);
 extern int vfs_getattr(struct path *, struct kstat *);
 void __inode_add_bytes(struct inode *inode, loff_t bytes);
 void inode_add_bytes(struct inode *inode, loff_t bytes);
+void __inode_sub_bytes(struct inode *inode, loff_t bytes);
 void inode_sub_bytes(struct inode *inode, loff_t bytes);
 loff_t inode_get_bytes(struct inode *inode);
 void inode_set_bytes(struct inode *inode, loff_t bytes);

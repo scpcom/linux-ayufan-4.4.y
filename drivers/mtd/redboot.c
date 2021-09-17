@@ -180,7 +180,11 @@ static int parse_redboot_partitions(struct mtd_info *master,
 	}
 
 	for (i = 0; i < numslots; i++) {
+#ifdef CONFIG_SYNO_MTD_PARTS_KEEP_ORDER
+		struct fis_list *new_fl;
+#else /* CONFIG_SYNO_MTD_PARTS_KEEP_ORDER */
 		struct fis_list *new_fl, **prev;
+#endif /* CONFIG_SYNO_MTD_PARTS_KEEP_ORDER */
 
 		if (buf[i].name[0] == 0xff) {
 			if (buf[i].name[1] == 0xff) {
@@ -207,11 +211,22 @@ static int parse_redboot_partitions(struct mtd_info *master,
 		/* I'm sure the JFFS2 code has done me permanent damage.
 		 * I now think the following is _normal_
 		 */
+#ifdef CONFIG_SYNO_MTD_PARTS_KEEP_ORDER
+		 if (i == 0) {
+			 fl = new_fl;
+			 tmp_fl = fl;
+		 } else {
+			 tmp_fl->next = new_fl;
+			 tmp_fl = new_fl;
+		 }
+		 new_fl->next = NULL;
+#else /* CONFIG_SYNO_MTD_PARTS_KEEP_ORDER */
 		prev = &fl;
 		while(*prev && (*prev)->img->flash_base < new_fl->img->flash_base)
 			prev = &(*prev)->next;
 		new_fl->next = *prev;
 		*prev = new_fl;
+#endif /* CONFIG_SYNO_MTD_PARTS_KEEP_ORDER */
 
 		nrparts++;
 	}

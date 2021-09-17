@@ -248,6 +248,9 @@ int snd_unregister_device(int type, struct snd_card *card, int dev);
 void *snd_lookup_minor_data(unsigned int minor, int type);
 int snd_add_device_sysfs_file(int type, struct snd_card *card, int dev,
 			      struct device_attribute *attr);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+int snd_find_minor(int type, int card_num, int dev);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 #ifdef CONFIG_SND_OSSEMUL
 int snd_register_oss_device(int type, struct snd_card *card, int dev,

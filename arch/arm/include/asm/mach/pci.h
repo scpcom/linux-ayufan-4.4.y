@@ -16,6 +16,9 @@
 struct pci_sys_data;
 struct pci_ops;
 struct pci_bus;
+#if defined (CONFIG_SYNO_LSP_MONACO)
+struct device;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 struct hw_pci {
 #ifdef CONFIG_PCI_DOMAINS
@@ -35,6 +38,10 @@ struct hw_pci {
 					  resource_size_t start,
 					  resource_size_t size,
 					  resource_size_t align);
+#if defined (CONFIG_SYNO_LSP_MONACO) || defined(CONFIG_SYNO_LSP_ARMADA)
+	void		(*add_bus)(struct pci_bus *bus);
+	void		(*remove_bus)(struct pci_bus *bus);
+#endif /* CONFIG_SYNO_LSP_MONACO || CONFIG_SYNO_LSP_ARMADA */
 };
 
 /*
@@ -62,13 +69,30 @@ struct pci_sys_data {
 					  resource_size_t start,
 					  resource_size_t size,
 					  resource_size_t align);
+#if defined (CONFIG_SYNO_LSP_MONACO) || defined(CONFIG_SYNO_LSP_ARMADA)
+	void		(*add_bus)(struct pci_bus *bus);
+	void		(*remove_bus)(struct pci_bus *bus);
+#endif /* CONFIG_SYNO_LSP_MONACO || CONFIG_SYNO_LSP_ARMADA */
 	void		*private_data;	/* platform controller private data	*/
 };
 
 /*
  * Call this with your hw_pci struct to initialise the PCI system.
  */
+#if defined (CONFIG_SYNO_LSP_MONACO)
+void pci_common_init_dev(struct device *, struct hw_pci *);
+
+/*
+ * Compatibility wrapper for older platforms that do not care about
+ * passing the parent device.
+ */
+static inline void pci_common_init(struct hw_pci *hw)
+{
+	pci_common_init_dev(NULL, hw);
+}
+#else /* CONFIG_SYNO_LSP_MONACO */
 void pci_common_init(struct hw_pci *);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 /*
  * Setup early fixed I/O mapping.

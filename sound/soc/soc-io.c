@@ -16,7 +16,10 @@
 #if defined(CONFIG_SYNO_IGNORE_TRACE_SND_SOC)
 #else
 #include <linux/regmap.h>
-#endi /*CONFIG_SYNO_IGNORE_TRACE_SND_SOC*/
+#endif /*CONFIG_SYNO_IGNORE_TRACE_SND_SOC*/
+#if defined(CONFIG_SYNO_ARMADA)
+#include <linux/regmap.h>
+#endif /* CONFIG_SYNO_ARMADA */
 #include <linux/export.h>
 #include <sound/soc.h>
 

@@ -1680,7 +1680,10 @@ static int tsi108_ether_remove(struct platform_device *pdev)
 
 	unregister_netdev(dev);
 	tsi108_stop_ethernet(dev);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#else /* CONFIG_SYNO_LSP_MONACO */
 	platform_set_drvdata(pdev, NULL);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	iounmap(priv->regs);
 	iounmap(priv->phyregs);
 	free_netdev(dev);

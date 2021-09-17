@@ -145,7 +145,11 @@ static struct snd_pcm_ops omap_pcm_ops = {
 	.mmap		= omap_pcm_mmap,
 };
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA */
 static u64 omap_pcm_dmamask = DMA_BIT_MASK(64);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 static int omap_pcm_preallocate_dma_buffer(struct snd_pcm *pcm,
 	int stream)
@@ -193,10 +197,16 @@ static int omap_pcm_new(struct snd_soc_pcm_runtime *rtd)
 	struct snd_pcm *pcm = rtd->pcm;
 	int ret = 0;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	ret = dma_coerce_mask_and_coherent(card->dev, DMA_BIT_MASK(64));
+	if (ret)
+		return ret;
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	if (!card->dev->dma_mask)
 		card->dev->dma_mask = &omap_pcm_dmamask;
 	if (!card->dev->coherent_dma_mask)
 		card->dev->coherent_dma_mask = DMA_BIT_MASK(64);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 	if (pcm->streams[SNDRV_PCM_STREAM_PLAYBACK].substream) {
 		ret = omap_pcm_preallocate_dma_buffer(pcm,

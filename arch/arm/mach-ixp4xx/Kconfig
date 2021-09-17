@@ -2,6 +2,7 @@ if ARCH_IXP4XX
 
 config ARCH_SUPPORTS_BIG_ENDIAN
 	bool
+	depends on !ARCH_ALPINE && !SYNO_LSP_ARMADA
 	default y
 
 menu "Intel IXP4xx Implementation Options"

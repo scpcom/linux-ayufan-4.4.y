@@ -338,6 +338,9 @@ struct extent_crypt_result {
 	int rc;
 };
 
+#if defined(CONFIG_SYNO_ARMADA)
+// do nothing
+#else /* CONFIG_SYNO_ARMADA */
 static void extent_crypt_complete(struct crypto_async_request *req, int rc)
 {
 	struct extent_crypt_result *ecr = req->data;
@@ -348,6 +351,7 @@ static void extent_crypt_complete(struct crypto_async_request *req, int rc)
 	ecr->rc = rc;
 	complete(&ecr->completion);
 }
+#endif /* CONFIG_SYNO_ARMADA */
 
 #ifdef CONFIG_SYNO_ECRYPTFS_OCF
 struct ocf_wr_priv {
@@ -616,10 +620,17 @@ static int ecryptfs_encrypt_extent(struct page *enc_extent_page,
 					  crypt_stat->extent_size, extent_iv);
 #endif /* CONFIG_SYNO_ECRYPTFS_OCF */
 	if (rc < 0) {
+#ifdef CONFIG_SYNO_LSP_ALPINE
+		printk(KERN_ERR "%s: Error attempting to encrypt page with "
+		       "page->index = [%lld], extent_offset = [%ld]; "
+		       "rc = [%d]\n", __func__, (unsigned long long)page->index, extent_offset,
+		       rc);
+#else /* CONFIG_SYNO_LSP_ALPINE */
 		printk(KERN_ERR "%s: Error attempting to encrypt page with "
 		       "page->index = [%ld], extent_offset = [%ld]; "
 		       "rc = [%d]\n", __func__, page->index, extent_offset,
 		       rc);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 		goto out;
 	}
 	rc = 0;
@@ -780,10 +791,17 @@ static int ecryptfs_decrypt_extent(struct page *page,
 					  crypt_stat->extent_size, extent_iv);
 #endif /*CONFIG_SYNO_ECRYPTFS_OCF*/
 	if (rc < 0) {
+#ifdef CONFIG_SYNO_LSP_ALPINE
+		printk(KERN_ERR "%s: Error attempting to decrypt to page with "
+		       "page->index = [%lld], extent_offset = [%ld]; "
+		       "rc = [%d]\n", __func__, (unsigned long long)page->index, extent_offset,
+		       rc);
+#else /* CONFIG_SYNO_LSP_ALPINE */
 		printk(KERN_ERR "%s: Error attempting to decrypt to page with "
 		       "page->index = [%ld], extent_offset = [%ld]; "
 		       "rc = [%d]\n", __func__, page->index, extent_offset,
 		       rc);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 		goto out;
 	}
 	rc = 0;
@@ -886,7 +904,7 @@ int ecryptfs_decrypt_page(struct page *page)
 			!memcmp(enc_extent_virt+16, syno_zero_virt+16, crypt_stat->extent_size-16)){
 			char *ecryptfs_page_virt;
 			ecryptfs_page_virt = kmap_atomic(page);
-			memcpy((char *)ecryptfs_page_virt,
+			memcpy((char *)(ecryptfs_page_virt + (extent_offset * crypt_stat->extent_size)),
 			enc_extent_virt, crypt_stat->extent_size);
 			kunmap_atomic(ecryptfs_page_virt);
 			rc = 0;
@@ -1151,7 +1169,12 @@ out_unlock:
 	}
 	mutex_lock(&crypt_stat->cs_tfm_mutex);
 	rc = ecryptfs_crypto_api_algify_cipher_name(&full_alg_name,
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+						    crypt_stat->cipher,
+						    crypt_stat->cipher_mode);
+#else /* CONFIG_SYNO_LSP_ALPINE */
 						    crypt_stat->cipher, "cbc");
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	if (rc)
 		goto out_unlock;
 	crypt_stat->tfm = crypto_alloc_ablkcipher(full_alg_name, 0, 0);
@@ -1160,8 +1183,14 @@ out_unlock:
 		rc = PTR_ERR(crypt_stat->tfm);
 		crypt_stat->tfm = NULL;
 		ecryptfs_printk(KERN_ERR, "cryptfs: init_crypt_ctx(): "
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+				"Error initializing cipher [%s] and mode [%s]\n",
+				crypt_stat->cipher,
+				crypt_stat->cipher_mode);
+#else /* CONFIG_SYNO_LSP_ALPINE */
 				"Error initializing cipher [%s]\n",
 				crypt_stat->cipher);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 		goto out_unlock;
 	}
 	crypto_ablkcipher_set_flags(crypt_stat->tfm, CRYPTO_TFM_REQ_WEAK_KEY);
@@ -1199,6 +1228,9 @@ void ecryptfs_set_default_sizes(struct ecryptfs_crypt_stat *crypt_stat)
 	if (crypt_stat->flags & ECRYPTFS_METADATA_IN_XATTR)
 		crypt_stat->metadata_size = ECRYPTFS_MINIMUM_HEADER_EXTENT_SIZE;
 	else {
+#if defined(CONFIG_SYNO_ALPINE)
+		crypt_stat->metadata_size = ECRYPTFS_MINIMUM_HEADER_EXTENT_SIZE;
+#endif /* CONFIG_SYNO_ALPINE */
 		if (PAGE_CACHE_SIZE <= ECRYPTFS_MINIMUM_HEADER_EXTENT_SIZE)
 			crypt_stat->metadata_size =
 				ECRYPTFS_MINIMUM_HEADER_EXTENT_SIZE;
@@ -1324,6 +1356,9 @@ static void ecryptfs_set_default_crypt_stat_vals(
 						      mount_crypt_stat);
 	ecryptfs_set_default_sizes(crypt_stat);
 	strcpy(crypt_stat->cipher, ECRYPTFS_DEFAULT_CIPHER);
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	strcpy(crypt_stat->cipher_mode, ECRYPTFS_DEFAULT_CIPHER_MODE);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	crypt_stat->key_size = ECRYPTFS_DEFAULT_KEY_BYTES;
 	crypt_stat->flags &= ~(ECRYPTFS_KEY_VALID);
 	crypt_stat->file_version = ECRYPTFS_FILE_VERSION;
@@ -1357,6 +1392,9 @@ int ecryptfs_new_file_context(struct inode *ecryptfs_inode)
 	    &ecryptfs_superblock_to_private(
 		    ecryptfs_inode->i_sb)->mount_crypt_stat;
 	int cipher_name_len;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	int cipher_mode_name_len;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	int rc = 0;
 
 	ecryptfs_set_default_crypt_stat_vals(crypt_stat, mount_crypt_stat);
@@ -1376,6 +1414,14 @@ int ecryptfs_new_file_context(struct inode *ecryptfs_inode)
 	       mount_crypt_stat->global_default_cipher_name,
 	       cipher_name_len);
 	crypt_stat->cipher[cipher_name_len] = '\0';
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+    cipher_mode_name_len =
+	strlen(mount_crypt_stat->global_default_cipher_mode_name);
+    memcpy(crypt_stat->cipher_mode,
+    mount_crypt_stat->global_default_cipher_mode_name,
+	cipher_mode_name_len);
+    crypt_stat->cipher_mode[cipher_mode_name_len] = '\0';
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	crypt_stat->key_size =
 		mount_crypt_stat->global_default_cipher_key_size;
 	ecryptfs_generate_new_key(crypt_stat);
@@ -1486,6 +1532,70 @@ void ecryptfs_write_crypt_stat_flags(char *page_virt,
 	put_unaligned_be32(flags, page_virt);
 	(*written) = 4;
 }
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+struct ecryptfs_cipher_mode_code_str_map_elem {
+	char mode_str[ECRYPTFS_MAX_CIPHER_MODE_NAME_SIZE + 1];
+	u8 mode_code;
+};
+
+static struct ecryptfs_cipher_mode_code_str_map_elem
+ecryptfs_cipher_mode_code_str_map[] = {
+	{"cbc", ECRYPTFS_CIPHER_MODE_CBC},
+	{"ctr", ECRYPTFS_CIPHER_MODE_CTR}
+};
+
+/**
++ * ecryptfs_code_for_cipher_mode_string
++ *  <at> mode_name: The string alias for the cipher mode
++ *
++ * Retruns zero on no match, or the cipher code on match
++ */
+u8 ecryptfs_code_for_cipher_mode_string(char *mode_name)
+{
+	int i;
+	u8 code = 0;
+	struct ecryptfs_cipher_mode_code_str_map_elem *map =
+		ecryptfs_cipher_mode_code_str_map;
+
+	for (i = 0; i < ARRAY_SIZE(ecryptfs_cipher_mode_code_str_map); i++)
+		if (strcmp(mode_name, map[i].mode_str) == 0) {
+			code = map[i].mode_code;
+			break;
+		}
+
+	return code;
+}
+
+/**
+ * ecryptfs_cipher_mode_code_to_string
+ *  <at> str: Destination to write out the cipher mode name
+ *  <at> cipher_code: The code to conver to cipher mode name string
+ *
+ * Retruns zero in success
+ */
+int ecryptfs_cipher_mode_code_to_string(char *str, u8 mode_code)
+{
+	int rc = 0;
+	int i;
+	struct ecryptfs_cipher_mode_code_str_map_elem *map =
+		ecryptfs_cipher_mode_code_str_map;
+
+	str[0] = '\0';
+	for (i = 0; i < ARRAY_SIZE(ecryptfs_cipher_mode_code_str_map); i++)
+		if (mode_code == map[i].mode_code) {
+			strcpy(str, map[i].mode_str);
+			break;
+		}
+	if (str[0] == '\0') {
+		ecryptfs_printk(KERN_WARNING, "Cipher mode not recognized: "
+				"[%d]\n", mode_code);
+		rc = -EINVAL;
+	}
+
+	return rc;
+}
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 struct ecryptfs_cipher_code_str_map_elem {
 	char cipher_str[16];

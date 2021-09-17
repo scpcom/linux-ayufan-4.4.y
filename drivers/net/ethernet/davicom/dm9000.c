@@ -1670,7 +1670,10 @@ dm9000_drv_remove(struct platform_device *pdev)
 {
 	struct net_device *ndev = platform_get_drvdata(pdev);
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#else /* CONFIG_SYNO_LSP_MONACO */
 	platform_set_drvdata(pdev, NULL);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 	unregister_netdev(ndev);
 	dm9000_release_board(pdev, netdev_priv(ndev));

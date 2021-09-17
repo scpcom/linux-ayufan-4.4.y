@@ -67,3 +67,8 @@ obj-$(CONFIG_XEN_PCIDEV_FRONTEND) += xen-pcifront.o
 obj-$(CONFIG_OF) += of.o
 
 ccflags-$(CONFIG_PCI_DEBUG) := -DDEBUG
+
+ifeq (y, $(filter y, $(CONFIG_ARCH_STI) $(CONFIG_SYNO_LSP_ARMADA)))
+# PCI host controller drivers
+obj-y += host/
+endif

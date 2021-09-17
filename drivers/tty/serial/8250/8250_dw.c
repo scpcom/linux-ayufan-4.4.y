@@ -53,58 +53,145 @@
 #define DW_UART_CPR_FIFO_SIZE(a)	(((a >> 16) & 0xff) * 16)
 
 struct dw8250_data {
+#if defined(CONFIG_SYNO_ARMADA)
+	int		last_mcr;
+#else /* CONFIG_SYNO_ARMADA */
 	int		last_lcr;
+#endif /* CONFIG_SYNO_ARMADA */
 	int		line;
 	struct clk	*clk;
 };
+
+#if defined(CONFIG_SYNO_ARMADA)
+static inline int dw8250_modify_msr(struct uart_port *p, int offset, int value)
+{
+	struct dw8250_data *d = p->private_data;
+
+	/* If reading MSR, report CTS asserted when auto-CTS/RTS enabled */
+	if (offset == UART_MSR && d->last_mcr & UART_MCR_AFE) {
+		value |= UART_MSR_CTS;
+		value &= ~UART_MSR_DCTS;
+	}
+
+	return value;
+}
+
+static void dw8250_force_idle(struct uart_port *p)
+{
+	serial8250_clear_and_reinit_fifos(container_of
+					  (p, struct uart_8250_port, port));
+	(void)p->serial_in(p, UART_RX);
+}
+#endif /* CONFIG_SYNO_ARMADA */
 
 static void dw8250_serial_out(struct uart_port *p, int offset, int value)
 {
 	struct dw8250_data *d = p->private_data;
 
+#if defined(CONFIG_SYNO_ARMADA)
+	if (offset == UART_MCR)
+		d->last_mcr = value;
+
+	writeb(value, p->membase + (offset << p->regshift));
+
+	/* Make sure LCR write wasn't ignored */
+	if (offset == UART_LCR) {
+		int tries = 1000;
+		while (tries--) {
+			unsigned int lcr = p->serial_in(p, UART_LCR);
+			if ((value & ~UART_LCR_SPAR) == (lcr & ~UART_LCR_SPAR))
+				return;
+			dw8250_force_idle(p);
+			writeb(value, p->membase + (UART_LCR << p->regshift));
+		}
+		dev_err(p->dev, "Couldn't set LCR to %d\n", value);
+	}
+#else /* CONFIG_SYNO_ARMADA */
 	if (offset == UART_LCR)
 		d->last_lcr = value;
 
 	offset <<= p->regshift;
 	writeb(value, p->membase + offset);
+#endif /* CONFIG_SYNO_ARMADA */
 }
 
 static unsigned int dw8250_serial_in(struct uart_port *p, int offset)
 {
+#if defined(CONFIG_SYNO_ARMADA)
+	unsigned int value = readb(p->membase + (offset << p->regshift));
+
+	return dw8250_modify_msr(p, offset, value);
+#else /* CONFIG_SYNO_ARMADA */
 	offset <<= p->regshift;
 
 	return readb(p->membase + offset);
+#endif /* CONFIG_SYNO_ARMADA */
 }
 
 static void dw8250_serial_out32(struct uart_port *p, int offset, int value)
 {
 	struct dw8250_data *d = p->private_data;
 
+#if defined(CONFIG_SYNO_ARMADA)
+	if (offset == UART_MCR)
+		d->last_mcr = value;
+
+	writel(value, p->membase + (offset << p->regshift));
+
+	/* Make sure LCR write wasn't ignored */
+	if (offset == UART_LCR) {
+		int tries = 1000;
+		while (tries--) {
+			unsigned int lcr = p->serial_in(p, UART_LCR);
+			if ((value & ~UART_LCR_SPAR) == (lcr & ~UART_LCR_SPAR))
+				return;
+			dw8250_force_idle(p);
+			writel(value, p->membase + (UART_LCR << p->regshift));
+		}
+		dev_err(p->dev, "Couldn't set LCR to %d\n", value);
+	}
+#else /* CONFIG_SYNO_ARMADA */
 	if (offset == UART_LCR)
 		d->last_lcr = value;
 
 	offset <<= p->regshift;
 	writel(value, p->membase + offset);
+#endif /* CONFIG_SYNO_ARMADA */
 }
 
 static unsigned int dw8250_serial_in32(struct uart_port *p, int offset)
 {
+#if defined(CONFIG_SYNO_ARMADA)
+	unsigned int value = readl(p->membase + (offset << p->regshift));
+
+	return dw8250_modify_msr(p, offset, value);
+#else /* CONFIG_SYNO_ARMADA */
 	offset <<= p->regshift;
 
 	return readl(p->membase + offset);
+#endif /* CONFIG_SYNO_ARMADA */
 }
 
 static int dw8250_handle_irq(struct uart_port *p)
 {
+#if defined(CONFIG_SYNO_ARMADA)
+	// do nothing
+#else /* CONFIG_SYNO_ARMADA */
 	struct dw8250_data *d = p->private_data;
+#endif /* CONFIG_SYNO_ARMADA */
 	unsigned int iir = p->serial_in(p, UART_IIR);
 
 	if (serial8250_handle_irq(p, iir)) {
 		return 1;
 	} else if ((iir & UART_IIR_BUSY) == UART_IIR_BUSY) {
+#if defined(CONFIG_SYNO_ARMADA)
+		/* Clear the USR */
+		(void)p->serial_in(p, DW_UART_USR);
+#else /* CONFIG_SYNO_ARMADA */
 		/* Clear the USR and write the LCR again. */
 		(void)p->serial_in(p, DW_UART_USR);
 		p->serial_out(p, UART_LCR, d->last_lcr);
+#endif /* CONFIG_SYNO_ARMADA */
 
 		return 1;
 	}

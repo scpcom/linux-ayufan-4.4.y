@@ -98,7 +98,11 @@ module_param (park, uint, S_IRUGO);
 MODULE_PARM_DESC (park, "park setting; 1-3 back-to-back async packets");
 
 /* for flakey hardware, ignore overcurrent indicators */
+#ifdef CONFIG_SYNO_MONACO
+static bool ignore_oc = 1;
+#else
 static bool ignore_oc = 0;
+#endif /* CONFIG_SYNO_MONACO */
 module_param (ignore_oc, bool, S_IRUGO);
 MODULE_PARM_DESC (ignore_oc, "ignore bogus hardware overcurrent indications");
 
@@ -222,6 +226,13 @@ static void tdi_reset (struct ehci_hcd *ehci)
 
 	tmp = ehci_readl(ehci, &ehci->regs->usbmode);
 	tmp |= USBMODE_CM_HC;
+#if defined(CONFIG_SYNO_ARMADA)
+	/*
+	 * MRVL: Disable USB Streaming
+	 */
+	tmp |= (1 << 4);
+#endif /* CONFIG_SYNO_ARMADA */
+
 	/* The default byte access to MMR space is LE after
 	 * controller reset. Set the required endian mode
 	 * for transfer buffers to match the host microprocessor

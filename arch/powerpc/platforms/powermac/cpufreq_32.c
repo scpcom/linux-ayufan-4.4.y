@@ -476,7 +476,11 @@ static struct cpufreq_driver pmac_cpufreq_driver = {
 	.flags		= CPUFREQ_PM_NO_WARN,
 	.attr		= pmac_cpu_freqs_attr,
 	.name		= "powermac",
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	.owner		= THIS_MODULE,
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 };
 
 static int pmac_cpufreq_init_MacRISC3(struct device_node *cpunode)

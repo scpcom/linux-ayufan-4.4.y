@@ -181,3 +181,25 @@ endif # PHYLIB
 config MICREL_KS8995MA
 	tristate "Micrel KS8995MA 5-ports 10/100 managed Ethernet switch"
 	depends on SPI
+
+config SWCONFIG
+	tristate "Realtek Switch configuration API"
+	help
+	  Switch configuration API using netlink. This allows
+	  you to configure the VLAN features of certain switches.
+
+config RTL8366_SMI
+	tristate "Driver for the RTL8366 SMI interface"
+	help
+	  This module implements the SMI interface protocol which is used
+	  by some RTL8366 ethernet switch devices via the generic GPIO API.
+
+config RTL8366_SMI_DEBUG_FS
+	bool "RTL8366 switch driver DEBUG_FS support"
+	depends on DEBUG_FS && RTL8366_SMI
+	default n
+
+config RTL8367_PHY
+	tristate "Driver for the Realtek RTL8367R/M switches"
+	select SWCONFIG
+	depends on RTL8366_SMI

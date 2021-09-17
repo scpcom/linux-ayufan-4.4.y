@@ -166,4 +166,12 @@ source "drivers/ipack/Kconfig"
 
 source "drivers/reset/Kconfig"
 
+source "drivers/phy/Kconfig"
+
+source "drivers/lpm/Kconfig"
+
+if SYNO_LSP_ARMADA
+source "drivers/telephony/Kconfig"
+endif
+
 endmenu

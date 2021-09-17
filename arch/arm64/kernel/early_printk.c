@@ -25,6 +25,9 @@
 
 #include <linux/amba/serial.h>
 #include <linux/serial_reg.h>
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#include <linux/st-asc.h>
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 static void __iomem *early_base;
 static void (*printch)(char ch);
@@ -72,6 +75,20 @@ static void uart8250_32bit_printch(char ch)
 	writel_relaxed(ch, early_base + (UART_TX << 2));
 }
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+/*
+ * ST-ASC single character TX.
+ */
+static void st_asc_printch(char ch)
+{
+	while (!(readl_relaxed(early_base + ASC_STA) & ASC_STA_TE))
+		;
+	writeb_relaxed(ch, early_base + ASC_TXBUF);
+	while (readl_relaxed(early_base + ASC_STA) & ASC_STA_TF)
+		;
+}
+#endif /* CONFIG_SYNO_LSP_MONACO */
+
 struct earlycon_match {
 	const char *name;
 	void (*printch)(char ch);
@@ -82,6 +99,9 @@ static const struct earlycon_match earlycon_match[] __initconst = {
 	{ .name = "smh", .printch = smh_printch, },
 	{ .name = "uart8250-8bit", .printch = uart8250_8bit_printch, },
 	{ .name = "uart8250-32bit", .printch = uart8250_32bit_printch, },
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	{ .name = "st-asc", .printch = st_asc_printch, },
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	{}
 };
 

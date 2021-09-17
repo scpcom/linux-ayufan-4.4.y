@@ -301,8 +301,13 @@ static inline void atomic64_add(u64 i, atomic64_t *v)
 
 	__asm__ __volatile__("@ atomic64_add\n"
 "1:	ldrexd	%0, %H0, [%3]\n"
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+"	adds	%Q0, %Q0, %Q4\n"
+"	adc	%R0, %R0, %R4\n"
+#else /* CONFIG_SYNO_LSP_ARMADA */
 "	adds	%0, %0, %4\n"
 "	adc	%H0, %H0, %H4\n"
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 "	strexd	%1, %0, %H0, [%3]\n"
 "	teq	%1, #0\n"
 "	bne	1b"
@@ -320,8 +325,13 @@ static inline u64 atomic64_add_return(u64 i, atomic64_t *v)
 
 	__asm__ __volatile__("@ atomic64_add_return\n"
 "1:	ldrexd	%0, %H0, [%3]\n"
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+"	adds	%Q0, %Q0, %Q4\n"
+"	adc	%R0, %R0, %R4\n"
+#else /* CONFIG_SYNO_LSP_ARMADA */
 "	adds	%0, %0, %4\n"
 "	adc	%H0, %H0, %H4\n"
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 "	strexd	%1, %0, %H0, [%3]\n"
 "	teq	%1, #0\n"
 "	bne	1b"
@@ -341,8 +351,13 @@ static inline void atomic64_sub(u64 i, atomic64_t *v)
 
 	__asm__ __volatile__("@ atomic64_sub\n"
 "1:	ldrexd	%0, %H0, [%3]\n"
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+"	subs	%Q0, %Q0, %Q4\n"
+"	sbc	%R0, %R0, %R4\n"
+#else /* CONFIG_SYNO_LSP_ARMADA */
 "	subs	%0, %0, %4\n"
 "	sbc	%H0, %H0, %H4\n"
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 "	strexd	%1, %0, %H0, [%3]\n"
 "	teq	%1, #0\n"
 "	bne	1b"
@@ -360,8 +375,13 @@ static inline u64 atomic64_sub_return(u64 i, atomic64_t *v)
 
 	__asm__ __volatile__("@ atomic64_sub_return\n"
 "1:	ldrexd	%0, %H0, [%3]\n"
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+"	subs	%Q0, %Q0, %Q4\n"
+"	sbc	%R0, %R0, %R4\n"
+#else /* CONFIG_SYNO_LSP_ARMADA */
 "	subs	%0, %0, %4\n"
 "	sbc	%H0, %H0, %H4\n"
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 "	strexd	%1, %0, %H0, [%3]\n"
 "	teq	%1, #0\n"
 "	bne	1b"
@@ -428,9 +448,15 @@ static inline u64 atomic64_dec_if_positive(atomic64_t *v)
 
 	__asm__ __volatile__("@ atomic64_dec_if_positive\n"
 "1:	ldrexd	%0, %H0, [%3]\n"
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+"	subs	%Q0, %Q0, #1\n"
+"	sbc	%R0, %R0, #0\n"
+"	teq	%R0, #0\n"
+#else /* CONFIG_SYNO_LSP_ARMADA */
 "	subs	%0, %0, #1\n"
 "	sbc	%H0, %H0, #0\n"
 "	teq	%H0, #0\n"
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 "	bmi	2f\n"
 "	strexd	%1, %0, %H0, [%3]\n"
 "	teq	%1, #0\n"
@@ -459,8 +485,13 @@ static inline int atomic64_add_unless(atomic64_t *v, u64 a, u64 u)
 "	teqeq	%H0, %H5\n"
 "	moveq	%1, #0\n"
 "	beq	2f\n"
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+"	adds	%Q0, %Q0, %Q6\n"
+"	adc	%R0, %R0, %R6\n"
+#else /* CONFIG_SYNO_LSP_ARMADA */
 "	adds	%0, %0, %6\n"
 "	adc	%H0, %H0, %H6\n"
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 "	strexd	%2, %0, %H0, [%4]\n"
 "	teq	%2, #0\n"
 "	bne	1b\n"

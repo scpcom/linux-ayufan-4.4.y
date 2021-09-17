@@ -51,11 +51,19 @@ TRACE_EVENT(writeback_dirty_page,
 		__entry->index = page->index;
 	),
 
+#ifdef CONFIG_SYNO_LSP_ALPINE
+	TP_printk("bdi %s: ino=%lu index=%llu",
+		__entry->name,
+		__entry->ino,
+		(unsigned long long)__entry->index
+	)
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	TP_printk("bdi %s: ino=%lu index=%lu",
 		__entry->name,
 		__entry->ino,
 		__entry->index
 	)
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 );
 
 DECLARE_EVENT_CLASS(writeback_dirty_inode_template,

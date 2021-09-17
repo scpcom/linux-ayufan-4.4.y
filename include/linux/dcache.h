@@ -230,8 +230,13 @@ static inline int dname_external(struct dentry *dentry)
 }
 
 #ifdef CONFIG_SYNO_FS_CASELESS_STAT
+#if defined(CONFIG_SYNO_ALPINE) || defined(CONFIG_SYNO_LSP_MONACO) || defined(CONFIG_SYNO_ARMADA)
+extern int dentry_cmp(const struct dentry *dentry, const unsigned char *ct, unsigned tcount);
+extern int dentry_string_cmp(const unsigned char *cs, const unsigned char *ct, unsigned tcount);
+#else /* CONFIG_SYNO_ALPINE || CONFIG_SYNO_LSP_MONACO || CONFIG_SYNO_ARMADA */
 extern inline int dentry_cmp(const struct dentry *dentry, const unsigned char *ct, unsigned tcount);
 extern inline int dentry_string_cmp(const unsigned char *cs, const unsigned char *ct, unsigned tcount);
+#endif /* CONFIG_SYNO_ALPINE || CONFIG_SYNO_LSP_MONACO || CONFIG_SYNO_ARMADA */
 #endif /* CONFIG_SYNO_FS_CASELESS_STAT */
 
 /*

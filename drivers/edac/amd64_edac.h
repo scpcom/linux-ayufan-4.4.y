@@ -159,6 +159,8 @@
 #define ON true
 #define OFF false
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#else /* CONFIG_SYNO_LSP_MONACO */
 /*
  * Create a contiguous bitmask starting at bit position @lo and ending at
  * position @hi. For example
@@ -166,6 +168,7 @@
  * GENMASK(21, 39) gives us the 64bit vector 0x000000ffffe00000.
  */
 #define GENMASK(lo, hi)			(((1ULL << ((hi) - (lo) + 1)) - 1) << (lo))
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 /*
  * PCI-defined configuration space registers

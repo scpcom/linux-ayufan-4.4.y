@@ -93,6 +93,9 @@ static const char netdev_features_strings[NETDEV_FEATURE_COUNT][ETH_GSTRING_LEN]
 	[NETIF_F_LOOPBACK_BIT] =         "loopback",
 	[NETIF_F_RXFCS_BIT] =            "rx-fcs",
 	[NETIF_F_RXALL_BIT] =            "rx-all",
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+        [NETIF_F_MQ_TX_LOCK_OPT_BIT] =   "mq-tx-lock-opt",
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 };
 
 static int ethtool_get_features(struct net_device *dev, void __user *useraddr)

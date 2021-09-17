@@ -154,6 +154,10 @@ static const struct usb_device_id usb_quirk_list[] = {
 	/* INTEL VALUE SSD */
 	{ USB_DEVICE(0x8086, 0xf1a5), .driver_info = USB_QUIRK_RESET_RESUME },
 
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+	/* Kingston Technology */
+	{ USB_DEVICE(0x13fe, 0x3e00), .driver_info = USB_QUIRK_RESET },
+#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
 	{ }  /* terminating entry must be last */
 };
 

@@ -488,6 +488,14 @@ void st_tx_wakeup(struct st_data_s *st_data)
 	clear_bit(ST_TX_SENDING, &st_data->tx_state);
 }
 
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+static void st_tx_wakeup_work(struct work_struct *work)
+{
+	struct st_data_s *st_data = container_of(work, struct st_data_s,
+						 wakeup_work);
+	st_tx_wakeup(st_data);
+}
+#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
 /********************************************************************/
 /* functions called from ST KIM
 */
@@ -794,12 +802,17 @@ static void st_tty_receive(struct tty_struct *tty, const unsigned char *data,
 static void st_tty_wakeup(struct tty_struct *tty)
 {
 	struct	st_data_s *st_gdata = tty->disc_data;
+
 	pr_debug("%s ", __func__);
 	/* don't do an wakeup for now */
 	clear_bit(TTY_DO_WRITE_WAKEUP, &tty->flags);
 
 	/* call our internal wakeup */
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+	schedule_work(&st_gdata->wakeup_work);
+#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
 	st_tx_wakeup((void *)st_gdata);
+#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
 }
 
 static void st_tty_flush_buffer(struct tty_struct *tty)
@@ -854,6 +867,9 @@ int st_core_init(struct st_data_s **core_data)
 	 */
 	skb_queue_head_init(&st_gdata->txq);
 	skb_queue_head_init(&st_gdata->tx_waitq);
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+	INIT_WORK(&st_gdata->wakeup_work, st_tx_wakeup_work);
+#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
 
 	/* Locking used in st_int_enqueue() to avoid multiple execution */
 	spin_lock_init(&st_gdata->lock);

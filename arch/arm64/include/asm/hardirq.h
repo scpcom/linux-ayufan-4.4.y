@@ -49,9 +49,12 @@ static inline void ack_bad_irq(unsigned int irq)
 
 extern void handle_IRQ(unsigned int, struct pt_regs *);
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#else /* CONFIG_SYNO_LSP_MONACO */
 /*
  * No arch-specific IRQ flags.
  */
 #define set_irq_flags(irq, flags)
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 #endif /* __ASM_HARDIRQ_H */

@@ -37,6 +37,10 @@ static noinline void __down(struct semaphore *sem);
 static noinline int __down_interruptible(struct semaphore *sem);
 static noinline int __down_killable(struct semaphore *sem);
 static noinline int __down_timeout(struct semaphore *sem, long jiffies);
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+static noinline int __down_timeout_interruptible(struct semaphore *sem,
+		long jiffies);
+#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
 static noinline void __up(struct semaphore *sem);
 
 /**
@@ -168,6 +172,34 @@ int down_timeout(struct semaphore *sem, long jiffies)
 }
 EXPORT_SYMBOL(down_timeout);
 
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+/**
+ * down_timeout_interruptible - acquire the semaphore within a specified time
+ * @sem: the semaphore to be acquired
+ * @jiffies: how long to wait before failing
+ *
+ * Attempts to acquire the semaphore.  If no more tasks are allowed to
+ * acquire the semaphore, calling this function will put the task to sleep.
+ * If the semaphore is not released within the specified number of jiffies,
+ * this function returns -ETIME.  It returns 0 if the semaphore was acquired.
+ */
+int down_timeout_interruptible(struct semaphore *sem, long jiffies)
+{
+	unsigned long flags;
+	int result = 0;
+
+	raw_spin_lock_irqsave(&sem->lock, flags);
+	if (likely(sem->count > 0))
+		sem->count--;
+	else
+		result = __down_timeout_interruptible(sem, jiffies);
+	raw_spin_unlock_irqrestore(&sem->lock, flags);
+
+	return result;
+}
+EXPORT_SYMBOL(down_timeout_interruptible);
+#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+
 /**
  * up - release the semaphore
  * @sem: the semaphore to release
@@ -252,6 +284,13 @@ static noinline int __sched __down_timeout(struct semaphore *sem, long jiffies)
 {
 	return __down_common(sem, TASK_UNINTERRUPTIBLE, jiffies);
 }
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+static noinline int __sched __down_timeout_interruptible(struct semaphore *sem,
+		long jiffies)
+{
+	return __down_common(sem, TASK_INTERRUPTIBLE, jiffies);
+}
+#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
 
 static noinline void __sched __up(struct semaphore *sem)
 {

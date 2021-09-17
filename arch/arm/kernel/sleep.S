@@ -81,6 +81,9 @@ ENDPROC(cpu_resume_after_mmu)
 	.data
 	.align
 ENTRY(cpu_resume)
+#if defined(CONFIG_SYNO_LSP_ALPINE) || defined(CONFIG_SYNO_LSP_ARMADA)
+ARM_BE8(setend be)			@ ensure we are in BE mode
+#endif /* CONFIG_SYNO_LSP_ALPINE || CONFIG_SYNO_LSP_ARMADA */
 #ifdef CONFIG_SMP
 	adr	r0, sleep_save_sp
 	ALT_SMP(mrc p15, 0, r1, c0, c0, 5)
@@ -98,6 +101,9 @@ THUMB(	mov	sp, r2			)
 THUMB(	bx	r3			)
 ENDPROC(cpu_resume)
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	.globl	sleep_save_sp
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 sleep_save_sp:
 	.rept	CONFIG_NR_CPUS
 	.long	0				@ preserve stack phys ptr here

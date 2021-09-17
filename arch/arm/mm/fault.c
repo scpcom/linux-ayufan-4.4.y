@@ -112,9 +112,26 @@ void show_pte(struct mm_struct *mm, unsigned long addr)
 		pte = pte_offset_map(pmd, addr);
 		printk(", *pte=%08llx", (long long)pte_val(*pte));
 #ifndef CONFIG_ARM_LPAE
+#if defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT)
+		{
+			unsigned long pte_ptr = (unsigned long)pte;
+			unsigned long tmp = pte_ptr;
+			unsigned long shift_bits;
+			unsigned long mask;
+
+			shift_bits = PAGE_SHIFT - 12;
+			mask = 0x7FC & (~((shift_bits-1) << 7));
+			pte_ptr += (PTE_HWTABLE_PTRS * sizeof(void *));
+			pte_ptr &= ~0x7FC;
+			tmp &= mask;
+			pte_ptr += (tmp << shift_bits);
+			printk(", *ppte=%08llx", (long long unsigned int)pte_val((pte_t *)pte_ptr));
+		}
+#else /* CONFIG_SYNO_LSP_ARMADA && CONFIG_MV_LARGE_PAGE_SUPPORT */
 		printk(", *ppte=%08llx",
 		       (long long)pte_val(pte[PTE_HWTABLE_PTRS]));
-#endif
+#endif /* CONFIG_SYNO_LSP_ARMADA && CONFIG_MV_LARGE_PAGE_SUPPORT */
+#endif /* CONFIG_ARM_LPAE */
 		pte_unmap(pte);
 	} while(0);
 
@@ -487,6 +504,9 @@ do_translation_fault(unsigned long addr, unsigned int fsr,
 }
 #endif					/* CONFIG_MMU */
 
+#if defined(CONFIG_SYNO_ALPINE)
+// Alpine do not need do_sect_fault()
+#else /* CONFIG_SYNO_ALPINE */
 /*
  * Some section permission faults need to be handled gracefully.
  * They can happen due to a __{get,put}_user during an oops.
@@ -497,6 +517,7 @@ do_sect_fault(unsigned long addr, unsigned int fsr, struct pt_regs *regs)
 	do_bad_area(addr, fsr, regs);
 	return 0;
 }
+#endif /* CONFIG_SYNO_ALPINE */
 
 /*
  * This abort handler always returns "fault".

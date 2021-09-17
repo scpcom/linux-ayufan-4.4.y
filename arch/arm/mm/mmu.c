@@ -29,6 +29,11 @@
 #include <asm/system_info.h>
 #include <asm/traps.h>
 
+#if (defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE) && defined(CONFIG_HIGHMEM)) ||\
+	(defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && defined(CONFIG_HIGHMEM))
+#include <asm/fixmap.h>
+#endif
+
 #include <asm/mach/arch.h>
 #include <asm/mach/map.h>
 #include <asm/mach/pci.h>
@@ -338,7 +343,11 @@ EXPORT_SYMBOL(get_mem_type);
 /*
  * Adjust the PMD section entries according to the CPU in use.
  */
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+static void __init build_mem_type_table(const struct machine_desc *mdesc)
+#else /* CONFIG_SYNO_LSP_ARMADA */
 static void __init build_mem_type_table(void)
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 {
 	struct cachepolicy *cp;
 	unsigned int cr = get_cr();
@@ -361,7 +370,11 @@ static void __init build_mem_type_table(void)
 			cachepolicy = CPOLICY_WRITEBACK;
 		ecc_mask = 0;
 	}
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	if (is_smp() || (mdesc->flags & MACHINE_NEEDS_CPOLICY_WRITEALLOC))
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	if (is_smp())
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 		cachepolicy = CPOLICY_WRITEALLOC;
 
 	/*
@@ -472,7 +485,32 @@ static void __init build_mem_type_table(void)
 		mem_types[MT_CACHECLEAN].prot_sect |= PMD_SECT_APX|PMD_SECT_AP_WRITE;
 #endif
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#ifdef CONFIG_ARM_UNIPROCESSOR_IOCC
+		{
+#else /* CONFIG_ARM_UNIPROCESSOR_IOCC */
 		if (is_smp()) {
+#endif /* CONFIG_ARM_UNIPROCESSOR_IOCC */
+#elif defined(CONFIG_SYNO_LSP_ARMADA)
+		/*
+		 * On Cortex-A9 systems, configured in !SMP, proc-v7.S
+		 * has not set the SMP bit and the TLB broadcast
+		 * bit. However, these are needed to use the shareable
+		 * attribute on page tables, which in turn is needed
+		 * for certain systems that provide hardware I/O
+		 * coherency.
+		 */
+		if (read_cpuid_part_number() == ARM_CPU_PART_CORTEX_A9 &&
+		    !is_smp() && (mdesc->flags & MACHINE_NEEDS_SHAREABLE_PAGES)) {
+			u32 reg;
+			asm("mrc p15, 0, %0, c1, c0, 1" : "=r" (reg));
+			reg |= (1 << 6) | (1 << 0);
+			asm("mcr p15, 0, %0, c1, c0, 1" : : "r" (reg));
+		}
+		if (is_smp() || (mdesc->flags & MACHINE_NEEDS_SHAREABLE_PAGES)) {
+#else
+		if (is_smp()) {
+#endif
 			/*
 			 * Mark memory with the "shared" attribute
 			 * for SMP systems
@@ -598,7 +636,15 @@ static void __init *early_alloc(unsigned long sz)
 static pte_t * __init early_pte_alloc(pmd_t *pmd, unsigned long addr, unsigned long prot)
 {
 	if (pmd_none(*pmd)) {
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+		pte_t *pte = early_alloc(max_t(size_t,
+					PTE_HWTABLE_OFF + PTE_HWTABLE_SIZE,
+					PAGE_SIZE));
+#elif defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT)
+		pte_t *pte = early_alloc(PAGE_SIZE);
+#else
 		pte_t *pte = early_alloc(PTE_HWTABLE_OFF + PTE_HWTABLE_SIZE);
+#endif
 		__pmd_populate(pmd, __pa(pte), prot);
 	}
 	BUG_ON(pmd_bad(*pmd));
@@ -956,6 +1002,30 @@ void __init debug_ll_io_init(void)
 static void * __initdata vmalloc_min =
 	(void *)(VMALLOC_END - (240 << 20) - VMALLOC_OFFSET);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && defined(CONFIG_HIGHMEM)
+/* Create L1 Mapping for High-Mem pages. */
+static void __init map_highmem_pages(void)
+{
+	struct map_desc map;
+	unsigned long addr;
+	pmd_t *pmd;
+	pte_t *pte;
+
+	for (addr = FIXADDR_START; addr < FIXADDR_TOP; addr += SZ_1M) {
+		map.pfn = __phys_to_pfn(virt_to_phys((void*)addr));
+		map.virtual = addr;
+		map.length = PAGE_SIZE;
+		map.type = MT_DEVICE;
+		create_mapping(&map);
+
+		/* Clear the L2 entry. */
+		pmd = pmd_offset(pgd_offset_k(addr), addr);
+		pte = pte_offset_kernel(pmd, addr);
+		set_pte_ext(pte, __pte(0), 0);
+	}
+}
+#endif
+
 /*
  * vmalloc=size forces the vmalloc area to be exactly 'size'
  * bytes. This can be used to increase (or decrease) the vmalloc
@@ -1159,6 +1229,30 @@ void __init arm_mm_memblock_reserve(void)
 #endif
 }
 
+#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE) && defined(CONFIG_HIGHMEM)
+/* Prepare all levels for mapping highmem pages except the pte.
+ * This function isn't needed if FIXADDR is inside the already-existing
+ * mapping 0xfff0000 - 0xffffffff
+ * */
+static void __init prepare_highmem_tables(void)
+{
+	struct map_desc map;
+	unsigned long addr;
+
+	for (addr = FIXADDR_START; addr < FIXADDR_TOP; addr += SECTION_SIZE) {
+		/* map the first page from each section */
+		map.pfn = __phys_to_pfn(virt_to_phys((void *)addr));
+		map.virtual = addr;
+		map.length = PAGE_SIZE;
+		map.type = MT_MEMORY;
+		create_mapping(&map);
+
+		/* remove pte. Other pagetable levels are ready */
+		set_fix_pte(addr,__pte(0));
+	}
+}
+#endif /* CONFIG_SYNO_LSP_ALPINE && CONFIG_ARM_PAGE_SIZE_LARGE && CONFIG_HIGHMEM */
+
 /*
  * Set up the device mappings.  Since we clear out the page tables for all
  * mappings above VMALLOC_START, we will remove any debug device mappings.
@@ -1241,6 +1335,14 @@ static void __init devicemaps_init(struct machine_desc *mdesc)
 	map.type = MT_LOW_VECTORS;
 	create_mapping(&map);
 
+#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE) && defined(CONFIG_HIGHMEM)
+	prepare_highmem_tables();
+#endif /* CONFIG_SYNO_LSP_ALPINE && CONFIG_ARM_PAGE_SIZE_LARGE && CONFIG_HIGHMEM */
+
+#if defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && defined(CONFIG_HIGHMEM)
+	map_highmem_pages();
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
 	/*
 	 * Ask the machine support to map in the statically mapped devices.
 	 */
@@ -1303,7 +1405,11 @@ void __init paging_init(struct machine_desc *mdesc)
 
 	memblock_set_current_limit(arm_lowmem_limit);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	build_mem_type_table(mdesc);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	build_mem_type_table();
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	prepare_page_table();
 	map_lowmem();
 	dma_contiguous_remap();

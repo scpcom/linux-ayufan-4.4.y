@@ -573,6 +573,9 @@ void set_iounmap_nonlazy(void)
 {
 	atomic_set(&vmap_lazy_nr, lazy_max_pages()+1);
 }
+#if defined (CONFIG_SYNO_LSP_MONACO)
+EXPORT_SYMBOL_GPL(set_iounmap_nonlazy);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 /*
  * Purges all lazily-freed vmap areas.

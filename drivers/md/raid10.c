@@ -120,7 +120,6 @@ END:
 #endif /* CONFIG_SYNO_MD_STATUS_DISKERROR */
 
 static int enough(struct r10conf *conf, int ignore);
-static int _enough(struct r10conf *conf, int previous, int ignore);
 static sector_t reshape_request(struct mddev *mddev, sector_t sector_nr,
 				int *skipped);
 static void reshape_request_write(struct mddev *mddev, struct r10bio *r10_bio);
@@ -1717,51 +1716,31 @@ static void status(struct seq_file *seq, struct mddev *mddev)
  * Don't consider the device numbered 'ignore'
  * as we might be about to remove it.
  */
-static int _enough(struct r10conf *conf, int previous, int ignore)
+static int _enough(struct r10conf *conf, struct geom *geo, int ignore)
 {
 	int first = 0;
-	int has_enough = 0;
-	int disks, ncopies;
-	if (previous) {
-		disks = conf->prev.raid_disks;
-		ncopies = conf->prev.near_copies;
-	} else {
-		disks = conf->geo.raid_disks;
-		ncopies = conf->geo.near_copies;
-	}
 
-	rcu_read_lock();
 	do {
 		int n = conf->copies;
 		int cnt = 0;
 		int this = first;
 		while (n--) {
-			struct md_rdev *rdev;
-			if (this != ignore &&
-			    (rdev = rcu_dereference(conf->mirrors[this].rdev)) &&
-			    test_bit(In_sync, &rdev->flags))
+			if (conf->mirrors[this].rdev &&
+			    this != ignore)
 				cnt++;
-			this = (this+1) % disks;
+			this = (this+1) % geo->raid_disks;
 		}
 		if (cnt == 0)
-			goto out;
-		first = (first + ncopies) % disks;
+			return 0;
+		first = (first + geo->near_copies) % geo->raid_disks;
 	} while (first != 0);
-	has_enough = 1;
-out:
-	rcu_read_unlock();
-	return has_enough;
+	return 1;
 }
 
 static int enough(struct r10conf *conf, int ignore)
 {
-	/* when calling 'enough', both 'prev' and 'geo' must
-	 * be stable.
-	 * This is ensured if ->reconfig_mutex or ->device_lock
-	 * is held.
-	 */
-	return _enough(conf, 0, ignore) &&
-		_enough(conf, 1, ignore);
+	return _enough(conf, &conf->geo, ignore) &&
+		_enough(conf, &conf->prev, ignore);
 }
 
 #if defined(CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY)
@@ -2025,7 +2004,6 @@ static void error(struct mddev *mddev, struct md_rdev *rdev)
 {
 	char b[BDEVNAME_SIZE];
 	struct r10conf *conf = mddev->private;
-	unsigned long flags;
 
 	/*
 	 * If it is not operational, then we have already marked it as dead
@@ -2033,18 +2011,18 @@ static void error(struct mddev *mddev, struct md_rdev *rdev)
 	 * next level up know.
 	 * else mark the drive as failed
 	 */
-	spin_lock_irqsave(&conf->device_lock, flags);
 	if (test_bit(In_sync, &rdev->flags)
-	    && !enough(conf, rdev->raid_disk)) {
+	    && !enough(conf, rdev->raid_disk))
 		/*
 		 * Don't fail the drive, just return an IO error.
 		 */
-		spin_unlock_irqrestore(&conf->device_lock, flags);
 		return;
-	}
 	if (test_and_clear_bit(In_sync, &rdev->flags)) {
+		unsigned long flags;
+		spin_lock_irqsave(&conf->device_lock, flags);
 		mddev->degraded++;
-			/*
+		spin_unlock_irqrestore(&conf->device_lock, flags);
+		/*
 		 * if recovery is running, make sure it aborts.
 		 */
 		set_bit(MD_RECOVERY_INTR, &mddev->recovery);
@@ -2052,7 +2030,6 @@ static void error(struct mddev *mddev, struct md_rdev *rdev)
 	set_bit(Blocked, &rdev->flags);
 	set_bit(Faulty, &rdev->flags);
 	set_bit(MD_CHANGE_DEVS, &mddev->flags);
-	spin_unlock_irqrestore(&conf->device_lock, flags);
 	printk(KERN_ALERT
 	       "md/raid10:%s: Disk failure on %s, disabling device.\n"
 	       "md/raid10:%s: Operation continuing on %d devices.\n",
@@ -2172,7 +2149,7 @@ static int raid10_add_disk(struct mddev *mddev, struct md_rdev *rdev)
 		 * very different from resync
 		 */
 		return -EBUSY;
-	if (rdev->saved_raid_disk < 0 && !_enough(conf, 1, -1))
+	if (rdev->saved_raid_disk < 0 && !_enough(conf, &conf->prev, -1))
 		return -EINVAL;
 
 	if (rdev->raid_disk >= 0)
@@ -2200,17 +2177,15 @@ static int raid10_add_disk(struct mddev *mddev, struct md_rdev *rdev)
 			set_bit(Replacement, &rdev->flags);
 			rdev->raid_disk = mirror;
 			err = 0;
-			if (mddev->gendisk)
-				disk_stack_limits(mddev->gendisk, rdev->bdev,
-						  rdev->data_offset << 9);
+			disk_stack_limits(mddev->gendisk, rdev->bdev,
+					  rdev->data_offset << 9);
 			conf->fullsync = 1;
 			rcu_assign_pointer(p->replacement, rdev);
 			break;
 		}
 
-		if (mddev->gendisk)
-			disk_stack_limits(mddev->gendisk, rdev->bdev,
-					  rdev->data_offset << 9);
+		disk_stack_limits(mddev->gendisk, rdev->bdev,
+				  rdev->data_offset << 9);
 
 		p->head_position = 0;
 		p->recovery_disabled = mddev->recovery_disabled - 1;

@@ -531,8 +531,12 @@ static int ams_delta_cx20442_init(struct snd_soc_pcm_runtime *rtd)
 
 	/* Set up initial pin constellation */
 	snd_soc_dapm_disable_pin(dapm, "Mouthpiece");
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	snd_soc_dapm_enable_pin(dapm, "Earpiece");
 	snd_soc_dapm_enable_pin(dapm, "Microphone");
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	snd_soc_dapm_disable_pin(dapm, "Speaker");
 	snd_soc_dapm_disable_pin(dapm, "AGCIN");
 	snd_soc_dapm_disable_pin(dapm, "AGCOUT");

@@ -89,3 +89,11 @@ config BTRFS_ASSERT
 	  any of the assertions trip.  This is meant for btrfs developers only.
 
 	  If unsure, say N.
+
+config BTRFS_FS_AHASH_CRC
+	bool "Btrfs with async CRC hash"
+	default n
+	depends on BTRFS_FS && ARCH_ALPINE && ARM_PAGE_SIZE_32KB
+	help
+	  Use asynchronous CRC hash when calculating checksum for
+	  data.

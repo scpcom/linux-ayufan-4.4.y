@@ -277,8 +277,15 @@ static void __init qnap_ts409_init(void)
 	/*
 	 * Configure peripherals.
 	 */
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	mvebu_mbus_add_window_by_id(ORION_MBUS_DEVBUS_BOOT_TARGET,
+				    ORION_MBUS_DEVBUS_BOOT_ATTR,
+				    QNAP_TS409_NOR_BOOT_BASE,
+				    QNAP_TS409_NOR_BOOT_SIZE);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	mvebu_mbus_add_window("devbus-boot", QNAP_TS409_NOR_BOOT_BASE,
 			      QNAP_TS409_NOR_BOOT_SIZE);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	platform_device_register(&qnap_ts409_nor_flash);
 
 	orion5x_ehci0_init();

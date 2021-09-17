@@ -745,9 +745,15 @@ fill_invalid_ext:
 			}
 			/* page ref released in bl_end_io_write_zero */
 			index = isect >> PAGE_CACHE_SECTOR_SHIFT;
+#ifdef CONFIG_SYNO_LSP_ALPINE
+			dprintk("%s zero %dth page: index %llu isect %llu\n",
+				__func__, npg_zero, (unsigned long long)index,
+				(unsigned long long)isect);
+#else /* CONFIG_SYNO_LSP_ALPINE */
 			dprintk("%s zero %dth page: index %lu isect %llu\n",
 				__func__, npg_zero, index,
 				(unsigned long long)isect);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 			page = bl_find_get_zeroing_page(header->inode, index,
 							cow_read);
 			if (unlikely(IS_ERR(page))) {
@@ -1218,7 +1224,12 @@ static u64 pnfs_num_cont_bytes(struct inode *inode, pgoff_t idx)
 	end = DIV_ROUND_UP(i_size_read(inode), PAGE_CACHE_SIZE);
 	if (end != NFS_I(inode)->npages) {
 		rcu_read_lock();
+#ifdef CONFIG_SYNO_LSP_ALPINE
+		end = radix_tree_next_hole(&mapping->page_tree, idx + 1,
+					   RDX_TREE_KEY_MAX_VALUE);
+#else /* CONFIG_SYNO_LSP_ALPINE */
 		end = radix_tree_next_hole(&mapping->page_tree, idx + 1, ULONG_MAX);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 		rcu_read_unlock();
 	}
 

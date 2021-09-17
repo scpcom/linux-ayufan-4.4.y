@@ -31,3 +31,5 @@ obj-$(CONFIG_USB_MXS_PHY)		+= phy-mxs-usb.o
 obj-$(CONFIG_USB_RCAR_PHY)		+= phy-rcar-usb.o
 obj-$(CONFIG_USB_ULPI)			+= phy-ulpi.o
 obj-$(CONFIG_USB_ULPI_VIEWPORT)		+= phy-ulpi-viewport.o
+obj-$(CONFIG_PHY_STI8416_USB2)		+= phy-sti8416-usb2.o
+obj-$(CONFIG_ST_USB3_MIPHY)		+= phy-st-usb3.o

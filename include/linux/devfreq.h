@@ -15,7 +15,11 @@
 
 #include <linux/device.h>
 #include <linux/notifier.h>
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#include <linux/pm_opp.h>
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 #include <linux/opp.h>
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
 #define DEVFREQ_NAME_LEN 16
 
@@ -185,7 +189,11 @@ extern int devfreq_suspend_device(struct devfreq *devfreq);
 extern int devfreq_resume_device(struct devfreq *devfreq);
 
 /* Helper functions for devfreq user device driver with OPP. */
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+extern struct dev_pm_opp *devfreq_recommended_opp(struct device *dev,
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 extern struct opp *devfreq_recommended_opp(struct device *dev,
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 					   unsigned long *freq, u32 flags);
 extern int devfreq_register_opp_notifier(struct device *dev,
 					 struct devfreq *devfreq);
@@ -236,7 +244,11 @@ static inline int devfreq_resume_device(struct devfreq *devfreq)
 	return 0;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+static inline struct dev_pm_opp *devfreq_recommended_opp(struct device *dev,
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 static inline struct opp *devfreq_recommended_opp(struct device *dev,
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 					   unsigned long *freq, u32 flags)
 {
 	return ERR_PTR(-EINVAL);

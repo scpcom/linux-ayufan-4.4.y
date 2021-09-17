@@ -31,7 +31,15 @@
 #include <net/tcp.h>
 #include <net/netdma.h>
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#ifdef CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
+#define NET_DMA_DEFAULT_COPYBREAK 8192
+#else /* CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE */
+#define NET_DMA_DEFAULT_COPYBREAK  (1 << 20) /* don't enable NET_DMA by default */
+#endif /* CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE */
+#else /* CONFIG_SYNO_LSP_ALPINE */
 #define NET_DMA_DEFAULT_COPYBREAK 4096
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 int sysctl_tcp_dma_copybreak = NET_DMA_DEFAULT_COPYBREAK;
 EXPORT_SYMBOL(sysctl_tcp_dma_copybreak);
@@ -52,13 +60,58 @@ int dma_skb_copy_datagram_iovec(struct dma_chan *chan,
 {
 	int start = skb_headlen(skb);
 	int i, copy = start - offset;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	dma_cookie_t cookie = 0;
+	struct sg_table	*dst_sgt;
+	struct sg_table	*src_sgt;
+	struct scatterlist *dst_sg;
+	int	dst_sg_len;
+	struct scatterlist *src_sg;
+	int		src_sg_len = skb_shinfo(skb)->nr_frags;
+	size_t	dst_len = len;
+	size_t	dst_offset = offset;
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	struct sk_buff *frag_iter;
 	dma_cookie_t cookie = 0;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+#ifdef CONFIG_SYNO_ALPINE_FIX_DMA_RECVFILE
+	int retry_limit = 10;
+#endif /* CONFIG_SYNO_ALPINE_FIX_DMA_RECVFILE */
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	pr_debug("%s %d copy %d len %d nr_iovecs %d skb frags %d\n",
+			__func__, __LINE__, copy, len, pinned_list->nr_iovecs,
+			src_sg_len);
+
+	dst_sgt = pinned_list->sgts;
+
+	if (copy > 0)
+		src_sg_len += 1;
+
+	src_sgt = pinned_list->sgts + 1;
+
+	dst_sg = dst_sgt->sgl;
+	src_sg = src_sgt->sgl;
+	src_sg_len = 0;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	/* Copy header. */
 	if (copy > 0) {
 		if (copy > len)
 			copy = len;
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+		sg_set_buf(src_sg, skb->data + offset, copy);
+		pr_debug("%s %d: add src buf page %p. addr %p len 0x%x\n", __func__,
+				__LINE__, virt_to_page(skb->data),
+				skb->data, copy);
+
+		len -= copy;
+		src_sg_len++;
+		if (len == 0)
+			goto fill_dst_sg;
+		offset += copy;
+		src_sg = sg_next(src_sg);
+#else /* CONFIG_SYNO_LSP_ALPINE */
 		cookie = dma_memcpy_to_iovec(chan, to, pinned_list,
 					    skb->data + offset, copy);
 		if (cookie < 0)
@@ -67,6 +120,7 @@ int dma_skb_copy_datagram_iovec(struct dma_chan *chan,
 		if (len == 0)
 			goto end;
 		offset += copy;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	}
 
 	/* Copy paged appendix. Hmm... why does this look so complicated? */
@@ -84,6 +138,17 @@ int dma_skb_copy_datagram_iovec(struct dma_chan *chan,
 			if (copy > len)
 				copy = len;
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+			sg_set_page(src_sg, page, copy, frag->page_offset +
+					offset - start);
+			pr_debug("%s %d: add src buf [%d] page %p. len 0x%x\n", __func__,
+				__LINE__, i, page, copy);
+			src_sg = sg_next(src_sg);
+			src_sg_len++;
+			len -= copy;
+			if (len == 0)
+				break;
+#else /* CONFIG_SYNO_LSP_ALPINE */
 			cookie = dma_memcpy_pg_to_iovec(chan, to, pinned_list, page,
 					frag->page_offset + offset - start, copy);
 			if (cookie < 0)
@@ -91,11 +156,36 @@ int dma_skb_copy_datagram_iovec(struct dma_chan *chan,
 			len -= copy;
 			if (len == 0)
 				goto end;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 			offset += copy;
 		}
 		start = end;
 	}
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+fill_dst_sg:
+	dst_sg_len = dma_memcpy_fill_sg_from_iovec(chan, to, pinned_list, dst_sg, dst_offset, dst_len);
+	BUG_ON(dst_sg_len <= 0);
+
+#ifdef CONFIG_SYNO_ALPINE_FIX_DMA_RECVFILE
+retry:
+#endif /* CONFIG_SYNO_ALPINE_FIX_DMA_RECVFILE */
+	cookie = dma_async_memcpy_sg_to_sg(chan,
+					dst_sgt->sgl,
+					dst_sg_len,
+					src_sgt->sgl,
+					src_sg_len);
+#ifdef CONFIG_SYNO_ALPINE_FIX_DMA_RECVFILE
+	if (unlikely(cookie == -ENOMEM)) {
+		if (retry_limit-- > 0) {
+			udelay(50);
+			goto retry;
+		} else {
+			printk(KERN_ERR "Cannot retrieve DMA buffer!\n");
+		}
+	}
+#endif /* CONFIG_SYNO_ALPINE_FIX_DMA_RECVFILE */
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	skb_walk_frags(skb, frag_iter) {
 		int end;
 
@@ -121,11 +211,16 @@ int dma_skb_copy_datagram_iovec(struct dma_chan *chan,
 	}
 
 end:
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	if (!len) {
 		skb->dma_cookie = cookie;
 		return cookie;
 	}
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+// do nothing
+#else /* CONFIG_SYNO_LSP_ALPINE */
 fault:
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	return -EFAULT;
 }

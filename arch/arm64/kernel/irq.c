@@ -28,6 +28,9 @@
 #include <linux/irqchip.h>
 #include <linux/seq_file.h>
 #include <linux/ratelimit.h>
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#include <linux/export.h>
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 unsigned long irq_err_count;
 
@@ -81,3 +84,26 @@ void __init init_IRQ(void)
 	if (!handle_arch_irq)
 		panic("No interrupt controller found.");
 }
+
+#if defined (CONFIG_SYNO_LSP_MONACO)
+void set_irq_flags(unsigned int irq, unsigned int flags)
+{
+	unsigned long clr = 0;
+	unsigned long set = IRQ_NOREQUEST | IRQ_NOPROBE | IRQ_NOAUTOEN;
+
+	if (irq >= nr_irqs) {
+		pr_err("Trying to set irq flags for IRQ%d\n", irq);
+		return;
+	}
+
+	if (flags & IRQF_VALID)
+		clr |= IRQ_NOREQUEST;
+	if (flags & IRQF_PROBE)
+		clr |= IRQ_NOPROBE;
+	if (!(flags & IRQF_NOAUTOEN))
+		clr |= IRQ_NOAUTOEN;
+	/* Order is clear bits in "clr" then set bits in "set" */
+	irq_modify_status(irq, clr, set & ~clr);
+}
+EXPORT_SYMBOL_GPL(set_irq_flags);
+#endif /* CONFIG_SYNO_LSP_MONACO */

@@ -213,6 +213,21 @@ config DECOMPRESS_LZO
 	select LZO_DECOMPRESS
 	tristate
 
+config LIBELF_32
+	bool
+
+config LIBELF_64
+	bool
+
+config ST_ELF_EXTENSIONS
+	bool "ST ELF extensions for libelf"
+	select CRC32
+	select ZLIB_INFLATE
+	depends on (LIBELF_32 || LIBELF_64)
+	help
+	  Enables ST ELF extensions for libelf, such as Zlib
+	  compressed segment loading and checksums on loadable ELF segments.
+
 #
 # Generic allocator support is selected if needed
 #

@@ -69,7 +69,8 @@ config THERMAL_GOV_USER_SPACE
 config CPU_THERMAL
 	bool "generic cpu cooling support"
 	depends on CPU_FREQ
-	select CPU_FREQ_TABLE
+	select CPU_FREQ_TABLE if !SYNO_LSP_ARMADA_2015_T1_1p4
+	depends on (THERMAL_OF && SYNO_LSP_ARMADA_2015_T1_1p4) || !SYNO_LSP_ARMADA_2015_T1_1p4
 	help
 	  This implements the generic cpu cooling mechanism through frequency
 	  reduction. An ACPI version of this already exists
@@ -90,6 +91,14 @@ config THERMAL_EMULATION
 	  WARNING: Be careful while enabling this option on production systems,
 	  because userland can easily disable the thermal policy by simply
 	  flooding this sysfs node with low temperature values.
+
+config AL_THERMAL
+	bool "Annapurna Labs thermal sensor driver"
+	depends on ARCH_ALPINE
+	depends on OF
+	help
+	  Enable this to plug the Annapurna Labs thermal sensor driver into the
+	  Linux thermal framework
 
 config SPEAR_THERMAL
 	bool "SPEAr thermal sensor driver"
@@ -168,5 +177,7 @@ config INTEL_POWERCLAMP
 	  Enable this to enable Intel PowerClamp idle injection driver. This
 	  enforce idle time which results in more package C-state residency. The
 	  user interface is exposed via generic thermal framework.
+
+source "drivers/thermal/st/Kconfig"
 
 endif

@@ -157,6 +157,9 @@ struct st_data_s {
 	unsigned long ll_state;
 	void *kim_data;
 	struct tty_struct *tty;
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+	struct work_struct wakeup_work;
+#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
 };
 
 /*

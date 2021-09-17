@@ -110,7 +110,11 @@ static inline void sb800_prefetch(struct ohci_hcd *ohci, int on)
 #endif
 
 /* Some boards misreport power switching/overcurrent */
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+static bool distrust_firmware = 0;
+#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
 static bool distrust_firmware = 1;
+#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
 module_param (distrust_firmware, bool, 0);
 MODULE_PARM_DESC (distrust_firmware,
 	"true to distrust firmware power/overcurrent setup");

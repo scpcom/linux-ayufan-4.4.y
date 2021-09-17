@@ -4522,6 +4522,174 @@ out:
 	return error;
 }
 
+#ifdef CONFIG_SYNO_FS_NOTIFY
+inline void free_rename_path_list(struct synotify_rename_path * rename_path_list)
+{
+	while(rename_path_list) {
+		struct synotify_rename_path *tmp = rename_path_list;
+		rename_path_list = rename_path_list->next;
+
+		if (tmp->old_full_path)
+			kfree(tmp->old_full_path);
+		if (tmp->new_full_path)
+			kfree(tmp->new_full_path);
+
+		mntput(tmp->vfs_mnt);
+		kfree(tmp);
+	}
+}
+
+static inline struct synotify_rename_path * get_rename_path(struct vfsmount *vfsmnt, struct dentry *old_dentry, struct dentry *new_dentry)
+{
+	int ret = -1;
+	struct synotify_rename_path * result = NULL;
+	struct synotify_rename_path * rename_path = NULL;
+
+	struct path old_path;
+	struct path new_path;
+	struct path root_path;
+	char *old_path_buf = NULL;
+	char *new_path_buf = NULL;
+	char *tmp_old_full_path = NULL;
+	char *tmp_new_full_path = NULL;
+	char *tmp_old_path = NULL;
+	char *tmp_new_path = NULL;
+
+	if (!vfsmnt || !old_dentry || !new_dentry) {
+		return NULL;
+	}
+
+	rename_path = kmalloc(sizeof(struct synotify_rename_path), GFP_NOFS);
+	if (!rename_path) {
+		goto end;
+	}
+
+	memset(&old_path, 0, sizeof(struct path));
+	memset(&new_path, 0, sizeof(struct path));
+	memset(&root_path, 0, sizeof(struct path));
+
+	old_path.mnt = vfsmnt;
+	old_path.dentry = old_dentry;
+	new_path.mnt = vfsmnt;
+	new_path.dentry = new_dentry;
+
+	root_path.mnt = vfsmnt;
+	root_path.dentry = vfsmnt->mnt_root;
+
+	old_path_buf = kmalloc(PATH_MAX, GFP_NOFS);
+	if (!old_path_buf) {
+		goto end;
+	}
+
+	new_path_buf = kmalloc(PATH_MAX, GFP_NOFS);
+	if (!new_path_buf) {
+		goto end;
+	}
+
+	// set synotify_rename_path
+	tmp_old_full_path = __d_path(&old_path, &root_path, old_path_buf, PATH_MAX-1);
+	tmp_new_full_path = __d_path(&new_path, &root_path, new_path_buf, PATH_MAX-1);
+
+	if (IS_ERR_OR_NULL(tmp_old_full_path) || IS_ERR_OR_NULL(tmp_new_full_path)) {
+		goto end;
+	}
+
+	// get required path, update to rename_path
+	tmp_old_path = kstrdup(tmp_old_full_path, GFP_NOFS);
+	if (!tmp_old_path) {
+		goto end;
+	}
+	tmp_new_path = kstrdup(tmp_new_full_path, GFP_NOFS);
+	if (!tmp_new_path) {
+		goto end;
+	}
+	rename_path->old_full_path = tmp_old_path;
+	rename_path->new_full_path = tmp_new_path;
+	rename_path->vfs_mnt = vfsmnt;
+	rename_path->next = NULL;
+
+	result = rename_path;
+	ret = 0;
+end:
+	if (ret != 0) {
+		if (tmp_old_path)
+			kfree(tmp_old_path);
+		if (tmp_new_path)
+			kfree(tmp_new_path);
+		if (rename_path)
+			kfree(rename_path);
+	}
+
+	if (old_path_buf)
+		kfree(old_path_buf);
+	if (new_path_buf)
+		kfree(new_path_buf);
+
+	return result;
+}
+
+inline struct synotify_rename_path * get_rename_path_list(struct dentry *old_dentry, struct dentry *new_dentry, __u32 old_dir_mask, __u32 new_dir_mask)
+{
+	struct nsproxy *nsproxy = current->nsproxy;
+	struct mnt_namespace *mnt_space = NULL;
+	struct list_head *list_head = NULL;
+	struct synotify_rename_path *head = NULL;
+	struct synotify_rename_path *tail = NULL;
+
+	if (!nsproxy) {
+		return NULL;
+	}
+
+	mnt_space = nsproxy->mnt_ns;
+	if (!mnt_space) {
+		return NULL;
+	}
+
+	list_for_each(list_head, &mnt_space->list) {
+		struct mount *mnt = list_entry(list_head, struct mount, mnt_list);
+		struct synotify_rename_path *rename_path = NULL;
+		struct vfsmount *vfsmnt = NULL;
+		__u32 test_old_mask = (old_dir_mask & ~FS_EVENT_ON_CHILD);
+		__u32 test_new_mask = (new_dir_mask & ~FS_EVENT_ON_CHILD);
+
+		if (!mnt) {
+			continue;
+		}
+		if (mnt->mnt.mnt_sb != new_dentry->d_sb) {
+			continue;
+		}
+
+		if (!(test_old_mask & mnt->mnt_fsnotify_mask)) {
+			continue;
+		}
+		if (!(test_new_mask & mnt->mnt_fsnotify_mask)) {
+			continue;
+		}
+
+		vfsmnt = &mnt->mnt;
+		// NOTE: we will hold vfsmnt till calling free_rename_path_list when getting rename path successfully
+		mntget(vfsmnt);
+
+		rename_path = get_rename_path(vfsmnt, old_dentry, new_dentry);
+
+		if (!rename_path) {
+			mntput(vfsmnt);
+		} else {
+			if (!head) {
+				head = rename_path;
+				tail = rename_path;
+			} else {
+				tail->next = rename_path;
+				tail = rename_path;
+			}
+		}
+	} // list_for_each mount
+
+	return head;
+}
+
+#endif
+
 int vfs_rename(struct inode *old_dir, struct dentry *old_dentry,
 	       struct inode *new_dir, struct dentry *new_dentry)
 {
@@ -4529,10 +4697,9 @@ int vfs_rename(struct inode *old_dir, struct dentry *old_dentry,
 	int is_dir = S_ISDIR(old_dentry->d_inode->i_mode);
 	const unsigned char *old_name;
 #ifdef CONFIG_SYNO_FS_NOTIFY
-	char *tmp_old_full = NULL;
-	char *tmp_new_full = NULL;
-	char *tmp_old_buff = NULL;
-	char *tmp_new_buff = NULL;
+	struct synotify_rename_path *rename_path_list = NULL;
+	__u32 old_dir_mask = (FS_EVENT_ON_CHILD | FS_MOVED_FROM);
+	__u32 new_dir_mask = (FS_EVENT_ON_CHILD | FS_MOVED_TO);
 #endif
 
 	if (old_dentry->d_inode == new_dentry->d_inode)
@@ -4559,25 +4726,27 @@ int vfs_rename(struct inode *old_dir, struct dentry *old_dentry,
 		return -EPERM;
 
 #ifdef CONFIG_SYNO_FS_NOTIFY
-	tmp_old_buff = kmalloc(PATH_MAX, GFP_NOFS);
-	tmp_new_buff = kmalloc(PATH_MAX, GFP_NOFS);
-	if (!tmp_old_buff || !tmp_new_buff) {
-		error = -ENOMEM;
-		goto out_free;
+	if (old_dir == new_dir)
+		old_dir_mask |= FS_DN_RENAME;
+
+	if (is_dir) {
+		old_dir_mask |= FS_ISDIR;
+		new_dir_mask |= FS_ISDIR;
 	}
-	tmp_old_full = dentry_path_raw(old_dentry, tmp_old_buff, PATH_MAX-1);
-	tmp_new_full = dentry_path_raw(new_dentry, tmp_new_buff, PATH_MAX-1);
+	rename_path_list = get_rename_path_list(old_dentry, new_dentry, old_dir_mask, new_dir_mask);
 #endif
+
 	old_name = fsnotify_oldname_init(old_dentry->d_name.name);
 
 	if (is_dir)
 		error = vfs_rename_dir(old_dir,old_dentry,new_dir,new_dentry);
 	else
 		error = vfs_rename_other(old_dir,old_dentry,new_dir,new_dentry);
+
 	if (!error)
 #ifdef CONFIG_SYNO_FS_NOTIFY
 		fsnotify_move(old_dir, new_dir, old_name, is_dir,
-			      new_dentry->d_inode, old_dentry, tmp_old_full, tmp_new_full);
+			      new_dentry->d_inode, old_dentry, rename_path_list);
 #else
 		fsnotify_move(old_dir, new_dir, old_name, is_dir,
 			      new_dentry->d_inode, old_dentry);
@@ -4585,9 +4754,7 @@ int vfs_rename(struct inode *old_dir, struct dentry *old_dentry,
 	fsnotify_oldname_free(old_name);
 
 #ifdef CONFIG_SYNO_FS_NOTIFY
-out_free:
-	kfree(tmp_old_buff);
-	kfree(tmp_new_buff);
+	free_rename_path_list(rename_path_list);
 #endif
 	return error;
 }

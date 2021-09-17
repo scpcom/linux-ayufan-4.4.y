@@ -251,6 +251,12 @@ struct fsg_common {
 	struct usb_composite_dev *cdev;
 	struct fsg_dev		*fsg, *new_fsg;
 	wait_queue_head_t	fsg_wait;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	wait_queue_head_t	fsg_write_thread_wait;
+
+	bool write_thread_wakeup;
+	bool use_writing_thread;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 	/* filesem protects: backing files in use */
 	struct rw_semaphore	filesem;
@@ -264,6 +270,10 @@ struct fsg_common {
 
 	struct fsg_buffhd	*next_buffhd_to_fill;
 	struct fsg_buffhd	*next_buffhd_to_drain;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	struct fsg_buffhd	*next_buffhd_to_write;
+	struct fsg_buffhd	*last_buffhd_to_write;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	struct fsg_buffhd	*buffhds;
 
 	int			cmnd_size;
@@ -284,6 +294,9 @@ struct fsg_common {
 	u32			tag;
 	u32			residue;
 	u32			usb_amount_left;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	u32			num_write_bufs;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 	unsigned int		can_stall:1;
 	unsigned int		free_storage_on_release:1;
@@ -295,6 +308,9 @@ struct fsg_common {
 	int			thread_wakeup_needed;
 	struct completion	thread_notifier;
 	struct task_struct	*thread_task;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	struct task_struct	*write_thread_task;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 	/* Callback functions. */
 	const struct fsg_operations	*ops;
@@ -629,6 +645,19 @@ static int sleep_thread(struct fsg_common *common)
 	return rc;
 }
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+/*
+ * Wait for the writing thread to finish the writes commands.
+ * This is done to avoid read-write race and after flush command.
+ */
+static inline void wait_for_writing_thread_done(struct fsg_common *common)
+{
+	if (common->use_writing_thread)
+		while (common->num_write_bufs != 0)
+			sleep_thread(common);
+}
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
 /*-------------------------------------------------------------------------*/
 
 static int do_read(struct fsg_common *common)
@@ -671,6 +700,14 @@ static int do_read(struct fsg_common *common)
 	amount_left = common->data_size_from_cmnd;
 	if (unlikely(amount_left == 0))
 		return -EIO;		/* No default reply */
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	if (common->num_write_bufs != 0)
+		DBG(common, "Start waiting with %d buffers in queue\n",
+				common->num_write_bufs);
+
+	wait_for_writing_thread_done(common);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 	for (;;) {
 		/*
@@ -821,6 +858,12 @@ static int do_write(struct fsg_common *common)
 
 		/* Queue a request for more data from the host */
 		bh = common->next_buffhd_to_fill;
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+		if (bh->state == BUF_STATE_BUSY)
+			sleep_thread(common);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
 		if (bh->state == BUF_STATE_EMPTY && get_some_more) {
 
 			/*
@@ -868,7 +911,11 @@ static int do_write(struct fsg_common *common)
 		if (bh->state == BUF_STATE_FULL) {
 			smp_rmb();
 			common->next_buffhd_to_drain = bh->next;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+			// do nothing
+#else /* CONFIG_SYNO_LSP_ALPINE */
 			bh->state = BUF_STATE_EMPTY;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 			/* Did something go wrong with the transfer? */
 			if (bh->outreq->status != 0) {
@@ -898,11 +945,43 @@ static int do_write(struct fsg_common *common)
 			if (amount == 0)
 				goto empty_write;
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+			if (common->use_writing_thread) {
+				bh->file = curlun->filp;
+				bh->amount = amount;
+				bh->file_offset = file_offset;
+				bh->state = BUF_STATE_BUSY;
+
+				spin_lock_irq(&common->lock);
+				if (common->next_buffhd_to_write == NULL)
+					common->next_buffhd_to_write = bh;
+				else
+					common->last_buffhd_to_write->
+					next_to_write = bh;
+				common->last_buffhd_to_write = bh;
+				common->num_write_bufs++;
+
+				spin_unlock_irq(&common->lock);
+
+				common->write_thread_wakeup = true;
+				wake_up(&common->fsg_write_thread_wait);
+
+				/* assume the write went well */
+				nwritten = amount;
+			} else {
+				file_offset_tmp = file_offset;
+				bh->state = BUF_STATE_EMPTY;
+				nwritten = vfs_write(curlun->filp,
+					     (char __user *)bh->buf,
+					     amount, &file_offset_tmp);
+			}
+#else /* CONFIG_SYNO_LSP_ALPINE */
 			/* Perform the write */
 			file_offset_tmp = file_offset;
 			nwritten = vfs_write(curlun->filp,
 					     (char __user *)bh->buf,
 					     amount, &file_offset_tmp);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 			VLDBG(curlun, "file write %u @ %llu -> %d\n", amount,
 			      (unsigned long long)file_offset, (int)nwritten);
 			if (signal_pending(current))
@@ -957,6 +1036,11 @@ static int do_synchronize_cache(struct fsg_common *common)
 
 	/* We ignore the requested LBA and write out all file's
 	 * dirty data buffers. */
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	wait_for_writing_thread_done(common);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
 	rc = fsg_lun_fsync_sub(curlun);
 	if (rc)
 		curlun->sense_data = SS_WRITE_ERROR;
@@ -1012,6 +1096,14 @@ static int do_verify(struct fsg_common *common)
 	/* Prepare to carry out the file verify */
 	amount_left = verification_length << curlun->blkbits;
 	file_offset = ((loff_t) lba) << curlun->blkbits;
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	if (common->num_write_bufs != 0)
+		DBG(common, "Start waiting with %d buffers in queue\n",
+				common->num_write_bufs);
+
+	wait_for_writing_thread_done(common);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 	/* Write out all the dirty buffers before invalidating them */
 	fsg_lun_fsync_sub(curlun);
@@ -1376,6 +1468,10 @@ static int do_prevent_allow(struct fsg_common *common)
 		return -EINVAL;
 	}
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	wait_for_writing_thread_done(common);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
 	if (curlun->prevent_medium_removal && !prevent)
 		fsg_lun_fsync_sub(curlun);
 	curlun->prevent_medium_removal = prevent;
@@ -1461,6 +1557,10 @@ static int throw_away_data(struct fsg_common *common)
 	struct fsg_buffhd	*bh;
 	u32			amount;
 	int			rc;
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	wait_for_writing_thread_done(common);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 	for (bh = common->next_buffhd_to_drain;
 	     bh->state != BUF_STATE_EMPTY || common->usb_amount_left > 0;
@@ -2349,6 +2449,8 @@ static void handle_exception(struct fsg_common *common)
 		}
 	}
 
+	wait_for_writing_thread_done(common);
+
 	/* Cancel all the pending transfers */
 	if (likely(common->fsg)) {
 		for (i = 0; i < fsg_num_buffers; ++i) {
@@ -2555,6 +2657,82 @@ static int fsg_main_thread(void *common_)
 	complete_and_exit(&common->thread_notifier, 0);
 }
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+static int fsg_write_thread(void *common_)
+{
+	struct fsg_common	*common = common_;
+	struct fsg_buffhd	*bh;
+	void				*buf;
+	ssize_t				nwritten;
+
+	/*
+	 * Allow the thread to be killed by a signal, but set the signal mask
+	 * to block everything but INT, TERM, KILL, and USR1.
+	 */
+	allow_signal(SIGINT);
+	allow_signal(SIGTERM);
+	allow_signal(SIGKILL);
+	allow_signal(SIGUSR1);
+
+	/* Allow the thread to be frozen */
+	set_freezable();
+
+	/*
+	 * Arrange for userspace references to be interpreted as kernel
+	 * pointers.  That way we can pass a kernel pointer to a routine
+	 * that expects a __user pointer and it will work okay.
+	 */
+	set_fs(get_ds());
+
+	/* The main loop */
+	while (common->state != FSG_STATE_TERMINATED) {
+
+		bh = common->next_buffhd_to_write;
+
+		DBG(common,
+				"Going to start tranax with %d bufs and bh: %x\n",
+				common->num_write_bufs, bh);
+
+		while (bh && bh->state == BUF_STATE_BUSY) {
+
+			nwritten = vfs_write(bh->file,
+					     (char __user *)bh->buf,
+					     bh->amount,
+					     &bh->file_offset);
+
+		    if (nwritten < bh->amount)
+				ERROR(common,
+					"write command failed. Write -%d/%d offset: %d\n",
+					nwritten, bh->amount, bh->file_offset);
+
+			spin_lock_irq(&common->lock);
+			common->next_buffhd_to_write = bh->next_to_write;
+			common->num_write_bufs--;
+			bh->next_to_write = NULL;
+			bh->state = BUF_STATE_EMPTY;
+			bh = common->next_buffhd_to_write;
+			spin_unlock_irq(&common->lock);
+		}
+
+		if (common->num_write_bufs != 0)
+			ERROR(common,
+					"[%s]: Writing error: common->num_write_bufs = %d\n",
+					__func__, common->num_write_bufs);
+
+		wakeup_thread(common);
+
+		wait_event_interruptible(common->fsg_write_thread_wait,
+				common->write_thread_wakeup);
+		common->write_thread_wakeup = false;
+
+		if (signal_pending(current))
+			flush_signals(current);
+	}
+
+	return 0;
+}
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
 /*************************** DEVICE ATTRIBUTES ***************************/
 
 static DEVICE_ATTR(ro, 0644, fsg_show_ro, fsg_store_ro);
@@ -2633,6 +2811,12 @@ static struct fsg_common *fsg_common_init(struct fsg_common *common,
 	common->ep0 = gadget->ep0;
 	common->ep0req = cdev->req;
 	common->cdev = cdev;
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	common->next_buffhd_to_write = common->last_buffhd_to_write = NULL;
+	common->num_write_bufs = 0;
+	common->use_writing_thread = true;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 	/* Maybe allocate device-global string IDs, and patch descriptors */
 	if (fsg_strings[FSG_STRING_INTERFACE].id == 0) {
@@ -2749,6 +2933,16 @@ buffhds_first_it:
 	}
 	init_completion(&common->thread_notifier);
 	init_waitqueue_head(&common->fsg_wait);
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	init_waitqueue_head(&common->fsg_write_thread_wait);
+
+	common->write_thread_task =
+		kthread_create(fsg_write_thread, common, "write-storage");
+	if (IS_ERR(common->write_thread_task)) {
+		rc = PTR_ERR(common->write_thread_task);
+		goto error_release;
+	}
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 	/* Information */
 	INFO(common, FSG_DRIVER_DESC ", version: " FSG_DRIVER_VERSION "\n");
@@ -2779,6 +2973,11 @@ buffhds_first_it:
 	DBG(common, "I/O thread pid: %d\n", task_pid_nr(common->thread_task));
 
 	wake_up_process(common->thread_task);
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	if (common->use_writing_thread)
+		wake_up_process(common->write_thread_task);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 	return common;
 

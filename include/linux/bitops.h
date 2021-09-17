@@ -5,10 +5,23 @@
 #ifdef	__KERNEL__
 #define BIT(nr)			(1UL << (nr))
 #define BIT_MASK(nr)		(1UL << ((nr) % BITS_PER_LONG))
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#define BITS_MASK(lsb, msb)	((BIT(msb - lsb + 1) - 1) << lsb)
+#endif /* CONFIG_SYNO_LSP_MONACO */
 #define BIT_WORD(nr)		((nr) / BITS_PER_LONG)
 #define BITS_PER_BYTE		8
 #define BITS_TO_LONGS(nr)	DIV_ROUND_UP(nr, BITS_PER_BYTE * sizeof(long))
 #endif
+#if defined (CONFIG_SYNO_LSP_MONACO)
+
+/*
+ * Create a contiguous bitmask starting at bit position @l and ending at
+ * position @h. For example
+ * GENMASK_ULL(39, 21) gives us the 64bit vector 0x000000ffffe00000.
+ */
+#define GENMASK(h, l)		(((U32_C(1) << ((h) - (l) + 1)) - 1) << (l))
+#define GENMASK_ULL(h, l)	(((U64_C(1) << ((h) - (l) + 1)) - 1) << (l))
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 extern unsigned int __sw_hweight8(unsigned int w);
 extern unsigned int __sw_hweight16(unsigned int w);

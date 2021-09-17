@@ -356,7 +356,11 @@ struct sock {
 	kmemcheck_bitfield_end(flags);
 	int			sk_wmem_queued;
 	gfp_t			sk_allocation;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	u32			sk_pacing_rate; /* bytes per second */
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	netdev_features_t	sk_route_caps;
 	netdev_features_t	sk_route_nocaps;
 	int			sk_gso_type;

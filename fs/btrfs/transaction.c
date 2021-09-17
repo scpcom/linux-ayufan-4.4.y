@@ -526,11 +526,7 @@ alloc_fail:
 					num_bytes);
 reserve_fail:
 	if (qgroup_reserved)
-#ifdef CONFIG_SYNO_BTRFS_FIX_QGROUP_OVERRUN
-		btrfs_qgroup_free(root, qgroup_reserved, 1);
-#else
 		btrfs_qgroup_free(root, qgroup_reserved);
-#endif
 	return ERR_PTR(ret);
 }
 
@@ -616,7 +612,6 @@ int btrfs_wait_for_commit(struct btrfs_root *root, u64 transid)
 		if (transid <= root->fs_info->last_trans_committed)
 			goto out;
 
-		ret = -EINVAL;
 		/* find specified transaction */
 		spin_lock(&root->fs_info->trans_lock);
 		list_for_each_entry(t, &root->fs_info->trans_list, list) {
@@ -632,9 +627,16 @@ int btrfs_wait_for_commit(struct btrfs_root *root, u64 transid)
 			}
 		}
 		spin_unlock(&root->fs_info->trans_lock);
-		/* The specified transaction doesn't exist */
-		if (!cur_trans)
+
+		/*
+		 * The specified transaction doesn't exist, or we
+		 * raced with btrfs_commit_transaction
+		 */
+		if (!cur_trans) {
+			if (transid > root->fs_info->last_trans_committed)
+				ret = -EINVAL;
 			goto out;
+		}
 	} else {
 		/* find newest transaction that is committing | committed */
 		spin_lock(&root->fs_info->trans_lock);
@@ -740,11 +742,7 @@ static int __btrfs_end_transaction(struct btrfs_trans_handle *trans,
 		 * the same root has to be passed here between start_transaction
 		 * and end_transaction. Subvolume quota depends on this.
 		 */
-#ifdef CONFIG_SYNO_BTRFS_FIX_QGROUP_OVERRUN
-		btrfs_qgroup_free(trans->root, trans->qgroup_reserved, 1);
-#else
 		btrfs_qgroup_free(trans->root, trans->qgroup_reserved);
-#endif
 		trans->qgroup_reserved = 0;
 	}
 
@@ -794,6 +792,9 @@ static int __btrfs_end_transaction(struct btrfs_trans_handle *trans,
 		wake_up_process(info->transaction_kthread);
 		err = -EIO;
 	}
+#ifdef CONFIG_SYNO_BTRFS_REMOVE_RAID_CRASH_QGROUP_BUG_ON
+	if (likely(!test_bit(BTRFS_FS_STATE_ERROR, &root->fs_info->fs_state)))
+#endif /* CONFIG_SYNO_BTRFS_REMOVE_RAID_CRASH_QGROUP_BUG_ON */
 	assert_qgroups_uptodate(trans);
 
 	kmem_cache_free(btrfs_trans_handle_cachep, trans);
@@ -1414,12 +1415,18 @@ static noinline int create_pending_snapshots(struct btrfs_trans_handle *trans,
 	struct list_head *head = &trans->transaction->pending_snapshots;
 	int ret = 0;
 
+#ifdef CONFIG_SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT
+	mutex_lock(&fs_info->pending_snapshots_mutex);
+#endif /* CONFIG_SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT */
 	list_for_each_entry_safe(pending, next, head, list) {
 		list_del(&pending->list);
 		ret = create_pending_snapshot(trans, fs_info, pending);
 		if (ret)
 			break;
 	}
+#ifdef CONFIG_SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT
+	mutex_unlock(&fs_info->pending_snapshots_mutex);
+#endif /* CONFIG_SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT */
 	return ret;
 }
 
@@ -1651,6 +1658,10 @@ static inline int btrfs_start_delalloc_flush(struct btrfs_fs_info *fs_info)
 {
 	if (btrfs_test_opt(fs_info->tree_root, FLUSHONCOMMIT))
 		return btrfs_start_delalloc_roots(fs_info, 1, -1);
+#ifdef CONFIG_SYNO_BTRFS_FLUSHONCOMMIT_THRESHOLD
+	else if (fs_info->delalloc_inodes_nr > fs_info->flushoncommit_threshold)
+		return btrfs_start_delalloc_roots(fs_info, 1, -1);
+#endif
 	return 0;
 }
 
@@ -1658,6 +1669,11 @@ static inline void btrfs_wait_delalloc_flush(struct btrfs_fs_info *fs_info)
 {
 	if (btrfs_test_opt(fs_info->tree_root, FLUSHONCOMMIT))
 		btrfs_wait_ordered_roots(fs_info, -1);
+#ifdef CONFIG_SYNO_BTRFS_FLUSHONCOMMIT_THRESHOLD
+	else if (fs_info->ordered_extent_nr > fs_info->flushoncommit_threshold) {
+		btrfs_wait_ordered_roots(fs_info, -1);
+	}
+#endif
 }
 
 int btrfs_commit_transaction(struct btrfs_trans_handle *trans,
@@ -1693,11 +1709,7 @@ int btrfs_commit_transaction(struct btrfs_trans_handle *trans,
 	btrfs_trans_release_metadata(trans, root);
 	trans->block_rsv = NULL;
 	if (trans->qgroup_reserved) {
-#ifdef CONFIG_SYNO_BTRFS_FIX_QGROUP_OVERRUN
-		btrfs_qgroup_free(root, trans->qgroup_reserved, 1);
-#else
 		btrfs_qgroup_free(root, trans->qgroup_reserved);
-#endif
 		trans->qgroup_reserved = 0;
 	}
 
@@ -1987,11 +1999,7 @@ cleanup_transaction:
 	btrfs_trans_release_metadata(trans, root);
 	trans->block_rsv = NULL;
 	if (trans->qgroup_reserved) {
-#ifdef CONFIG_SYNO_BTRFS_FIX_QGROUP_OVERRUN
-		btrfs_qgroup_free(root, trans->qgroup_reserved, 1);
-#else
 		btrfs_qgroup_free(root, trans->qgroup_reserved);
-#endif
 		trans->qgroup_reserved = 0;
 	}
 	btrfs_warn(root->fs_info, "Skipping commit of aborted transaction.");

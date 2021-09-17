@@ -58,6 +58,9 @@
 #include <linux/usb/hcd.h>
 #include <linux/mutex.h>
 #include <linux/uaccess.h>
+#if defined(CONFIG_SYNO_ARMADA)
+#include <linux/synobios.h>
+#endif /* CONFIG_SYNO_ARMADA */
 
 #include "usb.h"
 
@@ -497,6 +500,18 @@ int blIsUSBDeviceAtFrontPort(struct usb_device *usbdev)
 	if(usbdev && usbdev->bus) {
 		memset(buf, 0, sizeof(buf));
 		sprintf(buf, "%s-%s", usbdev->bus->bus_name, usbdev->devpath);
+#if defined(CONFIG_SYNO_ARMADA)
+		if (syno_is_hw_version(HW_DS216)) {
+			if(!strcmp(buf,"f1058000.usb-1")) {
+			return 1;
+			}
+		}
+#endif
+#if defined(CONFIG_SYNO_BRASWELL)
+		if(!strcmp(buf,"0000:00:14.0-2")) {
+			return 1;
+		}
+#endif /* CONFIG_SYNO_BRASWELL */
 #if defined(CONFIG_SYNO_X86)
 #if defined(CONFIG_ARCH_GEN3)
 		if(!strcmp(buf,"0000:01:0d.0-1")) {

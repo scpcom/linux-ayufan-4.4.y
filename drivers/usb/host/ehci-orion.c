@@ -24,8 +24,13 @@
 
 #include "ehci.h"
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+#define rdl(off)	readl_relaxed(hcd->regs + (off))
+#define wrl(off, val)	writel_relaxed((val), hcd->regs + (off))
+#else /* CONFIG_SYNO_LSP_ARMADA */
 #define rdl(off)	__raw_readl(hcd->regs + (off))
 #define wrl(off, val)	__raw_writel((val), hcd->regs + (off))
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 #define USB_CMD			0x140
 #define USB_MODE		0x1a8
@@ -45,6 +50,10 @@
 static const char hcd_name[] = "ehci-orion";
 
 static struct hc_driver __read_mostly ehci_orion_hc_driver;
+
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+static u32 usb_save[(USB_IPG - USB_CAUSE) + (USB_PHY_TST_GRP_CTRL - USB_PHY_PWR_CTRL)];
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 /*
  * Implement Orion USB controller specification guidelines
@@ -148,6 +157,10 @@ static int ehci_orion_drv_probe(struct platform_device *pdev)
 	void __iomem *regs;
 	int irq, err;
 	enum orion_ehci_phy_ver phy_version;
+#if defined (CONFIG_SYNO_USB_POWER_RESET)
+	struct device_node	*node = pdev->dev.of_node;
+	u32 vbus_gpio_pin = 0;
+#endif /* CONFIG_SYNO_USB_POWER_RESET */
 
 	if (usb_disabled())
 		return -ENODEV;
@@ -214,6 +227,27 @@ static int ehci_orion_drv_probe(struct platform_device *pdev)
 		goto err3;
 	}
 
+#if defined (CONFIG_SYNO_USB_POWER_RESET)
+	if (node) {
+		if (of_property_read_bool(node, "power-control-capable")) {
+			hcd->power_control_support = 1;
+		} else {
+			hcd->power_control_support = 0;
+		}
+		if (of_property_read_bool(node, "vbus-gpio")) {
+			of_property_read_u32(node, "vbus-gpio", &vbus_gpio_pin);
+			/* hcd->vbus_gpio_pin' is an integer, but vbus_gpio_pin is
+			 * an unsigned integer. It should be safe because it's enough
+			 * for gpio number.
+			 */
+			hcd->vbus_gpio_pin = vbus_gpio_pin;
+		} else {
+			hcd->vbus_gpio_pin = -1;
+			dev_warn(&pdev->dev, "failed to get Vbus gpio\n");
+		}
+	}
+#endif /* CONFIG_SYNO_USB_POWER_RESET */
+
 	hcd->rsrc_start = res->start;
 	hcd->rsrc_len = resource_size(res);
 	hcd->regs = regs;
@@ -248,7 +282,10 @@ static int ehci_orion_drv_probe(struct platform_device *pdev)
 	default:
 		printk(KERN_WARNING "Orion ehci -USB phy version isn't supported.\n");
 	}
-
+#if defined (CONFIG_SYNO_USB_POWER_RESET)
+	dev_info(&pdev->dev, "USB2 Vbus gpio %d\n", hcd->vbus_gpio_pin);
+	dev_info(&pdev->dev, "power control %s\n", hcd->power_control_support ? "enabled" : "disabled");
+#endif /* CONFIG_SYNO_USB_POWER_RESET */
 	err = usb_add_hcd(hcd, irq, IRQF_SHARED);
 	if (err)
 		goto err4;
@@ -287,8 +324,103 @@ static int ehci_orion_drv_remove(struct platform_device *pdev)
 		clk_disable_unprepare(clk);
 		clk_put(clk);
 	}
+
 	return 0;
 }
+
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+static int ehci_orion_drv_suspend(struct platform_device *pdev, pm_message_t state)
+{
+	struct usb_hcd *hcd = platform_get_drvdata(pdev);
+
+	int addr, i;
+
+	for (addr = USB_CAUSE, i = 0; addr <= USB_IPG; addr += 0x4, i++)
+		usb_save[i] = readl_relaxed(hcd->regs + addr);
+
+	for (addr = USB_PHY_PWR_CTRL; addr <= USB_PHY_TST_GRP_CTRL; addr += 0x4, i++)
+		usb_save[i] = readl_relaxed(hcd->regs + addr);
+
+	return 0;
+}
+
+#define MV_USB_CORE_CMD_RESET_BIT           1
+#define MV_USB_CORE_CMD_RESET_MASK          (1 << MV_USB_CORE_CMD_RESET_BIT)
+#define MV_USB_CORE_MODE_OFFSET                 0
+#define MV_USB_CORE_MODE_MASK                   (3 << MV_USB_CORE_MODE_OFFSET)
+#define MV_USB_CORE_MODE_HOST                   (3 << MV_USB_CORE_MODE_OFFSET)
+#define MV_USB_CORE_MODE_DEVICE                 (2 << MV_USB_CORE_MODE_OFFSET)
+#define MV_USB_CORE_CMD_RUN_BIT             0
+#define MV_USB_CORE_CMD_RUN_MASK            (1 << MV_USB_CORE_CMD_RUN_BIT)
+
+static int ehci_orion_drv_resume(struct platform_device *pdev)
+{
+	struct usb_hcd *hcd = platform_get_drvdata(pdev);
+	int addr, regVal, i;
+
+	for (addr = USB_CAUSE, i = 0; addr <= USB_IPG; addr += 0x4, i++)
+		writel_relaxed(usb_save[i], hcd->regs + addr);
+
+	for (addr = USB_PHY_PWR_CTRL; addr <= USB_PHY_TST_GRP_CTRL; addr += 0x4, i++)
+		writel_relaxed(usb_save[i], hcd->regs + addr);
+
+	/* Clear Interrupt Cause and Mask registers */
+	writel_relaxed(0, hcd->regs + 0x310);
+	writel_relaxed(0, hcd->regs + 0x314);
+
+	/* Reset controller */
+	regVal = readl_relaxed(hcd->regs + 0x140);
+	writel_relaxed(regVal | MV_USB_CORE_CMD_RESET_MASK, hcd->regs + 0x140);
+	while (readl_relaxed(hcd->regs + 0x140) & MV_USB_CORE_CMD_RESET_MASK)
+		;
+
+	/* Set Mode register (Stop and Reset USB Core before) */
+	/* Stop the controller */
+	regVal = readl_relaxed(hcd->regs + 0x140);
+	regVal &= ~MV_USB_CORE_CMD_RUN_MASK;
+	writel_relaxed(regVal, hcd->regs + 0x140);
+
+	/* Reset the controller to get default values */
+	regVal = readl_relaxed(hcd->regs + 0x140);
+	regVal |= MV_USB_CORE_CMD_RESET_MASK;
+	writel_relaxed(regVal, hcd->regs + 0x140);
+
+	/* Wait for the controller reset to complete */
+	do {
+		regVal = readl_relaxed(hcd->regs + 0x140);
+	} while (regVal & MV_USB_CORE_CMD_RESET_MASK);
+
+	/* Set USB_MODE register */
+	regVal = MV_USB_CORE_MODE_HOST;
+	writel_relaxed(regVal, hcd->regs + 0x1A8);
+
+	return 0;
+}
+
+#if defined(CONFIG_SYNO_ARMADA)
+static void ehci_orion_drv_shutdown(struct platform_device *pdev)
+#else /* CONFIG_SYNO_ARMADA */
+static int ehci_orion_drv_shutdown(struct platform_device *pdev)
+#endif /* CONFIG_SYNO_ARMADA */
+{
+	struct usb_hcd *hcd = platform_get_drvdata(pdev);
+	static void __iomem *usb_pwr_ctrl_base;
+	struct clk *clk;
+
+	usb_hcd_platform_shutdown(pdev);
+
+	usb_pwr_ctrl_base = hcd->regs + USB_PHY_PWR_CTRL;
+	BUG_ON(!usb_pwr_ctrl_base);
+	/* Power Down & PLL Power down */
+	writel((readl(usb_pwr_ctrl_base) & ~(BIT(0) | BIT(1))), usb_pwr_ctrl_base);
+
+	clk = clk_get(&pdev->dev, NULL);
+	if (!IS_ERR(clk)) {
+		clk_disable_unprepare(clk);
+		clk_put(clk);
+	}
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 static const struct of_device_id ehci_orion_dt_ids[] = {
 	{ .compatible = "marvell,orion-ehci", },
@@ -299,7 +431,15 @@ MODULE_DEVICE_TABLE(of, ehci_orion_dt_ids);
 static struct platform_driver ehci_orion_driver = {
 	.probe		= ehci_orion_drv_probe,
 	.remove		= ehci_orion_drv_remove,
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+#ifdef CONFIG_PM
+	.suspend        = ehci_orion_drv_suspend,
+	.resume         = ehci_orion_drv_resume,
+#endif
+	.shutdown	= ehci_orion_drv_shutdown,
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	.shutdown	= usb_hcd_platform_shutdown,
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	.driver = {
 		.name	= "orion-ehci",
 		.owner  = THIS_MODULE,

@@ -29,6 +29,9 @@ struct cpu {
 extern int register_cpu(struct cpu *cpu, int num);
 extern struct device *get_cpu_device(unsigned cpu);
 extern bool cpu_is_hotpluggable(unsigned cpu);
+#if defined(CONFIG_SYNO_LSP_MONACO_SDK2_15_4) || defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+extern bool arch_match_cpu_phys_id(int cpu, u64 phys_id);
+#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 || CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
 extern int cpu_add_dev_attr(struct device_attribute *attr);
 extern void cpu_remove_dev_attr(struct device_attribute *attr);

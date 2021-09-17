@@ -33,7 +33,7 @@ my %ignore_type = ();
 my @ignore = ();
 my $help = 0;
 my $configuration_file = ".checkpatch.conf";
-my $max_line_length = 80;
+my $max_line_length = 120;
 
 sub help {
 	my ($exitcode) = @_;
@@ -1783,7 +1783,8 @@ sub process {
 		    $rawline !~ /^.\s*\*\s*\@$Ident\s/ &&
 		    !($line =~ /^\+\s*$logFunctions\s*\(\s*(?:(KERN_\S+\s*|[^"]*))?"[X\t]*"\s*(?:|,|\)\s*;)\s*$/ ||
 		    $line =~ /^\+\s*"[^"]*"\s*(?:\s*|,|\)\s*;)\s*$/) &&
-		    $length > $max_line_length)
+		    $length > $max_line_length &&
+		    !($realfile =~ /sysfs/))
 		{
 			WARN("LONG_LINE",
 			     "line over $max_line_length characters\n" . $herecurr);
@@ -2395,10 +2396,10 @@ sub process {
 # 			$clean = 0;
 # 		}
 
-		if ($line =~ /\bLINUX_VERSION_CODE\b/) {
-			WARN("LINUX_VERSION_CODE",
-			     "LINUX_VERSION_CODE should be avoided, code should be for the version to which it is merged\n" . $herecurr);
-		}
+#		if ($line =~ /\bLINUX_VERSION_CODE\b/) {
+#			WARN("LINUX_VERSION_CODE",
+#			     "LINUX_VERSION_CODE should be avoided, code should be for the version to which it is merged\n" . $herecurr);
+#		}
 
 # check for uses of printk_ratelimit
 		if ($line =~ /\bprintk_ratelimit\s*\(/) {
@@ -2931,19 +2932,6 @@ sub process {
 			if ($s =~ /^\s*;/) {
 				ERROR("WHILE_AFTER_BRACE",
 				      "while should follow close brace '}'\n" . $hereprev);
-			}
-		}
-
-#CamelCase
-		while ($line =~ m{($Constant|$Lval)}g) {
-			my $var = $1;
-			if ($var !~ /$Constant/ &&
-			    $var =~ /[A-Z]\w*[a-z]|[a-z]\w*[A-Z]/ &&
-			    $var !~ /"^(?:Clear|Set|TestClear|TestSet|)Page[A-Z]/ &&
-			    !defined $camelcase{$var}) {
-				$camelcase{$var} = 1;
-				WARN("CAMELCASE",
-				     "Avoid CamelCase: <$var>\n" . $herecurr);
 			}
 		}
 

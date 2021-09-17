@@ -16,7 +16,11 @@
 
 #include <linux/types.h>
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#define COMMAND_LINE_SIZE 2048
+#else /* CONFIG_SYNO_LSP_MONACO */
 #define COMMAND_LINE_SIZE 1024
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 /* The list ends with an ATAG_NONE node. */
 #define ATAG_NONE	0x00000000

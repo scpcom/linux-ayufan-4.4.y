@@ -154,6 +154,26 @@ static inline int irq_balancing_disabled(unsigned int irq)
 	return desc->status_use_accessors & IRQ_NO_BALANCING_MASK;
 }
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+static inline int irq_is_per_cpu(unsigned int irq)
+{
+	struct irq_desc *desc;
+
+	desc = irq_to_desc(irq);
+	return desc->status_use_accessors & IRQ_PER_CPU;
+}
+#endif /* CONFIG_SYNO_LSP_MONACO */
+
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+static inline int irq_is_percpu(unsigned int irq)
+{
+	struct irq_desc *desc;
+
+	desc = irq_to_desc(irq);
+	return desc->status_use_accessors & IRQ_PER_CPU;
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
 static inline void
 irq_set_lockdep_class(unsigned int irq, struct lock_class_key *class)
 {

@@ -1742,7 +1742,11 @@ int write_cache_pages(struct address_space *mapping,
 			cycled = 1;
 		else
 			cycled = 0;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+		end = PGOFF_MAX;
+#else /* CONFIG_SYNO_LSP_ALPINE */
 		end = -1;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	} else {
 		index = wbc->range_start >> PAGE_CACHE_SHIFT;
 		end = wbc->range_end >> PAGE_CACHE_SHIFT;

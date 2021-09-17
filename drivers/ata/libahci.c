@@ -43,6 +43,9 @@
 #include <linux/device.h>
 #include <scsi/scsi_host.h>
 #include <scsi/scsi_cmnd.h>
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#include <linux/gpio.h>
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 #ifdef CONFIG_SYNO_ATA_AHCI_LED_SGPIO
 #include <scsi/scsi_device.h>
 #endif /* CONFIG_SYNO_ATA_AHCI_LED_SGPIO */
@@ -294,9 +297,6 @@ struct device_attribute *ahci_sdev_attrs[] = {
 	&dev_attr_sw_locate,
 	&dev_attr_sw_fault,
 #endif /* CONFIG_SYNO_ATA_AHCI_LED_SGPIO */
-#ifdef CONFIG_SYNO_CUSTOM_SCMD_TIMEOUT
-	&dev_attr_syno_scmd_min_timeout,
-#endif /* CONFIG_SYNO_CUSTOM_SCMD_TIMEOUT */
 	NULL
 };
 EXPORT_SYMBOL_GPL(ahci_sdev_attrs);
@@ -329,6 +329,9 @@ struct ata_port_operations ahci_ops = {
 	.em_store		= ahci_led_store,
 	.sw_activity_show	= ahci_activity_show,
 	.sw_activity_store	= ahci_activity_store,
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	.transmit_led_message	= ahci_transmit_led_message,
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 #ifdef CONFIG_PM
 	.port_suspend		= ahci_port_suspend,
 	.port_resume		= ahci_port_resume,
@@ -913,13 +916,16 @@ static int syno_need_ahci_software_activity(struct ata_port *ap)
 	struct pci_dev *pdev = NULL;
 	int ret = 0;
 
-	if (syno_is_hw_version(HW_DS2415p)) {
+	/*These Avoton models do not need SW ACT*/
+	if (syno_is_hw_version(HW_DS2415p) || syno_is_hw_version(HW_RS2416p) || syno_is_hw_version(HW_RS2416rpp)) {
 		goto END;
 	}
+
 	if (ap != NULL) {
 		pdev = to_pci_dev(ap->dev);
 		if (pdev != NULL && pdev->vendor == 0x8086) {
 			switch (pdev->device) {
+				/* Avoton internal SATA chip */
 				case 0x1f22:
 				case 0x1f32:
 					ret = 1;
@@ -941,6 +947,60 @@ static void syno_sw_activity(struct ata_port *ap)
 	}
 	syno_ledtrig_active_set(gpGreenLedMap[ap->syno_disk_index]);		
 }
+
+/**
+ * This function is used for AHCI software activity led,
+ *
+ * hostnum is scsi_host index
+ */
+int syno_ahci_disk_led_enable(const unsigned short hostnum, const int iValue)
+{
+	struct Scsi_Host *shost = scsi_host_lookup(hostnum);
+	struct ata_port *ap = NULL;
+	int ret = -EINVAL;
+	struct ahci_port_priv *pp = NULL;
+	struct ahci_em_priv *emp = NULL;
+	struct ata_link *link = NULL;
+	unsigned long flags;
+
+	if (NULL == shost) {
+		goto END;
+	}
+
+	if (NULL == (ap = ata_shost_to_port(shost))) {
+		goto END;
+	}
+
+	// del old timer
+	pp = ap->private_data;
+	spin_lock_irqsave(ap->lock, flags);
+	ata_for_each_link(link, ap, EDGE) {
+		emp = &pp->em_priv[link->pmp];
+		emp->saved_activity = emp->activity = 0;
+		del_timer(&emp->timer);
+	}
+
+	if (iValue) {
+		ap->flags |= ATA_FLAG_SW_ACTIVITY;
+		ata_for_each_link(link, ap, EDGE) {
+			ahci_init_sw_activity(link);
+		}
+	} else {
+		ap->flags &= ~ATA_FLAG_SW_ACTIVITY;
+		ata_for_each_link(link, ap, EDGE) {
+			link->flags &= ~ATA_LFLAG_SW_ACTIVITY;
+		}
+	}
+	spin_unlock_irqrestore(ap->lock, flags);
+	ret = 0;
+
+END:
+	if (shost) {
+		scsi_host_put(shost);
+	}
+	return ret;
+}
+EXPORT_SYMBOL(syno_ahci_disk_led_enable);
 #endif /* CONFIG_SYNO_AHCI_SOFTWARE_ACITIVITY */
 
 static void ahci_start_port(struct ata_port *ap)
@@ -966,7 +1026,11 @@ static void ahci_start_port(struct ata_port *ap)
 
 			/* EM Transmit bit maybe busy during init */
 			for (i = 0; i < EM_MAX_RETRY; i++) {
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+				rc = ap->ops->transmit_led_message(ap,
+#else /* CONFIG_SYNO_LSP_ALPINE */
 				rc = ahci_transmit_led_message(ap,
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 							       emp->led_state,
 							       4);
 				if (rc == -EBUSY)
@@ -981,6 +1045,10 @@ static void ahci_start_port(struct ata_port *ap)
 	if (syno_need_ahci_software_activity(ap)) {
 		ap->flags |= ATA_FLAG_SW_ACTIVITY;
 	}
+	/* monaco platform force inable sw activity */
+#if defined(CONFIG_SYNO_MONACO)
+	ap->flags |= ATA_FLAG_SW_ACTIVITY;
+#endif /* CONFIG_SYNO_MONACO */
 #endif /* CONFIG_SYNO_AHCI_SOFTWARE_ACITIVITY */
 
 	if (ap->flags & ATA_FLAG_SW_ACTIVITY)
@@ -1188,11 +1256,21 @@ static void ahci_sw_activity_blink(unsigned long arg)
 	} else {
 		/* switch to idle */
 		led_message &= ~EM_MSG_LED_VALUE_ACTIVITY;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+		if ((ata_phys_link_online(link)) || (emp->blink_policy == BLINK_OFF))
+			led_message |= (1 << 16);
+		mod_timer(&emp->timer, jiffies + msecs_to_jiffies(500));
+#else /* CONFIG_SYNO_LSP_ALPINE */
 		if (emp->blink_policy == BLINK_OFF)
 			led_message |= (1 << 16);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	}
 	spin_unlock_irqrestore(ap->lock, flags);
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	ap->ops->transmit_led_message(ap, led_message, 4);
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	ahci_transmit_led_message(ap, led_message, 4);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 #endif /* CONFIG_SYNO_AHCI_SOFTWARE_ACITIVITY */
 }
 
@@ -1204,6 +1282,9 @@ static void ahci_init_sw_activity(struct ata_link *link)
 
 	/* init activity stats, setup timer */
 	emp->saved_activity = emp->activity = 0;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	emp->blink_policy = BLINK_ON;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	setup_timer(&emp->timer, ahci_sw_activity_blink, (unsigned long)link);
 
 	/* check our blink policy and set flag for link if it's enabled */
@@ -1228,6 +1309,42 @@ int ahci_reset_em(struct ata_host *host)
 	return 0;
 }
 EXPORT_SYMBOL_GPL(ahci_reset_em);
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+ssize_t al_ahci_transmit_led_message(struct ata_port *ap, u32 state,
+					    ssize_t size)
+{
+	struct ahci_host_priv *hpriv = ap->host->private_data;
+	struct ahci_port_priv *pp = ap->private_data;
+	unsigned long flags;
+	int led_val = 0;
+	int pmp;
+	struct ahci_em_priv *emp;
+
+	/* get the slot number from the message */
+	pmp = (state & EM_MSG_LED_PMP_SLOT) >> 8;
+	if (pmp < EM_MAX_SLOTS)
+		emp = &pp->em_priv[pmp];
+	else
+		return -EINVAL;
+
+	if (hpriv->led_gpio[ap->port_no] == -1)
+		return -EINVAL;
+
+	spin_lock_irqsave(&ap->host->lock, flags);
+
+	if(state & EM_MSG_LED_VALUE_ON)
+		led_val = 1;
+
+	gpio_set_value(hpriv->led_gpio[ap->port_no], led_val);
+
+	/* save off new led state for port/slot */
+	emp->led_state = state;
+
+	spin_unlock_irqrestore(&ap->host->lock, flags);
+	return size;
+}
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 static ssize_t ahci_transmit_led_message(struct ata_port *ap, u32 state,
 					ssize_t size)
@@ -1325,7 +1442,11 @@ static ssize_t ahci_led_store(struct ata_port *ap, const char *buf,
 	if (emp->blink_policy)
 		state &= ~EM_MSG_LED_VALUE_ACTIVITY;
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	return ap->ops->transmit_led_message(ap, state, size);
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	return ahci_transmit_led_message(ap, state, size);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 }
 
 static ssize_t ahci_activity_store(struct ata_device *dev, enum sw_activity val)
@@ -1344,7 +1465,11 @@ static ssize_t ahci_activity_store(struct ata_device *dev, enum sw_activity val)
 		/* set the LED to OFF */
 		port_led_state &= EM_MSG_LED_VALUE_OFF;
 		port_led_state |= (ap->port_no | (link->pmp << 8));
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+		ap->ops->transmit_led_message(ap, port_led_state, 4);
+#else /* CONFIG_SYNO_LSP_ALPINE */
 		ahci_transmit_led_message(ap, port_led_state, 4);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	} else {
 		link->flags |= ATA_LFLAG_SW_ACTIVITY;
 		if (val == BLINK_OFF) {
@@ -1352,7 +1477,11 @@ static ssize_t ahci_activity_store(struct ata_device *dev, enum sw_activity val)
 			port_led_state &= EM_MSG_LED_VALUE_OFF;
 			port_led_state |= (ap->port_no | (link->pmp << 8));
 			port_led_state |= EM_MSG_LED_VALUE_ON; /* check this */
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+			ap->ops->transmit_led_message(ap, port_led_state, 4);
+#else /* CONFIG_SYNO_LSP_ALPINE */
 			ahci_transmit_led_message(ap, port_led_state, 4);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 		}
 	}
 	emp->blink_policy = val;
@@ -1816,6 +1945,18 @@ int sata_syno_ahci_defer_cmd(struct ata_queued_cmd *qc)
 EXPORT_SYMBOL_GPL(sata_syno_ahci_defer_cmd);
 #endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
 
+#ifdef CONFIG_SYNO_AHCI_PMP_SII3x26_DEFER_CMD
+int ahci_syno_pmp_3x26_qc_defer(struct ata_queued_cmd *qc)
+{
+	struct ata_port *ap = qc->ap;
+	if (!sata_pmp_attached(ap))
+		return ata_std_qc_defer(qc);
+	else
+		return sata_syno_ahci_defer_cmd(qc);
+}
+EXPORT_SYMBOL_GPL(ahci_syno_pmp_3x26_qc_defer);
+#endif
+
 static int ahci_pmp_qc_defer(struct ata_queued_cmd *qc)
 {
 	struct ata_port *ap = qc->ap;
@@ -1824,11 +1965,7 @@ static int ahci_pmp_qc_defer(struct ata_queued_cmd *qc)
 	if (!sata_pmp_attached(ap) || pp->fbs_enabled)
 		return ata_std_qc_defer(qc);
 	else
-#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
-		return sata_syno_ahci_defer_cmd(qc);
-#else
 		return sata_pmp_qc_defer_cmd_switch(qc);
-#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
 }
 
 static void ahci_qc_prep(struct ata_queued_cmd *qc)
@@ -2145,6 +2282,10 @@ void ahci_hw_port_interrupt(struct ata_port *ap)
 
 	pp->intr_status |= status;
 }
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+EXPORT_SYMBOL_GPL(ahci_hw_port_interrupt);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 irqreturn_t ahci_hw_interrupt(int irq, void *dev_instance)
 {

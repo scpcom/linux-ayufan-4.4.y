@@ -54,6 +54,21 @@
 #include "gadget.h"
 #include "io.h"
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#ifdef CONFIG_USB_DWC3_AL_RMN_2648
+#include <linux/of.h>
+#include <mach/alpine_machine.h>
+#include "al_hal/al_hal_common.h"
+#include "al_hal/al_hal_serdes_regs.h"
+#endif
+
+#ifdef CONFIG_USB_DWC3_AL_VBUS_GPIO
+#include <linux/irq.h>
+#include <linux/of_gpio.h>
+#include "linux/workqueue.h"
+#endif
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
 /**
  * dwc3_gadget_set_test_mode - Enables USB2 Test Modes
  * @dwc: pointer to our context structure
@@ -1058,6 +1073,9 @@ static int __dwc3_gadget_ep_queue(struct dwc3_ep *dep, struct dwc3_request *req)
 	req->direction		= dep->direction;
 	req->epnum		= dep->number;
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	/*
 	 * We only add to our list of requests now and
 	 * start consuming the list once we get XferNotReady
@@ -1070,6 +1088,7 @@ static int __dwc3_gadget_ep_queue(struct dwc3_ep *dep, struct dwc3_request *req)
 	 * This will also avoid Host cancelling URBs due to too
 	 * many NAKs.
 	 */
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	ret = usb_gadget_map_request(&dwc->gadget, &req->request,
 			dep->direction);
 	if (ret)
@@ -1126,6 +1145,15 @@ static int __dwc3_gadget_ep_queue(struct dwc3_ep *dep, struct dwc3_request *req)
 					dep->name);
 		return ret;
 	}
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	ret = __dwc3_gadget_kick_transfer(dep, 0, 1);
+	if (ret && ret != -EBUSY) {
+		dev_dbg(dwc->dev, "%s: failed to kick transfers\n",
+				dep->name);
+		return ret;
+	}
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 	return 0;
 }
@@ -1909,6 +1937,9 @@ static void dwc3_endpoint_interrupt(struct dwc3 *dwc,
 {
 	struct dwc3_ep		*dep;
 	u8			epnum = event->endpoint_number;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	int ret;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 	dep = dwc->eps[epnum];
 
@@ -1934,6 +1965,13 @@ static void dwc3_endpoint_interrupt(struct dwc3 *dwc,
 		}
 
 		dwc3_endpoint_transfer_complete(dwc, dep, event, 1);
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+		ret = __dwc3_gadget_kick_transfer(dep, 0, 1);
+		if (!ret || ret == -EBUSY)
+			dev_dbg(dwc->dev, "%s: failed to kick transfers\n",
+					dep->name);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 		break;
 	case DWC3_DEPEVT_XFERINPROGRESS:
 		if (!usb_endpoint_xfer_isoc(dep->endpoint.desc)) {
@@ -1943,6 +1981,15 @@ static void dwc3_endpoint_interrupt(struct dwc3 *dwc,
 		}
 
 		dwc3_endpoint_transfer_complete(dwc, dep, event, 0);
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+		ret = __dwc3_gadget_kick_transfer(dep, 0, 0);
+		if (!ret || ret == -EBUSY) {
+			dev_dbg(dwc->dev, "%s: failed to kick transfers\n",
+					dep->name);
+			return;
+		}
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 		break;
 	case DWC3_DEPEVT_XFERNOTREADY:
 		if (usb_endpoint_xfer_isoc(dep->endpoint.desc)) {
@@ -2355,6 +2402,186 @@ static void dwc3_gadget_wakeup_interrupt(struct dwc3 *dwc)
 	dwc->gadget_driver->resume(&dwc->gadget);
 }
 
+#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_USB_DWC3_AL_RMN_2648)
+#define DWC3_GDBGLTSSM_LINK_STATE_MASK		0x03C00000
+#define DWC3_GDBGLTSSM_LINK_STATE_SHIFT		22
+#define DWC3_GDBGLTSSM_LINK_SUB_STATE_MASK	0x003C0000
+#define DWC3_GDBGLTSSM_LINK_SUB_STATE_SHIFT	18
+#define DWC3_POLLING_LFPS			2
+#define DWC3_POLLING_TSEQ			3
+#define DWC3_GDBGLTSSM_RXEQTRAIN_SHIFT		8
+
+#define SERDES_RXEQEVAL_OVERRIDE_EN_ADDR	6
+#define SERDES_RXEQEVAL_OVERRIDE_EN		(1 << 4)
+#define SERDES_RXEQEVAL_OVERRIDE_ADDR		3
+#define SERDES_RXEQEVAL_OVERRIDE_SET		(1 << 6)
+#define SERDES_TXDETECTRX_OVERRIDE_EN_ADDR	7
+#define SERDES_TXDETECTRX_OVERRIDE_EN		(1 << 5)
+#define SERDES_TXDETECTRX_OVERRIDE_ADDR		4
+
+#define AL_SRDS_REG_TYPE_PCS			1
+#define SRDS_CORE_REG_ADDR(page, type, offset)\
+	(((page) << 13) | ((type) << 12) | (offset))
+
+static inline void al_serdes_reg_write(
+	struct al_serdes_regs 		*regs_base,
+	u32				page,
+	int				type,
+	u16				offset,
+	u8				data)
+{
+	writel(SRDS_CORE_REG_ADDR(page, type, offset),
+			&regs_base->gen.reg_addr);
+
+	writel(data, &regs_base->gen.reg_data);
+}
+
+static inline void dwc3_al_rmn_2648(struct dwc3 *dwc)
+{
+	struct al_serdes_regs *serdes_regs = dwc->serdes_regs_base;
+	uint32_t gdbgltssm = dwc3_readl(dwc->regs, DWC3_GDBGLTSSM);
+	uint32_t link_sub_state, rxeqtrain;
+	bool rxeqeval_override = false;
+	bool rxeqeval_set = false;
+	bool txdetectrx_override = false;
+
+	do {
+		link_sub_state = AL_REG_FIELD_GET(gdbgltssm,
+				DWC3_GDBGLTSSM_LINK_SUB_STATE_MASK,
+				DWC3_GDBGLTSSM_LINK_SUB_STATE_SHIFT);
+		rxeqtrain = AL_REG_BIT_GET(gdbgltssm,
+				DWC3_GDBGLTSSM_RXEQTRAIN_SHIFT);
+
+		switch (link_sub_state) {
+		case DWC3_POLLING_LFPS:
+			if (!rxeqeval_override) {
+				dev_dbg(dwc->dev, "%s: rxeqeval override\n",
+						__func__);
+				al_serdes_reg_write(
+					serdes_regs,
+					dwc->serdes_lane,
+					AL_SRDS_REG_TYPE_PCS,
+					SERDES_RXEQEVAL_OVERRIDE_ADDR,
+					0);
+				al_serdes_reg_write(
+					serdes_regs,
+					dwc->serdes_lane,
+					AL_SRDS_REG_TYPE_PCS,
+					SERDES_RXEQEVAL_OVERRIDE_EN_ADDR,
+					SERDES_RXEQEVAL_OVERRIDE_EN);
+				rxeqeval_override = true;
+			}
+			if (rxeqtrain && !rxeqeval_set) {
+				dev_dbg(dwc->dev, "%s: txdetectrx override\n",
+						__func__);
+				al_serdes_reg_write(
+					serdes_regs,
+					dwc->serdes_lane,
+					AL_SRDS_REG_TYPE_PCS,
+					SERDES_TXDETECTRX_OVERRIDE_ADDR,
+					0);
+				al_serdes_reg_write(
+					serdes_regs,
+					dwc->serdes_lane,
+					AL_SRDS_REG_TYPE_PCS,
+					SERDES_TXDETECTRX_OVERRIDE_EN_ADDR,
+					SERDES_TXDETECTRX_OVERRIDE_EN);
+				txdetectrx_override = true;
+
+				dev_dbg(dwc->dev, "%s: rxeqeval set\n",
+						__func__);
+				al_serdes_reg_write(
+					serdes_regs,
+					dwc->serdes_lane,
+					AL_SRDS_REG_TYPE_PCS,
+					SERDES_RXEQEVAL_OVERRIDE_ADDR,
+					SERDES_RXEQEVAL_OVERRIDE_SET);
+				rxeqeval_set = true;
+			}
+			break;
+		case DWC3_POLLING_TSEQ:
+			if (rxeqtrain && !rxeqeval_set) {
+				dev_dbg(dwc->dev, "%s: rxeqeval set\n",
+						__func__);
+				al_serdes_reg_write(
+					serdes_regs,
+					dwc->serdes_lane,
+					AL_SRDS_REG_TYPE_PCS,
+					SERDES_RXEQEVAL_OVERRIDE_ADDR,
+					SERDES_RXEQEVAL_OVERRIDE_SET);
+				rxeqeval_set = true;
+			}
+			if (txdetectrx_override){
+				dev_dbg(dwc->dev,
+					"%s: stop txdetectrx override\n",
+						__func__);
+				al_serdes_reg_write(
+					serdes_regs,
+					dwc->serdes_lane,
+					AL_SRDS_REG_TYPE_PCS,
+					SERDES_TXDETECTRX_OVERRIDE_EN_ADDR,
+					0);
+				txdetectrx_override = false;
+			}
+			if (!rxeqtrain && rxeqeval_set) {
+				dev_dbg(dwc->dev, "%s: rxeqeval clear\n",
+						__func__);
+				al_serdes_reg_write(
+					serdes_regs,
+					dwc->serdes_lane,
+					AL_SRDS_REG_TYPE_PCS,
+					SERDES_RXEQEVAL_OVERRIDE_ADDR,
+					0);
+				rxeqeval_set = false;
+			}
+			break;
+		default:
+			if (rxeqeval_override) {
+				dev_dbg(dwc->dev,
+					"%s: stop rxeqeval override\n",
+						__func__);
+				al_serdes_reg_write(
+					serdes_regs,
+					dwc->serdes_lane,
+					AL_SRDS_REG_TYPE_PCS,
+					SERDES_RXEQEVAL_OVERRIDE_EN_ADDR,
+					0);
+				rxeqeval_override = false;
+			}
+			if (rxeqeval_set) {
+				dev_dbg(dwc->dev, "%s: rxeqeval clear\n",
+						__func__);
+				al_serdes_reg_write(
+					serdes_regs,
+					dwc->serdes_lane,
+					AL_SRDS_REG_TYPE_PCS,
+					SERDES_RXEQEVAL_OVERRIDE_ADDR,
+					0);
+				rxeqeval_set = false;
+			}
+			if (txdetectrx_override){
+				dev_dbg(dwc->dev,
+					"%s: stop txdetectrx override\n",
+						__func__);
+				al_serdes_reg_write(
+					serdes_regs,
+					dwc->serdes_lane,
+					AL_SRDS_REG_TYPE_PCS,
+					SERDES_TXDETECTRX_OVERRIDE_EN_ADDR,
+					0);
+				txdetectrx_override = false;
+			}
+			break;
+		}
+
+		gdbgltssm = dwc3_readl(dwc->regs, DWC3_GDBGLTSSM);
+	} while(AL_REG_FIELD_GET(gdbgltssm,
+			DWC3_GDBGLTSSM_LINK_STATE_MASK,
+			DWC3_GDBGLTSSM_LINK_STATE_SHIFT) ==
+					DWC3_LINK_STATE_POLL);
+}
+#endif /* CONFIG_SYNO_LSP_ALPINE && CONFIG_USB_DWC3_AL_RMN_2648 */
+
 static void dwc3_gadget_linksts_change_interrupt(struct dwc3 *dwc,
 		unsigned int evtinfo)
 {
@@ -2434,6 +2661,34 @@ static void dwc3_gadget_linksts_change_interrupt(struct dwc3 *dwc,
 		}
 	}
 
+#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_USB_DWC3_AL_RMN_2648)
+	if (next == DWC3_LINK_STATE_POLL) {
+		/*
+		 * Addressing RMN: 2648
+		 *
+		 * RMN description:
+		 * USB Serdes LFPS is sent instead of valid TSEQ seq.
+		 * The issue is caused by the fact that OCTL_PMA_TXBEACON_A
+		 * (in dualusb_4lane_32b_if_usb.v) is not updated in S_EQEVAL,
+		 * S_EQEVAL_2 and S_EQEVAL_3 states.
+		 * Thus, if S_EQEVAL is entered when OCTL_PMA_TXBEACON_A is
+		 * asserted, it'll stay asserted during the whole equalization
+		 * process.
+		 * OCTL_PMA_TXBEACON_A asserted when both TxElecIdle and
+		 * TxDetectRx PIPE signals are asserted.
+		 * S_EQEVAL is entered when RxEqEval signal is asserted in the
+		 * Serdes.
+		 *
+		 * Software flow:
+		 * Take control of TxDetectRx and RxEqEval signals in the
+		 * Serdes.
+		 * When RxEqTrain bit is set in GDBGLTSSM register,
+		 * make sure TxDetectRx is deasserted and only then assert
+		 * RxEqEval.
+		 */
+		dwc3_al_rmn_2648(dwc);
+	}
+#endif /* CONFIG_SYNO_LSP_ALPINE && CONFIG_USB_DWC3_AL_RMN_2648 */
 	dwc->link_state = next;
 
 	dev_vdbg(dwc->dev, "%s link %d\n", __func__, dwc->link_state);
@@ -2587,6 +2842,46 @@ static irqreturn_t dwc3_interrupt(int irq, void *_dwc)
 	return ret;
 }
 
+#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_USB_DWC3_AL_VBUS_GPIO)
+static void dwc3_vbus_work(struct work_struct *work)
+{
+	struct dwc3 *dwc = container_of(work, struct dwc3, vbus_work.work);
+	unsigned long flags;
+	int vbus;
+
+	spin_lock_irqsave(&dwc->lock, flags);
+
+	vbus = gpio_get_value(dwc->vbus_gpio);
+	if (vbus == dwc->vbus_active) {
+		spin_unlock_irqrestore(&dwc->lock, flags);
+		return;
+	}
+
+	dwc->vbus_active = vbus;
+
+	if (vbus) {
+		dev_dbg(dwc->dev, "%s: vbus_connect\n", __func__);
+		if (dwc->gadget_driver)
+			dwc3_gadget_run_stop(dwc, 1);
+	} else {
+		dev_dbg(dwc->dev, "%s: vbus_disconnect\n", __func__);
+		if (dwc->gadget_driver)
+			dwc3_gadget_run_stop(dwc, 0);
+	}
+
+	spin_unlock_irqrestore(&dwc->lock, flags);
+}
+
+static irqreturn_t dwc3_vbus_irq(int irq, void *data)
+{
+	struct dwc3 *dwc = data;
+
+	schedule_delayed_work(&dwc->vbus_work, msecs_to_jiffies(100));
+
+	return IRQ_HANDLED;
+}
+#endif /* CONFIG_SYNO_LSP_ALPINE && CONFIG_USB_DWC3_AL_VBUS_GPIO */
+
 /**
  * dwc3_gadget_init - Initializes gadget related registers
  * @dwc: pointer to our controller context structure
@@ -2597,6 +2892,12 @@ int dwc3_gadget_init(struct dwc3 *dwc)
 {
 	u32					reg;
 	int					ret;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(CONFIG_USB_DWC3_AL_RMN_2648) || \
+		defined(CONFIG_USB_DWC3_AL_VBUS_GPIO)
+	struct device_node			*np;
+#endif
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 	dwc->ctrl_req = dma_alloc_coherent(dwc->dev, sizeof(*dwc->ctrl_req),
 			&dwc->ctrl_req_addr, GFP_KERNEL);
@@ -2645,6 +2946,69 @@ int dwc3_gadget_init(struct dwc3 *dwc)
 	if (ret)
 		goto err4;
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#ifdef CONFIG_USB_DWC3_AL_RMN_2648
+	np = of_find_compatible_node(NULL, NULL, "annapurna-labs,al-usb");
+	if (!np) {
+		dev_err(dwc->dev, "failed to get usb data from device tree --> %d\n",
+				ret);
+		goto err5;
+	}
+
+	if (of_property_read_u32(np, "serdes-group", &dwc->serdes_group)) {
+		dev_err(dwc->dev, "failed to get serdes group --> %d\n", ret);
+		goto err5;
+	}
+
+	if (of_property_read_u32(np, "serdes-lane",  &dwc->serdes_lane)) {
+		dev_err(dwc->dev, "failed to get serdes lane --> %d\n",	ret);
+		goto err5;
+	}
+
+	dwc->serdes_regs_base = alpine_serdes_resource_get(dwc->serdes_group);
+	if (!dwc->serdes_regs_base) {
+		dev_err(dwc->dev, "failed to get serdes regs base --> %d\n",
+				ret);
+		goto err5;
+	}
+#endif
+
+#ifdef CONFIG_USB_DWC3_AL_VBUS_GPIO
+	INIT_DELAYED_WORK(&dwc->vbus_work, dwc3_vbus_work);
+
+	np = of_find_compatible_node(NULL, NULL, "annapurna-labs,al-usb");
+	dwc->vbus_gpio = of_get_named_gpio(np, "vbus-gpio", 0);
+
+	if (gpio_is_valid(dwc->vbus_gpio)) {
+		int vbus_gpio_irq = gpio_to_irq(dwc->vbus_gpio);
+		dwc->vbus_active = 0;
+
+		ret = gpio_request_one(dwc->vbus_gpio, GPIOF_DIR_IN,
+				"dwc3-vbus");
+		if (ret) {
+			dev_err(dwc->dev, "failed to request vbus gpio #%d --> %d\n",
+					dwc->vbus_gpio, ret);
+			goto err5;
+		}
+
+		irq_set_irq_type(vbus_gpio_irq, IRQ_TYPE_EDGE_BOTH);
+		if (ret) {
+			dev_err(dwc->dev, "failed to set type for vbus gpio irq #%d --> %d\n",
+					vbus_gpio_irq, ret);
+			goto err7;
+		}
+
+		ret = request_irq(vbus_gpio_irq, dwc3_vbus_irq, 0, "dwc3-vbus",
+				dwc);
+		if (ret) {
+			dev_err(dwc->dev, "failed to request vbus gpio irq #%d --> %d\n",
+					vbus_gpio_irq, ret);
+			goto err6;
+		}
+	}
+#endif
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
 	reg = dwc3_readl(dwc->regs, DWC3_DCFG);
 	reg |= DWC3_DCFG_LPM_CAP;
 	dwc3_writel(dwc->regs, DWC3_DCFG, reg);
@@ -2658,10 +3022,28 @@ int dwc3_gadget_init(struct dwc3 *dwc)
 	ret = usb_add_gadget_udc(dwc->dev, &dwc->gadget);
 	if (ret) {
 		dev_err(dwc->dev, "failed to register udc\n");
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+		goto err7;
+#else /* CONFIG_SYNO_LSP_ALPINE */
 		goto err5;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	}
 
 	return 0;
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+err7:
+#ifdef CONFIG_USB_DWC3_AL_VBUS_GPIO
+	if (gpio_is_valid(dwc->vbus_gpio))
+		free_irq(gpio_to_irq(dwc->vbus_gpio), dwc);
+#endif
+
+err6:
+#ifdef CONFIG_USB_DWC3_AL_VBUS_GPIO
+	if (gpio_is_valid(dwc->vbus_gpio))
+		gpio_free(dwc->vbus_gpio);
+#endif
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 err5:
 	dwc3_gadget_free_endpoints(dwc);
@@ -2690,6 +3072,13 @@ err0:
 void dwc3_gadget_exit(struct dwc3 *dwc)
 {
 	usb_del_gadget_udc(&dwc->gadget);
+
+#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_USB_DWC3_AL_VBUS_GPIO)
+	if (gpio_is_valid(dwc->vbus_gpio)) {
+		free_irq(gpio_to_irq(dwc->vbus_gpio), dwc);
+		gpio_free(dwc->vbus_gpio);
+	}
+#endif /* CONFIG_SYNO_LSP_ALPINE && CONFIG_USB_DWC3_AL_VBUS_GPIO */
 
 	dwc3_gadget_free_endpoints(dwc);
 

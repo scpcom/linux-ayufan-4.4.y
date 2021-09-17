@@ -443,7 +443,11 @@ static int dac33_playback_event(struct snd_soc_dapm_widget *w,
 static int dac33_get_fifo_mode(struct snd_kcontrol *kcontrol,
 			 struct snd_ctl_elem_value *ucontrol)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	struct tlv320dac33_priv *dac33 = snd_soc_codec_get_drvdata(codec);
 
 	ucontrol->value.integer.value[0] = dac33->fifo_mode;
@@ -454,7 +458,11 @@ static int dac33_get_fifo_mode(struct snd_kcontrol *kcontrol,
 static int dac33_set_fifo_mode(struct snd_kcontrol *kcontrol,
 			 struct snd_ctl_elem_value *ucontrol)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	struct tlv320dac33_priv *dac33 = snd_soc_codec_get_drvdata(codec);
 	int ret = 0;
 

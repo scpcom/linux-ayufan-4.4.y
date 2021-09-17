@@ -42,7 +42,11 @@
 	dmb
 	mov	\rscratch, #0
 	strb	\rscratch, [\rbase, \rcpu]
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	dsb	st
+#else /* CONFIG_SYNO_LSP_MONACO */
 	dsb
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	sev
 .endm
 
@@ -102,7 +106,11 @@ ENTRY(vlock_unlock)
 	dmb
 	mov	r1, #VLOCK_OWNER_NONE
 	strb	r1, [r0, #VLOCK_OWNER_OFFSET]
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	dsb	st
+#else /* CONFIG_SYNO_LSP_MONACO */
 	dsb
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	sev
 	bx	lr
 ENDPROC(vlock_unlock)

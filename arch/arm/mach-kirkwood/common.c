@@ -36,6 +36,14 @@
 #include <linux/platform_data/dma-mv_xor.h>
 #include "common.h"
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+/* These can go away once Kirkwood uses the mvebu-mbus DT binding */
+#define KIRKWOOD_MBUS_NAND_TARGET 0x01
+#define KIRKWOOD_MBUS_NAND_ATTR   0x2f
+#define KIRKWOOD_MBUS_SRAM_TARGET 0x03
+#define KIRKWOOD_MBUS_SRAM_ATTR   0x01
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
 /*****************************************************************************
  * I/O Address Mapping
  ****************************************************************************/
@@ -263,7 +271,11 @@ void __init kirkwood_clk_init(void)
 	orion_clkdev_add(NULL, MV_XOR_NAME ".1", xor1);
 	orion_clkdev_add("0", "pcie", pex0);
 	orion_clkdev_add("1", "pcie", pex1);
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	orion_clkdev_add(NULL, "mvebu-audio", audio);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	orion_clkdev_add(NULL, "kirkwood-i2s", audio);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	orion_clkdev_add(NULL, MV64XXX_I2C_CTLR_NAME ".0", runit);
 	orion_clkdev_add(NULL, MV64XXX_I2C_CTLR_NAME ".1", runit);
 
@@ -515,9 +527,13 @@ void __init kirkwood_init_early(void)
 {
 	orion_time_set_base(TIMER_VIRT_BASE);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	mvebu_mbus_init("marvell,kirkwood-mbus",
 			BRIDGE_WINS_BASE, BRIDGE_WINS_SZ,
 			DDR_WINDOW_CPU_BASE, DDR_WINDOW_CPU_SZ);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 }
 
 int kirkwood_tclk;
@@ -546,7 +562,11 @@ void __init kirkwood_timer_init(void)
 /*****************************************************************************
  * Audio
  ****************************************************************************/
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+static struct resource kirkwood_audio_resources[] = {
+#else /* CONFIG_SYNO_LSP_ARMADA */
 static struct resource kirkwood_i2s_resources[] = {
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	[0] = {
 		.start  = AUDIO_PHYS_BASE,
 		.end    = AUDIO_PHYS_BASE + SZ_16K - 1,
@@ -559,10 +579,30 @@ static struct resource kirkwood_i2s_resources[] = {
 	},
 };
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+static struct kirkwood_asoc_platform_data kirkwood_audio_data = {
+#else /* CONFIG_SYNO_LSP_ARMADA */
 static struct kirkwood_asoc_platform_data kirkwood_i2s_data = {
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	.burst       = 128,
 };
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+static struct platform_device kirkwood_audio_device = {
+	.name		= "mvebu-audio",
+	.id		= -1,
+	.num_resources	= ARRAY_SIZE(kirkwood_audio_resources),
+	.resource	= kirkwood_audio_resources,
+	.dev		= {
+		.platform_data	= &kirkwood_audio_data,
+	},
+};
+
+void __init kirkwood_audio_init(void)
+{
+	platform_device_register(&kirkwood_audio_device);
+}
+#else /* CONFIG_SYNO_LSP_ARMADA */
 static struct platform_device kirkwood_i2s_device = {
 	.name		= "kirkwood-i2s",
 	.id		= -1,
@@ -583,6 +623,7 @@ void __init kirkwood_audio_init(void)
 	platform_device_register(&kirkwood_i2s_device);
 	platform_device_register(&kirkwood_pcm_device);
 }
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 /*****************************************************************************
  * General
@@ -635,6 +676,16 @@ char * __init kirkwood_id(void)
 
 void __init kirkwood_setup_wins(void)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	mvebu_mbus_add_window_by_id(KIRKWOOD_MBUS_NAND_TARGET,
+				    KIRKWOOD_MBUS_NAND_ATTR,
+				    KIRKWOOD_NAND_MEM_PHYS_BASE,
+				    KIRKWOOD_NAND_MEM_SIZE);
+	mvebu_mbus_add_window_by_id(KIRKWOOD_MBUS_SRAM_TARGET,
+				    KIRKWOOD_MBUS_SRAM_ATTR,
+				    KIRKWOOD_SRAM_PHYS_BASE,
+				    KIRKWOOD_SRAM_SIZE);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	/*
 	 * The PCIe windows will no longer be statically allocated
 	 * here once Kirkwood is migrated to the pci-mvebu driver.
@@ -663,6 +714,7 @@ void __init kirkwood_setup_wins(void)
 			      KIRKWOOD_NAND_MEM_SIZE);
 	mvebu_mbus_add_window("sram", KIRKWOOD_SRAM_PHYS_BASE,
 			      KIRKWOOD_SRAM_SIZE);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 }
 
 void __init kirkwood_l2_init(void)
@@ -689,6 +741,12 @@ void __init kirkwood_init(void)
 	 * up to deal with.
 	 */
 	writel(readl(CPU_CONFIG) & ~CPU_CONFIG_ERROR_PROP, CPU_CONFIG);
+
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	BUG_ON(mvebu_mbus_init("marvell,kirkwood-mbus",
+			BRIDGE_WINS_BASE, BRIDGE_WINS_SZ,
+			DDR_WINDOW_CPU_BASE, DDR_WINDOW_CPU_SZ));
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 	kirkwood_setup_wins();
 

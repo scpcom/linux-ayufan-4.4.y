@@ -141,10 +141,17 @@ struct dma_map_ops arm_dma_ops = {
 };
 EXPORT_SYMBOL(arm_dma_ops);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+void *arm_coherent_dma_alloc(struct device *dev, size_t size,
+	dma_addr_t *handle, gfp_t gfp, struct dma_attrs *attrs);
+void arm_coherent_dma_free(struct device *dev, size_t size, void *cpu_addr,
+				  dma_addr_t handle, struct dma_attrs *attrs);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 static void *arm_coherent_dma_alloc(struct device *dev, size_t size,
 	dma_addr_t *handle, gfp_t gfp, struct dma_attrs *attrs);
 static void arm_coherent_dma_free(struct device *dev, size_t size, void *cpu_addr,
 				  dma_addr_t handle, struct dma_attrs *attrs);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 struct dma_map_ops arm_coherent_dma_ops = {
 	.alloc			= arm_coherent_dma_alloc,
@@ -250,7 +257,11 @@ static void __dma_free_buffer(struct page *page, size_t size)
 
 #ifdef CONFIG_MMU
 #ifdef CONFIG_HUGETLB_PAGE
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#warning ARM Coherent DMA allocator does not (yet) support huge TLB
+#else /* CONFIG_SYNO_LSP_ALPINE */
 #error ARM Coherent DMA allocator does not (yet) support huge TLB
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 #endif
 
 static void *__alloc_from_contiguous(struct device *dev, size_t size,
@@ -298,7 +309,11 @@ static void __dma_free_remap(void *cpu_addr, size_t size)
 	vunmap(cpu_addr);
 }
 
-#define DEFAULT_DMA_COHERENT_POOL_SIZE	SZ_256K
+#ifdef CONFIG_SYNO_DMA_COHERENT_POOL_1M
+#define DEFAULT_DMA_COHERENT_POOL_SIZE SZ_1M
+#else /* CONFIG_SYNO_DMA_COHERENT_POOL_1M */
+#define DEFAULT_DMA_COHERENT_POOL_SIZE SZ_256K
+#endif /* CONFIG_SYNO_DMA_COHERENT_POOL_1M */
 
 struct dma_pool {
 	size_t size;
@@ -455,7 +470,10 @@ static void __dma_remap(struct page *page, size_t size, pgprot_t prot)
 	unsigned end = start + size;
 
 	apply_to_page_range(&init_mm, start, size, __dma_update_pte, &prot);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#else /* CONFIG_SYNO_LSP_MONACO */
 	dsb();
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	flush_tlb_kernel_range(start, end);
 }
 
@@ -696,7 +714,11 @@ void *arm_dma_alloc(struct device *dev, size_t size, dma_addr_t *handle,
 			   __builtin_return_address(0));
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+void *arm_coherent_dma_alloc(struct device *dev, size_t size,
+#else /* CONFIG_SYNO_LSP_ARMADA */
 static void *arm_coherent_dma_alloc(struct device *dev, size_t size,
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	dma_addr_t *handle, gfp_t gfp, struct dma_attrs *attrs)
 {
 	pgprot_t prot = __get_dma_pgprot(attrs, pgprot_kernel);
@@ -775,7 +797,11 @@ void arm_dma_free(struct device *dev, size_t size, void *cpu_addr,
 	__arm_dma_free(dev, size, cpu_addr, handle, attrs, false);
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+void arm_coherent_dma_free(struct device *dev, size_t size, void *cpu_addr,
+#else /* CONFIG_SYNO_LSP_ARMADA */
 static void arm_coherent_dma_free(struct device *dev, size_t size, void *cpu_addr,
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 				  dma_addr_t handle, struct dma_attrs *attrs)
 {
 	__arm_dma_free(dev, size, cpu_addr, handle, attrs, true);

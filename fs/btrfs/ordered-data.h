@@ -18,6 +18,9 @@
 
 #ifndef __BTRFS_ORDERED_DATA__
 #define __BTRFS_ORDERED_DATA__
+#if defined(CONFIG_SYNO_ALPINE)
+#include "ctree.h"
+#endif /* CONFIG_SYNO_ALPINE */
 
 /* one of these per inode */
 struct btrfs_ordered_inode_tree {

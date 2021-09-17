@@ -238,6 +238,17 @@ static void fixup_no_write_suspend(struct mtd_info *mtd)
 }
 #endif
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+static void fixup_st_m28wXX0_disable_bufferwrite(struct mtd_info *mtd)
+{
+	struct map_info *map = mtd->priv;
+	struct cfi_private *cfi = map->fldrv_priv;
+
+	printk(KERN_INFO "Using word write for ST M28WXX0 FLASH\n");
+	cfi->cfiq->BufWriteTimeoutTyp = 0;	/* Not supported */
+	cfi->cfiq->BufWriteTimeoutMax = 0;	/* Not supported */
+}
+#else /* CONFIG_SYNO_LSP_MONACO */
 static void fixup_st_m28w320ct(struct mtd_info *mtd)
 {
 	struct map_info *map = mtd->priv;
@@ -246,6 +257,7 @@ static void fixup_st_m28w320ct(struct mtd_info *mtd)
 	cfi->cfiq->BufWriteTimeoutTyp = 0;	/* Not supported */
 	cfi->cfiq->BufWriteTimeoutMax = 0;	/* Not supported */
 }
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 static void fixup_st_m28w320cb(struct mtd_info *mtd)
 {
@@ -302,11 +314,25 @@ static struct cfi_fixup cfi_fixup_table[] = {
 #ifdef CMDSET0001_DISABLE_WRITE_SUSPEND
 	{ CFI_MFR_ANY, CFI_ID_ANY, fixup_no_write_suspend },
 #endif
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	{ CFI_MFR_ST, 0x00ba, /* M28W320CT */
+		fixup_st_m28wXX0_disable_bufferwrite },
+	{ CFI_MFR_ST, 0x00bb, /* M28W320CB */ fixup_st_m28w320cb },
+	{ CFI_MFR_ST, 0x8857, fixup_st_m28wXX0_disable_bufferwrite },
+	{ CFI_MFR_ST, 0x8858, fixup_st_m28wXX0_disable_bufferwrite },
+	{ CFI_MFR_ST, 0x8859, fixup_st_m28wXX0_disable_bufferwrite },
+	{ CFI_MFR_ST, 0x880a, fixup_st_m28wXX0_disable_bufferwrite },
+	{ CFI_MFR_ST, 0x880b, fixup_st_m28wXX0_disable_bufferwrite },
+	{ CFI_MFR_ST, 0x880c, fixup_st_m28wXX0_disable_bufferwrite },
+#endif /* CONFIG_SYNO_LSP_MONACO */
 #if !FORCE_WORD_WRITE
 	{ CFI_MFR_ANY, CFI_ID_ANY, fixup_use_write_buffers },
 #endif
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#else /* CONFIG_SYNO_LSP_MONACO */
 	{ CFI_MFR_ST, 0x00ba, /* M28W320CT */ fixup_st_m28w320ct },
 	{ CFI_MFR_ST, 0x00bb, /* M28W320CB */ fixup_st_m28w320cb },
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	{ CFI_MFR_INTEL, CFI_ID_ANY, fixup_unlock_powerup_lock },
 	{ 0, 0, NULL }
 };
@@ -1207,7 +1233,12 @@ static int inval_cache_and_wait_for_operation(
 	struct cfi_private *cfi = map->fldrv_priv;
 	map_word status, status_OK = CMD(0x80);
 	int chip_state = chip->state;
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	unsigned int sleep_time, reset_timeo;
+	long int timeo;
+#else /* CONFIG_SYNO_LSP_MONACO */
 	unsigned int timeo, sleep_time, reset_timeo;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 	mutex_unlock(&chip->mutex);
 	if (inval_len)
@@ -1247,7 +1278,11 @@ static int inval_cache_and_wait_for_operation(
 			timeo = reset_timeo;
 			chip->write_suspended = 0;
 		}
+#if defined (CONFIG_SYNO_LSP_MONACO)
+		if (timeo <= 0) {
+#else /* CONFIG_SYNO_LSP_MONACO */
 		if (!timeo) {
+#endif /* CONFIG_SYNO_LSP_MONACO */
 			map_write(map, CMD(0x70), cmd_adr);
 			chip->state = FL_STATUS;
 			return -ETIME;
@@ -1914,7 +1949,12 @@ static int __xipram do_erase_oneblock(struct map_info *map, struct flchip *chip,
 			printk(KERN_ERR "%s: block erase error: (bad command sequence, status 0x%lx)\n", map->name, chipstatus);
 			ret = -EINVAL;
 		} else if (chipstatus & 0x02) {
+#if defined (CONFIG_SYNO_LSP_MONACO)
+			printk(KERN_ERR "%s: block erase error: (protection bit"
+			       " set, status 0x%lx)\n", map->name, chipstatus);
+#else /* CONFIG_SYNO_LSP_MONACO */
 			/* Protection bit set */
+#endif /* CONFIG_SYNO_LSP_MONACO */
 			ret = -EROFS;
 		} else if (chipstatus & 0x8) {
 			/* Voltage */
@@ -2062,10 +2102,17 @@ static int __xipram do_xxlock_oneblock(struct map_info *map, struct flchip *chip
 	} else
 		BUG();
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	/* Time for operation... */
+	if (extp && (extp->FeatureSupport & (1 << 5))) {
+		/* Instant Individual Block Locking supported: no delay */
+		udelay = 0;
+#else /* CONFIG_SYNO_LSP_MONACO */
 	/*
 	 * If Instant Individual Block Locking supported then no need
 	 * to delay.
 	 */
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	/*
 	 * Unlocking may take up to 1.4 seconds on some Intel flashes. So
 	 * lets use a max of 1.5 seconds (1500ms) as timeout.
@@ -2118,6 +2165,11 @@ static int cfi_intelext_lock(struct mtd_info *mtd, loff_t ofs, uint64_t len)
 
 static int cfi_intelext_unlock(struct mtd_info *mtd, loff_t ofs, uint64_t len)
 {
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	struct map_info *map = mtd->priv;
+	struct cfi_private *cfi = map->fldrv_priv;
+	struct cfi_pri_intelext *extp = cfi->cmdset_priv;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	int ret;
 
 #ifdef DEBUG_LOCK_BITS
@@ -2127,6 +2179,15 @@ static int cfi_intelext_unlock(struct mtd_info *mtd, loff_t ofs, uint64_t len)
 		ofs, len, NULL);
 #endif
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	/* 'unlock' in legacy mode will unlock entire chip, so no point
+	   in performing the operation more than once. */
+	if (extp && (extp->FeatureSupport & (1 << 3)))
+		ret = cfi_varsize_frob(mtd, do_xxlock_oneblock,
+				       ofs, mtd->erasesize,
+				       DO_XXLOCK_ONEBLOCK_UNLOCK);
+	else
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	ret = cfi_varsize_frob(mtd, do_xxlock_oneblock,
 					ofs, len, DO_XXLOCK_ONEBLOCK_UNLOCK);
 

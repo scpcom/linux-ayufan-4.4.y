@@ -7665,6 +7665,9 @@ _scsih_shutdown(struct pci_dev *pdev)
 	unsigned long flags;
 
 	ioc->remove_host = 1;
+#ifdef CONFIG_SYNO_SAS_MPT2_RESET_ON_REBOOT
+	ioc->shutdown = 1;
+#endif /* CONFIG_SYNO_SAS_MPT2_RESET_ON_REBOOT */
 	_scsih_fw_event_cleanup_queue(ioc);
 
 	spin_lock_irqsave(&ioc->fw_event_lock, flags);

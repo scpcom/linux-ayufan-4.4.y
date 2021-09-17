@@ -437,6 +437,15 @@ void __arm_iounmap(volatile void __iomem *io_addr)
 EXPORT_SYMBOL(__arm_iounmap);
 
 #ifdef CONFIG_PCI
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+static int pci_ioremap_mem_type = MT_DEVICE;
+
+void pci_ioremap_set_mem_type(int mem_type)
+{
+	pci_ioremap_mem_type = mem_type;
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
 int pci_ioremap_io(unsigned int offset, phys_addr_t phys_addr)
 {
 	BUG_ON(offset + SZ_64K > IO_SPACE_LIMIT);
@@ -444,7 +453,11 @@ int pci_ioremap_io(unsigned int offset, phys_addr_t phys_addr)
 	return ioremap_page_range(PCI_IO_VIRT_BASE + offset,
 				  PCI_IO_VIRT_BASE + offset + SZ_64K,
 				  phys_addr,
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+				  __pgprot(get_mem_type(pci_ioremap_mem_type)->prot_pte));
+#else /* CONFIG_SYNO_LSP_ARMADA */
 				  __pgprot(get_mem_type(MT_DEVICE)->prot_pte));
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 }
 EXPORT_SYMBOL_GPL(pci_ioremap_io);
 #endif

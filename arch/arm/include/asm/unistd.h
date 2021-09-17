@@ -15,7 +15,13 @@
 
 #include <uapi/asm/unistd.h>
 
+#ifdef CONFIG_SYNO_SYSTEM_CALL
+#include <asm-generic/bitsperlong.h>
+#define __NR_syscalls  (380 + 48)
+#else /* CONFIG_SYNO_SYSTEM_CALL */
 #define __NR_syscalls  (380)
+#endif /* CONFIG_SYNO_SYSTEM_CALL */
+
 #define __ARM_NR_cmpxchg		(__ARM_NR_BASE+0x00fff0)
 
 #define __ARCH_WANT_STAT64
@@ -49,5 +55,22 @@
 #define __IGNORE_fadvise64_64
 #define __IGNORE_migrate_pages
 #define __IGNORE_kcmp
+
+#ifdef CONFIG_SYNO_SYSTEM_CALL
+#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+#if BITS_PER_LONG == 32
+#define __IGNORE_SYNOCaselessStat
+#define __IGNORE_SYNOCaselessLStat
+#endif /* BITS_PER_LONG == 32 */
+#endif /* CONFIG_SYNO_FS_CASELESS_STAT */
+
+#ifdef CONFIG_SYNO_FS_STAT
+#if BITS_PER_LONG == 32
+#define __IGNORE_SYNOStat
+#define __IGNORE_SYNOFStat
+#define __IGNORE_SYNOLStat
+#endif /* BITS_PER_LONG == 32 */
+#endif /* CONFIG_SYNO_FS_STAT */
+#endif /* CONFIG_SYNO_SYSTEM_CALL */
 
 #endif /* __ASM_ARM_UNISTD_H */

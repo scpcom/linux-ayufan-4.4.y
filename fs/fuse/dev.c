@@ -785,7 +785,11 @@ static int fuse_check_page(struct page *page)
 	       1 << PG_active |
 	       1 << PG_reclaim))) {
 		printk(KERN_WARNING "fuse: trying to steal weird page\n");
+#ifdef CONFIG_SYNO_ALPINE
+		printk(KERN_WARNING "  page=%p index=%lli flags=%08lx, count=%i, mapcount=%i, mapping=%p\n", page, page->index, page->flags, page_count(page), page_mapcount(page), page->mapping);
+#else /* CONFIG_SYNO_ALPINE */
 		printk(KERN_WARNING "  page=%p index=%li flags=%08lx, count=%i, mapcount=%i, mapping=%p\n", page, page->index, page->flags, page_count(page), page_mapcount(page), page->mapping);
+#endif /* CONFIG_SYNO_ALPINE */
 		return 1;
 	}
 	return 0;

@@ -134,7 +134,11 @@ static void set_sample_period(void)
 	 * and hard thresholds) to increment before the
 	 * hardlockup detector generates a warning
 	 */
+#ifdef CONFIG_SYNO_SOFTLOCKUP_THRESH_EXTENSION
+	sample_period = (get_softlockup_thresh() / 2) * ((u64)NSEC_PER_SEC / 5);
+#else
 	sample_period = get_softlockup_thresh() * ((u64)NSEC_PER_SEC / 5);
+#endif
 }
 
 /* Commands for resetting the watchdog */

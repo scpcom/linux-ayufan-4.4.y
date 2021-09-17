@@ -618,9 +618,13 @@ static int intel_pstate_set_policy(struct cpufreq_policy *policy)
 
 static int intel_pstate_verify_policy(struct cpufreq_policy *policy)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	cpufreq_verify_within_cpu_limits(policy);
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	cpufreq_verify_within_limits(policy,
 				policy->cpuinfo.min_freq,
 				policy->cpuinfo.max_freq);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
 	if ((policy->policy != CPUFREQ_POLICY_POWERSAVE) &&
 		(policy->policy != CPUFREQ_POLICY_PERFORMANCE))
@@ -629,7 +633,11 @@ static int intel_pstate_verify_policy(struct cpufreq_policy *policy)
 	return 0;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+static int intel_pstate_cpu_exit(struct cpufreq_policy *policy)
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 static int __cpuinit intel_pstate_cpu_exit(struct cpufreq_policy *policy)
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 {
 	int cpu = policy->cpu;
 
@@ -639,7 +647,11 @@ static int __cpuinit intel_pstate_cpu_exit(struct cpufreq_policy *policy)
 	return 0;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+static int intel_pstate_cpu_init(struct cpufreq_policy *policy)
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 static int __cpuinit intel_pstate_cpu_init(struct cpufreq_policy *policy)
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 {
 	struct cpudata *cpu;
 	int rc;
@@ -676,7 +688,11 @@ static struct cpufreq_driver intel_pstate_driver = {
 	.init		= intel_pstate_cpu_init,
 	.exit		= intel_pstate_cpu_exit,
 	.name		= "intel_pstate",
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	.owner		= THIS_MODULE,
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 };
 
 static int __initdata no_load;

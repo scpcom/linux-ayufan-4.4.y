@@ -127,6 +127,11 @@ char gszDiskIdxMap[16] = {0};
 EXPORT_SYMBOL(gszDiskIdxMap);
 #endif /* CONFIG_SYNO_DISK_INDEX_MAP */
 
+#ifdef CONFIG_SYNO_FIXED_DISK_NAME_MV14XX
+char gszDiskIdxMapMv14xx[8] = {0};
+EXPORT_SYMBOL(gszDiskIdxMapMv14xx);
+#endif /* CONFIG_SYNO_FIXED_DISK_NAME_MV14XX */
+
 #ifdef CONFIG_SYNO_HDD_HOTPLUG
 long g_hdd_hotplug = 0;
 EXPORT_SYMBOL(g_hdd_hotplug);
@@ -269,6 +274,13 @@ int gSynoFactoryUSB3Disable = 0;
 EXPORT_SYMBOL(gSynoFactoryUSB3Disable);
 #endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
 
+#ifdef CONFIG_SYNO_CASTRATED_XHC
+char gSynoCastratedXhcAddr[CONFIG_SYNO_NUM_CASTRATED_XHC][13] = {'\0'};
+unsigned int gSynoCastratedXhcPortBitmap[CONFIG_SYNO_NUM_CASTRATED_XHC] = {0};
+EXPORT_SYMBOL(gSynoCastratedXhcAddr);
+EXPORT_SYMBOL(gSynoCastratedXhcPortBitmap);
+#endif /* CONFIG_SYNO_CASTRATED_XHC */
+
 #ifdef CONFIG_SYNO_SAS_ENCOLURE_PWR_CTL
 int giSynoEncPwrCtl = 0;
 extern int SynoProcEncPwrCtl(struct ctl_table *table, int write,
@@ -279,6 +291,16 @@ extern int SynoProcEncPwrCtl(struct ctl_table *table, int write,
 int (*syno_test_list)(unsigned char, struct tty_struct *);
 EXPORT_SYMBOL(syno_test_list);
 #endif /* CONFIG_SYNO_TTY_EXPORT */
+
+#if defined(CONFIG_SYNO_MONACO_SUPPORT_WOL)
+int (*syno_standby_power_enable)(void) = NULL;
+EXPORT_SYMBOL(syno_standby_power_enable);
+#endif
+
+#ifdef CONFIG_SYNO_MEM_MODE_INFO
+int gSynoMemMode = 0;
+EXPORT_SYMBOL(gSynoMemMode);
+#endif /* CONFIG_SYNO_MEM_MODE_INFO */
 
 /* External variables not in a header file. */
 extern int sysctl_overcommit_memory;
@@ -1228,6 +1250,17 @@ static struct ctl_table kern_table[] = {
 		.mode		= 0644,
 		.proc_handler	= perf_proc_update_handler,
 	},
+#if defined(CONFIG_SYNO_ARMADA)
+	{
+		.procname	= "perf_cpu_time_max_percent",
+		.data		= &sysctl_perf_cpu_time_max_percent,
+		.maxlen		= sizeof(sysctl_perf_cpu_time_max_percent),
+		.mode		= 0644,
+		.proc_handler	= perf_cpu_time_max_percent_handler,
+		.extra1		= &zero,
+		.extra2		= &one_hundred,
+	},
+#endif /* CONFIG_SYNO_ARMADA */
 #endif
 #ifdef CONFIG_KMEMCHECK
 	{
@@ -1498,6 +1531,15 @@ static struct ctl_table kern_table[] = {
 		.proc_handler   = SynoProcEncPwrCtl,
 	},
 #endif /* CONFIG_SYNO_SAS_ENCOLURE_PWR_CTL */
+#ifdef CONFIG_SYNO_MEM_MODE_INFO
+	{
+		.procname	= "syno_mem_mode",
+		.data		= &gSynoMemMode,
+		.maxlen		= sizeof (int),
+		.mode		= 0444,
+		.proc_handler	= &proc_dointvec,
+	},
+#endif /* CONFIG_SYNO_MEM_MODE_INFO */
 	{ }
 };
 

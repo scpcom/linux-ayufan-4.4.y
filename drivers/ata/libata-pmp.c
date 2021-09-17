@@ -1413,6 +1413,15 @@ static void sata_pmp_quirks(struct ata_port *ap)
 				       ATA_LFLAG_NO_SRST |
 				       ATA_LFLAG_ASSUME_ATA;
 		}
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	} else if (vendor == 0x11ab && devid == 0x4140) {
+		/* Marvell 4140 quirks */
+		ata_for_each_link(link, ap, EDGE) {
+			/* port 4 is for SEMB device and it doesn't like SRST */
+			if (link->pmp == 4)
+				link->flags |= ATA_LFLAG_DISABLED;
+		}
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	}
 }
 
@@ -1531,15 +1540,19 @@ int sata_pmp_attach(struct ata_device *dev)
 		goto fail;
 
 #ifdef CONFIG_SYNO_SATA_PM_LINK_RETRY
-	/* Only sil3132 & sil3531 need to do the retry */
 	if (ap->host) {
 		pdev = to_pci_dev(ap->host->dev);
 	}
-
-	if (pdev && (pdev->vendor == 0x1095 &&
-				(pdev->device == 0x3132 || pdev->device == 0x3531))) {
-		ap->isFirstAttach = 1;
+	/* Only the following chips need the retry */
+	if (pdev && ((pdev->vendor == 0x1095 && pdev->device == 0x3132) ||
+				 (pdev->vendor == 0x1095 && pdev->device == 0x3531) ||
+				 (pdev->vendor == 0x1b4b && pdev->device == 0x9215)) ) {
+		ap->syno_pm_need_retry = PM_RETRY;
+	}else if (pdev && ((pdev->vendor == 0x1b4b && pdev->device == 0x9170))) {
+		/* These chip will retry every time, while others only need it for first attach*/
+		ap->syno_pm_need_retry = PM_ALWAYS_RETRY;
 	}
+
 #endif /* CONFIG_SYNO_SATA_PM_LINK_RETRY */
 
 #ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO

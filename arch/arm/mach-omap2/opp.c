@@ -17,7 +17,11 @@
  * GNU General Public License for more details.
  */
 #include <linux/module.h>
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#include <linux/pm_opp.h>
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 #include <linux/opp.h>
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 #include <linux/cpu.h>
 
 #include "omap_device.h"
@@ -81,14 +85,22 @@ int __init omap_init_opp_table(struct omap_opp_def *opp_def,
 			dev = &oh->od->pdev->dev;
 		}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+		r = dev_pm_opp_add(dev, opp_def->freq, opp_def->u_volt);
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 		r = opp_add(dev, opp_def->freq, opp_def->u_volt);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 		if (r) {
 			dev_err(dev, "%s: add OPP %ld failed for %s [%d] result=%d\n",
 				__func__, opp_def->freq,
 				opp_def->hwmod_name, i, r);
 		} else {
 			if (!opp_def->default_available)
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+				r = dev_pm_opp_disable(dev, opp_def->freq);
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 				r = opp_disable(dev, opp_def->freq);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 			if (r)
 				dev_err(dev, "%s: disable %ld failed for %s [%d] result=%d\n",
 					__func__, opp_def->freq,

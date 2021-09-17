@@ -112,7 +112,11 @@ extern void warn_slowpath_null(const char *file, const int line);
 #endif
 
 #ifndef HAVE_ARCH_BUG_ON
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#define BUG_ON(condition) do { if (condition) {} } while(0)
+#else /* CONFIG_SYNO_LSP_MONACO */
 #define BUG_ON(condition) do { if (condition) ; } while(0)
+#endif /* CONFIG_SYNO_LSP_MONACO */
 #endif
 
 #ifndef HAVE_ARCH_WARN_ON

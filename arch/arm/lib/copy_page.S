@@ -28,7 +28,11 @@ ENTRY(copy_page)
 		stmfd	sp!, {r4, lr}			@	2
 	PLD(	pld	[r1, #0]		)
 	PLD(	pld	[r1, #L1_CACHE_BYTES]		)
+#if defined(CONFIG_SYNO_LSP_ALPINE) || (defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT))
+		ldr	r2, =COPY_COUNT			@	1
+#else
 		mov	r2, #COPY_COUNT			@	1
+#endif
 		ldmia	r1!, {r3, r4, ip, lr}		@	4+1
 1:	PLD(	pld	[r1, #2 * L1_CACHE_BYTES])
 	PLD(	pld	[r1, #3 * L1_CACHE_BYTES])

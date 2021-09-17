@@ -12,7 +12,11 @@
 #include <linux/err.h>
 #include <linux/module.h>
 #include <linux/of.h>
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#include <linux/pm_opp.h>
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 #include <linux/opp.h>
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 #include <linux/platform_device.h>
 #include <linux/regulator/consumer.h>
 
@@ -48,7 +52,11 @@ static int imx6q_set_target(struct cpufreq_policy *policy,
 			    unsigned int target_freq, unsigned int relation)
 {
 	struct cpufreq_freqs freqs;
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	struct dev_pm_opp *opp;
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	struct opp *opp;
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	unsigned long freq_hz, volt, volt_old;
 	unsigned int index;
 	int ret;
@@ -71,14 +79,22 @@ static int imx6q_set_target(struct cpufreq_policy *policy,
 	cpufreq_notify_transition(policy, &freqs, CPUFREQ_PRECHANGE);
 
 	rcu_read_lock();
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	opp = dev_pm_opp_find_freq_ceil(cpu_dev, &freq_hz);
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	opp = opp_find_freq_ceil(cpu_dev, &freq_hz);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	if (IS_ERR(opp)) {
 		rcu_read_unlock();
 		dev_err(cpu_dev, "failed to find OPP for %ld\n", freq_hz);
 		return PTR_ERR(opp);
 	}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	volt = dev_pm_opp_get_voltage(opp);
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	volt = opp_get_voltage(opp);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	rcu_read_unlock();
 	volt_old = regulator_get_voltage(arm_reg);
 
@@ -210,7 +226,11 @@ static struct cpufreq_driver imx6q_cpufreq_driver = {
 static int imx6q_cpufreq_probe(struct platform_device *pdev)
 {
 	struct device_node *np;
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	struct dev_pm_opp *opp;
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	struct opp *opp;
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	unsigned long min_volt, max_volt;
 	int num, ret;
 
@@ -246,14 +266,22 @@ static int imx6q_cpufreq_probe(struct platform_device *pdev)
 	}
 
 	/* We expect an OPP table supplied by platform */
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	num = dev_pm_opp_get_opp_count(cpu_dev);
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	num = opp_get_opp_count(cpu_dev);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	if (num < 0) {
 		ret = num;
 		dev_err(cpu_dev, "no OPP table is found: %d\n", ret);
 		goto put_node;
 	}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	ret = dev_pm_opp_init_cpufreq_table(cpu_dev, &freq_table);
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	ret = opp_init_cpufreq_table(cpu_dev, &freq_table);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	if (ret) {
 		dev_err(cpu_dev, "failed to init cpufreq table: %d\n", ret);
 		goto put_node;
@@ -268,12 +296,21 @@ static int imx6q_cpufreq_probe(struct platform_device *pdev)
 	 * same order.
 	 */
 	rcu_read_lock();
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	opp = dev_pm_opp_find_freq_exact(cpu_dev,
+				  freq_table[0].frequency * 1000, true);
+	min_volt = dev_pm_opp_get_voltage(opp);
+	opp = dev_pm_opp_find_freq_exact(cpu_dev,
+				  freq_table[--num].frequency * 1000, true);
+	max_volt = dev_pm_opp_get_voltage(opp);
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	opp = opp_find_freq_exact(cpu_dev,
 				  freq_table[0].frequency * 1000, true);
 	min_volt = opp_get_voltage(opp);
 	opp = opp_find_freq_exact(cpu_dev,
 				  freq_table[--num].frequency * 1000, true);
 	max_volt = opp_get_voltage(opp);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	rcu_read_unlock();
 	ret = regulator_set_voltage_time(arm_reg, min_volt, max_volt);
 	if (ret > 0)
@@ -301,7 +338,11 @@ static int imx6q_cpufreq_probe(struct platform_device *pdev)
 	return 0;
 
 free_freq_table:
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	dev_pm_opp_free_cpufreq_table(cpu_dev, &freq_table);
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	opp_free_cpufreq_table(cpu_dev, &freq_table);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 put_node:
 	of_node_put(np);
 	return ret;
@@ -310,7 +351,11 @@ put_node:
 static int imx6q_cpufreq_remove(struct platform_device *pdev)
 {
 	cpufreq_unregister_driver(&imx6q_cpufreq_driver);
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	dev_pm_opp_free_cpufreq_table(cpu_dev, &freq_table);
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	opp_free_cpufreq_table(cpu_dev, &freq_table);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
 	return 0;
 }

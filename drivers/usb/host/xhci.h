@@ -919,6 +919,9 @@ struct xhci_virt_device {
 	struct xhci_tt_bw_info		*tt_info;
 	/* The current max exit latency for the enabled USB3 link states. */
 	u16				current_mel;
+#ifdef CONFIG_SYNO_FORCE_EMPTY_UNAVAILABLE_XHCI_TD
+	bool			disconnected;
+#endif /* CONFIG_SYNO_FORCE_EMPTY_UNAVAILABLE_XHCI_TD */
 };
 
 /*
@@ -1067,6 +1070,16 @@ struct xhci_event_cmd {
 };
 
 /* flags bitmasks */
+#if defined (CONFIG_SYNO_LSP_MONACO)
+
+/* Address device - disable SetAddress */
+#define TRB_BSR		(1<<9)
+enum xhci_setup_dev {
+	SETUP_CONTEXT_ONLY,
+	SETUP_CONTEXT_ADDRESS,
+};
+
+#endif /* CONFIG_SYNO_LSP_MONACO */
 /* bits 16:23 are the virtual function ID */
 /* bits 24:31 are the slot ID */
 #define TRB_TO_SLOT_ID(p)	(((p) & (0xff<<24)) >> 24)
@@ -1380,7 +1393,20 @@ struct xhci_bus_state {
 	unsigned long		resume_done[USB_MAXCHILDREN];
 	/* which ports have started to resume */
 	unsigned long		resuming_ports;
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	/* Which ports are waiting on RExit to U0 transition. */
+	unsigned long		rexit_ports;
+	struct completion	rexit_done[USB_MAXCHILDREN];
+#endif /* CONFIG_SYNO_LSP_MONACO */
 };
+#if defined (CONFIG_SYNO_LSP_MONACO)
+
+/*
+ * It can take up to 20 ms to transition from RExit to U0 on the
+ * Intel Lynx Point LP xHCI host.
+ */
+#define	XHCI_MAX_REXIT_TIMEOUT	(20 * 1000)
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 static inline unsigned int hcd_index(struct usb_hcd *hcd)
 {
@@ -1409,6 +1435,9 @@ struct xhci_hcd {
 	__u32		hcc_params;
 
 	spinlock_t	lock;
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	void           *priv;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 	/* packed release number */
 	u8		sbrn;
@@ -1544,6 +1573,11 @@ static inline struct usb_hcd *xhci_to_hcd(struct xhci_hcd *xhci)
 {
 	return xhci->main_hcd;
 }
+
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+int common_xhci_plat_probe(struct platform_device *pdev, void *priv);
+int common_xhci_plat_remove(struct platform_device *dev);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 #ifdef CONFIG_USB_XHCI_HCD_DEBUGGING
 #define XHCI_DEBUG	1
@@ -1697,6 +1731,10 @@ void xhci_urb_free_priv(struct xhci_hcd *xhci, struct urb_priv *urb_priv);
 void xhci_free_command(struct xhci_hcd *xhci,
 		struct xhci_command *command);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+extern void xhci_kick_kxhcd(struct xhci_hcd *xhci);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+
 #ifdef CONFIG_PCI
 /* xHCI PCI glue */
 int xhci_register_pci(void);
@@ -1754,6 +1792,9 @@ int xhci_free_streams(struct usb_hcd *hcd, struct usb_device *udev,
 		struct usb_host_endpoint **eps, unsigned int num_eps,
 		gfp_t mem_flags);
 int xhci_address_device(struct usb_hcd *hcd, struct usb_device *udev);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+int xhci_enable_device(struct usb_hcd *hcd, struct usb_device *udev);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 int xhci_update_device(struct usb_hcd *hcd, struct usb_device *udev);
 int xhci_set_usb2_hardware_lpm(struct usb_hcd *hcd,
 				struct usb_device *udev, int enable);
@@ -1776,8 +1817,13 @@ struct xhci_segment *trb_in_td(struct xhci_segment *start_seg,
 int xhci_is_vendor_info_code(struct xhci_hcd *xhci, unsigned int trb_comp_code);
 void xhci_ring_cmd_db(struct xhci_hcd *xhci);
 int xhci_queue_slot_control(struct xhci_hcd *xhci, u32 trb_type, u32 slot_id);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+int xhci_queue_address_device(struct xhci_hcd *xhci, dma_addr_t in_ctx_ptr,
+		u32 slot_id, enum xhci_setup_dev);
+#else /* CONFIG_SYNO_LSP_MONACO */
 int xhci_queue_address_device(struct xhci_hcd *xhci, dma_addr_t in_ctx_ptr,
 		u32 slot_id);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 int xhci_queue_vendor_command(struct xhci_hcd *xhci,
 		u32 field1, u32 field2, u32 field3, u32 field4);
 int xhci_queue_stop_endpoint(struct xhci_hcd *xhci, int slot_id,
@@ -1851,5 +1897,10 @@ struct xhci_ep_ctx *xhci_get_ep_ctx(struct xhci_hcd *xhci, struct xhci_container
 
 /* xHCI quirks */
 bool xhci_compliance_mode_recovery_timer_quirk_check(void);
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+/* HCRST debug */
+#define XHCI_MV_HCRST_DEBUG		1
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
 #endif /* __LINUX_XHCI_HCD_H */

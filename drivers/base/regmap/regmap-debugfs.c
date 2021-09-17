@@ -145,7 +145,11 @@ static unsigned int regmap_debugfs_get_dump_start(struct regmap *map,
 			reg_offset = fpos_offset / map->debugfs_tot_len;
 			*pos = c->min + (reg_offset * map->debugfs_tot_len);
 			mutex_unlock(&map->cache_lock);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+			return c->base_reg + (reg_offset * map->reg_stride);
+#else /* CONFIG_SYNO_LSP_MONACO */
 			return c->base_reg + reg_offset;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 		}
 
 		*pos = c->max;

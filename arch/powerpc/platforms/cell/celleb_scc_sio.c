@@ -45,7 +45,11 @@ static int __init txx9_serial_init(void)
 	struct device_node *node;
 	int i;
 	struct uart_port req;
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	struct of_phandle_args irq;
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	struct of_irq irq;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	struct resource res;
 
 	for_each_compatible_node(node, "serial", "toshiba,sio-scc") {
@@ -53,7 +57,11 @@ static int __init txx9_serial_init(void)
 			if (!(txx9_serial_bitmap & (1<<i)))
 				continue;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+			if (of_irq_parse_one(node, i, &irq))
+#else /* CONFIG_SYNO_LSP_ARMADA */
 			if (of_irq_map_one(node, i, &irq))
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 				continue;
 			if (of_address_to_resource(node,
 				txx9_scc_tab[i].index, &res))
@@ -66,8 +74,12 @@ static int __init txx9_serial_init(void)
 #ifdef CONFIG_SERIAL_TXX9_CONSOLE
 			req.membase = ioremap(req.mapbase, 0x24);
 #endif
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+			req.irq = irq_create_of_mapping(&irq);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 			req.irq = irq_create_of_mapping(irq.controller,
 				irq.specifier, irq.size);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 			req.flags |= UPF_IOREMAP | UPF_BUGGY_UART
 				/*HAVE_CTS_LINE*/;
 			req.uartclk = 83300000;

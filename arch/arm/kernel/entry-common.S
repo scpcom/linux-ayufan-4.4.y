@@ -378,9 +378,13 @@ ENTRY(vector_swi)
 #else
 	ldr	r10, [lr, #-4]			@ get SWI instruction
 #endif
+#if defined(CONFIG_SYNO_LSP_ALPINE) || defined(CONFIG_SYNO_LSP_ARMADA)
+ ARM_BE8(rev	r10, r10)			@ little endian instruction
+#else /* CONFIG_SYNO_LSP_ALPINE || CONFIG_SYNO_LSP_ARMADA */
 #ifdef CONFIG_CPU_ENDIAN_BE8
 	rev	r10, r10			@ little endian instruction
 #endif
+#endif /* CONFIG_SYNO_LSP_ALPINE || CONFIG_SYNO_LSP_ARMADA */
 
 #elif defined(CONFIG_AEABI)
 
@@ -537,11 +541,56 @@ sys_fstatfs64_wrapper:
 		b	sys_fstatfs64
 ENDPROC(sys_fstatfs64_wrapper)
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+sys_mmap2:
+		str	r5, [sp, #4]
+#if (PAGE_SHIFT > 12)
+		b	sys_arm_mmap_4koff
+#else /* PAGE_SHIFT > 12 */
+		b	sys_mmap_pgoff
+#endif /* PAGE_SHIFT > 12 */
+#else /* CONFIG_SYNO_LSP_ALPINE */
 /*
  * Note: off_4k (r5) is always units of 4K.  If we can't do the requested
  * offset, we return EINVAL.
  */
+
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+#ifdef CONFIG_MV_8KB_SW_PAGE_SIZE_SUPPORT
+#define PGOFF_MASK 0x1
+#define PGOFF_SHIFT 1
+#elif defined(CONFIG_MV_16KB_SW_PAGE_SIZE_SUPPORT)
+#define PGOFF_MASK 0x3
+#define PGOFF_SHIFT 2
+#elif defined(CONFIG_MV_32KB_SW_PAGE_SIZE_SUPPORT)
+#define PGOFF_MASK 0x7
+#define PGOFF_SHIFT 3
+#elif defined(CONFIG_MV_64KB_SW_PAGE_SIZE_SUPPORT)
+#define PGOFF_MASK 0xF
+#define PGOFF_SHIFT 4
+#elif defined(CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT)
+#define PGOFF_MASK 0xF
+#define PGOFF_SHIFT 4
+#else
+#define PGOFF_MASK 0x0
+#define PGOFF_SHIFT 0
+#endif
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
 sys_mmap2:
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+#ifdef CONFIG_MV_LARGE_PAGE_SUPPORT
+		tst	r5, #PGOFF_MASK
+		moveq	r5, r5, lsr #PGOFF_SHIFT
+		streq	r5, [sp, #4]
+		beq	sys_mmap_pgoff
+		mov	r0, #-EINVAL
+		mov	pc, lr
+#else
+		str	r5, [sp, #4]
+		b	sys_mmap_pgoff
+#endif
+#else /* CONFIG_SYNO_LSP_ARMADA */
 #if PAGE_SHIFT > 12
 		tst	r5, #PGOFF_MASK
 		moveq	r5, r5, lsr #PAGE_SHIFT - 12
@@ -553,6 +602,8 @@ sys_mmap2:
 		str	r5, [sp, #4]
 		b	sys_mmap_pgoff
 #endif
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 ENDPROC(sys_mmap2)
 
 #ifdef CONFIG_OABI_COMPAT

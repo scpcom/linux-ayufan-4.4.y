@@ -118,6 +118,9 @@ static int part_read_oob(struct mtd_info *mtd, loff_t from,
 		struct mtd_oob_ops *ops)
 {
 	struct mtd_part *part = PART(mtd);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	struct mtd_ecc_stats stats;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	int res;
 
 	if (from >= mtd->size)
@@ -125,6 +128,10 @@ static int part_read_oob(struct mtd_info *mtd, loff_t from,
 	if (ops->datbuf && from + ops->len > mtd->size)
 		return -EINVAL;
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	stats = part->master->ecc_stats;
+
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	/*
 	 * If OOB is also requested, make sure that we do not read past the end
 	 * of this partition.
@@ -143,12 +150,22 @@ static int part_read_oob(struct mtd_info *mtd, loff_t from,
 	}
 
 	res = part->master->_read_oob(part->master, from + part->offset, ops);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+
+	mtd->ecc_stats.corrected += part->master->ecc_stats.corrected -
+		stats.corrected;
+		if (mtd_is_eccerr(res))
+		mtd->ecc_stats.failed += part->master->ecc_stats.failed -
+			stats.failed;
+
+#else /* CONFIG_SYNO_LSP_MONACO */
 	if (unlikely(res)) {
 		if (mtd_is_bitflip(res))
 			mtd->ecc_stats.corrected++;
 		if (mtd_is_eccerr(res))
 			mtd->ecc_stats.failed++;
 	}
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	return res;
 }
 
@@ -381,6 +398,11 @@ static struct mtd_part *allocate_partition(struct mtd_info *master,
 	slave->mtd.owner = master->owner;
 	slave->mtd.backing_dev_info = master->backing_dev_info;
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	/* Flag MTD device as a slave partition */
+	slave->mtd.flags |= MTD_SLAVE_PARTITION;
+
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	/* NOTE:  we don't arrange MTDs as a tree; it'd be error-prone
 	 * to have the same data be in two different partitions.
 	 */
@@ -539,6 +561,12 @@ static struct mtd_part *allocate_partition(struct mtd_info *master,
 		}
 	}
 
+#if defined(CONFIG_SYNO_LSP_MONACO)
+	/* Set MTD_SPANS_MASTER if slave MTD spans entire master MTD */
+	if (slave->offset == 0 && slave->mtd.size == master->size)
+		slave->mtd.flags |= MTD_SPANS_MASTER;
+#endif /* CONFIG_SYNO_LSP_MONACO */
+
 out_register:
 #if defined(CONFIG_SYNO_MAC_ADDRESS) || defined(CONFIG_SYNO_SERIAL)
 	if ((memcmp(part->name, "vender", 7)==0) ||
@@ -558,8 +586,8 @@ out_register:
 		char *ptr;
 		char szSerial[32];
 		char szCheckSum[32];
-		unsigned int uichksum = 0;
-		unsigned int uiTemp = 0;
+		unsigned long ulchksum = 0;
+		unsigned long ulTemp = 0;
 #endif /* CONFIG_SYNO_SERIAL */
 
 		part_read(&slave->mtd, 0, 128, &retlen, rgbszBuf);
@@ -580,11 +608,20 @@ out_register:
 			}
 			x+=6;
 
-			if (Sum==0 || ucSum!=rgbszBuf[x]) {
-				printk("vender Mac%d checksum error ucSum:0x%02x Buf:0x%02x Sum:%d.\n", 
+			if (0==Sum) {
+				printk("vender Mac%d doesn't set ucSum:0x%02x Buf:0x%02x Sum:%d.\n",
+						n, ucSum, rgbszBuf[x], Sum);
+			} else if (ucSum!=rgbszBuf[x]) {
+				printk("vender Mac%d checksum error ucSum:0x%02x Buf:0x%02x Sum:%d.\n",
 						n, ucSum, rgbszBuf[x], Sum);
 				grgbLanMac[n][0] = '\0';
 			} else {
+				printk("vender Mac%d address : %02x:%02x:%02x:%02x:%02x:%02x\n",n,rgbLanMac[n][0],
+												  rgbLanMac[n][1],
+												  rgbLanMac[n][2],
+												  rgbLanMac[n][3],
+												  rgbLanMac[n][4],
+												  rgbLanMac[n][5]);
 				snprintf(grgbLanMac[n], sizeof(grgbLanMac),
 						"%02x%02x%02x%02x%02x%02x",
 				rgbLanMac[n][0],
@@ -637,15 +674,15 @@ out_register:
 
 			//calculate checksum
 			for (i = 0 ; i < strlen(szSerial); i++) {
-				uichksum += szSerial[i];
+				ulchksum += szSerial[i];
 			}
 
 			//------ check checksum ------
-			if (0 != strict_strtoul(szCheckSum, 10, &uiTemp)) {
+			if (0 != strict_strtoul(szCheckSum, 10, &ulTemp)) {
 				printk("string conversion error: '%s'\n", szCheckSum);
 				goto SKIP_SERIAL;
-			} else if (uichksum != uiTemp) {
-				printk("serial number checksum error, serial='%s', checksum='%u' not '%u'\n", szSerial, uichksum, uiTemp);
+			} else if (ulchksum != ulTemp) {
+				printk("serial number checksum error, serial='%s', checksum='%lu' not '%lu'\n", szSerial, ulchksum, ulTemp);
 				goto SKIP_SERIAL;
 			}
 		} else {
@@ -802,6 +839,28 @@ int add_mtd_partitions(struct mtd_info *master,
 
 	return 0;
 }
+#if defined (CONFIG_SYNO_LSP_MONACO)
+
+/*
+ * Retrieve a master's MTD slave object for the partition named @name.  If
+ * found, returns a pointer the Slave's mtd_info structure, and sets the @offset
+ * parameter.  Else, returns NULL.
+ */
+struct mtd_info *get_mtd_partition_slave(struct mtd_info *master, char *name,
+					 uint64_t *offset)
+{
+	struct mtd_part *slave, *next;
+
+	list_for_each_entry_safe(slave, next, &mtd_partitions, list)
+		if (slave->master == master &&
+		    strcmp(slave->mtd.name, name) == 0) {
+			*offset = slave->offset;
+			return &slave->mtd;
+		}
+	return NULL;
+}
+EXPORT_SYMBOL(get_mtd_partition_slave);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 static DEFINE_SPINLOCK(part_parser_lock);
 static LIST_HEAD(part_parsers);
@@ -849,6 +908,9 @@ EXPORT_SYMBOL_GPL(deregister_mtd_parser);
  * are changing this array!
  */
 static const char * const default_mtd_part_types[] = {
+#if defined(CONFIG_SYNO_ALPINE) || defined(CONFIG_SYNO_MONACO) || defined(CONFIG_SYNO_ARMADA)
+	"RedBoot",
+#endif /* CONFIG_SYNO_ALPINE || CONFIG_SYNO_MONACO || CONFIG_SYNO_ARMADA */
 	"cmdlinepart",
 	"ofpart",
 	NULL

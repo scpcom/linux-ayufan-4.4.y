@@ -15,10 +15,17 @@
 #include <asm/assembler.h>
 #include <asm/errno.h>
 #include <asm/domain.h>
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#include <asm/page.h>
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 		.text
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+// do nothing
+#else /* CONFIG_SYNO_LSP_ALPINE */
 #define PAGE_SHIFT 12
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 /* Prototype: int __copy_to_user(void *to, const char *from, size_t n)
  * Purpose  : copy a block to user memory from kernel memory

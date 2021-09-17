@@ -116,6 +116,37 @@ static struct dvb_pll_desc dvb_pll_thomson_dtt759x = {
 	},
 };
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+static void thomson_dtt7546x_bw(struct dvb_frontend *fe, u8 *buf)
+{
+	/* set CB2 reg - set ATC, XTO */
+	buf[4] = 0xe3;
+}
+
+static struct dvb_pll_desc dvb_pll_thomson_dtt7546x = {
+	.name  = "Thomson dtt7546x",
+	.min   = 44250000,
+	.max   = 863250000,
+	.set   = thomson_dtt7546x_bw,
+	.iffreq = 36166667,
+	.count = 12,
+	.entries = {
+		{  121000000, 166667, 0x88, 0x01 },
+		{  141000000, 166667, 0x88, 0x41 },
+		{  166000000, 166667, 0x88, 0x81 },
+		{  182000000, 166667, 0x88, 0xc1 },
+		{  286000000, 166667, 0x88, 0x02 },
+		{  386000000, 166667, 0x88, 0x42 },
+		{  446000000, 166667, 0x88, 0x82 },
+		{  466000000, 166667, 0x88, 0xc2 },
+		{  506000000, 166667, 0x88, 0x08 },
+		{  761000000, 166667, 0x88, 0x48 },
+		{  846000000, 166667, 0x88, 0x88 },
+		{  905000000, 166667, 0x88, 0xc8 },
+	},
+};
+
+#endif /* CONFIG_SYNO_LSP_MONACO */
 static void thomson_dtt7520x_bw(struct dvb_frontend *fe, u8 *buf)
 {
 	u32 bw = fe->dtv_property_cache.bandwidth_hz;
@@ -539,6 +570,9 @@ static struct dvb_pll_desc *pll_list[] = {
 	[DVB_PLL_THOMSON_DTT7579]        = &dvb_pll_thomson_dtt7579,
 	[DVB_PLL_THOMSON_DTT759X]        = &dvb_pll_thomson_dtt759x,
 	[DVB_PLL_THOMSON_DTT7520X]       = &dvb_pll_thomson_dtt7520x,
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	[DVB_PLL_THOMSON_DTT7546X]       = &dvb_pll_thomson_dtt7546x,
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	[DVB_PLL_LG_Z201]                = &dvb_pll_lg_z201,
 	[DVB_PLL_UNKNOWN_1]              = &dvb_pll_unknown_1,
 	[DVB_PLL_TUA6010XS]              = &dvb_pll_tua6010xs,

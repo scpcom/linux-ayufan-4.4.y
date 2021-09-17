@@ -36,12 +36,23 @@
  */
 
 #include <linux/platform_device.h>
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#include <linux/usb.h>
+#include <linux/usb/hcd.h>
+#include <linux/usb/xhci_pdriver.h>
+#include "../host/xhci.h"
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 #include "core.h"
 
 int dwc3_host_init(struct dwc3 *dwc)
 {
 	struct platform_device	*xhci;
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	struct usb_hcd *hcd;
+	struct xhci_hcd *xhci_dev;
+	struct usb_xhci_pdata	pdata;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	int			ret;
 
 	xhci = platform_device_alloc("xhci-hcd", PLATFORM_DEVID_AUTO);
@@ -65,12 +76,39 @@ int dwc3_host_init(struct dwc3 *dwc)
 		dev_err(dwc->dev, "couldn't add resources to xHCI device\n");
 		goto err1;
 	}
+#if defined (CONFIG_SYNO_LSP_MONACO)
+
+	memset(&pdata, 0, sizeof(pdata));
+
+#ifdef CONFIG_DWC3_HOST_USB3_LPM_ENABLE
+	pdata.usb3_lpm_capable = 1;
+#endif
+
+	ret = platform_device_add_data(xhci, &pdata, sizeof(pdata));
+	if (ret) {
+		dev_err(dwc->dev, "couldn't add platform data to xHCI device\n");
+		goto err1;
+	}
+
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 	ret = platform_device_add(xhci);
 	if (ret) {
 		dev_err(dwc->dev, "failed to register xHCI device\n");
 		goto err1;
 	}
+#if defined (CONFIG_SYNO_LSP_MONACO)
+
+	/*
+	 * Attach the host controller phy to the shared_hcd struct of the
+	 * initialized xhci-hcd.
+	 * This will allow to inherit all the usb_phy callbacks, if any,
+	 * used for example at phy connect/disconnect time.
+	 */
+	hcd = platform_get_drvdata(xhci);
+	xhci_dev = hcd_to_xhci(hcd);
+	xhci_dev->shared_hcd->phy = dwc->usb3_phy;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 	return 0;
 

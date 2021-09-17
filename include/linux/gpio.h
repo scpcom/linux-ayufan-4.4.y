@@ -40,6 +40,10 @@ struct gpio {
 };
 
 #ifdef CONFIG_GPIOLIB
+#ifdef CONFIG_SYNO_X86_PINCTRL_GPIO
+extern int syno_gpio_value_set(int iPin, int iValue);
+extern int syno_gpio_value_get(int iPin, int *pValue);
+#endif /* CONFIG_SYNO_X86_PINCTRL_GPIO */
 
 #ifdef CONFIG_ARCH_HAVE_CUSTOM_GPIO_H
 #include <asm/gpio.h>
@@ -204,6 +208,19 @@ static inline int gpio_to_irq(unsigned gpio)
 	return -EINVAL;
 }
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+static inline int gpio_lock_as_irq(struct gpio_chip *chip, unsigned int offset)
+{
+	WARN_ON(1);
+	return -EINVAL;
+}
+
+static inline void gpio_unlock_as_irq(struct gpio_chip *chip,
+				      unsigned int offset)
+{
+	WARN_ON(1);
+}
+#endif /* CONFIG_SYNO_LSP_MONACO */
 static inline int irq_to_gpio(unsigned irq)
 {
 	/* irq can never have been returned from gpio_to_irq() */

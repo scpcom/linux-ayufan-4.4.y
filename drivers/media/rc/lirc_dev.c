@@ -35,6 +35,9 @@
 #include <linux/device.h>
 #include <linux/cdev.h>
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#include <media/rc-core.h>
+#endif /* CONFIG_SYNO_LSP_MONACO */
 #include <media/lirc.h>
 #include <media/lirc_dev.h>
 
@@ -465,6 +468,14 @@ int lirc_dev_fop_open(struct inode *inode, struct file *file)
 		retval = -EBUSY;
 		goto error;
 	}
+#if defined (CONFIG_SYNO_LSP_MONACO)
+
+	if (ir->d.rdev) {
+		retval = rc_open(ir->d.rdev);
+		if (retval)
+			goto error;
+	}
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 	cdev = ir->cdev;
 	if (try_module_get(cdev->owner)) {
@@ -509,6 +520,11 @@ int lirc_dev_fop_close(struct inode *inode, struct file *file)
 	dev_dbg(ir->d.dev, LOGHEAD "close called\n", ir->d.name, ir->d.minor);
 
 	WARN_ON(mutex_lock_killable(&lirc_dev_lock));
+#if defined (CONFIG_SYNO_LSP_MONACO)
+
+	if (ir->d.rdev)
+		rc_close(ir->d.rdev);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 	ir->open--;
 	if (ir->attached) {

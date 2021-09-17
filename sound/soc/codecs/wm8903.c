@@ -442,7 +442,11 @@ static int wm8903_set_deemph(struct snd_soc_codec *codec)
 static int wm8903_get_deemph(struct snd_kcontrol *kcontrol,
 			     struct snd_ctl_elem_value *ucontrol)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	struct wm8903_priv *wm8903 = snd_soc_codec_get_drvdata(codec);
 
 	ucontrol->value.enumerated.item[0] = wm8903->deemph;
@@ -453,7 +457,11 @@ static int wm8903_get_deemph(struct snd_kcontrol *kcontrol,
 static int wm8903_put_deemph(struct snd_kcontrol *kcontrol,
 			     struct snd_ctl_elem_value *ucontrol)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	struct wm8903_priv *wm8903 = snd_soc_codec_get_drvdata(codec);
 	int deemph = ucontrol->value.enumerated.item[0];
 	int ret = 0;

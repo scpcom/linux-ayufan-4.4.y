@@ -27,6 +27,9 @@
 #include <linux/ipc.h>
 #include <linux/uaccess.h>
 #include <linux/slab.h>
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#include <linux/printk.h>
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 /*
  * Since loff_t is a 64 bit type we avoid a lot of ABI hassle
@@ -37,3 +40,26 @@ asmlinkage long sys_arm_fadvise64_64(int fd, int advice,
 {
 	return sys_fadvise64_64(fd, offset, len, advice);
 }
+
+#if defined(CONFIG_SYNO_LSP_ALPINE) && (PAGE_SHIFT > 12)
+	/*
+	 * the "offeset" input variable is in always in 4k units for mmap2.
+	 * If PAGE_SIZE is different, we need shift it to present real pages,
+	 * and to make sure that the actual address is PAGE_SIZE aligned
+	 */
+asmlinkage unsigned long sys_arm_mmap_4koff(unsigned long addr,
+		unsigned long len, unsigned long prot, unsigned long flags,
+		unsigned long fd, unsigned long offset)
+{
+	unsigned long pgoff;
+	if (offset & ((PAGE_SIZE-1)>>12)) {
+		printk(KERN_WARNING
+				"mmap received unaligned request offset: %x.",
+				(unsigned int)offset);
+		return -EINVAL;
+	}
+	pgoff = offset >> (PAGE_SHIFT - 12);
+
+	return sys_mmap_pgoff(addr, len, prot, flags, fd, pgoff);
+}
+#endif /* CONFIG_SYNO_LSP_ALPINE && PAGE_SHIFT > 12 */

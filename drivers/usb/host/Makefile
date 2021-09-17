@@ -15,8 +15,16 @@ xhci-hcd-y := xhci.o xhci-mem.o
 xhci-hcd-y += xhci-ring.o xhci-hub.o xhci-dbg.o
 xhci-hcd-$(CONFIG_PCI)	+= xhci-pci.o
 
+ifeq ($(CONFIG_SYNO_ARMADA),y)
+xhci-hcd-y		+= xhci-plat.o
+xhci-hcd-y		+= xhci-mvebu.o
+else
 ifneq ($(CONFIG_USB_XHCI_PLATFORM), )
 	xhci-hcd-y		+= xhci-plat.o
+ifeq ($(CONFIG_SYNO_LSP_ARMADA),y)
+	xhci-hcd-$(CONFIG_USB_XHCI_MVEBU)	+= xhci-mvebu.o
+endif
+endif
 endif
 
 etxhci-hcd-y := etxhci.o etxhci-mem.o etxhci-pci.o
@@ -57,3 +65,4 @@ obj-$(CONFIG_USB_FSL_MPH_DR_OF)	+= fsl-mph-dr-of.o
 obj-$(CONFIG_USB_OCTEON2_COMMON) += octeon2-common.o
 obj-$(CONFIG_USB_HCD_BCMA)	+= bcma-hcd.o
 obj-$(CONFIG_USB_HCD_SSB)	+= ssb-hcd.o
+obj-$(CONFIG_USB_HCD_ST)	+= st-hcd.o

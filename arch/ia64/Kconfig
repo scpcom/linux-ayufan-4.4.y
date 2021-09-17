@@ -9,7 +9,7 @@ config IA64
 	select PCI if (!IA64_HP_SIM)
 	select ACPI if (!IA64_HP_SIM)
 	select PM if (!IA64_HP_SIM)
-	select ARCH_SUPPORTS_MSI
+	select ARCH_SUPPORTS_MSI if !SYNO_LSP_ARMADA || (SYNO_LSP_ARMADA && !ARCH_MVEBU)
 	select HAVE_UNSTABLE_SCHED_CLOCK
 	select HAVE_IDE
 	select HAVE_OPROFILE

@@ -549,7 +549,12 @@ static void determine_valid_ioctls(struct video_device *vdev)
 {
 	DECLARE_BITMAP(valid_ioctls, BASE_VIDIOC_PRIVATE);
 	const struct v4l2_ioctl_ops *ops = vdev->ioctl_ops;
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	bool is_vid = ((vdev->vfl_type == VFL_TYPE_GRABBER) ||
+				(vdev->vfl_type == VFL_TYPE_TSMUX));
+#else /* CONFIG_SYNO_LSP_MONACO */
 	bool is_vid = vdev->vfl_type == VFL_TYPE_GRABBER;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	bool is_vbi = vdev->vfl_type == VFL_TYPE_VBI;
 	bool is_radio = vdev->vfl_type == VFL_TYPE_RADIO;
 	bool is_rx = vdev->vfl_dir != VFL_DIR_TX;
@@ -758,6 +763,8 @@ static void determine_valid_ioctls(struct video_device *vdev)
  *	%VFL_TYPE_RADIO - A radio card
  *
  *	%VFL_TYPE_SUBDEV - A subdevice
+ *
+ *	%VFL_TYPE_TSMUX - A SDK2 STM TS muxer
  */
 int __video_register_device(struct video_device *vdev, int type, int nr,
 		int warn_if_nr_in_use, struct module *owner)
@@ -794,6 +801,11 @@ int __video_register_device(struct video_device *vdev, int type, int nr,
 	case VFL_TYPE_SUBDEV:
 		name_base = "v4l-subdev";
 		break;
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	case VFL_TYPE_TSMUX:
+		name_base = "tsmux";
+		break;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	default:
 		printk(KERN_ERR "%s called with unknown type: %d\n",
 		       __func__, type);

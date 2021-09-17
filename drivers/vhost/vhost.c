@@ -1404,7 +1404,11 @@ int vhost_add_used_n(struct vhost_virtqueue *vq, struct vring_used_elem *heads,
 
 	/* Make sure buffer is written before we update index. */
 	smp_wmb();
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	if (__put_user(vq->last_used_idx, &vq->used->idx)) {
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	if (put_user(vq->last_used_idx, &vq->used->idx)) {
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 		vq_err(vq, "Failed to increment used idx");
 		return -EFAULT;
 	}
@@ -1448,7 +1452,11 @@ static bool vhost_notify(struct vhost_dev *dev, struct vhost_virtqueue *vq)
 	if (unlikely(!v))
 		return true;
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	if (__get_user(event, vhost_used_event(vq))) {
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	if (get_user(event, vhost_used_event(vq))) {
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 		vq_err(vq, "Failed to get used event idx");
 		return true;
 	}

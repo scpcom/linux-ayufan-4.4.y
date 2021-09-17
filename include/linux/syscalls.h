@@ -860,7 +860,9 @@ asmlinkage long sys_finit_module(int fd, const char __user *uargs, int flags);
 /* 403 */ asmlinkage long sys_SYNOArchiveBit(const char __user *filename, int cmd);
 #endif
 /* 404 */ asmlinkage long sys_recvfile(int fd, int s, loff_t *offset, size_t nbytes, size_t *rwbytes);
-//* 405 */ asmlinkage long sys_SYNOMTDAlloc(int alloc);
+#ifdef CONFIG_SYNO_MTD_ALLOC
+/* 405 */ asmlinkage long sys_SYNOMTDAlloc(bool alloc);
+#endif /* CONFIG_SYNO_MTD_ALLOC */
 #ifdef CONFIG_SYNO_FS_CASELESS_STAT
 #if BITS_PER_LONG == 32
 /* 406 */ asmlinkage long sys_SYNOCaselessStat64(char __user *filename, struct stat64 __user *statbuf);
@@ -893,8 +895,10 @@ asmlinkage long sys_finit_module(int fd, const char __user *uargs, int flags);
 /* 422 */ asmlinkage long sys_SYNONotifyInit(unsigned int event_f_flags);
 /* 423 */ asmlinkage long sys_SYNONotifyAddWatch(int synotify_fd, const char  __user *pathname, u64 mask);
 /* 424 */ asmlinkage long sys_SYNONotifyRemoveWatch(int synotify_fd, const char  __user *pathname, u64 mask);
-//* 425 */ asmlinkage long sys_SYNONotifyAddWatch32(int synotify_fd, const char  __user *pathname, u32 mask);
-//* 426 */ asmlinkage long sys_SYNONotifyRemoveWatch32(int synotify_fd, const char  __user *pathname, u32 mask);
+#if BITS_PER_LONG == 32
+/* 425 */ asmlinkage long sys_SYNONotifyAddWatch32(int synotify_fd, const char  __user *pathname, u32 mask);
+/* 426 */ asmlinkage long sys_SYNONotifyRemoveWatch32(int synotify_fd, const char  __user *pathname, u32 mask);
+#endif /* BITS_PER_LONG == 32 */
 #endif /* CONFIG_SYNO_FS_NOTIFY */
 #ifdef CONFIG_SYNO_FS_ARCHIVE_BIT
 /* 427 */ asmlinkage long sys_SYNOArchiveOverwrite(unsigned int fd, unsigned int flags);

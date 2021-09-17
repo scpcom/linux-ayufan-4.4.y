@@ -224,6 +224,198 @@ int of_pci_address_to_resource(struct device_node *dev, int bar,
 	return __of_address_to_resource(dev, addrp, size, flags, NULL, r);
 }
 EXPORT_SYMBOL_GPL(of_pci_address_to_resource);
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+struct of_pci_range_iter *of_pci_process_ranges(struct of_pci_range_iter *iter,
+						struct device_node *node)
+{
+	const int na = 3, ns = 2;
+	int rlen;
+
+	if (!iter->range) {
+		iter->pna = of_n_addr_cells(node);
+		iter->np = iter->pna + na + ns;
+
+		iter->range = of_get_property(node, "ranges", &rlen);
+		if (iter->range == NULL)
+			return NULL;
+
+		iter->end = iter->range + rlen / sizeof(__be32);
+	}
+
+	if (iter->range + iter->np > iter->end)
+		return NULL;
+
+	iter->pci_space = be32_to_cpup(iter->range);
+	iter->flags = of_bus_pci_get_flags(iter->range);
+	iter->pci_addr = of_read_number(iter->range + 1, ns);
+	iter->cpu_addr = of_translate_address(node, iter->range + na);
+	iter->size = of_read_number(iter->range + iter->pna + na, ns);
+
+	iter->range += iter->np;
+
+	/* Now consume following elements while they are contiguous */
+	while (iter->range + iter->np <= iter->end) {
+		u32 flags, pci_space;
+		u64 pci_addr, cpu_addr, size;
+
+		pci_space = be32_to_cpup(iter->range);
+		flags = of_bus_pci_get_flags(iter->range);
+		pci_addr = of_read_number(iter->range + 1, ns);
+		cpu_addr = of_translate_address(node, iter->range + na);
+		size = of_read_number(iter->range + iter->pna + na, ns);
+
+		if (flags != iter->flags)
+			break;
+		if (pci_addr != iter->pci_addr + iter->size ||
+		    cpu_addr != iter->cpu_addr + iter->size)
+			break;
+
+		iter->size += size;
+		iter->range += iter->np;
+	}
+
+	return iter;
+}
+EXPORT_SYMBOL_GPL(of_pci_process_ranges);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
+#if defined(CONFIG_SYNO_LSP_MONACO)
+int of_pci_range_parser_init(struct of_pci_range_parser *parser,
+		struct device_node *node)
+{
+	const int na = 3, ns = 2;
+	int rlen;
+
+	parser->node = node;
+	parser->pna = of_n_addr_cells(node);
+	parser->np = parser->pna + na + ns;
+
+	parser->range = of_get_property(node, "ranges", &rlen);
+	if (parser->range == NULL)
+		return -ENOENT;
+
+	parser->end = parser->range + rlen / sizeof(__be32);
+
+	return 0;
+}
+EXPORT_SYMBOL_GPL(of_pci_range_parser_init);
+
+struct of_pci_range *of_pci_range_parser_one(struct of_pci_range_parser *parser,
+		struct of_pci_range *range)
+{
+	const int na = 3, ns = 2;
+
+	if (!range)
+		return NULL;
+
+	if (!parser->range || parser->range + parser->np > parser->end)
+		return NULL;
+
+	range->pci_space = parser->range[0];
+	range->flags = of_bus_pci_get_flags(parser->range);
+	range->pci_addr = of_read_number(parser->range + 1, ns);
+	range->cpu_addr = of_translate_address(parser->node,
+			parser->range + na);
+	range->size = of_read_number(parser->range + parser->pna + na, ns);
+
+	parser->range += parser->np;
+
+	/* Now consume following elements while they are contiguous */
+	while (parser->range + parser->np <= parser->end) {
+		u32 flags, pci_space;
+		u64 pci_addr, cpu_addr, size;
+
+		pci_space = be32_to_cpup(parser->range);
+		flags = of_bus_pci_get_flags(parser->range);
+		pci_addr = of_read_number(parser->range + 1, ns);
+		cpu_addr = of_translate_address(parser->node,
+				parser->range + na);
+		size = of_read_number(parser->range + parser->pna + na, ns);
+
+		if (flags != range->flags)
+			break;
+		if (pci_addr != range->pci_addr + range->size ||
+				cpu_addr != range->cpu_addr + range->size)
+			break;
+
+		range->size += size;
+		parser->range += parser->np;
+	}
+
+	return range;
+}
+EXPORT_SYMBOL_GPL(of_pci_range_parser_one);
+#endif /* CONFIG_SYNO_LSP_MONACO */
+
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+int of_pci_range_parser_init(struct of_pci_range_parser *parser,
+				struct device_node *node)
+{
+	const int na = 3, ns = 2;
+	int rlen;
+
+	parser->node = node;
+	parser->pna = of_n_addr_cells(node);
+	parser->np = parser->pna + na + ns;
+
+	parser->range = of_get_property(node, "ranges", &rlen);
+	if (parser->range == NULL)
+		return -ENOENT;
+
+	parser->end = parser->range + rlen / sizeof(__be32);
+
+	return 0;
+}
+EXPORT_SYMBOL_GPL(of_pci_range_parser_init);
+
+struct of_pci_range *of_pci_range_parser_one(struct of_pci_range_parser *parser,
+						struct of_pci_range *range)
+{
+	const int na = 3, ns = 2;
+
+	if (!range)
+		return NULL;
+
+	if (!parser->range || parser->range + parser->np > parser->end)
+		return NULL;
+
+	range->pci_space = parser->range[0];
+	range->flags = of_bus_pci_get_flags(parser->range);
+	range->pci_addr = of_read_number(parser->range + 1, ns);
+	range->cpu_addr = of_translate_address(parser->node,
+				parser->range + na);
+	range->size = of_read_number(parser->range + parser->pna + na, ns);
+
+	parser->range += parser->np;
+
+	/* Now consume following elements while they are contiguous */
+	while (parser->range + parser->np <= parser->end) {
+		u32 flags, pci_space;
+		u64 pci_addr, cpu_addr, size;
+
+		pci_space = be32_to_cpup(parser->range);
+		flags = of_bus_pci_get_flags(parser->range);
+		pci_addr = of_read_number(parser->range + 1, ns);
+		cpu_addr = of_translate_address(parser->node,
+				parser->range + na);
+		size = of_read_number(parser->range + parser->pna + na, ns);
+
+		if (flags != range->flags)
+			break;
+		if (pci_addr != range->pci_addr + range->size ||
+		    cpu_addr != range->cpu_addr + range->size)
+			break;
+
+		range->size += size;
+		parser->range += parser->np;
+	}
+
+	return range;
+}
+EXPORT_SYMBOL_GPL(of_pci_range_parser_one);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
 #endif /* CONFIG_PCI */
 
 /*
@@ -415,7 +607,11 @@ static u64 __of_translate_address(struct device_node *dev,
 	int na, ns, pna, pns;
 	u64 result = OF_BAD_ADDR;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	pr_debug("OF: ** translation for device %s **\n", of_node_full_name(dev));
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	pr_debug("OF: ** translation for device %s **\n", dev->full_name);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 	/* Increase refcount at current level */
 	of_node_get(dev);
@@ -430,13 +626,21 @@ static u64 __of_translate_address(struct device_node *dev,
 	bus->count_cells(dev, &na, &ns);
 	if (!OF_CHECK_COUNTS(na, ns)) {
 		printk(KERN_ERR "prom_parse: Bad cell count for %s\n",
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+		       of_node_full_name(dev));
+#else /* CONFIG_SYNO_LSP_ARMADA */
 		       dev->full_name);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 		goto bail;
 	}
 	memcpy(addr, in_addr, na * 4);
 
 	pr_debug("OF: bus is %s (na=%d, ns=%d) on %s\n",
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	    bus->name, na, ns, of_node_full_name(parent));
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	    bus->name, na, ns, parent->full_name);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	of_dump_addr("OF: translating address:", addr, na);
 
 	/* Translate */
@@ -458,12 +662,20 @@ static u64 __of_translate_address(struct device_node *dev,
 		pbus->count_cells(dev, &pna, &pns);
 		if (!OF_CHECK_COUNTS(pna, pns)) {
 			printk(KERN_ERR "prom_parse: Bad cell count for %s\n",
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+			       of_node_full_name(dev));
+#else /* CONFIG_SYNO_LSP_ARMADA */
 			       dev->full_name);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 			break;
 		}
 
 		pr_debug("OF: parent bus is %s (na=%d, ns=%d) on %s\n",
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+		    pbus->name, pna, pns, of_node_full_name(parent));
+#else /* CONFIG_SYNO_LSP_ARMADA */
 		    pbus->name, pna, pns, parent->full_name);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 		/* Apply bus translation */
 		if (of_translate_one(dev, bus, pbus, addr, na, ns, pna, rprop))

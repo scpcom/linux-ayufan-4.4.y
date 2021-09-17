@@ -43,7 +43,11 @@ static struct reg_default max9768_default_regs[] = {
 static int max9768_get_gpio(struct snd_kcontrol *kcontrol,
 	struct snd_ctl_elem_value *ucontrol)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	struct max9768 *max9768 = snd_soc_codec_get_drvdata(codec);
 	int val = gpio_get_value_cansleep(max9768->mute_gpio);
 
@@ -55,7 +59,11 @@ static int max9768_get_gpio(struct snd_kcontrol *kcontrol,
 static int max9768_set_gpio(struct snd_kcontrol *kcontrol,
 	struct snd_ctl_elem_value *ucontrol)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	struct max9768 *max9768 = snd_soc_codec_get_drvdata(codec);
 
 	gpio_set_value_cansleep(max9768->mute_gpio, !ucontrol->value.integer.value[0]);

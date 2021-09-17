@@ -41,6 +41,10 @@ extern int __must_check down_interruptible(struct semaphore *sem);
 extern int __must_check down_killable(struct semaphore *sem);
 extern int __must_check down_trylock(struct semaphore *sem);
 extern int __must_check down_timeout(struct semaphore *sem, long jiffies);
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+extern int __must_check down_timeout_interruptible(struct semaphore *sem,
+		long jiffies);
+#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
 extern void up(struct semaphore *sem);
 
 #endif /* __LINUX_SEMAPHORE_H */

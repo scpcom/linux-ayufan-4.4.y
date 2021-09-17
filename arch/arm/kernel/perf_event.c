@@ -16,6 +16,10 @@
 #include <linux/platform_device.h>
 #include <linux/pm_runtime.h>
 #include <linux/uaccess.h>
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+#include <linux/irq.h>
+#include <linux/irqdesc.h>
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 #include <asm/irq_regs.h>
 #include <asm/pmu.h>
@@ -298,6 +302,49 @@ validate_group(struct perf_event *event)
 	return 0;
 }
 
+#if defined(CONFIG_SYNO_LSP_MONACO)
+static irqreturn_t armpmu_dispatch_irq(int irq, void *dev)
+{
+    struct pmu_hw_events *cpuc  = (struct pmu_hw_events *)dev;
+    struct arm_pmu *armpmu = to_arm_pmu(cpuc->pmu);
+
+    struct platform_device *plat_device = armpmu->plat_device;
+    struct arm_pmu_platdata *plat = dev_get_platdata(&plat_device->dev);
+    int ret;
+
+    if (plat && plat->handle_irq)
+        ret = plat->handle_irq(irq, armpmu, armpmu->handle_irq);
+    else
+        ret = armpmu->handle_irq(irq, armpmu);
+
+    return ret;
+}
+#elif defined(CONFIG_SYNO_LSP_ARMADA)
+static irqreturn_t armpmu_dispatch_irq(int irq, void *dev)
+{
+	int ret;
+	u64 start_clock, finish_clock;
+	struct arm_pmu *armpmu;
+	struct platform_device *plat_device;
+	struct arm_pmu_platdata *plat;
+
+	if (irq_is_percpu(irq))
+		dev = *(void **)dev;
+	armpmu = dev;
+	plat_device = armpmu->plat_device;
+	plat = dev_get_platdata(&plat_device->dev);
+
+	start_clock = sched_clock();
+	if (plat && plat->handle_irq)
+		ret = plat->handle_irq(irq, dev, armpmu->handle_irq);
+	else
+		ret = armpmu->handle_irq(irq, dev);
+	finish_clock = sched_clock();
+
+	perf_sample_event_took(finish_clock - start_clock);
+	return ret;
+}
+#else
 static irqreturn_t armpmu_dispatch_irq(int irq, void *dev)
 {
 	struct arm_pmu *armpmu = (struct arm_pmu *) dev;
@@ -309,6 +356,7 @@ static irqreturn_t armpmu_dispatch_irq(int irq, void *dev)
 	else
 		return armpmu->handle_irq(irq, dev);
 }
+#endif
 
 static void
 armpmu_release_hardware(struct arm_pmu *armpmu)

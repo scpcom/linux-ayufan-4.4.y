@@ -45,6 +45,9 @@
 #include <linux/posix_acl_xattr.h>
 #include "ctree.h"
 #include "disk-io.h"
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#include "csum.h"
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 #include "transaction.h"
 #include "btrfs_inode.h"
 #include "print-tree.h"
@@ -1617,6 +1620,9 @@ static void btrfs_add_delalloc_inodes(struct btrfs_root *root,
 		set_bit(BTRFS_INODE_IN_DELALLOC_LIST,
 			&BTRFS_I(inode)->runtime_flags);
 		root->nr_delalloc_inodes++;
+#ifdef CONFIG_SYNO_BTRFS_FLUSHONCOMMIT_THRESHOLD
+		root->fs_info->delalloc_inodes_nr++;
+#endif
 		if (root->nr_delalloc_inodes == 1) {
 			spin_lock(&root->fs_info->delalloc_root_lock);
 			BUG_ON(!list_empty(&root->delalloc_root));
@@ -1637,6 +1643,9 @@ static void btrfs_del_delalloc_inode(struct btrfs_root *root,
 		clear_bit(BTRFS_INODE_IN_DELALLOC_LIST,
 			  &BTRFS_I(inode)->runtime_flags);
 		root->nr_delalloc_inodes--;
+#ifdef CONFIG_SYNO_BTRFS_FLUSHONCOMMIT_THRESHOLD
+		root->fs_info->delalloc_inodes_nr--;
+#endif
 		if (!root->nr_delalloc_inodes) {
 			spin_lock(&root->fs_info->delalloc_root_lock);
 			BUG_ON(list_empty(&root->delalloc_root));
@@ -2987,17 +2996,28 @@ static int btrfs_readpage_end_io_hook(struct btrfs_io_bio *io_bio,
 	phy_offset >>= inode->i_sb->s_blocksize_bits;
 	csum_expected = *(((u32 *)io_bio->csum) + phy_offset);
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	btrfs_csum_page_digest(page, offset, end - start + 1, &csum);
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	kaddr = kmap_atomic(page);
 	csum = btrfs_csum_data(kaddr + offset, csum,  end - start + 1);
 	btrfs_csum_final(csum, (char *)&csum);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	if (csum != csum_expected)
 		goto zeroit;
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	kunmap_atomic(kaddr);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 good:
 	return 0;
 
 zeroit:
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	kaddr = kmap_atomic(page);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	if (__ratelimit(&_rs))
 		btrfs_info(root->fs_info, "csum failed ino %llu off %llu csum %u expected csum %u",
 			btrfs_ino(page->mapping->host), start, csum, csum_expected);
@@ -3766,7 +3786,8 @@ noinline int btrfs_update_inode(struct btrfs_trans_handle *trans,
 	 * without delay
 	 */
 	if (!btrfs_is_free_space_inode(inode)
-	    && root->root_key.objectid != BTRFS_DATA_RELOC_TREE_OBJECTID) {
+	    && root->root_key.objectid != BTRFS_DATA_RELOC_TREE_OBJECTID
+	    && !root->fs_info->log_root_recovering) {
 		btrfs_update_root_times(trans, root);
 
 		ret = btrfs_delayed_update_inode(trans, root, inode);
@@ -7216,7 +7237,6 @@ static int btrfs_get_blocks_direct(struct inode *inode, sector_t iblock,
 	    ((BTRFS_I(inode)->flags & BTRFS_INODE_NODATACOW) &&
 	     em->block_start != EXTENT_MAP_HOLE)) {
 		int type;
-		int ret;
 		u64 block_start, orig_start, orig_block_len, ram_bytes;
 
 		if (test_bit(EXTENT_FLAG_PREALLOC, &em->flags))

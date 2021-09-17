@@ -430,7 +430,7 @@ menuconfig PCI
 	bool "PCI support"
 	default n
 	depends on 64BIT
-	select ARCH_SUPPORTS_MSI
+	select ARCH_SUPPORTS_MSI if !SYNO_LSP_ARMADA || (SYNO_LSP_ARMADA && !ARCH_MVEBU)
 	select PCI_MSI
 	help
 	  Enable PCI support.

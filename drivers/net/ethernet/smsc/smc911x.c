@@ -2081,7 +2081,10 @@ static int smc911x_drv_probe(struct platform_device *pdev)
 	ndev->base_addr = res->start;
 	ret = smc911x_probe(ndev);
 	if (ret != 0) {
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#else /* CONFIG_SYNO_LSP_MONACO */
 		platform_set_drvdata(pdev, NULL);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 		iounmap(addr);
 release_both:
 		free_netdev(ndev);
@@ -2107,7 +2110,10 @@ static int smc911x_drv_remove(struct platform_device *pdev)
 	struct resource *res;
 
 	DBG(SMC_DEBUG_FUNC, "--> %s\n", __func__);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#else /* CONFIG_SYNO_LSP_MONACO */
 	platform_set_drvdata(pdev, NULL);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 	unregister_netdev(ndev);
 

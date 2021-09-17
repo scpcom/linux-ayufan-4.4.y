@@ -261,7 +261,7 @@ static int pl061_probe(struct amba_device *adev, const struct amba_id *id)
 	struct device *dev = &adev->dev;
 	struct pl061_platform_data *pdata = dev->platform_data;
 	struct pl061_gpio *chip;
-	int ret, irq, i, irq_base;
+	int ret, irq, i, irq_base = 0;
 
 	chip = devm_kzalloc(dev, sizeof(*chip), GFP_KERNEL);
 	if (chip == NULL)
@@ -272,9 +272,23 @@ static int pl061_probe(struct amba_device *adev, const struct amba_id *id)
 		irq_base = pdata->irq_base;
 		if (irq_base <= 0)
 			return -ENODEV;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	} else if (adev->dev.of_node) {
+		const void *ptr;
+		unsigned int baseidx = -1; /* GPIO dynamic allocation */
+
+		ptr = of_get_property(adev->dev.of_node, "baseidx", NULL);
+		if (ptr)
+			baseidx = be32_to_cpup(ptr);
+		chip->gc.base = baseidx;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	} else {
 		chip->gc.base = -1;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+		// do nothing
+#else /* CONFIG_SYNO_LSP_ALPINE */
 		irq_base = 0;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	}
 
 	if (!devm_request_mem_region(dev, adev->res.start,

@@ -23,6 +23,9 @@
 #include <linux/bitops.h>
 #include <linux/blkdev.h>
 #include <asm/byteorder.h>
+#ifdef CONFIG_SYNO_EXT4_FIX_RESIZE_16TB_IN_32BIT
+#include <asm/div64.h>
+#endif /* CONFIG_SYNO_EXT4_FIX_RESIZE_16TB_IN_32BIT */
 
 #include "ext4.h"
 #include "ext4_jbd2.h"
@@ -344,7 +347,12 @@ static int find_group_dir(struct super_block *sb, struct inode *parent,
 	int ret = -1;
 
 	freei = percpu_counter_read_positive(&EXT4_SB(sb)->s_freeinodes_counter);
+#ifdef CONFIG_SYNO_EXT4_FIX_RESIZE_16TB_IN_32BIT
+	avefreei = freei;
+	do_div(avefreei, ngroups);
+#else
 	avefreei = freei / ngroups;
+#endif
 
 	for (group = 0; group < ngroups; group++) {
 		desc = ext4_get_group_desc(sb, group, NULL);
@@ -538,7 +546,12 @@ static int find_group_orlov(struct super_block *sb, struct inode *parent,
 	}
 
 	freei = percpu_counter_read_positive(&sbi->s_freeinodes_counter);
+#ifdef CONFIG_SYNO_EXT4_FIX_RESIZE_16TB_IN_32BIT
+	avefreei = freei;
+	do_div(avefreei, ngroups);
+#else
 	avefreei = freei / ngroups;
+#endif
 	freeb = EXT4_C2B(sbi,
 		percpu_counter_read_positive(&sbi->s_freeclusters_counter));
 	avefreec = freeb;
@@ -632,7 +645,12 @@ static int find_group_orlov(struct super_block *sb, struct inode *parent,
 
 fallback:
 	ngroups = real_ngroups;
+#ifdef CONFIG_SYNO_EXT4_FIX_RESIZE_16TB_IN_32BIT
+	avefreei = freei;
+	do_div(avefreei, ngroups);
+#else
 	avefreei = freei / ngroups;
+#endif
 fallback_retry:
 	parent_group = EXT4_I(parent)->i_block_group;
 	for (i = 0; i < ngroups; i++) {

@@ -73,10 +73,6 @@ struct btrfs_qgroup {
 	 * reservation tracking
 	 */
 	u64 reserved;
-#ifdef CONFIG_SYNO_BTRFS_FIX_QGROUP_OVERRUN
-	u64 delayed_free; /* wait quota to be added to rfer in qgroup accounting */
-	bool not_accounting;
-#endif
 
 	/*
 	 * lists
@@ -1387,17 +1383,6 @@ static int qgroup_excl_accounting(struct btrfs_fs_info *fs_info,
 	qgroup->excl += sign * oper->num_bytes;
 	qgroup->excl_cmpr += sign * oper->num_bytes;
 
-#ifdef CONFIG_SYNO_BTRFS_FIX_QGROUP_OVERRUN
-	if (sign == 1 && qgroup->not_accounting) {
-		if (qgroup->delayed_free > oper->num_bytes)
-			qgroup->delayed_free -= oper->num_bytes;
-		else {
-			qgroup->delayed_free = 0;
-			qgroup->not_accounting = 0;
-		}
-	}
-#endif
-
 	qgroup_dirty(fs_info, qgroup);
 
 	/* Get all of the parent groups that contain this qgroup */
@@ -1418,17 +1403,6 @@ static int qgroup_excl_accounting(struct btrfs_fs_info *fs_info,
 		if (sign < 0)
 			WARN_ON(qgroup->excl < oper->num_bytes);
 		qgroup->excl_cmpr += sign * oper->num_bytes;
-
-#ifdef CONFIG_SYNO_BTRFS_FIX_QGROUP_OVERRUN
-	if (sign == 1 && qgroup->not_accounting) {
-		if (qgroup->delayed_free > oper->num_bytes)
-			qgroup->delayed_free -= oper->num_bytes;
-		else {
-			qgroup->delayed_free = 0;
-			qgroup->not_accounting = 0;
-		}
-	}
-#endif
 
 		qgroup_dirty(fs_info, qgroup);
 
@@ -1709,16 +1683,6 @@ static int qgroup_adjust_counters(struct btrfs_fs_info *fs_info,
 		if (qg->old_refcnt <= seq && qg->new_refcnt > seq) {
 			qg->rfer += num_bytes;
 			qg->rfer_cmpr += num_bytes;
-#ifdef CONFIG_SYNO_BTRFS_FIX_QGROUP_OVERRUN
-			if (qg->not_accounting) {
-				if (qg->delayed_free > num_bytes)
-					qg->delayed_free -= num_bytes;
-				else {
-					qg->delayed_free = 0;
-					qg->not_accounting = 0;
-				}
-			}
-#endif
 			dirty = true;
 		}
 
@@ -2046,10 +2010,6 @@ int btrfs_run_qgroups(struct btrfs_trans_handle *trans,
 		struct btrfs_qgroup *qgroup;
 		qgroup = list_first_entry(&fs_info->dirty_qgroups,
 					  struct btrfs_qgroup, dirty);
-#ifdef CONFIG_SYNO_BTRFS_FIX_QGROUP_OVERRUN
-		// Avoid quota leak (e.g., reserved more space than we actually use)
-		qgroup->delayed_free = 0;
-#endif
 		list_del_init(&qgroup->dirty);
 		spin_unlock(&fs_info->qgroup_lock);
 		ret = update_qgroup_info_item(trans, quota_root, qgroup);
@@ -2307,22 +2267,14 @@ int btrfs_qgroup_reserve(struct btrfs_root *root, u64 num_bytes)
 		qg = u64_to_ptr(unode->aux);
 
 		if ((qg->lim_flags & BTRFS_QGROUP_LIMIT_MAX_RFER) &&
-#ifdef CONFIG_SYNO_BTRFS_FIX_QGROUP_OVERRUN
-		    qg->reserved + qg->delayed_free + (s64)qg->rfer + num_bytes >
-#else
 		    qg->reserved + (s64)qg->rfer + num_bytes >
-#endif
 		    qg->max_rfer) {
 			ret = -EDQUOT;
 			goto out;
 		}
 
 		if ((qg->lim_flags & BTRFS_QGROUP_LIMIT_MAX_EXCL) &&
-#ifdef CONFIG_SYNO_BTRFS_FIX_QGROUP_OVERRUN
-		    qg->reserved + qg->delayed_free + (s64)qg->excl + num_bytes >
-#else
 		    qg->reserved + (s64)qg->excl + num_bytes >
-#endif
 		    qg->max_excl) {
 			ret = -EDQUOT;
 			goto out;
@@ -2347,9 +2299,6 @@ int btrfs_qgroup_reserve(struct btrfs_root *root, u64 num_bytes)
 		qg = u64_to_ptr(unode->aux);
 
 		qg->reserved += num_bytes;
-#ifdef CONFIG_SYNO_BTRFS_FIX_QGROUP_OVERRUN
-		qg->not_accounting = 1;
-#endif
 	}
 
 out:
@@ -2357,11 +2306,7 @@ out:
 	return ret;
 }
 
-#ifdef CONFIG_SYNO_BTRFS_FIX_QGROUP_OVERRUN
-void btrfs_qgroup_free(struct btrfs_root *root, u64 num_bytes, bool force_free)
-#else
 void btrfs_qgroup_free(struct btrfs_root *root, u64 num_bytes)
-#endif
 {
 	struct btrfs_root *quota_root;
 	struct btrfs_qgroup *qgroup;
@@ -2399,10 +2344,6 @@ void btrfs_qgroup_free(struct btrfs_root *root, u64 num_bytes)
 
 		qg = u64_to_ptr(unode->aux);
 
-#ifdef CONFIG_SYNO_BTRFS_FIX_QGROUP_OVERRUN
-		if (qg->not_accounting && !force_free)
-			qg->delayed_free += num_bytes;
-#endif
 		qg->reserved -= num_bytes;
 
 		list_for_each_entry(glist, &qg->groups, next_group) {

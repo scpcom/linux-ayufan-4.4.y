@@ -301,31 +301,68 @@ out:
 EXPORT_SYMBOL_GPL(fsnotify);
 
 #ifdef CONFIG_SYNO_FS_NOTIFY
-/* Retrieve mount by given super block, remember to invoke mntput afterward.
- * Note: In the case that different mount has same super block, it will get the first matching mount
- * It is undefined behavior on bind mount case.
- */
-inline struct vfsmount *get_vfsmount_by_sb(struct super_block *sb)
+/*
+ * notify_event
+ *
+ * get notify event path by given vfsmnt and dentry.
+ * notify event according to procedded dentry path.
+ *
+ * */
+static int notify_event(struct vfsmount *vfsmnt, struct dentry *dentry, __u32 mask)
 {
-	struct list_head *head = NULL;
-	struct mount *mnt = NULL;
-	struct nsproxy *nsproxy = NULL;
-	if (!sb)
-		return NULL;
+	int ret = 0;
+	struct path path;
+	struct path root_path;
+	char *dentry_path = NULL;
+	char *dentry_buf = NULL;
+	struct mount * mnt = NULL;
+	__u32 test_mask = (mask & ~FS_EVENT_ON_CHILD);
 
-	nsproxy = current->nsproxy;
-	if (nsproxy) {
-		struct mnt_namespace *mnt_space = nsproxy->mnt_ns;
-		if(mnt_space){
-			list_for_each(head, &mnt_space->list) {
-				mnt = list_entry(head, struct mount, mnt_list);
-				if (mnt && mnt->mnt.mnt_sb == sb) {
-					return &mnt->mnt;
-				}
-			}
-		}
+	if (!dentry) {
+		ret = -EINVAL;
+		goto end;
 	}
-	return NULL;
+	if (!vfsmnt) {
+		ret = -EINVAL;
+		goto end;
+	}
+
+	mnt = real_mount(vfsmnt);
+	if (!mnt) {
+		ret = -EINVAL;
+		goto end;
+	}
+
+	if (!(test_mask & mnt->mnt_fsnotify_mask)) {
+		ret = 0;
+		goto end;
+	}
+
+	memset(&path, 0, sizeof(struct path));
+	memset(&root_path, 0, sizeof(struct path));
+
+	path.mnt = vfsmnt;
+	path.dentry = dentry;
+	root_path.mnt = vfsmnt;
+	root_path.dentry = vfsmnt->mnt_root;
+
+	dentry_buf = kmalloc(PATH_MAX, GFP_NOFS);
+	if (!dentry_buf) {
+		ret = -ENOMEM;
+		goto end;
+	}
+
+	dentry_path = __d_path(&path, &root_path, dentry_buf, PATH_MAX-1);
+	if (IS_ERR_OR_NULL(dentry_path)) {
+		ret = -1;
+		goto end;
+	}
+
+	SYNOFsnotify(mask, &path, FSNOTIFY_EVENT_SYNO, dentry_path, 0);
+end:
+	if (dentry_buf)
+		kfree(dentry_buf);
+	return ret;
 }
 
 inline int SYNOFsnotify(__u32 mask, void *data, int data_is,
@@ -380,42 +417,37 @@ inline int SYNOFsnotify(__u32 mask, void *data, int data_is,
 /* Do syno notify according to given dentry and mask */
 int SYNONotify(struct dentry *dentry, __u32 mask)
 {
-	struct path path;
-	char *dentry_path = NULL;
-	char *dentry_buf = NULL;
+	struct list_head *head = NULL;
+	struct nsproxy *nsproxy = NULL;
 	int ret = 0;
 
-	memset(&path, 0, sizeof(struct path));
-	if(!dentry){
+	if (!dentry) {
 		ret = -EINVAL;
 		goto ERR;
 	}
 
-	path.mnt = get_vfsmount_by_sb(dentry->d_sb);
-	if(!path.mnt){
+	if (!dentry->d_sb) {
 		ret = -EINVAL;
 		goto ERR;
 	}
-	path.dentry = dentry;
-	mntget(path.mnt);
 
-	dentry_buf = kmalloc(PATH_MAX, GFP_NOFS);
-	if(!dentry_buf){
-		ret = -ENOMEM;
-		goto ERR;
+	nsproxy = current->nsproxy;
+	if (nsproxy) {
+		struct mnt_namespace *mnt_space = nsproxy->mnt_ns;
+		if (mnt_space) {
+			list_for_each(head, &mnt_space->list) {
+				struct mount *mnt = list_entry(head, struct mount, mnt_list);
+				if (mnt && mnt->mnt.mnt_sb == dentry->d_sb) {
+					struct vfsmount *vfsmnt = &mnt->mnt;
+					mntget(vfsmnt);
+					notify_event(vfsmnt, dentry, mask); // NOTE: ignore error
+					mntput(vfsmnt);
+				}
+			}
+		}
 	}
-
-	dentry_path = dentry_path_raw(dentry, dentry_buf, PATH_MAX-1);
-	if (IS_ERR(dentry_path)) {
-		ret = PTR_ERR(dentry_path);
-		goto ERR;
-	}
-	SYNOFsnotify(mask, &path, FSNOTIFY_EVENT_SYNO, dentry_path, 0);
 
 ERR:
-	if (path.mnt)
-		mntput(path.mnt);
-	kfree(dentry_buf);
 	return ret;
 }
 EXPORT_SYMBOL(SYNONotify);

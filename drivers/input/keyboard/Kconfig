@@ -501,6 +501,16 @@ config KEYBOARD_STOWAWAY
 	  To compile this driver as a module, choose M here: the
 	  module will be called stowaway.
 
+config KEYBOARD_ST_KEYSCAN
+	tristate "STMicroelectronics keyscan support"
+	select INPUT_EVDEV
+	help
+	  Say Y here if you want to use a keypad attached to the keyscan block
+	  on some STMicroelectronics SoC devices.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called stm-keyscan.
+
 config KEYBOARD_SUNKBD
 	tristate "Sun Type 4 and Type 5 keyboard"
 	select SERIO

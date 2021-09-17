@@ -123,7 +123,7 @@ __iter_div_u64_rem(u64 dividend, u32 divisor, u64 *remainder)
 #ifdef CONFIG_SYNO_EMULATE_U64_DIVISOR
 static inline u64 mod_u64_rem64(u64 dividend, u64 divisor)
 {
-#ifdef CONFIG_32BIT
+#if defined(CONFIG_32BIT) || (BITS_PER_LONG == 32)
         if (dividend < divisor) {
                 return dividend;
         } else if (dividend == divisor) {

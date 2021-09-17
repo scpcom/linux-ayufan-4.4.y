@@ -126,6 +126,30 @@ int reset_control_deassert(struct reset_control *rstc)
 }
 EXPORT_SYMBOL_GPL(reset_control_deassert);
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+/**
+ * reset_control_is_asserted - queries the reset line status
+ * @rstc: reset controller
+ */
+int reset_control_is_asserted(struct reset_control *rstc)
+{
+	if (rstc->rcdev->ops->is_asserted)
+		return rstc->rcdev->ops->is_asserted(rstc->rcdev, rstc->id);
+
+	return -ENOSYS;
+}
+EXPORT_SYMBOL_GPL(reset_control_is_asserted);
+
+#endif /* CONFIG_SYNO_LSP_MONACO */
+
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+/**
+ * of_reset_control_get - Lookup and obtain a reference to a reset
+ * controller by OF node.
+ */
+struct reset_control *of_reset_control_get(struct device_node *np,
+					   const char *id)
+#else /* CONFIG_SYNO_LSP_ARMADA */
 /**
  * reset_control_get - Lookup and obtain a reference to a reset controller.
  * @dev: device to be reset by the controller
@@ -136,6 +160,7 @@ EXPORT_SYMBOL_GPL(reset_control_deassert);
  * Use of id names is optional.
  */
 struct reset_control *reset_control_get(struct device *dev, const char *id)
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 {
 	struct reset_control *rstc = ERR_PTR(-EPROBE_DEFER);
 	struct reset_controller_dev *r, *rcdev;
@@ -144,6 +169,13 @@ struct reset_control *reset_control_get(struct device *dev, const char *id)
 	int rstc_id;
 	int ret;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	if (id)
+		index = of_property_match_string(np,
+						 "reset-names", id);
+	ret = of_parse_phandle_with_args(np, "resets", "#reset-cells",
+					 index, &args);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	if (!dev)
 		return ERR_PTR(-EINVAL);
 
@@ -152,6 +184,7 @@ struct reset_control *reset_control_get(struct device *dev, const char *id)
 						 "reset-names", id);
 	ret = of_parse_phandle_with_args(dev->of_node, "resets", "#reset-cells",
 					 index, &args);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	if (ret)
 		return ERR_PTR(ret);
 
@@ -167,7 +200,11 @@ struct reset_control *reset_control_get(struct device *dev, const char *id)
 
 	if (!rcdev) {
 		mutex_unlock(&reset_controller_list_mutex);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+		return ERR_PTR(-EPROBE_DEFER);
+#else /* CONFIG_SYNO_LSP_MONACO */
 		return ERR_PTR(-ENODEV);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	}
 
 	rstc_id = rcdev->of_xlate(rcdev, &args);
@@ -185,12 +222,44 @@ struct reset_control *reset_control_get(struct device *dev, const char *id)
 		return ERR_PTR(-ENOMEM);
 	}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	rstc->dev = NULL;
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	rstc->dev = dev;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	rstc->rcdev = rcdev;
 	rstc->id = rstc_id;
 
 	return rstc;
 }
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+EXPORT_SYMBOL(of_reset_control_get);
+
+/**
+ * reset_control_get - Lookup and obtain a reference to a reset controller.
+ * @dev: device to be reset by the controller
+ * @id: reset line name
+ *
+ * Returns a struct reset_control or IS_ERR() condition containing errno.
+ *
+ * Use of id names is optional.
+ */
+struct reset_control *reset_control_get(struct device *dev, const char *id)
+{
+	struct reset_control *rstc;
+
+	if (!dev)
+		return ERR_PTR(-EINVAL);
+
+	rstc = of_reset_control_get(dev->of_node, id);
+	if (IS_ERR(rstc))
+		return rstc;
+
+	rstc->dev = dev;
+
+	return rstc;
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 EXPORT_SYMBOL_GPL(reset_control_get);
 
 /**

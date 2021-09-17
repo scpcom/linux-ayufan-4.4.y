@@ -96,6 +96,10 @@ struct mmc_command {
  */
 
 	unsigned int		cmd_timeout_ms;	/* in milliseconds */
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+	/* Set this flag only for blocking sanitize request */
+	bool			sanitize_busy;
+#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
 
 	struct mmc_data		*data;		/* data segment associated with cmd */
 	struct mmc_request	*mrq;		/* associated request */

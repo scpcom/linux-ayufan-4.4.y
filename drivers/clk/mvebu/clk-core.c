@@ -313,6 +313,244 @@ static const struct core_clocks armada_xp_core_clocks = {
 
 #endif /* CONFIG_MACH_ARMADA_370_XP */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+#ifdef CONFIG_MACH_ARMADA_375
+/*
+ * For Armada 375 Sample At Reset the CPU, DDR and L2 clock are all
+ * defined in the same time
+ *
+ * SAR0[21:17]   : CPU frequency    DDR frequency   L2 frequency
+ *		 6   =  400 MHz	    400 MHz	    200 MHz
+ *		 15  =  600 MHz	    600 MHz	    300 MHz
+ *		 21  =  800 MHz	    534 MHz	    400 MHz
+ *		 25  = 1000 MHz	    500 MHz	    500 MHz
+ *		 others reserved.
+ *
+ * SAR0[22]   : TCLK frequency
+ *		 0 = 166 MHz
+ *		 1 = 200 MHz
+ */
+
+#define	    SAR1_A375_TCLK_FREQ_OPT		22
+#define	    SAR1_A375_TCLK_FREQ_OPT_MASK	0x1
+#define	    SAR1_A375_CPU_DDR_L2_FREQ_OPT	17
+#define	    SAR1_A375_CPU_DDR_L2_FREQ_OPT_MASK	0x1F
+
+static const u32 __initconst armada_375_tclk_frequencies[] = {
+	166000000,
+	200000000,
+};
+
+static u32 __init armada_375_get_tclk_freq(void __iomem *sar)
+{
+	u8 tclk_freq_select = 0;
+
+	tclk_freq_select = ((readl(sar) >> SAR1_A375_TCLK_FREQ_OPT) &
+			    SAR1_A375_TCLK_FREQ_OPT_MASK);
+	return armada_375_tclk_frequencies[tclk_freq_select];
+}
+
+static const u32 __initconst armada_375_cpu_frequencies[] = {
+	0, 0, 0, 0, 0, 0,
+	400000000,
+	0, 0, 0, 0, 0, 0, 0, 0,
+	600000000,
+	0, 0, 0, 0, 0,
+	800000000,
+	0, 0, 0,
+	1000000000,
+};
+
+static u32 __init armada_375_get_cpu_freq(void __iomem *sar)
+{
+	u32 cpu_freq;
+	u8 cpu_freq_select = 0;
+
+	cpu_freq_select = ((readl(sar) >> SAR1_A375_CPU_DDR_L2_FREQ_OPT) &
+			   SAR1_A375_CPU_DDR_L2_FREQ_OPT_MASK);
+	if (cpu_freq_select >= ARRAY_SIZE(armada_375_cpu_frequencies)) {
+		pr_err("CPU freq select unsupported %d\n", cpu_freq_select);
+		cpu_freq = 0;
+	} else
+		cpu_freq = armada_375_cpu_frequencies[cpu_freq_select];
+
+	return cpu_freq;
+}
+
+enum { A375_CPU_TO_DDR, A375_CPU_TO_L2};
+
+static const struct core_ratio __initconst armada_375_core_ratios[] = {
+	{ .id = A375_CPU_TO_L2,	 .name = "l2clk" },
+	{ .id = A375_CPU_TO_DDR, .name = "ddrclk" },
+};
+
+static const int __initconst armada_375_cpu_l2_ratios[32][2] = {
+	{0, 1}, {0, 1}, {0, 1}, {0, 1},
+	{0, 1}, {0, 1}, {1, 2}, {0, 1},
+	{0, 1}, {0, 1}, {0, 1}, {0, 1},
+	{0, 1}, {0, 1}, {0, 1}, {1, 2},
+	{0, 1}, {0, 1}, {0, 1}, {0, 1},
+	{0, 1}, {1, 2}, {0, 1}, {0, 1},
+	{0, 1}, {1, 2}, {0, 1}, {0, 1},
+	{0, 1}, {0, 1}, {0, 1}, {0, 1},
+};
+
+static const int __initconst armada_375_cpu_ddr_ratios[32][2] = {
+	{0, 1}, {0, 1}, {0, 1}, {0, 1},
+	{0, 1}, {0, 1}, {1, 1}, {0, 1},
+	{0, 1}, {0, 1}, {0, 1}, {0, 1},
+	{0, 1}, {0, 1}, {0, 1}, {2, 3},
+	{0, 1}, {0, 1}, {0, 1}, {0, 1},
+	{0, 1}, {2, 3}, {0, 1}, {0, 1},
+	{0, 1}, {1, 2}, {0, 1}, {0, 1},
+	{0, 1}, {0, 1}, {0, 1}, {0, 1},
+};
+
+static void __init armada_375_get_clk_ratio(
+	void __iomem *sar, int id, int *mult, int *div)
+{
+	u32 opt = ((readl(sar) >> SAR1_A375_CPU_DDR_L2_FREQ_OPT) &
+		SAR1_A375_CPU_DDR_L2_FREQ_OPT_MASK);
+
+	switch (id) {
+	case A375_CPU_TO_L2:
+		*mult = armada_375_cpu_l2_ratios[opt][0];
+		*div = armada_375_cpu_l2_ratios[opt][1];
+		break;
+	case A375_CPU_TO_DDR:
+		*mult = armada_375_cpu_ddr_ratios[opt][0];
+		*div = armada_375_cpu_ddr_ratios[opt][1];
+		break;
+	}
+}
+
+static const struct core_clocks armada_375_core_clocks = {
+	.get_tclk_freq = armada_375_get_tclk_freq,
+	.get_cpu_freq = armada_375_get_cpu_freq,
+	.get_clk_ratio = armada_375_get_clk_ratio,
+	.ratios = armada_375_core_ratios,
+	.num_ratios = ARRAY_SIZE(armada_375_core_ratios),
+};
+
+#endif /* CONFIG_MACH_ARMADA_375 */
+
+#ifdef CONFIG_MACH_ARMADA_380
+/*
+ * SAR[14:10] : Ratios between PCLK0, NBCLK, HCLK and DRAM clocks
+ *
+ * SAR[15]    : TCLK frequency
+ *		 0 = 250 MHz
+ *		 1 = 200 MHz
+ */
+
+#define	    SAR_A380_TCLK_FREQ_OPT              15
+#define	    SAR_A380_TCLK_FREQ_OPT_MASK	        0x1
+#define	    SAR_A380_CPU_DDR_L2_FREQ_OPT        10
+#define	    SAR_A380_CPU_DDR_L2_FREQ_OPT_MASK	0x1F
+
+static const u32 __initconst armada_380_tclk_frequencies[] = {
+	250000000,
+	200000000,
+};
+
+static u32 __init armada_380_get_tclk_freq(void __iomem *sar)
+{
+	u8 tclk_freq_select = 0;
+
+	tclk_freq_select = ((readl(sar) >> SAR_A380_TCLK_FREQ_OPT) &
+			    SAR_A380_TCLK_FREQ_OPT_MASK);
+	return armada_380_tclk_frequencies[tclk_freq_select];
+}
+
+static const u32 __initconst armada_380_cpu_frequencies[] = {
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	666 * 1000 * 1000, 0, 800 * 1000 * 1000, 0,
+	1066 * 1000 * 1000, 0, 1200 * 1000 * 1000, 0,
+	1332 * 1000 * 1000, 0, 0, 0,
+	1600 * 1000 * 1000, 0, 0, 0,
+	1866 * 1000 * 1000, 0, 0, 2000 * 1000 * 1000,
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+	0, 0, 0, 0,
+	1066 * 1000 * 1000, 0, 0, 0,
+	1332 * 1000 * 1000, 0, 0, 0,
+	1600 * 1000 * 1000,
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+};
+
+static u32 __init armada_380_get_cpu_freq(void __iomem *sar)
+{
+	u32 cpu_freq;
+	u8 cpu_freq_select = 0;
+
+	cpu_freq_select = ((readl(sar) >> SAR_A380_CPU_DDR_L2_FREQ_OPT) &
+			   SAR_A380_CPU_DDR_L2_FREQ_OPT_MASK);
+	if (cpu_freq_select >= ARRAY_SIZE(armada_380_cpu_frequencies)) {
+		pr_err("CPU freq select unsupported %d\n", cpu_freq_select);
+		cpu_freq = 0;
+	} else
+		cpu_freq = armada_380_cpu_frequencies[cpu_freq_select];
+
+	return cpu_freq;
+}
+
+enum { A380_CPU_TO_DDR, A380_CPU_TO_L2 };
+
+static const struct core_ratio __initconst armada_380_core_ratios[] = {
+	{ .id = A380_CPU_TO_L2,	 .name = "l2clk" },
+	{ .id = A380_CPU_TO_DDR, .name = "ddrclk" },
+};
+
+static const int __initconst armada_380_cpu_l2_ratios[32][2] = {
+	{0, 1}, {0, 1}, {0, 1}, {0, 1},
+	{1, 2}, {0, 1}, {0, 1}, {0, 1},
+	{1, 2}, {0, 1}, {0, 1}, {0, 1},
+	{1, 2}, {0, 1}, {0, 1}, {0, 1},
+	{0, 1}, {0, 1}, {0, 1}, {0, 1},
+	{0, 1}, {0, 1}, {0, 1}, {0, 1},
+	{0, 1}, {0, 1}, {0, 1}, {0, 1},
+	{0, 1}, {0, 1}, {0, 1}, {0, 1},
+};
+
+static const int __initconst armada_380_cpu_ddr_ratios[32][2] = {
+	{0, 1}, {0, 1}, {0, 1}, {0, 1},
+	{1, 2}, {0, 1}, {0, 1}, {0, 1},
+	{1, 2}, {0, 1}, {0, 1}, {0, 1},
+	{1, 2}, {0, 1}, {0, 1}, {0, 1},
+	{0, 1}, {0, 1}, {0, 1}, {0, 1},
+	{0, 1}, {0, 1}, {0, 1}, {0, 1},
+	{0, 1}, {0, 1}, {0, 1}, {0, 1},
+	{0, 1}, {0, 1}, {0, 1}, {0, 1},
+};
+
+static void __init armada_380_get_clk_ratio(
+	void __iomem *sar, int id, int *mult, int *div)
+{
+	u32 opt = ((readl(sar) >> SAR_A380_CPU_DDR_L2_FREQ_OPT) &
+		SAR_A380_CPU_DDR_L2_FREQ_OPT_MASK);
+
+	switch (id) {
+	case A380_CPU_TO_L2:
+		*mult = armada_380_cpu_l2_ratios[opt][0];
+		*div = armada_380_cpu_l2_ratios[opt][1];
+		break;
+	case A380_CPU_TO_DDR:
+		*mult = armada_380_cpu_ddr_ratios[opt][0];
+		*div = armada_380_cpu_ddr_ratios[opt][1];
+		break;
+	}
+}
+
+static const struct core_clocks armada_380_core_clocks = {
+	.get_tclk_freq = armada_380_get_tclk_freq,
+	.get_cpu_freq = armada_380_get_cpu_freq,
+	.get_clk_ratio = armada_380_get_clk_ratio,
+	.ratios = armada_380_core_ratios,
+	.num_ratios = ARRAY_SIZE(armada_380_core_ratios),
+};
+
+#endif /* CONFIG_MACH_ARMADA_380 */
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
 /*
  * Dove PLL sample-at-reset configuration
  *
@@ -641,6 +879,20 @@ static const __initdata struct of_device_id clk_core_match[] = {
 		.data = &armada_xp_core_clocks,
 	},
 #endif
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+#ifdef CONFIG_MACH_ARMADA_375
+	{
+		.compatible = "marvell,armada-375-core-clock",
+		.data = &armada_375_core_clocks,
+	},
+#endif
+#ifdef CONFIG_MACH_ARMADA_380
+	{
+		.compatible = "marvell,armada-380-core-clock",
+		.data = &armada_380_core_clocks,
+	},
+#endif
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 #ifdef CONFIG_ARCH_DOVE
 	{
 		.compatible = "marvell,dove-core-clock",

@@ -1935,7 +1935,11 @@ retry:
 			n_desc_blocks = o_desc_blocks +
 				le16_to_cpu(es->s_reserved_gdt_blocks);
 			n_group = n_desc_blocks * EXT4_DESC_PER_BLOCK(sb);
+#ifdef CONFIG_SYNO_EXT4_FIX_RESIZE_16TB_IN_32BIT
+			n_blocks_count = (ext4_fsblk_t)n_group * EXT4_BLOCKS_PER_GROUP(sb);
+#else
 			n_blocks_count = n_group * EXT4_BLOCKS_PER_GROUP(sb);
+#endif
 			n_group--; /* set to last group number */
 		}
 

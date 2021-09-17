@@ -167,8 +167,13 @@ static int get_property(unsigned int cpu, unsigned long input,
 			continue;
 
 		/* get the frequency order */
+#if defined (CONFIG_SYNO_LSP_MONACO)
+		if (freq != CPUFREQ_ENTRY_INVALID && descend == -1)
+			descend = !!(freq > table[i].frequency);
+#else /* CONFIG_SYNO_LSP_MONACO */
 		if (freq != CPUFREQ_ENTRY_INVALID && descend != -1)
 			descend = !!(freq > table[i].frequency);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 		freq = table[i].frequency;
 		max_level++;
@@ -321,6 +326,10 @@ static int cpufreq_thermal_notifier(struct notifier_block *nb,
 
 	if (cpumask_test_cpu(policy->cpu, &notify_device->allowed_cpus))
 		max_freq = notify_device->cpufreq_val;
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	else
+		return 0;
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
 	/* Never exceed user_policy.max */
 	if (max_freq > policy->user_policy.max)
@@ -413,19 +422,45 @@ static struct notifier_block thermal_cpufreq_notifier_block = {
 	.notifier_call = cpufreq_thermal_notifier,
 };
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+/**
+ * __cpufreq_cooling_register - helper function to create cpufreq cooling device
+ * @np: a valid struct device_node to the cooling device device tree node
+ */
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 /**
  * cpufreq_cooling_register - function to create cpufreq cooling device.
+ */
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+/**
  * @clip_cpus: cpumask of cpus where the frequency constraints will happen.
  *
  * This interface function registers the cpufreq cooling device with the name
  * "thermal-cpufreq-%x". This api can support multiple instances of cpufreq
+ */
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+/**
+ * cooling devices. It also gives the opportunity to link the cooling device
+ * with a device tree node, in order to bind it via the thermal DT code.
+ */
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+/*
  * cooling devices.
+ */
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+/**
  *
  * Return: a valid struct thermal_cooling_device pointer on success,
  * on failure, it returns a corresponding ERR_PTR().
  */
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+static struct thermal_cooling_device *
+__cpufreq_cooling_register(struct device_node *np,
+			   const struct cpumask *clip_cpus)
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 struct thermal_cooling_device *
 cpufreq_cooling_register(const struct cpumask *clip_cpus)
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 {
 	struct thermal_cooling_device *cool_dev;
 	struct cpufreq_cooling_device *cpufreq_dev = NULL;
@@ -464,6 +499,15 @@ cpufreq_cooling_register(const struct cpumask *clip_cpus)
 	snprintf(dev_name, sizeof(dev_name), "thermal-cpufreq-%d",
 		 cpufreq_dev->id);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	cool_dev = thermal_of_cooling_device_register(np, dev_name, cpufreq_dev,
+						      &cpufreq_cooling_ops);
+	if (IS_ERR(cool_dev)) {
+		release_idr(&cpufreq_idr, cpufreq_dev->id);
+		kfree(cpufreq_dev);
+		return cool_dev;
+	}
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	cool_dev = thermal_cooling_device_register(dev_name, cpufreq_dev,
 						   &cpufreq_cooling_ops);
 	if (!cool_dev) {
@@ -471,6 +515,7 @@ cpufreq_cooling_register(const struct cpumask *clip_cpus)
 		kfree(cpufreq_dev);
 		return ERR_PTR(-EINVAL);
 	}
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	cpufreq_dev->cool_dev = cool_dev;
 	cpufreq_dev->cpufreq_state = 0;
 	mutex_lock(&cooling_cpufreq_lock);
@@ -485,7 +530,52 @@ cpufreq_cooling_register(const struct cpumask *clip_cpus)
 
 	return cool_dev;
 }
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+/**
+ * cpufreq_cooling_register - function to create cpufreq cooling device.
+ * @clip_cpus: cpumask of cpus where the frequency constraints will happen.
+ *
+ * This interface function registers the cpufreq cooling device with the name
+ * "thermal-cpufreq-%x". This api can support multiple instances of cpufreq
+ * cooling devices.
+ *
+ * Return: a valid struct thermal_cooling_device pointer on success,
+ * on failure, it returns a corresponding ERR_PTR().
+ */
+struct thermal_cooling_device *
+cpufreq_cooling_register(const struct cpumask *clip_cpus)
+{
+	return __cpufreq_cooling_register(NULL, clip_cpus);
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 EXPORT_SYMBOL_GPL(cpufreq_cooling_register);
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+/**
+ * of_cpufreq_cooling_register - function to create cpufreq cooling device.
+ * @np: a valid struct device_node to the cooling device device tree node
+ * @clip_cpus: cpumask of cpus where the frequency constraints will happen.
+ *
+ * This interface function registers the cpufreq cooling device with the name
+ * "thermal-cpufreq-%x". This api can support multiple instances of cpufreq
+ * cooling devices. Using this API, the cpufreq cooling device will be
+ * linked to the device tree node provided.
+ *
+ * Return: a valid struct thermal_cooling_device pointer on success,
+ * on failure, it returns a corresponding ERR_PTR().
+ */
+struct thermal_cooling_device *
+of_cpufreq_cooling_register(struct device_node *np,
+			    const struct cpumask *clip_cpus)
+{
+	if (!np)
+		return ERR_PTR(-EINVAL);
+
+	return __cpufreq_cooling_register(np, clip_cpus);
+}
+EXPORT_SYMBOL_GPL(of_cpufreq_cooling_register);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
 /**
  * cpufreq_cooling_unregister - function to remove cpufreq cooling device.

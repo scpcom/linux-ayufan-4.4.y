@@ -207,6 +207,9 @@ int irq_set_affinity(unsigned int irq, const struct cpumask *mask)
 	raw_spin_unlock_irqrestore(&desc->lock, flags);
 	return ret;
 }
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+EXPORT_SYMBOL_GPL(irq_set_affinity);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 int irq_set_affinity_hint(unsigned int irq, const struct cpumask *m)
 {

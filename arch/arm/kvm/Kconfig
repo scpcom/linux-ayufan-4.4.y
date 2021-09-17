@@ -22,6 +22,7 @@ config KVM
 	select ANON_INODES
 	select KVM_MMIO
 	select KVM_ARM_HOST
+	select HAVE_KVM_EVENTFD if ARCH_ALPINE
 	depends on ARM_VIRT_EXT && ARM_LPAE
 	---help---
 	  Support hosting virtualized guest machines. You will also

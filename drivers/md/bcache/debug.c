@@ -47,10 +47,11 @@ const char *bch_ptr_status(struct cache_set *c, const struct bkey *k)
 	return "";
 }
 
-int bch_bkey_to_text(char *buf, size_t size, const struct bkey *k)
+struct keyprint_hack bch_pkey(const struct bkey *k)
 {
 	unsigned i = 0;
-	char *out = buf, *end = buf + size;
+	struct keyprint_hack r;
+	char *out = r.s, *end = r.s + KEYHACK_SIZE;
 
 #define p(...)	(out += scnprintf(out, end - out, __VA_ARGS__))
 
@@ -74,14 +75,16 @@ int bch_bkey_to_text(char *buf, size_t size, const struct bkey *k)
 	if (KEY_CSUM(k))
 		p(" cs%llu %llx", KEY_CSUM(k), k->ptr[1]);
 #undef p
-	return out - buf;
+	return r;
 }
 
-int bch_btree_to_text(char *buf, size_t size, const struct btree *b)
+struct keyprint_hack bch_pbtree(const struct btree *b)
 {
-	return scnprintf(buf, size, "%zu level %i/%i",
-			 PTR_BUCKET_NR(b->c, &b->key, 0),
-			 b->level, b->c->root ? b->c->root->level : -1);
+	struct keyprint_hack r;
+
+	snprintf(r.s, 40, "%zu level %i/%i", PTR_BUCKET_NR(b->c, &b->key, 0),
+		 b->level, b->c->root ? b->c->root->level : -1);
+	return r;
 }
 
 #if defined(CONFIG_BCACHE_DEBUG) || defined(CONFIG_BCACHE_EDEBUG)
@@ -97,12 +100,10 @@ static void dump_bset(struct btree *b, struct bset *i)
 {
 	struct bkey *k;
 	unsigned j;
-	char buf[80];
 
 	for (k = i->start; k < end(i); k = bkey_next(k)) {
-		bch_bkey_to_text(buf, sizeof(buf), k);
 		printk(KERN_ERR "block %zu key %zi/%u: %s", index(i, b),
-		       (uint64_t *) k - i->d, i->keys, buf);
+		       (uint64_t *) k - i->d, i->keys, pkey(k));
 
 		for (j = 0; j < KEY_PTRS(k); j++) {
 			size_t n = PTR_BUCKET_NR(b->c, k, j);
@@ -143,7 +144,7 @@ void bch_btree_verify(struct btree *b, struct bset *new)
 	v->written = 0;
 	v->level = b->level;
 
-	bch_btree_node_read(v);
+	bch_btree_read(v);
 	closure_wait_event(&v->io.wait, &cl,
 			   atomic_read(&b->io.cl.remaining) == -1);
 
@@ -199,7 +200,7 @@ void bch_data_verify(struct search *s)
 	if (!check)
 		return;
 
-	if (bio_alloc_pages(check, GFP_NOIO))
+	if (bch_bio_alloc_pages(check, GFP_NOIO))
 		goto out_put;
 
 	check->bi_rw		= READ_SYNC;
@@ -251,7 +252,6 @@ static void vdump_bucket_and_panic(struct btree *b, const char *fmt,
 				   va_list args)
 {
 	unsigned i;
-	char buf[80];
 
 	console_lock();
 
@@ -262,8 +262,7 @@ static void vdump_bucket_and_panic(struct btree *b, const char *fmt,
 
 	console_unlock();
 
-	bch_btree_to_text(buf, sizeof(buf), b);
-	panic("at %s\n", buf);
+	panic("at %s\n", pbtree(b));
 }
 
 void bch_check_key_order_msg(struct btree *b, struct bset *i,
@@ -338,7 +337,6 @@ static ssize_t bch_dump_read(struct file *file, char __user *buf,
 {
 	struct dump_iterator *i = file->private_data;
 	ssize_t ret = 0;
-	char kbuf[80];
 
 	while (size) {
 		struct keybuf_key *w;
@@ -357,12 +355,11 @@ static ssize_t bch_dump_read(struct file *file, char __user *buf,
 		if (i->bytes)
 			break;
 
-		w = bch_keybuf_next_rescan(i->c, &i->keys, &MAX_KEY, dump_pred);
+		w = bch_keybuf_next_rescan(i->c, &i->keys, &MAX_KEY);
 		if (!w)
 			break;
 
-		bch_bkey_to_text(kbuf, sizeof(kbuf), &w->key);
-		i->bytes = snprintf(i->buf, PAGE_SIZE, "%s\n", kbuf);
+		i->bytes = snprintf(i->buf, PAGE_SIZE, "%s\n", pkey(&w->key));
 		bch_keybuf_del(&i->keys, w);
 	}
 
@@ -380,7 +377,7 @@ static int bch_dump_open(struct inode *inode, struct file *file)
 
 	file->private_data = i;
 	i->c = c;
-	bch_keybuf_init(&i->keys);
+	bch_keybuf_init(&i->keys, dump_pred);
 	i->keys.last_scanned = KEY(0, 0, 0);
 
 	return 0;
@@ -412,6 +409,142 @@ void bch_debug_init_cache_set(struct cache_set *c)
 
 #endif
 
+/* Fuzz tester has rotted: */
+#if 0
+
+static ssize_t btree_fuzz(struct kobject *k, struct kobj_attribute *a,
+			  const char *buffer, size_t size)
+{
+	void dump(struct btree *b)
+	{
+		struct bset *i;
+
+		for (i = b->sets[0].data;
+		     index(i, b) < btree_blocks(b) &&
+		     i->seq == b->sets[0].data->seq;
+		     i = ((void *) i) + set_blocks(i, b->c) * block_bytes(b->c))
+			dump_bset(b, i);
+	}
+
+	struct cache_sb *sb;
+	struct cache_set *c;
+	struct btree *all[3], *b, *fill, *orig;
+	int j;
+
+	struct btree_op op;
+	bch_btree_op_init_stack(&op);
+
+	sb = kzalloc(sizeof(struct cache_sb), GFP_KERNEL);
+	if (!sb)
+		return -ENOMEM;
+
+	sb->bucket_size = 128;
+	sb->block_size = 4;
+
+	c = bch_cache_set_alloc(sb);
+	if (!c)
+		return -ENOMEM;
+
+	for (j = 0; j < 3; j++) {
+		BUG_ON(list_empty(&c->btree_cache));
+		all[j] = list_first_entry(&c->btree_cache, struct btree, list);
+		list_del_init(&all[j]->list);
+
+		all[j]->key = KEY(0, 0, c->sb.bucket_size);
+		bkey_copy_key(&all[j]->key, &MAX_KEY);
+	}
+
+	b = all[0];
+	fill = all[1];
+	orig = all[2];
+
+	while (1) {
+		for (j = 0; j < 3; j++)
+			all[j]->written = all[j]->nsets = 0;
+
+		bch_bset_init_next(b);
+
+		while (1) {
+			struct bset *i = write_block(b);
+			struct bkey *k = op.keys.top;
+			unsigned rand;
+
+			bkey_init(k);
+			rand = get_random_int();
+
+			op.type = rand & 1
+				? BTREE_INSERT
+				: BTREE_REPLACE;
+			rand >>= 1;
+
+			SET_KEY_SIZE(k, bucket_remainder(c, rand));
+			rand >>= c->bucket_bits;
+			rand &= 1024 * 512 - 1;
+			rand += c->sb.bucket_size;
+			SET_KEY_OFFSET(k, rand);
+#if 0
+			SET_KEY_PTRS(k, 1);
+#endif
+			bch_keylist_push(&op.keys);
+			bch_btree_insert_keys(b, &op);
+
+			if (should_split(b) ||
+			    set_blocks(i, b->c) !=
+			    __set_blocks(i, i->keys + 15, b->c)) {
+				i->csum = csum_set(i);
+
+				memcpy(write_block(fill),
+				       i, set_bytes(i));
+
+				b->written += set_blocks(i, b->c);
+				fill->written = b->written;
+				if (b->written == btree_blocks(b))
+					break;
+
+				bch_btree_sort_lazy(b);
+				bch_bset_init_next(b);
+			}
+		}
+
+		memcpy(orig->sets[0].data,
+		       fill->sets[0].data,
+		       btree_bytes(c));
+
+		bch_btree_sort(b);
+		fill->written = 0;
+		bch_btree_read_done(&fill->io.cl);
+
+		if (b->sets[0].data->keys != fill->sets[0].data->keys ||
+		    memcmp(b->sets[0].data->start,
+			   fill->sets[0].data->start,
+			   b->sets[0].data->keys * sizeof(uint64_t))) {
+			struct bset *i = b->sets[0].data;
+			struct bkey *k, *l;
+
+			for (k = i->start,
+			     l = fill->sets[0].data->start;
+			     k < end(i);
+			     k = bkey_next(k), l = bkey_next(l))
+				if (bkey_cmp(k, l) ||
+				    KEY_SIZE(k) != KEY_SIZE(l))
+					pr_err("key %zi differs: %s != %s",
+					       (uint64_t *) k - i->d,
+					       pkey(k), pkey(l));
+
+			for (j = 0; j < 3; j++) {
+				pr_err("**** Set %i ****", j);
+				dump(all[j]);
+			}
+			panic("\n");
+		}
+
+		pr_info("fuzz complete: %i keys", b->sets[0].data->keys);
+	}
+}
+
+kobj_attribute_write(fuzz, btree_fuzz);
+#endif
+
 void bch_debug_exit(void)
 {
 	if (!IS_ERR_OR_NULL(debug))
@@ -421,6 +554,11 @@ void bch_debug_exit(void)
 int __init bch_debug_init(struct kobject *kobj)
 {
 	int ret = 0;
+#if 0
+	ret = sysfs_create_file(kobj, &ksysfs_fuzz.attr);
+	if (ret)
+		return ret;
+#endif
 
 	debug = debugfs_create_dir("bcache", NULL);
 	return ret;

@@ -2723,7 +2723,11 @@ static int check_modinfo(struct module *mod, struct load_info *info, int flags)
 	return 0;
 }
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+static int find_module_sections(struct module *mod, struct load_info *info)
+#else /* CONFIG_SYNO_LSP_MONACO */
 static void find_module_sections(struct module *mod, struct load_info *info)
+#endif /* CONFIG_SYNO_LSP_MONACO */
 {
 	mod->kp = section_objs(info, "__param",
 			       sizeof(*mod->kp), &mod->num_kp);
@@ -2753,6 +2757,20 @@ static void find_module_sections(struct module *mod, struct load_info *info)
 #ifdef CONFIG_CONSTRUCTORS
 	mod->ctors = section_objs(info, ".ctors",
 				  sizeof(*mod->ctors), &mod->num_ctors);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	if (!mod->ctors)
+		mod->ctors = section_objs(info, ".init_array",
+				sizeof(*mod->ctors), &mod->num_ctors);
+	else if (find_sec(info, ".init_array")) {
+		/*
+		 * This shouldn't happen with same compiler and binutils
+		 * building all parts of the module.
+		 */
+		printk(KERN_WARNING "%s: has both .ctors and .init_array.\n",
+		       mod->name);
+		return -EINVAL;
+	}
+#endif /* CONFIG_SYNO_LSP_MONACO */
 #endif
 
 #ifdef CONFIG_TRACEPOINTS
@@ -2791,6 +2809,10 @@ static void find_module_sections(struct module *mod, struct load_info *info)
 
 	info->debug = section_objs(info, "__verbose",
 				   sizeof(*info->debug), &info->num_debug);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+
+	return 0;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 }
 
 static int move_module(struct module *mod, struct load_info *info)
@@ -3246,7 +3268,13 @@ static int load_module(struct load_info *info, const char __user *uargs,
 
 	/* Now we've got everything in the final locations, we can
 	 * find optional sections. */
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	err = find_module_sections(mod, info);
+	if (err)
+		goto free_unload;
+#else /* CONFIG_SYNO_LSP_MONACO */
 	find_module_sections(mod, info);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 	err = check_module_license_and_versions(mod);
 	if (err)
@@ -3845,3 +3873,20 @@ void module_layout(struct module *mod,
 }
 EXPORT_SYMBOL(module_layout);
 #endif
+
+#ifdef CONFIG_SYNO_OOM_DUMP_MODULE
+void syno_dump_modules(void)
+{
+	struct module *mod;
+
+	pr_warning( "\n[size]\t\t[module]\n\n");
+
+	list_for_each_entry_rcu(mod, &modules, list) {
+		if (mod->state == MODULE_STATE_UNFORMED)
+			continue;
+
+		pr_warning( "%u\t\t%s\n", mod->init_size + mod->core_size, mod->name);
+	}
+}
+EXPORT_SYMBOL_GPL(syno_dump_modules);
+#endif /* CONFIG_SYNO_OOM_DUMP_MODULE */

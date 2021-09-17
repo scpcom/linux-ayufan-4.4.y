@@ -174,6 +174,9 @@ struct tcp_sock {
 		struct dma_chan		*dma_chan;
 		int			wakeup;
 		struct dma_pinned_list	*pinned_list;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+		bool			pinned;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 		dma_cookie_t		dma_cookie;
 #endif
 	} ucopy;

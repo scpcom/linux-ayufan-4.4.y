@@ -27,6 +27,16 @@
 #include <linux/kernel.h>
 #include <linux/rcupdate.h>
 
+#ifdef CONFIG_LFS_ON_32CPU
+/* index type */
+#define rdx_t	unsigned long long
+#define RDX_TREE_KEY_MAX_VALUE	ULLONG_MAX
+#else /* CONFIG_LFS_ON_32CPU */
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#define rdx_t	unsigned long
+#define RDX_TREE_KEY_MAX_VALUE	ULONG_MAX
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* CONFIG_LFS_ON_32CPU */
 /*
  * An indirect pointer (root->rnode pointing to a radix_tree_node, rather
  * than a data item) is signalled by the low bit set in the root->rnode
@@ -216,6 +226,44 @@ static inline void radix_tree_replace_slot(void **pslot, void *item)
 	rcu_assign_pointer(*pslot, item);
 }
 
+#ifdef CONFIG_SYNO_LSP_ALPINE
+int radix_tree_insert(struct radix_tree_root *, rdx_t, void *);
+void *radix_tree_lookup(struct radix_tree_root *, rdx_t);
+void **radix_tree_lookup_slot(struct radix_tree_root *, rdx_t);
+void *radix_tree_delete(struct radix_tree_root *, rdx_t);
+unsigned int
+radix_tree_gang_lookup(struct radix_tree_root *root, void **results,
+			rdx_t first_index, unsigned int max_items);
+unsigned int radix_tree_gang_lookup_slot(struct radix_tree_root *root,
+			void ***results, rdx_t *indices,
+			rdx_t first_index, unsigned int max_items);
+rdx_t radix_tree_next_hole(struct radix_tree_root *root,
+				rdx_t index, rdx_t max_scan);
+rdx_t radix_tree_prev_hole(struct radix_tree_root *root,
+				rdx_t index, rdx_t max_scan);
+int radix_tree_preload(gfp_t gfp_mask);
+void radix_tree_init(void);
+void *radix_tree_tag_set(struct radix_tree_root *root,
+			rdx_t index, unsigned int tag);
+void *radix_tree_tag_clear(struct radix_tree_root *root,
+			rdx_t index, unsigned int tag);
+int radix_tree_tag_get(struct radix_tree_root *root,
+			rdx_t index, unsigned int tag);
+unsigned int
+radix_tree_gang_lookup_tag(struct radix_tree_root *root, void **results,
+		rdx_t first_index, unsigned int max_items,
+		unsigned int tag);
+unsigned int
+radix_tree_gang_lookup_tag_slot(struct radix_tree_root *root, void ***results,
+		rdx_t first_index, unsigned int max_items,
+		unsigned int tag);
+unsigned long radix_tree_range_tag_if_tagged(struct radix_tree_root *root,
+		rdx_t *first_indexp, rdx_t last_index,
+		unsigned long nr_to_tag,
+		unsigned int fromtag, unsigned int totag);
+int radix_tree_tagged(struct radix_tree_root *root, unsigned int tag);
+rdx_t radix_tree_locate_item(struct radix_tree_root *root, void *item);
+#else /* CONFIG_SYNO_LSP_ALPINE */
 int radix_tree_insert(struct radix_tree_root *, unsigned long, void *);
 void *radix_tree_lookup(struct radix_tree_root *, unsigned long);
 void **radix_tree_lookup_slot(struct radix_tree_root *, unsigned long);
@@ -252,6 +300,7 @@ unsigned long radix_tree_range_tag_if_tagged(struct radix_tree_root *root,
 		unsigned int fromtag, unsigned int totag);
 int radix_tree_tagged(struct radix_tree_root *root, unsigned int tag);
 unsigned long radix_tree_locate_item(struct radix_tree_root *root, void *item);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 static inline void radix_tree_preload_end(void)
 {
@@ -273,8 +322,13 @@ static inline void radix_tree_preload_end(void)
  * radix tree tag.
  */
 struct radix_tree_iter {
+#ifdef CONFIG_SYNO_LSP_ALPINE
+	rdx_t	index;
+	rdx_t	next_index;
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	unsigned long	index;
 	unsigned long	next_index;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	unsigned long	tags;
 };
 
@@ -290,7 +344,11 @@ struct radix_tree_iter {
  * Returns:	NULL
  */
 static __always_inline void **
+#ifdef CONFIG_SYNO_LSP_ALPINE
+radix_tree_iter_init(struct radix_tree_iter *iter, rdx_t start)
+#else /* CONFIG_SYNO_LSP_ALPINE */
 radix_tree_iter_init(struct radix_tree_iter *iter, unsigned long start)
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 {
 	/*
 	 * Leave iter->tags uninitialized. radix_tree_next_chunk() will fill it

@@ -139,7 +139,15 @@ typedef unsigned long blkcnt_t;
  * can override it.
  */
 #ifndef pgoff_t
+#ifdef CONFIG_LFS_ON_32CPU
+#define pgoff_t unsigned long long
+#define PGOFF_MAX	ULLONG_MAX
+#else /* CONFIG_LFS_ON_32CPU */
 #define pgoff_t unsigned long
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#define PGOFF_MAX	ULONG_MAX
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* CONFIG_LFS_ON_32CPU */
 #endif
 
 #ifdef CONFIG_ARCH_DMA_ADDR_T_64BIT

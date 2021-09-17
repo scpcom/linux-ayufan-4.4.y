@@ -281,13 +281,22 @@ static void afs_kill_pages(struct afs_vnode *vnode, bool error,
 	struct pagevec pv;
 	unsigned count, loop;
 
+#ifdef CONFIG_SYNO_LSP_ALPINE
+	_enter("{%x:%u},%llx-%llx",
+	       vnode->fid.vid, vnode->fid.vnode, (unsigned long long)first, (unsigned long long)last);
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	_enter("{%x:%u},%lx-%lx",
 	       vnode->fid.vid, vnode->fid.vnode, first, last);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 	pagevec_init(&pv, 0);
 
 	do {
+#ifdef CONFIG_SYNO_LSP_ALPINE
+		_debug("kill %llx-%llx", (unsigned long long)first, (unsigned long long)last);
+#else /* CONFIG_SYNO_LSP_ALPINE */
 		_debug("kill %lx-%lx", first, last);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 		count = last - first + 1;
 		if (count > PAGEVEC_SIZE)

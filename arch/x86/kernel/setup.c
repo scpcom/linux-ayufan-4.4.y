@@ -115,7 +115,13 @@
 #include  <linux/synobios.h>
 
 extern int grgPwrCtlPin[];
+#ifdef CONFIG_SYNO_X86_PINCTRL_GPIO
+#include <linux/gpio.h>
+#endif /* CONFIG_SYNO_X86_PINCTRL_GPIO */
+
+#ifdef CONFIG_SYNO_ICH_GPIO_CTRL
 extern u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite);
+#endif /* CONFIG_SYNO_ICH_GPIO_CTRL */
 #endif /* CONFIG_SYNO_ATA_PWR_CTRL && CONFIG_SYNO_X64 */
 
 #ifdef CONFIG_SYNO_SATA_PORT_MAP
@@ -125,6 +131,10 @@ extern char gszSataPortMap[8];
 #ifdef CONFIG_SYNO_DISK_INDEX_MAP
 extern char gszDiskIdxMap[16];
 #endif /* CONFIG_SYNO_DISK_INDEX_MAP */
+
+#ifdef CONFIG_SYNO_FIXED_DISK_NAME_MV14XX
+extern char gszDiskIdxMapMv14xx[8];
+#endif /* CONFIG_SYNO_FIXED_DISK_NAME_MV14XX */
 
 #ifdef CONFIG_SYNO_DYN_MODULE_INSTALL
 extern int gSynoHasDynModule;
@@ -196,6 +206,11 @@ extern int gSynoFactoryUSBFastReset;
 #ifdef CONFIG_SYNO_FACTORY_USB3_DISABLE
 extern int gSynoFactoryUSB3Disable;
 #endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
+
+#ifdef CONFIG_SYNO_CASTRATED_XHC
+extern char gSynoCastratedXhcAddr[CONFIG_SYNO_NUM_CASTRATED_XHC][13];
+extern unsigned int gSynoCastratedXhcPortBitmap[CONFIG_SYNO_NUM_CASTRATED_XHC];
+#endif /* CONFIG_SYNO_CASTRATED_XHC */
 
 /*
  * max_low_pfn_mapped: highest direct mapped pfn under 4GB
@@ -382,8 +397,7 @@ static u8 SYNO_GET_HDD_ENABLE_PIN(const int index)
 #elif defined(CONFIG_SYNO_AVOTON)
 	u8 HddEnPinMap[] = {10, 15, 16, 17};
 #elif defined(CONFIG_SYNO_BRASWELL)
-	/* Todo */
-	u8 HddEnPinMap[] = {0, 0, 0, 0};
+	u8 HddEnPinMap[] = {61, 60, 64, 58};
 #else
 	u8 *HddEnPinMap = NULL;
 #endif
@@ -405,6 +419,17 @@ END:
 	return ret;
 }
 
+static u32 SYNO_X86_GPIO_PIN_SET(int pin, int *pValue)
+{
+	u32 ret = 0;
+#if defined(CONFIG_SYNO_ICH_GPIO_CTRL)
+	ret = syno_pch_lpc_gpio_pin(pin, pValue, 1);
+#elif defined(CONFIG_SYNO_X86_PINCTRL_GPIO)
+	ret = syno_gpio_value_set(pin, *pValue);
+#endif
+	return ret;
+}
+
 /* SYNO_CTRL_HDD_POWERON
  * HDD power control for x86_64 and cedarview
  * input: index - disk index, 1-based, 0 for all hdd.
@@ -419,49 +444,51 @@ int SYNO_CTRL_HDD_POWERON(int index, int value)
 		switch(index){
 			case 0:
 				/* index is 1-based, so apply 0 for all*/
-				syno_pch_lpc_gpio_pin(15 , &value, 1);
+				SYNO_X86_GPIO_PIN_SET(15 , &value);
 				mdelay(200);
-				syno_pch_lpc_gpio_pin(25 , &value, 1);
+				SYNO_X86_GPIO_PIN_SET(25 , &value);
 				break;
 			case 1:
-				syno_pch_lpc_gpio_pin(15 , &value, 1);
+				SYNO_X86_GPIO_PIN_SET(15 , &value);
 				break;
 			case 2:
-				syno_pch_lpc_gpio_pin(25 , &value, 1);
+				SYNO_X86_GPIO_PIN_SET(25 , &value);
 				break;
 			default:
 				goto END;
 		}
 	}else if(syno_is_hw_version(HW_DS412p) ||
 		 syno_is_hw_version(HW_DS415p) ||
-		 syno_is_hw_version(HW_DS416play)) {
+		 syno_is_hw_version(HW_DS416p)) {
 		switch(index){
 			case 0:
 				/* index is 1-based, so apply 0 for all*/
-				syno_pch_lpc_gpio_pin(SYNO_GET_HDD_ENABLE_PIN(1), &value, 1);
+				SYNO_X86_GPIO_PIN_SET(SYNO_GET_HDD_ENABLE_PIN(1), &value);
 				mdelay(200);
-				syno_pch_lpc_gpio_pin(SYNO_GET_HDD_ENABLE_PIN(2) , &value, 1);
+				SYNO_X86_GPIO_PIN_SET(SYNO_GET_HDD_ENABLE_PIN(2) , &value);
 				mdelay(200);
-				syno_pch_lpc_gpio_pin(SYNO_GET_HDD_ENABLE_PIN(3) , &value, 1);
+				SYNO_X86_GPIO_PIN_SET(SYNO_GET_HDD_ENABLE_PIN(3) , &value);
 				mdelay(200);
-				syno_pch_lpc_gpio_pin(SYNO_GET_HDD_ENABLE_PIN(4) , &value, 1);
+				SYNO_X86_GPIO_PIN_SET(SYNO_GET_HDD_ENABLE_PIN(4) , &value);
 				break;
 			case 1 ... 4:
-				syno_pch_lpc_gpio_pin(SYNO_GET_HDD_ENABLE_PIN(index) , &value, 1);
+				SYNO_X86_GPIO_PIN_SET(SYNO_GET_HDD_ENABLE_PIN(index) , &value);
 				break;
 			default:
 				goto END;
 		}
-	}else if(syno_is_hw_version(HW_DS713p)) {
+	}else if(syno_is_hw_version(HW_DS713p) ||
+		syno_is_hw_version(HW_DS716p) ||
+		syno_is_hw_version(HW_DS216p)) {
 		switch(index){
 			case 0:
 				/* index is 1-based, so apply 0 for all*/
-				syno_pch_lpc_gpio_pin(SYNO_GET_HDD_ENABLE_PIN(1) , &value, 1);
+				SYNO_X86_GPIO_PIN_SET(SYNO_GET_HDD_ENABLE_PIN(1) , &value);
 				mdelay(200);
-				syno_pch_lpc_gpio_pin(SYNO_GET_HDD_ENABLE_PIN(2) , &value, 1);
+				SYNO_X86_GPIO_PIN_SET(SYNO_GET_HDD_ENABLE_PIN(2) , &value);
 				break;
 			case 1 ... 2:
-				syno_pch_lpc_gpio_pin(SYNO_GET_HDD_ENABLE_PIN(index) , &value, 1);
+				SYNO_X86_GPIO_PIN_SET(SYNO_GET_HDD_ENABLE_PIN(index) , &value);
 				break;
 			default:
 				goto END;
@@ -490,8 +517,7 @@ static u8 SYNO_GET_HDD_PRESENT_PIN(const int index)
 #elif defined(CONFIG_SYNO_AVOTON)
 	u8 przPinMap[] = {18, 28, 34, 44};
 #elif defined(CONFIG_SYNO_BRASWELL)
-/* Todo */
-	u8 przPinMap[] = {0, 0, 0, 0};
+	u8 przPinMap[] = {56, 59, 63, 57};
 #else
 	u8 *przPinMap = NULL;
 #endif
@@ -539,7 +565,11 @@ int SYNO_CHECK_HDD_PRESENT(int index)
 		goto END;
 	}
 
+#if defined(CONFIG_SYNO_ICH_GPIO_CTRL)
 	syno_pch_lpc_gpio_pin(iPin, &iPrzVal, 0);
+#elif defined(CONFIG_SYNO_X86_PINCTRL_GPIO)
+	syno_gpio_value_get(iPin, &iPrzVal);
+#endif
 
 	if (iInverseValue) {
 		if (iPrzVal) {
@@ -569,8 +599,10 @@ int SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER(void)
 	    syno_is_hw_version(HW_DS712pv10) ||
 	    syno_is_hw_version(HW_DS412p) ||
 	    syno_is_hw_version(HW_DS415p) ||
-	    syno_is_hw_version(HW_DS416play) ||
-	    syno_is_hw_version(HW_DS713p)) {
+	    syno_is_hw_version(HW_DS416p) ||
+	    syno_is_hw_version(HW_DS713p) ||
+		syno_is_hw_version(HW_DS716p) ||
+		syno_is_hw_version(HW_DS216p)) {
 		iRet = 1;
 	} else {
 		goto END;
@@ -597,7 +629,7 @@ int SynoProcEncPwrCtl(struct ctl_table *table, int write,
 	int iValue = 0;
 
 	if (write) {
-		if (-1 == syno_pch_lpc_gpio_pin(20, &iValue, 1)) {
+		if (-1 == SYNO_X86_GPIO_PIN_SET(20, &iValue)) {
 			printk("fail to drive PCH GPIO20 to low\n");
 		}
 	}
@@ -849,6 +881,20 @@ static int __init early_disk_idx_map(char *p)
 __setup("DiskIdxMap=", early_disk_idx_map);
 #endif /* CONFIG_SYNO_DISK_INDEX_MAP */
 
+#ifdef CONFIG_SYNO_FIXED_DISK_NAME_MV14XX
+static int __init early_disk_idx_map_mv14xx(char *p)
+{
+	snprintf(gszDiskIdxMapMv14xx, sizeof(gszDiskIdxMapMv14xx), "%s", p);
+
+	if('\0' != gszDiskIdxMapMv14xx[0]) {
+		printk("Disk Indx Map on MV14xx: %s\n", gszDiskIdxMapMv14xx);
+	}
+
+	return 1;
+}
+__setup("DiskIdxMapMv14xx=", early_disk_idx_map_mv14xx);
+#endif /* CONFIG_SYNO_FIXED_DISK_NAME_MV14XX */
+
 #ifdef CONFIG_SYNO_HW_REVISION
 static int __init early_hw_revision(char *p)
 {
@@ -1069,6 +1115,39 @@ static int __init early_factory_usb3_disable(char *p)
 }
 __setup("syno_disable_usb3=", early_factory_usb3_disable);
 #endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
+
+#ifdef CONFIG_SYNO_CASTRATED_XHC
+static int __init early_castrated_xhc(char *p)
+{
+	int iCount = 0;
+	char *pBegin = p;
+	char *pEnd = strstr(pBegin, ",");
+	char *pPortSep = NULL;
+
+	while (iCount < CONFIG_SYNO_NUM_CASTRATED_XHC) {
+		if(NULL != pEnd)
+			*pEnd = '\0';
+		pPortSep = strstr(pBegin, "@");
+		if (pPortSep == NULL) {
+			printk("Castrated xHC - Parameter format not correct\n");
+			break;
+		}
+		*pPortSep = '\0';
+		snprintf(gSynoCastratedXhcAddr[iCount],
+				sizeof(gSynoCastratedXhcAddr[iCount]), "%s", pBegin);
+		gSynoCastratedXhcPortBitmap[iCount] = simple_strtoul(pPortSep + 1, NULL,
+				16);
+		if (NULL == pEnd)
+			break;
+		pBegin = pEnd + 1;
+		pEnd = strstr(pBegin, ",");
+		iCount++;
+	}
+
+	return 1;
+}
+__setup("syno_castrated_xhc=", early_castrated_xhc);
+#endif /* CONFIG_SYNO_CASTRATED_XHC */
 
 #ifdef CONFIG_SYNO_SATA_DISK_SEQ_REVERSE
 static int __init early_disk_seq_reserve(char *p)

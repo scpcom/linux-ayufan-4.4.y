@@ -91,12 +91,20 @@ dtb-$(CONFIG_ARCH_KIRKWOOD) += kirkwood-cloudbox.dtb \
 dtb-$(CONFIG_ARCH_MARCO) += marco-evb.dtb
 dtb-$(CONFIG_ARCH_MSM) += msm8660-surf.dtb \
 	msm8960-cdp.dtb
+ifeq ($(CONFIG_SYNO_LSP_ARMADA),y)
+dtb-$(CONFIG_ARCH_MVEBU) += armada-38x-modular.dtb \
+	armada-388-customer0.dtb \
+	armada-385-customer1.dtb \
+	armada-382-customer2.dtb \
+	armada-385-customer3.dtb
+else
 dtb-$(CONFIG_ARCH_MVEBU) += armada-370-db.dtb \
 	armada-370-mirabox.dtb \
 	armada-370-rd.dtb \
 	armada-xp-db.dtb \
 	armada-xp-gp.dtb \
 	armada-xp-openblocks-ax3-4.dtb
+endif
 dtb-$(CONFIG_ARCH_MXC) += \
 	imx25-karo-tx25.dtb \
 	imx25-pdk.dtb \
@@ -177,6 +185,35 @@ dtb-$(CONFIG_ARCH_SPEAR3XX)+= spear300-evb.dtb \
 	spear320-evb.dtb \
 	spear320-hmi.dtb
 dtb-$(CONFIG_ARCH_SPEAR6XX)+= spear600-evb.dtb
+dtb-$(CONFIG_ARCH_STI)+= stih416-b2000.dtb \
+	stih416-b2020.dtb \
+	stih416-b2020e.dtb \
+	stih416-b2105.dtb \
+	stid127-b2112.dtb \
+	stid127-b2147.dtb \
+	stid127-b2163a.dtb \
+	stih407-b2120.dtb \
+	stih407-b2089.dtb \
+	stih407-b2148.dtb \
+	stih407-b2172.dtb \
+	stih410cut1-b2120.dtb \
+	stih410cut1-b2163.dtb \
+	stih410-b2120.dtb \
+	stih410-b2089.dtb \
+	stih410cut1-b2148.dtb \
+	stih410-b2148.dtb \
+	stih305-b2120.dtb \
+	stih305-b2089.dtb \
+	stih305-b2148.dtb \
+	stih310cut1-b2120.dtb \
+	stih310-b2120.dtb \
+	stih310-b2089.dtb \
+	stih310cut1-b2148.dtb \
+	stih310-b2148.dtb \
+	stih301cut1-b2173.dtb \
+	stih301-b2173.dtb \
+	stih314cut0-b2188.dtb \
+	stih301-b2196.dtb
 dtb-$(CONFIG_ARCH_SUNXI) += \
 	sun4i-a10-cubieboard.dtb \
 	sun4i-a10-mini-xplus.dtb \
@@ -209,6 +246,19 @@ dtb-$(CONFIG_ARCH_VT8500) += vt8500-bv07.dtb \
 	wm8650-mid.dtb \
 	wm8850-w70v2.dtb
 dtb-$(CONFIG_ARCH_ZYNQ) += zynq-zc702.dtb
+
+dtb-$(CONFIG_ARCH_ALPINE) += \
+	alpine_db_m0.dtb \
+	alpine_db.dtb \
+	alpine_db_pcie.dtb \
+	alpine_db_pcie01g0.dtb \
+	alpine_db_xen.dtb \
+	alpine_niagara312a.dtb \
+	alpine_sdnic.dtb \
+	alpine_sdnic_nand.dtb \
+	alpine_sdnic_2ep.dtb \
+	alpine_security_box.dtb \
+	alpine_haifa_interposer.dtb \
 
 targets += dtbs
 targets += $(dtb-y)

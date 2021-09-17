@@ -16,7 +16,11 @@ typedef struct {
 #ifdef CONFIG_CPU_HAS_ASID
 #define ASID_BITS	8
 #define ASID_MASK	((~0ULL) << ASID_BITS)
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+#define ASID(mm)	((unsigned int)((mm)->context.id.counter & ~ASID_MASK))
+#else /* CONFIG_SYNO_LSP_ARMADA */
 #define ASID(mm)	((mm)->context.id.counter & ~ASID_MASK)
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 #else
 #define ASID(mm)	(0)
 #endif

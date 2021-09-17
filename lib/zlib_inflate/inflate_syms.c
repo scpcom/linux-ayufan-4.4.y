@@ -17,4 +17,9 @@ EXPORT_SYMBOL(zlib_inflateEnd);
 EXPORT_SYMBOL(zlib_inflateReset);
 EXPORT_SYMBOL(zlib_inflateIncomp); 
 EXPORT_SYMBOL(zlib_inflate_blob);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#ifdef CONFIG_ST_ELF_EXTENSIONS
+EXPORT_SYMBOL(zlib_inflate_blob_with_header);
+#endif
+#endif /* CONFIG_SYNO_LSP_MONACO */
 MODULE_LICENSE("GPL");

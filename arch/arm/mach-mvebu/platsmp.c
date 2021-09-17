@@ -21,6 +21,9 @@
 #include <linux/smp.h>
 #include <linux/clk.h>
 #include <linux/of.h>
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+#include <linux/of_address.h>
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 #include <linux/mbus.h>
 #include <asm/cacheflush.h>
 #include <asm/smp_plat.h>
@@ -28,6 +31,11 @@
 #include "armada-370-xp.h"
 #include "pmsu.h"
 #include "coherency.h"
+
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+#define AXP_BOOTROM_BASE 0xfff00000
+#define AXP_BOOTROM_SIZE 0x100000
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 void __init set_secondary_cpus_clock(void)
 {
@@ -67,6 +75,9 @@ void __init set_secondary_cpus_clock(void)
 		if (cpu != thiscpu) {
 			cpu_clk = of_clk_get(np, 0);
 			clk_set_rate(cpu_clk, rate);
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+			clk_prepare_enable(cpu_clk);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 		}
 	}
 }
@@ -81,11 +92,54 @@ static int __cpuinit armada_xp_boot_secondary(unsigned int cpu,
 {
 	pr_info("Booting CPU %d\n", cpu);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	mvebu_pmsu_set_cpu_boot_addr(cpu, armada_xp_secondary_startup);
+	mvebu_boot_cpu(cpu);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	armada_xp_boot_cpu(cpu, armada_xp_secondary_startup);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 	return 0;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+static void __init armada_xp_smp_init_cpus(void)
+{
+	unsigned int ncores = num_possible_cpus();
+
+	if (ncores == 0 || ncores > ARMADA_XP_MAX_CPUS)
+		panic("Invalid number of CPUs in DT\n");
+
+	set_smp_cross_call(armada_mpic_send_doorbell);
+}
+
+void __init armada_xp_smp_prepare_cpus(unsigned int max_cpus)
+{
+	struct device_node *node;
+	struct resource res;
+	int err;
+
+	set_secondary_cpus_clock();
+	flush_cache_all();
+	set_cpu_coherent();
+
+	/*
+	 * In order to boot the secondary CPUs we need to ensure
+	 * the bootROM is mapped at the correct address.
+	 */
+	node = of_find_compatible_node(NULL, NULL, "marvell,bootrom");
+	if (!node)
+		panic("Cannot find 'marvell,bootrom' compatible node");
+
+	err = of_address_to_resource(node, 0, &res);
+	if (err < 0)
+		panic("Cannot get 'bootrom' node address");
+
+	if (res.start != AXP_BOOTROM_BASE ||
+	    resource_size(&res) != AXP_BOOTROM_SIZE)
+		panic("The address for the BootROM is incorrect");
+}
+#else /* CONFIG_SYNO_LSP_ARMADA */
 static void __init armada_xp_smp_init_cpus(void)
 {
 	unsigned int i, ncores;
@@ -112,6 +166,7 @@ void __init armada_xp_smp_prepare_cpus(unsigned int max_cpus)
 	set_cpu_coherent(cpu_logical_map(smp_processor_id()), 0);
 	mvebu_mbus_add_window("bootrom", 0xfff00000, SZ_1M);
 }
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 struct smp_operations armada_xp_smp_ops __initdata = {
 	.smp_init_cpus		= armada_xp_smp_init_cpus,

@@ -698,19 +698,65 @@ void rc_keydown_notimeout(struct rc_dev *dev, int scancode, u8 toggle)
 }
 EXPORT_SYMBOL_GPL(rc_keydown_notimeout);
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+int rc_open(struct rc_dev *rdev)
+{
+	int rval = 0;
+
+	if (!rdev)
+		return -EINVAL;
+
+	mutex_lock(&rdev->lock);
+	if (!rdev->users++)
+		rval = rdev->open(rdev);
+
+	if (rval)
+		rdev->users--;
+
+	mutex_unlock(&rdev->lock);
+
+	return rval;
+}
+EXPORT_SYMBOL_GPL(rc_open);
+
+#endif /* CONFIG_SYNO_LSP_MONACO */
 static int ir_open(struct input_dev *idev)
 {
 	struct rc_dev *rdev = input_get_drvdata(idev);
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	return rc_open(rdev);
+#else /* CONFIG_SYNO_LSP_MONACO */
 	return rdev->open(rdev);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 }
+
+#if defined (CONFIG_SYNO_LSP_MONACO)
+void rc_close(struct rc_dev *rdev)
+{
+	if (rdev) {
+		mutex_lock(&rdev->lock);
+
+		 if (!--rdev->users)
+		rdev->close(rdev);
+
+		mutex_unlock(&rdev->lock);
+	}
+}
+
+EXPORT_SYMBOL_GPL(rc_close);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 static void ir_close(struct input_dev *idev)
 {
 	struct rc_dev *rdev = input_get_drvdata(idev);
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	rc_close(rdev);
+#else /* CONFIG_SYNO_LSP_MONACO */
 	 if (rdev)
 		rdev->close(rdev);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 }
 
 /* class for /sys/class/rc */
@@ -1075,7 +1121,16 @@ int rc_register_device(struct rc_dev *dev)
 	memcpy(&dev->input_dev->id, &dev->input_id, sizeof(dev->input_id));
 	dev->input_dev->phys = dev->input_phys;
 	dev->input_dev->name = dev->input_name;
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	/* input_register_device can call ir_open, so unlock mutex here */
+	mutex_unlock(&dev->lock);
+
 	rc = input_register_device(dev->input_dev);
+
+	mutex_lock(&dev->lock);
+#else /* CONFIG_SYNO_LSP_MONACO */
+	rc = input_register_device(dev->input_dev);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	if (rc)
 		goto out_table;
 

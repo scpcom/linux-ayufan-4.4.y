@@ -84,7 +84,11 @@ static struct snd_pcm_ops pxa2xx_pcm_ops = {
 	.mmap		= pxa2xx_pcm_mmap,
 };
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA */
 static u64 pxa2xx_pcm_dmamask = DMA_BIT_MASK(32);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 static int pxa2xx_soc_pcm_new(struct snd_soc_pcm_runtime *rtd)
 {
@@ -92,10 +96,16 @@ static int pxa2xx_soc_pcm_new(struct snd_soc_pcm_runtime *rtd)
 	struct snd_pcm *pcm = rtd->pcm;
 	int ret = 0;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	ret = dma_coerce_mask_and_coherent(card->dev, DMA_BIT_MASK(32));
+	if (ret)
+		return ret;
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	if (!card->dev->dma_mask)
 		card->dev->dma_mask = &pxa2xx_pcm_dmamask;
 	if (!card->dev->coherent_dma_mask)
 		card->dev->coherent_dma_mask = DMA_BIT_MASK(32);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 	if (pcm->streams[SNDRV_PCM_STREAM_PLAYBACK].substream) {
 		ret = pxa2xx_pcm_preallocate_dma_buffer(pcm,

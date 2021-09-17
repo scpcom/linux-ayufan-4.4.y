@@ -3,6 +3,18 @@
 
 #include <linux/thread_info.h>
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+/*
+ * For v7 SMP cores running a preemptible kernel we may be pre-empted
+ * during a TLB maintenance operation, so execute an inner-shareable dsb
+ * to ensure that the maintenance completes in case we migrate to another
+ * CPU.
+ */
+#if defined(CONFIG_PREEMPT) && defined(CONFIG_SMP) && defined(CONFIG_CPU_V7)
+#define finish_arch_switch(prev)	dsb(ish)
+#endif
+#endif /* CONFIG_SYNO_LSP_MONACO */
+
 /*
  * switch_to(prev, next) should switch from task `prev' to `next'
  * `prev' will never be the same as `next'.  schedule() itself

@@ -17,7 +17,11 @@
 #include <linux/device.h>
 #include <linux/cpufreq.h>
 #include <linux/clk.h>
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#include <linux/pm_opp.h>
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 #include <linux/opp.h>
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
 /*
  * agent_id values for use with omap_pm_set_min_bus_tput():

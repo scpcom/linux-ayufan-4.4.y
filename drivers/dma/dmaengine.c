@@ -65,11 +65,17 @@
 #include <linux/acpi.h>
 #include <linux/acpi_dma.h>
 #include <linux/of_dma.h>
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+#include <linux/pagemap.h>
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 static DEFINE_MUTEX(dma_list_mutex);
 static DEFINE_IDR(dma_idr);
 static LIST_HEAD(dma_device_list);
 static long dmaengine_ref_count;
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+static struct page *temp_page = NULL;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 /* --- sysfs implementation --- */
 
@@ -347,7 +353,11 @@ EXPORT_SYMBOL(dma_find_channel);
  */
 struct dma_chan *net_dma_find_channel(void)
 {
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	struct dma_chan *chan = dma_find_channel(DMA_SG);
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	struct dma_chan *chan = dma_find_channel(DMA_MEMCPY);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	if (chan && !is_dma_copy_aligned(chan->device, 1, 1, 1))
 		return NULL;
 
@@ -924,6 +934,10 @@ dma_async_memcpy_buf_to_buf(struct dma_chan *chan, void *dest,
 }
 EXPORT_SYMBOL(dma_async_memcpy_buf_to_buf);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+#define DMA_ENGINE_MIN_OP_SIZE 128
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
 /**
  * dma_async_memcpy_buf_to_pg - offloaded copy from address to page
  * @chan: DMA channel to offload copy to
@@ -946,6 +960,42 @@ dma_async_memcpy_buf_to_pg(struct dma_chan *chan, struct page *page,
 	dma_addr_t dma_dest, dma_src;
 	dma_cookie_t cookie;
 	unsigned long flags;
+
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	if (!page) {
+		printk(KERN_ERR "%s page %p\n", __FUNCTION__, (void*)page);
+		return -EFAULT;
+	}
+	/*
+	  This code snippet is for Marvell XOR engine that supports operation on len < 128
+	  So if we get a copy operation smaller than 128, we use memcpy
+	  Also, we're creating a dummy dma operation in order to satisfy upper layers waiting
+	  for a valid cookie return code.
+	*/
+	if (len < DMA_ENGINE_MIN_OP_SIZE)
+	{
+		void * dst = kmap_atomic(page) + offset;
+		memcpy(dst, kdata, len);
+		kunmap_atomic(dst);
+
+		dma_src = dma_map_page(dev->dev, temp_page, 0, PAGE_SIZE, DMA_TO_DEVICE);
+		dma_dest = dma_map_page(dev->dev, temp_page, 0, PAGE_SIZE, DMA_FROM_DEVICE);
+
+		flags = DMA_CTRL_ACK;
+		tx = dev->device_prep_dma_memcpy(chan, dma_dest, dma_src, DMA_ENGINE_MIN_OP_SIZE, flags);
+
+		if (!tx) {
+			dma_unmap_page(dev->dev, dma_src, PAGE_SIZE, DMA_TO_DEVICE);
+			dma_unmap_page(dev->dev, dma_dest, PAGE_SIZE, DMA_FROM_DEVICE);
+			return -ENOMEM;
+		}
+
+		tx->callback = NULL;
+		cookie = tx->tx_submit(tx);
+
+		return cookie;
+	}
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 	dma_src = dma_map_single(dev->dev, kdata, len, DMA_TO_DEVICE);
 	dma_dest = dma_map_page(dev->dev, page, offset, len, DMA_FROM_DEVICE);
@@ -995,6 +1045,42 @@ dma_async_memcpy_pg_to_pg(struct dma_chan *chan, struct page *dest_pg,
 	dma_cookie_t cookie;
 	unsigned long flags;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	if (!dest_pg || !src_pg) {
+		printk(KERN_ERR "%s dest_pg %p src_pg %p\n", __FUNCTION__, (void*)dest_pg, (void*)src_pg);
+		return -EFAULT;
+	}
+
+	/*
+	  This code snippet is for Marvell XOR engine that doesn't support operations on len < 128
+	  So if we get a copy operation smaller than 128, we use memcpy
+	  Also, we're creating a dummy dma operation in order to satisfy upper layers waiting
+	  for a valid cookie return code.
+	*/
+	if (len < DMA_ENGINE_MIN_OP_SIZE)
+	{
+		void * dst = kmap_atomic(dest_pg) + dest_off;
+		memcpy(dst, src_pg+src_off, len);
+		kunmap_atomic(dst);
+
+		dma_src = dma_map_page(dev->dev, temp_page, 0, PAGE_SIZE, DMA_TO_DEVICE);
+		dma_dest = dma_map_page(dev->dev, temp_page, 0, PAGE_SIZE, DMA_FROM_DEVICE);
+		flags = DMA_CTRL_ACK;
+		tx = dev->device_prep_dma_memcpy(chan, dma_dest, dma_src, DMA_ENGINE_MIN_OP_SIZE, flags);
+
+		if (!tx) {
+			dma_unmap_page(dev->dev, dma_src, PAGE_SIZE, DMA_TO_DEVICE);
+			dma_unmap_page(dev->dev, dma_dest, PAGE_SIZE, DMA_FROM_DEVICE);
+			return -ENOMEM;
+		}
+
+		tx->callback = NULL;
+		cookie = tx->tx_submit(tx);
+
+		return cookie;
+	}
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
 	dma_src = dma_map_page(dev->dev, src_pg, src_off, len, DMA_TO_DEVICE);
 	dma_dest = dma_map_page(dev->dev, dest_pg, dest_off, len,
 				DMA_FROM_DEVICE);
@@ -1018,6 +1104,61 @@ dma_async_memcpy_pg_to_pg(struct dma_chan *chan, struct page *dest_pg,
 	return cookie;
 }
 EXPORT_SYMBOL(dma_async_memcpy_pg_to_pg);
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+/**
+ * dma_async_memcpy_sg_to_sg - offloaded copy from sg to sg
+ * @chan: DMA channel to offload copy to
+ * @dest_pg: destination page
+ * @dest_off: offset in page to copy to
+ * @src_pg: source page
+ * @src_off: offset in page to copy from
+ * @len: length
+ */
+dma_cookie_t
+dma_async_memcpy_sg_to_sg(struct dma_chan *chan,
+	struct scatterlist *dst_sg, unsigned int dst_nents,
+	struct scatterlist *src_sg, unsigned int src_nents)
+{
+	struct dma_device *dev = chan->device;
+	struct dma_async_tx_descriptor *tx;
+	dma_cookie_t cookie;
+	unsigned long flags;
+	int src_sglen;
+	int dst_sglen;
+
+	/* Map DMA buffers */
+	src_sglen = dma_map_sg(chan->device->dev, src_sg,
+				src_nents, DMA_TO_DEVICE);
+	BUG_ON(!src_sglen);
+
+	dst_sglen = dma_map_sg(chan->device->dev, dst_sg,
+				dst_nents, DMA_FROM_DEVICE);
+	BUG_ON(!dst_sglen);
+
+	flags = DMA_CTRL_ACK;
+
+	tx = dev->device_prep_dma_sg(chan, dst_sg, dst_sglen,
+					     src_sg, src_sglen, flags);
+	if (!tx) {
+		dma_unmap_sg(chan->device->dev, src_sg,
+			   src_nents, DMA_TO_DEVICE);
+		dma_unmap_sg(chan->device->dev, dst_sg,
+			   dst_nents, DMA_FROM_DEVICE);
+		return -ENOMEM;
+	}
+
+	tx->callback = NULL;
+	cookie = tx->tx_submit(tx);
+
+	preempt_disable();
+	__this_cpu_inc(chan->local->memcpy_count);
+	preempt_enable();
+
+	return cookie;
+}
+EXPORT_SYMBOL(dma_async_memcpy_sg_to_sg);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 void dma_async_tx_descriptor_init(struct dma_async_tx_descriptor *tx,
 	struct dma_chan *chan)
@@ -1092,6 +1233,11 @@ EXPORT_SYMBOL_GPL(dma_run_dependencies);
 
 static int __init dma_bus_init(void)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	temp_page = alloc_pages(GFP_KERNEL, 0);
+	if (!temp_page)
+                BUG();
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	return class_register(&dma_devclass);
 }
 arch_initcall(dma_bus_init);

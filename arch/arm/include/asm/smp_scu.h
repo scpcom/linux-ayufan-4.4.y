@@ -26,11 +26,19 @@ static inline unsigned long scu_a9_get_base(void)
 unsigned int scu_get_core_count(void __iomem *);
 int scu_power_mode(void __iomem *, unsigned int);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(CONFIG_HAVE_ARM_SCU)
+void scu_enable(void __iomem *scu_base);
+#else
+static inline void scu_enable(void __iomem *scu_base) {}
+#endif
+#else /* CONFIG_SYNO_LSP_ARMADA */
 #ifdef CONFIG_SMP
 void scu_enable(void __iomem *scu_base);
 #else
 static inline void scu_enable(void __iomem *scu_base) {}
 #endif
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 #endif
 

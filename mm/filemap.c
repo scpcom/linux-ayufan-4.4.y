@@ -1570,7 +1570,11 @@ static void do_sync_mmap_readahead(struct vm_area_struct *vma,
 	 * mmap read-around
 	 */
 	ra_pages = max_sane_readahead(ra->ra_pages);
+#ifdef CONFIG_LFS_ON_32CPU
+	ra->start = max_t(long long, 0, offset - ra_pages / 2);
+#else /* CONFIG_LFS_ON_32CPU */
 	ra->start = max_t(long, 0, offset - ra_pages / 2);
+#endif /* CONFIG_LFS_ON_32CPU */
 	ra->size = ra_pages;
 	ra->async_size = ra_pages / 4;
 	ra_submit(ra, mapping, file);
@@ -2217,8 +2221,12 @@ static int sock2iov(struct socket *sock, struct kvec *iov,
 	sock->sk->sk_rcvtimeo = 64 * HZ;
 
 	kmsg_ret = kernel_recvmsg(
-			sock, &msg, &iov[0], page_count, bytes_to_received,
+			sock, &msg, &iov[start_page], page_count, bytes_to_received,
+#if defined(CONFIG_SYNO_ALPINE)
+			MSG_WAITALL | MSG_NOCATCHSIGNAL | MSG_KERNSPACE);
+#else /* CONFIG_SYNO_ALPINE */
 			MSG_WAITALL | MSG_NOCATCHSIGNAL);
+#endif /* CONFIG_SYNO_ALPINE */
 
 	sock->sk->sk_rcvtimeo = rcvtimeo;
 	if (kmsg_ret >= 0) {
@@ -2359,8 +2367,6 @@ release_pages:
 								bytes, bytes, page, fsdata);
 			/* Keep error code if write_end() failed for some reason */
 			if (0 > write_end_ret) {
-				printk("write_end failed. file:%s, pos:%lld, ret:%d\n",
-				      file->f_dentry->d_name.name, pos, write_end_ret);
 				if (!failed_write_flag) {
 					failed_write_flag = 1;
 					if (page_index) {
@@ -2651,6 +2657,21 @@ struct page *grab_cache_page_write_begin(struct address_space *mapping,
 		gfp_mask |= __GFP_WRITE;
 	if (flags & AOP_FLAG_NOFS)
 		gfp_notmask = __GFP_FS;
+
+#ifdef CONFIG_SYNO_PKMAP_NOT_ENOUGH_FIX
+	/**
+	 * The purpose of this line is to avoid from getting pages from high
+	 * memory. In some extreme conditions, kernel may get a lot of pages
+	 * from high page and try to map them into pkmap address.
+	 * pkmap is usually 2 MB width and limited resource, so anyone who map
+	 * this page shall unmap it ASAP. For system write begin routine, it
+	 * grabs memory from page cache and we shall force them to get page
+	 * from normal memory in case the pkmap address is not enough, and any
+	 * caller to map a high page will stick into a long wait.
+	 */
+	gfp_notmask |= __GFP_HIGHMEM;
+#endif
+
 repeat:
 	page = find_lock_page(mapping, index);
 	if (page)

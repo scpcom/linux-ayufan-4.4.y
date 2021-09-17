@@ -353,6 +353,12 @@ config REGULATOR_DB8500_PRCMU
 	  This driver supports the voltage domain regulators controlled by the
 	  DB8500 PRCMU
 
+config REGULATOR_ST_PWM
+	tristate "STMicroelectronics PWM voltage regulator"
+	depends on ARCH_STI
+	help
+	 This driver supports ST's PWM controlled voltage regulators.
+
 config REGULATOR_PALMAS
 	tristate "TI Palmas PMIC Regulators"
 	depends on MFD_PALMAS
@@ -514,5 +520,11 @@ config REGULATOR_AS3711
 	  This driver provides support for the voltage regulators on the
 	  AS3711 PMIC
 
+config REGULATOR_ST_FLASHSS
+	tristate "STMicroelectronics FlashSS regulator"
+	depends on ARCH_STI && OF
+	help
+	  This driver provides support for the voltage regulators available
+	  inside the FlashSS embedded in some ST SoCs: e.g. STiH407/STiH410
+	  and STi8416.
 endif
-

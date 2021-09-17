@@ -1886,7 +1886,11 @@ retry:
 		pgoff_t next = 0, tofind;
 		struct page **pages;
 
+#ifdef CONFIG_SYNO_LSP_ALPINE
+		tofind = min((pgoff_t)((cifs_sb->wsize / PAGE_CACHE_SIZE) - 1),
+#else /* CONFIG_SYNO_LSP_ALPINE */
 		tofind = min((cifs_sb->wsize / PAGE_CACHE_SIZE) - 1,
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 				end - index) + 1;
 
 		wdata = cifs_writedata_alloc((unsigned int)tofind,
@@ -3175,7 +3179,11 @@ cifs_readpages_read_into_pages(struct TCP_Server_Info *server,
 	/* determine the eof that the server (probably) has */
 	eof = CIFS_I(rdata->mapping->host)->server_eof;
 	eof_index = eof ? (eof - 1) >> PAGE_CACHE_SHIFT : 0;
+#ifdef CONFIG_SYNO_LSP_ALPINE
+	cifs_dbg(FYI, "eof=%llu eof_index=%llu\n", eof, (unsigned long long)eof_index);
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	cifs_dbg(FYI, "eof=%llu eof_index=%lu\n", eof, eof_index);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 	rdata->tailsz = PAGE_CACHE_SIZE;
 	for (i = 0; i < nr_pages; i++) {
@@ -3185,14 +3193,23 @@ cifs_readpages_read_into_pages(struct TCP_Server_Info *server,
 			/* enough data to fill the page */
 			iov.iov_base = kmap(page);
 			iov.iov_len = PAGE_CACHE_SIZE;
+#ifdef CONFIG_SYNO_ALPINE
+			cifs_dbg(FYI, "%u: idx=%llu iov_base=%p iov_len=%zu\n",
+				 i, page->index, iov.iov_base, iov.iov_len);
+#else /* CONFIG_SYNO_ALPINE */
 			cifs_dbg(FYI, "%u: idx=%lu iov_base=%p iov_len=%zu\n",
 				 i, page->index, iov.iov_base, iov.iov_len);
+#endif /* CONFIG_SYNO_ALPINE */
 			len -= PAGE_CACHE_SIZE;
 		} else if (len > 0) {
 			/* enough for partial page, fill and zero the rest */
 			iov.iov_base = kmap(page);
 			iov.iov_len = len;
+#ifdef CONFIG_SYNO_ALPINE
+			cifs_dbg(FYI, "%u: idx=%llu iov_base=%p iov_len=%zu\n",
+#else /* CONFIG_SYNO_ALPINE */
 			cifs_dbg(FYI, "%u: idx=%lu iov_base=%p iov_len=%zu\n",
+#endif /* CONFIG_SYNO_ALPINE */
 				 i, page->index, iov.iov_base, iov.iov_len);
 			memset(iov.iov_base + len,
 				'\0', PAGE_CACHE_SIZE - len);

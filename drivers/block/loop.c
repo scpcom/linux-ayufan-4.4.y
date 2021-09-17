@@ -344,8 +344,13 @@ lo_splice_actor(struct pipe_inode_info *pipe, struct pipe_buffer *buf,
 		size = p->bsize;
 
 	if (lo_do_transfer(lo, READ, page, buf->offset, p->page, p->offset, size, IV)) {
+#ifdef CONFIG_SYNO_LSP_ALPINE
+		printk(KERN_ERR "loop: transfer error block %lld\n",
+		       (unsigned long long)page->index);
+#else /* CONFIG_SYNO_LSP_ALPINE */
 		printk(KERN_ERR "loop: transfer error block %ld\n",
 		       page->index);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 		size = -EINVAL;
 	}
 

@@ -452,6 +452,67 @@ void sg_miter_start(struct sg_mapping_iter *miter, struct scatterlist *sgl,
 }
 EXPORT_SYMBOL(sg_miter_start);
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+static bool sg_miter_get_next_page(struct sg_mapping_iter *miter)
+{
+	if (!miter->__remaining) {
+		struct scatterlist *sg;
+		unsigned long pgoffset;
+
+		if (!__sg_page_iter_next(&miter->piter))
+			return false;
+
+		sg = miter->piter.sg;
+		pgoffset = miter->piter.sg_pgoffset;
+
+		miter->__offset = pgoffset ? 0 : sg->offset;
+		miter->__remaining = sg->offset + sg->length -
+				(pgoffset << PAGE_SHIFT) - miter->__offset;
+		miter->__remaining = min_t(unsigned long, miter->__remaining,
+					   PAGE_SIZE - miter->__offset);
+	}
+
+	return true;
+}
+
+/**
+ * sg_miter_skip - reposition mapping iterator
+ * @miter: sg mapping iter to be skipped
+ * @offset: number of bytes to plus the current location
+ *
+ * Description:
+ *   Sets the offset of @miter to its current location plus @offset bytes.
+ *   If mapping iterator @miter has been proceeded by sg_miter_next(), this
+ *   stops @miter.
+ *
+ * Context:
+ *   Don't care if @miter is stopped, or not proceeded yet.
+ *   Otherwise, preemption disabled if the SG_MITER_ATOMIC is set.
+ *
+ * Returns:
+ *   true if @miter contains the valid mapping.  false if end of sg
+ *   list is reached.
+ */
+static bool sg_miter_skip(struct sg_mapping_iter *miter, off_t offset)
+{
+	sg_miter_stop(miter);
+
+	while (offset) {
+		off_t consumed;
+
+		if (!sg_miter_get_next_page(miter))
+			return false;
+
+		consumed = min_t(off_t, offset, miter->__remaining);
+		miter->__offset += consumed;
+		miter->__remaining -= consumed;
+		offset -= consumed;
+	}
+
+	return true;
+}
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
 /**
  * sg_miter_next - proceed mapping iterator to the next mapping
  * @miter: sg mapping iter to proceed
@@ -477,6 +538,10 @@ bool sg_miter_next(struct sg_mapping_iter *miter)
 	 * Get to the next page if necessary.
 	 * __remaining, __offset is adjusted by sg_miter_stop
 	 */
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	if (!sg_miter_get_next_page(miter))
+		return false;
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	if (!miter->__remaining) {
 		struct scatterlist *sg;
 		unsigned long pgoffset;
@@ -493,6 +558,8 @@ bool sg_miter_next(struct sg_mapping_iter *miter)
 		miter->__remaining = min_t(unsigned long, miter->__remaining,
 					   PAGE_SIZE - miter->__offset);
 	}
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
 	miter->page = sg_page_iter_page(&miter->piter);
 	miter->consumed = miter->length = miter->__remaining;
 
@@ -546,6 +613,21 @@ void sg_miter_stop(struct sg_mapping_iter *miter)
 }
 EXPORT_SYMBOL(sg_miter_stop);
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+/**
+ * sg_copy_buffer - Copy data between a linear buffer and an SG list
+ * @sgl:		 The SG list
+ * @nents:		 Number of SG entries
+ * @buf:		 Where to copy from
+ * @buflen:		 The number of bytes to copy
+ * @skip:		 Number of bytes to skip before copying
+ * @to_buffer:		 transfer direction (true == from an sg list to a
+ *			 buffer, false == from a buffer to an sg list
+ *
+ * Returns the number of copied bytes.
+ *
+ **/
+#else /* CONFIG_SYNO_LSP_ALPINE */
 /**
  * sg_copy_buffer - Copy data between a linear buffer and an SG list
  * @sgl:		 The SG list
@@ -558,8 +640,15 @@ EXPORT_SYMBOL(sg_miter_stop);
  * Returns the number of copied bytes.
  *
  **/
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+static size_t sg_copy_buffer(struct scatterlist *sgl, unsigned int nents,
+			     void *buf, size_t buflen, off_t skip,
+			     bool to_buffer)
+#else /* CONFIG_SYNO_LSP_ALPINE */
 static size_t sg_copy_buffer(struct scatterlist *sgl, unsigned int nents,
 			     void *buf, size_t buflen, int to_buffer)
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 {
 	unsigned int offset = 0;
 	struct sg_mapping_iter miter;
@@ -572,6 +661,11 @@ static size_t sg_copy_buffer(struct scatterlist *sgl, unsigned int nents,
 		sg_flags |= SG_MITER_TO_SG;
 
 	sg_miter_start(&miter, sgl, nents, sg_flags);
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	if (!sg_miter_skip(&miter, skip))
+		return false;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 	local_irq_save(flags);
 
@@ -607,7 +701,11 @@ static size_t sg_copy_buffer(struct scatterlist *sgl, unsigned int nents,
 size_t sg_copy_from_buffer(struct scatterlist *sgl, unsigned int nents,
 			   void *buf, size_t buflen)
 {
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	return sg_copy_buffer(sgl, nents, buf, buflen, 0, false);
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	return sg_copy_buffer(sgl, nents, buf, buflen, 0);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 }
 EXPORT_SYMBOL(sg_copy_from_buffer);
 
@@ -624,6 +722,48 @@ EXPORT_SYMBOL(sg_copy_from_buffer);
 size_t sg_copy_to_buffer(struct scatterlist *sgl, unsigned int nents,
 			 void *buf, size_t buflen)
 {
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	return sg_copy_buffer(sgl, nents, buf, buflen, 0, true);
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	return sg_copy_buffer(sgl, nents, buf, buflen, 1);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 }
 EXPORT_SYMBOL(sg_copy_to_buffer);
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+/**
+ * sg_pcopy_from_buffer - Copy from a linear buffer to an SG list
+ * @sgl:		 The SG list
+ * @nents:		 Number of SG entries
+ * @buf:		 Where to copy from
+ * @skip:		 Number of bytes to skip before copying
+ * @buflen:		 The number of bytes to copy
+ *
+ * Returns the number of copied bytes.
+ *
+ **/
+size_t sg_pcopy_from_buffer(struct scatterlist *sgl, unsigned int nents,
+			    void *buf, size_t buflen, off_t skip)
+{
+	return sg_copy_buffer(sgl, nents, buf, buflen, skip, false);
+}
+EXPORT_SYMBOL(sg_pcopy_from_buffer);
+
+/**
+ * sg_pcopy_to_buffer - Copy from an SG list to a linear buffer
+ * @sgl:		 The SG list
+ * @nents:		 Number of SG entries
+ * @buf:		 Where to copy to
+ * @skip:		 Number of bytes to skip before copying
+ * @buflen:		 The number of bytes to copy
+ *
+ * Returns the number of copied bytes.
+ *
+ **/
+size_t sg_pcopy_to_buffer(struct scatterlist *sgl, unsigned int nents,
+			  void *buf, size_t buflen, off_t skip)
+{
+	return sg_copy_buffer(sgl, nents, buf, buflen, skip, true);
+}
+EXPORT_SYMBOL(sg_pcopy_to_buffer);
+#endif /* CONFIG_SYNO_LSP_ALPINE */

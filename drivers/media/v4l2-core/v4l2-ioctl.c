@@ -150,6 +150,10 @@ const char *v4l2_type_names[] = {
 	[V4L2_BUF_TYPE_VIDEO_OUTPUT_OVERLAY] = "vid-out-overlay",
 	[V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE] = "vid-cap-mplane",
 	[V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE] = "vid-out-mplane",
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	[V4L2_BUF_TYPE_DVB_CAPTURE] = "dvb-cap",
+	[V4L2_BUF_TYPE_DVB_OUTPUT]  = "dvb-cap",
+#endif /* CONFIG_SYNO_LSP_MONACO */
 };
 EXPORT_SYMBOL(v4l2_type_names);
 
@@ -900,6 +904,16 @@ static int check_fmt(struct file *file, enum v4l2_buf_type type)
 		return -EINVAL;
 
 	switch (type) {
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	case V4L2_BUF_TYPE_DVB_CAPTURE:
+		if (ops->vidioc_g_fmt_dvb_cap)
+			return 0;
+		break;
+	case V4L2_BUF_TYPE_DVB_OUTPUT:
+		if (ops->vidioc_g_fmt_dvb_out)
+			return 0;
+		break;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	case V4L2_BUF_TYPE_VIDEO_CAPTURE:
 		if (is_vid && is_rx &&
 		    (ops->vidioc_g_fmt_vid_cap || ops->vidioc_g_fmt_vid_cap_mplane))
@@ -1061,6 +1075,17 @@ static int v4l_enum_fmt(const struct v4l2_ioctl_ops *ops,
 		if (unlikely(!is_tx || !ops->vidioc_enum_fmt_vid_out_mplane))
 			break;
 		return ops->vidioc_enum_fmt_vid_out_mplane(file, fh, arg);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	/* next two added to support STM tsmux */
+	case V4L2_BUF_TYPE_DVB_CAPTURE:
+		if (unlikely(!is_rx || !ops->vidioc_enum_fmt_dvb_cap))
+			break;
+		return ops->vidioc_enum_fmt_dvb_cap(file, fh, arg);
+	case V4L2_BUF_TYPE_DVB_OUTPUT:
+		if (unlikely(!is_tx || !ops->vidioc_enum_fmt_dvb_out))
+			break;
+		return ops->vidioc_enum_fmt_dvb_out(file, fh, arg);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	}
 	return -EINVAL;
 }
@@ -1115,6 +1140,17 @@ static int v4l_g_fmt(const struct v4l2_ioctl_ops *ops,
 		if (unlikely(!is_tx || is_vid || !ops->vidioc_g_fmt_sliced_vbi_out))
 			break;
 		return ops->vidioc_g_fmt_sliced_vbi_out(file, fh, arg);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	/* next two added to support STM tsmux */
+	case V4L2_BUF_TYPE_DVB_CAPTURE:
+		if (unlikely(!is_rx || !ops->vidioc_g_fmt_dvb_cap))
+			break;
+		return ops->vidioc_g_fmt_dvb_cap(file, fh, arg);
+	case V4L2_BUF_TYPE_DVB_OUTPUT:
+		if (unlikely(!is_tx || !ops->vidioc_g_fmt_dvb_out))
+			break;
+		return ops->vidioc_g_fmt_dvb_out(file, fh, arg);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	}
 	return -EINVAL;
 }
@@ -1179,6 +1215,19 @@ static int v4l_s_fmt(const struct v4l2_ioctl_ops *ops,
 			break;
 		CLEAR_AFTER_FIELD(p, fmt.sliced);
 		return ops->vidioc_s_fmt_sliced_vbi_out(file, fh, arg);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	/* next two added to support STM tsmux */
+	case V4L2_BUF_TYPE_DVB_CAPTURE:
+		if (unlikely(!is_rx || !ops->vidioc_s_fmt_dvb_cap))
+			break;
+		CLEAR_AFTER_FIELD(p, fmt.dvb);
+		return ops->vidioc_s_fmt_dvb_cap(file, fh, arg);
+	case V4L2_BUF_TYPE_DVB_OUTPUT:
+		if (unlikely(!is_tx || !ops->vidioc_s_fmt_dvb_out))
+			break;
+		CLEAR_AFTER_FIELD(p, fmt.dvb);
+		return ops->vidioc_s_fmt_dvb_out(file, fh, arg);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	}
 	return -EINVAL;
 }
@@ -1243,6 +1292,19 @@ static int v4l_try_fmt(const struct v4l2_ioctl_ops *ops,
 			break;
 		CLEAR_AFTER_FIELD(p, fmt.sliced);
 		return ops->vidioc_try_fmt_sliced_vbi_out(file, fh, arg);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	/* next two added to support STM tsmux */
+	case V4L2_BUF_TYPE_DVB_CAPTURE:
+		if (unlikely(!is_rx || !ops->vidioc_try_fmt_dvb_cap))
+			break;
+		CLEAR_AFTER_FIELD(p, fmt.pix);
+		return ops->vidioc_try_fmt_dvb_cap(file, fh, arg);
+	case V4L2_BUF_TYPE_DVB_OUTPUT:
+		if (unlikely(!is_tx || !ops->vidioc_try_fmt_vid_out))
+			break;
+		CLEAR_AFTER_FIELD(p, fmt.pix);
+		return ops->vidioc_try_fmt_dvb_out(file, fh, arg);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	}
 	return -EINVAL;
 }

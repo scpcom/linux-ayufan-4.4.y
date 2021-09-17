@@ -49,13 +49,40 @@ struct msi_desc {
 	struct kobject kobj;
 };
 
+#if defined (CONFIG_SYNO_LSP_MONACO) || defined(CONFIG_SYNO_LSP_ARMADA)
+/*
+ * The arch hooks to setup up msi irqs. Those functions are
+ * implemented as weak symbols so that they /can/ be overriden by
+ * architecture specific code if needed.
+ */
+#else /* CONFIG_SYNO_LSP_MONACO || CONFIG_SYNO_LSP_ARMADA */
 /*
  * The arch hook for setup up msi irqs
  */
+#endif /* CONFIG_SYNO_LSP_MONACO || CONFIG_SYNO_LSP_ARMADA */
 int arch_setup_msi_irq(struct pci_dev *dev, struct msi_desc *desc);
 void arch_teardown_msi_irq(unsigned int irq);
 int arch_setup_msi_irqs(struct pci_dev *dev, int nvec, int type);
 void arch_teardown_msi_irqs(struct pci_dev *dev);
 int arch_msi_check_device(struct pci_dev* dev, int nvec, int type);
+#if defined (CONFIG_SYNO_LSP_MONACO) || defined(CONFIG_SYNO_LSP_ARMADA)
+void arch_restore_msi_irqs(struct pci_dev *dev, int irq);
+
+void default_teardown_msi_irqs(struct pci_dev *dev);
+void default_restore_msi_irqs(struct pci_dev *dev, int irq);
+
+struct msi_chip {
+	struct module *owner;
+	struct device *dev;
+	struct device_node *of_node;
+	struct list_head list;
+
+	int (*setup_irq)(struct msi_chip *chip, struct pci_dev *dev,
+			 struct msi_desc *desc);
+	void (*teardown_irq)(struct msi_chip *chip, unsigned int irq);
+	int (*check_device)(struct msi_chip *chip, struct pci_dev *dev,
+			    int nvec, int type);
+};
+#endif /* CONFIG_SYNO_LSP_MONACO || CONFIG_SYNO_LSP_ARMADA */
 
 #endif /* LINUX_MSI_H */

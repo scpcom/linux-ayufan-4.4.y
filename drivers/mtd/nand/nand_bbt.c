@@ -127,10 +127,49 @@ static int check_pattern(uint8_t *buf, int len, int paglen, struct nand_bbt_desc
  */
 static int check_short_pattern(uint8_t *buf, struct nand_bbt_descr *td)
 {
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	int ooblen, e, i = 0;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	/* Compare the pattern */
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	if (memcmp(buf + td->offs, td->pattern, td->len))
+			goto check_stm_ecc;
+#else /* CONFIG_SYNO_LSP_MONACO */
 	if (memcmp(buf + td->offs, td->pattern, td->len))
 		return -1;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	return 0;
+#if defined (CONFIG_SYNO_LSP_MONACO)
+ check_stm_ecc:
+	/* Potential bad-block... */
+	if (td->options & NAND_BBT_SCANSTMBOOTECC) {
+		/* Check for STM boot-mode ECC... */
+		ooblen = (td->offs == 5) ? 16 : 64;
+		e = 0;
+		for (i = 3; i < ooblen; i += 4)
+			e += hweight8(buf[i] ^ 'B');
+
+		/* Tolerate a single bit-error accross 'B' markers */
+		if (e <= 1)
+			return 0;
+	}
+	if (td->options & NAND_BBT_SCANSTMAFMECC) {
+		/* Check for STM AFM ECC... */
+		ooblen = (td->offs == 5) ? 16 : 64;
+		e = 0;
+		for (i = 3; i < ooblen; i += 16) {
+			e += hweight8(buf[i]   ^ 'A');
+			e += hweight8(buf[i+1] ^ 'F');
+			e += hweight8(buf[i+2] ^ 'M');
+		}
+		/* Tolerate a single bit-error accross 'AFM' markers */
+		if (e <= 1)
+	return 0;
+	}
+
+	/* Bad-block confirmed! */
+	return -1;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 }
 
 /**
@@ -307,7 +346,11 @@ static int scan_read_oob(struct mtd_info *mtd, uint8_t *buf, loff_t offs,
 	struct mtd_oob_ops ops;
 	int res, ret = 0;
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	ops.mode = MTD_OPS_RAW;
+#else /* CONFIG_SYNO_LSP_MONACO */
 	ops.mode = MTD_OPS_PLACE_OOB;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	ops.ooboffs = 0;
 	ops.ooblen = mtd->oobsize;
 
@@ -1284,6 +1327,30 @@ static struct nand_bbt_descr bbt_mirror_no_oob_descr = {
 	.pattern = mirror_pattern
 };
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+
+/* BBT descriptors for (Micron) 4-bit on-die ECC */
+static struct nand_bbt_descr bbt_main_descr_ode = {
+	.options = NAND_BBT_LASTBLOCK | NAND_BBT_CREATE | NAND_BBT_WRITE
+	| NAND_BBT_2BIT | NAND_BBT_VERSION | NAND_BBT_PERCHIP,
+	.offs =	8 + 8,		/* need to shift by 8 due to on-die ECC */
+	.len = 4,
+	.veroffs = 12 + 8,	/* need to shift by 8 due to on-die ECC */
+	.maxblocks = 4,
+	.pattern = bbt_pattern
+};
+
+static struct nand_bbt_descr bbt_mirror_descr_ode = {
+	.options = NAND_BBT_LASTBLOCK | NAND_BBT_CREATE | NAND_BBT_WRITE
+		| NAND_BBT_2BIT | NAND_BBT_VERSION | NAND_BBT_PERCHIP,
+	.offs =	8 + 8,		/* need to shift by 8 due to on-die ECC */
+	.len = 4,
+	.veroffs = 12 + 8,	/* need to shift by 8 due to on-die ECC */
+	.maxblocks = 4,
+	.pattern = mirror_pattern
+};
+
+#endif /* CONFIG_SYNO_LSP_MONACO */
 #define BADBLOCK_SCAN_MASK (~NAND_BBT_NO_OOB)
 /**
  * nand_create_badblock_pattern - [INTERN] Creates a BBT descriptor structure
@@ -1331,6 +1398,11 @@ int nand_default_bbt(struct mtd_info *mtd)
 			if (this->bbt_options & NAND_BBT_NO_OOB) {
 				this->bbt_td = &bbt_main_no_oob_descr;
 				this->bbt_md = &bbt_mirror_no_oob_descr;
+#if defined (CONFIG_SYNO_LSP_MONACO)
+			} else if (this->ecc.mode == NAND_ECC_4BITONDIE) {
+				this->bbt_td = &bbt_main_descr_ode;
+				this->bbt_md = &bbt_mirror_descr_ode;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 			} else {
 				this->bbt_td = &bbt_main_descr;
 				this->bbt_md = &bbt_mirror_descr;
@@ -1377,7 +1449,13 @@ int nand_isbad_bbt(struct mtd_info *mtd, loff_t offs, int allowbbt)
 	}
 	return 1;
 }
+#if defined (CONFIG_SYNO_LSP_MONACO)
+EXPORT_SYMBOL_GPL(nand_isbad_bbt);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 EXPORT_SYMBOL(nand_scan_bbt);
 EXPORT_SYMBOL(nand_default_bbt);
 EXPORT_SYMBOL_GPL(nand_update_bbt);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#include "stm_nand_bbt.c"
+#endif /* CONFIG_SYNO_LSP_MONACO */

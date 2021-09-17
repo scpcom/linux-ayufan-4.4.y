@@ -46,7 +46,11 @@ int rtc_read_time(struct rtc_device *rtc, struct rtc_time *tm)
 	mutex_unlock(&rtc->ops_lock);
 	return err;
 }
+#if defined(CONFIG_SYNO_ARMADA)
+EXPORT_SYMBOL(rtc_read_time);
+#else /* CONFIG_SYNO_ARMADA */
 EXPORT_SYMBOL_GPL(rtc_read_time);
+#endif /* CONFIG_SYNO_ARMADA */
 
 int rtc_set_time(struct rtc_device *rtc, struct rtc_time *tm)
 {
@@ -77,7 +81,11 @@ int rtc_set_time(struct rtc_device *rtc, struct rtc_time *tm)
 	schedule_work(&rtc->irqwork);
 	return err;
 }
+#if defined(CONFIG_SYNO_ARMADA)
+EXPORT_SYMBOL(rtc_set_time);
+#else /* CONFIG_SYNO_ARMADA */
 EXPORT_SYMBOL_GPL(rtc_set_time);
+#endif /* CONFIG_SYNO_ARMADA */
 
 int rtc_set_mmss(struct rtc_device *rtc, unsigned long secs)
 {
@@ -321,7 +329,11 @@ int rtc_read_alarm(struct rtc_device *rtc, struct rtc_wkalrm *alarm)
 
 	return err;
 }
+#if defined(CONFIG_SYNO_ARMADA)
+EXPORT_SYMBOL(rtc_read_alarm);
+#else /* CONFIG_SYNO_ARMADA */
 EXPORT_SYMBOL_GPL(rtc_read_alarm);
+#endif /* CONFIG_SYNO_ARMADA */
 
 static int __rtc_set_alarm(struct rtc_device *rtc, struct rtc_wkalrm *alarm)
 {
@@ -378,7 +390,11 @@ int rtc_set_alarm(struct rtc_device *rtc, struct rtc_wkalrm *alarm)
 	mutex_unlock(&rtc->ops_lock);
 	return err;
 }
+#if defined(CONFIG_SYNO_ARMADA)
+EXPORT_SYMBOL(rtc_set_alarm);
+#else /* CONFIG_SYNO_ARMADA */
 EXPORT_SYMBOL_GPL(rtc_set_alarm);
+#endif /* CONFIG_SYNO_ARMADA */
 
 /* Called once per device from rtc_device_register */
 int rtc_initialize_alarm(struct rtc_device *rtc, struct rtc_wkalrm *alarm)
@@ -438,7 +454,11 @@ int rtc_alarm_irq_enable(struct rtc_device *rtc, unsigned int enabled)
 	mutex_unlock(&rtc->ops_lock);
 	return err;
 }
+#if defined(CONFIG_SYNO_ARMADA)
+EXPORT_SYMBOL(rtc_alarm_irq_enable);
+#else /* CONFIG_SYNO_ARMADA */
 EXPORT_SYMBOL_GPL(rtc_alarm_irq_enable);
+#endif /* CONFIG_SYNO_ARMADA */
 
 int rtc_update_irq_enable(struct rtc_device *rtc, unsigned int enabled)
 {
@@ -608,14 +628,22 @@ struct rtc_device *rtc_class_open(const char *name)
 
 	return rtc;
 }
+#if defined(CONFIG_SYNO_ARMADA)
+EXPORT_SYMBOL(rtc_class_open);
+#else /* CONFIG_SYNO_ARMADA */
 EXPORT_SYMBOL_GPL(rtc_class_open);
+#endif /* CONFIG_SYNO_ARMADA */
 
 void rtc_class_close(struct rtc_device *rtc)
 {
 	module_put(rtc->owner);
 	put_device(&rtc->dev);
 }
+#if defined(CONFIG_SYNO_ARMADA)
+EXPORT_SYMBOL(rtc_class_close);
+#else /* CONFIG_SYNO_ARMADA */
 EXPORT_SYMBOL_GPL(rtc_class_close);
+#endif /* CONFIG_SYNO_ARMADA */
 
 int rtc_irq_register(struct rtc_device *rtc, struct rtc_task *task)
 {

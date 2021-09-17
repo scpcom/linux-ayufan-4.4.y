@@ -290,7 +290,11 @@ static void l2x0_disable(void)
 	raw_spin_lock_irqsave(&l2x0_lock, flags);
 	__l2x0_flush_all();
 	writel_relaxed(0, l2x0_base + L2X0_CTRL);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	dsb(st);
+#else /* CONFIG_SYNO_LSP_MONACO */
 	dsb();
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	raw_spin_unlock_irqrestore(&l2x0_lock, flags);
 }
 
@@ -298,6 +302,9 @@ static void l2x0_unlock(u32 cache_id)
 {
 	int lockregs;
 	int i;
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	u32 way_mask = 0;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 	switch (cache_id & L2X0_CACHE_ID_PART_MASK) {
 	case L2X0_CACHE_ID_PART_L310:
@@ -312,12 +319,25 @@ static void l2x0_unlock(u32 cache_id)
 		break;
 	}
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	/* Reduce by 4 ways (locked): remaining = 4*128KB = 512KB */
+	if (of_machine_is_compatible("st,stih301"))
+		way_mask = 0x0F;
+
+	for (i = 0; i < lockregs; i++) {
+		writel_relaxed(way_mask, l2x0_base + L2X0_LOCKDOWN_WAY_D_BASE +
+			       i * L2X0_LOCKDOWN_STRIDE);
+		writel_relaxed(way_mask, l2x0_base + L2X0_LOCKDOWN_WAY_I_BASE +
+			       i * L2X0_LOCKDOWN_STRIDE);
+	}
+#else /* CONFIG_SYNO_LSP_MONACO */
 	for (i = 0; i < lockregs; i++) {
 		writel_relaxed(0x0, l2x0_base + L2X0_LOCKDOWN_WAY_D_BASE +
 			       i * L2X0_LOCKDOWN_STRIDE);
 		writel_relaxed(0x0, l2x0_base + L2X0_LOCKDOWN_WAY_I_BASE +
 			       i * L2X0_LOCKDOWN_STRIDE);
 	}
+#endif /* CONFIG_SYNO_LSP_MONACO */
 }
 
 void __init l2x0_init(void __iomem *base, u32 aux_val, u32 aux_mask)
@@ -328,6 +348,12 @@ void __init l2x0_init(void __iomem *base, u32 aux_val, u32 aux_mask)
 	int ways;
 	int way_size_shift = L2X0_WAY_SIZE_SHIFT;
 	const char *type;
+#if defined (CONFIG_SYNO_MONACO)
+#if defined (CONFIG_SYNO_MONACO_PERF_ENHANCED)
+#else /* CONFIG_SYNO_MONACO_PERF_ENHANCED */
+	u32 pf;
+#endif /* CONFIG_SYNO_MONACO_PERF_ENHANCED */
+#endif  /* CONFIG_SYNO_MONACO */
 
 	l2x0_base = base;
 	if (cache_id_part_number_from_dt)
@@ -383,11 +409,22 @@ void __init l2x0_init(void __iomem *base, u32 aux_val, u32 aux_mask)
 
 	l2x0_size = ways * way_size * SZ_1K;
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	/* Reduced by 4 ways (locked): remaining = 4*128KB = 512KB */
+	if (of_machine_is_compatible("st,stih301"))
+		l2x0_size = 512 * SZ_1K;
+#endif /* CONFIG_SYNO_LSP_MONACO */
+
 	/*
 	 * Check if l2x0 controller is already enabled.
 	 * If you are booting from non-secure mode
 	 * accessing the below registers will fault.
 	 */
+
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	/* Allows L2 cache controller to enter in idle mode */
+	writel(0x3, l2x0_base + L2X0_POWER_CTRL);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	if (!(readl_relaxed(l2x0_base + L2X0_CTRL) & L2X0_CTRL_EN)) {
 		/* Make sure that I&D is not locked down when starting */
 		l2x0_unlock(cache_id);
@@ -401,11 +438,31 @@ void __init l2x0_init(void __iomem *base, u32 aux_val, u32 aux_mask)
 		writel_relaxed(L2X0_CTRL_EN, l2x0_base + L2X0_CTRL);
 	}
 
+#if defined (CONFIG_SYNO_MONACO)
+#if defined (CONFIG_SYNO_MONACO_PERF_ENHANCED)
+	/* Incr double linefill enable
+	 * Data prefetch enable
+	 * Double linefill enable
+	 * Double linefill on WRAP disable
+	 * NO prefetch drop enable
+	 */
+	writel_relaxed(0x58800000, l2x0_base + L2X0_PREFETCH_CTRL);
+#else /* CONFIG_SYNO_MONACO_PERF_ENHANCED */
+	pf = readl_relaxed(l2x0_base + L2X0_PREFETCH_CTRL);
+	pf |= 0xf | BIT(24) | BIT(27) | BIT(30);
+	writel_relaxed(pf, l2x0_base + L2X0_PREFETCH_CTRL);
+	pf = readl_relaxed(l2x0_base + L2X0_PREFETCH_CTRL);
+#endif /* CONFIG_SYNO_MONACO_PERF_ENHANCED */
+#endif  /* CONFIG_SYNO_MONACO */
+
 	/* Re-read it in case some bits are reserved. */
 	aux = readl_relaxed(l2x0_base + L2X0_AUX_CTRL);
 
 	/* Save the value for resuming. */
 	l2x0_saved_regs.aux_ctrl = aux;
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	l2x0_saved_regs.pwr_ctrl = readl_relaxed(l2x0_base + L2X0_POWER_CTRL);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 	if (!of_init) {
 		outer_cache.inv_range = l2x0_inv_range;
@@ -776,7 +833,11 @@ static const struct of_device_id l2x0_ids[] __initconst = {
 	{}
 };
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+int __init l2x0_of_init_common(u32 aux_val, u32 aux_mask, bool is_coherent)
+#else /* CONFIG_SYNO_LSP_ARMADA */
 int __init l2x0_of_init(u32 aux_val, u32 aux_mask)
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 {
 	struct device_node *np;
 	const struct l2x0_of_data *data;
@@ -813,8 +874,36 @@ int __init l2x0_of_init(u32 aux_val, u32 aux_mask)
 
 	of_init = true;
 	memcpy(&outer_cache, &data->outer_cache, sizeof(outer_cache));
+
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	/*
+	 * PL310 newer than r3p2 don't need an outer cache sync
+	 * operation when the system is operating with hardware
+	 * coherency enabled, as it is done directly in hardware.
+	 */
+	if (of_device_is_compatible(np, "arm,pl310-cache")) {
+		u32 l2x0_revision = readl_relaxed(l2x0_base + L2X0_CACHE_ID) &
+			L2X0_CACHE_ID_RTL_MASK;
+		if (l2x0_revision >= L2X0_CACHE_ID_RTL_R3P2 && is_coherent)
+			outer_cache.sync = NULL;
+	}
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
 	l2x0_init(l2x0_base, aux_val, aux_mask);
 
 	return 0;
 }
+
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+int __init l2x0_of_init(u32 aux_val, u32 aux_mask)
+{
+	return l2x0_of_init_common(aux_val, aux_mask, false);
+}
+
+int __init l2x0_of_init_coherent(u32 aux_val, u32 aux_mask)
+{
+	return l2x0_of_init_common(aux_val, aux_mask, true);
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
 #endif

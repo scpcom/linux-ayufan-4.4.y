@@ -14,6 +14,9 @@
 #include <linux/init.h>
 #include <linux/errno.h>
 #include <linux/bcd.h>
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#include <linux/delay.h>
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 #define BQ32K_SECONDS		0x00	/* Seconds register address */
 #define BQ32K_SECONDS_MASK	0x7F	/* Mask over seconds value */
@@ -56,6 +59,10 @@ static int bq32k_read(struct device *dev, void *data, uint8_t off, uint8_t len)
 		}
 	};
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	/* temporary fix: without this delay, this function may fail */
+	udelay(30);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	if (i2c_transfer(client->adapter, msgs, 2) == 2)
 		return 0;
 

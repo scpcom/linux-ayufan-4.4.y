@@ -2021,7 +2021,26 @@ struct vm_area_struct *find_vma(struct mm_struct *mm, unsigned long addr)
 			vma_tmp = rb_entry(rb_node,
 					   struct vm_area_struct, vm_rb);
 
+#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_ARM_PAGE_SIZE_64KB)
+	/* Take into account a wrap-around of the vm_end field to 0x0.
+	** This happends on last arm page with 64KB page sizes.
+	** vm_start =0xFFFF0000, size 64KB.
+	**
+	** This fix is apparently enough, but should be revisited.
+	*/
+				if ((vma_tmp->vm_end - 1) >= addr) {
+					WARN(!(vma_tmp->vm_end),
+						"find vma found the last page,"
+						"ending in address 0x0");
+#elif defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT)
+			/* Take into account a wrap-around of the
+				** vm_end field to 0x0. e.g. vm_start =
+				** 0xFFFF0000 size PAGE_SIZE.
+				*/
+			if ((vma_tmp->vm_end - 1) >= addr) {
+#else
 			if (vma_tmp->vm_end > addr) {
+#endif
 				vma = vma_tmp;
 				if (vma_tmp->vm_start <= addr)
 					break;

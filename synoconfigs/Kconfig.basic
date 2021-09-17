@@ -23,16 +23,19 @@ config SYNO_USB_FLASH_BOOT
 config SYNO_USB_FLASH_DEVICE_INDEX
 	int "USB Boot Flash Device Number"
 	default "255" if SYNO_USB_FLASH_BOOT
+	depends on SYNO_USB_FLASH_BOOT
 	help
 
 config SYNO_USB_FLASH_DEVICE_NAME
 	string "USB Boot Flash Device Name"
 	default "synoboot" if SYNO_USB_FLASH_BOOT
+	depends on SYNO_USB_FLASH_BOOT
 	help
 
 config SYNO_USB_FLASH_DEVICE_PATH
 	string "USB Boot Flash Device Path"
 	default "/dev/synoboot" if SYNO_USB_FLASH_BOOT
+	depends on SYNO_USB_FLASH_BOOT
 	help
 
 config SYNO_INSTALL_FLAG
@@ -55,11 +58,19 @@ config SYNO_DYN_MODULE_INSTALL
 config SYNO_ICH_GPIO_CTRL
 	bool "X86 PCH/ICH GPIO Control"
 	default y
-	depends on X86_64
 	help
 	  GPIO control for x86 chipset south bridge PCH/ICH.
 	  Merged SYNO_PCH_GPIO_CTRL & SYNO_LPC_ICH_GPIO_CTRL.
-
+	  
+config SYNO_X86_PINCTRL_GPIO
+	bool "X86 GPIO Control With Pinctrl Subsystem"
+	default y
+	depends on X86_64
+	select PINCTRL
+	select GPIOLIB
+	help
+	  GPIO control for x86 chipset with pinctrl subsystem.
+	  
 config SYNO_X86_CORETEMP
 	bool "X86 Core Temperature Detection"
 	default y
@@ -180,6 +191,16 @@ config SYNO_IT87_SUPERIO_RW
 	  <DSM> No Bug Entry
 	  Support IT87 super IO pins r/w.
 	  Writable pins are defined in table writable_pin_setting[].
+
+config SYNO_DMA_COHERENT_POOL_1M
+	bool "increacse DMA coherent pool from 256K to 1M"
+	default n
+	help
+	  <DSM> #78462
+	  This config fixed the failure of loading driver dvb_usb_af9035 for STM_MONACO,
+	  which uses dvb drivers of linux-3.10.x-bsp.
+	  The DMA coherent pool will be too small for initializing driver dvb_usb_af9035,
+	  so increase the pool size from 256K to 1M.
 
 endmenu #System Features
 
@@ -340,6 +361,14 @@ config SYNO_CGROUP_MEM_DISABLE
 	  <DSM> #75786
 	  Because cgroup subsys memory will impact system performance, thus we default disable it.
 
+config SYNO_MEM_MODE_INFO
+	bool "Transcoding Memory Mode Info"
+	depends on SYNO_MONACO
+	default y
+	help
+	  <DSM> #79246 - add memorylayout tool for STM_MONACO
+	  Create /proc/sys/kernel/syno_mem_mode entry for getting current memory mode.
+
 endmenu #Boot Arguments
 
 menu "Kernel Core Enhancements"
@@ -394,5 +423,16 @@ config SYNO_SOFTLOCKUP_THRESH_EXTENSION
 	  <DSM> #66061
 	  The time to spin up disks in 4bay model may be larger than 7*3=21s,so we extend
 	  the threshold of soft lockup from 20s to 40s to prevent false alarm call trace.
+
+config SYNO_PKMAP_NOT_ENOUGH_FIX
+	bool "Allocate low pages in case pkmap address is not enough"
+	default y
+	depends on SYNO_ALPINE
+	help
+	  In 32-bit arm, pkmap is limited resource, and if kernel wants to map high page,
+	  this page will be mapped to pkmap address and shall be unmapped ASAP. In max
+	  connection test, kernel will try to grab pages and map it to address space.
+	  Sometimes, kernel will always get high pages and run out of pkmap address. So,
+	  limit the kernel to get low pages in write-begin of file system.
 
 endmenu #Kernel Core Enhancements

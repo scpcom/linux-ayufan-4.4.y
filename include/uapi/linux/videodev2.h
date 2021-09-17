@@ -139,6 +139,13 @@ enum v4l2_buf_type {
 #endif
 	V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE = 9,
 	V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE  = 10,
+#if defined (CONFIG_SYNO_LSP_MONACO)
+
+	/* for STM tsmux device */
+	V4L2_BUF_TYPE_DVB_CAPTURE	   = 11,
+	V4L2_BUF_TYPE_DVB_OUTPUT	   = 12,
+
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	/* Deprecated, do not use */
 	V4L2_BUF_TYPE_PRIVATE              = 0x80,
 };
@@ -147,6 +154,16 @@ enum v4l2_buf_type {
 	((type) == V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE	\
 	 || (type) == V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE)
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#define V4L2_TYPE_IS_OUTPUT(type)				\
+	((type) == V4L2_BUF_TYPE_VIDEO_OUTPUT			\
+	 || (type) == V4L2_BUF_TYPE_DVB_OUTPUT			\
+	 || (type) == V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE		\
+	 || (type) == V4L2_BUF_TYPE_VIDEO_OVERLAY		\
+	 || (type) == V4L2_BUF_TYPE_VIDEO_OUTPUT_OVERLAY	\
+	 || (type) == V4L2_BUF_TYPE_VBI_OUTPUT			\
+	 || (type) == V4L2_BUF_TYPE_SLICED_VBI_OUTPUT)
+#else /* CONFIG_SYNO_LSP_MONACO */
 #define V4L2_TYPE_IS_OUTPUT(type)				\
 	((type) == V4L2_BUF_TYPE_VIDEO_OUTPUT			\
 	 || (type) == V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE		\
@@ -154,6 +171,8 @@ enum v4l2_buf_type {
 	 || (type) == V4L2_BUF_TYPE_VIDEO_OUTPUT_OVERLAY	\
 	 || (type) == V4L2_BUF_TYPE_VBI_OUTPUT			\
 	 || (type) == V4L2_BUF_TYPE_SLICED_VBI_OUTPUT)
+
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 enum v4l2_tuner_type {
 	V4L2_TUNER_RADIO	     = 1,
@@ -264,11 +283,37 @@ struct v4l2_capability {
 #define V4L2_CAP_RADIO			0x00040000  /* is a radio device */
 #define V4L2_CAP_MODULATOR		0x00080000  /* has a modulator */
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+/* STM SDK2 tsmux device (hope bits 21-24 not used (3.4 was in 12-14) */
+#define V4L2_CAP_DVB_CAPTURE		0x00100000  /* tsmux capture device */
+#define V4L2_CAP_DVB_OUTPUT		0x00200000  /* tsmux output device */
+#endif /* CONFIG_SYNO_LSP_MONACO */
+
 #define V4L2_CAP_READWRITE              0x01000000  /* read/write systemcalls */
 #define V4L2_CAP_ASYNCIO                0x02000000  /* async I/O */
 #define V4L2_CAP_STREAMING              0x04000000  /* streaming I/O ioctls */
 
 #define V4L2_CAP_DEVICE_CAPS            0x80000000  /* sets device capabilities field */
+#if defined (CONFIG_SYNO_LSP_MONACO)
+
+/*
+ *      D V B   T S    F O R M A T  (STM SDK2 extension)
+ */
+
+struct v4l2_dvb_format {
+	__u32 data_type;
+	__u32 buffer_size;
+	__u32 codec;
+	__u32 reserved[3];
+};
+
+#define V4L2_DVB_FMT_TS		v4l2_fourcc('T', 'S', '0', '1')/* (Standard 188 bytes TS) */
+#define V4L2_DVB_FMT_DLNA_TS	v4l2_fourcc('D', 'L', 'N', 'A')/* (192 bytes timestamped TS) */
+#define V4L2_DVB_FMT_ES		v4l2_fourcc('E', 'S', '0', '1')/* (ES data) */
+#define V4L2_DVB_FMT_PES	v4l2_fourcc('P', 'E', 'S', '0')/* (PES data) */
+#define V4L2_DVB_FMT_DATA	v4l2_fourcc('D', 'A', 'T', 'A')/* (DATA) */
+
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 /*
  *	V I D E O   I M A G E   F O R M A T
@@ -350,6 +395,11 @@ struct v4l2_pix_format {
 #define V4L2_PIX_FMT_NV21M   v4l2_fourcc('N', 'M', '2', '1') /* 21  Y/CrCb 4:2:0  */
 #define V4L2_PIX_FMT_NV12MT  v4l2_fourcc('T', 'M', '1', '2') /* 12  Y/CbCr 4:2:0 64x32 macroblocks */
 #define V4L2_PIX_FMT_NV12MT_16X16 v4l2_fourcc('V', 'M', '1', '2') /* 12  Y/CbCr 4:2:0 16x16 macroblocks */
+#if defined (CONFIG_SYNO_LSP_MONACO)
+/* next two used by STM SDK2 C8jpeg decoder */
+#define V4L2_PIX_FMT_NV16M   v4l2_fourcc('N', 'M', '1', '6') /* 16  Y/CbCr 4:2:2  */
+#define V4L2_PIX_FMT_NV24M   v4l2_fourcc('N', 'M', '2', '4') /* 24  Y/CbCr 4:4:4  */
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 /* three non contiguous planes - Y, Cb, Cr */
 #define V4L2_PIX_FMT_YUV420M v4l2_fourcc('Y', 'M', '1', '2') /* 12  YUV420 planar */
@@ -1690,6 +1740,9 @@ struct v4l2_format {
 		struct v4l2_window		win;     /* V4L2_BUF_TYPE_VIDEO_OVERLAY */
 		struct v4l2_vbi_format		vbi;     /* V4L2_BUF_TYPE_VBI_CAPTURE */
 		struct v4l2_sliced_vbi_format	sliced;  /* V4L2_BUF_TYPE_SLICED_VBI_CAPTURE */
+#if defined (CONFIG_SYNO_LSP_MONACO)
+		struct v4l2_dvb_format		dvb;	 /* V4L2_BUF_TYPE_DVB_CAPTURE */
+#endif /* CONFIG_SYNO_LSP_MONACO */
 		__u8	raw_data[200];                   /* user-defined */
 	} fmt;
 };
@@ -1714,6 +1767,9 @@ struct v4l2_streamparm {
 #define V4L2_EVENT_EOS				2
 #define V4L2_EVENT_CTRL				3
 #define V4L2_EVENT_FRAME_SYNC			4
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#define V4L2_EVENT_SOURCE_CHANGE		5
+#endif /* CONFIG_SYNO_LSP_MONACO */
 #define V4L2_EVENT_PRIVATE_START		0x08000000
 
 /* Payload for V4L2_EVENT_VSYNC */
@@ -1744,6 +1800,13 @@ struct v4l2_event_ctrl {
 struct v4l2_event_frame_sync {
 	__u32 frame_sequence;
 };
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#define V4L2_EVENT_SRC_CH_RESOLUTION		(1 << 0)
+
+struct v4l2_event_src_change {
+	__u32 changes;
+};
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 struct v4l2_event {
 	__u32				type;
@@ -1751,6 +1814,9 @@ struct v4l2_event {
 		struct v4l2_event_vsync		vsync;
 		struct v4l2_event_ctrl		ctrl;
 		struct v4l2_event_frame_sync	frame_sync;
+#if defined (CONFIG_SYNO_LSP_MONACO)
+		struct v4l2_event_src_change	src_change;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 		__u8				data[64];
 	} u;
 	__u32				pending;

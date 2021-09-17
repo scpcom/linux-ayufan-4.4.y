@@ -60,8 +60,13 @@ int __xipram cfi_qry_mode_on(uint32_t base, struct map_info *map,
 		return 1;
 	/* QRY not found probably we deal with some odd CFI chips */
 	/* Some revisions of some old Intel chips? */
-	cfi_send_gen_cmd(0xF0, 0, base, map, cfi, cfi->device_type, NULL);
+#if defined (CONFIG_SYNO_LSP_MONACO)
 	cfi_send_gen_cmd(0xFF, 0, base, map, cfi, cfi->device_type, NULL);
+	cfi_send_gen_cmd(0xF0, 0, base, map, cfi, cfi->device_type, NULL);
+#else /* CONFIG_SYNO_LSP_MONACO */
+	cfi_send_gen_cmd(0xF0, 0, base, map, cfi, cfi->device_type, NULL);	
+	cfi_send_gen_cmd(0xFF, 0, base, map, cfi, cfi->device_type, NULL);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	cfi_send_gen_cmd(0x98, 0x55, base, map, cfi, cfi->device_type, NULL);
 	if (cfi_qry_present(map, base, cfi))
 		return 1;

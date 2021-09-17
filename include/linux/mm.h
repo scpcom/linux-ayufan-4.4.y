@@ -284,6 +284,14 @@ static inline int put_page_testzero(struct page *page)
 	return atomic_dec_and_test(&page->_count);
 }
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+static inline int put_page_n_testzero(struct page *page, unsigned int c)
+{
+	VM_BUG_ON(atomic_read(&page->_count) < c);
+	return atomic_sub_and_test(c, &page->_count);
+}
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
 /*
  * Try to grab a ref unless the page has a refcount of zero, return false if
  * that is the case.
@@ -456,6 +464,9 @@ static inline void __ClearPageBuddy(struct page *page)
 }
 
 void put_page(struct page *page);
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+void put_page_n(struct page *page, unsigned int c);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 void put_pages_list(struct list_head *pages);
 
 void split_page(struct page *page, unsigned int order);
@@ -1477,10 +1488,17 @@ void vma_interval_tree_insert_after(struct vm_area_struct *node,
 				    struct rb_root *root);
 void vma_interval_tree_remove(struct vm_area_struct *node,
 			      struct rb_root *root);
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+struct vm_area_struct *vma_interval_tree_iter_first(struct rb_root *root,
+				 pgoff_t start, pgoff_t last);
+struct vm_area_struct *vma_interval_tree_iter_next(struct vm_area_struct *node,
+				pgoff_t start, pgoff_t last);
+#else /* CONFIG_SYNO_LSP_ALPINE */
 struct vm_area_struct *vma_interval_tree_iter_first(struct rb_root *root,
 				unsigned long start, unsigned long last);
 struct vm_area_struct *vma_interval_tree_iter_next(struct vm_area_struct *node,
 				unsigned long start, unsigned long last);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 #define vma_interval_tree_foreach(vma, root, start, last)		\
 	for (vma = vma_interval_tree_iter_first(root, start, last);	\
@@ -1496,10 +1514,17 @@ void anon_vma_interval_tree_insert(struct anon_vma_chain *node,
 				   struct rb_root *root);
 void anon_vma_interval_tree_remove(struct anon_vma_chain *node,
 				   struct rb_root *root);
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+struct anon_vma_chain *anon_vma_interval_tree_iter_first(
+	struct rb_root *root, pgoff_t start, pgoff_t last);
+struct anon_vma_chain *anon_vma_interval_tree_iter_next(
+	struct anon_vma_chain *node, pgoff_t start, pgoff_t last);
+#else /* CONFIG_SYNO_LSP_ALPINE */
 struct anon_vma_chain *anon_vma_interval_tree_iter_first(
 	struct rb_root *root, unsigned long start, unsigned long last);
 struct anon_vma_chain *anon_vma_interval_tree_iter_next(
 	struct anon_vma_chain *node, unsigned long start, unsigned long last);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 #ifdef CONFIG_DEBUG_VM_RB
 void anon_vma_interval_tree_verify(struct anon_vma_chain *node);
 #endif

@@ -126,8 +126,13 @@
 	.endm
 
 	.macro	get_thread_info, rd
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	mov	\rd, sp, lsr #(PAGE_SHIFT + THREAD_SIZE_ORDER)
+	mov	\rd, \rd, lsl #(PAGE_SHIFT + THREAD_SIZE_ORDER)
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	mov	\rd, sp, lsr #13
 	mov	\rd, \rd, lsl #13
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	.endm
 
 	@

@@ -4,7 +4,7 @@
 
 config ARM_BIG_LITTLE_CPUFREQ
 	tristate "Generic ARM big LITTLE CPUfreq driver"
-	depends on ARM_CPU_TOPOLOGY && PM_OPP && HAVE_CLK
+	depends on ((ARM_CPU_TOPOLOGY && !SYNO_LSP_ARMADA_2015_T1_1p4) || (ARM && ARM_CPU_TOPOLOGY && SYNO_LSP_ARMADA_2015_T1_1p4)) && PM_OPP && HAVE_CLK
 	help
 	  This enables the Generic CPUfreq driver for ARM big.LITTLE platforms.
 
@@ -44,8 +44,9 @@ config ARM_EXYNOS5250_CPUFREQ
 	  SoC.
 
 config ARM_EXYNOS5440_CPUFREQ
-	def_bool SOC_EXYNOS5440
-	depends on HAVE_CLK && PM_OPP && OF
+	bool "SAMSUNG EXYNOS5440"
+	depends on HAVE_CLK && OF && ((PM_OPP && !SYNO_LSP_ARMADA_2015_T1_1p4) || (SOC_EXYNOS5440 && SYNO_LSP_ARMADA_2015_T1_1p4))
+	default y if SYNO_LSP_ARMADA_2015_T1_1p4
 	help
 	  This adds the CPUFreq driver for Samsung EXYNOS5440
 	  SoC. The nature of exynos5440 clock controller is
@@ -94,7 +95,7 @@ config ARM_OMAP2PLUS_CPUFREQ
 	bool "TI OMAP2+"
 	depends on ARCH_OMAP2PLUS
 	default ARCH_OMAP2PLUS
-	select CPU_FREQ_TABLE
+	select CPU_FREQ_TABLE if !SYNO_LSP_ARMADA_2015_T1_1p4
 
 config ARM_S3C2416_CPUFREQ
 	bool "S3C2416 CPU Frequency scaling support"
@@ -130,7 +131,7 @@ config ARM_S3C64XX_CPUFREQ
 config ARM_S5PV210_CPUFREQ
 	bool "Samsung S5PV210 and S5PC110"
 	depends on CPU_S5PV210
-	select CPU_FREQ_TABLE
+	select CPU_FREQ_TABLE if !SYNO_LSP_ARMADA_2015_T1_1p4
 	default y
 	help
 	  This adds the CPUFreq driver for Samsung S5PV210 and
@@ -150,3 +151,10 @@ config ARM_SPEAR_CPUFREQ
 	default y
 	help
 	  This adds the CPUFreq driver support for SPEAr SOCs.
+
+config ARM_TEGRA_CPUFREQ
+	bool "TEGRA CPUFreq support"
+	depends on ARCH_TEGRA && SYNO_LSP_ARMADA_2015_T1_1p4
+	default y
+	help
+	  This adds the CPUFreq driver support for TEGRA SOCs.

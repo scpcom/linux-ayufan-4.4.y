@@ -15,6 +15,9 @@
 
 #include <linux/linkage.h>
 #include <asm/mcpm.h>
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+#include <asm/assembler.h>
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 #include "vlock.h"
 
@@ -47,6 +50,9 @@
 
 ENTRY(mcpm_entry_point)
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+ ARM_BE8(setend        be)
+#endif /* CONFIG_SYNO_LSP_ARMADA */
  THUMB(	adr	r12, BSYM(1f)	)
  THUMB(	bx	r12		)
  THUMB(	.thumb			)
@@ -151,7 +157,11 @@ mcpm_setup_leave:
 
 	mov	r0, #INBOUND_NOT_COMING_UP
 	strb	r0, [r8, #MCPM_SYNC_CLUSTER_INBOUND]
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	dsb	st
+#else /* CONFIG_SYNO_LSP_MONACO */
 	dsb
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	sev
 
 	mov	r0, r11

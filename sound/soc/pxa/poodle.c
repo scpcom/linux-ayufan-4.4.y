@@ -235,7 +235,11 @@ static int poodle_wm8731_init(struct snd_soc_pcm_runtime *rtd)
 
 	snd_soc_dapm_nc_pin(dapm, "LLINEIN");
 	snd_soc_dapm_nc_pin(dapm, "RLINEIN");
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	snd_soc_dapm_enable_pin(dapm, "MICIN");
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 	return 0;
 }

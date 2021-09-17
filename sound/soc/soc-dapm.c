@@ -37,6 +37,9 @@
 #include <linux/regulator/consumer.h>
 #include <linux/clk.h>
 #include <linux/slab.h>
+#if defined(CONFIG_SYNO_ARMADA)
+#include <linux/regmap.h>
+#endif /* CONFIG_SYNO_ARMADA */
 #include <sound/core.h>
 #include <sound/pcm.h>
 #include <sound/pcm_params.h>
@@ -870,7 +873,11 @@ static int is_connected_output_ep(struct snd_soc_dapm_widget *widget,
 		if (path->walked)
 			continue;
 
+#if defined(CONFIG_SYNO_ARMADA)
+		// do nothing
+#else /* CONFIG_SYNO_ARMADA */
 		trace_snd_soc_dapm_output_path(widget, path);
+#endif /* CONFIG_SYNO_ARMADA */
 
 		if (path->sink && path->connect) {
 			path->walked = 1;
@@ -977,7 +984,11 @@ static int is_connected_input_ep(struct snd_soc_dapm_widget *widget,
 		if (path->walked)
 			continue;
 
+#if defined(CONFIG_SYNO_ARMADA)
+// do nothing
+#else /* CONFIG_SYNO_ARMADA */
 		trace_snd_soc_dapm_input_path(widget, path);
+#endif /* CONFIG_SYNO_ARMADA */
 
 		if (path->source && path->connect) {
 			path->walked = 1;
@@ -1038,7 +1049,11 @@ int snd_soc_dapm_dai_get_connected_widgets(struct snd_soc_dai *dai, int stream,
 				      &dai->capture_widget->sources);
 	}
 
+#if defined(CONFIG_SYNO_ARMADA)
+// do nothing
+#else /* CONFIG_SYNO_ARMADA */
 	trace_snd_soc_dapm_connected(paths, stream);
+#endif /* CONFIG_SYNO_ARMADA */
 	mutex_unlock(&card->dapm_mutex);
 
 	return paths;

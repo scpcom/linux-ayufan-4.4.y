@@ -1560,14 +1560,21 @@ static int alg_test_hash(const struct alg_test_desc *desc, const char *driver,
 static int alg_test_crc32c(const struct alg_test_desc *desc,
 			   const char *driver, u32 type, u32 mask)
 {
+#ifdef CONFIG_CRYPTO_DEV_AL_AHASH_CRC
+	// do nothing
+#else /* CONFIG_CRYPTO_DEV_AL_AHASH_CRC */
 	struct crypto_shash *tfm;
 	u32 val;
+#endif /* CONFIG_CRYPTO_DEV_AL_AHASH_CRC */
 	int err;
 
 	err = alg_test_hash(desc, driver, type, mask);
 	if (err)
 		goto out;
 
+#ifdef CONFIG_CRYPTO_DEV_AL_AHASH_CRC
+	// do nothing
+#else /* CONFIG_CRYPTO_DEV_AL_AHASH_CRC */
 	tfm = crypto_alloc_shash(driver, type, mask);
 	if (IS_ERR(tfm)) {
 		printk(KERN_ERR "alg: crc32c: Failed to load transform for %s: "
@@ -1601,6 +1608,7 @@ static int alg_test_crc32c(const struct alg_test_desc *desc,
 	} while (0);
 
 	crypto_free_shash(tfm);
+#endif /* CONFIG_CRYPTO_DEV_AL_AHASH_CRC */
 
 out:
 	return err;
@@ -1762,6 +1770,20 @@ static const struct alg_test_desc alg_test_descs[] = {
 			}
 		}
 	}, {
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+		.alg = "authenc(hmac(sha384),cbc(aes))",
+		.test = alg_test_aead,
+		.fips_allowed = 1,
+		.suite = {
+			.aead = {
+				.enc = {
+					.vecs = hmac_sha384_aes_cbc_enc_tv_template,
+					.count = HMAC_SHA384_AES_CBC_ENC_TEST_VECTORS
+				}
+			}
+		}
+	}, {
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 		.alg = "authenc(hmac(sha512),cbc(aes))",
 		.test = alg_test_aead,
 		.fips_allowed = 1,

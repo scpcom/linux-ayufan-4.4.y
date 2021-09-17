@@ -329,6 +329,9 @@ void kernel_restart_prepare(char *cmd)
 	system_state = SYSTEM_RESTART;
 	usermodehelper_disable();
 	device_shutdown();
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	syscore_shutdown();
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 }
 
 /**

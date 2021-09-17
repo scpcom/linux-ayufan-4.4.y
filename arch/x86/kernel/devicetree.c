@@ -106,7 +106,11 @@ struct device_node *pcibios_get_phb_of_node(struct pci_bus *bus)
 
 static int x86_of_pci_irq_enable(struct pci_dev *dev)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	struct of_phandle_args oirq;
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	struct of_irq oirq;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	u32 virq;
 	int ret;
 	u8 pin;
@@ -117,12 +121,20 @@ static int x86_of_pci_irq_enable(struct pci_dev *dev)
 	if (!pin)
 		return 0;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	ret = of_irq_parse_pci(dev, &oirq);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	ret = of_irq_map_pci(dev, &oirq);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	if (ret)
 		return ret;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	virq = irq_create_of_mapping(&oirq);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	virq = irq_create_of_mapping(oirq.controller, oirq.specifier,
 			oirq.size);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	if (virq == 0)
 		return -EINVAL;
 	dev->irq = virq;

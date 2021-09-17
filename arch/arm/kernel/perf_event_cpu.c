@@ -25,6 +25,12 @@
 #include <linux/platform_device.h>
 #include <linux/slab.h>
 #include <linux/spinlock.h>
+#if defined (CONFIG_SYNO_LSP_MONACO) || defined(CONFIG_SYNO_LSP_ARMADA)
+#include <linux/irq.h>
+#endif /* CONFIG_SYNO_LSP_MONACO || CONFIG_SYNO_LSP_ARMADA */
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+#include <linux/irqdesc.h>
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 #include <asm/cputype.h>
 #include <asm/irq_regs.h>
@@ -33,6 +39,9 @@
 /* Set at runtime when we know what CPU type we are. */
 static struct arm_pmu *cpu_pmu;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+static DEFINE_PER_CPU(struct arm_pmu *, percpu_pmu);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 static DEFINE_PER_CPU(struct perf_event * [ARMPMU_MAX_HWEVENTS], hw_events);
 static DEFINE_PER_CPU(unsigned long [BITS_TO_LONGS(ARMPMU_MAX_HWEVENTS)], used_mask);
 static DEFINE_PER_CPU(struct pmu_hw_events, cpu_hw_events);
@@ -71,6 +80,42 @@ static struct pmu_hw_events *cpu_pmu_get_cpu_events(void)
 	return &__get_cpu_var(cpu_hw_events);
 }
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+/* Wrap enable_percpu_irq up as a smp_call_func_t */
+static void cpu_pmu_enable_percpu_irq(void *irq)
+{
+	enable_percpu_irq((int)irq, IRQ_TYPE_NONE);
+}
+
+/* Wrap disable_percpu_irq up as a smp_call_func_t */
+static void cpu_pmu_disable_percpu_irq(void *irq)
+{
+	disable_percpu_irq((int)irq);
+}
+#endif /* CONFIG_SYNO_LSP_MONACO */
+
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+static void cpu_pmu_enable_percpu_irq(void *data)
+{
+	struct arm_pmu *cpu_pmu = data;
+	struct platform_device *pmu_device = cpu_pmu->plat_device;
+	int irq = platform_get_irq(pmu_device, 0);
+
+	enable_percpu_irq(irq, IRQ_TYPE_NONE);
+	cpumask_set_cpu(smp_processor_id(), &cpu_pmu->active_irqs);
+}
+
+static void cpu_pmu_disable_percpu_irq(void *data)
+{
+	struct arm_pmu *cpu_pmu = data;
+	struct platform_device *pmu_device = cpu_pmu->plat_device;
+	int irq = platform_get_irq(pmu_device, 0);
+
+	cpumask_clear_cpu(smp_processor_id(), &cpu_pmu->active_irqs);
+	disable_percpu_irq(irq);
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
 static void cpu_pmu_free_irq(struct arm_pmu *cpu_pmu)
 {
 	int i, irq, irqs;
@@ -78,12 +123,39 @@ static void cpu_pmu_free_irq(struct arm_pmu *cpu_pmu)
 
 	irqs = min(pmu_device->num_resources, num_possible_cpus());
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	irq = platform_get_irq(pmu_device, 0);
+	if (irq >= 0 && irq_is_percpu(irq)) {
+		on_each_cpu(cpu_pmu_disable_percpu_irq, cpu_pmu, 1);
+		free_percpu_irq(irq, &percpu_pmu);
+	} else {
+		for (i = 0; i < irqs; ++i) {
+			if (!cpumask_test_and_clear_cpu(i, &cpu_pmu->active_irqs))
+				continue;
+			irq = platform_get_irq(pmu_device, i);
+			if (irq >= 0)
+				free_irq(irq, cpu_pmu);
+		}
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	for (i = 0; i < irqs; ++i) {
 		if (!cpumask_test_and_clear_cpu(i, &cpu_pmu->active_irqs))
 			continue;
 		irq = platform_get_irq(pmu_device, i);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+		if (irq >= 0) {
+			if (irq_is_per_cpu(irq)) {
+				WARN_ON(irqs > 1);
+				on_each_cpu(cpu_pmu_disable_percpu_irq,
+						(void *)irq, 1);
+				free_percpu_irq(irq, &cpu_hw_events);
+			} else
+				free_irq(irq, &per_cpu(cpu_hw_events, i));
+		}
+#else /* CONFIG_SYNO_LSP_MONACO */
 		if (irq >= 0)
 			free_irq(irq, cpu_pmu);
+#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	}
 }
 
@@ -101,11 +173,89 @@ static int cpu_pmu_request_irq(struct arm_pmu *cpu_pmu, irq_handler_t handler)
 		return -ENODEV;
 	}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	irq = platform_get_irq(pmu_device, 0);
+	if (irq >= 0 && irq_is_percpu(irq)) {
+		err = request_percpu_irq(irq, handler, "arm-pmu", &percpu_pmu);
+		if (err) {
+			pr_err("unable to request IRQ%d for ARM PMU counters\n",
+				irq);
+			return err;
+		}
+		on_each_cpu(cpu_pmu_enable_percpu_irq, cpu_pmu, 1);
+	} else {
+		for (i = 0; i < irqs; ++i) {
+			err = 0;
+			irq = platform_get_irq(pmu_device, i);
+			if (irq < 0)
+				continue;
+
+			/*
+			 * If we have a single PMU interrupt that we can't shift,
+			 * assume that we're running on a uniprocessor machine and
+			 * continue. Otherwise, continue without this interrupt.
+			 */
+			if (irq_set_affinity(irq, cpumask_of(i)) && irqs > 1) {
+				pr_warning("unable to set irq affinity (irq=%d, cpu=%u)\n",
+					    irq, i);
+				continue;
+			}
+
+			err = request_irq(irq, handler,
+					  IRQF_NOBALANCING | IRQF_NO_THREAD, "arm-pmu",
+					  cpu_pmu);
+			if (err) {
+				pr_err("unable to request IRQ%d for ARM PMU counters\n",
+					irq);
+				return err;
+			}
+		}
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	for (i = 0; i < irqs; ++i) {
 		err = 0;
 		irq = platform_get_irq(pmu_device, i);
 		if (irq < 0)
 			continue;
+#if defined (CONFIG_SYNO_LSP_MONACO)
+		if (irq_is_per_cpu(irq)) {
+			/*
+			 * We assume that if the PMU IRQ is per-cpu, then
+			 * there is only one.
+			 */
+			WARN_ON(irqs > 1);
+
+			err = request_percpu_irq(irq, handler,
+						"arm-pmu", &cpu_hw_events);
+			if (err) {
+				pr_err("unable to request IRQ%d for ARM PMU counters\n",
+					irq);
+				return err;
+			}
+
+			on_each_cpu(cpu_pmu_enable_percpu_irq,
+					(void *)irq, 1);
+		} else {
+		/*
+		 * If we have a single PMU interrupt that we can't shift,
+			* assume that we're running on a uniprocessor machine
+			* and continue. Otherwise, continue without this
+			* interrupt.
+		 */
+		if (irq_set_affinity(irq, cpumask_of(i)) && irqs > 1) {
+				pr_warn("unable to set irq affinity (irq=%d, cpu=%u)\n",
+				    irq, i);
+			continue;
+		}
+
+			err = request_irq(irq, handler, IRQF_NOBALANCING,
+					"arm-pmu", &per_cpu(cpu_hw_events, i));
+		if (err) {
+			pr_err("unable to request IRQ%d for ARM PMU counters\n",
+				irq);
+			return err;
+		}
+		}
+#else /* CONFIG_SYNO_LSP_MONACO */
 
 		/*
 		 * If we have a single PMU interrupt that we can't shift,
@@ -125,6 +275,8 @@ static int cpu_pmu_request_irq(struct arm_pmu *cpu_pmu, irq_handler_t handler)
 				irq);
 			return err;
 		}
+#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 		cpumask_set_cpu(i, &cpu_pmu->active_irqs);
 	}
@@ -139,7 +291,13 @@ static void cpu_pmu_init(struct arm_pmu *cpu_pmu)
 		struct pmu_hw_events *events = &per_cpu(cpu_hw_events, cpu);
 		events->events = per_cpu(hw_events, cpu);
 		events->used_mask = per_cpu(used_mask, cpu);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+		events->pmu = &cpu_pmu->pmu;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 		raw_spin_lock_init(&events->pmu_lock);
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+		per_cpu(percpu_pmu, cpu) = cpu_pmu;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	}
 
 	cpu_pmu->get_hw_events	= cpu_pmu_get_cpu_events;

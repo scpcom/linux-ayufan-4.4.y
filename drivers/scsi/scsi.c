@@ -820,7 +820,7 @@ int scsi_dispatch_cmd(struct scsi_cmnd *cmd)
 	// so we must skip these commands here, and we also skip TEST_UNIT_READY, LOG_SENSE, and START_STOP for SAS disks
 	/* mvSata */
 	if(0x0C == cmd->cmnd[0]) {
-		struct scatterlist *sg;
+		struct scatterlist *sg = NULL;
 		unsigned char* pBuffer;
 
 		if( cmd->sdb.table.nents ) {

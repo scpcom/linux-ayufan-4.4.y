@@ -79,6 +79,9 @@ static int palm27x_ac97_init(struct snd_soc_pcm_runtime *rtd)
 	struct snd_soc_dapm_context *dapm = &codec->dapm;
 	int err;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	/* connected pins */
 	if (machine_is_palmld())
 		snd_soc_dapm_enable_pin(dapm, "MIC1");
@@ -86,6 +89,7 @@ static int palm27x_ac97_init(struct snd_soc_pcm_runtime *rtd)
 	snd_soc_dapm_enable_pin(dapm, "HPOUTR");
 	snd_soc_dapm_enable_pin(dapm, "LOUT2");
 	snd_soc_dapm_enable_pin(dapm, "ROUT2");
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 	/* not connected pins */
 	snd_soc_dapm_nc_pin(dapm, "OUT3");

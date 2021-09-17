@@ -1834,6 +1834,9 @@ SYSCALL_DEFINE6(recvfrom, int, fd, void __user *, ubuf, size_t, size,
 	msg.msg_controllen = 0;
 	msg.msg_iovlen = 1;
 	msg.msg_iov = &iov;
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	msg.msg_flags = 0;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	iov.iov_len = size;
 	iov.iov_base = ubuf;
 	/* Save some cycles and don't copy the address if not needed */

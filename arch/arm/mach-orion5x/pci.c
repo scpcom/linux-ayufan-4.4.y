@@ -154,11 +154,18 @@ static int __init pcie_setup(struct pci_sys_data *sys)
 	if (dev == MV88F5181_DEV_ID || dev == MV88F5182_DEV_ID) {
 		printk(KERN_NOTICE "Applying Orion-1/Orion-NAS PCIe config "
 				   "read transaction workaround\n");
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+		mvebu_mbus_add_window_by_id(ORION_MBUS_PCIE_WA_TARGET,
+					    ORION_MBUS_PCIE_WA_ATTR,
+					    ORION5X_PCIE_WA_PHYS_BASE,
+					    ORION5X_PCIE_WA_SIZE);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 		mvebu_mbus_add_window_remap_flags("pcie0.0",
 						  ORION5X_PCIE_WA_PHYS_BASE,
 						  ORION5X_PCIE_WA_SIZE,
 						  MVEBU_MBUS_NO_REMAP,
 						  MVEBU_MBUS_PCI_WA);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 		pcie_ops.read = pcie_rd_conf_wa;
 	}
 

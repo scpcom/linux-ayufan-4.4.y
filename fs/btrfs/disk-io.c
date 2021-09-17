@@ -32,6 +32,11 @@
 #include <linux/uuid.h>
 #include <linux/semaphore.h>
 #include <asm/unaligned.h>
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+#include <linux/async_tx.h>
+#include <linux/dma-attrs.h>
+#include <linux/dma-mapping.h>
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 #include "ctree.h"
 #include "disk-io.h"
 #include "hash.h"
@@ -158,6 +163,9 @@ static struct btrfs_lockdep_keyset {
 	{ .id = BTRFS_TREE_RELOC_OBJECTID,	.name_stem = "treloc"	},
 	{ .id = BTRFS_DATA_RELOC_TREE_OBJECTID,	.name_stem = "dreloc"	},
 	{ .id = BTRFS_UUID_TREE_OBJECTID,	.name_stem = "uuid"	},
+#ifdef CONFIG_SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+	{ .id = BTRFS_BLOCK_GROUP_HINT_TREE_OBJECTID,   .name_stem = "block-group-hint" },
+#endif
 	{ .id = 0,				.name_stem = "tree"	},
 };
 
@@ -252,6 +260,54 @@ void btrfs_csum_final(u32 crc, char *result)
 {
 	put_unaligned_le32(~crc, result);
 }
+
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+struct dma_async_tx_descriptor *
+btrfs_csum_data_dma_offload(const u8 *data, u32 *crc, unsigned int len)
+{
+	struct async_submit_ctl submit;
+	struct dma_chan *chan;
+	struct dma_device *device;
+	struct dma_async_tx_descriptor *tx;
+	dma_addr_t src;
+
+	/* perform basic sanity checks */
+	if (unlikely((unsigned long)data < PAGE_OFFSET)	||
+	    unlikely(high_memory <= ((void *)data)))
+		return NULL;
+
+	len = min(len, (unsigned int)(high_memory - (void *)data));
+
+	/* offload the crc calc for page size */
+	if (len != PAGE_SIZE)
+		return NULL;
+
+	init_async_submit(&submit, 0, NULL, NULL, NULL, NULL);
+
+	chan = async_tx_find_channel(&submit, DMA_CRC32C, NULL, 0, NULL, 0, 0);
+	if (!chan)
+		return NULL;
+
+	device = chan->device;
+	src = dma_map_single(device->dev, (void *)data, len, DMA_TO_DEVICE);
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	tx = device->device_prep_dma_crc32c(chan, src, len, crc, 0);
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+	tx = device->device_prep_dma_crc32c(chan, src, len, crc,
+					    DMA_COMPL_SKIP_DEST_UNMAP | DMA_PREP_INTERRUPT);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+	if (unlikely(!tx)) {
+		/* HW is unable to handle this context */
+		dma_unmap_page(device->dev, src, len, DMA_TO_DEVICE);
+		return NULL;
+	}
+
+	async_tx_submit(chan, tx, &submit);
+
+	return tx;
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 /*
  * compute the csum for a btree block, and either verify it or write it
@@ -1240,6 +1296,9 @@ static void __setup_root(u32 nodesize, u32 leafsize, u32 sectorsize,
 	mutex_init(&root->objectid_mutex);
 	mutex_init(&root->log_mutex);
 	mutex_init(&root->ordered_extent_mutex);
+#ifdef CONFIG_SYNO_BTRFS_ADD_LOCK_ON_FLUSH_ORDERED_EXTENT
+	mutex_init(&root->ordered_extent_worker_mutex);
+#endif
 	mutex_init(&root->delalloc_mutex);
 	init_waitqueue_head(&root->log_writer_wait);
 	init_waitqueue_head(&root->log_commit_wait[0]);
@@ -1648,6 +1707,11 @@ struct btrfs_root *btrfs_get_fs_root(struct btrfs_fs_info *fs_info,
 	if (location->objectid == BTRFS_UUID_TREE_OBJECTID)
 		return fs_info->uuid_root ? fs_info->uuid_root :
 					    ERR_PTR(-ENOENT);
+#ifdef CONFIG_SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+	if (location->objectid == BTRFS_BLOCK_GROUP_HINT_TREE_OBJECTID)
+		return fs_info->block_group_hint_root ? fs_info->block_group_hint_root :
+					    ERR_PTR(-ENOENT);
+#endif
 
 again:
 	root = btrfs_lookup_fs_root(fs_info, location->objectid);
@@ -2075,6 +2139,9 @@ static void btrfs_stop_all_workers(struct btrfs_fs_info *fs_info)
 	btrfs_destroy_workqueue(fs_info->delayed_workers);
 	btrfs_destroy_workqueue(fs_info->caching_workers);
 	btrfs_destroy_workqueue(fs_info->readahead_workers);
+#ifdef CONFIG_SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+	btrfs_destroy_workqueue(fs_info->reada_path_workers);
+#endif
 	btrfs_destroy_workqueue(fs_info->flush_workers);
 	btrfs_destroy_workqueue(fs_info->qgroup_rescan_workers);
 	btrfs_destroy_workqueue(fs_info->extent_workers);
@@ -2100,6 +2167,9 @@ static void free_root_pointers(struct btrfs_fs_info *info, int chunk_root)
 	free_root_extent_buffers(info->csum_root);
 	free_root_extent_buffers(info->quota_root);
 	free_root_extent_buffers(info->uuid_root);
+#ifdef CONFIG_SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+	free_root_extent_buffers(info->block_group_hint_root);
+#endif
 	if (chunk_root)
 		free_root_extent_buffers(info->chunk_root);
 }
@@ -2164,6 +2234,9 @@ int open_ctree(struct super_block *sb,
 	struct btrfs_root *quota_root;
 	struct btrfs_root *uuid_root;
 	struct btrfs_root *log_tree_root;
+#ifdef CONFIG_SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+	struct btrfs_root *block_group_hint_root;
+#endif
 
 	int ret;
 	int err = -EINVAL;
@@ -2248,6 +2321,9 @@ int open_ctree(struct super_block *sb,
 	spin_lock_init(&fs_info->unused_bgs_lock);
 	rwlock_init(&fs_info->tree_mod_log_lock);
 	mutex_init(&fs_info->reloc_mutex);
+#ifdef CONFIG_SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT
+	mutex_init(&fs_info->pending_snapshots_mutex);
+#endif /* CONFIG_SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT */
 	mutex_init(&fs_info->delalloc_root_mutex);
 	seqlock_init(&fs_info->profiles_lock);
 
@@ -2382,6 +2458,15 @@ int open_ctree(struct super_block *sb,
 	mutex_init(&fs_info->dev_replace.lock_finishing_cancel_unmount);
 	mutex_init(&fs_info->dev_replace.lock_management_lock);
 	mutex_init(&fs_info->dev_replace.lock);
+
+#ifdef CONFIG_SYNO_BTRFS_METADATA_RESERVE
+	fs_info->metadata_ratio = 50;
+#endif
+#ifdef CONFIG_SYNO_BTRFS_FLUSHONCOMMIT_THRESHOLD
+	fs_info->ordered_extent_nr = 0;
+	fs_info->delalloc_inodes_nr = 0;
+	fs_info->flushoncommit_threshold = 1000;
+#endif
 
 	spin_lock_init(&fs_info->qgroup_lock);
 	mutex_init(&fs_info->qgroup_ioctl_lock);
@@ -2610,6 +2695,10 @@ int open_ctree(struct super_block *sb,
 		btrfs_alloc_workqueue("delayed-meta", flags, max_active, 0);
 	fs_info->readahead_workers =
 		btrfs_alloc_workqueue("readahead", flags, max_active, 2);
+#ifdef CONFIG_SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+	fs_info->reada_path_workers =
+		btrfs_alloc_workqueue("reada-path", flags, max_active, 2);
+#endif
 	fs_info->qgroup_rescan_workers =
 		btrfs_alloc_workqueue("qgroup-rescan", flags, 1, 0);
 	fs_info->extent_workers =
@@ -2779,6 +2868,20 @@ retry_root_backup:
 		check_uuid_tree =
 		    generation != btrfs_super_uuid_tree_generation(disk_super);
 	}
+
+#ifdef CONFIG_SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+	if (!fs_info->no_block_group_hint) {
+		spin_lock_init(&fs_info->block_group_hint_tree_lock);
+		location.objectid = BTRFS_BLOCK_GROUP_HINT_TREE_OBJECTID;
+		block_group_hint_root = btrfs_read_tree_root(tree_root, &location);
+		if (IS_ERR_OR_NULL(block_group_hint_root))
+			fs_info->block_group_hint_root = NULL;
+		else {
+			set_bit(BTRFS_ROOT_TRACK_DIRTY, &block_group_hint_root->state);
+			fs_info->block_group_hint_root = block_group_hint_root;
+		}
+	}
+#endif
 
 	fs_info->generation = generation;
 	fs_info->last_trans_committed = generation;
@@ -4121,12 +4224,6 @@ again:
 					    EXTENT_DIRTY, NULL);
 		if (ret)
 			break;
-
-		/* opt_discard */
-		if (btrfs_test_opt(root, DISCARD))
-			ret = btrfs_error_discard_extent(root, start,
-							 end + 1 - start,
-							 NULL);
 
 		clear_extent_dirty(unpin, start, end, GFP_NOFS);
 		btrfs_error_unpin_extent_range(root, start, end);

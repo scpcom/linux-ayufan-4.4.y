@@ -28,6 +28,12 @@
 struct dev_pin_info {
 	struct pinctrl *p;
 	struct pinctrl_state *default_state;
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#ifdef CONFIG_PM
+	struct pinctrl_state *sleep_state;
+	struct pinctrl_state *idle_state;
+#endif
+#endif /* CONFIG_SYNO_LSP_MONACO */
 };
 
 extern int pinctrl_bind_pins(struct device *dev);

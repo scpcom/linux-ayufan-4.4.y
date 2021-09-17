@@ -379,6 +379,12 @@ int add_mtd_device(struct mtd_info *mtd)
 			       mtd->name);
 	}
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	/* Set MTD_SPANS_MASTER for non-slave MTD devices */
+	if (!(mtd->flags & MTD_SLAVE_PARTITION))
+		mtd->flags |= MTD_SPANS_MASTER;
+
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	/* Caller should have set dev.parent to match the
 	 * physical device.
 	 */

@@ -26,6 +26,25 @@
 #include <linux/string.h>
 #include <linux/slab.h>
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+/**
+ * irq_of_parse_and_map - Parse and map an interrupt into linux virq space
+ * @dev: Device node of the device whose interrupt is to be mapped
+ * @index: Index of the interrupt to map
+ *
+ * This function is a wrapper that chains of_irq_parse_one() and
+ * irq_create_of_mapping() to make things easier to callers
+ */
+unsigned int irq_of_parse_and_map(struct device_node *dev, int index)
+{
+	struct of_phandle_args oirq;
+
+	if (of_irq_parse_one(dev, index, &oirq))
+		return 0;
+
+	return irq_create_of_mapping(&oirq);
+}
+#else /* CONFIG_SYNO_LSP_ARMADA */
 /**
  * irq_of_parse_and_map - Parse and map an interrupt into linux virq space
  * @device: Device node of the device whose interrupt is to be mapped
@@ -44,6 +63,7 @@ unsigned int irq_of_parse_and_map(struct device_node *dev, int index)
 	return irq_create_of_mapping(oirq.controller, oirq.specifier,
 				     oirq.size);
 }
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 EXPORT_SYMBOL_GPL(irq_of_parse_and_map);
 
 /**
@@ -78,6 +98,38 @@ struct device_node *of_irq_find_parent(struct device_node *child)
 	return p;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+/**
+ * of_irq_parse_raw - Low level interrupt tree parsing
+ * @parent:	the device interrupt parent
+ * @addr:	address specifier (start of "reg" property of the device) in be32 format
+ * @out_irq:	structure of_irq updated by this function
+ *
+ * Returns 0 on success and a negative number on error
+ *
+ * This function is a low-level interrupt tree walking function. It
+ * can be used to do a partial walk with synthetized reg and interrupts
+ * properties, for example when resolving PCI interrupts when no device
+ * node exist for the parent. It takes an interrupt specifier structure as
+ * input, walks the tree looking for any interrupt-map properties, translates
+ * the specifier for each map, and then returns the translated map.
+ */
+int of_irq_parse_raw(const __be32 *addr, struct of_phandle_args *out_irq)
+{
+	struct device_node *ipar, *tnode, *old = NULL, *newpar = NULL;
+	__be32 initial_match_array[MAX_PHANDLE_ARGS];
+	const __be32 *match_array = initial_match_array;
+	const __be32 *tmp, *imap, *imask, dummy_imask[] = { [0 ... MAX_PHANDLE_ARGS] = ~0 };
+
+	u32 intsize = 1, addrsize, newintsize = 0, newaddrsize = 0;
+	int imaplen, match, i;
+
+#ifdef DEBUG
+	of_print_phandle_args("of_irq_parse_raw: ", out_irq);
+#endif
+
+	ipar = of_node_get(out_irq->np);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 /**
  * of_irq_map_raw - Low level interrupt tree parsing
  * @parent:	the device interrupt parent
@@ -106,6 +158,7 @@ int of_irq_map_raw(struct device_node *parent, const __be32 *intspec,
 		 be32_to_cpup(intspec + 1), ointsize);
 
 	ipar = of_node_get(parent);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 	/* First get the #interrupt-cells property of the current cursor
 	 * that tells us how to interpret the passed-in intspec. If there
@@ -126,9 +179,15 @@ int of_irq_map_raw(struct device_node *parent, const __be32 *intspec,
 		goto fail;
 	}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	pr_debug("of_irq_parse_raw: ipar=%s, size=%d\n", of_node_full_name(ipar), intsize);
+
+	if (out_irq->args_count != intsize)
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	pr_debug("of_irq_map_raw: ipar=%s, size=%d\n", ipar->full_name, intsize);
 
 	if (ointsize != intsize)
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 		return -EINVAL;
 
 	/* Look for this #address-cells. We have to implement the old linux
@@ -147,6 +206,18 @@ int of_irq_map_raw(struct device_node *parent, const __be32 *intspec,
 
 	pr_debug(" -> addrsize=%d\n", addrsize);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	/* Range check so that the temporary buffer doesn't overflow */
+	if (WARN_ON(addrsize + intsize > MAX_PHANDLE_ARGS))
+		goto fail;
+
+	/* Precalculate the match array - this simplifies match loop */
+	for (i = 0; i < addrsize; i++)
+		initial_match_array[i] = addr ? addr[i] : 0;
+	for (i = 0; i < intsize; i++)
+		initial_match_array[addrsize + i] = cpu_to_be32(out_irq->args[i]);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
 	/* Now start the actual "proper" walk of the interrupt tree */
 	while (ipar != NULL) {
 		/* Now check if cursor is an interrupt-controller and if it is
@@ -155,14 +226,29 @@ int of_irq_map_raw(struct device_node *parent, const __be32 *intspec,
 		if (of_get_property(ipar, "interrupt-controller", NULL) !=
 				NULL) {
 			pr_debug(" -> got it !\n");
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+			// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA */
 			for (i = 0; i < intsize; i++)
 				out_irq->specifier[i] =
 						of_read_number(intspec +i, 1);
 			out_irq->size = intsize;
 			out_irq->controller = ipar;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 			of_node_put(old);
 			return 0;
 		}
+
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+		/*
+		 * interrupt-map parsing does not work without a reg
+		 * property when #address-cells != 0
+		 */
+		if (addrsize && !addr) {
+			pr_debug(" -> no reg passed in when needed !\n");
+			goto fail;
+		}
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 		/* Now look for an interrupt-map */
 		imap = of_get_property(ipar, "interrupt-map", &imaplen);
@@ -177,6 +263,10 @@ int of_irq_map_raw(struct device_node *parent, const __be32 *intspec,
 		/* Look for a mask */
 		imask = of_get_property(ipar, "interrupt-map-mask", NULL);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+		if (!imask)
+			imask = dummy_imask;
+#else /* CONFIG_SYNO_LSP_ARMADA */
 		/* If we were passed no "reg" property and we attempt to parse
 		 * an interrupt-map, then #address-cells must be 0.
 		 * Fail if it's not.
@@ -185,12 +275,17 @@ int of_irq_map_raw(struct device_node *parent, const __be32 *intspec,
 			pr_debug(" -> no reg passed in when needed !\n");
 			goto fail;
 		}
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 		/* Parse interrupt-map */
 		match = 0;
 		while (imaplen > (addrsize + intsize + 1) && !match) {
 			/* Compare specifiers */
 			match = 1;
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+			for (i = 0; i < (addrsize + intsize); i++, imaplen--)
+				match &= !((match_array[i] ^ *imap++) & imask[i]);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 			for (i = 0; i < addrsize && match; ++i) {
 				__be32 mask = imask ? imask[i]
 						    : cpu_to_be32(0xffffffffu);
@@ -204,6 +299,7 @@ int of_irq_map_raw(struct device_node *parent, const __be32 *intspec,
 			}
 			imap += addrsize + intsize;
 			imaplen -= addrsize + intsize;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 			pr_debug(" -> match=%d (imaplen=%d)\n", match, imaplen);
 
@@ -237,6 +333,10 @@ int of_irq_map_raw(struct device_node *parent, const __be32 *intspec,
 			    newintsize, newaddrsize);
 
 			/* Check for malformed properties */
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+			if (WARN_ON(newaddrsize + newintsize > MAX_PHANDLE_ARGS))
+				goto fail;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 			if (imaplen < (newaddrsize + newintsize))
 				goto fail;
 
@@ -248,12 +348,27 @@ int of_irq_map_raw(struct device_node *parent, const __be32 *intspec,
 		if (!match)
 			goto fail;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+		/*
+		 * Successfully parsed an interrrupt-map translation; copy new
+		 * interrupt specifier into the out_irq structure
+		 */
+		of_node_put(out_irq->np);
+		out_irq->np = of_node_get(newpar);
+
+		match_array = imap - newaddrsize - newintsize;
+		for (i = 0; i < newintsize; i++)
+			out_irq->args[i] = be32_to_cpup(imap - newintsize + i);
+		out_irq->args_count = intsize = newintsize;
+		addrsize = newaddrsize;
+#else /* CONFIG_SYNO_LSP_ARMADA */
 		of_node_put(old);
 		old = of_node_get(newpar);
 		addrsize = newaddrsize;
 		intsize = newintsize;
 		intspec = imap - intsize;
 		addr = intspec - addrsize;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 	skiplevel:
 		/* Iterate again with new parent */
@@ -264,13 +379,34 @@ int of_irq_map_raw(struct device_node *parent, const __be32 *intspec,
 	}
  fail:
 	of_node_put(ipar);
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	of_node_put(out_irq->np);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	of_node_put(old);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	of_node_put(newpar);
 
 	return -EINVAL;
 }
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+EXPORT_SYMBOL_GPL(of_irq_parse_raw);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 EXPORT_SYMBOL_GPL(of_irq_map_raw);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+/**
+ * of_irq_parse_one - Resolve an interrupt for a device
+ * @device: the device whose interrupt is to be resolved
+ * @index: index of the interrupt to resolve
+ * @out_irq: structure of_irq filled by this function
+ *
+ * This function resolves an interrupt for a node by walking the interrupt tree,
+ * finding which interrupt controller node it is attached to, and returning the
+ * interrupt specifier that can be used to retrieve a Linux IRQ number.
+ */
+int of_irq_parse_one(struct device_node *device, int index, struct of_phandle_args *out_irq)
+#else /* CONFIG_SYNO_LSP_ARMADA */
 /**
  * of_irq_map_one - Resolve an interrupt for a device
  * @device: the device whose interrupt is to be resolved
@@ -281,28 +417,57 @@ EXPORT_SYMBOL_GPL(of_irq_map_raw);
  * device-tree node. It's the high level pendant to of_irq_map_raw().
  */
 int of_irq_map_one(struct device_node *device, int index, struct of_irq *out_irq)
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 {
 	struct device_node *p;
 	const __be32 *intspec, *tmp, *addr;
 	u32 intsize, intlen;
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	int i, res = -EINVAL;
+
+	pr_debug("of_irq_parse_one: dev=%s, index=%d\n", of_node_full_name(device), index);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	int res = -EINVAL;
 
 	pr_debug("of_irq_map_one: dev=%s, index=%d\n", device->full_name, index);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 	/* OldWorld mac stuff is "special", handle out of line */
 	if (of_irq_workarounds & OF_IMAP_OLDWORLD_MAC)
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+		return of_irq_parse_oldworld(device, index, out_irq);
+
+	/* Get the reg property (if any) */
+	addr = of_get_property(device, "reg", NULL);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 		return of_irq_map_oldworld(device, index, out_irq);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 	/* Get the interrupts property */
 	intspec = of_get_property(device, "interrupts", &intlen);
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	if (intspec == NULL) {
+		/* Try the new-style interrupts-extended */
+		res = of_parse_phandle_with_args(device, "interrupts-extended",
+						"#interrupt-cells", index, out_irq);
+		if (res)
+			return -EINVAL;
+		return of_irq_parse_raw(addr, out_irq);
+	}
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	if (intspec == NULL)
 		return -EINVAL;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	intlen /= sizeof(*intspec);
 
 	pr_debug(" intspec=%d intlen=%d\n", be32_to_cpup(intspec), intlen);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	/* Get the reg property (if any) */
 	addr = of_get_property(device, "reg", NULL);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 	/* Look for the interrupt parent. */
 	p = of_irq_find_parent(device);
@@ -321,14 +486,30 @@ int of_irq_map_one(struct device_node *device, int index, struct of_irq *out_irq
 	if ((index + 1) * intsize > intlen)
 		goto out;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	/* Copy intspec into irq structure */
+	intspec += index * intsize;
+	out_irq->np = p;
+	out_irq->args_count = intsize;
+	for (i = 0; i < intsize; i++)
+		out_irq->args[i] = be32_to_cpup(intspec++);
+
+	/* Check if there are any interrupt-map translations to process */
+	res = of_irq_parse_raw(addr, out_irq);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	/* Get new specifier and map it */
 	res = of_irq_map_raw(p, intspec + index * intsize, intsize,
 			     addr, out_irq);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
  out:
 	of_node_put(p);
 	return res;
 }
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+EXPORT_SYMBOL_GPL(of_irq_parse_one);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 EXPORT_SYMBOL_GPL(of_irq_map_one);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 /**
  * of_irq_to_resource - Decode a node's IRQ and return it as a resource
@@ -345,6 +526,9 @@ int of_irq_to_resource(struct device_node *dev, int index, struct resource *r)
 	if (r && irq) {
 		const char *name = NULL;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+		memset(r, 0, sizeof(*r));
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 		/*
 		 * Get optional "interrupts-names" property to add a name
 		 * to the resource.
@@ -353,8 +537,13 @@ int of_irq_to_resource(struct device_node *dev, int index, struct resource *r)
 					      &name);
 
 		r->start = r->end = irq;
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+		r->flags = IORESOURCE_IRQ | irqd_get_trigger_type(irq_get_irq_data(irq));
+		r->name = name ? name : of_node_full_name(dev);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 		r->flags = IORESOURCE_IRQ;
 		r->name = name ? name : dev->full_name;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	}
 
 	return irq;
@@ -367,9 +556,16 @@ EXPORT_SYMBOL_GPL(of_irq_to_resource);
  */
 int of_irq_count(struct device_node *dev)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	struct of_phandle_args irq;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	int nr = 0;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	while (of_irq_parse_one(dev, nr, &irq) == 0)
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	while (of_irq_to_resource(dev, nr, NULL))
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 		nr++;
 
 	return nr;
@@ -482,8 +678,14 @@ void __init of_irq_init(const struct of_device_id *matches)
 		}
 
 		/* Get the next pending parent that might have children */
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+		desc = list_first_entry_or_null(&intc_parent_list,
+						typeof(*desc), list);
+		if (!desc) {
+#else /* CONFIG_SYNO_LSP_ARMADA */
 		desc = list_first_entry(&intc_parent_list, typeof(*desc), list);
 		if (list_empty(&intc_parent_list) || !desc) {
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 			pr_err("of_irq_init: children remain, but no parents\n");
 			break;
 		}

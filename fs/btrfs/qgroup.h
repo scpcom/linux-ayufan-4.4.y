@@ -95,11 +95,7 @@ int btrfs_qgroup_inherit(struct btrfs_trans_handle *trans,
 			 struct btrfs_fs_info *fs_info, u64 srcid, u64 objectid,
 			 struct btrfs_qgroup_inherit *inherit);
 int btrfs_qgroup_reserve(struct btrfs_root *root, u64 num_bytes);
-#ifdef CONFIG_SYNO_BTRFS_FIX_QGROUP_OVERRUN
-void btrfs_qgroup_free(struct btrfs_root *root, u64 num_bytes, bool force_free);
-#else
 void btrfs_qgroup_free(struct btrfs_root *root, u64 num_bytes);
-#endif
 
 #ifdef CONFIG_SYNO_BTRFS_QGROUP_QUERY
 void btrfs_qgroup_query(struct btrfs_fs_info *fs_info, u64 qgroupid,

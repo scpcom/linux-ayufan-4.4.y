@@ -11,6 +11,9 @@
 #define __ARM_KGDB_H__
 
 #include <linux/ptrace.h>
+#if defined(CONFIG_SYNO_LSP_ALPINE) || defined(CONFIG_SYNO_LSP_ARMADA)
+#include <asm/opcodes.h>
+#endif /* CONFIG_SYNO_LSP_ALPINE || CONFIG_SYNO_LSP_ARMADA */
 
 /*
  * GDB assumes that we're a user process being debugged, so
@@ -41,7 +44,11 @@
 
 static inline void arch_kgdb_breakpoint(void)
 {
+#if defined(CONFIG_SYNO_LSP_ALPINE) || defined(CONFIG_SYNO_LSP_ARMADA)
+	asm(__inst_arm(0xe7ffdeff));
+#else /* CONFIG_SYNO_LSP_ALPINE || CONFIG_SYNO_LSP_ARMADA */
 	asm(".word 0xe7ffdeff");
+#endif /* CONFIG_SYNO_LSP_ALPINE || CONFIG_SYNO_LSP_ARMADA */
 }
 
 extern void kgdb_handle_bus_error(void);

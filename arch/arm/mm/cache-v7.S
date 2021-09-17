@@ -15,6 +15,9 @@
 #include <asm/assembler.h>
 #include <asm/errno.h>
 #include <asm/unwind.h>
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#include <asm/page.h>
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 #include "proc-macros.S"
 
@@ -282,7 +285,11 @@ ENTRY(v7_coherent_user_range)
 	add	r12, r12, r2
 	cmp	r12, r1
 	blo	1b
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	dsb	ishst
+#else /* CONFIG_SYNO_LSP_MONACO */
 	dsb
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	icache_line_size r2, r3
 	sub	r3, r2, #1
 	bic	r12, r0, r3
@@ -294,7 +301,11 @@ ENTRY(v7_coherent_user_range)
 	mov	r0, #0
 	ALT_SMP(mcr	p15, 0, r0, c7, c1, 6)	@ invalidate BTB Inner Shareable
 	ALT_UP(mcr	p15, 0, r0, c7, c5, 6)	@ invalidate BTB
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	dsb	ishst
+#else /* CONFIG_SYNO_LSP_MONACO */
 	dsb
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	isb
 	mov	pc, lr
 

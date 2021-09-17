@@ -14,7 +14,7 @@
  */
 
 /dts-v1/;
-/include/ "armada-370.dtsi"
+#include "armada-370.dtsi"
 
 / {
 	model = "Marvell Armada 370 Evaluation Board";
@@ -30,9 +30,13 @@
 	};
 
 	soc {
+		ranges = <MBUS_ID(0xf0, 0x01) 0 0xf1000000 0x100000
+			  MBUS_ID(0x01, 0xe0) 0 0xfff00000 0x100000
+			  MBUS_ID(0x09, 0x01) 0 0xf1100000 0x10000>;	/* CESA0: PHYS=0xf1100000
+									   size 64K */
+
 		internal-regs {
 			serial@12000 {
-				clock-frequency = <200000000>;
 				status = "okay";
 			};
 			sata@a0000 {
@@ -74,6 +78,7 @@
 				 */
 				status = "disabled";
 				/* No CD or WP GPIOs */
+				broken-cd;
 			};
 
 			usb@50000 {
@@ -96,21 +101,55 @@
 				};
 			};
 
-			pcie-controller {
+			/* 1GB Flash via NFC NAND controller */
+			nfc: nand-flash@d0000 {
+				#address-cells = <1>;
+				#size-cells = <1>;
 				status = "okay";
-				/*
-				 * The two PCIe units are accessible through
-				 * both standard PCIe slots and mini-PCIe
-				 * slots on the board.
-				 */
-				pcie@1,0 {
-					/* Port 0, Lane 0 */
-					status = "okay";
+
+				nfc,nfc-mode  = "normal";       /* normal or ganged */
+				nfc,nfc-dma   = <0>;            /* 0 for no, 1 for dma */
+				nfc,nfc-width = <8>;
+				nfc,ecc-type  = <1>;            /* 4 bit */
+				nfc,num-cs    = <1>;
+
+				mtd0@00000000 {
+					label = "U-Boot";
+					reg = <0x00000000 0x00300000>;
+					read-only;
 				};
-				pcie@2,0 {
-					/* Port 1, Lane 0 */
-					status = "okay";
+
+				mtd1@00080000 {
+					label = "uImage";
+					reg = <0x00300000 0x00400000>;
+					read-only;
 				};
+
+				mtd2@00140000 {
+					label = "Root";
+					reg = <0x00700000 0x3f900000>;
+				};
+			};
+
+			crypto@9D000 {
+				status = "okay";
+			};
+		};
+
+		pcie-controller {
+			status = "okay";
+			/*
+			 * The two PCIe units are accessible through
+			 * both standard PCIe slots and mini-PCIe
+			 * slots on the board.
+			 */
+			pcie@1,0 {
+				/* Port 0, Lane 0 */
+				status = "okay";
+			};
+			pcie@2,0 {
+				/* Port 1, Lane 0 */
+				status = "okay";
 			};
 		};
 	};

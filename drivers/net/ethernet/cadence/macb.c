@@ -1649,7 +1649,10 @@ err_out_put_pclk:
 err_out_free_dev:
 	free_netdev(dev);
 err_out:
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#else /* CONFIG_SYNO_LSP_MONACO */
 	platform_set_drvdata(pdev, NULL);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	return err;
 }
 
@@ -1675,7 +1678,10 @@ static int __exit macb_remove(struct platform_device *pdev)
 		clk_disable_unprepare(bp->pclk);
 		clk_put(bp->pclk);
 		free_netdev(dev);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#else /* CONFIG_SYNO_LSP_MONACO */
 		platform_set_drvdata(pdev, NULL);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	}
 
 	return 0;

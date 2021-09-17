@@ -487,8 +487,32 @@ static void skb_release_data(struct sk_buff *skb)
 			       &skb_shinfo(skb)->dataref)) {
 		if (skb_shinfo(skb)->nr_frags) {
 			int i;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+			int nr_frags = skb_shinfo(skb)->nr_frags;
+
+			if(nr_frags > 1) {
+				unsigned int c = 0;
+				for (i = 0; i < nr_frags - 1; i++) {
+					struct page *page = skb_frag_page(&skb_shinfo(skb)->frags[i]);
+					struct page *next_page = skb_frag_page(&skb_shinfo(skb)->frags[i + 1]);
+					if (!PageCompound(page) && (page == next_page)) {
+						c++;
+						continue;
+					} else {
+						put_page_n(page, c + 1);
+						c = 0;
+					}
+				}
+
+				put_page_n(skb_frag_page(&skb_shinfo(skb)->frags[i]), c + 1);
+			} else {
+				for (i = 0; i < nr_frags; i++)
+					skb_frag_unref(skb, i);
+			}
+#else /* CONFIG_SYNO_LSP_ALPINE */
 			for (i = 0; i < skb_shinfo(skb)->nr_frags; i++)
 				skb_frag_unref(skb, i);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 		}
 
 		/*
@@ -507,6 +531,14 @@ static void skb_release_data(struct sk_buff *skb)
 			skb_drop_fraglist(skb);
 
 		skb_free_head(skb);
+#if defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_NET_SKB_RECYCLE)
+		/* Workaround for the cases when recycle callback was not called */
+		if (skb->skb_recycle) {
+			/* Sign that skb is not available for recycle */
+			skb->hw_cookie |= BIT(0);
+			skb->skb_recycle(skb);
+		}
+#endif /* CONFIG_SYNO_LSP_ARMADA && CONFIG_NET_SKB_RECYCLE */
 	}
 }
 
@@ -544,7 +576,11 @@ static void kfree_skbmem(struct sk_buff *skb)
 	}
 }
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+void skb_release_head_state(struct sk_buff *skb)
+#else /* CONFIG_SYNO_LSP_ALPINE */
 static void skb_release_head_state(struct sk_buff *skb)
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 {
 	skb_dst_drop(skb);
 #ifdef CONFIG_XFRM
@@ -568,6 +604,9 @@ static void skb_release_head_state(struct sk_buff *skb)
 #endif
 #endif
 }
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+EXPORT_SYMBOL(skb_release_head_state);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 /* Free everything but the sk_buff shell. */
 static void skb_release_all(struct sk_buff *skb)
@@ -588,6 +627,10 @@ static void skb_release_all(struct sk_buff *skb)
 
 void __kfree_skb(struct sk_buff *skb)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_NET_SKB_RECYCLE)
+	if (skb->skb_recycle && !skb->skb_recycle(skb))
+		return;
+#endif /* CONFIG_SYNO_LSP_ARMADA && CONFIG_NET_SKB_RECYCLE */
 	skb_release_all(skb);
 	kfree_skbmem(skb);
 }
@@ -665,6 +708,55 @@ void consume_skb(struct sk_buff *skb)
 }
 EXPORT_SYMBOL(consume_skb);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_NET_SKB_RECYCLE)
+/**
+ *	skb_recycle - clean up an skb for reuse
+ *	@skb: buffer
+ *
+ *	Recycles the skb to be reused as a receive buffer. This
+ *	function does any necessary reference count dropping, and
+ *	cleans up the skbuff as if it just came from __alloc_skb().
+ */
+void skb_recycle(struct sk_buff *skb)
+{
+	struct skb_shared_info *shinfo;
+
+	skb_release_head_state(skb);
+
+	shinfo = skb_shinfo(skb);
+	memset(shinfo, 0, offsetof(struct skb_shared_info, dataref));
+	atomic_set(&shinfo->dataref, 1);
+
+	memset(skb, 0, offsetof(struct sk_buff, tail));
+	skb->data = skb->head + NET_SKB_PAD;
+	skb_reset_tail_pointer(skb);
+}
+EXPORT_SYMBOL(skb_recycle);
+
+/**
+ *	skb_recycle_check - check if skb can be reused for receive
+ *	@skb: buffer
+ *	@skb_size: minimum receive buffer size
+ *
+ *	Checks that the skb passed in is not shared or cloned, and
+ *	that it is linear and its head portion at least as large as
+ *	skb_size so that it can be recycled as a receive buffer.
+ *	If these conditions are met, this function does any necessary
+ *	reference count dropping and cleans up the skbuff as if it
+ *	just came from __alloc_skb().
+ */
+bool skb_recycle_check(struct sk_buff *skb, int skb_size)
+{
+	if (!skb_is_recycleable(skb, skb_size))
+		return false;
+
+	skb_recycle(skb);
+
+	return true;
+}
+EXPORT_SYMBOL(skb_recycle_check);
+#endif /* CONFIG_SYNO_LSP_ARMADA && CONFIG_NET_SKB_RECYCLE */
+
 static void __copy_skb_header(struct sk_buff *new, const struct sk_buff *old)
 {
 	new->tstamp		= old->tstamp;
@@ -733,6 +825,11 @@ static struct sk_buff *__skb_clone(struct sk_buff *n, struct sk_buff *skb)
 	n->cloned = 1;
 	n->nohdr = 0;
 	n->destructor = NULL;
+#if defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_NET_SKB_RECYCLE)
+	n->skb_recycle = NULL;
+	n->hw_cookie = 0;
+#endif /* CONFIG_SYNO_LSP_ARMADA && CONFIG_NET_SKB_RECYCLE */
+
 	C(tail);
 	C(end);
 	C(head);
@@ -3387,6 +3484,15 @@ EXPORT_SYMBOL(__skb_warn_lro_forwarding);
 void kfree_skb_partial(struct sk_buff *skb, bool head_stolen)
 {
 	if (head_stolen) {
+#if defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_NET_SKB_RECYCLE)
+		/* Workaround for the cases when recycle callback was not called */
+		if (skb->skb_recycle) {
+			/* Sign that skb is not available for recycle */
+			skb->hw_cookie |= BIT(0);
+			skb->skb_recycle(skb);
+		}
+#endif /* CONFIG_SYNO_LSP_ARMADA && CONFIG_NET_SKB_RECYCLE */
+
 		skb_release_head_state(skb);
 		kmem_cache_free(skbuff_head_cache, skb);
 	} else {

@@ -49,8 +49,13 @@ static int probed;
 /*
  * Get a bit field at register value <v>, from bit <lo> to bit <hi>
  */
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#define GET_BITFIELD(v, lo, hi)	\
+	(((v) & GENMASK_ULL(hi, lo)) >> (lo))
+#else /* CONFIG_SYNO_LSP_MONACO */
 #define GET_BITFIELD(v, lo, hi)	\
 	(((v) & ((1ULL << ((hi) - (lo) + 1)) - 1) << (lo)) >> (lo))
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 /*
  * sbridge Memory Controller Registers

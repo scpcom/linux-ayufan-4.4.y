@@ -45,6 +45,12 @@
 #include "../scsi/scsi_transport_api.h"
 
 #include <linux/libata.h>
+#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_MONACO)
+#include <linux/of.h>
+#endif /* CONFIG_SYNO_ARMADA || CONFIG_SYNO_MONACO */
+#if defined(CONFIG_SYNO_MONACO)
+#include <linux/platform_device.h>
+#endif
 
 #include "libata.h"
 
@@ -617,6 +623,63 @@ void ata_scsi_error(struct Scsi_Host *host)
 	DPRINTK("EXIT\n");
 }
 
+#ifdef CONFIG_SYNO_EARLY_NCQ_ANALYZE
+void syno_pmp_ncq_cmd_error_handler(struct ata_port *ap)
+{
+	struct ata_link *link = NULL;
+	struct ata_eh_info *ehi = NULL;
+	struct ata_eh_context *ehc = NULL;
+	bool eh_acquired = false;
+	u32 qc_timeout_map = 0;
+	struct ata_queued_cmd *qc = NULL;
+	int i;
+
+	/* Undo timeout flag */
+	for (i = 0; i < ATA_MAX_QUEUE; i++) {
+		qc = __ata_qc_from_tag(ap, i);
+
+		if ((qc->err_mask & AC_ERR_TIMEOUT) && (qc->flags & ATA_QCFLAG_FAILED)) {
+			qc->err_mask &= ~AC_ERR_TIMEOUT;
+			qc->flags &= ~ATA_QCFLAG_FAILED;
+			qc_timeout_map |= (1 << i);
+		}
+	}
+
+	/* Analyze NCQ error */
+	ata_for_each_link(link, ap, EDGE) {
+		ehi = &link->eh_info;
+		eh_acquired = false;
+
+		if (ehi->err_mask & AC_ERR_DEV) {
+			ehc = &link->eh_context;
+			ehc->i.err_mask |= AC_ERR_DEV;
+
+			if (ap->host->eh_owner == NULL) {
+				ata_eh_acquire(ap);
+				eh_acquired = true;
+			}
+
+			ata_eh_analyze_ncq_error(link);
+
+			if (eh_acquired) {
+				ata_eh_release(ap);
+			}
+		}
+	}
+
+	/* Add timeout flag back */
+	for (i = 0; i < ATA_MAX_QUEUE; i++) {
+		if (qc_timeout_map & (1 << i)) {
+			qc = __ata_qc_from_tag(ap, i);
+
+			qc->err_mask |= AC_ERR_TIMEOUT;
+			qc->flags |= ATA_QCFLAG_FAILED;
+			qc_timeout_map &= ~(1 << i);
+		}
+	}
+}
+#endif /* CONFIG_SYNO_EARLY_NCQ_ANALYZE */
+
 /**
  * ata_scsi_cmd_error_handler - error callback for a list of commands
  * @host:	scsi host containing the port
@@ -695,6 +758,14 @@ void ata_scsi_cmd_error_handler(struct Scsi_Host *host, struct ata_port *ap,
 				scsi_eh_finish_cmd(scmd, &ap->eh_done_q);
 			}
 		}
+
+#ifdef CONFIG_SYNO_EARLY_NCQ_ANALYZE
+		if (nr_timedout && ap->nr_pmp_links) {
+			spin_unlock_irqrestore(ap->lock, flags);
+			syno_pmp_ncq_cmd_error_handler(ap);
+			spin_lock_irqsave(ap->lock, flags);
+		}
+#endif /* CONFIG_SYNO_EARLY_NCQ_ANALYZE */
 
 		/* If we have timed out qcs.  They belong to EH from
 		 * this point but the state of the controller is
@@ -4094,7 +4165,7 @@ int ata_eh_recover(struct ata_port *ap, ata_prereset_fn_t prereset,
 		 * Alpine + 88SE9170 + PM3826 also has this problem too
 		 */
 		iResetTimes = EUNIT_DROP_SPEED_RETRY;
-		while (ap->isFirstAttach && 0 < iResetTimes) {
+		while (ap->syno_pm_need_retry && 0 < iResetTimes) {
 			u32 sstatus, scontrol;
 			if (sata_scr_read(link, SCR_STATUS, &sstatus)) {
 				break;
@@ -4115,7 +4186,7 @@ int ata_eh_recover(struct ata_port *ap, ata_prereset_fn_t prereset,
 			iResetTimes--;
 		}
 		/* HDD drop and do host reset */
-		if (ap->isFirstAttach && syno_ata_link_retry(link)) {
+		if (ap->syno_pm_need_retry && syno_ata_link_retry(link)) {
 			ehc->i.action |= ATA_EH_HARDRESET;
 			rc = 1;
 		}
@@ -4131,8 +4202,8 @@ int ata_eh_recover(struct ata_port *ap, ata_prereset_fn_t prereset,
 		}
 	}
 #ifdef CONFIG_SYNO_SATA_PM_LINK_RETRY
-	if (blResetDone && ap->isFirstAttach) {
-		ap->isFirstAttach = 0;
+	if (blResetDone && ap->syno_pm_need_retry == PM_RETRY) {
+		ap->syno_pm_need_retry = PM_NO_RETRY;
 	}
 #endif /* CONFIG_SYNO_SATA_PM_LINK_RETRY */
 

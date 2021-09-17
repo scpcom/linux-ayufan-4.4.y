@@ -143,7 +143,11 @@ static struct cpufreq_driver sc520_freq_driver = {
 	.init	= sc520_freq_cpu_init,
 	.exit	= sc520_freq_cpu_exit,
 	.name	= "sc520_freq",
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	.owner	= THIS_MODULE,
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	.attr	= sc520_freq_attr,
 };
 

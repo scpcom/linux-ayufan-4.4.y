@@ -68,13 +68,34 @@
  * until either the TLB entry is evicted under pressure, or a context
  * switch which changes the user space mapping occurs.
  */
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+#ifdef CONFIG_MV_LARGE_PAGE_SUPPORT
+#define PTRS_PER_PTE		(512 >> (PAGE_SHIFT-12))
+#define PTE_HWTABLE_PTRS	(512)
+#else /* CONFIG_MV_LARGE_PAGE_SUPPORT */
 #define PTRS_PER_PTE		512
+#define PTE_HWTABLE_PTRS	(PTRS_PER_PTE)
+#endif /* CONFIG_MV_LARGE_PAGE_SUPPORT */
+#else /* CONFIG_SYNO_LSP_ARMADA */
+#define PTRS_PER_PTE		512
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
 #define PTRS_PER_PMD		1
 #define PTRS_PER_PGD		2048
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+#define PTE_HWTABLE_OFF		(512 * sizeof(pte_t))
+#define PTE_HWTABLE_SIZE	(PTE_HWTABLE_PTRS * sizeof(u32))
+#else /* CONFIG_SYNO_LSP_ARMADA */
 #define PTE_HWTABLE_PTRS	(PTRS_PER_PTE)
 #define PTE_HWTABLE_OFF		(PTE_HWTABLE_PTRS * sizeof(pte_t))
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#define PTE_HWTABLE_SIZE	(PTE_HWTABLE_PTRS * sizeof(u32))
+#define PTE_HWTABLE_MASK	(~((PTE_HWTABLE_SIZE*2)-1))
+#else /* CONFIG_SYNO_LSP_ALPINE */
 #define PTE_HWTABLE_SIZE	(PTRS_PER_PTE * sizeof(u32))
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 /*
  * PMD_SHIFT determines the size of the area a second-level page table can map

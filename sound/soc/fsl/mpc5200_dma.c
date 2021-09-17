@@ -298,7 +298,11 @@ static struct snd_pcm_ops psc_dma_ops = {
 	.hw_params	= psc_dma_hw_params,
 };
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA */
 static u64 psc_dma_dmamask = DMA_BIT_MASK(32);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 static int psc_dma_new(struct snd_soc_pcm_runtime *rtd)
 {
 	struct snd_card *card = rtd->card->snd_card;
@@ -311,10 +315,16 @@ static int psc_dma_new(struct snd_soc_pcm_runtime *rtd)
 	dev_dbg(rtd->platform->dev, "psc_dma_new(card=%p, dai=%p, pcm=%p)\n",
 		card, dai, pcm);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	rc = dma_coerce_mask_and_coherent(card->dev, DMA_BIT_MASK(32));
+	if (rc)
+		return rc;
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	if (!card->dev->dma_mask)
 		card->dev->dma_mask = &psc_dma_dmamask;
 	if (!card->dev->coherent_dma_mask)
 		card->dev->coherent_dma_mask = DMA_BIT_MASK(32);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 	if (pcm->streams[SNDRV_PCM_STREAM_PLAYBACK].substream) {
 		rc = snd_dma_alloc_pages(SNDRV_DMA_TYPE_DEV, pcm->card->dev,

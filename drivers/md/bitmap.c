@@ -848,7 +848,11 @@ static void bitmap_file_set_bit(struct bitmap *bitmap, sector_t block)
 	else
 		set_bit_le(bit, kaddr);
 	kunmap_atomic(kaddr);
+#ifdef CONFIG_SYNO_LSP_ALPINE
+	pr_debug("set file bit %lu page %llu\n", bit, (unsigned long long)page->index);
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	pr_debug("set file bit %lu page %lu\n", bit, page->index);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	/* record page number so it gets flushed to disk when unplug occurs */
 	set_page_attr(bitmap, page->index, BITMAP_PAGE_DIRTY);
 }
@@ -2002,9 +2006,9 @@ location_store(struct mddev *mddev, const char *buf, size_t len)
 		} else {
 			int rv;
 			if (buf[0] == '+')
-				rv = kstrtoll(buf+1, 10, &offset);
+				rv = strict_strtoll(buf+1, 10, &offset);
 			else
-				rv = kstrtoll(buf, 10, &offset);
+				rv = strict_strtoll(buf, 10, &offset);
 			if (rv)
 				return rv;
 			if (offset == 0)
@@ -2139,7 +2143,7 @@ static ssize_t
 backlog_store(struct mddev *mddev, const char *buf, size_t len)
 {
 	unsigned long backlog;
-	int rv = kstrtoul(buf, 10, &backlog);
+	int rv = strict_strtoul(buf, 10, &backlog);
 	if (rv)
 		return rv;
 	if (backlog > COUNTER_MAX)
@@ -2165,7 +2169,7 @@ chunksize_store(struct mddev *mddev, const char *buf, size_t len)
 	unsigned long csize;
 	if (mddev->bitmap)
 		return -EBUSY;
-	rv = kstrtoul(buf, 10, &csize);
+	rv = strict_strtoul(buf, 10, &csize);
 	if (rv)
 		return rv;
 	if (csize < 512 ||

@@ -489,6 +489,68 @@ static int m88e1118_config_aneg(struct phy_device *phydev)
 	return 0;
 }
 
+#ifdef CONFIG_SYNO_PHY_INIT_88E1514
+static int m88e1514_config_init(struct phy_device *phydev)
+{
+	int err;
+	int status = 0;
+	int page;
+
+	/* To change LED behavior, switch to extension Page3 first */
+	page = phy_read(phydev, MII_MARVELL_PHY_PAGE);
+	if (page < 0)
+		return page;
+	err = phy_write(phydev, MII_MARVELL_PHY_PAGE, 0x0003);
+	if (err < 0)
+		return err;
+
+	/* Write Register 16 to change LED behavior
+	 * LED0 (0:3) : On on link, blink on activity => 0001
+	 * LED1 (4:7) : On on 100M => 0111
+	 * LED2 (8:11): On on 10 M => 0111
+	 * */
+	status = phy_read(phydev, 0x10);
+	if (status < 0)
+		return status;
+	status &= 0xf000;
+	status |= 0x0771;
+	err = phy_write(phydev, 0x10, status);
+	if (err < 0)
+		return err;
+
+	/* Write Register 18 to change LED blink rate
+	 * Blink Rate (8:10): 170 ms => 010
+	 * */
+	status = phy_read(phydev, 0x12);
+	status &= 0xf8ff;
+	status |= 0x0200;
+	err = phy_write(phydev, 0x12, status);
+	if (err < 0)
+		return err;
+
+	/* To initialize MAC registers, switch to extension Page2 first */
+	err = phy_write(phydev, MII_MARVELL_PHY_PAGE, 0x0002);
+	if (err < 0)
+		return err;
+
+	/* Write Register 16 to disable MAC CLK125
+	 * CLK125 (2) : Disable internally generated 125 MHz clock => 1
+	 * */
+	status = phy_read(phydev, 0x10);
+	if (status < 0)
+		return status;
+	status |= 0x0004;
+	err = phy_write(phydev, 0x10, status);
+	if (err < 0)
+		return err;
+
+	/* Switch to previous extension Page */
+	err = phy_write(phydev, MII_MARVELL_PHY_PAGE, page);
+
+	return err;
+}
+#endif
+
 static int m88e1118_config_init(struct phy_device *phydev)
 {
 	int err;
@@ -939,6 +1001,22 @@ static struct phy_driver marvell_drivers[] = {
 		.config_intr = &marvell_config_intr,
 		.driver = { .owner = THIS_MODULE },
 	},
+#ifdef CONFIG_SYNO_PHY_INIT_88E1514
+	{
+		.phy_id = MARVELL_PHY_ID_88E1514,
+		.phy_id_mask = MARVELL_PHY_ID_MASK | 0xf, /* make sure it would match phy 1514 only instead of 151x */
+		.name = "Marvell 88E1514",
+		.features = PHY_GBIT_FEATURES,
+		.flags = PHY_HAS_INTERRUPT,
+		.config_init = &m88e1514_config_init,
+/* Check these functions before using it. */
+//		.config_aneg = &marvell_config_aneg,
+//		.read_status = &marvell_read_status,
+//		.ack_interrupt = &marvell_ack_interrupt,
+//		.config_intr = &marvell_config_intr,
+		.driver = { .owner = THIS_MODULE },
+	},
+#endif
 };
 
 static int __init marvell_init(void)
@@ -966,6 +1044,9 @@ static struct mdio_device_id __maybe_unused marvell_tbl[] = {
 	{ 0x01410e50, 0xfffffff0 },
 	{ 0x01410e30, 0xfffffff0 },
 	{ 0x01410e90, 0xfffffff0 },
+#ifdef CONFIG_SYNO_PHY_INIT_88E1514
+	{ 0x01410dd1, 0xffffffff },
+#endif
 	{ }
 };
 

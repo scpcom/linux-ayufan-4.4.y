@@ -2021,7 +2021,11 @@ process:
 	if (!sock_owned_by_user(sk)) {
 #ifdef CONFIG_NET_DMA
 		struct tcp_sock *tp = tcp_sk(sk);
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+		if (!tp->ucopy.dma_chan && tp->ucopy.pinned)
+#else /* CONFIG_SYNO_LSP_ALPINE */
 		if (!tp->ucopy.dma_chan && tp->ucopy.pinned_list)
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 			tp->ucopy.dma_chan = net_dma_find_channel();
 		if (tp->ucopy.dma_chan)
 			ret = tcp_v4_do_rcv(sk, skb);

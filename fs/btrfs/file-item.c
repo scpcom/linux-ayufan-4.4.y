@@ -20,8 +20,15 @@
 #include <linux/slab.h>
 #include <linux/pagemap.h>
 #include <linux/highmem.h>
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+#include <linux/dmaengine.h>
+#include <linux/async_tx.h>
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 #include "ctree.h"
 #include "disk-io.h"
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#include "csum.h"
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 #include "transaction.h"
 #include "volumes.h"
 #include "print-tree.h"
@@ -423,7 +430,7 @@ int btrfs_lookup_csums_range(struct btrfs_root *root, u64 start, u64 end,
 	ret = 0;
 fail:
 	while (ret < 0 && !list_empty(&tmplist)) {
-		sums = list_entry(&tmplist, struct btrfs_ordered_sum, list);
+		sums = list_entry(tmplist.next, struct btrfs_ordered_sum, list);
 		list_del(&sums->list);
 		kfree(sums);
 	}
@@ -433,18 +440,39 @@ fail:
 	return ret;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+struct sum_offload {
+	u32				*sum;	/* ptr to sum	*/
+	struct dma_async_tx_descriptor	*tx;	/* tx desc	*/
+	char				*data;	/* bvec kmapped	*/
+};
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
 int btrfs_csum_one_bio(struct btrfs_root *root, struct inode *inode,
 		       struct bio *bio, u64 file_start, int contig)
 {
 	struct btrfs_ordered_sum *sums;
 	struct btrfs_ordered_extent *ordered;
+#if defined(CONFIG_SYNO_LSP_ALPINE) || defined(CONFIG_SYNO_LSP_ARMADA)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_ALPINE || CONFIG_SYNO_LSP_ARMADA */
 	char *data;
+#endif /* CONFIG_SYNO_LSP_ALPINE || CONFIG_SYNO_LSP_ARMADA */
 	struct bio_vec *bvec = bio->bi_io_vec;
 	int bio_index = 0;
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	int bio_idx2;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	int index;
 	unsigned long total_bytes = 0;
 	unsigned long this_sum_bytes = 0;
 	u64 offset;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	void *mpage_priv = btrfs_csum_mpage_init(bio->bi_vcnt);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	struct sum_offload *sum_off;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 	WARN_ON(bio->bi_vcnt <= 0);
 	sums = kzalloc(btrfs_ordered_sum_size(root, bio->bi_size), GFP_NOFS);
@@ -464,6 +492,11 @@ int btrfs_csum_one_bio(struct btrfs_root *root, struct inode *inode,
 	sums->bytenr = (u64)bio->bi_sector << 9;
 	index = 0;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	sum_off = kzalloc(bio->bi_vcnt * (sizeof(struct sum_offload)), GFP_KERNEL);
+	BUG_ON(!sum_off);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
 	while (bio_index < bio->bi_vcnt) {
 		if (!contig)
 			offset = page_offset(bvec->bv_page) + bvec->bv_offset;
@@ -473,6 +506,19 @@ int btrfs_csum_one_bio(struct btrfs_root *root, struct inode *inode,
 			unsigned long bytes_left;
 			sums->len = this_sum_bytes;
 			this_sum_bytes = 0;
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+			bio_idx2 = 0;
+
+			while (bio_idx2 < bio_index) {
+				if (sum_off[bio_idx2].tx) {
+					async_tx_quiesce(&sum_off[bio_idx2].tx);
+					kunmap_atomic(sum_off[bio_idx2].data);
+					btrfs_csum_final(*sum_off[bio_idx2].sum,
+							(char *)sum_off[bio_idx2].sum);
+				}
+				bio_idx2++;
+			}
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 			btrfs_add_ordered_sum(inode, ordered, sums);
 			btrfs_put_ordered_extent(ordered);
 
@@ -489,6 +535,53 @@ int btrfs_csum_one_bio(struct btrfs_root *root, struct inode *inode,
 			index = 0;
 		}
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+		btrfs_csum_mpage_digest(mpage_priv,
+					bvec->bv_page,
+					bvec->bv_offset,
+					bvec->bv_len,
+#if defined(CONFIG_SYNO_ALPINE)
+					&(sums->sums[index]));
+#else /* CONFIG_SYNO_ALPINE */
+					&sector_sum->sum);
+#endif /* CONFIG_SYNO_ALPINE */
+#elif defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(CONFIG_SYNO_ARMADA)
+		sum_off[bio_index].data = kmap_atomic(bvec->bv_page);
+		sums->sums[index] = ~(u32)0;
+		sum_off[bio_index].tx =
+			btrfs_csum_data_dma_offload(sum_off[bio_index].data + bvec->bv_offset,
+						&(sums->sums[index]),
+						bvec->bv_len);
+
+		if (sum_off[bio_index].tx)
+			sum_off[bio_index].sum = &(sums->sums[index]);
+		else {
+			sums->sums[index] = btrfs_csum_data(sum_off[bio_index].data + bvec->bv_offset,
+						sums->sums[index],
+						bvec->bv_len);
+			kunmap_atomic(sum_off[bio_index].data);
+			btrfs_csum_final(sums->sums[index], (char *)&(sums->sums[index]));
+		}
+#else /* CONFIG_SYNO_ARMADA */
+		sum_off[bio_index].data = kmap_atomic(bvec->bv_page);
+		sector_sum->sum = ~(u32)0;
+		sum_off[bio_index].tx =
+			btrfs_csum_data_dma_offload(sum_off[bio_index].data + bvec->bv_offset,
+						&sector_sum->sum,
+						bvec->bv_len);
+
+		if (sum_off[bio_index].tx)
+			sum_off[bio_index].sum = &sector_sum->sum;
+		else {
+			sector_sum->sum = btrfs_csum_data(sum_off[bio_index].data + bvec->bv_offset,
+						  sector_sum->sum,
+						  bvec->bv_len);
+			kunmap_atomic(sum_off[bio_index].data);
+			btrfs_csum_final(sector_sum->sum, (char *)&sector_sum->sum);
+		}
+#endif /* CONFIG_SYNO_ARMADA */
+#else /* CONFIG_SYNO_LSP_ALPINE, CONFIG_SYNO_LSP_ARMADA */
 		data = kmap_atomic(bvec->bv_page);
 		sums->sums[index] = ~(u32)0;
 		sums->sums[index] = btrfs_csum_data(data + bvec->bv_offset,
@@ -497,6 +590,7 @@ int btrfs_csum_one_bio(struct btrfs_root *root, struct inode *inode,
 		kunmap_atomic(data);
 		btrfs_csum_final(sums->sums[index],
 				 (char *)(sums->sums + index));
+#endif /* CONFIG_SYNO_LSP_ALPINE, CONFIG_SYNO_LSP_ARMADA */
 
 		bio_index++;
 		index++;
@@ -505,6 +599,24 @@ int btrfs_csum_one_bio(struct btrfs_root *root, struct inode *inode,
 		offset += bvec->bv_len;
 		bvec++;
 	}
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	/* Blocks until checksum is calculated for all pages */
+	btrfs_csum_mpage_final(mpage_priv);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	bio_idx2 = 0;
+	while (bio_idx2 < bio->bi_vcnt) {
+		if (sum_off[bio_idx2].tx) {
+			async_tx_quiesce(&sum_off[bio_idx2].tx);
+			kunmap_atomic(sum_off[bio_idx2].data);
+			btrfs_csum_final(*sum_off[bio_idx2].sum, (char *)sum_off[bio_idx2].sum);
+		}
+		bio_idx2++;
+	}
+
+	kfree(sum_off);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	this_sum_bytes = 0;
 	btrfs_add_ordered_sum(inode, ordered, sums);
 	btrfs_put_ordered_extent(ordered);
@@ -755,7 +867,7 @@ again:
 				found_next = 1;
 			if (ret != 0)
 				goto insert;
-			slot = 0;
+			slot = path->slots[0];
 		}
 		btrfs_item_key_to_cpu(path->nodes[0], &found_key, slot);
 		if (found_key.objectid != BTRFS_EXTENT_CSUM_OBJECTID ||

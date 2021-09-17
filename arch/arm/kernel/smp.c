@@ -57,7 +57,11 @@ struct secondary_data secondary_data;
  * control for which core is the next to come out of the secondary
  * boot "holding pen"
  */
+#if defined (CONFIG_SYNO_LSP_MONACO)
+volatile int pen_release = -1;
+#else /* CONFIG_SYNO_LSP_MONACO */
 volatile int __cpuinitdata pen_release = -1;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 enum ipi_msg_type {
 	IPI_WAKEUP,
@@ -367,6 +371,11 @@ asmlinkage void __cpuinit secondary_start_kernel(void)
 	local_irq_enable();
 	local_fiq_enable();
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	/* Enable imprecise aborts */
+	asm volatile("cpsie	a");
+#endif /* CONFIG_SYNO_LSP_MONACO */
+
 	/*
 	 * OK, it's off to the idle thread for us
 	 */
@@ -375,6 +384,10 @@ asmlinkage void __cpuinit secondary_start_kernel(void)
 
 void __init smp_cpus_done(unsigned int max_cpus)
 {
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	printk(KERN_INFO "SMP: Total of %d processors activated.\n",
+	       num_online_cpus());
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	int cpu;
 	unsigned long bogosum = 0;
 
@@ -386,6 +399,7 @@ void __init smp_cpus_done(unsigned int max_cpus)
 	       num_online_cpus(),
 	       bogosum / (500000/HZ),
 	       (bogosum / (5000/HZ)) % 100);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 	hyp_mode_check();
 }
@@ -514,7 +528,11 @@ static void __cpuinit broadcast_timer_setup(struct clock_event_device *evt)
 	evt->features	= CLOCK_EVT_FEAT_ONESHOT |
 			  CLOCK_EVT_FEAT_PERIODIC |
 			  CLOCK_EVT_FEAT_DUMMY;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	evt->rating	= 400;
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	evt->rating	= 100;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	evt->mult	= 1;
 	evt->set_mode	= broadcast_timer_set_mode;
 
@@ -584,8 +602,22 @@ static void ipi_cpu_stop(unsigned int cpu)
 	local_fiq_disable();
 	local_irq_disable();
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	/*
+	 * If Soft power off is enabled, instead of relaxing the CPU upon IPI_CPU_STOP event,
+	 * the CPU will enter WFI state
+	 */
+	while (1)
+#ifdef CONFIG_MVEBU_SOFT_POWEROFF
+		wfi();
+#else
+		cpu_relax();
+#endif
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	while (1)
 		cpu_relax();
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
 }
 
 /*

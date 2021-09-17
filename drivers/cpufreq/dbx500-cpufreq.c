@@ -82,7 +82,11 @@ static unsigned int dbx500_cpufreq_getspeed(unsigned int cpu)
 	return freq_table[i].frequency;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+static int dbx500_cpufreq_init(struct cpufreq_policy *policy)
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 static int __cpuinit dbx500_cpufreq_init(struct cpufreq_policy *policy)
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 {
 	int res;
 

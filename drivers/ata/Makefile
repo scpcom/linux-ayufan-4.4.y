@@ -1,10 +1,18 @@
 
 obj-$(CONFIG_ATA)		+= libata.o
 
+ifeq ($(CONFIG_ARCH_ALPINE),y)
+KBUILD_CPPFLAGS += -Iarch/arm/mach-alpine/include/al_hal/
+endif
+
 # non-SFF interface
 obj-$(CONFIG_SATA_AHCI)		+= ahci.o libahci.o
 obj-$(CONFIG_SATA_ACARD_AHCI)	+= acard-ahci.o libahci.o
 obj-$(CONFIG_SATA_AHCI_PLATFORM) += ahci_platform.o libahci.o
+obj-$(CONFIG_SATA_AHCI_ST)	+= ahci_st.o
+ifeq ($(CONFIG_SYNO_LSP_ARMADA),y)
+obj-$(CONFIG_SATA_AHCI_MV)	+= ahci_mv.o libahci.o
+endif
 obj-$(CONFIG_SATA_FSL)		+= sata_fsl.o
 obj-$(CONFIG_SATA_INIC162X)	+= sata_inic162x.o
 ifeq ($(CONFIG_SYNO_SATA_CHIP_REORDER),y)

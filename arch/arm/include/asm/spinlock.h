@@ -46,7 +46,11 @@ static inline void dsb_sev(void)
 {
 #if __LINUX_ARM_ARCH__ >= 7
 	__asm__ __volatile__ (
+#if defined (CONFIG_SYNO_LSP_MONACO)
+		"dsb ishst\n"
+#else /* CONFIG_SYNO_LSP_MONACO */
 		"dsb\n"
+#endif /* CONFIG_SYNO_LSP_MONACO */
 		SEV
 	);
 #else
@@ -71,6 +75,14 @@ static inline void dsb_sev(void)
 
 #define arch_spin_lock_flags(lock, flags) arch_spin_lock(lock)
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#ifdef CONFIG_ARCH_ALPINE
+extern unsigned int al_spin_lock_wfe_enable;
+#else /* CONFIG_ARCH_ALPINE */
+#define al_spin_lock_wfe_enable 1
+#endif /* CONFIG_ARCH_ALPINE */
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
 static inline void arch_spin_lock(arch_spinlock_t *lock)
 {
 	unsigned long tmp;
@@ -88,7 +100,12 @@ static inline void arch_spin_lock(arch_spinlock_t *lock)
 	: "cc");
 
 	while (lockval.tickets.next != lockval.tickets.owner) {
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+		if (al_spin_lock_wfe_enable)
+			wfe();
+#else /* CONFIG_SYNO_LSP_ALPINE */
 		wfe();
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 		lockval.tickets.owner = ACCESS_ONCE(lock->tickets.owner);
 	}
 
@@ -124,7 +141,12 @@ static inline void arch_spin_unlock(arch_spinlock_t *lock)
 {
 	smp_mb();
 	lock->tickets.owner++;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	if (al_spin_lock_wfe_enable)
+		dsb_sev();
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	dsb_sev();
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 }
 
 static inline int arch_spin_is_locked(arch_spinlock_t *lock)

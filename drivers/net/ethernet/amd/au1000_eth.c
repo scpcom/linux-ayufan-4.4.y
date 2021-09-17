@@ -1298,7 +1298,10 @@ static int au1000_remove(struct platform_device *pdev)
 	int i;
 	struct resource *base, *macen;
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#else /* CONFIG_SYNO_LSP_MONACO */
 	platform_set_drvdata(pdev, NULL);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 	unregister_netdev(dev);
 	mdiobus_unregister(aup->mii_bus);

@@ -106,6 +106,9 @@ source "sound/parisc/Kconfig"
 
 source "sound/soc/Kconfig"
 
+# STMicroelectronics' SoCs support
+source "sound/stm/Kconfig"
+
 endif # SND
 
 menuconfig SOUND_PRIME

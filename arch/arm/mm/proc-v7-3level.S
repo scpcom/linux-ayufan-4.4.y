@@ -61,6 +61,7 @@ ENDPROC(cpu_v7_switch_mm)
  *
  * Set a level 2 translation table entry.
  * - ptep - pointer to level 3 translation table entry
+ * -		(in r0, r1 - but r1 is always 0 because it's a virtual address)
  * - pte - PTE value to store (64-bit in r2 and r3)
  */
 ENTRY(cpu_v7_set_pte_ext)
@@ -72,10 +73,50 @@ ENTRY(cpu_v7_set_pte_ext)
 	bne	1f
 	tst	r3, #1 << (55 - 32)		@ L_PTE_DIRTY
 	orreq	r2, #L_PTE_RDONLY
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+1:
+#if (HW_PAGES_PER_PAGE >= 2)
+	/* note: the first address is PAGE_SIZE-aligned
+	 * The difference between the first and last
+	 * address we map is one entry less than PAGE_SIZE
+	 * so we don't need to take carry into account
+	 */
+	add		r1, r0, #((HW_PAGES_PER_PAGE)<<3)
+	cmp		r2, #0
+	bne 3f
+	/* pte is zero, write 16 zeroes */
+2:	sub r1, r1, #8
+	strd	r2, r3, [r1]
+	ALT_SMP(W(nop))
+	ALT_UP (mcr	p15, 0, r1, c7, c10, 1)		@ flush_pte
+	cmp r1, r0
+	bgt 2b
+	b 5f
+3:	/* pte is not zero. Write 16 consecutive vals */
+#if (HW_PAGES_PER_PAGE >= 16)
+	orr		r3, r3, #1 << (52-32)	@contigous_bit
+#endif /* HW_PAGES_PER_PAGE >= 16 */
+	add		r2, r2, #(PAGE_SIZE)
+4:	sub r1, r1, #8
+	sub r2, r2, #(HW_PAGE_SIZE)
+	strd	r2, r3, [r1]
+	ALT_SMP(W(nop))
+	ALT_UP (mcr	p15, 0, r1, c7, c10, 1)		@ flush_pte
+	cmp r1, r0
+	bgt 4b
+5:	/*done looping */
+	mov r1, #0
+#else /* HW_PAGES_PER_PAGE >= 2 */
+	strd	r2, r3, [r0]
+	ALT_SMP(W(nop))
+	ALT_UP (mcr	p15, 0, r0, c7, c10, 1)		@ flush_pte
+#endif /* HW_PAGES_PER_PAGE >= 2 */
+#else /* CONFIG_SYNO_LSP_ALPINE */
 1:	strd	r2, r3, [r0]
 	ALT_SMP(W(nop))
 	ALT_UP (mcr	p15, 0, r0, c7, c10, 1)		@ flush_pte
-#endif
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* CONFIG_MMU */
 	mov	pc, lr
 ENDPROC(cpu_v7_set_pte_ext)
 

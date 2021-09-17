@@ -477,3 +477,24 @@ config FRONTSWAP
 	  and swap data is stored as normal on the matching swap device.
 
 	  If unsure, say Y to enable frontswap.
+
+config BPA2
+	bool "Big Physical Area version 2"
+	help
+	  Enables kernel support for reserving large areas of physical
+	  memory at boot-time for use by certain device drivers (such as
+	  video framegrabbers, etc.) which require it. This is backwards
+	  compatible with the original "Big Physical Area" API,
+	  but with extensions for multiple areas. It can also be configured
+	  from the architecture specific setup code.
+
+config BPA2_ALLOC_TRACE
+	bool "Trace BPA2 allocations"
+	depends on BPA2
+	depends on PROC_FS
+	select STACKTRACE
+	default n
+	help
+	  Enables tracing of BPA2 allocations - /proc/bpa2 will list
+	  all the allocations together with information about a code which
+	  called the allocator function.

@@ -210,4 +210,27 @@ config USB_ULPI_VIEWPORT
 	  Provides read/write operations to the ULPI phy register set for
 	  controllers with a viewport register (e.g. Chipidea/ARC controllers).
 
+config PHY_STIH407_USB
+	tristate "STMicroelectronics picoPHY/MiPHY driver for STiH407 series"
+	depends on SOC_STIH407
+	help
+	  Enable this to support the USB transceiver that is part of
+	  STMicroelectronics STiH407 SoC series. This will provide the picoPHY
+	  that is used to manage USB2 ports.
+
+config ST_USB3_MIPHY
+	tristate "STMicroelectronics MiPHY 28LP driver for STiH407 series"
+	depends on SOC_STIH407 || SOC_STI8416
+	help
+	  Enable this to support the MiPHY LP28 device that is part of
+	  STMicroelectronics STiH407/STi8416 SoC series.
+
+config PHY_STI8416_USB2
+	tristate "STMicroelectronics USB2 PHY driver for STi8416 series"
+	depends on SOC_STI8416
+	help
+	  Enable this to support the USB transceiver that is part of
+	  STMicroelectronics STi8416 SoC series. This will provide the PHY
+	  that is used to manage USB2 ports.
+
 endif # USB_PHY

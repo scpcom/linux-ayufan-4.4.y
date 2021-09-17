@@ -58,7 +58,12 @@ struct mmc_ios {
 #define MMC_TIMING_UHS_SDR50	5
 #define MMC_TIMING_UHS_SDR104	6
 #define MMC_TIMING_UHS_DDR50	7
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#define MMC_TIMING_MMC_DDR52	8
+#define MMC_TIMING_MMC_HS200	9
+#else /* CONFIG_SYNO_LSP_MONACO */
 #define MMC_TIMING_MMC_HS200	8
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 #define MMC_SDR_MODE		0
 #define MMC_1_2V_DDR_MODE	1
@@ -281,6 +286,9 @@ struct mmc_host {
 #define MMC_CAP2_PACKED_CMD	(MMC_CAP2_PACKED_RD | \
 				 MMC_CAP2_PACKED_WR)
 #define MMC_CAP2_NO_PRESCAN_POWERUP (1 << 14)	/* Don't power up before scan */
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#define MMC_CAP2_SANITIZE	(1 << 15)		/* Support Sanitize */
+#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
 
 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
 

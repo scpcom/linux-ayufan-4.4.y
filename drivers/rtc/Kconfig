@@ -1130,6 +1130,32 @@ config RTC_DRV_PCAP
 	  If you say Y here you will get support for the RTC found on
 	  the PCAP2 ASIC used on some Motorola phones.
 
+config RTC_DRV_ST_LPC
+	tristate "STMicroelectronics LPC RTC device driver"
+	depends on ARM && ARCH_STI
+	depends on OF
+	help
+	  If you say yes here you get support for the
+	  STMicroelectronics Low Power Controller (LPC) based RTC.
+	  !!! BE CARREFUL !!!
+	  This driver shares hardware resources with watchdog part of the
+	  LPC. Both lpc rtc driver and lpc watchdog driver cannot be
+	  used together.
+
+	  This driver can also be built as a module. If so, the module
+	  will be called rtc-st-lpc.
+
+config RTC_DRV_ST_SBC
+	tristate "STMicroelectronics SBC RTC device driver"
+	depends on ARM && ARCH_STI && ST_LPM
+	default n
+	help
+	  If you say yes here you get support for the
+	  STMicroelectronics Standby Controller (SBC) based RTC.
+
+	  This driver can also be built as a module. If so, the module
+	  will be called rtc-st-sbc.
+
 config RTC_DRV_MC13XXX
 	depends on MFD_MC13XXX
 	tristate "Freescale MC13xxx RTC"

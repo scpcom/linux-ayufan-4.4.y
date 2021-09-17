@@ -99,6 +99,9 @@ static void __init parse_dt_topology(void)
 	unsigned long max_capacity = 0;
 	unsigned long capacity = 0;
 	int alloc_size, cpu = 0;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	extern unsigned long cpu_clock_freq;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 	alloc_size = nr_cpu_ids * sizeof(struct cpu_capacity);
 	cpu_capacity = kzalloc(alloc_size, GFP_NOWAIT);
@@ -131,6 +134,16 @@ static void __init parse_dt_topology(void)
 		}
 
 		capacity = ((be32_to_cpup(rate)) >> 20) * cpu_eff->efficiency;
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+		if (!cpu_clock_freq) {
+			cpu_clock_freq = be32_to_cpup(rate);
+			if (cpu_clock_freq)
+				pr_info("CPU speed: %lu.%01luGHz\n",
+					cpu_clock_freq / 1000000000,
+					(cpu_clock_freq / 100000000) % 10);
+		}
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 		/* Save min capacity of the system */
 		if (capacity < min_capacity)

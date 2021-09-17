@@ -45,6 +45,9 @@
 #include <linux/usb/hcd.h>
 
 #include "usb.h"
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#include "hub.h"
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
 /*-------------------------------------------------------------------------*/
 
@@ -2225,6 +2228,61 @@ irqreturn_t usb_hcd_irq (int irq, void *__hcd)
 	return rc;
 }
 EXPORT_SYMBOL_GPL(usb_hcd_irq);
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+void usb_hc_post_reset(struct usb_hcd *hcd)
+{
+	struct usb_hub *hub = usb_hub_to_struct_hub(hcd->self.root_hub);
+	dev_dbg(hcd->self.controller, "re-enable the roothub\n");
+
+	root_hub_recovery(hub);
+}
+EXPORT_SYMBOL_GPL(usb_hc_post_reset);
+
+void usb_hc_pre_reset(struct usb_hcd *hcd)
+{
+	unsigned long flags;
+
+	spin_lock_irqsave(&hcd_root_hub_lock, flags);
+	set_bit(HCD_FLAG_DEAD, &hcd->flags);
+
+	if (hcd->rh_registered) {
+		clear_bit(HCD_FLAG_POLL_RH, &hcd->flags);
+
+		/* Make khubd clean up old urbs and devices,
+		 * first detach all the children.
+		 */
+		usb_set_device_state(hcd->self.root_hub,
+				     USB_STATE_NOTATTACHED);
+
+		/* Mark the roothub to reset state. */
+		usb_set_device_state(hcd->self.root_hub,
+				     USB_STATE_RH_RST);
+		usb_kick_khubd(hcd->self.root_hub);
+	}
+
+	if (usb_hcd_is_primary_hcd(hcd) && hcd->shared_hcd) {
+		hcd = hcd->shared_hcd;
+		if (hcd->rh_registered) {
+			clear_bit(HCD_FLAG_POLL_RH, &hcd->flags);
+
+			/* Make khubd clean up old urbs and devices,
+			 * first detach all the children.
+			 */
+			usb_set_device_state(hcd->self.root_hub,
+					     USB_STATE_NOTATTACHED);
+
+			/* Mark the roothub to reset state. */
+			usb_set_device_state(hcd->self.root_hub,
+					     USB_STATE_RH_RST);
+			usb_kick_khubd(hcd->self.root_hub);
+		}
+	}
+	spin_unlock_irqrestore(&hcd_root_hub_lock, flags);
+	/* Make sure that the other roothub is also deallocated. */
+}
+EXPORT_SYMBOL_GPL(usb_hc_pre_reset);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
 /*-------------------------------------------------------------------------*/
 

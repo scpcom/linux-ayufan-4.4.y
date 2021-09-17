@@ -37,6 +37,10 @@
 #include <linux/mtd/map.h>
 
 #include <asm/uaccess.h>
+#ifdef CONFIG_SYNO_MTD_ALLOC
+#include <linux/syscalls.h>
+#include <linux/semaphore.h>
+#endif /* CONFIG_SYNO_MTD_ALLOC */
 
 #include "mtdcore.h"
 
@@ -279,19 +283,97 @@ static ssize_t mtdchar_read(struct file *file, char __user *buf, size_t count,
 	return total_retlen;
 } /* mtdchar_read */
 
+#ifdef CONFIG_SYNO_MTD_ALLOC
+static int syno_write_buf_size = 0x1000;
+
+char *kbuf;
+int write_kbuf_len;
+struct semaphore write_kbuf_sem;
+
+/**
+ * This function accuire or release buffer for mtd driver to write flash.
+ * The updater should call SYNOMTDAlloc() before doing system upgrade,
+ * and this buffer should not be released before upgrade finished.
+ * Otherwise, if the buffer is malloc-ed and released within a dd write,
+ * the kernel may malloc failed somehow.
+ *
+ * @author cnliu
+ * @param blMalloc
+ *     A boolean variable to indicate malloc or release.
+ *     true: To malloc buffer for mtd driver to write before doing mtd_write().
+ *     false: After mtd_write(), we need to free buffer for mtd driver.
+ *
+ * @return
+ *     Upon successful malloc, SYNOMTDAlloc() return 0.
+ *     Otherwise return -ENOMEM.
+ *
+ * @example
+ *     if (SYNOMTDAlloc(true) == 0) {
+ *         system("dd if=zImage of=/dev/mtd1 bs=128k");
+ *         SYNOMTDAlloc(false);
+ *     }
+ *
+ * @see init_mtdchar
+ * @see mtd_write
+ * @see write_kbuf_sem
+ * @see lnxsdk/main/updater.c
+ */
+long sys_SYNOMTDAlloc(bool blMalloc)
+{
+	int retval = 0;
+
+	down(&write_kbuf_sem);
+	if (blMalloc) {
+		if (write_kbuf_len)
+			goto End;
+
+		write_kbuf_len = syno_write_buf_size;
+		kbuf = kmalloc(write_kbuf_len, GFP_KERNEL);
+		if (!kbuf) {
+			printk(KERN_NOTICE "%s:%d(%s) malloc fail write_kbuf_len=[%d], kbuf=[%p]\n", __FILE__, __LINE__, __func__, write_kbuf_len, kbuf);
+			write_kbuf_len = 0x0;
+			retval = -ENOMEM;
+		}
+	} else {
+		if (!write_kbuf_len)
+			goto End;
+		write_kbuf_len = 0x0;
+		kfree(kbuf);
+		kbuf = NULL;
+	}
+End:
+	up(&write_kbuf_sem);
+	return retval;
+} /* sys_SYNOMTDAlloc() */
+#endif /* CONFIG_SYNO_MTD_ALLOC */
+
 static ssize_t mtdchar_write(struct file *file, const char __user *buf, size_t count,
 			loff_t *ppos)
 {
 	struct mtd_file_info *mfi = file->private_data;
 	struct mtd_info *mtd = mfi->mtd;
+#ifdef CONFIG_SYNO_MTD_ALLOC
+	// do nothing
+#else /* CONFIG_SYNO_MTD_ALLOC */
 	size_t size = count;
 	char *kbuf;
+#endif /* CONFIG_SYNO_MTD_ALLOC */
 	size_t retlen;
 	size_t total_retlen=0;
 	int ret=0;
 	int len;
 
 	pr_debug("MTD_write\n");
+#ifdef CONFIG_SYNO_MTD_ALLOC
+	if (syno_write_buf_size < mtd->writesize) {
+		printk(KERN_ERR "mtd kmalloc size small than mtd driver minimal write size !!\n");
+		WARN_ON(1);
+		syno_write_buf_size = mtd->writesize;
+		if (write_kbuf_len)
+			sys_SYNOMTDAlloc(false);
+		printk(KERN_ERR "mtd kmalloc size replace with mtd driver minimal write size !!\n");
+	}
+#endif /* CONFIG_SYNO_MTD_ALLOC */
 
 	if (*ppos == mtd->size)
 		return -ENOSPC;
@@ -302,15 +384,35 @@ static ssize_t mtdchar_write(struct file *file, const char __user *buf, size_t c
 	if (!count)
 		return 0;
 
+#ifdef CONFIG_SYNO_MTD_ALLOC
+	if (!write_kbuf_len) {
+		ret = sys_SYNOMTDAlloc(true);
+		if (ret != 0)
+			return ret;
+	}
+	down(&write_kbuf_sem);
+#else /* CONFIG_SYNO_MTD_ALLOC */
 	kbuf = mtd_kmalloc_up_to(mtd, &size);
 	if (!kbuf)
 		return -ENOMEM;
+#endif /* CONFIG_SYNO_MTD_ALLOC */
 
 	while (count) {
+#ifdef CONFIG_SYNO_MTD_ALLOC
+		if (count > syno_write_buf_size)
+			len = syno_write_buf_size;
+		else
+			len = count;
+#else /* CONFIG_SYNO_MTD_ALLOC */
 		len = min_t(size_t, count, size);
+#endif /* CONFIG_SYNO_MTD_ALLOC */
 
 		if (copy_from_user(kbuf, buf, len)) {
+#ifdef CONFIG_SYNO_MTD_ALLOC
+			up(&write_kbuf_sem);
+#else /* CONFIG_SYNO_MTD_ALLOC */
 			kfree(kbuf);
+#endif /* CONFIG_SYNO_MTD_ALLOC */
 			return -EFAULT;
 		}
 
@@ -348,20 +450,30 @@ static ssize_t mtdchar_write(struct file *file, const char __user *buf, size_t c
 			buf += retlen;
 		}
 		else {
+#ifdef CONFIG_SYNO_MTD_ALLOC
+			up(&write_kbuf_sem);
+#else /* CONFIG_SYNO_MTD_ALLOC */
 			kfree(kbuf);
+#endif /* CONFIG_SYNO_MTD_ALLOC */
 			return ret;
 		}
 	}
 
+#ifdef CONFIG_SYNO_MTD_ALLOC
+	up(&write_kbuf_sem);
+#else /* CONFIG_SYNO_MTD_ALLOC */
 	kfree(kbuf);
+#endif /* CONFIG_SYNO_MTD_ALLOC */
 	return total_retlen;
 } /* mtdchar_write */
 
-#ifdef CONFIG_SYNO_SYSTEM_CALL // FIXME
-SYSCALL_DEFINE1(SYNOMTDAlloc, int, alloc)
+#ifdef CONFIG_SYNO_SYSTEM_CALL
+#ifdef CONFIG_SYNO_MTD_ALLOC
+SYSCALL_DEFINE1(SYNOMTDAlloc, bool, blMalloc)
 {
-	return 0;
+	return sys_SYNOMTDAlloc(blMalloc);
 }
+#endif /* CONFIG_SYNO_MTD_ALLOC */
 #endif /* CONFIG_SYNO_SYSTEM_CALL */
 
 /*======================================================================
@@ -538,6 +650,9 @@ static int shrink_ecclayout(const struct nand_ecclayout *from,
 		to->oobavail += from->oobfree[i].length;
 		to->oobfree[i] = from->oobfree[i];
 	}
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	to->eccbytes = from->eccbytes;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 	return 0;
 }
@@ -1243,6 +1358,11 @@ int __init init_mtdchar(void)
 		       ret);
 		goto err_unregister_chdev;
 	}
+
+#ifdef CONFIG_SYNO_MTD_ALLOC
+	/* Allocate buffer and init spinlock */
+	sema_init(&write_kbuf_sem, 1);
+#endif /* CONFIG_SYNO_MTD_ALLOC */
 
 	return ret;
 

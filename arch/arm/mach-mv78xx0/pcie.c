@@ -18,6 +18,13 @@
 #include <mach/mv78xx0.h>
 #include "common.h"
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+#define MV78XX0_MBUS_PCIE_MEM_TARGET(port, lane) ((port) ? 8 : 4)
+#define MV78XX0_MBUS_PCIE_MEM_ATTR(port, lane)   (0xf8 & ~(0x10 << (lane)))
+#define MV78XX0_MBUS_PCIE_IO_TARGET(port, lane)  ((port) ? 8 : 4)
+#define MV78XX0_MBUS_PCIE_IO_ATTR(port, lane)    (0xf0 & ~(0x10 << (lane)))
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
 struct pcie_port {
 	u8			maj;
 	u8			min;
@@ -71,7 +78,11 @@ static void __init mv78xx0_pcie_preinit(void)
 	start = MV78XX0_PCIE_MEM_PHYS_BASE;
 	for (i = 0; i < num_pcie_ports; i++) {
 		struct pcie_port *pp = pcie_port + i;
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+		// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA */
 		char winname[MVEBU_MBUS_MAX_WINNAME_SZ];
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 		snprintf(pp->mem_space_name, sizeof(pp->mem_space_name),
 			"PCIe %d.%d MEM", pp->maj, pp->min);
@@ -85,6 +96,14 @@ static void __init mv78xx0_pcie_preinit(void)
 		if (request_resource(&iomem_resource, &pp->res))
 			panic("can't allocate PCIe MEM sub-space");
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+		mvebu_mbus_add_window_by_id(MV78XX0_MBUS_PCIE_MEM_TARGET(pp->maj, pp->min),
+					    MV78XX0_MBUS_PCIE_MEM_ATTR(pp->maj, pp->min),
+					    pp->res.start, resource_size(&pp->res));
+		mvebu_mbus_add_window_remap_by_id(MV78XX0_MBUS_PCIE_IO_TARGET(pp->maj, pp->min),
+						  MV78XX0_MBUS_PCIE_IO_ATTR(pp->maj, pp->min),
+						  i * SZ_64K, SZ_64K, 0);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 		snprintf(winname, sizeof(winname), "pcie%d.%d",
 			 pp->maj, pp->min);
 
@@ -96,6 +115,7 @@ static void __init mv78xx0_pcie_preinit(void)
 		mvebu_mbus_add_window_remap_flags(winname,
 						  i * SZ_64K, SZ_64K,
 						  0, MVEBU_MBUS_PCI_IO);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	}
 }
 

@@ -21,6 +21,9 @@
 #include <asm/unistd.h>
 #include <asm/vfp.h>
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+extern const unsigned long sigreturn_codes[7];
+#else /* CONFIG_SYNO_LSP_ARMADA */
 /*
  * For ARM syscalls, we encode the syscall number into the instruction.
  */
@@ -44,6 +47,7 @@ static const unsigned long sigreturn_codes[7] = {
 	MOV_R7_NR_SIGRETURN,    SWI_SYS_SIGRETURN,    SWI_THUMB_SIGRETURN,
 	MOV_R7_NR_RT_SIGRETURN, SWI_SYS_RT_SIGRETURN, SWI_THUMB_RT_SIGRETURN,
 };
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 static unsigned long signal_return_offset;
 

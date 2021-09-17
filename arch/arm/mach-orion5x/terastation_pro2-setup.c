@@ -329,8 +329,15 @@ static void __init tsp2_init(void)
 	/*
 	 * Configure peripherals.
 	 */
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	mvebu_mbus_add_window_by_id(ORION_MBUS_DEVBUS_BOOT_TARGET,
+				    ORION_MBUS_DEVBUS_BOOT_ATTR,
+				    TSP2_NOR_BOOT_BASE,
+				    TSP2_NOR_BOOT_SIZE);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	mvebu_mbus_add_window("devbus-boot", TSP2_NOR_BOOT_BASE,
 			      TSP2_NOR_BOOT_SIZE);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	platform_device_register(&tsp2_nor_flash);
 
 	orion5x_ehci0_init();

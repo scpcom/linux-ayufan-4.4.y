@@ -16,14 +16,37 @@
  * common to all Armada SoCs.
  */
 
-/include/ "armada-370-xp.dtsi"
+#include "armada-370-xp.dtsi"
 
 / {
 	model = "Marvell Armada XP family SoC";
 	compatible = "marvell,armadaxp", "marvell,armada-370-xp";
 
+	aliases {
+		eth2 = &eth2;
+	};
+
 	soc {
+		compatible = "marvell,armadaxp-mbus", "simple-bus";
+
+		bootrom {
+			compatible = "marvell,bootrom";
+			reg = <MBUS_ID(0x01, 0x1d) 0 0x100000>;
+		};
+
+		/* Security Accelerator SRAM (CESA) */
+		cesa-sram {
+			compatible = "marvell,cesa-sram";
+			reg = <MBUS_ID(0x09, 0x01) 0 0x10000   /*chan0*/
+			       MBUS_ID(0x09, 0x05) 0 0x10000>; /*chan1*/
+		};
+
 		internal-regs {
+			sdramc@1400 {
+				compatible = "marvell,armada-xp-sdram-controller";
+				reg = <0x1400 0x500>;
+			};
+
 			L2: l2-cache {
 				compatible = "marvell,aurora-system-cache";
 				reg = <0x08000 0x1000>;
@@ -32,12 +55,18 @@
 			};
 
 			interrupt-controller@20000 {
-			      reg = <0x20a00 0x2d0>, <0x21070 0x58>;
+			      reg = <0x20a00 0x2d0>, <0x21070 0x58>, <0x21870 0x390>;
 			};
 
 			armada-370-xp-pmsu@22000 {
 				compatible = "marvell,armada-370-xp-pmsu";
-				reg = <0x22100 0x430>, <0x20800 0x20>;
+				reg = <0x22100 0x400>;
+			};
+
+			cpurst: cpurst@20800 {
+				compatible = "marvell,armada-xp-cpu-reset";
+				reg = <0x20800 0x20>;
+				#reset-cells = <1>;
 			};
 
 			serial@12200 {
@@ -46,6 +75,7 @@
 				reg-shift = <2>;
 				interrupts = <43>;
 				reg-io-width = <1>;
+				clocks = <&coreclk 0>;
 				status = "disabled";
 			};
 			serial@12300 {
@@ -54,11 +84,14 @@
 				reg-shift = <2>;
 				interrupts = <44>;
 				reg-io-width = <1>;
+				clocks = <&coreclk 0>;
 				status = "disabled";
 			};
 
 			timer@20300 {
-				marvell,timer-25Mhz;
+				compatible = "marvell,armada-xp-timer";
+				clocks = <&coreclk 2>, <&refclk>;
+				clock-names = "nbclk", "fixed";
 			};
 
 			coreclk: mvebu-sar@18230 {
@@ -70,7 +103,7 @@
 			cpuclk: clock-complex@18700 {
 				#clock-cells = <1>;
 				compatible = "marvell,armada-xp-cpu-clock";
-				reg = <0x18700 0xA0>;
+				reg = <0x18700 0xA0>, <0x1c054 0x10>;
 				clocks = <&coreclk 1>;
 			};
 
@@ -86,12 +119,36 @@
 				reg = <0x18200 0x500>;
 			};
 
-			ethernet@30000 {
-				compatible = "marvell,armada-370-neta";
-				reg = <0x30000 0x2500>;
+			/* PnC and BM */
+			bm_pnc@c0000 {
+				compatible = "marvell,neta_bm_pnc";
+				reg = <0xc0000 0xAC 0xc8000 0x48>;
+				clocks = <&gateclk 13>;
+				/*neta_cap_bm, bitmap of NETA dynamic capabilities, such as PNC, BM, HWF and PME
+				  PNC--0x1, BM--0x2, HWF--0x4, PME--0x8*/
+				neta_cap_bm = <0x3>;
+				pnc_tcam_size = <1024>;
+			};
+
+			/* Overwrite FIFO size */
+			eth0: ethernet@70000 {
+				tx-csum-limit = <9800>;
+			};
+
+			eth1: ethernet@74000 {
+				tx-csum-limit = <9800>;
+			};
+
+			eth2: ethernet@30000 {
+				compatible = "marvell,neta";
+				reg = <0x30000 0x4000>;
 				interrupts = <12>;
 				clocks = <&gateclk 2>;
+				tx-csum-limit = <9800>;
 				status = "disabled";
+				mac-address = [ 00 50 43 02 02 02 ];
+				eth,port-num    = <2>;
+				eth,port-mtu    = <1500>;
 			};
 
 			xor@60900 {
@@ -156,6 +213,48 @@
 					0x184d0 0x4>;
 				status = "okay";
 			};
+
+			crypto@9D000 {
+				compatible = "marvell,armada-cesa";
+				reg = <0x9D000 0x1000	/* cesa base reg chan 0 */
+				       0x90000 0x1000	/* tdma base reg chan 0 */
+				       0x9F000 0x1000	/* cesa base reg chan 1 */
+				       0x92000 0x1000>;	/* tdma base reg chan 1 */
+				clocks = <&gateclk 23>;
+				cesa,channels = <0x2>;
+				cesa,mode = "ocf";	/* ocf or test */
+				cesa,feature = "int_coalescing"; /* chain, int_coalescing
+							   or int_per_packet */
+
+				/* threshold and time_threshold relevant if
+				   int_coalescing in use */
+				cesa,threshold = <0x2>;
+				cesa,time_threshold = <0xff>;
+
+				cesa,ctrlModel = /bits/ 16 <0x7846>;
+				cesa,ctrlRev = /bits/ 8 <2>;
+				cesa,sramOffset = /bits/ 16 <0>;
+				status = "disabled";
+
+				crypto10 {
+					/* channel 0 */
+					interrupts = <48>;
+				};
+				crypto11 {
+					/* channel 1 */
+					interrupts = <49>;
+				};
+			};
+
+		};
+	};
+
+	clocks {
+		/* 25 MHz reference crystal */
+		refclk: oscillator {
+			compatible = "fixed-clock";
+			#clock-cells = <0>;
+			clock-frequency = <25000000>;
 		};
 	};
 };

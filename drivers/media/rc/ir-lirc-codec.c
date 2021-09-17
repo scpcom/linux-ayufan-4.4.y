@@ -375,6 +375,9 @@ static int ir_lirc_register(struct rc_dev *dev)
 	drv->code_length = sizeof(struct ir_raw_event) * 8;
 	drv->fops = &lirc_fops;
 	drv->dev = &dev->dev;
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	drv->rdev = dev;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	drv->owner = THIS_MODULE;
 
 	drv->minor = lirc_register_driver(drv);

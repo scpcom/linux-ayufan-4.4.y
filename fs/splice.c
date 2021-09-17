@@ -19,6 +19,9 @@
  */
 #include <linux/fs.h>
 #include <linux/file.h>
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+#include <linux/fsnotify.h>
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 #include <linux/pagemap.h>
 #include <linux/splice.h>
 #include <linux/memcontrol.h>
@@ -26,12 +29,21 @@
 #include <linux/swap.h>
 #include <linux/writeback.h>
 #include <linux/export.h>
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#include <linux/buffer_head.h>
+#include <linux/module.h>
+#include <linux/sizes.h>
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 #include <linux/syscalls.h>
 #include <linux/uio.h>
 #include <linux/security.h>
 #include <linux/gfp.h>
 #include <linux/socket.h>
 #include <linux/compat.h>
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+#include <linux/net.h>
+#include <net/sock.h>
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 #include "internal.h"
 
 /*
@@ -536,10 +548,15 @@ ssize_t generic_file_splice_read(struct file *in, loff_t *ppos,
 		len = left;
 
 	ret = __generic_file_splice_read(in, ppos, pipe, len, flags);
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	if (ret > 0)
+		*ppos += ret;
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	if (ret > 0) {
 		*ppos += ret;
 		file_accessed(in);
 	}
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 	return ret;
 }
@@ -712,6 +729,21 @@ static int pipe_to_sendpage(struct pipe_inode_info *pipe,
 	struct file *file = sd->u.file;
 	loff_t pos = sd->pos;
 	int more;
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	int ret;
+
+	ret = buf->ops->confirm(pipe, buf);
+	if (!ret) {
+		more = (sd->flags & SPLICE_F_MORE) ? MSG_MORE : 0;
+		if (sd->len < sd->total_len && pipe->nrbufs > 1)
+			more |= MSG_SENDPAGE_NOTLAST;
+
+		ret = file->f_op->sendpage(file, buf->page, buf->offset,
+					   sd->len, &pos, more);
+	}
+
+	return ret;
+#else /* CONFIG_SYNO_LSP_ARMADA */
 
 	if (!likely(file->f_op && file->f_op->sendpage))
 		return -EINVAL;
@@ -723,6 +755,7 @@ static int pipe_to_sendpage(struct pipe_inode_info *pipe,
 
 	return file->f_op->sendpage(file, buf->page, buf->offset,
 				    sd->len, &pos, more);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 }
 
 /*
@@ -1029,12 +1062,18 @@ generic_file_splice_write(struct pipe_inode_info *pipe, struct file *out,
 
 		mutex_lock_nested(&inode->i_mutex, I_MUTEX_CHILD);
 		ret = file_remove_suid(out);
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+		if (!ret)
+			ret = splice_from_pipe_feed(pipe, &sd,
+						    pipe_to_file);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 		if (!ret) {
 			ret = file_update_time(out);
 			if (!ret)
 				ret = splice_from_pipe_feed(pipe, &sd,
 							    pipe_to_file);
 		}
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 		mutex_unlock(&inode->i_mutex);
 	} while (ret > 0);
 	splice_from_pipe_end(pipe, &sd);
@@ -1432,6 +1471,328 @@ static long do_splice(struct file *in, loff_t __user *off_in,
 	return -EINVAL;
 }
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#include <net/sock.h>
+struct RECV_FILE_CONTROL_BLOCK
+{
+	struct page *rv_page;
+	loff_t rv_pos;
+	size_t  rv_count;
+	void *rv_fsdata;
+};
+
+#if defined(CONFIG_SYNO_ALPINE)
+// we use the definitions in include/linux/fs.h and socket.h
+#else /* CONFIG_SYNO_ALPINE */
+#ifdef CONFIG_ARM_PAGE_SIZE_32KB
+#define MAX_PAGES_PER_RECVFILE (SZ_1M / PAGE_SIZE)
+#else
+#define MAX_PAGES_PER_RECVFILE (SZ_128K / PAGE_SIZE)
+#endif
+#define MSG_KERNSPACE			0x1000000
+#define MSG_NOCATCHSIGNAL		0x2000000
+#endif /* CONFIG_SYNO_ALPINE */
+
+static ssize_t do_splice_from_socket(struct file *file, struct socket *sock,
+					loff_t __user *ppos,size_t count)
+{
+	struct address_space *mapping = file->f_mapping;
+	struct inode	*inode = mapping->host;
+	loff_t pos;
+	int count_tmp;
+	int err = 0;
+	int cPagePtr = 0;
+	int cPagesAllocated = 0;
+	struct RECV_FILE_CONTROL_BLOCK rv_cb[MAX_PAGES_PER_RECVFILE + 1];
+	struct kvec iov[MAX_PAGES_PER_RECVFILE + 1];
+	struct msghdr msg;
+	long rcvtimeo;
+	int ret;
+
+	if(copy_from_user(&pos, ppos, sizeof(loff_t)))
+		return -EFAULT;
+
+	if (count > MAX_PAGES_PER_RECVFILE * PAGE_SIZE) {
+		count = MAX_PAGES_PER_RECVFILE * PAGE_SIZE;
+	}
+
+	mutex_lock(&inode->i_mutex);
+
+	// vfs_check_frozen(inode->i_sb, SB_FREEZE_WRITE);
+	// TODO: add sb_start_write(inode->i_sb); and end somewhere
+	/* We can write back this queue in page reclaim */
+	current->backing_dev_info = mapping->backing_dev_info;
+
+	err = generic_write_checks(file, &pos, &count, S_ISBLK(inode->i_mode));
+	if (err != 0 || count == 0)
+		goto done;
+
+	file_remove_suid(file);
+	file_update_time(file);
+
+	count_tmp = count;
+	do {
+		unsigned long bytes;	/* Bytes to write to page */
+		unsigned long offset;	/* Offset into pagecache page */
+		struct page *pageP;
+		void *fsdata;
+
+		offset = (pos & (PAGE_CACHE_SIZE - 1));
+		bytes = PAGE_CACHE_SIZE - offset;
+		if (bytes > count_tmp)
+			bytes = count_tmp;
+
+		ret =  mapping->a_ops->write_begin(file, mapping, pos, bytes,
+						   AOP_FLAG_UNINTERRUPTIBLE,
+						   &pageP,&fsdata);
+
+		if (unlikely(ret)) {
+			err = ret;
+			for(cPagePtr = 0; cPagePtr < cPagesAllocated; cPagePtr++) {
+				kunmap(rv_cb[cPagePtr].rv_page);
+				ret = mapping->a_ops->write_end(file, mapping,
+								rv_cb[cPagePtr].rv_pos,
+								rv_cb[cPagePtr].rv_count,
+								rv_cb[cPagePtr].rv_count,
+								rv_cb[cPagePtr].rv_page,
+								rv_cb[cPagePtr].rv_fsdata);
+			}
+			goto done;
+		}
+		rv_cb[cPagesAllocated].rv_page = pageP;
+		rv_cb[cPagesAllocated].rv_pos = pos;
+		rv_cb[cPagesAllocated].rv_count = bytes;
+		rv_cb[cPagesAllocated].rv_fsdata = fsdata;
+		iov[cPagesAllocated].iov_base = kmap(pageP) + offset;
+		iov[cPagesAllocated].iov_len = bytes;
+		cPagesAllocated++;
+		count_tmp -= bytes;
+		pos += bytes;
+	} while (count_tmp);
+
+	/* IOV is ready, receive the data from socket now */
+	msg.msg_name = NULL;
+	msg.msg_namelen = 0;
+	msg.msg_iov = (struct iovec *)&iov[0];
+	msg.msg_iovlen = cPagesAllocated ;
+	msg.msg_control = NULL;
+	msg.msg_controllen = 0;
+	msg.msg_flags = MSG_KERNSPACE;
+	rcvtimeo = sock->sk->sk_rcvtimeo;
+	sock->sk->sk_rcvtimeo = 8 * HZ;
+
+	ret = kernel_recvmsg(sock, &msg, &iov[0], cPagesAllocated, count,
+			     MSG_WAITALL | MSG_NOCATCHSIGNAL);
+
+	sock->sk->sk_rcvtimeo = rcvtimeo;
+
+	if(unlikely(ret < 0)) {
+		err = ret;
+		for(cPagePtr = 0; cPagePtr < cPagesAllocated; cPagePtr++){
+			kunmap(rv_cb[cPagePtr].rv_page);
+			ret = mapping->a_ops->write_end(file, mapping,
+							rv_cb[cPagePtr].rv_pos,
+							rv_cb[cPagePtr].rv_count,
+							rv_cb[cPagePtr].rv_count,
+							rv_cb[cPagePtr].rv_page,
+							rv_cb[cPagePtr].rv_fsdata);
+		}
+		goto done;
+	} else {
+		err = 0;
+		pos = pos - count + ret;
+		count = ret;
+	}
+
+	for (cPagePtr=0;cPagePtr < cPagesAllocated;cPagePtr++) {
+		//flush_dcache_page(pageP);
+		kunmap(rv_cb[cPagePtr].rv_page);
+		ret = mapping->a_ops->write_end(file, mapping,
+						rv_cb[cPagePtr].rv_pos,
+						rv_cb[cPagePtr].rv_count,
+						rv_cb[cPagePtr].rv_count,
+						rv_cb[cPagePtr].rv_page,
+						rv_cb[cPagePtr].rv_fsdata);
+
+		if (unlikely(ret < 0))
+			printk("%s: write_end fail,ret = %d\n",__func__,ret);
+		//cond_resched();
+	}
+	balance_dirty_pages_ratelimited(mapping);
+	if(unlikely(copy_to_user(ppos,&pos,sizeof(loff_t))))
+		err = -EFAULT;
+
+done:
+	current->backing_dev_info = NULL;
+	mutex_unlock(&inode->i_mutex);
+
+	if(err)
+		return err;
+	else
+		return count;
+}
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+ssize_t generic_splice_from_socket(struct file *file, struct socket *sock,
+				   loff_t __user *ppos, size_t count_req)
+{
+	struct address_space *mapping = file->f_mapping;
+	struct inode *inode = mapping->host;
+	loff_t pos, pos_tmp;
+	int ret, i = 0, nr_pages;
+	struct recvfile_ctl_blk *rv_cb;
+	struct kvec *iov;
+	struct msghdr msg = { 0 };
+	bool append = true;
+	int remaining, krecvmsg_sz;
+	size_t written = 0, verified_sz,
+		pg_cache_sz, pg_cache_end_sz;
+
+	if (copy_from_user(&pos, ppos, sizeof(loff_t))) {
+		ret = -EFAULT;
+		goto err;
+	}
+
+	ret = rw_verify_area(WRITE, file, &file->f_pos, count_req);
+	if (ret < 0)
+		goto err;
+
+	verified_sz = ret;
+
+	nr_pages = (((pos & ~PAGE_CACHE_MASK) + count_req + ~PAGE_CACHE_MASK) >> PAGE_CACHE_SHIFT);
+	rv_cb = kzalloc(nr_pages * sizeof(struct recvfile_ctl_blk), GFP_KERNEL);
+	if (unlikely(!rv_cb)) {
+		ret = -ENOMEM;
+		goto err;
+	}
+
+	iov = kzalloc(nr_pages * sizeof(struct kvec), GFP_KERNEL);
+	if (unlikely(!iov)) {
+		kfree(rv_cb);
+		ret = -ENOMEM;
+		goto err;
+	}
+
+	sb_start_intwrite(inode->i_sb);
+
+	/* We can write back this queue in page reclaim. */
+	current->backing_dev_info = mapping->backing_dev_info;
+
+	mutex_lock(&inode->i_mutex);
+
+	ret = generic_write_checks(file, &pos, &verified_sz, S_ISBLK(inode->i_mode));
+	if (ret < 0) {
+		pr_info("%s: generic_write_checks err, ret=%d:\n", __func__, ret);
+		goto cleanup;
+	}
+
+	ret = file_remove_suid(file);
+	if (ret) {
+		pr_info("%s: file_remove_suid err, ret=%d:\n", __func__, ret);
+		goto cleanup;
+	}
+
+	ret = file_update_time(file);
+	if (ret) {
+		pr_info("%s: file_update_time err, ret=%d:\n", __func__, ret);
+		goto cleanup;
+	}
+
+	pg_cache_sz = 0;
+	remaining = verified_sz;
+	pos_tmp = pos;
+	for (i = 0; i < nr_pages; i++) {
+		pgoff_t offset = pos_tmp & (PAGE_CACHE_SIZE - 1);
+		unsigned len = min_t(unsigned int, PAGE_CACHE_SIZE - offset, remaining);
+		struct page *page;
+		void *fsdata;
+
+		ret = pagecache_write_begin(file, mapping, pos_tmp, len,
+					    AOP_FLAG_UNINTERRUPTIBLE,
+					    &page, &fsdata);
+
+		if (unlikely(ret)) {
+			pr_info("pagecache_write_begin err. ret %d:\n", ret);
+			break;
+		}
+
+		rv_cb[i].rv_page = page;
+		rv_cb[i].rv_pos = pos_tmp;
+		rv_cb[i].rv_count = len;
+		rv_cb[i].rv_fsdata = fsdata;
+		iov[i].iov_base = kmap(page) + offset;
+		iov[i].iov_len = len;
+		remaining -= len;
+		pos_tmp += len;
+		pg_cache_sz += len;
+
+		if (i_size_read(inode) < pos_tmp)
+			i_size_write(inode, pos_tmp);
+	}
+
+	nr_pages = i;
+
+	/* failed to get page cache */
+	if (unlikely(pg_cache_sz == 0))
+		goto cleanup;
+
+	if (pos + pg_cache_sz < i_size_read(inode))
+		append = false;
+
+	/* IOV is ready, receive the data from socket now */
+	krecvmsg_sz = kernel_recvmsg(sock, &msg, iov, nr_pages, pg_cache_sz, MSG_WAITALL);
+
+	/* socket data is ready, write page cache */
+	for (i = 0, pg_cache_end_sz = 0; i < nr_pages; i++) {
+		unsigned to_copy = min_t(unsigned int, rv_cb[i].rv_count, pg_cache_sz - pg_cache_end_sz);
+
+		kunmap(rv_cb[i].rv_page);
+		ret = pagecache_write_end(file, mapping,
+					  rv_cb[i].rv_pos,
+					  rv_cb[i].rv_count,
+					  to_copy,
+					  rv_cb[i].rv_page,
+					  rv_cb[i].rv_fsdata);
+		if (unlikely(ret < 0)) {
+			pr_info("%s: pagecache_write_end fail,ret = %d\n", __func__, ret);
+			break;
+		}
+		BUG_ON(ret != rv_cb[i].rv_count);
+		pg_cache_end_sz += ret;
+	}
+
+	/* update the actual bytes written */
+	if (likely(krecvmsg_sz > 0))
+		/* use the least byte size */
+		written = min_t(size_t, pg_cache_end_sz, krecvmsg_sz);
+
+	if (likely(written > 0)) {
+		balance_dirty_pages_ratelimited(mapping);
+		pos += written;
+		fsnotify_modify(file);
+
+		if (unlikely((count_req != written) && append))
+			truncate_setsize(inode, pos);
+
+		if (copy_to_user(ppos, &pos, sizeof(loff_t))) {
+			written = 0;
+			ret = -EFAULT;
+		}
+	}
+cleanup:
+	mutex_unlock(&inode->i_mutex);
+	sb_end_intwrite(inode->i_sb);
+	current->backing_dev_info = NULL;
+
+	kfree(iov);
+	kfree(rv_cb);
+
+err:
+	return written ? written : ret;
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
 /*
  * Map an iov into an array of pages and offset/length tupples. With the
  * partial_page structure, we can map several non-contiguous ranges into
@@ -1758,12 +2119,69 @@ SYSCALL_DEFINE6(splice, int, fd_in, loff_t __user *, off_in,
 		size_t, len, unsigned int, flags)
 {
 	struct fd in, out;
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	int error;
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	long error;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+#if defined(CONFIG_SYNO_LSP_ALPINE) || defined(CONFIG_SYNO_LSP_ARMADA)
+	struct socket *sock = NULL;
+#endif /* CONFIG_SYNO_LSP_ALPINE || CONFIG_SYNO_LSP_ARMADA */
 
 	if (unlikely(!len))
 		return 0;
 
 	error = -EBADF;
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	/* check fd_in is socket fd */
+	sock = sockfd_lookup(fd_in, (int *)&error);
+	if(sock){
+		if(!sock->sk) {
+			BUG();
+			goto done;
+		}
+		out = fdget(fd_out);
+
+		if (out.file) {
+			if (!(out.file->f_mode & FMODE_WRITE))
+				goto done;
+			if (out.file->f_op && out.file->f_op->splice_from_socket)
+				error = out.file->f_op->splice_from_socket(out.file, sock, off_out,len);
+			else
+				error = do_splice_from_socket(out.file, sock, off_out,len);
+		}
+done:
+		if(out.file)
+			fdput(out);
+
+		fput(sock->file);
+		return error;
+	}
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	/* check if fd_in is a socket */
+	sock = sockfd_lookup(fd_in, &error);
+	if (sock) {
+		if (!sock->sk)
+			goto nosock;
+		out = fdget(fd_out);
+		if (out.file) {
+			if (!(out.file->f_mode & FMODE_WRITE))
+				goto done;
+			if (!out.file->f_op->splice_from_socket)
+				goto done;
+			error = out.file->f_op->splice_from_socket(out.file, sock, off_out, len);
+		}
+done:
+		fdput(out);
+nosock:
+		fput(sock->file);
+		return error;
+	}
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
 	in = fdget(fd_in);
 	if (in.file) {
 		if (in.file->f_mode & FMODE_READ) {

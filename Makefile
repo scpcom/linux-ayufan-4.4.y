@@ -639,6 +639,12 @@ ifdef CONFIG_DYNAMIC_FTRACE
 endif
 endif
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+ifdef CONFIG_KPTRACE
+KBUILD_CFLAGS	+= -fno-ipa-cp
+endif
+#endif /* CONFIG_SYNO_LSP_MONACO */
+
 # We trigger additional mismatches with less inlining
 ifdef CONFIG_DEBUG_SECTION_MISMATCH
 KBUILD_CFLAGS += $(call cc-option, -fno-inline-functions-called-once)

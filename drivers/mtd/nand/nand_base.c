@@ -46,6 +46,16 @@
 #include <linux/io.h>
 #include <linux/mtd/partitions.h>
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#ifdef CONFIG_DEBUG_FS
+#include <linux/debugfs.h>
+struct dentry *file_erasebb;
+#endif
+
+u8 nand_erasebb;
+EXPORT_SYMBOL_GPL(nand_erasebb);
+
+#endif /* CONFIG_SYNO_LSP_MONACO */
 /* Define default oob placement schemes for large and small page devices */
 static struct nand_ecclayout nand_oob_8 = {
 	.eccbytes = 3,
@@ -90,10 +100,17 @@ static struct nand_ecclayout nand_oob_128 = {
 		 .length = 78} }
 };
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+int nand_get_device(struct mtd_info *mtd, int new_state);
+
+int nand_do_write_oob(struct mtd_info *mtd, loff_t to,
+			     struct mtd_oob_ops *ops);
+#else /* CONFIG_SYNO_LSP_MONACO */
 static int nand_get_device(struct mtd_info *mtd, int new_state);
 
 static int nand_do_write_oob(struct mtd_info *mtd, loff_t to,
 			     struct mtd_oob_ops *ops);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 /*
  * For devices which display every fart in the system on a separate LED. Is
@@ -128,7 +145,11 @@ static int check_offs_len(struct mtd_info *mtd,
  *
  * Release chip lock and wake up anyone waiting on the device.
  */
+#if defined (CONFIG_SYNO_LSP_MONACO)
+void nand_release_device(struct mtd_info *mtd)
+#else /* CONFIG_SYNO_LSP_MONACO */
 static void nand_release_device(struct mtd_info *mtd)
+#endif /* CONFIG_SYNO_LSP_MONACO */
 {
 	struct nand_chip *chip = mtd->priv;
 
@@ -139,6 +160,9 @@ static void nand_release_device(struct mtd_info *mtd)
 	wake_up(&chip->controller->wq);
 	spin_unlock(&chip->controller->lock);
 }
+#if defined (CONFIG_SYNO_LSP_MONACO)
+EXPORT_SYMBOL_GPL(nand_release_device);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 /**
  * nand_read_byte - [DEFAULT] read one byte from the chip
@@ -426,7 +450,11 @@ static int nand_default_block_markbad(struct mtd_info *mtd, loff_t ofs)
  * Check, if the device is write protected. The function expects, that the
  * device is already selected.
  */
+#if defined (CONFIG_SYNO_LSP_MONACO)
+int nand_check_wp(struct mtd_info *mtd)
+#else /* CONFIG_SYNO_LSP_MONACO */
 static int nand_check_wp(struct mtd_info *mtd)
+#endif /* CONFIG_SYNO_LSP_MONACO */
 {
 	struct nand_chip *chip = mtd->priv;
 
@@ -438,6 +466,9 @@ static int nand_check_wp(struct mtd_info *mtd)
 	chip->cmdfunc(mtd, NAND_CMD_STATUS, -1, -1);
 	return (chip->read_byte(mtd) & NAND_STATUS_WP) ? 0 : 1;
 }
+#if defined (CONFIG_SYNO_LSP_MONACO)
+EXPORT_SYMBOL_GPL(nand_check_wp);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 /**
  * nand_block_checkbad - [GENERIC] Check if a block is marked bad
@@ -739,8 +770,12 @@ static void panic_nand_get_device(struct nand_chip *chip,
  *
  * Get the device and lock it for exclusive access
  */
+#if defined (CONFIG_SYNO_LSP_MONACO)
+int nand_get_device(struct mtd_info *mtd, int new_state)
+#else /* CONFIG_SYNO_LSP_MONACO */
 static int
 nand_get_device(struct mtd_info *mtd, int new_state)
+#endif /* CONFIG_SYNO_LSP_MONACO */
 {
 	struct nand_chip *chip = mtd->priv;
 	spinlock_t *lock = &chip->controller->lock;
@@ -772,6 +807,9 @@ retry:
 	remove_wait_queue(wq, &wait);
 	goto retry;
 }
+#if defined (CONFIG_SYNO_LSP_MONACO)
+EXPORT_SYMBOL_GPL(nand_get_device);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 /**
  * panic_nand_wait - [GENERIC] wait until the command is done
@@ -1369,8 +1407,13 @@ static int nand_read_page_syndrome(struct mtd_info *mtd, struct nand_chip *chip,
  * @ops: oob ops structure
  * @len: size of oob to transfer
  */
+#if defined (CONFIG_SYNO_LSP_MONACO)
+uint8_t *nand_transfer_oob(struct nand_chip *chip, uint8_t *oob,
+				  struct mtd_oob_ops *ops, size_t len)
+#else /* CONFIG_SYNO_LSP_MONACO */
 static uint8_t *nand_transfer_oob(struct nand_chip *chip, uint8_t *oob,
 				  struct mtd_oob_ops *ops, size_t len)
+#endif /* CONFIG_SYNO_LSP_MONACO */
 {
 	switch (ops->mode) {
 
@@ -1409,6 +1452,9 @@ static uint8_t *nand_transfer_oob(struct nand_chip *chip, uint8_t *oob,
 	}
 	return NULL;
 }
+#if defined (CONFIG_SYNO_LSP_MONACO)
+EXPORT_SYMBOL_GPL(nand_transfer_oob);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 /**
  * nand_do_read_ops - [INTERN] Read data with ECC
@@ -1418,8 +1464,13 @@ static uint8_t *nand_transfer_oob(struct nand_chip *chip, uint8_t *oob,
  *
  * Internal function. Called with chip held.
  */
+#if defined (CONFIG_SYNO_LSP_MONACO)
+int nand_do_read_ops(struct mtd_info *mtd, loff_t from,
+			    struct mtd_oob_ops *ops)
+#else /* CONFIG_SYNO_LSP_MONACO */
 static int nand_do_read_ops(struct mtd_info *mtd, loff_t from,
 			    struct mtd_oob_ops *ops)
+#endif /* CONFIG_SYNO_LSP_MONACO */
 {
 	int chipnr, page, realpage, col, bytes, aligned, oob_required;
 	struct nand_chip *chip = mtd->priv;
@@ -1553,6 +1604,9 @@ static int nand_do_read_ops(struct mtd_info *mtd, loff_t from,
 
 	return max_bitflips;
 }
+#if defined (CONFIG_SYNO_LSP_MONACO)
+EXPORT_SYMBOL_GPL(nand_do_read_ops);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 /**
  * nand_read - [MTD Interface] MTD compatibility function for nand_do_read_ecc
@@ -1723,8 +1777,13 @@ static int nand_write_oob_syndrome(struct mtd_info *mtd,
  *
  * NAND read out-of-band data from the spare area.
  */
+#if defined (CONFIG_SYNO_LSP_MONACO)
+int nand_do_read_oob(struct mtd_info *mtd, loff_t from,
+			    struct mtd_oob_ops *ops)
+#else /* CONFIG_SYNO_LSP_MONACO */
 static int nand_do_read_oob(struct mtd_info *mtd, loff_t from,
 			    struct mtd_oob_ops *ops)
+#endif /* CONFIG_SYNO_LSP_MONACO */
 {
 	int page, realpage, chipnr;
 	struct nand_chip *chip = mtd->priv;
@@ -1813,6 +1872,9 @@ static int nand_do_read_oob(struct mtd_info *mtd, loff_t from,
 
 	return  mtd->ecc_stats.corrected - stats.corrected ? -EUCLEAN : 0;
 }
+#if defined (CONFIG_SYNO_LSP_MONACO)
+EXPORT_SYMBOL_GPL(nand_do_read_oob);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 /**
  * nand_read_oob - [MTD Interface] NAND read data and/or out-of-band
@@ -2157,8 +2219,13 @@ static int nand_write_page(struct mtd_info *mtd, struct nand_chip *chip,
  * @len: oob data write length
  * @ops: oob ops structure
  */
+#if defined (CONFIG_SYNO_LSP_MONACO)
+uint8_t *nand_fill_oob(struct mtd_info *mtd, uint8_t *oob, size_t len,
+			      struct mtd_oob_ops *ops)
+#else /* CONFIG_SYNO_LSP_MONACO */
 static uint8_t *nand_fill_oob(struct mtd_info *mtd, uint8_t *oob, size_t len,
 			      struct mtd_oob_ops *ops)
+#endif /* CONFIG_SYNO_LSP_MONACO */
 {
 	struct nand_chip *chip = mtd->priv;
 
@@ -2205,6 +2272,9 @@ static uint8_t *nand_fill_oob(struct mtd_info *mtd, uint8_t *oob, size_t len,
 	}
 	return NULL;
 }
+#if defined (CONFIG_SYNO_LSP_MONACO)
+EXPORT_SYMBOL_GPL(nand_fill_oob);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 #define NOTALIGNED(x)	((x & (chip->subpagesize - 1)) != 0)
 
@@ -2216,8 +2286,13 @@ static uint8_t *nand_fill_oob(struct mtd_info *mtd, uint8_t *oob, size_t len,
  *
  * NAND write with ECC.
  */
+#if defined (CONFIG_SYNO_LSP_MONACO)
+int nand_do_write_ops(struct mtd_info *mtd, loff_t to,
+			     struct mtd_oob_ops *ops)
+#else /* CONFIG_SYNO_LSP_MONACO */
 static int nand_do_write_ops(struct mtd_info *mtd, loff_t to,
 			     struct mtd_oob_ops *ops)
+#endif /* CONFIG_SYNO_LSP_MONACO */
 {
 	int chipnr, realpage, page, blockmask, column;
 	struct nand_chip *chip = mtd->priv;
@@ -2323,6 +2398,9 @@ err_out:
 	chip->select_chip(mtd, -1);
 	return ret;
 }
+#if defined (CONFIG_SYNO_LSP_MONACO)
+EXPORT_SYMBOL_GPL(nand_do_write_ops);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 /**
  * panic_nand_write - [MTD Interface] NAND write with ECC
@@ -2394,8 +2472,13 @@ static int nand_write(struct mtd_info *mtd, loff_t to, size_t len,
  *
  * NAND write out-of-band.
  */
+#if defined (CONFIG_SYNO_LSP_MONACO)
+int nand_do_write_oob(struct mtd_info *mtd, loff_t to,
+			     struct mtd_oob_ops *ops)
+#else /* CONFIG_SYNO_LSP_MONACO */
 static int nand_do_write_oob(struct mtd_info *mtd, loff_t to,
 			     struct mtd_oob_ops *ops)
+#endif /* CONFIG_SYNO_LSP_MONACO */
 {
 	int chipnr, page, status, len;
 	struct nand_chip *chip = mtd->priv;
@@ -2471,6 +2554,9 @@ static int nand_do_write_oob(struct mtd_info *mtd, loff_t to,
 
 	return 0;
 }
+#if defined (CONFIG_SYNO_LSP_MONACO)
+EXPORT_SYMBOL_GPL(nand_do_write_oob);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 /**
  * nand_write_oob - [MTD Interface] NAND write data and/or out-of-band
@@ -2591,8 +2677,14 @@ int nand_erase_nand(struct mtd_info *mtd, struct erase_info *instr,
 
 	while (len) {
 		/* Check if we have a bad block, we do not erase bad blocks! */
+#if defined (CONFIG_SYNO_LSP_MONACO)
+		if (!nand_erasebb &&
+			nand_block_checkbad(mtd, ((loff_t) page) <<
+					chip->page_shift, 0, allowbbt)) {
+#else /* CONFIG_SYNO_LSP_MONACO */
 		if (nand_block_checkbad(mtd, ((loff_t) page) <<
 					chip->page_shift, 0, allowbbt)) {
+#endif /* CONFIG_SYNO_LSP_MONACO */
 			pr_warn("%s: attempt to erase a bad block at page 0x%08x\n",
 				    __func__, page);
 			instr->state = MTD_ERASE_FAILED;
@@ -2664,7 +2756,11 @@ erase_exit:
  *
  * Sync is actually a wait for chip ready function.
  */
+#if defined (CONFIG_SYNO_LSP_MONACO)
+void nand_sync(struct mtd_info *mtd)
+#else /* CONFIG_SYNO_LSP_MONACO */
 static void nand_sync(struct mtd_info *mtd)
+#endif /* CONFIG_SYNO_LSP_MONACO */
 {
 	pr_debug("%s: called\n", __func__);
 
@@ -2673,6 +2769,9 @@ static void nand_sync(struct mtd_info *mtd)
 	/* Release it and go back */
 	nand_release_device(mtd);
 }
+#if defined (CONFIG_SYNO_LSP_MONACO)
+EXPORT_SYMBOL_GPL(nand_sync);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 /**
  * nand_block_isbad - [MTD Interface] Check if block at offset is bad
@@ -2753,7 +2852,11 @@ static int nand_onfi_get_features(struct mtd_info *mtd, struct nand_chip *chip,
  * nand_suspend - [MTD Interface] Suspend the NAND flash
  * @mtd: MTD device structure
  */
+#if defined (CONFIG_SYNO_LSP_MONACO)
+int nand_suspend(struct mtd_info *mtd)
+#else /* CONFIG_SYNO_LSP_MONACO */
 static int nand_suspend(struct mtd_info *mtd)
+#endif /* CONFIG_SYNO_LSP_MONACO */
 {
 	return nand_get_device(mtd, FL_PM_SUSPENDED);
 }
@@ -2762,7 +2865,11 @@ static int nand_suspend(struct mtd_info *mtd)
  * nand_resume - [MTD Interface] Resume the NAND flash
  * @mtd: MTD device structure
  */
+#if defined (CONFIG_SYNO_LSP_MONACO)
+void nand_resume(struct mtd_info *mtd)
+#else /* CONFIG_SYNO_LSP_MONACO */
 static void nand_resume(struct mtd_info *mtd)
+#endif /* CONFIG_SYNO_LSP_MONACO */
 {
 	struct nand_chip *chip = mtd->priv;
 
@@ -2845,6 +2952,78 @@ static u16 onfi_crc16(u16 crc, u8 const *p, size_t len)
 	return crc;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+/* Parse the Extended Parameter Page. */
+static int nand_flash_detect_ext_param_page(struct mtd_info *mtd,
+		struct nand_chip *chip, struct nand_onfi_params *p)
+{
+	struct onfi_ext_param_page *ep;
+	struct onfi_ext_section *s;
+	struct onfi_ext_ecc_info *ecc;
+	uint8_t *cursor;
+	int ret = -EINVAL;
+	int len;
+	int i;
+
+	len = le16_to_cpu(p->ext_param_page_length) * 16;
+	ep = kmalloc(len, GFP_KERNEL);
+	if (!ep)
+		return -ENOMEM;
+
+	/* Send our own NAND_CMD_PARAM. */
+	chip->cmdfunc(mtd, NAND_CMD_PARAM, 0, -1);
+
+	/* Use the Change Read Column command to skip the ONFI param pages. */
+	chip->cmdfunc(mtd, NAND_CMD_RNDOUT,
+			sizeof(*p) * p->num_of_param_pages , -1);
+
+	/* Read out the Extended Parameter Page. */
+	chip->read_buf(mtd, (uint8_t *)ep, len);
+	if ((onfi_crc16(ONFI_CRC_BASE, ((uint8_t *)ep) + 2, len - 2)
+		!= le16_to_cpu(ep->crc))) {
+		pr_debug("fail in the CRC.\n");
+		goto ext_out;
+	}
+
+	/*
+	 * Check the signature.
+	 * Do not strictly follow the ONFI spec, maybe changed in future.
+	 */
+	if (strncmp(ep->sig, "EPPS", 4)) {
+		pr_debug("The signature is invalid.\n");
+		goto ext_out;
+	}
+
+	/* find the ECC section. */
+	cursor = (uint8_t *)(ep + 1);
+	for (i = 0; i < ONFI_EXT_SECTION_MAX; i++) {
+		s = ep->sections + i;
+		if (s->type == ONFI_SECTION_TYPE_2)
+			break;
+		cursor += s->length * 16;
+	}
+	if (i == ONFI_EXT_SECTION_MAX) {
+		pr_debug("We can not find the ECC section.\n");
+		goto ext_out;
+	}
+
+	/* get the info we want. */
+	ecc = (struct onfi_ext_ecc_info *)cursor;
+
+	if (ecc->codeword_size) {
+		chip->ecc_strength_ds = ecc->ecc_bits;
+		chip->ecc_step_ds = 1 << ecc->codeword_size;
+	}
+
+	pr_info("ONFI extended param page detected.\n");
+	ret = 0;
+
+ext_out:
+	kfree(ep);
+	return ret;
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
 /*
  * Check if the NAND chip is ONFI compliant, returns 1 if it is, 0 otherwise.
  */
@@ -2920,6 +3099,28 @@ static int nand_flash_detect_onfi(struct mtd_info *mtd, struct nand_chip *chip,
 	*busw = 0;
 	if (le16_to_cpu(p->features) & 1)
 		*busw = NAND_BUSWIDTH_16;
+
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	if (p->ecc_bits != 0xff) {
+		chip->ecc_strength_ds = p->ecc_bits;
+		chip->ecc_step_ds = 512;
+	} else if (chip->onfi_version >= 21 &&
+		(onfi_feature(chip) & ONFI_FEATURE_EXT_PARAM_PAGE)) {
+
+		/*
+		 * The nand_flash_detect_ext_param_page() uses the
+		 * Change Read Column command which maybe not supported
+		 * by the chip->cmdfunc. So try to update the chip->cmdfunc
+		 * now. We do not replace user supplied command function.
+		 */
+		if (mtd->writesize > 512 && chip->cmdfunc == nand_command)
+			chip->cmdfunc = nand_command_lp;
+
+		/* The Extended Parameter Page is supported since ONFI 2.1. */
+		if (nand_flash_detect_ext_param_page(mtd, chip, p))
+			pr_info("Failed to detect the extended param page.\n");
+	}
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 	pr_info("ONFI flash detected\n");
 	return 1;
@@ -3766,12 +3967,23 @@ EXPORT_SYMBOL_GPL(nand_release);
 
 static int __init nand_base_init(void)
 {
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#ifdef CONFIG_DEBUG_FS
+	file_erasebb = debugfs_create_u8("nanderasebb", 0644, NULL,
+					 &nand_erasebb);
+#endif
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	led_trigger_register_simple("nand-disk", &nand_led_trigger);
 	return 0;
 }
 
 static void __exit nand_base_exit(void)
 {
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#ifdef CONFIG_DEBUG_FS
+	debugfs_remove(file_erasebb);
+#endif
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	led_trigger_unregister_simple(nand_led_trigger);
 }
 

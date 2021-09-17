@@ -1,7 +1,7 @@
 /dts-v1/;
 
-/include/ "kirkwood.dtsi"
-/include/ "kirkwood-6281.dtsi"
+#include "kirkwood.dtsi"
+#include "kirkwood-6281.dtsi"
 
 / {
 	model = "Globalscale Technologies Guruplug Server Plus";
@@ -72,6 +72,8 @@
 
 		mvsdio@90000 {
 			status = "okay";
+			/* No CD or WP GPIOs */
+			broken-cd;
 		};
 	};
 

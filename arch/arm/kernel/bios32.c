@@ -363,6 +363,21 @@ void pcibios_fixup_bus(struct pci_bus *bus)
 }
 EXPORT_SYMBOL(pcibios_fixup_bus);
 
+#if defined (CONFIG_SYNO_LSP_MONACO) || defined(CONFIG_SYNO_LSP_ARMADA)
+void pcibios_add_bus(struct pci_bus *bus)
+{
+	struct pci_sys_data *sys = bus->sysdata;
+	if (sys->add_bus)
+		sys->add_bus(bus);
+}
+
+void pcibios_remove_bus(struct pci_bus *bus)
+{
+	struct pci_sys_data *sys = bus->sysdata;
+	if (sys->remove_bus)
+		sys->remove_bus(bus);
+}
+#endif /* CONFIG_SYNO_LSP_MONACO || CONFIG_SYNO_LSP_ARMADA */
 /*
  * Swizzle the device pin each time we cross a bridge.  If a platform does
  * not provide a swizzle function, we perform the standard PCI swizzling.
@@ -445,13 +460,25 @@ static int pcibios_init_resources(int busnr, struct pci_sys_data *sys)
 	return 0;
 }
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+static void pcibios_init_hw(struct device *parent, struct hw_pci *hw,
+			    struct list_head *head)
+#else /* CONFIG_SYNO_LSP_MONACO */
 static void pcibios_init_hw(struct hw_pci *hw, struct list_head *head)
+#endif /* CONFIG_SYNO_LSP_MONACO */
 {
 	struct pci_sys_data *sys = NULL;
 	int ret;
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	int nr;
+	static int busnr;
+
+	for (nr = 0; nr < hw->nr_controllers; nr++) {
+#else /* CONFIG_SYNO_LSP_MONACO */
 	int nr, busnr;
 
 	for (nr = busnr = 0; nr < hw->nr_controllers; nr++) {
+#endif /* CONFIG_SYNO_LSP_MONACO */
 		sys = kzalloc(sizeof(struct pci_sys_data), GFP_KERNEL);
 		if (!sys)
 			panic("PCI: unable to allocate sys data!");
@@ -463,6 +490,10 @@ static void pcibios_init_hw(struct hw_pci *hw, struct list_head *head)
 		sys->swizzle = hw->swizzle;
 		sys->map_irq = hw->map_irq;
 		sys->align_resource = hw->align_resource;
+#if defined (CONFIG_SYNO_LSP_MONACO) || defined(CONFIG_SYNO_LSP_ARMADA)
+		sys->add_bus = hw->add_bus;
+		sys->remove_bus = hw->remove_bus;
+#endif /* CONFIG_SYNO_LSP_MONACO || CONFIG_SYNO_LSP_ARMADA */
 		INIT_LIST_HEAD(&sys->resources);
 
 		if (hw->private_data)
@@ -480,8 +511,13 @@ static void pcibios_init_hw(struct hw_pci *hw, struct list_head *head)
 			if (hw->scan)
 				sys->bus = hw->scan(nr, sys);
 			else
+#if defined (CONFIG_SYNO_LSP_MONACO)
+				sys->bus = pci_scan_root_bus(parent, sys->busnr,
+						hw->ops, sys, &sys->resources);
+#else /* CONFIG_SYNO_LSP_MONACO */
 				sys->bus = pci_scan_root_bus(NULL, sys->busnr,
 						hw->ops, sys, &sys->resources);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 			if (!sys->bus)
 				panic("PCI: unable to scan bus!");
@@ -497,7 +533,11 @@ static void pcibios_init_hw(struct hw_pci *hw, struct list_head *head)
 	}
 }
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+void pci_common_init_dev(struct device *parent, struct hw_pci *hw)
+#else /* CONFIG_SYNO_LSP_MONACO */
 void pci_common_init(struct hw_pci *hw)
+#endif /* CONFIG_SYNO_LSP_MONACO */
 {
 	struct pci_sys_data *sys;
 	LIST_HEAD(head);
@@ -505,7 +545,11 @@ void pci_common_init(struct hw_pci *hw)
 	pci_add_flags(PCI_REASSIGN_ALL_RSRC);
 	if (hw->preinit)
 		hw->preinit();
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	pcibios_init_hw(parent, hw, &head);
+#else /* CONFIG_SYNO_LSP_MONACO */
 	pcibios_init_hw(hw, &head);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	if (hw->postinit)
 		hw->postinit();
 

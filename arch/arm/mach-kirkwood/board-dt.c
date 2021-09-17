@@ -93,6 +93,9 @@ static void __init kirkwood_dt_init(void)
 	 */
 	writel(readl(CPU_CONFIG) & ~CPU_CONFIG_ERROR_PROP, CPU_CONFIG);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	BUG_ON(mvebu_mbus_dt_init(false));
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	kirkwood_setup_wins();
 
 	kirkwood_l2_init();

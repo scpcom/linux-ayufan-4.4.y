@@ -29,7 +29,11 @@
 #include "inode-map.h"
 #include "volumes.h"
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#define BITS_PER_BITMAP		(PAGE_CACHE_SIZE * 8LLU)
+#else /* CONFIG_SYNO_LSP_ALPINE */
 #define BITS_PER_BITMAP		(PAGE_CACHE_SIZE * 8)
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 #define MAX_CACHE_BYTES_PER_GIG	(32 * 1024)
 
 struct btrfs_trim_range {

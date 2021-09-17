@@ -173,6 +173,18 @@ config CRYPTO_DEV_MV_CESA
 
 	  Currently the driver supports AES in ECB and CBC mode without DMA.
 
+config MV_INCLUDE_CESA
+	bool "CESA Support"
+	depends on SYNO_LSP_ARMADA && ARCH_MVEBU
+	default n
+        help
+	  This enables the driver for the CESA - Cryptographic Engines and
+	  Security Accelerators found in the Marvell Armada SoC devices.
+
+if MV_INCLUDE_CESA = "y"
+	source "drivers/crypto/mvebu_cesa/Kconfig"
+endif
+
 config CRYPTO_DEV_NIAGARA2
        tristate "Niagara2 Stream Processing Unit driver"
        select CRYPTO_DES
@@ -385,5 +397,7 @@ config CRYPTO_DEV_ATMEL_SHA
 
 	  To compile this driver as a module, choose M here: the module
 	  will be called atmel-sha.
+
+source drivers/crypto/al/Kconfig
 
 endif # CRYPTO_HW

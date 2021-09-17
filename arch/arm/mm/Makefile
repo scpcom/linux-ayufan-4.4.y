@@ -16,6 +16,9 @@ obj-$(CONFIG_MODULES)		+= proc-syms.o
 
 obj-$(CONFIG_ALIGNMENT_TRAP)	+= alignment.o
 obj-$(CONFIG_HIGHMEM)		+= highmem.o
+ifeq ($(CONFIG_ARCH_ALPINE),y)
+obj-$(CONFIG_HUGETLB_PAGE)	+= hugetlbpage.o
+endif
 
 obj-$(CONFIG_CPU_ABRT_NOMMU)	+= abort-nommu.o
 obj-$(CONFIG_CPU_ABRT_EV4)	+= abort-ev4.o

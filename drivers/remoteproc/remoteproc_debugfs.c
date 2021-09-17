@@ -88,8 +88,35 @@ static ssize_t rproc_state_read(struct file *filp, char __user *userbuf,
 	return simple_read_from_buffer(userbuf, count, ppos, buf, i);
 }
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+static ssize_t rproc_state_write(struct file *filp, const char __user *userbuf,
+				 size_t count, loff_t *ppos)
+{
+	struct rproc *rproc = filp->private_data;
+	char buf[2];
+	int ret;
+
+	ret = copy_from_user(buf, userbuf, 1);
+	if (ret)
+		return -EFAULT;
+
+	switch (buf[0]) {
+	case '1':
+		ret = rproc_boot(rproc);
+		if (ret)
+			dev_err(&rproc->dev, "boot failed with %d\n", ret);
+		break;
+	default:
+		rproc_shutdown(rproc);
+	};
+	return count;
+}
+#endif /* CONFIG_SYNO_LSP_MONACO */
 static const struct file_operations rproc_state_ops = {
 	.read = rproc_state_read,
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	.write = rproc_state_write,
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	.open = simple_open,
 	.llseek	= generic_file_llseek,
 };

@@ -65,6 +65,9 @@ int tick_switch_to_oneshot(void (*handler)(struct clock_event_device *))
 	if (!dev || !(dev->features & CLOCK_EVT_FEAT_ONESHOT) ||
 		    !tick_device_is_functional(dev)) {
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+		// do nothing
+#else /* CONFIG_SYNO_LSP_ALPINE */
 		printk(KERN_INFO "Clockevents: "
 		       "could not switch to one-shot mode:");
 		if (!dev) {
@@ -76,6 +79,7 @@ int tick_switch_to_oneshot(void (*handler)(struct clock_event_device *))
 				printk(" %s does not support one-shot mode.\n",
 				       dev->name);
 		}
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 		return -EINVAL;
 	}
 

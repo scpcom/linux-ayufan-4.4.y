@@ -14,12 +14,19 @@
 ifneq ($(MACHINE),)
 include $(srctree)/$(MACHINE)/Makefile.boot
 endif
+ifeq ($(CONFIG_SYNO_ARMADA),y)
+include $(srctree)/arch/arm/mach-mvebu/Makefile.boot
+endif
 
 # Note: the following conditions must always be true:
 #   ZRELADDR == virt_to_phys(PAGE_OFFSET + TEXT_OFFSET)
 #   PARAMS_PHYS must be within 4MB of ZRELADDR
 #   INITRD_PHYS must be in RAM
+ifeq ($(CONFIG_SYNO_LSP_MONACO),y)
+ZRELADDR    := 0x43008000
+else
 ZRELADDR    := $(zreladdr-y)
+endif
 PARAMS_PHYS := $(params_phys-y)
 INITRD_PHYS := $(initrd_phys-y)
 

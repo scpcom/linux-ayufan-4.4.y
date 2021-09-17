@@ -50,7 +50,11 @@ snd-soc-alc5632-objs := alc5632.o
 snd-soc-sigmadsp-objs := sigmadsp.o
 snd-soc-si476x-objs := si476x.o
 snd-soc-sn95031-objs := sn95031.o
+ifeq ($(CONFIG_SYNO_LSP_ARMADA),y)
+snd-soc-spdif-tx-objs := spdif_transmitter.o
+else
 snd-soc-spdif-tx-objs := spdif_transciever.o
+endif
 snd-soc-spdif-rx-objs := spdif_receiver.o
 snd-soc-ssm2602-objs := ssm2602.o
 snd-soc-sta32x-objs := sta32x.o

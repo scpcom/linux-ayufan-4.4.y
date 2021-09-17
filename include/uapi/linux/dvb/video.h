@@ -114,6 +114,13 @@ struct video_command {
 		struct {
 			__u32 data[16];
 		} raw;
+#if defined (CONFIG_SYNO_LSP_MONACO)
+
+		struct {
+			__u32 option;
+			__u32 value;
+		} option;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	};
 };
 

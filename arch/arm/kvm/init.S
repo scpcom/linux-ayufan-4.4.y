@@ -142,7 +142,11 @@ target:	@ We're now in the trampoline code, switch page tables
 
 	@ Invalidate the old TLBs
 	mcr	p15, 4, r0, c8, c7, 0	@ TLBIALLH
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	dsb	ish
+#else /* CONFIG_SYNO_LSP_MONACO */
 	dsb
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 	eret
 

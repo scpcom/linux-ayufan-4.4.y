@@ -106,7 +106,11 @@ static int txsrc_get(struct snd_kcontrol *kcontrol,
 	struct snd_soc_codec *codec;
 	unsigned int src;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	codec = snd_soc_kcontrol_codec(kcontrol);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	codec = snd_kcontrol_chip(kcontrol);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	src = snd_soc_read(codec, WM8804_SPDTX4);
 	if (src & 0x40)
 		ucontrol->value.integer.value[0] = 1;
@@ -122,7 +126,11 @@ static int txsrc_put(struct snd_kcontrol *kcontrol,
 	struct snd_soc_codec *codec;
 	unsigned int src, txpwr;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	codec = snd_soc_kcontrol_codec(kcontrol);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	codec = snd_kcontrol_chip(kcontrol);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 	if (ucontrol->value.integer.value[0] != 0
 			&& ucontrol->value.integer.value[0] != 1)

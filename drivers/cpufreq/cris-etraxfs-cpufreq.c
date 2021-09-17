@@ -108,7 +108,11 @@ static struct cpufreq_driver cris_freq_driver = {
 	.init = cris_freq_cpu_init,
 	.exit = cris_freq_cpu_exit,
 	.name = "cris_freq",
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	.owner = THIS_MODULE,
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	.attr = cris_freq_attr,
 };
 

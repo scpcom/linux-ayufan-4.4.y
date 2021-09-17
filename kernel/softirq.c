@@ -253,12 +253,16 @@ restart:
 			h->action(h);
 			trace_softirq_exit(vec_nr);
 			if (unlikely(prev_count != preempt_count())) {
+#if defined (CONFIG_SYNO_LSP_MONACO)
+				/* Nested kprobes might appear to cause an
+				 * inconsistent preemption count */
 				printk(KERN_ERR "huh, entered softirq %u %s %p"
 				       "with preempt_count %08x,"
 				       " exited with %08x?\n", vec_nr,
 				       softirq_to_name[vec_nr], h->action,
 				       prev_count, preempt_count());
 				preempt_count() = prev_count;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 			}
 
 			rcu_bh_qs(cpu);

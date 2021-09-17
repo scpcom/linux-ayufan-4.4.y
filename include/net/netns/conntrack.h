@@ -32,6 +32,9 @@ struct nf_tcp_net {
 	unsigned int tcp_loose;
 	unsigned int tcp_be_liberal;
 	unsigned int tcp_max_retrans;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	unsigned int tcp_window_tracking;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 };
 
 enum udp_conntrack {

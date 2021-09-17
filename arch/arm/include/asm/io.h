@@ -35,6 +35,14 @@
 #define isa_page_to_bus page_to_phys
 #define isa_bus_to_virt phys_to_virt
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+/*
+ * Atomic MMIO-wide IO modify
+ */
+extern void atomic_io_modify(void __iomem *reg, u32 mask, u32 set);
+extern void atomic_io_modify_relaxed(void __iomem *reg, u32 mask, u32 set);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
 /*
  * Generic IO read/write.  These perform native-endian accesses.  Note
  * that some architectures will want to re-define __raw_{read,write}w.
@@ -171,6 +179,14 @@ static inline void __iomem *__typesafe_io(unsigned long addr)
 /* PCI fixed i/o mapping */
 #define PCI_IO_VIRT_BASE	0xfee00000
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(CONFIG_PCI)
+void pci_ioremap_set_mem_type(int mem_type);
+#else
+static inline void pci_ioremap_set_mem_type(int mem_type) {}
+#endif
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
 extern int pci_ioremap_io(unsigned int offset, phys_addr_t phys_addr);
 
 /*
@@ -286,15 +302,32 @@ extern void _memset_io(volatile void __iomem *, int, size_t);
  * IO port primitives for more information.
  */
 #ifndef readl
+#ifdef AL_PCIE_RMN_1010
+uint32_t al_dma_read_reg32(const volatile void __iomem *address);
+uint16_t al_dma_read_reg16(const volatile void __iomem *address);
+uint8_t al_dma_read_reg8(const volatile void __iomem *address);
+
+#define readb_relaxed(c)	(al_dma_read_reg8(c))
+#define readw_relaxed(c)	(al_dma_read_reg16(c))
+#define readl_relaxed(c)	(al_dma_read_reg32(c))
+
+#else
 #define readb_relaxed(c) ({ u8  __r = __raw_readb(c); __r; })
 #define readw_relaxed(c) ({ u16 __r = le16_to_cpu((__force __le16) \
 					__raw_readw(c)); __r; })
 #define readl_relaxed(c) ({ u32 __r = le32_to_cpu((__force __le32) \
 					__raw_readl(c)); __r; })
+#endif
 
 #define writeb_relaxed(v,c)	__raw_writeb(v,c)
 #define writew_relaxed(v,c)	__raw_writew((__force u16) cpu_to_le16(v),c)
+
+#ifdef AL_PCIE_RMN_1010
+void al_dma_write_reg32(volatile void __iomem *address, u32 val);
+#define writel_relaxed(v,c)	(al_dma_write_reg32(c,v))
+#else
 #define writel_relaxed(v,c)	__raw_writel((__force u32) cpu_to_le32(v),c)
+#endif
 
 #define readb(c)		({ u8  __v = readb_relaxed(c); __iormb(); __v; })
 #define readw(c)		({ u16 __v = readw_relaxed(c); __iormb(); __v; })

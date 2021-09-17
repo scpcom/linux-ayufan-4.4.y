@@ -369,7 +369,11 @@ static struct cpufreq_driver speedstep_driver = {
 	.exit		= speedstep_cpu_exit,
 	.get		= speedstep_get,
 	.resume		= speedstep_resume,
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	.owner		= THIS_MODULE,
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	.attr		= speedstep_attr,
 };
 

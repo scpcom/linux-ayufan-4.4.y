@@ -1484,6 +1484,21 @@ config SERIAL_RP2_NR_UARTS
 	  If multiple cards are present, the default limit of 32 ports may
 	  need to be increased.
 
-endmenu
+config SERIAL_ST_ASC
+	tristate "ST ASC serial port support"
+	select SERIAL_CORE
+	help
+	  This driver is for the on-chip Asychronous Serial Controller on
+	  STMicroelectronics STi SoCs.
+	  ASC is embedded in ST COMMS IP block. It supports Rx & Tx functionality.
+	  It support all industry standard baud rates.
 
+	  If unsure, say N.
+
+config SERIAL_ST_ASC_CONSOLE
+	bool "Support for console on ST ASC"
+	depends on SERIAL_ST_ASC=y
+	select SERIAL_CORE_CONSOLE
+
+endmenu
 endif # TTY

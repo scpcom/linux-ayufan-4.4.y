@@ -486,7 +486,11 @@ static __init int celleb_setup_pciex(struct device_node *node,
 				     struct pci_controller *phb)
 {
 	struct resource	r;
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	struct of_phandle_args oirq;
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	struct of_irq oirq;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	int virq;
 
 	/* SMMIO registers; used inside this file */
@@ -507,12 +511,20 @@ static __init int celleb_setup_pciex(struct device_node *node,
 	phb->ops = &scc_pciex_pci_ops;
 
 	/* internal interrupt handler */
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	if (of_irq_parse_one(node, 1, &oirq)) {
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	if (of_irq_map_one(node, 1, &oirq)) {
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 		pr_err("PCIEXC:Failed to map irq\n");
 		goto error;
 	}
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	virq = irq_create_of_mapping(&oirq);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	virq = irq_create_of_mapping(oirq.controller, oirq.specifier,
 				     oirq.size);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	if (request_irq(virq, pciex_handle_internal_irq,
 			0, "pciex", (void *)phb)) {
 		pr_err("PCIEXC:Failed to request irq\n");

@@ -97,6 +97,7 @@ static int syno_hddmon_unplug_monitor(void *args)
 				continue;
 			}
 
+			mdelay(200);
 			SYNO_CTRL_HDD_POWERON(iIdx, iPrzPinVal);
 			pData->blHddEnStat[iIdx-1] = iPrzPinVal;
 		}
@@ -137,6 +138,7 @@ static void syno_hddmon_task(SynoHddMonData_t *pData)
 				pUnplugMonitor = kthread_run(syno_hddmon_unplug_monitor, pData, SYNO_HDDMON_UPLG_STR);
 			}
 
+			mdelay(200);
 			SYNO_CTRL_HDD_POWERON(iIdx, iPrzPinVal);
 			pData->blHddEnStat[iIdx-1] = iPrzPinVal;
 
@@ -176,6 +178,7 @@ static void syno_hddmon_sync(SynoHddMonData_t *pData)
 		 * so turns the pins to low if the hdds do not present.
 		 */
 		if(!iPrzPinVal) {
+			mdelay(200);
 			SYNO_CTRL_HDD_POWERON(iIdx, iPrzPinVal);
 			pData->blHddEnStat[iIdx-1] = iPrzPinVal;
 		}

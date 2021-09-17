@@ -462,6 +462,9 @@ EXPORT_SYMBOL(getnstime_raw_and_real);
 
 #endif /* CONFIG_NTP_PPS */
 
+#ifdef CONFIG_ARCH_ALPINE
+extern unsigned int al_gettimeofday_use_jiffies;
+#endif
 /**
  * do_gettimeofday - Returns the time of day in a timeval
  * @tv:		pointer to the timeval to be set
@@ -472,9 +475,24 @@ void do_gettimeofday(struct timeval *tv)
 {
 	struct timespec now;
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#ifdef CONFIG_ARCH_ALPINE
+	if (!al_gettimeofday_use_jiffies) {
+#endif /* CONFIG_ARCH_ALPINE */
+		getnstimeofday(&now);
+		tv->tv_sec = now.tv_sec;
+		tv->tv_usec = now.tv_nsec/1000;
+#ifdef CONFIG_ARCH_ALPINE
+	} else {
+		tv->tv_sec = timekeeper.xtime_sec;
+		tv->tv_usec = 0;
+	}
+#endif /* CONFIG_ARCH_ALPINE */
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	getnstimeofday(&now);
 	tv->tv_sec = now.tv_sec;
 	tv->tv_usec = now.tv_nsec/1000;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 }
 EXPORT_SYMBOL(do_gettimeofday);
 

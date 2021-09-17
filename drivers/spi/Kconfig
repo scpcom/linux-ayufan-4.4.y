@@ -416,6 +416,15 @@ config SPI_MXS
 	help
 	  SPI driver for Freescale MXS devices.
 
+config SPI_ST
+	tristate "STMicroelectronics SPI SSC-based driver"
+	depends on ARCH_STI
+	select SPI_BITBANG
+	help
+	  STMicroelectronics SoCs support for SPI.
+	  If you say yes to this option, support will be included for the
+	  SSC driven SPI.
+
 config SPI_TEGRA114
 	tristate "NVIDIA Tegra114 SPI Controller"
 	depends on ARCH_TEGRA && TEGRA20_APB_DMA

@@ -20,7 +20,11 @@
 #include <linux/module.h>
 #include <linux/of_address.h>
 #include <linux/of_irq.h>
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#include <linux/pm_opp.h>
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 #include <linux/opp.h>
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 #include <linux/platform_device.h>
 #include <linux/slab.h>
 
@@ -118,12 +122,20 @@ static int init_div_table(void)
 	struct cpufreq_frequency_table *freq_tbl = dvfs_info->freq_table;
 	unsigned int tmp, clk_div, ema_div, freq, volt_id;
 	int i = 0;
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	struct dev_pm_opp *opp;
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	struct opp *opp;
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
 	rcu_read_lock();
 	for (i = 0; freq_tbl[i].frequency != CPUFREQ_TABLE_END; i++) {
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+		opp = dev_pm_opp_find_freq_exact(dvfs_info->dev,
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 		opp = opp_find_freq_exact(dvfs_info->dev,
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 					freq_tbl[i].frequency * 1000, true);
 		if (IS_ERR(opp)) {
 			rcu_read_unlock();
@@ -142,7 +154,11 @@ static int init_div_table(void)
 					<< P0_7_CSCLKDEV_SHIFT;
 
 		/* Calculate EMA */
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+		volt_id = dev_pm_opp_get_voltage(opp);
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 		volt_id = opp_get_voltage(opp);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 		volt_id = (MAX_VOLTAGE - volt_id) / VOLTAGE_STEP;
 		if (volt_id < PMIC_HIGH_VOLT) {
 			ema_div = (CPUEMA_HIGH << P0_7_CPUEMA_SHIFT) |
@@ -396,13 +412,22 @@ static int exynos_cpufreq_probe(struct platform_device *pdev)
 		goto err_put_node;
 	}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	ret = dev_pm_opp_init_cpufreq_table(dvfs_info->dev,
+					    &dvfs_info->freq_table);
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	ret = opp_init_cpufreq_table(dvfs_info->dev, &dvfs_info->freq_table);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	if (ret) {
 		dev_err(dvfs_info->dev,
 			"failed to init cpufreq table: %d\n", ret);
 		goto err_put_node;
 	}
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	dvfs_info->freq_count = dev_pm_opp_get_opp_count(dvfs_info->dev);
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	dvfs_info->freq_count = opp_get_opp_count(dvfs_info->dev);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	exynos_sort_descend_freq_table();
 
 	if (of_property_read_u32(np, "clock-latency", &dvfs_info->latency))
@@ -451,7 +476,11 @@ static int exynos_cpufreq_probe(struct platform_device *pdev)
 	return 0;
 
 err_free_table:
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	dev_pm_opp_free_cpufreq_table(dvfs_info->dev, &dvfs_info->freq_table);
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	opp_free_cpufreq_table(dvfs_info->dev, &dvfs_info->freq_table);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 err_put_node:
 	of_node_put(np);
 	dev_err(dvfs_info->dev, "%s: failed initialization\n", __func__);
@@ -461,7 +490,11 @@ err_put_node:
 static int exynos_cpufreq_remove(struct platform_device *pdev)
 {
 	cpufreq_unregister_driver(&exynos_driver);
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	dev_pm_opp_free_cpufreq_table(dvfs_info->dev, &dvfs_info->freq_table);
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	opp_free_cpufreq_table(dvfs_info->dev, &dvfs_info->freq_table);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	return 0;
 }
 

@@ -910,6 +910,9 @@ SYSCALL_DEFINE1(dup, unsigned int, fildes)
 	}
 	return ret;
 }
+#if defined(CONFIG_SYNO_ARMADA) && defined(CONFIG_SYNO_USE_OCF_LINUX)
+EXPORT_SYMBOL(sys_dup);
+#endif /* CONFIG_SYNO_ARMADA && CONFIG_SYNO_USE_OCF_LINUX */
 
 int f_dupfd(unsigned int from, struct file *file, unsigned flags)
 {

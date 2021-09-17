@@ -74,6 +74,9 @@ enum dma_transaction_type {
 	DMA_SLAVE,
 	DMA_CYCLIC,
 	DMA_INTERLEAVE,
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	DMA_CRC32C,
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 /* last transaction type for creation of the capabilities mask */
 	DMA_TX_TYPE_END,
 };
@@ -183,6 +186,12 @@ struct dma_interleaved_template {
  * @DMA_PREP_FENCE - tell the driver that subsequent operations depend
  *  on the result of this operation
  */
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+/*
+ * @DMA_PREP_PQ_MULT - tell the driver that this is a mult request
+ * @DMA_PREP_PQ_SUM_PRODUCT - tell the driver that this is a sum product request
+ */
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 enum dma_ctrl_flags {
 	DMA_PREP_INTERRUPT = (1 << 0),
 	DMA_CTRL_ACK = (1 << 1),
@@ -194,6 +203,10 @@ enum dma_ctrl_flags {
 	DMA_PREP_PQ_DISABLE_Q = (1 << 7),
 	DMA_PREP_CONTINUE = (1 << 8),
 	DMA_PREP_FENCE = (1 << 9),
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	DMA_PREP_PQ_MULT = (1 << 10),
+	DMA_PREP_PQ_SUM_PRODUCT = (1 << 11),
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 };
 
 /**
@@ -582,6 +595,11 @@ struct dma_device {
 		struct scatterlist *dst_sg, unsigned int dst_nents,
 		struct scatterlist *src_sg, unsigned int src_nents,
 		unsigned long flags);
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	struct dma_async_tx_descriptor *(*device_prep_dma_crc32c)(
+		struct dma_chan *chan, dma_addr_t src,
+		size_t len, u32 *seed, unsigned long flags);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 	struct dma_async_tx_descriptor *(*device_prep_slave_sg)(
 		struct dma_chan *chan, struct scatterlist *sgl,
@@ -845,6 +863,12 @@ dma_cookie_t dma_async_memcpy_buf_to_pg(struct dma_chan *chan,
 dma_cookie_t dma_async_memcpy_pg_to_pg(struct dma_chan *chan,
 	struct page *dest_pg, unsigned int dest_off, struct page *src_pg,
 	unsigned int src_off, size_t len);
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+dma_cookie_t dma_async_memcpy_sg_to_sg(struct dma_chan *chan,
+	struct scatterlist *dst_sg, unsigned int dst_nents,
+	struct scatterlist *src_sg, unsigned int src_nents);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
 void dma_async_tx_descriptor_init(struct dma_async_tx_descriptor *tx,
 	struct dma_chan *chan);
 
@@ -1027,12 +1051,35 @@ struct dma_page_list {
 };
 
 struct dma_pinned_list {
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	int kernel;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	int nr_iovecs;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	int nr_pages;
+	struct sg_table	*sgts;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	struct dma_page_list page_list[0];
 };
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+struct tcp_sock;
+int dma_pin_iovec_pages(struct tcp_sock *tp, struct iovec *iov, size_t len);
+#else /* CONFIG_SYNO_LSP_ALPINE */
 struct dma_pinned_list *dma_pin_iovec_pages(struct iovec *iov, size_t len);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 void dma_unpin_iovec_pages(struct dma_pinned_list* pinned_list);
+#if defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_SPLICE_NET_DMA_SUPPORT)
+struct dma_pinned_list *dma_pin_kernel_iovec_pages(struct iovec *iov, size_t len);
+void dma_unpin_kernel_iovec_pages(struct dma_pinned_list* pinned_list);
+#endif /* CONFIG_SYNO_LSP_ARMADA && CONFIG_SPLICE_NET_DMA_SUPPORT */
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+void dma_free_iovec_data(struct tcp_sock *tp);
+
+int dma_memcpy_fill_sg_from_iovec(struct dma_chan *chan, struct iovec *iov,
+	struct dma_pinned_list *pinned_list, struct scatterlist *dst_sg,
+	unsigned int offset,size_t len);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 dma_cookie_t dma_memcpy_to_iovec(struct dma_chan *chan, struct iovec *iov,
 	struct dma_pinned_list *pinned_list, unsigned char *kdata, size_t len);

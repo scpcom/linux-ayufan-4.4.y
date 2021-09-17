@@ -54,6 +54,10 @@ static DEFINE_SPINLOCK(device_state_lock);
 static DEFINE_SPINLOCK(hub_event_lock);
 static LIST_HEAD(hub_event_list);	/* List of hubs needing servicing */
 
+#ifdef CONFIG_SYNO_USB_SERIAL_FIX
+extern struct mutex hub_init_mutex;
+#endif /* CONFIG_SYNO_USB_SERIAL_FIX */
+
 /* Wakes up khubd */
 static DECLARE_WAIT_QUEUE_HEAD(kethubd_wait);
 
@@ -891,6 +895,10 @@ static int hub_configure(struct usb_hub *hub,
 	unsigned unit_load;
 	unsigned full_load;
 
+#ifdef CONFIG_SYNO_USB_SERIAL_FIX
+	mutex_lock(&hub_init_mutex);
+#endif /* CONFIG_SYNO_USB_SERIAL_FIX */
+
 	hub->buffer = kmalloc(sizeof(*hub->buffer), GFP_KERNEL);
 	if (!hub->buffer) {
 		ret = -ENOMEM;
@@ -1158,7 +1166,9 @@ static int hub_configure(struct usb_hub *hub,
 			goto fail_keep_maxchild;
 		}
 	}
-
+#ifdef CONFIG_SYNO_USB_SERIAL_FIX
+	mutex_unlock(&hub_init_mutex);
+#endif /* CONFIG_SYNO_USB_SERIAL_FIX */
 	usb_hub_adjust_deviceremovable(hdev, hub->descriptor);
 
 	hub_activate(hub, HUB_INIT);
@@ -1170,6 +1180,9 @@ fail_keep_maxchild:
 	dev_err (hub_dev, "config failed, %s (err %d)\n",
 			message, ret);
 	/* hub_disconnect() frees urb and descriptor */
+#ifdef CONFIG_SYNO_USB_SERIAL_FIX
+	mutex_unlock(&hub_init_mutex);
+#endif /* CONFIG_SYNO_USB_SERIAL_FIX */
 	return ret;
 }
 
@@ -1196,6 +1209,9 @@ static void hub_disconnect(struct usb_interface *intf)
 		usb_autopm_put_interface_no_suspend(intf);
 	}
 	hub->disconnected = 1;
+#ifdef CONFIG_SYNO_USB_UPS_DISCONNECT_FILTER
+	del_timer_sync(&hub->ups_discon_flt_timer);
+#endif /* CONFIG_SYNO_USB_UPS_DISCONNECT_FILTER */
 	spin_unlock_irq(&hub_event_lock);
 
 	/* Disconnect all children and quiesce the hub */
@@ -1224,6 +1240,27 @@ static void hub_disconnect(struct usb_interface *intf)
 	pm_suspend_ignore_children(&intf->dev, false);
 	kref_put(&hub->kref, hub_release);
 }
+
+#ifdef CONFIG_SYNO_USB_UPS_DISCONNECT_FILTER
+static bool is_quirk_ups(struct usb_device *udev)
+{
+	return 0x0764 == le16_to_cpu(udev->descriptor.idVendor) ||
+		(0x0463 == le16_to_cpu(udev->descriptor.idVendor) &&
+		0xffff == le16_to_cpu(udev->descriptor.idProduct)) ||
+		(0x0665 == le16_to_cpu(udev->descriptor.idVendor) &&
+		0x5161 == le16_to_cpu(udev->descriptor.idProduct)) ||
+		(0x051d == le16_to_cpu(udev->descriptor.idVendor) &&
+		0x0002 == le16_to_cpu(udev->descriptor.idProduct));
+}
+
+static void ups_discon_flt_work(unsigned long arg)
+{
+	struct usb_hub *hub = (struct usb_hub *) arg;
+
+	set_bit(hub->ups_discon_flt_port, hub->change_bits);
+	kick_kethubd(hub);
+}
+#endif /* CONFIG_SYNO_USB_UPS_DISCONNECT_FILTER */
 
 static int hub_probe(struct usb_interface *intf, const struct usb_device_id *id)
 {
@@ -1330,6 +1367,13 @@ descriptor_error:
 
 	if (hdev->speed == USB_SPEED_HIGH)
 		highspeed_hubs++;
+
+#ifdef CONFIG_SYNO_USB_UPS_DISCONNECT_FILTER
+	init_timer(&hub->ups_discon_flt_timer);
+	hub->ups_discon_flt_timer.data = (unsigned long) hub;
+	hub->ups_discon_flt_timer.function = ups_discon_flt_work;
+	hub->ups_discon_flt_last = jiffies - 16 * HZ;
+#endif /* CONFIG_SYNO_USB_UPS_DISCONNECT_FILTER */
 
 	if (hub_configure(hub, endpoint) >= 0)
 		return 0;
@@ -1721,7 +1765,9 @@ static inline void announce_device(struct usb_device *udev) { }
 static int usb_enumerate_device(struct usb_device *udev)
 {
 	int err = 0;
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(3,10,35))
 	int retry = 2;
+#endif
 
 	if (udev->config == NULL) {
 		err = usb_get_configuration(udev);
@@ -1754,6 +1800,20 @@ static int usb_enumerate_device(struct usb_device *udev)
 	udev->manufacturer = usb_cache_string(udev,
 					      udev->descriptor.iManufacturer);
 	udev->serial = usb_cache_string(udev, udev->descriptor.iSerialNumber);
+
+#ifdef CONFIG_SYNO_GET_SN_WORKAROUNDS
+	if (0x054c == le16_to_cpu(udev->descriptor.idVendor) &&
+		0x05bf == le16_to_cpu(udev->descriptor.idProduct) &&
+		NULL == udev->serial) {
+		int i;
+		for (i = 0; i < 3; i++) {
+			udev->serial = usb_cache_string(udev,
+					udev->descriptor.iSerialNumber);
+			if (NULL != udev->serial)
+				break;
+		}
+	}
+#endif /* CONFIG_SYNO_GET_SN_WORKAROUNDS */
 #endif
 
 	usb_detect_interface_quirks(udev);
@@ -1956,7 +2016,10 @@ RETRY:
 			bus = container_of(buslist, struct usb_bus, bus_list);
 			if (!bus->root_hub)
 				continue;
+
+			mutex_lock(&hub_init_mutex);
 			match = device_serial_match(bus->root_hub, udev);
+			mutex_unlock(&hub_init_mutex);
 
 			if (match) {
 				break;
@@ -2144,7 +2207,7 @@ out_authorized:
 #define HUB_LONG_RESET_TIME	200
 #define HUB_RESET_TIMEOUT	800
 
-#define HUB_SPEED_MORPH_TRIES	3
+#define HUB_SPEED_MORPH_TRIES	5
 #define HUB_SPEED_MORPH_RESET_TRIES	3
 
 static int hub_port_reset(struct usb_hub *hub, int port1,
@@ -2215,7 +2278,17 @@ static int hub_port_wait_reset(struct usb_hub *hub, int port1,
 	 */
 	if (!hub_is_superspeed(hub->hdev) &&
 			(portchange & USB_PORT_STAT_C_CONNECTION))
+	{
+#ifdef CONFIG_SYNO_USB_CONNECT_DEBOUNCER
+		usb_clear_port_feature(hub->hdev, port1,
+				USB_PORT_FEAT_C_CONNECTION);
+		if (portchange & USB_PORT_STAT_C_ENABLE)
+			usb_clear_port_feature(hub->hdev, port1,
+					USB_PORT_FEAT_C_ENABLE);
+		return -SYNO_CONNECT_BOUNCE;
+#endif /* CONFIG_SYNO_USB_CONNECT_DEBOUNCER */
 		return -ENOTCONN;
+	}
 
 	if (!(portstatus & USB_PORT_STAT_ENABLE))
 		return -EBUSY;
@@ -2320,7 +2393,11 @@ static int hub_port_reset(struct usb_hub *hub, int port1,
 		}
 
 		/* Check for disconnect or reset */
-		if (status == 0 || status == -ENOTCONN || status == -ENODEV) {
+		if ((status == 0 || status == -ENOTCONN || status == -ENODEV)
+#ifdef CONFIG_SYNO_USB_CONNECT_DEBOUNCER
+				&& -SYNO_CONNECT_BOUNCE != status
+#endif /* CONFIG_SYNO_USB_CONNECT_DEBOUNCER */
+			) {
 			hub_port_finish_reset(hub, port1, udev, &status);
 
 			if (!hub_is_superspeed(hub->hdev))
@@ -3357,8 +3434,58 @@ static void hub_port_connect_change(struct usb_hub *hub, int port1,
 	}
 
 	/* Disconnect any existing devices under this port */
-	if (udev)
+	if (udev) {
+#ifdef CONFIG_SYNO_USB_UPS_DISCONNECT_FILTER
+		/* Defer disconnect for UPS devices */
+		if (is_quirk_ups(udev)) {
+			if (portstatus & USB_PORT_STAT_CONNECTION) {
+				/* for the case that the device is connected again after
+				 * disconnected, cancel the disconnection and reset it.
+				 */
+				int ret;
+
+				del_timer_sync(&hub->ups_discon_flt_timer);
+				hub->ups_discon_flt_last = jiffies;
+				hub_port_debounce_be_stable(hub, port1);
+				ret = usb_reset_and_verify_device(udev);
+				if (0 > ret) {
+					hub_port_status(hub, port1, &portstatus, &portchange);
+					dev_err(hub_dev, "deferred disconnect failed, "
+							"on port %d reset (ret: %d), status: %04x, "
+							"change: %04x\n", port1, ret, portstatus,
+							portchange);
+				} else
+					return;
+			} else if (portchange & USB_PORT_STAT_C_CONNECTION) {
+				/* for the case that the device is disconnected, defer it. */
+				if (0x0665 == le16_to_cpu(udev->descriptor.idVendor) &&
+					0x5161 == le16_to_cpu(udev->descriptor.idProduct) &&
+					time_after(hub->ups_discon_flt_last + 15 * HZ, jiffies))
+					/* For the buggy UPS which disconnects very frequently
+					 * before a UPS driver (usually in userspace) links the UPS.
+					 * Because the condition that the buggy UPS isn't stable
+					 * initally and UPS driver can't also link it before the
+					 * driver stops trying, so we should actually disconnect and
+					 * re-connect to notify and restart the UPS driver.
+					 */
+					;
+				else {
+					if (!timer_pending(&hub->ups_discon_flt_timer)) {
+						hub->ups_discon_flt_port = port1;
+						hub->ups_discon_flt_timer.expires = jiffies + 3 * HZ;
+						add_timer(&hub->ups_discon_flt_timer);
+					}
+					return;
+				}
+			} else
+				/* for the case that defer disconnection timeout, disconnect it
+				 * actually.
+				 */
+				del_timer(&hub->ups_discon_flt_timer);
+		}
+#endif /* CONFIG_SYNO_USB_UPS_DISCONNECT_FILTER */
 		ethub_usb_disconnect(&hub->ports[port1 - 1]->child);
+	}
 	clear_bit(port1, hub->change_bits);
 
 	/* We can forget about a "removed" device when there's a physical
@@ -3710,6 +3837,17 @@ static void hub_events(void)
 					    "disabled by hub (EMI?), "
 					    "re-enabling...\n",
 						i);
+#ifdef CONFIG_SYNO_USB_UPS_DISCONNECT_FILTER
+					struct usb_device *udev;
+
+					ret = 1;
+					udev = hub->ports[i - 1]->child;
+					/* re-enable for UPS's EMI without disconnect */
+					if (is_quirk_ups(udev))
+						ret = usb_reset_and_verify_device(udev);
+
+					if (ret)
+#endif /* CONFIG_SYNO_USB_UPS_DISCONNECT_FILTER */
 					connect_change = 1;
 				}
 			}

@@ -1121,11 +1121,22 @@ xlog_iodone(xfs_buf_t *bp)
 	/* log I/O is always issued ASYNC */
 	ASSERT(XFS_BUF_ISASYNC(bp));
 	xlog_state_done_syncing(iclog, aborted);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+
+	/*
+	 * drop the buffer lock now that we are done. Nothing references
+	 * the buffer after this, so an unmount waiting on this lock can now
+	 * tear it down safely. As such, it is unsafe to reference the buffer
+	 * (bp) after the unlock as we could race with it being freed.
+	 */
+	xfs_buf_unlock(bp);
+#else /* CONFIG_SYNO_LSP_MONACO */
 	/*
 	 * do not reference the buffer (bp) here as we could race
 	 * with it being freed after writing the unmount record to the
 	 * log.
 	 */
+#endif /* CONFIG_SYNO_LSP_MONACO */
 }
 
 /*
@@ -1308,7 +1319,19 @@ xlog_alloc_log(
 	if (!bp)
 		goto out_free_log;
 	bp->b_iodone = xlog_iodone;
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	/*
+	 * The iclogbuf buffer locks are held over IO but we are not going to do
+	 * IO yet.  Hence unlock the buffer so that the log IO path can grab it
+	 * when appropriately.
+	 */
 	ASSERT(xfs_buf_islocked(bp));
+	xfs_buf_unlock(bp);
+
+	bp->b_iodone = xlog_iodone;
+#else /* CONFIG_SYNO_LSP_MONACO */
+	ASSERT(xfs_buf_islocked(bp));
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	log->l_xbuf = bp;
 
 	spin_lock_init(&log->l_icloglock);
@@ -1337,6 +1360,11 @@ xlog_alloc_log(
 		if (!bp)
 			goto out_free_iclog;
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+		ASSERT(xfs_buf_islocked(bp));
+		xfs_buf_unlock(bp);
+
+#endif /* CONFIG_SYNO_LSP_MONACO */
 		bp->b_iodone = xlog_iodone;
 		iclog->ic_bp = bp;
 		iclog->ic_data = bp->b_addr;
@@ -1361,7 +1389,10 @@ xlog_alloc_log(
 		iclog->ic_callback_tail = &(iclog->ic_callback);
 		iclog->ic_datap = (char *)iclog->ic_data + log->l_iclog_hsize;
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#else /* CONFIG_SYNO_LSP_MONACO */
 		ASSERT(xfs_buf_islocked(iclog->ic_bp));
+#endif /* CONFIG_SYNO_LSP_MONACO */
 		init_waitqueue_head(&iclog->ic_force_wait);
 		init_waitqueue_head(&iclog->ic_write_wait);
 
@@ -1569,6 +1600,14 @@ xlog_cksum(
  * we transition the iclogs to IOERROR state *after* flushing all existing
  * iclogs to disk. This is because we don't want anymore new transactions to be
  * started or completed afterwards.
+ * CONFIG_SYNO_LSP_MONACO -- START
+ *
+ * We lock the iclogbufs here so that we can serialise against IO completion
+ * during unmount. We might be processing a shutdown triggered during unmount,
+ * and that can occur asynchronously to the unmount thread, and hence we need to
+ * ensure that completes before tearing down the iclogbufs. Hence we need to
+ * hold the buffer lock across the log IO to acheive that.
+ * CONFIG_SYNO_LSP_MONACO -- END
  */
 STATIC int
 xlog_bdstrat(
@@ -1576,6 +1615,9 @@ xlog_bdstrat(
 {
 	struct xlog_in_core	*iclog = bp->b_fspriv;
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	xfs_buf_lock(bp);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	if (iclog->ic_state & XLOG_STATE_IOERROR) {
 		xfs_buf_ioerror(bp, EIO);
 		xfs_buf_stale(bp);
@@ -1583,6 +1625,8 @@ xlog_bdstrat(
 		/*
 		 * It would seem logical to return EIO here, but we rely on
 		 * the log state machine to propagate I/O errors instead of
+		 * doing it here. Similarly, IO completion will unlock the
+		 * buffer, so we don't do it here.
 		 * doing it here.
 		 */
 		return 0;
@@ -1784,10 +1828,31 @@ xlog_dealloc_log(
 
 	xlog_cil_destroy(log);
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	/*
+	 * Cycle all the iclogbuf locks to make sure all log IO completion
+	 * is done before we tear down these buffers.
+	 */
+	iclog = log->l_iclog;
+	for (i = 0; i < log->l_iclog_bufs; i++) {
+		xfs_buf_lock(iclog->ic_bp);
+		xfs_buf_unlock(iclog->ic_bp);
+		iclog = iclog->ic_next;
+	}
+
+	/*
+	 * Always need to ensure that the extra buffer does not point to memory
+	 * owned by another log buffer before we free it. Also, cycle the lock
+	 * first to ensure we've completed IO on it.
+	 */
+	xfs_buf_lock(log->l_xbuf);
+	xfs_buf_unlock(log->l_xbuf);
+#else /* CONFIG_SYNO_LSP_MONACO */
 	/*
 	 * always need to ensure that the extra buffer does not point to memory
 	 * owned by another log buffer before we free it.
 	 */
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	xfs_buf_set_empty(log->l_xbuf, BTOBB(log->l_iclog_size));
 	xfs_buf_free(log->l_xbuf);
 

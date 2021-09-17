@@ -22,17 +22,151 @@
 #include <sound/pcm_params.h>
 #include <sound/soc.h>
 #include <linux/platform_data/asoc-kirkwood.h>
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+#include <linux/of.h>
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
 #include "kirkwood.h"
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+#define DRV_NAME	"mvebu-audio"
+#else /* CONFIG_SYNO_LSP_ARMADA */
 #define DRV_NAME	"kirkwood-i2s"
 
 #define KIRKWOOD_I2S_RATES \
 	(SNDRV_PCM_RATE_44100 | \
 	 SNDRV_PCM_RATE_48000 | SNDRV_PCM_RATE_96000)
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
 #define KIRKWOOD_I2S_FORMATS \
 	(SNDRV_PCM_FMTBIT_S16_LE | \
 	 SNDRV_PCM_FMTBIT_S24_LE | \
 	 SNDRV_PCM_FMTBIT_S32_LE)
+
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+#define KIRKWOOD_SPDIF_FORMATS \
+	(SNDRV_PCM_FMTBIT_S16_LE | \
+	 SNDRV_PCM_FMTBIT_S24_LE)
+
+/* These registers are relative to the second register region -
+ * audio pll configuration.
+ */
+#define A38X_PLL_CONF_REG0			0x0
+#define     A38X_PLL_FB_CLK_DIV_OFFSET		10
+#define     A38X_PLL_FB_CLK_DIV_MASK		0x7fc00
+#define A38X_PLL_CONF_REG1			0x4
+#define     A38X_PLL_FREQ_OFFSET_MASK		0xffff
+#define     A38X_PLL_FREQ_OFFSET_VALID		BIT(16)
+#define     A38X_PLL_SW_RESET			BIT(31)
+#define A38X_PLL_CONF_REG2			0x8
+#define     A38X_PLL_AUDIO_POSTDIV_MASK		0x7f
+
+/* Bit below belongs to SoC control register corresponding to the third
+ * register region.
+ */
+#define A38X_SPDIF_MODE_ENABLE		BIT(27)
+
+static int armada_38x_i2s_init_quirk(struct platform_device *pdev,
+				     struct kirkwood_dma_data *priv,
+				     struct snd_soc_dai_driver *dai_drv)
+{
+	struct device_node *np = pdev->dev.of_node;
+	struct resource *mem;
+	u32 reg_val;
+	int i;
+
+	mem = platform_get_resource(pdev, IORESOURCE_MEM, 1);
+	priv->pll_config = devm_ioremap_resource(&pdev->dev, mem);
+	if (IS_ERR(priv->pll_config))
+		return -ENOMEM;
+
+	mem = platform_get_resource(pdev, IORESOURCE_MEM, 2);
+	priv->soc_control = devm_ioremap_resource(&pdev->dev, mem);
+	if (IS_ERR(priv->soc_control))
+		return -ENOMEM;
+
+	/* Select one of exceptive modes: I2S or S/PDIF */
+	reg_val = readl(priv->soc_control);
+	if (of_property_read_bool(np, "spdif-mode")) {
+		reg_val |= A38X_SPDIF_MODE_ENABLE;
+		dev_info(&pdev->dev, "using S/PDIF mode\n");
+	} else {
+		reg_val &= ~A38X_SPDIF_MODE_ENABLE;
+		dev_info(&pdev->dev, "using I2S mode\n");
+	}
+	writel(reg_val, priv->soc_control);
+
+	/* Update available rates of mclk's fs */
+	for (i = 0; i < 2; i++) {
+		dai_drv[i].playback.rates |= SNDRV_PCM_RATE_192000;
+		dai_drv[i].capture.rates |= SNDRV_PCM_RATE_192000;
+	}
+
+	return 0;
+}
+
+static inline void armada_38x_set_pll(void __iomem *base, unsigned long rate)
+{
+	u32 reg_val;
+	u16 freq_offset = 0x22b0;
+	u8 audio_postdiv, fb_clk_div = 0x1d;
+
+	/* Set frequency offset value to not valid and enable PLL reset */
+	reg_val = readl(base + A38X_PLL_CONF_REG1);
+	reg_val &= ~A38X_PLL_FREQ_OFFSET_VALID;
+	reg_val &= ~A38X_PLL_SW_RESET;
+	writel(reg_val, base + A38X_PLL_CONF_REG1);
+
+	udelay(1);
+
+	/* Update PLL parameters */
+	switch (rate) {
+	default:
+	case 44100:
+		freq_offset = 0x735;
+		fb_clk_div = 0x1b;
+		audio_postdiv = 0xc;
+		break;
+	case 48000:
+		audio_postdiv = 0xc;
+		break;
+	case 96000:
+		audio_postdiv = 0x6;
+		break;
+	case 192000:
+		audio_postdiv = 0x3;
+		break;
+	}
+
+	reg_val = readl(base + A38X_PLL_CONF_REG0);
+	reg_val &= ~A38X_PLL_FB_CLK_DIV_MASK;
+	reg_val |= (fb_clk_div << A38X_PLL_FB_CLK_DIV_OFFSET);
+	writel(reg_val, base + A38X_PLL_CONF_REG0);
+
+	reg_val = readl(base + A38X_PLL_CONF_REG2);
+	reg_val &= ~A38X_PLL_AUDIO_POSTDIV_MASK;
+	reg_val |= audio_postdiv;
+	writel(reg_val, base + A38X_PLL_CONF_REG2);
+
+	reg_val = readl(base + A38X_PLL_CONF_REG1);
+	reg_val &= ~A38X_PLL_FREQ_OFFSET_MASK;
+	reg_val |= freq_offset;
+	writel(reg_val, base + A38X_PLL_CONF_REG1);
+
+	udelay(1);
+
+	/* Disable reset */
+	reg_val |= A38X_PLL_SW_RESET;
+	writel(reg_val, base + A38X_PLL_CONF_REG1);
+
+	/* Wait 50us for PLL to lock */
+	udelay(50);
+
+	/* Restore frequency offset value validity */
+	reg_val |= A38X_PLL_FREQ_OFFSET_VALID;
+	writel(reg_val, base + A38X_PLL_CONF_REG1);
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 static int kirkwood_i2s_set_fmt(struct snd_soc_dai *cpu_dai,
 		unsigned int fmt)
@@ -104,6 +238,22 @@ static void kirkwood_set_rate(struct snd_soc_dai *dai,
 {
 	uint32_t clks_ctrl;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	if (IS_ERR(priv->extclk)) {
+		/* use internal dco for the supported rates
+		 * defined in kirkwood_i2s_dai */
+		dev_dbg(dai->dev, "%s: dco set rate = %lu\n",
+			__func__, rate);
+		if (priv->pll_config)
+			armada_38x_set_pll(priv->pll_config, rate);
+		else
+			kirkwood_set_dco(priv->io, rate);
+
+		clks_ctrl = KIRKWOOD_MCLK_SOURCE_DCO;
+	} else {
+		/* use the external clock for the other rates
+		 * defined in kirkwood_i2s_dai_extclk */
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	if (rate == 44100 || rate == 48000 || rate == 96000) {
 		/* use internal dco for supported rates */
 		dev_dbg(dai->dev, "%s: dco set rate = %lu\n",
@@ -113,6 +263,7 @@ static void kirkwood_set_rate(struct snd_soc_dai *dai,
 		clks_ctrl = KIRKWOOD_MCLK_SOURCE_DCO;
 	} else if (!IS_ERR(priv->extclk)) {
 		/* use optional external clk for other rates */
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 		dev_dbg(dai->dev, "%s: extclk set rate = %lu -> %lu\n",
 			__func__, rate, 256 * rate);
 		clk_set_rate(priv->extclk, 256 * rate);
@@ -159,9 +310,19 @@ static int kirkwood_i2s_hw_params(struct snd_pcm_substream *substream,
 	case SNDRV_PCM_FORMAT_S16_LE:
 		i2s_value |= KIRKWOOD_I2S_CTL_SIZE_16;
 		ctl_play = KIRKWOOD_PLAYCTL_SIZE_16_C |
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+			   KIRKWOOD_PLAYCTL_I2S_EN |
+			   KIRKWOOD_PLAYCTL_SPDIF_EN;
+#else /* CONFIG_SYNO_LSP_ARMADA */
 			   KIRKWOOD_PLAYCTL_I2S_EN;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 		ctl_rec = KIRKWOOD_RECCTL_SIZE_16_C |
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+			  KIRKWOOD_RECCTL_I2S_EN |
+			  KIRKWOOD_RECCTL_SPDIF_EN;
+#else /* CONFIG_SYNO_LSP_ARMADA */
 			  KIRKWOOD_RECCTL_I2S_EN;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 		break;
 	/*
 	 * doesn't work... S20_3LE != kirkwood 20bit format ?
@@ -177,9 +338,19 @@ static int kirkwood_i2s_hw_params(struct snd_pcm_substream *substream,
 	case SNDRV_PCM_FORMAT_S24_LE:
 		i2s_value |= KIRKWOOD_I2S_CTL_SIZE_24;
 		ctl_play = KIRKWOOD_PLAYCTL_SIZE_24 |
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+			   KIRKWOOD_PLAYCTL_I2S_EN |
+			   KIRKWOOD_PLAYCTL_SPDIF_EN;
+#else /* CONFIG_SYNO_LSP_ARMADA */
 			   KIRKWOOD_PLAYCTL_I2S_EN;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 		ctl_rec = KIRKWOOD_RECCTL_SIZE_24 |
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+			  KIRKWOOD_RECCTL_I2S_EN |
+			  KIRKWOOD_RECCTL_SPDIF_EN;
+#else /* CONFIG_SYNO_LSP_ARMADA */
 			  KIRKWOOD_RECCTL_I2S_EN;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 		break;
 	case SNDRV_PCM_FORMAT_S32_LE:
 		i2s_value |= KIRKWOOD_I2S_CTL_SIZE_32;
@@ -199,12 +370,21 @@ static int kirkwood_i2s_hw_params(struct snd_pcm_substream *substream,
 			ctl_play |= KIRKWOOD_PLAYCTL_MONO_OFF;
 
 		priv->ctl_play &= ~(KIRKWOOD_PLAYCTL_MONO_MASK |
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+				    KIRKWOOD_PLAYCTL_ENABLE_MASK |
+#else /* CONFIG_SYNO_LSP_ARMADA */
 				    KIRKWOOD_PLAYCTL_I2S_EN |
 				    KIRKWOOD_PLAYCTL_SPDIF_EN |
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 				    KIRKWOOD_PLAYCTL_SIZE_MASK);
 		priv->ctl_play |= ctl_play;
 	} else {
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+		priv->ctl_rec &= ~(KIRKWOOD_RECCTL_ENABLE_MASK |
+				   KIRKWOOD_RECCTL_SIZE_MASK);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 		priv->ctl_rec &= ~KIRKWOOD_RECCTL_SIZE_MASK;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 		priv->ctl_rec |= ctl_rec;
 	}
 
@@ -213,14 +393,32 @@ static int kirkwood_i2s_hw_params(struct snd_pcm_substream *substream,
 	return 0;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+static unsigned kirkwood_i2s_play_mute(unsigned ctl)
+{
+	if (!(ctl & KIRKWOOD_PLAYCTL_I2S_EN))
+		ctl |= KIRKWOOD_PLAYCTL_I2S_MUTE;
+	if (!(ctl & KIRKWOOD_PLAYCTL_SPDIF_EN))
+		ctl |= KIRKWOOD_PLAYCTL_SPDIF_MUTE;
+	return ctl;
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
 static int kirkwood_i2s_play_trigger(struct snd_pcm_substream *substream,
 				int cmd, struct snd_soc_dai *dai)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	struct snd_pcm_runtime *runtime = substream->runtime;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	struct kirkwood_dma_data *priv = snd_soc_dai_get_drvdata(dai);
 	uint32_t ctl, value;
 
 	ctl = readl(priv->io + KIRKWOOD_PLAYCTL);
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	if ((ctl & KIRKWOOD_PLAYCTL_ENABLE_MASK) == 0) {
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	if (ctl & KIRKWOOD_PLAYCTL_PAUSE) {
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 		unsigned timeout = 5000;
 		/*
 		 * The Armada510 spec says that if we enter pause mode, the
@@ -244,14 +442,31 @@ static int kirkwood_i2s_play_trigger(struct snd_pcm_substream *substream,
 	case SNDRV_PCM_TRIGGER_START:
 		/* configure */
 		ctl = priv->ctl_play;
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+		if (dai->id == 0)
+			ctl &= ~KIRKWOOD_PLAYCTL_SPDIF_EN;	/* i2s */
+		else
+			ctl &= ~KIRKWOOD_PLAYCTL_I2S_EN;	/* spdif */
+		ctl = kirkwood_i2s_play_mute(ctl);
+		value = ctl & ~KIRKWOOD_PLAYCTL_ENABLE_MASK;
+#else /* CONFIG_SYNO_LSP_ARMADA */
 		value = ctl & ~(KIRKWOOD_PLAYCTL_I2S_EN |
 				KIRKWOOD_PLAYCTL_SPDIF_EN);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 		writel(value, priv->io + KIRKWOOD_PLAYCTL);
 
 		/* enable interrupts */
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+		if (!runtime->no_period_wakeup) {
+			value = readl(priv->io + KIRKWOOD_INT_MASK);
+			value |= KIRKWOOD_INT_CAUSE_PLAY_BYTES;
+			writel(value, priv->io + KIRKWOOD_INT_MASK);
+		}
+#else /* CONFIG_SYNO_LSP_ARMADA */
 		value = readl(priv->io + KIRKWOOD_INT_MASK);
 		value |= KIRKWOOD_INT_CAUSE_PLAY_BYTES;
 		writel(value, priv->io + KIRKWOOD_INT_MASK);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 		/* enable playback */
 		writel(ctl, priv->io + KIRKWOOD_PLAYCTL);
@@ -259,7 +474,12 @@ static int kirkwood_i2s_play_trigger(struct snd_pcm_substream *substream,
 
 	case SNDRV_PCM_TRIGGER_STOP:
 		/* stop audio, disable interrupts */
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+		ctl |= KIRKWOOD_PLAYCTL_PAUSE | KIRKWOOD_PLAYCTL_I2S_MUTE |
+				KIRKWOOD_PLAYCTL_SPDIF_MUTE;
+#else /* CONFIG_SYNO_LSP_ARMADA */
 		ctl |= KIRKWOOD_PLAYCTL_PAUSE | KIRKWOOD_PLAYCTL_I2S_MUTE;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 		writel(ctl, priv->io + KIRKWOOD_PLAYCTL);
 
 		value = readl(priv->io + KIRKWOOD_INT_MASK);
@@ -267,19 +487,34 @@ static int kirkwood_i2s_play_trigger(struct snd_pcm_substream *substream,
 		writel(value, priv->io + KIRKWOOD_INT_MASK);
 
 		/* disable all playbacks */
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+		ctl &= ~KIRKWOOD_PLAYCTL_ENABLE_MASK;
+#else /* CONFIG_SYNO_LSP_ARMADA */
 		ctl &= ~(KIRKWOOD_PLAYCTL_I2S_EN | KIRKWOOD_PLAYCTL_SPDIF_EN);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 		writel(ctl, priv->io + KIRKWOOD_PLAYCTL);
 		break;
 
 	case SNDRV_PCM_TRIGGER_PAUSE_PUSH:
 	case SNDRV_PCM_TRIGGER_SUSPEND:
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+		ctl |= KIRKWOOD_PLAYCTL_PAUSE | KIRKWOOD_PLAYCTL_I2S_MUTE |
+				KIRKWOOD_PLAYCTL_SPDIF_MUTE;
+#else /* CONFIG_SYNO_LSP_ARMADA */
 		ctl |= KIRKWOOD_PLAYCTL_PAUSE | KIRKWOOD_PLAYCTL_I2S_MUTE;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 		writel(ctl, priv->io + KIRKWOOD_PLAYCTL);
 		break;
 
 	case SNDRV_PCM_TRIGGER_RESUME:
 	case SNDRV_PCM_TRIGGER_PAUSE_RELEASE:
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+		ctl &= ~(KIRKWOOD_PLAYCTL_PAUSE | KIRKWOOD_PLAYCTL_I2S_MUTE |
+				KIRKWOOD_PLAYCTL_SPDIF_MUTE);
+		ctl = kirkwood_i2s_play_mute(ctl);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 		ctl &= ~(KIRKWOOD_PLAYCTL_PAUSE | KIRKWOOD_PLAYCTL_I2S_MUTE);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 		writel(ctl, priv->io + KIRKWOOD_PLAYCTL);
 		break;
 
@@ -302,7 +537,16 @@ static int kirkwood_i2s_rec_trigger(struct snd_pcm_substream *substream,
 	case SNDRV_PCM_TRIGGER_START:
 		/* configure */
 		ctl = priv->ctl_rec;
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+		if (dai->id == 0)
+			ctl &= ~KIRKWOOD_RECCTL_SPDIF_EN;	/* i2s */
+		else
+			ctl &= ~KIRKWOOD_RECCTL_I2S_EN;		/* spdif */
+
+		value = ctl & ~KIRKWOOD_RECCTL_ENABLE_MASK;
+#else /* CONFIG_SYNO_LSP_ARMADA */
 		value = ctl & ~KIRKWOOD_RECCTL_I2S_EN;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 		writel(value, priv->io + KIRKWOOD_RECCTL);
 
 		/* enable interrupts */
@@ -326,7 +570,11 @@ static int kirkwood_i2s_rec_trigger(struct snd_pcm_substream *substream,
 
 		/* disable all records */
 		value = readl(priv->io + KIRKWOOD_RECCTL);
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+		value &= ~KIRKWOOD_RECCTL_ENABLE_MASK;
+#else /* CONFIG_SYNO_LSP_ARMADA */
 		value &= ~(KIRKWOOD_RECCTL_I2S_EN | KIRKWOOD_RECCTL_SPDIF_EN);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 		writel(value, priv->io + KIRKWOOD_RECCTL);
 		break;
 
@@ -362,9 +610,14 @@ static int kirkwood_i2s_trigger(struct snd_pcm_substream *substream, int cmd,
 	return 0;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+static int kirkwood_i2s_init(struct kirkwood_dma_data *priv)
+{
+#else /* CONFIG_SYNO_LSP_ARMADA */
 static int kirkwood_i2s_probe(struct snd_soc_dai *dai)
 {
 	struct kirkwood_dma_data *priv = snd_soc_dai_get_drvdata(dai);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	unsigned long value;
 	unsigned int reg_data;
 
@@ -387,21 +640,33 @@ static int kirkwood_i2s_probe(struct snd_soc_dai *dai)
 
 	/* disable playback/record */
 	value = readl(priv->io + KIRKWOOD_PLAYCTL);
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	value &= ~KIRKWOOD_PLAYCTL_ENABLE_MASK;
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	value &= ~(KIRKWOOD_PLAYCTL_I2S_EN|KIRKWOOD_PLAYCTL_SPDIF_EN);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	writel(value, priv->io + KIRKWOOD_PLAYCTL);
 
 	value = readl(priv->io + KIRKWOOD_RECCTL);
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	value &= ~KIRKWOOD_RECCTL_ENABLE_MASK;
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	value &= ~(KIRKWOOD_RECCTL_I2S_EN | KIRKWOOD_RECCTL_SPDIF_EN);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	writel(value, priv->io + KIRKWOOD_RECCTL);
 
 	return 0;
 
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA */
 static int kirkwood_i2s_remove(struct snd_soc_dai *dai)
 {
 	return 0;
 }
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 static const struct snd_soc_dai_ops kirkwood_i2s_dai_ops = {
 	.startup	= kirkwood_i2s_startup,
@@ -410,6 +675,93 @@ static const struct snd_soc_dai_ops kirkwood_i2s_dai_ops = {
 	.set_fmt        = kirkwood_i2s_set_fmt,
 };
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+static struct snd_soc_dai_driver kirkwood_i2s_dai[2] = {
+	{
+	.name = "i2s",
+	.id = 0,
+	.playback = {
+		.channels_min = 1,
+		.channels_max = 2,
+		.rates = SNDRV_PCM_RATE_44100 | SNDRV_PCM_RATE_48000 |
+				SNDRV_PCM_RATE_96000,
+		.formats = KIRKWOOD_I2S_FORMATS,
+	},
+	.capture = {
+		.channels_min = 1,
+		.channels_max = 2,
+		.rates = SNDRV_PCM_RATE_44100 | SNDRV_PCM_RATE_48000 |
+				SNDRV_PCM_RATE_96000,
+		.formats = KIRKWOOD_I2S_FORMATS,
+	},
+	.ops = &kirkwood_i2s_dai_ops,
+	},
+	{
+	.name = "spdif",
+	.id = 1,
+	.playback = {
+		.channels_min = 1,
+		.channels_max = 2,
+		.rates = SNDRV_PCM_RATE_44100 | SNDRV_PCM_RATE_48000 |
+				SNDRV_PCM_RATE_96000,
+		.formats = KIRKWOOD_SPDIF_FORMATS,
+	},
+	.capture = {
+		.channels_min = 1,
+		.channels_max = 2,
+		.rates = SNDRV_PCM_RATE_44100 | SNDRV_PCM_RATE_48000 |
+				SNDRV_PCM_RATE_96000,
+		.formats = KIRKWOOD_SPDIF_FORMATS,
+	},
+	.ops = &kirkwood_i2s_dai_ops,
+	},
+};
+
+static struct snd_soc_dai_driver kirkwood_i2s_dai_extclk[2] = {
+	{
+	.name = "i2s",
+	.id = 0,
+	.playback = {
+		.channels_min = 1,
+		.channels_max = 2,
+		.rates = SNDRV_PCM_RATE_CONTINUOUS,
+		.rate_min = 5512,
+		.rate_max = 192000,
+		.formats = KIRKWOOD_I2S_FORMATS,
+	},
+	.capture = {
+		.channels_min = 1,
+		.channels_max = 2,
+		.rates = SNDRV_PCM_RATE_CONTINUOUS,
+		.rate_min = 5512,
+		.rate_max = 192000,
+		.formats = KIRKWOOD_I2S_FORMATS,
+	},
+	.ops = &kirkwood_i2s_dai_ops,
+	},
+	{
+	.name = "spdif",
+	.id = 1,
+	.playback = {
+		.channels_min = 1,
+		.channels_max = 2,
+		.rates = SNDRV_PCM_RATE_CONTINUOUS,
+		.rate_min = 5512,
+		.rate_max = 192000,
+		.formats = KIRKWOOD_SPDIF_FORMATS,
+	},
+	.capture = {
+		.channels_min = 1,
+		.channels_max = 2,
+		.rates = SNDRV_PCM_RATE_CONTINUOUS,
+		.rate_min = 5512,
+		.rate_max = 192000,
+		.formats = KIRKWOOD_SPDIF_FORMATS,
+	},
+	.ops = &kirkwood_i2s_dai_ops,
+	},
+};
+#else /* CONFIG_SYNO_LSP_ARMADA */
 static struct snd_soc_dai_driver kirkwood_i2s_dai = {
 	.probe = kirkwood_i2s_probe,
 	.remove = kirkwood_i2s_remove,
@@ -449,6 +801,7 @@ static struct snd_soc_dai_driver kirkwood_i2s_dai_extclk = {
 	},
 	.ops = &kirkwood_i2s_dai_ops,
 };
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 static const struct snd_soc_component_driver kirkwood_i2s_component = {
 	.name		= DRV_NAME,
@@ -457,9 +810,16 @@ static const struct snd_soc_component_driver kirkwood_i2s_component = {
 static int kirkwood_i2s_dev_probe(struct platform_device *pdev)
 {
 	struct kirkwood_asoc_platform_data *data = pdev->dev.platform_data;
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	struct snd_soc_dai_driver *soc_dai = kirkwood_i2s_dai;
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	struct snd_soc_dai_driver *soc_dai = &kirkwood_i2s_dai;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	struct kirkwood_dma_data *priv;
 	struct resource *mem;
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	struct device_node *np = pdev->dev.of_node;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	int err;
 
 	priv = devm_kzalloc(&pdev->dev, sizeof(*priv), GFP_KERNEL);
@@ -480,6 +840,24 @@ static int kirkwood_i2s_dev_probe(struct platform_device *pdev)
 		return -ENXIO;
 	}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	if (of_device_is_compatible(np, "marvell,armada-380-audio")) {
+		err = armada_38x_i2s_init_quirk(pdev, priv, soc_dai);
+		if (err < 0)
+			return err;
+	}
+
+	if (np) {
+		priv->burst = 128;		/* might be 32 or 128 */
+	} else if (data) {
+		priv->burst = data->burst;
+	} else {
+		dev_err(&pdev->dev, "no DT nor platform data ?!\n");
+		return -EINVAL;
+	}
+
+	priv->clk = devm_clk_get(&pdev->dev, np ? "internal" : NULL);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	if (!data) {
 		dev_err(&pdev->dev, "no platform data ?!\n");
 		return -EINVAL;
@@ -488,6 +866,7 @@ static int kirkwood_i2s_dev_probe(struct platform_device *pdev)
 	priv->burst = data->burst;
 
 	priv->clk = devm_clk_get(&pdev->dev, NULL);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	if (IS_ERR(priv->clk)) {
 		dev_err(&pdev->dev, "no clock\n");
 		return PTR_ERR(priv->clk);
@@ -497,15 +876,31 @@ static int kirkwood_i2s_dev_probe(struct platform_device *pdev)
 	if (err < 0)
 		return err;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	priv->extclk = devm_clk_get(&pdev->dev, "extclk");
+	if (IS_ERR(priv->extclk)) {
+		if (PTR_ERR(priv->extclk) == -EPROBE_DEFER)
+			return -EPROBE_DEFER;
+	} else {
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	priv->extclk = clk_get(&pdev->dev, "extclk");
 	if (!IS_ERR(priv->extclk)) {
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 		if (priv->extclk == priv->clk) {
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+			devm_clk_put(&pdev->dev, priv->extclk);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 			clk_put(priv->extclk);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 			priv->extclk = ERR_PTR(-EINVAL);
 		} else {
 			dev_info(&pdev->dev, "found external clock\n");
 			clk_prepare_enable(priv->extclk);
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+			soc_dai = kirkwood_i2s_dai_extclk;
+#else /* CONFIG_SYNO_LSP_ARMADA */
 			soc_dai = &kirkwood_i2s_dai_extclk;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 		}
 	}
 
@@ -514,7 +909,11 @@ static int kirkwood_i2s_dev_probe(struct platform_device *pdev)
 	priv->ctl_rec = KIRKWOOD_RECCTL_SIZE_24;
 
 	/* Select the burst size */
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	if (priv->burst == 32) {
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	if (data->burst == 32) {
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 		priv->ctl_play |= KIRKWOOD_PLAYCTL_BURST_32;
 		priv->ctl_rec |= KIRKWOOD_RECCTL_BURST_32;
 	} else {
@@ -522,6 +921,29 @@ static int kirkwood_i2s_dev_probe(struct platform_device *pdev)
 		priv->ctl_rec |= KIRKWOOD_RECCTL_BURST_128;
 	}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	err = snd_soc_register_component(&pdev->dev, &kirkwood_i2s_component,
+					 soc_dai, 2);
+	if (err) {
+		dev_err(&pdev->dev, "snd_soc_register_component failed\n");
+		goto err_component;
+	}
+
+	err = snd_soc_register_platform(&pdev->dev, &kirkwood_soc_platform);
+	if (err) {
+		dev_err(&pdev->dev, "snd_soc_register_platform failed\n");
+		goto err_platform;
+	}
+
+	kirkwood_i2s_init(priv);
+
+	return 0;
+ err_platform:
+	snd_soc_unregister_component(&pdev->dev);
+ err_component:
+	if (!IS_ERR(priv->extclk))
+		clk_disable_unprepare(priv->extclk);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	err = snd_soc_register_component(&pdev->dev, &kirkwood_i2s_component,
 					 soc_dai, 1);
 	if (!err)
@@ -530,8 +952,8 @@ static int kirkwood_i2s_dev_probe(struct platform_device *pdev)
 
 	if (!IS_ERR(priv->extclk)) {
 		clk_disable_unprepare(priv->extclk);
-		clk_put(priv->extclk);
 	}
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	clk_disable_unprepare(priv->clk);
 
 	return err;
@@ -541,23 +963,46 @@ static int kirkwood_i2s_dev_remove(struct platform_device *pdev)
 {
 	struct kirkwood_dma_data *priv = dev_get_drvdata(&pdev->dev);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	snd_soc_unregister_platform(&pdev->dev);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	snd_soc_unregister_component(&pdev->dev);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	if (!IS_ERR(priv->extclk))
+		clk_disable_unprepare(priv->extclk);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	if (!IS_ERR(priv->extclk)) {
 		clk_disable_unprepare(priv->extclk);
 		clk_put(priv->extclk);
 	}
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	clk_disable_unprepare(priv->clk);
 
 	return 0;
 }
+
+#if defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_OF)
+static struct of_device_id mvebu_audio_of_match[] = {
+	{ .compatible = "marvell,kirkwood-audio" },
+	{ .compatible = "marvell,dove-audio" },
+	{ .compatible = "marvell,armada370-audio" },
+	{ .compatible = "marvell,armada-380-audio" },
+	{ }
+};
+MODULE_DEVICE_TABLE(of, mvebu_audio_of_match);
+#endif /* CONFIG_SYNO_LSP_ARMADA && CONFIG_OF */
 
 static struct platform_driver kirkwood_i2s_driver = {
 	.probe  = kirkwood_i2s_dev_probe,
 	.remove = kirkwood_i2s_dev_remove,
 	.driver = {
 		.name = DRV_NAME,
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+		.of_match_table = of_match_ptr(mvebu_audio_of_match),
+#else /* CONFIG_SYNO_LSP_ARMADA */
 		.owner = THIS_MODULE,
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	},
 };
 
@@ -567,4 +1012,8 @@ module_platform_driver(kirkwood_i2s_driver);
 MODULE_AUTHOR("Arnaud Patard, <arnaud.patard@rtp-net.org>");
 MODULE_DESCRIPTION("Kirkwood I2S SoC Interface");
 MODULE_LICENSE("GPL");
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+MODULE_ALIAS("platform:mvebu-audio");
+#else /* CONFIG_SYNO_LSP_ARMADA */
 MODULE_ALIAS("platform:kirkwood-i2s");
+#endif /* CONFIG_SYNO_LSP_ARMADA */

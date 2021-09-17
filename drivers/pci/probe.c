@@ -642,6 +642,9 @@ static struct pci_bus *pci_alloc_child_bus(struct pci_bus *parent,
 
 	child->parent = parent;
 	child->ops = parent->ops;
+#if defined (CONFIG_SYNO_LSP_MONACO) || defined(CONFIG_SYNO_LSP_ARMADA)
+	child->msi = parent->msi;
+#endif /* CONFIG_SYNO_LSP_MONACO || CONFIG_SYNO_LSP_ARMADA */
 	child->sysdata = parent->sysdata;
 	child->bus_flags = parent->bus_flags;
 
@@ -1562,7 +1565,11 @@ static void pcie_write_mrrs(struct pci_dev *dev)
 			"with pci=pcie_bus_safe.\n");
 }
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+int pcie_bus_configure_set(struct pci_dev *dev, void *data)
+#else /* CONFIG_SYNO_LSP_ALPINE */
 static int pcie_bus_configure_set(struct pci_dev *dev, void *data)
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 {
 	int mps, orig_mps;
 

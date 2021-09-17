@@ -1119,12 +1119,21 @@ static inline ssize_t do_tty_write(
 			size = chunk;
 		ret = -EFAULT;
 #if defined(CONFIG_SYNO_MICROP_CTRL) && defined(CONFIG_SYNO_X64)
-		if (0 == strcmp(tty->name, "ttyS1"))
-			memcpy(tty->write_buf, buf, size);
-		else
+		if (0 == strcmp(tty->name, "ttyS1")) {
+			if (access_ok(VERIFY_READ, buf, size)) {
+				if (copy_from_user(tty->write_buf, buf, size)) {
+					printk(KERN_DEBUG "error attempted to copy_from_user\n");
+				}
+			} else {
+				memcpy(tty->write_buf, buf, size);
+			}
+		} else {
 #endif /* CONFIG_SYNO_MICROP_CTRL && CONFIG_SYNO_X64 */
 		if (copy_from_user(tty->write_buf, buf, size))
 			break;
+#if defined(CONFIG_SYNO_MICROP_CTRL) && defined(CONFIG_SYNO_X64)
+		}
+#endif /* CONFIG_SYNO_MICROP_CTRL && CONFIG_SYNO_X64 */
 		ret = write(tty, file, tty->write_buf, size);
 		if (ret <= 0)
 			break;
@@ -1275,6 +1284,16 @@ static void pty_line_name(struct tty_driver *driver, int index, char *p)
  *
  *	Locking: None
  */
+#if defined(CONFIG_SYNO_ARMADA)
+static ssize_t tty_line_name(struct tty_driver *driver, int index, char *p)
+{
+	if (driver->flags & TTY_DRIVER_UNNUMBERED_NODE)
+		return sprintf(p, "%s", driver->name);
+	else
+		return sprintf(p, "%s%d", driver->name,
+			       index + driver->name_base);
+}
+#else /* CONFIG_SYNO_ARMADA */
 static void tty_line_name(struct tty_driver *driver, int index, char *p)
 {
 	if (driver->flags & TTY_DRIVER_UNNUMBERED_NODE)
@@ -1282,6 +1301,7 @@ static void tty_line_name(struct tty_driver *driver, int index, char *p)
 	else
 		sprintf(p, "%s%d", driver->name, index + driver->name_base);
 }
+#endif /* CONFIG_SYNO_ARMADA */
 
 /**
  *	tty_driver_lookup_tty() - find an existing tty, if any
@@ -1705,6 +1725,9 @@ int tty_release(struct inode *inode, struct file *filp)
 	int	pty_master, tty_closing, o_tty_closing, do_sleep;
 	int	idx;
 	char	buf[64];
+#if defined(CONFIG_SYNO_ARMADA)
+	long	timeout = 0;
+#endif /* CONFIG_SYNO_ARMADA */
 
 	if (tty_paranoia_check(tty, inode, __func__))
 		return 0;
@@ -1789,7 +1812,15 @@ int tty_release(struct inode *inode, struct file *filp)
 				__func__, tty_name(tty, buf));
 		tty_unlock_pair(tty, o_tty);
 		mutex_unlock(&tty_mutex);
+#if defined(CONFIG_SYNO_ARMADA)
+		schedule_timeout_killable(timeout);
+		if (timeout < 120 * HZ)
+			timeout = 2 * timeout + 1;
+		else
+			timeout = MAX_SCHEDULE_TIMEOUT;
+#else /* CONFIG_SYNO_ARMADA */
 		schedule();
+#endif /* CONFIG_SYNO_ARMADA */
 	}
 
 	/*
@@ -3577,9 +3608,25 @@ static ssize_t show_cons_active(struct device *dev,
 		if (i >= ARRAY_SIZE(cs))
 			break;
 	}
+#if defined(CONFIG_SYNO_ARMADA)
+	while (i--) {
+		int index = cs[i]->index;
+		struct tty_driver *drv = cs[i]->device(cs[i], &index);
+
+		/* don't resolve tty0 as some programs depend on it */
+		if (drv && (cs[i]->index > 0 || drv->major != TTY_MAJOR))
+			count += tty_line_name(drv, index, buf + count);
+		else
+			count += sprintf(buf + count, "%s%d",
+					 cs[i]->name, cs[i]->index);
+
+		count += sprintf(buf + count, "%c", i ? ' ':'\n');
+	}
+#else /* CONFIG_SYNO_ARMADA */
 	while (i--)
 		count += sprintf(buf + count, "%s%d%c",
 				 cs[i]->name, cs[i]->index, i ? ' ':'\n');
+#endif /* CONFIG_SYNO_ARMADA */
 	console_unlock();
 
 	return count;

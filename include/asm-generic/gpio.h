@@ -190,6 +190,10 @@ extern int __gpio_cansleep(unsigned gpio);
 
 extern int __gpio_to_irq(unsigned gpio);
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+extern int gpio_lock_as_irq(struct gpio_chip *chip, unsigned int offset);
+extern void gpio_unlock_as_irq(struct gpio_chip *chip, unsigned int offset);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 extern int gpio_request_one(unsigned gpio, unsigned long flags, const char *label);
 extern int gpio_request_array(const struct gpio *array, size_t num);
 extern void gpio_free_array(const struct gpio *array, size_t num);

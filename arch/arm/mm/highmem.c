@@ -69,14 +69,22 @@ void *kmap_atomic(struct page *page)
 	 * With debugging enabled, kunmap_atomic forces that entry to 0.
 	 * Make sure it was indeed properly unmapped.
 	 */
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	BUG_ON(!pte_none(get_fix_pte(vaddr)));
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	BUG_ON(!pte_none(get_top_pte(vaddr)));
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 #endif
 	/*
 	 * When debugging is off, kunmap_atomic leaves the previous mapping
 	 * in place, so the contained TLB flush ensures the TLB is updated
 	 * with the new mapping.
 	 */
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	set_fix_pte(vaddr, mk_pte(page, kmap_prot));
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	set_top_pte(vaddr, mk_pte(page, kmap_prot));
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 	return (void *)vaddr;
 }
@@ -95,7 +103,11 @@ void __kunmap_atomic(void *kvaddr)
 			__cpuc_flush_dcache_area((void *)vaddr, PAGE_SIZE);
 #ifdef CONFIG_DEBUG_HIGHMEM
 		BUG_ON(vaddr != __fix_to_virt(FIX_KMAP_BEGIN + idx));
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+		set_fix_pte(vaddr, __pte(0));
+#else /* CONFIG_SYNO_LSP_ALPINE */
 		set_top_pte(vaddr, __pte(0));
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 #else
 		(void) idx;  /* to kill a warning */
 #endif
@@ -119,9 +131,17 @@ void *kmap_atomic_pfn(unsigned long pfn)
 	idx = type + KM_TYPE_NR * smp_processor_id();
 	vaddr = __fix_to_virt(FIX_KMAP_BEGIN + idx);
 #ifdef CONFIG_DEBUG_HIGHMEM
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	BUG_ON(!pte_none(get_fix_pte(vaddr)));
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	BUG_ON(!pte_none(get_top_pte(vaddr)));
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 #endif
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	set_fix_pte(vaddr, pfn_pte(pfn, kmap_prot));
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	set_top_pte(vaddr, pfn_pte(pfn, kmap_prot));
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 	return (void *)vaddr;
 }
@@ -133,5 +153,9 @@ struct page *kmap_atomic_to_page(const void *ptr)
 	if (vaddr < FIXADDR_START)
 		return virt_to_page(ptr);
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	return pte_page(get_fix_pte(vaddr));
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	return pte_page(get_top_pte(vaddr));
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 }

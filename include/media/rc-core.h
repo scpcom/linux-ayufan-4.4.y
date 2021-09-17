@@ -101,6 +101,9 @@ struct rc_dev {
 	bool				idle;
 	u64				allowed_protos;
 	u64				enabled_protocols;
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	u32				users;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	u32				scanmask;
 	void				*priv;
 	spinlock_t			keylock;
@@ -141,6 +144,11 @@ struct rc_dev *rc_allocate_device(void);
 void rc_free_device(struct rc_dev *dev);
 int rc_register_device(struct rc_dev *dev);
 void rc_unregister_device(struct rc_dev *dev);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+
+int rc_open(struct rc_dev *rdev);
+void rc_close(struct rc_dev *rdev);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 void rc_repeat(struct rc_dev *dev);
 void rc_keydown(struct rc_dev *dev, int scancode, u8 toggle);

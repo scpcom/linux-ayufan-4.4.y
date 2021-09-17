@@ -32,7 +32,11 @@ static unsigned int longrun_low_freq, longrun_high_freq;
  * Reads the current LongRun policy by access to MSR_TMTA_LONGRUN_FLAGS
  * and MSR_TMTA_LONGRUN_CTRL
  */
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+static void longrun_get_policy(struct cpufreq_policy *policy)
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 static void __cpuinit longrun_get_policy(struct cpufreq_policy *policy)
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 {
 	u32 msr_lo, msr_hi;
 
@@ -126,9 +130,13 @@ static int longrun_verify_policy(struct cpufreq_policy *policy)
 		return -EINVAL;
 
 	policy->cpu = 0;
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	cpufreq_verify_within_cpu_limits(policy);
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	cpufreq_verify_within_limits(policy,
 		policy->cpuinfo.min_freq,
 		policy->cpuinfo.max_freq);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
 	if ((policy->policy != CPUFREQ_POLICY_POWERSAVE) &&
 	    (policy->policy != CPUFREQ_POLICY_PERFORMANCE))
@@ -160,7 +168,11 @@ static unsigned int longrun_get(unsigned int cpu)
  * TMTA rules:
  * performance_pctg = (target_freq - low_freq)/(high_freq - low_freq)
  */
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+static int longrun_determine_freqs(unsigned int *low_freq,
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 static int __cpuinit longrun_determine_freqs(unsigned int *low_freq,
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 						      unsigned int *high_freq)
 {
 	u32 msr_lo, msr_hi;
@@ -252,7 +264,11 @@ static int __cpuinit longrun_determine_freqs(unsigned int *low_freq,
 	return 0;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+static int longrun_cpu_init(struct cpufreq_policy *policy)
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 static int __cpuinit longrun_cpu_init(struct cpufreq_policy *policy)
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 {
 	int result = 0;
 
@@ -281,7 +297,11 @@ static struct cpufreq_driver longrun_driver = {
 	.get		= longrun_get,
 	.init		= longrun_cpu_init,
 	.name		= "longrun",
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	.owner		= THIS_MODULE,
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 };
 
 static const struct x86_cpu_id longrun_ids[] = {

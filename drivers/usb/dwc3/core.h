@@ -50,6 +50,10 @@
 #include <linux/usb/ch9.h>
 #include <linux/usb/gadget.h>
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#include <linux/phy/phy.h>
+
+#endif /* CONFIG_SYNO_LSP_MONACO */
 /* Global constants */
 #define DWC3_EP0_BOUNCE_SIZE	512
 #define DWC3_ENDPOINTS_NUM	32
@@ -363,6 +367,9 @@
 
 /* Structures */
 
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+struct dwc3_cfg_ops;
+#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
 struct dwc3_trb;
 
 /**
@@ -635,6 +642,8 @@ struct dwc3_scratchpad_array {
  * @mode: mode of operation
  * @usb2_phy: pointer to USB2 PHY
  * @usb3_phy: pointer to USB3 PHY
+ * @usb2_generic_phy: pointer to USB2 PHY
+ * @usb3_generic_phy: pointer to USB3 PHY
  * @dcfg: saved contents of DCFG register
  * @gctl: saved contents of GCTL register
  * @is_selfpowered: true when we are selfpowered
@@ -686,6 +695,11 @@ struct dwc3 {
 
 	struct usb_phy		*usb2_phy;
 	struct usb_phy		*usb3_phy;
+#if defined (CONFIG_SYNO_LSP_MONACO)
+
+	struct phy		*usb2_generic_phy;
+	struct phy		*usb3_generic_phy;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 	void __iomem		*regs;
 	size_t			regs_size;
@@ -751,7 +765,31 @@ struct dwc3 {
 
 	u8			test_mode;
 	u8			test_mode_nr;
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+	struct dwc3_cfg_ops     *cfg_ops;
+#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#ifdef CONFIG_USB_DWC3_AL_RMN_2648
+	void __iomem *		serdes_regs_base;
+	u32			serdes_group;
+	u32			serdes_lane;
+#endif
+#ifdef CONFIG_USB_DWC3_AL_VBUS_GPIO
+	int			vbus_active;
+	int			vbus_gpio;
+	struct delayed_work	vbus_work;
+#endif
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 };
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+/**
+ * struct dwc3_cfg_ops - configuration ops for dwc3 registers
+ * these ops may are requrired for some hardware.
+ */
+struct dwc3_cfg_ops {
+	u32 (*dwc3_gsbuscfg)(struct device *dev, int index);
+};
+#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
 
 /* -------------------------------------------------------------------------- */
 

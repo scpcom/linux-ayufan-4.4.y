@@ -1429,7 +1429,7 @@ source "drivers/cpufreq/Kconfig"
 config BFIN_CPU_FREQ
 	bool
 	depends on CPU_FREQ
-	select CPU_FREQ_TABLE
+	select CPU_FREQ_TABLE if !SYNO_LSP_ARMADA_2015_T1_1p4
 	default y
 
 config CPU_VOLTAGE

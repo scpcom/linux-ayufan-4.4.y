@@ -13,8 +13,16 @@
  * 0xfffe0000 and 0xfffeffff.
  */
 
+#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE) && defined(CONFIG_HIGHMEM)
+#define FIXADDR_START		0xff400000UL
+#define FIXADDR_TOP		0xff800000UL
+#elif defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && defined(CONFIG_HIGHMEM)
+#define FIXADDR_START		0xffc00000UL
+#define FIXADDR_TOP		0xfff00000UL
+#else
 #define FIXADDR_START		0xfff00000UL
 #define FIXADDR_TOP		0xfffe0000UL
+#endif
 #define FIXADDR_SIZE		(FIXADDR_TOP - FIXADDR_START)
 
 #define FIX_KMAP_BEGIN		0

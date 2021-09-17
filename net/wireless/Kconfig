@@ -1,5 +1,6 @@
 config WIRELESS_EXT
 	bool
+	def_bool y if SYNO_ALPINE || SYNO_LSP_ARMADA_2015_T1_1p4
 
 config WEXT_CORE
 	def_bool y
@@ -12,9 +13,11 @@ config WEXT_PROC
 
 config WEXT_SPY
 	bool
+	def_bool y if SYNO_LSP_ARMADA_2015_T1_1p4
 
 config WEXT_PRIV
 	bool
+	def_bool y if SYNO_ALPINE || SYNO_LSP_ARMADA_2015_T1_1p4
 
 config CFG80211
 	tristate "cfg80211 - wireless configuration API"

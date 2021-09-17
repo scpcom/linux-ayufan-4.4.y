@@ -43,6 +43,18 @@ static unsigned int _get_table_maxdiv(const struct clk_div_table *table)
 	return maxdiv;
 }
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+static unsigned int _get_table_mindiv(const struct clk_div_table *table)
+{
+	unsigned int mindiv = UINT_MAX;
+	const struct clk_div_table *clkt;
+
+	for (clkt = table; clkt->div; clkt++)
+		if (clkt->div < mindiv)
+			mindiv = clkt->div;
+	return mindiv;
+}
+#endif /* CONFIG_SYNO_LSP_MONACO */
 static unsigned int _get_maxdiv(struct clk_divider *divider)
 {
 	if (divider->flags & CLK_DIVIDER_ONE_BASED)
@@ -144,12 +156,114 @@ static bool _is_valid_div(struct clk_divider *divider, unsigned int div)
 	return true;
 }
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+static int _round_up_table(const struct clk_div_table *table, int div)
+{
+	const struct clk_div_table *clkt;
+	int up = _get_table_maxdiv(table);
+
+	for (clkt = table; clkt->div; clkt++) {
+		if (clkt->div == div)
+			return clkt->div;
+		else if (clkt->div < div)
+			continue;
+
+		if ((clkt->div - div) < (up - div))
+			up = clkt->div;
+	}
+
+	return up;
+}
+
+static int _round_down_table(const struct clk_div_table *table, int div)
+{
+	const struct clk_div_table *clkt;
+	int down = _get_table_mindiv(table);
+
+	for (clkt = table; clkt->div; clkt++) {
+		if (clkt->div == div)
+			return clkt->div;
+		else if (clkt->div > div)
+			continue;
+
+		if ((div - clkt->div) < (div - down))
+			down = clkt->div;
+	}
+
+	return down;
+}
+
+static int _div_round_up(struct clk_divider *divider,
+		unsigned long parent_rate, unsigned long rate)
+{
+	int div = DIV_ROUND_UP(parent_rate, rate);
+
+	if (divider->flags & CLK_DIVIDER_POWER_OF_TWO)
+		div = __roundup_pow_of_two(div);
+	if (divider->table)
+		div = _round_up_table(divider->table, div);
+
+	return div;
+}
+
+static int _div_round_closest(struct clk_divider *divider,
+		unsigned long parent_rate, unsigned long rate)
+{
+	int up, down, div;
+
+	up = down = div = DIV_ROUND_CLOSEST(parent_rate, rate);
+
+	if (divider->flags & CLK_DIVIDER_POWER_OF_TWO) {
+		up = __roundup_pow_of_two(div);
+		down = __rounddown_pow_of_two(div);
+	} else if (divider->table) {
+		up = _round_up_table(divider->table, div);
+		down = _round_down_table(divider->table, div);
+	}
+
+	return (up - div) <= (div - down) ? up : down;
+}
+
+static int _div_round(struct clk_divider *divider, unsigned long parent_rate,
+		unsigned long rate)
+{
+	if (divider->flags & CLK_DIVIDER_ROUND_CLOSEST)
+		return _div_round_closest(divider, parent_rate, rate);
+
+	return _div_round_up(divider, parent_rate, rate);
+}
+
+static bool _is_best_div(struct clk_divider *divider,
+		int rate, int now, int best)
+{
+	if (divider->flags & CLK_DIVIDER_ROUND_CLOSEST)
+		return abs(rate - now) <= abs(rate - best);
+
+	return now <= rate && now > best;
+}
+
+static int _next_div(struct clk_divider *divider, int div)
+{
+	div++;
+
+	if (divider->flags & CLK_DIVIDER_POWER_OF_TWO)
+		return __roundup_pow_of_two(div);
+	if (divider->table)
+		return _round_up_table(divider->table, div);
+
+	return div;
+}
+#endif /* CONFIG_SYNO_LSP_MONACO */
+
 static int clk_divider_bestdiv(struct clk_hw *hw, unsigned long rate,
 		unsigned long *best_parent_rate)
 {
 	struct clk_divider *divider = to_clk_divider(hw);
 	int i, bestdiv = 0;
 	unsigned long parent_rate, best = 0, now, maxdiv;
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	unsigned long parent_rate_saved = *best_parent_rate;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 	if (!rate)
 		rate = 1;
@@ -158,7 +272,11 @@ static int clk_divider_bestdiv(struct clk_hw *hw, unsigned long rate,
 
 	if (!(__clk_get_flags(hw->clk) & CLK_SET_RATE_PARENT)) {
 		parent_rate = *best_parent_rate;
+#if defined (CONFIG_SYNO_LSP_MONACO)
+		bestdiv = _div_round(divider, parent_rate, rate);
+#else /* CONFIG_SYNO_LSP_MONACO */
 		bestdiv = DIV_ROUND_UP(parent_rate, rate);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 		bestdiv = bestdiv == 0 ? 1 : bestdiv;
 		bestdiv = bestdiv > maxdiv ? maxdiv : bestdiv;
 		return bestdiv;
@@ -170,6 +288,29 @@ static int clk_divider_bestdiv(struct clk_hw *hw, unsigned long rate,
 	 */
 	maxdiv = min(ULONG_MAX / rate, maxdiv);
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	for (i = 1; i <= maxdiv; i = _next_div(divider, i)) {
+		if (!_is_valid_div(divider, i))
+			continue;
+		if (rate * i == parent_rate_saved) {
+			/*
+			 * It's the most ideal case if the requested rate can be
+			 * divided from parent clock without needing to change
+			 * parent rate, so return the divider immediately.
+			 */
+			*best_parent_rate = parent_rate_saved;
+			return i;
+		}
+		parent_rate = __clk_round_rate(__clk_get_parent(hw->clk),
+				MULT_ROUND_UP(rate, i));
+		now = parent_rate / i;
+		if (_is_best_div(divider, rate, now, best)) {
+			bestdiv = i;
+			best = now;
+			*best_parent_rate = parent_rate;
+		}
+	}
+#else /* CONFIG_SYNO_LSP_MONACO */
 	for (i = 1; i <= maxdiv; i++) {
 		if (!_is_valid_div(divider, i))
 			continue;
@@ -182,6 +323,7 @@ static int clk_divider_bestdiv(struct clk_hw *hw, unsigned long rate,
 			*best_parent_rate = parent_rate;
 		}
 	}
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 	if (!bestdiv) {
 		bestdiv = _get_maxdiv(divider);
@@ -209,6 +351,10 @@ static int clk_divider_set_rate(struct clk_hw *hw, unsigned long rate,
 	u32 val;
 
 	div = parent_rate / rate;
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	if (!_is_valid_div(divider, div))
+		return -EINVAL;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	value = _get_val(divider, div);
 
 	if (value > div_mask(divider))

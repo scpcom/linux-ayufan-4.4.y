@@ -222,6 +222,9 @@ static int __init mv_rtc_probe(struct platform_device *pdev)
 	struct rtc_plat_data *pdata;
 	resource_size_t size;
 	u32 rtc_time;
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	u32 rtc_date;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	int ret = 0;
 
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
@@ -264,6 +267,19 @@ static int __init mv_rtc_probe(struct platform_device *pdev)
 			goto out;
 		}
 	}
+
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	/*
+	 * A date after January 19th, 2038 does not fit on 32 bits and
+	 * will confuse the kernel and userspace. Reset to a sane date
+	 * (January 1st, 2013) if we're after 2038.
+	 */
+	rtc_date = readl(pdata->ioaddr + RTC_DATE_REG_OFFS);
+	if (bcd2bin((rtc_date >> RTC_YEAR_OFFS) & 0xff) >= 38) {
+		dev_info(&pdev->dev, "invalid RTC date, resetting to January, 1st 2013\n");
+		writel(0x130101, pdata->ioaddr + RTC_DATE_REG_OFFS);
+	}
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 	pdata->irq = platform_get_irq(pdev, 0);
 

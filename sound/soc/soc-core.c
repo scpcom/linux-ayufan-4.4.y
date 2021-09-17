@@ -33,6 +33,9 @@
 #include <linux/ctype.h>
 #include <linux/slab.h>
 #include <linux/of.h>
+#if defined(CONFIG_SYNO_ARMADA)
+#include <linux/regmap.h>
+#endif /* CONFIG_SYNO_ARMADA */
 #include <sound/ac97_codec.h>
 #include <sound/core.h>
 #include <sound/jack.h>

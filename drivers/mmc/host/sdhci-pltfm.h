@@ -18,6 +18,9 @@
 struct sdhci_pltfm_data {
 	const struct sdhci_ops *ops;
 	unsigned int quirks;
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	unsigned int quirks2;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 };
 
 struct sdhci_pltfm_host {

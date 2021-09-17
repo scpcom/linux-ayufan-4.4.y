@@ -28,7 +28,6 @@
 #endif
 
 #ifdef CONFIG_SYNO_FS_ARCHIVE_BIT
-#define SYNO_ARCHIVE_BIT
 #if defined (F_CLEAR_ARCHIVE) || defined (F_SETSMB_ARCHIVE) || defined (F_SETSMB_HIDDEN) || \
 	defined (F_SETSMB_SYSTEM) || defined (F_CLRSMB_ARCHIVE) || defined (F_CLRSMB_HIDDEN) || \
 	defined (F_CLRSMB_SYSTEM) || defined (F_CLEAR_S3_ARCHIVE)

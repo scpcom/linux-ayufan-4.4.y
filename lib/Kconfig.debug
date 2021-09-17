@@ -1312,6 +1312,7 @@ config DEBUG_STRICT_USER_COPY_CHECKS
 
 source mm/Kconfig.debug
 source kernel/trace/Kconfig
+source kernel/mtt/Kconfig
 
 config RBTREE_TEST
 	tristate "Red-Black tree test"

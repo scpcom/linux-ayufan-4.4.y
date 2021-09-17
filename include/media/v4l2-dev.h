@@ -24,7 +24,12 @@
 #define VFL_TYPE_VBI		1
 #define VFL_TYPE_RADIO		2
 #define VFL_TYPE_SUBDEV		3
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#define VFL_TYPE_TSMUX		4
+#define VFL_TYPE_MAX		5
+#else /* CONFIG_SYNO_LSP_MONACO */
 #define VFL_TYPE_MAX		4
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 /* Is this a receiver, transmitter or mem-to-mem? */
 /* Ignored for VFL_TYPE_SUBDEV. */

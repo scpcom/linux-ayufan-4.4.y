@@ -119,8 +119,13 @@ struct dvb_demux {
 
 	struct list_head frontend_list;
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	struct dvb_demux_feed *pesfilter[DMX_PES_LAST];
+	u16 pids[DMX_PES_LAST];
+#else /* CONFIG_SYNO_LSP_MONACO */
 	struct dvb_demux_feed *pesfilter[DMX_PES_OTHER];
 	u16 pids[DMX_PES_OTHER];
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	int playing;
 	int recording;
 

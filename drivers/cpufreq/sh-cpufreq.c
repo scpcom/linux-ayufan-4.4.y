@@ -87,15 +87,23 @@ static int sh_cpufreq_verify(struct cpufreq_policy *policy)
 	if (freq_table)
 		return cpufreq_frequency_table_verify(policy, freq_table);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	cpufreq_verify_within_cpu_limits(policy);
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	cpufreq_verify_within_limits(policy, policy->cpuinfo.min_freq,
 				     policy->cpuinfo.max_freq);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
 	policy->min = (clk_round_rate(cpuclk, 1) + 500) / 1000;
 	policy->max = (clk_round_rate(cpuclk, ~0UL) + 500) / 1000;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	cpufreq_verify_within_cpu_limits(policy);
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	cpufreq_verify_within_limits(policy, policy->cpuinfo.min_freq,
 				     policy->cpuinfo.max_freq);
 
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	return 0;
 }
 
@@ -148,7 +156,11 @@ static int sh_cpufreq_cpu_exit(struct cpufreq_policy *policy)
 	unsigned int cpu = policy->cpu;
 	struct clk *cpuclk = &per_cpu(sh_cpuclk, cpu);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	cpufreq_frequency_table_put_attr(cpu);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	clk_put(cpuclk);
 
 	return 0;
@@ -160,7 +172,11 @@ static struct freq_attr *sh_freq_attr[] = {
 };
 
 static struct cpufreq_driver sh_cpufreq_driver = {
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	.owner		= THIS_MODULE,
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	.name		= "sh",
 	.get		= sh_cpufreq_get,
 	.target		= sh_cpufreq_target,

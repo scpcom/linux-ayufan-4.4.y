@@ -97,4 +97,78 @@ config SYNO_SFP_UNSUPPORTED_NOTIFY
 	  Provides an interface at /proc/driver/syno_unsupported_sfp_notify
 	  to inform userspace that if an unsupported SFP+ module inserted.
 
+config SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
+	bool "Tuning Alpine network performance"
+	default y
+	depends on SYNO_ALPINE
+	help
+	  Adjust network settings to boost network performance.
+
+config SYNO_ALPINE_FIX_DMA_RECVFILE
+	bool "Fix Alpine file checksum error when using NET DMA"
+	default y
+	depends on SYNO_ALPINE
+	help
+	  When using recvfile, it expects it can receive full data (not partial).
+	  If it receives partial data, the remaining data will be random values, and
+	  file checksum will be incorrect.
+	  On Alpine, if CONFIG_NET_DMA is enabled, sometimes tcp_recvmsg will return
+	  partial data due to full DMA buffer, causing recvfile behave incorrectly.
+	  We add the delay & retry mechanism for this issue.
+
+config SYNO_ALPINE_ADJUST_RX_EQUAL
+	bool "Add an option to turn on/off 10G rx equalization according to sys entry"
+	default y
+	depends on SYNO_ALPINE
+	help
+	  RX equalization is used to tune best parameters for 10G transmission.
+	  Add an option to turn on/off RX equalization according to the entry in
+	  sys file system.
+
+config SYNO_ALPINE_CHANGE_RJ45_LED_BEHAVIOR
+	bool "Adjust Alpine backplane RJ45 LED behavior"
+	default y
+	depends on SYNO_ALPINE
+	help
+	  Adjust LED behavior to match HW spec.
+
+config SYNO_MONACO_NETWORK_FIXED
+	bool "Fix network when link speed on 10Mb/s"
+	default y
+	depends on SYNO_LSP_MONACO
+	help
+	  It is a workaround for link speed 10Mb/s.
+	  After applying this patch, the tx clk is 2.5MHz.
+
+config SYNO_PHY_INIT
+	bool "syno initialization of phy device"
+	default y
+	help
+	  Adjust registers to match HW spec.
+
+config SYNO_PHY_INIT_88E1514
+	bool "Enable phy driver of the phy 88E1514"
+	default y
+	depends on SYNO_PHY_INIT
+	help
+	  Enable phy driver of the phy 88E1514.
+
+config SYNO_INCREASE_SKB_SIZE
+       bool "Increase skb size to 2K"
+       default y
+       depends on SYNO_MONACO
+       help
+       <DSM> 86053
+       We find that STM mac receive packets which size is large than mtu 1500.
+       It will make skb_put trigger skb_over_panic. This config increase skb size to 2K.
+
+config SYNO_INCREASE_TSQ_SIZE
+	   bool "Increase TSQ size"
+	   default y
+	   depends on SYNO_ARMADA
+	   help
+	   <DSM> 83574
+	   We found that the size of tcp small queues would affect
+	   the performance of RX's throughput.
+
 endmenu #Network

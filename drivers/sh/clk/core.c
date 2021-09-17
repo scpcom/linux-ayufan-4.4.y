@@ -63,12 +63,20 @@ void clk_rate_table_build(struct clk *clk,
 		else
 			freq = clk->parent->rate * mult / div;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+		freq_table[i].driver_data = i;
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 		freq_table[i].index = i;
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 		freq_table[i].frequency = freq;
 	}
 
 	/* Termination entry */
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	freq_table[i].driver_data = i;
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	freq_table[i].index = i;
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	freq_table[i].frequency = CPUFREQ_TABLE_END;
 }
 

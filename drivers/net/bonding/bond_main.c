@@ -1396,6 +1396,9 @@ static netdev_features_t bond_fix_features(struct net_device *dev,
 		goto out;
 	}
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	features &= ~(NETIF_F_GSO_SOFTWARE | NETIF_F_GSO_ROBUST);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	mask = features;
 	features &= ~NETIF_F_ONE_FOR_ALL;
 	features |= NETIF_F_ALL_FOR_ALL;
@@ -1412,9 +1415,15 @@ out:
 	return features;
 }
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#define BOND_VLAN_FEATURES	(NETIF_F_ALL_CSUM | NETIF_F_SG | \
+				 NETIF_F_FRAGLIST | \
+				 NETIF_F_HIGHDMA | NETIF_F_LRO)
+#else /* CONFIG_SYNO_LSP_ALPINE */
 #define BOND_VLAN_FEATURES	(NETIF_F_ALL_CSUM | NETIF_F_SG | \
 				 NETIF_F_FRAGLIST | NETIF_F_ALL_TSO | \
 				 NETIF_F_HIGHDMA | NETIF_F_LRO)
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 static void bond_compute_features(struct bonding *bond)
 {

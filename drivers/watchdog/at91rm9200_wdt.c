@@ -268,7 +268,11 @@ static struct platform_driver at91wdt_driver = {
 	.driver		= {
 		.name	= "at91_wdt",
 		.owner	= THIS_MODULE,
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+		.of_match_table = at91_wdt_dt_ids,
+#else /* CONFIG_SYNO_LSP_ARMADA */
 		.of_match_table = of_match_ptr(at91_wdt_dt_ids),
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	},
 };
 

@@ -70,7 +70,21 @@ static void ehci_handover_companion_ports(struct ehci_hcd *ehci)
 	}
 
 	/* Give the connections some time to appear */
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+	port = HCS_N_PORTS(ehci->hcs_params);
+	while (port--) {
+		if (test_bit(port, &ehci->owned_ports)) {
+			reg = &ehci->regs->port_status[port];
+			status = handshake(ehci, reg, PORT_CONNECT,
+					   PORT_CONNECT, 150000);
+			if (status != 0)
+				ehci_dbg(ehci, "port %d: disconnected\n",
+					 port + 1);
+		}
+	}
+#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
 	msleep(20);
+#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
 
 	spin_lock_irq(&ehci->lock);
 	port = HCS_N_PORTS(ehci->hcs_params);
@@ -1035,7 +1049,11 @@ static int ehci_hub_control (
 			set_bit(wIndex, &ehci->suspended_ports);
 			break;
 		case USB_PORT_FEAT_POWER:
+#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+			if (!(temp & PORT_OC) && HCS_PPC(ehci->hcs_params))
+#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
 			if (HCS_PPC (ehci->hcs_params))
+#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
 				ehci_writel(ehci, temp | PORT_POWER,
 						status_reg);
 			break;

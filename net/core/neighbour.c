@@ -2761,6 +2761,13 @@ void neigh_app_ns(struct neighbour *n)
 EXPORT_SYMBOL(neigh_app_ns);
 #endif /* CONFIG_ARPD */
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+int hh_output_relaxed __read_mostly = 0;
+#if defined(CONFIG_SYNO_ALPINE)
+EXPORT_SYMBOL(hh_output_relaxed);
+#endif /* CONFIG_SYNO_ALPINE */
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
 #ifdef CONFIG_SYSCTL
 static int zero;
 static int unres_qlen_max = INT_MAX / SKB_TRUESIZE(ETH_FRAME_LEN);

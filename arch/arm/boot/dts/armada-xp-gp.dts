@@ -14,7 +14,8 @@
  */
 
 /dts-v1/;
-/include/ "armada-xp-mv78460.dtsi"
+#include <dt-bindings/gpio/gpio.h>
+#include "armada-xp-mv78460.dtsi"
 
 / {
 	model = "Marvell Armada XP Development Board DB-MV784MP-GP";
@@ -38,29 +39,96 @@
 		      <0x00000001 0x00000000 0x00000001 0x00000000>;
 	};
 
+	cpus {
+		pm_pic {
+			ctrl-gpios = <&gpio0 16 GPIO_ACTIVE_LOW>,
+				     <&gpio0 17 GPIO_ACTIVE_LOW>,
+				     <&gpio0 18 GPIO_ACTIVE_LOW>;
+		};
+	};
+
 	soc {
-		ranges = <0          0 0xd0000000 0x100000  /* Internal registers 1MiB */
-			  0xe0000000 0 0xe0000000 0x8100000 /* PCIe */
-			  0xf0000000 0 0xf0000000 0x1000000 /* Device Bus, NOR 16MiB  */>;
+		ranges = <MBUS_ID(0xf0, 0x01) 0 0 0xf1000000 0x100000
+			  MBUS_ID(0x01, 0x1d) 0 0 0xfff00000 0x100000
+			  MBUS_ID(0x01, 0x2f) 0 0 0xf0000000 0x1000000
+			  MBUS_ID(0x09, 0x01) 0 0 0xf1100000 0x10000	/* CESA0: PHYS=0xf1100000
+									   size 64K */
+			  MBUS_ID(0x09, 0x05) 0 0 0xf1110000 0x10000	/* CESA1: PHYS=0xf1110000
+									   size 64K */
+			  MBUS_ID(0x0c, 0x04) 0 0 0xf1200000 0x100000>;	/* PNC_BM: PHYS=0xf1200000
+									   size 1M, (PnC 512KB, BM 512KB) */
+
+		devbus-bootcs {
+			status = "okay";
+
+			/* Device Bus parameters are required */
+
+			/* Read parameters */
+			devbus,bus-width    = <16>;
+			devbus,turn-off-ps  = <60000>;
+			devbus,badr-skew-ps = <0>;
+			devbus,acc-first-ps = <124000>;
+			devbus,acc-next-ps  = <248000>;
+			devbus,rd-setup-ps  = <0>;
+			devbus,rd-hold-ps   = <0>;
+
+			/* Write parameters */
+			devbus,sync-enable = <0>;
+			devbus,wr-high-ps  = <60000>;
+			devbus,wr-low-ps   = <60000>;
+			devbus,ale-wr-ps   = <60000>;
+
+			/* NOR 16 MiB */
+			nor@0 {
+				compatible = "cfi-flash";
+				reg = <0 0x1000000>;
+				bank-width = <2>;
+			};
+		};
+
+		pcie-controller {
+			status = "okay";
+
+			/*
+			 * The 3 slots are physically present as
+			 * standard PCIe slots on the board.
+			 */
+			pcie@1,0 {
+				/* Port 0, Lane 0 */
+				status = "okay";
+			};
+			pcie@9,0 {
+				/* Port 2, Lane 0 */
+				status = "okay";
+			};
+			pcie@10,0 {
+				/* Port 3, Lane 0 */
+				status = "okay";
+			};
+		};
 
 		internal-regs {
 			serial@12000 {
-				clock-frequency = <250000000>;
 				status = "okay";
 			};
 			serial@12100 {
-				clock-frequency = <250000000>;
 				status = "okay";
 			};
 			serial@12200 {
-				clock-frequency = <250000000>;
 				status = "okay";
 			};
 			serial@12300 {
-				clock-frequency = <250000000>;
 				status = "okay";
 			};
-
+			pinctrl {
+				pinctrl-0 = <&pic_pins>;
+				pinctrl-names = "default";
+				pic_pins: pic-pins-0 {
+					marvell,pins = "mpp16", "mpp17",
+						       "mpp18";
+					marvell,function = "gpio";
+				};
+			};
 			sata@a0000 {
 				nr-ports = <2>;
 				status = "okay";
@@ -105,6 +173,16 @@
 				phy-mode = "rgmii-id";
 			};
 
+			/* Front-side USB slot */
+			usb@50000 {
+				status = "okay";
+			};
+
+			/* Back-side USB slot */
+			usb@51000 {
+				status = "okay";
+			};
+
 			spi0: spi@10600 {
 				status = "okay";
 
@@ -117,54 +195,45 @@
 				};
 			};
 
-			devbus-bootcs@10400 {
+			nand@d0000 {
+				num-cs = <1>;
+				marvell,nand-keep-config;
+				marvell,nand-enable-arbiter;
+				nand-on-flash-bbt;
+			};
+
+			/* 1GB Flash via NFC NAND controller */
+			nfc: nand-flash@d0000 {
+				#address-cells = <1>;
+				#size-cells = <1>;
 				status = "okay";
-				ranges = <0 0xf0000000 0x1000000>; /* @addr 0xf000000, size 0x1000000 */
 
-				/* Device Bus parameters are required */
+				nfc,nfc-mode  = "normal";       /* normal or ganged */
+				nfc,nfc-dma   = <0>;            /* 0 for no, 1 for dma */
+				nfc,nfc-width = <8>;
+				nfc,ecc-type  = <1>;            /* 4 bit */
+				nfc,num-cs    = <1>;
 
-				/* Read parameters */
-				devbus,bus-width    = <8>;
-				devbus,turn-off-ps  = <60000>;
-				devbus,badr-skew-ps = <0>;
-				devbus,acc-first-ps = <124000>;
-				devbus,acc-next-ps  = <248000>;
-				devbus,rd-setup-ps  = <0>;
-				devbus,rd-hold-ps   = <0>;
+				mtd0@00000000 {
+					label = "U-Boot";
+					reg = <0x00000000 0x00300000>;
+					read-only;
+				};
 
-				/* Write parameters */
-				devbus,sync-enable = <0>;
-				devbus,wr-high-ps  = <60000>;
-				devbus,wr-low-ps   = <60000>;
-				devbus,ale-wr-ps   = <60000>;
+				mtd1@00080000 {
+					label = "uImage";
+					reg = <0x00300000 0x00400000>;
+					read-only;
+				};
 
-				/* NOR 16 MiB */
-				nor@0 {
-					compatible = "cfi-flash";
-					reg = <0 0x1000000>;
-					bank-width = <2>;
+				mtd2@00140000 {
+					label = "Root";
+					reg = <0x00700000 0x3f900000>;
 				};
 			};
 
-			pcie-controller {
+			crypto@9D000 {
 				status = "okay";
-
-				/*
-				 * The 3 slots are physically present as
-				 * standard PCIe slots on the board.
-				 */
-				pcie@1,0 {
-					/* Port 0, Lane 0 */
-					status = "okay";
-				};
-				pcie@9,0 {
-					/* Port 2, Lane 0 */
-					status = "okay";
-				};
-				pcie@10,0 {
-					/* Port 3, Lane 0 */
-					status = "okay";
-				};
 			};
 		};
 	};

@@ -95,6 +95,10 @@ typedef unsigned int t_key;
 #define IS_TNODE(n) (!(n->parent & T_LEAF))
 #define IS_LEAF(n) (n->parent & T_LEAF)
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+static int fib_local_acceleration = 0;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
 struct rt_trie_node {
 	unsigned long parent;
 	t_key key;
@@ -150,8 +154,22 @@ struct trie_stat {
 	unsigned int nodesizes[MAX_STAT_DEPTH];
 };
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#define FIB_LOCAL_ACC_SIZE 20
+#define FIB_LOCAL_ACC_INVALID INADDR_LOOPBACK
+
+struct fib_local_acc {
+	u32 enabled;
+	u32 max_used;
+	u32 acc[FIB_LOCAL_ACC_SIZE];
+};
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
 struct trie {
 	struct rt_trie_node __rcu *trie;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	struct fib_local_acc   *fib_local_acc;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 #ifdef CONFIG_IP_FIB_TRIE_STATS
 	struct trie_use_stats stats;
 #endif
@@ -175,6 +193,13 @@ static const int sync_pages = 128;
 
 static struct kmem_cache *fn_alias_kmem __read_mostly;
 static struct kmem_cache *trie_leaf_kmem __read_mostly;
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+static struct fib_local_acc* fib_local_acc_init(void);
+static void fib_local_acc_add(struct fib_table *tb, u32 key, int plen);
+static void fib_local_acc_del(struct fib_table *tb, u32 key, int plen);
+static int fib_local_acc_match(struct fib_table *tb, u32 key);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 /*
  * caller must hold RTNL
@@ -1322,6 +1347,10 @@ int fib_table_insert(struct fib_table *tb, struct fib_config *cfg)
 	rtmsg_fib(RTM_NEWROUTE, htonl(key), new_fa, plen, tb->tb_id,
 		  &cfg->fc_nlinfo, 0);
 succeeded:
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	if (RT_TABLE_LOCAL == tb->tb_id)
+		fib_local_acc_add(tb, key, plen);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	return 0;
 
 out_free_new_fa:
@@ -1412,6 +1441,12 @@ int fib_table_lookup(struct fib_table *tb, const struct flowi4 *flp,
 	unsigned int current_prefix_length = KEYLENGTH;
 	struct tnode *cn;
 	t_key pref_mismatch;
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	if (fib_local_acceleration && (RT_TABLE_LOCAL == tb->tb_id)
+	    && (!fib_local_acc_match(tb, key)))
+		return 1;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 	rcu_read_lock();
 
@@ -1699,6 +1734,12 @@ int fib_table_delete(struct fib_table *tb, struct fib_config *cfg)
 
 	fib_release_info(fa->fa_info);
 	alias_free_mem_rcu(fa);
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	if (RT_TABLE_LOCAL == tb->tb_id)
+		fib_local_acc_del(tb, key, plen);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
 	return 0;
 }
 
@@ -1832,6 +1873,13 @@ int fib_table_flush(struct fib_table *tb)
 
 void fib_free_table(struct fib_table *tb)
 {
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	struct trie *t = (struct trie *) tb->tb_data;
+
+	if (t->fib_local_acc)
+		kfree(t->fib_local_acc);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
 	kfree(tb);
 }
 
@@ -1959,6 +2007,124 @@ void __init fib_trie_init(void)
 					   0, SLAB_PANIC, NULL);
 }
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+static struct fib_local_acc* fib_local_acc_init(void)
+{
+	struct fib_local_acc* fib_local_acc =
+		kzalloc(sizeof(struct fib_local_acc), GFP_KERNEL);
+	int i;
+
+	if (fib_local_acc == NULL) return NULL;
+
+	for (i= 0; i < FIB_LOCAL_ACC_SIZE; i++) {
+		fib_local_acc->acc[i] = FIB_LOCAL_ACC_INVALID;
+	}
+
+	fib_local_acc->enabled = 1;
+	fib_local_acc->max_used = 0;
+	return fib_local_acc;
+}
+
+static void fib_local_acc_add(struct fib_table *tb, u32 key, int plen) {
+	int entry;
+	struct trie *t = (struct trie *) tb->tb_data;
+	struct fib_local_acc *fib_local_acc = t->fib_local_acc;
+
+	if ((!fib_local_acc) ||
+	    (fib_local_acc->enabled == 0)) {
+		return;
+	}
+
+	if (unlikely(IN_LOOPBACK(key)))
+		return;
+
+	if (plen != 32) {
+		goto disable;
+	}
+
+	for (entry = 0; entry < FIB_LOCAL_ACC_SIZE; entry ++) {
+		if (fib_local_acc->acc[entry] == FIB_LOCAL_ACC_INVALID)
+			break;
+	}
+
+	if (entry == FIB_LOCAL_ACC_SIZE) {
+		goto disable;
+	}
+
+	if (entry == fib_local_acc->max_used)
+		fib_local_acc->max_used += 1;
+
+	fib_local_acc->acc[entry] = key;
+	return;
+
+disable:
+	fib_local_acc->enabled = 0;
+	printk(KERN_INFO "fib_local_acc: disable local acc %d %x\n", plen, key);
+	return;
+}
+
+static void fib_local_acc_del(struct fib_table *tb, u32 key, int plen) {
+
+	int entry;
+	struct trie *t = (struct trie *) tb->tb_data;
+	struct fib_local_acc *fib_local_acc = t->fib_local_acc;
+
+	if ((!fib_local_acc) ||
+	    (fib_local_acc->enabled == 0)) {
+		return;
+	}
+
+	if (unlikely(IN_LOOPBACK(key) ||
+		     plen != 32))
+		return;
+
+	for (entry = 0; entry < FIB_LOCAL_ACC_SIZE; entry++) {
+		if (fib_local_acc->acc[entry] == key) {
+			fib_local_acc->acc[entry] = FIB_LOCAL_ACC_INVALID;
+			break;
+		}
+	}
+
+	if (entry + 1 == fib_local_acc->max_used) {
+		while (entry >= 0) {
+			if (fib_local_acc->acc[entry] != FIB_LOCAL_ACC_INVALID)
+				break;
+			entry--;
+		}
+
+		fib_local_acc->max_used = entry + 1;
+	}
+
+	return;
+}
+
+static int fib_local_acc_match(struct fib_table *tb, u32 key) {
+	int entry;
+	struct trie *t = (struct trie *) tb->tb_data;
+	struct fib_local_acc *fib_local_acc = t->fib_local_acc;
+	u32 stored_key;
+
+	if ((!fib_local_acc) ||
+	    (fib_local_acc->enabled == 0)) {
+		return -1;
+	}
+
+	if (unlikely(IN_LOOPBACK(key)))
+		return 1;
+
+	for (entry = 0; entry < fib_local_acc->max_used; entry ++) {
+
+		stored_key =  fib_local_acc->acc[entry];
+
+		if (unlikely(stored_key == key)) {
+			return 1;
+		}
+	}
+
+	return 0;
+}
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
 struct fib_table *fib_trie_table(u32 id)
 {
 	struct fib_table *tb;
@@ -1975,6 +2141,11 @@ struct fib_table *fib_trie_table(u32 id)
 
 	t = (struct trie *) tb->tb_data;
 	memset(t, 0, sizeof(*t));
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	if (RT_TABLE_LOCAL == id)
+		t->fib_local_acc = fib_local_acc_init();
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 	return tb;
 }
@@ -2578,6 +2749,19 @@ static const struct file_operations fib_route_fops = {
 	.release = seq_release_net,
 };
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+static ctl_table fib_trie_proc_table[] = {
+	{
+		.procname= "fib_local_acc",
+		.data= &fib_local_acceleration,
+		.maxlen= sizeof(int),
+		.mode= 0644,
+		.proc_handler= proc_dointvec,
+	},
+	{ }
+};
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
 int __net_init fib_proc_init(struct net *net)
 {
 	if (!proc_create("fib_trie", S_IRUGO, net->proc_net, &fib_trie_fops))
@@ -2589,6 +2773,11 @@ int __net_init fib_proc_init(struct net *net)
 
 	if (!proc_create("route", S_IRUGO, net->proc_net, &fib_route_fops))
 		goto out3;
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	register_net_sysctl(net, "net/ipv4/route/fib_trie/",
+			    fib_trie_proc_table);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 	return 0;
 

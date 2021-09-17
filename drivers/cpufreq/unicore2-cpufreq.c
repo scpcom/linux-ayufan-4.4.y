@@ -29,8 +29,12 @@ int ucv2_verify_speed(struct cpufreq_policy *policy)
 	if (policy->cpu)
 		return -EINVAL;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	cpufreq_verify_within_cpu_limits(policy);
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	cpufreq_verify_within_limits(policy,
 			policy->cpuinfo.min_freq, policy->cpuinfo.max_freq);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
 	return 0;
 }
@@ -48,11 +52,27 @@ static int ucv2_target(struct cpufreq_policy *policy,
 			 unsigned int target_freq,
 			 unsigned int relation)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	unsigned int cur = ucv2_getspeed(0);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	struct cpufreq_freqs freqs;
 	struct clk *mclk = clk_get(NULL, "MAIN_CLK");
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	int ret;
+
+	freqs.old = policy->cur;
+	freqs.new = target_freq;
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
 	cpufreq_notify_transition(policy, &freqs, CPUFREQ_PRECHANGE);
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	ret = clk_set_rate(mclk, target_freq * 1000);
+	cpufreq_notify_post_transition(policy, &freqs, ret);
+
+	return ret;
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
 	if (!clk_set_rate(mclk, target_freq * 1000)) {
 		freqs.old = cur;
@@ -62,6 +82,7 @@ static int ucv2_target(struct cpufreq_policy *policy,
 	cpufreq_notify_transition(policy, &freqs, CPUFREQ_POSTCHANGE);
 
 	return 0;
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 }
 
 static int __init ucv2_cpu_init(struct cpufreq_policy *policy)

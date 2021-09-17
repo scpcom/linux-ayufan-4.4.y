@@ -35,7 +35,11 @@ static int mpic_msi_reserve_u3_hwirqs(struct mpic *mpic)
 	const struct irq_domain_ops *ops = mpic->irqhost->ops;
 	struct device_node *np;
 	int flags, index, i;
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	struct of_phandle_args oirq;
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	struct of_irq oirq;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 	pr_debug("mpic: found U3, guessing msi allocator setup\n");
 
@@ -62,9 +66,15 @@ static int mpic_msi_reserve_u3_hwirqs(struct mpic *mpic)
 		pr_debug("mpic: mapping hwirqs for %s\n", np->full_name);
 
 		index = 0;
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+		while (of_irq_parse_one(np, index++, &oirq) == 0) {
+			ops->xlate(mpic->irqhost, NULL, oirq.args,
+						oirq.args_count, &hwirq, &flags);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 		while (of_irq_map_one(np, index++, &oirq) == 0) {
 			ops->xlate(mpic->irqhost, NULL, oirq.specifier,
 						oirq.size, &hwirq, &flags);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 			msi_bitmap_reserve_hwirq(&mpic->msi_bitmap, hwirq);
 		}
 	}

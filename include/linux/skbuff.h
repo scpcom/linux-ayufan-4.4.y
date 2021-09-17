@@ -445,6 +445,11 @@ struct sk_buff {
 	__be16			protocol;
 
 	void			(*destructor)(struct sk_buff *skb);
+#if defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_NET_SKB_RECYCLE)
+	int				(*skb_recycle) (struct sk_buff *skb);
+	__u32			hw_cookie;
+#endif /* CONFIG_SYNO_LSP_ARMADA && CONFIG_NET_SKB_RECYCLE */
+
 #if defined(CONFIG_NF_CONNTRACK) || defined(CONFIG_NF_CONNTRACK_MODULE)
 	struct nf_conntrack	*nfct;
 #endif
@@ -647,7 +652,14 @@ static inline struct sk_buff *alloc_skb_head(gfp_t priority)
 	return __alloc_skb_head(priority, -1);
 }
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+extern void skb_release_head_state(struct sk_buff *skb);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 extern struct sk_buff *skb_morph(struct sk_buff *dst, struct sk_buff *src);
+#if defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_NET_SKB_RECYCLE)
+extern void skb_recycle(struct sk_buff *skb);
+extern bool skb_recycle_check(struct sk_buff *skb, int skb_size);
+#endif /* CONFIG_SYNO_LSP_ARMADA && CONFIG_NET_SKB_RECYCLE */
 extern int skb_copy_ubufs(struct sk_buff *skb, gfp_t gfp_mask);
 extern struct sk_buff *skb_clone(struct sk_buff *skb,
 				 gfp_t priority);
@@ -2448,6 +2460,11 @@ extern int	       skb_copy_datagram_iovec1(const struct sk_buff *from,
 					       int offset, struct iovec *to,
 					       int size);
 #endif /* CONFIG_SYNO_FS_RECVFILE */
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+extern int	       skb_copy_datagram_to_kernel_iovec(const struct sk_buff *from,
+					       int offset, struct iovec *to,
+					       int size);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 extern int	       skb_copy_and_csum_datagram_iovec(struct sk_buff *skb,
 							int hlen,
 							struct iovec *iov);
@@ -2931,5 +2948,30 @@ static inline unsigned int skb_gso_network_seglen(const struct sk_buff *skb)
 			       skb_network_header(skb);
 	return hdr_len + skb_gso_transport_seglen(skb);
 }
+#if defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_NET_SKB_RECYCLE)
+static inline bool skb_is_recycleable(const struct sk_buff *skb, int skb_size)
+{
+	if (irqs_disabled())
+		return false;
+
+	if (skb_shinfo(skb)->tx_flags & SKBTX_DEV_ZEROCOPY)
+		return false;
+
+	if (skb_is_nonlinear(skb) || skb->fclone != SKB_FCLONE_UNAVAILABLE)
+		return false;
+
+	skb_size = SKB_DATA_ALIGN(skb_size + NET_SKB_PAD);
+	if (skb_end_pointer(skb) - skb->head < skb_size)
+		return false;
+
+	if (skb_shared(skb) || skb_cloned(skb) || skb_has_frag_list(skb))
+		return false;
+
+	if (skb->head_frag)
+		return false;
+
+	return true;
+}
+#endif	/* CONFIG_SYNO_LSP_ARMADA && CONFIG_NET_SKB_RECYCLE */
 #endif	/* __KERNEL__ */
 #endif	/* _LINUX_SKBUFF_H */

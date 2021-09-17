@@ -24,7 +24,11 @@
 #include <linux/of_address.h>
 #include <linux/of_irq.h>
 #include <linux/of_platform.h>
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#include <linux/pm_opp.h>
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 #include <linux/opp.h>
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 #include <linux/phy.h>
 #include <linux/regmap.h>
 #include <linux/micrel_phy.h>
@@ -199,7 +203,11 @@ static void __init imx6q_opp_check_1p2ghz(struct device *cpu_dev)
 	val = readl_relaxed(base + OCOTP_CFG3);
 	val >>= OCOTP_CFG3_SPEED_SHIFT;
 	if ((val & 0x3) != OCOTP_CFG3_SPEED_1P2GHZ)
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+		if (dev_pm_opp_disable(cpu_dev, 1200000000))
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 		if (opp_disable(cpu_dev, 1200000000))
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 			pr_warn("failed to disable 1.2 GHz OPP\n");
 
 put_node:

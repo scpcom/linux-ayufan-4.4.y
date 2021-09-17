@@ -62,6 +62,12 @@ ENTRY(cpu_v7_switch_mm)
 	mov	pc, lr
 ENDPROC(cpu_v7_switch_mm)
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+.macro flush_pte adr
+	mcr	p15, 0, \adr, c7, c10, 1	@ flush_pte
+.endm
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
 /*
  *	cpu_v7_set_pte_ext(ptep, pte)
  *
@@ -76,10 +82,51 @@ ENTRY(cpu_v7_set_pte_ext)
 #ifdef CONFIG_MMU
 	str	r1, [r0]			@ linux version
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	/* Calc HW PTE Entry Offset */
+#ifdef CONFIG_MV_LARGE_PAGE_SUPPORT
+#ifdef CONFIG_MV_8KB_SW_PAGE_SIZE_SUPPORT
+	mov	r3, #0x3FC
+	and	r3, r3, r0
+	mov	r3, r3, lsl#1
+#elif defined(CONFIG_MV_16KB_SW_PAGE_SIZE_SUPPORT)
+	mov	r3, #0x1FC
+	and	r3, r3, r0
+	mov	r3, r3, lsl#2
+#elif defined(CONFIG_MV_32KB_SW_PAGE_SIZE_SUPPORT)
+	mov	r3, #0xFC
+	and	r3, r3, r0
+	mov	r3, r3, lsl#3
+#elif defined(CONFIG_MV_64KB_SW_PAGE_SIZE_SUPPORT)
+	mov	r3, #0x7C
+	and	r3, r3, r0
+	mov	r3, r3, lsl#4
+#elif defined(CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT)
+	mov	r3, #0x7C
+	and	r3, r3, r0
+	mov	r3, r3, lsl#4
+#endif /* CONFIG_MV_8KB_SW_PAGE_SIZE_SUPPORT */
+	bic	r0, r0, #0x3FC
+	bic	r0, r0, #0x400
+	orr	r0, r0, r3
+#endif /* CONFIG_MV_LARGE_PAGE_SUPPORT */
+	bic	r3, r1, #0x000003f0
+#ifdef CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT
+	bic	r3, r3, #0x00000F000
+#endif
+	bic	r3, r3, #PTE_TYPE_MASK
+	orr	r3, r3, r2
+#ifdef CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT
+	orr	r3, r3, #PTE_EXT_AP0 | 1
+#else
+	orr	r3, r3, #PTE_EXT_AP0 | 2
+#endif
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	bic	r3, r1, #0x000003f0
 	bic	r3, r3, #PTE_TYPE_MASK
 	orr	r3, r3, r2
 	orr	r3, r3, #PTE_EXT_AP0 | 2
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 	tst	r1, #1 << 4
 	orrne	r3, r3, #PTE_EXT_TEX(1)
@@ -110,9 +157,83 @@ ENTRY(cpu_v7_set_pte_ext)
  ARM(	str	r3, [r0, #2048]! )
  THUMB(	add	r0, r0, #2048 )
  THUMB(	str	r3, [r0] )
+#endif /* CONFIG_MMU */
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+#ifdef CONFIG_MMU
+#ifdef CONFIG_MV_LARGE_PAGE_SUPPORT
+#ifdef CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT
+	@ Need to duplicate the entry 16 times because of overlapping in PTE index bits.
+	str	r3, [r0, #4]
+	str	r3, [r0, #8]
+	str	r3, [r0, #12]
+	str	r3, [r0, #16]
+	str	r3, [r0, #20]
+	str	r3, [r0, #24]
+	str	r3, [r0, #28]
+	flush_pte r0
+	add	r0, r0, #32
+	str	r3, [r0]
+	str	r3, [r0, #4]
+	str	r3, [r0, #8]
+	str	r3, [r0, #12]
+	str	r3, [r0, #16]
+	str	r3, [r0, #20]
+	str	r3, [r0, #24]
+	str	r3, [r0, #28]
+	flush_pte r0
+#else
+#if PAGE_SHIFT > 12 		// >= 8KB
+	add	r3, r3, #0x1000
+	str	r3, [r0, #4]
+#endif /* PAGE_SHIFT > 12 */
+#if PAGE_SHIFT > 13		// >= 16KB
+	add	r3, r3, #0x1000
+	str	r3, [r0, #8]
+	add	r3, r3, #0x1000
+	str	r3, [r0, #12]
+#endif /* PAGE_SHIFT > 13 */
+#if PAGE_SHIFT > 14		// >= 32KB
+	add	r3, r3, #0x1000
+	str	r3, [r0, #16]
+	add	r3, r3, #0x1000
+	str	r3, [r0, #20]
+	add	r3, r3, #0x1000
+	str	r3, [r0, #24]
+	add	r3, r3, #0x1000
+	str	r3, [r0, #28]
+#endif /* PAGE_SHIFT > 14 */
+	flush_pte r0
+#if PAGE_SHIFT > 15		// >= 64KB
+	add	r0, r0, #32
+	add	r3, r3, #0x1000
+	str	r3, [r0]
+	add	r3, r3, #0x1000
+	str	r3, [r0, #4]
+	add	r3, r3, #0x1000
+	str	r3, [r0, #8]
+	add	r3, r3, #0x1000
+	str	r3, [r0, #12]
+	add	r3, r3, #0x1000
+	str	r3, [r0, #16]
+	add	r3, r3, #0x1000
+	str	r3, [r0, #20]
+	add	r3, r3, #0x1000
+	str	r3, [r0, #24]
+	add	r3, r3, #0x1000
+	str	r3, [r0, #28]
+	flush_pte r0
+#endif /* PAGE_SHIFT > 15 */
+#endif /* CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT */
+#else /* CONFIG_MV_LARGE_PAGE_SUPPORT */
+	flush_pte	r0
+#endif /* CONFIG_MV_LARGE_PAGE_SUPPORT */
+#endif /* CONFIG_MMU */
+#else /* CONFIG_SYNO_LSP_ARMADA */
+#ifdef CONFIG_MMU
 	ALT_SMP(W(nop))
 	ALT_UP (mcr	p15, 0, r0, c7, c10, 1)		@ flush_pte
 #endif
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	mov	pc, lr
 ENDPROC(cpu_v7_set_pte_ext)
 

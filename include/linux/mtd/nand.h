@@ -106,12 +106,20 @@ extern int nand_unlock(struct mtd_info *mtd, loff_t ofs, uint64_t len);
 
 #define NAND_CMD_NONE		-1
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+/* Feature Addresses (for the "SET/GET FEATURES" commands) */
+#define NAND_FEATURE_MICRON_ARRAY_OP_MODE	0x90
+#endif /* CONFIG_SYNO_LSP_MONACO */
+
 /* Status bits */
 #define NAND_STATUS_FAIL	0x01
 #define NAND_STATUS_FAIL_N1	0x02
 #define NAND_STATUS_TRUE_READY	0x20
 #define NAND_STATUS_READY	0x40
 #define NAND_STATUS_WP		0x80
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#define NAND_STATUS_ECCREWRITE	0x08
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 /*
  * Constants for ECC_MODES
@@ -122,6 +130,9 @@ typedef enum {
 	NAND_ECC_HW,
 	NAND_ECC_HW_SYNDROME,
 	NAND_ECC_HW_OOB_FIRST,
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	NAND_ECC_4BITONDIE,
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	NAND_ECC_SOFT_BCH,
 } nand_ecc_modes_t;
 
@@ -142,10 +153,20 @@ typedef enum {
  * Option constants for bizarre disfunctionality and real
  * features.
  */
+#if defined (CONFIG_SYNO_LSP_MONACO)
+/* Chip can not auto increment pages */
+#define NAND_NO_AUTOINCR	0x00000001
+#endif /* CONFIG_SYNO_LSP_MONACO */
 /* Buswidth is 16 bit */
 #define NAND_BUSWIDTH_16	0x00000002
 /* Chip has cache program function */
 #define NAND_CACHEPRG		0x00000008
+#if defined (CONFIG_SYNO_LSP_MONACO)
+
+/* Chip has copy back function */
+#define NAND_COPYBACK		0x00000010
+
+#endif /* CONFIG_SYNO_LSP_MONACO */
 /*
  * Chip requires ready check on read (for auto-incremented sequential read).
  * True only for small page devices; large page devices do not support
@@ -164,13 +185,31 @@ typedef enum {
 
 /* Device supports subpage reads */
 #define NAND_SUBPAGE_READ	0x00001000
+#if defined (CONFIG_SYNO_LSP_MONACO)
+/* Device supports cache read function */
+#define NAND_CACHERD		0x00001000
+
+#define NAND_MULTIPLANE_READ	0x00002000
+/* Deivce supports multi-plane program/erase operations */
+#define NAND_MULTIPLANE_PROG_ERASE	0x00004000
+/* Deivce supports multi-LUN operations */
+#define NAND_MULTILUN		0x00008000
+/* Micron '4-bit On-die ECC' device */
+#define NAND_MICRON_4BITONDIEECC	0x00080000
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 /* Options valid for Samsung large page devices */
 #define NAND_SAMSUNG_LP_OPTIONS NAND_CACHEPRG
 
 /* Macros to identify the above */
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#define NAND_CANAUTOINCR(chip) (!(chip->options & NAND_NO_AUTOINCR))
+#endif /* CONFIG_SYNO_LSP_MONACO */
 #define NAND_HAS_CACHEPROG(chip) ((chip->options & NAND_CACHEPRG))
 #define NAND_HAS_SUBPAGE_READ(chip) ((chip->options & NAND_SUBPAGE_READ))
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#define NAND_CHIPOPTIONS_MSK	(0x0000ffff & ~NAND_NO_AUTOINCR)
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 /* Non chip related options */
 /* This option skips the bbt scan during initialization. */
@@ -201,6 +240,12 @@ typedef enum {
 /* Keep gcc happy */
 struct nand_chip;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+/* ONFI features */
+#define ONFI_FEATURE_16_BIT_BUS		(1 << 0)
+#define ONFI_FEATURE_EXT_PARAM_PAGE	(1 << 7)
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
 /* ONFI timing mode, used in both asynchronous and synchronous mode */
 #define ONFI_TIMING_MODE_0		(1 << 0)
 #define ONFI_TIMING_MODE_1		(1 << 1)
@@ -223,7 +268,14 @@ struct nand_onfi_params {
 	__le16 revision;
 	__le16 features;
 	__le16 opt_cmd;
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	u8 reserved0[2];
+	__le16 ext_param_page_length; /* since ONFI 2.1 */
+	u8 num_of_param_pages;        /* since ONFI 2.1 */
+	u8 reserved1[17];
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	u8 reserved[22];
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 	/* manufacturer information block */
 	char manufacturer[12];
@@ -279,6 +331,78 @@ struct nand_onfi_params {
 } __attribute__((packed));
 
 #define ONFI_CRC_BASE	0x4F4E
+#if defined (CONFIG_SYNO_LSP_MONACO)
+
+/*
+ * NAND Device Timing Specification
+ *
+ * All values in nano seconds, except where specified.
+ */
+struct nand_timing_spec {
+	int	tR;		/* Max Page Read delay [us]*/
+	int	tCLS;		/* Min CLE setup time */
+	int	tCS;		/* Min CE setup time */
+	int	tALS;		/* Min ALE setup time */
+	int	tDS;		/* Min Data setup time */
+	int	tWP;		/* Min WE pulse width */
+	int	tCLH;		/* Min CLE hold time */
+	int	tCH;		/* Min CE hold time */
+	int	tALH;		/* Min ALE hold time */
+	int	tDH;		/* Min Data hold time */
+	int	tWB;		/* Max WE high to busy */
+	int	tWH;		/* Min WE hold time */
+	int	tWC;		/* Min Write cycle time */
+	int	tRP;		/* Min RE pulse width */
+	int	tREH;		/* Min RE high hold time */
+	int	tRC;		/* Min Read cycle time */
+	int	tREA;		/* Max Read access time */
+	int	tRHOH;		/* Min RE high to output hold */
+	int	tCEA;		/* Max CE access time */
+	int	tCOH;		/* Min CE high to output hold */
+	int	tCHZ;		/* Max CE high to output high Z */
+	int	tCSD;		/* Min CE high to ALE/CLE don't care */
+};
+
+/* ONFI define 6 timing modes */
+#define NAND_ONFI_TIMING_MODES		6
+extern struct nand_timing_spec nand_onfi_timing_specs[];
+#endif /* CONFIG_SYNO_LSP_MONACO */
+
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+/* Extended ECC information Block Definition (since ONFI 2.1) */
+struct onfi_ext_ecc_info {
+	u8 ecc_bits;
+	u8 codeword_size;
+	__le16 bb_per_lun;
+	__le16 block_endurance;
+	u8 reserved[2];
+} __packed;
+
+#define ONFI_SECTION_TYPE_0	0	/* Unused section. */
+#define ONFI_SECTION_TYPE_1	1	/* for additional sections. */
+#define ONFI_SECTION_TYPE_2	2	/* for ECC information. */
+struct onfi_ext_section {
+	u8 type;
+	u8 length;
+} __packed;
+
+#define ONFI_EXT_SECTION_MAX 8
+
+/* Extended Parameter Page Definition (since ONFI 2.1) */
+struct onfi_ext_param_page {
+	__le16 crc;
+	u8 sig[4];             /* 'E' 'P' 'P' 'S' */
+	u8 reserved0[10];
+	struct onfi_ext_section sections[ONFI_EXT_SECTION_MAX];
+
+	/*
+	 * The actual size of the Extended Parameter Page is in
+	 * @ext_param_page_length of nand_onfi_params{}.
+	 * The following are the variable length sections.
+	 * So we do not add any fields below. Please see the ONFI spec.
+	 */
+} __packed;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 /**
  * struct nand_hw_control - Control structure for hardware controller (e.g ECC generator) shared among independent devices
@@ -427,12 +551,25 @@ struct nand_buffers {
  * @bbt_options:	[INTERN] bad block specific options. All options used
  *			here must come from bbm.h. By default, these options
  *			will be copied to the appropriate nand_bbt_descr's.
+ * @bbm:		[INTERN] Bad block marker flags (see bbm.h).
  * @badblockpos:	[INTERN] position of the bad block marker in the oob
  *			area.
  * @badblockbits:	[INTERN] minimum number of set bits in a good block's
  *			bad block marker position; i.e., BBM == 11110111b is
  *			not bad when badblockbits == 7
  * @cellinfo:		[INTERN] MLC/multichip data from chip ident
+ */
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+/*
+ * @ecc_strength_ds:	[INTERN] ECC correctability from the datasheet.
+ *			Minimum amount of bit errors per @ecc_step_ds guaranteed
+ *			to be correctable. If unknown, set to zero.
+ * @ecc_step_ds:	[INTERN] ECC step required by the @ecc_strength_ds,
+ *                      also from the datasheet. It is the recommended ECC step
+ *			size, if known; if unknown, set to zero.
+ */
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+/*
  * @numchips:		[INTERN] number of physical chips
  * @chipsize:		[INTERN] the size of one chip for multichip arrays
  * @pagemask:		[INTERN] page number mask = number of (pages / chip) - 1
@@ -496,7 +633,15 @@ struct nand_chip {
 
 	int chip_delay;
 	unsigned int options;
+#if defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_MTD_NAND_NFC_MLC_SUPPORT)
+	unsigned int	oobsize_ovrd;
+	unsigned int	bb_location;
+	unsigned int	bb_page;
+#endif /* CONFIG_SYNO_LSP_ARMADA && CONFIG_MTD_NAND_NFC_MLC_SUPPORT */
 	unsigned int bbt_options;
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	unsigned int bbm;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 	int page_shift;
 	int phys_erase_shift;
@@ -509,8 +654,16 @@ struct nand_chip {
 	unsigned int pagebuf_bitflips;
 	int subpagesize;
 	uint8_t cellinfo;
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	uint16_t ecc_strength_ds;
+	uint16_t ecc_step_ds;
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 	int badblockpos;
 	int badblockbits;
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	int planes_per_chip;
+	int luns_per_chip;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 	int onfi_version;
 	struct nand_onfi_params	onfi_params;
@@ -622,6 +775,13 @@ struct nand_manufacturers {
 
 extern struct nand_flash_dev nand_flash_ids[];
 extern struct nand_manufacturers nand_manuf_ids[];
+#if defined (CONFIG_SYNO_LSP_MONACO)
+extern int nand_decode_readid(struct mtd_info *mtd, struct nand_chip *chip,
+			      struct nand_flash_dev *type, uint8_t *id,
+			      int max_id_len);
+extern void nand_derive_bbm(struct mtd_info *mtd, struct nand_chip *chip,
+			    uint8_t *id);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 extern int nand_scan_bbt(struct mtd_info *mtd, struct nand_bbt_descr *bd);
 extern int nand_update_bbt(struct mtd_info *mtd, loff_t offs);
@@ -631,6 +791,22 @@ extern int nand_erase_nand(struct mtd_info *mtd, struct erase_info *instr,
 			   int allowbbt);
 extern int nand_do_read(struct mtd_info *mtd, loff_t from, size_t len,
 			size_t *retlen, uint8_t *buf);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+extern void nand_sync(struct mtd_info *mtd);
+extern int nand_suspend(struct mtd_info *mtd);
+extern void nand_resume(struct mtd_info *mtd);
+
+extern uint8_t *nand_transfer_oob(struct nand_chip *chip, uint8_t *oob,
+				  struct mtd_oob_ops *ops, size_t len);
+extern int nand_check_wp(struct mtd_info *mtd);
+extern uint8_t *nand_fill_oob(struct mtd_info *mtd, uint8_t *oob, size_t len,
+			      struct mtd_oob_ops *ops);
+extern int nand_do_write_oob(struct mtd_info *mtd, loff_t to,
+			     struct mtd_oob_ops *ops);
+extern int nand_get_device(struct mtd_info *mtd, int new_state);
+extern void nand_release_device(struct mtd_info *mtd);
+extern u8 nand_erasebb;
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 /**
  * struct platform_nand_chip - chip level device structure
@@ -706,6 +882,14 @@ struct platform_nand_chip *get_platform_nandchip(struct mtd_info *mtd)
 
 	return chip->priv;
 }
+
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+/* return the supported features. */
+static inline int onfi_feature(struct nand_chip *chip)
+{
+	return chip->onfi_version ? le16_to_cpu(chip->onfi_params.features) : 0;
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 /* return the supported asynchronous timing mode. */
 static inline int onfi_get_async_timing_mode(struct nand_chip *chip)

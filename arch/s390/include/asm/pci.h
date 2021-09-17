@@ -21,9 +21,13 @@ void pci_iounmap(struct pci_dev *, void __iomem *);
 int pci_domain_nr(struct pci_bus *);
 int pci_proc_domain(struct pci_bus *);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA */
 /* MSI arch hooks */
 #define arch_setup_msi_irqs	arch_setup_msi_irqs
 #define arch_teardown_msi_irqs	arch_teardown_msi_irqs
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 #define ZPCI_BUS_NR			0	/* default bus number */
 #define ZPCI_DEVFN			0	/* default device number */

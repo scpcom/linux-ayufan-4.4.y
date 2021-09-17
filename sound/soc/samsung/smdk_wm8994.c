@@ -91,6 +91,9 @@ static int smdk_wm8994_init_paiftx(struct snd_soc_pcm_runtime *rtd)
 	struct snd_soc_codec *codec = rtd->codec;
 	struct snd_soc_dapm_context *dapm = &codec->dapm;
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	/* HeadPhone */
 	snd_soc_dapm_enable_pin(dapm, "HPOUT1R");
 	snd_soc_dapm_enable_pin(dapm, "HPOUT1L");
@@ -102,6 +105,7 @@ static int smdk_wm8994_init_paiftx(struct snd_soc_pcm_runtime *rtd)
 	/* LineIn */
 	snd_soc_dapm_enable_pin(dapm, "IN2LN");
 	snd_soc_dapm_enable_pin(dapm, "IN2RN");
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 	/* Other pins NC */
 	snd_soc_dapm_nc_pin(dapm, "HPOUT2P");

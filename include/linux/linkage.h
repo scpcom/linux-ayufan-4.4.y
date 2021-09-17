@@ -6,14 +6,21 @@
 #include <linux/export.h>
 #include <asm/linkage.h>
 
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#else /* CONFIG_SYNO_LSP_MONACO */
 #ifdef __cplusplus
 #define CPP_ASMLINKAGE extern "C"
 #else
 #define CPP_ASMLINKAGE
 #endif
+#endif /* CONFIG_SYNO_LSP_MONACO */
 
 #ifndef asmlinkage
+#if defined (CONFIG_SYNO_LSP_MONACO)
+#define asmlinkage
+#else /* CONFIG_SYNO_LSP_MONACO */
 #define asmlinkage CPP_ASMLINKAGE
+#endif /* CONFIG_SYNO_LSP_MONACO */
 #endif
 
 #ifndef cond_syscall

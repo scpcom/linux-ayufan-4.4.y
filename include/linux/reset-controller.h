@@ -17,6 +17,10 @@ struct reset_control_ops {
 	int (*reset)(struct reset_controller_dev *rcdev, unsigned long id);
 	int (*assert)(struct reset_controller_dev *rcdev, unsigned long id);
 	int (*deassert)(struct reset_controller_dev *rcdev, unsigned long id);
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	int (*is_asserted)(struct reset_controller_dev *rcdev,
+			   unsigned long id);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 };
 
 struct module;

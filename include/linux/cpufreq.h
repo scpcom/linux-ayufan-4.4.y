@@ -1,8 +1,8 @@
 /*
- *  linux/include/linux/cpufreq.h
+ * linux/include/linux/cpufreq.h
  *
- *  Copyright (C) 2001 Russell King
- *            (C) 2002 - 2003 Dominik Brodowski <linux@brodo.de>
+ * Copyright (C) 2001 Russell King
+ *           (C) 2002 - 2003 Dominik Brodowski <linux@brodo.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -11,6 +11,14 @@
 #ifndef _LINUX_CPUFREQ_H
 #define _LINUX_CPUFREQ_H
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#include <linux/clk.h>
+#include <linux/cpumask.h>
+#include <linux/completion.h>
+#include <linux/kobject.h>
+#include <linux/notifier.h>
+#include <linux/sysfs.h>
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 #include <asm/cputime.h>
 #include <linux/mutex.h>
 #include <linux/notifier.h>
@@ -25,7 +33,33 @@
 #define CPUFREQ_NAME_LEN 16
 /* Print length for names. Extra 1 space for accomodating '\n' in prints */
 #define CPUFREQ_NAME_PLEN (CPUFREQ_NAME_LEN + 1)
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+/*********************************************************************
+ *                        CPUFREQ INTERFACE                          *
+ *********************************************************************/
+/*
+ * Frequency values here are CPU kHz
+ *
+ * Maximum transition latency is in nanoseconds - if it's unknown,
+ * CPUFREQ_ETERNAL shall be used.
+ */
+
+#define CPUFREQ_ETERNAL			(-1)
+#define CPUFREQ_NAME_LEN		16
+/* Print length for names. Extra 1 space for accomodating '\n' in prints */
+#define CPUFREQ_NAME_PLEN		(CPUFREQ_NAME_LEN + 1)
+
+struct cpufreq_governor;
+
+struct cpufreq_freqs {
+	unsigned int cpu;	/* cpu nr */
+	unsigned int old;
+	unsigned int new;
+	u8 flags;		/* flags of cpufreq_driver, see below. */
+};
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 /*********************************************************************
  *                     CPUFREQ NOTIFIER INTERFACE                    *
  *********************************************************************/
@@ -72,6 +106,8 @@ struct cpufreq_governor;
 extern struct kobject *cpufreq_global_kobject;
 
 #define CPUFREQ_ETERNAL			(-1)
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+
 struct cpufreq_cpuinfo {
 	unsigned int		max_freq;
 	unsigned int		min_freq;
@@ -97,6 +133,9 @@ struct cpufreq_policy {
 	unsigned int		cpu;    /* cpu nr of CPU managing this policy */
 	unsigned int		last_cpu; /* cpu nr of previous CPU that managed
 					   * this policy */
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	struct clk		*clk;
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	struct cpufreq_cpuinfo	cpuinfo;/* see above */
 
 	unsigned int		min;    /* in kHz */
@@ -111,16 +150,43 @@ struct cpufreq_policy {
 					 * called, but you're in IRQ context */
 
 	struct cpufreq_real_policy	user_policy;
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	struct cpufreq_frequency_table	*freq_table;
 
+	struct list_head        policy_list;
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	struct kobject		kobj;
 	struct completion	kobj_unregister;
+
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	/*
+	 * The rules for this semaphore:
+	 * - Any routine that wants to read from the policy structure will
+	 *   do a down_read on this semaphore.
+	 * - Any routine that will write to the policy structure and/or may take away
+	 *   the policy altogether (eg. CPU hotplug), will hold this lock in write
+	 *   mode before doing so.
+	 *
+	 * Additional rules:
+	 * - Lock should not be held across
+	 *     __cpufreq_governor(data, CPUFREQ_GOV_POLICY_EXIT);
+	 */
+	struct rw_semaphore	rwsem;
+
+	/* For cpufreq driver's internal use */
+	void			*driver_data;
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 };
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 #define CPUFREQ_ADJUST			(0)
 #define CPUFREQ_INCOMPATIBLE		(1)
 #define CPUFREQ_NOTIFY			(2)
 #define CPUFREQ_START			(3)
 #define CPUFREQ_UPDATE_POLICY_CPU	(4)
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
 /* Only for ACPI */
 #define CPUFREQ_SHARED_TYPE_NONE (0) /* None */
@@ -128,11 +194,241 @@ struct cpufreq_policy {
 #define CPUFREQ_SHARED_TYPE_ALL	 (2) /* All dependent CPUs should set freq */
 #define CPUFREQ_SHARED_TYPE_ANY	 (3) /* Freq can be set from any dependent CPU*/
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#ifdef CONFIG_CPU_FREQ
+struct cpufreq_policy *cpufreq_cpu_get(unsigned int cpu);
+void cpufreq_cpu_put(struct cpufreq_policy *policy);
+#else
+static inline struct cpufreq_policy *cpufreq_cpu_get(unsigned int cpu)
+{
+	return NULL;
+}
+static inline void cpufreq_cpu_put(struct cpufreq_policy *policy) { }
+#endif
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+
 static inline bool policy_is_shared(struct cpufreq_policy *policy)
 {
 	return cpumask_weight(policy->cpus) > 1;
 }
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+/* /sys/devices/system/cpu/cpufreq: entry point for global variables */
+extern struct kobject *cpufreq_global_kobject;
+int cpufreq_get_global_kobject(void);
+void cpufreq_put_global_kobject(void);
+int cpufreq_sysfs_create_file(const struct attribute *attr);
+void cpufreq_sysfs_remove_file(const struct attribute *attr);
+
+#ifdef CONFIG_CPU_FREQ
+unsigned int cpufreq_get(unsigned int cpu);
+unsigned int cpufreq_quick_get(unsigned int cpu);
+unsigned int cpufreq_quick_get_max(unsigned int cpu);
+void disable_cpufreq(void);
+
+u64 get_cpu_idle_time(unsigned int cpu, u64 *wall, int io_busy);
+int cpufreq_get_policy(struct cpufreq_policy *policy, unsigned int cpu);
+int cpufreq_update_policy(unsigned int cpu);
+bool have_governor_per_policy(void);
+struct kobject *get_governor_parent_kobj(struct cpufreq_policy *policy);
+#else
+static inline unsigned int cpufreq_get(unsigned int cpu)
+{
+	return 0;
+}
+static inline unsigned int cpufreq_quick_get(unsigned int cpu)
+{
+	return 0;
+}
+static inline unsigned int cpufreq_quick_get_max(unsigned int cpu)
+{
+	return 0;
+}
+static inline void disable_cpufreq(void) { }
+#endif
+
+/*********************************************************************
+ *                      CPUFREQ DRIVER INTERFACE                     *
+ *********************************************************************/
+
+#define CPUFREQ_RELATION_L 0  /* lowest frequency at or above target */
+#define CPUFREQ_RELATION_H 1  /* highest frequency below or at target */
+
+struct freq_attr {
+	struct attribute attr;
+	ssize_t (*show)(struct cpufreq_policy *, char *);
+	ssize_t (*store)(struct cpufreq_policy *, const char *, size_t count);
+};
+
+#define cpufreq_freq_attr_ro(_name)		\
+static struct freq_attr _name =			\
+__ATTR(_name, 0444, show_##_name, NULL)
+
+#define cpufreq_freq_attr_ro_perm(_name, _perm)	\
+static struct freq_attr _name =			\
+__ATTR(_name, _perm, show_##_name, NULL)
+
+#define cpufreq_freq_attr_rw(_name)		\
+static struct freq_attr _name =			\
+__ATTR(_name, 0644, show_##_name, store_##_name)
+
+struct global_attr {
+	struct attribute attr;
+	ssize_t (*show)(struct kobject *kobj,
+			struct attribute *attr, char *buf);
+	ssize_t (*store)(struct kobject *a, struct attribute *b,
+			 const char *c, size_t count);
+};
+
+#define define_one_global_ro(_name)		\
+static struct global_attr _name =		\
+__ATTR(_name, 0444, show_##_name, NULL)
+
+#define define_one_global_rw(_name)		\
+static struct global_attr _name =		\
+__ATTR(_name, 0644, show_##_name, store_##_name)
+
+struct cpufreq_driver {
+	char			name[CPUFREQ_NAME_LEN];
+	u8			flags;
+	void			*driver_data;
+
+	/* needed by all drivers */
+	int	(*init)		(struct cpufreq_policy *policy);
+	int	(*verify)	(struct cpufreq_policy *policy);
+
+	/* define one out of two */
+	int	(*setpolicy)	(struct cpufreq_policy *policy);
+	int	(*target)	(struct cpufreq_policy *policy,	/* Deprecated */
+				 unsigned int target_freq,
+				 unsigned int relation);
+	int	(*target_index)	(struct cpufreq_policy *policy,
+				 unsigned int index);
+
+	/* should be defined, if possible */
+	unsigned int	(*get)	(unsigned int cpu);
+
+	/* optional */
+	int	(*bios_limit)	(int cpu, unsigned int *limit);
+
+	int	(*exit)		(struct cpufreq_policy *policy);
+	int	(*suspend)	(struct cpufreq_policy *policy);
+	int	(*resume)	(struct cpufreq_policy *policy);
+	struct freq_attr	**attr;
+
+	/* platform specific boost support code */
+	bool                    boost_supported;
+	bool                    boost_enabled;
+	int     (*set_boost)    (int state);
+};
+
+/* flags */
+#define CPUFREQ_STICKY		(1 << 0)	/* driver isn't removed even if
+						   all ->init() calls failed */
+#define CPUFREQ_CONST_LOOPS	(1 << 1)	/* loops_per_jiffy or other
+						   kernel "constants" aren't
+						   affected by frequency
+						   transitions */
+#define CPUFREQ_PM_NO_WARN	(1 << 2)	/* don't warn on suspend/resume
+						   speed mismatches */
+
+/*
+ * This should be set by platforms having multiple clock-domains, i.e.
+ * supporting multiple policies. With this sysfs directories of governor would
+ * be created in cpu/cpu<num>/cpufreq/ directory and so they can use the same
+ * governor with different tunables for different clusters.
+ */
+#define CPUFREQ_HAVE_GOVERNOR_PER_POLICY (1 << 3)
+
+/*
+ * Driver will do POSTCHANGE notifications from outside of their ->target()
+ * routine and so must set cpufreq_driver->flags with this flag, so that core
+ * can handle them specially.
+ */
+#define CPUFREQ_ASYNC_NOTIFICATION  (1 << 4)
+
+/*
+ * Set by drivers which want cpufreq core to check if CPU is running at a
+ * frequency present in freq-table exposed by the driver. For these drivers if
+ * CPU is found running at an out of table freq, we will try to set it to a freq
+ * from the table. And if that fails, we will stop further boot process by
+ * issuing a BUG_ON().
+ */
+#define CPUFREQ_NEED_INITIAL_FREQ_CHECK	(1 << 5)
+
+int cpufreq_register_driver(struct cpufreq_driver *driver_data);
+int cpufreq_unregister_driver(struct cpufreq_driver *driver_data);
+
+const char *cpufreq_get_current_driver(void);
+void *cpufreq_get_driver_data(void);
+
+static inline void cpufreq_verify_within_limits(struct cpufreq_policy *policy,
+		unsigned int min, unsigned int max)
+{
+	if (policy->min < min)
+		policy->min = min;
+	if (policy->max < min)
+		policy->max = min;
+	if (policy->min > max)
+		policy->min = max;
+	if (policy->max > max)
+		policy->max = max;
+	if (policy->min > policy->max)
+		policy->min = policy->max;
+	return;
+}
+
+static inline void
+cpufreq_verify_within_cpu_limits(struct cpufreq_policy *policy)
+{
+	cpufreq_verify_within_limits(policy, policy->cpuinfo.min_freq,
+			policy->cpuinfo.max_freq);
+}
+
+/*********************************************************************
+ *                     CPUFREQ NOTIFIER INTERFACE                    *
+ *********************************************************************/
+
+#define CPUFREQ_TRANSITION_NOTIFIER	(0)
+#define CPUFREQ_POLICY_NOTIFIER		(1)
+
+/* Transition notifiers */
+#define CPUFREQ_PRECHANGE		(0)
+#define CPUFREQ_POSTCHANGE		(1)
+#define CPUFREQ_RESUMECHANGE		(8)
+#define CPUFREQ_SUSPENDCHANGE		(9)
+
+/* Policy Notifiers  */
+#define CPUFREQ_ADJUST			(0)
+#define CPUFREQ_INCOMPATIBLE		(1)
+#define CPUFREQ_NOTIFY			(2)
+#define CPUFREQ_START			(3)
+#define CPUFREQ_UPDATE_POLICY_CPU	(4)
+#define CPUFREQ_CREATE_POLICY		(5)
+#define CPUFREQ_REMOVE_POLICY		(6)
+
+#ifdef CONFIG_CPU_FREQ
+int cpufreq_register_notifier(struct notifier_block *nb, unsigned int list);
+int cpufreq_unregister_notifier(struct notifier_block *nb, unsigned int list);
+
+void cpufreq_notify_transition(struct cpufreq_policy *policy,
+		struct cpufreq_freqs *freqs, unsigned int state);
+void cpufreq_notify_post_transition(struct cpufreq_policy *policy,
+		struct cpufreq_freqs *freqs, int transition_failed);
+
+#else /* CONFIG_CPU_FREQ */
+static inline int cpufreq_register_notifier(struct notifier_block *nb,
+						unsigned int list)
+{
+	return 0;
+}
+static inline int cpufreq_unregister_notifier(struct notifier_block *nb,
+						unsigned int list)
+{
+	return 0;
+}
+#endif /* !CONFIG_CPU_FREQ */
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 /******************** cpufreq transition notifiers *******************/
 
 #define CPUFREQ_PRECHANGE	(0)
@@ -146,37 +442,48 @@ struct cpufreq_freqs {
 	unsigned int new;
 	u8 flags;		/* flags of cpufreq_driver, see below. */
 };
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
 /**
- * cpufreq_scale - "old * mult / div" calculation for large values (32-bit-arch safe)
+ * cpufreq_scale - "old * mult / div" calculation for large values (32-bit-arch
+ * safe)
  * @old:   old value
  * @div:   divisor
  * @mult:  multiplier
  *
  *
- *    new = old * mult / div
+ * new = old * mult / div
  */
-static inline unsigned long cpufreq_scale(unsigned long old, u_int div, u_int mult)
+static inline unsigned long cpufreq_scale(unsigned long old, u_int div,
+		u_int mult)
 {
 #if BITS_PER_LONG == 32
-
 	u64 result = ((u64) old) * ((u64) mult);
 	do_div(result, div);
 	return (unsigned long) result;
 
 #elif BITS_PER_LONG == 64
-
 	unsigned long result = old * ((u64) mult);
 	result /= div;
 	return result;
-
 #endif
-};
+}
 
 /*********************************************************************
  *                          CPUFREQ GOVERNORS                        *
  *********************************************************************/
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+/*
+ * If (cpufreq_driver->target) exists, the ->governor decides what frequency
+ * within the limits is used. If (cpufreq_driver->setpolicy> exists, these
+ * two generic policies are available:
+ */
+#define CPUFREQ_POLICY_POWERSAVE	(1)
+#define CPUFREQ_POLICY_PERFORMANCE	(2)
+
+/* Governor Events */
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 #define CPUFREQ_GOV_START	1
 #define CPUFREQ_GOV_STOP	2
 #define CPUFREQ_GOV_LIMITS	3
@@ -199,22 +506,35 @@ struct cpufreq_governor {
 	struct module		*owner;
 };
 
-/*
- * Pass a target to the cpufreq driver.
- */
+/* Pass a target to the cpufreq driver */
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+int cpufreq_driver_target(struct cpufreq_policy *policy,
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 extern int cpufreq_driver_target(struct cpufreq_policy *policy,
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 				 unsigned int target_freq,
 				 unsigned int relation);
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+int __cpufreq_driver_target(struct cpufreq_policy *policy,
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 extern int __cpufreq_driver_target(struct cpufreq_policy *policy,
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 				   unsigned int target_freq,
 				   unsigned int relation);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 extern int __cpufreq_driver_getavg(struct cpufreq_policy *policy,
 				   unsigned int cpu);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
 int cpufreq_register_governor(struct cpufreq_governor *governor);
 void cpufreq_unregister_governor(struct cpufreq_governor *governor);
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 /*********************************************************************
  *                      CPUFREQ DRIVER INTERFACE                     *
  *********************************************************************/
@@ -360,15 +680,20 @@ static inline unsigned int cpufreq_quick_get_max(unsigned int cpu)
 	return 0;
 }
 #endif
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+/* CPUFREQ DEFAULT GOVERNOR */
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 /*********************************************************************
  *                       CPUFREQ DEFAULT GOVERNOR                    *
  *********************************************************************/
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
 /*
-  Performance governor is fallback governor if any other gov failed to
-  auto load due latency restrictions
-*/
+ * Performance governor is fallback governor if any other gov failed to auto
+ * load due latency restrictions
+ */
 #ifdef CONFIG_CPU_FREQ_GOV_PERFORMANCE
 extern struct cpufreq_governor cpufreq_gov_performance;
 #endif
@@ -394,9 +719,16 @@ extern struct cpufreq_governor cpufreq_gov_conservative;
 
 #define CPUFREQ_ENTRY_INVALID ~0
 #define CPUFREQ_TABLE_END     ~1
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#define CPUFREQ_BOOST_FREQ    ~2
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
 struct cpufreq_frequency_table {
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	unsigned int	driver_data; /* driver specific data, not used by core */
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	unsigned int	index;     /* any */
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	unsigned int	frequency; /* kHz - doesn't need to be in ascending
 				    * order */
 };
@@ -406,22 +738,68 @@ int cpufreq_frequency_table_cpuinfo(struct cpufreq_policy *policy,
 
 int cpufreq_frequency_table_verify(struct cpufreq_policy *policy,
 				   struct cpufreq_frequency_table *table);
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+int cpufreq_generic_frequency_table_verify(struct cpufreq_policy *policy);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
 int cpufreq_frequency_table_target(struct cpufreq_policy *policy,
 				   struct cpufreq_frequency_table *table,
 				   unsigned int target_freq,
 				   unsigned int relation,
 				   unsigned int *index);
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+int cpufreq_frequency_table_get_index(struct cpufreq_policy *policy,
+		unsigned int freq);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+ssize_t cpufreq_show_cpus(const struct cpumask *mask, char *buf);
+
+#ifdef CONFIG_CPU_FREQ
+int cpufreq_boost_trigger_state(int state);
+int cpufreq_boost_supported(void);
+int cpufreq_boost_enabled(void);
+#else
+static inline int cpufreq_boost_trigger_state(int state)
+{
+	return 0;
+}
+static inline int cpufreq_boost_supported(void)
+{
+	return 0;
+}
+static inline int cpufreq_boost_enabled(void)
+{
+	return 0;
+}
+#endif
+/* the following funtion is for cpufreq core use only */
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 /* the following 3 funtions are for cpufreq core use only */
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 struct cpufreq_frequency_table *cpufreq_frequency_get_table(unsigned int cpu);
 
 /* the following are really really optional */
 extern struct freq_attr cpufreq_freq_attr_scaling_available_freqs;
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+extern struct freq_attr *cpufreq_generic_attr[];
+int cpufreq_table_validate_and_show(struct cpufreq_policy *policy,
+				      struct cpufreq_frequency_table *table);
 
+unsigned int cpufreq_generic_get(unsigned int cpu);
+int cpufreq_generic_init(struct cpufreq_policy *policy,
+		struct cpufreq_frequency_table *table,
+		unsigned int transition_latency);
+static inline int cpufreq_generic_exit(struct cpufreq_policy *policy)
+{
+	return 0;
+}
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 void cpufreq_frequency_table_get_attr(struct cpufreq_frequency_table *table,
 				      unsigned int cpu);
 void cpufreq_frequency_table_update_policy_cpu(struct cpufreq_policy *policy);
 
 void cpufreq_frequency_table_put_attr(unsigned int cpu);
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+
 #endif /* _LINUX_CPUFREQ_H */

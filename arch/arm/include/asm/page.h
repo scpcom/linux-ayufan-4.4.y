@@ -11,9 +11,42 @@
 #define _ASMARM_PAGE_H
 
 /* PAGE_SHIFT determines the page size */
+#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE)
+#define PAGE_SHIFT		CONFIG_ARM_PAGE_SIZE_LARGE_SHIFT
+#elif defined(CONFIG_SYNO_LSP_ARMADA)
+#ifdef CONFIG_MV_8KB_SW_PAGE_SIZE_SUPPORT
+#define PAGE_SHIFT		13
+#define MV_PAGE_SIZE_STR	"8KB SW Page Size"
+#elif defined(CONFIG_MV_16KB_SW_PAGE_SIZE_SUPPORT)
+#define PAGE_SHIFT		14
+#define MV_PAGE_SIZE_STR	"16KB SW Page Size"
+#elif defined(CONFIG_MV_32KB_SW_PAGE_SIZE_SUPPORT)
+#define PAGE_SHIFT		15
+#define MV_PAGE_SIZE_STR	"32KB SW Page Size"
+#elif defined(CONFIG_MV_64KB_SW_PAGE_SIZE_SUPPORT)
+#define PAGE_SHIFT		16
+#define MV_PAGE_SIZE_STR	"64KB SW Page Size"
+#elif defined(CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT)
+#define PAGE_SHIFT		16
+#define MV_PAGE_SIZE_STR	"64KB MMU Page Size"
+#else
 #define PAGE_SHIFT		12
+#endif
+#else
+#define PAGE_SHIFT		12
+#endif
 #define PAGE_SIZE		(_AC(1,UL) << PAGE_SHIFT)
 #define PAGE_MASK		(~(PAGE_SIZE-1))
+
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+/* H/W pages are always 4KB.
+ * A single linux page may be implemented using more than one H/W page.
+ */
+#define HW_PAGE_SHIFT		12
+#define HW_PAGE_SIZE		(1 << HW_PAGE_SHIFT)
+#define HW_PAGE_MASK		(~(HW_PAGE_SIZE-1))
+#define HW_PAGES_PER_PAGE	(1 << (PAGE_SHIFT - HW_PAGE_SHIFT))
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 #ifndef __ASSEMBLY__
 

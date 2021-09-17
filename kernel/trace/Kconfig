@@ -47,6 +47,9 @@ config HAVE_FTRACE_MCOUNT_RECORD
 	help
 	  See Documentation/trace/ftrace-design.txt
 
+config HAVE_KPTRACE
+	bool
+
 config HAVE_SYSCALL_TRACEPOINTS
 	bool
 	help
@@ -574,6 +577,31 @@ config RING_BUFFER_STARTUP_TEST
 	 If unsure, say N
 
 endif # FTRACE
+
+config KPTRACE
+	bool "KPTrace"
+	depends on HAVE_KPTRACE
+	select KPROBES
+	select DEBUG_FS
+	select RELAY
+	select SYSFS
+	select KALLSYMS
+	select MTT
+	default n
+	help
+	  KPTrace is a kprobes-based dynamic trace tool. It provides a full
+	  set of optional pre-defined tracepoints, plus a simple way to add
+	  and remove tracepoints at runtime.
+
+config KPTRACE_SYNC
+       bool "Trace synchronization events"
+       depends on KPTRACE
+       default n
+       help
+        For KPTrace to be able to trace synchonization events (for example
+        mutex and semaphore usage), certain key functions like mutex_lock
+        must not be inlined. This may adversely affect system performance,
+        and so this option must be used with care.
 
 endif # TRACING_SUPPORT
 

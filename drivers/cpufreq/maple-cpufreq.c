@@ -189,7 +189,11 @@ static int maple_cpufreq_cpu_init(struct cpufreq_policy *policy)
 
 static struct cpufreq_driver maple_cpufreq_driver = {
 	.name		= "maple",
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	.owner		= THIS_MODULE,
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	.flags		= CPUFREQ_CONST_LOOPS,
 	.init		= maple_cpufreq_cpu_init,
 	.verify		= maple_cpufreq_verify,

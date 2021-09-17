@@ -80,7 +80,24 @@
  */
 #define IOREMAP_MAX_ORDER	24
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+/*
+ * Size of DMA-consistent memory region.  Must be multiple of 2M,
+ * between 2MB and 14MB inclusive.
+ */
+#ifndef CONSISTENT_DMA_SIZE
+#define CONSISTENT_DMA_SIZE	SZ_2M
+#endif /* !CONSISTENT_DMA_SIZE */
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
+#if defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && defined(CONFIG_HIGHMEM)
+#define CONSISTENT_END		(0xffc00000UL)
+#else /* CONFIG_SYNO_LSP_ARMADA */
 #define CONSISTENT_END		(0xffe00000UL)
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#define CONSISTENT_BASE		(CONSISTENT_END - CONSISTENT_DMA_SIZE)
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 #else /* CONFIG_MMU */
 

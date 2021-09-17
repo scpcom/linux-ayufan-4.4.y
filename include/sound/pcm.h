@@ -927,8 +927,13 @@ void snd_pcm_timer_done(struct snd_pcm_substream *substream);
 static inline void snd_pcm_gettime(struct snd_pcm_runtime *runtime,
 				   struct timespec *tv)
 {
+#if defined (CONFIG_SYNO_LSP_MONACO)
+	if (runtime->tstamp_type == SNDRV_PCM_TSTAMP_TYPE_MONOTONIC)
+		getrawmonotonic(tv);
+#else /* CONFIG_SYNO_LSP_MONACO */
 	if (runtime->tstamp_type == SNDRV_PCM_TSTAMP_TYPE_MONOTONIC)
 		do_posix_clock_monotonic_gettime(tv);
+#endif /* CONFIG_SYNO_LSP_MONACO */
 	else
 		getnstimeofday(tv);
 }

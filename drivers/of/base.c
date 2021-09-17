@@ -18,6 +18,9 @@
  *      2 of the License, or (at your option) any later version.
  */
 #include <linux/ctype.h>
+#if defined(CONFIG_SYNO_LSP_MONACO_SDK2_15_4) || defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#include <linux/cpu.h>
+#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 || CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 #include <linux/module.h>
 #include <linux/of.h>
 #include <linux/spinlock.h>
@@ -229,6 +232,102 @@ const void *of_get_property(const struct device_node *np, const char *name,
 	return pp ? pp->value : NULL;
 }
 EXPORT_SYMBOL(of_get_property);
+
+#if defined(CONFIG_SYNO_LSP_MONACO_SDK2_15_4) || defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+/*
+ * arch_match_cpu_phys_id - Match the given logical CPU and physical id
+ *
+ * @cpu: logical cpu index of a core/thread
+ * @phys_id: physical identifier of a core/thread
+ *
+ * CPU logical to physical index mapping is architecture specific.
+ * However this __weak function provides a default match of physical
+ * id to logical cpu index. phys_id provided here is usually values read
+ * from the device tree which must match the hardware internal registers.
+ *
+ * Returns true if the physical identifier and the logical cpu index
+ * correspond to the same core/thread, false otherwise.
+ */
+bool __weak arch_match_cpu_phys_id(int cpu, u64 phys_id)
+{
+	return (u32)phys_id == cpu;
+}
+
+/**
+ * Checks if the given "prop_name" property holds the physical id of the
+ * core/thread corresponding to the logical cpu 'cpu'. If 'thread' is not
+ * NULL, local thread number within the core is returned in it.
+ */
+static bool __of_find_n_match_cpu_property(struct device_node *cpun,
+			const char *prop_name, int cpu, unsigned int *thread)
+{
+	const __be32 *cell;
+	int ac, prop_len, tid;
+	u64 hwid;
+
+	ac = of_n_addr_cells(cpun);
+	cell = of_get_property(cpun, prop_name, &prop_len);
+	if (!cell)
+		return false;
+	prop_len /= sizeof(*cell);
+	for (tid = 0; tid < prop_len; tid++) {
+		hwid = of_read_number(cell, ac);
+		if (arch_match_cpu_phys_id(cpu, hwid)) {
+			if (thread)
+				*thread = tid;
+			return true;
+		}
+		cell += ac;
+	}
+	return false;
+}
+
+/**
+ * of_get_cpu_node - Get device node associated with the given logical CPU
+ *
+ * @cpu: CPU number(logical index) for which device node is required
+ * @thread: if not NULL, local thread number within the physical core is
+ *          returned
+ *
+ * The main purpose of this function is to retrieve the device node for the
+ * given logical CPU index. It should be used to initialize the of_node in
+ * cpu device. Once of_node in cpu device is populated, all the further
+ * references can use that instead.
+ *
+ * CPU logical to physical index mapping is architecture specific and is built
+ * before booting secondary cores. This function uses arch_match_cpu_phys_id
+ * which can be overridden by architecture specific implementation.
+ *
+ * Returns a node pointer for the logical cpu if found, else NULL.
+ */
+struct device_node *of_get_cpu_node(int cpu, unsigned int *thread)
+{
+	struct device_node *cpun, *cpus;
+
+	cpus = of_find_node_by_path("/cpus");
+	if (!cpus) {
+		pr_warn("Missing cpus node, bailing out\n");
+		return NULL;
+	}
+
+	for_each_child_of_node(cpus, cpun) {
+		if (of_node_cmp(cpun->type, "cpu"))
+			continue;
+		/* Check for non-standard "ibm,ppc-interrupt-server#s" property
+		 * for thread ids on PowerPC. If it doesn't exist fallback to
+		 * standard "reg" property.
+		 */
+		if (IS_ENABLED(CONFIG_PPC) &&
+			__of_find_n_match_cpu_property(cpun,
+				"ibm,ppc-interrupt-server#s", cpu, thread))
+			return cpun;
+		if (__of_find_n_match_cpu_property(cpun, "reg", cpu, thread))
+			return cpun;
+	}
+	return NULL;
+}
+EXPORT_SYMBOL(of_get_cpu_node);
+#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 || CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
 /** Checks if the given "compat" string matches one of the strings in
  * the device's "compatible" property
@@ -1136,9 +1235,25 @@ EXPORT_SYMBOL(of_parse_phandle);
  * To get a device_node of the `node2' node you may call this:
  * of_parse_phandle_with_args(node3, "list", "#list-cells", 1, &args);
  */
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+void of_print_phandle_args(const char *msg, const struct of_phandle_args *args)
+{
+	int i;
+	printk("%s %s", msg, of_node_full_name(args->np));
+	for (i = 0; i < args->args_count; i++)
+		printk(i ? ",%08x" : ":%08x", args->args[i]);
+	printk("\n");
+}
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
 static int __of_parse_phandle_with_args(const struct device_node *np,
 					const char *list_name,
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+					const char *cells_name,
+					int cell_count, int index,
+#else /* CONFIG_SYNO_LSP_ARMADA */
 					const char *cells_name, int index,
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 					struct of_phandle_args *out_args)
 {
 	const __be32 *list, *list_end;
@@ -1174,12 +1289,27 @@ static int __of_parse_phandle_with_args(const struct device_node *np,
 					 np->full_name);
 				goto err;
 			}
+
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+			if (cells_name) {
+				if (of_property_read_u32(node, cells_name,
+							 &count)) {
+					pr_err("%s: could not get %s for %s\n",
+						np->full_name, cells_name,
+						node->full_name);
+					goto err;
+				}
+			} else {
+				count = cell_count;
+			}
+#else /* CONFIG_SYNO_LSP_ARMADA */
 			if (of_property_read_u32(node, cells_name, &count)) {
 				pr_err("%s: could not get %s for %s\n",
 					 np->full_name, cells_name,
 					 node->full_name);
 				goto err;
 			}
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 			/*
 			 * Make sure that the arguments actually fit in the
@@ -1244,9 +1374,57 @@ int of_parse_phandle_with_args(const struct device_node *np, const char *list_na
 {
 	if (index < 0)
 		return -EINVAL;
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	return __of_parse_phandle_with_args(np, list_name, cells_name, 0,
+					    index, out_args);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	return __of_parse_phandle_with_args(np, list_name, cells_name, index, out_args);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 }
 EXPORT_SYMBOL(of_parse_phandle_with_args);
+
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+/**
+ * of_parse_phandle_with_fixed_args() - Find a node pointed by phandle in a list
+ * @np:		pointer to a device tree node containing a list
+ * @list_name:	property name that contains a list
+ * @cell_count: number of argument cells following the phandle
+ * @index:	index of a phandle to parse out
+ * @out_args:	optional pointer to output arguments structure (will be filled)
+ *
+ * This function is useful to parse lists of phandles and their arguments.
+ * Returns 0 on success and fills out_args, on error returns appropriate
+ * errno value.
+ *
+ * Caller is responsible to call of_node_put() on the returned out_args->node
+ * pointer.
+ *
+ * Example:
+ *
+ * phandle1: node1 {
+ * }
+ *
+ * phandle2: node2 {
+ * }
+ *
+ * node3 {
+ * 	list = <&phandle1 0 2 &phandle2 2 3>;
+ * }
+ *
+ * To get a device_node of the `node2' node you may call this:
+ * of_parse_phandle_with_fixed_args(node3, "list", 2, 1, &args);
+ */
+int of_parse_phandle_with_fixed_args(const struct device_node *np,
+				const char *list_name, int cell_count,
+				int index, struct of_phandle_args *out_args)
+{
+	if (index < 0)
+		return -EINVAL;
+	return __of_parse_phandle_with_args(np, list_name, NULL, cell_count,
+					   index, out_args);
+}
+EXPORT_SYMBOL(of_parse_phandle_with_fixed_args);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 
 /**
  * of_count_phandle_with_args() - Find the number of phandles references in a property
@@ -1266,7 +1444,12 @@ EXPORT_SYMBOL(of_parse_phandle_with_args);
 int of_count_phandle_with_args(const struct device_node *np, const char *list_name,
 				const char *cells_name)
 {
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	return __of_parse_phandle_with_args(np, list_name, cells_name, 0, -1,
+					    NULL);
+#else /* CONFIG_SYNO_LSP_ARMADA */
 	return __of_parse_phandle_with_args(np, list_name, cells_name, -1, NULL);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
 }
 EXPORT_SYMBOL(of_count_phandle_with_args);
 

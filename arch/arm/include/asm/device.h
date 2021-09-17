@@ -17,6 +17,9 @@ struct dev_archdata {
 #ifdef CONFIG_ARM_DMA_USE_IOMMU
 	struct dma_iommu_mapping	*mapping;
 #endif
+#ifdef CONFIG_ARM_HWCC_FLAG
+	int hwcc; /* 1 - HW cache coherency, 0 - SW cache coherency */
+#endif
 };
 
 struct omap_device;

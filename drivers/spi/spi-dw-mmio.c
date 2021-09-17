@@ -16,6 +16,9 @@
 #include <linux/spi/spi.h>
 #include <linux/scatterlist.h>
 #include <linux/module.h>
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+#include <linux/of.h>
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 #include "spi-dw.h"
 
@@ -32,6 +35,9 @@ static int dw_spi_mmio_probe(struct platform_device *pdev)
 	struct dw_spi *dws;
 	struct resource *mem, *ioarea;
 	int ret;
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	int num_cs, bus_num;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 	dwsmmio = kzalloc(sizeof(struct dw_spi_mmio), GFP_KERNEL);
 	if (!dwsmmio) {
@@ -78,9 +84,25 @@ static int dw_spi_mmio_probe(struct platform_device *pdev)
 	}
 	clk_enable(dwsmmio->clk);
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	ret = of_property_read_u32(pdev->dev.of_node, "bus-num", &bus_num);
+	if (ret < 0)
+		dws->bus_num = 0;
+	else
+		dws->bus_num = bus_num;
+
+	ret = of_property_read_u32(pdev->dev.of_node, "num-chipselect", &num_cs);
+	if (ret < 0)
+		dws->num_cs = 4;
+	else
+		dws->num_cs = num_cs;
+
+	dws->parent_dev = &pdev->dev;
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	dws->parent_dev = &pdev->dev;
 	dws->bus_num = 0;
 	dws->num_cs = 4;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	dws->max_freq = clk_get_rate(dwsmmio->clk);
 
 	ret = dw_spi_add_host(dws);
@@ -127,12 +149,23 @@ static int dw_spi_mmio_remove(struct platform_device *pdev)
 	return 0;
 }
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+static struct of_device_id dw_spi_mmio_of_match[] = {
+		{ .compatible = "snps,dw-spi-mmio", },
+		{ /* sentinel */}
+};
+MODULE_DEVICE_TABLE(of, dw_spi_mmio_of_match);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
+
 static struct platform_driver dw_spi_mmio_driver = {
 	.probe		= dw_spi_mmio_probe,
 	.remove		= dw_spi_mmio_remove,
 	.driver		= {
 		.name	= DRIVER_NAME,
 		.owner	= THIS_MODULE,
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+		.of_match_table = dw_spi_mmio_of_match,
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	},
 };
 module_platform_driver(dw_spi_mmio_driver);

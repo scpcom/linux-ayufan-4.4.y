@@ -930,6 +930,14 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
 		memcpy(card->raw_cid, cid, sizeof(card->raw_cid));
 	}
 
+#if defined(CONFIG_SYNO_LSP_ARMADA)
+	/*
+	 * Call the optional init_card function to handle quirks.
+	 */
+	if (host->ops->init_card)
+		host->ops->init_card(host, card);
+#endif /* CONFIG_SYNO_LSP_ARMADA */
+
 	/*
 	 * For native busses:  get card RCA and quit open drain mode.
 	 */

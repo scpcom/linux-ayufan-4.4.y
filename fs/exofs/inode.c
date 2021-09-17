@@ -577,7 +577,11 @@ static struct page *__r4w_get_page(void *priv, u64 offset, bool *uptodate)
 
 		if (offset >= i_size) {
 			*uptodate = true;
+#ifdef CONFIG_SYNO_LSP_ALPINE
+			EXOFS_DBGMSG("offset >= i_size index=0x%llx\n", _LLU(index));
+#else /* CONFIG_SYNO_LSP_ALPINE */
 			EXOFS_DBGMSG("offset >= i_size index=0x%lx\n", index);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 			return ZERO_PAGE(0);
 		}
 
@@ -596,7 +600,11 @@ static struct page *__r4w_get_page(void *priv, u64 offset, bool *uptodate)
 			*uptodate = true;
 		else
 			*uptodate = PageUptodate(page);
+#ifdef CONFIG_SYNO_LSP_ALPINE
+		EXOFS_DBGMSG("index=0x%llx uptodate=%d\n", _LLU(index), *uptodate);
+#else /* CONFIG_SYNO_LSP_ALPINE */
 		EXOFS_DBGMSG("index=0x%lx uptodate=%d\n", index, *uptodate);
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 		return page;
 	} else {
 		EXOFS_DBGMSG("YES that_locked_page index=0x%lx\n",

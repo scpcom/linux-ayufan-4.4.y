@@ -924,7 +924,11 @@ enum usb_device_state {
 	USB_STATE_ADDRESS,
 	USB_STATE_CONFIGURED,			/* most functions */
 
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	USB_STATE_SUSPENDED,
+#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 	USB_STATE_SUSPENDED
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 
 	/* NOTE:  there are actually four different SUSPENDED
 	 * states, returning to POWERED, DEFAULT, ADDRESS, or
@@ -932,6 +936,9 @@ enum usb_device_state {
 	 * At this level there's no difference between L1 and L2
 	 * suspend states.  (L2 being original USB 1.1 suspend.)
 	 */
+#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+	USB_STATE_RH_RST,
+#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
 };
 
 enum usb3_link_state {

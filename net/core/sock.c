@@ -2266,7 +2266,11 @@ void sock_init_data(struct socket *sock, struct sock *sk)
 
 	sk->sk_stamp = ktime_set(-1L, 0);
 
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+	// do nothing
+#else /* CONFIG_SYNO_LSP_ALPINE */
 	sk->sk_pacing_rate = ~0U;
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 	/*
 	 * Before updating sk_refcnt, we must commit prior changes to memory
 	 * (Documentation/RCU/rculist_nulls.txt for details)

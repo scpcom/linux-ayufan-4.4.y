@@ -47,8 +47,18 @@ obj-$(CONFIG_MTD_NAND_NUC900)		+= nuc900_nand.o
 obj-$(CONFIG_MTD_NAND_MPC5121_NFC)	+= mpc5121_nfc.o
 obj-$(CONFIG_MTD_NAND_RICOH)		+= r852.o
 obj-$(CONFIG_MTD_NAND_JZ4740)		+= jz4740_nand.o
+ifeq ($(CONFIG_SYNO_MONACO), y)
+obj-$(CONFIG_OF)			+= stm_nand_dt.o
+endif
+obj-$(CONFIG_MTD_NAND_STM_BCH)		+= stm_nand_bch.o
+obj-$(CONFIG_MTD_NAND_STM_FLEX)		+= stm_nand_flex.o stm_nand_ecc.o
+obj-$(CONFIG_MTD_NAND_STM_AFM)		+= stm_nand_afm.o stm_nand_ecc.o
 obj-$(CONFIG_MTD_NAND_GPMI_NAND)	+= gpmi-nand/
 obj-$(CONFIG_MTD_NAND_XWAY)		+= xway_nand.o
 obj-$(CONFIG_MTD_NAND_BCM47XXNFLASH)	+= bcm47xxnflash/
+obj-$(CONFIG_MTD_NAND_AL)		+= al/
+ifeq ($(CONFIG_SYNO_LSP_ARMADA),y)
+obj-$(CONFIG_MTD_NAND_MVEBU_NFC)	+= mvebu_nfc/
+endif
 
 nand-objs := nand_base.o nand_bbt.o

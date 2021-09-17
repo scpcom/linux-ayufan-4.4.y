@@ -20,6 +20,9 @@
 #define __XATTR__
 
 #include <linux/xattr.h>
+#if defined(CONFIG_SYNO_ALPINE)
+#include "transaction.h"
+#endif /* CONFIG_SYNO_ALPINE */
 
 extern const struct xattr_handler btrfs_xattr_acl_access_handler;
 extern const struct xattr_handler btrfs_xattr_acl_default_handler;

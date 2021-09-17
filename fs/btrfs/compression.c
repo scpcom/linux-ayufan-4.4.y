@@ -128,7 +128,11 @@ static int check_compressed_csum(struct inode *inode,
 		kunmap_atomic(kaddr);
 
 		if (csum != *cb_sum) {
+#if defined(CONFIG_SYNO_LSP_ALPINE)
+			btrfs_err(BTRFS_I(inode)->root->fs_info,
+#else /* CONFIG_SYNO_LSP_ALPINE */
 			btrfs_info(BTRFS_I(inode)->root->fs_info,
+#endif /* CONFIG_SYNO_LSP_ALPINE */
 			   "csum failed ino %llu extent %llu csum %u wanted %u mirror %d",
 			   btrfs_ino(inode), disk_start, csum, *cb_sum,
 			   cb->mirror_num);

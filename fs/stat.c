@@ -490,13 +490,14 @@ SYSCALL_DEFINE2(stat64, const char __user *, filename,
 		struct stat64 __user *, statbuf)
 {
 	struct kstat stat;
+	int error = 0;
 
 #ifdef CONFIG_SYNO_DEBUG_FLAG
 	if(syno_hibernation_log_level > 0) {
 		syno_do_hibernation_filename_log(filename);
 	}
 #endif /* CONFIG_SYNO_DEBUG_FLAG */
-	int error = vfs_stat(filename, &stat);
+	error = vfs_stat(filename, &stat);
 
 	if (!error)
 		error = cp_new_stat64(&stat, statbuf);
@@ -638,7 +639,7 @@ SYSCALL_DEFINE2(SYNOCaselessLStat64, char __user *, filename, struct stat64 __us
 #else /* !(__ARCH_WANT_STAT64 || __ARCH_WANT_COMPAT_STAT64) */
 SYSCALL_DEFINE2(SYNOCaselessStat, char __user *, filename, struct stat __user *, statbuf)
 {
-#ifdef CONFIF_SYNO_FS_CASELESS_STAT
+#ifdef CONFIG_SYNO_FS_CASELESS_STAT
 	int last_component = 0;
 	long error = -1;
 	struct kstat stat;
@@ -767,7 +768,7 @@ Out:
 	return error;
 }
 
-SYSCALL_DEFINE3(SYNOStat64, const char __user *, filename, unsigned int, flags, struct SYNOSTAT64 __user *, statbuf)
+SYSCALL_DEFINE3(SYNOStat64, char __user *, filename, unsigned int, flags, struct SYNOSTAT64 __user *, statbuf)
 {
 	return do_SYNOStat64(filename, 0, flags, statbuf);
 }
@@ -785,7 +786,7 @@ SYSCALL_DEFINE3(SYNOFStat64, unsigned int, fd, unsigned int, flags, struct SYNOS
 	return SYNOStat64CopyToUser(&kst, flags, statbuf);
 }
 
-SYSCALL_DEFINE3(SYNOLStat64, const char __user *, filename, unsigned int, flags, struct SYNOSTAT64 __user *, statbuf)
+SYSCALL_DEFINE3(SYNOLStat64, char __user *, filename, unsigned int, flags, struct SYNOSTAT64 __user *, statbuf)
 {
 	return do_SYNOStat64(filename, 1, flags, statbuf);
 }
@@ -924,9 +925,8 @@ void inode_add_bytes(struct inode *inode, loff_t bytes)
 
 EXPORT_SYMBOL(inode_add_bytes);
 
-void inode_sub_bytes(struct inode *inode, loff_t bytes)
+void __inode_sub_bytes(struct inode *inode, loff_t bytes)
 {
-	spin_lock(&inode->i_lock);
 	inode->i_blocks -= bytes >> 9;
 	bytes &= 511;
 	if (inode->i_bytes < bytes) {
@@ -934,6 +934,14 @@ void inode_sub_bytes(struct inode *inode, loff_t bytes)
 		inode->i_bytes += 512;
 	}
 	inode->i_bytes -= bytes;
+}
+
+EXPORT_SYMBOL(__inode_sub_bytes);
+
+void inode_sub_bytes(struct inode *inode, loff_t bytes)
+{
+	spin_lock(&inode->i_lock);
+	__inode_sub_bytes(inode, bytes);
 	spin_unlock(&inode->i_lock);
 }
 
