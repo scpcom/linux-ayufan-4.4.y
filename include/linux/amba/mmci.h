@@ -6,6 +6,7 @@
 
 #include <linux/mmc/host.h>
 
+
 /*
  * These defines is places here due to access is needed from machine
  * configuration files. The ST Micro version does not have ROD and

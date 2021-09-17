@@ -1114,6 +1114,7 @@ long arch_ptrace(struct task_struct *child, long request,
 	return ptrace_request(child, request, addr, data);
 }
 
+
 static int __init ptrace_break_init(void)
 {
 	hook_debug_fault_code(DBG_ESR_EVT_BRK, arm64_break_trap, SIGTRAP,
@@ -1121,6 +1122,7 @@ static int __init ptrace_break_init(void)
 	return 0;
 }
 core_initcall(ptrace_break_init);
+
 
 asmlinkage int syscall_trace(int dir, struct pt_regs *regs)
 {

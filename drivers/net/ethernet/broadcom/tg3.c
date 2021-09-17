@@ -15,6 +15,7 @@
  *	notice is accompanying it.
  */
 
+
 #include <linux/module.h>
 #include <linux/moduleparam.h>
 #include <linux/stringify.h>
@@ -442,6 +443,7 @@ static const struct {
 #define TG3_EXT_LOOPB_TEST	6
 #define TG3_INTERRUPT_TEST	7
 
+
 static const struct {
 	const char string[ETH_GSTRING_LEN];
 } ethtool_test_keys[] = {
@@ -456,6 +458,7 @@ static const struct {
 };
 
 #define TG3_NUM_TEST	ARRAY_SIZE(ethtool_test_keys)
+
 
 static void tg3_write32(struct tg3 *tp, u32 off, u32 val)
 {
@@ -2236,6 +2239,7 @@ static void tg3_phy_toggle_apd(struct tg3 *tp, bool enable)
 
 	tg3_writephy(tp, MII_TG3_MISC_SHDW, reg);
 
+
 	reg = MII_TG3_MISC_SHDW_WREN |
 	      MII_TG3_MISC_SHDW_APD_SEL |
 	      MII_TG3_MISC_SHDW_APD_WKTM_84MS;
@@ -3902,6 +3906,7 @@ static int tg3_load_tso_firmware(struct tg3 *tp)
 	return 0;
 }
 
+
 /* tp->lock is held. */
 static void __tg3_set_mac_addr(struct tg3 *tp, bool skip_mac_1)
 {
@@ -4556,6 +4561,7 @@ static bool tg3_phy_eee_config_ok(struct tg3 *tp)
 		return false;
 
 	val &= (MDIO_AN_EEE_ADV_100TX | MDIO_AN_EEE_ADV_1000T);
+
 
 	if (advertising & ADVERTISED_100baseT_Full)
 		tgtadv |= MDIO_AN_EEE_ADV_100TX;
@@ -6482,6 +6488,7 @@ static void tg3_rx_data_free(struct tg3 *tp, struct ring_info *ri, u32 map_sz)
 	ri->data = NULL;
 }
 
+
 /* Returns size of skb allocated or < 0 on error.
  *
  * We only need to fill in the address because the other members
@@ -7855,6 +7862,7 @@ static netdev_tx_t tg3_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	if (pci_dma_mapping_error(tp->pdev, mapping))
 		goto drop;
 
+
 	tnapi->tx_buffers[entry].skb = skb;
 	dma_unmap_addr_set(&tnapi->tx_buffers[entry], mapping, mapping);
 
@@ -9142,6 +9150,7 @@ static void tg3_set_bdinfo(struct tg3 *tp, u32 bdinfo_addr,
 			      nic_addr);
 }
 
+
 static void tg3_coal_tx_init(struct tg3 *tp, struct ethtool_coalesce *ec)
 {
 	int i = 0;
@@ -9248,6 +9257,7 @@ static void tg3_rings_reset(struct tg3 *tp)
 	     txrcb < limit; txrcb += TG3_BDINFO_SIZE)
 		tg3_write_mem(tp, txrcb + TG3_BDINFO_MAXLEN_FLAGS,
 			      BDINFO_FLAGS_DISABLED);
+
 
 	/* Disable all receive return rings but the first. */
 	if (tg3_flag(tp, 5717_PLUS))
@@ -10511,6 +10521,7 @@ static ssize_t tg3_show_temp(struct device *dev,
 	return sprintf(buf, "%u\n", temperature);
 }
 
+
 static SENSOR_DEVICE_ATTR(temp1_input, S_IRUGO, tg3_show_temp, NULL,
 			  TG3_TEMP_SENSOR_OFFSET);
 static SENSOR_DEVICE_ATTR(temp1_crit, S_IRUGO, tg3_show_temp, NULL,
@@ -10572,6 +10583,7 @@ static void tg3_hwmon_open(struct tg3 *tp)
 		sysfs_remove_group(&pdev->dev.kobj, &tg3_group);
 	}
 }
+
 
 #define TG3_STAT_ADD32(PSTAT, REG) \
 do {	u32 __val = tr32(REG); \
@@ -11310,6 +11322,7 @@ static int tg3_start(struct tg3 *tp, bool reset_phy, bool test_irq,
 		tg3_ptp_init(tp);
 	else
 		tg3_ptp_resume(tp);
+
 
 	tg3_full_unlock(tp);
 
@@ -14259,6 +14272,7 @@ static void tg3_get_57780_nvram_info(struct tg3 *tp)
 	if (tp->nvram_pagesize != 264 && tp->nvram_pagesize != 528)
 		tg3_flag_set(tp, NO_NVRAM_ADDR_TRANS);
 }
+
 
 static void tg3_get_5717_nvram_info(struct tg3 *tp)
 {

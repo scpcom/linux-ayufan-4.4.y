@@ -42,6 +42,7 @@ static struct snd_midi_op emux_ops = {
 	snd_emux_sysex,
 };
 
+
 /*
  * number of MIDI channels
  */
@@ -112,6 +113,7 @@ snd_emux_init_seq(struct snd_emux *emu, struct snd_card *card, int index)
 	return 0;
 }
 
+
 /*
  * Detach from the ports that were set up for this synthesizer and
  * destroy the kernel client.
@@ -129,6 +131,7 @@ snd_emux_detach_seq(struct snd_emux *emu)
 	}
 	mutex_unlock(&emu->register_mutex);
 }
+
 
 /*
  * create a sequencer port and channel_set
@@ -180,6 +183,7 @@ snd_emux_create_port(struct snd_emux *emu, char *name,
 	return p;
 }
 
+
 /*
  * release memory block for port
  */
@@ -198,6 +202,7 @@ free_port(void *private_data)
 	}
 }
 
+
 #define DEFAULT_DRUM_FLAGS	(1<<9)
 
 /*
@@ -211,6 +216,7 @@ snd_emux_init_port(struct snd_emux_port *p)
 
 	snd_emux_reset_port(p);
 }
+
 
 /*
  * reset port
@@ -240,6 +246,7 @@ snd_emux_reset_port(struct snd_emux_port *port)
 	}
 }
 
+
 /*
  * input sequencer event
  */
@@ -257,6 +264,7 @@ snd_emux_event_input(struct snd_seq_event *ev, int direct, void *private_data,
 
 	return 0;
 }
+
 
 /*
  * increment usage count
@@ -276,6 +284,7 @@ snd_emux_inc_count(struct snd_emux *emu)
 	return 1;
 }
 
+
 /*
  * decrease usage count
  */
@@ -288,6 +297,7 @@ snd_emux_dec_count(struct snd_emux *emu)
 		snd_emux_terminate_all(emu);
 	module_put(emu->ops.owner);
 }
+
 
 /*
  * Routine that is called upon a first use of a particular port
@@ -334,6 +344,7 @@ snd_emux_unuse(void *private_data, struct snd_seq_port_subscribe *info)
 	mutex_unlock(&emu->register_mutex);
 	return 0;
 }
+
 
 /*
  * attach virtual rawmidi devices

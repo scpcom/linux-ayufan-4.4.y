@@ -80,6 +80,7 @@
 
 #define	ENABLE_HEXDUMP	0	/* Enable if you need it */
 
+
 #ifdef USBVISION_DEBUG
 	#define PDEBUG(level, fmt, args...) { \
 		if (video_debug & (level)) \
@@ -97,6 +98,7 @@
 /* String operations */
 #define rmspace(str)	while (*str == ' ') str++;
 #define goto2next(str)	while (*str != ' ') str++; while (*str == ' ') str++;
+
 
 /* sequential number of usbvision device */
 static int usbvision_nr;
@@ -142,12 +144,14 @@ MODULE_PARM_DESC(power_on_at_open, " Set the default device to power on when dev
 MODULE_PARM_DESC(video_nr, "Set video device number (/dev/videoX).  Default: -1 (autodetect)");
 MODULE_PARM_DESC(radio_nr, "Set radio device number (/dev/radioX).  Default: -1 (autodetect)");
 
+
 /* Misc stuff */
 MODULE_AUTHOR(DRIVER_AUTHOR);
 MODULE_DESCRIPTION(DRIVER_DESC);
 MODULE_LICENSE(DRIVER_LICENSE);
 MODULE_VERSION(USBVISION_VERSION_STRING);
 MODULE_ALIAS(DRIVER_ALIAS);
+
 
 /*****************************************************************************/
 /* SYSFS Code - Copied from the stv680.c usb module.			     */
@@ -448,6 +452,7 @@ static int usbvision_v4l2_close(struct file *file)
 	PDEBUG(DBG_IO, "success");
 	return 0;
 }
+
 
 /*
  * usbvision_ioctl()
@@ -1186,6 +1191,7 @@ out:
 	return err_code;
 }
 
+
 static int usbvision_radio_close(struct file *file)
 {
 	struct usb_usbvision *usbvision = video_drvdata(file);
@@ -1271,6 +1277,7 @@ static struct video_device usbvision_video_template = {
 	.current_norm   = V4L2_STD_PAL
 };
 
+
 /* Radio template */
 static const struct v4l2_file_operations usbvision_radio_fops = {
 	.owner             = THIS_MODULE,
@@ -1304,6 +1311,7 @@ static struct video_device usbvision_radio_template = {
 	.tvnorms              = USBVISION_NORMS,
 	.current_norm         = V4L2_STD_PAL
 };
+
 
 static struct video_device *usbvision_vdev_init(struct usb_usbvision *usbvision,
 					struct video_device *vdev_template,
@@ -1460,6 +1468,7 @@ static void usbvision_release(struct usb_usbvision *usbvision)
 	PDEBUG(DBG_PROBE, "success");
 }
 
+
 /*********************** usb interface **********************************/
 
 static void usbvision_configure_video(struct usb_usbvision *usbvision)
@@ -1577,6 +1586,7 @@ static int usbvision_probe(struct usb_interface *intf,
 		       usbvision->alt_max_pkt_size[i]);
 	}
 
+
 	usbvision->nr = usbvision_nr++;
 
 	usbvision->have_tuner = usbvision_device_data[model].tuner;
@@ -1600,6 +1610,7 @@ static int usbvision_probe(struct usb_interface *intf,
 	PDEBUG(DBG_PROBE, "success");
 	return 0;
 }
+
 
 /*
  * usbvision_disconnect()
