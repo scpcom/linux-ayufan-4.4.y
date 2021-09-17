@@ -751,8 +751,6 @@ static void __mv_xor_slot_cleanup(struct mv_xor_chan *mv_chan)
 #else  
 	list_for_each_entry_safe(iter, _iter, &mv_chan->chain,
 					chain_node) {
-		prefetch(_iter);
-		prefetch(&_iter->async_tx);
 
 		if (seen_current)
 			break;
@@ -761,21 +759,38 @@ static void __mv_xor_slot_cleanup(struct mv_xor_chan *mv_chan)
 			seen_current = 1;
 			if (busy)
 				break;
+			}
 		}
-
-		cookie = mv_xor_run_tx_complete_actions(iter, mv_chan, cookie);
-
-		if (mv_xor_clean_slot(iter, mv_chan))
-			break;
 	}
 
 	if ((busy == 0) && !list_empty(&mv_chan->chain)) {
-		struct mv_xor_desc_slot *chain_head;
-		chain_head = list_entry(mv_chan->chain.next,
-					struct mv_xor_desc_slot,
-					chain_node);
-
-		mv_xor_start_new_chain(mv_chan, chain_head);
+		if (current_cleaned) {
+			/*
+			 * current descriptor cleaned and removed, run
+			 * from list head
+			 */
+			iter = list_entry(mv_chan->chain.next,
+					  struct mv_xor_desc_slot,
+					  chain_node);
+			mv_xor_start_new_chain(mv_chan, iter);
+		} else {
+			if (!list_is_last(&iter->chain_node, &mv_chan->chain)) {
+				/*
+				 * descriptors are still waiting after
+				 * current, trigger them
+				 */
+				iter = list_entry(iter->chain_node.next,
+						  struct mv_xor_desc_slot,
+						  chain_node);
+				mv_xor_start_new_chain(mv_chan, iter);
+			} else {
+				/*
+				 * some descriptors are still waiting
+				 * to be cleaned
+				 */
+				tasklet_schedule(&mv_chan->irq_tasklet);
+			}
+		}
 	}
 #endif  
 

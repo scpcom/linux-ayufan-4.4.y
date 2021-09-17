@@ -2204,7 +2204,7 @@ static void fixup_ti816x_class(struct pci_dev *dev)
 	dev->class = PCI_CLASS_MULTIMEDIA_VIDEO;
 }
 DECLARE_PCI_FIXUP_CLASS_EARLY(PCI_VENDOR_ID_TI, 0xb800,
-				 PCI_CLASS_NOT_DEFINED, 0, fixup_ti816x_class);
+			      PCI_CLASS_NOT_DEFINED, 0, fixup_ti816x_class);
 
 static void fixup_mpss_256(struct pci_dev *dev)
 {

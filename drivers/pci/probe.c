@@ -151,6 +151,9 @@ int __pci_read_base(struct pci_dev *dev, enum pci_bar_type type,
 	struct pci_bus_region region;
 	bool bar_too_big = false, bar_disabled = false;
 
+	if (dev->non_compliant_bars)
+		return 0;
+
 	mask = type ? PCI_ROM_ADDRESS_MASK : ~0;
 #ifdef MY_DEF_HERE
 	if (PCI_VENDOR_ID_INTEL == dev->vendor && 0x2934 == dev->device) {
@@ -865,6 +868,7 @@ void set_pcie_hotplug_bridge(struct pci_dev *pdev)
 int pci_setup_device(struct pci_dev *dev)
 {
 	u32 class;
+	u16 cmd;
 	u8 hdr_type;
 	struct pci_slot *slot;
 	int pos = 0;

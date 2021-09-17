@@ -572,7 +572,6 @@ node_error:
 
 void hfs_bnode_free(struct hfs_bnode *node)
 {
-#if 0
 	int i;
 
 	for (i = 0; i < node->tree->pages_per_bnode; i++)
