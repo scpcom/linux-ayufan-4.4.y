@@ -1,0 +1,54 @@
+menu "Hi3531a board feature"
+
+config MACH_HI3531A
+	bool "Support hi3531a platform"
+	select CPU_V7
+	select ARM_GIC
+	select ARM_TIMER_SP804
+	help
+	  Include support for the hisilion Hi3531A platform.
+	  Hi3531a support ARM CORTEX-A9 processer,
+	  within a Generic Interrupt Controller.
+	  Support DDR2 and DDR3.
+choice
+	prompt "CPU timer source"
+	default SP804_LOCAL_TIMER_HI3531A
+
+config SP804_LOCAL_TIMER_HI3531A
+	bool "arm local timer from sp804"
+	help
+	  arm local timer from sp804.
+	  if you choice sp804 as local timer,
+	  please select HAVE_SP804_LOCAL_TIMER_HI3531A,
+	  if you choice arm selt as local timer,
+	  please select HAVE_ARM_LOCAL_TIMER_HI3531A.
+
+config ARM_LOCAL_TIMER_HI3531A
+	bool "arm local timer from arm self"
+	help
+	  arm local timer from arm self.
+	  if you choice sp804 as local timer,
+	  please select HAVE_SP804_LOCAL_TIMER_HI3531A,
+	  if you choice arm selt as local timer,
+	  please select HAVE_ARM_LOCAL_TIMER_HI3531A.
+
+endchoice
+
+config HI_3531A_HZ
+	int "Config HZ"
+	default 100 if HIGH_RES_TIMERS
+	default 100
+
+config DEFAULT_BUSCLK
+	int "DEFAULT_BUSCLK"
+	default "50000000"
+	help
+	  Default AHB clock rate
+
+config DEFAULT_UART_BASE_ADDR
+	hex "Default uart controller base address"
+	default "0x12080000"
+	help
+	  Default UART controller base address
+
+endmenu

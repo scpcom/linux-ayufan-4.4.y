@@ -1,0 +1,83 @@
+#
+# hiusb Host Controller Drivers
+#
+comment "hiusb(ehci/ohci) Host Controller Drivers"
+	depends on USB
+
+menuconfig HIUSB_HOST2_0
+	bool "hiusb2.0 usb host support"
+	depends on ARCH_HI3521A
+	default y if ARCH_HI3521A
+	help
+          This selects the usb(ehci/ohci) family usb host.
+	  Say Y to enable hisi usb2.0 controller driver.
+	  IF you do not use usb2.0 device in your board,
+	  say N to get a smaller uImage. Mostly you need it.
+
+if HIUSB_HOST2_0
+
+config HIUSB_HOST
+	bool "hisilicon usb host controller support"
+	depends on ARCH_HI3521A
+	default y if ARCH_HI3521A
+	help
+	  You can select host mode by the option.
+	  when you select the option, usb2.0 host
+	  driver can use. The code main to init the control.
+	  If you want to use hisilicon usb control, you must select
+	  the option.
+
+config HIUSB_EHCI
+	bool "hiusb-ehci usb host device support"
+	depends on ARCH_HI3521A
+	default y if ARCH_HI3521A
+	help
+	  Enable hisi ehci controller driver.
+	  Say Y to enable hisi usb2.0 ehci controller driver.
+	  IF you do not use usb2.0 ehci device in your board, say N to get a
+	  smaller uImage. Mostly you need it.
+
+config HIUSB_EHCI_IOBASE
+	hex "hiusb-ehci IO address"
+	default "0x10040000" if ARCH_HI3521A
+
+config HIUSB_EHCI_IOSIZE
+	hex "hiusb-ehci IO size"
+	default "0x00010000"
+	help
+	  default is 0x10000.
+
+config HIUSB_EHCI_IRQNUM
+	int "hiusb-ehci irq number"
+	default "51" if ARCH_HI3521A
+	help
+	  Please use the default value in this Kconfig, The default value
+	  is the right value provided by hisi.
+
+config HIUSB_OHCI
+	bool "hiusb-ohci usb host device support"
+	depends on ARCH_HI3521A
+	default y if ARCH_HI3521A
+	help
+	  Enable hisi ohci controller driver.
+	  Say Y to enable hisi usb2.0 ohci controller driver.
+	  IF you do not use usb2.0 ohci device in your board, say N to get a
+	  smaller uImage. Mostly you need it.
+
+config HIUSB_OHCI_IOBASE
+	hex "hiusb-ohci IO address"
+	default "0x10030000" if ARCH_HI3521A
+
+config HIUSB_OHCI_IOSIZE
+	hex "hiusb-ohci IO size"
+	default "0x00010000"
+	help
+	  default is 0x10000.
+
+config HIUSB_OHCI_IRQNUM
+	int "hiusb-ohci irq number"
+	default "50" if ARCH_HI3521A
+	help
+	  Please use the default value in this Kconfig, The default value
+	  is the right value provided by hisi.
+endif # HIUSB_HOST2_0

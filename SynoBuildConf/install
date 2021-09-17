@@ -1,0 +1,12 @@
+#!/bin/bash
+# Copyright (c) 2000-2015 Synology Inc. All rights reserved.
+
+UDEV_DEVICE_TABLE="${TmpInstDir}/lib/udev/devicetable"
+USB_USBMODEM_MAP="usb.usbmodem.table"
+
+if [ ! -d ${UDEV_DEVICE_TABLE} ]; then
+	mkdir -p ${UDEV_DEVICE_TABLE}
+fi
+if [ -f "${USB_USBMODEM_MAP}" ]; then
+	install -c ${USB_USBMODEM_MAP} ${UDEV_DEVICE_TABLE}
+fi

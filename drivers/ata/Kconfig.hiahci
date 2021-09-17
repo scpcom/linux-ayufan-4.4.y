@@ -1,0 +1,114 @@
+menuconfig HI_SATA
+	bool "hisilicon sata device support"
+	depends on (ARCH_HI3536 || ARCH_HI3521A || ARCH_HI3531A)
+	default y if (ARCH_HI3536 || ARCH_HI3521A || ARCH_HI3531A)
+	select ATA
+	select ATA_VERBOSE_ERROR
+	select SATA_PMP
+
+if HI_SATA
+config HI_SATA_IOBASE
+	hex "hi sata IO address"
+	default "0x11010000" if (ARCH_HI3536 || ARCH_HI3521A || ARCH_HI3531A)
+	help
+	  hisilicon sata io base address.
+
+config HI_SATA_IOSIZE
+	hex "hi sata IO size"
+	default "0x00010000" if (ARCH_HI3536 || ARCH_HI3521A || ARCH_HI3531A)
+	help
+	  default is 0x10000.
+
+config HI_SATA_IRQNUM
+	int "hi sata irq number"
+	default "59" if ARCH_HI3536
+	default "49" if ARCH_HI3521A
+	default "49" if ARCH_HI3531A
+	help
+	  hisilicon sata irq number.
+
+config HI_SATA_PORTS
+	int "hi sata port number"
+	range 1 2 if (ARCH_HI3536 || ARCH_HI3521A)
+	range 1 4 if ARCH_HI3531A
+	default "2" if (ARCH_HI3536 || ARCH_HI3521A)
+	default "4" if ARCH_HI3531A
+	help
+	  hisilicon sata port number.
+
+config HI_SATA_MODE
+	int "hi sata interworking speed mode(1.5G:0/3G:1/6G:2)"
+	range 0 2 if (ARCH_HI3536 || ARCH_HI3521A || ARCH_HI3531A)
+	default "1" if (ARCH_HI3536 || ARCH_HI3521A || ARCH_HI3531A)
+	help
+	  hisilicon interworking speed mode.
+
+config HI_SATA_FBS
+	int "hi sata FIS-Based switching"
+	default 1
+	range 0 1
+	help
+	  Hisatav200 supports FBS.
+	  FBS is FIS-Based switching.
+	  Choose y if you want to use it.
+
+config HI_SATA_NCQ
+	int "hi sata Native Command Queuing"
+	default 1
+	range 0 1
+	help
+	  Hisatav200 supports NCQ.
+	  NCQ is Native Command Queuing.
+	  Choose y if you want to use it.
+
+config HI_SATA_PREEMPH
+	hex "hi sata phy PX TX pre-emphasis"
+	depends on (ARCH_HI3521A || ARCH_HI3520DV300)
+	default 0x14451 if ARCH_HI3521A
+	default 0x14451 if ARCH_HI3520DV300
+
+config HI_SATA_AMPLITUDE
+	hex "hi sata phy PX TX amplitude"
+	depends on (ARCH_HI3521A || ARCH_HI3520DV300)
+	default 0x8377eb8 if ARCH_HI3521A
+	default 0x8377eb8 if ARCH_HI3520DV300
+
+config HI_SATA_RAM
+	bool "hi sata use RAM prdt"
+	depends on (ARCH_HI3536 || ARCH_HI3531A)
+	default n if (ARCH_HI3536 || ARCH_HI3531A)
+	help
+	  Hisatav200 supports RAM.
+	  Set command table in RAM
+	  Set PRDT in RAM
+	  Offload CPU usage
+
+if HI_SATA_RAM
+config HI_SATA_RAM_CMD_BASE
+	hex "hi sata use RAM cmd table"
+	depends on ARCH_HI3536
+	default "0x4020000" if ARCH_HI3536
+
+config HI_SATA_RAM_CMD_IO_SIZE
+	hex "the size of hi sata use RAM cmd table"
+	depends on ARCH_HI3536
+	default "0x400" if ARCH_HI3536
+
+config HI_SATA_RAM_PRDT_BASE
+	hex "hi sata use RAM prdt"
+	depends on ARCH_HI3536
+	default "0x4030000" if ARCH_HI3536
+
+config HI_SATA_RAM_PRDT_IO_SIZE
+	hex "the size of hi sata use RAM prdt"
+	depends on ARCH_HI3536
+	default "0x10000" if ARCH_HI3536
+
+config HI_SATA_RAM_SG_NUM
+	int "hi sata use RAM default sg number"
+	range 1 168
+	depends on ARCH_HI3536
+	default "120" if ARCH_HI3536
+endif
+endif
+

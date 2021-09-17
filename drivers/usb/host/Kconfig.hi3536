@@ -1,0 +1,130 @@
+#
+# hiusb Host Controller Drivers
+#
+comment "hiusb Host Controller Drivers"
+	depends on USB
+
+menuconfig HIUSB_HOST
+	bool "hiusb(xhci/ehci/ohci) family usb host device support"
+	default y
+	help
+	  This selects the usb(xhci/ehci/ohci) family usb host device.
+
+if HIUSB_HOST
+
+config HIUSB_XHCI
+	bool "hiusb-xhci usb host device support"
+	default y
+
+config HIUSB_XHCI_IOBASE
+	hex "hiusb-xhci IO address"
+	default "0x11040000"
+
+config HIUSB_XHCI_IOSIZE
+	hex "hiusb-xhci IO size"
+	default "0x00010000"
+	help
+	  default is 0x10000.
+
+config HIUSB_XHCI_IRQNUM
+	int "hiusb-xhci irq number"
+	default "60"
+
+config HIUSB_EHCI
+	bool "hiusb-ehci usb host device support"
+	default y
+
+config HIUSB_EHCI_IOBASE
+	hex "hiusb-ehci IO address"
+	default "0x10040000"
+
+config HIUSB_EHCI_IOSIZE
+	hex "hiusb-ehci IO size"
+	default "0x00010000"
+	help
+	  default is 0x10000.
+
+config HIUSB_EHCI_IRQNUM
+	int "hiusb-ehci irq number"
+	default "53"
+
+config HIUSB_OHCI
+	bool "hiusb-ohci usb host device support"
+	default y
+
+config HIUSB_OHCI_IOBASE
+	hex "hiusb-ohci IO address"
+	default "0x10030000"
+
+config HIUSB_OHCI_IOSIZE
+	hex "hiusb-ohci IO size"
+	default "0x00010000"
+	help
+	  default is 0x10000.
+
+config HIUSB_OHCI_IRQNUM
+	int "hiusb-ohci irq number"
+	default "52"
+endif # HIUSB_HOST2_0
+
+menuconfig HIUSB_DEVICE2_0
+	bool "hiusb2.0 usb device support"
+	default y
+	select USB_GADGET_DUALSPEED
+	select USB_GADGET_SELECTED
+	help
+          This selects the usb(ehci/ohci) family usb device.
+	  Say Y to enable hisi usb2.0 controller driver.
+	  IF you do not use usb2.0 device in your board,
+	  say N to get a smaller uImage. Mostly you need it.
+
+if HIUSB_DEVICE2_0
+
+config HIUSB_DEVICE
+	tristate "hisilicon highspeed device controller version 3.00a driver"
+	default y
+	help
+	  You can select device mode by the option.
+	  Enable hisi ehci controller driver.
+	  Say Y to enable hisi usb2.0 ehci controller driver.
+	  IF you do not use usb2.0 ehci device in your board, say N to get a
+	  smaller uImage. Mostly you need it.
+
+config HIUSBUDC_REG_BASE_ADDRESS
+	hex "hisilicon highspeed device control register base address"
+	default "0x10050000" if ARCH_HI3536
+
+config HIUSBUDC_REG_BASE_ADDRESS_LEN
+	hex "hisilicon highspeed device control register size length"
+	default "0x40000" if ARCH_HI3536
+
+config HIUSBUDC_IRQ_NUMBER
+	int "hisilicon highspeed device interrupt number"
+	default "54" if ARCH_HI3536
+
+config HIUSBUDC_DMA_BUF_LENGTH
+	int "hisilicon highspeed device dma buffer length"
+	default "16384" if ARCH_HI3536
+
+config HIUSBUDC_PHY_UTMI_BITWIDTH
+	int "hisilicon highspeed device phy interface utmi bitwidth"
+	default "8"
+
+config HIUSB_SWITCH_HOST_DEVICE
+	hex "host/device switch register address"
+	default "0x1212007c" if ARCH_HI3536
+	help
+	  host/device switch register address
+
+config SWITCH_HIUSB_HOST_DEVICE_BIT
+	int "host/device switch set bit"
+	default "31"
+
+config HIUSB_OTG_SWITCH_TIME
+	int "host/device detection interval(ms)"
+	default "1000"
+	help
+	  host/device detection interval
+
+endif # HI_HS_DEVICE
+

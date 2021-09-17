@@ -1,0 +1,61 @@
+menuconfig HI3536_IPCM
+	tristate "Hi3536 ipcm added"
+	depends on  (ARCH_HI3536 || ARCH_HI3536_SLAVE)
+	help
+	  The hi3536 ipcm module support the communication
+	  between the cpu a17 and a7, there are some paramters
+	  for this module should be set.
+	  for example, shared memory base address, share memory
+	  size, irq number and so on.
+
+if HI3536_IPCM
+config HIIPCM_IRQNUM
+	int "hiipcm irq number"
+	default "7" if (ARCH_HI3536 || ARCH_HI3536_SLAVE)
+
+config HIIPCM_SHARE_MEM_ADDR
+	hex "hiipcm share mem address"
+	default "0x04010000" if (ARCH_HI3536 || ARCH_HI3536_SLAVE)
+
+config HIIPCM_SHARE_MEM_SIZE
+	hex "hiipcm share mem size"
+	default "0x00006000"
+
+config HIIPCM_DATA_REG_BASE
+	hex "hiipcm data register base address"
+	default "0x12050000" if (ARCH_HI3536 || ARCH_HI3536_SLAVE)
+
+
+config HIIPCM_CPU_ID
+	int "CPU ID(0:A17, 1:A7)"
+	default "0" if ARCH_HI3536
+	default "1" if ARCH_HI3536_SLAVE
+	help
+	  The cpu id of ipcm, ipcm module runs in A17, IPCM_CPU_ID=0;
+          ipcm runs in A7, IPCM_CPU_ID=1.
+
+          /* cpu id definitions */
+          typedef enum {
+               IPCM_CPU_ID_A17,          /* 0x0 */
+               IPCM_CPU_ID_A7,           /* 0x1 */
+          } ipcm_cpu_id_t;
+
+config HIIPCM_IRQ_STATISTIC_ENABLE
+	bool "enable hi-ipcm irq number statistic"
+	default "0"
+	help
+	  If enable this option
+	  (HIIPCM_IRQ_STATISTIC_ENABLE = 1),
+	  the hi-ipcm module would statistic
+	  the sent and received number of irq.
+
+config HIIPCM_WAIT_TIMEOUT
+	int "hiipcm wait timeout"
+	default "5" if (ARCH_HI3536 || ARCH_HI3536_SLAVE)
+	help
+	  The wait timeout value for hiipcm module.
+	  It's unit of this value is second. The
+	  default value 5, means the max wait time
+	  is 5s.
+
+endif

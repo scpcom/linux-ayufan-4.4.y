@@ -1,0 +1,44 @@
+#ifndef __HISI_PCIE_H__
+#define __HISI_PCIE_H__
+
+#define MISC_CTRL_BASE		0x12120000
+#define PCIE_MEM_BASE		0x30000000
+#define PCIE_EP_CONF_BASE	0x20000000
+#define PCIE_DBI_BASE		0x1f000000
+#define PERI_CRG_BASE		0x12040000
+
+#define PERI_CRG44		0xB0
+#define PCIE_X2_SRST_REQ	6
+
+#define PCIE_X2_AUX_CKEN	3
+#define PCIE_X2_PIPE_CKEN	2
+#define PCIE_X2_SYS_CKEN	1
+#define PCIE_X2_BUS_CKEN	0
+
+#define PCIE_SYS_CTRL0		0xE0
+#define PCIE_DEVICE_TYPE	28
+#define PCIE_WM_EP		0x0
+#define PCIE_WM_LEGACY		0x1
+#define PCIE_WM_RC		0x4
+
+#define PCIE_SYS_CTRL7		0xFC
+#define PCIE_APP_LTSSM_ENBALE	11
+
+#define PCIE_SYS_STATE0		0x110
+#define PCIE_XMLH_LINK_UP	15
+#define PCIE_RDLH_LINK_UP	5
+
+#define PCIE_IRQ_INTA		82
+#define PCIE_IRQ_INTB		83
+#define PCIE_IRQ_INTC		84
+#define PCIE_IRQ_INTD		85
+#define PCIE_IRQ_EDMA		86
+#define PCIE_IRQ_MSI		87
+#define PCIE_IRQ_LINK_DOWN	88
+
+#define PCIE_INTA_PIN		1
+#define PCIE_INTB_PIN		2
+#define PCIE_INTC_PIN		3
+#define PCIE_INTD_PIN		4
+
+#endif

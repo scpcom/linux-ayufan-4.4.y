@@ -1,0 +1,99 @@
+menu "Hi3536 board feature"
+
+config MACH_HI3536
+	bool "Support hi3536 platform"
+	select CPU_V7
+	select ARM_GIC
+	select ARM_TIMER_SP804
+	help
+	  Include support for the hisilion Hi3536 platform.
+	  S40 support ARM CORTEX-A17 processer,
+	  within a Generic Interrupt Controller.
+	  Support DDR2 and DDR3.
+
+choice
+	prompt "CPU timer source"
+	default SP804_LOCAL_TIMER
+
+config SP804_LOCAL_TIMER
+	bool "arm local timer from sp804"
+	help
+	  arm local timer from sp804.
+	  if you choice sp804 as local timer,
+	  please select HAVE_SP804_LOCAL_TIMER_HI3536,
+	  if you choice arm selt as local timer,
+	  please select HAVE_ARM_LOCAL_TIMER.
+
+config ARM_LOCAL_TIMER
+	bool "arm local timer from arm self"
+	help
+	  arm local timer from arm self.
+	  if you choice sp804 as local timer,
+	  please select HAVE_SP804_LOCAL_TIMER_HI3516A,
+	  if you choice arm selt as local timer,
+	  please select HAVE_ARM_LOCAL_TIMER.
+
+endchoice
+
+config HI_3536_HZ
+	int "Config HZ"
+	default 100 if HIGH_RES_TIMERS
+	default 100
+
+config DEFAULT_BUSCLK
+	int "DEFAULT_BUSCLK"
+	default "50000000"
+	help
+	  Default AHB clock rate
+
+config DEFAULT_UART_BASE_ADDR
+	hex "Default uart controller base address"
+	default "0xF8B00000"
+	help
+	  Default UART controller base address
+
+config HI3536_SYSCNT
+	bool "hi3536 syscounter"
+	depends on MACH_HI3536
+	default n if MACH_HI3536
+	help
+	  This is the parameter about syscounter.
+	  When it is set,syscounter is enabled.
+	  The parameter should be fit to logic
+	  version.
+
+config A17_BOOT_A7
+	bool "A17 booting A7"
+	depends on ARCH_HI3536
+	default y if ARCH_HI3536
+	help
+	  A17 boot A7 up.
+	  when this parameter set true,
+	  A17 os will boot A7 os.
+	  This parameter is used in A17 os.
+
+config HI3536_TAG
+	hex "hi3536 tag"
+	depends on A17_BOOT_A7
+	default "0x726d6d80"
+	help
+	  Parameters passed from uboot can be parseed via this tag.
+
+config IRQNUM_SEND_TO_A7
+	int "the num of irq sending to A7"
+	range 2 1020
+	depends on A17_BOOT_A7
+	default 20 if ARCH_HI3536
+	help
+	 It shows how many irqs should send to A7 in A17-booting-A7 mode.
+
+config IRQ_TO_A7
+	string "Send irq to A7"
+	depends on A17_BOOT_A7
+	default "34,39,106"  if ARCH_HI3536
+	help
+          when A17 booting A7,some irq should send to A7 cpu.This parameter shows
+          which irq should pass to A7 cpu.The irq num should be in the range (32 1020).
+          This is done here because gic distributor is inited here.
+
+endmenu

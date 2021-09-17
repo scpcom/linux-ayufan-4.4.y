@@ -1,0 +1,35 @@
+menuconfig XOR_ENGINE
+	tristate "XOR engine contrller driver"
+	depends on (ARCH_HI3536)
+	default n if (ARCH_HI3536)
+	help
+	  support xor logic
+	  xor logic is an IP
+	  that offload xor
+	  calculation in SOC.
+
+if XOR_ENGINE
+config XOR_IOADDR
+	hex "XOR IO address"
+	default "0x12260000" if (ARCH_HI3536)
+
+config XOR_IOSIZE
+	hex "XOR IO size"
+	default "0x00010000"
+
+config XOR_IRQNUM
+	int "XOR irq number"
+	default "119" if (ARCH_HI3536)
+
+config XOR_SYS_IOADDR
+	hex "XOR System Config IO address"
+	default "0x12040000" if (ARCH_HI3536)
+
+config XOR_SYS_IOSIZE
+	hex "XOR System Config IO size"
+	default "0x00000100"
+
+config XOR_POLL
+	bool "use xor poll mode"
+	default "y"
+endif

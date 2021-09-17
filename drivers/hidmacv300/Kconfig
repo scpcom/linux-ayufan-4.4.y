@@ -1,0 +1,63 @@
+menuconfig HIDMAC_V300
+	tristate "Hisilicon DMA Controller V300"
+	depends on ARCH_HI3536
+	default y if ARCH_HI3536
+	help
+	  This is the driver for hisilicon DMA controoller
+	  IP.
+
+if HIDMAC_V300
+
+config HIDMAC_BASE_ADDR
+	hex "HIDMACV300 base address"
+	default "0x12280000" if (ARCH_HI3536)
+
+config HIDMAC_IOSIZE
+	hex "HIDMACV300 IO size"
+	default "0x00003000"
+
+config HIDMAC_IRQNUM
+	int "HIDMACV300 irq number"
+	default "43" if (ARCH_HI3536)
+
+config HIDMAC_SYS_IOADDR
+	hex "HIDMACV300 System Config IO address"
+	default "0x12040000" if (ARCH_HI3536)
+
+config HIDMAC_SYS_IOSIZE
+	hex "HIDMACV300 System Config IO size"
+	default "0x00000100"
+
+config HIDMAC_CHN_NUM
+	int "HIDMACV300 max channel number"
+	default 8
+
+config HI_DMAC_MISC_DEV
+	bool "HIDMACV300 misc dev"
+	default y if (ARCH_HI3536)
+	depends on HIDMAC_V300
+
+config HI_IOMMU
+	bool "Hisi Iommu Support"
+	default y if (ARCH_HI3536)
+	depends on HIDMAC_V300
+
+if HI_IOMMU
+config  HI_IOMMU_IO_BASE
+	hex "Hisi Iommu IO Address"
+	default "0x131f0000" if (ARCH_HI3536)
+
+config  HI_IOMMU_IO_SIZE
+	hex "Hisi Iommu IO size"
+	default "0x00010000" if (ARCH_HI3536)
+
+config  HI_IOMMU_IRQ_START
+	int "Hisi Iommu Irq Number"
+	default "94" if (ARCH_HI3536)
+
+config HI_IOMMU_THRESHOLD
+	int "Hisi Iommu threshold KBytes"
+	range 4 128
+	default "64" if (ARCH_HI3536)
+endif
+endif
