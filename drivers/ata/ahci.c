@@ -1900,14 +1900,18 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 			host->ports[2]->flags &= ~ATA_FLAG_FPDMA_AA;
 		}
 	}
-#endif 
-	
+	if (syno_is_hw_version(HW_RS816)) {
+		if (pdev->vendor == 0x1b4b && pdev->device == 0x9215) {
+			host->ports[0]->flags &= ~ATA_FLAG_NCQ;
+			host->ports[0]->flags &= ~ATA_FLAG_FPDMA_AA;
+		}
+	}
+#endif  
+	 
 	ahci_p5wdh_workaround(host);
 
-	
 	ahci_gtf_filter_workaround(host);
 
-	
 	rc = ahci_configure_dma_masks(pdev, hpriv->cap & HOST_CAP_64);
 	if (rc)
 		return rc;

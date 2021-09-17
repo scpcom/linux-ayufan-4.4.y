@@ -168,62 +168,58 @@ struct mddev {
 #define	UNTIL_IOCTL	1
 #define	UNTIL_STOP	2
 
-	
 	int				major_version,
 					minor_version,
 					patch_version;
 	int				persistent;
-	int 				external;	
-	char				metadata_type[17]; 
+	int 				external;	 
+	char				metadata_type[17];  
 	int				chunk_sectors;
 	time_t				ctime, utime;
 	int				level, layout;
 	char				clevel[16];
 	int				raid_disks;
 	int				max_disks;
-	sector_t			dev_sectors; 	
-	sector_t			array_sectors; 
-	int				external_size; 
+	sector_t			dev_sectors; 	 
+	sector_t			array_sectors;  
+	int				external_size;  
 	__u64				events;
-	
+	 
 	int				can_decrease_events;
 
 	char				uuid[16];
 
-	
 	sector_t			reshape_position;
 	int				delta_disks, new_level, new_layout;
 	int				new_chunk_sectors;
 	int				reshape_backwards;
 
-	struct md_thread		*thread;	
-	struct md_thread		*sync_thread;	
+	struct md_thread		*thread;	 
+	struct md_thread		*sync_thread;	 
 
-	
 	char				*last_sync_action;
-	sector_t			curr_resync;	
-	
+	sector_t			curr_resync;	 
+	 
 	sector_t			curr_resync_completed;
-	unsigned long			resync_mark;	
-	sector_t			resync_mark_cnt;
-	sector_t			curr_mark_cnt; 
+	unsigned long			resync_mark;	 
+	sector_t			resync_mark_cnt; 
+	sector_t			curr_mark_cnt;  
 
-	sector_t			resync_max_sectors; 
+	sector_t			resync_max_sectors;  
 
-	atomic64_t			resync_mismatches; 
+	atomic64_t			resync_mismatches;  
 
-	
 	sector_t			suspend_lo;
 	sector_t			suspend_hi;
-	
+	 
 	int				sync_speed_min;
 	int				sync_speed_max;
 
-	
 	int				parallel_resync;
 
 	int				ok_start_degraded;
-	
+	struct bio		*biolist; 	 
+
 #define	MD_RECOVERY_RUNNING	0
 #define	MD_RECOVERY_SYNC	1
 #define	MD_RECOVERY_RECOVER	2
@@ -237,93 +233,82 @@ struct mddev {
 #define	MD_RECOVERY_ERROR	10
 
 	unsigned long			recovery;
-	
+	 
 #ifdef MY_ABC_HERE
-	
+	 
 	int	reshape_interrupt;
-#endif 
+#endif  
 	int				recovery_disabled;
 
-	int				in_sync;	
-	
+	int				in_sync;	 
+	 
 	struct mutex			open_mutex;
 	struct mutex			reconfig_mutex;
-	atomic_t			active;		
-	atomic_t			openers;	
+	atomic_t			active;		 
+	atomic_t			openers;	 
 
-	int				changed;	
-	int				degraded;	
-	int				merge_check_needed; 
+	int				changed;	 
+	int				degraded;	 
+	int				merge_check_needed;  
 
-	atomic_t			recovery_active; 
+	atomic_t			recovery_active;  
 	wait_queue_head_t		recovery_wait;
 	sector_t			recovery_cp;
-	sector_t			resync_min;	
-	sector_t			resync_max;	
+	sector_t			resync_min;	 
+	sector_t			resync_max;	 
 
-	struct sysfs_dirent		*sysfs_state;	
-	struct sysfs_dirent		*sysfs_action;  
+	struct sysfs_dirent		*sysfs_state;	 
+	struct sysfs_dirent		*sysfs_action;   
 
-	struct work_struct del_work;	
+	struct work_struct del_work;	 
 
 	spinlock_t			write_lock;
-	wait_queue_head_t		sb_wait;	
-	atomic_t			pending_writes;	
+	wait_queue_head_t		sb_wait;	 
+	atomic_t			pending_writes;	 
 
-	unsigned int			safemode;	 
+	unsigned int			safemode;	  
 	unsigned int			safemode_delay;
 	struct timer_list		safemode_timer;
 	atomic_t			writes_pending; 
-	struct request_queue		*queue;	
+	struct request_queue		*queue;	 
 
-	struct bitmap                   *bitmap; 
+	struct bitmap                   *bitmap;  
 	struct {
-		struct file		*file; 
-		loff_t			offset; 
-		unsigned long		space; 
-		loff_t			default_offset; 
-		unsigned long		default_space; 
+		struct file		*file;  
+		loff_t			offset;  
+		unsigned long		space;  
+		loff_t			default_offset;  
+		unsigned long		default_space;  
 		struct mutex		mutex;
 		unsigned long		chunksize;
-		unsigned long		daemon_sleep; 
-		unsigned long		max_write_behind; 
+		unsigned long		daemon_sleep;  
+		unsigned long		max_write_behind;  
 		int			external;
 	} bitmap_info;
 
-	atomic_t 			max_corr_read_errors; 
+	atomic_t 			max_corr_read_errors;  
 	struct list_head		all_mddevs;
 #ifdef MY_ABC_HERE
-	unsigned char			blActive;  
-	spinlock_t				ActLock;   
-	unsigned long			ulLastReq; 
-#endif 
+	unsigned char			blActive;   
+	spinlock_t				ActLock;    
+	unsigned long			ulLastReq;  
+#endif  
 #ifdef MY_ABC_HERE
-    unsigned char           nodev_and_crashed;     
-#endif 
-#ifdef CONFIG_SYNO_MD_BAD_SECTOR_AUTO_REMAP
-#define MD_AUTO_REMAP_MODE_FORCE_OFF 0
-#define MD_AUTO_REMAP_MODE_FORCE_ON 1
-#define MD_AUTO_REMAP_MODE_ISMAXDEGRADE 2
-	unsigned char			auto_remap;
-#endif 
-#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
-	void                            *syno_private;    
-	char                            lv_name[16];
-#endif 
+    unsigned char           nodev_and_crashed;      
+#endif  
 
 #ifdef MY_ABC_HERE
 	mempool_t	*syno_mdio_mempool;
-#endif 
+#endif  
 
 	struct attribute_group		*to_remove;
 
 	struct bio_set			*bio_set;
 
-	
 	struct bio *flush_bio;
 	atomic_t flush_pending;
 	struct work_struct flush_work;
-	struct work_struct event_work;	
+	struct work_struct event_work;	 
 	void (*sync_super)(struct mddev *mddev, struct md_rdev *rdev);
 };
 
@@ -364,13 +349,9 @@ struct md_personality
 	int (*check_reshape) (struct mddev *mddev);
 	int (*start_reshape) (struct mddev *mddev);
 	void (*finish_reshape) (struct mddev *mddev);
-	
+	 
 	void (*quiesce) (struct mddev *mddev, int state);
-	
-#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
-	unsigned char (*ismaxdegrade) (struct mddev *mddev);
-	void (*syno_set_rdev_auto_remap) (struct mddev *mddev);
-#endif 
+	 
 	void *(*takeover) (struct mddev *mddev);
 };
 
@@ -487,16 +468,9 @@ extern void md_integrity_add_rdev(struct md_rdev *rdev, struct mddev *mddev);
 extern int strict_strtoul_scaled(const char *cp, unsigned long *res, int scale);
 extern void restore_bitmap_write_access(struct file *file);
 
-#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
-void SynoAutoRemapReport(struct mddev *mddev, sector_t sector, struct block_device *bdev);
-#endif 
-#ifdef CONFIG_SYNO_MD_BAD_SECTOR_AUTO_REMAP
-void RaidRemapModeSet(struct block_device *, unsigned char);
-#endif 
-
 #ifdef MY_ABC_HERE
 void SYNORaidRdevUnplug(struct mddev *mddev, struct md_rdev *rdev);
-#endif 
+#endif  
 extern void mddev_init(struct mddev *mddev);
 extern int md_run(struct mddev *mddev);
 extern void md_stop(struct mddev *mddev);

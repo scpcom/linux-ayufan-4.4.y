@@ -710,12 +710,6 @@ int dm_table_add_target(struct dm_table *t, const char *type,
 		DMWARN("%s: %s: ignoring discards_supported because num_discard_bios is zero.",
 		       dm_device_name(t->md), type);
 
-#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
-	if (tgt->type->lvinfoset){
-		tgt->type->lvinfoset(tgt);
-	}
-#endif 
-
 	return 0;
 
  bad:

@@ -1,11 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-
-#if defined(MY_ABC_HERE)
-
-#endif 
-
+ 
 #include <linux/init.h>
 #include <linux/platform_device.h>
 #include <linux/kernel.h>

@@ -75,21 +75,20 @@ static int cp_stat64(struct stat64 __user *ubuf, struct kstat *stat)
 #ifdef MY_ABC_HERE
 #include <linux/synolib.h>
 extern int syno_hibernation_log_level;
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
-extern int __SYNOCaselessStat(char __user * filename, int no_follow_link, struct kstat *stat, int *last_component, int flags);
-#endif 
+extern int __SYNOCaselessStat(char __user * filename, int no_follow_link, struct kstat *stat, int flags);
+#endif  
 
 #ifdef MY_ABC_HERE
 asmlinkage long sys32_SYNOCaselessStat64(char __user *filename, struct stat64 __user *statbuf)
 {
 #ifdef MY_ABC_HERE
-	int last_component = 0;
 	long error = -1;
 	struct kstat stat;
 
-	error =  __SYNOCaselessStat(filename, 0, &stat, &last_component, 0);
+	error =  __SYNOCaselessStat(filename, 0, &stat, 0);
 	if (!error) {
 		error = cp_stat64(statbuf, &stat);
 	}
@@ -97,17 +96,16 @@ asmlinkage long sys32_SYNOCaselessStat64(char __user *filename, struct stat64 __
 	return error;
 #else
 	return -EOPNOTSUPP;
-#endif 
+#endif  
 }
 
 asmlinkage long sys32_SYNOCaselessLStat64(char __user *filename, struct stat64 __user *statbuf)
 {
 #ifdef MY_ABC_HERE
-	int last_component = 0;
 	long error = -1;
 	struct kstat stat;
 
-	error =  __SYNOCaselessStat(filename, 1, &stat, &last_component, 0);
+	error =  __SYNOCaselessStat(filename, 1, &stat, 0);
 	if (!error) {
 		error = cp_stat64(statbuf, &stat);
 	}
@@ -174,16 +172,10 @@ static long do_SYNOStat64(char __user * filename, int no_follow_link, unsigned i
 
 	if (flags & SYNOST_IS_CASELESS) {
 #ifdef MY_ABC_HERE
-		int last_component = 0;
-		error = __SYNOCaselessStat(filename, no_follow_link, &kst, &last_component, flags);
-		if (-ENOENT == error) {
-			if (__put_user(last_component, &pSt->ext.last_component)){
-				goto Out;
-			}
-		}
+		error = __SYNOCaselessStat(filename, no_follow_link, &kst, flags);
 #else
 		error = -EOPNOTSUPP;
-#endif 
+#endif  
 	} else if (no_follow_link) {
 		error = syno_vfs_fstatat(filename, &kst, 0, flags);
 	} else {

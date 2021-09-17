@@ -15,82 +15,69 @@ struct btrfs_ordered_inode_tree {
 };
 
 struct btrfs_ordered_sum {
-	
+	 
 	u64 bytenr;
 
-	
 	int len;
 	struct list_head list;
-	
+	 
 	u32 sums[];
 };
 
+#define BTRFS_ORDERED_IO_DONE 0  
 
-#define BTRFS_ORDERED_IO_DONE 0 
+#define BTRFS_ORDERED_COMPLETE 1  
 
-#define BTRFS_ORDERED_COMPLETE 1 
+#define BTRFS_ORDERED_NOCOW 2  
 
-#define BTRFS_ORDERED_NOCOW 2 
+#define BTRFS_ORDERED_COMPRESSED 3  
 
-#define BTRFS_ORDERED_COMPRESSED 3 
+#define BTRFS_ORDERED_PREALLOC 4  
 
-#define BTRFS_ORDERED_PREALLOC 4 
+#define BTRFS_ORDERED_DIRECT 5  
 
-#define BTRFS_ORDERED_DIRECT 5 
+#define BTRFS_ORDERED_IOERR 6  
 
-#define BTRFS_ORDERED_IOERR 6 
+#define BTRFS_ORDERED_UPDATED_ISIZE 7  
+#define BTRFS_ORDERED_LOGGED_CSUM 8  
+#define BTRFS_ORDERED_TRUNCATED 9  
 
-#define BTRFS_ORDERED_UPDATED_ISIZE 7 
-#define BTRFS_ORDERED_LOGGED_CSUM 8 
-#define BTRFS_ORDERED_TRUNCATED 9 
-
+#define BTRFS_ORDERED_LOGGED 10  
+#define BTRFS_ORDERED_PENDING 11  
 struct btrfs_ordered_extent {
-	
+	 
 	u64 file_offset;
 
-	
 	u64 start;
 
-	
 	u64 len;
 
-	
 	u64 disk_len;
 
-	
 	u64 bytes_left;
 
-	
 	u64 outstanding_isize;
 
-	
 	u64 truncated_len;
 
-	
 	unsigned long flags;
 
-	
 	int compress_type;
 
-	
 	atomic_t refs;
 
-	
 	struct inode *inode;
 
-	
 	struct list_head list;
 
-	
 	struct list_head log_list;
 
-	
+	struct list_head trans_list;
+
 	wait_queue_head_t wait;
 
-	
 	struct rb_node rb_node;
 
-	
 	struct list_head root_extent_list;
 
 	struct btrfs_work work;
@@ -145,6 +132,9 @@ btrfs_lookup_first_ordered_extent(struct inode * inode, u64 file_offset);
 struct btrfs_ordered_extent *btrfs_lookup_ordered_range(struct inode *inode,
 							u64 file_offset,
 							u64 len);
+bool btrfs_have_ordered_extents_in_range(struct inode *inode,
+					 u64 file_offset,
+					 u64 len);
 int btrfs_ordered_update_i_size(struct inode *inode, u64 offset,
 				struct btrfs_ordered_extent *ordered);
 int btrfs_find_ordered_sum(struct inode *inode, u64 offset, u64 disk_bytenr,
@@ -152,11 +142,14 @@ int btrfs_find_ordered_sum(struct inode *inode, u64 offset, u64 disk_bytenr,
 int btrfs_wait_ordered_extents(struct btrfs_root *root, int nr);
 void btrfs_wait_ordered_roots(struct btrfs_fs_info *fs_info, int nr);
 void btrfs_get_logged_extents(struct inode *inode,
-			      struct list_head *logged_list);
+			      struct list_head *logged_list,
+			      const loff_t start,
+			      const loff_t end);
 void btrfs_put_logged_extents(struct list_head *logged_list);
 void btrfs_submit_logged_extents(struct list_head *logged_list,
 				 struct btrfs_root *log);
-void btrfs_wait_logged_extents(struct btrfs_root *log, u64 transid);
+void btrfs_wait_logged_extents(struct btrfs_trans_handle *trans,
+			       struct btrfs_root *log, u64 transid);
 void btrfs_free_logged_extents(struct btrfs_root *log, u64 transid);
 int __init ordered_data_init(void);
 void ordered_data_exit(void);

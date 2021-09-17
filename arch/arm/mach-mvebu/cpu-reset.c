@@ -21,6 +21,8 @@
 
 extern void (*arm_pm_restart)(char str, const char *cmd);
 
+static void __iomem *uart1_base;
+
 static void synology_power_off(void)
 {
 	void *base_addr = ioremap(PORT1_BASE, 32);
@@ -30,25 +32,23 @@ static void synology_power_off(void)
 
 static void synology_restart(char mode, const char *cmd)
 {
-	void *base_addr = ioremap(PORT1_BASE, 32);
-	UART1_WRITE(SET8N1, base_addr, LCR);
-	UART1_WRITE(SOFTWARE_REBOOT, base_addr, TX);
+	UART1_WRITE(SET8N1, uart1_base, LCR);
+	UART1_WRITE(SOFTWARE_REBOOT, uart1_base, TX);
 
-	
 	mdelay(1000);
-	
+	 
 	printk("Reboot failed -- System halted\n");
 	local_irq_disable();
 	while (1);
 }
-#endif 
+#endif  
 
 static struct of_device_id of_cpu_reset_table[] = {
 	{.compatible = "marvell,armada-370-cpu-reset", .data = (void*) 1 },
 	{.compatible = "marvell,armada-xp-cpu-reset",  .data = (void*) 4 },
 	{.compatible = "marvell,armada-375-cpu-reset", .data = (void*) 2 },
 	{.compatible = "marvell,armada-380-cpu-reset", .data = (void*) 2 },
-	{  },
+	{   },
 };
 
 static void __iomem *cpu_reset_base;
@@ -105,9 +105,10 @@ int __init mvebu_cpu_reset_init(void)
 		reset_controller_register(&mvebu_cpu_reset_dev);
 	}
 #if defined(MY_ABC_HERE)
+	uart1_base = ioremap(PORT1_BASE, 32);
 	pm_power_off = synology_power_off;
 	arm_pm_restart = synology_restart;
-#endif 
+#endif  
 
 	return 0;
 }

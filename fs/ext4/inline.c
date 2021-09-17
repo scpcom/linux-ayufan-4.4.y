@@ -794,6 +794,8 @@ int ext4_da_write_inline_data_begin(struct address_space *mapping,
 			goto out;
 	}
 
+	flags |= AOP_FLAG_NOFS;
+
 	if (ret == -ENOSPC) {
 		ret = ext4_da_convert_inline_data_to_extent(mapping,
 							    inode,
@@ -801,9 +803,6 @@ int ext4_da_write_inline_data_begin(struct address_space *mapping,
 							    fsdata);
 		goto out;
 	}
-
-	
-	flags |= AOP_FLAG_NOFS;
 
 	page = grab_cache_page_write_begin(mapping, 0, flags);
 	if (!page) {

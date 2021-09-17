@@ -3123,6 +3123,7 @@ static int update_space_info(struct btrfs_fs_info *info, u64 flags,
 	found->bytes_readonly = 0;
 	found->bytes_may_use = 0;
 	found->full = 0;
+	found->max_extent_size = 0;
 	found->force_alloc = CHUNK_ALLOC_NO_FORCE;
 	found->chunk_alloc = 0;
 	found->flush = 0;
@@ -5071,6 +5072,30 @@ void btrfs_prepare_extent_commit(struct btrfs_trans_handle *trans,
 	update_global_block_rsv(fs_info);
 }
 
+static struct btrfs_free_cluster *
+fetch_cluster_info(struct btrfs_root *root, struct btrfs_space_info *space_info,
+		   u64 *empty_cluster)
+{
+	struct btrfs_free_cluster *ret = NULL;
+	bool ssd = btrfs_test_opt(root, SSD);
+
+	*empty_cluster = 0;
+	if (btrfs_mixed_space_info(space_info))
+		return ret;
+
+	if (ssd)
+		*empty_cluster = 2 * 1024 * 1024;
+	if (space_info->flags & BTRFS_BLOCK_GROUP_METADATA) {
+		ret = &root->fs_info->meta_alloc_cluster;
+		if (!ssd)
+			*empty_cluster = 64 * 1024;
+	} else if ((space_info->flags & BTRFS_BLOCK_GROUP_DATA) && ssd) {
+		ret = &root->fs_info->data_alloc_cluster;
+	}
+
+	return ret;
+}
+
 static int unpin_extent_range(struct btrfs_root *root, u64 start, u64 end,
 			      const bool return_free_space)
 {
@@ -5078,7 +5103,10 @@ static int unpin_extent_range(struct btrfs_root *root, u64 start, u64 end,
 	struct btrfs_block_group_cache *cache = NULL;
 	struct btrfs_space_info *space_info;
 	struct btrfs_block_rsv *global_rsv = &fs_info->global_block_rsv;
+	struct btrfs_free_cluster *cluster = NULL;
 	u64 len;
+	u64 total_unpinned = 0;
+	u64 empty_cluster = 0;
 	bool readonly;
 
 	while (start <= end) {
@@ -5087,8 +5115,14 @@ static int unpin_extent_range(struct btrfs_root *root, u64 start, u64 end,
 		    start >= cache->key.objectid + cache->key.offset) {
 			if (cache)
 				btrfs_put_block_group(cache);
+			total_unpinned = 0;
 			cache = btrfs_lookup_block_group(fs_info, start);
-			BUG_ON(!cache); 
+			BUG_ON(!cache);  
+
+			cluster = fetch_cluster_info(root,
+						     cache->space_info,
+						     &empty_cluster);
+			empty_cluster <<= 1;
 		}
 
 		len = cache->key.objectid + cache->key.offset - start;
@@ -5101,12 +5135,21 @@ static int unpin_extent_range(struct btrfs_root *root, u64 start, u64 end,
 		}
 
 		start += len;
+		total_unpinned += len;
 		space_info = cache->space_info;
+
+		if (cluster && cluster->fragmented &&
+		    total_unpinned > empty_cluster) {
+			spin_lock(&cluster->lock);
+			cluster->fragmented = 0;
+			spin_unlock(&cluster->lock);
+		}
 
 		spin_lock(&space_info->lock);
 		spin_lock(&cache->lock);
 		cache->pinned -= len;
 		space_info->bytes_pinned -= len;
+		space_info->max_extent_size = 0;
 		percpu_counter_add(&space_info->total_bytes_pinned, -len);
 		if (cache->ro) {
 			space_info->bytes_readonly += len;
@@ -5776,7 +5819,7 @@ static noinline int find_free_extent(struct btrfs_root *orig_root,
 	struct btrfs_block_group_cache *block_group = NULL;
 	u64 search_start = 0;
 	u64 max_extent_size = 0;
-	int empty_cluster = 2 * 1024 * 1024;
+	u64 empty_cluster = 0;
 	struct btrfs_space_info *space_info;
 	int loop = 0;
 	int index = __get_raid_index(flags);
@@ -5789,6 +5832,8 @@ static noinline int find_free_extent(struct btrfs_root *orig_root,
 #ifdef MY_ABC_HERE
 	u64 reserve_bytes = 0;
 #endif
+	bool orig_have_caching_bg = false;
+	bool full_search = false;
 
 	WARN_ON(num_bytes < root->sectorsize);
 	btrfs_set_key_type(ins, BTRFS_EXTENT_ITEM_KEY);
@@ -5803,44 +5848,44 @@ static noinline int find_free_extent(struct btrfs_root *orig_root,
 		return -ENOSPC;
 	}
 
-	
-	if (btrfs_mixed_space_info(space_info))
-		use_cluster = false;
-
-	if (flags & BTRFS_BLOCK_GROUP_METADATA && use_cluster) {
-		last_ptr = &root->fs_info->meta_alloc_cluster;
-		if (!btrfs_test_opt(root, SSD))
-			empty_cluster = 64 * 1024;
+	if (unlikely(space_info->max_extent_size)) {
+		spin_lock(&space_info->lock);
+		if (space_info->max_extent_size &&
+		    num_bytes > space_info->max_extent_size) {
+			ins->offset = space_info->max_extent_size;
+			spin_unlock(&space_info->lock);
+			return -ENOSPC;
+		} else if (space_info->max_extent_size) {
+			use_cluster = false;
+		}
+		spin_unlock(&space_info->lock);
 	}
 
-	if ((flags & BTRFS_BLOCK_GROUP_DATA) && use_cluster &&
-	    btrfs_test_opt(root, SSD)) {
-		last_ptr = &root->fs_info->data_alloc_cluster;
-	}
-
+	last_ptr = fetch_cluster_info(orig_root, space_info, &empty_cluster);
 	if (last_ptr) {
 		spin_lock(&last_ptr->lock);
 		if (last_ptr->block_group)
 			hint_byte = last_ptr->window_start;
+		if (last_ptr->fragmented) {
+			 
+			hint_byte = last_ptr->window_start;
+			use_cluster = false;
+		}
 		spin_unlock(&last_ptr->lock);
 	}
 
 	search_start = max(search_start, first_logical_byte(root, 0));
 	search_start = max(search_start, hint_byte);
-
-	if (!last_ptr)
-		empty_cluster = 0;
-
 	if (search_start == hint_byte) {
 		block_group = btrfs_lookup_block_group(root->fs_info,
 						       search_start);
-		
+		 
 		if (block_group && block_group_bits(block_group, flags) &&
 		    block_group->cached != BTRFS_CACHE_NO) {
 			down_read(&space_info->groups_sem);
 			if (list_empty(&block_group->list) ||
 			    block_group->ro) {
-				
+				 
 				btrfs_put_block_group(block_group);
 				up_read(&space_info->groups_sem);
 			} else {
@@ -5854,6 +5899,8 @@ static noinline int find_free_extent(struct btrfs_root *orig_root,
 	}
 search:
 	have_caching_bg = false;
+	if (index == 0 || index == __get_raid_index(flags))
+		full_search = true;
 	down_read(&space_info->groups_sem);
 	list_for_each_entry(block_group, &space_info->block_groups[index],
 			    list) {
@@ -5877,6 +5924,7 @@ search:
 have_block_group:
 		cached = block_group_cache_done(block_group);
 		if (unlikely(!cached)) {
+			have_caching_bg = true;
 			ret = cache_block_group(block_group, 0);
 			BUG_ON(ret < 0);
 			ret = 0;
@@ -5887,11 +5935,10 @@ have_block_group:
 		if (unlikely(block_group->ro))
 			goto loop;
 
-		
-		if (last_ptr) {
+		if (last_ptr && use_cluster) {
 			struct btrfs_block_group_cache *used_block_group;
 			unsigned long aligned_cluster;
-			
+			 
 			used_block_group = btrfs_lock_cluster(block_group,
 							      last_ptr,
 							      delalloc);
@@ -5990,13 +6037,18 @@ refill_cluster:
 				goto have_block_group;
 			}
 
-			
 			btrfs_return_cluster_to_free_space(NULL, last_ptr);
 			spin_unlock(&last_ptr->refill_lock);
 			goto loop;
 		}
 
 unclustered_alloc:
+		 
+		if (unlikely(last_ptr)) {
+			spin_lock(&last_ptr->lock);
+			last_ptr->fragmented = 1;
+			spin_unlock(&last_ptr->lock);
+		}
 		spin_lock(&block_group->free_space_ctl->tree_lock);
 		if (cached &&
 		    block_group->free_space_ctl->free_space <
@@ -6021,15 +6073,12 @@ unclustered_alloc:
 			failed_alloc = true;
 			goto have_block_group;
 		} else if (!offset) {
-			if (!cached)
-				have_caching_bg = true;
 			goto loop;
 		}
 checks:
 		search_start = stripe_align(root, block_group,
 					    offset, num_bytes);
 
-		
 		if (search_start + num_bytes >
 		    block_group->key.objectid + block_group->key.offset) {
 			btrfs_add_free_space(block_group, offset, num_bytes);
@@ -6063,16 +6112,28 @@ loop:
 	}
 	up_read(&space_info->groups_sem);
 
+	if ((loop == LOOP_CACHING_NOWAIT) && have_caching_bg
+		&& !orig_have_caching_bg)
+		orig_have_caching_bg = true;
+
 	if (!ins->objectid && loop >= LOOP_CACHING_WAIT && have_caching_bg)
 		goto search;
 
 	if (!ins->objectid && ++index < BTRFS_NR_RAID_TYPES)
 		goto search;
 
-	
 	if (!ins->objectid && loop < LOOP_NO_EMPTY_SIZE) {
 		index = 0;
-		loop++;
+		if (loop == LOOP_CACHING_NOWAIT) {
+			 
+			if (orig_have_caching_bg || !full_search)
+				loop = LOOP_CACHING_WAIT;
+			else
+				loop = LOOP_ALLOC_CHUNK;
+		} else {
+			loop++;
+		}
+
 		if (loop == LOOP_ALLOC_CHUNK) {
 			struct btrfs_trans_handle *trans;
 			int exist = 0;
@@ -6090,7 +6151,19 @@ loop:
 
 			ret = do_chunk_alloc(trans, root, flags,
 					     CHUNK_ALLOC_FORCE);
-			
+
+			if (ret == -ENOSPC)
+#ifdef MY_ABC_HERE
+			{
+				if (flags & BTRFS_BLOCK_GROUP_METADATA)
+					loop = LOOP_NO_RESERVE;
+				else
+					loop = LOOP_NO_EMPTY_SIZE;
+			}
+#else
+				loop = LOOP_NO_EMPTY_SIZE;
+#endif  
+
 			if (ret < 0 && ret != -ENOSPC)
 				btrfs_abort_transaction(trans,
 							root, ret);
@@ -6108,6 +6181,12 @@ loop:
 		}
 #endif
 		if (loop == LOOP_NO_EMPTY_SIZE) {
+			 
+			if (empty_size == 0 &&
+			    empty_cluster == 0) {
+				ret = -ENOSPC;
+				goto out;
+			}
 			empty_size = 0;
 			empty_cluster = 0;
 		}
@@ -6116,11 +6195,20 @@ loop:
 	} else if (!ins->objectid) {
 		ret = -ENOSPC;
 	} else if (ins->objectid) {
+		if (!use_cluster && last_ptr) {
+			spin_lock(&last_ptr->lock);
+			last_ptr->window_start = ins->objectid;
+			spin_unlock(&last_ptr->lock);
+		}
 		ret = 0;
 	}
 out:
-	if (ret == -ENOSPC)
+	if (ret == -ENOSPC) {
+		spin_lock(&space_info->lock);
+		space_info->max_extent_size = max_extent_size;
+		spin_unlock(&space_info->lock);
 		ins->offset = max_extent_size;
+	}
 	return ret;
 }
 
@@ -6169,7 +6257,7 @@ int btrfs_reserve_extent(struct btrfs_root *root,
 			 u64 empty_size, u64 hint_byte,
 			 struct btrfs_key *ins, int is_data, int delalloc)
 {
-	bool final_tried = false;
+	bool final_tried = num_bytes == min_alloc_size;
 	u64 flags;
 	int ret;
 

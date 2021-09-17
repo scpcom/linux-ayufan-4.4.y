@@ -159,9 +159,11 @@ loop:
 	extwriter_counter_init(cur_trans, type);
 	init_waitqueue_head(&cur_trans->writer_wait);
 	init_waitqueue_head(&cur_trans->commit_wait);
+	init_waitqueue_head(&cur_trans->pending_wait);
 	cur_trans->state = TRANS_STATE_RUNNING;
-	
+	 
 	atomic_set(&cur_trans->use_count, 2);
+	atomic_set(&cur_trans->pending_ordered, 0);
 	cur_trans->start_time = get_seconds();
 
 	cur_trans->delayed_refs.href_root = RB_ROOT;
@@ -1486,6 +1488,13 @@ static inline void btrfs_wait_delalloc_flush(struct btrfs_fs_info *fs_info)
 #endif
 }
 
+static inline void
+btrfs_wait_pending_ordered(struct btrfs_transaction *cur_trans)
+{
+	wait_event(cur_trans->pending_wait,
+		   atomic_read(&cur_trans->pending_ordered) == 0);
+}
+
 int btrfs_commit_transaction(struct btrfs_trans_handle *trans,
 			     struct btrfs_root *root)
 {
@@ -1576,37 +1585,35 @@ int btrfs_commit_transaction(struct btrfs_trans_handle *trans,
 	wait_event(cur_trans->writer_wait,
 		   extwriter_counter_read(cur_trans) == 0);
 
-	
 	ret = btrfs_run_delayed_items(trans, root);
 	if (ret)
 		goto cleanup_transaction;
 
 	btrfs_wait_delalloc_flush(root->fs_info);
 
+	btrfs_wait_pending_ordered(cur_trans);
+
 	btrfs_scrub_pause(root);
-	
+	 
 	spin_lock(&root->fs_info->trans_lock);
 	cur_trans->state = TRANS_STATE_COMMIT_DOING;
 	spin_unlock(&root->fs_info->trans_lock);
 	wait_event(cur_trans->writer_wait,
 		   atomic_read(&cur_trans->num_writers) == 1);
 
-	
 	if (unlikely(ACCESS_ONCE(cur_trans->aborted))) {
 		ret = cur_trans->aborted;
 		goto scrub_continue;
 	}
-	
+	 
 	mutex_lock(&root->fs_info->reloc_mutex);
 
-	
 	ret = create_pending_snapshots(trans, root->fs_info);
 	if (ret) {
 		mutex_unlock(&root->fs_info->reloc_mutex);
 		goto scrub_continue;
 	}
 
-	
 	ret = btrfs_run_delayed_items(trans, root);
 	if (ret) {
 		mutex_unlock(&root->fs_info->reloc_mutex);

@@ -40,183 +40,140 @@ enum {
 	SYNO_PORT_TYPE_USB = 2,
 	SYNO_PORT_TYPE_SAS = 3,
 };
-#endif 
+#endif  
 
 enum {
-	SCSI_QDEPTH_DEFAULT,	
-	SCSI_QDEPTH_QFULL,	
-	SCSI_QDEPTH_RAMP_UP,	
+	SCSI_QDEPTH_DEFAULT,	 
+	SCSI_QDEPTH_QFULL,	 
+	SCSI_QDEPTH_RAMP_UP,	 
 };
 
 struct scsi_host_template {
 	struct module *module;
 	const char *name;
 
-	
 	int (* detect)(struct scsi_host_template *);
 
-	
 	int (* release)(struct Scsi_Host *);
 
-	
 	const char *(* info)(struct Scsi_Host *);
 
-	
 	int (* ioctl)(struct scsi_device *dev, int cmd, void __user *arg);
 
 #ifdef CONFIG_COMPAT
-	
+	 
 	int (* compat_ioctl)(struct scsi_device *dev, int cmd, void __user *arg);
 #endif
 
-	
 	int (* queuecommand)(struct Scsi_Host *, struct scsi_cmnd *);
 
-	
-	
 	int (* transfer_response)(struct scsi_cmnd *,
 				  void (*done)(struct scsi_cmnd *));
 
-	
 	int (* eh_abort_handler)(struct scsi_cmnd *);
 	int (* eh_device_reset_handler)(struct scsi_cmnd *);
 	int (* eh_target_reset_handler)(struct scsi_cmnd *);
 	int (* eh_bus_reset_handler)(struct scsi_cmnd *);
 	int (* eh_host_reset_handler)(struct scsi_cmnd *);
 
-	
 	int (* slave_alloc)(struct scsi_device *);
 
-	
 	int (* slave_configure)(struct scsi_device *);
 
-	
 	void (* slave_destroy)(struct scsi_device *);
 
-	
 	int (* target_alloc)(struct scsi_target *);
 
-	
 	void (* target_destroy)(struct scsi_target *);
 
-	
 	int (* scan_finished)(struct Scsi_Host *, unsigned long);
 
-	
 	void (* scan_start)(struct Scsi_Host *);
 
-	
 	int (* change_queue_depth)(struct scsi_device *, int, int);
 
-	
 	int (* change_queue_type)(struct scsi_device *, int);
 
-	
 	int (* bios_param)(struct scsi_device *, struct block_device *,
 			sector_t, int []);
 
-	
 	void (*unlock_native_capacity)(struct scsi_device *);
 
-	
 	int (*show_info)(struct seq_file *, struct Scsi_Host *);
 	int (*write_info)(struct Scsi_Host *, char *, int);
 
-	
 	enum blk_eh_timer_return (*eh_timed_out)(struct scsi_cmnd *);
-
-	
 
 	int (*host_reset)(struct Scsi_Host *shost, int reset_type);
 #define SCSI_ADAPTER_RESET	1
 #define SCSI_FIRMWARE_RESET	2
 
-	
 	const char *proc_name;
 
-	
 	struct proc_dir_entry *proc_dir;
 
-	
 	int can_queue;
 
-	
 	int this_id;
 
-	
 	unsigned short sg_tablesize;
 	unsigned short sg_prot_tablesize;
 
-	
 	unsigned short max_sectors;
 
-	
 	unsigned long dma_boundary;
 
-	
 #define SCSI_DEFAULT_MAX_SECTORS	1024
 
-	
 	short cmd_per_lun;
 
-	
 	unsigned char present;
 
-	
 	unsigned supported_mode:2;
 
-	
 	unsigned unchecked_isa_dma:1;
 
-	
 	unsigned use_clustering:1;
 
-	
 	unsigned emulated:1;
 
-	
 	unsigned skip_settle_delay:1;
 
-	
 	unsigned ordered_tag:1;
 
-	
 	unsigned no_write_same:1;
 
-	
 	unsigned int max_host_blocked;
 
-	
 #define SCSI_DEFAULT_HOST_BLOCKED	7
 
-	
 	struct device_attribute **shost_attrs;
 
-	
 	struct device_attribute **sdev_attrs;
 
-	
 	struct list_head legacy_hosts;
 
 #ifdef MY_ABC_HERE
-	
+	 
 	int  (* syno_index_get)(struct Scsi_Host *host, uint channel, uint id, uint lun);
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
-	
+	 
 	int  (* syno_host_power_ctl)(struct Scsi_Host *host, u8 blPowerOn);
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
 	int  syno_port_type;
-#endif 
+#endif  
 
-	
 	u64 vendor_id;
 #ifdef MY_DEF_HERE
 	unsigned char (* syno_get_disk_speed)(struct Scsi_Host *host, unsigned int phy_id);
-#endif 
-};
+#endif  
 
+#ifdef MY_DEF_HERE
+	int (*syno_set_sashost_disk_led)(struct scsi_device *, int);
+#endif
+};
 
 #define DEF_SCSI_QCMD(func_name) \
 	int func_name(struct Scsi_Host *shost, struct scsi_cmnd *cmd)	\

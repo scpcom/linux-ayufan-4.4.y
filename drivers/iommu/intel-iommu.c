@@ -2278,13 +2278,15 @@ static int __init init_dmars(void)
 	if (iommu_pass_through)
 		iommu_identity_mapping |= IDENTMAP_ALL;
 
+#ifdef CONFIG_SYNO_IOMMU_PASSTHROUGH
+	printk(KERN_INFO "IOMMU passthrough mode = %d\n", iommu_pass_through);
+#endif  
 #ifdef CONFIG_INTEL_IOMMU_BROKEN_GFX_WA
 	iommu_identity_mapping |= IDENTMAP_GFX;
 #endif
 
 	check_tylersburg_isoch();
 
-	
 	if (iommu_identity_mapping) {
 		ret = iommu_prepare_static_identity_mapping(hw_pass_through);
 		if (ret) {

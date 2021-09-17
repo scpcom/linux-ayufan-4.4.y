@@ -114,9 +114,6 @@ struct send_ctx {
 #ifdef MY_ABC_HERE
 	u32 subvol_flags;
 #endif
-#ifdef MY_ABC_HERE
-	u64 last_overwrite_ino;
-#endif 
 
 	struct list_head new_refs;
 	struct list_head deleted_refs;
@@ -145,18 +142,19 @@ struct pending_dir_move {
 #ifdef MY_ABC_HERE
 #else
 	bool is_orphan;
-#endif 
+#endif  
 	struct list_head update_refs;
 };
 
 struct waiting_dir_move {
 	struct rb_node node;
 	u64 ino;
-	
+	 
 	u64 rmdir_ino;
 #ifdef MY_ABC_HERE
 	bool orphanized;
-#endif 
+	u64 gen;
+#endif  
 };
 
 struct orphan_dir_info {
@@ -184,7 +182,11 @@ static int is_waiting_for_move(struct send_ctx *sctx, u64 ino);
 static struct waiting_dir_move *
 get_waiting_dir_move(struct send_ctx *sctx, u64 ino);
 
+#ifdef MY_ABC_HERE
+static int is_waiting_for_rm(struct send_ctx *sctx, u64 dir_ino, u64 dir_gen);
+#else
 static int is_waiting_for_rm(struct send_ctx *sctx, u64 dir_ino);
+#endif  
 
 static int need_send_hole(struct send_ctx *sctx)
 {
@@ -1416,6 +1418,12 @@ static int is_inode_existent(struct send_ctx *sctx, u64 ino, u64 gen)
 {
 	int ret;
 
+#ifdef MY_ABC_HERE
+	if (ino == BTRFS_FIRST_FREE_OBJECTID) {
+		return 1;
+	}
+#endif  
+
 	ret = get_cur_inode_state(sctx, ino, gen);
 	if (ret < 0)
 		goto out;
@@ -1571,6 +1579,9 @@ static int will_overwrite_ref(struct send_ctx *sctx, u64 dir, u64 dir_gen,
 	u64 gen;
 	u64 other_inode = 0;
 	u8 other_type = 0;
+#ifdef MY_ABC_HERE
+	struct waiting_dir_move *dm = NULL;
+#endif  
 
 	if (!sctx->parent_root)
 		goto out;
@@ -1579,8 +1590,11 @@ static int will_overwrite_ref(struct send_ctx *sctx, u64 dir, u64 dir_gen,
 	if (ret <= 0)
 		goto out;
 
-	
+#ifdef MY_ABC_HERE
+	if (sctx->parent_root && dir != BTRFS_FIRST_FREE_OBJECTID) {
+#else
 	if (sctx->parent_root) {
+#endif  
 		ret = get_inode_info(sctx->parent_root, dir, NULL, &gen, NULL,
 				     NULL, NULL, NULL);
 		if (ret < 0 && ret != -ENOENT)
@@ -1602,16 +1616,21 @@ static int will_overwrite_ref(struct send_ctx *sctx, u64 dir, u64 dir_gen,
 		goto out;
 	}
 
-	
 #ifdef MY_ABC_HERE
-	if (other_inode > sctx->send_progress || is_waiting_for_move(sctx, other_inode)) {
+	if (other_inode > sctx->send_progress || ((dm = get_waiting_dir_move(sctx, other_inode)) != NULL)) {
 #else
 	if (other_inode > sctx->send_progress) {
-#endif 
+#endif  
 		ret = get_inode_info(sctx->parent_root, other_inode, NULL,
 				who_gen, NULL, NULL, NULL, NULL);
 		if (ret < 0)
 			goto out;
+#ifdef MY_ABC_HERE
+		if (dm && dm->gen != *who_gen) {
+			ret = 0;
+			goto out;
+		}
+#endif  
 
 		ret = 1;
 		*who_ino = other_inode;
@@ -1640,13 +1659,27 @@ static int did_overwrite_ref(struct send_ctx *sctx,
 	if (ret <= 0)
 		goto out;
 
-	
+#ifdef MY_ABC_HERE
+	if (dir != BTRFS_FIRST_FREE_OBJECTID) {
+		ret = get_inode_info(sctx->send_root, dir, NULL, &gen, NULL,
+				     NULL, NULL, NULL);
+		if (ret < 0 && ret != -ENOENT)
+			goto out;
+		if (ret) {
+			ret = 0;
+			goto out;
+		}
+		if (gen != dir_gen)
+			goto out;
+	}
+#endif  
+
 	ret = lookup_dir_item_inode(sctx->send_root, dir, name, name_len,
 			&ow_inode, &other_type);
 	if (ret < 0 && ret != -ENOENT)
 		goto out;
 	if (ret) {
-		
+		 
 		ret = 0;
 		goto out;
 	}
@@ -1661,12 +1694,9 @@ static int did_overwrite_ref(struct send_ctx *sctx,
 		goto out;
 	}
 
-	
-#ifdef MY_ABC_HERE
-	if (ow_inode <= sctx->last_overwrite_ino)
-#else
-	if (ow_inode < sctx->send_progress)
-#endif 
+	if ((ow_inode < sctx->send_progress) ||
+	    (ino != sctx->cur_ino && ow_inode == sctx->cur_ino &&
+	     gen == sctx->cur_inode_gen))
 		ret = 1;
 	else
 		ret = 0;
@@ -1916,11 +1946,15 @@ static int get_cur_path(struct send_ctx *sctx, u64 ino, u64 gen,
 	while (!stop && ino != BTRFS_FIRST_FREE_OBJECTID) {
 #ifdef MY_ABC_HERE
 		struct waiting_dir_move *wdm;
-#endif 
+#endif  
 
 		fs_path_reset(name);
 
+#ifdef MY_ABC_HERE
+		if (is_waiting_for_rm(sctx, ino, gen)) {
+#else
 		if (is_waiting_for_rm(sctx, ino)) {
+#endif  
 			ret = gen_unique_name(sctx, ino, gen, name);
 			if (ret < 0)
 				goto out;
@@ -2559,11 +2593,19 @@ get_orphan_dir_info(struct send_ctx *sctx, u64 dir_ino)
 	return NULL;
 }
 
+#ifdef MY_ABC_HERE
+static int is_waiting_for_rm(struct send_ctx *sctx, u64 dir_ino, u64 dir_gen)
+#else
 static int is_waiting_for_rm(struct send_ctx *sctx, u64 dir_ino)
+#endif  
 {
 	struct orphan_dir_info *odi = get_orphan_dir_info(sctx, dir_ino);
 
+#ifdef MY_ABC_HERE
+	return (odi != NULL && odi->gen == dir_gen);
+#else
 	return odi != NULL;
+#endif  
 }
 
 static void free_orphan_dir_info(struct send_ctx *sctx,
@@ -2585,8 +2627,10 @@ static int can_rmdir(struct send_ctx *sctx, u64 dir, u64 dir_gen,
 	struct btrfs_key found_key;
 	struct btrfs_key loc;
 	struct btrfs_dir_item *di;
+#ifdef MY_ABC_HERE
+	u64 loc_gen;
+#endif  
 
-	
 	if (dir == BTRFS_FIRST_FREE_OBJECTID)
 		return 0;
 
@@ -2622,8 +2666,19 @@ static int can_rmdir(struct send_ctx *sctx, u64 dir, u64 dir_gen,
 				struct btrfs_dir_item);
 		btrfs_dir_item_key_to_cpu(path->nodes[0], di, &loc);
 
+#ifdef MY_ABC_HERE
+		ret = get_inode_info(root, loc.objectid, NULL, &loc_gen, NULL,
+			     NULL, NULL, NULL);
+		if (ret)
+			goto out;
+#endif  
+
 		dm = get_waiting_dir_move(sctx, loc.objectid);
+#ifdef MY_ABC_HERE
+		if (dm && dm->gen == loc_gen) {
+#else
 		if (dm) {
+#endif  
 			struct orphan_dir_info *odi;
 
 			odi = add_orphan_dir_info(sctx, dir);
@@ -2667,10 +2722,10 @@ static int is_waiting_for_move(struct send_ctx *sctx, u64 ino)
 }
 
 #ifdef MY_ABC_HERE
-static int add_waiting_dir_move(struct send_ctx *sctx, u64 ino, bool orphanized)
+static int add_waiting_dir_move(struct send_ctx *sctx, u64 ino, u64 gen, bool orphanized)
 #else
 static int add_waiting_dir_move(struct send_ctx *sctx, u64 ino)
-#endif 
+#endif  
 {
 	struct rb_node **p = &sctx->waiting_dir_moves.rb_node;
 	struct rb_node *parent = NULL;
@@ -2683,7 +2738,8 @@ static int add_waiting_dir_move(struct send_ctx *sctx, u64 ino)
 	dm->rmdir_ino = 0;
 #ifdef MY_ABC_HERE
 	dm->orphanized = orphanized;
-#endif 
+	dm->gen = gen;
+#endif  
 
 	while (*p) {
 		parent = *p;
@@ -2784,10 +2840,10 @@ static int add_pending_dir_move(struct send_ctx *sctx,
 	}
 
 #ifdef MY_ABC_HERE
-	ret = add_waiting_dir_move(sctx, pm->ino, is_orphan);
+	ret = add_waiting_dir_move(sctx, pm->ino, pm->gen, is_orphan);
 #else
 	ret = add_waiting_dir_move(sctx, pm->ino);
-#endif 
+#endif  
 	if (ret)
 		goto out;
 
@@ -2838,7 +2894,7 @@ static int path_loop(struct send_ctx *sctx, struct fs_path *name,
 		struct waiting_dir_move *wdm;
 		fs_path_reset(name);
 
-		if (is_waiting_for_rm(sctx, ino))
+		if (is_waiting_for_rm(sctx, ino, gen))
 			break;
 
 		wdm = get_waiting_dir_move(sctx, ino);
@@ -3376,17 +3432,11 @@ verbose_printk("btrfs: process_recorded_refs %llu\n", sctx->cur_ino);
 					   cur->name_len);
 			if (ret < 0)
 				goto out;
-
-#ifdef MY_ABC_HERE
-			
-			sctx->last_overwrite_ino = sctx->cur_ino;
-#endif 
-
 			if (ret) {
 				struct name_cache_entry *nce;
 #ifdef MY_ABC_HERE
 				struct waiting_dir_move *wdm;
-#endif 
+#endif  
 
 				ret = orphanize_inode(sctx, ow_inode, ow_gen,
 						cur->full_path);
@@ -4350,8 +4400,13 @@ verbose_printk("btrfs: send_clone offset=%llu, len=%d, clone_root=%llu, "
 	if (ret < 0)
 		goto out;
 
+#ifdef MY_ABC_HERE
+	TLV_PUT_UUID(sctx, BTRFS_SEND_A_CLONE_UUID,
+			clone_root->root->root_item.received_uuid);
+#else
 	TLV_PUT_UUID(sctx, BTRFS_SEND_A_CLONE_UUID,
 			clone_root->root->root_item.uuid);
+#endif  
 	TLV_PUT_U64(sctx, BTRFS_SEND_A_CLONE_CTRANSID,
 		    le64_to_cpu(clone_root->root->root_item.ctransid));
 	TLV_PUT_PATH(sctx, BTRFS_SEND_A_CLONE_PATH, p);
@@ -5570,11 +5625,7 @@ long btrfs_ioctl_send(struct file *mnt_file, void __user *arg_)
 	sctx->total_data_size = arg->total_data_size;
 	do_gettimeofday(&sctx->write_timeval);
 #endif
-#ifdef MY_ABC_HERE
-	sctx->last_overwrite_ino = 0;
-#endif 
-
-	
+	 
 	if (btrfs_root_dead(sctx->send_root)) {
 		ret = -EPERM;
 		goto out;

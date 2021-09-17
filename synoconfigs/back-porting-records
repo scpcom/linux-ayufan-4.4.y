@@ -1,3 +1,8 @@
+BUG ID: <DSM> # - configfs backport for lio-4.x
+Commit Hashes:
+	1ae1602de028acaa42a0f6ff18d19756f8e825c6
+	5cf6a51e6062afe7cc507f32f1e5f7e6497ae844
+
 BUG ID: <Snapshot & Replication> #1490 - suspicious log "io_stat stopped"
 Commit Hashes:
 	a90902531a06a030a252a07fbff7f45a189a64fe

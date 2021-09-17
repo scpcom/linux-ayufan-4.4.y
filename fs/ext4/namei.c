@@ -65,6 +65,8 @@ static int ext4_dentry_compare(const struct dentry *dentry,
 	if (caseless) {
 		return syno_utf8_strcmp(str, name->name, len, name->len, NULL);
 	} else {
+		if (len != name->len)
+			return 1;
 		return dentry_cmp(dentry, name->name, name->len);
 	}
 }

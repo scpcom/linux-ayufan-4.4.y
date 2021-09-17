@@ -495,33 +495,26 @@ static int scsi_sdev_check_buf_bit(const char *buf)
 }
 #endif
 
-#ifdef CONFIG_SYNO_MD_BAD_SECTOR_AUTO_REMAP
-extern void
-ScsiRemapModeSet(struct scsi_device *sdev, unsigned char blAutoRemap);
+#ifdef MY_ABC_HERE
 static ssize_t
-sdev_show_auto_remap(struct device *dev, struct device_attribute *attr, char *buf)
+syno_disk_serial_show(struct device *device, struct device_attribute *attr, char *buf)
 {
-	struct scsi_device *sdev;
-	sdev = to_scsi_device(dev);
-	return snprintf (buf, 20, "%d type 0x%x\n", sdev->auto_remap, sdev->type);
-}
+	struct scsi_device *sdev = NULL;
+	ssize_t len = -EFAULT;
 
-static ssize_t
-sdev_store_auto_remap(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
-{
-	struct scsi_device *sdev;
-	int val = 0;
-	sdev = to_scsi_device(dev);
-	sscanf (buf, "%d", &val);
+	if (NULL == (sdev = to_scsi_device(device))) {
+		goto END;
+	}
 
-	ScsiRemapModeSet(sdev, val ? 1 : 0);
-	return count;
+	len = snprintf(buf, SERIAL_NUM_SIZE + 2, "%s\n", sdev->syno_disk_serial);
+END:
+	return len;
 }
-static DEVICE_ATTR(auto_remap, S_IRUGO | S_IWUSR, sdev_show_auto_remap, sdev_store_auto_remap);
-#endif 
+static DEVICE_ATTR(syno_disk_serial, S_IRUGO, syno_disk_serial_show, NULL);
+#endif  
 
 #ifdef MY_ABC_HERE
-
+ 
 static ssize_t
 sdev_show_syno_idle_time(struct device *dev, struct device_attribute *attr, char *buf)
 {
@@ -869,19 +862,19 @@ static struct attribute *scsi_sdev_attrs[] = {
 	&dev_attr_iodone_cnt.attr,
 	&dev_attr_ioerr_cnt.attr,
 	&dev_attr_modalias.attr,
-#ifdef CONFIG_SYNO_MD_BAD_SECTOR_AUTO_REMAP
-	&dev_attr_auto_remap.attr,
-#endif 
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_idle_time.attr,
 	&dev_attr_syno_spindown.attr,
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_scmd_min_timeout.attr,
-#endif 
+#endif  
 #ifdef MY_DEF_HERE
 	&dev_attr_syno_disk_spd.attr,
-#endif 
+#endif  
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_disk_serial.attr,
+#endif  
 	REF_EVT(media_change),
 	NULL
 };

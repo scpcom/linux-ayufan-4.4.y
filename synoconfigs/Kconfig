@@ -1,7 +1,5 @@
 menuconfig SYNO_FEATURES
 	bool "Synology Enhancement Features"
-	help
-		TBD
 
 if SYNO_FEATURES
 

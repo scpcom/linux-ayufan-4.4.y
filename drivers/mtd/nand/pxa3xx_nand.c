@@ -1,11 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-
-#if defined(MY_ABC_HERE)
-
-#endif 
-
+ 
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/interrupt.h>
@@ -776,28 +772,24 @@ static irqreturn_t pxa3xx_nand_irq(int irq, void *devid)
 		status &= ~NDSR_WRCMDREQ;
 		info->state = STATE_CMD_HANDLE;
 
-#if defined(MY_ABC_HERE)
-		
-#endif 
 		nand_writel(info, NDCB0, info->ndcb0);
 		nand_writel(info, NDCB0, info->ndcb1);
 		nand_writel(info, NDCB0, info->ndcb2);
 
 #if defined(MY_ABC_HERE)
-		
+		 
 		if (info->variant == PXA3XX_NAND_VARIANT_ARMADA370)
 			nand_writel(info, NDCB0, info->ndcb3);
-#endif 
+#endif  
 	}
 
-	
 	nand_writel(info, NDSR, status);
 	if (is_completed)
 		complete(&info->cmd_complete);
 #if defined(MY_ABC_HERE)
 	if (is_ready)
 		complete(&info->dev_ready);
-#endif 
+#endif  
 NORMAL_IRQ_EXIT:
 	return IRQ_HANDLED;
 }

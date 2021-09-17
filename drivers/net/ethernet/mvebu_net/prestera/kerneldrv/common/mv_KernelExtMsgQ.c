@@ -48,9 +48,6 @@ static int mvKernelExtMsgQ_read_proc_mem(
     len = 0;
 
     len += sprintf(page+len,"id msgs waitRx waitTx");
-#ifdef MV_MSGQ_STAT
-    
-#endif
     len += sprintf(page+len," name\n");
     for (k = 1; k < mv_num_queues; k++)
     {
@@ -63,9 +60,6 @@ static int mvKernelExtMsgQ_read_proc_mem(
 
         len += sprintf(page+len,"%d %d %d %d",
                 k, q->messages, q->waitRx, q->waitTx);
-#ifdef MV_MSGQ_STAT
-        
-#endif
         if (q->name[0])
             len += sprintf(page+len," %s", q->name);
         page[len++] = '\n';
@@ -95,22 +89,19 @@ static int mvKernelExtMsgQ_read_proc_mem(
 
     return len;
 }
-#endif 
+#endif  
 
 #ifdef CONFIG_OF
 static int proc_status_show_msq(struct seq_file *m, void *v) {
 
 #if defined(MY_ABC_HERE)
-	
-#else 
+	 
+#else  
     int len;
-#endif 
+#endif  
     int k;
 
     seq_printf(m, "id msgs waitRx waitTx");
-#ifdef MV_MSGQ_STAT
-    
-#endif
     seq_printf(m, " name\n");
     for (k = 1; k < mv_num_queues; k++)
     {
@@ -123,9 +114,6 @@ static int proc_status_show_msq(struct seq_file *m, void *v) {
 
         seq_printf(m, "%d %d %d %d",
                 k, q->messages, q->waitRx, q->waitTx);
-#ifdef MV_MSGQ_STAT
-        
-#endif
         if (q->name[0])
             seq_printf(m, " %s", q->name);
 	seq_putc(m, '\n');

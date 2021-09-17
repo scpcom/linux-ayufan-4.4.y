@@ -2078,28 +2078,25 @@ static int mv_eth_tx(struct sk_buff *skb, struct net_device *dev)
 				  NETA_TX_PKT_OFFSET_MASK(NET_SKB_PAD + MV_ETH_MH_SIZE);
 			txq_ctrl->shadow_txq[txq_ctrl->shadow_txq_put_i] = NULL;
 			tx_desc->bufPhysAddr = virt_to_phys(skb->head);
-#endif 
+#endif  
 
 			atomic_dec(&pool->in_use);
 			STAT_DBG(pool->stats.skb_recycled_ok++);
 		} else {
 #if defined(MY_ABC_HERE)
-			
+			 
 			tx_desc->bufPhysAddr = mvOsCacheFlush(pp->dev->dev.parent, skb->data, tx_desc->dataSize);
-#endif 
+#endif  
 			txq_ctrl->shadow_txq[txq_ctrl->shadow_txq_put_i] = ((MV_ULONG) skb | MV_ETH_SHADOW_SKB);
 			if (pool && (atomic_read(&pool->in_use) > 0))
 				STAT_DBG(pool->stats.skb_recycled_err++);
 		}
 #else
-#if defined(MY_ABC_HERE)
-		
-#endif 
 		txq_ctrl->shadow_txq[txq_ctrl->shadow_txq_put_i] = ((MV_ULONG) skb | MV_ETH_SHADOW_SKB);
 #if defined(MY_ABC_HERE)
 		tx_desc->bufPhysAddr = mvOsCacheFlush(pp->dev->dev.parent, skb->data, tx_desc->dataSize);
-#endif 
-#endif 
+#endif  
+#endif  
 
 		if (tx_spec.flags & MV_ETH_F_NO_PAD)
 			tx_cmd |= NETA_TX_F_DESC_MASK | NETA_TX_L_DESC_MASK;
@@ -2164,11 +2161,7 @@ static int mv_eth_tx(struct sk_buff *skb, struct net_device *dev)
 out:
 	if (frags > 0) {
 		dev->stats.tx_packets++;
-#if defined(MY_ABC_HERE)
-		dev->stats.tx_bytes += skb_len;
-#else
 		dev->stats.tx_bytes += skb->len;
-#endif 
 	} else {
 		dev->stats.tx_dropped++;
 		dev_kfree_skb_any(skb);
@@ -2177,22 +2170,21 @@ out:
 #ifndef CONFIG_MV_NETA_TXDONE_ISR
 	if (txq_ctrl) {
 		if (txq_ctrl->txq_count >= mv_ctrl_txdone) {
-#if defined(MY_ABC_HERE) && !defined(CONFIG_MV_ETH_STAT_DIST)
-			
-#else 
 			u32 tx_done = mv_eth_txq_done(pp, txq_ctrl);
-
+#if defined(MY_ABC_HERE) && !defined(CONFIG_MV_ETH_STAT_DIST)
+			 
+#else  
 			STAT_DIST((tx_done < pp->dist_stats.tx_done_dist_size) ? pp->dist_stats.tx_done_dist[tx_done]++ : 0);
-#endif 
+#endif  
 		}
-		
+		 
 		if ((txq_ctrl->txq_count > 0)  && (txq_ctrl->txq_count <= frags) && (frags > 0)) {
 			struct cpu_ctrl *cpuCtrl = pp->cpu_config[smp_processor_id()];
 
 			mv_eth_add_tx_done_timer(cpuCtrl);
 		}
 	}
-#endif 
+#endif  
 
 	if (txq_ctrl)
 		mv_eth_unlock(txq_ctrl, flags);

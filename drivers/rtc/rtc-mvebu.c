@@ -94,17 +94,16 @@ static bool rtc_init_state(mvebu_rtc_t *rtc)
 		}
 	}
 }
-#endif 
-
+#endif  
 
 static void rtc_next_alarm_time(struct rtc_time *next, struct rtc_time *now, struct rtc_time *alrm)
 {
 	unsigned long now_time;
 	unsigned long next_time;
 
-	next->tm_year = now->tm_year;
-	next->tm_mon  = now->tm_mon;
-	next->tm_mday = now->tm_mday;
+	next->tm_year = alrm->tm_year;
+	next->tm_mon  = alrm->tm_mon;
+	next->tm_mday = alrm->tm_mday;
 	next->tm_hour = alrm->tm_hour;
 	next->tm_min  = alrm->tm_min;
 	next->tm_sec  = alrm->tm_sec;
@@ -249,13 +248,10 @@ struct str_time_2_freq {
 	unsigned long nTime;
 	uint8_t nFreq;
 } __packed;
-#endif 
+#endif  
 
 static int mvebu_rtc_read_time(struct device *dev, struct rtc_time *tm)
 {
-#if defined(MY_ABC_HERE)
-	
-#endif 
 	mvebu_rtc_t *rtc = dev_get_drvdata(dev);
 #if defined(MY_ABC_HERE)
 	unsigned long nTimeArray[SAMPLE_NR], i, j, nTime;

@@ -48,13 +48,8 @@ static unsigned int _major = 0;
 
 static DEFINE_IDR(_minor_idr);
 
-#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
-extern sector_t (*funcSYNOLvLgSectorCount)(void *private, sector_t sector);
-sector_t SynoLvLgSectorCount(void *, sector_t);
-#endif 
-
 static DEFINE_SPINLOCK(_minor_lock);
-
+ 
 struct dm_io {
 	struct mapped_device *md;
 	int error;
@@ -253,10 +248,6 @@ static int __init dm_init(void)
 		if (r)
 			goto bad;
 	}
-
-#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
-	funcSYNOLvLgSectorCount = SynoLvLgSectorCount;
-#endif 
 
 	return 0;
 
@@ -827,20 +818,6 @@ int dm_set_target_max_io_len(struct dm_target *ti, sector_t len)
 	return 0;
 }
 EXPORT_SYMBOL_GPL(dm_set_target_max_io_len);
-
-#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
-sector_t SynoLvLgSectorCount(void *private, sector_t sector)
-{
-	struct dm_target *ti = (struct dm_target *)private;
-
-	if (ti && ti->type->lg_sector_get) {
-		return ti->type->lg_sector_get(sector, ti);
-	}
-
-	return 0;
-}
-EXPORT_SYMBOL(SynoLvLgSectorCount);
-#endif 
 
 static void __map_bio(struct dm_target_io *tio)
 {

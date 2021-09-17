@@ -27,6 +27,37 @@
  * configfs Copyright (C) 2005 Oracle.  All rights reserved.
  */
 
+#ifdef MY_ABC_HERE
+static inline struct inode *d_inode(const struct dentry *dentry)
+{
+	return dentry->d_inode;
+}
+
+static inline void inode_lock(struct inode *inode)
+{
+	mutex_lock(&inode->i_mutex);
+}
+
+static inline void inode_unlock(struct inode *inode)
+{
+	mutex_unlock(&inode->i_mutex);
+}
+
+static inline int inode_trylock(struct inode *inode)
+{
+	return mutex_trylock(&inode->i_mutex);
+}
+
+static inline int inode_is_locked(struct inode *inode)
+{
+	return mutex_is_locked(&inode->i_mutex);
+}
+
+static inline void inode_lock_nested(struct inode *inode, unsigned subclass)
+{
+	mutex_lock_nested(&inode->i_mutex, subclass);
+}
+#endif
 #ifdef pr_fmt
 #undef pr_fmt
 #endif
@@ -56,13 +87,14 @@ struct configfs_dirent {
 #define CONFIGFS_ROOT		0x0001
 #define CONFIGFS_DIR		0x0002
 #define CONFIGFS_ITEM_ATTR	0x0004
+#define CONFIGFS_ITEM_BIN_ATTR	0x0008
 #define CONFIGFS_ITEM_LINK	0x0020
 #define CONFIGFS_USET_DIR	0x0040
 #define CONFIGFS_USET_DEFAULT	0x0080
 #define CONFIGFS_USET_DROPPING	0x0100
 #define CONFIGFS_USET_IN_MKDIR	0x0200
 #define CONFIGFS_USET_CREATING	0x0400
-#define CONFIGFS_NOT_PINNED	(CONFIGFS_ITEM_ATTR)
+#define CONFIGFS_NOT_PINNED	(CONFIGFS_ITEM_ATTR | CONFIGFS_ITEM_BIN_ATTR)
 
 extern struct mutex configfs_symlink_mutex;
 extern spinlock_t configfs_dirent_lock;
@@ -72,16 +104,17 @@ extern struct kmem_cache *configfs_dir_cachep;
 extern int configfs_is_root(struct config_item *item);
 
 extern struct inode * configfs_new_inode(umode_t mode, struct configfs_dirent *, struct super_block *);
-extern int configfs_create(struct dentry *, umode_t mode, int (*init)(struct inode *));
+extern int configfs_create(struct dentry *, umode_t mode, void (*init)(struct inode *));
 extern int configfs_inode_init(void);
 extern void configfs_inode_exit(void);
 
 extern int configfs_create_file(struct config_item *, const struct configfs_attribute *);
+extern int configfs_create_bin_file(struct config_item *,
+				    const struct configfs_bin_attribute *);
 extern int configfs_make_dirent(struct configfs_dirent *,
 				struct dentry *, void *, umode_t, int);
 extern int configfs_dirent_is_ready(struct configfs_dirent *);
 
-extern int configfs_add_file(struct dentry *, const struct configfs_attribute *, int);
 extern void configfs_hash_and_remove(struct dentry * dir, const char * name);
 
 extern const unsigned char * configfs_get_name(struct configfs_dirent *sd);
@@ -94,7 +127,7 @@ extern void configfs_release_fs(void);
 extern struct rw_semaphore configfs_rename_sem;
 extern const struct file_operations configfs_dir_operations;
 extern const struct file_operations configfs_file_operations;
-extern const struct file_operations bin_fops;
+extern const struct file_operations configfs_bin_file_operations;
 extern const struct inode_operations configfs_dir_inode_operations;
 extern const struct inode_operations configfs_root_inode_operations;
 extern const struct inode_operations configfs_symlink_inode_operations;
@@ -123,6 +156,13 @@ static inline struct configfs_attribute * to_attr(struct dentry * dentry)
 {
 	struct configfs_dirent * sd = dentry->d_fsdata;
 	return ((struct configfs_attribute *) sd->s_element);
+}
+
+static inline struct configfs_bin_attribute *to_bin_attr(struct dentry *dentry)
+{
+	struct configfs_attribute *attr = to_attr(dentry);
+
+	return container_of(attr, struct configfs_bin_attribute, cb_attr);
 }
 
 static inline struct config_item *configfs_get_config_item(struct dentry *dentry)

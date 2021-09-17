@@ -45,32 +45,29 @@
 #include "props.h"
 #include "sysfs.h"
 #include "qgroup.h"
+#include "tree-log.h"
 
 #ifdef CONFIG_64BIT
-
+ 
 struct btrfs_ioctl_timespec_32 {
 	__u64 sec;
 	__u32 nsec;
 } __attribute__ ((__packed__));
 
 struct btrfs_ioctl_received_subvol_args_32 {
-	char	uuid[BTRFS_UUID_SIZE];	
-	__u64	stransid;		
-	__u64	rtransid;		
-	struct btrfs_ioctl_timespec_32 stime; 
-	struct btrfs_ioctl_timespec_32 rtime; 
-	__u64	flags;			
+	char	uuid[BTRFS_UUID_SIZE];	 
+	__u64	stransid;		 
+	__u64	rtransid;		 
+	struct btrfs_ioctl_timespec_32 stime;  
+	struct btrfs_ioctl_timespec_32 rtime;  
+	__u64	flags;			 
 #ifdef MY_ABC_HERE
-	struct btrfs_ioctl_timespec_32 otime; 
-	
-	
-	
-	
-	
+	struct btrfs_ioctl_timespec_32 otime;  
+	 
 	__u64	reserved[14];
 #else
-	__u64	reserved[16];		
-#endif 
+	__u64	reserved[16];		 
+#endif  
 } __attribute__ ((__packed__));
 
 #define BTRFS_IOC_SET_RECEIVED_SUBVOL_32 _IOWR(BTRFS_IOCTL_MAGIC, 37, \
@@ -882,12 +879,9 @@ static int find_new_extents(struct btrfs_root *root,
 	min_key.offset = *off;
 
 	while (1) {
-		path->keep_locks = 1;
 		ret = btrfs_search_forward(root, &min_key, path, newer_than);
 		if (ret != 0)
 			goto none;
-		path->keep_locks = 0;
-		btrfs_unlock_up_safe(path, 1);
 process_slot:
 		if (min_key.objectid != ino)
 			goto none;
@@ -1990,8 +1984,6 @@ static noinline int search_ioctl(struct inode *inode,
 	key.type = sk->min_type;
 	key.offset = sk->min_offset;
 
-	path->keep_locks = 1;
-
 	while (1) {
 		ret = btrfs_search_forward(root, &key, path, sk->min_transid);
 		if (ret != 0) {
@@ -2312,6 +2304,8 @@ static noinline int btrfs_ioctl_snap_destroy(struct file *file,
 	}
 	trans->block_rsv = &block_rsv;
 	trans->bytes_reserved = block_rsv.size;
+
+	btrfs_record_snapshot_destroy(trans, dir);
 
 	ret = btrfs_unlink_subvol(trans, root, dir,
 				dest->root_key.objectid,

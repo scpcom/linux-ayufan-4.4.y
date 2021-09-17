@@ -598,8 +598,89 @@ static int syno_is_pmp_device(struct device *dev)
 End:
 	return iRet;
 }
-#endif 
+#endif  
 
+#ifdef MY_ABC_HERE
+#define SERIAL_RESULT_BUF_SIZE 252
+#define VPD_SUPPORTED_VPDS 0x00
+#define VPD_UNIT_SERIAL_NUM 0x80
+static int syno_fetch_unit_serial_num(struct scsi_device *sdev)
+{
+	int ret = -1, result = 0, k = 0, len = 0;
+	unsigned char scsi_cmd[MAX_COMMAND_SIZE];
+	struct scsi_sense_hdr sshdr;
+	unsigned char serial_num_result[SERIAL_RESULT_BUF_SIZE];
+
+	if (NULL == sdev) {
+		SCSI_LOG_SCAN_BUS(3, printk(KERN_INFO "scsi_device null pointer\n"));
+		goto END;
+	}
+
+	memset(scsi_cmd, 0, 6);
+	scsi_cmd[0] = INQUIRY;
+	scsi_cmd[1] = 0x01;
+	scsi_cmd[2] = VPD_SUPPORTED_VPDS;
+	scsi_cmd[4] = SERIAL_RESULT_BUF_SIZE;
+	memset(serial_num_result, 0, SERIAL_RESULT_BUF_SIZE);
+
+	result = scsi_execute_req(sdev,  scsi_cmd, DMA_FROM_DEVICE,
+				  serial_num_result, SERIAL_RESULT_BUF_SIZE, &sshdr,
+				  HZ / 2 + HZ * scsi_inq_timeout, 3,
+				  NULL);
+
+	if (result) {
+		SCSI_LOG_SCAN_BUS(3, printk(KERN_INFO "get serial num INQUIRY failed with code 0x%x\n", result));
+		goto END;
+	}
+
+	if (VPD_SUPPORTED_VPDS != serial_num_result[1] ||
+		0x00 != serial_num_result[2]) {
+		SCSI_LOG_SCAN_BUS(3, printk(KERN_INFO "bad supported VPDs page\n"));
+		goto END;
+	}
+
+	len = (serial_num_result[2] << 8) + serial_num_result[3];  
+	for (k = 0; k < len; ++k) {
+		if (VPD_UNIT_SERIAL_NUM == serial_num_result[k + 4])
+			break;
+	}
+	if (k >= len) {
+		SCSI_LOG_SCAN_BUS(3, printk(KERN_INFO "without serial num page\n"));
+		goto END;
+	}
+
+	memset(scsi_cmd, 0, 6);
+	scsi_cmd[0] = INQUIRY;
+	scsi_cmd[1] = 0x01;
+	scsi_cmd[2] = VPD_UNIT_SERIAL_NUM;
+	scsi_cmd[4] = SERIAL_RESULT_BUF_SIZE;
+	memset(serial_num_result, 0, SERIAL_RESULT_BUF_SIZE);
+
+	result = scsi_execute_req(sdev,  scsi_cmd, DMA_FROM_DEVICE,
+				  serial_num_result, SERIAL_RESULT_BUF_SIZE, &sshdr,
+				  HZ / 2 + HZ * scsi_inq_timeout, 3,
+				  NULL);
+
+	if (result) {
+		SCSI_LOG_SCAN_BUS(3, printk(KERN_INFO "get serial num INQUIRY failed with code 0x%x\n", result));
+		goto END;
+	}
+
+	len = (serial_num_result[2] << 8) + serial_num_result[3];  
+	len = (len > SERIAL_NUM_SIZE) ? SERIAL_NUM_SIZE : len;
+	if (VPD_UNIT_SERIAL_NUM != serial_num_result[1] ||
+		0 >= len) {
+		SCSI_LOG_SCAN_BUS(3, printk(KERN_INFO "bad serial number length VPD page\n"));
+		goto END;
+	}
+
+	sanitize_inquiry_string(serial_num_result + 4, len);
+	memcpy(sdev->syno_disk_serial, serial_num_result + 4, len);
+	ret = 0;
+END:
+	return ret;
+}
+#endif  
 
 static int scsi_probe_lun(struct scsi_device *sdev, unsigned char *inq_result,
 			  int result_len, int *bflags)
@@ -723,38 +804,34 @@ static int scsi_probe_lun(struct scsi_device *sdev, unsigned char *inq_result,
 				"Consider BLIST_INQUIRY_36 for this device\n",
 				try_inquiry_len);
 
-		
 		try_inquiry_len = first_inquiry_len;
 		pass = 3;
 		goto next_pass;
 	}
 
-	
 	if (result)
 		return -EIO;
 
-	
 	sdev->inquiry_len = min(try_inquiry_len, response_len);
 
-	
 	if (sdev->inquiry_len < 36) {
 		printk(KERN_INFO "scsi scan: INQUIRY result too short (%d),"
 				" using 36\n", sdev->inquiry_len);
 		sdev->inquiry_len = 36;
 	}
 
-	
-
-	
 	sdev->scsi_level = inq_result[2] & 0x07;
 	if (sdev->scsi_level >= 2 ||
 	    (sdev->scsi_level == 1 && (inq_result[3] & 0x0f) == 1))
 		sdev->scsi_level++;
 	sdev->sdev_target->scsi_level = sdev->scsi_level;
 
+#ifdef MY_ABC_HERE
+	memset(sdev->syno_disk_serial, 0, sizeof(sdev->syno_disk_serial));
+	syno_fetch_unit_serial_num(sdev);
+#endif  
 	return 0;
 }
-
 
 static int scsi_add_lun(struct scsi_device *sdev, unsigned char *inq_result,
 		int *bflags, int async)
@@ -762,11 +839,8 @@ static int scsi_add_lun(struct scsi_device *sdev, unsigned char *inq_result,
 	int ret;
 #ifdef MY_ABC_HERE
 	unsigned char szDiskModel[CONFIG_SYNO_DISK_MODEL_NUM + 4] = {'\0'};
-#endif 
+#endif  
 
-	
-
-	
 	sdev->inquiry = kmemdup(inq_result,
 				max_t(size_t, sdev->inquiry_len, 36),
 				GFP_ATOMIC);

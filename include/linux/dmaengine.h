@@ -73,10 +73,6 @@ struct dma_interleaved_template {
 	struct data_chunk sgl[0];
 };
 
-
-#if defined(MY_ABC_HERE)
-
-#endif 
 enum dma_ctrl_flags {
 	DMA_PREP_INTERRUPT = (1 << 0),
 	DMA_CTRL_ACK = (1 << 1),

@@ -1630,13 +1630,13 @@ int do_recvfile(struct file *file, struct socket *sock, loff_t pos,
 	int                    err = 0;
 	int                    pages_allocated = 0;
 	int                    page_index = 0;
-	int                    flags = AOP_FLAG_UNINTERRUPTIBLE|AOP_FLAG_RECVFILE;
+	int                    flags = AOP_FLAG_UNINTERRUPTIBLE | AOP_FLAG_RECVFILE | AOP_FLAG_NOFS;
 	int                    write_end_ret = 0, failed_write_flag = 0;
 	loff_t                 firstPagePos = 0, lastPagePos = 0;
 	unsigned               firstPageBytes = 0, lastPageBytes = 0;
 	unsigned               bytes = 0;
 	pgoff_t                offset = (pos & (PAGE_CACHE_SIZE - 1));
-	void                  *fsdata = NULL; 
+	void                  *fsdata = NULL;  
 	size_t                 bytes_received = 0, bytes_wrote = 0;
 	ssize_t                bytes_to_received = 0;
 	struct kvec            iov[MAX_PAGES_PER_RECVFILE + 1];
@@ -1795,13 +1795,12 @@ int do_aggregate_recvfile(struct file *file, struct socket *sock, loff_t pos,
 		bytes = min_t(unsigned int, PAGE_CACHE_SIZE - offset, count);
 
 		err = mapping->a_ops->write_begin(
-					file, mapping, pos, bytes, AOP_FLAG_UNINTERRUPTIBLE|AOP_FLAG_RECVFILE,
+					file, mapping, pos, bytes, AOP_FLAG_UNINTERRUPTIBLE | AOP_FLAG_RECVFILE | AOP_FLAG_NOFS,
 					&page, &fsdata);
 		if (err) {
 			goto release_pages;
 		}
 
-		
 		rgPageList[pages_allocated] = page;
 		rgPos[pages_allocated] = pos;
 		rgBytes[pages_allocated] = bytes;
@@ -1978,8 +1977,8 @@ struct page *grab_cache_page_write_begin(struct address_space *mapping,
 	if (flags & AOP_FLAG_NOFS)
 		gfp_notmask = __GFP_FS;
 
-#ifdef CONFIG_SYNO_PKMAP_NOT_ENOUGH_FIX
-	
+#ifdef MY_DEF_HERE
+	 
 	gfp_notmask |= __GFP_HIGHMEM;
 #endif
 

@@ -1507,15 +1507,11 @@ int mv_pp2_skb_recycle(struct sk_buff *skb)
 	mv_pp2_pool_refill(ppool, bm, phys_addr, (unsigned long) skb);
 	atomic_dec(&ppool->in_use);
 
-#ifdef CONFIG_MV_PP2_DEBUG_CODE
-
-#endif 
-
 	return !is_recyclable;
 }
 EXPORT_SYMBOL(mv_pp2_skb_recycle);
 
-#endif 
+#endif  
 
 static struct sk_buff *mv_pp2_skb_alloc(struct eth_port *pp, struct bm_pool *pool,
 					phys_addr_t *phys_addr, gfp_t gfp_mask)

@@ -86,92 +86,87 @@ EXPORT_SYMBOL(syno_hibernation_log_level);
 
 int giSynoAtaDebug=0;
 EXPORT_SYMBOL(giSynoAtaDebug);
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 long unsigned int guiWakeupDisksNum = 1;
 EXPORT_SYMBOL(guiWakeupDisksNum);
-
+ 
 int giDenoOfTimeInterval = 1;
 EXPORT_SYMBOL(giDenoOfTimeInterval);
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 char gszSataPortMap[8] = {0};
 EXPORT_SYMBOL(gszSataPortMap);
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 unsigned int gSynoSataHostCnt = 0;
 EXPORT_SYMBOL(gSynoSataHostCnt);
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 char gszDiskIdxMap[16] = {0};
 EXPORT_SYMBOL(gszDiskIdxMap);
-#endif 
-
-#ifdef MY_DEF_HERE
-char gszDiskIdxMapMv14xx[8] = {0};
-EXPORT_SYMBOL(gszDiskIdxMapMv14xx);
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 long g_hdd_hotplug = 0;
 EXPORT_SYMBOL(g_hdd_hotplug);
-#endif 
+#endif  
 
 #ifdef MY_DEF_HERE
 #ifdef MY_DEF_HERE
 int gSynoHasDynModule = 1;
-#else 
+#else  
 int gSynoHasDynModule = 0;
-#endif 
+#endif  
 EXPORT_SYMBOL(gSynoHasDynModule);
-#endif 
+#endif  
 
 #ifdef MY_DEF_HERE
 int gSynoInstallFlag = 0;
 EXPORT_SYMBOL(gSynoInstallFlag);
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 char gszSynoHWRevision[4] = {'\0'};
 EXPORT_SYMBOL(gszSynoHWRevision);
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 char gszSynoHWVersion[16];
 EXPORT_SYMBOL(gszSynoHWVersion);
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 long g_syno_hdd_powerup_seq = -1;
 long syno_boot_hd_count = 0;
 EXPORT_SYMBOL(g_syno_hdd_powerup_seq);
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 char g_ahci_switch = '1';
 EXPORT_SYMBOL(g_ahci_switch);
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 long g_sata_mv_led = 0;
 EXPORT_SYMBOL(g_sata_mv_led);
-#endif 
+#endif  
 
 #ifdef MY_DEF_HERE
 int giSynoHddLedEnabled = 1;
 EXPORT_SYMBOL(giSynoHddLedEnabled);
-#endif  
+#endif   
 
 #ifdef MY_ABC_HERE
 char gszSerialNum[32];
 EXPORT_SYMBOL(gszSerialNum);
 char gszCustomSerialNum[32];
 EXPORT_SYMBOL(gszCustomSerialNum);
-#endif 
+#endif  
 
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 #include <linux/synosata.h>
@@ -179,32 +174,39 @@ int (*funcSYNOGetHwCapability)(CAPABILITY *) = NULL;
 EXPORT_SYMBOL(funcSYNOGetHwCapability);
 EUNIT_PWRON_TYPE (*funcSynoEunitPowerctlType)(void) = NULL;
 EXPORT_SYMBOL(funcSynoEunitPowerctlType);
-#endif 
+#endif  
 
 #ifdef MY_DEF_HERE
 int (*funcSYNOCtrlDiskLedBy1475)(unsigned short, unsigned short) = NULL;
 EXPORT_SYMBOL(funcSYNOCtrlDiskLedBy1475);
-#endif 
+#endif  
 
-#ifdef MY_ABC_HERE
+#ifdef  MY_ABC_HERE
 int gSynoRaidSyncFlag = 0;
 EXPORT_SYMBOL(gSynoRaidSyncFlag);
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 DECLARE_RWSEM(s_reshape_mount_key);
 EXPORT_SYMBOL(s_reshape_mount_key);
-#endif 
+#endif  
+
+#ifdef MY_ABC_HERE
+unsigned char g_syno_sata_remap[SATA_REMAP_MAX] = {SATA_REMAP_NOT_INIT};
+EXPORT_SYMBOL(g_syno_sata_remap);
+int g_use_sata_remap = 0;
+EXPORT_SYMBOL(g_use_sata_remap);
+#endif  
 
 #ifdef MY_ABC_HERE
 char giDiskSeqReverse[8] = {0};
 EXPORT_SYMBOL(giDiskSeqReverse);
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 long g_internal_netif_num = -1;
 EXPORT_SYMBOL(g_internal_netif_num);
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 unsigned char grgbLanMac[SYNO_MAC_MAX_NUMBER][16];
@@ -282,18 +284,23 @@ unsigned gSynoUsbVbusGpp[CONFIG_SYNO_USB_VBUS_NUM_GPIO] = {0};
 EXPORT_SYMBOL(gSynoUsbVbusHostAddr);
 EXPORT_SYMBOL(gSynoUsbVbusPort);
 EXPORT_SYMBOL(gSynoUsbVbusGpp);
-#endif 
+#endif  
 
 #ifdef MY_DEF_HERE
 int giSynoEncPwrCtl = 0;
 extern int SynoProcEncPwrCtl(struct ctl_table *table, int write,
 		        void __user *buffer, size_t *lenp, loff_t *ppos);
-#endif 
+#endif  
+
+#ifdef MY_DEF_HERE
+char gSynoSASHBAAddr[CONFIG_SYNO_SAS_MAX_HBA_SLOT][13] = {{0}};
+EXPORT_SYMBOL(gSynoSASHBAAddr);
+#endif  
 
 #ifdef MY_ABC_HERE
 int (*syno_test_list)(unsigned char, struct tty_struct *);
 EXPORT_SYMBOL(syno_test_list);
-#endif 
+#endif  
 
 #if defined(MY_DEF_HERE)
 int (*syno_standby_power_enable)(void) = NULL;
@@ -303,8 +310,17 @@ EXPORT_SYMBOL(syno_standby_power_enable);
 #ifdef MY_DEF_HERE
 int gSynoMemMode = 0;
 EXPORT_SYMBOL(gSynoMemMode);
-#endif 
+#endif  
 
+#ifdef MY_DEF_HERE
+int (*syno_valid_lsi3008_led)(u8 cmd);
+EXPORT_SYMBOL(syno_valid_lsi3008_led);
+#endif  
+
+#ifdef MY_DEF_HERE
+int (*syno_disk_map_table_gen_mv14xx)(int *iDiskMapTable, int iPortMax);
+EXPORT_SYMBOL(syno_disk_map_table_gen_mv14xx);
+#endif  
 
 extern int sysctl_overcommit_memory;
 extern int sysctl_overcommit_ratio;

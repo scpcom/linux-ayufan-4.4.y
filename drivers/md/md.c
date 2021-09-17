@@ -811,11 +811,38 @@ static void super_written(struct bio *bio, int error)
 	bio_put(bio);
 }
 
+#ifdef MY_ABC_HERE
+static void super_written_retry(struct bio *rbio, int error)
+{
+	unsigned long flags;
+	struct bio *bio = rbio->bi_private;
+	struct md_rdev *rdev = bio->bi_private;
+	struct mddev *mddev = rdev->mddev;
+	if (!test_bit(BIO_UPTODATE, &rbio->bi_flags) &&
+		-EIO == error) {
+			printk("md: super_written_retry for error=%d \n", error);
+			spin_lock_irqsave(&mddev->write_lock, flags);
+			bio->bi_next = mddev->biolist;
+			mddev->biolist = bio;
+			spin_unlock_irqrestore(&mddev->write_lock, flags);
+			wake_up(&mddev->sb_wait);
+			bio_put(rbio);
+	} else {
+			bio_put(bio);
+			rbio->bi_private = rdev;
+			super_written(rbio, error);
+	}
+}
+#endif  
+
 void md_super_write(struct mddev *mddev, struct md_rdev *rdev,
 		   sector_t sector, int size, struct page *page)
 {
-	
+	 
 	struct bio *bio = bio_alloc_mddev(GFP_NOIO, 1, mddev);
+#ifdef MY_ABC_HERE
+	struct bio *rbio;
+#endif  
 
 	bio->bi_bdev = rdev->meta_bdev ? rdev->meta_bdev : rdev->bdev;
 	bio->bi_sector = sector;
@@ -824,17 +851,40 @@ void md_super_write(struct mddev *mddev, struct md_rdev *rdev,
 	bio->bi_end_io = super_written;
 
 	atomic_inc(&mddev->pending_writes);
+#ifdef MY_ABC_HERE
+	rbio = bio_clone_mddev(bio, GFP_NOIO, mddev);
+	 
+	if (NULL != rbio) {
+		rbio->bi_private = bio;
+		rbio->bi_end_io = super_written_retry;
+		submit_bio(WRITE_FLUSH_FUA, rbio);
+	}else {
+		submit_bio(WRITE_FLUSH_FUA, bio);
+	}
+#else
 	submit_bio(WRITE_FLUSH_FUA, bio);
+#endif  
 }
 
 void md_super_wait(struct mddev *mddev)
 {
-	
+	 
 	DEFINE_WAIT(wq);
 	for(;;) {
 		prepare_to_wait(&mddev->sb_wait, &wq, TASK_UNINTERRUPTIBLE);
 		if (atomic_read(&mddev->pending_writes)==0)
 			break;
+#ifdef MY_ABC_HERE
+		while (mddev->biolist) {
+			struct bio *bio;
+			spin_lock_irq(&mddev->write_lock);
+			bio = mddev->biolist;
+			mddev->biolist = bio->bi_next ;
+			bio->bi_next = NULL;
+			spin_unlock_irq(&mddev->write_lock);
+			submit_bio(bio->bi_rw, bio);
+		}
+#endif
 		schedule();
 	}
 	finish_wait(&mddev->sb_wait, &wq);
@@ -902,104 +952,14 @@ void SYNOSwapSuperblock0(mdp_super_t *sb)
 	sb->cp_events_hi = sb->cp_events_lo;
 	sb->cp_events_lo = t32;
 }
-#endif 
-
-#ifdef CONFIG_SYNO_MD_BAD_SECTOR_AUTO_REMAP
-static inline void
-RaidMemberAutoRemapSet(struct mddev *mddev)
-{
-	struct md_rdev *rdev;
-	char b[BDEVNAME_SIZE];
-
-#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
-	if (MD_AUTO_REMAP_MODE_ISMAXDEGRADE == mddev->auto_remap && mddev->pers->syno_set_rdev_auto_remap) {
-		mddev->pers->syno_set_rdev_auto_remap(mddev);
-	} else {
-		rdev_for_each(rdev, mddev) {
-			bdevname(rdev->bdev, b);
-			RaidRemapModeSet(rdev->bdev, mddev->auto_remap);
-			printk("md: %s: set %s to auto_remap [%d]\n", mdname(mddev), b, mddev->auto_remap);
-		}
-	}
-#else 
-	rdev_for_each(rdev, mddev) {
-		bdevname(rdev->bdev, b);
-		RaidRemapModeSet(rdev->bdev, mddev->auto_remap);
-		printk("md: %s: set %s to auto_remap [%d]\n", mdname(mddev), b, mddev->auto_remap);
-	}
-#endif 
-}
-#endif 
-
-#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
-static int sync_sb_page_io(struct block_device *bdev, sector_t sector, int size,
-		struct page *page, int rw)
-{
-	struct bio *bio = bio_alloc(GFP_NOIO, 1);
-	struct completion event;
-	int ret;
-
-	rw |= REQ_SYNC;
-
-	bio->bi_bdev = bdev;
-	bio->bi_sector = sector;
-	bio_add_page(bio, page, size, 0);
-	init_completion(&event);
-	bio->bi_private = &event;
-	bio->bi_end_io = bi_complete;
-	submit_bio(rw, bio);
-	wait_for_completion(&event);
-
-	ret = test_bit(BIO_UPTODATE, &bio->bi_flags);
-	if (ret && bio_flagged(bio, BIO_AUTO_REMAP)) {
-		clear_bit(BIO_AUTO_REMAP, &bio->bi_flags);
-		ret = 0;
-	}
-
-	bio_put(bio);
-	return ret;
-}
-
-static int SynoRaidAutoRemapAdjust(struct mddev *mddev, int specify_setting)
-{
-	int old_setting = -1;
-
-	if (NULL == mddev || NULL == mddev->pers) {
-		goto END;
-	}
-
-	old_setting = mddev->auto_remap;
-
-	if (MD_AUTO_REMAP_MODE_ISMAXDEGRADE == specify_setting) {
-		if (mddev->pers->ismaxdegrade && mddev->pers->ismaxdegrade(mddev)) {
-			if (!mddev->pers->syno_set_rdev_auto_remap) {
-				specify_setting = MD_AUTO_REMAP_MODE_FORCE_ON;
-			}
-		} else {
-			specify_setting = MD_AUTO_REMAP_MODE_FORCE_OFF;
-		}
-	}
-
-	mddev->auto_remap = specify_setting;
-
-	if (old_setting != mddev->auto_remap || MD_AUTO_REMAP_MODE_ISMAXDEGRADE == mddev->auto_remap) {
-		RaidMemberAutoRemapSet(mddev);
-	} else { 
-		printk("md: %s: current auto_remap = %d\n", mdname(mddev), mddev->auto_remap);
-	}
-
-END:
-	
-	return old_setting;
-}
-#endif 
+#endif  
 
 static int read_disk_sb(struct md_rdev * rdev, int size)
 {
 	char b[BDEVNAME_SIZE];
 #ifdef MY_ABC_HERE
 	mdp_super_t *sb;
-#endif 
+#endif  
 	if (!rdev->sb_page) {
 		MD_BUG();
 		return -EINVAL;
@@ -1007,13 +967,8 @@ static int read_disk_sb(struct md_rdev * rdev, int size)
 	if (rdev->sb_loaded)
 		return 0;
 
-#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
-	if (!sync_sb_page_io(rdev->bdev, rdev->sb_start, size, rdev->sb_page, READ))
-		goto fail;
-#else 
 	if (!sync_page_io(rdev, 0, size, rdev->sb_page, READ, true))
 		goto fail;
-#endif 
 
 #ifdef MY_ABC_HERE
 	sb = (mdp_super_t*)page_address(rdev->sb_page);
@@ -2286,9 +2241,6 @@ static void export_rdev(struct md_rdev * rdev)
 
 static void kick_rdev_from_array(struct md_rdev * rdev)
 {
-#ifdef CONFIG_SYNO_MD_BAD_SECTOR_AUTO_REMAP
-	RaidRemapModeSet(rdev->bdev, 0);
-#endif 
 	unbind_rdev_from_array(rdev);
 	export_rdev(rdev);
 }
@@ -3240,15 +3192,12 @@ static struct md_rdev *md_import_device(dev_t newdev, int super_format, int supe
 #ifdef MY_ABC_HERE
 	if ((err = alloc_disk_wakeup_page(rdev)))
 		goto abort_free;
-#endif 
+#endif  
 
 	err = lock_rdev(rdev, newdev, super_format == -2);
 	if (err)
 		goto abort_free;
 
-#ifdef CONFIG_SYNO_MD_BAD_SECTOR_AUTO_REMAP
-	RaidRemapModeSet(rdev->bdev, 0);
-#endif 
 	kobject_init(&rdev->kobj, &rdev_ktype);
 
 	size = i_size_read(rdev->bdev->bd_inode) >> BLOCK_SIZE_BITS;
@@ -4523,58 +4472,6 @@ static struct md_sysfs_entry md_reshape_direction =
 __ATTR(reshape_direction, S_IRUGO|S_IWUSR, reshape_direction_show,
        reshape_direction_store);
 
-#ifdef CONFIG_SYNO_MD_BAD_SECTOR_AUTO_REMAP
-static ssize_t
-auto_remap_show(struct mddev *mddev, char *page)
-{
-	return sprintf(page, "%d\n", mddev->auto_remap);
-}
-
-static ssize_t
-auto_remap_store(struct mddev *mddev, const char *page, size_t len)
-{
-	int auto_remap_mode = -1;
-
-	if (!mddev->pers){
-		len = -EINVAL;
-		goto END;
-	}
-#ifdef MY_ABC_HERE
-	if (mddev->nodev_and_crashed) {
-		
-		goto END;
-	}
-#endif 
-
-#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
-	if (cmd_match(page, "2")) { 
-		auto_remap_mode = MD_AUTO_REMAP_MODE_ISMAXDEGRADE;
-	} else
-#endif 
-	if (cmd_match(page, "1")) {
-		auto_remap_mode = MD_AUTO_REMAP_MODE_FORCE_ON;
-	} else if (cmd_match(page, "0")) {
-		auto_remap_mode = MD_AUTO_REMAP_MODE_FORCE_OFF;
-	} else {
-		printk("md: %s: auto_remap, error input\n", mdname(mddev));
-		goto END;
-	}
-
-#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
-	SynoRaidAutoRemapAdjust(mddev, auto_remap_mode);
-#else 
-	mddev->auto_remap = auto_remap_mode;
-	RaidMemberAutoRemapSet(mddev);
-#endif 
-
-END:
-	return len;
-}
-
-static struct md_sysfs_entry md_auto_remap =
-__ATTR(auto_remap, S_IRUGO|S_IWUSR, auto_remap_show, auto_remap_store);
-#endif 
-
 #ifdef MY_ABC_HERE
 static ssize_t
 md_active_show(struct mddev *mddev, char *page)
@@ -4669,12 +4566,9 @@ static struct attribute *md_default_attrs[] = {
 	&md_reshape_direction.attr,
 	&md_array_size.attr,
 	&max_corr_read_errors.attr,
-#ifdef CONFIG_SYNO_MD_BAD_SECTOR_AUTO_REMAP
-	&md_auto_remap.attr,
-#endif 
 #ifdef MY_ABC_HERE
 	&md_active.attr,
-#endif 
+#endif  
 	NULL,
 };
 
@@ -4922,39 +4816,11 @@ static void md_safemode_timeout(unsigned long data)
 	md_wakeup_thread(mddev->thread);
 }
 
-#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
-void SYNOLvInfoSet(struct block_device *bdev, void *private, const char *name)
-{
-	struct mddev *mddev = NULL;
-	char *szDiskName = NULL;
-
-	if (!bdev || !private || !name){
-		printk("%s:%s(%d) error params\n", __FILE__, __FUNCTION__, __LINE__);
-		return;
-	}
-
-	szDiskName = bdev->bd_disk->disk_name;
-	if (NULL == strstr(szDiskName, "md")) {
-		printk("%s:%s(%d) This's not md device:[%s]\n",
-			__FILE__, __FUNCTION__, __LINE__, szDiskName);
-		return;
-	}
-
-	mddev = bdev->bd_disk->private_data;
-	if (mddev) {
-		mddev->syno_private = private;
-	}
-
-	snprintf(mddev->lv_name, 16, "%s", name);
-}
-EXPORT_SYMBOL(SYNOLvInfoSet);
-#endif 
-
 #ifdef MY_ABC_HERE
 static int start_dirty_degraded = 1;
-#else 
+#else  
 static int start_dirty_degraded;
-#endif 
+#endif  
 
 int md_run(struct mddev *mddev)
 {
@@ -5400,13 +5266,9 @@ static int do_md_stop(struct mddev * mddev, int mode,
 
 		if (mddev->ro)
 			mddev->ro = 0;
-#ifdef CONFIG_SYNO_MD_BAD_SECTOR_AUTO_REMAP
-		mddev->auto_remap = MD_AUTO_REMAP_MODE_FORCE_OFF;
-		RaidMemberAutoRemapSet(mddev);
-#endif 
 	} else
 		mutex_unlock(&mddev->open_mutex);
-	
+	 
 	if (mode == 0) {
 		printk(KERN_INFO "md: %s stopped.\n", mdname(mddev));
 
@@ -7251,28 +7113,20 @@ void md_do_sync(struct md_thread *thread)
 	struct md_rdev *rdev;
 	char *desc, *action = NULL;
 	struct blk_plug plug;
-#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
-	int old_auto_remap_setting = -1;
-#endif 
 
 #ifdef MY_ABC_HERE
-	
+	 
 #ifdef MY_DEF_HERE
 	set_user_nice(current, 10);
 #endif
-#endif 
+#endif  
 
-	
 	if (test_bit(MD_RECOVERY_DONE, &mddev->recovery))
 		return;
-	if (mddev->ro) {
+	if (mddev->ro) { 
 		set_bit(MD_RECOVERY_INTR, &mddev->recovery);
 		return;
 	}
-
-#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
-	old_auto_remap_setting = SynoRaidAutoRemapAdjust(mddev, MD_AUTO_REMAP_MODE_ISMAXDEGRADE);
-#endif 
 
 	if (test_bit(MD_RECOVERY_SYNC, &mddev->recovery)) {
 		if (test_bit(MD_RECOVERY_CHECK, &mddev->recovery)) {
@@ -7566,20 +7420,16 @@ void md_do_sync(struct md_thread *thread)
 	wake_up(&resync_wait);
 	set_bit(MD_RECOVERY_DONE, &mddev->recovery);
 	md_wakeup_thread(mddev->thread);
-#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
-	
-	SynoRaidAutoRemapAdjust(mddev, old_auto_remap_setting);
-#endif 
 	return;
 
  interrupted:
-	
+	 
 #ifdef MY_ABC_HERE
 	printk(KERN_WARNING "md: md_do_sync() got signal ... exiting\n");
-#else 
+#else  
 	printk(KERN_INFO
 	       "md: md_do_sync() got signal ... exiting\n");
-#endif 
+#endif  
 	set_bit(MD_RECOVERY_INTR, &mddev->recovery);
 	goto out;
 
@@ -7663,9 +7513,12 @@ no_add:
 	return spares;
 }
 
-
 void md_check_recovery(struct mddev *mddev)
 {
+#ifdef MY_ABC_HERE
+	int is_get_reshape_and_mount_lock = 0;
+#endif  
+
 	if (mddev->suspended)
 #ifdef MY_ABC_HERE
 	{
@@ -7702,13 +7555,23 @@ void md_check_recovery(struct mddev *mddev)
 		))
 		return;
 
+#ifdef MY_ABC_HERE
+	if (test_bit(MD_RECOVERY_DONE, &mddev->recovery) && mddev->sync_thread) {
+		if (1 == down_write_trylock(&s_reshape_mount_key)) {
+			is_get_reshape_and_mount_lock = 1;
+		} else {
+			return;
+		}
+	}
+#endif  
+
 	if (mddev_trylock(mddev)) {
 		int spares = 0;
 
 		if (mddev->ro) {
-			
+			 
 			remove_and_add_spares(mddev, NULL);
-			
+			 
 			set_bit(MD_RECOVERY_INTR, &mddev->recovery);
 			md_reap_sync_thread(mddev);
 			clear_bit(MD_RECOVERY_NEEDED, &mddev->recovery);
@@ -7738,44 +7601,35 @@ void md_check_recovery(struct mddev *mddev)
 
 		if (test_bit(MD_RECOVERY_RUNNING, &mddev->recovery) &&
 		    !test_bit(MD_RECOVERY_DONE, &mddev->recovery)) {
-			
+			 
 			clear_bit(MD_RECOVERY_NEEDED, &mddev->recovery);
 			goto unlock;
 		}
 		if (mddev->sync_thread) {
-#ifdef MY_ABC_HERE
-			if (0 == down_write_trylock(&s_reshape_mount_key)) {
-				goto unlock;
-			}
 			md_reap_sync_thread(mddev);
-			up_write(&s_reshape_mount_key);
-#else 
-			md_reap_sync_thread(mddev);
-#endif 
 			goto unlock;
 		}
-		
+		 
 		mddev->curr_resync_completed = 0;
 		set_bit(MD_RECOVERY_RUNNING, &mddev->recovery);
-		
+		 
 		clear_bit(MD_RECOVERY_INTR, &mddev->recovery);
 		clear_bit(MD_RECOVERY_DONE, &mddev->recovery);
 
 		if (!test_and_clear_bit(MD_RECOVERY_NEEDED, &mddev->recovery) ||
 		    test_bit(MD_RECOVERY_FROZEN, &mddev->recovery))
 			goto unlock;
-		
-
+		 
 		if (mddev->reshape_position != MaxSector) {
 #ifdef MY_ABC_HERE
-			
+			 
 			if (mddev->degraded) {
 				remove_faulty(mddev);
 			}
 #endif
 			if (mddev->pers->check_reshape == NULL ||
 			    mddev->pers->check_reshape(mddev) != 0)
-				
+				 
 				goto unlock;
 			set_bit(MD_RECOVERY_RESHAPE, &mddev->recovery);
 			clear_bit(MD_RECOVERY_RECOVER, &mddev->recovery);
@@ -7834,18 +7688,21 @@ void md_check_recovery(struct mddev *mddev)
 		}
 		mddev_unlock(mddev);
 	}
+#ifdef MY_ABC_HERE
+	if (is_get_reshape_and_mount_lock) {
+		up_write(&s_reshape_mount_key);
+	}
+#endif  
 }
 
 void md_reap_sync_thread(struct mddev *mddev)
 {
 	struct md_rdev *rdev;
 
-	
 	md_unregister_thread(&mddev->sync_thread);
 	if (!test_bit(MD_RECOVERY_INTR, &mddev->recovery) &&
 	    !test_bit(MD_RECOVERY_REQUESTED, &mddev->recovery)) {
-		
-		
+		 
 		if (mddev->pers->spare_active(mddev)) {
 			sysfs_notify(&mddev->kobj, NULL,
 				     "degraded");

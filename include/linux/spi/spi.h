@@ -101,73 +101,54 @@ static inline struct spi_driver *to_spi_driver(struct device_driver *drv)
 
 extern int spi_register_driver(struct spi_driver *sdrv);
 
-
 static inline void spi_unregister_driver(struct spi_driver *sdrv)
 {
 	if (sdrv)
 		driver_unregister(&sdrv->driver);
 }
 
-
 #define module_spi_driver(__spi_driver) \
 	module_driver(__spi_driver, spi_register_driver, \
 			spi_unregister_driver)
-
-
-#if defined(MY_ABC_HERE)
-
-#endif 
 
 struct spi_master {
 	struct device	dev;
 
 	struct list_head list;
 
-	
 	s16			bus_num;
 
-	
 	u16			num_chipselect;
 
-	
 	u16			dma_alignment;
 
-	
 	u16			mode_bits;
 
-	
 	u32			bits_per_word_mask;
 
 #if defined(MY_ABC_HERE)
-	
+	 
 	u32			min_speed_hz;
 	u32			max_speed_hz;
-#endif 
+#endif  
 
-	
 	u16			flags;
-#define SPI_MASTER_HALF_DUPLEX	BIT(0)		
-#define SPI_MASTER_NO_RX	BIT(1)		
-#define SPI_MASTER_NO_TX	BIT(2)		
+#define SPI_MASTER_HALF_DUPLEX	BIT(0)		 
+#define SPI_MASTER_NO_RX	BIT(1)		 
+#define SPI_MASTER_NO_TX	BIT(2)		 
 
-	
 	spinlock_t		bus_lock_spinlock;
 	struct mutex		bus_lock_mutex;
 
-	
 	bool			bus_lock_flag;
 
-	
 	int			(*setup)(struct spi_device *spi);
 
-	
 	int			(*transfer)(struct spi_device *spi,
 						struct spi_message *mesg);
 
-	
 	void			(*cleanup)(struct spi_device *spi);
 
-	
 	bool				queued;
 	struct kthread_worker		kworker;
 	struct task_struct		*kworker_task;

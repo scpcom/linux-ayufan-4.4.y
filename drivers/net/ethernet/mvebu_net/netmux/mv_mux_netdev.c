@@ -380,76 +380,60 @@ static inline int mv_mux_vlan2dsa(struct sk_buff *skb, u32 dsa)
 static inline int mv_mux_vlan2edsa(struct sk_buff *skb, unsigned int edsaL, unsigned int edsaH)
 {
 	u8 *dsa_header;
-	
+	 
 	u8 trg_dev = (edsaL >> MV_DSA_HDR_TRG_DEV_WORD_OFF) & MV_DSA_HDR_TRG_DEV_MASK;
 	u8 trg_port = (edsaL >> MV_DSA_HDR_TRG_PORT_WORD_OFF) & MV_DSA_HDR_TRG_PORT_MASK;
 
-	
 	if (skb->protocol == htons(ETH_P_8021Q)) {
 		if (skb_cow_head(skb, 0) < 0)
 			return -1;
 
-		
 		skb_push(skb, MV_ETH_DSA_SIZE);
 
-		
 		memmove(skb->data, skb->data + MV_ETH_DSA_SIZE, 2 * MV_MAC_ADDR_SIZE + MV_ETH_DSA_SIZE);
 
-		
 		dsa_header = skb->data + 2 * MV_MAC_ADDR_SIZE;
 		dsa_header[0] = 0x60 | trg_dev;
 		dsa_header[1] = trg_port << 3;
 
-		
 		if (dsa_header[2] & 0x10) {
 			dsa_header[4] |= 0x40;
 			dsa_header[2] &= ~0x10;
 		}
 
-		
 		dsa_header[2] |= 0x10;
 		dsa_header[4] &= 0x7f;
-		
+		 
 		if (edsaH & 0x400)
 			dsa_header[6] |= 0x04;
 	} else {
 		if (skb_cow_head(skb, MV_ETH_EDSA_SIZE) < 0)
 			return -1;
 
-		
 		skb_push(skb, MV_ETH_EDSA_SIZE);
 
-		
 		memmove(skb->data, skb->data + MV_ETH_EDSA_SIZE, 2 * MV_MAC_ADDR_SIZE);
 
-		
 		dsa_header = skb->data + 2 * MV_MAC_ADDR_SIZE;
 		dsa_header[0] = 0x40 | trg_dev;
 		dsa_header[1] = trg_port << 3;
 		dsa_header[2] = 0x00;
 		dsa_header[3] = 0x00;
 
-		
 		dsa_header[2] |= 0x10;
-		
+		 
 		dsa_header[4] = 0x00;
-		
+		 
 		dsa_header[5] = 0x00;
 		dsa_header[6] = 0x00;
 		dsa_header[7] = 0x00;
-		
+		 
 		if (edsaH & 0x400)
 			dsa_header[6] |= 0x04;
 	}
 
-#ifdef CONFIG_MV_ETH_DEBUG_CODE
-	
-#endif
-
 	return MV_OK;
 }
-
-
 
 int mv_mux_rx(struct sk_buff *skb, int port, struct napi_struct *napi)
 {

@@ -496,14 +496,25 @@ static void SynoSpinupDone(struct request *req, int uptodate)
 static void SynoSubmitSpinupReq(struct scsi_device *device)
 {
 	struct request *req;
+	static int is_print = 0;
 
-	req = blk_get_request(device->request_queue, READ, GFP_ATOMIC);
+	while (1) {
+		req = blk_get_request(device->request_queue, READ, GFP_ATOMIC);
+		if (!req) {
+			if (!is_print) {
+				printk(KERN_ERR "%s: Can't get request, retry it", __func__);
+				is_print = 1;
+			}
+		} else {
+			break;
+		}
+	}
 
 	req->cmd[0] = START_STOP;
 	req->cmd[1] = 0;
 	req->cmd[2] = 0;
 	req->cmd[3] = 0;
-	req->cmd[4] = 1; 
+	req->cmd[4] = 1;  
 	req->cmd[5] = 0;
 
 	req->cmd_len = COMMAND_SIZE(req->cmd[0]);

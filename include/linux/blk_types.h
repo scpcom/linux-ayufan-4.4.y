@@ -46,58 +46,49 @@ struct bio {
 
 	void			*bi_private;
 #ifdef CONFIG_BLK_CGROUP
-	
+	 
 	struct io_context	*bi_ioc;
 	struct cgroup_subsys_state *bi_css;
 #endif
 #if defined(CONFIG_BLK_DEV_INTEGRITY)
-	struct bio_integrity_payload *bi_integrity;  
+	struct bio_integrity_payload *bi_integrity;   
 #endif
 
-	
+	unsigned int		bi_max_vecs;	 
 
-	unsigned int		bi_max_vecs;	
+	atomic_t		bi_cnt;		 
 
-	atomic_t		bi_cnt;		
-
-	struct bio_vec		*bi_io_vec;	
+	struct bio_vec		*bi_io_vec;	 
 
 	struct bio_set		*bi_pool;
 
-	
 	struct bio_vec		bi_inline_vecs[0];
 };
 
 #define BIO_RESET_BYTES		offsetof(struct bio, bi_max_vecs)
 
-
-#define BIO_UPTODATE	0	
-#define BIO_RW_BLOCK	1	
-#define BIO_EOF		2	
-#define BIO_SEG_VALID	3	
-#define BIO_CLONED	4	
-#define BIO_BOUNCED	5	
-#define BIO_USER_MAPPED 6	
-#define BIO_EOPNOTSUPP	7	
-#define BIO_NULL_MAPPED 8	
-#define BIO_FS_INTEGRITY 9	
-#define BIO_QUIET	10	
-#define BIO_MAPPED_INTEGRITY 11
-#define BIO_SNAP_STABLE	12	
-
+#define BIO_UPTODATE	0	 
+#define BIO_RW_BLOCK	1	 
+#define BIO_EOF		2	 
+#define BIO_SEG_VALID	3	 
+#define BIO_CLONED	4	 
+#define BIO_BOUNCED	5	 
+#define BIO_USER_MAPPED 6	 
+#define BIO_EOPNOTSUPP	7	 
+#define BIO_NULL_MAPPED 8	 
+#define BIO_FS_INTEGRITY 9	 
+#define BIO_QUIET	10	 
+#define BIO_MAPPED_INTEGRITY 11 
+#define BIO_SNAP_STABLE	12	 
 
 #define BIO_RESET_BITS	13
-#define BIO_OWNS_VEC	13	
-#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
-#define BIO_AUTO_REMAP 14	
-#endif 
+#define BIO_OWNS_VEC	13	 
 #ifdef MY_ABC_HERE
-
+ 
 #define BIO_MD_RETURN_ERROR 15
-#endif 
+#endif  
 
 #define bio_flagged(bio, flag)	((bio)->bi_flags & (1 << (flag)))
-
 
 #define BIO_POOL_BITS		(4)
 #define BIO_POOL_NONE		((1UL << BIO_POOL_BITS) - 1)
@@ -105,50 +96,47 @@ struct bio {
 #define BIO_POOL_MASK		(1UL << BIO_POOL_OFFSET)
 #define BIO_POOL_IDX(bio)	((bio)->bi_flags >> BIO_POOL_OFFSET)
 
-#endif 
-
+#endif  
 
 enum rq_flag_bits {
-	
-	__REQ_WRITE,		
-	__REQ_FAILFAST_DEV,	
-	__REQ_FAILFAST_TRANSPORT, 
-	__REQ_FAILFAST_DRIVER,	
+	 
+	__REQ_WRITE,		 
+	__REQ_FAILFAST_DEV,	 
+	__REQ_FAILFAST_TRANSPORT,  
+	__REQ_FAILFAST_DRIVER,	 
 
-	__REQ_SYNC,		
-	__REQ_META,		
-	__REQ_PRIO,		
-	__REQ_DISCARD,		
-	__REQ_SECURE,		
-	__REQ_WRITE_SAME,	
+	__REQ_SYNC,		 
+	__REQ_META,		 
+	__REQ_PRIO,		 
+	__REQ_DISCARD,		 
+	__REQ_SECURE,		 
+	__REQ_WRITE_SAME,	 
 
-	__REQ_NOIDLE,		
-	__REQ_FUA,		
-	__REQ_FLUSH,		
+	__REQ_NOIDLE,		 
+	__REQ_FUA,		 
+	__REQ_FLUSH,		 
 
-	
-	__REQ_RAHEAD,		
-	__REQ_THROTTLED,	
+	__REQ_RAHEAD,		 
+	__REQ_THROTTLED,	 
 
-	
-	__REQ_SORTED,		
-	__REQ_SOFTBARRIER,	
-	__REQ_NOMERGE,		
-	__REQ_STARTED,		
-	__REQ_DONTPREP,		
-	__REQ_QUEUED,		
-	__REQ_ELVPRIV,		
-	__REQ_FAILED,		
-	__REQ_QUIET,		
-	__REQ_PREEMPT,		
-	__REQ_ALLOCED,		
-	__REQ_COPY_USER,	
-	__REQ_FLUSH_SEQ,	
-	__REQ_IO_STAT,		
-	__REQ_MIXED_MERGE,	
-	__REQ_KERNEL, 		
-	__REQ_PM,		
-	__REQ_NR_BITS,		
+	__REQ_SORTED,		 
+	__REQ_SOFTBARRIER,	 
+	__REQ_NOMERGE,		 
+	__REQ_STARTED,		 
+	__REQ_DONTPREP,		 
+	__REQ_QUEUED,		 
+	__REQ_ELVPRIV,		 
+	__REQ_FAILED,		 
+	__REQ_QUIET,		 
+	__REQ_PREEMPT,		 
+	__REQ_ALLOCED,		 
+	__REQ_COPY_USER,	 
+	__REQ_FLUSH_SEQ,	 
+	__REQ_IO_STAT,		 
+	__REQ_MIXED_MERGE,	 
+	__REQ_KERNEL, 		 
+	__REQ_PM,		 
+	__REQ_NR_BITS,		 
 };
 
 #define REQ_WRITE		(1 << __REQ_WRITE)

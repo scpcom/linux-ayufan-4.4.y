@@ -194,6 +194,49 @@ static int mergable_maps(struct extent_map *prev, struct extent_map *next)
 	return 0;
 }
 
+#ifdef MY_ABC_HERE
+static void check_and_insret_extent_map_to_global_extent(struct extent_map_tree *tree, struct extent_map *em)
+{
+	u64 rootid = 0;
+
+	atomic_inc(&tree->nr_extent_maps);
+	if (tree->inode && tree->inode->root && !btrfs_is_free_space_inode(&tree->inode->vfs_inode)) {
+		rootid = tree->inode->root->objectid;
+		if (rootid == BTRFS_FS_TREE_OBJECTID ||
+			(rootid >= BTRFS_FIRST_FREE_OBJECTID && rootid <= BTRFS_LAST_FREE_OBJECTID)) {
+			atomic_inc(&tree->inode->root->fs_info->nr_extent_maps);
+			if (list_empty(&tree->inode->free_extent_map_inode)) {
+				spin_lock(&tree->inode->root->fs_info->extent_map_inode_list_lock);
+				list_move_tail(&tree->inode->free_extent_map_inode, &tree->inode->root->fs_info->extent_map_inode_list);
+				spin_unlock(&tree->inode->root->fs_info->extent_map_inode_list_lock);
+			}
+		}
+	}
+}
+static void check_and_decrease_global_extent(struct extent_map_tree *tree)
+{
+	u64 rootid = 0;
+
+	WARN_ON(atomic_read(&tree->nr_extent_maps) == 0);
+	atomic_dec(&tree->nr_extent_maps);
+	if (tree->inode && tree->inode->root && !btrfs_is_free_space_inode(&tree->inode->vfs_inode)) {
+		rootid = tree->inode->root->objectid;
+		if (rootid == BTRFS_FS_TREE_OBJECTID ||
+			(rootid >= BTRFS_FIRST_FREE_OBJECTID && rootid <= BTRFS_LAST_FREE_OBJECTID)) {
+			WARN_ON(atomic_read(&(tree->inode->root->fs_info->nr_extent_maps)) == 0);
+			atomic_dec(&tree->inode->root->fs_info->nr_extent_maps);
+			if (atomic_read(&tree->nr_extent_maps) == 0 && !list_empty(&tree->inode->free_extent_map_inode)) {
+				spin_lock(&tree->inode->root->fs_info->extent_map_inode_list_lock);
+				if (atomic_read(&tree->inode->free_extent_map_counts) == 0) {
+					list_del_init(&tree->inode->free_extent_map_inode);
+				}
+				spin_unlock(&tree->inode->root->fs_info->extent_map_inode_list_lock);
+			}
+		}
+	}
+}
+#endif  
+
 static void try_merge_map(struct extent_map_tree *tree, struct extent_map *em)
 {
 	struct extent_map *merge = NULL;
@@ -218,13 +261,7 @@ static void try_merge_map(struct extent_map_tree *tree, struct extent_map *em)
 			free_extent_map(merge);
 
 #ifdef MY_ABC_HERE
-			
-			WARN_ON(atomic_read(&tree->nr_extent_maps) == 0);
-			atomic_dec(&tree->nr_extent_maps);
-			if (tree->inode && !btrfs_is_free_space_inode(&tree->inode->vfs_inode)) {
-				WARN_ON(atomic_read(&(tree->inode->root->fs_info->nr_extent_maps)) == 0);
-				atomic_dec(&tree->inode->root->fs_info->nr_extent_maps);
-			}
+			check_and_decrease_global_extent(tree);
 #endif
 		}
 	}
@@ -242,17 +279,10 @@ static void try_merge_map(struct extent_map_tree *tree, struct extent_map *em)
 		free_extent_map(merge);
 
 #ifdef MY_ABC_HERE
-		
-		WARN_ON(atomic_read(&tree->nr_extent_maps) == 0);
-		atomic_dec(&tree->nr_extent_maps);
-		if (tree->inode && !btrfs_is_free_space_inode(&tree->inode->vfs_inode)) {
-			WARN_ON(atomic_read(&(tree->inode->root->fs_info->nr_extent_maps)) == 0);
-			atomic_dec(&tree->inode->root->fs_info->nr_extent_maps);
-		}
+		check_and_decrease_global_extent(tree);
 #endif
 	}
 }
-
 
 int unpin_extent_cache(struct extent_map_tree *tree, u64 start, u64 len,
 		       u64 gen)
@@ -324,10 +354,7 @@ int add_extent_mapping(struct extent_map_tree *tree,
 		goto out;
 
 #ifdef MY_ABC_HERE
-	atomic_inc(&tree->nr_extent_maps);
-	if (tree->inode && !btrfs_is_free_space_inode(&tree->inode->vfs_inode)) {
-		atomic_inc(&tree->inode->root->fs_info->nr_extent_maps);
-	}
+	check_and_insret_extent_map_to_global_extent(tree, em);
 #endif
 	setup_extent_mapping(tree, em, modified);
 out:
@@ -363,13 +390,11 @@ __lookup_extent_mapping(struct extent_map_tree *tree,
 	return em;
 }
 
-
 struct extent_map *lookup_extent_mapping(struct extent_map_tree *tree,
 					 u64 start, u64 len)
 {
 	return __lookup_extent_mapping(tree, start, len, 1);
 }
-
 
 struct extent_map *search_extent_mapping(struct extent_map_tree *tree,
 					 u64 start, u64 len)
@@ -377,26 +402,21 @@ struct extent_map *search_extent_mapping(struct extent_map_tree *tree,
 	return __lookup_extent_mapping(tree, start, len, 0);
 }
 
-
 int remove_extent_mapping(struct extent_map_tree *tree, struct extent_map *em)
 {
 	int ret = 0;
 
 	WARN_ON(test_bit(EXTENT_FLAG_PINNED, &em->flags));
+
 	rb_erase(&em->rb_node, &tree->map);
 	if (!test_bit(EXTENT_FLAG_LOGGING, &em->flags))
 		list_del_init(&em->list);
 	RB_CLEAR_NODE(&em->rb_node);
 
 #ifdef MY_ABC_HERE
-	
-	WARN_ON(atomic_read(&tree->nr_extent_maps) == 0);
-	atomic_dec(&tree->nr_extent_maps);
-	if (tree->inode && !btrfs_is_free_space_inode(&tree->inode->vfs_inode)) {
-		WARN_ON(atomic_read(&(tree->inode->root->fs_info->nr_extent_maps)) == 0);
-		atomic_dec(&tree->inode->root->fs_info->nr_extent_maps);
-	}
-#endif
+	check_and_decrease_global_extent(tree);
+#endif  
+
 	return ret;
 }
 

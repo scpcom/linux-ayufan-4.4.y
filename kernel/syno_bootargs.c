@@ -1,108 +1,113 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-
+ 
 #include <linux/kernel.h>
 #include <linux/synolib.h>
 
 #ifdef MY_ABC_HERE
 extern char gszDiskIdxMap[16];
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 extern char gszSynoHWRevision[];
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 extern char gszSynoHWVersion[];
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 extern long g_syno_hdd_powerup_seq;
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 extern long g_hdd_hotplug;
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 extern unsigned char grgbLanMac[SYNO_MAC_MAX_NUMBER][16];
 extern int giVenderFormatVersion;
 extern char gszSkipVenderMacInterfaces[256];
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 extern char gszSerialNum[32];
 extern char gszCustomSerialNum[32];
-#endif 
+#endif  
+
+#ifdef MY_ABC_HERE
+extern unsigned char g_syno_sata_remap[SATA_REMAP_MAX];
+extern int g_use_sata_remap;
+#endif  
 
 #ifdef MY_ABC_HERE
 extern char giDiskSeqReverse[8];
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 extern long g_internal_netif_num;
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 extern long g_sata_mv_led;
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 extern int gSynoFactoryUSBFastReset;
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 extern int gSynoFactoryUSB3Disable;
-#endif 
+#endif  
 
 #ifdef MY_DEF_HERE
 extern int gSynoMemMode;
-#endif 
+#endif  
 
 #ifdef CONFIG_SYNO_SWITCH_NET_DEVICE_NAME
 extern unsigned int gSwitchDev;
 extern char gDevPCIName[CONFIG_SYNO_MAX_SWITCHABLE_NET_DEVICE][CONFIG_SYNO_NET_DEVICE_ENCODING_LENGTH];
-#endif 
+#endif  
 
 #ifdef MY_DEF_HERE
 extern long g_is_sas_model;
-#endif 
+#endif  
 
 #ifdef MY_DEF_HERE
 extern int gSynoDualHead;
-#endif 
+#endif  
 
 #ifdef MY_DEF_HERE
 extern int gSynoSASWriteConflictPanic;
-#endif 
+#endif  
+
+#ifdef MY_DEF_HERE
+extern char gSynoSASHBAAddr[CONFIG_SYNO_SAS_MAX_HBA_SLOT][13];
+#endif  
 
 #ifdef MY_DEF_HERE
 extern int gSynoBootSATADOM;
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 extern char g_ahci_switch;
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 extern char gszSataPortMap[8];
-#endif 
-
-#ifdef MY_DEF_HERE
-extern char gszDiskIdxMapMv14xx[8];
-#endif 
+#endif  
 
 #ifdef MY_DEF_HERE
 extern char gSynoCastratedXhcAddr[CONFIG_SYNO_NUM_CASTRATED_XHC][13];
 extern unsigned int gSynoCastratedXhcPortBitmap[CONFIG_SYNO_NUM_CASTRATED_XHC];
-#endif 
+#endif  
 
 #ifdef MY_DEF_HERE
 extern char gSynoUsbVbusHostAddr[CONFIG_SYNO_USB_VBUS_NUM_GPIO][13];
 extern int gSynoUsbVbusPort[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
 extern unsigned gSynoUsbVbusGpp[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 static int __init early_disk_idx_map(char *p)
@@ -325,7 +330,64 @@ static int __init early_factory_usb3_disable(char *p)
 	return 1;
 }
 __setup("syno_disable_usb3=", early_factory_usb3_disable);
-#endif 
+#endif  
+
+#ifdef MY_ABC_HERE
+ 
+static int __init early_sata_remap(char *p)
+{
+	int i;
+	char *ptr = p;
+
+	for (i=0; i<SATA_REMAP_MAX; i++)
+		g_syno_sata_remap[i] = i;
+
+	while (ptr && *ptr) {
+		char *cp = ptr;
+		char *sz_origin;
+		char *sz_mapped;
+		int origin_idx;
+		int mapped_idx;
+
+		sz_origin = cp;
+		if ((cp = strchr(sz_origin, '>'))) {
+			*cp++ = '\0';
+		} else {
+			goto FMT_ERR;
+		}
+
+		sz_mapped = cp;
+		if ((cp = strchr(sz_mapped, ':'))) {
+			*cp++ = '\0';
+		}
+
+		origin_idx = simple_strtol(sz_origin, NULL, 10);
+		mapped_idx = simple_strtol(sz_mapped, NULL, 10);
+
+		if ((SATA_REMAP_MAX > origin_idx) &&
+		    (SATA_REMAP_MAX > mapped_idx)) {
+			g_syno_sata_remap[origin_idx] = mapped_idx;
+		} else {
+			goto FMT_ERR;
+		}
+
+		ptr = cp;
+	}
+
+	printk(KERN_INFO "SYNO: sata remap initialized\n");
+
+	g_use_sata_remap = 1;
+	return 0;
+
+FMT_ERR:
+	 
+	printk(KERN_ERR "SYNO: sata remap format error, ignore.\n");
+	g_syno_sata_remap[0] = SATA_REMAP_NOT_INIT;
+	return 0;
+}
+
+__setup("sata_remap=", early_sata_remap);
+#endif  
 
 #ifdef MY_ABC_HERE
 static int __init early_disk_seq_reserve(char *p)
@@ -413,21 +475,7 @@ static int __init early_netif_seq(char *p)
 }
 
 __setup("netif_seq=",early_netif_seq);
-#endif 
-
-#ifdef MY_DEF_HERE
-static int __init early_disk_idx_map_mv14xx(char *p)
-{
-	snprintf(gszDiskIdxMapMv14xx, sizeof(gszDiskIdxMapMv14xx), "%s", p);
-
-	if('\0' != gszDiskIdxMapMv14xx[0]) {
-		printk("Disk Indx Map on MV14xx: %s\n", gszDiskIdxMapMv14xx);
-	}
-
-	return 1;
-}
-__setup("DiskIdxMapMv14xx=", early_disk_idx_map_mv14xx);
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 static int __init early_sataport_map(char *p)
@@ -485,7 +533,30 @@ static int __init early_sas_reservation_write_conflict(char *p)
 	return 1;
 }
 __setup("sas_reservation_write_conflict=", early_sas_reservation_write_conflict);
-#endif 
+#endif  
+
+#ifdef MY_DEF_HERE
+static int __init early_sas_hba_idx(char *p)
+{
+	char iCount = 0;
+	char *pBegin = p;
+	char *pEnd = NULL;
+
+	do {
+		pEnd = strstr(pBegin, ",");
+		if (NULL != pEnd) {
+			*pEnd = '\0';
+		}
+		snprintf(gSynoSASHBAAddr[iCount],
+				sizeof(gSynoSASHBAAddr[iCount]), "%s", pBegin);
+		pBegin = (NULL == pEnd) ? NULL : pEnd + 1;
+		iCount ++;
+	} while (NULL != pBegin && iCount < CONFIG_SYNO_SAS_MAX_HBA_SLOT);
+
+	return 1;
+}
+__setup("sas_hba_idx_addr=", early_sas_hba_idx);
+#endif  
 
 #ifdef MY_DEF_HERE
 static int __init early_synoboot_satadom(char *p)

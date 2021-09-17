@@ -26,11 +26,15 @@
 
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 #include <linux/synosata.h>
-#endif 
+#endif  
 
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 #include <linux/synobios.h>
-#endif 
+#endif  
+
+#ifdef MY_ABC_HERE
+#include <linux/synolib.h>
+#endif  
 
 #ifdef MY_ABC_HERE
 #include <linux/random.h>
@@ -556,36 +560,57 @@ void SynoEunitFlagSet(struct ata_port *pAp_master, bool blset, unsigned int flag
 		if (NULL == ap_host) {
 			continue;
 		}
-#else 
+#else  
 		if (NULL == (ap_host = scsi_host_lookup(i - 1))) {
 			continue;
 		}
-#endif 
+#endif  
 
 		if (NULL == (ap = ata_shost_to_port(ap_host))) {
 			goto CONTINUE_FOR;
 		}
 
-		
 		if (!syno_is_synology_pm(ap)) {
 			goto CONTINUE_FOR;
 		}
 
-		
 		if (unique != SYNO_UNIQUE(ap->PMSynoUnique)) {
 			goto CONTINUE_FOR;
 		}
 
-		
-		if (ap->host == pAp_master->host) {
-			unsigned long flags;
-			spin_lock_irqsave(ap->lock, flags);
-			if (blset) {
-				ap->pflags |= flag;
-			} else {
-				ap->pflags &= ~flag;
+		if (IS_SYNOLOGY_RX4(ap->PMSynoUnique) ||
+				IS_SYNOLOGY_DX5(ap->PMSynoUnique) ||
+				IS_SYNOLOGY_DX513(ap->PMSynoUnique) ||
+				IS_SYNOLOGY_DX213(ap->PMSynoUnique) ||
+				IS_SYNOLOGY_RX413(ap->PMSynoUnique) ||
+				IS_SYNOLOGY_RX415(ap->PMSynoUnique)) {
+			if (ap->host == pAp_master->host && ap->port_no == pAp_master->port_no) {
+				unsigned long flags;
+				spin_lock_irqsave(ap->lock, flags);
+				if (blset) {
+					ap->pflags |= flag;
+				} else {
+					ap->pflags &= ~flag;
+				}
+				spin_unlock_irqrestore(ap->lock, flags);
 			}
-			spin_unlock_irqrestore(ap->lock, flags);
+		}
+
+		if (IS_SYNOLOGY_DXC(ap->PMSynoUnique) ||
+				IS_SYNOLOGY_RXC(ap->PMSynoUnique) ||
+				IS_SYNOLOGY_RX1214(ap->PMSynoUnique) ||
+				IS_SYNOLOGY_RX1217(ap->PMSynoUnique) ||
+				IS_SYNOLOGY_DX1215(ap->PMSynoUnique)) {
+			if (ap->host == pAp_master->host) {
+				unsigned long flags;
+				spin_lock_irqsave(ap->lock, flags);
+				if (blset) {
+					ap->pflags |= flag;
+				} else {
+					ap->pflags &= ~flag;
+				}
+				spin_unlock_irqrestore(ap->lock, flags);
+			}
 		}
 CONTINUE_FOR:
 		scsi_host_put(ap_host);
@@ -1031,37 +1056,7 @@ unlock:
 DEVICE_ATTR(syno_wcache, S_IRUGO | S_IWUSR,
 	    syno_wcache_show, syno_wcache_store);
 EXPORT_SYMBOL_GPL(dev_attr_syno_wcache);
-#endif 
-
-#ifdef CONFIG_SYNO_SATA_DISK_SERIAL
-static ssize_t
-syno_disk_serial_show(struct device *device,
-					  struct device_attribute *attr, char *buf)
-{
-	
-	struct scsi_device *sdev = to_scsi_device(device);
-	struct ata_port *ap = NULL;
-	struct ata_device *dev = NULL;
-	ssize_t len = 0;
-	char szDiskSerial[ATA_ID_SERNO_LEN + 1] = {'\0'};
-	char *szStripSerial = NULL;
-
-	ap = ata_shost_to_port(sdev->host);
-	dev = ata_scsi_find_dev(ap, sdev);
-	if (dev) {
-		ata_id_string(dev->id, szDiskSerial, ATA_ID_SERNO, ATA_ID_SERNO_LEN);
-		
-		szStripSerial = strstrip(szDiskSerial);
-		
-		len = snprintf(buf, strlen(szStripSerial) + 2, "%s%s", szStripSerial, "\n");
-	}
-
-	return len;
-}
-
-DEVICE_ATTR(syno_disk_serial, S_IRUGO, syno_disk_serial_show, NULL);
-EXPORT_SYMBOL_GPL(dev_attr_syno_disk_serial);
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 #define SYNO_DISK_TRANS_LEN 3
@@ -4623,81 +4618,9 @@ int syno_disk_map_table_gen_from_disk_idx_map(int *iDiskMapTable)
 END:
 	return iErr;
 }
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
-
-#define SATA_REMAP_MAX  32
-#define SATA_REMAP_NOT_INIT 0xff
-static u8 syno_sata_remap[SATA_REMAP_MAX] = {SATA_REMAP_NOT_INIT};
-static int use_sata_remap = 0;
-
-static int get_remap_idx(int origin_idx)
-{
-	if ((SATA_REMAP_NOT_INIT == syno_sata_remap[0]) ||
-	    (SATA_REMAP_MAX <= origin_idx)) {
-		return origin_idx;
-	} else {
-		return syno_sata_remap[origin_idx];
-	}
-}
-
-static int __init early_sata_remap(char *p)
-{
-	int i;
-	char *ptr = p;
-
-	
-	for (i=0; i<SATA_REMAP_MAX; i++)
-		syno_sata_remap[i] = i;
-
-	
-	while (ptr && *ptr) {
-		char *cp = ptr;
-		char *sz_origin;
-		char *sz_mapped;
-		int origin_idx;
-		int mapped_idx;
-
-		sz_origin = cp;
-		if ((cp = strchr(sz_origin, '>'))) {
-			*cp++ = '\0';
-		} else {
-			goto FMT_ERR;
-		}
-
-		sz_mapped = cp;
-		if ((cp = strchr(sz_mapped, ':'))) {
-			*cp++ = '\0';
-		}
-
-		origin_idx = simple_strtol(sz_origin, NULL, 10);
-		mapped_idx = simple_strtol(sz_mapped, NULL, 10);
-
-		if ((SATA_REMAP_MAX > origin_idx) &&
-		    (SATA_REMAP_MAX > mapped_idx)) {
-			syno_sata_remap[origin_idx] = mapped_idx;
-		} else {
-			goto FMT_ERR;
-		}
-
-		ptr = cp;
-	}
-
-	printk(KERN_INFO "SYNO: sata remap initialized\n");
-
-	use_sata_remap = 1;
-	return 0;
-
-FMT_ERR:
-	
-	printk(KERN_ERR "SYNO: sata remap format error, ignore.\n");
-	syno_sata_remap[0] = SATA_REMAP_NOT_INIT;
-	return 0;
-}
-
-__setup("sata_remap=", early_sata_remap);
-
 int syno_disk_map_table_gen_from_sata_remap (int *iDiskMapTable)
 {
 	int iAtaHostCount = 0;
@@ -4711,7 +4634,7 @@ int syno_disk_map_table_gen_from_sata_remap (int *iDiskMapTable)
 
 	iAtaHostMax = atomic_read(&ata_print_id);
 	while (iAtaHostCount < iAtaHostMax) {
-		iDiskIdx = get_remap_idx(iAtaHostCount);
+		iDiskIdx = syno_get_remap_idx(iAtaHostCount);
 		iDiskMapTable[iDiskIdx] = iAtaHostCount;
 		iAtaHostCount++;
 	}
@@ -4788,19 +4711,18 @@ int syno_libata_disk_map_table_gen(int *iDiskMapTable)
 	if (0 < strlen(gszDiskIdxMap)) {
 		iErr = syno_disk_map_table_gen_from_disk_idx_map(iDiskMapTable);
 	}
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
-	if (1 == use_sata_remap) {
+	if (1 == g_use_sata_remap) {
 		iErr = syno_disk_map_table_gen_from_sata_remap(iDiskMapTable);
 	}
-#endif 
+#endif  
 
 END:
 	return iErr;
 }
 EXPORT_SYMBOL(syno_libata_disk_map_table_gen);
-
 
 static int syno_is_reversed_scsi_host_model(int host_no)
 {
@@ -4841,33 +4763,31 @@ int syno_libata_index_get(struct Scsi_Host *host, uint channel, uint id, uint lu
 			mapped_idx += ap->print_id - pAtaHost->ports[0]->print_id;
 		}
 
-		
 		blMapped = true;
 	} else {
 		mapped_idx = host->host_no;
 	}
 #else
 	mapped_idx = host->host_no;
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 	if (!blMapped) {
-		mapped_idx = get_remap_idx(index);
+		mapped_idx = syno_get_remap_idx(index);
 
 		if (mapped_idx != index) {
-			
+			 
 			blMapped = true;
 		}
 	}
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 	if (syno_is_synology_pm(ap)) {
-		mapped_idx = ((mapped_idx+1)*26) + channel; 
+		mapped_idx = ((mapped_idx+1)*26) + channel;  
 	} else {
-#endif 
+#endif  
 
-	
 	if (0 <= (reversed_idx = syno_is_reversed_scsi_host_model(host->host_no))) {
 		mapped_idx = reversed_idx;
 		blMapped = true;

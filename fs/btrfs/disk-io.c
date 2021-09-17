@@ -2123,6 +2123,8 @@ int open_ctree(struct super_block *sb,
 	btrfs_mapping_init(&fs_info->mapping_tree);
 #ifdef MY_ABC_HERE
 	atomic_set(&fs_info->nr_extent_maps, 0);
+	INIT_LIST_HEAD(&fs_info->extent_map_inode_list);
+	spin_lock_init(&fs_info->extent_map_inode_list_lock);
 #endif
 	btrfs_init_block_rsv(&fs_info->global_block_rsv,
 			     BTRFS_BLOCK_RSV_GLOBAL);
