@@ -1,19 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * drivers/net/phy/at803x.c
- *
- * Driver for Atheros 803x PHY
- *
- * Author: Matus Ujhelyi <ujhelyi.m@gmail.com>
- *
- * This program is free software; you can redistribute  it and/or modify it
- * under  the terms of  the GNU General  Public License as published by the
- * Free Software Foundation;  either version 2 of the  License, or (at your
- * option) any later version.
- */
-
+ 
 #include <linux/phy.h>
 #include <linux/module.h>
 #include <linux/string.h>
@@ -35,7 +23,7 @@
 #define AT803X_DEBUG_DATA			0x1E
 #define AT803X_DEBUG_SYSTEM_MODE_CTRL		0x05
 #define AT803X_DEBUG_RGMII_TX_CLK_DLY		BIT(8)
-#endif /* MY_DEF_HERE */
+#endif  
 
 MODULE_DESCRIPTION("Atheros 803x PHY driver");
 MODULE_AUTHOR("Matus Ujhelyi");
@@ -105,7 +93,7 @@ static void at803x_get_wol(struct phy_device *phydev,
 	if (value & AT803X_WOL_ENABLE)
 		wol->wolopts |= WAKE_MAGIC;
 }
-#else /* MY_DEF_HERE */
+#else  
 static void at803x_set_wol_mac_addr(struct phy_device *phydev)
 {
 	struct net_device *ndev = phydev->attached_dev;
@@ -135,7 +123,7 @@ static void at803x_set_wol_mac_addr(struct phy_device *phydev)
 				  mac[(i * 2) + 1] | (mac[(i * 2)] << 8));
 	}
 }
-#endif /* MY_DEF_HERE */
+#endif  
 
 static int at803x_config_init(struct phy_device *phydev)
 {
@@ -143,10 +131,10 @@ static int at803x_config_init(struct phy_device *phydev)
 #if defined(MY_DEF_HERE)
 	int ret;
 	u32 features;
-#else /* MY_DEF_HERE */
+#else  
 	u32 features;
 	int status;
-#endif /* MY_DEF_HERE */
+#endif  
 
 	features = SUPPORTED_TP | SUPPORTED_MII | SUPPORTED_AUI |
 		   SUPPORTED_FIBRE | SUPPORTED_BNC;
@@ -189,12 +177,12 @@ static int at803x_config_init(struct phy_device *phydev)
 			AT803X_DEBUG_RGMII_TX_CLK_DLY);
 	if (ret)
 		return ret;
-#else /* MY_DEF_HERE */
-	/* enable WOL */
+#else  
+	 
 	at803x_set_wol_mac_addr(phydev);
 	status = phy_write(phydev, AT803X_INTR_ENABLE, AT803X_WOL_ENABLE);
 	status = phy_read(phydev, AT803X_INTR_STATUS);
-#endif /* MY_DEF_HERE */
+#endif  
 
 	return 0;
 }
@@ -202,11 +190,11 @@ static int at803x_config_init(struct phy_device *phydev)
 #if defined(MY_DEF_HERE)
 static struct phy_driver at803x_driver[] = {
 {
-	/* ATHEROS 8035 */
-#else /* MY_DEF_HERE */
-/* ATHEROS 8035 */
+	 
+#else  
+ 
 static struct phy_driver at8035_driver = {
-#endif /* MY_DEF_HERE */
+#endif  
 	.phy_id		= 0x004dd072,
 	.name		= "Atheros 8035 ethernet",
 	.phy_id_mask	= 0xffffffef,
@@ -214,7 +202,7 @@ static struct phy_driver at8035_driver = {
 #if defined(MY_DEF_HERE)
 	.set_wol	= at803x_set_wol,
 	.get_wol	= at803x_get_wol,
-#endif /* MY_DEF_HERE */
+#endif  
 	.features	= PHY_GBIT_FEATURES,
 	.flags		= PHY_HAS_INTERRUPT,
 	.config_aneg	= &genphy_config_aneg,
@@ -224,13 +212,12 @@ static struct phy_driver at8035_driver = {
 	},
 #if defined(MY_DEF_HERE)
 }, {
-	/* ATHEROS 8030 */
-#else /* MY_DEF_HERE */
+	 
+#else  
 };
 
-/* ATHEROS 8030 */
 static struct phy_driver at8030_driver = {
-#endif /* MY_DEF_HERE */
+#endif  
 	.phy_id		= 0x004dd076,
 	.name		= "Atheros 8030 ethernet",
 	.phy_id_mask	= 0xffffffef,
@@ -238,7 +225,7 @@ static struct phy_driver at8030_driver = {
 #if defined(MY_DEF_HERE)
 	.set_wol	= at803x_set_wol,
 	.get_wol	= at803x_get_wol,
-#endif /* MY_DEF_HERE */
+#endif  
 	.features	= PHY_GBIT_FEATURES,
 	.flags		= PHY_HAS_INTERRUPT,
 	.config_aneg	= &genphy_config_aneg,
@@ -248,7 +235,7 @@ static struct phy_driver at8030_driver = {
 	},
 #if defined(MY_DEF_HERE)
 }, {
-	/* ATHEROS 8031 */
+	 
 	.phy_id		= 0x004dd074,
 	.name		= "Atheros 8031 ethernet",
 	.phy_id_mask	= 0xffffffef,
@@ -263,9 +250,9 @@ static struct phy_driver at8030_driver = {
 		.owner = THIS_MODULE,
 	},
 } };
-#else /* MY_DEF_HERE */
+#else  
 };
-#endif /* MY_DEF_HERE */
+#endif  
 
 #if defined(MY_DEF_HERE)
 static int __init atheros_init(void)
@@ -279,7 +266,7 @@ static void __exit atheros_exit(void)
 	return phy_drivers_unregister(at803x_driver,
 				      ARRAY_SIZE(at803x_driver));
 }
-#else /* MY_DEF_HERE */
+#else  
 static int __init atheros_init(void)
 {
 	int ret;
@@ -305,7 +292,7 @@ static void __exit atheros_exit(void)
 	phy_driver_unregister(&at8035_driver);
 	phy_driver_unregister(&at8030_driver);
 }
-#endif /* MY_DEF_HERE */
+#endif  
 
 module_init(atheros_init);
 module_exit(atheros_exit);
@@ -314,7 +301,7 @@ static struct mdio_device_id __maybe_unused atheros_tbl[] = {
 	{ 0x004dd076, 0xffffffef },
 #if defined(MY_DEF_HERE)
 	{ 0x004dd074, 0xffffffef },
-#endif /* MY_DEF_HERE */
+#endif  
 	{ 0x004dd072, 0xffffffef },
 	{ }
 };

@@ -1,22 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * dma.c  --  ALSA Soc Audio Layer
- *
- * (c) 2006 Wolfson Microelectronics PLC.
- * Graeme Gregory graeme.gregory@wolfsonmicro.com or linux@wolfsonmicro.com
- *
- * Copyright 2004-2005 Simtec Electronics
- *	http://armlinux.simtec.co.uk/
- *	Ben Dooks <ben@simtec.co.uk>
- *
- *  This program is free software; you can redistribute  it and/or modify it
- *  under  the terms of  the GNU General  Public License as published by the
- *  Free Software Foundation;  either version 2 of the  License, or (at your
- *  option) any later version.
- */
-
+ 
 #include <linux/slab.h>
 #include <linux/dma-mapping.h>
 #include <linux/module.h>
@@ -65,11 +50,6 @@ struct runtime_data {
 
 static void audio_buffdone(void *data);
 
-/* dma_enqueue
- *
- * place a dma buffer onto the queue for the dma system
- * to handle.
- */
 static void dma_enqueue(struct snd_pcm_substream *substream)
 {
 	struct runtime_data *prtd = substream->runtime->private_data;
@@ -152,15 +132,11 @@ static int dma_hw_params(struct snd_pcm_substream *substream,
 
 	pr_debug("Entered %s\n", __func__);
 
-	/* return if this is a bufferless transfer e.g.
-	 * codec <--> BT codec or GSM modem -- lg FIXME */
 	if (!dma)
 		return 0;
 
-	/* this may get called several times by oss emulation
-	 * with different params -HW */
 	if (prtd->params == NULL) {
-		/* prepare DMA */
+		 
 		prtd->params = dma;
 
 		pr_debug("params %p, client %p, channel %d\n", prtd->params,
@@ -222,18 +198,14 @@ static int dma_prepare(struct snd_pcm_substream *substream)
 
 	pr_debug("Entered %s\n", __func__);
 
-	/* return if this is a bufferless transfer e.g.
-	 * codec <--> BT codec or GSM modem -- lg FIXME */
 	if (!prtd->params)
 		return 0;
 
-	/* flush the DMA channel */
 	prtd->params->ops->flush(prtd->params->ch);
 
 	prtd->dma_loaded = 0;
 	prtd->dma_pos = prtd->dma_start;
 
-	/* enqueue dma buffers */
 	dma_enqueue(substream);
 
 	return ret;
@@ -281,12 +253,6 @@ dma_pointer(struct snd_pcm_substream *substream)
 	res = prtd->dma_pos - prtd->dma_start;
 
 	pr_debug("Pointer offset: %lu\n", res);
-
-	/* we seem to be getting the odd error from the pcm library due
-	 * to out-of-bounds pointers. this is maybe due to the dma engine
-	 * not having loaded the new values for the channel before being
-	 * called... (todo - fix )
-	 */
 
 	if (res >= snd_pcm_lib_buffer_bytes(substream)) {
 		if (res == snd_pcm_lib_buffer_bytes(substream))
@@ -399,10 +365,10 @@ static void dma_free_dma_buffers(struct snd_pcm *pcm)
 }
 
 #if defined(MY_ABC_HERE)
-// do nothing
-#else /* MY_ABC_HERE */
+ 
+#else  
 static u64 dma_mask = DMA_BIT_MASK(32);
-#endif /* MY_ABC_HERE */
+#endif  
 
 static int dma_new(struct snd_soc_pcm_runtime *rtd)
 {
@@ -416,12 +382,12 @@ static int dma_new(struct snd_soc_pcm_runtime *rtd)
 	ret = dma_coerce_mask_and_coherent(card->dev, DMA_BIT_MASK(32));
 	if (ret)
 		return ret;
-#else /* MY_ABC_HERE */
+#else  
 	if (!card->dev->dma_mask)
 		card->dev->dma_mask = &dma_mask;
 	if (!card->dev->coherent_dma_mask)
 		card->dev->coherent_dma_mask = DMA_BIT_MASK(32);
-#endif /* MY_ABC_HERE */
+#endif  
 
 	if (pcm->streams[SNDRV_PCM_STREAM_PLAYBACK].substream) {
 		ret = preallocate_dma_buffer(pcm,

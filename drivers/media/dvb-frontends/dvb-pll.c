@@ -1,26 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * descriptions + helper functions for simple dvb plls.
- *
- * (c) 2004 Gerd Knorr <kraxel@bytesex.org> [SuSE Labs]
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- */
-
+ 
 #include <linux/slab.h>
 #include <linux/module.h>
 #include <linux/dvb/frontend.h>
@@ -29,17 +10,14 @@
 #include "dvb-pll.h"
 
 struct dvb_pll_priv {
-	/* pll number */
+	 
 	int nr;
 
-	/* i2c details */
 	int pll_i2c_address;
 	struct i2c_adapter *i2c;
 
-	/* the PLL descriptor */
 	struct dvb_pll_desc *pll_desc;
 
-	/* cached frequency/bandwidth */
 	u32 frequency;
 	u32 bandwidth;
 };
@@ -56,8 +34,6 @@ static unsigned int id[DVB_PLL_MAX] =
 	{ [ 0 ... (DVB_PLL_MAX-1) ] = DVB_PLL_UNDEFINED };
 module_param_array(id, int, NULL, 0644);
 MODULE_PARM_DESC(id, "force pll id to use (DEBUG ONLY)");
-
-/* ----------------------------------------------------------- */
 
 struct dvb_pll_desc {
 	char *name;
@@ -76,9 +52,6 @@ struct dvb_pll_desc {
 		u8  cb;
 	} entries[12];
 };
-
-/* ----------------------------------------------------------- */
-/* descriptions                                                */
 
 static struct dvb_pll_desc dvb_pll_thomson_dtt7579 = {
 	.name  = "Thomson dtt7579",
@@ -122,7 +95,7 @@ static struct dvb_pll_desc dvb_pll_thomson_dtt759x = {
 #if defined (MY_DEF_HERE)
 static void thomson_dtt7546x_bw(struct dvb_frontend *fe, u8 *buf)
 {
-	/* set CB2 reg - set ATC, XTO */
+	 
 	buf[4] = 0xe3;
 }
 
@@ -149,7 +122,7 @@ static struct dvb_pll_desc dvb_pll_thomson_dtt7546x = {
 	},
 };
 
-#endif /* MY_DEF_HERE */
+#endif  
 static void thomson_dtt7520x_bw(struct dvb_frontend *fe, u8 *buf)
 {
 	u32 bw = fe->dtv_property_cache.bandwidth_hz;
@@ -192,7 +165,7 @@ static struct dvb_pll_desc dvb_pll_lg_z201 = {
 };
 
 static struct dvb_pll_desc dvb_pll_unknown_1 = {
-	.name  = "unknown 1", /* used by dntv live dvb-t */
+	.name  = "unknown 1",  
 	.min   = 174000000,
 	.max   = 862000000,
 	.iffreq= 36166667,
@@ -210,9 +183,6 @@ static struct dvb_pll_desc dvb_pll_unknown_1 = {
 	},
 };
 
-/* Infineon TUA6010XS
- * used in Thomson Cable Tuner
- */
 static struct dvb_pll_desc dvb_pll_tua6010xs = {
 	.name  = "Infineon TUA6010XS",
 	.min   =  44250000,
@@ -226,7 +196,6 @@ static struct dvb_pll_desc dvb_pll_tua6010xs = {
 	},
 };
 
-/* Panasonic env57h1xd5 (some Philips PLL ?) */
 static struct dvb_pll_desc dvb_pll_env57h1xd5 = {
 	.name  = "Panasonic ENV57H1XD5",
 	.min   =  44250000,
@@ -241,9 +210,6 @@ static struct dvb_pll_desc dvb_pll_env57h1xd5 = {
 	},
 };
 
-/* Philips TDA6650/TDA6651
- * used in Panasonic ENV77H11D5
- */
 static void tda665x_bw(struct dvb_frontend *fe, u8 *buf)
 {
 	u32 bw = fe->dtv_property_cache.bandwidth_hz;
@@ -260,24 +226,21 @@ static struct dvb_pll_desc dvb_pll_tda665x = {
 	.initdata = (u8[]){ 4, 0x0b, 0xf5, 0x85, 0xab },
 	.count = 12,
 	.entries = {
-		{   93834000, 166667, 0xca, 0x61 /* 011 0 0 0  01 */ },
-		{  123834000, 166667, 0xca, 0xa1 /* 101 0 0 0  01 */ },
-		{  161000000, 166667, 0xca, 0xa1 /* 101 0 0 0  01 */ },
-		{  163834000, 166667, 0xca, 0xc2 /* 110 0 0 0  10 */ },
-		{  253834000, 166667, 0xca, 0x62 /* 011 0 0 0  10 */ },
-		{  383834000, 166667, 0xca, 0xa2 /* 101 0 0 0  10 */ },
-		{  443834000, 166667, 0xca, 0xc2 /* 110 0 0 0  10 */ },
-		{  444000000, 166667, 0xca, 0xc4 /* 110 0 0 1  00 */ },
-		{  583834000, 166667, 0xca, 0x64 /* 011 0 0 1  00 */ },
-		{  793834000, 166667, 0xca, 0xa4 /* 101 0 0 1  00 */ },
-		{  444834000, 166667, 0xca, 0xc4 /* 110 0 0 1  00 */ },
-		{  861000000, 166667, 0xca, 0xe4 /* 111 0 0 1  00 */ },
+		{   93834000, 166667, 0xca, 0x61   },
+		{  123834000, 166667, 0xca, 0xa1   },
+		{  161000000, 166667, 0xca, 0xa1   },
+		{  163834000, 166667, 0xca, 0xc2   },
+		{  253834000, 166667, 0xca, 0x62   },
+		{  383834000, 166667, 0xca, 0xa2   },
+		{  443834000, 166667, 0xca, 0xc2   },
+		{  444000000, 166667, 0xca, 0xc4   },
+		{  583834000, 166667, 0xca, 0x64   },
+		{  793834000, 166667, 0xca, 0xa4   },
+		{  444834000, 166667, 0xca, 0xc4   },
+		{  861000000, 166667, 0xca, 0xe4   },
 	}
 };
 
-/* Infineon TUA6034
- * used in LG TDTP E102P
- */
 static void tua6034_bw(struct dvb_frontend *fe, u8 *buf)
 {
 	u32 bw = fe->dtv_property_cache.bandwidth_hz;
@@ -299,9 +262,6 @@ static struct dvb_pll_desc dvb_pll_tua6034 = {
 	},
 };
 
-/* ALPS TDED4
- * used in Nebula-Cards and USB boxes
- */
 static void tded4_bw(struct dvb_frontend *fe, u8 *buf)
 {
 	u32 bw = fe->dtv_property_cache.bandwidth_hz;
@@ -324,9 +284,6 @@ static struct dvb_pll_desc dvb_pll_tded4 = {
 	}
 };
 
-/* ALPS TDHU2
- * used in AverTVHD MCE A180
- */
 static struct dvb_pll_desc dvb_pll_tdhu2 = {
 	.name = "ALPS TDHU2",
 	.min = 54000000,
@@ -341,9 +298,6 @@ static struct dvb_pll_desc dvb_pll_tdhu2 = {
 	}
 };
 
-/* Samsung TBMV30111IN / TBMV30712IN1
- * used in Air2PC ATSC - 2nd generation (nxt2002)
- */
 static struct dvb_pll_desc dvb_pll_samsung_tbmv = {
 	.name = "Samsung TBMV30111IN / TBMV30712IN1",
 	.min = 54000000,
@@ -360,14 +314,11 @@ static struct dvb_pll_desc dvb_pll_samsung_tbmv = {
 	}
 };
 
-/*
- * Philips SD1878 Tuner.
- */
 static struct dvb_pll_desc dvb_pll_philips_sd1878_tda8261 = {
 	.name  = "Philips SD1878",
 	.min   =  950000,
 	.max   = 2150000,
-	.iffreq= 249, /* zero-IF, offset 249 is to round up */
+	.iffreq= 249,  
 	.count = 4,
 	.entries = {
 		{ 1250000, 500, 0xc4, 0x00},
@@ -421,8 +372,8 @@ static void opera1_bw(struct dvb_frontend *fe, u8 *buf)
 		lpf = 0x3;
 		else
 		lpf = 0xb;
-	buf[2] ^= 0x1c; /* Flip bits 3-5 */
-	/* Set lpf */
+	buf[2] ^= 0x1c;  
+	 
 	buf[2] |= ((lpf >> 2) & 0x3) << 3;
 	buf[3] |= (lpf & 0x3) << 2;
 
@@ -475,7 +426,6 @@ static void samsung_dtos403ih102a_set(struct dvb_frontend *fe, u8 *buf)
 	return;
 }
 
-/* unknown pll used in Samsung DTOS403IH102A DVB-C tuner */
 static struct dvb_pll_desc dvb_pll_samsung_dtos403ih102a = {
 	.name   = "Samsung DTOS403IH102A",
 	.min    =  44250000,
@@ -495,7 +445,6 @@ static struct dvb_pll_desc dvb_pll_samsung_dtos403ih102a = {
 	}
 };
 
-/* Samsung TDTC9251DH0 DVB-T NIM, as used on AirStar 2 */
 static struct dvb_pll_desc dvb_pll_samsung_tdtc9251dh0 = {
 	.name	= "Samsung TDTC9251DH0",
 	.min	=  48000000,
@@ -509,32 +458,23 @@ static struct dvb_pll_desc dvb_pll_samsung_tdtc9251dh0 = {
 	}
 };
 
-/* Samsung TBDU18132 DVB-S NIM with TSA5059 PLL, used in SkyStar2 DVB-S 2.3 */
 static struct dvb_pll_desc dvb_pll_samsung_tbdu18132 = {
 	.name = "Samsung TBDU18132",
 	.min	=  950000,
-	.max	= 2150000, /* guesses */
+	.max	= 2150000,  
 	.iffreq = 0,
 	.count = 2,
 	.entries = {
 		{ 1550000, 125, 0x84, 0x82 },
 		{ 4095937, 125, 0x84, 0x80 },
 	}
-	/* TSA5059 PLL has a 17 bit divisor rather than the 15 bits supported
-	 * by this driver.  The two extra bits are 0x60 in the third byte.  15
-	 * bits is enough for over 4 GHz, which is enough to cover the range
-	 * of this tuner.  We could use the additional divisor bits by adding
-	 * more entries, e.g.
-	 { 0x0ffff * 125 + 125/2, 125, 0x84 | 0x20, },
-	 { 0x17fff * 125 + 125/2, 125, 0x84 | 0x40, },
-	 { 0x1ffff * 125 + 125/2, 125, 0x84 | 0x60, }, */
+	 
 };
 
-/* Samsung TBMU24112 DVB-S NIM with SL1935 zero-IF tuner */
 static struct dvb_pll_desc dvb_pll_samsung_tbmu24112 = {
 	.name = "Samsung TBMU24112",
 	.min	=  950000,
-	.max	= 2150000, /* guesses */
+	.max	= 2150000,  
 	.iffreq = 0,
 	.count = 2,
 	.entries = {
@@ -543,15 +483,6 @@ static struct dvb_pll_desc dvb_pll_samsung_tbmu24112 = {
 	}
 };
 
-/* Alps TDEE4 DVB-C NIM, used on Cablestar 2 */
-/* byte 4 : 1  *   *   AGD R3  R2  R1  R0
- * byte 5 : C1 *   RE  RTS BS4 BS3 BS2 BS1
- * AGD = 1, R3 R2 R1 R0 = 0 1 0 1 => byte 4 = 1**10101 = 0x95
- * Range(MHz)  C1 *  RE RTS BS4 BS3 BS2 BS1  Byte 5
- *  47 - 153   0  *  0   0   0   0   0   1   0x01
- * 153 - 430   0  *  0   0   0   0   1   0   0x02
- * 430 - 822   0  *  0   0   1   0   0   0   0x08
- * 822 - 862   1  *  0   0   1   0   0   0   0x88 */
 static struct dvb_pll_desc dvb_pll_alps_tdee4 = {
 	.name = "ALPS TDEE4",
 	.min	=  47000000,
@@ -566,8 +497,6 @@ static struct dvb_pll_desc dvb_pll_alps_tdee4 = {
 	}
 };
 
-/* ----------------------------------------------------------- */
-
 static struct dvb_pll_desc *pll_list[] = {
 	[DVB_PLL_UNDEFINED]              = NULL,
 	[DVB_PLL_THOMSON_DTT7579]        = &dvb_pll_thomson_dtt7579,
@@ -575,7 +504,7 @@ static struct dvb_pll_desc *pll_list[] = {
 	[DVB_PLL_THOMSON_DTT7520X]       = &dvb_pll_thomson_dtt7520x,
 #if defined (MY_DEF_HERE)
 	[DVB_PLL_THOMSON_DTT7546X]       = &dvb_pll_thomson_dtt7546x,
-#endif /* MY_DEF_HERE */
+#endif  
 	[DVB_PLL_LG_Z201]                = &dvb_pll_lg_z201,
 	[DVB_PLL_UNKNOWN_1]              = &dvb_pll_unknown_1,
 	[DVB_PLL_TUA6010XS]              = &dvb_pll_tua6010xs,
@@ -593,9 +522,6 @@ static struct dvb_pll_desc *pll_list[] = {
 	[DVB_PLL_SAMSUNG_TBDU18132]	 = &dvb_pll_samsung_tbdu18132,
 	[DVB_PLL_SAMSUNG_TBMU24112]      = &dvb_pll_samsung_tbmu24112,
 };
-
-/* ----------------------------------------------------------- */
-/* code                                                        */
 
 static int dvb_pll_configure(struct dvb_frontend *fe, u8 *buf,
 			     const u32 frequency)
@@ -634,7 +560,6 @@ static int dvb_pll_configure(struct dvb_frontend *fe, u8 *buf,
 		printk("pll: %s: div=%d | buf=0x%02x,0x%02x,0x%02x,0x%02x\n",
 		       desc->name, div, buf[0], buf[1], buf[2], buf[3]);
 
-	// calculate the frequency we set it to
 	return (div * desc->entries[i].stepsize) - desc->iffreq;
 }
 
@@ -667,7 +592,7 @@ static int dvb_pll_sleep(struct dvb_frontend *fe)
 		}
 		return 0;
 	}
-	/* Shouldn't be called when initdata is NULL, maybe BUG()? */
+	 
 	return -EINVAL;
 }
 
@@ -772,7 +697,7 @@ static int dvb_pll_init(struct dvb_frontend *fe)
 		}
 		return 0;
 	}
-	/* Shouldn't be called when initdata is NULL, maybe BUG()? */
+	 
 	return -EINVAL;
 }
 

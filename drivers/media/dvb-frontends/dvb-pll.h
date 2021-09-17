@@ -1,10 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * descriptions + helper functions for simple dvb plls.
- */
-
+ 
 #ifndef __DVB_PLL_H__
 #define __DVB_PLL_H__
 
@@ -33,17 +30,8 @@
 #define DVB_PLL_THOMSON_DTT7520X       19
 #if defined (MY_DEF_HERE)
 #define DVB_PLL_THOMSON_DTT7546X       20
-#endif /* MY_DEF_HERE */
+#endif  
 
-/**
- * Attach a dvb-pll to the supplied frontend structure.
- *
- * @param fe Frontend to attach to.
- * @param pll_addr i2c address of the PLL (if used).
- * @param i2c i2c adapter to use (set to NULL if not used).
- * @param pll_desc_id dvb_pll_desc to use.
- * @return Frontend pointer on success, NULL on failure
- */
 #if IS_ENABLED(CONFIG_DVB_PLL)
 extern struct dvb_frontend *dvb_pll_attach(struct dvb_frontend *fe,
 					   int pll_addr,

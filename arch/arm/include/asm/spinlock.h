@@ -10,10 +10,6 @@
 
 #include <asm/processor.h>
 
-/*
- * sev and wfe are ARMv6K extensions.  Uniprocessor ARMv6 may not have the K
- * extensions, so when running on UP, we have to patch these instructions away.
- */
 #define ALT_SMP(smp, up)					\
 	"9998:	" smp "\n"					\
 	"	.pushsection \".alt.smp.init\", \"a\"\n"	\
@@ -23,17 +19,7 @@
 
 #ifdef CONFIG_THUMB2_KERNEL
 #define SEV		ALT_SMP("sev.w", "nop.w")
-/*
- * For Thumb-2, special care is needed to ensure that the conditional WFE
- * instruction really does assemble to exactly 4 bytes (as required by
- * the SMP_ON_UP fixup code).   By itself "wfene" might cause the
- * assembler to insert a extra (16-bit) IT instruction, depending on the
- * presence or absence of neighbouring conditional instructions.
- *
- * To avoid this unpredictableness, an approprite IT is inserted explicitly:
- * the assembler won't change IT instructions which are explicitly present
- * in the input.
- */
+ 
 #define WFE(cond)	ALT_SMP(		\
 	"it " cond "\n\t"			\
 	"wfe" cond ".n",			\
@@ -51,9 +37,9 @@ static inline void dsb_sev(void)
 	__asm__ __volatile__ (
 #if defined (MY_DEF_HERE)
 		"dsb ishst\n"
-#else /* MY_DEF_HERE */
+#else  
 		"dsb\n"
-#endif /* MY_DEF_HERE */
+#endif  
 		SEV
 	);
 #else
@@ -65,14 +51,6 @@ static inline void dsb_sev(void)
 #endif
 }
 
-/*
- * ARMv6 ticket-based spin-locking.
- *
- * A memory barrier is required after we get a lock, and before we
- * release it, because V6 CPUs are assumed to have weakly ordered
- * memory.
- */
-
 #define arch_spin_unlock_wait(lock) \
 	do { while (arch_spin_is_locked(lock)) cpu_relax(); } while (0)
 
@@ -81,10 +59,10 @@ static inline void dsb_sev(void)
 #if defined(MY_DEF_HERE)
 #ifdef CONFIG_ARCH_ALPINE
 extern unsigned int al_spin_lock_wfe_enable;
-#else /* CONFIG_ARCH_ALPINE */
+#else  
 #define al_spin_lock_wfe_enable 1
-#endif /* CONFIG_ARCH_ALPINE */
-#endif /* MY_DEF_HERE */
+#endif  
+#endif  
 
 static inline void arch_spin_lock(arch_spinlock_t *lock)
 {
@@ -106,9 +84,9 @@ static inline void arch_spin_lock(arch_spinlock_t *lock)
 #if defined(MY_DEF_HERE)
 		if (al_spin_lock_wfe_enable)
 			wfe();
-#else /* MY_DEF_HERE */
+#else  
 		wfe();
-#endif /* MY_DEF_HERE */
+#endif  
 		lockval.tickets.owner = ACCESS_ONCE(lock->tickets.owner);
 	}
 
@@ -147,9 +125,9 @@ static inline void arch_spin_unlock(arch_spinlock_t *lock)
 #if defined(MY_DEF_HERE)
 	if (al_spin_lock_wfe_enable)
 		dsb_sev();
-#else /* MY_DEF_HERE */
+#else  
 	dsb_sev();
-#endif /* MY_DEF_HERE */
+#endif  
 }
 
 static inline int arch_spin_is_locked(arch_spinlock_t *lock)
@@ -164,14 +142,6 @@ static inline int arch_spin_is_contended(arch_spinlock_t *lock)
 	return (tickets.next - tickets.owner) > 1;
 }
 #define arch_spin_is_contended	arch_spin_is_contended
-
-/*
- * RWLOCKS
- *
- *
- * Write locks are easy - we just set bit 31.  When unlocking, we can
- * just write zero since the lock is exclusively held.
- */
 
 static inline void arch_write_lock(arch_rwlock_t *rw)
 {
@@ -227,21 +197,8 @@ static inline void arch_write_unlock(arch_rwlock_t *rw)
 	dsb_sev();
 }
 
-/* write_can_lock - would write_trylock() succeed? */
 #define arch_write_can_lock(x)		((x)->lock == 0)
 
-/*
- * Read locks are a bit more hairy:
- *  - Exclusively load the lock value.
- *  - Increment it.
- *  - Store new lock value if positive, and we still own this location.
- *    If the value is negative, we've already failed.
- *  - If we failed to store the value, we want a negative result.
- *  - If we failed, try again.
- * Unlocking is similarly hairy.  We may have multiple read locks
- * currently active.  However, we know we won't have any write
- * locks.
- */
 static inline void arch_read_lock(arch_rwlock_t *rw)
 {
 	unsigned long tmp, tmp2;
@@ -295,7 +252,6 @@ static inline int arch_read_trylock(arch_rwlock_t *rw)
 		: "cc");
 	} while (res);
 
-	/* If the lock is negative, then it is already held for write. */
 	if (contended < 0x80000000) {
 		smp_mb();
 		return 1;
@@ -304,7 +260,6 @@ static inline int arch_read_trylock(arch_rwlock_t *rw)
 	}
 }
 
-/* read_can_lock - would read_trylock() succeed? */
 #define arch_read_can_lock(x)		((x)->lock < 0x80000000)
 
 #define arch_read_lock_flags(lock, flags) arch_read_lock(lock)
@@ -314,4 +269,4 @@ static inline int arch_read_trylock(arch_rwlock_t *rw)
 #define arch_read_relax(lock)	cpu_relax()
 #define arch_write_relax(lock)	cpu_relax()
 
-#endif /* __ASM_SPINLOCK_H */
+#endif  

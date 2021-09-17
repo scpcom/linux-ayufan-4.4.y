@@ -1,15 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) 2013 STMicroelectronics Limited
- * Author: Srinivas Kandagatla <srinivas.kandagatla@st.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- */
+ 
 #include <linux/kernel.h>
 #include <linux/clk.h>
 #include <linux/interrupt.h>
@@ -25,8 +17,8 @@ struct st_rc_device {
 	int				irq;
 	int				irq_wake;
 	struct clk			*sys_clock;
-	void				*base;	/* Register base address */
-	void				*rx_base;/* RX Register base address */
+	void				*base;	 
+	void				*rx_base; 
 	struct pinctrl			*pinctrl;
 	struct pinctrl_state		*pins_default;
 	struct pinctrl_state		*pins_sleep;
@@ -38,31 +30,24 @@ struct st_rc_device {
 	struct	reset_control		*rstc;
 };
 
-/* Registers */
-#define IRB_SAMPLE_RATE_COMM	0x64	/* sample freq divisor*/
-#define IRB_CLOCK_SEL		0x70	/* clock select       */
-#define IRB_CLOCK_SEL_STATUS	0x74	/* clock status       */
-/* IRB IR/UHF receiver registers */
-#define IRB_RX_ON               0x40	/* pulse time capture */
-#define IRB_RX_SYS              0X44	/* sym period capture */
-#define IRB_RX_INT_EN           0x48	/* IRQ enable (R/W)   */
-#define IRB_RX_INT_STATUS       0x4c	/* IRQ status (R/W)   */
-#define IRB_RX_EN               0x50	/* Receive enable     */
-#define IRB_MAX_SYM_PERIOD      0x54	/* max sym value      */
-#define IRB_RX_INT_CLEAR        0x58	/* overrun status     */
-#define IRB_RX_STATUS           0x6c	/* receive status     */
-#define IRB_RX_NOISE_SUPPR      0x5c	/* noise suppression  */
-#define IRB_RX_POLARITY_INV     0x68	/* polarity inverter  */
+#define IRB_SAMPLE_RATE_COMM	0x64	 
+#define IRB_CLOCK_SEL		0x70	 
+#define IRB_CLOCK_SEL_STATUS	0x74	 
+ 
+#define IRB_RX_ON               0x40	 
+#define IRB_RX_SYS              0X44	 
+#define IRB_RX_INT_EN           0x48	 
+#define IRB_RX_INT_STATUS       0x4c	 
+#define IRB_RX_EN               0x50	 
+#define IRB_MAX_SYM_PERIOD      0x54	 
+#define IRB_RX_INT_CLEAR        0x58	 
+#define IRB_RX_STATUS           0x6c	 
+#define IRB_RX_NOISE_SUPPR      0x5c	 
+#define IRB_RX_POLARITY_INV     0x68	 
 
-/**
- * IRQ set: Enable full FIFO                 1  -> bit  3;
- *          Enable overrun IRQ               1  -> bit  2;
- *          Enable last symbol IRQ           1  -> bit  1:
- *          Enable RX interrupt              1  -> bit  0;
- */
 #define IRB_RX_INTS		0x0f
 #define IRB_RX_OVERRUN_INT	0x04
- /* maximum symbol period (microsecs),timeout to detect end of symbol train */
+  
 #define MAX_SYMB_TIME		0x5000
 #define IRB_SAMPLE_FREQ		10000000
 #define	IRB_FIFO_NOT_EMPTY	0xff00
@@ -87,28 +72,6 @@ static void st_rc_send_lirc_timeout(struct rc_dev *rdev)
 	ir_raw_event_store(rdev, &ev);
 }
 
-/**
- * RX graphical example to better understand the difference between ST IR block
- * output and standard definition used by LIRC (and most of the world!)
- *
- *           mark                                     mark
- *      |-IRB_RX_ON-|                            |-IRB_RX_ON-|
- *      ___  ___  ___                            ___  ___  ___             _
- *      | |  | |  | |                            | |  | |  | |             |
- *      | |  | |  | |         space 0            | |  | |  | |   space 1   |
- * _____| |__| |__| |____________________________| |__| |__| |_____________|
- *
- *      |--------------- IRB_RX_SYS -------------|------ IRB_RX_SYS -------|
- *
- *      |------------- encoding bit 0 -----------|---- encoding bit 1 -----|
- *
- * ST hardware returns mark (IRB_RX_ON) and total symbol time (IRB_RX_SYS), so
- * convert to standard mark/space we have to calculate space=(IRB_RX_SYS-mark)
- * The mark time represents the amount of time the carrier (usually 36-40kHz)
- * is detected.The above examples shows Pulse Width Modulation encoding where
- * bit 0 is represented by space>mark.
- */
-
 static irqreturn_t st_rc_rx_interrupt(int irq, void *data)
 {
 	unsigned int symbol, mark = 0;
@@ -127,7 +90,7 @@ static irqreturn_t st_rc_rx_interrupt(int irq, void *data)
 		u32 int_status = readl(dev->rx_base + IRB_RX_INT_STATUS);
 
 		if (unlikely(int_status & IRB_RX_OVERRUN_INT)) {
-			/* discard the entire collection in case of errors!  */
+			 
 			ir_raw_event_reset(dev->rdev);
 			dev_info(dev->dev, "IR RX overrun\n");
 			writel(IRB_RX_OVERRUN_INT,
@@ -141,10 +104,9 @@ static irqreturn_t st_rc_rx_interrupt(int irq, void *data)
 		if (symbol == IRB_TIMEOUT)
 			last_symbol = 1;
 
-		 /* Ignore any noise */
 		if ((mark > 2) && (symbol > 1)) {
 			symbol -= mark;
-			if (dev->overclocking) { /* adjustments to timings */
+			if (dev->overclocking) {  
 				symbol *= dev->sample_mult;
 				symbol /= dev->sample_div;
 				mark *= dev->sample_mult;
@@ -170,7 +132,6 @@ static irqreturn_t st_rc_rx_interrupt(int irq, void *data)
 
 	writel(IRB_RX_INTS, dev->rx_base + IRB_RX_INT_CLEAR);
 
-	/* Empty software fifo */
 	ir_raw_event_handle(dev->rdev);
 	return IRQ_HANDLED;
 }
@@ -181,21 +142,19 @@ static void st_rc_hardware_init(struct st_rc_device *dev)
 	unsigned int rx_max_symbol_per = MAX_SYMB_TIME;
 	unsigned int rx_sampling_freq_div;
 
-	/* Enable the IP */
 	if (dev->rstc)
 		reset_control_deassert(dev->rstc);
 
 	clk_prepare_enable(dev->sys_clock);
 	baseclock = clk_get_rate(dev->sys_clock);
 
-	/* IRB input pins are inverted internally from high to low. */
 	writel(1, dev->rx_base + IRB_RX_POLARITY_INV);
 
 	rx_sampling_freq_div = baseclock / IRB_SAMPLE_FREQ;
 	writel(rx_sampling_freq_div, dev->base + IRB_SAMPLE_RATE_COMM);
 
 	freqdiff = baseclock - (rx_sampling_freq_div * IRB_SAMPLE_FREQ);
-	if (freqdiff) { /* over clocking, workout the adjustment factors */
+	if (freqdiff) {  
 		dev->overclocking = true;
 		dev->sample_mult = 1000;
 		dev->sample_div = baseclock / (10000 * rx_sampling_freq_div);
@@ -204,12 +163,6 @@ static void st_rc_hardware_init(struct st_rc_device *dev)
 
 	writel(rx_max_symbol_per, dev->rx_base + IRB_MAX_SYM_PERIOD);
 
-	/*
-	 * By default, IR IT should be disabled for all
-	 * boot cases including DCPS wake-up. Only if
-	 * a client opens the IR device later on, interrupts
-	 * are enabled.
-	 */
 	IR_INT_DISABLE(dev->rx_base);
 }
 
@@ -228,7 +181,7 @@ static int st_rc_open(struct rc_dev *rdev)
 	unsigned long flags;
 
 	local_irq_save(flags);
-	/* enable interrupts and receiver */
+	 
 	IR_INT_ENABLE(dev->rx_base);
 
 	local_irq_restore(flags);
@@ -239,7 +192,7 @@ static int st_rc_open(struct rc_dev *rdev)
 static void st_rc_close(struct rc_dev *rdev)
 {
 	struct st_rc_device *dev = rdev->priv;
-	/* disable interrupts and receiver */
+	 
 	IR_INT_DISABLE(dev->rx_base);
 }
 
@@ -328,7 +281,7 @@ static int st_rc_probe(struct platform_device *pdev)
 
 	rdev->driver_type = RC_DRIVER_IR_RAW;
 	rdev->allowed_protos = RC_BIT_ALL;
-	/* rx sampling rate is 10Mhz */
+	 
 	rdev->rx_resolution = 100;
 	rdev->timeout = US_TO_NS(MAX_SYMB_TIME);
 	rdev->priv = rc_dev;
@@ -338,7 +291,6 @@ static int st_rc_probe(struct platform_device *pdev)
 	rdev->map_name = RC_MAP_LIRC;
 	rdev->input_name = "ST Remote Control Receiver";
 
-	/* enable wake via this device */
 	device_set_wakeup_capable(dev, true);
 
 	ret = rc_register_device(rdev);
@@ -353,10 +305,6 @@ static int st_rc_probe(struct platform_device *pdev)
 		goto rcerr;
 	}
 
-	/**
-	 * for LIRC_MODE_MODE2 or LIRC_MODE_PULSE or LIRC_MODE_RAW
-	 * lircd expects a long space first before a signal train to sync.
-	 */
 	st_rc_send_lirc_timeout(rdev);
 
 	dev_info(dev, "setup in %s mode\n", rc_dev->rxuhfmode ? "UHF" : "IR");
@@ -381,12 +329,7 @@ static int st_rc_suspend(struct device *dev)
 	struct rc_dev *rdev = rc_dev->rdev;
 
 	if (device_may_wakeup(dev)) {
-		/*
-		 * If IR wake-up is set but no user of IR device is open, then
-		 * IR interrupts will be off and no IR wake-up is available.
-		 * This error condition should be checked before entering
-		 * standby.
-		 */
+		 
 		if (!rdev->users) {
 			dev_err(dev,
 				"IR wake-up not available though requested");
@@ -426,19 +369,6 @@ static int st_rc_resume(struct device *dev)
 					rc_dev->pins_default);
 	}
 
-	/*
-	 * Upon CPS wake-up, SBC F/w disables
-	 * the IR device. This is to avoid
-	 * occurance of interrupt during PBL
-	 * execution (assuming PBL enables
-	 * interrupts). For this reason,
-	 * after a CPS wake-up, IR device
-	 * is no longer working from the
-	 * Linux kernel side. Hence we need to
-	 * call st_rc_hardware_init() and IR_INT_ENABLE
-	 * irrespective of whether IR is selected as
-	 * a wake-up device.
-	 */
 	st_rc_hardware_init(rc_dev);
 	if (rdev->users)
 		IR_INT_ENABLE(rc_dev->rx_base);
@@ -451,7 +381,7 @@ static SIMPLE_DEV_PM_OPS(st_rc_pm_ops, st_rc_suspend, st_rc_resume);
 #else
 #define DEV_PM_OPS	NULL
 #endif
-#else /* MY_DEF_HERE */
+#else  
 #ifdef CONFIG_PM
 static int st_rc_suspend(struct device *dev)
 {
@@ -459,12 +389,7 @@ static int st_rc_suspend(struct device *dev)
 	struct rc_dev *rdev = rc_dev->rdev;
 
 	if (device_may_wakeup(dev)) {
-		/*
-		 * If IR wake-up is set but no user of IR device is open, then
-		 * IR interrupts will be off and no IR wake-up is available.
-		 * This error condition should be checked before entering
-		 * standby.
-		 */
+		 
 		if (!rdev->users) {
 			dev_err(dev, "IR wake-up not available though requested");
 			return -EINVAL;
@@ -503,19 +428,6 @@ static int st_rc_resume(struct device *dev)
 					rc_dev->pins_default);
 	}
 
-	/*
-	 * Upon CPS wake-up, SBC F/w disables
-	 * the IR device. This is to avoid
-	 * occurance of interrupt during PBL
-	 * execution (assuming PBL enables
-	 * interrupts). For this reason,
-	 * after a CPS wake-up, IR device
-	 * is no longer working from the
-	 * Linux kernel side. Hence we need to
-	 * call st_rc_hardware_init() and IR_INT_ENABLE
-	 * irrespective of whether IR is selected as
-	 * a wake-up device.
-	 */
 	st_rc_hardware_init(rc_dev);
 	if (rdev->users)
 		IR_INT_ENABLE(rc_dev->rx_base);
@@ -525,7 +437,7 @@ static int st_rc_resume(struct device *dev)
 
 static SIMPLE_DEV_PM_OPS(st_rc_pm_ops, st_rc_suspend, st_rc_resume);
 #endif
-#endif /* MY_DEF_HERE */
+#endif  
 
 static void st_rc_shutdown(struct platform_device *pdev)
 {
@@ -553,11 +465,11 @@ static struct platform_driver st_rc_driver = {
 		.of_match_table = of_match_ptr(st_rc_match),
 #ifdef MY_DEF_HERE
 		.pm     = DEV_PM_OPS,
-#else /* MY_DEF_HERE */
+#else  
 #ifdef CONFIG_PM
 		.pm     = &st_rc_pm_ops,
 #endif
-#endif /* MY_DEF_HERE */
+#endif  
 	},
 	.probe = st_rc_probe,
 	.shutdown = st_rc_shutdown,

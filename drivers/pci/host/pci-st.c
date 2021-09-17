@@ -1,21 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * ST PCI express Driver for STMicroelectronics SoCs
- * ST PCIe IPs are built around a Synopsys IP Core.
- *
- * Author: Fabrice Gasnier <fabrice.gasnier@st.com>
- *
- * Copyright (C) 2003-2013 STMicroelectronics (R&D) Limited
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- */
-
+ 
 #include <linux/module.h>
 #include <linux/interrupt.h>
 #include <linux/of_address.h>
@@ -33,59 +19,38 @@
 #include <linux/irq.h>
 #include <linux/irqdomain.h>
 
-/* register definitions */
 #define TRANSLATION_CONTROL		0x900
-/* No effect in RC mode */
+ 
 #define EP_TRANSLATION_ENABLE		BIT(0)
-/* Controls if area is inclusive or exclusive */
+ 
 #define RC_PASS_ADDR_RANGE		BIT(1)
 
-/* Reserved in RC mode */
 #define PIM0_MEM_ADDR_START		0x910
 #define PIM1_MEM_ADDR_START		0x914
 #define PIM2_MEM_ADDR_START		0x918
 
-/*
- * Base of area reserved for config accesses. Fixed
- * size of 64K.
- */
 #define CFG_BASE_ADDRESS		0x92c
 
 #define CFG_REGION_SIZE			65536
 
-/*
- * The PCIe capability registers start at this offset in configuration
- * space. Strictly speaking we should follow the caps linked list pointer,
- * but there seems little point since this is fixed
- */
 #define CFG_PCIE_CAP			0x70
 
-/* First 4K of config space has this BDF (bus,device,function) */
 #define FUNC0_BDF_NUM			0x930
 
-/*
- * There are other registers to control function 1 etc, split up into
- * 4K chunks. I cannot see any use for these, it is simpler to always
- * use FUNC0 and reprogram it as needed to drive the appropriate config
- * cycle
- */
 #define FUNC_BDF_NUM(x)			(0x930 + (((x) / 2) * 4))
 
-/* Reserved in RC mode */
 #define POM0_MEM_ADDR_START		0x960
-/* Start address of region 0 to be blocked/passed */
+ 
 #define IN0_MEM_ADDR_START		0x964
-/* End address of region 0 to be blocked/passed */
+ 
 #define IN0_MEM_ADDR_LIMIT		0x968
 
-/* Reserved in RC mode */
 #define POM1_MEM_ADDR_START		0x970
-/* Start address of region 1 to be blocked/passed */
+ 
 #define IN1_MEM_ADDR_START		0x974
-/* End address of region 1 to be blocked/passed */
+ 
 #define IN1_MEM_ADDR_LIMIT		0x978
 
-/* MSI registers */
 #define MSI_ADDRESS			0x820
 #define MSI_UPPER_ADDRESS		0x824
 #define MSI_OFFSET_REG(n)		((n) * 0xc)
@@ -96,10 +61,8 @@
 #define MSI_NUM_ENDPOINTS		8
 #define INT_PCI_MSI_NR			(MSI_NUM_ENDPOINTS * 32)
 
-/* This actually containes the LTSSM state machine state */
 #define PORT_LOGIC_DEBUG_REG_0		0x728
 
-/* LTSSM state machine values	*/
 #define DEBUG_REG_0_LTSSM_MASK		0x1f
 #define S_DETECT_QUIET			0x00
 #define S_DETECT_ACT			0x01
@@ -134,7 +97,6 @@
 #define S_HOT_RESET_ENTRY		0x1E
 #define S_HOT_RESET			0x1F
 
-/* syscfg bits */
 #define PCIE_SYS_INT			BIT(5)
 #define PCIE_APP_REQ_RETRY_EN		BIT(3)
 #define PCIE_APP_LTSSM_ENABLE		BIT(2)
@@ -142,16 +104,6 @@
 #define PCIE_DEVICE_TYPE		BIT(0)
 #define PCIE_DEFAULT_VAL		PCIE_DEVICE_TYPE
 
-/**
- * struct st_msi - msi private data
- * @chip: irq chip for PCIe MSI
- * @used: bitmap for MSI IRQs
- * @regs: PCIe control registers
- * @domain: IRQ domain for MSI controller
- * @mux_irq: MSI irq
- * @reg_lock: Access lock to MSI registers
- * @lock: irq bitmap access lock
- */
 struct st_msi {
 	struct msi_chip chip;
 	DECLARE_BITMAP(used, INT_PCI_MSI_NR);
@@ -169,13 +121,6 @@ static inline struct st_msi *to_st_msi(struct msi_chip *chip)
 
 struct st_pcie;
 
-/**
- * struct st_pcie_ops - SOC dependent data
- * @init: reference to controller power & reset init routine
- * @enable_ltssm: reference to controller link enable routine
- * @disable_ltssm:  reference to controller link disable routine
- * @phy_auto: flag when phy automatically configured
- */
 struct st_pcie_ops {
 	int (*init)(struct st_pcie *st_pcie);
 	int (*enable_ltssm)(struct st_pcie *st_pcie);
@@ -183,36 +128,11 @@ struct st_pcie_ops {
 	bool phy_auto;
 };
 
-/**
- * struct st_pcie - private data of the controller
- * @dev: device for this controller
- * @root_bus_nr: root bus number
- * @cntrl: PCIe control registers
- * @ahb: Amba->stbus convertor registers
- * @syscfg0: PCIe configuration 0 register, regmap offset
- * @syscfg1: PCIe configuration 1 register, regmap offset
- * @ahb_val: Amba->stbus convertor tuning
- * @msi: private msi structure
- * @phy: associated pcie phy
- * @config_area: PCIe configuration space
- * @io: PCIe I/O space
- * @mem: PCIe non-prefetchable memory space
- * @prefetch: PCIe prefetchable memory space
- * @lmi: memory made available to the controller
- * @abort_lock: prevent config space access race
- * @data: SOC dependent data
- * @regmap: Syscfg registers bank in which PCIe port is configured
- * @pwr: power control
- * @rst: reset control
- * @irq: PCIe INTA, INTB...
- * @irq_lines: PCIe INTx lines number
- * @reset_gpio: optional reset gpio
- */
 struct st_pcie {
 	struct device *dev;
 #ifdef MY_DEF_HERE
 	u8 root_bus_nr;
-#endif /* MY_DEF_HERE */
+#endif  
 
 	void __iomem *cntrl;
 	void __iomem *ahb;
@@ -246,15 +166,6 @@ static inline struct st_pcie *sys_to_pcie(struct pci_sys_data *sys)
 	return sys->private_data;
 }
 
-/*
- * Routines to access the DBI port of the synopsys IP. This contains the
- * standard config registers, as well as some other registers. Unfortunately,
- * IP only support word access. Little helper function to build up byte and
- * half word data access.
- *
- * We do not have a spinlock for these, so be careful of your usage. Relies on
- * the config spinlock for config cycles.
- */
 static inline u32 shift_data_read(int where, int size, u32 data)
 {
 	data >>= (8 * (where & 0x3));
@@ -281,7 +192,6 @@ static u32 dbi_read(struct st_pcie *priv, int where, int size)
 {
 	u32 data;
 
-	/* Read the dword aligned data */
 	data = readl_relaxed(priv->cntrl + (where & ~0x3));
 
 	return shift_data_read(where, size, data);
@@ -333,7 +243,6 @@ static void dbi_write(struct st_pcie *priv,
 	u32 uninitialized_var(data);
 	int aligned_addr = where & ~0x3;
 
-	/* Read the dword aligned data if we have to */
 	if (size != 4)
 		data = readl_relaxed(priv->cntrl + aligned_addr);
 
@@ -372,47 +281,25 @@ static inline u16 pcie_cap_readw(struct st_pcie *priv,
 	return dbi_readw(priv, CFG_PCIE_CAP + cap);
 }
 
-/* Time to wait between testing the link in msecs (hardware poll interval) */
 #define LINK_LOOP_DELAY_MS 1
-/* Total amount of time to wait for the link to come up in msecs */
+ 
 #define LINK_WAIT_MS 120
 #define LINK_LOOP_COUNT (LINK_WAIT_MS / LINK_LOOP_DELAY_MS)
 
-/*
- * Function to test if the link is in an operational state or not. We must
- * ensure the link is operational before we try to do a configuration access.
- */
 static int link_up(struct st_pcie *priv)
 {
 	u32 status;
 	int link_up;
 	int count = 0;
 
-	/*
-	 * We have to be careful here. This is used in config read/write,
-	 * The higher levels switch off interrupts, so you cannot use
-	 * jiffies to do a timeout, or reschedule
-	 */
 	do {
-		/*
-		 * What about L2? I think software intervention is
-		 * required to get it out of L2, so in effect the link
-		 * is down. Requires more work when/if we implement power
-		 * management
-		 */
+		 
 		status = dbi_readl(priv, PORT_LOGIC_DEBUG_REG_0);
 		status &= DEBUG_REG_0_LTSSM_MASK;
 
 		link_up = (status == S_L0) || (status == S_L0S) ||
 			  (status == S_L1_IDLE);
 
-		/*
-		 * It can take some considerable time for the link to actually
-		 * come up, caused by the PLLs. Experiments indicate it takes
-		 * about 8ms to actually bring the link up, but this can vary
-		 * considerably according to the specification. This code should
-		 * allow sufficient time
-		 */
 		if (!link_up)
 			mdelay(LINK_LOOP_DELAY_MS);
 
@@ -421,27 +308,8 @@ static int link_up(struct st_pcie *priv)
 	return link_up;
 }
 
-/*
- * On ARM platforms, we actually get a bus error returned when the PCIe IP
- * returns a UR or CRS instead of an OK. What we do to try to work around this
- * is hook the arm async abort exception and then check if the pc value is in
- * the region we expect bus errors could be generated. Fortunately we can
- * constrain the area the CPU will generate the async exception with the use of
- * a barrier instruction
- *
- * The abort_flag is set if we see a bus error returned when we make config
- * requests.  It doesn't need to be an atomic variable, since it can only be
- * looked at safely in the regions protected by the spinlock anyway. However,
- * making it atomic avoids the need for volatile wierdness to prevent the
- * compiler from optimizing incorrectly
- */
 static atomic_t abort_flag;
 
-/*
- * Holds the addresses where we are expecting an abort to be generated. We only
- * have to cope with one at a time as config read/write are spinlocked so
- * cannot be in the critical code section at the same time.
- */
 static unsigned long abort_start, abort_end;
 
 static int st_pcie_abort(unsigned long addr, unsigned int fsr,
@@ -449,63 +317,18 @@ static int st_pcie_abort(unsigned long addr, unsigned int fsr,
 {
 	unsigned long pc = regs->ARM_pc;
 
-	/*
-	 * If it isn't the expected place, then return 1 which will then fall
-	 * through to the default error handler. This means that if we get a
-	 * bus error for something other than PCIE config read/write accesses
-	 * we will not just carry on silently.
-	 */
 	if (pc < abort_start || pc >= abort_end)
 		return 1;
 
-	/* Again, if it isn't an async abort then return to default handler */
 	if (!((fsr & (1 << 10)) && ((fsr & 0xf) == 0x6)))
 		return 1;
 
-	/* Set abort flag */
 	atomic_set(&abort_flag, 1);
 
-	/* Barrier to ensure propogation */
 	mb();
 
 	return 0;
 }
-
-/*
- * The PCI express core IP expects the following arrangement on it's address
- * bus (slv_haddr) when driving config cycles.
- * bus_number		[31:24]
- * dev_number		[23:19]
- * func_number		[18:16]
- * unused		[15:12]
- * ext_reg_number	[11:8]
- * reg_number		[7:2]
- *
- * Bits [15:12] are unused.
- *
- * In the glue logic there is a 64K region of address space that can be
- * written/read to generate config cycles. The base address of this is
- * controlled by CFG_BASE_ADDRESS. There are 8 16 bit registers called
- * FUNC0_BDF_NUM to FUNC8_BDF_NUM. These split the bottom half of the 64K
- * window into 8 regions at 4K boundaries (quite what the other 32K is for is a
- * mystery). These control the bus,device and function number you are trying to
- * talk to.
- *
- * The decision on whether to generate a type 0 or type 1 access is controlled
- * by bits 15:12 of the address you write to.  If they are zero, then a type 0
- * is generated, if anything else it will be a type 1. Thus the bottom 4K
- * region controlled by FUNC0_BDF_NUM can only generate type 0, all the others
- * can only generate type 1.
- *
- * We only use FUNC0_BDF_NUM and FUNC1_BDF_NUM. Which one you use is selected
- * by bit 12 of the address you write to. The selected register is then used
- * for the top 16 bits of the slv_haddr to form the bus/dev/func, bit 15:12 are
- * wired to zero, and bits 11:2 form the address of the register you want to
- * read in config space.
- *
- * We always write FUNC0_BDF_NUM as a 32 bit write. So if we want type 1
- * accesses we have to shift by 16 so in effect we are writing to FUNC1_BDF_NUM
- */
 
 static inline u32 bdf_num(int bus, int devfn, int is_root_bus)
 {
@@ -520,26 +343,21 @@ static inline unsigned config_addr(int where, int is_root_bus)
 static int st_pcie_valid_config(struct st_pcie *pp,
 				struct pci_bus *bus, int dev)
 {
-	/* If there is no link, then there is no device */
+	 
 	if (bus->number != pp->root_bus_nr) {
 		if (!link_up(pp))
 			return 0;
 	}
 
-	/* access only one slot on each root port */
 	if (bus->number == pp->root_bus_nr && dev > 0)
 		return 0;
 
-	/*
-	 * do not read more than one device on the bus directly attached
-	 * to RC's (Virtual Bridge's) DS side.
-	 */
 	if (bus->primary == pp->root_bus_nr && dev > 0)
 		return 0;
 
 	return 1;
 }
-#endif /* MY_DEF_HERE */
+#endif  
 
 static int st_pcie_config_read(struct pci_bus *bus, unsigned int devfn,
 				int where, int size, u32 *val)
@@ -547,9 +365,9 @@ static int st_pcie_config_read(struct pci_bus *bus, unsigned int devfn,
 	u32 bdf;
 	u32 data;
 #ifdef MY_DEF_HERE
-#else /* MY_DEF_HERE */
+#else  
 	int slot = PCI_SLOT(devfn);
-#endif /* MY_DEF_HERE */
+#endif  
 	unsigned long flags;
 	struct st_pcie *priv = sys_to_pcie(bus->sysdata);
 	int is_root_bus = pci_is_root_bus(bus);
@@ -562,154 +380,82 @@ static int st_pcie_config_read(struct pci_bus *bus, unsigned int devfn,
 	}
 
 	if (is_root_bus) {
-		/* read own conf */
+		 
 		data = dbi_readl(priv, (where & ~0x3));
 		*val = shift_data_read(where, size, data);
 		return PCIBIOS_SUCCESSFUL;
 	}
 
-#else /* MY_DEF_HERE */
+#else  
 #ifdef CONFIG_STM_PCIE_TRACKER_BUG
 	void __iomem *raw_config_area = priv->config_area;
 	raw_config_area = __stm_unfrob(priv->config_area);
 #endif
-	/*
-	 * PCI express devices will respond to all config type 0 cycles, since
-	 * they are point to point links. Thus to avoid probing for multiple
-	 * devices on the root bus we simply ignore any request for anything
-	 * other than slot 1 if it is on the root bus. The switch will reject
-	 * requests for slots it knows do not exist.
-	 *
-	 * We have to check for the link being up as we will hang if we issue
-	 * a config request and the link is down.
-	 */
+	 
 	if (!priv || (is_root_bus && slot != 1) || !link_up(priv)) {
 		*val = ~0;
 		return PCIBIOS_DEVICE_NOT_FOUND;
 	}
 
-#endif /* MY_DEF_HERE */
+#endif  
 	bdf = bdf_num(bus->number, devfn, is_root_bus);
 
 retry:
-	/*
-	 * Claim lock, FUNC[01]_BDF_NUM has to remain unchanged for the whole
-	 * cycle
-	 */
+	 
 	spin_lock_irqsave(&priv->abort_lock, flags);
 
-	/* Set the config packet devfn */
 	dbi_writel(priv, bdf, FUNC0_BDF_NUM);
-	/*
-	 * We have to read it back here, as there is a race condition between
-	 * the write to the FUNC0_BDF_NUM and the actual read from the config
-	 * address space. These appear to be different stbus targets, and it
-	 * looks as if the read can overtake the write sometimes. The result of
-	 * this is that you end up reading from the wrong device.
-	 */
+	 
 	dbi_readl(priv, FUNC0_BDF_NUM);
 
 	atomic_set(&abort_flag, 0);
 	ret = PCIBIOS_SUCCESSFUL;
 
 #ifdef MY_DEF_HERE
-#else /* MY_DEF_HERE */
+#else  
 #ifdef CONFIG_STM_PCIE_TRACKER_BUG
-	/*
-	 * We must take the IO spinlock here, to prevent the other CPU issuing
-	 * a non config readl/writel. We know irqs are off, so we can use a
-	 * standard spinlock
-	 */
+	 
 	spin_lock(&stm_pcie_io_spinlock);
 #endif
-#endif /* MY_DEF_HERE */
+#endif  
 
-	/*
-	 * Get the addresses of where we expect the aborts to happen. These are
-	 * placed as close as possible to the code due to branch length
-	 * limitations on the ARM
-	 */
 	abort_start = (unsigned long)&&config_read_start;
 	abort_end = (unsigned long)&&config_read_end;
 
-	/*
-	 * Mark start of region where we can expect bus errors. This assumes
-	 * that readl is actually a macro not a real function call which is
-	 * the case on our ARM platforms.
-	 */
 config_read_start:
 #ifdef MY_DEF_HERE
-	/* Read the dword aligned data */
+	 
 	data = readl(priv->config_area + config_addr(where,
 		     bus->parent->number == priv->root_bus_nr));
-#else /* MY_DEF_HERE */
+#else  
 #ifndef CONFIG_STM_PCIE_TRACKER_BUG
-	/* Read the dword aligned data */
+	 
 	data = readl(priv->config_area + config_addr(where, is_root_bus));
-#else // CONFIG_STM_PCIE_TRACKER_BUG
-
-	/*
-	 * Read the dword aligned data. If we have the tracker bug workaround
-	 * enabled, we MUST use the raw variant. Otherwise we will lose the
-	 * spinlock when we restart the abort, which would be disasterous.
-	 *
-	 * This means we have to unfrob the pointer before we call this,
-	 * otherwise we will blow up
-	 *
-	 * It is also vital that whatever is called here does NOT make any
-	 * function calls.
-	 */
+#else  
 
 	data = __raw_readl(raw_config_area +
 			   config_addr(where, is_root_bus));
 
-#endif // CONFIG_STM_PCIE_TRACKER_BUG
-#endif /* MY_DEF_HERE */
+#endif  
+#endif  
 
-	mb(); /* Barrier to force bus error to go no further than here */
+	mb();  
 
 config_read_end:
 
 #ifdef MY_DEF_HERE
-#else /* MY_DEF_HERE */
+#else  
 #ifdef CONFIG_STM_PCIE_TRACKER_BUG
 	spin_unlock(&stm_pcie_io_spinlock);
 #endif
-#endif /* MY_DEF_HERE */
-	/* If the trap handler has fired, then set the data to 0xffffffff */
+#endif  
+	 
 	if (atomic_read(&abort_flag)) {
 		ret = PCIBIOS_DEVICE_NOT_FOUND;
 		data = ~0;
 	}
 
 	spin_unlock_irqrestore(&priv->abort_lock, flags);
-
-	/*
-	 * This is intended to help with when we are probing the bus. The
-	 * problem is that the wrapper logic doesn't have any way to
-	 * interrogate if the configuration request failed or not. The read
-	 * will return 0 if something has gone wrong.
-	 *
-	 * On the ARM we actually get a real bus error, which is what the
-	 * abort_flag check above is checking for.
-	 *
-	 * Unfortunately this means it is impossible to tell the difference
-	 * between when a device doesn't exist (the switch will return a UR
-	 * completion) or the device does exist but isn't yet ready to accept
-	 * configuration requests (the device will return a CRS completion)
-	 *
-	 * The result of this is that we will miss devices when probing.
-	 *
-	 * So if we are trying to read the dev/vendor id on devfn 0 and we
-	 * appear to get zero back, then we retry the request.  We know that
-	 * zero can never be a valid device/vendor id. The specification says
-	 * we must retry for up to a second before we decide the device is
-	 * dead. If we are still dead then we assume there is nothing there and
-	 * return ~0
-	 *
-	 * The downside of this is that we incur a delay of 1s for every pci
-	 * express link that doesn't have a device connected.
-	 */
 
 	if (((where&~3) == 0) && devfn == 0 && (data == 0 || data == ~0)) {
 		if (retry_count++ < 1000) {
@@ -733,86 +479,76 @@ static int st_pcie_config_write(struct pci_bus *bus, unsigned int devfn,
 	u32 bdf;
 	u32 data = 0;
 #ifdef MY_DEF_HERE
-#else /* MY_DEF_HERE */
+#else  
 	int slot = PCI_SLOT(devfn);
-#endif /* MY_DEF_HERE */
+#endif  
 	struct st_pcie *priv = sys_to_pcie(bus->sysdata);
 	int is_root_bus = pci_is_root_bus(bus);
 	int ret;
 #ifdef MY_DEF_HERE
-#else /* MY_DEF_HERE */
+#else  
 #ifdef CONFIG_STM_PCIE_TRACKER_BUG
 	void __iomem *raw_config_area = priv->config_area;
 	raw_config_area = __stm_unfrob(priv->config_area);
 #endif
-#endif /* MY_DEF_HERE */
+#endif  
 
 #ifdef MY_DEF_HERE
 	if (st_pcie_valid_config(priv, bus, PCI_SLOT(devfn)) == 0)
-#else /* MY_DEF_HERE */
+#else  
 	if (!priv || (is_root_bus && slot != 1) || !link_up(priv))
-#endif /* MY_DEF_HERE */
+#endif  
 		return PCIBIOS_DEVICE_NOT_FOUND;
 #ifdef MY_DEF_HERE
 	if (is_root_bus) {
-		/* write own conf */
+		 
 		data = dbi_readl(priv, (where & ~0x3));
 		data = shift_data_write(where, size, val, data);
 		dbi_writel(priv, data, (where & ~0x3));
 		return PCIBIOS_SUCCESSFUL;
 	}
-#endif /* MY_DEF_HERE */
+#endif  
 
 	bdf = bdf_num(bus->number, devfn, is_root_bus);
 
-	/*
-	 * Claim lock, FUNC[01]_BDF_NUM has to remain unchanged for the whole
-	 * cycle
-	 */
 	spin_lock_irqsave(&priv->abort_lock, flags);
 
-	/* Set the config packet devfn */
 	dbi_writel(priv, bdf, FUNC0_BDF_NUM);
 	dbi_readl(priv, FUNC0_BDF_NUM);
 
 	atomic_set(&abort_flag, 0);
 
 #ifdef MY_DEF_HERE
-#else /* MY_DEF_HERE */
+#else  
 #ifdef CONFIG_STM_PCIE_TRACKER_BUG
-	/*
-	 * We must take the IO spinlock here, to prevent the other CPU issuing
-	 * a non config readl/writel. We know irqs are off, so we can use a
-	 * standard spinlock
-	 */
+	 
 	spin_lock(&stm_pcie_io_spinlock);
 #endif
-#endif /* MY_DEF_HERE */
+#endif  
 
 	abort_start = (unsigned long)&&config_write_start;
 	abort_end = (unsigned long)&&config_write_end;
 
-	/* We can expect bus errors for the read and the write */
 config_write_start:
 
 #ifdef MY_DEF_HERE
-	/* Read the dword aligned data */
+	 
 	if (size != 4)
 		data = readl(priv->config_area + config_addr(where,
 			     bus->parent->number == priv->root_bus_nr));
-#else /* MY_DEF_HERE */
+#else  
 #ifndef CONFIG_STM_PCIE_TRACKER_BUG
-	/* Read the dword aligned data */
+	 
 	if (size != 4)
 		data = readl(priv->config_area +
 			     config_addr(where, is_root_bus));
 #else
-	/* Read the dword aligned data */
+	 
 	if (size != 4)
 		data = __raw_readl(raw_config_area +
 			     config_addr(where, is_root_bus));
 #endif
-#endif /* MY_DEF_HERE */
+#endif  
 	mb();
 
 	data = shift_data_write(where, size, val, data);
@@ -820,24 +556,24 @@ config_write_start:
 #ifdef MY_DEF_HERE
 	writel(data, priv->config_area + config_addr(where,
 	       bus->parent->number == priv->root_bus_nr));
-#else /* MY_DEF_HERE */
+#else  
 #ifndef CONFIG_STM_PCIE_TRACKER_BUG
 	writel(data, priv->config_area + config_addr(where, is_root_bus));
 #else
 	__raw_writel(data, raw_config_area + config_addr(where, is_root_bus));
 #endif
-#endif /* MY_DEF_HERE */
+#endif  
 
 	mb();
 
 config_write_end:
 
 #ifdef MY_DEF_HERE
-#else /* MY_DEF_HERE */
+#else  
 #ifdef CONFIG_STM_PCIE_TRACKER_BUG
 	spin_unlock(&stm_pcie_io_spinlock);
 #endif
-#endif /* MY_DEF_HERE */
+#endif  
 	ret = atomic_read(&abort_flag) ? PCIBIOS_DEVICE_NOT_FOUND
 				       : PCIBIOS_SUCCESSFUL;
 
@@ -862,14 +598,9 @@ static void st_pcie_board_reset(struct st_pcie *pcie)
 		return;
 	}
 
-	/* From PCIe spec */
 	usleep_range(1000, 2000);
 	gpio_direction_output(pcie->reset_gpio, 1);
 
-	/*
-	 * PCIe specification states that you should not issue any config
-	 * requests until 100ms after asserting reset, so we enforce that here
-	 */
 	usleep_range(100000, 150000);
 }
 
@@ -884,60 +615,39 @@ static int st_pcie_hw_setup(struct st_pcie *priv,
 	if (err)
 		return err;
 
-	/* Don't see any point in enabling IO here */
 	dbi_writew(priv, PCI_COMMAND_MEMORY | PCI_COMMAND_MASTER, PCI_COMMAND);
 
-	/* Set up the config window to the top of the PCI address space */
 	dbi_writel(priv, config_window_start, CFG_BASE_ADDRESS);
 
-	/*
-	 * Open up all of memory to the PCI controller. We could do slightly
-	 * better than this and exclude the kernel text segment and bss etc.
-	 * They are base/limit registers so can be of arbitrary alignment
-	 * presumably
-	 */
 	dbi_writel(priv, lmi_window_start, IN0_MEM_ADDR_START);
 	dbi_writel(priv, lmi_window_start + lmi_window_size - 1,
 		   IN0_MEM_ADDR_LIMIT);
 
-	/* Disable the 2nd region */
 	dbi_writel(priv, ~0, IN1_MEM_ADDR_START);
 	dbi_writel(priv, 0, IN1_MEM_ADDR_LIMIT);
 
 	dbi_writel(priv, RC_PASS_ADDR_RANGE, TRANSLATION_CONTROL);
 
 	if (priv->ahb) {
-		/*  bridge settings */
+		 
 		writel(priv->ahb_val, priv->ahb + 4);
-		/*
-		 * Later versions of the AMBA bridge have a merging capability,
-		 * whereby reads and writes are merged into an AHB burst
-		 * transaction. This breaks PCIe as it will then prefetch a
-		 * maximally sized transaction.
-		 * We have to disable this capability, which is controlled
-		 * by bit 3 of the SD_CONFIG register. Bit 2 (the busy bit)
-		 * must always be written as zero. We set the cont_on_error
-		 * bit, as this is the reset state.
-		*/
+		 
 		writel(0x2, priv->ahb);
 	}
 
-	/* Now assert the board level reset to the other PCIe device */
 	st_pcie_board_reset(priv);
 
-	/* Re-enable the link */
 #ifdef MY_DEF_HERE
 	err = priv->data->enable_ltssm(priv);
 	if (err)
 		return err;
 
-	/* program correct class for RC */
 	dbi_writew(priv, PCI_CLASS_BRIDGE_PCI, PCI_CLASS_DEVICE);
 
 	return err;
-#else /* MY_DEF_HERE */
+#else  
 	return priv->data->enable_ltssm(priv);
-#endif /* MY_DEF_HERE */
+#endif  
 }
 
 static int remap_named_resource(struct platform_device *pdev,
@@ -978,9 +688,9 @@ static int st_pcie_map_irq(const struct pci_dev *dev, u8 slot, u8 pin)
 	struct st_pcie *pcie = sys_to_pcie(dev->bus->sysdata);
 #ifdef MY_DEF_HERE
 	int i = (slot + pin - 1) % 4;
-#else /* MY_DEF_HERE */
+#else  
 	int i = (slot - 1 + pin - 1) % 4;
-#endif /* MY_DEF_HERE */
+#endif  
 
 	if (i >= pcie->irq_lines)
 		i = 0;
@@ -1022,7 +732,7 @@ static struct pci_bus *st_pcie_scan(int nr, struct pci_sys_data *sys)
 
 #ifdef MY_DEF_HERE
 	pcie->root_bus_nr = sys->busnr;
-#endif /* MY_DEF_HERE */
+#endif  
 	return pci_scan_root_bus(pcie->dev, sys->busnr, &st_pcie_config_ops,
 				 sys, &sys->resources);
 }
@@ -1047,7 +757,6 @@ static irqreturn_t st_msi_irq_demux(int mux_irq, void *data)
 			offset = find_first_bit(&status, 32);
 			index = ep * 32 + offset;
 
-			/* clear the interrupt */
 			writel_relaxed(1 << offset,
 					msi->regs + MSI_INTERRUPT_STATUS(ep));
 			readl_relaxed(msi->regs + MSI_INTERRUPT_STATUS(ep));
@@ -1059,10 +768,7 @@ static irqreturn_t st_msi_irq_demux(int mux_irq, void *data)
 				else
 					dev_info(pcie->dev, "unhandled MSI\n");
 			} else {
-				/*
-				 * that's weird who triggered this?
-				 * just clear it
-				 */
+				 
 				dev_info(pcie->dev, "unexpected MSI\n");
 			}
 
@@ -1093,7 +799,6 @@ static inline void set_msi_bit(struct irq_data *data, unsigned int reg_base)
 	val |= 1 << offset;
 	writel_relaxed(val, msi->regs + reg_base + MSI_OFFSET_REG(ep));
 
-	/* Read back for write posting */
 	readl_relaxed(msi->regs + reg_base + MSI_OFFSET_REG(ep));
 
 	spin_unlock_irqrestore(&msi->reg_lock, flags);
@@ -1113,7 +818,6 @@ static inline void clear_msi_bit(struct irq_data *data, unsigned int reg_base)
 	val &= ~(1 << offset);
 	writel_relaxed(val, msi->regs + reg_base + MSI_OFFSET_REG(ep));
 
-	/* Read back for write postng */
 	readl_relaxed(msi->regs + reg_base + MSI_OFFSET_REG(ep));
 
 	spin_unlock_irqrestore(&msi->reg_lock, flags);
@@ -1122,20 +826,13 @@ static inline void clear_msi_bit(struct irq_data *data, unsigned int reg_base)
 static void st_enable_msi_irq(struct irq_data *data)
 {
 	set_msi_bit(data, MSI_INTERRUPT_ENABLE(0));
-	/*
-	 * The generic code will have masked all interrupts for device that
-	 * support the optional Mask capability. Therefore  we have to unmask
-	 * interrupts on the device if the device supports the Mask capability.
-	 *
-	 * We do not have to this in the irq mask/unmask functions, as we can
-	 * mask at the MSI interrupt controller itself.
-	 */
+	 
 	unmask_msi_irq(data);
 }
 
 static void st_disable_msi_irq(struct irq_data *data)
 {
-	/* Disable the msi irq on the device */
+	 
 	mask_msi_irq(data);
 
 	clear_msi_bit(data, MSI_INTERRUPT_ENABLE(0));
@@ -1163,15 +860,9 @@ static void st_msi_init_one(struct st_msi *msi)
 {
 	int ep;
 
-	/*
-	 * Set the magic address the hardware responds to. This has to be in
-	 * the range the PCI controller can write to. We just use the value
-	 * of the st_msi data structure, but anything will do
-	 */
 	writel(0, msi->regs + MSI_UPPER_ADDRESS);
 	writel(virt_to_phys(msi), msi->regs + MSI_ADDRESS);
 
-	/* Disable everything to start with */
 	for (ep = 0; ep < MSI_NUM_ENDPOINTS; ep++) {
 		writel(0, msi->regs + MSI_INTERRUPT_ENABLE(ep));
 		writel(0, msi->regs + MSI_INTERRUPT_MASK(ep));
@@ -1242,12 +933,6 @@ static int st_setup_msi_irq(struct msi_chip *chip, struct pci_dev *pdev,
 
 	irq_set_msi_desc(irq, desc);
 
-	/*
-	 * Set up the data the card needs in order to raise
-	 * interrupt. The format of the data word is
-	 * [7:5] Selects endpoint register
-	 * [4:0] Interrupt number to raise
-	 */
 	msg.data = hwirq;
 	msg.address_hi = 0;
 	msg.address_lo = virt_to_phys(msi);
@@ -1280,7 +965,6 @@ static int st_pcie_enable_msi(struct st_pcie *pcie)
 	spin_lock_init(&msi->reg_lock);
 	mutex_init(&msi->lock);
 
-	/* Copy over the register pointer for convenience */
 	msi->regs = pcie->cntrl;
 
 	msi->chip.dev = pcie->dev;
@@ -1424,7 +1108,6 @@ static int st_pcie_init(struct st_pcie *pcie)
 		return ret;
 	}
 
-	/* Set device type : Root Complex */
 	ret = regmap_write(pcie->regmap, pcie->syscfg0, PCIE_DEVICE_TYPE);
 	if (ret < 0) {
 		dev_err(pcie->dev, "unable to set device type\n");
@@ -1435,7 +1118,6 @@ static int st_pcie_init(struct st_pcie *pcie)
 	return ret;
 }
 
-/* STiH407 */
 static int stih407_pcie_enable_ltssm(struct st_pcie *pcie)
 {
 	if (!pcie->syscfg1)
@@ -1496,7 +1178,6 @@ static int st_pcie_suspend(struct device *pcie_dev)
 {
 	struct st_pcie *pcie = dev_get_drvdata(pcie_dev);
 
-	/* To guarantee a real phy initialization on resume */
 	if (!pcie->data->phy_auto)
 		phy_exit(pcie->phy);
 
@@ -1529,7 +1210,7 @@ static int st_pcie_resume(struct device *pcie_dev)
 		pcie->config_window_start);
 
 	if (IS_ENABLED(CONFIG_PCI_MSI)) {
-		/* MSI configuration */
+		 
 		st_msi_init_one(pcie->msi);
 	}
 
@@ -1588,7 +1269,6 @@ static int __init st_pcie_probe(struct platform_device *pdev)
 	if (!res)
 		return -ENXIO;
 
-	/* Check that this has sensible values */
 	if ((resource_size(res) != CFG_REGION_SIZE) ||
 	    (res->start & (CFG_REGION_SIZE - 1))) {
 		dev_err(pcie->dev, "Invalid config space properties\n");
@@ -1614,7 +1294,6 @@ static int __init st_pcie_probe(struct platform_device *pdev)
 	if (res)
 		pcie->syscfg1 = res->start;
 
-	/* request pcie syserr interrupt */
 	serr_irq = platform_get_irq_byname(pdev, "pcie syserr");
 	if (serr_irq < 0) {
 		dev_err(&pdev->dev, "failed to get syserr IRQ: %d\n",
@@ -1630,7 +1309,6 @@ static int __init st_pcie_probe(struct platform_device *pdev)
 		return err;
 	}
 
-	/* At least one pcie interrupt */
 	err = platform_get_irq_byname(pdev, "pcie inta");
 	if (err < 0) {
 		dev_err(&pdev->dev, "failed to get inta IRQ: %d\n", err);
@@ -1669,10 +1347,6 @@ static int __init st_pcie_probe(struct platform_device *pdev)
 		return -EINVAL;
 	}
 
-	/*
-	 * We have to initialise the PCIe cell on some hardware before we can
-	 * talk to the phy
-	 */
 	err = pcie->data->init(pcie);
 	if (err)
 		return err;
@@ -1685,7 +1359,6 @@ static int __init st_pcie_probe(struct platform_device *pdev)
 
 	if (!pcie->data->phy_auto) {
 
-		/* Now claim the associated miphy */
 		pcie->phy = devm_phy_get(&pdev->dev, "pcie_phy");
 		if (IS_ERR(pcie->phy)) {
 			dev_err(&pdev->dev, "no PHY configured\n");
@@ -1699,7 +1372,6 @@ static int __init st_pcie_probe(struct platform_device *pdev)
 		}
 	}
 
-	/* Claim the GPIO for PRST# if available */
 	pcie->reset_gpio = of_get_named_gpio(np, "reset-gpio", 0);
 	if (!gpio_is_valid(pcie->reset_gpio))
 		dev_dbg(&pdev->dev, "No reset-gpio configured\n");
@@ -1714,7 +1386,6 @@ static int __init st_pcie_probe(struct platform_device *pdev)
 		}
 	}
 
-	/* Now do all the register poking */
 	err = st_pcie_hw_setup(pcie, pcie->lmi->start,
 				resource_size(pcie->lmi),
 				pcie->config_window_start);
@@ -1724,23 +1395,18 @@ static int __init st_pcie_probe(struct platform_device *pdev)
 	}
 
 	if (IS_ENABLED(CONFIG_PCI_MSI)) {
-		/* MSI configuration */
+		 
 		err = st_pcie_enable_msi(pcie);
 		if (err)
 			goto disable_link;
 	}
 
 	if (IS_ENABLED(CONFIG_ARM)) {
-		/*
-		 * We have to hook the abort handler so that we can intercept
-		 * bus errors when doing config read/write that return UR,
-		 * which is flagged up as a bus error
-		 */
+		 
 		hook_fault_code(16+6, st_pcie_abort, SIGBUS, 0,
 			"imprecise external abort");
 	}
 
-	/* And now hook this into the generic driver */
 	err = st_pcie_enable(pcie);
 	if (err < 0) {
 		dev_err(&pdev->dev, "failed to enable PCIe ports: %d\n", err);
@@ -1775,7 +1441,6 @@ static struct platform_driver st_pcie_driver = {
 	},
 };
 
-/* ST PCIe driver does not allow module unload */
 static int __init pcie_init(void)
 {
 	return platform_driver_probe(&st_pcie_driver, st_pcie_probe);

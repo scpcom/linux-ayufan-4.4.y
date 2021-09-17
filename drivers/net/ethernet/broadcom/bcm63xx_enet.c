@@ -1,25 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Driver for BCM963xx builtin Ethernet mac
- *
- * Copyright (C) 2008 Maxime Bizon <mbizon@freebox.fr>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- */
+ 
 #include <linux/init.h>
 #include <linux/interrupt.h>
 #include <linux/module.h>
@@ -44,12 +26,8 @@ static int copybreak __read_mostly = 128;
 module_param(copybreak, int, 0);
 MODULE_PARM_DESC(copybreak, "Receive copy threshold");
 
-/* io memory shared between all devices */
 static void __iomem *bcm_enet_shared_base;
 
-/*
- * io helpers to access mac registers
- */
 static inline u32 enet_readl(struct bcm_enet_priv *priv, u32 off)
 {
 	return bcm_readl(priv->base + off);
@@ -61,9 +39,6 @@ static inline void enet_writel(struct bcm_enet_priv *priv,
 	bcm_writel(val, priv->base + off);
 }
 
-/*
- * io helpers to access shared registers
- */
 static inline u32 enet_dma_readl(struct bcm_enet_priv *priv, u32 off)
 {
 	return bcm_readl(bcm_enet_shared_base + off);
@@ -75,21 +50,15 @@ static inline void enet_dma_writel(struct bcm_enet_priv *priv,
 	bcm_writel(val, bcm_enet_shared_base + off);
 }
 
-/*
- * write given data into mii register and wait for transfer to end
- * with timeout (average measured transfer time is 25us)
- */
 static int do_mdio_op(struct bcm_enet_priv *priv, unsigned int data)
 {
 	int limit;
 
-	/* make sure mii interrupt status is cleared */
 	enet_writel(priv, ENET_IR_MII, ENET_IR_REG);
 
 	enet_writel(priv, data, ENET_MIIDATA_REG);
 	wmb();
 
-	/* busy wait on mii interrupt bit, with timeout */
 	limit = 1000;
 	do {
 		if (enet_readl(priv, ENET_IR_REG) & ENET_IR_MII)
@@ -100,9 +69,6 @@ static int do_mdio_op(struct bcm_enet_priv *priv, unsigned int data)
 	return (limit < 0) ? 1 : 0;
 }
 
-/*
- * MII internal read callback
- */
 static int bcm_enet_mdio_read(struct bcm_enet_priv *priv, int mii_id,
 			      int regnum)
 {
@@ -121,9 +87,6 @@ static int bcm_enet_mdio_read(struct bcm_enet_priv *priv, int mii_id,
 	return val;
 }
 
-/*
- * MII internal write callback
- */
 static int bcm_enet_mdio_write(struct bcm_enet_priv *priv, int mii_id,
 			       int regnum, u16 value)
 {
@@ -139,45 +102,30 @@ static int bcm_enet_mdio_write(struct bcm_enet_priv *priv, int mii_id,
 	return 0;
 }
 
-/*
- * MII read callback from phylib
- */
 static int bcm_enet_mdio_read_phylib(struct mii_bus *bus, int mii_id,
 				     int regnum)
 {
 	return bcm_enet_mdio_read(bus->priv, mii_id, regnum);
 }
 
-/*
- * MII write callback from phylib
- */
 static int bcm_enet_mdio_write_phylib(struct mii_bus *bus, int mii_id,
 				      int regnum, u16 value)
 {
 	return bcm_enet_mdio_write(bus->priv, mii_id, regnum, value);
 }
 
-/*
- * MII read callback from mii core
- */
 static int bcm_enet_mdio_read_mii(struct net_device *dev, int mii_id,
 				  int regnum)
 {
 	return bcm_enet_mdio_read(netdev_priv(dev), mii_id, regnum);
 }
 
-/*
- * MII write callback from mii core
- */
 static void bcm_enet_mdio_write_mii(struct net_device *dev, int mii_id,
 				    int regnum, int value)
 {
 	bcm_enet_mdio_write(netdev_priv(dev), mii_id, regnum, value);
 }
 
-/*
- * refill rx queue
- */
 static int bcm_enet_refill_rx(struct net_device *dev)
 {
 	struct bcm_enet_priv *priv;
@@ -219,12 +167,9 @@ static int bcm_enet_refill_rx(struct net_device *dev)
 
 		priv->rx_desc_count++;
 
-		/* tell dma engine we allocated one buffer */
 		enet_dma_writel(priv, 1, ENETDMA_BUFALLOC_REG(priv->rx_chan));
 	}
 
-	/* If rx ring is still empty, set a timer to try allocating
-	 * again at a later time. */
 	if (priv->rx_desc_count == 0 && netif_running(dev)) {
 		dev_warn(&priv->pdev->dev, "unable to refill rx ring\n");
 		priv->rx_timeout.expires = jiffies + HZ;
@@ -234,9 +179,6 @@ static int bcm_enet_refill_rx(struct net_device *dev)
 	return 0;
 }
 
-/*
- * timer callback to defer refill rx queue in case we're OOM
- */
 static void bcm_enet_refill_rx_timer(unsigned long data)
 {
 	struct net_device *dev;
@@ -250,9 +192,6 @@ static void bcm_enet_refill_rx_timer(unsigned long data)
 	spin_unlock(&priv->rx_lock);
 }
 
-/*
- * extract packet from rx queue
- */
 static int bcm_enet_receive_queue(struct net_device *dev, int budget)
 {
 	struct bcm_enet_priv *priv;
@@ -263,8 +202,6 @@ static int bcm_enet_receive_queue(struct net_device *dev, int budget)
 	kdev = &priv->pdev->dev;
 	processed = 0;
 
-	/* don't scan ring further than number of refilled
-	 * descriptor */
 	if (budget > priv->rx_desc_count)
 		budget = priv->rx_desc_count;
 
@@ -278,13 +215,10 @@ static int bcm_enet_receive_queue(struct net_device *dev, int budget)
 		desc_idx = priv->rx_curr_desc;
 		desc = &priv->rx_desc_cpu[desc_idx];
 
-		/* make sure we actually read the descriptor status at
-		 * each loop */
 		rmb();
 
 		len_stat = desc->len_stat;
 
-		/* break if dma ownership belongs to hw */
 		if (len_stat & DMADESC_OWNER_MASK)
 			break;
 
@@ -294,14 +228,11 @@ static int bcm_enet_receive_queue(struct net_device *dev, int budget)
 			priv->rx_curr_desc = 0;
 		priv->rx_desc_count--;
 
-		/* if the packet does not have start of packet _and_
-		 * end of packet flag set, then just recycle it */
 		if ((len_stat & DMADESC_ESOP_MASK) != DMADESC_ESOP_MASK) {
 			dev->stats.rx_dropped++;
 			continue;
 		}
 
-		/* recycle packet if it's marked as bad */
 		if (unlikely(len_stat & DMADESC_ERR_MASK)) {
 			dev->stats.rx_errors++;
 
@@ -316,10 +247,9 @@ static int bcm_enet_receive_queue(struct net_device *dev, int budget)
 			continue;
 		}
 
-		/* valid packet */
 		skb = priv->rx_skb[desc_idx];
 		len = (len_stat & DMADESC_LENGTH_MASK) >> DMADESC_LENGTH_SHIFT;
-		/* don't include FCS */
+		 
 		len -= 4;
 
 		if (len < copybreak) {
@@ -327,7 +257,7 @@ static int bcm_enet_receive_queue(struct net_device *dev, int budget)
 
 			nskb = netdev_alloc_skb_ip_align(dev, len);
 			if (!nskb) {
-				/* forget packet, just rearm desc */
+				 
 				dev->stats.rx_dropped++;
 				continue;
 			}
@@ -355,7 +285,6 @@ static int bcm_enet_receive_queue(struct net_device *dev, int budget)
 	if (processed || !priv->rx_desc_count) {
 		bcm_enet_refill_rx(dev);
 
-		/* kick rx dma */
 		enet_dma_writel(priv, ENETDMA_CHANCFG_EN_MASK,
 				ENETDMA_CHANCFG_REG(priv->rx_chan));
 	}
@@ -363,9 +292,6 @@ static int bcm_enet_receive_queue(struct net_device *dev, int budget)
 	return processed;
 }
 
-/*
- * try to or force reclaim of transmitted buffers
- */
 static int bcm_enet_tx_reclaim(struct net_device *dev, int force)
 {
 	struct bcm_enet_priv *priv;
@@ -378,8 +304,6 @@ static int bcm_enet_tx_reclaim(struct net_device *dev, int force)
 		struct bcm_enet_desc *desc;
 		struct sk_buff *skb;
 
-		/* We run in a bh and fight against start_xmit, which
-		 * is called with bh disabled  */
 		spin_lock(&priv->tx_lock);
 
 		desc = &priv->tx_desc_cpu[priv->tx_dirty_desc];
@@ -389,8 +313,6 @@ static int bcm_enet_tx_reclaim(struct net_device *dev, int force)
 			break;
 		}
 
-		/* ensure other field of the descriptor were not read
-		 * before we checked ownership */
 		rmb();
 
 		skb = priv->tx_skb[priv->tx_dirty_desc];
@@ -418,9 +340,6 @@ static int bcm_enet_tx_reclaim(struct net_device *dev, int force)
 	return released;
 }
 
-/*
- * poll func, called by network core
- */
 static int bcm_enet_poll(struct napi_struct *napi, int budget)
 {
 	struct bcm_enet_priv *priv;
@@ -430,13 +349,11 @@ static int bcm_enet_poll(struct napi_struct *napi, int budget)
 	priv = container_of(napi, struct bcm_enet_priv, napi);
 	dev = priv->net_dev;
 
-	/* ack interrupts */
 	enet_dma_writel(priv, ENETDMA_IR_PKTDONE_MASK,
 			ENETDMA_IR_REG(priv->rx_chan));
 	enet_dma_writel(priv, ENETDMA_IR_PKTDONE_MASK,
 			ENETDMA_IR_REG(priv->tx_chan));
 
-	/* reclaim sent skb */
 	tx_work_done = bcm_enet_tx_reclaim(dev, 0);
 
 	spin_lock(&priv->rx_lock);
@@ -444,15 +361,12 @@ static int bcm_enet_poll(struct napi_struct *napi, int budget)
 	spin_unlock(&priv->rx_lock);
 
 	if (rx_work_done >= budget || tx_work_done > 0) {
-		/* rx/tx queue is not yet empty/clean */
+		 
 		return rx_work_done;
 	}
 
-	/* no more packet in rx/tx queue, remove device from poll
-	 * queue */
 	napi_complete(napi);
 
-	/* restore rx/tx interrupt */
 	enet_dma_writel(priv, ENETDMA_IR_PKTDONE_MASK,
 			ENETDMA_IRMASK_REG(priv->rx_chan));
 	enet_dma_writel(priv, ENETDMA_IR_PKTDONE_MASK,
@@ -461,9 +375,6 @@ static int bcm_enet_poll(struct napi_struct *napi, int budget)
 	return rx_work_done;
 }
 
-/*
- * mac interrupt handler
- */
 static irqreturn_t bcm_enet_isr_mac(int irq, void *dev_id)
 {
 	struct net_device *dev;
@@ -477,19 +388,14 @@ static irqreturn_t bcm_enet_isr_mac(int irq, void *dev_id)
 	if (!(stat & ENET_IR_MIB))
 		return IRQ_NONE;
 
-	/* clear & mask interrupt */
 	enet_writel(priv, ENET_IR_MIB, ENET_IR_REG);
 	enet_writel(priv, 0, ENET_IRMASK_REG);
 
-	/* read mib registers in workqueue */
 	schedule_work(&priv->mib_update_task);
 
 	return IRQ_HANDLED;
 }
 
-/*
- * rx/tx dma interrupt handler
- */
 static irqreturn_t bcm_enet_isr_dma(int irq, void *dev_id)
 {
 	struct net_device *dev;
@@ -498,7 +404,6 @@ static irqreturn_t bcm_enet_isr_dma(int irq, void *dev_id)
 	dev = dev_id;
 	priv = netdev_priv(dev);
 
-	/* mask rx/tx interrupts */
 	enet_dma_writel(priv, 0, ENETDMA_IRMASK_REG(priv->rx_chan));
 	enet_dma_writel(priv, 0, ENETDMA_IRMASK_REG(priv->tx_chan));
 
@@ -507,9 +412,6 @@ static irqreturn_t bcm_enet_isr_dma(int irq, void *dev_id)
 	return IRQ_HANDLED;
 }
 
-/*
- * tx request callback
- */
 static int bcm_enet_start_xmit(struct sk_buff *skb, struct net_device *dev)
 {
 	struct bcm_enet_priv *priv;
@@ -519,11 +421,8 @@ static int bcm_enet_start_xmit(struct sk_buff *skb, struct net_device *dev)
 
 	priv = netdev_priv(dev);
 
-	/* lock against tx reclaim */
 	spin_lock(&priv->tx_lock);
 
-	/* make sure  the tx hw queue  is not full,  should not happen
-	 * since we stop queue before it's the case */
 	if (unlikely(!priv->tx_desc_count)) {
 		netif_stop_queue(dev);
 		dev_err(&priv->pdev->dev, "xmit called with no tx desc "
@@ -532,11 +431,9 @@ static int bcm_enet_start_xmit(struct sk_buff *skb, struct net_device *dev)
 		goto out_unlock;
 	}
 
-	/* point to the next available desc */
 	desc = &priv->tx_desc_cpu[priv->tx_curr_desc];
 	priv->tx_skb[priv->tx_curr_desc] = skb;
 
-	/* fill descriptor */
 	desc->address = dma_map_single(&priv->pdev->dev, skb->data, skb->len,
 				       DMA_TO_DEVICE);
 
@@ -552,17 +449,13 @@ static int bcm_enet_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	}
 	priv->tx_desc_count--;
 
-	/* dma might be already polling, make sure we update desc
-	 * fields in correct order */
 	wmb();
 	desc->len_stat = len_stat;
 	wmb();
 
-	/* kick tx dma */
 	enet_dma_writel(priv, ENETDMA_CHANCFG_EN_MASK,
 			ENETDMA_CHANCFG_REG(priv->tx_chan));
 
-	/* stop queue if no more desc available */
 	if (!priv->tx_desc_count)
 		netif_stop_queue(dev);
 
@@ -575,9 +468,6 @@ out_unlock:
 	return ret;
 }
 
-/*
- * Change the interface's mac address.
- */
 static int bcm_enet_set_mac_address(struct net_device *dev, void *p)
 {
 	struct bcm_enet_priv *priv;
@@ -587,7 +477,6 @@ static int bcm_enet_set_mac_address(struct net_device *dev, void *p)
 	priv = netdev_priv(dev);
 	memcpy(dev->dev_addr, addr->sa_data, ETH_ALEN);
 
-	/* use perfect match register 0 to store my mac address */
 	val = (dev->dev_addr[2] << 24) | (dev->dev_addr[3] << 16) |
 		(dev->dev_addr[4] << 8) | dev->dev_addr[5];
 	enet_writel(priv, val, ENET_PML_REG(0));
@@ -599,9 +488,6 @@ static int bcm_enet_set_mac_address(struct net_device *dev, void *p)
 	return 0;
 }
 
-/*
- * Change rx mode (promiscuous/allmulti) and update multicast list
- */
 static void bcm_enet_set_multicast_list(struct net_device *dev)
 {
 	struct bcm_enet_priv *priv;
@@ -618,15 +504,11 @@ static void bcm_enet_set_multicast_list(struct net_device *dev)
 	else
 		val &= ~ENET_RXCFG_PROMISC_MASK;
 
-	/* only 3 perfect match registers left, first one is used for
-	 * own mac address */
 	if ((dev->flags & IFF_ALLMULTI) || netdev_mc_count(dev) > 3)
 		val |= ENET_RXCFG_ALLMCAST_MASK;
 	else
 		val &= ~ENET_RXCFG_ALLMCAST_MASK;
 
-	/* no need to set perfect match registers if we catch all
-	 * multicast */
 	if (val & ENET_RXCFG_ALLMCAST_MASK) {
 		enet_writel(priv, val, ENET_RXCFG_REG);
 		return;
@@ -639,7 +521,7 @@ static void bcm_enet_set_multicast_list(struct net_device *dev)
 
 		if (i == 3)
 			break;
-		/* update perfect match registers */
+		 
 		dmi_addr = ha->addr;
 		tmp = (dmi_addr[2] << 24) | (dmi_addr[3] << 16) |
 			(dmi_addr[4] << 8) | dmi_addr[5];
@@ -658,9 +540,6 @@ static void bcm_enet_set_multicast_list(struct net_device *dev)
 	enet_writel(priv, val, ENET_RXCFG_REG);
 }
 
-/*
- * set mac duplex parameters
- */
 static void bcm_enet_set_duplex(struct bcm_enet_priv *priv, int fullduplex)
 {
 	u32 val;
@@ -673,14 +552,10 @@ static void bcm_enet_set_duplex(struct bcm_enet_priv *priv, int fullduplex)
 	enet_writel(priv, val, ENET_TXCTL_REG);
 }
 
-/*
- * set mac flow control parameters
- */
 static void bcm_enet_set_flow(struct bcm_enet_priv *priv, int rx_en, int tx_en)
 {
 	u32 val;
 
-	/* rx flow control (pause frame handling) */
 	val = enet_readl(priv, ENET_RXCFG_REG);
 	if (rx_en)
 		val |= ENET_RXCFG_ENFLOW_MASK;
@@ -688,7 +563,6 @@ static void bcm_enet_set_flow(struct bcm_enet_priv *priv, int rx_en, int tx_en)
 		val &= ~ENET_RXCFG_ENFLOW_MASK;
 	enet_writel(priv, val, ENET_RXCFG_REG);
 
-	/* tx flow control (pause frame generation) */
 	val = enet_dma_readl(priv, ENETDMA_CFG_REG);
 	if (tx_en)
 		val |= ENETDMA_CFG_FLOWCH_MASK(priv->rx_chan);
@@ -697,9 +571,6 @@ static void bcm_enet_set_flow(struct bcm_enet_priv *priv, int rx_en, int tx_en)
 	enet_dma_writel(priv, val, ENETDMA_CFG_REG);
 }
 
-/*
- * link changed callback (from phylib)
- */
 static void bcm_enet_adjust_phy_link(struct net_device *dev)
 {
 	struct bcm_enet_priv *priv;
@@ -715,7 +586,6 @@ static void bcm_enet_adjust_phy_link(struct net_device *dev)
 		priv->old_link = phydev->link;
 	}
 
-	/* reflect duplex change in mac configuration */
 	if (phydev->link && phydev->duplex != priv->old_duplex) {
 		bcm_enet_set_duplex(priv,
 				    (phydev->duplex == DUPLEX_FULL) ? 1 : 0);
@@ -723,17 +593,15 @@ static void bcm_enet_adjust_phy_link(struct net_device *dev)
 		priv->old_duplex = phydev->duplex;
 	}
 
-	/* enable flow control if remote advertise it (trust phylib to
-	 * check that duplex is full */
 	if (phydev->link && phydev->pause != priv->old_pause) {
 		int rx_pause_en, tx_pause_en;
 
 		if (phydev->pause) {
-			/* pause was advertised by lpa and us */
+			 
 			rx_pause_en = 1;
 			tx_pause_en = 1;
 		} else if (!priv->pause_auto) {
-			/* pause setting overrided by user */
+			 
 			rx_pause_en = priv->pause_rx;
 			tx_pause_en = priv->pause_tx;
 		} else {
@@ -758,9 +626,6 @@ static void bcm_enet_adjust_phy_link(struct net_device *dev)
 	}
 }
 
-/*
- * link changed callback (if phylib is not used)
- */
 static void bcm_enet_adjust_link(struct net_device *dev)
 {
 	struct bcm_enet_priv *priv;
@@ -778,9 +643,6 @@ static void bcm_enet_adjust_link(struct net_device *dev)
 		priv->pause_tx ? "tx" : "off");
 }
 
-/*
- * open callback, allocate dma rings & buffers and start rx operation
- */
 static int bcm_enet_open(struct net_device *dev)
 {
 	struct bcm_enet_priv *priv;
@@ -797,7 +659,7 @@ static int bcm_enet_open(struct net_device *dev)
 	kdev = &priv->pdev->dev;
 
 	if (priv->has_phy) {
-		/* connect to PHY */
+		 
 		snprintf(phy_id, sizeof(phy_id), PHY_ID_FMT,
 			 priv->mii_bus->id, priv->phy_id);
 
@@ -809,7 +671,6 @@ static int bcm_enet_open(struct net_device *dev)
 			return PTR_ERR(phydev);
 		}
 
-		/* mask with MAC supported features */
 		phydev->supported &= (SUPPORTED_10baseT_Half |
 				      SUPPORTED_10baseT_Full |
 				      SUPPORTED_100baseT_Half |
@@ -833,7 +694,6 @@ static int bcm_enet_open(struct net_device *dev)
 		priv->phydev = phydev;
 	}
 
-	/* mask all interrupts and request them */
 	enet_writel(priv, 0, ENET_IRMASK_REG);
 	enet_dma_writel(priv, 0, ENETDMA_IRMASK_REG(priv->rx_chan));
 	enet_dma_writel(priv, 0, ENETDMA_IRMASK_REG(priv->tx_chan));
@@ -852,17 +712,14 @@ static int bcm_enet_open(struct net_device *dev)
 	if (ret)
 		goto out_freeirq_rx;
 
-	/* initialize perfect match registers */
 	for (i = 0; i < 4; i++) {
 		enet_writel(priv, 0, ENET_PML_REG(i));
 		enet_writel(priv, 0, ENET_PMH_REG(i));
 	}
 
-	/* write device mac address */
 	memcpy(addr.sa_data, dev->dev_addr, ETH_ALEN);
 	bcm_enet_set_mac_address(dev, &addr);
 
-	/* allocate rx dma ring */
 	size = priv->rx_ring_size * sizeof(struct bcm_enet_desc);
 	p = dma_alloc_coherent(kdev, size, &priv->rx_desc_dma,
 			       GFP_KERNEL | __GFP_ZERO);
@@ -874,7 +731,6 @@ static int bcm_enet_open(struct net_device *dev)
 	priv->rx_desc_alloc_size = size;
 	priv->rx_desc_cpu = p;
 
-	/* allocate tx dma ring */
 	size = priv->tx_ring_size * sizeof(struct bcm_enet_desc);
 	p = dma_alloc_coherent(kdev, size, &priv->tx_desc_dma,
 			       GFP_KERNEL | __GFP_ZERO);
@@ -898,7 +754,6 @@ static int bcm_enet_open(struct net_device *dev)
 	priv->tx_curr_desc = 0;
 	spin_lock_init(&priv->tx_lock);
 
-	/* init & fill rx ring with skbs */
 	priv->rx_skb = kcalloc(priv->rx_ring_size, sizeof(struct sk_buff *),
 			       GFP_KERNEL);
 	if (!priv->rx_skb) {
@@ -910,7 +765,6 @@ static int bcm_enet_open(struct net_device *dev)
 	priv->rx_dirty_desc = 0;
 	priv->rx_curr_desc = 0;
 
-	/* initialize flow control buffer allocation */
 	enet_dma_writel(priv, ENETDMA_BUFALLOC_FORCE_MASK | 0,
 			ENETDMA_BUFALLOC_REG(priv->rx_chan));
 
@@ -920,13 +774,11 @@ static int bcm_enet_open(struct net_device *dev)
 		goto out;
 	}
 
-	/* write rx & tx ring addresses */
 	enet_dma_writel(priv, priv->rx_desc_dma,
 			ENETDMA_RSTART_REG(priv->rx_chan));
 	enet_dma_writel(priv, priv->tx_desc_dma,
 			ENETDMA_RSTART_REG(priv->tx_chan));
 
-	/* clear remaining state ram for rx & tx channel */
 	enet_dma_writel(priv, 0, ENETDMA_SRAM2_REG(priv->rx_chan));
 	enet_dma_writel(priv, 0, ENETDMA_SRAM2_REG(priv->tx_chan));
 	enet_dma_writel(priv, 0, ENETDMA_SRAM3_REG(priv->rx_chan));
@@ -934,27 +786,21 @@ static int bcm_enet_open(struct net_device *dev)
 	enet_dma_writel(priv, 0, ENETDMA_SRAM4_REG(priv->rx_chan));
 	enet_dma_writel(priv, 0, ENETDMA_SRAM4_REG(priv->tx_chan));
 
-	/* set max rx/tx length */
 	enet_writel(priv, priv->hw_mtu, ENET_RXMAXLEN_REG);
 	enet_writel(priv, priv->hw_mtu, ENET_TXMAXLEN_REG);
 
-	/* set dma maximum burst len */
 	enet_dma_writel(priv, BCMENET_DMA_MAXBURST,
 			ENETDMA_MAXBURST_REG(priv->rx_chan));
 	enet_dma_writel(priv, BCMENET_DMA_MAXBURST,
 			ENETDMA_MAXBURST_REG(priv->tx_chan));
 
-	/* set correct transmit fifo watermark */
 	enet_writel(priv, BCMENET_TX_FIFO_TRESH, ENET_TXWMARK_REG);
 
-	/* set flow control low/high threshold to 1/3 / 2/3 */
 	val = priv->rx_ring_size / 3;
 	enet_dma_writel(priv, val, ENETDMA_FLOWCL_REG(priv->rx_chan));
 	val = (priv->rx_ring_size * 2) / 3;
 	enet_dma_writel(priv, val, ENETDMA_FLOWCH_REG(priv->rx_chan));
 
-	/* all set, enable mac and interrupts, start dma engine and
-	 * kick rx dma channel */
 	wmb();
 	val = enet_readl(priv, ENET_CTL_REG);
 	val |= ENET_CTL_ENABLE_MASK;
@@ -963,17 +809,14 @@ static int bcm_enet_open(struct net_device *dev)
 	enet_dma_writel(priv, ENETDMA_CHANCFG_EN_MASK,
 			ENETDMA_CHANCFG_REG(priv->rx_chan));
 
-	/* watch "mib counters about to overflow" interrupt */
 	enet_writel(priv, ENET_IR_MIB, ENET_IR_REG);
 	enet_writel(priv, ENET_IR_MIB, ENET_IRMASK_REG);
 
-	/* watch "packet transferred" interrupt in rx and tx */
 	enet_dma_writel(priv, ENETDMA_IR_PKTDONE_MASK,
 			ENETDMA_IR_REG(priv->rx_chan));
 	enet_dma_writel(priv, ENETDMA_IR_PKTDONE_MASK,
 			ENETDMA_IR_REG(priv->tx_chan));
 
-	/* make sure we enable napi before rx interrupt  */
 	napi_enable(&priv->napi);
 
 	enet_dma_writel(priv, ENETDMA_IR_PKTDONE_MASK,
@@ -1029,9 +872,6 @@ out_phy_disconnect:
 	return ret;
 }
 
-/*
- * disable mac
- */
 static void bcm_enet_disable_mac(struct bcm_enet_priv *priv)
 {
 	int limit;
@@ -1052,9 +892,6 @@ static void bcm_enet_disable_mac(struct bcm_enet_priv *priv)
 	} while (limit--);
 }
 
-/*
- * disable dma in given channel
- */
 static void bcm_enet_disable_dma(struct bcm_enet_priv *priv, int chan)
 {
 	int limit;
@@ -1072,9 +909,6 @@ static void bcm_enet_disable_dma(struct bcm_enet_priv *priv, int chan)
 	} while (limit--);
 }
 
-/*
- * stop callback
- */
 static int bcm_enet_stop(struct net_device *dev)
 {
 	struct bcm_enet_priv *priv;
@@ -1090,23 +924,18 @@ static int bcm_enet_stop(struct net_device *dev)
 		phy_stop(priv->phydev);
 	del_timer_sync(&priv->rx_timeout);
 
-	/* mask all interrupts */
 	enet_writel(priv, 0, ENET_IRMASK_REG);
 	enet_dma_writel(priv, 0, ENETDMA_IRMASK_REG(priv->rx_chan));
 	enet_dma_writel(priv, 0, ENETDMA_IRMASK_REG(priv->tx_chan));
 
-	/* make sure no mib update is scheduled */
 	cancel_work_sync(&priv->mib_update_task);
 
-	/* disable dma & mac */
 	bcm_enet_disable_dma(priv, priv->tx_chan);
 	bcm_enet_disable_dma(priv, priv->rx_chan);
 	bcm_enet_disable_mac(priv);
 
-	/* force reclaim of all tx buffers */
 	bcm_enet_tx_reclaim(dev, 1);
 
-	/* free the rx skb ring */
 	for (i = 0; i < priv->rx_ring_size; i++) {
 		struct bcm_enet_desc *desc;
 
@@ -1119,7 +948,6 @@ static int bcm_enet_stop(struct net_device *dev)
 		kfree_skb(priv->rx_skb[i]);
 	}
 
-	/* free remaining allocated memory */
 	kfree(priv->rx_skb);
 	kfree(priv->tx_skb);
 	dma_free_coherent(kdev, priv->rx_desc_alloc_size,
@@ -1130,7 +958,6 @@ static int bcm_enet_stop(struct net_device *dev)
 	free_irq(priv->irq_rx, dev);
 	free_irq(dev->irq, dev);
 
-	/* release phy */
 	if (priv->has_phy) {
 		phy_disconnect(priv->phydev);
 		priv->phydev = NULL;
@@ -1139,9 +966,6 @@ static int bcm_enet_stop(struct net_device *dev)
 	return 0;
 }
 
-/*
- * ethtool callbacks
- */
 struct bcm_enet_stats {
 	char stat_string[ETH_GSTRING_LEN];
 	int sizeof_stat;
@@ -1281,8 +1105,6 @@ static void update_mib_counters(struct bcm_enet_priv *priv)
 			*(u32 *)p += val;
 	}
 
-	/* also empty unused mib counters to make sure mib counter
-	 * overflow interrupt is cleared */
 	for (i = 0; i < ARRAY_SIZE(unused_mib_regs); i++)
 		(void)enet_readl(priv, ENET_MIB_REG(unused_mib_regs[i]));
 }
@@ -1296,7 +1118,6 @@ static void bcm_enet_update_mib_counters_defer(struct work_struct *t)
 	update_mib_counters(priv);
 	mutex_unlock(&priv->mib_update_lock);
 
-	/* reenable mib interrupt */
 	if (netif_running(priv->net_dev))
 		enet_writel(priv, ENET_IR_MIB, ENET_IRMASK_REG);
 }
@@ -1393,7 +1214,6 @@ static void bcm_enet_get_ringparam(struct net_device *dev,
 
 	priv = netdev_priv(dev);
 
-	/* rx/tx ring is actually only limited by memory */
 	ering->rx_max_pending = 8192;
 	ering->tx_max_pending = 8192;
 	ering->rx_pending = priv->rx_ring_size;
@@ -1449,13 +1269,11 @@ static int bcm_enet_set_pauseparam(struct net_device *dev,
 
 	if (priv->has_phy) {
 		if (ecmd->autoneg && (ecmd->rx_pause != ecmd->tx_pause)) {
-			/* asymetric pause mode not supported,
-			 * actually possible but integrated PHY has RO
-			 * asym_pause bit */
+			 
 			return -EINVAL;
 		}
 	} else {
-		/* no pause autoneg on direct mii connection */
+		 
 		if (ecmd->autoneg)
 			return -EINVAL;
 	}
@@ -1503,41 +1321,24 @@ static int bcm_enet_ioctl(struct net_device *dev, struct ifreq *rq, int cmd)
 	}
 }
 
-/*
- * calculate actual hardware mtu
- */
 static int compute_hw_mtu(struct bcm_enet_priv *priv, int mtu)
 {
 	int actual_mtu;
 
 	actual_mtu = mtu;
 
-	/* add ethernet header + vlan tag size */
 	actual_mtu += VLAN_ETH_HLEN;
 
 	if (actual_mtu < 64 || actual_mtu > BCMENET_MAX_MTU)
 		return -EINVAL;
 
-	/*
-	 * setup maximum size before we get overflow mark in
-	 * descriptor, note that this will not prevent reception of
-	 * big frames, they will be split into multiple buffers
-	 * anyway
-	 */
 	priv->hw_mtu = actual_mtu;
 
-	/*
-	 * align rx buffer size to dma burst len, account FCS since
-	 * it's appended
-	 */
 	priv->rx_skb_size = ALIGN(actual_mtu + ETH_FCS_LEN,
 				  BCMENET_DMA_MAXBURST * 4);
 	return 0;
 }
 
-/*
- * adjust mtu, can't be called while device is running
- */
 static int bcm_enet_change_mtu(struct net_device *dev, int new_mtu)
 {
 	int ret;
@@ -1552,18 +1353,13 @@ static int bcm_enet_change_mtu(struct net_device *dev, int new_mtu)
 	return 0;
 }
 
-/*
- * preinit hardware to allow mii operation while device is down
- */
 static void bcm_enet_hw_preinit(struct bcm_enet_priv *priv)
 {
 	u32 val;
 	int limit;
 
-	/* make sure mac is disabled */
 	bcm_enet_disable_mac(priv);
 
-	/* soft reset mac */
 	val = ENET_CTL_SRESET_MASK;
 	enet_writel(priv, val, ENET_CTL_REG);
 	wmb();
@@ -1576,7 +1372,6 @@ static void bcm_enet_hw_preinit(struct bcm_enet_priv *priv)
 		udelay(1);
 	} while (limit--);
 
-	/* select correct mii interface */
 	val = enet_readl(priv, ENET_CTL_REG);
 	if (priv->use_external_mii)
 		val |= ENET_CTL_EPHYSEL_MASK;
@@ -1584,11 +1379,9 @@ static void bcm_enet_hw_preinit(struct bcm_enet_priv *priv)
 		val &= ~ENET_CTL_EPHYSEL_MASK;
 	enet_writel(priv, val, ENET_CTL_REG);
 
-	/* turn on mdc clock */
 	enet_writel(priv, (0x1f << ENET_MIISC_MDCFREQDIV_SHIFT) |
 		    ENET_MIISC_PREAMBLEEN_MASK, ENET_MIISC_REG);
 
-	/* set mib counters to self-clear when read */
 	val = enet_readl(priv, ENET_MIBCTL_REG);
 	val |= ENET_MIBCTL_RDCLEAR_MASK;
 	enet_writel(priv, val, ENET_MIBCTL_REG);
@@ -1607,9 +1400,6 @@ static const struct net_device_ops bcm_enet_ops = {
 #endif
 };
 
-/*
- * allocate netdevice, request register memory and register device.
- */
 static int bcm_enet_probe(struct platform_device *pdev)
 {
 	struct bcm_enet_priv *priv;
@@ -1620,8 +1410,6 @@ static int bcm_enet_probe(struct platform_device *pdev)
 	const char *clk_name;
 	int i, ret;
 
-	/* stop if shared driver failed, assume driver->probe will be
-	 * called in the same order we register devices (correct ?) */
 	if (!bcm_enet_shared_base)
 		return -ENODEV;
 
@@ -1653,7 +1441,6 @@ static int bcm_enet_probe(struct platform_device *pdev)
 	priv->irq_tx = res_irq_tx->start;
 	priv->mac_id = pdev->id;
 
-	/* get rx & tx dma channel id for this mac */
 	if (priv->mac_id == 0) {
 		priv->rx_chan = 0;
 		priv->tx_chan = 1;
@@ -1671,7 +1458,6 @@ static int bcm_enet_probe(struct platform_device *pdev)
 	}
 	clk_prepare_enable(priv->mac_clk);
 
-	/* initialize default and fetch platform data */
 	priv->rx_ring_size = BCMENET_DEF_RX_DESC;
 	priv->tx_ring_size = BCMENET_DEF_TX_DESC;
 
@@ -1691,7 +1477,7 @@ static int bcm_enet_probe(struct platform_device *pdev)
 	}
 
 	if (priv->mac_id == 0 && priv->has_phy && !priv->use_external_mii) {
-		/* using internal PHY, enable clock */
+		 
 		priv->phy_clk = clk_get(&pdev->dev, "ephy");
 		if (IS_ERR(priv->phy_clk)) {
 			ret = PTR_ERR(priv->phy_clk);
@@ -1701,10 +1487,8 @@ static int bcm_enet_probe(struct platform_device *pdev)
 		clk_prepare_enable(priv->phy_clk);
 	}
 
-	/* do minimal hardware init to be able to probe mii bus */
 	bcm_enet_hw_preinit(priv);
 
-	/* MII bus registration */
 	if (priv->has_phy) {
 
 		priv->mii_bus = mdiobus_alloc();
@@ -1721,9 +1505,6 @@ static int bcm_enet_probe(struct platform_device *pdev)
 		bus->write = bcm_enet_mdio_write_phylib;
 		sprintf(bus->id, "%s-%d", pdev->name, priv->mac_id);
 
-		/* only probe bus where we think the PHY is, because
-		 * the mdio read operation return 0 instead of 0xffff
-		 * if a slave is not present on hw */
 		bus->phy_mask = ~(1 << priv->phy_id);
 
 		bus->irq = devm_kzalloc(&pdev->dev, sizeof(int) * PHY_MAX_ADDR,
@@ -1745,7 +1526,6 @@ static int bcm_enet_probe(struct platform_device *pdev)
 		}
 	} else {
 
-		/* run platform code to initialize PHY device */
 		if (pd->mii_config &&
 		    pd->mii_config(dev, 1, bcm_enet_mdio_read_mii,
 				   bcm_enet_mdio_write_mii)) {
@@ -1756,20 +1536,16 @@ static int bcm_enet_probe(struct platform_device *pdev)
 
 	spin_lock_init(&priv->rx_lock);
 
-	/* init rx timeout (used for oom) */
 	init_timer(&priv->rx_timeout);
 	priv->rx_timeout.function = bcm_enet_refill_rx_timer;
 	priv->rx_timeout.data = (unsigned long)dev;
 
-	/* init the mib update lock&work */
 	mutex_init(&priv->mib_update_lock);
 	INIT_WORK(&priv->mib_update_task, bcm_enet_update_mib_counters_defer);
 
-	/* zero mib counters */
 	for (i = 0; i < ENET_MIB_REG_COUNT; i++)
 		enet_writel(priv, 0, ENET_MIB_REG(i));
 
-	/* register netdevice */
 	dev->netdev_ops = &bcm_enet_ops;
 	netif_napi_add(dev, &priv->napi, bcm_enet_poll, 16);
 
@@ -1796,7 +1572,7 @@ out_free_mdio:
 		mdiobus_free(priv->mii_bus);
 
 out_uninit_hw:
-	/* turn off mdc clock */
+	 
 	enet_writel(priv, 0, ENET_MIISC_REG);
 	if (priv->phy_clk) {
 		clk_disable_unprepare(priv->phy_clk);
@@ -1811,20 +1587,15 @@ out:
 	return ret;
 }
 
-/*
- * exit func, stops hardware and unregisters netdevice
- */
 static int bcm_enet_remove(struct platform_device *pdev)
 {
 	struct bcm_enet_priv *priv;
 	struct net_device *dev;
 
-	/* stop netdevice */
 	dev = platform_get_drvdata(pdev);
 	priv = netdev_priv(dev);
 	unregister_netdev(dev);
 
-	/* turn off mdc clock */
 	enet_writel(priv, 0, ENET_MIISC_REG);
 
 	if (priv->has_phy) {
@@ -1839,7 +1610,6 @@ static int bcm_enet_remove(struct platform_device *pdev)
 				       bcm_enet_mdio_write_mii);
 	}
 
-	/* disable hw block clocks */
 	if (priv->phy_clk) {
 		clk_disable_unprepare(priv->phy_clk);
 		clk_put(priv->phy_clk);
@@ -1848,9 +1618,9 @@ static int bcm_enet_remove(struct platform_device *pdev)
 	clk_put(priv->mac_clk);
 
 #if defined (MY_DEF_HERE)
-#else /* MY_DEF_HERE */
+#else  
 	platform_set_drvdata(pdev, NULL);
-#endif /* MY_DEF_HERE */
+#endif  
 	free_netdev(dev);
 	return 0;
 }
@@ -1864,9 +1634,6 @@ struct platform_driver bcm63xx_enet_driver = {
 	},
 };
 
-/*
- * reserve & remap memory space shared between all macs
- */
 static int bcm_enet_shared_probe(struct platform_device *pdev)
 {
 	struct resource *res;
@@ -1887,10 +1654,6 @@ static int bcm_enet_shared_remove(struct platform_device *pdev)
 	return 0;
 }
 
-/*
- * this "shared" driver is needed because both macs share a single
- * address space
- */
 struct platform_driver bcm63xx_enet_shared_driver = {
 	.probe	= bcm_enet_shared_probe,
 	.remove	= bcm_enet_shared_remove,
@@ -1900,9 +1663,6 @@ struct platform_driver bcm63xx_enet_shared_driver = {
 	},
 };
 
-/*
- * entry point
- */
 static int __init bcm_enet_init(void)
 {
 	int ret;

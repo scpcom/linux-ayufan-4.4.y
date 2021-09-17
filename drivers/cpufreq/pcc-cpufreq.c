@@ -1,31 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  pcc-cpufreq.c - Processor Clocking Control firmware cpufreq interface
- *
- *  Copyright (C) 2009 Red Hat, Matthew Garrett <mjg@redhat.com>
- *  Copyright (C) 2009 Hewlett-Packard Development Company, L.P.
- *	Nagananda Chumbalkar <nagananda.chumbalkar@hp.com>
- *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; version 2 of the License.
- *
- *  This program is distributed in the hope that it will be useful, but
- *  WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, GOOD TITLE or NON
- *  INFRINGEMENT. See the GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License along
- *  with this program; if not, write to the Free Software Foundation, Inc.,
- *  675 Mass Ave, Cambridge, MA 02139, USA.
- *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/init.h>
@@ -116,10 +92,10 @@ static int pcc_cpufreq_verify(struct cpufreq_policy *policy)
 {
 #if defined(MY_ABC_HERE)
 	cpufreq_verify_within_cpu_limits(policy);
-#else /* MY_ABC_HERE */
+#else  
 	cpufreq_verify_within_limits(policy, policy->cpuinfo.min_freq,
 				     policy->cpuinfo.max_freq);
-#endif /* MY_ABC_HERE */
+#endif  
 	return 0;
 }
 
@@ -169,7 +145,6 @@ static unsigned int pcc_get_freq(unsigned int cpu)
 	output_buffer =
 		ioread32(pcch_virt_addr + pcc_cpu_data->output_offset);
 
-	/* Clear the input buffer - we are done with the current command */
 	memset_io((pcch_virt_addr + pcc_cpu_data->input_offset), 0, BUF_SZ);
 
 	status = ioread16(&pcch_hdr->status);
@@ -232,7 +207,6 @@ static int pcc_cpufreq_target(struct cpufreq_policy *policy,
 
 	pcc_cmd();
 
-	/* Clear the input buffer - we are done with the current command */
 	memset_io((pcch_virt_addr + pcc_cpu_data->input_offset), 0, BUF_SZ);
 
 	status = ioread16(&pcch_hdr->status);
@@ -417,7 +391,7 @@ static int __init pcc_cpufreq_probe(void)
 		ret = pcc_cpufreq_do_osc(&osc_handle);
 		if (ret)
 			pr_debug("probe: _OSC evaluation did not succeed\n");
-		/* Firmware's use of _OSC is optional */
+		 
 		ret = 0;
 	}
 
@@ -593,10 +567,10 @@ static struct cpufreq_driver pcc_cpufreq_driver = {
 	.exit = pcc_cpufreq_cpu_exit,
 	.name = "pcc-cpufreq",
 #if defined(MY_ABC_HERE)
-	// do nothing
-#else /* MY_ABC_HERE */
+	 
+#else  
 	.owner = THIS_MODULE,
-#endif /* MY_ABC_HERE */
+#endif  
 };
 
 static int __init pcc_cpufreq_init(void)

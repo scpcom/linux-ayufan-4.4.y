@@ -1,16 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * MAX9768 AMP driver
- *
- * Copyright (C) 2011, 2012 by Wolfram Sang, Pengutronix e.K.
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; version 2 of the License.
- */
-
+ 
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/i2c.h>
@@ -23,11 +14,9 @@
 #include <sound/tlv.h>
 #include <sound/max9768.h>
 
-/* "Registers" */
 #define MAX9768_VOL 0
 #define MAX9768_CTRL 3
 
-/* Commands */
 #define MAX9768_CTRL_PWM 0x15
 #define MAX9768_CTRL_FILTERLESS 0x16
 
@@ -48,9 +37,9 @@ static int max9768_get_gpio(struct snd_kcontrol *kcontrol,
 {
 #if defined(MY_ABC_HERE)
 	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
-#else /* MY_ABC_HERE */
+#else  
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
-#endif /* MY_ABC_HERE */
+#endif  
 	struct max9768 *max9768 = snd_soc_codec_get_drvdata(codec);
 	int val = gpio_get_value_cansleep(max9768->mute_gpio);
 
@@ -64,9 +53,9 @@ static int max9768_set_gpio(struct snd_kcontrol *kcontrol,
 {
 #if defined(MY_ABC_HERE)
 	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
-#else /* MY_ABC_HERE */
+#else  
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
-#endif /* MY_ABC_HERE */
+#endif  
 	struct max9768 *max9768 = snd_soc_codec_get_drvdata(codec);
 
 	gpio_set_value_cansleep(max9768->mute_gpio, !ucontrol->value.integer.value[0]);
@@ -182,11 +171,10 @@ static int max9768_i2c_probe(struct i2c_client *client,
 		return -ENOMEM;
 
 	if (pdata) {
-		/* Mute on powerup to avoid clicks */
+		 
 		err = gpio_request_one(pdata->mute_gpio, GPIOF_INIT_HIGH, "MAX9768 Mute");
 		max9768->mute_gpio = err ?: pdata->mute_gpio;
 
-		/* Activate chip by releasing shutdown, enables I2C */
 		err = gpio_request_one(pdata->shdn_gpio, GPIOF_INIT_HIGH, "MAX9768 Shutdown");
 		max9768->shdn_gpio = err ?: pdata->shdn_gpio;
 

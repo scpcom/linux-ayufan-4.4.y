@@ -14,17 +14,17 @@ static struct fsr_info fsr_info[] = {
 	{ do_bad,		SIGSEGV, SEGV_ACCERR,	"level 1 access flag fault"	},
 #if defined(MY_DEF_HERE)
 	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 2 access flag fault"	},
-#else /* MY_DEF_HERE */
+#else  
 	{ do_bad,		SIGSEGV, SEGV_ACCERR,	"level 2 access flag fault"	},
-#endif /* MY_DEF_HERE */
+#endif  
 	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 3 access flag fault"	},
 	{ do_bad,		SIGBUS,  0,		"reserved permission fault"	},
 	{ do_bad,		SIGSEGV, SEGV_ACCERR,	"level 1 permission fault"	},
 #if defined(MY_DEF_HERE)
 	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 2 permission fault"	},
-#else /* MY_DEF_HERE */
+#else  
 	{ do_sect_fault,	SIGSEGV, SEGV_ACCERR,	"level 2 permission fault"	},
-#endif /* MY_DEF_HERE */
+#endif  
 	{ do_page_fault,	SIGSEGV, SEGV_ACCERR,	"level 3 permission fault"	},
 	{ do_bad,		SIGBUS,  0,		"synchronous external abort"	},
 	{ do_bad,		SIGBUS,  0,		"asynchronous external abort"	},

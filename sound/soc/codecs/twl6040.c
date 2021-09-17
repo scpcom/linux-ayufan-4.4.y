@@ -1,27 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * ALSA SoC TWL6040 codec driver
- *
- * Author:	 Misael Lopez Cruz <x0052729@ti.com>
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
- * 02110-1301 USA
- *
- */
-
+ 
 #include <linux/module.h>
 #include <linux/moduleparam.h>
 #include <linux/init.h>
@@ -49,11 +29,9 @@
 #define TWL6040_OUTHF_0dB 0x03
 #define TWL6040_OUTHF_M52dB 0x1D
 
-/* Shadow register used by the driver */
 #define TWL6040_REG_SW_SHADOW	0x2F
 #define TWL6040_CACHEREGNUM	(TWL6040_REG_SW_SHADOW + 1)
 
-/* TWL6040_REG_SW_SHADOW (0x2F) fields */
 #define TWL6040_EAR_PATH_ENABLE	0x01
 
 struct twl6040_jack_data {
@@ -62,7 +40,6 @@ struct twl6040_jack_data {
 	int report;
 };
 
-/* codec private data */
 struct twl6040_data {
 	int plug_irq;
 	int codec_powered;
@@ -77,62 +54,58 @@ struct twl6040_data {
 	struct mutex mutex;
 };
 
-/*
- * twl6040 register cache & default register settings
- */
 static const u8 twl6040_reg[TWL6040_CACHEREGNUM] = {
-	0x00, /* not used	0x00	*/
-	0x4B, /* REG_ASICID	0x01 (ro) */
-	0x00, /* REG_ASICREV	0x02 (ro) */
-	0x00, /* REG_INTID	0x03	*/
-	0x00, /* REG_INTMR	0x04	*/
-	0x00, /* REG_NCPCTRL	0x05	*/
-	0x00, /* REG_LDOCTL	0x06	*/
-	0x60, /* REG_HPPLLCTL	0x07	*/
-	0x00, /* REG_LPPLLCTL	0x08	*/
-	0x4A, /* REG_LPPLLDIV	0x09	*/
-	0x00, /* REG_AMICBCTL	0x0A	*/
-	0x00, /* REG_DMICBCTL	0x0B	*/
-	0x00, /* REG_MICLCTL	0x0C	*/
-	0x00, /* REG_MICRCTL	0x0D	*/
-	0x00, /* REG_MICGAIN	0x0E	*/
-	0x1B, /* REG_LINEGAIN	0x0F	*/
-	0x00, /* REG_HSLCTL	0x10	*/
-	0x00, /* REG_HSRCTL	0x11	*/
-	0x00, /* REG_HSGAIN	0x12	*/
-	0x00, /* REG_EARCTL	0x13	*/
-	0x00, /* REG_HFLCTL	0x14	*/
-	0x00, /* REG_HFLGAIN	0x15	*/
-	0x00, /* REG_HFRCTL	0x16	*/
-	0x00, /* REG_HFRGAIN	0x17	*/
-	0x00, /* REG_VIBCTLL	0x18	*/
-	0x00, /* REG_VIBDATL	0x19	*/
-	0x00, /* REG_VIBCTLR	0x1A	*/
-	0x00, /* REG_VIBDATR	0x1B	*/
-	0x00, /* REG_HKCTL1	0x1C	*/
-	0x00, /* REG_HKCTL2	0x1D	*/
-	0x00, /* REG_GPOCTL	0x1E	*/
-	0x00, /* REG_ALB	0x1F	*/
-	0x00, /* REG_DLB	0x20	*/
-	0x00, /* not used	0x21	*/
-	0x00, /* not used	0x22	*/
-	0x00, /* not used	0x23	*/
-	0x00, /* not used	0x24	*/
-	0x00, /* not used	0x25	*/
-	0x00, /* not used	0x26	*/
-	0x00, /* not used	0x27	*/
-	0x00, /* REG_TRIM1	0x28	*/
-	0x00, /* REG_TRIM2	0x29	*/
-	0x00, /* REG_TRIM3	0x2A	*/
-	0x00, /* REG_HSOTRIM	0x2B	*/
-	0x00, /* REG_HFOTRIM	0x2C	*/
-	0x09, /* REG_ACCCTL	0x2D	*/
-	0x00, /* REG_STATUS	0x2E (ro) */
+	0x00,  
+	0x4B,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x60,  
+	0x00,  
+	0x4A,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x1B,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x09,  
+	0x00,  
 
-	0x00, /* REG_SW_SHADOW	0x2F - Shadow, non HW register */
+	0x00,  
 };
 
-/* List of registers to be restored after power up */
 static const int twl6040_restore_list[] = {
 	TWL6040_REG_MICLCTL,
 	TWL6040_REG_MICRCTL,
@@ -148,7 +121,6 @@ static const int twl6040_restore_list[] = {
 	TWL6040_REG_HFRGAIN,
 };
 
-/* set of rates for each pll: low-power and high-performance */
 static unsigned int lp_rates[] = {
 	8000,
 	11250,
@@ -174,9 +146,6 @@ static struct snd_pcm_hw_constraint_list sysclk_constraints[] = {
 	{ .count = ARRAY_SIZE(hp_rates), .list = hp_rates, },
 };
 
-/*
- * read twl6040 register cache
- */
 static inline unsigned int twl6040_read_reg_cache(struct snd_soc_codec *codec,
 						unsigned int reg)
 {
@@ -188,9 +157,6 @@ static inline unsigned int twl6040_read_reg_cache(struct snd_soc_codec *codec,
 	return cache[reg];
 }
 
-/*
- * write twl6040 register cache
- */
 static inline void twl6040_write_reg_cache(struct snd_soc_codec *codec,
 						u8 reg, u8 value)
 {
@@ -201,9 +167,6 @@ static inline void twl6040_write_reg_cache(struct snd_soc_codec *codec,
 	cache[reg] = value;
 }
 
-/*
- * read from twl6040 hardware register
- */
 static int twl6040_read_reg_volatile(struct snd_soc_codec *codec,
 			unsigned int reg)
 {
@@ -223,9 +186,6 @@ static int twl6040_read_reg_volatile(struct snd_soc_codec *codec,
 	return value;
 }
 
-/*
- * write to the twl6040 register space
- */
 static int twl6040_write(struct snd_soc_codec *codec,
 			unsigned int reg, unsigned int value)
 {
@@ -246,7 +206,6 @@ static void twl6040_init_chip(struct snd_soc_codec *codec)
 	struct twl6040 *twl6040 = codec->control_data;
 	u8 val;
 
-	/* Update reg_cache: ASICREV, and TRIM values */
 	val = twl6040_get_revid(twl6040);
 	twl6040_write_reg_cache(codec, TWL6040_REG_ASICREV, val);
 
@@ -256,16 +215,9 @@ static void twl6040_init_chip(struct snd_soc_codec *codec)
 	twl6040_read_reg_volatile(codec, TWL6040_REG_HSOTRIM);
 	twl6040_read_reg_volatile(codec, TWL6040_REG_HFOTRIM);
 
-	/* Change chip defaults */
-	/* No imput selected for microphone amplifiers */
 	twl6040_write_reg_cache(codec, TWL6040_REG_MICLCTL, 0x18);
 	twl6040_write_reg_cache(codec, TWL6040_REG_MICRCTL, 0x18);
 
-	/*
-	 * We need to lower the default gain values, so the ramp code
-	 * can work correctly for the first playback.
-	 * This reduces the pop noise heard at the first playback.
-	 */
 	twl6040_write_reg_cache(codec, TWL6040_REG_HSGAIN, 0xff);
 	twl6040_write_reg_cache(codec, TWL6040_REG_EARCTL, 0x1e);
 	twl6040_write_reg_cache(codec, TWL6040_REG_HFLGAIN, 0x1d);
@@ -284,7 +236,6 @@ static void twl6040_restore_regs(struct snd_soc_codec *codec)
 	}
 }
 
-/* set headset dac and driver power mode */
 static int headset_power_mode(struct snd_soc_codec *codec, int high_perf)
 {
 	int hslctl, hsrctl;
@@ -313,11 +264,6 @@ static int twl6040_hs_dac_event(struct snd_soc_dapm_widget *w,
 	struct snd_soc_codec *codec = w->codec;
 	u8 hslctl, hsrctl;
 
-	/*
-	 * Workaround for Headset DC offset caused pop noise:
-	 * Both HS DAC need to be turned on (before the HS driver) and off at
-	 * the same time.
-	 */
 	hslctl = twl6040_read_reg_cache(codec, TWL6040_REG_HSLCTL);
 	hsrctl = twl6040_read_reg_cache(codec, TWL6040_REG_HSRCTL);
 	if (SND_SOC_DAPM_EVENT_ON(event)) {
@@ -342,7 +288,7 @@ static int twl6040_ep_drv_event(struct snd_soc_dapm_widget *w,
 	int ret = 0;
 
 	if (SND_SOC_DAPM_EVENT_ON(event)) {
-		/* Earphone doesn't support low power mode */
+		 
 		priv->hs_power_mode_locked = 1;
 		ret = headset_power_mode(codec, 1);
 	} else {
@@ -363,7 +309,6 @@ static void twl6040_hs_jack_report(struct snd_soc_codec *codec,
 
 	mutex_lock(&priv->mutex);
 
-	/* Sync status */
 	status = twl6040_read_reg_volatile(codec, TWL6040_REG_STATUS);
 	if (status & TWL6040_PLUGCOMP)
 		snd_soc_jack_report(jack, report, report);
@@ -396,7 +341,6 @@ static void twl6040_accessory_work(struct work_struct *work)
 	twl6040_hs_jack_report(codec, hs_jack->jack, hs_jack->report);
 }
 
-/* audio interrupt handler */
 static irqreturn_t twl6040_audio_handler(int irq, void *data)
 {
 	struct snd_soc_codec *codec = data;
@@ -416,7 +360,6 @@ static int twl6040_soc_dapm_put_vibra_enum(struct snd_kcontrol *kcontrol,
 	struct soc_enum *e = (struct soc_enum *)kcontrol->private_value;
 	unsigned int val;
 
-	/* Do not allow changes while Input/FF efect is running */
 	val = twl6040_read_reg_volatile(codec, e->reg);
 	if (val & TWL6040_VIBENA && !(val & TWL6040_VIBSEL))
 		return -EBUSY;
@@ -424,47 +367,21 @@ static int twl6040_soc_dapm_put_vibra_enum(struct snd_kcontrol *kcontrol,
 	return snd_soc_dapm_put_enum_double(kcontrol, ucontrol);
 }
 
-/*
- * MICATT volume control:
- * from -6 to 0 dB in 6 dB steps
- */
 static DECLARE_TLV_DB_SCALE(mic_preamp_tlv, -600, 600, 0);
 
-/*
- * MICGAIN volume control:
- * from 6 to 30 dB in 6 dB steps
- */
 static DECLARE_TLV_DB_SCALE(mic_amp_tlv, 600, 600, 0);
 
-/*
- * AFMGAIN volume control:
- * from -18 to 24 dB in 6 dB steps
- */
 static DECLARE_TLV_DB_SCALE(afm_amp_tlv, -1800, 600, 0);
 
-/*
- * HSGAIN volume control:
- * from -30 to 0 dB in 2 dB steps
- */
 static DECLARE_TLV_DB_SCALE(hs_tlv, -3000, 200, 0);
 
-/*
- * HFGAIN volume control:
- * from -52 to 6 dB in 2 dB steps
- */
 static DECLARE_TLV_DB_SCALE(hf_tlv, -5200, 200, 0);
 
-/*
- * EPGAIN volume control:
- * from -24 to 6 dB in 2 dB steps
- */
 static DECLARE_TLV_DB_SCALE(ep_tlv, -2400, 200, 0);
 
-/* Left analog microphone selection */
 static const char *twl6040_amicl_texts[] =
 	{"Headset Mic", "Main Mic", "Aux/FM Left", "Off"};
 
-/* Right analog microphone selection */
 static const char *twl6040_amicr_texts[] =
 	{"Headset Mic", "Sub Mic", "Aux/FM Right", "Off"};
 
@@ -514,14 +431,12 @@ static const struct snd_kcontrol_new amicl_control =
 static const struct snd_kcontrol_new amicr_control =
 	SOC_DAPM_ENUM("Route", twl6040_enum[1]);
 
-/* Headset DAC playback switches */
 static const struct snd_kcontrol_new hsl_mux_controls =
 	SOC_DAPM_ENUM("Route", twl6040_hs_enum[0]);
 
 static const struct snd_kcontrol_new hsr_mux_controls =
 	SOC_DAPM_ENUM("Route", twl6040_hs_enum[1]);
 
-/* Handsfree DAC playback switches */
 static const struct snd_kcontrol_new hfl_mux_controls =
 	SOC_DAPM_ENUM("Route", twl6040_hf_enum[0]);
 
@@ -537,7 +452,6 @@ static const struct snd_kcontrol_new auxl_switch_control =
 static const struct snd_kcontrol_new auxr_switch_control =
 	SOC_DAPM_SINGLE("Switch", TWL6040_REG_HFRCTL, 6, 1, 0);
 
-/* Vibra playback switches */
 static const struct snd_kcontrol_new vibral_mux_controls =
 	SOC_DAPM_ENUM_EXT("Route", twl6040_vibra_enum[0],
 		snd_soc_dapm_get_enum_double,
@@ -548,7 +462,6 @@ static const struct snd_kcontrol_new vibrar_mux_controls =
 		snd_soc_dapm_get_enum_double,
 		twl6040_soc_dapm_put_vibra_enum);
 
-/* Headset power mode */
 static const char *twl6040_power_mode_texts[] = {
 	"Low-Power", "High-Performance",
 };
@@ -562,9 +475,9 @@ static int twl6040_headset_power_get_enum(struct snd_kcontrol *kcontrol,
 {
 #if defined(MY_ABC_HERE)
 	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
-#else /* MY_ABC_HERE */
+#else  
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
-#endif /* MY_ABC_HERE */
+#endif  
 	struct twl6040_data *priv = snd_soc_codec_get_drvdata(codec);
 
 	ucontrol->value.enumerated.item[0] = priv->hs_power_mode;
@@ -577,9 +490,9 @@ static int twl6040_headset_power_put_enum(struct snd_kcontrol *kcontrol,
 {
 #if defined(MY_ABC_HERE)
 	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
-#else /* MY_ABC_HERE */
+#else  
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
-#endif /* MY_ABC_HERE */
+#endif  
 	struct twl6040_data *priv = snd_soc_codec_get_drvdata(codec);
 	int high_perf = ucontrol->value.enumerated.item[0];
 	int ret = 0;
@@ -598,9 +511,9 @@ static int twl6040_pll_get_enum(struct snd_kcontrol *kcontrol,
 {
 #if defined(MY_ABC_HERE)
 	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
-#else /* MY_ABC_HERE */
+#else  
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
-#endif /* MY_ABC_HERE */
+#endif  
 	struct twl6040_data *priv = snd_soc_codec_get_drvdata(codec);
 
 	ucontrol->value.enumerated.item[0] = priv->pll_power_mode;
@@ -613,9 +526,9 @@ static int twl6040_pll_put_enum(struct snd_kcontrol *kcontrol,
 {
 #if defined(MY_ABC_HERE)
 	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
-#else /* MY_ABC_HERE */
+#else  
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
-#endif /* MY_ABC_HERE */
+#endif  
 	struct twl6040_data *priv = snd_soc_codec_get_drvdata(codec);
 
 	priv->pll_power_mode = ucontrol->value.enumerated.item[0];
@@ -628,20 +541,20 @@ int twl6040_get_dl1_gain(struct snd_soc_codec *codec)
 	struct snd_soc_dapm_context *dapm = &codec->dapm;
 
 	if (snd_soc_dapm_get_pin_status(dapm, "EP"))
-		return -1; /* -1dB */
+		return -1;  
 
 	if (snd_soc_dapm_get_pin_status(dapm, "HSOR") ||
 		snd_soc_dapm_get_pin_status(dapm, "HSOL")) {
 
 		u8 val = snd_soc_read(codec, TWL6040_REG_HSLCTL);
 		if (val & TWL6040_HSDACMODE)
-			/* HSDACL in LP mode */
-			return -8; /* -8dB */
+			 
+			return -8;  
 		else
-			/* HSDACL in HP mode */
-			return -1; /* -1dB */
+			 
+			return -1;  
 	}
-	return 0; /* 0dB */
+	return 0;  
 }
 EXPORT_SYMBOL_GPL(twl6040_get_dl1_gain);
 
@@ -667,26 +580,24 @@ int twl6040_get_hs_step_size(struct snd_soc_codec *codec)
 	struct twl6040 *twl6040 = codec->control_data;
 
 	if (twl6040_get_revid(twl6040) < TWL6040_REV_ES1_3)
-		/* For ES under ES_1.3 HS step is 2 mV */
+		 
 		return 2;
 	else
-		/* For ES_1.3 HS step is 1 mV */
+		 
 		return 1;
 }
 EXPORT_SYMBOL_GPL(twl6040_get_hs_step_size);
 
 static const struct snd_kcontrol_new twl6040_snd_controls[] = {
-	/* Capture gains */
+	 
 	SOC_DOUBLE_TLV("Capture Preamplifier Volume",
 		TWL6040_REG_MICGAIN, 6, 7, 1, 1, mic_preamp_tlv),
 	SOC_DOUBLE_TLV("Capture Volume",
 		TWL6040_REG_MICGAIN, 0, 3, 4, 0, mic_amp_tlv),
 
-	/* AFM gains */
 	SOC_DOUBLE_TLV("Aux FM Volume",
 		TWL6040_REG_LINEGAIN, 0, 3, 7, 0, afm_amp_tlv),
 
-	/* Playback gains */
 	SOC_DOUBLE_TLV("Headset Playback Volume",
 		TWL6040_REG_HSGAIN, 0, 4, 0xF, 1, hs_tlv),
 	SOC_DOUBLE_R_TLV("Handsfree Playback Volume",
@@ -703,14 +614,13 @@ static const struct snd_kcontrol_new twl6040_snd_controls[] = {
 };
 
 static const struct snd_soc_dapm_widget twl6040_dapm_widgets[] = {
-	/* Inputs */
+	 
 	SND_SOC_DAPM_INPUT("MAINMIC"),
 	SND_SOC_DAPM_INPUT("HSMIC"),
 	SND_SOC_DAPM_INPUT("SUBMIC"),
 	SND_SOC_DAPM_INPUT("AFML"),
 	SND_SOC_DAPM_INPUT("AFMR"),
 
-	/* Outputs */
 	SND_SOC_DAPM_OUTPUT("HSOL"),
 	SND_SOC_DAPM_OUTPUT("HSOR"),
 	SND_SOC_DAPM_OUTPUT("HFL"),
@@ -721,29 +631,24 @@ static const struct snd_soc_dapm_widget twl6040_dapm_widgets[] = {
 	SND_SOC_DAPM_OUTPUT("VIBRAL"),
 	SND_SOC_DAPM_OUTPUT("VIBRAR"),
 
-	/* Analog input muxes for the capture amplifiers */
 	SND_SOC_DAPM_MUX("Analog Left Capture Route",
 			SND_SOC_NOPM, 0, 0, &amicl_control),
 	SND_SOC_DAPM_MUX("Analog Right Capture Route",
 			SND_SOC_NOPM, 0, 0, &amicr_control),
 
-	/* Analog capture PGAs */
 	SND_SOC_DAPM_PGA("MicAmpL",
 			TWL6040_REG_MICLCTL, 0, 0, NULL, 0),
 	SND_SOC_DAPM_PGA("MicAmpR",
 			TWL6040_REG_MICRCTL, 0, 0, NULL, 0),
 
-	/* Auxiliary FM PGAs */
 	SND_SOC_DAPM_PGA("AFMAmpL",
 			TWL6040_REG_MICLCTL, 1, 0, NULL, 0),
 	SND_SOC_DAPM_PGA("AFMAmpR",
 			TWL6040_REG_MICRCTL, 1, 0, NULL, 0),
 
-	/* ADCs */
 	SND_SOC_DAPM_ADC("ADC Left", NULL, TWL6040_REG_MICLCTL, 2, 0),
 	SND_SOC_DAPM_ADC("ADC Right", NULL, TWL6040_REG_MICRCTL, 2, 0),
 
-	/* Microphone bias */
 	SND_SOC_DAPM_SUPPLY("Headset Mic Bias",
 			    TWL6040_REG_AMICBCTL, 0, 0, NULL, 0),
 	SND_SOC_DAPM_SUPPLY("Main Mic Bias",
@@ -753,19 +658,18 @@ static const struct snd_soc_dapm_widget twl6040_dapm_widgets[] = {
 	SND_SOC_DAPM_SUPPLY("Digital Mic2 Bias",
 			    TWL6040_REG_DMICBCTL, 4, 0, NULL, 0),
 
-	/* DACs */
 	SND_SOC_DAPM_DAC("HSDAC Left", NULL, SND_SOC_NOPM, 0, 0),
 	SND_SOC_DAPM_DAC("HSDAC Right", NULL, SND_SOC_NOPM, 0, 0),
 	SND_SOC_DAPM_DAC("HFDAC Left", NULL, TWL6040_REG_HFLCTL, 0, 0),
 	SND_SOC_DAPM_DAC("HFDAC Right", NULL, TWL6040_REG_HFRCTL, 0, 0),
-	/* Virtual DAC for vibra path (DL4 channel) */
+	 
 	SND_SOC_DAPM_DAC("VIBRA DAC", NULL, SND_SOC_NOPM, 0, 0),
 
 	SND_SOC_DAPM_MUX("Handsfree Left Playback",
 			SND_SOC_NOPM, 0, 0, &hfl_mux_controls),
 	SND_SOC_DAPM_MUX("Handsfree Right Playback",
 			SND_SOC_NOPM, 0, 0, &hfr_mux_controls),
-	/* Analog playback Muxes */
+	 
 	SND_SOC_DAPM_MUX("Headset Left Playback",
 			SND_SOC_NOPM, 0, 0, &hsl_mux_controls),
 	SND_SOC_DAPM_MUX("Headset Right Playback",
@@ -783,7 +687,6 @@ static const struct snd_soc_dapm_widget twl6040_dapm_widgets[] = {
 	SND_SOC_DAPM_SWITCH("AUXR Playback", SND_SOC_NOPM, 0, 0,
 			&auxr_switch_control),
 
-	/* Analog playback drivers */
 	SND_SOC_DAPM_OUT_DRV("HF Left Driver",
 			TWL6040_REG_HFLCTL, 4, 0, NULL, 0),
 	SND_SOC_DAPM_OUT_DRV("HF Right Driver",
@@ -809,7 +712,6 @@ static const struct snd_soc_dapm_widget twl6040_dapm_widgets[] = {
 			      twl6040_hs_dac_event,
 			      SND_SOC_DAPM_POST_PMU | SND_SOC_DAPM_POST_PMD),
 
-	/* Analog playback PGAs */
 	SND_SOC_DAPM_PGA("HF Left PGA",
 			TWL6040_REG_HFLCTL, 1, 0, NULL, 0),
 	SND_SOC_DAPM_PGA("HF Right PGA",
@@ -818,7 +720,7 @@ static const struct snd_soc_dapm_widget twl6040_dapm_widgets[] = {
 };
 
 static const struct snd_soc_dapm_route intercon[] = {
-	/* Stream -> DAC mapping */
+	 
 	{"HSDAC Left", NULL, "Legacy Playback"},
 	{"HSDAC Left", NULL, "Headset Playback"},
 	{"HSDAC Right", NULL, "Legacy Playback"},
@@ -832,13 +734,11 @@ static const struct snd_soc_dapm_route intercon[] = {
 	{"VIBRA DAC", NULL, "Legacy Playback"},
 	{"VIBRA DAC", NULL, "Vibra Playback"},
 
-	/* ADC -> Stream mapping */
 	{"Legacy Capture" , NULL, "ADC Left"},
 	{"Capture", NULL, "ADC Left"},
 	{"Legacy Capture", NULL, "ADC Right"},
 	{"Capture" , NULL, "ADC Right"},
 
-	/* Capture path */
 	{"Analog Left Capture Route", "Headset Mic", "HSMIC"},
 	{"Analog Left Capture Route", "Main Mic", "MAINMIC"},
 	{"Analog Left Capture Route", "Aux/FM Left", "AFML"},
@@ -853,7 +753,6 @@ static const struct snd_soc_dapm_route intercon[] = {
 	{"ADC Left", NULL, "MicAmpL"},
 	{"ADC Right", NULL, "MicAmpR"},
 
-	/* AFM path */
 	{"AFMAmpL", NULL, "AFML"},
 	{"AFMAmpR", NULL, "AFMR"},
 
@@ -872,7 +771,6 @@ static const struct snd_soc_dapm_route intercon[] = {
 	{"HSOL", NULL, "HS Left Driver"},
 	{"HSOR", NULL, "HS Right Driver"},
 
-	/* Earphone playback path */
 	{"Earphone Playback", "Switch", "HSDAC Left"},
 	{"Earphone Driver", NULL, "Earphone Playback"},
 	{"EP", NULL, "Earphone Driver"},
@@ -898,7 +796,6 @@ static const struct snd_soc_dapm_route intercon[] = {
 	{"AUXL", NULL, "AUXL Playback"},
 	{"AUXR", NULL, "AUXR Playback"},
 
-	/* Vibrator paths */
 	{"Vibra Left Playback", "Audio PDM", "VIBRA DAC"},
 	{"Vibra Right Playback", "Audio PDM", "VIBRA DAC"},
 
@@ -935,7 +832,6 @@ static int twl6040_set_bias_level(struct snd_soc_codec *codec,
 
 		twl6040_restore_regs(codec);
 
-		/* Set external boost GPO */
 		twl6040_write(codec, TWL6040_REG_GPOCTL, 0x02);
 		break;
 	case SND_SOC_BIAS_OFF:
@@ -979,7 +875,7 @@ static int twl6040_hw_params(struct snd_pcm_substream *substream,
 	case 22500:
 	case 44100:
 	case 88200:
-		/* These rates are not supported when HPPLL is in use */
+		 
 		if (unlikely(priv->pll == TWL6040_SYSCLK_SEL_HPPLL)) {
 			dev_err(codec->dev, "HPPLL does not support rate %d\n",
 				rate);
@@ -1172,7 +1068,6 @@ static int twl6040_probe(struct snd_soc_codec *codec)
 
 	twl6040_init_chip(codec);
 
-	/* power on device */
 	return twl6040_set_bias_level(codec, SND_SOC_BIAS_STANDBY);
 }
 

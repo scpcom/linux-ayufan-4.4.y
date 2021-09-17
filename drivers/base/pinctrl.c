@@ -1,27 +1,12 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Driver core interface to the pinctrl subsystem.
- *
- * Copyright (C) 2012 ST-Ericsson SA
- * Written on behalf of Linaro for ST-Ericsson
- * Based on bits of regulator core, gpio core and clk core
- *
- * Author: Linus Walleij <linus.walleij@linaro.org>
- *
- * License terms: GNU General Public License (GPL) version 2
- */
-
+ 
 #include <linux/device.h>
 #include <linux/pinctrl/devinfo.h>
 #include <linux/pinctrl/consumer.h>
 #include <linux/slab.h>
 
-/**
- * pinctrl_bind_pins() - called by the device core before probe
- * @dev: the device that is just about to probe
- */
 int pinctrl_bind_pins(struct device *dev)
 {
 	int ret;
@@ -53,38 +38,28 @@ int pinctrl_bind_pins(struct device *dev)
 
 #if defined (MY_DEF_HERE)
 #ifdef CONFIG_PM
-	/*
-	 * If power management is enabled, we also look for the optional
-	 * sleep and idle pin states, with semantics as defined in
-	 * <linux/pinctrl/pinctrl-state.h>
-	 */
+	 
 	dev->pins->sleep_state = pinctrl_lookup_state(dev->pins->p,
 					PINCTRL_STATE_SLEEP);
 	if (IS_ERR(dev->pins->sleep_state))
-		/* Not supplying this state is perfectly legal */
+		 
 		dev_dbg(dev, "no sleep pinctrl state\n");
 
 	dev->pins->idle_state = pinctrl_lookup_state(dev->pins->p,
 					PINCTRL_STATE_IDLE);
 	if (IS_ERR(dev->pins->idle_state))
-		/* Not supplying this state is perfectly legal */
+		 
 		dev_dbg(dev, "no idle pinctrl state\n");
 #endif
-#endif /* MY_DEF_HERE */
+#endif  
 	return 0;
 
-	/*
-	 * If no pinctrl handle or default state was found for this device,
-	 * let's explicitly free the pin container in the device, there is
-	 * no point in keeping it around.
-	 */
 cleanup_get:
 	devm_pinctrl_put(dev->pins->p);
 cleanup_alloc:
 	devm_kfree(dev, dev->pins);
 	dev->pins = NULL;
 
-	/* Only return deferrals */
 	if (ret != -EPROBE_DEFER)
 		ret = 0;
 

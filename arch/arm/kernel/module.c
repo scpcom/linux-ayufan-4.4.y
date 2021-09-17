@@ -1,18 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  linux/arch/arm/kernel/module.c
- *
- *  Copyright (C) 2002 Russell King.
- *  Modified for nommu by Hyok S. Choi
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- *
- * Module allocation method suggested by Andi Kleen.
- */
+ 
 #include <linux/module.h>
 #include <linux/moduleloader.h>
 #include <linux/kernel.h>
@@ -29,15 +18,10 @@
 #include <asm/unwind.h>
 #if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 #include <asm/opcodes.h>
-#endif /* MY_DEF_HERE || MY_ABC_HERE */
+#endif  
 
 #ifdef CONFIG_XIP_KERNEL
-/*
- * The XIP kernel text is mapped in the module area for modules and
- * some other stuff to work without any indirect relocations.
- * MODULES_VADDR is redefined here and not in asm/memory.h to avoid
- * recompiling the whole kernel when CONFIG_XIP_KERNEL is turned on/off.
- */
+ 
 #undef MODULES_VADDR
 #define MODULES_VADDR	(((unsigned long)_etext + ~PMD_MASK) & PMD_MASK)
 #endif
@@ -68,7 +52,7 @@ apply_relocate(Elf32_Shdr *sechdrs, const char *strtab, unsigned int symindex,
 		s32 offset;
 #if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 		u32 tmp;
-#endif /* MY_DEF_HERE || MY_ABC_HERE */
+#endif  
 #ifdef CONFIG_THUMB2_KERNEL
 		u32 upper, lower, sign, j1, j2;
 #endif
@@ -94,13 +78,13 @@ apply_relocate(Elf32_Shdr *sechdrs, const char *strtab, unsigned int symindex,
 
 		switch (ELF32_R_TYPE(rel->r_info)) {
 		case R_ARM_NONE:
-			/* ignore */
+			 
 			break;
 
 		case R_ARM_ABS32:
 #if defined (MY_DEF_HERE)
-		case R_ARM_TARGET1: /* Absolute form in kernel space context */
-#endif /* MY_DEF_HERE */
+		case R_ARM_TARGET1:  
+#endif  
 			*(u32 *)loc += sym->st_value;
 			break;
 
@@ -110,9 +94,9 @@ apply_relocate(Elf32_Shdr *sechdrs, const char *strtab, unsigned int symindex,
 #if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 			offset = __mem_to_opcode_arm(*(u32 *)loc);
 			offset = (offset & 0x00ffffff) << 2;
-#else /* MY_DEF_HERE || MY_ABC_HERE */
+#else  
 			offset = (*(u32 *)loc & 0x00ffffff) << 2;
-#endif /* MY_DEF_HERE || MY_ABC_HERE */
+#endif  
 			if (offset & 0x02000000)
 				offset -= 0x04000000;
 
@@ -133,24 +117,21 @@ apply_relocate(Elf32_Shdr *sechdrs, const char *strtab, unsigned int symindex,
 
 			*(u32 *)loc &= __opcode_to_mem_arm(0xff000000);
 			*(u32 *)loc |= __opcode_to_mem_arm(offset);
-#else /* MY_DEF_HERE || MY_ABC_HERE */
+#else  
 			*(u32 *)loc &= 0xff000000;
 			*(u32 *)loc |= offset & 0x00ffffff;
-#endif /* MY_DEF_HERE || MY_ABC_HERE */
+#endif  
 			break;
 
 	       case R_ARM_V4BX:
-		       /* Preserve Rm and the condition code. Alter
-			* other bits to re-code instruction as
-			* MOV PC,Rm.
-			*/
+		        
 #if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 		       *(u32 *)loc &= __opcode_to_mem_arm(0xf000000f);
 		       *(u32 *)loc |= __opcode_to_mem_arm(0x01a0f000);
-#else /* MY_DEF_HERE || MY_ABC_HERE */
+#else  
 		       *(u32 *)loc &= 0xf000000f;
 		       *(u32 *)loc |= 0x01a0f000;
-#endif /* MY_DEF_HERE || MY_ABC_HERE */
+#endif  
 		       break;
 
 		case R_ARM_PREL31:
@@ -162,9 +143,9 @@ apply_relocate(Elf32_Shdr *sechdrs, const char *strtab, unsigned int symindex,
 		case R_ARM_MOVT_ABS:
 #if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 			offset = tmp = __mem_to_opcode_arm(*(u32 *)loc);
-#else /* MY_DEF_HERE || MY_ABC_HERE */
+#else  
 			offset = *(u32 *)loc;
-#endif /* MY_DEF_HERE || MY_ABC_HERE */
+#endif  
 			offset = ((offset & 0xf0000) >> 4) | (offset & 0xfff);
 			offset = (offset ^ 0x8000) - 0x8000;
 
@@ -178,11 +159,11 @@ apply_relocate(Elf32_Shdr *sechdrs, const char *strtab, unsigned int symindex,
 				(offset & 0x0fff);
 
 			*(u32 *)loc = __opcode_to_mem_arm(tmp);
-#else /* MY_DEF_HERE || MY_ABC_HERE */
+#else  
 			*(u32 *)loc &= 0xfff0f000;
 			*(u32 *)loc |= ((offset & 0xf000) << 4) |
 					(offset & 0x0fff);
-#endif /* MY_DEF_HERE || MY_ABC_HERE */
+#endif  
 			break;
 
 #ifdef CONFIG_THUMB2_KERNEL
@@ -191,24 +172,11 @@ apply_relocate(Elf32_Shdr *sechdrs, const char *strtab, unsigned int symindex,
 #if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 			upper = __mem_to_opcode_thumb16(*(u16 *)loc);
 			lower = __mem_to_opcode_thumb16(*(u16 *)(loc + 2));
-#else /* MY_DEF_HERE || MY_ABC_HERE */
+#else  
 			upper = *(u16 *)loc;
 			lower = *(u16 *)(loc + 2);
-#endif /* MY_DEF_HERE || MY_ABC_HERE */
+#endif  
 
-			/*
-			 * 25 bit signed address range (Thumb-2 BL and B.W
-			 * instructions):
-			 *   S:I1:I2:imm10:imm11:0
-			 * where:
-			 *   S     = upper[10]   = offset[24]
-			 *   I1    = ~(J1 ^ S)   = offset[23]
-			 *   I2    = ~(J2 ^ S)   = offset[22]
-			 *   imm10 = upper[9:0]  = offset[21:12]
-			 *   imm11 = lower[10:0] = offset[11:1]
-			 *   J1    = lower[13]
-			 *   J2    = lower[11]
-			 */
 			sign = (upper >> 10) & 1;
 			j1 = (lower >> 13) & 1;
 			j2 = (lower >> 11) & 1;
@@ -220,15 +188,6 @@ apply_relocate(Elf32_Shdr *sechdrs, const char *strtab, unsigned int symindex,
 				offset -= 0x02000000;
 			offset += sym->st_value - loc;
 
-			/*
-			 * For function symbols, only Thumb addresses are
-			 * allowed (no interworking).
-			 *
-			 * For non-function symbols, the destination
-			 * has no specific ARM/Thumb disposition, so
-			 * the branch is resolved under the assumption
-			 * that interworking is not required.
-			 */
 			if ((ELF32_ST_TYPE(sym->st_info) == STT_FUNC &&
 				!(offset & 1)) ||
 			    offset <= (s32)0xff000000 ||
@@ -252,13 +211,13 @@ apply_relocate(Elf32_Shdr *sechdrs, const char *strtab, unsigned int symindex,
 
 			*(u16 *)loc = __opcode_to_mem_thumb16(upper);
 			*(u16 *)(loc + 2) = __opcode_to_mem_thumb16(lower);
-#else /* MY_DEF_HERE || MY_ABC_HERE */
+#else  
 			*(u16 *)loc = (u16)((upper & 0xf800) | (sign << 10) |
 					    ((offset >> 12) & 0x03ff));
 			*(u16 *)(loc + 2) = (u16)((lower & 0xd000) |
 						  (j1 << 13) | (j2 << 11) |
 						  ((offset >> 1) & 0x07ff));
-#endif /* MY_DEF_HERE || MY_ABC_HERE */
+#endif  
 			break;
 
 		case R_ARM_THM_MOVW_ABS_NC:
@@ -266,21 +225,11 @@ apply_relocate(Elf32_Shdr *sechdrs, const char *strtab, unsigned int symindex,
 #if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 			upper = __mem_to_opcode_thumb16(*(u16 *)loc);
 			lower = __mem_to_opcode_thumb16(*(u16 *)(loc + 2));
-#else /* MY_DEF_HERE || MY_ABC_HERE */
+#else  
 			upper = *(u16 *)loc;
 			lower = *(u16 *)(loc + 2);
-#endif /* MY_DEF_HERE || MY_ABC_HERE */
+#endif  
 
-			/*
-			 * MOVT/MOVW instructions encoding in Thumb-2:
-			 *
-			 * i	= upper[10]
-			 * imm4	= upper[3:0]
-			 * imm3	= lower[14:12]
-			 * imm8	= lower[7:0]
-			 *
-			 * imm16 = imm4:i:imm3:imm8
-			 */
 			offset = ((upper & 0x000f) << 12) |
 				((upper & 0x0400) << 1) |
 				((lower & 0x7000) >> 4) | (lower & 0x00ff);
@@ -299,14 +248,14 @@ apply_relocate(Elf32_Shdr *sechdrs, const char *strtab, unsigned int symindex,
 				      (offset & 0x00ff));
 			*(u16 *)loc = __opcode_to_mem_thumb16(upper);
 			*(u16 *)(loc + 2) = __opcode_to_mem_thumb16(lower);
-#else /* MY_DEF_HERE || MY_ABC_HERE */
+#else  
 			*(u16 *)loc = (u16)((upper & 0xfbf0) |
 					    ((offset & 0xf000) >> 12) |
 					    ((offset & 0x0800) >> 1));
 			*(u16 *)(loc + 2) = (u16)((lower & 0x8f00) |
 						  ((offset & 0x0700) << 4) |
 						  (offset & 0x00ff));
-#endif /* MY_DEF_HERE || MY_ABC_HERE */
+#endif  
 			break;
 #endif
 

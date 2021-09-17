@@ -1,30 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
-  This contains the functions to handle the platform driver.
-
-  Copyright (C) 2007-2011  STMicroelectronics Ltd
-
-  This program is free software; you can redistribute it and/or modify it
-  under the terms and conditions of the GNU General Public License,
-  version 2, as published by the Free Software Foundation.
-
-  This program is distributed in the hope it will be useful, but WITHOUT
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
-  more details.
-
-  You should have received a copy of the GNU General Public License along with
-  this program; if not, write to the Free Software Foundation, Inc.,
-  51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
-
-  The full GNU General Public License is included in this distribution in
-  the file called "COPYING".
-
-  Author: Giuseppe Cavallaro <peppe.cavallaro@st.com>
-*******************************************************************************/
-
+ 
 #include <linux/platform_device.h>
 #include <linux/io.h>
 #include <linux/of.h>
@@ -43,13 +20,13 @@ static const struct of_device_id stmmac_dt_ids[] = {
 	{ .compatible = "st,stid127-dwmac", .data = &stid127_dwmac_data},
 	{ .compatible = "st,sti8416-dwmac", .data = &sti8416_dwmac_data},
 #endif
-	/* SoC specific glue layers should come before generic bindings */
+	 
 	{ .compatible = "st,spear600-gmac"},
 	{ .compatible = "snps,dwmac-3.610"},
 	{ .compatible = "snps,dwmac-3.70a"},
 	{ .compatible = "snps,dwmac-3.710"},
 	{ .compatible = "snps,dwmac"},
-	{ /* sentinel */ }
+	{   }
 };
 MODULE_DEVICE_TABLE(of, stmmac_dt_ids);
 
@@ -96,7 +73,6 @@ static int stmmac_probe_config_dt(struct platform_device *pdev,
 		strcpy(plat->phy_bus_name, "fixed");
 	}
 
-	/* Get max speed of operation from device tree */
 	if (of_property_read_u32(np, "max-speed", &plat->max_speed))
 		plat->max_speed = -1;
 
@@ -104,7 +80,6 @@ static int stmmac_probe_config_dt(struct platform_device *pdev,
 	if (plat->bus_id < 0)
 		plat->bus_id = 0;
 
-	/* Default to phy auto-detection */
 	plat->phy_addr = -1;
 
 	if (plat->phy_bus_name)
@@ -115,12 +90,6 @@ static int stmmac_probe_config_dt(struct platform_device *pdev,
 					   sizeof(struct stmmac_mdio_bus_data),
 					   GFP_KERNEL);
 
-	/**
-	 * "snps,phy-addr" is not a standard property.
-	 * Eplain this should be used to limit the PHY discovery
-	 * to a given PHY address instead of all possible ones.
-	 * So warn on its use.
-	 */
 	if (of_property_read_u32(np, "snps,phy-addr", &plat->phy_addr) == 0) {
 		if (plat->mdio_bus_data) {
 			plat->mdio_bus_data->phy_mask = ~(1 << plat->phy_addr);
@@ -132,26 +101,12 @@ static int stmmac_probe_config_dt(struct platform_device *pdev,
 	plat->force_sf_dma_mode =
 		of_property_read_bool(np, "snps,force_sf_dma_mode");
 
-	/* Set the maxmtu to a default of JUMBO_LEN in case the
-	 * parameter is not present in the device tree.
-	 */
 	plat->maxmtu = JUMBO_LEN;
 
-	/*
-	 * Currently only the properties needed on SPEAr600
-	 * are provided. All other properties should be added
-	 * once needed on other platforms.
-	 */
 	if (of_device_is_compatible(np, "st,spear600-gmac") ||
 		of_device_is_compatible(np, "snps,dwmac-3.70a") ||
 		of_device_is_compatible(np, "snps,dwmac")) {
-		/* Note that the max-frame-size parameter as defined in the
-		 * ePAPR v1.1 spec is defined as max-frame-size, it's
-		 * actually used as the IEEE definition of MAC Client
-		 * data, or MTU. The ePAPR specification is confusing as
-		 * the definition is max-frame-size, but usage examples
-		 * are clearly MTUs
-		 */
+		 
 		of_property_read_u32(np, "max-frame-size", &plat->maxmtu);
 		plat->has_gmac = 1;
 		plat->pmt = 1;
@@ -195,15 +150,8 @@ static int stmmac_probe_config_dt(struct platform_device *pdev,
 {
 	return -ENOSYS;
 }
-#endif /* CONFIG_OF */
+#endif  
 
-/**
- * stmmac_pltfr_probe
- * @pdev: platform device pointer
- * Description: platform_device probe function. It allocates
- * the necessary resources and invokes the main to init
- * the net device, register the mdio bus etc.
- */
 static int stmmac_pltfr_probe(struct platform_device *pdev)
 {
 	int ret = 0;
@@ -237,14 +185,12 @@ static int stmmac_pltfr_probe(struct platform_device *pdev)
 		}
 	}
 
-	/* Custom setup (if needed) */
 	if (plat_dat->setup) {
 		plat_dat->bsp_priv = plat_dat->setup(pdev);
 		if (IS_ERR(plat_dat->bsp_priv))
 			return PTR_ERR(plat_dat->bsp_priv);
 	}
 
-	/* Custom initialisation (if needed)*/
 	if (plat_dat->init) {
 		ret = plat_dat->init(pdev, plat_dat->bsp_priv);
 		if (unlikely(ret))
@@ -257,11 +203,9 @@ static int stmmac_pltfr_probe(struct platform_device *pdev)
 		return PTR_ERR(priv);
 	}
 
-	/* Get MAC address if available (DT) */
 	if (mac)
 		memcpy(priv->dev->dev_addr, mac, ETH_ALEN);
 
-	/* Get the MAC information */
 	priv->dev->irq = platform_get_irq_byname(pdev, "macirq");
 	if (priv->dev->irq < 0) {
 		if (priv->dev->irq != -EPROBE_DEFER) {
@@ -271,14 +215,6 @@ static int stmmac_pltfr_probe(struct platform_device *pdev)
 		return priv->dev->irq;
 	}
 
-	/*
-	 * On some platforms e.g. SPEAr the wake up irq differs from the mac irq
-	 * The external wake up irq can be passed through the platform code
-	 * named as "eth_wake_irq"
-	 *
-	 * In case the wake up interrupt is not passed from the platform
-	 * so the driver will continue to use the mac irq (ndev->irq)
-	 */
 	priv->wol_irq = platform_get_irq_byname(pdev, "eth_wake_irq");
 	if (priv->wol_irq < 0) {
 		if (priv->wol_irq == -EPROBE_DEFER)
@@ -297,12 +233,6 @@ static int stmmac_pltfr_probe(struct platform_device *pdev)
 	return 0;
 }
 
-/**
- * stmmac_pltfr_remove
- * @pdev: platform device pointer
- * Description: this function calls the main to free the net resources
- * and calls the platforms hook and release the resources (e.g. mem).
- */
 static int stmmac_pltfr_remove(struct platform_device *pdev)
 {
 	struct net_device *ndev = platform_get_drvdata(pdev);
@@ -318,12 +248,6 @@ static int stmmac_pltfr_remove(struct platform_device *pdev)
 	return ret;
 }
 
-/**
- * stmmac_pltfr_shutdown
- * @pdev: platform device pointer
- * Description: this function is just to program the PMT block when
- * shutdown is invoked.
- */
 static void stmmac_pltfr_shutdown(struct platform_device *pdev)
 {
 	struct net_device *ndev = platform_get_drvdata(pdev);
@@ -331,7 +255,7 @@ static void stmmac_pltfr_shutdown(struct platform_device *pdev)
 
 	if (device_may_wakeup(priv->device)) {
 		priv->hw->mac->pmt(priv->ioaddr, priv->wolopts);
-		/* Keep the core active */
+		 
 		stmmac_set_mac(priv->ioaddr, true);
 	}
 }
@@ -368,8 +292,8 @@ static SIMPLE_DEV_PM_OPS(stmmac_pltfr_pm_ops,
 #define DEV_PM_OPS     (&stmmac_pltfr_pm_ops)
 #else
 #define DEV_PM_OPS     NULL
-#endif /* CONFIG_PM_SLEEP */
-#else /* MY_DEF_HERE */
+#endif  
+#else  
 #ifdef CONFIG_PM
 static int stmmac_pltfr_suspend(struct device *dev)
 {
@@ -397,11 +321,11 @@ static int stmmac_pltfr_resume(struct device *dev)
 	return stmmac_resume(ndev);
 }
 
-#endif /* CONFIG_PM */
+#endif  
 
 static SIMPLE_DEV_PM_OPS(stmmac_pltfr_pm_ops,
 			stmmac_pltfr_suspend, stmmac_pltfr_resume);
-#endif /* MY_DEF_HERE */
+#endif  
 
 struct platform_driver stmmac_pltfr_driver = {
 	.probe = stmmac_pltfr_probe,
@@ -412,9 +336,9 @@ struct platform_driver stmmac_pltfr_driver = {
 		   .owner = THIS_MODULE,
 #ifdef MY_DEF_HERE
 		   .pm = DEV_PM_OPS,
-#else /* MY_DEF_HERE */
+#else  
 		   .pm = &stmmac_pltfr_pm_ops,
-#endif /* MY_DEF_HERE */
+#endif  
 		   .of_match_table = of_match_ptr(stmmac_dt_ids),
 		   },
 };

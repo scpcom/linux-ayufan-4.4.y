@@ -1,25 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Coherency fabric (Aurora) support for Armada 370 and XP platforms.
- *
- * Copyright (C) 2012 Marvell
- *
- * Yehuda Yitschak <yehuday@marvell.com>
- * Gregory Clement <gregory.clement@free-electrons.com>
- * Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
- *
- * This file is licensed under the terms of the GNU General Public
- * License version 2.  This program is licensed "as is" without any
- * warranty of any kind, whether express or implied.
- *
- * The Armada 370 and Armada XP SOCs have a coherency fabric which is
- * responsible for ensuring hardware coherency between all CPUs and between
- * CPUs and I/O masters. This file initializes the coherency fabric and
- * supplies basic routines for configuring and controlling hardware coherency
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/of_address.h>
@@ -29,11 +11,11 @@
 #include <linux/platform_device.h>
 #if defined(MY_ABC_HERE)
 #include <linux/pci.h>
-#endif /* MY_ABC_HERE */
+#endif  
 #include <asm/smp_plat.h>
 #if defined(MY_ABC_HERE)
 #include <asm/cacheflush.h>
-#endif /* MY_ABC_HERE */
+#endif  
 #include "armada-370-xp.h"
 
 #if defined(MY_ABC_HERE)
@@ -41,22 +23,15 @@ extern void armada_380_scu_enable(void);
 static int coherency_type(void);
 unsigned long coherency_phys_base;
 void __iomem *coherency_base;
-#else /* MY_ABC_HERE */
-/*
- * Some functions in this file are called very early during SMP
- * initialization. At that time the device tree framework is not yet
- * ready, and it is not possible to get the register address to
- * ioremap it. That's why the pointer below is given with an initial
- * value matching its virtual mapping
- */
+#else  
+ 
 static void __iomem *coherency_base = ARMADA_370_XP_REGS_VIRT_BASE + 0x20200;
-#endif /* MY_ABC_HERE */
+#endif  
 static void __iomem *coherency_cpu_base;
 #if defined(MY_ABC_HERE)
 bool coherency_hard_mode;
-#endif /* MY_ABC_HERE */
+#endif  
 
-/* Coherency fabric registers */
 #define COHERENCY_FABRIC_CFG_OFFSET		   0x4
 
 #define IO_SYNC_BARRIER_CTL_OFFSET		   0x0
@@ -69,11 +44,6 @@ enum {
 	COHERENCY_FABRIC_TYPE_ARMADA_380,
 };
 
-/*
- * The "marvell,coherency-fabric" compatible string is kept for
- * backward compatibility reasons, and is equivalent to
- * "marvell,armada-370-coherency-fabric".
- */
 static struct of_device_id of_coherency_table[] = {
 	{.compatible = "marvell,coherency-fabric",
 	 .data = (void*) COHERENCY_FABRIC_TYPE_ARMADA_370_XP },
@@ -83,20 +53,20 @@ static struct of_device_id of_coherency_table[] = {
 	 .data = (void*) COHERENCY_FABRIC_TYPE_ARMADA_375 },
 	{.compatible = "marvell,armada-380-coherency-fabric",
 	 .data = (void*) COHERENCY_FABRIC_TYPE_ARMADA_380 },
-	{ /* end of list */ },
+	{   },
 };
-#else /* MY_ABC_HERE */
+#else  
 static struct of_device_id of_coherency_table[] = {
 	{.compatible = "marvell,coherency-fabric"},
-	{ /* end of list */ },
+	{   },
 };
-#endif /* MY_ABC_HERE */
+#endif  
 
 #if defined(MY_ABC_HERE)
-/* Functions defined in coherency_ll.S */
+ 
 int ll_enable_coherency(void);
 void ll_add_cpu_to_smp_group(void);
-#else /* MY_ABC_HERE */
+#else  
 #ifdef CONFIG_SMP
 int coherency_get_cpu_count(void)
 {
@@ -109,9 +79,8 @@ int coherency_get_cpu_count(void)
 }
 #endif
 
-/* Function defined in coherency_ll.S */
 int ll_set_cpu_coherent(void __iomem *base_addr, unsigned int hw_cpu_id);
-#endif /* MY_ABC_HERE */
+#endif  
 
 #if defined(MY_ABC_HERE)
 int set_cpu_coherent(void)
@@ -131,7 +100,7 @@ int set_cpu_coherent(void)
 
 	return 0;
 }
-#else /* MY_ABC_HERE */
+#else  
 int set_cpu_coherent(unsigned int hw_cpu_id, int smp_group_id)
 {
 	if (!coherency_base) {
@@ -142,7 +111,7 @@ int set_cpu_coherent(unsigned int hw_cpu_id, int smp_group_id)
 
 	return ll_set_cpu_coherent(coherency_base, hw_cpu_id);
 }
-#endif /* MY_ABC_HERE */
+#endif  
 
 static inline void mvebu_hwcc_sync_io_barrier(void)
 {
@@ -179,10 +148,10 @@ static struct dma_map_ops mvebu_hwcc_dma_ops = {
 #if defined(MY_ABC_HERE)
 	.alloc			= arm_coherent_dma_alloc,
 	.free			= arm_coherent_dma_free,
-#else /* MY_ABC_HERE */
+#else  
 	.alloc			= arm_dma_alloc,
 	.free			= arm_dma_free,
-#endif /* MY_ABC_HERE */
+#endif  
 	.mmap			= arm_dma_mmap,
 	.map_page		= mvebu_hwcc_dma_map_page,
 	.unmap_page		= mvebu_hwcc_dma_unmap_page,
@@ -218,12 +187,7 @@ static void __init armada_370_coherency_init(struct device_node *np)
 	struct resource res;
 	of_address_to_resource(np, 0, &res);
 	coherency_phys_base = res.start;
-	/*
-	 * Ensure secondary CPUs will see the updated value,
-	 * which they read before they join the coherency
-	 * fabric, and therefore before they are coherent with
-	 * the boot CPU cache.
-	 */
+	 
 	sync_cache_w(&coherency_phys_base);
 	coherency_base = of_iomap(np, 0);
 	coherency_cpu_base = of_iomap(np, 1);
@@ -244,26 +208,6 @@ static int coherency_type(void)
 {
 	struct device_node *np;
 
-	/*
-	 * The coherency fabric is needed:
-	 * - For coherency between processors on Armada XP, so only
-	 *   when SMP is enabled.
-	 * - For coherency between the processor and I/O devices, but
-	 *   this coherency requires many pre-requisites (write
-	 *   allocate cache policy, shareable pages, SMP bit set) that
-	 *   are only meant in SMP situations.
-	 *
-	 * Note that this means that on Armada 370, there is currently
-	 * no way to use hardware I/O coherency, because even when
-	 * CONFIG_SMP is enabled, is_smp() returns false due to the
-	 * Armada 370 being a single-core processor. To lift this
-	 * limitation, we would have to find a way to make the cache
-	 * policy set to write-allocate (on all Armada SoCs), and to
-	 * set the shareable attribute in page tables (on all Armada
-	 * SoCs except the Armada 370). Unfortunately, such decisions
-	 * are taken very early in the kernel boot process, at a point
-	 * where we don't know yet on which SoC we are running.
-	 */
 	if (!is_smp())
 		return 0;
 
@@ -330,7 +274,7 @@ static int __init coherency_pci_notify_init(void)
 }
 
 arch_initcall(coherency_pci_notify_init);
-#else /* MY_ABC_HERE */
+#else  
 int __init coherency_init(void)
 {
 	struct device_node *np;
@@ -346,4 +290,4 @@ int __init coherency_init(void)
 
 	return 0;
 }
-#endif /* MY_ABC_HERE */
+#endif  

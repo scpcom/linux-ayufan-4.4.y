@@ -1,18 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * linux/sound/soc/pxa/brownstone.c
- *
- * Copyright (C) 2011 Marvell International Ltd.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- */
-
+ 
 #include <linux/module.h>
 #include <sound/core.h>
 #include <sound/pcm.h>
@@ -54,15 +43,14 @@ static int brownstone_wm8994_init(struct snd_soc_pcm_runtime *rtd)
 	struct snd_soc_dapm_context *dapm = &codec->dapm;
 
 #if defined(MY_ABC_HERE)
-	// do nothing
-#else /* MY_ABC_HERE */
+	 
+#else  
 	snd_soc_dapm_enable_pin(dapm, "Ext Spk");
 	snd_soc_dapm_enable_pin(dapm, "Headset Stereophone");
 	snd_soc_dapm_enable_pin(dapm, "Headset Mic");
 	snd_soc_dapm_enable_pin(dapm, "Main Mic");
-#endif /* MY_ABC_HERE */
+#endif  
 
-	/* set endpoints to not connected */
 	snd_soc_dapm_nc_pin(dapm, "HPOUT2P");
 	snd_soc_dapm_nc_pin(dapm, "HPOUT2N");
 	snd_soc_dapm_nc_pin(dapm, "LINEOUT1N");
@@ -107,13 +95,11 @@ static int brownstone_wm8994_hw_params(struct snd_pcm_substream *substream,
 	snd_soc_dai_set_pll(cpu_dai, MMP_SYSCLK, 0, freq_out, sysclk);
 	snd_soc_dai_set_pll(cpu_dai, MMP_SSPA_CLK, 0, freq_out, sspa_mclk);
 
-	/* set wm8994 sysclk */
 	snd_soc_dai_set_sysclk(codec_dai, WM8994_SYSCLK_MCLK1, sysclk, 0);
 
 	return 0;
 }
 
-/* machine stream operations */
 static struct snd_soc_ops brownstone_ops = {
 	.hw_params = brownstone_wm8994_hw_params,
 };
@@ -133,7 +119,6 @@ static struct snd_soc_dai_link brownstone_wm8994_dai[] = {
 },
 };
 
-/* audio machine driver */
 static struct snd_soc_card brownstone = {
 	.name         = "brownstone",
 	.dai_link     = brownstone_wm8994_dai,

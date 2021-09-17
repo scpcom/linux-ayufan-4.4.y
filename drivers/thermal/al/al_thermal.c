@@ -1,22 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Annapurna Labs thermal driver.
- *
- * Copyright (C) 2013 Annapurna Labs
- *
- * This software is licensed under the terms of the GNU General Public
- * License version 2, as published by the Free Software Foundation, and
- * may be copied, distributed, and modified under those terms.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- */
-
+ 
 #include <linux/err.h>
 #include <linux/of.h>
 #include <linux/module.h>
@@ -86,7 +71,6 @@ static int al_thermal_suspend(struct device *dev)
 	struct thermal_zone_device *al_thermal = platform_get_drvdata(pdev);
 	struct al_thermal_dev *al_dev = al_thermal->devdata;
 
-	/* Disable Annapurna Labs Thermal Sensor */
 	al_thermal_sensor_enable_set(&al_dev->handle, 0);
 
 	pr_info("%s: Suspended.\n", __func__);
@@ -101,7 +85,6 @@ static int al_thermal_resume(struct device *dev)
 	struct al_thermal_dev *al_dev = al_thermal->devdata;
 	int err = 0;
 
-	/* Enable Annapurna Labs Thermal Sensor */
 	err = thermal_enable(&al_dev->handle);
 	if (err) {
 		pr_err("%s: thermal_enable failed!\n", __func__);
@@ -119,7 +102,7 @@ static SIMPLE_DEV_PM_OPS(al_thermal_pm_ops, al_thermal_suspend,
 
 #ifdef MY_DEF_HERE
 struct thermal_zone_device *g_syno_al_thermal = NULL;
-#endif /* MY_DEF_HERE */
+#endif  
 
 static int al_thermal_probe(struct platform_device *pdev)
 {
@@ -176,7 +159,7 @@ static int al_thermal_probe(struct platform_device *pdev)
 	}
 #ifdef MY_DEF_HERE
 	g_syno_al_thermal = al_thermal;
-#endif /* MY_DEF_HERE */
+#endif  
 
 	platform_set_drvdata(pdev, al_thermal);
 
@@ -199,14 +182,13 @@ int syno_alpine_get_cpu_temperature(int *temperature)
 	if (ret != 0)
 		return ret;
 
-	/* check unsigned long -> int overflow */
 	if (ulTemperature != (unsigned long)(int)ulTemperature)
 		return -ERANGE;
 	*temperature = (int)ulTemperature;
 	return 0;
 }
 EXPORT_SYMBOL(syno_alpine_get_cpu_temperature);
-#endif /* MY_DEF_HERE */
+#endif  
 
 static int al_thermal_exit(struct platform_device *pdev)
 {

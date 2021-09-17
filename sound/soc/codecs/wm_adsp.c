@@ -1,18 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * wm_adsp.c  --  Wolfson ADSP support
- *
- * Copyright 2012 Wolfson Microelectronics plc
- *
- * Author: Mark Brown <broonie@opensource.wolfsonmicro.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
-
+ 
 #include <linux/module.h>
 #include <linux/moduleparam.h>
 #include <linux/init.h>
@@ -80,39 +69,30 @@
 #define ADSP1_CONTROL_30                  0x24
 #define ADSP1_CONTROL_31                  0x26
 
-/*
- * ADSP1 Control 19
- */
-#define ADSP1_WDMA_BUFFER_LENGTH_MASK     0x00FF  /* DSP1_WDMA_BUFFER_LENGTH - [7:0] */
-#define ADSP1_WDMA_BUFFER_LENGTH_SHIFT         0  /* DSP1_WDMA_BUFFER_LENGTH - [7:0] */
-#define ADSP1_WDMA_BUFFER_LENGTH_WIDTH         8  /* DSP1_WDMA_BUFFER_LENGTH - [7:0] */
+#define ADSP1_WDMA_BUFFER_LENGTH_MASK     0x00FF   
+#define ADSP1_WDMA_BUFFER_LENGTH_SHIFT         0   
+#define ADSP1_WDMA_BUFFER_LENGTH_WIDTH         8   
 
-/*
- * ADSP1 Control 30
- */
-#define ADSP1_DBG_CLK_ENA                 0x0008  /* DSP1_DBG_CLK_ENA */
-#define ADSP1_DBG_CLK_ENA_MASK            0x0008  /* DSP1_DBG_CLK_ENA */
-#define ADSP1_DBG_CLK_ENA_SHIFT                3  /* DSP1_DBG_CLK_ENA */
-#define ADSP1_DBG_CLK_ENA_WIDTH                1  /* DSP1_DBG_CLK_ENA */
-#define ADSP1_SYS_ENA                     0x0004  /* DSP1_SYS_ENA */
-#define ADSP1_SYS_ENA_MASK                0x0004  /* DSP1_SYS_ENA */
-#define ADSP1_SYS_ENA_SHIFT                    2  /* DSP1_SYS_ENA */
-#define ADSP1_SYS_ENA_WIDTH                    1  /* DSP1_SYS_ENA */
-#define ADSP1_CORE_ENA                    0x0002  /* DSP1_CORE_ENA */
-#define ADSP1_CORE_ENA_MASK               0x0002  /* DSP1_CORE_ENA */
-#define ADSP1_CORE_ENA_SHIFT                   1  /* DSP1_CORE_ENA */
-#define ADSP1_CORE_ENA_WIDTH                   1  /* DSP1_CORE_ENA */
-#define ADSP1_START                       0x0001  /* DSP1_START */
-#define ADSP1_START_MASK                  0x0001  /* DSP1_START */
-#define ADSP1_START_SHIFT                      0  /* DSP1_START */
-#define ADSP1_START_WIDTH                      1  /* DSP1_START */
+#define ADSP1_DBG_CLK_ENA                 0x0008   
+#define ADSP1_DBG_CLK_ENA_MASK            0x0008   
+#define ADSP1_DBG_CLK_ENA_SHIFT                3   
+#define ADSP1_DBG_CLK_ENA_WIDTH                1   
+#define ADSP1_SYS_ENA                     0x0004   
+#define ADSP1_SYS_ENA_MASK                0x0004   
+#define ADSP1_SYS_ENA_SHIFT                    2   
+#define ADSP1_SYS_ENA_WIDTH                    1   
+#define ADSP1_CORE_ENA                    0x0002   
+#define ADSP1_CORE_ENA_MASK               0x0002   
+#define ADSP1_CORE_ENA_SHIFT                   1   
+#define ADSP1_CORE_ENA_WIDTH                   1   
+#define ADSP1_START                       0x0001   
+#define ADSP1_START_MASK                  0x0001   
+#define ADSP1_START_SHIFT                      0   
+#define ADSP1_START_WIDTH                      1   
 
-/*
- * ADSP1 Control 31
- */
-#define ADSP1_CLK_SEL_MASK                0x0007  /* CLK_SEL_ENA */
-#define ADSP1_CLK_SEL_SHIFT                    0  /* CLK_SEL_ENA */
-#define ADSP1_CLK_SEL_WIDTH                    3  /* CLK_SEL_ENA */
+#define ADSP1_CLK_SEL_MASK                0x0007   
+#define ADSP1_CLK_SEL_SHIFT                    0   
+#define ADSP1_CLK_SEL_WIDTH                    3   
 
 #define ADSP2_CONTROL        0x0
 #define ADSP2_CLOCKING       0x1
@@ -121,37 +101,27 @@
 #define ADSP2_WDMA_CONFIG_2 0x31
 #define ADSP2_RDMA_CONFIG_1 0x34
 
-/*
- * ADSP2 Control
- */
+#define ADSP2_MEM_ENA                     0x0010   
+#define ADSP2_MEM_ENA_MASK                0x0010   
+#define ADSP2_MEM_ENA_SHIFT                    4   
+#define ADSP2_MEM_ENA_WIDTH                    1   
+#define ADSP2_SYS_ENA                     0x0004   
+#define ADSP2_SYS_ENA_MASK                0x0004   
+#define ADSP2_SYS_ENA_SHIFT                    2   
+#define ADSP2_SYS_ENA_WIDTH                    1   
+#define ADSP2_CORE_ENA                    0x0002   
+#define ADSP2_CORE_ENA_MASK               0x0002   
+#define ADSP2_CORE_ENA_SHIFT                   1   
+#define ADSP2_CORE_ENA_WIDTH                   1   
+#define ADSP2_START                       0x0001   
+#define ADSP2_START_MASK                  0x0001   
+#define ADSP2_START_SHIFT                      0   
+#define ADSP2_START_WIDTH                      1   
 
-#define ADSP2_MEM_ENA                     0x0010  /* DSP1_MEM_ENA */
-#define ADSP2_MEM_ENA_MASK                0x0010  /* DSP1_MEM_ENA */
-#define ADSP2_MEM_ENA_SHIFT                    4  /* DSP1_MEM_ENA */
-#define ADSP2_MEM_ENA_WIDTH                    1  /* DSP1_MEM_ENA */
-#define ADSP2_SYS_ENA                     0x0004  /* DSP1_SYS_ENA */
-#define ADSP2_SYS_ENA_MASK                0x0004  /* DSP1_SYS_ENA */
-#define ADSP2_SYS_ENA_SHIFT                    2  /* DSP1_SYS_ENA */
-#define ADSP2_SYS_ENA_WIDTH                    1  /* DSP1_SYS_ENA */
-#define ADSP2_CORE_ENA                    0x0002  /* DSP1_CORE_ENA */
-#define ADSP2_CORE_ENA_MASK               0x0002  /* DSP1_CORE_ENA */
-#define ADSP2_CORE_ENA_SHIFT                   1  /* DSP1_CORE_ENA */
-#define ADSP2_CORE_ENA_WIDTH                   1  /* DSP1_CORE_ENA */
-#define ADSP2_START                       0x0001  /* DSP1_START */
-#define ADSP2_START_MASK                  0x0001  /* DSP1_START */
-#define ADSP2_START_SHIFT                      0  /* DSP1_START */
-#define ADSP2_START_WIDTH                      1  /* DSP1_START */
+#define ADSP2_CLK_SEL_MASK                0x0007   
+#define ADSP2_CLK_SEL_SHIFT                    0   
+#define ADSP2_CLK_SEL_WIDTH                    3   
 
-/*
- * ADSP2 clocking
- */
-#define ADSP2_CLK_SEL_MASK                0x0007  /* CLK_SEL_ENA */
-#define ADSP2_CLK_SEL_SHIFT                    0  /* CLK_SEL_ENA */
-#define ADSP2_CLK_SEL_WIDTH                    3  /* CLK_SEL_ENA */
-
-/*
- * ADSP2 Status 1
- */
 #define ADSP2_RAM_RDY                     0x0001
 #define ADSP2_RAM_RDY_MASK                0x0001
 #define ADSP2_RAM_RDY_SHIFT                    0
@@ -222,9 +192,9 @@ static int wm_adsp_fw_get(struct snd_kcontrol *kcontrol,
 {
 #if defined(MY_ABC_HERE)
 	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
-#else /* MY_ABC_HERE */
+#else  
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
-#endif /* MY_ABC_HERE */
+#endif  
 	struct soc_enum *e = (struct soc_enum *)kcontrol->private_value;
 	struct wm_adsp *adsp = snd_soc_codec_get_drvdata(codec);
 
@@ -238,9 +208,9 @@ static int wm_adsp_fw_put(struct snd_kcontrol *kcontrol,
 {
 #if defined(MY_ABC_HERE)
 	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
-#else /* MY_ABC_HERE */
+#else  
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
-#endif /* MY_ABC_HERE */
+#endif  
 	struct soc_enum *e = (struct soc_enum *)kcontrol->private_value;
 	struct wm_adsp *adsp = snd_soc_codec_get_drvdata(codec);
 
@@ -697,7 +667,6 @@ static int wm_adsp_setup_algs(struct wm_adsp *dsp)
 		return -EINVAL;
 	}
 
-	/* Read the terminator first to validate the length */
 	ret = regmap_raw_read(regmap, mem->base + term, &val, sizeof(val));
 	if (ret != 0) {
 		adsp_err(dsp, "Failed to read algorithm list end: %d\n",
@@ -877,10 +846,7 @@ static int wm_adsp_load_coeff(struct wm_adsp *dsp)
 		case (WMFW_INFO_TEXT << 8):
 			break;
 		case (WMFW_ABSOLUTE << 8):
-			/*
-			 * Old files may use this for global
-			 * coefficients.
-			 */
+			 
 			if (le32_to_cpu(blk->id) == dsp->fw_id &&
 			    offset == 0) {
 				region_name = "global coefficients";
@@ -1005,10 +971,6 @@ int wm_adsp1_event(struct snd_soc_dapm_widget *w,
 		regmap_update_bits(dsp->regmap, dsp->base + ADSP1_CONTROL_30,
 				   ADSP1_SYS_ENA, ADSP1_SYS_ENA);
 
-		/*
-		 * For simplicity set the DSP clock rate to be the
-		 * SYSCLK rate rather than making it configurable.
-		 */
 		if(dsp->sysclk_reg) {
 			ret = regmap_read(dsp->regmap, dsp->sysclk_reg, &val);
 			if (ret != 0) {
@@ -1042,14 +1004,13 @@ int wm_adsp1_event(struct snd_soc_dapm_widget *w,
 		if (ret != 0)
 			goto err;
 
-		/* Start the core running */
 		regmap_update_bits(dsp->regmap, dsp->base + ADSP1_CONTROL_30,
 				   ADSP1_CORE_ENA | ADSP1_START,
 				   ADSP1_CORE_ENA | ADSP1_START);
 		break;
 
 	case SND_SOC_DAPM_PRE_PMD:
-		/* Halt the core */
+		 
 		regmap_update_bits(dsp->regmap, dsp->base + ADSP1_CONTROL_30,
 				   ADSP1_CORE_ENA | ADSP1_START, 0);
 
@@ -1083,7 +1044,6 @@ static int wm_adsp2_ena(struct wm_adsp *dsp)
 	if (ret != 0)
 		return ret;
 
-	/* Wait for the RAM to start, should be near instantaneous */
 	for (count = 0; count < 10; ++count) {
 		ret = regmap_read(dsp->regmap, dsp->base + ADSP2_STATUS1,
 				  &val);
@@ -1119,10 +1079,7 @@ int wm_adsp2_event(struct snd_soc_dapm_widget *w,
 
 	switch (event) {
 	case SND_SOC_DAPM_POST_PMU:
-		/*
-		 * For simplicity set the DSP clock rate to be the
-		 * SYSCLK rate rather than making it configurable.
-		 */
+		 
 		ret = regmap_read(dsp->regmap, ARIZONA_SYSTEM_CLOCK_1, &val);
 		if (ret != 0) {
 			adsp_err(dsp, "Failed to read SYSCLK state: %d\n",
@@ -1204,7 +1161,6 @@ int wm_adsp2_event(struct snd_soc_dapm_widget *w,
 				   ADSP2_SYS_ENA | ADSP2_CORE_ENA |
 				   ADSP2_START, 0);
 
-		/* Make sure DMAs are quiesced */
 		regmap_write(dsp->regmap, dsp->base + ADSP2_WDMA_CONFIG_1, 0);
 		regmap_write(dsp->regmap, dsp->base + ADSP2_WDMA_CONFIG_2, 0);
 		regmap_write(dsp->regmap, dsp->base + ADSP2_RDMA_CONFIG_1, 0);
@@ -1249,10 +1205,6 @@ int wm_adsp2_init(struct wm_adsp *adsp, bool dvfs)
 {
 	int ret;
 
-	/*
-	 * Disable the DSP memory by default when in reset for a small
-	 * power saving.
-	 */
 	ret = regmap_update_bits(adsp->regmap, adsp->base + ADSP2_CONTROL,
 				 ADSP2_MEM_ENA, 0);
 	if (ret != 0) {

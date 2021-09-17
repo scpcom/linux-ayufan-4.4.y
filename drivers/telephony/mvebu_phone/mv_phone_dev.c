@@ -1,70 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
-Copyright (C) Marvell International Ltd. and its affiliates
-
-This software file (the "File") is owned and distributed by Marvell
-International Ltd. and/or its affiliates ("Marvell") under the following
-alternative licensing terms.  Once you have made an election to distribute the
-File under one of the following license alternatives, please (i) delete this
-introductory statement regarding license alternatives, (ii) delete the two
-license alternatives that you have not elected to use and (iii) preserve the
-Marvell copyright notice above.
-
-********************************************************************************
-Marvell Commercial License Option
-
-If you received this File from Marvell and you have entered into a commercial
-license agreement (a "Commercial License") with Marvell, the File is licensed
-to you under the terms of the applicable Commercial License.
-
-********************************************************************************
-Marvell GPL License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or
-modify this File in accordance with the terms and conditions of the General
-Public License Version 2, June 1991 (the "GPL License"), a copy of which is
-available along with the File in the license.txt file or by writing to the Free
-Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 or
-on the worldwide web at http://www.gnu.org/licenses/gpl.txt.
-
-THE FILE IS DISTRIBUTED AS-IS, WITHOUT WARRANTY OF ANY KIND, AND THE IMPLIED
-WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY
-DISCLAIMED.  The GPL License provides additional details about this warranty
-disclaimer.
-********************************************************************************
-Marvell BSD License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or
-modify this File under the following licensing terms.
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-	*   Redistributions of source code must retain the above copyright notice,
-	    this list of conditions and the following disclaimer.
-
-	*   Redistributions in binary form must reproduce the above copyright
-	    notice, this list of conditions and the following disclaimer in the
-	    documentation and/or other materials provided with the distribution.
-
-	*   Neither the name of Marvell nor the names of its contributors may be
-	    used to endorse or promote products derived from this software without
-	    specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-*******************************************************************************/
-
+ 
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/platform_device.h>
@@ -86,7 +23,6 @@ int use_pclk_external;
 int mv_phone_enabled;
 struct mv_phone_dev *priv;
 
-/* Initialize the TDM subsystem. */
 int mvSysTdmInit(MV_TDM_PARAMS *tdm_params)
 {
 	MV_TDM_HAL_DATA hal_data;
@@ -122,7 +58,6 @@ int mvSysTdmInit(MV_TDM_PARAMS *tdm_params)
 	return ret;
 }
 
-/* Enable device interrupts. */
 void mvSysTdmIntEnable(u8 dev_id)
 {
 	MV_TDM_UNIT_TYPE tdmUnit;
@@ -132,7 +67,6 @@ void mvSysTdmIntEnable(u8 dev_id)
 		mvTdmIntEnable();
 }
 
-/* Disable device interrupts. */
 void mvSysTdmIntDisable(u8 dev_id)
 {
 	MV_TDM_UNIT_TYPE tdm_unit;
@@ -142,19 +76,16 @@ void mvSysTdmIntDisable(u8 dev_id)
 		mvTdmIntDisable();
 }
 
-/* Get board type for SLIC unit (pre-defined). */
 u32 mvBoardSlicUnitTypeGet(void)
 {
 	return MV_BOARD_SLIC_DISABLED;
 }
 
-/* Get TDM unit interrupt number. */
 u32 mvCtrlTdmUnitIrqGet(void)
 {
 	return priv->irq;
 }
 
-/* Get TDM unit type. */
 MV_TDM_UNIT_TYPE mvCtrlTdmUnitTypeGet(void)
 {
 	MV_TDM_UNIT_TYPE tdm_type = MV_TDM_UNIT_NONE;
@@ -168,7 +99,6 @@ MV_TDM_UNIT_TYPE mvCtrlTdmUnitTypeGet(void)
 	return tdm_type;
 }
 
-/* Configure PLL to 24MHz */
 static int mv_phone_tdm_clk_pll_config(struct platform_device *pdev)
 {
 	struct resource *mem;
@@ -184,7 +114,6 @@ static int mv_phone_tdm_clk_pll_config(struct platform_device *pdev)
 			return -ENOMEM;
 	}
 
-	/* Set frequency offset value to not valid and enable PLL reset */
 	reg_val = readl(priv->pll_base + TDM_PLL_CONF_REG1);
 	reg_val &= ~TDM_PLL_FREQ_OFFSET_VALID;
 	reg_val &= ~TDM_PLL_SW_RESET;
@@ -192,7 +121,6 @@ static int mv_phone_tdm_clk_pll_config(struct platform_device *pdev)
 
 	udelay(1);
 
-	/* Update PLL parameters */
 	reg_val = readl(priv->pll_base + TDM_PLL_CONF_REG0);
 	reg_val &= ~TDM_PLL_FB_CLK_DIV_MASK;
 	reg_val |= (fb_clk_div << TDM_PLL_FB_CLK_DIV_OFFSET);
@@ -210,21 +138,17 @@ static int mv_phone_tdm_clk_pll_config(struct platform_device *pdev)
 
 	udelay(1);
 
-	/* Disable reset */
 	reg_val |= TDM_PLL_SW_RESET;
 	writel(reg_val, priv->pll_base + TDM_PLL_CONF_REG1);
 
-	/* Wait 50us for PLL to lock */
 	udelay(50);
 
-	/* Restore frequency offset value validity */
 	reg_val |= TDM_PLL_FREQ_OFFSET_VALID;
 	writel(reg_val, priv->pll_base + TDM_PLL_CONF_REG1);
 
 	return 0;
 }
 
-/* Set DCO post divider in respect of 24MHz PLL output */
 static int mv_phone_dco_post_div_config(struct platform_device *pdev,
 					u32 pclk_freq_mhz)
 {
@@ -254,17 +178,14 @@ static int mv_phone_dco_post_div_config(struct platform_device *pdev,
 		break;
 	}
 
-	/* Disable output clock */
 	reg_val = readl(priv->dco_div_reg);
 	writel(MV_BIT_CLEAR(reg_val, DCO_CLK_DIV_RESET_OFFS),
 	       priv->dco_div_reg);
 
-	/* Set DCO source ratio */
 	reg_val = readl(priv->dco_div_reg);
 	writel((reg_val & ~DCO_CLK_DIV_RATIO_MASK) | pcm_clk_ratio,
 	       priv->dco_div_reg);
 
-	/* Reload new DCO source ratio */
 	reg_val = readl(priv->dco_div_reg);
 	writel(MV_BIT_SET(reg_val, DCO_CLK_DIV_MOD_OFFS), priv->dco_div_reg);
 	mdelay(1);
@@ -273,14 +194,12 @@ static int mv_phone_dco_post_div_config(struct platform_device *pdev,
 	writel(MV_BIT_CLEAR(reg_val, DCO_CLK_DIV_MOD_OFFS), priv->dco_div_reg);
 	mdelay(1);
 
-	/* Enable output clock */
 	reg_val = readl(priv->dco_div_reg);
 	writel(MV_BIT_SET(reg_val, DCO_CLK_DIV_RESET_OFFS), priv->dco_div_reg);
 
 	return 0;
 }
 
-/* Initialize decoding windows */
 static int mv_conf_mbus_windows(struct device *dev, void __iomem *regs,
 				const struct mbus_dram_target_info *dram)
 {
@@ -299,12 +218,11 @@ static int mv_conf_mbus_windows(struct device *dev, void __iomem *regs,
 	for (i = 0; i < dram->num_cs; i++) {
 		const struct mbus_dram_window *cs = dram->cs + i;
 
-		/* Write size, attributes and target id to control register */
 		writel(((cs->size - 1) & 0xffff0000) |
 			(cs->mbus_attr << 8) |
 			(dram->mbus_dram_target_id << 4) | 1,
 			regs + TDM_WIN_CTRL_REG(i));
-		/* Write base address to base register */
+		 
 		writel(cs->base, regs + TDM_WIN_BASE_REG(i));
 	}
 
@@ -410,7 +328,7 @@ static int mvebu_phone_suspend(struct device *dev)
 	priv->tdm_spi_mux_reg = MV_REG_READ(TDM_SPI_MUX_REG);
 	priv->tdm_mbus_config_reg = MV_REG_READ(TDM_MBUS_CONFIG_REG);
 	priv->tdm_misc_reg = MV_REG_READ(TDM_MISC_REG);
-#endif /* MY_ABC_HERE */
+#endif  
 
 	return 0;
 }
@@ -422,7 +340,7 @@ static int mvebu_phone_resume(struct device *dev)
 	int err, i;
 #else
 	int err;
-#endif /* MY_ABC_HERE */
+#endif  
 
 	err = mv_conf_mbus_windows(dev, priv->tdm_base,
 				   mv_mbus_dram_info());
@@ -449,7 +367,7 @@ static int mvebu_phone_resume(struct device *dev)
 	MV_REG_WRITE(TDM_MISC_REG, priv->tdm_misc_reg);
 #else
 	mvSysTdmInit(priv->tdm_params);
-#endif /* MY_ABC_HERE */
+#endif  
 
 	return 0;
 }

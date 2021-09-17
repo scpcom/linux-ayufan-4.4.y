@@ -1,23 +1,12 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * ST Thermal Sensor Driver for memory mapped sensors.
- * Author: Ajit Pal Singh <ajitpal.singh@st.com>
- *
- * Copyright (C) 2003-2013 STMicroelectronics (R&D) Limited
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- */
+ 
 #include <linux/of.h>
 #include <linux/module.h>
 #ifdef MY_DEF_HERE
 #include <linux/of_address.h>
-#endif /* MY_DEF_HERE */
+#endif  
 
 #include "st_thermal.h"
 
@@ -28,29 +17,23 @@
 #define STIH416_MPE_INT_EN			STIH416_THSENS(3)
 #define STIH416_MPE_INT_EVT			STIH416_THSENS(4)
 
-/* Power control bits for the memory mapped thermal sensor */
 #define THERMAL_PDN				BIT(4)
 #define THERMAL_SRSTN				BIT(10)
 
 static const struct reg_field st_thermal_memmap_regfields[MAX_REGFIELDS] = {
-	/*
-	 * According to the STIH416 MPE temp sensor data sheet -
-	 * the PDN (Power Down Bit) and SRSTN (Soft Reset Bit) need to be
-	 * written simultaneously for powering on and off the temperature
-	 * sensor. regmap_update_bits() will be used to update the register.
-	 */
+	 
 	[INT_THRESH_HI] = REG_FIELD(STIH416_MPE_INT_THRESH, 0, 7),
 	[DCORRECT] = REG_FIELD(STIH416_MPE_CONF, 5, 9),
 	[OVERFLOW] = REG_FIELD(STIH416_MPE_STATUS, 9, 9),
 	[DATA] = REG_FIELD(STIH416_MPE_STATUS, 11, 18),
 #ifdef MY_DEF_HERE
 	[DATARDY] = REG_FIELD(STIH416_MPE_STATUS, 10, 10),
-#endif /* MY_DEF_HERE */
+#endif  
 	[INT_ENABLE] = REG_FIELD(STIH416_MPE_INT_EN, 0, 0),
 	[INT_THRESH_LOW] = REG_FIELD(STIH416_MPE_INT_THRESH, 8, 15),
 #ifdef MY_DEF_HERE
 	[DC_CALIB] = REG_FIELD(0, 22, 26),
-#endif /* MY_DEF_HERE */
+#endif  
 };
 
 static irqreturn_t st_thermal_thresh_int(int irq, void *data)
@@ -58,9 +41,8 @@ static irqreturn_t st_thermal_thresh_int(int irq, void *data)
 	struct st_thermal_sensor *sensor = data;
 	struct device *dev = sensor_to_dev(sensor);
 
-	/* Enable polling, if passive cooling is enabled */
 	if (sensor->cdev) {
-		/* Notify user space */
+		 
 		kobject_uevent(&sensor->th_dev->device.kobj, KOBJ_CHANGE);
 		dev_info(dev, "passive cooling threshold:(%d) crossed\n",
 			 sensor->passive_temp);
@@ -74,9 +56,6 @@ static irqreturn_t st_thermal_thresh_int(int irq, void *data)
 	return IRQ_HANDLED;
 }
 
-/*
- * Private ops for the memory based thermal sensors.
- */
 static int st_memmap_power_ctrl(struct st_thermal_sensor *sensor,
 				enum st_thermal_power_state power_state)
 {
@@ -85,9 +64,9 @@ static int st_memmap_power_ctrl(struct st_thermal_sensor *sensor,
 
 #ifdef MY_DEF_HERE
 	return regmap_update_bits(sensor->regmap[TH_REGS], STIH416_MPE_CONF,
-#else /* MY_DEF_HERE */
+#else  
 	return regmap_update_bits(sensor->regmap, STIH416_MPE_CONF,
-#endif /* MY_DEF_HERE */
+#endif  
 				  mask, val);
 }
 
@@ -96,9 +75,9 @@ static int st_memmap_alloc_regfields(struct st_thermal_sensor *sensor)
 	struct device *dev = sensor_to_dev(sensor);
 #ifdef MY_DEF_HERE
 	struct regmap *regmap = sensor->regmap[TH_REGS];
-#else /* MY_DEF_HERE */
+#else  
 	struct regmap *regmap = sensor->regmap;
-#endif /* MY_DEF_HERE */
+#endif  
 	const struct reg_field *reg_fields = sensor->data->reg_fields;
 	int ret;
 
@@ -118,9 +97,9 @@ static int st_memmap_alloc_regfields(struct st_thermal_sensor *sensor)
 	    IS_ERR(sensor->int_enable)) {
 #ifdef MY_DEF_HERE
 		dev_err(dev, "failed to alloc reg field(s)\n");
-#else /* MY_DEF_HERE */
+#else  
 		dev_err(dev, "%s,failed to alloc reg field(s)\n", __func__);
-#endif /* MY_DEF_HERE */
+#endif  
 		return -EINVAL;
 	}
 
@@ -157,14 +136,12 @@ static int st_memmap_enable_irq(struct st_thermal_sensor *sensor)
 	if (!sensor->cdev)
 		threshold_temp = sensor->data->crit_temp;
 
-	/* Set upper passive threshold */
 	ret = regmap_field_write(sensor->int_thresh_hi,
 				 threshold_temp
 				 - sensor->data->temp_adjust_val);
 	if (ret)
 		return ret;
 
-	/* Set low threshold */
 	ret = regmap_field_write(sensor->int_thresh_low,
 				 threshold_temp
 				 - sensor->data->temp_adjust_val);
@@ -182,17 +159,12 @@ static void st_memmap_clear_irq(struct thermal_zone_device *th,
 	if (th->polling_delay &&
 	    (temp < mcelsius(sensor->passive_temp))) {
 		sensor->th_dev->polling_delay = 0;
-		/*
-		 * Clear interrupt.
-		 * Interrupt should be cleared only after the temperature is
-		 * less then the threshold temp, otherwise a new interrupt is
-		 * raised immediately.
-		 */
+		 
 #ifdef MY_DEF_HERE
 		regmap_write(sensor->regmap[TH_REGS], STIH416_MPE_INT_EVT, 1);
-#else /* MY_DEF_HERE */
+#else  
 		regmap_write(sensor->regmap, STIH416_MPE_INT_EVT, 1);
-#endif /* MY_DEF_HERE */
+#endif  
 	}
 }
 
@@ -227,7 +199,7 @@ static int st_memmap_do_memmap_regmap(struct st_thermal_sensor *sensor)
 	}
 
 	return 0;
-#else /* MY_DEF_HERE */
+#else  
 	struct platform_device *pdev = to_platform_device(dev);
 	struct resource *res;
 	int ret = 0;
@@ -253,7 +225,7 @@ static int st_memmap_do_memmap_regmap(struct st_thermal_sensor *sensor)
 	}
 
 	return ret;
-#endif /* MY_DEF_HERE */
+#endif  
 }
 
 static struct st_thermal_sensor_ops st_memmap_sensor_ops = {
@@ -265,7 +237,6 @@ static struct st_thermal_sensor_ops st_memmap_sensor_ops = {
 	.clear_irq = st_memmap_clear_irq,
 };
 
-/* Compatible device data stih416 mpe thermal sensor */
 struct st_thermal_compat_data st_416mpe_data = {
 	.reg_fields = st_thermal_memmap_regfields,
 	.ops = &st_memmap_sensor_ops,
@@ -275,7 +246,6 @@ struct st_thermal_compat_data st_416mpe_data = {
 	.crit_temp = 125,
 };
 
-/* Compatible device data stih407 thermal sensor */
 struct st_thermal_compat_data st_407_data = {
 	.reg_fields = st_thermal_memmap_regfields,
 	.ops = &st_memmap_sensor_ops,

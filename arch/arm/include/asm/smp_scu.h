@@ -35,13 +35,13 @@ void scu_enable(void __iomem *scu_base);
 #else
 static inline void scu_enable(void __iomem *scu_base) {}
 #endif
-#else /* MY_ABC_HERE */
+#else  
 #ifdef CONFIG_SMP
 void scu_enable(void __iomem *scu_base);
 #else
 static inline void scu_enable(void __iomem *scu_base) {}
 #endif
-#endif /* MY_ABC_HERE */
+#endif  
 
 #endif
 

@@ -1,19 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Marvell Armada 380/385 pinctrl driver based on mvebu pinctrl core
- *
- * Copyright (C) 2013 Marvell
- *
- * Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- */
-
+ 
 #include <linux/err.h>
 #include <linux/init.h>
 #include <linux/io.h>
@@ -392,7 +380,7 @@ static struct of_device_id armada_38x_pinctrl_of_match[] = {
 		.compatible = "marvell,mv88f6824-pinctrl",
 		.data       = (void *) V_88F6828,
 	},
-#endif /* MY_ABC_HERE */
+#endif  
 	{
 		.compatible = "marvell,mv88f6828-pinctrl",
 		.data       = (void *) V_88F6828,

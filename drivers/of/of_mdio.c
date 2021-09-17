@@ -1,17 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * OF helpers for the MDIO (Ethernet PHY) API
- *
- * Copyright (c) 2009 Secret Lab Technologies, Ltd.
- *
- * This file is released under the GPLv2
- *
- * This file provides helper functions for extracting PHY device information
- * out of the OpenFirmware device tree and using it to populate an mii_bus.
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/device.h>
 #include <linux/netdevice.h>
@@ -19,7 +9,7 @@
 #include <linux/phy.h>
 #if defined(MY_ABC_HERE)
 #include <linux/phy_fixed.h>
-#endif /* MY_ABC_HERE */
+#endif  
 #include <linux/of.h>
 #include <linux/of_irq.h>
 #include <linux/of_mdio.h>
@@ -28,14 +18,6 @@
 MODULE_AUTHOR("Grant Likely <grant.likely@secretlab.ca>");
 MODULE_LICENSE("GPL");
 
-/**
- * of_mdiobus_register - Register mii_bus and create PHYs from the device tree
- * @mdio: pointer to mii_bus structure
- * @np: pointer to device_node of MDIO bus.
- *
- * This function registers the mii_bus structure and registers a phy_device
- * for each child node of @np.
- */
 int of_mdiobus_register(struct mii_bus *mdio, struct device_node *np)
 {
 	struct phy_device *phy;
@@ -45,25 +27,20 @@ int of_mdiobus_register(struct mii_bus *mdio, struct device_node *np)
 	bool is_c45, scanphys = false;
 	int rc, i, len;
 
-	/* Mask out all PHYs from auto probing.  Instead the PHYs listed in
-	 * the device tree are populated after the bus has been registered */
 	mdio->phy_mask = ~0;
 
-	/* Clear all the IRQ properties */
 	if (mdio->irq)
 		for (i=0; i<PHY_MAX_ADDR; i++)
 			mdio->irq[i] = PHY_POLL;
 
 	mdio->dev.of_node = np;
 
-	/* Register the MDIO bus */
 	rc = mdiobus_register(mdio);
 	if (rc)
 		return rc;
 
-	/* Loop over the child nodes and register a phy_device for each one */
 	for_each_available_child_of_node(np, child) {
-		/* A PHY must have a reg property in the range [0-31] */
+		 
 		paddr = of_get_property(child, "reg", &len);
 		if (!paddr || len < sizeof(*paddr)) {
 			scanphys = true;
@@ -96,12 +73,9 @@ int of_mdiobus_register(struct mii_bus *mdio, struct device_node *np)
 			continue;
 		}
 
-		/* Associate the OF node with the device structure so it
-		 * can be looked up later */
 		of_node_get(child);
 		phy->dev.of_node = child;
 
-		/* All data is now stored in the phy struct; register it */
 		rc = phy_device_register(phy);
 		if (rc) {
 			phy_device_free(phy);
@@ -116,9 +90,8 @@ int of_mdiobus_register(struct mii_bus *mdio, struct device_node *np)
 	if (!scanphys)
 		return 0;
 
-	/* auto scan for PHYs with empty reg property */
 	for_each_available_child_of_node(np, child) {
-		/* Skip PHYs with reg property set */
+		 
 		paddr = of_get_property(child, "reg", &len);
 		if (paddr)
 			continue;
@@ -127,11 +100,10 @@ int of_mdiobus_register(struct mii_bus *mdio, struct device_node *np)
 						 "ethernet-phy-ieee802.3-c45");
 
 		for (addr = 0; addr < PHY_MAX_ADDR; addr++) {
-			/* skip already registered PHYs */
+			 
 			if (mdio->phy_map[addr])
 				continue;
 
-			/* be noisy to encourage people to set reg property */
 			dev_info(&mdio->dev, "scan phy %s at address %i\n",
 				 child->name, addr);
 
@@ -146,13 +118,9 @@ int of_mdiobus_register(struct mii_bus *mdio, struct device_node *np)
 					mdio->irq[addr] = PHY_POLL;
 			}
 
-			/* Associate the OF node with the device structure so it
-			 * can be looked up later */
 			of_node_get(child);
 			phy->dev.of_node = child;
 
-			/* All data is now stored in the phy struct;
-			 * register it */
 			rc = phy_device_register(phy);
 			if (rc) {
 				phy_device_free(phy);
@@ -170,18 +138,11 @@ int of_mdiobus_register(struct mii_bus *mdio, struct device_node *np)
 }
 EXPORT_SYMBOL(of_mdiobus_register);
 
-/* Helper function for of_phy_find_device */
 static int of_phy_match(struct device *dev, void *phy_np)
 {
 	return dev->of_node == phy_np;
 }
 
-/**
- * of_phy_find_device - Give a PHY node, find the phy_device
- * @phy_np: Pointer to the phy's device tree node
- *
- * Returns a pointer to the phy_device.
- */
 struct phy_device *of_phy_find_device(struct device_node *phy_np)
 {
 	struct device *d;
@@ -193,15 +154,6 @@ struct phy_device *of_phy_find_device(struct device_node *phy_np)
 }
 EXPORT_SYMBOL(of_phy_find_device);
 
-/**
- * of_phy_connect - Connect to the phy described in the device tree
- * @dev: pointer to net_device claiming the phy
- * @phy_np: Pointer to device tree node for the PHY
- * @hndlr: Link state callback for the network device
- * @iface: PHY data interface type
- *
- * Returns a pointer to the phy_device if successful.  NULL otherwise
- */
 struct phy_device *of_phy_connect(struct net_device *dev,
 				  struct device_node *phy_np,
 				  void (*hndlr)(struct net_device *), u32 flags,
@@ -216,21 +168,11 @@ struct phy_device *of_phy_connect(struct net_device *dev,
 }
 EXPORT_SYMBOL(of_phy_connect);
 
-/**
- * of_phy_connect_fixed_link - Parse fixed-link property and return a dummy phy
- * @dev: pointer to net_device claiming the phy
- * @hndlr: Link state callback for the network device
- * @iface: PHY data interface type
- */
 #if defined(MY_ABC_HERE)
-// do nothing
-#else /* MY_ABC_HERE */
-/*
- * This function is a temporary stop-gap and will be removed soon.  It is
- * only to support the fs_enet, ucc_geth and gianfar Ethernet drivers.  Do
- * not call this function from new drivers.
- */
-#endif /* MY_ABC_HERE */
+ 
+#else  
+ 
+#endif  
 struct phy_device *of_phy_connect_fixed_link(struct net_device *dev,
 					     void (*hndlr)(struct net_device *),
 					     phy_interface_t iface)
@@ -260,11 +202,7 @@ struct phy_device *of_phy_connect_fixed_link(struct net_device *dev,
 EXPORT_SYMBOL(of_phy_connect_fixed_link);
 
 #if defined(MY_ABC_HERE) && defined(CONFIG_FIXED_PHY)
-/**
- * of_phy_register_fixed_link - Parse fixed-link property and register a dummy phy
- * @np: pointer to the OF device node that contains the "fixed-link"
- * property for which a dummy phy should be registered.
- */
+ 
 #define FIXED_LINK_PROPERTIES_COUNT 5
 int of_phy_register_fixed_link(struct device_node *np)
 {
@@ -288,4 +226,4 @@ int of_phy_register_fixed_link(struct device_node *np)
 			     &status);
 }
 EXPORT_SYMBOL(of_phy_register_fixed_link);
-#endif /* MY_ABC_HERE && CONFIG_FIXED_PHY */
+#endif  

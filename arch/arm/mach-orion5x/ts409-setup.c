@@ -1,19 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * QNAP TS-409 Board Setup
- *
- * Maintainer: Sylver Bruneau <sylver.bruneau@gmail.com>
- *
- * Copyright (C) 2008  Sylver Bruneau <sylver.bruneau@gmail.com>
- * Copyright (C) 2008  Martin Michlmayr <tbm@cyrius.com>
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version
- * 2 of the License, or (at your option) any later version.
- */
+ 
 #include <linux/gpio.h>
 #include <linux/kernel.h>
 #include <linux/init.h>
@@ -35,40 +23,9 @@
 #include "mpp.h"
 #include "tsx09-common.h"
 
-/*****************************************************************************
- * QNAP TS-409 Info
- ****************************************************************************/
-
-/*
- * QNAP TS-409 hardware :
- * - Marvell 88F5281-D0
- * - Marvell 88SX7042 SATA controller (PCIe)
- * - Marvell 88E1118 Gigabit Ethernet PHY
- * - RTC S35390A (@0x30) on I2C bus
- * - 8MB NOR flash
- * - 256MB of DDR-2 RAM
- */
-
-/*
- * 8MB NOR flash Device bus boot chip select
- */
-
 #define QNAP_TS409_NOR_BOOT_BASE 0xff800000
 #define QNAP_TS409_NOR_BOOT_SIZE SZ_8M
 
-/****************************************************************************
- * 8MiB NOR flash. The struct mtd_partition is not in the same order as the
- *     partitions on the device because we want to keep compatibility with
- *     existing QNAP firmware.
- *
- * Layout as used by QNAP:
- *  [2] 0x00000000-0x00200000 : "Kernel"
- *  [3] 0x00200000-0x00600000 : "RootFS1"
- *  [4] 0x00600000-0x00700000 : "RootFS2"
- *  [6] 0x00700000-0x00760000 : "NAS Config" (read-only)
- *  [5] 0x00760000-0x00780000 : "U-Boot Config"
- *  [1] 0x00780000-0x00800000 : "U-Boot" (read-only)
- ***************************************************************************/
 static struct mtd_partition qnap_ts409_partitions[] = {
 	{
 		.name		= "U-Boot",
@@ -119,25 +76,15 @@ static struct platform_device qnap_ts409_nor_flash = {
 	.resource	= &qnap_ts409_nor_flash_resource,
 };
 
-/*****************************************************************************
- * PCI
- ****************************************************************************/
-
 static int __init qnap_ts409_pci_map_irq(const struct pci_dev *dev, u8 slot,
 	u8 pin)
 {
 	int irq;
 
-	/*
-	 * Check for devices with hard-wired IRQs.
-	 */
 	irq = orion5x_pci_map_irq(dev, slot, pin);
 	if (irq != -1)
 		return irq;
 
-	/*
-	 * PCI isn't used on the TS-409
-	 */
 	return -1;
 }
 
@@ -158,19 +105,11 @@ static int __init qnap_ts409_pci_init(void)
 
 subsys_initcall(qnap_ts409_pci_init);
 
-/*****************************************************************************
- * RTC S35390A on I2C bus
- ****************************************************************************/
-
 #define TS409_RTC_GPIO	10
 
 static struct i2c_board_info __initdata qnap_ts409_i2c_rtc = {
 	I2C_BOARD_INFO("s35390a", 0x30),
 };
-
-/*****************************************************************************
- * LEDs attached to GPIO
- ****************************************************************************/
 
 static struct gpio_led ts409_led_pins[] = {
 	{
@@ -205,11 +144,6 @@ static struct platform_device ts409_leds = {
 	},
 };
 
-/****************************************************************************
- * GPIO Attached Keys
- *     Power button is attached to the PIC microcontroller
- ****************************************************************************/
-
 #define QNAP_TS409_GPIO_KEY_RESET	14
 #define QNAP_TS409_GPIO_KEY_MEDIA	15
 
@@ -241,28 +175,25 @@ static struct platform_device qnap_ts409_button_device = {
 	},
 };
 
-/*****************************************************************************
- * General Setup
- ****************************************************************************/
 static unsigned int ts409_mpp_modes[] __initdata = {
 	MPP0_UNUSED,
 	MPP1_UNUSED,
 	MPP2_UNUSED,
 	MPP3_UNUSED,
-	MPP4_GPIO,		/* HDD 1 status */
-	MPP5_GPIO,		/* HDD 2 status */
-	MPP6_GPIO,		/* HDD 3 status */
-	MPP7_GPIO,		/* HDD 4 status */
+	MPP4_GPIO,		 
+	MPP5_GPIO,		 
+	MPP6_GPIO,		 
+	MPP7_GPIO,		 
 	MPP8_UNUSED,
 	MPP9_UNUSED,
-	MPP10_GPIO,		/* RTC int */
+	MPP10_GPIO,		 
 	MPP11_UNUSED,
 	MPP12_UNUSED,
 	MPP13_UNUSED,
-	MPP14_GPIO,		/* SW_RST */
-	MPP15_GPIO,		/* USB copy button */
-	MPP16_UART,		/* UART1 RXD */
-	MPP17_UART,		/* UART1 TXD */
+	MPP14_GPIO,		 
+	MPP15_GPIO,		 
+	MPP16_UART,		 
+	MPP17_UART,		 
 	MPP18_UNUSED,
 	MPP19_UNUSED,
 	0,
@@ -270,25 +201,20 @@ static unsigned int ts409_mpp_modes[] __initdata = {
 
 static void __init qnap_ts409_init(void)
 {
-	/*
-	 * Setup basic Orion functions. Need to be called early.
-	 */
+	 
 	orion5x_init();
 
 	orion5x_mpp_conf(ts409_mpp_modes);
 
-	/*
-	 * Configure peripherals.
-	 */
 #if defined(MY_ABC_HERE)
 	mvebu_mbus_add_window_by_id(ORION_MBUS_DEVBUS_BOOT_TARGET,
 				    ORION_MBUS_DEVBUS_BOOT_ATTR,
 				    QNAP_TS409_NOR_BOOT_BASE,
 				    QNAP_TS409_NOR_BOOT_SIZE);
-#else /* MY_ABC_HERE */
+#else  
 	mvebu_mbus_add_window("devbus-boot", QNAP_TS409_NOR_BOOT_BASE,
 			      QNAP_TS409_NOR_BOOT_SIZE);
-#endif /* MY_ABC_HERE */
+#endif  
 	platform_device_register(&qnap_ts409_nor_flash);
 
 	orion5x_ehci0_init();
@@ -302,7 +228,6 @@ static void __init qnap_ts409_init(void)
 
 	platform_device_register(&qnap_ts409_button_device);
 
-	/* Get RTC IRQ and register the chip */
 	if (gpio_request(TS409_RTC_GPIO, "rtc") == 0) {
 		if (gpio_direction_input(TS409_RTC_GPIO) == 0)
 			qnap_ts409_i2c_rtc.irq = gpio_to_irq(TS409_RTC_GPIO);
@@ -314,12 +239,11 @@ static void __init qnap_ts409_init(void)
 	i2c_register_board_info(0, &qnap_ts409_i2c_rtc, 1);
 	platform_device_register(&ts409_leds);
 
-	/* register tsx09 specific power-off method */
 	pm_power_off = qnap_tsx09_power_off;
 }
 
 MACHINE_START(TS409, "QNAP TS-409")
-	/* Maintainer:  Sylver Bruneau <sylver.bruneau@gmail.com> */
+	 
 	.atag_offset	= 0x100,
 	.init_machine	= qnap_ts409_init,
 	.map_io		= orion5x_map_io,

@@ -1,12 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) 2008 Red Hat, Inc. All rights reserved.
- *
- * This file is released under the GPL.
- */
-
+ 
 #include <linux/sysfs.h>
 #include <linux/dm-ioctl.h>
 #include "dm.h"
@@ -25,7 +20,7 @@ struct dm_sysfs_attr dm_attr_##_name = \
 #define DM_ATTR_RW(_name) \
 struct dm_sysfs_attr dm_attr_##_name = \
 	__ATTR(_name, S_IRUGO|S_IWUSR, dm_attr_##_name##_show, dm_attr_##_name##_store)
-#endif /* MY_ABC_HERE */
+#endif  
 
 static ssize_t dm_attr_show(struct kobject *kobj, struct attribute *attr,
 			    char *page)
@@ -71,7 +66,7 @@ static ssize_t dm_attr_store(struct kobject *kobj, struct attribute *attr, const
 {
 	struct dm_sysfs_attr *dm_attr = NULL;
 	struct mapped_device *md = NULL;
-	char szBuf[2] = {'\0'}; /* just fix compiler warning, 0 or 1 */
+	char szBuf[2] = {'\0'};  
 
 	dm_attr = container_of(attr, struct dm_sysfs_attr, attr);
 	if (!dm_attr->store)
@@ -100,7 +95,7 @@ static ssize_t dm_attr_active_store(struct mapped_device *md, char *buf)
 	return 0;
 }
 static DM_ATTR_RW(active);
-#endif /* MY_ABC_HERE */
+#endif  
 
 static ssize_t dm_attr_suspended_show(struct mapped_device *md, char *buf)
 {
@@ -119,7 +114,7 @@ static struct attribute *dm_attrs[] = {
 	&dm_attr_suspended.attr,
 #ifdef MY_ABC_HERE
 	&dm_attr_active.attr,
-#endif /* MY_ABC_HERE */
+#endif  
 	NULL,
 };
 
@@ -127,23 +122,15 @@ static const struct sysfs_ops dm_sysfs_ops = {
 	.show	= dm_attr_show,
 #ifdef MY_ABC_HERE
 	.store	= dm_attr_store,
-#endif /* MY_ABC_HERE */
+#endif  
 };
 
-/*
- * dm kobject is embedded in mapped_device structure
- * no need to define release function here
- */
 static struct kobj_type dm_ktype = {
 	.sysfs_ops	= &dm_sysfs_ops,
 	.default_attrs	= dm_attrs,
 	.release	= dm_kobject_release,
 };
 
-/*
- * Initialize kobj
- * because nobody using md yet, no need to call explicit dm_get/put
- */
 int dm_sysfs_init(struct mapped_device *md)
 {
 	return kobject_init_and_add(dm_kobject(md), &dm_ktype,
@@ -151,9 +138,6 @@ int dm_sysfs_init(struct mapped_device *md)
 				    "%s", "dm");
 }
 
-/*
- * Remove kobj, called after all references removed
- */
 void dm_sysfs_exit(struct mapped_device *md)
 {
 	struct kobject *kobj = dm_kobject(md);

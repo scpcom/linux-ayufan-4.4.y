@@ -1,76 +1,13 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
-Copyright (C) Marvell International Ltd. and its affiliates
-
-This software file (the "File") is owned and distributed by Marvell
-International Ltd. and/or its affiliates ("Marvell") under the following
-alternative licensing terms.  Once you have made an election to distribute the
-File under one of the following license alternatives, please (i) delete this
-introductory statement regarding license alternatives, (ii) delete the two
-license alternatives that you have not elected to use and (iii) preserve the
-Marvell copyright notice above.
-
-********************************************************************************
-Marvell Commercial License Option
-
-If you received this File from Marvell and you have entered into a commercial
-license agreement (a "Commercial License") with Marvell, the File is licensed
-to you under the terms of the applicable Commercial License.
-
-********************************************************************************
-Marvell GPL License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or
-modify this File in accordance with the terms and conditions of the General
-Public License Version 2, June 1991 (the "GPL License"), a copy of which is
-available along with the File in the license.txt file or by writing to the Free
-Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 or
-on the worldwide web at http://www.gnu.org/licenses/gpl.txt.
-
-THE FILE IS DISTRIBUTED AS-IS, WITHOUT WARRANTY OF ANY KIND, AND THE IMPLIED
-WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY
-DISCLAIMED.  The GPL License provides additional details about this warranty
-disclaimer.
-********************************************************************************
-Marvell BSD License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or
-modify this File under the following licensing terms.
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-    *   Redistributions of source code must retain the above copyright notice,
-	    this list of conditions and the following disclaimer.
-
-    *   Redistributions in binary form must reproduce the above copyright
-	notice, this list of conditions and the following disclaimer in the
-	documentation and/or other materials provided with the distribution.
-
-    *   Neither the name of Marvell nor the names of its contributors may be
-	used to endorse or promote products derived from this software without
-	specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-*******************************************************************************/
-
+ 
 #ifndef __INCmvCommonh
 #define __INCmvCommonh
 
 #ifdef __cplusplus
 extern "C" {
-#endif	/* __cplusplus */
+#endif	 
 
 #include "mvTypes.h"
 #include "mvDeviceId.h"
@@ -78,7 +15,6 @@ extern "C" {
 #include "mv802_3.h"
 #include "mvVideo.h"
 
-/* The golden ration: an arbitrary value */
 #define MV_JHASH_GOLDEN_RATIO           0x9e3779b9
 
 #define MV_JHASH_MIX(a, b, c)        \
@@ -110,15 +46,11 @@ static inline MV_U32 mv_jhash_3words(MV_U32 a, MV_U32 b, MV_U32 c, MV_U32 initva
 }
 #endif
 
-/* Swap tool */
-
-/* 16bit nibble swap. For example 0x1234 -> 0x2143                          */
 #define MV_NIBBLE_SWAP_16BIT(X)        (((X&0xf) << 4) |     \
 					((X&0xf0) >> 4) |    \
 					((X&0xf00) << 4) |   \
 					((X&0xf000) >> 4))
 
-/* 32bit nibble swap. For example 0x12345678 -> 0x21436587                  */
 #define MV_NIBBLE_SWAP_32BIT(X)		(((X&0xf) << 4) |       \
 					((X&0xf0) >> 4) |      \
 					((X&0xf00) << 4) |     \
@@ -128,16 +60,13 @@ static inline MV_U32 mv_jhash_3words(MV_U32 a, MV_U32 b, MV_U32 c, MV_U32 initva
 					((X&0xf000000) << 4) | \
 					((X&0xf0000000) >> 4))
 
-/* 16bit byte swap. For example 0x1234->0x3412                             */
 #define MV_BYTE_SWAP_16BIT(X) ((((X)&0xff)<<8) | (((X)&0xff00)>>8))
 
-/* 32bit byte swap. For example 0x12345678->0x78563412                    */
 #define MV_BYTE_SWAP_32BIT(X)  ((((X)&0xff)<<24) |                       \
 				(((X)&0xff00)<<8) |                      \
 				(((X)&0xff0000)>>8) |                    \
 				(((X)&0xff000000)>>24))
 
-/* 64bit byte swap. For example 0x11223344.55667788 -> 0x88776655.44332211  */
 #define MV_BYTE_SWAP_64BIT(X) ((l64) ((((X)&0xffULL)<<56) |             \
 				      (((X)&0xff00ULL)<<40) |           \
 				      (((X)&0xff0000ULL)<<24) |         \
@@ -147,7 +76,6 @@ static inline MV_U32 mv_jhash_3words(MV_U32 a, MV_U32 b, MV_U32 c, MV_U32 initva
 				      (((X)&0xff000000000000ULL)>>40) | \
 				      (((X)&0xff00000000000000ULL)>>56)))
 
-/* Endianess macros.                                                        */
 #if defined(MV_CPU_LE)
 #define MV_16BIT_LE(X)  (X)
 #define MV_32BIT_LE(X)  (X)
@@ -166,10 +94,8 @@ static inline MV_U32 mv_jhash_3words(MV_U32 a, MV_U32 b, MV_U32 c, MV_U32 initva
 #error "CPU endianess isn't defined!\n"
 #endif
 
-/* Bit field definitions */
 #define NO_BIT      0x00000000
 
-/* avoid redefinition of bits */
 #ifndef BIT0
 
 #define BIT0        0x00000001
@@ -205,8 +131,8 @@ static inline MV_U32 mv_jhash_3words(MV_U32 a, MV_U32 b, MV_U32 c, MV_U32 initva
 #define BIT30       0x40000000
 #define BIT31       0x80000000
 
-#endif /* BIT0 */
-/* Handy sizes */
+#endif  
+ 
 #define _1K         0x00000400
 #define _2K         0x00000800
 #define _4K         0x00001000
@@ -232,10 +158,9 @@ static inline MV_U32 mv_jhash_3words(MV_U32 a, MV_U32 b, MV_U32 c, MV_U32 initva
 #define _1G         0x40000000
 #define _2G         0x80000000
 
-/* Tclock and Sys clock define */
 #if defined(MY_ABC_HERE)
 #define _50MHz      50000000
-#endif /* MY_ABC_HERE */
+#endif  
 #define _100MHz     100000000
 #define _125MHz     125000000
 #define _133MHz     133333334
@@ -257,7 +182,6 @@ static inline MV_U32 mv_jhash_3words(MV_U32 a, MV_U32 b, MV_U32 c, MV_U32 initva
 #define _1GHz       1000000000UL
 #define _2GHz       2000000000UL
 
-/* Supported clocks */
 #define MV_BOARD_TCLK_100MHZ	100000000
 #define MV_BOARD_TCLK_125MHZ	125000000
 #define MV_BOARD_TCLK_133MHZ	133333333
@@ -281,56 +205,39 @@ static inline MV_U32 mv_jhash_3words(MV_U32 a, MV_U32 b, MV_U32 c, MV_U32 initva
 
 #define MV_BOARD_REFCLK_25MHZ	 25000000
 
-/* For better address window table readability */
 #define EN			MV_TRUE
 #define DIS			MV_FALSE
-#define N_A			-1	/* Not applicable */
+#define N_A			-1	 
 
-/* Cache configuration options for memory (DRAM, SRAM, ... ) */
-
-/* Memory uncached, HW or SW cache coherency is not needed */
 #define MV_UNCACHED             0
-/* Memory cached, HW cache coherency supported in WriteThrough mode */
+ 
 #define MV_CACHE_COHER_HW_WT    1
-/* Memory cached, HW cache coherency supported in WriteBack mode */
+ 
 #define MV_CACHE_COHER_HW_WB    2
-/* Memory cached, No HW cache coherency, Cache coherency must be in SW */
+ 
 #define MV_CACHE_COHER_SW       3
 
-/* Macro for testing aligment. Positive if number is NOT aligned   */
 #define MV_IS_NOT_ALIGN(number, align)      ((number) & ((align) - 1))
 
-/* Macro for alignment up. For example, MV_ALIGN_UP(0x0330, 0x20) = 0x0340   */
 #define MV_ALIGN_UP(number, align)                                          \
 (((number) & ((align) - 1)) ? (((number) + (align)) & ~((align)-1)) : (number))
 
-/* Macro for alignment down. For example, MV_ALIGN_UP(0x0330, 0x20) = 0x0320 */
 #define MV_ALIGN_DOWN(number, align) ((number) & ~((align)-1))
 
-/* This macro returns absolute value                                        */
 #define MV_ABS(number)  (((int)(number) < 0) ? -(int)(number) : (int)(number))
 
-/* Bit fields manipulation macros                                           */
-
-/* An integer word which its 'x' bit is set                                 */
 #define MV_BIT_MASK(bitNum)         (1 << (bitNum))
 
-/* Checks wheter bit 'x' in integer word is set                             */
 #define MV_BIT_CHECK(word, bitNum)  ((word) & MV_BIT_MASK(bitNum))
 
-/* Clear (reset) bit 'x' in integer word (RMW - Read-Modify-Write)          */
 #define MV_BIT_CLEAR(word, bitNum)  ((word) &= ~(MV_BIT_MASK(bitNum)))
 
-/* Set bit 'x' in integer word (RMW)                                        */
 #define MV_BIT_SET(word, bitNum)    ((word) |= MV_BIT_MASK(bitNum))
 
-/* Invert bit 'x' in integer word (RMW)                                     */
 #define MV_BIT_INV(word, bitNum)    ((word) ^= MV_BIT_MASK(bitNum))
 
-/* Get the min between 'a' or 'b'                                           */
 #define MV_MIN(a, b)    (((a) < (b)) ? (a) : (b))
 
-/* Get the max between 'a' or 'b'                                           */
 #define MV_MAX(a, b)    (((a) < (b)) ? (b) : (a))
 
 #define mvOsDivide(num, div)	\
@@ -395,8 +302,7 @@ static inline MV_U32 mv_jhash_3words(MV_U32 a, MV_U32 b, MV_U32 c, MV_U32 initva
 }
 
 #ifndef MV_ASMLANGUAGE
-/* mvCommon API list */
-
+ 
 int mvCharToHex(char ch);
 int mvCharToDigit(char ch);
 
@@ -416,10 +322,10 @@ MV_U32 mvLog2(MV_U32 num);
 MV_STATUS mvWinOverlapTest(MV_ADDR_WIN *pAddrWin1, MV_ADDR_WIN *pAddrWin2);
 MV_STATUS mvWinWithinWinTest(MV_ADDR_WIN *pAddrWin1, MV_ADDR_WIN *pAddrWin2);
 
-#endif /* MV_ASMLANGUAGE */
+#endif  
 
 #ifdef __cplusplus
 }
-#endif	/* __cplusplus */
+#endif	 
 
-#endif /* __INCmvCommonh */
+#endif  

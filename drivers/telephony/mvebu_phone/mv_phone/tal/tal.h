@@ -1,38 +1,17 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
-Copyright (C) Marvell International Ltd. and its affiliates
-********************************************************************************
-Marvell GPL License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or
-modify this File in accordance with the terms and conditions of the General
-Public License Version 2, June 1991 (the "GPL License"), a copy of which is
-available along with the File in the license.txt file or by writing to the Free
-Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 or
-on the worldwide web at http://www.gnu.org/licenses/gpl.txt.
-
-THE FILE IS DISTRIBUTED AS-IS, WITHOUT WARRANTY OF ANY KIND, AND THE IMPLIED
-WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY
-DISCLAIMED.  The GPL License provides additional details about this warranty
-disclaimer.
-********************************************************************************/
-
-/* Marvell Telephony Adaptation Layer */
-
+ 
 #ifndef _TAL_H_
 #define _TAL_H_
 
 #include "mvOs.h"
 #if defined(MY_ABC_HERE)
 #include "voiceband/tdm/mvTdm.h"
-#endif /* MY_ABC_HERE */
+#endif  
 
-/* Defines */
 #define TAL_MAX_PHONE_LINES	32
 
-/* Enumerators */
 typedef enum {
 	TAL_PCM_FORMAT_1BYTE = 1,
 	TAL_PCM_FORMAT_2BYTES = 2,
@@ -45,7 +24,6 @@ typedef enum {
 	TAL_STAT_INIT_ERROR,
 } tal_stat_t;
 
-/* Structures */
 typedef struct {
 	tal_pcm_format_t pcm_format;
 	unsigned short pcm_slot[TAL_MAX_PHONE_LINES];
@@ -79,7 +57,6 @@ typedef struct {
 	void (*stats_get)(tal_stats_t *tal_stats);
 } tal_if_t;
 
-/* API */
 tal_stat_t tal_init(tal_params_t *tal_params, tal_mmp_ops_t *mmp_ops);
 tal_stat_t tal_stats_get(tal_stats_t *tal_stats);
 void tal_exit(void);
@@ -92,4 +69,4 @@ tal_stat_t tal_mmp_rx(unsigned char *buffer, int size);
 tal_stat_t tal_mmp_tx(unsigned char *buffer, int size);
 tal_stat_t tal_write(unsigned char *buffer, int size);
 
-#endif /* _TAL_H */
+#endif  

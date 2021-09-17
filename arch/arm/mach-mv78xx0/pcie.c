@@ -1,16 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * arch/arm/mach-mv78xx0/pcie.c
- *
- * PCIe functions for Marvell MV78xx0 SoCs
- *
- * This file is licensed under the terms of the GNU General Public
- * License version 2.  This program is licensed "as is" without any
- * warranty of any kind, whether express or implied.
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/pci.h>
 #include <linux/mbus.h>
@@ -26,7 +17,7 @@
 #define MV78XX0_MBUS_PCIE_MEM_ATTR(port, lane)   (0xf8 & ~(0x10 << (lane)))
 #define MV78XX0_MBUS_PCIE_IO_TARGET(port, lane)  ((port) ? 8 : 4)
 #define MV78XX0_MBUS_PCIE_IO_ATTR(port, lane)    (0xf0 & ~(0x10 << (lane)))
-#endif /* MY_ABC_HERE */
+#endif  
 
 struct pcie_port {
 	u8			maj;
@@ -82,10 +73,10 @@ static void __init mv78xx0_pcie_preinit(void)
 	for (i = 0; i < num_pcie_ports; i++) {
 		struct pcie_port *pp = pcie_port + i;
 #if defined(MY_ABC_HERE)
-		// do nothing
-#else /* MY_ABC_HERE */
+		 
+#else  
 		char winname[MVEBU_MBUS_MAX_WINNAME_SZ];
-#endif /* MY_ABC_HERE */
+#endif  
 
 		snprintf(pp->mem_space_name, sizeof(pp->mem_space_name),
 			"PCIe %d.%d MEM", pp->maj, pp->min);
@@ -106,7 +97,7 @@ static void __init mv78xx0_pcie_preinit(void)
 		mvebu_mbus_add_window_remap_by_id(MV78XX0_MBUS_PCIE_IO_TARGET(pp->maj, pp->min),
 						  MV78XX0_MBUS_PCIE_IO_ATTR(pp->maj, pp->min),
 						  i * SZ_64K, SZ_64K, 0);
-#else /* MY_ABC_HERE */
+#else  
 		snprintf(winname, sizeof(winname), "pcie%d.%d",
 			 pp->maj, pp->min);
 
@@ -118,7 +109,7 @@ static void __init mv78xx0_pcie_preinit(void)
 		mvebu_mbus_add_window_remap_flags(winname,
 						  i * SZ_64K, SZ_64K,
 						  0, MVEBU_MBUS_PCI_IO);
-#endif /* MY_ABC_HERE */
+#endif  
 	}
 }
 
@@ -133,9 +124,6 @@ static int __init mv78xx0_pcie_setup(int nr, struct pci_sys_data *sys)
 	sys->private_data = pp;
 	pp->root_bus_nr = sys->busnr;
 
-	/*
-	 * Generic PCIe unit setup.
-	 */
 	orion_pcie_set_local_bus_nr(pp->base, sys->busnr);
 	orion_pcie_setup(pp->base);
 
@@ -148,10 +136,7 @@ static int __init mv78xx0_pcie_setup(int nr, struct pci_sys_data *sys)
 
 static int pcie_valid_config(struct pcie_port *pp, int bus, int dev)
 {
-	/*
-	 * Don't go out when trying to access nonexisting devices
-	 * on the local bus.
-	 */
+	 
 	if (bus == pp->root_bus_nr && dev > 1)
 		return 0;
 
@@ -203,9 +188,7 @@ static struct pci_ops pcie_ops = {
 
 static void rc_pci_fixup(struct pci_dev *dev)
 {
-	/*
-	 * Prevent enumeration of root complex.
-	 */
+	 
 	if (dev->bus->parent == NULL && dev->devfn == 0) {
 		int i;
 

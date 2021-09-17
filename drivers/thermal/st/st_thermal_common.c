@@ -1,29 +1,17 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * ST Thermal Sensor Driver common routines
- * Author: Ajit Pal Singh <ajitpal.singh@st.com>
- *
- * Copyright (C) 2003-2013 STMicroelectronics (R&D) Limited
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- */
-
+ 
 #include <linux/clk.h>
 #ifdef MY_DEF_HERE
 #include <linux/delay.h>
-#endif /* MY_DEF_HERE */
+#endif  
 #include <linux/module.h>
 #include <linux/of.h>
 #include <linux/cpu_cooling.h>
 #ifdef MY_DEF_HERE
 #include <linux/mfd/syscon.h>
-#endif /* MY_DEF_HERE */
+#endif  
 
 #include "st_thermal.h"
 
@@ -55,18 +43,14 @@ out:
 EXPORT_SYMBOL(syno_get_temperature);
 #endif
 
-/*
- * Function to allocate regfields which are common
- * between syscfg and memory mapped based sensors
- */
 int st_thermal_common_alloc_regfields(struct st_thermal_sensor *sensor)
 {
 	struct device *dev = sensor_to_dev(sensor);
 #ifdef MY_DEF_HERE
 	struct regmap *regmap = sensor->regmap[TH_REGS];
-#else /* MY_DEF_HERE */
+#else  
 	struct regmap *regmap = sensor->regmap;
-#endif /* MY_DEF_HERE */
+#endif  
 	const struct reg_field *reg_fields = sensor->data->reg_fields;
 
 	sensor->dcorrect = devm_regmap_field_alloc(dev, regmap,
@@ -80,14 +64,14 @@ int st_thermal_common_alloc_regfields(struct st_thermal_sensor *sensor)
 #ifdef MY_DEF_HERE
 	sensor->datardy = devm_regmap_field_alloc(dev, regmap,
 					reg_fields[DATARDY]);
-#endif /* MY_DEF_HERE */
+#endif  
 
 	if (IS_ERR(sensor->dcorrect) || IS_ERR(sensor->overflow) ||
 #ifdef MY_DEF_HERE
 	    IS_ERR(sensor->temp_data) || IS_ERR(sensor->datardy)) {
-#else /* MY_DEF_HERE */
+#else  
 	    IS_ERR(sensor->temp_data)) {
-#endif /* MY_DEF_HERE */
+#endif  
 		return -EINVAL;
 	}
 
@@ -102,7 +86,7 @@ int st_thermal_common_alloc_regfields(struct st_thermal_sensor *sensor)
 		if (IS_ERR(sensor->dc_calib))
 			return -EINVAL;
 	}
-#endif /* MY_DEF_HERE */
+#endif  
 
 	return 0;
 }
@@ -142,7 +126,7 @@ static int st_thermal_probe_dt(struct st_thermal_sensor *sensor)
 			return -EINVAL;
 		}
 	}
-#endif /* MY_DEF_HERE */
+#endif  
 
 	return sensor->ops->alloc_regfields(sensor);
 }
@@ -150,14 +134,14 @@ static int st_thermal_probe_dt(struct st_thermal_sensor *sensor)
 static int st_thermal_sensor_on(struct st_thermal_sensor *sensor)
 {
 #ifdef MY_DEF_HERE
-#else /* MY_DEF_HERE */
+#else  
 	int ret;
-#endif /* MY_DEF_HERE */
+#endif  
 	struct device *dev = sensor_to_dev(sensor);
 #ifdef MY_DEF_HERE
 	int ret;
 	unsigned int datardy = 0, count = 0;
-#endif /* MY_DEF_HERE */
+#endif  
 
 	ret = clk_prepare_enable(sensor->clk);
 	if (ret) {
@@ -172,12 +156,9 @@ static int st_thermal_sensor_on(struct st_thermal_sensor *sensor)
 	}
 
 #ifdef MY_DEF_HERE
-	/* Wait for thermal sensor to start */
+	 
 	usleep_range(1000, 1050);
-	/*
-	 * Wait for data ready to be set so that we can have
-	 * a valid reading.
-	 */
+	 
 	while (count < 1000 && !datardy) {
 		ret = regmap_field_read(sensor->datardy, &datardy);
 		if (ret)
@@ -189,7 +170,7 @@ static int st_thermal_sensor_on(struct st_thermal_sensor *sensor)
 		ret = -EBUSY;
 		goto clk_dis;
 	}
-#endif /* MY_DEF_HERE */
+#endif  
 
 	return 0;
 clk_dis:
@@ -216,33 +197,32 @@ static int st_thermal_calibration(struct st_thermal_sensor *sensor)
 	int ret;
 #ifdef MY_DEF_HERE
 	unsigned int dc = sensor->data->calibration_val;
-#endif /* MY_DEF_HERE */
+#endif  
 	struct device *dev = sensor_to_dev(sensor);
 
 #ifdef MY_DEF_HERE
-	/* Read calibration data*/
+	 
 	if (sensor->dc_calib) {
 		ret = regmap_field_read(sensor->dc_calib, &dc);
 		if (ret)
 			return ret;
 	}
-#else /* MY_DEF_HERE */
-	/* TODO : Read calibration data from SAFEMEM */
-#endif /* MY_DEF_HERE */
+#else  
+	 
+#endif  
 
 #ifdef MY_DEF_HERE
 	ret = regmap_field_write(sensor->dcorrect, dc);
-#else /* MY_DEF_HERE */
+#else  
 	ret = regmap_field_write(sensor->dcorrect,
 				 sensor->data->calibration_val);
-#endif /* MY_DEF_HERE */
+#endif  
 	if (ret)
 		dev_err(dev, "unable to set calibration data\n");
 
 	return ret;
 }
 
-/* Callback to get temperature from HW*/
 static int st_thermal_get_temp(struct thermal_zone_device *th,
 		unsigned long *temperature)
 {
@@ -383,7 +363,7 @@ static int st_thermal_probe(struct platform_device *pdev)
 		ret = PTR_ERR(sensor->clk);
 		goto out;
 	}
-	/* Activate thermal sensor */
+	 
 	ret = st_thermal_sensor_on(sensor);
 	if (ret) {
 		dev_err(dev, "unable to power on sensor\n");
@@ -502,7 +482,7 @@ static struct of_device_id st_thermal_of_match[] = {
 	{ .compatible = "st,stih407-thermal",
 		.data = &st_407_data },
 #endif
-	{ /* sentinel */ }
+	{   }
 };
 
 static SIMPLE_DEV_PM_OPS(st_thermal_pm_ops, st_thermal_suspend,

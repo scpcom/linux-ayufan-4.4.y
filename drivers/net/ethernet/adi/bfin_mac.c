@@ -1,16 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Blackfin On-Chip MAC Driver
- *
- * Copyright 2004-2010 Analog Devices Inc.
- *
- * Enter bugs at http://blackfin.uclinux.org/
- *
- * Licensed under the GPL-2 or later.
- */
-
+ 
 #define DRV_VERSION	"1.1"
 #define DRV_DESC	"Blackfin on-chip Ethernet MAC driver"
 
@@ -68,7 +59,6 @@ MODULE_ALIAS("platform:bfin_mac");
 
 #define MAX_TIMEOUT_CNT	500
 
-/* pointers to maintain transmit list */
 static struct net_dma_desc_tx *tx_list_head;
 static struct net_dma_desc_tx *tx_list_tail;
 static struct net_dma_desc_rx *rx_list_head;
@@ -121,10 +111,7 @@ static int desc_list_init(struct net_device *dev)
 	int i;
 	struct sk_buff *new_skb;
 #if !defined(CONFIG_BFIN_MAC_USE_L1)
-	/*
-	 * This dma_handle is useless in Blackfin dma_alloc_coherent().
-	 * The real dma handler is the return value of dma_alloc_coherent().
-	 */
+	 
 	dma_addr_t dma_handle;
 #endif
 
@@ -140,7 +127,6 @@ static int desc_list_init(struct net_device *dev)
 	if (rx_desc == NULL)
 		goto init_error;
 
-	/* init tx_list */
 	tx_list_head = tx_list_tail = tx_desc;
 
 	for (i = 0; i < CONFIG_BFIN_TX_DESC_NUM; i++) {
@@ -148,26 +134,11 @@ static int desc_list_init(struct net_device *dev)
 		struct dma_descriptor *a = &(t->desc_a);
 		struct dma_descriptor *b = &(t->desc_b);
 
-		/*
-		 * disable DMA
-		 * read from memory WNR = 0
-		 * wordsize is 32 bits
-		 * 6 half words is desc size
-		 * large desc flow
-		 */
 		a->config = WDSIZE_32 | NDSIZE_6 | DMAFLOW_LARGE;
 		a->start_addr = (unsigned long)t->packet;
 		a->x_count = 0;
 		a->next_dma_desc = b;
 
-		/*
-		 * enabled DMA
-		 * write to memory WNR = 1
-		 * wordsize is 32 bits
-		 * disable interrupt
-		 * 6 half words is desc size
-		 * large desc flow
-		 */
 		b->config = DMAEN | WNR | WDSIZE_32 | NDSIZE_6 | DMAFLOW_LARGE;
 		b->start_addr = (unsigned long)(&(t->status));
 		b->x_count = 0;
@@ -177,11 +148,10 @@ static int desc_list_init(struct net_device *dev)
 		tx_list_tail->next = t;
 		tx_list_tail = t;
 	}
-	tx_list_tail->next = tx_list_head;	/* tx_list is a circle */
+	tx_list_tail->next = tx_list_head;	 
 	tx_list_tail->desc_b.next_dma_desc = &(tx_list_head->desc_a);
 	current_tx_ptr = tx_list_head;
 
-	/* init rx_list */
 	rx_list_head = rx_list_tail = rx_desc;
 
 	for (i = 0; i < CONFIG_BFIN_RX_DESC_NUM; i++) {
@@ -189,41 +159,22 @@ static int desc_list_init(struct net_device *dev)
 		struct dma_descriptor *a = &(r->desc_a);
 		struct dma_descriptor *b = &(r->desc_b);
 
-		/* allocate a new skb for next time receive */
 		new_skb = netdev_alloc_skb(dev, PKT_BUF_SZ + NET_IP_ALIGN);
 		if (!new_skb)
 			goto init_error;
 
 		skb_reserve(new_skb, NET_IP_ALIGN);
-		/* Invidate the data cache of skb->data range when it is write back
-		 * cache. It will prevent overwritting the new data from DMA
-		 */
+		 
 		blackfin_dcache_invalidate_range((unsigned long)new_skb->head,
 					 (unsigned long)new_skb->end);
 		r->skb = new_skb;
 
-		/*
-		 * enabled DMA
-		 * write to memory WNR = 1
-		 * wordsize is 32 bits
-		 * disable interrupt
-		 * 6 half words is desc size
-		 * large desc flow
-		 */
 		a->config = DMAEN | WNR | WDSIZE_32 | NDSIZE_6 | DMAFLOW_LARGE;
-		/* since RXDWA is enabled */
+		 
 		a->start_addr = (unsigned long)new_skb->data - 2;
 		a->x_count = 0;
 		a->next_dma_desc = b;
 
-		/*
-		 * enabled DMA
-		 * write to memory WNR = 1
-		 * wordsize is 32 bits
-		 * enable interrupt
-		 * 6 half words is desc size
-		 * large desc flow
-		 */
 		b->config = DMAEN | WNR | WDSIZE_32 | DI_EN |
 				NDSIZE_6 | DMAFLOW_LARGE;
 		b->start_addr = (unsigned long)(&(r->status));
@@ -233,7 +184,7 @@ static int desc_list_init(struct net_device *dev)
 		rx_list_tail->next = r;
 		rx_list_tail = r;
 	}
-	rx_list_tail->next = rx_list_head;	/* rx_list is a circle */
+	rx_list_tail->next = rx_list_head;	 
 	rx_list_tail->desc_b.next_dma_desc = &(rx_list_head->desc_a);
 	current_rx_ptr = rx_list_head;
 
@@ -245,17 +196,10 @@ init_error:
 	return -ENOMEM;
 }
 
-/*---PHY CONTROL AND CONFIGURATION-----------------------------------------*/
-
-/*
- * MII operations
- */
-/* Wait until the previous MDC/MDIO transaction has completed */
 static int bfin_mdio_poll(void)
 {
 	int timeout_cnt = MAX_TIMEOUT_CNT;
 
-	/* poll the STABUSY bit */
 	while ((bfin_read_EMAC_STAADD()) & STABUSY) {
 		udelay(1);
 		if (timeout_cnt-- < 0) {
@@ -267,7 +211,6 @@ static int bfin_mdio_poll(void)
 	return 0;
 }
 
-/* Read an off-chip register in a PHY through the MDC/MDIO port */
 static int bfin_mdiobus_read(struct mii_bus *bus, int phy_addr, int regnum)
 {
 	int ret;
@@ -276,7 +219,6 @@ static int bfin_mdiobus_read(struct mii_bus *bus, int phy_addr, int regnum)
 	if (ret)
 		return ret;
 
-	/* read mode */
 	bfin_write_EMAC_STAADD(SET_PHYAD((u16) phy_addr) |
 				SET_REGAD((u16) regnum) |
 				STABUSY);
@@ -288,7 +230,6 @@ static int bfin_mdiobus_read(struct mii_bus *bus, int phy_addr, int regnum)
 	return (int) bfin_read_EMAC_STADAT();
 }
 
-/* Write an off-chip register in a PHY through the MDC/MDIO port */
 static int bfin_mdiobus_write(struct mii_bus *bus, int phy_addr, int regnum,
 			      u16 value)
 {
@@ -300,7 +241,6 @@ static int bfin_mdiobus_write(struct mii_bus *bus, int phy_addr, int regnum,
 
 	bfin_write_EMAC_STADAT((u32) value);
 
-	/* write mode */
 	bfin_write_EMAC_STAADD(SET_PHYAD((u16) phy_addr) |
 				SET_REGAD((u16) regnum) |
 				STAOP |
@@ -323,8 +263,7 @@ static void bfin_mac_adjust_link(struct net_device *dev)
 
 	spin_lock_irqsave(&lp->lock, flags);
 	if (phydev->link) {
-		/* Now we make sure that we can be in full duplex mode.
-		 * If not, we operate in half-duplex mode. */
+		 
 		if (phydev->duplex != lp->old_duplex) {
 			u32 opmode = bfin_read_EMAC_OPMODE();
 			new_state = 1;
@@ -381,7 +320,6 @@ static void bfin_mac_adjust_link(struct net_device *dev)
 	spin_unlock_irqrestore(&lp->lock, flags);
 }
 
-/* MDC  = 2.5 MHz */
 #define MDC_CLK 2500000
 
 static int mii_probe(struct net_device *dev, int phy_mode)
@@ -392,7 +330,6 @@ static int mii_probe(struct net_device *dev, int phy_mode)
 	int i;
 	u32 sclk, mdc_div;
 
-	/* Enable PHY output early */
 	if (!(bfin_read_VR_CTL() & CLKBUFOE))
 		bfin_write_VR_CTL(bfin_read_VR_CTL() | CLKBUFOE);
 
@@ -403,18 +340,16 @@ static int mii_probe(struct net_device *dev, int phy_mode)
 	sysctl = (sysctl & ~MDCDIV) | SET_MDCDIV(mdc_div);
 	bfin_write_EMAC_SYSCTL(sysctl);
 
-	/* search for connected PHY device */
 	for (i = 0; i < PHY_MAX_ADDR; ++i) {
 		struct phy_device *const tmp_phydev = lp->mii_bus->phy_map[i];
 
 		if (!tmp_phydev)
-			continue; /* no PHY here... */
+			continue;  
 
 		phydev = tmp_phydev;
-		break; /* found it */
+		break;  
 	}
 
-	/* now we are supposed to have a proper phydev, to attach to... */
 	if (!phydev) {
 		netdev_err(dev, "no phy device found\n");
 		return -ENODEV;
@@ -434,7 +369,6 @@ static int mii_probe(struct net_device *dev, int phy_mode)
 		return PTR_ERR(phydev);
 	}
 
-	/* mask with MAC supported features */
 	phydev->supported &= (SUPPORTED_10baseT_Half
 			      | SUPPORTED_10baseT_Full
 			      | SUPPORTED_100baseT_Half
@@ -459,13 +393,6 @@ static int mii_probe(struct net_device *dev, int phy_mode)
 	return 0;
 }
 
-/*
- * Ethtool support
- */
-
-/*
- * interrupt routine for magic packet wakeup
- */
 static irqreturn_t bfin_mac_wake_interrupt(int irq, void *dev_id)
 {
 	return IRQ_HANDLED;
@@ -530,7 +457,7 @@ static int bfin_mac_ethtool_setwol(struct net_device *dev,
 	lp->wol = wolinfo->wolopts;
 
 	if (lp->wol && !lp->irq_wake_requested) {
-		/* register wake irq handler */
+		 
 		rc = request_irq(IRQ_MAC_WAKEDET, bfin_mac_wake_interrupt,
 				 IRQF_DISABLED, "EMAC_WAKE", dev);
 		if (rc)
@@ -543,7 +470,6 @@ static int bfin_mac_ethtool_setwol(struct net_device *dev,
 		lp->irq_wake_requested = false;
 	}
 
-	/* Make sure the PHY driver doesn't suspend */
 	device_init_wakeup(&dev->dev, lp->wol);
 
 	return 0;
@@ -584,22 +510,14 @@ static const struct ethtool_ops bfin_mac_ethtool_ops = {
 #endif
 };
 
-/**************************************************************************/
 static void setup_system_regs(struct net_device *dev)
 {
 	struct bfin_mac_local *lp = netdev_priv(dev);
 	int i;
 	unsigned short sysctl;
 
-	/*
-	 * Odd word alignment for Receive Frame DMA word
-	 * Configure checksum support and rcve frame word alignment
-	 */
 	sysctl = bfin_read_EMAC_SYSCTL();
-	/*
-	 * check if interrupt is requested for any PHY,
-	 * enable PHY interrupt only if needed
-	 */
+	 
 	for (i = 0; i < PHY_MAX_ADDR; ++i)
 		if (lp->mii_bus->irq[i] != PHY_POLL)
 			break;
@@ -615,17 +533,14 @@ static void setup_system_regs(struct net_device *dev)
 
 	bfin_write_EMAC_MMC_CTL(RSTC | CROLL);
 
-	/* Set vlan regs to let 1522 bytes long packets pass through */
 	bfin_write_EMAC_VLAN1(lp->vlan1_mask);
 	bfin_write_EMAC_VLAN2(lp->vlan2_mask);
 
-	/* Initialize the TX DMA channel registers */
 	bfin_write_DMA2_X_COUNT(0);
 	bfin_write_DMA2_X_MODIFY(4);
 	bfin_write_DMA2_Y_COUNT(0);
 	bfin_write_DMA2_Y_MODIFY(0);
 
-	/* Initialize the RX DMA channel registers */
 	bfin_write_DMA1_X_COUNT(0);
 	bfin_write_DMA1_X_MODIFY(4);
 	bfin_write_DMA1_Y_COUNT(0);
@@ -637,7 +552,6 @@ static void setup_mac_addr(u8 *mac_addr)
 	u32 addr_low = le32_to_cpu(*(__le32 *) & mac_addr[0]);
 	u16 addr_hi = le16_to_cpu(*(__le16 *) & mac_addr[4]);
 
-	/* this depends on a little-endian machine */
 	bfin_write_EMAC_ADDRLO(addr_low);
 	bfin_write_EMAC_ADDRHI(addr_hi);
 }
@@ -683,7 +597,6 @@ static int bfin_mac_hwtstamp_ioctl(struct net_device *netdev,
 	pr_debug("%s config flag:0x%x, tx_type:0x%x, rx_filter:0x%x\n",
 			__func__, config.flags, config.tx_type, config.rx_filter);
 
-	/* reserved for future extensions */
 	if (config.flags)
 		return -EINVAL;
 
@@ -695,38 +608,25 @@ static int bfin_mac_hwtstamp_ioctl(struct net_device *netdev,
 
 	switch (config.rx_filter) {
 	case HWTSTAMP_FILTER_NONE:
-		/*
-		 * Dont allow any timestamping
-		 */
+		 
 		ptpfv3 = 0xFFFFFFFF;
 		bfin_write_EMAC_PTP_FV3(ptpfv3);
 		break;
 	case HWTSTAMP_FILTER_PTP_V1_L4_EVENT:
 	case HWTSTAMP_FILTER_PTP_V1_L4_SYNC:
 	case HWTSTAMP_FILTER_PTP_V1_L4_DELAY_REQ:
-		/*
-		 * Clear the five comparison mask bits (bits[12:8]) in EMAC_PTP_CTL)
-		 * to enable all the field matches.
-		 */
+		 
 		ptpctl &= ~0x1F00;
 		bfin_write_EMAC_PTP_CTL(ptpctl);
-		/*
-		 * Keep the default values of the EMAC_PTP_FOFF register.
-		 */
+		 
 		ptpfoff = 0x4A24170C;
 		bfin_write_EMAC_PTP_FOFF(ptpfoff);
-		/*
-		 * Keep the default values of the EMAC_PTP_FV1 and EMAC_PTP_FV2
-		 * registers.
-		 */
+		 
 		ptpfv1 = 0x11040800;
 		bfin_write_EMAC_PTP_FV1(ptpfv1);
 		ptpfv2 = 0x0140013F;
 		bfin_write_EMAC_PTP_FV2(ptpfv2);
-		/*
-		 * The default value (0xFFFC) allows the timestamping of both
-		 * received Sync messages and Delay_Req messages.
-		 */
+		 
 		ptpfv3 = 0xFFFFFFFC;
 		bfin_write_EMAC_PTP_FV3(ptpfv3);
 
@@ -735,29 +635,18 @@ static int bfin_mac_hwtstamp_ioctl(struct net_device *netdev,
 	case HWTSTAMP_FILTER_PTP_V2_L4_EVENT:
 	case HWTSTAMP_FILTER_PTP_V2_L4_SYNC:
 	case HWTSTAMP_FILTER_PTP_V2_DELAY_REQ:
-		/* Clear all five comparison mask bits (bits[12:8]) in the
-		 * EMAC_PTP_CTL register to enable all the field matches.
-		 */
+		 
 		ptpctl &= ~0x1F00;
 		bfin_write_EMAC_PTP_CTL(ptpctl);
-		/*
-		 * Keep the default values of the EMAC_PTP_FOFF register, except set
-		 * the PTPCOF field to 0x2A.
-		 */
+		 
 		ptpfoff = 0x2A24170C;
 		bfin_write_EMAC_PTP_FOFF(ptpfoff);
-		/*
-		 * Keep the default values of the EMAC_PTP_FV1 and EMAC_PTP_FV2
-		 * registers.
-		 */
+		 
 		ptpfv1 = 0x11040800;
 		bfin_write_EMAC_PTP_FV1(ptpfv1);
 		ptpfv2 = 0x0140013F;
 		bfin_write_EMAC_PTP_FV2(ptpfv2);
-		/*
-		 * To allow the timestamping of Pdelay_Req and Pdelay_Resp, set
-		 * the value to 0xFFF0.
-		 */
+		 
 		ptpfv3 = 0xFFFFFFF0;
 		bfin_write_EMAC_PTP_FV3(ptpfv3);
 
@@ -766,30 +655,18 @@ static int bfin_mac_hwtstamp_ioctl(struct net_device *netdev,
 	case HWTSTAMP_FILTER_PTP_V2_L2_EVENT:
 	case HWTSTAMP_FILTER_PTP_V2_L2_SYNC:
 	case HWTSTAMP_FILTER_PTP_V2_L2_DELAY_REQ:
-		/*
-		 * Clear bits 8 and 12 of the EMAC_PTP_CTL register to enable only the
-		 * EFTM and PTPCM field comparison.
-		 */
+		 
 		ptpctl &= ~0x1100;
 		bfin_write_EMAC_PTP_CTL(ptpctl);
-		/*
-		 * Keep the default values of all the fields of the EMAC_PTP_FOFF
-		 * register, except set the PTPCOF field to 0x0E.
-		 */
+		 
 		ptpfoff = 0x0E24170C;
 		bfin_write_EMAC_PTP_FOFF(ptpfoff);
-		/*
-		 * Program bits [15:0] of the EMAC_PTP_FV1 register to 0x88F7, which
-		 * corresponds to PTP messages on the MAC layer.
-		 */
+		 
 		ptpfv1 = 0x110488F7;
 		bfin_write_EMAC_PTP_FV1(ptpfv1);
 		ptpfv2 = 0x0140013F;
 		bfin_write_EMAC_PTP_FV2(ptpfv2);
-		/*
-		 * To allow the timestamping of Pdelay_Req and Pdelay_Resp
-		 * messages, set the value to 0xFFF0.
-		 */
+		 
 		ptpfv3 = 0xFFFFFFF0;
 		bfin_write_EMAC_PTP_FV3(ptpfv3);
 
@@ -809,9 +686,6 @@ static int bfin_mac_hwtstamp_ioctl(struct net_device *netdev,
 		ptpctl |= PTP_EN;
 		bfin_write_EMAC_PTP_CTL(ptpctl);
 
-		/*
-		 * clear any existing timestamp
-		 */
 		bfin_read_EMAC_PTP_RXSNAPLO();
 		bfin_read_EMAC_PTP_RXSNAPHI();
 
@@ -833,17 +707,8 @@ static void bfin_tx_hwtstamp(struct net_device *netdev, struct sk_buff *skb)
 	if (skb_shinfo(skb)->tx_flags & SKBTX_HW_TSTAMP) {
 		int timeout_cnt = MAX_TIMEOUT_CNT;
 
-		/* When doing time stamping, keep the connection to the socket
-		 * a while longer
-		 */
 		skb_shinfo(skb)->tx_flags |= SKBTX_IN_PROGRESS;
 
-		/*
-		 * The timestamping is done at the EMAC module's MII/RMII interface
-		 * when the module sees the Start of Frame of an event message packet. This
-		 * interface is the closest possible place to the physical Ethernet transmission
-		 * medium, providing the best timing accuracy.
-		 */
 		while ((!(bfin_read_EMAC_PTP_ISTAT() & TXTL)) && (--timeout_cnt))
 			udelay(1);
 		if (timeout_cnt == 0)
@@ -892,7 +757,6 @@ static void bfin_mac_hwtstamp_init(struct net_device *netdev)
 	u64 addend, ppb;
 	u32 input_clk, phc_clk;
 
-	/* Initialize hardware timer */
 	input_clk = get_sclk();
 	phc_clk = bfin_select_phc_clock(input_clk, &lp->shift);
 	addend = phc_clk * (1ULL << 32);
@@ -904,7 +768,6 @@ static void bfin_mac_hwtstamp_init(struct net_device *netdev)
 	do_div(ppb, phc_clk);
 	lp->max_ppb = ppb - 1000000000ULL - 1ULL;
 
-	/* Initialize hwstamp config */
 	lp->stamp_cfg.rx_filter = HWTSTAMP_FILTER_NONE;
 	lp->stamp_cfg.tx_type = HWTSTAMP_TX_OFF;
 }
@@ -935,8 +798,6 @@ static void bfin_ptp_time_write(struct bfin_mac_local *lp, u64 ns)
 	bfin_write_EMAC_PTP_TIMELO(lo);
 	bfin_write_EMAC_PTP_TIMEHI(hi);
 }
-
-/* PTP Hardware Clock operations */
 
 static int bfin_ptp_adjfreq(struct ptp_clock_info *ptp, s32 ppb)
 {
@@ -1094,9 +955,9 @@ static void tx_reclaim_skb(struct bfin_mac_local *lp)
 
 	if (current_tx_ptr->next == tx_list_head) {
 		while (tx_list_head->status.status_word == 0) {
-			/* slow down polling to avoid too many queue stop. */
+			 
 			udelay(10);
-			/* reclaim skb if DMA is not running. */
+			 
 			if (!(bfin_read_DMA2_IRQ_STATUS() & DMA_RUN))
 				break;
 			if (timeout_cnt-- < 0)
@@ -1114,7 +975,7 @@ static void tx_reclaim_skb(struct bfin_mac_local *lp)
 		netif_wake_queue(lp->ndev);
 
 	if (tx_list_head != current_tx_ptr) {
-		/* shorten the timer interval if tx queue is stopped */
+		 
 		if (netif_queue_stopped(lp->ndev))
 			lp->tx_reclaim_timer.expires =
 				jiffies + (TX_RECLAIM_JIFFIES >> 4);
@@ -1144,25 +1005,20 @@ static int bfin_mac_hard_start_xmit(struct sk_buff *skb,
 	current_tx_ptr->skb = skb;
 
 	if (data_align == 0x2) {
-		/* move skb->data to current_tx_ptr payload */
+		 
 		data = (u16 *)(skb->data) - 1;
 		*data = (u16)(skb->len);
-		/*
-		 * When transmitting an Ethernet packet, the PTP_TSYNC module requires
-		 * a DMA_Length_Word field associated with the packet. The lower 12 bits
-		 * of this field are the length of the packet payload in bytes and the higher
-		 * 4 bits are the timestamping enable field.
-		 */
+		 
 		if (skb_shinfo(skb)->tx_flags & SKBTX_HW_TSTAMP)
 			*data |= 0x1000;
 
 		current_tx_ptr->desc_a.start_addr = (u32)data;
-		/* this is important! */
+		 
 		blackfin_dcache_flush_range((u32)data,
 				(u32)((u8 *)data + skb->len + 4));
 	} else {
 		*((u16 *)(current_tx_ptr->packet)) = (u16)(skb->len);
-		/* enable timestamping for the sent packet */
+		 
 		if (skb_shinfo(skb)->tx_flags & SKBTX_HW_TSTAMP)
 			*((u16 *)(current_tx_ptr->packet)) |= 0x1000;
 		memcpy((u8 *)(current_tx_ptr->packet + 2), skb->data,
@@ -1174,27 +1030,19 @@ static int bfin_mac_hard_start_xmit(struct sk_buff *skb,
 			(u32)(current_tx_ptr->packet + skb->len + 2));
 	}
 
-	/* make sure the internal data buffers in the core are drained
-	 * so that the DMA descriptors are completely written when the
-	 * DMA engine goes to fetch them below
-	 */
 	SSYNC();
 
-	/* always clear status buffer before start tx dma */
 	current_tx_ptr->status.status_word = 0;
 
-	/* enable this packet's dma */
 	current_tx_ptr->desc_a.config |= DMAEN;
 
-	/* tx dma is running, just return */
 	if (bfin_read_DMA2_IRQ_STATUS() & DMA_RUN)
 		goto out;
 
-	/* tx dma is not running */
 	bfin_write_DMA2_NEXT_DESC_PTR(&(current_tx_ptr->desc_a));
-	/* dma enabled, read from memory, size is 6 */
+	 
 	bfin_write_DMA2_CONFIG(current_tx_ptr->desc_a.config);
-	/* Turn on the EMAC tx */
+	 
 	bfin_write_EMAC_OPMODE(bfin_read_EMAC_OPMODE() | TE);
 
 out:
@@ -1223,16 +1071,12 @@ static void bfin_mac_rx(struct net_device *dev)
 	unsigned char fcs[ETH_FCS_LEN + 1];
 #endif
 
-	/* check if frame status word reports an error condition
-	 * we which case we simply drop the packet
-	 */
 	if (current_rx_ptr->status.status_word & RX_ERROR_MASK) {
 		netdev_notice(dev, "rx: receive error - packet dropped\n");
 		dev->stats.rx_dropped++;
 		goto out;
 	}
 
-	/* allocate a new skb for next time receive */
 	skb = current_rx_ptr->skb;
 
 	new_skb = netdev_alloc_skb(dev, PKT_BUF_SZ + NET_IP_ALIGN);
@@ -1240,11 +1084,9 @@ static void bfin_mac_rx(struct net_device *dev)
 		dev->stats.rx_dropped++;
 		goto out;
 	}
-	/* reserve 2 bytes for RXDWA padding */
+	 
 	skb_reserve(new_skb, NET_IP_ALIGN);
-	/* Invidate the data cache of skb->data range when it is write back
-	 * cache. It will prevent overwritting the new data from DMA
-	 */
+	 
 	blackfin_dcache_invalidate_range((unsigned long)new_skb->head,
 					 (unsigned long)new_skb->end);
 
@@ -1252,7 +1094,7 @@ static void bfin_mac_rx(struct net_device *dev)
 	current_rx_ptr->desc_a.start_addr = (unsigned long)new_skb->data - 2;
 
 	len = (unsigned short)((current_rx_ptr->status.status_word) & RX_FRLEN);
-	/* Deduce Ethernet FCS length from Ethernet payload length */
+	 
 	len -= ETH_FCS_LEN;
 	skb_put(skb, len);
 
@@ -1261,20 +1103,10 @@ static void bfin_mac_rx(struct net_device *dev)
 	bfin_rx_hwtstamp(dev, skb);
 
 #if defined(BFIN_MAC_CSUM_OFFLOAD)
-	/* Checksum offloading only works for IPv4 packets with the standard IP header
-	 * length of 20 bytes, because the blackfin MAC checksum calculation is
-	 * based on that assumption. We must NOT use the calculated checksum if our
-	 * IP version or header break that assumption.
-	 */
+	 
 	if (skb->data[IP_HEADER_OFF] == 0x45) {
 		skb->csum = current_rx_ptr->status.ip_payload_csum;
-		/*
-		 * Deduce Ethernet FCS from hardware generated IP payload checksum.
-		 * IP checksum is based on 16-bit one's complement algorithm.
-		 * To deduce a value from checksum is equal to add its inversion.
-		 * If the IP payload len is odd, the inversed FCS should also
-		 * begin from odd address and leave first byte zero.
-		 */
+		 
 		if (skb->len % 2) {
 			fcs[0] = 0;
 			for (i = 0; i < ETH_FCS_LEN; i++)
@@ -1297,7 +1129,6 @@ out:
 	current_rx_ptr = current_rx_ptr->next;
 }
 
-/* interrupt routine to handle rx and error signal */
 static irqreturn_t bfin_mac_interrupt(int irq, void *dev_id)
 {
 	struct net_device *dev = dev_id;
@@ -1305,7 +1136,7 @@ static irqreturn_t bfin_mac_interrupt(int irq, void *dev_id)
 
 get_one_packet:
 	if (current_rx_ptr->status.status_word == 0) {
-		/* no more new packet received */
+		 
 		if (number == 0) {
 			if (current_rx_ptr->next->status.status_word != 0) {
 				current_rx_ptr = current_rx_ptr->next;
@@ -1333,7 +1164,7 @@ static void bfin_mac_poll(struct net_device *dev)
 	tx_reclaim_skb(lp);
 	enable_irq(IRQ_MAC_RX);
 }
-#endif				/* CONFIG_NET_POLL_CONTROLLER */
+#endif				 
 
 static void bfin_mac_disable(void)
 {
@@ -1342,13 +1173,10 @@ static void bfin_mac_disable(void)
 	opmode = bfin_read_EMAC_OPMODE();
 	opmode &= (~RE);
 	opmode &= (~TE);
-	/* Turn off the EMAC */
+	 
 	bfin_write_EMAC_OPMODE(opmode);
 }
 
-/*
- * Enable Interrupts, Receive, and Transmit
- */
 static int bfin_mac_enable(struct phy_device *phydev)
 {
 	int ret;
@@ -1356,22 +1184,13 @@ static int bfin_mac_enable(struct phy_device *phydev)
 
 	pr_debug("%s\n", __func__);
 
-	/* Set RX DMA */
 	bfin_write_DMA1_NEXT_DESC_PTR(&(rx_list_head->desc_a));
 	bfin_write_DMA1_CONFIG(rx_list_head->desc_a.config);
 
-	/* Wait MII done */
 	ret = bfin_mdio_poll();
 	if (ret)
 		return ret;
 
-	/* We enable only RX here */
-	/* ASTP   : Enable Automatic Pad Stripping
-	   PR     : Promiscuous Mode for test
-	   PSF    : Receive frames with total length less than 64 bytes.
-	   FDMODE : Full Duplex Mode
-	   LB     : Internal Loopback for test
-	   RE     : Receiver Enable */
 	opmode = bfin_read_EMAC_OPMODE();
 	if (opmode & FDMODE)
 		opmode |= PSF;
@@ -1380,28 +1199,20 @@ static int bfin_mac_enable(struct phy_device *phydev)
 	opmode |= RE;
 
 	if (phydev->interface == PHY_INTERFACE_MODE_RMII) {
-		opmode |= RMII; /* For Now only 100MBit are supported */
+		opmode |= RMII;  
 #if defined(CONFIG_BF537) || defined(CONFIG_BF536)
 		if (__SILICON_REVISION__ < 3) {
-			/*
-			 * This isn't publicly documented (fun times!), but in
-			 * silicon <=0.2, the RX and TX pins are clocked together.
-			 * So in order to recv, we must enable the transmit side
-			 * as well.  This will cause a spurious TX interrupt too,
-			 * but we can easily consume that.
-			 */
+			 
 			opmode |= TE;
 		}
 #endif
 	}
 
-	/* Turn on the EMAC rx */
 	bfin_write_EMAC_OPMODE(opmode);
 
 	return 0;
 }
 
-/* Our watchdog timed out. Called by the networking layer */
 static void bfin_mac_timeout(struct net_device *dev)
 {
 	struct bfin_mac_local *lp = netdev_priv(dev);
@@ -1412,7 +1223,6 @@ static void bfin_mac_timeout(struct net_device *dev)
 
 	del_timer(&lp->tx_reclaim_timer);
 
-	/* reset tx queue and free skb */
 	while (tx_list_head != current_tx_ptr) {
 		tx_list_head->desc_a.config &= ~DMAEN;
 		tx_list_head->status.status_word = 0;
@@ -1428,8 +1238,7 @@ static void bfin_mac_timeout(struct net_device *dev)
 
 	bfin_mac_enable(lp->phydev);
 
-	/* We can accept TX packets again */
-	dev->trans_start = jiffies; /* prevent tx timeout */
+	dev->trans_start = jiffies;  
 	netif_wake_queue(dev);
 }
 
@@ -1455,12 +1264,6 @@ static void bfin_mac_multicast_hash(struct net_device *dev)
 	bfin_write_EMAC_HASHLO(emac_hashlo);
 }
 
-/*
- * This routine will, depending on the values passed to it,
- * either make it accept multicast packets, go into
- * promiscuous mode (for TCPDUMP and cousins) or accept
- * a select set of multicast packets
- */
 static void bfin_mac_set_multicast_list(struct net_device *dev)
 {
 	u32 sysctl;
@@ -1471,18 +1274,18 @@ static void bfin_mac_set_multicast_list(struct net_device *dev)
 		sysctl |= PR;
 		bfin_write_EMAC_OPMODE(sysctl);
 	} else if (dev->flags & IFF_ALLMULTI) {
-		/* accept all multicast */
+		 
 		sysctl = bfin_read_EMAC_OPMODE();
 		sysctl |= PAM;
 		bfin_write_EMAC_OPMODE(sysctl);
 	} else if (!netdev_mc_empty(dev)) {
-		/* set up multicast hash table */
+		 
 		sysctl = bfin_read_EMAC_OPMODE();
 		sysctl |= HM;
 		bfin_write_EMAC_OPMODE(sysctl);
 		bfin_mac_multicast_hash(dev);
 	} else {
-		/* clear promisc or multicast mode */
+		 
 		sysctl = bfin_read_EMAC_OPMODE();
 		sysctl &= ~(RAF | PAM);
 		bfin_write_EMAC_OPMODE(sysctl);
@@ -1507,40 +1310,26 @@ static int bfin_mac_ioctl(struct net_device *netdev, struct ifreq *ifr, int cmd)
 	}
 }
 
-/*
- * this puts the device in an inactive state
- */
 static void bfin_mac_shutdown(struct net_device *dev)
 {
-	/* Turn off the EMAC */
+	 
 	bfin_write_EMAC_OPMODE(0x00000000);
-	/* Turn off the EMAC RX DMA */
+	 
 	bfin_write_DMA1_CONFIG(0x0000);
 	bfin_write_DMA2_CONFIG(0x0000);
 }
 
-/*
- * Open and Initialize the interface
- *
- * Set up everything, reset the card, etc..
- */
 static int bfin_mac_open(struct net_device *dev)
 {
 	struct bfin_mac_local *lp = netdev_priv(dev);
 	int ret;
 	pr_debug("%s: %s\n", dev->name, __func__);
 
-	/*
-	 * Check that the address is valid.  If its not, refuse
-	 * to bring the device up.  The user must specify an
-	 * address using ifconfig eth0 hw ether xx:xx:xx:xx:xx:xx
-	 */
 	if (!is_valid_ether_addr(dev->dev_addr)) {
 		netdev_warn(dev, "no valid ethernet hw addr\n");
 		return -EINVAL;
 	}
 
-	/* initial rx and tx list */
 	ret = desc_list_init(dev);
 	if (ret)
 		return ret;
@@ -1562,11 +1351,6 @@ static int bfin_mac_open(struct net_device *dev)
 	return 0;
 }
 
-/*
- * this makes the board clean up everything that it can
- * and not talk to the outside world.   Caused by
- * an 'ifconfig ethX down'
- */
 static int bfin_mac_close(struct net_device *dev)
 {
 	struct bfin_mac_local *lp = netdev_priv(dev);
@@ -1578,10 +1362,8 @@ static int bfin_mac_close(struct net_device *dev)
 	phy_stop(lp->phydev);
 	phy_write(lp->phydev, MII_BMCR, BMCR_PDOWN);
 
-	/* clear everything */
 	bfin_mac_shutdown(dev);
 
-	/* free the rx/tx buffers */
 	desc_list_free();
 
 	return 0;
@@ -1619,12 +1401,9 @@ static int bfin_mac_probe(struct platform_device *pdev)
 	lp = netdev_priv(ndev);
 	lp->ndev = ndev;
 
-	/* Grab the MAC address in the MAC */
 	*(__le32 *) (&(ndev->dev_addr[0])) = cpu_to_le32(bfin_read_EMAC_ADDRLO());
 	*(__le16 *) (&(ndev->dev_addr[4])) = cpu_to_le16((u16) bfin_read_EMAC_ADDRHI());
 
-	/* probe mac */
-	/*todo: how to proble? which is revision_register */
 	bfin_write_EMAC_ADDRLO(0x12345678);
 	if (bfin_read_EMAC_ADDRLO() != 0x12345678) {
 		dev_err(&pdev->dev, "Cannot detect Blackfin on-chip ethernet MAC controller!\n");
@@ -1632,15 +1411,10 @@ static int bfin_mac_probe(struct platform_device *pdev)
 		goto out_err_probe_mac;
 	}
 
-	/*
-	 * Is it valid? (Did bootloader initialize it?)
-	 * Grab the MAC from the board somehow
-	 * this is done in the arch/blackfin/mach-bfxxx/boards/eth_mac.c
-	 */
 	if (!is_valid_ether_addr(ndev->dev_addr)) {
 		if (bfin_get_ether_addr(ndev->dev_addr) ||
 		     !is_valid_ether_addr(ndev->dev_addr)) {
-			/* Still not valid, get a random one */
+			 
 			netdev_warn(ndev, "Setting Ethernet MAC to a random one\n");
 			eth_hw_addr_random(ndev);
 		}
@@ -1672,7 +1446,6 @@ static int bfin_mac_probe(struct platform_device *pdev)
 	lp->vlan1_mask = ETH_P_8021Q | mii_bus_data->vlan1_mask;
 	lp->vlan2_mask = ETH_P_8021Q | mii_bus_data->vlan2_mask;
 
-	/* Fill in the fields of the device structure with ethernet values. */
 	ether_setup(ndev);
 
 	ndev->netdev_ops = &bfin_mac_netdev_ops;
@@ -1684,8 +1457,6 @@ static int bfin_mac_probe(struct platform_device *pdev)
 
 	spin_lock_init(&lp->lock);
 
-	/* now, enable interrupts */
-	/* register irq handler */
 	rc = request_irq(IRQ_MAC_RX, bfin_mac_interrupt,
 			IRQF_DISABLED, "EMAC_RX", ndev);
 	if (rc) {
@@ -1707,7 +1478,6 @@ static int bfin_mac_probe(struct platform_device *pdev)
 		goto out_err_phc;
 	}
 
-	/* now, print out the card info, in a short format.. */
 	netdev_info(ndev, "%s, Version %s\n", DRV_DESC, DRV_VERSION);
 
 	return 0;
@@ -1721,9 +1491,9 @@ out_err_mii_probe:
 	mdiobus_free(lp->mii_bus);
 out_err_probe_mac:
 #if defined (MY_DEF_HERE)
-#else /* MY_DEF_HERE */
+#else  
 	platform_set_drvdata(pdev, NULL);
-#endif /* MY_DEF_HERE */
+#endif  
 	free_netdev(ndev);
 
 	return rc;
@@ -1737,9 +1507,9 @@ static int bfin_mac_remove(struct platform_device *pdev)
 	bfin_phc_release(lp);
 
 #if defined (MY_DEF_HERE)
-#else /* MY_DEF_HERE */
+#else  
 	platform_set_drvdata(pdev, NULL);
-#endif /* MY_DEF_HERE */
+#endif  
 
 	lp->mii_bus->priv = NULL;
 
@@ -1789,7 +1559,7 @@ static int bfin_mac_resume(struct platform_device *pdev)
 #else
 #define bfin_mac_suspend NULL
 #define bfin_mac_resume NULL
-#endif	/* CONFIG_PM */
+#endif	 
 
 static int bfin_mii_bus_probe(struct platform_device *pdev)
 {
@@ -1804,10 +1574,6 @@ static int bfin_mii_bus_probe(struct platform_device *pdev)
 		return -EINVAL;
 	}
 
-	/*
-	 * We are setting up a network card,
-	 * so set the GPIO pins to Ethernet mode
-	 */
 	pin_req = mii_bus_pd->mac_peripherals;
 	rc = peripheral_request_list(pin_req, KBUILD_MODNAME);
 	if (rc) {
@@ -1876,9 +1642,9 @@ static int bfin_mii_bus_remove(struct platform_device *pdev)
 		dev_get_platdata(&pdev->dev);
 
 #if defined (MY_DEF_HERE)
-#else /* MY_DEF_HERE */
+#else  
 	platform_set_drvdata(pdev, NULL);
-#endif /* MY_DEF_HERE */
+#endif  
 	mdiobus_unregister(miibus);
 	kfree(miibus->irq);
 	mdiobus_free(miibus);

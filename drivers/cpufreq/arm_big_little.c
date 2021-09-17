@@ -1,25 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * ARM big.LITTLE Platforms CPUFreq support
- *
- * Copyright (C) 2013 ARM Ltd.
- * Sudeep KarkadaNagesha <sudeep.karkadanagesha@arm.com>
- *
- * Copyright (C) 2013 Linaro.
- * Viresh Kumar <viresh.kumar@linaro.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- *
- * This program is distributed "as is" WITHOUT ANY WARRANTY of any
- * kind, whether express or implied; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- */
-
+ 
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
 #include <linux/clk.h>
@@ -30,16 +12,15 @@
 #include <linux/of_platform.h>
 #if defined(MY_ABC_HERE)
 #include <linux/pm_opp.h>
-#else /* MY_ABC_HERE */
+#else  
 #include <linux/opp.h>
-#endif /* MY_ABC_HERE */
+#endif  
 #include <linux/slab.h>
 #include <linux/topology.h>
 #include <linux/types.h>
 
 #include "arm_big_little.h"
 
-/* Currently we support only two clusters */
 #define MAX_CLUSTERS	2
 
 static struct cpufreq_arm_bL_ops *arm_bL_ops;
@@ -54,7 +35,6 @@ static unsigned int bL_cpufreq_get(unsigned int cpu)
 	return clk_get_rate(clk[cur_cluster]) / 1000;
 }
 
-/* Validate policy frequency range */
 static int bL_cpufreq_verify_policy(struct cpufreq_policy *policy)
 {
 	u32 cur_cluster = cpu_to_cluster(policy->cpu);
@@ -62,7 +42,6 @@ static int bL_cpufreq_verify_policy(struct cpufreq_policy *policy)
 	return cpufreq_frequency_table_verify(policy, freq_table[cur_cluster]);
 }
 
-/* Set clock frequency */
 static int bL_cpufreq_set_target(struct cpufreq_policy *policy,
 		unsigned int target_freq, unsigned int relation)
 {
@@ -74,7 +53,6 @@ static int bL_cpufreq_set_target(struct cpufreq_policy *policy,
 
 	freqs.old = bL_cpufreq_get(policy->cpu);
 
-	/* Determine valid target frequency using freq_table */
 	cpufreq_frequency_table_target(policy, freq_table[cur_cluster],
 			target_freq, relation, &freq_tab_idx);
 	freqs.new = freq_table[cur_cluster][freq_tab_idx].frequency;
@@ -109,9 +87,9 @@ static void put_cluster_clk_and_freq_table(struct device *cpu_dev)
 		clk_put(clk[cluster]);
 #if defined(MY_ABC_HERE)
 		dev_pm_opp_free_cpufreq_table(cpu_dev, &freq_table[cluster]);
-#else /* MY_ABC_HERE */
+#else  
 		opp_free_cpufreq_table(cpu_dev, &freq_table[cluster]);
-#endif /* MY_ABC_HERE */
+#endif  
 		dev_dbg(cpu_dev, "%s: cluster: %d\n", __func__, cluster);
 	}
 }
@@ -134,9 +112,9 @@ static int get_cluster_clk_and_freq_table(struct device *cpu_dev)
 
 #if defined(MY_ABC_HERE)
 	ret = dev_pm_opp_init_cpufreq_table(cpu_dev, &freq_table[cluster]);
-#else /* MY_ABC_HERE */
+#else  
 	ret = opp_init_cpufreq_table(cpu_dev, &freq_table[cluster]);
-#endif /* MY_ABC_HERE */
+#endif  
 	if (ret) {
 		dev_err(cpu_dev, "%s: failed to init cpufreq table, cpu: %d, err: %d\n",
 				__func__, cpu_dev->id, ret);
@@ -157,9 +135,9 @@ static int get_cluster_clk_and_freq_table(struct device *cpu_dev)
 	ret = PTR_ERR(clk[cluster]);
 #if defined(MY_ABC_HERE)
 	dev_pm_opp_free_cpufreq_table(cpu_dev, &freq_table[cluster]);
-#else /* MY_ABC_HERE */
+#else  
 	opp_free_cpufreq_table(cpu_dev, &freq_table[cluster]);
-#endif /* MY_ABC_HERE */
+#endif  
 
 atomic_dec:
 	atomic_dec(&cluster_usage[cluster]);
@@ -168,7 +146,6 @@ atomic_dec:
 	return ret;
 }
 
-/* Per-CPU initialization */
 static int bL_cpufreq_init(struct cpufreq_policy *policy)
 {
 	u32 cur_cluster = cpu_to_cluster(policy->cpu);
@@ -227,7 +204,6 @@ static int bL_cpufreq_exit(struct cpufreq_policy *policy)
 	return 0;
 }
 
-/* Export freq_table to sysfs */
 static struct freq_attr *bL_cpufreq_attr[] = {
 	&cpufreq_freq_attr_scaling_available_freqs,
 	NULL,
@@ -238,19 +214,19 @@ static struct cpufreq_driver bL_cpufreq_driver = {
 #if defined(MY_ABC_HERE)
 	.flags			= CPUFREQ_STICKY |
 					CPUFREQ_HAVE_GOVERNOR_PER_POLICY,
-#else /* MY_ABC_HERE */
+#else  
 	.flags			= CPUFREQ_STICKY,
-#endif /* MY_ABC_HERE */
+#endif  
 	.verify			= bL_cpufreq_verify_policy,
 	.target			= bL_cpufreq_set_target,
 	.get			= bL_cpufreq_get,
 	.init			= bL_cpufreq_init,
 	.exit			= bL_cpufreq_exit,
 #if defined(MY_ABC_HERE)
-	// do nothing
-#else /* MY_ABC_HERE */
+	 
+#else  
 	.have_governor_per_policy = true,
-#endif /* MY_ABC_HERE */
+#endif  
 	.attr			= bL_cpufreq_attr,
 };
 

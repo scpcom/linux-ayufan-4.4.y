@@ -1,21 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Texas Instruments Ethernet Switch Driver
- *
- * Copyright (C) 2012 Texas Instruments
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation version 2.
- *
- * This program is distributed "as is" WITHOUT ANY WARRANTY of any
- * kind, whether express or implied; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/io.h>
 #include <linux/clk.h>
@@ -201,57 +187,52 @@ struct cpsw_ss_regs {
 	u32	dlr_ltype;
 };
 
-/* CPSW_PORT_V1 */
-#define CPSW1_MAX_BLKS      0x00 /* Maximum FIFO Blocks */
-#define CPSW1_BLK_CNT       0x04 /* FIFO Block Usage Count (Read Only) */
-#define CPSW1_TX_IN_CTL     0x08 /* Transmit FIFO Control */
-#define CPSW1_PORT_VLAN     0x0c /* VLAN Register */
-#define CPSW1_TX_PRI_MAP    0x10 /* Tx Header Priority to Switch Pri Mapping */
-#define CPSW1_TS_CTL        0x14 /* Time Sync Control */
-#define CPSW1_TS_SEQ_LTYPE  0x18 /* Time Sync Sequence ID Offset and Msg Type */
-#define CPSW1_TS_VLAN       0x1c /* Time Sync VLAN1 and VLAN2 */
+#define CPSW1_MAX_BLKS      0x00  
+#define CPSW1_BLK_CNT       0x04  
+#define CPSW1_TX_IN_CTL     0x08  
+#define CPSW1_PORT_VLAN     0x0c  
+#define CPSW1_TX_PRI_MAP    0x10  
+#define CPSW1_TS_CTL        0x14  
+#define CPSW1_TS_SEQ_LTYPE  0x18  
+#define CPSW1_TS_VLAN       0x1c  
 
-/* CPSW_PORT_V2 */
-#define CPSW2_CONTROL       0x00 /* Control Register */
-#define CPSW2_MAX_BLKS      0x08 /* Maximum FIFO Blocks */
-#define CPSW2_BLK_CNT       0x0c /* FIFO Block Usage Count (Read Only) */
-#define CPSW2_TX_IN_CTL     0x10 /* Transmit FIFO Control */
-#define CPSW2_PORT_VLAN     0x14 /* VLAN Register */
-#define CPSW2_TX_PRI_MAP    0x18 /* Tx Header Priority to Switch Pri Mapping */
-#define CPSW2_TS_SEQ_MTYPE  0x1c /* Time Sync Sequence ID Offset and Msg Type */
+#define CPSW2_CONTROL       0x00  
+#define CPSW2_MAX_BLKS      0x08  
+#define CPSW2_BLK_CNT       0x0c  
+#define CPSW2_TX_IN_CTL     0x10  
+#define CPSW2_PORT_VLAN     0x14  
+#define CPSW2_TX_PRI_MAP    0x18  
+#define CPSW2_TS_SEQ_MTYPE  0x1c  
 
-/* CPSW_PORT_V1 and V2 */
-#define SA_LO               0x20 /* CPGMAC_SL Source Address Low */
-#define SA_HI               0x24 /* CPGMAC_SL Source Address High */
-#define SEND_PERCENT        0x28 /* Transmit Queue Send Percentages */
+#define SA_LO               0x20  
+#define SA_HI               0x24  
+#define SEND_PERCENT        0x28  
 
-/* CPSW_PORT_V2 only */
-#define RX_DSCP_PRI_MAP0    0x30 /* Rx DSCP Priority to Rx Packet Mapping */
-#define RX_DSCP_PRI_MAP1    0x34 /* Rx DSCP Priority to Rx Packet Mapping */
-#define RX_DSCP_PRI_MAP2    0x38 /* Rx DSCP Priority to Rx Packet Mapping */
-#define RX_DSCP_PRI_MAP3    0x3c /* Rx DSCP Priority to Rx Packet Mapping */
-#define RX_DSCP_PRI_MAP4    0x40 /* Rx DSCP Priority to Rx Packet Mapping */
-#define RX_DSCP_PRI_MAP5    0x44 /* Rx DSCP Priority to Rx Packet Mapping */
-#define RX_DSCP_PRI_MAP6    0x48 /* Rx DSCP Priority to Rx Packet Mapping */
-#define RX_DSCP_PRI_MAP7    0x4c /* Rx DSCP Priority to Rx Packet Mapping */
+#define RX_DSCP_PRI_MAP0    0x30  
+#define RX_DSCP_PRI_MAP1    0x34  
+#define RX_DSCP_PRI_MAP2    0x38  
+#define RX_DSCP_PRI_MAP3    0x3c  
+#define RX_DSCP_PRI_MAP4    0x40  
+#define RX_DSCP_PRI_MAP5    0x44  
+#define RX_DSCP_PRI_MAP6    0x48  
+#define RX_DSCP_PRI_MAP7    0x4c  
 
-/* Bit definitions for the CPSW2_CONTROL register */
-#define PASS_PRI_TAGGED     (1<<24) /* Pass Priority Tagged */
-#define VLAN_LTYPE2_EN      (1<<21) /* VLAN LTYPE 2 enable */
-#define VLAN_LTYPE1_EN      (1<<20) /* VLAN LTYPE 1 enable */
-#define DSCP_PRI_EN         (1<<16) /* DSCP Priority Enable */
-#define TS_320              (1<<14) /* Time Sync Dest Port 320 enable */
-#define TS_319              (1<<13) /* Time Sync Dest Port 319 enable */
-#define TS_132              (1<<12) /* Time Sync Dest IP Addr 132 enable */
-#define TS_131              (1<<11) /* Time Sync Dest IP Addr 131 enable */
-#define TS_130              (1<<10) /* Time Sync Dest IP Addr 130 enable */
-#define TS_129              (1<<9)  /* Time Sync Dest IP Addr 129 enable */
-#define TS_BIT8             (1<<8)  /* ts_ttl_nonzero? */
-#define TS_ANNEX_D_EN       (1<<4)  /* Time Sync Annex D enable */
-#define TS_LTYPE2_EN        (1<<3)  /* Time Sync LTYPE 2 enable */
-#define TS_LTYPE1_EN        (1<<2)  /* Time Sync LTYPE 1 enable */
-#define TS_TX_EN            (1<<1)  /* Time Sync Transmit Enable */
-#define TS_RX_EN            (1<<0)  /* Time Sync Receive Enable */
+#define PASS_PRI_TAGGED     (1<<24)  
+#define VLAN_LTYPE2_EN      (1<<21)  
+#define VLAN_LTYPE1_EN      (1<<20)  
+#define DSCP_PRI_EN         (1<<16)  
+#define TS_320              (1<<14)  
+#define TS_319              (1<<13)  
+#define TS_132              (1<<12)  
+#define TS_131              (1<<11)  
+#define TS_130              (1<<10)  
+#define TS_129              (1<<9)   
+#define TS_BIT8             (1<<8)   
+#define TS_ANNEX_D_EN       (1<<4)   
+#define TS_LTYPE2_EN        (1<<3)   
+#define TS_LTYPE1_EN        (1<<2)   
+#define TS_TX_EN            (1<<1)   
+#define TS_RX_EN            (1<<0)   
 
 #define CTRL_TS_BITS \
 	(TS_320 | TS_319 | TS_132 | TS_131 | TS_130 | TS_129 | TS_BIT8 | \
@@ -261,21 +242,17 @@ struct cpsw_ss_regs {
 #define CTRL_TX_TS_BITS  (CTRL_TS_BITS | TS_TX_EN)
 #define CTRL_RX_TS_BITS  (CTRL_TS_BITS | TS_RX_EN)
 
-/* Bit definitions for the CPSW2_TS_SEQ_MTYPE register */
-#define TS_SEQ_ID_OFFSET_SHIFT   (16)    /* Time Sync Sequence ID Offset */
+#define TS_SEQ_ID_OFFSET_SHIFT   (16)     
 #define TS_SEQ_ID_OFFSET_MASK    (0x3f)
-#define TS_MSG_TYPE_EN_SHIFT     (0)     /* Time Sync Message Type Enable */
+#define TS_MSG_TYPE_EN_SHIFT     (0)      
 #define TS_MSG_TYPE_EN_MASK      (0xffff)
 
-/* The PTP event messages - Sync, Delay_Req, Pdelay_Req, and Pdelay_Resp. */
 #define EVENT_MSG_BITS ((1<<0) | (1<<1) | (1<<2) | (1<<3))
 
-/* Bit definitions for the CPSW1_TS_CTL register */
 #define CPSW_V1_TS_RX_EN		BIT(0)
 #define CPSW_V1_TS_TX_EN		BIT(4)
 #define CPSW_V1_MSG_TYPE_OFS		16
 
-/* Bit definitions for the CPSW1_TS_SEQ_LTYPE register */
 #define CPSW_V1_SEQ_ID_OFS_SHIFT	16
 
 struct cpsw_host_regs {
@@ -348,7 +325,7 @@ struct cpsw_priv {
 	struct cpdma_ctlr		*dma;
 	struct cpdma_chan		*txch, *rxch;
 	struct cpsw_ale			*ale;
-	/* snapshot of IRQ numbers */
+	 
 	u32 irqs_table[4];
 	u32 num_irqs;
 	bool irq_enabled;
@@ -419,18 +396,16 @@ static void cpsw_ndo_set_rx_mode(struct net_device *ndev)
 	struct cpsw_priv *priv = netdev_priv(ndev);
 
 	if (ndev->flags & IFF_PROMISC) {
-		/* Enable promiscuous mode */
+		 
 		dev_err(priv->dev, "Ignoring Promiscuous mode\n");
 		return;
 	}
 
-	/* Clear all mcast from ALE */
 	cpsw_ale_flush_multicast(priv->ale, ALE_ALL_PORTS << priv->host_port);
 
 	if (!netdev_mc_empty(ndev)) {
 		struct netdev_hw_addr *ha;
 
-		/* program multicast address list into ALE register */
 		netdev_for_each_mc_addr(ha, ndev) {
 			cpsw_add_mcast(priv, (u8 *)ha->addr);
 		}
@@ -461,9 +436,6 @@ void cpsw_tx_handler(void *token, int len, int status)
 	struct net_device	*ndev = skb->dev;
 	struct cpsw_priv	*priv = netdev_priv(ndev);
 
-	/* Check whether the queue is stopped due to stalled tx dma, if the
-	 * queue is stopped then start the queue as we have free desc for tx
-	 */
 	if (unlikely(netif_queue_stopped(ndev)))
 		netif_wake_queue(ndev);
 	cpts_tx_timestamp(priv->cpts, skb);
@@ -483,7 +455,7 @@ void cpsw_rx_handler(void *token, int len, int status)
 	cpsw_dual_emac_src_port_detect(status, priv, ndev, skb);
 
 	if (unlikely(status < 0)) {
-		/* the interface is going down, skbs are purged */
+		 
 		dev_kfree_skb_any(skb);
 		return;
 	}
@@ -608,23 +580,21 @@ static void _cpsw_adjust_link(struct cpsw_slave *slave,
 	if (phy->link) {
 		mac_control = priv->data.mac_control;
 
-		/* enable forwarding */
 		cpsw_ale_control_set(priv->ale, slave_port,
 				     ALE_PORT_STATE, ALE_PORT_STATE_FORWARD);
 
 		if (phy->speed == 1000)
-			mac_control |= BIT(7);	/* GIGABITEN	*/
+			mac_control |= BIT(7);	 
 		if (phy->duplex)
-			mac_control |= BIT(0);	/* FULLDUPLEXEN	*/
+			mac_control |= BIT(0);	 
 
-		/* set speed_in input in case RMII mode is used in 100Mbps */
 		if (phy->speed == 100)
 			mac_control |= BIT(15);
 
 		*link = true;
 	} else {
 		mac_control = 0;
-		/* disable forwarding */
+		 
 		cpsw_ale_control_set(priv->ale, slave_port,
 				     ALE_PORT_STATE, ALE_PORT_STATE_DISABLE);
 	}
@@ -685,9 +655,7 @@ static int cpsw_set_coalesce(struct net_device *ndev,
 		coal_intvl = CPSW_CMINTMIN_INTVL;
 
 	if (coal_intvl > CPSW_CMINTMAX_INTVL) {
-		/* Interrupt pacer works with 4us Pulse, we can
-		 * throttle further by dilating the 4us pulse.
-		 */
+		 
 		addnl_dvdr = CPSW_INTPRESCALE_MASK / prescale;
 
 		if (addnl_dvdr > 1) {
@@ -793,7 +761,6 @@ static void cpsw_slave_open(struct cpsw_slave *slave, struct cpsw_priv *priv)
 
 	soft_reset(name, &slave->sliver->soft_reset);
 
-	/* setup priority mapping */
 	__raw_writel(RX_PRIORITY_MAPPING, &slave->sliver->rx_pri_map);
 
 	switch (priv->version) {
@@ -805,11 +772,10 @@ static void cpsw_slave_open(struct cpsw_slave *slave, struct cpsw_priv *priv)
 		break;
 	}
 
-	/* setup max packet size, and mac address */
 	__raw_writel(priv->rx_packet_max, &slave->sliver->rx_maxlen);
 	cpsw_set_slave_mac(slave, priv);
 
-	slave->mac_control = 0;	/* no link yet */
+	slave->mac_control = 0;	 
 
 	slave_port = cpsw_get_slave_port(priv, slave->slave_num);
 
@@ -857,11 +823,9 @@ static void cpsw_init_host_port(struct cpsw_priv *priv)
 	u32 control_reg;
 	u32 fifo_mode;
 
-	/* soft reset the controller and initialize ale */
 	soft_reset("cpsw", &priv->regs->soft_reset);
 	cpsw_ale_start(priv->ale);
 
-	/* switch to vlan unaware mode */
 	cpsw_ale_control_set(priv->ale, priv->host_port, ALE_VLAN_AWARE,
 			     CPSW_ALE_VLAN_AWARE);
 	control_reg = readl(&priv->regs->control);
@@ -871,7 +835,6 @@ static void cpsw_init_host_port(struct cpsw_priv *priv)
 		     CPSW_FIFO_NORMAL_MODE;
 	writel(fifo_mode, &priv->host_port_regs->tx_in_ctl);
 
-	/* setup host port priority mapping */
 	__raw_writel(CPDMA_TX_PRIORITY_MAP,
 		     &priv->host_port_regs->cpdma_tx_pri_map);
 	__raw_writel(0, &priv->host_port_regs->cpdma_rx_chan_map);
@@ -915,24 +878,20 @@ static int cpsw_ndo_open(struct net_device *ndev)
 		 CPSW_MAJOR_VERSION(reg), CPSW_MINOR_VERSION(reg),
 		 CPSW_RTL_VERSION(reg));
 
-	/* initialize host and slave ports */
 	if (!cpsw_common_res_usage_state(priv))
 		cpsw_init_host_port(priv);
 	for_each_slave(priv, cpsw_slave_open, priv);
 
-	/* Add default VLAN */
 	if (!priv->data.dual_emac)
 		cpsw_add_default_vlan(priv);
 
 	if (!cpsw_common_res_usage_state(priv)) {
-		/* setup tx dma to fixed prio and zero offset */
+		 
 		cpdma_control_set(priv->dma, CPDMA_TX_PRIO_FIXED, 1);
 		cpdma_control_set(priv->dma, CPDMA_RX_BUFFER_OFFSET, 0);
 
-		/* disable priority elevation */
 		__raw_writel(0, &priv->regs->ptype);
 
-		/* enable statistics collection only on all ports */
 		__raw_writel(0x7, &priv->regs->stat_port_en);
 
 		if (WARN_ON(!priv->data.rx_descs))
@@ -953,13 +912,10 @@ static int cpsw_ndo_open(struct net_device *ndev)
 				goto err_cleanup;
 			}
 		}
-		/* continue even if we didn't manage to submit all
-		 * receive descs
-		 */
+		 
 		cpsw_info(priv, ifup, "submitted %d rx descriptors\n", i);
 	}
 
-	/* Enable Interrupt pacing if configured */
 	if (priv->coal_intvl != 0) {
 		struct ethtool_coalesce coal;
 
@@ -1041,9 +997,6 @@ static netdev_tx_t cpsw_ndo_start_xmit(struct sk_buff *skb,
 		goto fail;
 	}
 
-	/* If there is no more tx desc left free then we need to
-	 * tell the kernel to stop sending us tx frames.
-	 */
 	if (unlikely(!cpdma_check_free_tx_desc(priv->txch)))
 		netif_stop_queue(ndev);
 
@@ -1056,23 +1009,10 @@ fail:
 
 static void cpsw_ndo_change_rx_flags(struct net_device *ndev, int flags)
 {
-	/*
-	 * The switch cannot operate in promiscuous mode without substantial
-	 * headache.  For promiscuous mode to work, we would need to put the
-	 * ALE in bypass mode and route all traffic to the host port.
-	 * Subsequently, the host will need to operate as a "bridge", learn,
-	 * and flood as needed.  For now, we simply complain here and
-	 * do nothing about it :-)
-	 */
+	 
 	if ((flags & IFF_PROMISC) && (ndev->flags & IFF_PROMISC))
 		dev_err(&ndev->dev, "promiscuity ignored!\n");
 
-	/*
-	 * The switch cannot filter multicast traffic unless it is configured
-	 * in "VLAN Aware" mode.  Unfortunately, VLAN awareness requires a
-	 * whole bunch of additional logic that this driver does not implement
-	 * at present.
-	 */
 	if ((flags & IFF_ALLMULTI) && !(ndev->flags & IFF_ALLMULTI))
 		dev_err(&ndev->dev, "multicast traffic cannot be filtered!\n");
 }
@@ -1137,7 +1077,6 @@ static int cpsw_hwtstamp_ioctl(struct net_device *dev, struct ifreq *ifr)
 	if (copy_from_user(&cfg, ifr->ifr_data, sizeof(cfg)))
 		return -EFAULT;
 
-	/* reserved for future extensions */
 	if (cfg.flags)
 		return -EINVAL;
 
@@ -1191,7 +1130,7 @@ static int cpsw_hwtstamp_ioctl(struct net_device *dev, struct ifreq *ifr)
 	return copy_to_user(ifr->ifr_data, &cfg, sizeof(cfg)) ? -EFAULT : 0;
 }
 
-#endif /*CONFIG_TI_CPTS*/
+#endif  
 
 static int cpsw_ndo_ioctl(struct net_device *dev, struct ifreq *req, int cmd)
 {
@@ -1297,10 +1236,7 @@ static int cpsw_ndo_vlan_rx_add_vid(struct net_device *ndev,
 		return 0;
 
 	if (priv->data.dual_emac) {
-		/* In dual EMAC, reserved VLAN id should not be used for
-		 * creating VLAN interfaces as this can break the dual
-		 * EMAC port separation
-		 */
+		 
 		int i;
 
 		for (i = 0; i < priv->data.slaves; i++) {
@@ -1546,11 +1482,8 @@ static int cpsw_probe_dt(struct cpsw_platform_data *data,
 	if (!of_property_read_u32(node, "dual_emac", &prop))
 		data->dual_emac = prop;
 
-	/*
-	 * Populate all the child nodes here...
-	 */
 	ret = of_platform_populate(node, NULL, NULL, &pdev->dev);
-	/* We do not want to force this, as in some cases may not have child */
+	 
 	if (ret)
 		pr_warn("Doesn't have any child node\n");
 
@@ -1668,7 +1601,6 @@ static int cpsw_probe_dual_emac(struct platform_device *pdev,
 	SET_ETHTOOL_OPS(ndev, &cpsw_ethtool_ops);
 	netif_napi_add(ndev, &priv_sl2->napi, cpsw_poll, CPSW_POLL_WEIGHT);
 
-	/* register the network device */
 	SET_NETDEV_DEV(ndev, &pdev->dev);
 	ret = register_netdev(ndev);
 	if (ret) {
@@ -1713,9 +1645,6 @@ static int cpsw_probe(struct platform_device *pdev)
 		goto clean_ndev_ret;
 	}
 
-	/*
-	 * This may be required here for child devices.
-	 */
 	pm_runtime_enable(&pdev->dev);
 
 	if (cpsw_probe_dt(&priv->data, pdev)) {
@@ -1907,7 +1836,6 @@ static int cpsw_probe(struct platform_device *pdev)
 	SET_ETHTOOL_OPS(ndev, &cpsw_ethtool_ops);
 	netif_napi_add(ndev, &priv->napi, cpsw_poll, CPSW_POLL_WEIGHT);
 
-	/* register the network device */
 	SET_NETDEV_DEV(ndev, &pdev->dev);
 	ret = register_netdev(ndev);
 	if (ret) {
@@ -1970,9 +1898,9 @@ static int cpsw_remove(struct platform_device *pdev)
 	int i;
 
 #if defined (MY_DEF_HERE)
-#else /* MY_DEF_HERE */
+#else  
 	platform_set_drvdata(pdev, NULL);
-#endif /* MY_DEF_HERE */
+#endif  
 	if (priv->data.dual_emac)
 		unregister_netdev(cpsw_get_slave_ndev(priv, 1));
 	unregister_netdev(ndev);
@@ -2034,7 +1962,7 @@ static const struct dev_pm_ops cpsw_pm_ops = {
 
 static const struct of_device_id cpsw_of_mtable[] = {
 	{ .compatible = "ti,cpsw", },
-	{ /* sentinel */ },
+	{   },
 };
 MODULE_DEVICE_TABLE(of, cpsw_of_mtable);
 

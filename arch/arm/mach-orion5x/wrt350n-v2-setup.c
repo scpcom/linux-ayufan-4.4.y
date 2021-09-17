@@ -1,13 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * arch/arm/mach-orion5x/wrt350n-v2-setup.c
- *
- * This file is licensed under the terms of the GNU General Public
- * License version 2.  This program is licensed "as is" without any
- * warranty of any kind, whether express or implied.
- */
+ 
 #include <linux/gpio.h>
 #include <linux/kernel.h>
 #include <linux/init.h>
@@ -29,9 +23,6 @@
 #include "common.h"
 #include "mpp.h"
 
-/*
- * LEDs attached to GPIO
- */
 static struct gpio_led wrt350n_v2_led_pins[] = {
 	{
 		.name		= "wrt350nv2:green:power",
@@ -69,9 +60,6 @@ static struct platform_device wrt350n_v2_leds = {
 	},
 };
 
-/*
- * Buttons attached to GPIO
- */
 static struct gpio_keys_button wrt350n_v2_buttons[] = {
 	{
 		.code		= KEY_RESTART,
@@ -100,36 +88,30 @@ static struct platform_device wrt350n_v2_button_device = {
 	},
 };
 
-/*
- * General setup
- */
 static unsigned int wrt350n_v2_mpp_modes[] __initdata = {
-	MPP0_GPIO,		/* Power LED green (0=on) */
-	MPP1_GPIO,		/* Security LED (0=on) */
-	MPP2_GPIO,		/* Internal Button (0=on) */
-	MPP3_GPIO,		/* Reset Button (0=on) */
-	MPP4_GPIO,		/* PCI int */
-	MPP5_GPIO,		/* Power LED orange (0=on) */
-	MPP6_GPIO,		/* USB LED (0=on) */
-	MPP7_GPIO,		/* Wireless LED (0=on) */
-	MPP8_UNUSED,		/* ??? */
-	MPP9_GIGE,		/* GE_RXERR */
-	MPP10_UNUSED,		/* ??? */
-	MPP11_UNUSED,		/* ??? */
-	MPP12_GIGE,		/* GE_TXD[4] */
-	MPP13_GIGE,		/* GE_TXD[5] */
-	MPP14_GIGE,		/* GE_TXD[6] */
-	MPP15_GIGE,		/* GE_TXD[7] */
-	MPP16_GIGE,		/* GE_RXD[4] */
-	MPP17_GIGE,		/* GE_RXD[5] */
-	MPP18_GIGE,		/* GE_RXD[6] */
-	MPP19_GIGE,		/* GE_RXD[7] */
+	MPP0_GPIO,		 
+	MPP1_GPIO,		 
+	MPP2_GPIO,		 
+	MPP3_GPIO,		 
+	MPP4_GPIO,		 
+	MPP5_GPIO,		 
+	MPP6_GPIO,		 
+	MPP7_GPIO,		 
+	MPP8_UNUSED,		 
+	MPP9_GIGE,		 
+	MPP10_UNUSED,		 
+	MPP11_UNUSED,		 
+	MPP12_GIGE,		 
+	MPP13_GIGE,		 
+	MPP14_GIGE,		 
+	MPP15_GIGE,		 
+	MPP16_GIGE,		 
+	MPP17_GIGE,		 
+	MPP18_GIGE,		 
+	MPP19_GIGE,		 
 	0,
 };
 
-/*
- * 8M NOR flash Device bus boot chip select
- */
 #define WRT350N_V2_NOR_BOOT_BASE	0xf4000000
 #define WRT350N_V2_NOR_BOOT_SIZE	SZ_8M
 
@@ -201,16 +183,11 @@ static struct dsa_platform_data wrt350n_v2_switch_plat_data = {
 
 static void __init wrt350n_v2_init(void)
 {
-	/*
-	 * Setup basic Orion functions. Need to be called early.
-	 */
+	 
 	orion5x_init();
 
 	orion5x_mpp_conf(wrt350n_v2_mpp_modes);
 
-	/*
-	 * Configure peripherals.
-	 */
 	orion5x_ehci0_init();
 	orion5x_eth_init(&wrt350n_v2_eth_data);
 	orion5x_eth_switch_init(&wrt350n_v2_switch_plat_data, NO_IRQ);
@@ -221,10 +198,10 @@ static void __init wrt350n_v2_init(void)
 				    ORION_MBUS_DEVBUS_BOOT_ATTR,
 				    WRT350N_V2_NOR_BOOT_BASE,
 				    WRT350N_V2_NOR_BOOT_SIZE);
-#else /* MY_ABC_HERE */
+#else  
 	mvebu_mbus_add_window("devbus-boot", WRT350N_V2_NOR_BOOT_BASE,
 			      WRT350N_V2_NOR_BOOT_SIZE);
-#endif /* MY_ABC_HERE */
+#endif  
 	platform_device_register(&wrt350n_v2_nor_flash);
 	platform_device_register(&wrt350n_v2_leds);
 	platform_device_register(&wrt350n_v2_button_device);
@@ -235,16 +212,10 @@ static int __init wrt350n_v2_pci_map_irq(const struct pci_dev *dev, u8 slot,
 {
 	int irq;
 
-	/*
-	 * Check for devices with hard-wired IRQs.
-	 */
 	irq = orion5x_pci_map_irq(dev, slot, pin);
 	if (irq != -1)
 		return irq;
 
-	/*
-	 * Mini-PCI slot.
-	 */
 	if (slot == 7)
 		return gpio_to_irq(4);
 
@@ -268,7 +239,7 @@ static int __init wrt350n_v2_pci_init(void)
 subsys_initcall(wrt350n_v2_pci_init);
 
 MACHINE_START(WRT350N_V2, "Linksys WRT350N v2")
-	/* Maintainer: Lennert Buytenhek <buytenh@marvell.com> */
+	 
 	.atag_offset	= 0x100,
 	.init_machine	= wrt350n_v2_init,
 	.map_io		= orion5x_map_io,

@@ -1,30 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
-  STMMAC Ethtool support
-
-  Copyright (C) 2007-2009  STMicroelectronics Ltd
-
-  This program is free software; you can redistribute it and/or modify it
-  under the terms and conditions of the GNU General Public License,
-  version 2, as published by the Free Software Foundation.
-
-  This program is distributed in the hope it will be useful, but WITHOUT
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
-  more details.
-
-  You should have received a copy of the GNU General Public License along with
-  this program; if not, write to the Free Software Foundation, Inc.,
-  51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
-
-  The full GNU General Public License is included in this distribution in
-  the file called "COPYING".
-
-  Author: Giuseppe Cavallaro <peppe.cavallaro@st.com>
-*******************************************************************************/
-
+ 
 #include <linux/etherdevice.h>
 #include <linux/ethtool.h>
 #include <linux/interrupt.h>
@@ -51,7 +28,7 @@ struct stmmac_stats {
 	offsetof(struct stmmac_priv, xstats.m)}
 
 static const struct stmmac_stats stmmac_gstrings_stats[] = {
-	/* Transmit errors */
+	 
 	STMMAC_STAT(tx_underflow),
 	STMMAC_STAT(tx_carrier),
 	STMMAC_STAT(tx_losscarrier),
@@ -62,7 +39,7 @@ static const struct stmmac_stats stmmac_gstrings_stats[] = {
 	STMMAC_STAT(tx_frame_flushed),
 	STMMAC_STAT(tx_payload_error),
 	STMMAC_STAT(tx_ip_header_error),
-	/* Receive errors */
+	 
 	STMMAC_STAT(rx_desc),
 	STMMAC_STAT(sa_filter_fail),
 	STMMAC_STAT(overflow_error),
@@ -80,7 +57,7 @@ static const struct stmmac_stats stmmac_gstrings_stats[] = {
 	STMMAC_STAT(rx_missed_cntr),
 	STMMAC_STAT(rx_overflow_cntr),
 	STMMAC_STAT(rx_vlan),
-	/* Tx/Rx IRQ error info */
+	 
 	STMMAC_STAT(tx_undeflow_irq),
 	STMMAC_STAT(tx_process_stopped_irq),
 	STMMAC_STAT(tx_jabber_irq),
@@ -90,7 +67,7 @@ static const struct stmmac_stats stmmac_gstrings_stats[] = {
 	STMMAC_STAT(rx_watchdog_irq),
 	STMMAC_STAT(tx_early_irq),
 	STMMAC_STAT(fatal_bus_error_irq),
-	/* Tx/Rx IRQ Events */
+	 
 	STMMAC_STAT(rx_early_irq),
 	STMMAC_STAT(threshold),
 	STMMAC_STAT(tx_pkt_n),
@@ -102,17 +79,17 @@ static const struct stmmac_stats stmmac_gstrings_stats[] = {
 	STMMAC_STAT(tx_clean),
 	STMMAC_STAT(tx_set_ic_bit),
 	STMMAC_STAT(irq_receive_pmt_irq_n),
-	/* MMC info */
+	 
 	STMMAC_STAT(mmc_tx_irq_n),
 	STMMAC_STAT(mmc_rx_irq_n),
 	STMMAC_STAT(mmc_rx_csum_offload_irq_n),
-	/* EEE */
+	 
 	STMMAC_STAT(irq_tx_path_in_lpi_mode_n),
 	STMMAC_STAT(irq_tx_path_exit_lpi_mode_n),
 	STMMAC_STAT(irq_rx_path_in_lpi_mode_n),
 	STMMAC_STAT(irq_rx_path_exit_lpi_mode_n),
 	STMMAC_STAT(phy_eee_wakeup_error_n),
-	/* Extended RDES status */
+	 
 	STMMAC_STAT(ip_hdr_err),
 	STMMAC_STAT(ip_payload_err),
 	STMMAC_STAT(ip_csum_bypassed),
@@ -135,11 +112,11 @@ static const struct stmmac_stats stmmac_gstrings_stats[] = {
 	STMMAC_STAT(l3_filter_match),
 	STMMAC_STAT(l4_filter_match),
 	STMMAC_STAT(l3_l4_filter_no_match),
-	/* PCS */
+	 
 	STMMAC_STAT(irq_pcs_ane_n),
 	STMMAC_STAT(irq_pcs_link_n),
 	STMMAC_STAT(irq_rgmii_n),
-	/* DEBUG */
+	 
 	STMMAC_STAT(mtl_tx_status_fifo_full),
 	STMMAC_STAT(mtl_tx_fifo_not_empty),
 	STMMAC_STAT(mmtl_fifo_ctrl),
@@ -167,7 +144,6 @@ static const struct stmmac_stats stmmac_gstrings_stats[] = {
 };
 #define STMMAC_STATS_LEN ARRAY_SIZE(stmmac_gstrings_stats)
 
-/* HW MAC Management counters (if supported) */
 #define STMMAC_MMC_STAT(m)	\
 	{ #m, FIELD_SIZEOF(struct stmmac_counters, m),	\
 	offsetof(struct stmmac_priv, mmc.m)}
@@ -288,13 +264,10 @@ static int stmmac_ethtool_getsettings(struct net_device *dev,
 
 		ethtool_cmd_speed_set(cmd, priv->xstats.pcs_speed);
 
-		/* Get and convert ADV/LP_ADV from the HW AN registers */
 		if (priv->hw->mac->get_adv)
 			priv->hw->mac->get_adv(priv->ioaddr, &adv);
 		else
-			return -EOPNOTSUPP;	/* should never happen indeed */
-
-		/* Encoding of PSE bits is defined in 802.3z, 37.2.1.4 */
+			return -EOPNOTSUPP;	 
 
 		if (adv.pause & STMMAC_PCS_PAUSE)
 			cmd->advertising |= ADVERTISED_Pause;
@@ -305,7 +278,6 @@ static int stmmac_ethtool_getsettings(struct net_device *dev,
 		if (adv.lp_pause & STMMAC_PCS_ASYM_PAUSE)
 			cmd->lp_advertising |= ADVERTISED_Asym_Pause;
 
-		/* Reg49[3] always set because ANE is always supported */
 		cmd->autoneg = ADVERTISED_Autoneg;
 		cmd->supported |= SUPPORTED_Autoneg;
 		cmd->advertising |= ADVERTISED_Autoneg;
@@ -364,7 +336,6 @@ static int stmmac_ethtool_setsettings(struct net_device *dev,
 	if ((priv->pcs & STMMAC_PCS_RGMII) || (priv->pcs & STMMAC_PCS_SGMII)) {
 		u32 mask = ADVERTISED_Autoneg | ADVERTISED_Pause;
 
-		/* Only support ANE */
 		if (cmd->autoneg != AUTONEG_ENABLE)
 			return -EINVAL;
 
@@ -428,20 +399,20 @@ static void stmmac_ethtool_gregs(struct net_device *dev,
 	memset(reg_space, 0x0, REG_SPACE_SIZE);
 
 	if (!priv->plat->has_gmac) {
-		/* MAC registers */
+		 
 		for (i = 0; i < 12; i++)
 			reg_space[i] = readl(priv->ioaddr + (i * 4));
-		/* DMA registers */
+		 
 		for (i = 0; i < 9; i++)
 			reg_space[i + 12] =
 			    readl(priv->ioaddr + (DMA_BUS_MODE + (i * 4)));
 		reg_space[22] = readl(priv->ioaddr + DMA_CUR_TX_BUF_ADDR);
 		reg_space[23] = readl(priv->ioaddr + DMA_CUR_RX_BUF_ADDR);
 	} else {
-		/* MAC registers */
+		 
 		for (i = 0; i < 55; i++)
 			reg_space[i] = readl(priv->ioaddr + (i * 4));
-		/* DMA registers */
+		 
 		for (i = 0; i < 22; i++)
 			reg_space[i + 55] =
 			    readl(priv->ioaddr + (DMA_BUS_MODE + (i * 4)));
@@ -454,7 +425,7 @@ stmmac_get_pauseparam(struct net_device *netdev,
 {
 	struct stmmac_priv *priv = netdev_priv(netdev);
 
-	if (priv->pcs)	/* FIXME */
+	if (priv->pcs)	 
 		return;
 
 	pause->rx_pause = 0;
@@ -477,7 +448,7 @@ stmmac_set_pauseparam(struct net_device *netdev,
 	int new_pause = FLOW_OFF;
 	int ret = 0;
 
-	if (priv->pcs)	/* FIXME */
+	if (priv->pcs)	 
 		return -EOPNOTSUPP;
 
 	if (pause->rx_pause)
@@ -503,13 +474,12 @@ static void stmmac_get_ethtool_stats(struct net_device *dev,
 	struct stmmac_priv *priv = netdev_priv(dev);
 	int i, j = 0;
 
-	/* Update the DMA HW counters for dwmac10/100 */
 	if (!priv->plat->has_gmac)
 		priv->hw->dma->dma_diagnostic_fr(&dev->stats,
 						 (void *) &priv->xstats,
 						 priv->ioaddr);
 	else {
-		/* If supported, for new GMAC chips expose the MMC counters */
+		 
 		if (priv->dma_cap.rmon) {
 			dwmac_mmc_read(priv->ioaddr, &priv->mmc);
 
@@ -584,7 +554,6 @@ static void stmmac_get_strings(struct net_device *dev, u32 stringset, u8 *data)
 	}
 }
 
-/* Currently only support WOL through Magic packet. */
 static void stmmac_get_wol(struct net_device *dev, struct ethtool_wolinfo *wol)
 {
 	struct stmmac_priv *priv = netdev_priv(dev);
@@ -614,8 +583,6 @@ static int syno_stmmac_set_wol(struct net_device *dev, struct ethtool_wolinfo *w
 	unsigned short szMacTmp[MAC_ADDR_LEN/2] = {'0'};
 	int idx = 0;
 
-	/* It is only working on one LAN model          */
-	/* last config will over-write previous setting */
 	if (wol->wolopts) {
 		syno_standby_power_enable = keep_standby_power;
 	} else {
@@ -627,21 +594,18 @@ static int syno_stmmac_set_wol(struct net_device *dev, struct ethtool_wolinfo *w
 		szMacTmp[idx] = (dev->dev_addr[idx*2] & 0xff) | (dev->dev_addr[idx*2 + 1] & 0xff) << 8;
 	}
 
-	/* Tell phy about MAC address */
 	phy_write(dev->phydev, 31, 0x7);
 	phy_write(dev->phydev, 30, 0x6E);
 	phy_write(dev->phydev, 21, szMacTmp[0]);
 	phy_write(dev->phydev, 22, szMacTmp[1]);
 	phy_write(dev->phydev, 23, szMacTmp[2]);
 
-	/* Limit packet size */
 	phy_write(dev->phydev, 30, 0x6D);
 	phy_write(dev->phydev, 22, 0x1FFF);
 
-	/* enable Magic packet */
 	phy_write(dev->phydev, 30, 0x6D);
 	phy_write(dev->phydev, 21, 0x1000);
-	phy_write(dev->phydev, 31, 0x0000); //set PHY to page 0
+	phy_write(dev->phydev, 31, 0x0000);  
 
 END:
 	spin_lock_irq(&priv->lock);
@@ -656,9 +620,6 @@ static int stmmac_set_wol(struct net_device *dev, struct ethtool_wolinfo *wol)
 	struct stmmac_priv *priv = netdev_priv(dev);
 	u32 support = WAKE_MAGIC | WAKE_UCAST;
 
-	/* By default almost all GMAC devices support the WoL via
-	 * magic frame but we can disable it if the HW capability
-	 * register shows no support for pmt_magic_frame. */
 	if ((priv->hw_cap_support) && (!priv->dma_cap.pmt_magic_frame))
 		wol->wolopts &= ~WAKE_MAGIC;
 
@@ -713,21 +674,15 @@ static int stmmac_ethtool_op_set_eee(struct net_device *dev,
 	} else {
 		int ret;
 
-		/* Advertise supported eee on PHY */
 		edata->advertised = edata->supported;
 		ret = phy_ethtool_set_eee(priv->phydev, edata);
 		if (ret < 0)
 			return ret;
 
-		/* We are asking for enabling the EEE but it is safe
-		 * to verify all by invoking the eee_init function.
-		 * In case of failure it will return an error.
-		 */
 		priv->eee_enabled = stmmac_eee_init(priv);
 		if (!priv->eee_enabled)
 			return -EOPNOTSUPP;
 
-		/* Do not change tx_lpi_timer in case of failure */
 		priv->tx_lpi_timer = edata->tx_lpi_timer;
 	}
 
@@ -774,7 +729,6 @@ static int stmmac_set_coalesce(struct net_device *dev,
 	struct stmmac_priv *priv = netdev_priv(dev);
 	unsigned int rx_riwt;
 
-	/* Check not supported parameters  */
 	if ((ec->rx_max_coalesced_frames) || (ec->rx_coalesce_usecs_irq) ||
 	    (ec->rx_max_coalesced_frames_irq) || (ec->tx_coalesce_usecs_irq) ||
 	    (ec->use_adaptive_rx_coalesce) || (ec->use_adaptive_tx_coalesce) ||
@@ -806,7 +760,6 @@ static int stmmac_set_coalesce(struct net_device *dev,
 	else if (!priv->use_riwt)
 		return -EOPNOTSUPP;
 
-	/* Only copy relevant parameters, ignore all others. */
 	priv->tx_coal_frames = ec->tx_max_coalesced_frames;
 	priv->tx_coal_timer = ec->tx_coalesce_usecs;
 	priv->rx_riwt = rx_riwt;

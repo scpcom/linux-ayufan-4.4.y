@@ -1,27 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * spu management operations for of based platforms
- *
- * (C) Copyright IBM Deutschland Entwicklung GmbH 2005
- * Copyright 2006 Sony Corp.
- * (C) Copyright 2007 TOSHIBA CORPORATION
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- */
-
+ 
 #include <linux/interrupt.h>
 #include <linux/list.h>
 #include <linux/export.h>
@@ -52,17 +32,14 @@ static u64 __init find_spu_unit_number(struct device_node *spe)
 	const unsigned int *prop;
 	int proplen;
 
-	/* new device trees should provide the physical-id attribute */
 	prop = of_get_property(spe, "physical-id", &proplen);
 	if (proplen == 4)
 		return (u64)*prop;
 
-	/* celleb device tree provides the unit-id */
 	prop = of_get_property(spe, "unit-id", &proplen);
 	if (proplen == 4)
 		return (u64)*prop;
 
-	/* legacy device trees provide the id in the reg attribute */
 	prop = of_get_property(spe, "reg", &proplen);
 	if (proplen == 4)
 		return (u64)*prop;
@@ -86,7 +63,6 @@ static int __init spu_map_interrupts_old(struct spu *spu,
 	const u32 *tmp;
 	int nid;
 
-	/* Get the interrupt source unit from the device-tree */
 	tmp = of_get_property(np, "isrc", NULL);
 	if (!tmp)
 		return -ENODEV;
@@ -99,15 +75,12 @@ static int __init spu_map_interrupts_old(struct spu *spu,
 	} else
 		nid = tmp[0];
 
-	/* Add the node number */
 	isrc |= nid << IIC_IRQ_NODE_SHIFT;
 
-	/* Now map interrupts of all 3 classes */
 	spu->irqs[0] = irq_create_mapping(NULL, IIC_IRQ_CLASS_0 | isrc);
 	spu->irqs[1] = irq_create_mapping(NULL, IIC_IRQ_CLASS_1 | isrc);
 	spu->irqs[2] = irq_create_mapping(NULL, IIC_IRQ_CLASS_2 | isrc);
 
-	/* Right now, we only fail if class 2 failed */
 	return spu->irqs[2] == NO_IRQ ? -EINVAL : 0;
 }
 
@@ -144,7 +117,6 @@ static int __init spu_map_device_old(struct spu *spu)
 		goto out;
 	spu->local_store_phys = *(unsigned long *)prop;
 
-	/* we use local store as ram, not io memory */
 	spu->local_store = (void __force *)
 		spu_map_prop_old(spu, node, "local-store");
 	if (!spu->local_store)
@@ -182,18 +154,18 @@ static int __init spu_map_interrupts(struct spu *spu, struct device_node *np)
 {
 #if defined(MY_ABC_HERE)
 	struct of_phandle_args oirq;
-#else /* MY_ABC_HERE */
+#else  
 	struct of_irq oirq;
-#endif /* MY_ABC_HERE */
+#endif  
 	int ret;
 	int i;
 
 	for (i=0; i < 3; i++) {
 #if defined(MY_ABC_HERE)
 		ret = of_irq_parse_one(np, i, &oirq);
-#else /* MY_ABC_HERE */
+#else  
 		ret = of_irq_map_one(np, i, &oirq);
-#endif /* MY_ABC_HERE */
+#endif  
 		if (ret) {
 			pr_debug("spu_new: failed to get irq %d\n", i);
 			goto err;
@@ -203,12 +175,12 @@ static int __init spu_map_interrupts(struct spu *spu, struct device_node *np)
 		pr_debug("  irq %d no 0x%x on %s\n", i, oirq.args[0],
 			 oirq.np->full_name);
 		spu->irqs[i] = irq_create_of_mapping(&oirq);
-#else /* MY_ABC_HERE */
+#else  
 		pr_debug("  irq %d no 0x%x on %s\n", i, oirq.specifier[0],
 			 oirq.controller->full_name);
 		spu->irqs[i] = irq_create_of_mapping(oirq.controller,
 					oirq.specifier, oirq.size);
-#endif /* MY_ABC_HERE */
+#endif  
 		if (spu->irqs[i] == NO_IRQ) {
 			pr_debug("spu_new: failed to map it !\n");
 			goto err;
@@ -219,9 +191,9 @@ static int __init spu_map_interrupts(struct spu *spu, struct device_node *np)
 err:
 #if defined(MY_ABC_HERE)
 	pr_debug("failed to map irq %x for spu %s\n", *oirq.args,
-#else /* MY_ABC_HERE */
+#else  
 	pr_debug("failed to map irq %x for spu %s\n", *oirq.specifier,
-#endif /* MY_ABC_HERE */
+#endif  
 		spu->name);
 	for (; i >= 0; i--) {
 		if (spu->irqs[i] != NO_IRQ)
@@ -400,7 +372,6 @@ static void disable_spu_by_master_run(struct spu_context *ctx)
 	ctx->ops->master_stop(ctx);
 }
 
-/* Hardcoded affinity idxs for qs20 */
 #define QS20_SPES_PER_BE 8
 static int qs20_reg_idxs[QS20_SPES_PER_BE] =   { 0, 2, 4, 6, 7, 5, 3, 1 };
 static int qs20_reg_memory[QS20_SPES_PER_BE] = { 1, 1, 0, 0, 0, 0, 0, 0 };
@@ -500,10 +471,6 @@ static void init_affinity_node(int cbe)
 		last_spu_dn = spu_devnode(last_spu);
 		vic_handles = of_get_property(last_spu_dn, "vicinity", &lenp);
 
-		/*
-		 * Walk through each phandle in vicinity property of the spu
-		 * (tipically two vicinity phandles per spe node)
-		 */
 		for (i = 0; i < (lenp / sizeof(phandle)); i++) {
 			if (vic_handles[i] == avoid_ph)
 				continue;
@@ -512,7 +479,6 @@ static void init_affinity_node(int cbe)
 			if (!vic_dn)
 				continue;
 
-			/* a neighbour might be spe, mic-tm, or bif0 */
 			name = of_get_property(vic_dn, "name", NULL);
 			if (!name)
 				continue;
@@ -521,12 +487,7 @@ static void init_affinity_node(int cbe)
 				spu = devnode_spu(cbe, vic_dn);
 				avoid_ph = last_spu_dn->phandle;
 			} else {
-				/*
-				 * "mic-tm" and "bif0" nodes do not have
-				 * vicinity property. So we need to find the
-				 * spe which has vic_dn as neighbour, but
-				 * skipping the one we came from (last_spu_dn)
-				 */
+				 
 				spu = neighbour_spu(cbe, vic_dn, last_spu_dn);
 				if (!spu)
 					continue;

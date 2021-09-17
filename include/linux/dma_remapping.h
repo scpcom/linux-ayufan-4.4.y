@@ -25,7 +25,6 @@ struct intel_iommu;
 struct dmar_domain;
 struct root_entry;
 
-
 #ifdef CONFIG_INTEL_IOMMU
 extern void free_dmar_iommu(struct intel_iommu *iommu);
 extern int iommu_calculate_agaw(struct intel_iommu *iommu);
@@ -47,6 +46,5 @@ static inline void free_dmar_iommu(struct intel_iommu *iommu)
 #define dmar_disabled	(1)
 #define intel_iommu_enabled (0)
 #endif
-
 
 #endif

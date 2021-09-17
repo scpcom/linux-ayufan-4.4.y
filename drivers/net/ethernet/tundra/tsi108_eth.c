@@ -1,38 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
-
-  Copyright(c) 2006 Tundra Semiconductor Corporation.
-
-  This program is free software; you can redistribute it and/or modify it
-  under the terms of the GNU General Public License as published by the Free
-  Software Foundation; either version 2 of the License, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful, but WITHOUT
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
-  more details.
-
-  You should have received a copy of the GNU General Public License along with
-  this program; if not, write to the Free Software Foundation, Inc., 59
-  Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
-*******************************************************************************/
-
-/* This driver is based on the driver code originally developed
- * for the Intel IOC80314 (ForestLake) Gigabit Ethernet by
- * scott.wood@timesys.com  * Copyright (C) 2003 TimeSys Corporation
- *
- * Currently changes from original version are:
- * - porting to Tsi108-based platform and kernel 2.6 (kong.lai@tundra.com)
- * - modifications to handle two ports independently and support for
- *   additional PHY devices (alexandre.bounine@tundra.com)
- * - Get hardware information from platform device. (tie-fei.zang@freescale.com)
- *
- */
-
+ 
 #include <linux/module.h>
 #include <linux/types.h>
 #include <linux/init.h>
@@ -58,62 +27,46 @@
 
 #include "tsi108_eth.h"
 
-#define MII_READ_DELAY 10000	/* max link wait time in msec */
+#define MII_READ_DELAY 10000	 
 
 #define TSI108_RXRING_LEN     256
 
-/* NOTE: The driver currently does not support receiving packets
- * larger than the buffer size, so don't decrease this (unless you
- * want to add such support).
- */
 #define TSI108_RXBUF_SIZE     1536
 
 #define TSI108_TXRING_LEN     256
 
 #define TSI108_TX_INT_FREQ    64
 
-/* Check the phy status every half a second. */
 #define CHECK_PHY_INTERVAL (HZ/2)
 
 static int tsi108_init_one(struct platform_device *pdev);
 static int tsi108_ether_remove(struct platform_device *pdev);
 
 struct tsi108_prv_data {
-	void  __iomem *regs;	/* Base of normal regs */
-	void  __iomem *phyregs;	/* Base of register bank used for PHY access */
+	void  __iomem *regs;	 
+	void  __iomem *phyregs;	 
 
 	struct net_device *dev;
 	struct napi_struct napi;
 
-	unsigned int phy;		/* Index of PHY for this interface */
+	unsigned int phy;		 
 	unsigned int irq_num;
 	unsigned int id;
 	unsigned int phy_type;
 
-	struct timer_list timer;/* Timer that triggers the check phy function */
-	unsigned int rxtail;	/* Next entry in rxring to read */
-	unsigned int rxhead;	/* Next entry in rxring to give a new buffer */
-	unsigned int rxfree;	/* Number of free, allocated RX buffers */
+	struct timer_list timer; 
+	unsigned int rxtail;	 
+	unsigned int rxhead;	 
+	unsigned int rxfree;	 
 
-	unsigned int rxpending;	/* Non-zero if there are still descriptors
-				 * to be processed from a previous descriptor
-				 * interrupt condition that has been cleared */
+	unsigned int rxpending;	 
 
-	unsigned int txtail;	/* Next TX descriptor to check status on */
-	unsigned int txhead;	/* Next TX descriptor to use */
-
-	/* Number of free TX descriptors.  This could be calculated from
-	 * rxhead and rxtail if one descriptor were left unused to disambiguate
-	 * full and empty conditions, but it's simpler to just keep track
-	 * explicitly. */
+	unsigned int txtail;	 
+	unsigned int txhead;	 
 
 	unsigned int txfree;
 
-	unsigned int phy_ok;		/* The PHY is currently powered on. */
-
-	/* PHY status (duplex is 1 for half, 2 for full,
-	 * so that the default 0 indicates that neither has
-	 * yet been configured). */
+	unsigned int phy_ok;		 
 
 	unsigned int link_up;
 	unsigned int speed;
@@ -126,39 +79,25 @@ struct tsi108_prv_data {
 
 	dma_addr_t txdma, rxdma;
 
-	/* txlock nests in misclock and phy_lock */
-
 	spinlock_t txlock, misclock;
-
-	/* stats is used to hold the upper bits of each hardware counter,
-	 * and tmpstats is used to hold the full values for returning
-	 * to the caller of get_stats().  They must be separate in case
-	 * an overflow interrupt occurs before the stats are consumed.
-	 */
 
 	struct net_device_stats stats;
 	struct net_device_stats tmpstats;
 
-	/* These stats are kept separate in hardware, thus require individual
-	 * fields for handling carry.  They are combined in get_stats.
-	 */
+	unsigned long rx_fcs;	 
+	unsigned long rx_short_fcs;	 
+	unsigned long rx_long_fcs;	 
+	unsigned long rx_underruns;	 
+	unsigned long rx_overruns;	 
 
-	unsigned long rx_fcs;	/* Add to rx_frame_errors */
-	unsigned long rx_short_fcs;	/* Add to rx_frame_errors */
-	unsigned long rx_long_fcs;	/* Add to rx_frame_errors */
-	unsigned long rx_underruns;	/* Add to rx_length_errors */
-	unsigned long rx_overruns;	/* Add to rx_length_errors */
-
-	unsigned long tx_coll_abort;	/* Add to tx_aborted_errors/collisions */
-	unsigned long tx_pause_drop;	/* Add to tx_aborted_errors */
+	unsigned long tx_coll_abort;	 
+	unsigned long tx_pause_drop;	 
 
 	unsigned long mc_hash[16];
-	u32 msg_enable;			/* debug message level */
+	u32 msg_enable;			 
 	struct mii_if_info mii_if;
 	unsigned int init_media;
 };
-
-/* Structure for a device driver */
 
 static struct platform_driver tsi_eth_driver = {
 	.probe = tsi108_init_one,
@@ -195,11 +134,6 @@ static void dump_eth_one(struct net_device *dev)
 	       TSI_READ(TSI108_EC_RXESTAT),
 	       TSI_READ(TSI108_EC_RXERR), data->rxpending);
 }
-
-/* Synchronization is needed between the thread and up/down events.
- * Note that the PHY is accessed through the same registers for both
- * interfaces, so this can't be made interface-specific.
- */
 
 static DEFINE_SPINLOCK(phy_lock);
 
@@ -346,9 +280,7 @@ static void tsi108_check_phy(struct net_device *dev)
 		}
 
 		if (data->link_up == 0) {
-			/* The manual says it can take 3-4 usecs for the speed change
-			 * to take effect.
-			 */
+			 
 			udelay(5);
 
 			spin_lock(&data->txlock);
@@ -456,9 +388,6 @@ static void tsi108_stat_carry(struct net_device *dev)
 	spin_unlock_irq(&data->misclock);
 }
 
-/* Read a stat counter atomically with respect to carries.
- * data->misclock must be held.
- */
 static inline unsigned long
 tsi108_read_stat(struct tsi108_prv_data * data, int reg, int carry_bit,
 		 int carry_shift, unsigned long *upper)
@@ -473,11 +402,6 @@ tsi108_read_stat(struct tsi108_prv_data * data, int reg, int carry_bit,
 
       again:
 	val = TSI_READ(reg) | *upper;
-
-	/* Check to see if it overflowed, but the interrupt hasn't
-	 * been serviced yet.  If so, handle the carry here, and
-	 * try again.
-	 */
 
 	if (unlikely(TSI_READ(carryreg) & carry_bit)) {
 		*upper += carry_shift;
@@ -570,7 +494,6 @@ static struct net_device_stats *tsi108_get_stats(struct net_device *dev)
 			     TSI108_STAT_RXDROP_CARRY,
 			     &data->stats.rx_missed_errors);
 
-	/* These three are maintained by software. */
 	data->tmpstats.rx_fifo_errors = data->stats.rx_fifo_errors;
 	data->tmpstats.rx_crc_errors = data->stats.rx_crc_errors;
 
@@ -616,9 +539,6 @@ static void tsi108_restart_tx(struct tsi108_prv_data * data)
 			     TSI108_EC_TXCTRL_GO | TSI108_EC_TXCTRL_QUEUE0);
 }
 
-/* txlock must be held by caller, with IRQs disabled, and
- * with permission to re-enable them when the lock is dropped.
- */
 static void tsi108_complete_tx(struct net_device *dev)
 {
 	struct tsi108_prv_data *data = netdev_priv(dev);
@@ -688,16 +608,6 @@ static int tsi108_send_packet(struct sk_buff * skb, struct net_device *dev)
 		int misc = 0;
 		int tx = data->txhead;
 
-		/* This is done to mark every TSI108_TX_INT_FREQ tx buffers with
-		 * the interrupt bit.  TX descriptor-complete interrupts are
-		 * enabled when the queue fills up, and masked when there is
-		 * still free space.  This way, when saturating the outbound
-		 * link, the tx interrupts are kept to a reasonable level.
-		 * When the queue is not full, reclamation of skbs still occurs
-		 * as new packets are transmitted, or on a queue-empty
-		 * interrupt.
-		 */
-
 		if ((tx % TSI108_TX_INT_FREQ == 0) &&
 		    ((TSI108_TXRING_LEN - data->txfree) >= TSI108_TX_INT_FREQ))
 			misc = TSI108_TX_INT;
@@ -737,10 +647,6 @@ static int tsi108_send_packet(struct sk_buff * skb, struct net_device *dev)
 	}
 
 	tsi108_complete_tx(dev);
-
-	/* This must be done after the check for completed tx descriptors,
-	 * so that the tail pointer is correct.
-	 */
 
 	if (!(TSI_READ(TSI108_EC_TXSTAT) & TSI108_EC_TXSTAT_QUEUE0))
 		tsi108_restart_tx(data);
@@ -814,11 +720,6 @@ static int tsi108_refill_rx(struct net_device *dev, int budget)
 							TSI108_RX_SKB_SIZE,
 							DMA_FROM_DEVICE);
 
-		/* Sometimes the hardware sets blen to zero after packet
-		 * reception, even though the manual says that it's only ever
-		 * modified by the driver.
-		 */
-
 		data->rxring[rx].blen = TSI108_RX_SKB_SIZE;
 		data->rxring[rx].misc = TSI108_RX_OWN | TSI108_RX_INT;
 
@@ -850,18 +751,6 @@ static int tsi108_poll(struct napi_struct *napi, int budget)
 
 	if (data->rxpending || (estat & TSI108_EC_RXESTAT_Q0_DESCINT))
 		num_received = tsi108_complete_rx(dev, budget);
-
-	/* This should normally fill no more slots than the number of
-	 * packets received in tsi108_complete_rx().  The exception
-	 * is when we previously ran out of memory for RX SKBs.  In that
-	 * case, it's helpful to obey the budget, not only so that the
-	 * CPU isn't hogged, but so that memory (which may still be low)
-	 * is not hogged by one device.
-	 *
-	 * A work unit is considered to be two SKBs to allow us to catch
-	 * up when the ring has shrunk due to out-of-memory but we're
-	 * still removing the full budget's worth of packets each time.
-	 */
 
 	if (data->rxfree < TSI108_RXRING_LEN)
 		num_filled = tsi108_refill_rx(dev, budget * 2);
@@ -909,22 +798,8 @@ static void tsi108_rx_int(struct net_device *dev)
 {
 	struct tsi108_prv_data *data = netdev_priv(dev);
 
-	/* A race could cause dev to already be scheduled, so it's not an
-	 * error if that happens (and interrupts shouldn't be re-masked,
-	 * because that can cause harmful races, if poll has already
-	 * unmasked them but not cleared LINK_STATE_SCHED).
-	 *
-	 * This can happen if this code races with tsi108_poll(), which masks
-	 * the interrupts after tsi108_irq_one() read the mask, but before
-	 * napi_schedule is called.  It could also happen due to calls
-	 * from tsi108_check_rxring().
-	 */
-
 	if (napi_schedule_prep(&data->napi)) {
-		/* Mask, rather than ack, the receive interrupts.  The ack
-		 * will happen in tsi108_poll().
-		 */
-
+		 
 		TSI_WRITE(TSI108_EC_INTMASK,
 				     TSI_READ(TSI108_EC_INTMASK) |
 				     TSI108_INT_RXQUEUE0
@@ -934,22 +809,7 @@ static void tsi108_rx_int(struct net_device *dev)
 		__napi_schedule(&data->napi);
 	} else {
 		if (!netif_running(dev)) {
-			/* This can happen if an interrupt occurs while the
-			 * interface is being brought down, as the START
-			 * bit is cleared before the stop function is called.
-			 *
-			 * In this case, the interrupts must be masked, or
-			 * they will continue indefinitely.
-			 *
-			 * There's a race here if the interface is brought down
-			 * and then up in rapid succession, as the device could
-			 * be made running after the above check and before
-			 * the masking below.  This will only happen if the IRQ
-			 * thread has a lower priority than the task brining
-			 * up the interface.  Fixing this race would likely
-			 * require changes in generic code.
-			 */
-
+			 
 			TSI_WRITE(TSI108_EC_INTMASK,
 					     TSI_READ
 					     (TSI108_EC_INTMASK) |
@@ -962,21 +822,9 @@ static void tsi108_rx_int(struct net_device *dev)
 	}
 }
 
-/* If the RX ring has run out of memory, try periodically
- * to allocate some more, as otherwise poll would never
- * get called (apart from the initial end-of-queue condition).
- *
- * This is called once per second (by default) from the thread.
- */
-
 static void tsi108_check_rxring(struct net_device *dev)
 {
 	struct tsi108_prv_data *data = netdev_priv(dev);
-
-	/* A poll is scheduled, as opposed to caling tsi108_refill_rx
-	 * directly, so as to keep the receive path single-threaded
-	 * (and thus not needing a lock).
-	 */
 
 	if (netif_running(dev) && data->rxfree < TSI108_RXRING_LEN / 4)
 		tsi108_rx_int(dev);
@@ -1012,7 +860,7 @@ static irqreturn_t tsi108_irq(int irq, void *dev_id)
 	u32 stat = TSI_READ(TSI108_EC_INTSTAT);
 
 	if (!(stat & TSI108_INT_ANY))
-		return IRQ_NONE;	/* Not our interrupt */
+		return IRQ_NONE;	 
 
 	stat &= ~TSI_READ(TSI108_EC_INTMASK);
 
@@ -1042,11 +890,10 @@ static void tsi108_stop_ethernet(struct net_device *dev)
 {
 	struct tsi108_prv_data *data = netdev_priv(dev);
 	int i = 1000;
-	/* Disable all TX and RX queues ... */
+	 
 	TSI_WRITE(TSI108_EC_TXCTRL, 0);
 	TSI_WRITE(TSI108_EC_RXCTRL, 0);
 
-	/* ...and wait for them to become idle */
 	while(i--) {
 		if(!(TSI_READ(TSI108_EC_TXSTAT) & TSI108_EC_TXSTAT_ACTIVE))
 			break;
@@ -1101,9 +948,6 @@ static int tsi108_get_mac(struct net_device *dev)
 	u32 word1 = TSI_READ(TSI108_MAC_ADDR1);
 	u32 word2 = TSI_READ(TSI108_MAC_ADDR2);
 
-	/* Note that the octets are reversed from what the manual says,
-	 * producing an even weirder ordering...
-	 */
 	if (word2 == 0 && word1 == 0) {
 		dev->dev_addr[0] = 0x00;
 		dev->dev_addr[1] = 0x06;
@@ -1151,7 +995,7 @@ static int tsi108_set_mac(struct net_device *dev, void *addr)
 		return -EADDRNOTAVAIL;
 
 	for (i = 0; i < 6; i++)
-		/* +2 is for the offset of the HW addr type */
+		 
 		dev->dev_addr[i] = ((unsigned char *)addr)[i + 2];
 
 	word2 = (dev->dev_addr[0] << 16) | (dev->dev_addr[1] << 24);
@@ -1172,7 +1016,6 @@ static int tsi108_set_mac(struct net_device *dev, void *addr)
 	return 0;
 }
 
-/* Protected by dev->xmit_lock. */
 static void tsi108_set_rx_mode(struct net_device *dev)
 {
 	struct tsi108_prv_data *data = netdev_priv(dev);
@@ -1206,9 +1049,7 @@ static void tsi108_set_rx_mode(struct net_device *dev)
 				     TSI108_EC_HASHADDR_MCAST);
 
 		for (i = 0; i < 16; i++) {
-			/* The manual says that the hardware may drop
-			 * back-to-back writes to the data register.
-			 */
+			 
 			udelay(1);
 			TSI_WRITE(TSI108_EC_HASHDATA,
 					     data->mc_hash[i]);
@@ -1249,16 +1090,7 @@ static void tsi108_init_phy(struct net_device *dev)
 	while (tsi108_read_mii(data, MII_BMCR) & BMCR_ANRESTART)
 		cpu_relax();
 
-	/* Set G/MII mode and receive clock select in TBI control #2.  The
-	 * second port won't work if this isn't done, even though we don't
-	 * use TBI mode.
-	 */
-
 	tsi108_write_tbi(data, 0x11, 0x30);
-
-	/* FIXME: It seems to take more than 2 back-to-back reads to the
-	 * PHY_STAT register before the link up status bit is set.
-	 */
 
 	data->link_up = 0;
 
@@ -1337,10 +1169,7 @@ static int tsi108_open(struct net_device *dev)
 
 		skb = netdev_alloc_skb_ip_align(dev, TSI108_RXBUF_SIZE);
 		if (!skb) {
-			/* Bah.  No memory for now, but maybe we'll get
-			 * some more later.
-			 * For now, we'll live with the smaller ring.
-			 */
+			 
 			printk(KERN_WARNING
 			       "%s: Could only allocate %d receive skb(s).\n",
 			       dev->name, i);
@@ -1403,8 +1232,6 @@ static int tsi108_close(struct net_device *dev)
 	TSI_WRITE(TSI108_EC_INTMASK, ~0);
 	TSI_WRITE(TSI108_MAC_CFG1, 0);
 
-	/* Check for any pending TX packets, and drop them. */
-
 	while (!data->txfree || data->txhead != data->txtail) {
 		int tx = data->txtail;
 		struct sk_buff *skb;
@@ -1415,8 +1242,6 @@ static int tsi108_close(struct net_device *dev)
 	}
 
 	free_irq(data->irq_num, dev);
-
-	/* Discard the RX ring. */
 
 	while (data->rxfree) {
 		int rx = data->rxtail;
@@ -1567,8 +1392,6 @@ tsi108_init_one(struct platform_device *pdev)
 		return -ENODEV;
 	}
 
-	/* Create an ethernet device instance */
-
 	dev = alloc_etherdev(sizeof(struct tsi108_prv_data));
 	if (!dev)
 		return -ENOMEM;
@@ -1592,7 +1415,7 @@ tsi108_init_one(struct platform_device *pdev)
 		err = -ENOMEM;
 		goto phyregs_fail;
 	}
-/* MII setup */
+ 
 	data->mii_if.dev = dev;
 	data->mii_if.mdio_read = tsi108_mdio_read;
 	data->mii_if.mdio_write = tsi108_mdio_write;
@@ -1607,14 +1430,6 @@ tsi108_init_one(struct platform_device *pdev)
 	netif_napi_add(dev, &data->napi, tsi108_poll, 64);
 	dev->netdev_ops = &tsi108_netdev_ops;
 	dev->ethtool_ops = &tsi108_ethtool_ops;
-
-	/* Apparently, the Linux networking code won't use scatter-gather
-	 * if the hardware doesn't do checksums.  However, it's faster
-	 * to checksum in place and use SG, as (among other reasons)
-	 * the cache won't be dirtied (which then has to be flushed
-	 * before DMA).  The checksumming is done by the driver (via
-	 * a new function skb_csum_dev() in net/core/skbuff.c).
-	 */
 
 	dev->features = NETIF_F_HIGHDMA;
 
@@ -1659,13 +1474,6 @@ regs_fail:
 	return err;
 }
 
-/* There's no way to either get interrupts from the PHY when
- * something changes, or to have the Tsi108 automatically communicate
- * with the PHY to reconfigure itself.
- *
- * Thus, we have to do it using a timer.
- */
-
 static void tsi108_timed_checker(unsigned long dev_ptr)
 {
 	struct net_device *dev = (struct net_device *)dev_ptr;
@@ -1684,9 +1492,9 @@ static int tsi108_ether_remove(struct platform_device *pdev)
 	unregister_netdev(dev);
 	tsi108_stop_ethernet(dev);
 #if defined (MY_DEF_HERE)
-#else /* MY_DEF_HERE */
+#else  
 	platform_set_drvdata(pdev, NULL);
-#endif /* MY_DEF_HERE */
+#endif  
 	iounmap(priv->regs);
 	iounmap(priv->phyregs);
 	free_netdev(dev);

@@ -1,24 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) 2007 Oracle.  All rights reserved.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public
- * License v2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 021110-1307, USA.
- */
-
+ 
 #ifndef __DISKIO__
 #define __DISKIO__
 
@@ -94,13 +77,6 @@ void btrfs_free_fs_root(struct btrfs_root *root);
 struct btrfs_root *btrfs_alloc_dummy_root(void);
 #endif
 
-/*
- * This function is used to grab the root, and avoid it is freed when we
- * access it. But it doesn't ensure that the tree is not dropped.
- *
- * If you want to ensure the whole tree is safe, you should use
- * 	fs_info->subvol_srcu
- */
 static inline struct btrfs_root *btrfs_grab_fs_root(struct btrfs_root *root)
 {
 	if (atomic_inc_not_zero(&root->refs))
@@ -123,7 +99,7 @@ u32 btrfs_csum_data(char *data, u32 seed, size_t len);
 #if defined(MY_ABC_HERE)
 struct dma_async_tx_descriptor *
 btrfs_csum_data_dma_offload(const u8 *data, u32 *crc, unsigned int len);
-#endif /* MY_ABC_HERE */
+#endif  
 void btrfs_csum_final(u32 crc, char *result);
 int btrfs_bio_wq_end_io(struct btrfs_fs_info *info, struct bio *bio,
 			int metadata);

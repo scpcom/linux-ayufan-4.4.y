@@ -1,24 +1,12 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  arch/arm/include/asm/glue-cache.h
- *
- *  Copyright (C) 1999-2002 Russell King
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
+ 
 #ifndef ASM_GLUE_CACHE_H
 #define ASM_GLUE_CACHE_H
 
 #include <asm/glue.h>
 
-/*
- *	Cache Model
- *	===========
- */
 #undef _CACHE
 #undef MULTI_CACHE
 
@@ -106,34 +94,30 @@
 
 #if defined(CONFIG_CPU_V6) || defined(CONFIG_CPU_V6K)
 #if defined (MY_DEF_HERE)
-/*# ifdef _CACHE */
+ 
 #  define MULTI_CACHE 1
-/* # else */
-/* #  define _CACHE v6 */
-/* # endif */
-#else /* MY_DEF_HERE */
+ 
+#else  
 # ifdef _CACHE
 #  define MULTI_CACHE 1
 # else
 #  define _CACHE v6
 # endif
-#endif /* MY_DEF_HERE */
+#endif  
 #endif
 
 #if defined(CONFIG_CPU_V7)
 #if defined (MY_DEF_HERE)
-/* # ifdef _CACHE */
+ 
 #  define MULTI_CACHE 1
-/* # else */
-/* #  define _CACHE v7 */
-/* # endif */
-#else /* MY_DEF_HERE */
+ 
+#else  
 # ifdef _CACHE
 #  define MULTI_CACHE 1
 # else
 #  define _CACHE v7
 # endif
-#endif /* MY_DEF_HERE */
+#endif  
 #endif
 
 #if !defined(_CACHE) && !defined(MULTI_CACHE)

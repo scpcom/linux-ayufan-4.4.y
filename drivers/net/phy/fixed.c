@@ -1,20 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Fixed MDIO bus (MDIO bus emulation with fixed PHYs)
- *
- * Author: Vitaly Bordug <vbordug@ru.mvista.com>
- *         Anton Vorontsov <avorontsov@ru.mvista.com>
- *
- * Copyright (c) 2006-2007 MontaVista Software, Inc.
- *
- * This program is free software; you can redistribute  it and/or modify it
- * under  the terms of  the GNU General  Public License as published by the
- * Free Software Foundation;  either version 2 of the  License, or (at your
- * option) any later version.
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/platform_device.h>
@@ -128,7 +115,7 @@ static int fixed_mdio_read(struct mii_bus *bus, int phy_id, int reg_num)
 
 	list_for_each_entry(fp, &fmb->phys, node) {
 		if (fp->id == phy_id) {
-			/* Issue callback if user registered it. */
+			 
 			if (fp->link_update) {
 				fp->link_update(fp->phydev->attached_dev,
 						&fp->status);
@@ -147,11 +134,6 @@ static int fixed_mdio_write(struct mii_bus *bus, int phy_id, int reg_num,
 	return 0;
 }
 
-/*
- * If something weird is required to be done with link/speed,
- * network driver is able to assign a function to implement this.
- * May be useful for PHY's that need to be software-driven.
- */
 int fixed_phy_set_link_update(struct phy_device *phydev,
 			      int (*link_update)(struct net_device *,
 						 struct fixed_phy_status *))
@@ -200,7 +182,7 @@ int fixed_phy_add(unsigned int irq, int phy_id,
 
 #if defined(MY_ABC_HERE)
 	mdiobus_scan(fmb->mii_bus, phy_id);
-#endif /* MY_ABC_HERE */
+#endif  
 
 	return 0;
 

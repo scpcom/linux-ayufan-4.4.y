@@ -1,34 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * File:         sound/soc/blackfin/bf5xx-ac97-pcm.c
- * Author:       Cliff Cai <Cliff.Cai@analog.com>
- *
- * Created:      Tue June 06 2008
- * Description:  DMA Driver for AC97 sound chip
- *
- * Modified:
- *               Copyright 2008 Analog Devices Inc.
- *
- * Bugs:         Enter bugs at http://blackfin.uclinux.org/
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, see the file COPYING, or write
- * to the Free Software Foundation, Inc.,
- * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- */
-
+ 
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/platform_device.h>
@@ -47,12 +20,12 @@
 #include "bf5xx-sport.h"
 
 static unsigned int ac97_chan_mask[] = {
-	SP_FL, /* Mono */
-	SP_STEREO, /* Stereo */
-	SP_2DOT1, /* 2.1*/
-	SP_QUAD,/*Quadraquic*/
-	SP_FL | SP_FR | SP_FC | SP_SL | SP_SR,/*5 channels */
-	SP_5DOT1, /* 5.1 */
+	SP_FL,  
+	SP_STEREO,  
+	SP_2DOT1,  
+	SP_QUAD, 
+	SP_FL | SP_FR | SP_FC | SP_SL | SP_SR, 
+	SP_5DOT1,  
 };
 
 #if defined(CONFIG_SND_BF5XX_MMAP_SUPPORT)
@@ -99,10 +72,6 @@ static void bf5xx_dma_irq(void *data)
 	snd_pcm_period_elapsed(pcm);
 }
 
-/* The memory size for pure pcm data is 128*1024 = 0x20000 bytes.
- * The total rx/tx buffer is for ac97 frame to hold all pcm data
- * is  0x20000 * sizeof(struct ac97_frame) / 4.
- */
 static const struct snd_pcm_hardware bf5xx_pcm_hardware = {
 	.info			= SNDRV_PCM_INFO_INTERLEAVED |
 #if defined(CONFIG_SND_BF5XX_MMAP_SUPPORT)
@@ -116,7 +85,7 @@ static const struct snd_pcm_hardware bf5xx_pcm_hardware = {
 	.period_bytes_max	= 0x10000,
 	.periods_min		= 1,
 	.periods_max		= PAGE_SIZE/32,
-	.buffer_bytes_max	= 0x20000, /* 128 kbytes */
+	.buffer_bytes_max	= 0x20000,  
 	.fifo_size		= 16,
 };
 
@@ -156,9 +125,6 @@ static int bf5xx_pcm_prepare(struct snd_pcm_substream *substream)
 	struct snd_pcm_runtime *runtime = substream->runtime;
 	struct sport_device *sport = runtime->private_data;
 
-	/* An intermediate buffer is introduced for implementing mmap for
-	 * SPORT working in TMD mode(include AC97).
-	 */
 #if defined(CONFIG_SND_BF5XX_MMAP_SUPPORT)
 	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK) {
 		sport_set_tx_callback(sport, bf5xx_dma_irq, substream);
@@ -348,10 +314,6 @@ static int bf5xx_pcm_preallocate_dma_buffer(struct snd_pcm *pcm, int stream)
 	else
 		sport_handle->rx_buf = buf->area;
 
-/*
- * Need to allocate local buffer when enable
- * MMAP for SPORT working in TMD mode (include AC97).
- */
 #if defined(CONFIG_SND_BF5XX_MMAP_SUPPORT)
 	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK) {
 		if (!sport_handle->tx_dma_buf) {
@@ -420,10 +382,10 @@ static void bf5xx_pcm_free_dma_buffers(struct snd_pcm *pcm)
 }
 
 #if defined(MY_ABC_HERE)
-// do nothing
-#else /* MY_ABC_HERE */
+ 
+#else  
 static u64 bf5xx_pcm_dmamask = DMA_BIT_MASK(32);
-#endif /* MY_ABC_HERE */
+#endif  
 
 static int bf5xx_pcm_ac97_new(struct snd_soc_pcm_runtime *rtd)
 {
@@ -436,7 +398,7 @@ static int bf5xx_pcm_ac97_new(struct snd_soc_pcm_runtime *rtd)
 	ret = dma_coerce_mask_and_coherent(card->dev, DMA_BIT_MASK(32));
 	if (ret)
 		return ret;
-#else /* MY_ABC_HERE */
+#else  
 	int ret = 0;
 
 	pr_debug("%s enter\n", __func__);
@@ -444,7 +406,7 @@ static int bf5xx_pcm_ac97_new(struct snd_soc_pcm_runtime *rtd)
 		card->dev->dma_mask = &bf5xx_pcm_dmamask;
 	if (!card->dev->coherent_dma_mask)
 		card->dev->coherent_dma_mask = DMA_BIT_MASK(32);
-#endif /* MY_ABC_HERE */
+#endif  
 
 	if (pcm->streams[SNDRV_PCM_STREAM_PLAYBACK].substream) {
 		ret = bf5xx_pcm_preallocate_dma_buffer(pcm,

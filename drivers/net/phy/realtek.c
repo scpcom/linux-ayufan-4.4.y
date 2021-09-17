@@ -1,21 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * drivers/net/phy/realtek.c
- *
- * Driver for Realtek PHYs
- *
- * Author: Johnson Leung <r58129@freescale.com>
- *
- * Copyright (c) 2004 Freescale Semiconductor, Inc.
- *
- * This program is free software; you can redistribute  it and/or modify it
- * under  the terms of  the GNU General  Public License as published by the
- * Free Software Foundation;  either version 2 of the  License, or (at your
- * option) any later version.
- *
- */
+ 
 #include <linux/phy.h>
 #include <linux/module.h>
 
@@ -28,9 +14,9 @@
 
 #if defined (MY_DEF_HERE)
 #define	RTL8211E_INER_LINK_STATUS	0x400
-#else /* MY_DEF_HERE */
+#else  
 #define	RTL8211E_INER_LINK_STAT	0x10
-#endif /* MY_DEF_HERE */
+#endif  
 
 MODULE_DESCRIPTION("Realtek PHY driver");
 MODULE_AUTHOR("Johnson Leung");
@@ -66,17 +52,16 @@ static int rtl8211e_config_intr(struct phy_device *phydev)
 #if defined (MY_DEF_HERE)
 		err = phy_write(phydev, RTL821x_INER,
 				RTL8211E_INER_LINK_STATUS);
-#else /* MY_DEF_HERE */
+#else  
 		err = phy_write(phydev, RTL821x_INER,
 				RTL8211E_INER_LINK_STAT);
-#endif /* MY_DEF_HERE */
+#endif  
 	else
 		err = phy_write(phydev, RTL821x_INER, 0);
 
 	return err;
 }
 
-/* RTL8211B */
 static struct phy_driver rtl8211b_driver = {
 	.phy_id		= 0x001cc912,
 	.name		= "RTL8211B Gigabit Ethernet",
@@ -91,7 +76,7 @@ static struct phy_driver rtl8211b_driver = {
 };
 
 #if defined(MY_DEF_HERE)
-/* RTL8211DN */
+ 
 static struct phy_driver rtl8211dn_driver = {
 	.phy_id		= 0x001cc914,
 	.name		= "RTL8211DN Gigabit Ethernet",
@@ -104,9 +89,8 @@ static struct phy_driver rtl8211dn_driver = {
 	.config_intr	= &rtl8211b_config_intr,
 	.driver		= { .owner = THIS_MODULE,},
 };
-#endif /* MY_DEF_HERE */
+#endif  
 
-/* RTL8211E */
 static struct phy_driver rtl8211e_driver = {
 	.phy_id		= 0x001cc915,
 	.name		= "RTL8211E Gigabit Ethernet",
@@ -133,7 +117,7 @@ static int __init realtek_init(void)
 	ret = phy_driver_register(&rtl8211dn_driver);
 	if (ret < 0)
 		return -ENODEV;
-#endif /* MY_DEF_HERE */
+#endif  
 	return phy_driver_register(&rtl8211e_driver);
 }
 
@@ -142,7 +126,7 @@ static void __exit realtek_exit(void)
 	phy_driver_unregister(&rtl8211b_driver);
 #if defined(MY_DEF_HERE)
 	phy_driver_unregister(&rtl8211dn_driver);
-#endif /* MY_DEF_HERE */
+#endif  
 	phy_driver_unregister(&rtl8211e_driver);
 }
 
@@ -153,7 +137,7 @@ static struct mdio_device_id __maybe_unused realtek_tbl[] = {
 	{ 0x001cc912, 0x001fffff },
 #if defined(MY_DEF_HERE)
 	{ 0x001cc914, 0x001fffff },
-#endif /* MY_DEF_HERE */
+#endif  
 	{ 0x001cc915, 0x001fffff },
 	{ }
 };

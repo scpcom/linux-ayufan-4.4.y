@@ -1,24 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Codec driver for ST STA32x 2.1-channel high-efficiency digital audio system
- *
- * Copyright: 2011 Raumfeld GmbH
- * Author: Johannes Stezenbach <js@sig21.net>
- *
- * based on code from:
- *	Wolfson Microelectronics PLC.
- *	  Mark Brown <broonie@opensource.wolfsonmicro.com>
- *	Freescale Semiconductor, Inc.
- *	  Timur Tabi <timur@freescale.com>
- *
- * This program is free software; you can redistribute  it and/or modify it
- * under  the terms of  the GNU General  Public License as published by the
- * Free Software Foundation;  either version 2 of the  License, or (at your
- * option) any later version.
- */
-
+ 
 #define pr_fmt(fmt) KBUILD_MODNAME ":%s:%d: " fmt, __func__, __LINE__
 
 #include <linux/module.h>
@@ -58,7 +41,6 @@
 	 SNDRV_PCM_FMTBIT_S24_LE  | SNDRV_PCM_FMTBIT_S24_BE  | \
 	 SNDRV_PCM_FMTBIT_S32_LE  | SNDRV_PCM_FMTBIT_S32_BE)
 
-/* Power-up register defaults */
 static const struct reg_default sta32x_regs[] = {
 	{  0x0, 0x63 },
 	{  0x1, 0x80 },
@@ -105,14 +87,12 @@ static const struct reg_default sta32x_regs[] = {
 	{ 0x2c, 0x0c },
 };
 
-/* regulator power supply names */
 static const char *sta32x_supply_names[] = {
-	"Vdda",	/* analog supply, 3.3VV */
-	"Vdd3",	/* digital supply, 3.3V */
-	"Vcc"	/* power amp spply, 10V - 36V */
+	"Vdda",	 
+	"Vdd3",	 
+	"Vcc"	 
 };
 
-/* codec private data */
 struct sta32x_priv {
 	struct regmap *regmap;
 	struct regulator_bulk_data supplies[ARRAY_SIZE(sta32x_supply_names)];
@@ -227,13 +207,6 @@ static SOC_ENUM_SINGLE_DECL(sta32x_limiter2_release_rate_enum,
 			    STA32X_L2AR, STA32X_LxR_SHIFT,
 			    sta32x_limiter_release_rate);
 
-/* byte array controls for setting biquad, mixer, scaling coefficients;
- * for biquads all five coefficients need to be set in one go,
- * mixer and pre/postscale coefs can be set individually;
- * each coef is 24bit, the bytes are ordered in the same way
- * as given in the STA32x data sheet (big endian; b1, b2, a1, a2, b0)
- */
-
 static int sta32x_coefficient_info(struct snd_kcontrol *kcontrol,
 				   struct snd_ctl_elem_info *uinfo)
 {
@@ -248,18 +221,16 @@ static int sta32x_coefficient_get(struct snd_kcontrol *kcontrol,
 {
 #if defined(MY_ABC_HERE)
 	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
-#else /* MY_ABC_HERE */
+#else  
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
-#endif /* MY_ABC_HERE */
+#endif  
 	int numcoef = kcontrol->private_value >> 16;
 	int index = kcontrol->private_value & 0xffff;
 	unsigned int cfud;
 	int i;
 
-	/* preserve reserved bits in STA32X_CFUD */
 	cfud = snd_soc_read(codec, STA32X_CFUD) & 0xf0;
-	/* chip documentation does not say if the bits are self clearing,
-	 * so do it explicitly */
+	 
 	snd_soc_write(codec, STA32X_CFUD, cfud);
 
 	snd_soc_write(codec, STA32X_CFADDR2, index);
@@ -281,19 +252,17 @@ static int sta32x_coefficient_put(struct snd_kcontrol *kcontrol,
 {
 #if defined(MY_ABC_HERE)
 	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
-#else /* MY_ABC_HERE */
+#else  
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
-#endif /* MY_ABC_HERE */
+#endif  
 	struct sta32x_priv *sta32x = snd_soc_codec_get_drvdata(codec);
 	int numcoef = kcontrol->private_value >> 16;
 	int index = kcontrol->private_value & 0xffff;
 	unsigned int cfud;
 	int i;
 
-	/* preserve reserved bits in STA32X_CFUD */
 	cfud = snd_soc_read(codec, STA32X_CFUD) & 0xf0;
-	/* chip documentation does not say if the bits are self clearing,
-	 * so do it explicitly */
+	 
 	snd_soc_write(codec, STA32X_CFUD, cfud);
 
 	snd_soc_write(codec, STA32X_CFADDR2, index);
@@ -321,7 +290,6 @@ static int sta32x_sync_coef_shadow(struct snd_soc_codec *codec)
 	unsigned int cfud;
 	int i;
 
-	/* preserve reserved bits in STA32X_CFUD */
 	cfud = snd_soc_read(codec, STA32X_CFUD) & 0xf0;
 
 	for (i = 0; i < STA32X_COEF_COUNT; i++) {
@@ -332,8 +300,7 @@ static int sta32x_sync_coef_shadow(struct snd_soc_codec *codec)
 			      (sta32x->coef_shadow[i] >> 8) & 0xff);
 		snd_soc_write(codec, STA32X_B1CF3,
 			      (sta32x->coef_shadow[i]) & 0xff);
-		/* chip documentation does not say if the bits are
-		 * self-clearing, so do it explicitly */
+		 
 		snd_soc_write(codec, STA32X_CFUD, cfud);
 		snd_soc_write(codec, STA32X_CFUD, cfud | 0x01);
 	}
@@ -346,7 +313,6 @@ static int sta32x_cache_sync(struct snd_soc_codec *codec)
 	unsigned int mute;
 	int rc;
 
-	/* mute during register sync */
 	mute = snd_soc_read(codec, STA32X_MMUTE);
 	snd_soc_write(codec, STA32X_MMUTE, mute | STA32X_MMUTE_MMUTE);
 	sta32x_sync_coef_shadow(codec);
@@ -355,7 +321,6 @@ static int sta32x_cache_sync(struct snd_soc_codec *codec)
 	return rc;
 }
 
-/* work around ESD issue where sta32x resets and loses all configuration */
 static void sta32x_watchdog(struct work_struct *work)
 {
 	struct sta32x_priv *sta32x = container_of(work, struct sta32x_priv,
@@ -363,7 +328,6 @@ static void sta32x_watchdog(struct work_struct *work)
 	struct snd_soc_codec *codec = sta32x->codec;
 	unsigned int confa, confa_cached;
 
-	/* check if sta32x has reset itself */
 	confa_cached = snd_soc_read(codec, STA32X_CONFA);
 	regcache_cache_bypass(sta32x->regmap, true);
 	confa = snd_soc_read(codec, STA32X_CONFA);
@@ -445,9 +409,6 @@ SOC_ENUM("Limiter2 Attack Rate (dB/ms)", sta32x_limiter2_attack_rate_enum),
 SOC_ENUM("Limiter1 Release Rate (dB/ms)", sta32x_limiter1_release_rate_enum),
 SOC_ENUM("Limiter2 Release Rate (dB/ms)", sta32x_limiter2_release_rate_enum),
 
-/* depending on mode, the attack/release thresholds have
- * two different enum definitions; provide both
- */
 SOC_SINGLE_TLV("Limiter1 Attack Threshold (AC Mode)", STA32X_L1ATRT, STA32X_LxA_SHIFT,
 	       16, 0, sta32x_limiter_ac_attack_tlv),
 SOC_SINGLE_TLV("Limiter2 Attack Threshold (AC Mode)", STA32X_L2ATRT, STA32X_LxA_SHIFT,
@@ -502,7 +463,6 @@ static const struct snd_soc_dapm_route sta32x_dapm_routes[] = {
 	{ "SUB", NULL, "DAC" },
 };
 
-/* MCLK interpolation ratio per fs */
 static struct {
 	int fs;
 	int ir;
@@ -516,7 +476,6 @@ static struct {
 	{ 192000, 2 },
 };
 
-/* MCLK to fs clock ratios */
 static struct {
 	int ratio;
 	int mcs;
@@ -527,25 +486,6 @@ static struct {
 	{ { 384, 2 }, { 256, 3 }, { 192, 4 }, { 128, 5 }, {64, 0 }, { 0, 0 } },
 };
 
-/**
- * sta32x_set_dai_sysclk - configure MCLK
- * @codec_dai: the codec DAI
- * @clk_id: the clock ID (ignored)
- * @freq: the MCLK input frequency
- * @dir: the clock direction (ignored)
- *
- * The value of MCLK is used to determine which sample rates are supported
- * by the STA32X, based on the mclk_ratios table.
- *
- * This function must be called by the machine driver's 'startup' function,
- * otherwise the list of supported sample rates will not be available in
- * time for ALSA.
- *
- * For setups with variable MCLKs, pass 0 as 'freq' argument. This will cause
- * theoretically possible sample rates to be enabled. Call it again with a
- * proper value set one the external clock is set (most probably you would do
- * that from a machine's driver 'hw_param' hook.
- */
 static int sta32x_set_dai_sysclk(struct snd_soc_dai *codec_dai,
 		int clk_id, unsigned int freq, int dir)
 {
@@ -574,7 +514,7 @@ static int sta32x_set_dai_sysclk(struct snd_soc_dai *codec_dai,
 				}
 			}
 		}
-		/* FIXME: soc should support a rate list */
+		 
 		rates &= ~SNDRV_PCM_RATE_KNOT;
 
 		if (!rates) {
@@ -582,7 +522,7 @@ static int sta32x_set_dai_sysclk(struct snd_soc_dai *codec_dai,
 			return -EINVAL;
 		}
 	} else {
-		/* enable all possible rates */
+		 
 		rates = STA32X_RATES;
 		rate_min = 32000;
 		rate_max = 192000;
@@ -594,14 +534,6 @@ static int sta32x_set_dai_sysclk(struct snd_soc_dai *codec_dai,
 	return 0;
 }
 
-/**
- * sta32x_set_dai_fmt - configure the codec for the selected audio format
- * @codec_dai: the codec DAI
- * @fmt: a SND_SOC_DAIFMT_x value indicating the data format
- *
- * This function takes a bitmask of SND_SOC_DAIFMT_x bits and programs the
- * codec accordingly.
- */
 static int sta32x_set_dai_fmt(struct snd_soc_dai *codec_dai,
 			      unsigned int fmt)
 {
@@ -644,15 +576,6 @@ static int sta32x_set_dai_fmt(struct snd_soc_dai *codec_dai,
 	return 0;
 }
 
-/**
- * sta32x_hw_params - program the STA32X with the given hardware parameters.
- * @substream: the audio stream
- * @params: the hardware parameters to set
- * @dai: the SOC DAI (ignored)
- *
- * This function programs the hardware with the values provided.
- * Specifically, the sample rate and the data format.
- */
 static int sta32x_hw_params(struct snd_pcm_substream *substream,
 			    struct snd_pcm_hw_params *params,
 			    struct snd_soc_dai *dai)
@@ -692,7 +615,7 @@ static int sta32x_hw_params(struct snd_pcm_substream *substream,
 	case SNDRV_PCM_FORMAT_S24_3LE:
 	case SNDRV_PCM_FORMAT_S24_3BE:
 		pr_debug("24bit\n");
-		/* fall through */
+		 
 	case SNDRV_PCM_FORMAT_S32_LE:
 	case SNDRV_PCM_FORMAT_S32_BE:
 		pr_debug("24bit or 32bit\n");
@@ -766,15 +689,6 @@ static int sta32x_hw_params(struct snd_pcm_substream *substream,
 	return 0;
 }
 
-/**
- * sta32x_set_bias_level - DAPM callback
- * @codec: the codec device
- * @level: DAPM power level
- *
- * This is called by ALSA to put the codec into low power mode
- * or to wake it up.  If the codec is powered off completely
- * all registers must be restored after power on.
- */
 static int sta32x_set_bias_level(struct snd_soc_codec *codec,
 				 enum snd_soc_bias_level level)
 {
@@ -787,7 +701,7 @@ static int sta32x_set_bias_level(struct snd_soc_codec *codec,
 		break;
 
 	case SND_SOC_BIAS_PREPARE:
-		/* Full power on */
+		 
 		snd_soc_update_bits(codec, STA32X_CONFF,
 				    STA32X_CONFF_PWDN | STA32X_CONFF_EAPD,
 				    STA32X_CONFF_PWDN | STA32X_CONFF_EAPD);
@@ -807,8 +721,6 @@ static int sta32x_set_bias_level(struct snd_soc_codec *codec,
 			sta32x_watchdog_start(sta32x);
 		}
 
-		/* Power up to mute */
-		/* FIXME */
 		snd_soc_update_bits(codec, STA32X_CONFF,
 				    STA32X_CONFF_PWDN | STA32X_CONFF_EAPD,
 				    STA32X_CONFF_PWDN | STA32X_CONFF_EAPD);
@@ -816,7 +728,7 @@ static int sta32x_set_bias_level(struct snd_soc_codec *codec,
 		break;
 
 	case SND_SOC_BIAS_OFF:
-		/* The chip runs through the power down sequence for us. */
+		 
 		snd_soc_update_bits(codec, STA32X_CONFF,
 				    STA32X_CONFF_PWDN | STA32X_CONFF_EAPD,
 				    STA32X_CONFF_PWDN);
@@ -880,9 +792,6 @@ static int sta32x_probe(struct snd_soc_codec *codec)
 		return ret;
 	}
 
-	/* Tell ASoC what kind of I/O to use to read the registers.  ASoC will
-	 * then do the I2C transactions itself.
-	 */
 	codec->control_data = sta32x->regmap;
 	ret = snd_soc_codec_set_cache_io(codec, 8, 8, SND_SOC_REGMAP);
 	if (ret < 0) {
@@ -890,12 +799,6 @@ static int sta32x_probe(struct snd_soc_codec *codec)
 		goto err;
 	}
 
-	/* Chip documentation explicitly requires that the reset values
-	 * of reserved register bits are left untouched.
-	 * Write the register default value to cache for reserved registers,
-	 * so the write to the these registers are suppressed by the cache
-	 * restore code when it skips writes of default registers.
-	 */
 	regcache_cache_only(sta32x->regmap, true);
 	snd_soc_write(codec, STA32X_CONFC, 0xc2);
 	snd_soc_write(codec, STA32X_CONFE, 0xc2);
@@ -906,7 +809,6 @@ static int sta32x_probe(struct snd_soc_codec *codec)
 	snd_soc_write(codec, STA32X_C3CFG, 0x40);
 	regcache_cache_only(sta32x->regmap, false);
 
-	/* set thermal warning adjustment and recovery */
 	if (!(sta32x->pdata->thermal_conf & STA32X_THERMAL_ADJUSTMENT_ENABLE))
 		thermal |= STA32X_CONFA_TWAB;
 	if (!(sta32x->pdata->thermal_conf & STA32X_THERMAL_RECOVERY_ENABLE))
@@ -915,13 +817,11 @@ static int sta32x_probe(struct snd_soc_codec *codec)
 			    STA32X_CONFA_TWAB | STA32X_CONFA_TWRB,
 			    thermal);
 
-	/* select output configuration  */
 	snd_soc_update_bits(codec, STA32X_CONFF,
 			    STA32X_CONFF_OCFG_MASK,
 			    sta32x->pdata->output_conf
 			    << STA32X_CONFF_OCFG_SHIFT);
 
-	/* channel to output mapping */
 	snd_soc_update_bits(codec, STA32X_C1CFG,
 			    STA32X_CxCFG_OM_MASK,
 			    sta32x->pdata->ch1_output_mapping
@@ -935,7 +835,6 @@ static int sta32x_probe(struct snd_soc_codec *codec)
 			    sta32x->pdata->ch3_output_mapping
 			    << STA32X_CxCFG_OM_SHIFT);
 
-	/* initialize coefficient shadow RAM with reset values */
 	for (i = 4; i <= 49; i += 5)
 		sta32x->coef_shadow[i] = 0x400000;
 	for (i = 50; i <= 54; i++)
@@ -950,7 +849,7 @@ static int sta32x_probe(struct snd_soc_codec *codec)
 		INIT_DELAYED_WORK(&sta32x->watchdog_work, sta32x_watchdog);
 
 	sta32x_set_bias_level(codec, SND_SOC_BIAS_STANDBY);
-	/* Bias level configuration will have done an extra enable */
+	 
 	regulator_bulk_disable(ARRAY_SIZE(sta32x->supplies), sta32x->supplies);
 
 	return 0;
@@ -1016,7 +915,6 @@ static int sta32x_i2c_probe(struct i2c_client *i2c,
 	if (!sta32x)
 		return -ENOMEM;
 
-	/* regulators */
 	for (i = 0; i < ARRAY_SIZE(sta32x->supplies); i++)
 		sta32x->supplies[i].supply = sta32x_supply_names[i];
 

@@ -1,18 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright 2012 (C), Jason Cooper <jason@lakedaemon.net>
- *
- * arch/arm/mach-kirkwood/board-dt.c
- *
- * Flattened Device Tree board initialization
- *
- * This file is licensed under the terms of the GNU General Public
- * License version 2.  This program is licensed "as is" without any
- * warranty of any kind, whether express or implied.
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/of.h>
@@ -32,12 +21,6 @@ static struct of_device_id kirkwood_dt_match_table[] __initdata = {
 	{ .compatible = "simple-bus", },
 	{ }
 };
-
-/*
- * There are still devices that doesn't know about DT yet.  Get clock
- * gates here and add a clock lookup alias, so that old platform
- * devices still work.
-*/
 
 static void __init kirkwood_legacy_clk_init(void)
 {
@@ -62,11 +45,6 @@ static void __init kirkwood_legacy_clk_init(void)
 	orion_clkdev_add(NULL, "mvsdio",
 			 of_clk_get_from_provider(&clkspec));
 
-	/*
-	 * The ethernet interfaces forget the MAC address assigned by
-	 * u-boot if the clocks are turned off. Until proper DT support
-	 * is available we always enable them for now.
-	 */
 	clkspec.args[0] = CGC_BIT_GE0;
 	clk = of_clk_get_from_provider(&clkspec);
 	orion_clkdev_add(NULL, "mv643xx_eth_port.0", clk);
@@ -88,22 +66,15 @@ static void __init kirkwood_dt_init(void)
 {
 	pr_info("Kirkwood: %s, TCLK=%d.\n", kirkwood_id(), kirkwood_tclk);
 
-	/*
-	 * Disable propagation of mbus errors to the CPU local bus,
-	 * as this causes mbus errors (which can occur for example
-	 * for PCI aborts) to throw CPU aborts, which we're not set
-	 * up to deal with.
-	 */
 	writel(readl(CPU_CONFIG) & ~CPU_CONFIG_ERROR_PROP, CPU_CONFIG);
 
 #if defined(MY_ABC_HERE)
 	BUG_ON(mvebu_mbus_dt_init(false));
-#endif /* MY_ABC_HERE */
+#endif  
 	kirkwood_setup_wins();
 
 	kirkwood_l2_init();
 
-	/* Setup root of clk tree */
 	kirkwood_of_clk_init();
 
 	kirkwood_cpuidle_init();
@@ -196,7 +167,7 @@ static const char * const kirkwood_dt_board_compat[] = {
 };
 
 DT_MACHINE_START(KIRKWOOD_DT, "Marvell Kirkwood (Flattened Device Tree)")
-	/* Maintainer: Jason Cooper <jason@lakedaemon.net> */
+	 
 	.map_io		= kirkwood_map_io,
 	.init_early	= kirkwood_init_early,
 	.init_irq	= orion_dt_init_irq,

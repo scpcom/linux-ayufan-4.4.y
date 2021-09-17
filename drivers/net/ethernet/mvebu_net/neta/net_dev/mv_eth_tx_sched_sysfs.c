@@ -1,32 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
-Copyright (C) Marvell International Ltd. and its affiliates
-
-This software file (the "File") is owned and distributed by Marvell
-International Ltd. and/or its affiliates ("Marvell") under the following
-alternative licensing terms.  Once you have made an election to distribute the
-File under one of the following license alternatives, please (i) delete this
-introductory statement regarding license alternatives, (ii) delete the two
-license alternatives that you have not elected to use and (iii) preserve the
-Marvell copyright notice above.
-
-********************************************************************************
-Marvell GPL License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or
-modify this File in accordance with the terms and conditions of the General
-Public License Version 2, June 1991 (the "GPL License"), a copy of which is
-available along with the File in the license.txt file or by writing to the Free
-Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 or
-on the worldwide web at http://www.gnu.org/licenses/gpl.txt.
-
-THE FILE IS DISTRIBUTED AS-IS, WITHOUT WARRANTY OF ANY KIND, AND THE IMPLIED
-WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY
-DISCLAIMED.  The GPL License provides additional details about this warranty
-disclaimer.
-*******************************************************************************/
+ 
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/types.h>
@@ -39,8 +14,8 @@ disclaimer.
 
 static ssize_t mv_eth_help(char *b)
 {
-	int o = 0; /* buffer offset */
-	int s = PAGE_SIZE; /* buffer size */
+	int o = 0;  
+	int s = PAGE_SIZE;  
 
 	o += scnprintf(b+o, s-o, "p, txp, txq, d                        - are dec numbers\n");
 	o += scnprintf(b+o, s-o, "\n");
@@ -83,12 +58,12 @@ static ssize_t mv_eth_3_store(struct device *dev,
 	sscanf(buf, "%d %d %d", &p, &i, &v);
 
 #if defined(MY_ABC_HERE)
-	/*check whether the port is valid*/
+	 
 	if (mv_eth_port_by_id(p) == NULL) {
 		pr_err("%s: port %d is invalid\n", __func__, p);
 		return -EINVAL;
 	}
-#endif /* MY_ABC_HERE */
+#endif  
 
 	local_irq_save(flags);
 
@@ -126,12 +101,12 @@ static ssize_t mv_eth_4_store(struct device *dev,
 	sscanf(buf, "%d %d %d %d", &p, &txp, &txq, &v);
 
 #if defined(MY_ABC_HERE)
-	/*check whether the port is valid*/
+	 
 	if (mv_eth_port_by_id(p) == NULL) {
 		pr_err("%s: port %d is invalid\n", __func__, p);
 		return -EINVAL;
 	}
-#endif /* MY_ABC_HERE */
+#endif  
 
 	local_irq_save(flags);
 

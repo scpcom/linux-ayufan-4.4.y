@@ -1,18 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * arch/arm/mach-orion5x/common.c
- *
- * Core functions for Marvell Orion 5x SoCs
- *
- * Maintainer: Tzachi Perelstein <tzachi@marvell.com>
- *
- * This file is licensed under the terms of the GNU General Public
- * License version 2.  This program is licensed "as is" without any
- * warranty of any kind, whether express or implied.
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/platform_device.h>
@@ -40,9 +29,6 @@
 #include <plat/common.h>
 #include "common.h"
 
-/*****************************************************************************
- * I/O Address Mapping
- ****************************************************************************/
 static struct map_desc orion5x_io_desc[] __initdata = {
 	{
 		.virtual	= (unsigned long) ORION5X_REGS_VIRT_BASE,
@@ -62,9 +48,6 @@ void __init orion5x_map_io(void)
 	iotable_init(orion5x_io_desc, ARRAY_SIZE(orion5x_io_desc));
 }
 
-/*****************************************************************************
- * CLK tree
- ****************************************************************************/
 static struct clk *tclk;
 
 void __init clk_init(void)
@@ -75,26 +58,17 @@ void __init clk_init(void)
 	orion_clkdev_init(tclk);
 }
 
-/*****************************************************************************
- * EHCI0
- ****************************************************************************/
 void __init orion5x_ehci0_init(void)
 {
 	orion_ehci_init(ORION5X_USB0_PHYS_BASE, IRQ_ORION5X_USB0_CTRL,
 			EHCI_PHY_ORION);
 }
 
-/*****************************************************************************
- * EHCI1
- ****************************************************************************/
 void __init orion5x_ehci1_init(void)
 {
 	orion_ehci_1_init(ORION5X_USB1_PHYS_BASE, IRQ_ORION5X_USB1_CTRL);
 }
 
-/*****************************************************************************
- * GE00
- ****************************************************************************/
 void __init orion5x_eth_init(struct mv643xx_eth_platform_data *eth_data)
 {
 	orion_ge00_init(eth_data,
@@ -103,60 +77,39 @@ void __init orion5x_eth_init(struct mv643xx_eth_platform_data *eth_data)
 			MV643XX_TX_CSUM_DEFAULT_LIMIT);
 }
 
-/*****************************************************************************
- * Ethernet switch
- ****************************************************************************/
 void __init orion5x_eth_switch_init(struct dsa_platform_data *d, int irq)
 {
 	orion_ge00_switch_init(d, irq);
 }
 
-/*****************************************************************************
- * I2C
- ****************************************************************************/
 void __init orion5x_i2c_init(void)
 {
 	orion_i2c_init(I2C_PHYS_BASE, IRQ_ORION5X_I2C, 8);
 
 }
 
-/*****************************************************************************
- * SATA
- ****************************************************************************/
 void __init orion5x_sata_init(struct mv_sata_platform_data *sata_data)
 {
 	orion_sata_init(sata_data, ORION5X_SATA_PHYS_BASE, IRQ_ORION5X_SATA);
 }
 
-/*****************************************************************************
- * SPI
- ****************************************************************************/
 void __init orion5x_spi_init()
 {
 	orion_spi_init(SPI_PHYS_BASE);
 }
 
-/*****************************************************************************
- * UART0
- ****************************************************************************/
 void __init orion5x_uart0_init(void)
 {
 	orion_uart0_init(UART0_VIRT_BASE, UART0_PHYS_BASE,
 			 IRQ_ORION5X_UART0, tclk);
 }
 
-/*****************************************************************************
- * UART1
- ****************************************************************************/
 void __init orion5x_uart1_init(void)
 {
 	orion_uart1_init(UART1_VIRT_BASE, UART1_PHYS_BASE,
 			 IRQ_ORION5X_UART1, tclk);
 }
 
-/*****************************************************************************
- * XOR engine
- ****************************************************************************/
 void __init orion5x_xor_init(void)
 {
 	orion_xor0_init(ORION5X_XOR_PHYS_BASE,
@@ -164,9 +117,6 @@ void __init orion5x_xor_init(void)
 			IRQ_ORION5X_XOR0, IRQ_ORION5X_XOR1);
 }
 
-/*****************************************************************************
- * Cryptographic Engines and Security Accelerator (CESA)
- ****************************************************************************/
 static void __init orion5x_crypto_init(void)
 {
 #if defined(MY_ABC_HERE)
@@ -174,25 +124,19 @@ static void __init orion5x_crypto_init(void)
 				    ORION_MBUS_SRAM_ATTR,
 				    ORION5X_SRAM_PHYS_BASE,
 				    ORION5X_SRAM_SIZE);
-#else /* MY_ABC_HERE */
+#else  
 	mvebu_mbus_add_window("sram", ORION5X_SRAM_PHYS_BASE,
 			      ORION5X_SRAM_SIZE);
-#endif /* MY_ABC_HERE */
+#endif  
 	orion_crypto_init(ORION5X_CRYPTO_PHYS_BASE, ORION5X_SRAM_PHYS_BASE,
 			  SZ_8K, IRQ_ORION5X_CESA);
 }
 
-/*****************************************************************************
- * Watchdog
- ****************************************************************************/
 void __init orion5x_wdt_init(void)
 {
 	orion_wdt_init();
 }
 
-/*****************************************************************************
- * Time handling
- ****************************************************************************/
 void __init orion5x_init_early(void)
 {
 	u32 rev, dev;
@@ -200,7 +144,6 @@ void __init orion5x_init_early(void)
 
 	orion_time_set_base(TIMER_VIRT_BASE);
 
-	/* Initialize the MBUS driver */
 	orion5x_pcie_id(&dev, &rev);
 	if (dev == MV88F5281_DEV_ID)
 		mbus_soc_name = "marvell,orion5x-88f5281-mbus";
@@ -219,10 +162,7 @@ void __init orion5x_init_early(void)
 
 void orion5x_setup_wins(void)
 {
-	/*
-	 * The PCIe windows will no longer be statically allocated
-	 * here once Orion5x is migrated to the pci-mvebu driver.
-	 */
+	 
 #if defined(MY_ABC_HERE)
 	mvebu_mbus_add_window_remap_by_id(ORION_MBUS_PCIE_IO_TARGET,
 					  ORION_MBUS_PCIE_IO_ATTR,
@@ -242,7 +182,7 @@ void orion5x_setup_wins(void)
 				    ORION_MBUS_PCI_MEM_ATTR,
 				    ORION5X_PCI_MEM_PHYS_BASE,
 				    ORION5X_PCI_MEM_SIZE);
-#else /* MY_ABC_HERE */
+#else  
 	mvebu_mbus_add_window_remap_flags("pcie0.0", ORION5X_PCIE_IO_PHYS_BASE,
 					  ORION5X_PCIE_IO_SIZE,
 					  ORION5X_PCIE_IO_BUS_BASE,
@@ -259,7 +199,7 @@ void orion5x_setup_wins(void)
 					  ORION5X_PCI_MEM_SIZE,
 					  MVEBU_MBUS_NO_REMAP,
 					  MVEBU_MBUS_PCI_MEM);
-#endif /* MY_ABC_HERE */
+#endif  
 }
 
 int orion5x_tclk;
@@ -284,12 +224,6 @@ void __init orion5x_timer_init(void)
 			IRQ_ORION5X_BRIDGE, orion5x_tclk);
 }
 
-/*****************************************************************************
- * General
- ****************************************************************************/
-/*
- * Identify device ID and rev from PCIe configuration header space '0'.
- */
 void __init orion5x_id(u32 *dev, u32 *rev, char **dev_name)
 {
 	orion5x_pcie_id(dev, rev);
@@ -337,52 +271,31 @@ void __init orion5x_init(void)
 	orion5x_id(&dev, &rev, &dev_name);
 	printk(KERN_INFO "Orion ID: %s. TCLK=%d.\n", dev_name, orion5x_tclk);
 
-	/*
-	 * Setup Orion address map
-	 */
 	orion5x_setup_wins();
 
-	/* Setup root of clk tree */
 	clk_init();
 
-	/*
-	 * Don't issue "Wait for Interrupt" instruction if we are
-	 * running on D0 5281 silicon.
-	 */
 	if (dev == MV88F5281_DEV_ID && rev == MV88F5281_REV_D0) {
 		printk(KERN_INFO "Orion: Applying 5281 D0 WFI workaround.\n");
 		cpu_idle_poll_ctrl(true);
 	}
 
-	/*
-	 * The 5082/5181l/5182/6082/6082l/6183 have crypto
-	 * while 5180n/5181/5281 don't have crypto.
-	 */
 	if ((dev == MV88F5181_DEV_ID && rev >= MV88F5181L_REV_A0) ||
 	    dev == MV88F5182_DEV_ID || dev == MV88F6183_DEV_ID)
 		orion5x_crypto_init();
 
-	/*
-	 * Register watchdog driver
-	 */
 	orion5x_wdt_init();
 }
 
 void orion5x_restart(char mode, const char *cmd)
 {
-	/*
-	 * Enable and issue soft reset
-	 */
+	 
 	orion5x_setbits(RSTOUTn_MASK, (1 << 2));
 	orion5x_setbits(CPU_SOFT_RESET, 1);
 	mdelay(200);
 	orion5x_clrbits(CPU_SOFT_RESET, 1);
 }
 
-/*
- * Many orion-based systems have buggy bootloader implementations.
- * This is a common fixup for bogus memory tags.
- */
 void __init tag_fixup_mem32(struct tag *t, char **from,
 			    struct meminfo *meminfo)
 {

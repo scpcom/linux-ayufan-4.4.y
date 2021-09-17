@@ -1,22 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * SuperH clock framework
- *
- *  Copyright (C) 2005 - 2010  Paul Mundt
- *
- * This clock framework is derived from the OMAP version by:
- *
- *	Copyright (C) 2004 - 2008 Nokia Corporation
- *	Written by Tuukka Tikkanen <tuukka.tikkanen@elektrobit.com>
- *
- *  Modified for omap shared clock framework by Tony Lindgren <tony@atomide.com>
- *
- * This file is subject to the terms and conditions of the GNU General Public
- * License.  See the file "COPYING" in the main directory of this archive
- * for more details.
- */
+ 
 #define pr_fmt(fmt) "clock: " fmt
 
 #include <linux/kernel.h>
@@ -36,7 +21,6 @@ static LIST_HEAD(clock_list);
 static DEFINE_SPINLOCK(clock_lock);
 static DEFINE_MUTEX(clock_list_sem);
 
-/* clock disable operations are not passed on to hardware during boot */
 static int allow_disable;
 
 void clk_rate_table_build(struct clk *clk,
@@ -68,18 +52,17 @@ void clk_rate_table_build(struct clk *clk,
 
 #if defined(MY_ABC_HERE)
 		freq_table[i].driver_data = i;
-#else /* MY_ABC_HERE */
+#else  
 		freq_table[i].index = i;
-#endif /* MY_ABC_HERE */
+#endif  
 		freq_table[i].frequency = freq;
 	}
 
-	/* Termination entry */
 #if defined(MY_ABC_HERE)
 	freq_table[i].driver_data = i;
-#else /* MY_ABC_HERE */
+#else  
 	freq_table[i].index = i;
-#endif /* MY_ABC_HERE */
+#endif  
 	freq_table[i].frequency = CPUFREQ_TABLE_END;
 }
 
@@ -222,7 +205,6 @@ int clk_rate_table_find(struct clk *clk,
 	return -ENOENT;
 }
 
-/* Used for clocks that always have same value as the parent clock */
 unsigned long followparent_recalc(struct clk *clk)
 {
 	return clk->parent ? clk->parent->rate : 0;
@@ -238,7 +220,6 @@ int clk_reparent(struct clk *child, struct clk *parent)
 	return 0;
 }
 
-/* Propagate rate to children */
 void propagate_rate(struct clk *tclk)
 {
 	struct clk *clkp;
@@ -323,13 +304,6 @@ EXPORT_SYMBOL_GPL(clk_enable);
 
 static LIST_HEAD(root_clks);
 
-/**
- * recalculate_root_clocks - recalculate and propagate all root clocks
- *
- * Recalculates all root clocks (clocks with no parent), which if the
- * clock's .recalc is set correctly, should also propagate their rates.
- * Called at init.
- */
 void recalculate_root_clocks(void)
 {
 	struct clk *clkp;
@@ -355,32 +329,19 @@ static int clk_establish_mapping(struct clk *clk)
 {
 	struct clk_mapping *mapping = clk->mapping;
 
-	/*
-	 * Propagate mappings.
-	 */
 	if (!mapping) {
 		struct clk *clkp;
 
-		/*
-		 * dummy mapping for root clocks with no specified ranges
-		 */
 		if (!clk->parent) {
 			clk->mapping = &dummy_mapping;
 			goto out;
 		}
 
-		/*
-		 * If we're on a child clock and it provides no mapping of its
-		 * own, inherit the mapping from its root clock.
-		 */
 		clkp = lookup_root_clock(clk);
 		mapping = clkp->mapping;
 		BUG_ON(!mapping);
 	}
 
-	/*
-	 * Establish initial mapping.
-	 */
 	if (!mapping->base && mapping->phys) {
 		kref_init(&mapping->ref);
 
@@ -388,9 +349,7 @@ static int clk_establish_mapping(struct clk *clk)
 		if (unlikely(!mapping->base))
 			return -ENXIO;
 	} else if (mapping->base) {
-		/*
-		 * Bump the refcount for an existing mapping
-		 */
+		 
 		kref_get(&mapping->ref);
 	}
 
@@ -414,7 +373,6 @@ static void clk_teardown_mapping(struct clk *clk)
 {
 	struct clk_mapping *mapping = clk->mapping;
 
-	/* Nothing to do */
 	if (mapping == &dummy_mapping)
 		goto out;
 
@@ -431,9 +389,6 @@ int clk_register(struct clk *clk)
 	if (IS_ERR_OR_NULL(clk))
 		return -EINVAL;
 
-	/*
-	 * trap out already registered clocks
-	 */
 	if (clk->node.next || clk->node.prev)
 		return 0;
 
@@ -702,7 +657,6 @@ static int __init clk_late_init(void)
 	unsigned long flags;
 	struct clk *clk;
 
-	/* disable all clocks with zero use count */
 	mutex_lock(&clock_list_sem);
 	spin_lock_irqsave(&clock_lock, flags);
 
@@ -710,7 +664,6 @@ static int __init clk_late_init(void)
 		if (!clk->usecount && clk->ops && clk->ops->disable)
 			clk->ops->disable(clk);
 
-	/* from now on allow clock disable operations */
 	allow_disable = 1;
 
 	spin_unlock_irqrestore(&clock_lock, flags);

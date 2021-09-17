@@ -1,17 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * kirkwood.h
- *
- * (c) 2010 Arnaud Patard <apatard@mandriva.com>
- *
- *  This program is free software; you can redistribute  it and/or modify it
- *  under  the terms of  the GNU General  Public License as published by the
- *  Free Software Foundation;  either version 2 of the  License, or (at your
- *  option) any later version.
- */
-
+ 
 #ifndef _KIRKWOOD_AUDIO_H
 #define _KIRKWOOD_AUDIO_H
 
@@ -43,7 +33,7 @@
 #if defined(MY_ABC_HERE)
 #define KIRKWOOD_RECCTL_ENABLE_MASK		(KIRKWOOD_RECCTL_SPDIF_EN | \
 						 KIRKWOOD_RECCTL_I2S_EN)
-#endif /* MY_ABC_HERE */
+#endif  
 
 #define KIRKWOOD_REC_BUF_ADDR			0x1004
 #define KIRKWOOD_REC_BUF_SIZE			0x1008
@@ -72,7 +62,7 @@
 #if defined(MY_ABC_HERE)
 #define KIRKWOOD_PLAYCTL_ENABLE_MASK		(KIRKWOOD_PLAYCTL_SPDIF_EN | \
 						 KIRKWOOD_PLAYCTL_I2S_EN)
-#endif /* MY_ABC_HERE */
+#endif  
 
 #define KIRKWOOD_PLAY_BUF_ADDR			0x1104
 #define KIRKWOOD_PLAY_BUF_SIZE			0x1108
@@ -128,8 +118,6 @@
 
 #define KIRKWOOD_AUDIO_BUF_MAX			(16*1024*1024)
 
-/* Theses values come from the marvell alsa driver */
-/* need to find where they come from               */
 #if defined(MY_ABC_HERE)
 #define KIRKWOOD_SND_MIN_PERIODS		2
 #define KIRKWOOD_SND_MAX_PERIODS		16
@@ -137,19 +125,19 @@
 #define KIRKWOOD_SND_MAX_PERIOD_BYTES		0x8000
 #define KIRKWOOD_SND_MAX_BUFFER_BYTES		(KIRKWOOD_SND_MAX_PERIOD_BYTES \
 						 * KIRKWOOD_SND_MAX_PERIODS)
-#else /* MY_ABC_HERE */
+#else  
 #define KIRKWOOD_SND_MIN_PERIODS		8
 #define KIRKWOOD_SND_MAX_PERIODS		16
 #define KIRKWOOD_SND_MIN_PERIOD_BYTES		0x4000
 #define KIRKWOOD_SND_MAX_PERIOD_BYTES		0x4000
-#endif /* MY_ABC_HERE */
+#endif  
 
 struct kirkwood_dma_data {
 	void __iomem *io;
 #if defined(MY_ABC_HERE)
 	void __iomem *pll_config;
 	void __iomem *soc_control;
-#endif /* MY_ABC_HERE */
+#endif  
 	struct clk *clk;
 	struct clk *extclk;
 	uint32_t ctl_play;
@@ -157,13 +145,13 @@ struct kirkwood_dma_data {
 #if defined(MY_ABC_HERE)
 	struct snd_pcm_substream *substream_play;
 	struct snd_pcm_substream *substream_rec;
-#endif /* MY_ABC_HERE */
+#endif  
 	int irq;
 	int burst;
 };
 
 #if defined(MY_ABC_HERE)
 extern struct snd_soc_platform_driver kirkwood_soc_platform;
-#endif /* MY_ABC_HERE */
+#endif  
 
 #endif

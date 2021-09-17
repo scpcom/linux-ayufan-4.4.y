@@ -1,15 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  linux/arch/arm/mm/pgd.c
- *
- *  Copyright (C) 1998-2005 Russell King
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
+ 
 #include <linux/mm.h>
 #include <linux/gfp.h>
 #include <linux/highmem.h>
@@ -30,9 +22,6 @@
 #define __pgd_free(pgd)	free_pages((unsigned long)pgd, 2)
 #endif
 
-/*
- * need to get a 16k page for level 1
- */
 pgd_t *pgd_alloc(struct mm_struct *mm)
 {
 	pgd_t *new_pgd, *init_pgd;
@@ -46,9 +35,6 @@ pgd_t *pgd_alloc(struct mm_struct *mm)
 
 	memset(new_pgd, 0, USER_PTRS_PER_PGD * sizeof(pgd_t));
 
-	/*
-	 * Copy over the kernel and IO PGD entries
-	 */
 	init_pgd = pgd_offset_k(0);
 	memcpy(new_pgd + USER_PTRS_PER_PGD, init_pgd + USER_PTRS_PER_PGD,
 		       (PTRS_PER_PGD - USER_PTRS_PER_PGD) * sizeof(pgd_t));
@@ -56,9 +42,7 @@ pgd_t *pgd_alloc(struct mm_struct *mm)
 	clean_dcache_area(new_pgd, PTRS_PER_PGD * sizeof(pgd_t));
 
 #ifdef CONFIG_ARM_LPAE
-	/*
-	 * Allocate PMD table for modules and pkmap mappings.
-	 */
+	 
 	new_pud = pud_alloc(mm, new_pgd + pgd_index(MODULES_VADDR),
 			    MODULES_VADDR);
 	if (!new_pud)
@@ -70,11 +54,7 @@ pgd_t *pgd_alloc(struct mm_struct *mm)
 #endif
 
 	if (!vectors_high()) {
-		/*
-		 * On ARM, first page must always be allocated since it
-		 * contains the machine vectors. The vectors are always high
-		 * with LPAE.
-		 */
+		 
 		new_pud = pud_alloc(mm, new_pgd, 0);
 		if (!new_pud)
 			goto no_pud;
@@ -92,16 +72,16 @@ pgd_t *pgd_alloc(struct mm_struct *mm)
 		init_pte = pte_offset_map(init_pmd, 0);
 #if defined(MY_DEF_HERE)
 		set_pte_ext(new_pte, *init_pte, 0);
-#else /* MY_DEF_HERE */
+#else  
 		set_pte_ext(new_pte + 0, init_pte[0], 0);
 #if defined(MY_ABC_HERE)
 #ifndef CONFIG_MV_LARGE_PAGE_SUPPORT
 		set_pte_ext(new_pte + 1, init_pte[1], 0);
 #endif
-#else /* MY_ABC_HERE */
+#else  
 		set_pte_ext(new_pte + 1, init_pte[1], 0);
-#endif /* MY_ABC_HERE */
-#endif /* MY_DEF_HERE */
+#endif  
+#endif  
 		pte_unmap(init_pte);
 		pte_unmap(new_pte);
 	}
@@ -151,9 +131,7 @@ no_pud:
 	pud_free(mm, pud);
 no_pgd:
 #ifdef CONFIG_ARM_LPAE
-	/*
-	 * Free modules/pkmap or identity pmd tables.
-	 */
+	 
 	for (pgd = pgd_base; pgd < pgd_base + PTRS_PER_PGD; pgd++) {
 		if (pgd_none_or_clear_bad(pgd))
 			continue;

@@ -1,41 +1,10 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Marvell MVEBU pinctrl driver
- *
- * Authors: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
- *          Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- */
-
+ 
 #ifndef __PINCTRL_MVEBU_H__
 #define __PINCTRL_MVEBU_H__
 
-/**
- * struct mvebu_mpp_ctrl - describe a mpp control
- * @name: name of the control group
- * @pid: first pin id handled by this control
- * @npins: number of pins controlled by this control
- * @mpp_get: (optional) special function to get mpp setting
- * @mpp_set: (optional) special function to set mpp setting
- * @mpp_gpio_req: (optional) special function to request gpio
- * @mpp_gpio_dir: (optional) special function to set gpio direction
- *
- * A mpp_ctrl describes a muxable unit, e.g. pin, group of pins, or
- * internal function, inside the SoC. Each muxable unit can be switched
- * between two or more different settings, e.g. assign mpp pin 13 to
- * uart1 or sata.
- *
- * If optional mpp_get/_set functions are set these are used to get/set
- * a specific mode. Otherwise it is assumed that the mpp control is based
- * on 4-bit groups in subsequent registers. The optional mpp_gpio_req/_dir
- * functions can be used to allow pin settings with varying gpio pins.
- */
 struct mvebu_mpp_ctrl {
 	const char *name;
 	u8 pid;
@@ -47,29 +16,6 @@ struct mvebu_mpp_ctrl {
 	int (*mpp_gpio_dir)(struct mvebu_mpp_ctrl *ctrl, u8 pid, bool input);
 };
 
-/**
- * struct mvebu_mpp_ctrl_setting - describe a mpp ctrl setting
- * @val: ctrl setting value
- * @name: ctrl setting name, e.g. uart2, spi0 - unique per mpp_mode
- * @subname: (optional) additional ctrl setting name, e.g. rts, cts
- * @variant: (optional) variant identifier mask
- * @flags: (private) flags to store gpi/gpo/gpio capabilities
- *
- * A ctrl_setting describes a specific internal mux function that a mpp pin
- * can be switched to. The value (val) will be written in the corresponding
- * register for common mpp pin configuration registers on MVEBU. SoC specific
- * mpp_get/_set function may use val to distinguish between different settings.
- *
- * The name will be used to switch to this setting in DT description, e.g.
- * marvell,function = "uart2". subname is only for debugging purposes.
- *
- * If name is one of "gpi", "gpo", "gpio" gpio capabilities are
- * parsed during initialization and stored in flags.
- *
- * The variant can be used to combine different revisions of one SoC to a
- * common pinctrl driver. It is matched (AND) with variant of soc_info to
- * determine if a setting is available on the current SoC revision.
- */
 struct mvebu_mpp_ctrl_setting {
 	u8 val;
 	const char *name;
@@ -80,33 +26,11 @@ struct mvebu_mpp_ctrl_setting {
 #define  MVEBU_SETTING_GPI	(1 << 1)
 };
 
-/**
- * struct mvebu_mpp_mode - link ctrl and settings
- * @pid: first pin id handled by this mode
- * @settings: list of settings available for this mode
- *
- * A mode connects all available settings with the corresponding mpp_ctrl
- * given by pid.
- */
 struct mvebu_mpp_mode {
 	u8 pid;
 	struct mvebu_mpp_ctrl_setting *settings;
 };
 
-/**
- * struct mvebu_pinctrl_soc_info - SoC specific info passed to pinctrl-mvebu
- * @variant: variant mask of soc_info
- * @controls: list of available mvebu_mpp_ctrls
- * @ncontrols: number of available mvebu_mpp_ctrls
- * @modes: list of available mvebu_mpp_modes
- * @nmodes: number of available mvebu_mpp_modes
- * @gpioranges: list of pinctrl_gpio_ranges
- * @ngpioranges: number of available pinctrl_gpio_ranges
- *
- * This struct describes all pinctrl related information for a specific SoC.
- * If variant is unequal 0 it will be matched (AND) with variant of each
- * setting and allows to distinguish between different revisions of one SoC.
- */
 struct mvebu_pinctrl_soc_info {
 	u8 variant;
 	struct mvebu_mpp_ctrl *controls;
@@ -194,6 +118,6 @@ int mvebu_pinctrl_remove(struct platform_device *pdev);
 #if defined(MY_ABC_HERE)
 int mvebu_pinctrl_suspend(struct platform_device *pdev, pm_message_t state);
 int mvebu_pinctrl_resume(struct platform_device *pdev);
-#endif /* MY_ABC_HERE */
+#endif  
 
 #endif

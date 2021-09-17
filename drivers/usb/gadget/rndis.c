@@ -36,11 +36,9 @@
 #include <asm/byteorder.h>
 #include <asm/unaligned.h>
 
-
 #undef	VERBOSE_DEBUG
 
 #include "rndis.h"
-
 
 /* The driver for your USB chip needs to support ep0 OUT to work with
  * RNDIS, plus all three CDC Ethernet endpoints (interrupt not optional).
@@ -59,7 +57,6 @@ MODULE_PARM_DESC (rndis_debug, "enable debugging");
 
 #define RNDIS_MAX_CONFIGS	1
 
-
 static rndis_params rndis_per_dev_params[RNDIS_MAX_CONFIGS];
 
 /* Driver Version */
@@ -67,7 +64,6 @@ static const __le32 rndis_driver_version = cpu_to_le32(1);
 
 /* Function Prototypes */
 static rndis_resp_t *rndis_add_response(int configNr, u32 length);
-
 
 /* supported OIDs */
 static const u32 oid_supported_list[] =
@@ -157,7 +153,6 @@ static const u32 oid_supported_list[] =
 #endif	/* RNDIS_WAKEUP */
 #endif	/* RNDIS_PM */
 };
-
 
 /* NDIS Functions */
 static int gen_ndis_query_resp(int configNr, u32 OID, u8 *buf,
@@ -725,7 +720,6 @@ static int rndis_keepalive_response(int configNr,
 	return 0;
 }
 
-
 /*
  * Device to Host Comunication
  */
@@ -1126,7 +1120,6 @@ static const struct file_operations rndis_proc_fops = {
 static struct proc_dir_entry *rndis_connect_state [RNDIS_MAX_CONFIGS];
 
 #endif /* CONFIG_USB_GADGET_DEBUG_FILES */
-
 
 int rndis_init(void)
 {

@@ -1,19 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * linux/arch/arm/include/asm/hardware/coresight.h
- *
- * CoreSight components' registers
- *
- * Copyright (C) 2009 Nokia Corporation.
- * Alexander Shishkin
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
-
+ 
 #ifndef __ASM_HARDWARE_CORESIGHT_H
 #define __ASM_HARDWARE_CORESIGHT_H
 
@@ -30,24 +18,22 @@
 #define etm_writel(t, v, x) \
 	(writel_relaxed((v), (t)->etm_regs + (x)))
 #define etm_readl(t, x) (readl_relaxed((t)->etm_regs + (x)))
-#else /* MY_ABC_HERE */
+#else  
 #define etm_writel(t, v, x) \
 	(__raw_writel((v), (t)->etm_regs + (x)))
 #define etm_readl(t, x) (__raw_readl((t)->etm_regs + (x)))
-#endif /* MY_ABC_HERE */
+#endif  
 
-/* CoreSight Management Registers */
 #define CSMR_LOCKACCESS 0xfb0
 #define CSMR_LOCKSTATUS 0xfb4
 #define CSMR_AUTHSTATUS 0xfb8
 #define CSMR_DEVID	0xfc8
 #define CSMR_DEVTYPE	0xfcc
-/* CoreSight Component Registers */
+ 
 #define CSCR_CLASS	0xff4
 
 #define CS_LAR_KEY	0xc5acce55
 
-/* ETM control register, "ETM Architecture", 3.3.1 */
 #define ETMR_CTRL		0
 #define ETMCTRL_POWERDOWN	1
 #define ETMCTRL_PROGRAM		(1 << 10)
@@ -65,18 +51,12 @@
 #define ETMCTRL_BRANCH_OUTPUT	(1 << 8)
 #define ETMCTRL_CYCLEACCURATE	(1 << 12)
 
-/* ETM configuration code register */
 #define ETMR_CONFCODE		(0x04)
 
-/* ETM trace start/stop resource control register */
 #define ETMR_TRACESSCTRL	(0x18)
 
-/* ETM trigger event register */
 #define ETMR_TRIGEVT		(0x08)
 
-/* address access type register bits, "ETM architecture",
- * table 3-27 */
-/* - access type */
 #define ETMAAT_IFETCH		0
 #define ETMAAT_IEXEC		1
 #define ETMAAT_IEXECPASS	2
@@ -84,22 +64,22 @@
 #define ETMAAT_DLOADSTORE	4
 #define ETMAAT_DLOAD		5
 #define ETMAAT_DSTORE		6
-/* - comparison access size */
+ 
 #define ETMAAT_JAVA		(0 << 3)
 #define ETMAAT_THUMB		(1 << 3)
 #define ETMAAT_ARM		(3 << 3)
-/* - data value comparison control */
+ 
 #define ETMAAT_NOVALCMP		(0 << 5)
 #define ETMAAT_VALMATCH		(1 << 5)
 #define ETMAAT_VALNOMATCH	(3 << 5)
-/* - exact match */
+ 
 #define ETMAAT_EXACTMATCH	(1 << 7)
-/* - context id comparator control */
+ 
 #define ETMAAT_IGNCONTEXTID	(0 << 8)
 #define ETMAAT_VALUE1		(1 << 8)
 #define ETMAAT_VALUE2		(2 << 8)
 #define ETMAAT_VALUE3		(3 << 8)
-/* - security level control */
+ 
 #define ETMAAT_IGNSECURITY	(0 << 10)
 #define ETMAAT_NSONLY		(1 << 10)
 #define ETMAAT_SONLY		(2 << 10)
@@ -107,7 +87,6 @@
 #define ETMR_COMP_VAL(x)	(0x40 + (x) * 4)
 #define ETMR_COMP_ACC_TYPE(x)	(0x80 + (x) * 4)
 
-/* ETM status register, "ETM Architecture", 3.3.2 */
 #define ETMR_STATUS		(0x10)
 #define ETMST_OVERFLOW		BIT(0)
 #define ETMST_PROGBIT		BIT(1)
@@ -127,13 +106,11 @@
 				ETMCTRL_BRANCH_OUTPUT | \
 				ETMCTRL_DO_CONTEXTID)
 
-/* ETM management registers, "ETM Architecture", 3.5.24 */
 #define ETMMR_OSLAR	0x300
 #define ETMMR_OSLSR	0x304
 #define ETMMR_OSSRR	0x308
 #define ETMMR_PDSR	0x314
 
-/* ETB registers, "CoreSight Components TRM", 9.3 */
 #define ETBR_DEPTH		0x04
 #define ETBR_STATUS		0x0c
 #define ETBR_READMEM		0x10
@@ -154,11 +131,11 @@
 #define etb_writel(t, v, x) \
 	(writel_relaxed((v), (t)->etb_regs + (x)))
 #define etb_readl(t, x) (readl_relaxed((t)->etb_regs + (x)))
-#else /* MY_ABC_HERE */
+#else  
 #define etb_writel(t, v, x) \
 	(__raw_writel((v), (t)->etb_regs + (x)))
 #define etb_readl(t, x) (__raw_readl((t)->etb_regs + (x)))
-#endif /* MY_ABC_HERE */
+#endif  
 
 #define etm_lock(t) do { etm_writel((t), 0, CSMR_LOCKACCESS); } while (0)
 #define etm_unlock(t) \
@@ -168,4 +145,4 @@
 #define etb_unlock(t) \
 	do { etb_writel((t), CS_LAR_KEY, CSMR_LOCKACCESS); } while (0)
 
-#endif /* __ASM_HARDWARE_CORESIGHT_H */
+#endif  

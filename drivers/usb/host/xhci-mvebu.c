@@ -1,15 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) 2013 Marvell
- * Author: Gregory CLEMENT <gregory.clement@free-electrons.com>
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * version 2 as published by the Free Software Foundation.
- */
-
+ 
 #include <linux/clk.h>
 #include <linux/io.h>
 #include <linux/mbus.h>
@@ -32,13 +24,11 @@ static void mv_usb3_conf_mbus_windows(void __iomem *base,
 {
 	int win;
 
-	/* Clear all existing windows */
 	for (win = 0; win < USB3_MAX_WINDOWS; win++) {
 		writel(0, base + USB3_WIN_CTRL(win));
 		writel(0, base + USB3_WIN_BASE(win));
 	}
 
-	/* Program each DRAM CS in a seperate window */
 	for (win = 0; win < dram->num_cs; win++) {
 		const struct mbus_dram_window *cs = dram->cs + win;
 
@@ -58,7 +48,7 @@ static void xhci_mvebu_quirks(struct platform_device *pdev)
 
 	xhci->quirks |= XHCI_RESET_ON_RESUME;
 }
-#endif /* MY_ABC_HERE */
+#endif  
 
 int xhci_mvebu_probe(struct platform_device *pdev)
 {
@@ -105,7 +95,7 @@ int xhci_mvebu_probe(struct platform_device *pdev)
 	}
 #if defined(MY_ABC_HERE)
 	xhci_mvebu_quirks(pdev);
-#endif /* MY_ABC_HERE */
+#endif  
 
 	return ret;
 }

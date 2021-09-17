@@ -1,41 +1,13 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  linux/arch/arm/include/asm/pmu.h
- *
- *  Copyright (C) 2009 picoChip Designs Ltd, Jamie Iles
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- *
- */
-
+ 
 #ifndef __ARM_PMU_H__
 #define __ARM_PMU_H__
 
 #include <linux/interrupt.h>
 #include <linux/perf_event.h>
 
-/*
- * struct arm_pmu_platdata - ARM PMU platform data
- *
- * @handle_irq: an optional handler which will be called from the
- *	interrupt and passed the address of the low level handler,
- *	and can be used to implement any platform specific handling
- *	before or after calling it.
- * @runtime_resume: an optional handler which will be called by the
- *	runtime PM framework following a call to pm_runtime_get().
- *	Note that if pm_runtime_get() is called more than once in
- *	succession this handler will only be called once.
- * @runtime_suspend: an optional handler which will be called by the
- *	runtime PM framework following a call to pm_runtime_put().
- *	Note that if pm_runtime_get() is called more than once in
- *	succession this handler will only be called following the
- *	final call to pm_runtime_put() that actually disables the
- *	hardware.
- */
 struct arm_pmu_platdata {
 	irqreturn_t (*handle_irq)(int irq, void *dev,
 				  irq_handler_t pmu_handler);
@@ -45,28 +17,17 @@ struct arm_pmu_platdata {
 
 #ifdef CONFIG_HW_PERF_EVENTS
 
-/* The events for a given PMU register set. */
 struct pmu_hw_events {
-	/*
-	 * The events that are active on the PMU for the given index.
-	 */
+	 
 	struct perf_event	**events;
 
-	/*
-	 * A 1 bit for an index indicates that the counter is being used for
-	 * an event. A 0 means that the counter can be used.
-	 */
 	unsigned long           *used_mask;
 
-	/*
-	 * Hardware lock to serialize accesses to PMU registers. Needed for the
-	 * read/modify/write sequences.
-	 */
 	raw_spinlock_t		pmu_lock;
 #if defined (MY_DEF_HERE)
 
 	struct pmu		*pmu;
-#endif /* MY_DEF_HERE */
+#endif  
 };
 
 struct arm_pmu {
@@ -113,6 +74,6 @@ int armpmu_map_event(struct perf_event *event,
 						[PERF_COUNT_HW_CACHE_RESULT_MAX],
 		     u32 raw_event_mask);
 
-#endif /* CONFIG_HW_PERF_EVENTS */
+#endif  
 
-#endif /* __ARM_PMU_H__ */
+#endif  

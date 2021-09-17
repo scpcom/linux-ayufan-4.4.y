@@ -1,24 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) 2012 - Virtual Open Systems and Columbia University
- * Author: Christoffer Dall <c.dall@virtualopensystems.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License, version 2, as
- * published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
-
+ 
 #include <linux/kvm_host.h>
 #include <asm/kvm_mmio.h>
 #include <asm/kvm_emulate.h>
@@ -26,14 +9,6 @@
 
 #include "trace.h"
 
-/**
- * kvm_handle_mmio_return -- Handle MMIO loads after user space emulation
- * @vcpu: The VCPU pointer
- * @run:  The VCPU run struct containing the mmio data
- *
- * This should only be called after returning from userspace for MMIO load
- * emulation.
- */
 int kvm_handle_mmio_return(struct kvm_vcpu *vcpu, struct kvm_run *run)
 {
 	unsigned long *dest;
@@ -70,13 +45,13 @@ static int decode_hsr(struct kvm_vcpu *vcpu, phys_addr_t fault_ipa,
 	bool is_write, sign_extend;
 
 	if (kvm_vcpu_dabt_isextabt(vcpu)) {
-		/* cache operation on I/O addr, tell guest unsupported */
+		 
 		kvm_inject_dabt(vcpu, kvm_vcpu_get_hfar(vcpu));
 		return 1;
 	}
 
 	if (kvm_vcpu_dabt_iss1tw(vcpu)) {
-		/* page table accesses IO mem: tell guest to fix its TTBR */
+		 
 		kvm_inject_dabt(vcpu, kvm_vcpu_get_hfar(vcpu));
 		return 1;
 	}
@@ -90,7 +65,7 @@ static int decode_hsr(struct kvm_vcpu *vcpu, phys_addr_t fault_ipa,
 	rt = kvm_vcpu_dabt_get_rd(vcpu);
 
 	if (kvm_vcpu_reg_is_pc(vcpu, rt)) {
-		/* IO memory trying to read/write pc */
+		 
 		kvm_inject_pabt(vcpu, kvm_vcpu_get_hfar(vcpu));
 		return 1;
 	}
@@ -101,21 +76,12 @@ static int decode_hsr(struct kvm_vcpu *vcpu, phys_addr_t fault_ipa,
 	vcpu->arch.mmio_decode.sign_extend = sign_extend;
 	vcpu->arch.mmio_decode.rt = rt;
 
-	/*
-	 * The MMIO instruction is emulated and should not be re-executed
-	 * in the guest.
-	 */
 	kvm_skip_instr(vcpu, kvm_vcpu_trap_il_is32bit(vcpu));
 	return 0;
 }
 
 #if defined(MY_DEF_HERE)
-/**
- * Check whether kvm_io_bus can handle this MMIO request
- *
- * return non-zero means the request has been handled by kvm_io_bus, and
- * we don't require user space.
- */
+ 
 static int kvm_arm_mmio_read_write(struct kvm_vcpu *vcpu, struct kvm_run *run,
 		 struct kvm_exit_mmio *mmio)
 {
@@ -136,14 +102,9 @@ static int kvm_arm_mmio_read_write(struct kvm_vcpu *vcpu, struct kvm_run *run,
 		kvm_handle_mmio_return(vcpu, run);
 	}
 
-	/*
-	 * Returning 0 from kvm_io_bus_*() means the mmio request has been
-	 * processed, but the caller handle_exit() and io_mem_abort() regards
-	 * as requiring user-space.
-	 */
 	return !ret;
 }
-#endif /* MY_DEF_HERE */
+#endif  
 
 int io_mem_abort(struct kvm_vcpu *vcpu, struct kvm_run *run,
 		 phys_addr_t fault_ipa)
@@ -151,13 +112,6 @@ int io_mem_abort(struct kvm_vcpu *vcpu, struct kvm_run *run,
 	struct kvm_exit_mmio mmio;
 	unsigned long rt;
 	int ret;
-
-	/*
-	 * Prepare MMIO operation. First stash it in a private
-	 * structure that we can use for in-kernel emulation. If the
-	 * kernel can't handle it, copy it into run->mmio and let user
-	 * space do its magic.
-	 */
 
 	if (kvm_vcpu_dabt_isvalid(vcpu)) {
 		ret = decode_hsr(vcpu, fault_ipa, &mmio);
@@ -183,7 +137,7 @@ int io_mem_abort(struct kvm_vcpu *vcpu, struct kvm_run *run,
 #if defined(MY_DEF_HERE)
 	if (kvm_arm_mmio_read_write(vcpu, run, &mmio))
 		return 1;
-#endif /* MY_DEF_HERE */
+#endif  
 
 	kvm_prepare_mmio(run, &mmio);
 	return 0;

@@ -1,17 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * arch/arm/mach-orion5x/rd88f5182-setup.c
- *
- * Marvell Orion-NAS Reference Design Setup
- *
- * Maintainer: Ronen Shitrit <rshitrit@marvell.com>
- *
- * This file is licensed under the terms of the GNU General Public
- * License version 2.  This program is licensed "as is" without any
- * warranty of any kind, whether express or implied.
- */
+ 
 #include <linux/gpio.h>
 #include <linux/kernel.h>
 #include <linux/init.h>
@@ -30,35 +20,15 @@
 #include "common.h"
 #include "mpp.h"
 
-/*****************************************************************************
- * RD-88F5182 Info
- ****************************************************************************/
-
-/*
- * 512K NOR flash Device bus boot chip select
- */
-
 #define RD88F5182_NOR_BOOT_BASE		0xf4000000
 #define RD88F5182_NOR_BOOT_SIZE		SZ_512K
-
-/*
- * 16M NOR flash on Device bus chip select 1
- */
 
 #define RD88F5182_NOR_BASE		0xfc000000
 #define RD88F5182_NOR_SIZE		SZ_16M
 
-/*
- * PCI
- */
-
 #define RD88F5182_PCI_SLOT0_OFFS	7
 #define RD88F5182_PCI_SLOT0_IRQ_A_PIN	7
 #define RD88F5182_PCI_SLOT0_IRQ_B_PIN	6
-
-/*****************************************************************************
- * 16M NOR Flash on Device bus CS1
- ****************************************************************************/
 
 static struct physmap_flash_data rd88f5182_nor_flash_data = {
 	.width		= 1,
@@ -79,10 +49,6 @@ static struct platform_device rd88f5182_nor_flash = {
 	.num_resources		= 1,
 	.resource		= &rd88f5182_nor_flash_resource,
 };
-
-/*****************************************************************************
- * Use GPIO LED as CPU active indication
- ****************************************************************************/
 
 #define RD88F5182_GPIO_LED		0
 
@@ -107,17 +73,10 @@ static struct platform_device rd88f5182_gpio_leds = {
 	},
 };
 
-/*****************************************************************************
- * PCI
- ****************************************************************************/
-
 void __init rd88f5182_pci_preinit(void)
 {
 	int pin;
 
-	/*
-	 * Configure PCI GPIO IRQ pins
-	 */
 	pin = RD88F5182_PCI_SLOT0_IRQ_A_PIN;
 	if (gpio_request(pin, "PCI IntA") == 0) {
 		if (gpio_direction_input(pin) == 0) {
@@ -150,16 +109,10 @@ static int __init rd88f5182_pci_map_irq(const struct pci_dev *dev, u8 slot,
 {
 	int irq;
 
-	/*
-	 * Check for devices with hard-wired IRQs.
-	 */
 	irq = orion5x_pci_map_irq(dev, slot, pin);
 	if (irq != -1)
 		return irq;
 
-	/*
-	 * PCI IRQs are connected via GPIOs
-	 */
 	switch (slot - RD88F5182_PCI_SLOT0_OFFS) {
 	case 0:
 		if (pin == 1)
@@ -189,48 +142,35 @@ static int __init rd88f5182_pci_init(void)
 
 subsys_initcall(rd88f5182_pci_init);
 
-/*****************************************************************************
- * Ethernet
- ****************************************************************************/
-
 static struct mv643xx_eth_platform_data rd88f5182_eth_data = {
 	.phy_addr	= MV643XX_ETH_PHY_ADDR(8),
 };
 
-/*****************************************************************************
- * RTC DS1338 on I2C bus
- ****************************************************************************/
 static struct i2c_board_info __initdata rd88f5182_i2c_rtc = {
 	I2C_BOARD_INFO("ds1338", 0x68),
 };
 
-/*****************************************************************************
- * Sata
- ****************************************************************************/
 static struct mv_sata_platform_data rd88f5182_sata_data = {
 	.n_ports	= 2,
 };
 
-/*****************************************************************************
- * General Setup
- ****************************************************************************/
 static unsigned int rd88f5182_mpp_modes[] __initdata = {
-	MPP0_GPIO,		/* Debug Led */
-	MPP1_GPIO,		/* Reset Switch */
+	MPP0_GPIO,		 
+	MPP1_GPIO,		 
 	MPP2_UNUSED,
-	MPP3_GPIO,		/* RTC Int */
+	MPP3_GPIO,		 
 	MPP4_GPIO,
 	MPP5_GPIO,
-	MPP6_GPIO,		/* PCI_intA */
-	MPP7_GPIO,		/* PCI_intB */
+	MPP6_GPIO,		 
+	MPP7_GPIO,		 
 	MPP8_UNUSED,
 	MPP9_UNUSED,
 	MPP10_UNUSED,
 	MPP11_UNUSED,
-	MPP12_SATA_LED,		/* SATA 0 presence */
-	MPP13_SATA_LED,		/* SATA 1 presence */
-	MPP14_SATA_LED,		/* SATA 0 active */
-	MPP15_SATA_LED,		/* SATA 1 active */
+	MPP12_SATA_LED,		 
+	MPP13_SATA_LED,		 
+	MPP14_SATA_LED,		 
+	MPP15_SATA_LED,		 
 	MPP16_UNUSED,
 	MPP17_UNUSED,
 	MPP18_UNUSED,
@@ -240,25 +180,11 @@ static unsigned int rd88f5182_mpp_modes[] __initdata = {
 
 static void __init rd88f5182_init(void)
 {
-	/*
-	 * Setup basic Orion functions. Need to be called early.
-	 */
+	 
 	orion5x_init();
 
 	orion5x_mpp_conf(rd88f5182_mpp_modes);
 
-	/*
-	 * MPP[20] PCI Clock to MV88F5182
-	 * MPP[21] PCI Clock to mini PCI CON11
-	 * MPP[22] USB 0 over current indication
-	 * MPP[23] USB 1 over current indication
-	 * MPP[24] USB 1 over current enable
-	 * MPP[25] USB 0 over current enable
-	 */
-
-	/*
-	 * Configure peripherals.
-	 */
 	orion5x_ehci0_init();
 	orion5x_ehci1_init();
 	orion5x_eth_init(&rd88f5182_eth_data);
@@ -276,13 +202,13 @@ static void __init rd88f5182_init(void)
 				    ORION_MBUS_DEVBUS_ATTR(1),
 				    RD88F5182_NOR_BASE,
 				    RD88F5182_NOR_SIZE);
-#else /* MY_ABC_HERE */
+#else  
 	mvebu_mbus_add_window("devbus-boot", RD88F5182_NOR_BOOT_BASE,
 			      RD88F5182_NOR_BOOT_SIZE);
 
 	mvebu_mbus_add_window("devbus-cs1", RD88F5182_NOR_BASE,
 			      RD88F5182_NOR_SIZE);
-#endif /* MY_ABC_HERE */
+#endif  
 	platform_device_register(&rd88f5182_nor_flash);
 	platform_device_register(&rd88f5182_gpio_leds);
 
@@ -290,7 +216,7 @@ static void __init rd88f5182_init(void)
 }
 
 MACHINE_START(RD88F5182, "Marvell Orion-NAS Reference Design")
-	/* Maintainer: Ronen Shitrit <rshitrit@marvell.com> */
+	 
 	.atag_offset	= 0x100,
 	.init_machine	= rd88f5182_init,
 	.map_io		= orion5x_map_io,

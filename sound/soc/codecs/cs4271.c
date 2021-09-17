@@ -1,27 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * CS4271 ASoC codec driver
- *
- * Copyright (c) 2010 Alexander Sverdlin <subaparts@yandex.ru>
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * This driver support CS4271 codec being master or slave, working
- * in control port mode, connected either via SPI or I2C.
- * The data format accepted is I2S or left-justified.
- * DAPM support not implemented.
- */
-
+ 
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/delay.h>
@@ -40,23 +20,19 @@
 			    SNDRV_PCM_FMTBIT_S32_LE)
 #define CS4271_PCM_RATES SNDRV_PCM_RATE_8000_192000
 
-/*
- * CS4271 registers
- */
-#define CS4271_MODE1	0x01	/* Mode Control 1 */
-#define CS4271_DACCTL	0x02	/* DAC Control */
-#define CS4271_DACVOL	0x03	/* DAC Volume & Mixing Control */
-#define CS4271_VOLA	0x04	/* DAC Channel A Volume Control */
-#define CS4271_VOLB	0x05	/* DAC Channel B Volume Control */
-#define CS4271_ADCCTL	0x06	/* ADC Control */
-#define CS4271_MODE2	0x07	/* Mode Control 2 */
-#define CS4271_CHIPID	0x08	/* Chip ID */
+#define CS4271_MODE1	0x01	 
+#define CS4271_DACCTL	0x02	 
+#define CS4271_DACVOL	0x03	 
+#define CS4271_VOLA	0x04	 
+#define CS4271_VOLB	0x05	 
+#define CS4271_ADCCTL	0x06	 
+#define CS4271_MODE2	0x07	 
+#define CS4271_CHIPID	0x08	 
 
 #define CS4271_FIRSTREG	CS4271_MODE1
 #define CS4271_LASTREG	CS4271_MODE2
 #define CS4271_NR_REGS	((CS4271_LASTREG & 0xFF) + 1)
 
-/* Bit masks for the CS4271 registers */
 #define CS4271_MODE1_MODE_MASK	0xC0
 #define CS4271_MODE1_MODE_1X	0x00
 #define CS4271_MODE1_MODE_2X	0x80
@@ -139,12 +115,6 @@
 #define CS4271_CHIPID_PART_MASK	0xF0
 #define CS4271_CHIPID_REV_MASK	0x0F
 
-/*
- * Default CS4271 power-up configuration
- * Array contains non-existing in hw register at address 0
- * Array do not include Chip ID, as codec driver does not use
- * registers read operations at all
- */
 static const struct reg_default cs4271_reg_defaults[] = {
 	{ CS4271_MODE1,		0, },
 	{ CS4271_DACCTL,	CS4271_DACCTL_AMUTE, },
@@ -161,26 +131,21 @@ static bool cs4271_volatile_reg(struct device *dev, unsigned int reg)
 }
 
 struct cs4271_private {
-	/* SND_SOC_I2C or SND_SOC_SPI */
+	 
 	unsigned int			mclk;
 	bool				master;
 	bool				deemph;
 	struct regmap			*regmap;
-	/* Current sample rate for de-emphasis control */
+	 
 	int				rate;
-	/* GPIO driving Reset pin, if any */
+	 
 	int				gpio_nreset;
-	/* GPIO that disable serial bus, if any */
+	 
 	int				gpio_disable;
-	/* enable soft reset workaround */
+	 
 	bool				enable_soft_reset;
 };
 
-/*
- * @freq is the desired MCLK rate
- * MCLK rate should (c) be the sample rate, multiplied by one of the
- * ratios listed in cs4271_mclk_fs_ratios table
- */
 static int cs4271_set_dai_sysclk(struct snd_soc_dai *codec_dai,
 				 int clk_id, unsigned int freq, int dir)
 {
@@ -248,7 +213,7 @@ static int cs4271_set_deemph(struct snd_soc_codec *codec)
 	int val = CS4271_DACCTL_DEM_DIS;
 
 	if (cs4271->deemph) {
-		/* Find closest de-emphasis freq */
+		 
 		val = 1;
 		for (i = 2; i < ARRAY_SIZE(cs4271_deemph); i++)
 			if (abs(cs4271_deemph[i] - cs4271->rate) <
@@ -269,9 +234,9 @@ static int cs4271_get_deemph(struct snd_kcontrol *kcontrol,
 {
 #if defined(MY_ABC_HERE)
 	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
-#else /* MY_ABC_HERE */
+#else  
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
-#endif /* MY_ABC_HERE */
+#endif  
 	struct cs4271_private *cs4271 = snd_soc_codec_get_drvdata(codec);
 
 	ucontrol->value.integer.value[0] = cs4271->deemph;
@@ -283,9 +248,9 @@ static int cs4271_put_deemph(struct snd_kcontrol *kcontrol,
 {
 #if defined(MY_ABC_HERE)
 	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
-#else /* MY_ABC_HERE */
+#else  
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
-#endif /* MY_ABC_HERE */
+#endif  
 	struct cs4271_private *cs4271 = snd_soc_codec_get_drvdata(codec);
 
 	cs4271->deemph = ucontrol->value.integer.value[0];
@@ -293,10 +258,10 @@ static int cs4271_put_deemph(struct snd_kcontrol *kcontrol,
 }
 
 struct cs4271_clk_cfg {
-	bool		master;		/* codec mode */
-	u8		speed_mode;	/* codec speed mode: 1x, 2x, 4x */
-	unsigned short	ratio;		/* MCLK / sample rate */
-	u8		ratio_mask;	/* ratio bit mask for Master mode */
+	bool		master;		 
+	u8		speed_mode;	 
+	unsigned short	ratio;		 
+	u8		ratio_mask;	 
 };
 
 static struct cs4271_clk_cfg cs4271_clk_tab[] = {
@@ -341,15 +306,7 @@ static int cs4271_hw_params(struct snd_pcm_substream *substream,
 	unsigned int ratio, val;
 
 	if (cs4271->enable_soft_reset) {
-		/*
-		 * Put the codec in soft reset and back again in case it's not
-		 * currently streaming data. This way of bringing the codec in
-		 * sync to the current clocks is not explicitly documented in
-		 * the data sheet, but it seems to work fine, and in contrast
-		 * to a read hardware reset, we don't have to sync back all
-		 * registers every time.
-		 */
-
+		 
 		if ((substream->stream == SNDRV_PCM_STREAM_PLAYBACK &&
 		     !dai->capture_active) ||
 		    (substream->stream == SNDRV_PCM_STREAM_CAPTURE &&
@@ -369,7 +326,6 @@ static int cs4271_hw_params(struct snd_pcm_substream *substream,
 
 	cs4271->rate = params_rate(params);
 
-	/* Configure DAC */
 	if (cs4271->rate < 50000)
 		val = CS4271_MODE1_MODE_1X;
 	else if (cs4271->rate < 100000)
@@ -428,7 +384,6 @@ static int cs4271_mute_stream(struct snd_soc_dai *dai, int mute, int stream)
 	return 0;
 }
 
-/* CS4271 controls */
 static DECLARE_TLV_DB_SCALE(cs4271_dac_tlv, -12700, 100, 0);
 
 static const struct snd_kcontrol_new cs4271_snd_controls[] = {
@@ -485,7 +440,6 @@ static int cs4271_soc_suspend(struct snd_soc_codec *codec)
 	int ret;
 	struct cs4271_private *cs4271 = snd_soc_codec_get_drvdata(codec);
 
-	/* Set power-down bit */
 	ret = regmap_update_bits(cs4271->regmap, CS4271_MODE2,
 				 CS4271_MODE2_PDN, CS4271_MODE2_PDN);
 	if (ret < 0)
@@ -499,12 +453,10 @@ static int cs4271_soc_resume(struct snd_soc_codec *codec)
 	int ret;
 	struct cs4271_private *cs4271 = snd_soc_codec_get_drvdata(codec);
 
-	/* Restore codec state */
 	ret = regcache_sync(cs4271->regmap);
 	if (ret < 0)
 		return ret;
 
-	/* then disable the power-down bit */
 	ret = regmap_update_bits(cs4271->regmap, CS4271_MODE2,
 				 CS4271_MODE2_PDN, 0);
 	if (ret < 0)
@@ -515,7 +467,7 @@ static int cs4271_soc_resume(struct snd_soc_codec *codec)
 #else
 #define cs4271_soc_suspend	NULL
 #define cs4271_soc_resume	NULL
-#endif /* CONFIG_PM */
+#endif  
 
 #ifdef CONFIG_OF
 static const struct of_device_id cs4271_dt_ids[] = {
@@ -560,11 +512,11 @@ static int cs4271_probe(struct snd_soc_codec *codec)
 		if (devm_gpio_request(codec->dev, gpio_nreset, "CS4271 Reset"))
 			gpio_nreset = -EINVAL;
 	if (gpio_nreset >= 0) {
-		/* Reset codec */
+		 
 		gpio_direction_output(gpio_nreset, 0);
 		udelay(1);
 		gpio_set_value(gpio_nreset, 1);
-		/* Give the codec time to wake up */
+		 
 		udelay(1);
 	}
 
@@ -579,7 +531,7 @@ static int cs4271_probe(struct snd_soc_codec *codec)
 				 CS4271_MODE2_PDN, 0);
 	if (ret < 0)
 		return ret;
-	/* Power-up sequence requires 85 uS */
+	 
 	udelay(85);
 
 	if (amutec_eq_bmutec)
@@ -596,7 +548,7 @@ static int cs4271_remove(struct snd_soc_codec *codec)
 	struct cs4271_private *cs4271 = snd_soc_codec_get_drvdata(codec);
 
 	if (gpio_is_valid(cs4271->gpio_nreset))
-		/* Set codec to the reset state */
+		 
 		gpio_set_value(cs4271->gpio_nreset, 0);
 
 	return 0;
@@ -657,7 +609,7 @@ static struct spi_driver cs4271_spi_driver = {
 	.probe		= cs4271_spi_probe,
 	.remove		= cs4271_spi_remove,
 };
-#endif /* defined(CONFIG_SPI_MASTER) */
+#endif  
 
 #if defined(CONFIG_I2C) || defined(CONFIG_I2C_MODULE)
 static const struct i2c_device_id cs4271_i2c_id[] = {
@@ -712,15 +664,8 @@ static struct i2c_driver cs4271_i2c_driver = {
 	.probe		= cs4271_i2c_probe,
 	.remove		= cs4271_i2c_remove,
 };
-#endif /* defined(CONFIG_I2C) || defined(CONFIG_I2C_MODULE) */
+#endif  
 
-/*
- * We only register our serial bus driver here without
- * assignment to particular chip. So if any of the below
- * fails, there is some problem with I2C or SPI subsystem.
- * In most cases this module will be compiled with support
- * of only one serial bus.
- */
 static int __init cs4271_modinit(void)
 {
 	int ret;

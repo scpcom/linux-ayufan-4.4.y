@@ -1,18 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) 2011 Sascha Hauer, Pengutronix <s.hauer@pengutronix.de>
- * Copyright (C) 2011 Richard Zhao, Linaro <richard.zhao@linaro.org>
- * Copyright (C) 2011-2012 Mike Turquette, Linaro Ltd <mturquette@linaro.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- *
- * Adjustable divider clock implementation
- */
-
+ 
 #include <linux/clk-provider.h>
 #include <linux/module.h>
 #include <linux/slab.h>
@@ -20,16 +9,6 @@
 #include <linux/err.h>
 #include <linux/string.h>
 #include <linux/log2.h>
-
-/*
- * DOC: basic adjustable divider clock that cannot gate
- *
- * Traits of this clock:
- * prepare - clk_prepare only ensures that parents are prepared
- * enable - clk_enable only ensures that parents are enabled
- * rate - rate is adjustable.  clk->rate = parent->rate / divisor
- * parent - fixed parent.  No clk_set_parent support
- */
 
 #define to_clk_divider(_hw) container_of(_hw, struct clk_divider, hw)
 
@@ -57,7 +36,7 @@ static unsigned int _get_table_mindiv(const struct clk_div_table *table)
 			mindiv = clkt->div;
 	return mindiv;
 }
-#endif /* MY_DEF_HERE */
+#endif  
 static unsigned int _get_maxdiv(struct clk_divider *divider)
 {
 	if (divider->flags & CLK_DIVIDER_ONE_BASED)
@@ -133,10 +112,6 @@ static unsigned long clk_divider_recalc_rate(struct clk_hw *hw,
 	return parent_rate / div;
 }
 
-/*
- * The reverse of DIV_ROUND_UP: The maximum number which
- * divided by m is r
- */
 #define MULT_ROUND_UP(r, m) ((r) * (m) + (m) - 1)
 
 static bool _is_valid_table_div(const struct clk_div_table *table,
@@ -256,7 +231,7 @@ static int _next_div(struct clk_divider *divider, int div)
 
 	return div;
 }
-#endif /* MY_DEF_HERE */
+#endif  
 
 static int clk_divider_bestdiv(struct clk_hw *hw, unsigned long rate,
 		unsigned long *best_parent_rate)
@@ -266,7 +241,7 @@ static int clk_divider_bestdiv(struct clk_hw *hw, unsigned long rate,
 	unsigned long parent_rate, best = 0, now, maxdiv;
 #if defined (MY_DEF_HERE)
 	unsigned long parent_rate_saved = *best_parent_rate;
-#endif /* MY_DEF_HERE */
+#endif  
 
 	if (!rate)
 		rate = 1;
@@ -277,18 +252,14 @@ static int clk_divider_bestdiv(struct clk_hw *hw, unsigned long rate,
 		parent_rate = *best_parent_rate;
 #if defined (MY_DEF_HERE)
 		bestdiv = _div_round(divider, parent_rate, rate);
-#else /* MY_DEF_HERE */
+#else  
 		bestdiv = DIV_ROUND_UP(parent_rate, rate);
-#endif /* MY_DEF_HERE */
+#endif  
 		bestdiv = bestdiv == 0 ? 1 : bestdiv;
 		bestdiv = bestdiv > maxdiv ? maxdiv : bestdiv;
 		return bestdiv;
 	}
 
-	/*
-	 * The maximum divider we can use without overflowing
-	 * unsigned long in rate * i below
-	 */
 	maxdiv = min(ULONG_MAX / rate, maxdiv);
 
 #if defined (MY_DEF_HERE)
@@ -296,11 +267,7 @@ static int clk_divider_bestdiv(struct clk_hw *hw, unsigned long rate,
 		if (!_is_valid_div(divider, i))
 			continue;
 		if (rate * i == parent_rate_saved) {
-			/*
-			 * It's the most ideal case if the requested rate can be
-			 * divided from parent clock without needing to change
-			 * parent rate, so return the divider immediately.
-			 */
+			 
 			*best_parent_rate = parent_rate_saved;
 			return i;
 		}
@@ -313,7 +280,7 @@ static int clk_divider_bestdiv(struct clk_hw *hw, unsigned long rate,
 			*best_parent_rate = parent_rate;
 		}
 	}
-#else /* MY_DEF_HERE */
+#else  
 	for (i = 1; i <= maxdiv; i++) {
 		if (!_is_valid_div(divider, i))
 			continue;
@@ -326,7 +293,7 @@ static int clk_divider_bestdiv(struct clk_hw *hw, unsigned long rate,
 			*best_parent_rate = parent_rate;
 		}
 	}
-#endif /* MY_DEF_HERE */
+#endif  
 
 	if (!bestdiv) {
 		bestdiv = _get_maxdiv(divider);
@@ -357,7 +324,7 @@ static int clk_divider_set_rate(struct clk_hw *hw, unsigned long rate,
 #if defined (MY_DEF_HERE)
 	if (!_is_valid_div(divider, div))
 		return -EINVAL;
-#endif /* MY_DEF_HERE */
+#endif  
 	value = _get_val(divider, div);
 
 	if (value > div_mask(divider))
@@ -394,7 +361,6 @@ static struct clk *_register_divider(struct device *dev, const char *name,
 	struct clk *clk;
 	struct clk_init_data init;
 
-	/* allocate the divider */
 	div = kzalloc(sizeof(struct clk_divider), GFP_KERNEL);
 	if (!div) {
 		pr_err("%s: could not allocate divider clk\n", __func__);
@@ -407,7 +373,6 @@ static struct clk *_register_divider(struct device *dev, const char *name,
 	init.parent_names = (parent_name ? &parent_name: NULL);
 	init.num_parents = (parent_name ? 1 : 0);
 
-	/* struct clk_divider assignments */
 	div->reg = reg;
 	div->shift = shift;
 	div->width = width;
@@ -416,7 +381,6 @@ static struct clk *_register_divider(struct device *dev, const char *name,
 	div->hw.init = &init;
 	div->table = table;
 
-	/* register the clock */
 	clk = clk_register(dev, &div->hw);
 
 	if (IS_ERR(clk))
@@ -425,18 +389,6 @@ static struct clk *_register_divider(struct device *dev, const char *name,
 	return clk;
 }
 
-/**
- * clk_register_divider - register a divider clock with the clock framework
- * @dev: device registering this clock
- * @name: name of this clock
- * @parent_name: name of clock's parent
- * @flags: framework-specific flags
- * @reg: register address to adjust divider
- * @shift: number of bits to shift the bitfield
- * @width: width of the bitfield
- * @clk_divider_flags: divider-specific flags for this clock
- * @lock: shared register lock for this clock
- */
 struct clk *clk_register_divider(struct device *dev, const char *name,
 		const char *parent_name, unsigned long flags,
 		void __iomem *reg, u8 shift, u8 width,
@@ -446,20 +398,6 @@ struct clk *clk_register_divider(struct device *dev, const char *name,
 			width, clk_divider_flags, NULL, lock);
 }
 
-/**
- * clk_register_divider_table - register a table based divider clock with
- * the clock framework
- * @dev: device registering this clock
- * @name: name of this clock
- * @parent_name: name of clock's parent
- * @flags: framework-specific flags
- * @reg: register address to adjust divider
- * @shift: number of bits to shift the bitfield
- * @width: width of the bitfield
- * @clk_divider_flags: divider-specific flags for this clock
- * @table: array of divider/value pairs ending with a div set to 0
- * @lock: shared register lock for this clock
- */
 struct clk *clk_register_divider_table(struct device *dev, const char *name,
 		const char *parent_name, unsigned long flags,
 		void __iomem *reg, u8 shift, u8 width,

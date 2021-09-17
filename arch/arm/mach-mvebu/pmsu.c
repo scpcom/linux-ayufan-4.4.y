@@ -1,24 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Power Management Service Unit(PMSU) support for Armada 370/XP platforms.
- *
- * Copyright (C) 2012 Marvell
- *
- * Yehuda Yitschak <yehuday@marvell.com>
- * Gregory Clement <gregory.clement@free-electrons.com>
- * Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
- *
- * This file is licensed under the terms of the GNU General Public
- * License version 2.  This program is licensed "as is" without any
- * warranty of any kind, whether express or implied.
- *
- * The Armada 370 and Armada XP SOCs have a power management service
- * unit which is responsible for powering down and waking up CPUs and
- * other SOC units
- */
-
+ 
 #if defined(MY_ABC_HERE)
 #define pr_fmt(fmt) "mvebu-pmsu: " fmt
 
@@ -27,15 +10,15 @@
 #include <linux/cpu.h>
 #if defined(MY_ABC_HERE)
 #include <linux/cpufreq-dt.h>
-#endif /* MY_ABC_HERE */
+#endif  
 #include <linux/delay.h>
-#endif /* MY_ABC_HERE */
+#endif  
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/of_address.h>
 #if defined(MY_ABC_HERE)
 #include <linux/of_device.h>
-#endif /* MY_ABC_HERE */
+#endif  
 #include <linux/io.h>
 #if defined(MY_ABC_HERE)
 #include <linux/kernel.h>
@@ -45,10 +28,10 @@
 #include <linux/platform_device.h>
 #if defined(MY_ABC_HERE)
 #include <linux/pm_opp.h>
-#else /* MY_ABC_HERE */
+#else  
 #include <linux/opp.h>
-#endif /* MY_ABC_HERE */
-#endif /* MY_ABC_HERE */
+#endif  
+#endif  
 #include <linux/smp.h>
 #if defined(MY_ABC_HERE)
 #include <linux/resource.h>
@@ -56,7 +39,7 @@
 #include <asm/cacheflush.h>
 #include <asm/cp15.h>
 #include <asm/smp_scu.h>
-#endif /* MY_ABC_HERE */
+#endif  
 #include <asm/smp_plat.h>
 #if defined(MY_ABC_HERE)
 #include <asm/suspend.h>
@@ -67,7 +50,6 @@
 #define PMSU_BASE_OFFSET    0x100
 #define PMSU_REG_SIZE	    0x1000
 
-/* PMSU MP registers */
 #define PMSU_CONTROL_AND_CONFIG(cpu)	    ((cpu * 0x100) + 0x104)
 #define PMSU_CONTROL_AND_CONFIG_DFS_REQ		BIT(18)
 #define PMSU_CONTROL_AND_CONFIG_PWDDN_REQ	BIT(16)
@@ -92,17 +74,13 @@
 
 #define PMSU_BOOT_ADDR_REDIRECT_OFFSET(cpu) ((cpu * 0x100) + 0x124)
 
-/* PMSU fabric registers */
 #define L2C_NFABRIC_PM_CTL		    0x4
 #define L2C_NFABRIC_PM_CTL_PWR_DOWN		BIT(20)
 
-/* PMSU delay registers */
 #define PMSU_POWERDOWN_DELAY		    0xF04
 #define PMSU_POWERDOWN_DELAY_PMU		BIT(1)
 #define PMSU_POWERDOWN_DELAY_MASK		0xFFFE
 #define PMSU_DFLT_ARMADA38X_DELAY	        0x64
-
-/* CA9 MPcore SoC Control registers */
 
 #define MPCORE_RESET_CTL		    0x64
 #define MPCORE_RESET_CTL_L2			BIT(0)
@@ -121,15 +99,15 @@ extern void ll_enable_coherency(void);
 extern void armada_370_xp_cpu_resume(void);
 extern void armada_38x_cpu_resume(void);
 #if defined(MY_ABC_HERE)
-// do nothing
-#else /* MY_ABC_HERE */
+ 
+#else  
 extern struct clk *get_cpu_clk(int cpu);
-#endif /* MY_ABC_HERE */
+#endif  
 
 void __iomem *scu_base;
 
 static phys_addr_t pmsu_mp_phys_base;
-#endif /* MY_ABC_HERE */
+#endif  
 static void __iomem *pmsu_mp_base;
 #if defined(MY_ABC_HERE)
 
@@ -137,22 +115,22 @@ static void *mvebu_cpu_resume;
 static int (*mvebu_pmsu_dfs_request_ptr)(int cpu);
 
 static void __iomem *sram_wa_virt_base[2];
-#else /* MY_ABC_HERE */
+#else  
 static void __iomem *pmsu_reset_base;
 
 #define PMSU_BOOT_ADDR_REDIRECT_OFFSET(cpu)	((cpu * 0x100) + 0x24)
 #define PMSU_RESET_CTL_OFFSET(cpu)		(cpu * 0x8)
-#endif /* MY_ABC_HERE */
+#endif  
 
 static struct of_device_id of_pmsu_table[] = {
 #if defined(MY_ABC_HERE)
 	{ .compatible = "marvell,armada-370-pmsu", },
 	{ .compatible = "marvell,armada-370-xp-pmsu", },
 	{ .compatible = "marvell,armada-380-pmsu", },
-#else /* MY_ABC_HERE */
+#else  
 	{.compatible = "marvell,armada-370-xp-pmsu"},
-#endif /* MY_ABC_HERE */
-	{ /* end of list */ },
+#endif  
+	{   },
 };
 
 #if defined(MY_ABC_HERE)
@@ -165,12 +143,7 @@ void mvebu_pmsu_set_cpu_boot_addr(int hw_cpu, void *boot_addr)
 extern unsigned char mvebu_boot_wa_start;
 extern unsigned char mvebu_boot_wa_end;
 extern long sleep_save_sp[CONFIG_NR_CPUS];
-/*
- * This function sets up the boot address workaround needed for SMP
- * boot on Armada 375 Z1 and cpuidle on Armada 370. It unmaps the
- * BootROM Mbus window, and instead remaps a crypto SRAM into which a
- * custom piece of code is copied to replace the problematic BootROM.
- */
+ 
 int mvebu_setup_boot_addr_wa(unsigned int crypto_eng_target,
 			     unsigned int crypto_eng_attribute,
 			     phys_addr_t resume_addr_reg)
@@ -190,12 +163,6 @@ int mvebu_setup_boot_addr_wa(unsigned int crypto_eng_target,
 
 	memcpy(sram_virt_base, &mvebu_boot_wa_start, code_len);
 
-	/*
-	 * The last word of the code copied in SRAM must contain the
-	 * physical base address of the PMSU register. We
-	 * intentionally store this address in the native endianness
-	 * of the system.
-	 */
 	__raw_writel((unsigned long)resume_addr_reg,
 		     sram_virt_base + code_len - 4);
 
@@ -204,30 +171,24 @@ int mvebu_setup_boot_addr_wa(unsigned int crypto_eng_target,
 	return 0;
 }
 
-/*
- * Due to a known ARM architecture bug which is related to the PCIe bus,
- * the L2 cache cannot be cleaned during the cpuidle suspend flow under active PCIe traffic.
- * Therefore we copy the cpuidle saved data to the CESA SRAM instead of cleaning it to the DRAM
- * and copy it to the DRAM when we return from the idle state
- */
 int armada_38x_cpuidle_wa(void)
 {
 	u32 *tmp;
 	unsigned int hw_cpu = cpu_logical_map(smp_processor_id());
 
 	tmp = sram_wa_virt_base[hw_cpu];
-	*tmp = virt_to_phys(&sleep_save_sp[hw_cpu]);	/* Save address */
+	*tmp = virt_to_phys(&sleep_save_sp[hw_cpu]);	 
 	tmp++;
-	*tmp = sleep_save_sp[hw_cpu];			/* Save pointer address */
+	*tmp = sleep_save_sp[hw_cpu];			 
 	tmp++;
-	*tmp = 0x2C;					/* Save size */
+	*tmp = 0x2C;					 
 	tmp++;
 #if defined(MY_ABC_HERE)
-	memcpy(tmp, (void *)(sleep_save_sp[hw_cpu] + 0xC0000000), 0x2C); /* Copy from virtual address (mmu enabled) */
+	memcpy(tmp, (void *)(sleep_save_sp[hw_cpu] + 0xC0000000), 0x2C);  
 	return 0;
-#else /* MY_ABC_HERE */
-	memcpy(tmp, sleep_save_sp[hw_cpu] + 0xC0000000, 0x2C); /* Copy from virtual address (mmu enabled) */
-#endif /* MY_ABC_HERE */
+#else  
+	memcpy(tmp, sleep_save_sp[hw_cpu] + 0xC0000000, 0x2C);  
+#endif  
 }
 
 static int __init mvebu_v7_pmsu_init(void)
@@ -283,7 +244,6 @@ static void mvebu_v7_pmsu_enable_l2_powerdown_onidle(void)
 	if (pmsu_mp_base == NULL)
 		return;
 
-	/* Enable L2 & Fabric powerdown in Deep-Idle mode - Fabric */
 	reg = readl(pmsu_mp_base + L2C_NFABRIC_PM_CTL);
 	reg |= L2C_NFABRIC_PM_CTL_PWR_DOWN;
 	writel(reg, pmsu_mp_base + L2C_NFABRIC_PM_CTL);
@@ -295,7 +255,6 @@ enum pmsu_idle_prepare_flags {
 	PMSU_PREPARE_SNOOP_DISABLE = BIT(1),
 };
 
-/* No locking is needed because we only access per-CPU registers */
 static int mvebu_v7_pmsu_idle_prepare(unsigned long flags)
 {
 	unsigned int hw_cpu = cpu_logical_map(smp_processor_id());
@@ -304,11 +263,6 @@ static int mvebu_v7_pmsu_idle_prepare(unsigned long flags)
 	if (pmsu_mp_base == NULL)
 		return -EINVAL;
 
-	/*
-	 * Adjust the PMSU configuration to wait for WFI signal, enable
-	 * IRQ and FIQ as wakeup events, set wait for snoop queue empty
-	 * indication and mask IRQ and FIQ from CPU
-	 */
 	reg = readl(pmsu_mp_base + PMSU_STATUS_AND_MASK(hw_cpu));
 	reg |= PMSU_STATUS_AND_MASK_CPU_IDLE_WAIT    |
 	       PMSU_STATUS_AND_MASK_IRQ_WAKEUP       |
@@ -319,16 +273,15 @@ static int mvebu_v7_pmsu_idle_prepare(unsigned long flags)
 	writel(reg, pmsu_mp_base + PMSU_STATUS_AND_MASK(hw_cpu));
 
 	reg = readl(pmsu_mp_base + PMSU_CONTROL_AND_CONFIG(hw_cpu));
-	/* ask HW to power down the L2 Cache if needed */
+	 
 	if (flags & PMSU_PREPARE_DEEP_IDLE)
 		reg |= PMSU_CONTROL_AND_CONFIG_L2_PWDDN;
 
-	/* request power down */
 	reg |= PMSU_CONTROL_AND_CONFIG_PWDDN_REQ;
 	writel(reg, pmsu_mp_base + PMSU_CONTROL_AND_CONFIG(hw_cpu));
 
 	if (flags & PMSU_PREPARE_SNOOP_DISABLE) {
-		/* Disable snoop disable by HW - SW is taking care of it */
+		 
 		reg = readl(pmsu_mp_base + PMSU_CPU_POWER_DOWN_CONTROL(hw_cpu));
 		reg |= PMSU_CPU_POWER_DOWN_DIS_SNP_Q_SKIP;
 		writel(reg, pmsu_mp_base + PMSU_CPU_POWER_DOWN_CONTROL(hw_cpu));
@@ -357,14 +310,10 @@ int armada_370_xp_pmsu_idle_enter(unsigned long deepidle)
 
 	wfi();
 
-	/* If we are here, wfi failed. As processors run out of
-	 * coherency for some time, tlbs might be stale, so flush them
-	 */
 	local_flush_tlb_all();
 
 	ll_enable_coherency();
 
-	/* Test the CR_C bit and set it if it was cleared */
 	asm volatile(
 	"mrc	p15, 0, r0, c1, c0, 0 \n\t"
 	"tst	r0, #(1 << 2) \n\t"
@@ -393,10 +342,7 @@ int armada_38x_do_cpu_suspend(unsigned long deepidle)
 		flags |= PMSU_PREPARE_DEEP_IDLE;
 
 	mvebu_v7_pmsu_idle_prepare(flags);
-	/*
-	 * Already flushed cache, but do it again as the outer cache
-	 * functions dirty the cache with spinlocks
-	 */
+	 
 	v7_exit_coherency_flush(louis);
 
 	scu_power_mode(scu_base, SCU_PM_POWEROFF);
@@ -411,7 +357,6 @@ static int armada_38x_cpu_suspend(unsigned long deepidle)
 	return cpu_suspend(false, armada_38x_do_cpu_suspend);
 }
 
-/* No locking is needed because we only access per-CPU registers */
 void mvebu_v7_pmsu_idle_exit(void)
 {
 	unsigned int hw_cpu = cpu_logical_map(smp_processor_id());
@@ -419,20 +364,15 @@ void mvebu_v7_pmsu_idle_exit(void)
 
 	if (pmsu_mp_base == NULL)
 		return;
-	/* cancel ask HW to power down the L2 Cache if possible */
+	 
 	reg = readl(pmsu_mp_base + PMSU_CONTROL_AND_CONFIG(hw_cpu));
 	reg &= ~PMSU_CONTROL_AND_CONFIG_L2_PWDDN;
 #if defined(MY_ABC_HERE)
-	/*
-	 * When exiting from idle state such as cpuidle or hotplug,
-	 * Enable PMU wait for the CPU to enter WFI when doing DFS
-	 * by setting CPUx Frequency ID to 1
-	 */
+	 
 	reg |= (1 << 4);
-#endif /* MY_ABC_HERE */
+#endif  
 	writel(reg, pmsu_mp_base + PMSU_CONTROL_AND_CONFIG(hw_cpu));
 
-	/* cancel Enable wakeup events and mask interrupts */
 	reg = readl(pmsu_mp_base + PMSU_STATUS_AND_MASK(hw_cpu));
 	reg &= ~(PMSU_STATUS_AND_MASK_IRQ_WAKEUP | PMSU_STATUS_AND_MASK_FIQ_WAKEUP);
 	reg &= ~PMSU_STATUS_AND_MASK_CPU_IDLE_WAIT;
@@ -447,15 +387,12 @@ void mvebu_v7_pmsu_disable_dfs_cpu(int hw_cpu)
 	u32 reg;
 	if (pmsu_mp_base == NULL)
 		return;
-	/*
-	 * Disable PMU wait for the CPU to enter WFI when doing DFS
-	 * by setting CPUx Frequency ID to 0
-	 */
+	 
 	reg = readl(pmsu_mp_base + PMSU_CONTROL_AND_CONFIG(hw_cpu));
 	reg &= ~(0xf << 4);
 	writel(reg, pmsu_mp_base + PMSU_CONTROL_AND_CONFIG(hw_cpu));
 }
-#endif /* MY_ABC_HERE */
+#endif  
 
 static int mvebu_v7_cpu_pm_notify(struct notifier_block *self,
 				    unsigned long action, void *hcpu)
@@ -503,14 +440,6 @@ static __init int armada_370_cpuidle_init(void)
 		return -ENODEV;
 	of_node_put(np);
 
-	/*
-	 * On Armada 370, there is "a slow exit process from the deep
-	 * idle state due to heavy L1/L2 cache cleanup operations
-	 * performed by the BootROM software". To avoid this, we
-	 * replace the restart code of the bootrom by a a simple jump
-	 * to the boot address. Then the code located at this boot
-	 * address will take care of the initialization.
-	 */
 	redirect_reg = pmsu_mp_phys_base + PMSU_BOOT_ADDR_REDIRECT_OFFSET(0);
 	mvebu_setup_boot_addr_wa(ARMADA_370_CRYPT0_ENG_TARGET,
 				 ARMADA_370_CRYPT0_ENG_ATTR,
@@ -542,14 +471,12 @@ int armada_38x_cpuidle_init(void)
 	BUG_ON(!mpsoc_base);
 	of_node_put(np);
 
-	/* Set up reset mask when powering down the cpus */
 	reg = readl(mpsoc_base + MPCORE_RESET_CTL);
 	reg |= MPCORE_RESET_CTL_L2;
 	reg |= MPCORE_RESET_CTL_DEBUG;
 	writel(reg, mpsoc_base + MPCORE_RESET_CTL);
 	iounmap(mpsoc_base);
 
-	/* Set up delay */
 	reg = readl(pmsu_mp_base + PMSU_POWERDOWN_DELAY);
 	reg &= ~PMSU_POWERDOWN_DELAY_MASK;
 	reg |= PMSU_DFLT_ARMADA38X_DELAY;
@@ -559,15 +486,9 @@ int armada_38x_cpuidle_init(void)
 	mvebu_cpu_resume = armada_38x_cpu_resume;
 	mvebu_v7_cpuidle_device.dev.platform_data = &armada_38x_cpuidle;
 
-	/* PCIe deadlock WA for Armada 38x cpuidle */
-	/* CESA SRAM remap */
 	sram_wa_virt_base[0] = ioremap(0xf1100000, SZ_64);
 	sram_wa_virt_base[1] = ioremap(0xf1110000, SZ_64);
 
-	/* Disable the L2 cache clean function as it is being used in the cpu_suspend
-	 * Flow and violates the PCIe deadlock WA.
-	 * We cannot disable this function in the L2 cache driver as it will break SMP boot */
-	/* TBD - Disable cpuidle outer cache WA as it affects Suspend to RAM */
 #if 0
 	outer_cache.clean_range = NULL;
 #endif
@@ -628,36 +549,27 @@ static void mvebu_pmsu_dfs_request_local(void *data)
 
 	local_irq_save(flags);
 
-	/* Clear any previous DFS DONE event & Mask the DFS done interrupt */
 	reg = readl(pmsu_mp_base + PMSU_EVENT_STATUS_AND_MASK(cpu));
 	reg &= ~PMSU_EVENT_STATUS_AND_MASK_DFS_DONE;
 	reg |= PMSU_EVENT_STATUS_AND_MASK_DFS_DONE_MASK;
 	writel(reg, pmsu_mp_base + PMSU_EVENT_STATUS_AND_MASK(cpu));
 
-	/* Prepare to enter idle */
 	reg = readl(pmsu_mp_base + PMSU_STATUS_AND_MASK(cpu));
 	reg |= PMSU_STATUS_AND_MASK_CPU_IDLE_WAIT |
 	       PMSU_STATUS_AND_MASK_IRQ_MASK     |
 	       PMSU_STATUS_AND_MASK_FIQ_MASK;
 	writel(reg, pmsu_mp_base + PMSU_STATUS_AND_MASK(cpu));
 
-	/* Request the DFS transition */
 	reg = readl(pmsu_mp_base + PMSU_CONTROL_AND_CONFIG(cpu));
 	reg |= PMSU_CONTROL_AND_CONFIG_DFS_REQ;
 	writel(reg, pmsu_mp_base + PMSU_CONTROL_AND_CONFIG(cpu));
 
-	/* The fact of entering idle will trigger the DFS transition */
 	wfi();
 
-	/*
-	 * We're back from idle, the DFS transition has completed,
-	 * clear the idle wait indication.
-	 */
 	reg = readl(pmsu_mp_base + PMSU_STATUS_AND_MASK(cpu));
 	reg &= ~PMSU_STATUS_AND_MASK_CPU_IDLE_WAIT;
 	writel(reg, pmsu_mp_base + PMSU_STATUS_AND_MASK(cpu));
 
-	/* Restore the DFS mask to its original state */
 	reg = readl(pmsu_mp_base + PMSU_EVENT_STATUS_AND_MASK(cpu));
 	reg &= ~PMSU_EVENT_STATUS_AND_MASK_DFS_DONE_MASK;
 	writel(reg, pmsu_mp_base + PMSU_EVENT_STATUS_AND_MASK(cpu));
@@ -671,11 +583,9 @@ int armada_xp_pmsu_dfs_request(int cpu)
 	int hwcpu = cpu_logical_map(cpu);
 	u32 reg;
 
-	/* Trigger the DFS on the appropriate CPU */
 	smp_call_function_single(cpu, mvebu_pmsu_dfs_request_local,
 				 NULL, false);
 
-	/* Poll until the DFS done event is generated */
 	timeout = jiffies + HZ;
 	while (time_before(jiffies, timeout)) {
 		reg = readl(pmsu_mp_base + PMSU_EVENT_STATUS_AND_MASK(hwcpu));
@@ -693,20 +603,16 @@ int armada_xp_pmsu_dfs_request(int cpu)
 int armada_380_pmsu_dfs_request(int cpu)
 {
 #if defined(MY_ABC_HERE)
-	/*
-	 * Protect CPU DFS from changing the number of online cpus number during
-	 * frequency transition by temporarily disable cpu hotplug
-	 */
+	 
 	cpu_hotplug_disable();
-#endif /* MY_ABC_HERE */
+#endif  
 
-	/* Trigger the DFS on the appropriate CPU */
 	on_each_cpu(mvebu_pmsu_dfs_request_local,
 				 NULL, false);
 
 #if defined(MY_ABC_HERE)
 	cpu_hotplug_enable();
-#endif /* MY_ABC_HERE */
+#endif  
 
 	return 0;
 }
@@ -724,7 +630,7 @@ struct cpufreq_dt_platform_data armada_xp_cpufreq_dt_pd = {
 struct cpufreq_dt_platform_data armada_380_cpufreq_dt_pd = {
 	.independent_clocks = false,
 };
-#endif /* MY_ABC_HERE */
+#endif  
 
 static int mvebu_v7_pmsu_register_cpufreq(int cpu)
 {
@@ -733,14 +639,7 @@ static int mvebu_v7_pmsu_register_cpufreq(int cpu)
 	int ret;
 #if defined(MY_ABC_HERE)
 	struct device_node *np;
-#endif /* MY_ABC_HERE */
-
-	/*
-	* registers the operating points
-	* supported (which are the nominal CPU frequency and half of
-	* it), and registers the clock notifier that will take care
-	* of doing the PMSU part of a frequency transition.
-	*/
+#endif  
 
 #if defined(MY_ABC_HERE)
 	for_each_child_of_node(of_find_node_by_path("/cpus"), np)
@@ -751,7 +650,7 @@ static int mvebu_v7_pmsu_register_cpufreq(int cpu)
 		pr_err("failed to find cpufreq node\n");
 		return -ENOENT;
 	}
-#endif /* MY_ABC_HERE */
+#endif  
 
 	cpu_dev = get_cpu_device(cpu);
 	if (!cpu_dev) {
@@ -761,7 +660,7 @@ static int mvebu_v7_pmsu_register_cpufreq(int cpu)
 
 #if defined(MY_ABC_HERE)
 	cpu_dev->of_node = np;
-#endif /* MY_ABC_HERE */
+#endif  
 
 	clk = clk_get(cpu_dev, 0);
 	if (!clk) {
@@ -769,17 +668,11 @@ static int mvebu_v7_pmsu_register_cpufreq(int cpu)
 		return -ENODEV;
 	}
 
-	/*
-	 * In case of a failure of dev_pm_opp_add(), we don't
-	 * bother with cleaning up the registered OPP (there's
-	 * no function to do so), and simply cancel the
-	 * registration of the cpufreq device.
-	 */
 #if defined(MY_ABC_HERE)
 		ret = dev_pm_opp_add(cpu_dev, clk_get_rate(clk), 0);
-#else /* MY_ABC_HERE */
+#else  
 		ret = opp_add(cpu_dev, clk_get_rate(clk), 0);
-#endif /* MY_ABC_HERE */
+#endif  
 	if (ret) {
 		clk_put(clk);
 		return ret;
@@ -787,9 +680,9 @@ static int mvebu_v7_pmsu_register_cpufreq(int cpu)
 
 #if defined(MY_ABC_HERE)
 		ret = dev_pm_opp_add(cpu_dev, clk_get_rate(clk) / 2, 0);
-#else /* MY_ABC_HERE */
+#else  
 		ret = opp_add(cpu_dev, clk_get_rate(clk) / 2, 0);
-#endif /* MY_ABC_HERE */
+#endif  
 	if (ret) {
 		clk_put(clk);
 		return ret;
@@ -805,14 +698,6 @@ static int __init mvebu_v7_pmsu_cpufreq_init(void)
 	struct resource res;
 	int ret, cpu;
 
-	/*
-	 * In order to have proper cpufreq handling, we need to ensure
-	 * that the Device Tree description of the CPU clock includes
-	 * the definition of the PMU DFS registers. If not, we do not
-	 * register the clock notifier and the cpufreq driver. This
-	 * piece of code is only for compatibility with old Device
-	 * Trees.
-	 */
 	np = of_find_compatible_node(NULL, NULL, "marvell,armada-xp-cpu-clock");
 	if (!np)
 		return 0;
@@ -826,7 +711,6 @@ static int __init mvebu_v7_pmsu_cpufreq_init(void)
 
 	of_node_put(np);
 
-	/* register cpu clock for each cpu */
 	for_each_possible_cpu(cpu) {
 		ret = mvebu_v7_pmsu_register_cpufreq(cpu);
 		if (ret)
@@ -847,13 +731,13 @@ static int __init mvebu_v7_pmsu_cpufreq_init(void)
 
 	} else
 		return 0;
-#endif /* MY_ABC_HERE */
+#endif  
 
 	return 0;
 }
 
 device_initcall(mvebu_v7_pmsu_cpufreq_init);
-#else /* MY_ABC_HERE */
+#else  
 #ifdef CONFIG_SMP
 int armada_xp_boot_cpu(unsigned int cpu_id, void *boot_addr)
 {
@@ -869,7 +753,6 @@ int armada_xp_boot_cpu(unsigned int cpu_id, void *boot_addr)
 	writel(virt_to_phys(boot_addr), pmsu_mp_base +
 			PMSU_BOOT_ADDR_REDIRECT_OFFSET(hw_cpu));
 
-	/* Release CPU from reset by clearing reset bit*/
 	reg = readl(pmsu_reset_base + PMSU_RESET_CTL_OFFSET(hw_cpu));
 	reg &= (~0x1);
 	writel(reg, pmsu_reset_base + PMSU_RESET_CTL_OFFSET(hw_cpu));
@@ -893,4 +776,4 @@ int __init armada_370_xp_pmsu_init(void)
 }
 
 early_initcall(armada_370_xp_pmsu_init);
-#endif /* MY_ABC_HERE */
+#endif  

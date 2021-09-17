@@ -1,9 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  linux/arch/arm/mm/mmap.c
- */
+ 
 #include <linux/fs.h>
 #include <linux/mm.h>
 #include <linux/mman.h>
@@ -18,7 +16,6 @@
 	((((addr)+SHMLBA-1)&~(SHMLBA-1)) +	\
 	 (((pgoff)<<PAGE_SHIFT) & (SHMLBA-1)))
 
-/* gap between mmap and stack */
 #define MIN_GAP (128*1024*1024UL)
 #define MAX_GAP ((TASK_SIZE)/6*5)
 
@@ -45,15 +42,6 @@ static unsigned long mmap_base(unsigned long rnd)
 	return PAGE_ALIGN(TASK_SIZE - gap - rnd);
 }
 
-/*
- * We need to ensure that shared mappings are correctly aligned to
- * avoid aliasing issues with VIPT caches.  We need to ensure that
- * a specific page of an object is always mapped at a multiple of
- * SHMLBA bytes.
- *
- * We unconditionally provide this function for all cases, however
- * in the VIVT case, we optimise out the alignment rules.
- */
 unsigned long
 arch_get_unmapped_area(struct file *filp, unsigned long addr,
 		unsigned long len, unsigned long pgoff, unsigned long flags)
@@ -64,16 +52,9 @@ arch_get_unmapped_area(struct file *filp, unsigned long addr,
 	int aliasing = cache_is_vipt_aliasing();
 	struct vm_unmapped_area_info info;
 
-	/*
-	 * We only need to do colour alignment if either the I or D
-	 * caches alias.
-	 */
 	if (aliasing)
 		do_align = filp || (flags & MAP_SHARED);
 
-	/*
-	 * We enforce the MAP_FIXED case.
-	 */
 	if (flags & MAP_FIXED) {
 		if (aliasing && flags & MAP_SHARED &&
 		    (addr - (pgoff << PAGE_SHIFT)) & (SHMLBA - 1))
@@ -117,14 +98,9 @@ arch_get_unmapped_area_topdown(struct file *filp, const unsigned long addr0,
 	int aliasing = cache_is_vipt_aliasing();
 	struct vm_unmapped_area_info info;
 
-	/*
-	 * We only need to do colour alignment if either the I or D
-	 * caches alias.
-	 */
 	if (aliasing)
 		do_align = filp || (flags & MAP_SHARED);
 
-	/* requested length too big for entire address space */
 	if (len > TASK_SIZE)
 		return -ENOMEM;
 
@@ -135,7 +111,6 @@ arch_get_unmapped_area_topdown(struct file *filp, const unsigned long addr0,
 		return addr;
 	}
 
-	/* requesting a specific address */
 	if (addr) {
 		if (do_align)
 			addr = COLOUR_ALIGN(addr, pgoff);
@@ -151,20 +126,14 @@ arch_get_unmapped_area_topdown(struct file *filp, const unsigned long addr0,
 	info.length = len;
 #if defined(MY_DEF_HERE)
 	info.low_limit = PAGE_SIZE;
-#else /* MY_DEF_HERE */
+#else  
 	info.low_limit = FIRST_USER_ADDRESS;
-#endif /* MY_DEF_HERE */
+#endif  
 	info.high_limit = mm->mmap_base;
 	info.align_mask = do_align ? (PAGE_MASK & (SHMLBA - 1)) : 0;
 	info.align_offset = pgoff << PAGE_SHIFT;
 	addr = vm_unmapped_area(&info);
 
-	/*
-	 * A failed mmap() very likely causes application failure,
-	 * so fall back to the bottom-up function here. This scenario
-	 * can happen with large stack limits and large mmap()
-	 * allocations.
-	 */
 	if (addr & ~PAGE_MASK) {
 		VM_BUG_ON(addr != -ENOMEM);
 		info.flags = 0;
@@ -180,7 +149,6 @@ void arch_pick_mmap_layout(struct mm_struct *mm)
 {
 	unsigned long random_factor = 0UL;
 
-	/* 8 bits of randomness in 20 address space bits */
 	if ((current->flags & PF_RANDOMIZE) &&
 	    !(current->personality & ADDR_NO_RANDOMIZE))
 		random_factor = (get_random_int() % (1 << 8)) << PAGE_SHIFT;
@@ -196,10 +164,6 @@ void arch_pick_mmap_layout(struct mm_struct *mm)
 	}
 }
 
-/*
- * You really shouldn't be using read() or write() on /dev/mem.  This
- * might go away in the future.
- */
 int valid_phys_addr_range(phys_addr_t addr, size_t size)
 {
 	if (addr < PHYS_OFFSET)
@@ -210,9 +174,6 @@ int valid_phys_addr_range(phys_addr_t addr, size_t size)
 	return 1;
 }
 
-/*
- * Do not allow /dev/mem mappings beyond the supported physical range.
- */
 int valid_mmap_phys_addr_range(unsigned long pfn, size_t size)
 {
 	return (pfn + (size >> PAGE_SHIFT)) <= (1 + (PHYS_MASK >> PAGE_SHIFT));
@@ -222,13 +183,6 @@ int valid_mmap_phys_addr_range(unsigned long pfn, size_t size)
 
 #include <linux/ioport.h>
 
-/*
- * devmem_is_allowed() checks to see if /dev/mem access to a certain
- * address is valid. The argument is a physical page number.
- * We mimic x86 here by disallowing access to system RAM as well as
- * device-exclusive MMIO regions. This effectively disable read()/write()
- * on /dev/mem.
- */
 int devmem_is_allowed(unsigned long pfn)
 {
 	if (iomem_is_exclusive(pfn << PAGE_SHIFT))

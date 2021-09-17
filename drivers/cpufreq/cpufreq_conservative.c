@@ -1,22 +1,10 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  drivers/cpufreq/cpufreq_conservative.c
- *
- *  Copyright (C)  2001 Russell King
- *            (C)  2003 Venkatesh Pallipadi <venkatesh.pallipadi@intel.com>.
- *                      Jun Nakajima <jun.nakajima@intel.com>
- *            (C)  2009 Alexander Clouter <alex@digriz.org.uk>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
-
+ 
 #if defined(MY_ABC_HERE)
 #include <linux/slab.h>
-#else /* MY_ABC_HERE */
+#else  
 #include <linux/cpufreq.h>
 #include <linux/init.h>
 #include <linux/kernel.h>
@@ -30,10 +18,9 @@
 #include <linux/sysfs.h>
 #include <linux/types.h>
 
-#endif /* MY_ABC_HERE */
+#endif  
 #include "cpufreq_governor.h"
 
-/* Conservative governor macros */
 #define DEF_FREQUENCY_UP_THRESHOLD		(80)
 #define DEF_FREQUENCY_DOWN_THRESHOLD		(20)
 #define DEF_FREQUENCY_STEP			(5)
@@ -47,22 +34,12 @@ static inline unsigned int get_freq_target(struct cs_dbs_tuners *cs_tuners,
 {
 	unsigned int freq_target = (cs_tuners->freq_step * policy->max) / 100;
 
-	/* max freq cannot be less than 100. But who knows... */
 	if (unlikely(freq_target == 0))
 		freq_target = DEF_FREQUENCY_STEP;
 
 	return freq_target;
 }
 
-/*
- * Every sampling_rate, we check, if current idle time is less than 20%
- * (default), then we try to increase frequency. Every sampling_rate *
- * sampling_down_factor, we check, if current idle time is more than 80%
- * (default), then we try to decrease frequency
- *
- * Any frequency increase takes it to the maximum frequency. Frequency reduction
- * happens at minimum steps of 5% (default) of maximum frequency
- */
 static void cs_check_cpu(int cpu, unsigned int load)
 {
 	struct cs_cpu_dbs_info_s *dbs_info = &per_cpu(cs_cpu_dbs_info, cpu);
@@ -70,18 +47,12 @@ static void cs_check_cpu(int cpu, unsigned int load)
 	struct dbs_data *dbs_data = policy->governor_data;
 	struct cs_dbs_tuners *cs_tuners = dbs_data->tuners;
 
-	/*
-	 * break out if we 'cannot' reduce the speed as the user might
-	 * want freq_step to be zero
-	 */
 	if (cs_tuners->freq_step == 0)
 		return;
 
-	/* Check for frequency increase */
 	if (load > cs_tuners->up_threshold) {
 		dbs_info->down_skip = 0;
 
-		/* if we are already at full speed then break out early */
 		if (dbs_info->requested_freq == policy->max)
 			return;
 
@@ -95,19 +66,15 @@ static void cs_check_cpu(int cpu, unsigned int load)
 		return;
 	}
 
-	/* if sampling_down_factor is active break out early */
 	if (++dbs_info->down_skip < cs_tuners->sampling_down_factor)
 		return;
 	dbs_info->down_skip = 0;
 
-	/* Check for frequency decrease */
 	if (load < cs_tuners->down_threshold) {
 #if defined(MY_ABC_HERE)
 		unsigned int freq_target;
-#endif /* MY_ABC_HERE */
-		/*
-		 * if we cannot reduce the frequency anymore, break out early
-		 */
+#endif  
+		 
 		if (policy->cur == policy->min)
 			return;
 
@@ -116,10 +83,10 @@ static void cs_check_cpu(int cpu, unsigned int load)
 		if (dbs_info->requested_freq > freq_target)
 			dbs_info->requested_freq -= freq_target;
 		else
-#else /* MY_ABC_HERE */
+#else  
 		dbs_info->requested_freq -= get_freq_target(cs_tuners, policy);
 		if (dbs_info->requested_freq < policy->min)
-#endif /* MY_ABC_HERE */
+#endif  
 			dbs_info->requested_freq = policy->min;
 
 		__cpufreq_driver_target(policy, dbs_info->requested_freq,
@@ -163,10 +130,6 @@ static int dbs_cpufreq_notifier(struct notifier_block *nb, unsigned long val,
 
 	policy = dbs_info->cdbs.cur_policy;
 
-	/*
-	 * we only care if our internally tracked freq moves outside the 'valid'
-	 * ranges of frequency available to us otherwise we do not change it
-	*/
 	if (dbs_info->requested_freq > policy->max
 			|| dbs_info->requested_freq < policy->min)
 		dbs_info->requested_freq = freq->new;
@@ -174,7 +137,6 @@ static int dbs_cpufreq_notifier(struct notifier_block *nb, unsigned long val,
 	return 0;
 }
 
-/************************** sysfs interface ************************/
 static struct common_dbs_data cs_dbs_cdata;
 
 static ssize_t store_sampling_down_factor(struct dbs_data *dbs_data,
@@ -230,7 +192,6 @@ static ssize_t store_down_threshold(struct dbs_data *dbs_data, const char *buf,
 	int ret;
 	ret = sscanf(buf, "%u", &input);
 
-	/* cannot be lower than 11 otherwise freq will not fall */
 	if (ret != 1 || input < 11 || input > 100 ||
 			input >= cs_tuners->up_threshold)
 		return -EINVAL;
@@ -253,12 +214,11 @@ static ssize_t store_ignore_nice_load(struct dbs_data *dbs_data,
 	if (input > 1)
 		input = 1;
 
-	if (input == cs_tuners->ignore_nice_load) /* nothing to do */
+	if (input == cs_tuners->ignore_nice_load)  
 		return count;
 
 	cs_tuners->ignore_nice_load = input;
 
-	/* we need to re-evaluate prev_cpu_idle */
 	for_each_online_cpu(j) {
 		struct cs_cpu_dbs_info_s *dbs_info;
 		dbs_info = &per_cpu(cs_cpu_dbs_info, j);
@@ -285,10 +245,6 @@ static ssize_t store_freq_step(struct dbs_data *dbs_data, const char *buf,
 	if (input > 100)
 		input = 100;
 
-	/*
-	 * no need to test here if freq_step is zero as the user might actually
-	 * want this, they would be crazy though :)
-	 */
 	cs_tuners->freq_step = input;
 	return count;
 }
@@ -341,17 +297,15 @@ static struct attribute_group cs_attr_group_gov_pol = {
 	.name = "conservative",
 };
 
-/************************** sysfs end ************************/
-
 static int cs_init(struct dbs_data *dbs_data)
 {
 	struct cs_dbs_tuners *tuners;
 
 #if defined(MY_ABC_HERE)
 	tuners = kzalloc(sizeof(*tuners), GFP_KERNEL);
-#else /* MY_ABC_HERE */
+#else  
 	tuners = kzalloc(sizeof(struct cs_dbs_tuners), GFP_KERNEL);
-#endif /* MY_ABC_HERE */
+#endif  
 	if (!tuners) {
 		pr_err("%s: kzalloc failed\n", __func__);
 		return -ENOMEM;

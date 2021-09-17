@@ -1,18 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Register map access API internal header
- *
- * Copyright 2011 Wolfson Microelectronics plc
- *
- * Author: Mark Brown <broonie@opensource.wolfsonmicro.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
-
+ 
 #ifndef _REGMAP_INTERNAL_H
 #define _REGMAP_INTERNAL_H
 
@@ -57,11 +46,11 @@ struct regmap {
 	spinlock_t spinlock;
 	regmap_lock lock;
 	regmap_unlock unlock;
-	void *lock_arg; /* This is passed to lock/unlock functions */
+	void *lock_arg;  
 
-	struct device *dev; /* Device we do I/O on */
-	void *work_buf;     /* Scratch buffer used to format I/O */
-	struct regmap_format format;  /* Buffer format */
+	struct device *dev;  
+	void *work_buf;      
+	struct regmap_format format;   
 	const struct regmap_bus *bus;
 	void *bus_context;
 	const char *name;
@@ -101,28 +90,24 @@ struct regmap {
 	u8 read_flag_mask;
 	u8 write_flag_mask;
 
-	/* number of bits to (left) shift the reg value when formatting*/
 	int reg_shift;
 	int reg_stride;
 
-	/* regcache specific members */
 	const struct regcache_ops *cache_ops;
 	enum regcache_type cache_type;
 
-	/* number of bytes in reg_defaults_raw */
 	unsigned int cache_size_raw;
-	/* number of bytes per word in reg_defaults_raw */
+	 
 	unsigned int cache_word_size;
-	/* number of entries in reg_defaults */
+	 
 	unsigned int num_reg_defaults;
-	/* number of entries in reg_defaults_raw */
+	 
 	unsigned int num_reg_defaults_raw;
 
-	/* if set, only the cache is modified not the HW */
 	u32 cache_only;
-	/* if set, only the HW is modified not the cache */
+	 
 	u32 cache_bypass;
-	/* if set, remember to free reg_defaults_raw */
+	 
 	bool cache_free;
 
 	struct reg_default *reg_defaults;
@@ -136,11 +121,10 @@ struct regmap {
 	struct reg_default *patch;
 	int patch_regs;
 
-	/* if set, converts bulk rw to single rw */
 	bool use_single_rw;
 
 	struct rb_root range_tree;
-	void *selector_work_buf;	/* Scratch buffer used for selector */
+	void *selector_work_buf;	 
 };
 
 struct regcache_ops {
@@ -181,11 +165,11 @@ struct regmap_range_node {
 struct regmap_field {
 	struct regmap *regmap;
 	unsigned int mask;
-	/* lsb */
+	 
 	unsigned int shift;
 	unsigned int reg;
 };
-#endif /* MY_DEF_HERE */
+#endif  
 #ifdef CONFIG_DEBUG_FS
 extern void regmap_debugfs_initcall(void);
 extern void regmap_debugfs_init(struct regmap *map, const char *name);
@@ -196,7 +180,6 @@ static inline void regmap_debugfs_init(struct regmap *map, const char *name) { }
 static inline void regmap_debugfs_exit(struct regmap *map) { }
 #endif
 
-/* regcache core declarations */
 int regcache_init(struct regmap *map, const struct regmap_config *config);
 void regcache_exit(struct regmap *map);
 int regcache_read(struct regmap *map,

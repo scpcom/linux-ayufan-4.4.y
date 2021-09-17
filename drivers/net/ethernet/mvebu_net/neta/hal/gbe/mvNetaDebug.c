@@ -1,80 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
-Copyright (C) Marvell International Ltd. and its affiliates
-
-This software file (the "File") is owned and distributed by Marvell
-International Ltd. and/or its affiliates ("Marvell") under the following
-alternative licensing terms.  Once you have made an election to distribute the
-File under one of the following license alternatives, please (i) delete this
-introductory statement regarding license alternatives, (ii) delete the two
-license alternatives that you have not elected to use and (iii) preserve the
-Marvell copyright notice above.
-
-********************************************************************************
-Marvell Commercial License Option
-
-If you received this File from Marvell and you have entered into a commercial
-license agreement (a "Commercial License") with Marvell, the File is licensed
-to you under the terms of the applicable Commercial License.
-
-********************************************************************************
-Marvell GPL License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or
-modify this File in accordance with the terms and conditions of the General
-Public License Version 2, June 1991 (the "GPL License"), a copy of which is
-available along with the File in the license.txt file or by writing to the Free
-Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 or
-on the worldwide web at http://www.gnu.org/licenses/gpl.txt.
-
-THE FILE IS DISTRIBUTED AS-IS, WITHOUT WARRANTY OF ANY KIND, AND THE IMPLIED
-WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY
-DISCLAIMED.  The GPL License provides additional details about this warranty
-disclaimer.
-********************************************************************************
-Marvell BSD License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or
-modify this File under the following licensing terms.
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-    *   Redistributions of source code must retain the above copyright notice,
-	this list of conditions and the following disclaimer.
-
-    *   Redistributions in binary form must reproduce the above copyright
-	notice, this list of conditions and the following disclaimer in the
-	documentation and/or other materials provided with the distribution.
-
-    *   Neither the name of Marvell nor the names of its contributors may be
-	used to endorse or promote products derived from this software without
-	specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-*******************************************************************************/
-
-/*******************************************************************************
-* mvNetaDebug.c - Source file for user friendly debug functions
-*
-* DESCRIPTION:
-*
-* DEPENDENCIES:
-*       None.
-*
-*******************************************************************************/
-
+ 
 #include "mvOs.h"
 #include "mvCommon.h"
 #include "mvTypes.h"
@@ -148,7 +75,6 @@ void mvEthTxpWrrRegs(int port, int txp)
 	}
 }
 
-/* Print important registers of Ethernet port */
 void mvEthPortRegs(int port)
 {
 	int txp;
@@ -173,7 +99,6 @@ void mvEthPortRegs(int port)
 		mvEthRegPrint(ETH_TX_QUEUE_COMMAND_REG(port, txp), "ETH_TX_QUEUE_COMMAND_REG");
 }
 
-/* Print Giga Ethernet UNIT registers */
 void mvEthRegs(int port)
 {
 	int win;
@@ -193,7 +118,7 @@ void mvEthRegs(int port)
 	regValue = MV_REG_READ(ETH_BASE_ADDR_ENABLE_REG(port));
 	for (win = 0; win < ETH_MAX_DECODE_WIN; win++) {
 		if (regValue & (1 << win))
-			continue; /* window is disable */
+			continue;  
 		mvOsPrintf("win[%d]\n", win);
 		mvEthRegPrint(ETH_WIN_BASE_REG(port, win), "ETH_WIN_BASE_REG");
 		mvEthRegPrint(ETH_WIN_SIZE_REG(port, win), "ETH_WIN_SIZE_REG");
@@ -224,7 +149,7 @@ void    mvNetaGmacRegs(int port)
 	mvEthRegPrint(NETA_GMAC_MASK_REG(port),         "NETA_GMAC_MASK_REG");
 	mvEthRegPrint(NETA_GMAC_MIB_CTRL_REG(port),     "NETA_GMAC_MIB_CTRL_REG");
 }
-#endif /* MV_ETH_GMAC_NEW */
+#endif  
 
 void mvNetaRxqRegs(int port, int rxq)
 {
@@ -298,13 +223,13 @@ void mvNetaPncRegs(void)
 		for (i = 0; i < MV_PNC_AGING_MAX_GROUP; i++)
 			mvEthRegPrint2(MV_PNC_AGING_LO_THRESH_REG(i), "PNC_AGING_LO_THRESH_REG", i);
 	}
-#endif /* MV_ETH_PNC_AGING */
+#endif  
 
 #ifdef MV_ETH_PNC_LB
 	mvEthRegPrint(MV_PNC_LB_CRC_INIT_REG, "PNC_LB_CRC_INIT_REG");
-#endif /* MV_ETH_PNC_LB */
+#endif  
 }
-#endif /* CONFIG_MV_ETH_PNC */
+#endif  
 
 #ifdef CONFIG_MV_ETH_PMT
 void mvNetaPmtRegs(int port, int txp)
@@ -352,9 +277,9 @@ void mvNetaPmtRegs(int port, int txp)
 
 	for (i = 0; i < NETA_TX_MAX_ETH_TYPE_REGS; i++)
 		mvEthRegPrint2(NETA_TX_ETH_TYPE_REG(port, txp, i), "NETA_TX_ETH_TYPE_REG", i);
-#endif /* MV_ETH_PMT_NEW */
+#endif  
 }
-#endif /* CONFIG_MV_ETH_PMT */
+#endif  
 
 void mvNetaPortRegs(int port)
 {
@@ -364,15 +289,12 @@ void mvNetaPortRegs(int port)
 	if (mvNetaPortCheck(port))
 		return;
 
-	/* Per CPU register */
 	for (i = 0; i < NETA_MAX_CPU_REGS; i++)
 		mvEthRegPrint2(NETA_CPU_MAP_REG(port, i), "NETA_CPU_MAP_REG", i);
 
-	/* Per BM pool registers */
 	for (i = 0; i < MV_BM_POOLS; i++)
 		mvEthRegPrint2(NETA_POOL_BUF_SIZE_REG(port, i), "NETA_POOL_BUF_SIZE_REG", i);
 
-	/* Per port registers */
 	mvEthRegPrint(NETA_VERSION_REG(port), "NETA_VERSION_REG");
 	mvEthRegPrint(NETA_PORT_RX_RESET_REG(port), "NETA_PORT_RX_RESET_REG");
 	for (i = 0; i < pPortCtrl->txpNum; i++)
@@ -386,7 +308,6 @@ void mvNetaPortRegs(int port)
 	mvEthRegPrint(NETA_INTR_ENABLE_REG(port), "NETA_INTR_ENABLE_REG");
 }
 
-/* Print status of Ethernet port */
 void mvNetaPortStatus(int port)
 {
 	MV_ETH_PORT_STATUS	link;
@@ -433,7 +354,7 @@ void mvNetaPortStatus(int port)
 	   (regValue & ETH_DEF_RX_BPDU_QUEUE_ALL_MASK) >> ETH_DEF_RX_BPDU_QUEUE_OFFSET,
 	   (regValue & ETH_DEF_RX_TCP_QUEUE_ALL_MASK) >> ETH_DEF_RX_TCP_QUEUE_OFFSET,
 	   (regValue & ETH_DEF_RX_UDP_QUEUE_ALL_MASK) >> ETH_DEF_RX_UDP_QUEUE_OFFSET);
-#else /* CONFIG_MV_ETH_PNC */
+#else  
 	if (!MV_NETA_PNC_CAP()) {
 		MV_U32	regValue = MV_REG_READ(ETH_PORT_CONFIG_REG(port));
 
@@ -444,7 +365,7 @@ void mvNetaPortStatus(int port)
 		   (regValue & ETH_DEF_RX_TCP_QUEUE_ALL_MASK) >> ETH_DEF_RX_TCP_QUEUE_OFFSET,
 		   (regValue & ETH_DEF_RX_UDP_QUEUE_ALL_MASK) >> ETH_DEF_RX_UDP_QUEUE_OFFSET);
 	}
-#endif /* CONFIG_MV_ETH_PNC */
+#endif  
 }
 
 void mvNetaRxqShow(int port, int rxq, int mode)
@@ -495,9 +416,9 @@ void mvNetaRxqShow(int port, int rxq, int mode)
 
 #if defined(MY_ABC_HERE)
 			mvOsCacheLineInv(pPortCtrl->osHandle, pRxDesc);
-#else /* MY_ABC_HERE */
+#else  
 			mvOsCacheLineInv(NULL, pRxDesc);
-#endif /* MY_ABC_HERE */
+#endif  
 		}
 	}
 }
@@ -550,14 +471,13 @@ void mvNetaTxqShow(int port, int txp, int txq, int mode)
 
 #if defined(MY_ABC_HERE)
 			mvOsCacheLineInv(pPortCtrl->osHandle, pTxDesc);
-#else /* MY_ABC_HERE */
+#else  
 			mvOsCacheLineInv(NULL, pTxDesc);
-#endif /* MY_ABC_HERE */
+#endif  
 		}
 	}
 }
 
-/* Print counters of the Ethernet port */
 void mvEthPortCounters(int port, int mib)
 {
 #ifndef MV_PON_MIB_SUPPORT
@@ -565,7 +485,7 @@ void mvEthPortCounters(int port, int mib)
 		mvOsPrintf("%s: not supported for PON port\n", __func__);
 		return;
 	}
-#endif /* !MV_PON_MIB_SUPPORT */
+#endif  
 
 	if (mvNetaTxpCheck(port, mib))
 		return;
@@ -584,7 +504,7 @@ void mvEthPortCounters(int port, int mib)
 
 		mvEthRegPrint(NETA_PON_MIB_RX_DEF_REG, "NETA_PON_MIB_RX_DEF_REG");
 	}
-#endif /* CONFIG_MV_PON */
+#endif  
 
 	mvOsPrintf("\n[Rx]\n");
 	mvEthMibPrint(port, mib, ETH_MIB_GOOD_FRAMES_RECEIVED, "GOOD_FRAMES_RECEIVED");
@@ -624,7 +544,6 @@ void mvEthPortCounters(int port, int mib)
 	mvOsPrintf("\n");
 }
 
-/* Print RMON counters of the Ethernet port */
 void mvEthPortRmonCounters(int port, int mib)
 {
 	void	*pHndl;
@@ -744,12 +663,11 @@ void mvNetaHwfRxpRegs(int port)
 	mvEthRegPrint(NETA_HWF_RX_CTRL_REG(port), "NETA_HWF_RX_CTRL_REG");
 	mvEthRegPrint(NETA_HWF_RX_THRESH_REG(port), "NETA_HWF_RX_THRESH_REG");
 
-	/* Calculate total number of txp */
 	txpNum = 2;
 
 #ifdef CONFIG_MV_PON
 	txpNum += MV_ETH_MAX_TCONT();
-#endif /* CONFIG_MV_PON */
+#endif  
 
 	for (txp = 0; txp < txpNum; txp += 2)
 		mvEthRegPrint2(NETA_HWF_TXP_CFG_REG(port, txp), "NETA_HWF_TXP_CFG_REG", txp);
@@ -777,7 +695,7 @@ void mvNetaHwfTxpRegs(int port, int p, int txp)
 		mvEthRegPrint(NETA_HWF_TXQ_ENABLE_REG(port), "NETA_HWF_TXQ_ENABLE_REG");
 	}
 }
-#endif /* CONFIG_MV_ETH_HWF */
+#endif  
 
 void mvNetaCpuDump(int port, int cpu, int rxTx)
 {
@@ -816,4 +734,4 @@ void mvNetaPonTxpRegs(int port, int txp)
 	for (txq = 0; txq < MV_ETH_MAX_TXQ; txq++)
 		mvEthRegPrint2(NETA_TXQ_NEW_BYTES_REG(port, txp, txq), "NETA_TXQ_NEW_BYTES_REG", txq);
 }
-#endif /* CONFIG_MV_PON */
+#endif  

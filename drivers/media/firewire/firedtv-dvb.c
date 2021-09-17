@@ -1,18 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * FireDTV driver (formerly known as FireSAT)
- *
- * Copyright (C) 2004 Andreas Monitzer <andy@monitzer.com>
- * Copyright (C) 2008 Henrik Kurelid <henrik@kurelid.se>
- *
- *	This program is free software; you can redistribute it and/or
- *	modify it under the terms of the GNU General Public License as
- *	published by the Free Software Foundation; either version 2 of
- *	the License, or (at your option) any later version.
- */
-
+ 
 #include <linux/bitops.h>
 #include <linux/device.h>
 #include <linux/errno.h>
@@ -139,11 +128,11 @@ int fdtv_stop_feed(struct dvb_demux_feed *dvbdmxfeed)
 			if (dvbdmxfeed->pes_type >= DMX_PES_LAST ||
 			    !demux->pesfilter[dvbdmxfeed->pes_type])
 				return -EINVAL;
-#else /* MY_DEF_HERE */
+#else  
 			if (dvbdmxfeed->pes_type >= DMX_PES_OTHER ||
 			    !demux->pesfilter[dvbdmxfeed->pes_type])
 				return -EINVAL;
-#endif /* MY_DEF_HERE */
+#endif  
 
 			demux->pids[dvbdmxfeed->pes_type] |= 0x8000;
 			demux->pesfilter[dvbdmxfeed->pes_type] = NULL;
@@ -153,11 +142,11 @@ int fdtv_stop_feed(struct dvb_demux_feed *dvbdmxfeed)
 		if (!(dvbdmxfeed->ts_type & TS_DECODER &&
 		      dvbdmxfeed->pes_type < DMX_PES_LAST))
 			return 0;
-#else /* MY_DEF_HERE */
+#else  
 		if (!(dvbdmxfeed->ts_type & TS_DECODER &&
 		      dvbdmxfeed->pes_type < DMX_PES_OTHER))
 			return 0;
-#endif /* MY_DEF_HERE */
+#endif  
 	}
 
 	if (mutex_lock_interruptible(&fdtv->demux_mutex))
@@ -185,7 +174,6 @@ int fdtv_dvb_register(struct firedtv *fdtv, const char *name)
 	if (err < 0)
 		goto fail_log;
 
-	/*DMX_TS_FILTERING | DMX_SECTION_FILTERING*/
 	fdtv->demux.dmx.capabilities = 0;
 
 	fdtv->demux.priv	= fdtv;

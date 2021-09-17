@@ -1,24 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * usb port device code
- *
- * Copyright (C) 2012 Intel Corp
- *
- * Author: Lan Tianyu <tianyu.lan@intel.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
- * for more details.
- *
- */
-
+ 
 #include <linux/slab.h>
 #include <linux/pm_qos.h>
 #include <linux/gpio.h>
@@ -93,12 +76,7 @@ static int usb_port_runtime_resume(struct device *dev)
 
 	retval = usb_hub_set_port_power(hdev, port1, true);
 	if (port_dev->child && !retval) {
-		/*
-		 * Attempt to wait for usb hub port to be reconnected in order
-		 * to make the resume procedure successful.  The device may have
-		 * disconnected while the port was powered off, so ignore the
-		 * return status.
-		 */
+		 
 		retval = hub_port_debounce_be_connected(hub, port1);
 		if (retval < 0)
 			dev_dbg(&port_dev->dev, "can't get reconnection after setting port  power on, status %d\n",
@@ -160,16 +138,16 @@ int usb_hub_create_port_device(struct usb_hub *hub, int port1)
 #if defined(MY_DEF_HERE) ||\
 	defined(MY_DEF_HERE)
 	struct usb_device *hdev = hub->hdev;
-#endif /* MY_DEF_HERE || MY_DEF_HERE */
+#endif  
 #ifdef MY_DEF_HERE
 	extern char gSynoCastratedXhcAddr[CONFIG_SYNO_NUM_CASTRATED_XHC][13];
 	extern unsigned gSynoCastratedXhcPortBitmap[CONFIG_SYNO_NUM_CASTRATED_XHC];
-#endif /* MY_DEF_HERE */
+#endif  
 #ifdef MY_DEF_HERE
 	extern char gSynoUsbVbusHostAddr[CONFIG_SYNO_USB_VBUS_NUM_GPIO][13];
 	extern int gSynoUsbVbusPort[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
 	extern unsigned gSynoUsbVbusGpp[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
-#endif /* MY_DEF_HERE */
+#endif  
 
 	port_dev = kzalloc(sizeof(*port_dev), GFP_KERNEL);
 	if (!port_dev) {
@@ -186,7 +164,7 @@ int usb_hub_create_port_device(struct usb_hub *hub, int port1)
 	dev_set_name(&port_dev->dev, "port%d", port1);
 #if defined (MY_ABC_HERE)
 	port_dev->power_cycle_counter = SYNO_POWER_CYCLE_TRIES;
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef MY_DEF_HERE
 	if (hdev && hdev->serial) {
@@ -194,17 +172,14 @@ int usb_hub_create_port_device(struct usb_hub *hub, int port1)
 		for (i = 0; i < CONFIG_SYNO_NUM_CASTRATED_XHC; i++) {
 			if (0 == strcmp(gSynoCastratedXhcAddr[i], hdev->serial) &&
 				gSynoCastratedXhcPortBitmap[i] & (0x01 << (port1 - 1))) {
-				/* Castrated xHC-port is an outer USB-port which is serviced by
-				 * a xHCI and without physical links of USB3 (i.e. without USB3
-				 * capability.
-				 */
+				 
 				port_dev->flag |= SYNO_USB_PORT_CASTRATED_XHC;
 				if (hub_is_superspeed(hdev))
 					dev_info (&port_dev->dev, "is a castrated xHC-port\n");
 			}
 		}
 	}
-#endif /* MY_DEF_HERE */
+#endif  
 
 #ifdef MY_DEF_HERE
 	if (hdev && hdev->serial) {
@@ -222,17 +197,13 @@ int usb_hub_create_port_device(struct usb_hub *hub, int port1)
 			}
 		}
 	}
-#endif /* MY_DEF_HERE */
+#endif  
 	retval = device_register(&port_dev->dev);
 	if (retval)
 		goto error_register;
 
 	pm_runtime_set_active(&port_dev->dev);
 
-	/* It would be dangerous if user space couldn't
-	 * prevent usb device from being powered off. So don't
-	 * enable port runtime pm if failed to expose port's pm qos.
-	 */
 	if (!dev_pm_qos_expose_flags(&port_dev->dev,
 			PM_QOS_FLAG_NO_POWER_OFF))
 		pm_runtime_enable(&port_dev->dev);

@@ -1,72 +1,9 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
-Copyright (C) Marvell International Ltd. and its affiliates
-
-This software file (the "File") is owned and distributed by Marvell
-International Ltd. and/or its affiliates ("Marvell") under the following
-alternative licensing terms.  Once you have made an election to distribute the
-File under one of the following license alternatives, please (i) delete this
-introductory statement regarding license alternatives, (ii) delete the two
-license alternatives that you have not elected to use and (iii) preserve the
-Marvell copyright notice above.
-
-********************************************************************************
-Marvell Commercial License Option
-
-If you received this File from Marvell and you have entered into a commercial
-license agreement (a "Commercial License") with Marvell, the File is licensed
-to you under the terms of the applicable Commercial License.
-
-********************************************************************************
-Marvell GPL License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or
-modify this File in accordance with the terms and conditions of the General
-Public License Version 2, June 1991 (the "GPL License"), a copy of which is
-available along with the File in the license.txt file or by writing to the Free
-Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 or
-on the worldwide web at http://www.gnu.org/licenses/gpl.txt.
-
-THE FILE IS DISTRIBUTED AS-IS, WITHOUT WARRANTY OF ANY KIND, AND THE IMPLIED
-WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY
-DISCLAIMED.  The GPL License provides additional details about this warranty
-disclaimer.
-********************************************************************************
-Marvell BSD License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or
-modify this File under the following licensing terms.
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-    *   Redistributions of source code must retain the above copyright notice,
-	this list of conditions and the following disclaimer.
-
-    *   Redistributions in binary form must reproduce the above copyright
-	notice, this list of conditions and the following disclaimer in the
-	documentation and/or other materials provided with the distribution.
-
-    *   Neither the name of Marvell nor the names of its contributors may be
-	used to endorse or promote products derived from this software without
-	specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-*******************************************************************************/
+ 
 #include "voiceband/tdm/mvTdm.h"
 
-/* defines */
 #define INT_SAMPLE			2
 #define BUFF_IS_FULL			1
 #define BUFF_IS_EMPTY			0
@@ -77,18 +14,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MV_TDM_CS			0
 #define BUFF_INVALID			-1
 
-/* static APIs */
 static MV_STATUS mvTdmChInit(MV_U8 ch);
 static MV_STATUS mvTdmChRemove(MV_U8 ch);
 static MV_VOID mvTdmReset(MV_VOID);
 static MV_VOID mvTdmDaisyChainModeSet(MV_VOID);
 static MV_VOID mvTdmShowProperties(MV_VOID);
-/* Tx */
+ 
 static INLINE MV_STATUS mvTdmChTxLow(MV_U8 ch);
-/* Rx */
+ 
 static INLINE MV_STATUS mvTdmChRxLow(MV_U8 ch);
 
-/* TDM channel info structure */
 typedef struct _mv_tdm_ch_info {
 	MV_U8 ch;
 	MV_U8 *rxBuffVirt[TOTAL_BUFFERS], *txBuffVirt[TOTAL_BUFFERS];
@@ -98,7 +33,6 @@ typedef struct _mv_tdm_ch_info {
 	MV_U8 rxFirst;
 } MV_TDM_CH_INFO;
 
-/* globals */
 static MV_U8 *rxAggrBuffVirt, *txAggrBuffVirt;
 static MV_ULONG rxAggrBuffPhys, txAggrBuffPhys;
 static MV_U8 rxInt, txInt;
@@ -133,7 +67,6 @@ MV_STATUS mvTdmHalInit(MV_TDM_PARAMS *tdmParams, MV_TDM_HAL_DATA *halData)
 	MV_TRC_REC("->%s\n", __func__);
 	mvTdmShowProperties();
 
-	/* Init globals */
 	rxInt = txInt = 0;
 	rxFull = txEmpty = BUFF_INVALID;
 	tdmEnable = 0, intLock = 0;
@@ -147,11 +80,10 @@ MV_STATUS mvTdmHalInit(MV_TDM_PARAMS *tdmParams, MV_TDM_HAL_DATA *halData)
 	pcmRestartCount = 0;
 
 	if (tdmParams->samplingPeriod > MV_TDM_MAX_SAMPLING_PERIOD)
-		factor = 1;	/* use base sample period(10ms) */
+		factor = 1;	 
 	else
 		factor = (tdmParams->samplingPeriod / MV_TDM_BASE_SAMPLING_PERIOD);
 
-	/* Extract pcm format & band mode */
 	if (pcmFormat == MV_PCM_FORMAT_4BYTES) {
 		pcmFormat = MV_PCM_FORMAT_2BYTES;
 		tdmBandMode = MV_WIDE_BAND;
@@ -159,7 +91,6 @@ MV_STATUS mvTdmHalInit(MV_TDM_PARAMS *tdmParams, MV_TDM_HAL_DATA *halData)
 		tdmBandMode = MV_NARROW_BAND;
 	}
 
-	/* Allocate aggregated buffers for data transport */
 	MV_TRC_REC("allocate %d bytes for aggregated buffer\n", MV_TDM_AGGR_BUFF_SIZE(pcmFormat, tdmBandMode, factor));
 	rxAggrBuffVirt = (MV_U8 *) mvOsIoCachedMalloc(NULL, MV_TDM_AGGR_BUFF_SIZE(pcmFormat, tdmBandMode, factor),
 						      &rxAggrBuffPhys, NULL);
@@ -170,37 +101,33 @@ MV_STATUS mvTdmHalInit(MV_TDM_PARAMS *tdmParams, MV_TDM_HAL_DATA *halData)
 		return MV_NO_RESOURCE;
 	}
 
-	/* Clear buffers */
 	memset(rxAggrBuffVirt, 0, MV_TDM_AGGR_BUFF_SIZE(pcmFormat, tdmBandMode, factor));
 	memset(txAggrBuffVirt, 0, MV_TDM_AGGR_BUFF_SIZE(pcmFormat, tdmBandMode, factor));
 
-	/* Calculate CH(0/1) Delay Control for narrow/wideband modes */
 	for (ch = 0; ch < MV_TDM2C_TOTAL_CHANNELS; ch++) {
 		nbDelay = ((tdmParams->pcmSlot[ch] * PCM_SLOT_PCLK) + 1);
-		wbDelay = (nbDelay + ((halData->frameTs / 2) * PCM_SLOT_PCLK)); /* Offset required by ZARLINK VE880 SLIC */
+		wbDelay = (nbDelay + ((halData->frameTs / 2) * PCM_SLOT_PCLK));  
 		chDelay[ch] = ((nbDelay << CH_RX_DELAY_OFFS) | (nbDelay << CH_TX_DELAY_OFFS));
 		chDelay[(ch + 2)] = ((wbDelay << CH_RX_DELAY_OFFS) | (wbDelay << CH_TX_DELAY_OFFS));
 	}
 
-	/* Config TDM */
-	MV_REG_BIT_RESET(TDM_SPI_MUX_REG, BIT0);	/* enable TDM/SPI interface */
+	MV_REG_BIT_RESET(TDM_SPI_MUX_REG, BIT0);	 
 #if defined(MY_ABC_HERE)
-	// do nothing
-#else /* MY_ABC_HERE */
-	MV_REG_BIT_SET(TDM_MISC_REG, BIT0);		/* sw reset to TDM for 5181L-A1 & up */
-#endif /* MY_ABC_HERE */
-	MV_REG_WRITE(INT_RESET_SELECT_REG, CLEAR_ON_ZERO);	/* int cause is not clear on read */
-	MV_REG_WRITE(INT_EVENT_MASK_REG, 0x3ffff);	/* all interrupt bits latched in status */
-	MV_REG_WRITE(INT_STATUS_MASK_REG, 0);	/* disable interrupts */
-	MV_REG_WRITE(INT_STATUS_REG, 0);	/* clear int status register */
+	 
+#else  
+	MV_REG_BIT_SET(TDM_MISC_REG, BIT0);		 
+#endif  
+	MV_REG_WRITE(INT_RESET_SELECT_REG, CLEAR_ON_ZERO);	 
+	MV_REG_WRITE(INT_EVENT_MASK_REG, 0x3ffff);	 
+	MV_REG_WRITE(INT_STATUS_MASK_REG, 0);	 
+	MV_REG_WRITE(INT_STATUS_REG, 0);	 
 
-	/* Bypass clock divider */
-	MV_REG_WRITE(PCM_CLK_RATE_DIV_REG, PCM_DIV_PASS);	/* PCM PCLK freq */
+	MV_REG_WRITE(PCM_CLK_RATE_DIV_REG, PCM_DIV_PASS);	 
 
-	MV_REG_WRITE(DUMMY_RX_WRITE_DATA_REG, 0);	/* Padding on Rx completion */
+	MV_REG_WRITE(DUMMY_RX_WRITE_DATA_REG, 0);	 
 	MV_REG_BYTE_WRITE(SPI_GLOBAL_CTRL_REG, MV_REG_READ(SPI_GLOBAL_CTRL_REG) | SPI_GLOBAL_ENABLE);
-	MV_REG_BYTE_WRITE(SPI_CLK_PRESCALAR_REG, SPI_CLK_2MHZ);	/* SPI SCLK freq */
-	MV_REG_WRITE(FRAME_TIMESLOT_REG, (MV_U32)halData->frameTs); /* Number of timeslots (PCLK) */
+	MV_REG_BYTE_WRITE(SPI_CLK_PRESCALAR_REG, SPI_CLK_2MHZ);	 
+	MV_REG_WRITE(FRAME_TIMESLOT_REG, (MV_U32)halData->frameTs);  
 
 	if (tdmBandMode == MV_NARROW_BAND) {
 		pcmCtrlReg = (CONFIG_PCM_CRTL | (((MV_U8)pcmFormat - 1) << PCM_SAMPLE_SIZE_OFFS));
@@ -208,35 +135,33 @@ MV_STATUS mvTdmHalInit(MV_TDM_PARAMS *tdmParams, MV_TDM_HAL_DATA *halData)
 		if (use_pclk_external)
 			pcmCtrlReg |= MASTER_PCLK_EXTERNAL;
 #endif
-		MV_REG_WRITE(PCM_CTRL_REG, pcmCtrlReg);	/* PCM configuration */
-		MV_REG_WRITE(CH_DELAY_CTRL_REG(0), chDelay[0]);	/* CH0 delay control register */
-		MV_REG_WRITE(CH_DELAY_CTRL_REG(1), chDelay[1]);	/* CH1 delay control register */
-	} else {		/* MV_WIDE_BAND */
+		MV_REG_WRITE(PCM_CTRL_REG, pcmCtrlReg);	 
+		MV_REG_WRITE(CH_DELAY_CTRL_REG(0), chDelay[0]);	 
+		MV_REG_WRITE(CH_DELAY_CTRL_REG(1), chDelay[1]);	 
+	} else {		 
 
 		pcmCtrlReg = (CONFIG_WB_PCM_CRTL | (((MV_U8)pcmFormat - 1) << PCM_SAMPLE_SIZE_OFFS));
 #ifdef CONFIG_OF
 		if (use_pclk_external)
 			pcmCtrlReg |= MASTER_PCLK_EXTERNAL;
 #endif
-		MV_REG_WRITE(PCM_CTRL_REG, pcmCtrlReg);	/* PCM configuration - WB support */
-		MV_REG_WRITE(CH_DELAY_CTRL_REG(0), chDelay[0]);	/* CH0 delay control register */
-		MV_REG_WRITE(CH_DELAY_CTRL_REG(1), chDelay[1]);	/* CH1 delay control register */
-		MV_REG_WRITE(CH_WB_DELAY_CTRL_REG(0), chDelay[2]);	/* CH0 WB delay control register */
-		MV_REG_WRITE(CH_WB_DELAY_CTRL_REG(1), chDelay[3]);	/* CH1 WB delay control register */
+		MV_REG_WRITE(PCM_CTRL_REG, pcmCtrlReg);	 
+		MV_REG_WRITE(CH_DELAY_CTRL_REG(0), chDelay[0]);	 
+		MV_REG_WRITE(CH_DELAY_CTRL_REG(1), chDelay[1]);	 
+		MV_REG_WRITE(CH_WB_DELAY_CTRL_REG(0), chDelay[2]);	 
+		MV_REG_WRITE(CH_WB_DELAY_CTRL_REG(1), chDelay[3]);	 
 	}
 
-	/* Issue reset to codec(s) */
 	MV_TRC_REC("reseting voice unit(s)\n");
 	MV_REG_WRITE(MISC_CTRL_REG, 0);
 	mvOsDelay(1);
 	MV_REG_WRITE(MISC_CTRL_REG, 1);
 
 	if (spiMode) {
-		/* Configure TDM to work in daisy chain mode */
+		 
 		mvTdmDaisyChainModeSet();
 	}
 
-	/* Initialize all HW units */
 	for (ch = 0; ch < MV_TDM2C_TOTAL_CHANNELS; ch++) {
 		if (mvTdmChInit(ch) != MV_OK) {
 			mvOsPrintf("mvTdmChInit(%d) failed !\n", ch);
@@ -244,7 +169,6 @@ MV_STATUS mvTdmHalInit(MV_TDM_PARAMS *tdmParams, MV_TDM_HAL_DATA *halData)
 		}
 	}
 
-	/* Enable SLIC/DAA interrupt detection(before pcm is active) */
 	MV_REG_WRITE(INT_STATUS_MASK_REG, (MV_REG_READ(INT_STATUS_MASK_REG) | TDM_INT_SLIC));
 
 	MV_TRC_REC("<-%s\n", __func__);
@@ -271,12 +195,11 @@ static MV_STATUS mvTdmChInit(MV_U8 ch)
 
 	chInfo->ch = ch;
 
-	/* Per channel TDM init */
-	MV_REG_WRITE(CH_ENABLE_REG(ch), CH_DISABLE);	/* disable channel (enable in pcm start) */
-	MV_REG_WRITE(CH_SAMPLE_REG(ch), CONFIG_CH_SAMPLE(tdmBandMode, factor));	/* set total samples and int sample */
+	MV_REG_WRITE(CH_ENABLE_REG(ch), CH_DISABLE);	 
+	MV_REG_WRITE(CH_SAMPLE_REG(ch), CONFIG_CH_SAMPLE(tdmBandMode, factor));	 
 
 	for (buff = 0; buff < TOTAL_BUFFERS; buff++) {
-		/* Buffers must be 32B aligned */
+		 
 		chInfo->rxBuffVirt[buff] =
 		    (MV_U8 *) mvOsIoUncachedMalloc(NULL, MV_TDM_CH_BUFF_SIZE(pcmFormat, tdmBandMode, factor),
 						   &(chInfo->rxBuffPhys[buff]), NULL);
@@ -305,20 +228,18 @@ MV_VOID mvTdmRelease(MV_VOID)
 
 	MV_TRC_REC("->%s\n", __func__);
 
-	/* Free Rx/Tx aggregated buffers */
 	mvOsIoCachedFree(NULL, MV_TDM_AGGR_BUFF_SIZE(pcmFormat, tdmBandMode, factor), rxAggrBuffPhys,
 			 rxAggrBuffVirt, 0);
 	mvOsIoCachedFree(NULL, MV_TDM_AGGR_BUFF_SIZE(pcmFormat, tdmBandMode, factor), txAggrBuffPhys,
 			 txAggrBuffVirt, 0);
 
-	/* Release HW channel resources */
 	for (ch = 0; ch < MV_TDM2C_TOTAL_CHANNELS; ch++)
 		mvTdmChRemove(ch);
 
 #if defined(MY_ABC_HERE)
-	/* Disable TDM/SPI interface */
+	 
 	MV_REG_BIT_SET(TDM_SPI_MUX_REG, BIT0);
-#endif /* MY_ABC_HERE */
+#endif  
 
 	MV_TRC_REC("<-%s\n", __func__);
 }
@@ -357,7 +278,6 @@ static MV_VOID mvTdmReset(MV_VOID)
 
 	MV_TRC_REC("->%s\n", __func__);
 
-	/* Reset globals */
 	rxInt = txInt = 0;
 	rxFull = txEmpty = BUFF_INVALID;
 
@@ -383,7 +303,7 @@ MV_VOID mvTdmPcmStart(MV_VOID)
 
 	MV_TRC_REC("->%s\n", __func__);
 
-	tdmEnable = 1;		/* TDM is enabled  */
+	tdmEnable = 1;		 
 	intLock = 0;
 	chanStopCount = 0;
 	mvTdmReset();
@@ -391,29 +311,23 @@ MV_VOID mvTdmPcmStart(MV_VOID)
 	for (ch = 0; ch < MV_TDM2C_TOTAL_CHANNELS; ch++) {
 		chInfo = tdmChInfo[ch];
 
-		/* Set Tx buff */
 		MV_REG_WRITE(CH_TX_ADDR_REG(ch), chInfo->txBuffPhys[chInfo->txCurrBuff]);
 		MV_REG_BYTE_WRITE(CH_BUFF_OWN_REG(ch) + TX_OWN_BYTE_OFFS, OWN_BY_HW);
 
-		/* Set Rx buff */
 		MV_REG_WRITE(CH_RX_ADDR_REG(ch), chInfo->rxBuffPhys[chInfo->rxCurrBuff]);
 		MV_REG_BYTE_WRITE(CH_BUFF_OWN_REG(ch) + RX_OWN_BYTE_OFFS, OWN_BY_HW);
 
 	}
 
-	/* Enable Tx */
 	MV_REG_BYTE_WRITE(CH_ENABLE_REG(0) + TX_ENABLE_BYTE_OFFS, CH_ENABLE);
 	MV_REG_BYTE_WRITE(CH_ENABLE_REG(1) + TX_ENABLE_BYTE_OFFS, CH_ENABLE);
 
-	/* Enable Rx */
 	MV_REG_BYTE_WRITE(CH_ENABLE_REG(0) + RX_ENABLE_BYTE_OFFS, CH_ENABLE);
 	MV_REG_BYTE_WRITE(CH_ENABLE_REG(1) + RX_ENABLE_BYTE_OFFS, CH_ENABLE);
 
-	/* Enable Tx interrupts */
 	MV_REG_WRITE(INT_STATUS_REG, MV_REG_READ(INT_STATUS_REG) & (~(TDM_INT_TX(0) | TDM_INT_TX(1))));
 	MV_REG_WRITE(INT_STATUS_MASK_REG, (MV_REG_READ(INT_STATUS_MASK_REG) | TDM_INT_TX(0) | TDM_INT_TX(1)));
 
-	/* Enable Rx interrupts */
 	MV_REG_WRITE(INT_STATUS_REG, (MV_REG_READ(INT_STATUS_REG) & (~(TDM_INT_RX(0) | TDM_INT_RX(1)))));
 	MV_REG_WRITE(INT_STATUS_MASK_REG, (MV_REG_READ(INT_STATUS_MASK_REG) | TDM_INT_RX(0) | TDM_INT_RX(1)));
 
@@ -427,9 +341,6 @@ MV_VOID mvTdmPcmStop(MV_VOID)
 	tdmEnable = 0;
 	mvTdmReset();
 
-	/* Mask all interrpts except SLIC/DAA */
-	/*MV_REG_WRITE(INT_STATUS_MASK_REG, (MV_U32)TDM_INT_SLIC);*/
-
 	MV_TRC_REC("<-%s\n", __func__);
 }
 
@@ -441,7 +352,6 @@ MV_STATUS mvTdmTx(MV_U8 *tdmTxBuff)
 
 	MV_TRC_REC("->%s\n", __func__);
 
-	/* Sanity check */
 	if (tdmTxBuff != txAggrBuffVirt) {
 		mvOsPrintf("%s: Error, invalid Tx buffer !!!\n", __func__);
 		return MV_ERROR;
@@ -463,7 +373,7 @@ MV_STATUS mvTdmTx(MV_U8 *tdmTxBuff)
 			   MV_TDM_CH_BUFF_SIZE(pcmFormat, tdmBandMode, factor));
 		chInfo->txBuffFull[txEmpty] = BUFF_IS_FULL;
 		pTdmTxBuff = tdmTxBuff + (ch * MV_TDM_CH_BUFF_SIZE(pcmFormat, tdmBandMode, factor));
-		/* Copy data from voice engine buffer to DMA */
+		 
 		mvOsMemcpy(chInfo->txBuffVirt[txEmpty], pTdmTxBuff,
 			   MV_TDM_CH_BUFF_SIZE(pcmFormat, tdmBandMode, factor));
 	}
@@ -482,7 +392,6 @@ MV_STATUS mvTdmRx(MV_U8 *tdmRxBuff)
 
 	MV_TRC_REC("->%s\n", __func__);
 
-	/* Sanity check */
 	if (tdmRxBuff != rxAggrBuffVirt) {
 		mvOsPrintf("%s: invalid Rx buffer !!!\n", __func__);
 		return MV_ERROR;
@@ -503,7 +412,7 @@ MV_STATUS mvTdmRx(MV_U8 *tdmRxBuff)
 		chInfo->rxBuffFull[rxFull] = BUFF_IS_EMPTY;
 		MV_TRC_REC("%s get Rx buffer(%d) for channel(%d)\n", __func__, rxFull, ch);
 		pTdmRxBuff = tdmRxBuff + (ch * MV_TDM_CH_BUFF_SIZE(pcmFormat, tdmBandMode, factor));
-		/* Copy data from DMA to voice engine buffer */
+		 
 		mvOsMemcpy(pTdmRxBuff, chInfo->rxBuffVirt[rxFull], MV_TDM_CH_BUFF_SIZE(pcmFormat, tdmBandMode, factor));
 	}
 
@@ -521,7 +430,6 @@ MV_32 mvPcmStopIntMiss(void)
 	statusReg = MV_REG_READ(INT_STATUS_REG);
 	maskReg = MV_REG_READ(INT_STATUS_MASK_REG);
 
-	/* Refer only to unmasked bits */
 	statusStopInt = statusReg & maskReg;
 
 	if (statusStopInt & TX_UNDERFLOW_BIT(1)) {
@@ -555,7 +463,6 @@ MV_32 mvPcmStopIntMiss(void)
 	return ret;
 }
 
-/* Low level TDM interrupt service routine */
 MV_32 mvTdmIntLow(MV_TDM_INT_INFO *tdmIntInfo)
 {
 	MV_U32 statusReg, maskReg, statusAndMask;
@@ -566,27 +473,23 @@ MV_32 mvTdmIntLow(MV_TDM_INT_INFO *tdmIntInfo)
 
 	MV_TRC_REC("->%s\n", __func__);
 
-	/* Read Status & mask registers */
 	statusReg = MV_REG_READ(INT_STATUS_REG);
 	maskReg = MV_REG_READ(INT_STATUS_MASK_REG);
 	MV_TRC_REC("CAUSE(0x%x), MASK(0x%x)\n", statusReg, maskReg);
 
-	/* Refer only to unmasked bits */
 	statusAndMask = statusReg & maskReg;
 
-	/* Reset params */
 	tdmIntInfo->tdmRxBuff = NULL;
 	tdmIntInfo->tdmTxBuff = NULL;
 	tdmIntInfo->intType = MV_EMPTY_INT;
 	tdmIntInfo->cs = MV_TDM_CS;
 
-	/* Handle SLIC/DAA int */
 	if (statusAndMask & SLIC_INT_BIT) {
 		MV_TRC_REC("Phone interrupt !!!\n");
 		tdmIntInfo->intType |= MV_PHONE_INT;
 	}
 #if 0
-	/* Return in case TDM is disabled */
+	 
 	if (!tdmEnable) {
 		MV_TRC_REC("TDM is disabled - quit low level ISR\n");
 		MV_REG_WRITE(INT_STATUS_REG, ~statusReg);
@@ -601,7 +504,6 @@ MV_32 mvTdmIntLow(MV_TDM_INT_INFO *tdmIntInfo)
 
 	for (ch = 0; ch < MV_TDM2C_TOTAL_CHANNELS; ch++) {
 
-		/* Give next buff to TDM and set curr buff as empty */
 		if ((statusAndMask & TX_BIT(ch)) && tdmEnable && !intLock) {
 			MV_TRC_REC("Tx interrupt(ch%d) !!!\n", ch);
 
@@ -620,7 +522,6 @@ MV_32 mvTdmIntLow(MV_TDM_INT_INFO *tdmIntInfo)
 				}
 			}
 
-			/* MV_OK -> Tx is done for both channels */
 			if (mvTdmChTxLow(ch) == MV_OK) {
 				MV_TRC_REC("Assign Tx aggregate buffer for further processing\n");
 				tdmIntInfo->tdmTxBuff = txAggrBuffVirt;
@@ -649,7 +550,6 @@ MV_32 mvTdmIntLow(MV_TDM_INT_INFO *tdmIntInfo)
 				}
 			}
 
-			/* MV_OK -> Rx is done for both channels */
 			if (mvTdmChRxLow(ch) == MV_OK) {
 				MV_TRC_REC("Assign Rx aggregate buffer for further processing\n");
 				tdmIntInfo->tdmRxBuff = rxAggrBuffVirt;
@@ -668,7 +568,7 @@ MV_32 mvTdmIntLow(MV_TDM_INT_INFO *tdmIntInfo)
 				tdmIntInfo->intType |= MV_TX_ERROR_INT;
 				if (!(statusAndMask & TX_BIT(ch))) {
 					ret = -1;
-					/* MV_OK -> Tx is done for both channels */
+					 
 					if (mvTdmChTxLow(ch) == MV_OK) {
 						MV_TRC_REC("Assign Tx aggregate buffer for further processing\n");
 						tdmIntInfo->tdmTxBuff = txAggrBuffVirt;
@@ -678,7 +578,7 @@ MV_32 mvTdmIntLow(MV_TDM_INT_INFO *tdmIntInfo)
 			} else {
 				MV_TRC_REC("Expected Tx underflow(not an error)\n");
 				tdmIntInfo->intType |= MV_CHAN_STOP_INT;
-				tdmIntInfo->data = ++chanStopCount; /* Update number of channels already stopped */
+				tdmIntInfo->data = ++chanStopCount;  
 				MV_REG_WRITE(INT_STATUS_MASK_REG,
 					MV_REG_READ(INT_STATUS_MASK_REG) & (~(TDM_INT_TX(ch))));
 			}
@@ -691,7 +591,7 @@ MV_32 mvTdmIntLow(MV_TDM_INT_INFO *tdmIntInfo)
 				tdmIntInfo->intType |= MV_RX_ERROR_INT;
 				if (!(statusAndMask & RX_BIT(ch))) {
 					ret = -1;
-					/* MV_OK -> Rx is done for both channels */
+					 
 					if (mvTdmChRxLow(ch) == MV_OK) {
 						MV_TRC_REC("Assign Rx aggregate buffer for further processing\n");
 						tdmIntInfo->tdmRxBuff = rxAggrBuffVirt;
@@ -701,17 +601,15 @@ MV_32 mvTdmIntLow(MV_TDM_INT_INFO *tdmIntInfo)
 			} else {
 				MV_TRC_REC("Expected Rx overflow(not an error)\n");
 				tdmIntInfo->intType |= MV_CHAN_STOP_INT;
-				tdmIntInfo->data = ++chanStopCount; /* Update number of channels already stopped */
+				tdmIntInfo->data = ++chanStopCount;  
 				MV_REG_WRITE(INT_STATUS_MASK_REG,
 					     MV_REG_READ(INT_STATUS_MASK_REG) & (~(TDM_INT_RX(ch))));
 			}
 		}
 	}
 
-	/* clear TDM interrupts */
 	MV_REG_WRITE(INT_STATUS_REG, ~statusReg);
 
-	/* Check if interrupt was missed -> restart */
 	if  (intTxMiss != -1)  {
 		MV_TRC_REC("Missing Tx Interrupt Detected ch%d!!!\n", intTxMiss);
 		if (intTxMiss)
@@ -746,7 +644,6 @@ static INLINE MV_STATUS mvTdmChTxLow(MV_U8 ch)
 
 	MV_TRC_REC("->%s ch%d\n", __func__, ch);
 
-	/* count tx interrupts */
 	txInt++;
 	MV_TRC_REC("txInt(%d)\n", txInt);
 
@@ -755,15 +652,11 @@ static INLINE MV_STATUS mvTdmChTxLow(MV_U8 ch)
 	else
 		MV_TRC_REC("curr buf is empty [MMP miss write]\n");
 
-	/* Change buffers */
 	chInfo->txCurrBuff = MV_TDM_NEXT_BUFFER(chInfo->txCurrBuff);
 
-	/* Mark next buff to be transmitted by HW as empty. Give it to the HW
-	   for next frame. The app need to write the data before HW takes it.  */
 	chInfo->txBuffFull[chInfo->txCurrBuff] = BUFF_IS_EMPTY;
 	MV_TRC_REC("->%s clear buf(%d) for channel(%d)\n", __func__, chInfo->txCurrBuff, ch);
 
-	/* Poll on SW ownership (single check) */
 	MV_TRC_REC("start poll for SW ownership\n");
 	while (((MV_REG_BYTE_READ(CH_BUFF_OWN_REG(chInfo->ch) + TX_OWN_BYTE_OFFS) & OWNER_MASK) == OWN_BY_HW)
 	       && (max_poll < 2000)) {
@@ -778,18 +671,14 @@ static INLINE MV_STATUS mvTdmChTxLow(MV_U8 ch)
 	}
 	MV_TRC_REC("ch%d, start tx buff %d\n", ch, chInfo->txCurrBuff);
 
-	/*Set TX buff address (must be 32 byte aligned) */
 	MV_REG_WRITE(CH_TX_ADDR_REG(chInfo->ch), chInfo->txBuffPhys[chInfo->txCurrBuff]);
 
-	/* Set HW ownership */
 	MV_REG_BYTE_WRITE(CH_BUFF_OWN_REG(chInfo->ch) + TX_OWN_BYTE_OFFS, OWN_BY_HW);
 
-	/* Enable Tx */
 	MV_REG_BYTE_WRITE(CH_ENABLE_REG(chInfo->ch) + TX_ENABLE_BYTE_OFFS, CH_ENABLE);
 
 	MV_TRC_REC("<-%s\n", __func__);
 
-	/* Did we get the required amount of irqs for Tx wakeup ? */
 	if (txInt < MV_TDM_INT_COUNTER) {
 		return MV_NOT_READY;
 	} else {
@@ -818,14 +707,10 @@ static INLINE MV_STATUS mvTdmChRxLow(MV_U8 ch)
 	else
 		MV_TRC_REC("curr buf is full [MMP miss read]\n");
 
-	/* Mark last buff that was received by HW as full. Give next buff to HW for */
-	/* next frame. The app need to read the data before next irq */
 	chInfo->rxBuffFull[chInfo->rxCurrBuff] = BUFF_IS_FULL;
 
-	/* Change buffers */
 	chInfo->rxCurrBuff = MV_TDM_NEXT_BUFFER(chInfo->rxCurrBuff);
 
-	/* Poll on SW ownership (single check) */
 	MV_TRC_REC("start poll for ownership\n");
 	while (((MV_REG_BYTE_READ(CH_BUFF_OWN_REG(chInfo->ch) + RX_OWN_BYTE_OFFS) & OWNER_MASK) == OWN_BY_HW)
 	       && (max_poll < 2000)) {
@@ -840,18 +725,14 @@ static INLINE MV_STATUS mvTdmChRxLow(MV_U8 ch)
 	}
 	MV_TRC_REC("%s ch%d, start rx buff %d\n", __func__, ch, chInfo->rxCurrBuff);
 
-	/* Set RX buff address (must be 32 byte aligned) */
 	MV_REG_WRITE(CH_RX_ADDR_REG(chInfo->ch), chInfo->rxBuffPhys[chInfo->rxCurrBuff]);
 
-	/* Set HW ownership */
 	MV_REG_BYTE_WRITE(CH_BUFF_OWN_REG(chInfo->ch) + RX_OWN_BYTE_OFFS, OWN_BY_HW);
 
-	/* Enable Rx */
 	MV_REG_BYTE_WRITE(CH_ENABLE_REG(chInfo->ch) + RX_ENABLE_BYTE_OFFS, CH_ENABLE);
 
 	MV_TRC_REC("<-%s\n", __func__);
 
-	/* Did we get the required amount of irqs for Rx wakeup ? */
 	if (rxInt < MV_TDM_INT_COUNTER) {
 		return MV_NOT_READY;
 	} else {
@@ -862,10 +743,6 @@ static INLINE MV_STATUS mvTdmChRxLow(MV_U8 ch)
 		return MV_OK;
 	}
 }
-
-/****************************
-**        SPI Stuff        **
-****************************/
 
 static MV_VOID mvTdmSetCurrentUnit(MV_32 cs)
 {
@@ -886,7 +763,7 @@ static MV_VOID mvTdmDaisyChainModeSet(MV_VOID)
 	MV_REG_WRITE(SPI_CODEC_CMD_LO_REG, (0x80 << 8) | 0);
 	MV_REG_WRITE(SPI_CODEC_CTRL_REG, TRANSFER_BYTES(2) | ENDIANESS_MSB_MODE | WR_MODE | CLK_SPEED_LO_DIV);
 	MV_REG_WRITE(SPI_CTRL_REG, MV_REG_READ(SPI_CTRL_REG) | SPI_ACTIVE);
-	/* Poll for ready indication */
+	 
 	while ((MV_REG_READ(SPI_CTRL_REG) & SPI_STAT_MASK) == SPI_ACTIVE)
 		continue;
 }
@@ -895,9 +772,6 @@ MV_STATUS mvTdmSpiWrite(MV_U8 *cmdBuff, MV_U8 cmdSize, MV_U8 *dataBuff, MV_U8 da
 {
 	MV_U32 i, val1 = 0, val2 = 0, cmd;
 
-	/*MV_TRC_REC("%s: cs = %d val1 = 0x%x val2 = 0x%x\n",__func__,cs, val1, val2); */
-
-	/* Poll for ready indication */
 	while ((MV_REG_READ(SPI_CTRL_REG) & SPI_STAT_MASK) == SPI_ACTIVE)
 		continue;
 
@@ -912,21 +786,17 @@ MV_STATUS mvTdmSpiWrite(MV_U8 *cmdBuff, MV_U8 cmdSize, MV_U8 *dataBuff, MV_U8 da
 
 	mvTdmSetCurrentUnit(cs);
 
-	/* Prepare codec control parameters for command transmission */
 	cmd = TRANSFER_BYTES(cmdSize) | ENDIANESS_MSB_MODE | WR_MODE | CLK_SPEED_LO_DIV;
 
 	MV_REG_WRITE(SPI_CODEC_CMD_LO_REG, val1);
 	MV_REG_WRITE(SPI_CODEC_CMD_HI_REG, val2);
 	MV_REG_WRITE(SPI_CODEC_CTRL_REG, cmd);
 
-	/* Activate */
 	MV_REG_WRITE(SPI_CTRL_REG, MV_REG_READ(SPI_CTRL_REG) | SPI_ACTIVE);
 
-	/* Poll for ready indication */
 	while ((MV_REG_READ(SPI_CTRL_REG) & SPI_STAT_MASK) == SPI_ACTIVE)
 		continue;
 
-	/* Update the command to 1 data byte transfer */
 	cmd = TRANSFER_BYTES(1) | ENDIANESS_MSB_MODE | WR_MODE | CLK_SPEED_LO_DIV;
 
 	for (i = 0; i < dataSize; i++) {
@@ -937,10 +807,8 @@ MV_STATUS mvTdmSpiWrite(MV_U8 *cmdBuff, MV_U8 cmdSize, MV_U8 *dataBuff, MV_U8 da
 		MV_REG_WRITE(SPI_CODEC_CMD_LO_REG, val1);
 		MV_REG_WRITE(SPI_CODEC_CTRL_REG, cmd);
 
-		/* Activate */
 		MV_REG_WRITE(SPI_CTRL_REG, MV_REG_READ(SPI_CTRL_REG) | SPI_ACTIVE);
 
-		/* Poll for ready indication */
 		while ((MV_REG_READ(SPI_CTRL_REG) & SPI_STAT_MASK) == SPI_ACTIVE)
 			continue;
 	}
@@ -953,14 +821,11 @@ MV_STATUS mvTdmSpiRead(MV_U8 *cmdBuff, MV_U8 cmdSize, MV_U8 *dataBuff, MV_U8 dat
 	MV_U32 val1 = 0, val2 = 0, cmd;
 	MV_U32 data;
 
-	/*MV_TRC_REC("%s: cs = %d val1 = 0x%x val2 = 0x%x\n",__func__,cs, val1, val2); */
-
 	if (dataSize > 2) {
 		mvOsPrintf("%s: Error, exceeded max read size(%d)\n", __func__, dataSize);
 		return MV_ERROR;
 	}
 
-	/* Poll for ready indication */
 	while ((MV_REG_READ(SPI_CTRL_REG) & SPI_STAT_MASK) == SPI_ACTIVE)
 		continue;
 
@@ -977,7 +842,6 @@ MV_STATUS mvTdmSpiRead(MV_U8 *cmdBuff, MV_U8 cmdSize, MV_U8 *dataBuff, MV_U8 dat
 
 	mvTdmSetCurrentUnit(cs);
 
-	/* Prepare codec control parameters for command transmission */
 	if (dataSize == 1)
 		cmd = TRANSFER_BYTES(cmdSize) | ENDIANESS_MSB_MODE | RD_MODE | READ_1_BYTE | CLK_SPEED_LO_DIV;
 	else
@@ -987,14 +851,11 @@ MV_STATUS mvTdmSpiRead(MV_U8 *cmdBuff, MV_U8 cmdSize, MV_U8 *dataBuff, MV_U8 dat
 	MV_REG_WRITE(SPI_CODEC_CMD_HI_REG, val2);
 	MV_REG_WRITE(SPI_CODEC_CTRL_REG, cmd);
 
-	/* Activate */
 	MV_REG_WRITE(SPI_CTRL_REG, MV_REG_READ(SPI_CTRL_REG) | SPI_ACTIVE);
 
-	/* Poll for ready indication */
 	while ((MV_REG_READ(SPI_CTRL_REG) & SPI_STAT_MASK) == SPI_ACTIVE)
 		continue;
 
-	/* Read the data received from codec */
 	data = MV_REG_READ(SPI_CODEC_READ_DATA_REG);
 	dataBuff[dataSize - 1] = (data & 0xff);
 
@@ -1004,9 +865,6 @@ MV_STATUS mvTdmSpiRead(MV_U8 *cmdBuff, MV_U8 cmdSize, MV_U8 *dataBuff, MV_U8 dat
 	return MV_OK;
 }
 
-/******************
-** Debug Display **
-******************/
 MV_VOID mvOsRegDump(MV_U32 reg)
 {
 	mvOsPrintf("0x%05x: %08x\n", reg, MV_REG_READ(reg));
@@ -1093,29 +951,25 @@ MV_VOID mvTdmPcmIfReset(MV_VOID)
 	MV_TRC_REC("->%s\n", __func__);
 
 #if defined(MY_ABC_HERE)
-	/* SW PCM reset assert */
+	 
 	MV_REG_BIT_RESET(TDM_MISC_REG, BIT0);
 
 	mvOsDelay(10);
 
-	/* SW PCM reset de-assert */
 	MV_REG_BIT_SET(TDM_MISC_REG, BIT0);
 
-	/* Wait a bit more - might be fine tuned */
 	mvOsDelay(50);
-#else /* MY_ABC_HERE */
+#else  
 	MV_REG_BIT_RESET(PCM_CTRL_REG, BIT0);
 
-	/* Wait a bit - might be fine tuned */
 	mvOsDelay(5);
 
-	MV_REG_BIT_SET(TDM_SPI_MUX_REG, BIT0);	/* Disable TDM/SPI interface */
+	MV_REG_BIT_SET(TDM_SPI_MUX_REG, BIT0);	 
 
-	MV_REG_WRITE(TDM_MISC_REG, 0);		/* SW PCM reset */
+	MV_REG_WRITE(TDM_MISC_REG, 0);		 
 
-	/* Wait a bit more - might be fine tuned */
 	mvOsDelay(100);
-#endif /* MY_ABC_HERE */
+#endif  
 
 	MV_TRC_REC("<-%s\n", __func__);
 }

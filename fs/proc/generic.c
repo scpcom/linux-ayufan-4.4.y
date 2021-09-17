@@ -3,7 +3,7 @@
  *
  * This file contains generic proc-fs routines for handling
  * directories and files.
- * 
+ *
  * Copyright (C) 1991, 1992 Linus Torvalds.
  * Copyright (C) 1997 Theodore Ts'o
  */
@@ -283,7 +283,7 @@ int proc_readdir_de(struct proc_dir_entry *de, struct file *filp, void *dirent,
 	}
 	ret = 1;
 out:
-	return ret;	
+	return ret;
 }
 
 int proc_readdir(struct file *filp, void *dirent, filldir_t filldir)
@@ -317,7 +317,7 @@ static int proc_register(struct proc_dir_entry * dir, struct proc_dir_entry * dp
 {
 	struct proc_dir_entry *tmp;
 	int ret;
-	
+
 	ret = proc_alloc_inum(&dp->low_ino);
 	if (ret)
 		return ret;
@@ -480,7 +480,7 @@ out:
 	return NULL;
 }
 EXPORT_SYMBOL(proc_create_data);
- 
+
 void proc_set_size(struct proc_dir_entry *de, loff_t size)
 {
 	de->size = size;

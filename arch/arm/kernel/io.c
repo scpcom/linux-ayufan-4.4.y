@@ -9,12 +9,6 @@
 
 static DEFINE_RAW_SPINLOCK(__io_lock);
 
-/*
- * Generic atomic MMIO modify.
- *
- * Allows thread-safe access to registers shared by unrelated subsystems.
- * The access is protected by a single MMIO-wide lock.
- */
 void atomic_io_modify_relaxed(void __iomem *reg, u32 mask, u32 set)
 {
 	unsigned long flags;
@@ -40,12 +34,8 @@ void atomic_io_modify(void __iomem *reg, u32 mask, u32 set)
 	raw_spin_unlock_irqrestore(&__io_lock, flags);
 }
 EXPORT_SYMBOL(atomic_io_modify);
-#endif /* MY_ABC_HERE */
+#endif  
 
-/*
- * Copy data from IO memory space to "real" memory space.
- * This needs to be optimized.
- */
 void _memcpy_fromio(void *to, const volatile void __iomem *from, size_t count)
 {
 	unsigned char *t = to;
@@ -57,10 +47,6 @@ void _memcpy_fromio(void *to, const volatile void __iomem *from, size_t count)
 	}
 }
 
-/*
- * Copy data from "real" memory space to IO memory space.
- * This needs to be optimized.
- */
 void _memcpy_toio(volatile void __iomem *to, const void *from, size_t count)
 {
 	const unsigned char *f = from;
@@ -72,10 +58,6 @@ void _memcpy_toio(volatile void __iomem *to, const void *from, size_t count)
 	}
 }
 
-/*
- * "memset" on IO memory space.
- * This needs to be optimized.
- */
 void _memset_io(volatile void __iomem *dst, int c, size_t count)
 {
 	while (count) {

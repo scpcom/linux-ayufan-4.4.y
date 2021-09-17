@@ -1,80 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
-Copyright (C) Marvell International Ltd. and its affiliates
-
-This software file (the "File") is owned and distributed by Marvell
-International Ltd. and/or its affiliates ("Marvell") under the following
-alternative licensing terms.  Once you have made an election to distribute the
-File under one of the following license alternatives, please (i) delete this
-introductory statement regarding license alternatives, (ii) delete the two
-license alternatives that you have not elected to use and (iii) preserve the
-Marvell copyright notice above.
-
-********************************************************************************
-Marvell Commercial License Option
-
-If you received this File from Marvell and you have entered into a commercial
-license agreement (a "Commercial License") with Marvell, the File is licensed
-to you under the terms of the applicable Commercial License.
-
-********************************************************************************
-Marvell GPL License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or
-modify this File in accordance with the terms and conditions of the General
-Public License Version 2, June 1991 (the "GPL License"), a copy of which is
-available along with the File in the license.txt file or by writing to the Free
-Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 or
-on the worldwide web at http://www.gnu.org/licenses/gpl.txt.
-
-THE FILE IS DISTRIBUTED AS-IS, WITHOUT WARRANTY OF ANY KIND, AND THE IMPLIED
-WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY
-DISCLAIMED.  The GPL License provides additional details about this warranty
-disclaimer.
-********************************************************************************
-Marvell BSD License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or
-modify this File under the following licensing terms.
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-    *   Redistributions of source code must retain the above copyright notice,
-	    this list of conditions and the following disclaimer.
-
-    *   Redistributions in binary form must reproduce the above copyright
-        notice, this list of conditions and the following disclaimer in the
-        documentation and/or other materials provided with the distribution.
-
-    *   Neither the name of Marvell nor the names of its contributors may be
-        used to endorse or promote products derived from this software without
-        specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-********************************************************************************
-* mvKernelExtSem.c
-*
-* DESCRIPTION:
-*       functions in kernel mode special for mainOs.
-*       Semaphores implementation
-*
-* DEPENDENCIES:
-*
-*       $Revision: 6$
-*******************************************************************************/
-
+ 
 #ifdef CONFIG_OF
 #include <linux/proc_fs.h>
 #endif
@@ -99,26 +26,9 @@ static int              mv_num_semaphores = MV_SEMAPHORES_DEF;
 module_param(mv_num_semaphores, int, S_IRUGO);
 
 #if defined(MY_ABC_HERE) && defined(CONFIG_OF)
-// do nothing
-#else /* MY_ABC_HERE */
-/*******************************************************************************
-* mvKernelExtSem_read_proc_mem
-*
-* DESCRIPTION:
-*       proc read data rooutine.
-*       Use cat /proc/mvKernelExtSem to show semaphore list
-*
-* INPUTS:
-*
-* OUTPUTS:
-*       None
-*
-* RETURNS:
-*       Data length
-*
-* COMMENTS:
-*
-*******************************************************************************/
+ 
+#else  
+ 
 static int mvKernelExtSem_read_proc_mem(
         char * page,
         char **start,
@@ -184,7 +94,7 @@ static int mvKernelExtSem_read_proc_mem(
 
     return len;
 }
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef CONFIG_OF
 static int proc_status_show(struct seq_file *m, void *v) {
@@ -240,25 +150,6 @@ static const struct file_operations mv_kext_sem_read_proc_operations = {
 };
 #endif
 
-/*******************************************************************************
-* mvKernelExt_SemInit
-*
-* DESCRIPTION:
-*       Initialize semaphore support, create /proc for semaphores info
-*
-* INPUTS:
-*       None
-*
-* OUTPUTS:
-*       None
-*
-* RETURNS:
-*       Non zero if successful
-*       Zero if failed
-*
-* COMMENTS:
-*
-*******************************************************************************/
 static int mvKernelExt_SemInit(void)
 {
     if (mv_num_semaphores < MV_SEMAPHORES_MIN)
@@ -281,32 +172,13 @@ static int mvKernelExt_SemInit(void)
 	if (!proc_create("mvKernelExtSem", S_IRUGO, NULL, &mv_kext_sem_read_proc_operations))
 		return -ENOMEM;
 #else
-    /* create proc entry */
+     
     create_proc_read_entry("mvKernelExtSem", 0, NULL, mvKernelExtSem_read_proc_mem, NULL);
 #endif
 
     return 1;
 }
 
-/*******************************************************************************
-* mvKernelExt_DeleteAll
-*
-* DESCRIPTION:
-*       Destroys all semaphores
-*       This is safety action which is executed when all tasks closed
-*
-* INPUTS:
-*       None
-*
-* OUTPUTS:
-*       None
-*
-* RETURNS:
-*       None
-*
-* COMMENTS:
-*
-*******************************************************************************/
 static void mvKernelExt_DeleteAll(void)
 {
     int k;
@@ -322,24 +194,6 @@ static void mvKernelExt_DeleteAll(void)
     }
 }
 
-/*******************************************************************************
-* mvKernelExt_SemCleanup
-*
-* DESCRIPTION:
-*       Perform semaphore cleanup actions before module unload
-*
-* INPUTS:
-*       None
-*
-* OUTPUTS:
-*       None
-*
-* RETURNS:
-*       None
-*
-* COMMENTS:
-*
-*******************************************************************************/
 static void mvKernelExt_SemCleanup(void)
 {
     MV_GLOBAL_LOCK();
@@ -357,29 +211,6 @@ static void mvKernelExt_SemCleanup(void)
     remove_proc_entry("mvKernelExtSem", NULL);
 }
 
-/*******************************************************************************
-* mvKernelExt_SemCreate
-*
-* DESCRIPTION:
-*       Create a new semaphore or open existing one
-*
-* INPUTS:
-*       arg   - pointer to structure with creation flags and semaphore name
-*
-* OUTPUTS:
-*       None
-*
-* RETURNS:
-*       Positive value         - semaphore ID
-*       -MVKERNELEXT_EINVAL    - invalid parameter passed
-*       -MVKERNELEXT_ENOMEM    - semaphore array is full
-*       -MVKERNELEXT_ECONFLICT - open existing semaphore with different type
-*                                specified
-*
-*
-* COMMENTS:
-*
-*******************************************************************************/
 int mvKernelExt_SemCreate(int flags, const char *name)
 {
     int k;
@@ -392,7 +223,7 @@ int mvKernelExt_SemCreate(int flags, const char *name)
 
     if (flags & MV_SEMAPTHORE_F_OPENEXIST)
     {
-        /* try to find existing semaphore first */
+         
         for (k = 1; k < mv_num_semaphores; k++)
         {
             sem = mvSemaphores + k;
@@ -405,11 +236,11 @@ int mvKernelExt_SemCreate(int flags, const char *name)
 
         if (k < mv_num_semaphores)
         {
-            /* found */
+             
             if ((sem->flags & MV_SEMAPTHORE_F_TYPE_MASK) !=
                     (flags & MV_SEMAPTHORE_F_TYPE_MASK))
             {
-                /* semaphore has different type */
+                 
                 MV_GLOBAL_UNLOCK();
                 return -MVKERNELEXT_ECONFLICT;
             }
@@ -419,7 +250,6 @@ int mvKernelExt_SemCreate(int flags, const char *name)
         }
     }
 
-    /* create semaphore */
     for (k = 1; k < mv_num_semaphores; k++)
     {
         if (mvSemaphores[k].flags == 0)
@@ -477,25 +307,6 @@ ret_einval: \
         return -MVKERNELEXT_EDELETED; \
     }
 
-/*******************************************************************************
-* mvKernelExt_SemDelete
-*
-* DESCRIPTION:
-*       Destroys semaphore
-*
-* INPUTS:
-*       semid   - semaphore ID
-*
-* OUTPUTS:
-*       None
-*
-* RETURNS:
-*       Zero if successful
-*       -MVKERNELEXT_EINVAL if bad ID passed
-*
-* COMMENTS:
-*
-*******************************************************************************/
 int mvKernelExt_SemDelete(int semid)
 {
     mvSemaphoreSTC *sem;
@@ -509,26 +320,6 @@ int mvKernelExt_SemDelete(int semid)
     return 0;
 }
 
-/*******************************************************************************
-* mvKernelExt_SemSignal
-*
-* DESCRIPTION:
-*       Signals to semaphore
-*
-* INPUTS:
-*       semid   - semaphore ID
-*
-* OUTPUTS:
-*       None
-*
-* RETURNS:
-*       Zero if successful
-*       -MVKERNELEXT_EINVAL - bad ID passed
-*       -MVKERNELEXT_EPERM  - Mutex semaphore is locked by another task
-*
-* COMMENTS:
-*
-*******************************************************************************/
 int mvKernelExt_SemSignal(int semid)
 {
     mvSemaphoreSTC *sem;
@@ -552,7 +343,7 @@ int mvKernelExt_SemSignal(int semid)
         if (sem->flags & MV_SEMAPTHORE_F_COUNT)
             sem->count++;
         else
-            sem->count = 1; /* binary */
+            sem->count = 1;  
         mv_waitqueue_wake_first(&(sem->waitqueue));
     }
 
@@ -563,24 +354,6 @@ int mvKernelExt_SemSignal(int semid)
     return 0;
 }
 
-/*******************************************************************************
-* mvKernelExt_SemUnlockMutexes
-*
-* DESCRIPTION:
-*       Unlock all mutexes locked by dead task
-*
-* INPUTS:
-*       owner   - pointer to kernel's structure of dead task
-*
-* OUTPUTS:
-*       None
-*
-* RETURNS:
-*       None
-*
-* COMMENTS:
-*
-*******************************************************************************/
 static void mvKernelExt_SemUnlockMutexes(
         struct task_struct  *owner
 )
@@ -600,25 +373,6 @@ static void mvKernelExt_SemUnlockMutexes(
     }
 }
 
-/*******************************************************************************
-* mvKernelExt_SemTryWait_common
-*
-* DESCRIPTION:
-*       Try to acquire semaphore without waiting
-*
-* INPUTS:
-*       sem   - pointer to semaphore structure
-*
-* OUTPUTS:
-*       None
-*
-* RETURNS:
-*       Zero if successful
-*       -MVKERNELEXT_EBUSY   - semaphore cannot be taken immediatelly
-*
-* COMMENTS:
-*
-*******************************************************************************/
 static int mvKernelExt_SemTryWait_common(
         mvSemaphoreSTC *sem
 )
@@ -646,26 +400,6 @@ static int mvKernelExt_SemTryWait_common(
     return 0;
 }
 
-/*******************************************************************************
-* mvKernelExt_SemTryWait
-*
-* DESCRIPTION:
-*       Try to acquire semaphore without waiting
-*
-* INPUTS:
-*       semid   - semaphore ID
-*
-* OUTPUTS:
-*       None
-*
-* RETURNS:
-*       Zero if successful
-*       -MVKERNELEXT_EINVAL  - bad ID passed
-*       -MVKERNELEXT_EBUSY   - semaphore cannot be taken immediatelly
-*
-* COMMENTS:
-*
-*******************************************************************************/
 int mvKernelExt_SemTryWait(int semid)
 {
     mvSemaphoreSTC *sem;
@@ -679,28 +413,6 @@ int mvKernelExt_SemTryWait(int semid)
     return ret;
 }
 
-/*******************************************************************************
-* mvKernelExt_SemWait
-*
-* DESCRIPTION:
-*       Wait for semaphore
-*
-* INPUTS:
-*       semid   - semaphore ID
-*
-* OUTPUTS:
-*       None
-*
-* RETURNS:
-*       Zero if successful
-*       -MVKERNELEXT_EINVAL  - bad ID passed
-*       -MVKERNELEXT_ENOMEM  - current task is not registered
-*                              and task array is full
-*       -MVKERNELEXT_EINTR   - wait interrupted
-*
-* COMMENTS:
-*
-*******************************************************************************/
 int mvKernelExt_SemWait(int semid)
 {
     mvSemaphoreSTC *sem;
@@ -746,30 +458,6 @@ int mvKernelExt_SemWait(int semid)
     return 0;
 }
 
-/*******************************************************************************
-* mvKernelExt_SemWaitTimeout
-*
-* DESCRIPTION:
-*       Wait for semaphore
-*
-* INPUTS:
-*       semid   - semaphore ID
-*       timeout - timeout in milliseconds
-*
-* OUTPUTS:
-*       None
-*
-* RETURNS:
-*       Zero if successful
-*       -MVKERNELEXT_EINVAL   - bad ID passed
-*       -MVKERNELEXT_ENOMEM   - current task is not registered
-*                               and task array is full
-*       -MVKERNELEXT_EINTR    - wait interrupted
-*       -MVKERNELEXT_ETIMEOUT - wait timeout
-*
-* COMMENTS:
-*
-*******************************************************************************/
 int mvKernelExt_SemWaitTimeout(
         int semid,
         unsigned long timeout

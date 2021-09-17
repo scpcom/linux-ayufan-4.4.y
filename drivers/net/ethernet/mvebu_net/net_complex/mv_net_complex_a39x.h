@@ -1,32 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
-Copyright (C) Marvell International Ltd. and its affiliates
-
-This software file (the "File") is owned and distributed by Marvell
-International Ltd. and/or its affiliates ("Marvell") under the following
-alternative licensing terms.  Once you have made an election to distribute the
-File under one of the following license alternatives, please (i) delete this
-introductory statement regarding license alternatives, (ii) delete the two
-license alternatives that you have not elected to use and (iii) preserve the
-Marvell copyright notice above.
-
-********************************************************************************
-Marvell GPL License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or
-modify this File in accordance with the terms and conditions of the General
-Public License Version 2, June 1991 (the "GPL License"), a copy of which is
-available along with the File in the license.txt file or on the worldwide web
-at http://www.gnu.org/licenses/gpl.txt.
-
-THE FILE IS DISTRIBUTED AS-IS, WITHOUT WARRANTY OF ANY KIND, AND THE IMPLIED
-WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY
-DISCLAIMED.  The GPL License provides additional details about this warranty
-disclaimer.
-*******************************************************************************/
-
+ 
 #ifndef LINUX_MV_NETCOMPLEX_A39X_H
 #define LINUX_MV_NETCOMPLEX_A39X_H
 
@@ -99,8 +74,6 @@ enum mvNetComplexPhase {
 	MV_NETC_SECOND_PHASE,
 };
 
-/******************************************************************************/
-/* Power managment clock control1 */
 #define MV_NETCOMP_CLOCK_GATING					(MV_NET_COMPLEX_OFFSET)
 
 #define NETC_CLOCK_GATING_SRAM_X2_OFFSET			8
@@ -133,7 +106,6 @@ enum mvNetComplexPhase {
 #define NETC_CLOCK_GATING_QM1_OFFSET				17
 #define NETC_CLOCK_GATING_QM1_MASK				(0x1 << NETC_CLOCK_GATING_QM1_OFFSET)
 
-/* System Soft Reset 1 */
 #define MV_NETCOMP_SYSTEM_SOFT_RESET			(MV_NET_COMPLEX_OFFSET + 0x8)
 
 #define NETC_GOP_SOFT_RESET_OFFSET				6
@@ -151,7 +123,6 @@ enum mvNetComplexPhase {
 #define NETC_NSS_QM1_LOAD_CONF_OFFSET				17
 #define NETC_NSS_QM1_LOAD_CONF_MASK				(0x1 << NETC_NSS_QM1_LOAD_CONF_OFFSET)
 
-/* Ports Control 0 */
 #define MV_NETCOMP_PORTS_CONTROL_0			(MV_NET_COMPLEX_OFFSET + 0x10)
 
 #define NETC_CLK_DIV_PHASE_OFFSET			31
@@ -163,7 +134,6 @@ enum mvNetComplexPhase {
 #define NETC_BUS_WIDTH_SELECT_OFFSET			1
 #define NETC_BUS_WIDTH_SELECT_MASK			(0x1 << NETC_BUS_WIDTH_SELECT_OFFSET)
 
-/* Ports Control 1 */
 #define MV_NETCOMP_PORTS_CONTROL_1			(MV_NET_COMPLEX_OFFSET + 0x14)
 
 #define NETC_PORT_GIG_RF_RESET_OFFSET(port)		(28 + port)
@@ -172,7 +142,6 @@ enum mvNetComplexPhase {
 #define NETC_PORTS_ACTIVE_OFFSET(port)			(0 + port)
 #define NETC_PORTS_ACTIVE_MASK(port)			(0x1 << NETC_PORTS_ACTIVE_OFFSET(port))
 
-/* Networking Complex Control 0 */
 #define MV_NETCOMP_CONTROL_0				(MV_NET_COMPLEX_OFFSET + 0x20)
 
 #define NETC_CTRL_ENA_XAUI_OFFSET			11
@@ -184,13 +153,11 @@ enum mvNetComplexPhase {
 #define NETC_GBE_PORT1_MODE_OFFSET			1
 #define NETC_GBE_PORT1_MODE_MASK			(0x1 << NETC_GBE_PORT1_MODE_OFFSET)
 
-/* Networking Complex AMB Access Control 0 */
 #define MV_NETCOMP_AMB_ACCESS_CTRL_0			(MV_NET_COMPLEX_OFFSET + 0xC0)
 
 #define NETC_AMB_ACCESS_CTRL_OFFSET			24
 #define NETC_AMB_ACCESS_CTRL_MASK			(0xff << NETC_AMB_ACCESS_CTRL_OFFSET)
 
-/* QSGMII Control 1 */
 #define MV_NETCOMP_QSGMII_CTRL_1			(MV_IP_CONFIG_REGS_OFFSET + 0x94)
 
 #define NETC_QSGMII_CTRL_RSTN_OFFSET			31
@@ -202,13 +169,11 @@ enum mvNetComplexPhase {
 #define NETC_QSGMII_CTRL_VERSION_OFFSET			28
 #define NETC_QSGMII_CTRL_VERSION_MASK			(0x1 << NETC_QSGMII_CTRL_VERSION_OFFSET)
 
-/* Function Enable Control 1 */
 #define MV_NETCOMP_FUNCTION_ENABLE_CTRL_1			(MV_MISC_REGS_OFFSET + 0x88)
 
 #define NETC_PACKET_PROCESS_OFFSET			1
 #define NETC_PACKET_PROCESS_MASK			(0x1 << NETC_PACKET_PROCESS_OFFSET)
 
-/* ComPhy Selector */
 #define COMMON_PHYS_SELECTORS_REG			(MV_COMMON_PHY_REGS_OFFSET + 0xFC)
 
 #define COMMON_PHYS_SELECTOR_LANE_OFFSET(lane)		(4 * lane)
@@ -216,8 +181,8 @@ enum mvNetComplexPhase {
 
 #if defined(MY_ABC_HERE)
 int mv_net_complex_dynamic_init(u32 net_comp_config);
-#endif /* MY_ABC_HERE */
+#endif  
 int mv_net_complex_init(u32 net_comp_config, enum mvNetComplexPhase phase);
 void mv_net_complex_nss_select(u32 val);
 
-#endif /* LINUX_MV_NETCOMPLEX_A39X_H */
+#endif  

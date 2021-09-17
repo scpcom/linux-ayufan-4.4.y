@@ -1,17 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) 2008, 2009 Provigent Ltd.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- *
- * Driver for the ARM PrimeCell(tm) General Purpose Input/Output (PL061)
- *
- * Data sheet: ARM DDI 0190B, September 2000
- */
+ 
 #include <linux/spinlock.h>
 #include <linux/errno.h>
 #include <linux/module.h>
@@ -66,10 +56,7 @@ struct pl061_gpio {
 
 static int pl061_gpio_request(struct gpio_chip *chip, unsigned offset)
 {
-	/*
-	 * Map back to global GPIO space and request muxing, the direction
-	 * parameter does not matter for this controller.
-	 */
+	 
 	int gpio = chip->base + offset;
 
 	return pinctrl_request_gpio(gpio);
@@ -116,10 +103,6 @@ static int pl061_direction_output(struct gpio_chip *gc, unsigned offset,
 	gpiodir |= 1 << offset;
 	writeb(gpiodir, chip->base + GPIODIR);
 
-	/*
-	 * gpio value is set again, because pl061 doesn't allow to set value of
-	 * a gpio pin before configuring it in OUT mode.
-	 */
 	writeb(!!value << offset, chip->base + (1 << (offset + 2)));
 	spin_unlock_irqrestore(&chip->lock, flags);
 
@@ -278,20 +261,20 @@ static int pl061_probe(struct amba_device *adev, const struct amba_id *id)
 #if defined(MY_DEF_HERE)
 	} else if (adev->dev.of_node) {
 		const void *ptr;
-		unsigned int baseidx = -1; /* GPIO dynamic allocation */
+		unsigned int baseidx = -1;  
 
 		ptr = of_get_property(adev->dev.of_node, "baseidx", NULL);
 		if (ptr)
 			baseidx = be32_to_cpup(ptr);
 		chip->gc.base = baseidx;
-#endif /* MY_DEF_HERE */
+#endif  
 	} else {
 		chip->gc.base = -1;
 #if defined(MY_DEF_HERE)
-		// do nothing
-#else /* MY_DEF_HERE */
+		 
+#else  
 		irq_base = 0;
-#endif /* MY_DEF_HERE */
+#endif  
 	}
 
 	if (!devm_request_mem_region(dev, adev->res.start,
@@ -321,10 +304,7 @@ static int pl061_probe(struct amba_device *adev, const struct amba_id *id)
 	if (ret)
 		return ret;
 
-	/*
-	 * irq_chip support
-	 */
-	writeb(0, chip->base + GPIOIE); /* disable irqs */
+	writeb(0, chip->base + GPIOIE);  
 	irq = adev->irq[0];
 	if (irq < 0)
 		return -ENODEV;

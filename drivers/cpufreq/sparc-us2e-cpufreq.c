@@ -1,14 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/* us2e_cpufreq.c: UltraSPARC-IIe cpu frequency support
- *
- * Copyright (C) 2003 David S. Miller (davem@redhat.com)
- *
- * Many thanks to Dominik Brodowski for fixing up the cpufreq
- * infrastructure in order to make this driver easier to implement.
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/sched.h>
@@ -28,15 +21,11 @@ struct us2e_freq_percpu_info {
 	struct cpufreq_frequency_table table[6];
 };
 
-/* Indexed by cpu number. */
 static struct us2e_freq_percpu_info *us2e_freq_table;
 
 #define HBIRD_MEM_CNTL0_ADDR	0x1fe0000f010UL
 #define HBIRD_ESTAR_MODE_ADDR	0x1fe0000f080UL
 
-/* UltraSPARC-IIe has five dividers: 1, 2, 4, 6, and 8.  These are controlled
- * in the ESTAR mode control register.
- */
 #define ESTAR_MODE_DIV_1	0x0000000000000000UL
 #define ESTAR_MODE_DIV_2	0x0000000000000001UL
 #define ESTAR_MODE_DIV_4	0x0000000000000003UL
@@ -64,11 +53,11 @@ static void write_hbreg(unsigned long addr, unsigned long val)
 {
 	__asm__ __volatile__("stxa	%0, [%1] %2\n\t"
 			     "membar	#Sync"
-			     : /* no outputs */
+			     :  
 			     : "r" (val), "r" (addr), "i" (ASI_PHYS_BYPASS_EC_E)
 			     : "memory");
 	if (addr == HBIRD_ESTAR_MODE_ADDR) {
-		/* Need to wait 16 clock cycles for the PLL to lock.  */
+		 
 		udelay(1);
 	}
 }
@@ -106,9 +95,6 @@ static void frob_mem_refresh(int cpu_slowing_down,
 	if (cpu_slowing_down && !(mctrl & MCTRL0_SREFRESH_ENAB)) {
 		unsigned long usecs;
 
-		/* We have to wait for both refresh counts (old
-		 * and new) to go to zero.
-		 */
 		usecs = (MCTRL0_REFR_CLKS_P_CNT *
 			 (refr_count + old_refr_count) *
 			 1000000UL *
@@ -127,7 +113,6 @@ static void us2e_transition(unsigned long estar, unsigned long new_bits,
 
 	estar &= ~ESTAR_MODE_DIV_MASK;
 
-	/* This is based upon the state transition diagram in the IIe manual.  */
 	if (old_divisor == 2 && divisor == 1) {
 		self_refresh_ctl(0);
 		write_hbreg(HBIRD_ESTAR_MODE_ADDR, estar | new_bits);
@@ -356,18 +341,18 @@ static int __init us2e_freq_init(void)
 		ret = -ENOMEM;
 #if defined(MY_ABC_HERE)
 		driver = kzalloc(sizeof(*driver), GFP_KERNEL);
-#else /* MY_ABC_HERE */
+#else  
 		driver = kzalloc(sizeof(struct cpufreq_driver), GFP_KERNEL);
-#endif /* MY_ABC_HERE */
+#endif  
 		if (!driver)
 			goto err_out;
 
 #if defined(MY_ABC_HERE)
 		us2e_freq_table = kzalloc((NR_CPUS * sizeof(*us2e_freq_table)),
-#else /* MY_ABC_HERE */
+#else  
 		us2e_freq_table = kzalloc(
 			(NR_CPUS * sizeof(struct us2e_freq_percpu_info)),
-#endif /* MY_ABC_HERE */
+#endif  
 			GFP_KERNEL);
 		if (!us2e_freq_table)
 			goto err_out;
@@ -378,10 +363,10 @@ static int __init us2e_freq_init(void)
 		driver->get = us2e_freq_get;
 		driver->exit = us2e_freq_cpu_exit;
 #if defined(MY_ABC_HERE)
-		// do nothing
-#else /* MY_ABC_HERE */
+		 
+#else  
 		driver->owner = THIS_MODULE,
-#endif /* MY_ABC_HERE */
+#endif  
 		strcpy(driver->name, "UltraSPARC-IIe");
 
 		cpufreq_us2e_driver = driver;

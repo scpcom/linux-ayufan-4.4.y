@@ -1,36 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * sdhci-pltfm.c Support for SDHCI platform devices
- * Copyright (c) 2009 Intel Corporation
- *
- * Copyright (c) 2007, 2011 Freescale Semiconductor, Inc.
- * Copyright (c) 2009 MontaVista Software, Inc.
- *
- * Authors: Xiaobo Xie <X.Xie@freescale.com>
- *	    Anton Vorontsov <avorontsov@ru.mvista.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- */
-
-/* Supports:
- * SDHCI platform devices
- *
- * Inspired by sdhci-pci.c, by Pierre Ossman
- */
-
+ 
 #include <linux/err.h>
 #include <linux/module.h>
 #include <linux/of.h>
@@ -57,12 +28,11 @@ static bool sdhci_of_wp_inverted(struct device_node *np)
 	    of_get_property(np, "wp-inverted", NULL))
 		return true;
 
-	/* Old device trees don't have the wp-inverted property. */
 #ifdef CONFIG_PPC
 	return machine_is(mpc837x_rdb) || machine_is(mpc837x_mds);
 #else
 	return false;
-#endif /* CONFIG_PPC */
+#endif  
 }
 
 void sdhci_get_of_property(struct platform_device *pdev)
@@ -114,7 +84,7 @@ void sdhci_get_of_property(struct platform_device *pdev)
 }
 #else
 void sdhci_get_of_property(struct platform_device *pdev) {}
-#endif /* CONFIG_OF */
+#endif  
 EXPORT_SYMBOL_GPL(sdhci_get_of_property);
 
 struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
@@ -135,7 +105,6 @@ struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
 	if (resource_size(iomem) < 0x100)
 		dev_err(&pdev->dev, "Invalid iomem size!\n");
 
-	/* Some PCI-based MFD need the parent here */
 	if (pdev->dev.parent != &platform_bus && !np)
 		host = sdhci_alloc_host(pdev->dev.parent, sizeof(*pltfm_host));
 	else
@@ -158,10 +127,10 @@ struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
 		host->quirks = pdata->quirks;
 		host->quirks2 = pdata->quirks2;
 	}
-#else /* MY_DEF_HERE */
+#else  
 	if (pdata)
 		host->quirks = pdata->quirks;
-#endif /* MY_DEF_HERE */
+#endif  
 	host->irq = platform_get_irq(pdev, 0);
 
 	if (!request_mem_region(iomem->start, resource_size(iomem),
@@ -178,10 +147,6 @@ struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
 		goto err_remap;
 	}
 
-	/*
-	 * Some platforms need to probe the controller to be able to
-	 * determine which caps should be used.
-	 */
 	if (host->ops && host->ops->platform_init)
 		host->ops->platform_init(host);
 
@@ -263,7 +228,7 @@ const struct dev_pm_ops sdhci_pltfm_pmops = {
 	.resume		= sdhci_pltfm_resume,
 };
 EXPORT_SYMBOL_GPL(sdhci_pltfm_pmops);
-#endif	/* CONFIG_PM */
+#endif	 
 
 static int __init sdhci_pltfm_drv_init(void)
 {

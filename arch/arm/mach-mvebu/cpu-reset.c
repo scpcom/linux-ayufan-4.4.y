@@ -1,16 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) 2013 Marvell
- *
- * Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
- *
- * This file is licensed under the terms of the GNU General Public
- * License version 2.  This program is licensed "as is" without any
- * warranty of any kind, whether express or implied.
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/of_address.h>
@@ -43,21 +34,21 @@ static void synology_restart(char mode, const char *cmd)
 	UART1_WRITE(SET8N1, base_addr, LCR);
 	UART1_WRITE(SOFTWARE_REBOOT, base_addr, TX);
 
-	/* delay for uart1 send the request to uP */
+	
 	mdelay(1000);
-	/* models without microp will go here */
+	
 	printk("Reboot failed -- System halted\n");
 	local_irq_disable();
 	while (1);
 }
-#endif /* MY_ABC_HERE */
+#endif 
 
 static struct of_device_id of_cpu_reset_table[] = {
 	{.compatible = "marvell,armada-370-cpu-reset", .data = (void*) 1 },
 	{.compatible = "marvell,armada-xp-cpu-reset",  .data = (void*) 4 },
 	{.compatible = "marvell,armada-375-cpu-reset", .data = (void*) 2 },
 	{.compatible = "marvell,armada-380-cpu-reset", .data = (void*) 2 },
-	{ /* end of list */ },
+	{  },
 };
 
 static void __iomem *cpu_reset_base;
@@ -116,7 +107,7 @@ int __init mvebu_cpu_reset_init(void)
 #if defined(MY_ABC_HERE)
 	pm_power_off = synology_power_off;
 	arm_pm_restart = synology_restart;
-#endif /* MY_ABC_HERE */
+#endif 
 
 	return 0;
 }

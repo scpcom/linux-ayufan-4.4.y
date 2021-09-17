@@ -1,21 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Cherryview/Braswell pinctrl driver
- *
- * Copyright (C) 2014, Intel Corporation
- * Author: Mika Westerberg <mika.westerberg@linux.intel.com>
- *
- * This driver is based on the original Cherryview GPIO driver by
- *   Ning Li <ning.li@intel.com>
- *   Alan Cox <alan@linux.intel.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/init.h>
@@ -33,7 +19,7 @@
 
 #ifdef MY_DEF_HERE
 #include <linux/delay.h>
-#endif /* MY_DEF_HERE */
+#endif  
 
 #define CHV_INTSTAT			0x300
 #define CHV_INTMASK			0x380
@@ -77,28 +63,12 @@
 #define CHV_PADCTRL1_INTWAKECFG_BOTH	3
 #define CHV_PADCTRL1_INTWAKECFG_LEVEL	4
 
-/**
- * struct chv_alternate_function - A per group or per pin alternate function
- * @pin: Pin number (only used in per pin configs)
- * @mode: Mode the pin should be set in
- * @invert_oe: Invert OE for this pin
- */
 struct chv_alternate_function {
 	unsigned pin;
 	u8 mode;
 	bool invert_oe;
 };
 
-/**
- * struct chv_pincgroup - describes a CHV pin group
- * @name: Name of the group
- * @pins: An array of pins in this group
- * @npins: Number of pins in this group
- * @altfunc: Alternate function applied to all pins in this group
- * @overrides: Alternate function override per pin or %NULL if not used
- * @noverrides: Number of per pin alternate function overrides if
- *              @overrides != NULL.
- */
 struct chv_pingroup {
 	const char *name;
 	const unsigned *pins;
@@ -108,42 +78,17 @@ struct chv_pingroup {
 	size_t noverrides;
 };
 
-/**
- * struct chv_function - A CHV pinmux function
- * @name: Name of the function
- * @groups: An array of groups for this function
- * @ngroups: Number of groups in @groups
- */
 struct chv_function {
 	const char *name;
 	const char * const *groups;
 	size_t ngroups;
 };
 
-/**
- * struct chv_gpio_pinrange - A range of pins that can be used as GPIOs
- * @base: Start pin number
- * @npins: Number of pins in this range
- */
 struct chv_gpio_pinrange {
 	unsigned base;
 	unsigned npins;
 };
 
-/**
- * struct chv_community - A community specific configuration
- * @uid: ACPI _UID used to match the community
- * @pins: All pins in this community
- * @npins: Number of pins
- * @groups: All groups in this community
- * @ngroups: Number of groups
- * @functions: All functions in this community
- * @nfunctions: Number of functions
- * @ngpios: Number of GPIOs in this community
- * @gpio_ranges: An array of GPIO ranges in this community
- * @ngpio_ranges: Number of GPIO ranges
- * @ngpios: Total number of GPIOs in this community
- */
 struct chv_community {
 	const char *uid;
 	const struct pinctrl_pin_desc *pins;
@@ -157,7 +102,7 @@ struct chv_community {
 	size_t ngpios;
 #ifdef MY_DEF_HERE
 	int base;
-#endif /* MY_DEF_HERE */
+#endif  
 };
 
 struct chv_pin_context {
@@ -165,21 +110,6 @@ struct chv_pin_context {
 	u32 padctrl1;
 };
 
-/**
- * struct chv_pinctrl - CHV pinctrl private structure
- * @dev: Pointer to the parent device
- * @pctldesc: Pin controller description
- * @pctldev: Pointer to the pin controller device
- * @chip: GPIO chip in this pin controller
- * @regs: MMIO registers
- * @lock: Lock to serialize register accesses
- * @intr_lines: Stores mapping between 16 HW interrupt wires and GPIO
- *		offset (in GPIO number space)
- * @community: Community this pinctrl instance represents
- *
- * The first group in @groups is expected to contain all pins that can be
- * used as GPIOs.
- */
 struct chv_pinctrl {
 	struct device *dev;
 	struct pinctrl_desc pctldesc;
@@ -319,17 +249,12 @@ static const unsigned southwest_i2c_nfc_pins[] = { 49, 52 };
 static const unsigned southwest_smbus_pins[] = { 79, 81, 82 };
 static const unsigned southwest_spi3_pins[] = { 76, 79, 80, 81, 82 };
 
-/* LPE I2S TXD pins need to have invert_oe set */
 static const struct chv_alternate_function southwest_lpe_altfuncs[] = {
 	ALTERNATE_FUNCTION(30, 1, true),
 	ALTERNATE_FUNCTION(34, 1, true),
 	ALTERNATE_FUNCTION(97, 1, true),
 };
 
-/*
- * Two spi3 chipselects are available in different mode than the main spi3
- * functionality, which is using mode 1.
- */
 static const struct chv_alternate_function southwest_spi3_altfuncs[] = {
 	ALTERNATE_FUNCTION(76, 3, false),
 	ALTERNATE_FUNCTION(80, 3, false),
@@ -370,10 +295,6 @@ static const char * const southwest_i2c6_groups[] = { "i2c6_grp" };
 static const char * const southwest_i2c_nfc_groups[] = { "i2c_nfc_grp" };
 static const char * const southwest_spi3_groups[] = { "spi3_grp" };
 
-/*
- * Only do pinmuxing for certain LPSS devices for now. Rest of the pins are
- * enabled only as GPIOs.
- */
 static const struct chv_function southwest_functions[] = {
 	FUNCTION("uart0", southwest_uart0_groups),
 	FUNCTION("uart1", southwest_uart1_groups),
@@ -414,7 +335,7 @@ static const struct chv_community southwest_community = {
 	.ngpios = ARRAY_SIZE(southwest_pins),
 #ifdef MY_DEF_HERE
 	.base = 0 ,
-#endif /* MY_DEF_HERE */
+#endif  
 };
 
 static const struct pinctrl_pin_desc north_pins[] = {
@@ -500,7 +421,7 @@ static const struct chv_community north_community = {
 	.ngpios = ARRAY_SIZE(north_pins),
 #ifdef MY_DEF_HERE
     .base = 56 ,
-#endif /* MY_DEF_HERE */
+#endif  
 };
 
 static const struct pinctrl_pin_desc east_pins[] = {
@@ -545,7 +466,7 @@ static const struct chv_community east_community = {
 	.ngpios = ARRAY_SIZE(east_pins),
 #ifdef MY_DEF_HERE
     .base = 115 ,
-#endif /* MY_DEF_HERE */
+#endif  
 };
 
 static const struct pinctrl_pin_desc southeast_pins[] = {
@@ -673,7 +594,7 @@ static const struct chv_community southeast_community = {
 	.ngpios = ARRAY_SIZE(southeast_pins),
 #ifdef MY_DEF_HERE
     .base = 139 ,
-#endif /* MY_DEF_HERE */
+#endif  
 };
 
 static const struct chv_community *chv_communities[] = {
@@ -698,11 +619,10 @@ static void __iomem *chv_padreg(struct chv_pinctrl *pctrl, unsigned offset,
 static void chv_writel(u32 value, void __iomem *reg)
 {
 	writel(value, reg);
-	/* simple readback to confirm the bus transferring done */
+	 
 	readl(reg);
 }
 
-/* When Pad Cfg is locked, driver can only change GPIOTXState or GPIORXState */
 static bool chv_pad_locked(struct chv_pinctrl *pctrl, unsigned offset)
 {
 	void __iomem *reg;
@@ -784,7 +704,7 @@ static struct pinctrl_desc chv_pinctrl_desc = {
 #ifdef MY_DEF_HERE
 static int chv_gpio_request(struct gpio_chip *chip, unsigned offset)
 {
-	int iRet = -EBUSY; // We do not want native function pin to be muxed
+	int iRet = -EBUSY;  
 	u32 value;
 	void __iomem *reg;
 	unsigned long flags;
@@ -798,7 +718,7 @@ static int chv_gpio_request(struct gpio_chip *chip, unsigned offset)
 	spin_unlock_irqrestore(&pctrl->lock, flags);
 
 	if (value){
-		iRet = 0; // only return success if the requested pin is a GPIO pin already
+		iRet = 0;  
 	}
 
 	return iRet;
@@ -806,9 +726,9 @@ static int chv_gpio_request(struct gpio_chip *chip, unsigned offset)
 
 static void chv_gpio_free(struct gpio_chip *chip, unsigned offset)
 {
-    // we don't want GPIO pin to be freed
+     
 }
-#else /* MY_DEF_HERE */
+#else  
 static int chv_gpio_request(struct gpio_chip *chip, unsigned offset)
 {
 	return pinctrl_request_gpio(chip->base + offset);
@@ -818,7 +738,7 @@ static void chv_gpio_free(struct gpio_chip *chip, unsigned offset)
 {
 	pinctrl_free_gpio(chip->base + offset);
 }
-#endif /* MY_DEF_HERE */
+#endif  
 
 static unsigned chv_gpio_offset_to_pin(struct chv_pinctrl *pctrl,
 				       unsigned offset)
@@ -851,7 +771,7 @@ static void chv_gpio_set(struct gpio_chip *chip, unsigned offset, int value)
 	u32 ctrl0;
 #ifdef MY_DEF_HERE
 	int iRetry = 0;
-#endif /* MY_DEF_HERE */
+#endif  
 
 	spin_lock_irqsave(&pctrl->lock, flags);
 
@@ -879,7 +799,7 @@ static void chv_gpio_set(struct gpio_chip *chip, unsigned offset, int value)
 	if (iRetry != 0) {
 		printk("finish GPIO rewrite %d retry\n", iRetry);
 	}
-#endif /* MY_DEF_HERE */
+#endif  
 
 	spin_unlock_irqrestore(&pctrl->lock, flags);
 }
@@ -898,7 +818,7 @@ static int chv_gpio_get_direction(struct gpio_chip *chip, unsigned offset)
 	return direction != CHV_PADCTRL0_GPIOCFG_GPO;
 }
 #ifdef MY_DEF_HERE
-/* we do not want the direction to be changed at all */
+ 
 static int chv_gpio_direction_input(struct gpio_chip *chip, unsigned offset)
 {
 	return -ENOSYS;
@@ -909,7 +829,7 @@ static int chv_gpio_direction_output(struct gpio_chip *chip, unsigned offset,
 {
 	return -ENOSYS;
 }
-#else /* MY_DEF_HERE */
+#else  
 static int chv_gpio_direction_input(struct gpio_chip *chip, unsigned offset)
 {
 	return pinctrl_gpio_direction_input(chip->base + offset);
@@ -921,7 +841,7 @@ static int chv_gpio_direction_output(struct gpio_chip *chip, unsigned offset,
 	chv_gpio_set(chip, offset, value);
 	return pinctrl_gpio_direction_output(chip->base + offset);
 }
-#endif /* MY_DEF_HERE */
+#endif  
 static const struct gpio_chip chv_gpio_chip = {
 	.owner = THIS_MODULE,
 	.request = chv_gpio_request,
@@ -945,11 +865,11 @@ static int chv_gpio_probe(struct chv_pinctrl *pctrl, int irq)
 	chip->label = dev_name(pctrl->dev);
 	chip->dev = pctrl->dev;
 #ifdef MY_DEF_HERE
-	chip->base = pctrl->community->base; // Use the pre-coded GPIO base insteaded of dynamic assignment
+	chip->base = pctrl->community->base;  
 	printk(KERN_INFO"cherryview-pinctrl: Adding GPIO Controller - Pin ranged %d ~ %d \n", chip->base, (chip->base + chip->ngpio - 1));
-#else /* MY_DEF_HERE */
+#else  
 	chip->base = -1;
-#endif /* MY_DEF_HERE */
+#endif  
 	ret = gpiochip_add(chip);
 	if (ret) {
 		dev_err(pctrl->dev, "Failed to register gpiochip\n");

@@ -1,14 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * st-lpc-wdt.c
- *
- * Copyright (C) STMicroelectronics SA 2013
- * Author:  David Paris <david.paris@st.com> for STMicroelectronics.
- * License terms:  GNU General Public License (GPL), version 2
- */
-
+ 
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/watchdog.h>
@@ -21,14 +14,13 @@
 #include <linux/regmap.h>
 #include <linux/mfd/syscon.h>
 
-/* Low Power Alarm */
 #define LPC_LPA_LSB_OFF		0x410
 #define LPC_LPA_START_OFF	0x418
-/* LPC as WDT */
+ 
 #define LPC_WDT_OFF		0x510
 
 #define WATCHDOG_MIN		1
-#define WATCHDOG_MAX32		4294967 /* 32bit resolution */
+#define WATCHDOG_MAX32		4294967  
 
 #define WDT_ENABLE		1
 #define WDT_DISABLE		0
@@ -101,18 +93,9 @@ static struct of_device_id st_lpc_wdt_match[] = {
 
 MODULE_DEVICE_TABLE(of, st_lpc_wdt_match);
 
-/*
- * st_lpc_wdt_setup:
- * Configure how LPC watchdog interrupt acts on platform
- *	enable: 0: No platform reboot when watchdog occurs
- *		1: Platform will reboot when watchdog occurs
- */
 static void st_lpc_wdt_setup(bool enable)
 {
-	/*
-	 * Here we choose type of watchdog reset
-	 * 0: Cold 1: Warm
-	 */
+	 
 	if (lpc_wdt.cpurst->type) {
 		regmap_update_bits(lpc_wdt.cpurst->syscfg,
 				lpc_wdt.cpurst->type,
@@ -120,37 +103,20 @@ static void st_lpc_wdt_setup(bool enable)
 				lpc_wdt.rst_type);
 	}
 
-	/*
-	 * Here we mask/unmask watchdog reset
-	 */
 	regmap_update_bits(lpc_wdt.cpurst->syscfg,
 			lpc_wdt.cpurst->mask,
 			lpc_wdt.cpurst->mask_msk,
 			!enable);
 }
 
-/*
- * st_lpc_wdt_load_timer:
- * API to load the watchdog timeout value in the LPA down counter
- *	timeout: watchdog timeout in seconds
- */
 static void st_lpc_wdt_load_timer(unsigned int timeout)
 {
 	timeout *= clk_get_rate(lpc_wdt.clk);
 
-	/*
-	 * Write only LSB as timeout in Watchdog
-	 * framework is 32bits only
-	 */
 	writel_relaxed(timeout, lpc_wdt.ioaddr + LPC_LPA_LSB_OFF);
 	writel_relaxed(1, lpc_wdt.ioaddr + LPC_LPA_START_OFF);
 }
 
-/*
- * st_lpc_wdt_start:
- * API to start to LPA downcounting
- *	wdd: the watchdog to start
- */
 static int st_lpc_wdt_start(struct watchdog_device *wdd)
 {
 	writel_relaxed(1, lpc_wdt.ioaddr + LPC_WDT_OFF);
@@ -158,11 +124,6 @@ static int st_lpc_wdt_start(struct watchdog_device *wdd)
 	return 0;
 }
 
-/*
- * st_lpc_wdt_stop:
- * API to stop to LPA downcounting
- *	wdd: the watchdog to stop
- */
 static int st_lpc_wdt_stop(struct watchdog_device *wdd)
 {
 	writel_relaxed(0, lpc_wdt.ioaddr + LPC_WDT_OFF);
@@ -170,13 +131,6 @@ static int st_lpc_wdt_stop(struct watchdog_device *wdd)
 	return 0;
 }
 
-/*
- * st_lpc_wdt_set_timeout:
- * API calls by watchdog framework to load the watchdog
- * timeout value.
- *	wdd: the watchdog device to configure
- *	timeout: the watchdog timeout in seconds
- */
 static int st_lpc_wdt_set_timeout(struct watchdog_device *wdd,
 				 unsigned int timeout)
 {
@@ -186,11 +140,6 @@ static int st_lpc_wdt_set_timeout(struct watchdog_device *wdd,
 	return 0;
 }
 
-/*
- * st_lpc_wdt_keep_alive:
- * API to kick the watchdog
- *	wdd: the watchdog device to kick
- */
 static int st_lpc_wdt_keepalive(struct watchdog_device *wdd)
 {
 	st_lpc_wdt_load_timer(wdd->timeout);
@@ -222,9 +171,7 @@ static struct watchdog_device lpc_wdt_dev = {
 #ifdef CONFIG_PM_SLEEP
 static int st_lpc_wdt_suspend(struct device *dev)
 {
-	/*
-	 * Stop watchdog during suspend
-	 */
+	 
 	if (watchdog_active(&lpc_wdt_dev))
 		st_lpc_wdt_stop(&lpc_wdt_dev);
 
@@ -237,9 +184,6 @@ static int st_lpc_wdt_resume(struct device *dev)
 {
 	st_lpc_wdt_setup(WDT_ENABLE);
 
-	/*
-	 * Re-start watchdog if it was active before suspend
-	 */
 	if (watchdog_active(&lpc_wdt_dev)) {
 		st_lpc_wdt_load_timer(lpc_wdt_dev.timeout);
 		st_lpc_wdt_start(&lpc_wdt_dev);
@@ -253,13 +197,11 @@ SIMPLE_DEV_PM_OPS(st_lpc_wdt_pm_ops, st_lpc_wdt_suspend, st_lpc_wdt_resume);
 #else
 #define ST_LPC_WDT_PM	NULL
 #endif
-#else /* MY_DEF_HERE */
+#else  
 #ifdef CONFIG_PM
 static int st_lpc_wdt_suspend(struct device *dev)
 {
-	/*
-	 * Stop watchdog during suspend
-	 */
+	 
 	if (watchdog_active(&lpc_wdt_dev))
 		st_lpc_wdt_stop(&lpc_wdt_dev);
 
@@ -272,9 +214,6 @@ static int st_lpc_wdt_resume(struct device *dev)
 {
 	st_lpc_wdt_setup(WDT_ENABLE);
 
-	/*
-	 * Re-start watchdog if it was active before suspend
-	 */
 	if (watchdog_active(&lpc_wdt_dev)) {
 		st_lpc_wdt_load_timer(lpc_wdt_dev.timeout);
 		st_lpc_wdt_start(&lpc_wdt_dev);
@@ -288,7 +227,7 @@ SIMPLE_DEV_PM_OPS(st_lpc_wdt_pm_ops, st_lpc_wdt_suspend, st_lpc_wdt_resume);
 #else
 #define ST_LPC_WDT_PM	NULL
 #endif
-#endif /* MY_DEF_HERE */
+#endif  
 
 static int st_lpc_wdt_probe(struct platform_device *pdev)
 {
@@ -343,7 +282,6 @@ static int st_lpc_wdt_probe(struct platform_device *pdev)
 		return ret;
 	}
 
-	/* Init Watchdog timeout with value in DT */
 	watchdog_init_timeout(&lpc_wdt_dev, 0, dev);
 
 	st_lpc_wdt_setup(WDT_ENABLE);

@@ -1,16 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Driver for TI BQ32000 RTC.
- *
- * Copyright (C) 2009 Semihalf.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
-
+ 
 #include <linux/module.h>
 #include <linux/i2c.h>
 #include <linux/rtc.h>
@@ -19,19 +10,19 @@
 #include <linux/bcd.h>
 #if defined(MY_DEF_HERE)
 #include <linux/delay.h>
-#endif /* MY_DEF_HERE */
+#endif  
 
-#define BQ32K_SECONDS		0x00	/* Seconds register address */
-#define BQ32K_SECONDS_MASK	0x7F	/* Mask over seconds value */
-#define BQ32K_STOP		0x80	/* Oscillator Stop flat */
+#define BQ32K_SECONDS		0x00	 
+#define BQ32K_SECONDS_MASK	0x7F	 
+#define BQ32K_STOP		0x80	 
 
-#define BQ32K_MINUTES		0x01	/* Minutes register address */
-#define BQ32K_MINUTES_MASK	0x7F	/* Mask over minutes value */
-#define BQ32K_OF		0x80	/* Oscillator Failure flag */
+#define BQ32K_MINUTES		0x01	 
+#define BQ32K_MINUTES_MASK	0x7F	 
+#define BQ32K_OF		0x80	 
 
-#define BQ32K_HOURS_MASK	0x3F	/* Mask over hours value */
-#define BQ32K_CENT		0x40	/* Century flag */
-#define BQ32K_CENT_EN		0x80	/* Century flag enable bit */
+#define BQ32K_HOURS_MASK	0x3F	 
+#define BQ32K_CENT		0x40	 
+#define BQ32K_CENT_EN		0x80	 
 
 struct bq32k_regs {
 	uint8_t		seconds;
@@ -63,9 +54,9 @@ static int bq32k_read(struct device *dev, void *data, uint8_t off, uint8_t len)
 	};
 
 #if defined(MY_DEF_HERE)
-	/* temporary fix: without this delay, this function may fail */
+	 
 	udelay(30);
-#endif /* MY_DEF_HERE */
+#endif  
 	if (i2c_transfer(client->adapter, msgs, 2) == 2)
 		return 0;
 
@@ -143,7 +134,6 @@ static int bq32k_probe(struct i2c_client *client,
 	if (!i2c_check_functionality(client->adapter, I2C_FUNC_I2C))
 		return -ENODEV;
 
-	/* Check Oscillator Stop flag */
 	error = bq32k_read(dev, &reg, BQ32K_SECONDS, 1);
 	if (!error && (reg & BQ32K_STOP)) {
 		dev_warn(dev, "Oscillator was halted. Restarting...\n");
@@ -153,7 +143,6 @@ static int bq32k_probe(struct i2c_client *client,
 	if (error)
 		return error;
 
-	/* Check Oscillator Failure flag */
 	error = bq32k_read(dev, &reg, BQ32K_MINUTES, 1);
 	if (!error && (reg & BQ32K_OF)) {
 		dev_warn(dev, "Oscillator Failure. Check RTC battery.\n");

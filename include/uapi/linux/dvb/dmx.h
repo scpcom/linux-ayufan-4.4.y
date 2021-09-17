@@ -1,29 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * dmx.h
- *
- * Copyright (C) 2000 Marcus Metzler <marcus@convergence.de>
- *                  & Ralph  Metzler <ralph@convergence.de>
- *                    for convergence integrated media GmbH
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public License
- * as published by the Free Software Foundation; either version 2.1
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- *
- */
-
+ 
 #ifndef _UAPI_DVBDMX_H_
 #define _UAPI_DVBDMX_H_
 
@@ -36,19 +14,18 @@
 
 typedef enum
 {
-	DMX_OUT_DECODER, /* Streaming directly to decoder. */
-	DMX_OUT_TAP,     /* Output going to a memory buffer */
-			 /* (to be retrieved via the read command).*/
-	DMX_OUT_TS_TAP,  /* Output multiplexed into a new TS  */
-			 /* (to be retrieved by reading from the */
-			 /* logical DVR device).                 */
-	DMX_OUT_TSDEMUX_TAP /* Like TS_TAP but retrieved from the DMX device */
+	DMX_OUT_DECODER,  
+	DMX_OUT_TAP,      
+			  
+	DMX_OUT_TS_TAP,   
+			  
+	DMX_OUT_TSDEMUX_TAP  
 } dmx_output_t;
 
 typedef enum
 {
-	DMX_IN_FRONTEND, /* Input from a front-end device.  */
-	DMX_IN_DVR       /* Input from the logical DVR device.  */
+	DMX_IN_FRONTEND,  
+	DMX_IN_DVR        
 } dmx_input_t;
 
 typedef enum dmx_ts_pes
@@ -249,9 +226,9 @@ typedef enum dmx_ts_pes
 	DMX_PES_PCR31,
 
 	DMX_PES_LAST
-#else /* MY_DEF_HERE */
+#else  
 	DMX_PES_OTHER
-#endif /* MY_DEF_HERE */
+#endif  
 } dmx_pes_type_t;
 
 #define DMX_PES_AUDIO    DMX_PES_AUDIO0
@@ -311,7 +288,7 @@ typedef enum {
 	DMX_SOURCE_FRONT13,
 	DMX_SOURCE_FRONT14,
 	DMX_SOURCE_FRONT15,
-#endif /* MY_DEF_HERE */
+#endif  
 	DMX_SOURCE_DVR0   = 16,
 	DMX_SOURCE_DVR1,
 	DMX_SOURCE_DVR2,
@@ -329,15 +306,15 @@ typedef enum {
 	DMX_SOURCE_DVR13,
 	DMX_SOURCE_DVR14,
 	DMX_SOURCE_DVR15
-#else /* MY_DEF_HERE */
+#else  
 	DMX_SOURCE_DVR3
-#endif /* MY_DEF_HERE */
+#endif  
 } dmx_source_t;
 
 struct dmx_stc {
-	unsigned int num;	/* input : which STC? 0..N */
-	unsigned int base;	/* output: divisor for stc to get 90 kHz clock */
-	__u64 stc;		/* output: stc in 'base'*90 kHz units */
+	unsigned int num;	 
+	unsigned int base;	 
+	__u64 stc;		 
 };
 
 #define DMX_START                _IO('o', 41)
@@ -352,4 +329,4 @@ struct dmx_stc {
 #define DMX_ADD_PID              _IOW('o', 51, __u16)
 #define DMX_REMOVE_PID           _IOW('o', 52, __u16)
 
-#endif /* _UAPI_DVBDMX_H_ */
+#endif  

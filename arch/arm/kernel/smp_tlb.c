@@ -1,15 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  linux/arch/arm/kernel/smp_tlb.c
- *
- *  Copyright (C) 2002 ARM Limited, All Rights Reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
+ 
 #include <linux/preempt.h>
 #include <linux/smp.h>
 
@@ -17,11 +9,6 @@
 #include <asm/tlbflush.h>
 #include <asm/mmu_context.h>
 
-/**********************************************************************/
-
-/*
- * TLB operations
- */
 struct tlb_args {
 	struct vm_area_struct *ta_vma;
 	unsigned long ta_start;
@@ -78,7 +65,6 @@ static int erratum_a15_798181(void)
 {
 	unsigned int midr = read_cpuid_id();
 
-	/* Cortex-A15 r0p0..r3p2 affected */
 	if ((midr & 0xff0ffff0) != 0x410fc0f0 || midr > 0x413fc0f2)
 		return 0;
 	return 1;
@@ -126,9 +112,9 @@ void flush_tlb_all(void)
 	else
 #if defined (MY_DEF_HERE)
 		__flush_tlb_all();
-#else /* MY_DEF_HERE */
+#else  
 		local_flush_tlb_all();
-#endif /* MY_DEF_HERE */
+#endif  
 	broadcast_tlb_a15_erratum();
 }
 
@@ -139,9 +125,9 @@ void flush_tlb_mm(struct mm_struct *mm)
 	else
 #if defined (MY_DEF_HERE)
 		__flush_tlb_mm(mm);
-#else /* MY_DEF_HERE */
+#else  
 		local_flush_tlb_mm(mm);
-#endif /* MY_DEF_HERE */
+#endif  
 	broadcast_tlb_mm_a15_erratum(mm);
 }
 
@@ -156,9 +142,9 @@ void flush_tlb_page(struct vm_area_struct *vma, unsigned long uaddr)
 	} else
 #if defined (MY_DEF_HERE)
 		__flush_tlb_page(vma, uaddr);
-#else /* MY_DEF_HERE */
+#else  
 		local_flush_tlb_page(vma, uaddr);
-#endif /* MY_DEF_HERE */
+#endif  
 	broadcast_tlb_mm_a15_erratum(vma->vm_mm);
 }
 
@@ -171,9 +157,9 @@ void flush_tlb_kernel_page(unsigned long kaddr)
 	} else
 #if defined (MY_DEF_HERE)
 		__flush_tlb_kernel_page(kaddr);
-#else /* MY_DEF_HERE */
+#else  
 		local_flush_tlb_kernel_page(kaddr);
-#endif /* MY_DEF_HERE */
+#endif  
 	broadcast_tlb_a15_erratum();
 }
 
@@ -211,7 +197,7 @@ void flush_bp_all(void)
 	else
 #if defined (MY_DEF_HERE)
 		__flush_bp_all();
-#else /* MY_DEF_HERE */
+#else  
 		local_flush_bp_all();
-#endif /* MY_DEF_HERE */
+#endif  
 }

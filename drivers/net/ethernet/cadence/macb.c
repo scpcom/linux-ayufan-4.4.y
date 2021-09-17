@@ -1,16 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Cadence MACB/GEM Ethernet Controller driver
- *
- * Copyright (C) 2004-2006 Atmel Corporation
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
-
+ 
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 #include <linux/clk.h>
 #include <linux/module.h>
@@ -36,13 +27,12 @@
 #include "macb.h"
 
 #define RX_BUFFER_SIZE		128
-#define RX_RING_SIZE		512 /* must be power of 2 */
+#define RX_RING_SIZE		512  
 #define RX_RING_BYTES		(sizeof(struct macb_dma_desc) * RX_RING_SIZE)
 
-#define TX_RING_SIZE		128 /* must be power of 2 */
+#define TX_RING_SIZE		128  
 #define TX_RING_BYTES		(sizeof(struct macb_dma_desc) * TX_RING_SIZE)
 
-/* level of occupied TX descriptors under which we wake up TX process */
 #define MACB_TX_WAKEUP_THRESH	(3 * TX_RING_SIZE / 4)
 
 #define MACB_RX_INT_FLAGS	(MACB_BIT(RCOMP) | MACB_BIT(RXUBR)	\
@@ -52,13 +42,8 @@
 					| MACB_BIT(TXERR))
 #define MACB_TX_INT_FLAGS	(MACB_TX_ERR_FLAGS | MACB_BIT(TCOMP))
 
-/*
- * Graceful stop timeouts in us. We should allow up to
- * 1 frame time (10 Mbits/s, full-duplex, ignoring collisions)
- */
 #define MACB_HALT_TIMEOUT	1230
 
-/* Ring buffer accessors */
 static unsigned int macb_tx_ring_wrap(unsigned int index)
 {
 	return index & (TX_RING_SIZE - 1);
@@ -108,7 +93,6 @@ void macb_set_hwaddr(struct macb *bp)
 	top = cpu_to_le16(*((u16 *)(bp->dev->dev_addr + 4)));
 	macb_or_gem_writel(bp, SA1T, top);
 
-	/* Clear unused address register sets */
 	macb_or_gem_writel(bp, SA2B, 0);
 	macb_or_gem_writel(bp, SA2T, 0);
 	macb_or_gem_writel(bp, SA3B, 0);
@@ -128,7 +112,6 @@ void macb_get_hwaddr(struct macb *bp)
 
 	pdata = bp->pdev->dev.platform_data;
 
-	/* Check all 4 address register for vaild address */
 	for (i = 0; i < 4; i++) {
 		bottom = macb_or_gem_readl(bp, SA1B + i * 8);
 		top = macb_or_gem_readl(bp, SA1T + i * 8);
@@ -171,7 +154,6 @@ static int macb_mdio_read(struct mii_bus *bus, int mii_id, int regnum)
 			      | MACB_BF(REGA, regnum)
 			      | MACB_BF(CODE, MACB_MAN_CODE)));
 
-	/* wait for end of transfer */
 	while (!MACB_BFEXT(IDLE, macb_readl(bp, NSR)))
 		cpu_relax();
 
@@ -192,7 +174,6 @@ static int macb_mdio_write(struct mii_bus *bus, int mii_id, int regnum,
 			      | MACB_BF(CODE, MACB_MAN_CODE)
 			      | MACB_BF(DATA, value)));
 
-	/* wait for end of transfer */
 	while (!MACB_BFEXT(IDLE, macb_readl(bp, NSR)))
 		cpu_relax();
 
@@ -265,7 +246,6 @@ static void macb_handle_link_change(struct net_device *dev)
 	}
 }
 
-/* based on au1000_eth. c*/
 static int macb_mii_probe(struct net_device *dev)
 {
 	struct macb *bp = netdev_priv(dev);
@@ -289,7 +269,6 @@ static int macb_mii_probe(struct net_device *dev)
 		}
 	}
 
-	/* attach the mac to the phy */
 	ret = phy_connect_direct(dev, phydev, &macb_handle_link_change,
 				 bp->phy_interface);
 	if (ret) {
@@ -297,7 +276,6 @@ static int macb_mii_probe(struct net_device *dev)
 		return ret;
 	}
 
-	/* mask with MAC supported features */
 	if (macb_is_gem(bp))
 		phydev->supported &= PHY_GBIT_FEATURES;
 	else
@@ -318,7 +296,6 @@ int macb_mii_init(struct macb *bp)
 	struct macb_platform_data *pdata;
 	int err = -ENXIO, i;
 
-	/* Enable management port */
 	macb_writel(bp, NCR, MACB_BIT(MPE));
 
 	bp->mii_bus = mdiobus_alloc();
@@ -413,23 +390,12 @@ static void macb_tx_error_task(struct work_struct *work)
 	netdev_vdbg(bp->dev, "macb_tx_error_task: t = %u, h = %u\n",
 		    bp->tx_tail, bp->tx_head);
 
-	/* Make sure nobody is trying to queue up new packets */
 	netif_stop_queue(bp->dev);
 
-	/*
-	 * Stop transmission now
-	 * (in case we have just queued new packets)
-	 */
 	if (macb_halt_tx(bp))
-		/* Just complain for now, reinitializing TX path can be good */
+		 
 		netdev_err(bp->dev, "BUG: halt tx timed out\n");
 
-	/* No need for the lock here as nobody will interrupt us anymore */
-
-	/*
-	 * Treat frames in TX queue including the ones that caused the error.
-	 * Free transmit buffers in upper layer.
-	 */
 	for (tail = bp->tx_tail; tail != bp->tx_head; tail++) {
 		struct macb_dma_desc	*desc;
 		u32			ctrl;
@@ -445,11 +411,7 @@ static void macb_tx_error_task(struct work_struct *work)
 			bp->stats.tx_packets++;
 			bp->stats.tx_bytes += skb->len;
 		} else {
-			/*
-			 * "Buffers exhausted mid-frame" errors may only happen
-			 * if the driver is buggy, so complain loudly about those.
-			 * Statistics are updated by hardware.
-			 */
+			 
 			if (ctrl & MACB_BIT(TX_BUF_EXHAUSTED))
 				netdev_err(bp->dev,
 					   "BUG: TX buffers exhausted mid-frame\n");
@@ -463,18 +425,14 @@ static void macb_tx_error_task(struct work_struct *work)
 		dev_kfree_skb(skb);
 	}
 
-	/* Make descriptor updates visible to hardware */
 	wmb();
 
-	/* Reinitialize the TX desc queue */
 	macb_writel(bp, TBQP, bp->tx_ring_dma);
-	/* Make TX ring reflect state of hardware */
+	 
 	bp->tx_head = bp->tx_tail = 0;
 
-	/* Now we are ready to start transmission again */
 	netif_wake_queue(bp->dev);
 
-	/* Housework before enabling TX IRQ */
 	macb_writel(bp, TSR, macb_readl(bp, TSR));
 	macb_writel(bp, IER, MACB_TX_INT_FLAGS);
 }
@@ -503,7 +461,6 @@ static void macb_tx_interrupt(struct macb *bp)
 
 		desc = macb_tx_desc(bp, tail);
 
-		/* Make hw descriptor updates visible to CPU */
 		rmb();
 
 		ctrl = desc->ctrl;
@@ -547,15 +504,6 @@ static int macb_rx_frame(struct macb *bp, unsigned int first_frag,
 		macb_rx_ring_wrap(first_frag),
 		macb_rx_ring_wrap(last_frag), len);
 
-	/*
-	 * The ethernet header starts NET_IP_ALIGN bytes into the
-	 * first buffer. Since the header is 14 bytes, this makes the
-	 * payload word-aligned.
-	 *
-	 * Instead of calling skb_reserve(NET_IP_ALIGN), we just copy
-	 * the two padding bytes into the skb so that we avoid hitting
-	 * the slowpath in memcpy(), and pull them off afterwards.
-	 */
 	skb = netdev_alloc_skb(bp->dev, len + NET_IP_ALIGN);
 	if (!skb) {
 		bp->stats.rx_dropped++;
@@ -566,7 +514,6 @@ static int macb_rx_frame(struct macb *bp, unsigned int first_frag,
 				break;
 		}
 
-		/* Make descriptor updates visible to hardware */
 		wmb();
 
 		return 1;
@@ -594,7 +541,6 @@ static int macb_rx_frame(struct macb *bp, unsigned int first_frag,
 			break;
 	}
 
-	/* Make descriptor updates visible to hardware */
 	wmb();
 
 	__skb_pull(skb, NET_IP_ALIGN);
@@ -609,7 +555,6 @@ static int macb_rx_frame(struct macb *bp, unsigned int first_frag,
 	return 0;
 }
 
-/* Mark DMA descriptors from begin up to and not including end as unused */
 static void discard_partial_frame(struct macb *bp, unsigned int begin,
 				  unsigned int end)
 {
@@ -620,14 +565,8 @@ static void discard_partial_frame(struct macb *bp, unsigned int begin,
 		desc->addr &= ~MACB_BIT(RX_USED);
 	}
 
-	/* Make descriptor updates visible to hardware */
 	wmb();
 
-	/*
-	 * When this happens, the hardware stats registers for
-	 * whatever caused this is updated, so we don't have to record
-	 * anything.
-	 */
 }
 
 static int macb_rx(struct macb *bp, int budget)
@@ -640,7 +579,6 @@ static int macb_rx(struct macb *bp, int budget)
 		struct macb_dma_desc *desc = macb_rx_desc(bp, tail);
 		u32 addr, ctrl;
 
-		/* Make hw descriptor updates visible to CPU */
 		rmb();
 
 		addr = desc->addr;
@@ -694,19 +632,12 @@ static int macb_poll(struct napi_struct *napi, int budget)
 	if (work_done < budget) {
 		napi_complete(napi);
 
-		/*
-		 * We've done what we can to clean the buffers. Make sure we
-		 * get notified when new packets arrive.
-		 */
 		macb_writel(bp, IER, MACB_RX_INT_FLAGS);
 
-		/* Packets received while interrupts were disabled */
 		status = macb_readl(bp, RSR);
 		if (unlikely(status))
 			napi_reschedule(napi);
 	}
-
-	/* TODO: Handle errors */
 
 	return work_done;
 }
@@ -725,7 +656,7 @@ static irqreturn_t macb_interrupt(int irq, void *dev_id)
 	spin_lock(&bp->lock);
 
 	while (status) {
-		/* close possible race with dev_close */
+		 
 		if (unlikely(!netif_running(dev))) {
 			macb_writel(bp, IDR, -1);
 			break;
@@ -734,13 +665,7 @@ static irqreturn_t macb_interrupt(int irq, void *dev_id)
 		netdev_vdbg(bp->dev, "isr = 0x%08lx\n", (unsigned long)status);
 
 		if (status & MACB_RX_INT_FLAGS) {
-			/*
-			 * There's no point taking any more interrupts
-			 * until we have processed the buffers. The
-			 * scheduling call may fail if the poll routine
-			 * is already scheduled, so disable interrupts
-			 * now.
-			 */
+			 
 			macb_writel(bp, IDR, MACB_RX_INT_FLAGS);
 			if (bp->caps & MACB_CAPS_ISR_CLEAR_ON_WRITE)
 				macb_writel(bp, ISR, MACB_BIT(RCOMP));
@@ -760,13 +685,8 @@ static irqreturn_t macb_interrupt(int irq, void *dev_id)
 		if (status & MACB_BIT(TCOMP))
 			macb_tx_interrupt(bp);
 
-		/*
-		 * Link change detection isn't possible with RMII, so we'll
-		 * add that if/when we get our hands on a full-blown MII PHY.
-		 */
-
 		if (status & MACB_BIT(ISR_ROVR)) {
-			/* We missed at least one packet */
+			 
 			if (macb_is_gem(bp))
 				bp->hw_stats.gem.rx_overruns++;
 			else
@@ -774,11 +694,7 @@ static irqreturn_t macb_interrupt(int irq, void *dev_id)
 		}
 
 		if (status & MACB_BIT(HRESP)) {
-			/*
-			 * TODO: Reset the hardware, and maybe move the
-			 * netdev_err to a lower-priority context as well
-			 * (work queue?)
-			 */
+			 
 			netdev_err(dev, "DMA bus error: HRESP not OK\n");
 		}
 
@@ -791,10 +707,7 @@ static irqreturn_t macb_interrupt(int irq, void *dev_id)
 }
 
 #ifdef CONFIG_NET_POLL_CONTROLLER
-/*
- * Polling receive - used by netconsole and other diagnostic tools
- * to allow network i/o with interrupts disabled.
- */
+ 
 static void macb_poll_controller(struct net_device *dev)
 {
 	unsigned long flags;
@@ -827,7 +740,6 @@ static int macb_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	len = skb->len;
 	spin_lock_irqsave(&bp->lock, flags);
 
-	/* This is a hard error, log it. */
 	if (CIRC_SPACE(bp->tx_head, bp->tx_tail, TX_RING_SIZE) < 1) {
 		netif_stop_queue(dev);
 		spin_unlock_irqrestore(&bp->lock, flags);
@@ -858,7 +770,6 @@ static int macb_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	desc->addr = mapping;
 	desc->ctrl = ctrl;
 
-	/* Make newly initialized descriptor visible to hardware */
 	wmb();
 
 	skb_tx_timestamp(skb);
@@ -964,20 +875,14 @@ static void macb_init_rings(struct macb *bp)
 
 static void macb_reset_hw(struct macb *bp)
 {
-	/*
-	 * Disable RX and TX (XXX: Should we halt the transmission
-	 * more gracefully?)
-	 */
+	 
 	macb_writel(bp, NCR, 0);
 
-	/* Clear the stats registers (XXX: Update stats first?) */
 	macb_writel(bp, NCR, MACB_BIT(CLRSTAT));
 
-	/* Clear all status flags */
 	macb_writel(bp, TSR, -1);
 	macb_writel(bp, RSR, -1);
 
-	/* Disable all interrupts */
 	macb_writel(bp, IDR, -1);
 	macb_readl(bp, ISR);
 }
@@ -1024,11 +929,6 @@ static u32 macb_mdc_clk_div(struct macb *bp)
 	return config;
 }
 
-/*
- * Get the DMA bus width field of the network configuration register that we
- * should program.  We find the width from decoding the design configuration
- * register to find the maximum supported data bus width.
- */
 static u32 macb_dbw(struct macb *bp)
 {
 	if (!macb_is_gem(bp))
@@ -1045,14 +945,6 @@ static u32 macb_dbw(struct macb *bp)
 	}
 }
 
-/*
- * Configure the receive DMA engine
- * - use the correct receive buffer size
- * - set the possibility to use INCR16 bursts
- *   (if not supported by FIFO, it will fallback to default)
- * - set both rx/tx packet buffers to full memory size
- * These are configurable parameters for GEM.
- */
 static void macb_configure_dma(struct macb *bp)
 {
 	u32 dmacfg;
@@ -1067,9 +959,6 @@ static void macb_configure_dma(struct macb *bp)
 	}
 }
 
-/*
- * Configure peripheral capacities according to integration options used
- */
 static void macb_configure_caps(struct macb *bp)
 {
 	if (macb_is_gem(bp)) {
@@ -1086,14 +975,14 @@ static void macb_init_hw(struct macb *bp)
 	macb_set_hwaddr(bp);
 
 	config = macb_mdc_clk_div(bp);
-	config |= MACB_BF(RBOF, NET_IP_ALIGN);	/* Make eth data aligned */
-	config |= MACB_BIT(PAE);		/* PAuse Enable */
-	config |= MACB_BIT(DRFCS);		/* Discard Rx FCS */
-	config |= MACB_BIT(BIG);		/* Receive oversized frames */
+	config |= MACB_BF(RBOF, NET_IP_ALIGN);	 
+	config |= MACB_BIT(PAE);		 
+	config |= MACB_BIT(DRFCS);		 
+	config |= MACB_BIT(BIG);		 
 	if (bp->dev->flags & IFF_PROMISC)
-		config |= MACB_BIT(CAF);	/* Copy All Frames */
+		config |= MACB_BIT(CAF);	 
 	if (!(bp->dev->flags & IFF_BROADCAST))
-		config |= MACB_BIT(NBC);	/* No BroadCast */
+		config |= MACB_BIT(NBC);	 
 	config |= macb_dbw(bp);
 	macb_writel(bp, NCFGR, config);
 	bp->speed = SPEED_10;
@@ -1102,53 +991,16 @@ static void macb_init_hw(struct macb *bp)
 	macb_configure_dma(bp);
 	macb_configure_caps(bp);
 
-	/* Initialize TX and RX buffers */
 	macb_writel(bp, RBQP, bp->rx_ring_dma);
 	macb_writel(bp, TBQP, bp->tx_ring_dma);
 
-	/* Enable TX and RX */
 	macb_writel(bp, NCR, MACB_BIT(RE) | MACB_BIT(TE) | MACB_BIT(MPE));
 
-	/* Enable interrupts */
 	macb_writel(bp, IER, (MACB_RX_INT_FLAGS
 			      | MACB_TX_INT_FLAGS
 			      | MACB_BIT(HRESP)));
 
 }
-
-/*
- * The hash address register is 64 bits long and takes up two
- * locations in the memory map.  The least significant bits are stored
- * in EMAC_HSL and the most significant bits in EMAC_HSH.
- *
- * The unicast hash enable and the multicast hash enable bits in the
- * network configuration register enable the reception of hash matched
- * frames. The destination address is reduced to a 6 bit index into
- * the 64 bit hash register using the following hash function.  The
- * hash function is an exclusive or of every sixth bit of the
- * destination address.
- *
- * hi[5] = da[5] ^ da[11] ^ da[17] ^ da[23] ^ da[29] ^ da[35] ^ da[41] ^ da[47]
- * hi[4] = da[4] ^ da[10] ^ da[16] ^ da[22] ^ da[28] ^ da[34] ^ da[40] ^ da[46]
- * hi[3] = da[3] ^ da[09] ^ da[15] ^ da[21] ^ da[27] ^ da[33] ^ da[39] ^ da[45]
- * hi[2] = da[2] ^ da[08] ^ da[14] ^ da[20] ^ da[26] ^ da[32] ^ da[38] ^ da[44]
- * hi[1] = da[1] ^ da[07] ^ da[13] ^ da[19] ^ da[25] ^ da[31] ^ da[37] ^ da[43]
- * hi[0] = da[0] ^ da[06] ^ da[12] ^ da[18] ^ da[24] ^ da[30] ^ da[36] ^ da[42]
- *
- * da[0] represents the least significant bit of the first byte
- * received, that is, the multicast/unicast indicator, and da[47]
- * represents the most significant bit of the last byte received.  If
- * the hash index, hi[n], points to a bit that is set in the hash
- * register then the frame will be matched according to whether the
- * frame is multicast or unicast.  A multicast match will be signalled
- * if the multicast hash enable bit is set, da[0] is 1 and the hash
- * index points to a bit set in the hash register.  A unicast match
- * will be signalled if the unicast hash enable bit is set, da[0] is 0
- * and the hash index points to a bit set in the hash register.  To
- * receive all multicast frames, the hash register should be set with
- * all ones and the multicast hash enable bit should be set in the
- * network configuration register.
- */
 
 static inline int hash_bit_value(int bitnr, __u8 *addr)
 {
@@ -1157,9 +1009,6 @@ static inline int hash_bit_value(int bitnr, __u8 *addr)
 	return 0;
 }
 
-/*
- * Return the hash index value for the specified address.
- */
 static int hash_get_index(__u8 *addr)
 {
 	int i, j, bitval;
@@ -1175,9 +1024,6 @@ static int hash_get_index(__u8 *addr)
 	return hash_index;
 }
 
-/*
- * Add multicast addresses to the internal multicast-hash table.
- */
 static void macb_sethashtable(struct net_device *dev)
 {
 	struct netdev_hw_addr *ha;
@@ -1196,9 +1042,6 @@ static void macb_sethashtable(struct net_device *dev)
 	macb_or_gem_writel(bp, HRT, mc_filter[1]);
 }
 
-/*
- * Enable/Disable promiscuous and multicast modes.
- */
 void macb_set_rx_mode(struct net_device *dev)
 {
 	unsigned long cfg;
@@ -1207,23 +1050,23 @@ void macb_set_rx_mode(struct net_device *dev)
 	cfg = macb_readl(bp, NCFGR);
 
 	if (dev->flags & IFF_PROMISC)
-		/* Enable promiscuous mode */
+		 
 		cfg |= MACB_BIT(CAF);
 	else if (dev->flags & (~IFF_PROMISC))
-		 /* Disable promiscuous mode */
+		  
 		cfg &= ~MACB_BIT(CAF);
 
 	if (dev->flags & IFF_ALLMULTI) {
-		/* Enable all multicast mode */
+		 
 		macb_or_gem_writel(bp, HRB, -1);
 		macb_or_gem_writel(bp, HRT, -1);
 		cfg |= MACB_BIT(NCFGR_MTI);
 	} else if (!netdev_mc_empty(dev)) {
-		/* Enable specific multicasts */
+		 
 		macb_sethashtable(dev);
 		cfg |= MACB_BIT(NCFGR_MTI);
 	} else if (dev->flags & (~IFF_ALLMULTI)) {
-		/* Disable all multicast mode */
+		 
 		macb_or_gem_writel(bp, HRB, 0);
 		macb_or_gem_writel(bp, HRT, 0);
 		cfg &= ~MACB_BIT(NCFGR_MTI);
@@ -1240,10 +1083,8 @@ static int macb_open(struct net_device *dev)
 
 	netdev_dbg(bp->dev, "open\n");
 
-	/* carrier starts down */
 	netif_carrier_off(dev);
 
-	/* if the phy is not yet register, retry later*/
 	if (!bp->phy_dev)
 		return -EAGAIN;
 
@@ -1259,7 +1100,6 @@ static int macb_open(struct net_device *dev)
 	macb_init_rings(bp);
 	macb_init_hw(bp);
 
-	/* schedule a link state check */
 	phy_start(bp->phy_dev);
 
 	netif_start_queue(dev);
@@ -1345,10 +1185,8 @@ struct net_device_stats *macb_get_stats(struct net_device *dev)
 	if (macb_is_gem(bp))
 		return gem_get_stats(bp);
 
-	/* read stats from hardware */
 	macb_update_stats(bp);
 
-	/* Convert HW stats into netdevice stats */
 	nstat->rx_errors = (hwstat->rx_fcs_errors +
 			    hwstat->rx_align_errors +
 			    hwstat->rx_resource_errors +
@@ -1374,12 +1212,11 @@ struct net_device_stats *macb_get_stats(struct net_device *dev)
 	nstat->rx_crc_errors = hwstat->rx_fcs_errors;
 	nstat->rx_frame_errors = hwstat->rx_align_errors;
 	nstat->rx_fifo_errors = hwstat->rx_overruns;
-	/* XXX: What does "missed" mean? */
+	 
 	nstat->tx_aborted_errors = hwstat->tx_excessive_cols;
 	nstat->tx_carrier_errors = hwstat->tx_carrier_errors;
 	nstat->tx_fifo_errors = hwstat->tx_underruns;
-	/* Don't know about heartbeat or window errors... */
-
+	 
 	return nstat;
 }
 EXPORT_SYMBOL_GPL(macb_get_stats);
@@ -1491,7 +1328,7 @@ static const struct of_device_id macb_dt_ids[] = {
 	{ .compatible = "cdns,macb" },
 	{ .compatible = "cdns,pc302-gem" },
 	{ .compatible = "cdns,gem" },
-	{ /* sentinel */ }
+	{   }
 };
 MODULE_DEVICE_TABLE(of, macb_dt_ids);
 #endif
@@ -1530,7 +1367,6 @@ static int __init macb_probe(struct platform_device *pdev)
 
 	SET_NETDEV_DEV(dev, &pdev->dev);
 
-	/* TODO: Actually, we have some interesting features... */
 	dev->features |= 0;
 
 	bp = netdev_priv(dev);
@@ -1575,7 +1411,6 @@ static int __init macb_probe(struct platform_device *pdev)
 
 	dev->base_addr = regs->start;
 
-	/* Set MII management clock divider */
 	config = macb_mdc_clk_div(bp);
 	config |= macb_dbw(bp);
 	macb_writel(bp, NCFGR, config);
@@ -1653,9 +1488,9 @@ err_out_free_dev:
 	free_netdev(dev);
 err_out:
 #if defined (MY_DEF_HERE)
-#else /* MY_DEF_HERE */
+#else  
 	platform_set_drvdata(pdev, NULL);
-#endif /* MY_DEF_HERE */
+#endif  
 	return err;
 }
 
@@ -1682,9 +1517,9 @@ static int __exit macb_remove(struct platform_device *pdev)
 		clk_put(bp->pclk);
 		free_netdev(dev);
 #if defined (MY_DEF_HERE)
-#else /* MY_DEF_HERE */
+#else  
 		platform_set_drvdata(pdev, NULL);
-#endif /* MY_DEF_HERE */
+#endif  
 	}
 
 	return 0;

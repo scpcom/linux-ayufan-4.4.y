@@ -1,27 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * afeb9260.c  --  SoC audio for AFEB9260
- *
- * Copyright (C) 2009 Sergey Lapin <slapin@ossfans.org>
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
- * 02110-1301 USA
- *
- */
-
+ 
 #include <linux/module.h>
 #include <linux/moduleparam.h>
 #include <linux/kernel.h>
@@ -51,7 +31,6 @@ static int afeb9260_hw_params(struct snd_pcm_substream *substream,
 	struct snd_soc_dai *codec_dai = rtd->codec_dai;
 	int err;
 
-	/* Set the codec system clock for DAC and ADC */
 	err =
 	    snd_soc_dai_set_sysclk(codec_dai, 0, CODEC_CLOCK, SND_SOC_CLOCK_IN);
 
@@ -84,8 +63,8 @@ static const struct snd_soc_dapm_route afeb9260_audio_map[] = {
 };
 
 #if defined(MY_ABC_HERE)
-// do nothing
-#else /* MY_ABC_HERE */
+ 
+#else  
 static int afeb9260_tlv320aic23_init(struct snd_soc_pcm_runtime *rtd)
 {
 	struct snd_soc_codec *codec = rtd->codec;
@@ -97,9 +76,8 @@ static int afeb9260_tlv320aic23_init(struct snd_soc_pcm_runtime *rtd)
 
 	return 0;
 }
-#endif /* MY_ABC_HERE */
+#endif  
 
-/* Digital audio interface glue - connects codec <--> CPU */
 static struct snd_soc_dai_link afeb9260_dai = {
 	.name = "TLV320AIC23",
 	.stream_name = "AIC23",
@@ -108,16 +86,15 @@ static struct snd_soc_dai_link afeb9260_dai = {
 	.platform_name = "atmel_pcm-audio",
 	.codec_name = "tlv320aic23-codec.0-001a",
 #if defined(MY_ABC_HERE)
-	// do nothing
-#else /* MY_ABC_HERE */
+	 
+#else  
 	.init = afeb9260_tlv320aic23_init,
-#endif /* MY_ABC_HERE */
+#endif  
 	.dai_fmt = SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_NB_IF |
 		   SND_SOC_DAIFMT_CBM_CFM,
 	.ops = &afeb9260_ops,
 };
 
-/* Audio machine driver */
 static struct snd_soc_card snd_soc_machine_afeb9260 = {
 	.name = "AFEB9260",
 	.owner = THIS_MODULE,

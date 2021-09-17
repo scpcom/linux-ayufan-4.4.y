@@ -1,26 +1,16 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * pm.c - Common OMAP2+ power management-related code
- *
- * Copyright (C) 2010 Texas Instruments, Inc.
- * Copyright (C) 2010 Nokia Corporation
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/io.h>
 #include <linux/err.h>
 #if defined(MY_ABC_HERE)
 #include <linux/pm_opp.h>
-#else /* MY_ABC_HERE */
+#else  
 #include <linux/opp.h>
-#endif /* MY_ABC_HERE */
+#endif  
 #include <linux/export.h>
 #include <linux/suspend.h>
 #include <linux/cpu.h>
@@ -39,18 +29,10 @@
 #include "pm.h"
 #include "twl-common.h"
 
-/*
- * omap_pm_suspend: points to a function that does the SoC-specific
- * suspend work
- */
 int (*omap_pm_suspend)(void);
 
 #ifdef CONFIG_PM
-/**
- * struct omap2_oscillator - Describe the board main oscillator latencies
- * @startup_time: oscillator startup latency
- * @shutdown_time: oscillator shutdown latency
- */
+ 
 struct omap2_oscillator {
 	u32 startup_time;
 	u32 shutdown_time;
@@ -95,9 +77,6 @@ static int __init _init_omap_device(char *name)
 	return 0;
 }
 
-/*
- * Build omap_devices for processors and bus.
- */
 static void __init omap2_init_processor_devices(void)
 {
 	_init_omap_device("mpu");
@@ -115,7 +94,7 @@ static void __init omap2_init_processor_devices(void)
 
 int __init omap_pm_clkdms_setup(struct clockdomain *clkdm, void *unused)
 {
-	/* XXX The usecount test is racy */
+	 
 	if ((clkdm->flags & CLKDM_CAN_ENABLE_AUTO) &&
 	    !(clkdm->flags & CLKDM_MISSING_IDLE_REPORTING))
 		clkdm_allow_idle(clkdm);
@@ -125,14 +104,6 @@ int __init omap_pm_clkdms_setup(struct clockdomain *clkdm, void *unused)
 	return 0;
 }
 
-/*
- * This API is to be called during init to set the various voltage
- * domains to the voltage as per the opp table. Typically we boot up
- * at the nominal voltage. So this function finds out the rate of
- * the clock associated with the voltage domain, finds out the correct
- * opp entry and sets the voltage domain to the voltage specified
- * in the opp entry
- */
 static int __init omap2_set_init_voltage(char *vdd_name, char *clk_name,
 					 const char *oh_name)
 {
@@ -140,9 +111,9 @@ static int __init omap2_set_init_voltage(char *vdd_name, char *clk_name,
 	struct clk *clk;
 #if defined(MY_ABC_HERE)
 	struct dev_pm_opp *opp;
-#else /* MY_ABC_HERE */
+#else  
 	struct opp *opp;
-#endif /* MY_ABC_HERE */
+#endif  
 	unsigned long freq, bootup_volt;
 	struct device *dev;
 
@@ -152,10 +123,7 @@ static int __init omap2_set_init_voltage(char *vdd_name, char *clk_name,
 	}
 
 	if (!strncmp(oh_name, "mpu", 3))
-		/* 
-		 * All current OMAPs share voltage rail and clock
-		 * source, so CPU0 is used to represent the MPU-SS.
-		 */
+		 
 		dev = get_cpu_device(0);
 	else
 		dev = omap_device_get_by_hwmod_name(oh_name);
@@ -185,9 +153,9 @@ static int __init omap2_set_init_voltage(char *vdd_name, char *clk_name,
 	rcu_read_lock();
 #if defined(MY_ABC_HERE)
 	opp = dev_pm_opp_find_freq_ceil(dev, &freq);
-#else /* MY_ABC_HERE */
+#else  
 	opp = opp_find_freq_ceil(dev, &freq);
-#endif /* MY_ABC_HERE */
+#endif  
 	if (IS_ERR(opp)) {
 		rcu_read_unlock();
 		pr_err("%s: unable to find boot up OPP for vdd_%s\n",
@@ -197,9 +165,9 @@ static int __init omap2_set_init_voltage(char *vdd_name, char *clk_name,
 
 #if defined(MY_ABC_HERE)
 	bootup_volt = dev_pm_opp_get_voltage(opp);
-#else /* MY_ABC_HERE */
+#else  
 	bootup_volt = opp_get_voltage(opp);
-#endif /* MY_ABC_HERE */
+#endif  
 	rcu_read_unlock();
 	if (!bootup_volt) {
 		pr_err("%s: unable to find voltage corresponding to the bootup OPP for vdd_%s\n",
@@ -221,7 +189,7 @@ static int omap_pm_enter(suspend_state_t suspend_state)
 	int ret = 0;
 
 	if (!omap_pm_suspend)
-		return -ENOENT; /* XXX doublecheck */
+		return -ENOENT;  
 
 	switch (suspend_state) {
 	case PM_SUSPEND_STANDBY:
@@ -262,7 +230,7 @@ static const struct platform_suspend_ops omap_pm_ops = {
 	.valid		= suspend_valid_only_mem,
 };
 
-#endif /* CONFIG_SUSPEND */
+#endif  
 
 static void __init omap3_init_voltages(void)
 {
@@ -301,25 +269,17 @@ omap_postcore_initcall(omap2_common_pm_init);
 
 int __init omap2_common_pm_late_init(void)
 {
-	/*
-	 * In the case of DT, the PMIC and SR initialization will be done using
-	 * a completely different mechanism.
-	 * Disable this part if a DT blob is available.
-	 */
+	 
 	if (!of_have_populated_dt()) {
 
-		/* Init the voltage layer */
 		omap_pmic_late_init();
 		omap_voltage_late_init();
 
-		/* Initialize the voltages */
 		omap3_init_voltages();
 		omap4_init_voltages();
 
-		/* Smartreflex device init */
 		omap_devinit_smartreflex();
 
-		/* cpufreq dummy device instantiation */
 		omap_init_cpufreq();
 	}
 

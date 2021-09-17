@@ -1,17 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * -------------------------------------------------------------------------
- * Copyright (C) 2014  STMicroelectronics
- * Author:	Sudeep Biswas		<sudeep.biswas@st.com>
- *		Francesco M. Virlinzi	<francesco.virlinzi@st.com>
- *		Laurent MEUNIER		<laurent.meunier@st.com>
- *
- * May be copied or modified under the terms of the GNU General Public
- * License V.2 ONLY.  See linux/COPYING for more information.
- * ------------------------------------------------------------------------- */
-
+ 
 #include <linux/irq.h>
 #include <linux/io.h>
 #include <linux/irqchip/arm-gic.h>
@@ -30,23 +20,11 @@
 #define WAY_SIZE_SHIFT			17
 #define MIN_WAY_SIZE			16384
 
-/* List of functions implementing the suspend_ops */
 static int sti_suspend_valid(suspend_state_t state);
 static int sti_suspend_begin(suspend_state_t state);
 static int sti_suspend_prepare(void);
 static int sti_suspend_enter(suspend_state_t state);
 
-/* States definitions */
-/*
- * Currently three low power suspend modes
- * are supported: freeze, standby and mem.
- * freeze support is in-build in kernel and no
- * support from platform power code is required.
- * standby and mem require platfrom code support.
- * They require explicit callback support.
- * It is to be noted that standby is mapped to HPS
- * and mem is mapped to CPS.
- */
 struct sti_hw_state_desc sti_hw_pltf_states[MAX_SUSPEND_STATE],
 	sti_hw_states[MAX_SUSPEND_STATE] = {
 	{
@@ -90,11 +68,6 @@ enum tbl_level {
 	TBL_EXIT
 };
 
-/*
- * The below object is defined for STiH407 family SoCs.
- * This will differ for other SoCs such as ORLY, etc.
- * Support added for only STiH407 family SoCs
- */
 static const struct sti_low_power_syscfg_info ddr3_syscfg_info = {
 	.ddr3_cfg_offset = 0x160,
 	.ddr3_stat_offset = 0x920,
@@ -103,13 +76,13 @@ static const struct sti_low_power_syscfg_info ddr3_syscfg_info = {
 };
 
 static struct of_device_id suspend_of_match[] = {
-	/* For STiH407 family SoCs */
+	 
 	{
-		/* Supporting 407 family SoCs */
+		 
 		.compatible = "st,stih407-ddr-controller",
 		.data = &ddr3_syscfg_info,
 	},
-	/* Add compatible and data here and in the DT to support other SoCs */
+	 
 	{}
 };
 
@@ -118,7 +91,7 @@ static int sti_suspend_valid(suspend_state_t state)
 	int i;
 
 	for (i = 0; i < sti_suspend.hw_state_nr; i++) {
-		/*  check if the right target state */
+		 
 		if (state == sti_suspend.hw_states[i].target_state) {
 			pr_info("sti pm: support mode: %s\n",
 				sti_suspend.hw_states[i].desc);
@@ -126,7 +99,6 @@ static int sti_suspend_valid(suspend_state_t state)
 		}
 	}
 
-	/*  if not found, then not valid must return false */
 	return false;
 }
 
@@ -137,7 +109,7 @@ static int sti_suspend_begin(suspend_state_t state)
 	sti_suspend.index = -1;
 
 	for (i = 0; i < sti_suspend.hw_state_nr; i++) {
-		/*  check if the right target state */
+		 
 		if (state == sti_suspend.hw_states[i].target_state) {
 			sti_suspend.index = i;
 			return 0;
@@ -162,10 +134,6 @@ static void sti_copy_suspend_table(struct sti_suspend_table *table,
 		tbl_len_byte = table->exit_size;
 	}
 
-	/*
-	 * if table->base_address is zero, this means no patching
-	 * of poke table. Poke table is already set.
-	 */
 	if (!table->base_address)
 		memcpy(*__va_add, tbl_ptr, tbl_len_byte);
 	else
@@ -195,20 +163,17 @@ static int sti_suspend_prepare(void)
 
 	index = sti_suspend.index;
 
-	/* if preparation already done during init time, return immediately */
 	if (sti_suspend.hw_states[index].init_time_prepare == -1)
 		return 0;
 
 	pr_info("sti pm: Copying poke table & poke loop to buffer\n");
 	__va_buf = sti_suspend.hw_states[index].cache_buffer;
 
-	/* copy the __pokeloop code in buffer*/
 	sti_suspend.hw_states[index].buffer_data.pokeloop = __va_buf;
 
 	memcpy(__va_buf, sti_pokeloop, sti_pokeloop_sz);
 	__va_buf += sti_pokeloop_sz;
 
-	/* copy the entry_tables in buffer */
 	sti_suspend.hw_states[index].buffer_data.table_enter = __va_buf;
 
 	list_for_each_entry(table,
@@ -222,7 +187,6 @@ static int sti_suspend_prepare(void)
 
 	sti_insert_poke_table_end(&__va_buf);
 
-	/* copy the exit_data_table in buffer */
 	sti_suspend.hw_states[index].buffer_data.table_exit = __va_buf;
 
 	list_for_each_entry_reverse(table,
@@ -239,10 +203,6 @@ static int sti_suspend_prepare(void)
 
 	sti_suspend.hw_states[index].buffer_data.sti_buffer_code = __va_buf;
 
-	/*
-	 * call prepare() for target state specific code to be
-	 * copied to buffer
-	 */
 	pr_info("sti pm: entering prepare:%s\n",
 		sti_suspend.hw_states[index].desc);
 
@@ -271,13 +231,6 @@ static int sti_suspend_enter(suspend_state_t state)
 			enter(&sti_suspend.hw_states[sti_suspend.index]);
 }
 
-/*
- * sti_gic_set_wake is called whenever any driver
- * that is capable of wakeup calls enable_irq_wakeup().
- * This simply checks if valid IRQ number is given and
- * does not require to do anything else. If irq number
- * is invalid then error is returned.
- */
 static int sti_gic_set_wake(struct irq_data *d, unsigned int on)
 {
 	if (d->irq <= MAX_GIC_SPI_INT)
@@ -315,14 +268,13 @@ static int __init sti_suspend_setup(void)
 
 	of_node_put(np);
 
-	/* Read Cache type register to know the way mask */
 	sti_suspend.l2waymask = readl_relaxed(sti_suspend.l2cachebase +
 						L2CC_AUX_CNTRL_REG_OFFSET);
 
 	if (sti_suspend.l2waymask & L2CC_WAY_MASK)
-		sti_suspend.l2waymask = WAY_MASK_SIXTEEN_WAYS; /* 16 ways */
+		sti_suspend.l2waymask = WAY_MASK_SIXTEEN_WAYS;  
 	else
-		sti_suspend.l2waymask = WAY_MASK_EIGHT_WAYS; /* 8 ways */
+		sti_suspend.l2waymask = WAY_MASK_EIGHT_WAYS;  
 
 	np = of_find_node_by_name(NULL, "ddr-pctl-controller");
 	if (IS_ERR_OR_NULL(np))
@@ -398,13 +350,12 @@ static int __init sti_suspend_setup(void)
 				      nr_ddr_pctl,
 				      lp_info);
 
-		/* This will be true for CPS */
 		if (!ret && hw_state->init_time_prepare == 0x1) {
 #ifdef MY_DEF_HERE
 			sti_suspend.index = sti_suspend.hw_state_nr;
-#else /* MY_DEF_HERE */
+#else  
 			sti_suspend.index = i;
-#endif /* MY_DEF_HERE */
+#endif  
 			ret = sti_suspend_prepare();
 			hw_state->init_time_prepare = -1;
 		}
@@ -418,19 +369,6 @@ static int __init sti_suspend_setup(void)
 
 	suspend_set_ops(&sti_suspend.ops);
 
-	 /*
-	  * irqchip's irq_set_wake() is called whenever any driver
-	  * that is capable of wakeup calls enable_irq_wakeup()
-	  * If bsp code set this, its fine, otherwise it wont
-	  * work. So for safety we set this from here too. It does
-	  * nothing apart from checking the validity of the irq
-	  * number that can possibly give a wakeup. This
-	  * assignment and the corresponding function can be
-	  * removed if you are sure that somebody set this before
-	  * with a properly written function. Currently in 3.10 kernel
-	  * nobody is setting this. Hence this is done by the power
-	  * code.
-	  */
 	if (!gic_arch_extn.irq_set_wake)
 		gic_arch_extn.irq_set_wake = sti_gic_set_wake;
 
@@ -444,9 +382,6 @@ err:
 	return -ENODEV;
 }
 
-/*
- * helper function to calculate l2cc way size
- */
 unsigned int sti_get_l2cc_way_size(void)
 {
 	u32 l2ccaux_reg;

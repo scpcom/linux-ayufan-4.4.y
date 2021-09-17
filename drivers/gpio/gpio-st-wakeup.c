@@ -1,16 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Driver for GPIO lines capable of generating external interrupts.
- *
- * Copyright 2014 David Paris <david.paris@st.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
-
+ 
 #include <linux/module.h>
 #include <linux/pm.h>
 #include <linux/of_platform.h>
@@ -43,16 +34,16 @@ static int st_wakeup_get_devtree_child_data(struct device *dev,
 #ifdef MY_DEF_HERE
 	int *irq, error, gpio;
 	static int i;
-#else /* MY_DEF_HERE */
+#else  
 	int *irq, i = 0, error, gpio;
-#endif /* MY_DEF_HERE */
+#endif  
 	u32 reg;
 	unsigned int gpio_flags;
 #ifdef MY_DEF_HERE
 	u32 irq_flags = IRQF_TRIGGER_RISING
 			|IRQF_TRIGGER_FALLING
 			| IRQF_NO_SUSPEND;
-#endif /* MY_DEF_HERE */
+#endif  
 
 	pio_settings = &drvdata->wkpins_data[i].pio_settings;
 	irq = &drvdata->wkpins_data[i++].irq;
@@ -64,9 +55,6 @@ static int st_wakeup_get_devtree_child_data(struct device *dev,
 
 	pio_settings->pio_use = reg;
 
-	/* In case of EXT_IT pio use, pio_pin is the number of the
-	 * ext_it line (0, 1 or 2)
-	 */
 	if (pio_settings->pio_use == ST_LPM_PIO_EXT_IT) {
 		if (of_property_read_u32(pp, "st,ext_it_num", &reg)) {
 			dev_err(dev, "st,ext_it_num to be defined (0 to 2)\n");
@@ -113,7 +101,7 @@ static int st_wakeup_get_devtree_child_data(struct device *dev,
 
 			irq_flags = pio_settings->pio_level ?
 				IRQF_TRIGGER_HIGH : IRQF_TRIGGER_LOW;
-#endif /* MY_DEF_HERE */
+#endif  
 		}
 
 		if (!pio_settings->pio_direction == GPIOF_DIR_OUT)
@@ -141,10 +129,10 @@ static int st_wakeup_get_devtree_child_data(struct device *dev,
 	error = request_any_context_irq(*irq, (irq_handler_t)st_gpio_wakeup_isr,
 #ifdef MY_DEF_HERE
 					irq_flags, dev->kobj.name, NULL);
-#else /* MY_DEF_HERE */
+#else  
 					IRQF_TRIGGER_RISING,
 					dev->kobj.name, NULL);
-#endif /* MY_DEF_HERE */
+#endif  
 	if (error < 0) {
 		dev_err(dev, "Unable to claim irq %d; error %d\n", *irq, error);
 		return error;
@@ -195,7 +183,7 @@ static int st_wakeup_pins_restore_pins_config(void *dev)
 
 	return 0;
 }
-#endif /* MY_DEF_HERE */
+#endif  
 
 static struct of_device_id st_wakeup_pins_of_match[] = {
 	{ .compatible = "st,wakeup-pins", },
@@ -233,7 +221,7 @@ static int st_wakeup_pins_probe(struct platform_device *pdev)
 	st_lpm_register_callback(ST_LPM_GPIO_WAKEUP,
 				 st_wakeup_pins_restore_pins_config,
 				 (void *)&pdev->dev);
-#endif /* MY_DEF_HERE */
+#endif  
 
 	return 0;
 }

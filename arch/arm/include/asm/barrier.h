@@ -40,7 +40,7 @@
 				    : : "r" (0) : "memory")
 #define dmb(x) __asm__ __volatile__ ("" : : : "memory")
 #endif
-#else /* MY_DEF_HERE */
+#else  
 #if __LINUX_ARM_ARCH__ >= 7
 #define isb() __asm__ __volatile__ ("isb" : : : "memory")
 #define dsb() __asm__ __volatile__ ("dsb" : : : "memory")
@@ -64,7 +64,7 @@
 				    : : "r" (0) : "memory")
 #define dmb() __asm__ __volatile__ ("" : : : "memory")
 #endif
-#endif /* MY_DEF_HERE */
+#endif  
 
 #ifdef CONFIG_ARCH_HAS_BARRIERS
 #include <mach/barriers.h>
@@ -73,9 +73,9 @@
 #define rmb()		dsb()
 #if defined (MY_DEF_HERE)
 #define wmb()		do { dsb(st); outer_sync(); } while (0)
-#else /* MY_DEF_HERE */
+#else  
 #define wmb()		mb()
-#endif /* MY_DEF_HERE */
+#endif  
 #else
 #define mb()		barrier()
 #define rmb()		barrier()
@@ -91,11 +91,11 @@
 #define smp_mb()	dmb(ish)
 #define smp_rmb()	smp_mb()
 #define smp_wmb()	dmb(ishst)
-#else /* MY_DEF_HERE */
+#else  
 #define smp_mb()	dmb()
 #define smp_rmb()	dmb()
 #define smp_wmb()	dmb()
-#endif /* MY_DEF_HERE */
+#endif  
 #endif
 
 #define read_barrier_depends()		do { } while(0)
@@ -103,5 +103,5 @@
 
 #define set_mb(var, value)	do { var = value; smp_mb(); } while (0)
 
-#endif /* !__ASSEMBLY__ */
-#endif /* __ASM_BARRIER_H */
+#endif  
+#endif  

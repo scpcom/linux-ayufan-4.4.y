@@ -1,38 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * TAS5086 ASoC codec driver
- *
- * Copyright (c) 2013 Daniel Mack <zonque@gmail.com>
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * TODO:
- *  - implement DAPM and input muxing
- *  - implement modulation limit
- *  - implement non-default PWM start
- *
- * Note that this chip has a very unusual register layout, specifically
- * because the registers are of unequal size, and multi-byte registers
- * require bulk writes to take effect. Regmap does not support that kind
- * of devices.
- *
- * Currently, the driver does not touch any of the registers >= 0x20, so
- * it doesn't matter because the entire map can be accessed as 8-bit
- * array. In case more features will be added in the future
- * that require access to higher registers, the entire regmap H/W I/O
- * routines have to be open-coded.
- */
-
+ 
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/delay.h>
@@ -57,10 +26,7 @@
 			     SNDRV_PCM_RATE_96000 | SNDRV_PCM_RATE_176400 | \
 			     SNDRV_PCM_RATE_192000)
 
-/*
- * TAS5086 registers
- */
-#define TAS5086_CLOCK_CONTROL		0x00	/* Clock control register  */
+#define TAS5086_CLOCK_CONTROL		0x00	 
 #define TAS5086_CLOCK_RATE(val)		(val << 5)
 #define TAS5086_CLOCK_RATE_MASK		(0x7 << 5)
 #define TAS5086_CLOCK_RATIO(val)	(val << 2)
@@ -71,25 +37,22 @@
 #define TAS5086_DEEMPH_MASK		0x03
 #define TAS5086_SOFT_MUTE_ALL		0x3f
 
-#define TAS5086_DEV_ID			0x01	/* Device ID register */
-#define TAS5086_ERROR_STATUS		0x02	/* Error status register */
-#define TAS5086_SYS_CONTROL_1		0x03	/* System control register 1 */
-#define TAS5086_SERIAL_DATA_IF		0x04	/* Serial data interface register  */
-#define TAS5086_SYS_CONTROL_2		0x05	/* System control register 2 */
-#define TAS5086_SOFT_MUTE		0x06	/* Soft mute register */
-#define TAS5086_MASTER_VOL		0x07	/* Master volume  */
-#define TAS5086_CHANNEL_VOL(X)		(0x08 + (X))	/* Channel 1-6 volume */
-#define TAS5086_VOLUME_CONTROL		0x09	/* Volume control register */
-#define TAS5086_MOD_LIMIT		0x10	/* Modulation limit register */
-#define TAS5086_PWM_START		0x18	/* PWM start register */
-#define TAS5086_SURROUND		0x19	/* Surround register */
-#define TAS5086_SPLIT_CAP_CHARGE	0x1a	/* Split cap charge period register */
-#define TAS5086_OSC_TRIM		0x1b	/* Oscillator trim register */
+#define TAS5086_DEV_ID			0x01	 
+#define TAS5086_ERROR_STATUS		0x02	 
+#define TAS5086_SYS_CONTROL_1		0x03	 
+#define TAS5086_SERIAL_DATA_IF		0x04	 
+#define TAS5086_SYS_CONTROL_2		0x05	 
+#define TAS5086_SOFT_MUTE		0x06	 
+#define TAS5086_MASTER_VOL		0x07	 
+#define TAS5086_CHANNEL_VOL(X)		(0x08 + (X))	 
+#define TAS5086_VOLUME_CONTROL		0x09	 
+#define TAS5086_MOD_LIMIT		0x10	 
+#define TAS5086_PWM_START		0x18	 
+#define TAS5086_SURROUND		0x19	 
+#define TAS5086_SPLIT_CAP_CHARGE	0x1a	 
+#define TAS5086_OSC_TRIM		0x1b	 
 #define TAS5086_BKNDERR 		0x1c
 
-/*
- * Default TAS5086 power-up configuration
- */
 static const struct reg_default tas5086_reg_defaults[] = {
 	{ 0x00,	0x6c },
 	{ 0x01,	0x03 },
@@ -148,9 +111,9 @@ struct tas5086_private {
 	unsigned int	mclk, sclk;
 	unsigned int	format;
 	bool		deemph;
-	/* Current sample rate for de-emphasis control */
+	 
 	int		rate;
-	/* GPIO driving Reset pin, if any */
+	 
 	int		gpio_nreset;
 };
 
@@ -175,9 +138,9 @@ static int tas5086_get_deemph(struct snd_kcontrol *kcontrol,
 {
 #if defined(MY_ABC_HERE)
 	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
-#else /* MY_ABC_HERE */
+#else  
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
-#endif /* MY_ABC_HERE */
+#endif  
 	struct tas5086_private *priv = snd_soc_codec_get_drvdata(codec);
 
 	ucontrol->value.integer.value[0] = priv->deemph;
@@ -190,9 +153,9 @@ static int tas5086_put_deemph(struct snd_kcontrol *kcontrol,
 {
 #if defined(MY_ABC_HERE)
 	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
-#else /* MY_ABC_HERE */
+#else  
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
-#endif /* MY_ABC_HERE */
+#endif  
 	struct tas5086_private *priv = snd_soc_codec_get_drvdata(codec);
 
 	priv->deemph = ucontrol->value.integer.value[0];
@@ -224,13 +187,11 @@ static int tas5086_set_dai_fmt(struct snd_soc_dai *codec_dai,
 	struct snd_soc_codec *codec = codec_dai->codec;
 	struct tas5086_private *priv = snd_soc_codec_get_drvdata(codec);
 
-	/* The TAS5086 can only be slave to all clocks */
 	if ((format & SND_SOC_DAIFMT_MASTER_MASK) != SND_SOC_DAIFMT_CBS_CFS) {
 		dev_err(codec->dev, "Invalid clocking mode\n");
 		return -EINVAL;
 	}
 
-	/* we need to refer to the data format from hw_params() */
 	priv->format = format;
 
 	return 0;
@@ -266,7 +227,6 @@ static int tas5086_hw_params(struct snd_pcm_substream *substream,
 
 	priv->rate = params_rate(params);
 
-	/* Look up the sample rate and refer to the offset in the list */
 	val = index_in_array(tas5086_sample_rates,
 			     ARRAY_SIZE(tas5086_sample_rates), priv->rate);
 
@@ -281,7 +241,6 @@ static int tas5086_hw_params(struct snd_pcm_substream *substream,
 	if (ret < 0)
 		return ret;
 
-	/* MCLK / Fs ratio */
 	val = index_in_array(tas5086_ratios, ARRAY_SIZE(tas5086_ratios),
 			     priv->mclk / priv->rate);
 	if (val < 0) {
@@ -302,14 +261,6 @@ static int tas5086_hw_params(struct snd_pcm_substream *substream,
 	if (ret < 0)
 		return ret;
 
-	/*
-	 * The chip has a very unituitive register mapping and muxes information
-	 * about data format and sample depth into the same register, but not on
-	 * a logical bit-boundary. Hence, we have to refer to the format passed
-	 * in the set_dai_fmt() callback and set up everything from here.
-	 *
-	 * First, determine the 'base' value, using the format ...
-	 */
 	switch (priv->format & SND_SOC_DAIFMT_FORMAT_MASK) {
 	case SND_SOC_DAIFMT_RIGHT_J:
 		val = 0x00;
@@ -325,7 +276,6 @@ static int tas5086_hw_params(struct snd_pcm_substream *substream,
 		return -EINVAL;
 	}
 
-	/* ... then add the offset for the sample bit depth. */
 	switch (params_format(params)) {
         case SNDRV_PCM_FORMAT_S16_LE:
 		val += 0;
@@ -345,7 +295,6 @@ static int tas5086_hw_params(struct snd_pcm_substream *substream,
 	if (ret < 0)
 		return ret;
 
-	/* clock is considered valid now */
 	ret = regmap_update_bits(priv->regmap, TAS5086_CLOCK_CONTROL,
 				 TAS5086_CLOCK_VALID, TAS5086_CLOCK_VALID);
 	if (ret < 0)
@@ -366,7 +315,6 @@ static int tas5086_mute_stream(struct snd_soc_dai *dai, int mute, int stream)
 	return regmap_write(priv->regmap, TAS5086_SOFT_MUTE, val);
 }
 
-/* TAS5086 controls */
 static const DECLARE_TLV_DB_SCALE(tas5086_dac_tlv, -10350, 50, 1);
 
 static const struct snd_kcontrol_new tas5086_controls[] = {
@@ -409,12 +357,11 @@ static int tas5086_soc_resume(struct snd_soc_codec *codec)
 {
 	struct tas5086_private *priv = snd_soc_codec_get_drvdata(codec);
 
-	/* Restore codec state */
 	return regcache_sync(priv->regmap);
 }
 #else
 #define tas5086_soc_resume	NULL
-#endif /* CONFIG_PM */
+#endif  
 
 #ifdef CONFIG_OF
 static const struct of_device_id tas5086_dt_ids[] = {
@@ -424,7 +371,6 @@ static const struct of_device_id tas5086_dt_ids[] = {
 MODULE_DEVICE_TABLE(of, tas5086_dt_ids);
 #endif
 
-/* charge period values in microseconds */
 static const int tas5086_charge_period[] = {
 	  13000,  16900,   23400,   31200,   41600,   54600,   72800,   96200,
 	 130000, 156000,  234000,  312000,  416000,  546000,  728000,  962000,
@@ -434,7 +380,7 @@ static const int tas5086_charge_period[] = {
 static int tas5086_probe(struct snd_soc_codec *codec)
 {
 	struct tas5086_private *priv = snd_soc_codec_get_drvdata(codec);
-	int charge_period = 1300000; /* hardware default is 1300 ms */
+	int charge_period = 1300000;  
 	int i, ret;
 
 	if (of_match_device(of_match_ptr(tas5086_dt_ids), codec->dev)) {
@@ -442,7 +388,6 @@ static int tas5086_probe(struct snd_soc_codec *codec)
 		of_property_read_u32(of_node, "ti,charge-period", &charge_period);
 	}
 
-	/* lookup and set split-capacitor charge period */
 	if (charge_period == 0) {
 		regmap_write(priv->regmap, TAS5086_SPLIT_CAP_CHARGE, 0);
 	} else {
@@ -458,22 +403,18 @@ static int tas5086_probe(struct snd_soc_codec *codec)
 				 charge_period);
 	}
 
-	/* enable factory trim */
 	ret = regmap_write(priv->regmap, TAS5086_OSC_TRIM, 0x00);
 	if (ret < 0)
 		return ret;
 
-	/* start all channels */
 	ret = regmap_write(priv->regmap, TAS5086_SYS_CONTROL_2, 0x20);
 	if (ret < 0)
 		return ret;
 
-	/* set master volume to 0 dB */
 	ret = regmap_write(priv->regmap, TAS5086_MASTER_VOL, 0x30);
 	if (ret < 0)
 		return ret;
 
-	/* mute all channels for now */
 	ret = regmap_write(priv->regmap, TAS5086_SOFT_MUTE,
 			   TAS5086_SOFT_MUTE_ALL);
 	if (ret < 0)
@@ -487,7 +428,7 @@ static int tas5086_remove(struct snd_soc_codec *codec)
 	struct tas5086_private *priv = snd_soc_codec_get_drvdata(codec);
 
 	if (gpio_is_valid(priv->gpio_nreset))
-		/* Set codec to the reset state */
+		 
 		gpio_set_value(priv->gpio_nreset, 0);
 
 	return 0;
@@ -550,18 +491,16 @@ static int tas5086_i2c_probe(struct i2c_client *i2c,
 			gpio_nreset = -EINVAL;
 
 	if (gpio_is_valid(gpio_nreset)) {
-		/* Reset codec - minimum assertion time is 400ns */
+		 
 		gpio_direction_output(gpio_nreset, 0);
 		udelay(1);
 		gpio_set_value(gpio_nreset, 1);
 
-		/* Codec needs ~15ms to wake up */
 		msleep(15);
 	}
 
 	priv->gpio_nreset = gpio_nreset;
 
-	/* The TAS5086 always returns 0x03 in its TAS5086_DEV_ID register */
 	ret = regmap_read(priv->regmap, TAS5086_DEV_ID, &i);
 	if (ret < 0)
 		return ret;

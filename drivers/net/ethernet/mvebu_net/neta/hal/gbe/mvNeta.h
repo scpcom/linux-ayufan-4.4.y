@@ -1,76 +1,13 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
-Copyright (C) Marvell International Ltd. and its affiliates
-
-This software file (the "File") is owned and distributed by Marvell
-International Ltd. and/or its affiliates ("Marvell") under the following
-alternative licensing terms.  Once you have made an election to distribute the
-File under one of the following license alternatives, please (i) delete this
-introductory statement regarding license alternatives, (ii) delete the two
-license alternatives that you have not elected to use and (iii) preserve the
-Marvell copyright notice above.
-
-********************************************************************************
-Marvell Commercial License Option
-
-If you received this File from Marvell and you have entered into a commercial
-license agreement (a "Commercial License") with Marvell, the File is licensed
-to you under the terms of the applicable Commercial License.
-
-********************************************************************************
-Marvell GPL License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or
-modify this File in accordance with the terms and conditions of the General
-Public License Version 2, June 1991 (the "GPL License"), a copy of which is
-available along with the File in the license.txt file or by writing to the Free
-Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 or
-on the worldwide web at http://www.gnu.org/licenses/gpl.txt.
-
-THE FILE IS DISTRIBUTED AS-IS, WITHOUT WARRANTY OF ANY KIND, AND THE IMPLIED
-WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY
-DISCLAIMED.  The GPL License provides additional details about this warranty
-disclaimer.
-********************************************************************************
-Marvell BSD License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or
-modify this File under the following licensing terms.
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-    *   Redistributions of source code must retain the above copyright notice,
-	this list of conditions and the following disclaimer.
-
-    *   Redistributions in binary form must reproduce the above copyright
-	notice, this list of conditions and the following disclaimer in the
-	documentation and/or other materials provided with the distribution.
-
-    *   Neither the name of Marvell nor the names of its contributors may be
-	used to endorse or promote products derived from this software without
-	specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-*******************************************************************************/
-
+ 
 #ifndef __mvNeta_h__
 #define __mvNeta_h__
 
 #ifdef __cplusplus
 extern "C" {
-#endif /* __cplusplus */
+#endif  
 
 #include "mvTypes.h"
 #include "mvCommon.h"
@@ -80,13 +17,13 @@ extern "C" {
 
 #ifdef CONFIG_MV_ETH_PNC
 # include "pnc/mvPnc.h"
-#endif /* CONFIG_MV_ETH_PNC */
+#endif  
 
 #ifdef CONFIG_MV_NETA_DEBUG_CODE
 # define mvNetaDebugPrintf      mvOsPrintf
 #else
 # define mvNetaDebugPrintf(msg, ...)
-#endif /* CONFIG_MV_NETA_DEBUG_CODE */
+#endif  
 
 #ifndef MV_ETH_MAX_TCONT
 # define MV_ETH_MAX_TCONT 1
@@ -122,7 +59,7 @@ typedef struct {
 #define MV_NFP_RES_NETDEV_EXT      0x0010
 #define MV_NFP_RES_L4_CSUM_NEEDED  0x0020
 
-#endif /* CONFIG_MV_ETH_NFP */
+#endif  
 
 #define NETA_RX_IP_IS_FRAG(status)     ((status) & NETA_RX_IP4_FRAG_MASK)
 #define NETA_RX_IP_SET_FRAG(rxd)       ((rxd)->status |= NETA_RX_IP4_FRAG_MASK)
@@ -167,7 +104,7 @@ typedef struct {
 #define NETA_RX_L4_IS_OTHER(status)    (((status) & NETA_RX_L4_MASK) == NETA_RX_L4_OTHER)
 #define NETA_RX_L4_SET_OTHER(rxd)      ((rxd)->status |= NETA_RX_L4_OTHER)
 
-#else /* LEGACY parser */
+#else  
 
 #define NETA_RX_IS_PPPOE(rxd)          (MV_FALSE)
 #define NETA_RX_SET_PPPOE(rxd)
@@ -208,7 +145,7 @@ typedef struct {
 #define NETA_RX_L3_IS_UN(status)       (((status) & ETH_RX_IP_FRAME_TYPE_MASK) == 0)
 #define NETA_RX_L3_SET_UN(rxd)         ((rxd)->status &= ~ETH_RX_IP_FRAME_TYPE_MASK)
 
-#endif /* MV_ETH_LEGACY_PARSER_IPV6 */
+#endif  
 
 #define NETA_RX_L4_IS_TCP(status)      (((status) & ETH_RX_L4_TYPE_MASK) == ETH_RX_L4_TCP_TYPE)
 #define NETA_RX_L4_SET_TCP(rxd)        ((rxd)->status |= ETH_RX_L4_TCP_TYPE)
@@ -219,9 +156,8 @@ typedef struct {
 #define NETA_RX_L4_IS_OTHER(status)    (((status) & ETH_RX_L4_TYPE_MASK) == ETH_RX_L4_OTHER_TYPE)
 #define NETA_RX_L4_SET_OTHER(rxd)      ((rxd)->status |= ETH_RX_L4_OTHER_TYPE)
 
-#endif	/* CONFIG_MV_ETH_PNC */
+#endif	 
 
-/* Default port configuration value */
 #define PORT_CONFIG_VALUE(rxQ)			\
 	(					\
 	ETH_DEF_RX_QUEUE_MASK(rxQ) |		\
@@ -233,7 +169,6 @@ typedef struct {
 	ETH_RX_CHECKSUM_WITH_PSEUDO_HDR		\
 	)
 
-/* Default port extend configuration value */
 #define PORT_CONFIG_EXTEND_VALUE            0
 
 #ifdef MV_ETH_GMAC_NEW
@@ -246,7 +181,7 @@ typedef struct {
 	ETH_DO_NOT_FORCE_LINK_FAIL_MASK |	\
 	ETH_SET_FULL_DUPLEX_MASK		\
 	)
-#endif /* MV_ETH_GMAC_NEW */
+#endif  
 
 typedef enum {
 	MV_ETH_SPEED_AN,
@@ -272,11 +207,10 @@ typedef enum {
 } MV_ETH_PORT_FC;
 
 typedef enum {
-	MV_ETH_PRIO_FIXED = 0,	/* Fixed priority mode */
-	MV_ETH_PRIO_WRR = 1	/* Weighted round robin priority mode */
+	MV_ETH_PRIO_FIXED = 0,	 
+	MV_ETH_PRIO_WRR = 1	 
 } MV_ETH_PRIO_MODE;
 
-/* Ethernet port specific infomation */
 typedef struct eth_link_status {
 	MV_BOOL				linkup;
 	MV_ETH_PORT_SPEED	speed;
@@ -298,21 +232,20 @@ typedef struct {
 	MV_U32 tClk;
 	MV_U32 cpuMask;
 	MV_BOOL	iocc;
-	MV_U16 ctrlModel;       /* Controller Model     */
-	MV_U8  ctrlRev;         /* Controller Revision  */
+	MV_U16 ctrlModel;        
+	MV_U8  ctrlRev;          
 
 #ifdef CONFIG_MV_ETH_BM
 	MV_ULONG bmPhysBase;
 	MV_U8 *bmVirtBase;
-#endif /* CONFIG_MV_ETH_BM */
+#endif  
 
 #ifdef CONFIG_MV_ETH_PNC
 	MV_U32 pncTcamSize;
 	MV_ULONG pncPhysBase;
 	MV_U8 *pncVirtBase;
-#endif /* CONFIG_MV_ETH_PNC */
+#endif  
 
-	/* Obsolete fields - unused */
 	MV_U32 pClk;
 	MV_U32 portMask;
 	int    maxCPUs;
@@ -350,7 +283,7 @@ typedef struct {
 #if defined(MY_ABC_HERE)
 #define MV_NETA_RX_LAST_DESC_PTR(pQueueCtrl)  \
 	(((NETA_RX_DESC *)pQueueCtrl.pFirst) + pQueueCtrl.lastDesc)
-#endif /* MY_ABC_HERE */
+#endif  
 
 typedef struct {
 	MV_NETA_QUEUE_CTRL queueCtrl;
@@ -376,30 +309,27 @@ typedef struct {
 extern MV_NETA_PORT_CTRL **mvNetaPortCtrl;
 extern MV_NETA_HAL_DATA mvNetaHalData;
 extern unsigned int neta_cap_bitmap;
-/* NETA dynamic capabilities bitmap define */
+ 
 #define MV_ETH_CAP_PNC		(0x00000001)
 #define MV_ETH_CAP_BM		(0x00000002)
 #define MV_ETH_CAP_HWF		(0x00000004)
 #define MV_ETH_CAP_PME		(0x00000008)
-/* NETA dynamic capabilities macro */
+ 
 #define MV_NETA_BM_CAP()	(MV_ETH_CAP_BM & neta_cap_bitmap)
 #define MV_NETA_PNC_CAP()	(MV_ETH_CAP_PNC & neta_cap_bitmap)
 #define MV_NETA_HWF_CAP()	(MV_ETH_CAP_HWF & neta_cap_bitmap)
 #define MV_NETA_PMT_CAP()	(MV_ETH_CAP_PME & neta_cap_bitmap)
 
-/* Get Giga port handler */
 static INLINE MV_NETA_PORT_CTRL *mvNetaPortHndlGet(int port)
 {
 	return mvNetaPortCtrl[port];
 }
 
-/* Get RX queue handler */
 static INLINE MV_NETA_RXQ_CTRL *mvNetaRxqHndlGet(int port, int rxq)
 {
 	return &mvNetaPortCtrl[port]->pRxQueue[rxq];
 }
 
-/* Get TX queue handler */
 static INLINE MV_NETA_TXQ_CTRL *mvNetaTxqHndlGet(int port, int txp, int txq)
 {
 	MV_NETA_PORT_CTRL *pPortCtrl = mvNetaPortCtrl[port];
@@ -408,7 +338,7 @@ static INLINE MV_NETA_TXQ_CTRL *mvNetaTxqHndlGet(int port, int txp, int txq)
 }
 
 #if defined(MV_CPU_BE) && defined(CONFIG_MV_ETH_BE_WA)
-/* Swap RX descriptor to be BE */
+ 
 static INLINE void mvNetaRxqDescSwap(NETA_RX_DESC *pRxDesc)
 {
 	pRxDesc->status = MV_BYTE_SWAP_32BIT(pRxDesc->status);
@@ -416,14 +346,13 @@ static INLINE void mvNetaRxqDescSwap(NETA_RX_DESC *pRxDesc)
 	pRxDesc->dataSize =  MV_BYTE_SWAP_16BIT(pRxDesc->dataSize);
 	pRxDesc->bufPhysAddr = MV_BYTE_SWAP_32BIT(pRxDesc->bufPhysAddr);
 	pRxDesc->pncFlowId = MV_BYTE_SWAP_32BIT(pRxDesc->pncFlowId);
-	/* pRxDesc->bufCookie = MV_BYTE_SWAP_32BIT(pRxDesc->bufCookie); */
+	 
 	pRxDesc->prefetchCmd = MV_BYTE_SWAP_16BIT(pRxDesc->prefetchCmd);
 	pRxDesc->csumL4 = MV_BYTE_SWAP_16BIT(pRxDesc->csumL4);
 	pRxDesc->pncExtra = MV_BYTE_SWAP_32BIT(pRxDesc->pncExtra);
 	pRxDesc->hw_cmd = MV_BYTE_SWAP_32BIT(pRxDesc->hw_cmd);
 }
 
-/* Swap TX descriptor to be BE */
 static INLINE void mvNetaTxqDescSwap(NETA_TX_DESC *pTxDesc)
 {
 	pTxDesc->command = MV_BYTE_SWAP_32BIT(pTxDesc->command);
@@ -439,9 +368,8 @@ static INLINE void mvNetaRxqDescSwap(NETA_RX_DESC *pRxDesc)
 static INLINE void mvNetaTxqDescSwap(NETA_TX_DESC *pTxDesc)
 {
 }
-#endif /* MV_CPU_BE &&  CONFIG_MV_ETH_BE_WA */
+#endif  
 
-/* Get number of RX descriptors occupied by received packets */
 static INLINE int mvNetaRxqBusyDescNumGet(int port, int rxq)
 {
 	MV_U32 regVal;
@@ -451,7 +379,6 @@ static INLINE int mvNetaRxqBusyDescNumGet(int port, int rxq)
 	return (regVal & NETA_RXQ_OCCUPIED_DESC_ALL_MASK) >> NETA_RXQ_OCCUPIED_DESC_OFFS;
 }
 
-/* Get number of free RX descriptors ready to received new packets */
 static INLINE int mvNetaRxqFreeDescNumGet(int port, int rxq)
 {
 	MV_U32 regVal;
@@ -461,10 +388,6 @@ static INLINE int mvNetaRxqFreeDescNumGet(int port, int rxq)
 	return (regVal & NETA_RXQ_NON_OCCUPIED_DESC_ALL_MASK) >> NETA_RXQ_NON_OCCUPIED_DESC_OFFS;
 }
 
-/* Update HW with number of RX descriptors processed by SW:
- *    - decrement number of occupied descriptors
- *    - increment number of Non-occupied descriptors
- */
 static INLINE void mvNetaRxqDescNumUpdate(int port, int rxq, int rx_done, int rx_filled)
 {
 	MV_U32 regVal;
@@ -475,7 +398,6 @@ static INLINE void mvNetaRxqDescNumUpdate(int port, int rxq, int rx_done, int rx
 		return;
 	}
 
-	/* Only 255 descriptors can be added at once */
 	while ((rx_done > 0) || (rx_filled > 0)) {
 		if (rx_done <= 0xFF) {
 			regVal = (rx_done << NETA_RXQ_DEC_OCCUPIED_OFFS);
@@ -495,12 +417,10 @@ static INLINE void mvNetaRxqDescNumUpdate(int port, int rxq, int rx_done, int rx
 	}
 }
 
-/* Add number of descriptors are ready to receive new packets */
 static INLINE void mvNetaRxqNonOccupDescAdd(int port, int rxq, int rx_desc)
 {
 	MV_U32	regVal;
 
-	/* Only 255 descriptors can be added at once */
 	while (rx_desc > 0xFF) {
 		regVal = (0xFF << NETA_RXQ_ADD_NON_OCCUPIED_OFFS);
 		MV_REG_WRITE(NETA_RXQ_STATUS_UPDATE_REG(port, rxq), regVal);
@@ -510,12 +430,10 @@ static INLINE void mvNetaRxqNonOccupDescAdd(int port, int rxq, int rx_desc)
 	MV_REG_WRITE(NETA_RXQ_STATUS_UPDATE_REG(port, rxq), regVal);
 }
 
-/* Decrement number of processed descriptors */
 static INLINE void mvNetaRxqOccupDescDec(int port, int rxq, int rx_desc)
 {
 	MV_U32	regVal;
 
-	/* Only 255 descriptors can be updated at once */
 	while (rx_desc > 0xFF) {
 		regVal = (0xFF << NETA_RXQ_DEC_OCCUPIED_OFFS);
 		MV_REG_WRITE(NETA_RXQ_STATUS_UPDATE_REG(port, rxq), regVal);
@@ -525,12 +443,10 @@ static INLINE void mvNetaRxqOccupDescDec(int port, int rxq, int rx_desc)
 	MV_REG_WRITE(NETA_RXQ_STATUS_UPDATE_REG(port, rxq), regVal);
 }
 
-/* Decrement sent descriptors counter */
 static INLINE void mvNetaTxqSentDescDec(int port, int txp, int txq, int sent_desc)
 {
 	MV_U32 regVal;
 
-	/* Only 255 TX descriptors can be updated at once */
 	while (sent_desc > 0xFF) {
 		regVal = (0xFF << NETA_TXQ_DEC_SENT_OFFS);
 		MV_REG_WRITE(NETA_TXQ_UPDATE_REG(port, txp, txq), regVal);
@@ -540,7 +456,6 @@ static INLINE void mvNetaTxqSentDescDec(int port, int txp, int txq, int sent_des
 	MV_REG_WRITE(NETA_TXQ_UPDATE_REG(port, txp, txq), regVal);
 }
 
-/* Get number of TX descriptors already sent by HW */
 static INLINE int mvNetaTxqSentDescNumGet(int port, int txp, int txq)
 {
 	MV_U32  regVal;
@@ -552,7 +467,6 @@ static INLINE int mvNetaTxqSentDescNumGet(int port, int txp, int txq)
 	return sent_desc;
 }
 
-/* Invalidate TXQ descriptor - buffer will not be sent, buffer will not be returned */
 static INLINE void mvNetaTxqDescInv(NETA_TX_DESC *pTxDesc)
 {
 	pTxDesc->command |= NETA_TX_HWF_MASK;
@@ -560,13 +474,11 @@ static INLINE void mvNetaTxqDescInv(NETA_TX_DESC *pTxDesc)
 	pTxDesc->hw_cmd |= NETA_TX_ES_MASK;
 }
 
-/* Return: 1 - TX descriptor is valid, 0 - TX descriptor is invalid */
 static INLINE int mvNetaTxqDescIsValid(NETA_TX_DESC *pTxDesc)
 {
 	return ((pTxDesc->hw_cmd & NETA_TX_ES_MASK) == 0);
 }
 
-/* Get index of descripotor to be processed next in the specific TXQ */
 static INLINE int mvNetaTxqNextIndexGet(int port, int txp, int txq)
 {
 	MV_U32 regVal;
@@ -576,7 +488,6 @@ static INLINE int mvNetaTxqNextIndexGet(int port, int txp, int txq)
 	return (regVal & NETA_TXQ_NEXT_DESC_INDEX_MASK) >> NETA_TXQ_NEXT_DESC_INDEX_OFFS;
 }
 
-/* Get number of TX descriptors didn't send by HW yet and waiting for TX */
 static INLINE int mvNetaTxqPendDescNumGet(int port, int txp, int txq)
 {
 	MV_U32 regVal;
@@ -586,12 +497,10 @@ static INLINE int mvNetaTxqPendDescNumGet(int port, int txp, int txq)
 	return (regVal & NETA_TXQ_PENDING_DESC_MASK) >> NETA_TXQ_PENDING_DESC_OFFS;
 }
 
-/* Update HW with number of TX descriptors to be sent */
 static INLINE void mvNetaTxqPendDescAdd(int port, int txp, int txq, int pend_desc)
 {
 	MV_U32 regVal;
 
-	/* Only 255 descriptors can be added at once - we don't check it for performance */
 	while (pend_desc > 0xFF) {
 		regVal = (0xFF << NETA_TXQ_ADD_PENDING_OFFS);
 		MV_REG_WRITE(NETA_TXQ_UPDATE_REG(port, txp, txq), regVal);
@@ -601,21 +510,18 @@ static INLINE void mvNetaTxqPendDescAdd(int port, int txp, int txq, int pend_des
 	MV_REG_WRITE(NETA_TXQ_UPDATE_REG(port, txp, txq), regVal);
 }
 
-/* Get number of sent descriptors and descrement counter. Number of sent descriptors is returned. */
 static INLINE int mvNetaTxqSentDescProc(int port, int txp, int txq)
 {
 	int sent_desc;
 
-	/* Get number of sent descriptors */
 	sent_desc = mvNetaTxqSentDescNumGet(port, txp, txq);
-	/* Decrement sent descriptors counter */
+	 
 	if (sent_desc)
 		mvNetaTxqSentDescDec(port, txp, txq, sent_desc);
 
 	return sent_desc;
 }
 
-/* Get pointer to next RX descriptor to be processed by SW */
 static INLINE NETA_RX_DESC *mvNetaRxqNextDescGet(MV_NETA_RXQ_CTRL *pRxq)
 {
 	NETA_RX_DESC	*pRxDesc;
@@ -629,7 +535,7 @@ static INLINE NETA_RX_DESC *mvNetaRxqNextDescGet(MV_NETA_RXQ_CTRL *pRxq)
 }
 
 #if defined(MY_ABC_HERE)
-/* Get the next desc pointer following current desc */
+ 
 static INLINE NETA_RX_DESC *mvNetaRxqNextDescPtr(MV_NETA_RXQ_CTRL *pRxq, NETA_RX_DESC *pRxDesc)
 {
 	NETA_RX_DESC *pNextDesc;
@@ -641,7 +547,7 @@ static INLINE NETA_RX_DESC *mvNetaRxqNextDescPtr(MV_NETA_RXQ_CTRL *pRxq, NETA_RX
 
 	return pNextDesc;
 }
-#endif /* MY_ABC_HERE */
+#endif  
 
 static INLINE NETA_RX_DESC *mvNetaRxqDescGet(MV_NETA_RXQ_CTRL *pRxq)
 {
@@ -652,7 +558,6 @@ static INLINE NETA_RX_DESC *mvNetaRxqDescGet(MV_NETA_RXQ_CTRL *pRxq)
 	return pRxDesc;
 }
 
-/* Refill RX descriptor (when BM is not supported) */
 static INLINE void mvNetaRxDescFill(NETA_RX_DESC *pRxDesc, MV_U32 physAddr, MV_U32 cookie)
 {
 	pRxDesc->bufCookie = (MV_U32)cookie;
@@ -661,10 +566,9 @@ static INLINE void mvNetaRxDescFill(NETA_RX_DESC *pRxDesc, MV_U32 physAddr, MV_U
 	pRxDesc->bufPhysAddr = MV_32BIT_LE(physAddr);
 #else
 	pRxDesc->bufPhysAddr = physAddr;
-#endif /* CONFIG_MV_ETH_BE_WA */
+#endif  
 }
 
-/* Get pointer to next TX descriptor to be processed (send) by HW */
 static INLINE NETA_TX_DESC *mvNetaTxqNextDescGet(MV_NETA_TXQ_CTRL *pTxq)
 {
 	int txDesc = pTxq->queueCtrl.nextToProc;
@@ -674,7 +578,6 @@ static INLINE NETA_TX_DESC *mvNetaTxqNextDescGet(MV_NETA_TXQ_CTRL *pTxq)
 	return ((NETA_TX_DESC *) pTxq->queueCtrl.pFirst) + txDesc;
 }
 
-/* Get pointer to previous TX descriptor in the ring for rollback when needed */
 static INLINE NETA_TX_DESC *mvNetaTxqPrevDescGet(MV_NETA_TXQ_CTRL *pTxq)
 {
 	int txDesc = pTxq->queueCtrl.nextToProc;
@@ -684,13 +587,10 @@ static INLINE NETA_TX_DESC *mvNetaTxqPrevDescGet(MV_NETA_TXQ_CTRL *pTxq)
 	return ((NETA_TX_DESC *) pTxq->queueCtrl.pFirst) + txDesc;
 }
 
-/* Set TXQ descriptors fields relevant for CSUM calculation */
 static INLINE MV_U32 mvNetaTxqDescCsum(int l3_offs, int l3_proto, int ip_hdr_len, int l4_proto)
 {
 	MV_U32 command;
 
-	/* fields: L3_offset, IP_hdrlen, L3_type, G_IPv4_chk, G_L4_chk, L4_type */
-	/* required only for checksum calculation */
 	command = (l3_offs << NETA_TX_L3_OFFSET_OFFS);
 	command |= (ip_hdr_len << NETA_TX_IP_HLEN_OFFS);
 
@@ -723,9 +623,8 @@ static INLINE void mvNetaPonTxqBytesAdd(int port, int txp, int txq, int bytes)
 
 	MV_REG_WRITE(NETA_TX_ADD_BYTES_REG(port, txp), regVal);
 }
-#endif /* CONFIG_MV_PON */
+#endif  
 
-/* Function prototypes */
 MV_STATUS 	mvNetaHalInit(MV_NETA_HAL_DATA *halData);
 
 MV_STATUS 	mvNetaWinInit(MV_U32 port, MV_UNIT_WIN_INFO *addrWinMap);
@@ -770,7 +669,6 @@ void		mvNetaSetOtherMcastTable(int portNo, int queue);
 void		mvNetaSetUcastTable(int port, int queue);
 void		mvNetaSetSpecialMcastTable(int portNo, int queue);
 
-/************************ Legacy parse function start *******************************/
 MV_STATUS	mvNetaRxUnicastPromiscSet(int port, MV_BOOL isPromisc);
 
 MV_STATUS	mvNetaMcastAddrSet(int port, MV_U8 *pAddr, int queue);
@@ -786,8 +684,7 @@ MV_STATUS	mvNetaTcpRxq(int port, int rxq);
 MV_STATUS	mvNetaUdpRxq(int port, int rxq);
 MV_STATUS	mvNetaArpRxq(int port, int rxq);
 MV_STATUS	mvNetaBpduRxq(int port, int rxq);
-/************************ Legacy parse function end *******************************/
-
+ 
 void 		mvNetaPhyAddrSet(int port, int phyAddr);
 int 		mvNetaPhyAddrGet(int port);
 void		mvNetaPhyAddrPollingDisable(int port);
@@ -795,7 +692,6 @@ void		mvNetaPhyAddrPollingDisable(int port);
 void 		mvNetaPortPowerDown(int port);
 void		mvNetaPortPowerUp(int port, MV_BOOL isSgmii, MV_BOOL isRgmii, MV_BOOL isInband);
 
-/* Interrupt Coalesting functions */
 MV_STATUS mvNetaRxqTimeCoalSet(int port, int rxq, MV_U32 uSec);
 MV_STATUS mvNetaRxqPktsCoalSet(int port, int rxq, MV_U32 pkts);
 MV_STATUS mvNetaTxDonePktsCoalSet(int port, int txp, int txq, MV_U32 pkts);
@@ -858,13 +754,13 @@ MV_STATUS mvNetaFlowCtrlGet(int port, MV_ETH_PORT_FC *flowControl);
 MV_STATUS   mvEthGmacRgmiiSet(int port, int enable);
 MV_STATUS	mvNetaGmacLpiSet(int port, int mode);
 void	    mvNetaGmacRegs(int port);
-#endif /* MV_ETH_GMAC_NEW */
+#endif  
 
 #ifdef CONFIG_MV_PON
 void        mvNetaPonTxpRegs(int port, int txp);
 MV_STATUS   mvNetaPonRxMibDefault(int mib);
 MV_STATUS   mvNetaPonRxMibGemPid(int mib, MV_U16 gemPid);
-#endif /* CONFIG_MV_PON */
+#endif  
 
 #ifdef CONFIG_MV_ETH_HWF
 typedef enum {
@@ -885,10 +781,10 @@ MV_STATUS mvNetaHwfTxqNextIndexGet(int port, int tx_port, int txp, int txq, int 
 void mvNetaHwfRxpRegs(int port);
 void mvNetaHwfTxpRegs(int port, int p, int txp);
 void mvNetaHwfTxpCntrs(int port, int p, int txp);
-#endif /* CONFIG_MV_ETH_HWF */
+#endif  
 
 #ifdef __cplusplus
 }
-#endif /* __cplusplus */
+#endif  
 
-#endif /* __mvNeta_h__ */
+#endif  

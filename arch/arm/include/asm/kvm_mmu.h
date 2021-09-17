@@ -1,43 +1,17 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) 2012 - Virtual Open Systems and Columbia University
- * Author: Christoffer Dall <c.dall@virtualopensystems.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License, version 2, as
- * published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
-
+ 
 #ifndef __ARM_KVM_MMU_H__
 #define __ARM_KVM_MMU_H__
 
 #include <asm/memory.h>
 #include <asm/page.h>
 
-/*
- * We directly use the kernel VA for the HYP, as we can directly share
- * the mapping (HTTBR "covers" TTBR1).
- */
 #define HYP_PAGE_OFFSET_MASK	UL(~0)
 #define HYP_PAGE_OFFSET		PAGE_OFFSET
 #define KERN_TO_HYP(kva)	(kva)
 
-/*
- * Our virtual mapping for the boot-time MMU-enable code. Must be
- * shared across all the page-tables. Conveniently, we use the vectors
- * page, where no kernel data will ever be shared with HYP.
- */
 #define TRAMPOLINE_VA		UL(CONFIG_VECTORS_BASE)
 
 #ifndef __ASSEMBLY__
@@ -69,13 +43,10 @@ static inline void kvm_set_pte(pte_t *pte, pte_t new_pte)
 {
 #if defined(MY_DEF_HERE)
 	pte_val(*pte) = pte_val(new_pte);
-#else /* MY_DEF_HERE */
+#else  
 	pte_val(*pte) = new_pte;
-#endif /* MY_DEF_HERE */
-	/*
-	 * flush_pmd_entry just takes a void pointer and cleans the necessary
-	 * cache entries, so we can reuse the function for ptes.
-	 */
+#endif  
+	 
 	flush_pmd_entry(pte);
 }
 
@@ -114,29 +85,18 @@ struct kvm;
 
 static inline void coherent_icache_guest_page(struct kvm *kvm, gfn_t gfn)
 {
-	/*
-	 * If we are going to insert an instruction page and the icache is
-	 * either VIPT or PIPT, there is a potential problem where the host
-	 * (or another VM) may have used the same page as this guest, and we
-	 * read incorrect data from the icache.  If we're using a PIPT cache,
-	 * we can invalidate just that page, but if we are using a VIPT cache
-	 * we need to invalidate the entire icache - damn shame - as written
-	 * in the ARM ARM (DDI 0406C.b - Page B3-1393).
-	 *
-	 * VIVT caches are tagged using both the ASID and the VMID and doesn't
-	 * need any kind of flushing (DDI 0406C.b - Page B3-1392).
-	 */
+	 
 	if (icache_is_pipt()) {
 		unsigned long hva = gfn_to_hva(kvm, gfn);
 		__cpuc_coherent_user_range(hva, hva + PAGE_SIZE);
 	} else if (!icache_is_vivt_asid_tagged()) {
-		/* any kind of VIPT cache */
+		 
 		__flush_icache_all();
 	}
 }
 
 #define kvm_flush_dcache_to_poc(a,l)	__cpuc_flush_dcache_area((a), (l))
 
-#endif	/* !__ASSEMBLY__ */
+#endif	 
 
-#endif /* __ARM_KVM_MMU_H__ */
+#endif  

@@ -1,14 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/* us3_cpufreq.c: UltraSPARC-III cpu frequency support
- *
- * Copyright (C) 2003 David S. Miller (davem@redhat.com)
- *
- * Many thanks to Dominik Brodowski for fixing up the cpufreq
- * infrastructure in order to make this driver easier to implement.
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/sched.h>
@@ -27,12 +20,8 @@ struct us3_freq_percpu_info {
 	struct cpufreq_frequency_table table[4];
 };
 
-/* Indexed by cpu number. */
 static struct us3_freq_percpu_info *us3_freq_table;
 
-/* UltraSPARC-III has three dividers: 1, 2, and 32.  These are controlled
- * in the Safari config register.
- */
 #define SAFARI_CFG_DIV_1	0x0000000000000000UL
 #define SAFARI_CFG_DIV_2	0x0000000040000000UL
 #define SAFARI_CFG_DIV_32	0x0000000080000000UL
@@ -52,7 +41,7 @@ static void write_safari_cfg(unsigned long val)
 {
 	__asm__ __volatile__("stxa	%0, [%%g0] %1\n\t"
 			     "membar	#Sync"
-			     : /* no outputs */
+			     :  
 			     : "r" (val), "i" (ASI_SAFARI_CONFIG)
 			     : "memory");
 }
@@ -217,18 +206,18 @@ static int __init us3_freq_init(void)
 		ret = -ENOMEM;
 #if defined(MY_ABC_HERE)
 		driver = kzalloc(sizeof(*driver), GFP_KERNEL);
-#else /* MY_ABC_HERE */
+#else  
 		driver = kzalloc(sizeof(struct cpufreq_driver), GFP_KERNEL);
-#endif /* MY_ABC_HERE */
+#endif  
 		if (!driver)
 			goto err_out;
 
 #if defined(MY_ABC_HERE)
 		us3_freq_table = kzalloc((NR_CPUS * sizeof(*us3_freq_table)),
-#else /* MY_ABC_HERE */
+#else  
 		us3_freq_table = kzalloc(
 			(NR_CPUS * sizeof(struct us3_freq_percpu_info)),
-#endif /* MY_ABC_HERE */
+#endif  
 			GFP_KERNEL);
 		if (!us3_freq_table)
 			goto err_out;
@@ -239,10 +228,10 @@ static int __init us3_freq_init(void)
 		driver->get = us3_freq_get;
 		driver->exit = us3_freq_cpu_exit;
 #if defined(MY_ABC_HERE)
-		// do nothing
-#else /* MY_ABC_HERE */
+		 
+#else  
 		driver->owner = THIS_MODULE,
-#endif /* MY_ABC_HERE */
+#endif  
 		strcpy(driver->name, "UltraSPARC-III");
 
 		cpufreq_us3_driver = driver;

@@ -1,21 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * This driver implements communication with Standby Controller
- * in some STMicroelectronics devices
- *
- * Copyright (C) 2014 STMicroelectronics Limited
- *
- * Contributor:Francesco Virlinzi <francesco.virlinzi@st.com>
- * Author:Pooja Agarwal <pooja.agarwal@st.com>
- * Author:Udit Kumar <udit-dlh.kumar@st.com>
- * Author:Sudeep Biswas <sudeep.biswas@st.com>
- *
- * May be copied or modified under the terms of the GNU General Public License.
- * See linux/COPYING for more information.
- */
-
+ 
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <asm/unaligned.h>
@@ -29,7 +15,6 @@ static void *st_lpm_private_data;
 
 static DEFINE_MUTEX(st_lpm_mutex);
 
-/*a Set of LPM callbacks and datas */
 struct st_lpm_callback {
 	int (*fn)(void *);
 	void *data;
@@ -125,14 +110,6 @@ int st_lpm_set_ops(struct st_lpm_ops *ops, void *private_data)
 	return 0;
 }
 
-/**
- * st_lpm_write_edid()	To write the EDID Info to SBC-DMEM
- * @data		byte array to write
- * @block_num		Block number to write
- *
- * Return - 0 on success
- * Return -  negative error code on failure.
- */
 int st_lpm_write_edid(unsigned char *data, u8 block_num)
 {
 	if (!st_lpm_ops || !st_lpm_ops->write_edid || !data)
@@ -142,14 +119,6 @@ int st_lpm_write_edid(unsigned char *data, u8 block_num)
 }
 EXPORT_SYMBOL(st_lpm_write_edid);
 
-/**
- * st_lpm_read_edid()	To read EDID Info from SBC-DMEM
- * @data		byte array to write
- * @block_num		Block number to read
- *
- * Return - 0 on success
- * Return - negative error code on failure.
- */
 int st_lpm_read_edid(unsigned char *data, u8 block_num)
 {
 	if (!st_lpm_ops || !st_lpm_ops->read_edid || !data)
@@ -160,14 +129,7 @@ int st_lpm_read_edid(unsigned char *data, u8 block_num)
 EXPORT_SYMBOL(st_lpm_read_edid);
 
 #ifdef MY_DEF_HERE
-/*
- * st_lpm_setup_tracedata - Set trace data parameters
- * @trace_modules - peripherals for which trace data to be enabled
- *
- * Return - 0 on success
- * Return - negative error code on failure.
- */
-
+ 
 int st_lpm_setup_tracedata(u16 trace_modules)
 {
 	if (!st_lpm_ops || !st_lpm_ops->setup_tracedata)
@@ -176,17 +138,8 @@ int st_lpm_setup_tracedata(u16 trace_modules)
 	return st_lpm_ops->setup_tracedata(trace_modules, st_lpm_private_data);
 }
 EXPORT_SYMBOL(st_lpm_setup_tracedata);
-#endif /* MY_DEF_HERE */
+#endif  
 
-/**
- * st_lpm_write_dmem()	To write to SBC-DMEM
- * @data		byte array to write
- * @size		number of bytes to write
- * @offset		offset in DMEM where to start write from
- *
- * Return - 0 on success
- * Return - negative error code on failure.
- */
 int st_lpm_write_dmem(unsigned char *data, unsigned int size,
 		      int offset)
 {
@@ -200,15 +153,6 @@ int st_lpm_write_dmem(unsigned char *data, unsigned int size,
 }
 EXPORT_SYMBOL(st_lpm_write_dmem);
 
-/**
- * st_lpm_read_dmem()	To read from SBC-DMEM
- * @data		byte array to read into
- * @size		number of bytes to read
- * @offset		offset in DMEM where to start read from
- *
- * Return - 0 on success
- * Return -  negative error code on failure.
- */
 int st_lpm_read_dmem(unsigned char *data, unsigned int size,
 		     int offset)
 {
@@ -222,13 +166,6 @@ int st_lpm_read_dmem(unsigned char *data, unsigned int size,
 }
 EXPORT_SYMBOL(st_lpm_read_dmem);
 
-/**
- * st_lpm_get_dmem_offset()	To get offset inside SBC-DMEM
- * @offset_type			type of the offset that is wanted
- *
- * Return - 0 on success
- * Return -  negative error code on failure.
- */
 int st_lpm_get_dmem_offset(enum st_lpm_sbc_dmem_offset_type offset_type)
 {
 	if (!st_lpm_ops || !st_lpm_ops->get_dmem_offset)
@@ -238,16 +175,6 @@ int st_lpm_get_dmem_offset(enum st_lpm_sbc_dmem_offset_type offset_type)
 }
 EXPORT_SYMBOL(st_lpm_get_dmem_offset);
 
-/**
- * st_lpm_get_version() - To get version of driver and firmware
- * @driver_version:	driver version
- * @fw_version:		firmware version
- *
- * This function will return firmware and driver version in parameters.
- *
- * Return - 0 on success
- * Return -  negative error code on failure.
- */
 int st_lpm_get_version(struct st_lpm_version *driver_version,
 	struct st_lpm_version *fw_version)
 {
@@ -257,7 +184,6 @@ int st_lpm_get_version(struct st_lpm_version *driver_version,
 		.command_id = LPM_MSG_VER,
 	};
 
-	/* Check parameters */
 	if (unlikely(!driver_version || !fw_version))
 		return -EINVAL;
 
@@ -266,7 +192,6 @@ int st_lpm_get_version(struct st_lpm_version *driver_version,
 	if (ret)
 		return ret;
 
-	/* Copy the firmware version in paramater */
 	fw_version->major_comm_protocol = response.buf[0] >> 4;
 	fw_version->minor_comm_protocol = response.buf[0] & 0x0F;
 	fw_version->major_soft = response.buf[1] >> 4;
@@ -288,18 +213,6 @@ int st_lpm_get_version(struct st_lpm_version *driver_version,
 }
 EXPORT_SYMBOL(st_lpm_get_version);
 
-/**
- * st_lpm_setup_ir() - To set ir key setup
- * @num_keys:		Number of IR keys
- * @ir_key_info:	Information of IR keys
- *
- * This function will configure IR information on SBC firmware.
- * User needs to pass on which IR keys wakeup is required and
- * the expected pattern for those keys.
- *
- * Return - 0 on success
- * Return - negative error code on failure.
-*/
 int st_lpm_setup_ir(u8 num_keys, struct st_lpm_ir_keyinfo *ir_key_info)
 {
 	struct st_lpm_ir_keyinfo *this_key;
@@ -313,7 +226,7 @@ int st_lpm_setup_ir(u8 num_keys, struct st_lpm_ir_keyinfo *ir_key_info)
 
 		ir_key_info++;
 		key_info = &this_key->ir_key;
-		/* Check key crediantials */
+		 
 		if (unlikely(this_key->time_period == 0 ||
 			     key_info->num_patterns >= 64))
 			return -EINVAL;
@@ -325,7 +238,6 @@ int st_lpm_setup_ir(u8 num_keys, struct st_lpm_ir_keyinfo *ir_key_info)
 
 		org_buf = buf;
 
-		/* Fill buffer */
 		*buf++ = LPM_MSG_SET_IR;
 		*buf++ = 0;
 		*buf++ = this_key->ir_id & 0xF;
@@ -341,7 +253,7 @@ int st_lpm_setup_ir(u8 num_keys, struct st_lpm_ir_keyinfo *ir_key_info)
 		*buf++ = this_key->tolerance;
 		*buf++ = key_info->key_index & 0xF;
 		*buf++ = key_info->num_patterns;
-		/* Now compress the actual data and copy */
+		 
 		buf = org_buf + 12;
 
 		for (i = 0; i < key_info->num_patterns; i++) {
@@ -363,21 +275,8 @@ int st_lpm_setup_ir(u8 num_keys, struct st_lpm_ir_keyinfo *ir_key_info)
 EXPORT_SYMBOL(st_lpm_setup_ir);
 
 #ifdef MY_DEF_HERE
-#else /* MY_DEF_HERE */
-/**
- * lpm_get_trigger_data - to get which device woken up the system
- * @wakeup_device:      Which device did the wakeup
- * @size_max:           max size to read
- * @size_min:           min size
- * @data:               pointer to get data
- *
- * This function will return data associated with wakeup device
- * This is internal function
- *
- * Return - 0 on success
- * Return - negative error code on failure.
- */
-
+#else  
+ 
 int st_lpm_get_trigger_data(enum st_lpm_wakeup_devices wakeup_device,
 		unsigned int size_max, unsigned int size_min,
 		char *data)
@@ -400,26 +299,13 @@ int st_lpm_get_trigger_data(enum st_lpm_wakeup_devices wakeup_device,
 	return err;
 }
 EXPORT_SYMBOL(st_lpm_get_trigger_data);
-#endif /* MY_DEF_HERE */
+#endif  
 
-/**
- * st_lpm_get_wakeup_info() - To get additional info about wakeup device
- * @wakeupdevice:	wakeup device id
- * @validsize:		read valid size will be returned
- * @datasize:		data size to read
- * @data:		data pointer
- *
- * This API will return additional data for wakeup device if required.
- *
- * Return - 0 on success if data read from SBC is <= datasize
- * Return - 1 if data available with SBC is > datasize
- * Return - negative error on failure
-*/
 #ifdef MY_DEF_HERE
 int st_lpm_get_wakeup_info(enum st_lpm_wakeup_devices wakeupdevice,
-#else /* MY_DEF_HERE */
+#else  
 int st_lpm_get_wakeup_info(enum st_lpm_wakeup_devices *wakeupdevice,
-#endif /* MY_DEF_HERE */
+#endif  
 			s16 *validsize, u16 datasize, char *data)
 {
 	int err = 0;
@@ -432,40 +318,28 @@ int st_lpm_get_wakeup_info(enum st_lpm_wakeup_devices *wakeupdevice,
 #ifdef MY_DEF_HERE
 	command.buf[0] = wakeupdevice;
 	command.buf[1] = (wakeupdevice & 0xFF00) >> 8;
-#else /* MY_DEF_HERE */
+#else  
 	command.buf[0] = *wakeupdevice;
 	command.buf[1] = (*wakeupdevice & 0xFF00) >> 8;
-#endif /* MY_DEF_HERE */
+#endif  
 
-	/* Copy size requested */
 	put_unaligned_le16(datasize, &command.buf[2]);
 	err = st_lpm_ops_exchange_msg(&command, &response);
 	if (unlikely(err < 0))
 		goto exit;
 
-	/* Two response are possible*/
 	if (response.command_id == LPM_MSG_BKBD_READ) {
-		/*
-		 * If SBC replied to read response from its DMEM then
-		 * get the offset to read from SBC memory.
-		 */
+		 
 		offset = get_unaligned_le32(&response.buf[2]);
 
-		/* Get valid size from SBC */
 		st_lpm_ops_read_bulk(2, offset + 2, (char *)validsize);
 
-		/* Check if bit#15 is set */
 		if (*validsize < 0) {
 			pr_err("st lpm: Error data size not valid\n");
 			err = -EINVAL;
 			goto exit;
 		}
 
-		/*
-		 * Below condition is not possible
-		 * SBC have to provide data less than or equal to datasize
-		 * Added below check, if some bug pops up in firmware
-		 */
 		if (unlikely(*validsize > datasize)) {
 			pr_err("st lpm: more data than allowed\n");
 			err = -EINVAL;
@@ -475,24 +349,19 @@ int st_lpm_get_wakeup_info(enum st_lpm_wakeup_devices *wakeupdevice,
 
 	} else {
 		*validsize = get_unaligned_le16(response.buf);
-		/* Check if bit#15 is set in mailbox */
+		 
 		if (*validsize < 0) {
 			pr_err("st lpm: Error data size not valid\n");
 			err = -EINVAL;
 			goto exit;
 		}
 
-		/*
-		 * Below condition is not possible
-		 * SBC have to provide data less than or equal to datasize
-		 * Added below check, if some bug pops up in firmware
-		 */
 		if (unlikely(*validsize > datasize)) {
 			pr_err("st lpm: more data than allowed\n");
 			err = -EINVAL;
 			goto exit;
 		}
-		/* Copy data to user */
+		 
 		memcpy(data, &response.buf[2], *validsize);
 	}
 exit:
@@ -500,13 +369,6 @@ exit:
 }
 EXPORT_SYMBOL(st_lpm_get_wakeup_info);
 
-/**
- * st_lpm_configure_wdt - Set watchdog timeout for Standby Controller
- * @time_in_ms:	timeout in milli second
- *
- * Return - 0 on success
- * Return - negative error code on failure.
- */
 int st_lpm_configure_wdt(u16 time_in_ms, u8 wdt_type)
 {
 	struct lpm_message response = {0};
@@ -524,15 +386,6 @@ int st_lpm_configure_wdt(u16 time_in_ms, u8 wdt_type)
 }
 EXPORT_SYMBOL(st_lpm_configure_wdt);
 
-/**
- * st_lpm_get_fw_state - Get the SBC firmware status
- * @fw_state:	enum for firmware status
- *
- * Firmware status will be returned in passed parameter.
- *
- * Return - 0 on success
- * Return - negative  error code on failure.
- */
 int st_lpm_get_fw_state(enum st_lpm_sbc_state *fw_state)
 {
 	int ret = 0;
@@ -553,13 +406,6 @@ int st_lpm_get_fw_state(enum st_lpm_sbc_state *fw_state)
 }
 EXPORT_SYMBOL(st_lpm_get_fw_state);
 
-/**
- * st_lpm_reset() - To reset part of full SOC
- * @reset_type:	type of reset
- *
- * Return - 0 on success
- * Return - negative error on failure
- */
 int st_lpm_reset(enum st_lpm_reset_type reset_type)
 {
 	int ret = 0;
@@ -574,7 +420,7 @@ int st_lpm_reset(enum st_lpm_reset_type reset_type)
 	if (!ret && reset_type == ST_LPM_SBC_RESET) {
 		int i = 0;
 		enum st_lpm_sbc_state fw_state;
-		/* Wait till 1 second to get response from firmware */
+		 
 		for (i = 0; i < 10; ++i) {
 			ret = st_lpm_get_fw_state(&fw_state);
 			if (!ret)
@@ -586,18 +432,6 @@ int st_lpm_reset(enum st_lpm_reset_type reset_type)
 }
 EXPORT_SYMBOL(st_lpm_reset);
 
-/**
- * st_lpm_set_wakeup_device - To set wakeup devices
- * @devices:	All enabled wakeup devices
- *
- * In older protocol version wakeup devices were limited to 8,
- * whereas new protocol version supports upto 10 wakeup devices.
- * Therefore two different message were used to set wakeup devices,
- * driver checks firmware version and send wakeup device accordingly.
- *
- * Return - 0 on success
- * Return - negative error code on failure.
- */
 int st_lpm_set_wakeup_device(u16 devices)
 {
 	struct st_lpm_adv_feature feature;
@@ -608,15 +442,6 @@ int st_lpm_set_wakeup_device(u16 devices)
 }
 EXPORT_SYMBOL(st_lpm_set_wakeup_device);
 
-/**
- * st_lpm_set_wakeup_time - To set wakeup time
- * @timeout:	Timeout in seconds after which wakeup is required
- *
- * Wakeup will be done after current time + timeout
- *
- * Return - 0 on success
- * Return - negative error code on failure.
- */
 int st_lpm_set_wakeup_time(u32 timeout)
 {
 	struct lpm_message response = {0};
@@ -625,23 +450,13 @@ int st_lpm_set_wakeup_time(u32 timeout)
 	};
 
 	timeout = cpu_to_le32(timeout);
-	/* Copy timeout into message */
+	 
 	memcpy(command.buf, &timeout, 4);
 
 	return st_lpm_ops_exchange_msg(&command, &response);
 }
 EXPORT_SYMBOL(st_lpm_set_wakeup_time);
 
-/**
- * st_lpm_set_rtc - To set rtc time for standby controller
- * @new_rtc:	rtc value
- *
- * SBC can display RTC clock when in standby mode using this RTC value,
- * This RTC will act as base for RTC hardware of SBC.
- *
- * Return - 0 on success
- * Return - negative error code on failure.
- */
 int st_lpm_set_rtc(struct rtc_time *new_rtc)
 {
 	struct lpm_message response = {0};
@@ -649,7 +464,6 @@ int st_lpm_set_rtc(struct rtc_time *new_rtc)
 		.command_id = LPM_MSG_SET_RTC,
 	};
 
-	/* Copy received values of rtc into message */
 	if (new_rtc->tm_year >= MIN_RTC_YEAR &&
 	    new_rtc->tm_year <= MAX_RTC_YEAR)
 		command.buf[5] = new_rtc->tm_year - MIN_RTC_YEAR;
@@ -749,20 +563,6 @@ int stm_lpm_get_standby_time(u32 *time)
 }
 EXPORT_SYMBOL(stm_lpm_get_standby_time);
 
-/**
- * st_lpm_get_wakeup_device - To get wake devices
- * @wakeup_device:	wakeup device
- *
- * This function will return wakeup device because of which SBC has
- * woken up the SOC.
- * In older protocol version wakeup devices were limited to 8,
- * whereas new Protocol version supports upto 10 wakeup devices.
- * Therefore two different message were used to get wakeup device.
- * Driver checks firmware version and send wakeup device accordingly.
- *
- * Return - 0 on success
- * Return - negative error code on failure.
- */
 int st_lpm_get_wakeup_device(enum st_lpm_wakeup_devices *wakeup_device)
 {
 	int err = 0;
@@ -782,16 +582,6 @@ int st_lpm_get_wakeup_device(enum st_lpm_wakeup_devices *wakeup_device)
 }
 EXPORT_SYMBOL(st_lpm_get_wakeup_device);
 
-/**
- * st_lpm_setup_fp - To set front panel information for SBC
- * @fp_setting:	Front panel setting
- *
- * This function will set front panel setting.
- * By default host CPU is assumed to control the front panel.
- *
- * Return - 0 on success
- * Return - negative error code on failure.
- */
 int st_lpm_setup_fp(struct st_lpm_fp_setting *fp_setting)
 {
 	struct lpm_message response = {0};
@@ -810,19 +600,6 @@ int st_lpm_setup_fp(struct st_lpm_fp_setting *fp_setting)
 }
 EXPORT_SYMBOL(st_lpm_setup_fp);
 
-/**
- * st_lpm_setup_pio - To inform SBC about PIO Use
- * @pio_setting:	pio_setting
- *
- * This function will inform SBC about PIO use,
- * driver running on Host must configure the PIO.
- * SBC will not do any configuration for PIO.
- * GPIO can be used as power control for board,
- * gpio interrupt, external interrupt, Phy WOL wakeup.
- *
- * Return - 0 on success
- * Return - negative error code on failure.
- */
 int st_lpm_setup_pio(struct st_lpm_pio_setting *pio_setting)
 {
 	struct lpm_message response = {0};
@@ -850,18 +627,6 @@ int st_lpm_setup_pio(struct st_lpm_pio_setting *pio_setting)
 }
 EXPORT_SYMBOL(st_lpm_setup_pio);
 
-/**
- * st_lpm_setup_keyscan - To inform SBC about wakeup key of Keyscan
- * @key_data:	Keyscan Key info
- *
- * This function will inform SBC about keyscan key
- * on which SBC will wakeup.
- * Driver running on Host must configure the Keyscan IP.
- * SBC will not do any configuration.
- *
- * Return - 0 on success
- * Return - negative error code on failure.
- */
 int st_lpm_setup_keyscan(u16 key_data)
 {
 	struct lpm_message response = {0};
@@ -875,23 +640,6 @@ int st_lpm_setup_keyscan(u16 key_data)
 }
 EXPORT_SYMBOL(st_lpm_setup_keyscan);
 
-/**
- * st_lpm_set_adv_feature - Set advance feature of SBC
- * @enabled:	If feature needs to enabled
- *		pass 1 for enabling, 0 disabling
- * @feature:	Feature type and its parameters.
- *		Features can be :
- *		SBC VCORE External without parameter.
- *		SBC Low voltage detect with value of voltage.
- *		SBC clock selection(external, AGC or 32K).
- *		SBC RTC source 32K_TCXO or 32K_OSC
- *		SBC Wakeup triggers.
- *
- * This function will enable/disable selected feature on SBC
- *
- * Return - 0 on success
- * Return - negative error code on failure.
- */
 int st_lpm_set_adv_feature(u8 enabled, struct st_lpm_adv_feature *feature)
 {
 	struct lpm_message response = {0};
@@ -900,7 +648,7 @@ int st_lpm_set_adv_feature(u8 enabled, struct st_lpm_adv_feature *feature)
 	};
 #ifdef MY_DEF_HERE
 	int ret;
-#endif /* MY_DEF_HERE */
+#endif  
 
 	if (unlikely(feature == NULL))
 		return -EINVAL;
@@ -910,37 +658,19 @@ int st_lpm_set_adv_feature(u8 enabled, struct st_lpm_adv_feature *feature)
 	command.buf[1] = enabled;
 
 #ifdef MY_DEF_HERE
-	/*
-	 * No response expected from  SBC in case it is
-	 * set to IDLE mode
-	 */
+	 
 	if (feature->feature_name == ST_LPM_SBC_IDLE)
 		ret = st_lpm_ops_exchange_msg(&command, NULL);
 	else
 		ret = st_lpm_ops_exchange_msg(&command, &response);
 
 	return ret;
-#else /* MY_DEF_HERE */
+#else  
 	return st_lpm_ops_exchange_msg(&command, &response);
-#endif /* MY_DEF_HERE */
+#endif  
 }
 EXPORT_SYMBOL(st_lpm_set_adv_feature);
 
-/**
- * st_lpm_get_adv_feature - To get current/supported features of SBC
- * @all_features:	If required to get all features.
- *			pass 1 to get all supported features by SBC.
- *			pass 0 to get all current enabled feature of SBC.
- * @features:		structure to get features of SBC
- *
- * Supported or currently  enabled features will be returned in get_params
- * field of features argument.
- * get_params[0-3] are bit map for each feature. Bit map 0-3 is reserved
- * get_params[4-5] are bit map for wakeup triggers.
- *
- * Return - 0 on success
- * Return - negative error code on failure.
- */
 int st_lpm_get_adv_feature(bool all_features, bool custom_feature,
 			struct st_lpm_adv_feature *features)
 {
@@ -967,17 +697,6 @@ int st_lpm_get_adv_feature(bool all_features, bool custom_feature,
 }
 EXPORT_SYMBOL(st_lpm_get_adv_feature);
 
-/**
- * st_lpm_setup_fp_pio - To setup frontpanel long press GPIO
- * @pio_setting:		PIO data
- * @long_press_delay:		Delay to detect long presss
- * @default_reset_delay:	Default delay to do SOC reset
- *
- * This function will inform SBC about long press GPIO and its delays
- *
- * Return - 0 on success
- * Return - negative error code on failure.
- */
 int st_lpm_setup_fp_pio(struct st_lpm_pio_setting *pio_setting,
 			u32 long_press_delay, u32 default_reset_delay)
 {
@@ -1001,7 +720,6 @@ int st_lpm_setup_fp_pio(struct st_lpm_pio_setting *pio_setting,
 
 	command.buf[2] = pio_setting->pio_use;
 
-	/*msg[3,4,5] are reserved */
 	memcpy(&command.buf[6], &long_press_delay, 4);
 	memcpy(&command.buf[10], &default_reset_delay, 4);
 
@@ -1009,17 +727,6 @@ int st_lpm_setup_fp_pio(struct st_lpm_pio_setting *pio_setting,
 }
 EXPORT_SYMBOL(st_lpm_setup_fp_pio);
 
-/**
- * st_lpm_setup_power_on_delay - To setup delay on wakeup
- * @de_bounce_delay:	this is button de bounce delay.
- * @dc_stability_delay:	this is DC stability delay
- *
- * This function will inform SBC about delays on detecting valid wakeup
- * If this is not called, SBC will use default delay
- *
- * Return - 0 on success
- * Return - negative error code on failure.
- */
 int st_lpm_setup_power_on_delay(u16 de_bounce_delay,
 				u16 dc_stable_delay)
 {
@@ -1035,17 +742,6 @@ int st_lpm_setup_power_on_delay(u16 de_bounce_delay,
 }
 EXPORT_SYMBOL(st_lpm_setup_power_on_delay);
 
-/**
- * st_lpm_setup_rtc_calibration_time -
- *	To setup the RTC calibration time in min
- * @cal_time:	Calibration time in minutes.
- *
- * This function will inform SBC about the RTC calibration time
- * If this is not called, SBC will use default time (5 min)
- *
- * Return - 0 on success
- * Return - negative error code on failure.
- */
 int st_lpm_setup_rtc_calibration_time(u8 cal_time)
 {
 	struct st_lpm_adv_feature feature;
@@ -1057,15 +753,6 @@ int st_lpm_setup_rtc_calibration_time(u8 cal_time)
 }
 EXPORT_SYMBOL(st_lpm_setup_rtc_calibration_time);
 
-/**
- * st_lpm_set_cec_addr - to set CEC address for SBC
- * @addr:	CEC's physical and logical address
- *
- * This function will inform SBC about CEC phy and logical addresses
- *
- * Return - 0 on success
- * Return - negative error code on failure.
- */
 int st_lpm_set_cec_addr(struct st_lpm_cec_address *addr)
 {
 	struct lpm_message response = {0};
@@ -1083,16 +770,6 @@ int st_lpm_set_cec_addr(struct st_lpm_cec_address *addr)
 }
 EXPORT_SYMBOL(st_lpm_set_cec_addr);
 
-/**
- * st_lpm_cec_config - configure SBC for CEC WU or custom message
- * @use:	WU reason or custom message
- * @params:	Data associated with use
- *
- * This function will inform SBC about CEC WU or custom message
- *
- * Return - 0 on success
- * Return - negative error code on failure.
- */
 int st_lpm_cec_config(enum st_lpm_cec_select use,
 			union st_lpm_cec_params *params)
 {
@@ -1152,11 +829,6 @@ int st_lpm_sbc_ir_enable(bool enable)
 }
 EXPORT_SYMBOL(st_lpm_sbc_ir_enable);
 
-/**
- * st_lpm_register_callback - to register user callback
- *
- * This function will configure user's callback for long press PIO
- */
 int st_lpm_register_callback(enum st_lpm_callback_type type,
 	int (*fnc)(void *), void *data)
 {
@@ -1215,4 +887,4 @@ int st_start_loaded_fw(void)
 	return 0;
 }
 EXPORT_SYMBOL(st_start_loaded_fw);
-#endif /* MY_DEF_HERE */
+#endif  

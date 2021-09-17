@@ -1,29 +1,14 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * drivers/cpufreq/cpufreq_governor.c
- *
- * CPUFREQ governors common code
- *
- * Copyright	(C) 2001 Russell King
- *		(C) 2003 Venkatesh Pallipadi <venkatesh.pallipadi@intel.com>.
- *		(C) 2003 Jun Nakajima <jun.nakajima@intel.com>
- *		(C) 2009 Alexander Clouter <alex@digriz.org.uk>
- *		(c) 2012 Viresh Kumar <viresh.kumar@linaro.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
-
+ 
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
 #if defined(MY_ABC_HERE)
 #include <linux/export.h>
 #include <linux/kernel_stat.h>
 #include <linux/slab.h>
-#else /* MY_ABC_HERE */
+#else  
 #include <asm/cputime.h>
 #include <linux/cpufreq.h>
 #include <linux/cpumask.h>
@@ -34,13 +19,13 @@
 #include <linux/tick.h>
 #include <linux/types.h>
 #include <linux/workqueue.h>
-#endif /* MY_ABC_HERE */
+#endif  
 
 #include "cpufreq_governor.h"
 
 #if defined(MY_ABC_HERE)
-// do nothing
-#else /* MY_ABC_HERE */
+ 
+#else  
 static struct kobject *get_governor_parent_kobj(struct cpufreq_policy *policy)
 {
 	if (have_governor_per_policy())
@@ -48,7 +33,7 @@ static struct kobject *get_governor_parent_kobj(struct cpufreq_policy *policy)
 	else
 		return cpufreq_global_kobject;
 }
-#endif /* MY_ABC_HERE */
+#endif  
 
 static struct attribute_group *get_sysfs_attr(struct dbs_data *dbs_data)
 {
@@ -59,8 +44,8 @@ static struct attribute_group *get_sysfs_attr(struct dbs_data *dbs_data)
 }
 
 #if defined(MY_ABC_HERE)
-// do nothing
-#else /* MY_ABC_HERE */
+ 
+#else  
 static inline u64 get_cpu_idle_time_jiffy(unsigned int cpu, u64 *wall)
 {
 	u64 idle_time;
@@ -95,7 +80,7 @@ u64 get_cpu_idle_time(unsigned int cpu, u64 *wall, int io_busy)
 	return idle_time;
 }
 EXPORT_SYMBOL_GPL(get_cpu_idle_time);
-#endif /* MY_ABC_HERE */
+#endif  
 
 void dbs_check_cpu(struct dbs_data *dbs_data, int cpu)
 {
@@ -114,7 +99,6 @@ void dbs_check_cpu(struct dbs_data *dbs_data, int cpu)
 
 	policy = cdbs->cur_policy;
 
-	/* Get Absolute Load */
 	for_each_cpu(j, policy->cpus) {
 		struct cpu_dbs_common_info *j_cdbs;
 		u64 cur_wall_time, cur_idle_time;
@@ -124,12 +108,6 @@ void dbs_check_cpu(struct dbs_data *dbs_data, int cpu)
 
 		j_cdbs = dbs_data->cdata->get_cpu_cdbs(j);
 
-		/*
-		 * For the purpose of ondemand, waiting for disk IO is
-		 * an indication that you're performance critical, and
-		 * not that the system is actually idle. So do not add
-		 * the iowait time to the cpu idle time.
-		 */
 		if (dbs_data->cdata->governor == GOV_ONDEMAND)
 			io_busy = od_tuners->io_is_busy;
 		cur_idle_time = get_cpu_idle_time(j, &cur_wall_time, io_busy);
@@ -148,10 +126,7 @@ void dbs_check_cpu(struct dbs_data *dbs_data, int cpu)
 
 			cur_nice = kcpustat_cpu(j).cpustat[CPUTIME_NICE] -
 					 cdbs->prev_cpu_nice;
-			/*
-			 * Assumption: nice time between sampling periods will
-			 * be less than 2^32 jiffies for 32 bit sys
-			 */
+			 
 			cur_nice_jiffies = (unsigned long)
 					cputime64_to_jiffies64(cur_nice);
 
@@ -192,13 +167,7 @@ void gov_queue_work(struct dbs_data *dbs_data, struct cpufreq_policy *policy,
 		goto out_unlock;
 
 	if (!all_cpus) {
-		/*
-		 * Use raw_smp_processor_id() to avoid preemptible warnings.
-		 * We know that this is only called with all_cpus == false from
-		 * works that have been queued with *_work_on() functions and
-		 * those works are canceled during CPU_DOWN_PREPARE so they
-		 * can't possibly run on any other CPU.
-		 */
+		 
 		__gov_queue_work(raw_smp_processor_id(), dbs_data, delay);
 	} else {
 		for_each_cpu(i, policy->cpus)
@@ -208,7 +177,7 @@ void gov_queue_work(struct dbs_data *dbs_data, struct cpufreq_policy *policy,
 out_unlock:
 	mutex_unlock(&cpufreq_governor_lock);
 }
-#else /* MY_ABC_HERE */
+#else  
 void gov_queue_work(struct dbs_data *dbs_data, struct cpufreq_policy *policy,
 		unsigned int delay, bool all_cpus)
 {
@@ -224,7 +193,7 @@ void gov_queue_work(struct dbs_data *dbs_data, struct cpufreq_policy *policy,
 			__gov_queue_work(i, dbs_data, delay);
 	}
 }
-#endif /* MY_ABC_HERE */
+#endif  
 EXPORT_SYMBOL_GPL(gov_queue_work);
 
 static inline void gov_cancel_work(struct dbs_data *dbs_data,
@@ -239,7 +208,6 @@ static inline void gov_cancel_work(struct dbs_data *dbs_data,
 	}
 }
 
-/* Will return if we need to evaluate cpu load again or not */
 bool need_load_eval(struct cpu_dbs_common_info *cdbs,
 		unsigned int sampling_rate)
 {
@@ -247,7 +215,6 @@ bool need_load_eval(struct cpu_dbs_common_info *cdbs,
 		ktime_t time_now = ktime_get();
 		s64 delta_us = ktime_us_delta(time_now, cdbs->time_stamp);
 
-		/* Do nothing if we recently have sampled */
 		if (delta_us < (s64)(sampling_rate / 2))
 			return false;
 		else
@@ -319,7 +286,7 @@ int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 #if defined(MY_ABC_HERE)
 		if (!have_governor_per_policy())
 			WARN_ON(cpufreq_get_global_kobject());
-#endif /* MY_ABC_HERE */
+#endif  
 
 		rc = sysfs_create_group(get_governor_parent_kobj(policy),
 				get_sysfs_attr(dbs_data));
@@ -331,12 +298,10 @@ int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 
 		policy->governor_data = dbs_data;
 
-		/* policy latency is in ns. Convert it to us first */
 		latency = policy->cpuinfo.transition_latency / 1000;
 		if (latency == 0)
 			latency = 1;
 
-		/* Bring kernel and HW constraints together */
 		dbs_data->min_sampling_rate = max(dbs_data->min_sampling_rate,
 				MIN_LATENCY_MULTIPLIER * latency);
 		set_sampling_rate(dbs_data, max(dbs_data->min_sampling_rate,
@@ -362,7 +327,7 @@ int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 #if defined(MY_ABC_HERE)
 			if (!have_governor_per_policy())
 				cpufreq_put_global_kobject();
-#endif /* MY_ABC_HERE */
+#endif  
 
 			if ((dbs_data->cdata->governor == GOV_CONSERVATIVE) &&
 				(policy->governor->initialized == 1)) {
@@ -422,13 +387,10 @@ int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 		}
 
 #if defined(MY_ABC_HERE)
-		// do nothing
-#else /* MY_ABC_HERE */
-		/*
-		 * conservative does not implement micro like ondemand
-		 * governor, thus we are bound to jiffes/HZ
-		 */
-#endif /* MY_ABC_HERE */
+		 
+#else  
+		 
+#endif  
 		if (dbs_data->cdata->governor == GOV_CONSERVATIVE) {
 			cs_dbs_info->down_skip = 0;
 			cs_dbs_info->enable = 1;
@@ -441,7 +403,6 @@ int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 
 		mutex_unlock(&dbs_data->mutex);
 
-		/* Initiate timer time stamp */
 		cpu_cdbs->time_stamp = ktime_get();
 
 		gov_queue_work(dbs_data, policy,
@@ -458,7 +419,7 @@ int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 		mutex_destroy(&cpu_cdbs->timer_mutex);
 #if defined(MY_ABC_HERE)
 		cpu_cdbs->cur_policy = NULL;
-#endif /* MY_ABC_HERE */
+#endif  
 
 		mutex_unlock(&dbs_data->mutex);
 
@@ -471,7 +432,7 @@ int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 			mutex_unlock(&dbs_data->mutex);
 			break;
 		}
-#endif /* MY_ABC_HERE */
+#endif  
 		mutex_lock(&cpu_cdbs->timer_mutex);
 		if (policy->max < cpu_cdbs->cur_policy->cur)
 			__cpufreq_driver_target(cpu_cdbs->cur_policy,
@@ -483,7 +444,7 @@ int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 		mutex_unlock(&cpu_cdbs->timer_mutex);
 #if defined(MY_ABC_HERE)
 		mutex_unlock(&dbs_data->mutex);
-#endif /* MY_ABC_HERE */
+#endif  
 		break;
 	}
 	return 0;

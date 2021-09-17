@@ -1,15 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) 2013 STMicroelectronics (R&D) Limited.
- * Author(s): Srinivas Kandagatla <srinivas.kandagatla@st.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
-
+ 
 #include <linux/clk-provider.h>
 #include <linux/clocksource.h>
 #include <linux/irq.h>
@@ -81,7 +73,7 @@ static int __init of_add_fixed_phys(void)
 	return 0;
 }
 arch_initcall(of_add_fixed_phys);
-#endif /* CONFIG_FIXED_PHY */
+#endif  
 
 void __init sti_l2x0_init(void)
 {
@@ -91,7 +83,6 @@ void __init sti_l2x0_init(void)
 	if (of_machine_is_compatible("st,stid127"))
 		way_size = 0x3;
 
-	/* may be this can be encoded in macros like BIT*() */
 	aux_ctrl = (0x1 << L2X0_AUX_CTRL_SHARE_OVERRIDE_SHIFT) |
 		(0x1 << L2X0_AUX_CTRL_DATA_PREFETCH_SHIFT) |
 		(0x1 << L2X0_AUX_CTRL_INSTR_PREFETCH_SHIFT) |
@@ -117,7 +108,7 @@ static const char *sti_dt_match[] __initdata = {
 };
 
 #ifdef MY_DEF_HERE
-#else /* MY_DEF_HERE */
+#else  
 void __init sti_init_early(void)
 {
 #ifdef CONFIG_STM_PCIE_TRACKER_BUG
@@ -128,14 +119,14 @@ void __init sti_init_early(void)
 		stm_hook_ioremap();
 #endif
 }
-#endif /* MY_DEF_HERE */
+#endif  
 
 DT_MACHINE_START(STM, "STi SoC with Flattened Device Tree")
 	.map_io		= debug_ll_io_init,
 #ifdef MY_DEF_HERE
-#else /* MY_DEF_HERE */
+#else  
 	.init_early	= sti_init_early,
-#endif /* MY_DEF_HERE */
+#endif  
 	.init_late	= sti_init_machine_late,
 	.init_time	= sti_timer_init,
 	.init_machine	= sti_init_machine,

@@ -1,12 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) ST-Microelectronics SA 2014
- * Author:  Maxime Coquelin <maxime.coquelin@st.com> for ST-Microelectronics.
- * License terms:  GNU General Public License (GPL), version 2
- */
-
+ 
 #include <linux/module.h>
 #include <linux/of_platform.h>
 #include <linux/platform_device.h>
@@ -178,7 +173,7 @@ static const struct st_soc_clk_init stih416_soc_clks[] = {
 };
 
 static const struct st_clk_tree stih410_clktree[] = {
-	/* Clockgen D0 */
+	 
 	CLKTREE_SET_RATE("CLK_S_D0_QUADFS.pll", 660000000),
 	CLKTREE_SET_RATE("CLK_S_D0_FS0_CH0", 50000000),
 	CLKTREE_SET("CLK_PCM_0", "CLK_S_D0_FS0_CH0", 50000000),
@@ -189,11 +184,9 @@ static const struct st_clk_tree stih410_clktree[] = {
 	CLKTREE_SET_RATE("CLK_S_D0_FS0_CH3", 50000000),
 	CLKTREE_SET("CLK_SPDIFF", "CLK_S_D0_FS0_CH3", 50000000),
 
-	/* Clockgen D2 */
 	CLKTREE_SET_RATE("CLK_S_D2_QUADFS.pll", 660000000),
 	CLKTREE_SET_PARENT("CLK_TMDS_HDMI", "CLK_TMDSOUT_HDMI"),
 
-	/* Clockgen D3 */
 	CLKTREE_SET_RATE("CLK_S_D3_QUADFS.pll", 660000000),
 	CLKTREE_SET_RATE("CLK_S_D3_FS0_CH0", 27000000),
 	CLKTREE_SET("CLK_STFE_FRC1", "CLK_S_D3_FS0_CH0", 27000000),
@@ -204,7 +197,6 @@ static const struct st_clk_tree stih410_clktree[] = {
 	CLKTREE_SET("CLK_MCHI", "CLK_S_D3_FS0_CH1", 27000000),
 	CLKTREE_SET("CLK_LPC_0", "CLK_SYSIN", 600000),
 
-	/* Clockgen C0 */
 	CLKTREE_SET_RATE("CLK_S_C0_FS0_CH2", 27000000),
 	CLKTREE_SET("CLK_DSS_LPC", "CLK_S_C0_FS0_CH2", 27000000),
 	CLKTREE_SET_RATE("CLK_MMC_0", 200000000),
@@ -270,9 +262,9 @@ static const struct st_soc_clk_init stih410_soc_clks[] = {
 	SOC_CLK_INIT_DIS_ON_RESUME("CLK_DSS_LPC"),
 #ifdef MY_DEF_HERE
 	SOC_CLK_INIT("CLK_PROC_STFE"),
-#else /* MY_DEF_HERE */
+#else  
 	SOC_CLK_INIT_DIS_ON_RESUME("CLK_PROC_STFE"),
-#endif /* MY_DEF_HERE */
+#endif  
 	SOC_CLK_INIT_DIS_ON_RESUME("CLK_FC_HADES"),
 	SOC_CLK_INIT_DIS_ON_RESUME("CLK_JPEGDEC"),
 	SOC_CLK_INIT_DIS_ON_RESUME("CLK_IC_LMI1"),
@@ -318,7 +310,7 @@ static const struct st_soc_clk_init stih410_soc_clks[] = {
 };
 
 static const struct st_clk_tree stih407_clktree[] = {
-	/* Clockgen D0 */
+	 
 	CLKTREE_SET_RATE("CLK_S_D0_QUADFS.pll", 660000000),
 	CLKTREE_SET_RATE("CLK_S_D0_FS0_CH0", 50000000),
 	CLKTREE_SET("CLK_PCM_0", "CLK_S_D0_FS0_CH0", 50000000),
@@ -329,11 +321,9 @@ static const struct st_clk_tree stih407_clktree[] = {
 	CLKTREE_SET_RATE("CLK_S_D0_FS0_CH3", 50000000),
 	CLKTREE_SET("CLK_SPDIFF", "CLK_S_D0_FS0_CH3", 50000000),
 
-	/* Clockgen D2 */
 	CLKTREE_SET_RATE("CLK_S_D2_QUADFS.pll", 660000000),
 	CLKTREE_SET_PARENT("CLK_TMDS_HDMI", "CLK_TMDSOUT_HDMI"),
 
-	/* Clockgen D3 */
 	CLKTREE_SET_RATE("CLK_S_D3_QUADFS.pll", 660000000),
 	CLKTREE_SET_RATE("CLK_S_D3_FS0_CH0", 27000000),
 	CLKTREE_SET("CLK_STFE_FRC1", "CLK_S_D3_FS0_CH0", 27000000),
@@ -344,7 +334,6 @@ static const struct st_clk_tree stih407_clktree[] = {
 	CLKTREE_SET("CLK_MCHI", "CLK_S_D3_FS0_CH1", 27000000),
 	CLKTREE_SET("CLK_LPC_0", "CLK_SYSIN", 600000),
 
-	/* Clockgen C0 */
 	CLKTREE_SET_RATE("CLK_S_C0_FS0_CH2", 27000000),
 	CLKTREE_SET("CLK_DSS_LPC", "CLK_S_C0_FS0_CH2", 27000000),
 	CLKTREE_SET_RATE("CLK_S_C0_FS0_CH3", 250000000),
@@ -387,9 +376,9 @@ static const struct st_soc_clk_init stih407_soc_clks[] = {
 	SOC_CLK_INIT_DIS_ON_RESUME("CLK_HVA"),
 #ifdef MY_DEF_HERE
 	SOC_CLK_INIT("CLK_PROC_STFE"),
-#else /* MY_DEF_HERE */
+#else  
 	SOC_CLK_INIT_DIS_ON_RESUME("CLK_PROC_STFE"),
-#endif /* MY_DEF_HERE */
+#endif  
 	SOC_CLK_INIT_DIS_ON_RESUME("CLK_PROC_TP"),
 	SOC_CLK_INIT_DIS_ON_RESUME("CLK_MMC_0"),
 	SOC_CLK_INIT_ALWAYS_ON("CLK_MMC_1"),
@@ -489,7 +478,7 @@ static const struct st_soc_clk_init stid127_soc_clks[] = {
 };
 
 static const struct st_clk_tree sti8416_clktree[] = {
-	/* Some Part of this configuration might move to Target Pack Later*/
+	 
 	CLKTREE_SET("CLK_ST231_DMU_0", "CLK_S_B0_PLL0_ODF_0", 700000000),
 	CLKTREE_SET("CLK_ST231_DMU_1", "CLK_S_B0_PLL0_ODF_0", 700000000),
 	CLKTREE_SET("CLK_VID_DMU_0", "CLK_S_B0_PLL0_ODF_0", 700000000),

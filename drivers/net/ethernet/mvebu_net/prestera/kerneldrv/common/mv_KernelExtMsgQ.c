@@ -1,27 +1,13 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
-* mv_KervelExtMsgQ.c
-*
-* DESCRIPTION:
-*       Message queues
-*
-* DEPENDENCIES:
-*
-* FILE REVISION NUMBER:
-*       $Revision: $
-1*******************************************************************************/
-
+ 
 #ifdef CONFIG_OF
 #include <linux/proc_fs.h>
 #endif
 
-/************* Defines ********************************************************/
-
 #define MV_MSGQ_STAT
 
-/************ Internal Typedefs ***********************************************/
 typedef struct _mvMsgQ
 {
     int                     flags;
@@ -44,26 +30,9 @@ static int              mv_num_queues = MV_QUEUES_DEF;
 module_param(mv_num_queues, int, S_IRUGO);
 
 #if defined(MY_ABC_HERE) && defined(CONFIG_OF)
-// do nothing
-#else /* MY_ABC_HERE */
-/*******************************************************************************
-* mvKernelExtMsgQ_read_proc_mem
-*
-* DESCRIPTION:
-*       proc read data rooutine.
-*       Use cat /proc/mvKernelExtMsgQ to show message queue list
-*
-* INPUTS:
-*
-* OUTPUTS:
-*       None
-*
-* RETURNS:
-*       Data length
-*
-* COMMENTS:
-*
-*******************************************************************************/
+ 
+#else  
+ 
 static int mvKernelExtMsgQ_read_proc_mem(
         char * page,
         char **start,
@@ -80,9 +49,7 @@ static int mvKernelExtMsgQ_read_proc_mem(
 
     len += sprintf(page+len,"id msgs waitRx waitTx");
 #ifdef MV_MSGQ_STAT
-    /*
-    len += sprintf(page+len," tcount gcount wcount");
-    */
+    
 #endif
     len += sprintf(page+len," name\n");
     for (k = 1; k < mv_num_queues; k++)
@@ -97,9 +64,7 @@ static int mvKernelExtMsgQ_read_proc_mem(
         len += sprintf(page+len,"%d %d %d %d",
                 k, q->messages, q->waitRx, q->waitTx);
 #ifdef MV_MSGQ_STAT
-        /*
-        len += sprintf(page+len," %d %d %d", sem->tcount, sem->gcount, sem->wcount);
-        */
+        
 #endif
         if (q->name[0])
             len += sprintf(page+len," %s", q->name);
@@ -130,23 +95,21 @@ static int mvKernelExtMsgQ_read_proc_mem(
 
     return len;
 }
-#endif /* MY_ABC_HERE */
+#endif 
 
 #ifdef CONFIG_OF
 static int proc_status_show_msq(struct seq_file *m, void *v) {
 
 #if defined(MY_ABC_HERE)
-	// do nothing
-#else /* MY_ABC_HERE */
+	
+#else 
     int len;
-#endif /* MY_ABC_HERE */
+#endif 
     int k;
 
     seq_printf(m, "id msgs waitRx waitTx");
 #ifdef MV_MSGQ_STAT
-    /*
-    len += sprintf(page+len," tcount gcount wcount");
-    */
+    
 #endif
     seq_printf(m, " name\n");
     for (k = 1; k < mv_num_queues; k++)
@@ -161,9 +124,7 @@ static int proc_status_show_msq(struct seq_file *m, void *v) {
         seq_printf(m, "%d %d %d %d",
                 k, q->messages, q->waitRx, q->waitTx);
 #ifdef MV_MSGQ_STAT
-        /*
-        len += sprintf(page+len," %d %d %d", sem->tcount, sem->gcount, sem->wcount);
-        */
+        
 #endif
         if (q->name[0])
             seq_printf(m, " %s", q->name);
@@ -193,25 +154,6 @@ static const struct file_operations mv_kext_msq_read_proc_operations = {
 };
 #endif
 
-/*******************************************************************************
-* mvKernelExt_MsgQInit
-*
-* DESCRIPTION:
-*       Initialize message queues support, create /proc for queues info
-*
-* INPUTS:
-*       None
-*
-* OUTPUTS:
-*       None
-*
-* RETURNS:
-*       Non zero if successful
-*       Zero if failed
-*
-* COMMENTS:
-*
-*******************************************************************************/
 static int mvKernelExt_MsgQInit(void)
 {
     if (mv_num_queues < MV_QUEUES_MIN)
@@ -227,7 +169,6 @@ static int mvKernelExt_MsgQInit(void)
 
     memset(mvMsgQs, 0, mv_num_queues * sizeof(mvMsgQSTC));
 
-    /* create proc entry */
 #ifdef CONFIG_OF
 	if (!proc_create("mvKernelExtMsgQ", S_IRUGO, NULL, &mv_kext_msq_read_proc_operations))
 		return -ENOMEM;
@@ -238,25 +179,6 @@ static int mvKernelExt_MsgQInit(void)
     return 1;
 }
 
-/*******************************************************************************
-* mvKernelExt_DeleteAllMsgQ
-*
-* DESCRIPTION:
-*       Destroys all message queues
-*       This is safety action which is executed when all tasks closed
-*
-* INPUTS:
-*       None
-*
-* OUTPUTS:
-*       None
-*
-* RETURNS:
-*       None
-*
-* COMMENTS:
-*
-*******************************************************************************/
 static void mvKernelExt_DeleteAllMsgQ(void)
 {
     int k;
@@ -274,24 +196,6 @@ static void mvKernelExt_DeleteAllMsgQ(void)
     }
 }
 
-/*******************************************************************************
-* mvKernelExt_MsgQCleanup
-*
-* DESCRIPTION:
-*       Perform message queues cleanup actions before module unload
-*
-* INPUTS:
-*       None
-*
-* OUTPUTS:
-*       None
-*
-* RETURNS:
-*       None
-*
-* COMMENTS:
-*
-*******************************************************************************/
 static void mvKernelExt_MsgQCleanup(void)
 {
     MV_GLOBAL_LOCK();
@@ -309,27 +213,6 @@ static void mvKernelExt_MsgQCleanup(void)
     remove_proc_entry("mvKernelExtMsgQ", NULL);
 }
 
-/*******************************************************************************
-* mvKernelExt_MsgQCreate
-*
-* DESCRIPTION:
-*       Create a new message queue
-*
-* INPUTS:
-*       arg   - pointer to structure with creation params and queue name
-*
-* OUTPUTS:
-*       None
-*
-* RETURNS:
-*       Positive value         - queue ID
-*       -MVKERNELEXT_EINVAL    - invalid parameter passed
-*       -MVKERNELEXT_ENOMEM    - queue array is full
-*
-*
-* COMMENTS:
-*
-*******************************************************************************/
 int mvKernelExt_MsgQCreate(
     const char *name,
     int maxMsgs,
@@ -341,7 +224,6 @@ int mvKernelExt_MsgQCreate(
 
     MV_GLOBAL_LOCK();
 
-    /* create queue */
     for (k = 1; k < mv_num_queues; k++)
     {
         if (mvMsgQs[k].flags == 0)
@@ -358,7 +240,6 @@ int mvKernelExt_MsgQCreate(
     q->flags = 3;
     MV_GLOBAL_UNLOCK();
 
-    /* align max message size by 4 bytes */
     maxMsgSize = (maxMsgSize+3) & ~3;
     q->maxMsgs = maxMsgs;
     q->maxMsgSize = maxMsgSize;
@@ -400,25 +281,6 @@ ret_einval: \
         return -MVKERNELEXT_EDELETED; \
     }
 
-/*******************************************************************************
-* mvKernelExt_MsgQDelete
-*
-* DESCRIPTION:
-*       Destroys semaphore
-*
-* INPUTS:
-*       msgqId   - queue ID
-*
-* OUTPUTS:
-*       None
-*
-* RETURNS:
-*       Zero if successful
-*       -MVKERNELEXT_EINVAL if bad ID passed
-*
-* COMMENTS:
-*
-*******************************************************************************/
 int mvKernelExt_MsgQDelete(int msgqId)
 {
     mvMsgQSTC *q;
@@ -426,7 +288,7 @@ int mvKernelExt_MsgQDelete(int msgqId)
 
     MSGQ_BY_ID(msgqId);
 
-    q->flags = 2; /* deleting */
+    q->flags = 2;  
 
     for (timeOut = HZ; q->waitRx && timeOut; timeOut--)
     {
@@ -460,33 +322,6 @@ int mvKernelExt_MsgQDelete(int msgqId)
     return 0;
 }
 
-/*******************************************************************************
-* mvKernelExt_MsgQSend
-*
-* DESCRIPTION:
-*       Send message to queue
-*
-* INPUTS:
-*       msgqId       - Message queue Id
-*       message      - message data pointer
-*       messageSize  - message size
-*       timeOut      - time out in miliseconds or
-*                      -1 for WAIT_FOREVER or 0 for NO_WAIT
-*       userspace    - called from userspace
-*
-* OUTPUTS:
-*       None
-*
-* RETURNS:
-*       Zero if successful
-*       -MVKERNELEXT_EINVAL    - bad ID passed
-*       -MVKERNELEXT_ETIMEOUT  - on timeout
-*       -MVKERNELEXT_ENOMEM    - full and no wait
-*       -MVKERNELEXT_EDELETED  - deleted
-*
-* COMMENTS:
-*
-*******************************************************************************/
 int mvKernelExt_MsgQSend(
     int     msgqId,
     void*   message,
@@ -502,11 +337,11 @@ int mvKernelExt_MsgQSend(
 
     while (q->messages == q->maxMsgs)
     {
-        /* queue full */
+         
         if (timeOut == 0)
         {
             MV_GLOBAL_UNLOCK();
-            return -MVKERNELEXT_EFULL; /* ??? -MVKERNELEXT_ETIMEOUT */
+            return -MVKERNELEXT_EFULL;  
         }
         else
         {
@@ -533,7 +368,7 @@ int mvKernelExt_MsgQSend(
                     return -MVKERNELEXT_EINTR;
                 }
             }
-            else /* timeOut == -1, wait forever */
+            else  
             {
                 if (unlikely(mv_do_wait_on_queue(&(q->txWaitQueue), p)))
                 {
@@ -547,7 +382,6 @@ int mvKernelExt_MsgQSend(
         }
     }
 
-    /* put message */
     msg = q->buffer + q->head * (q->maxMsgSize + sizeof(int));
     if (messageSize > q->maxMsgSize)
         messageSize = q->maxMsgSize;
@@ -567,50 +401,20 @@ int mvKernelExt_MsgQSend(
 
     }
     q->head++;
-    if (q->head >= q->maxMsgs) /* round up */
+    if (q->head >= q->maxMsgs)  
         q->head = 0;
     q->messages++;
 
-    /* signal to Recv thread if any */
     if (q->waitRx)
     {
         mv_waitqueue_wake_first(&(q->rxWaitQueue));
-        /*
-        if (unlikely(!q->rxWaitQueue.first))
-            q->waitRx = 0;
-        */
+         
     }
 
     MV_GLOBAL_UNLOCK();
     return 0;
 }
 
-/*******************************************************************************
-* mvKernelExt_MsgQRecv
-*
-* DESCRIPTION:
-*       Receive message from queue
-*
-* INPUTS:
-*       msgqId       - Message queue Id
-*       messageSize  - size of buffer pointed by message
-*       timeOut      - time out in miliseconds or
-*                      -1 for WAIT_FOREVER or 0 for NO_WAIT
-*       userspace    - called from userspace
-*
-* OUTPUTS:
-*       message      - message data pointer
-*
-* RETURNS:
-*       message size if successful
-*       -MVKERNELEXT_EINVAL    - bad ID passed
-*       -MVKERNELEXT_ETIMEOUT  - on timeout
-*       -MVKERNELEXT_ENOMEM    - empty and no wait
-*       -MVKERNELEXT_EDELETED  - deleted
-*
-* COMMENTS:
-*
-*******************************************************************************/
 int mvKernelExt_MsgQRecv(
     int     msgqId,
     void*   message,
@@ -627,11 +431,11 @@ int mvKernelExt_MsgQRecv(
 
     while (q->messages == 0)
     {
-        /* queue empty */
+         
         if (timeOut == 0)
         {
             MV_GLOBAL_UNLOCK();
-            return -MVKERNELEXT_EEMPTY; /* ??? -MVKERNELEXT_ETIMEOUT */
+            return -MVKERNELEXT_EEMPTY;  
         }
         else
         {
@@ -658,7 +462,7 @@ int mvKernelExt_MsgQRecv(
                     return -MVKERNELEXT_EINTR;
                 }
             }
-            else /* timeOut == -1, wait forever */
+            else  
             {
                 if (unlikely(mv_do_wait_on_queue(&(q->rxWaitQueue), p)))
                 {
@@ -671,7 +475,7 @@ int mvKernelExt_MsgQRecv(
             q->waitRx--;
         }
     }
-    /* get message */
+     
     msg = q->buffer + q->tail * (q->maxMsgSize + sizeof(int));
     msgSize = *((int*)msg);
     if (msgSize > messageSize)
@@ -689,43 +493,20 @@ int mvKernelExt_MsgQRecv(
         memcpy(message, msg+sizeof(int), msgSize);
     }
     q->tail++;
-    if (q->tail >= q->maxMsgs) /* round up */
+    if (q->tail >= q->maxMsgs)  
         q->tail = 0;
     q->messages--;
 
-    /* signal to Recv thread if any */
     if (q->waitTx)
     {
         mv_waitqueue_wake_first(&(q->txWaitQueue));
-        /*
-        if (unlikely(!q->txWaitQueue.first))
-            q->waitTx = 0;*/
+         
     }
 
     MV_GLOBAL_UNLOCK();
     return msgSize;
 }
 
-/*******************************************************************************
-* mvKernelExt_MsgQNumMsgs
-*
-* DESCRIPTION:
-*       Return number of messages pending in queue
-*
-* INPUTS:
-*       msgqId       - Message queue Id
-*
-* OUTPUTS:
-*       None
-*
-* RETURNS:
-*       numMessages  - number of messages pending in queue
-*       -MVKERNELEXT_EINVAL    - bad ID passed
-*
-* COMMENTS:
-*       None
-*
-*******************************************************************************/
 int mvKernelExt_MsgQNumMsgs(int msgqId)
 {
     int numMessages;

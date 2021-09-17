@@ -1,29 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * cs42l51.c
- *
- * ASoC Driver for Cirrus Logic CS42L51 codecs
- *
- * Copyright (c) 2010 Arnaud Patard <apatard@mandriva.com>
- *
- * Based on cs4270.c - Copyright (c) Freescale Semiconductor
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * For now:
- *  - Only I2C is support. Not SPI
- *  - master mode *NOT* supported
- */
-
+ 
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <sound/core.h>
@@ -35,7 +13,7 @@
 #include <linux/i2c.h>
 #if defined(MY_ABC_HERE)
 #include <linux/regmap.h>
-#endif /* MY_ABC_HERE */
+#endif  
 
 #include "cs42l51.h"
 
@@ -47,12 +25,12 @@ enum master_slave_mode {
 
 struct cs42l51_private {
 #if defined(MY_ABC_HERE)
-	// do nothing
-#else /* MY_ABC_HERE */
+	 
+#else  
 	enum snd_soc_control_type control_type;
-#endif /* MY_ABC_HERE */
+#endif  
 	unsigned int mclk;
-	unsigned int audio_mode;	/* The mode (I2S or left-justified) */
+	unsigned int audio_mode;	 
 	enum master_slave_mode func;
 };
 
@@ -63,8 +41,8 @@ struct cs42l51_private {
 		SNDRV_PCM_FMTBIT_S24_LE  | SNDRV_PCM_FMTBIT_S24_BE)
 
 #if defined(MY_ABC_HERE)
-// do nothing
-#else /* MY_ABC_HERE */
+ 
+#else  
 static int cs42l51_fill_cache(struct snd_soc_codec *codec)
 {
 	u8 *cache = codec->reg_cache + 1;
@@ -82,16 +60,16 @@ static int cs42l51_fill_cache(struct snd_soc_codec *codec)
 
 	return 0;
 }
-#endif /* MY_ABC_HERE */
+#endif  
 
 static int cs42l51_get_chan_mix(struct snd_kcontrol *kcontrol,
 			struct snd_ctl_elem_value *ucontrol)
 {
 #if defined(MY_ABC_HERE)
 	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
-#else /* MY_ABC_HERE */
+#else  
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
-#endif /* MY_ABC_HERE */
+#endif  
 	unsigned long value = snd_soc_read(codec, CS42L51_PCM_MIXER)&3;
 
 	switch (value) {
@@ -99,7 +77,7 @@ static int cs42l51_get_chan_mix(struct snd_kcontrol *kcontrol,
 	case 0:
 		ucontrol->value.integer.value[0] = 0;
 		break;
-	/* same value : (L+R)/2 and (R+L)/2 */
+	 
 	case 1:
 	case 2:
 		ucontrol->value.integer.value[0] = 1;
@@ -121,9 +99,9 @@ static int cs42l51_set_chan_mix(struct snd_kcontrol *kcontrol,
 {
 #if defined(MY_ABC_HERE)
 	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
-#else /* MY_ABC_HERE */
+#else  
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
-#endif /* MY_ABC_HERE */
+#endif  
 	unsigned char val;
 
 	switch (ucontrol->value.integer.value[0]) {
@@ -186,12 +164,6 @@ static const struct snd_kcontrol_new cs42l51_snd_controls[] = {
 			cs42l51_get_chan_mix, cs42l51_set_chan_mix),
 };
 
-/*
- * to power down, one must:
- * 1.) Enable the PDN bit
- * 2.) enable power-down for the select channels
- * 3.) disable the PDN bit.
- */
 static int cs42l51_pdn_event(struct snd_soc_dapm_widget *w,
 		struct snd_kcontrol *kcontrol, int event)
 {
@@ -251,7 +223,6 @@ static const struct snd_soc_dapm_widget cs42l51_dapm_widgets[] = {
 		CS42L51_POWER_CTL1, 6, 1,
 		cs42l51_pdn_event, SND_SOC_DAPM_PRE_POST_PMD),
 
-	/* analog/mic */
 	SND_SOC_DAPM_INPUT("AIN1L"),
 	SND_SOC_DAPM_INPUT("AIN1R"),
 	SND_SOC_DAPM_INPUT("AIN2L"),
@@ -264,11 +235,9 @@ static const struct snd_soc_dapm_widget cs42l51_dapm_widgets[] = {
 	SND_SOC_DAPM_MIXER("Mic Preamp Right",
 		CS42L51_MIC_POWER_CTL, 3, 1, NULL, 0),
 
-	/* HP */
 	SND_SOC_DAPM_OUTPUT("HPL"),
 	SND_SOC_DAPM_OUTPUT("HPR"),
 
-	/* mux */
 	SND_SOC_DAPM_MUX("DAC Mux", SND_SOC_NOPM, 0, 0,
 		&cs42l51_dac_mux_controls),
 	SND_SOC_DAPM_MUX("PGA-ADC Mux Left", SND_SOC_NOPM, 0, 0,
@@ -400,16 +369,15 @@ static int cs42l51_hw_params(struct snd_pcm_substream *substream,
 		break;
 	}
 
-	/* Figure out which MCLK/LRCK ratio to use */
-	rate = params_rate(params);     /* Sampling rate, in Hz */
-	ratio = cs42l51->mclk / rate;    /* MCLK/LRCK ratio */
+	rate = params_rate(params);      
+	ratio = cs42l51->mclk / rate;     
 	for (i = 0; i < nr_ratios; i++) {
 		if (ratios[i].ratio == ratio)
 			break;
 	}
 
 	if (i == nr_ratios) {
-		/* We did not find a matching ratio */
+		 
 		dev_err(codec->dev, "could not find matching ratio\n");
 		return -EINVAL;
 	}
@@ -458,7 +426,7 @@ static int cs42l51_hw_params(struct snd_pcm_substream *substream,
 		case 24:
 			fmt = CS42L51_DAC_DIF_RJ24;
 			break;
-#else /* MY_ABC_HERE */
+#else  
 		switch (params_format(params)) {
 		case SNDRV_PCM_FORMAT_S16_LE:
 		case SNDRV_PCM_FORMAT_S16_BE:
@@ -476,7 +444,7 @@ static int cs42l51_hw_params(struct snd_pcm_substream *substream,
 		case SNDRV_PCM_FORMAT_S24_BE:
 			fmt = CS42L51_DAC_DIF_RJ24;
 			break;
-#endif /* MY_ABC_HERE */
+#endif  
 		default:
 			dev_err(codec->dev, "unknown format\n");
 			return -EINVAL;
@@ -550,7 +518,7 @@ static int cs42l51_probe(struct snd_soc_codec *codec)
 	int ret, reg;
 
 	ret = snd_soc_codec_set_cache_io(codec, 8, 8, SND_SOC_REGMAP);
-#else /* MY_ABC_HERE */
+#else  
 	struct cs42l51_private *cs42l51 = snd_soc_codec_get_drvdata(codec);
 	int ret, reg;
 
@@ -561,19 +529,12 @@ static int cs42l51_probe(struct snd_soc_codec *codec)
 	}
 
 	ret = snd_soc_codec_set_cache_io(codec, 8, 8, cs42l51->control_type);
-#endif /* MY_ABC_HERE */
+#endif  
 	if (ret < 0) {
 		dev_err(codec->dev, "Failed to set cache I/O: %d\n", ret);
 		return ret;
 	}
 
-	/*
-	 * DAC configuration
-	 * - Use signal processor
-	 * - auto mute
-	 * - vol changes immediate
-	 * - no de-emphasize
-	 */
 	reg = CS42L51_DAC_CTL_DATA_SEL(1)
 		| CS42L51_DAC_CTL_AMUTE | CS42L51_DAC_CTL_DACSZ(0);
 	ret = snd_soc_write(codec, CS42L51_DAC_CTL, reg);
@@ -586,11 +547,11 @@ static int cs42l51_probe(struct snd_soc_codec *codec)
 static struct snd_soc_codec_driver soc_codec_device_cs42l51 = {
 	.probe = cs42l51_probe,
 #if defined(MY_ABC_HERE)
-	// do nothing
-#else /* MY_ABC_HERE */
+	 
+#else  
 	.reg_cache_size = CS42L51_NUMREGS + 1,
 	.reg_word_size = sizeof(u8),
-#endif /* MY_ABC_HERE */
+#endif  
 
 	.controls = cs42l51_snd_controls,
 	.num_controls = ARRAY_SIZE(cs42l51_snd_controls),
@@ -608,7 +569,7 @@ static const struct regmap_config cs42l51_regmap = {
 	.max_register = CS42L51_CHARGE_FREQ,
 	.cache_type = REGCACHE_RBTREE,
 };
-#endif /* MY_ABC_HERE */
+#endif  
 
 static int cs42l51_i2c_probe(struct i2c_client *i2c_client,
 	const struct i2c_device_id *id)
@@ -617,7 +578,7 @@ static int cs42l51_i2c_probe(struct i2c_client *i2c_client,
 #if defined(MY_ABC_HERE)
 	struct regmap *regmap;
 	unsigned int val;
-#endif /* MY_ABC_HERE */
+#endif  
 	int ret;
 
 #if defined(MY_ABC_HERE)
@@ -628,14 +589,13 @@ static int cs42l51_i2c_probe(struct i2c_client *i2c_client,
 			ret);
 		return ret;
 	}
-#endif /* MY_ABC_HERE */
+#endif  
 
-	/* Verify that we have a CS42L51 */
 #if defined(MY_ABC_HERE)
 	ret = regmap_read(regmap, CS42L51_CHIP_REV_ID, &val);
-#else /* MY_ABC_HERE */
+#else  
 	ret = i2c_smbus_read_byte_data(i2c_client, CS42L51_CHIP_REV_ID);
-#endif /* MY_ABC_HERE */
+#endif  
 	if (ret < 0) {
 		dev_err(&i2c_client->dev, "failed to read I2C\n");
 		goto error;
@@ -645,11 +605,11 @@ static int cs42l51_i2c_probe(struct i2c_client *i2c_client,
 	if ((val != CS42L51_MK_CHIP_REV(CS42L51_CHIP_ID, CS42L51_CHIP_REV_A)) &&
 	    (val != CS42L51_MK_CHIP_REV(CS42L51_CHIP_ID, CS42L51_CHIP_REV_B))) {
 		dev_err(&i2c_client->dev, "Invalid chip id: %x\n", val);
-#else /* MY_ABC_HERE */
+#else  
 	if ((ret != CS42L51_MK_CHIP_REV(CS42L51_CHIP_ID, CS42L51_CHIP_REV_A)) &&
 	    (ret != CS42L51_MK_CHIP_REV(CS42L51_CHIP_ID, CS42L51_CHIP_REV_B))) {
 		dev_err(&i2c_client->dev, "Invalid chip id\n");
-#endif /* MY_ABC_HERE */
+#endif  
 		ret = -ENODEV;
 		goto error;
 	}
@@ -657,9 +617,9 @@ static int cs42l51_i2c_probe(struct i2c_client *i2c_client,
 	dev_info(&i2c_client->dev, "found device cs42l51 rev %d\n",
 #if defined(MY_ABC_HERE)
 		 val & 7);
-#else /* MY_ABC_HERE */
+#else  
 				ret & 7);
-#endif /* MY_ABC_HERE */
+#endif  
 
 	cs42l51 = devm_kzalloc(&i2c_client->dev, sizeof(struct cs42l51_private),
 			       GFP_KERNEL);
@@ -668,7 +628,7 @@ static int cs42l51_i2c_probe(struct i2c_client *i2c_client,
 		return -ENOMEM;
 
 	i2c_set_clientdata(i2c_client, cs42l51);
-#else /* MY_ABC_HERE */
+#else  
 	if (!cs42l51) {
 		dev_err(&i2c_client->dev, "could not allocate codec\n");
 		return -ENOMEM;
@@ -676,7 +636,7 @@ static int cs42l51_i2c_probe(struct i2c_client *i2c_client,
 
 	i2c_set_clientdata(i2c_client, cs42l51);
 	cs42l51->control_type = SND_SOC_I2C;
-#endif /* MY_ABC_HERE */
+#endif  
 
 	ret =  snd_soc_register_codec(&i2c_client->dev,
 			&soc_codec_device_cs42l51, &cs42l51_dai, 1);
@@ -702,7 +662,7 @@ static const struct of_device_id cs42l51_of_match[] = {
 	{ }
 };
 MODULE_DEVICE_TABLE(of, cs42l51_of_match);
-#endif /* MY_ABC_HERE */
+#endif  
 
 static struct i2c_driver cs42l51_i2c_driver = {
 	.driver = {
@@ -710,7 +670,7 @@ static struct i2c_driver cs42l51_i2c_driver = {
 		.owner = THIS_MODULE,
 #if defined(MY_ABC_HERE)
 		.of_match_table = cs42l51_of_match,
-#endif /* MY_ABC_HERE */
+#endif  
 	},
 	.id_table = cs42l51_id,
 	.probe = cs42l51_i2c_probe,

@@ -1,64 +1,20 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
-Copyright (C) 2014 Annapurna Labs Ltd.
-
-This file may be licensed under the terms of the Annapurna Labs Commercial
-License Agreement.
-
-Alternatively, this file can be distributed under the terms of the GNU General
-Public License V2 as published by the Free Software Foundation and can be
-found at http://www.gnu.org/licenses/gpl-2.0.html
-
-Alternatively, redistribution and use in source and binary forms, with or
-without modification, are permitted provided that the following conditions are
-met:
-
-    *     Redistributions of source code must retain the above copyright notice,
-	  this list of conditions and the following disclaimer.
-
-    *     Redistributions in binary form must reproduce the above copyright
-	  notice, this list of conditions and the following disclaimer in
-	  the documentation and/or other materials provided with the
-	  distribution.
-
- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
- ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
- ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-*******************************************************************************/
-
-/**
- *  @{
- * @file   al_init_eth_lm.c
- *
- * @brief ethernet link management common utilities
- *
- */
-
+ 
 #include "al_init_eth_lm.h"
 #include "al_hal_serdes.h"
 #include "al_hal_eth.h"
 #include "al_init_eth_kr.h"
 #include "al_hal_serdes_internal_regs.h"
 
-/* delay before checking link status with new serdes parameters (uSec) */
 #define AL_ETH_LM_LINK_STATUS_DELAY	1000
-/* delay before checking link status after reconfiguring the retimer (mSec) */
+ 
 #define AL_ETH_LM_RETIMER_LINK_STATUS_DELAY 50
 
 #define AL_ETH_LM_EQ_ITERATIONS		15
 #define AL_ETH_LM_MAX_DCGAIN		8
 
-/* num of link training failures till serdes reset */
 #define AL_ETH_LT_FAILURES_TO_RESET	(10)
 
 #define SFP_I2C_HEADER_10G_IDX		3
@@ -121,7 +77,7 @@ static int al_eth_sfp_detect(struct al_eth_lm_context	*lm_context,
 
 	if (rc) {
 		if (rc == -ETIMEDOUT) {
-			/* ETIMEDOUT is returned when no SFP is connected */
+			 
 			lm_debug("%s: SFP Disconnected\n", __func__);
 			*new_mode = AL_ETH_LM_MODE_DISCONNECTED;
 		} else {
@@ -134,7 +90,7 @@ static int al_eth_sfp_detect(struct al_eth_lm_context	*lm_context,
 	} else if (sfp_cable_tech & SFP_10G_DA_ACTIVE) {
 		lm_debug("%s: 10G DAC active (%d M) detected\n", __func__, sfp_da_len);
 		*new_mode = AL_ETH_LM_MODE_10G_DA;
-		/* for active direct attached need to use len 0 in the retimer configuration */
+		 
 		lm_context->da_len = 0;
 	} else if (sfp_10g != 0) {
 		lm_debug("%s: 10 SFP detected\n", __func__);
@@ -169,7 +125,7 @@ static struct al_serdes_adv_tx_params da_tx_params = {
 static struct al_serdes_adv_rx_params da_rx_params = {
 	.override		= AL_TRUE,
 #ifdef MY_DEF_HERE
-	// empirical values, tested by using DS2015xs and Foxconn DA cable
+	 
 	.dcgain			= 0x7,
 	.dfe_3db_freq		= 0x7,
 	.dfe_gain		= 0x0,
@@ -180,7 +136,7 @@ static struct al_serdes_adv_rx_params da_rx_params = {
 	.low_freq_agc_gain	= 0x7,
 	.precal_code_sel	= 0,
 	.high_freq_agc_boost	= 0x1b,
-#else /* MY_DEF_HERE */
+#else  
 	.dcgain			= 0x4,
 	.dfe_3db_freq		= 0x4,
 	.dfe_gain		= 0x3,
@@ -191,7 +147,7 @@ static struct al_serdes_adv_rx_params da_rx_params = {
 	.low_freq_agc_gain	= 0x7,
 	.precal_code_sel	= 0,
 	.high_freq_agc_boost	= 0x1d,
-#endif /* MY_DEF_HERE */
+#endif  
 };
 
 static struct al_serdes_adv_tx_params optic_tx_params = {
@@ -410,17 +366,17 @@ int al_eth_lm_retimer_config(struct al_eth_lm_context	*lm_context)
 	uint8_t boost = 0;
 
 	if ((lm_context->mode != AL_ETH_LM_MODE_10G_DA) || (lm_context->da_len == 0))
-		boost = 0; /* ~5dB Loss */
+		boost = 0;  
 	else if (lm_context->da_len <= 1)
-		boost = 0x1; /* ~5dB Loss */
+		boost = 0x1;  
 	else if (lm_context->da_len <= 2)
-		boost = 0x2; /* ~9dB Loss */
+		boost = 0x2;  
 	else if (lm_context->da_len <= 3)
-		boost = 0x3; /* ~12dB Loss */
+		boost = 0x3;  
 	else if (lm_context->da_len <= 5)
-		boost = 0x7; /* ~16dB Loss */
+		boost = 0x7;  
 	else
-		boost = 0xb; /* ~19dB Loss */
+		boost = 0xb;  
 
 	lm_debug("config retimer boost in channel %d to 0x%x\n",
 		 lm_context->retimer_channel, boost);
@@ -445,9 +401,6 @@ int al_eth_lm_retimer_config(struct al_eth_lm_context	*lm_context)
 	return 0;
 }
 
-/*****************************************************************************/
-/***************************** API functions *********************************/
-/*****************************************************************************/
 int al_eth_lm_init(struct al_eth_lm_context	*lm_context,
 		   struct al_eth_lm_init_params	*params)
 {
@@ -474,7 +427,6 @@ int al_eth_lm_init(struct al_eth_lm_context	*lm_context,
 	lm_context->i2c_context = params->i2c_context;
 	lm_context->get_random_byte = params->get_random_byte;
 
-	/* eeprom_read must be provided if sfp_detection is true */
 	al_assert((lm_context->sfp_detection == AL_FALSE) ||
 		  (lm_context->i2c_read != NULL));
 
@@ -524,7 +476,6 @@ int al_eth_lm_link_detection(struct al_eth_lm_context	*lm_context,
 	if (link_fault) {
 		*link_fault = AL_FALSE;
 
-		/* link status lost */
 		if ((lm_context->last_link_status.link_up == AL_TRUE) &&
 		    (status.link_up == AL_TRUE))
 			return 0;
@@ -570,7 +521,7 @@ int al_eth_lm_link_establish(struct al_eth_lm_context	*lm_context,
 					lm_context->lane);
 
 	if (signal_detected == AL_FALSE) {
-		/* if no signal detected there is nothing to do */
+		 
 		*link_up = AL_FALSE;
 		return 0;
 	}

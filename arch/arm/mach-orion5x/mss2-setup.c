@@ -1,17 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Maxtor Shared Storage II Board Setup
- *
- * Maintainer: Sylver Bruneau <sylver.bruneau@googlemail.com>
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version
- * 2 of the License, or (at your option) any later version.
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/platform_device.h>
@@ -36,23 +26,6 @@
 #define MSS2_NOR_BOOT_BASE	0xff800000
 #define MSS2_NOR_BOOT_SIZE	SZ_256K
 
-/*****************************************************************************
- * Maxtor Shared Storage II Info
- ****************************************************************************/
-
-/*
- * Maxtor Shared Storage II hardware :
- * - Marvell 88F5182-A2 C500
- * - Marvell 88E1111 Gigabit Ethernet PHY
- * - RTC M41T81 (@0x68) on I2C bus
- * - 256KB NOR flash
- * - 64MB of RAM
- */
-
-/*****************************************************************************
- * 256KB NOR Flash on BOOT Device
- ****************************************************************************/
-
 static struct physmap_flash_data mss2_nor_flash_data = {
 	.width		= 1,
 };
@@ -73,16 +46,10 @@ static struct platform_device mss2_nor_flash = {
 	.num_resources	= 1,
 };
 
-/****************************************************************************
- * PCI setup
- ****************************************************************************/
 static int __init mss2_pci_map_irq(const struct pci_dev *dev, u8 slot, u8 pin)
 {
 	int irq;
 
-	/*
-	 * Check for devices with hard-wired IRQs.
-	 */
 	irq = orion5x_pci_map_irq(dev, slot, pin);
 	if (irq != -1)
 		return irq;
@@ -106,25 +73,13 @@ static int __init mss2_pci_init(void)
 }
 subsys_initcall(mss2_pci_init);
 
-/*****************************************************************************
- * Ethernet
- ****************************************************************************/
-
 static struct mv643xx_eth_platform_data mss2_eth_data = {
 	.phy_addr	= MV643XX_ETH_PHY_ADDR(8),
 };
 
-/*****************************************************************************
- * SATA
- ****************************************************************************/
-
 static struct mv_sata_platform_data mss2_sata_data = {
 	.n_ports	= 2,
 };
-
-/*****************************************************************************
- * GPIO buttons
- ****************************************************************************/
 
 #define MSS2_GPIO_KEY_RESET	12
 #define MSS2_GPIO_KEY_POWER	11
@@ -156,32 +111,16 @@ static struct platform_device mss2_button_device = {
 	},
 };
 
-/*****************************************************************************
- * RTC m41t81 on I2C bus
- ****************************************************************************/
-
 #define MSS2_GPIO_RTC_IRQ	3
 
 static struct i2c_board_info __initdata mss2_i2c_rtc = {
 	I2C_BOARD_INFO("m41t81", 0x68),
 };
 
-/*****************************************************************************
- * MSS2 power off method
- ****************************************************************************/
-/*
- * On the Maxtor Shared Storage II, the shutdown process is the following :
- * - Userland modifies U-boot env to tell U-boot to go idle at next boot
- * - The board reboots
- * - U-boot starts and go into an idle mode until the user press "power"
- */
 static void mss2_power_off(void)
 {
 	u32 reg;
 
-	/*
-	 * Enable and issue soft reset
-	 */
 	reg = readl(RSTOUTn_MASK);
 	reg |= 1 << 2;
 	writel(reg, RSTOUTn_MASK);
@@ -191,26 +130,23 @@ static void mss2_power_off(void)
 	writel(reg, CPU_SOFT_RESET);
 }
 
-/****************************************************************************
- * General Setup
- ****************************************************************************/
 static unsigned int mss2_mpp_modes[] __initdata = {
-	MPP0_GPIO,		/* Power LED */
-	MPP1_GPIO,		/* Error LED */
+	MPP0_GPIO,		 
+	MPP1_GPIO,		 
 	MPP2_UNUSED,
-	MPP3_GPIO,		/* RTC interrupt */
-	MPP4_GPIO,		/* HDD ind. (Single/Dual)*/
-	MPP5_GPIO,		/* HD0 5V control */
-	MPP6_GPIO,		/* HD0 12V control */
-	MPP7_GPIO,		/* HD1 5V control */
-	MPP8_GPIO,		/* HD1 12V control */
+	MPP3_GPIO,		 
+	MPP4_GPIO,		 
+	MPP5_GPIO,		 
+	MPP6_GPIO,		 
+	MPP7_GPIO,		 
+	MPP8_GPIO,		 
 	MPP9_UNUSED,
-	MPP10_GPIO,		/* Fan control */
-	MPP11_GPIO,		/* Power button */
-	MPP12_GPIO,		/* Reset button */
+	MPP10_GPIO,		 
+	MPP11_GPIO,		 
+	MPP12_GPIO,		 
 	MPP13_UNUSED,
-	MPP14_SATA_LED,		/* SATA 0 active */
-	MPP15_SATA_LED,		/* SATA 1 active */
+	MPP14_SATA_LED,		 
+	MPP15_SATA_LED,		 
 	MPP16_UNUSED,
 	MPP17_UNUSED,
 	MPP18_UNUSED,
@@ -220,21 +156,11 @@ static unsigned int mss2_mpp_modes[] __initdata = {
 
 static void __init mss2_init(void)
 {
-	/* Setup basic Orion functions. Need to be called early. */
+	 
 	orion5x_init();
 
 	orion5x_mpp_conf(mss2_mpp_modes);
 
-	/*
-	 * MPP[20] Unused
-	 * MPP[21] PCI clock
-	 * MPP[22] USB 0 over current
-	 * MPP[23] USB 1 over current
-	 */
-
-	/*
-	 * Configure peripherals.
-	 */
 	orion5x_ehci0_init();
 	orion5x_ehci1_init();
 	orion5x_eth_init(&mss2_eth_data);
@@ -248,10 +174,10 @@ static void __init mss2_init(void)
 				    ORION_MBUS_DEVBUS_BOOT_ATTR,
 				    MSS2_NOR_BOOT_BASE,
 				    MSS2_NOR_BOOT_SIZE);
-#else /* MY_ABC_HERE */
+#else  
 	mvebu_mbus_add_window("devbus-boot", MSS2_NOR_BOOT_BASE,
 			      MSS2_NOR_BOOT_SIZE);
-#endif /* MY_ABC_HERE */
+#endif  
 	platform_device_register(&mss2_nor_flash);
 
 	platform_device_register(&mss2_button_device);
@@ -264,12 +190,11 @@ static void __init mss2_init(void)
 	}
 	i2c_register_board_info(0, &mss2_i2c_rtc, 1);
 
-	/* register mss2 specific power-off method */
 	pm_power_off = mss2_power_off;
 }
 
 MACHINE_START(MSS2, "Maxtor Shared Storage II")
-	/* Maintainer: Sylver Bruneau <sylver.bruneau@googlemail.com> */
+	 
 	.atag_offset	= 0x100,
 	.init_machine	= mss2_init,
 	.map_io		= orion5x_map_io,

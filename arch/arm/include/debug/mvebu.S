@@ -1,19 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Early serial output macro for Marvell  SoC
- *
- * Copyright (C) 2012 Marvell
- *
- * Lior Amsalem <alior@marvell.com>
- * Gregory Clement <gregory.clement@free-electrons.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
-*/
-
+ 
 #if defined(MY_ABC_HERE) && defined(CONFIG_DEBUG_MVEBU_UART_ALTERNATE)
 #define ARMADA_370_XP_REGS_PHYS_BASE	0xf1000000
 #else

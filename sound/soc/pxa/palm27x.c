@@ -1,21 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * linux/sound/soc/pxa/palm27x.c
- *
- * SoC Audio driver for Palm T|X, T5 and LifeDrive
- *
- * based on tosa.c
- *
- * Copyright (C) 2008 Marek Vasut <marek.vasut@gmail.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- *
- */
-
+ 
 #include <linux/module.h>
 #include <linux/moduleparam.h>
 #include <linux/device.h>
@@ -35,7 +21,6 @@
 
 static struct snd_soc_jack hs_jack;
 
-/* Headphones jack detection DAPM pins */
 static struct snd_soc_jack_pin hs_jack_pins[] = {
 	{
 		.pin    = "Headphone Jack",
@@ -43,34 +28,29 @@ static struct snd_soc_jack_pin hs_jack_pins[] = {
 	},
 };
 
-/* Headphones jack detection gpios */
 static struct snd_soc_jack_gpio hs_jack_gpios[] = {
 	[0] = {
-		/* gpio is set on per-platform basis */
+		 
 		.name           = "hp-gpio",
 		.report         = SND_JACK_HEADPHONE,
 		.debounce_time	= 200,
 	},
 };
 
-/* Palm27x machine dapm widgets */
 static const struct snd_soc_dapm_widget palm27x_dapm_widgets[] = {
 	SND_SOC_DAPM_HP("Headphone Jack", NULL),
 	SND_SOC_DAPM_SPK("Ext. Speaker", NULL),
 	SND_SOC_DAPM_MIC("Ext. Microphone", NULL),
 };
 
-/* PalmTX audio map */
 static const struct snd_soc_dapm_route audio_map[] = {
-	/* headphone connected to HPOUTL, HPOUTR */
+	 
 	{"Headphone Jack", NULL, "HPOUTL"},
 	{"Headphone Jack", NULL, "HPOUTR"},
 
-	/* ext speaker connected to ROUT2, LOUT2 */
 	{"Ext. Speaker", NULL, "LOUT2"},
 	{"Ext. Speaker", NULL, "ROUT2"},
 
-	/* mic connected to MIC1 */
 	{"Ext. Microphone", NULL, "MIC1"},
 };
 
@@ -83,18 +63,17 @@ static int palm27x_ac97_init(struct snd_soc_pcm_runtime *rtd)
 	int err;
 
 #if defined(MY_ABC_HERE)
-	// do nothing
-#else /* MY_ABC_HERE */
-	/* connected pins */
+	 
+#else  
+	 
 	if (machine_is_palmld())
 		snd_soc_dapm_enable_pin(dapm, "MIC1");
 	snd_soc_dapm_enable_pin(dapm, "HPOUTL");
 	snd_soc_dapm_enable_pin(dapm, "HPOUTR");
 	snd_soc_dapm_enable_pin(dapm, "LOUT2");
 	snd_soc_dapm_enable_pin(dapm, "ROUT2");
-#endif /* MY_ABC_HERE */
+#endif  
 
-	/* not connected pins */
 	snd_soc_dapm_nc_pin(dapm, "OUT3");
 	snd_soc_dapm_nc_pin(dapm, "MONOOUT");
 	snd_soc_dapm_nc_pin(dapm, "LINEINL");
@@ -103,7 +82,6 @@ static int palm27x_ac97_init(struct snd_soc_pcm_runtime *rtd)
 	snd_soc_dapm_nc_pin(dapm, "PHONE");
 	snd_soc_dapm_nc_pin(dapm, "MIC2");
 
-	/* Jack detection API stuff */
 	err = snd_soc_jack_new(codec, "Headphone Jack",
 				SND_JACK_HEADPHONE, &hs_jack);
 	if (err)
@@ -193,7 +171,6 @@ static struct platform_driver palm27x_wm9712_driver = {
 
 module_platform_driver(palm27x_wm9712_driver);
 
-/* Module information */
 MODULE_AUTHOR("Marek Vasut <marek.vasut@gmail.com>");
 MODULE_DESCRIPTION("ALSA SoC Palm T|X, T5 and LifeDrive");
 MODULE_LICENSE("GPL");

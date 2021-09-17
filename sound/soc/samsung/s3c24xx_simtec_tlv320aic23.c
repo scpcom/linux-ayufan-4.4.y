@@ -1,30 +1,11 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/* sound/soc/samsung/s3c24xx_simtec_tlv320aic23.c
- *
- * Copyright 2009 Simtec Electronics
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
-*/
-
+ 
 #include <linux/module.h>
 #include <sound/soc.h>
 
 #include "s3c24xx_simtec.h"
-
-/* supported machines:
- *
- * Machine	Connections		AMP
- * -------	-----------		---
- * BAST		MIC, HPOUT, LOUT, LIN	TPA2001D1 (HPOUTL,R) (gain hardwired)
- * VR1000	HPOUT, LIN		None
- * VR2000	LIN, LOUT, MIC, HP	LM4871 (HPOUTL,R)
- * DePicture	LIN, LOUT, MIC, HP	LM4871 (HPOUTL,R)
- * Anubis	LIN, LOUT, MIC, HP	TPA2001D1 (HPOUTL,R)
- */
 
 static const struct snd_soc_dapm_widget dapm_widgets[] = {
 	SND_SOC_DAPM_HP("Headphone Jack", NULL),
@@ -46,18 +27,11 @@ static const struct snd_soc_dapm_route base_map[] = {
 	{ "MICIN", NULL, "Mic Jack"},
 };
 
-/**
- * simtec_tlv320aic23_init - initialise and add controls
- * @codec; The codec instance to attach to.
- *
- * Attach our controls and configure the necessary codec
- * mappings for our sound card instance.
-*/
 static int simtec_tlv320aic23_init(struct snd_soc_pcm_runtime *rtd)
 {
 #if defined(MY_ABC_HERE)
-	// do nothing
-#else /* MY_ABC_HERE */
+	 
+#else  
 	struct snd_soc_codec *codec = rtd->codec;
 	struct snd_soc_dapm_context *dapm = &codec->dapm;
 
@@ -65,7 +39,7 @@ static int simtec_tlv320aic23_init(struct snd_soc_pcm_runtime *rtd)
 	snd_soc_dapm_enable_pin(dapm, "Line In");
 	snd_soc_dapm_enable_pin(dapm, "Line Out");
 	snd_soc_dapm_enable_pin(dapm, "Mic Jack");
-#endif /* MY_ABC_HERE */
+#endif  
 
 	simtec_audio_init(rtd);
 
@@ -82,7 +56,6 @@ static struct snd_soc_dai_link simtec_dai_aic23 = {
 	.init		= simtec_tlv320aic23_init,
 };
 
-/* simtec audio machine driver */
 static struct snd_soc_card snd_soc_machine_simtec_aic23 = {
 	.name		= "Simtec",
 	.owner		= THIS_MODULE,

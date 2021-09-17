@@ -1,17 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (c) 2010-2011 Samsung Electronics Co., Ltd.
- *		http://www.samsung.com
- *
- * EXYNOS - CPU frequency scaling support for EXYNOS series
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
-*/
-
+ 
 #include <linux/kernel.h>
 #include <linux/err.h>
 #include <linux/clk.h>
@@ -77,11 +67,6 @@ static int exynos_cpufreq_scale(unsigned int target_freq)
 	if (freqs.new == freqs.old)
 		goto out;
 
-	/*
-	 * The policy max have been changed so that we cannot get proper
-	 * old_index with cpufreq_frequency_table_target(). Thus, ignore
-	 * policy and get the index from the raw freqeuncy table.
-	 */
 	old_index = exynos_cpufreq_get_index(freqs.old);
 	if (old_index < 0) {
 		ret = old_index;
@@ -94,11 +79,6 @@ static int exynos_cpufreq_scale(unsigned int target_freq)
 		goto out;
 	}
 
-	/*
-	 * ARM clock source will be changed APLL to MPLL temporary
-	 * To support this level, need to control regulator for
-	 * required voltage level
-	 */
 	if (exynos_info->need_apll_change != NULL) {
 		if (exynos_info->need_apll_change(old_index, index) &&
 		   (freq_table[index].frequency < mpll_freq_khz) &&
@@ -109,9 +89,8 @@ static int exynos_cpufreq_scale(unsigned int target_freq)
 
 	cpufreq_notify_transition(policy, &freqs, CPUFREQ_PRECHANGE);
 
-	/* When the new frequency is higher than current frequency */
 	if ((freqs.new > freqs.old) && !safe_arm_volt) {
-		/* Firstly, voltage up to increase frequency */
+		 
 		ret = regulator_set_voltage(arm_regulator, arm_volt, arm_volt);
 		if (ret) {
 			pr_err("%s: failed to set cpu voltage to %d\n",
@@ -134,10 +113,9 @@ static int exynos_cpufreq_scale(unsigned int target_freq)
 
 	cpufreq_notify_transition(policy, &freqs, CPUFREQ_POSTCHANGE);
 
-	/* When the new frequency is lower than current frequency */
 	if ((freqs.new < freqs.old) ||
 	   ((freqs.new > freqs.old) && safe_arm_volt)) {
-		/* down the voltage after frequency change */
+		 
 		regulator_set_voltage(arm_regulator, arm_volt,
 				arm_volt);
 		if (ret) {
@@ -196,21 +174,6 @@ static int exynos_cpufreq_resume(struct cpufreq_policy *policy)
 }
 #endif
 
-/**
- * exynos_cpufreq_pm_notifier - block CPUFREQ's activities in suspend-resume
- *			context
- * @notifier
- * @pm_event
- * @v
- *
- * While frequency_locked == true, target() ignores every frequency but
- * locking_frequency. The locking_frequency value is the initial frequency,
- * which is set by the bootloader. In order to eliminate possible
- * inconsistency in clock values, we save and restore frequencies during
- * suspend and resume and block CPUFREQ activities. Note that the standard
- * suspend/resume cannot be used as they are too deep (syscore_ops) for
- * regulator actions.
- */
 static int exynos_cpufreq_pm_notifier(struct notifier_block *notifier,
 				       unsigned long pm_event, void *v)
 {
@@ -248,7 +211,6 @@ static int exynos_cpufreq_cpu_init(struct cpufreq_policy *policy)
 
 	cpufreq_frequency_table_get_attr(exynos_info->freq_table, policy->cpu);
 
-	/* set the transition latency value */
 	policy->cpuinfo.transition_latency = 100000;
 
 	cpumask_setall(policy->cpus);
@@ -288,9 +250,9 @@ static int __init exynos_cpufreq_init(void)
 
 #if defined(MY_ABC_HERE)
 	exynos_info = kzalloc(sizeof(*exynos_info), GFP_KERNEL);
-#else /* MY_ABC_HERE */
+#else  
 	exynos_info = kzalloc(sizeof(struct exynos_dvfs_info), GFP_KERNEL);
-#endif /* MY_ABC_HERE */
+#endif  
 	if (!exynos_info)
 		return -ENOMEM;
 

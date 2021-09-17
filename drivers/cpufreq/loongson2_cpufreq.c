@@ -1,22 +1,11 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Cpufreq driver for the loongson-2 processors
- *
- * The 2E revision of loongson processor not support this feature.
- *
- * Copyright (C) 2006 - 2008 Lemote Inc. & Insititute of Computing Technology
- * Author: Yanhua, yanh@lemote.com
- *
- * This file is subject to the terms and conditions of the GNU General Public
- * License.  See the file "COPYING" in the main directory of this archive
- * for more details.
- */
+ 
 #include <linux/cpufreq.h>
 #include <linux/module.h>
 #include <linux/err.h>
-#include <linux/sched.h>	/* set_cpus_allowed() */
+#include <linux/sched.h>	 
 #include <linux/delay.h>
 #include <linux/platform_device.h>
 
@@ -52,9 +41,6 @@ static unsigned int loongson2_cpufreq_get(unsigned int cpu)
 	return clk_get_rate(cpuclk);
 }
 
-/*
- * Here we notify other drivers of the proposed change and the final change.
- */
 static int loongson2_cpufreq_target(struct cpufreq_policy *policy,
 				     unsigned int target_freq,
 				     unsigned int relation)
@@ -88,15 +74,12 @@ static int loongson2_cpufreq_target(struct cpufreq_policy *policy,
 	if (freqs.new == freqs.old)
 		return 0;
 
-	/* notifiers */
 	cpufreq_notify_transition(policy, &freqs, CPUFREQ_PRECHANGE);
 
 	set_cpus_allowed_ptr(current, &cpus_allowed);
 
-	/* setting the cpu frequency */
 	clk_set_rate(cpuclk, freq);
 
-	/* notifiers */
 	cpufreq_notify_transition(policy, &freqs, CPUFREQ_POSTCHANGE);
 
 	pr_debug("cpufreq: set frequency %u kHz\n", freq);
@@ -122,7 +105,6 @@ static int loongson2_cpufreq_cpu_init(struct cpufreq_policy *policy)
 		return -EINVAL;
 	}
 
-	/* clock table init */
 	for (i = 2;
 	     (loongson2_clockmod_table[i].frequency != CPUFREQ_TABLE_END);
 	     i++)
@@ -162,10 +144,10 @@ static struct freq_attr *loongson2_table_attr[] = {
 
 static struct cpufreq_driver loongson2_cpufreq_driver = {
 #if defined(MY_ABC_HERE)
-	// do nothing
-#else /* MY_ABC_HERE */
+	 
+#else  
 	.owner = THIS_MODULE,
-#endif /* MY_ABC_HERE */
+#endif  
 	.name = "loongson2",
 	.init = loongson2_cpufreq_cpu_init,
 	.verify = loongson2_cpufreq_verify,
@@ -192,11 +174,6 @@ static struct platform_driver platform_driver = {
 	.id_table = platform_device_ids,
 };
 
-/*
- * This is the simple version of Loongson-2 wait, Maybe we need do this in
- * interrupt disabled context.
- */
-
 static DEFINE_SPINLOCK(loongson2_wait_lock);
 
 static void loongson2_cpu_wait(void)
@@ -206,8 +183,8 @@ static void loongson2_cpu_wait(void)
 
 	spin_lock_irqsave(&loongson2_wait_lock, flags);
 	cpu_freq = LOONGSON_CHIPCFG0;
-	LOONGSON_CHIPCFG0 &= ~0x7;	/* Put CPU into wait mode */
-	LOONGSON_CHIPCFG0 = cpu_freq;	/* Restore CPU state */
+	LOONGSON_CHIPCFG0 &= ~0x7;	 
+	LOONGSON_CHIPCFG0 = cpu_freq;	 
 	spin_unlock_irqrestore(&loongson2_wait_lock, flags);
 	local_irq_enable();
 }
@@ -216,7 +193,6 @@ static int __init cpufreq_init(void)
 {
 	int ret;
 
-	/* Register platform stuff */
 	ret = platform_driver_register(&platform_driver);
 	if (ret)
 		return ret;

@@ -24,7 +24,7 @@ enum {
 	false	= 0,
 	true	= 1
 };
-#endif /* MY_DEF_HERE */
+#endif  
 
 #undef offsetof
 #ifdef __compiler_offsetof

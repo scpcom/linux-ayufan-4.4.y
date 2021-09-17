@@ -1,30 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * v4l2-event.c
- *
- * V4L2 events.
- *
- * Copyright (C) 2009--2010 Nokia Corporation.
- *
- * Contact: Sakari Ailus <sakari.ailus@iki.fi>
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
- * 02110-1301 USA
- */
-
+ 
 #include <media/v4l2-dev.h>
 #include <media/v4l2-fh.h>
 #include <media/v4l2-event.h>
@@ -75,7 +52,6 @@ int v4l2_event_dequeue(struct v4l2_fh *fh, struct v4l2_event *event,
 	if (nonblocking)
 		return __v4l2_event_dequeue(fh, event);
 
-	/* Release the vdev lock while waiting */
 	if (fh->vdev->lock)
 		mutex_unlock(fh->vdev->lock);
 
@@ -95,7 +71,6 @@ int v4l2_event_dequeue(struct v4l2_fh *fh, struct v4l2_event *event,
 }
 EXPORT_SYMBOL_GPL(v4l2_event_dequeue);
 
-/* Caller must hold fh->vdev->fh_lock! */
 static struct v4l2_subscribed_event *v4l2_event_subscribed(
 		struct v4l2_fh *fh, u32 type, u32 id)
 {
@@ -117,25 +92,17 @@ static void __v4l2_event_queue_fh(struct v4l2_fh *fh, const struct v4l2_event *e
 	struct v4l2_kevent *kev;
 	bool copy_payload = true;
 
-	/* Are we subscribed? */
 	sev = v4l2_event_subscribed(fh, ev->type, ev->id);
 	if (sev == NULL)
 		return;
 
-	/*
-	 * If the event has been added to the fh->subscribed list, but its
-	 * add op has not completed yet elems will be 0, treat this as
-	 * not being subscribed.
-	 */
 	if (!sev->elems)
 		return;
 
-	/* Increase event sequence number on fh. */
 	fh->sequence++;
 
-	/* Do we have any free events? */
 	if (sev->in_use == sev->elems) {
-		/* no, remove the oldest one */
+		 
 		kev = sev->events + sev_pos(sev, 0);
 		list_del(&kev->list);
 		sev->in_use--;
@@ -153,7 +120,6 @@ static void __v4l2_event_queue_fh(struct v4l2_fh *fh, const struct v4l2_event *e
 		}
 	}
 
-	/* Take one and fill it. */
 	kev = sev->events + sev_pos(sev, sev->in_use);
 	kev->event.type = ev->type;
 	if (copy_payload)
@@ -238,7 +204,7 @@ int v4l2_event_subscribe(struct v4l2_fh *fh,
 
 	if (found_ev) {
 		kfree(sev);
-		return 0; /* Already listening */
+		return 0;  
 	}
 
 	if (sev->ops && sev->ops->add) {
@@ -250,7 +216,6 @@ int v4l2_event_subscribe(struct v4l2_fh *fh,
 		}
 	}
 
-	/* Mark as ready for use */
 	sev->elems = elems;
 
 	return 0;
@@ -296,7 +261,7 @@ int v4l2_event_unsubscribe(struct v4l2_fh *fh,
 
 	sev = v4l2_event_subscribed(fh, sub->type, sub->id);
 	if (sev != NULL) {
-		/* Remove any pending events for this subscription */
+		 
 		for (i = 0; i < sev->in_use; i++) {
 			list_del(&sev->events[sev_pos(sev, i)].list);
 			fh->navailable--;
@@ -358,4 +323,4 @@ int v4l2_src_change_event_subdev_subscribe(struct v4l2_subdev *sd,
 	return v4l2_src_change_event_subscribe(fh, sub);
 }
 EXPORT_SYMBOL_GPL(v4l2_src_change_event_subdev_subscribe);
-#endif /* MY_DEF_HERE */
+#endif  

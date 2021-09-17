@@ -1,20 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  linux/arch/arm/kernel/sys_arm.c
- *
- *  Copyright (C) People who wrote linux/arch/i386/kernel/sys_i386.c
- *  Copyright (C) 1995, 1996 Russell King.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- *
- *  This file contains various random system calls that
- *  have a non-standard calling sequence on the Linux/arm
- *  platform.
- */
+ 
 #include <linux/export.h>
 #include <linux/errno.h>
 #include <linux/sched.h>
@@ -32,12 +19,8 @@
 #include <linux/slab.h>
 #if defined(MY_DEF_HERE)
 #include <linux/printk.h>
-#endif /* MY_DEF_HERE */
+#endif  
 
-/*
- * Since loff_t is a 64 bit type we avoid a lot of ABI hassle
- * with a different argument ordering.
- */
 asmlinkage long sys_arm_fadvise64_64(int fd, int advice,
 				     loff_t offset, loff_t len)
 {
@@ -45,11 +28,7 @@ asmlinkage long sys_arm_fadvise64_64(int fd, int advice,
 }
 
 #if defined(MY_DEF_HERE) && (PAGE_SHIFT > 12)
-	/*
-	 * the "offeset" input variable is in always in 4k units for mmap2.
-	 * If PAGE_SIZE is different, we need shift it to present real pages,
-	 * and to make sure that the actual address is PAGE_SIZE aligned
-	 */
+	 
 asmlinkage unsigned long sys_arm_mmap_4koff(unsigned long addr,
 		unsigned long len, unsigned long prot, unsigned long flags,
 		unsigned long fd, unsigned long offset)
@@ -65,4 +44,4 @@ asmlinkage unsigned long sys_arm_mmap_4koff(unsigned long addr,
 
 	return sys_mmap_pgoff(addr, len, prot, flags, fd, pgoff);
 }
-#endif /* MY_DEF_HERE && PAGE_SHIFT > 12 */
+#endif  

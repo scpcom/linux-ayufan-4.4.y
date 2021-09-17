@@ -55,14 +55,14 @@ static inline int dma_map_sg_attrs(struct device *dev, struct scatterlist *sg,
 	int i;
 	for_each_sg(sg, s, nents, i)
 		kmemcheck_mark_initialized(sg_virt(s), s->length);
-#endif /* CONFIG_KMEMCHECK */
-#else /* MY_DEF_HERE */
+#endif  
+#else  
 	int i, ents;
 	struct scatterlist *s;
 
 	for_each_sg(sg, s, nents, i)
 		kmemcheck_mark_initialized(sg_virt(s), s->length);
-#endif /* MY_DEF_HERE */
+#endif  
 	BUG_ON(!valid_dma_direction(dir));
 	ents = ops->map_sg(dev, sg, nents, dir, attrs);
 	debug_dma_map_sg(dev, sg, nents, ents, dir);
@@ -92,10 +92,10 @@ static inline dma_addr_t dma_map_page(struct device *dev, struct page *page,
 #if defined(MY_DEF_HERE)
 #ifdef CONFIG_KMEMCHECK
 	kmemcheck_mark_initialized(page_address(page) + offset, size);
-#endif /* CONFIG_KMEMCHECK */
-#else /* MY_DEF_HERE */
+#endif  
+#else  
 	kmemcheck_mark_initialized(page_address(page) + offset, size);
-#endif /* MY_DEF_HERE */
+#endif  
 	BUG_ON(!valid_dma_direction(dir));
 	addr = ops->map_page(dev, page, offset, size, dir, NULL);
 	debug_dma_map_page(dev, page, offset, size, dir, addr, false);
@@ -199,19 +199,6 @@ dma_sync_sg_for_device(struct device *dev, struct scatterlist *sg,
 extern int dma_common_mmap(struct device *dev, struct vm_area_struct *vma,
 			   void *cpu_addr, dma_addr_t dma_addr, size_t size);
 
-/**
- * dma_mmap_attrs - map a coherent DMA allocation into user space
- * @dev: valid struct device pointer, or NULL for ISA and EISA-like devices
- * @vma: vm_area_struct describing requested user mapping
- * @cpu_addr: kernel CPU-view address returned from dma_alloc_attrs
- * @handle: device-view address returned from dma_alloc_attrs
- * @size: size of memory originally requested in dma_alloc_attrs
- * @attrs: attributes of mapping properties requested in dma_alloc_attrs
- *
- * Map a coherent DMA buffer previously allocated by dma_alloc_attrs
- * into user space.  The coherent DMA buffer must not be freed by the
- * driver until the user space mapping has been released.
- */
 static inline int
 dma_mmap_attrs(struct device *dev, struct vm_area_struct *vma, void *cpu_addr,
 	       dma_addr_t dma_addr, size_t size, struct dma_attrs *attrs)

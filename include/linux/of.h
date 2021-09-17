@@ -3,21 +3,7 @@
 #endif
 #ifndef _LINUX_OF_H
 #define _LINUX_OF_H
-/*
- * Definitions for talking to the Open Firmware PROM on
- * Power Macintosh and other computers.
- *
- * Copyright (C) 1996-2005 Paul Mackerras.
- *
- * Updates for PPC64 by Peter Bergner & David Engebretsen, IBM Corp.
- * Updates for SPARC64 by David S. Miller
- * Derived from PowerPC and Sparc prom.h files by Stephen Rothwell, IBM Corp.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version
- * 2 of the License, or (at your option) any later version.
- */
+ 
 #include <linux/types.h>
 #include <linux/bitops.h>
 #include <linux/errno.h>
@@ -53,13 +39,13 @@ struct device_node {
 	const char *full_name;
 
 	struct	property *properties;
-	struct	property *deadprops;	/* removed properties */
+	struct	property *deadprops;	 
 	struct	device_node *parent;
 	struct	device_node *child;
 	struct	device_node *sibling;
-	struct	device_node *next;	/* next device of same type */
-	struct	device_node *allnext;	/* next in list of all nodes */
-	struct	proc_dir_entry *pde;	/* this node's proc directory */
+	struct	device_node *next;	 
+	struct	device_node *allnext;	 
+	struct	proc_dir_entry *pde;	 
 	struct	kref kref;
 	unsigned long _flags;
 	void	*data;
@@ -80,18 +66,17 @@ struct of_phandle_args {
 #ifdef CONFIG_OF_DYNAMIC
 extern struct device_node *of_node_get(struct device_node *node);
 extern void of_node_put(struct device_node *node);
-#else /* CONFIG_OF_DYNAMIC */
-/* Dummy ref counting routines - to be implemented later */
+#else  
+ 
 static inline struct device_node *of_node_get(struct device_node *node)
 {
 	return node;
 }
 static inline void of_node_put(struct device_node *node) { }
-#endif /* !CONFIG_OF_DYNAMIC */
+#endif  
 
 #ifdef CONFIG_OF
 
-/* Pointer for first entry in chain of all nodes. */
 extern struct device_node *of_allnodes;
 extern struct device_node *of_chosen;
 extern struct device_node *of_aliases;
@@ -119,11 +104,6 @@ static inline void of_node_set_flag(struct device_node *n, unsigned long flag)
 
 extern struct device_node *of_find_all_nodes(struct device_node *prev);
 
-/*
- * OF address retrieval & translation
- */
-
-/* Helper to read a big number; size is in cells (not bytes) */
 static inline u64 of_read_number(const __be32 *cell, int size)
 {
 	u64 r = 0;
@@ -132,31 +112,27 @@ static inline u64 of_read_number(const __be32 *cell, int size)
 	return r;
 }
 
-/* Like of_read_number, but we want an unsigned long result */
 static inline unsigned long of_read_ulong(const __be32 *cell, int size)
 {
-	/* toss away upper bits if unsigned long is smaller than u64 */
+	 
 	return of_read_number(cell, size);
 }
 
 #include <asm/prom.h>
 
-/* Default #address and #size cells.  Allow arch asm/prom.h to override */
 #if !defined(OF_ROOT_NODE_ADDR_CELLS_DEFAULT)
 #define OF_ROOT_NODE_ADDR_CELLS_DEFAULT 1
 #define OF_ROOT_NODE_SIZE_CELLS_DEFAULT 1
 #endif
 
-/* Default string compare functions, Allow arch asm/prom.h to override */
 #if !defined(of_compat_cmp)
 #define of_compat_cmp(s1, s2, l)	strcasecmp((s1), (s2))
 #define of_prop_cmp(s1, s2)		strcmp((s1), (s2))
 #define of_node_cmp(s1, s2)		strcasecmp((s1), (s2))
 #endif
 
-/* flag descriptions */
-#define OF_DYNAMIC	1 /* node and properties were allocated via kmalloc */
-#define OF_DETACHED	2 /* node has been detached from the device tree */
+#define OF_DYNAMIC	1  
+#define OF_DETACHED	2  
 
 #define OF_IS_DYNAMIC(x) test_bit(OF_DYNAMIC, &x->_flags)
 #define OF_MARK_DYNAMIC(x) set_bit(OF_DYNAMIC, &x->_flags)
@@ -240,7 +216,7 @@ static inline int of_get_available_child_count(const struct device_node *np)
 
 	return num;
 }
-#endif /* MY_ABC_HERE */
+#endif  
 
 extern struct device_node *of_find_node_with_property(
 	struct device_node *from, const char *prop_name);
@@ -282,7 +258,7 @@ extern const void *of_get_property(const struct device_node *node,
 				int *lenp);
 #if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 extern struct device_node *of_get_cpu_node(int cpu, unsigned int *thread);
-#endif /* MY_DEF_HERE || MY_ABC_HERE */
+#endif  
 #define for_each_property_of_node(dn, pp) \
 	for (pp = dn->properties; pp != NULL; pp = pp->next)
 
@@ -293,7 +269,7 @@ extern const struct of_device_id *of_match_node(
 extern int of_modalias_node(struct device_node *node, char *modalias, int len);
 #if defined(MY_ABC_HERE)
 extern void of_print_phandle_args(const char *msg, const struct of_phandle_args *args);
-#endif /* MY_ABC_HERE */
+#endif  
 extern struct device_node *of_parse_phandle(const struct device_node *np,
 					    const char *phandle_name,
 					    int index);
@@ -304,7 +280,7 @@ extern int of_parse_phandle_with_args(const struct device_node *np,
 extern int of_parse_phandle_with_fixed_args(const struct device_node *np,
 	const char *list_name, int cells_count, int index,
 	struct of_phandle_args *out_args);
-#endif /* MY_ABC_HERE */
+#endif  
 extern int of_count_phandle_with_args(const struct device_node *np,
 	const char *list_name, const char *cells_name);
 
@@ -317,7 +293,6 @@ extern int of_add_property(struct device_node *np, struct property *prop);
 extern int of_remove_property(struct device_node *np, struct property *prop);
 extern int of_update_property(struct device_node *np, struct property *newprop);
 
-/* For updating the device tree at runtime */
 #define OF_RECONFIG_ATTACH_NODE		0x0001
 #define OF_RECONFIG_DETACH_NODE		0x0002
 #define OF_RECONFIG_ADD_PROPERTY	0x0003
@@ -338,14 +313,6 @@ extern int of_detach_node(struct device_node *);
 
 #define of_match_ptr(_ptr)	(_ptr)
 
-/*
- * struct property *prop;
- * const __be32 *p;
- * u32 u;
- *
- * of_property_for_each_u32(np, "propname", prop, p, u)
- *         printk("U32 value: %x\n", u);
- */
 const __be32 *of_prop_next_u32(struct property *prop, const __be32 *cur,
 			       u32 *pu);
 #define of_property_for_each_u32(np, propname, prop, p, u)	\
@@ -354,13 +321,6 @@ const __be32 *of_prop_next_u32(struct property *prop, const __be32 *cur,
 		p;						\
 		p = of_prop_next_u32(prop, p, &u))
 
-/*
- * struct property *prop;
- * const char *s;
- *
- * of_property_for_each_string(np, "propname", prop, s)
- *         printk("String value: %s\n", s);
- */
 const char *of_prop_next_string(struct property *prop, const char *cur);
 #define of_property_for_each_string(np, propname, prop, s)	\
 	for (prop = of_find_property(np, propname, NULL),	\
@@ -368,7 +328,7 @@ const char *of_prop_next_string(struct property *prop, const char *cur);
 		s;						\
 		s = of_prop_next_string(prop, s))
 
-#else /* CONFIG_OF */
+#else  
 
 static inline const char* of_node_full_name(struct device_node *np)
 {
@@ -411,7 +371,7 @@ static inline int of_get_available_child_count(const struct device_node *np)
 {
 	return 0;
 }
-#endif /* MY_ABC_HERE */
+#endif  
 
 static inline int of_device_is_compatible(const struct device_node *device,
 					  const char *name)
@@ -490,7 +450,7 @@ static inline struct device_node *of_get_cpu_node(int cpu,
 {
 	return NULL;
 }
-#endif /* MY_DEF_HERE || MY_ABC_HERE */
+#endif  
 
 static inline int of_property_read_u64(const struct device_node *np,
 				       const char *propname, u64 *out_value)
@@ -528,7 +488,7 @@ static inline int of_parse_phandle_with_fixed_args(const struct device_node *np,
 {
 	return -ENOSYS;
 }
-#endif /* MY_ABC_HERE */
+#endif  
 
 static inline int of_count_phandle_with_args(struct device_node *np,
 					     const char *list_name,
@@ -553,7 +513,7 @@ static inline int of_machine_is_compatible(const char *compat)
 	while (0)
 #define of_property_for_each_string(np, propname, prop, s) \
 	while (0)
-#endif /* CONFIG_OF */
+#endif  
 
 #ifndef of_node_to_nid
 static inline int of_node_to_nid(struct device_node *np)
@@ -564,19 +524,6 @@ static inline int of_node_to_nid(struct device_node *np)
 #define of_node_to_nid of_node_to_nid
 #endif
 
-/**
- * of_property_read_string_array() - Read an array of strings from a multiple
- * strings property.
- * @np:		device node from which the property value is to be read.
- * @propname:	name of the property to be searched.
- * @out_strs:	output array of string pointers.
- * @sz:		number of array elements to read.
- *
- * Search for a property in a device tree node and retrieve a list of
- * terminated string values (pointer to data, not a copy) in that property.
- *
- * If @out_strs is NULL, the number of strings in the property is returned.
- */
 static inline int of_property_read_string_array(struct device_node *np,
 						const char *propname, const char **out_strs,
 						size_t sz)
@@ -584,42 +531,12 @@ static inline int of_property_read_string_array(struct device_node *np,
 	return of_property_read_string_helper(np, propname, out_strs, sz, 0);
 }
 
-/**
- * of_property_count_strings() - Find and return the number of strings from a
- * multiple strings property.
- * @np:		device node from which the property value is to be read.
- * @propname:	name of the property to be searched.
- *
- * Search for a property in a device tree node and retrieve the number of null
- * terminated string contain in it. Returns the number of strings on
- * success, -EINVAL if the property does not exist, -ENODATA if property
- * does not have a value, and -EILSEQ if the string is not null-terminated
- * within the length of the property data.
- */
 static inline int of_property_count_strings(struct device_node *np,
 					    const char *propname)
 {
 	return of_property_read_string_helper(np, propname, NULL, 0, 0);
 }
 
-/**
- * of_property_read_string_index() - Find and read a string from a multiple
- * strings property.
- * @np:		device node from which the property value is to be read.
- * @propname:	name of the property to be searched.
- * @index:	index of the string in the list of strings
- * @out_string:	pointer to null terminated return string, modified only if
- *		return value is 0.
- *
- * Search for a property in a device tree node and retrieve a null
- * terminated string value (pointer to data, not a copy) in the list of strings
- * contained in that property.
- * Returns 0 on success, -EINVAL if the property does not exist, -ENODATA if
- * property does not have a value, and -EILSEQ if the string is not
- * null-terminated within the length of the property data.
- *
- * The out_string pointer is modified only if a valid string can be decoded.
- */
 static inline int of_property_read_string_index(struct device_node *np,
 						const char *propname,
 						int index, const char **output)
@@ -628,14 +545,6 @@ static inline int of_property_read_string_index(struct device_node *np,
 	return rc < 0 ? rc : 0;
 }
 
-/**
- * of_property_read_bool - Findfrom a property
- * @np:		device node from which the property value is to be read.
- * @propname:	name of the property to be searched.
- *
- * Search for a property in a device node.
- * Returns true if the property exist false otherwise.
- */
 static inline bool of_property_read_bool(const struct device_node *np,
 					 const char *propname)
 {
@@ -675,4 +584,4 @@ extern void proc_device_tree_update_prop(struct proc_dir_entry *pde,
 					 struct property *oldprop);
 #endif
 
-#endif /* _LINUX_OF_H */
+#endif  

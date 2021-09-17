@@ -1,31 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
-Copyright (C) Marvell International Ltd. and its affiliates
-
-This software file (the "File") is owned and distributed by Marvell
-International Ltd. and/or its affiliates ("Marvell") under the following
-alternative licensing terms.  Once you have made an election to distribute the
-File under one of the following license alternatives, please (i) delete this
-introductory statement regarding license alternatives, (ii) delete the two
-license alternatives that you have not elected to use and (iii) preserve the
-Marvell copyright notice above.
-
-********************************************************************************
-Marvell GPL License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or
-modify this File in accordance with the terms and conditions of the General
-Public License Version 2, June 1991 (the "GPL License"), a copy of which is
-available along with the File in the license.txt file or on the worldwide web
-at http://www.gnu.org/licenses/gpl.txt.
-
-THE FILE IS DISTRIBUTED AS-IS, WITHOUT WARRANTY OF ANY KIND, AND THE IMPLIED
-WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY
-DISCLAIMED.  The GPL License provides additional details about this warranty
-disclaimer.
-*******************************************************************************/
+ 
 #include <linux/kernel.h>
 #include <linux/version.h>
 #include <linux/netdevice.h>
@@ -43,7 +19,7 @@ disclaimer.
 
 #ifdef CONFIG_ARCH_MVEBU
 #include "mvNetConfig.h"
-#endif /* CONFIG_ARCH_MVEBU */
+#endif  
 
 #include "mv_net_complex_a39x.h"
 
@@ -56,17 +32,17 @@ static struct resource mv_net_complex_resources[] = {
 	{
 		.name	= "netcomplex_misc",
 		.start	= INTER_REGS_PHYS_BASE | 0x18200,
-		.end	= (INTER_REGS_PHYS_BASE | 0x18200) + 0x100 - 1, /* 256 B */
+		.end	= (INTER_REGS_PHYS_BASE | 0x18200) + 0x100 - 1,  
 		.flags	= IORESOURCE_MEM,
 	}, {
 		.name	= "netcomplex_phy",
 		.start	= INTER_REGS_PHYS_BASE | 0x18300,
-		.end	= (INTER_REGS_PHYS_BASE | 0x18300) + 0x200 - 1, /* 512 B */
+		.end	= (INTER_REGS_PHYS_BASE | 0x18300) + 0x200 - 1,  
 		.flags	= IORESOURCE_MEM,
 	}, {
 		.name	= "netcomplex_base",
 		.start	= INTER_REGS_PHYS_BASE | 0x18a00,
-		.end	= (INTER_REGS_PHYS_BASE | 0x18a00) + 0x1000 - 1, /* 4 KB */
+		.end	= (INTER_REGS_PHYS_BASE | 0x18a00) + 0x1000 - 1,  
 		.flags	= IORESOURCE_MEM,
 	},
 };
@@ -146,9 +122,7 @@ static void mv_net_pm_clock_up(void)
 
 static void mv_net_restore_regs_defaults(void)
 {
-	/* WA for A390 Z1 - when NSS wake up from reset
-	registers default values are wrong */
-
+	 
 	mv_net_pm_clock_down();
 	mv_net_assert_load_config();
 	mv_net_pm_clock_up();
@@ -311,7 +285,6 @@ static void mv_net_complex_com_phy_selector_config(u32 netComplex)
 {
 	u32 selector = MV_REG_READ(COMMON_PHYS_SELECTORS_REG);
 
-	/* Change the value of the selector from the legacy mode to NSS mode */
 	if (netComplex & MV_NETCOMP_GE_MAC0_2_SGMII_L0) {
 		selector &= ~COMMON_PHYS_SELECTOR_LANE_MASK(0);
 		selector |= 0x4 << COMMON_PHYS_SELECTOR_LANE_OFFSET(0);
@@ -351,19 +324,19 @@ static void mv_net_complex_com_phy_selector_config(u32 netComplex)
 static void mv_net_complex_qsgmii_ctrl_config(void)
 {
 	u32 reg;
-	/* Reset the QSGMII controller */
+	 
 	reg = (MV_REG_READ(MV_NETCOMP_QSGMII_CTRL_1) & (~NETC_QSGMII_CTRL_RSTN_MASK));
 	reg |= 0 << NETC_QSGMII_CTRL_RSTN_OFFSET;
 	MV_REG_WRITE(MV_NETCOMP_QSGMII_CTRL_1, reg);
-	/* Set the QSGMII controller to work with NSS */
+	 
 	reg = (MV_REG_READ(MV_NETCOMP_QSGMII_CTRL_1) & (~NETC_QSGMII_CTRL_VERSION_MASK));
 	reg |= 1 << NETC_QSGMII_CTRL_VERSION_OFFSET;
 	MV_REG_WRITE(MV_NETCOMP_QSGMII_CTRL_1, reg);
-	/* Enable the QSGMII Serdes-GOP path */
+	 
 	reg = (MV_REG_READ(MV_NETCOMP_QSGMII_CTRL_1) & (~NETC_QSGMII_CTRL_V3ACTIVE_MASK));
 	reg |= 0 << NETC_QSGMII_CTRL_V3ACTIVE_OFFSET;
 	MV_REG_WRITE(MV_NETCOMP_QSGMII_CTRL_1, reg);
-	/* De-assert the QSGMII controller */
+	 
 	reg = (MV_REG_READ(MV_NETCOMP_QSGMII_CTRL_1) & (~NETC_QSGMII_CTRL_RSTN_MASK));
 	reg |= 1 << NETC_QSGMII_CTRL_RSTN_OFFSET;
 	MV_REG_WRITE(MV_NETCOMP_QSGMII_CTRL_1, reg);
@@ -373,13 +346,13 @@ static void mv_net_complex_mac_to_rgmii(u32 port, enum mvNetComplexPhase phase)
 {
 	switch (phase) {
 	case MV_NETC_FIRST_PHASE:
-		/* Set Bus Width to HB mode = 1 */
+		 
 		mv_net_complex_bus_width_select(1);
-		/* Select RGMII mode */
+		 
 		mv_net_complex_gbe_mode_select(1);
 		break;
 	case MV_NETC_SECOND_PHASE:
-		/* De-assert the relevant port HB reset */
+		 
 		mv_net_complex_port_rf_reset(port, 1);
 		break;
 	}
@@ -389,17 +362,17 @@ static void mv_net_complex_mac_to_qsgmii(u32 port, enum mvNetComplexPhase phase)
 {
 	switch (phase) {
 	case MV_NETC_FIRST_PHASE:
-		/* Set Bus Width to FB mode = 0 */
+		 
 		mv_net_complex_bus_width_select(0);
-		/* Select SGMII mode */
+		 
 		mv_net_complex_gbe_mode_select(0);
-		/* Configure the sample stages */
+		 
 		mv_net_complex_sample_stages_timing(0);
-		/* config QSGMII */
+		 
 		mv_net_complex_qsgmii_ctrl_config();
 		break;
 	case MV_NETC_SECOND_PHASE:
-		/* De-assert the relevant port HB reset */
+		 
 		mv_net_complex_port_rf_reset(port, 1);
 		break;
 	}
@@ -409,17 +382,17 @@ static void mv_net_complex_mac_to_sgmii(u32 port, enum mvNetComplexPhase phase, 
 {
 	switch (phase) {
 	case MV_NETC_FIRST_PHASE:
-		/* Set Bus Width to HB mode = 1 */
+		 
 		mv_net_complex_bus_width_select(1);
-		/* Select SGMII mode */
+		 
 		mv_net_complex_gbe_mode_select(0);
-		/* Configure the sample stages */
+		 
 		mv_net_complex_sample_stages_timing(0);
-		/* Configure the ComPhy Selector */
+		 
 		mv_net_complex_com_phy_selector_config(netComplex);
 		break;
 	case MV_NETC_SECOND_PHASE:
-		/* De-assert the relevant port HB reset */
+		 
 		mv_net_complex_port_rf_reset(port, 1);
 		break;
 	}
@@ -429,11 +402,11 @@ static void mv_net_complex_mac_to_rxaui(u32 port, enum mvNetComplexPhase phase)
 {
 	switch (phase) {
 	case MV_NETC_FIRST_PHASE:
-		/* RXAUI Serdes/s Clock alignment */
+		 
 		mv_net_complex_rxaui_enable(port, 1);
 		break;
 	case MV_NETC_SECOND_PHASE:
-		/* De-assert the relevant port HB reset */
+		 
 		mv_net_complex_port_rf_reset(port, 1);
 		break;
 	}
@@ -443,11 +416,11 @@ static void mv_net_complex_mac_to_xaui(u32 port, enum mvNetComplexPhase phase)
 {
 	switch (phase) {
 	case MV_NETC_FIRST_PHASE:
-		/* RXAUI Serdes/s Clock alignment */
+		 
 		mv_net_complex_xaui_enable(port, 1);
 		break;
 	case MV_NETC_SECOND_PHASE:
-		/* De-assert the relevant port HB reset */
+		 
 		mv_net_complex_port_rf_reset(port, 1);
 		break;
 	}
@@ -458,7 +431,6 @@ int mv_net_complex_dynamic_init(u32 net_comp_config)
 {
 	u32 i;
 
-	/* Active the GOP 4 ports */
 	for (i = 0; i < 4; i++)
 		mv_net_complex_active_port(i, 1);
 
@@ -467,28 +439,24 @@ int mv_net_complex_dynamic_init(u32 net_comp_config)
 	else
 		mv_net_complex_rxaui_enable(0, 0);
 
-	/* Set Bus Width to HB mode = 1 */
 	mv_net_complex_bus_width_select(1);
-	/* Select SGMII mode */
+	 
 	mv_net_complex_gbe_mode_select(0);
-	/* Configure the sample stages */
+	 
 	mv_net_complex_sample_stages_timing(0);
 
-	/* Configure the ComPhy Selector */
 	mv_net_complex_com_phy_selector_config(net_comp_config);
 
-	/* un reset */
 	for (i = 0; i < 4; i++)
 		mv_net_complex_port_rf_reset(i, 1);
 
-	/* Enable the GOP internal clock logic */
 	mv_net_complex_gop_clock_logic_set(1);
-	/* De-assert GOP unit reset */
+	 
 	mv_net_complex_gop_reset(1);
 
 	return 0;
 }
-#endif /* MY_ABC_HERE */
+#endif  
 
 int mv_net_complex_init(u32 net_comp_config, enum mvNetComplexPhase phase)
 {
@@ -496,14 +464,13 @@ int mv_net_complex_init(u32 net_comp_config, enum mvNetComplexPhase phase)
 	u32 c = net_comp_config, i;
 
 	if (phase == MV_NETC_FIRST_PHASE) {
-		/* fix the base address for transactions from the AXI to MBUS */
+		 
 		reg = (MV_REG_READ(MV_NETCOMP_AMB_ACCESS_CTRL_0) & (~NETC_AMB_ACCESS_CTRL_MASK));
 		reg |= (mv_net_reg_virt_base & NETC_AMB_ACCESS_CTRL_MASK);
 		MV_REG_WRITE(MV_NETCOMP_AMB_ACCESS_CTRL_0, reg);
 
-		/* Reset the GOP unit */
 		mv_net_complex_gop_reset(0);
-		/* Active the GOP 4 ports */
+		 
 		for (i = 0; i < 4; i++)
 			mv_net_complex_active_port(i, 1);
 	}
@@ -543,26 +510,25 @@ int mv_net_complex_init(u32 net_comp_config, enum mvNetComplexPhase phase)
 		mv_net_complex_mac_to_qsgmii(3, phase);
 
 	if (phase == MV_NETC_FIRST_PHASE)
-		/* Enable the NSS (PPv3) instead of the NetA (PPv1) */
+		 
 		mv_net_complex_nss_select(1);
 
 #if defined(MY_ABC_HERE)
 	if (phase == MV_NETC_SECOND_PHASE) {
-#else /* MY_ABC_HERE */
+#else  
 	else if (phase == MV_NETC_SECOND_PHASE) {
-#endif /* MY_ABC_HERE */
-		/* Enable the GOP internal clock logic */
+#endif  
+		 
 		mv_net_complex_gop_clock_logic_set(1);
-		/* De-assert GOP unit reset */
+		 
 		mv_net_complex_gop_reset(1);
 
 #if defined(MY_ABC_HERE)
-		// do nothing
-#else /* MY_ABC_HERE */
-		/* WA for A390 Z1 - when NSS wake up from reset
-		registers default values are wrong */
+		 
+#else  
+		 
 		mv_net_restore_regs_defaults();
-#endif /* MY_ABC_HERE */
+#endif  
 	}
 
 	return 0;
@@ -572,7 +538,6 @@ static int mv_net_complex_plat_data_get(struct platform_device *pdev)
 {
 	struct resource *res;
 
-	/* map Misc registers space */
 	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "netcomplex_misc");
 	if (!res) {
 		pr_err("Can not find SoC control registers base address, aborting\n");
@@ -587,7 +552,6 @@ static int mv_net_complex_plat_data_get(struct platform_device *pdev)
 	pr_info("Net complex misc registers base: PHYS = 0x%x, VIRT = 0x%0x, size = %d Bytes\n",
 		res->start, mv_net_complex_misc_vbase_addr, resource_size(res));
 
-	/* map PHY registers space */
 	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "netcomplex_phy");
 	if (!res) {
 		pr_err("Can not find PHY registers base address, aborting\n");
@@ -602,7 +566,6 @@ static int mv_net_complex_plat_data_get(struct platform_device *pdev)
 	pr_info("PP3 netcomplex PHY registers base: PHYS = 0x%x, VIRT = 0x%0x, size = %d Bytes\n",
 		res->start, mv_net_complex_phy_vbase_addr, resource_size(res));
 
-	/* map PHY registers space */
 	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "netcomplex_base");
 	if (!res) {
 		pr_err("Can not find PHY registers base address, aborting\n");
@@ -617,7 +580,6 @@ static int mv_net_complex_plat_data_get(struct platform_device *pdev)
 	pr_info("PP3 netcomplex base registers base: PHYS = 0x%x, VIRT = 0x%0x, size = %d Bytes\n",
 		res->start, mv_net_complex_vbase_addr, resource_size(res));
 
-	/* map register physical addr */
 	mv_net_reg_virt_base = (u32)ioremap(INTER_REGS_PHYS_BASE, INTER_REGS_SIZE);
 	if (!mv_net_reg_virt_base) {
 		pr_err("Cannot map base registers, aborting\n");
@@ -629,16 +591,16 @@ static int mv_net_complex_plat_data_get(struct platform_device *pdev)
 
 #if defined(MY_ABC_HERE)
 u32 net_complex = 0x421;
-#endif /* MY_ABC_HERE */
+#endif  
 
 static int mv_net_complex_probe(struct platform_device *pdev)
 {
 	int ret;
 #if defined(MY_ABC_HERE)
-	// do nothing
-#else /* MY_ABC_HERE */
+	 
+#else  
 	u32 net_complex;
-#endif /* MY_ABC_HERE */
+#endif  
 
 	ret = mv_net_complex_plat_data_get(pdev);
 	if (ret) {
@@ -646,20 +608,18 @@ static int mv_net_complex_probe(struct platform_device *pdev)
 		return -1;
 	}
 
-	/* TODO -- Static initialize net complex temp, after fdt ready, fix it */
 #if defined(MY_ABC_HERE)
 	pr_info("\nRun with net_complex = 0x%x\n", net_complex);
-#else /* MY_ABC_HERE */
+#else  
 	net_complex = 0x421;
-#endif /* MY_ABC_HERE */
+#endif  
 	mv_net_complex_init(net_complex, 0);
 	mv_net_complex_init(net_complex, 1);
 
 #if defined(MY_ABC_HERE)
-	/* WA for A390 Z1 - when NSS wake up from reset
-	registers default values are wrong */
+	 
 	mv_net_restore_regs_defaults();
-#endif /* MY_ABC_HERE */
+#endif  
 
 	return 0;
 }
@@ -677,11 +637,11 @@ static int mv_nss_cmdline_config(char *s)
 	return 1;
 }
 __setup("netcomplex=", mv_nss_cmdline_config);
-#endif /* MY_ABC_HERE */
+#endif  
 
 static int mv_net_complex_remove(struct platform_device *pdev)
 {
-	/* free all shared resources */
+	 
 	return 0;
 }
 
@@ -696,7 +656,7 @@ static struct platform_driver mv_net_complex_driver = {
 
 static int mv_net_complex_device_register(void)
 {
-	/* Register netcomplex device */
+	 
 	platform_device_register(&mv_net_complex_plat);
 
 	return 0;
@@ -706,7 +666,6 @@ static int __init mv_net_complex_init_module(void)
 {
 	int rc;
 
-	/* register net device for static initialization, remove it when FDT ready  */
 	rc = mv_net_complex_device_register();
 	if (rc < 0) {
 		pr_err("%s Net device register fail. rc=%d\n", __func__, rc);
@@ -724,8 +683,6 @@ static int __init mv_net_complex_init_module(void)
 	return rc;
 }
 module_init(mv_net_complex_init_module);
-
-/*---------------------------------------------------------------------------*/
 
 static void __exit mv_net_complex_cleanup_module(void)
 {

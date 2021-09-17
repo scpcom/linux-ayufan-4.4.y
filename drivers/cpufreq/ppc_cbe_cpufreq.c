@@ -1,28 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * cpufreq driver for the cell processor
- *
- * (C) Copyright IBM Deutschland Entwicklung GmbH 2005-2007
- *
- * Author: Christian Krafft <krafft@de.ibm.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- */
-
+ 
 #include <linux/cpufreq.h>
 #include <linux/module.h>
 #include <linux/of_platform.h>
@@ -35,7 +14,6 @@
 
 static DEFINE_MUTEX(cbe_switch_mutex);
 
-/* the CBE supports an 8 step frequency scaling */
 static struct cpufreq_frequency_table cbe_freqs[] = {
 	{1,	0},
 	{2,	0},
@@ -47,10 +25,6 @@ static struct cpufreq_frequency_table cbe_freqs[] = {
 	{10,	0},
 	{0,	CPUFREQ_TABLE_END},
 };
-
-/*
- * hardware specific functions
- */
 
 static int set_pmode(unsigned int cpu, unsigned int slow_mode)
 {
@@ -66,10 +40,6 @@ static int set_pmode(unsigned int cpu, unsigned int slow_mode)
 	return rc;
 }
 
-/*
- * cpufreq functions
- */
-
 static int cbe_cpufreq_cpu_init(struct cpufreq_policy *policy)
 {
 	const u32 *max_freqp;
@@ -84,9 +54,6 @@ static int cbe_cpufreq_cpu_init(struct cpufreq_policy *policy)
 
 	pr_debug("init cpufreq on CPU %d\n", policy->cpu);
 
-	/*
-	 * Let's check we can actually get to the CELL regs
-	 */
 	if (!cbe_get_cpu_pmd_regs(policy->cpu) ||
 	    !cbe_get_cpu_mic_tm_regs(policy->cpu)) {
 		pr_info("invalid CBE regs pointers for cpufreq\n");
@@ -100,20 +67,16 @@ static int cbe_cpufreq_cpu_init(struct cpufreq_policy *policy)
 	if (!max_freqp)
 		return -EINVAL;
 
-	/* we need the freq in kHz */
 	max_freq = *max_freqp / 1000;
 
 	pr_debug("max clock-frequency is at %u kHz\n", max_freq);
 	pr_debug("initializing frequency table\n");
 
-	/* initialize frequency table */
 	for (i=0; cbe_freqs[i].frequency!=CPUFREQ_TABLE_END; i++) {
 		cbe_freqs[i].frequency = max_freq / cbe_freqs[i].index;
 		pr_debug("%d: %d\n", i, cbe_freqs[i].frequency);
 	}
 
-	/* if DEBUG is enabled set_pmode() measures the latency
-	 * of a transition */
 	policy->cpuinfo.transition_latency = 25000;
 
 	cur_pmode = cbe_cpufreq_get_pmode(policy->cpu);
@@ -127,8 +90,6 @@ static int cbe_cpufreq_cpu_init(struct cpufreq_policy *policy)
 
 	cpufreq_frequency_table_get_attr(cbe_freqs, policy->cpu);
 
-	/* this ensures that policy->cpuinfo_min
-	 * and policy->cpuinfo_max are set correctly */
 	return cpufreq_frequency_table_cpuinfo(policy, cbe_freqs);
 }
 
@@ -184,16 +145,12 @@ static struct cpufreq_driver cbe_cpufreq_driver = {
 	.exit		= cbe_cpufreq_cpu_exit,
 	.name		= "cbe-cpufreq",
 #if defined(MY_ABC_HERE)
-	// do nothing
-#else /* MY_ABC_HERE */
+	 
+#else  
 	.owner		= THIS_MODULE,
-#endif /* MY_ABC_HERE */
+#endif  
 	.flags		= CPUFREQ_CONST_LOOPS,
 };
-
-/*
- * module init and destoy
- */
 
 static int __init cbe_cpufreq_init(void)
 {

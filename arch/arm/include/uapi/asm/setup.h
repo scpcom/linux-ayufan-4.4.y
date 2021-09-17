@@ -1,19 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  linux/include/asm/setup.h
- *
- *  Copyright (C) 1997-1999 Russell King
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- *
- *  Structure passed to kernel to tell it about the
- *  hardware it's running on.  See Documentation/arm/Setup
- *  for more info.
- */
+ 
 #ifndef _UAPI__ASMARM_SETUP_H
 #define _UAPI__ASMARM_SETUP_H
 
@@ -21,11 +9,10 @@
 
 #if defined (MY_DEF_HERE)
 #define COMMAND_LINE_SIZE 2048
-#else /* MY_DEF_HERE */
+#else  
 #define COMMAND_LINE_SIZE 1024
-#endif /* MY_DEF_HERE */
+#endif  
 
-/* The list ends with an ATAG_NONE node. */
 #define ATAG_NONE	0x00000000
 
 struct tag_header {
@@ -33,24 +20,21 @@ struct tag_header {
 	__u32 tag;
 };
 
-/* The list must start with an ATAG_CORE node */
 #define ATAG_CORE	0x54410001
 
 struct tag_core {
-	__u32 flags;		/* bit 0 = read-only */
+	__u32 flags;		 
 	__u32 pagesize;
 	__u32 rootdev;
 };
 
-/* it is allowed to have multiple ATAG_MEM nodes */
 #define ATAG_MEM	0x54410002
 
 struct tag_mem32 {
 	__u32	size;
-	__u32	start;	/* physical start address */
+	__u32	start;	 
 };
 
-/* VGA text type displays */
 #define ATAG_VIDEOTEXT	0x54410003
 
 struct tag_videotext {
@@ -65,31 +49,23 @@ struct tag_videotext {
 	__u16		video_points;
 };
 
-/* describes how the ramdisk will be used in kernel */
 #define ATAG_RAMDISK	0x54410004
 
 struct tag_ramdisk {
-	__u32 flags;	/* bit 0 = load, bit 1 = prompt */
-	__u32 size;	/* decompressed ramdisk size in _kilo_ bytes */
-	__u32 start;	/* starting block of floppy-based RAM disk image */
+	__u32 flags;	 
+	__u32 size;	 
+	__u32 start;	 
 };
 
-/* describes where the compressed ramdisk image lives (virtual address) */
-/*
- * this one accidentally used virtual addresses - as such,
- * it's deprecated.
- */
 #define ATAG_INITRD	0x54410005
 
-/* describes where the compressed ramdisk image lives (physical address) */
 #define ATAG_INITRD2	0x54420005
 
 struct tag_initrd {
-	__u32 start;	/* physical start address */
-	__u32 size;	/* size of compressed ramdisk image in bytes */
+	__u32 start;	 
+	__u32 size;	 
 };
 
-/* board serial number. "64 bits should be enough for everybody" */
 #define ATAG_SERIAL	0x54410006
 
 struct tag_serialnr {
@@ -97,16 +73,12 @@ struct tag_serialnr {
 	__u32 high;
 };
 
-/* board revision */
 #define ATAG_REVISION	0x54410007
 
 struct tag_revision {
 	__u32 rev;
 };
 
-/* initial values for vesafb-type framebuffers. see struct screen_info
- * in include/linux/tty.h
- */
 #define ATAG_VIDEOLFB	0x54410008
 
 struct tag_videolfb {
@@ -126,14 +98,12 @@ struct tag_videolfb {
 	__u8		rsvd_pos;
 };
 
-/* command line: \0 terminated string */
 #define ATAG_CMDLINE	0x54410009
 
 struct tag_cmdline {
-	char	cmdline[1];	/* this is the minimum size */
+	char	cmdline[1];	 
 };
 
-/* acorn RiscPC specific information */
 #define ATAG_ACORN	0x41000101
 
 struct tag_acorn {
@@ -143,7 +113,6 @@ struct tag_acorn {
 	__u8 adfsdrives;
 };
 
-/* footbridge memory clock, see arch/arm/mach-footbridge/arch.c */
 #define ATAG_MEMCLK	0x41000402
 
 struct tag_memclk {
@@ -163,14 +132,8 @@ struct tag {
 		struct tag_videolfb	videolfb;
 		struct tag_cmdline	cmdline;
 
-		/*
-		 * Acorn specific
-		 */
 		struct tag_acorn	acorn;
 
-		/*
-		 * DC21285 specific
-		 */
 		struct tag_memclk	memclk;
 	} u;
 };
@@ -190,4 +153,4 @@ struct tagtable {
 #define for_each_tag(t,base)		\
 	for (t = base; t->hdr.size; t = tag_next(t))
 
-#endif /* _UAPI__ASMARM_SETUP_H */
+#endif  

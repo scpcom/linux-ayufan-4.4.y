@@ -1,76 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
-   Copyright (C) Marvell International Ltd. and its affiliates
-
-   This software file (the "File") is owned and distributed by Marvell
-   International Ltd. and/or its affiliates ("Marvell") under the following
-   alternative licensing terms.  Once you have made an election to distribute the
-   File under one of the following license alternatives, please (i) delete this
-   introductory statement regarding license alternatives, (ii) delete the two
-   license alternatives that you have not elected to use and (iii) preserve the
-   Marvell copyright notice above.
-
-********************************************************************************
-   Marvell Commercial License Option
-
-   If you received this File from Marvell and you have entered into a commercial
-   license agreement (a "Commercial License") with Marvell, the File is licensed
-   to you under the terms of the applicable Commercial License.
-
-********************************************************************************
-   Marvell GPL License Option
-
-   If you received this File from Marvell, you may opt to use, redistribute and/or
-   modify this File in accordance with the terms and conditions of the General
-   Public License Version 2, June 1991 (the "GPL License"), a copy of which is
-   available along with the File in the license.txt file or by writing to the Free
-   Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 or
-   on the worldwide web at http://www.gnu.org/licenses/gpl.txt.
-
-   THE FILE IS DISTRIBUTED AS-IS, WITHOUT WARRANTY OF ANY KIND, AND THE IMPLIED
-   WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY
-   DISCLAIMED.  The GPL License provides additional details about this warranty
-   disclaimer.
-********************************************************************************
-   Marvell BSD License Option
-
-   If you received this File from Marvell, you may opt to use, redistribute and/or
-   modify this File under the following licensing terms.
-   Redistribution and use in source and binary forms, with or without modification,
-   are permitted provided that the following conditions are met:
-
-*   Redistributions of source code must retain the above copyright notice,
-    this list of conditions and the following disclaimer.
-
-*   Redistributions in binary form must reproduce the above copyright
-    notice, this list of conditions and the following disclaimer in the
-    documentation and/or other materials provided with the distribution.
-
-*   Neither the name of Marvell nor the names of its contributors may be
-    used to endorse or promote products derived from this software without
-    specific prior written permission.
-
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-********************************************************************************
-* mv_prestera_pci.c
-*
-* DESCRIPTION:
-*	functions in kernel mode special for pci prestera.
-*
-* DEPENDENCIES:
-*
-*******************************************************************************/
+ 
 #include <linux/pci.h>
 #include <linux/module.h>
 #include <linux/mm.h>
@@ -93,11 +24,10 @@
 #ifdef CONFIG_MV_INCLUDE_DRAGONITE_XCAT
 #if defined(MY_ABC_HERE)
 #include <linux/miscdevice.h>
-#endif /* MY_ABC_HERE */
+#endif  
 #include "mv_drivers_lsp/mv_dragonite/dragonite_xcat.h"
 #endif
 
-/* Macro definitions */
 #undef MV_PP_PCI_DBG
 #undef MV_PP_IDT_DBG
 
@@ -113,7 +43,6 @@
 #define SHARED_RAM_ATTR_ID		0x3E
 #define DRAGONITE_TARGET_ID		0xa
 
-/* DRAGONTIE */
 #define DRAGONITE_CTRL_REG			0x1c
 #define DRAGONITE_POE_CAUSE_IRQ_REG		0x64
 #define DRAGONITE_POE_MASK_IRQ_REG		0x68
@@ -126,28 +55,23 @@
 #define idtprintk(a...)
 #endif
 
-/* Global variables */
 static const char prestera_drv_name[] = "mvPP_PCI";
 static void __iomem *inter_regs;
 static struct idtSwitchConfig idtSwCfg[MAX_NUM_OF_IDT_SWITCH];
 
 static struct pci_decoding_window ac3_pci_sysmap[] = {
 
-	/*win_num	bar_num			offset		size(n*64KB)	remap
-	 *				target_id			attr	status*/
-	/* BAR 1*/
 	{0,		PXWCR_WIN_BAR_MAP_BAR1,	0x0,		_64M,		0x0,
 					SWITCH_TARGET_ID,		0x0,	ENABLE},
 
-	/* BAR 2*/
 	{DFXW,		PXWCR_WIN_BAR_MAP_BAR2,	DFX_BASE,	DFX_SIZE,	0x0,
 					DFX_TARGET_ID,			0x0,	ENABLE},
 
 #if defined(MY_ABC_HERE)
 	{SCPUW,		PXWCR_WIN_BAR_MAP_BAR2,	SCPU_BASE,	SCPU_SIZE,	0xFFE00000,
-#else /* MY_ABC_HERE */
+#else  
 	{SCPUW,		PXWCR_WIN_BAR_MAP_BAR2,	SCPU_BASE,	SCPU_SIZE,	0xFFF80000,
-#endif /* MY_ABC_HERE */
+#endif  
 					RAM_TARGET_ID,	SHARED_RAM_ATTR_ID,	ENABLE},
 
 	{DITCMW,	PXWCR_WIN_BAR_MAP_BAR2, ITCM_BASE,	ITCM_SIZE,	0x0,
@@ -162,21 +86,17 @@ static struct pci_decoding_window ac3_pci_sysmap[] = {
 
 static struct pci_decoding_window bc2_pci_sysmap[] = {
 
-	/*win_num	bar_num			offset		size(n*64KB)	remap
-	 *				target_id			attr	status*/
-	/* BAR 1*/
 	{0,		PXWCR_WIN_BAR_MAP_BAR1,	0x0,		_64M,		0x0,
 					SWITCH_TARGET_ID,		0x0,	ENABLE},
 
-	/* BAR 2*/
 	{DFXW,		PXWCR_WIN_BAR_MAP_BAR2,	DFX_BASE,	DFX_SIZE,	0x0,
 					DFX_TARGET_ID,			0x0,	ENABLE},
 
 #if defined(MY_ABC_HERE)
 	{SCPUW,		PXWCR_WIN_BAR_MAP_BAR2,	SCPU_BASE,	SCPU_SIZE,	0xFFE00000,
-#else /* MY_ABC_HERE */
+#else  
 	{SCPUW,		PXWCR_WIN_BAR_MAP_BAR2,	SCPU_BASE,	SCPU_SIZE,	0xFFF80000,
-#endif /* MY_ABC_HERE */
+#endif  
 					RAM_TARGET_ID,	SHARED_RAM_ATTR_ID,	ENABLE},
 
 	{0xff,		PXWCR_WIN_BAR_MAP_BAR2,	0x0,		0,		0x0,
@@ -185,9 +105,7 @@ static struct pci_decoding_window bc2_pci_sysmap[] = {
 
 static struct pci_decoding_window *get_pci_sysmap(struct pci_dev *pdev)
 {
-	/* For future extensions - pay attention that only MSB of device id
-	   is tested since AC3/BC2 devices use LSB for coding device flavour
-	 */
+	 
 	switch (pdev->device & ~MV_DEV_FLAVOUR_MASK) {
 
 	case MV_BOBCAT2_DEV_ID:
@@ -199,11 +117,6 @@ static struct pci_decoding_window *get_pci_sysmap(struct pci_dev *pdev)
 	}
 }
 
-/*******************************************************************************
-*	mv_set_pex_bars
-*
-*
-*******************************************************************************/
 static void mv_set_pex_bars(uint8_t pex_nr, uint8_t bar_nr, int enable)
 {
 	int val;
@@ -221,30 +134,18 @@ static void mv_set_pex_bars(uint8_t pex_nr, uint8_t bar_nr, int enable)
 			inter_regs + PEX_BAR_CTRL_REG(pex_nr, bar_nr));
 }
 
-/*******************************************************************************
-*	mv_resize_bar
-*
-*
-*******************************************************************************/
 static void mv_resize_bar(uint8_t pex_nr, uint8_t bar_nr, uint32_t bar_size)
 {
-	/* Disable BAR before reconfiguration */
+	 
 	mv_set_pex_bars(pex_nr, bar_nr, DISABLE);
 
-	/* Resize */
 	writel(bar_size, inter_regs + PEX_BAR_CTRL_REG(pex_nr, bar_nr));
 	dprintk("PEX_BAR_CTRL_REG(%d, %d) = 0x%x\n", pex_nr, bar_nr,
 		readl(inter_regs + PEX_BAR_CTRL_REG(pex_nr, bar_nr)));
 
-	/* Enable BAR */
 	mv_set_pex_bars(pex_nr, bar_nr, ENABLE);
 }
 
-/*******************************************************************************
-*	mv_read_and_assign_bars
-*
-*
-*******************************************************************************/
 static int mv_read_and_assign_bars(struct pci_dev *pdev, int resno)
 {
 	struct resource *res = pdev->resource + resno;
@@ -263,11 +164,6 @@ static int mv_read_and_assign_bars(struct pci_dev *pdev, int resno)
 	return err;
 }
 
-/*******************************************************************************
-*	mv_configure_win_bar
-*
-*
-*******************************************************************************/
 static int mv_configure_win_bar(struct pci_decoding_window *win_map, struct pci_dev *pdev)
 {
 	uint8_t target, bar_nr;
@@ -329,7 +225,6 @@ static void mv_release_pci_resources(struct pci_dev *pdev)
 {
 	int i;
 
-	/* Release all resources which were assigned */
 	for (i = 0; i < PCI_STD_RESOURCE_END; i++) {
 		struct resource *res = pdev->resource + i;
 		if (res->parent)
@@ -353,7 +248,6 @@ static int mv_calc_bar_size(struct pci_decoding_window *win_map, uint8_t bar)
 		size += win_map[target].size;
 	}
 
-	/* Round up to next power of 2 if needed */
 	if (!MV_IS_POWER_OF_2(size))
 		size = (1 << (mvLog2(size) + 1));
 
@@ -362,21 +256,10 @@ static int mv_calc_bar_size(struct pci_decoding_window *win_map, uint8_t bar)
 
 }
 
-/*******************************************************************************
-*	mv_reconfig_bars
-*
-*	PCI device BAR Re-configuration
-*
-*******************************************************************************/
 static int mv_reconfig_bars(struct pci_dev *pdev, struct pci_decoding_window *prestera_sysmap_bar)
 {
 	int i, err, size;
 
-	/* For some configurations BAR1 or BAR2 occupied whole pci address space
-	 * and BAR0 which is needed to reconfigure other bars is not assigned
-	 * and therefore unreachable. If BAR0 is not assigned, assigned it to
-	 * be able to resize BAR1 and BAR2
-	 */
 	if (!pdev->resource->parent) {
 		mv_release_pci_resources(pdev);
 		err = mv_read_and_assign_bars(pdev, MV_PCI_BAR_INTER_REGS);
@@ -391,23 +274,16 @@ static int mv_reconfig_bars(struct pci_dev *pdev, struct pci_decoding_window *pr
 	}
 	dprintk("%s: inter_regs 0x%p\n", __func__, inter_regs);
 
-	/* Resize BAR1 (64MB for SWITCH) */
 	size = mv_calc_bar_size(prestera_sysmap_bar, BAR_1);
 	mv_resize_bar(PEX_0, BAR_1, SIZE_TO_BAR_REG(size));
 
-	/* Resize BAR2 (1MB for DFX and Dragonite) */
 	size = mv_calc_bar_size(prestera_sysmap_bar, BAR_2);
 	mv_resize_bar(PEX_0, BAR_2, SIZE_TO_BAR_REG(size));
 
-	/* Unmap inter_regs - will be mapped again after BAR reassignment */
 	iounmap(inter_regs);
 
 	mv_release_pci_resources(pdev);
 
-	/*
-	 * Now when all PCI BARs are reconfigured, read them again and reassign
-	 * resources
-	 */
 	err = mv_read_and_assign_bars(pdev, MV_PCI_BAR_1);
 	if (err != 0)
 		return err;
@@ -425,7 +301,6 @@ static int mv_reconfig_bars(struct pci_dev *pdev, struct pci_decoding_window *pr
 	}
 	dprintk("%s: inter_regs 0x%p\n", __func__, inter_regs);
 
-	/* Disable all windows which point to BAR1 and BAR2 */
 	for (i = 0; i < 6; i++) {
 		if (i < 4) {
 			writel(0, inter_regs + PEX_WIN0_3_CTRL_REG(PEX_0, i));
@@ -447,12 +322,6 @@ static int mv_reconfig_bars(struct pci_dev *pdev, struct pci_decoding_window *pr
 	return err;
 }
 
-/*******************************************************************************
-*	mv_calc_device_address_range
-*
-*	Scan device bars and calc address range
-*
-*******************************************************************************/
 static void mv_calc_device_address_range(struct pci_dev *dev,  unsigned int devInstance, int index)
 {
 	unsigned int i = 0;
@@ -478,15 +347,6 @@ static void mv_calc_device_address_range(struct pci_dev *dev,  unsigned int devI
 	idtSwCfg[index].idtSwPortCfg.endAddr[devInstance] = endAddr;
 }
 
-/*******************************************************************************
-*	mv_find_pci_dev_pp_instances
-*
-*	Scan for PCI devices
-*	Search for first instance if IDT Switch - defined as Uplink Bus
-*	Search for second instance if IDT Switch - defined as Downlink Bus
-*	Search for Marvell devices - count and save for further processing
-*
-*******************************************************************************/
 static void mv_find_pci_dev_pp_instances(void)
 {
 	struct pci_dev *dev = NULL;
@@ -535,14 +395,6 @@ static void mv_find_pci_dev_pp_instances(void)
 	}
 }
 
-/*******************************************************************************
-*	mv_discover_active_pp_instances
-*
-*	Locate the active downlink ports connected to IDT switch
-*	The idt switch downlink ports are 2 - (2 + ppInstance).
-*	ports 0 - 1 are for the IDT switch, define which idt port are connected to the pps
-*
-*******************************************************************************/
 static void mv_discover_active_pp_instances(void)
 {
 	int i, num;
@@ -562,11 +414,6 @@ static void mv_discover_active_pp_instances(void)
 	}
 }
 
-/*******************************************************************************
-*	mv_configure_idt_switch_addr_range
-*
-*
-*******************************************************************************/
 static void mv_configure_idt_switch_addr_range(void)
 {
 	int i;
@@ -597,11 +444,6 @@ static void mv_configure_idt_switch_addr_range(void)
 	}
 }
 
-/*******************************************************************************
-*	mv_print_idt_switch_configuration
-*
-*
-*******************************************************************************/
 static void mv_print_idt_switch_configuration(void)
 {
 	int i;
@@ -658,23 +500,15 @@ static void mv_print_idt_switch_configuration(void)
 	idtprintk("\n");
 }
 
-/*******************************************************************************
-*	mv_reconfig_idt_switch
-*
-*
-*******************************************************************************/
 void mv_reconfig_idt_switch(void)
 {
-	/* Scan for PCI devices - Marvell & IDT Switch */
+	 
 	mv_find_pci_dev_pp_instances();
 
-	/* Discover Marvell devices connected to IDT Switch */
 	mv_discover_active_pp_instances();
 
-	/* Configure IDT Switch address range */
 	mv_configure_idt_switch_addr_range();
 
-	/* Print configuration */
 	mv_print_idt_switch_configuration();
 }
 
@@ -737,9 +571,9 @@ int __init mv_msys_dragonite_init(struct pci_dev *pdev, struct pci_decoding_wind
 	mv_dragonite_dev->name		= "dragonite_xcat";
 #if defined(MY_ABC_HERE)
 	mv_dragonite_dev->id		= 1;
-#else /* MY_ABC_HERE */
+#else  
 	mv_dragonite_dev->id		= -1;
-#endif /* MY_ABC_HERE */
+#endif  
 	mv_dragonite_dev->dev.platform_data = dragonite_pci_data;
 	mv_dragonite_dev->num_resources	= 4;
 	mv_dragonite_dev->resource	= dragonite_resources;
@@ -750,12 +584,6 @@ int __init mv_msys_dragonite_init(struct pci_dev *pdev, struct pci_decoding_wind
 }
 #endif
 
-/*******************************************************************************
-*	prestera_pci_probe
-*
-*	PCI device probe function
-*
-*******************************************************************************/
 static int prestera_pci_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 {
 	int err;
@@ -766,7 +594,6 @@ static int prestera_pci_probe(struct pci_dev *pdev, const struct pci_device_id *
 	void __iomem * const *iomap;
 #endif
 
-	/* Make sure all AC3/BC2 device flavours are handled in the same way */
 	if (((pdev->device & ~MV_DEV_FLAVOUR_MASK) == MV_BOBCAT2_DEV_ID) ||
 		((pdev->device & ~MV_DEV_FLAVOUR_MASK) == MV_ALLEYCAT3_DEV_ID))
 		tmpDevId &= ~MV_DEV_FLAVOUR_MASK;
@@ -792,12 +619,6 @@ static int prestera_pci_probe(struct pci_dev *pdev, const struct pci_device_id *
 		if (err)
 			return err;
 
-		/*
-		* Reconfigure and reassign bars
-		*  BAR0: 1MB  for INTER REGS (fixed size, no configuration needed)
-		*  BAR1: 64MB for SWITCH REGS
-		*  BAR2: 1MB  for DFX REGS
-		*/
 		err = mv_reconfig_bars(pdev, prestera_sysmap_bar);
 		if (err != 0)
 			return err;
@@ -858,7 +679,7 @@ static void prestera_pci_remove(struct pci_dev *pdev)
 }
 
 static DEFINE_PCI_DEVICE_TABLE(prestera_pci_tbl) = {
-	/* Marvell */
+	 
 	{ PCI_DEVICE(PCI_VENDOR_ID_IDT_SWITCH, MV_IDT_SWITCH_DEV_ID_808E)},
 	{ PCI_DEVICE(PCI_VENDOR_ID_IDT_SWITCH, MV_IDT_SWITCH_DEV_ID_802B)},
 	MV_PCI_DEVICE_FLAVOUR_TABLE_ENTRIES(MV_BOBCAT2_DEV_ID),

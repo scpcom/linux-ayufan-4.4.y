@@ -1,29 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *   STMicroelectronics SOC audio clocks wrapper
- *
- *   Copyright (c) 2010-2011 STMicroelectronics Limited
- *
- *   Authors: Pawel Moll <pawel.moll@st.com>
- *
- *   This program is free software; you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation; either version 2 of the License, or
- *   (at your option) any later version.
- *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
- *
- *   You should have received a copy of the GNU General Public License
- *   along with this program; if not, write to the Free Software
- *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
- *
- */
-
+ 
 #include <linux/slab.h>
 #include <linux/clk.h>
 #include <linux/export.h>
@@ -39,13 +17,11 @@ struct snd_stm_clk {
 	struct clk *clk;
 
 	unsigned long nominal_rate;
-	int adjustment; /* Difference from the nominal rate, in ppm */
+	int adjustment;  
 	atomic_t enabled;
 
 	snd_stm_magic_field;
 };
-
-/* Adjustment ALSA control */
 
 static int snd_stm_clk_adjustment_info(struct snd_kcontrol *kcontrol,
 		struct snd_ctl_elem_info *uinfo)
@@ -107,8 +83,6 @@ static struct snd_kcontrol_new snd_stm_clk_adjustment_ctl = {
 	.put = snd_stm_clk_adjustment_put,
 };
 
-/* Sound Clock interface */
-
 #ifdef MY_DEF_HERE
 int snd_stm_clk_prepare_enable(struct snd_stm_clk *clk)
 {
@@ -145,7 +119,7 @@ int snd_stm_clk_prepare(struct snd_stm_clk *clk)
 	return result;
 }
 EXPORT_SYMBOL(snd_stm_clk_prepare);
-#endif /* MY_DEF_HERE */
+#endif  
 
 int snd_stm_clk_enable(struct snd_stm_clk *clk)
 {
@@ -163,12 +137,12 @@ int snd_stm_clk_enable(struct snd_stm_clk *clk)
 	result = clk_enable(clk->clk);
 	if (result)
 		atomic_set(&clk->enabled, 0);
-#else /* MY_DEF_HERE */
+#else  
 	result = clk_prepare_enable(clk->clk);
 	if (result) {
 		atomic_set(&clk->enabled, 0);
 	}
-#endif /* MY_DEF_HERE */
+#endif  
 
 	return result;
 }
@@ -187,7 +161,7 @@ int snd_stm_clk_unprepare(struct snd_stm_clk *clk)
 	return 0;
 }
 EXPORT_SYMBOL(snd_stm_clk_unprepare);
-#endif /* MY_DEF_HERE */
+#endif  
 
 int snd_stm_clk_disable(struct snd_stm_clk *clk)
 {
@@ -201,9 +175,9 @@ int snd_stm_clk_disable(struct snd_stm_clk *clk)
 
 #ifdef MY_DEF_HERE
 	clk_disable(clk->clk);
-#else /* MY_DEF_HERE */
+#else  
 	clk_disable_unprepare(clk->clk);
-#endif /* MY_DEF_HERE */
+#endif  
 
 	atomic_set(&clk->enabled, 0);
 
@@ -228,7 +202,7 @@ int snd_stm_clk_disable_unprepare(struct snd_stm_clk *clk)
 	return 0;
 }
 EXPORT_SYMBOL(snd_stm_clk_disable_unprepare);
-#endif /* MY_DEF_HERE */
+#endif  
 
 int snd_stm_clk_set_rate(struct snd_stm_clk *clk, unsigned long rate)
 {
@@ -240,43 +214,24 @@ int snd_stm_clk_set_rate(struct snd_stm_clk *clk, unsigned long rate)
 	BUG_ON(!clk);
 	BUG_ON(!snd_stm_magic_valid(clk));
 
-	/* User must enable the clock first */
 	if (!atomic_read(&clk->enabled))
 		return -EAGAIN;
 
-	/*             a
-	 * F = f + --------- * f = f + d
-	 *          1000000
-	 *
-	 *         a
-	 * d = --------- * f
-	 *      1000000
-	 *
-	 * where:
-	 *   f - nominal rate
-	 *   a - adjustment in ppm (parts per milion)
-	 *   F - rate to be set in synthesizer
-	 *   d - delta (difference) between f and F
-	 */
 	if (clk->adjustment < 0) {
-		/* div64_64 operates on unsigned values... */
+		 
 		delta = -1;
 		clk->adjustment = -clk->adjustment;
 	} else {
 		delta = 1;
 	}
-	/* 500000 ppm is 0.5, which is used to round up values */
+	 
 	delta *= (int)div64_u64((uint64_t)rate *
 			(uint64_t)clk->adjustment + 500000,
 			1000000);
 	rate_adjusted = rate + delta;
 
-	/* adjusted rate should never be == 0 */
 	BUG_ON(rate_adjusted == 0);
 
-	/* using the parent ops table directly avoids taking the clock
-	 * spinlock the current execution context already owns.
-	 */
 	if (likely(clk_set_rate(clk->clk, rate_adjusted)) < 0) {
 		snd_stm_printe("Failed to clk set rate %d !\n",
 				rate_adjusted);
@@ -286,18 +241,16 @@ int snd_stm_clk_set_rate(struct snd_stm_clk *clk, unsigned long rate)
 	rate_achieved = clk_get_rate(clk->clk);
 	BUG_ON(rate_achieved == 0);
 
-	/* using ALSA's adjustment control, we can modify the rate to be up to
-	   twice as much as requested, but no more */
 	BUG_ON(rate_achieved > 2*rate);
 	delta = rate_achieved - rate;
 	if (delta < 0) {
-		/* div64_64 operates on unsigned values... */
+		 
 		delta = -delta;
 		clk->adjustment = -1;
 	} else {
 		clk->adjustment = 1;
 	}
-	/* frequency/2 is added to round up result */
+	 
 	clk->adjustment *= (int)div64_u64((uint64_t)delta * 1000000 +
 			rate / 2, rate);
 
@@ -332,8 +285,6 @@ struct snd_stm_clk *snd_stm_clk_get(struct device *dev, const char *id,
 				id, dev_name(dev));
 		goto error_clk_get;
 	}
-
-	/* Rate adjustment ALSA control */
 
 	snd_stm_clk_adjustment_ctl.device = card_device;
 	if (snd_ctl_add(card, snd_ctl_new1(&snd_stm_clk_adjustment_ctl,

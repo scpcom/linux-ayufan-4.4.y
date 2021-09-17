@@ -1,80 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
-Copyright (C) Marvell International Ltd. and its affiliates
-
-This software file (the "File") is owned and distributed by Marvell
-International Ltd. and/or its affiliates ("Marvell") under the following
-alternative licensing terms.  Once you have made an election to distribute the
-File under one of the following license alternatives, please (i) delete this
-introductory statement regarding license alternatives, (ii) delete the two
-license alternatives that you have not elected to use and (iii) preserve the
-Marvell copyright notice above.
-
-********************************************************************************
-Marvell Commercial License Option
-
-If you received this File from Marvell and you have entered into a commercial
-license agreement (a "Commercial License") with Marvell, the File is licensed
-to you under the terms of the applicable Commercial License.
-
-********************************************************************************
-Marvell GPL License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or
-modify this File in accordance with the terms and conditions of the General
-Public License Version 2, June 1991 (the "GPL License"), a copy of which is
-available along with the File in the license.txt file or by writing to the Free
-Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 or
-on the worldwide web at http://www.gnu.org/licenses/gpl.txt.
-
-THE FILE IS DISTRIBUTED AS-IS, WITHOUT WARRANTY OF ANY KIND, AND THE IMPLIED
-WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY
-DISCLAIMED.  The GPL License provides additional details about this warranty
-disclaimer.
-********************************************************************************
-Marvell BSD License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or
-modify this File under the following licensing terms.
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-    *   Redistributions of source code must retain the above copyright notice,
-	    this list of conditions and the following disclaimer.
-
-    *   Redistributions in binary form must reproduce the above copyright
-        notice, this list of conditions and the following disclaimer in the
-        documentation and/or other materials provided with the distribution.
-
-    *   Neither the name of Marvell nor the names of its contributors may be
-        used to endorse or promote products derived from this software without
-        specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-********************************************************************************
-* mvKernelExt.c
-*
-* DESCRIPTION:
-*       functions in kernel mode special for mainOs.
-*
-* DEPENDENCIES:
-*       mvKernelExt.h
-*       mvKernelExt_Sem.c
-*
-*       $Revision: 9$
-*******************************************************************************/
+ 
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <asm/uaccess.h>
@@ -102,11 +29,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #ifdef CONFIG_SMP
-/* spinlock_t mv_giantlock = SPIN_LOCK_UNLOCKED; */
+ 
 DEFINE_SPINLOCK(mv_giantlock);
 #endif
 
-/* local variables and variables */
 static int                  mvKernelExt_major = MVKERNELEXT_MAJOR;
 static int                  mvKernelExt_minor = MVKERNELEXT_MINOR;
 static int                  mvKernelExt_initialized = 0;
@@ -118,32 +44,16 @@ module_param(mvKernelExt_minor, int, S_IRUGO);
 MODULE_AUTHOR("Marvell Semi.");
 MODULE_LICENSE("GPL");
 
-/************************************************************************
- * mvKernelExt_read: this should be the read device function, for now in
- * current mvKernelExt driver implemention it does nothing
- ************************************************************************/
 static ssize_t mvKernelExt_read(struct file *filp, char *buf, size_t count, loff_t *f_pos)
 {
     return -ERESTARTSYS;
 }
 
-/************************************************************************
- *
- * mvKernelExt_write: this should be the write device function, for now in
- * current mvKernelExt driver implemention it does nothing
- *
- ************************************************************************/
 static ssize_t mvKernelExt_write(struct file *filp, const char *buf, size_t count, loff_t *f_pos)
 {
     return -ERESTARTSYS;
 }
 
-/************************************************************************
- *
- * mvKernelExt_lseek: this should be the lseek device function, for now in
- * current mvKernelExt driver implemention it does nothing
- *
- ************************************************************************/
 static loff_t mvKernelExt_lseek(struct file *filp, loff_t off, int whence)
 {
     return -ERESTARTSYS;
@@ -153,32 +63,6 @@ static loff_t mvKernelExt_lseek(struct file *filp, loff_t off, int whence)
 #include "../common/mv_KernelExtSem.c"
 #include "../common/mv_KernelExtMsgQ.c"
 
-/************************************************************************
-*
-* waitqueue support functions
-*
-* These functions required to suspend thread till some event occurs
-************************************************************************/
-
-/*******************************************************************************
-* mv_waitqueue_init
-*
-* DESCRIPTION:
-*       Initialize wait queue structure
-*
-* INPUTS:
-*       queue  - pointer to wait queue structure
-*
-* OUTPUTS:
-*       None
-*
-* RETURNS:
-*       None
-*
-* COMMENTS:
-*       None
-*
-*******************************************************************************/
 static void mv_waitqueue_init(
         mv_waitqueue_t* queue
 )
@@ -186,25 +70,6 @@ static void mv_waitqueue_init(
     memset(queue, 0, sizeof(*queue));
 }
 
-/*******************************************************************************
-* mv_waitqueue_cleanup
-*
-* DESCRIPTION:
-*       Cleanup wait queue structure
-*
-* INPUTS:
-*       queue  - pointer to wait queue structure
-*
-* OUTPUTS:
-*       None
-*
-* RETURNS:
-*       None
-*
-* COMMENTS:
-*       None
-*
-*******************************************************************************/
 static void mv_waitqueue_cleanup(
         mv_waitqueue_t* queue
 )
@@ -212,26 +77,6 @@ static void mv_waitqueue_cleanup(
     memset(queue, 0, sizeof(*queue));
 }
 
-/*******************************************************************************
-* mv_waitqueue_add
-*
-* DESCRIPTION:
-*       add task to wait queue
-*
-* INPUTS:
-*       queue  - pointer to wait queue structure
-*       tsk    - pointer to task structure
-*
-* OUTPUTS:
-*       None
-*
-* RETURNS:
-*       None
-*
-* COMMENTS:
-*       Interrupts must be disabled when this function called
-*
-*******************************************************************************/
 static void mv_waitqueue_add(
         mv_waitqueue_t* queue,
         struct mv_task* tsk
@@ -248,25 +93,6 @@ static void mv_waitqueue_add(
     queue->last = tsk;
 }
 
-/*******************************************************************************
-* mv_waitqueue_wake_first
-*
-* DESCRIPTION:
-*       wakeup first task waiting in queue
-*
-* INPUTS:
-*       queue  - pointer to wait queue structure
-*
-* OUTPUTS:
-*       None
-*
-* RETURNS:
-*       None
-*
-* COMMENTS:
-*       Interrupts must be disabled when this function called
-*
-*******************************************************************************/
 static void mv_waitqueue_wake_first(
         mv_waitqueue_t* queue
 )
@@ -290,25 +116,6 @@ static void mv_waitqueue_wake_first(
         queue->last = NULL;
 }
 
-/*******************************************************************************
-* mv_waitqueue_wake_all
-*
-* DESCRIPTION:
-*       wakeup all tasks waiting in queue
-*
-* INPUTS:
-*       queue  - pointer to wait queue structure
-*
-* OUTPUTS:
-*       None
-*
-* RETURNS:
-*       None
-*
-* COMMENTS:
-*       Interrupts must be disabled when this function called
-*
-*******************************************************************************/
 static void mv_waitqueue_wake_all(
         mv_waitqueue_t* queue
 )
@@ -335,25 +142,6 @@ static void mv_waitqueue_wake_all(
     queue->first = queue->last = NULL;
 }
 
-/*******************************************************************************
-* mv_delete_from_waitqueue
-*
-* DESCRIPTION:
-*       remove task from wait queue
-*
-* INPUTS:
-*       tsk    - pointer to task structure
-*
-* OUTPUTS:
-*       None
-*
-* RETURNS:
-*       None
-*
-* COMMENTS:
-*       Interrupts must be disabled when this function called
-*
-*******************************************************************************/
 static void mv_delete_from_waitqueue(
         struct mv_task* tsk
 )
@@ -394,30 +182,6 @@ static void mv_delete_from_waitqueue(
 
 }
 
-/*******************************************************************************
-* mv_do_short_wait_on_queue
-*
-* DESCRIPTION:
-*       Suspend a task on wait queue for a short period.
-*       Function has a best performance in a cost of CPU usage
-*       This is useful for mutual exclusion semaphores
-*
-* INPUTS:
-*       queue  - pointer to wait queue structure
-*       tsk    - pointer to task structure
-*       owner  - resourse owner
-*
-* OUTPUTS:
-*       None
-*
-* RETURNS:
-*       Zero if wait successful
-*       Non zero if wait interrupted (signal caught)
-*
-* COMMENTS:
-*       Interrupts must be disabled when this function called
-*
-*******************************************************************************/
 static int mv_do_short_wait_on_queue(
         mv_waitqueue_t* queue,
         struct mv_task* tsk,
@@ -449,7 +213,7 @@ static int mv_do_short_wait_on_queue(
         {
             if (tsk->task->prio <= (*owner)->prio)
             {
-                /* spin locks are not acceptable */
+                 
                 break;
             }
         }
@@ -467,7 +231,6 @@ static int mv_do_short_wait_on_queue(
     if (!tsk->waitqueue)
         return 0;
 
-    /* currect task is realtime and has higher prio than resource owner */
     tsk->tasklockflag = 2;
     while (tsk->waitqueue)
     {
@@ -486,31 +249,6 @@ static int mv_do_short_wait_on_queue(
 #endif
 }
 
-/*******************************************************************************
-* mv_do_wait_on_queue
-*
-* DESCRIPTION:
-*       Suspend a task on wait queue.
-*       Function has the same performance as mv_do_short_wait_on_queue when
-*       task suspended for short period. After that task state changed to
-*       suspended
-*       This is useful for binary and counting semaphores
-*
-* INPUTS:
-*       queue  - pointer to wait queue structure
-*       tsk    - pointer to task structure
-*
-* OUTPUTS:
-*       None
-*
-* RETURNS:
-*       Zero if wait successful
-*       Non zero if wait interrupted (signal caught)
-*
-* COMMENTS:
-*       Interrupts must be disabled when this function called
-*
-*******************************************************************************/
 static int mv_do_wait_on_queue(
         mv_waitqueue_t* queue,
         struct mv_task* tsk
@@ -554,30 +292,6 @@ static int mv_do_wait_on_queue(
     return 0;
 }
 
-/*******************************************************************************
-* mv_do_wait_on_queue_timeout
-*
-* DESCRIPTION:
-*       Suspend a task on wait queue.
-*       Return if timer expited.
-*
-* INPUTS:
-*       queue   - pointer to wait queue structure
-*       tsk     - pointer to task structure
-*       timeout - timeout in scheduller ticks
-*
-* OUTPUTS:
-*       None
-*
-* RETURNS:
-*       Non zero if wait successful
-*       Zero if timeout occured
-*       -1 if wait interrupted (signal caught)
-*
-* COMMENTS:
-*       Interrupts must be disabled when this function called
-*
-*******************************************************************************/
 static unsigned long mv_do_wait_on_queue_timeout(
         mv_waitqueue_t* queue,
         struct mv_task* tsk,
@@ -600,7 +314,7 @@ static unsigned long mv_do_wait_on_queue_timeout(
         timeout = schedule_timeout(timeout);
         MV_GLOBAL_LOCK();
     }
-    if (tsk->waitqueue) /* timeout, delete from waitqueue */
+    if (tsk->waitqueue)  
     {
         tsk->tasklockflag = 0;
         mv_delete_from_waitqueue(tsk);
@@ -608,32 +322,6 @@ static unsigned long mv_do_wait_on_queue_timeout(
     return timeout;
 }
 
-/************************************************************************
-*
-* Task lookup functions
-*
-* These functions required to lookup tasks in task array
-************************************************************************/
-
-/*******************************************************************************
-* mv_check_tasks
-*
-* DESCRIPTION:
-*       Walk through task array and check if task still alive
-*       Perform cleanup actions for dead tasks
-*
-* INPUTS:
-*       None
-*
-* OUTPUTS:
-*       None
-*
-* RETURNS:
-*       None
-*
-* COMMENTS:
-*
-*******************************************************************************/
 static void mv_check_tasks(void)
 {
     int k;
@@ -641,7 +329,7 @@ static void mv_check_tasks(void)
     MV_GLOBAL_LOCK();
     for (k = 0; k < mv_num_tasks; )
     {
-        /* search task */
+         
         struct task_struct *p, *g;
         int found = 0;
         do_each_thread(g, p) {
@@ -650,7 +338,7 @@ static void mv_check_tasks(void)
         } while_each_thread(g, p);
         if (!found)
         {
-            /* task not found */
+             
             mv_unregistertask(mv_tasks[k]->task);
             continue;
         }
@@ -664,25 +352,6 @@ static void mv_check_tasks(void)
     MV_GLOBAL_UNLOCK();
 }
 
-/*******************************************************************************
-* translate_priority
-*
-* DESCRIPTION:
-*       Translates a v2pthread priority into kernel priority
-*
-* INPUTS:
-*       policy    - scheduler policy
-*       priority  - vxWorks task priority
-*
-* OUTPUTS:
-*       None
-*
-* RETURNS:
-*       kernel priority
-*
-* COMMENTS:
-*
-*******************************************************************************/
 static int translate_priority(
         int policy,
         int priority
@@ -691,9 +360,6 @@ static int translate_priority(
     if (policy == SCHED_NORMAL)
         return 0;
 
-    /*
-    **  Validate the range of the user's task priority.
-    */
     if (priority < 0 || priority > 255)
         return MV_PRIO_MAX;
 
@@ -701,10 +367,9 @@ static int translate_priority(
     if (priority <= 10)
         return MV_PRIO_MAX-1;
 #endif
-    /* reverse */
+     
     priority = 255 - priority;
 
-    /* translate 0..255 to MAX_RT_PRIO..MAX_PRIO */
     priority *= (MV_PRIO_MAX-MV_PRIO_MIN);
     priority >>= 8;
     priority += MV_PRIO_MIN;
@@ -714,26 +379,6 @@ static int translate_priority(
     return( priority );
 }
 
-/*******************************************************************************
-* mv_set_prio
-*
-* DESCRIPTION:
-*       Set task priority
-*
-* INPUTS:
-*       param->taskid       - task ID
-*       param->vxw_priority - vxWorks task priority
-*
-* OUTPUTS:
-*       None
-*
-* RETURNS:
-*       Zero if successful
-*       -MVKERNELEXT_EINVAL  - if task is not registered
-*
-* COMMENTS:
-*
-*******************************************************************************/
 static int mv_set_prio(mv_priority_stc *param)
 {
     struct mv_task* p;
@@ -761,26 +406,9 @@ static int mv_set_prio(mv_priority_stc *param)
 }
 
 #if defined(MY_ABC_HERE) && defined(CONFIG_OF)
-// do nothing
-#else /* MY_ABC_HERE */
-/*******************************************************************************
-* mvKernelExt_read_proc_mem
-*
-* DESCRIPTION:
-*       proc read data rooutine.
-*       Use cat /proc/mvKernelExt to show task list and tasklock state
-*
-* INPUTS:
-*
-* OUTPUTS:
-*       None
-*
-* RETURNS:
-*       Data length
-*
-* COMMENTS:
-*
-*******************************************************************************/
+ 
+#else  
+ 
 static int mvKernelExt_read_proc_mem(
         char    *page,
         char    **start,
@@ -808,7 +436,7 @@ static int mvKernelExt_read_proc_mem(
         for (p = mv_tasklock_waitqueue.first; p; p = p->wait_next)
             len += sprintf(page+len," wq: %d\n", p->task->pid);
     }
-    /* list registered tasks */
+     
     for (k = 0; k < mv_num_tasks; k++)
     {
         len += sprintf(page+len,
@@ -848,27 +476,8 @@ static int mvKernelExt_read_proc_mem(
 
     return len;
 }
-#endif /* MY_ABC_HERE */
+#endif  
 
-/************************************************************************
-* mvKernelExt_cleanup
-*
-* DESCRIPTION:
-*       Perform cleanup actions while module unloading
-*       Unregister /proc entry, remove device entry
-*
-* INPUTS:
-*       None
-*
-* OUTPUTS:
-*       None
-*
-* RETURNS:
-*       None
-*
-* COMMENTS:
-*
-*******************************************************************************/
 void mvKernelExt_cleanup(void)
 {
     printk("mvKernelExt Says: Bye world from kernel\n");
@@ -885,35 +494,12 @@ void mvKernelExt_cleanup(void)
 
 }
 
-/************************************************************************
-* mvKernelExt_init
-*
-* DESCRIPTION:
-*       Module initialization
-*       Register device entry, /proc entry
-*
-* INPUTS:
-*       None
-*
-* OUTPUTS:
-*       None
-*
-* RETURNS:
-*       Zero if successful
-*       Non zero if failed
-*
-* COMMENTS:
-*
-*******************************************************************************/
 int mvKernelExt_init(void)
 {
     int         result = 0;
 
     printk(KERN_DEBUG "mvKernelExt_init\n");
 
-    /* first thing register the device at OS */
-
-    /* Register your major. */
     result = register_chrdev_region(
             MKDEV(mvKernelExt_major, mvKernelExt_minor),
             1, "mvKernelExt");
@@ -948,9 +534,8 @@ int mvKernelExt_init(void)
         return result;
     }
 
-/* code for kernel 2.6 shouldn't be relevant for 3.10 */
 #ifndef CONFIG_OF
-    /* create proc entry */
+     
     create_proc_read_entry("mvKernelExt", 0, NULL, mvKernelExt_read_proc_mem, NULL);
 #endif
 

@@ -1,20 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Ethernet driver for the Atmel AT91RM9200 (Thunder)
- *
- *  Copyright (C) 2003 SAN People (Pty) Ltd
- *
- * Based on an earlier Atmel EMAC macrocell driver by Atmel and Lineo Inc.
- * Initial version by Rick Bronson 01/11/2003
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version
- * 2 of the License, or (at your option) any later version.
- */
-
+ 
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/interrupt.h>
@@ -36,12 +23,10 @@
 
 #include "macb.h"
 
-/* 1518 rounded up */
 #define MAX_RBUFF_SZ	0x600
-/* max number of receive buffers */
+ 
 #define MAX_RX_DESCR	9
 
-/* Initialize and start the Receiver and Transmit subsystems */
 static int at91ether_start(struct net_device *dev)
 {
 	struct macb *lp = netdev_priv(dev);
@@ -74,30 +59,24 @@ static int at91ether_start(struct net_device *dev)
 		addr += MAX_RBUFF_SZ;
 	}
 
-	/* Set the Wrap bit on the last descriptor */
 	lp->rx_ring[MAX_RX_DESCR - 1].addr |= MACB_BIT(RX_WRAP);
 
-	/* Reset buffer index */
 	lp->rx_tail = 0;
 
-	/* Program address of descriptor list in Rx Buffer Queue register */
 	macb_writel(lp, RBQP, lp->rx_ring_dma);
 
-	/* Enable Receive and Transmit */
 	ctl = macb_readl(lp, NCR);
 	macb_writel(lp, NCR, ctl | MACB_BIT(RE) | MACB_BIT(TE));
 
 	return 0;
 }
 
-/* Open the ethernet interface */
 static int at91ether_open(struct net_device *dev)
 {
 	struct macb *lp = netdev_priv(dev);
 	u32 ctl;
 	int ret;
 
-	/* Clear internal statistics */
 	ctl = macb_readl(lp, NCR);
 	macb_writel(lp, NCR, ctl | MACB_BIT(CLRSTAT));
 
@@ -107,7 +86,6 @@ static int at91ether_open(struct net_device *dev)
 	if (ret)
 		return ret;
 
-	/* Enable MAC interrupts */
 	macb_writel(lp, IER, MACB_BIT(RCOMP)	|
 			     MACB_BIT(RXUBR)	|
 			     MACB_BIT(ISR_TUND)	|
@@ -116,7 +94,6 @@ static int at91ether_open(struct net_device *dev)
 			     MACB_BIT(ISR_ROVR)	|
 			     MACB_BIT(HRESP));
 
-	/* schedule a link state check */
 	phy_start(lp->phy_dev);
 
 	netif_start_queue(dev);
@@ -124,17 +101,14 @@ static int at91ether_open(struct net_device *dev)
 	return 0;
 }
 
-/* Close the interface */
 static int at91ether_close(struct net_device *dev)
 {
 	struct macb *lp = netdev_priv(dev);
 	u32 ctl;
 
-	/* Disable Receiver and Transmitter */
 	ctl = macb_readl(lp, NCR);
 	macb_writel(lp, NCR, ctl & ~(MACB_BIT(TE) | MACB_BIT(RE)));
 
-	/* Disable MAC interrupts */
 	macb_writel(lp, IDR, MACB_BIT(RCOMP)	|
 			     MACB_BIT(RXUBR)	|
 			     MACB_BIT(ISR_TUND)	|
@@ -158,7 +132,6 @@ static int at91ether_close(struct net_device *dev)
 	return 0;
 }
 
-/* Transmit packet */
 static int at91ether_start_xmit(struct sk_buff *skb, struct net_device *dev)
 {
 	struct macb *lp = netdev_priv(dev);
@@ -166,15 +139,13 @@ static int at91ether_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	if (macb_readl(lp, TSR) & MACB_BIT(RM9200_BNQ)) {
 		netif_stop_queue(dev);
 
-		/* Store packet information (to free when Tx completed) */
 		lp->skb = skb;
 		lp->skb_length = skb->len;
 		lp->skb_physaddr = dma_map_single(NULL, skb->data, skb->len,
 							DMA_TO_DEVICE);
 
-		/* Set address of the data in the Transmit Address register */
 		macb_writel(lp, TAR, lp->skb_physaddr);
-		/* Set length of the packet in the Transmit Control register */
+		 
 		macb_writel(lp, TCR, skb->len);
 
 	} else {
@@ -185,9 +156,6 @@ static int at91ether_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	return NETDEV_TX_OK;
 }
 
-/* Extract received frame from buffer descriptors and sent to upper layers.
- * (Called from interrupt context)
- */
 static void at91ether_rx(struct net_device *dev)
 {
 	struct macb *lp = netdev_priv(dev);
@@ -214,10 +182,8 @@ static void at91ether_rx(struct net_device *dev)
 		if (lp->rx_ring[lp->rx_tail].ctrl & MACB_BIT(RX_MHASH_MATCH))
 			lp->stats.multicast++;
 
-		/* reset ownership bit */
 		lp->rx_ring[lp->rx_tail].addr &= ~MACB_BIT(RX_USED);
 
-		/* wrap after last buffer */
 		if (lp->rx_tail == MAX_RX_DESCR - 1)
 			lp->rx_tail = 0;
 		else
@@ -225,25 +191,19 @@ static void at91ether_rx(struct net_device *dev)
 	}
 }
 
-/* MAC interrupt handler */
 static irqreturn_t at91ether_interrupt(int irq, void *dev_id)
 {
 	struct net_device *dev = dev_id;
 	struct macb *lp = netdev_priv(dev);
 	u32 intstatus, ctl;
 
-	/* MAC Interrupt Status register indicates what interrupts are pending.
-	 * It is automatically cleared once read.
-	 */
 	intstatus = macb_readl(lp, ISR);
 
-	/* Receive complete */
 	if (intstatus & MACB_BIT(RCOMP))
 		at91ether_rx(dev);
 
-	/* Transmit complete */
 	if (intstatus & MACB_BIT(TCOMP)) {
-		/* The TCOM bit is set even if the transmission failed */
+		 
 		if (intstatus & (MACB_BIT(ISR_TUND) | MACB_BIT(ISR_RLE)))
 			lp->stats.tx_errors++;
 
@@ -257,7 +217,6 @@ static irqreturn_t at91ether_interrupt(int irq, void *dev_id)
 		netif_wake_queue(dev);
 	}
 
-	/* Work-around for EMAC Errata section 41.3.1 */
 	if (intstatus & MACB_BIT(RXUBR)) {
 		ctl = macb_readl(lp, NCR);
 		macb_writel(lp, NCR, ctl & ~MACB_BIT(RE));
@@ -300,12 +259,11 @@ static const struct net_device_ops at91ether_netdev_ops = {
 static const struct of_device_id at91ether_dt_ids[] = {
 	{ .compatible = "cdns,at91rm9200-emac" },
 	{ .compatible = "cdns,emac" },
-	{ /* sentinel */ }
+	{   }
 };
 MODULE_DEVICE_TABLE(of, at91ether_dt_ids);
 #endif
 
-/* Detect MAC & PHY and perform ethernet interface initialization */
 static int __init at91ether_probe(struct platform_device *pdev)
 {
 	struct macb_platform_data *board_data = pdev->dev.platform_data;
@@ -340,7 +298,6 @@ static int __init at91ether_probe(struct platform_device *pdev)
 	lp->dev = dev;
 	spin_lock_init(&lp->lock);
 
-	/* physical base address */
 	dev->base_addr = regs->start;
 	lp->regs = devm_ioremap(&pdev->dev, regs->start, resource_size(regs));
 	if (!lp->regs) {
@@ -348,7 +305,6 @@ static int __init at91ether_probe(struct platform_device *pdev)
 		goto err_free_dev;
 	}
 
-	/* Clock */
 	lp->pclk = devm_clk_get(&pdev->dev, "ether_clk");
 	if (IS_ERR(lp->pclk)) {
 		res = PTR_ERR(lp->pclk);
@@ -356,7 +312,6 @@ static int __init at91ether_probe(struct platform_device *pdev)
 	}
 	clk_enable(lp->pclk);
 
-	/* Install the interrupt handler */
 	dev->irq = platform_get_irq(pdev, 0);
 	res = devm_request_irq(&pdev->dev, dev->irq, at91ether_interrupt, 0, dev->name, dev);
 	if (res)
@@ -392,7 +347,6 @@ static int __init at91ether_probe(struct platform_device *pdev)
 
 	macb_writel(lp, NCFGR, reg);
 
-	/* Register the network interface */
 	res = register_netdev(dev);
 	if (res)
 		goto err_disable_clock;
@@ -401,7 +355,6 @@ static int __init at91ether_probe(struct platform_device *pdev)
 	if (res)
 		goto err_out_unregister_netdev;
 
-	/* will be enabled in open() */
 	netif_carrier_off(dev);
 
 	phydev = lp->phy_dev;
@@ -409,7 +362,6 @@ static int __init at91ether_probe(struct platform_device *pdev)
 				phydev->drv->name, dev_name(&phydev->dev),
 				phydev->irq);
 
-	/* Display ethernet banner */
 	netdev_info(dev, "AT91 ethernet at 0x%08lx int=%d (%pM)\n",
 				dev->base_addr, dev->irq, dev->dev_addr);
 
@@ -439,9 +391,9 @@ static int at91ether_remove(struct platform_device *pdev)
 	clk_disable(lp->pclk);
 	free_netdev(dev);
 #if defined (MY_DEF_HERE)
-#else /* MY_DEF_HERE */
+#else  
 	platform_set_drvdata(pdev, NULL);
-#endif /* MY_DEF_HERE */
+#endif  
 
 	return 0;
 }

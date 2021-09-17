@@ -1,20 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  linux/arch/arm/kernel/traps.c
- *
- *  Copyright (C) 1995-2009 Russell King
- *  Fragments that appear the same as linux/arch/i386/kernel/traps.c (C) Linus Torvalds
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- *
- *  'traps.c' handles hardware exceptions after we have saved some state in
- *  'linux/arch/arm/lib/traps.S'.  Mostly a debugging aid, but will probably
- *  kill the offending process.
- */
+ 
 #include <linux/signal.h>
 #include <linux/personality.h>
 #include <linux/kallsyms.h>
@@ -39,7 +26,7 @@
 #include <asm/system_misc.h>
 #if defined(MY_ABC_HERE)
 #include <asm/opcodes.h>
-#endif /* MY_ABC_HERE */
+#endif  
 
 static const char *handler[]= {
 	"prefetch abort",
@@ -77,11 +64,7 @@ void dump_backtrace_entry(unsigned long where, unsigned long from, unsigned long
 }
 
 #ifndef CONFIG_ARM_UNWIND
-/*
- * Stack pointers should always be within the kernels view of
- * physical memory.  If it is not there, then we can't dump
- * out any information relating to the stack.
- */
+ 
 static int verify_stack(unsigned long sp)
 {
 	if (sp < PAGE_OFFSET ||
@@ -92,9 +75,6 @@ static int verify_stack(unsigned long sp)
 }
 #endif
 
-/*
- * Dump out the contents of some memory nicely...
- */
 static void dump_mem(const char *lvl, const char *str, unsigned long bottom,
 		     unsigned long top)
 {
@@ -102,11 +82,6 @@ static void dump_mem(const char *lvl, const char *str, unsigned long bottom,
 	mm_segment_t fs;
 	int i;
 
-	/*
-	 * We need to switch to kernel mode so that we can use __get_user
-	 * to safely read from kernel space.  Note that we now dump the
-	 * code first, just in case the backtrace kills us.
-	 */
 	fs = get_fs();
 	set_fs(KERNEL_DS);
 
@@ -143,11 +118,6 @@ static void dump_instr(const char *lvl, struct pt_regs *regs)
 	char str[sizeof("00000000 ") * 5 + 2 + 1], *p = str;
 	int i;
 
-	/*
-	 * We need to switch to kernel mode so that we can use __get_user
-	 * to safely read from kernel space.  Note that we now dump the
-	 * code first, just in case the backtrace kills us.
-	 */
 	fs = get_fs();
 	set_fs(KERNEL_DS);
 
@@ -257,8 +227,8 @@ int get_stack(char *buf, unsigned long *sp, size_t size, size_t depth)
 	return pos;
 }
 EXPORT_SYMBOL_GPL(get_stack);
-#endif /*CONFIG_KPTRACE*/
-#endif /* MY_DEF_HERE */
+#endif  
+#endif  
 
 void show_stack(struct task_struct *tsk, unsigned long *sp)
 {
@@ -291,7 +261,6 @@ static int __die(const char *str, int err, struct pt_regs *regs)
 	printk(KERN_EMERG "Internal error: %s: %x [#%d]" S_PREEMPT S_SMP
 	       S_ISA "\n", str, err, ++die_counter);
 
-	/* trap and error numbers are mostly meaningless on ARM */
 	ret = notify_die(DIE_OOPS, str, regs, err, tsk->thread.trap_no, SIGSEGV);
 	if (ret == NOTIFY_STOP)
 		return 1;
@@ -322,12 +291,11 @@ static unsigned long oops_begin(void)
 
 	oops_enter();
 
-	/* racy, but better than risking deadlock. */
 	raw_local_irq_save(flags);
 	cpu = smp_processor_id();
 	if (!arch_spin_trylock(&die_lock)) {
 		if (cpu == die_owner)
-			/* nested oops. should stop eventually */;
+			 ;
 		else
 			arch_spin_lock(&die_lock);
 	}
@@ -348,7 +316,7 @@ static void oops_end(unsigned long flags, struct pt_regs *regs, int signr)
 	add_taint(TAINT_DIE, LOCKDEP_NOW_UNRELIABLE);
 	die_nest_count--;
 	if (!die_nest_count)
-		/* Nest count reaches zero, release the lock. */
+		 
 		arch_spin_unlock(&die_lock);
 	raw_local_irq_restore(flags);
 	oops_exit();
@@ -361,9 +329,6 @@ static void oops_end(unsigned long flags, struct pt_regs *regs, int signr)
 		do_exit(signr);
 }
 
-/*
- * This function is protected against re-entrancy.
- */
 void die(const char *str, struct pt_regs *regs, int err)
 {
 	enum bug_trap_type bug_type = BUG_TRAP_TYPE_NONE;
@@ -469,26 +434,26 @@ asmlinkage void __exception do_undefinstr(struct pt_regs *regs)
 				inst2 = __mem_to_opcode_thumb16(((u16 *)pc)[1]);
 				instr = __opcode_thumb32_compose(instr, inst2);
 			}
-#else /* MY_ABC_HERE */
+#else  
 			instr = ((u16 *)pc)[0];
 			if (is_wide_instruction(instr)) {
 				instr <<= 16;
 				instr |= ((u16 *)pc)[1];
 			}
-#endif /* MY_ABC_HERE */
+#endif  
 		} else
 #endif
 #if defined(MY_ABC_HERE)
 			instr = __mem_to_opcode_arm(*(u32 *) pc);
-#else /* MY_ABC_HERE */
+#else  
 			instr = *(u32 *) pc;
-#endif /* MY_ABC_HERE */
+#endif  
 	} else if (thumb_mode(regs)) {
 		if (get_user(instr, (u16 __user *)pc))
 			goto die_sig;
 #if defined(MY_ABC_HERE)
 		instr = __mem_to_opcode_thumb16(instr);
-#endif /* MY_ABC_HERE */
+#endif  
 		if (is_wide_instruction(instr)) {
 			unsigned int instr2;
 			if (get_user(instr2, (u16 __user *)pc+1))
@@ -496,15 +461,15 @@ asmlinkage void __exception do_undefinstr(struct pt_regs *regs)
 #if defined(MY_ABC_HERE)
 			instr2 = __mem_to_opcode_thumb16(instr2);
 			instr = __opcode_thumb32_compose(instr, instr2);
-#else /* MY_ABC_HERE */
+#else  
 			instr <<= 16;
 			instr |= instr2;
-#endif /* MY_ABC_HERE */
+#endif  
 		}
 	} else if (get_user(instr, (u32 __user *)pc)) {
 #if defined(MY_ABC_HERE)
 		instr = __mem_to_opcode_arm(instr);
-#endif /* MY_ABC_HERE */
+#endif  
 		goto die_sig;
 	}
 
@@ -534,12 +499,6 @@ asmlinkage void do_unexp_fiq (struct pt_regs *regs)
 	printk("You may have a hardware problem...\n");
 }
 
-/*
- * bad_mode handles the impossible case in the vectors.  If you see one of
- * these, then it's extremely serious, and could mean you have buggy hardware.
- * It never returns, and never tries to sync.  We hope that we can at least
- * dump out some state information...
- */
 asmlinkage void bad_mode(struct pt_regs *regs, int reason)
 {
 	console_verbose();
@@ -605,10 +564,6 @@ do_cache_op(unsigned long start, unsigned long end, int flags)
 	return -EINVAL;
 }
 
-/*
- * Handle all unrecognised system calls.
- *  0x9f0000 - 0x9fffff are some more esoteric system calls
- */
 #define NR(x) ((__ARM_NR_##x) - __ARM_NR_BASE)
 asmlinkage int arm_syscall(int no, struct pt_regs *regs)
 {
@@ -619,7 +574,7 @@ asmlinkage int arm_syscall(int no, struct pt_regs *regs)
 		return bad_syscall(no, regs);
 
 	switch (no & 0xffff) {
-	case 0: /* branch through 0 */
+	case 0:  
 		info.si_signo = SIGSEGV;
 		info.si_errno = 0;
 		info.si_code  = SEGV_MAPERR;
@@ -628,25 +583,11 @@ asmlinkage int arm_syscall(int no, struct pt_regs *regs)
 		arm_notify_die("branch through zero", regs, &info, 0, 0);
 		return 0;
 
-	case NR(breakpoint): /* SWI BREAK_POINT */
+	case NR(breakpoint):  
 		regs->ARM_pc -= thumb_mode(regs) ? 2 : 4;
 		ptrace_break(current, regs);
 		return regs->ARM_r0;
 
-	/*
-	 * Flush a region from virtual address 'r0' to virtual address 'r1'
-	 * _exclusive_.  There is no alignment requirement on either address;
-	 * user space does not need to know the hardware cache layout.
-	 *
-	 * r2 contains flags.  It should ALWAYS be passed as ZERO until it
-	 * is defined to be something else.  For now we ignore it, but may
-	 * the fires of hell burn in your belly if you break this rule. ;)
-	 *
-	 * (at a later date, we may want to allow this call to not flush
-	 * various aspects of the cache.  Passing '0' will guarantee that
-	 * everything necessary gets flushed to maintain consistency in
-	 * the specified region).
-	 */
 	case NR(cacheflush):
 		return do_cache_op(regs->ARM_r0, regs->ARM_r1, regs->ARM_r2);
 
@@ -670,28 +611,13 @@ asmlinkage int arm_syscall(int no, struct pt_regs *regs)
 			asm ("mcr p15, 0, %0, c13, c0, 3"
 				: : "r" (regs->ARM_r0));
 		} else {
-			/*
-			 * User space must never try to access this directly.
-			 * Expect your app to break eventually if you do so.
-			 * The user helper at 0xffff0fe0 must be used instead.
-			 * (see entry-armv.S for details)
-			 */
+			 
 			*((unsigned int *)0xffff0ff0) = regs->ARM_r0;
 		}
 		return 0;
 
 #ifdef CONFIG_NEEDS_SYSCALL_FOR_CMPXCHG
-	/*
-	 * Atomically store r1 in *r2 if *r2 is equal to r0 for user space.
-	 * Return zero in r0 if *MEM was changed or non-zero if no exchange
-	 * happened.  Also set the user C flag accordingly.
-	 * If access permissions have to be fixed up then non-zero is
-	 * returned and the operation has to be re-attempted.
-	 *
-	 * *NOTE*: This is a ghost syscall private to the kernel.  Only the
-	 * __kuser_cmpxchg code in entry-armv.S should be aware of its
-	 * existence.  Don't ever use this from user code.
-	 */
+	 
 	case NR(cmpxchg):
 	for (;;) {
 		extern void do_DataAbort(unsigned long addr, unsigned int fsr,
@@ -727,25 +653,19 @@ asmlinkage int arm_syscall(int no, struct pt_regs *regs)
 
 		bad_access:
 		up_read(&mm->mmap_sem);
-		/* simulate a write access fault */
+		 
 		do_DataAbort(addr, 15 + (1 << 11), regs);
 	}
 #endif
 
 	default:
-		/* Calls 9f00xx..9f07ff are defined to return -ENOSYS
-		   if not implemented, rather than raising SIGILL.  This
-		   way the calling program can gracefully determine whether
-		   a feature is supported.  */
+		 
 		if ((no & 0xffff) <= 0x7ff)
 			return -ENOSYS;
 		break;
 	}
 #ifdef CONFIG_DEBUG_USER
-	/*
-	 * experience shows that these seem to indicate that
-	 * something catastrophic has happened
-	 */
+	 
 	if (user_debug & UDBG_SYSCALL) {
 		printk("[%d] %s: arm syscall %d\n",
 		       task_pid_nr(current), current->comm, no);
@@ -767,14 +687,6 @@ asmlinkage int arm_syscall(int no, struct pt_regs *regs)
 }
 
 #ifdef CONFIG_TLS_REG_EMUL
-
-/*
- * We might be running on an ARMv6+ processor which should have the TLS
- * register but for some reason we can't use it, or maybe an SMP system
- * using a pre-ARMv6 processor (there are apparently a few prototypes like
- * that in existence) and therefore access to that register must be
- * emulated.
- */
 
 static int get_tp_trap(struct pt_regs *regs, unsigned int instr)
 {
@@ -812,10 +724,6 @@ void __bad_xchg(volatile void *ptr, int size)
 }
 EXPORT_SYMBOL(__bad_xchg);
 
-/*
- * A data abort trap was taken, but we did not handle the instruction.
- * Try to abort the user program, or panic if it was the kernel.
- */
 asmlinkage void
 baddataabort(int code, unsigned long instr, struct pt_regs *regs)
 {
@@ -872,7 +780,6 @@ void abort(void)
 {
 	BUG();
 
-	/* if that doesn't kill us, halt */
 	panic("Oops failed to kill thread");
 }
 EXPORT_SYMBOL(abort);
@@ -890,10 +797,6 @@ static void __init kuser_init(void *vectors)
 
 	memcpy(vectors + 0x1000 - kuser_sz, __kuser_helper_start, kuser_sz);
 
-	/*
-	 * vectors + 0xfe0 = __kuser_get_tls
-	 * vectors + 0xfe8 = hardware TLS instruction at 0xffff0fe8
-	 */
 	if (tls_emu || has_tls_reg)
 		memcpy(vectors + 0xfe0, vectors + 0xfe8, 4);
 }
@@ -912,20 +815,9 @@ void __init early_trap_init(void *vectors_base)
 
 	vectors_page = vectors_base;
 
-	/*
-	 * Poison the vectors page with an undefined instruction.  This
-	 * instruction is chosen to be undefined for both ARM and Thumb
-	 * ISAs.  The Thumb version is an undefined instruction with a
-	 * branch back to the undefined instruction.
-	 */
 	for (i = 0; i < PAGE_SIZE / sizeof(u32); i++)
 		((u32 *)vectors_base)[i] = 0xe7fddef1;
 
-	/*
-	 * Copy the vectors, stubs and kuser helpers (in entry-armv.S)
-	 * into the vector page, mapped at 0xffff0000, and ensure these
-	 * are visible to the instruction stream.
-	 */
 	memcpy((void *)vectors, __vectors_start, __vectors_end - __vectors_start);
 	memcpy((void *)vectors + 0x1000, __stubs_start, __stubs_end - __stubs_start);
 
@@ -934,7 +826,7 @@ void __init early_trap_init(void *vectors_base)
 	flush_icache_range(vectors, vectors + PAGE_SIZE * 2);
 	modify_domain(DOMAIN_USER, DOMAIN_CLIENT);
 #if defined (MY_DEF_HERE)
-	/* Enable imprecise aborts */
+	 
 	asm volatile("cpsie	a");
-#endif /* MY_DEF_HERE */
+#endif  
 }

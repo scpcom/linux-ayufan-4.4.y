@@ -1,21 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Marvell Armada 370 and Armada XP SoC IRQ handling
- *
- * Copyright (C) 2012 Marvell
- *
- * Lior Amsalem <alior@marvell.com>
- * Gregory CLEMENT <gregory.clement@free-electrons.com>
- * Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
- * Ben Dooks <ben.dooks@codethink.co.uk>
- *
- * This file is licensed under the terms of the GNU General Public
- * License version 2.  This program is licensed "as is" without any
- * warranty of any kind, whether express or implied.
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/init.h>
@@ -23,19 +9,19 @@
 #include <linux/interrupt.h>
 #if defined(MY_ABC_HERE)
 #include <linux/irqchip/chained_irq.h>
-#endif /* MY_ABC_HERE */
+#endif  
 #include <linux/io.h>
 #include <linux/of_address.h>
 #include <linux/of_irq.h>
 #if defined(MY_ABC_HERE)
 #include <linux/of_pci.h>
-#endif /* MY_ABC_HERE */
+#endif  
 #include <linux/irqdomain.h>
 #if defined(MY_ABC_HERE)
 #include <linux/slab.h>
 #include <linux/syscore_ops.h>
 #include <linux/msi.h>
-#endif /* MY_ABC_HERE */
+#endif  
 #include <asm/mach/arch.h>
 #include <asm/exception.h>
 #include <asm/smp_plat.h>
@@ -43,12 +29,11 @@
 
 #include "irqchip.h"
 
-/* Interrupt Controller Registers Map */
 #define ARMADA_370_XP_INT_SET_MASK_OFFS		(0x48)
 #define ARMADA_370_XP_INT_CLEAR_MASK_OFFS	(0x4C)
 #if defined(MY_ABC_HERE)
 #define ARMADA_370_XP_INT_CPU_SUBSYS_MASK_OFFS	(0x54)
-#endif /* MY_ABC_HERE */
+#endif  
 
 #define ARMADA_370_XP_INT_CONTROL		(0x00)
 #define ARMADA_370_XP_INT_SET_ENABLE_OFFS	(0x30)
@@ -58,7 +43,7 @@
 #define ARMADA_370_XP_CPU_INTACK_OFFS		(0x44)
 #if defined(MY_ABC_HERE)
 #define ARMADA_375_PPI_CAUSE			(0x10)
-#endif /* MY_ABC_HERE */
+#endif  
 
 #define ARMADA_370_XP_SW_TRIG_INT_OFFS           (0x4)
 #define ARMADA_370_XP_IN_DRBEL_MSK_OFFS          (0xc)
@@ -72,7 +57,7 @@
 
 #define ARMADA_370_XP_GBE0_PER_CPU_IRQ		(8)
 #define ARMADA_370_XP_GBE3_PER_CPU_IRQ		(15)
-#endif /* MY_ABC_HERE */
+#endif  
 
 #define IPI_DOORBELL_START                      (0)
 #define IPI_DOORBELL_END                        (8)
@@ -88,9 +73,9 @@ static DEFINE_RAW_SPINLOCK(irq_controller_lock);
 #endif
 
 static void __iomem *cpus_int_base;
-#else /* MY_ABC_HERE */
+#else  
 static DEFINE_RAW_SPINLOCK(irq_controller_lock);
-#endif /* MY_ABC_HERE */
+#endif  
 static void __iomem *per_cpu_int_base;
 static void __iomem *main_int_base;
 static struct irq_domain *armada_370_xp_mpic_domain;
@@ -102,13 +87,8 @@ static DECLARE_BITMAP(msi_used, PCI_MSI_DOORBELL_NR);
 static DEFINE_MUTEX(msi_used_lock);
 static phys_addr_t msi_doorbell_addr;
 #endif
-#endif /* MY_ABC_HERE */
+#endif  
 
-/*
- * In SMP mode:
- * For shared global interrupts, mask/unmask global enable bit
- * For CPU interrupts, mask/unmask the calling CPU's bit
- */
 static void armada_370_xp_irq_mask(struct irq_data *d)
 {
 	irq_hw_number_t hwirq = irqd_to_hwirq(d);
@@ -123,7 +103,7 @@ static void armada_370_xp_irq_mask(struct irq_data *d)
 		writel(hwirq, main_int_base +
 				ARMADA_370_XP_INT_CLEAR_ENABLE_OFFS);
 #if defined(MY_ABC_HERE) && defined(CONFIG_SMP)
-	/* In case of Network Per CPU IRQ and SMP - Mask all CPUs */
+	 
 	else if ((hwirq >= ARMADA_370_XP_GBE0_PER_CPU_IRQ) &&
 		 (hwirq <= ARMADA_370_XP_GBE3_PER_CPU_IRQ) &&
 		 (nr_cpu_ids > 1)) {
@@ -132,7 +112,7 @@ static void armada_370_xp_irq_mask(struct irq_data *d)
 				writel(hwirq, cpus_int_base + 0x100 * cpu + ARMADA_370_XP_INT_SET_MASK_OFFS);
 		}
 	}
-#endif /* MY_ABC_HERE && CONFIG_SMP */
+#endif  
 	else
 		writel(hwirq, per_cpu_int_base +
 				ARMADA_370_XP_INT_SET_MASK_OFFS);
@@ -152,7 +132,7 @@ static void armada_370_xp_irq_unmask(struct irq_data *d)
 		writel(hwirq, main_int_base +
 				ARMADA_370_XP_INT_SET_ENABLE_OFFS);
 #if defined(MY_ABC_HERE) && defined(CONFIG_SMP)
-	/* In case of Network Per CPU IRQ and SMP - Set correct affinity to the IRQ */
+	 
 	else if ((hwirq >= ARMADA_370_XP_GBE0_PER_CPU_IRQ) &&
 		 (hwirq <= ARMADA_370_XP_GBE3_PER_CPU_IRQ) &&
 		 (nr_cpu_ids > 1)) {
@@ -161,7 +141,7 @@ static void armada_370_xp_irq_unmask(struct irq_data *d)
 				writel(hwirq, cpus_int_base + 0x100 * cpu + ARMADA_370_XP_INT_CLEAR_MASK_OFFS);
 		}
 	}
-#endif /* MY_ABC_HERE && CONFIG_SMP */
+#endif  
 	else
 		writel(hwirq, per_cpu_int_base +
 				ARMADA_370_XP_INT_CLEAR_MASK_OFFS);
@@ -293,7 +273,6 @@ static int armada_370_xp_msi_init(struct device_node *node,
 	writel(reg, per_cpu_int_base +
 	       ARMADA_370_XP_IN_DRBEL_MSK_OFFS);
 
-	/* Unmask IPI interrupt */
 	writel(1, per_cpu_int_base + ARMADA_370_XP_INT_CLEAR_MASK_OFFS);
 
 	return 0;
@@ -305,7 +284,7 @@ static inline int armada_370_xp_msi_init(struct device_node *node,
 	return 0;
 }
 #endif
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef CONFIG_SMP
 static int armada_xp_set_affinity(struct irq_data *d,
@@ -317,7 +296,7 @@ static int armada_xp_set_affinity(struct irq_data *d,
 	unsigned long present_mask = 0;
 #else
 	unsigned long online_mask = 0;
-#endif /* MY_ABC_HERE */
+#endif  
 	unsigned long count = 0;
 	irq_hw_number_t hwirq = irqd_to_hwirq(d);
 	int cpu;
@@ -327,20 +306,13 @@ static int armada_xp_set_affinity(struct irq_data *d,
 		count++;
 	}
 
-	/*
-	 * Forbid mutlicore interrupt affinity
-	 * This is required since the MPIC HW doesn't limit
-	 * several CPUs from acknowledging the same interrupt.
-	 */
 #if defined(MY_ABC_HERE)
-	/*
-	 * Note: Allow GBE interrupt set affinity.
-	 */
+	 
 	if (count > 1 && (hwirq < ARMADA_370_XP_GBE0_PER_CPU_IRQ ||
 			  hwirq > ARMADA_370_XP_GBE3_PER_CPU_IRQ))
-#else /* MY_ABC_HERE */
+#else  
 	if (count > 1)
-#endif /* MY_ABC_HERE */
+#endif  
 		return -EINVAL;
 #if defined(MY_ABC_HERE)
 	for_each_cpu(cpu, cpu_present_mask)
@@ -348,7 +320,7 @@ static int armada_xp_set_affinity(struct irq_data *d,
 #else
 	for_each_cpu(cpu, cpu_online_mask)
 		online_mask |= 1 << cpu_logical_map(cpu);
-#endif /* MY_ABC_HERE */
+#endif  
 
 	raw_spin_lock(&irq_controller_lock);
 
@@ -357,7 +329,7 @@ static int armada_xp_set_affinity(struct irq_data *d,
 	reg = (reg & (~present_mask)) | new_mask;
 #else
 	reg = (reg & (~online_mask)) | new_mask;
-#endif /* MY_ABC_HERE */
+#endif  
 	writel(reg, main_int_base + ARMADA_370_XP_INT_SOURCE_CTL(hwirq));
 
 	raw_spin_unlock(&irq_controller_lock);
@@ -383,7 +355,7 @@ static void armada_370_xp_enable_pmu_irq(void *data)
 	writel(1 << cpuid, per_cpu_int_base +
 				ARMADA_370_XP_INT_CPU_SUBSYS_MASK_OFFS);
 }
-#endif /* MY_ABC_HERE */
+#endif  
 
 static int armada_370_xp_mpic_irq_map(struct irq_domain *h,
 				      unsigned int virq, irq_hw_number_t hw)
@@ -401,24 +373,16 @@ static int armada_370_xp_mpic_irq_map(struct irq_domain *h,
 	irq_set_status_flags(virq, IRQ_LEVEL);
 
 #if defined(MY_ABC_HERE)
-	/*
-	 * Setup CPU Subsystem Mask registers.
-	 * Enable only Performance Counter Overflow interrupts.
-	 */
+	 
 	if (hw == ARMADA_370_XP_CPU_SUBSYS_PERF_CNT)
 		on_each_cpu_mask(cpu_online_mask,
 			armada_370_xp_enable_pmu_irq, NULL, 1);
 
-	/*
-	 * Setup Timer0 and CPU Subsystem Summary as Per-CPU interrupts.
-	 * Although the CPU Subsystem Cause contains also global IRQs,
-	 * we will use only Performance Counter Overflow interrupts.
-	 */
 	if ((hw == ARMADA_370_XP_TIMER0_PER_CPU_IRQ) ||
 				(hw == ARMADA_370_XP_CPU_SUBSYS_PERF_CNT)) {
-#else /* MY_ABC_HERE */
+#else  
 	if (hw == ARMADA_370_XP_TIMER0_PER_CPU_IRQ) {
-#endif /* MY_ABC_HERE */
+#endif  
 		irq_set_percpu_devid(virq);
 		irq_set_chip_and_handler(virq, &armada_370_xp_irq_chip,
 					handle_percpu_devid_irq);
@@ -438,34 +402,26 @@ void armada_mpic_send_doorbell(const struct cpumask *mask, unsigned int irq)
 	int cpu;
 	unsigned long map = 0;
 
-	/* Convert our logical CPU mask into a physical one. */
 	for_each_cpu(cpu, mask)
 		map |= 1 << cpu_logical_map(cpu);
 
-	/*
-	 * Ensure that stores to Normal memory are visible to the
-	 * other CPUs before issuing the IPI.
-	 */
 	dsb();
 
-	/* submit softirq */
 	writel((map << 8) | irq, main_int_base +
 		ARMADA_370_XP_SW_TRIG_INT_OFFS);
 }
 
 void armada_xp_mpic_smp_cpu_init(void)
 {
-	/* Clear pending IPIs */
+	 
 	writel(0, per_cpu_int_base + ARMADA_370_XP_IN_DRBEL_CAUSE_OFFS);
 
-	/* Enable first 8 IPIs */
 	writel(IPI_DOORBELL_MASK, per_cpu_int_base +
 		ARMADA_370_XP_IN_DRBEL_MSK_OFFS);
 
-	/* Unmask IPI interrupt */
 	writel(0, per_cpu_int_base + ARMADA_370_XP_INT_CLEAR_MASK_OFFS);
 }
-#endif /* CONFIG_SMP */
+#endif  
 
 static struct irq_domain_ops armada_370_xp_mpic_irq_ops = {
 	.map = armada_370_xp_mpic_irq_map,
@@ -474,13 +430,7 @@ static struct irq_domain_ops armada_370_xp_mpic_irq_ops = {
 
 #if defined(MY_ABC_HERE)
 #ifdef CONFIG_PCI_MSI
-/*
- * This function handles MSI for the case where the MPIC is a slave of
- * another interrupt controller. We unfortunately cannot factorize
- * this with the MSI handling code in armada_370_xp_handle_irq()
- * because this function must call handle_IRQ() while the below
- * function calls generic_handle_irq().
- */
+ 
 static void armada_370_xp_mpic_handle_cascade_msi(void)
 {
 	u32 msimask, msinr;
@@ -525,10 +475,7 @@ static void armada_370_xp_mpic_handle_cascade_irq(unsigned int irq,
 	for_each_set_bit(irqn, &irqmap, BITS_PER_LONG) {
 
 		irqsrc = readl_relaxed(main_int_base + ARMADA_370_XP_INT_SOURCE_CTL(irqn));
-		/*
-		 * Check if the interrupt is not masked on current CPU.
-		 * Test IRQ (0-1) and FIQ (8-9) mask bits.
-		 */
+		 
 		if ((irqsrc & (0x101 << cpuid)) == 0)
 			continue;
 
@@ -548,7 +495,7 @@ static void armada_370_xp_mpic_handle_cascade_irq(unsigned int irq,
 
 	chained_irq_exit(chip, desc);
 }
-#endif /* MY_ABC_HERE */
+#endif  
 
 static asmlinkage void __exception_irq_entry
 armada_370_xp_handle_irq(struct pt_regs *regs)
@@ -565,9 +512,9 @@ armada_370_xp_handle_irq(struct pt_regs *regs)
 
 #if defined(MY_ABC_HERE)
 		if (irqnr > 1) {
-#else /* MY_ABC_HERE */
+#else  
 		if (irqnr > 0) {
-#endif /* MY_ABC_HERE */
+#endif  
 			irqnr =	irq_find_mapping(armada_370_xp_mpic_domain,
 					irqnr);
 			handle_IRQ(irqnr, regs);
@@ -575,7 +522,7 @@ armada_370_xp_handle_irq(struct pt_regs *regs)
 		}
 
 #if defined(MY_ABC_HERE) && defined(CONFIG_PCI_MSI)
-		/* MSI handling */
+		 
 		if (irqnr == 1) {
 			u32 msimask, msinr;
 
@@ -598,10 +545,10 @@ armada_370_xp_handle_irq(struct pt_regs *regs)
 				handle_IRQ(irq, regs);
 			}
 		}
-#endif /* MY_ABC_HERE && CONFIG_PCI_MSI */
+#endif  
 
 #ifdef CONFIG_SMP
-		/* IPI Handling */
+		 
 		if (irqnr == 0) {
 			u32 ipimask, ipinr;
 
@@ -612,7 +559,6 @@ armada_370_xp_handle_irq(struct pt_regs *regs)
 			writel(~ipimask, per_cpu_int_base +
 				ARMADA_370_XP_IN_DRBEL_CAUSE_OFFS);
 
-			/* Handle all pending doorbells */
 			for (ipinr = IPI_DOORBELL_START;
 			     ipinr < IPI_DOORBELL_END; ipinr++) {
 				if (ipimask & (0x1 << ipinr))
@@ -638,7 +584,6 @@ static void armada_370_xp_mpic_resume(void)
 	int nirqs;
 	irq_hw_number_t irq;
 
-	/* Re-enable interrupts */
 	nirqs = (readl(main_int_base + ARMADA_370_XP_INT_CONTROL) >> 2) & 0x3ff;
 	for (irq = 0; irq < nirqs; irq++) {
 		struct irq_data *data;
@@ -660,7 +605,6 @@ static void armada_370_xp_mpic_resume(void)
 			armada_370_xp_irq_unmask(data);
 	}
 
-	/* Reconfigure doorbells for IPIs and MSIs */
 	writel(doorbell_mask_reg,
 	       per_cpu_int_base + ARMADA_370_XP_IN_DRBEL_MSK_OFFS);
 	if (doorbell_mask_reg & IPI_DOORBELL_MASK)
@@ -673,7 +617,7 @@ struct syscore_ops armada_370_xp_mpic_syscore_ops = {
 	.suspend	= armada_370_xp_mpic_suspend,
 	.resume		= armada_370_xp_mpic_resume,
 };
-#endif /* MY_ABC_HERE */
+#endif  
 
 static int __init armada_370_xp_mpic_of_init(struct device_node *node,
 					     struct device_node *parent)
@@ -710,7 +654,7 @@ static int __init armada_370_xp_mpic_of_init(struct device_node *node,
 					resource_size(&cpus_int_res));
 		BUG_ON(!cpus_int_base);
 	}
-#else /* MY_ABC_HERE */
+#else  
 	u32 control;
 
 	main_int_base = of_iomap(node, 0);
@@ -718,7 +662,7 @@ static int __init armada_370_xp_mpic_of_init(struct device_node *node,
 
 	BUG_ON(!main_int_base);
 	BUG_ON(!per_cpu_int_base);
-#endif /* MY_ABC_HERE */
+#endif  
 
 	control = readl(main_int_base + ARMADA_370_XP_INT_CONTROL);
 
@@ -728,21 +672,16 @@ static int __init armada_370_xp_mpic_of_init(struct device_node *node,
 
 #if defined(MY_ABC_HERE)
 	BUG_ON(!armada_370_xp_mpic_domain);
-#else /* MY_ABC_HERE */
+#else  
 	if (!armada_370_xp_mpic_domain)
 		panic("Unable to add Armada_370_Xp MPIC irq domain (DT)\n");
 
 	irq_set_default_host(armada_370_xp_mpic_domain);
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef CONFIG_SMP
 	armada_xp_mpic_smp_cpu_init();
 
-	/*
-	 * Set the default affinity from all CPUs to the boot cpu.
-	 * This is required since the MPIC doesn't limit several CPUs
-	 * from acknowledging the same interrupt.
-	 */
 	cpumask_clear(irq_default_affinity);
 	cpumask_set_cpu(smp_processor_id(), irq_default_affinity);
 
@@ -761,9 +700,9 @@ static int __init armada_370_xp_mpic_of_init(struct device_node *node,
 	}
 
 	register_syscore_ops(&armada_370_xp_mpic_syscore_ops);
-#else /* MY_ABC_HERE */
+#else  
 	set_handle_irq(armada_370_xp_handle_irq);
-#endif /* MY_ABC_HERE */
+#endif  
 
 	return 0;
 }

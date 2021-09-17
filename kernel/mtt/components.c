@@ -1,33 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  Multi-Target Trace solution
- *
- *  MTT - SYSTEM TRACE MODULES SUPPORT.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2
- * as published by the Free Software Foundation
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *
- * Copyright (C) STMicroelectronics, 2011
- *
- * parts:
- * Copyright (C) 2004-2007 Greg Kroah-Hartman <greg@kroah.com>
- * Copyright (C) 2007 Novell Inc.
- *
- * Released under the GPL version 2 only.
- *
- */
+ 
 #include <linux/slab.h>
 #include <linux/kobject.h>
 #include <linux/string.h>
@@ -50,7 +24,6 @@ static struct mutex comp_mutex;
 struct mtt_component_obj **mtt_comp_cpu;
 struct mtt_component_obj **mtt_comp_kmux;
 
-/* a custom attribute that works just for a struct mtt_component_obj. */
 struct mtt_component_attribute {
 	struct attribute attr;
 	 ssize_t(*show) (struct mtt_component_obj *mtt_component,
@@ -81,10 +54,6 @@ static ssize_t mtt_component_attr_show(struct kobject *kobj,
 	return attribute->show(mtt_component, attribute, buf);
 }
 
-/*
- * Just like the default show function above, but this one is for when the
- * sysfs "store" is requested (when a value is written to a file.)
- */
 static ssize_t mtt_component_attr_store(struct kobject *kobj,
 					struct attribute *attr, const char *buf,
 					size_t len)
@@ -101,19 +70,11 @@ static ssize_t mtt_component_attr_store(struct kobject *kobj,
 	return attribute->store(mtt_component, attribute, buf, len);
 }
 
-/* Our custom sysfs_ops that we will associate with our ktype later on */
 static const struct sysfs_ops mtt_component_sysfs_ops = {
 	.show = mtt_component_attr_show,
 	.store = mtt_component_attr_store,
 };
 
-/*
- * The release function for our object.  This is REQUIRED by the kernel to
- * have.  We free the memory held in our object here.
- *
- * NEVER try to get away with just a "blank" release function to try to be
- * smarter than the kernel.  Turns out, no one ever is...
- */
 static void mtt_component_release(struct kobject *kobj)
 {
 	struct mtt_component_obj *mtt_component;
@@ -121,22 +82,12 @@ static void mtt_component_release(struct kobject *kobj)
 	kfree(mtt_component);
 }
 
-/*
- * allocate the management structure for a component
- * comp_id: the component ID as defined in mtt_api_internal.h
- * comp_name: NULL or a short string to name the component.
- * early: for early setup code.
- */
 struct mtt_component_obj *mtt_component_alloc(uint32_t comp_id,
 					      const char *comp_name,
 					      int early)
 {
 	struct mtt_component_obj *co;
 
-	/* This will try to allocate memory with GFP_KERNEL
-	 * there is no reason it will be called from a context
-	 * that cannot sleep
-	 */
 	BUG_ON(in_interrupt());
 
 	mutex_lock(&comp_mutex);
@@ -145,11 +96,6 @@ struct mtt_component_obj *mtt_component_alloc(uint32_t comp_id,
 		uint32_t last_kernel_compid;
 		uint32_t invl_kernel_compid;
 
-		/*
-		 * This should be handle per output driver
-		 * (where the constraints are.
-		 * output driver knows which channels to use.
-		 */
 		if (mtt_cur_out_drv) {
 			last_kernel_compid = mtt_cur_out_drv->last_ch_ker;
 			invl_kernel_compid = mtt_cur_out_drv->invl_ch_ker;
@@ -157,7 +103,6 @@ struct mtt_component_obj *mtt_component_alloc(uint32_t comp_id,
 			return NULL;
 		}
 
-		/* use any free ID */
 		comp_id = last_kernel_compid;
 		if (last_kernel_compid < invl_kernel_compid) {
 			last_kernel_compid++;
@@ -165,7 +110,6 @@ struct mtt_component_obj *mtt_component_alloc(uint32_t comp_id,
 		}
 	}
 
-	/* client code component: check first if already opened. */
 	if ((comp_id & MTT_COMPID_ST) == 0) {
 		list_for_each_entry(co, &mtt_comp_list, list) {
 			if (co->id == comp_id) {
@@ -181,8 +125,7 @@ struct mtt_component_obj *mtt_component_alloc(uint32_t comp_id,
 	co = create_mtt_component_obj(comp_id, comp_name, early);
 
 	if (co) {
-		/* Let the output driver prepare a channel
-		 * or whatever it needs */
+		 
 		if (mtt_cur_out_drv && (mtt_cur_out_drv->comp_alloc_func))
 			co->private =
 			    mtt_cur_out_drv->comp_alloc_func(comp_id,
@@ -190,7 +133,7 @@ struct mtt_component_obj *mtt_component_alloc(uint32_t comp_id,
 							     private);
 
 		if ((comp_id & MTT_COMPID_ST) == 0)
-			/* Send notification frame */
+			 
 			mtt_get_cname_tx(comp_id);
 	}
 
@@ -198,7 +141,6 @@ struct mtt_component_obj *mtt_component_alloc(uint32_t comp_id,
 	return co;
 }
 
-/* Called when a new driver is configured */
 void mtt_component_fixup_co_private(void)
 {
 	struct list_head *p;
@@ -206,14 +148,9 @@ void mtt_component_fixup_co_private(void)
 
 	MTT_BUG_ON(mtt_cur_out_drv == NULL);
 
-	/* The output driver may not require a post-alloc
-	 * fixup. */
 	if (!mtt_cur_out_drv->comp_alloc_func)
 		return;
 
-	/* Make sure we don't miss a component being added
-	 * with the previous driver set.
-	 */
 	mutex_lock(&comp_mutex);
 
 	list_for_each(p, &mtt_comp_list) {
@@ -225,9 +162,6 @@ void mtt_component_fixup_co_private(void)
 	mutex_unlock(&comp_mutex);
 }
 
-/* The "mtt_component" file where the ID variable
- * is read from and written to.
- */
 static ssize_t id_show(struct mtt_component_obj *mtt_component_obj,
 		       struct mtt_component_attribute *attr, char *buf)
 {
@@ -243,7 +177,6 @@ static ssize_t level_show(struct mtt_component_obj *co,
 	return sprintf(buf, "level filter = %x\n", co->filter);
 }
 
-/* Store the level, with radix 16 as it is a bit mask. */
 static ssize_t level_store(struct mtt_component_obj *co,
 			   struct mtt_component_attribute *attr,
 			   const char *buf, size_t count)
@@ -282,40 +215,34 @@ static struct mtt_component_obj *create_mtt_component_obj(int comp_id,
 {
 	struct mtt_component_obj *mtt_component;
 #ifdef MY_DEF_HERE
-#else /* MY_DEF_HERE */
+#else  
 	int retval;
-#endif /* MY_DEF_HERE */
+#endif  
 
-	/* Allocate the memory for the whole object */
 	mtt_component = kzalloc(sizeof(*mtt_component), GFP_KERNEL);
 	if (!mtt_component)
 		return NULL;
 
 	mtt_component->id = comp_id;
 
-	/* Init component filter from mtt_sys_config filter */
 	mtt_component->filter = MTT_LEVEL_ALL;
 	mtt_component->active_filter = mtt_sys_config.filter;
 
-	/* Some early or internal components will not have a kobj */
 	if (!early) {
 #ifdef MY_DEF_HERE
 		char sname[16];
 		const char *pname;
 
-		/* Be sure component name is a consistent string */
 		if (name)
 			pname = name;
 		else {
-			/* Anonymous component */
+			 
 			sprintf(sname, "comp_%05d", comp_id & 0xffff);
 			pname = sname;
 		}
 
 		mtt_component->kobj.kset = component_kset;
 
-		/* Initialize and add the kobject to the kernel,
-		 * if it does not exist already */
 		if (kset_find_obj(component_kset, pname) == NULL) {
 
 			int retval;
@@ -330,9 +257,9 @@ static struct mtt_component_obj *create_mtt_component_obj(int comp_id,
 			}
 		} else
 			return mtt_component;
-#else /* MY_DEF_HERE */
+#else  
 		mtt_component->kobj.kset = component_kset;
-		/* Initialize and add the kobject to the kernel. */
+		 
 		if (name)
 			retval = kobject_init_and_add(&mtt_component->kobj,
 					      &mtt_component_ktype,
@@ -347,12 +274,11 @@ static struct mtt_component_obj *create_mtt_component_obj(int comp_id,
 			kfree(mtt_component);
 			return NULL;
 		}
-#endif /* MY_DEF_HERE */
+#endif  
 
 		kobject_uevent(&mtt_component->kobj, KOBJ_ADD);
 	}
 
-	/* A mutex is held by the caller */
 	list_add_tail(&mtt_component->list, &mtt_comp_list);
 
 	return mtt_component;
@@ -372,9 +298,6 @@ void mtt_component_delete(struct mtt_component_obj *co)
 	mutex_unlock(&comp_mutex);
 }
 
-/* Reset the filter level for all components to the given value,
- * but if the components has a custom filter value already.
- * this implements snapping to the core.filter. */
 void mtt_component_snap_filter(uint32_t filter)
 {
 	struct list_head *p;
@@ -383,14 +306,12 @@ void mtt_component_snap_filter(uint32_t filter)
 	list_for_each(p, &mtt_comp_list) {
 		co = list_entry(p, struct mtt_component_obj, list);
 
-		/* Turning off the core does turn off each component. */
 		if ((co->filter == MTT_LEVEL_ALL) || (filter == MTT_LEVEL_NONE))
 			co->active_filter = filter;
 	}
 }
 
-/* Reply to IOC_GET_COMP_INFO */
-int mtt_component_info(struct mtt_cmd_comp_info *info /*.id is inout */)
+int mtt_component_info(struct mtt_cmd_comp_info *info  )
 {
 	struct list_head *p;
 	struct mtt_component_obj *co;
@@ -400,7 +321,7 @@ int mtt_component_info(struct mtt_cmd_comp_info *info /*.id is inout */)
 	list_for_each(p, &mtt_comp_list) {
 		co = list_entry(p, struct mtt_component_obj, list);
 		if (co && (info->id == co->id)) {
-			/* Fill the component info. */
+			 
 			info->filter = co->filter;
 			strncpy(info->name, co->kobj.name, sizeof(info->name));
 			return 0;
@@ -414,15 +335,11 @@ int __init create_components_tree(struct device *parent)
 	int core;
 	int err = 0;
 
-	/* Pay attention we modify char #8 in the strings below. */
 	char name_kmux[] = "mtt_kmux0";
 	char name_cpus[] = "mtt_cpus0";
 
 	mutex_init(&comp_mutex);
 
-	/* Create a kset with the name of "components",
-	 * located under /sys/kernel/
-	 */
 	component_kset =
 	    kset_create_and_add("components", NULL, &(parent->kobj));
 	if (!component_kset)
@@ -453,7 +370,7 @@ int __init create_components_tree(struct device *parent)
 	}
 
 	if (err) {
-		/* Try release whatever we got */
+		 
 		printk(KERN_ERR "mtt: releasing component tree (ENOMEM)");
 		remove_components_tree();
 		return -ENOMEM;

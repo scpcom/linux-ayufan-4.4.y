@@ -1,19 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * ACPI support for platform bus type.
- *
- * Copyright (C) 2012, Intel Corporation
- * Authors: Mika Westerberg <mika.westerberg@linux.intel.com>
- *          Mathias Nyman <mathias.nyman@linux.intel.com>
- *          Rafael J. Wysocki <rafael.j.wysocki@intel.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
-
+ 
 #include <linux/acpi.h>
 #include <linux/device.h>
 #include <linux/err.h>
@@ -25,31 +13,16 @@
 
 ACPI_MODULE_NAME("platform");
 
-/*
- * The following ACPI IDs are known to be suitable for representing as
- * platform devices.
- */
 static const struct acpi_device_id acpi_platform_device_ids[] = {
 
 	{ "PNP0D40" },
 #ifdef MY_DEF_HERE
-	{ "INT33FF" }, // Braswell GPIO controller
-#endif /* MY_DEF_HERE */
+	{ "INT33FF" },  
+#endif  
 
 	{ }
 };
 
-/**
- * acpi_create_platform_device - Create platform device for ACPI device node
- * @adev: ACPI device node to create a platform device for.
- * @id: ACPI device ID used to match @adev.
- *
- * Check if the given @adev can be represented as a platform device and, if
- * that's the case, create and register a platform device, populate its common
- * resources and returns a pointer to it.  Otherwise, return %NULL.
- *
- * Name of the platform device will be the same as @adev's.
- */
 int acpi_create_platform_device(struct acpi_device *adev,
 				const struct acpi_device_id *id)
 {
@@ -61,7 +34,6 @@ int acpi_create_platform_device(struct acpi_device *adev,
 	struct resource *resources;
 	int count;
 
-	/* If the ACPI node already has a physical device attached, skip it. */
 	if (adev->physical_node_count)
 		return 0;
 
@@ -83,11 +55,7 @@ int acpi_create_platform_device(struct acpi_device *adev,
 	acpi_dev_free_resource_list(&resource_list);
 
 	memset(&pdevinfo, 0, sizeof(pdevinfo));
-	/*
-	 * If the ACPI node has a parent and that parent has a physical device
-	 * attached to it, that physical device should be the parent of the
-	 * platform device we are about to create.
-	 */
+	 
 	pdevinfo.parent = NULL;
 	acpi_parent = adev->parent;
 	if (acpi_parent) {

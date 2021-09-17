@@ -1,21 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * This driver implements communication with internal Standby Controller
- * over mailbox interface in some STMicroelectronics devices.
- *
- * Copyright (C) 2014 STMicroelectronics Limited.
- *
- * Contributor:Francesco Virlinzi <francesco.virlinzi@st.com>
- * Author:Pooja Agarwal <pooja.agarwal@st.com>
- * Author:Udit Kumar <udit-dlh.kumar@st.com>
- * Author:Sudeep Biswas <sudeep.biswas@st.com>
- *
- * May be copied or modified under the terms of the GNU General Public License.
- * See linux/COPYING for more information.
- */
-
+ 
 #include <linux/platform_device.h>
 #include <linux/module.h>
 #include <linux/interrupt.h>
@@ -49,33 +35,33 @@ static const struct st_lpm_wkup_dev_name wkup_dev_name_tab[] = {
 enum lpm_services {
 #ifdef MY_DEF_HERE
 	LPM_FW_RELOAD,
-#endif /* MY_DEF_HERE */
+#endif  
 	LPM_CUST_FEAT,
 	LPM_EDID,
 #ifdef MY_DEF_HERE
 	LPM_SBC_TRACES,
 	LPM_SBC_TRACES_IN_SUSPEND
-#endif /* MY_DEF_HERE */
+#endif  
 };
 
 static struct st_lpm_version lpm_fw_ver_vs_services[] = {
 #ifdef MY_DEF_HERE
-	 /* Since LPM Fw v1.2.0 */
+	  
 	[LPM_FW_RELOAD] = {.major_soft = 1, .minor_soft = 2, .patch_soft = 0},
-#endif /* MY_DEF_HERE */
-	 /* Since LPM Fw v1.4.0 */
+#endif  
+	  
 	[LPM_CUST_FEAT] = {.major_soft = 1, .minor_soft = 4, .patch_soft = 0},
-	/* Since LPM Fw v1.4.2 */
+	 
 #ifdef MY_DEF_HERE
 	[LPM_EDID] = {.major_soft = 1, .minor_soft = 4,	.patch_soft = 2},
-	/* Since LPM Fw v1.8.0 */
+	 
 	[LPM_SBC_TRACES] = {.major_soft = 1, .minor_soft = 8, .patch_soft = 0},
-	/* Since LPM Fw v1.8.1 */
+	 
 	[LPM_SBC_TRACES_IN_SUSPEND] = {
 		.major_soft = 1, .minor_soft = 8, .patch_soft = 1},
-#else /* MY_DEF_HERE */
+#else  
 	[LPM_EDID] = {.major_soft = 1, .minor_soft = 4,	.patch_soft = 2,},
-#endif /* MY_DEF_HERE */
+#endif  
 };
 
 static bool lpm_check_fw_version(struct st_lpm_version *fw_ver,
@@ -104,43 +90,15 @@ static bool lpm_check_fw_version(struct st_lpm_version *fw_ver,
 				return true;
 }
 
-/**
- * st_lpm_driver_data - Local struct of driver
- * @iomem_base[2]:		memory region mapped by driver
- *				iomem_base[0] is SBC program and data
- *				base address
- *				size of iomem_base[0] is 0xA0000
- *				iomem_base[1] is SBC mailbox address
- *				size of iomem_base[1] is 0x400
- *				iomem_base[2] is SBC config reg mapped in
- *				sysconf
- *
- * @fw_reply_msg:		reply message from firmware
- * @fw_request_msg:		firmware request message
- * @fw_name:			Name of firmware
- * @reply_from_sbc:		reply from SBC, true in case reply received
- * @wait_queue:			wait queue
- * @mutex:			message protection mutex
- * @glbtransaction_id:		global transaction id used in communication
- * @sbc_state:			State of SBC firmware
- * @power_on_gpio:		the gpio pin number assinged by gpio lib for
- *				power on/off pin
- * @trigger_level:		the trigger level for power on/off pin
- * @pmem_offset:		the progam section of the f/w to be loaded here
- *				this is different for different chip.
- *				Read from DT
- * @dev:			the device object. Required to store here for
- *				using in dev_*
- */
 struct st_lpm_driver_data {
 	void * __iomem iomem_base[3];
 	struct lpm_message fw_reply_msg;
 	struct lpm_message fw_request_msg;
 #ifdef MY_DEF_HERE
 	char fw_name[30];
-#else /* MY_DEF_HERE */
+#else  
 	char fw_name[20];
-#endif /* MY_DEF_HERE */
+#endif  
 	int reply_from_sbc;
 	wait_queue_head_t wait_queue;
 	struct mutex mutex;
@@ -159,73 +117,39 @@ struct st_lpm_driver_data {
 #ifdef MY_DEF_HERE
 	const struct firmware *fw;
 	u16 trace_data_value;
-#endif /* MY_DEF_HERE */
+#endif  
 };
 
-/* To write 32 bit data into LPM */
 #define lpm_write32(drv, index, offset, value)	iowrite32(value,	\
 			(drv)->iomem_base[index] + offset)
 
-/* To read 32 bit data into LPM */
 #define lpm_read32(drv, idx, offset)	ioread32(			\
 			(drv)->iomem_base[idx] + offset)
 
-/*
- * For internal standby controller
- * Various offset of LPM IP, These offsets are w.r.t LPM memory resources.
- * There are three LPM memory resources used
- * first is for SBC PMEM,
- * second is for SBC mailbox,
- * third is for SBC configuration registers.
- */
-/* Marker in elf file to indicate writing to program area */
 #define SBC_PRG_MEMORY_ELF_MARKER	0x00400000
 
-/* SBC mailbox offset as seen by Host w.r.t mem source 2 */
 #define SBC_MBX_OFFSET		0x0
 
-/* SBC configuration register offset as seen on Host w.r.t mem source 3 */
 #define SBC_CONFIG_OFFSET	0x0
 
-/*
- * Mailbox registers to be written by host,
- * SBC firmware will read below registers to get host message.
- * There are four such registers in mailbox each of 4 bytes.
- */
 #define MBX_WRITE_STATUS(i)	(SBC_MBX_OFFSET + (i) * 0x4)
 
-/*
- * Mailbox registers to be read by host,
- * SBC firmware will write below registers to send message.
- * There are four such registers in mailbox each of 4 bytes.
- */
 #define MBX_READ_STATUS(i)	(SBC_MBX_OFFSET + 0x100 + (i) * 0x4)
 
-/* To clear mailbox interrupt status */
 #define MBX_READ_CLR_STATUS1	(SBC_MBX_OFFSET + 0x144)
 
-/* To enable/disable mailbox interrupt on Host :RW */
 #define MBX_INT_ENABLE		(SBC_MBX_OFFSET + 0x164)
-/* To enable mailbox interrupt on Host : WO only set allowed */
+ 
 #define MBX_INT_SET_ENABLE	(SBC_MBX_OFFSET + 0x184)
 
-/* To disable mailbox interrupt on Host : WO only clear allowed */
 #define MBX_INT_CLR_ENABLE	(SBC_MBX_OFFSET + 0x1A4)
 
-/*
- * From host there are three type of message can be send to SBC
- * No reply expected from SBC i.e. reset SBC, Passive standby
- * Reply is expected from SBC i.e. get version etc.
- * Reply is expected but interrupts are disabled
- */
 #define SBC_REPLY_NO		0x0
 #define SBC_REPLY_YES		0x1
 #define SBC_REPLY_NO_IRQ	0x2
 
-/* Value to be set by SBC-Fw in EXIT_CPS register when exiting form CPS */
 #define CPS_EXIT_EXIT_CPS	0x9b
 
-/* Value to be set by SBC-Fw in EXIT_CPS register when exiting other than CPS */
 #define DEFAULT_EXIT_CPS	0xb8
 
 #ifdef MY_DEF_HERE
@@ -237,22 +161,12 @@ static int lpm_config_reboot(enum st_lpm_config_reboot_type type, void *data)
 
 	switch (type) {
 	case ST_LPM_REBOOT_WITH_DDR_SELF_REFRESH:
-	/*
-	 * Exit_CPS:
-	 * [7:1] == 7b1001101:
-	 *	DDRs in self-refresh
-	 * [0] == 1b1:
-	 *	DDRs in self-refresh (back compatibility)
-	 */
+	 
 		feature.params.set_params[0] = CPS_EXIT_EXIT_CPS;
 		break;
 
 	case ST_LPM_REBOOT_WITH_DDR_OFF:
-	/*
-	 * Exit_CPS:
-	 * [9:8] == 2b11:
-	 *	DDRs are powered off
-	 */
+	 
 		feature.params.set_params[0] = DEFAULT_EXIT_CPS;
 		break;
 	}
@@ -283,19 +197,13 @@ static void lpm_configure_power_on_gpio(struct st_lpm_driver_data *lpm_drv)
 				"Setup power_on gpio failed: err = %d\n", err);
 	}
 }
-#endif /* MY_DEF_HERE */
+#endif  
 
 static int lpm_exchange_msg(struct lpm_message *command,
 	struct lpm_message *response, void *private_data);
 
 #ifdef MY_DEF_HERE
-/*
- * lpm_setup_tracedata - Set trace data parameters
- * @trace_modules - peripherals for which trace data to be enabled
- *
- * Return - 0 on success
- * Return - negative error code on failure.
- */
+ 
 static int lpm_setup_tracedata(u16 trace_modules, void *data)
 {
 	struct st_lpm_driver_data *lpm_drv = data;
@@ -333,7 +241,6 @@ static void lpm_sec_init(struct st_lpm_driver_data *lpm_drv)
 
 	dev_dbg(lpm_drv->dev, "SBC Firmware is running\n");
 
-	/* Print firmware version information */
 	err = st_lpm_get_version(&driver_ver, &lpm_drv->fw_ver);
 
 	if (err >= 0) {
@@ -346,11 +253,6 @@ static void lpm_sec_init(struct st_lpm_driver_data *lpm_drv)
 			 lpm_drv->fw_ver.month, lpm_drv->fw_ver.year);
 	}
 
-	/*
-	 * Request default value of EXIT_CPS, to be set while
-	 * exiting from non-CPS warm reset cases, such as
-	 * manual reset exit, WDT exit, shutdown exit.
-	 */
 	lpm_config_reboot(ST_LPM_REBOOT_WITH_DDR_OFF, lpm_drv);
 
 	lpm_configure_power_on_gpio(lpm_drv);
@@ -359,17 +261,8 @@ static void lpm_sec_init(struct st_lpm_driver_data *lpm_drv)
 	lpm_setup_tracedata(ST_LPM_TRACE_GENERAL, lpm_drv);
 #endif
 }
-#endif /* MY_DEF_HERE */
+#endif  
 
-/**
- * lpm_isr() - Mailbox ISR
- * @this_irq:	irq
- * @params:	Parameters
- *
- * This ISR is invoked when there is some message from SBC.
- * Message could be reply or some request.
- * If this a request then such message will be posted to a work queue.
- */
 static irqreturn_t lpm_isr(int this_irq, void *params)
 {
 	struct st_lpm_driver_data *lpm_drv =
@@ -377,36 +270,26 @@ static irqreturn_t lpm_isr(int this_irq, void *params)
 	u32 msg_read[4], i;
 	struct lpm_message *msg, *msg_p;
 
-	/*
-	 * Read the data from mailbox
-	 * SBC will always be in little endian mode
-	 * if host is in big endian then reverse int
-	 */
 	lpm_drv->reply_from_sbc = 0;
 
 	for (i = 0; i < 4; i++) {
 		msg_read[i] = lpm_read32(lpm_drv, 1, MBX_READ_STATUS(1 + i));
 		msg_read[i] = cpu_to_le32(msg_read[i]);
 		}
-	/* Copy first message to check if it's reply from SBC or request */
+	 
 	msg_p = (struct lpm_message *)msg_read;
 
 	if (msg_p->command_id == LPM_MSG_INFORM_HOST) {
 		if (msg_p->buf[0] == ST_LPM_ALARM_TIMER) {
 			st_lpm_notify(ST_LPM_RTC);
 
-			/* Clear mail box */
 			lpm_write32(lpm_drv, 1, MBX_READ_CLR_STATUS1,
 					0xFFFFFFFF);
 
-			/* No more action needed in this case
-			 * SBC is not waiting or requesting anything
-			 */
 			return IRQ_HANDLED;
 		}
 	}
 
-	/* Check if reply from SBC or request from SBC */
 	if ((msg_p->command_id & LPM_MSG_REPLY) ||
 			(msg_p->command_id == LPM_MSG_BKBD_READ)) {
 		msg = &lpm_drv->fw_reply_msg;
@@ -415,10 +298,8 @@ static irqreturn_t lpm_isr(int this_irq, void *params)
 		msg = &lpm_drv->fw_request_msg;
 	}
 
-	/* Copy mailbox data into local structure */
 	memcpy(msg, &msg_read, 16);
 
-	/* Clear mail box */
 	lpm_write32(lpm_drv, 1, MBX_READ_CLR_STATUS1, 0xFFFFFFFF);
 
 	if (lpm_drv->reply_from_sbc != 1)
@@ -441,7 +322,7 @@ static irqreturn_t lpm_threaded_isr(int this_irq, void *params)
 	u8 length;
 	u32 offset;
 	char data[128];
-#endif /* MY_DEF_HERE */
+#endif  
 
 	msg_p = &lpm_drv->fw_request_msg;
 	dev_dbg(lpm_drv->dev, "Send reply to firmware\nrecd command id %x\n",
@@ -449,7 +330,7 @@ static irqreturn_t lpm_threaded_isr(int this_irq, void *params)
 
 	switch (msg_p->command_id) {
 	case LPM_MSG_VER:
-		/* In case firmware requested driver version*/
+		 
 		buf[0] = (LPM_MAJOR_PROTO_VER << 4) | LPM_MINOR_PROTO_VER;
 		buf[1] = (LPM_MAJOR_SOFT_VER << 4) | LPM_MINOR_SOFT_VER;
 		buf[2] = (LPM_PATCH_SOFT_VER << 4) | LPM_BUILD_MONTH;
@@ -483,7 +364,7 @@ static irqreturn_t lpm_threaded_isr(int this_irq, void *params)
 			memcpy_fromio(data, lpm_drv->iomem_base[0] +
 					DATA_OFFSET + offset, length);
 			dev_info(lpm_drv->dev, "SBC f/w traces:%s\n", data);
-#else /* MY_DEF_HERE */
+#else  
 		err = st_lpm_notify(ST_LPM_FP_PIO_PRESS);
 		if (err >= 0) {
 			memcpy(&command.buf[2], &err, 4);
@@ -493,11 +374,11 @@ static irqreturn_t lpm_threaded_isr(int this_irq, void *params)
 			dev_dbg(lpm_drv->dev,
 				"PIO Reset callback error reported (%d)\n",
 				err);
-#endif /* MY_DEF_HERE */
+#endif  
 			return IRQ_HANDLED;
 		}
 	default:
-		/* Send reply to SBC as error*/
+		 
 		buf[0] = msg_p->command_id;
 		buf[1] = -EINVAL;
 		command.command_id = LPM_MSG_ERR;
@@ -511,33 +392,16 @@ static irqreturn_t lpm_threaded_isr(int this_irq, void *params)
 	return IRQ_HANDLED;
 }
 
-/**
- * lpm_send_msg() - Send mailbox message
- * @msg:	message pointer
- * @msg_size:	message size
- *
- * Return - 0 if firmware is running
- * Return - -EREMOTEIO either firmware is not loaded or not running
- */
 static int lpm_send_msg(struct st_lpm_driver_data *lpm_drv,
 	struct lpm_message *msg, unsigned char msg_size)
 {
 	int err = 0, count;
 	u32 *tmp_i = (u32 *)msg;
 
-	/* Check if firmware is loaded or not */
 	if (!(lpm_drv->sbc_state == ST_LPM_SBC_RUNNING ||
 	      lpm_drv->sbc_state == ST_LPM_SBC_BOOT))
 		return -EREMOTEIO;
 
-	/*
-	 * Write data to mailbox, covert data into LE format.
-	 * also mailbox is 4 byte deep, we need to write 4 byte always
-	 *
-	 * First byte of message is used to generate interrupt as well as
-	 * serve as command id.
-	 * Therefore first four byte of message part are written at last.
-	 */
 	for (count = (msg_size + 1) / 4; count >= 0; count--) {
 		*(tmp_i + count) = cpu_to_le32(*(tmp_i + count));
 		lpm_write32(lpm_drv, 1, (MBX_WRITE_STATUS(1 + count)),
@@ -547,65 +411,38 @@ static int lpm_send_msg(struct st_lpm_driver_data *lpm_drv,
 	return err;
 }
 
-/**
- * lpm_get_response() - To get SBC response
- * @response:	response of SBC
- *
- * This function is to get SBC response in polling mode
- * This will be called when interrupts are disabled and we
- * still need to get response from SBC.
- *
- * Return - 0 on success
- * Return - 1 when SBC firmware is not responding
- */
 static int lpm_get_response(struct st_lpm_driver_data *lpm_drv,
 	struct lpm_message *response)
 {
 	int count, i;
 	u32 msg_read1[4];
 
-	/* Poll time of 1 Second is good enough to see SBC reply */
 	for (count = 0; count < 100; count++) {
 		msg_read1[0] = lpm_read32(lpm_drv, 1, MBX_READ_STATUS(1));
 		msg_read1[0] = cpu_to_le32(msg_read1[0]);
-		/* If we received a reply then break the loop */
+		 
 		if (msg_read1[0] & 0xFF)
 			break;
 		mdelay(10);
 	}
 
-	/* If no reply within 1 second then firmware is not responding */
 	if (count == 100) {
 		dev_err(lpm_drv->dev, "count %d value %x\n",
 				count, msg_read1[0]);
 		return 1;
 	}
 
-	/* Get other data from mailbox */
 	for (i = 1; i < 4; i++) {
 		msg_read1[i] = lpm_read32(lpm_drv, 1, MBX_READ_STATUS(1 + i));
 		msg_read1[i] = cpu_to_le32(msg_read1[i]);
 	}
-	/* Copy data received from mailbox*/
+	 
 	memcpy(&lpm_drv->fw_reply_msg, (void *)msg_read1, 16);
 	lpm_write32(lpm_drv, 1, MBX_READ_CLR_STATUS1, 0xFFFFFFFF);
 
 	return 0;
 }
 
-/**
- * lpm_exchange_msg() - Internal function  used for message exchange with SBC
- * @send_msg:	message to send
- * @response:	response from SBC firmware
- *
- * This function can be called in three contexts
- * One when reply from SBC is expected for this command
- * Second when reply from SBC is not expected
- * Third when called from interrupt disabled but reply is expected
- *
- * Return - 0 on success
- * Return - negative error code on failure.
-*/
 static int lpm_exchange_msg(struct lpm_message *command,
 	struct lpm_message *response, void *data)
 {
@@ -616,11 +453,6 @@ static int lpm_exchange_msg(struct lpm_message *command,
 
 	dev_dbg(lpm_drv->dev, "%s\n", __func__);
 
-	/*
-	 * Lock the mailbox, prevent other caller to access MB write
-	 * In case API is called with interrupt disabled from Linux PM
-	 * try to lock mutex.
-	 */
 	if (irqs_disabled()) {
 		err = mutex_trylock(&lpm_drv->mutex);
 		reply_type = SBC_REPLY_NO_IRQ;
@@ -639,18 +471,15 @@ static int lpm_exchange_msg(struct lpm_message *command,
 	else
 		lpm_msg.transaction_id = lpm_drv->glbtransaction_id++;
 
-	/* Copy data into mailbox message */
 	data_size = st_lpm_get_command_data_size(command->command_id);
 	if (data_size)
 		memcpy(lpm_msg.buf, command->buf, data_size);
 
-	/* Print message information for debug purpose */
 	dev_dbg(lpm_drv->dev, "Sending msg {%x, %x}\n", lpm_msg.command_id,
 		lpm_msg.transaction_id);
 
 	lpm_drv->reply_from_sbc = 0;
 
-	/* Send message to mailbox write */
 	err = lpm_send_msg(lpm_drv, &lpm_msg, data_size);
 
 	if (unlikely(err < 0)) {
@@ -661,15 +490,11 @@ static int lpm_exchange_msg(struct lpm_message *command,
 	switch (reply_type) {
 	case SBC_REPLY_NO_IRQ:
 		err = lpm_get_response(lpm_drv, response);
-		if (err) /* f/w timed out to give a response */
+		if (err)  
 			err = -ETIMEDOUT;
 		break;
 	case  SBC_REPLY_YES:
-		/*
-		 * wait for response here
-		 * In case of signal, we can get negative value
-		 * In such case wait till timeout or response from SBC
-		 */
+		 
 		do {
 			err = wait_event_interruptible_timeout(
 				lpm_drv->wait_queue,
@@ -677,13 +502,9 @@ static int lpm_exchange_msg(struct lpm_message *command,
 				msecs_to_jiffies(100));
 		} while (err < 0);
 
-		if (err == 0) /* means, wait ended because of timeout */
+		if (err == 0)  
 			err = -ETIMEDOUT;
-		/*
-		 * if err is major than 0, this means condition evaluated to
-		 * true before timeout occurred. But that means there is no
-		 * error.
-		 */
+		 
 		if (err > 0)
 			err = 0;
 		break;
@@ -711,24 +532,14 @@ static int lpm_exchange_msg(struct lpm_message *command,
 		if (response->command_id == LPM_MSG_ERR) {
 			dev_err(lpm_drv->dev,
 				"Firmware error code %d\n", response->buf[1]);
-			/*
-			 * Firmware does not support this command
-			 * therefore firmware gave error.
-			 * In such cases, return EREMOTEIO as firmware error
-			 * code is not yet decided.
-			 * To Do
-			 * conversion of firmware error code into Linux world
-			 */
+			 
 			err = -EREMOTEIO;
 		}
-		/* There is possibility we might get response for large msg. */
+		 
 		if (response->command_id == LPM_MSG_BKBD_READ)
 			dev_dbg(lpm_drv->dev, "Got in reply a big message\n");
 	} else {
-		/*
-		 * Different trans id is expected from SBC as big messages are
-		 * encapsulated into LPM_MSG_BKBD_WRIRE message.
-		 */
+		 
 		dev_dbg(lpm_drv->dev,
 			"Received ID %x\n", response->transaction_id);
 	}
@@ -739,18 +550,6 @@ exit_fun:
 	return err;
 }
 
-/**
- * lpm_send_big_message() - To send big message over SBC DMEM
- * @size:	size of message
- * @offset:	offset
- * @sbc_msg:	buffer pointer
- *
- * This function is used to send large messages(>LPM_MAX_MSG_DATA)
- * using SBC DMEM.
- *
- * Return - 0 on success
- * Return - negative error code on failure.
- */
 static int lpm_write_bulk(u16 size, const char *sbc_msg, void *data,
 			  int *offset_dmem)
 {
@@ -770,13 +569,11 @@ static int lpm_write_bulk(u16 size, const char *sbc_msg, void *data,
 		if (err)
 			return err;
 
-		/* Get the offset in SBC memory */
 		offset = get_unaligned_le32(&response.buf[2]);
 	} else {
 		offset = *offset_dmem;
 	}
 
-	/* Copy message in SBC memory */
 	if (size == sizeof(unsigned long))
 		writel(*((unsigned long *)sbc_msg),
 		       lpm_drv->iomem_base[0] + DATA_OFFSET + offset);
@@ -784,7 +581,7 @@ static int lpm_write_bulk(u16 size, const char *sbc_msg, void *data,
 		memcpy_toio(lpm_drv->iomem_base[0] + DATA_OFFSET + offset,
 			    sbc_msg, size);
 	if (!offset_dmem) {
-		/* Send this big message */
+		 
 		put_unaligned_le16(size, command.buf);
 		put_unaligned_le32(offset, &command.buf[2]);
 		command.command_id = LPM_MSG_BKBD_WRITE;
@@ -804,18 +601,6 @@ static int lpm_read_bulk(u16 size, u16 offset, char *msg, void *data)
 	return 0;
 }
 
-/**
- * lpm_write_edid_info() - To send edid info over SBC DMEM
- * @edid_buf:	EDID info buffer pointer
- * @block_num:	Block number to read
- * @data:	pointer the the st_lpm_driver_data structure
- *
- * This function is used to send EDID info message to LPM
- * using SBC DMEM.
- *
- * Return - 0 on success
- * Return - negative error code on failure.
-*/
 static int lpm_write_edid_info(u8 *edid_buf, u8 block_num, void *data)
 {
 	struct st_lpm_driver_data *lpm_drv = data;
@@ -835,7 +620,6 @@ static int lpm_write_edid_info(u8 *edid_buf, u8 block_num, void *data)
 		return -EINVAL;
 	}
 
-	/* Request an offset to copy EDID info to SBC */
 	command.command_id = LPM_MSG_LGWR_OFFSET;
 	put_unaligned_le16(ST_LPM_EDID_BLK_SIZE, command.buf);
 
@@ -845,13 +629,9 @@ static int lpm_write_edid_info(u8 *edid_buf, u8 block_num, void *data)
 
 	offset = get_unaligned_le32(&response.buf[2]);
 
-	/* Copy message in SBC memory */
 	memcpy_toio(lpm_drv->iomem_base[0] + DATA_OFFSET + offset,
 		    (const void *)edid_buf, ST_LPM_EDID_BLK_SIZE);
 
-	/* Inform SBC EDID Info are available for copy
-	 * to EDID Info SBC DMEM dedicated space
-	 */
 	command.command_id = LPM_MSG_EDID_INFO,
 	command.buf[0] = ST_LPM_EDID_BLK_SIZE;
 	command.buf[1] = block_num;
@@ -861,7 +641,6 @@ static int lpm_write_edid_info(u8 *edid_buf, u8 block_num, void *data)
 	    response.buf[1] != command.buf[1])
 		return -EIO;
 
-	/* Send the 0xFF block number to indicates end of EDID info */
 	command.command_id = LPM_MSG_EDID_INFO,
 	command.buf[0] = ST_LPM_EDID_BLK_SIZE;
 	command.buf[1] = ST_LPM_EDID_BLK_END;
@@ -874,20 +653,6 @@ static int lpm_write_edid_info(u8 *edid_buf, u8 block_num, void *data)
 	return 0;
 }
 
-/**
- * lpm_read_edid_info() - To send edid info over SBC DMEM
- * @edid_buf:	EDID info buffer pointer
- * @block_num:	Block number to read
- * @data:	Pointer to the st_lpm_driver_data structure
- *
- * This function is used to request EDID info message from LPM
- * REMARK: As EDID read will return 4 * 128Byte of data,
- * edid_buf should point on a memory zone big enough to store
- * these EDID info data.
- *
- * Return - 0 on success
- * Return - negative error code on failure.
-*/
 static int lpm_read_edid_info(u8 *edid_buf, u8 block_num, void *data)
 {
 	struct st_lpm_driver_data *lpm_drv = data;
@@ -907,7 +672,6 @@ static int lpm_read_edid_info(u8 *edid_buf, u8 block_num, void *data)
 		return -EINVAL;
 	}
 
-	/* Send the EDID message to inform SBC EDID info are available */
 	command.command_id = LPM_MSG_EDID_INFO,
 	command.buf[0] = 0;
 	command.buf[1] = block_num;
@@ -923,15 +687,7 @@ static int lpm_read_edid_info(u8 *edid_buf, u8 block_num, void *data)
 }
 
 #ifdef MY_DEF_HERE
-/**
- * lpm_reload_fw_prepare() - To prepare SBC for Fw reload
- * @data:	Pointer to the st_lpm_driver_data structure
- *
- * This function is used to prepare SBC in order to reload its Fw
- *
- * Return - 0 on success
- * Return - negative error code on failure.
-*/
+ 
 static int lpm_reload_fw_prepare(void *data)
 {
 	struct st_lpm_driver_data *lpm_drv = data;
@@ -948,14 +704,12 @@ static int lpm_reload_fw_prepare(void *data)
 
 	mutex_lock(&lpm_drv->fwlock);
 
-	/* Put SBC in Idle mode for reload operation */
 	feature.feature_name = ST_LPM_SBC_IDLE;
 	feature.params.set_params[0] = 0x55;
 	feature.params.set_params[1] = 0xAA;
 
 	st_lpm_set_adv_feature(1, &feature);
 
-	/* Wait till SBC is in IDLE */
 	do {
 		power_status = readl(lpm_drv->iomem_base[2] + LPM_POWER_STATUS);
 	} while (((power_status & XP70_IDLE_MODE) == 0) && (i++ < 1000));
@@ -968,12 +722,10 @@ static int lpm_reload_fw_prepare(void *data)
 
 	dev_dbg(lpm_drv->dev, "SBC is in IDLE\n");
 
-	/* Exit SBC from Idle mode to load new Fw data */
 	writel(BIT(1), lpm_drv->iomem_base[2]);
 
 	i = 0;
 
-	/* Wait SBC comes out of Idle */
 	do {
 		power_status = readl(lpm_drv->iomem_base[2] + LPM_POWER_STATUS);
 	} while (((power_status & XP70_IDLE_MODE) != 0) && (i++ < 1000));
@@ -993,15 +745,6 @@ static int lpm_reload_fw_prepare(void *data)
 	return err;
 }
 
-/**
- * lpm_start_loaded_fw() - To start SBC for loaded Fw
- * @data:	Pointer to the st_lpm_driver_data structure
- *
- * This function is used to start SBC after a Fw has been loaded
- *
- * Return - 0 on success
- * Return - negative error code on failure.
-*/
 static int lpm_start_loaded_fw(void *data)
 {
 	struct st_lpm_driver_data *lpm_drv = data;
@@ -1018,7 +761,6 @@ static int lpm_start_loaded_fw(void *data)
 	lpm_drv->sbc_state = ST_LPM_SBC_BOOT;
 	lpm_write32(lpm_drv, 1, MBX_INT_SET_ENABLE, 0xFF);
 
-	/* get response from firmware */
 	for (i = 0; i < 10; i++) {
 		mdelay(100);
 		err = st_lpm_get_fw_state(&lpm_drv->sbc_state);
@@ -1044,7 +786,7 @@ static int lpm_start_loaded_fw(void *data)
 
 	return 0;
 }
-#endif /* MY_DEF_HERE */
+#endif  
 
 static int lpm_offset_dmem(enum st_lpm_sbc_dmem_offset_type type, void *data)
 {
@@ -1057,7 +799,7 @@ static int lpm_offset_dmem(enum st_lpm_sbc_dmem_offset_type type, void *data)
 }
 
 #ifdef MY_DEF_HERE
-#else /* MY_DEF_HERE */
+#else  
 static int lpm_config_reboot(enum st_lpm_config_reboot_type type, void *data)
 {
 	struct st_lpm_adv_feature feature;
@@ -1066,22 +808,12 @@ static int lpm_config_reboot(enum st_lpm_config_reboot_type type, void *data)
 
 	switch (type) {
 	case ST_LPM_REBOOT_WITH_DDR_SELF_REFRESH:
-	/*
-	 * Exit_CPS:
-	 * [7:1] == 7b1001101:
-	 *	DDRs in self-refresh
-	 * [0] == 1b1:
-	 *	DDRs in self-refresh (back compatibility)
-	 */
+	 
 		feature.params.set_params[0] = CPS_EXIT_EXIT_CPS;
 		break;
 
 	case ST_LPM_REBOOT_WITH_DDR_OFF:
-	/*
-	 * Exit_CPS:
-	 * [9:8] == 2b11:
-	 *	DDRs are powered off
-	 */
+	 
 		feature.params.set_params[0] = DEFAULT_EXIT_CPS;
 		break;
 	}
@@ -1090,7 +822,7 @@ static int lpm_config_reboot(enum st_lpm_config_reboot_type type, void *data)
 
 	return 0;
 }
-#endif /* MY_DEF_HERE */
+#endif  
 
 static void lpm_ir_enable(bool enable, void *data)
 {
@@ -1118,7 +850,7 @@ static struct st_lpm_ops st_lpm_mb_ops = {
 	.reload_fw_prepare = lpm_reload_fw_prepare,
 	.start_loaded_fw = lpm_start_loaded_fw,
 	.setup_tracedata = lpm_setup_tracedata,
-#endif /* MY_DEF_HERE */
+#endif  
 };
 
 static struct of_device_id lpm_child_match_table[] = {
@@ -1162,10 +894,6 @@ static int lpm_load_fw(struct st_lpm_driver_data *lpm_drv, bool reload)
 
 	mutex_lock(&lpm_drv->fwlock);
 
-	/**
-	 * Now load the different sections of the elf to the appropriate device
-	 * addresses.
-	 */
 	elf_data = fw->data;
 	ehdr = (struct elf64_hdr *)elf_data;
 	phdr = (struct elf64_phdr *)(elf_data + ehdr->e_phoff);
@@ -1221,7 +949,7 @@ static int lpm_firmware_cb(const struct firmware *fw,
 	return err;
 }
 #endif
-#else /* MY_DEF_HERE */
+#else  
 static void lpm_sec_init(struct st_lpm_driver_data *lpm_drv_p)
 {
 	struct st_lpm_version driver_ver;
@@ -1229,7 +957,6 @@ static void lpm_sec_init(struct st_lpm_driver_data *lpm_drv_p)
 
 	dev_dbg(lpm_drv_p->dev, "SBC Firmware is running\n");
 
-	/* Print firmware version information */
 	err = st_lpm_get_version(&driver_ver, &lpm_drv_p->fw_ver);
 
 	if (err >= 0) {
@@ -1242,11 +969,6 @@ static void lpm_sec_init(struct st_lpm_driver_data *lpm_drv_p)
 			 lpm_drv_p->fw_ver.month, lpm_drv_p->fw_ver.year);
 	}
 
-	/*
-	 * Request default value of EXIT_CPS, to be set while
-	 * exiting from non-CPS warm reset cases, such as
-	 * manual reset exit, WDT exit, shutdown exit.
-	 */
 	st_lpm_config_reboot(ST_LPM_REBOOT_WITH_DDR_OFF);
 
 	if (lpm_drv_p->power_on_gpio >= 0) {
@@ -1272,12 +994,6 @@ static void lpm_sec_init(struct st_lpm_driver_data *lpm_drv_p)
 	lpm_drv_p->fwstatus = true;
 }
 
-/**
- * lpm_start_fw() - Start sbc firmware
- *
- * Return - 0 on success
- * Return - negative error on failure
- */
 static int lpm_start_fw(struct st_lpm_driver_data *lpm_drv)
 {
 	int ret, i;
@@ -1289,9 +1005,8 @@ static int lpm_start_fw(struct st_lpm_driver_data *lpm_drv)
 	confreg = confreg | BIT(0);
 	writel(confreg, lpm_drv->iomem_base[2]);
 
-	msleep(100); /* wait SBC boots */
+	msleep(100);  
 
-	/* get response from firmware */
 	for (i = 0; i < 10; ++i) {
 		ret = st_lpm_get_fw_state(&lpm_drv->sbc_state);
 		if (ret < 0 || lpm_drv->sbc_state == ST_LPM_SBC_RUNNING)
@@ -1302,14 +1017,6 @@ static int lpm_start_fw(struct st_lpm_driver_data *lpm_drv)
 	return ret;
 }
 
-/**
- * lpm_load_fw() - Load sbc firmware
- * @fw:	pointer to firmware
- * @lpm_drv_p:	driver date
- *
- * Return - 0 on success
- * Return - negative error on failure
- */
 static int lpm_load_fw(const struct firmware *fw,
 		struct st_lpm_driver_data *lpm_drv_p)
 {
@@ -1335,10 +1042,6 @@ static int lpm_load_fw(const struct firmware *fw,
 	dev_dbg(lpm_drv_p->dev, "SBC Fw %s Found, Loading ...\n",
 			lpm_drv_p->fw_name);
 
-	/**
-	 * Now load the different sections of the elf to the appropriate device
-	 * addresses.
-	 */
 	elf_data = fw->data;
 	ehdr = (struct elf64_hdr *)elf_data;
 	phdr = (struct elf64_phdr *)(elf_data + ehdr->e_phoff);
@@ -1369,10 +1072,6 @@ static int lpm_load_fw(const struct firmware *fw,
 			    elf_data + phdr->p_offset, size);
 	}
 
-	/**
-	 * All done, f/w is loaded to device, set the "go" bit
-	 * to kick the LPM processor running the loaded f/w
-	 */
 	err = lpm_start_fw(lpm_drv_p);
 	if (err) {
 		dev_err(lpm_drv_p->dev, "Failed to start SBC Fw\n");
@@ -1381,10 +1080,9 @@ static int lpm_load_fw(const struct firmware *fw,
 
 	lpm_sec_init(lpm_drv_p);
 
-	/* We do not return error if caused by SBC communication */
 	return 1;
 }
-#endif /* MY_DEF_HERE */
+#endif  
 
 static ssize_t st_lpm_show_wakeup(struct device *dev,
 				struct device_attribute *attr, char *buf)
@@ -1395,7 +1093,7 @@ static ssize_t st_lpm_show_wakeup(struct device *dev,
 	enum st_lpm_wakeup_devices wakeup_device = 0;
 #ifdef MY_DEF_HERE
 	s16 ValidSize;
-#endif /* MY_DEF_HERE */
+#endif  
 
 	if (st_lpm_get_wakeup_device(&wakeup_device) < 0)
 		dev_err(dev, "<%s> firmware not responding\n", __func__);
@@ -1405,12 +1103,12 @@ static ssize_t st_lpm_show_wakeup(struct device *dev,
 					   2, data) < 0)
 			dev_err(dev, "<%s> trigger data message failed\n",
 					__func__);
-#else /* MY_DEF_HERE */
+#else  
 	if (ST_LPM_WAKEUP_PIO & wakeup_device)
 		if (st_lpm_get_trigger_data(ST_LPM_WAKEUP_PIO, 2, 2, data) < 0)
 			dev_err(dev, "<%s> trigger data message failed\n",
 					__func__);
-#endif /* MY_DEF_HERE */
+#endif  
 
 	for (i = 0; i < sizeof(wkup_dev_name_tab) /
 			sizeof(struct st_lpm_wkup_dev_name); i++) {
@@ -1482,7 +1180,6 @@ static ssize_t st_lpm_reload_fw(struct device *dev,
 	dev_info(lpm_drv->dev, "About to load new firmware (%s)\n",
 			 lpm_drv->fw_name);
 
-	/* Check if fw exits before switching SBC to Idle Mode */
 	ret = request_firmware(&lpm_drv->fw, lpm_drv->fw_name, lpm_drv->dev);
 	if (ret) {
 		dev_warn(lpm_drv->dev, "LPM Fw %s not found, abort\n",
@@ -1529,7 +1226,7 @@ static ssize_t st_lpm_set_tracedata_config(struct device *dev,
 static DEVICE_ATTR(wakeup, S_IRUGO, st_lpm_show_wakeup, NULL);
 static DEVICE_ATTR(trace_config, S_IWUSR, NULL, st_lpm_set_tracedata_config);
 
-#else /* MY_DEF_HERE */
+#else  
 static ssize_t st_lpm_load_fw(struct device *dev,
 			      struct device_attribute *attr, const char *buf,
 			      size_t count)
@@ -1577,7 +1274,7 @@ exit:
 
 static DEVICE_ATTR(wakeup, S_IRUGO, st_lpm_show_wakeup, NULL);
 static DEVICE_ATTR(loadfw, S_IWUSR, NULL, st_lpm_load_fw);
-#endif /* MY_DEF_HERE */
+#endif  
 
 static int st_sbc_get_devtree_pdata(struct device *dev,
 				    struct st_sbc_platform_data *pdata,
@@ -1685,7 +1382,7 @@ static inline int sti_wakeup_notifier(struct notifier_block *nb,
 	return NOTIFY_OK;
 }
 #endif
-#else /* MY_DEF_HERE */
+#else  
 static void st_lpm_check_wakeup_device(
 	struct st_lpm_driver_data *lpm_drv,
 	struct device *dev, unsigned int enable)
@@ -1745,7 +1442,7 @@ static int sti_wakeup_notifier(struct notifier_block *nb,
 
 	return NOTIFY_OK;
 }
-#endif /* MY_DEF_HERE */
+#endif  
 
 static int st_lpm_probe(struct platform_device *pdev)
 {
@@ -1759,9 +1456,9 @@ static int st_lpm_probe(struct platform_device *pdev)
 
 #ifdef MY_DEF_HERE
 	dev_dbg(&pdev->dev, "st lpm probe\n");
-#else /* MY_DEF_HERE */
+#else  
 	dev_dbg(lpm_drv->dev, "st lpm probe\n");
-#endif /* MY_DEF_HERE */
+#endif  
 
 	lpm_drv = devm_kzalloc(&pdev->dev, sizeof(struct st_lpm_driver_data),
 				GFP_KERNEL);
@@ -1825,14 +1522,12 @@ static int st_lpm_probe(struct platform_device *pdev)
 			"lpm_add %x\n", (u32)lpm_drv->iomem_base[count]);
 	}
 
-	/* Read the pmem_offset from DT */
 	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "pmem");
 	if (!res)
 		return -ENODEV;
 
 	lpm_drv->pmem_offset = res->start;
 
-	/* Irq request */
 	res = platform_get_resource(pdev, IORESOURCE_IRQ, 0);
 	if (!res) {
 		dev_err(lpm_drv->dev, "%s irq resource %x not provided\n",
@@ -1840,17 +1535,11 @@ static int st_lpm_probe(struct platform_device *pdev)
 		return -ENODEV;
 	}
 
-	/* Semaphore initialization */
 	init_waitqueue_head(&lpm_drv->wait_queue);
 	mutex_init(&lpm_drv->mutex);
 
 	mutex_init(&lpm_drv->fwlock);
 
-	/*
-	 * Work struct init
-	 * lpm does not need dedicate work queue
-	 * use default queue
-	 */
 	if (devm_request_threaded_irq(&pdev->dev, res->start, lpm_isr,
 		lpm_threaded_isr, IRQF_NO_SUSPEND,
 		"st-lpm", (void *)lpm_drv) < 0) {
@@ -1859,31 +1548,25 @@ static int st_lpm_probe(struct platform_device *pdev)
 		return -ENODEV;
 	}
 
-	/*set driver specific data */
 	platform_set_drvdata(pdev, lpm_drv);
 
-	/*
-	 * Program Mailbox for interrupt enable
-	 */
 	lpm_write32(lpm_drv, 1, MBX_INT_SET_ENABLE, 0xFF);
 	lpm_drv->sbc_state = ST_LPM_SBC_BOOT;
 
-	/* register wakeup notifier */
 	lpm_drv->wakeup_cb.notifier_call = sti_wakeup_notifier;
 	wakeup_source_notifier_register(&lpm_drv->wakeup_cb);
 
 	st_lpm_set_ops(&st_lpm_mb_ops, (void *)lpm_drv);
 
-	/* Check whether the f/w is  running */
 	confreg = readl(lpm_drv->iomem_base[2]);
-	if (confreg & BIT(0)) { /* SBC Fw is booted */
+	if (confreg & BIT(0)) {  
 		err = st_lpm_get_fw_state(&lpm_drv->sbc_state);
 
 #ifdef MY_DEF_HERE
 		if (!err && lpm_drv->sbc_state == ST_LPM_SBC_RUNNING) {
-#else /* MY_DEF_HERE */
+#else  
 		if (lpm_drv->sbc_state == ST_LPM_SBC_RUNNING)
-#endif /* MY_DEF_HERE */
+#endif  
 			lpm_sec_init(lpm_drv);
 #ifdef MY_DEF_HERE
 			of_platform_populate(lpm_drv->dev->of_node,
@@ -1897,21 +1580,21 @@ static int st_lpm_probe(struct platform_device *pdev)
 			dev_info(lpm_drv->dev,
 				"Use sysfs FW trigger to load and activate LPM Firmware\n");
 		}
-#endif /* MY_DEF_HERE */
+#endif  
 	} else {
 #ifdef CONFIG_SBC_FW_LOADED_BY_PBL
 		dev_dbg(lpm_drv->dev, "SBC Firmware loaded but not booted\n");
 #ifdef MY_DEF_HERE
 		err = lpm_start_loaded_fw(lpm_drv);
-#else /* MY_DEF_HERE */
+#else  
 		err = lpm_start_fw(lpm_drv);
-#endif /* MY_DEF_HERE */
+#endif  
 		if (err) {
 #ifdef MY_DEF_HERE
 			dev_err(lpm_drv->dev, "Failed to start SBC Fw\n");
-#else /* MY_DEF_HERE */
+#else  
 			dev_err(pdev->dev, "Failed to start SBC Fw\n");
-#endif /* MY_DEF_HERE */
+#endif  
 			return err;
 		}
 
@@ -1919,21 +1602,21 @@ static int st_lpm_probe(struct platform_device *pdev)
 		of_platform_populate(lpm_drv->dev->of_node,
 				     lpm_child_match_table,
 				     NULL, lpm_drv->dev);
-#else /* MY_DEF_HERE */
+#else  
 		lpm_sec_init(lpm_drv);
-#endif /* MY_DEF_HERE */
+#endif  
 #else
 		dev_dbg(lpm_drv->dev, "SBC Firmware loading requested\n");
-		/* Initiate the loading of the device f/w */
+		 
 		err = request_firmware_nowait(THIS_MODULE, 1, lpm_drv->fw_name,
 					      &pdev->dev, GFP_KERNEL,
 					      (struct st_lpm_driver_data *)
 					      lpm_drv,
 #ifdef MY_DEF_HERE
 					      (void *)lpm_firmware_cb);
-#else /* MY_DEF_HERE */
+#else  
 					      (void *)lpm_load_fw);
-#endif /* MY_DEF_HERE */
+#endif  
 		if (err)
 			return err;
 #endif
@@ -1965,22 +1648,16 @@ static int st_lpm_probe(struct platform_device *pdev)
 		dev_err(&pdev->dev, "Cannot create trace_config sysfs entry\n");
 		return err;
 	}
-#else /* MY_DEF_HERE */
+#else  
 	err = device_create_file(&pdev->dev, &dev_attr_loadfw);
 	if (err) {
 		dev_err(&pdev->dev, "Cannot create loadfw sysfs entry\n");
 		return err;
 	}
-#endif /* MY_DEF_HERE */
+#endif  
 
 	return 0;
 }
-
-/**
- * st_lpm_remove() - To free used resources
- * @pdev:	device pointer
- * Return code 0
- */
 
 static int  st_lpm_remove(struct platform_device *pdev)
 {
@@ -1992,13 +1669,6 @@ static int  st_lpm_remove(struct platform_device *pdev)
 	return 0;
 }
 
-/*
- * data array storing chip specific SBC-DMEM offsets
- * currently defined only for 407 family SoCs
- * [0] = offset of dtu buffer address in SBC-DMEM
- * [1] = offset of CPS Tag in SBC-DMEM
- * [2] = offset of pen holding variable in SBC-DMEM
- */
 unsigned int stih407_family_lpm_data[] = {0x94, 0x84, 0xa4};
 
 static struct of_device_id st_lpm_match[] = {
@@ -2098,11 +1768,7 @@ static void st_lpm_setup_ir_init(void)
 
 	if (st_lpm_setup_ir_done_once)
 		return;
-	/*
-	 * Work around for IR Red key wakeup
-	 * This workaround will be removed, once
-	 * proper IR module is written and loaded
-	 */
+	 
 	st_lpm_setup_ir(ARRAY_SIZE(ir_key), ir_key);
 	st_lpm_setup_ir_done_once = 1;
 }
@@ -2117,7 +1783,7 @@ static int st_lpm_pm_suspend(struct device *dev)
 	st_lpm_setup_ir_init();
 
 	if (!lpm_drv->wakeup_bitmap) {
-		/* don't suspend without wakeup device */
+		 
 		pr_err("No device is able to wakeup\n");
 		return -EINVAL;
 	}
@@ -2151,11 +1817,7 @@ static int st_lpm_pm_resume(struct device *dev)
 	if (lpm_drv->trace_data_value &&
 	    !lpm_check_fw_version(&lpm_drv->fw_ver, LPM_SBC_TRACES_IN_SUSPEND))
 		lpm_setup_tracedata(lpm_drv->trace_data_value, lpm_drv);
-	/*
-	 * Request default value of EXIT_CPS, to be set while
-	 * exiting from non-CPS warm reset cases, such as
-	 * manual reset exit, WDT exit, shutdown exit.
-	 */
+	 
 	lpm_config_reboot(ST_LPM_REBOOT_WITH_DDR_OFF, lpm_drv);
 
 	return 0;
@@ -2166,7 +1828,7 @@ SIMPLE_DEV_PM_OPS(st_lpm_pm_ops, st_lpm_pm_suspend, st_lpm_pm_resume);
 #else
 #define ST_LPM_PM_OPS		NULL
 #endif
-#else /* MY_DEF_HERE */
+#else  
 #ifdef CONFIG_PM
 static void st_lpm_setup_ir_init(void)
 {
@@ -2251,11 +1913,7 @@ static void st_lpm_setup_ir_init(void)
 
 	if (st_lpm_setup_ir_done_once)
 		return;
-	/*
-	 * Work around for IR Red key wakeup
-	 * This workaround will be removed, once
-	 * proper IR module is written and loaded
-	 */
+	 
 	st_lpm_setup_ir(ARRAY_SIZE(ir_key), ir_key);
 	st_lpm_setup_ir_done_once = 1;
 }
@@ -2268,7 +1926,7 @@ static int st_lpm_pm_suspend(struct device *dev)
 	st_lpm_setup_ir_init();
 
 	if (!lpm_drv->wakeup_bitmap) {
-		/* don't suspend without wakeup device */
+		 
 		pr_err("No device is able to wakeup\n");
 		return -EINVAL;
 	}
@@ -2281,11 +1939,7 @@ static int st_lpm_pm_suspend(struct device *dev)
 
 static int st_lpm_pm_resume(struct device *dev)
 {
-	/*
-	 * Request default value of EXIT_CPS, to be set while
-	 * exiting from non-CPS warm reset cases, such as
-	 * manual reset exit, WDT exit, shutdown exit.
-	 */
+	 
 	st_lpm_config_reboot(ST_LPM_REBOOT_WITH_DDR_OFF);
 
 	return 0;
@@ -2296,7 +1950,7 @@ SIMPLE_DEV_PM_OPS(st_lpm_pm_ops, st_lpm_pm_suspend, st_lpm_pm_resume);
 #else
 #define ST_LPM_PM_OPS		NULL
 #endif
-#endif /* MY_DEF_HERE */
+#endif  
 
 static void st_lpm_shutdown(struct platform_device *pdev)
 {
@@ -2311,9 +1965,9 @@ static void st_lpm_shutdown(struct platform_device *pdev)
 
 #ifdef MY_DEF_HERE
 	lpm_config_reboot(ST_LPM_REBOOT_WITH_DDR_OFF, lpm_drv);
-#else /* MY_DEF_HERE */
+#else  
 	st_lpm_config_reboot(ST_LPM_REBOOT_WITH_DDR_OFF);
-#endif /* MY_DEF_HERE */
+#endif  
 	offset = st_lpm_get_dmem_offset(ST_SBC_DMEM_PEN_HOLDING_VAR);
 	if (offset >= 0)
 		st_lpm_write_dmem(reset_buf, 4, offset);

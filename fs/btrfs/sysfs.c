@@ -1,24 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) 2007 Oracle.  All rights reserved.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public
- * License v2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 021110-1307, USA.
- */
-
+ 
 #include <linux/sched.h>
 #include <linux/slab.h>
 #include <linux/spinlock.h>
@@ -140,7 +123,6 @@ static ssize_t btrfs_feature_attr_store(struct kobject *kobj,
 
 	features = get_features(fs_info, fa->feature_set);
 
-	/* Nothing to do */
 	if ((val && (features & fa->feature_bit)) ||
 	    (!val && !(features & fa->feature_bit)))
 		return count;
@@ -575,7 +557,7 @@ const char * const btrfs_feature_set_names[3] = {
 
 char *btrfs_printable_features(enum btrfs_feature_set set, u64 flags)
 {
-	size_t bufsize = 4096; /* safe max, 64 names * 64 bytes */
+	size_t bufsize = 4096;  
 	int len = 0;
 	int i;
 	char *str;
@@ -698,13 +680,10 @@ int btrfs_kobj_add_device(struct btrfs_fs_info *fs_info,
 	return error;
 }
 
-/* /sys/fs/btrfs/ entry */
 static struct kset *btrfs_kset;
 
-/* /sys/kernel/debug/btrfs */
 static struct dentry *btrfs_debugfs_root_dentry;
 
-/* Debugging tunables and exported data */
 u64 btrfs_debugfs_test;
 
 int btrfs_sysfs_add_one(struct btrfs_fs_info *fs_info)

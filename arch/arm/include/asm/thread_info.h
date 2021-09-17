@@ -1,15 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  arch/arm/include/asm/thread_info.h
- *
- *  Copyright (C) 2002 Russell King.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
+ 
 #ifndef __ASM_ARM_THREAD_INFO_H
 #define __ASM_ARM_THREAD_INFO_H
 
@@ -22,15 +14,15 @@
 
 #if (PAGE_SHIFT > 12)
 #define THREAD_SIZE_ORDER	0
-#else /* PAGE_SHIFT > 12 */
+#else  
 #define THREAD_SIZE_ORDER	1
-#endif /* PAGE_SHIFT > 12 */
+#endif  
 
 #define THREAD_SIZE		(PAGE_SIZE << THREAD_SIZE_ORDER)
-#else /* MY_DEF_HERE */
+#else  
 #define THREAD_SIZE_ORDER	1
 #define THREAD_SIZE		8192
-#endif /* MY_DEF_HERE */
+#endif  
 #define THREAD_START_SP		(THREAD_SIZE - 8)
 
 #ifndef __ASSEMBLY__
@@ -54,24 +46,20 @@ struct cpu_context_save {
 	__u32	fp;
 	__u32	sp;
 	__u32	pc;
-	__u32	extra[2];		/* Xscale 'acc' register, etc */
+	__u32	extra[2];		 
 };
 
-/*
- * low level task data that entry.S needs immediate access to.
- * __switch_to() assumes cpu_context follows immediately after cpu_domain.
- */
 struct thread_info {
-	unsigned long		flags;		/* low level flags */
-	int			preempt_count;	/* 0 => preemptable, <0 => bug */
-	mm_segment_t		addr_limit;	/* address limit */
-	struct task_struct	*task;		/* main task structure */
-	struct exec_domain	*exec_domain;	/* execution domain */
-	__u32			cpu;		/* cpu */
-	__u32			cpu_domain;	/* cpu domain */
-	struct cpu_context_save	cpu_context;	/* cpu context */
-	__u32			syscall;	/* syscall number */
-	__u8			used_cp[16];	/* thread used copro */
+	unsigned long		flags;		 
+	int			preempt_count;	 
+	mm_segment_t		addr_limit;	 
+	struct task_struct	*task;		 
+	struct exec_domain	*exec_domain;	 
+	__u32			cpu;		 
+	__u32			cpu_domain;	 
+	struct cpu_context_save	cpu_context;	 
+	__u32			syscall;	 
+	__u8			used_cp[16];	 
 	unsigned long		tp_value;
 #ifdef CONFIG_CRUNCH
 	struct crunch_state	crunchstate;
@@ -79,7 +67,7 @@ struct thread_info {
 	union fp_state		fpstate __attribute__((aligned(8)));
 	union vfp_state		vfpstate;
 #ifdef CONFIG_ARM_THUMBEE
-	unsigned long		thumbee_state;	/* ThumbEE Handler Base register */
+	unsigned long		thumbee_state;	 
 #endif
 	struct restart_block	restart_block;
 };
@@ -102,9 +90,6 @@ struct thread_info {
 #define init_thread_info	(init_thread_union.thread_info)
 #define init_stack		(init_thread_union.stack)
 
-/*
- * how to get the thread information struct from C
- */
 static inline struct thread_info *current_thread_info(void) __attribute_const__;
 
 static inline struct thread_info *current_thread_info(void)
@@ -143,32 +128,18 @@ extern int vfp_restore_user_hwstate(struct user_vfp __user *,
 				    struct user_vfp_exc __user *);
 #endif
 
-/*
- * We use bit 30 of the preempt_count to indicate that kernel
- * preemption is occurring.  See <asm/hardirq.h>.
- */
 #define PREEMPT_ACTIVE	0x40000000
 
-/*
- * thread information flags:
- *  TIF_SYSCALL_TRACE	- syscall trace active
- *  TIF_SYSCAL_AUDIT	- syscall auditing active
- *  TIF_SIGPENDING	- signal pending
- *  TIF_NEED_RESCHED	- rescheduling necessary
- *  TIF_NOTIFY_RESUME	- callback before returning to user
- *  TIF_USEDFPU		- FPU was used by this task this quantum (SMP)
- *  TIF_POLLING_NRFLAG	- true if poll_idle() is polling TIF_NEED_RESCHED
- */
 #define TIF_SIGPENDING		0
 #define TIF_NEED_RESCHED	1
-#define TIF_NOTIFY_RESUME	2	/* callback before returning to user */
+#define TIF_NOTIFY_RESUME	2	 
 #define TIF_SYSCALL_TRACE	8
 #define TIF_SYSCALL_AUDIT	9
 #define TIF_SYSCALL_TRACEPOINT	10
-#define TIF_SECCOMP		11	/* seccomp syscall filtering active */
-#define TIF_NOHZ		12	/* in adaptive nohz mode */
+#define TIF_SECCOMP		11	 
+#define TIF_NOHZ		12	 
 #define TIF_USING_IWMMXT	17
-#define TIF_MEMDIE		18	/* is terminating due to OOM killer */
+#define TIF_MEMDIE		18	 
 #define TIF_RESTORE_SIGMASK	20
 
 #define _TIF_SIGPENDING		(1 << TIF_SIGPENDING)
@@ -180,14 +151,10 @@ extern int vfp_restore_user_hwstate(struct user_vfp __user *,
 #define _TIF_SECCOMP		(1 << TIF_SECCOMP)
 #define _TIF_USING_IWMMXT	(1 << TIF_USING_IWMMXT)
 
-/* Checks for any syscall work in entry-common.S */
 #define _TIF_SYSCALL_WORK (_TIF_SYSCALL_TRACE | _TIF_SYSCALL_AUDIT | \
 			   _TIF_SYSCALL_TRACEPOINT | _TIF_SECCOMP)
 
-/*
- * Change these and you break ASM code in entry-common.S
- */
 #define _TIF_WORK_MASK		(_TIF_NEED_RESCHED | _TIF_SIGPENDING | _TIF_NOTIFY_RESUME)
 
-#endif /* __KERNEL__ */
-#endif /* __ASM_ARM_THREAD_INFO_H */
+#endif  
+#endif  

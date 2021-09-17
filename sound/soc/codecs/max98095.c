@@ -1,16 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * max98095.c -- MAX98095 ALSA SoC Audio driver
- *
- * Copyright 2011 Maxim Integrated Products
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
-
+ 
 #include <linux/module.h>
 #include <linux/moduleparam.h>
 #include <linux/kernel.h>
@@ -60,524 +51,524 @@ struct max98095_priv {
 };
 
 static const u8 max98095_reg_def[M98095_REG_CNT] = {
-	0x00, /* 00 */
-	0x00, /* 01 */
-	0x00, /* 02 */
-	0x00, /* 03 */
-	0x00, /* 04 */
-	0x00, /* 05 */
-	0x00, /* 06 */
-	0x00, /* 07 */
-	0x00, /* 08 */
-	0x00, /* 09 */
-	0x00, /* 0A */
-	0x00, /* 0B */
-	0x00, /* 0C */
-	0x00, /* 0D */
-	0x00, /* 0E */
-	0x00, /* 0F */
-	0x00, /* 10 */
-	0x00, /* 11 */
-	0x00, /* 12 */
-	0x00, /* 13 */
-	0x00, /* 14 */
-	0x00, /* 15 */
-	0x00, /* 16 */
-	0x00, /* 17 */
-	0x00, /* 18 */
-	0x00, /* 19 */
-	0x00, /* 1A */
-	0x00, /* 1B */
-	0x00, /* 1C */
-	0x00, /* 1D */
-	0x00, /* 1E */
-	0x00, /* 1F */
-	0x00, /* 20 */
-	0x00, /* 21 */
-	0x00, /* 22 */
-	0x00, /* 23 */
-	0x00, /* 24 */
-	0x00, /* 25 */
-	0x00, /* 26 */
-	0x00, /* 27 */
-	0x00, /* 28 */
-	0x00, /* 29 */
-	0x00, /* 2A */
-	0x00, /* 2B */
-	0x00, /* 2C */
-	0x00, /* 2D */
-	0x00, /* 2E */
-	0x00, /* 2F */
-	0x00, /* 30 */
-	0x00, /* 31 */
-	0x00, /* 32 */
-	0x00, /* 33 */
-	0x00, /* 34 */
-	0x00, /* 35 */
-	0x00, /* 36 */
-	0x00, /* 37 */
-	0x00, /* 38 */
-	0x00, /* 39 */
-	0x00, /* 3A */
-	0x00, /* 3B */
-	0x00, /* 3C */
-	0x00, /* 3D */
-	0x00, /* 3E */
-	0x00, /* 3F */
-	0x00, /* 40 */
-	0x00, /* 41 */
-	0x00, /* 42 */
-	0x00, /* 43 */
-	0x00, /* 44 */
-	0x00, /* 45 */
-	0x00, /* 46 */
-	0x00, /* 47 */
-	0x00, /* 48 */
-	0x00, /* 49 */
-	0x00, /* 4A */
-	0x00, /* 4B */
-	0x00, /* 4C */
-	0x00, /* 4D */
-	0x00, /* 4E */
-	0x00, /* 4F */
-	0x00, /* 50 */
-	0x00, /* 51 */
-	0x00, /* 52 */
-	0x00, /* 53 */
-	0x00, /* 54 */
-	0x00, /* 55 */
-	0x00, /* 56 */
-	0x00, /* 57 */
-	0x00, /* 58 */
-	0x00, /* 59 */
-	0x00, /* 5A */
-	0x00, /* 5B */
-	0x00, /* 5C */
-	0x00, /* 5D */
-	0x00, /* 5E */
-	0x00, /* 5F */
-	0x00, /* 60 */
-	0x00, /* 61 */
-	0x00, /* 62 */
-	0x00, /* 63 */
-	0x00, /* 64 */
-	0x00, /* 65 */
-	0x00, /* 66 */
-	0x00, /* 67 */
-	0x00, /* 68 */
-	0x00, /* 69 */
-	0x00, /* 6A */
-	0x00, /* 6B */
-	0x00, /* 6C */
-	0x00, /* 6D */
-	0x00, /* 6E */
-	0x00, /* 6F */
-	0x00, /* 70 */
-	0x00, /* 71 */
-	0x00, /* 72 */
-	0x00, /* 73 */
-	0x00, /* 74 */
-	0x00, /* 75 */
-	0x00, /* 76 */
-	0x00, /* 77 */
-	0x00, /* 78 */
-	0x00, /* 79 */
-	0x00, /* 7A */
-	0x00, /* 7B */
-	0x00, /* 7C */
-	0x00, /* 7D */
-	0x00, /* 7E */
-	0x00, /* 7F */
-	0x00, /* 80 */
-	0x00, /* 81 */
-	0x00, /* 82 */
-	0x00, /* 83 */
-	0x00, /* 84 */
-	0x00, /* 85 */
-	0x00, /* 86 */
-	0x00, /* 87 */
-	0x00, /* 88 */
-	0x00, /* 89 */
-	0x00, /* 8A */
-	0x00, /* 8B */
-	0x00, /* 8C */
-	0x00, /* 8D */
-	0x00, /* 8E */
-	0x00, /* 8F */
-	0x00, /* 90 */
-	0x00, /* 91 */
-	0x30, /* 92 */
-	0xF0, /* 93 */
-	0x00, /* 94 */
-	0x00, /* 95 */
-	0x3F, /* 96 */
-	0x00, /* 97 */
-	0x00, /* 98 */
-	0x00, /* 99 */
-	0x00, /* 9A */
-	0x00, /* 9B */
-	0x00, /* 9C */
-	0x00, /* 9D */
-	0x00, /* 9E */
-	0x00, /* 9F */
-	0x00, /* A0 */
-	0x00, /* A1 */
-	0x00, /* A2 */
-	0x00, /* A3 */
-	0x00, /* A4 */
-	0x00, /* A5 */
-	0x00, /* A6 */
-	0x00, /* A7 */
-	0x00, /* A8 */
-	0x00, /* A9 */
-	0x00, /* AA */
-	0x00, /* AB */
-	0x00, /* AC */
-	0x00, /* AD */
-	0x00, /* AE */
-	0x00, /* AF */
-	0x00, /* B0 */
-	0x00, /* B1 */
-	0x00, /* B2 */
-	0x00, /* B3 */
-	0x00, /* B4 */
-	0x00, /* B5 */
-	0x00, /* B6 */
-	0x00, /* B7 */
-	0x00, /* B8 */
-	0x00, /* B9 */
-	0x00, /* BA */
-	0x00, /* BB */
-	0x00, /* BC */
-	0x00, /* BD */
-	0x00, /* BE */
-	0x00, /* BF */
-	0x00, /* C0 */
-	0x00, /* C1 */
-	0x00, /* C2 */
-	0x00, /* C3 */
-	0x00, /* C4 */
-	0x00, /* C5 */
-	0x00, /* C6 */
-	0x00, /* C7 */
-	0x00, /* C8 */
-	0x00, /* C9 */
-	0x00, /* CA */
-	0x00, /* CB */
-	0x00, /* CC */
-	0x00, /* CD */
-	0x00, /* CE */
-	0x00, /* CF */
-	0x00, /* D0 */
-	0x00, /* D1 */
-	0x00, /* D2 */
-	0x00, /* D3 */
-	0x00, /* D4 */
-	0x00, /* D5 */
-	0x00, /* D6 */
-	0x00, /* D7 */
-	0x00, /* D8 */
-	0x00, /* D9 */
-	0x00, /* DA */
-	0x00, /* DB */
-	0x00, /* DC */
-	0x00, /* DD */
-	0x00, /* DE */
-	0x00, /* DF */
-	0x00, /* E0 */
-	0x00, /* E1 */
-	0x00, /* E2 */
-	0x00, /* E3 */
-	0x00, /* E4 */
-	0x00, /* E5 */
-	0x00, /* E6 */
-	0x00, /* E7 */
-	0x00, /* E8 */
-	0x00, /* E9 */
-	0x00, /* EA */
-	0x00, /* EB */
-	0x00, /* EC */
-	0x00, /* ED */
-	0x00, /* EE */
-	0x00, /* EF */
-	0x00, /* F0 */
-	0x00, /* F1 */
-	0x00, /* F2 */
-	0x00, /* F3 */
-	0x00, /* F4 */
-	0x00, /* F5 */
-	0x00, /* F6 */
-	0x00, /* F7 */
-	0x00, /* F8 */
-	0x00, /* F9 */
-	0x00, /* FA */
-	0x00, /* FB */
-	0x00, /* FC */
-	0x00, /* FD */
-	0x00, /* FE */
-	0x00, /* FF */
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x30,  
+	0xF0,  
+	0x00,  
+	0x00,  
+	0x3F,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
+	0x00,  
 };
 
 static struct {
 	int readable;
 	int writable;
 } max98095_access[M98095_REG_CNT] = {
-	{ 0x00, 0x00 }, /* 00 */
-	{ 0xFF, 0x00 }, /* 01 */
-	{ 0xFF, 0x00 }, /* 02 */
-	{ 0xFF, 0x00 }, /* 03 */
-	{ 0xFF, 0x00 }, /* 04 */
-	{ 0xFF, 0x00 }, /* 05 */
-	{ 0xFF, 0x00 }, /* 06 */
-	{ 0xFF, 0x00 }, /* 07 */
-	{ 0xFF, 0x00 }, /* 08 */
-	{ 0xFF, 0x00 }, /* 09 */
-	{ 0xFF, 0x00 }, /* 0A */
-	{ 0xFF, 0x00 }, /* 0B */
-	{ 0xFF, 0x00 }, /* 0C */
-	{ 0xFF, 0x00 }, /* 0D */
-	{ 0xFF, 0x00 }, /* 0E */
-	{ 0xFF, 0x9F }, /* 0F */
-	{ 0xFF, 0xFF }, /* 10 */
-	{ 0xFF, 0xFF }, /* 11 */
-	{ 0xFF, 0xFF }, /* 12 */
-	{ 0xFF, 0xFF }, /* 13 */
-	{ 0xFF, 0xFF }, /* 14 */
-	{ 0xFF, 0xFF }, /* 15 */
-	{ 0xFF, 0xFF }, /* 16 */
-	{ 0xFF, 0xFF }, /* 17 */
-	{ 0xFF, 0xFF }, /* 18 */
-	{ 0xFF, 0xFF }, /* 19 */
-	{ 0xFF, 0xFF }, /* 1A */
-	{ 0xFF, 0xFF }, /* 1B */
-	{ 0xFF, 0xFF }, /* 1C */
-	{ 0xFF, 0xFF }, /* 1D */
-	{ 0xFF, 0x77 }, /* 1E */
-	{ 0xFF, 0x77 }, /* 1F */
-	{ 0xFF, 0x77 }, /* 20 */
-	{ 0xFF, 0x77 }, /* 21 */
-	{ 0xFF, 0x77 }, /* 22 */
-	{ 0xFF, 0x77 }, /* 23 */
-	{ 0xFF, 0xFF }, /* 24 */
-	{ 0xFF, 0x7F }, /* 25 */
-	{ 0xFF, 0x31 }, /* 26 */
-	{ 0xFF, 0xFF }, /* 27 */
-	{ 0xFF, 0xFF }, /* 28 */
-	{ 0xFF, 0xFF }, /* 29 */
-	{ 0xFF, 0xF7 }, /* 2A */
-	{ 0xFF, 0x2F }, /* 2B */
-	{ 0xFF, 0xEF }, /* 2C */
-	{ 0xFF, 0xFF }, /* 2D */
-	{ 0xFF, 0xFF }, /* 2E */
-	{ 0xFF, 0xFF }, /* 2F */
-	{ 0xFF, 0xFF }, /* 30 */
-	{ 0xFF, 0xFF }, /* 31 */
-	{ 0xFF, 0xFF }, /* 32 */
-	{ 0xFF, 0xFF }, /* 33 */
-	{ 0xFF, 0xF7 }, /* 34 */
-	{ 0xFF, 0x2F }, /* 35 */
-	{ 0xFF, 0xCF }, /* 36 */
-	{ 0xFF, 0xFF }, /* 37 */
-	{ 0xFF, 0xFF }, /* 38 */
-	{ 0xFF, 0xFF }, /* 39 */
-	{ 0xFF, 0xFF }, /* 3A */
-	{ 0xFF, 0xFF }, /* 3B */
-	{ 0xFF, 0xFF }, /* 3C */
-	{ 0xFF, 0xFF }, /* 3D */
-	{ 0xFF, 0xF7 }, /* 3E */
-	{ 0xFF, 0x2F }, /* 3F */
-	{ 0xFF, 0xCF }, /* 40 */
-	{ 0xFF, 0xFF }, /* 41 */
-	{ 0xFF, 0x77 }, /* 42 */
-	{ 0xFF, 0xFF }, /* 43 */
-	{ 0xFF, 0xFF }, /* 44 */
-	{ 0xFF, 0xFF }, /* 45 */
-	{ 0xFF, 0xFF }, /* 46 */
-	{ 0xFF, 0xFF }, /* 47 */
-	{ 0xFF, 0xFF }, /* 48 */
-	{ 0xFF, 0x0F }, /* 49 */
-	{ 0xFF, 0xFF }, /* 4A */
-	{ 0xFF, 0xFF }, /* 4B */
-	{ 0xFF, 0x3F }, /* 4C */
-	{ 0xFF, 0x3F }, /* 4D */
-	{ 0xFF, 0x3F }, /* 4E */
-	{ 0xFF, 0xFF }, /* 4F */
-	{ 0xFF, 0x7F }, /* 50 */
-	{ 0xFF, 0x7F }, /* 51 */
-	{ 0xFF, 0x0F }, /* 52 */
-	{ 0xFF, 0x3F }, /* 53 */
-	{ 0xFF, 0x3F }, /* 54 */
-	{ 0xFF, 0x3F }, /* 55 */
-	{ 0xFF, 0xFF }, /* 56 */
-	{ 0xFF, 0xFF }, /* 57 */
-	{ 0xFF, 0xBF }, /* 58 */
-	{ 0xFF, 0x1F }, /* 59 */
-	{ 0xFF, 0xBF }, /* 5A */
-	{ 0xFF, 0x1F }, /* 5B */
-	{ 0xFF, 0xBF }, /* 5C */
-	{ 0xFF, 0x3F }, /* 5D */
-	{ 0xFF, 0x3F }, /* 5E */
-	{ 0xFF, 0x7F }, /* 5F */
-	{ 0xFF, 0x7F }, /* 60 */
-	{ 0xFF, 0x47 }, /* 61 */
-	{ 0xFF, 0x9F }, /* 62 */
-	{ 0xFF, 0x9F }, /* 63 */
-	{ 0xFF, 0x9F }, /* 64 */
-	{ 0xFF, 0x9F }, /* 65 */
-	{ 0xFF, 0x9F }, /* 66 */
-	{ 0xFF, 0xBF }, /* 67 */
-	{ 0xFF, 0xBF }, /* 68 */
-	{ 0xFF, 0xFF }, /* 69 */
-	{ 0xFF, 0xFF }, /* 6A */
-	{ 0xFF, 0x7F }, /* 6B */
-	{ 0xFF, 0xF7 }, /* 6C */
-	{ 0xFF, 0xFF }, /* 6D */
-	{ 0xFF, 0xFF }, /* 6E */
-	{ 0xFF, 0x1F }, /* 6F */
-	{ 0xFF, 0xF7 }, /* 70 */
-	{ 0xFF, 0xFF }, /* 71 */
-	{ 0xFF, 0xFF }, /* 72 */
-	{ 0xFF, 0x1F }, /* 73 */
-	{ 0xFF, 0xF7 }, /* 74 */
-	{ 0xFF, 0xFF }, /* 75 */
-	{ 0xFF, 0xFF }, /* 76 */
-	{ 0xFF, 0x1F }, /* 77 */
-	{ 0xFF, 0xF7 }, /* 78 */
-	{ 0xFF, 0xFF }, /* 79 */
-	{ 0xFF, 0xFF }, /* 7A */
-	{ 0xFF, 0x1F }, /* 7B */
-	{ 0xFF, 0xF7 }, /* 7C */
-	{ 0xFF, 0xFF }, /* 7D */
-	{ 0xFF, 0xFF }, /* 7E */
-	{ 0xFF, 0x1F }, /* 7F */
-	{ 0xFF, 0xF7 }, /* 80 */
-	{ 0xFF, 0xFF }, /* 81 */
-	{ 0xFF, 0xFF }, /* 82 */
-	{ 0xFF, 0x1F }, /* 83 */
-	{ 0xFF, 0x7F }, /* 84 */
-	{ 0xFF, 0x0F }, /* 85 */
-	{ 0xFF, 0xD8 }, /* 86 */
-	{ 0xFF, 0xFF }, /* 87 */
-	{ 0xFF, 0xEF }, /* 88 */
-	{ 0xFF, 0xFE }, /* 89 */
-	{ 0xFF, 0xFE }, /* 8A */
-	{ 0xFF, 0xFF }, /* 8B */
-	{ 0xFF, 0xFF }, /* 8C */
-	{ 0xFF, 0x3F }, /* 8D */
-	{ 0xFF, 0xFF }, /* 8E */
-	{ 0xFF, 0x3F }, /* 8F */
-	{ 0xFF, 0x8F }, /* 90 */
-	{ 0xFF, 0xFF }, /* 91 */
-	{ 0xFF, 0x3F }, /* 92 */
-	{ 0xFF, 0xFF }, /* 93 */
-	{ 0xFF, 0xFF }, /* 94 */
-	{ 0xFF, 0x0F }, /* 95 */
-	{ 0xFF, 0x3F }, /* 96 */
-	{ 0xFF, 0x8C }, /* 97 */
-	{ 0x00, 0x00 }, /* 98 */
-	{ 0x00, 0x00 }, /* 99 */
-	{ 0x00, 0x00 }, /* 9A */
-	{ 0x00, 0x00 }, /* 9B */
-	{ 0x00, 0x00 }, /* 9C */
-	{ 0x00, 0x00 }, /* 9D */
-	{ 0x00, 0x00 }, /* 9E */
-	{ 0x00, 0x00 }, /* 9F */
-	{ 0x00, 0x00 }, /* A0 */
-	{ 0x00, 0x00 }, /* A1 */
-	{ 0x00, 0x00 }, /* A2 */
-	{ 0x00, 0x00 }, /* A3 */
-	{ 0x00, 0x00 }, /* A4 */
-	{ 0x00, 0x00 }, /* A5 */
-	{ 0x00, 0x00 }, /* A6 */
-	{ 0x00, 0x00 }, /* A7 */
-	{ 0x00, 0x00 }, /* A8 */
-	{ 0x00, 0x00 }, /* A9 */
-	{ 0x00, 0x00 }, /* AA */
-	{ 0x00, 0x00 }, /* AB */
-	{ 0x00, 0x00 }, /* AC */
-	{ 0x00, 0x00 }, /* AD */
-	{ 0x00, 0x00 }, /* AE */
-	{ 0x00, 0x00 }, /* AF */
-	{ 0x00, 0x00 }, /* B0 */
-	{ 0x00, 0x00 }, /* B1 */
-	{ 0x00, 0x00 }, /* B2 */
-	{ 0x00, 0x00 }, /* B3 */
-	{ 0x00, 0x00 }, /* B4 */
-	{ 0x00, 0x00 }, /* B5 */
-	{ 0x00, 0x00 }, /* B6 */
-	{ 0x00, 0x00 }, /* B7 */
-	{ 0x00, 0x00 }, /* B8 */
-	{ 0x00, 0x00 }, /* B9 */
-	{ 0x00, 0x00 }, /* BA */
-	{ 0x00, 0x00 }, /* BB */
-	{ 0x00, 0x00 }, /* BC */
-	{ 0x00, 0x00 }, /* BD */
-	{ 0x00, 0x00 }, /* BE */
-	{ 0x00, 0x00 }, /* BF */
-	{ 0x00, 0x00 }, /* C0 */
-	{ 0x00, 0x00 }, /* C1 */
-	{ 0x00, 0x00 }, /* C2 */
-	{ 0x00, 0x00 }, /* C3 */
-	{ 0x00, 0x00 }, /* C4 */
-	{ 0x00, 0x00 }, /* C5 */
-	{ 0x00, 0x00 }, /* C6 */
-	{ 0x00, 0x00 }, /* C7 */
-	{ 0x00, 0x00 }, /* C8 */
-	{ 0x00, 0x00 }, /* C9 */
-	{ 0x00, 0x00 }, /* CA */
-	{ 0x00, 0x00 }, /* CB */
-	{ 0x00, 0x00 }, /* CC */
-	{ 0x00, 0x00 }, /* CD */
-	{ 0x00, 0x00 }, /* CE */
-	{ 0x00, 0x00 }, /* CF */
-	{ 0x00, 0x00 }, /* D0 */
-	{ 0x00, 0x00 }, /* D1 */
-	{ 0x00, 0x00 }, /* D2 */
-	{ 0x00, 0x00 }, /* D3 */
-	{ 0x00, 0x00 }, /* D4 */
-	{ 0x00, 0x00 }, /* D5 */
-	{ 0x00, 0x00 }, /* D6 */
-	{ 0x00, 0x00 }, /* D7 */
-	{ 0x00, 0x00 }, /* D8 */
-	{ 0x00, 0x00 }, /* D9 */
-	{ 0x00, 0x00 }, /* DA */
-	{ 0x00, 0x00 }, /* DB */
-	{ 0x00, 0x00 }, /* DC */
-	{ 0x00, 0x00 }, /* DD */
-	{ 0x00, 0x00 }, /* DE */
-	{ 0x00, 0x00 }, /* DF */
-	{ 0x00, 0x00 }, /* E0 */
-	{ 0x00, 0x00 }, /* E1 */
-	{ 0x00, 0x00 }, /* E2 */
-	{ 0x00, 0x00 }, /* E3 */
-	{ 0x00, 0x00 }, /* E4 */
-	{ 0x00, 0x00 }, /* E5 */
-	{ 0x00, 0x00 }, /* E6 */
-	{ 0x00, 0x00 }, /* E7 */
-	{ 0x00, 0x00 }, /* E8 */
-	{ 0x00, 0x00 }, /* E9 */
-	{ 0x00, 0x00 }, /* EA */
-	{ 0x00, 0x00 }, /* EB */
-	{ 0x00, 0x00 }, /* EC */
-	{ 0x00, 0x00 }, /* ED */
-	{ 0x00, 0x00 }, /* EE */
-	{ 0x00, 0x00 }, /* EF */
-	{ 0x00, 0x00 }, /* F0 */
-	{ 0x00, 0x00 }, /* F1 */
-	{ 0x00, 0x00 }, /* F2 */
-	{ 0x00, 0x00 }, /* F3 */
-	{ 0x00, 0x00 }, /* F4 */
-	{ 0x00, 0x00 }, /* F5 */
-	{ 0x00, 0x00 }, /* F6 */
-	{ 0x00, 0x00 }, /* F7 */
-	{ 0x00, 0x00 }, /* F8 */
-	{ 0x00, 0x00 }, /* F9 */
-	{ 0x00, 0x00 }, /* FA */
-	{ 0x00, 0x00 }, /* FB */
-	{ 0x00, 0x00 }, /* FC */
-	{ 0x00, 0x00 }, /* FD */
-	{ 0x00, 0x00 }, /* FE */
-	{ 0xFF, 0x00 }, /* FF */
+	{ 0x00, 0x00 },  
+	{ 0xFF, 0x00 },  
+	{ 0xFF, 0x00 },  
+	{ 0xFF, 0x00 },  
+	{ 0xFF, 0x00 },  
+	{ 0xFF, 0x00 },  
+	{ 0xFF, 0x00 },  
+	{ 0xFF, 0x00 },  
+	{ 0xFF, 0x00 },  
+	{ 0xFF, 0x00 },  
+	{ 0xFF, 0x00 },  
+	{ 0xFF, 0x00 },  
+	{ 0xFF, 0x00 },  
+	{ 0xFF, 0x00 },  
+	{ 0xFF, 0x00 },  
+	{ 0xFF, 0x9F },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0x77 },  
+	{ 0xFF, 0x77 },  
+	{ 0xFF, 0x77 },  
+	{ 0xFF, 0x77 },  
+	{ 0xFF, 0x77 },  
+	{ 0xFF, 0x77 },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0x7F },  
+	{ 0xFF, 0x31 },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xF7 },  
+	{ 0xFF, 0x2F },  
+	{ 0xFF, 0xEF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xF7 },  
+	{ 0xFF, 0x2F },  
+	{ 0xFF, 0xCF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xF7 },  
+	{ 0xFF, 0x2F },  
+	{ 0xFF, 0xCF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0x77 },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0x0F },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0x3F },  
+	{ 0xFF, 0x3F },  
+	{ 0xFF, 0x3F },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0x7F },  
+	{ 0xFF, 0x7F },  
+	{ 0xFF, 0x0F },  
+	{ 0xFF, 0x3F },  
+	{ 0xFF, 0x3F },  
+	{ 0xFF, 0x3F },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xBF },  
+	{ 0xFF, 0x1F },  
+	{ 0xFF, 0xBF },  
+	{ 0xFF, 0x1F },  
+	{ 0xFF, 0xBF },  
+	{ 0xFF, 0x3F },  
+	{ 0xFF, 0x3F },  
+	{ 0xFF, 0x7F },  
+	{ 0xFF, 0x7F },  
+	{ 0xFF, 0x47 },  
+	{ 0xFF, 0x9F },  
+	{ 0xFF, 0x9F },  
+	{ 0xFF, 0x9F },  
+	{ 0xFF, 0x9F },  
+	{ 0xFF, 0x9F },  
+	{ 0xFF, 0xBF },  
+	{ 0xFF, 0xBF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0x7F },  
+	{ 0xFF, 0xF7 },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0x1F },  
+	{ 0xFF, 0xF7 },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0x1F },  
+	{ 0xFF, 0xF7 },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0x1F },  
+	{ 0xFF, 0xF7 },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0x1F },  
+	{ 0xFF, 0xF7 },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0x1F },  
+	{ 0xFF, 0xF7 },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0x1F },  
+	{ 0xFF, 0x7F },  
+	{ 0xFF, 0x0F },  
+	{ 0xFF, 0xD8 },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xEF },  
+	{ 0xFF, 0xFE },  
+	{ 0xFF, 0xFE },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0x3F },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0x3F },  
+	{ 0xFF, 0x8F },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0x3F },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0xFF },  
+	{ 0xFF, 0x0F },  
+	{ 0xFF, 0x3F },  
+	{ 0xFF, 0x8C },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0x00, 0x00 },  
+	{ 0xFF, 0x00 },  
 };
 
 static int max98095_readable(struct snd_soc_codec *codec, unsigned int reg)
@@ -614,11 +605,6 @@ static int max98095_volatile(struct snd_soc_codec *codec, unsigned int reg)
 	return 0;
 }
 
-/*
- * Filter coefficients are in a separate register segment
- * and they share the address space of the normal registers.
- * The coefficient registers do not need or share the cache.
- */
 static int max98095_hw_write(struct snd_soc_codec *codec, unsigned int reg,
 			     unsigned int value)
 {
@@ -631,9 +617,6 @@ static int max98095_hw_write(struct snd_soc_codec *codec, unsigned int reg,
 	return ret ? -EIO : 0;
 }
 
-/*
- * Load equalizer DSP coefficient configurations registers
- */
 static void m98095_eq_band(struct snd_soc_codec *codec, unsigned int dai,
 		    unsigned int band, u16 *coefs)
 {
@@ -643,22 +626,16 @@ static void m98095_eq_band(struct snd_soc_codec *codec, unsigned int dai,
 	BUG_ON(band > 4);
 	BUG_ON(dai > 1);
 
-	/* Load the base register address */
 	eq_reg = dai ? M98095_142_DAI2_EQ_BASE : M98095_110_DAI1_EQ_BASE;
 
-	/* Add the band address offset, note adjustment for word address */
 	eq_reg += band * (M98095_COEFS_PER_BAND << 1);
 
-	/* Step through the registers and coefs */
 	for (i = 0; i < M98095_COEFS_PER_BAND; i++) {
 		max98095_hw_write(codec, eq_reg++, M98095_BYTE1(coefs[i]));
 		max98095_hw_write(codec, eq_reg++, M98095_BYTE0(coefs[i]));
 	}
 }
 
-/*
- * Load biquad filter coefficient configurations registers
- */
 static void m98095_biquad_band(struct snd_soc_codec *codec, unsigned int dai,
 		    unsigned int band, u16 *coefs)
 {
@@ -668,13 +645,10 @@ static void m98095_biquad_band(struct snd_soc_codec *codec, unsigned int dai,
 	BUG_ON(band > 1);
 	BUG_ON(dai > 1);
 
-	/* Load the base register address */
 	bq_reg = dai ? M98095_17E_DAI2_BQ_BASE : M98095_174_DAI1_BQ_BASE;
 
-	/* Add the band address offset, note adjustment for word address */
 	bq_reg += band * (M98095_COEFS_PER_BAND << 1);
 
-	/* Step through the registers and coefs */
 	for (i = 0; i < M98095_COEFS_PER_BAND; i++) {
 		max98095_hw_write(codec, bq_reg++, M98095_BYTE1(coefs[i]));
 		max98095_hw_write(codec, bq_reg++, M98095_BYTE0(coefs[i]));
@@ -732,9 +706,9 @@ static int max98095_mic1pre_set(struct snd_kcontrol *kcontrol,
 {
 #if defined(MY_ABC_HERE)
 	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
-#else /* MY_ABC_HERE */
+#else  
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
-#endif /* MY_ABC_HERE */
+#endif  
 	struct max98095_priv *max98095 = snd_soc_codec_get_drvdata(codec);
 	unsigned int sel = ucontrol->value.integer.value[0];
 
@@ -750,9 +724,9 @@ static int max98095_mic1pre_get(struct snd_kcontrol *kcontrol,
 {
 #if defined(MY_ABC_HERE)
 	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
-#else /* MY_ABC_HERE */
+#else  
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
-#endif /* MY_ABC_HERE */
+#endif  
 	struct max98095_priv *max98095 = snd_soc_codec_get_drvdata(codec);
 
 	ucontrol->value.integer.value[0] = max98095->mic1pre;
@@ -764,9 +738,9 @@ static int max98095_mic2pre_set(struct snd_kcontrol *kcontrol,
 {
 #if defined(MY_ABC_HERE)
 	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
-#else /* MY_ABC_HERE */
+#else  
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
-#endif /* MY_ABC_HERE */
+#endif  
 	struct max98095_priv *max98095 = snd_soc_codec_get_drvdata(codec);
 	unsigned int sel = ucontrol->value.integer.value[0];
 
@@ -782,9 +756,9 @@ static int max98095_mic2pre_get(struct snd_kcontrol *kcontrol,
 {
 #if defined(MY_ABC_HERE)
 	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
-#else /* MY_ABC_HERE */
+#else  
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
-#endif /* MY_ABC_HERE */
+#endif  
 	struct max98095_priv *max98095 = snd_soc_codec_get_drvdata(codec);
 
 	ucontrol->value.integer.value[0] = max98095->mic2pre;
@@ -903,7 +877,6 @@ static const struct snd_kcontrol_new max98095_snd_controls[] = {
 	SOC_ENUM("Lineout Mode", max98095_lineout_mode_enum),
 };
 
-/* Left speaker mixer switch */
 static const struct snd_kcontrol_new max98095_left_speaker_mixer_controls[] = {
 	SOC_DAPM_SINGLE("Left DAC1 Switch", M98095_050_MIX_SPK_LEFT, 0, 1, 0),
 	SOC_DAPM_SINGLE("Right DAC1 Switch", M98095_050_MIX_SPK_LEFT, 6, 1, 0),
@@ -915,7 +888,6 @@ static const struct snd_kcontrol_new max98095_left_speaker_mixer_controls[] = {
 	SOC_DAPM_SINGLE("IN2 Switch", M98095_050_MIX_SPK_LEFT, 2, 1, 0),
 };
 
-/* Right speaker mixer switch */
 static const struct snd_kcontrol_new max98095_right_speaker_mixer_controls[] = {
 	SOC_DAPM_SINGLE("Left DAC1 Switch", M98095_051_MIX_SPK_RIGHT, 6, 1, 0),
 	SOC_DAPM_SINGLE("Right DAC1 Switch", M98095_051_MIX_SPK_RIGHT, 0, 1, 0),
@@ -927,7 +899,6 @@ static const struct snd_kcontrol_new max98095_right_speaker_mixer_controls[] = {
 	SOC_DAPM_SINGLE("IN2 Switch", M98095_051_MIX_SPK_RIGHT, 2, 1, 0),
 };
 
-/* Left headphone mixer switch */
 static const struct snd_kcontrol_new max98095_left_hp_mixer_controls[] = {
 	SOC_DAPM_SINGLE("Left DAC1 Switch", M98095_04C_MIX_HP_LEFT, 0, 1, 0),
 	SOC_DAPM_SINGLE("Right DAC1 Switch", M98095_04C_MIX_HP_LEFT, 5, 1, 0),
@@ -937,7 +908,6 @@ static const struct snd_kcontrol_new max98095_left_hp_mixer_controls[] = {
 	SOC_DAPM_SINGLE("IN2 Switch", M98095_04C_MIX_HP_LEFT, 2, 1, 0),
 };
 
-/* Right headphone mixer switch */
 static const struct snd_kcontrol_new max98095_right_hp_mixer_controls[] = {
 	SOC_DAPM_SINGLE("Left DAC1 Switch", M98095_04D_MIX_HP_RIGHT, 5, 1, 0),
 	SOC_DAPM_SINGLE("Right DAC1 Switch", M98095_04D_MIX_HP_RIGHT, 0, 1, 0),
@@ -947,7 +917,6 @@ static const struct snd_kcontrol_new max98095_right_hp_mixer_controls[] = {
 	SOC_DAPM_SINGLE("IN2 Switch", M98095_04D_MIX_HP_RIGHT, 2, 1, 0),
 };
 
-/* Receiver earpiece mixer switch */
 static const struct snd_kcontrol_new max98095_mono_rcv_mixer_controls[] = {
 	SOC_DAPM_SINGLE("Left DAC1 Switch", M98095_04F_MIX_RCV, 0, 1, 0),
 	SOC_DAPM_SINGLE("Right DAC1 Switch", M98095_04F_MIX_RCV, 5, 1, 0),
@@ -957,7 +926,6 @@ static const struct snd_kcontrol_new max98095_mono_rcv_mixer_controls[] = {
 	SOC_DAPM_SINGLE("IN2 Switch", M98095_04F_MIX_RCV, 2, 1, 0),
 };
 
-/* Left lineout mixer switch */
 static const struct snd_kcontrol_new max98095_left_lineout_mixer_controls[] = {
 	SOC_DAPM_SINGLE("Left DAC1 Switch", M98095_053_MIX_LINEOUT1, 5, 1, 0),
 	SOC_DAPM_SINGLE("Right DAC1 Switch", M98095_053_MIX_LINEOUT1, 0, 1, 0),
@@ -967,7 +935,6 @@ static const struct snd_kcontrol_new max98095_left_lineout_mixer_controls[] = {
 	SOC_DAPM_SINGLE("IN2 Switch", M98095_053_MIX_LINEOUT1, 2, 1, 0),
 };
 
-/* Right lineout mixer switch */
 static const struct snd_kcontrol_new max98095_right_lineout_mixer_controls[] = {
 	SOC_DAPM_SINGLE("Left DAC1 Switch", M98095_054_MIX_LINEOUT2, 0, 1, 0),
 	SOC_DAPM_SINGLE("Right DAC1 Switch", M98095_054_MIX_LINEOUT2, 5, 1, 0),
@@ -977,7 +944,6 @@ static const struct snd_kcontrol_new max98095_right_lineout_mixer_controls[] = {
 	SOC_DAPM_SINGLE("IN2 Switch", M98095_054_MIX_LINEOUT2, 2, 1, 0),
 };
 
-/* Left ADC mixer switch */
 static const struct snd_kcontrol_new max98095_left_ADC_mixer_controls[] = {
 	SOC_DAPM_SINGLE("MIC1 Switch", M98095_04A_MIX_ADC_LEFT, 7, 1, 0),
 	SOC_DAPM_SINGLE("MIC2 Switch", M98095_04A_MIX_ADC_LEFT, 6, 1, 0),
@@ -985,7 +951,6 @@ static const struct snd_kcontrol_new max98095_left_ADC_mixer_controls[] = {
 	SOC_DAPM_SINGLE("IN2 Switch", M98095_04A_MIX_ADC_LEFT, 2, 1, 0),
 };
 
-/* Right ADC mixer switch */
 static const struct snd_kcontrol_new max98095_right_ADC_mixer_controls[] = {
 	SOC_DAPM_SINGLE("MIC1 Switch", M98095_04B_MIX_ADC_RIGHT, 7, 1, 0),
 	SOC_DAPM_SINGLE("MIC2 Switch", M98095_04B_MIX_ADC_RIGHT, 6, 1, 0),
@@ -1019,10 +984,6 @@ static int max98095_mic_event(struct snd_soc_dapm_widget *w,
 	return 0;
 }
 
-/*
- * The line inputs are stereo inputs with the left and right
- * channels sharing a common PGA power control signal.
- */
 static int max98095_line_pga(struct snd_soc_dapm_widget *w,
 			     int event, u8 channel)
 {
@@ -1066,10 +1027,6 @@ static int max98095_pga_in2_event(struct snd_soc_dapm_widget *w,
 	return max98095_line_pga(w, event, 2);
 }
 
-/*
- * The stereo line out mixer outputs to two stereo line outs.
- * The 2nd pair has a separate set of enables.
- */
 static int max98095_lineout_event(struct snd_soc_dapm_widget *w,
 			     struct snd_kcontrol *kcontrol, int event)
 {
@@ -1203,7 +1160,7 @@ static const struct snd_soc_dapm_widget max98095_dapm_widgets[] = {
 };
 
 static const struct snd_soc_dapm_route max98095_audio_map[] = {
-	/* Left headphone output mixer */
+	 
 	{"Left Headphone Mixer", "Left DAC1 Switch", "DACL1"},
 	{"Left Headphone Mixer", "Right DAC1 Switch", "DACR1"},
 	{"Left Headphone Mixer", "MIC1 Switch", "MIC1 Input"},
@@ -1211,7 +1168,6 @@ static const struct snd_soc_dapm_route max98095_audio_map[] = {
 	{"Left Headphone Mixer", "IN1 Switch", "IN1 Input"},
 	{"Left Headphone Mixer", "IN2 Switch", "IN2 Input"},
 
-	/* Right headphone output mixer */
 	{"Right Headphone Mixer", "Left DAC1 Switch", "DACL1"},
 	{"Right Headphone Mixer", "Right DAC1 Switch", "DACR1"},
 	{"Right Headphone Mixer", "MIC1 Switch", "MIC1 Input"},
@@ -1219,7 +1175,6 @@ static const struct snd_soc_dapm_route max98095_audio_map[] = {
 	{"Right Headphone Mixer", "IN1 Switch", "IN1 Input"},
 	{"Right Headphone Mixer", "IN2 Switch", "IN2 Input"},
 
-	/* Left speaker output mixer */
 	{"Left Speaker Mixer", "Left DAC1 Switch", "DACL1"},
 	{"Left Speaker Mixer", "Right DAC1 Switch", "DACR1"},
 	{"Left Speaker Mixer", "Mono DAC2 Switch", "DACM2"},
@@ -1229,7 +1184,6 @@ static const struct snd_soc_dapm_route max98095_audio_map[] = {
 	{"Left Speaker Mixer", "IN1 Switch", "IN1 Input"},
 	{"Left Speaker Mixer", "IN2 Switch", "IN2 Input"},
 
-	/* Right speaker output mixer */
 	{"Right Speaker Mixer", "Left DAC1 Switch", "DACL1"},
 	{"Right Speaker Mixer", "Right DAC1 Switch", "DACR1"},
 	{"Right Speaker Mixer", "Mono DAC2 Switch", "DACM2"},
@@ -1239,7 +1193,6 @@ static const struct snd_soc_dapm_route max98095_audio_map[] = {
 	{"Right Speaker Mixer", "IN1 Switch", "IN1 Input"},
 	{"Right Speaker Mixer", "IN2 Switch", "IN2 Input"},
 
-	/* Earpiece/Receiver output mixer */
 	{"Receiver Mixer", "Left DAC1 Switch", "DACL1"},
 	{"Receiver Mixer", "Right DAC1 Switch", "DACR1"},
 	{"Receiver Mixer", "MIC1 Switch", "MIC1 Input"},
@@ -1247,7 +1200,6 @@ static const struct snd_soc_dapm_route max98095_audio_map[] = {
 	{"Receiver Mixer", "IN1 Switch", "IN1 Input"},
 	{"Receiver Mixer", "IN2 Switch", "IN2 Input"},
 
-	/* Left Lineout output mixer */
 	{"Left Lineout Mixer", "Left DAC1 Switch", "DACL1"},
 	{"Left Lineout Mixer", "Right DAC1 Switch", "DACR1"},
 	{"Left Lineout Mixer", "MIC1 Switch", "MIC1 Input"},
@@ -1255,7 +1207,6 @@ static const struct snd_soc_dapm_route max98095_audio_map[] = {
 	{"Left Lineout Mixer", "IN1 Switch", "IN1 Input"},
 	{"Left Lineout Mixer", "IN2 Switch", "IN2 Input"},
 
-	/* Right lineout output mixer */
 	{"Right Lineout Mixer", "Left DAC1 Switch", "DACL1"},
 	{"Right Lineout Mixer", "Right DAC1 Switch", "DACR1"},
 	{"Right Lineout Mixer", "MIC1 Switch", "MIC1 Input"},
@@ -1281,19 +1232,16 @@ static const struct snd_soc_dapm_route max98095_audio_map[] = {
 	{"OUT3", NULL, "LINE Left Out"},
 	{"OUT4", NULL, "LINE Right Out"},
 
-	/* Left ADC input mixer */
 	{"Left ADC Mixer", "MIC1 Switch", "MIC1 Input"},
 	{"Left ADC Mixer", "MIC2 Switch", "MIC2 Input"},
 	{"Left ADC Mixer", "IN1 Switch", "IN1 Input"},
 	{"Left ADC Mixer", "IN2 Switch", "IN2 Input"},
 
-	/* Right ADC input mixer */
 	{"Right ADC Mixer", "MIC1 Switch", "MIC1 Input"},
 	{"Right ADC Mixer", "MIC2 Switch", "MIC2 Input"},
 	{"Right ADC Mixer", "IN1 Switch", "IN1 Input"},
 	{"Right ADC Mixer", "IN2 Switch", "IN2 Input"},
 
-	/* Inputs */
 	{"ADCL", NULL, "Left ADC Mixer"},
 	{"ADCR", NULL, "Right ADC Mixer"},
 
@@ -1312,7 +1260,6 @@ static int max98095_add_widgets(struct snd_soc_codec *codec)
 	return 0;
 }
 
-/* codec mclk clock divider coefficients */
 static const struct {
 	u32 rate;
 	u8  sr;
@@ -1378,7 +1325,6 @@ static int max98095_dai1_hw_params(struct snd_pcm_substream *substream,
 		M98095_CLKMODE_MASK, regval);
 	cdata->rate = rate;
 
-	/* Configure NI when operating as master */
 	if (snd_soc_read(codec, M98095_02A_DAI1_FORMAT) & M98095_DAI_MAS) {
 		if (max98095->sysclk == 0) {
 			dev_err(codec->dev, "Invalid system clock frequency\n");
@@ -1393,7 +1339,6 @@ static int max98095_dai1_hw_params(struct snd_pcm_substream *substream,
 			ni & 0xFF);
 	}
 
-	/* Update sample rate mode */
 	if (rate < 50000)
 		snd_soc_update_bits(codec, M98095_02E_DAI1_FILTERS,
 			M98095_DAI_DHF, 0);
@@ -1439,7 +1384,6 @@ static int max98095_dai2_hw_params(struct snd_pcm_substream *substream,
 		M98095_CLKMODE_MASK, regval);
 	cdata->rate = rate;
 
-	/* Configure NI when operating as master */
 	if (snd_soc_read(codec, M98095_034_DAI2_FORMAT) & M98095_DAI_MAS) {
 		if (max98095->sysclk == 0) {
 			dev_err(codec->dev, "Invalid system clock frequency\n");
@@ -1454,7 +1398,6 @@ static int max98095_dai2_hw_params(struct snd_pcm_substream *substream,
 			ni & 0xFF);
 	}
 
-	/* Update sample rate mode */
 	if (rate < 50000)
 		snd_soc_update_bits(codec, M98095_038_DAI2_FILTERS,
 			M98095_DAI_DHF, 0);
@@ -1500,7 +1443,6 @@ static int max98095_dai3_hw_params(struct snd_pcm_substream *substream,
 		M98095_CLKMODE_MASK, regval);
 	cdata->rate = rate;
 
-	/* Configure NI when operating as master */
 	if (snd_soc_read(codec, M98095_03E_DAI3_FORMAT) & M98095_DAI_MAS) {
 		if (max98095->sysclk == 0) {
 			dev_err(codec->dev, "Invalid system clock frequency\n");
@@ -1515,7 +1457,6 @@ static int max98095_dai3_hw_params(struct snd_pcm_substream *substream,
 			ni & 0xFF);
 	}
 
-	/* Update sample rate mode */
 	if (rate < 50000)
 		snd_soc_update_bits(codec, M98095_042_DAI3_FILTERS,
 			M98095_DAI_DHF, 0);
@@ -1532,15 +1473,9 @@ static int max98095_dai_set_sysclk(struct snd_soc_dai *dai,
 	struct snd_soc_codec *codec = dai->codec;
 	struct max98095_priv *max98095 = snd_soc_codec_get_drvdata(codec);
 
-	/* Requested clock frequency is already setup */
 	if (freq == max98095->sysclk)
 		return 0;
 
-	/* Setup clocks for slave mode, and using the PLL
-	 * PSCLK = 0x01 (when master clk is 10MHz to 20MHz)
-	 *         0x02 (when master clk is 20MHz to 40MHz)..
-	 *         0x03 (when master clk is 40MHz to 60MHz)..
-	 */
 	if ((freq >= 10000000) && (freq < 20000000)) {
 		snd_soc_write(codec, M98095_026_SYS_CLK, 0x10);
 	} else if ((freq >= 20000000) && (freq < 40000000)) {
@@ -1573,14 +1508,14 @@ static int max98095_dai1_set_fmt(struct snd_soc_dai *codec_dai,
 
 		switch (fmt & SND_SOC_DAIFMT_MASTER_MASK) {
 		case SND_SOC_DAIFMT_CBS_CFS:
-			/* Slave mode PLL */
+			 
 			snd_soc_write(codec, M98095_028_DAI1_CLKCFG_HI,
 				0x80);
 			snd_soc_write(codec, M98095_029_DAI1_CLKCFG_LO,
 				0x00);
 			break;
 		case SND_SOC_DAIFMT_CBM_CFM:
-			/* Set to master mode */
+			 
 			regval |= M98095_DAI_MAS;
 			break;
 		case SND_SOC_DAIFMT_CBS_CFM:
@@ -1641,14 +1576,14 @@ static int max98095_dai2_set_fmt(struct snd_soc_dai *codec_dai,
 
 		switch (fmt & SND_SOC_DAIFMT_MASTER_MASK) {
 		case SND_SOC_DAIFMT_CBS_CFS:
-			/* Slave mode PLL */
+			 
 			snd_soc_write(codec, M98095_032_DAI2_CLKCFG_HI,
 				0x80);
 			snd_soc_write(codec, M98095_033_DAI2_CLKCFG_LO,
 				0x00);
 			break;
 		case SND_SOC_DAIFMT_CBM_CFM:
-			/* Set to master mode */
+			 
 			regval |= M98095_DAI_MAS;
 			break;
 		case SND_SOC_DAIFMT_CBS_CFM:
@@ -1710,14 +1645,14 @@ static int max98095_dai3_set_fmt(struct snd_soc_dai *codec_dai,
 
 		switch (fmt & SND_SOC_DAIFMT_MASTER_MASK) {
 		case SND_SOC_DAIFMT_CBS_CFS:
-			/* Slave mode PLL */
+			 
 			snd_soc_write(codec, M98095_03C_DAI3_CLKCFG_HI,
 				0x80);
 			snd_soc_write(codec, M98095_03D_DAI3_CLKCFG_LO,
 				0x00);
 			break;
 		case SND_SOC_DAIFMT_CBM_CFM:
-			/* Set to master mode */
+			 
 			regval |= M98095_DAI_MAS;
 			break;
 		case SND_SOC_DAIFMT_CBS_CFM:
@@ -1879,9 +1814,9 @@ static int max98095_put_eq_enum(struct snd_kcontrol *kcontrol,
 {
 #if defined(MY_ABC_HERE)
 	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
-#else /* MY_ABC_HERE */
+#else  
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
-#endif /* MY_ABC_HERE */
+#endif  
 	struct max98095_priv *max98095 = snd_soc_codec_get_drvdata(codec);
 	struct max98095_pdata *pdata = max98095->pdata;
 	int channel = max98095_get_eq_channel(kcontrol->id.name);
@@ -1903,7 +1838,6 @@ static int max98095_put_eq_enum(struct snd_kcontrol *kcontrol,
 	cdata->eq_sel = sel;
 	fs = cdata->rate;
 
-	/* Find the selected configuration with nearest sample rate */
 	best = 0;
 	best_val = INT_MAX;
 	for (i = 0; i < pdata->eq_cfgcnt; i++) {
@@ -1922,7 +1856,6 @@ static int max98095_put_eq_enum(struct snd_kcontrol *kcontrol,
 
 	regmask = (channel == 0) ? M98095_EQ1EN : M98095_EQ2EN;
 
-	/* Disable filter while configuring, and save current on/off state */
 	regsave = snd_soc_read(codec, M98095_088_CFG_LEVEL);
 	snd_soc_update_bits(codec, M98095_088_CFG_LEVEL, regmask, 0);
 
@@ -1936,7 +1869,6 @@ static int max98095_put_eq_enum(struct snd_kcontrol *kcontrol,
 	snd_soc_update_bits(codec, M98095_00F_HOST_CFG, M98095_SEG, 0);
 	mutex_unlock(&codec->mutex);
 
-	/* Restore the original on/off state */
 	snd_soc_update_bits(codec, M98095_088_CFG_LEVEL, regmask, regsave);
 	return 0;
 }
@@ -1946,9 +1878,9 @@ static int max98095_get_eq_enum(struct snd_kcontrol *kcontrol,
 {
 #if defined(MY_ABC_HERE)
 	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
-#else /* MY_ABC_HERE */
+#else  
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
-#endif /* MY_ABC_HERE */
+#endif  
 	struct max98095_priv *max98095 = snd_soc_codec_get_drvdata(codec);
 	int channel = max98095_get_eq_channel(kcontrol->id.name);
 	struct max98095_cdata *cdata;
@@ -1983,9 +1915,6 @@ static void max98095_handle_eq_pdata(struct snd_soc_codec *codec)
 	cfg = pdata->eq_cfg;
 	cfgcnt = pdata->eq_cfgcnt;
 
-	/* Setup an array of texts for the equalizer enum.
-	 * This is based on Mark Brown's equalizer driver code.
-	 */
 	max98095->eq_textcnt = 0;
 	max98095->eq_texts = NULL;
 	for (i = 0; i < cfgcnt; i++) {
@@ -1997,20 +1926,17 @@ static void max98095_handle_eq_pdata(struct snd_soc_codec *codec)
 		if (j != max98095->eq_textcnt)
 			continue;
 
-		/* Expand the array */
 		t = krealloc(max98095->eq_texts,
 			     sizeof(char *) * (max98095->eq_textcnt + 1),
 			     GFP_KERNEL);
 		if (t == NULL)
 			continue;
 
-		/* Store the new entry */
 		t[max98095->eq_textcnt] = cfg[i].name;
 		max98095->eq_textcnt++;
 		max98095->eq_texts = t;
 	}
 
-	/* Now point the soc_enum to .texts array items */
 	max98095->eq_enum.texts = max98095->eq_texts;
 	max98095->eq_enum.max = max98095->eq_textcnt;
 
@@ -2030,7 +1956,6 @@ static int max98095_get_bq_channel(struct snd_soc_codec *codec,
 		if (strcmp(name, bq_mode_name[i]) == 0)
 			return i;
 
-	/* Shouldn't happen */
 	dev_err(codec->dev, "Bad biquad channel name '%s'\n", name);
 	return -EINVAL;
 }
@@ -2040,9 +1965,9 @@ static int max98095_put_bq_enum(struct snd_kcontrol *kcontrol,
 {
 #if defined(MY_ABC_HERE)
 	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
-#else /* MY_ABC_HERE */
+#else  
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
-#endif /* MY_ABC_HERE */
+#endif  
 	struct max98095_priv *max98095 = snd_soc_codec_get_drvdata(codec);
 	struct max98095_pdata *pdata = max98095->pdata;
 	int channel = max98095_get_bq_channel(codec, kcontrol->id.name);
@@ -2065,7 +1990,6 @@ static int max98095_put_bq_enum(struct snd_kcontrol *kcontrol,
 	cdata->bq_sel = sel;
 	fs = cdata->rate;
 
-	/* Find the selected configuration with nearest sample rate */
 	best = 0;
 	best_val = INT_MAX;
 	for (i = 0; i < pdata->bq_cfgcnt; i++) {
@@ -2084,7 +2008,6 @@ static int max98095_put_bq_enum(struct snd_kcontrol *kcontrol,
 
 	regmask = (channel == 0) ? M98095_BQ1EN : M98095_BQ2EN;
 
-	/* Disable filter while configuring, and save current on/off state */
 	regsave = snd_soc_read(codec, M98095_088_CFG_LEVEL);
 	snd_soc_update_bits(codec, M98095_088_CFG_LEVEL, regmask, 0);
 
@@ -2095,7 +2018,6 @@ static int max98095_put_bq_enum(struct snd_kcontrol *kcontrol,
 	snd_soc_update_bits(codec, M98095_00F_HOST_CFG, M98095_SEG, 0);
 	mutex_unlock(&codec->mutex);
 
-	/* Restore the original on/off state */
 	snd_soc_update_bits(codec, M98095_088_CFG_LEVEL, regmask, regsave);
 	return 0;
 }
@@ -2105,9 +2027,9 @@ static int max98095_get_bq_enum(struct snd_kcontrol *kcontrol,
 {
 #if defined(MY_ABC_HERE)
 	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
-#else /* MY_ABC_HERE */
+#else  
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
-#endif /* MY_ABC_HERE */
+#endif  
 	struct max98095_priv *max98095 = snd_soc_codec_get_drvdata(codec);
 	int channel = max98095_get_bq_channel(codec, kcontrol->id.name);
 	struct max98095_cdata *cdata;
@@ -2146,9 +2068,6 @@ static void max98095_handle_bq_pdata(struct snd_soc_codec *codec)
 	cfg = pdata->bq_cfg;
 	cfgcnt = pdata->bq_cfgcnt;
 
-	/* Setup an array of texts for the biquad enum.
-	 * This is based on Mark Brown's equalizer driver code.
-	 */
 	max98095->bq_textcnt = 0;
 	max98095->bq_texts = NULL;
 	for (i = 0; i < cfgcnt; i++) {
@@ -2160,20 +2079,17 @@ static void max98095_handle_bq_pdata(struct snd_soc_codec *codec)
 		if (j != max98095->bq_textcnt)
 			continue;
 
-		/* Expand the array */
 		t = krealloc(max98095->bq_texts,
 			     sizeof(char *) * (max98095->bq_textcnt + 1),
 			     GFP_KERNEL);
 		if (t == NULL)
 			continue;
 
-		/* Store the new entry */
 		t[max98095->bq_textcnt] = cfg[i].name;
 		max98095->bq_textcnt++;
 		max98095->bq_texts = t;
 	}
 
-	/* Now point the soc_enum to .texts array items */
 	max98095->bq_enum.texts = max98095->bq_texts;
 	max98095->bq_enum.max = max98095->bq_textcnt;
 
@@ -2193,7 +2109,6 @@ static void max98095_handle_pdata(struct snd_soc_codec *codec)
 		return;
 	}
 
-	/* Configure mic for analog/digital mic mode */
 	if (pdata->digmic_left_mode)
 		regval |= M98095_DIGMIC_L;
 
@@ -2202,11 +2117,9 @@ static void max98095_handle_pdata(struct snd_soc_codec *codec)
 
 	snd_soc_write(codec, M98095_087_CFG_MIC, regval);
 
-	/* Configure equalizers */
 	if (pdata->eq_cfgcnt)
 		max98095_handle_eq_pdata(codec);
 
-	/* Configure bi-quad filters */
 	if (pdata->bq_cfgcnt)
 		max98095_handle_bq_pdata(codec);
 }
@@ -2219,19 +2132,15 @@ static irqreturn_t max98095_report_jack(int irq, void *data)
 	int hp_report = 0;
 	int mic_report = 0;
 
-	/* Read the Jack Status Register */
 	value = snd_soc_read(codec, M98095_007_JACK_AUTO_STS);
 
-	/* If ddone is not set, then detection isn't finished yet */
 	if ((value & M98095_DDONE) == 0)
 		return IRQ_NONE;
 
-	/* if hp, check its bit, and if set, clear it */
 	if ((value & M98095_HP_IN || value & M98095_LO_IN) &&
 		max98095->headphone_jack)
 		hp_report |= SND_JACK_HEADPHONE;
 
-	/* if mic, check its bit, and if set, clear it */
 	if ((value & M98095_MIC_IN) && max98095->mic_jack)
 		mic_report |= SND_JACK_MICROPHONE;
 
@@ -2270,7 +2179,6 @@ static int max98095_jack_detect_enable(struct snd_soc_codec *codec)
 		return ret;
 	}
 
-	/* configure auto detection to be enabled */
 	ret = snd_soc_write(codec, M98095_089_JACK_DET_AUTO, detect_enable);
 	if (ret < 0) {
 		dev_err(codec->dev, "Failed to cfg auto detect %d\n", ret);
@@ -2284,7 +2192,6 @@ static int max98095_jack_detect_disable(struct snd_soc_codec *codec)
 {
 	int ret = 0;
 
-	/* configure auto detection to be disabled */
 	ret = snd_soc_write(codec, M98095_089_JACK_DET_AUTO, 0x0);
 	if (ret < 0) {
 		dev_err(codec->dev, "Failed to cfg auto detect %d\n", ret);
@@ -2304,13 +2211,11 @@ int max98095_jack_detect(struct snd_soc_codec *codec,
 	max98095->headphone_jack = hp_jack;
 	max98095->mic_jack = mic_jack;
 
-	/* only progress if we have at least 1 jack pointer */
 	if (!hp_jack && !mic_jack)
 		return -EINVAL;
 
 	max98095_jack_detect_enable(codec);
 
-	/* enable interrupts for headphone jack detection */
 	ret = snd_soc_update_bits(codec, M98095_013_JACK_INT_EN,
 		M98095_IDDONE, M98095_IDDONE);
 	if (ret < 0) {
@@ -2359,8 +2264,6 @@ static int max98095_reset(struct snd_soc_codec *codec)
 {
 	int i, ret;
 
-	/* Gracefully reset the DSP core and the codec hardware
-	 * in a proper sequence */
 	ret = snd_soc_write(codec, M98095_00F_HOST_CFG, 0);
 	if (ret < 0) {
 		dev_err(codec->dev, "Failed to reset DSP: %d\n", ret);
@@ -2373,8 +2276,6 @@ static int max98095_reset(struct snd_soc_codec *codec)
 		return ret;
 	}
 
-	/* Reset to hardware default for registers, as there is not
-	 * a soft reset hardware control register */
 	for (i = M98095_010_HOST_INT_CFG; i < M98095_REG_MAX_CACHED; i++) {
 		ret = snd_soc_write(codec, i, max98095_reg_def[i]);
 		if (ret < 0) {
@@ -2399,12 +2300,9 @@ static int max98095_probe(struct snd_soc_codec *codec)
 		return ret;
 	}
 
-	/* reset the codec, the DSP core, and disable all interrupts */
 	max98095_reset(codec);
 
 	client = to_i2c_client(codec->dev);
-
-	/* initialize private data */
 
 	max98095->sysclk = (unsigned)-1;
 	max98095->eq_textcnt = 0;
@@ -2433,7 +2331,7 @@ static int max98095_probe(struct snd_soc_codec *codec)
 	max98095->mic2pre = 0;
 
 	if (client->irq) {
-		/* register an audio interrupt */
+		 
 		ret = request_threaded_irq(client->irq, NULL,
 			max98095_report_jack,
 			IRQF_TRIGGER_FALLING | IRQF_TRIGGER_RISING,
@@ -2454,7 +2352,6 @@ static int max98095_probe(struct snd_soc_codec *codec)
 
 	snd_soc_write(codec, M98095_097_PWR_SYS, M98095_PWRSV);
 
-	/* initialize registers cache to hardware default */
 	max98095_set_bias_level(codec, SND_SOC_BIAS_STANDBY);
 
 	snd_soc_write(codec, M98095_048_MIX_DAC_LR,
@@ -2478,7 +2375,6 @@ static int max98095_probe(struct snd_soc_codec *codec)
 
 	max98095_handle_pdata(codec);
 
-	/* take the codec out of the shut down */
 	snd_soc_update_bits(codec, M98095_097_PWR_SYS, M98095_SHDNRUN,
 		M98095_SHDNRUN);
 

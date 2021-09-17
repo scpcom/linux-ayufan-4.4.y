@@ -1,28 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *   STMicroelectronics audio DAC buffer (amplifier) driver
- *
- *   Copyright (c) 2005-2014 STMicroelectronics Limited
- *
- *   Author: Guillaume Kouadio Carry <guillaume.kouadio-carry@st.com>
- *
- *   This program is free software; you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation; either version 2 of the License, or
- *   (at your option) any later version.
- *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
- *
- *   You should have received a copy of the GNU General Public License
- *   along with this program; if not, write to the Free Software
- *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
- */
-
+ 
 #include <linux/module.h>
 #include <linux/i2c.h>
 #include "common.h"
@@ -30,31 +9,24 @@
 static int snd_stm_debug_level;
 module_param_named(debug, snd_stm_debug_level, int, S_IRUGO | S_IWUSR);
 
-/* Hardware-related definitions */
-
-/* st6440 audio i2c registers*/
 #define SUB_ADDR 0
 #define WR0 1
 #define WR1 2
 
-/* Content of registers at power-on reset */
 #define WR0_POR 0
 #define WR1_POR 0
 #define SUB_ADDR_POR 0
 
-/* st6440 audio mute control is at WR1 b7 */
 #define AUDIO_OUT_MUTE_SHIFT 7
 #define AUDIO_OUT_MUTE_MASK (1 << AUDIO_OUT_MUTE_SHIFT)
 #define AUDIO_OUT_ACTIVE (0 << AUDIO_OUT_MUTE_SHIFT)
 #define AUDIO_OUT_MUTED (1 << AUDIO_OUT_MUTE_SHIFT)
 
-/*  st6440 audio standby mode is at WR1 b2 */
 #define AUDIO_OUT_STANDBY_SHIFT 2
 #define AUDIO_OUT_STANDBY_MASK (1 << AUDIO_OUT_STANDBY_SHIFT)
 #define AUDIO_OUT_ON (0 << AUDIO_OUT_STANDBY_SHIFT)
 #define AUDIO_OUT_OFF (1 << AUDIO_OUT_STANDBY_SHIFT)
 
-/* Audio gain at WR0 b6,b5,b4 */
 #define AUDIO_GAIN_SHIFT 4
 #define AUDIO_GAIN_MASK (7<<AUDIO_GAIN_SHIFT)
 #define AUDIO_GAIN_0 (0 << AUDIO_GAIN_SHIFT)
@@ -86,10 +58,8 @@ static const struct audio_buffer_gain audio_gain_value[AUDIO_NUM_GAIN] = {
 	{ AUDIO_GAIN_28, "7 = +28dB"},
 };
 
-/* Each i2c transfer has 3 bytes : 1 sub-address and 2 data */
 #define PAGE_LEN 3
 
-/* Internal st6440 instance structure */
 struct dac_buffer_data {
 	struct device *dev;
 	struct snd_stm_conv_converter *converter;
@@ -114,7 +84,6 @@ static int dac_buffer_set_enabled(int enabled, void *priv)
 	BUG_ON(!conv);
 	BUG_ON(!snd_stm_magic_valid(conv));
 
-	/* return if already enabled */
 	if (enabled == conv->enabled)
 		return 0;
 
@@ -143,7 +112,6 @@ static int dac_buffer_set_muted(int muted, void *priv)
 	BUG_ON(!conv);
 	BUG_ON(!snd_stm_magic_valid(conv));
 
-	/*return if already muted*/
 	if (muted == conv->muted)
 		return 0;
 
@@ -185,29 +153,21 @@ static int dac_buffer_set_gain(int gain, void *priv)
 	return 0;
 }
 
-/* ALSA low-level device implementation */
-
 static int dac_buffer_setting(struct dac_buffer_data *conv)
 {
 	BUG_ON(!conv);
 	BUG_ON(!snd_stm_magic_valid(conv));
 
-	/* Put the buffer into mute */
 	dac_buffer_set_muted(1,  conv);
 
-	/* set output level to default*/
 	dac_buffer_set_gain(conv->gain, conv);
 
-	/*Take the buffer out of standby */
 	dac_buffer_set_enabled(1, conv);
 
-	/* unmute the buffer */
 	dac_buffer_set_muted(0,  conv);
 
 	return 0;
 }
-
-/* Driver routines */
 
 static int dac_buffer_parse_dt(struct i2c_client *client,
 		struct dac_buffer_data *conv)
@@ -215,7 +175,6 @@ static int dac_buffer_parse_dt(struct i2c_client *client,
 	struct device_node *pnode = client->dev.of_node;
 	int val;
 
-	/* get source_bus_id node */
 	val = get_property_hdl(&client->dev, pnode, "st,source-bus-id", 0);
 	if (!val) {
 		dev_err(&client->dev, "unable to find DT source-bus-id node");
@@ -225,11 +184,9 @@ static int dac_buffer_parse_dt(struct i2c_client *client,
 	of_property_read_string(conv->source_bus_id, "description",
 				&conv->source_bus_id_description);
 
-	/* get source bus card device*/
 	of_property_read_u32(conv->source_bus_id, "card-device",
 			&conv->card_device);
 
-	/* get DAC buffer gain number */
 	of_property_read_u32(pnode, "st,buffer-gain", &conv->gain_num);
 
 	return 0;
@@ -244,12 +201,10 @@ static int dac_buffer_suspend(struct device *dev)
 
 	dev_dbg(dev, "%s:enter %s\n", __func__, dev_name(dev));
 
-	/* mute the buffer */
 	res = dac_buffer_set_muted(1, conv);
 	if (res < 0)
 		return res;
 
-	/*Set the buffer in standby */
 	res = dac_buffer_set_enabled(0, conv);
 	if (res < 0)
 		return res;
@@ -273,7 +228,7 @@ static SIMPLE_DEV_PM_OPS(dac_buff_pm_ops,
 #else
 #define DAC_BUFF_PM_OPS NULL
 #endif
-#endif /* MY_DEF_HERE */
+#endif  
 
 static int dac_buffer_probe(struct i2c_client *client,
 		const struct i2c_device_id *id)
@@ -285,7 +240,6 @@ static int dac_buffer_probe(struct i2c_client *client,
 
 	snd_stm_printd(0, "%s('%s')\n", __func__, dev_name(&client->dev));
 
-	/* Allocate driver structure */
 	conv = devm_kzalloc(&client->dev, sizeof(*conv), GFP_KERNEL);
 	if (!conv) {
 		dev_err(&client->dev, "Failed to allocate driver structure");
@@ -301,7 +255,6 @@ static int dac_buffer_probe(struct i2c_client *client,
 	conv->buf[WR0] = WR0_POR;
 	conv->buf[WR1] = WR1_POR;
 
-	/* Get resources */
 	if (!client->dev.of_node) {
 		dev_err(conv->dev, "device not in dt");
 		return -EINVAL;
@@ -312,7 +265,6 @@ static int dac_buffer_probe(struct i2c_client *client,
 		return -EINVAL;
 	}
 
-	/* Ensure the gain number is correct */
 	if (conv->gain_num >= AUDIO_NUM_GAIN) {
 		dev_warn(conv->dev,
 			 "Invalid audio dac gain number - Using the default");
@@ -324,7 +276,6 @@ static int dac_buffer_probe(struct i2c_client *client,
 		 conv->gain_num,
 		 audio_gain_value[conv->gain_num].name);
 
-	/* Ensure valid bus id */
 	if (!conv->source_bus_id) {
 		dev_err(conv->dev, "Invalid source bus id!");
 		return -EINVAL;
@@ -333,11 +284,11 @@ static int dac_buffer_probe(struct i2c_client *client,
 	dac_buffer_setting(conv);
 
 #ifdef MY_DEF_HERE
-	/* store context in drivers */
+	 
 	i2c_set_clientdata(client, conv);
-#else /* MY_DEF_HERE */
+#else  
 	dev_info(&client->dev, "Audio buffer st6440 probed\n");
-#endif /* MY_DEF_HERE */
+#endif  
 
 	return 0;
 }
@@ -349,19 +300,17 @@ static int dac_buffer_remove(struct i2c_client *client)
 	BUG_ON(!conv);
 	BUG_ON(!snd_stm_magic_valid(conv));
 
-	/* Put the buffer into mute */
 #ifdef MY_DEF_HERE
 	dac_buffer_set_muted(1, conv);
-#else /* MY_DEF_HERE */
+#else  
 	dac_buffer_set_muted(AUDIO_OUT_MUTED,  conv->i2c_client);
-#endif /* MY_DEF_HERE */
+#endif  
 
-	/*put the buffer into standby */
 #ifdef MY_DEF_HERE
 	dac_buffer_set_enabled(0, conv);
-#else /* MY_DEF_HERE */
+#else  
 	dac_buffer_set_enabled(AUDIO_OUT_OFF, conv->i2c_client);
-#endif /* MY_DEF_HERE */
+#endif  
 
 	snd_stm_magic_clear(conv);
 
@@ -381,7 +330,7 @@ static struct i2c_driver dac_buffer_driver = {
 		.owner = THIS_MODULE,
 #ifdef MY_DEF_HERE
 		.pm = DAC_BUFF_PM_OPS,
-#endif /* MY_DEF_HERE */
+#endif  
 	},
 	.probe = dac_buffer_probe,
 	.remove = dac_buffer_remove,
@@ -390,7 +339,7 @@ static struct i2c_driver dac_buffer_driver = {
 
 #ifdef MY_DEF_HERE
 module_i2c_driver(dac_buffer_driver);
-#else /* MY_DEF_HERE */
+#else  
 static int dac_buffer_init(void)
 {
 	return i2c_add_driver(&dac_buffer_driver);
@@ -402,7 +351,7 @@ static void dac_buffer_exit(void)
 	i2c_del_driver(&dac_buffer_driver);
 }
 module_exit(dac_buffer_exit);
-#endif /* MY_DEF_HERE */
+#endif  
 
 MODULE_AUTHOR("Guillaume Kouadio Carry <guillaume.kouadio-carry@st.com>");
 MODULE_DESCRIPTION("STMicroelectronics st6440 audio buffer driver");

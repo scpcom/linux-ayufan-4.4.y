@@ -1,25 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * drivers/net/ethernet/netx-eth.c
- *
- * Copyright (c) 2005 Sascha Hauer <s.hauer@pengutronix.de>, Pengutronix
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2
- * as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
-
+ 
 #include <linux/init.h>
 #include <linux/interrupt.h>
 #include <linux/module.h>
@@ -39,22 +21,19 @@
 #include <mach/xc.h>
 #include <linux/platform_data/eth-netx.h>
 
-/* XC Fifo Offsets */
-#define EMPTY_PTR_FIFO(xcno)    (0 + ((xcno) << 3))	/* Index of the empty pointer FIFO */
-#define IND_FIFO_PORT_HI(xcno)  (1 + ((xcno) << 3))	/* Index of the FIFO where received */
-							/* Data packages are indicated by XC */
-#define IND_FIFO_PORT_LO(xcno)  (2 + ((xcno) << 3))	/* Index of the FIFO where received */
-							/* Data packages are indicated by XC */
-#define REQ_FIFO_PORT_HI(xcno)  (3 + ((xcno) << 3))	/* Index of the FIFO where Data packages */
-							/* have to be indicated by ARM which */
-							/* shall be sent */
-#define REQ_FIFO_PORT_LO(xcno)  (4 + ((xcno) << 3))	/* Index of the FIFO where Data packages */
-							/* have to be indicated by ARM which shall */
-							/* be sent */
-#define CON_FIFO_PORT_HI(xcno)  (5 + ((xcno) << 3))	/* Index of the FIFO where sent Data packages */
-							/* are confirmed */
-#define CON_FIFO_PORT_LO(xcno)  (6 + ((xcno) << 3))	/* Index of the FIFO where sent Data */
-							/* packages are confirmed */
+#define EMPTY_PTR_FIFO(xcno)    (0 + ((xcno) << 3))	 
+#define IND_FIFO_PORT_HI(xcno)  (1 + ((xcno) << 3))	 
+							 
+#define IND_FIFO_PORT_LO(xcno)  (2 + ((xcno) << 3))	 
+							 
+#define REQ_FIFO_PORT_HI(xcno)  (3 + ((xcno) << 3))	 
+							 
+#define REQ_FIFO_PORT_LO(xcno)  (4 + ((xcno) << 3))	 
+							 
+#define CON_FIFO_PORT_HI(xcno)  (5 + ((xcno) << 3))	 
+							 
+#define CON_FIFO_PORT_LO(xcno)  (6 + ((xcno) << 3))	 
+							 
 #define PFIFO_MASK(xcno)        (0x7f << (xcno*8))
 
 #define FIFO_PTR_FRAMELEN_SHIFT 0
@@ -94,7 +73,6 @@
 
 #define CARDNAME "netx-eth"
 
-/* LSB must be zero */
 #define INTERNAL_PHY_ADR 0x1c
 
 struct netx_eth_priv {
@@ -108,7 +86,7 @@ struct netx_eth_priv {
 
 static void netx_eth_set_multicast_list(struct net_device *ndev)
 {
-	/* implement me */
+	 
 }
 
 static int
@@ -337,11 +315,8 @@ static int netx_eth_enable(struct net_device *ndev)
 	running = xc_running(priv->xc);
 	xc_stop(priv->xc);
 
-	/* if the xc engine is already running, assume the bootloader has
-	 * loaded the firmware for us
-	 */
 	if (running) {
-		/* get Node Address from hardware */
+		 
 		mac4321 = readl(priv->xpec_base +
 			NETX_XPEC_RAM_START_OFS + ETH_MAC_4321);
 		mac65 = readl(priv->xpec_base +
@@ -426,9 +401,9 @@ exit_free_xc:
 	free_xc(priv->xc);
 exit_free_netdev:
 #if defined (MY_DEF_HERE)
-#else /* MY_DEF_HERE */
+#else  
 	platform_set_drvdata(pdev, NULL);
-#endif /* MY_DEF_HERE */
+#endif  
 	free_netdev(ndev);
 exit:
 	return ret;

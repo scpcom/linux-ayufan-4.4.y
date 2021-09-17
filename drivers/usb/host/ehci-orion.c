@@ -1,16 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * drivers/usb/host/ehci-orion.c
- *
- * Tzachi Perelstein <tzachi@marvell.com>
- *
- * This file is licensed under  the terms of the GNU General Public
- * License version 2. This program is licensed "as is" without any
- * warranty of any kind, whether express or implied.
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/platform_device.h>
@@ -30,10 +21,10 @@
 #if defined(MY_ABC_HERE)
 #define rdl(off)	readl_relaxed(hcd->regs + (off))
 #define wrl(off, val)	writel_relaxed((val), hcd->regs + (off))
-#else /* MY_ABC_HERE */
+#else  
 #define rdl(off)	__raw_readl(hcd->regs + (off))
 #define wrl(off, val)	__raw_writel((val), hcd->regs + (off))
-#endif /* MY_ABC_HERE */
+#endif  
 
 #define USB_CMD			0x140
 #define USB_MODE		0x1a8
@@ -56,75 +47,33 @@ static struct hc_driver __read_mostly ehci_orion_hc_driver;
 
 #if defined(MY_ABC_HERE)
 static u32 usb_save[(USB_IPG - USB_CAUSE) + (USB_PHY_TST_GRP_CTRL - USB_PHY_PWR_CTRL)];
-#endif /* MY_ABC_HERE */
+#endif  
 
-/*
- * Implement Orion USB controller specification guidelines
- */
 static void orion_usb_phy_v1_setup(struct usb_hcd *hcd)
 {
-	/* The below GLs are according to the Orion Errata document */
-	/*
-	 * Clear interrupt cause and mask
-	 */
+	 
 	wrl(USB_CAUSE, 0);
 	wrl(USB_MASK, 0);
 
-	/*
-	 * Reset controller
-	 */
 	wrl(USB_CMD, rdl(USB_CMD) | 0x2);
 	while (rdl(USB_CMD) & 0x2);
 
-	/*
-	 * GL# USB-10: Set IPG for non start of frame packets
-	 * Bits[14:8]=0xc
-	 */
 	wrl(USB_IPG, (rdl(USB_IPG) & ~0x7f00) | 0xc00);
 
-	/*
-	 * GL# USB-9: USB 2.0 Power Control
-	 * BG_VSEL[7:6]=0x1
-	 */
 	wrl(USB_PHY_PWR_CTRL, (rdl(USB_PHY_PWR_CTRL) & ~0xc0)| 0x40);
 
-	/*
-	 * GL# USB-1: USB PHY Tx Control - force calibration to '8'
-	 * TXDATA_BLOCK_EN[21]=0x1, EXT_RCAL_EN[13]=0x1, IMP_CAL[6:3]=0x8
-	 */
 	wrl(USB_PHY_TX_CTRL, (rdl(USB_PHY_TX_CTRL) & ~0x78) | 0x202040);
 
-	/*
-	 * GL# USB-3 GL# USB-9: USB PHY Rx Control
-	 * RXDATA_BLOCK_LENGHT[31:30]=0x3, EDGE_DET_SEL[27:26]=0,
-	 * CDR_FASTLOCK_EN[21]=0, DISCON_THRESHOLD[9:8]=0, SQ_THRESH[7:4]=0x1
-	 */
 	wrl(USB_PHY_RX_CTRL, (rdl(USB_PHY_RX_CTRL) & ~0xc2003f0) | 0xc0000010);
 
-	/*
-	 * GL# USB-3 GL# USB-9: USB PHY IVREF Control
-	 * PLLVDD12[1:0]=0x2, RXVDD[5:4]=0x3, Reserved[19]=0
-	 */
 	wrl(USB_PHY_IVREF_CTRL, (rdl(USB_PHY_IVREF_CTRL) & ~0x80003 ) | 0x32);
 
-	/*
-	 * GL# USB-3 GL# USB-9: USB PHY Test Group Control
-	 * REG_FIFO_SQ_RST[15]=0
-	 */
 	wrl(USB_PHY_TST_GRP_CTRL, rdl(USB_PHY_TST_GRP_CTRL) & ~0x8000);
 
-	/*
-	 * Stop and reset controller
-	 */
 	wrl(USB_CMD, rdl(USB_CMD) & ~0x1);
 	wrl(USB_CMD, rdl(USB_CMD) | 0x2);
 	while (rdl(USB_CMD) & 0x2);
 
-	/*
-	 * GL# USB-5 Streaming disable REG_USB_MODE[4]=1
-	 * TBD: This need to be done after each reset!
-	 * GL# USB-4 Setup USB Host mode
-	 */
 	wrl(USB_MODE, 0x13);
 }
 
@@ -163,7 +112,7 @@ static int ehci_orion_drv_probe(struct platform_device *pdev)
 #if defined (MY_ABC_HERE)
 	struct device_node	*node = pdev->dev.of_node;
 	u32 vbus_gpio_pin = 0;
-#endif /* MY_ABC_HERE */
+#endif  
 
 	if (usb_disabled())
 		return -ENODEV;
@@ -191,11 +140,6 @@ static int ehci_orion_drv_probe(struct platform_device *pdev)
 		goto err1;
 	}
 
-	/*
-	 * Right now device-tree probed devices don't get dma_mask
-	 * set. Since shared usb code relies on it, set it here for
-	 * now. Once we have dma capability bindings this can go away.
-	 */
 	if (!pdev->dev.dma_mask)
 		pdev->dev.dma_mask = &pdev->dev.coherent_dma_mask;
 	if (!pdev->dev.coherent_dma_mask)
@@ -215,8 +159,6 @@ static int ehci_orion_drv_probe(struct platform_device *pdev)
 		goto err2;
 	}
 
-	/* Not all platforms can gate the clock, so it is not
-	   an error if the clock does not exists. */
 	clk = clk_get(&pdev->dev, NULL);
 	if (!IS_ERR(clk)) {
 		clk_prepare_enable(clk);
@@ -239,17 +181,14 @@ static int ehci_orion_drv_probe(struct platform_device *pdev)
 		}
 		if (of_property_read_bool(node, "vbus-gpio")) {
 			of_property_read_u32(node, "vbus-gpio", &vbus_gpio_pin);
-			/* hcd->vbus_gpio_pin' is an integer, but vbus_gpio_pin is
-			 * an unsigned integer. It should be safe because it's enough
-			 * for gpio number.
-			 */
+			 
 			hcd->vbus_gpio_pin = vbus_gpio_pin;
 		} else {
 			hcd->vbus_gpio_pin = -1;
 			dev_warn(&pdev->dev, "failed to get Vbus gpio\n");
 		}
 	}
-#endif /* MY_ABC_HERE */
+#endif  
 
 	hcd->rsrc_start = res->start;
 	hcd->rsrc_len = resource_size(res);
@@ -259,23 +198,17 @@ static int ehci_orion_drv_probe(struct platform_device *pdev)
 	ehci->caps = hcd->regs + 0x100;
 	hcd->has_tt = 1;
 
-	/*
-	 * (Re-)program MBUS remapping windows if we are asked to.
-	 */
 	dram = mv_mbus_dram_info();
 	if (dram)
 		ehci_orion_conf_mbus_windows(hcd, dram);
 
-	/*
-	 * setup Orion USB controller.
-	 */
 	if (pdev->dev.of_node)
 		phy_version = EHCI_PHY_NA;
 	else
 		phy_version = pd->phy_version;
 
 	switch (phy_version) {
-	case EHCI_PHY_NA:	/* dont change USB phy settings */
+	case EHCI_PHY_NA:	 
 		break;
 	case EHCI_PHY_ORION:
 		orion_usb_phy_v1_setup(hcd);
@@ -288,7 +221,7 @@ static int ehci_orion_drv_probe(struct platform_device *pdev)
 #if defined (MY_ABC_HERE)
 	dev_info(&pdev->dev, "USB2 Vbus gpio %d\n", hcd->vbus_gpio_pin);
 	dev_info(&pdev->dev, "power control %s\n", hcd->power_control_support ? "enabled" : "disabled");
-#endif /* MY_ABC_HERE */
+#endif  
 	err = usb_add_hcd(hcd, irq, IRQF_SHARED);
 	if (err)
 		goto err4;
@@ -367,33 +300,26 @@ static int ehci_orion_drv_resume(struct platform_device *pdev)
 	for (addr = USB_PHY_PWR_CTRL; addr <= USB_PHY_TST_GRP_CTRL; addr += 0x4, i++)
 		writel_relaxed(usb_save[i], hcd->regs + addr);
 
-	/* Clear Interrupt Cause and Mask registers */
 	writel_relaxed(0, hcd->regs + 0x310);
 	writel_relaxed(0, hcd->regs + 0x314);
 
-	/* Reset controller */
 	regVal = readl_relaxed(hcd->regs + 0x140);
 	writel_relaxed(regVal | MV_USB_CORE_CMD_RESET_MASK, hcd->regs + 0x140);
 	while (readl_relaxed(hcd->regs + 0x140) & MV_USB_CORE_CMD_RESET_MASK)
 		;
 
-	/* Set Mode register (Stop and Reset USB Core before) */
-	/* Stop the controller */
 	regVal = readl_relaxed(hcd->regs + 0x140);
 	regVal &= ~MV_USB_CORE_CMD_RUN_MASK;
 	writel_relaxed(regVal, hcd->regs + 0x140);
 
-	/* Reset the controller to get default values */
 	regVal = readl_relaxed(hcd->regs + 0x140);
 	regVal |= MV_USB_CORE_CMD_RESET_MASK;
 	writel_relaxed(regVal, hcd->regs + 0x140);
 
-	/* Wait for the controller reset to complete */
 	do {
 		regVal = readl_relaxed(hcd->regs + 0x140);
 	} while (regVal & MV_USB_CORE_CMD_RESET_MASK);
 
-	/* Set USB_MODE register */
 	regVal = MV_USB_CORE_MODE_HOST;
 	writel_relaxed(regVal, hcd->regs + 0x1A8);
 
@@ -402,9 +328,9 @@ static int ehci_orion_drv_resume(struct platform_device *pdev)
 
 #if defined(MY_ABC_HERE)
 static void ehci_orion_drv_shutdown(struct platform_device *pdev)
-#else /* MY_ABC_HERE */
+#else  
 static int ehci_orion_drv_shutdown(struct platform_device *pdev)
-#endif /* MY_ABC_HERE */
+#endif  
 {
 	struct usb_hcd *hcd = platform_get_drvdata(pdev);
 	static void __iomem *usb_pwr_ctrl_base;
@@ -414,7 +340,7 @@ static int ehci_orion_drv_shutdown(struct platform_device *pdev)
 
 	usb_pwr_ctrl_base = hcd->regs + USB_PHY_PWR_CTRL;
 	BUG_ON(!usb_pwr_ctrl_base);
-	/* Power Down & PLL Power down */
+	 
 	writel((readl(usb_pwr_ctrl_base) & ~(BIT(0) | BIT(1))), usb_pwr_ctrl_base);
 
 	clk = clk_get(&pdev->dev, NULL);
@@ -423,7 +349,7 @@ static int ehci_orion_drv_shutdown(struct platform_device *pdev)
 		clk_put(clk);
 	}
 }
-#endif /* MY_ABC_HERE */
+#endif  
 
 static const struct of_device_id ehci_orion_dt_ids[] = {
 	{ .compatible = "marvell,orion-ehci", },
@@ -440,9 +366,9 @@ static struct platform_driver ehci_orion_driver = {
 	.resume         = ehci_orion_drv_resume,
 #endif
 	.shutdown	= ehci_orion_drv_shutdown,
-#else /* MY_ABC_HERE */
+#else  
 	.shutdown	= usb_hcd_platform_shutdown,
-#endif /* MY_ABC_HERE */
+#endif  
 	.driver = {
 		.name	= "orion-ehci",
 		.owner  = THIS_MODULE,

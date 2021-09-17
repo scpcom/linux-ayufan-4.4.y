@@ -1,32 +1,18 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * linux/drivers/cpufreq/freq_table.c
- *
- * Copyright (C) 2002 - 2003 Dominik Brodowski
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- *
- */
-
+ 
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
 #if defined(MY_ABC_HERE)
 #include <linux/cpufreq.h>
 #include <linux/module.h>
-#else /* MY_ABC_HERE */
+#else  
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/cpufreq.h>
-#endif /* MY_ABC_HERE */
-
-/*********************************************************************
- *                     FREQUENCY TABLE HELPERS                       *
- *********************************************************************/
+#endif  
 
 int cpufreq_frequency_table_cpuinfo(struct cpufreq_policy *policy,
 				    struct cpufreq_frequency_table *table)
@@ -49,10 +35,10 @@ int cpufreq_frequency_table_cpuinfo(struct cpufreq_policy *policy,
 
 		pr_debug("table entry %u: %u kHz, %u driver_data\n",
 					i, freq, table[i].driver_data);
-#else /* MY_ABC_HERE */
+#else  
 		pr_debug("table entry %u: %u kHz, %u index\n",
 					i, freq, table[i].index);
-#endif /* MY_ABC_HERE */
+#endif  
 		if (freq < min_freq)
 			min_freq = freq;
 		if (freq > max_freq)
@@ -75,11 +61,11 @@ int cpufreq_frequency_table_verify(struct cpufreq_policy *policy,
 #if defined(MY_ABC_HERE)
 	unsigned int next_larger = ~0, freq, i = 0;
 	bool found = false;
-#else /* MY_ABC_HERE */
+#else  
 	unsigned int next_larger = ~0;
 	unsigned int i;
 	unsigned int count = 0;
-#endif /* MY_ABC_HERE */
+#endif  
 
 	pr_debug("request for verification of policy (%u - %u kHz) for cpu %u\n",
 					policy->min, policy->max, policy->cpu);
@@ -103,7 +89,7 @@ int cpufreq_frequency_table_verify(struct cpufreq_policy *policy,
 		policy->max = next_larger;
 		cpufreq_verify_within_cpu_limits(policy);
 	}
-#else /* MY_ABC_HERE */
+#else  
 	cpufreq_verify_within_limits(policy, policy->cpuinfo.min_freq,
 				     policy->cpuinfo.max_freq);
 
@@ -122,7 +108,7 @@ int cpufreq_frequency_table_verify(struct cpufreq_policy *policy,
 
 	cpufreq_verify_within_limits(policy, policy->cpuinfo.min_freq,
 				     policy->cpuinfo.max_freq);
-#endif /* MY_ABC_HERE */
+#endif  
 
 	pr_debug("verification lead to (%u - %u kHz) for cpu %u\n",
 				policy->min, policy->max, policy->cpu);
@@ -132,10 +118,7 @@ int cpufreq_frequency_table_verify(struct cpufreq_policy *policy,
 EXPORT_SYMBOL_GPL(cpufreq_frequency_table_verify);
 
 #if defined(MY_ABC_HERE)
-/*
- * Generic routine to verify policy & frequency table, requires driver to set
- * policy->freq_table prior to it.
- */
+ 
 int cpufreq_generic_frequency_table_verify(struct cpufreq_policy *policy)
 {
 	struct cpufreq_frequency_table *table =
@@ -146,7 +129,7 @@ int cpufreq_generic_frequency_table_verify(struct cpufreq_policy *policy)
 	return cpufreq_frequency_table_verify(policy, table);
 }
 EXPORT_SYMBOL_GPL(cpufreq_generic_frequency_table_verify);
-#endif /* MY_ABC_HERE */
+#endif  
 
 int cpufreq_frequency_table_target(struct cpufreq_policy *policy,
 				   struct cpufreq_frequency_table *table,
@@ -157,17 +140,17 @@ int cpufreq_frequency_table_target(struct cpufreq_policy *policy,
 	struct cpufreq_frequency_table optimal = {
 #if defined(MY_ABC_HERE)
 		.driver_data = ~0,
-#else /* MY_ABC_HERE */
+#else  
 		.index = ~0,
-#endif /* MY_ABC_HERE */
+#endif  
 		.frequency = 0,
 	};
 	struct cpufreq_frequency_table suboptimal = {
 #if defined(MY_ABC_HERE)
 		.driver_data = ~0,
-#else /* MY_ABC_HERE */
+#else  
 		.index = ~0,
-#endif /* MY_ABC_HERE */
+#endif  
 		.frequency = 0,
 	};
 	unsigned int i;
@@ -197,18 +180,18 @@ int cpufreq_frequency_table_target(struct cpufreq_policy *policy,
 					optimal.frequency = freq;
 #if defined(MY_ABC_HERE)
 					optimal.driver_data = i;
-#else /* MY_ABC_HERE */
+#else  
 					optimal.index = i;
-#endif /* MY_ABC_HERE */
+#endif  
 				}
 			} else {
 				if (freq <= suboptimal.frequency) {
 					suboptimal.frequency = freq;
 #if defined(MY_ABC_HERE)
 					suboptimal.driver_data = i;
-#else /* MY_ABC_HERE */
+#else  
 					suboptimal.index = i;
-#endif /* MY_ABC_HERE */
+#endif  
 				}
 			}
 			break;
@@ -218,18 +201,18 @@ int cpufreq_frequency_table_target(struct cpufreq_policy *policy,
 					optimal.frequency = freq;
 #if defined(MY_ABC_HERE)
 					optimal.driver_data = i;
-#else /* MY_ABC_HERE */
+#else  
 					optimal.index = i;
-#endif /* MY_ABC_HERE */
+#endif  
 				}
 			} else {
 				if (freq >= suboptimal.frequency) {
 					suboptimal.frequency = freq;
 #if defined(MY_ABC_HERE)
 					suboptimal.driver_data = i;
-#else /* MY_ABC_HERE */
+#else  
 					suboptimal.index = i;
-#endif /* MY_ABC_HERE */
+#endif  
 				}
 			}
 			break;
@@ -245,7 +228,7 @@ int cpufreq_frequency_table_target(struct cpufreq_policy *policy,
 
 	pr_debug("target is %u (%u kHz, %u)\n", *index, table[*index].frequency,
 		table[*index].driver_data);
-#else /* MY_ABC_HERE */
+#else  
 	if (optimal.index > i) {
 		if (suboptimal.index > i)
 			return -EINVAL;
@@ -255,7 +238,7 @@ int cpufreq_frequency_table_target(struct cpufreq_policy *policy,
 
 	pr_debug("target is %u (%u kHz, %u)\n", *index, table[*index].frequency,
 		table[*index].index);
-#endif /* MY_ABC_HERE */
+#endif  
 
 	return 0;
 }
@@ -282,19 +265,16 @@ int cpufreq_frequency_table_get_index(struct cpufreq_policy *policy,
 	return -EINVAL;
 }
 EXPORT_SYMBOL_GPL(cpufreq_frequency_table_get_index);
-#else /* MY_ABC_HERE */
+#else  
 static DEFINE_PER_CPU(struct cpufreq_frequency_table *, cpufreq_show_table);
-#endif /* MY_ABC_HERE */
+#endif  
 
-/**
- * show_available_freqs - show available frequencies for the specified CPU
- */
 #if defined(MY_ABC_HERE)
 static ssize_t show_available_freqs(struct cpufreq_policy *policy, char *buf,
 				    bool show_boost)
-#else /* MY_ABC_HERE */
+#else  
 static ssize_t show_available_freqs(struct cpufreq_policy *policy, char *buf)
-#endif /* MY_ABC_HERE */
+#endif  
 {
 	unsigned int i = 0;
 #if defined(MY_ABC_HERE)
@@ -303,7 +283,7 @@ static ssize_t show_available_freqs(struct cpufreq_policy *policy, char *buf)
 
 	if (!table)
 		return -ENODEV;
-#else /* MY_ABC_HERE */
+#else  
 	unsigned int cpu = policy->cpu;
 	ssize_t count = 0;
 	struct cpufreq_frequency_table *table;
@@ -312,26 +292,16 @@ static ssize_t show_available_freqs(struct cpufreq_policy *policy, char *buf)
 		return -ENODEV;
 
 	table = per_cpu(cpufreq_show_table, cpu);
-#endif /* MY_ABC_HERE */
+#endif  
 
 	for (i = 0; (table[i].frequency != CPUFREQ_TABLE_END); i++) {
 		if (table[i].frequency == CPUFREQ_ENTRY_INVALID)
 			continue;
 #if defined(MY_ABC_HERE)
-		/*
-		 * show_boost = true and driver_data = BOOST freq
-		 * display BOOST freqs
-		 *
-		 * show_boost = false and driver_data = BOOST freq
-		 * show_boost = true and driver_data != BOOST freq
-		 * continue - do not display anything
-		 *
-		 * show_boost = false and driver_data != BOOST freq
-		 * display NON BOOST freqs
-		 */
+		 
 		if (show_boost ^ (table[i].driver_data == CPUFREQ_BOOST_FREQ))
 			continue;
-#endif /* MY_ABC_HERE */
+#endif  
 
 		count += sprintf(&buf[count], "%d ", table[i].frequency);
 	}
@@ -346,31 +316,24 @@ static ssize_t show_available_freqs(struct cpufreq_policy *policy, char *buf)
 struct freq_attr cpufreq_freq_attr_##_name##_freqs =     \
 __ATTR_RO(_name##_frequencies)
 
-/**
- * show_scaling_available_frequencies - show available normal frequencies for
- * the specified CPU
- */
 static ssize_t scaling_available_frequencies_show(struct cpufreq_policy *policy,
 						  char *buf)
 {
 	return show_available_freqs(policy, buf, false);
 }
 cpufreq_attr_available_freq(scaling_available);
-#else /* MY_ABC_HERE */
+#else  
 struct freq_attr cpufreq_freq_attr_scaling_available_freqs = {
 	.attr = { .name = "scaling_available_frequencies",
 		  .mode = 0444,
 		},
 	.show = show_available_freqs,
 };
-#endif /* MY_ABC_HERE */
+#endif  
 EXPORT_SYMBOL_GPL(cpufreq_freq_attr_scaling_available_freqs);
 
 #if defined(MY_ABC_HERE)
-/**
- * show_available_boost_freqs - show available boost frequencies for
- * the specified CPU
- */
+ 
 static ssize_t scaling_boost_frequencies_show(struct cpufreq_policy *policy,
 					      char *buf)
 {
@@ -407,11 +370,8 @@ struct cpufreq_frequency_table *cpufreq_frequency_get_table(unsigned int cpu)
 	struct cpufreq_policy *policy = cpufreq_cpu_get_raw(cpu);
 	return policy ? policy->freq_table : NULL;
 }
-#else /* MY_ABC_HERE */
-/*
- * if you use these, you must assure that the frequency table is valid
- * all the time between get_attr and put_attr!
- */
+#else  
+ 
 void cpufreq_frequency_table_get_attr(struct cpufreq_frequency_table *table,
 				      unsigned int cpu)
 {
@@ -440,7 +400,7 @@ struct cpufreq_frequency_table *cpufreq_frequency_get_table(unsigned int cpu)
 {
 	return per_cpu(cpufreq_show_table, cpu);
 }
-#endif /* MY_ABC_HERE */
+#endif  
 EXPORT_SYMBOL_GPL(cpufreq_frequency_get_table);
 
 MODULE_AUTHOR("Dominik Brodowski <linux@brodo.de>");

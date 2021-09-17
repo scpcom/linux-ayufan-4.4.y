@@ -40,11 +40,9 @@ struct shared_info *HYPERVISOR_shared_info = (void *)&xen_dummy_shared_info;
 DEFINE_PER_CPU(struct vcpu_info *, xen_vcpu);
 static struct vcpu_info __percpu *xen_vcpu_info;
 
-/* These are unused until we support booting "pre-ballooned" */
 unsigned long xen_released_pages;
 struct xen_memory_region xen_extra_mem[XEN_EXTRA_MEM_MAX_REGIONS] __initdata;
 
-/* TODO: to be removed */
 __read_mostly int xen_have_vector_callback;
 EXPORT_SYMBOL_GPL(xen_have_vector_callback);
 
@@ -53,7 +51,6 @@ EXPORT_SYMBOL_GPL(xen_platform_pci_unplug);
 
 static __read_mostly int xen_events_irq = -1;
 
-/* map fgmfn of domid to lpfn in the current domain */
 static int map_foreign_page(unsigned long lpfn, unsigned long fgmfn,
 			    unsigned int domid)
 {
@@ -82,7 +79,7 @@ static int map_foreign_page(unsigned long lpfn, unsigned long fgmfn,
 }
 
 struct remap_data {
-	xen_pfn_t fgmfn; /* foreign domain's gmfn */
+	xen_pfn_t fgmfn;  
 	pgprot_t prot;
 	domid_t  domid;
 	struct vm_area_struct *vma;
@@ -115,7 +112,6 @@ int xen_remap_domain_mfn_range(struct vm_area_struct *vma,
 	int err;
 	struct remap_data data;
 
-	/* TBD: Batching, current sole caller only does page at a time */
 	if (nr > 1)
 		return -EINVAL;
 
@@ -194,10 +190,6 @@ static void xen_power_off(void)
 		BUG();
 }
 
-/*
- * see Documentation/devicetree/bindings/arm/xen.txt for the
- * documentation of the Xen Device Tree format.
- */
 #define GRANT_TABLE_PHYSADDR 0
 static int __init xen_guest_init(void)
 {
@@ -227,16 +219,16 @@ static int __init xen_guest_init(void)
 		return 0;
 #if defined(MY_DEF_HERE)
 	xen_hvm_resume_frames = res.start;
-#else /* MY_DEF_HERE */
+#else  
 	xen_hvm_resume_frames = res.start >> PAGE_SHIFT;
-#endif /* MY_DEF_HERE */
+#endif  
 	xen_events_irq = irq_of_parse_and_map(node, 0);
 	pr_info("Xen %s support found, events_irq=%d gnttab_frame_pfn=%lx\n",
 #if defined(MY_DEF_HERE)
 			version, xen_events_irq, xen_hvm_resume_frames >> PAGE_SHIFT);
-#else /* MY_DEF_HERE */
+#else  
 			version, xen_events_irq, xen_hvm_resume_frames);
-#endif /* MY_DEF_HERE */
+#endif  
 	xen_domain_type = XEN_HVM_DOMAIN;
 
 	xen_setup_features();
@@ -261,14 +253,6 @@ static int __init xen_guest_init(void)
 
 	HYPERVISOR_shared_info = (struct shared_info *)shared_info_page;
 
-	/* xen_vcpu is a pointer to the vcpu_info struct in the shared_info
-	 * page, we use it in the event channel upcall and in some pvclock
-	 * related functions. 
-	 * The shared info contains exactly 1 CPU (the boot CPU). The guest
-	 * is required to use VCPUOP_register_vcpu_info to place vcpu info
-	 * for secondary CPUs as they are brought up.
-	 * For uniformity we use VCPUOP_register_vcpu_info even on cpu0.
-	 */
 	xen_vcpu_info = __alloc_percpu(sizeof(struct vcpu_info),
 			                       sizeof(struct vcpu_info));
 	if (xen_vcpu_info == NULL)
@@ -319,7 +303,6 @@ static int __init xen_init_events(void)
 }
 postcore_initcall(xen_init_events);
 
-/* In the hypervisor.S file. */
 EXPORT_SYMBOL_GPL(HYPERVISOR_event_channel_op);
 EXPORT_SYMBOL_GPL(HYPERVISOR_grant_table_op);
 EXPORT_SYMBOL_GPL(HYPERVISOR_xen_version);

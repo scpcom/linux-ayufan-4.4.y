@@ -1,10 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Self tests for device tree subsystem
- */
-
+ 
 #define pr_fmt(fmt) "### dt-test ### " fmt
 
 #include <linux/clk.h>
@@ -14,7 +11,7 @@
 #include <linux/of.h>
 #if defined(MY_ABC_HERE)
 #include <linux/of_irq.h>
-#endif /* MY_ABC_HERE */
+#endif  
 #include <linux/list.h>
 #include <linux/mutex.h>
 #include <linux/slab.h>
@@ -35,7 +32,7 @@ static struct selftest_results {
 		pr_debug("pass %s():%i\n", __func__, __LINE__); \
 	} \
 }
-#else /* MY_ABC_HERE */
+#else  
 static bool selftest_passed = true;
 
 #define selftest(result, fmt, ...) { \
@@ -46,7 +43,7 @@ static bool selftest_passed = true;
 		pr_info("pass %s:%i\n", __FILE__, __LINE__); \
 	} \
 }
-#endif /* MY_ABC_HERE */
+#endif  
 
 static void __init of_selftest_parse_phandle_with_args(void)
 {
@@ -68,7 +65,6 @@ static void __init of_selftest_parse_phandle_with_args(void)
 		rc = of_parse_phandle_with_args(np, "phandle-list",
 						"#phandle-cells", i, &args);
 
-		/* Test the values from tests-phandle.dtsi */
 		switch (i) {
 		case 0:
 			passed &= !rc;
@@ -117,7 +113,6 @@ static void __init of_selftest_parse_phandle_with_args(void)
 			 i, args.np->full_name, rc);
 	}
 
-	/* Check for missing list property */
 	rc = of_parse_phandle_with_args(np, "phandle-list-missing",
 					"#phandle-cells", 0, &args);
 	selftest(rc == -ENOENT, "expected:%i got:%i\n", -ENOENT, rc);
@@ -125,7 +120,6 @@ static void __init of_selftest_parse_phandle_with_args(void)
 					"#phandle-cells");
 	selftest(rc == -ENOENT, "expected:%i got:%i\n", -ENOENT, rc);
 
-	/* Check for missing cells property */
 	rc = of_parse_phandle_with_args(np, "phandle-list",
 					"#phandle-cells-missing", 0, &args);
 	selftest(rc == -EINVAL, "expected:%i got:%i\n", -EINVAL, rc);
@@ -133,7 +127,6 @@ static void __init of_selftest_parse_phandle_with_args(void)
 					"#phandle-cells-missing");
 	selftest(rc == -EINVAL, "expected:%i got:%i\n", -EINVAL, rc);
 
-	/* Check for bad phandle in list */
 	rc = of_parse_phandle_with_args(np, "phandle-list-bad-phandle",
 					"#phandle-cells", 0, &args);
 	selftest(rc == -EINVAL, "expected:%i got:%i\n", -EINVAL, rc);
@@ -141,7 +134,6 @@ static void __init of_selftest_parse_phandle_with_args(void)
 					"#phandle-cells");
 	selftest(rc == -EINVAL, "expected:%i got:%i\n", -EINVAL, rc);
 
-	/* Check for incorrectly formed argument list */
 	rc = of_parse_phandle_with_args(np, "phandle-list-bad-args",
 					"#phandle-cells", 1, &args);
 	selftest(rc == -EINVAL, "expected:%i got:%i\n", -EINVAL, rc);
@@ -178,7 +170,6 @@ static void __init of_selftest_property_string(void)
 	rc = of_property_match_string(np, "unterminated-string", "blah");
 	selftest(rc == -EILSEQ, "unterminated string; rc=%i\n", rc);
 
-	/* of_property_count_strings() tests */
 	rc = of_property_count_strings(np, "string-property");
 	selftest(rc == 1, "Incorrect string count; rc=%i\n", rc);
 	rc = of_property_count_strings(np, "phandle-list-names");
@@ -188,7 +179,6 @@ static void __init of_selftest_property_string(void)
 	rc = of_property_count_strings(np, "unterminated-string-list");
 	selftest(rc == -EILSEQ, "unterminated string array; rc=%i\n", rc);
 
-	/* of_property_read_string_index() tests */
 	rc = of_property_read_string_index(np, "string-property", 0, strings);
 	selftest(rc == 0 && !strcmp(strings[0], "foobar"), "of_property_read_string_index() failure; rc=%i\n", rc);
 	strings[0] = NULL;
@@ -209,21 +199,20 @@ static void __init of_selftest_property_string(void)
 	rc = of_property_read_string_index(np, "unterminated-string-list", 0, strings);
 	selftest(rc == 0 && !strcmp(strings[0], "first"), "of_property_read_string_index() failure; rc=%i\n", rc);
 	strings[0] = NULL;
-	rc = of_property_read_string_index(np, "unterminated-string-list", 2, strings); /* should fail */
+	rc = of_property_read_string_index(np, "unterminated-string-list", 2, strings);  
 	selftest(rc == -EILSEQ && strings[0] == NULL, "of_property_read_string_index() failure; rc=%i\n", rc);
 	strings[1] = NULL;
 
-	/* of_property_read_string_array() tests */
 	rc = of_property_read_string_array(np, "string-property", strings, 4);
 	selftest(rc == 1, "Incorrect string count; rc=%i\n", rc);
 	rc = of_property_read_string_array(np, "phandle-list-names", strings, 4);
 	selftest(rc == 3, "Incorrect string count; rc=%i\n", rc);
 	rc = of_property_read_string_array(np, "unterminated-string", strings, 4);
 	selftest(rc == -EILSEQ, "unterminated string; rc=%i\n", rc);
-	/* -- An incorrectly formed string should cause a failure */
+	 
 	rc = of_property_read_string_array(np, "unterminated-string-list", strings, 4);
 	selftest(rc == -EILSEQ, "unterminated string array; rc=%i\n", rc);
-	/* -- parsing the correctly formed strings should still work: */
+	 
 	strings[2] = NULL;
 	rc = of_property_read_string_array(np, "unterminated-string-list", strings, 2);
 	selftest(rc == 2 && strings[2] == NULL, "of_property_read_string_array() failure; rc=%i\n", rc);
@@ -270,7 +259,6 @@ static void __init of_selftest_parse_interrupts(void)
 		args.args_count = 0;
 		rc = of_irq_parse_one(np, i, &args);
 
-		/* Test the values from tests-phandle.dtsi */
 		switch (i) {
 		case 0:
 			passed &= !rc;
@@ -321,7 +309,6 @@ static void __init of_selftest_parse_interrupts_extended(void)
 		bool passed = true;
 		rc = of_irq_parse_one(np, i, &args);
 
-		/* Test the values from tests-phandle.dtsi */
 		switch (i) {
 		case 0:
 			passed &= !rc;
@@ -373,7 +360,7 @@ static void __init of_selftest_parse_interrupts_extended(void)
 	}
 	of_node_put(np);
 }
-#endif /* MY_ABC_HERE */
+#endif  
 
 static int __init of_selftest(void)
 {
@@ -394,9 +381,9 @@ static int __init of_selftest(void)
 	of_selftest_parse_interrupts_extended();
 	pr_info("end of selftest - %i passed, %i failed\n",
 		selftest_results.passed, selftest_results.failed);
-#else /* MY_ABC_HERE */
+#else  
 	pr_info("end of selftest - %s\n", selftest_passed ? "PASS" : "FAIL");
-#endif /* MY_ABC_HERE */
+#endif  
 	return 0;
 }
 late_initcall(of_selftest);

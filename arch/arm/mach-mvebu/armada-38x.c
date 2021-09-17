@@ -1,18 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Device Tree support for Armada 380/385 platforms.
- *
- * Copyright (C) 2013 Marvell
- *
- * Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
- *
- * This file is licensed under the terms of the GNU General Public
- * License version 2.  This program is licensed "as is" without any
- * warranty of any kind, whether express or implied.
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/of_address.h>
@@ -53,9 +42,9 @@ void armada_380_scu_enable(void)
 		scu_base = of_iomap(np, 0);
 
 		scu_ctrl = readl_relaxed(scu_base + SCU_CTRL);
-		/* already enabled? */
+		 
 		if (!(scu_ctrl & 1)) {
-			/* Enable SCU Speculative linefills to L2 */
+			 
 			scu_ctrl |= (1 << 3);
 			writel_relaxed(scu_ctrl, scu_base + SCU_CTRL);
 		}
@@ -79,16 +68,8 @@ void __init armada_380_l2_enable(void)
 		goto out;
 	}
 
-	/* Configure the L2 PREFETCH and POWER registers */
 	val = 0x58800000;
-	/*
-	*  Support the following configuration:
-	*  Incr double linefill enable
-	*  Data prefetch enable
-	*  Double linefill enable
-	*  Double linefill on WRAP disable
-	*  NO prefetch drop enable
-	 */
+	 
 	writel_relaxed(val, l2x0_base + L2X0_PREFETCH_CTRL);
 	val = L2X0_DYNAMIC_CLK_GATING_EN;
 	writel_relaxed(val, l2x0_base + L2X0_POWER_CTRL);
@@ -112,35 +93,26 @@ static void __init armada_380_mbus_optimization(void)
 	struct device_node *np;
 	void __iomem *mbus_units_base;
 #if defined(MY_ABC_HERE)
-	// do nothing
-#else /* MY_ABC_HERE */
+	 
+#else  
 	u32 val;
-#endif /* MY_ABC_HERE */
+#endif  
 
 	np = of_find_matching_node(NULL, of_mbusc_table);
 	if (np) {
 		mbus_units_base = of_iomap(np, 3);
 		BUG_ON(!mbus_units_base);
 
-		/* MBUS Units Priority Control Register -
-		Prioritize XOR, PCIe and GbEs (ID=4,6,3,7,8) DRAM access
-		GbE is High and others are Med */
 		__raw_writel(0x19180, mbus_units_base);
 
-		/* Fabric Units Priority Control Register -
-		Prioritize CPUs requests */
 #if defined(MY_ABC_HERE)
 		__raw_writel(0x3000A, mbus_units_base + 0x4);
-#else /* MY_ABC_HERE */
+#else  
 		__raw_writel(0xA, mbus_units_base + 0x4);
-#endif /* MY_ABC_HERE */
+#endif  
 
-		/* MBUS Units Prefetch Control Register -
-		Pre-fetch enable for all IO masters */
 		__raw_writel(0xFFFF, mbus_units_base + 0x8);
 
-		/* Fabric Units Prefetch Control Register -
-		Enable the CPUs Instruction and Data prefetch */
 		__raw_writel(0x303, mbus_units_base + 0xC);
 
 		iounmap(mbus_units_base);
@@ -186,15 +158,6 @@ static const char * const armada_380_dt_compat[] = {
 	"marvell,armada388",
 	NULL,
 };
-
-/*
- * When returning from suspend, the platform goes through the
- * bootloader, which executes its DDR3 training code. This code has
- * the unfortunate idea of using the first 10 KB of each DRAM bank to
- * exercise the RAM and calculate the optimal timings. Therefore, this
- * area of RAM is overwritten, and shouldn't be used by the kernel if
- * suspend/resume is supported.
- */
 
 #ifdef CONFIG_SUSPEND
 #define MVEBU_DDR_TRAINING_AREA_SZ (10 * SZ_1K)

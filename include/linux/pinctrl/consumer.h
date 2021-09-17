@@ -1,17 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Consumer interface the pin control subsystem
- *
- * Copyright (C) 2012 ST-Ericsson SA
- * Written on behalf of Linaro for ST-Ericsson
- * Based on bits of regulator core, gpio core and clk core
- *
- * Author: Linus Walleij <linus.walleij@linaro.org>
- *
- * License terms: GNU General Public License (GPL) version 2
- */
+ 
 #ifndef __LINUX_PINCTRL_CONSUMER_H
 #define __LINUX_PINCTRL_CONSUMER_H
 
@@ -20,14 +10,12 @@
 #include <linux/seq_file.h>
 #include <linux/pinctrl/pinctrl-state.h>
 
-/* This struct is private to the core and should be regarded as a cookie */
 struct pinctrl;
 struct pinctrl_state;
 struct device;
 
 #ifdef CONFIG_PINCTRL
 
-/* External interface to pin control */
 extern int pinctrl_request_gpio(unsigned gpio);
 extern void pinctrl_free_gpio(unsigned gpio);
 extern int pinctrl_gpio_direction_input(unsigned gpio);
@@ -62,8 +50,8 @@ static inline int pinctrl_pm_select_idle_state(struct device *dev)
 	return 0;
 }
 #endif
-#endif /* MY_DEF_HERE */
-#else /* !CONFIG_PINCTRL */
+#endif  
+#else  
 
 static inline int pinctrl_request_gpio(unsigned gpio)
 {
@@ -115,7 +103,7 @@ static inline void devm_pinctrl_put(struct pinctrl *p)
 {
 }
 
-#endif /* CONFIG_PINCTRL */
+#endif  
 
 static inline struct pinctrl * __must_check pinctrl_get_select(
 					struct device *dev, const char *name)
@@ -237,8 +225,8 @@ static inline int pinctrl_pm_select_idle_state(struct device *dev)
 {
 	return 0;
 }
-#endif /* MY_DEF_HERE */
+#endif  
 
 #endif
 
-#endif /* __LINUX_PINCTRL_CONSUMER_H */
+#endif  

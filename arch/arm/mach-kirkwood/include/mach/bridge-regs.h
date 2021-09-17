@@ -1,16 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * arch/arm/mach-kirkwood/include/mach/bridge-regs.h
- *
- * Mbus-L to Mbus Bridge Registers
- *
- * This file is licensed under the terms of the GNU General Public
- * License version 2.  This program is licensed "as is" without any
- * warranty of any kind, whether express or implied.
- */
-
+ 
 #ifndef __ASM_ARCH_BRIDGE_REGS_H
 #define __ASM_ARCH_BRIDGE_REGS_H
 
@@ -25,7 +16,7 @@
 #define RSTOUTn_MASK		(BRIDGE_VIRT_BASE + 0x0108)
 #if defined(MY_ABC_HERE)
 #define RSTOUTn_MASK_PHYS	(BRIDGE_PHYS_BASE + 0x0108)
-#endif /* MY_ABC_HERE */
+#endif  
 #define WDT_RESET_OUT_EN	0x00000002
 #define SOFT_RESET_OUT_EN	0x00000004
 

@@ -1,19 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (c) 2013 Samsung Electronics Co., Ltd.
- *		http://www.samsung.com
- *
- * Amit Daniel Kachhap <amit.daniel@samsung.com>
- *
- * EXYNOS5440 - CPU frequency scaling support
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
-*/
-
+ 
 #include <linux/clk.h>
 #include <linux/cpu.h>
 #include <linux/cpufreq.h>
@@ -25,13 +13,12 @@
 #include <linux/of_irq.h>
 #if defined(MY_ABC_HERE)
 #include <linux/pm_opp.h>
-#else /* MY_ABC_HERE */
+#else  
 #include <linux/opp.h>
-#endif /* MY_ABC_HERE */
+#endif  
 #include <linux/platform_device.h>
 #include <linux/slab.h>
 
-/* Register definitions */
 #define XMU_DVFS_CTRL		0x0060
 #define XMU_PMU_P0_7		0x0064
 #define XMU_C0_3_PSTATE		0x0090
@@ -41,7 +28,6 @@
 #define XMU_PMUIRQEN		0x00d4
 #define XMU_PMUIRQ		0x00d8
 
-/* PMU mask and shift definations */
 #define P_VALUE_MASK		0x7
 
 #define XMU_DVFS_CTRL_EN_SHIFT	0
@@ -71,7 +57,6 @@
 
 #define PSTATE_CHANGED_SHIFT		0
 
-/* some constant values for clock divider calculation */
 #define CPU_DIV_FREQ_MAX	500
 #define CPU_DBG_FREQ_MAX	375
 #define CPU_ATB_FREQ_MAX	500
@@ -88,10 +73,10 @@
 #define L2EMA_LOW		0x4
 
 #define DIV_TAB_MAX	2
-/* frequency unit is 20MHZ */
+ 
 #define FREQ_UNIT	20
-#define MAX_VOLTAGE	1550000 /* In microvolt */
-#define VOLTAGE_STEP	12500	/* In microvolt */
+#define MAX_VOLTAGE	1550000  
+#define VOLTAGE_STEP	12500	 
 
 #define CPUFREQ_NAME		"exynos5440_dvfs"
 #define DEF_TRANS_LATENCY	100000
@@ -127,18 +112,18 @@ static int init_div_table(void)
 	int i = 0;
 #if defined(MY_ABC_HERE)
 	struct dev_pm_opp *opp;
-#else /* MY_ABC_HERE */
+#else  
 	struct opp *opp;
-#endif /* MY_ABC_HERE */
+#endif  
 
 	rcu_read_lock();
 	for (i = 0; freq_tbl[i].frequency != CPUFREQ_TABLE_END; i++) {
 
 #if defined(MY_ABC_HERE)
 		opp = dev_pm_opp_find_freq_exact(dvfs_info->dev,
-#else /* MY_ABC_HERE */
+#else  
 		opp = opp_find_freq_exact(dvfs_info->dev,
-#endif /* MY_ABC_HERE */
+#endif  
 					freq_tbl[i].frequency * 1000, true);
 		if (IS_ERR(opp)) {
 			rcu_read_unlock();
@@ -148,7 +133,7 @@ static int init_div_table(void)
 			return PTR_ERR(opp);
 		}
 
-		freq = freq_tbl[i].frequency / 1000; /* In MHZ */
+		freq = freq_tbl[i].frequency / 1000;  
 		clk_div = ((freq / CPU_DIV_FREQ_MAX) & P0_7_CPUCLKDEV_MASK)
 					<< P0_7_CPUCLKDEV_SHIFT;
 		clk_div |= ((freq / CPU_ATB_FREQ_MAX) & P0_7_ATBCLKDEV_MASK)
@@ -156,12 +141,11 @@ static int init_div_table(void)
 		clk_div |= ((freq / CPU_DBG_FREQ_MAX) & P0_7_CSCLKDEV_MASK)
 					<< P0_7_CSCLKDEV_SHIFT;
 
-		/* Calculate EMA */
 #if defined(MY_ABC_HERE)
 		volt_id = dev_pm_opp_get_voltage(opp);
-#else /* MY_ABC_HERE */
+#else  
 		volt_id = opp_get_voltage(opp);
-#endif /* MY_ABC_HERE */
+#endif  
 		volt_id = (MAX_VOLTAGE - volt_id) / VOLTAGE_STEP;
 		if (volt_id < PMIC_HIGH_VOLT) {
 			ema_div = (CPUEMA_HIGH << P0_7_CPUEMA_SHIFT) |
@@ -188,27 +172,24 @@ static void exynos_enable_dvfs(void)
 {
 	unsigned int tmp, i, cpu;
 	struct cpufreq_frequency_table *freq_table = dvfs_info->freq_table;
-	/* Disable DVFS */
+	 
 	__raw_writel(0,	dvfs_info->base + XMU_DVFS_CTRL);
 
-	/* Enable PSTATE Change Event */
 	tmp = __raw_readl(dvfs_info->base + XMU_PMUEVTEN);
 	tmp |= (1 << PSTATE_CHANGED_EVTEN_SHIFT);
 	 __raw_writel(tmp, dvfs_info->base + XMU_PMUEVTEN);
 
-	/* Enable PSTATE Change IRQ */
 	tmp = __raw_readl(dvfs_info->base + XMU_PMUIRQEN);
 	tmp |= (1 << PSTATE_CHANGED_IRQEN_SHIFT);
 	 __raw_writel(tmp, dvfs_info->base + XMU_PMUIRQEN);
 
-	/* Set initial performance index */
 	for (i = 0; freq_table[i].frequency != CPUFREQ_TABLE_END; i++)
 		if (freq_table[i].frequency == dvfs_info->cur_frequency)
 			break;
 
 	if (freq_table[i].frequency == CPUFREQ_TABLE_END) {
 		dev_crit(dvfs_info->dev, "Boot up frequency not supported\n");
-		/* Assign the highest frequency */
+		 
 		i = 0;
 		dvfs_info->cur_frequency = freq_table[i].frequency;
 	}
@@ -223,7 +204,6 @@ static void exynos_enable_dvfs(void)
 		__raw_writel(tmp, dvfs_info->base + XMU_C0_3_PSTATE + cpu * 4);
 	}
 
-	/* Enable DVFS */
 	__raw_writel(1 << XMU_DVFS_CTRL_EN_SHIFT,
 				dvfs_info->base + XMU_DVFS_CTRL);
 }
@@ -259,7 +239,6 @@ static int exynos_target(struct cpufreq_policy *policy,
 
 	cpufreq_notify_transition(policy, &freqs, CPUFREQ_PRECHANGE);
 
-	/* Set the target frequency in all C0_3_PSTATE register */
 	for_each_cpu(i, policy->cpus) {
 		tmp = __raw_readl(dvfs_info->base + XMU_C0_3_PSTATE + i * 4);
 		tmp &= ~(P_VALUE_MASK << C0_3_PSTATE_NEW_SHIFT);
@@ -275,10 +254,9 @@ out:
 static void exynos_cpufreq_work(struct work_struct *work)
 {
 	unsigned int cur_pstate, index;
-	struct cpufreq_policy *policy = cpufreq_cpu_get(0); /* boot CPU */
+	struct cpufreq_policy *policy = cpufreq_cpu_get(0);  
 	struct cpufreq_frequency_table *freq_table = dvfs_info->freq_table;
 
-	/* Ensure we can access cpufreq structures */
 	if (unlikely(dvfs_info->dvfs_enabled == false))
 		goto skip_work;
 
@@ -324,12 +302,7 @@ static void exynos_sort_descend_freq_table(void)
 	struct cpufreq_frequency_table *freq_tbl = dvfs_info->freq_table;
 	int i = 0, index;
 	unsigned int tmp_freq;
-	/*
-	 * Exynos5440 clock controller state logic expects the cpufreq table to
-	 * be in descending order. But the OPP library constructs the table in
-	 * ascending order. So to make the table descending we just need to
-	 * swap the i element with the N - i element.
-	 */
+	 
 	for (i = 0; i < dvfs_info->freq_count / 2; i++) {
 		index = dvfs_info->freq_count - i - 1;
 		tmp_freq = freq_tbl[i].frequency;
@@ -418,9 +391,9 @@ static int exynos_cpufreq_probe(struct platform_device *pdev)
 #if defined(MY_ABC_HERE)
 	ret = dev_pm_opp_init_cpufreq_table(dvfs_info->dev,
 					    &dvfs_info->freq_table);
-#else /* MY_ABC_HERE */
+#else  
 	ret = opp_init_cpufreq_table(dvfs_info->dev, &dvfs_info->freq_table);
-#endif /* MY_ABC_HERE */
+#endif  
 	if (ret) {
 		dev_err(dvfs_info->dev,
 			"failed to init cpufreq table: %d\n", ret);
@@ -428,9 +401,9 @@ static int exynos_cpufreq_probe(struct platform_device *pdev)
 	}
 #if defined(MY_ABC_HERE)
 	dvfs_info->freq_count = dev_pm_opp_get_opp_count(dvfs_info->dev);
-#else /* MY_ABC_HERE */
+#else  
 	dvfs_info->freq_count = opp_get_opp_count(dvfs_info->dev);
-#endif /* MY_ABC_HERE */
+#endif  
 	exynos_sort_descend_freq_table();
 
 	if (of_property_read_u32(np, "clock-latency", &dvfs_info->latency))
@@ -481,9 +454,9 @@ static int exynos_cpufreq_probe(struct platform_device *pdev)
 err_free_table:
 #if defined(MY_ABC_HERE)
 	dev_pm_opp_free_cpufreq_table(dvfs_info->dev, &dvfs_info->freq_table);
-#else /* MY_ABC_HERE */
+#else  
 	opp_free_cpufreq_table(dvfs_info->dev, &dvfs_info->freq_table);
-#endif /* MY_ABC_HERE */
+#endif  
 err_put_node:
 	of_node_put(np);
 	dev_err(dvfs_info->dev, "%s: failed initialization\n", __func__);
@@ -495,9 +468,9 @@ static int exynos_cpufreq_remove(struct platform_device *pdev)
 	cpufreq_unregister_driver(&exynos_driver);
 #if defined(MY_ABC_HERE)
 	dev_pm_opp_free_cpufreq_table(dvfs_info->dev, &dvfs_info->freq_table);
-#else /* MY_ABC_HERE */
+#else  
 	opp_free_cpufreq_table(dvfs_info->dev, &dvfs_info->freq_table);
-#endif /* MY_ABC_HERE */
+#endif  
 	return 0;
 }
 

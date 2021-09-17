@@ -1,25 +1,12 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Symmetric Multi Processing (SMP) support for Armada 380/385
- *
- * Copyright (C) 2013 Marvell
- *
- * Gregory CLEMENT <gregory.clement@free-electrons.com>
- * Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
- *
- * This file is licensed under the terms of the GNU General Public
- * License version 2.  This program is licensed "as is" without any
- * warranty of any kind, whether express or implied.
- *
- */
-
+ 
 #include <linux/init.h>
 #include <linux/io.h>
 #if defined(MY_ABC_HERE)
 #include <linux/clk.h>
-#endif /* MY_ABC_HERE */
+#endif  
 #include <linux/of.h>
 #include <linux/smp.h>
 #include <linux/cpu.h>
@@ -58,7 +45,7 @@ static void __init set_secondary_cpus_clock(void)
 		return;
 	clk_prepare_enable(cpu_clk);
 }
-#endif /* MY_ABC_HERE */
+#endif  
 
 extern void a380_secondary_startup(void);
 static struct notifier_block armada_380_secondary_cpu_notifier;
@@ -71,10 +58,6 @@ static int __cpuinit armada_380_boot_secondary(unsigned int cpu, struct task_str
 	return 0;
 }
 
-/*
- * Initialise the CPU possible map early - this describes the CPUs
- * which may be present or become present in the system.
- */
 static void __init armada_380_smp_init_cpus(void)
 {
 	struct device_node *np;
@@ -88,7 +71,6 @@ static void __init armada_380_smp_init_cpus(void)
 	if (ncores == 0 || ncores > ARMADA_380_MAX_CPUS)
 		panic("Invalid number of CPUs in DT\n");
 
-	/* Limit possible CPUs to defconfig */
 	if (ncores > nr_cpu_ids) {
 		pr_warn("SMP: %d CPUs physically present. Only %d configured.",
 			ncores, nr_cpu_ids);
@@ -107,55 +89,35 @@ static void __init armada_380_smp_prepare_cpus(unsigned int max_cpus)
 	for (i = 0; i < max_cpus; i++)
 		set_cpu_present(i, true);
 
-	/*
-	 * Register notifier to unmask SOC Private Peripheral Interrupt on
-	 * second core. It have to be done here because the interrupt
-	 * cannot be enabled from another CPU.
-	 */
 	register_cpu_notifier(&armada_380_secondary_cpu_notifier);
 
 #if defined(MY_ABC_HERE)
 	set_secondary_cpus_clock();
-#endif /* MY_ABC_HERE */
+#endif  
 }
 
 #if defined(MY_ABC_HERE)
-/*
- * When a CPU is brought back online, either through CPU hotplug, or
- * because of the boot of a kexec'ed kernel, the PMSU configuration
- * for this CPU might be in the deep idle state, preventing this CPU
- * from receiving interrupts. Here, we therefore take out the current
- * CPU from this state, which was entered by armada_38x_cpu_die()
- * below.
- */
+ 
 static void armada_38x_secondary_init(unsigned int cpu)
 {
 	mvebu_v7_pmsu_idle_exit();
 }
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef CONFIG_HOTPLUG_CPU
 static void armada_38x_cpu_die(unsigned int cpu)
 {
-	/*
-	 * CPU hotplug is implemented by putting offline CPUs into the
-	 * deep idle sleep state.
-	 */
+	 
 	armada_38x_do_cpu_suspend(true);
 }
 
 #if defined(MY_ABC_HERE)
-/*
- * We need a dummy function, so that platform_can_cpu_hotplug() knows
- * we support CPU hotplug. However, the function does not need to do
- * anything, because CPUs going offline can enter the deep idle state
- * by themselves, without any help from a still alive CPU.
- */
+ 
 static int armada_38x_cpu_kill(unsigned int cpu)
 {
 	return 1;
 }
-#endif /* MY_ABC_HERE */
+#endif  
 #endif
 
 struct smp_operations armada_380_smp_ops __initdata = {
@@ -164,18 +126,15 @@ struct smp_operations armada_380_smp_ops __initdata = {
 	.smp_boot_secondary	= armada_380_boot_secondary,
 #if defined(MY_ABC_HERE)
 	.smp_secondary_init     = armada_38x_secondary_init,
-#endif /* MY_ABC_HERE */
+#endif  
 #ifdef CONFIG_HOTPLUG_CPU
 	.cpu_die		= armada_38x_cpu_die,
 #if defined(MY_ABC_HERE)
 	.cpu_kill               = armada_38x_cpu_kill,
-#endif /* MY_ABC_HERE */
+#endif  
 #endif
 };
 
-/*
- * CPU Notifier for enabling the SOC Private Peripheral Interrupts on CPU1.
- */
 static int __cpuinit armada_380_secondary_init(struct notifier_block *nfb,
 					       unsigned long action, void *hcpu)
 {

@@ -1,15 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  linux/arch/arm/kernel/signal.c
- *
- *  Copyright (C) 1995-2009 Russell King
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
+ 
 #include <linux/errno.h>
 #include <linux/random.h>
 #include <linux/signal.h>
@@ -26,23 +18,14 @@
 
 #if defined(MY_ABC_HERE)
 extern const unsigned long sigreturn_codes[7];
-#else /* MY_ABC_HERE */
-/*
- * For ARM syscalls, we encode the syscall number into the instruction.
- */
+#else  
+ 
 #define SWI_SYS_SIGRETURN	(0xef000000|(__NR_sigreturn)|(__NR_OABI_SYSCALL_BASE))
 #define SWI_SYS_RT_SIGRETURN	(0xef000000|(__NR_rt_sigreturn)|(__NR_OABI_SYSCALL_BASE))
 
-/*
- * With EABI, the syscall number has to be loaded into r7.
- */
 #define MOV_R7_NR_SIGRETURN	(0xe3a07000 | (__NR_sigreturn - __NR_SYSCALL_BASE))
 #define MOV_R7_NR_RT_SIGRETURN	(0xe3a07000 | (__NR_rt_sigreturn - __NR_SYSCALL_BASE))
 
-/*
- * For Thumb syscalls, we pass the syscall number via r7.  We therefore
- * need two 16-bit instructions.
- */
 #define SWI_THUMB_SIGRETURN	(0xdf00 << 16 | 0x2700 | (__NR_sigreturn - __NR_SYSCALL_BASE))
 #define SWI_THUMB_RT_SIGRETURN	(0xdf00 << 16 | 0x2700 | (__NR_rt_sigreturn - __NR_SYSCALL_BASE))
 
@@ -50,7 +33,7 @@ static const unsigned long sigreturn_codes[7] = {
 	MOV_R7_NR_SIGRETURN,    SWI_SYS_SIGRETURN,    SWI_THUMB_SIGRETURN,
 	MOV_R7_NR_RT_SIGRETURN, SWI_SYS_RT_SIGRETURN, SWI_THUMB_RT_SIGRETURN,
 };
-#endif /* MY_ABC_HERE */
+#endif  
 
 static unsigned long signal_return_offset;
 
@@ -60,7 +43,6 @@ static int preserve_crunch_context(struct crunch_sigframe __user *frame)
 	char kbuf[sizeof(*frame) + 8];
 	struct crunch_sigframe *kframe;
 
-	/* the crunch context must be 64 bit aligned */
 	kframe = (struct crunch_sigframe *)((unsigned long)(kbuf + 8) & ~7);
 	kframe->magic = CRUNCH_MAGIC;
 	kframe->size = CRUNCH_STORAGE_SIZE;
@@ -73,7 +55,6 @@ static int restore_crunch_context(struct crunch_sigframe __user *frame)
 	char kbuf[sizeof(*frame) + 8];
 	struct crunch_sigframe *kframe;
 
-	/* the crunch context must be 64 bit aligned */
 	kframe = (struct crunch_sigframe *)((unsigned long)(kbuf + 8) & ~7);
 	if (__copy_from_user(kframe, frame, sizeof(*frame)))
 		return -1;
@@ -92,7 +73,6 @@ static int preserve_iwmmxt_context(struct iwmmxt_sigframe *frame)
 	char kbuf[sizeof(*frame) + 8];
 	struct iwmmxt_sigframe *kframe;
 
-	/* the iWMMXt context must be 64 bit aligned */
 	kframe = (struct iwmmxt_sigframe *)((unsigned long)(kbuf + 8) & ~7);
 	kframe->magic = IWMMXT_MAGIC;
 	kframe->size = IWMMXT_STORAGE_SIZE;
@@ -105,7 +85,6 @@ static int restore_iwmmxt_context(struct iwmmxt_sigframe *frame)
 	char kbuf[sizeof(*frame) + 8];
 	struct iwmmxt_sigframe *kframe;
 
-	/* the iWMMXt context must be 64 bit aligned */
 	kframe = (struct iwmmxt_sigframe *)((unsigned long)(kbuf + 8) & ~7);
 	if (__copy_from_user(kframe, frame, sizeof(*frame)))
 		return -1;
@@ -154,9 +133,6 @@ static int restore_vfp_context(struct vfp_sigframe __user *frame)
 
 #endif
 
-/*
- * Do a signal return; undo the signal stack.  These are aligned to 64-bit.
- */
 struct sigframe {
 	struct ucontext uc;
 	unsigned long retcode[2];
@@ -218,14 +194,8 @@ asmlinkage int sys_sigreturn(struct pt_regs *regs)
 {
 	struct sigframe __user *frame;
 
-	/* Always make any pending restarted system calls return -EINTR */
 	current_thread_info()->restart_block.fn = do_no_restart_syscall;
 
-	/*
-	 * Since we stacked the signal on a 64-bit boundary,
-	 * then 'sp' should be word aligned here.  If it's
-	 * not, then the user is trying to mess with us.
-	 */
 	if (regs->ARM_sp & 7)
 		goto badframe;
 
@@ -248,14 +218,8 @@ asmlinkage int sys_rt_sigreturn(struct pt_regs *regs)
 {
 	struct rt_sigframe __user *frame;
 
-	/* Always make any pending restarted system calls return -EINTR */
 	current_thread_info()->restart_block.fn = do_no_restart_syscall;
 
-	/*
-	 * Since we stacked the signal on a 64-bit boundary,
-	 * then 'sp' should be word aligned here.  If it's
-	 * not, then the user is trying to mess with us.
-	 */
 	if (regs->ARM_sp & 7)
 		goto badframe;
 
@@ -332,23 +296,14 @@ get_sigframe(struct ksignal *ksig, struct pt_regs *regs, int framesize)
 	unsigned long sp = sigsp(regs->ARM_sp, ksig);
 	void __user *frame;
 
-	/*
-	 * ATPCS B01 mandates 8-byte alignment
-	 */
 	frame = (void __user *)((sp - framesize) & ~7);
 
-	/*
-	 * Check that we can actually write to the signal frame.
-	 */
 	if (!access_ok(VERIFY_WRITE, frame, framesize))
 		frame = NULL;
 
 	return frame;
 }
 
-/*
- * translate the signal
- */
 static inline int map_sig(int sig)
 {
 	struct thread_info *thread = current_thread_info();
@@ -368,24 +323,18 @@ setup_return(struct pt_regs *regs, struct ksignal *ksig,
 
 	cpsr |= PSR_ENDSTATE;
 
-	/*
-	 * Maybe we need to deliver a 32-bit signal to a 26-bit task.
-	 */
 	if (ksig->ka.sa.sa_flags & SA_THIRTYTWO)
 		cpsr = (cpsr & ~MODE_MASK) | USR_MODE;
 
 #ifdef CONFIG_ARM_THUMB
 	if (elf_hwcap & HWCAP_THUMB) {
-		/*
-		 * The LSB of the handler determines if we're going to
-		 * be using THUMB or ARM mode for this signal handler.
-		 */
+		 
 		thumb = handler & 1;
 
 		if (thumb) {
 			cpsr |= PSR_T_BIT;
 #if __LINUX_ARM_ARCH__ >= 7
-			/* clear the If-Then Thumb-2 execution state */
+			 
 			cpsr &= ~PSR_IT_MASK;
 #endif
 		} else
@@ -408,20 +357,13 @@ setup_return(struct pt_regs *regs, struct ksignal *ksig,
 #ifdef CONFIG_MMU
 		if (cpsr & MODE32_BIT) {
 			struct mm_struct *mm = current->mm;
-			/*
-			 * 32-bit code can use the signal return page
-			 * except when the MPU has protected the vectors
-			 * page from PL0
-			 */
+			 
 			retcode = mm->context.sigpage + signal_return_offset +
 				  (idx << 2) + thumb;
 		} else
 #endif
 		{
-			/*
-			 * Ensure that the instruction cache sees
-			 * the return code written onto the stack.
-			 */
+			 
 			flush_icache_range((unsigned long)rc,
 					   (unsigned long)(rc + 2));
 
@@ -447,9 +389,6 @@ setup_frame(struct ksignal *ksig, sigset_t *set, struct pt_regs *regs)
 	if (!frame)
 		return 1;
 
-	/*
-	 * Set uc.uc_flags to a value which sc.trap_no would never have.
-	 */
 	__put_user_error(0x5ac3c35a, &frame->uc.uc_flags, err);
 
 	err |= setup_sigframe(frame, regs, set);
@@ -479,11 +418,7 @@ setup_rt_frame(struct ksignal *ksig, sigset_t *set, struct pt_regs *regs)
 		err = setup_return(regs, ksig, frame->sig.retcode, frame);
 
 	if (err == 0) {
-		/*
-		 * For realtime signals we must also set the second and third
-		 * arguments for the signal handler.
-		 *   -- Peter Maydell <pmaydell@chiark.greenend.org.uk> 2000-12-06
-		 */
+		 
 		regs->ARM_r1 = (unsigned long)&frame->info;
 		regs->ARM_r2 = (unsigned long)&frame->sig.uc;
 	}
@@ -491,57 +426,32 @@ setup_rt_frame(struct ksignal *ksig, sigset_t *set, struct pt_regs *regs)
 	return err;
 }
 
-/*
- * OK, we're invoking a handler
- */	
 static void handle_signal(struct ksignal *ksig, struct pt_regs *regs)
 {
 	sigset_t *oldset = sigmask_to_save();
 	int ret;
 
-	/*
-	 * Set up the stack frame
-	 */
 	if (ksig->ka.sa.sa_flags & SA_SIGINFO)
 		ret = setup_rt_frame(ksig, oldset, regs);
 	else
 		ret = setup_frame(ksig, oldset, regs);
 
-	/*
-	 * Check that the resulting registers are actually sane.
-	 */
 	ret |= !valid_user_regs(regs);
 
 	signal_setup_done(ret, ksig, 0);
 }
 
-/*
- * Note that 'init' is a special process: it doesn't get signals it doesn't
- * want to handle. Thus you cannot kill init even with a SIGKILL even by
- * mistake.
- *
- * Note that we go through the signals twice: once to check the signals that
- * the kernel can handle, and then we build all the user-level signal handling
- * stack-frames in one go after that.
- */
 static int do_signal(struct pt_regs *regs, int syscall)
 {
 	unsigned int retval = 0, continue_addr = 0, restart_addr = 0;
 	struct ksignal ksig;
 	int restart = 0;
 
-	/*
-	 * If we were from a system call, check for system call restarting...
-	 */
 	if (syscall) {
 		continue_addr = regs->ARM_pc;
 		restart_addr = continue_addr - (thumb_mode(regs) ? 2 : 4);
 		retval = regs->ARM_r0;
 
-		/*
-		 * Prepare for system call restart.  We do this here so that a
-		 * debugger will see the already changed PSW.
-		 */
 		switch (retval) {
 		case -ERESTART_RESTARTBLOCK:
 			restart -= 2;
@@ -555,17 +465,8 @@ static int do_signal(struct pt_regs *regs, int syscall)
 		}
 	}
 
-	/*
-	 * Get the signal to deliver.  When running under ptrace, at this
-	 * point the debugger may change all our registers ...
-	 */
-	/*
-	 * Depending on the signal settings we may need to revert the
-	 * decision to restart the system call.  But skip this if a
-	 * debugger has chosen to restart at a different PC.
-	 */
 	if (get_signal(&ksig)) {
-		/* handler */
+		 
 		if (unlikely(restart) && regs->ARM_pc == restart_addr) {
 			if (retval == -ERESTARTNOHAND ||
 			    retval == -ERESTART_RESTARTBLOCK
@@ -577,7 +478,7 @@ static int do_signal(struct pt_regs *regs, int syscall)
 		}
 		handle_signal(&ksig, regs);
 	} else {
-		/* no handler */
+		 
 		restore_saved_sigmask();
 		if (unlikely(restart) && regs->ARM_pc == restart_addr) {
 			regs->ARM_pc = continue_addr;
@@ -600,11 +501,7 @@ do_work_pending(struct pt_regs *regs, unsigned int thread_flags, int syscall)
 			if (thread_flags & _TIF_SIGPENDING) {
 				int restart = do_signal(regs, syscall);
 				if (unlikely(restart)) {
-					/*
-					 * Restart without handlers.
-					 * Deal with it without leaving
-					 * the kernel space.
-					 */
+					 
 					return restart;
 				}
 				syscall = 0;
@@ -633,14 +530,9 @@ struct page *get_signal_page(void)
 
 	addr = page_address(page);
 
-	/* Give the signal return code some randomness */
 	offset = 0x200 + (get_random_int() & 0x7fc);
 	signal_return_offset = offset;
 
-	/*
-	 * Copy signal return handlers into the vector page, and
-	 * set sigreturn to be a pointer to these.
-	 */
 	memcpy(addr + offset, sigreturn_codes, sizeof(sigreturn_codes));
 
 	ptr = (unsigned long)addr + offset;

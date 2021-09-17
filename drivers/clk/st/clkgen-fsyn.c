@@ -1,21 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) 2013 STMicroelectronics R&D Ltd
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- *
- */
-
-/*
- * Authors:
- * Stephen Gallimore <stephen.gallimore@st.com>,
- * Pankaj Dev <pankaj.dev@st.com>.
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/spinlock.h>
@@ -33,11 +19,6 @@
 #include "clkgen.h"
 #include "clk-common.h"
 
-/*
- * Maximum input clock to the PLL before we divide it down by 2
- * although in reality in actual systems this has never been seen to
- * be used.
- */
 #define QUADFS_NDIV_THRESHOLD 30000000
 
 #define PLL_BW_GOODREF   (0L)
@@ -85,14 +66,8 @@ static const struct clk_ops st_quadfs_fs216c65_ops;
 static const struct clk_ops st_quadfs_fs432c65_ops;
 static const struct clk_ops st_quadfs_fs660c32_ops;
 
-/*
- * Values for all of the standalone instances of this clock
- * generator found in STiH415 and STiH416 SYSCFG register banks. Note
- * that the individual channel standby control bits (nsb) are in the
- * first register along with the PLL control bits.
- */
 static struct clkgen_quadfs_data st_fs216c65_B_415 = {
-	/* 415 specific */
+	 
 	.npda = CLKGEN_FIELD(0x0, 0x1, 4),
 	.nsb = { CLKGEN_FIELD(0x44, 0x1, 0),
 		 CLKGEN_FIELD(0x44, 0x1, 1),
@@ -120,14 +95,14 @@ static struct clkgen_quadfs_data st_fs216c65_B_415 = {
 		  CLKGEN_FIELD(0x40, 0x7, 0) },
 	.reset_present = true,
 	.nreset = CLKGEN_FIELD(0x0, 0x1, 3),
-	/* unlock reg access */
+	 
 	.init_reg1 = CLKGEN_FIELD(0xc0de, 0xffff, 0),
 	.pll_ops	= &st_quadfs_pll_c65_ops,
 	.fsynth_ops	= &st_quadfs_fs216c65_ops,
 };
 
 static struct clkgen_quadfs_data st_fs216c65_415 = {
-	/* 415 specific */
+	 
 	.npda = CLKGEN_FIELD(0x0, 0x1, 14),
 	.nsb = { CLKGEN_FIELD(0x0, 0x1, 10),
 		 CLKGEN_FIELD(0x0, 0x1, 11),
@@ -160,7 +135,7 @@ static struct clkgen_quadfs_data st_fs216c65_415 = {
 };
 
 static struct clkgen_quadfs_data st_fs216c65_416 = {
-	/* 416 specific */
+	 
 	.npda	= CLKGEN_FIELD(0x0, 0x1, 14),
 	.nsb	= { CLKGEN_FIELD(0x0, 0x1, 10),
 		    CLKGEN_FIELD(0x0, 0x1, 11),
@@ -560,7 +535,7 @@ static struct clkgen_quadfs_data st_fs660c32_TEL_127 = {
 	.lock_status = CLKGEN_FIELD(0x20, 0x1, 5),
 	.powerup_polarity = 1,
 	.standby_polarity = 1,
-	/* enable output select */
+	 
 	.init_reg1 = CLKGEN_FIELD(0x0, 0x1f, 0),
 	.pll_ops	= &st_quadfs_pll_c32_ops,
 	.fsynth_ops	= &st_quadfs_fs660c32_ops,
@@ -616,27 +591,6 @@ static struct clkgen_quadfs_conf st_fs660c32_conf_D2_407 = {
 	.fsynth_clkflags = { CLK_IGNORE_UNUSED, CLK_IGNORE_UNUSED },
 };
 
-/**
- * DOC: A Frequency Synthesizer that multiples its input clock by a fixed factor
- *
- * Traits of this clock:
- * prepare - clk_(un)prepare only ensures parent is (un)prepared
- * enable - clk_enable and clk_disable are functional & control the Fsyn
- * rate - inherits rate from parent. set_rate/round_rate/recalc_rate
- * parent - fixed parent.  No clk_set_parent support
- */
-
-/**
- * struct st_clk_quadfs_pll - A pll which outputs a fixed multiplier of
- *                                  its parent clock, found inside a type of
- *                                  ST quad channel frequency synthesizer block
- *
- * @hw: handle between common and hardware-specific interfaces.
- * @ndiv: regmap field for the ndiv control.
- * @regs_base: base address of the configuration registers.
- * @lock: spinlock.
- *
- */
 struct st_clk_quadfs_pll {
 	struct clk_hw	hw;
 	void __iomem	*regs_base;
@@ -655,24 +609,16 @@ static int quadfs_pll_enable(struct clk_hw *hw)
 	if (pll->lock)
 		spin_lock_irqsave(pll->lock, flags);
 
-	/*
-	 * Bring block out of reset if we have reset control.
-	 */
 	if (pll->data->reset_present)
 		CLKGEN_WRITE(pll, nreset, 1);
 
 	if (pll->data->bwfilter_present) {
-		/*
-		 * Use a fixed input clock noise bandwidth filter for the moment
-		 */
+		 
 		CLKGEN_WRITE(pll, ref_bw, PLL_BW_GOODREF);
 	}
 
 	CLKGEN_WRITE(pll, ndiv, pll->ndiv);
 
-	/*
-	 * Power up the PLL
-	 */
 	CLKGEN_WRITE(pll, npda, !pll->data->powerup_polarity);
 
 	if (pll->lock)
@@ -696,10 +642,6 @@ static void quadfs_pll_disable(struct clk_hw *hw)
 	if (pll->lock)
 		spin_lock_irqsave(pll->lock, flags);
 
-	/*
-	 * Powerdown the PLL and then put block into soft reset if we have
-	 * reset control.
-	 */
 	CLKGEN_WRITE(pll, npda, pll->data->powerup_polarity);
 
 	if (pll->data->reset_present)
@@ -716,9 +658,9 @@ static int quadfs_pll_is_enabled(struct clk_hw *hw)
 
 #ifdef MY_DEF_HERE
 	return pll->data->powerup_polarity ? !npda : !!npda;
-#else /* MY_DEF_HERE */
+#else  
 	return !!npda;
-#endif /* MY_DEF_HERE */
+#endif  
 }
 
 static unsigned long quadfs_pll_fs660c32_recalc_rate(struct clk_hw *hw,
@@ -813,9 +755,7 @@ static struct clk * __init st_clk_register_quadfs_pll(
 	struct clk *clk;
 	struct clk_init_data init;
 	unsigned long flags = ((conf_data) ? conf_data->pll_clkflags : 0);
-	/*
-	 * Sanity check required pointers.
-	 */
+	 
 	if (WARN_ON(!name || !parent_name))
 		return ERR_PTR(-EINVAL);
 
@@ -842,31 +782,6 @@ static struct clk * __init st_clk_register_quadfs_pll(
 	return clk;
 }
 
-/**
- * DOC: A digital frequency synthesizer
- *
- * Traits of this clock:
- * prepare - clk_(un)prepare only ensures parent is (un)prepared
- * enable - clk_enable and clk_disable are functional
- * rate - set rate is functional
- * parent - fixed parent.  No clk_set_parent support
- */
-
-/**
- * struct st_clk_quadfs_fsynth - One clock output from a four channel digital
- *                                  frequency synthesizer (fsynth) block.
- *
- * @hw: handle between common and hardware-specific interfaces
- *
- * @nsb: regmap field in the output control register for the digital
- *       standby of this fsynth channel. This control is active low so
- *       the channel is in standby when the control bit is cleared.
- *
- * @nsdiv: regmap field in the output control register for
- *          for the optional divide by 3 of this fsynth channel. This control
- *          is active low so the divide by 3 is active when the control bit is
- *          cleared and the divide is bypassed when the bit is set.
- */
 struct st_clk_quadfs_fsynth {
 	struct clk_hw	hw;
 	void __iomem	*regs_base;
@@ -874,17 +789,7 @@ struct st_clk_quadfs_fsynth {
 	struct clkgen_quadfs_data *data;
 
 	u32 chan;
-	/*
-	 * Cached hardware values from set_rate so we can program the
-	 * hardware in enable. There are two reasons for this:
-	 *
-	 *  1. The registers may not be writable until the parent has been
-	 *     enabled.
-	 *
-	 *  2. It restores the clock rate when a driver does an enable
-	 *     on PM restore, after a suspend to RAM has lost the hardware
-	 *     setup.
-	 */
+	 
 	u32 md;
 	u32 pe;
 	u32 sdiv;
@@ -896,10 +801,7 @@ struct st_clk_quadfs_fsynth {
 
 static void quadfs_fsynth_program_enable(struct st_clk_quadfs_fsynth *fs)
 {
-	/*
-	 * Pulse the program enable register lsb to make the hardware take
-	 * notice of the new md/pe values with a glitchless transition.
-	 */
+	 
 	CLKGEN_WRITE(fs, en[fs->chan], 1);
 	CLKGEN_WRITE(fs, en[fs->chan], 0);
 }
@@ -908,11 +810,6 @@ static void quadfs_fsynth_program_rate(struct st_clk_quadfs_fsynth *fs)
 {
 	unsigned long flags = 0;
 
-	/*
-	 * Ensure the md/pe parameters are ignored while we are
-	 * reprogramming them so we can get a glitchless change
-	 * when fine tuning the speed of a running clock.
-	 */
 	CLKGEN_WRITE(fs, en[fs->chan], 0);
 
 	CLKGEN_WRITE(fs, mdiv[fs->chan], fs->md);
@@ -983,9 +880,7 @@ static int quadfs_fsynth_is_enabled(struct clk_hw *hw)
 static int quadfs_fsynt_get_hw_value_for_recalc(struct st_clk_quadfs_fsynth *fs,
 		struct stm_fs *params)
 {
-	/*
-	 * Get the initial hardware values for recalc_rate
-	 */
+	 
 	params->mdiv	= CLKGEN_READ(fs, mdiv[fs->chan]);
 	params->pe	= CLKGEN_READ(fs, pe[fs->chan]);
 	params->sdiv	= CLKGEN_READ(fs, sdiv[fs->chan]);
@@ -995,9 +890,6 @@ static int quadfs_fsynt_get_hw_value_for_recalc(struct st_clk_quadfs_fsynth *fs,
 	else
 		params->nsdiv = NSDIV_BIN(fs->data->fixed_nsdiv[fs->chan]);
 
-	/*
-	 * If All are NULL then assume no clock rate is programmed.
-	 */
 	if (!params->mdiv && !params->pe && !params->sdiv)
 		return 1;
 
@@ -1078,7 +970,6 @@ static long quadfs_fs216c65_find_best_rate(struct st_clk_quadfs_fsynth *fs,
 	struct stm_fs params2 = *params;
 	unsigned long rate1, rate2;
 
-	/* Try both solutions for closest match */
 	params1.nsdiv = (fs->data->nsdiv_present && fs->data->fixed_nsdiv[fs->chan]) ?
 			NSDIV_BIN(fs->data->fixed_nsdiv[fs->chan]) : 1;
 	if (!clk_fs216c65_get_params(parent_rate, rate, &params1))
@@ -1113,7 +1004,6 @@ static long quadfs_fs432c65_find_best_rate(struct st_clk_quadfs_fsynth *fs,
 	struct stm_fs params2 = *params;
 	unsigned long rate1, rate2;
 
-	/* Try both solutions for closest match */
 	params1.nsdiv = (fs->data->nsdiv_present && fs->data->fixed_nsdiv[fs->chan]) ?
 			NSDIV_BIN(fs->data->fixed_nsdiv[fs->chan]) : 1;
 	if (!clk_fs432c65_get_params(parent_rate, rate, &params1))
@@ -1148,7 +1038,6 @@ static long quadfs_fs660c32_find_best_rate(struct st_clk_quadfs_fsynth *fs,
 	struct stm_fs params2 = *params;
 	unsigned long rate1, rate2;
 
-	/* Try both solutions for closest match */
 	params1.nsdiv = (fs->data->nsdiv_present && fs->data->fixed_nsdiv[fs->chan]) ?
 			NSDIV_BIN(fs->data->fixed_nsdiv[fs->chan]) : 1;
 	if (!clk_fs660c32_dig_get_params(parent_rate, rate, &params1))
@@ -1250,10 +1139,6 @@ static int quadfs_fs216c65_set_rate(struct clk_hw *hw, unsigned long rate,
 	fs->sdiv = params.sdiv;
 	fs->nsdiv = params.nsdiv;
 
-	/*
-	 * In some integrations you can only change the fsynth programming when
-	 * the parent entity containing it is enabled.
-	 */
 	quadfs_fsynth_program_rate(fs);
 	quadfs_fsynth_program_enable(fs);
 
@@ -1287,10 +1172,6 @@ static int quadfs_fs432c65_set_rate(struct clk_hw *hw, unsigned long rate,
 	fs->sdiv = params.sdiv;
 	fs->nsdiv = params.nsdiv;
 
-	/*
-	 * In some integrations you can only change the fsynth programming when
-	 * the parent entity containing it is enabled.
-	 */
 	quadfs_fsynth_program_rate(fs);
 	quadfs_fsynth_program_enable(fs);
 
@@ -1324,10 +1205,6 @@ static int quadfs_fs660c32_set_rate(struct clk_hw *hw, unsigned long rate,
 	fs->sdiv = params.sdiv;
 	fs->nsdiv = params.nsdiv;
 
-	/*
-	 * In some integrations you can only change the fsynth programming when
-	 * the parent entity containing it is enabled.
-	 */
 	quadfs_fsynth_program_rate(fs);
 	quadfs_fsynth_program_enable(fs);
 
@@ -1372,9 +1249,7 @@ static struct clk * __init st_clk_register_quadfs_fsynth(
 	struct clk_init_data init;
 	unsigned long flags = ((conf_data) ?
 			       conf_data->fsynth_clkflags[chan] : 0);
-	/*
-	 * Sanity check required pointers, note that nsdiv3 is optional.
-	 */
+	 
 	if (WARN_ON(!name || !parent_name))
 		return ERR_PTR(-EINVAL);
 
@@ -1501,9 +1376,6 @@ static void __init st_of_create_quadfs_fsynths(
 			break;
 		}
 
-		/*
-		 * If we read an empty clock name then the channel is unused
-		 */
 		if (*clk_name == '\0')
 			continue;
 
@@ -1511,10 +1383,6 @@ static void __init st_of_create_quadfs_fsynths(
 						    quadfs, conf_data, reg,
 						    fschan, lock);
 
-		/*
-		 * If there was an error registering this clock output, clean
-		 * up and move on to the next one.
-		 */
 		if (!IS_ERR(clk)) {
 			clk_data->clks[fschan] = clk;
 			pr_debug("%s: parent %s rate %u\n",
@@ -1551,7 +1419,6 @@ static void __init st_of_quadfs_setup(struct device_node *np)
 	if (!reg)
 		return;
 
-	/* initialise additional registers, if present */
 	reg1 = of_iomap(np, 1);
 	if (reg1) {
 		writel((readl(reg1) &
@@ -1565,8 +1432,6 @@ static void __init st_of_quadfs_setup(struct device_node *np)
 	if (!clk_parent_name)
 		return;
 
-	/* Use VCO name is specificed in DT as 4th argument
-	in "clock-output-names" */
 	if (of_property_read_string_index(np, "clock-output-names",
 					  4, &pll_name) || (*pll_name == '\0'))
 		no_vco_name = true;
@@ -1598,6 +1463,6 @@ static void __init st_of_quadfs_setup(struct device_node *np)
 
 err_exit:
 	if (no_vco_name)
-		kfree(pll_name); /* No longer need local copy of the PLL name */
+		kfree(pll_name);  
 }
 CLK_OF_DECLARE(quadfs, "st,quadfs", st_of_quadfs_setup);

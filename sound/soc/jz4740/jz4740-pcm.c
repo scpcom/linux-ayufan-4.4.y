@@ -1,20 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  Copyright (C) 2010, Lars-Peter Clausen <lars@metafoo.de>
- *
- *  This program is free software; you can redistribute	 it and/or modify it
- *  under  the terms of	 the GNU General  Public License as published by the
- *  Free Software Foundation;  either version 2 of the	License, or (at your
- *  option) any later version.
- *
- *  You should have received a copy of the  GNU General Public License along
- *  with this program; if not, write  to the Free Software Foundation, Inc.,
- *  675 Mass Ave, Cambridge, MA 02139, USA.
- *
- */
-
+ 
 #include <linux/init.h>
 #include <linux/interrupt.h>
 #include <linux/kernel.h>
@@ -43,7 +30,6 @@ struct jz4740_runtime_data {
 	dma_addr_t fifo_addr;
 };
 
-/* identify hardware playback capabilities */
 static const struct snd_pcm_hardware jz4740_pcm_hardware = {
 	.info = SNDRV_PCM_INFO_MMAP |
 		SNDRV_PCM_INFO_MMAP_VALID |
@@ -199,10 +185,6 @@ static snd_pcm_uframes_t jz4740_pcm_pointer(struct snd_pcm_substream *substream)
 	snd_pcm_uframes_t offset;
 	struct jz4740_dma_chan *dma = prtd->dma;
 
-	/* prtd->dma_pos points to the end of the current transfer. So by
-	 * subtracting prdt->dma_start we get the offset to the end of the
-	 * current period in bytes. By subtracting the residue of the transfer
-	 * we get the current offset in bytes. */
 	byte_offset = prtd->dma_pos - prtd->dma_start;
 	byte_offset -= jz4740_dma_get_residue(dma);
 
@@ -301,10 +283,10 @@ static void jz4740_pcm_free(struct snd_pcm *pcm)
 }
 
 #if defined(MY_ABC_HERE)
-// do nothing
-#else /* MY_ABC_HERE */
+ 
+#else  
 static u64 jz4740_pcm_dmamask = DMA_BIT_MASK(32);
-#endif /* MY_ABC_HERE */
+#endif  
 
 static int jz4740_pcm_new(struct snd_soc_pcm_runtime *rtd)
 {
@@ -316,13 +298,13 @@ static int jz4740_pcm_new(struct snd_soc_pcm_runtime *rtd)
 	ret = dma_coerce_mask_and_coherent(card->dev, DMA_BIT_MASK(32));
 	if (ret)
 		return ret;
-#else /* MY_ABC_HERE */
+#else  
 	if (!card->dev->dma_mask)
 		card->dev->dma_mask = &jz4740_pcm_dmamask;
 
 	if (!card->dev->coherent_dma_mask)
 		card->dev->coherent_dma_mask = DMA_BIT_MASK(32);
-#endif /* MY_ABC_HERE */
+#endif  
 
 	if (pcm->streams[SNDRV_PCM_STREAM_PLAYBACK].substream) {
 		ret = jz4740_pcm_preallocate_dma_buffer(pcm,

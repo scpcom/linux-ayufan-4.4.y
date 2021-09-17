@@ -1,26 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Marvell EBU SoC Realtime Clock Driver (RTC)
- *
- * Copyright (C) 2014 Marvell
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- * Based on a driver made by Brian Mahaffy <bmahaffy@marvell.com>
- */
-
+ 
 #include <linux/module.h>
 #include <linux/rtc.h>
 #include <linux/fs.h>
@@ -32,8 +13,6 @@
 #include <linux/interrupt.h>
 #include <linux/delay.h>
 
-/* The RTC DRS, revision 1.2, indicates that firmware should wait 5us after every register write */
-/* to the RTC hard macro so that the required update can occur without holding off the system bus */
 #define RTC_READ_REG(reg)		ioread32(rtc->regbase_rtc + reg)
 #define RTC_WRITE_REG(val, reg)		{ iowrite32(val, rtc->regbase_rtc + reg); udelay(5); }
 
@@ -64,7 +43,7 @@
 
 #if defined(MY_ABC_HERE)
 #define SAMPLE_NR 100
-#endif /* MY_ABC_HERE */
+#endif  
 
 typedef struct mvebu_rtc_s {
 	struct rtc_device *rtc_dev;
@@ -76,29 +55,24 @@ typedef struct mvebu_rtc_s {
 } mvebu_rtc_t;
 
 #if defined(MY_ABC_HERE)
-// do nothing
-#else /* MY_ABC_HERE */
+ 
+#else  
 static bool rtc_init_state(mvebu_rtc_t *rtc)
 {
-	/* Update RTC-MBUS bridge timing parameters */
+	 
 	writel(0xFD4D4CFA, rtc->regbase_soc);
 
-	/* Make sure we are not in any test mode */
 	RTC_WRITE_REG(0, RTC_TEST_CONFIG_REG_OFFS);
 	msleep_interruptible(500);
 
-	/* Setup nominal register access timing */
 	RTC_WRITE_REG(RTC_NOMINAL_TIMING, RTC_CLOCK_CORR_REG_OFFS);
 
-	/* Turn off Int1 sources & clear the Alarm count */
 	RTC_WRITE_REG(0, RTC_IRQ_1_CONFIG_REG_OFFS);
 	RTC_WRITE_REG(0, RTC_ALARM_1_REG_OFFS);
 
-	/* Turn off Int2 sources & clear the Periodic count */
 	RTC_WRITE_REG(0, RTC_IRQ_2_CONFIG_REG_OFFS);
 	RTC_WRITE_REG(0, RTC_ALARM_2_REG_OFFS);
 
-	/* Clear any pending Status bits */
 	RTC_WRITE_REG((RTC_SZ_STATUS_ALARM1_MASK | RTC_SZ_STATUS_ALARM2_MASK), RTC_STATUS_REG_OFFS);
 	{
 		uint32_t stat, alrm1, alrm2, int1, int2, tstcfg;
@@ -120,12 +94,9 @@ static bool rtc_init_state(mvebu_rtc_t *rtc)
 		}
 	}
 }
-#endif /* MY_ABC_HERE */
+#endif 
 
-/*
- * Calculate the next alarm time given the
- * requested alarm time and the current time...
- */
+
 static void rtc_next_alarm_time(struct rtc_time *next, struct rtc_time *now, struct rtc_time *alrm)
 {
 	unsigned long now_time;
@@ -141,7 +112,6 @@ static void rtc_next_alarm_time(struct rtc_time *next, struct rtc_time *now, str
 	rtc_tm_to_time(now, &now_time);
 	rtc_tm_to_time(next, &next_time);
 
-	/* Do we need to advance a day? */
 	if (next_time < now_time) {
 		next_time += 60 * 60 * 24;
 		rtc_time_to_tm(next_time, next);
@@ -152,10 +122,6 @@ static void rtc_next_alarm_time(struct rtc_time *next, struct rtc_time *now, str
 #define SAMPLE_SIZE 100
 #define RETRY_LIMIT 100
 
-/*
- * Sample SAMPLE_SIZE times, then return the majority value.
- * If the majority value is not dominant, resample until it is.
- */
 static unsigned long syno_mvebu_rtc_read_register_majority(mvebu_rtc_t *rtc, int register_offset)
 {
 	int i, count, majority_element, retry_counter = 0;
@@ -195,7 +161,7 @@ static unsigned long syno_mvebu_rtc_read_register_majority(mvebu_rtc_t *rtc, int
 	}
 	return majority_element;
 }
-#endif /* MY_ABC_HERE */
+#endif  
 
 static int rtc_setup_alarm(mvebu_rtc_t *rtc, struct rtc_time *alrm)
 {
@@ -255,19 +221,14 @@ static irqreturn_t mvebu_rtc_irq_handler(int irq, void *rtc_ptr)
 
 	rtc_status_reg = RTC_READ_REG(RTC_STATUS_REG_OFFS);
 
-	/* Has Alarm 1 triggered? */
-	/* TBD - properly check IRQ status */
-	/* if (rtc_status_reg & RTC_SZ_STATUS_ALARM1_MASK) { */
-		/* Disable the interrupt.  This alarm is complete... */
 		RTC_WRITE_REG(RTC_SZ_INTERRUPT1_RESERVED1_MASK, RTC_IRQ_1_CONFIG_REG_OFFS);
 		RTC_WRITE_REG(RTC_SZ_STATUS_ALARM1_MASK, RTC_STATUS_REG_OFFS);
 
 		rtc_update_irq(rtc->rtc_dev, 1, (RTC_IRQF | RTC_AF));
 		irq_status = IRQ_HANDLED;
-	/* } */
+	 
 #if 0
-	/* Has either the 1Hz or user periodic frequency triggered?
-	 NOTE: This is a periodic interrupt.  It keeps on trucking... */
+	 
 	if (rtc_status_reg & RTC_SZ_STATUS_ALARM2_MASK) {
 		RTC_WRITE_REG(RTC_SZ_STATUS_ALARM2_MASK, RTC_STATUS_REG_OFFS);
 
@@ -288,27 +249,13 @@ struct str_time_2_freq {
 	unsigned long nTime;
 	uint8_t nFreq;
 } __packed;
-#endif /* MY_ABC_HERE */
+#endif 
 
 static int mvebu_rtc_read_time(struct device *dev, struct rtc_time *tm)
 {
 #if defined(MY_ABC_HERE)
-	/* Functional Errata Ref #: FE-3124064 - WA for failing time read attempts.
-	 * Description:
-	 *		The device supports CPU write and read access to the RTC Time register.
-	 *	However, due to this erratum, Write to RTC TIME register may fail.
-	 *  Read from RTC TIME register may fail.
-	 * Workaround:
-	 *  Before writing to RTC TIME register, issue a dummy write of 0x0 twice to
-	 *  RTC Status register.
-	 *  Configure maximum value (0x3FF) in write clock period in RTC Mbus Bridge
-	 *  Timing Control register.
-	 *  Before writing to RTC TIME register, issue a dummy write of 0x0 twice to
-	 *  RTC Status register.
-	 *		RTC TIME register should be read 100 times, then find the result
-	 *	that appear most frequently, use this result as the correct value.
-	 */
-#endif /* MY_ABC_HERE */
+	
+#endif 
 	mvebu_rtc_t *rtc = dev_get_drvdata(dev);
 #if defined(MY_ABC_HERE)
 	unsigned long nTimeArray[SAMPLE_NR], i, j, nTime;
@@ -319,28 +266,26 @@ static int mvebu_rtc_read_time(struct device *dev, struct rtc_time *tm)
 #endif
 #if defined(MY_ABC_HERE)
 	int retry_counter = 0;
-#endif /* MY_ABC_HERE */
+#endif  
 
 #if defined(MY_ABC_HERE)
 	if (rtc == NULL) {
 		dev_err(dev, "Can't get driver data of RTC device\n");
 		return 0;
 	}
-#endif /* MY_ABC_HERE */
+#endif  
 	spin_lock_irq(&rtc->lock);
 
 #if defined(MY_ABC_HERE)
-	// do nothing
+	 
 #else
 	time = RTC_READ_REG(RTC_TIME_REG_OFFS);
 
-	/* WA for failing time read attempts. The HW ERRATA information should be added here */
-	/* if detected more than one second between two time reads, read once again */
 	time_check = RTC_READ_REG(RTC_TIME_REG_OFFS);
 	if ((time_check - time) > 1)
 		time_check = RTC_READ_REG(RTC_TIME_REG_OFFS);
-	/* End of WA */
-#endif /* MY_ABC_HERE */
+	 
+#endif  
 
 #if defined(MY_ABC_HERE)
 	for (i = 0; i < SAMPLE_NR; i++) {
@@ -349,18 +294,16 @@ static int mvebu_rtc_read_time(struct device *dev, struct rtc_time *tm)
 	}
 #else
 	rtc_time_to_tm(time_check, tm);
-#endif /* MY_ABC_HERE */
+#endif  
 	spin_unlock_irq(&rtc->lock);
 
 #if defined(MY_ABC_HERE)
 #if defined(MY_ABC_HERE)
 	while(1) {
-#endif /* MY_ABC_HERE */
+#endif  
 	for (i = 0; i < SAMPLE_NR; i++) {
 		nTime = nTimeArray[i];
-		/* if nTime appears in sTimeToFreq array so add the counter of nTime value,
-		   if didn't appear yet in counters array then allocate new member of
-		   sTimeToFreq array with counter = 1 */
+		 
 		for (j = 0; j < SAMPLE_NR; j++) {
 			if (sTimeToFreq[j].nFreq == 0 || sTimeToFreq[j].nTime == nTime)
 				break;
@@ -368,7 +311,7 @@ static int mvebu_rtc_read_time(struct device *dev, struct rtc_time *tm)
 		if (sTimeToFreq[j].nFreq == 0)
 			sTimeToFreq[j].nTime = nTime;
 		sTimeToFreq[j].nFreq++;
-		/*find the most common result*/
+		 
 		if (nMax < sTimeToFreq[j].nFreq) {
 			indexMax = j;
 			nMax = sTimeToFreq[j].nFreq;
@@ -385,11 +328,11 @@ static int mvebu_rtc_read_time(struct device *dev, struct rtc_time *tm)
 				break;
 			}
 		}
-	} /* while loop */
-#endif /* MY_ABC_HERE */
+	}  
+#endif  
 
 	rtc_time_to_tm(sTimeToFreq[indexMax].nTime, tm);
-#endif /* MY_ABC_HERE */
+#endif  
 	return 0;
 }
 
@@ -402,27 +345,23 @@ static int mvebu_rtc_set_time(struct device *dev, struct rtc_time *tm)
 		spin_lock_irq(&rtc->lock);
 
 #if defined(MY_ABC_HERE)
-		/* Reset Test register */
+		 
 		RTC_WRITE_REG(0, RTC_TEST_CONFIG_REG_OFFS);
-		mdelay(500); /* Oscillator startup time */
-#endif /* MY_ABC_HERE */
+		mdelay(500);  
+#endif  
 
 #if defined(MY_ABC_HERE)
-		/*
-		* According to errata FE-3124064, Write to RTC TIME register
-		* may fail. As a workaround, after writing to RTC TIME register,
-		* issue a dummy write of 0x0 twice to RTC Status register.
-		*/
+		 
 #else
-		/* WA for failing time set attempts. The HW ERRATA information should be added here */
-#endif /* MY_ABC_HERE */
+		 
+#endif  
 		RTC_WRITE_REG(0, RTC_STATUS_REG_OFFS);
 #if defined(MY_ABC_HERE)
 		RTC_WRITE_REG(0, RTC_STATUS_REG_OFFS);
 #else
 		mdelay(100);
-		/* End of SW WA */
-#endif /* MY_ABC_HERE */
+		 
+#endif  
 
 		RTC_WRITE_REG(time, RTC_TIME_REG_OFFS);
 		spin_unlock_irq(&rtc->lock);
@@ -551,10 +490,8 @@ static int mvebu_rtc_probe(struct platform_device *pdev)
 		goto errExit1;
 	}
 
-	/* No need to re-init the RTC as it was already initialized by the boot loader at start of battery life */
 #if 0
-	/* Init the state of the RTC, failure indicates there is probably no battery */
-
+	 
 	{
 		uint32_t count = 3;
 
@@ -570,7 +507,6 @@ static int mvebu_rtc_probe(struct platform_device *pdev)
 #endif
 	spin_lock_init(&rtc->lock);
 
-	/* register shared periodic/carry/alarm irq */
 	ret = request_irq(rtc->irq, mvebu_rtc_irq_handler, 0, "mvebu-rtc", rtc);
 	if (unlikely(ret)) {
 		dev_err(&pdev->dev, "Request IRQ failed with %d, IRQ %d\n", ret, rtc->irq);
@@ -630,7 +566,6 @@ static int mvebu_rtc_resume(struct platform_device *pdev)
 {
 	mvebu_rtc_t *rtc = platform_get_drvdata(pdev);
 
-	/* Update RTC-MBUS bridge timing parameters */
 	writel(0xFD4D4CFA, rtc->regbase_soc);
 
 	return 0;

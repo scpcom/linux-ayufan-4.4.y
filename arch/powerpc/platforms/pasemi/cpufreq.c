@@ -1,33 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) 2007 PA Semi, Inc
- *
- * Authors: Egor Martovetsky <egor@pasemi.com>
- *	    Olof Johansson <olof@lixom.net>
- *
- * Maintained by: Olof Johansson <olof@lixom.net>
- *
- * Based on arch/powerpc/platforms/cell/cbe_cpufreq.c:
- * (C) Copyright IBM Deutschland Entwicklung GmbH 2005
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- */
-
+ 
 #include <linux/cpufreq.h>
 #include <linux/timer.h>
 #include <linux/module.h>
@@ -44,11 +18,9 @@
 #define SDCPWR_PWST0_REG	0x0000
 #define SDCPWR_GIZTIME_REG	0x0440
 
-/* SDCPWR_GIZTIME_REG fields */
 #define SDCPWR_GIZTIME_GR	0x80000000
 #define SDCPWR_GIZTIME_LONGLOCK	0x000000ff
 
-/* Offset of ASR registers from SDC base */
 #define SDCASR_OFFSET		0x120000
 
 static void __iomem *sdcpwr_mapbase;
@@ -56,13 +28,8 @@ static void __iomem *sdcasr_mapbase;
 
 static DEFINE_MUTEX(pas_switch_mutex);
 
-/* Current astate, is used when waking up from power savings on
- * one core, in case the other core has switched states during
- * the idle time.
- */
 static int current_astate;
 
-/* We support 5(A0-A4) power states excluding turbo(A5-A6) modes */
 static struct cpufreq_frequency_table pas_freqs[] = {
 	{0,	0},
 	{1,	0},
@@ -76,10 +43,6 @@ static struct freq_attr *pas_cpu_freqs_attr[] = {
 	&cpufreq_freq_attr_scaling_available_freqs,
 	NULL,
 };
-
-/*
- * hardware specific functions
- */
 
 static int get_astate_freq(int astate)
 {
@@ -105,7 +68,6 @@ static int get_gizmo_latency(void)
 
 	giztime = in_le32(sdcpwr_mapbase + SDCPWR_GIZTIME_REG);
 
-	/* just provide the upper bound */
 	if (giztime & SDCPWR_GIZTIME_GR)
 		ret = (giztime & SDCPWR_GIZTIME_LONGLOCK) * 128000;
 	else
@@ -118,7 +80,6 @@ static void set_astate(int cpu, unsigned int astate)
 {
 	unsigned long flags;
 
-	/* Return if called before init has run */
 	if (unlikely(!sdcasr_mapbase))
 		return;
 
@@ -138,10 +99,6 @@ void restore_astate(int cpu)
 {
 	set_astate(cpu, current_astate);
 }
-
-/*
- * cpufreq functions
- */
 
 static int pas_cpufreq_cpu_init(struct cpufreq_policy *policy)
 {
@@ -199,13 +156,11 @@ static int pas_cpufreq_cpu_init(struct cpufreq_policy *policy)
 		goto out_unmap_sdcpwr;
 	}
 
-	/* we need the freq in kHz */
 	max_freq = *max_freqp / 1000;
 
 	pr_debug("max clock-frequency is at %u kHz\n", max_freq);
 	pr_debug("initializing frequency table\n");
 
-	/* initialize frequency table */
 	for (i=0; pas_freqs[i].frequency!=CPUFREQ_TABLE_END; i++) {
 		pas_freqs[i].frequency = get_astate_freq(pas_freqs[i].index) * 100000;
 		pr_debug("%d: %d\n", i, pas_freqs[i].frequency);
@@ -223,9 +178,6 @@ static int pas_cpufreq_cpu_init(struct cpufreq_policy *policy)
 
 	cpufreq_frequency_table_get_attr(pas_freqs, policy->cpu);
 
-	/* this ensures that policy->cpuinfo_min and policy->cpuinfo_max
-	 * are set correctly
-	 */
 	return cpufreq_frequency_table_cpuinfo(policy, pas_freqs);
 
 out_unmap_sdcpwr:
@@ -239,10 +191,7 @@ out:
 
 static int pas_cpufreq_cpu_exit(struct cpufreq_policy *policy)
 {
-	/*
-	 * We don't support CPU hotplug. Don't unmap after the system
-	 * has already made it to a running state.
-	 */
+	 
 	if (system_state != SYSTEM_BOOTING)
 		return 0;
 
@@ -300,10 +249,10 @@ static int pas_cpufreq_target(struct cpufreq_policy *policy,
 static struct cpufreq_driver pas_cpufreq_driver = {
 	.name		= "pas-cpufreq",
 #if defined(MY_ABC_HERE)
-	// do nothing
-#else /* MY_ABC_HERE */
+	 
+#else  
 	.owner		= THIS_MODULE,
-#endif /* MY_ABC_HERE */
+#endif  
 	.flags		= CPUFREQ_CONST_LOOPS,
 	.init		= pas_cpufreq_cpu_init,
 	.exit		= pas_cpufreq_cpu_exit,
@@ -311,10 +260,6 @@ static struct cpufreq_driver pas_cpufreq_driver = {
 	.target		= pas_cpufreq_target,
 	.attr		= pas_cpu_freqs_attr,
 };
-
-/*
- * module init and destoy
- */
 
 static int __init pas_cpufreq_init(void)
 {

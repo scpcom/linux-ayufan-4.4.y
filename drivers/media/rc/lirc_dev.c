@@ -1,27 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * LIRC base driver
- *
- * by Artur Lipowski <alipowski@interia.pl>
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- */
-
+ 
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/sched.h>
@@ -40,7 +20,7 @@
 
 #if defined (MY_DEF_HERE)
 #include <media/rc-core.h>
-#endif /* MY_DEF_HERE */
+#endif  
 #include <media/lirc.h>
 #include <media/lirc_dev.h>
 
@@ -71,12 +51,8 @@ static DEFINE_MUTEX(lirc_dev_lock);
 
 static struct irctl *irctls[MAX_IRCTL_DEVICES];
 
-/* Only used for sysfs but defined to void otherwise */
 static struct class *lirc_class;
 
-/*  helper function
- *  initializes the irctl structure
- */
 static void lirc_irctl_init(struct irctl *ir)
 {
 	mutex_init(&ir->irctl_lock);
@@ -96,20 +72,12 @@ static void lirc_irctl_cleanup(struct irctl *ir)
 	ir->buf = NULL;
 }
 
-/*  helper function
- *  reads key codes from driver and puts them into buffer
- *  returns 0 on success
- */
 static int lirc_add_to_buf(struct irctl *ir)
 {
 	if (ir->d.add_to_buf) {
 		int res = -ENODATA;
 		int got_data = 0;
 
-		/*
-		 * service the device as long as it is returning
-		 * data and we have space
-		 */
 get_data:
 		res = ir->d.add_to_buf(ir->d.data, ir->buf);
 		if (res == 0) {
@@ -126,8 +94,6 @@ get_data:
 	return 0;
 }
 
-/* main function of the polling thread
- */
 static int lirc_thread(void *irctl)
 {
 	struct irctl *ir = irctl;
@@ -282,7 +248,7 @@ int lirc_register_driver(struct lirc_driver *d)
 	minor = d->minor;
 
 	if (minor < 0) {
-		/* find first free slot for driver */
+		 
 		for (minor = 0; minor < MAX_IRCTL_DEVICES; minor++)
 			if (!irctls[minor])
 				break;
@@ -311,11 +277,10 @@ int lirc_register_driver(struct lirc_driver *d)
 	if (d->sample_rate) {
 		ir->jiffies_to_wait = HZ / d->sample_rate;
 	} else {
-		/* it means - wait for external event in task queue */
+		 
 		ir->jiffies_to_wait = 0;
 	}
 
-	/* some safety check 8-) */
 	d->name[sizeof(d->name)-1] = '\0';
 
 	bytes_in_key = BITS_TO_LONGS(d->code_length) +
@@ -349,7 +314,7 @@ int lirc_register_driver(struct lirc_driver *d)
 		      "lirc%u", ir->d.minor);
 
 	if (d->sample_rate) {
-		/* try to fire up polling thread */
+		 
 		ir->task = kthread_run(lirc_thread, (void *)ir, "lirc_dev");
 		if (IS_ERR(ir->task)) {
 			dev_err(d->dev, "lirc_dev: lirc_register_driver: "
@@ -409,7 +374,6 @@ int lirc_unregister_driver(int minor)
 		return -ENOENT;
 	}
 
-	/* end up polling thread */
 	if (ir->task)
 		kthread_stop(ir->task);
 
@@ -478,7 +442,7 @@ int lirc_dev_fop_open(struct inode *inode, struct file *file)
 		if (retval)
 			goto error;
 	}
-#endif /* MY_DEF_HERE */
+#endif  
 
 	cdev = ir->cdev;
 	if (try_module_get(cdev->owner)) {
@@ -527,7 +491,7 @@ int lirc_dev_fop_close(struct inode *inode, struct file *file)
 
 	if (ir->d.rdev)
 		rc_close(ir->d.rdev);
-#endif /* MY_DEF_HERE */
+#endif  
 
 	ir->open--;
 	if (ir->attached) {
@@ -624,10 +588,7 @@ long lirc_dev_fop_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 		result = get_user(mode, (__u32 *)arg);
 		if (!result && !(LIRC_MODE2REC(mode) & ir->d.features))
 			result = -EINVAL;
-		/*
-		 * FIXME: We should actually set the mode somehow but
-		 * for now, lirc_serial doesn't support mode changing either
-		 */
+		 
 		break;
 	case LIRC_GET_LENGTH:
 		result = put_user(ir->d.code_length, (__u32 *)arg);
@@ -698,24 +659,12 @@ ssize_t lirc_dev_fop_read(struct file *file,
 		goto out_locked;
 	}
 
-	/*
-	 * we add ourselves to the task queue before buffer check
-	 * to avoid losing scan code (in case when queue is awaken somewhere
-	 * between while condition checking and scheduling)
-	 */
 	add_wait_queue(&ir->buf->wait_poll, &wait);
 	set_current_state(TASK_INTERRUPTIBLE);
 
-	/*
-	 * while we didn't provide 'length' bytes, device is opened in blocking
-	 * mode and 'copy_to_user' is happy, wait for data.
-	 */
 	while (written < length && ret == 0) {
 		if (lirc_buffer_empty(ir->buf)) {
-			/* According to the read(2) man page, 'written' can be
-			 * returned as less than 'length', instead of blocking
-			 * again, returning -EWOULDBLOCK, or returning
-			 * -ERESTARTSYS */
+			 
 			if (written)
 				break;
 			if (file->f_flags & O_NONBLOCK) {

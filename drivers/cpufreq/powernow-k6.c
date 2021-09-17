@@ -1,16 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  This file was based upon code in Powertweak Linux (http://powertweak.sf.net)
- *  (C) 2000-2003  Dave Jones, Arjan van de Ven, Janne Pänkälä,
- *                 Dominik Brodowski.
- *
- *  Licensed under the terms of the GNU GPL License version 2.
- *
- *  BIG FAT DISCLAIMER: Work in progress code. Possibly *dangerous*
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/init.h>
@@ -22,11 +13,10 @@
 #include <asm/cpu_device_id.h>
 #include <asm/msr.h>
 
-#define POWERNOW_IOPORT 0xfff0          /* it doesn't matter where, as long
-					   as it is unused */
+#define POWERNOW_IOPORT 0xfff0           
 
 #define PFX "powernow-k6: "
-static unsigned int                     busfreq;   /* FSB, in 10 kHz */
+static unsigned int                     busfreq;    
 static unsigned int                     max_multiplier;
 
 static unsigned int			param_busfreq = 0;
@@ -38,16 +28,15 @@ MODULE_PARM_DESC(max_multiplier, "Maximum multiplier (allowed values: 20 30 35 4
 module_param_named(bus_frequency, param_busfreq, uint, S_IRUGO);
 MODULE_PARM_DESC(bus_frequency, "Bus frequency in kHz");
 
-/* Clock ratio multiplied by 10 - see table 27 in AMD#23446 */
 static struct cpufreq_frequency_table clock_ratio[] = {
-	{60,  /* 110 -> 6.0x */ 0},
-	{55,  /* 011 -> 5.5x */ 0},
-	{50,  /* 001 -> 5.0x */ 0},
-	{45,  /* 000 -> 4.5x */ 0},
-	{40,  /* 010 -> 4.0x */ 0},
-	{35,  /* 111 -> 3.5x */ 0},
-	{30,  /* 101 -> 3.0x */ 0},
-	{20,  /* 100 -> 2.0x */ 0},
+	{60,    0},
+	{55,    0},
+	{50,    0},
+	{45,    0},
+	{40,    0},
+	{35,    0},
+	{30,    0},
+	{20,    0},
 	{0, CPUFREQ_TABLE_END}
 };
 
@@ -58,30 +47,24 @@ static const struct {
 	unsigned freq;
 	unsigned mult;
 } usual_frequency_table[] = {
-	{ 400000, 40 },	// 100   * 4
-	{ 450000, 45 }, // 100   * 4.5
-	{ 475000, 50 }, //  95   * 5
-	{ 500000, 50 }, // 100   * 5
-	{ 506250, 45 }, // 112.5 * 4.5
-	{ 533500, 55 }, //  97   * 5.5
-	{ 550000, 55 }, // 100   * 5.5
-	{ 562500, 50 }, // 112.5 * 5
-	{ 570000, 60 }, //  95   * 6
-	{ 600000, 60 }, // 100   * 6
-	{ 618750, 55 }, // 112.5 * 5.5
-	{ 660000, 55 }, // 120   * 5.5
-	{ 675000, 60 }, // 112.5 * 6
-	{ 720000, 60 }, // 120   * 6
+	{ 400000, 40 },	 
+	{ 450000, 45 },  
+	{ 475000, 50 },  
+	{ 500000, 50 },  
+	{ 506250, 45 },  
+	{ 533500, 55 },  
+	{ 550000, 55 },  
+	{ 562500, 50 },  
+	{ 570000, 60 },  
+	{ 600000, 60 },  
+	{ 618750, 55 },  
+	{ 660000, 55 },  
+	{ 675000, 60 },  
+	{ 720000, 60 },  
 };
 
 #define FREQ_RANGE		3000
 
-/**
- * powernow_k6_get_cpu_multiplier - returns the current FSB multiplier
- *
- * Returns the current setting of the frequency multiplier. Core clock
- * speed is frequency of the Front-Side Bus multiplied with this value.
- */
 static int powernow_k6_get_cpu_multiplier(void)
 {
 	unsigned long invalue = 0;
@@ -90,10 +73,10 @@ static int powernow_k6_get_cpu_multiplier(void)
 	local_irq_disable();
 
 	msrval = POWERNOW_IOPORT + 0x1;
-	wrmsr(MSR_K6_EPMR, msrval, 0); /* enable the PowerNow port */
+	wrmsr(MSR_K6_EPMR, msrval, 0);  
 	invalue = inl(POWERNOW_IOPORT + 0x8);
 	msrval = POWERNOW_IOPORT + 0x0;
-	wrmsr(MSR_K6_EPMR, msrval, 0); /* disable it again */
+	wrmsr(MSR_K6_EPMR, msrval, 0);  
 
 	local_irq_enable();
 
@@ -106,12 +89,6 @@ static void powernow_k6_set_cpu_multiplier(unsigned int best_i)
 	unsigned long msrval;
 	unsigned long cr0;
 
-	/* we now need to transform best_i to the BVC format, see AMD#23446 */
-
-	/*
-	 * The processor doesn't respond to inquiry cycles while changing the
-	 * frequency, so we must disable cache.
-	 */
 	local_irq_disable();
 	cr0 = read_cr0();
 	write_cr0(cr0 | X86_CR0_CD);
@@ -120,24 +97,18 @@ static void powernow_k6_set_cpu_multiplier(unsigned int best_i)
 	outvalue = (1<<12) | (1<<10) | (1<<9) | (index_to_register[best_i]<<5);
 
 	msrval = POWERNOW_IOPORT + 0x1;
-	wrmsr(MSR_K6_EPMR, msrval, 0); /* enable the PowerNow port */
+	wrmsr(MSR_K6_EPMR, msrval, 0);  
 	invalue = inl(POWERNOW_IOPORT + 0x8);
 	invalue = invalue & 0x1f;
 	outvalue = outvalue | invalue;
 	outl(outvalue, (POWERNOW_IOPORT + 0x8));
 	msrval = POWERNOW_IOPORT + 0x0;
-	wrmsr(MSR_K6_EPMR, msrval, 0); /* disable it again */
+	wrmsr(MSR_K6_EPMR, msrval, 0);  
 
 	write_cr0(cr0);
 	local_irq_enable();
 }
 
-/**
- * powernow_k6_set_state - set the PowerNow! multiplier
- * @best_i: clock_ratio[best_i] is the target multiplier
- *
- *   Tries to change the PowerNow! multiplier
- */
 static void powernow_k6_set_state(struct cpufreq_policy *policy,
 		unsigned int best_i)
 {
@@ -160,27 +131,11 @@ static void powernow_k6_set_state(struct cpufreq_policy *policy,
 	return;
 }
 
-/**
- * powernow_k6_verify - verifies a new CPUfreq policy
- * @policy: new policy
- *
- * Policy must be within lowest and highest possible CPU Frequency,
- * and at least one possible state must be within min and max.
- */
 static int powernow_k6_verify(struct cpufreq_policy *policy)
 {
 	return cpufreq_frequency_table_verify(policy, &clock_ratio[0]);
 }
 
-/**
- * powernow_k6_setpolicy - sets a new CPUFreq policy
- * @policy: new policy
- * @target_freq: the target frequency
- * @relation: how that frequency relates to achieved frequency
- *  (CPUFREQ_RELATION_L or CPUFREQ_RELATION_H)
- *
- * sets a new CPUFreq policy
- */
 static int powernow_k6_target(struct cpufreq_policy *policy,
 			       unsigned int target_freq,
 			       unsigned int relation)
@@ -248,7 +203,6 @@ have_max_multiplier:
 have_busfreq:
 	param_busfreq = busfreq * 10;
 
-	/* table init */
 	for (i = 0; (clock_ratio[i].frequency != CPUFREQ_TABLE_END); i++) {
 		f = clock_ratio[i].index;
 		if (f > max_multiplier)
@@ -257,7 +211,6 @@ have_busfreq:
 			clock_ratio[i].frequency = busfreq * f;
 	}
 
-	/* cpuinfo and default policy values */
 	policy->cpuinfo.transition_latency = 500000;
 	policy->cur = busfreq * max_multiplier;
 
@@ -278,10 +231,10 @@ static int powernow_k6_cpu_exit(struct cpufreq_policy *policy)
 			powernow_k6_set_state(policy, i);
 	}
 #if defined(MY_ABC_HERE)
-	// do nothing
-#else /* MY_ABC_HERE */
+	 
+#else  
 	cpufreq_frequency_table_put_attr(policy->cpu);
-#endif /* MY_ABC_HERE */
+#endif  
 	return 0;
 }
 
@@ -305,10 +258,10 @@ static struct cpufreq_driver powernow_k6_driver = {
 	.get		= powernow_k6_get,
 	.name		= "powernow-k6",
 #if defined(MY_ABC_HERE)
-	// do nothing
-#else /* MY_ABC_HERE */
+	 
+#else  
 	.owner		= THIS_MODULE,
-#endif /* MY_ABC_HERE */
+#endif  
 	.attr		= powernow_k6_attr,
 };
 
@@ -319,13 +272,6 @@ static const struct x86_cpu_id powernow_k6_ids[] = {
 };
 MODULE_DEVICE_TABLE(x86cpu, powernow_k6_ids);
 
-/**
- * powernow_k6_init - initializes the k6 PowerNow! CPUFreq driver
- *
- *   Initializes the K6 PowerNow! support. Returns -ENODEV on unsupported
- * devices, -EINVAL or -ENOMEM on problems during initiatization, and zero
- * on success.
- */
 static int __init powernow_k6_init(void)
 {
 	if (!x86_match_cpu(powernow_k6_ids))
@@ -344,11 +290,6 @@ static int __init powernow_k6_init(void)
 	return 0;
 }
 
-/**
- * powernow_k6_exit - unregisters AMD K6-2+/3+ PowerNow! support
- *
- *   Unregisters AMD K6-2+ / K6-3+ PowerNow! support.
- */
 static void __exit powernow_k6_exit(void)
 {
 	cpufreq_unregister_driver(&powernow_k6_driver);

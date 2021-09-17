@@ -1,16 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * This file provides the ACPI based P-state support. This
- * module works with generic cpufreq infrastructure. Most of
- * the code is based on i386 version
- * (arch/i386/kernel/cpu/cpufreq/acpi-cpufreq.c)
- *
- * Copyright (C) 2005 Intel Corp
- *      Venkatesh Pallipadi <venkatesh.pallipadi@intel.com>
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/slab.h>
 #include <linux/module.h>
@@ -77,7 +68,6 @@ processor_get_pstate (
 	return (int)retval;
 }
 
-/* To be used only after data->acpi_data is initialized */
 static unsigned
 extract_clock (
 	struct cpufreq_acpi_io *data,
@@ -112,7 +102,6 @@ processor_get_freq (
 	if (smp_processor_id() != cpu)
 		goto migrate_end;
 
-	/* processor_get_pstate gets the instantaneous frequency */
 	ret = processor_get_pstate(&value);
 
 	if (ret) {
@@ -165,17 +154,10 @@ processor_set_freq (
 	pr_debug("Transitioning from P%d to P%d\n",
 		data->acpi_data.state, state);
 
-	/* cpufreq frequency struct */
 	cpufreq_freqs.old = data->freq_table[data->acpi_data.state].frequency;
 	cpufreq_freqs.new = data->freq_table[state].frequency;
 
-	/* notify cpufreq */
 	cpufreq_notify_transition(policy, &cpufreq_freqs, CPUFREQ_PRECHANGE);
-
-	/*
-	 * First we write the target state's 'control' value to the
-	 * control_register.
-	 */
 
 	value = (u32) data->acpi_data.states[state].control;
 
@@ -269,9 +251,9 @@ acpi_cpufreq_cpu_init (
 
 #if defined(MY_ABC_HERE)
 	data = kzalloc(sizeof(*data), GFP_KERNEL);
-#else /* MY_ABC_HERE */
+#else  
 	data = kzalloc(sizeof(struct cpufreq_acpi_io), GFP_KERNEL);
-#endif /* MY_ABC_HERE */
+#endif  
 	if (!data)
 		return (-ENOMEM);
 
@@ -282,7 +264,6 @@ acpi_cpufreq_cpu_init (
 	if (result)
 		goto err_free;
 
-	/* capability check */
 	if (data->acpi_data.state_count <= 1) {
 		pr_debug("No P-States\n");
 		result = -ENODEV;
@@ -300,12 +281,11 @@ acpi_cpufreq_cpu_init (
 		goto err_unreg;
 	}
 
-	/* alloc freq_table */
 #if defined(MY_ABC_HERE)
 	data->freq_table = kmalloc(sizeof(*data->freq_table) *
-#else /* MY_ABC_HERE */
+#else  
 	data->freq_table = kmalloc(sizeof(struct cpufreq_frequency_table) *
-#endif /* MY_ABC_HERE */
+#endif  
 	                           (data->acpi_data.state_count + 1),
 	                           GFP_KERNEL);
 	if (!data->freq_table) {
@@ -313,7 +293,6 @@ acpi_cpufreq_cpu_init (
 		goto err_unreg;
 	}
 
-	/* detect transition latency */
 	policy->cpuinfo.transition_latency = 0;
 	for (i=0; i<data->acpi_data.state_count; i++) {
 		if ((data->acpi_data.states[i].transition_latency * 1000) >
@@ -324,7 +303,6 @@ acpi_cpufreq_cpu_init (
 	}
 	policy->cur = processor_get_freq(data, policy->cpu);
 
-	/* table init */
 	for (i = 0; i <= data->acpi_data.state_count; i++)
 	{
 		data->freq_table[i].index = i;
@@ -341,7 +319,6 @@ acpi_cpufreq_cpu_init (
 		goto err_freqfree;
 	}
 
-	/* notify BIOS that we exist */
 	acpi_processor_notify_smm(THIS_MODULE);
 
 	printk(KERN_INFO "acpi-cpufreq: CPU%u - ACPI performance management "
@@ -359,8 +336,6 @@ acpi_cpufreq_cpu_init (
 
 	cpufreq_frequency_table_get_attr(data->freq_table, policy->cpu);
 
-	/* the first call to ->target() should result in us actually
-	 * writing something to the appropriate registers. */
 	data->resume = 1;
 
 	return (result);
@@ -386,10 +361,10 @@ acpi_cpufreq_cpu_exit (
 
 	if (data) {
 #if defined(MY_ABC_HERE)
-		// do nothing
-#else /* MY_ABC_HERE */
+		 
+#else  
 		cpufreq_frequency_table_put_attr(policy->cpu);
-#endif /* MY_ABC_HERE */
+#endif  
 		acpi_io_data[policy->cpu] = NULL;
 		acpi_processor_unregister_performance(&data->acpi_data,
 		                                      policy->cpu);
@@ -412,10 +387,10 @@ static struct cpufreq_driver acpi_cpufreq_driver = {
 	.exit		= acpi_cpufreq_cpu_exit,
 	.name		= "acpi-cpufreq",
 #if defined(MY_ABC_HERE)
-	// do nothing
-#else /* MY_ABC_HERE */
+	 
+#else  
 	.owner		= THIS_MODULE,
-#endif /* MY_ABC_HERE */
+#endif  
 	.attr           = acpi_cpufreq_attr,
 };
 

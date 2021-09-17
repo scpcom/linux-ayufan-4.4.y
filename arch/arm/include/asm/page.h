@@ -1,19 +1,10 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  arch/arm/include/asm/page.h
- *
- *  Copyright (C) 1995-2003 Russell King
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
+ 
 #ifndef _ASMARM_PAGE_H
 #define _ASMARM_PAGE_H
 
-/* PAGE_SHIFT determines the page size */
 #if defined(MY_DEF_HERE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE)
 #define PAGE_SHIFT		CONFIG_ARM_PAGE_SIZE_LARGE_SHIFT
 #elif defined(MY_ABC_HERE)
@@ -42,14 +33,12 @@
 #define PAGE_MASK		(~((1 << PAGE_SHIFT) - 1))
 
 #if defined(MY_DEF_HERE)
-/* H/W pages are always 4KB.
- * A single linux page may be implemented using more than one H/W page.
- */
+ 
 #define HW_PAGE_SHIFT		12
 #define HW_PAGE_SIZE		(1 << HW_PAGE_SHIFT)
 #define HW_PAGE_MASK		(~(HW_PAGE_SIZE-1))
 #define HW_PAGES_PER_PAGE	(1 << (PAGE_SHIFT - HW_PAGE_SHIFT))
-#endif /* MY_DEF_HERE */
+#endif  
 
 #ifndef __ASSEMBLY__
 
@@ -61,21 +50,6 @@
 
 #include <asm/glue.h>
 
-/*
- *	User Space Model
- *	================
- *
- *	This section selects the correct set of functions for dealing with
- *	page-based copying and clearing for user space for the particular
- *	processor(s) we're building for.
- *
- *	We have the following to choose from:
- *	  v4wt		- ARMv4 with writethrough cache, without minicache
- *	  v4wb		- ARMv4 with writeback cache, without minicache
- *	  v4_mc		- ARMv4 with minicache
- *	  xscale	- Xscale
- *	  xsc3		- XScalev3
- */
 #undef _USER
 #undef MULTI_USER
 
@@ -188,7 +162,7 @@ extern void copy_page(void *to, const void *from);
 #include <asm/pgtable-2level-types.h>
 #endif
 
-#endif /* CONFIG_MMU */
+#endif  
 
 typedef struct page *pgtable_t;
 
@@ -198,7 +172,7 @@ extern int pfn_valid(unsigned long);
 
 #include <asm/memory.h>
 
-#endif /* !__ASSEMBLY__ */
+#endif  
 
 #define VM_DATA_DEFAULT_FLAGS \
 	(((current->personality & READ_IMPLIES_EXEC) ? VM_EXEC : 0) | \

@@ -1,19 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) 2004-2007 Atmel Corporation
- *
- * Based on MIPS implementation arch/mips/kernel/time.c
- *   Copyright 2001 MontaVista Software Inc.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
-
-/*#define DEBUG*/
-
+ 
 #include <linux/kernel.h>
 #include <linux/types.h>
 #include <linux/init.h>
@@ -37,7 +25,7 @@ static int at32_verify_speed(struct cpufreq_policy *policy)
 
 static unsigned int at32_get_speed(unsigned int cpu)
 {
-	/* No SMP support */
+	 
 	if (cpu)
 		return 0;
 	return (unsigned int)((clk_get_rate(cpuclk) + 500) / 1000);
@@ -53,10 +41,8 @@ static int at32_set_target(struct cpufreq_policy *policy,
 	struct cpufreq_freqs freqs;
 	long freq;
 
-	/* Convert target_freq from kHz to Hz */
 	freq = clk_round_rate(cpuclk, target_freq * 1000);
 
-	/* Check if policy->min <= new_freq <= policy->max */
 	if(freq < (policy->min * 1000) || freq > (policy->max * 1000))
 		return -EINVAL;
 
@@ -112,10 +98,10 @@ static int __init at32_cpufreq_driver_init(struct cpufreq_policy *policy)
 static struct cpufreq_driver at32_driver = {
 	.name		= "at32ap",
 #if defined(MY_ABC_HERE)
-	// do nothing
-#else /* MY_ABC_HERE */
+	 
+#else  
 	.owner		= THIS_MODULE,
-#endif /* MY_ABC_HERE */
+#endif  
 	.init		= at32_cpufreq_driver_init,
 	.verify		= at32_verify_speed,
 	.target		= at32_set_target,

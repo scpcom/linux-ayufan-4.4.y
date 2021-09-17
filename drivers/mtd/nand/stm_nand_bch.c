@@ -1,23 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  ------------------------------------------------------------------------
- *  stm_nand_bch.c Support for STMicroelectronics NANDi BCH Controller
- *
- *  See Documentation/mtd/stm-nand-bch-notes.txt for additional information.
- *  ------------------------------------------------------------------------
- *
- *  Copyright (c) 2011 STMicroelectronics Limited
- *  Author: Angus Clark <Angus.Clark@st.com>
- *
- *  ------------------------------------------------------------------------
- *  May be copied or modified under the terms of the GNU General Public
- *  License Version 2.0 only.  See linux/COPYING for more information.
- *  ------------------------------------------------------------------------
- *
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/delay.h>
 #include <linux/module.h>
@@ -40,13 +24,11 @@
 
 #define NAME	"stm-nand-bch"
 
-/* NANDi BCH Controller properties */
 #define NANDI_BCH_SECTOR_SIZE			1024
 #define NANDI_BCH_DMA_ALIGNMENT			64
 #define NANDI_BCH_MAX_BUF_LIST			8
 #define NANDI_BCH_BUF_LIST_SIZE			(4 * NANDI_BCH_MAX_BUF_LIST)
 
-/* BCH ECC sizes */
 static int bch_ecc_sizes[] = {
 	[BCH_18BIT_ECC] = 32,
 	[BCH_30BIT_ECC] = 54,
@@ -58,9 +40,6 @@ static int bch_ecc_strength[] = {
 	[BCH_NO_ECC] = 0,
 };
 
-/*
- * Inband Bad Block Table (IBBT)
- */
 #define NAND_IBBT_NBLOCKS	4
 #define NAND_IBBT_SIGLEN	4
 #define NAND_IBBT_PRIMARY	0
@@ -78,84 +57,72 @@ static char *bbt_strs[] = {
 	"mirror",
 };
 
-/* IBBT header */
 struct nand_ibbt_header {
-	uint8_t	signature[4];		/* "Bbt0" or "1tbB" signature */
-	uint8_t version;		/* BBT version ("age") */
-	uint8_t reserved[3];		/* padding */
-	uint8_t schema[4];		/* "base" schema (x4) */
+	uint8_t	signature[4];		 
+	uint8_t version;		 
+	uint8_t reserved[3];		 
+	uint8_t schema[4];		 
 } __attribute__((__packed__));
 
-/* Extend IBBT header with some stm-nand-bch niceties */
 struct nand_ibbt_bch_header {
 	struct nand_ibbt_header base;
-	uint8_t schema[4];		/* "private" schema (x4) */
-	uint8_t ecc_size[4];		/* ECC bytes (0, 32, 54) (x4) */
-	char	author[64];		/* Arbitrary string for S/W to use */
+	uint8_t schema[4];		 
+	uint8_t ecc_size[4];		 
+	char	author[64];		 
 }; __attribute__((__packed__))
 
-/* Bad Block Table (BBT) */
 struct nandi_bbt_info {
-	uint32_t	bbt_size;		/* Size of bad-block table */
-	uint32_t	bbt_vers[2];		/* Version (Primary/Mirror) */
-	uint32_t	bbt_block[2];		/* Block No. (Primary/Mirror) */
-	uint8_t		*bbt;			/* Table data */
+	uint32_t	bbt_size;		 
+	uint32_t	bbt_vers[2];		 
+	uint32_t	bbt_block[2];		 
+	uint8_t		*bbt;			 
 };
 
-/* Collection of MTD/NAND device information */
 struct nandi_info {
-	struct mtd_info		mtd;		/* MTD info */
-	struct nand_chip	chip;		/* NAND chip info */
+	struct mtd_info		mtd;		 
+	struct nand_chip	chip;		 
 
-	struct nand_ecclayout	ecclayout;	/* MTD ECC layout */
-	struct nandi_bbt_info	bbt_info;	/* Bad Block Table */
-	int			nr_parts;	/* Number of MTD partitions */
-	struct	mtd_partition	*parts;		/* MTD partitions */
+	struct nand_ecclayout	ecclayout;	 
+	struct nandi_bbt_info	bbt_info;	 
+	int			nr_parts;	 
+	struct	mtd_partition	*parts;		 
 };
 
-/* NANDi Controller (Hamming/BCH) */
 struct nandi_controller {
-	void __iomem		*base;		/* Controller base*/
-	void __iomem		*dma;		/* DMA control base */
+	void __iomem		*base;		 
+	void __iomem		*dma;		 
 
 	struct clk		*bch_clk;
 	struct clk		*emi_clk;
 
-						/* IRQ-triggered Completions: */
-	struct completion	seq_completed;	/*   SEQ Over */
-	struct completion	rbn_completed;	/*   RBn */
+	struct completion	seq_completed;	 
+	struct completion	rbn_completed;	 
 
 	struct device		*dev;
 
-	int			bch_ecc_mode;	/* ECC mode */
-	int			extra_addr;	/* Extra address cycle */
+	int			bch_ecc_mode;	 
+	int			extra_addr;	 
 
 	uint32_t		bch_select_reg;
 	uint32_t		bch_select_msk;
 
-	/* The threshold at which the number of corrected bit-flips per sector
-	 * is deemed to have reached an excessive level (triggers '-EUCLEAN'
-	 * return code).
-	 */
 	int			bitflip_threshold;
 
-	uint32_t		page_shift;	/* Some working variables */
+	uint32_t		page_shift;	 
 	uint32_t		block_shift;
 	uint32_t		blocks_per_device;
 	uint32_t		sectors_per_page;
 
-	uint8_t			*buf;		/* Some buffers to use */
+	uint8_t			*buf;		 
 	uint8_t			*page_buf;
 	uint8_t			*oob_buf;
 	uint32_t		*buf_list;
 
-	int			cached_page;	/* page number of page in
-						 *  'page_buf' */
+	int			cached_page;	 
 
-	struct nandi_info	info;		/* NAND device info */
+	struct nandi_info	info;		 
 };
 
-/* BCH 'program' structure */
 struct bch_prog {
 	u32	multi_cs_addr[3];
 	u32	multi_cs_config;
@@ -170,7 +137,6 @@ struct bch_prog {
 	u32	seq_cfg;
 };
 
-/* BCH template programs (modified on-the-fly) */
 static struct bch_prog bch_prog_read_page = {
 	.cmd = {
 		NAND_CMD_READ0,
@@ -237,34 +203,25 @@ static struct bch_prog bch_prog_erase_block = {
 extern int nand_get_device(struct mtd_info *mtd, int new_state);
 extern void nand_release_device(struct mtd_info *mtd);
 
-/* Configure BCH read/write/erase programs */
 static void bch_configure_progs(struct nandi_controller *nandi)
 {
 	uint8_t data_opa = ffs(nandi->sectors_per_page) - 1;
 	uint8_t data_instr = BCH_INSTR(BCH_OPC_DATA, data_opa);
 	uint32_t gen_cfg_ecc = nandi->bch_ecc_mode << GEN_CFG_ECC_SHIFT;
 
-	/* Set 'DATA' instruction */
 	bch_prog_read_page.seq[3] = data_instr;
 	bch_prog_write_page.seq[1] = data_instr;
 
-	/* Set ECC mode */
 	bch_prog_read_page.gen_cfg |= gen_cfg_ecc;
 	bch_prog_write_page.gen_cfg |= gen_cfg_ecc;
 	bch_prog_erase_block.gen_cfg |= gen_cfg_ecc;
 
-	/* Template sequences above are defined for devices that use 5 address
-	 * cycles for page Read/Write operations (and 3 for Erase operations).
-	 * Update sequences for devices that use 4 address cycles.
-	 */
 	if (!nandi->extra_addr) {
-		/* Clear 'GEN_CFG_EXTRA_ADD_CYCLE' flag */
+		 
 		bch_prog_read_page.gen_cfg &= ~GEN_CFG_EXTRA_ADD_CYCLE;
 		bch_prog_write_page.gen_cfg &= ~GEN_CFG_EXTRA_ADD_CYCLE;
 		bch_prog_erase_block.gen_cfg &= ~GEN_CFG_EXTRA_ADD_CYCLE;
 
-		/* Configure Erase sequence for 2 address cycles (page
-		 * address) */
 		bch_prog_erase_block.seq[0] = BCH_CL_CMD_1;
 		bch_prog_erase_block.seq[1] = BCH_AL_EX_0;
 		bch_prog_erase_block.seq[2] = BCH_AL_EX_1;
@@ -276,9 +233,6 @@ static void bch_configure_progs(struct nandi_controller *nandi)
 
 }
 
-/*
- * NANDi Interrupts (shared by Hamming and BCH controllers)
- */
 static irqreturn_t nandi_irq_handler(int irq, void *dev)
 {
 	struct nandi_controller *nandi = dev;
@@ -287,13 +241,13 @@ static irqreturn_t nandi_irq_handler(int irq, void *dev)
 	status = readl(nandi->base + NANDBCH_INT_STA);
 
 	if (status & NANDBCH_INT_SEQNODESOVER) {
-		/* BCH */
+		 
 		writel(NANDBCH_INT_CLR_SEQNODESOVER,
 		       nandi->base + NANDBCH_INT_CLR);
 		complete(&nandi->seq_completed);
 	}
 	if (status & NAND_INT_RBN) {
-		/* Hamming */
+		 
 		writel(NAND_INT_CLR_RBN, nandi->base + NANDHAM_INT_CLR);
 		complete(&nandi->rbn_completed);
 	}
@@ -321,9 +275,6 @@ static void nandi_disable_interrupts(struct nandi_controller *nandi,
 	writel(val, nandi->base + NANDBCH_INT_EN);
 }
 
-/*
- * BCH Operations
- */
 static inline void bch_load_prog_cpu(struct nandi_controller *nandi,
 				     struct bch_prog *prog)
 {
@@ -332,7 +283,7 @@ static inline void bch_load_prog_cpu(struct nandi_controller *nandi,
 	int i;
 
 	for (i = 0; i < 16; i++) {
-		/* Skip registers marked as "reserved" */
+		 
 		if (i != 11 && i != 14)
 			writel(*src, dst);
 		dst++;
@@ -377,15 +328,6 @@ static uint8_t bch_erase_block(struct nandi_controller *nandi,
 	return status;
 }
 
-/*
- * Detect an erased page, tolerating and correcting up to a specified number of
- * bits at '0'.  (For many devices, it is now deemed within spec for an erased
- * page to include a number of bits at '0', either as a result of read-disturb
- * behaviour or 'stuck-at-zero' failures.)  Returns the number of corrected
- * bits, or a '-1' if we have exceeded the maximum number of bits at '0' (likely
- * to be a genuine uncorrectable ECC error).  In the latter case, the data must
- * be returned unmodified, in accordance with the MTD API.
- */
 static int check_erased_page(uint8_t *data, uint32_t page_size, int max_zeros)
 {
 	uint8_t *b = data;
@@ -404,7 +346,6 @@ static int check_erased_page(uint8_t *data, uint32_t page_size, int max_zeros)
 	return zeros;
 }
 
-/* Returns the number of ECC errors, or '-1' for uncorrectable error */
 static int bch_read_page(struct nandi_controller *nandi,
 			 loff_t offs,
 			 uint8_t *buf)
@@ -427,7 +368,6 @@ static int bch_read_page(struct nandi_controller *nandi,
 	nandi_enable_interrupts(nandi, NANDBCH_INT_SEQNODESOVER);
 	INIT_COMPLETION(nandi->seq_completed);
 
-	/* Reset ECC stats */
 	writel(CFG_RESET_ECC_ALL | CFG_ENABLE_AFM,
 	       nandi->base + NANDBCH_CONTROLLER_CFG);
 	writel(CFG_ENABLE_AFM, nandi->base + NANDBCH_CONTROLLER_CFG);
@@ -454,12 +394,9 @@ static int bch_read_page(struct nandi_controller *nandi,
 			 DMA_TO_DEVICE);
 	dma_unmap_single(NULL, buf_phys, page_size, DMA_FROM_DEVICE);
 
-	/* Use the maximum per-sector ECC count! */
 	ecc_err = readl(nandi->base + NANDBCH_ECC_SCORE_REG_A) & 0xff;
 	if (ecc_err == 0xff) {
-		/* Downgrade uncorrectable ECC error for an erased page,
-		 * tolerating 'sectors_per_page' bits at zero.
-		 */
+		 
 		ret = check_erased_page(buf, page_size,
 					nandi->sectors_per_page);
 		if (ret >= 0)
@@ -472,7 +409,6 @@ static int bch_read_page(struct nandi_controller *nandi,
 	return ret;
 }
 
-/* Returns the status of the NAND device following the write operation */
 static uint8_t bch_write_page(struct nandi_controller *nandi,
 			      loff_t offs, const uint8_t *buf)
 {
@@ -521,7 +457,6 @@ static uint8_t bch_write_page(struct nandi_controller *nandi,
 	return status;
 }
 
-/* Helper function for bch_mtd_read, to handle multi-page or non-aligned reads */
 static int bch_read(struct nandi_controller *nandi,
 		    loff_t from, size_t len,
 		    size_t *retlen, u_char *buf)
@@ -555,7 +490,7 @@ static int bch_read(struct nandi_controller *nandi,
 
 		if ((bytes != page_size) ||
 		    ((unsigned int)buf & (NANDI_BCH_DMA_ALIGNMENT - 1)) ||
-		    (!virt_addr_valid(buf))) /* vmalloc'd buffer! */
+		    (!virt_addr_valid(buf)))  
 			bounce = 1;
 		else
 			bounce = 0;
@@ -574,7 +509,6 @@ static int bch_read(struct nandi_controller *nandi,
 					__func__, page_offs);
 				nandi->info.mtd.ecc_stats.failed++;
 
-				/* Do not cache uncorrectable pages */
 				if (bounce)
 					nandi->cached_page = -1;
 			} else {
@@ -599,20 +533,17 @@ static int bch_read(struct nandi_controller *nandi,
 		if (retlen)
 			*retlen += bytes;
 
-		/* We are now page-aligned */
 		page_offs += page_size;
 		page_num++;
 		col_offs = 0;
 	}
 
-	/* Return '-EBADMSG' if we have encountered an uncorrectable error. */
 	if (nandi->info.mtd.ecc_stats.failed - stats.failed)
 		return -EBADMSG;
 
 	return max_ecc_errs;
 }
 
-/* Helper function for mtd_write, to handle multi-page and non-aligned writes */
 static int bch_write(struct nandi_controller *nandi,
 		     loff_t to, size_t len,
 		     size_t *retlen, const uint8_t *buf)
@@ -629,7 +560,7 @@ static int bch_write(struct nandi_controller *nandi,
 	BUG_ON(to & (page_size - 1));
 
 	if (((unsigned long)buf & (NANDI_BCH_DMA_ALIGNMENT - 1)) ||
-	    !virt_addr_valid(buf)) { /* vmalloc'd buffer! */
+	    !virt_addr_valid(buf)) {  
 		bounce = 1;
 	} else {
 		bounce = 0;
@@ -668,9 +599,6 @@ static int bch_write(struct nandi_controller *nandi,
 	return 0;
 }
 
-/*
- * Hamming-FLEX operations
- */
 static int flex_wait_rbn(struct nandi_controller *nandi)
 {
 	int ret;
@@ -704,13 +632,6 @@ static void flex_addr(struct nandi_controller *nandi,
 	writel(addr, nandi->base + NANDHAM_FLEX_ADD);
 }
 
-/*
- * Partial implementation of MTD/NAND Interface, based on Hamming-FLEX
- * operation.
- *
- * Allows us to make use of nand_base.c functions where possible
- * (e.g. nand_scan_ident() and friends).
- */
 static void flex_command_lp(struct mtd_info *mtd, unsigned int command,
 			    int column, int page)
 {
@@ -722,7 +643,7 @@ static void flex_command_lp(struct mtd_info *mtd, unsigned int command,
 
 	switch (command) {
 	case NAND_CMD_READOOB:
-		/* Emulate NAND_CMD_READOOB */
+		 
 		column += mtd->writesize;
 		command = NAND_CMD_READ0;
 		break;
@@ -731,7 +652,7 @@ static void flex_command_lp(struct mtd_info *mtd, unsigned int command,
 	case NAND_CMD_SEQIN:
 	case NAND_CMD_RESET:
 	case NAND_CMD_PARAM:
-		/* Prime RBn wait */
+		 
 		nandi_enable_interrupts(nandi, NAND_INT_RBN);
 		INIT_COMPLETION(nandi->rbn_completed);
 		break;
@@ -740,18 +661,12 @@ static void flex_command_lp(struct mtd_info *mtd, unsigned int command,
 	case NAND_CMD_ERASE2:
 		break;
 	default:
-		/* Catch unexpected commands */
+		 
 		BUG();
 	}
 
-	/*
-	 * Command Cycle
-	 */
 	flex_cmd(nandi, command);
 
-	/*
-	 * Address Cycles
-	 */
 	if (column != -1)
 		flex_addr(nandi, column,
 			  (command == NAND_CMD_READID) ? 1 : 2);
@@ -759,13 +674,9 @@ static void flex_command_lp(struct mtd_info *mtd, unsigned int command,
 	if (page != -1)
 		flex_addr(nandi, page, nandi->extra_addr ? 3 : 2);
 
-	/* Complete 'READ0' command */
 	if (command == NAND_CMD_READ0)
 		flex_cmd(nandi, NAND_CMD_READSTART);
 
-	/* Wait for RBn, if required.  (Note, other commands may handle wait
-	 * elsewhere)
-	 */
 	if (command == NAND_CMD_RESET ||
 	    command == NAND_CMD_READ0 ||
 	    command == NAND_CMD_PARAM) {
@@ -799,7 +710,6 @@ static int flex_wait_func(struct mtd_info *mtd, struct nand_chip *chip)
 	return (int)(readl(nandi->base + NANDHAM_FLEX_DATA) & 0xff);
 }
 
-/* Multi-CS devices not supported */
 static void flex_select_chip(struct mtd_info *mtd, int chipnr)
 {
 
@@ -814,14 +724,12 @@ static void flex_read_buf(struct mtd_info *mtd, uint8_t *buf, int len)
 	stm_nandi_select(STM_NANDI_HAMMING, nandi->bch_select_reg,
 				nandi->bch_select_msk);
 
-	/* Read bytes until buf is 4-byte aligned */
 	while (len && ((unsigned int)buf & 0x3)) {
 		*buf++ = (uint8_t)(readl(nandi->base + NANDHAM_FLEX_DATA)
 				   & 0xff);
 		len--;
 	};
 
-	/* Use 'BEATS_4'/readsl */
 	if (len > 8) {
 		aligned = len & ~0x3;
 		writel(FLEX_DATA_CFG_BEATS_4 | FLEX_DATA_CFG_CSN,
@@ -836,7 +744,6 @@ static void flex_read_buf(struct mtd_info *mtd, uint8_t *buf, int len)
 		       nandi->base + NANDHAM_FLEX_DATAREAD_CONFIG);
 	}
 
-	/* Mop up remaining bytes */
 	while (len > 0) {
 		*buf++ = (uint8_t)(readl(nandi->base + NANDHAM_FLEX_DATA)
 				   & 0xff);
@@ -850,13 +757,11 @@ static void flex_write_buf(struct mtd_info *mtd, const uint8_t *buf, int len)
 	struct nandi_controller *nandi = chip->priv;
 	int aligned;
 
-	/* Write bytes until buf is 4-byte aligned */
 	while (len && ((unsigned int)buf & 0x3)) {
 		writel(*buf++, nandi->base + NANDHAM_FLEX_DATA);
 		len--;
 	};
 
-	/* USE 'BEATS_4/writesl */
 	if (len > 8) {
 		aligned = len & ~0x3;
 		writel(FLEX_DATA_CFG_BEATS_4 | FLEX_DATA_CFG_CSN,
@@ -868,14 +773,12 @@ static void flex_write_buf(struct mtd_info *mtd, const uint8_t *buf, int len)
 		       nandi->base + NANDHAM_FLEX_DATAWRITE_CONFIG);
 	}
 
-	/* Mop up remaining bytes */
 	while (len > 0) {
 		writel(*buf++, nandi->base + NANDHAM_FLEX_DATA);
 		len--;
 	}
 }
 
-/* Catch calls to non-supported functions */
 static uint16_t flex_read_word_BUG(struct mtd_info *mtd)
 {
 	BUG();
@@ -904,9 +807,6 @@ int flex_scan_bbt_BUG(struct mtd_info *mtd)
 	return 1;
 }
 
-/*
- * Hamming-FLEX operations (optimised replacements for nand_base.c versions)
- */
 static int flex_check_wp(struct nandi_controller *nandi)
 {
 	uint8_t status;
@@ -1000,9 +900,6 @@ static int flex_write_raw(struct nandi_controller *nandi,
 	return status;
 }
 
-/*
- * Bad Block Tables/Bad Block Markers
- */
 #define BBT_MARK_BAD_FACTORY	0x0
 #define BBT_MARK_BAD_WEAR	0x1
 #define BBT_MARK_GOOD		0x3
@@ -1028,7 +925,6 @@ static int bbt_is_block_bad(uint8_t *bbt, uint32_t block)
 	return bbt_get_block_mark(bbt, block) == BBT_MARK_GOOD ? 0 : 1;
 }
 
-/* Scan page for BBM(s), according to specified scheme */
 static int nandi_scan_bad_block_markers_page(struct nandi_controller *nandi,
 					     uint32_t page,
 					     uint32_t bbm_scheme)
@@ -1039,10 +935,8 @@ static int nandi_scan_bad_block_markers_page(struct nandi_controller *nandi,
 	int e;
 	int ret = 0;
 
-	/* Read the OOB area */
 	flex_read_raw(nandi, page, mtd->writesize, oob_buf, mtd->oobsize);
 
-	/* Check for markers */
 	if (bbm_scheme & NAND_BBM_BYTE_OOB_ALL) {
 		for (i = 0; i < mtd->oobsize; i++)
 			if (oob_buf[i] != 0xff) {
@@ -1056,7 +950,6 @@ static int nandi_scan_bad_block_markers_page(struct nandi_controller *nandi,
 		ret = 1;
 	}
 
-	/* Tolerate 'alien' Hamming Boot Mode ECC */
 	if (ret == 1) {
 		e = 0;
 		for (i = 0; i < mtd->oobsize; i += 16)
@@ -1065,7 +958,6 @@ static int nandi_scan_bad_block_markers_page(struct nandi_controller *nandi,
 			ret = 0;
 	}
 
-	/* Tolerate 'alien' Hamming AFM ECC */
 	if (ret == 1) {
 		e = 0;
 		for (i = 0; i < mtd->oobsize; i += 16) {
@@ -1080,7 +972,6 @@ static int nandi_scan_bad_block_markers_page(struct nandi_controller *nandi,
 	return ret;
 }
 
-/* Scan block for BBM(s), according to specified scheme */
 static int nandi_scan_bad_block_markers_block(struct nandi_controller *nandi,
 					      uint32_t block,
 					      uint32_t bbm_scheme)
@@ -1105,7 +996,6 @@ static int nandi_scan_bad_block_markers_block(struct nandi_controller *nandi,
 	return 0;
 }
 
-/* Scan for BBMs and build memory-resident BBT */
 static int nandi_scan_build_bbt(struct nandi_controller *nandi,
 				struct nandi_bbt_info *bbt_info,
 				uint32_t bbm_scheme)
@@ -1131,7 +1021,6 @@ static int nandi_scan_build_bbt(struct nandi_controller *nandi,
 	return 0;
 }
 
-/* Populate IBBT BCH Header */
 static void bch_fill_ibbt_header(struct nandi_controller *nandi,
 				 struct nand_ibbt_bch_header *ibbt_header,
 				 int bak, uint8_t vers)
@@ -1147,7 +1036,6 @@ static void bch_fill_ibbt_header(struct nandi_controller *nandi,
 	memcpy(ibbt_header->author, author, sizeof(author));
 }
 
-/* Write IBBT to Flash */
 static int bch_write_bbt_data(struct nandi_controller *nandi,
 			      struct nandi_bbt_info *bbt_info,
 			      uint32_t block, int bak, uint8_t vers)
@@ -1160,12 +1048,10 @@ static int bch_write_bbt_data(struct nandi_controller *nandi,
 
 	nandi->cached_page = -1;
 
-	/* Write BBT contents to first page of block*/
 	offs = (loff_t)block << nandi->block_shift;
 	if (bch_write_page(nandi, offs, bbt_info->bbt) & NAND_STATUS_FAIL)
 		return 1;
 
-	/* Update IBBT header and write to last page of block */
 	memset(ibbt_header, 0xff, nandi->info.mtd.writesize);
 	bch_fill_ibbt_header(nandi, ibbt_header, bak, vers);
 	offs += block_size - page_size;
@@ -1176,8 +1062,6 @@ static int bch_write_bbt_data(struct nandi_controller *nandi,
 	return 0;
 }
 
-/* Update Flash-resident BBT: erase/search suitable block, and write table
- * data to Flash */
 static int bch_update_bbt(struct nandi_controller *nandi,
 			 struct nandi_bbt_info *bbt_info,
 			 int bak, uint8_t vers)
@@ -1193,15 +1077,12 @@ static int bch_update_bbt(struct nandi_controller *nandi,
 	for (block = bbt_info->bbt_block[bak]; block >= block_lower;  block--) {
 		offs = (loff_t)block << nandi->block_shift;
 
-		/* Skip if block used by other table */
 		if (block == block_other)
 			continue;
 
-		/* Skip if block is marked bad */
 		if (bbt_is_block_bad(bbt_info->bbt, block))
 			continue;
 
-		/* Erase block, mark bad and skip on failure */
 		if (bch_erase_block(nandi, offs) & NAND_STATUS_FAIL) {
 			dev_info(nandi->dev, "failed to erase block "
 				 "[%u:0x%012llx] while updating BBT\n",
@@ -1212,7 +1093,6 @@ static int bch_update_bbt(struct nandi_controller *nandi,
 			continue;
 		}
 
-		/* Write BBT, mark bad and skip on failure */
 		if (bch_write_bbt_data(nandi, bbt_info, block, bak, vers)) {
 			dev_info(nandi->dev, "failed to write BBT to block"
 				 "[%u:0x%012llx]\n", block, offs);
@@ -1222,13 +1102,11 @@ static int bch_update_bbt(struct nandi_controller *nandi,
 			continue;
 		}
 
-		/* Success */
 		bbt_info->bbt_block[bak] = block;
 		bbt_info->bbt_vers[bak] = vers;
 		break;
 	}
 
-	/* No space in BBT area */
 	if (block < block_lower) {
 		dev_err(nandi->dev, "no space left in BBT area\n");
 		dev_err(nandi->dev, "failed to update %s BBT\n", bbt_strs[bak]);
@@ -1252,8 +1130,6 @@ static char *bbt_update_strs[] = {
 	"both",
 };
 
-/* Update Flash-resident BBT(s), incrementing 'vers' number if required, and
- * ensuring Primary and Mirror are kept in sync */
 static int bch_update_bbts(struct nandi_controller *nandi,
 			   struct nandi_bbt_info *bbt_info,
 			   unsigned int update, uint8_t vers)
@@ -1263,50 +1139,39 @@ static int bch_update_bbts(struct nandi_controller *nandi,
 	dev_info(nandi->dev, "updating %s BBT(s)\n", bbt_update_strs[update]);
 
 	do {
-		/* Update Primary if specified */
+		 
 		if (update & NAND_IBBT_UPDATE_PRIMARY) {
 			err = bch_update_bbt(nandi, bbt_info, NAND_IBBT_PRIMARY,
 					     vers);
-			/* Bail out on error (e.g. no space left in BBT area) */
+			 
 			if (err)
 				return err;
 
-			/* If update resulted in a new BBT version
-			 * (e.g. Erase/Write fail on BBT block) update version
-			 * here, and force update of other table.
-			 */
 			if (bbt_info->bbt_vers[NAND_IBBT_PRIMARY] != vers) {
 				vers = bbt_info->bbt_vers[NAND_IBBT_PRIMARY];
 				update = NAND_IBBT_UPDATE_MIRROR;
 			}
 		}
 
-		/* Update Mirror if specified */
 		if (update & NAND_IBBT_UPDATE_MIRROR) {
 			err = bch_update_bbt(nandi, bbt_info, NAND_IBBT_MIRROR,
 					     vers);
-			/* Bail out on error (e.g. no space left in BBT area) */
+			 
 			if (err)
 				return err;
 
-			/* If update resulted in a new BBT version
-			 * (e.g. Erase/Write fail on BBT block) update version
-			 * here, and force update of other table.
-			 */
 			if (bbt_info->bbt_vers[NAND_IBBT_MIRROR] != vers) {
 				vers = bbt_info->bbt_vers[NAND_IBBT_MIRROR];
 				update = NAND_IBBT_UPDATE_PRIMARY;
 			}
 		}
 
-		/* Continue, until Primary and Mirror versions are in sync */
 	} while (bbt_info->bbt_vers[NAND_IBBT_PRIMARY] !=
 		 bbt_info->bbt_vers[NAND_IBBT_MIRROR]);
 
 	return 0;
 }
 
-/* Scan block for IBBT signature */
 static int bch_find_ibbt_sig(struct nandi_controller *nandi,
 			     uint32_t block, int *bak, uint8_t *vers,
 			     char *author)
@@ -1321,7 +1186,6 @@ static int bch_find_ibbt_sig(struct nandi_controller *nandi,
 
 	nandi->cached_page = -1;
 
-	/* Load last page of block */
 	offs = (loff_t)block << nandi->block_shift;
 	offs += mtd->erasesize - mtd->writesize;
 	if (bch_read_page(nandi, offs, buf) < 0) {
@@ -1332,7 +1196,6 @@ static int bch_find_ibbt_sig(struct nandi_controller *nandi,
 	}
 	ibbt_header = (struct nand_ibbt_bch_header *)buf;
 
-	/* Test IBBT signature */
 	match_sig = 0;
 	for (b = 0; b < 2 && !match_sig; b++) {
 		match_sig = 1;
@@ -1346,19 +1209,16 @@ static int bch_find_ibbt_sig(struct nandi_controller *nandi,
 	}
 
 	if (!match_sig)
-		return 0; /* Failed to match IBBT signature */
+		return 0;  
 
-	/* Test IBBT schema */
 	for (i = 0; i < 4; i++)
 		if (ibbt_header->base.schema[i] != NAND_IBBT_SCHEMA)
 			return 0;
 
-	/* Test IBBT BCH schema */
 	for (i = 0; i < 4; i++)
 		if (ibbt_header->schema[i] != NAND_IBBT_BCH_SCHEMA)
 			return 0;
 
-	/* We have a match */
 	*vers = ibbt_header->base.version;
 	*bak = b - 1;
 	strncpy(author, ibbt_header->author, 64);
@@ -1366,9 +1226,6 @@ static int bch_find_ibbt_sig(struct nandi_controller *nandi,
 	return 1;
 }
 
-/* Search for, and load Flash-resident BBT, updating Primary/Mirror if
- * required
- */
 static int bch_load_bbt(struct nandi_controller *nandi,
 			struct nandi_bbt_info *bbt_info)
 {
@@ -1386,7 +1243,6 @@ static int bch_load_bbt(struct nandi_controller *nandi,
 	bbt_info->bbt_vers[0] = 0;
 	bbt_info->bbt_vers[1] = 0;
 
-	/* Look for IBBT signatures */
 	for (block = nandi->blocks_per_device - NAND_IBBT_NBLOCKS;
 	     block < nandi->blocks_per_device;
 	     block++) {
@@ -1405,30 +1261,29 @@ static int bch_load_bbt(struct nandi_controller *nandi,
 		}
 	}
 
-	/* What have we found? */
 	if (bbt_info->bbt_block[0] == 0 && bbt_info->bbt_block[1] == 0) {
-		/* no primary, no mirror: return error*/
+		 
 		return 1;
 	} else if (bbt_info->bbt_block[0] == 0) {
-		/* no primary: use mirror, update primary */
+		 
 		bak = 1;
 		update = NAND_IBBT_UPDATE_PRIMARY;
 		bbt_info->bbt_block[0] = nandi->blocks_per_device - 1;
 	} else if (bbt_info->bbt_block[1] == 0) {
-		/* no mirror: use primary, update mirror */
+		 
 		bak = 0;
 		update = NAND_IBBT_UPDATE_MIRROR;
 		bbt_info->bbt_block[1] = nandi->blocks_per_device - 1;
 	} else if (bbt_info->bbt_vers[0] == bbt_info->bbt_vers[1]) {
-		/* primary == mirror: use primary, no update required */
+		 
 		bak = 0;
 	} else if ((int8_t)(bbt_info->bbt_vers[1] -
 			    bbt_info->bbt_vers[0]) < 0) {
-		/* primary > mirror: use primary, update mirror */
+		 
 		bak = 0;
 		update = NAND_IBBT_UPDATE_MIRROR;
 	} else {
-		/* mirror > primary: use mirror, update primary */
+		 
 		bak = 1;
 		update = NAND_IBBT_UPDATE_PRIMARY;
 	}
@@ -1439,23 +1294,18 @@ static int bch_load_bbt(struct nandi_controller *nandi,
 	dev_info(nandi->dev, "using BBT [%s:%u] at 0x%012llx [%u]\n",
 		 bbt_strs[bak], vers, offs, block);
 
-	/* Read BBT data */
 	if (bch_read_page(nandi, offs, bbt_info->bbt) < 0) {
 		dev_err(nandi->dev, "error while reading BBT %s:%u] at "
 			"0x%012llx [%u]\n", bbt_strs[bak], vers, offs, block);
 		return 1;
 	}
 
-	/* Update other BBT if required */
 	if (update)
 		bch_update_bbts(nandi, bbt_info, update, vers);
 
 	return 0;
 }
 
-/*
- * MTD Interface: Standard set of callbacks for MTD functionality
- */
 static int bch_mtd_read(struct mtd_info *mtd, loff_t from, size_t len,
 		    size_t *retlen, uint8_t *buf)
 {
@@ -1523,8 +1373,6 @@ static int bch_mtd_write(struct mtd_info *mtd, loff_t to, size_t len,
 
 }
 
-/* Helper function for mtd_read_oob(): handles multi-page transfers and mapping
- * between BCH sectors and MTD page+OOB data. */
 static int flex_do_read_ops(struct nandi_controller *nandi,
 				loff_t from,
 				struct mtd_oob_ops *ops)
@@ -1582,8 +1430,6 @@ static int flex_do_read_ops(struct nandi_controller *nandi,
 	return 0;
 }
 
-/* Helper function for mtd_write_oob(): handles multi-page transfers and mapping
- * between BCH sectors and MTD page+OOB data. */
 static int flex_do_write_ops(struct nandi_controller *nandi,
 			     loff_t to,
 			     struct mtd_oob_ops *ops)
@@ -1674,21 +1520,15 @@ static int bch_mtd_read_oob(struct mtd_info *mtd, loff_t from,
 	ops->oobretlen = 0;
 	ops->retlen = 0;
 
-	/* We report OOB as unavailable (i.e. oobavail = 0), therefore nothing
-	 * should call this */
 	if (ops->oobbuf && ops->mode == MTD_OPS_AUTO_OOB)
 		return -ENOTSUPP;
 
-	/* Not currently supported by MTD.  Note, will have to fake support if
-	 * backporting 'in-band' nand_bbt.c... */
 	if (ops->datbuf && ops->oobbuf && ops->mode == MTD_OPS_PLACE_OOB)
 		return -ENOTSUPP;
 
-	/* Do not allow oob reads with ooboffs */
 	if (ops->oobbuf && ops->ooboffs)
 		return -ENOTSUPP;
 
-	/* Do not allow reads past end of device */
 	if (ops->datbuf && (from + ops->len) > mtd->size) {
 		dev_err(nandi->dev, "attempt read beyond end of device\n");
 		return -EINVAL;
@@ -1700,9 +1540,6 @@ static int bch_mtd_read_oob(struct mtd_info *mtd, loff_t from,
 		return -EINVAL;
 	}
 
-	/* Do not allow non-aligned reads.  Note, might be sensible to support
-	 * oob-only or data-only non-aligned reads, but have seen no use-cases
-	 * so far. */
 	if ((from & page_mask) ||
 	    (ops->datbuf && (ops->len & page_mask)) ||
 	    (ops->oobbuf && (ops->ooblen % mtd->oobsize))) {
@@ -1710,7 +1547,6 @@ static int bch_mtd_read_oob(struct mtd_info *mtd, loff_t from,
 		return -ENOTSUPP;
 	}
 
-	/* Do not allow inconsistent data and oob lengths */
 	if (ops->datbuf && ops->oobbuf &&
 	    (ops->len / mtd->writesize != ops->ooblen / mtd->oobsize)) {
 		dev_err(nandi->dev, "data length inconsistent with oob "
@@ -1747,21 +1583,15 @@ static int bch_mtd_write_oob(struct mtd_info *mtd, loff_t to,
 	ops->oobretlen = 0;
 	ops->retlen = 0;
 
-	/* We report OOB as unavailable (i.e. oobavail = 0), therefore nothing
-	 * should call this */
 	if (ops->oobbuf && ops->mode == MTD_OPS_AUTO_OOB)
 		return -ENOTSUPP;
 
-	/* Not currently supported by MTD.  Note, will have to fake support if
-	 * backporting wavefront nand_bbt.c... */
 	if (ops->datbuf && ops->oobbuf && ops->mode == MTD_OPS_PLACE_OOB)
 		return -ENOTSUPP;
 
-	/* Do not allow oob writes with ooboffs */
 	if (ops->oobbuf && ops->ooboffs)
 		return -ENOTSUPP;
 
-	/* Do not allow writes past end of device */
 	if (ops->datbuf && (to + ops->len) > mtd->size) {
 		dev_err(nandi->dev, "attempt write beyond end of device\n");
 		return -EINVAL;
@@ -1772,7 +1602,6 @@ static int bch_mtd_write_oob(struct mtd_info *mtd, loff_t to,
 		return -EINVAL;
 	}
 
-	/* Do not allow non-aligned writes */
 	if ((to & page_mask) ||
 	    (ops->datbuf && (ops->len & page_mask)) ||
 	    (ops->oobbuf && (ops->ooblen % mtd->oobsize))) {
@@ -1780,7 +1609,6 @@ static int bch_mtd_write_oob(struct mtd_info *mtd, loff_t to,
 		return -EINVAL;
 	}
 
-	/* Do not allow inconsistent data and oob lengths */
 	if (ops->datbuf && ops->oobbuf &&
 	    (ops->len / mtd->writesize != ops->ooblen / mtd->oobsize)) {
 		dev_err(nandi->dev, "data length inconsistent with oob "
@@ -1809,13 +1637,11 @@ static int bch_mtd_block_isbad(struct mtd_info *mtd, loff_t offs)
 
 	uint32_t block;
 
-	/* Check for invalid offset */
 	if (offs > mtd->size)
 		return -EINVAL;
 
 	block = offs >> nandi->block_shift;
 
-	/* Protect blocks reserved for BBTs */
 	if (block >= (nandi->blocks_per_device - NAND_IBBT_NBLOCKS))
 		return 1;
 
@@ -1830,18 +1656,15 @@ static int bch_mtd_block_markbad(struct mtd_info *mtd, loff_t offs)
 	uint32_t block;
 	int ret;
 
-	/* Is block already considered bad? (will also catch invalid offsets) */
 	ret = mtd_block_isbad(mtd, offs);
 	if (ret < 0)
 		return ret;
 	if (ret == 1)
 		return 0;
 
-	/* Mark bad */
 	block = offs >> nandi->block_shift;
 	bbt_set_block_mark(nandi->info.bbt_info.bbt, block, BBT_MARK_BAD_WEAR);
 
-	/* Update BBTs, incrementing bbt_vers */
 	nand_get_device(mtd, FL_WRITING);
 	ret = bch_update_bbts(nandi, &nandi->info.bbt_info,
 			      NAND_IBBT_UPDATE_BOTH,
@@ -1892,7 +1715,6 @@ static int bch_mtd_erase(struct mtd_info *mtd, struct erase_info *instr)
 		goto erase_exit;
 	}
 
-	/* Offset of block containing cached page */
 	offs_cached = ((uint64_t)nandi->cached_page << nandi->page_shift) &
 		~block_mask;
 
@@ -1957,9 +1779,7 @@ static void nandi_dump_bad_blocks(struct nandi_controller *nandi,
 }
 
 #ifdef CONFIG_STM_NAND_BCH_DEBUG
-/*
- * Debug code (adds considerable bloat, so enable only when necessary)
- */
+ 
 static char *nand_cmd_strs[256] = {
 	[NAND_CMD_READ0]	= "READ0",
 	[NAND_CMD_READ1]	= "READ1",
@@ -2188,11 +2008,8 @@ static void nandi_dump_info(struct nandi_controller *nandi)
 	nandi_dump_bad_blocks(nandi, nandi->info.bbt_info.bbt);
 }
 
-#endif /* CONFIG_STM_NAND_BCH_DEBUG */
+#endif  
 
-/*
- * Initialisation
- */
 static int bch_check_compatibility(struct nandi_controller *nandi,
 				   struct mtd_info *mtd,
 				   struct nand_chip *chip)
@@ -2208,7 +2025,7 @@ static int bch_check_compatibility(struct nandi_controller *nandi,
 	}
 
 	if (nandi->blocks_per_device/4 > mtd->writesize) {
-		/* Need to implement multi-page BBT support... */
+		 
 		dev_err(nandi->dev, "BBT too big to fit in single page\n");
 		return 1;
 	}
@@ -2222,7 +2039,6 @@ static int bch_check_compatibility(struct nandi_controller *nandi,
 	return 0;
 }
 
-/* Select strongest ECC scheme compatible with OOB size */
 static int bch_set_ecc_auto(struct nandi_controller *nandi,
 			    struct mtd_info *mtd,
 			    struct nand_chip *chip)
@@ -2242,14 +2058,12 @@ static int bch_set_ecc_auto(struct nandi_controller *nandi,
 	return 1;
 }
 
-/* Configure MTD/NAND interface */
 static void nandi_set_mtd_defaults(struct nandi_controller *nandi,
 				   struct mtd_info *mtd, struct nand_chip *chip)
 {
 	struct nandi_info *info = &nandi->info;
 	int i;
 
-	/* ecclayout */
 	info->ecclayout.eccbytes = mtd->oobsize;
 	for (i = 0; i < 64; i++)
 		info->ecclayout.eccpos[i] = i;
@@ -2257,7 +2071,6 @@ static void nandi_set_mtd_defaults(struct nandi_controller *nandi,
 	info->ecclayout.oobfree[0].length = 0;
 	info->ecclayout.oobavail = 0;
 
-	/* nand_chip */
 	chip->controller = &chip->hwcontrol;
 	spin_lock_init(&chip->controller->lock);
 	init_waitqueue_head(&chip->controller->wq);
@@ -2279,7 +2092,6 @@ static void nandi_set_mtd_defaults(struct nandi_controller *nandi,
 	chip->bbt_options |= NAND_BBT_USE_FLASH;
 	chip->scan_bbt = flex_scan_bbt_BUG;
 
-	/* mtd_info */
 	mtd->owner = THIS_MODULE;
 	mtd->type = MTD_NANDFLASH;
 	mtd->flags = MTD_CAP_NANDFLASH;
@@ -2324,11 +2136,6 @@ static int nandi_examine_bbts(struct nandi_controller *nandi,
 	return stmnand_examine_bbts(mtd, bch_remap);
 }
 
-/*
- * Timing Configuration
- */
-
-/* Derive Hamming-FLEX timing register values from 'nand_timing_spec' data */
 static void flex_calc_timing_registers(struct nand_timing_spec *spec,
 				       int tCLK, int relax,
 				       uint32_t *ctl_timing,
@@ -2348,17 +2155,11 @@ static void flex_calc_timing_registers(struct nand_timing_spec *spec,
 	int n_ren_on;
 	int n_ren_off;
 
-	/*
-	 * CTL_TIMING
-	 */
-
-	/*	- SETUP */
 	n_ctl_setup = (spec->tCLS - spec->tWP + tCLK - 1)/tCLK;
 	if (n_ctl_setup < 1)
 		n_ctl_setup = 1;
 	n_ctl_setup += relax;
 
-	/*	- HOLD */
 	tMAX_HOLD = spec->tCLH;
 	if (spec->tCH > tMAX_HOLD)
 		tMAX_HOLD = spec->tCH;
@@ -2368,23 +2169,14 @@ static void flex_calc_timing_registers(struct nand_timing_spec *spec,
 		tMAX_HOLD = spec->tDH;
 	n_ctl_hold = (tMAX_HOLD + tCLK - 1)/tCLK + relax;
 
-	/*	- CE_deassert_hold = 0 */
-
-	/*	- WE_high_to_RBn_low */
 	n_ctl_wb = (spec->tWB + tCLK - 1)/tCLK;
 
 	*ctl_timing = ((n_ctl_setup & 0xff) |
 		       (n_ctl_hold & 0xff) << 8 |
 		       (n_ctl_wb & 0xff) << 24);
 
-	/*
-	 * WEN_TIMING
-	 */
-
-	/*	- ON */
 	n_wen_on = (spec->tWH + tCLK - 1)/tCLK + relax;
 
-	/*	- OFF */
 	tMAX_WEN_OFF = spec->tWC - spec->tWH;
 	if (spec->tWP > tMAX_WEN_OFF)
 		tMAX_WEN_OFF = spec->tWP;
@@ -2393,14 +2185,8 @@ static void flex_calc_timing_registers(struct nand_timing_spec *spec,
 	*wen_timing = ((n_wen_on & 0xff) |
 		       (n_wen_off & 0xff) << 8);
 
-	/*
-	 * REN_TIMING
-	 */
-
-	/*	- ON */
 	n_ren_on = (spec->tREH + tCLK - 1)/tCLK + relax;
 
-	/*	- OFF */
 	tMAX_REN_OFF = spec->tRC - spec->tREH;
 	if (spec->tRP > tMAX_REN_OFF)
 		tMAX_REN_OFF = spec->tRP;
@@ -2412,7 +2198,6 @@ static void flex_calc_timing_registers(struct nand_timing_spec *spec,
 		       (n_ren_off & 0xff) << 8);
 }
 
-/* Derive BCH timing register values from 'nand_timing_spec' data */
 static void bch_calc_timing_registers(struct nand_timing_spec *spec,
 				      int tCLK, int relax,
 				      uint32_t *ctl_timing,
@@ -2438,18 +2223,12 @@ static void bch_calc_timing_registers(struct nand_timing_spec *spec,
 	int ren_half_on;
 	int ren_half_off;
 
-	/*
-	 * CTL_TIMING
-	 */
-
-	/*	- SETUP */
 	if (spec->tCLS > spec->tWP)
 		n_ctl_setup = (spec->tCLS - spec->tWP + tCLK - 1)/tCLK;
 	else
 		n_ctl_setup = 0;
 	n_ctl_setup += relax;
 
-	/*	- HOLD */
 	tMAX_HOLD = spec->tCLH;
 	if (spec->tCH > tMAX_HOLD)
 		tMAX_HOLD = spec->tCH;
@@ -2458,26 +2237,18 @@ static void bch_calc_timing_registers(struct nand_timing_spec *spec,
 	if (spec->tDH > tMAX_HOLD)
 		tMAX_HOLD = spec->tDH;
 	n_ctl_hold = (tMAX_HOLD + tCLK - 1)/tCLK + relax;
-	/*	- CE_deassert_hold = 0 */
-
-	/*	- WE_high_to_RBn_low */
+	 
 	n_ctl_wb = (spec->tWB + tCLK - 1)/tCLK;
 
 	*ctl_timing = ((n_ctl_setup & 0xff) |
 		       (n_ctl_hold & 0xff) << 8 |
 		       (n_ctl_wb & 0xff) << 24);
 
-	/*
-	 * WEN_TIMING
-	 */
-
-	/*	- ON */
 	n_wen_on = (2 * spec->tWH + tCLK - 1)/tCLK;
 	wen_half_on = n_wen_on % 2;
 	n_wen_on /= 2;
 	n_wen_on += relax;
 
-	/*	- OFF */
 	n_wen_off = (2 * spec->tWP + tCLK - 1)/tCLK;
 	wen_half_off = n_wen_off % 2;
 	n_wen_off /= 2;
@@ -2488,11 +2259,6 @@ static void bch_calc_timing_registers(struct nand_timing_spec *spec,
 		       (wen_half_on << 16) |
 		       (wen_half_off << 17));
 
-	/*
-	 * REN_TIMING
-	 */
-
-	/*	- ON */
 	tMAX_REN_ON = spec->tRC - spec->tRP;
 	if (spec->tREH > tMAX_REN_ON)
 		tMAX_REN_ON = spec->tREH;
@@ -2502,13 +2268,11 @@ static void bch_calc_timing_registers(struct nand_timing_spec *spec,
 	n_ren_on /= 2;
 	n_ren_on += relax;
 
-	/*	- OFF */
 	n_ren_off = (2 * spec->tREA + tCLK - 1)/tCLK;
 	ren_half_off = n_ren_off % 2;
 	n_ren_off /= 2;
 	n_ren_off += relax;
 
-	/*	- DATA_LATCH */
 	if (spec->tREA <= (spec->tRP - (2 * tCLK)))
 		n_d_latch = 0;
 	else if (spec->tREA <= (spec->tRP - tCLK))
@@ -2518,7 +2282,6 @@ static void bch_calc_timing_registers(struct nand_timing_spec *spec,
 	else
 		n_d_latch = 3;
 
-	/*	- TELQV */
 	tMAX_CS_DEASSERT = spec->tCOH;
 	if (spec->tCHZ > tMAX_CS_DEASSERT)
 		tMAX_CS_DEASSERT = spec->tCHZ;
@@ -2546,7 +2309,7 @@ static void nandi_clk_enable(struct nandi_controller *nandi, bool enable)
 		enable ? clk_prepare_enable(nandi->bch_clk) :
 			clk_disable_unprepare(nandi->bch_clk);
 }
-#else /* MY_DEF_HERE */
+#else  
 static void nandi_clk_enable(struct nandi_controller *nandi)
 {
 	if (nandi->emi_clk)
@@ -2562,7 +2325,7 @@ static void nandi_clk_disable(struct nandi_controller *nandi)
 	if (nandi->bch_clk)
 		clk_disable_unprepare(nandi->bch_clk);
 }
-#endif /* MY_DEF_HERE */
+#endif  
 
 static struct clk *nandi_clk_setup(struct nandi_controller *nandi,
 	char *clkn)
@@ -2599,25 +2362,22 @@ static void flex_configure_timing_registers(struct nandi_controller *nandi,
 	uint32_t wen_timing;
 	uint32_t ren_timing;
 
-	/* Select Hamming Controller */
 	stm_nandi_select(STM_NANDI_HAMMING, nandi->bch_select_reg,
 				nandi->bch_select_msk);
 
-	/* Get EMI clock (default 100MHz) */
 	if (nandi->emi_clk)
 		emi_t_ns = 1000000000UL / clk_get_rate(nandi->emi_clk);
 	else {
 		dev_warn(nandi->dev, "No EMI clock available; assuming default 100MHz\n");
 		emi_t_ns = 10;
 	}
-	/* Derive timing register values from specification */
+	 
 	flex_calc_timing_registers(spec, emi_t_ns, relax,
 				   &ctl_timing, &wen_timing, &ren_timing);
 
 	dev_dbg(nandi->dev, "updating FLEX timing configuration [0x%08x, 0x%08x, 0x%08x]\n",
 		ctl_timing, wen_timing, ren_timing);
 
-	/* Program timing registers */
 	writel(ctl_timing, nandi->base + NANDHAM_CTL_TIMING);
 	writel(wen_timing, nandi->base + NANDHAM_WEN_TIMING);
 	writel(ren_timing, nandi->base + NANDHAM_REN_TIMING);
@@ -2633,25 +2393,22 @@ static void bch_configure_timing_registers(struct nandi_controller *nandi,
 	uint32_t wen_timing;
 	uint32_t ren_timing;
 
-	/* Select BCH Controller */
 	stm_nandi_select(STM_NANDI_BCH, nandi->bch_select_reg,
 				nandi->bch_select_msk);
 
-	/* Get BCH clock (default 200MHz) */
 	if (nandi->bch_clk)
 		bch_t_ns = 1000000000UL / clk_get_rate(nandi->bch_clk);
 	else {
 		dev_warn(nandi->dev, "No BCH clock available; assuming default 200MHz\n");
 		bch_t_ns = 5;
 	}
-	/* Derive timing register values from specification */
+	 
 	bch_calc_timing_registers(spec, bch_t_ns, relax,
 				  &ctl_timing, &wen_timing, &ren_timing);
 
 	dev_dbg(nandi->dev, "updating BCH timing configuration [0x%08x, 0x%08x, 0x%08x]\n",
 		ctl_timing, wen_timing, ren_timing);
 
-	/* Program timing registers */
 	writel(ctl_timing, nandi->base + NANDBCH_CTL_TIMING);
 	writel(wen_timing, nandi->base + NANDBCH_WEN_TIMING);
 	writel(ren_timing, nandi->base + NANDBCH_REN_TIMING);
@@ -2672,32 +2429,25 @@ static void nandi_init_hamming(struct nandi_controller *nandi, int emi_bank)
 	stm_nandi_select(STM_NANDI_HAMMING, nandi->bch_select_reg,
 				nandi->bch_select_msk);
 
-	/* Reset and disable boot-mode controller */
 	writel(BOOT_CFG_RESET, nandi->base + NANDHAM_BOOTBANK_CFG);
 	udelay(1);
 	writel(0x00000000, nandi->base + NANDHAM_BOOTBANK_CFG);
 
-	/* Reset controller */
 	writel(CFG_RESET, nandi->base + NANDHAM_FLEXMODE_CFG);
 	udelay(1);
 	writel(0x00000000, nandi->base + NANDHAM_FLEXMODE_CFG);
 
-	/* Set EMI Bank */
 	writel(0x1 << emi_bank, nandi->base + NANDHAM_FLEX_MUXCTRL);
 
-	/* Enable FLEX mode */
 	writel(CFG_ENABLE_FLEX, nandi->base + NANDHAM_FLEXMODE_CFG);
 
-	/* Configure FLEX_DATA_READ/WRITE for 1-byte access */
 	writel(FLEX_DATA_CFG_BEATS_1 | FLEX_DATA_CFG_CSN,
 	       nandi->base + NANDHAM_FLEX_DATAREAD_CONFIG);
 	writel(FLEX_DATA_CFG_BEATS_1 | FLEX_DATA_CFG_CSN,
 	       nandi->base + NANDHAM_FLEX_DATAREAD_CONFIG);
 
-	/* RBn interrupt on rising edge */
 	writel(NAND_EDGE_CFG_RBN_RISING, nandi->base + NANDHAM_INT_EDGE_CFG);
 
-	/* Enable interrupts */
 	nandi_enable_interrupts(nandi, NAND_INT_ENABLE);
 }
 
@@ -2705,38 +2455,30 @@ static void nandi_init_bch(struct nandi_controller *nandi, int emi_bank)
 {
 	dev_dbg(nandi->dev, "%s\n", __func__);
 
-	/* Initialise BCH Controller */
 	stm_nandi_select(STM_NANDI_BCH, nandi->bch_select_reg,
 				nandi->bch_select_msk);
 
-	/* Reset and disable boot-mode controller */
 	writel(BOOT_CFG_RESET, nandi->base + NANDBCH_BOOTBANK_CFG);
 	udelay(1);
 	writel(0x00000000, nandi->base + NANDBCH_BOOTBANK_CFG);
 
-	/* Reset AFM controller */
 	writel(CFG_RESET, nandi->base + NANDBCH_CONTROLLER_CFG);
 	udelay(1);
 	writel(0x00000000, nandi->base + NANDBCH_CONTROLLER_CFG);
 
-	/* Set EMI Bank */
 	writel(0x1 << emi_bank, nandi->base + NANDBCH_FLEX_MUXCTRL);
 
-	/* Reset ECC stats */
 	writel(0x7f0, nandi->base + NANDBCH_CONTROLLER_CFG);
 	udelay(1);
 
-	/* Enable AFM */
 	writel(CFG_ENABLE_AFM, nandi->base + NANDBCH_CONTROLLER_CFG);
 
-	/* Configure Read DMA Plugs (values supplied by Validation)*/
 	writel(0x00000005, nandi->dma + EMISS_NAND_RD_DMA_PAGE_SIZE);
 	writel(0x00000005, nandi->dma + EMISS_NAND_RD_DMA_MAX_OPCODE_SIZE);
 	writel(0x00000002, nandi->dma + EMISS_NAND_RD_DMA_MIN_OPCODE_SIZE);
 	writel(0x00000001, nandi->dma + EMISS_NAND_RD_DMA_MAX_CHUNK_SIZE);
 	writel(0x00000000, nandi->dma + EMISS_NAND_RD_DMA_MAX_MESSAGE_SIZE);
 
-	/* Configure Write DMA Plugs (values supplied by Validation) */
 	writel(0x00000005, nandi->dma + EMISS_NAND_WR_DMA_PAGE_SIZE);
 	writel(0x00000005, nandi->dma + EMISS_NAND_WR_DMA_MAX_OPCODE_SIZE);
 	writel(0x00000002, nandi->dma + EMISS_NAND_WR_DMA_MIN_OPCODE_SIZE);
@@ -2943,9 +2685,6 @@ static int stm_nand_bch_probe(struct platform_device *pdev)
 	if (nand_scan_ident(mtd, 1, NULL) != 0)
 		return -ENODEV;
 
-	/*
-	 * Configure timing registers
-	 */
 	if (bank->timing_spec) {
 		dev_info(&pdev->dev, "Using platform timing data\n");
 		nandi_configure_timing_registers(nandi, bank->timing_spec,
@@ -2956,7 +2695,6 @@ static int stm_nand_bch_probe(struct platform_device *pdev)
 
 		mode = fls(le16_to_cpu(onfi->async_timing_mode)) - 1;
 
-		/* Modes 4 and 5 (EDO) are not supported on our H/W */
 		if (mode > 3)
 			mode = 3;
 
@@ -2973,7 +2711,6 @@ static int stm_nand_bch_probe(struct platform_device *pdev)
 		return -EINVAL;
 	}
 
-	/* Derive some working variables */
 	nandi->sectors_per_page = mtd->writesize / NANDI_BCH_SECTOR_SIZE;
 	nandi->blocks_per_device = mtd->size >> chip->phys_erase_shift;
 	nandi->page_shift = chip->page_shift;
@@ -2981,7 +2718,6 @@ static int stm_nand_bch_probe(struct platform_device *pdev)
 	nandi->extra_addr = ((chip->chipsize >> nandi->page_shift) >
 			     0x10000) ? 1 : 0;
 
-	/* Set ECC mode */
 	switch (pdata->bch_ecc_cfg) {
 	case BCH_ECC_CFG_AUTO:
 		if (bch_set_ecc_auto(nandi, mtd, chip) != 0) {
@@ -3000,9 +2736,6 @@ static int stm_nand_bch_probe(struct platform_device *pdev)
 		break;
 	}
 
-	/* Get bit-flips threshold. A value of '0' is interpreted as
-	 * <ecc_strength>.
-	 */
 	if (pdata->bch_bitflip_threshold) {
 		nandi->bitflip_threshold = pdata->bch_bitflip_threshold;
 	} else {
@@ -3017,39 +2750,28 @@ static int stm_nand_bch_probe(struct platform_device *pdev)
 	info->ecclayout.eccbytes = nandi->sectors_per_page *
 		bch_ecc_sizes[nandi->bch_ecc_mode];
 
-	/* Check compatibility */
 	if (bch_check_compatibility(nandi, mtd, chip) != 0) {
 		dev_err(nandi->dev, "NAND device incompatible with NANDi/BCH "
 			"Controller\n");
 		return -EINVAL;
 	}
 
-	/* Tune BCH programs according to device found and ECC mode */
 	bch_configure_progs(nandi);
 
-	/*
-	 * Initialise working buffers, accomodating DMA alignment constraints:
-	 */
-
-	/*	- Page and OOB */
 	buf_size = mtd->writesize + mtd->oobsize + NANDI_BCH_DMA_ALIGNMENT;
 
-	/*	- BBT data (page-size aligned) */
-	bbt_info->bbt_size = nandi->blocks_per_device >> 2; /* 2 bits/block */
+	bbt_info->bbt_size = nandi->blocks_per_device >> 2;  
 	bbt_buf_size = ALIGN(bbt_info->bbt_size, mtd->writesize);
 	buf_size += bbt_buf_size + NANDI_BCH_DMA_ALIGNMENT;
 
-	/*	- BCH BUF list */
 	buf_size += NANDI_BCH_BUF_LIST_SIZE + NANDI_BCH_DMA_ALIGNMENT;
 
-	/* Allocate bufffer */
 	nandi->buf = devm_kzalloc(&pdev->dev, buf_size, GFP_KERNEL);
 	if (!nandi->buf) {
 		dev_err(nandi->dev, "failed to allocate working buffers\n");
 		return -ENOMEM;
 	}
 
-	/* Set/Align buffer pointers */
 	nandi->page_buf = PTR_ALIGN(nandi->buf, NANDI_BCH_DMA_ALIGNMENT);
 	nandi->oob_buf = nandi->page_buf + mtd->writesize;
 	bbt_info->bbt = PTR_ALIGN(nandi->oob_buf + mtd->oobsize,
@@ -3064,13 +2786,12 @@ static int stm_nand_bch_probe(struct platform_device *pdev)
 		return mtd_device_register(mtd, NULL, 0);
 	}
 
-	/* Load Flash-resident BBT */
 	err = bch_load_bbt(nandi, bbt_info);
 
 	if (err) {
 		dev_err(nandi->dev, "failed to find BBTs: "
 			"scan device for bad-block markers\n");
-		/* scan, build, and write BBT */
+		 
 		nandi_scan_build_bbt(nandi, bbt_info, chip->bbm);
 		if (bch_update_bbts(nandi, bbt_info, NAND_IBBT_UPDATE_BOTH,
 				    bbt_info->bbt_vers[0] + 1) != 0)
@@ -3079,9 +2800,6 @@ static int stm_nand_bch_probe(struct platform_device *pdev)
 
 	nandi_dump_info(nandi);
 
-	/*
-	 * Add partitions
-	 */
 	err = mtd_device_parse_register(mtd, part_probes, &ppdata,
 				bank->partitions, bank->nr_partitions);
 
@@ -3097,9 +2815,9 @@ static int stm_nand_bch_remove(struct platform_device *pdev)
 
 #ifdef MY_DEF_HERE
 	nandi_clk_enable(nandi, false);
-#else /* MY_DEF_HERE */
+#else  
 	nandi_clk_disable(nandi);
-#endif /* MY_DEF_HERE */
+#endif  
 
 	return 0;
 }
@@ -3134,7 +2852,7 @@ SIMPLE_DEV_PM_OPS(stm_nand_bch_pm_ops, stm_nand_bch_suspend,
 #else
 #define STM_NAND_BCH_PM_OPS	NULL
 #endif
-#else /* MY_DEF_HERE */
+#else  
 #ifdef CONFIG_PM
 static int stm_nand_bch_suspend(struct device *dev)
 {
@@ -3163,7 +2881,7 @@ SIMPLE_DEV_PM_OPS(stm_nand_bch_pm_ops, stm_nand_bch_suspend,
 #else
 #define STM_NAND_BCH_PM_OPS	NULL
 #endif
-#endif /* MY_DEF_HERE */
+#endif  
 
 #ifdef CONFIG_OF
 static struct of_device_id nand_bch_match[] = {

@@ -1,31 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *   STMicroelectronics System-on-Chips' internal (sysconf controlled)
- *   audio DAC driver
- *
- *   Copyright (c) 2005-2013 STMicroelectronics Limited
- *
- *   Author: John Boddie <john.boddie@st.com>
- *           Pawel Moll <pawel.moll@st.com>
- *
- *   This program is free software; you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation; either version 2 of the License, or
- *   (at your option) any later version.
- *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
- *
- *   You should have received a copy of the GNU General Public License
- *   along with this program; if not, write to the Free Software
- *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
- *
- */
-
+ 
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/io.h>
@@ -42,16 +18,11 @@
 static int snd_stm_debug_level;
 module_param_named(debug, snd_stm_debug_level, int, S_IRUGO | S_IWUSR);
 
-/*
- * Hardware-related definitions
- */
-
 #define FORMAT (SND_STM_FORMAT__I2S | SND_STM_FORMAT__SUBFRAME_32_BITS)
 #define OVERSAMPLING 256
 
 static struct of_device_id conv_dac_sc_match[];
 
-/* Regfield IDs */
 enum {
 	CONVDACSC_NOT_STANDBY,
 	CONVDACSC_STANDBY,
@@ -63,13 +34,9 @@ enum {
 	CONVDACSC_ANALOG_STANDBY,
 	CONVDACSC_ANALOG_PWR_DW,
 	CONVDACSC_ANALOG_NOT_PWR_DW_BG,
-	/* keep last */
+	 
 	MAX_REGFIELDS
 };
-
-/*
- * Internal DAC instance structure
- */
 
 struct conv_dac_sc_sysconf_regfields {
 	bool avail;
@@ -79,7 +46,6 @@ struct conv_dac_sc_sysconf_regfields {
 struct conv_dac_sc {
 	struct device *dev;
 
-	/* System informations */
 	struct snd_stm_conv_converter *converter;
 	const char *bus_id;
 	struct device_node *source_bus_id;
@@ -92,11 +58,10 @@ struct conv_dac_sc {
 	int oversampling;
 	struct reset_control *nrst;
 
-	/* sysconf registers bank map */
 	struct regmap *sysconf_regmap;
-	/* sysconf register bit fields */
+	 
 	const struct conv_dac_sc_sysconf_regfields *sysconf_regfields;
-	/* Control bits */
+	 
 	struct regmap_field *mode;
 	struct regmap_field *nsb;
 	struct regmap_field *sb;
@@ -110,10 +75,6 @@ struct conv_dac_sc {
 
 	snd_stm_magic_field;
 };
-
-/*
- * sysconf registers configuration of given platform
- */
 
 static const struct conv_dac_sc_sysconf_regfields
 	conv_dac_sc_sysconf_regfields_stih416[MAX_REGFIELDS] = {
@@ -130,10 +91,6 @@ static const struct conv_dac_sc_sysconf_regfields
 	[CONVDACSC_SOFTMUTE] = {true, REG_FIELD(STIH407_AUDIO_DAC_CTRL, 0, 0)},
 	[CONVDACSC_ANALOG_STANDBY] = {true, REG_FIELD(STIH407_AUDIO_DAC_CTRL, 1, 1)},
 };
-
-/*
- * Converter interface implementation
- */
 
 static unsigned int conv_dac_sc_get_format(void *priv)
 {
@@ -173,34 +130,32 @@ static int conv_dac_sc_set_enabled(int enabled, void *priv)
 
 	if (enabled) {
 #ifdef MY_DEF_HERE
-		/* take the DAC analog bits out of standby */
+		 
 		if (conv->sbana)
 			regmap_field_write(conv->sbana, 0);
-#endif /* MY_DEF_HERE */
-		/* Take the DAC out of standby */
+#endif  
+		 
 		if (conv->nsb)
 			regmap_field_write(conv->nsb, 1);
 		if (conv->sb)
 			regmap_field_write(conv->sb, 0);
 
-		/* Take the DAC out of reset */
 		if (conv->nrst)
 			reset_control_deassert(conv->nrst);
 	} else {
-		/* Put the DAC into reset */
+		 
 		if (conv->nrst)
 			reset_control_assert(conv->nrst);
 
-		/* Put the DAC into standby */
 		if (conv->nsb)
 			regmap_field_write(conv->nsb, 0);
 		if (conv->sb)
 			regmap_field_write(conv->sb, 1);
 #ifdef MY_DEF_HERE
-		/* Put the DAC analog bits into standby */
+		 
 		if (conv->sbana)
 			regmap_field_write(conv->sbana, 1);
-#endif /* MY_DEF_HERE */
+#endif  
 	}
 
 	return 0;
@@ -241,17 +196,14 @@ static int conv_dac_sc_set_idle(struct conv_dac_sc *conv)
 	BUG_ON(!conv);
 	BUG_ON(!snd_stm_magic_valid(conv));
 
-	/* Put the DAC into reset */
 	if (conv->nrst)
 		reset_control_assert(conv->nrst);
 
-	/* Put the DAC into standby */
 	if (conv->nsb)
 		regmap_field_write(conv->nsb, 0);
 	if (conv->sb)
 		regmap_field_write(conv->sb, 1);
 
-	/* Mute the DAC */
 	if (conv->softmute)
 		regmap_field_write(conv->softmute, 1);
 	if (conv->mute_l)
@@ -259,7 +211,6 @@ static int conv_dac_sc_set_idle(struct conv_dac_sc *conv)
 	if (conv->mute_r)
 		regmap_field_write(conv->mute_r, 1);
 
-	/* Put the DAC analog bits in standby */
 	if (conv->mode)
 		regmap_field_write(conv->mode, 0);
 	if (conv->npdana)
@@ -273,38 +224,32 @@ static int conv_dac_sc_set_idle(struct conv_dac_sc *conv)
 
 	return 0;
 }
-#endif /* MY_DEF_HERE */
-
-/*
- * ALSA low-level device implementation
- */
+#endif  
 
 static int conv_dac_sc_register(struct snd_device *snd_device)
 {
 	struct conv_dac_sc *conv = snd_device->device_data;
 
 #ifdef MY_DEF_HERE
-#else /* MY_DEF_HERE */
+#else  
 	BUG_ON(!conv);
 	BUG_ON(!snd_stm_magic_valid(conv));
-#endif /* MY_DEF_HERE */
+#endif  
 
 	dev_dbg(conv->dev, "%s(snd_device=%p)", __func__, snd_device);
 
 #ifdef MY_DEF_HERE
 	return conv_dac_sc_set_idle(conv);
-#else /* MY_DEF_HERE */
-	/* Put the DAC into reset */
+#else  
+	 
 	if (conv->nrst)
 		reset_control_assert(conv->nrst);
 
-	/* Put the DAC into standby */
 	if (conv->nsb)
 		regmap_field_write(conv->nsb, 0);
 	if (conv->sb)
 		regmap_field_write(conv->sb, 1);
 
-	/* Mute the DAC */
 	if (conv->softmute)
 		regmap_field_write(conv->softmute, 1);
 	if (conv->mute_l)
@@ -312,7 +257,6 @@ static int conv_dac_sc_register(struct snd_device *snd_device)
 	if (conv->mute_r)
 		regmap_field_write(conv->mute_r, 1);
 
-	/* Take the DAC analog bits out of standby */
 	if (conv->mode)
 		regmap_field_write(conv->mode, 0);
 	if (conv->npdana)
@@ -325,7 +269,7 @@ static int conv_dac_sc_register(struct snd_device *snd_device)
 		regmap_field_write(conv->pndbg, 1);
 
 	return 0;
-#endif /* MY_DEF_HERE */
+#endif  
 }
 
 static int conv_dac_sc_disconnect(struct snd_device *snd_device)
@@ -337,17 +281,14 @@ static int conv_dac_sc_disconnect(struct snd_device *snd_device)
 
 	dev_dbg(conv->dev, "%s(snd_device=%p)", __func__, snd_device);
 
-	/* Put the DAC into reset */
 	if (conv->nrst)
 		reset_control_assert(conv->nrst);
 
-	/* Put the DAC into standby */
 	if (conv->nsb)
 		regmap_field_write(conv->nsb, 0);
 	if (conv->sb)
 		regmap_field_write(conv->sb, 1);
 
-	/* Mute the DAC */
 	if (conv->softmute)
 		regmap_field_write(conv->softmute, 1);
 	if (conv->mute_l)
@@ -355,7 +296,6 @@ static int conv_dac_sc_disconnect(struct snd_device *snd_device)
 	if (conv->mute_r)
 		regmap_field_write(conv->mute_r, 1);
 
-	/* Put the DAC analog bits into standby */
 	if (conv->mode)
 		regmap_field_write(conv->mode, 0);
 	if (conv->npdana)
@@ -375,17 +315,12 @@ static struct snd_device_ops conv_dac_sc_snd_device_ops = {
 	.dev_disconnect	= conv_dac_sc_disconnect,
 };
 
-/*
- * Platform driver routines
- */
-
 static int conv_dac_sc_parse_dt(struct platform_device *pdev,
 		struct conv_dac_sc *conv)
 {
 	struct device_node *pnode = pdev->dev.of_node;
 	int val;
 
-	/* get source_bus_id node */
 	val = get_property_hdl(&pdev->dev, pnode, "source-bus-id", 0);
 	if (!val) {
 		dev_err(&pdev->dev, "unable to find DT source-bus-id node");
@@ -395,7 +330,6 @@ static int conv_dac_sc_parse_dt(struct platform_device *pdev,
 	of_property_read_string(conv->source_bus_id, "description",
 				&conv->source_bus_id_description);
 
-	/* Read the device and channel properties */
 	of_property_read_u32(pnode, "channel-to", &conv->channel_to);
 	of_property_read_u32(pnode, "channel-from", &conv->channel_from);
 	of_property_read_u32(pnode, "format", &conv->format);
@@ -421,7 +355,6 @@ static int conv_dac_sc_parse_dt(struct platform_device *pdev,
 static void conv_dac_sc_sysconf_claim(struct conv_dac_sc *conv)
 {
 
-	/* Read the device standby sysconf properties */
 	if (conv->sysconf_regfields[CONVDACSC_NOT_STANDBY].avail == true)
 		conv->nsb = regmap_field_alloc(conv->sysconf_regmap,
 			conv->sysconf_regfields[CONVDACSC_NOT_STANDBY].regfield);
@@ -429,7 +362,6 @@ static void conv_dac_sc_sysconf_claim(struct conv_dac_sc *conv)
 		conv->sb = regmap_field_alloc(conv->sysconf_regmap,
 			conv->sysconf_regfields[CONVDACSC_STANDBY].regfield);
 
-	/* Read the device mute sysconf properties */
 	if (conv->sysconf_regfields[CONVDACSC_SOFTMUTE].avail == true)
 		conv->softmute = regmap_field_alloc(conv->sysconf_regmap,
 			conv->sysconf_regfields[CONVDACSC_SOFTMUTE].regfield);
@@ -440,12 +372,10 @@ static void conv_dac_sc_sysconf_claim(struct conv_dac_sc *conv)
 		conv->mute_r = regmap_field_alloc(conv->sysconf_regmap,
 			conv->sysconf_regfields[CONVDACSC_MUTE_R].regfield);
 
-	/* Read the device mode sysconf property */
 	if (conv->sysconf_regfields[CONVDACSC_MODE].avail == true)
 		conv->mode = regmap_field_alloc(conv->sysconf_regmap,
 			conv->sysconf_regfields[CONVDACSC_MODE].regfield);
 
-	/* Read the device analog sysconf properties */
 	if (conv->sysconf_regfields[CONVDACSC_ANALOG_NOT_PWR_DW].avail == true)
 		conv->npdana = regmap_field_alloc(conv->sysconf_regmap,
 			conv->sysconf_regfields[CONVDACSC_ANALOG_NOT_PWR_DW].regfield);
@@ -470,7 +400,6 @@ static int conv_dac_sc_probe(struct platform_device *pdev)
 
 	snd_stm_printd(0, "%s('%s')\n", __func__, dev_name(&pdev->dev));
 
-	/* Allocate driver structure */
 	conv = devm_kzalloc(&pdev->dev, sizeof(*conv), GFP_KERNEL);
 	if (!conv) {
 		dev_err(&pdev->dev, "Failed to allocate driver structure");
@@ -481,13 +410,11 @@ static int conv_dac_sc_probe(struct platform_device *pdev)
 	conv->dev = &pdev->dev;
 	conv->bus_id = dev_name(&pdev->dev);
 
-	/* Get resources */
 	if (!pdev->dev.of_node) {
 		dev_err(conv->dev, "device not in dt");
 		return -EINVAL;
 	}
 
-	/* Get soft reset control */
 	conv->nrst = devm_reset_control_get(&pdev->dev, "dac_nrst");
 	if (IS_ERR(conv->nrst)) {
 		dev_info(conv->dev, "audio dac soft reset control not defined\n");
@@ -499,30 +426,24 @@ static int conv_dac_sc_probe(struct platform_device *pdev)
 		return -EINVAL;
 	}
 
-	/* Ensure valid bus id */
 	if (!conv->source_bus_id) {
 		dev_err(conv->dev, "Invalid source bus id!");
 		return -EINVAL;
 	}
 
-	/* Check if we need to use the default format */
 	if (conv->format == 0)
 		conv->format = FORMAT;
 
-	/* Check if we need to use the default oversampling */
 	if (conv->oversampling == 0)
 		conv->oversampling = OVERSAMPLING;
 
-	/* claim sysconf */
 	conv_dac_sc_sysconf_claim(conv);
 
-	/* SoC must have either 'not-standby' or 'standby' sysconf */
 	if (!conv->nsb && !conv->sb) {
 		dev_err(conv->dev, "Failed to claim any standby sysconf!");
 		return -EINVAL;
 	}
 
-	/* SoC must have either 'softmute' or 'mute-left' & 'mute-right' */
 	if (!conv->softmute && !conv->mute_l && !conv->mute_r) {
 		dev_err(conv->dev, "Failed to claim any mute sysconf!");
 		return -EINVAL;
@@ -530,7 +451,6 @@ static int conv_dac_sc_probe(struct platform_device *pdev)
 
 	dev_dbg(&pdev->dev, "Attached to %s", conv->source_bus_id_description);
 
-	/* Register the converter */
 	conv->converter = snd_stm_conv_register_converter(
 			"DAC SC", &conv_dac_sc_ops, conv,
 			&platform_bus_type, conv->source_bus_id,
@@ -541,7 +461,6 @@ static int conv_dac_sc_probe(struct platform_device *pdev)
 		goto error_attach;
 	}
 
-	/* Create ALSA low-level device */
 	result = snd_device_new(card, SNDRV_DEV_LOWLEVEL, conv,
 			&conv_dac_sc_snd_device_ops);
 	if (result < 0) {
@@ -549,7 +468,6 @@ static int conv_dac_sc_probe(struct platform_device *pdev)
 		goto error_device;
 	}
 
-	/* Save converter in driver data */
 	platform_set_drvdata(pdev, conv);
 
 	return 0;
@@ -613,11 +531,7 @@ SIMPLE_DEV_PM_OPS(conv_dac_sc_pm_ops, NULL, conv_dac_sc_resume);
 #else
 #define CONV_DAC_SC_PM_OPS	NULL
 #endif
-#endif /* MY_DEF_HERE */
-
-/*
- * Module initialization.
- */
+#endif  
 
 static struct of_device_id conv_dac_sc_match[] = {
 	{
@@ -638,7 +552,7 @@ static struct platform_driver conv_dac_sc_platform_driver = {
 	.driver.of_match_table = conv_dac_sc_match,
 #ifdef MY_DEF_HERE
 	.driver.pm	= CONV_DAC_SC_PM_OPS,
-#endif /* MY_DEF_HERE */
+#endif  
 	.probe		= conv_dac_sc_probe,
 	.remove		= conv_dac_sc_remove,
 };

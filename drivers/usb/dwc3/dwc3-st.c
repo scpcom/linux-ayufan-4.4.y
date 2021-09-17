@@ -1,25 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/**
- * dwc3-st.c Support for dwc3 platform devices on Stmicroelectronics platforms
- *
- * This is a small platform driver for the dwc3 to provide the glue logic
- * to configure the controller. Tested on STi platforms.
- *
- * Copyright (c) 2013 Stmicroelectronics
- *
- * Author: Giuseppe Cavallaro <peppe.cavallaro@st.com>
- * Contributors: Aymen Bouattay <aymen.bouattay@st.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * Inspired by dwc3-omap.c and dwc3-exynos.c.
- */
-
+ 
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/slab.h>
@@ -37,7 +19,6 @@
 #include "core.h"
 #include "io.h"
 
-/* Reg glue registers */
 #define USB2_CLKRST_CTRL 0x00
 #define aux_clk_en(n) ((n)<<0)
 #define sw_pipew_reset_n(n) ((n)<<4)
@@ -45,12 +26,7 @@
 #define xhci_revision(n) ((n)<<12)
 
 #define USB2_VBUS_MNGMNT_SEL1 0x2C
-/*
- * 2'b00 : Override value from Reg 0x30 is selected
- * 2'b01 : utmiotg_vbusvalid from usb3_top top is selected
- * 2'b10 : pipew_powerpresent from PIPEW instance is selected
- * 2'b11 : value is 1'b0
- */
+ 
 #define SEL_OVERRIDE_VBUSVALID(n) ((n)<<0)
 #define SEL_OVERRIDE_POWERPRESENT(n) ((n)<<4)
 #define SEL_OVERRIDE_BVALID(n) ((n)<<8)
@@ -60,18 +36,17 @@
 #define OVERRIDE_POWERPRESENT_VAL (1 << 4)
 #define OVERRIDE_BVALID_VAL (1 << 8)
 
-/* Static DRD configuration */
 #define USB_HOST_DEFAULT_MASK	0xffe
 #define USB_SET_PORT_DEVICE	0x1
 
 struct st_dwc3 {
-	struct device *dev;	/* device pointer */
-	void __iomem *glue_base;	/* ioaddr for programming the glue */
-	struct regmap *regmap;	/* regmap for getting syscfg */
-	int syscfg_reg_off;	/* usb syscfg control offset */
-	bool drd_device_conf;	/* DRD static host/device conf */
-	struct reset_control *rstc_p;	/* Power down */
-	struct reset_control *rstc_s;	/* Soft Reset */
+	struct device *dev;	 
+	void __iomem *glue_base;	 
+	struct regmap *regmap;	 
+	int syscfg_reg_off;	 
+	bool drd_device_conf;	 
+	struct reset_control *rstc_p;	 
+	struct reset_control *rstc_s;	 
 };
 
 static inline u32 st_dwc3_readl(void __iomem *base, u32 offset)
@@ -84,13 +59,6 @@ static inline void st_dwc3_writel(void __iomem *base, u32 offset, u32 value)
 	writel_relaxed(value, base + offset);
 }
 
-/**
- * st_dwc3_drd_init: program the port
- * @dwc3_data: driver private structure
- * Description: this function is to program the port either host or device
- * according to the static configuration passed from devicetree.
- * OTG and dual role are not yet supported!
- */
 static int st_dwc3_drd_init(struct st_dwc3 *dwc3_data)
 {
 	u32 val;
@@ -105,10 +73,6 @@ static int st_dwc3_drd_init(struct st_dwc3 *dwc3_data)
 	return regmap_write(dwc3_data->regmap, dwc3_data->syscfg_reg_off, val);
 }
 
-/**
- * st_dwc3_init: init the controller via glue logic
- * @dwc3_data: driver private structure
- */
 static void st_dwc3_init(struct st_dwc3 *dwc3_data)
 {
 	u32 reg = st_dwc3_readl(dwc3_data->glue_base, USB2_CLKRST_CTRL);
@@ -153,19 +117,14 @@ static u32 st_dwc3_gsbuscfg_setup(struct device *dev, int index)
 		return -EINVAL;
 	}
 }
-#endif /* MY_DEF_HERE */
-/**
- * st_dwc3_probe: main probe function
- * @pdev: platform_device
- * Description: this is the probe function that gets all the resources to manage
- * the glue-logic, setup the controller and resets it.
- */
+#endif  
+ 
 static int st_dwc3_probe(struct platform_device *pdev)
 {
 	struct st_dwc3 *dwc3_data;
 #ifdef MY_DEF_HERE
 	struct dwc3_cfg_ops cfg_ops;
-#endif /* MY_DEF_HERE */
+#endif  
 	struct resource *res;
 	struct device *dev = &pdev->dev;
 	struct device_node *node = dev->of_node;
@@ -203,14 +162,12 @@ static int st_dwc3_probe(struct platform_device *pdev)
 	if (IS_ERR(dwc3_data->rstc_p))
 		return PTR_ERR(dwc3_data->rstc_p);
 
-	/* PowerDown */
 	reset_control_deassert(dwc3_data->rstc_p);
 
 	dwc3_data->rstc_s = devm_reset_control_get(dwc3_data->dev, "soft");
 	if (IS_ERR(dwc3_data->rstc_s))
 		return PTR_ERR(dwc3_data->rstc_s);
 
-	/* Soft reset DWC3 + Miphy */
 	reset_control_deassert(dwc3_data->rstc_s);
 #ifdef MY_DEF_HERE
 	memset(&cfg_ops, 0, sizeof(cfg_ops));
@@ -225,11 +182,11 @@ static int st_dwc3_probe(struct platform_device *pdev)
 		dev_err(dwc3_data->dev, "failed to add platform data to dwc3 core\n");
 		return ret;
 	}
-#endif /* MY_DEF_HERE */
+#endif  
 
 	if (node) {
 		st_dwc3_dt_get_pdata(pdev, dwc3_data);
-		/* Allocate and initialize the core */
+		 
 		ret = of_platform_populate(node, NULL, NULL, dev);
 		if (ret) {
 			dev_err(dev, "failed to add dwc3 core\n");
@@ -240,11 +197,6 @@ static int st_dwc3_probe(struct platform_device *pdev)
 		return -ENODEV;
 	}
 
-	/* Configure the USB port as device or host according to the static
-	 * configuration passed from the platform.
-	 * DRD is the only mode currently supported so this will be enhanced
-	 * later as soon as OTG will be available.
-	 */
 	ret = st_dwc3_drd_init(dwc3_data);
 	if (ret)
 		return ret;
@@ -252,7 +204,6 @@ static int st_dwc3_probe(struct platform_device *pdev)
 	dev_info(&pdev->dev, "configured as %s DRD\n",
 		 dwc3_data->drd_device_conf ? "device" : "host");
 
-	/* ST glue logic init */
 	st_dwc3_init(dwc3_data);
 
 	platform_set_drvdata(pdev, dwc3_data);
@@ -312,7 +263,7 @@ static const struct dev_pm_ops st_dwc3_dev_pm_ops = {
 #define DEV_PM_OPS	(&st_dwc3_dev_pm_ops)
 #else
 #define DEV_PM_OPS	NULL
-#endif /* CONFIG_PM_SLEEP */
+#endif  
 
 static struct of_device_id st_dwc3_match[] = {
 	{.compatible = "st,stih407-dwc3"},

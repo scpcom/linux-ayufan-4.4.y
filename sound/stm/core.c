@@ -1,29 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *   Core routines for STMicroelectronics' SoCs audio drivers
- *
- *   Copyright (c) 2005-2011 STMicroelectronics Limited
- *
- *   Author: Pawel Moll <pawel.moll@st.com>
- *
- *   This program is free software; you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation; either version 2 of the License, or
- *   (at your option) any later version.
- *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
- *
- *   You should have received a copy of the GNU General Public License
- *   along with this program; if not, write to the Free Software
- *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
- *
- */
-
+ 
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/slab.h>
@@ -44,10 +22,6 @@
 
 int snd_stm_debug_level;
 module_param_named(debug, snd_stm_debug_level, int, S_IRUGO | S_IWUSR);
-
-/*
- * device tree utility functions
- */
 
 int get_property_hdl(struct device *dev, struct device_node *np,
 					const char *prop, int idx)
@@ -71,10 +45,6 @@ int get_property_hdl(struct device *dev, struct device_node *np,
 
 	return be32_to_cpup(phandle + idx);
 }
-
-/*
- * ALSA card management
- */
 
 struct snd_stm_card_info {
 	const char *name;
@@ -104,11 +74,9 @@ static int snd_stm_card_do_register(struct snd_stm_card_info *card_info)
 	BUG_ON(!card_info->card);
 	BUG_ON(!card_info->subsystem);
 
-	/* Return if card is already registered */
 	if (card_info->is_registered)
 		return 0;
 
-	/* Configure card details */
 	snprintf(card_info->card->shortname, sizeof(card_info->card->shortname),
 			"ST %s subsystem", card_info->subsystem);
 
@@ -116,7 +84,6 @@ static int snd_stm_card_do_register(struct snd_stm_card_info *card_info)
 			"STMicroelectronics %s subsystem",
 				card_info->subsystem);
 
-	/* Register the sound card (and instantiate all attached devices) */
 	result = snd_card_register(card_info->card);
 	if (result) {
 		snd_stm_printe("Failed to register %s sound card\n",
@@ -124,7 +91,6 @@ static int snd_stm_card_do_register(struct snd_stm_card_info *card_info)
 		return result;
 	}
 
-	/* Indicate card is registered */
 	card_info->is_registered = 1;
 
 	return result;
@@ -138,13 +104,11 @@ int snd_stm_card_register(enum snd_stm_card_type card_type)
 
 	snd_stm_printd(1, "%s(card_type=%d)\n", __func__, card_type);
 
-	/* Register a single card type */
 	if (card_type < SND_STM_CARD_TYPE_COUNT) {
 		card_info = snd_stm_card_find(card_type);
 		return snd_stm_card_do_register(card_info);
 	}
 
-	/* Register all card types */
 	if (card_type == SND_STM_CARD_TYPE_ALL) {
 		for (i = 0; i < SND_STM_CARD_TYPE_COUNT; ++i)
 			result |= snd_stm_card_do_register(&snd_stm_cards[i]);
@@ -152,7 +116,6 @@ int snd_stm_card_register(enum snd_stm_card_type card_type)
 		return result;
 	}
 
-	/* Card type must be invalid */
 	snd_stm_printe("Invalid card type (%d)\n", card_type);
 	return -EINVAL;
 }
@@ -177,10 +140,6 @@ struct snd_card *snd_stm_card_get(enum snd_stm_card_type card_type)
 	return card_info->card;
 }
 EXPORT_SYMBOL(snd_stm_card_get);
-
-/*
- * Resources management
- */
 
 int snd_stm_memory_request(struct platform_device *pdev,
 		struct resource **mem_region, void **base_address)
@@ -225,9 +184,6 @@ int snd_stm_irq_request(struct platform_device *pdev,
 		return -EBUSY;
 	}
 
-	/* request_irq() enables the interrupt immediately; as it is
-	 * lethal in concurrent audio environment, we want to have
-	 * it disabled for most of the time... */
 	disable_irq(*irq);
 
 	return 0;
@@ -235,10 +191,7 @@ int snd_stm_irq_request(struct platform_device *pdev,
 EXPORT_SYMBOL(snd_stm_irq_request);
 
 #ifdef CONFIG_PROC_FS
-/*
- * ALSA procfs additional entries
- */
-
+ 
 static struct snd_info_entry *snd_stm_info_root;
 
 int snd_stm_info_create(void)
@@ -273,7 +226,6 @@ int snd_stm_info_register(struct snd_info_entry **entry,
 {
 	int result = 0;
 
-	/* Skip the "snd_" prefix, if bus_id has been simply given */
 	if (strncmp(name, "snd_", 4) == 0)
 		name += 4;
 
@@ -300,9 +252,7 @@ void snd_stm_info_unregister(struct snd_info_entry *entry)
 }
 EXPORT_SYMBOL(snd_stm_info_unregister);
 #endif
-/*
- * PCM buffer memory management
- */
+ 
 struct snd_stm_buffer {
 	struct snd_pcm *pcm;
 
@@ -444,7 +394,7 @@ EXPORT_SYMBOL(snd_stm_buffer_free);
 static int snd_stm_buffer_mmap_fault(struct vm_area_struct *area,
 				     struct vm_fault *vmf)
 {
-	/* No VMA expanding here! */
+	 
 	return VM_FAULT_SIGBUS;
 }
 
@@ -511,16 +461,8 @@ int snd_stm_pcm_transfer_bytes(unsigned int bytes_per_frame,
 	return transfer_bytes;
 }
 EXPORT_SYMBOL(snd_stm_pcm_transfer_bytes);
-#else /* MY_DEF_HERE */
-/*
- * Common ALSA parameters constraints
- */
-
-/*
-#define FIXED_TRANSFER_BYTES max_transfer_bytes > 16 ? 16 : max_transfer_bytes
-#define FIXED_TRANSFER_BYTES max_transfer_bytes
-*/
-
+#else  
+ 
 #if defined(FIXED_TRANSFER_BYTES)
 
 int snd_stm_pcm_transfer_bytes(unsigned int bytes_per_frame,
@@ -613,11 +555,8 @@ EXPORT_SYMBOL(snd_stm_pcm_hw_constraint_transfer_bytes);
 
 #endif
 
-#endif /* MY_DEF_HERE */
-/*
- * Common ALSA controls routines
- */
-
+#endif  
+ 
 int snd_stm_ctl_boolean_info(struct snd_kcontrol *kcontrol,
 		struct snd_ctl_elem_info *uinfo)
 {
@@ -697,12 +636,6 @@ int snd_stm_iec958_cmp(const struct snd_aes_iec958 *a,
 }
 EXPORT_SYMBOL(snd_stm_iec958_cmp);
 
-/*
- * Debug features
- */
-
-/* Memory dump function */
-
 void snd_stm_hex_dump(void *data, int size)
 {
 	unsigned char *buffer = data;
@@ -718,7 +651,6 @@ void snd_stm_hex_dump(void *data, int size)
 	}
 }
 
-/* IEC958 structure dump */
 void snd_stm_iec958_dump(const struct snd_aes_iec958 *vuc)
 {
 	int i;
@@ -756,10 +688,6 @@ void snd_stm_iec958_dump(const struct snd_aes_iec958 *vuc)
 			vuc->dig_subframe[2], vuc->dig_subframe[3]);
 }
 
-/*
- * Core initialization
- */
-
 static int snd_stm_core_init(void)
 {
 	int result;
@@ -767,11 +695,9 @@ static int snd_stm_core_init(void)
 
 	snd_stm_printd(0, "%s()\n", __func__);
 
-	/* Initialise the sound card info data */
 	SND_STM_CARDS_INIT_AUDIO(snd_stm_cards);
 	SND_STM_CARDS_INIT_TELSS(snd_stm_cards);
 
-	/* Create the sound cards (but don't register them yet!) */
 	for (i = 0; i < SND_STM_CARD_TYPE_COUNT; ++i) {
 		result = snd_card_create(-1, snd_stm_cards[i].name, THIS_MODULE,
 				0, &snd_stm_cards[i].card);

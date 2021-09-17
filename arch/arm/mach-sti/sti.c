@@ -1,13 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) 2013 STMicroelectronics Limited
- * Author: Srinivas Kandagatla <srinivas.kandagatla@st.com>
- *
- * May be copied or modified under the terms of the GNU General Public
- * License.  See linux/COPYING for more information.
- */
+ 
 #include <linux/of.h>
 #include <linux/of_platform.h>
 #include <linux/platform_device.h>
@@ -69,11 +63,11 @@ static void synology_power_off(void)
 		} else
 			goto END;
 
-		writel(0x1189 & ~0x80, microp_base + 0x0c); /* ctrl */
-		writel(BAUDRATE_VAL_M1(9600, microp_rate), microp_base); /* baud rate 9600 */
-		writel(20, microp_base + 0x1c); /* timeout */
-		writel(1, microp_base + 0x10); /* int */
-		writel(0x1189, microp_base + 0x0c); /* ctrl */
+		writel(0x1189 & ~0x80, microp_base + 0x0c);  
+		writel(BAUDRATE_VAL_M1(9600, microp_rate), microp_base);  
+		writel(20, microp_base + 0x1c);  
+		writel(1, microp_base + 0x10);  
+		writel(0x1189, microp_base + 0x0c);  
 
 #if defined(MY_DEF_HERE)
 		if (NULL != syno_standby_power_enable) {
@@ -94,13 +88,8 @@ END:
 
 }
 
-#endif /* MY_DEF_HERE */
-/*
- * Temporary function to enable clocks in ClockgenTel:
- * -VCO to 540 MHz
- * -ETH0 (chan2) to 25 MHz
- * To be removed as soon as ClockenTel is supported by GCF
- */
+#endif  
+ 
 static void stid127_setup_clockgentel(void)
 {
 	void __iomem *base;
@@ -113,14 +102,12 @@ static void stid127_setup_clockgentel(void)
 		return;
 	}
 
-	/* setup VCO_USB to 540 MHz on QFS_TEL */
 	writel(0x208, base);
 	tmp = readl(base + 0x1c);
 	writel(tmp & 0x1fe, base + 0x1c);
 	tmp =  readl(base + 0x20);
 	writel(tmp & 0x1fe, base + 0x20);
 
-	/* Set ETH0 to 25MHz (chan 2)*/
 	tmp = readl(base);
 	writel(tmp | BIT(6), base);
 	tmp = readl(base + 0x20);
@@ -130,7 +117,6 @@ static void stid127_setup_clockgentel(void)
 	tmp = readl(base + 0x1c);
 	writel(tmp & ~BIT(3), base + 0x1c);
 
-	/* setup CCM_USB: divide (540MHz) src by 45 to get 12 MHz on phy USB2*/
 	writel(0x2012d, base + 0x64);
 	writel(0xc, base + 0x74);
 
@@ -163,7 +149,6 @@ static void __init soc_info_populate(struct soc_device_attribute *soc_dev_attr)
 	if (!family)
 		return;
 
-	/* Extract the SoC name from the "model" DT entry */
 	strncat(family, model, family_length);
 	soc_dev_attr->family = kasprintf(GFP_KERNEL, "%s", family);
 }
@@ -191,11 +176,6 @@ static struct device *sti_soc_device_init(void)
 #define ST_GPIO_PINS_PER_BANK (8)
 #define TSOUT1_BYTECLK_GPIO (5 * ST_GPIO_PINS_PER_BANK + 0)
 
-/* On stid127-b2112 PIO5[0] (TSOUT1_BYTECLK) goes to CN10 (TSAERROR_TSAERROR).
- * On b2105, CN29 (NIM3) it is wired to SIS2_ERROR.
- * This patch is to force TSOUT1_BYTECLK to low for NIM3 connection with
- * Cannes
- */
 void __init sti_init_machine_late(void)
 {
 	if (of_machine_is_compatible("st,stid127"))
@@ -210,9 +190,9 @@ void __init sti_init_machine_late(void)
 void __init sti_init_machine(void)
 {
 #ifdef MY_DEF_HERE
-#else /* MY_DEF_HERE */
+#else  
 	struct platform_device_info devinfo = { .name = "cpufreq-cpu0", };
-#endif /* MY_DEF_HERE */
+#endif  
 	struct device *parent = NULL;
 
 	parent = sti_soc_device_init();
@@ -222,10 +202,10 @@ void __init sti_init_machine(void)
 	if (of_machine_is_compatible("st,stid127"))
 		stid127_setup_clockgentel();
 #ifdef MY_DEF_HERE
-#else /* MY_DEF_HERE */
+#else  
 
 	platform_device_register_full(&devinfo);
-#endif /* MY_DEF_HERE */
+#endif  
 }
 #ifdef MY_DEF_HERE
 static int sti_register_cpufreqcpu0(void)
@@ -236,4 +216,4 @@ static int sti_register_cpufreqcpu0(void)
 	return 0;
 }
 late_initcall(sti_register_cpufreqcpu0);
-#endif /* MY_DEF_HERE */
+#endif  

@@ -1,17 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *	kirkwood_freq.c: cpufreq driver for the Marvell kirkwood
- *
- *	Copyright (C) 2013 Andrew Lunn <andrew@lunn.ch>
- *
- *	This program is free software; you can redistribute it and/or
- *	modify it under the terms of the GNU General Public License
- *	as published by the Free Software Foundation; either version
- *	2 of the License, or (at your option) any later version.
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/clk.h>
@@ -36,18 +26,9 @@ static struct priv
 #define STATE_CPU_FREQ 0x01
 #define STATE_DDR_FREQ 0x02
 
-/*
- * Kirkwood can swap the clock to the CPU between two clocks:
- *
- * - cpu clk
- * - ddr clk
- *
- * The frequencies are set at runtime before registering this *
- * table.
- */
 static struct cpufreq_frequency_table kirkwood_freq_table[] = {
-	{STATE_CPU_FREQ,	0}, /* CPU uses cpuclk */
-	{STATE_DDR_FREQ,	0}, /* CPU uses ddrclk */
+	{STATE_CPU_FREQ,	0},  
+	{STATE_DDR_FREQ,	0},  
 	{0,			CPUFREQ_TABLE_END},
 };
 
@@ -78,7 +59,6 @@ static void kirkwood_cpufreq_set_cpu_state(struct cpufreq_policy *policy,
 	if (freqs.old != freqs.new) {
 		local_irq_disable();
 
-		/* Disable interrupts to the CPU */
 		reg = readl_relaxed(priv.base);
 		reg |= CPU_SW_INT_BLK;
 		writel_relaxed(reg, priv.base);
@@ -92,10 +72,8 @@ static void kirkwood_cpufreq_set_cpu_state(struct cpufreq_policy *policy,
 			break;
 		}
 
-		/* Wait-for-Interrupt, while the hardware changes frequency */
 		cpu_do_idle();
 
-		/* Enable interrupts to the CPU */
 		reg = readl_relaxed(priv.base);
 		reg &= ~CPU_SW_INT_BLK;
 		writel_relaxed(reg, priv.base);
@@ -125,13 +103,11 @@ static int kirkwood_cpufreq_target(struct cpufreq_policy *policy,
 	return 0;
 }
 
-/* Module init and exit code */
 static int kirkwood_cpufreq_cpu_init(struct cpufreq_policy *policy)
 {
 	int result;
 
-	/* cpuinfo and default policy values */
-	policy->cpuinfo.transition_latency = 5000; /* 5uS */
+	policy->cpuinfo.transition_latency = 5000;  
 	policy->cur = kirkwood_cpufreq_get_cpu_frequency(0);
 
 	result = cpufreq_frequency_table_cpuinfo(policy, kirkwood_freq_table);
@@ -162,10 +138,10 @@ static struct cpufreq_driver kirkwood_cpufreq_driver = {
 	.exit	= kirkwood_cpufreq_cpu_exit,
 	.name	= "kirkwood-cpufreq",
 #if defined(MY_ABC_HERE)
-	// do nothing
-#else /* MY_ABC_HERE */
+	 
+#else  
 	.owner	= THIS_MODULE,
-#endif /* MY_ABC_HERE */
+#endif  
 	.attr	= kirkwood_cpufreq_attr,
 };
 

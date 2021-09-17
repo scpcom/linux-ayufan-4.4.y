@@ -1,35 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * This file is part of UBIFS.
- *
- * Copyright (C) 2006-2008 Nokia Corporation
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License version 2 as published by
- * the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc., 51
- * Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
- *
- * Authors: Artem Bityutskiy (Битюцкий Артём)
- *          Adrian Hunter
- */
-
-/*
- * This file implements most of the debugging stuff which is compiled in only
- * when it is enabled. But some debugging check functions are implemented in
- * corresponding subsystem, just because they are closely related and utilize
- * various local functions of those subsystems.
- */
-
+ 
 #include <linux/module.h>
 #include <linux/debugfs.h>
 #include <linux/math64.h>
@@ -273,10 +245,10 @@ void ubifs_dump_inode(struct ubifs_info *c, const struct inode *inode)
 #ifdef MY_DEF_HERE
 	pr_err("\tlast_page_read %llu\n", (unsigned long long)ui->last_page_read);
 	pr_err("\tread_in_a_row  %llu\n", (unsigned long long)ui->read_in_a_row);
-#else /* MY_DEF_HERE */
+#else  
 	pr_err("\tlast_page_read %lu\n", ui->last_page_read);
 	pr_err("\tread_in_a_row  %lu\n", ui->read_in_a_row);
-#endif /* MY_DEF_HERE */
+#endif  
 	pr_err("\tdata_len       %d\n", ui->data_len);
 
 	if (!S_ISDIR(inode->i_mode))
@@ -313,7 +285,6 @@ void ubifs_dump_node(const struct ubifs_info *c, const void *node)
 	const struct ubifs_ch *ch = node;
 	char key_buf[DBG_KEY_BUF_LEN];
 
-	/* If the magic is incorrect, just hexdump the first bytes */
 	if (le32_to_cpu(ch->magic) != UBIFS_NODE_MAGIC) {
 		pr_err("Not a node, first %zu bytes:", UBIFS_CH_SZ);
 		print_hex_dump(KERN_ERR, "", DUMP_PREFIX_OFFSET, 32, 1,
@@ -606,11 +577,7 @@ void ubifs_dump_budg(struct ubifs_info *c, const struct ubifs_budg_info *bi)
 	       c->dark_wm, c->dead_wm, c->max_idx_node_sz);
 
 	if (bi != &c->bi)
-		/*
-		 * If we are dumping saved budgeting data, do not print
-		 * additional information which is about the current state, not
-		 * the old one which corresponded to the saved budgeting data.
-		 */
+		 
 		goto out_unlock;
 
 	pr_err("\tfreeable_cnt %d, calc_idx_sz %lld, idx_gc_cnt %d\n",
@@ -621,7 +588,6 @@ void ubifs_dump_budg(struct ubifs_info *c, const struct ubifs_budg_info *bi)
 	       atomic_long_read(&c->clean_zn_cnt));
 	pr_err("\tgc_lnum %d, ihead_lnum %d\n", c->gc_lnum, c->ihead_lnum);
 
-	/* If we are in R/O mode, journal heads do not exist */
 	if (c->jheads)
 		for (i = 0; i < c->jhead_cnt; i++)
 			pr_err("\tjhead %s\t LEB %d\n",
@@ -638,7 +604,6 @@ void ubifs_dump_budg(struct ubifs_info *c, const struct ubifs_budg_info *bi)
 		       idx_gc->lnum, idx_gc->unmap);
 	pr_err("\tcommit state %d\n", c->cmt_state);
 
-	/* Print budgeting predictions */
 	available = ubifs_calc_available(c, c->bi.min_idx_lebs);
 	outstanding = c->bi.data_growth + c->bi.dd_growth;
 	free = ubifs_get_free_space_nolock(c);
@@ -720,11 +685,7 @@ void ubifs_dump_lprop(const struct ubifs_info *c, const struct ubifs_lprops *lp)
 		if (bud->lnum == lp->lnum) {
 			int head = 0;
 			for (i = 0; i < c->jhead_cnt; i++) {
-				/*
-				 * Note, if we are in R/O mode or in the middle
-				 * of mounting/re-mounting, the write-buffers do
-				 * not exist.
-				 */
+				 
 				if (c->jheads &&
 				    lp->lnum == c->jheads[i].wbuf.lnum) {
 					pr_cont(", jhead %s", dbg_jhead(i));
@@ -954,25 +915,11 @@ static int dump_znode(struct ubifs_info *c, struct ubifs_znode *znode,
 	return 0;
 }
 
-/**
- * ubifs_dump_index - dump the on-flash index.
- * @c: UBIFS file-system description object
- *
- * This function dumps whole UBIFS indexing B-tree, unlike 'ubifs_dump_tnc()'
- * which dumps only in-memory znodes and does not read znodes which from flash.
- */
 void ubifs_dump_index(struct ubifs_info *c)
 {
 	dbg_walk_index(c, NULL, dump_znode, NULL);
 }
 
-/**
- * dbg_save_space_info - save information about flash space.
- * @c: UBIFS file-system description object
- *
- * This function saves information about UBIFS free space, dirty space, etc, in
- * order to check it later.
- */
 void dbg_save_space_info(struct ubifs_info *c)
 {
 	struct ubifs_debug_info *d = c->dbg;
@@ -983,30 +930,6 @@ void dbg_save_space_info(struct ubifs_info *c)
 	memcpy(&d->saved_bi, &c->bi, sizeof(struct ubifs_budg_info));
 	d->saved_idx_gc_cnt = c->idx_gc_cnt;
 
-	/*
-	 * We use a dirty hack here and zero out @c->freeable_cnt, because it
-	 * affects the free space calculations, and UBIFS might not know about
-	 * all freeable eraseblocks. Indeed, we know about freeable eraseblocks
-	 * only when we read their lprops, and we do this only lazily, upon the
-	 * need. So at any given point of time @c->freeable_cnt might be not
-	 * exactly accurate.
-	 *
-	 * Just one example about the issue we hit when we did not zero
-	 * @c->freeable_cnt.
-	 * 1. The file-system is mounted R/O, c->freeable_cnt is %0. We save the
-	 *    amount of free space in @d->saved_free
-	 * 2. We re-mount R/W, which makes UBIFS to read the "lsave"
-	 *    information from flash, where we cache LEBs from various
-	 *    categories ('ubifs_remount_fs()' -> 'ubifs_lpt_init()'
-	 *    -> 'lpt_init_wr()' -> 'read_lsave()' -> 'ubifs_lpt_lookup()'
-	 *    -> 'ubifs_get_pnode()' -> 'update_cats()'
-	 *    -> 'ubifs_add_to_cat()').
-	 * 3. Lsave contains a freeable eraseblock, and @c->freeable_cnt
-	 *    becomes %1.
-	 * 4. We calculate the amount of free space when the re-mount is
-	 *    finished in 'dbg_check_space_info()' and it does not match
-	 *    @d->saved_free.
-	 */
 	freeable_cnt = c->freeable_cnt;
 	c->freeable_cnt = 0;
 	d->saved_free = ubifs_get_free_space_nolock(c);
@@ -1014,15 +937,6 @@ void dbg_save_space_info(struct ubifs_info *c)
 	spin_unlock(&c->space_lock);
 }
 
-/**
- * dbg_check_space_info - check flash space information.
- * @c: UBIFS file-system description object
- *
- * This function compares current flash space information with the information
- * which was saved when the 'dbg_save_space_info()' function was called.
- * Returns zero if the information has not changed, and %-EINVAL it it has
- * changed.
- */
 int dbg_check_space_info(struct ubifs_info *c)
 {
 	struct ubifs_debug_info *d = c->dbg;
@@ -1060,16 +974,6 @@ out:
 	return -EINVAL;
 }
 
-/**
- * dbg_check_synced_i_size - check synchronized inode size.
- * @c: UBIFS file-system description object
- * @inode: inode to check
- *
- * If inode is clean, synchronized inode size has to be equivalent to current
- * inode size. This function has to be called only for locked inodes (@i_mutex
- * has to be locked). Returns %0 if synchronized inode size if correct, and
- * %-EINVAL if not.
- */
 int dbg_check_synced_i_size(const struct ubifs_info *c, struct inode *inode)
 {
 	int err = 0;
@@ -1095,19 +999,6 @@ int dbg_check_synced_i_size(const struct ubifs_info *c, struct inode *inode)
 	return err;
 }
 
-/*
- * dbg_check_dir - check directory inode size and link count.
- * @c: UBIFS file-system description object
- * @dir: the directory to calculate size for
- * @size: the result is returned here
- *
- * This function makes sure that directory size and link count are correct.
- * Returns zero in case of success and a negative error code in case of
- * failure.
- *
- * Note, it is good idea to make sure the @dir->i_mutex is locked before
- * calling this function.
- */
 int dbg_check_dir(struct ubifs_info *c, const struct inode *dir)
 {
 	unsigned int nlink = 2;
@@ -1164,19 +1055,6 @@ int dbg_check_dir(struct ubifs_info *c, const struct inode *dir)
 	return 0;
 }
 
-/**
- * dbg_check_key_order - make sure that colliding keys are properly ordered.
- * @c: UBIFS file-system description object
- * @zbr1: first zbranch
- * @zbr2: following zbranch
- *
- * In UBIFS indexing B-tree colliding keys has to be sorted in binary order of
- * names of the direntries/xentries which are referred by the keys. This
- * function reads direntries/xentries referred by @zbr1 and @zbr2 and makes
- * sure the name of direntry/xentry referred by @zbr1 is less than
- * direntry/xentry referred by @zbr2. Returns zero if this is true, %1 if not,
- * and a negative error code in case of failure.
- */
 static int dbg_check_key_order(struct ubifs_info *c, struct ubifs_zbranch *zbr1,
 			       struct ubifs_zbranch *zbr2)
 {
@@ -1209,7 +1087,6 @@ static int dbg_check_key_order(struct ubifs_info *c, struct ubifs_zbranch *zbr1,
 	if (err)
 		goto out_free;
 
-	/* Make sure node keys are the same as in zbranch */
 	err = 1;
 	key_read(c, &dent1->key, &key);
 	if (keys_cmp(c, &zbr1->key, &key)) {
@@ -1260,14 +1137,6 @@ out_free:
 	return err;
 }
 
-/**
- * dbg_check_znode - check if znode is all right.
- * @c: UBIFS file-system description object
- * @zbr: zbranch which points to this znode
- *
- * This function makes sure that znode referred to by @zbr is all right.
- * Returns zero if it is, and %-EINVAL if it is not.
- */
 static int dbg_check_znode(struct ubifs_info *c, struct ubifs_zbranch *zbr)
 {
 	struct ubifs_znode *znode = zbr->znode;
@@ -1288,26 +1157,17 @@ static int dbg_check_znode(struct ubifs_info *c, struct ubifs_zbranch *zbr)
 	}
 
 	if (zbr->len == 0)
-		/* Only dirty zbranch may have no on-flash nodes */
+		 
 		if (!ubifs_zn_dirty(znode)) {
 			err = 4;
 			goto out;
 		}
 
 	if (ubifs_zn_dirty(znode)) {
-		/*
-		 * If znode is dirty, its parent has to be dirty as well. The
-		 * order of the operation is important, so we have to have
-		 * memory barriers.
-		 */
+		 
 		smp_mb();
 		if (zp && !ubifs_zn_dirty(zp)) {
-			/*
-			 * The dirty flag is atomic and is cleared outside the
-			 * TNC mutex, so znode's dirty flag may now have
-			 * been cleared. The child is always cleared before the
-			 * parent, so we just need to check again.
-			 */
+			 
 			smp_mb();
 			if (ubifs_zn_dirty(znode)) {
 				err = 5;
@@ -1324,10 +1184,9 @@ static int dbg_check_znode(struct ubifs_info *c, struct ubifs_zbranch *zbr)
 			goto out;
 		}
 
-		/* Make sure the 'parent' pointer in our znode is correct */
 		err = ubifs_search_zbranch(c, zp, &zbr->key, &n);
 		if (!err) {
-			/* This zbranch does not exist in the parent */
+			 
 			err = 7;
 			goto out;
 		}
@@ -1338,7 +1197,7 @@ static int dbg_check_znode(struct ubifs_info *c, struct ubifs_zbranch *zbr)
 		}
 
 		if (znode->iip != n) {
-			/* This may happen only in case of collisions */
+			 
 			if (keys_cmp(c, &zp->zbranch[n].key,
 				     &zp->zbranch[znode->iip].key)) {
 				err = 9;
@@ -1347,10 +1206,6 @@ static int dbg_check_znode(struct ubifs_info *c, struct ubifs_zbranch *zbr)
 			n = znode->iip;
 		}
 
-		/*
-		 * Make sure that the first key in our znode is greater than or
-		 * equal to the key in the pointing zbranch.
-		 */
 		min = &zbr->key;
 		cmp = keys_cmp(c, min, &znode->zbranch[0].key);
 		if (cmp == 1) {
@@ -1361,11 +1216,6 @@ static int dbg_check_znode(struct ubifs_info *c, struct ubifs_zbranch *zbr)
 		if (n + 1 < zp->child_cnt) {
 			max = &zp->zbranch[n + 1].key;
 
-			/*
-			 * Make sure the last key in our znode is less or
-			 * equivalent than the key in the zbranch which goes
-			 * after our pointing zbranch.
-			 */
 			cmp = keys_cmp(c, max,
 				&znode->zbranch[znode->child_cnt - 1].key);
 			if (cmp == -1) {
@@ -1374,17 +1224,13 @@ static int dbg_check_znode(struct ubifs_info *c, struct ubifs_zbranch *zbr)
 			}
 		}
 	} else {
-		/* This may only be root znode */
+		 
 		if (zbr != &c->zroot) {
 			err = 12;
 			goto out;
 		}
 	}
 
-	/*
-	 * Make sure that next key is greater or equivalent then the previous
-	 * one.
-	 */
 	for (n = 1; n < znode->child_cnt; n++) {
 		cmp = keys_cmp(c, &znode->zbranch[n - 1].key,
 			       &znode->zbranch[n].key);
@@ -1393,7 +1239,7 @@ static int dbg_check_znode(struct ubifs_info *c, struct ubifs_zbranch *zbr)
 			goto out;
 		}
 		if (cmp == 0) {
-			/* This can only be keys with colliding hash */
+			 
 			if (!is_hash_key(c, &znode->zbranch[n].key)) {
 				err = 14;
 				goto out;
@@ -1402,10 +1248,6 @@ static int dbg_check_znode(struct ubifs_info *c, struct ubifs_zbranch *zbr)
 			if (znode->level != 0 || c->replaying)
 				continue;
 
-			/*
-			 * Colliding keys should follow binary order of
-			 * corresponding xentry/dentry names.
-			 */
 			err = dbg_check_key_order(c, &znode->zbranch[n - 1],
 						  &znode->zbranch[n]);
 			if (err < 0)
@@ -1464,14 +1306,6 @@ out:
 	return -EINVAL;
 }
 
-/**
- * dbg_check_tnc - check TNC tree.
- * @c: UBIFS file-system description object
- * @extra: do extra checks that are possible at start commit
- *
- * This function traverses whole TNC tree and checks every znode. Returns zero
- * if everything is all right and %-EINVAL if something is wrong with TNC.
- */
 int dbg_check_tnc(struct ubifs_info *c, int extra)
 {
 	struct ubifs_znode *znode;
@@ -1511,10 +1345,6 @@ int dbg_check_tnc(struct ubifs_info *c, int extra)
 		if (!znode)
 			break;
 
-		/*
-		 * If the last key of this znode is equivalent to the first key
-		 * of the next znode (collision), then check order of the keys.
-		 */
 		last = prev->child_cnt - 1;
 		if (prev->level == 0 && znode->level == 0 && !c->replaying &&
 		    !keys_cmp(c, &prev->zbranch[last].key,
@@ -1551,21 +1381,6 @@ int dbg_check_tnc(struct ubifs_info *c, int extra)
 	return 0;
 }
 
-/**
- * dbg_walk_index - walk the on-flash index.
- * @c: UBIFS file-system description object
- * @leaf_cb: called for each leaf node
- * @znode_cb: called for each indexing node
- * @priv: private data which is passed to callbacks
- *
- * This function walks the UBIFS index and calls the @leaf_cb for each leaf
- * node and @znode_cb for each indexing node. Returns zero in case of success
- * and a negative error code in case of failure.
- *
- * It would be better if this function removed every znode it pulled to into
- * the TNC, so that the behavior more closely matched the non-debugging
- * behavior.
- */
 int dbg_walk_index(struct ubifs_info *c, dbg_leaf_callback leaf_cb,
 		   dbg_znode_callback znode_cb, void *priv)
 {
@@ -1574,7 +1389,7 @@ int dbg_walk_index(struct ubifs_info *c, dbg_leaf_callback leaf_cb,
 	struct ubifs_znode *znode, *child;
 
 	mutex_lock(&c->tnc_mutex);
-	/* If the root indexing node is not in TNC - pull it */
+	 
 	if (!c->zroot.znode) {
 		c->zroot.znode = ubifs_load_znode(c, &c->zroot, NULL, 0);
 		if (IS_ERR(c->zroot.znode)) {
@@ -1584,11 +1399,6 @@ int dbg_walk_index(struct ubifs_info *c, dbg_leaf_callback leaf_cb,
 		}
 	}
 
-	/*
-	 * We are going to traverse the indexing tree in the postorder manner.
-	 * Go down and find the leftmost indexing node where we are going to
-	 * start from.
-	 */
 	znode = c->zroot.znode;
 	while (znode->level > 0) {
 		zbr = &znode->zbranch[0];
@@ -1605,7 +1415,6 @@ int dbg_walk_index(struct ubifs_info *c, dbg_leaf_callback leaf_cb,
 		znode = child;
 	}
 
-	/* Iterate over all indexing nodes */
 	while (1) {
 		int idx;
 
@@ -1638,7 +1447,7 @@ int dbg_walk_index(struct ubifs_info *c, dbg_leaf_callback leaf_cb,
 		idx = znode->iip + 1;
 		znode = znode->parent;
 		if (idx < znode->child_cnt) {
-			/* Switch to the next index in the parent */
+			 
 			zbr = &znode->zbranch[idx];
 			child = zbr->znode;
 			if (!child) {
@@ -1651,13 +1460,9 @@ int dbg_walk_index(struct ubifs_info *c, dbg_leaf_callback leaf_cb,
 			}
 			znode = child;
 		} else
-			/*
-			 * This is the last child, switch to the parent and
-			 * continue.
-			 */
+			 
 			continue;
 
-		/* Go to the lowest leftmost znode in the new sub-tree */
 		while (znode->level > 0) {
 			zbr = &znode->zbranch[0];
 			child = zbr->znode;
@@ -1688,16 +1493,6 @@ out_unlock:
 	return err;
 }
 
-/**
- * add_size - add znode size to partially calculated index size.
- * @c: UBIFS file-system description object
- * @znode: znode to add size for
- * @priv: partially calculated index size
- *
- * This is a helper function for 'dbg_check_idx_size()' which is called for
- * every indexing node and adds its size to the 'long long' variable pointed to
- * by @priv.
- */
 static int add_size(struct ubifs_info *c, struct ubifs_znode *znode, void *priv)
 {
 	long long *idx_size = priv;
@@ -1709,15 +1504,6 @@ static int add_size(struct ubifs_info *c, struct ubifs_znode *znode, void *priv)
 	return 0;
 }
 
-/**
- * dbg_check_idx_size - check index size.
- * @c: UBIFS file-system description object
- * @idx_size: size to check
- *
- * This function walks the UBIFS index, calculates its size and checks that the
- * size is equivalent to @idx_size. Returns zero in case of success and a
- * negative error code in case of failure.
- */
 int dbg_check_idx_size(struct ubifs_info *c, long long idx_size)
 {
 	int err;
@@ -1742,26 +1528,6 @@ int dbg_check_idx_size(struct ubifs_info *c, long long idx_size)
 	return 0;
 }
 
-/**
- * struct fsck_inode - information about an inode used when checking the file-system.
- * @rb: link in the RB-tree of inodes
- * @inum: inode number
- * @mode: inode type, permissions, etc
- * @nlink: inode link count
- * @xattr_cnt: count of extended attributes
- * @references: how many directory/xattr entries refer this inode (calculated
- *              while walking the index)
- * @calc_cnt: for directory inode count of child directories
- * @size: inode size (read from on-flash inode)
- * @xattr_sz: summary size of all extended attributes (read from on-flash
- *            inode)
- * @calc_sz: for directories calculated directory size
- * @calc_xcnt: count of extended attributes
- * @calc_xsz: calculated summary size of all extended attributes
- * @xattr_nms: sum of lengths of all extended attribute names belonging to this
- *             inode (read from on-flash inode)
- * @calc_xnms: calculated sum of lengths of all extended attribute names
- */
 struct fsck_inode {
 	struct rb_node rb;
 	ino_t inum;
@@ -1779,24 +1545,10 @@ struct fsck_inode {
 	long long calc_xnms;
 };
 
-/**
- * struct fsck_data - private FS checking information.
- * @inodes: RB-tree of all inodes (contains @struct fsck_inode objects)
- */
 struct fsck_data {
 	struct rb_root inodes;
 };
 
-/**
- * add_inode - add inode information to RB-tree of inodes.
- * @c: UBIFS file-system description object
- * @fsckd: FS checking information
- * @ino: raw UBIFS inode to add
- *
- * This is a helper function for 'check_leaf()' which adds information about
- * inode @ino to the RB-tree of inodes. Returns inode information pointer in
- * case of success and a negative error code in case of failure.
- */
 static struct fsck_inode *add_inode(struct ubifs_info *c,
 				    struct fsck_data *fsckd,
 				    struct ubifs_ino_node *ino)
@@ -1832,17 +1584,7 @@ static struct fsck_inode *add_inode(struct ubifs_info *c,
 	inode = ilookup(c->vfs_sb, inum);
 
 	fscki->inum = inum;
-	/*
-	 * If the inode is present in the VFS inode cache, use it instead of
-	 * the on-flash inode which might be out-of-date. E.g., the size might
-	 * be out-of-date. If we do not do this, the following may happen, for
-	 * example:
-	 *   1. A power cut happens
-	 *   2. We mount the file-system R/O, the replay process fixes up the
-	 *      inode size in the VFS cache, but on on-flash.
-	 *   3. 'check_leaf()' fails because it hits a data node beyond inode
-	 *      size.
-	 */
+	 
 	if (!inode) {
 		fscki->nlink = le32_to_cpu(ino->nlink);
 		fscki->size = le64_to_cpu(ino->size);
@@ -1872,15 +1614,6 @@ static struct fsck_inode *add_inode(struct ubifs_info *c,
 	return fscki;
 }
 
-/**
- * search_inode - search inode in the RB-tree of inodes.
- * @fsckd: FS checking information
- * @inum: inode number to search
- *
- * This is a helper function for 'check_leaf()' which searches inode @inum in
- * the RB-tree of inodes and returns an inode information pointer or %NULL if
- * the inode was not found.
- */
 static struct fsck_inode *search_inode(struct fsck_data *fsckd, ino_t inum)
 {
 	struct rb_node *p;
@@ -1899,17 +1632,6 @@ static struct fsck_inode *search_inode(struct fsck_data *fsckd, ino_t inum)
 	return NULL;
 }
 
-/**
- * read_add_inode - read inode node and add it to RB-tree of inodes.
- * @c: UBIFS file-system description object
- * @fsckd: FS checking information
- * @inum: inode number to read
- *
- * This is a helper function for 'check_leaf()' which finds inode node @inum in
- * the index, reads it, and adds it to the RB-tree of inodes. Returns inode
- * information pointer in case of success and a negative error code in case of
- * failure.
- */
 static struct fsck_inode *read_add_inode(struct ubifs_info *c,
 					 struct fsck_data *fsckd, ino_t inum)
 {
@@ -1965,22 +1687,6 @@ static struct fsck_inode *read_add_inode(struct ubifs_info *c,
 	return fscki;
 }
 
-/**
- * check_leaf - check leaf node.
- * @c: UBIFS file-system description object
- * @zbr: zbranch of the leaf node to check
- * @priv: FS checking information
- *
- * This is a helper function for 'dbg_check_filesystem()' which is called for
- * every single leaf node while walking the indexing tree. It checks that the
- * leaf node referred from the indexing tree exists, has correct CRC, and does
- * some other basic validation. This function is also responsible for building
- * an RB-tree of inodes - it adds all inodes into the RB-tree. It also
- * calculates reference count, size, etc for each inode in order to later
- * compare them to the information stored inside the inodes and detect possible
- * inconsistencies. Returns zero in case of success and a negative error code
- * in case of failure.
- */
 static int check_leaf(struct ubifs_info *c, struct ubifs_zbranch *zbr,
 		      void *priv)
 {
@@ -2007,7 +1713,6 @@ static int check_leaf(struct ubifs_info *c, struct ubifs_zbranch *zbr,
 		goto out_free;
 	}
 
-	/* If this is an inode node, add it to RB-tree of inodes */
 	if (type == UBIFS_INO_KEY) {
 		fscki = add_inode(c, priv, node);
 		if (IS_ERR(fscki)) {
@@ -2038,10 +1743,6 @@ static int check_leaf(struct ubifs_info *c, struct ubifs_zbranch *zbr,
 		long long blk_offs;
 		struct ubifs_data_node *dn = node;
 
-		/*
-		 * Search the inode node this data node belongs to and insert
-		 * it to the RB-tree of inodes.
-		 */
 		inum = key_inum_flash(c, &dn->key);
 		fscki = read_add_inode(c, priv, inum);
 		if (IS_ERR(fscki)) {
@@ -2051,7 +1752,6 @@ static int check_leaf(struct ubifs_info *c, struct ubifs_zbranch *zbr,
 			goto out_dump;
 		}
 
-		/* Make sure the data node is within inode size */
 		blk_offs = key_block_flash(c, &dn->key);
 		blk_offs <<= UBIFS_BLOCK_SHIFT;
 		blk_offs += le32_to_cpu(dn->size);
@@ -2070,10 +1770,6 @@ static int check_leaf(struct ubifs_info *c, struct ubifs_zbranch *zbr,
 		if (err)
 			goto out_dump;
 
-		/*
-		 * Search the inode node this entry refers to and the parent
-		 * inode node and insert them to the RB-tree of inodes.
-		 */
 		inum = le64_to_cpu(dent->inum);
 		fscki = read_add_inode(c, priv, inum);
 		if (IS_ERR(fscki)) {
@@ -2083,7 +1779,6 @@ static int check_leaf(struct ubifs_info *c, struct ubifs_zbranch *zbr,
 			goto out_dump;
 		}
 
-		/* Count how many direntries or xentries refers this inode */
 		fscki->references += 1;
 
 		inum = key_inum_flash(c, &dent->key);
@@ -2120,10 +1815,6 @@ out_free:
 	return err;
 }
 
-/**
- * free_inodes - free RB-tree of inodes.
- * @fsckd: FS checking information
- */
 static void free_inodes(struct fsck_data *fsckd)
 {
 	struct rb_node *this = fsckd->inodes.rb_node;
@@ -2148,16 +1839,6 @@ static void free_inodes(struct fsck_data *fsckd)
 	}
 }
 
-/**
- * check_inodes - checks all inodes.
- * @c: UBIFS file-system description object
- * @fsckd: FS checking information
- *
- * This is a helper function for 'dbg_check_filesystem()' which walks the
- * RB-tree of inodes after the index scan has been finished, and checks that
- * inode nlink, size, etc are correct. Returns zero if inodes are fine,
- * %-EINVAL if not, and a negative error code in case of failure.
- */
 static int check_inodes(struct ubifs_info *c, struct fsck_data *fsckd)
 {
 	int n, err;
@@ -2173,11 +1854,7 @@ static int check_inodes(struct ubifs_info *c, struct fsck_data *fsckd)
 		this = rb_next(this);
 
 		if (S_ISDIR(fscki->mode)) {
-			/*
-			 * Directories have to have exactly one reference (they
-			 * cannot have hardlinks), although root inode is an
-			 * exception.
-			 */
+			 
 			if (fscki->inum != UBIFS_ROOT_INO &&
 			    fscki->references != 1) {
 				ubifs_err("directory inode %lu has %d direntries which refer it, but should be 1",
@@ -2235,7 +1912,7 @@ static int check_inodes(struct ubifs_info *c, struct fsck_data *fsckd)
 	return 0;
 
 out_dump:
-	/* Read the bad inode and dump it */
+	 
 	ino_key_init(c, &key, fscki->inum);
 	err = ubifs_lookup_level0(c, &key, &znode, &n);
 	if (!err) {
@@ -2268,19 +1945,6 @@ out_dump:
 	return -EINVAL;
 }
 
-/**
- * dbg_check_filesystem - check the file-system.
- * @c: UBIFS file-system description object
- *
- * This function checks the file system, namely:
- * o makes sure that all leaf nodes exist and their CRCs are correct;
- * o makes sure inode nlink, size, xattr size/count are correct (for all
- *   inodes).
- *
- * The function reads whole indexing tree and all nodes, so it is pretty
- * heavy-weight. Returns zero if the file-system is consistent, %-EINVAL if
- * not, and a negative error code in case of failure.
- */
 int dbg_check_filesystem(struct ubifs_info *c)
 {
 	int err;
@@ -2308,14 +1972,6 @@ out_free:
 	return err;
 }
 
-/**
- * dbg_check_data_nodes_order - check that list of data nodes is sorted.
- * @c: UBIFS file-system description object
- * @head: the list of nodes ('struct ubifs_scan_node' objects)
- *
- * This function returns zero if the list of data nodes is sorted correctly,
- * and %-EINVAL if not.
- */
 int dbg_check_data_nodes_order(struct ubifs_info *c, struct list_head *head)
 {
 	struct list_head *cur;
@@ -2375,14 +2031,6 @@ error_dump:
 	return -EINVAL;
 }
 
-/**
- * dbg_check_nondata_nodes_order - check that list of data nodes is sorted.
- * @c: UBIFS file-system description object
- * @head: the list of nodes ('struct ubifs_scan_node' objects)
- *
- * This function returns zero if the list of non-data nodes is sorted correctly,
- * and %-EINVAL if not.
- */
 int dbg_check_nondata_nodes_order(struct ubifs_info *c, struct list_head *head)
 {
 	struct list_head *cur;
@@ -2421,7 +2069,7 @@ int dbg_check_nondata_nodes_order(struct ubifs_info *c, struct list_head *head)
 			continue;
 
 		if (sa->type == UBIFS_INO_NODE && sb->type == UBIFS_INO_NODE) {
-			/* Inode nodes are sorted in descending size order */
+			 
 			if (sa->len < sb->len) {
 				ubifs_err("smaller inode node goes first");
 				goto error_dump;
@@ -2429,10 +2077,6 @@ int dbg_check_nondata_nodes_order(struct ubifs_info *c, struct list_head *head)
 			continue;
 		}
 
-		/*
-		 * This is either a dentry or xentry, which should be sorted in
-		 * ascending (parent ino, hash) order.
-		 */
 		inuma = key_inum(c, &sa->key);
 		inumb = key_inum(c, &sb->key);
 
@@ -2478,13 +2122,13 @@ static int power_cut_emulated(struct ubifs_info *c, int lnum, int write)
 	ubifs_assert(dbg_is_tst_rcvry(c));
 
 	if (!d->pc_cnt) {
-		/* First call - decide delay to the power cut */
+		 
 		if (chance(1, 2)) {
 			unsigned long delay;
 
 			if (chance(1, 2)) {
 				d->pc_delay = 1;
-				/* Fail withing 1 minute */
+				 
 				delay = prandom_u32() % 60000;
 				d->pc_timeout = jiffies;
 				d->pc_timeout += msecs_to_jiffies(delay);
@@ -2492,7 +2136,7 @@ static int power_cut_emulated(struct ubifs_info *c, int lnum, int write)
 			} else {
 				d->pc_delay = 2;
 				delay = prandom_u32() % 10000;
-				/* Fail within 10000 operations */
+				 
 				d->pc_cnt_max = delay;
 				ubifs_warn("failing after %lu calls", delay);
 			}
@@ -2501,7 +2145,6 @@ static int power_cut_emulated(struct ubifs_info *c, int lnum, int write)
 		d->pc_cnt += 1;
 	}
 
-	/* Determine if failure delay has expired */
 	if (d->pc_delay == 1 && time_before(jiffies, d->pc_timeout))
 			return 0;
 	if (d->pc_delay == 2 && d->pc_cnt++ < d->pc_cnt_max)
@@ -2572,7 +2215,7 @@ static int corrupt_data(const struct ubifs_info *c, const void *buf,
 	unsigned char *p = (void *)buf;
 
 	from = prandom_u32() % (len + 1);
-	/* Corruption may only span one max. write unit */
+	 
 	to = min(len, ALIGN(from, c->max_write_size));
 
 	ubifs_warn("filled bytes %u-%u with %s", from, to - 1,
@@ -2656,10 +2299,6 @@ int dbg_leb_map(struct ubifs_info *c, int lnum)
 	return 0;
 }
 
-/*
- * Root directory for UBIFS stuff in debugfs. Contains sub-directories which
- * contain the stuff specific to particular file-system mounts.
- */
 static struct dentry *dfs_rootdir;
 
 static int dfs_file_open(struct inode *inode, struct file *file)
@@ -2668,18 +2307,6 @@ static int dfs_file_open(struct inode *inode, struct file *file)
 	return nonseekable_open(inode, file);
 }
 
-/**
- * provide_user_output - provide output to the user reading a debugfs file.
- * @val: boolean value for the answer
- * @u: the buffer to store the answer at
- * @count: size of the buffer
- * @ppos: position in the @u output buffer
- *
- * This is a simple helper function which stores @val boolean value in the user
- * buffer when the user reads one of UBIFS debugfs files. Returns amount of
- * bytes written to @u in case of success and a negative error code in case of
- * failure.
- */
 static int provide_user_output(int val, char __user *u, size_t count,
 			       loff_t *ppos)
 {
@@ -2723,15 +2350,6 @@ static ssize_t dfs_file_read(struct file *file, char __user *u, size_t count,
 	return provide_user_output(val, u, count, ppos);
 }
 
-/**
- * interpret_user_input - interpret user debugfs file input.
- * @u: user-provided buffer with the input
- * @count: buffer size
- *
- * This is a helper function which interpret user input to a boolean UBIFS
- * debugfs file. Returns %0 or %1 in case of success and a negative error code
- * in case of failure.
- */
 static int interpret_user_input(const char __user *u, size_t count)
 {
 	size_t buf_size;
@@ -2757,18 +2375,6 @@ static ssize_t dfs_file_write(struct file *file, const char __user *u,
 	struct dentry *dent = file->f_path.dentry;
 	int val;
 
-	/*
-	 * TODO: this is racy - the file-system might have already been
-	 * unmounted and we'd oops in this case. The plan is to fix it with
-	 * help of 'iterate_supers_type()' which we should have in v3.0: when
-	 * a debugfs opened, we rember FS's UUID in file->private_data. Then
-	 * whenever we access the FS via a debugfs file, we iterate all UBIFS
-	 * superblocks and fine the one with the same UUID, and take the
-	 * locking right.
-	 *
-	 * The other way to go suggested by Al Viro is to create a separate
-	 * 'ubifs-debug' file-system instead.
-	 */
 	if (file->f_path.dentry == d->dfs_dump_lprops) {
 		ubifs_dump_lprops(c);
 		return count;
@@ -2816,18 +2422,6 @@ static const struct file_operations dfs_fops = {
 	.llseek = no_llseek,
 };
 
-/**
- * dbg_debugfs_init_fs - initialize debugfs for UBIFS instance.
- * @c: UBIFS file-system description object
- *
- * This function creates all debugfs files for this instance of UBIFS. Returns
- * zero in case of success and a negative error code in case of failure.
- *
- * Note, the only reason we have not merged this function with the
- * 'ubifs_debugging_init()' function is because it is better to initialize
- * debugfs interfaces at the very end of the mount process, and remove them at
- * the very beginning of the mount process.
- */
 int dbg_debugfs_init_fs(struct ubifs_info *c)
 {
 	int err, n;
@@ -2841,7 +2435,7 @@ int dbg_debugfs_init_fs(struct ubifs_info *c)
 	n = snprintf(d->dfs_dir_name, UBIFS_DFS_DIR_LEN + 1, UBIFS_DFS_DIR_NAME,
 		     c->vi.ubi_num, c->vi.vol_id);
 	if (n == UBIFS_DFS_DIR_LEN) {
-		/* The array size is too small */
+		 
 		fname = UBIFS_DFS_DIR_NAME;
 		dent = ERR_PTR(-EINVAL);
 		goto out;
@@ -2931,10 +2525,6 @@ out:
 	return err;
 }
 
-/**
- * dbg_debugfs_exit_fs - remove all debugfs files.
- * @c: UBIFS file-system description object
- */
 void dbg_debugfs_exit_fs(struct ubifs_info *c)
 {
 	if (IS_ENABLED(CONFIG_DEBUG_FS))
@@ -3009,14 +2599,6 @@ static const struct file_operations dfs_global_fops = {
 	.llseek = no_llseek,
 };
 
-/**
- * dbg_debugfs_init - initialize debugfs file-system.
- *
- * UBIFS uses debugfs file-system to expose various debugging knobs to
- * user-space. This function creates "ubifs" directory in the debugfs
- * file-system. Returns zero in case of success and a negative error code in
- * case of failure.
- */
 int dbg_debugfs_init(void)
 {
 	int err;
@@ -3085,23 +2667,12 @@ out:
 	return err;
 }
 
-/**
- * dbg_debugfs_exit - remove the "ubifs" directory from debugfs file-system.
- */
 void dbg_debugfs_exit(void)
 {
 	if (IS_ENABLED(CONFIG_DEBUG_FS))
 		debugfs_remove_recursive(dfs_rootdir);
 }
 
-/**
- * ubifs_debugging_init - initialize UBIFS debugging.
- * @c: UBIFS file-system description object
- *
- * This function initializes debugging-related data for the file system.
- * Returns zero in case of success and a negative error code in case of
- * failure.
- */
 int ubifs_debugging_init(struct ubifs_info *c)
 {
 	c->dbg = kzalloc(sizeof(struct ubifs_debug_info), GFP_KERNEL);
@@ -3111,10 +2682,6 @@ int ubifs_debugging_init(struct ubifs_info *c)
 	return 0;
 }
 
-/**
- * ubifs_debugging_exit - free debugging data.
- * @c: UBIFS file-system description object
- */
 void ubifs_debugging_exit(struct ubifs_info *c)
 {
 	kfree(c->dbg);

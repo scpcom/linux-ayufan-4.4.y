@@ -1,16 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright 2010 MontaVista Software, LLC.
- *
- * Author: Anton Vorontsov <avorontsov@ru.mvista.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
-
+ 
 #ifndef _DRIVERS_MMC_SDHCI_PLTFM_H
 #define _DRIVERS_MMC_SDHCI_PLTFM_H
 
@@ -23,23 +14,19 @@ struct sdhci_pltfm_data {
 	unsigned int quirks;
 #if defined (MY_DEF_HERE)
 	unsigned int quirks2;
-#endif /* MY_DEF_HERE */
+#endif  
 };
 
 struct sdhci_pltfm_host {
 	struct clk *clk;
-	void *priv; /* to handle quirks across io-accessor calls */
+	void *priv;  
 
-	/* migrate from sdhci_of_host */
 	unsigned int clock;
 	u16 xfer_mode_shadow;
 };
 
 #ifdef CONFIG_MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER
-/*
- * These accessors are designed for big endian hosts doing I/O to
- * little endian controllers incorporating a 32-bit hardware byte swapper.
- */
+ 
 static inline u32 sdhci_be32bs_readl(struct sdhci_host *host, int reg)
 {
 	return in_be32(host->ioaddr + reg);
@@ -70,10 +57,7 @@ static inline void sdhci_be32bs_writew(struct sdhci_host *host,
 
 	switch (reg) {
 	case SDHCI_TRANSFER_MODE:
-		/*
-		 * Postpone this write, we must do it together with a
-		 * command write that is down below.
-		 */
+		 
 		pltfm_host->xfer_mode_shadow = val;
 		return;
 	case SDHCI_COMMAND:
@@ -92,7 +76,7 @@ static inline void sdhci_be32bs_writeb(struct sdhci_host *host, u8 val, int reg)
 
 	clrsetbits_be32(host->ioaddr + base , 0xff << shift, val << shift);
 }
-#endif /* CONFIG_MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER */
+#endif  
 
 extern void sdhci_get_of_property(struct platform_device *pdev);
 
@@ -113,4 +97,4 @@ extern const struct dev_pm_ops sdhci_pltfm_pmops;
 #define SDHCI_PLTFM_PMOPS NULL
 #endif
 
-#endif /* _DRIVERS_MMC_SDHCI_PLTFM_H */
+#endif  

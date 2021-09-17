@@ -1,20 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/* ir-lirc-codec.c - rc-core to classic lirc interface bridge
- *
- * Copyright (C) 2010 by Jarod Wilson <jarod@redhat.com>
- *
- * This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation version 2 of the License.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- */
-
+ 
 #include <linux/sched.h>
 #include <linux/wait.h>
 #include <linux/module.h>
@@ -25,14 +12,6 @@
 
 #define LIRCBUF_SIZE 256
 
-/**
- * ir_lirc_decode() - Send raw IR data to lirc_dev to be relayed to the
- *		      lircd userspace daemon for decoding.
- * @input_dev:	the struct rc_dev descriptor of the device
- * @duration:	the struct ir_raw_event descriptor of the pulse/space
- *
- * This function returns -EINVAL if the lirc interfaces aren't wired up.
- */
 static int ir_lirc_decode(struct rc_dev *dev, struct ir_raw_event ev)
 {
 	struct lirc_codec *lirc = &dev->raw->lirc;
@@ -44,22 +23,15 @@ static int ir_lirc_decode(struct rc_dev *dev, struct ir_raw_event ev)
 	if (!dev->raw->lirc.drv || !dev->raw->lirc.drv->rbuf)
 		return -EINVAL;
 
-	/* Packet start */
 	if (ev.reset) {
-		/* Userspace expects a long space event before the start of
-		 * the signal to use as a sync.  This may be done with repeat
-		 * packets and normal samples.  But if a reset has been sent
-		 * then we assume that a long time has passed, so we send a
-		 * space with the maximum time value. */
+		 
 		sample = LIRC_SPACE(LIRC_VALUE_MASK);
 		IR_dprintk(2, "delivering reset sync space to lirc_dev\n");
 
-	/* Carrier reports */
 	} else if (ev.carrier_report) {
 		sample = LIRC_FREQUENCY(ev.carrier);
 		IR_dprintk(2, "carrier report (freq: %d)\n", sample);
 
-	/* Packet end */
 	} else if (ev.timeout) {
 
 		if (lirc->gap)
@@ -75,7 +47,6 @@ static int ir_lirc_decode(struct rc_dev *dev, struct ir_raw_event ev)
 		sample = LIRC_TIMEOUT(ev.duration / 1000);
 		IR_dprintk(2, "timeout report (duration: %d)\n", sample);
 
-	/* Normal sample */
 	} else {
 
 		if (lirc->gap) {
@@ -84,7 +55,6 @@ static int ir_lirc_decode(struct rc_dev *dev, struct ir_raw_event ev)
 			lirc->gap_duration += ktime_to_ns(ktime_sub(ktime_get(),
 				lirc->gap_start));
 
-			/* Convert to ms and cap by LIRC_VALUE_MASK */
 			do_div(lirc->gap_duration, 1000);
 			lirc->gap_duration = min(lirc->gap_duration,
 							(u64)LIRC_VALUE_MASK);
@@ -113,12 +83,12 @@ static ssize_t ir_lirc_transmit_ir(struct file *file, const char __user *buf,
 {
 	struct lirc_codec *lirc;
 	struct rc_dev *dev;
-	unsigned int *txbuf; /* buffer with values to transmit */
+	unsigned int *txbuf;  
 	ssize_t ret = -EINVAL;
 	size_t count;
 	ktime_t start;
 	s64 towait;
-	unsigned int duration = 0; /* signal duration in us */
+	unsigned int duration = 0;  
 	int i;
 
 	start = ktime_get();
@@ -158,11 +128,6 @@ static ssize_t ir_lirc_transmit_ir(struct file *file, const char __user *buf,
 
 	ret *= sizeof(unsigned int);
 
-	/*
-	 * The lircd gap calculation expects the write function to
-	 * wait for the actual IR signal to be transmitted before
-	 * returning.
-	 */
 	towait = ktime_us_delta(ktime_add_us(start, duration), ktime_get());
 	if (towait > 0) {
 		set_current_state(TASK_INTERRUPTIBLE);
@@ -199,7 +164,6 @@ static long ir_lirc_ioctl(struct file *filep, unsigned int cmd,
 
 	switch (cmd) {
 
-	/* legacy support */
 	case LIRC_GET_SEND_MODE:
 		val = LIRC_CAN_SEND_PULSE & LIRC_CAN_SEND_MASK;
 		break;
@@ -209,7 +173,6 @@ static long ir_lirc_ioctl(struct file *filep, unsigned int cmd,
 			return -EINVAL;
 		return 0;
 
-	/* TX settings */
 	case LIRC_SET_TRANSMITTER_MASK:
 		if (!dev->s_tx_mask)
 			return -ENOSYS;
@@ -231,7 +194,6 @@ static long ir_lirc_ioctl(struct file *filep, unsigned int cmd,
 
 		return dev->s_tx_duty_cycle(dev, val);
 
-	/* RX settings */
 	case LIRC_SET_REC_CARRIER:
 		if (!dev->s_rx_carrier_range)
 			return -ENOSYS;
@@ -266,7 +228,6 @@ static long ir_lirc_ioctl(struct file *filep, unsigned int cmd,
 
 		return dev->s_carrier_report(dev, !!val);
 
-	/* Generic timeout support */
 	case LIRC_GET_MIN_TIMEOUT:
 		if (!dev->max_timeout)
 			return -ENOSYS;
@@ -386,7 +347,7 @@ static int ir_lirc_register(struct rc_dev *dev)
 	drv->dev = &dev->dev;
 #if defined (MY_DEF_HERE)
 	drv->rdev = dev;
-#endif /* MY_DEF_HERE */
+#endif  
 	drv->owner = THIS_MODULE;
 
 	drv->minor = lirc_register_driver(drv);

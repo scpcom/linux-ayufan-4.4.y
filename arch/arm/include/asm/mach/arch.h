@@ -1,16 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  arch/arm/include/asm/mach/arch.h
- *
- *  Copyright (C) 2000 Russell King
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
-
+ 
 #ifndef __ASSEMBLY__
 
 struct tag;
@@ -24,39 +15,38 @@ struct smp_operations;
 #endif
 
 #if defined(MY_ABC_HERE)
-/* Possible flags in struct machine_desc */
+ 
 #define MACHINE_NEEDS_CPOLICY_WRITEALLOC BIT(0)
 #define MACHINE_NEEDS_SHAREABLE_PAGES    BIT(1)
-#endif /* MY_ABC_HERE */
+#endif  
 
 struct machine_desc {
-	unsigned int		nr;		/* architecture number	*/
-	const char		*name;		/* architecture name	*/
-	unsigned long		atag_offset;	/* tagged list (relative) */
-	const char *const 	*dt_compat;	/* array of device tree
-						 * 'compatible' strings	*/
+	unsigned int		nr;		 
+	const char		*name;		 
+	unsigned long		atag_offset;	 
+	const char *const 	*dt_compat;	 
 
-	unsigned int		nr_irqs;	/* number of IRQs */
+	unsigned int		nr_irqs;	 
 
 #ifdef CONFIG_ZONE_DMA
-	unsigned long		dma_zone_size;	/* size of DMA-able area */
+	unsigned long		dma_zone_size;	 
 #endif
 
-	unsigned int		video_start;	/* start of video RAM	*/
-	unsigned int		video_end;	/* end of video RAM	*/
+	unsigned int		video_start;	 
+	unsigned int		video_end;	 
 
-	unsigned char		reserve_lp0 :1;	/* never has lp0	*/
-	unsigned char		reserve_lp1 :1;	/* never has lp1	*/
-	unsigned char		reserve_lp2 :1;	/* never has lp2	*/
+	unsigned char		reserve_lp0 :1;	 
+	unsigned char		reserve_lp1 :1;	 
+	unsigned char		reserve_lp2 :1;	 
 #if defined(MY_ABC_HERE)
 	unsigned long           flags;
-#endif /* MY_ABC_HERE */
-	char			restart_mode;	/* default restart mode	*/
-	struct smp_operations	*smp;		/* SMP operations	*/
+#endif  
+	char			restart_mode;	 
+	struct smp_operations	*smp;		 
 	void			(*fixup)(struct tag *, char **,
 					 struct meminfo *);
-	void			(*reserve)(void);/* reserve mem blocks	*/
-	void			(*map_io)(void);/* IO mapping function	*/
+	void			(*reserve)(void); 
+	void			(*map_io)(void); 
 	void			(*init_early)(void);
 	void			(*init_irq)(void);
 	void			(*init_time)(void);
@@ -68,22 +58,12 @@ struct machine_desc {
 	void			(*restart)(char, const char *);
 };
 
-/*
- * Current machine - only accessible during boot.
- */
 extern struct machine_desc *machine_desc;
 
-/*
- * Machine type table - also only accessible during boot
- */
 extern struct machine_desc __arch_info_begin[], __arch_info_end[];
 #define for_each_machine_desc(p)			\
 	for (p = __arch_info_begin; p < __arch_info_end; p++)
 
-/*
- * Set of macros to define architecture features.  This is built into
- * a table by the linker.
- */
 #define MACHINE_START(_type,_name)			\
 static const struct machine_desc __mach_desc_##_type	\
  __used							\

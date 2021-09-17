@@ -1,40 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/**************************************************************************
-
-  ST  Fastpath Interface driver
-  Copyright(c) 2011 - 2014 ST Microelectronics Corporation.
-
-  This program is free software; you can redistribute it and/or modify it
-  under the terms and conditions of the GNU General Public License,
-  version 2, as published by the Free Software Foundation.
-
-  This program is distributed in the hope it will be useful, but WITHOUT
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
-  more details.
-
-  You should have received a copy of the GNU General Public License along
-  with this program; if not, write to the Free Software Foundation, Inc.,
-  51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
-
-  The full GNU General Public License is included in this distribution in
-  the file called "COPYING".
-
-  Contact Information:
-  Manish Rathi <manish.rathi@st.com>
-
-TBD
-- Watchdog
-- VLAN offload
-- Flow control support
-- ndo_poll_controller callback
-- ioctl for startup queues
-- Power Management
-- Change MTU for shared channel
-**************************************************************************/
-
+ 
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/delay.h>
@@ -68,37 +35,37 @@ static int debug = -1;
 static struct fp_promisc_info fp_promisc[NUM_PHY_INTFS];
 
 static struct fp_qos_queue fp_qos_queue_info[NUM_QOS_QUEUES] = {
-	{256, 36, 255, 255, 36},/* DOCSIS QoS Queue 0 */
-	{256, 30, 36, 255, 36},	/* DOCSIS QoS Queue 1 */
-	{256, 30, 36, 255, 36},	/* DOCSIS QoS Queue2 */
-	{256, 30, 36, 255, 36},	/* DOCSIS QoS Queue3 */
-	{256, 36, 255, 255, 36},/* GIGE QoS Queue0 */
-	{256, 30, 36, 255, 36},	/* GIGE QoS Queue1 */
-	{256, 30, 36, 255, 36},	/* GIGE QoS Queue2 */
-	{256, 30, 36, 255, 36},	/* GIGE QoS Queue3 */
-	{32, 32, 32, 32, 6},	/* ISIS QoS Queue */
-	{32, 32, 32, 32, 6},	/* AP QoS Queue */
-	{32, 32, 32, 32, 6},	/* NP QoS Queue */
-	{32, 32, 32, 32, 6},	/* WIFI QoS Queue */
-	{32, 32, 32, 32, 6},	/* RECIRC QoS Queue */
+	{256, 36, 255, 255, 36}, 
+	{256, 30, 36, 255, 36},	 
+	{256, 30, 36, 255, 36},	 
+	{256, 30, 36, 255, 36},	 
+	{256, 36, 255, 255, 36}, 
+	{256, 30, 36, 255, 36},	 
+	{256, 30, 36, 255, 36},	 
+	{256, 30, 36, 255, 36},	 
+	{32, 32, 32, 32, 6},	 
+	{32, 32, 32, 32, 6},	 
+	{32, 32, 32, 32, 6},	 
+	{32, 32, 32, 32, 6},	 
+	{32, 32, 32, 32, 6},	 
 };
 
 static struct fp_qos_queue fpl_qos_queue_info[NUM_QOS_QUEUES] = {
-	 {256, 36, 255, 255, 22},	/* DOCSIS QoS Queue 0 */
-	 {256, 24, 36, 255, 22},	/* DOCSIS QoS Queue 1 */
-	 {256, 24, 36, 255, 22},	/* DOCSIS QoS Queue2 */
-	 {256, 24, 36, 255, 22},	/* DOCSIS QoS Queue3 */
-	 {256, 36, 255, 255, 22},	/* GIGE0 QoS Queue0 */
-	 {256, 24, 36, 255, 22},	/* GIGE0 QoS Queue1 */
-	 {256, 24, 36, 255, 22},	/* GIGE0 QoS Queue2 */
-	 {256, 24, 36, 255, 22},	/* GIGE0 QoS Queue3 */
-	 {256, 36, 255, 255, 22},	/* GIGE1 QoS Queue0 */
-	 {256, 24, 36, 255, 22},	/* GIGE1 QoS Queue1 */
-	 {256, 24, 36, 255, 22},	/* GIGE1 QoS Queue2 */
-	 {256, 24, 36, 255, 22},	/* GIGE1 QoS Queue3 */
-	 {32, 31, 31, 31, 16},		/* DMA0 QoS Queue */
-	 {32, 31, 31, 31, 16},		/* DMA1 QoS Queue */
-	 {32, 31, 31, 31, 16},		/* RECIRC QoS Queue */
+	 {256, 36, 255, 255, 22},	 
+	 {256, 24, 36, 255, 22},	 
+	 {256, 24, 36, 255, 22},	 
+	 {256, 24, 36, 255, 22},	 
+	 {256, 36, 255, 255, 22},	 
+	 {256, 24, 36, 255, 22},	 
+	 {256, 24, 36, 255, 22},	 
+	 {256, 24, 36, 255, 22},	 
+	 {256, 36, 255, 255, 22},	 
+	 {256, 24, 36, 255, 22},	 
+	 {256, 24, 36, 255, 22},	 
+	 {256, 24, 36, 255, 22},	 
+	 {32, 31, 31, 31, 16},		 
+	 {32, 31, 31, 31, 16},		 
+	 {32, 31, 31, 31, 16},		 
 };
 
 const struct stmfp_of_data sti_fplite_data = {
@@ -147,7 +114,7 @@ static int stmfp_if_config_dt(struct platform_device *pdev,
 	int ret = 0;
 #ifdef MY_DEF_HERE
 	const char *mac;
-#endif /* MY_DEF_HERE */
+#endif  
 
 	if (of_get_property(node, "fixed-link", NULL)) {
 		plat->phy_bus_name = devm_kzalloc(&pdev->dev,
@@ -189,13 +156,13 @@ static int stmfp_if_config_dt(struct platform_device *pdev,
 		ret = -ENODEV;
 	}
 #ifdef MY_DEF_HERE
-	/* Get MAC address if available */
+	 
 	mac =  of_get_mac_address(node);
 	if (mac) {
 		dev_info(&pdev->dev,"%s MAC address: %pM\n", plat->ifname, mac);
 		plat->mac_addr = mac;
 	}
-#endif /* MY_DEF_HERE */
+#endif  
 
 	return ret;
 }
@@ -334,7 +301,6 @@ static int fpif_rxb_setup(struct fpif_priv *priv)
 	dma_addr_t dma_addr;
 	struct device *dev = priv->dev;
 
-	/* Setup the skbuff rings */
 	for (i = 0; i < FPIF_RX_BUFS - 1; i++) {
 		skb = fpif_poll_start_skb(priv, GFP_KERNEL);
 		if (NULL == skb) {
@@ -374,7 +340,6 @@ static void fp_txdma_setup(struct fpif_priv *priv)
 	}
 	set_bit(priv->id, &txdma_ptr->users);
 
-	/* TX DMA Init */
 	txdma_ptr->tx_ch_reg = &fpgrp->txbase->per_ch[tx_ch];
 	txdma_ptr->bufptr = fpgrp->txbase->buf[tx_ch];
 	txdma_ptr->head_tx = 0;
@@ -436,7 +401,6 @@ static int fp_rxdma_setup(struct fpif_priv *priv)
 
 	set_bit(priv->id, &rxdma_ptr->users);
 
-	/* RX DMA Init */
 	rxdma_ptr->rx_ch_reg = &fpgrp->rxbase->per_ch[rx_ch];
 	rxdma_ptr->bufptr = fpgrp->rxbase->buf[rx_ch];
 	rxdma_ptr->head_rx = 0;
@@ -526,7 +490,6 @@ static void fp_qos_setup(struct fpif_grp *fpgrp, int num_q,
 		start_q = start_q + size_q;
 	}
 
-	/* Queue Manager common count setup */
 	fpif_write_reg(fpgrp->base +
 		       QOS_Q_COMMON_CNT_THRESH, fpgrp->plat->ofdt.common_cnt);
 	fpif_write_reg(fpgrp->base +
@@ -556,7 +519,6 @@ static void fp_hwinit(struct fpif_grp *fpgrp)
 	if (fpgrp->plat->platinit)
 		fpgrp->plat->platinit(fpgrp);
 
-	/* FP Hardware Init */
 	fpif_write_reg(fpgrp->base + FP_SOFT_RST, 1);
 	fpif_write_reg(fpgrp->base + FP_SOFT_RST, 0);
 
@@ -591,19 +553,16 @@ static void fp_hwinit(struct fpif_grp *fpgrp)
 	fpif_write_reg(fpgrp->base + FP_IMUX_TXDMA_TOE_RATE_CONTROL,
 		       IMUX_TXDMA_RATE);
 
-	/* QManager Qos Queue Setup */
 	if (fpgrp->version == FPLITE)
 		fp_qos_setup(fpgrp, 15, fpl_qos_queue_info);
 	else
 		fp_qos_setup(fpgrp, 13, fp_qos_queue_info);
 
-	/* Session Startup Queues */
 	for (idx = 0; idx < NUM_STARTUP_QUEUES; idx++) {
 		fpif_write_reg(fpgrp->base + SU_Q_BUSY +
 			       idx * STARTUP_Q_RPT_OFF, 0);
 	}
 
-	/* Session Startup Queue Control */
 	fpif_write_reg(fpgrp->base + SU_Q_GLOBAL_PACKET_RESERVE,
 		       SU_Q_MAX_PKT_G);
 	fpif_write_reg(fpgrp->base + SU_Q_GLOBAL_BUFFER_RESERVE,
@@ -611,7 +570,6 @@ static void fp_hwinit(struct fpif_grp *fpgrp)
 	fpif_write_reg(fpgrp->base + SU_Q_PACKET_RESERVE, SU_Q_MAX_PKT);
 	fpif_write_reg(fpgrp->base + SU_Q_BUFFER_RESERVE, SU_Q_MAX_BUF);
 
-	/* Interface Settings */
 	for (idx = 0; idx < NUM_PORTS; idx++) {
 		fpif_write_reg(fpgrp->base + FP_PORTSETTINGS_LO + idx *
 			       PORT_SETTINGS_RPT_OFF, DEF_QOSNONIP |
@@ -622,7 +580,6 @@ static void fp_hwinit(struct fpif_grp *fpgrp)
 			       ETH_DATA_LEN + ETH_HLEN + VLAN_HLEN * 2);
 	}
 
-	/* QoS label level settings */
 	fpif_write_reg(fpgrp->base + QOS_TRANSMIT_DESCRIPTOR +
 		       0 * QOS_DESCRIPTOR_RPT_OFF, 0 << 3 | 3 << 1 | 1 << 0);
 	fpif_write_reg(fpgrp->base + QOS_TRANSMIT_DESCRIPTOR +
@@ -640,22 +597,18 @@ static void fp_hwinit(struct fpif_grp *fpgrp)
 	fpif_write_reg(fpgrp->base + QOS_TRANSMIT_DESCRIPTOR +
 		       7 * QOS_DESCRIPTOR_RPT_OFF, 1 << 3 | 0 << 1 | 0 << 0);
 
-	/* DOCSIS SRR bit rate control */
 	fpif_write_reg(fpgrp->base + QOS_Q_SRR_BIT_RATE_CTRL +
 		       DEVID_DOCSIS * QOS_Q_SRR_BIT_RATE_CTRL_OFF,
 		       BW_SHAPING | MAX_MBPS | fpgrp->plat->ofdt.fp_clk_rate);
 
-	/* GIGE0 SRR bit rate control */
 	fpif_write_reg(fpgrp->base + QOS_Q_SRR_BIT_RATE_CTRL +
 		       DEVID_GIGE0 * QOS_Q_SRR_BIT_RATE_CTRL_OFF,
 		       BW_SHAPING | MAX_MBPS | fpgrp->plat->ofdt.fp_clk_rate);
 
-	/* GIGE1 SRR bit rate control */
 	fpif_write_reg(fpgrp->base + QOS_Q_SRR_BIT_RATE_CTRL +
 		       DEVID_GIGE1 * QOS_Q_SRR_BIT_RATE_CTRL_OFF,
 		       BW_SHAPING | MAX_MBPS | fpgrp->plat->ofdt.fp_clk_rate);
 
-	/* EMUX thresholds */
 	fpif_write_reg(fpgrp->base + FP_EMUX_THRESHOLD +
 		       DEVID_DOCSIS * EMUX_THRESHOLD_RPT_OFF, EMUX_THR);
 	fpif_write_reg(fpgrp->base + FP_EMUX_THRESHOLD +
@@ -723,11 +676,6 @@ static int fpif_deinit(struct fpif_grp *fpgrp)
 	return 0;
 }
 
-/**
- * fpif_clean_tx_ring() -- Processes each frame in the tx ring
- *   until the work limit has been reached. Returns the number
- *   of frames handled
- */
 static int fpif_clean_tx_ring(struct fpif_priv *priv, int tx_work_limit)
 {
 	int howmany = 0;
@@ -764,7 +712,7 @@ static int fpif_clean_tx_ring(struct fpif_priv *priv, int tx_work_limit)
 		txdma_ptr->fp_tx_skbuff[last_tx].skb_data = 0;
 		last_tx = (last_tx + 1) & TX_RING_MOD_MASK;
 		howmany++;
-		/* clear the tx interrupt */
+		 
 		if (last_tx == tail_ptr)
 			fpif_write_reg(&txdma_ptr->txbase->tx_irq_flags,
 				       1 << priv->tx_dma_ch);
@@ -834,8 +782,8 @@ static void fpif_fill_fphdr(struct fp_hdr *fphdr, struct sk_buff *skb,
 				>> 2;
 		l4offset = (skb->transport_header - skb->data - FP_HDR_SIZE +
 				2) >> 2;
-		proto = FPHDR_PROT_TCP; /* TCP */
-		mss = FPHDR_TCP_MSS_WORD; /* TCP mss in word size multiple */
+		proto = FPHDR_PROT_TCP;  
+		mss = FPHDR_TCP_MSS_WORD;  
 	}
 
 	fphdr->word0 = ntohl((ifidx << FPHDR_IFIDX_SHIFT) |
@@ -848,13 +796,8 @@ static void fpif_fill_fphdr(struct fp_hdr *fphdr, struct sk_buff *skb,
 			FPHDR_L3_SHIFT) | (l4offset << FPHDR_L4_SHIFT) |
 			FPHDR_NEXTHOP_IDX_MASK | FPHDR_SMAC_IDX_MASK);
 
-	/**
-	 * Here we want to keep 2 bytes after fastpath header intact so
-	 * we store this in temp variable and write in word3 with len
-	 */
 	temp = *(u16 *)((u8 *)fphdr + FP_HDR_SIZE);
 
-	/* This is required for hw tso workaround */
 	if (tso)
 		len_mask = FPHDR_TSO_LEN_MASK;
 
@@ -903,7 +846,7 @@ static int put_l2cam(struct fpif_priv *priv, u8 dev_addr[], int *idx)
 			dev_err(dev, "ERR:add entry L2CAM 0x%x\n", cam_sts);
 			return -EIO;
 		} else {
-		/* Return in case of Duplicate Entry */
+		 
 			return 0;
 		}
 	}
@@ -967,10 +910,6 @@ static int fpif_change_mtu(struct net_device *dev, int new_mtu)
 		return -EINVAL;
 	}
 
-	/**
-	 * Only stop and start the controller if it isn't already
-	 * stopped, and we changed something
-	 */
 	priv->rx_buffer_size = new_mtu + dev->hard_header_len +
 						VLAN_HLEN * 2;
 	dev->mtu = new_mtu;
@@ -1134,7 +1073,7 @@ static void add_in_cams(struct  net_device *br, struct net_device *port)
 	fp_promisc[priv->id].ifidx_log = br->ifindex;
 	err = put_l2cam(priv, br->dev_addr, &idx);
 	if (err) {
-		/* It is not preventing driver/hw to work */
+		 
 		dev_warn(dev, "fp:ERROR in putting br mac in l2cam\n");
 		priv->br_l2cam_idx = IDX_INV;
 	} else {
@@ -1269,7 +1208,6 @@ static void fpif_set_multi(struct net_device *dev)
 	if (priv->logical_if)
 		return;
 
-	/* promisc and allmulti idx share the same location in TCAM */
 	if (dev->flags & IFF_PROMISC) {
 		add_tcam_promisc(priv);
 		priv->allmulti_idx = TCAM_IDX_INV;
@@ -1295,12 +1233,6 @@ static void fpif_set_multi(struct net_device *dev)
 		put_l2cam(priv, ha->addr, &idx);
 }
 
-/**
- * fpif_process_frame() -- handle one incoming packet
- * @priv: private structure pointer
- * @skb: socket buffer pointer
- * Description: this is the main function to process the incoming frames
- */
 static int fpif_process_frame(struct fpif_priv *priv,
 			      struct sk_buff *skb)
 {
@@ -1372,9 +1304,9 @@ static int fpif_process_frame(struct fpif_priv *priv,
 	}
 
 	if (!wlan_dest) {
-		/* Tell the skb what kind of packet this is */
+		 
 		skb->protocol = eth_type_trans(skb, netdev);
-		/* Send the packet up the stack */
+		 
 		if (netif_msg_pktdata(priv))
 			dev_dbg(dev, "prot=0x%x len=%d dtlen=%d dma=%d\n",
 				htons(skb->protocol), skb->len,
@@ -1394,7 +1326,7 @@ static int fpif_process_frame(struct fpif_priv *priv,
 		}
 		skb->dev = ndev_cpu;
 		ret = ndev_cpu->netdev_ops->ndo_start_xmit(skb, ndev_cpu);
-		/* TBD: Need to handle this in a better way by keeping buffers*/
+		 
 		if (ret != NETDEV_TX_OK) {
 			dev_err(dev, "TXQ of wifi is full\n");
 			return -EBUSY;
@@ -1403,15 +1335,6 @@ static int fpif_process_frame(struct fpif_priv *priv,
 	return 0;
 }
 
-/**
- * fpif_clean_rx_ring() -- Processes each frame in the rx ring
- * until the budget/quota has been reached. Returns the number
- * of frames handled
- * @priv: private structure pointer
- * @limit: budget limit from poll method
- * Description: directly invoked by NAPI method it is to collect the frames
- * and clean the ring.
- */
 static int fpif_clean_rx_ring(struct fpif_priv *priv, int limit)
 {
 	struct sk_buff *skb;
@@ -1453,7 +1376,7 @@ static int fpif_clean_rx_ring(struct fpif_priv *priv, int limit)
 			fpif_q_rx_buffer(rxdma_ptr, skb, dma_addr);
 
 		last_rx = (last_rx + 1) & RX_RING_MOD_MASK;
-		/* clear the rx interrupt */
+		 
 		if (last_rx == tail_ptr)
 			fpif_write_reg(&rxdma_ptr->rxbase->rx_irq_flags,
 				       BIT(dma_ch));
@@ -1503,11 +1426,6 @@ static int fpif_poll(struct napi_struct *napi, int budget)
 	return howmany_rx;
 }
 
-/**
- * fpif_intr - Interrupt Handler
- * @irq: interrupt number
- * @data: pointer to a network platform interface device structure
- **/
 static irqreturn_t fpif_intr(int irq, void *data)
 {
 	struct fpif_grp *fpgrp = data;
@@ -1566,14 +1484,6 @@ static int fpif_xmit_frame_sg(struct fpif_priv *priv, struct sk_buff *skb)
 	return 0;
 }
 
-/**
- * fpif_xmit_frame: transmit function
- * @skb: socket buffer pointer
- * @netdev: net_device pointer
- * Description: this is called by the kernel when a frame is ready for xfer.
- * It is pointed to by the dev->hard_start_xmit function pointer
- * the frames.
- */
 static int fpif_xmit_frame(struct sk_buff *skb, struct net_device *netdev)
 {
 	struct fpif_priv *priv = netdev_priv(netdev);
@@ -1669,11 +1579,6 @@ static int fpif_xmit_frame(struct sk_buff *skb, struct net_device *netdev)
 	return ret;
 }
 
-/**
- * fpif_adjust_link
- * @dev: net device structure
- * Description: it adjusts the link parameters.
- */
 static void fpif_adjust_link(struct net_device *dev)
 {
 	struct fpif_priv *priv = netdev_priv(dev);
@@ -1762,14 +1667,6 @@ static void fpif_adjust_link(struct net_device *dev)
 	spin_unlock_irqrestore(&priv->fpif_lock, flags);
 }
 
-/**
- * fpif_init_phy - PHY initialization
- * @dev: net device structure
- * Description: it initializes the driver's PHY state, and attaches the PHY
- * to the mac driver.
- *  Return value:
- *  0 on success
- */
 static int fpif_init_phy(struct net_device *dev)
 {
 	struct fpif_priv *priv = netdev_priv(dev);
@@ -1842,18 +1739,6 @@ static int fp_vif_open(struct net_device *netdev)
 	return 0;
 }
 
-/**
- * fpif_open - Called when a network interface is made active
- * @netdev: network interface device structure
- *
- * Returns 0 on success, negative value on failure
- *
- * The open entry point is called when a network interface is made
- * active by the system (IFF_UP).  At this point all resources needed
- * for transmit and receive operations are allocated, the interrupt
- * handler is registered with the OS, the watchdog timer is started,
- * and the stack is notified that the interface is ready.
- */
 static int fpif_open(struct net_device *netdev)
 {
 	struct fpif_priv *priv = netdev_priv(netdev);
@@ -1959,13 +1844,6 @@ open_err4:
 	return err;
 }
 
-/**
- * fpif_close - Disables a network interface
- * @netdev: network interface device structure
- * Returns 0, this is not allowed to fail
- * The close entry point is called when an interface is de-activated
- * by the OS.
- **/
 static int fpif_close(struct net_device *netdev)
 {
 	struct fpif_priv *priv = netdev_priv(netdev);
@@ -2010,18 +1888,11 @@ static int fpif_close(struct net_device *netdev)
 	return 0;
 }
 
-/* FIXME */
 static void fpif_tx_timeout(struct net_device *netdev)
 {
 	pr_info("%s\n", __func__);
 }
 
-/**
- * fpif_get_stats - Get System Network Statistics
- * @dev: network interface device structure
- * @net_stats: rtnl_link stats
- * Description: returns the address of the device statistics structure.
- **/
 static struct rtnl_link_stats64 *fpif_get_stats64(struct net_device *dev,
 		struct rtnl_link_stats64 *net_stats)
 {
@@ -2066,13 +1937,11 @@ static struct rtnl_link_stats64 *fpif_get_stats64(struct net_device *dev,
 		lo = readl(priv->rgmii_base + RGMII_RX_BYTE_COUNT_LO);
 		hi = readl(priv->rgmii_base + RGMII_RX_BYTE_COUNT_HI);
 		net_stats->rx_bytes = lo | (hi << 32);
-		/* total number of multicast packets received */
+		 
 		lo = readl(priv->rgmii_base + RGMII_RX_MCAST_COUNT_LO);
 		hi = readl(priv->rgmii_base + RGMII_RX_MCAST_COUNT_HI);
 		net_stats->multicast = lo | (hi << 32);
 
-		/* Received length is unexpected */
-		/* TBC:What if receive less than minimum ethernet frame */
 		net_stats->rx_length_errors =
 		    readl(priv->rgmii_base + RGMII_RX_OVERSIZED_ERR_CNT);
 
@@ -2085,7 +1954,6 @@ static struct rtnl_link_stats64 *fpif_get_stats64(struct net_device *dev,
 					    net_stats->rx_length_errors +
 					    net_stats->rx_over_errors);
 
-		/* TBC : How to get rx collisions */
 		net_stats->collisions =
 		    readl(priv->rgmii_base + RGMII_TX_1COLL_COUNT) +
 		    readl(priv->rgmii_base + RGMII_TX_MULT_COLL_COUNT) +
@@ -2208,7 +2076,7 @@ static int fpif_init(struct fpif_grp *fpgrp)
 		priv->rxdma_ptr = &(fpgrp->rxdma_info[rx_dma_ch]);
 		priv->rxdma_ptr->rxbase = fpgrp->rxbase;
 		spin_lock_init(&priv->fpif_lock);
-		/* initialize a napi context */
+		 
 		netif_napi_add(netdev, &priv->napi, fpif_poll, FP_NAPI_BUDGET);
 		netdev->netdev_ops = &fpif_netdev_ops;
 		fpif_set_ethtool_ops(netdev);
@@ -2222,9 +2090,9 @@ static int fpif_init(struct fpif_grp *fpgrp)
 		netdev->watchdog_timeo = 5 * HZ;
 		if (fpif_data->mac_addr)
 			memcpy(netdev->dev_addr, fpif_data->mac_addr, ETH_ALEN);
-#else /* MY_DEF_HERE */
+#else  
 		netdev->watchdog_timeo = 5 * HZ,
-#endif /* MY_DEF_HERE */
+#endif  
 
 		priv->promisc_idx = TCAM_IDX_INV;
 		priv->allmulti_idx = TCAM_IDX_INV;
@@ -2334,7 +2202,6 @@ static int fpif_probe(struct platform_device *pdev)
 
 	pr_debug("%s\n", __func__);
 
-	/* Map FastPath register memory */
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 	if (!res) {
 		dev_err(dev, "ERROR :%s: platform_get_resource ", __func__);
@@ -2372,7 +2239,6 @@ static int fpif_probe(struct platform_device *pdev)
 
 	pdev->dev.platform_data = plat_dat;
 
-	/* Get Rx interrupt number */
 	rx_irq0 = platform_get_irq_byname(pdev, "fprxdma0irq");
 	if (rx_irq0 == -ENXIO) {
 		dev_err(dev, "ERROR: Rx IRQ0 config info not found\n");
@@ -2385,7 +2251,6 @@ static int fpif_probe(struct platform_device *pdev)
 		return -ENXIO;
 	}
 
-	/* Get Tx interrupt number */
 	tx_irq = platform_get_irq_byname(pdev, "fptxdmairq");
 	if (tx_irq == -ENXIO) {
 		dev_err(dev, "ERROR: Tx IRQ config info not found\n");
@@ -2452,13 +2317,12 @@ static int fpif_probe(struct platform_device *pdev)
 	}
 	clk_prepare_enable(fpgrp->clk_ife);
 
-	/* Get reset */
 	fpgrp->rstc = devm_reset_control_get(&pdev->dev, NULL);
 	if (IS_ERR(fpgrp->rstc)) {
 		err = -EINVAL;
 		goto exit_not_reset;
 	}
-	/* Perform full reset */
+	 
 	reset_control_assert(fpgrp->rstc);
 	reset_control_deassert(fpgrp->rstc);
 
@@ -2499,13 +2363,6 @@ static int __init fpif_init_module(void)
 	return platform_driver_register(&fpif_driver);
 }
 
-/**
- * fpif_exit_module - Device exit Routine
- * fpif_exit_module is to alert the driver
- * that it should release a device because
- * the driver is going to be removed from
- * memory.
- **/
 static void __exit fpif_exit_module(void)
 {
 	platform_driver_unregister(&fpif_driver);

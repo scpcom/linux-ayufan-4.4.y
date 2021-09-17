@@ -1,15 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Ethernet driver for the WIZnet W5100 chip.
- *
- * Copyright (C) 2006-2008 WIZnet Co.,Ltd.
- * Copyright (C) 2012 Mike Sinkovsky <msink@permonline.ru>
- *
- * Licensed under the GPL-2 or later.
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/kconfig.h>
@@ -38,44 +30,41 @@ MODULE_AUTHOR("Mike Sinkovsky <msink@permonline.ru>");
 MODULE_ALIAS("platform:"DRV_NAME);
 MODULE_LICENSE("GPL");
 
-/*
- * Registers
- */
 #define W5100_COMMON_REGS	0x0000
-#define W5100_MR		0x0000 /* Mode Register */
-#define   MR_RST		  0x80 /* S/W reset */
-#define   MR_PB			  0x10 /* Ping block */
-#define   MR_AI			  0x02 /* Address Auto-Increment */
-#define   MR_IND		  0x01 /* Indirect mode */
-#define W5100_SHAR		0x0009 /* Source MAC address */
-#define W5100_IR		0x0015 /* Interrupt Register */
-#define W5100_IMR		0x0016 /* Interrupt Mask Register */
-#define   IR_S0			  0x01 /* S0 interrupt */
-#define W5100_RTR		0x0017 /* Retry Time-value Register */
-#define   RTR_DEFAULT		  2000 /* =0x07d0 (2000) */
-#define W5100_RMSR		0x001a /* Receive Memory Size */
-#define W5100_TMSR		0x001b /* Transmit Memory Size */
+#define W5100_MR		0x0000  
+#define   MR_RST		  0x80  
+#define   MR_PB			  0x10  
+#define   MR_AI			  0x02  
+#define   MR_IND		  0x01  
+#define W5100_SHAR		0x0009  
+#define W5100_IR		0x0015  
+#define W5100_IMR		0x0016  
+#define   IR_S0			  0x01  
+#define W5100_RTR		0x0017  
+#define   RTR_DEFAULT		  2000  
+#define W5100_RMSR		0x001a  
+#define W5100_TMSR		0x001b  
 #define W5100_COMMON_REGS_LEN	0x0040
 
 #define W5100_S0_REGS		0x0400
-#define W5100_S0_MR		0x0400 /* S0 Mode Register */
-#define   S0_MR_MACRAW		  0x04 /* MAC RAW mode (promiscous) */
-#define   S0_MR_MACRAW_MF	  0x44 /* MAC RAW mode (filtered) */
-#define W5100_S0_CR		0x0401 /* S0 Command Register */
-#define   S0_CR_OPEN		  0x01 /* OPEN command */
-#define   S0_CR_CLOSE		  0x10 /* CLOSE command */
-#define   S0_CR_SEND		  0x20 /* SEND command */
-#define   S0_CR_RECV		  0x40 /* RECV command */
-#define W5100_S0_IR		0x0402 /* S0 Interrupt Register */
-#define   S0_IR_SENDOK		  0x10 /* complete sending */
-#define   S0_IR_RECV		  0x04 /* receiving data */
-#define W5100_S0_SR		0x0403 /* S0 Status Register */
-#define   S0_SR_MACRAW		  0x42 /* mac raw mode */
-#define W5100_S0_TX_FSR		0x0420 /* S0 Transmit free memory size */
-#define W5100_S0_TX_RD		0x0422 /* S0 Transmit memory read pointer */
-#define W5100_S0_TX_WR		0x0424 /* S0 Transmit memory write pointer */
-#define W5100_S0_RX_RSR		0x0426 /* S0 Receive free memory size */
-#define W5100_S0_RX_RD		0x0428 /* S0 Receive memory read pointer */
+#define W5100_S0_MR		0x0400  
+#define   S0_MR_MACRAW		  0x04  
+#define   S0_MR_MACRAW_MF	  0x44  
+#define W5100_S0_CR		0x0401  
+#define   S0_CR_OPEN		  0x01  
+#define   S0_CR_CLOSE		  0x10  
+#define   S0_CR_SEND		  0x20  
+#define   S0_CR_RECV		  0x40  
+#define W5100_S0_IR		0x0402  
+#define   S0_IR_SENDOK		  0x10  
+#define   S0_IR_RECV		  0x04  
+#define W5100_S0_SR		0x0403  
+#define   S0_SR_MACRAW		  0x42  
+#define W5100_S0_TX_FSR		0x0420  
+#define W5100_S0_TX_RD		0x0422  
+#define W5100_S0_TX_WR		0x0424  
+#define W5100_S0_RX_RSR		0x0426  
+#define W5100_S0_RX_RD		0x0428  
 #define W5100_S0_REGS_LEN	0x0040
 
 #define W5100_TX_MEM_START	0x4000
@@ -85,9 +74,6 @@ MODULE_LICENSE("GPL");
 #define W5100_RX_MEM_END	0x7fff
 #define W5100_RX_MEM_MASK	0x1fff
 
-/*
- * Device driver private data structure
- */
 struct w5100_priv {
 	void __iomem *base;
 	spinlock_t reg_lock;
@@ -108,18 +94,6 @@ struct w5100_priv {
 	u32 msg_enable;
 };
 
-/************************************************************************
- *
- *  Lowlevel I/O functions
- *
- ***********************************************************************/
-
-/*
- * In direct address mode host system can directly access W5100 registers
- * after mapping to Memory-Mapped I/O space.
- *
- * 0x8000 bytes are required for memory space.
- */
 static inline u8 w5100_read_direct(struct w5100_priv *priv, u16 addr)
 {
 	return ioread8(priv->base + (addr << CONFIG_WIZNET_BUS_SHIFT));
@@ -171,16 +145,8 @@ static void w5100_writebuf_direct(struct w5100_priv *priv,
 	}
 }
 
-/*
- * In indirect address mode host system indirectly accesses registers by
- * using Indirect Mode Address Register (IDM_AR) and Indirect Mode Data
- * Register (IDM_DR), which are directly mapped to Memory-Mapped I/O space.
- * Mode Register (MR) is directly accessible.
- *
- * Only 0x04 bytes are required for memory space.
- */
-#define W5100_IDM_AR		0x01   /* Indirect Mode Address Register */
-#define W5100_IDM_DR		0x03   /* Indirect Mode Data Register */
+#define W5100_IDM_AR		0x01    
+#define W5100_IDM_DR		0x03    
 
 static u8 w5100_read_indirect(struct w5100_priv *priv, u16 addr)
 {
@@ -298,7 +264,7 @@ static void w5100_writebuf_indirect(struct w5100_priv *priv,
 #define w5100_readbuf	w5100_readbuf_indirect
 #define w5100_writebuf	w5100_writebuf_indirect
 
-#else /* CONFIG_WIZNET_BUS_ANY */
+#else  
 #define w5100_read	priv->read
 #define w5100_write	priv->write
 #define w5100_read16	priv->read16
@@ -345,9 +311,6 @@ static void w5100_hw_reset(struct w5100_priv *priv)
 	w5100_write(priv, W5100_IMR, 0);
 	w5100_write_macaddr(priv);
 
-	/* Configure 16K of internal memory
-	 * as 8K RX buffer and 8K TX buffer
-	 */
 	w5100_write(priv, W5100_RMSR, 0x03);
 	w5100_write(priv, W5100_TMSR, 0x03);
 	mmiowb();
@@ -369,12 +332,6 @@ static void w5100_hw_close(struct w5100_priv *priv)
 	mmiowb();
 	w5100_command(priv, S0_CR_CLOSE);
 }
-
-/***********************************************************************
- *
- *   Device driver functions / callbacks
- *
- ***********************************************************************/
 
 static void w5100_get_drvinfo(struct net_device *ndev,
 			      struct ethtool_drvinfo *info)
@@ -718,9 +675,6 @@ static int w5100_probe(struct platform_device *pdev)
 	ndev->watchdog_timeo = HZ;
 	netif_napi_add(ndev, &priv->napi, w5100_napi_poll, 16);
 
-	/* This chip doesn't support VLAN packets with normal MTU,
-	 * so disable VLAN for this device.
-	 */
 	ndev->features |= NETIF_F_VLAN_CHALLENGED;
 
 	err = register_netdev(ndev);
@@ -738,9 +692,9 @@ err_hw_probe:
 err_register:
 	free_netdev(ndev);
 #if defined (MY_DEF_HERE)
-#else /* MY_DEF_HERE */
+#else  
 	platform_set_drvdata(pdev, NULL);
-#endif /* MY_DEF_HERE */
+#endif  
 	return err;
 }
 
@@ -757,9 +711,9 @@ static int w5100_remove(struct platform_device *pdev)
 	unregister_netdev(ndev);
 	free_netdev(ndev);
 #if defined (MY_DEF_HERE)
-#else /* MY_DEF_HERE */
+#else  
 	platform_set_drvdata(pdev, NULL);
-#endif /* MY_DEF_HERE */
+#endif  
 	return 0;
 }
 
@@ -796,7 +750,7 @@ static int w5100_resume(struct device *dev)
 	}
 	return 0;
 }
-#endif /* CONFIG_PM_SLEEP */
+#endif  
 
 static SIMPLE_DEV_PM_OPS(w5100_pm_ops, w5100_suspend, w5100_resume);
 

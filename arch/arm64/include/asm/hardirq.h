@@ -1,21 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) 2012 ARM Ltd.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+ 
 #ifndef __ASM_HARDIRQ_H
 #define __ASM_HARDIRQ_H
 
@@ -32,7 +18,7 @@ typedef struct {
 #endif
 } ____cacheline_aligned irq_cpustat_t;
 
-#include <linux/irq_cpustat.h>	/* Standard mappings for irq_cpustat_t above */
+#include <linux/irq_cpustat.h>	 
 
 #define __inc_irq_stat(cpu, member)	__IRQ_STAT(cpu, member)++
 #define __get_irq_stat(cpu, member)	__IRQ_STAT(cpu, member)
@@ -53,11 +39,9 @@ static inline void ack_bad_irq(unsigned int irq)
 extern void handle_IRQ(unsigned int, struct pt_regs *);
 
 #if defined (MY_DEF_HERE)
-#else /* MY_DEF_HERE */
-/*
- * No arch-specific IRQ flags.
- */
+#else  
+ 
 #define set_irq_flags(irq, flags)
-#endif /* MY_DEF_HERE */
+#endif  
 
-#endif /* __ASM_HARDIRQ_H */
+#endif  

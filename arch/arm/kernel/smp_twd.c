@@ -1,16 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  linux/arch/arm/kernel/smp_twd.c
- *
- *  Copyright (C) 2002 ARM Ltd.
- *  All Rights Reserved
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
+ 
 #include <linux/init.h>
 #include <linux/kernel.h>
 #include <linux/clk.h>
@@ -29,7 +20,6 @@
 #include <asm/smp_twd.h>
 #include <asm/localtimer.h>
 
-/* set up by the platform code */
 static void __iomem *twd_base;
 
 static struct clk *twd_clk;
@@ -50,13 +40,13 @@ static void twd_set_mode(enum clock_event_mode mode,
 			| TWD_TIMER_CONTROL_PERIODIC;
 #if defined(MY_ABC_HERE)
 		writel_relaxed(DIV_ROUND_CLOSEST(twd_timer_rate, HZ),
-#else /* MY_ABC_HERE */
+#else  
 		__raw_writel(DIV_ROUND_CLOSEST(twd_timer_rate, HZ),
-#endif /* MY_ABC_HERE */
+#endif  
 			twd_base + TWD_TIMER_LOAD);
 		break;
 	case CLOCK_EVT_MODE_ONESHOT:
-		/* period set, and timer enabled in 'next_event' hook */
+		 
 		ctrl = TWD_TIMER_CONTROL_IT_ENABLE | TWD_TIMER_CONTROL_ONESHOT;
 		break;
 	case CLOCK_EVT_MODE_UNUSED:
@@ -67,9 +57,9 @@ static void twd_set_mode(enum clock_event_mode mode,
 
 #if defined(MY_ABC_HERE)
 	writel_relaxed(ctrl, twd_base + TWD_TIMER_CONTROL);
-#else /* MY_ABC_HERE */
+#else  
 	__raw_writel(ctrl, twd_base + TWD_TIMER_CONTROL);
-#endif /* MY_ABC_HERE */
+#endif  
 }
 
 static int twd_set_next_event(unsigned long evt,
@@ -77,38 +67,32 @@ static int twd_set_next_event(unsigned long evt,
 {
 #if defined(MY_ABC_HERE)
 	unsigned long ctrl = readl_relaxed(twd_base + TWD_TIMER_CONTROL);
-#else /* MY_ABC_HERE */
+#else  
 	unsigned long ctrl = __raw_readl(twd_base + TWD_TIMER_CONTROL);
-#endif /* MY_ABC_HERE */
+#endif  
 
 	ctrl |= TWD_TIMER_CONTROL_ENABLE;
 
 #if defined(MY_ABC_HERE)
 	writel_relaxed(evt, twd_base + TWD_TIMER_COUNTER);
 	writel_relaxed(ctrl, twd_base + TWD_TIMER_CONTROL);
-#else /* MY_ABC_HERE */
+#else  
 	__raw_writel(evt, twd_base + TWD_TIMER_COUNTER);
 	__raw_writel(ctrl, twd_base + TWD_TIMER_CONTROL);
-#endif /* MY_ABC_HERE */
+#endif  
 
 	return 0;
 }
 
-/*
- * local_timer_ack: checks for a local timer interrupt.
- *
- * If a local timer interrupt has occurred, acknowledge and return 1.
- * Otherwise, return 0.
- */
 static int twd_timer_ack(void)
 {
 #if defined(MY_ABC_HERE)
 	if (readl_relaxed(twd_base + TWD_TIMER_INTSTAT)) {
 		writel_relaxed(1, twd_base + TWD_TIMER_INTSTAT);
-#else /* MY_ABC_HERE */
+#else  
 	if (__raw_readl(twd_base + TWD_TIMER_INTSTAT)) {
 		__raw_writel(1, twd_base + TWD_TIMER_INTSTAT);
-#endif /* MY_ABC_HERE */
+#endif  
 		return 1;
 	}
 
@@ -123,10 +107,6 @@ static void twd_timer_stop(struct clock_event_device *clk)
 
 #ifdef CONFIG_COMMON_CLK
 
-/*
- * Updates clockevent frequency when the cpu frequency changes.
- * Called on the cpu that is changing frequency with interrupts disabled.
- */
 static void twd_update_frequency(void *new_rate)
 {
 	twd_timer_rate = *((unsigned long *) new_rate);
@@ -139,11 +119,6 @@ static int twd_rate_change(struct notifier_block *nb,
 {
 	struct clk_notifier_data *cnd = data;
 
-	/*
-	 * The twd clock events must be reprogrammed to account for the new
-	 * frequency.  The timer is local to a cpu, so cross-call to the
-	 * changing cpu.
-	 */
 	if (flags == POST_RATE_CHANGE)
 		on_each_cpu(twd_update_frequency,
 				  (void *)&cnd->new_rate, 1);
@@ -168,10 +143,6 @@ core_initcall(twd_clk_init);
 
 #include <linux/cpufreq.h>
 
-/*
- * Updates clockevent frequency when the cpu frequency changes.
- * Called on the cpu that is changing frequency with interrupts disabled.
- */
 static void twd_update_frequency(void *data)
 {
 	twd_timer_rate = clk_get_rate(twd_clk);
@@ -184,11 +155,6 @@ static int twd_cpufreq_transition(struct notifier_block *nb,
 {
 	struct cpufreq_freqs *freqs = data;
 
-	/*
-	 * The twd clock events must be reprogrammed to account for the new
-	 * frequency.  The timer is local to a cpu, so cross-call to the
-	 * changing cpu.
-	 */
 	if (state == CPUFREQ_POSTCHANGE || state == CPUFREQ_RESUMECHANGE)
 		smp_call_function_single(freqs->cpu, twd_update_frequency,
 			NULL, 1);
@@ -217,44 +183,36 @@ static void __cpuinit twd_calibrate_rate(void)
 	unsigned long count;
 	u64 waitjiffies;
 
-	/*
-	 * If this is the first time round, we need to work out how fast
-	 * the timer ticks
-	 */
 	if (twd_timer_rate == 0) {
 		printk(KERN_INFO "Calibrating local timer... ");
 
-		/* Wait for a tick to start */
 		waitjiffies = get_jiffies_64() + 1;
 
 		while (get_jiffies_64() < waitjiffies)
 			udelay(10);
 
-		/* OK, now the tick has started, let's get the timer going */
 		waitjiffies += 5;
 
-				 /* enable, no interrupt or reload */
 #if defined(MY_ABC_HERE)
 		writel_relaxed(0x1, twd_base + TWD_TIMER_CONTROL);
-#else /* MY_ABC_HERE */
+#else  
 		__raw_writel(0x1, twd_base + TWD_TIMER_CONTROL);
-#endif /* MY_ABC_HERE */
+#endif  
 
-				 /* maximum value */
 #if defined(MY_ABC_HERE)
 		writel_relaxed(0xFFFFFFFFU, twd_base + TWD_TIMER_COUNTER);
-#else /* MY_ABC_HERE */
+#else  
 		__raw_writel(0xFFFFFFFFU, twd_base + TWD_TIMER_COUNTER);
-#endif /* MY_ABC_HERE */
+#endif  
 
 		while (get_jiffies_64() < waitjiffies)
 			udelay(10);
 
 #if defined(MY_ABC_HERE)
 		count = readl_relaxed(twd_base + TWD_TIMER_COUNTER);
-#else /* MY_ABC_HERE */
+#else  
 		count = __raw_readl(twd_base + TWD_TIMER_COUNTER);
-#endif /* MY_ABC_HERE */
+#endif  
 
 		twd_timer_rate = (0xFFFFFFFFU - count) * (HZ / 5);
 
@@ -299,24 +257,17 @@ static void twd_get_clock(struct device_node *np)
 	twd_timer_rate = clk_get_rate(twd_clk);
 }
 
-/*
- * Setup the local clock events for a CPU.
- */
 static int __cpuinit twd_timer_setup(struct clock_event_device *clk)
 {
 	struct clock_event_device **this_cpu_clk;
 	int cpu = smp_processor_id();
 
-	/*
-	 * If the basic setup for this CPU has been done before don't
-	 * bother with the below.
-	 */
 	if (per_cpu(percpu_setup_called, cpu)) {
 #if defined(MY_ABC_HERE)
 		writel_relaxed(0, twd_base + TWD_TIMER_CONTROL);
-#else /* MY_ABC_HERE */
+#else  
 		__raw_writel(0, twd_base + TWD_TIMER_CONTROL);
-#endif /* MY_ABC_HERE */
+#endif  
 		clockevents_register_device(*__this_cpu_ptr(twd_evt));
 		enable_percpu_irq(clk->irq, 0);
 		return 0;
@@ -325,15 +276,11 @@ static int __cpuinit twd_timer_setup(struct clock_event_device *clk)
 
 	twd_calibrate_rate();
 
-	/*
-	 * The following is done once per CPU the first time .setup() is
-	 * called.
-	 */
 #if defined(MY_ABC_HERE)
 	writel_relaxed(0, twd_base + TWD_TIMER_CONTROL);
-#else /* MY_ABC_HERE */
+#else  
 	__raw_writel(0, twd_base + TWD_TIMER_CONTROL);
-#endif /* MY_ABC_HERE */
+#endif  
 
 	clk->name = "local_timer";
 	clk->features = CLOCK_EVT_FEAT_PERIODIC | CLOCK_EVT_FEAT_ONESHOT |

@@ -1,24 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *
- * Copyright (C) 2012 ARM Limited
- *
- * Author: Will Deacon <will.deacon@arm.com>
- */
+ 
 #define pr_fmt(fmt) "CPU PMU: " fmt
 
 #include <linux/bitmap.h>
@@ -30,29 +13,24 @@
 #include <linux/spinlock.h>
 #if defined (MY_DEF_HERE) || defined(MY_ABC_HERE)
 #include <linux/irq.h>
-#endif /* MY_DEF_HERE || MY_ABC_HERE */
+#endif  
 #if defined(MY_ABC_HERE)
 #include <linux/irqdesc.h>
-#endif /* MY_ABC_HERE */
+#endif  
 
 #include <asm/cputype.h>
 #include <asm/irq_regs.h>
 #include <asm/pmu.h>
 
-/* Set at runtime when we know what CPU type we are. */
 static struct arm_pmu *cpu_pmu;
 
 #if defined(MY_ABC_HERE)
 static DEFINE_PER_CPU(struct arm_pmu *, percpu_pmu);
-#endif /* MY_ABC_HERE */
+#endif  
 static DEFINE_PER_CPU(struct perf_event * [ARMPMU_MAX_HWEVENTS], hw_events);
 static DEFINE_PER_CPU(unsigned long [BITS_TO_LONGS(ARMPMU_MAX_HWEVENTS)], used_mask);
 static DEFINE_PER_CPU(struct pmu_hw_events, cpu_hw_events);
 
-/*
- * Despite the names, these two functions are CPU-specific and are used
- * by the OProfile/perf code.
- */
 const char *perf_pmu_name(void)
 {
 	if (!cpu_pmu)
@@ -73,7 +51,6 @@ int perf_num_counters(void)
 }
 EXPORT_SYMBOL_GPL(perf_num_counters);
 
-/* Include the PMU-specific implementations. */
 #include "perf_event_xscale.c"
 #include "perf_event_v6.c"
 #include "perf_event_v7.c"
@@ -84,18 +61,17 @@ static struct pmu_hw_events *cpu_pmu_get_cpu_events(void)
 }
 
 #if defined (MY_DEF_HERE)
-/* Wrap enable_percpu_irq up as a smp_call_func_t */
+ 
 static void cpu_pmu_enable_percpu_irq(void *irq)
 {
 	enable_percpu_irq((int)irq, IRQ_TYPE_NONE);
 }
 
-/* Wrap disable_percpu_irq up as a smp_call_func_t */
 static void cpu_pmu_disable_percpu_irq(void *irq)
 {
 	disable_percpu_irq((int)irq);
 }
-#endif /* MY_DEF_HERE */
+#endif  
 
 #if defined(MY_ABC_HERE)
 static void cpu_pmu_enable_percpu_irq(void *data)
@@ -117,7 +93,7 @@ static void cpu_pmu_disable_percpu_irq(void *data)
 	cpumask_clear_cpu(smp_processor_id(), &cpu_pmu->active_irqs);
 	disable_percpu_irq(irq);
 }
-#endif /* MY_ABC_HERE */
+#endif  
 
 static void cpu_pmu_free_irq(struct arm_pmu *cpu_pmu)
 {
@@ -139,7 +115,7 @@ static void cpu_pmu_free_irq(struct arm_pmu *cpu_pmu)
 			if (irq >= 0)
 				free_irq(irq, cpu_pmu);
 		}
-#else /* MY_ABC_HERE */
+#else  
 	for (i = 0; i < irqs; ++i) {
 		if (!cpumask_test_and_clear_cpu(i, &cpu_pmu->active_irqs))
 			continue;
@@ -154,11 +130,11 @@ static void cpu_pmu_free_irq(struct arm_pmu *cpu_pmu)
 			} else
 				free_irq(irq, &per_cpu(cpu_hw_events, i));
 		}
-#else /* MY_DEF_HERE */
+#else  
 		if (irq >= 0)
 			free_irq(irq, cpu_pmu);
-#endif /* MY_DEF_HERE */
-#endif /* MY_ABC_HERE */
+#endif  
+#endif  
 	}
 }
 
@@ -193,11 +169,6 @@ static int cpu_pmu_request_irq(struct arm_pmu *cpu_pmu, irq_handler_t handler)
 			if (irq < 0)
 				continue;
 
-			/*
-			 * If we have a single PMU interrupt that we can't shift,
-			 * assume that we're running on a uniprocessor machine and
-			 * continue. Otherwise, continue without this interrupt.
-			 */
 			if (irq_set_affinity(irq, cpumask_of(i)) && irqs > 1) {
 				pr_warning("unable to set irq affinity (irq=%d, cpu=%u)\n",
 					    irq, i);
@@ -213,7 +184,7 @@ static int cpu_pmu_request_irq(struct arm_pmu *cpu_pmu, irq_handler_t handler)
 				return err;
 			}
 		}
-#else /* MY_ABC_HERE */
+#else  
 	for (i = 0; i < irqs; ++i) {
 		err = 0;
 		irq = platform_get_irq(pmu_device, i);
@@ -221,10 +192,7 @@ static int cpu_pmu_request_irq(struct arm_pmu *cpu_pmu, irq_handler_t handler)
 			continue;
 #if defined (MY_DEF_HERE)
 		if (irq_is_per_cpu(irq)) {
-			/*
-			 * We assume that if the PMU IRQ is per-cpu, then
-			 * there is only one.
-			 */
+			 
 			WARN_ON(irqs > 1);
 
 			err = request_percpu_irq(irq, handler,
@@ -238,12 +206,7 @@ static int cpu_pmu_request_irq(struct arm_pmu *cpu_pmu, irq_handler_t handler)
 			on_each_cpu(cpu_pmu_enable_percpu_irq,
 					(void *)irq, 1);
 		} else {
-		/*
-		 * If we have a single PMU interrupt that we can't shift,
-			* assume that we're running on a uniprocessor machine
-			* and continue. Otherwise, continue without this
-			* interrupt.
-		 */
+		 
 		if (irq_set_affinity(irq, cpumask_of(i)) && irqs > 1) {
 				pr_warn("unable to set irq affinity (irq=%d, cpu=%u)\n",
 				    irq, i);
@@ -258,13 +221,8 @@ static int cpu_pmu_request_irq(struct arm_pmu *cpu_pmu, irq_handler_t handler)
 			return err;
 		}
 		}
-#else /* MY_DEF_HERE */
+#else  
 
-		/*
-		 * If we have a single PMU interrupt that we can't shift,
-		 * assume that we're running on a uniprocessor machine and
-		 * continue. Otherwise, continue without this interrupt.
-		 */
 		if (irq_set_affinity(irq, cpumask_of(i)) && irqs > 1) {
 			pr_warning("unable to set irq affinity (irq=%d, cpu=%u)\n",
 				    irq, i);
@@ -278,8 +236,8 @@ static int cpu_pmu_request_irq(struct arm_pmu *cpu_pmu, irq_handler_t handler)
 				irq);
 			return err;
 		}
-#endif /* MY_DEF_HERE */
-#endif /* MY_ABC_HERE */
+#endif  
+#endif  
 
 		cpumask_set_cpu(i, &cpu_pmu->active_irqs);
 	}
@@ -296,28 +254,21 @@ static void cpu_pmu_init(struct arm_pmu *cpu_pmu)
 		events->used_mask = per_cpu(used_mask, cpu);
 #if defined (MY_DEF_HERE)
 		events->pmu = &cpu_pmu->pmu;
-#endif /* MY_DEF_HERE */
+#endif  
 		raw_spin_lock_init(&events->pmu_lock);
 #if defined(MY_ABC_HERE)
 		per_cpu(percpu_pmu, cpu) = cpu_pmu;
-#endif /* MY_ABC_HERE */
+#endif  
 	}
 
 	cpu_pmu->get_hw_events	= cpu_pmu_get_cpu_events;
 	cpu_pmu->request_irq	= cpu_pmu_request_irq;
 	cpu_pmu->free_irq	= cpu_pmu_free_irq;
 
-	/* Ensure the PMU has sane values out of reset. */
 	if (cpu_pmu->reset)
 		on_each_cpu(cpu_pmu->reset, cpu_pmu, 1);
 }
 
-/*
- * PMU hardware loses all context when a CPU goes offline.
- * When a CPU is hotplugged back in, since some hardware registers are
- * UNKNOWN at reset, the PMU must be explicitly reset to avoid reading
- * junk values out of them.
- */
 static int __cpuinit cpu_pmu_notify(struct notifier_block *b,
 				    unsigned long action, void *hcpu)
 {
@@ -336,9 +287,6 @@ static struct notifier_block __cpuinitdata cpu_pmu_hotplug_notifier = {
 	.notifier_call = cpu_pmu_notify,
 };
 
-/*
- * PMU platform driver and devicetree bindings.
- */
 static struct of_device_id cpu_pmu_of_device_ids[] = {
 	{.compatible = "arm,cortex-a15-pmu",	.data = armv7_a15_pmu_init},
 	{.compatible = "arm,cortex-a9-pmu",	.data = armv7_a9_pmu_init},
@@ -356,9 +304,6 @@ static struct platform_device_id cpu_pmu_plat_device_ids[] = {
 	{},
 };
 
-/*
- * CPU PMU identification and probing.
- */
 static int probe_current_pmu(struct arm_pmu *pmu)
 {
 	int cpu = get_cpu();
@@ -368,7 +313,6 @@ static int probe_current_pmu(struct arm_pmu *pmu)
 
 	pr_info("probing PMU on CPU %d\n", cpu);
 
-	/* ARM Ltd CPUs. */
 	if (implementor == ARM_CPU_IMP_ARM) {
 		switch (part_number) {
 		case ARM_CPU_PART_ARM1136:
@@ -395,7 +339,7 @@ static int probe_current_pmu(struct arm_pmu *pmu)
 			ret = armv7_a7_pmu_init(pmu);
 			break;
 		}
-	/* Intel CPUs [xscale]. */
+	 
 	} else if (implementor == ARM_CPU_IMP_INTEL) {
 		switch (xscale_cpu_arch_version()) {
 		case ARM_CPU_XSCALE_ARCH_V1:

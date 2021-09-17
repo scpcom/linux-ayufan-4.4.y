@@ -1,29 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * CS4270 ALSA SoC (ASoC) codec driver
- *
- * Author: Timur Tabi <timur@freescale.com>
- *
- * Copyright 2007-2009 Freescale Semiconductor, Inc.  This file is licensed
- * under the terms of the GNU General Public License version 2.  This
- * program is licensed "as is" without any warranty of any kind, whether
- * express or implied.
- *
- * This is an ASoC device driver for the Cirrus Logic CS4270 codec.
- *
- * Current features/limitations:
- *
- * - Software mode is supported.  Stand-alone mode is not supported.
- * - Only I2C is supported, not SPI
- * - Support for master and slave mode
- * - The machine driver's 'startup' function must call
- *   cs4270_set_dai_sysclk() with the value of MCLK.
- * - Only I2S and left-justified modes are supported
- * - Power management is supported
- */
-
+ 
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <sound/core.h>
@@ -35,12 +13,6 @@
 #include <linux/of_device.h>
 #include <linux/of_gpio.h>
 
-/*
- * The codec isn't really big-endian or little-endian, since the I2S
- * interface requires data to be sent serially with the MSbit first.
- * However, to support BE and LE I2S devices, we specify both here.  That
- * way, ALSA will always match the bit patterns.
- */
 #define CS4270_FORMATS (SNDRV_PCM_FMTBIT_S8      | \
 			SNDRV_PCM_FMTBIT_S16_LE  | SNDRV_PCM_FMTBIT_S16_BE  | \
 			SNDRV_PCM_FMTBIT_S18_3LE | SNDRV_PCM_FMTBIT_S18_3BE | \
@@ -48,22 +20,20 @@
 			SNDRV_PCM_FMTBIT_S24_3LE | SNDRV_PCM_FMTBIT_S24_3BE | \
 			SNDRV_PCM_FMTBIT_S24_LE  | SNDRV_PCM_FMTBIT_S24_BE)
 
-/* CS4270 registers addresses */
-#define CS4270_CHIPID	0x01	/* Chip ID */
-#define CS4270_PWRCTL	0x02	/* Power Control */
-#define CS4270_MODE	0x03	/* Mode Control */
-#define CS4270_FORMAT	0x04	/* Serial Format, ADC/DAC Control */
-#define CS4270_TRANS	0x05	/* Transition Control */
-#define CS4270_MUTE	0x06	/* Mute Control */
-#define CS4270_VOLA	0x07	/* DAC Channel A Volume Control */
-#define CS4270_VOLB	0x08	/* DAC Channel B Volume Control */
+#define CS4270_CHIPID	0x01	 
+#define CS4270_PWRCTL	0x02	 
+#define CS4270_MODE	0x03	 
+#define CS4270_FORMAT	0x04	 
+#define CS4270_TRANS	0x05	 
+#define CS4270_MUTE	0x06	 
+#define CS4270_VOLA	0x07	 
+#define CS4270_VOLB	0x08	 
 
 #define CS4270_FIRSTREG	0x01
 #define CS4270_LASTREG	0x08
 #define CS4270_NUMREGS	(CS4270_LASTREG - CS4270_FIRSTREG + 1)
 #define CS4270_I2C_INCR	0x80
 
-/* Bit masks for the CS4270 registers */
 #define CS4270_CHIPID_ID	0xF0
 #define CS4270_CHIPID_REV	0x0F
 #define CS4270_PWRCTL_FREEZE	0x80
@@ -110,12 +80,6 @@
 #define CS4270_MUTE_DAC_A	0x01
 #define CS4270_MUTE_DAC_B	0x02
 
-/* Power-on default values for the registers
- *
- * This array contains the power-on default values of the registers, with the
- * exception of the "CHIPID" register (01h).  The lower four bits of that
- * register contain the hardware revision, so it is treated as volatile.
- */
 static const struct reg_default cs4270_reg_defaults[] = {
 	{ 2, 0x00 },
 	{ 3, 0x30 },
@@ -130,50 +94,16 @@ static const char *supply_names[] = {
 	"va", "vd", "vlc"
 };
 
-/* Private data for the CS4270 */
 struct cs4270_private {
 	struct regmap *regmap;
-	unsigned int mclk; /* Input frequency of the MCLK pin */
-	unsigned int mode; /* The mode (I2S or left-justified) */
+	unsigned int mclk;  
+	unsigned int mode;  
 	unsigned int slave_mode;
 	unsigned int manual_mute;
 
-	/* power domain regulators */
 	struct regulator_bulk_data supplies[ARRAY_SIZE(supply_names)];
 };
 
-/**
- * struct cs4270_mode_ratios - clock ratio tables
- * @ratio: the ratio of MCLK to the sample rate
- * @speed_mode: the Speed Mode bits to set in the Mode Control register for
- *              this ratio
- * @mclk: the Ratio Select bits to set in the Mode Control register for this
- *        ratio
- *
- * The data for this chart is taken from Table 5 of the CS4270 reference
- * manual.
- *
- * This table is used to determine how to program the Mode Control register.
- * It is also used by cs4270_set_dai_sysclk() to tell ALSA which sampling
- * rates the CS4270 currently supports.
- *
- * @speed_mode is the corresponding bit pattern to be written to the
- * MODE bits of the Mode Control Register
- *
- * @mclk is the corresponding bit pattern to be wirten to the MCLK bits of
- * the Mode Control Register.
- *
- * In situations where a single ratio is represented by multiple speed
- * modes, we favor the slowest speed.  E.g, for a ratio of 128, we pick
- * double-speed instead of quad-speed.  However, the CS4270 errata states
- * that divide-By-1.5 can cause failures, so we avoid that mode where
- * possible.
- *
- * Errata: There is an errata for the CS4270 where divide-by-1.5 does not
- * work if Vd is 3.3V.  If this effects you, select the
- * CONFIG_SND_SOC_CS4270_VD33_ERRATA Kconfig option, and the driver will
- * never select any sample rates that require divide-by-1.5.
- */
 struct cs4270_mode_ratios {
 	unsigned int ratio;
 	u8 speed_mode;
@@ -194,7 +124,6 @@ static struct cs4270_mode_ratios cs4270_mode_ratios[] = {
 	{1024, CS4270_MODE_1X, CS4270_MODE_DIV4}
 };
 
-/* The number of MCLK/LRCK ratios supported by the CS4270 */
 #define NUM_MCLK_RATIOS		ARRAY_SIZE(cs4270_mode_ratios)
 
 static bool cs4270_reg_is_readable(struct device *dev, unsigned int reg)
@@ -204,40 +133,13 @@ static bool cs4270_reg_is_readable(struct device *dev, unsigned int reg)
 
 static bool cs4270_reg_is_volatile(struct device *dev, unsigned int reg)
 {
-	/* Unreadable registers are considered volatile */
+	 
 	if ((reg < CS4270_FIRSTREG) || (reg > CS4270_LASTREG))
 		return 1;
 
 	return reg == CS4270_CHIPID;
 }
 
-/**
- * cs4270_set_dai_sysclk - determine the CS4270 samples rates.
- * @codec_dai: the codec DAI
- * @clk_id: the clock ID (ignored)
- * @freq: the MCLK input frequency
- * @dir: the clock direction (ignored)
- *
- * This function is used to tell the codec driver what the input MCLK
- * frequency is.
- *
- * The value of MCLK is used to determine which sample rates are supported
- * by the CS4270.  The ratio of MCLK / Fs must be equal to one of nine
- * supported values - 64, 96, 128, 192, 256, 384, 512, 768, and 1024.
- *
- * This function calculates the nine ratios and determines which ones match
- * a standard sample rate.  If there's a match, then it is added to the list
- * of supported sample rates.
- *
- * This function must be called by the machine driver's 'startup' function,
- * otherwise the list of supported sample rates will not be available in
- * time for ALSA.
- *
- * For setups with variable MCLKs, pass 0 as 'freq' argument. This will cause
- * theoretically possible sample rates to be enabled. Call it again with a
- * proper value set one the external clock is set (most probably you would do
- * that from a machine's driver 'hw_param' hook.
- */
 static int cs4270_set_dai_sysclk(struct snd_soc_dai *codec_dai,
 				 int clk_id, unsigned int freq, int dir)
 {
@@ -248,26 +150,12 @@ static int cs4270_set_dai_sysclk(struct snd_soc_dai *codec_dai,
 	return 0;
 }
 
-/**
- * cs4270_set_dai_fmt - configure the codec for the selected audio format
- * @codec_dai: the codec DAI
- * @format: a SND_SOC_DAIFMT_x value indicating the data format
- *
- * This function takes a bitmask of SND_SOC_DAIFMT_x bits and programs the
- * codec accordingly.
- *
- * Currently, this function only supports SND_SOC_DAIFMT_I2S and
- * SND_SOC_DAIFMT_LEFT_J.  The CS4270 codec also supports right-justified
- * data for playback only, but ASoC currently does not support different
- * formats for playback vs. record.
- */
 static int cs4270_set_dai_fmt(struct snd_soc_dai *codec_dai,
 			      unsigned int format)
 {
 	struct snd_soc_codec *codec = codec_dai->codec;
 	struct cs4270_private *cs4270 = snd_soc_codec_get_drvdata(codec);
 
-	/* set DAI format */
 	switch (format & SND_SOC_DAIFMT_FORMAT_MASK) {
 	case SND_SOC_DAIFMT_I2S:
 	case SND_SOC_DAIFMT_LEFT_J:
@@ -278,7 +166,6 @@ static int cs4270_set_dai_fmt(struct snd_soc_dai *codec_dai,
 		return -EINVAL;
 	}
 
-	/* set master/slave audio interface */
 	switch (format & SND_SOC_DAIFMT_MASTER_MASK) {
 	case SND_SOC_DAIFMT_CBS_CFS:
 		cs4270->slave_mode = 1;
@@ -287,7 +174,7 @@ static int cs4270_set_dai_fmt(struct snd_soc_dai *codec_dai,
 		cs4270->slave_mode = 0;
 		break;
 	default:
-		/* all other modes are unsupported by the hardware */
+		 
 		dev_err(codec->dev, "Unknown master/slave configuration\n");
 		return -EINVAL;
 	}
@@ -295,20 +182,6 @@ static int cs4270_set_dai_fmt(struct snd_soc_dai *codec_dai,
 	return 0;
 }
 
-/**
- * cs4270_hw_params - program the CS4270 with the given hardware parameters.
- * @substream: the audio stream
- * @params: the hardware parameters to set
- * @dai: the SOC DAI (ignored)
- *
- * This function programs the hardware with the values provided.
- * Specifically, the sample rate and the data format.
- *
- * The .ops functions are used to provide board-specific data, like input
- * frequencies, to this driver.  This function takes that information,
- * combines it with the hardware parameters provided, and programs the
- * hardware accordingly.
- */
 static int cs4270_hw_params(struct snd_pcm_substream *substream,
 			    struct snd_pcm_hw_params *params,
 			    struct snd_soc_dai *dai)
@@ -321,10 +194,8 @@ static int cs4270_hw_params(struct snd_pcm_substream *substream,
 	unsigned int ratio;
 	int reg;
 
-	/* Figure out which MCLK/LRCK ratio to use */
-
-	rate = params_rate(params);	/* Sampling rate, in Hz */
-	ratio = cs4270->mclk / rate;	/* MCLK/LRCK ratio */
+	rate = params_rate(params);	 
+	ratio = cs4270->mclk / rate;	 
 
 	for (i = 0; i < NUM_MCLK_RATIOS; i++) {
 		if (cs4270_mode_ratios[i].ratio == ratio)
@@ -332,12 +203,10 @@ static int cs4270_hw_params(struct snd_pcm_substream *substream,
 	}
 
 	if (i == NUM_MCLK_RATIOS) {
-		/* We did not find a matching ratio */
+		 
 		dev_err(codec->dev, "could not find matching ratio\n");
 		return -EINVAL;
 	}
-
-	/* Set the sample rate */
 
 	reg = snd_soc_read(codec, CS4270_MODE);
 	reg &= ~(CS4270_MODE_SPEED_MASK | CS4270_MODE_DIV_MASK);
@@ -353,8 +222,6 @@ static int cs4270_hw_params(struct snd_pcm_substream *substream,
 		dev_err(codec->dev, "i2c write failed\n");
 		return ret;
 	}
-
-	/* Set the DAI format */
 
 	reg = snd_soc_read(codec, CS4270_FORMAT);
 	reg &= ~(CS4270_FORMAT_DAC_MASK | CS4270_FORMAT_ADC_MASK);
@@ -380,16 +247,6 @@ static int cs4270_hw_params(struct snd_pcm_substream *substream,
 	return ret;
 }
 
-/**
- * cs4270_dai_mute - enable/disable the CS4270 external mute
- * @dai: the SOC DAI
- * @mute: 0 = disable mute, 1 = enable mute
- *
- * This function toggles the mute bits in the MUTE register.  The CS4270's
- * mute capability is intended for external muting circuitry, so if the
- * board does not have the MUTEA or MUTEB pins connected to such circuitry,
- * then this function will do nothing.
- */
 static int cs4270_dai_mute(struct snd_soc_dai *dai, int mute)
 {
 	struct snd_soc_codec *codec = dai->codec;
@@ -408,28 +265,14 @@ static int cs4270_dai_mute(struct snd_soc_dai *dai, int mute)
 	return snd_soc_write(codec, CS4270_MUTE, reg6);
 }
 
-/**
- * cs4270_soc_put_mute - put callback for the 'Master Playback switch'
- * 			 alsa control.
- * @kcontrol: mixer control
- * @ucontrol: control element information
- *
- * This function basically passes the arguments on to the generic
- * snd_soc_put_volsw() function and saves the mute information in
- * our private data structure. This is because we want to prevent
- * cs4270_dai_mute() neglecting the user's decision to manually
- * mute the codec's output.
- *
- * Returns 0 for success.
- */
 static int cs4270_soc_put_mute(struct snd_kcontrol *kcontrol,
 				struct snd_ctl_elem_value *ucontrol)
 {
 #if defined(MY_ABC_HERE)
 	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
-#else /* MY_ABC_HERE */
+#else  
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
-#endif /* MY_ABC_HERE */
+#endif  
 	struct cs4270_private *cs4270 = snd_soc_codec_get_drvdata(codec);
 	int left = !ucontrol->value.integer.value[0];
 	int right = !ucontrol->value.integer.value[1];
@@ -440,7 +283,6 @@ static int cs4270_soc_put_mute(struct snd_kcontrol *kcontrol,
 	return snd_soc_put_volsw(kcontrol, ucontrol);
 }
 
-/* A list of non-DAPM controls that the CS4270 supports */
 static const struct snd_kcontrol_new cs4270_snd_controls[] = {
 	SOC_DOUBLE_R("Master Playback Volume",
 		CS4270_VOLA, CS4270_VOLB, 0, 0xFF, 1),
@@ -485,43 +327,23 @@ static struct snd_soc_dai_driver cs4270_dai = {
 	.ops = &cs4270_dai_ops,
 };
 
-/**
- * cs4270_probe - ASoC probe function
- * @pdev: platform device
- *
- * This function is called when ASoC has all the pieces it needs to
- * instantiate a sound driver.
- */
 static int cs4270_probe(struct snd_soc_codec *codec)
 {
 	struct cs4270_private *cs4270 = snd_soc_codec_get_drvdata(codec);
 	int ret;
 
-	/* Tell ASoC what kind of I/O to use to read the registers.  ASoC will
-	 * then do the I2C transactions itself.
-	 */
 	ret = snd_soc_codec_set_cache_io(codec, 8, 8, SND_SOC_REGMAP);
 	if (ret < 0) {
 		dev_err(codec->dev, "failed to set cache I/O (ret=%i)\n", ret);
 		return ret;
 	}
 
-	/* Disable auto-mute.  This feature appears to be buggy.  In some
-	 * situations, auto-mute will not deactivate when it should, so we want
-	 * this feature disabled by default.  An application (e.g. alsactl) can
-	 * re-enabled it by using the controls.
-	 */
 	ret = snd_soc_update_bits(codec, CS4270_MUTE, CS4270_MUTE_AUTO, 0);
 	if (ret < 0) {
 		dev_err(codec->dev, "i2c write failed\n");
 		return ret;
 	}
 
-	/* Disable automatic volume control.  The hardware enables, and it
-	 * causes volume change commands to be delayed, sometimes until after
-	 * playback has started.  An application (e.g. alsactl) can
-	 * re-enabled it by using the controls.
-	 */
 	ret = snd_soc_update_bits(codec, CS4270_TRANS,
 		CS4270_TRANS_SOFT | CS4270_TRANS_ZERO, 0);
 	if (ret < 0) {
@@ -535,12 +357,6 @@ static int cs4270_probe(struct snd_soc_codec *codec)
 	return ret;
 }
 
-/**
- * cs4270_remove - ASoC remove function
- * @pdev: platform device
- *
- * This function is the counterpart to cs4270_probe().
- */
 static int cs4270_remove(struct snd_soc_codec *codec)
 {
 	struct cs4270_private *cs4270 = snd_soc_codec_get_drvdata(codec);
@@ -551,15 +367,6 @@ static int cs4270_remove(struct snd_soc_codec *codec)
 };
 
 #ifdef CONFIG_PM
-
-/* This suspend/resume implementation can handle both - a simple standby
- * where the codec remains powered, and a full suspend, where the voltage
- * domain the codec is connected to is teared down and/or any other hardware
- * reset condition is asserted.
- *
- * The codec's own power saving features are enabled in the suspend callback,
- * and all registers are written back to the hardware when resuming.
- */
 
 static int cs4270_soc_suspend(struct snd_soc_codec *codec)
 {
@@ -590,14 +397,10 @@ static int cs4270_soc_resume(struct snd_soc_codec *codec)
 	if (ret != 0)
 		return ret;
 
-	/* In case the device was put to hard reset during sleep, we need to
-	 * wait 500ns here before any I2C communication. */
 	ndelay(500);
 
-	/* first restore the entire register cache ... */
 	regcache_sync(cs4270->regmap);
 
-	/* ... then disable the power-down bits */
 	reg = snd_soc_read(codec, CS4270_PWRCTL);
 	reg &= ~CS4270_PWRCTL_PDN_ALL;
 
@@ -606,11 +409,8 @@ static int cs4270_soc_resume(struct snd_soc_codec *codec)
 #else
 #define cs4270_soc_suspend	NULL
 #define cs4270_soc_resume	NULL
-#endif /* CONFIG_PM */
+#endif  
 
-/*
- * ASoC codec driver structure
- */
 static const struct snd_soc_codec_driver soc_codec_device_cs4270 = {
 	.probe =		cs4270_probe,
 	.remove =		cs4270_remove,
@@ -621,9 +421,6 @@ static const struct snd_soc_codec_driver soc_codec_device_cs4270 = {
 	.num_controls =		ARRAY_SIZE(cs4270_snd_controls),
 };
 
-/*
- * cs4270_of_match - the device tree bindings
- */
 static const struct of_device_id cs4270_of_match[] = {
 	{ .compatible = "cirrus,cs4270", },
 	{ }
@@ -642,14 +439,6 @@ static const struct regmap_config cs4270_regmap = {
 	.volatile_reg =		cs4270_reg_is_volatile,
 };
 
-/**
- * cs4270_i2c_probe - initialize the I2C interface of the CS4270
- * @i2c_client: the I2C client object
- * @id: the I2C device ID (ignored)
- *
- * This function is called whenever the I2C subsystem finds a device that
- * matches the device ID given via a prior call to i2c_add_driver().
- */
 static int cs4270_i2c_probe(struct i2c_client *i2c_client,
 	const struct i2c_device_id *id)
 {
@@ -665,7 +454,6 @@ static int cs4270_i2c_probe(struct i2c_client *i2c_client,
 		return -ENOMEM;
 	}
 
-	/* get the power supply regulators */
 	for (i = 0; i < ARRAY_SIZE(supply_names); i++)
 		cs4270->supplies[i].supply = supply_names[i];
 
@@ -675,7 +463,6 @@ static int cs4270_i2c_probe(struct i2c_client *i2c_client,
 	if (ret < 0)
 		return ret;
 
-	/* See if we have a way to bring the codec out of reset */
 	if (np) {
 		enum of_gpio_flags flags;
 		int gpio = of_get_named_gpio_flags(np, "reset-gpio", 0, &flags);
@@ -694,14 +481,13 @@ static int cs4270_i2c_probe(struct i2c_client *i2c_client,
 	if (IS_ERR(cs4270->regmap))
 		return PTR_ERR(cs4270->regmap);
 
-	/* Verify that we have a CS4270 */
 	ret = regmap_read(cs4270->regmap, CS4270_CHIPID, &val);
 	if (ret < 0) {
 		dev_err(&i2c_client->dev, "failed to read i2c at addr %X\n",
 		       i2c_client->addr);
 		return ret;
 	}
-	/* The top four bits of the chip ID should be 1100. */
+	 
 	if ((val & 0xF0) != 0xC0) {
 		dev_err(&i2c_client->dev, "device at addr %X is not a CS4270\n",
 		       i2c_client->addr);
@@ -719,33 +505,18 @@ static int cs4270_i2c_probe(struct i2c_client *i2c_client,
 	return ret;
 }
 
-/**
- * cs4270_i2c_remove - remove an I2C device
- * @i2c_client: the I2C client object
- *
- * This function is the counterpart to cs4270_i2c_probe().
- */
 static int cs4270_i2c_remove(struct i2c_client *i2c_client)
 {
 	snd_soc_unregister_codec(&i2c_client->dev);
 	return 0;
 }
 
-/*
- * cs4270_id - I2C device IDs supported by this driver
- */
 static const struct i2c_device_id cs4270_id[] = {
 	{"cs4270", 0},
 	{}
 };
 MODULE_DEVICE_TABLE(i2c, cs4270_id);
 
-/*
- * cs4270_i2c_driver - I2C device identification
- *
- * This structure tells the I2C subsystem how to identify and support a
- * given I2C device type.
- */
 static struct i2c_driver cs4270_i2c_driver = {
 	.driver = {
 		.name = "cs4270",

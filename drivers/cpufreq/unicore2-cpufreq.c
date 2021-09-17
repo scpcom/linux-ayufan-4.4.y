@@ -1,19 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * clock scaling for the UniCore-II
- *
- * Code specific to PKUnity SoC and UniCore ISA
- *
- *	Maintained by GUAN Xue-tao <gxt@mprc.pku.edu.cn>
- *	Copyright (C) 2001-2010 Guan Xuetao
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/types.h>
 #include <linux/init.h>
@@ -24,9 +12,6 @@
 
 static struct cpufreq_driver ucv2_driver;
 
-/* make sure that only the "userspace" governor is run
- * -- anything else wouldn't make sense on this platform, anyway.
- */
 int ucv2_verify_speed(struct cpufreq_policy *policy)
 {
 	if (policy->cpu)
@@ -34,10 +19,10 @@ int ucv2_verify_speed(struct cpufreq_policy *policy)
 
 #if defined(MY_ABC_HERE)
 	cpufreq_verify_within_cpu_limits(policy);
-#else /* MY_ABC_HERE */
+#else  
 	cpufreq_verify_within_limits(policy,
 			policy->cpuinfo.min_freq, policy->cpuinfo.max_freq);
-#endif /* MY_ABC_HERE */
+#endif  
 
 	return 0;
 }
@@ -56,10 +41,10 @@ static int ucv2_target(struct cpufreq_policy *policy,
 			 unsigned int relation)
 {
 #if defined(MY_ABC_HERE)
-	// do nothing
-#else /* MY_ABC_HERE */
+	 
+#else  
 	unsigned int cur = ucv2_getspeed(0);
-#endif /* MY_ABC_HERE */
+#endif  
 	struct cpufreq_freqs freqs;
 	struct clk *mclk = clk_get(NULL, "MAIN_CLK");
 #if defined(MY_ABC_HERE)
@@ -67,7 +52,7 @@ static int ucv2_target(struct cpufreq_policy *policy,
 
 	freqs.old = policy->cur;
 	freqs.new = target_freq;
-#endif /* MY_ABC_HERE */
+#endif  
 
 	cpufreq_notify_transition(policy, &freqs, CPUFREQ_PRECHANGE);
 #if defined(MY_ABC_HERE)
@@ -75,7 +60,7 @@ static int ucv2_target(struct cpufreq_policy *policy,
 	cpufreq_notify_post_transition(policy, &freqs, ret);
 
 	return ret;
-#else /* MY_ABC_HERE */
+#else  
 
 	if (!clk_set_rate(mclk, target_freq * 1000)) {
 		freqs.old = cur;
@@ -85,7 +70,7 @@ static int ucv2_target(struct cpufreq_policy *policy,
 	cpufreq_notify_transition(policy, &freqs, CPUFREQ_POSTCHANGE);
 
 	return 0;
-#endif /* MY_ABC_HERE */
+#endif  
 }
 
 static int __init ucv2_cpu_init(struct cpufreq_policy *policy)

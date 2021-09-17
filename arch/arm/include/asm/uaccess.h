@@ -1,19 +1,10 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  arch/arm/include/asm/uaccess.h
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
+ 
 #ifndef _ASMARM_UACCESS_H
 #define _ASMARM_UACCESS_H
 
-/*
- * User space memory access functions
- */
 #include <linux/string.h>
 #include <linux/thread_info.h>
 #include <asm/errno.h>
@@ -25,19 +16,6 @@
 #define VERIFY_READ 0
 #define VERIFY_WRITE 1
 
-/*
- * The exception table consists of pairs of addresses: the first is the
- * address of an instruction that is allowed to fault, and the second is
- * the address at which the program should continue.  No registers are
- * modified, so it is entirely up to the continuation code to figure out
- * what to do.
- *
- * All the routines below use bits of fixup code that are out of line
- * with the main instruction path.  This means when everything is well,
- * we don't even have to jump over them.  Further, they do not intrude
- * on our cache or tlb entries.
- */
-
 struct exception_table_entry
 {
 	unsigned long insn, fixup;
@@ -45,16 +23,9 @@ struct exception_table_entry
 
 extern int fixup_exception(struct pt_regs *regs);
 
-/*
- * These two are intentionally not defined anywhere - if the kernel
- * code generates any references to them, that's a bug.
- */
 extern int __get_user_bad(void);
 extern int __put_user_bad(void);
 
-/*
- * Note that this is actually 0x1,0000,0000
- */
 #define KERNEL_DS	0x00000000
 #define get_ds()	(KERNEL_DS)
 
@@ -79,7 +50,6 @@ static inline void set_fs(mm_segment_t fs)
 		: "cc"); \
 	(flag == 0); })
 
-/* We use 33-bit arithmetic here... */
 #define __range_ok(addr,size) ({ \
 	unsigned long flag, roksum; \
 	__chk_user_ptr(addr);	\
@@ -89,23 +59,12 @@ static inline void set_fs(mm_segment_t fs)
 		: "cc"); \
 	flag; })
 
-/*
- * Single-value transfer routines.  They automatically use the right
- * size if we just have the right pointer type.  Note that the functions
- * which read from user space (*get_*) need to take care not to leak
- * kernel data even if the calling code is buggy and fails to check
- * the return value.  This means zeroing out the destination variable
- * or buffer on error.  Normally this is done out of line by the
- * fixup code, but there are a few places where it intrudes on the
- * main code path.  When we only write to user space, there is no
- * problem.
- */
 extern int __get_user_1(void *);
 extern int __get_user_2(void *);
 extern int __get_user_4(void *);
 #ifdef MY_ABC_HERE
 extern int __get_user_8(void *);
-#endif /* MY_ABC_HERE */
+#endif  
 
 #define __GUP_CLOBBER_1	"lr", "cc"
 #ifdef CONFIG_CPU_USE_DOMAINS
@@ -116,7 +75,7 @@ extern int __get_user_8(void *);
 #define __GUP_CLOBBER_4	"lr", "cc"
 #ifdef MY_ABC_HERE
 #define __GUP_CLOBBER_8	"lr", "cc"
-#endif /* MY_ABC_HERE */
+#endif  
 
 #define __get_user_x(__r2,__p,__e,__l,__s)				\
 	   __asm__ __volatile__ (					\
@@ -163,7 +122,7 @@ extern int __get_user_8(void *);
 		x = (typeof(*(p))) __r2;				\
 		__e;							\
 	})
-#else /* MY_ABC_HERE */
+#else  
 #define __get_user_check(x,p)							\
 	({								\
 		unsigned long __limit = current_thread_info()->addr_limit - 1; \
@@ -186,7 +145,7 @@ extern int __get_user_8(void *);
 		x = (typeof(*(p))) __r2;				\
 		__e;							\
 	})
-#endif /* MY_ABC_HERE */
+#endif  
 
 #define get_user(x,p)							\
 	({								\
@@ -240,11 +199,8 @@ extern int __put_user_8(void *, unsigned long long);
 		__put_user_check(x,p);					\
 	 })
 
-#else /* CONFIG_MMU */
+#else  
 
-/*
- * uClinux has only one addr space, so has simplified address limits.
- */
 #define USER_DS			KERNEL_DS
 
 #define segment_eq(a,b)		(1)
@@ -259,22 +215,13 @@ static inline void set_fs(mm_segment_t fs)
 #define get_user(x,p)	__get_user(x,p)
 #define put_user(x,p)	__put_user(x,p)
 
-#endif /* CONFIG_MMU */
+#endif  
 
 #define access_ok(type,addr,size)	(__range_ok(addr,size) == 0)
 
 #define user_addr_max() \
 	(segment_eq(get_fs(), USER_DS) ? TASK_SIZE : ~0UL)
 
-/*
- * The "__xxx" versions of the user access functions do not verify the
- * address space - it must have been done previously with a separate
- * "access_ok()" call.
- *
- * The "xxx_error" versions set the third argument to EFAULT if an
- * error occurs, and leave it unchanged on success.  Note that these
- * versions are void (ie, don't return a value as such).
- */
 #define __get_user(x,ptr)						\
 ({									\
 	long __gu_err = 0;						\
@@ -340,7 +287,7 @@ do {									\
 	: "+r" (err), "=&r" (x)					\
 	: "r" (addr), "i" (-EFAULT)				\
 	: "cc")
-#else /* CONFIG_SYNO_LSP_ALPINE && CONFIG_VHOST_NET */
+#else  
 #define __get_user_asm_half(x,__gu_addr,err)			\
 ({								\
 	unsigned long __b1, __b2;				\
@@ -348,8 +295,8 @@ do {									\
 	__get_user_asm_byte(__b2, __gu_addr + 1, err);		\
 	(x) = __b1 | (__b2 << 8);				\
 })
-#endif /* MY_DEF_HERE && CONFIG_VHOST_NET */
-#else /* ARMEB */
+#endif  
+#else  
 #define __get_user_asm_half(x,__gu_addr,err)			\
 ({								\
 	unsigned long __b1, __b2;				\
@@ -440,15 +387,15 @@ do {									\
 	: "+r" (err)						\
 	: "r" (x), "r" (__pu_addr), "i" (-EFAULT)		\
 	: "cc")
-#else /* CONFIG_SYNO_LSP_ALPINE && CONFIG_VHOST_NET */
+#else  
 #define __put_user_asm_half(x,__pu_addr,err)			\
 ({								\
 	unsigned long __temp = (unsigned long)(x);		\
 	__put_user_asm_byte(__temp, __pu_addr, err);		\
 	__put_user_asm_byte(__temp >> 8, __pu_addr + 1, err);	\
 })
-#endif /* MY_DEF_HERE && CONFIG_VHOST_NET */
-#else /* ARMEB */
+#endif  
+#else  
 #define __put_user_asm_half(x,__pu_addr,err)			\
 ({								\
 	unsigned long __temp = (unsigned long)(x);		\
@@ -519,7 +466,7 @@ static inline unsigned long __must_check copy_from_user(void *to, const void __u
 {
 	if (access_ok(VERIFY_READ, from, n))
 		n = __copy_from_user(to, from, n);
-	else /* security hole - plug it */
+	else  
 		memset(to, 0, n);
 	return n;
 }
@@ -546,4 +493,4 @@ extern long strncpy_from_user(char *dest, const char __user *src, long count);
 extern __must_check long strlen_user(const char __user *str);
 extern __must_check long strnlen_user(const char __user *str, long n);
 
-#endif /* _ASMARM_UACCESS_H */
+#endif  

@@ -1,26 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * linux/sound/soc/pxa/ttc_dkb.c
- *
- * Copyright (C) 2012 Marvell International Ltd.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- */
+ 
 #include <linux/module.h>
 #include <linux/moduleparam.h>
 #include <sound/core.h>
@@ -41,7 +22,6 @@ static struct snd_soc_jack_pin mic_jack_pins[] = {
 	{ .pin = "Headset Mic 2",	.mask = SND_JACK_MICROPHONE, },
 };
 
-/* ttc machine dapm widgets */
 static const struct snd_soc_dapm_widget ttc_dapm_widgets[] = {
 	SND_SOC_DAPM_HP("Headset Stereophone", NULL),
 	SND_SOC_DAPM_LINE("Lineout Out 1", NULL),
@@ -52,7 +32,6 @@ static const struct snd_soc_dapm_widget ttc_dapm_widgets[] = {
 	SND_SOC_DAPM_MIC("Ext Mic 3", NULL),
 };
 
-/* ttc machine audio map */
 static const struct snd_soc_dapm_route ttc_audio_map[] = {
 	{"Headset Stereophone", NULL, "HS1"},
 	{"Headset Stereophone", NULL, "HS2"},
@@ -82,17 +61,16 @@ static int ttc_pm860x_init(struct snd_soc_pcm_runtime *rtd)
 	struct snd_soc_dapm_context *dapm = &codec->dapm;
 
 #if defined(MY_ABC_HERE)
-	// do nothing
-#else /* MY_ABC_HERE */
-	/* connected pins */
+	 
+#else  
+	 
 	snd_soc_dapm_enable_pin(dapm, "Ext Speaker");
 	snd_soc_dapm_enable_pin(dapm, "Ext Mic 1");
 	snd_soc_dapm_enable_pin(dapm, "Ext Mic 3");
-#endif /* MY_ABC_HERE */
+#endif  
 	snd_soc_dapm_disable_pin(dapm, "Headset Mic 2");
 	snd_soc_dapm_disable_pin(dapm, "Headset Stereophone");
 
-	/* Headset jack detection */
 	snd_soc_jack_new(codec, "Headphone Jack", SND_JACK_HEADPHONE
 			| SND_JACK_BTN_0 | SND_JACK_BTN_1 | SND_JACK_BTN_2,
 			&hs_jack);
@@ -103,7 +81,6 @@ static int ttc_pm860x_init(struct snd_soc_pcm_runtime *rtd)
 	snd_soc_jack_add_pins(&mic_jack, ARRAY_SIZE(mic_jack_pins),
 			      mic_jack_pins);
 
-	/* headphone, microphone detection & headset short detection */
 	pm860x_hs_jack_detect(codec, &hs_jack, SND_JACK_HEADPHONE,
 			      SND_JACK_BTN_0, SND_JACK_BTN_1, SND_JACK_BTN_2);
 	pm860x_mic_jack_detect(codec, &hs_jack, SND_JACK_MICROPHONE);
@@ -111,7 +88,6 @@ static int ttc_pm860x_init(struct snd_soc_pcm_runtime *rtd)
 	return 0;
 }
 
-/* ttc/td-dkb digital audio interface glue - connects codec <--> CPU */
 static struct snd_soc_dai_link ttc_pm860x_hifi_dai[] = {
 {
 	 .name = "88pm860x i2s",
@@ -126,7 +102,6 @@ static struct snd_soc_dai_link ttc_pm860x_hifi_dai[] = {
 },
 };
 
-/* ttc/td audio machine driver */
 static struct snd_soc_card ttc_dkb_card = {
 	.name = "ttc-dkb-hifi",
 	.dai_link = ttc_pm860x_hifi_dai,
@@ -173,7 +148,6 @@ static struct platform_driver ttc_dkb_driver = {
 
 module_platform_driver(ttc_dkb_driver);
 
-/* Module information */
 MODULE_AUTHOR("Qiao Zhou, <zhouqiao@marvell.com>");
 MODULE_DESCRIPTION("ALSA SoC TTC DKB");
 MODULE_LICENSE("GPL");

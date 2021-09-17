@@ -1,18 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  arch/arm/include/asm/unistd.h
- *
- *  Copyright (C) 2001-2005 Russell King
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- *
- * Please forward _all_ changes to this file to rmk@arm.linux.org.uk,
- * no matter what the change is.  Thanks!
- */
+ 
 #ifndef __ASM_ARM_UNISTD_H
 #define __ASM_ARM_UNISTD_H
 
@@ -21,9 +10,9 @@
 #ifdef MY_ABC_HERE
 #include <asm-generic/bitsperlong.h>
 #define __NR_syscalls  (380 + 48)
-#else /* MY_ABC_HERE */
+#else  
 #define __NR_syscalls  (380)
-#endif /* MY_ABC_HERE */
+#endif  
 
 #define __ARM_NR_cmpxchg		(__ARM_NR_BASE+0x00fff0)
 
@@ -52,9 +41,6 @@
 #define __ARCH_WANT_SYS_VFORK
 #define __ARCH_WANT_SYS_CLONE
 
-/*
- * Unimplemented (or alternatively implemented) syscalls
- */
 #define __IGNORE_fadvise64_64
 #define __IGNORE_migrate_pages
 
@@ -63,16 +49,16 @@
 #if BITS_PER_LONG == 32
 #define __IGNORE_SYNOCaselessStat
 #define __IGNORE_SYNOCaselessLStat
-#endif /* BITS_PER_LONG == 32 */
-#endif /* MY_ABC_HERE */
+#endif  
+#endif  
 
 #ifdef MY_ABC_HERE
 #if BITS_PER_LONG == 32
 #define __IGNORE_SYNOStat
 #define __IGNORE_SYNOFStat
 #define __IGNORE_SYNOLStat
-#endif /* BITS_PER_LONG == 32 */
-#endif /* MY_ABC_HERE */
-#endif /* MY_ABC_HERE */
+#endif  
+#endif  
+#endif  
 
-#endif /* __ASM_ARM_UNISTD_H */
+#endif  

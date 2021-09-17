@@ -1,93 +1,25 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*******************************************************************************
-Copyright (C) Marvell International Ltd. and its affiliates
-
-This software file (the "File") is owned and distributed by Marvell
-International Ltd. and/or its affiliates ("Marvell") under the following
-alternative licensing terms.  Once you have made an election to distribute the
-File under one of the following license alternatives, please (i) delete this
-introductory statement regarding license alternatives, (ii) delete the two
-license alternatives that you have not elected to use and (iii) preserve the
-Marvell copyright notice above.
-
-********************************************************************************
-Marvell Commercial License Option
-
-If you received this File from Marvell and you have entered into a commercial
-license agreement (a "Commercial License") with Marvell, the File is licensed
-to you under the terms of the applicable Commercial License.
-
-********************************************************************************
-Marvell GPL License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or
-modify this File in accordance with the terms and conditions of the General
-Public License Version 2, June 1991 (the "GPL License"), a copy of which is
-available along with the File in the license.txt file or by writing to the Free
-Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 or
-on the worldwide web at http://www.gnu.org/licenses/gpl.txt.
-
-THE FILE IS DISTRIBUTED AS-IS, WITHOUT WARRANTY OF ANY KIND, AND THE IMPLIED
-WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY
-DISCLAIMED.  The GPL License provides additional details about this warranty
-disclaimer.
-********************************************************************************
-Marvell BSD License Option
-
-If you received this File from Marvell, you may opt to use, redistribute and/or
-modify this File under the following licensing terms.
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-    *   Redistributions of source code must retain the above copyright notice,
-	this list of conditions and the following disclaimer.
-
-    *   Redistributions in binary form must reproduce the above copyright
-	notice, this list of conditions and the following disclaimer in the
-	documentation and/or other materials provided with the distribution.
-
-    *   Neither the name of Marvell nor the names of its contributors may be
-	used to endorse or promote products derived from this software without
-	specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-*******************************************************************************/
-
+ 
 #ifndef __INCmvDeviceIdh
 #define __INCmvDeviceIdh
 
 #ifdef __cplusplus
 extern "C" {
-#endif	/* __cplusplus */
+#endif	 
 
-/* defines  */
 #define MARVELL_VEN_ID			0x11ab
 #define MV_INVALID_DEV_ID		0xffff
 
-/* Disco-3 */
 #define MV64460_DEV_ID          	0x6480
 #define MV64460B_DEV_ID         	0x6485
 #define MV64430_DEV_ID          	0x6420
 
-/* Disco-5 */
 #define MV64560_DEV_ID          	0x6450
 
-/* Disco-6 */
 #define MV64660_DEV_ID          	0x6460
 
-/* Orion */
 #define MV_1181_DEV_ID          	0x1181
 #define MV_5181_DEV_ID          	0x5181
 #define MV_5281_DEV_ID          	0x5281
@@ -112,15 +44,14 @@ extern "C" {
 #define MV_5281_D2_ID           	((MV_5281_DEV_ID << 16) | MV_5281_D2_REV)
 #define MV_5281_D2_NAME         "88F5281 D2"
 
-#define MV_5181L_A0_REV         	0x8	/* need for PCIE Er */
-#define MV_5181_A1_REV          	0x1	/* for USB Er .. */
+#define MV_5181L_A0_REV         	0x8	 
+#define MV_5181_A1_REV          	0x1	 
 #define MV_5181_B0_REV          	0x2
 #define MV_5181_B1_REV          	0x3
 #define MV_5182_A1_REV          	0x1
 #define MV_5180N_B1_REV         	0x3
 #define MV_5181L_A0_ID          	((MV_5181_DEV_ID << 16) | MV_5181L_A0_REV)
 
-/* kw */
 #define MV_6281_DEV_ID          	0x6281
 #define MV_6282_DEV_ID          	0x1155
 #define MV_6192_DEV_ID          	0x6192
@@ -170,7 +101,7 @@ extern "C" {
 
 #define MV_88F6XXX_A0_REV         	0x2
 #define MV_88F6XXX_A1_REV         	0x3
-/* Disco-Duo */
+ 
 #define MV_78XX0_ZY_DEV_ID       0x6381
 #define MV_78XX0_ZY_NAME         "MV78X00"
 
@@ -213,7 +144,6 @@ extern "C" {
 #define MV_78200_A1_NAME	"MV78200 A1"
 #define MV_78XX0_A1_NAME	"MV78XX0 A1"
 
-/*MV88F632X family*/
 #define MV_6321_DEV_ID      	0x6321
 #define MV_6322_DEV_ID      	0x6322
 #define MV_6323_DEV_ID      	0x6323
@@ -232,7 +162,6 @@ extern "C" {
 #define MV_6322_A1_NAME		"88F6322 A1"
 #define MV_6323_A1_NAME		"88F6323 A1"
 
-/*MV88F6500 family*/
 #define MV_65XX_DEV_ID		0x6500
 #define MV_6510_DEV_ID		0x6510
 #define MV_6530_DEV_ID		0x6530
@@ -255,7 +184,6 @@ extern "C" {
 #define MV_6560_Z0_ID          		((MV_6560_DEV_ID << 16) | MV_6560_Z0_REV)
 #define MV_6560_Z0_NAME         	"88F6560 Z0"
 
-/* KW40 */
 #define MV_67XX			0x6700
 #define MV_6710_DEV_ID		0x6710
 
@@ -288,7 +216,6 @@ extern "C" {
 #define MV_6707_A1_ID           ((MV_6707_DEV_ID << 16) | MV_6707_A1_REV)
 #define MV_6707_A1_NAME         "MV6707 A1"
 
-/* Armada XP Family */
 #define MV_78XX0		0x78000
 #define MV_78130_DEV_ID		0x7813
 #define MV_78160_DEV_ID		0x7816
@@ -350,7 +277,6 @@ extern "C" {
 #define MV_78460_B0_ID         ((MV_78460_DEV_ID << 16) | MV_78XX0_B0_REV)
 #define MV_78460_B0_NAME       "MV78460 B0"
 
-/* Avanta LP Family */
 #define MV_88F66X0		0x6600
 #define MV_6610_DEV_ID		0x6610
 #define MV_6610F_DEV_ID		0x610F
@@ -376,7 +302,6 @@ extern "C" {
 	MV_88F66XX_A0_NAME \
 };
 
-/* Armada 375 Family */
 #define MV_88F67X0			0x6700
 #define MV_6720_DEV_ID		0x6720
 #define MV_88F6720_Z1_ID	0x0
@@ -395,26 +320,23 @@ extern "C" {
 	MV_88F672X_A0_NAME \
 };
 
-/* Armada 38x Family */
 #define MV_88F68XX		0x6800
 #define MV_6810_DEV_ID		0x6810
 #define MV_6811_DEV_ID		0x6811
 #define MV_6820_DEV_ID		0x6820
 #define MV_6828_DEV_ID		0x6828
 #if defined(MY_ABC_HERE)
-#define MV_6W22_DEV_ID		0x6823 /* 6W22=A383 */
-#define MV_6W23_DEV_ID		0x6824 /* 6W23=A384 */
+#define MV_6W22_DEV_ID		0x6823  
+#define MV_6W23_DEV_ID		0x6824  
 #define MV_6W22_DEV_NAME	"6W22"
 #define MV_6W23_DEV_NAME	"6W23"
-#endif /* MY_ABC_HERE */
+#endif  
 
-/* A38x revisions */
 #define MV_88F68XX_Z1_ID		0x0
 #define MV_88F68XX_Z1_NAME		"Z1"
 #define MV_88F68XX_A0_ID		0x4
 #define MV_88F68XX_A0_NAME		"A0"
 
-/* A39x revisions */
 #define MV_88F69XX_Z1_ID		0x2
 #define MV_88F69XX_Z1_NAME		"Z1"
 
@@ -426,15 +348,12 @@ extern "C" {
 	MV_88F68XX_A0_NAME,\
 };
 
-/* Armada 39x Family */
 #define MV_88F69XX		0x6900
 #define MV_6920_DEV_ID		0x6920
 #define MV_6928_DEV_ID		0x6928
 
-/* BobCat2  Family */
 #define MV_BOBCAT2_DEV_ID		0xFC00
 
-/* BobCat2  Revisions */
 #define MV_BOBCAT2_A0_ID		0x0
 #define MV_BOBCAT2_A0_NAME		"A0"
 #define MV_BOBCAT2_B0_ID		0x1
@@ -445,32 +364,28 @@ extern "C" {
 	MV_BOBCAT2_B0_NAME,\
 }
 #if defined(MY_ABC_HERE)
-/* BobK  Family */
+ 
 #define MV_BOBK_DEV_ID		0xBC00
 
-/* BobK deivces matrix */
 #define MV_BOBK_CETUS_98DX4235_DEV_ID		0xBE00
 #define MV_BOBK_CAELUM_98DX4203_DEV_ID		0xBC00
 #define MV_BOBK_LEWIS_98DX8212_DEV_ID		0xBE10
 
-/* BobK  Revisions */
 #define MV_BOBK_A0_ID		0x0
 #define MV_BOBK_A0_NAME		"A0"
 
 #define MV_BOBK_ID_ARRAY { \
 	 MV_BOBK_A0_NAME,\
 }
-#endif /* MY_ABC_HERE */
- /* Lion2  Family */
+#endif  
+  
 #define MV_LION2_DEV_ID		0x8000
 
-/* AlleyCat3  Family */
 #define MV_ALLEYCAT3_DEV_ID		0xF400
 #if defined(MY_ABC_HERE)
 #define MV_ALLEYCAT3_MAX_DEV_ID		0xF4FF
-#endif /* MY_ABC_HERE */
+#endif  
 
-/* AlleyCat3  Revisions */
 #define MV_ALLEYCAT3_A0_ID		0x3
 #define MV_ALLEYCAT3_A0_NAME	"A0"
 #define MV_ALLEYCAT3_A1_ID		0x4
@@ -484,13 +399,12 @@ extern "C" {
 	MV_ALLEYCAT3_A1_NAME,\
 }
 
- /* IDT Swicth  */
 #define PCI_VENDOR_ID_IDT_SWITCH	0x111D
 #define MV_IDT_SWITCH_DEV_ID_808E	0x808E
 #define MV_IDT_SWITCH_DEV_ID_802B	0x802B
 
 #ifdef __cplusplus
 }
-#endif	/* __cplusplus */
+#endif	 
 
-#endif				/* __INCmvDeviceIdh */
+#endif				 

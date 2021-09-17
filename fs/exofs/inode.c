@@ -1,39 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) 2005, 2006
- * Avishay Traeger (avishay@gmail.com)
- * Copyright (C) 2008, 2009
- * Boaz Harrosh <bharrosh@panasas.com>
- *
- * Copyrights for code taken from ext2:
- *     Copyright (C) 1992, 1993, 1994, 1995
- *     Remy Card (card@masi.ibp.fr)
- *     Laboratoire MASI - Institut Blaise Pascal
- *     Universite Pierre et Marie Curie (Paris VI)
- *     from
- *     linux/fs/minix/inode.c
- *     Copyright (C) 1991, 1992  Linus Torvalds
- *
- * This file is part of exofs.
- *
- * exofs is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation.  Since it is based on ext2, and the only
- * valid version of GPL for the Linux kernel is version 2, the only valid
- * version of GPL for exofs is version 2.
- *
- * exofs is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with exofs; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- */
-
+ 
 #include <linux/slab.h>
 
 #include "exofs.h"
@@ -59,10 +27,8 @@ struct page_collect {
 	unsigned alloc_pages;
 	unsigned nr_pages;
 	unsigned long length;
-	loff_t pg_first; /* keep 64bit also in 32-arches */
-	bool read_4_write; /* This means two things: that the read is sync
-			    * And the pages should not be unlocked.
-			    */
+	loff_t pg_first;  
+	bool read_4_write;  
 	struct page *that_locked_page;
 };
 
@@ -97,9 +63,6 @@ static void _pcol_reset(struct page_collect *pcol)
 	pcol->ios = NULL;
 	pcol->that_locked_page = NULL;
 
-	/* this is probably the end of the loop but in writes
-	 * it might not end here. don't be left with nothing
-	 */
 	if (!pcol->expected_pages)
 		pcol->expected_pages =
 				exofs_max_io_pages(&pcol->sbi->layout, ~0);
@@ -109,7 +72,6 @@ static int pcol_try_alloc(struct page_collect *pcol)
 {
 	unsigned pages;
 
-	/* TODO: easily support bio chaining */
 	pages =  exofs_max_io_pages(&pcol->sbi->layout, pcol->expected_pages);
 
 	for (; pages; pages >>= 1) {
@@ -153,26 +115,22 @@ static int update_read_page(struct page *page, int ret)
 {
 	switch (ret) {
 	case 0:
-		/* Everything is OK */
+		 
 		SetPageUptodate(page);
 		if (PageError(page))
 			ClearPageError(page);
 		break;
 	case -EFAULT:
-		/* In this case we were trying to read something that wasn't on
-		 * disk yet - return a page full of zeroes.  This should be OK,
-		 * because the object should be empty (if there was a write
-		 * before this read, the read would be waiting with the page
-		 * locked */
+		 
 		clear_highpage(page);
 
 		SetPageUptodate(page);
 		if (PageError(page))
 			ClearPageError(page);
 		EXOFS_DBGMSG("recovered read error\n");
-		/* fall through */
+		 
 	case PAGE_WAS_NOT_IN_IO:
-		ret = 0; /* recovered error */
+		ret = 0;  
 		break;
 	default:
 		SetPageError(page);
@@ -183,7 +141,7 @@ static int update_read_page(struct page *page, int ret)
 static void update_write_page(struct page *page, int ret)
 {
 	if (unlikely(ret == PAGE_WAS_NOT_IN_IO))
-		return; /* don't pass start don't collect $200 */
+		return;  
 
 	if (ret) {
 		mapping_set_error(page->mapping, ret);
@@ -192,9 +150,6 @@ static void update_write_page(struct page *page, int ret)
 	end_page_writeback(page);
 }
 
-/* Called at the end of reads, to optionally unlock pages and update their
- * status.
- */
 static int __readpages_done(struct page_collect *pcol)
 {
 	int i;
@@ -220,7 +175,7 @@ static int __readpages_done(struct page_collect *pcol)
 		int page_stat;
 
 		if (inode != pcol->inode)
-			continue; /* osd might add more pages at end */
+			continue;  
 
 		if (likely(length < good_bytes))
 			page_stat = 0;
@@ -242,7 +197,6 @@ static int __readpages_done(struct page_collect *pcol)
 	return ret;
 }
 
-/* callback of async reads */
 static void readpages_done(struct ore_io_state *ios, void *p)
 {
 	struct page_collect *pcol = p;
@@ -271,7 +225,7 @@ static void _unlock_pcol_pages(struct page_collect *pcol, int ret, int rw)
 static int _maybe_not_all_in_one_io(struct ore_io_state *ios,
 	struct page_collect *pcol_src, struct page_collect *pcol)
 {
-	/* length was wrong or offset was not page aligned */
+	 
 	BUG_ON(pcol_src->nr_pages < ios->nr_pages);
 
 	if (pcol_src->nr_pages > ios->nr_pages) {
@@ -281,11 +235,9 @@ static int _maybe_not_all_in_one_io(struct ore_io_state *ios,
 		unsigned i;
 		int ret;
 
-		/* This IO was trimmed */
 		pcol_src->nr_pages = ios->nr_pages;
 		pcol_src->length = ios->length;
 
-		/* Left over pages are passed to the next io */
 		pcol->expected_pages += pages_less;
 		pcol->nr_pages = pages_less;
 		pcol->length = len_less;
@@ -345,7 +297,6 @@ static int read_exec(struct page_collect *pcol)
 	ios->done = readpages_done;
 	ios->private = pcol_copy;
 
-	/* pages ownership was passed to pcol_copy */
 	_pcol_reset(pcol);
 
 	ret = _maybe_not_all_in_one_io(ios, pcol_copy, pcol);
@@ -364,7 +315,7 @@ static int read_exec(struct page_collect *pcol)
 	return 0;
 
 err:
-	if (!pcol_copy) /* Failed before ownership transfer */
+	if (!pcol_copy)  
 		pcol_copy = pcol;
 	_unlock_pcol_pages(pcol_copy, ret, READ);
 	pcol_free(pcol_copy);
@@ -373,13 +324,6 @@ err:
 	return ret;
 }
 
-/* readpage_strip is called either directly from readpage() or by the VFS from
- * within read_cache_pages(), to add one more page to be read. It will try to
- * collect as many contiguous pages as posible. If a discontinuity is
- * encountered, or it runs out of resources, it will submit the previous segment
- * and will start a new collection. Eventually caller must submit the last
- * segment if present.
- */
 static int readpage_strip(void *data, struct page *page)
 {
 	struct page_collect *pcol = data;
@@ -392,7 +336,6 @@ static int readpage_strip(void *data, struct page *page)
 
 	BUG_ON(!PageLocked(page));
 
-	/* FIXME: Just for debugging, will be removed */
 	if (PageUptodate(page))
 		EXOFS_ERR("PageUptodate(0x%lx, 0x%lx)\n", pcol->inode->i_ino,
 			  page->index);
@@ -407,9 +350,7 @@ static int readpage_strip(void *data, struct page *page)
 		len = 0;
 
 	if (!len || !obj_created(oi)) {
-		/* this will be out of bounds, or doesn't exist yet.
-		 * Current page is cleared and the request is split
-		 */
+		 
 		clear_highpage(page);
 
 		SetPageUptodate(page);
@@ -432,7 +373,7 @@ try_again:
 		pcol->pg_first = page->index;
 	} else if (unlikely((pcol->pg_first + pcol->nr_pages) !=
 		   page->index)) {
-		/* Discontinuity detected, split the request */
+		 
 		ret = read_exec(pcol);
 		if (unlikely(ret))
 			goto fail;
@@ -457,7 +398,6 @@ try_again:
 			  "this_len=0x%zx nr_pages=%u length=0x%lx\n",
 			  page, len, pcol->nr_pages, pcol->length);
 
-		/* split the request, and start again with current page */
 		ret = read_exec(pcol);
 		if (unlikely(ret))
 			goto fail;
@@ -468,7 +408,7 @@ try_again:
 	return 0;
 
 fail:
-	/* SetPageError(page); ??? */
+	 
 	unlock_page(page);
 	return ret;
 }
@@ -511,15 +451,11 @@ static int _readpage(struct page *page, bool read_4_write)
 	return read_exec(&pcol);
 }
 
-/*
- * We don't need the file
- */
 static int exofs_readpage(struct file *file, struct page *page)
 {
 	return _readpage(page, false);
 }
 
-/* Callback for osd_write. All writes are asynchronous */
 static void writepages_done(struct ore_io_state *ios, void *p)
 {
 	struct page_collect *pcol = p;
@@ -548,7 +484,7 @@ static void writepages_done(struct ore_io_state *ios, void *p)
 		int page_stat;
 
 		if (inode != pcol->inode)
-			continue; /* osd might add more pages to a bio */
+			continue;  
 
 		if (likely(length < good_bytes))
 			page_stat = 0;
@@ -582,9 +518,9 @@ static struct page *__r4w_get_page(void *priv, u64 offset, bool *uptodate)
 			*uptodate = true;
 #ifdef MY_DEF_HERE
 			EXOFS_DBGMSG("offset >= i_size index=0x%llx\n", _LLU(index));
-#else /* MY_DEF_HERE */
+#else  
 			EXOFS_DBGMSG("offset >= i_size index=0x%lx\n", index);
-#endif /* MY_DEF_HERE */
+#endif  
 			return ZERO_PAGE(0);
 		}
 
@@ -605,9 +541,9 @@ static struct page *__r4w_get_page(void *priv, u64 offset, bool *uptodate)
 			*uptodate = PageUptodate(page);
 #ifdef MY_DEF_HERE
 		EXOFS_DBGMSG("index=0x%llx uptodate=%d\n", _LLU(index), *uptodate);
-#else /* MY_DEF_HERE */
+#else  
 		EXOFS_DBGMSG("index=0x%lx uptodate=%d\n", index, *uptodate);
-#endif /* MY_DEF_HERE */
+#endif  
 		return page;
 	} else {
 		EXOFS_DBGMSG("YES that_locked_page index=0x%lx\n",
@@ -667,7 +603,6 @@ static int write_exec(struct page_collect *pcol)
 	ios->r4w = &_r4w_op;
 	ios->private = pcol_copy;
 
-	/* pages ownership was passed to pcol_copy */
 	_pcol_reset(pcol);
 
 	ret = _maybe_not_all_in_one_io(ios, pcol_copy, pcol);
@@ -687,7 +622,7 @@ static int write_exec(struct page_collect *pcol)
 	return 0;
 
 err:
-	if (!pcol_copy) /* Failed before ownership transfer */
+	if (!pcol_copy)  
 		pcol_copy = pcol;
 	_unlock_pcol_pages(pcol_copy, ret, WRITE);
 	pcol_free(pcol_copy);
@@ -696,13 +631,6 @@ err:
 	return ret;
 }
 
-/* writepage_strip is called either directly from writepage() or by the VFS from
- * within write_cache_pages(), to add one more page to be written to storage.
- * It will try to collect as many contiguous pages as possible. If a
- * discontinuity is encountered or it runs out of resources it will submit the
- * previous segment and will start a new collection.
- * Eventually caller must submit the last segment if present.
- */
 static int writepage_strip(struct page *page,
 			   struct writeback_control *wbc_unused, void *data)
 {
@@ -721,15 +649,13 @@ static int writepage_strip(struct page *page,
 		goto fail;
 
 	if (page->index < end_index)
-		/* in this case, the page is within the limits of the file */
+		 
 		len = PAGE_CACHE_SIZE;
 	else {
 		len = i_size & ~PAGE_CACHE_MASK;
 
 		if (page->index > end_index || !len) {
-			/* in this case, the page is outside the limits
-			 * (truncate in progress)
-			 */
+			 
 			ret = write_exec(pcol);
 			if (unlikely(ret))
 				goto fail;
@@ -749,7 +675,7 @@ try_again:
 		pcol->pg_first = page->index;
 	} else if (unlikely((pcol->pg_first + pcol->nr_pages) !=
 		   page->index)) {
-		/* Discontinuity detected, split the request */
+		 
 		ret = write_exec(pcol);
 		if (unlikely(ret))
 			goto fail;
@@ -774,7 +700,6 @@ try_again:
 			     "nr_pages=%u total_length=0x%lx\n",
 			     pcol->nr_pages, pcol->length);
 
-		/* split the request, next loop will start again */
 		ret = write_exec(pcol);
 		if (unlikely(ret)) {
 			EXOFS_DBGMSG("write_exec failed => %d", ret);
@@ -835,9 +760,9 @@ static int exofs_writepages(struct address_space *mapping,
 		return ret;
 
 	if (wbc->sync_mode == WB_SYNC_ALL) {
-		return write_exec(&pcol); /* pump the last reminder */
+		return write_exec(&pcol);  
 	} else if (pcol.nr_pages) {
-		/* not SYNC let the reminder join the next writeout */
+		 
 		unsigned i;
 
 		for (i = 0; i < pcol.nr_pages; i++) {
@@ -851,24 +776,6 @@ static int exofs_writepages(struct address_space *mapping,
 	return 0;
 }
 
-/*
-static int exofs_writepage(struct page *page, struct writeback_control *wbc)
-{
-	struct page_collect pcol;
-	int ret;
-
-	_pcol_init(&pcol, 1, page->mapping->host);
-
-	ret = writepage_strip(page, NULL, &pcol);
-	if (ret) {
-		EXOFS_ERR("exofs_writepage => %d\n", ret);
-		return ret;
-	}
-
-	return write_exec(&pcol);
-}
-*/
-/* i_mutex held using inode->i_size directly */
 static void _write_failed(struct inode *inode, loff_t to)
 {
 	if (to > inode->i_size)
@@ -894,7 +801,6 @@ int exofs_write_begin(struct file *file, struct address_space *mapping,
 		page = *pagep;
 	}
 
-	 /* read modify write */
 	if (!PageUptodate(page) && (len != PAGE_CACHE_SIZE)) {
 		loff_t i_size = i_size_read(mapping->host);
 		pgoff_t end_index = i_size >> PAGE_CACHE_SHIFT;
@@ -915,7 +821,7 @@ int exofs_write_begin(struct file *file, struct address_space *mapping,
 
 		ret = _readpage(page, true);
 		if (ret) {
-			/*SetPageError was done by _readpage. Is it ok?*/
+			 
 			unlock_page(page);
 			EXOFS_DBGMSG("__readpage failed\n");
 		}
@@ -943,7 +849,7 @@ static int exofs_write_end(struct file *file, struct address_space *mapping,
 			struct page *page, void *fsdata)
 {
 	struct inode *inode = mapping->host;
-	/* According to comment in simple_write_end i_mutex is held */
+	 
 	loff_t i_size = inode->i_size;
 	int ret;
 
@@ -951,7 +857,6 @@ static int exofs_write_end(struct file *file, struct address_space *mapping,
 	if (unlikely(ret))
 		_write_failed(inode, pos + len);
 
-	/* TODO: once simple_write_end marks inode dirty remove */
 	if (i_size != inode->i_size)
 		mark_inode_dirty(inode);
 	return ret;
@@ -981,11 +886,9 @@ const struct address_space_operations exofs_aops = {
 	.set_page_dirty	= __set_page_dirty_nobuffers,
 	.invalidatepage = exofs_invalidatepage,
 
-	/* Not implemented Yet */
-	.bmap		= NULL, /* TODO: use osd's OSD_ACT_READ_MAP */
-	.direct_IO	= NULL, /* TODO: Should be trivial to do */
+	.bmap		= NULL,  
+	.direct_IO	= NULL,  
 
-	/* With these NULL has special meaning or default is not exported */
 	.get_xip_mem	= NULL,
 	.migratepage	= NULL,
 	.launder_page	= NULL,
@@ -993,13 +896,6 @@ const struct address_space_operations exofs_aops = {
 	.error_remove_page = NULL,
 };
 
-/******************************************************************************
- * INODE OPERATIONS
- *****************************************************************************/
-
-/*
- * Test whether an inode is a fast symlink.
- */
 static inline int exofs_inode_is_fast_symlink(struct inode *inode)
 {
 	struct exofs_i_info *oi = exofs_i(inode);
@@ -1024,18 +920,11 @@ static int _do_truncate(struct inode *inode, loff_t newsize)
 	return ret;
 }
 
-/*
- * Set inode attributes - update size attribute on OSD if needed,
- *                        otherwise just call generic functions.
- */
 int exofs_setattr(struct dentry *dentry, struct iattr *iattr)
 {
 	struct inode *inode = dentry->d_inode;
 	int error;
 
-	/* if we are about to modify an object, and it hasn't been
-	 * created yet, wait
-	 */
 	error = wait_obj_created(exofs_i(inode));
 	if (unlikely(error))
 		return error;
@@ -1065,10 +954,6 @@ static const struct osd_attr g_attr_inode_dir_layout = ATTR_DEF(
 	EXOFS_ATTR_INODE_DIR_LAYOUT,
 	0);
 
-/*
- * Read the Linux inode info from the OSD, and return it as is. In exofs the
- * inode info is in an application specific page/attribute of the osd-object.
- */
 static int exofs_get_inode(struct super_block *sb, struct exofs_i_info *oi,
 		    struct exofs_fcb *inode)
 {
@@ -1100,9 +985,7 @@ static int exofs_get_inode(struct super_block *sb, struct exofs_i_info *oi,
 			  _LLU(oi->one_comp.obj.id), ret);
 		memset(inode, 0, sizeof(*inode));
 		inode->i_mode = 0040000 | (0777 & ~022);
-		/* If object is lost on target we might as well enable it's
-		 * delete.
-		 */
+		 
 		if ((ret == -ENOENT) || (ret == -EINVAL))
 			ret = 0;
 		goto out;
@@ -1156,9 +1039,7 @@ static void __oi_init(struct exofs_i_info *oi)
 	init_waitqueue_head(&oi->i_wq);
 	oi->i_flags = 0;
 }
-/*
- * Fill in an inode read from the OSD and set it up for use
- */
+ 
 struct inode *exofs_iget(struct super_block *sb, unsigned long ino)
 {
 	struct exofs_i_info *oi;
@@ -1176,14 +1057,12 @@ struct inode *exofs_iget(struct super_block *sb, unsigned long ino)
 	exofs_init_comps(&oi->oc, &oi->one_comp, sb->s_fs_info,
 			 exofs_oi_objno(oi));
 
-	/* read the inode from the osd */
 	ret = exofs_get_inode(sb, oi, &fcb);
 	if (ret)
 		goto bad_inode;
 
 	set_obj_created(oi);
 
-	/* copy stuff from on-disk struct to in-memory struct */
 	inode->i_mode = le16_to_cpu(fcb.i_mode);
 	i_uid_write(inode, le32_to_cpu(fcb.i_uid));
 	i_gid_write(inode, le32_to_cpu(fcb.i_gid));
@@ -1261,11 +1140,6 @@ int __exofs_wait_obj_created(struct exofs_i_info *oi)
 	return unlikely(is_bad_inode(&oi->vfs_inode)) ? -EIO : 0;
 }
 
-/*
- * Callback function from exofs_new_inode().  The important thing is that we
- * set the obj_created flag so that other methods know that the object exists on
- * the OSD.
- */
 static void create_done(struct ore_io_state *ios, void *p)
 {
 	struct inode *inode = p;
@@ -1282,12 +1156,7 @@ static void create_done(struct ore_io_state *ios, void *p)
 		EXOFS_ERR("object=0x%llx creation failed in pid=0x%llx",
 			  _LLU(exofs_oi_objno(oi)),
 			  _LLU(oi->one_comp.obj.partition));
-		/*TODO: When FS is corrupted creation can fail, object already
-		 * exist. Get rid of this asynchronous creation, if exist
-		 * increment the obj counter and try the next object. Until we
-		 * succeed. All these dangling objects will be made into lost
-		 * files by chkfs.exofs
-		 */
+		 
 	}
 
 	set_obj_created(oi);
@@ -1295,9 +1164,6 @@ static void create_done(struct ore_io_state *ios, void *p)
 	wake_up(&oi->i_wq);
 }
 
-/*
- * Set up a new inode and create an object for it on the OSD
- */
 struct inode *exofs_new_inode(struct inode *dir, umode_t mode)
 {
 	struct super_block *sb = dir->i_sb;
@@ -1329,7 +1195,7 @@ struct inode *exofs_new_inode(struct inode *dir, umode_t mode)
 
 	exofs_init_comps(&oi->oc, &oi->one_comp, sb->s_fs_info,
 			 exofs_oi_objno(oi));
-	exofs_sbi_write_stats(sbi); /* Make sure new sbi->s_nextid is on disk */
+	exofs_sbi_write_stats(sbi);  
 
 	mark_inode_dirty(inode);
 
@@ -1352,17 +1218,11 @@ struct inode *exofs_new_inode(struct inode *dir, umode_t mode)
 	return inode;
 }
 
-/*
- * struct to pass two arguments to update_inode's callback
- */
 struct updatei_args {
 	struct exofs_sb_info	*sbi;
 	struct exofs_fcb	fcb;
 };
 
-/*
- * Callback function from exofs_update_inode().
- */
 static void updatei_done(struct ore_io_state *ios, void *p)
 {
 	struct updatei_args *args = p;
@@ -1374,10 +1234,6 @@ static void updatei_done(struct ore_io_state *ios, void *p)
 	kfree(args);
 }
 
-/*
- * Write the inode to the OSD.  Just fill up the struct, and set the attribute
- * synchronously or asynchronously depending on the do_sync flag.
- */
 static int exofs_update_inode(struct inode *inode, int do_sync)
 {
 	struct exofs_i_info *oi = exofs_i(inode);
@@ -1444,7 +1300,7 @@ static int exofs_update_inode(struct inode *inode, int do_sync)
 	ret = ore_write(ios);
 	if (!do_sync && !ret) {
 		atomic_inc(&sbi->s_curr_pending);
-		goto out; /* deallocation in updatei_done */
+		goto out;  
 	}
 
 	ore_put_io_state(ios);
@@ -1458,14 +1314,10 @@ out:
 
 int exofs_write_inode(struct inode *inode, struct writeback_control *wbc)
 {
-	/* FIXME: fix fsync and use wbc->sync_mode == WB_SYNC_ALL */
+	 
 	return exofs_update_inode(inode, 1);
 }
 
-/*
- * Callback function from exofs_delete_inode() - don't have much cleaning up to
- * do.
- */
 static void delete_done(struct ore_io_state *ios, void *p)
 {
 	struct exofs_sb_info *sbi = p;
@@ -1475,11 +1327,6 @@ static void delete_done(struct ore_io_state *ios, void *p)
 	atomic_dec(&sbi->s_curr_pending);
 }
 
-/*
- * Called when the refcount of an inode reaches zero.  We remove the object
- * from the OSD here.  We make sure the object was created before we try and
- * delete it.
- */
 void exofs_evict_inode(struct inode *inode)
 {
 	struct exofs_i_info *oi = exofs_i(inode);
@@ -1490,21 +1337,14 @@ void exofs_evict_inode(struct inode *inode)
 
 	truncate_inode_pages(&inode->i_data, 0);
 
-	/* TODO: should do better here */
 	if (inode->i_nlink || is_bad_inode(inode))
 		goto no_delete;
 
 	inode->i_size = 0;
 	clear_inode(inode);
 
-	/* if we are deleting an obj that hasn't been created yet, wait.
-	 * This also makes sure that create_done cannot be called with an
-	 * already evicted inode.
-	 */
 	wait_obj_created(oi);
-	/* ignore the error, attempt a remove anyway */
-
-	/* Now Remove the OSD objects */
+	 
 	ret = ore_get_io_state(&sbi->layout, &oi->oc, &ios);
 	if (unlikely(ret)) {
 		EXOFS_ERR("%s: ore_get_io_state failed\n", __func__);

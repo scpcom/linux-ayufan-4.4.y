@@ -1,16 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Ethernet driver for the WIZnet W5300 chip.
- *
- * Copyright (C) 2008-2009 WIZnet Co.,Ltd.
- * Copyright (C) 2011 Taehun Kim <kth3321 <at> gmail.com>
- * Copyright (C) 2012 Mike Sinkovsky <msink@permonline.ru>
- *
- * Licensed under the GPL-2 or later.
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/kconfig.h>
@@ -39,55 +30,49 @@ MODULE_AUTHOR("Mike Sinkovsky <msink@permonline.ru>");
 MODULE_ALIAS("platform:"DRV_NAME);
 MODULE_LICENSE("GPL");
 
-/*
- * Registers
- */
-#define W5300_MR		0x0000	/* Mode Register */
-#define   MR_DBW		  (1 << 15) /* Data bus width */
-#define   MR_MPF		  (1 << 14) /* Mac layer pause frame */
-#define   MR_WDF(n)		  (((n)&7)<<11) /* Write data fetch time */
-#define   MR_RDH		  (1 << 10) /* Read data hold time */
-#define   MR_FS			  (1 << 8)  /* FIFO swap */
-#define   MR_RST		  (1 << 7)  /* S/W reset */
-#define   MR_PB			  (1 << 4)  /* Ping block */
-#define   MR_DBS		  (1 << 2)  /* Data bus swap */
-#define   MR_IND		  (1 << 0)  /* Indirect mode */
-#define W5300_IR		0x0002	/* Interrupt Register */
-#define W5300_IMR		0x0004	/* Interrupt Mask Register */
-#define   IR_S0			  0x0001  /* S0 interrupt */
-#define W5300_SHARL		0x0008	/* Source MAC address (0123) */
-#define W5300_SHARH		0x000c	/* Source MAC address (45) */
-#define W5300_TMSRL		0x0020	/* Transmit Memory Size (0123) */
-#define W5300_TMSRH		0x0024	/* Transmit Memory Size (4567) */
-#define W5300_RMSRL		0x0028	/* Receive Memory Size (0123) */
-#define W5300_RMSRH		0x002c	/* Receive Memory Size (4567) */
-#define W5300_MTYPE		0x0030	/* Memory Type */
-#define W5300_IDR		0x00fe	/* Chip ID register */
-#define   IDR_W5300		  0x5300  /* =0x5300 for WIZnet W5300 */
-#define W5300_S0_MR		0x0200	/* S0 Mode Register */
-#define   S0_MR_CLOSED		  0x0000  /* Close mode */
-#define   S0_MR_MACRAW		  0x0004  /* MAC RAW mode (promiscous) */
-#define   S0_MR_MACRAW_MF	  0x0044  /* MAC RAW mode (filtered) */
-#define W5300_S0_CR		0x0202	/* S0 Command Register */
-#define   S0_CR_OPEN		  0x0001  /* OPEN command */
-#define   S0_CR_CLOSE		  0x0010  /* CLOSE command */
-#define   S0_CR_SEND		  0x0020  /* SEND command */
-#define   S0_CR_RECV		  0x0040  /* RECV command */
-#define W5300_S0_IMR		0x0204	/* S0 Interrupt Mask Register */
-#define W5300_S0_IR		0x0206	/* S0 Interrupt Register */
-#define   S0_IR_RECV		  0x0004  /* Receive interrupt */
-#define   S0_IR_SENDOK		  0x0010  /* Send OK interrupt */
-#define W5300_S0_SSR		0x0208	/* S0 Socket Status Register */
-#define W5300_S0_TX_WRSR	0x0220	/* S0 TX Write Size Register */
-#define W5300_S0_TX_FSR		0x0224	/* S0 TX Free Size Register */
-#define W5300_S0_RX_RSR		0x0228	/* S0 Received data Size */
-#define W5300_S0_TX_FIFO	0x022e	/* S0 Transmit FIFO */
-#define W5300_S0_RX_FIFO	0x0230	/* S0 Receive FIFO */
+#define W5300_MR		0x0000	 
+#define   MR_DBW		  (1 << 15)  
+#define   MR_MPF		  (1 << 14)  
+#define   MR_WDF(n)		  (((n)&7)<<11)  
+#define   MR_RDH		  (1 << 10)  
+#define   MR_FS			  (1 << 8)   
+#define   MR_RST		  (1 << 7)   
+#define   MR_PB			  (1 << 4)   
+#define   MR_DBS		  (1 << 2)   
+#define   MR_IND		  (1 << 0)   
+#define W5300_IR		0x0002	 
+#define W5300_IMR		0x0004	 
+#define   IR_S0			  0x0001   
+#define W5300_SHARL		0x0008	 
+#define W5300_SHARH		0x000c	 
+#define W5300_TMSRL		0x0020	 
+#define W5300_TMSRH		0x0024	 
+#define W5300_RMSRL		0x0028	 
+#define W5300_RMSRH		0x002c	 
+#define W5300_MTYPE		0x0030	 
+#define W5300_IDR		0x00fe	 
+#define   IDR_W5300		  0x5300   
+#define W5300_S0_MR		0x0200	 
+#define   S0_MR_CLOSED		  0x0000   
+#define   S0_MR_MACRAW		  0x0004   
+#define   S0_MR_MACRAW_MF	  0x0044   
+#define W5300_S0_CR		0x0202	 
+#define   S0_CR_OPEN		  0x0001   
+#define   S0_CR_CLOSE		  0x0010   
+#define   S0_CR_SEND		  0x0020   
+#define   S0_CR_RECV		  0x0040   
+#define W5300_S0_IMR		0x0204	 
+#define W5300_S0_IR		0x0206	 
+#define   S0_IR_RECV		  0x0004   
+#define   S0_IR_SENDOK		  0x0010   
+#define W5300_S0_SSR		0x0208	 
+#define W5300_S0_TX_WRSR	0x0220	 
+#define W5300_S0_TX_FSR		0x0224	 
+#define W5300_S0_RX_RSR		0x0228	 
+#define W5300_S0_TX_FIFO	0x022e	 
+#define W5300_S0_RX_FIFO	0x0230	 
 #define W5300_REGS_LEN		0x0400
 
-/*
- * Device driver private data structure
- */
 struct w5300_priv {
 	void __iomem *base;
 	spinlock_t reg_lock;
@@ -104,18 +89,6 @@ struct w5300_priv {
 	u32 msg_enable;
 };
 
-/************************************************************************
- *
- *  Lowlevel I/O functions
- *
- ***********************************************************************/
-
-/*
- * In direct address mode host system can directly access W5300 registers
- * after mapping to Memory-Mapped I/O space.
- *
- * 0x400 bytes are required for memory space.
- */
 static inline u16 w5300_read_direct(struct w5300_priv *priv, u16 addr)
 {
 	return ioread16(priv->base + (addr << CONFIG_WIZNET_BUS_SHIFT));
@@ -127,16 +100,8 @@ static inline void w5300_write_direct(struct w5300_priv *priv,
 	iowrite16(data, priv->base + (addr << CONFIG_WIZNET_BUS_SHIFT));
 }
 
-/*
- * In indirect address mode host system indirectly accesses registers by
- * using Indirect Mode Address Register (IDM_AR) and Indirect Mode Data
- * Register (IDM_DR), which are directly mapped to Memory-Mapped I/O space.
- * Mode Register (MR) is directly accessible.
- *
- * Only 0x06 bytes are required for memory space.
- */
-#define W5300_IDM_AR		0x0002	 /* Indirect Mode Address */
-#define W5300_IDM_DR		0x0004	 /* Indirect Mode Data */
+#define W5300_IDM_AR		0x0002	  
+#define W5300_IDM_DR		0x0004	  
 
 static u16 w5300_read_indirect(struct w5300_priv *priv, u16 addr)
 {
@@ -172,7 +137,7 @@ static void w5300_write_indirect(struct w5300_priv *priv, u16 addr, u16 data)
 #define w5300_read	w5300_read_indirect
 #define w5300_write	w5300_write_indirect
 
-#else /* CONFIG_WIZNET_BUS_ANY */
+#else  
 #define w5300_read	priv->read
 #define w5300_write	priv->write
 #endif
@@ -260,9 +225,6 @@ static void w5300_hw_reset(struct w5300_priv *priv)
 	w5300_write(priv, W5300_IMR, 0);
 	w5300_write_macaddr(priv);
 
-	/* Configure 128K of internal memory
-	 * as 64K RX fifo and 64K TX fifo
-	 */
 	w5300_write32(priv, W5300_RMSRL, 64 << 24);
 	w5300_write32(priv, W5300_RMSRH, 0);
 	w5300_write32(priv, W5300_TMSRL, 64 << 24);
@@ -288,12 +250,6 @@ static void w5300_hw_close(struct w5300_priv *priv)
 	mmiowb();
 	w5300_command(priv, S0_CR_CLOSE);
 }
-
-/***********************************************************************
- *
- *   Device driver functions / callbacks
- *
- ***********************************************************************/
 
 static void w5300_get_drvinfo(struct net_device *ndev,
 			      struct ethtool_drvinfo *info)
@@ -344,8 +300,8 @@ static void w5300_get_regs(struct net_device *ndev,
 	regs->version = 1;
 	for (addr = 0; addr < W5300_REGS_LEN; addr += 2) {
 		switch (addr & 0x23f) {
-		case W5300_S0_TX_FIFO: /* cannot read TX_FIFO */
-		case W5300_S0_RX_FIFO: /* cannot read RX_FIFO */
+		case W5300_S0_TX_FIFO:  
+		case W5300_S0_RX_FIFO:  
 			data = 0xffff;
 			break;
 		default:
@@ -630,9 +586,6 @@ static int w5300_probe(struct platform_device *pdev)
 	ndev->watchdog_timeo = HZ;
 	netif_napi_add(ndev, &priv->napi, w5300_napi_poll, 16);
 
-	/* This chip doesn't support VLAN packets with normal MTU,
-	 * so disable VLAN for this device.
-	 */
 	ndev->features |= NETIF_F_VLAN_CHALLENGED;
 
 	err = register_netdev(ndev);
@@ -650,9 +603,9 @@ err_hw_probe:
 err_register:
 	free_netdev(ndev);
 #if defined (MY_DEF_HERE)
-#else /* MY_DEF_HERE */
+#else  
 	platform_set_drvdata(pdev, NULL);
-#endif /* MY_DEF_HERE */
+#endif  
 	return err;
 }
 
@@ -669,9 +622,9 @@ static int w5300_remove(struct platform_device *pdev)
 	unregister_netdev(ndev);
 	free_netdev(ndev);
 #if defined (MY_DEF_HERE)
-#else /* MY_DEF_HERE */
+#else  
 	platform_set_drvdata(pdev, NULL);
-#endif /* MY_DEF_HERE */
+#endif  
 	return 0;
 }
 
@@ -708,7 +661,7 @@ static int w5300_resume(struct device *dev)
 	}
 	return 0;
 }
-#endif /* CONFIG_PM_SLEEP */
+#endif  
 
 static SIMPLE_DEV_PM_OPS(w5300_pm_ops, w5300_suspend, w5300_resume);
 

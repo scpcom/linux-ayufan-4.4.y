@@ -23,7 +23,6 @@
 
 #include <asm/hwcap.h>
 
-
 /*
  * PSR bits
  */
@@ -57,7 +56,6 @@
 #define PSR_s		0x00ff0000	/* Status		*/
 #define PSR_x		0x0000ff00	/* Extension		*/
 #define PSR_c		0x000000ff	/* Control		*/
-
 
 #ifndef __ASSEMBLY__
 

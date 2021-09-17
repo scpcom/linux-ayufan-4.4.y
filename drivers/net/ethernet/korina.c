@@ -1,40 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- *  Driver for the IDT RC32434 (Korina) on-chip ethernet controller.
- *
- *  Copyright 2004 IDT Inc. (rischelp@idt.com)
- *  Copyright 2006 Felix Fietkau <nbd@openwrt.org>
- *  Copyright 2008 Florian Fainelli <florian@openwrt.org>
- *
- *  This program is free software; you can redistribute  it and/or modify it
- *  under  the terms of  the GNU General  Public License as published by the
- *  Free Software Foundation;  either version 2 of the  License, or (at your
- *  option) any later version.
- *
- *  THIS  SOFTWARE  IS PROVIDED   ``AS  IS'' AND   ANY  EXPRESS OR IMPLIED
- *  WARRANTIES,   INCLUDING, BUT NOT  LIMITED  TO, THE IMPLIED WARRANTIES OF
- *  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN
- *  NO  EVENT  SHALL   THE AUTHOR  BE    LIABLE FOR ANY   DIRECT, INDIRECT,
- *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- *  NOT LIMITED   TO, PROCUREMENT OF  SUBSTITUTE GOODS  OR SERVICES; LOSS OF
- *  USE, DATA,  OR PROFITS; OR  BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
- *  ANY THEORY OF LIABILITY, WHETHER IN  CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- *  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- *  You should have received a copy of the  GNU General Public License along
- *  with this program; if not, write  to the Free Software Foundation, Inc.,
- *  675 Mass Ave, Cambridge, MA 02139, USA.
- *
- *  Writing to a DMA status register:
- *
- *  When writing to the status register, you should mask the bit you have
- *  been testing the status register with. Both Tx and Rx DMA registers
- *  should stick to this procedure.
- */
-
+ 
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/moduleparam.h>
@@ -79,16 +46,12 @@
 				   ((dev)->dev_addr[4] << 8)  | \
 				   ((dev)->dev_addr[5]))
 
-#define MII_CLOCK 1250000 	/* no more than 2.5MHz */
+#define MII_CLOCK 1250000 	 
 
-/* the following must be powers of two */
-#define KORINA_NUM_RDS	64  /* number of receive descriptors */
-#define KORINA_NUM_TDS	64  /* number of transmit descriptors */
+#define KORINA_NUM_RDS	64   
+#define KORINA_NUM_TDS	64   
 
-/* KORINA_RBSIZE is the hardware's default maximum receive
- * frame size in bytes. Having this hardcoded means that there
- * is no support for MTU sizes greater than 1500. */
-#define KORINA_RBSIZE	1536 /* size of one resource buffer = Ether MTU */
+#define KORINA_RBSIZE	1536  
 #define KORINA_RDS_MASK	(KORINA_NUM_RDS - 1)
 #define KORINA_TDS_MASK	(KORINA_NUM_TDS - 1)
 #define RD_RING_SIZE 	(KORINA_NUM_RDS * sizeof(struct dma_desc))
@@ -101,13 +64,12 @@ enum chain_status { desc_filled, desc_empty };
 #define IS_DMA_DONE(X)   (((X) & (DMA_DESC_DONE)) != 0)
 #define RCVPKT_LENGTH(X)     (((X) & ETH_RX_LEN) >> ETH_RX_LEN_BIT)
 
-/* Information that need to be kept for each board. */
 struct korina_private {
 	struct eth_regs *eth_regs;
 	struct dma_reg *rx_dma_regs;
 	struct dma_reg *tx_dma_regs;
-	struct dma_desc *td_ring; /* transmit descriptor ring */
-	struct dma_desc *rd_ring; /* receive descriptor ring  */
+	struct dma_desc *td_ring;  
+	struct dma_desc *rd_ring;  
 
 	struct sk_buff *tx_skb[KORINA_NUM_TDS];
 	struct sk_buff *rx_skb[KORINA_NUM_RDS];
@@ -129,7 +91,7 @@ struct korina_private {
 	int ovr_irq;
 	int und_irq;
 
-	spinlock_t lock;        /* NIC xmit lock */
+	spinlock_t lock;         
 
 	int dma_halt_cnt;
 	int dma_run_cnt;
@@ -196,7 +158,6 @@ static void korina_chain_rx(struct korina_private *lp,
 	korina_chain_dma(lp->rx_dma_regs, CPHYSADDR(rd));
 }
 
-/* transmit packet */
 static int korina_send_packet(struct sk_buff *skb, struct net_device *dev)
 {
 	struct korina_private *lp = netdev_priv(dev);
@@ -209,7 +170,6 @@ static int korina_send_packet(struct sk_buff *skb, struct net_device *dev)
 
 	td = &lp->td_ring[lp->tx_chain_tail];
 
-	/* stop queue when full, drop pkts if queue already full */
 	if (lp->tx_count >= (KORINA_NUM_TDS - 2)) {
 		lp->tx_full = 1;
 
@@ -231,7 +191,6 @@ static int korina_send_packet(struct sk_buff *skb, struct net_device *dev)
 	length = skb->len;
 	dma_cache_wback((u32)skb->data, skb->len);
 
-	/* Setup the transmit descriptor. */
 	dma_cache_inv((u32) td, sizeof(*td));
 	td->ca = CPHYSADDR(skb->data);
 	chain_prev = (lp->tx_chain_tail - 1) & KORINA_TDS_MASK;
@@ -239,44 +198,44 @@ static int korina_send_packet(struct sk_buff *skb, struct net_device *dev)
 
 	if (readl(&(lp->tx_dma_regs->dmandptr)) == 0) {
 		if (lp->tx_chain_status == desc_empty) {
-			/* Update tail */
+			 
 			td->control = DMA_COUNT(length) |
 					DMA_DESC_COF | DMA_DESC_IOF;
-			/* Move tail */
+			 
 			lp->tx_chain_tail = chain_next;
-			/* Write to NDPTR */
+			 
 			writel(CPHYSADDR(&lp->td_ring[lp->tx_chain_head]),
 					&lp->tx_dma_regs->dmandptr);
-			/* Move head to tail */
+			 
 			lp->tx_chain_head = lp->tx_chain_tail;
 		} else {
-			/* Update tail */
+			 
 			td->control = DMA_COUNT(length) |
 					DMA_DESC_COF | DMA_DESC_IOF;
-			/* Link to prev */
+			 
 			lp->td_ring[chain_prev].control &=
 					~DMA_DESC_COF;
-			/* Link to prev */
+			 
 			lp->td_ring[chain_prev].link =  CPHYSADDR(td);
-			/* Move tail */
+			 
 			lp->tx_chain_tail = chain_next;
-			/* Write to NDPTR */
+			 
 			writel(CPHYSADDR(&lp->td_ring[lp->tx_chain_head]),
 					&(lp->tx_dma_regs->dmandptr));
-			/* Move head to tail */
+			 
 			lp->tx_chain_head = lp->tx_chain_tail;
 			lp->tx_chain_status = desc_empty;
 		}
 	} else {
 		if (lp->tx_chain_status == desc_empty) {
-			/* Update tail */
+			 
 			td->control = DMA_COUNT(length) |
 					DMA_DESC_COF | DMA_DESC_IOF;
-			/* Move tail */
+			 
 			lp->tx_chain_tail = chain_next;
 			lp->tx_chain_status = desc_filled;
 		} else {
-			/* Update tail */
+			 
 			td->control = DMA_COUNT(length) |
 					DMA_DESC_COF | DMA_DESC_IOF;
 			lp->td_ring[chain_prev].control &=
@@ -322,7 +281,6 @@ static void mdio_write(struct net_device *dev, int mii_id, int reg, int val)
 	writel(val, &lp->eth_regs->miimwtd);
 }
 
-/* Ethernet Rx DMA interrupt */
 static irqreturn_t korina_rx_dma_interrupt(int irq, void *dev_id)
 {
 	struct net_device *dev = dev_id;
@@ -369,7 +327,6 @@ static int korina_rx(struct net_device *dev, int limit)
 		if ((KORINA_RBSIZE - (u32)DMA_COUNT(rd->control)) == 0)
 			break;
 
-		/* Update statistics counters */
 		if (devcs & ETH_RX_CRC)
 			dev->stats.rx_crc_errors++;
 		if (devcs & ETH_RX_LOR)
@@ -386,36 +343,28 @@ static int korina_rx(struct net_device *dev, int limit)
 			dev->stats.multicast++;
 
 		if ((devcs & ETH_RX_LD) != ETH_RX_LD) {
-			/* check that this is a whole packet
-			 * WARNING: DMA_FD bit incorrectly set
-			 * in Rc32434 (errata ref #077) */
+			 
 			dev->stats.rx_errors++;
 			dev->stats.rx_dropped++;
 		} else if ((devcs & ETH_RX_ROK)) {
 			pkt_len = RCVPKT_LENGTH(devcs);
 
-			/* must be the (first and) last
-			 * descriptor then */
 			pkt_buf = (u8 *)lp->rx_skb[lp->rx_next_done]->data;
 
-			/* invalidate the cache */
 			dma_cache_inv((unsigned long)pkt_buf, pkt_len - 4);
 
-			/* Malloc up new buffer. */
 			skb_new = netdev_alloc_skb_ip_align(dev, KORINA_RBSIZE);
 
 			if (!skb_new)
 				break;
-			/* Do not count the CRC */
+			 
 			skb_put(skb, pkt_len - 4);
 			skb->protocol = eth_type_trans(skb, dev);
 
-			/* Pass the packet to upper layers */
 			netif_receive_skb(skb);
 			dev->stats.rx_packets++;
 			dev->stats.rx_bytes += pkt_len;
 
-			/* Update the mcast stats */
 			if (devcs & ETH_RX_MP)
 				dev->stats.multicast++;
 
@@ -424,7 +373,6 @@ static int korina_rx(struct net_device *dev, int limit)
 
 		rd->devcs = 0;
 
-		/* Restore descriptor's curr_addr */
 		if (skb_new)
 			rd->ca = CPHYSADDR(skb_new->data);
 		else
@@ -477,26 +425,21 @@ static int korina_poll(struct napi_struct *napi, int budget)
 	return work_done;
 }
 
-/*
- * Set or clear the multicast filter for this adaptor.
- */
 static void korina_multicast_list(struct net_device *dev)
 {
 	struct korina_private *lp = netdev_priv(dev);
 	unsigned long flags;
 	struct netdev_hw_addr *ha;
-	u32 recognise = ETH_ARC_AB;	/* always accept broadcasts */
+	u32 recognise = ETH_ARC_AB;	 
 	int i;
 
-	/* Set promiscuous mode */
 	if (dev->flags & IFF_PROMISC)
 		recognise |= ETH_ARC_PRO;
 
 	else if ((dev->flags & IFF_ALLMULTI) || (netdev_mc_count(dev) > 4))
-		/* All multicast and broadcast */
+		 
 		recognise |= ETH_ARC_AM;
 
-	/* Build the hash table */
 	if (netdev_mc_count(dev) > 4) {
 		u16 hash_table[4];
 		u32 crc;
@@ -509,10 +452,9 @@ static void korina_multicast_list(struct net_device *dev)
 			crc >>= 26;
 			hash_table[crc >> 4] |= 1 << (15 - (crc & 0xf));
 		}
-		/* Accept filtered multicast */
+		 
 		recognise |= ETH_ARC_AFM;
 
-		/* Fill the MAC hash tables with their values */
 		writel((u32)(hash_table[1] << 16 | hash_table[0]),
 					&lp->eth_regs->ethhash0);
 		writel((u32)(hash_table[3] << 16 | hash_table[2]),
@@ -533,7 +475,6 @@ static void korina_tx(struct net_device *dev)
 
 	spin_lock(&lp->lock);
 
-	/* Process all desc that are done */
 	while (IS_DMA_FINISHED(td->control)) {
 		if (lp->tx_full == 1) {
 			netif_wake_queue(dev);
@@ -546,7 +487,6 @@ static void korina_tx(struct net_device *dev)
 			dev->stats.tx_errors++;
 			dev->stats.tx_dropped++;
 
-			/* Should never happen */
 			printk(KERN_ERR "%s: split tx ignored\n",
 							dev->name);
 		} else if (devcs & ETH_TX_TOK) {
@@ -557,28 +497,22 @@ static void korina_tx(struct net_device *dev)
 			dev->stats.tx_errors++;
 			dev->stats.tx_dropped++;
 
-			/* Underflow */
 			if (devcs & ETH_TX_UND)
 				dev->stats.tx_fifo_errors++;
 
-			/* Oversized frame */
 			if (devcs & ETH_TX_OF)
 				dev->stats.tx_aborted_errors++;
 
-			/* Excessive deferrals */
 			if (devcs & ETH_TX_ED)
 				dev->stats.tx_carrier_errors++;
 
-			/* Collisions: medium busy */
 			if (devcs & ETH_TX_EC)
 				dev->stats.collisions++;
 
-			/* Late collision */
 			if (devcs & ETH_TX_LC)
 				dev->stats.tx_window_errors++;
 		}
 
-		/* We must always free the original skb */
 		if (lp->tx_skb[lp->tx_next_done]) {
 			dev_kfree_skb_any(lp->tx_skb[lp->tx_next_done]);
 			lp->tx_skb[lp->tx_next_done] = NULL;
@@ -590,13 +524,11 @@ static void korina_tx(struct net_device *dev)
 		lp->td_ring[lp->tx_next_done].ca = 0;
 		lp->tx_count--;
 
-		/* Go on to next transmission */
 		lp->tx_next_done = (lp->tx_next_done + 1) & KORINA_TDS_MASK;
 		td = &lp->td_ring[lp->tx_next_done];
 
 	}
 
-	/* Clear the DMA status register */
 	dmas = readl(&lp->tx_dma_regs->dmas);
 	writel(~dmas, &lp->tx_dma_regs->dmas);
 
@@ -668,10 +600,10 @@ static void korina_poll_media(unsigned long data)
 static void korina_set_carrier(struct mii_if_info *mii)
 {
 	if (mii->force_media) {
-		/* autoneg is off: Link is always assumed to be up */
+		 
 		if (!netif_carrier_ok(mii->dev))
 			netif_carrier_on(mii->dev);
-	} else  /* Let MMI library update carrier status */
+	} else   
 		korina_check_media(mii->dev, 0);
 }
 
@@ -691,7 +623,6 @@ static int korina_ioctl(struct net_device *dev, struct ifreq *rq, int cmd)
 	return rc;
 }
 
-/* ethtool helpers */
 static void netdev_get_drvinfo(struct net_device *dev,
 			struct ethtool_drvinfo *info)
 {
@@ -747,7 +678,6 @@ static int korina_alloc_ring(struct net_device *dev)
 	struct sk_buff *skb;
 	int i;
 
-	/* Initialize the transmit descriptors */
 	for (i = 0; i < KORINA_NUM_TDS; i++) {
 		lp->td_ring[i].control = DMA_DESC_IOF;
 		lp->td_ring[i].devcs = ETH_TX_FD | ETH_TX_LD;
@@ -758,7 +688,6 @@ static int korina_alloc_ring(struct net_device *dev)
 			lp->tx_full = lp->tx_count = 0;
 	lp->tx_chain_status = desc_empty;
 
-	/* Initialize the receive descriptors */
 	for (i = 0; i < KORINA_NUM_RDS; i++) {
 		skb = netdev_alloc_skb_ip_align(dev, KORINA_RBSIZE);
 		if (!skb)
@@ -771,8 +700,6 @@ static int korina_alloc_ring(struct net_device *dev)
 		lp->rd_ring[i].link = CPHYSADDR(&lp->rd_ring[i+1]);
 	}
 
-	/* loop back receive descriptors, so the last
-	 * descriptor points to the first one */
 	lp->rd_ring[i - 1].link = CPHYSADDR(&lp->rd_ring[0]);
 	lp->rd_ring[i - 1].control |= DMA_DESC_COD;
 
@@ -804,26 +731,19 @@ static void korina_free_ring(struct net_device *dev)
 	}
 }
 
-/*
- * Initialize the RC32434 ethernet controller.
- */
 static int korina_init(struct net_device *dev)
 {
 	struct korina_private *lp = netdev_priv(dev);
 
-	/* Disable DMA */
 	korina_abort_tx(dev);
 	korina_abort_rx(dev);
 
-	/* reset ethernet logic */
 	writel(0, &lp->eth_regs->ethintfc);
 	while ((readl(&lp->eth_regs->ethintfc) & ETH_INT_FC_RIP))
 		dev->trans_start = jiffies;
 
-	/* Enable Ethernet Interface */
 	writel(ETH_INT_FC_EN, &lp->eth_regs->ethintfc);
 
-	/* Allocate rings */
 	if (korina_alloc_ring(dev)) {
 		printk(KERN_ERR "%s: descriptor allocation failed\n", dev->name);
 		korina_free_ring(dev);
@@ -831,7 +751,7 @@ static int korina_init(struct net_device *dev)
 	}
 
 	writel(0, &lp->rx_dma_regs->dmas);
-	/* Start Rx DMA */
+	 
 	korina_start_rx(lp, &lp->rd_ring[0]);
 
 	writel(readl(&lp->tx_dma_regs->dmasm) &
@@ -841,10 +761,8 @@ static int korina_init(struct net_device *dev)
 			~(DMA_STAT_DONE | DMA_STAT_HALT | DMA_STAT_ERR),
 			&lp->rx_dma_regs->dmasm);
 
-	/* Accept only packets destined for this Ethernet device address */
 	writel(ETH_ARC_AB, &lp->eth_regs->etharc);
 
-	/* Set all Ether station address registers to their initial values */
 	writel(STATION_ADDRESS_LOW(dev), &lp->eth_regs->ethsal0);
 	writel(STATION_ADDRESS_HIGH(dev), &lp->eth_regs->ethsah0);
 
@@ -857,21 +775,16 @@ static int korina_init(struct net_device *dev)
 	writel(STATION_ADDRESS_LOW(dev), &lp->eth_regs->ethsal3);
 	writel(STATION_ADDRESS_HIGH(dev), &lp->eth_regs->ethsah3);
 
-	/* Frame Length Checking, Pad Enable, CRC Enable, Full Duplex set */
 	writel(ETH_MAC2_PE | ETH_MAC2_CEN | ETH_MAC2_FD,
 			&lp->eth_regs->ethmac2);
 
-	/* Back to back inter-packet-gap */
 	writel(0x15, &lp->eth_regs->ethipgt);
-	/* Non - Back to back inter-packet-gap */
+	 
 	writel(0x12, &lp->eth_regs->ethipgr);
 
-	/* Management Clock Prescaler Divisor
-	 * Clock independent setting */
 	writel(((idt_cpu_freq) / MII_CLOCK + 1) & ~1,
 		       &lp->eth_regs->ethmcp);
 
-	/* don't transmit until fifo contains 48b */
 	writel(48, &lp->eth_regs->ethfifott);
 
 	writel(ETH_MAC1_RE, &lp->eth_regs->ethmac1);
@@ -882,18 +795,12 @@ static int korina_init(struct net_device *dev)
 	return 0;
 }
 
-/*
- * Restart the RC32434 ethernet controller.
- */
 static void korina_restart_task(struct work_struct *work)
 {
 	struct korina_private *lp = container_of(work,
 			struct korina_private, restart_task);
 	struct net_device *dev = lp->dev;
 
-	/*
-	 * Disable interrupts
-	 */
 	disable_irq(lp->rx_irq);
 	disable_irq(lp->tx_irq);
 	disable_irq(lp->ovr_irq);
@@ -931,7 +838,6 @@ static void korina_clear_and_restart(struct net_device *dev, u32 value)
 	schedule_work(&lp->restart_task);
 }
 
-/* Ethernet Tx Underflow interrupt */
 static irqreturn_t korina_und_interrupt(int irq, void *dev_id)
 {
 	struct net_device *dev = dev_id;
@@ -957,7 +863,6 @@ static void korina_tx_timeout(struct net_device *dev)
 	schedule_work(&lp->restart_task);
 }
 
-/* Ethernet Rx Overflow interrupt */
 static irqreturn_t
 korina_ovr_interrupt(int irq, void *dev_id)
 {
@@ -990,16 +895,12 @@ static int korina_open(struct net_device *dev)
 	struct korina_private *lp = netdev_priv(dev);
 	int ret;
 
-	/* Initialize */
 	ret = korina_init(dev);
 	if (ret < 0) {
 		printk(KERN_ERR "%s: cannot open device\n", dev->name);
 		goto out;
 	}
 
-	/* Install the interrupt handler
-	 * that handles the Done Finished
-	 * Ovr and Und Events */
 	ret = request_irq(lp->rx_irq, korina_rx_dma_interrupt,
 			IRQF_DISABLED, "Korina ethernet Rx", dev);
 	if (ret < 0) {
@@ -1015,7 +916,6 @@ static int korina_open(struct net_device *dev)
 		goto err_free_rx_irq;
 	}
 
-	/* Install handler for overrun error. */
 	ret = request_irq(lp->ovr_irq, korina_ovr_interrupt,
 			IRQF_DISABLED, "Ethernet Overflow", dev);
 	if (ret < 0) {
@@ -1024,7 +924,6 @@ static int korina_open(struct net_device *dev)
 		goto err_free_tx_irq;
 	}
 
-	/* Install handler for underflow error. */
 	ret = request_irq(lp->und_irq, korina_und_interrupt,
 			IRQF_DISABLED, "Ethernet Underflow", dev);
 	if (ret < 0) {
@@ -1054,7 +953,6 @@ static int korina_close(struct net_device *dev)
 
 	del_timer(&lp->media_check_timer);
 
-	/* Disable interrupts */
 	disable_irq(lp->rx_irq);
 	disable_irq(lp->tx_irq);
 	disable_irq(lp->ovr_irq);
@@ -1156,12 +1054,11 @@ static int korina_probe(struct platform_device *pdev)
 	dma_cache_inv((unsigned long)(lp->td_ring),
 			TD_RING_SIZE + RD_RING_SIZE);
 
-	/* now convert TD_RING pointer to KSEG1 */
 	lp->td_ring = (struct dma_desc *)KSEG1ADDR(lp->td_ring);
 	lp->rd_ring = &lp->td_ring[KORINA_NUM_TDS];
 
 	spin_lock_init(&lp->lock);
-	/* just use the rx dma irq */
+	 
 	dev->irq = lp->rx_irq;
 	lp->dev = dev;
 
@@ -1216,9 +1113,9 @@ static int korina_remove(struct platform_device *pdev)
 	iounmap(lp->tx_dma_regs);
 
 #if defined (MY_DEF_HERE)
-#else /* MY_DEF_HERE */
+#else  
 	platform_set_drvdata(pdev, NULL);
-#endif /* MY_DEF_HERE */
+#endif  
 	unregister_netdev(bif->dev);
 	free_netdev(bif->dev);
 
