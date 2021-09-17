@@ -26,6 +26,7 @@
  * SOFTWARE.
  */
 
+
 #define pr_fmt(fmt)	KBUILD_MODNAME ": " fmt
 
 #include <crypto/internal/hash.h>
@@ -53,6 +54,7 @@ asmlinkage void sha256_transform_rorx(const char *data, u32 *digest,
 #endif
 
 static asmlinkage void (*sha256_transform_asm)(const char *, u32 *, u64);
+
 
 static int sha256_ssse3_init(struct shash_desc *desc)
 {
@@ -123,6 +125,7 @@ static int sha256_ssse3_update(struct shash_desc *desc, const u8 *data,
 
 	return res;
 }
+
 
 /* Add padding and return the message digest. */
 static int sha256_ssse3_final(struct shash_desc *desc, u8 *out)

@@ -549,6 +549,7 @@ extern void perf_pmu_migrate_context(struct pmu *pmu,
 extern u64 perf_event_read_value(struct perf_event *event,
 				 u64 *enabled, u64 *running);
 
+
 struct perf_sample_data {
 	u64				type;
 
@@ -694,20 +695,17 @@ static inline void perf_callchain_store(struct perf_callchain_entry *entry, u64 
 extern int sysctl_perf_event_paranoid;
 extern int sysctl_perf_event_mlock;
 extern int sysctl_perf_event_sample_rate;
-#if defined(CONFIG_SYNO_ARMADA)
 extern int sysctl_perf_cpu_time_max_percent;
 
 extern void perf_sample_event_took(u64 sample_len_ns);
-#endif /* CONFIG_SYNO_ARMADA */
 
 extern int perf_proc_update_handler(struct ctl_table *table, int write,
 		void __user *buffer, size_t *lenp,
 		loff_t *ppos);
-#if defined(CONFIG_SYNO_ARMADA)
 extern int perf_cpu_time_max_percent_handler(struct ctl_table *table, int write,
 		void __user *buffer, size_t *lenp,
 		loff_t *ppos);
-#endif /* CONFIG_SYNO_ARMADA */
+
 
 static inline bool perf_paranoid_tracepoint_raw(void)
 {
@@ -829,6 +827,7 @@ do {									\
 		(void *)(unsigned long)cpu);				\
 	register_cpu_notifier(&fn##_nb);				\
 } while (0)
+
 
 struct perf_pmu_events_attr {
 	struct device_attribute attr;

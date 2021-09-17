@@ -103,6 +103,8 @@
    x ^= ctx->w[m]; \
    dst[n] = cpu_to_le32(x)
 
+
+
 /* Encrypt one block.  in and out may be the same. */
 static void twofish_encrypt(struct crypto_tfm *tfm, u8 *out, const u8 *in)
 {
@@ -210,3 +212,4 @@ module_exit(twofish_mod_fini);
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION ("Twofish Cipher Algorithm");
 MODULE_ALIAS_CRYPTO("twofish");
+MODULE_ALIAS_CRYPTO("twofish-generic");

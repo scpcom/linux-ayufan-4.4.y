@@ -469,11 +469,20 @@ struct rtnl_link_stats64 *mvneta_get_stats64(struct net_device *dev,
 		u64 tx_packets;
 		u64 tx_bytes;
 
-	do {
-		start = u64_stats_fetch_begin_bh(&pp->tx_stats.syncp);
-		stats->tx_packets = pp->tx_stats.packets;
-		stats->tx_bytes	= pp->tx_stats.bytes;
-	} while (u64_stats_fetch_retry_bh(&pp->tx_stats.syncp, start));
+		cpu_stats = per_cpu_ptr(pp->stats, cpu);
+		do {
+			start = u64_stats_fetch_begin_bh(&cpu_stats->syncp);
+			rx_packets = cpu_stats->rx_packets;
+			rx_bytes   = cpu_stats->rx_bytes;
+			tx_packets = cpu_stats->tx_packets;
+			tx_bytes   = cpu_stats->tx_bytes;
+		} while (u64_stats_fetch_retry_bh(&cpu_stats->syncp, start));
+
+		stats->rx_packets += rx_packets;
+		stats->rx_bytes   += rx_bytes;
+		stats->tx_packets += tx_packets;
+		stats->tx_bytes   += tx_bytes;
+	}
 
 	stats->rx_errors	= dev->stats.rx_errors;
 	stats->rx_dropped	= dev->stats.rx_dropped;
@@ -1088,16 +1097,6 @@ static void mvneta_tx_done_pkts_coal_set(struct mvneta_port *pp,
 	mvreg_write(pp, MVNETA_TXQ_SIZE_REG(txq->id), val);
 
 	txq->done_pkts_coal = value;
-}
-
-/* Trigger tx done timer in MVNETA_TX_DONE_TIMER_PERIOD msecs */
-static void mvneta_add_tx_done_timer(struct mvneta_port *pp)
-{
-	if (test_and_set_bit(MVNETA_F_TX_DONE_TIMER_BIT, &pp->flags) == 0) {
-		pp->tx_done_timer.expires = jiffies +
-			msecs_to_jiffies(MVNETA_TX_DONE_TIMER_PERIOD);
-		add_timer(&pp->tx_done_timer);
-	}
 }
 
 /* Handle rx descriptor fill by setting buf_cookie and buf_phys_addr */

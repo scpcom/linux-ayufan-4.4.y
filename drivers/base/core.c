@@ -802,6 +802,8 @@ class_dir_create_and_add(struct class *class, struct kobject *parent_kobj)
 	return &dir->kobj;
 }
 
+static DEFINE_MUTEX(gdp_mutex);
+
 static struct kobject *get_device_parent(struct device *dev,
 					 struct device *parent)
 {

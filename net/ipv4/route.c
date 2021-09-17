@@ -247,6 +247,7 @@ static const struct file_operations rt_cache_seq_fops = {
 	.release = seq_release,
 };
 
+
 static void *rt_cpu_seq_start(struct seq_file *seq, loff_t *pos)
 {
 	int cpu;
@@ -322,6 +323,7 @@ static const struct seq_operations rt_cpu_seq_ops = {
 	.stop   = rt_cpu_seq_stop,
 	.show   = rt_cpu_seq_show,
 };
+
 
 static int rt_cpu_seq_open(struct inode *inode, struct file *file)
 {
@@ -1455,6 +1457,7 @@ e_err:
 	return err;
 }
 
+
 static void ip_handle_martian_source(struct net_device *dev,
 				     struct in_device *in_dev,
 				     struct sk_buff *skb,
@@ -2017,6 +2020,7 @@ struct rtable *__ip_route_output_key(struct net *net, struct flowi4 *fl4)
 		}
 	}
 
+
 	if (fl4->flowi4_oif) {
 		dev_out = dev_get_by_index_rcu(net, fl4->flowi4_oif);
 		rth = ERR_PTR(-ENODEV);
@@ -2073,6 +2077,7 @@ struct rtable *__ip_route_output_key(struct net *net, struct flowi4 *fl4)
 			   we send packet, ignoring both routing tables
 			   and ifaddr state. --ANK
 
+
 			   We could make it even if oif is unknown,
 			   likely IPv6, but we do not.
 			 */
@@ -2115,6 +2120,7 @@ struct rtable *__ip_route_output_key(struct net *net, struct flowi4 *fl4)
 
 	dev_out = FIB_RES_DEV(res);
 	fl4->flowi4_oif = dev_out->ifindex;
+
 
 make_route:
 	rth = __mkroute_output(&res, fl4, orig_oif, dev_out, flags);

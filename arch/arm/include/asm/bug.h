@@ -2,10 +2,8 @@
 #define _ASMARM_BUG_H
 
 #include <linux/linkage.h>
-#if defined(CONFIG_SYNO_LSP_ALPINE)
 #include <linux/types.h>
 #include <asm/opcodes.h>
-#endif /* CONFIG_SYNO_LSP_ALPINE */
 
 #ifdef CONFIG_BUG
 
@@ -16,18 +14,10 @@
  */
 #ifdef CONFIG_THUMB2_KERNEL
 #define BUG_INSTR_VALUE 0xde02
-#if defined(CONFIG_SYNO_LSP_ALPINE)
 #define BUG_INSTR(__value) __inst_thumb16(__value)
-#else /* CONFIG_SYNO_LSP_ALPINE */
-#define BUG_INSTR_TYPE ".hword "
-#endif /* CONFIG_SYNO_LSP_ALPINE */
 #else
 #define BUG_INSTR_VALUE 0xe7f001f2
-#if defined(CONFIG_SYNO_LSP_ALPINE)
 #define BUG_INSTR(__value) __inst_arm(__value)
-#else /* CONFIG_SYNO_LSP_ALPINE */
-#define BUG_INSTR_TYPE ".word "
-#endif /* CONFIG_SYNO_LSP_ALPINE */
 #endif
 
 #define BUG() _BUG(__FILE__, __LINE__, BUG_INSTR_VALUE)

@@ -20,21 +20,14 @@ static void __dma_tx_complete(void *param)
 	struct uart_8250_port	*p = param;
 	struct uart_8250_dma	*dma = p->dma;
 	struct circ_buf		*xmit = &p->port.state->xmit;
-
-#if defined(CONFIG_SYNO_ARMADA)
 	unsigned long	flags;
-#else /* CONFIG_SYNO_ARMADA */
-	dma->tx_running = 0;
-#endif /* CONFIG_SYNO_ARMADA */
 
 	dma_sync_single_for_cpu(dma->txchan->device->dev, dma->tx_addr,
 				UART_XMIT_SIZE, DMA_TO_DEVICE);
 
-#if defined(CONFIG_SYNO_ARMADA)
 	spin_lock_irqsave(&p->port.lock, flags);
 
 	dma->tx_running = 0;
-#endif /* CONFIG_SYNO_ARMADA */
 
 	xmit->tail += dma->tx_size;
 	xmit->tail &= UART_XMIT_SIZE - 1;
@@ -46,9 +39,7 @@ static void __dma_tx_complete(void *param)
 	if (!uart_circ_empty(xmit) && !uart_tx_stopped(&p->port))
 		serial8250_tx_dma(p);
 
-#if defined(CONFIG_SYNO_ARMADA)
 	spin_unlock_irqrestore(&p->port.lock, flags);
-#endif /* CONFIG_SYNO_ARMADA */
 }
 
 static void __dma_rx_complete(void *param)
@@ -201,17 +192,8 @@ int serial8250_request_dma(struct uart_8250_port *p)
 
 	dma->rx_buf = dma_alloc_coherent(dma->rxchan->device->dev, dma->rx_size,
 					&dma->rx_addr, GFP_KERNEL);
-
-#if defined(CONFIG_SYNO_ARMADA)
 	if (!dma->rx_buf)
 		goto err;
-#else /* CONFIG_SYNO_ARMADA */
-	if (!dma->rx_buf) {
-		dma_release_channel(dma->rxchan);
-		dma_release_channel(dma->txchan);
-		return -ENOMEM;
-	}
-#endif /* CONFIG_SYNO_ARMADA */
 
 	/* TX buffer */
 	dma->tx_addr = dma_map_single(dma->txchan->device->dev,
@@ -224,25 +206,14 @@ int serial8250_request_dma(struct uart_8250_port *p)
 		goto err;
 	}
 
-#if defined(CONFIG_SYNO_ARMADA)
-	if (dma_mapping_error(dma->txchan->device->dev, dma->tx_addr)) {
-		dma_free_coherent(dma->rxchan->device->dev, dma->rx_size,
-				  dma->rx_buf, dma->rx_addr);
-		goto err;
-	}
-#endif /* CONFIG_SYNO_ARMADA */
-
 	dev_dbg_ratelimited(p->port.dev, "got both dma channels\n");
 
 	return 0;
-
-#if defined(CONFIG_SYNO_ARMADA)
 err:
 	dma_release_channel(dma->rxchan);
 	dma_release_channel(dma->txchan);
 
 	return -ENOMEM;
-#endif /* CONFIG_SYNO_ARMADA */
 }
 EXPORT_SYMBOL_GPL(serial8250_request_dma);
 

@@ -54,6 +54,7 @@ asmlinkage void sha512_transform_rorx(const char *data, u64 *digest,
 
 static asmlinkage void (*sha512_transform_asm)(const char *, u64 *, u64);
 
+
 static int sha512_ssse3_init(struct shash_desc *desc)
 {
 	struct sha512_state *sctx = shash_desc_ctx(desc);
@@ -127,6 +128,7 @@ static int sha512_ssse3_update(struct shash_desc *desc, const u8 *data,
 
 	return res;
 }
+
 
 /* Add padding and return the message digest. */
 static int sha512_ssse3_final(struct shash_desc *desc, u8 *out)

@@ -241,10 +241,8 @@ static void uart_shutdown(struct tty_struct *tty, struct uart_state *state)
 		/*
 		 * Turn off DTR and RTS early.
 		 */
-#if defined(CONFIG_SYNO_ARMADA)
 		if (uart_console(uport) && tty)
 			uport->cons->cflag = tty->termios.c_cflag;
-#endif /* CONFIG_SYNO_ARMADA */
 
 		if (!tty || (tty->termios.c_cflag & HUPCL))
 			uart_clear_mctrl(uport, TIOCM_DTR | TIOCM_RTS);
@@ -361,11 +359,7 @@ uart_get_baud_rate(struct uart_port *port, struct ktermios *termios,
 		 * The spd_hi, spd_vhi, spd_shi, spd_warp kludge...
 		 * Die! Die! Die!
 		 */
-#if defined(CONFIG_SYNO_ARMADA)
 		if (try == 0 && baud == 38400)
-#else /* CONFIG_SYNO_ARMADA */
-		if (baud == 38400)
-#endif /* CONFIG_SYNO_ARMADA */
 			baud = altbaud;
 
 		/*
@@ -736,6 +730,7 @@ static int uart_set_info(struct tty_struct *tty, struct tty_port *port,
 	closing_wait = new_info->closing_wait == ASYNC_CLOSING_WAIT_NONE ?
 			ASYNC_CLOSING_WAIT_NONE :
 			msecs_to_jiffies(new_info->closing_wait * 10);
+
 
 	change_irq  = !(uport->flags & UPF_FIXED_PORT)
 		&& new_info->irq != uport->irq;
@@ -1158,6 +1153,7 @@ uart_ioctl(struct tty_struct *tty, unsigned int cmd,
 	struct tty_port *port = &state->port;
 	void __user *uarg = (void __user *)arg;
 	int ret = -ENOIOCTLCMD;
+
 
 	/*
 	 * These ioctls don't rely on the hardware to be present.
@@ -2464,6 +2460,7 @@ static ssize_t uart_get_attr_xmit_fifo_size(struct device *dev,
 	return snprintf(buf, PAGE_SIZE, "%d\n", tmp.xmit_fifo_size);
 }
 
+
 static ssize_t uart_get_attr_close_delay(struct device *dev,
 	struct device_attribute *attr, char *buf)
 {
@@ -2473,6 +2470,7 @@ static ssize_t uart_get_attr_close_delay(struct device *dev,
 	uart_get_info(port, &tmp);
 	return snprintf(buf, PAGE_SIZE, "%d\n", tmp.close_delay);
 }
+
 
 static ssize_t uart_get_attr_closing_wait(struct device *dev,
 	struct device_attribute *attr, char *buf)
@@ -2563,6 +2561,7 @@ static const struct attribute_group *tty_dev_attr_groups[] = {
 	&tty_dev_attr_group,
 	NULL
 	};
+
 
 /**
  *	uart_add_one_port - attach a driver-defined port structure

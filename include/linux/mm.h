@@ -1020,6 +1020,7 @@ extern void truncate_setsize(struct inode *inode, loff_t newsize);
 #ifdef CONFIG_SYNO_ECRYPTFS_REMOVE_TRUNCATE_WRITE
 extern void ecryptfs_truncate_setsize(struct inode *inode, loff_t newsize);
 #endif
+void pagecache_isize_extended(struct inode *inode, loff_t from, loff_t to);
 void truncate_pagecache_range(struct inode *inode, loff_t offset, loff_t end);
 int truncate_inode_page(struct address_space *mapping, struct page *page);
 int generic_error_remove_page(struct address_space *mapping, struct page *page);
@@ -1105,6 +1106,7 @@ void account_page_writeback(struct page *page);
 int set_page_dirty(struct page *page);
 int set_page_dirty_lock(struct page *page);
 int clear_page_dirty_for_io(struct page *page);
+int get_cmdline(struct task_struct *task, char *buffer, int buflen);
 
 /* Is the vma a continuation of the stack vma above it? */
 static inline int vma_growsdown(struct vm_area_struct *vma, unsigned long addr)

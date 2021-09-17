@@ -505,11 +505,7 @@ static int get_rx_bufs(struct vhost_virtqueue *vq,
 	unsigned int out, in;
 	int seg = 0;
 	int headcount = 0;
-#if defined(CONFIG_SYNO_LSP_ALPINE)
-	int d;
-#else /* CONFIG_SYNO_LSP_ALPINE */
 	unsigned d;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
 	int r, nlogs = 0;
 
 	while (datalen > 0 && headcount < quota) {
@@ -520,12 +516,10 @@ static int get_rx_bufs(struct vhost_virtqueue *vq,
 		r = vhost_get_vq_desc(vq->dev, vq, vq->iov + seg,
 				      ARRAY_SIZE(vq->iov) - seg, &out,
 				      &in, log, log_num);
-#if defined(CONFIG_SYNO_LSP_ALPINE)
-		if (unlikely(d < 0)) {
-			r = d;
+		if (unlikely(r < 0))
 			goto err;
-		}
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+
+		d = r;
 		if (d == vq->num) {
 			r = 0;
 			goto err;
