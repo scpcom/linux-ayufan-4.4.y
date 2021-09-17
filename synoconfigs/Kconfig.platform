@@ -1,0 +1,53 @@
+menu "Platform Selection"
+
+config SYNO_X64
+	bool
+	default y
+	depends on X86_64
+
+config SYNO_X86
+	bool
+	default y
+	depends on X86_32
+
+config SYNO_BROMOLOW
+	bool "Intel-Brolomow"
+	depends on X86_64
+	help
+
+config SYNO_GRANTLEY
+	bool "Intel Grantley"
+	depends on X86_64
+	help
+
+config SYNO_CEDARVIEW
+	bool "Intel-Cedarview"
+	depends on X86_64
+	help
+
+config SYNO_AVOTON
+	bool "Intel-Avoton"
+	depends on X86_64
+	help
+
+config SYNO_KVMX64
+	bool "KVM X64 Virtual machine"
+	depends on X86_64
+	help
+
+config SYNO_DUAL_HEAD
+	bool "Synology Dual Head Host"
+	default n
+	depends on SYNO_BROMOLOW && SYNO_USB_FLASH_BOOT
+	help
+		Dual head host use SATA DOM as the synoboot device. In this model SATA
+		controller & SAS expander exist simultaneously.
+
+config SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
+	bool "Let kernel panic if sas reservation write conflict"
+	default n
+	depends on SYNO_BROMOLOW
+	help
+		Check if sas reservation write conflict. If yes, kernel panic and then reboot.
+
+endmenu #Platform Selection

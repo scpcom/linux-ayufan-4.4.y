@@ -1,0 +1,185 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
+#ifndef __SYNO_H_
+#define __SYNO_H_
+
+#if defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3)
+#define SYNO_EVANSPORT_FLASH_PART
+#endif
+
+#if defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3)
+#define SYNO_EVANSPORT_GPIO_CTRL
+#endif
+
+#if defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3)
+#define SYNO_EVANSPORT_POWEROFF
+
+#ifdef SYNO_EVANSPORT_POWEROFF
+#define SYNO_EVANSPORT_TTYS1_PORT	0x2F8
+#define SYNO_EVANSPORT_SET8N1		0x3
+#define SYNO_EVANSPORT_SHUTDOWN_CMD	0x31
+#define SYNO_EVANSPORT_TXR		0
+#define SYNO_EVANSPORT_LCR		3
+#endif
+#endif
+
+#if defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3)
+#define SYNO_EVANSPORT_EXPORT_SYMBOL
+#endif
+
+#if defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3)
+#define SYNO_EVANSPORT_NON_PREEMPT_SMB
+#endif
+
+#if defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3)
+#define SYNO_EVANSPORT_WOL_WORKAROUND
+#endif
+
+#if defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3)
+#define SYNO_EVANSPORT_IPV4_ROUTE_WORKAROUND
+#endif
+
+#ifdef	CONFIG_SYNO_USB_FLASH_BOOT
+#ifdef	CONFIG_SYNO_X64
+#define IS_SYNO_USBBOOT_ID_VENDOR(VENDOR) (0xF400 == (VENDOR) || 0xF401 == (VENDOR))
+#define IS_SYNO_USBBOOT_ID_PRODUCT(PRODUCT) (0xF400 == (PRODUCT) || 0xF401 == (PRODUCT))
+#else  
+#define IS_SYNO_USBBOOT_ID_VENDOR(VENDOR) (0xF400 == (VENDOR))
+#define IS_SYNO_USBBOOT_ID_PRODUCT(PRODUCT) (0xF400 == (PRODUCT))
+#endif  
+#endif  
+
+#if defined(CONFIG_ARCH_FEROCEON) && defined(CONFIG_SATA_MV)
+#define SYNO_6281_SOC_USE_OPENSOURCE_SATA
+#endif
+
+#if defined(CONFIG_ARCH_FEROCEON) || defined(CONFIG_ARCH_KIRKWOOD) || defined(CONFIG_ARCH_ARMADA370)
+#define SYNO_ESATA_7042
+#endif
+
+#ifdef CONFIG_SYNO_MV88F6281
+#define SYNO_FLASH_MEMORY_SIZE
+#endif
+
+#ifdef SYNO_SYSTEM_CALL
+#define SYNO_MTD_ALLOC
+#endif
+
+#ifdef MY_ABC_HERE
+#define SYNO_YOTAWIMAX_DESC          "SYNO CDC Ethernet Device for YotaKey"
+#define SYNO_YOTAWIMAX_ETHERNET_NAME "wm"
+#define SYNO_YOTAWIMAX_NET_NOLINK_EVENT (0xffffffff)
+#endif
+
+#ifdef CONFIG_SYNO_MPC85XX_COMMON
+#define SYNO_NET_PHY_NOLINK_SPEED_INIT
+#endif
+
+#ifdef CONFIG_MACH_SYNOLOGY_6281
+#define SYNO_6281_MTU_WA
+#endif
+
+#if defined(CONFIG_PPC_85xx)
+#define SYNO_IPV6_110p_IPV6_READY
+#endif
+
+#if 0
+ 
+#define SYNO_USB_STOR_COMP_ENHANCE
+#endif
+ 
+#if 0
+ 
+#define SYNO_USB3_TIMEOUT
+#endif
+#if 0
+#define SYNO_USB3_RESET_RETRY
+#define SYNO_USB3_STALL_WAIT
+#endif
+ 
+#if 0
+ 
+#define SYNO_USB3_DEBUG
+
+#define SYNO_USB3_ERR_MONITOR
+#endif
+
+#if 0
+ 
+#define SYNO_USB3_SPECIAL_RESET
+#endif
+
+#if 0
+ 
+#define SYNO_USB3_RESET_FOR_ADDR_ERR
+#endif
+ 
+#define SYNO_FIX_MD_RESIZE_BUSY_LOOP 5
+
+#ifdef CONFIG_SYNO_MV88F6281
+#define SYNO_LIBATA_JMB_BEHAVIOR
+#endif
+
+#ifdef CONFIG_SYNO_EXT4_CREATE_TIME_BIG_ENDIAN_SWAP
+#define SYNO_CREATE_TIME_SWAP_VERSION 3719
+#endif
+
+#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+#define SYNO_SMB_PSTRING_LEN 1024
+#endif
+
+#ifdef SYNO_SYSTEM_CALL
+
+#define SYNO_REPLACE_SMB_NATIVE_OS
+
+#endif
+
+#if defined(CONFIG_SYNO_USE_OCF_LINUX) && !defined(CONFIG_CRYPTO_HW)
+#define SYNO_ECRYPTFS_OCF
+#endif
+
+#if defined(CONFIG_MV_XOR_MEMCOPY) && (defined(CONFIG_SYNO_LIO) || defined(MY_ABC_HERE))
+#define SYNO_MV_PERF
+#endif  
+
+#ifdef CONFIG_SYNO_MV88F6281_USBSTATION
+#define SYNO_SLOW_DOWN_UEVENT
+#endif
+
+#if defined(CONFIG_SYNO_MV88F6281) && !defined(CONFIG_SYNO_MV88F6281_USBSTATION)
+#define SYNO_CPUFREQ_ADJUST
+#endif
+
+#ifdef MY_ABC_HERE
+#define MAX_CHANNEL_RETRY       2
+#define CHANNEL_RETRY_INTERVAL  (3*HZ)
+
+#endif
+
+#include <uapi/linux/syno.h>
+
+#define SYNO_NFSD_WRITE_SIZE_MIN 131072
+
+#ifdef MY_ABC_HERE
+#define SYNO_NFSD_UDP_MAX_PACKET_SIZE 32768
+#define SYNO_NFSD_UDP_MIN_PACKET_SIZE 4096
+#define SYNO_NFSD_UDP_DEF_PACKET_SIZE 8192
+#endif
+
+#ifdef CONFIG_SYNO_FIXED_DISK_NAME
+ 
+#define SYNO_ISCSI_DEVICE_INDEX    (26 + 25 * 26)     
+
+#ifdef CONFIG_SYNO_ARMADA
+ 
+#define SYNO_INTERNAL_MICROSD_NAME "4-4"
+#endif  
+#endif  
+
+#if defined(CONFIG_SYNO_MV88F6281) || defined(SYNO_MARVELL_88F6180) || defined(SYNO_MARVELL_88F6281)
+#define SYNO_ARM_GENERIC_ATOMIC64
+#endif
+
+#endif  
