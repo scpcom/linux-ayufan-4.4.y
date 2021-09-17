@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * AppArmor security module
  *
@@ -1105,7 +1108,7 @@ audit:
 	if (!old_profile && !rename_profile)
 		op = OP_PROF_LOAD;
 
-#ifdef SYNO_APPARMOR_PATCH
+#ifdef MY_ABC_HERE
 	if (error)
 		error = audit_policy(op, GFP_ATOMIC, name, info, error);
 #else
@@ -1205,9 +1208,9 @@ ssize_t aa_remove_profiles(char *fqname, size_t size)
 	}
 
 	/* don't fail removal if audit fails */
-#ifndef SYNO_APPARMOR_PATCH
+#ifndef MY_ABC_HERE
 	(void) audit_policy(OP_PROF_RM, GFP_KERNEL, name, info, error);
-#endif /* SYNO_APPARMOR_PATCH */
+#endif /* MY_ABC_HERE */
 	aa_put_namespace(ns);
 	aa_put_profile(profile);
 	return size;

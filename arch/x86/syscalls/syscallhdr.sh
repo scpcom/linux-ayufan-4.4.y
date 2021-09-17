@@ -31,6 +31,8 @@ cat << SYNO_SYSTEM_CALLS
 #define SYNOACLSysIsSupport(arg1, arg2, arg3)		syscall(__NR_SYNOACLIsSupport, arg1, arg2, arg3)
 #define SYNOACLSysGetPerm(arg1, arg2)			syscall(__NR_SYNOACLGetPerm, arg1, arg2)
 
+#define SYNOFlushAggregate(arg1)			syscall(__NR_SYNOFlushAggregate, arg1)
+
 #if (__WORDSIZE == 64) || (_FILE_OFFSET_BITS == 64)
 #define SYNOStat(arg1, arg2, arg3)				syscall(__NR_SYNOStat, arg1, arg2, arg3)
 #define SYNOFStat(arg1, arg2, arg3)				syscall(__NR_SYNOFStat, arg1, arg2, arg3)

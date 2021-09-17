@@ -103,6 +103,13 @@ config SYNO_FS_EXPORT_SYMBOL_LOOKUP_HASH
 	  Export symbol "lookup_hash" (for lio-4.0 now).
 	  previous naming: SYNO_EXPORT_SYMBOL_FOR_LIO
 
+config SYNO_FS_REMOVE_RCU_WALK_PATH
+	bool "Remove rcu path walk to prevent deadlock"
+	default y
+	help
+	  <Linux Kernel Porting - linux-3.10.x> #263
+	  previous naming: CONFIG_SYNO_REMOVE_RCU_WALK_PATH
+
 config SYNO_FS_NOTIFY
 	bool "Support Synotify"
 	default y
@@ -479,6 +486,16 @@ config SYNO_EXT4_PROTECT_DISKSIZE_WRITE
 	  622cad1325 ext4: move ext4_update_i_disksize() into mpage_map_and_submit_extent()
 
 
+config SYNO_EXT4_FORCE_UPDATE_DA_FILE_SIZE
+	bool "Force update file size on buffer_delay if the file is growing"
+	default y
+	depends on EXT4_FS
+	help
+	  <DSM> #73519
+	  When delayed allocation, file size may not update in some reason while file copy stress.
+	  We force update file size if the file is growing, even if the buffer is mark delay.
+
+
 endmenu #EXT4
 
 menu "BTRFS"
@@ -576,13 +593,6 @@ config SYNO_BTRFS_CLONE_CHECK_QUOTA
 	help
 	  <FS Snapshot> #152
 	  add quota check for IOC_CLONE ioctl command
-
-config SYNO_BTRFS_NOCHECK_QUOTA
-	bool "Bypass quota check for various file operations"
-	default y
-	help
-	  <FS Snapshot> #165,#132
-	  bypass quota check for various file operations
 
 config SYNO_BTRFS_FREE_EXTENT_MAPS
 	bool "Add a machanisim to drop extent map cache"
@@ -740,6 +750,61 @@ config SYNO_BTRFS_REMOVE_UNUSED_QGROUP
 	help
 	  <FS Snapshot> #243
 	  Remove qgroup item when snapshot got deleted.
+
+config SYNO_BTRFS_BIG_BLOCK_GROUP
+	bool "Use big block group to reduce mount time on big volume"
+	default y
+	depends on BTRFS_FS
+	help
+	  <DSM> #75730
+	  Use big block group to reduce mount time on big volume. It
+	  will be applied only on volumes who have size larger than 1T.
+
+config SYNO_BTRFS_BIG_BLOCK_GROUP
+	bool "Use big block group to reduce mount time on big volume"
+	default y
+	depends on BTRFS_FS
+	help
+	  <DSM> #75057
+	  Use big block group to reduce mount time on big volume. It
+	  will be applied only on volumes who have size larger than 1T.
+
+config SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+	bool "Revert commit: wait or commit self transaction"
+	default y
+	depends on BTRFS_FS
+	help
+	  <FS Snapshot> #145
+	  Open source - Btrfs: just wait or commit our own log sub-transaction
+	  will cause btrfs panic everywhere. This config revert that commit.
+
+config SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+	bool "Fix btrfs hang on btrfs_end_io*"
+	default y
+	depends on BTRFS_FS
+	help
+	  <FS Snapshot> #149
+	  Open source - Btrfs: fix use-after-free in the finishing procedure of the device replace
+	  will cause bio_couter inc/dec call trace. This config revert that patch.
+
+config SYNO_BTRFS_REVERT_DELAYED_DELETE_INODE
+	bool "Fix dbench hang on delayed_delete_inode"
+	default y
+	depends on BTRFS_FS
+	help
+	  <DSM> #69252
+	  Open source - Btrfs: introduce the delayed inode ref deletion for the single link inode
+	  will cause delay cause release delay inode hang on dbench stress. This config revert
+	  this patch.
+
+config SYNO_BTRFS_UMOUNT_ERROR_VOLUME
+	bool "Fix umount on a error Btrfs volume"
+	default y
+	depends on BTRFS_FS
+	help
+	  <DSM> #76402
+	  Fix a infinite loop and a null pointer dereference bug so that umount
+	  process will not stuck or killed when unmount a error Btrfs volume.
 
 endmenu #BTRFS
 
@@ -982,6 +1047,14 @@ config SYNO_HFSPLUS_BREC_FIND_RET_CHECK
 	  <DSM> #68998
 	  hfsplus will try to update the attribute of parent brec even if it is empty.
 	  We skip update empty brec to prevent illegal memory write and hfsplus data corruption.
+
+config SYNO_HFSPLUS_GET_PAGE_IF_IN_USE
+	bool "Add page get/put mech for bnode page to prevent bad page"
+	default y
+	depends on HFSPLUS_FS
+	help
+	  <DSM> #74413
+	  There is no protection for hfsplus data page. The page may be mark in use after the page is release.
 
 endmenu #HFSPLUS
 

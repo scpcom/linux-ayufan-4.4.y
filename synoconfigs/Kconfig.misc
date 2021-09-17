@@ -69,12 +69,12 @@ config SYNO_POWEROFF_INFO_PRINT
 	  <Linux Kernel Porting 3.10.x> #515
 	  Show pma1 and pma2 in poweroff procedure
 
-config SYNO_HIGH_AVAILABILITY
-	bool "Synology High Availability"
-	depends on SYNO_BROMOLOW || SYNO_CEDARVIEW || SYNO_ALPINE || SYNO_AVOTON || SYNO_GRANTLEY
-	default y
+config SYNO_LOWER_MD_RESYNC_NICE
+	bool "Lower nice value to MD resync threads"
+	depends on SYNO_ALPINE
+	default n
 	help
-	  Check if support SHA
+	  Only alpine platform needs lower nice value now.
 
 config SYNO_FIX_DM_DISK_ALIGNMENT
 	bool "Fix issue of device mapper disk alignment problem"

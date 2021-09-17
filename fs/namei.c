@@ -2596,9 +2596,13 @@ static int path_lookupat(int dfd, const char *name,
 static int filename_lookup(int dfd, struct filename *name,
 				unsigned int flags, struct nameidata *nd)
 {
+#ifdef CONFIG_SYNO_FS_REMOVE_RCU_WALK_PATH
+	int retval = path_lookupat(dfd, name->name, flags, nd);
+#else
 	int retval = path_lookupat(dfd, name->name, flags | LOOKUP_RCU, nd);
 	if (unlikely(retval == -ECHILD))
 		retval = path_lookupat(dfd, name->name, flags, nd);
+#endif /* CONFIG_SYNO_FS_REMOVE_RCU_WALK_PATH */
 	if (unlikely(retval == -ESTALE))
 		retval = path_lookupat(dfd, name->name,
 						flags | LOOKUP_REVAL, nd);
@@ -3685,9 +3689,13 @@ struct file *do_filp_open(int dfd, struct filename *pathname,
 	struct nameidata nd;
 	struct file *filp;
 
+#ifdef CONFIG_SYNO_FS_REMOVE_RCU_WALK_PATH
+	filp = path_openat(dfd, pathname, &nd, op, flags);
+#else
 	filp = path_openat(dfd, pathname, &nd, op, flags | LOOKUP_RCU);
 	if (unlikely(filp == ERR_PTR(-ECHILD)))
 		filp = path_openat(dfd, pathname, &nd, op, flags);
+#endif /* CONFIG_SYNO_FS_REMOVE_RCU_WALK_PATH */
 	if (unlikely(filp == ERR_PTR(-ESTALE)))
 		filp = path_openat(dfd, pathname, &nd, op, flags | LOOKUP_REVAL);
 	return filp;
@@ -3708,9 +3716,13 @@ struct file *do_file_open_root(struct dentry *dentry, struct vfsmount *mnt,
 	if (dentry->d_inode->i_op->follow_link && op->intent & LOOKUP_OPEN)
 		return ERR_PTR(-ELOOP);
 
+#ifdef CONFIG_SYNO_FS_REMOVE_RCU_WALK_PATH
+	file = path_openat(-1, &filename, &nd, op, flags);
+#else
 	file = path_openat(-1, &filename, &nd, op, flags | LOOKUP_RCU);
 	if (unlikely(file == ERR_PTR(-ECHILD)))
 		file = path_openat(-1, &filename, &nd, op, flags);
+#endif /* CONFIG_SYNO_FS_REMOVE_RCU_WALK_PATH */
 	if (unlikely(file == ERR_PTR(-ESTALE)))
 		file = path_openat(-1, &filename, &nd, op, flags | LOOKUP_REVAL);
 	return file;

@@ -41,6 +41,9 @@
 #endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO || CONFIG_SYNO_ATA_PWR_CTRL */
 #include <linux/cdrom.h>
 #include <linux/sched.h>
+#ifdef CONFIG_SYNO_HW_VERSION
+#include <linux/synobios.h>
+#endif
 
 /*
  * Define if arch has non-standard setup.  This is a _PCI_ standard

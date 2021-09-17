@@ -2525,7 +2525,6 @@ qgroup_rescan_leaf(struct btrfs_fs_info *fs_info, struct btrfs_path *path,
 	}
 out:
 	btrfs_put_tree_mod_seq(fs_info, &tree_mod_seq_elem);
-
 	return ret;
 }
 

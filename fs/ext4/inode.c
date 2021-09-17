@@ -2810,7 +2810,11 @@ static int ext4_da_should_update_i_disksize(struct page *page,
 	for (i = 0; i < idx; i++)
 		bh = bh->b_this_page;
 
+#ifdef CONFIG_SYNO_EXT4_FORCE_UPDATE_DA_FILE_SIZE
+	if (!buffer_mapped(bh) || buffer_unwritten(bh))
+#else
 	if (!buffer_mapped(bh) || (buffer_delay(bh)) || buffer_unwritten(bh))
+#endif /* CONFIG_SYNO_EXT4_FORCE_UPDATE_DA_FILE_SIZE */
 		return 0;
 	return 1;
 }

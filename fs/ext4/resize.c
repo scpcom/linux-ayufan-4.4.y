@@ -695,10 +695,8 @@ static int verify_reserved_gdb(struct super_block *sb,
 	unsigned grp;
 	__le32 *p = (__le32 *)primary->b_data;
 	int gdbackups = 0;
-	unsigned translate32 = 0;
 
 	while ((grp = ext4_list_backups(sb, &three, &five, &seven)) < end) {
-		translate32 = grp * EXT4_BLOCKS_PER_GROUP(sb) + blk;
 		if (le32_to_cpu(*p++) !=
 		    grp * EXT4_BLOCKS_PER_GROUP(sb) + blk){
 			ext4_warning(sb, "reserved GDT %llu"

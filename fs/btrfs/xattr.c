@@ -234,11 +234,7 @@ int __btrfs_setxattr(struct btrfs_trans_handle *trans,
 	if (trans)
 		return do_setxattr(trans, inode, name, value, size, flags);
 
-#ifdef CONFIG_SYNO_BTRFS_NOCHECK_QUOTA
-	trans = btrfs_start_transaction_nocheckquota(root, 2);
-#else
 	trans = btrfs_start_transaction(root, 2);
-#endif
 	if (IS_ERR(trans))
 		return PTR_ERR(trans);
 

@@ -337,6 +337,9 @@ int fuse_reverse_inval_inode(struct super_block *sb, u64 nodeid,
 
 static void fuse_umount_begin(struct super_block *sb)
 {
+#ifdef CONFIG_SYNO_FS_RECVFILE
+	flush_aggregate_recvfile(-1);
+#endif /* CONFIG_SYNO_FS_RECVFILE */
 	fuse_abort_conn(get_fuse_conn_super(sb));
 }
 

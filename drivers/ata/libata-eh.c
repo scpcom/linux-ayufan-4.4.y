@@ -1942,7 +1942,7 @@ syno_ata_do_remap(struct ata_queued_cmd *qc, u8 blLBA48)
 				   tf.device, tf.ctl, tf.flags, tf.protocol);
 
 	ret = ata_exec_internal(qc->dev, &tf, NULL, DMA_TO_DEVICE,
-							empty_zero_page, size, 0);
+							page_address(ZERO_PAGE(0)), size, 0);
 
 	ata_dev_printk(qc->dev, KERN_WARNING,
 				   "Insert write command result %d\n", ret);
@@ -1995,7 +1995,12 @@ static unsigned int ata_eh_analyze_tf(struct ata_queued_cmd *qc,
 		if (err & ATA_IDNF)
 			qc->err_mask |= AC_ERR_INVALID;
 #ifdef CONFIG_SYNO_MD_BAD_SECTOR_AUTO_REMAP
+		/* Only UNC errors need remaping, and we also make sure that
+		 * the result is reported by log page 10h for NCQ commands.
+		 * This prevents remapping with untrusted LBAs.
+		 */
 		if (!(qc->ap->pflags & ATA_PFLAG_FROZEN) &&
+			(!ata_is_ncq(qc->tf.protocol) || qc->err_mask & AC_ERR_NCQ) &&
 			err & ATA_UNC) {
 			syno_ata_writes_sector(qc);
 		}
@@ -2269,6 +2274,24 @@ static unsigned int ata_eh_speed_down(struct ata_device *dev,
 	return action;
 }
 
+#ifdef CONFIG_SYNO_SII3132_MEDIA_ERROR_RETRY
+static int syno_media_error_retry(struct ata_queued_cmd *qc)
+{
+	int iRet = 1;
+
+#ifdef CONFIG_SYNO_HW_VERSION
+	if (qc && syno_is_hw_version(HW_DS1815p)) {
+		struct ata_port *ap = qc->ap;
+		if (ap && (ap->print_id == 7 || ap->print_id == 8)) {
+			iRet = 0;
+		}
+	}
+#endif
+
+	return iRet;
+}
+#endif
+
 /**
  *	ata_eh_worth_retry - analyze error and decide whether to retry
  *	@qc: qc to possibly retry
@@ -2280,8 +2303,14 @@ static unsigned int ata_eh_speed_down(struct ata_device *dev,
  */
 static inline int ata_eh_worth_retry(struct ata_queued_cmd *qc)
 {
+#ifdef CONFIG_SYNO_SII3132_MEDIA_ERROR_RETRY
+	if (syno_media_error_retry(qc)) {
+#endif
 	if (qc->err_mask & AC_ERR_MEDIA)
 		return 0;	/* don't retry media errors */
+#ifdef CONFIG_SYNO_SII3132_MEDIA_ERROR_RETRY
+	}
+#endif
 	if (qc->flags & ATA_QCFLAG_IO)
 		return 1;	/* otherwise retry anything from fs stack */
 	if (qc->err_mask & AC_ERR_INVALID)

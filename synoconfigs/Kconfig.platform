@@ -29,6 +29,11 @@ config SYNO_AVOTON
 	bool "Intel-Avoton"
 	depends on X86_64
 	help
+	
+config SYNO_BRASWELL
+	bool "Intel-Braswell"
+	depends on X86_64
+	help
 
 config SYNO_KVMX64
 	bool "KVM X64 Virtual machine"

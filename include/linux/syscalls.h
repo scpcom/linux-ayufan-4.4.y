@@ -877,6 +877,7 @@ asmlinkage long sys_finit_module(int fd, const char __user *uargs, int flags);
 /* 412 */ asmlinkage long sys_SYNOACLCheckPerm(const char __user *szPath, int mask);
 /* 413 */ asmlinkage long sys_SYNOACLIsSupport(const char __user *szPath, int fd, int tag);
 /* 414 */ asmlinkage long sys_SYNOACLGetPerm(const char __user *szPath, int __user *pOutPerm);
+/* 415 */ asmlinkage long sys_SYNOFlushAggregate(int fd);
 #ifdef CONFIG_SYNO_FS_STAT
 #if BITS_PER_LONG == 32
 /* 419 */ asmlinkage long sys_SYNOStat64(char __user *filename, unsigned int flags, struct SYNOSTAT64 __user *statbuf);

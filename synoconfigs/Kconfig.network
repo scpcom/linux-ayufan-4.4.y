@@ -55,6 +55,21 @@ config SYNO_BONDING_INIT_STATUS
 		The dev->operstate are not well initialized when bonding created.
 		In bonding, the dev->operstate is not initialized after dev_init. So we call default_operstate() to init this value.
 
+config SYNO_BONDING_FIX_ACTIVE
+	bool "Fix a bug in active backup bonding mode"
+	default y
+	help
+		<DSM> #74147
+		While keep changing the MTU of a bonding interface in active backup mode,
+		there is a chance that
+		(1) the speed of the current active slave remains unknown, or
+		(2) the current active slave is not actived
+		Either case causes the speed of the current active slave remains unknown.
+		If the speed of a bonding interface is unknown, its MTU can not
+		be changed again using synonet tool.
+		To solve the problem, this workaround changes the current active slave to
+		the next upped NIC slave with correct speed.
+
 config SYNO_IPV6_LINKLOCAL
 	bool "Assign an interface to IPV6 link local address automatically."
 	default y

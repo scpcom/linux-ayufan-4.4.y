@@ -1022,6 +1022,76 @@ static int fuse_write_end(struct file *file, struct address_space *mapping,
        page_cache_release(page);
        return res;
 }
+
+static ssize_t fuse_perform_write_pages(struct file *file,
+				  struct address_space *mapping,
+				  loff_t pos, struct page **page, unsigned len, unsigned page_num)
+{
+	struct inode *inode = mapping->host;
+	struct fuse_conn *fc = get_fuse_conn(inode);
+	int err = 0;
+	ssize_t res = 0;
+	unsigned offset = pos & (PAGE_CACHE_SIZE - 1);
+	struct fuse_req *req;
+	size_t num_written;
+	int i;
+
+	if (is_bad_inode(inode))
+		return -EIO;
+
+	req = fuse_get_req(fc, FUSE_MAX_PAGES_PER_REQ);
+	if (IS_ERR(req)) {
+		return PTR_ERR(req);
+	}
+
+	req->in.argpages = 1;
+
+	for (i = 0; i < page_num; i++) {
+		req->pages[req->num_pages] = page[i];
+		req->num_pages++;
+		req->page_descs[i].offset = 0;
+		req->page_descs[i].length = PAGE_SIZE;
+	}
+	if (offset) {
+		req->page_descs[0].offset = offset;
+		req->page_descs[0].length = PAGE_SIZE - offset;
+	}
+	if ((pos+len) & (PAGE_CACHE_SIZE - 1))
+		req->page_descs[page_num-1].length = (pos+len) & (PAGE_CACHE_SIZE - 1);
+
+	num_written = fuse_send_write_pages(req, file, inode,
+							    pos, len);
+	err = req->out.h.error;
+	if (!err) {
+		res += num_written;
+		pos += num_written;
+
+		/* break out of the loop on short write */
+		if (num_written != len)
+			err = -EIO;
+	}
+	fuse_put_request(fc, req);
+
+	if (res > 0)
+		fuse_write_update_size(inode, pos);
+
+	fuse_invalidate_attr(inode);
+
+	return res > 0 ? res : err;
+}
+
+static int fuse_aggregate_write_end(struct file *file, struct address_space *mapping,
+			loff_t pos, unsigned len, unsigned copied,
+			struct page **page, void *fsdata, unsigned page_num)
+{
+	int res = 0;
+
+	if (copied)
+		res = fuse_perform_write_pages(file, mapping,
+				  pos, page, len, page_num);
+
+	return res;
+}
 #endif /* CONFIG_SYNO_FS_RECVFILE */
 
 static ssize_t fuse_fill_write_pages(struct fuse_req *req,
@@ -2657,6 +2727,7 @@ static const struct address_space_operations fuse_file_aops  = {
 #ifdef CONFIG_SYNO_FS_RECVFILE
 	.write_begin    = fuse_write_begin,
 	.write_end      = fuse_write_end,
+	.aggregate_write_end	= fuse_aggregate_write_end,
 #endif /* CONFIG_SYNO_FS_RECVFILE */
 	.readpages	= fuse_readpages,
 	.set_page_dirty	= __set_page_dirty_nobuffers,
@@ -2668,4 +2739,7 @@ void fuse_init_file_inode(struct inode *inode)
 {
 	inode->i_fop = &fuse_file_operations;
 	inode->i_data.a_ops = &fuse_file_aops;
+#ifdef CONFIG_SYNO_FS_RECVFILE
+	inode->aggregate_flag = 0;
+#endif /* CONFIG_SYNO_FS_RECVFILE */
 }

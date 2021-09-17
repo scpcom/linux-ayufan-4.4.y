@@ -332,6 +332,9 @@ static inline void tty_set_flow_change(struct tty_struct *tty, int val)
 }
 
 #ifdef CONFIG_TTY
+#if defined(CONFIG_SYNO_MICROP_CTRL) && defined(CONFIG_SYNO_X64)
+extern int syno_ttys_write(const int index, const char* szBuf);
+#endif
 extern void console_init(void);
 extern void tty_kref_put(struct tty_struct *tty);
 extern struct pid *tty_get_pgrp(struct tty_struct *tty);

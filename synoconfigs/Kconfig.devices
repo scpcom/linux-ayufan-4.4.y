@@ -613,17 +613,17 @@ config SYNO_SATA_PM_SAMSUNG_PROBE_TIME_FIX
 	  porting #47 SYNO_SATA_SIL3132_HD_DETECT.
 	  We still port this define for compatibility.
 
-config SYNO_FIX_MV_LBA_ERR_RET
-	bool "Marvell 88SX7042 LBA return error workaround"
+config SYNO_UNC_LBA_RESTORE
+	bool "ATA UNC LBA return error workaround"
 	default y
 	help
-	  <DSM> #72618
-	  MV 7042 returns LBA registers even if the NCQ READ command failed.
+	  <DSM> #72618 #73898
+	  Some of the sata controllers return LBA registers even if the NCQ READ command failed.
 	  These register values are not defined in ATA standard and cannot be trusted.
 	  Passing these untrusted values to SCSI layer might cause in data lost due to 
 	  incorrect BIO completed-byte calculation.
-	  This fix only target on UNC error and will return the preceded LBA setup of the
-	  failed command like other SATA controllers do.
+	  This fix only target on UNC error and will restore the result LBA with the preceded setup 
+	  right before these information are formed into sense data and returned to SCSI layer.
 
 config SYNO_SATA_WCACHE_DISABLE
 	bool "Disk write cache blacklist"
@@ -847,6 +847,13 @@ config SYNO_CUSTOM_SCMD_TIMEOUT
 	  ST6000VN0001 is 23s. Then "DRDY (timeout)" occurs when the disk wakes up from stanby everytime.
 
 	  To avoid this issue, we provide an interface to change the timeout value of each disk.
+
+config SYNO_SII3132_MEDIA_ERROR_RETRY
+	bool "Enable SATA SiI3132 media error retry"
+	depends on SYNO_AVOTON
+	default n
+	help
+	  SiI3132 may get media error in some models, we could add retry for them
 
 endmenu #SATA
 
@@ -1149,7 +1156,16 @@ config SYNO_ICH_UHCI_NO_MMIO_OFF
 	help
 	  <Linux Kernel Porting - linux-3.10.x> #438
 	  Disabling Pineview's UHCI controller MMIO might cause system hang during boot time.
-	  Enable this to set the intel UHCI controller as a 'MMIO always on' device and prevent the situation.	  
+	  Enable this to set the intel UHCI controller as a 'MMIO always on' device and prevent the situation.
+
+config SYNO_USB3_RESET_WAIT
+	bool "Add extra delay time for USB reset in xhci driver"
+	default y
+	help
+	  <USB compatibility> #403 and <Linux Kernel Porting - linux-3.10.x> #80
+	  Add extra delay time for USB reset.
+	  NEC Chip has a compatibility issue on specific device during USB reset time.
+	  The USB device may meet "read descripter error" or "set address error".
 
 endmenu #USB
 
@@ -1207,10 +1223,11 @@ config SYNO_MICROP_CTRL
 	  Previous Naming: SYNO_X86_MICROP_CTRL
 
 config SYNO_TTY_EXPORT
-	bool "Support external use of tty device"
+	bool "Export uP symbol for synobios"
 	default y
 	help
-	  Support external use of tty device.
+	  <DSM-Protection>112, 116
+	  Export symbol "syno_test_list" for synobios use.
 
 endmenu #Serial/TTYs
 

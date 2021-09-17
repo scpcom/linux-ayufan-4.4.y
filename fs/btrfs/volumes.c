@@ -4185,8 +4185,18 @@ static int __btrfs_alloc_chunk(struct btrfs_trans_handle *trans,
 	ncopies = btrfs_raid_array[index].ncopies;
 
 	if (type & BTRFS_BLOCK_GROUP_DATA) {
+#ifdef CONFIG_SYNO_BTRFS_BIG_BLOCK_GROUP
+		if (info->super_copy->total_bytes > 1024ULL * 1024 * 1024 * 1024) {
+			max_stripe_size = 10ULL * 1024 * 1024 * 1024;
+			max_chunk_size = 2 * max_stripe_size;
+		} else {
+			max_stripe_size = 1024 * 1024 * 1024;
+			max_chunk_size = 10 * max_stripe_size;
+		}
+#else
 		max_stripe_size = 1024 * 1024 * 1024;
 		max_chunk_size = 10 * max_stripe_size;
+#endif
 		if (!devs_max)
 			devs_max = BTRFS_MAX_DEVS(info->chunk_root);
 	} else if (type & BTRFS_BLOCK_GROUP_METADATA) {
@@ -5428,7 +5438,10 @@ int btrfs_rmap_block(struct btrfs_mapping_tree *map_tree,
 static void btrfs_end_bio(struct bio *bio, int err)
 {
 	struct btrfs_bio *bbio = bio->bi_private;
+#ifdef CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#else
 	struct btrfs_device *dev = bbio->stripes[0].dev;
+#endif /* CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING */
 	int is_orig_bio = 0;
 
 	if (err) {
@@ -5436,6 +5449,9 @@ static void btrfs_end_bio(struct bio *bio, int err)
 		if (err == -EIO || err == -EREMOTEIO) {
 			unsigned int stripe_index =
 				btrfs_io_bio(bio)->stripe_index;
+#ifdef CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+			struct btrfs_device *dev;
+#endif /* CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING */
 
 			BUG_ON(stripe_index >= bbio->num_stripes);
 			dev = bbio->stripes[stripe_index].dev;
@@ -5457,7 +5473,10 @@ static void btrfs_end_bio(struct bio *bio, int err)
 	if (bio == bbio->orig_bio)
 		is_orig_bio = 1;
 
+#ifdef CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#else
 	btrfs_bio_counter_dec(bbio->fs_info);
+#endif /* CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING */
 
 	if (atomic_dec_and_test(&bbio->stripes_pending)) {
 		if (!is_orig_bio) {
@@ -5601,7 +5620,10 @@ static void submit_stripe_bio(struct btrfs_root *root, struct btrfs_bio *bbio,
 #endif
 	bio->bi_bdev = dev->bdev;
 
+#ifdef CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#else
 	btrfs_bio_counter_inc_noblocked(root->fs_info);
+#endif /* CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING */
 
 	if (async)
 		btrfs_schedule_bio(root, dev, rw, bio);
@@ -5671,24 +5693,45 @@ int btrfs_map_bio(struct btrfs_root *root, int rw, struct bio *bio,
 	length = bio->bi_size;
 	map_length = length;
 
+#ifdef CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#else
 	btrfs_bio_counter_inc_blocked(root->fs_info);
+#endif /* CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING */
 	ret = __btrfs_map_block(root->fs_info, rw, logical, &map_length, &bbio,
 			      mirror_num, &raid_map);
+#ifdef CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+	if (ret) /* -ENOMEM */
+		return ret;
+#else
 	if (ret) {
 		btrfs_bio_counter_dec(root->fs_info);
 		return ret;
 	}
+#endif /* CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING */
 
 	total_devs = bbio->num_stripes;
 	bbio->orig_bio = first_bio;
 	bbio->private = first_bio->bi_private;
 	bbio->end_io = first_bio->bi_end_io;
+#ifdef CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#else
 	bbio->fs_info = root->fs_info;
+#endif /* CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING */
 	atomic_set(&bbio->stripes_pending, bbio->num_stripes);
 
 	if (raid_map) {
 		/* In this case, map_length has been set to the length of
 		   a single stripe; not the whole write */
+#ifdef CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+		if (rw & WRITE) {
+			return raid56_parity_write(root, bio, bbio,
+						   raid_map, map_length);
+		} else {
+			return raid56_parity_recover(root, bio, bbio,
+						     raid_map, map_length,
+						     mirror_num);
+		}
+#else
 		if (rw & WRITE) {
 			ret = raid56_parity_write(root, bio, bbio,
 						  raid_map, map_length);
@@ -5703,6 +5746,7 @@ int btrfs_map_bio(struct btrfs_root *root, int rw, struct bio *bio,
 		 */
 		btrfs_bio_counter_dec(root->fs_info);
 		return ret;
+#endif /* CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING */
 	}
 
 	if (map_length < length) {
@@ -5744,7 +5788,10 @@ int btrfs_map_bio(struct btrfs_root *root, int rw, struct bio *bio,
 				  async_submit);
 		dev_nr++;
 	}
+#ifdef CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#else
 	btrfs_bio_counter_dec(root->fs_info);
+#endif /* CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING */
 	return 0;
 }
 

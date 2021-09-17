@@ -27,6 +27,10 @@
 extern int syno_hibernation_log_level;
 #endif /* CONFIG_SYNO_DEBUG_FLAG */
 
+#ifdef CONFIG_SYNO_FS_RECVFILE
+DEFINE_SPINLOCK(aggregate_lock);
+#endif /* CONFIG_SYNO_FS_RECVFILE */
+
 typedef ssize_t (*io_fn_t)(struct file *, char __user *, size_t, loff_t *);
 typedef ssize_t (*iov_fn_t)(struct kiocb *, const struct iovec *,
 		unsigned long, loff_t);
@@ -1251,23 +1255,84 @@ COMPAT_SYSCALL_DEFINE4(sendfile64, int, out_fd, int, in_fd,
 
 #ifdef CONFIG_SYNO_SYSTEM_CALL
 #ifdef CONFIG_SYNO_FS_RECVFILE
+int aggregate_fd = -1;
+atomic_t syno_aggregate_recvfile_count = ATOMIC_INIT(0);
+
+static int should_do_aggregate(struct file *file, int fd, loff_t pos, loff_t next_offset)
+{
+	int          blFlush = 0;
+	struct file *aggregate_file;
+	struct inode *inode;
+	static struct file *last_file = NULL;
+
+	if (!file->f_mapping->a_ops->aggregate_write_end)
+		return 0;
+
+	inode = file->f_dentry->d_inode->i_mapping->host;
+	spin_lock(&aggregate_lock);
+	if (0 == atomic_read(&syno_aggregate_recvfile_count)) {
+	// aggregate_recvfile() is available.
+		if (aggregate_fd == -1 || (fd == aggregate_fd && pos == next_offset && file == last_file)) {
+			// aggregate_fd == -1: there is no data to be flush.
+			// (fd == aggregate_fd && pos == next_offset): keep writing last time.
+			// (file == last_file): fd may be close and assign to another file.
+			aggregate_fd = fd;
+			last_file = file;
+			atomic_inc(&syno_aggregate_recvfile_count);
+			inode->aggregate_flag |= AGGREGATE_RECVFILE_DOING;
+			spin_unlock(&aggregate_lock);
+			return 1;
+		}
+		// data in aggregate_recvfile need to be flush, flush it.
+		aggregate_file = fget(aggregate_fd);
+		// fd may be changed after close_fd, check aggregate_write_end() here.
+		if (aggregate_file) {
+			if (last_file == aggregate_file) {
+				atomic_inc(&syno_aggregate_recvfile_count);
+				spin_unlock(&aggregate_lock);
+				aggregate_recvfile_flush_only(aggregate_file);
+				atomic_dec(&syno_aggregate_recvfile_count);
+				spin_lock(&aggregate_lock);
+			}
+			fput(aggregate_file);
+		}
+		// after flush, try again.
+		if (0 == atomic_read(&syno_aggregate_recvfile_count) && aggregate_fd == -1) {
+			aggregate_fd = fd;
+			last_file = file;
+			atomic_inc(&syno_aggregate_recvfile_count);
+			inode->aggregate_flag |= AGGREGATE_RECVFILE_DOING;
+			spin_unlock(&aggregate_lock);
+			return 1;
+		}
+	}
+	if (inode->aggregate_flag & AGGREGATE_RECVFILE_DOING) {
+		blFlush = 1;
+	}
+	spin_unlock(&aggregate_lock);
+
+	if (blFlush) {
+		flush_aggregate_recvfile(fd);
+	}
+	return 0;
+}
+
 SYSCALL_DEFINE5(recvfile, int, fd, int, s, loff_t *, offset, size_t, nbytes, size_t *, rwbytes)
 {
-	int ret = 0;
-	struct file *file = NULL;                /* reg file struct */
-	struct socket *sock = NULL;
-	struct inode *inode;
-	size_t bytes_received = 0;
-	size_t bytes_written = 0;
-	loff_t pos;                 /* file offset */
+	int             ret = 0;
+	loff_t          pos = 0;                 /* file offset */
+	size_t          bytes_received = 0;
+	size_t          bytes_written = 0;
+	size_t          total_received = 0;
+	size_t          total_written = 0;
+	struct file    *file = NULL;
+	struct socket  *sock = NULL;
+	struct inode   *inode = NULL;
+	static loff_t   next_offset = 0;
+	unsigned short  blAggregate = 0;
 
 	if (!offset) {
 		ret = -EINVAL;
-		goto out;
-	}
-
-	if(copy_from_user(&pos, offset, sizeof(loff_t))) {
-		ret = -EFAULT;
 		goto out;
 	}
 
@@ -1278,13 +1343,14 @@ SYSCALL_DEFINE5(recvfile, int, fd, int, s, loff_t *, offset, size_t, nbytes, siz
 		goto out;
 	}
 
-	/* check fd for regular file */
-	file = fget(fd);
-	if (!file) {
-		ret = -EBADF;
+	if(copy_from_user(&pos, offset, sizeof(loff_t))) {
+		ret = -EFAULT;
 		goto out;
 	}
-	if (!(file->f_mode & FMODE_WRITE)) {
+
+	/* check fd for regular file */
+	file = fget(fd);
+	if (!file || !(file->f_mode & FMODE_WRITE)) {
 		ret = -EBADF;
 		goto out;
 	}
@@ -1302,57 +1368,59 @@ SYSCALL_DEFINE5(recvfile, int, fd, int, s, loff_t *, offset, size_t, nbytes, siz
 
 	inode = file->f_dentry->d_inode->i_mapping->host;
 	mutex_lock(&inode->i_mutex);
-	/* refer to sock_read->sock_recvmsg->tcp_recvmsg */
-	if (nbytes <= (MAX_PAGES_PER_RECVFILE * PAGE_SIZE)){
-			ret = do_recvfile(file, sock, pos, nbytes, &bytes_received, &bytes_written);
-	} else {
-		/* this case should seldom/never happen */
-		size_t nbytes_left = nbytes;
-		size_t cBytereceived = 0;
-		size_t cBytewritten = 0;
-
-		do {
-				ret = do_recvfile(file, sock, pos,
-							  (nbytes_left >= (MAX_PAGES_PER_RECVFILE * PAGE_SIZE)) ?
-							   (MAX_PAGES_PER_RECVFILE * PAGE_SIZE) : nbytes_left
-							  , &cBytereceived, &cBytewritten);
-			if(ret > 0) {
-				bytes_received += ret;
-				bytes_written += ret;
-				nbytes_left -= ret;
-			}
-			else  {
-				bytes_received += cBytereceived;
-				bytes_written += cBytewritten;
-				break;
-			}
-		} while(nbytes_left > 0);
-		if(ret >= 0)
-			ret = bytes_received;
+	if (should_do_aggregate(file, fd, pos, next_offset)) {
+		blAggregate = 1;
 	}
+	/* refer to sock_read->sock_recvmsg->tcp_recvmsg */
+	do {
+		if (unlikely(blAggregate)) {
+			ret = do_aggregate_recvfile(file, sock, pos, (nbytes >= (MAX_PAGES_PER_RECVFILE * PAGE_SIZE)) ?
+						(MAX_PAGES_PER_RECVFILE * PAGE_SIZE) : nbytes, &bytes_received, &bytes_written, 0);
+			// trans aggregate_recvfile() to normal if it is flushing.
+			if (inode->aggregate_flag & AGGREGATE_RECVFILE_FLUSH &&
+			      !(inode->aggregate_flag & AGGREGATE_RECVFILE_DOING)) {
+				next_offset = pos;
+				atomic_dec(&syno_aggregate_recvfile_count);
+				blAggregate = 0;
+			}
+		} else {
+			ret = do_recvfile(file, sock, pos, (nbytes > (MAX_PAGES_PER_RECVFILE * PAGE_SIZE)) ?
+					   (MAX_PAGES_PER_RECVFILE * PAGE_SIZE) : nbytes, &bytes_received, &bytes_written);
+		}
+		total_received += bytes_received;
+		total_written += bytes_written;
+		if (0 >= ret) {
+			break;
+		}
+		nbytes -= bytes_written;
+		pos += bytes_written;
+	} while(nbytes > 0);
 	mutex_unlock(&inode->i_mutex);
+	if (unlikely(blAggregate)) {
+		next_offset = pos;
+		atomic_dec(&syno_aggregate_recvfile_count);
+	}
+
+	if(ret >= 0) {
+		fsnotify_modify(file);
+		ret = total_written;
+	}
 
 	if(0 > ret && rwbytes) {
 #ifdef CONFIG_IA32_EMULATION
-		rwbytes[0]=bytes_received;
-		rwbytes[1]=bytes_written;
+		rwbytes[0]=total_received;
+		rwbytes[1]=total_written;
 #else
-		int ret_copy_to_user = 0;
-		ret_copy_to_user = copy_to_user(&rwbytes[0], &bytes_received, sizeof(size_t));
-		if (ret_copy_to_user < 0) {
+		if (copy_to_user(&rwbytes[0], &total_received, sizeof(size_t)) < 0) {
 			ret = -ENOMEM;
 			goto out;
 		}
-		ret_copy_to_user = copy_to_user(&rwbytes[1], &bytes_written, sizeof(size_t));
-		if (ret_copy_to_user < 0) {
+		if (copy_to_user(&rwbytes[1], &total_written, sizeof(size_t)) < 0) {
 			ret = -ENOMEM;
 			goto out;
 		}
 #endif
 	}
-
-	if (ret >= 0)
-		fsnotify_modify(file);
 
 out:
 	if(file)
@@ -1361,10 +1429,18 @@ out:
 		fput(sock->file);
 
 	return ret;
+}
 
+SYSCALL_DEFINE1(SYNOFlushAggregate, int, fd)
+{
+	return flush_aggregate_recvfile(fd);
 }
 #else
 SYSCALL_DEFINE5(recvfile, int, fd, int, s, loff_t *, offset, size_t, nbytes, size_t *, rwbytes)
+{
+	return 0;
+}
+SYSCALL_DEFINE1(SYNOFlushAggregate, int, fd)
 {
 	return 0;
 }

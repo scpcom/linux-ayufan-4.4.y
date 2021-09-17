@@ -109,6 +109,10 @@ MODULE_PARM_DESC(use_both_schemes,
 DECLARE_RWSEM(ehci_cf_port_reset_rwsem);
 EXPORT_SYMBOL_GPL(ehci_cf_port_reset_rwsem);
 
+#ifdef CONFIG_SYNO_USB_SERIAL_FIX
+static DEFINE_MUTEX(hub_init_mutex);
+#endif /* CONFIG_SYNO_USB_SERIAL_FIX */
+
 #define HUB_DEBOUNCE_TIMEOUT	2000
 #define HUB_DEBOUNCE_STEP	  25
 #define HUB_DEBOUNCE_STABLE	 100
@@ -1314,6 +1318,10 @@ static int hub_configure(struct usb_hub *hub,
 	unsigned unit_load;
 	unsigned full_load;
 
+#ifdef CONFIG_SYNO_USB_SERIAL_FIX
+	mutex_lock(&hub_init_mutex);
+#endif /* CONFIG_SYNO_USB_SERIAL_FIX */
+
 	hub->buffer = kmalloc(sizeof(*hub->buffer), GFP_KERNEL);
 	if (!hub->buffer) {
 		ret = -ENOMEM;
@@ -1354,7 +1362,6 @@ static int hub_configure(struct usb_hub *hub,
 	hdev->maxchild = hub->descriptor->bNbrPorts;
 	dev_info (hub_dev, "%d port%s detected\n", hdev->maxchild,
 		(hdev->maxchild == 1) ? "" : "s");
-
 	hub->ports = kzalloc(hdev->maxchild * sizeof(struct usb_port *),
 			     GFP_KERNEL);
 	if (!hub->ports) {
@@ -1586,7 +1593,9 @@ static int hub_configure(struct usb_hub *hub,
 			goto fail_keep_maxchild;
 		}
 	}
-
+#ifdef CONFIG_SYNO_USB_SERIAL_FIX
+	mutex_unlock(&hub_init_mutex);
+#endif /* CONFIG_SYNO_USB_SERIAL_FIX */
 	usb_hub_adjust_deviceremovable(hdev, hub->descriptor);
 
 	hub_activate(hub, HUB_INIT);
@@ -1598,6 +1607,9 @@ fail_keep_maxchild:
 	dev_err (hub_dev, "config failed, %s (err %d)\n",
 			message, ret);
 	/* hub_disconnect() frees urb and descriptor */
+#ifdef CONFIG_SYNO_USB_SERIAL_FIX
+	mutex_unlock(&hub_init_mutex);
+#endif /* CONFIG_SYNO_USB_SERIAL_FIX */
 	return ret;
 }
 
@@ -2452,7 +2464,10 @@ RETRY:
 			bus = container_of(buslist, struct usb_bus, bus_list);
 			if (!bus->root_hub)
 				continue;
+
+			mutex_lock(&hub_init_mutex);
 			match = device_serial_match(bus->root_hub, udev);
+			mutex_unlock(&hub_init_mutex);
 
 			if (match) {
 				break;
@@ -2645,6 +2660,12 @@ static unsigned hub_is_wusb(struct usb_hub *hub)
 #define HUB_RESET_TIMEOUT   800
 #endif /* CONFIG_SYNO_HUB_RESET_TIMEOUT */
 
+#ifdef CONFIG_SYNO_USB3_RESET_WAIT
+// wait device reset, some devices are slow, then set address will fail
+// ex. WD passport, Fujitsu, HP.
+#define HUB_XHCI_ROOT_RESET_TIME	1000
+#endif /* CONFIG_SYNO_USB3_RESET_WAIT */
+
 static int hub_port_reset(struct usb_hub *hub, int port1,
 			struct usb_device *udev, unsigned int delay, bool warm);
 
@@ -2666,6 +2687,13 @@ static int hub_port_wait_reset(struct usb_hub *hub, int port1,
 	int delay_time, ret;
 	u16 portstatus;
 	u16 portchange;
+
+#ifdef CONFIG_SYNO_USB3_RESET_WAIT
+	// this sleep is waiting for status change to clear (reset/bh_reset/link_state),
+	// but sometimes it will take longer time to change the status,
+	// so prolong the waiting time.
+	msleep(20);
+#endif /* CONFIG_SYNO_USB3_RESET_WAIT */
 
 	for (delay_time = 0;
 			delay_time < HUB_RESET_TIMEOUT;
@@ -4110,6 +4138,11 @@ static int hub_set_address(struct usb_device *udev, int devnum)
 	return retval;
 }
 
+#ifdef CONFIG_SYNO_USB3_RESET_WAIT
+#define SPECIAL_RESET_RETRY 20 // times
+#define IS_XHCI(hub) (!strcmp(hub->hdev->bus->controller->driver->name, "xhci_hcd"))
+#endif /* CONFIG_SYNO_USB3_RESET_WAIT */
+
 /* Reset device, (re)assign address, get device descriptor.
  * Device connection must be stable, no more debouncing needed.
  * Returns device in USB_STATE_ADDRESS, except on error.
@@ -4137,6 +4170,11 @@ hub_port_init (struct usb_hub *hub, struct usb_device *udev, int port1,
 	 * (from USB 2.0 spec, section 7.1.7.5)
 	 */
 	if (!hdev->parent) {
+#ifdef CONFIG_SYNO_USB3_RESET_WAIT
+		if (IS_XHCI(hub))
+			delay = HUB_XHCI_ROOT_RESET_TIME;
+		else
+#endif /* CONFIG_SYNO_USB3_RESET_WAIT */
 		delay = HUB_ROOT_RESET_TIME;
 		if (port1 == hdev->bus->otg_port)
 			hdev->bus->b_hnp_enable = 0;

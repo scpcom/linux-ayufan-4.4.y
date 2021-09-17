@@ -2476,6 +2476,29 @@ static void bond_miimon_commit(struct bonding *bond)
 			} else if (slave != bond->primary_slave) {
 				/* prevent it from being the active one */
 				bond_set_backup_slave(slave);
+
+#ifdef CONFIG_SYNO_BONDING_FIX_ACTIVE
+				/* While keep changing the MTU of a bonding interface in active backup mode,
+				 * there is a chance that
+				 * (1) the speed of the current active slave remains unknown, or
+				 * (2) the current active slave is not actived
+				 * Either case causes the speed of the current active slave remains unknown.
+				 * If the speed of a bonding interface is unknown, its MTU can not
+				 * be changed again using synonet tool.
+				 * To solve the problem, this workaround changes the current active slave to
+				 * the next upped NIC slave with correct speed. */
+				block_netpoll_tx();
+				write_lock_bh(&bond->curr_slave_lock);
+				if ((NULL != bond->curr_active_slave) &&
+					(slave != bond->curr_active_slave) &&
+					(((SPEED_UNKNOWN == bond->curr_active_slave->speed) &&
+					  (SPEED_UNKNOWN != slave->speed)) ||
+					 (!bond_is_active_slave(bond->curr_active_slave)))) {
+					bond_change_active_slave(bond, slave);
+				}
+				write_unlock_bh(&bond->curr_slave_lock);
+				unblock_netpoll_tx();
+#endif /* CONFIG_SYNO_BONDING_FIX_ACTIVE */
 			}
 
 			pr_info("%s: link status definitely up for interface %s, %u Mbps %s duplex.\n",

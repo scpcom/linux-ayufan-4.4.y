@@ -5247,7 +5247,7 @@ int btrfs_delalloc_reserve_metadata(struct inode *inode, u64 num_bytes)
 #else
 			btrfs_qgroup_free(root, num_bytes +
 						nr_extents * root->leafsize);
-#endif
+#endif /* CONFIG_SYNO_BTRFS_FIX_QGROUP_OVERRUN */
 		goto out_fail;
 	}
 
@@ -5367,7 +5367,7 @@ void btrfs_delalloc_release_metadata(struct inode *inode, u64 num_bytes)
 #else
 		btrfs_qgroup_free(root, num_bytes +
 					dropped * root->leafsize);
-#endif
+#endif /* CONFIG_SYNO_BTRFS_FIX_QGROUP_OVERRUN */
 	}
 
 	btrfs_block_rsv_release(root, &root->fs_info->delalloc_block_rsv,

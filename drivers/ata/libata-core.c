@@ -2411,6 +2411,15 @@ int ata_dev_configure(struct ata_device *dev)
 		}
 	}
 #endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO && CONFIG_SYNO_HW_VERSION */
+
+#ifdef CONFIG_SYNO_HW_VERSION
+	// We limit DS1815+ internal SiI3132 port to 1.5Gbps to avoid ata error
+	if (syno_is_hw_version(HW_DS1815p)) {
+		if(ap && (ap->print_id == 7 || ap->print_id == 8)) {
+			dev->horkage |= ATA_HORKAGE_1_5_GBPS;
+		}
+	}
+#endif
 	ata_force_horkage(dev);
 
 	if (dev->horkage & ATA_HORKAGE_DISABLE) {

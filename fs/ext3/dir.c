@@ -54,7 +54,7 @@ static int is_dx_dir(struct inode *inode)
 #ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
 	if ((EXT3_SB(inode->i_sb)->s_es->s_syno_hash_magic !=
 		     cpu_to_le32(SYNO_HASH_MAGIC)) &&
-		EXT3_HAS_COMPAT_FEATURE(inode->i_sb,
+		!EXT3_HAS_COMPAT_FEATURE(inode->i_sb,
 		     EXT3_FEATURE_COMPAT_DIR_INDEX) &&
 #else
 	if (EXT3_HAS_COMPAT_FEATURE(inode->i_sb,

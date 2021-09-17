@@ -393,6 +393,11 @@ struct address_space_operations {
 	int (*write_end)(struct file *, struct address_space *mapping,
 				loff_t pos, unsigned len, unsigned copied,
 				struct page *page, void *fsdata);
+#ifdef CONFIG_SYNO_FS_RECVFILE
+	int (*aggregate_write_end)(struct file *, struct address_space *mapping,
+				loff_t pos, unsigned len, unsigned copied,
+				struct page **page, void *fsdata, unsigned page_num);
+#endif /* CONFIG_SYNO_FS_RECVFILE */
 
 	/* Unfortunately this kludge is needed for FIBMAP. Don't use it */
 	sector_t (*bmap)(struct address_space *, sector_t);
@@ -657,8 +662,16 @@ struct inode {
 #ifdef CONFIG_SYNO_FS_WINACL
 	struct syno_acl		*i_syno_acl;
 #endif /* CONFIG_SYNO_FS_WINACL */
+#ifdef CONFIG_SYNO_FS_RECVFILE
+	u8	aggregate_flag;
+#endif /* CONFIG_SYNO_FS_RECVFILE */
 	void			*i_private; /* fs or device private pointer */
 };
+
+#ifdef CONFIG_SYNO_FS_RECVFILE
+#define AGGREGATE_RECVFILE_DOING 1
+#define AGGREGATE_RECVFILE_FLUSH 2
+#endif /* CONFIG_SYNO_FS_RECVFILE */
 
 static inline int inode_unhashed(struct inode *inode)
 {
@@ -2506,6 +2519,20 @@ int generic_write_checks(struct file *file, loff_t *pos, size_t *count, int isbl
 */
 #define MAX_PAGES_PER_RECVFILE (1 << (17 - PAGE_SHIFT))
 extern int do_recvfile(struct file *, struct socket *, loff_t , size_t , size_t * , size_t *);
+/**
+* Description for page buffer in recvfile:
+* The max size of aggregating receive file request is "1MB". If PAGE_SIZE is changed from 4K to 64K,
+* maximal number of pages shall change dynamically to keep consistent maximal size "1MB".
+* 1MB = 2^20 and PAGE_SIZE is determined by PAGE_SHIFT, so formula for max page is
+* "2^(20 - PAGE_SHIFT)".
+*/
+#define MAX_PAGES_PER_AGGREGATE_RECVFILE (1 << (20 - PAGE_SHIFT))
+#if (MAX_PAGES_PER_RECVFILE > (MAX_PAGES_PER_AGGREGATE_RECVFILE - MAX_PAGES_PER_RECVFILE))
+#error "recvfile buffer configuration error, it will make aggregate recvfile fail to work."
+#endif
+extern void aggregate_recvfile_flush_only(struct file *file);
+extern int do_aggregate_recvfile(struct file *file, struct socket *sock, loff_t pos, size_t count, size_t *rbytes , size_t *wbytes, unsigned flush_only);
+extern int flush_aggregate_recvfile(int fd);
 #endif /* CONFIG_SYNO_FS_RECVFILE */
 extern ssize_t generic_file_aio_read(struct kiocb *, const struct iovec *, unsigned long, loff_t);
 extern ssize_t __generic_file_aio_write(struct kiocb *, const struct iovec *, unsigned long,

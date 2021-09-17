@@ -2252,14 +2252,16 @@ static void etxhci_prev_endpoint_reset(struct usb_hcd *hcd,
 	int i, ret = 0;
 	struct xhci_virt_device	*virt_dev;
 
-	xhci = hcd_to_xhci(hcd);
-	udev = (struct usb_device *) ep->hcpriv;
-
 	if (!ep->hcpriv)
 		return;
 
+	udev = (struct usb_device *) ep->hcpriv;
+	if (USB_SPEED_SUPER == udev->speed)
+		return;
+
+	xhci = hcd_to_xhci(hcd);
 	virt_dev = xhci->devs[udev->slot_id];
-	if (!virt_dev->data_toggle_cleanup)
+	if (virt_dev->donot_data_toggle_cleanup)
 		return;
 
 	ep_index = etxhci_get_endpoint_index(&ep->desc);

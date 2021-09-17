@@ -142,10 +142,6 @@ struct btrfs_trans_handle *btrfs_start_transaction(struct btrfs_root *root,
 						   int num_items);
 struct btrfs_trans_handle *btrfs_start_transaction_lflush(
 					struct btrfs_root *root, int num_items);
-#ifdef CONFIG_SYNO_BTRFS_NOCHECK_QUOTA
-struct btrfs_trans_handle *btrfs_start_transaction_nocheckquota(struct btrfs_root *root,
-						   int num_items);
-#endif
 struct btrfs_trans_handle *btrfs_join_transaction(struct btrfs_root *root);
 struct btrfs_trans_handle *btrfs_join_transaction_nolock(struct btrfs_root *root);
 struct btrfs_trans_handle *btrfs_attach_transaction(struct btrfs_root *root);

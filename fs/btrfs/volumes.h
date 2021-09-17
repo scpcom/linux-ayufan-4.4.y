@@ -189,7 +189,10 @@ typedef void (btrfs_bio_end_io_t) (struct btrfs_bio *bio, int err);
 
 struct btrfs_bio {
 	atomic_t stripes_pending;
+#ifdef CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#else
 	struct btrfs_fs_info *fs_info;
+#endif /* CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING */
 	bio_end_io_t *end_io;
 	struct bio *orig_bio;
 	void *private;

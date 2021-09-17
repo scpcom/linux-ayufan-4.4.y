@@ -379,11 +379,7 @@ static inline bool need_reserve_reloc_root(struct btrfs_root *root)
 
 static struct btrfs_trans_handle *
 start_transaction(struct btrfs_root *root, u64 num_items, unsigned int type,
-#ifdef CONFIG_SYNO_BTRFS_NOCHECK_QUOTA
-		  enum btrfs_reserve_flush_enum flush, int nocheck_quota)
-#else
 		  enum btrfs_reserve_flush_enum flush)
-#endif
 {
 	struct btrfs_trans_handle *h;
 	struct btrfs_transaction *cur_trans;
@@ -413,11 +409,7 @@ start_transaction(struct btrfs_root *root, u64 num_items, unsigned int type,
 	 * the appropriate flushing if need be.
 	 */
 	if (num_items > 0 && root != root->fs_info->chunk_root) {
-#ifdef CONFIG_SYNO_BTRFS_NOCHECK_QUOTA
-		if (!nocheck_quota && root->fs_info->quota_enabled &&
-#else
 		if (root->fs_info->quota_enabled &&
-#endif
 		    is_fstree(root->root_key.objectid)) {
 			qgroup_reserved = num_items * root->leafsize;
 			ret = btrfs_qgroup_reserve(root, qgroup_reserved);
@@ -542,63 +534,33 @@ reserve_fail:
 	return ERR_PTR(ret);
 }
 
-#ifdef CONFIG_SYNO_BTRFS_NOCHECK_QUOTA
-struct btrfs_trans_handle *btrfs_start_transaction_nocheckquota(struct btrfs_root *root,
-						   int num_items)
-{
-	return start_transaction(root, num_items, TRANS_START,
-				 BTRFS_RESERVE_FLUSH_ALL, 1);
-}
-#endif
-
 struct btrfs_trans_handle *btrfs_start_transaction(struct btrfs_root *root,
 						   int num_items)
 {
 	return start_transaction(root, num_items, TRANS_START,
-#ifdef CONFIG_SYNO_BTRFS_NOCHECK_QUOTA
-				 BTRFS_RESERVE_FLUSH_ALL, 0);
-#else
 				 BTRFS_RESERVE_FLUSH_ALL);
-#endif
 }
 
 struct btrfs_trans_handle *btrfs_start_transaction_lflush(
 					struct btrfs_root *root, int num_items)
 {
 	return start_transaction(root, num_items, TRANS_START,
-#ifdef CONFIG_SYNO_BTRFS_NOCHECK_QUOTA
-				 BTRFS_RESERVE_FLUSH_LIMIT, 0);
-#else
 				 BTRFS_RESERVE_FLUSH_LIMIT);
-#endif
-
 }
 
 struct btrfs_trans_handle *btrfs_join_transaction(struct btrfs_root *root)
 {
-#ifdef CONFIG_SYNO_BTRFS_NOCHECK_QUOTA
-	return start_transaction(root, 0, TRANS_JOIN, 0, 0);
-#else
 	return start_transaction(root, 0, TRANS_JOIN, 0);
-#endif
 }
 
 struct btrfs_trans_handle *btrfs_join_transaction_nolock(struct btrfs_root *root)
 {
-#ifdef CONFIG_SYNO_BTRFS_NOCHECK_QUOTA
-	return start_transaction(root, 0, TRANS_JOIN_NOLOCK, 0, 0);
-#else
 	return start_transaction(root, 0, TRANS_JOIN_NOLOCK, 0);
-#endif
 }
 
 struct btrfs_trans_handle *btrfs_start_ioctl_transaction(struct btrfs_root *root)
 {
-#ifdef CONFIG_SYNO_BTRFS_NOCHECK_QUOTA
-	return start_transaction(root, 0, TRANS_USERSPACE, 0, 0);
-#else
 	return start_transaction(root, 0, TRANS_USERSPACE, 0);
-#endif
 }
 
 /*
@@ -616,11 +578,7 @@ struct btrfs_trans_handle *btrfs_start_ioctl_transaction(struct btrfs_root *root
  */
 struct btrfs_trans_handle *btrfs_attach_transaction(struct btrfs_root *root)
 {
-#ifdef CONFIG_SYNO_BTRFS_NOCHECK_QUOTA
-	return start_transaction(root, 0, TRANS_ATTACH, 0, 0);
-#else
 	return start_transaction(root, 0, TRANS_ATTACH, 0);
-#endif
 }
 
 /*
@@ -635,11 +593,7 @@ btrfs_attach_transaction_barrier(struct btrfs_root *root)
 {
 	struct btrfs_trans_handle *trans;
 
-#ifdef CONFIG_SYNO_BTRFS_NOCHECK_QUOTA
-	trans = start_transaction(root, 0, TRANS_ATTACH, 0, 0);
-#else
 	trans = start_transaction(root, 0, TRANS_ATTACH, 0);
-#endif
 	if (IS_ERR(trans) && PTR_ERR(trans) == -ENOENT)
 		btrfs_wait_for_commit(root, 0);
 

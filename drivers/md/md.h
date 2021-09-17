@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
    md.h : kernel internal structure of the Linux MD driver
           Copyright (C) 1996-98 Ingo Molnar, Gadi Oxman
@@ -482,6 +485,10 @@ struct mddev {
 	void                            *syno_private;    // store lv struct for auto remap report
 	char                            lv_name[16];
 #endif /* CONFIG_SYNO_MD_AUTO_REMAP_REPORT */
+
+#ifdef MY_ABC_HERE
+	mempool_t	*syno_mdio_mempool;
+#endif /* MY_ABC_HERE */
 
 	struct attribute_group		*to_remove;
 

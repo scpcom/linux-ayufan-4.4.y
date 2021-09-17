@@ -163,6 +163,15 @@ config SYNO_DISPLAY_CPUINFO
 	  Display CPU core number and CPU clock in /proc/sys/kernel/syno_CPU_info_core
 	  and /proc/sys/kernel/syno_CPU_info_clock
 
+config SYNO_GRANTLEY_MAX_CPU_NUM
+	int "Support display CPU Number Information"
+	default 2
+	depends on SYNO_GRANTLEY && SYNO_DISPLAY_CPUINFO
+	help
+	  <DSM> #72724
+	  Display CPU core number in /proc/sys/kernel/syno_CPU_info_core_x
+	  so we need to define physical CPU number
+
 config SYNO_IT87_SUPERIO_RW
 	bool "Support IT87 super IO pins r/w"
 	default y
@@ -322,6 +331,14 @@ config SYNO_INITRAMFS_DECOMPRESS_ONCE
 	  It's workaround for backward compatibility.
 	  Some platform can not decompress initramfs file (rd.gz) correctly when
 	  passing inaccurate size of initrd by boot argument. eg.: initrd=0x2000040,4M
+
+config SYNO_CGROUP_MEM_DISABLE
+	bool "default disable cgroup subsys memory"
+	depends on CGROUPS
+	default y
+	help
+	  <DSM> #75786
+	  Because cgroup subsys memory will impact system performance, thus we default disable it.
 
 endmenu #Boot Arguments
 

@@ -393,9 +393,6 @@ static struct pci_driver sil24_pci_driver = {
 	.id_table		= sil24_pci_tbl,
 	.probe			= sil24_init_one,
 	.remove			= ata_pci_remove_one,
-#ifdef CONFIG_SYNO_ATA_SHUTDOWN_FIX
-	.shutdown		= sil24_pci_shutdown,
-#endif /* CONFIG_SYNO_ATA_SHUTDOWN_FIX */
 #ifdef CONFIG_PM
 	.suspend		= ata_pci_device_suspend,
 	.resume			= sil24_pci_device_resume,

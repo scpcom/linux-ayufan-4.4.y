@@ -466,7 +466,10 @@ static struct hfs_bnode *__hfs_bnode_create(struct hfs_btree *tree, u32 cnid)
 			page_cache_release(page);
 			goto fail;
 		}
+#ifdef CONFIG_SYNO_HFSPLUS_GET_PAGE_IF_IN_USE
+#else
 		page_cache_release(page);
+#endif /* CONFIG_SYNO_HFSPLUS_GET_PAGE_IF_IN_USE */
 		node->page[i] = page;
 	}
 
@@ -585,6 +588,13 @@ void hfs_bnode_free(struct hfs_bnode *node)
 		if (node->page[i])
 			page_cache_release(node->page[i]);
 #endif
+#ifdef CONFIG_SYNO_HFSPLUS_GET_PAGE_IF_IN_USE
+	int i;
+
+	for (i = 0; i < node->tree->pages_per_bnode; i++)
+		if (node->page[i])
+			page_cache_release(node->page[i]);
+#endif /* CONFIG_SYNO_HFSPLUS_GET_PAGE_IF_IN_USE */
 	kfree(node);
 }
 

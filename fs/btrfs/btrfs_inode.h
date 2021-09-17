@@ -139,8 +139,11 @@ struct btrfs_inode {
 	 */
 	u64 index_cnt;
 
+#ifdef CONFIG_SYNO_BTRFS_REVERT_DELAYED_DELETE_INODE
+#else
 	/* Cache the directory index number to speed the dir/file remove */
 	u64 dir_index;
+#endif /* CONFIG_SYNO_BTRFS_REVERT_DELAYED_DELETE_INODE */
 
 	/* the fsync log has some corner cases that mean we have to check
 	 * directories to see if any unlinks have been done before

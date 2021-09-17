@@ -27,14 +27,20 @@
 
 struct btrfs_log_ctx {
 	int log_ret;
+#ifdef CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#else
 	int log_transid;
+#endif /* CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS */
 	struct list_head list;
 };
 
 static inline void btrfs_init_log_ctx(struct btrfs_log_ctx *ctx)
 {
 	ctx->log_ret = 0;
+#ifdef CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#else
 	ctx->log_transid = 0;
+#endif /* CONFIG_CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS */
 	INIT_LIST_HEAD(&ctx->list);
 }
 

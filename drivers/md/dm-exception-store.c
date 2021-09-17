@@ -169,22 +169,21 @@ int dm_exception_store_set_chunk_size(struct dm_exception_store *store,
 
 #ifdef CONFIG_SYNO_FIX_DM_DISK_ALIGNMENT
 	/* DSM #62671 - for Time Backup to support 4K HDD.
+	 * DSM #77071 - for Time Backup align to SSD Cache chunk size.
 	 * Although this bug can be fixed by changing the attribute of the dmsetup caller in Time Backup,
 	 * we do not want to release another version of Time Backup. So we workaround here.
+	 * We will change the input chunk size to 8(4K) if the input is 4(2K),
+	 * since Time Backup use 4 in its option but we want to modify it to 8.
 	 */
-try_again:
+	if (4 == chunk_size) {
+		chunk_size = 8;
+	}
 #endif	/* CONFIG_SYNO_FIX_DM_DISK_ALIGNMENT */
 	/* Validate the chunk size against the device block size */
 	if (chunk_size %
 	    (bdev_logical_block_size(dm_snap_cow(store->snap)->bdev) >> 9) ||
 	    chunk_size %
 	    (bdev_logical_block_size(dm_snap_origin(store->snap)->bdev) >> 9)) {
-#ifdef CONFIG_SYNO_FIX_DM_DISK_ALIGNMENT
-		if (4 == chunk_size) {
-			chunk_size = 8;
-			goto try_again;
-		}
-#endif	/* CONFIG_SYNO_FIX_DM_DISK_ALIGNMENT */
 		*error = "Chunk size is not a multiple of device blocksize";
 		return -EINVAL;
 	}

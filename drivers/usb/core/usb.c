@@ -1000,6 +1000,10 @@ static void usb_debugfs_cleanup(void)
 {
 	debugfs_remove(usb_debug_devices);
 	debugfs_remove(usb_debug_root);
+#ifdef CONFIG_SYNO_ENABLE_USBFS_ENTRY
+	if (usbdir)
+		remove_proc_entry("bus/usb", NULL);
+#endif /* CONFIG_SYNO_ENABLE_USBFS_ENTRY */
 }
 
 /*

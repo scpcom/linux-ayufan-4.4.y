@@ -815,7 +815,7 @@ struct xhci_virt_device {
 	unsigned int	manual_halt_cleanup :1;
 	unsigned int	donot_downgrade :1;
 	unsigned int	defer_queue_bulk_td :1;
-	unsigned int	data_toggle_cleanup :1;
+	unsigned int	donot_data_toggle_cleanup :1;
 };
 
 /**

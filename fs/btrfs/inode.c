@@ -3346,11 +3346,7 @@ int btrfs_orphan_cleanup(struct btrfs_root *root)
 		 * kill the orphan item.
 		 */
 		if (ret == -ESTALE) {
-#ifdef CONFIG_SYNO_BTRFS_NOCHECK_QUOTA
-			trans = btrfs_start_transaction_nocheckquota(root, 1);
-#else
 			trans = btrfs_start_transaction(root, 1);
-#endif
 			if (IS_ERR(trans)) {
 				ret = PTR_ERR(trans);
 				goto out;
@@ -3382,11 +3378,7 @@ int btrfs_orphan_cleanup(struct btrfs_root *root)
 			nr_truncate++;
 
 			/* 1 for the orphan item deletion. */
-#ifdef CONFIG_SYNO_BTRFS_NOCHECK_QUOTA
-			trans = btrfs_start_transaction_nocheckquota(root, 1);
-#else
 			trans = btrfs_start_transaction(root, 1);
-#endif
 			if (IS_ERR(trans)) {
 				iput(inode);
 				ret = PTR_ERR(trans);
@@ -3520,7 +3512,10 @@ static void btrfs_read_locked_inode(struct inode *inode)
 	struct btrfs_timespec *tspec;
 	struct btrfs_root *root = BTRFS_I(inode)->root;
 	struct btrfs_key location;
+#ifdef CONFIG_SYNO_BTRFS_REVERT_DELAYED_DELETE_INODE
+#else
 	unsigned long ptr;
+#endif /* CONFIG_SYNO_BTRFS_REVERT_DELAYED_DELETE_INODE */
 	int maybe_acls;
 	u32 rdev;
 	int ret;
@@ -3544,7 +3539,11 @@ static void btrfs_read_locked_inode(struct inode *inode)
 	leaf = path->nodes[0];
 
 	if (filled)
+#ifdef CONFIG_SYNO_BTRFS_REVERT_DELAYED_DELETE_INODE
+		goto cache_acl;
+#else
 		goto cache_index;
+#endif /* CONFIG_SYNO_BTRFS_REVERT_DELAYED_DELETE_INODE */
 
 	inode_item = btrfs_item_ptr(leaf, path->slots[0],
 				    struct btrfs_inode_item);
@@ -3588,6 +3587,8 @@ static void btrfs_read_locked_inode(struct inode *inode)
 	BTRFS_I(inode)->index_cnt = (u64)-1;
 	BTRFS_I(inode)->flags = btrfs_inode_flags(leaf, inode_item);
 
+#ifdef CONFIG_SYNO_BTRFS_REVERT_DELAYED_DELETE_INODE
+#else
 cache_index:
 	path->slots[0]++;
 	if (inode->i_nlink != 1 ||
@@ -3611,6 +3612,7 @@ cache_index:
 		BTRFS_I(inode)->dir_index = btrfs_inode_extref_index(leaf,
 								     extref);
 	}
+#endif /* CONFIG_SYNO_BTRFS_REVERT_DELAYED_DELETE_INODE */
 cache_acl:
 	/*
 	 * try to precache a NULL acl entry for files that don't have
@@ -3840,6 +3842,8 @@ static int __btrfs_unlink_inode(struct btrfs_trans_handle *trans,
 	 */
 	btrfs_pin_log_trans(root);
 #endif /* CONFIG_SYNO_BTRFS_PIN_LOG_ON_DELETE_INODE */
+#ifdef CONFIG_SYNO_BTRFS_REVERT_DELAYED_DELETE_INODE
+#else
 	/*
 	 * If we don't have dir index, we have to get it by looking up
 	 * the inode ref, since we get the inode ref, remove it directly,
@@ -3860,6 +3864,7 @@ static int __btrfs_unlink_inode(struct btrfs_trans_handle *trans,
 			goto skip_backref;
 		}
 	}
+#endif /* CONFIG_SYNO_BTRFS_REVERT_DELAYED_DELETE_INODE */
 
 	ret = btrfs_del_inode_ref(trans, root, name, name_len, ino,
 				  dir_ino, &index);
@@ -3876,7 +3881,10 @@ static int __btrfs_unlink_inode(struct btrfs_trans_handle *trans,
 #ifdef CONFIG_SYNO_BTRFS_PIN_LOG_ON_DELETE_INODE
 	btrfs_end_log_trans(root);
 #endif /* CONFIG_SYNO_BTRFS_PIN_LOG_ON_DELETE_INODE */
+#ifdef CONFIG_SYNO_BTRFS_REVERT_DELAYED_DELETE_INODE
+#else
 skip_backref:
+#endif /* CONFIG_SYNO_BTRFS_REVERT_DELAYED_DELETE_INODE */
 	ret = btrfs_delete_delayed_dir_index(trans, root, dir, index);
 	if (ret) {
 		btrfs_abort_transaction(trans, root, ret);
@@ -3945,11 +3953,7 @@ static struct btrfs_trans_handle *__unlink_start_trans(struct inode *dir)
 	 * 1 for the inode ref
 	 * 1 for the inode
 	 */
-#ifdef CONFIG_SYNO_BTRFS_NOCHECK_QUOTA
-	trans = btrfs_start_transaction_nocheckquota(root, 5);
-#else
 	trans = btrfs_start_transaction(root, 5);
-#endif
 	if (!IS_ERR(trans) || PTR_ERR(trans) != -ENOSPC)
 		return trans;
 
@@ -4514,11 +4518,7 @@ static int maybe_insert_hole(struct btrfs_root *root, struct inode *inode,
 	 * 1 - for the one we're adding
 	 * 1 - for updating the inode.
 	 */
-#ifdef CONFIG_SYNO_BTRFS_NOCHECK_QUOTA
-	trans = btrfs_start_transaction_nocheckquota(root, 3);
-#else
 	trans = btrfs_start_transaction(root, 3);
-#endif
 	if (IS_ERR(trans))
 		return PTR_ERR(trans);
 
@@ -4678,11 +4678,7 @@ static int btrfs_setsize(struct inode *inode, struct iattr *attr)
 		if (ret)
 			return ret;
 
-#ifdef CONFIG_SYNO_BTRFS_NOCHECK_QUOTA
-		trans = btrfs_start_transaction_nocheckquota(root, 1);
-#else
 		trans = btrfs_start_transaction(root, 1);
-#endif
 		if (IS_ERR(trans))
 			return PTR_ERR(trans);
 
@@ -4705,11 +4701,7 @@ static int btrfs_setsize(struct inode *inode, struct iattr *attr)
 		 * 1 for the orphan item we're going to add
 		 * 1 for the orphan item deletion.
 		 */
-#ifdef CONFIG_SYNO_BTRFS_NOCHECK_QUOTA
-		trans = btrfs_start_transaction_nocheckquota(root, 2);
-#else
 		trans = btrfs_start_transaction(root, 2);
-#endif
 		if (IS_ERR(trans))
 			return PTR_ERR(trans);
 
@@ -4810,6 +4802,9 @@ static void evict_inode_truncate_pages(struct inode *inode)
 	struct extent_io_tree *io_tree = &BTRFS_I(inode)->io_tree;
 	struct extent_map_tree *map_tree = &BTRFS_I(inode)->extent_tree;
 	struct rb_node *node;
+#ifdef CONFIG_SYNO_BTRFS_UMOUNT_ERROR_VOLUME
+	struct btrfs_fs_info *fs_info = BTRFS_I(inode)->root->fs_info;
+#endif
 
 	ASSERT(inode->i_state & I_FREEING);
 	truncate_inode_pages(&inode->i_data, 0);
@@ -4838,6 +4833,14 @@ static void evict_inode_truncate_pages(struct inode *inode)
 #ifdef CONFIG_SYNO_BTRFS_AVOID_SEARCH_EXTENT_STATE_WHILE_EVICT_INODE
 		if (state->state & EXTENT_LOCKED) {
 			free_extent_state(state);
+#ifdef CONFIG_SYNO_BTRFS_UMOUNT_ERROR_VOLUME
+			// It is possible that no one can unlock the extent for us, just free it all.
+			if (unlikely(test_bit(BTRFS_FS_STATE_ERROR, &fs_info->fs_state))) {
+				rb_erase(node, &io_tree->state);
+				free_extent_state(state);
+				continue;
+			}
+#endif /* CONFIG_SYNO_BTRFS_UMOUNT_ERROR_VOLUME */
 			spin_unlock(&io_tree->lock);
 			schedule();
 			spin_lock(&io_tree->lock);
@@ -4846,6 +4849,15 @@ static void evict_inode_truncate_pages(struct inode *inode)
 		state->state |= EXTENT_LOCKED;
 		spin_unlock(&io_tree->lock);
 #else
+#ifdef CONFIG_SYNO_BTRFS_UMOUNT_ERROR_VOLUME
+		// It is possible that no one can unlock the extent for us, just free it all.
+		if (unlikely(test_bit(BTRFS_FS_STATE_ERROR, &fs_info->fs_state))) {
+			rb_erase(node, &io_tree->state);
+			free_extent_state(state);
+			free_extent_state(state);
+			continue;
+		}
+#endif /* CONFIG_SYNO_BTRFS_UMOUNT_ERROR_VOLUME */
 		spin_unlock(&io_tree->lock);
 
 		lock_extent_bits(io_tree, state->start, state->end,
@@ -4874,6 +4886,11 @@ void btrfs_evict_inode(struct inode *inode)
 	trace_btrfs_inode_evict(inode);
 
 	evict_inode_truncate_pages(inode);
+
+#ifdef CONFIG_SYNO_BTRFS_UMOUNT_ERROR_VOLUME
+	if (unlikely(test_bit(BTRFS_FS_STATE_ERROR, &root->fs_info->fs_state)))
+		goto no_delete;
+#endif
 
 	if (inode->i_nlink &&
 	    ((btrfs_root_refs(&root->root_item) != 0 &&
@@ -5660,11 +5677,7 @@ static int btrfs_dirty_inode(struct inode *inode)
 	if (ret && ret == -ENOSPC) {
 		/* whoops, lets try again with the full transaction */
 		btrfs_end_transaction(trans, root);
-#ifdef CONFIG_SYNO_BTRFS_NOCHECK_QUOTA
-		trans = btrfs_start_transaction_nocheckquota(root, 1);
-#else
 		trans = btrfs_start_transaction(root, 1);
-#endif
 		if (IS_ERR(trans))
 			return PTR_ERR(trans);
 
@@ -5829,7 +5842,10 @@ static struct inode *btrfs_new_inode(struct btrfs_trans_handle *trans,
 	 * number
 	 */
 	BTRFS_I(inode)->index_cnt = 2;
+#ifdef CONFIG_SYNO_BTRFS_REVERT_DELAYED_DELETE_INODE
+#else
 	BTRFS_I(inode)->dir_index = *index;
+#endif /* CONFIG_SYNO_BTRFS_REVERT_DELAYED_DELETE_INODE */
 	BTRFS_I(inode)->root = root;
 	BTRFS_I(inode)->generation = trans->transid;
 	inode->i_generation = BTRFS_I(inode)->generation;
@@ -6196,8 +6212,11 @@ static int btrfs_link(struct dentry *old_dentry, struct inode *dir,
 		goto fail;
 	}
 
+#ifdef CONFIG_SYNO_BTRFS_REVERT_DELAYED_DELETE_INODE
+#else
 	/* There are several dir indexes for this inode, clear the cache. */
 	BTRFS_I(inode)->dir_index = 0ULL;
+#endif /* CONFIG_SYNO_BTRFS_REVERT_DELAYED_DELETE_INODE */
 	inc_nlink(inode);
 	inode_inc_iversion(inode);
 	inode->i_ctime = CURRENT_TIME;
@@ -8162,11 +8181,7 @@ static int btrfs_truncate(struct inode *inode)
 	 * 1 for the truncate slack space
 	 * 1 for updating the inode.
 	 */
-#ifdef CONFIG_SYNO_BTRFS_NOCHECK_QUOTA
-	trans = btrfs_start_transaction_nocheckquota(root, 2);
-#else
 	trans = btrfs_start_transaction(root, 2);
-#endif
 	if (IS_ERR(trans)) {
 		err = PTR_ERR(trans);
 		goto out;
@@ -8227,11 +8242,7 @@ static int btrfs_truncate(struct inode *inode)
 		btrfs_end_transaction(trans, root);
 		btrfs_btree_balance_dirty(root);
 
-#ifdef CONFIG_SYNO_BTRFS_NOCHECK_QUOTA
-		trans = btrfs_start_transaction_nocheckquota(root, 2);
-#else
 		trans = btrfs_start_transaction(root, 2);
-#endif
 		if (IS_ERR(trans)) {
 			ret = err = PTR_ERR(trans);
 			trans = NULL;
@@ -8335,7 +8346,10 @@ struct inode *btrfs_alloc_inode(struct super_block *sb)
 	ei->flags = 0;
 	ei->csum_bytes = 0;
 	ei->index_cnt = (u64)-1;
+#ifdef CONFIG_SYNO_BTRFS_REVERT_DELAYED_DELETE_INODE
+#else
 	ei->dir_index = 0;
+#endif /* CONFIG_SYNO_BTRFS_REVERT_DELAYED_DELETE_INODE */
 	ei->last_unlink_trans = 0;
 	ei->last_log_commit = 0;
 
@@ -8655,11 +8669,7 @@ static int btrfs_rename(struct inode *old_dir, struct dentry *old_dentry,
 	 * inodes.  So 5 * 2 is 10, plus 1 for the new link, so 11 total items
 	 * should cover the worst case number of items we'll modify.
 	 */
-#ifdef CONFIG_SYNO_BTRFS_NOCHECK_QUOTA
-	trans = btrfs_start_transaction_nocheckquota(root, 11);
-#else
 	trans = btrfs_start_transaction(root, 11);
-#endif
 	if (IS_ERR(trans)) {
                 ret = PTR_ERR(trans);
                 goto out_notrans;
@@ -8672,7 +8682,10 @@ static int btrfs_rename(struct inode *old_dir, struct dentry *old_dentry,
 	if (ret)
 		goto out_fail;
 
+#ifdef CONFIG_SYNO_BTRFS_REVERT_DELAYED_DELETE_INODE
+#else
 	BTRFS_I(old_inode)->dir_index = 0ULL;
+#endif /* CONFIG_SYNO_BTRFS_REVERT_DELAYED_DELETE_INODE */
 	if (unlikely(old_ino == BTRFS_FIRST_FREE_OBJECTID)) {
 		/* force full log commit if subvolume involved. */
 		btrfs_set_log_full_commit(root->fs_info, trans);
@@ -8761,8 +8774,11 @@ static int btrfs_rename(struct inode *old_dir, struct dentry *old_dentry,
 		goto out_fail;
 	}
 
+#ifdef CONFIG_SYNO_BTRFS_REVERT_DELAYED_DELETE_INODE
+#else
 	if (old_inode->i_nlink == 1)
 		BTRFS_I(old_inode)->dir_index = index;
+#endif /* CONFIG_SYNO_BTRFS_REVERT_DELAYED_DELETE_INODE */
 
 	if (old_ino != BTRFS_FIRST_FREE_OBJECTID) {
 		struct dentry *parent = new_dentry->d_parent;

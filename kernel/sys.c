@@ -457,22 +457,10 @@ void kernel_power_off(void)
 EXPORT_SYMBOL_GPL(kernel_power_off);
 
 #if defined(CONFIG_SYNO_MICROP_CTRL) && defined(CONFIG_SYNO_X64)
+#define UART_TTYS_INDEX 1
 
-#ifdef CONFIG_SYNO_X86_SERIAL_PORT_SWAP
-#define UART_PORT1_IOBASE	0x3F8
-#else /* CONFIG_SYNO_X86_SERIAL_PORT_SWAP */
-#define UART_PORT1_IOBASE	0x2F8
-#endif /* CONFIG_SYNO_X86_SERIAL_PORT_SWAP */
-
-#define UART_CMD_PREFIX 45 // "-"
 #define UART_CMD_REBOOT 67 // "C"
 #define UART_CMD_POWEROFF   49 // "1"
-// below is copied from include/linux/serial_reg.h
-#define UART_TX     0   /* Out: Transmit buffer */
-#define UART_IER    1   /* Out: Interrupt Enable Register */
-#define UART_IER_THRI       0x02 /* Enable Transmitter holding register int. */
-#define UART_START_TX   UART_IER_THRI
-#define UART_STOP_TX    0x0
 #endif /* CONFIG_SYNO_MICROP_CTRL && CONFIG_SYNO_X64 */
 
 static DEFINE_MUTEX(reboot_mutex);
@@ -490,6 +478,9 @@ SYSCALL_DEFINE4(reboot, int, magic1, int, magic2, unsigned int, cmd,
 {
 	struct pid_namespace *pid_ns = task_active_pid_ns(current);
 	char buffer[256];
+#if defined(CONFIG_SYNO_MICROP_CTRL) && defined(CONFIG_SYNO_X64)
+	char szBuf[2];
+#endif
 	int ret = 0;
 
 	/* We only trust the superuser with rebooting the system. */
@@ -523,12 +514,9 @@ SYSCALL_DEFINE4(reboot, int, magic1, int, magic2, unsigned int, cmd,
 	switch (cmd) {
 	case LINUX_REBOOT_CMD_RESTART:
 #if defined(CONFIG_SYNO_MICROP_CTRL) && defined(CONFIG_SYNO_X64)
-		outb(UART_START_TX, UART_PORT1_IOBASE + UART_IER);
-		outb(UART_CMD_PREFIX, UART_PORT1_IOBASE + UART_TX);
-		outb(UART_CMD_REBOOT, UART_PORT1_IOBASE + UART_TX);
-		outb(13, UART_PORT1_IOBASE + UART_TX);
-		outb(10, UART_PORT1_IOBASE + UART_TX);
-		outb(UART_STOP_TX, UART_PORT1_IOBASE + UART_IER);
+		szBuf[0] = UART_CMD_REBOOT;
+		szBuf[1] = '\0';
+		syno_ttys_write(UART_TTYS_INDEX, szBuf);
 #endif /* CONFIG_SYNO_MICROP_CTRL && CONFIG_SYNO_X64 */
 		kernel_restart(NULL);
 		break;
@@ -548,12 +536,9 @@ SYSCALL_DEFINE4(reboot, int, magic1, int, magic2, unsigned int, cmd,
 
 	case LINUX_REBOOT_CMD_POWER_OFF:
 #if defined(CONFIG_SYNO_MICROP_CTRL) && defined(CONFIG_SYNO_X64)
-		outb(UART_START_TX, UART_PORT1_IOBASE + UART_IER);
-		outb(UART_CMD_PREFIX, UART_PORT1_IOBASE + UART_TX);
-		outb(UART_CMD_POWEROFF, UART_PORT1_IOBASE + UART_TX);
-		outb(13, UART_PORT1_IOBASE + UART_TX);
-		outb(10, UART_PORT1_IOBASE + UART_TX);
-		outb(UART_STOP_TX, UART_PORT1_IOBASE + UART_IER);
+		szBuf[0] = UART_CMD_POWEROFF;
+		szBuf[1] = '\0';
+		syno_ttys_write(UART_TTYS_INDEX, szBuf);
 #endif /* CONFIG_SYNO_MICROP_CTRL && CONFIG_SYNO_X64 */
 		kernel_power_off();
 		do_exit(0);

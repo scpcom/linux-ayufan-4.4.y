@@ -3617,6 +3617,10 @@ int xhci_alloc_dev(struct usb_hcd *hcd, struct usb_device *udev)
 	int ret;
 	union xhci_trb *cmd_trb;
 
+#ifdef CONFIG_SYNO_USB3_RESET_WAIT
+	msleep(1000); // wait device ready
+#endif /* CONFIG_SYNO_USB3_RESET_WAIT */
+
 	spin_lock_irqsave(&xhci->lock, flags);
 	cmd_trb = xhci_find_next_enqueue(xhci->cmd_ring);
 	ret = xhci_queue_slot_control(xhci, TRB_ENABLE_SLOT, 0);

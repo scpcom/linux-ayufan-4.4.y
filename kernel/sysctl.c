@@ -233,6 +233,10 @@ EXPORT_SYMBOL(gDevPCIName);
 #ifdef CONFIG_SYNO_DISPLAY_CPUINFO
 unsigned int gSynoCPUInfoCore = 0;
 EXPORT_SYMBOL(gSynoCPUInfoCore);
+#ifdef CONFIG_SYNO_GRANTLEY
+unsigned int gSynoMultiCPUInfoCore[CONFIG_SYNO_GRANTLEY_MAX_CPU_NUM];
+EXPORT_SYMBOL(gSynoMultiCPUInfoCore);
+#endif
 char gSynoCPUInfoClock[16];
 EXPORT_SYMBOL(gSynoCPUInfoClock);
 #endif /* CONFIG_SYNO_DISPLAY_CPUINFO */
@@ -1442,6 +1446,23 @@ static struct ctl_table kern_table[] = {
             .mode           = 0644,
             .proc_handler   = proc_dointvec,
         },
+#ifdef CONFIG_SYNO_GRANTLEY
+        {
+            .procname       = "syno_CPU_info_multicore_1",
+            .data           = &gSynoMultiCPUInfoCore[0],
+            .maxlen         = sizeof (unsigned int),
+            .mode           = 0644,
+            .proc_handler   = proc_dointvec,
+        },
+		{
+            .procname       = "syno_CPU_info_multicore_2",
+            .data           = &gSynoMultiCPUInfoCore[1],
+            .maxlen         = sizeof (unsigned int),
+            .mode           = 0644,
+            .proc_handler   = proc_dointvec,
+        },
+
+#endif
         {
             .procname       = "syno_CPU_info_clock",
             .data           = &gSynoCPUInfoClock,

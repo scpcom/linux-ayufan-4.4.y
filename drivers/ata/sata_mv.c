@@ -602,9 +602,6 @@ static int mv_qc_defer(struct ata_queued_cmd *qc);
 static void mv_qc_prep(struct ata_queued_cmd *qc);
 static void mv_qc_prep_iie(struct ata_queued_cmd *qc);
 static unsigned int mv_qc_issue(struct ata_queued_cmd *qc);
-#ifdef CONFIG_SYNO_FIX_MV_LBA_ERR_RET
-static bool syno_mv_qc_fill_rtf(struct ata_queued_cmd *qc);
-#endif /* CONFIG_SYNO_FIX_MV_LBA_ERR_RET */
 static int mv_hardreset(struct ata_link *link, unsigned int *class,
 			unsigned long deadline);
 static void mv_eh_freeze(struct ata_port *ap);
@@ -740,9 +737,6 @@ static struct ata_port_operations mv6_ops = {
 	.qc_defer		= mv_qc_defer,
 	.qc_prep		= mv_qc_prep,
 	.qc_issue		= mv_qc_issue,
-#ifdef CONFIG_SYNO_FIX_MV_LBA_ERR_RET
-	.qc_fill_rtf	= syno_mv_qc_fill_rtf,
-#endif /* CONFIG_SYNO_FIX_MV_LBA_ERR_RET */
 
 	.dev_config             = mv6_dev_config,
 
@@ -2474,39 +2468,6 @@ static unsigned int mv_qc_issue(struct ata_queued_cmd *qc)
 	return ata_bmdma_qc_issue(qc);
 }
 
-#ifdef CONFIG_SYNO_FIX_MV_LBA_ERR_RET
-static bool syno_mv_qc_fill_rtf(struct ata_queued_cmd *qc)
-{
-	bool bRet = false;
-	struct ata_taskfile *rtf = &qc->result_tf;
-	struct ata_taskfile *tf = &qc->tf;
-
-	/* Fill the result taskfile */
-	bRet = ata_sff_qc_fill_rtf(qc);
-
-    /* MV7042 would return the LBA even if the NCQ command failed because of UNC error,
-	 * and the scsi layer would take that as a partially success (which is not, of course.)
-	 * Since the LBA register value is not defined in the error return of a ATA_CMD_FPDMA_READ in ATA 8 standard,
-	 * we fill the LBA and device in result taskfile with the preceding setup.
-	 * Reference to "American National Standard T13/1699-D Table 136." for more information.
-     */
-	if (ATA_ERR & rtf->command &&
-		ATA_UNC & rtf->feature &&
-		ATA_TFLAG_LBA48 & tf->flags &&
-		ATA_CMD_FPDMA_READ == tf->command) {
-		rtf->lbal		= tf->lbal;
-		rtf->lbam		= tf->lbam;
-		rtf->lbah		= tf->lbah;
-		rtf->device		= tf->device;
-		rtf->hob_lbal	= tf->hob_lbal;
-		rtf->hob_lbam	= tf->hob_lbam;
-		rtf->hob_lbah	= tf->hob_lbah;
-	}
-
-	return bRet;
-}
-#endif /* CONFIG_SYNO_FIX_MV_LBA_ERR_RET */
-
 static struct ata_queued_cmd *mv_get_active_qc(struct ata_port *ap)
 {
 	struct mv_port_priv *pp = ap->private_data;
@@ -3767,7 +3728,7 @@ void syno_sata_mv_gpio_write(u8 blFaulty, const unsigned short hostnum)
 	if(NULL == (host_mmio = mv_host_base(ap->host))) {
 		goto END;
 	}
-
+	
 	led_idx = ap->print_id - ap->host->ports[0]->print_id;
 
 	gpio_value = readl(host_mmio + GPIO_CTL_DATA);

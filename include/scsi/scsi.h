@@ -587,7 +587,6 @@ static inline __u32 scsi_to_u32(__u8 *ptr)
 #ifdef __KERNEL__
 
 #ifdef CONFIG_SYNO_BADSECTOR_TEST
-#include <linux/syno.h>
 #define SCSI_IOCTL_SET_BADSECTORS    0x5400
 
 typedef struct _tag_SdBadSectors {

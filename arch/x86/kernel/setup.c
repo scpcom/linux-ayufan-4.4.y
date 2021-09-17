@@ -369,7 +369,7 @@ void * __init extend_brk(size_t size, size_t align)
 #define GPIO_UNDEF			0xFF
 
 /* SYNO_GET_HDD_ENABLE_PIN
- * Query HDD power control pin for x86_64 and cedarview
+ * Query HDD power control pin for x86_64, cedarview, avoton, braswell
  * input: index - disk index, 1-based
  * return: Pin Number
  */
@@ -381,6 +381,9 @@ static u8 SYNO_GET_HDD_ENABLE_PIN(const int index)
 	u8 HddEnPinMap[] = {16, 20, 21, 32};
 #elif defined(CONFIG_SYNO_AVOTON)
 	u8 HddEnPinMap[] = {10, 15, 16, 17};
+#elif defined(CONFIG_SYNO_BRASWELL)
+	/* Todo */
+	u8 HddEnPinMap[] = {0, 0, 0, 0};
 #else
 	u8 *HddEnPinMap = NULL;
 #endif
@@ -430,7 +433,8 @@ int SYNO_CTRL_HDD_POWERON(int index, int value)
 				goto END;
 		}
 	}else if(syno_is_hw_version(HW_DS412p) ||
-			syno_is_hw_version(HW_DS415p)) {
+		 syno_is_hw_version(HW_DS415p) ||
+		 syno_is_hw_version(HW_DS416play)) {
 		switch(index){
 			case 0:
 				/* index is 1-based, so apply 0 for all*/
@@ -485,6 +489,9 @@ static u8 SYNO_GET_HDD_PRESENT_PIN(const int index)
 	u8 przPinMap[]   = {33, 35, 49, 18};
 #elif defined(CONFIG_SYNO_AVOTON)
 	u8 przPinMap[] = {18, 28, 34, 44};
+#elif defined(CONFIG_SYNO_BRASWELL)
+/* Todo */
+	u8 przPinMap[] = {0, 0, 0, 0};
 #else
 	u8 *przPinMap = NULL;
 #endif
@@ -507,7 +514,7 @@ END:
 }
 
 /* SYNO_CHECK_HDD_PRESENT
- * Check HDD present for x86_64, cedarview and Avoton
+ * Check HDD present for x86_64, cedarview, Avoton, Braswell
  * input : index - disk index, 1-based.
  * output: 0 - HDD not present, 1 - HDD present.
  */
@@ -517,7 +524,7 @@ int SYNO_CHECK_HDD_PRESENT(int index)
 	u8 iPin = SYNO_GET_HDD_PRESENT_PIN(index);
 
 	/* please check spec with HW */
-#if defined(CONFIG_SYNO_AVOTON)
+#if defined(CONFIG_SYNO_AVOTON) || defined(CONFIG_SYNO_BRASWELL)
 	const int iInverseValue = 1;
 #else
 	const int iInverseValue = 0;
@@ -562,6 +569,7 @@ int SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER(void)
 	    syno_is_hw_version(HW_DS712pv10) ||
 	    syno_is_hw_version(HW_DS412p) ||
 	    syno_is_hw_version(HW_DS415p) ||
+	    syno_is_hw_version(HW_DS416play) ||
 	    syno_is_hw_version(HW_DS713p)) {
 		iRet = 1;
 	} else {

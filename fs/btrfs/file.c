@@ -2388,11 +2388,7 @@ static int btrfs_punch_hole(struct inode *inode, loff_t offset, loff_t len)
 	 * 1 - adding the hole extent if no_holes isn't set
 	 */
 	rsv_count = no_holes ? 2 : 3;
-#ifdef CONFIG_SYNO_BTRFS_NOCHECK_QUOTA
-	trans = btrfs_start_transaction_nocheckquota(root, rsv_count);
-#else
 	trans = btrfs_start_transaction(root, rsv_count);
-#endif
 	if (IS_ERR(trans)) {
 		err = PTR_ERR(trans);
 		goto out_free;
@@ -2433,11 +2429,8 @@ static int btrfs_punch_hole(struct inode *inode, loff_t offset, loff_t len)
 
 		btrfs_end_transaction(trans, root);
 		btrfs_btree_balance_dirty(root);
-#ifdef CONFIG_SYNO_BTRFS_NOCHECK_QUOTA
-		trans = btrfs_start_transaction_nocheckquota(root, rsv_count);
-#else
+
 		trans = btrfs_start_transaction(root, rsv_count);
-#endif
 		if (IS_ERR(trans)) {
 			ret = PTR_ERR(trans);
 			trans = NULL;
