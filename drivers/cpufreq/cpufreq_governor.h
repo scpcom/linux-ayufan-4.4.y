@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * drivers/cpufreq/cpufreq_governor.h
  *
@@ -18,16 +21,16 @@
 #define _CPUFREQ_GOVERNOR_H
 
 #include <linux/cpufreq.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 #include <linux/kernel_stat.h>
 #include <linux/module.h>
 #include <linux/mutex.h>
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 #include <linux/kobject.h>
 #include <linux/mutex.h>
 #include <linux/workqueue.h>
 #include <linux/sysfs.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 /*
  * The polling frequency depends on the capability of the processor. Default
@@ -198,14 +201,14 @@ struct common_dbs_data {
 	struct attribute_group *attr_group_gov_sys; /* one governor - system */
 	struct attribute_group *attr_group_gov_pol; /* one governor - policy */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	/*
 	 * Common data for platforms that don't set
 	 * CPUFREQ_HAVE_GOVERNOR_PER_POLICY
 	 */
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	/* Common data for platforms that don't set have_governor_per_policy */
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	struct dbs_data *gdbs_data;
 
 	struct cpu_dbs_common_info *(*get_cpu_cdbs)(int cpu);
@@ -235,11 +238,11 @@ struct od_ops {
 	void (*powersave_bias_init_cpu)(int cpu);
 	unsigned int (*powersave_bias_target)(struct cpufreq_policy *policy,
 			unsigned int freq_next, unsigned int relation);
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	void (*freq_increase)(struct cpufreq_policy *policy, unsigned int freq);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	void (*freq_increase)(struct cpufreq_policy *p, unsigned int freq);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 };
 
 struct cs_ops {
@@ -272,11 +275,11 @@ static ssize_t show_sampling_rate_min_gov_pol				\
 	return sprintf(buf, "%u\n", dbs_data->min_sampling_rate);	\
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 extern struct mutex cpufreq_governor_lock;
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 u64 get_cpu_idle_time(unsigned int cpu, u64 *wall, int io_busy);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 void dbs_check_cpu(struct dbs_data *dbs_data, int cpu);
 bool need_load_eval(struct cpu_dbs_common_info *cdbs,

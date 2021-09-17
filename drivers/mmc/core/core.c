@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/drivers/mmc/core/core.c
  *
@@ -437,7 +440,7 @@ static void mmc_wait_for_req_done(struct mmc_host *host,
 		wait_for_completion(&mrq->completion);
 
 		cmd = mrq->cmd;
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 		/*
 		 * If host has timed out waiting for the sanitize
 		 * to complete, card might be still in programming state
@@ -455,7 +458,7 @@ static void mmc_wait_for_req_done(struct mmc_host *host,
 				       mmc_hostname(host), __func__);
 			}
 		}
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 		if (!cmd->error || !cmd->retries ||
 		    mmc_card_removed(host->card))
 			break;

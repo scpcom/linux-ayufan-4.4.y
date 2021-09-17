@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/hfsplus/inode.c
  *
@@ -20,7 +23,7 @@
 #include "hfsplus_raw.h"
 #include "xattr.h"
 
-#ifdef CONFIG_SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+#ifdef MY_ABC_HERE
 extern struct mutex syno_hfsplus_global_mutex;
 #endif
 
@@ -194,7 +197,7 @@ static struct dentry *hfsplus_file_lookup(struct inode *dir,
 		goto out;
 
 	inode = HFSPLUS_I(dir)->rsrc_inode;
-#ifdef CONFIG_SYNO_HFSPLUS_RSRC_INODE_COUNT_FIX
+#ifdef MY_ABC_HERE
 	if (inode) {
 		atomic_inc(&inode->i_count);
 		goto out;
@@ -252,21 +255,21 @@ static void hfsplus_get_perms(struct inode *inode,
 	struct hfsplus_sb_info *sbi = HFSPLUS_SB(inode->i_sb);
 	u16 mode;
 
-#ifdef CONFIG_SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 	// ignore the file permission on disk to let umask working
 	mode = 0;
 #else
 	mode = be16_to_cpu(perms->mode);
 #endif
 
-#ifdef CONFIG_SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 	if (!sbi->uid)
 #endif
 	i_uid_write(inode, be32_to_cpu(perms->owner));
 	if (!i_uid_read(inode) && !mode)
 		inode->i_uid = sbi->uid;
 
-#ifdef CONFIG_SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 	if (!sbi->gid)
 #endif
 	i_gid_write(inode, be32_to_cpu(perms->group));
@@ -277,7 +280,7 @@ static void hfsplus_get_perms(struct inode *inode,
 		mode = mode ? (mode & S_IALLUGO) : (S_IRWXUGO & ~(sbi->umask));
 		mode |= S_IFDIR;
 	} else if (!mode)
-#ifdef CONFIG_SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 		mode = S_IFREG | (S_IRWXUGO & ~(sbi->umask));
 #else
 		mode = S_IFREG | ((S_IRUGO|S_IWUGO) & ~(sbi->umask));
@@ -336,12 +339,12 @@ static int hfsplus_setattr(struct dentry *dentry, struct iattr *attr)
 
 	if ((attr->ia_valid & ATTR_SIZE) &&
 	    attr->ia_size != i_size_read(inode)) {
-#ifdef CONFIG_SYNO_HFSPLUS_DONT_ZERO_ON_NEW_FILE
+#ifdef MY_ABC_HERE
 		loff_t old_size = i_size_read(inode);
 #endif
 		inode_dio_wait(inode);
 		truncate_setsize(inode, attr->ia_size);
-#ifdef CONFIG_SYNO_HFSPLUS_DONT_ZERO_ON_NEW_FILE
+#ifdef MY_ABC_HERE
 		if (0 != old_size)
 #endif
 		hfsplus_file_truncate(inode);
@@ -364,7 +367,7 @@ int hfsplus_file_fsync(struct file *file, loff_t start, loff_t end,
 	if (error)
 		return error;
 	mutex_lock(&inode->i_mutex);
-#ifdef CONFIG_SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+#ifdef MY_ABC_HERE
 	mutex_lock(&syno_hfsplus_global_mutex);
 #endif
 
@@ -407,7 +410,7 @@ int hfsplus_file_fsync(struct file *file, loff_t start, loff_t end,
 	if (!test_bit(HFSPLUS_SB_NOBARRIER, &sbi->flags))
 		blkdev_issue_flush(inode->i_sb->s_bdev, GFP_KERNEL, NULL);
 
-#ifdef CONFIG_SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+#ifdef MY_ABC_HERE
 	mutex_unlock(&syno_hfsplus_global_mutex);
 #endif
 	mutex_unlock(&inode->i_mutex);

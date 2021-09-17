@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * ST Thermal Sensor Driver for syscfg based sensors.
  * Author: Ajit Pal Singh <ajitpal.singh@st.com>
@@ -41,10 +44,10 @@ static const struct reg_field st_415sas_regfields[MAX_REGFIELDS] = {
 	[DCORRECT] = REG_FIELD(STIH415_SAS_THSENS_CONF, 4, 8),
 	[OVERFLOW] = REG_FIELD(STIH415_SAS_THSENS_STATUS, 8, 8),
 	[DATA] = REG_FIELD(STIH415_SAS_THSENS_STATUS, 10, 16),
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	[DATARDY] = REG_FIELD(STIH415_SAS_THSENS_STATUS, 9, 9),
 	[DC_CALIB] = REG_FIELD(0, 22, 26),
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 };
 
 static const struct reg_field st_415mpe_regfields[MAX_REGFIELDS] = {
@@ -52,10 +55,10 @@ static const struct reg_field st_415mpe_regfields[MAX_REGFIELDS] = {
 	[DCORRECT] = REG_FIELD(STIH415_MPE_THSENS_CONF, 3, 7),
 	[OVERFLOW] = REG_FIELD(STIH415_MPE_THSENS_STATUS, 9, 9),
 	[DATA] = REG_FIELD(STIH415_MPE_THSENS_STATUS, 11, 18),
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	[DATARDY] = REG_FIELD(STIH415_MPE_THSENS_STATUS, 10, 10),
 	[DC_CALIB] = REG_FIELD(0, 22, 26),
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 };
 
 static const struct reg_field st_416sas_regfields[MAX_REGFIELDS] = {
@@ -63,10 +66,10 @@ static const struct reg_field st_416sas_regfields[MAX_REGFIELDS] = {
 	[DCORRECT] = REG_FIELD(STIH416_SAS_THSENS_CONF, 4, 8),
 	[OVERFLOW] = REG_FIELD(STIH416_SAS_THSENS_STATUS1, 8, 8),
 	[DATA] = REG_FIELD(STIH416_SAS_THSENS_STATUS2, 10, 16),
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	[DATARDY] = REG_FIELD(STIH416_SAS_THSENS_STATUS2, 9, 9),
 	[DC_CALIB] = REG_FIELD(0, 22, 26),
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 };
 
 static const struct reg_field st_127_regfields[MAX_REGFIELDS] = {
@@ -74,10 +77,10 @@ static const struct reg_field st_127_regfields[MAX_REGFIELDS] = {
 	[DCORRECT] = REG_FIELD(STID127_THSENS_CONF, 2, 6),
 	[OVERFLOW] = REG_FIELD(STID127_THSENS_STATUS, 9, 9),
 	[DATA] = REG_FIELD(STID127_THSENS_STATUS, 11, 18),
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	[DATARDY] = REG_FIELD(STID127_THSENS_STATUS, 10, 10),
 	[DC_CALIB] = REG_FIELD(0, 22, 26),
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 };
 
 /* Private OPs for SYSCFG based thermal sensors */
@@ -96,11 +99,11 @@ static int st_syscfg_alloc_regfields(struct st_thermal_sensor *sensor)
 	if (ret)
 		return ret;
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	sensor->pwr = devm_regmap_field_alloc(dev, sensor->regmap[TH_REGS],
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	sensor->pwr = devm_regmap_field_alloc(dev, sensor->regmap,
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 				sensor->data->reg_fields[TEMP_PWR]);
 	if (IS_ERR(sensor->pwr)) {
 		dev_err(dev, "%s,failed to alloc reg field\n", __func__);
@@ -112,7 +115,7 @@ static int st_syscfg_alloc_regfields(struct st_thermal_sensor *sensor)
 
 static int st_syscfg_do_memmap_regmap(struct st_thermal_sensor *sensor)
 {
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	struct regmap *rmap;
 
 	rmap = syscon_regmap_lookup_by_compatible(sensor->data->sys_compat);
@@ -122,14 +125,14 @@ static int st_syscfg_do_memmap_regmap(struct st_thermal_sensor *sensor)
 		return PTR_ERR(rmap);
 	}
 	sensor->regmap[TH_REGS]	= rmap;
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	sensor->regmap =
 		syscon_regmap_lookup_by_compatible(sensor->data->sys_compat);
 	if (IS_ERR(sensor->regmap)) {
 		dev_err(sensor_to_dev(sensor), "could find regmap\n");
 		return PTR_ERR(sensor->regmap);
 	}
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	return 0;
 }

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2005, 2006
  * Avishay Traeger (avishay@gmail.com)
@@ -577,11 +580,11 @@ static struct page *__r4w_get_page(void *priv, u64 offset, bool *uptodate)
 
 		if (offset >= i_size) {
 			*uptodate = true;
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 			EXOFS_DBGMSG("offset >= i_size index=0x%llx\n", _LLU(index));
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 			EXOFS_DBGMSG("offset >= i_size index=0x%lx\n", index);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 			return ZERO_PAGE(0);
 		}
 
@@ -600,11 +603,11 @@ static struct page *__r4w_get_page(void *priv, u64 offset, bool *uptodate)
 			*uptodate = true;
 		else
 			*uptodate = PageUptodate(page);
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 		EXOFS_DBGMSG("index=0x%llx uptodate=%d\n", _LLU(index), *uptodate);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 		EXOFS_DBGMSG("index=0x%lx uptodate=%d\n", index, *uptodate);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 		return page;
 	} else {
 		EXOFS_DBGMSG("YES that_locked_page index=0x%lx\n",

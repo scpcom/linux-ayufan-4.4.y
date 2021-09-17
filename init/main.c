@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/init/main.c
  *
@@ -367,9 +370,9 @@ static noinline void __init_refok rest_init(void)
 	int pid;
 
 	rcu_scheduler_starting();
-#ifdef CONFIG_SYNO_FIX_SMPBOOT_RACE
+#ifdef MY_DEF_HERE
 	smpboot_thread_init();
-#endif /* CONFIG_SYNO_FIX_SMPBOOT_RACE */
+#endif /* MY_DEF_HERE */
 	/*
 	 * We need to spawn init first so that it obtains pid 1, however
 	 * the init task will end up wanting to create kthreads, which, if

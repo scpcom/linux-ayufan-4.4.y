@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/arch/arm/kernel/sys_arm.c
  *
@@ -27,9 +30,9 @@
 #include <linux/ipc.h>
 #include <linux/uaccess.h>
 #include <linux/slab.h>
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #include <linux/printk.h>
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 /*
  * Since loff_t is a 64 bit type we avoid a lot of ABI hassle
@@ -41,7 +44,7 @@ asmlinkage long sys_arm_fadvise64_64(int fd, int advice,
 	return sys_fadvise64_64(fd, offset, len, advice);
 }
 
-#if defined(CONFIG_SYNO_LSP_ALPINE) && (PAGE_SHIFT > 12)
+#if defined(MY_DEF_HERE) && (PAGE_SHIFT > 12)
 	/*
 	 * the "offeset" input variable is in always in 4k units for mmap2.
 	 * If PAGE_SIZE is different, we need shift it to present real pages,
@@ -62,4 +65,4 @@ asmlinkage unsigned long sys_arm_mmap_4koff(unsigned long addr,
 
 	return sys_mmap_pgoff(addr, len, prot, flags, fd, pgoff);
 }
-#endif /* CONFIG_SYNO_LSP_ALPINE && PAGE_SHIFT > 12 */
+#endif /* MY_DEF_HERE && PAGE_SHIFT > 12 */

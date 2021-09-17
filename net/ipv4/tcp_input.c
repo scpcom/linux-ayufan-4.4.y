@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * INET		An implementation of the TCP/IP protocol suite for the LINUX
  *		operating system.  INET is implemented using the  BSD Socket
@@ -98,9 +101,9 @@ int sysctl_tcp_thin_dupack __read_mostly;
 
 int sysctl_tcp_moderate_rcvbuf __read_mostly = 1;
 int sysctl_tcp_early_retrans __read_mostly = 3;
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 int sysctl_tcp_default_delack_segs __read_mostly = 1;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 #define FLAG_DATA		0x01 /* Incoming frame contained data.		*/
 #define FLAG_WIN_UPDATE		0x02 /* Incoming ACK was a window update.	*/
@@ -702,9 +705,9 @@ static void tcp_rtt_estimator(struct sock *sk, const __u32 mrtt)
 	}
 }
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 // do nothing
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 /* Set the sk_pacing_rate to allow proper sizing of TSO packets.
  * Note: TCP stack does not yet implement pacing.
  * FQ packet scheduler can be used to implement cheap but effective
@@ -732,7 +735,7 @@ static void tcp_update_pacing_rate(struct sock *sk)
 
 	sk->sk_pacing_rate = min_t(u64, rate, ~0U);
 }
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 /* Calculate rto without backoff.  This is the second half of Van Jacobson's
  * routine referred to above.
@@ -3368,11 +3371,11 @@ static int tcp_ack(struct sock *sk, const struct sk_buff *skb, int flag)
 	u32 ack_seq = TCP_SKB_CB(skb)->seq;
 	u32 ack = TCP_SKB_CB(skb)->ack_seq;
 	bool is_dupack = false;
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	u32 prior_in_flight;
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	u32 prior_in_flight, prior_cwnd = tp->snd_cwnd, prior_rtt = tp->srtt;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	u32 prior_fackets;
 	int prior_packets = tp->packets_out;
 	int prior_sacked = tp->sacked_out;
@@ -3480,12 +3483,12 @@ static int tcp_ack(struct sock *sk, const struct sk_buff *skb, int flag)
 
 	if (icsk->icsk_pending == ICSK_TIME_RETRANS)
 		tcp_schedule_loss_probe(sk);
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	if (tp->srtt != prior_rtt || tp->snd_cwnd != prior_cwnd)
 		tcp_update_pacing_rate(sk);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	return 1;
 
 no_queue:
@@ -4808,11 +4811,11 @@ static void __tcp_ack_snd_check(struct sock *sk, int ofo_possible)
 	struct tcp_sock *tp = tcp_sk(sk);
 
 	    /* More than one full frame received... */
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	if (((tp->rcv_nxt - tp->rcv_wup) > (inet_csk(sk)->icsk_ack.rcv_mss * sysctl_tcp_default_delack_segs) &&
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	if (((tp->rcv_nxt - tp->rcv_wup) > inet_csk(sk)->icsk_ack.rcv_mss &&
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	     /* ... and right edge of window advances far enough.
 	      * (tcp_recvmsg() will send ACK otherwise). Or...
 	      */
@@ -4996,11 +4999,11 @@ static bool tcp_dma_try_early_copy(struct sock *sk, struct sk_buff *skb,
 	if (tp->ucopy.wakeup)
 		return false;
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	if (!tp->ucopy.dma_chan && tp->ucopy.pinned)
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	if (!tp->ucopy.dma_chan && tp->ucopy.pinned_list)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 		tp->ucopy.dma_chan = net_dma_find_channel();
 
 	if (tp->ucopy.dma_chan && skb_csum_unnecessary(skb)) {
@@ -5792,11 +5795,11 @@ int tcp_rcv_state_process(struct sock *sk, struct sk_buff *skb,
 				} else
 					tcp_init_metrics(sk);
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 				// do nothing
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 				tcp_update_pacing_rate(sk);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 				/* Prevent spurious tcp_cwnd_restart() on
 				 * first data packet.

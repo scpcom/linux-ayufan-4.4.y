@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/net/sunrpc/clnt.c
  *
@@ -325,12 +328,12 @@ static struct rpc_clnt * rpc_new_client(const struct rpc_create_args *args, stru
 	clnt->cl_stats    = program->stats;
 	clnt->cl_metrics  = rpc_alloc_iostats(clnt);
 	err = -ENOMEM;
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 #ifdef CONFIG_PROC_FS
 	if (clnt->cl_metrics == NULL)
 		goto out_no_stats;
 #endif
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	clnt->cl_program  = program;
 	INIT_LIST_HEAD(&clnt->cl_tasks);
 	spin_lock_init(&clnt->cl_lock);
@@ -379,11 +382,11 @@ out_no_path:
 	kfree(clnt->cl_principal);
 out_no_principal:
 	rpc_free_iostats(clnt->cl_metrics);
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 #ifdef CONFIG_PROC_FS
 out_no_stats:
 #endif
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	kfree(clnt);
 out_err:
 	rpciod_down();

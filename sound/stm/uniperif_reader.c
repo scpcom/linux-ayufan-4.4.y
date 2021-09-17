@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *   STMicroelectronics System-on-Chips' Uniperipheral reader driver
  *
@@ -252,8 +255,8 @@ static int uniperif_reader_open(struct snd_pcm_substream *substream)
 		goto error;
 	}
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 	/* Make the period (so buffer as well) length (in bytes) a multiply
 	 * of a FDMA transfer bytes (which varies depending on channels
 	 * number and sample bytes) */
@@ -263,7 +266,7 @@ static int uniperif_reader_open(struct snd_pcm_substream *substream)
 		dev_err(reader->dev, "Failed to constrain buffer bytes");
 		goto error;
 	}
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	runtime->hw = uniperif_reader_hw;
 
@@ -1012,7 +1015,7 @@ static int uniperif_reader_remove(struct platform_device *pdev)
  * Power management
  */
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_PM_SLEEP
 static int uniperif_reader_suspend(struct device *dev)
 {
@@ -1071,7 +1074,7 @@ SIMPLE_DEV_PM_OPS(uniperif_reader_pm_ops,
 #else
 #define UNIPERIF_READER_PM_OPS	NULL
 #endif
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 #ifdef CONFIG_PM
 static int uniperif_reader_suspend(struct device *dev)
 {
@@ -1130,7 +1133,7 @@ SIMPLE_DEV_PM_OPS(uniperif_reader_pm_ops,
 #else
 #define UNIPERIF_READER_PM_OPS	NULL
 #endif
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 /*
  * Module initialization

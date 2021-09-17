@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef __ASMARM_ELF_H
 #define __ASMARM_ELF_H
 
@@ -52,9 +55,9 @@ typedef struct user_fp elf_fpregset_t;
 #define R_ARM_ABS32		2
 #define R_ARM_CALL		28
 #define R_ARM_JUMP24		29
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 #define R_ARM_TARGET1		38
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 #define R_ARM_V4BX		40
 #define R_ARM_PREL31		42
 #define R_ARM_MOVW_ABS_NC	43
@@ -112,11 +115,11 @@ int dump_task_regs(struct task_struct *t, elf_gregset_t *elfregs);
 #define ELF_CORE_COPY_TASK_REGS dump_task_regs
 
 #define CORE_DUMP_USE_REGSET
-#if defined(CONFIG_SYNO_LSP_ALPINE) || (defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT))
+#if defined(MY_DEF_HERE) || (defined(MY_ABC_HERE) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT))
 #define ELF_EXEC_PAGESIZE	PAGE_SIZE
-#else /* CONFIG_SYNO_LSP_ALPINE || (CONFIG_SYNO_LSP_ARMADA && CONFIG_MV_LARGE_PAGE_SUPPORT) */
+#else /* MY_DEF_HERE || (CONFIG_SYNO_LSP_ARMADA && CONFIG_MV_LARGE_PAGE_SUPPORT) */
 #define ELF_EXEC_PAGESIZE	4096
-#endif /* CONFIG_SYNO_LSP_ALPINE || (CONFIG_SYNO_LSP_ARMADA && CONFIG_MV_LARGE_PAGE_SUPPORT) */
+#endif /* MY_DEF_HERE || (CONFIG_SYNO_LSP_ARMADA && CONFIG_MV_LARGE_PAGE_SUPPORT) */
 
 /* This is the location that an ET_DYN program is loaded if exec'ed.  Typical
    use of this is to invoke "./ld.so someprog" to test out a new version of

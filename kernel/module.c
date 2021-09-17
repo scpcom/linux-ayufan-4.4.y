@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
    Copyright (C) 2002 Richard Henderson
    Copyright (C) 2001 Rusty Russell, 2002, 2010 Rusty Russell IBM.
@@ -2725,11 +2728,11 @@ static int check_modinfo(struct module *mod, struct load_info *info, int flags)
 	return 0;
 }
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 static int find_module_sections(struct module *mod, struct load_info *info)
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 static void find_module_sections(struct module *mod, struct load_info *info)
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 {
 	mod->kp = section_objs(info, "__param",
 			       sizeof(*mod->kp), &mod->num_kp);
@@ -2759,7 +2762,7 @@ static void find_module_sections(struct module *mod, struct load_info *info)
 #ifdef CONFIG_CONSTRUCTORS
 	mod->ctors = section_objs(info, ".ctors",
 				  sizeof(*mod->ctors), &mod->num_ctors);
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	if (!mod->ctors)
 		mod->ctors = section_objs(info, ".init_array",
 				sizeof(*mod->ctors), &mod->num_ctors);
@@ -2772,7 +2775,7 @@ static void find_module_sections(struct module *mod, struct load_info *info)
 		       mod->name);
 		return -EINVAL;
 	}
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 #endif
 
 #ifdef CONFIG_TRACEPOINTS
@@ -2811,10 +2814,10 @@ static void find_module_sections(struct module *mod, struct load_info *info)
 
 	info->debug = section_objs(info, "__verbose",
 				   sizeof(*info->debug), &info->num_debug);
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 
 	return 0;
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 }
 
 static int move_module(struct module *mod, struct load_info *info)
@@ -3270,13 +3273,13 @@ static int load_module(struct load_info *info, const char __user *uargs,
 
 	/* Now we've got everything in the final locations, we can
 	 * find optional sections. */
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	err = find_module_sections(mod, info);
 	if (err)
 		goto free_unload;
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 	find_module_sections(mod, info);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 	err = check_module_license_and_versions(mod);
 	if (err)
@@ -3879,7 +3882,7 @@ void module_layout(struct module *mod,
 EXPORT_SYMBOL(module_layout);
 #endif
 
-#ifdef CONFIG_SYNO_OOM_DUMP_MODULE
+#ifdef MY_ABC_HERE
 void syno_dump_modules(void)
 {
 	struct module *mod;
@@ -3894,4 +3897,4 @@ void syno_dump_modules(void)
 	}
 }
 EXPORT_SYMBOL_GPL(syno_dump_modules);
-#endif /* CONFIG_SYNO_OOM_DUMP_MODULE */
+#endif /* MY_ABC_HERE */

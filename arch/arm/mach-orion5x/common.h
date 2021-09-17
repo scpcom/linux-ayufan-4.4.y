@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef __ARCH_ORION5X_COMMON_H
 #define __ARCH_ORION5X_COMMON_H
 
@@ -5,7 +8,7 @@ struct dsa_platform_data;
 struct mv643xx_eth_platform_data;
 struct mv_sata_platform_data;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #define ORION_MBUS_PCIE_MEM_TARGET    0x04
 #define ORION_MBUS_PCIE_MEM_ATTR      0x59
 #define ORION_MBUS_PCIE_IO_TARGET     0x04
@@ -22,7 +25,7 @@ struct mv_sata_platform_data;
 #define ORION_MBUS_DEVBUS_ATTR(cs)    (~(1 << cs))
 #define ORION_MBUS_SRAM_TARGET        0x00
 #define ORION_MBUS_SRAM_ATTR          0x00
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 /*
  * Basic Orion init functions used early by machine-setup.

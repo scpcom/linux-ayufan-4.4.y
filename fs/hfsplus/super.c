@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/hfsplus/super.c
  *
@@ -22,7 +25,7 @@ static void hfsplus_destroy_inode(struct inode *inode);
 #include "hfsplus_fs.h"
 #include "xattr.h"
 
-#ifdef CONFIG_SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+#ifdef MY_ABC_HERE
 /* FIXME: consider using smaller lock, ie. i_lock, i_mutex ... */
 int syno_hfsplus_mutex_init = 0;
 struct mutex syno_hfsplus_global_mutex;
@@ -59,7 +62,7 @@ static int hfsplus_system_read_inode(struct inode *inode)
 	return 0;
 }
 
-#ifdef CONFIG_SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 // 3802 byte for 8K node_size
 static inline size_t hfsplus_get_maxinline_attrsize(struct hfs_btree *btree)
 {
@@ -399,7 +402,7 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 	struct nls_table *nls = NULL;
 	u64 last_fs_block, last_fs_page;
 	int err;
-#ifdef CONFIG_SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 	size_t max_attr_size = 0;
 	size_t cached_size = 0;
 #endif
@@ -409,7 +412,7 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 	if (!sbi)
 		goto out;
 
-#ifdef CONFIG_SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+#ifdef MY_ABC_HERE
 	if (0 == syno_hfsplus_mutex_init) {
 		syno_hfsplus_mutex_init = 1;
 		mutex_init(&syno_hfsplus_global_mutex);
@@ -516,7 +519,7 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 		}
 	}
 	sb->s_xattr = hfsplus_xattr_handlers;
-#ifdef CONFIG_SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 	if (sbi->attr_tree) {
 		max_attr_size = hfsplus_get_maxinline_attrsize(sbi->attr_tree);
 		cached_size = offsetof(struct hfsplus_attr_inline_data, raw_bytes) + max_attr_size;

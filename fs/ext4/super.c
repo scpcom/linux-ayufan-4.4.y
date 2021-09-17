@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/ext4/super.c
  *
@@ -83,14 +86,14 @@ static void ext4_unregister_li_request(struct super_block *sb);
 static void ext4_clear_request_list(void);
 static int ext4_reserve_clusters(struct ext4_sb_info *, ext4_fsblk_t);
 
-#ifdef CONFIG_SYNO_EXT4_CASELESS_STAT
+#ifdef MY_ABC_HERE
 extern struct dentry_operations ext4_dentry_operations;
 
 spinlock_t ext4_namei_buf_lock;  /* lock for ext4_utf8_namei_buf[] in fs/ext4/namei.c */
 spinlock_t ext4_hash_buf_lock;   /* lock for ext4_utf8_hash_buf[] in fs/ext4/hash.c */
 static int ext4_namei_lock_init = 0;
 static int ext4_hash_lock_init = 0;
-#endif /* CONFIG_SYNO_EXT4_CASELESS_STAT */
+#endif /* MY_ABC_HERE */
 
 #if !defined(CONFIG_EXT2_FS) && !defined(CONFIG_EXT2_FS_MODULE) && defined(CONFIG_EXT4_USE_FOR_EXT23)
 static struct file_system_type ext2_fs_type = {
@@ -326,7 +329,7 @@ static void SYNOExt4GetDSMVersion(const unsigned char* szVersionName, char* szDs
 }
 #endif /* CONFIG_SYNO_EXT4_CREATE_TIME_BIG_ENDIAN_SWAP */
 
-#ifdef CONFIG_SYNO_EXT4_ERROR_REPORT
+#ifdef MY_ABC_HERE
 int (*funcSYNOSendErrorFsEvent)(const unsigned char*, const unsigned int) = NULL;
 static void SynoAutoErrorFsReport(const unsigned char* szDsmVersion, const unsigned int iErrorCount)
 {
@@ -356,13 +359,13 @@ static void SYNOExt4GetDSMVersion(const unsigned char* szVersionName, char* szDs
 	}
 }
 EXPORT_SYMBOL(funcSYNOSendErrorFsEvent);
-#endif /* CONFIG_SYNO_EXT4_ERROR_REPORT */
+#endif /* MY_ABC_HERE */
 
 static void __save_error_info(struct super_block *sb, const char *func,
 			    unsigned int line)
 {
 	struct ext4_super_block *es = EXT4_SB(sb)->s_es;
-#ifdef CONFIG_SYNO_EXT4_ERROR_REPORT
+#ifdef MY_ABC_HERE
 	struct ext4_sb_info *sbi = EXT4_SB(sb);
 	char szDsmVersion[8] = {'\0'};
 #endif
@@ -387,7 +390,7 @@ static void __save_error_info(struct super_block *sb, const char *func,
 	if (!es->s_error_count)
 		mod_timer(&EXT4_SB(sb)->s_err_report, jiffies + 24*60*60*HZ);
 	le32_add_cpu(&es->s_error_count, 1);
-#ifdef CONFIG_SYNO_EXT4_ERROR_REPORT
+#ifdef MY_ABC_HERE
 	/* We don't need to care system FS */
 	if ((0 != strcmp(es->s_last_mounted, "/"))
 			&& (0 == sbi->s_new_error_fs_event_flag)
@@ -869,7 +872,7 @@ static void ext4_put_super(struct super_block *sb)
 	for (i = 0; i < MAXQUOTAS; i++)
 		kfree(sbi->s_qf_names[i]);
 #endif
-#ifdef CONFIG_SYNO_EXT4_ERROR_REPORT
+#ifdef MY_ABC_HERE
 	if (sbi->s_mount_path) {
 		kfree(sbi->s_mount_path);
 	}
@@ -1089,7 +1092,7 @@ static int bdev_try_to_free_page(struct super_block *sb, struct page *page,
 	return try_to_free_buffers(page);
 }
 
-#ifdef CONFIG_SYNO_EXT4_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 static int ext4_syno_set_sb_archive_ver(struct super_block *sb, u32 archive_ver)
 {
 	struct ext4_super_block *es = EXT4_SB(sb)->s_es;
@@ -1128,7 +1131,7 @@ static int ext4_syno_get_sb_archive_ver(struct super_block *sb, u32 *version)
 	*version = sb->s_archive_version;
 	return 0;
 }
-#ifdef CONFIG_SYNO_EXT4_ARCHIVE_VERSION_FIX
+#ifdef MY_ABC_HERE
 static int ext4_syno_set_sb_archive_ver1(struct super_block *sb, u32 archive_ver1)
 {
 	struct ext4_super_block *es = EXT4_SB(sb)->s_es;
@@ -1175,8 +1178,8 @@ static int ext4_syno_get_sb_archive_ver1(struct super_block *sb, u32 *version)
 	*version = sb->s_archive_version1;
 	return 0;
 }
-#endif /* CONFIG_SYNO_EXT4_ARCHIVE_VERSION_FIX */
-#endif /* CONFIG_SYNO_EXT4_ARCHIVE_VERSION */
+#endif /* MY_ABC_HERE */
+#endif /* MY_ABC_HERE */
 
 #ifdef CONFIG_QUOTA
 #define QTYPE2NAME(t) ((t) == USRQUOTA ? "user" : "group")
@@ -1235,14 +1238,14 @@ static const struct quotactl_ops ext4_qctl_sysfile_operations = {
 #endif
 
 static const struct super_operations ext4_sops = {
-#ifdef CONFIG_SYNO_EXT4_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	.syno_set_sb_archive_ver = ext4_syno_set_sb_archive_ver,
 	.syno_get_sb_archive_ver = ext4_syno_get_sb_archive_ver,
-#ifdef CONFIG_SYNO_EXT4_ARCHIVE_VERSION_FIX
+#ifdef MY_ABC_HERE
 	.syno_set_sb_archive_ver1 = ext4_syno_set_sb_archive_ver1,
 	.syno_get_sb_archive_ver1 = ext4_syno_get_sb_archive_ver1,
-#endif /* CONFIG_SYNO_EXT4_ARCHIVE_VERSION_FIX */
-#endif /* CONFIG_SYNO_EXT4_ARCHIVE_VERSION */
+#endif /* MY_ABC_HERE */
+#endif /* MY_ABC_HERE */
 	.alloc_inode	= ext4_alloc_inode,
 	.destroy_inode	= ext4_destroy_inode,
 	.write_inode	= ext4_write_inode,
@@ -1264,14 +1267,14 @@ static const struct super_operations ext4_sops = {
 };
 
 static const struct super_operations ext4_nojournal_sops = {
-#ifdef CONFIG_SYNO_EXT4_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	.syno_set_sb_archive_ver = ext4_syno_set_sb_archive_ver,
 	.syno_get_sb_archive_ver = ext4_syno_get_sb_archive_ver,
-#ifdef CONFIG_SYNO_EXT4_ARCHIVE_VERSION_FIX
+#ifdef MY_ABC_HERE
 	.syno_set_sb_archive_ver1 = ext4_syno_set_sb_archive_ver1,
 	.syno_get_sb_archive_ver1 = ext4_syno_get_sb_archive_ver1,
-#endif /* CONFIG_SYNO_EXT4_ARCHIVE_VERSION_FIX */
-#endif /* CONFIG_SYNO_EXT4_ARCHIVE_VERSION */
+#endif /* MY_ABC_HERE */
+#endif /* MY_ABC_HERE */
 	.alloc_inode	= ext4_alloc_inode,
 	.destroy_inode	= ext4_destroy_inode,
 	.write_inode	= ext4_write_inode,
@@ -1298,7 +1301,7 @@ static const struct export_operations ext4_export_ops = {
 enum {
 	Opt_bsd_df, Opt_minix_df, Opt_grpid, Opt_nogrpid,
 	Opt_resgid, Opt_resuid, Opt_sb, Opt_err_cont, Opt_err_panic, Opt_err_ro,
-#ifdef CONFIG_SYNO_EXT4_OLDALLOC
+#ifdef MY_ABC_HERE
 	Opt_nouid32, Opt_debug, Opt_removed, Opt_oldalloc, Opt_orlov,
 #else
 	Opt_nouid32, Opt_debug, Opt_removed,
@@ -1306,7 +1309,7 @@ enum {
 	Opt_user_xattr, Opt_nouser_xattr, Opt_acl, Opt_noacl,
 	Opt_auto_da_alloc, Opt_noauto_da_alloc, Opt_noload,
 	Opt_commit, Opt_min_batch_time, Opt_max_batch_time,
-#ifdef CONFIG_SYNO_EXT4_DEFAULT_MNTOPT_JOURNAL_CKSUM
+#ifdef MY_ABC_HERE
 	Opt_journal_dev, Opt_journal_checksum, Opt_nojournal_checksum, Opt_journal_async_commit,
 #else
 	Opt_journal_dev, Opt_journal_checksum, Opt_journal_async_commit,
@@ -1340,7 +1343,7 @@ static const match_table_t tokens = {
 	{Opt_err_ro, "errors=remount-ro"},
 	{Opt_nouid32, "nouid32"},
 	{Opt_debug, "debug"},
-#ifdef CONFIG_SYNO_EXT4_OLDALLOC
+#ifdef MY_ABC_HERE
 	{Opt_oldalloc, "oldalloc"},
 	{Opt_orlov, "orlov"},
 #else
@@ -1360,7 +1363,7 @@ static const match_table_t tokens = {
 	{Opt_max_batch_time, "max_batch_time=%u"},
 	{Opt_journal_dev, "journal_dev=%u"},
 	{Opt_journal_checksum, "journal_checksum"},
-#ifdef CONFIG_SYNO_EXT4_DEFAULT_MNTOPT_JOURNAL_CKSUM
+#ifdef MY_ABC_HERE
 	{Opt_nojournal_checksum, "nojournal_checksum"},
 #endif
 	{Opt_journal_async_commit, "journal_async_commit"},
@@ -1545,7 +1548,7 @@ static const struct mount_opts {
 	 MOPT_EXT4_ONLY | MOPT_CLEAR},
 	{Opt_journal_checksum, EXT4_MOUNT_JOURNAL_CHECKSUM,
 	 MOPT_EXT4_ONLY | MOPT_SET},
-#ifdef CONFIG_SYNO_EXT4_DEFAULT_MNTOPT_JOURNAL_CKSUM
+#ifdef MY_ABC_HERE
 	{Opt_nojournal_checksum, EXT4_MOUNT_JOURNAL_CHECKSUM,
 	 MOPT_EXT4_ONLY | MOPT_CLEAR},
 #endif
@@ -1590,7 +1593,7 @@ static const struct mount_opts {
 #endif
 	{Opt_nouid32, EXT4_MOUNT_NO_UID32, MOPT_SET},
 	{Opt_debug, EXT4_MOUNT_DEBUG, MOPT_SET},
-#ifdef CONFIG_SYNO_EXT4_OLDALLOC
+#ifdef MY_ABC_HERE
 	{Opt_oldalloc, EXT4_MOUNT_OLDALLOC,
 	 MOPT_EXT4_ONLY | MOPT_SET},
 	{Opt_orlov, EXT4_MOUNT_OLDALLOC,
@@ -1899,9 +1902,9 @@ static const char *token2str(int token)
 	return t->pattern;
 }
 
-#if defined(CONFIG_SYNO_DEBUG_FLAG) && defined(CONFIG_SYNO_EXT4_OLDALLOC)
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
 extern int SynoDebugFlag;
-#endif /* CONFIG_SYNO_DEBUG_FLAG */
+#endif /* MY_ABC_HERE */
 
 /*
  * Show an option if
@@ -1934,7 +1937,7 @@ static int _ext4_show_options(struct seq_file *seq, struct super_block *sb,
 		     (sbi->s_mount_opt & m->mount_opt) != m->mount_opt) ||
 		    (!want_set && (sbi->s_mount_opt & m->mount_opt)))
 			continue; /* select Opt_noFoo vs Opt_Foo */
-#if defined(CONFIG_SYNO_DEBUG_FLAG) && defined(CONFIG_SYNO_EXT4_OLDALLOC)
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
 		if (m->mount_opt == EXT4_MOUNT_OLDALLOC && !SynoDebugFlag)
 			continue;
 #endif
@@ -2038,7 +2041,7 @@ static int ext4_setup_super(struct super_block *sb, struct ext4_super_block *es,
 		ext4_msg(sb, KERN_WARNING,
 			 "warning: mounting fs with errors, "
 			 "running e2fsck is recommended");
-#ifdef CONFIG_SYNO_EXT_SKIP_FSCK_REMINDER
+#ifdef MY_ABC_HERE
 #else
 	else if ((__s16) le16_to_cpu(es->s_max_mnt_count) > 0 &&
 		 le16_to_cpu(es->s_mnt_count) >=
@@ -2636,7 +2639,7 @@ static ssize_t lifetime_write_kbytes_show(struct ext4_attr *a,
 			  EXT4_SB(sb)->s_sectors_written_start) >> 1)));
 }
 
-#ifdef CONFIG_SYNO_EXT4_LAZYINIT_INFO
+#ifdef MY_ABC_HERE
 static ssize_t lazyinit_info_show(struct ext4_attr *a,
 				       struct ext4_sb_info *sbi, char *buf)
 {
@@ -2654,7 +2657,7 @@ static ssize_t lazyinit_speed_show(struct ext4_attr *a,
 
 #endif
 
-#ifdef CONFIG_SYNO_EXT4_ERROR_REPORT
+#ifdef MY_ABC_HERE
 static ssize_t syno_fs_error_new_event_flag_show(struct ext4_attr *a,
 				       struct ext4_sb_info *sbi, char *buf)
 {
@@ -2689,7 +2692,7 @@ static ssize_t syno_fs_error_count_show(struct ext4_attr *a,
 {
 	return snprintf(buf, PAGE_SIZE, "%d\n", sbi->s_es->s_error_count);
 }
-#endif /* CONFIG_SYNO_EXT4_ERROR_REPORT */
+#endif /* MY_ABC_HERE */
 
 static ssize_t inode_readahead_blks_store(struct ext4_attr *a,
 					  struct ext4_sb_info *sbi,
@@ -2803,11 +2806,11 @@ EXT4_RW_ATTR_SBI_UI(mb_group_prealloc, s_mb_group_prealloc);
 EXT4_RW_ATTR_SBI_UI(max_writeback_mb_bump, s_max_writeback_mb_bump);
 EXT4_RW_ATTR_SBI_UI(extent_max_zeroout_kb, s_extent_max_zeroout_kb);
 EXT4_ATTR(trigger_fs_error, 0200, NULL, trigger_test_error);
-#ifdef CONFIG_SYNO_EXT4_LAZYINIT_INFO
+#ifdef MY_ABC_HERE
 EXT4_RO_ATTR(lazyinit_info);
 EXT4_RO_ATTR(lazyinit_speed);
 #endif
-#ifdef CONFIG_SYNO_EXT4_ERROR_REPORT
+#ifdef MY_ABC_HERE
 EXT4_RW_ATTR(syno_fs_error_new_event_flag);
 EXT4_RO_ATTR(syno_fs_error_mounted);
 EXT4_RO_ATTR(syno_fs_error_count);
@@ -2829,11 +2832,11 @@ static struct attribute *ext4_attrs[] = {
 	ATTR_LIST(max_writeback_mb_bump),
 	ATTR_LIST(extent_max_zeroout_kb),
 	ATTR_LIST(trigger_fs_error),
-#ifdef CONFIG_SYNO_EXT4_LAZYINIT_INFO
+#ifdef MY_ABC_HERE
 	ATTR_LIST(lazyinit_info),
 	ATTR_LIST(lazyinit_speed),
 #endif
-#ifdef CONFIG_SYNO_EXT4_ERROR_REPORT
+#ifdef MY_ABC_HERE
 	ATTR_LIST(syno_fs_error_new_event_flag),
 	ATTR_LIST(syno_fs_error_mounted),
 	ATTR_LIST(syno_fs_error_count),
@@ -3042,7 +3045,7 @@ static int ext4_run_li_request(struct ext4_li_request *elr)
 		timeout = jiffies;
 		ret = ext4_init_inode_table(sb, group,
 					    elr->lr_timeout ? 0 : 1);
-#ifdef CONFIG_SYNO_EXT4_LAZYINIT_DYNAMIC_SPEED
+#ifdef MY_ABC_HERE
 		if (elr->lr_timeout == 0 || ((elr->lr_next_group % 10) == 0)) {
 #else
 		if (elr->lr_timeout == 0) {
@@ -3708,7 +3711,7 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 	sbi->s_min_batch_time = EXT4_DEF_MIN_BATCH_TIME;
 	sbi->s_max_batch_time = EXT4_DEF_MAX_BATCH_TIME;
 
-#ifdef CONFIG_SYNO_EXT4_DEFAULT_MNTOPT_NOBARRIER
+#ifdef MY_ABC_HERE
 	clear_opt(sb, BARRIER);
 #else
 	if ((def_mount_opts & EXT4_DEFM_NOBARRIER) == 0)
@@ -3736,7 +3739,7 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 			 sbi->s_es->s_mount_opts);
 	}
 	sbi->s_def_mount_opt = sbi->s_mount_opt;
-#ifdef CONFIG_SYNO_EXT4_DEFAULT_MNTOPT_JOURNAL_CKSUM
+#ifdef MY_ABC_HERE
 	set_opt(sb, JOURNAL_CHECKSUM);
 #endif
 	if (!parse_options((char *) data, sb, &journal_devnum,
@@ -3892,12 +3895,12 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 	for (i = 0; i < 4; i++)
 		sbi->s_hash_seed[i] = le32_to_cpu(es->s_hash_seed[i]);
 	sbi->s_def_hash_version = es->s_def_hash_version;
-#ifdef CONFIG_SYNO_EXT4_CASELESS_STAT
+#ifdef MY_ABC_HERE
 	if (es->s_syno_hash_magic == cpu_to_le32(SYNO_HASH_MAGIC) ||
 	     EXT4_HAS_COMPAT_FEATURE(sb, EXT4_FEATURE_COMPAT_DIR_INDEX)) {
 #else
 	if (EXT4_HAS_COMPAT_FEATURE(sb, EXT4_FEATURE_COMPAT_DIR_INDEX)) {
-#endif /* CONFIG_SYNO_EXT4_CASELESS_STAT */
+#endif /* MY_ABC_HERE */
 		i = le32_to_cpu(es->s_flags);
 		if (i & EXT2_FLAGS_UNSIGNED_HASH)
 			sbi->s_hash_unsigned = 3;
@@ -4254,9 +4257,9 @@ no_journal:
 		iput(root);
 		goto failed_mount4;
 	}
-#ifdef CONFIG_SYNO_EXT4_CASELESS_STAT
+#ifdef MY_ABC_HERE
 	sb->s_d_op = &ext4_dentry_operations;
-#endif /* CONFIG_SYNO_EXT4_CASELESS_STAT */
+#endif /* MY_ABC_HERE */
 	sb->s_root = d_make_root(root);
 	if (!sb->s_root) {
 		ext4_msg(sb, KERN_ERR, "get root dentry failed");
@@ -4264,16 +4267,16 @@ no_journal:
 		goto failed_mount4;
 	}
 
-#ifdef CONFIG_SYNO_EXT4_CASELESS_STAT
+#ifdef MY_ABC_HERE
 	// root is mounted, attach our dentry operations
 	sb->s_root->d_op = &ext4_dentry_operations;
-#endif /* CONFIG_SYNO_EXT4_CASELESS_STAT */
-#ifdef CONFIG_SYNO_EXT4_ARCHIVE_VERSION
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
 	sb->s_archive_version = le32_to_cpu(es->s_archive_version);
-#ifdef CONFIG_SYNO_EXT4_ARCHIVE_VERSION_FIX
+#ifdef MY_ABC_HERE
 	sb->s_archive_version1 = le32_to_cpu(es->ext4_archive_version_bad);
-#endif /* CONFIG_SYNO_EXT4_ARCHIVE_VERSION_FIX */
-#endif /* CONFIG_SYNO_EXT4_ARCHIVE_VERSION */
+#endif /* MY_ABC_HERE */
+#endif /* MY_ABC_HERE */
 
 	if (ext4_setup_super(sb, es, sb->s_flags & MS_RDONLY))
 		sb->s_flags |= MS_RDONLY;
@@ -4363,7 +4366,7 @@ no_journal:
 	} else
 		descr = "out journal";
 
-#ifdef CONFIG_SYNO_EXT4_CASELESS_STAT
+#ifdef MY_ABC_HERE
 	if (!ext4_namei_lock_init) {
 		spin_lock_init(&ext4_namei_buf_lock);
 		ext4_namei_lock_init=1;
@@ -4372,7 +4375,7 @@ no_journal:
 		spin_lock_init(&ext4_hash_buf_lock);
 		ext4_hash_lock_init=1;
 	}
-#endif /* CONFIG_SYNO_EXT4_CASELESS_STAT */
+#endif /* MY_ABC_HERE */
 #ifdef CONFIG_SYNO_EXT4_CREATE_TIME_BIG_ENDIAN_SWAP
 	{
 		char szDsmVersion[8] = {'\0'};
@@ -5575,7 +5578,7 @@ static struct dentry *ext4_mount(struct file_system_type *fs_type, int flags,
 	return mount_bdev(fs_type, flags, dev_name, data, ext4_fill_super);
 }
 
-#ifdef CONFIG_SYNO_EXT4_ERROR_REPORT
+#ifdef MY_ABC_HERE
 void ext4_fill_mount_path(struct super_block *sb, char *szPath)
 {
 	struct ext4_sb_info *sbi = EXT4_SB(sb);

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  arch/arm/include/asm/page.h
  *
@@ -11,9 +14,9 @@
 #define _ASMARM_PAGE_H
 
 /* PAGE_SHIFT determines the page size */
-#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE)
+#if defined(MY_DEF_HERE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE)
 #define PAGE_SHIFT		CONFIG_ARM_PAGE_SIZE_LARGE_SHIFT
-#elif defined(CONFIG_SYNO_LSP_ARMADA)
+#elif defined(MY_ABC_HERE)
 #ifdef CONFIG_MV_8KB_SW_PAGE_SIZE_SUPPORT
 #define PAGE_SHIFT		13
 #define MV_PAGE_SIZE_STR	"8KB SW Page Size"
@@ -38,7 +41,7 @@
 #define PAGE_SIZE		(_AC(1,UL) << PAGE_SHIFT)
 #define PAGE_MASK		(~((1 << PAGE_SHIFT) - 1))
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 /* H/W pages are always 4KB.
  * A single linux page may be implemented using more than one H/W page.
  */
@@ -46,7 +49,7 @@
 #define HW_PAGE_SIZE		(1 << HW_PAGE_SHIFT)
 #define HW_PAGE_MASK		(~(HW_PAGE_SIZE-1))
 #define HW_PAGES_PER_PAGE	(1 << (PAGE_SHIFT - HW_PAGE_SHIFT))
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 #ifndef __ASSEMBLY__
 

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * v4l2-event.h
  *
@@ -132,10 +135,10 @@ int v4l2_event_unsubscribe(struct v4l2_fh *fh,
 void v4l2_event_unsubscribe_all(struct v4l2_fh *fh);
 int v4l2_event_subdev_unsubscribe(struct v4l2_subdev *sd, struct v4l2_fh *fh,
 				  struct v4l2_event_subscription *sub);
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 int v4l2_src_change_event_subscribe(struct v4l2_fh *fh,
 				const struct v4l2_event_subscription *sub);
 int v4l2_src_change_event_subdev_subscribe(struct v4l2_subdev *sd,
 		struct v4l2_fh *fh, struct v4l2_event_subscription *sub);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 #endif /* V4L2_EVENT_H */

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  arch/arm/include/asm/mach/pci.h
  *
@@ -16,9 +19,9 @@
 struct pci_sys_data;
 struct pci_ops;
 struct pci_bus;
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 struct device;
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 struct hw_pci {
 #ifdef CONFIG_PCI_DOMAINS
@@ -38,10 +41,10 @@ struct hw_pci {
 					  resource_size_t start,
 					  resource_size_t size,
 					  resource_size_t align);
-#if defined (CONFIG_SYNO_LSP_MONACO) || defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined (MY_DEF_HERE) || defined(MY_ABC_HERE)
 	void		(*add_bus)(struct pci_bus *bus);
 	void		(*remove_bus)(struct pci_bus *bus);
-#endif /* CONFIG_SYNO_LSP_MONACO || CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_DEF_HERE || MY_ABC_HERE */
 };
 
 /*
@@ -69,17 +72,17 @@ struct pci_sys_data {
 					  resource_size_t start,
 					  resource_size_t size,
 					  resource_size_t align);
-#if defined (CONFIG_SYNO_LSP_MONACO) || defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined (MY_DEF_HERE) || defined(MY_ABC_HERE)
 	void		(*add_bus)(struct pci_bus *bus);
 	void		(*remove_bus)(struct pci_bus *bus);
-#endif /* CONFIG_SYNO_LSP_MONACO || CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_DEF_HERE || MY_ABC_HERE */
 	void		*private_data;	/* platform controller private data	*/
 };
 
 /*
  * Call this with your hw_pci struct to initialise the PCI system.
  */
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 void pci_common_init_dev(struct device *, struct hw_pci *);
 
 /*
@@ -90,9 +93,9 @@ static inline void pci_common_init(struct hw_pci *hw)
 {
 	pci_common_init_dev(NULL, hw);
 }
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 void pci_common_init(struct hw_pci *);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 /*
  * Setup early fixed I/O mapping.

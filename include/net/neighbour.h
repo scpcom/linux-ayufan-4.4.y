@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _NET_NEIGHBOUR_H
 #define _NET_NEIGHBOUR_H
 
@@ -338,17 +341,17 @@ static inline int neigh_hh_output(const struct hh_cache *hh, struct sk_buff *skb
 {
 	unsigned int seq = 0;
 	int hh_len;
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	int retry;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 	do {
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 		if (!hh_output_relaxed)
 			seq = read_seqbegin(&hh->hh_lock);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 		seq = read_seqbegin(&hh->hh_lock);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 		hh_len = hh->hh_len;
 		if (likely(hh_len <= HH_DATA_MOD)) {
 			/* this is inlined by gcc */
@@ -359,15 +362,15 @@ static inline int neigh_hh_output(const struct hh_cache *hh, struct sk_buff *skb
 			memcpy(skb->data - hh_alen, hh->hh_data, hh_alen);
 		}
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 		retry = 0;
 		if (!hh_output_relaxed)
 			retry = read_seqretry(&hh->hh_lock, seq);
 
 	} while (retry);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	} while (read_seqretry(&hh->hh_lock, seq));
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 	skb_push(skb, hh_len);
 	return dev_queue_xmit(skb);

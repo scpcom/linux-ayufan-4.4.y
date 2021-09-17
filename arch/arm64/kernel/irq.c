@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Based on arch/arm/kernel/irq.c
  *
@@ -28,9 +31,9 @@
 #include <linux/irqchip.h>
 #include <linux/seq_file.h>
 #include <linux/ratelimit.h>
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 #include <linux/export.h>
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 unsigned long irq_err_count;
 
@@ -85,7 +88,7 @@ void __init init_IRQ(void)
 		panic("No interrupt controller found.");
 }
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 void set_irq_flags(unsigned int irq, unsigned int flags)
 {
 	unsigned long clr = 0;
@@ -106,4 +109,4 @@ void set_irq_flags(unsigned int irq, unsigned int flags)
 	irq_modify_status(irq, clr, set & ~clr);
 }
 EXPORT_SYMBOL_GPL(set_irq_flags);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */

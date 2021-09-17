@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/cpufreq.h>
@@ -108,11 +111,11 @@ static struct cpufreq_driver cris_freq_driver = {
 	.init = cris_freq_cpu_init,
 	.exit = cris_freq_cpu_exit,
 	.name = "cris_freq",
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	.owner = THIS_MODULE,
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	.attr = cris_freq_attr,
 };
 

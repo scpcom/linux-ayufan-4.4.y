@@ -1,9 +1,12 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef __ASM_ARM_SWITCH_TO_H
 #define __ASM_ARM_SWITCH_TO_H
 
 #include <linux/thread_info.h>
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 /*
  * For v7 SMP cores running a preemptible kernel we may be pre-empted
  * during a TLB maintenance operation, so execute an inner-shareable dsb
@@ -13,7 +16,7 @@
 #if defined(CONFIG_PREEMPT) && defined(CONFIG_SMP) && defined(CONFIG_CPU_V7)
 #define finish_arch_switch(prev)	dsb(ish)
 #endif
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 /*
  * switch_to(prev, next) should switch from task `prev' to `next'

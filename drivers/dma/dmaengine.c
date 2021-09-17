@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright(c) 2004 - 2006 Intel Corporation. All rights reserved.
  *
@@ -65,17 +68,17 @@
 #include <linux/acpi.h>
 #include <linux/acpi_dma.h>
 #include <linux/of_dma.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #include <linux/pagemap.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static DEFINE_MUTEX(dma_list_mutex);
 static DEFINE_IDR(dma_idr);
 static LIST_HEAD(dma_device_list);
 static long dmaengine_ref_count;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static struct page *temp_page = NULL;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 /* --- sysfs implementation --- */
 
@@ -353,11 +356,11 @@ EXPORT_SYMBOL(dma_find_channel);
  */
 struct dma_chan *net_dma_find_channel(void)
 {
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	struct dma_chan *chan = dma_find_channel(DMA_SG);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	struct dma_chan *chan = dma_find_channel(DMA_MEMCPY);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	if (chan && !is_dma_copy_aligned(chan->device, 1, 1, 1))
 		return NULL;
 
@@ -934,9 +937,9 @@ dma_async_memcpy_buf_to_buf(struct dma_chan *chan, void *dest,
 }
 EXPORT_SYMBOL(dma_async_memcpy_buf_to_buf);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #define DMA_ENGINE_MIN_OP_SIZE 128
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 /**
  * dma_async_memcpy_buf_to_pg - offloaded copy from address to page
@@ -961,7 +964,7 @@ dma_async_memcpy_buf_to_pg(struct dma_chan *chan, struct page *page,
 	dma_cookie_t cookie;
 	unsigned long flags;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	if (!page) {
 		printk(KERN_ERR "%s page %p\n", __FUNCTION__, (void*)page);
 		return -EFAULT;
@@ -995,7 +998,7 @@ dma_async_memcpy_buf_to_pg(struct dma_chan *chan, struct page *page,
 
 		return cookie;
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	dma_src = dma_map_single(dev->dev, kdata, len, DMA_TO_DEVICE);
 	dma_dest = dma_map_page(dev->dev, page, offset, len, DMA_FROM_DEVICE);
@@ -1045,7 +1048,7 @@ dma_async_memcpy_pg_to_pg(struct dma_chan *chan, struct page *dest_pg,
 	dma_cookie_t cookie;
 	unsigned long flags;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	if (!dest_pg || !src_pg) {
 		printk(KERN_ERR "%s dest_pg %p src_pg %p\n", __FUNCTION__, (void*)dest_pg, (void*)src_pg);
 		return -EFAULT;
@@ -1079,7 +1082,7 @@ dma_async_memcpy_pg_to_pg(struct dma_chan *chan, struct page *dest_pg,
 
 		return cookie;
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	dma_src = dma_map_page(dev->dev, src_pg, src_off, len, DMA_TO_DEVICE);
 	dma_dest = dma_map_page(dev->dev, dest_pg, dest_off, len,
@@ -1105,7 +1108,7 @@ dma_async_memcpy_pg_to_pg(struct dma_chan *chan, struct page *dest_pg,
 }
 EXPORT_SYMBOL(dma_async_memcpy_pg_to_pg);
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 /**
  * dma_async_memcpy_sg_to_sg - offloaded copy from sg to sg
  * @chan: DMA channel to offload copy to
@@ -1158,7 +1161,7 @@ dma_async_memcpy_sg_to_sg(struct dma_chan *chan,
 	return cookie;
 }
 EXPORT_SYMBOL(dma_async_memcpy_sg_to_sg);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 void dma_async_tx_descriptor_init(struct dma_async_tx_descriptor *tx,
 	struct dma_chan *chan)
@@ -1233,11 +1236,11 @@ EXPORT_SYMBOL_GPL(dma_run_dependencies);
 
 static int __init dma_bus_init(void)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	temp_page = alloc_pages(GFP_KERNEL, 0);
 	if (!temp_page)
                 BUG();
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	return class_register(&dma_devclass);
 }
 arch_initcall(dma_bus_init);

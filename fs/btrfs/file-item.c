@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2007 Oracle.  All rights reserved.
  *
@@ -20,15 +23,15 @@
 #include <linux/slab.h>
 #include <linux/pagemap.h>
 #include <linux/highmem.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #include <linux/dmaengine.h>
 #include <linux/async_tx.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 #include "ctree.h"
 #include "disk-io.h"
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #include "csum.h"
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 #include "transaction.h"
 #include "volumes.h"
 #include "print-tree.h"
@@ -440,39 +443,39 @@ fail:
 	return ret;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 struct sum_offload {
 	u32				*sum;	/* ptr to sum	*/
 	struct dma_async_tx_descriptor	*tx;	/* tx desc	*/
 	char				*data;	/* bvec kmapped	*/
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 int btrfs_csum_one_bio(struct btrfs_root *root, struct inode *inode,
 		       struct bio *bio, u64 file_start, int contig)
 {
 	struct btrfs_ordered_sum *sums;
 	struct btrfs_ordered_extent *ordered;
-#if defined(CONFIG_SYNO_LSP_ALPINE) || defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ALPINE || CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_DEF_HERE || MY_ABC_HERE */
 	char *data;
-#endif /* CONFIG_SYNO_LSP_ALPINE || CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_DEF_HERE || MY_ABC_HERE */
 	struct bio_vec *bvec = bio->bi_io_vec;
 	int bio_index = 0;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	int bio_idx2;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	int index;
 	unsigned long total_bytes = 0;
 	unsigned long this_sum_bytes = 0;
 	u64 offset;
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	void *mpage_priv = btrfs_csum_mpage_init(bio->bi_vcnt);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#endif /* MY_DEF_HERE */
+#if defined(MY_ABC_HERE)
 	struct sum_offload *sum_off;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	WARN_ON(bio->bi_vcnt <= 0);
 	sums = kzalloc(btrfs_ordered_sum_size(root, bio->bi_size), GFP_NOFS);
@@ -492,10 +495,10 @@ int btrfs_csum_one_bio(struct btrfs_root *root, struct inode *inode,
 	sums->bytenr = (u64)bio->bi_sector << 9;
 	index = 0;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	sum_off = kzalloc(bio->bi_vcnt * (sizeof(struct sum_offload)), GFP_KERNEL);
 	BUG_ON(!sum_off);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	while (bio_index < bio->bi_vcnt) {
 		if (!contig)
@@ -506,7 +509,7 @@ int btrfs_csum_one_bio(struct btrfs_root *root, struct inode *inode,
 			unsigned long bytes_left;
 			sums->len = this_sum_bytes;
 			this_sum_bytes = 0;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 			bio_idx2 = 0;
 
 			while (bio_idx2 < bio_index) {
@@ -518,7 +521,7 @@ int btrfs_csum_one_bio(struct btrfs_root *root, struct inode *inode,
 				}
 				bio_idx2++;
 			}
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 			btrfs_add_ordered_sum(inode, ordered, sums);
 			btrfs_put_ordered_extent(ordered);
 
@@ -535,18 +538,18 @@ int btrfs_csum_one_bio(struct btrfs_root *root, struct inode *inode,
 			index = 0;
 		}
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 		btrfs_csum_mpage_digest(mpage_priv,
 					bvec->bv_page,
 					bvec->bv_offset,
 					bvec->bv_len,
-#if defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE)
 					&(sums->sums[index]));
-#else /* CONFIG_SYNO_ALPINE */
+#else /* MY_DEF_HERE */
 					&sector_sum->sum);
-#endif /* CONFIG_SYNO_ALPINE */
-#elif defined(CONFIG_SYNO_LSP_ARMADA)
-#if defined(CONFIG_SYNO_ARMADA)
+#endif /* MY_DEF_HERE */
+#elif defined(MY_ABC_HERE)
+#if defined(MY_ABC_HERE)
 		sum_off[bio_index].data = kmap_atomic(bvec->bv_page);
 		sums->sums[index] = ~(u32)0;
 		sum_off[bio_index].tx =
@@ -563,7 +566,7 @@ int btrfs_csum_one_bio(struct btrfs_root *root, struct inode *inode,
 			kunmap_atomic(sum_off[bio_index].data);
 			btrfs_csum_final(sums->sums[index], (char *)&(sums->sums[index]));
 		}
-#else /* CONFIG_SYNO_ARMADA */
+#else /* MY_ABC_HERE */
 		sum_off[bio_index].data = kmap_atomic(bvec->bv_page);
 		sector_sum->sum = ~(u32)0;
 		sum_off[bio_index].tx =
@@ -580,7 +583,7 @@ int btrfs_csum_one_bio(struct btrfs_root *root, struct inode *inode,
 			kunmap_atomic(sum_off[bio_index].data);
 			btrfs_csum_final(sector_sum->sum, (char *)&sector_sum->sum);
 		}
-#endif /* CONFIG_SYNO_ARMADA */
+#endif /* MY_ABC_HERE */
 #else /* CONFIG_SYNO_LSP_ALPINE, CONFIG_SYNO_LSP_ARMADA */
 		data = kmap_atomic(bvec->bv_page);
 		sums->sums[index] = ~(u32)0;
@@ -600,11 +603,11 @@ int btrfs_csum_one_bio(struct btrfs_root *root, struct inode *inode,
 		bvec++;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	/* Blocks until checksum is calculated for all pages */
 	btrfs_csum_mpage_final(mpage_priv);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#endif /* MY_DEF_HERE */
+#if defined(MY_ABC_HERE)
 	bio_idx2 = 0;
 	while (bio_idx2 < bio->bi_vcnt) {
 		if (sum_off[bio_idx2].tx) {
@@ -616,7 +619,7 @@ int btrfs_csum_one_bio(struct btrfs_root *root, struct inode *inode,
 	}
 
 	kfree(sum_off);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	this_sum_bytes = 0;
 	btrfs_add_ordered_sum(inode, ordered, sums);
 	btrfs_put_ordered_extent(ordered);

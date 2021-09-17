@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * mm/truncate.c - code for taking down pages from address_spaces
  *
@@ -576,7 +579,7 @@ void truncate_setsize(struct inode *inode, loff_t newsize)
 }
 EXPORT_SYMBOL(truncate_setsize);
 
-#ifdef CONFIG_SYNO_ECRYPTFS_REMOVE_TRUNCATE_WRITE
+#ifdef MY_ABC_HERE
 void ecryptfs_truncate_setsize(struct inode *inode, loff_t newsize)
 {
 	loff_t oldsize;
@@ -589,7 +592,7 @@ void ecryptfs_truncate_setsize(struct inode *inode, loff_t newsize)
 	}
 }
 EXPORT_SYMBOL(ecryptfs_truncate_setsize);
-#endif /* CONFIG_SYNO_ECRYPTFS_REMOVE_TRUNCATE_WRITE */
+#endif /* MY_ABC_HERE */
 /**
  * pagecache_isize_extended - update pagecache after extension of i_size
  * @inode:	inode for which i_size was extended

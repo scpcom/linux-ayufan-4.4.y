@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * This file holds USB constants and structures that are needed for
  * USB device APIs.  These are used by the USB device model, which is
@@ -924,11 +927,11 @@ enum usb_device_state {
 	USB_STATE_ADDRESS,
 	USB_STATE_CONFIGURED,			/* most functions */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	USB_STATE_SUSPENDED,
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	USB_STATE_SUSPENDED
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	/* NOTE:  there are actually four different SUSPENDED
 	 * states, returning to POWERED, DEFAULT, ADDRESS, or
@@ -936,9 +939,9 @@ enum usb_device_state {
 	 * At this level there's no difference between L1 and L2
 	 * suspend states.  (L2 being original USB 1.1 suspend.)
 	 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	USB_STATE_RH_RST,
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 };
 
 enum usb3_link_state {

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Intel SpeedStep SMI driver.
  *
@@ -381,11 +384,11 @@ static struct cpufreq_driver speedstep_driver = {
 	.exit		= speedstep_cpu_exit,
 	.get		= speedstep_get,
 	.resume		= speedstep_resume,
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	.owner		= THIS_MODULE,
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	.attr		= speedstep_attr,
 };
 

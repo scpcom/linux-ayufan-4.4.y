@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * wm_hubs.c  --  WM8993/4 common code
  *
@@ -337,11 +340,11 @@ static void enable_dc_servo(struct snd_soc_codec *codec)
 static int wm8993_put_dc_servo(struct snd_kcontrol *kcontrol,
 			       struct snd_ctl_elem_value *ucontrol)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	struct wm_hubs_data *hubs = snd_soc_codec_get_drvdata(codec);
 	int ret;
 

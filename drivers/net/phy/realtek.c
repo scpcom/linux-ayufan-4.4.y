@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * drivers/net/phy/realtek.c
  *
@@ -23,11 +26,11 @@
 #define RTL821x_INER_INIT	0x6400
 #define RTL821x_INSR		0x13
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 #define	RTL8211E_INER_LINK_STATUS	0x400
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 #define	RTL8211E_INER_LINK_STAT	0x10
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 MODULE_DESCRIPTION("Realtek PHY driver");
 MODULE_AUTHOR("Johnson Leung");
@@ -60,13 +63,13 @@ static int rtl8211e_config_intr(struct phy_device *phydev)
 	int err;
 
 	if (phydev->interrupts == PHY_INTERRUPT_ENABLED)
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 		err = phy_write(phydev, RTL821x_INER,
 				RTL8211E_INER_LINK_STATUS);
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 		err = phy_write(phydev, RTL821x_INER,
 				RTL8211E_INER_LINK_STAT);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	else
 		err = phy_write(phydev, RTL821x_INER, 0);
 
@@ -87,7 +90,7 @@ static struct phy_driver rtl8211b_driver = {
 	.driver		= { .owner = THIS_MODULE,},
 };
 
-#if defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE)
 /* RTL8211DN */
 static struct phy_driver rtl8211dn_driver = {
 	.phy_id		= 0x001cc914,
@@ -101,7 +104,7 @@ static struct phy_driver rtl8211dn_driver = {
 	.config_intr	= &rtl8211b_config_intr,
 	.driver		= { .owner = THIS_MODULE,},
 };
-#endif /* CONFIG_SYNO_ALPINE */
+#endif /* MY_DEF_HERE */
 
 /* RTL8211E */
 static struct phy_driver rtl8211e_driver = {
@@ -126,20 +129,20 @@ static int __init realtek_init(void)
 	ret = phy_driver_register(&rtl8211b_driver);
 	if (ret < 0)
 		return -ENODEV;
-#if defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE)
 	ret = phy_driver_register(&rtl8211dn_driver);
 	if (ret < 0)
 		return -ENODEV;
-#endif /* CONFIG_SYNO_ALPINE */
+#endif /* MY_DEF_HERE */
 	return phy_driver_register(&rtl8211e_driver);
 }
 
 static void __exit realtek_exit(void)
 {
 	phy_driver_unregister(&rtl8211b_driver);
-#if defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE)
 	phy_driver_unregister(&rtl8211dn_driver);
-#endif /* CONFIG_SYNO_ALPINE */
+#endif /* MY_DEF_HERE */
 	phy_driver_unregister(&rtl8211e_driver);
 }
 
@@ -148,9 +151,9 @@ module_exit(realtek_exit);
 
 static struct mdio_device_id __maybe_unused realtek_tbl[] = {
 	{ 0x001cc912, 0x001fffff },
-#if defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE)
 	{ 0x001cc914, 0x001fffff },
-#endif /* CONFIG_SYNO_ALPINE */
+#endif /* MY_DEF_HERE */
 	{ 0x001cc915, 0x001fffff },
 	{ }
 };

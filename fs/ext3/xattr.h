@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
   File: fs/ext3/xattr.h
 
@@ -21,7 +24,7 @@
 #define EXT3_XATTR_INDEX_TRUSTED		4
 #define	EXT3_XATTR_INDEX_LUSTRE			5
 #define EXT3_XATTR_INDEX_SECURITY	        6
-#ifdef CONFIG_SYNO_EXT3_XATTR
+#ifdef MY_ABC_HERE
 /* Wrong syno ext3 xattr index while initial porting from linux-3.x */
 #define EXT3_XATTR_INDEX_SYNO_BAD	7
 #define EXT3_XATTR_INDEX_SYNO	8
@@ -63,7 +66,7 @@ struct ext3_xattr_entry {
 
 # ifdef CONFIG_EXT3_FS_XATTR
 
-#ifdef CONFIG_SYNO_EXT3_XATTR
+#ifdef MY_ABC_HERE
 extern struct xattr_handler ext3_xattr_syno_handler;
 #endif
 extern const struct xattr_handler ext3_xattr_user_handler;

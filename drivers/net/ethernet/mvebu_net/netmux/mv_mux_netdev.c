@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -188,12 +191,12 @@ void mv_mux_shadow_print(int gbe_port)
 	struct mv_mux_eth_port shadow;
 	static const char * const tags[] = {"None", "mh", "dsa", "edas", "vlan"};
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	if (gbe_port >= MV_ETH_MAX_PORTS) {
 		pr_err("gbe port %d is out of range (0..%d)\n", gbe_port, MV_ETH_MAX_PORTS-1);
 		return;
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	if (mux_eth_shadow[gbe_port].root == NULL)
 		printk(KERN_ERR "gbe port %d is not attached.\n", gbe_port);
@@ -306,7 +309,7 @@ static inline int mv_mux_dsa2vlan(struct net_device *mux_dev, struct sk_buff *sk
 	int source_device;
 	int source_port;
 	int len;
-#if defined(CONFIG_SYNO_ARMADA) && !defined(CONFIG_MV_ETH_DEBUG_CODE)
+#if defined(MY_ABC_HERE) && !defined(CONFIG_MV_ETH_DEBUG_CODE)
 	// do nothing
 #else
 	struct mux_netdev *pdev = MV_MUX_PRIV(mux_dev);
@@ -1078,12 +1081,12 @@ int mv_mux_tag_type_set(int port, int type)
 	unsigned int flgs;
 	struct net_device *root;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	if (port >= MV_ETH_MAX_PORTS) {
 		pr_err("gbe port %d is out of range (0..%d)\n", port, MV_ETH_MAX_PORTS-1);
 		return;
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	if ((type < MV_TAG_TYPE_NONE) || (type >= MV_TAG_TYPE_LAST)) {
 		printk(KERN_INFO "%s: Invalid tag type %d\n", __func__, type);

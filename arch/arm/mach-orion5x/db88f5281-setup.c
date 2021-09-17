@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * arch/arm/mach-orion5x/db88f5281-setup.c
  *
@@ -340,7 +343,7 @@ static void __init db88f5281_init(void)
 	orion5x_uart0_init();
 	orion5x_uart1_init();
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	mvebu_mbus_add_window_by_id(ORION_MBUS_DEVBUS_BOOT_TARGET,
 				    ORION_MBUS_DEVBUS_BOOT_ATTR,
 				    DB88F5281_NOR_BOOT_BASE,
@@ -362,7 +365,7 @@ static void __init db88f5281_init(void)
 				    ORION_MBUS_DEVBUS_ATTR(2),
 				    DB88F5281_NAND_BASE,
 				    DB88F5281_NAND_SIZE);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	mvebu_mbus_add_window("devbus-boot", DB88F5281_NOR_BOOT_BASE,
 			      DB88F5281_NOR_BOOT_SIZE);
 	platform_device_register(&db88f5281_boot_flash);
@@ -376,7 +379,7 @@ static void __init db88f5281_init(void)
 
 	mvebu_mbus_add_window("devbus-cs2", DB88F5281_NAND_BASE,
 			      DB88F5281_NAND_SIZE);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	platform_device_register(&db88f5281_nand_flash);
 
 	i2c_register_board_info(0, &db88f5281_i2c_rtc, 1);

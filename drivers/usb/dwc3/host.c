@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /**
  * host.c - DesignWare USB3 DRD Controller Host Glue
  *
@@ -36,23 +39,23 @@
  */
 
 #include <linux/platform_device.h>
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 #include <linux/usb.h>
 #include <linux/usb/hcd.h>
 #include <linux/usb/xhci_pdriver.h>
 #include "../host/xhci.h"
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 #include "core.h"
 
 int dwc3_host_init(struct dwc3 *dwc)
 {
 	struct platform_device	*xhci;
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	struct usb_hcd *hcd;
 	struct xhci_hcd *xhci_dev;
 	struct usb_xhci_pdata	pdata;
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	int			ret;
 
 	xhci = platform_device_alloc("xhci-hcd", PLATFORM_DEVID_AUTO);
@@ -76,7 +79,7 @@ int dwc3_host_init(struct dwc3 *dwc)
 		dev_err(dwc->dev, "couldn't add resources to xHCI device\n");
 		goto err1;
 	}
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 
 	memset(&pdata, 0, sizeof(pdata));
 
@@ -90,14 +93,14 @@ int dwc3_host_init(struct dwc3 *dwc)
 		goto err1;
 	}
 
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 	ret = platform_device_add(xhci);
 	if (ret) {
 		dev_err(dwc->dev, "failed to register xHCI device\n");
 		goto err1;
 	}
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 
 	/*
 	 * Attach the host controller phy to the shared_hcd struct of the
@@ -108,7 +111,7 @@ int dwc3_host_init(struct dwc3 *dwc)
 	hcd = platform_get_drvdata(xhci);
 	xhci_dev = hcd_to_xhci(hcd);
 	xhci_dev->shared_hcd->phy = dwc->usb3_phy;
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 	return 0;
 

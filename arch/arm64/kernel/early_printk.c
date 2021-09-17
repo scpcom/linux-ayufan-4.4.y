@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Earlyprintk support.
  *
@@ -25,9 +28,9 @@
 
 #include <linux/amba/serial.h>
 #include <linux/serial_reg.h>
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 #include <linux/st-asc.h>
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 static void __iomem *early_base;
 static void (*printch)(char ch);
@@ -75,7 +78,7 @@ static void uart8250_32bit_printch(char ch)
 	writel_relaxed(ch, early_base + (UART_TX << 2));
 }
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 /*
  * ST-ASC single character TX.
  */
@@ -87,7 +90,7 @@ static void st_asc_printch(char ch)
 	while (readl_relaxed(early_base + ASC_STA) & ASC_STA_TF)
 		;
 }
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 struct earlycon_match {
 	const char *name;
@@ -99,9 +102,9 @@ static const struct earlycon_match earlycon_match[] __initconst = {
 	{ .name = "smh", .printch = smh_printch, },
 	{ .name = "uart8250-8bit", .printch = uart8250_8bit_printch, },
 	{ .name = "uart8250-32bit", .printch = uart8250_32bit_printch, },
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	{ .name = "st-asc", .printch = st_asc_printch, },
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	{}
 };
 

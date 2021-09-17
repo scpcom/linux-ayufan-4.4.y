@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2003 Christophe Saout <christophe@saout.de>
  * Copyright (C) 2004 Clemens Fruhwirth <clemens@endorphin.org>
@@ -18,25 +21,25 @@
 #include <linux/crypto.h>
 #include <linux/workqueue.h>
 #include <linux/backing-dev.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #include <asm/atomic.h>
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 #include <linux/atomic.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 #include <linux/scatterlist.h>
 #include <asm/page.h>
 #include <asm/unaligned.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 // do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 #include <crypto/hash.h>
 #include <crypto/md5.h>
 #include <crypto/algapi.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 #include <linux/device-mapper.h>
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #if defined(CONFIG_OCF_DM_CRYPT)
 extern int cesaReqResources[];
 extern void DUMP_OCF_POOL(void);
@@ -67,14 +70,14 @@ struct crypt_io {
 	int error;
 	int post_process;
 };
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 #define DM_MSG_PREFIX "crypt"
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 /*
  * context holding the current state of a multi-part conversion
  */
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 struct convert_context {
 	struct bio *bio_in;
 	struct bio *bio_out;
@@ -85,7 +88,7 @@ struct convert_context {
 	sector_t sector;
 	int write;
 };
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 struct convert_context {
 	struct completion restart;
 	struct bio *bio_in;
@@ -121,11 +124,11 @@ struct dm_crypt_request {
 	struct scatterlist sg_out;
 	sector_t iv_sector;
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 struct crypt_config;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 struct crypt_iv_operations {
 	int (*ctr)(struct crypt_config *cc, struct dm_target *ti,
 		   const char *opts);
@@ -133,7 +136,7 @@ struct crypt_iv_operations {
 	const char *(*status)(struct crypt_config *cc);
 	int (*generator)(struct crypt_config *cc, u8 *iv, sector_t sector);
 };
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 struct crypt_iv_operations {
 	int (*ctr)(struct crypt_config *cc, struct dm_target *ti,
 		   const char *opts);
@@ -160,7 +163,7 @@ struct iv_lmk_private {
 	struct crypto_shash *hash_tfm;
 	u8 *seed;
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 /*
  * Crypt: maps a linear range of a block device
@@ -168,7 +171,7 @@ struct iv_lmk_private {
  */
 enum flags { DM_CRYPT_SUSPENDED, DM_CRYPT_KEY_VALID };
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 struct crypt_config {
 	struct dm_dev *dev;
 	sector_t start;
@@ -216,7 +219,7 @@ static wait_queue_head_t _crypt_waitq;
 static struct kmem_cache *_crypt_io_pool;
 
 static void clone_init(struct crypt_io *, struct bio *);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 /*
  * The fields in here must be read only after initialization.
  */
@@ -290,7 +293,7 @@ static struct crypto_ablkcipher *any_tfm(struct crypt_config *cc)
 {
 	return cc->tfms[0];
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 /*
  * Different IV generation algorithms:
@@ -298,14 +301,14 @@ static struct crypto_ablkcipher *any_tfm(struct crypt_config *cc)
  * plain: the initial vector is the 32-bit little-endian version of the sector
  *        number, padded with zeros if necessary.
  */
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 // do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 /*
  * plain64: the initial vector is the 64-bit little-endian version of the sector
  *        number, padded with zeros if necessary.
  */
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 /*
  * essiv: "encrypted sector|salt initial vector", the sector number is
  *        encrypted with the bulk cipher using a salt as key. The salt
@@ -317,9 +320,9 @@ static struct crypto_ablkcipher *any_tfm(struct crypt_config *cc)
  * null: the initial vector is always zero.  Provides compatibility with
  *       obsolete loop_fish2 devices.  Do not use for new devices.
  */
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 // do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 /*
  * lmk:  Compatible implementation of the block chaining mode used
  *       by the Loop-AES block device encryption system
@@ -335,13 +338,13 @@ static struct crypto_ablkcipher *any_tfm(struct crypt_config *cc)
  *         version 3: the same as version 2 with additional IV seed
  *                   (it uses 65 keys, last key is used as IV seed)
  */
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 /*
  * plumb: unimplemented, see:
  * http://article.gmane.org/gmane.linux.kernel.device-mapper.dm-crypt/454
  */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static int crypt_iv_plain_gen(struct crypt_config *cc, u8 *iv, sector_t sector)
 {
 	memset(iv, 0, cc->iv_size);
@@ -438,7 +441,7 @@ static int crypt_iv_essiv_gen(struct crypt_config *cc, u8 *iv, sector_t sector)
 	crypto_cipher_encrypt_one(cc->iv_gen_private.essiv_tfm, iv, iv);
 	return 0;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static int crypt_iv_plain_gen(struct crypt_config *cc, u8 *iv,
 			      struct dm_crypt_request *dmreq)
 {
@@ -613,17 +616,17 @@ static int crypt_iv_essiv_gen(struct crypt_config *cc, u8 *iv,
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
-#if !defined(CONFIG_SYNO_LSP_ARMADA) || (defined(CONFIG_SYNO_LSP_ARMADA) && !defined(CONFIG_OCF_DM_CRYPT))
+#if !defined(MY_ABC_HERE) || (defined(MY_ABC_HERE) && !defined(CONFIG_OCF_DM_CRYPT))
 static int crypt_iv_benbi_ctr(struct crypt_config *cc, struct dm_target *ti,
 			      const char *opts)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	unsigned int bs = crypto_blkcipher_blocksize(cc->tfm);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	unsigned bs = crypto_ablkcipher_blocksize(any_tfm(cc));
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	int log = ilog2(bs);
 
 	/* we need to calculate how far we must shift the sector count
@@ -639,11 +642,11 @@ static int crypt_iv_benbi_ctr(struct crypt_config *cc, struct dm_target *ti,
 		return -EINVAL;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	cc->iv_gen_private.benbi_shift = 9 - log;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	cc->iv_gen_private.benbi.shift = 9 - log;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	return 0;
 }
@@ -652,43 +655,43 @@ static void crypt_iv_benbi_dtr(struct crypt_config *cc)
 {
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static int crypt_iv_benbi_gen(struct crypt_config *cc, u8 *iv, sector_t sector)
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static int crypt_iv_benbi_gen(struct crypt_config *cc, u8 *iv,
 			      struct dm_crypt_request *dmreq)
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 {
 	__be64 val;
 
 	memset(iv, 0, cc->iv_size - sizeof(u64)); /* rest is cleared below */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	val = cpu_to_be64(((u64)sector << cc->iv_gen_private.benbi_shift) + 1);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	val = cpu_to_be64(((u64)dmreq->iv_sector << cc->iv_gen_private.benbi.shift) + 1);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	put_unaligned(val, (__be64 *)(iv + cc->iv_size - sizeof(u64)));
 
 	return 0;
 }
 #endif
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static int crypt_iv_null_gen(struct crypt_config *cc, u8 *iv, sector_t sector)
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static int crypt_iv_null_gen(struct crypt_config *cc, u8 *iv,
 			     struct dm_crypt_request *dmreq)
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 {
 	memset(iv, 0, cc->iv_size);
 
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 // do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static void crypt_iv_lmk_dtr(struct crypt_config *cc)
 {
 	struct iv_lmk_private *lmk = &cc->iv_gen_private.lmk;
@@ -838,33 +841,33 @@ static int crypt_iv_lmk_post(struct crypt_config *cc, u8 *iv,
 	kunmap_atomic(dst);
 	return r;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static struct crypt_iv_operations crypt_iv_plain_ops = {
 	.generator = crypt_iv_plain_gen
 };
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 // do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static struct crypt_iv_operations crypt_iv_plain64_ops = {
 	.generator = crypt_iv_plain64_gen
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static struct crypt_iv_operations crypt_iv_essiv_ops = {
 	.ctr       = crypt_iv_essiv_ctr,
 	.dtr       = crypt_iv_essiv_dtr,
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	.init      = crypt_iv_essiv_init,
 	.wipe      = crypt_iv_essiv_wipe,
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	.generator = crypt_iv_essiv_gen
 };
 
-#if !defined(CONFIG_SYNO_LSP_ARMADA) || (defined(CONFIG_SYNO_LSP_ARMADA) && !defined(CONFIG_OCF_DM_CRYPT))
+#if !defined(MY_ABC_HERE) || (defined(MY_ABC_HERE) && !defined(CONFIG_OCF_DM_CRYPT))
 static struct crypt_iv_operations crypt_iv_benbi_ops = {
 	.ctr	   = crypt_iv_benbi_ctr,
 	.dtr	   = crypt_iv_benbi_dtr,
@@ -876,7 +879,7 @@ static struct crypt_iv_operations crypt_iv_null_ops = {
 	.generator = crypt_iv_null_gen
 };
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #if defined(CONFIG_OCF_DM_CRYPT)
 static void dec_pending(struct crypt_io *io, int error);
 
@@ -1152,7 +1155,7 @@ crypt_convert_scatterlist(struct crypt_config *cc, struct scatterlist *out,
 }
 
 #endif
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static struct crypt_iv_operations crypt_iv_lmk_ops = {
 	.ctr	   = crypt_iv_lmk_ctr,
 	.dtr	   = crypt_iv_lmk_dtr,
@@ -1161,19 +1164,19 @@ static struct crypt_iv_operations crypt_iv_lmk_ops = {
 	.generator = crypt_iv_lmk_gen,
 	.post	   = crypt_iv_lmk_post
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static void
 crypt_convert_init(struct crypt_config *cc, struct convert_context *ctx,
                    struct bio *bio_out, struct bio *bio_in,
                    sector_t sector, int write)
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static void crypt_convert_init(struct crypt_config *cc,
 			       struct convert_context *ctx,
 			       struct bio *bio_out, struct bio *bio_in,
 			       sector_t sector)
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 {
 	ctx->bio_in = bio_in;
 	ctx->bio_out = bio_out;
@@ -1181,18 +1184,18 @@ static void crypt_convert_init(struct crypt_config *cc,
 	ctx->offset_out = 0;
 	ctx->idx_in = bio_in ? bio_in->bi_idx : 0;
 	ctx->idx_out = bio_out ? bio_out->bi_idx : 0;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	ctx->sector = sector + cc->iv_offset;
 	ctx->write = write;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	ctx->cc_sector = sector + cc->iv_offset;
 	init_completion(&ctx->restart);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 // do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static struct dm_crypt_request *dmreq_of_req(struct crypt_config *cc,
 					     struct ablkcipher_request *req)
 {
@@ -1283,9 +1286,9 @@ static void crypt_alloc_req(struct crypt_config *cc,
 	    CRYPTO_TFM_REQ_MAY_BACKLOG | CRYPTO_TFM_REQ_MAY_SLEEP,
 	    kcryptd_async_done, dmreq_of_req(cc, ctx->req));
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #if !defined(CONFIG_OCF_DM_CRYPT)
 /*
  * Encrypt / decrypt data from one bio to another one (can be the same one)
@@ -1329,7 +1332,7 @@ static int crypt_convert(struct crypt_config *cc,
 	return r;
 }
 #endif /* !CONFIG_OCF_DM_CRYPT */
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 /*
  * Encrypt / decrypt data from one bio to another one (can be the same one)
  */
@@ -1376,9 +1379,9 @@ static int crypt_convert(struct crypt_config *cc,
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 /*
  * Generate a new unfragmented bio with the given size
  * This should never violate the device limitations
@@ -1431,7 +1434,7 @@ static struct bio *crypt_alloc_buffer(struct crypt_io *io, unsigned int size)
 
 	return clone;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 /*
  * Generate a new unfragmented bio with the given size
  * This should never violate the device limitations
@@ -1486,26 +1489,26 @@ static struct bio *crypt_alloc_buffer(struct dm_crypt_io *io, unsigned size,
 
 	return clone;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static void crypt_free_buffer_pages(struct crypt_config *cc, struct bio *clone)
 {
 	unsigned int i;
 	struct bio_vec *bv;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	for (i = 0; i < clone->bi_vcnt; i++) {
 		bv = bio_iovec_idx(clone, i);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	bio_for_each_segment_all(bv, clone, i) {
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 		BUG_ON(!bv->bv_page);
 		mempool_free(bv->bv_page, cc->page_pool);
 		bv->bv_page = NULL;
 	}
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 /*
  * One of the bios was finished. Check for completion of
  * the whole request and correctly clean up the buffer.
@@ -1633,7 +1636,7 @@ static void clone_init(struct crypt_io *io, struct bio *clone)
 	clone->bi_bdev    = cc->dev->bdev;
 	clone->bi_rw      = io->base_bio->bi_rw;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static struct dm_crypt_io *crypt_io_alloc(struct crypt_config *cc,
 					  struct bio *bio, sector_t sector)
 {
@@ -1738,9 +1741,9 @@ static void clone_init(struct dm_crypt_io *io, struct bio *clone)
 	clone->bi_bdev    = cc->dev->bdev;
 	clone->bi_rw      = io->base_bio->bi_rw;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static void process_read(struct crypt_io *io)
 {
 	struct crypt_config *cc = io->target->private;
@@ -1873,7 +1876,7 @@ static void kcryptd_do_work(struct work_struct *work)
 		process_write(io);
 }
 
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static int kcryptd_io_read(struct dm_crypt_io *io, gfp_t gfp)
 {
 	struct crypt_config *cc = io->cc;
@@ -2115,7 +2118,7 @@ static void kcryptd_queue_crypt(struct dm_crypt_io *io)
 	INIT_WORK(&io->work, kcryptd_crypt);
 	queue_work(cc->crypt_queue, &io->work);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 /*
  * Decode key from its hex representation
@@ -2123,9 +2126,9 @@ static void kcryptd_queue_crypt(struct dm_crypt_io *io)
 static int crypt_decode_key(u8 *key, char *hex, unsigned int size)
 {
 	char buffer[3];
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	char *endp;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	unsigned int i;
 
 	buffer[2] = '\0';
@@ -2134,13 +2137,13 @@ static int crypt_decode_key(u8 *key, char *hex, unsigned int size)
 		buffer[0] = *hex++;
 		buffer[1] = *hex++;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		key[i] = (u8)simple_strtoul(buffer, &endp, 16);
 
 		if (endp != &buffer[2])
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		if (kstrtou8(buffer, 16, &key[i]))
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 			return -EINVAL;
 	}
 
@@ -2150,9 +2153,9 @@ static int crypt_decode_key(u8 *key, char *hex, unsigned int size)
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 // do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static void crypt_free_tfms(struct crypt_config *cc)
 {
 	unsigned i;
@@ -2207,9 +2210,9 @@ static int crypt_setkey_allcpus(struct crypt_config *cc)
 
 	return err;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static int crypt_set_key(struct crypt_config *cc, char *key)
 {
 	unsigned key_size = strlen(key) >> 1;
@@ -2226,7 +2229,7 @@ static int crypt_set_key(struct crypt_config *cc, char *key)
 
 	return 0;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static int crypt_set_key(struct crypt_config *cc, char *key)
 {
 	int r = -EINVAL;
@@ -2253,21 +2256,21 @@ out:
 
 	return r;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static int crypt_wipe_key(struct crypt_config *cc)
 {
 	clear_bit(DM_CRYPT_KEY_VALID, &cc->flags);
 	memset(&cc->key, 0, cc->key_size * sizeof(u8));
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	return 0;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	return crypt_setkey_allcpus(cc);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 /*
  * Construct an encryption mapping:
  * <cipher> <key> <iv_offset> <dev_path> <start>
@@ -2611,7 +2614,7 @@ static int crypt_map(struct dm_target *ti, struct bio *bio)
 
 	return DM_MAPIO_SUBMITTED;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static void crypt_dtr(struct dm_target *ti)
 {
 	struct crypt_config *cc = ti->private;
@@ -2983,7 +2986,7 @@ static int crypt_map(struct dm_target *ti, struct bio *bio)
 
 	return DM_MAPIO_SUBMITTED;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static void crypt_status(struct dm_target *ti, status_type_t type,
 			 unsigned status_flags, char *result, unsigned maxlen)
@@ -2997,15 +3000,15 @@ static void crypt_status(struct dm_target *ti, status_type_t type,
 		break;
 
 	case STATUSTYPE_TABLE:
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		if (cc->iv_mode)
 			DMEMIT("%s-%s-%s ", cc->cipher, cc->chainmode,
 			       cc->iv_mode);
 		else
 			DMEMIT("%s-%s ", cc->cipher, cc->chainmode);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		DMEMIT("%s ", cc->cipher_string);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 		if (cc->key_size > 0)
 			for (i = 0; i < cc->key_size; i++)
@@ -3016,12 +3019,12 @@ static void crypt_status(struct dm_target *ti, status_type_t type,
 		DMEMIT(" %llu %s %llu", (unsigned long long)cc->iv_offset,
 				cc->dev->name, (unsigned long long)cc->start);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		if (ti->num_discard_bios)
 			DMEMIT(" 1 allow_discards");
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 		break;
 	}
@@ -3060,30 +3063,30 @@ static void crypt_resume(struct dm_target *ti)
 static int crypt_message(struct dm_target *ti, unsigned argc, char **argv)
 {
 	struct crypt_config *cc = ti->private;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	int ret = -EINVAL;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	if (argc < 2)
 		goto error;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	if (!strnicmp(argv[0], MESG_STR("key"))) {
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	if (!strcasecmp(argv[0], "key")) {
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 		if (!test_bit(DM_CRYPT_SUSPENDED, &cc->flags)) {
 			DMWARN("not suspended during key manipulation.");
 			return -EINVAL;
 		}
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		if (argc == 3 && !strnicmp(argv[1], MESG_STR("set")))
 			return crypt_set_key(cc, argv[2]);
 		if (argc == 2 && !strnicmp(argv[1], MESG_STR("wipe")))
 			return crypt_wipe_key(cc);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		if (argc == 3 && !strcasecmp(argv[1], "set")) {
 			ret = crypt_set_key(cc, argv[2]);
 			if (ret)
@@ -3100,7 +3103,7 @@ static int crypt_message(struct dm_target *ti, unsigned argc, char **argv)
 			}
 			return crypt_wipe_key(cc);
 		}
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	}
 
 error:
@@ -3118,11 +3121,11 @@ static int crypt_merge(struct dm_target *ti, struct bvec_merge_data *bvm,
 		return max_size;
 
 	bvm->bi_bdev = cc->dev->bdev;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	bvm->bi_sector = cc->start + bvm->bi_sector - ti->begin;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	bvm->bi_sector = cc->start + dm_target_offset(ti, bvm->bi_sector);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	return min(max_size, q->merge_bvec_fn(q, bvm, biovec));
 }
@@ -3137,11 +3140,11 @@ static int crypt_iterate_devices(struct dm_target *ti,
 
 static struct target_type crypt_target = {
 	.name   = "crypt",
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	.version = {1, 5, 1},
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	.version = {1, 12, 1},
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	.module = THIS_MODULE,
 	.ctr    = crypt_ctr,
 	.dtr    = crypt_dtr,
@@ -3159,34 +3162,34 @@ static int __init dm_crypt_init(void)
 {
 	int r;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	_crypt_io_pool = KMEM_CACHE(crypt_io, 0);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	_crypt_io_pool = KMEM_CACHE(dm_crypt_io, 0);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	if (!_crypt_io_pool)
 		return -ENOMEM;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	_kcryptd_workqueue = create_workqueue("kcryptd");
 	if (!_kcryptd_workqueue) {
 		r = -ENOMEM;
 		DMERR("couldn't create kcryptd");
 		goto bad1;
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	r = dm_register_target(&crypt_target);
 	if (r < 0) {
 		DMERR("register failed %d", r);
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		goto bad2;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		kmem_cache_destroy(_crypt_io_pool);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	_crypt_requests = 0;
 	init_waitqueue_head(&_crypt_waitq);
 
@@ -3200,16 +3203,16 @@ bad2:
 	destroy_workqueue(_kcryptd_workqueue);
 bad1:
 	kmem_cache_destroy(_crypt_io_pool);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	return r;
 }
 
 static void __exit dm_crypt_exit(void)
 {
 	dm_unregister_target(&crypt_target);
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	destroy_workqueue(_kcryptd_workqueue);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	kmem_cache_destroy(_crypt_io_pool);
 }
 

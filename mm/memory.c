@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/mm/memory.c
  *
@@ -697,15 +700,15 @@ static void print_bad_pte(struct vm_area_struct *vma, unsigned long addr,
 		(long long)pte_val(pte), (long long)pmd_val(*pmd));
 	if (page)
 		dump_page(page);
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 	printk(KERN_ALERT
 		"addr:%p vm_flags:%08lx anon_vma:%p mapping:%p index:%llx\n",
 		(void *)addr, vma->vm_flags, vma->anon_vma, mapping, (unsigned long long)index);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	printk(KERN_ALERT
 		"addr:%p vm_flags:%08lx anon_vma:%p mapping:%p index:%lx\n",
 		(void *)addr, vma->vm_flags, vma->anon_vma, mapping, index);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	/*
 	 * Choose text because data symbols depend on CONFIG_KALLSYMS_ALL=y
 	 */
@@ -4341,7 +4344,7 @@ void copy_user_huge_page(struct page *dst, struct page *src,
 }
 #endif /* CONFIG_TRANSPARENT_HUGEPAGE || CONFIG_HUGETLBFS */
 
-#ifdef CONFIG_SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 extern struct mm_struct *syno_get_task_mm(struct task_struct *task);
 int syno_access_process_vm(struct task_struct *tsk, unsigned long addr, void *buf, int len, int write)
 {
@@ -4405,4 +4408,4 @@ int syno_access_process_vm(struct task_struct *tsk, unsigned long addr, void *bu
 
 	return buf - old_buf;
 }
-#endif /* CONFIG_SYNO_DEBUG_FLAG */
+#endif /* MY_ABC_HERE */

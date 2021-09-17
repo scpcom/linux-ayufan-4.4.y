@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  pcc-cpufreq.c - Processor Clocking Control firmware cpufreq interface
  *
@@ -111,12 +114,12 @@ static struct pcc_cpu __percpu *pcc_cpu_info;
 
 static int pcc_cpufreq_verify(struct cpufreq_policy *policy)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	cpufreq_verify_within_cpu_limits(policy);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	cpufreq_verify_within_limits(policy, policy->cpuinfo.min_freq,
 				     policy->cpuinfo.max_freq);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	return 0;
 }
 
@@ -589,11 +592,11 @@ static struct cpufreq_driver pcc_cpufreq_driver = {
 	.init = pcc_cpufreq_cpu_init,
 	.exit = pcc_cpufreq_cpu_exit,
 	.name = "pcc-cpufreq",
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	.owner = THIS_MODULE,
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 };
 
 static int __init pcc_cpufreq_init(void)

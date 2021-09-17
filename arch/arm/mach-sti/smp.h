@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  arch/arm/mach-sti/smp.h
  *
@@ -14,9 +17,9 @@
 
 extern struct smp_operations	sti_smp_ops;
 void sti_secondary_startup(void);
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 int sti_abap_c_start(void);
 extern unsigned int sti_abap_c_size;
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 #endif

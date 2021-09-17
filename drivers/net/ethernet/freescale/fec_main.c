@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Fast Ethernet Controller (FEC) driver for Motorola MPC8xx.
  * Copyright (c) 1997 Dan Malek (dmalek@jlc.net)
@@ -2051,11 +2054,11 @@ fec_drv_remove(struct platform_device *pdev)
 	}
 	free_netdev(ndev);
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
-#else /* CONFIG_SYNO_LSP_MONACO */
+#if defined (MY_DEF_HERE)
+#else /* MY_DEF_HERE */
 	platform_set_drvdata(pdev, NULL);
 
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	return 0;
 }
 

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -357,11 +360,11 @@ int snd_usb_add_audio_stream(struct snd_usb_audio *chip,
 		return err;
 	}
 	as->pcm = pcm;
-#if defined(CONFIG_SYNO_AUDIO_USE_EXTERNAL_SPEAKER)
+#if defined(MY_ABC_HERE)
 	if (pcm && pcm->card) {
 		pcm->card->low_level_dev_id = chip->usb_id;
 	}
-#endif /* CONFIG_SYNO_AUDIO_USE_EXTERNAL_SPEAKER */
+#endif /* MY_ABC_HERE */
 	pcm->private_data = as;
 	pcm->private_free = snd_usb_audio_pcm_free;
 	pcm->info_flags = 0;

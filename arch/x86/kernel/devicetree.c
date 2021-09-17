@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Architecture specific OF callbacks.
  */
@@ -106,11 +109,11 @@ struct device_node *pcibios_get_phb_of_node(struct pci_bus *bus)
 
 static int x86_of_pci_irq_enable(struct pci_dev *dev)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	struct of_phandle_args oirq;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	struct of_irq oirq;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	u32 virq;
 	int ret;
 	u8 pin;
@@ -121,20 +124,20 @@ static int x86_of_pci_irq_enable(struct pci_dev *dev)
 	if (!pin)
 		return 0;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	ret = of_irq_parse_pci(dev, &oirq);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	ret = of_irq_map_pci(dev, &oirq);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	if (ret)
 		return ret;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	virq = irq_create_of_mapping(&oirq);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	virq = irq_create_of_mapping(oirq.controller, oirq.specifier,
 			oirq.size);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	if (virq == 0)
 		return -EINVAL;
 	dev->irq = virq;

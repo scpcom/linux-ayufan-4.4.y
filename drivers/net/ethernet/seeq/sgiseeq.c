@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * sgiseeq.c: Seeq8003 ethernet driver for SGI machines.
  *
@@ -818,10 +821,10 @@ static int __exit sgiseeq_remove(struct platform_device *pdev)
 	dma_free_noncoherent(&pdev->dev, sizeof(*sp->srings), sp->srings,
 			     sp->srings_dma);
 	free_netdev(dev);
-#if defined (CONFIG_SYNO_LSP_MONACO)
-#else /* CONFIG_SYNO_LSP_MONACO */
+#if defined (MY_DEF_HERE)
+#else /* MY_DEF_HERE */
 	platform_set_drvdata(pdev, NULL);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 	return 0;
 }

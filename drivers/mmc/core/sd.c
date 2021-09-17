@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/drivers/mmc/core/sd.c
  *
@@ -930,13 +933,13 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
 		memcpy(card->raw_cid, cid, sizeof(card->raw_cid));
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	/*
 	 * Call the optional init_card function to handle quirks.
 	 */
 	if (host->ops->init_card)
 		host->ops->init_card(host, card);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	/*
 	 * For native busses:  get card RCA and quit open drain mode.

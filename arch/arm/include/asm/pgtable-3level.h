@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * arch/arm/include/asm/pgtable-3level.h
  *
@@ -29,22 +32,22 @@
  * There are enough spare bits in a page table entry for the kernel specific
  * state.
  */
-#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE)
+#if defined(MY_DEF_HERE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE)
 #define PTRS_PER_PTE		(512 >> (CONFIG_ARM_PAGE_SIZE_LARGE_SHIFT - 12))
 #else /* CONFIG_SYNO_LSP_ALPINE && CONFIG_ARM_PAGE_SIZE_LARGE */
 #define PTRS_PER_PTE		512
-#endif /* CONFIG_SYNO_LSP_ALPINE && CONFIG_ARM_PAGE_SIZE_LARGE */
+#endif /* MY_DEF_HERE && CONFIG_ARM_PAGE_SIZE_LARGE */
 #define PTRS_PER_PMD		512
 #define PTRS_PER_PGD		4
 
 #define PTE_HWTABLE_PTRS	(0)
 #define PTE_HWTABLE_OFF		(0)
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #define PTE_HWTABLE_SIZE	(512 * 8) /*512 64bit values*/
 #define PTE_HWTABLE_MASK	(~(PTE_HWTABLE_SIZE-1))
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 #define PTE_HWTABLE_SIZE	(PTRS_PER_PTE * sizeof(u64))
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 /*
  * PGDIR_SHIFT determines the size a top-level page table entry can map.
@@ -70,7 +73,7 @@
 
 #define USER_PTRS_PER_PGD	(PAGE_OFFSET / PGDIR_SIZE)
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 /*
  * Hugetlb definitions.
  */
@@ -78,7 +81,7 @@
 #define HPAGE_SIZE		(_AC(1, UL) << HPAGE_SHIFT)
 #define HPAGE_MASK		(~(HPAGE_SIZE - 1))
 #define HUGETLB_PAGE_ORDER	(HPAGE_SHIFT - PAGE_SHIFT)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 /*
  * "Linux" PTE definitions for LPAE.
@@ -98,12 +101,12 @@
 #define L_PTE_NONE		(_AT(pteval_t, 1) << 57)	/* PROT_NONE */
 #define L_PTE_RDONLY		(_AT(pteval_t, 1) << 58)	/* READ ONLY */
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #define PMD_SECT_VALID		(_AT(pmdval_t, 1) << 0)
 #define PMD_SECT_DIRTY		(_AT(pmdval_t, 1) << 55)
 #define PMD_SECT_SPLITTING	(_AT(pmdval_t, 1) << 56)
 #define PMD_SECT_NONE		(_AT(pmdval_t, 1) << 57)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 /*
  * To be used in assembly code with the upper page attributes.
@@ -168,11 +171,11 @@
 
 static inline pmd_t *pud_page_vaddr(pud_t pud)
 {
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	return __va(pud_val(pud) & PHYS_MASK & (s32)PTE_HWTABLE_MASK);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	return __va(pud_val(pud) & PHYS_MASK & (s32)PAGE_MASK);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 }
 
 /* Find an entry in the second-level page table.. */
@@ -215,7 +218,7 @@ static inline pmd_t *pmd_offset(pud_t *pud, unsigned long addr)
 
 #define set_pte_ext(ptep,pte,ext) cpu_set_pte_ext(ptep,__pte(pte_val(pte)|(ext)))
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #define pte_huge(pte)		(pte_val(pte) && !(pte_val(pte) & PTE_TABLE_BIT))
 #define pte_mkhuge(pte)		(__pte(pte_val(pte) & ~PTE_TABLE_BIT))
 
@@ -273,7 +276,7 @@ static inline int has_transparent_hugepage(void)
 {
 	return 1;
 }
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 #endif /* __ASSEMBLY__ */
 

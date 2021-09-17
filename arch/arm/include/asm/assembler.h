@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  arch/arm/include/asm/assembler.h
  *
@@ -53,14 +56,14 @@
 #define put_byte_3      lsl #0
 #endif
 
-#if defined(CONFIG_SYNO_LSP_ALPINE) || defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 /* Select code for any configuration running in BE8 mode */
 #ifdef CONFIG_CPU_ENDIAN_BE8
 #define ARM_BE8(code...) code
 #else
 #define ARM_BE8(code...)
 #endif
-#endif /* CONFIG_SYNO_LSP_ALPINE || CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_DEF_HERE || MY_ABC_HERE */
 
 /*
  * Data preload for architectures that support it
@@ -221,15 +224,15 @@
 #ifdef CONFIG_SMP
 #if __LINUX_ARM_ARCH__ >= 7
 	.ifeqs "\mode","arm"
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	ALT_SMP(dmb	ish)
 	.else
 	ALT_SMP(W(dmb)	ish)
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 	ALT_SMP(dmb)
 	.else
 	ALT_SMP(W(dmb))
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	.endif
 #elif __LINUX_ARM_ARCH__ == 6
 	ALT_SMP(mcr	p15, 0, r0, c7, c10, 5)	@ dmb

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2007 Oracle.  All rights reserved.
  *
@@ -39,7 +42,7 @@
 
 #undef SCRAMBLE_DELAYED_REFS
 
-#ifdef CONFIG_SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+#ifdef MY_ABC_HERE
 #define READA_BLOCK_GROUP_THREAD_MAX 10
 #endif
 
@@ -3810,7 +3813,7 @@ void btrfs_free_reserved_data_space(struct inode *inode, u64 bytes)
 	spin_unlock(&data_sinfo->lock);
 }
 
-#ifdef CONFIG_SYNO_BTRFS_METADATA_RESERVE
+#ifdef MY_ABC_HERE
 #else
 static void force_metadata_allocation(struct btrfs_fs_info *info)
 {
@@ -3951,7 +3954,7 @@ void check_system_chunk(struct btrfs_trans_handle *trans,
 	}
 }
 
-#ifdef CONFIG_SYNO_BTRFS_METADATA_RESERVE
+#ifdef MY_ABC_HERE
 static void check_metadata_chunk(struct btrfs_trans_handle *trans,
 			       struct btrfs_root *root, u64 data_total_bytes)
 {
@@ -3962,7 +3965,7 @@ static void check_metadata_chunk(struct btrfs_trans_handle *trans,
 	if (data_total_bytes > (space_info->total_bytes)*(fs_info->metadata_ratio))
 		btrfs_alloc_chunk(trans, root, btrfs_get_alloc_profile(root, 0));
 }
-#endif /* CONFIG_SYNO_BTRFS_METADATA_RESERVE */
+#endif /* MY_ABC_HERE */
 
 static int do_chunk_alloc(struct btrfs_trans_handle *trans,
 			  struct btrfs_root *extent_root, u64 flags, int force)
@@ -4037,7 +4040,7 @@ again:
 	 * FS as well.
 	 */
 	if (flags & BTRFS_BLOCK_GROUP_DATA && fs_info->metadata_ratio) {
-#ifdef CONFIG_SYNO_BTRFS_METADATA_RESERVE
+#ifdef MY_ABC_HERE
 		check_metadata_chunk(trans, extent_root, space_info->total_bytes);
 #else
 		fs_info->data_chunk_allocations++;
@@ -4082,13 +4085,13 @@ static int can_overcommit(struct btrfs_root *root,
 	u64 avail;
 	u64 used;
 
-#ifdef CONFIG_SYNO_BTRFS_METADATA_OVERCOMMIT_POLICY
+#ifdef MY_ABC_HERE
 	used = space_info->bytes_used + space_info->bytes_reserved +
 		space_info->bytes_readonly;
 #else
 	used = space_info->bytes_used + space_info->bytes_reserved +
 		space_info->bytes_pinned + space_info->bytes_readonly;
-#endif /* CONFIG_SYNO_BTRFS_METADATA_OVERCOMMIT_POLICY */
+#endif /* MY_ABC_HERE */
 
 	/*
 	 * We only want to allow over committing if we have lots of actual space
@@ -4102,11 +4105,11 @@ static int can_overcommit(struct btrfs_root *root,
 	if (used + space_size >= space_info->total_bytes)
 		return 0;
 
-#ifdef CONFIG_SYNO_BTRFS_METADATA_OVERCOMMIT_POLICY
+#ifdef MY_ABC_HERE
 	used += space_info->bytes_may_use + space_info->bytes_pinned;
 #else
 	used += space_info->bytes_may_use;
-#endif /* CONFIG_SYNO_BTRFS_METADATA_OVERCOMMIT_POLICY */
+#endif /* MY_ABC_HERE */
 
 	spin_lock(&root->fs_info->free_chunk_lock);
 	avail = root->fs_info->free_chunk_space;
@@ -4932,11 +4935,11 @@ static void update_global_block_rsv(struct btrfs_fs_info *fs_info)
 	spin_lock(&sinfo->lock);
 	spin_lock(&block_rsv->lock);
 
-#ifdef CONFIG_SYNO_BTRFS_GLOBAL_RESERVE_MINIMAL_VALUE
+#ifdef MY_ABC_HERE
 	if (fs_info->super_copy->total_bytes > 80ULL * 1024 * 1024 * 1024) {
 		num_bytes = max_t(u64, num_bytes, 256 * 1024 * 1024);
 	}
-#endif /* CONFIG_SYNO_BTRFS_GLOBAL_RESERVE_MINIMAL_VALUE */
+#endif /* MY_ABC_HERE */
 	block_rsv->size = min_t(u64, num_bytes, 512 * 1024 * 1024);
 
 	num_bytes = sinfo->bytes_used + sinfo->bytes_pinned +
@@ -5460,7 +5463,7 @@ void btrfs_delalloc_release_space(struct inode *inode, u64 num_bytes)
 	btrfs_free_reserved_data_space(inode, num_bytes);
 }
 
-#ifdef CONFIG_SYNO_BTRFS_METADATA_RESERVE
+#ifdef MY_ABC_HERE
 static int should_add_to_unused_bgs(struct btrfs_fs_info *fs_info, u64 flags)
 {
 	struct btrfs_space_info *space_info_metadata, *space_info_data;
@@ -5474,7 +5477,7 @@ static int should_add_to_unused_bgs(struct btrfs_fs_info *fs_info, u64 flags)
 		return 0;
 	return 1;
 }
-#endif /* CONFIG_SYNO_BTRFS_METADATA_RESERVE */
+#endif /* MY_ABC_HERE */
 
 static int update_block_group(struct btrfs_root *root,
 			      u64 bytenr, u64 num_bytes, int alloc)
@@ -5554,7 +5557,7 @@ static int update_block_group(struct btrfs_root *root,
 			 * No longer have used bytes in this block group, queue
 			 * it for deletion.
 			 */
-#ifdef CONFIG_SYNO_BTRFS_METADATA_RESERVE
+#ifdef MY_ABC_HERE
 			if (old_val == 0 && should_add_to_unused_bgs(info, cache->flags)) {
 #else
 			if (old_val == 0) {
@@ -6502,7 +6505,7 @@ enum btrfs_loop_type {
 	LOOP_CACHING_NOWAIT = 0,
 	LOOP_CACHING_WAIT = 1,
 	LOOP_ALLOC_CHUNK = 2,
-#ifdef CONFIG_SYNO_BTRFS_CLUSTER_RESERVE
+#ifdef MY_ABC_HERE
 	LOOP_NO_RESERVE = 3,
 	LOOP_NO_EMPTY_SIZE = 4,
 #else
@@ -6606,7 +6609,7 @@ static noinline int find_free_extent(struct btrfs_root *orig_root,
 	bool failed_alloc = false;
 	bool use_cluster = true;
 	bool have_caching_bg = false;
-#ifdef CONFIG_SYNO_BTRFS_CLUSTER_RESERVE
+#ifdef MY_ABC_HERE
 	u64 reserve_bytes = 0;
 #endif
 
@@ -6816,7 +6819,7 @@ refill_cluster:
 						empty_cluster + empty_size,
 					      block_group->full_stripe_len);
 
-#ifdef CONFIG_SYNO_BTRFS_CLUSTER_RESERVE
+#ifdef MY_ABC_HERE
 			if ((flags & BTRFS_BLOCK_GROUP_METADATA) && loop < LOOP_NO_RESERVE) {
 				/* reserve 1/4 block group size to suppress problem of extent tree loop */
 				reserve_bytes = block_group->key.offset >> 2;
@@ -6828,7 +6831,7 @@ refill_cluster:
 			ret = btrfs_find_space_cluster(root, block_group,
 						       last_ptr, search_start,
 						       num_bytes,
-#ifdef CONFIG_SYNO_BTRFS_CLUSTER_RESERVE
+#ifdef MY_ABC_HERE
 						       aligned_cluster, reserve_bytes);
 #else
 						       aligned_cluster);
@@ -6997,7 +7000,7 @@ loop:
 				goto out;
 		}
 
-#ifdef CONFIG_SYNO_BTRFS_CLUSTER_RESERVE
+#ifdef MY_ABC_HERE
 		if (!(flags & BTRFS_BLOCK_GROUP_METADATA) && loop == LOOP_NO_RESERVE) {
 			loop++;
 		}
@@ -8057,7 +8060,7 @@ int btrfs_drop_snapshot(struct btrfs_root *root,
 	int ret;
 	int level;
 	bool root_dropped = false;
-#ifdef CONFIG_SYNO_BTRFS_REMOVE_UNUSED_QGROUP
+#ifdef MY_ABC_HERE
 	struct btrfs_fs_info *fs_info = root->fs_info;
 	u64 qgroupid = root->root_key.objectid;
 #endif
@@ -8207,7 +8210,7 @@ int btrfs_drop_snapshot(struct btrfs_root *root,
 	if (err)
 		goto out_end_trans;
 
-#ifdef CONFIG_SYNO_BTRFS_REMOVE_UNUSED_QGROUP
+#ifdef MY_ABC_HERE
 	if (fs_info->quota_enabled && !for_reloc) {
 		ret = btrfs_remove_qgroup(trans, fs_info, qgroupid);
 		if (0 != ret) {
@@ -8533,22 +8536,22 @@ u64 btrfs_account_ro_block_groups_free_space(struct btrfs_space_info *sinfo)
 	int i;
 	u64 free_bytes = 0;
 
-#ifdef CONFIG_SYNO_BTRFS_CORRECT_SPACEINFO_LOCK
+#ifdef MY_ABC_HERE
 	down_read(&sinfo->groups_sem);
 #else
 	spin_lock(&sinfo->lock);
-#endif /* CONFIG_SYNO_BTRFS_CORRECT_SPACEINFO_LOCK */
+#endif /* MY_ABC_HERE */
 
 	for (i = 0; i < BTRFS_NR_RAID_TYPES; i++)
 		if (!list_empty(&sinfo->block_groups[i]))
 			free_bytes += __btrfs_get_ro_block_group_free_space(
 						&sinfo->block_groups[i]);
 
-#ifdef CONFIG_SYNO_BTRFS_CORRECT_SPACEINFO_LOCK
+#ifdef MY_ABC_HERE
 	up_read(&sinfo->groups_sem);
 #else
 	spin_unlock(&sinfo->lock);
-#endif /* CONFIG_SYNO_BTRFS_CORRECT_SPACEINFO_LOCK */
+#endif /* MY_ABC_HERE */
 
 	return free_bytes;
 }
@@ -8943,7 +8946,7 @@ btrfs_create_block_group_cache(struct btrfs_root *root, u64 start, u64 size)
 	return cache;
 }
 
-#ifdef CONFIG_SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+#ifdef MY_ABC_HERE
 static void reada_root(struct btrfs_root *root)
 {
 	struct extent_buffer *node;
@@ -9061,7 +9064,7 @@ int btrfs_read_block_groups(struct btrfs_root *root)
 	struct extent_buffer *leaf;
 	int need_clear = 0;
 	u64 cache_gen;
-#ifdef CONFIG_SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+#ifdef MY_ABC_HERE
 	struct btrfs_path *hint_path;
 #endif
 
@@ -9073,7 +9076,7 @@ int btrfs_read_block_groups(struct btrfs_root *root)
 	if (!path)
 		return -ENOMEM;
 	path->reada = 1;
-#ifdef CONFIG_SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+#ifdef MY_ABC_HERE
 	hint_path = btrfs_alloc_path();
 	if (!hint_path) {
 		ret = -ENOMEM;
@@ -9089,7 +9092,7 @@ int btrfs_read_block_groups(struct btrfs_root *root)
 	if (btrfs_test_opt(root, CLEAR_CACHE))
 		need_clear = 1;
 
-#ifdef CONFIG_SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+#ifdef MY_ABC_HERE
 	atomic_set(&info->reada_block_group_threads, 0);
 	reada_root(root);
 	if (info->block_group_hint_root) {
@@ -9101,7 +9104,7 @@ int btrfs_read_block_groups(struct btrfs_root *root)
 #endif
 
 	while (1) {
-#ifdef CONFIG_SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+#ifdef MY_ABC_HERE
 		if (info->block_group_hint_root)
 			reada_block_group_item(info, hint_path);
 #endif
@@ -9214,7 +9217,7 @@ int btrfs_read_block_groups(struct btrfs_root *root)
 		set_avail_alloc_bits(root->fs_info, cache->flags);
 		if (btrfs_chunk_readonly(root, cache->key.objectid)) {
 			set_block_group_ro(cache, 1);
-#ifdef CONFIG_SYNO_BTRFS_METADATA_RESERVE
+#ifdef MY_ABC_HERE
 		} else if (btrfs_block_group_used(&cache->item) == 0 && should_add_to_unused_bgs(root->fs_info, cache->flags)) {
 #else
 		} else if (btrfs_block_group_used(&cache->item) == 0) {
@@ -9256,7 +9259,7 @@ int btrfs_read_block_groups(struct btrfs_root *root)
 	ret = 0;
 error:
 	btrfs_free_path(path);
-#ifdef CONFIG_SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+#ifdef MY_ABC_HERE
 	btrfs_free_path(hint_path);
 #endif
 	return ret;
@@ -9270,7 +9273,7 @@ void btrfs_create_pending_block_groups(struct btrfs_trans_handle *trans,
 	struct btrfs_block_group_item item;
 	struct btrfs_key key;
 	int ret = 0;
-#ifdef CONFIG_SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+#ifdef MY_ABC_HERE
 	struct btrfs_fs_info *fs_info = root->fs_info;
 	struct btrfs_root *block_group_hint_root;
 
@@ -9302,7 +9305,7 @@ void btrfs_create_pending_block_groups(struct btrfs_trans_handle *trans,
 		if (ret)
 			btrfs_abort_transaction(trans, extent_root, ret);
 
-#ifdef CONFIG_SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+#ifdef MY_ABC_HERE
 		if (fs_info->block_group_hint_root) {
 			ret = btrfs_insert_item(trans, fs_info->block_group_hint_root, &key, &item,
 					sizeof(item));
@@ -9428,7 +9431,7 @@ int btrfs_remove_block_group(struct btrfs_trans_handle *trans,
 	int factor;
 	struct btrfs_caching_control *caching_ctl = NULL;
 	bool remove_em;
-#ifdef CONFIG_SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+#ifdef MY_ABC_HERE
 	struct btrfs_fs_info *fs_info = root->fs_info;
 #endif
 
@@ -9651,7 +9654,7 @@ int btrfs_remove_block_group(struct btrfs_trans_handle *trans,
 
 	ret = btrfs_del_item(trans, root, path);
 
-#ifdef CONFIG_SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+#ifdef MY_ABC_HERE
 	if (fs_info->block_group_hint_root) {
 		int search_ret;
 		btrfs_release_path(path);
@@ -9904,7 +9907,7 @@ int btrfs_trim_fs(struct btrfs_root *root, struct fstrim_range *range)
 		end = min(range->start + range->len,
 				cache->key.objectid + cache->key.offset);
 
-#ifdef CONFIG_SYNO_BTRFS_AVOID_TRIM_SYS_CHUNK
+#ifdef MY_ABC_HERE
 		if (end - start >= range->minlen &&
 				!(cache->flags & BTRFS_BLOCK_GROUP_SYSTEM)) {
 #else

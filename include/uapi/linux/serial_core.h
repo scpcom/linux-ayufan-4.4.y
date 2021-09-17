@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/drivers/char/serial_core.h
  *
@@ -226,9 +229,9 @@
 /* Rocketport EXPRESS/INFINITY */
 #define PORT_RP2	102
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 /* ST ASC type numbers */
 #define PORT_ASC       105
 
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 #endif /* _UAPILINUX_SERIAL_CORE_H */

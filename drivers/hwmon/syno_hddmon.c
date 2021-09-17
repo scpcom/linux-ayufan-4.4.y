@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/kthread.h>
@@ -14,19 +17,19 @@ MODULE_LICENSE("Proprietary");
 #define SYNO_HDDMON_UPLG_STR "Syno_HDDMon_UPLGM"
 extern long g_syno_hdd_powerup_seq;
 
-#ifdef CONFIG_SYNO_HDD_HOTPLUG
+#ifdef MY_ABC_HERE
 extern long g_hdd_hotplug;
-#endif /* CONFIG_SYNO_HDD_HOTPLUG */
+#endif /* MY_ABC_HERE */
 
 #define GPIO_UNDEF				0xFF
 
 extern int SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER(void);
 extern int SYNO_CTRL_HDD_POWERON(int index, int value);
-#ifdef CONFIG_SYNO_GPIO
+#ifdef MY_ABC_HERE
 extern int SYNO_CHECK_HDD_DETECT(int index);
 #else
 extern int SYNO_CHECK_HDD_PRESENT(int index);
-#endif /* CONFIG_SYNO_GPIO */
+#endif /* MY_ABC_HERE */
 
 typedef struct __SynoHddMonData {
 	int iProcessingIdx;
@@ -48,9 +51,9 @@ static int syno_hddmon_data_init(SynoHddMonData_t *pData)
 
 	memset(pData, 0, sizeof(SynoHddMonData_t));
 
-#ifdef CONFIG_SYNO_HDD_HOTPLUG
+#ifdef MY_ABC_HERE
 	pData->blHddHotPlugSupport = g_hdd_hotplug;
-#endif /* CONFIG_SYNO_HDD_HOTPLUG */
+#endif /* MY_ABC_HERE */
 
 	pData->iMaxHddNum = g_syno_hdd_powerup_seq;
 
@@ -95,11 +98,11 @@ static int syno_hddmon_unplug_monitor(void *args)
 				continue;
 			}
 
-#ifdef CONFIG_SYNO_GPIO
+#ifdef MY_ABC_HERE
 			iPrzPinVal = SYNO_CHECK_HDD_DETECT(iIdx);
 #else
 			iPrzPinVal = SYNO_CHECK_HDD_PRESENT(iIdx);
-#endif /* CONFIG_SYNO_GPIO */
+#endif /* MY_ABC_HERE */
 
 			if (iPrzPinVal) {
 				continue;
@@ -137,11 +140,11 @@ static void syno_hddmon_task(SynoHddMonData_t *pData)
 		pUnplugMonitor = NULL;
 		pData->iProcessingIdx = iIdx;
 
-#ifdef CONFIG_SYNO_GPIO
+#ifdef MY_ABC_HERE
 		iPrzPinVal = SYNO_CHECK_HDD_DETECT(iIdx);
 #else
 		iPrzPinVal = SYNO_CHECK_HDD_PRESENT(iIdx);
-#endif /* CONFIG_SYNO_GPIO */
+#endif /* MY_ABC_HERE */
 
 		if (pData->blHddEnStat[iIdx-1] != iPrzPinVal) {
 
@@ -184,7 +187,7 @@ static void syno_hddmon_sync(SynoHddMonData_t *pData)
 	for (iIdx = 1; iIdx <= pData->iMaxHddNum; iIdx++) {
 		pData->iProcessingIdx = iIdx;
 
-#ifdef CONFIG_SYNO_GPIO
+#ifdef MY_ABC_HERE
 		iPrzPinVal = SYNO_CHECK_HDD_DETECT(iIdx);
 #else
 		iPrzPinVal = SYNO_CHECK_HDD_PRESENT(iIdx);

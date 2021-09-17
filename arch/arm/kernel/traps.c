@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/arch/arm/kernel/traps.c
  *
@@ -34,9 +37,9 @@
 #include <asm/unwind.h>
 #include <asm/tls.h>
 #include <asm/system_misc.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #include <asm/opcodes.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static const char *handler[]= {
 	"prefetch abort",
@@ -211,7 +214,7 @@ static void dump_backtrace(struct pt_regs *regs, struct task_struct *tsk)
 }
 #endif
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 #ifdef CONFIG_KPTRACE
 int get_stack(char *buf, unsigned long *sp, size_t size, size_t depth)
 {
@@ -255,7 +258,7 @@ int get_stack(char *buf, unsigned long *sp, size_t size, size_t depth)
 }
 EXPORT_SYMBOL_GPL(get_stack);
 #endif /*CONFIG_KPTRACE*/
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 void show_stack(struct task_struct *tsk, unsigned long *sp)
 {
@@ -459,49 +462,49 @@ asmlinkage void __exception do_undefinstr(struct pt_regs *regs)
 	if (processor_mode(regs) == SVC_MODE) {
 #ifdef CONFIG_THUMB2_KERNEL
 		if (thumb_mode(regs)) {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 			instr = __mem_to_opcode_thumb16(((u16 *)pc)[0]);
 			if (is_wide_instruction(instr)) {
 				u16 inst2;
 				inst2 = __mem_to_opcode_thumb16(((u16 *)pc)[1]);
 				instr = __opcode_thumb32_compose(instr, inst2);
 			}
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 			instr = ((u16 *)pc)[0];
 			if (is_wide_instruction(instr)) {
 				instr <<= 16;
 				instr |= ((u16 *)pc)[1];
 			}
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 		} else
 #endif
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 			instr = __mem_to_opcode_arm(*(u32 *) pc);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 			instr = *(u32 *) pc;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	} else if (thumb_mode(regs)) {
 		if (get_user(instr, (u16 __user *)pc))
 			goto die_sig;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		instr = __mem_to_opcode_thumb16(instr);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 		if (is_wide_instruction(instr)) {
 			unsigned int instr2;
 			if (get_user(instr2, (u16 __user *)pc+1))
 				goto die_sig;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 			instr2 = __mem_to_opcode_thumb16(instr2);
 			instr = __opcode_thumb32_compose(instr, instr2);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 			instr <<= 16;
 			instr |= instr2;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 		}
 	} else if (get_user(instr, (u32 __user *)pc)) {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		instr = __mem_to_opcode_arm(instr);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 		goto die_sig;
 	}
 
@@ -930,8 +933,8 @@ void __init early_trap_init(void *vectors_base)
 
 	flush_icache_range(vectors, vectors + PAGE_SIZE * 2);
 	modify_domain(DOMAIN_USER, DOMAIN_CLIENT);
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	/* Enable imprecise aborts */
 	asm volatile("cpsie	a");
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 }

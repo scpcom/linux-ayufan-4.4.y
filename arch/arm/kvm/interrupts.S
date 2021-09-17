@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2012 - Virtual Open Systems and Columbia University
  * Author: Christoffer Dall <c.dall@virtualopensystems.com>
@@ -55,11 +58,11 @@ ENTRY(__kvm_tlb_flush_vmid_ipa)
 	mcrr	p15, 6, r2, r3, c2	@ Write VTTBR
 	isb
 	mcr     p15, 0, r0, c8, c3, 0	@ TLBIALLIS (rt ignored)
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	dsb	ish
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 	dsb
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	isb
 	mov	r2, #0
 	mov	r3, #0
@@ -83,11 +86,11 @@ ENTRY(__kvm_flush_vm_context)
 	mcr     p15, 4, r0, c8, c3, 4
 	/* Invalidate instruction caches Inner Shareable (ICIALLUIS) */
 	mcr     p15, 0, r0, c7, c1, 0
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	dsb	ish
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 	dsb
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	isb				@ Not necessary if followed by eret
 
 	bx	lr

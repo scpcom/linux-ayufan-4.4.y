@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Suspend/resume support. Currently supporting Armada XP only.
  *
@@ -18,9 +21,9 @@
 #include <linux/mbus.h>
 #include <linux/of_address.h>
 #include <linux/suspend.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 #include <linux/regulator/machine.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 #include <asm/cacheflush.h>
 #include <asm/outercache.h>
 #include <asm/suspend.h>
@@ -36,18 +39,18 @@
 #define  SDRAM_DLB_EVICTION_THRESHOLD_MASK 0xff
 
 extern void armada_38x_cpu_mem_resume(void);
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 // do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 extern int mvebu_pcie_resume(void);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 static void (*mvebu_board_pm_enter)(void __iomem *sdram_reg, u32 srcmd);
 static void __iomem *sdram_ctrl;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 static bool is_suspend_mem_available;
 static int (*mvebu_board_pm_init)(void);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 static int mvebu_pm_powerdown(unsigned long data)
 {
@@ -100,9 +103,9 @@ static int mvebu_pm_powerdown(unsigned long data)
 #define SDRAM_WIN_BASE_REG(x)	(0x20180 + (0x8*x))
 #define SDRAM_WIN_CTRL_REG(x)	(0x20184 + (0x8*x))
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(MY_ABC_HERE)
 // do nothing
-#else /* CONFIG_SYNO_ARMADA */
+#else /* MY_ABC_HERE */
 static phys_addr_t mvebu_internal_reg_base(void)
 {
 	struct device_node *np;
@@ -121,7 +124,7 @@ static phys_addr_t mvebu_internal_reg_base(void)
 
 	return of_translate_address(np, in_addr);
 }
-#endif /* CONFIG_SYNO_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static void mvebu_pm_store_bootinfo(void)
 {
@@ -175,18 +178,18 @@ static void mvebu_pm_store_bootinfo(void)
 	writel(BOOT_MAGIC_LIST_END, store_addr);
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 static void mvebu_enter_suspend(void)
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 static int mvebu_pm_enter(suspend_state_t state)
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	if (state != PM_SUSPEND_MEM)
 		return -EINVAL;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	cpu_pm_enter();
 
@@ -197,10 +200,10 @@ static int mvebu_pm_enter(suspend_state_t state)
 
 	cpu_suspend(0, mvebu_pm_powerdown);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	/* Remove CPU1 from the PMU frequnecy domain until it becomes online */
 	mvebu_v7_pmsu_disable_dfs_cpu(1);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	/* Disable the L2 Cache after it was being used by the bootROM */
 	outer_disable();
@@ -210,22 +213,22 @@ static int mvebu_pm_enter(suspend_state_t state)
 
 	set_cpu_coherent();
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	/* Eraly resume of PCIe to avoid PCIe resume failures - TBD */
 	mvebu_pcie_resume();
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	cpu_pm_exit();
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	return 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 static int mvebu_pm_enter(suspend_state_t state)
 {
 	switch (state) {
@@ -246,7 +249,7 @@ static int mvebu_pm_valid(suspend_state_t state)
 		(is_suspend_mem_available && (state == PM_SUSPEND_MEM)));
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 static int mvebu_suspend_prepare(void)
 {
 	int ret;
@@ -257,7 +260,7 @@ static int mvebu_suspend_prepare(void)
 
 	return ret;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 
 static void mvebu_suspend_finish(void)
 {
@@ -267,23 +270,23 @@ static void mvebu_suspend_finish(void)
 	if (ret)
 		pr_warn("Failed to resume regulators from suspend (%d)\n", ret);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 static const struct platform_suspend_ops mvebu_pm_ops = {
 	.enter = mvebu_pm_enter,
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4) || \
-	defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE) || \
+	defined(MY_ABC_HERE)
 	.valid = mvebu_pm_valid,
 	.finish = mvebu_suspend_finish,
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 	.prepare = mvebu_suspend_prepare,
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 #else
 	.valid = suspend_valid_only_mem,
 #endif
 };
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 void __init mvebu_pm_register_init(int (*board_pm_init)(void))
 {
 	mvebu_board_pm_init = board_pm_init;
@@ -305,14 +308,14 @@ static int __init mvebu_pm_init(void)
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 int __init mvebu_pm_suspend_init(void (*board_pm_enter)(void __iomem *sdram_reg,
 								u32 srcmd))
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 int mvebu_pm_init(void (*board_pm_enter)(void __iomem *sdram_reg, u32 srcmd))
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 {
 	struct device_node *np;
 	struct resource res;
@@ -348,15 +351,15 @@ int mvebu_pm_init(void (*board_pm_enter)(void __iomem *sdram_reg, u32 srcmd))
 
 	mvebu_board_pm_enter = board_pm_enter;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	is_suspend_mem_available = true;
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	suspend_set_ops(&mvebu_pm_ops);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 late_initcall(mvebu_pm_init);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */

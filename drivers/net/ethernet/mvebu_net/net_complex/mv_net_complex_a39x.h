@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -211,9 +214,9 @@ enum mvNetComplexPhase {
 #define COMMON_PHYS_SELECTOR_LANE_OFFSET(lane)		(4 * lane)
 #define COMMON_PHYS_SELECTOR_LANE_MASK(lane)		(0xF << COMMON_PHYS_SELECTOR_LANE_OFFSET(lane))
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 int mv_net_complex_dynamic_init(u32 net_comp_config);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 int mv_net_complex_init(u32 net_comp_config, enum mvNetComplexPhase phase);
 void mv_net_complex_nss_select(u32 val);
 

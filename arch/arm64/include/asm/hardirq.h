@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2012 ARM Ltd.
  *
@@ -49,12 +52,12 @@ static inline void ack_bad_irq(unsigned int irq)
 
 extern void handle_IRQ(unsigned int, struct pt_regs *);
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
-#else /* CONFIG_SYNO_LSP_MONACO */
+#if defined (MY_DEF_HERE)
+#else /* MY_DEF_HERE */
 /*
  * No arch-specific IRQ flags.
  */
 #define set_irq_flags(irq, flags)
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 #endif /* __ASM_HARDIRQ_H */

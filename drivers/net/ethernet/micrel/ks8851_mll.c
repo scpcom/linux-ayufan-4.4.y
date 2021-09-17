@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /**
  * drivers/net/ethernet/micrel/ks8851_mll.c
  * Copyright (c) 2009 Micrel Inc.
@@ -1665,10 +1668,10 @@ static int ks8851_remove(struct platform_device *pdev)
 	iounmap(ks->hw_addr);
 	free_netdev(netdev);
 	release_mem_region(iomem->start, resource_size(iomem));
-#if defined (CONFIG_SYNO_LSP_MONACO)
-#else /* CONFIG_SYNO_LSP_MONACO */
+#if defined (MY_DEF_HERE)
+#else /* MY_DEF_HERE */
 	platform_set_drvdata(pdev, NULL);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	return 0;
 
 }

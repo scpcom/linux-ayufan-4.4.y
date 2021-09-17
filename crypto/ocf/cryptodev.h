@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*	$FreeBSD: src/sys/opencrypto/cryptodev.h,v 1.25 2007/05/09 19:37:02 gnn Exp $	*/
 /*	$OpenBSD: cryptodev.h,v 1.31 2002/06/11 11:14:29 beck Exp $	*/
 
@@ -65,10 +68,10 @@
 #include <linux/in.h>
 #endif
 
-#if defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_OF) && defined(CONFIG_MV_INCLUDE_CESA)
+#if defined(MY_ABC_HERE) && defined(CONFIG_OF) && defined(CONFIG_MV_INCLUDE_CESA)
 #include "../../arch/arm/mach-mvebu/include/mach/mvTypes.h"
 #include "../../drivers/crypto/mvebu_cesa/mvSysCesaConfig.h"
-#endif /* CONFIG_SYNO_LSP_ARMADA && CONFIG_OF && CONFIG_MV_INCLUDE_CESA */
+#endif /* MY_ABC_HERE && CONFIG_OF && CONFIG_MV_INCLUDE_CESA */
 
 /* Some initial values */
 #define CRYPTO_DRIVERS_INITIAL	4
@@ -508,11 +511,11 @@ struct cryptkop {
 	int		(*krp_callback)(struct cryptkop *);
 };
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(MY_ABC_HERE)
 #include "ocf-compat.h"
-#else /* CONFIG_SYNO_ARMADA */
+#else /* MY_ABC_HERE */
 #include <ocf-compat.h>
-#endif /* CONFIG_SYNO_ARMADA */
+#endif /* MY_ABC_HERE */
 
 /*
  * Session ids are 64 bits.  The lower 32 bits contain a "local id" which

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2010 Marvell International Ltd.
  *		Zhangfei Gao <zhangfei.gao@marvell.com>
@@ -34,9 +37,9 @@
 #include <linux/of_gpio.h>
 #include <linux/pm.h>
 #include <linux/pm_runtime.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #include <linux/mbus.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 #include "sdhci.h"
 #include "sdhci-pltfm.h"
@@ -48,33 +51,33 @@
 #define SDCLK_DELAY_SHIFT	9
 #define SDCLK_DELAY_MASK	0x1f
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #define SD_EXTRA_PARAM_REG	0x100
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 #define SD_CFG_FIFO_PARAM       0x100
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 #define SDCFG_GEN_PAD_CLK_ON	(1<<6)
 #define SDCFG_GEN_PAD_CLK_CNT_MASK	0xFF
 #define SDCFG_GEN_PAD_CLK_CNT_SHIFT	24
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #define SD_FIFO_PARAM_REG	0x104
 #define SD_USE_DAT3		BIT(7)
 #define SD_OVRRD_CLK_OEN	BIT(11)
 #define SD_FORCE_CLK_ON		BIT(12)
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 #define SD_SPI_MODE          0x108
 #define SD_CE_ATA_1          0x10C
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #define SDCE_MMC_CARD		BIT(28)
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 #define SD_CE_ATA_2          0x10E
 #define SDCE_MISC_INT		(1<<2)
 #define SDCE_MISC_INT_EN	(1<<1)
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 /*
  * These registers are relative to the second register region, for the
  * MBus bridge.
@@ -117,16 +120,16 @@ static int mv_conf_mbus_windows(struct device *dev, void __iomem *regs,
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static void pxav3_set_private_registers(struct sdhci_host *host, u8 mask)
 {
 	struct platform_device *pdev = to_platform_device(mmc_dev(host->mmc));
 	struct sdhci_pxa_platdata *pdata = pdev->dev.platform_data;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	struct device_node *np = pdev->dev.of_node;
 	u32 reg_val;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	if (mask == SDHCI_RESET_ALL) {
 		/*
@@ -143,7 +146,7 @@ static void pxav3_set_private_registers(struct sdhci_host *host, u8 mask)
 			writew(tmp, host->ioaddr + SD_CLOCK_BURST_SIZE_SETUP);
 		}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		if (of_device_is_compatible(np, "marvell,armada-380-sdhci") &&
 		    host->quirks2 & SDHCI_QUIRK2_KEEP_INT_CLK_ON) {
 			reg_val = sdhci_readl(host, SD_FIFO_PARAM_REG);
@@ -158,11 +161,11 @@ static void pxav3_set_private_registers(struct sdhci_host *host, u8 mask)
 			reg_val |= SDHCI_CLOCK_INT_EN;
 			sdhci_writel(host, reg_val, SDHCI_CLOCK_CONTROL);
 		}
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	}
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static void pxav3_init_card(struct sdhci_host *host, struct mmc_card *card)
 {
 	struct platform_device *pdev = to_platform_device(mmc_dev(host->mmc));
@@ -178,7 +181,7 @@ static void pxav3_init_card(struct sdhci_host *host, struct mmc_card *card)
 		sdhci_writel(host, reg_val, SD_CE_ATA_1);
 	}
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 #define MAX_WAIT_COUNT 5
 static void pxav3_gen_init_74_clocks(struct sdhci_host *host, u8 power_mode)
@@ -204,15 +207,15 @@ static void pxav3_gen_init_74_clocks(struct sdhci_host *host, u8 power_mode)
 		writew(tmp, host->ioaddr + SD_CE_ATA_2);
 
 		/* start sending the 74 clocks */
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		tmp = readw(host->ioaddr + SD_EXTRA_PARAM_REG);
 		tmp |= SDCFG_GEN_PAD_CLK_ON;
 		writew(tmp, host->ioaddr + SD_EXTRA_PARAM_REG);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		tmp = readw(host->ioaddr + SD_CFG_FIFO_PARAM);
 		tmp |= SDCFG_GEN_PAD_CLK_ON;
 		writew(tmp, host->ioaddr + SD_CFG_FIFO_PARAM);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 		/* slowest speed is about 100KHz or 10usec per clock */
 		udelay(740);
@@ -238,16 +241,16 @@ static void pxav3_gen_init_74_clocks(struct sdhci_host *host, u8 power_mode)
 
 static int pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	struct platform_device *pdev = to_platform_device(mmc_dev(host->mmc));
 	struct device_node *np = pdev->dev.of_node;
 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
 	struct sdhci_pxa *pxa = pltfm_host->priv;
 	u16 ctrl_2;
 	u8 reg_val;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	u16 ctrl_2;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	/*
 	 * Set V18_EN -- UHS modes do not work without this.
@@ -275,7 +278,7 @@ static int pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
 		break;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	/* Update SDIO3 Configuration register according to
 	 * erratum 'FE-2946959'.
 	 */
@@ -295,7 +298,7 @@ static int pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
 		}
 		writeb(reg_val, pxa->sdio3_conf_reg);
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
 	dev_dbg(mmc_dev(host->mmc),
@@ -310,25 +313,25 @@ static const struct sdhci_ops pxav3_sdhci_ops = {
 	.set_uhs_signaling = pxav3_set_uhs_signaling,
 	.platform_send_init_74_clocks = pxav3_gen_init_74_clocks,
 	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	.init_card = pxav3_init_card,
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 };
 
 static struct sdhci_pltfm_data sdhci_pxav3_pdata = {
 	.quirks = SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK
 		| SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC
 		| SDHCI_QUIRK_32BIT_ADMA_SIZE
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 //		| SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN
 		| SDHCI_QUIRK_MISSING_CAPS,
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		| SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	.ops = &pxav3_sdhci_ops,
 };
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 static struct sdhci_pltfm_data sdhci_armada_380_pdata = {
 	.quirks = SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK
 		| SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC
@@ -336,23 +339,23 @@ static struct sdhci_pltfm_data sdhci_armada_380_pdata = {
 		| SDHCI_QUIRK_MISSING_CAPS,
 	.ops = &pxav3_sdhci_ops,
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 
 #ifdef CONFIG_OF
 static const struct of_device_id sdhci_pxav3_of_match[] = {
 	{
 		.compatible = "mrvl,pxav3-mmc",
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		.data = &sdhci_pxav3_pdata,
 	},
 	{
 		.compatible = "marvell,armada-380-sdhci",
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 		.data = &sdhci_armada_380_pdata,
 #else
 		.data = &sdhci_pxav3_pdata,
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
+#endif /* MY_ABC_HERE */
 	},
 	{},
 };
@@ -386,18 +389,18 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
 	struct sdhci_pltfm_host *pltfm_host;
 	struct sdhci_pxa_platdata *pdata = pdev->dev.platform_data;
 	struct device *dev = &pdev->dev;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	struct device_node *np = pdev->dev.of_node;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	struct sdhci_host *host = NULL;
 	struct sdhci_pxa *pxa = NULL;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	struct resource *res;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	const struct of_device_id *match;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	const struct sdhci_pltfm_data *sdhci_pltfm_data;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	int ret;
 	struct clk *clk;
@@ -406,7 +409,7 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
 	if (!pxa)
 		return -ENOMEM;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	match = of_match_device(of_match_ptr(sdhci_pxav3_of_match), &pdev->dev);
 
 	if (match)
@@ -415,15 +418,15 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
 		sdhci_pltfm_data = &sdhci_pxav3_pdata;
 
 	host = sdhci_pltfm_init(pdev, sdhci_pltfm_data);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	host = sdhci_pltfm_init(pdev, &sdhci_pxav3_pdata);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	if (IS_ERR(host)) {
 		kfree(pxa);
 		return PTR_ERR(host);
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	if (of_device_is_compatible(np, "marvell,armada-380-sdhci")) {
 		res = platform_get_resource(pdev, IORESOURCE_MEM, 1);
 		pxa->mbus_win_regs = devm_ioremap_resource(&pdev->dev, res);
@@ -444,7 +447,7 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
 		if (ret < 0)
 			goto err_clk_get;
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	pltfm_host = sdhci_priv(host);
 	pltfm_host->priv = pxa;
@@ -461,16 +464,16 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
 	/* enable 1/8V DDR capable */
 	host->mmc->caps |= MMC_CAP_1_8V_DDR;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	match = of_match_device(of_match_ptr(sdhci_pxav3_of_match), &pdev->dev);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	if (match) {
 		mmc_of_parse(host->mmc);
 		sdhci_get_of_property(pdev);
 		pdata = pxav3_get_mmc_pdata(dev);
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		host->caps = sdhci_readl(host, SDHCI_CAPABILITIES);
 		host->caps1 = sdhci_readl(host, SDHCI_CAPABILITIES_1);
 
@@ -495,7 +498,7 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
 			    !of_property_read_bool(np, "broken-cd"))
 				host->quirks2 |= SDHCI_QUIRK2_KEEP_INT_CLK_ON;
 		}
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	} else if (pdata) {
 		/* on-chip device */
 		if (pdata->flags & PXA_FLAG_CARD_PERMANENT)
@@ -603,7 +606,7 @@ static int sdhci_pxav3_resume(struct device *dev)
 {
 	int ret;
 	struct sdhci_host *host = dev_get_drvdata(dev);
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
 	struct sdhci_pxa *pxa = pltfm_host->priv;
 	struct device_node *np = dev->of_node;
@@ -611,7 +614,7 @@ static int sdhci_pxav3_resume(struct device *dev)
 	if (of_device_is_compatible(np, "marvell,armada-380-sdhci"))
 		ret = mv_conf_mbus_windows(dev, pxa->mbus_win_regs,
 					   mv_mbus_dram_info());
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	pm_runtime_get_sync(dev);
 	ret = sdhci_resume_host(host);

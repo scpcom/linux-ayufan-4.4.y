@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 1995-1997 Olaf Kirch <okir@monad.swb.de>
  */
@@ -5,7 +8,7 @@
 #ifndef LINUX_NFSD_VFS_H
 #define LINUX_NFSD_VFS_H
 
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 #include <linux/sched.h>
 #endif
 #include "nfsfh.h"
@@ -33,10 +36,10 @@
 
 #define NFSD_MAY_64BIT_COOKIE		0x1000 /* 64 bit readdir cookies for >= NFSv3 */
 
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 #define NFSD_MAY_APPEND			0x4000
 #define NFSD_MAY_SYNO_NOP		0x2000
-#endif //CONFIG_SYNO_FS_WINACL
+#endif //MY_ABC_HERE
 
 #define NFSD_MAY_CREATE		(NFSD_MAY_EXEC|NFSD_MAY_WRITE)
 #define NFSD_MAY_REMOVE		(NFSD_MAY_EXEC|NFSD_MAY_WRITE|NFSD_MAY_TRUNC)
@@ -138,7 +141,7 @@ static inline __be32 fh_getattr(struct svc_fh *fh, struct kstat *stat)
 {
 	struct path p = {.mnt = fh->fh_export->ex_path.mnt,
 			 .dentry = fh->fh_dentry};
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 	int err = 0;
 
 	err = vfs_getattr(&p, stat);

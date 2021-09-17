@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright 2010-2011 Calxeda, Inc.
  *
@@ -1790,10 +1793,10 @@ err_io:
 	free_netdev(ndev);
 err_alloc:
 	release_mem_region(res->start, resource_size(res));
-#if defined (CONFIG_SYNO_LSP_MONACO)
-#else /* CONFIG_SYNO_LSP_MONACO */
+#if defined (MY_DEF_HERE)
+#else /* MY_DEF_HERE */
 	platform_set_drvdata(pdev, NULL);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	return ret;
 }
 
@@ -1816,10 +1819,10 @@ static int xgmac_remove(struct platform_device *pdev)
 	free_irq(ndev->irq, ndev);
 	free_irq(priv->pmt_irq, ndev);
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
-#else /* CONFIG_SYNO_LSP_MONACO */
+#if defined (MY_DEF_HERE)
+#else /* MY_DEF_HERE */
 	platform_set_drvdata(pdev, NULL);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	unregister_netdev(ndev);
 	netif_napi_del(&priv->napi);
 

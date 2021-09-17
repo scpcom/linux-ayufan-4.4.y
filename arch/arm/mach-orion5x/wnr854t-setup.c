@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * arch/arm/mach-orion5x/wnr854t-setup.c
  *
@@ -127,15 +130,15 @@ static void __init wnr854t_init(void)
 	orion5x_eth_switch_init(&wnr854t_switch_plat_data, NO_IRQ);
 	orion5x_uart0_init();
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	mvebu_mbus_add_window_by_id(ORION_MBUS_DEVBUS_BOOT_TARGET,
 				    ORION_MBUS_DEVBUS_BOOT_ATTR,
 				    WNR854T_NOR_BOOT_BASE,
 				    WNR854T_NOR_BOOT_SIZE);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	mvebu_mbus_add_window("devbus-boot", WNR854T_NOR_BOOT_BASE,
 			      WNR854T_NOR_BOOT_SIZE);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	platform_device_register(&wnr854t_nor_flash);
 }
 

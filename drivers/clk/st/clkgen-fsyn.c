@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2013 STMicroelectronics R&D Ltd
  *
@@ -711,11 +714,11 @@ static int quadfs_pll_is_enabled(struct clk_hw *hw)
 	struct st_clk_quadfs_pll *pll = to_quadfs_pll(hw);
 	u32 npda = CLKGEN_READ(pll, npda);
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	return pll->data->powerup_polarity ? !npda : !!npda;
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	return !!npda;
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 }
 
 static unsigned long quadfs_pll_fs660c32_recalc_rate(struct clk_hw *hw,

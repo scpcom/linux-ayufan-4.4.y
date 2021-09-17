@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2007 Oracle.  All rights reserved.
  *
@@ -26,20 +29,20 @@
 #include <linux/mpage.h>
 #include <linux/aio.h>
 #include <linux/falloc.h>
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #include <linux/socket.h>
 #include <net/sock.h>
 #include <linux/net.h>
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 #include <linux/swap.h>
 #include <linux/writeback.h>
 #include <linux/statfs.h>
 #include <linux/compat.h>
 #include <linux/slab.h>
 #include <linux/btrfs.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 #include <net/sock.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 #include "ctree.h"
 #include "disk-io.h"
 #include "transaction.h"
@@ -2766,18 +2769,18 @@ out:
 	return offset;
 }
 
-#if defined(CONFIG_SYNO_LSP_ALPINE) && !defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
 #define MSG_KERNSPACE       0x1000000
 #define MSG_NOCATCHSIG   0x2000000
 
 static ssize_t btrfs_splice_from_socket(struct file *file, struct socket *sock,
 					loff_t __user *ppos, size_t count)
 {
-#if defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE)
 	struct inode *inode = file_inode(file);
-#else /* CONFIG_SYNO_ALPINE */
+#else /* MY_DEF_HERE */
 	struct inode *inode = fdentry(file)->d_inode;
-#endif /* CONFIG_SYNO_ALPINE */
+#endif /* MY_DEF_HERE */
 	struct btrfs_root *root = BTRFS_I(inode)->root;
 	struct page **pages = NULL;
 	struct kvec *iov = NULL;
@@ -2835,14 +2838,14 @@ static ssize_t btrfs_splice_from_socket(struct file *file, struct socket *sock,
 					num_pages << PAGE_CACHE_SHIFT)))
 		goto out_free;
 
-#if defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE)
 	if ((err = prepare_pages(file_inode(file), pages, num_pages,
 					pos, count, false))) {
-#else /* CONFIG_SYNO_ALPINE */
+#else /* MY_DEF_HERE */
 	if ((err = prepare_pages(root, file, pages, num_pages,
 					pos, pos >> PAGE_CACHE_SHIFT,
 					count, false))) {
-#endif /* CONFIG_SYNO_ALPINE */
+#endif /* MY_DEF_HERE */
 		btrfs_delalloc_release_space(inode,
 					num_pages << PAGE_CACHE_SHIFT);
 		goto out_free;
@@ -2871,11 +2874,11 @@ static ssize_t btrfs_splice_from_socket(struct file *file, struct socket *sock,
 	recvtimeo = sock->sk->sk_rcvtimeo;
 	sock->sk->sk_rcvtimeo = 8 * HZ;
 	copied = kernel_recvmsg(sock, &msg, iov, num_pages, count,
-#if defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE)
                              MSG_WAITALL | MSG_NOCATCHSIGNAL);
-#else /* CONFIG_SYNO_ALPINE */
+#else /* MY_DEF_HERE */
                              MSG_WAITALL | MSG_NOCATCHSIG);
-#endif /* CONFIG_SYNO_ALPINE */
+#endif /* MY_DEF_HERE */
 	sock->sk->sk_rcvtimeo = recvtimeo;
 
 	if (copied < 0) {
@@ -2945,12 +2948,12 @@ out:
 
 	return err ? err : copied;
 }
-#endif /* CONFIG_SYNO_LSP_ALPINE && !CONFIG_SYNO_ALPINE */
+#endif /* MY_DEF_HERE && !CONFIG_SYNO_ALPINE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(MY_ABC_HERE)
+#if defined(MY_ABC_HERE)
 extern int rw_verify_area(int read_write, struct file *file, loff_t *ppos, size_t count);
-#endif /* CONFIG_SYNO_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static ssize_t btrfs_splice_from_socket(struct file *file, struct socket *sock,
 					loff_t __user *ppos, size_t count)
@@ -3056,13 +3059,13 @@ static ssize_t btrfs_splice_from_socket(struct file *file, struct socket *sock,
 	 * pages we want, so we don't really need to worry about the
 	 * contents of pages from loop to loop
 	 */
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(MY_ABC_HERE)
 	ret = prepare_pages(file_inode(file), pages, num_pages,
 			    pos, count, false);
-#else /* CONFIG_SYNO_ARMADA */
+#else /* MY_ABC_HERE */
 	ret = prepare_pages(root, file, pages, num_pages,
 			    pos, 0, count, false);
-#endif /* CONFIG_SYNO_ARMADA */
+#endif /* MY_ABC_HERE */
 	if (ret) {
 		btrfs_delalloc_release_space(inode,
 					     num_pages << PAGE_CACHE_SHIFT);
@@ -3152,17 +3155,17 @@ out:
 	current->backing_dev_info = NULL;
 	return ret ? ret : copied;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 const struct file_operations btrfs_file_operations = {
 	.llseek		= btrfs_file_llseek,
 	.read		= do_sync_read,
 	.write		= do_sync_write,
 	.aio_read       = generic_file_aio_read,
-#if (defined(CONFIG_SYNO_LSP_ALPINE) && !defined(CONFIG_SYNO_ALPINE)) || \
-	defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if (defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)) || \
+	defined(MY_ABC_HERE)
 	.splice_from_socket	= btrfs_splice_from_socket,
-#endif /* (CONFIG_SYNO_LSP_ALPINE && !CONFIG_SYNO_ALPINE) || CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* (CONFIG_SYNO_LSP_ALPINE && !CONFIG_SYNO_ALPINE) || MY_ABC_HERE */
 	.splice_read	= generic_file_splice_read,
 	.aio_write	= btrfs_file_aio_write,
 	.mmap		= btrfs_file_mmap,
@@ -3172,11 +3175,11 @@ const struct file_operations btrfs_file_operations = {
 	.fallocate	= btrfs_fallocate,
 	.unlocked_ioctl	= btrfs_ioctl,
 #ifdef CONFIG_COMPAT
-#ifdef CONFIG_SYNO_BTRFS_COMPAT_IOCTL
+#ifdef MY_DEF_HERE
 	.compat_ioctl	= btrfs_compat_ioctl,
 #else
 	.compat_ioctl	= btrfs_ioctl,
-#endif /* CONFIG_SYNO_BTRFS_COMPAT_IOCTL */
+#endif /* MY_DEF_HERE */
 #endif
 };
 

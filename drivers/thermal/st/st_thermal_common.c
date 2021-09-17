@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * ST Thermal Sensor Driver common routines
  * Author: Ajit Pal Singh <ajitpal.singh@st.com>
@@ -12,19 +15,19 @@
  */
 
 #include <linux/clk.h>
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 #include <linux/delay.h>
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 #include <linux/module.h>
 #include <linux/of.h>
 #include <linux/cpu_cooling.h>
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 #include <linux/mfd/syscon.h>
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 #include "st_thermal.h"
 
-#if defined(CONFIG_SYNO_MONACO)
+#if defined(MY_DEF_HERE)
 static struct thermal_zone_device* g_syno_tz = NULL;
 static int st_thermal_get_temp(struct thermal_zone_device *th,
 		unsigned long *temperature);
@@ -59,11 +62,11 @@ EXPORT_SYMBOL(syno_get_temperature);
 int st_thermal_common_alloc_regfields(struct st_thermal_sensor *sensor)
 {
 	struct device *dev = sensor_to_dev(sensor);
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	struct regmap *regmap = sensor->regmap[TH_REGS];
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	struct regmap *regmap = sensor->regmap;
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	const struct reg_field *reg_fields = sensor->data->reg_fields;
 
 	sensor->dcorrect = devm_regmap_field_alloc(dev, regmap,
@@ -74,21 +77,21 @@ int st_thermal_common_alloc_regfields(struct st_thermal_sensor *sensor)
 
 	sensor->temp_data = devm_regmap_field_alloc(dev, regmap,
 					reg_fields[DATA]);
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	sensor->datardy = devm_regmap_field_alloc(dev, regmap,
 					reg_fields[DATARDY]);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	if (IS_ERR(sensor->dcorrect) || IS_ERR(sensor->overflow) ||
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	    IS_ERR(sensor->temp_data) || IS_ERR(sensor->datardy)) {
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	    IS_ERR(sensor->temp_data)) {
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 		return -EINVAL;
 	}
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	regmap = sensor->regmap[TH_CALIB];
 	if (regmap) {
 		struct reg_field reg_field = reg_fields[DC_CALIB];
@@ -99,7 +102,7 @@ int st_thermal_common_alloc_regfields(struct st_thermal_sensor *sensor)
 		if (IS_ERR(sensor->dc_calib))
 			return -EINVAL;
 	}
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	return 0;
 }
@@ -124,7 +127,7 @@ static int st_thermal_probe_dt(struct st_thermal_sensor *sensor)
 	ret = sensor->ops->do_memmap_regmap(sensor);
 	if (ret)
 		return ret;
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	sensor->regmap[TH_CALIB] =
 		syscon_regmap_lookup_by_phandle(np, "st,syscfg-calib");
 
@@ -139,22 +142,22 @@ static int st_thermal_probe_dt(struct st_thermal_sensor *sensor)
 			return -EINVAL;
 		}
 	}
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	return sensor->ops->alloc_regfields(sensor);
 }
 
 static int st_thermal_sensor_on(struct st_thermal_sensor *sensor)
 {
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 	int ret;
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	struct device *dev = sensor_to_dev(sensor);
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	int ret;
 	unsigned int datardy = 0, count = 0;
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	ret = clk_prepare_enable(sensor->clk);
 	if (ret) {
@@ -168,7 +171,7 @@ static int st_thermal_sensor_on(struct st_thermal_sensor *sensor)
 		goto clk_dis;
 	}
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	/* Wait for thermal sensor to start */
 	usleep_range(1000, 1050);
 	/*
@@ -186,7 +189,7 @@ static int st_thermal_sensor_on(struct st_thermal_sensor *sensor)
 		ret = -EBUSY;
 		goto clk_dis;
 	}
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	return 0;
 clk_dis:
@@ -211,28 +214,28 @@ static int st_thermal_sensor_off(struct st_thermal_sensor *sensor)
 static int st_thermal_calibration(struct st_thermal_sensor *sensor)
 {
 	int ret;
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	unsigned int dc = sensor->data->calibration_val;
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	struct device *dev = sensor_to_dev(sensor);
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	/* Read calibration data*/
 	if (sensor->dc_calib) {
 		ret = regmap_field_read(sensor->dc_calib, &dc);
 		if (ret)
 			return ret;
 	}
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	/* TODO : Read calibration data from SAFEMEM */
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	ret = regmap_field_write(sensor->dcorrect, dc);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	ret = regmap_field_write(sensor->dcorrect,
 				 sensor->data->calibration_val);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	if (ret)
 		dev_err(dev, "unable to set calibration data\n");
 
@@ -424,7 +427,7 @@ static int st_thermal_probe(struct platform_device *pdev)
 		}
 	}
 
-#if defined(CONFIG_SYNO_MONACO)
+#if defined(MY_DEF_HERE)
 	g_syno_tz = sensor->th_dev;
 #endif
 	platform_set_drvdata(pdev, sensor);

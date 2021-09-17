@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/proc_fs.h>
 #include <linux/export.h>
 #include <net/net_namespace.h>
@@ -145,10 +148,10 @@ static void bond_info_show_master(struct seq_file *seq)
 			seq_printf(seq, "\tPartner Mac Address: %pM\n",
 				   ad_info.partner_system);
 		}
-#ifdef CONFIG_SYNO_NET_BOND_ALB_INFO
+#ifdef MY_ABC_HERE
 	} else if (bond->params.mode == BOND_MODE_ALB) {
 		bond_alb_info_show(seq);
-#endif /* CONFIG_SYNO_NET_BOND_ALB_INFO */
+#endif /* MY_ABC_HERE */
 	}
 }
 

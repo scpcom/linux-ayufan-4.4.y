@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Packet matching code.
  *
@@ -39,13 +42,13 @@ MODULE_DESCRIPTION("IPv4 packet filter");
 /*#define DEBUG_ALLOW_ALL*/ /* Useful for remote debugging */
 /*#define DEBUG_IP_FIREWALL_USER*/
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 static bool allow_inaccurate_counters = false;
 module_param(allow_inaccurate_counters, bool, 0644);
 MODULE_PARM_DESC(
 	allow_inaccurate_counters,
 	"allow inaccurate iptable counters which enables faster packet processing (default: false)");
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 #ifdef DEBUG_IP_FIREWALL
 #define dprintf(format, args...) pr_info(format , ## args)
@@ -333,13 +336,13 @@ ipt_do_table(struct sk_buff *skb,
 	IP_NF_ASSERT(table->valid_hooks & (1 << hook));
 	local_bh_disable();
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	addend = 0;
         if (!allow_inaccurate_counters)
 		addend = xt_write_recseq_begin();
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	addend = xt_write_recseq_begin();
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 	private = table->private;
 	cpu        = smp_processor_id();
@@ -439,12 +442,12 @@ ipt_do_table(struct sk_buff *skb,
 		 __func__, *stackptr, origptr);
 	*stackptr = origptr;
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	if (!allow_inaccurate_counters || addend)
 		xt_write_recseq_end(addend);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	xt_write_recseq_end(addend);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 	local_bh_enable();
 

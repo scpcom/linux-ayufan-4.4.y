@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef __SOUND_CORE_H
 #define __SOUND_CORE_H
 
@@ -148,9 +151,9 @@ struct snd_card {
 	struct snd_mixer_oss *mixer_oss;
 	int mixer_oss_change_count;
 #endif
-#if defined(CONFIG_SYNO_AUDIO_USE_EXTERNAL_SPEAKER)
+#if defined(MY_ABC_HERE)
 	unsigned int low_level_dev_id;
-#endif /*CONFIG_SYNO_AUDIO_USE_EXTERNAL_SPEAKER*/
+#endif /*MY_ABC_HERE*/
 };
 
 #ifdef CONFIG_PM
@@ -250,9 +253,9 @@ int snd_unregister_device(int type, struct snd_card *card, int dev);
 void *snd_lookup_minor_data(unsigned int minor, int type);
 int snd_add_device_sysfs_file(int type, struct snd_card *card, int dev,
 			      struct device_attribute *attr);
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 int snd_find_minor(int type, int card_num, int dev);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 #ifdef CONFIG_SND_OSSEMUL
 int snd_register_oss_device(int type, struct snd_card *card, int dev,

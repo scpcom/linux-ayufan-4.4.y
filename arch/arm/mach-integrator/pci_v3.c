@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/arch/arm/mach-integrator/pci_v3.c
  *
@@ -611,7 +614,7 @@ void __init pci_v3_postinit(void)
 	register_isa_ports(PHYS_PCI_MEM_BASE, PHYS_PCI_IO_BASE, 0);
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 /*
  * A small note about bridges and interrupts.  The DECchip 21050 (and
  * later) adheres to the PCI-PCI bridge specification.  This says that
@@ -889,4 +892,4 @@ int __init pci_v3_early_init(void)
 	pci_map_io_early(__phys_to_pfn(PHYS_PCI_IO_BASE));
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */

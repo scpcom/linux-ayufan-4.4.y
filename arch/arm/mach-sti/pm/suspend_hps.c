@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
  /* -------------------------------------------------------------------------
  * Copyright (C) 2014  STMicroelectronics
  * Author: Francesco M. Virlinzi  <francesco.virlinzi@st.com>
@@ -37,12 +40,12 @@
 #define STID127_A9_PLL_POWER_DOWN	(0x0)
 #define STID127_A9_PLL_LOCK_STATUS	(0x98)
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 #define STIH407_A9_CLK_SELECTION	(0x1a4)
 #define STIH407_A9_PLL_POWER_DOWN	(0x1a8)
 #define STIH407_A9_PLL_LOCK_STATUS	(0x87c)
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 static DEFINE_MUTEX(hps_notify_mutex);
 static LIST_HEAD(hps_notify_list);
@@ -104,8 +107,8 @@ static struct poke_operation sti_hps_ddr_exit[] = {
 	WHILE_NE32(DDR_STAT, DDR_STAT_MASK, DDR_STAT_ACCESS),
 };
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 static  struct poke_operation stih41x_hps_ddr_pll_enter[] = {
 	OR32(DDR_PLL_CFG_OFFSET, 1),
 };
@@ -114,7 +117,7 @@ static  struct poke_operation stih41x_hps_ddr_pll_exit[] = {
 	UPDATE32(DDR_PLL_CFG_OFFSET, ~1, 0),
 	WHILE_NE32(DDR_PLL_STATUS_OFFSET, 1, 1),
 };
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 static  struct poke_operation stid127_hps_ddr_pll_enter[] = {
 #ifdef STID127_HPS_ISSUE_RESOLVE
@@ -157,8 +160,8 @@ static struct poke_operation stid127_hps_a9_clk_exit[] = {
 	UPDATE32(STID127_A9_CLK_SELECTION, ~(1 << 2), 0),
 };
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 static  struct poke_operation stih407_hps_ddr_pll_enter[] = {
 #ifdef STIH407_HPS_ISSUE_RESOLVE
 	/*
@@ -200,7 +203,7 @@ static struct poke_operation stih407_hps_a9_clk_exit[] = {
 	UPDATE32(STIH407_A9_CLK_SELECTION, ~(1 << 1), 0),
 };
 /* End defining poke tables */
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 /*
  * This will read the interrupt number that woken up the
@@ -491,9 +494,9 @@ int sti_hps_setup(struct sti_hw_state_desc *state, unsigned long *ddr_pctl_addr,
 						     ddr_pctl_addr[i]);
 		}
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 		if (of_machine_is_compatible("st,stid127")) {
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 		if (of_machine_is_compatible("st,stih416")) {
 			np = of_find_compatible_node(NULL, NULL,
 						     "st,stih416-cpu-syscfg");
@@ -519,7 +522,7 @@ int sti_hps_setup(struct sti_hw_state_desc *state, unsigned long *ddr_pctl_addr,
 						     stih41x_hps_ddr_pll_exit),
 						     ddr_sys_config_base);
 		} else if (of_machine_is_compatible("st,stid127")) {
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 			np = of_find_node_by_name(NULL, "ddr-pctl-controller");
 			if (IS_ERR_OR_NULL(np))
 					return -ENODEV;
@@ -561,13 +564,13 @@ int sti_hps_setup(struct sti_hw_state_desc *state, unsigned long *ddr_pctl_addr,
 						     sizeof(
 						     stid127_hps_a9_clk_exit),
 						     reg);
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 		} else if (of_machine_is_compatible("st,stih407") ||
 			   of_machine_is_compatible("st,stih410") ||
 			   of_machine_is_compatible("st,stih416")) {
 
 			return -ENOTSUPP;
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 		} else if (of_machine_is_compatible("st,stih407")) {
 			np = of_find_node_by_name(NULL, "ddr-pctl-controller");
 			if (IS_ERR_OR_NULL(np))
@@ -610,7 +613,7 @@ int sti_hps_setup(struct sti_hw_state_desc *state, unsigned long *ddr_pctl_addr,
 						     sizeof(
 						     stih407_hps_a9_clk_exit),
 						     reg);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 		}
 	} else if (state->ddr_state == DDR_OFF) {
 		pr_info("sti pm hps: DDR_OFF not supported in HPS\n");

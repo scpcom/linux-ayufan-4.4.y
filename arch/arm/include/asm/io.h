@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  arch/arm/include/asm/io.h
  *
@@ -35,13 +38,13 @@
 #define isa_page_to_bus page_to_phys
 #define isa_bus_to_virt phys_to_virt
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 /*
  * Atomic MMIO-wide IO modify
  */
 extern void atomic_io_modify(void __iomem *reg, u32 mask, u32 set);
 extern void atomic_io_modify_relaxed(void __iomem *reg, u32 mask, u32 set);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 /*
  * Generic IO read/write.  These perform native-endian accesses.  Note
@@ -179,13 +182,13 @@ static inline void __iomem *__typesafe_io(unsigned long addr)
 /* PCI fixed i/o mapping */
 #define PCI_IO_VIRT_BASE	0xfee00000
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #if defined(CONFIG_PCI)
 void pci_ioremap_set_mem_type(int mem_type);
 #else
 static inline void pci_ioremap_set_mem_type(int mem_type) {}
 #endif
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 extern int pci_ioremap_io(unsigned int offset, phys_addr_t phys_addr);
 

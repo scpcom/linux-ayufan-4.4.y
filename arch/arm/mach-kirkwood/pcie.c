@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * arch/arm/mach-kirkwood/pcie.c
  *
@@ -12,9 +15,9 @@
 #include <linux/pci.h>
 #include <linux/slab.h>
 #include <linux/clk.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #include <linux/mbus.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 #include <video/vga.h>
 #include <asm/irq.h>
 #include <asm/mach/pci.h>
@@ -22,7 +25,7 @@
 #include <mach/bridge-regs.h>
 #include "common.h"
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 /* These can go away once Kirkwood uses the mvebu-mbus DT binding */
 #define KIRKWOOD_MBUS_PCIE0_MEM_TARGET    0x4
 #define KIRKWOOD_MBUS_PCIE0_MEM_ATTR      0xe8
@@ -32,7 +35,7 @@
 #define KIRKWOOD_MBUS_PCIE1_MEM_ATTR      0xd8
 #define KIRKWOOD_MBUS_PCIE1_IO_TARGET     0x4
 #define KIRKWOOD_MBUS_PCIE1_IO_ATTR       0xd0
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static void kirkwood_enable_pcie_clk(const char *port)
 {
@@ -267,7 +270,7 @@ static void __init add_pcie_port(int index, void __iomem *base)
 
 void __init kirkwood_pcie_init(unsigned int portmask)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	mvebu_mbus_add_window_remap_by_id(KIRKWOOD_MBUS_PCIE0_IO_TARGET,
 					  KIRKWOOD_MBUS_PCIE0_IO_ATTR,
 					  KIRKWOOD_PCIE_IO_PHYS_BASE,
@@ -286,7 +289,7 @@ void __init kirkwood_pcie_init(unsigned int portmask)
 				    KIRKWOOD_MBUS_PCIE1_MEM_ATTR,
 				    KIRKWOOD_PCIE1_MEM_PHYS_BASE,
 				    KIRKWOOD_PCIE1_MEM_SIZE);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	vga_base = KIRKWOOD_PCIE_MEM_PHYS_BASE;
 

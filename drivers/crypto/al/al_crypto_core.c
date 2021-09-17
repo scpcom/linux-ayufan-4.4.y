@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * drivers/crypto/al_crypto_core.c
  *
@@ -434,9 +437,9 @@ static int al_crypto_setup_interrupts(struct al_crypto_device *device)
 		cpu = next_cpu((i % num_online_cpus() - 1), *cpu_online_mask);
 		cpumask_set_cpu(cpu, &chan->affinity_hint_mask);
 
-#if defined(CONFIG_SYNO_ALPINE_TUNING_CRYPTO_PERFORMANCE)
+#if defined(MY_DEF_HERE)
 		irq_set_affinity(msix->vector, &chan->affinity_hint_mask);
-#endif /* CONFIG_SYNO_ALPINE_TUNING_CRYPTO_PERFORMANCE */
+#endif /* MY_DEF_HERE */
 		irq_set_affinity_hint(msix->vector, &chan->affinity_hint_mask);
 	}
 

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * This header file contains public constants and structures used by
  * the scsi code for linux.
@@ -586,7 +589,7 @@ static inline __u32 scsi_to_u32(__u8 *ptr)
 
 #ifdef __KERNEL__
 
-#ifdef CONFIG_SYNO_BADSECTOR_TEST
+#ifdef MY_ABC_HERE
 #define SCSI_IOCTL_SET_BADSECTORS    0x5400
 
 typedef struct _tag_SdBadSectors {
@@ -600,7 +603,7 @@ typedef struct _tag_SdBadSectors {
 extern SDBADSECTORS grgSdBadSectors[CONFIG_SYNO_MAX_INTERNAL_DISK];
 extern int gBadSectorTest;
 #define SynoGetInternalDiskSeq(szBdevName) (szBdevName[2] - 'a')
-#endif /* CONFIG_SYNO_BADSECTOR_TEST */
+#endif /* MY_ABC_HERE */
 #endif /* __KERNEL__ */
 
 #endif /* _SCSI_SCSI_H */

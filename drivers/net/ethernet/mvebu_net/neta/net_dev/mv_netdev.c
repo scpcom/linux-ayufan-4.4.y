@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -38,9 +41,9 @@ disclaimer.
 #include <net/ip.h>
 #include <net/ipv6.h>
 #include <linux/module.h>
-#if defined(CONFIG_SYNO_ARMADA_SUPPORT_WOL)
+#if defined(MY_ABC_HERE)
 #include <linux/mii.h>
-#endif /* CONFIG_SYNO_ARMADA_SUPPORT_WOL */
+#endif /* MY_ABC_HERE */
 #include "mvOs.h"
 #include "mvDebug.h"
 #include "mvEthPhy.h"
@@ -84,11 +87,11 @@ disclaimer.
 #endif
 
 #ifdef CONFIG_OF
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 int port_vbase[MV_ETH_MAX_PORTS] = {0};
 #else
 int port_vbase[MV_ETH_MAX_PORTS];
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 int bm_reg_vbase, pnc_reg_vbase;
 static u32 pnc_phyaddr_base;
 static u32 pnc_win_size;
@@ -197,11 +200,11 @@ static int mv_eth_pool_add(struct eth_port *pp, int pool, int buf_num);
 static int mv_eth_pool_free(int pool, int num);
 static int mv_eth_pool_destroy(int pool);
 
-#if defined(CONFIG_SYNO_ARMADA_SUPPORT_WOL)
+#if defined(MY_ABC_HERE)
 extern MV_U32 syno_wol_support(struct eth_port *pp);
 extern int mv_eth_tool_read_phy_reg(int phy_addr, u16 page, u16 reg, u16 *val);
 DEFINE_SPINLOCK(mii_lock);
-#endif /* CONFIG_SYNO_ARMADA_SUPPORT_WOL */
+#endif /* MY_ABC_HERE */
 
 #ifdef CONFIG_MV_ETH_TSO
 int mv_eth_tx_tso(struct sk_buff *skb, struct net_device *dev, struct mv_eth_tx_spec *tx_spec,
@@ -642,11 +645,11 @@ int mv_eth_ctrl_port_buf_num_set(int port, int long_num, int short_num)
 
 #ifdef CONFIG_MV_ETH_BM_CPU
 	if (MV_NETA_BM_CAP()) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 		if ((pp->pool_short != NULL) && (pp->pool_short != pp->pool_long)) {
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 		if (pp->pool_short != NULL) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 			/* Update number of buffers in existing pool (allocate or free) */
 			if (pp->pool_short_num > short_num)
 				mv_eth_pool_free(pp->pool_short->pool, pp->pool_short_num - short_num);
@@ -1199,7 +1202,7 @@ void mv_eth_link_status_print(int port)
 		link.linkup = mv_pon_link_status();
 #endif /* CONFIG_MV_PON */
 
-#ifdef CONFIG_SYNO_ARMADA
+#ifdef MY_ABC_HERE
 	if (link.linkup) {
 		printk(KERN_INFO "link up");
 		printk(KERN_INFO ", %s duplex", (link.duplex == MV_ETH_DUPLEX_FULL) ? "full" : "half");
@@ -1227,7 +1230,7 @@ void mv_eth_link_status_print(int port)
 			printk(KERN_CONT "10 Mbps\n");
 	} else
 		printk(KERN_CONT "link down\n");
-#endif /* CONFIG_SYNO_ARMADA */
+#endif /* MY_ABC_HERE */
 }
 
 static void mv_eth_rx_error(struct eth_port *pp, struct neta_rx_desc *rx_desc)
@@ -1447,10 +1450,10 @@ static struct sk_buff *mv_eth_skb_alloc(struct eth_port *pp, struct bm_pool *poo
 	mvOsCacheLineFlush(pp->dev->dev.parent, skb->head);
 #endif /* CONFIG_MV_ETH_BM_CPU */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 	/* Save skb magic(bit 31~2) and pool(bit 1~0) id */
 	MV_NETA_SKB_MAGIC_BPID_SET(skb, (MV_NETA_SKB_MAGIC(skb) | pool->pool));
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 
 	if (phys_addr)
 		*phys_addr = mvOsCacheInvalidate(pp->dev->dev.parent, skb->head, RX_BUF_SIZE(pool->pkt_size));
@@ -1462,11 +1465,11 @@ static struct sk_buff *mv_eth_skb_alloc(struct eth_port *pp, struct bm_pool *poo
 static inline struct bm_pool *mv_eth_skb_recycle_get_pool(struct sk_buff *skb)
 {
 	if (mv_eth_is_swf_recycle() && MV_NETA_SKB_RECYCLE_MAGIC_IS_OK(skb))
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 		return &mv_eth_pool[MV_NETA_SKB_BPID_GET(skb)];
 #else
 		return &mv_eth_pool[MV_NETA_SKB_RECYCLE_BPID_GET(skb)];
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 	else
 		return NULL;
 }
@@ -1667,25 +1670,25 @@ inline int mv_eth_refill(struct eth_port *pp, int rxq,
 	phys_addr_t phys_addr;
 	int pool_in_use = atomic_read(&pool->in_use);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	/* if BM is enabled, always invalidate the cache line of rx_desc, no matter of refill fail or success */
 	if (mv_eth_pool_bm(pool))
 		mvOsCacheLineInv(pp->dev->dev.parent, rx_desc);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	if (pool_in_use <= 0)
 		return 0;
 
 	if (mv_eth_is_swf_recycle()) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 		if (mv_eth_pool_bm(pool) && (pool_in_use < pool->in_use_thresh))
 			return 0;
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 		if (mv_eth_pool_bm(pool) && (pool_in_use < pool->in_use_thresh)) {
 			mvOsCacheLineInv(pp->dev->dev.parent, rx_desc);
 			return 0;
 		}
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 		skb = mv_eth_pool_get(pp, pool);
 		if (!skb)
@@ -1695,15 +1698,15 @@ inline int mv_eth_refill(struct eth_port *pp, int rxq,
 	/* No recycle -  alloc new skb */
 	if (!skb) {
 		skb = mv_eth_skb_alloc(pp, pool, &phys_addr, GFP_ATOMIC);
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 		if (!skb)
 			return 1;
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 		if (!skb) {
 			pool->missed++;
 			mv_eth_add_cleanup_timer(pp->cpu_config[smp_processor_id()]);
 		}
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	}
 
 	mv_eth_rxq_refill(pp, rxq, pool, skb, rx_desc);
@@ -1829,7 +1832,7 @@ static inline int mv_eth_rx(struct eth_port *pp, int rx_todo, int rxq, struct na
 
 		rx_status = rx_desc->status;
 		skb = (struct sk_buff *)rx_desc->bufCookie;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 		/* rx desc pool id field valid only when BM works */
 		pool_id = (MV_NETA_BM_CAP()) ? (NETA_RX_GET_BPID(rx_desc)) : (MV_NETA_SKB_BPID_GET(skb));
 #else
@@ -1838,7 +1841,7 @@ static inline int mv_eth_rx(struct eth_port *pp, int rx_todo, int rxq, struct na
 #else
 		pool_id = NETA_RX_GET_BPID(rx_desc);
 #endif
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 		pool = &mv_eth_pool[pool_id];
 
 		if (((rx_status & NETA_RX_FL_DESC_MASK) != NETA_RX_FL_DESC_MASK) ||
@@ -1891,11 +1894,11 @@ static inline int mv_eth_rx(struct eth_port *pp, int rx_todo, int rxq, struct na
 
 	/* Set skb recycle magic(bit 31~2) and pool(bit 1~0) id  if recycle is enabled */
 	if (mv_eth_is_swf_recycle())
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 		MV_NETA_SKB_MAGIC_BPID_SET(skb, (MV_NETA_SKB_MAGIC(skb) | pool->pool));
 #else
 		MV_NETA_SKB_RECYCLE_MAGIC_BPID_SET(skb, (MV_NETA_SKB_RECYCLE_MAGIC(skb) | pool->pool));
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 
 #if defined(CONFIG_MV_ETH_PNC) && defined(CONFIG_MV_ETH_RX_SPECIAL)
 		/* Special RX processing */
@@ -1908,11 +1911,11 @@ static inline int mv_eth_rx(struct eth_port *pp, int rx_todo, int rxq, struct na
 				err = mv_eth_refill(pp, rxq, pool, rx_desc);
 				if (err) {
 					pr_err("Linux processing - Can't refill\n");
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 					atomic_inc(&pp->rxq_ctrl[rxq].missed);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 					pp->rxq_ctrl[rxq].missed++;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 					rx_filled--;
 				}
 				continue;
@@ -1955,7 +1958,7 @@ static inline int mv_eth_rx(struct eth_port *pp, int rx_todo, int rxq, struct na
 		}
 
 		/* Refill processing: */
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 		if (mv_eth_pool_bm(pool)) {/* case: BM_CPU enabled */
 			err = mv_eth_refill(pp, rxq, pool, rx_desc);
 			if (err) {
@@ -1984,7 +1987,7 @@ static inline int mv_eth_rx(struct eth_port *pp, int rx_todo, int rxq, struct na
 				rx_filled--;
 			}
 		}
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 		err = mv_eth_refill(pp, rxq, pool, rx_desc);
 		if (err) {
 			printk(KERN_ERR "Linux processing - Can't refill\n");
@@ -1992,7 +1995,7 @@ static inline int mv_eth_rx(struct eth_port *pp, int rx_todo, int rxq, struct na
 			mv_eth_add_cleanup_timer(pp->cpu_config[smp_processor_id()]);
 			rx_filled--;
 		}
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	}
 
@@ -2072,7 +2075,7 @@ static int mv_eth_tx(struct sk_buff *skb, struct net_device *dev)
 	}
 	mv_eth_lock(txq_ctrl, flags);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 #ifdef CONFIG_MV_NETA_DEBUG_CODE
 	if (pp->flags & MV_ETH_F_DBG_TX) {
 		pr_info("\n%s - eth_tx_%lu: cpu=%d, in_intr=0x%lx, port=%d, txp=%d, txq=%d\n",
@@ -2082,7 +2085,7 @@ static int mv_eth_tx(struct sk_buff *skb, struct net_device *dev)
 		mvDebugMemDump(skb->data, 64, 1);
 	}
 #endif /* CONFIG_MV_NETA_DEBUG_CODE */
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 
 #ifdef CONFIG_MV_ETH_TSO
 	/* GSO/TSO */
@@ -2106,45 +2109,45 @@ static int mv_eth_tx(struct sk_buff *skb, struct net_device *dev)
 		frags = 0;
 		goto out;
 	}
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 	// do nothing
 #else
 	/* Don't use BM for Linux packets: NETA_TX_BM_ENABLE_MASK = 0 */
 	/* NETA_TX_PKT_OFFSET_MASK = 0 - for all descriptors */
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 	tx_cmd = mv_eth_skb_tx_csum(pp, skb);
 
 #ifdef CONFIG_MV_PON
 	tx_desc->hw_cmd = tx_spec.hw_cmd;
 #endif
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 	//do nothing
 #else
 	/* FIXME: beware of nonlinear --BK */
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 	tx_desc->dataSize = skb_headlen(skb);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 	//do nothing
 #else
 	tx_desc->bufPhysAddr = mvOsCacheFlush(pp->dev->dev.parent, skb->data, tx_desc->dataSize);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 
 	/* Record skb len in case skb is reset when recycle */
 	skb_len = skb->len;
 
 	if (frags == 1) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 		/* First and Last descriptor */
 #else
 		/*
 		 * First and Last descriptor
 		 */
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 #if defined(CONFIG_MV_ETH_BM_CPU) && defined(CONFIG_MV_NETA_SKB_RECYCLE)
 		struct bm_pool *pool = mv_eth_skb_recycle_get_pool(skb);
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 		int headroom = skb_headroom(skb);
 
 		if (pool && (headroom < NETA_TX_PKT_OFFSET_MAX) &&
@@ -2157,9 +2160,9 @@ static int mv_eth_tx(struct sk_buff *skb, struct net_device *dev)
 		if (pool && (atomic_read(&pool->in_use) > 0) && skb_recycle_check(skb, pool->pkt_size)) {
 			/* HW release buffer after tx finished */
 			tx_cmd |= NETA_TX_BM_ENABLE_MASK |
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 				  NETA_TX_BM_POOL_ID_MASK(pool->pool) |
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 				  NETA_TX_PKT_OFFSET_MASK(headroom));
 			txq_ctrl->shadow_txq[txq_ctrl->shadow_txq_put_i] = 0;
 			tx_desc->bufPhysAddr = mvOsCacheFlush(pp->dev->dev.parent, skb->head,
@@ -2168,27 +2171,27 @@ static int mv_eth_tx(struct sk_buff *skb, struct net_device *dev)
 				  NETA_TX_PKT_OFFSET_MASK(NET_SKB_PAD + MV_ETH_MH_SIZE);
 			txq_ctrl->shadow_txq[txq_ctrl->shadow_txq_put_i] = NULL;
 			tx_desc->bufPhysAddr = virt_to_phys(skb->head);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 
 			atomic_dec(&pool->in_use);
 			STAT_DBG(pool->stats.skb_recycled_ok++);
 		} else {
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 			/* SKB can't be recycled - Don't use BM to release buffer */
 			tx_desc->bufPhysAddr = mvOsCacheFlush(pp->dev->dev.parent, skb->data, tx_desc->dataSize);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 			txq_ctrl->shadow_txq[txq_ctrl->shadow_txq_put_i] = ((MV_ULONG) skb | MV_ETH_SHADOW_SKB);
 			if (pool && (atomic_read(&pool->in_use) > 0))
 				STAT_DBG(pool->stats.skb_recycled_err++);
 		}
 #else
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 		/* SKB recycle or BM is not supported - Don't use BM to release buffer */
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 		txq_ctrl->shadow_txq[txq_ctrl->shadow_txq_put_i] = ((MV_ULONG) skb | MV_ETH_SHADOW_SKB);
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 		tx_desc->bufPhysAddr = mvOsCacheFlush(pp->dev->dev.parent, skb->data, tx_desc->dataSize);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 #endif /* CONFIG_MV_ETH_BM_CPU && CONFIG_MV_NETA_SKB_RECYCLE */
 
 		if (tx_spec.flags & MV_ETH_F_NO_PAD)
@@ -2201,10 +2204,10 @@ static int mv_eth_tx(struct sk_buff *skb, struct net_device *dev)
 
 		mv_eth_shadow_inc_put(txq_ctrl);
 	} else {
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 		/* For Scatter-Gather buffers - Don't use BM to release buffer */
 		tx_desc->bufPhysAddr = mvOsCacheFlush(pp->dev->dev.parent, skb->data, tx_desc->dataSize);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 
 		/* First but not Last */
 		tx_cmd |= NETA_TX_F_DESC_MASK;
@@ -2228,7 +2231,7 @@ static int mv_eth_tx(struct sk_buff *skb, struct net_device *dev)
 
 #ifdef CONFIG_MV_NETA_DEBUG_CODE
 	if (pp->flags & MV_ETH_F_DBG_TX) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 		// do nothing
 #else
 		printk(KERN_ERR "\n");
@@ -2236,14 +2239,14 @@ static int mv_eth_tx(struct sk_buff *skb, struct net_device *dev)
 				dev->name, dev->stats.tx_packets, smp_processor_id(),
 				in_interrupt(), pp->port, tx_spec.txp, tx_spec.txq);
 		pr_info("\t skb=%p, head=%p, data=%p, size=%d\n", skb, skb->head, skb->data, skb_len);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 		mv_eth_tx_desc_print(tx_desc);
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 		// do nothing
 #else
 		/*mv_eth_skb_print(skb);*/
 		mvDebugMemDump(skb->data, 64, 1);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 	}
 #endif /* CONFIG_MV_NETA_DEBUG_CODE */
 
@@ -2261,11 +2264,11 @@ static int mv_eth_tx(struct sk_buff *skb, struct net_device *dev)
 out:
 	if (frags > 0) {
 		dev->stats.tx_packets++;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 		dev->stats.tx_bytes += skb_len;
 #else
 		dev->stats.tx_bytes += skb->len;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 	} else {
 		dev->stats.tx_dropped++;
 		dev_kfree_skb_any(skb);
@@ -2274,13 +2277,13 @@ out:
 #ifndef CONFIG_MV_NETA_TXDONE_ISR
 	if (txq_ctrl) {
 		if (txq_ctrl->txq_count >= mv_ctrl_txdone) {
-#if defined(CONFIG_SYNO_ARMADA) && !defined(CONFIG_MV_ETH_STAT_DIST)
+#if defined(MY_ABC_HERE) && !defined(CONFIG_MV_ETH_STAT_DIST)
 			// do nothing
-#else /* CONFIG_SYNO_ARMADA */
+#else /* MY_ABC_HERE */
 			u32 tx_done = mv_eth_txq_done(pp, txq_ctrl);
 
 			STAT_DIST((tx_done < pp->dist_stats.tx_done_dist_size) ? pp->dist_stats.tx_done_dist[tx_done]++ : 0);
-#endif /* CONFIG_SYNO_ARMADA */
+#endif /* MY_ABC_HERE */
 		}
 		/* If after calling mv_eth_txq_done, txq_ctrl->txq_count equals frags, we need to set the timer */
 		if ((txq_ctrl->txq_count > 0)  && (txq_ctrl->txq_count <= frags) && (frags > 0)) {
@@ -2388,11 +2391,11 @@ static inline int mv_eth_tso_build_hdr_desc(struct eth_port *pp, struct neta_tx_
 }
 
 static inline int mv_eth_tso_build_data_desc(struct eth_port *pp, struct neta_tx_desc *tx_desc, struct sk_buff *skb,
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 					     struct tx_queue *txq_ctrl, struct page *frag_page, int page_offset,
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 					     struct tx_queue *txq_ctrl, char *frag_ptr,
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 					     int frag_size, int data_left, int total_left)
 {
 	int size;
@@ -2400,11 +2403,11 @@ static inline int mv_eth_tso_build_data_desc(struct eth_port *pp, struct neta_tx
 	size = MV_MIN(frag_size, data_left);
 
 	tx_desc->dataSize = size;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	tx_desc->bufPhysAddr = mvOsCachePageFlush(pp->dev->dev.parent, frag_page, page_offset, size);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	tx_desc->bufPhysAddr = mvOsCacheFlush(pp->dev->dev.parent, frag_ptr, size);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	tx_desc->command = 0;
 	txq_ctrl->shadow_txq[txq_ctrl->shadow_txq_put_i] = 0;
 
@@ -2432,19 +2435,19 @@ int mv_eth_tx_tso(struct sk_buff *skb, struct net_device *dev,
 {
 	int frag = 0;
 	int total_len, hdr_len, size, frag_size, data_left;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	char *frag_ptr;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	int totalDescNum, totalBytes = 0;
 	struct neta_tx_desc *tx_desc;
 	MV_U16 ip_id;
 	MV_U32 tcp_seq = 0;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	struct page *frag_page = NULL;
 	MV_U32 frag_offset = 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	skb_frag_t *skb_frag_ptr;
 	const struct tcphdr *th = tcp_hdr(skb);
 	struct eth_port *priv = MV_ETH_PRIV(dev);
@@ -2479,12 +2482,12 @@ int mv_eth_tx_tso(struct sk_buff *skb, struct net_device *dev,
 	tcp_seq = ntohl(th->seq);
 
 	frag_size = skb_headlen(skb);
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	frag_page = virt_to_page(skb->data);
 	frag_offset = offset_in_page(skb->data);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	frag_ptr = skb->data;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	if (frag_size < hdr_len) {
 		printk(KERN_ERR "***** ERROR: frag_size=%d, hdr_len=%d\n", frag_size, hdr_len);
@@ -2492,31 +2495,31 @@ int mv_eth_tx_tso(struct sk_buff *skb, struct net_device *dev,
 	}
 
 	frag_size -= hdr_len;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	frag_offset += hdr_len;
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	frag_ptr += hdr_len;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	if (frag_size == 0) {
 		skb_frag_ptr = &skb_shinfo(skb)->frags[frag];
 
 		/* Move to next segment */
 		frag_size = skb_frag_ptr->size;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 		frag_offset = skb_frag_ptr->page_offset;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 #if LINUX_VERSION_CODE > KERNEL_VERSION(3, 1, 10)
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 		frag_page = skb_frag_ptr->page.p;
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 		frag_ptr = page_address(skb_frag_ptr->page.p) + skb_frag_ptr->page_offset;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 #else
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 		frag_page = skb_frag_ptr->page;
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 		frag_ptr = page_address(skb_frag_ptr->page) + skb_frag_ptr->page_offset;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 #endif
 		frag++;
 	}
@@ -2557,11 +2560,11 @@ int mv_eth_tx_tso(struct sk_buff *skb, struct net_device *dev,
 			txq_ctrl->txq_count++;
 
 			size = mv_eth_tso_build_data_desc(priv, tx_desc, skb, txq_ctrl,
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 							  frag_page, frag_offset, frag_size, data_left, total_len);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 							  frag_ptr, frag_size, data_left, total_len);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 			totalBytes += size;
 /*
 			printk(KERN_ERR "Data desc: tx_desc=%p, skb=%p, size=%d, frag_size=%d, data_left=%d\n",
@@ -2571,32 +2574,32 @@ int mv_eth_tx_tso(struct sk_buff *skb, struct net_device *dev,
 			tcp_seq += size;
 
 			frag_size -= size;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 			frag_offset += size;
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 			frag_ptr += size;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 			if ((frag_size == 0) && (frag < skb_shinfo(skb)->nr_frags)) {
 				skb_frag_ptr = &skb_shinfo(skb)->frags[frag];
 
 				/* Move to next segment */
 				frag_size = skb_frag_ptr->size;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 				frag_offset = skb_frag_ptr->page_offset;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 #if LINUX_VERSION_CODE > KERNEL_VERSION(3, 1, 10)
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 				frag_page = skb_frag_ptr->page.p;
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 				frag_ptr = page_address(skb_frag_ptr->page.p) + skb_frag_ptr->page_offset;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 #else
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 				frag_page = skb_frag_ptr->page;
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 				frag_ptr = page_address(skb_frag_ptr->page) + skb_frag_ptr->page_offset;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 #endif
 				frag++;
 			}
@@ -2767,19 +2770,19 @@ static void mv_eth_tx_frag_process(struct eth_port *pp, struct sk_buff *skb, str
 		tx_desc->dataSize = frag->size;
 		tx_desc->bufPhysAddr =
 #if LINUX_VERSION_CODE > KERNEL_VERSION(3, 1, 10)
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 			mvOsCachePageFlush(pp->dev->dev.parent, frag->page.p, frag->page_offset, tx_desc->dataSize);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 			mvOsCacheFlush(pp->dev->dev.parent, page_address(frag->page.p) + frag->page_offset,
 			tx_desc->dataSize);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 #else
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 			mvOsCachePageFlush(pp->dev->dev.parent, frag->page, frag->page_offset, tx_desc->dataSize);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 			mvOsCacheFlush(pp->dev->dev.parent, page_address(frag->page) + frag->page_offset,
 			tx_desc->dataSize);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 #endif
 		if (i == (skb_shinfo(skb)->nr_frags - 1)) {
 			/* Last descriptor */
@@ -3028,11 +3031,11 @@ void	*mv_eth_bm_pool_create(int pool, int capacity, MV_ULONG *pPhysAddr)
 		void				*pVirt;
 		MV_STATUS			status;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 		pVirt = mvOsIoUncachedMalloc(neta_global_dev->parent, sizeof(MV_U32) * capacity, &physAddr, NULL);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 		pVirt = mvOsIoUncachedMalloc(NULL, sizeof(MV_U32) * capacity, &physAddr, NULL);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 		if (pVirt == NULL) {
 			mvOsPrintf("%s: Can't allocate %d bytes for Long pool #%d\n",
 					__func__, MV_BM_POOL_CAP_MAX * sizeof(MV_U32), pool);
@@ -3107,9 +3110,9 @@ static MV_STATUS mv_eth_pool_create(int pool, int capacity)
 	bm_pool->buf_num = 0;
 	atomic_set(&bm_pool->in_use, 0);
 	spin_lock_init(&bm_pool->lock);
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	atomic_set(&bm_pool->missed, 0);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	return MV_OK;
 }
@@ -3229,7 +3232,7 @@ void mv_eth_link_event(struct eth_port *pp, int print)
 	}
 
 	if (print) {
-#ifdef CONFIG_SYNO_ARMADA
+#ifdef MY_ABC_HERE
 		if (dev)
 			printk(KERN_INFO "%s: ", dev->name);
 		else
@@ -3239,7 +3242,7 @@ void mv_eth_link_event(struct eth_port *pp, int print)
 			printk(KERN_ERR "%s: ", dev->name);
 		else
 			printk(KERN_ERR "%s: ", "none");
-#endif /* CONFIG_SYNO_ARMADA */
+#endif /* MY_ABC_HERE */
 
 		mv_eth_link_status_print(pp->port);
 	}
@@ -3575,16 +3578,16 @@ static int mv_eth_load_network_interfaces(struct platform_device *pdev)
 	struct mv_neta_pdata *plat_data = (struct mv_neta_pdata *)pdev->dev.platform_data;
 
 	port = pdev->id;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	if (plat_data->tx_csum_limit < MV_ETH_TX_CSUM_MIN_SIZE || plat_data->tx_csum_limit > MV_ETH_TX_CSUM_MAX_SIZE) {
 		pr_info("WARN: Invalid FIFO size %d on port-%d, minimal size 2K will be used as default\n",
 											plat_data->tx_csum_limit, port);
 		plat_data->tx_csum_limit = MV_ETH_TX_CSUM_MIN_SIZE;
 	}
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	if (plat_data->tx_csum_limit == 0)
 		plat_data->tx_csum_limit = MV_ETH_TX_CSUM_MAX_SIZE;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	pr_info("  o Loading network interface(s) for port #%d: cpu_mask=0x%x, tx_csum_limit=%d\n",
 			port, plat_data->cpu_mask, plat_data->tx_csum_limit);
@@ -4719,7 +4722,7 @@ static struct mv_neta_pdata *mv_plat_data_get(struct platform_device *pdev)
 	}
 
 	/* build virtual port base address */
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 	if (!port_vbase[pdev->id]) {
 		base_addr = devm_ioremap(&pdev->dev, res->start, resource_size(res));
 		if (!base_addr) {
@@ -4767,7 +4770,7 @@ static struct mv_neta_pdata *mv_plat_data_get(struct platform_device *pdev)
 		return NULL;
 	}
 	port_vbase[pdev->id] = (int)base_addr;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 
 	/* get IRQ number */
 	if (pdev->dev.of_node) {
@@ -4811,15 +4814,15 @@ static struct mv_neta_pdata *mv_plat_data_get(struct platform_device *pdev)
 		return NULL;
 	}
 	/* Get TX checksum offload limit */
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	if (of_property_read_u32(np, "tx-csum-limit", &plat_data->tx_csum_limit)) {
 		pr_err("Could not get FIFO size, tx-csum-limit\n");
 		return NULL;
 	}
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	if (of_property_read_u32(np, "tx-csum-limit", &plat_data->tx_csum_limit))
 		plat_data->tx_csum_limit = MV_ETH_TX_CSUM_MAX_SIZE;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	/* Initialize PnC and BM module */
 	if (mv_eth_pnc_bm_init(plat_data)) {
@@ -4849,11 +4852,11 @@ static struct mv_neta_pdata *mv_plat_data_get(struct platform_device *pdev)
 	}
 
 	/* Global Parameters */
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 	// do nothing
 #else
 	plat_data->tclk = 166666667;    /*mvBoardTclkGet();*/
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 	plat_data->max_port = mv_eth_port_num_get(pdev);
 
 	/* Per port parameters */
@@ -4878,9 +4881,9 @@ static struct mv_neta_pdata *mv_plat_data_get(struct platform_device *pdev)
 
 	clk = devm_clk_get(&pdev->dev, 0);
 	clk_prepare_enable(clk);
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 	plat_data->tclk = clk_get_rate(clk);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 
 	return plat_data;
 }
@@ -4915,7 +4918,7 @@ static int mv_eth_probe(struct platform_device *pdev)
 	neta_cap_bitmap |= MV_ETH_CAP_PNC;
 #endif
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 #ifdef CONFIG_MV_ETH_BM_CPU
 	neta_cap_bitmap |= MV_ETH_CAP_BM;
 #endif
@@ -4923,7 +4926,7 @@ static int mv_eth_probe(struct platform_device *pdev)
 #ifdef CONFIG_MV_ETH_BM
 	neta_cap_bitmap |= MV_ETH_CAP_BM;
 #endif
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 
 #ifdef CONFIG_MV_ETH_HWF
 	neta_cap_bitmap |= MV_ETH_CAP_HWF;
@@ -5075,9 +5078,9 @@ struct net_device *mv_eth_netdev_init(struct platform_device *pdev)
 			printk(KERN_ERR "    o %s, ifindex = %d, GbE port = %d", dev->name, dev->ifindex, pp->port);
 
 			printk(KERN_CONT "\n");
-#if defined(CONFIG_SYNO_ARMADA_SUPPORT_WOL)
+#if defined(MY_ABC_HERE)
 			printk("    o %s, phy chipid = %x, Support WOL = %d\n", dev->name, pp->phy_chip, syno_wol_support(pp));
-#endif /* CONFIG_SYNO_ARMADA_SUPPORT_WOL */
+#endif /* MY_ABC_HERE */
 		}
 	}
 	platform_set_drvdata(pdev, pp->dev);
@@ -5162,10 +5165,10 @@ int mv_eth_hal_init(struct eth_port *pp)
 		rxq_ctrl->rxq_size = CONFIG_MV_ETH_RXQ_DESC;
 		rxq_ctrl->rxq_pkts_coal = CONFIG_MV_ETH_RX_COAL_PKTS;
 		rxq_ctrl->rxq_time_coal = CONFIG_MV_ETH_RX_COAL_USEC;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 		atomic_set(&rxq_ctrl->missed, 0);
 		atomic_set(&rxq_ctrl->refill_stop, 0);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	}
 
 	if (pp->flags & MV_ETH_F_MH)
@@ -5667,12 +5670,12 @@ int mv_eth_txp_reset(int port, int txp)
 			int mode, rx_port;
 
 			mode = mv_eth_ctrl_txq_mode_get(pp->port, txp, queue, &rx_port);
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 			/* The queue state is free does not mean the queue was not ever used */
 			if (mode != MV_ETH_TXQ_HWF) {
 #else
 			if (mode == MV_ETH_TXQ_CPU) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 				/* Free all buffers in TXQ */
 				mv_eth_txq_done_force(pp, txq_ctrl);
 				/* reset txq */
@@ -5680,20 +5683,20 @@ int mv_eth_txp_reset(int port, int txp)
 				txq_ctrl->shadow_txq_get_i = 0;
 			}
 #ifdef CONFIG_MV_ETH_HWF
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 			else if (MV_NETA_HWF_CAP())
 #else
 			else if (mode == MV_ETH_TXQ_HWF && MV_NETA_HWF_CAP())
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 				mv_eth_txq_hwf_clean(pp, txq_ctrl, rx_port);
 #endif /* CONFIG_MV_ETH_HWF */
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 			// do nothing
 #else
 			else
 				printk(KERN_ERR "%s: port=%d, txp=%d, txq=%d is not in use\n",
 						__func__, pp->port, txp, queue);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 		}
 	}
 	mvNetaTxpReset(port, txp);
@@ -5715,17 +5718,17 @@ int mv_eth_rx_reset(int port)
 #ifndef CONFIG_MV_ETH_BM_CPU
 	{
 		for (rxq = 0; rxq < CONFIG_MV_ETH_RXQ; rxq++) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 			struct sk_buff *skb;
 #else
 			struct eth_pbuf *pkt;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 			struct neta_rx_desc *rx_desc;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 			// do nothing
 #else
 			struct bm_pool *pool;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 			int i, rx_done;
 			MV_NETA_RXQ_CTRL *rx_ctrl = pp->rxq_ctrl[rxq].q;
 
@@ -5742,25 +5745,25 @@ int mv_eth_rx_reset(int port)
 				mvNetaRxqDescSwap(rx_desc);
 #endif /* MV_CPU_BE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 				skb = (struct sk_buff *)rx_desc->bufCookie;
 				mv_eth_pool_put(pp->pool_long, skb);
 #else
 				pkt = (struct eth_pbuf *)rx_desc->bufCookie;
 				pool = &mv_eth_pool[pkt->pool];
 				mv_eth_pool_put(pool, pkt);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 			}
 		}
 	}
 #else
 	if (!MV_NETA_BM_CAP()) {
 		for (rxq = 0; rxq < CONFIG_MV_ETH_RXQ; rxq++) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 			struct sk_buff *skb;
 #else
 			struct eth_pbuf *pkt;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 			struct neta_rx_desc *rx_desc;
 			struct bm_pool *pool;
 			int i, rx_done;
@@ -5778,7 +5781,7 @@ int mv_eth_rx_reset(int port)
 #if defined(MV_CPU_BE)
 				mvNetaRxqDescSwap(rx_desc);
 #endif /* MV_CPU_BE */
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 				skb = (struct sk_buff *)rx_desc->bufCookie;
 				if (pp->pool_short && (skb->data_len <= pp->pool_short->pkt_size))
 					pool = pp->pool_short;
@@ -5789,7 +5792,7 @@ int mv_eth_rx_reset(int port)
 				pkt = (struct eth_pbuf *)rx_desc->bufCookie;
 				pool = &mv_eth_pool[pkt->pool];
 				mv_eth_pool_put(pool, pkt);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 			}
 		}
 	}
@@ -6385,15 +6388,15 @@ static void mv_eth_cleanup_timer_callback(unsigned long data)
 {
 	struct cpu_ctrl *cpuCtrl = (struct cpu_ctrl *)data;
 	struct eth_port *pp = cpuCtrl->pp;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	struct sk_buff *skb;
 	struct bm_pool *pool;
 	struct neta_rx_desc *rx_desc;
 	phys_addr_t pa;
 	int index, refill_ok;
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	struct net_device *dev = pp->dev;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	STAT_INFO(pp->stats.cleanup_timer++);
 
@@ -6410,7 +6413,7 @@ static void mv_eth_cleanup_timer_callback(unsigned long data)
 	/* FIXME: check bm_pool->missed and pp->rxq_ctrl[rxq].missed counters and allocate */
 	/* re-add timer if necessary (check bm_pool->missed and pp->rxq_ctrl[rxq].missed   */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	if (MV_NETA_BM_CAP()) {/* BM enabled, allocate skb with pool->missed, and put into BM pool */
 		for (index = 0; index < MV_ETH_BM_POOLS; index++) {
 			pool = &mv_eth_pool[index];
@@ -6464,7 +6467,7 @@ static void mv_eth_cleanup_timer_callback(unsigned long data)
 			}
 		}
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 }
 
 void mv_eth_mac_show(int port)
@@ -6730,9 +6733,9 @@ static int mv_eth_priv_init(struct eth_port *pp, int port)
 	int cpu, i;
 	struct cpu_ctrl	*cpuCtrl;
 	u8	*ext_buf;
-#if defined(CONFIG_SYNO_ARMADA_SUPPORT_WOL)
+#if defined(MY_ABC_HERE)
 	MV_U16 phy_id_0, phy_id_1;
-#endif /* CONFIG_SYNO_ARMADA_SUPPORT_WOL */
+#endif /* MY_ABC_HERE */
 
 	/* Default field per cpu initialization */
 	for (i = 0; i < nr_cpu_ids; i++) {
@@ -6854,7 +6857,7 @@ static int mv_eth_priv_init(struct eth_port *pp, int port)
 		       pp->port, sizeof(u32) * (pp->txp_num * CONFIG_MV_ETH_TXQ * CONFIG_MV_ETH_TXQ_DESC + 1));
 #endif /* CONFIG_MV_ETH_STAT_DIST */
 
-#if defined(CONFIG_SYNO_ARMADA_SUPPORT_WOL)
+#if defined(MY_ABC_HERE)
 	pp->phy_id =  pp->plat_data->phy_addr;
 	pp->wol = 0;
 	if (mv_eth_tool_read_phy_reg(pp->phy_id, 0, MII_PHYSID1, &phy_id_0) ||
@@ -6869,7 +6872,7 @@ static int mv_eth_priv_init(struct eth_port *pp, int port)
 			pp->phy_chip = (phy_id_0 & 0xffff) << 16 | (phy_id_1 & 0xffff);
 		}
 	}
-#endif /* CONFIG_SYNO_ARMADA_SUPPORT_WOL */
+#endif /* MY_ABC_HERE */
 	return 0;
 }
 
@@ -6906,16 +6909,16 @@ void mv_eth_pool_status_print(int pool)
 	printk(KERN_ERR "\nRX Pool #%d: pkt_size=%d, BM-HW support - %s\n",
 	       pool, bm_pool->pkt_size, mv_eth_pool_bm(bm_pool) ? "Yes" : "No");
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	pr_info("bm_pool=%p, stack=%p, capacity=%d, buf_num=%d, port_map=0x%x missed=%d, in_use=%d, in_use_thresh=%u\n",
 		bm_pool->bm_pool, bm_pool->stack, bm_pool->capacity, bm_pool->buf_num,
 		bm_pool->port_map, atomic_read(&bm_pool->missed),
 		atomic_read(&bm_pool->in_use), bm_pool->in_use_thresh);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	pr_info("bm_pool=%p, stack=%p, capacity=%d, buf_num=%d, port_map=0x%x missed=%d, in_use=%u, in_use_thresh=%u\n",
 		bm_pool->bm_pool, bm_pool->stack, bm_pool->capacity, bm_pool->buf_num,
 		bm_pool->port_map, bm_pool->missed, bm_pool->in_use, bm_pool->in_use_thresh);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 #ifdef CONFIG_MV_ETH_STAT_ERR
 	printk(KERN_ERR "Errors: skb_alloc_oom=%u, stack_empty=%u, stack_full=%u\n",
@@ -7208,9 +7211,9 @@ void mv_eth_port_stats_print(unsigned int port)
 	pr_info("\n");
 	printk(KERN_ERR "tx_done_event.................%10u\n", stat->tx_done);
 	printk(KERN_ERR "cleanup_timer_event...........%10u\n", stat->cleanup_timer);
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	pr_info("skb from cleanup timer........%10u\n", stat->cleanup_timer_skb);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	printk(KERN_ERR "link..........................%10u\n", stat->link);
 	printk(KERN_ERR "netdev_stop...................%10u\n", stat->netdev_stop);
 #ifdef CONFIG_MV_ETH_RX_SPECIAL
@@ -7232,15 +7235,15 @@ void mv_eth_port_stats_print(unsigned int port)
 		rxq_fill = stat->rxq_fill[queue];
 #endif /* CONFIG_MV_ETH_STAT_DBG */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 		pr_info("%3d:  %10u    %10u          %d\n",
 			queue, rxq_ok, rxq_fill,
 			atomic_read(&pp->rxq_ctrl[queue].missed));
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 		printk(KERN_ERR "%3d:  %10u    %10u          %d\n",
 			queue, rxq_ok, rxq_fill,
 			pp->rxq_ctrl[queue].missed);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 		total_rx_ok += rxq_ok;
 		total_rx_fill_ok += rxq_fill;
 	}
@@ -7303,21 +7306,21 @@ void mv_eth_port_stats_print(unsigned int port)
 			memset(&txq_ctrl->stats, 0, sizeof(txq_ctrl->stats));
 		}
 	}
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	pr_info("\n");
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	printk(KERN_ERR "\n\n");
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	memset(stat, 0, sizeof(struct port_stats));
 
 	/* RX pool statistics */
 #ifdef CONFIG_MV_ETH_BM_CPU
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	if (MV_NETA_BM_CAP() && pp->pool_short && (pp->pool_short != pp->pool_long))
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	if (MV_NETA_BM_CAP() && pp->pool_short)
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 		mv_eth_pool_status_print(pp->pool_short->pool);
 #endif /* CONFIG_MV_ETH_BM_CPU */
 
@@ -7763,7 +7766,7 @@ static int mv_eth_remove(struct platform_device *pdev)
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_ARMADA_SUPPORT_WOL)
+#if defined(MY_ABC_HERE)
 void syno_mv_net_setup_wol(void)
 {
 	int i = 0, j = 0;
@@ -7810,14 +7813,14 @@ void syno_mv_net_setup_wol(void)
 		}
 	}
 }
-#endif /* CONFIG_SYNO_ARMADA_SUPPORT_WOL */
+#endif /* MY_ABC_HERE */
 
 static void mv_eth_shutdown(struct platform_device *pdev)
 {
 	printk(KERN_INFO "Shutting Down Marvell Ethernet Driver\n");
-#if defined(CONFIG_SYNO_ARMADA_SUPPORT_WOL)
+#if defined(MY_ABC_HERE)
 	syno_mv_net_setup_wol();
-#endif /* CONFIG_SYNO_ARMADA_SUPPORT_WOL */
+#endif /* MY_ABC_HERE */
 }
 
 #ifdef CONFIG_OF
@@ -7864,9 +7867,9 @@ module_platform_driver(mv_eth_driver);
 static int __init mv_eth_init_module(void)
 {
 	int err = platform_driver_register(&mv_eth_driver);
-#if defined(CONFIG_SYNO_ARMADA_SUPPORT_WOL)
+#if defined(MY_ABC_HERE)
 	spin_lock_init(&mii_lock);
-#endif /* CONFIG_SYNO_ARMADA_SUPPORT_WOL */
+#endif /* MY_ABC_HERE */
 
 	return err;
 }

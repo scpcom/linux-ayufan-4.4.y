@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -79,13 +82,13 @@ static ssize_t mv_eth_3_store(struct device *dev,
 	err = p = i = v = 0;
 	sscanf(buf, "%d %d %d", &p, &i, &v);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 	/*check whether the port is valid*/
 	if (mv_eth_port_by_id(p) == NULL) {
 		pr_err("%s: port %d is invalid\n", __func__, p);
 		return -EINVAL;
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 
 	local_irq_save(flags);
 
@@ -122,13 +125,13 @@ static ssize_t mv_eth_4_store(struct device *dev,
 	err = p = txp = txq = v = 0;
 	sscanf(buf, "%d %d %d %d", &p, &txp, &txq, &v);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 	/*check whether the port is valid*/
 	if (mv_eth_port_by_id(p) == NULL) {
 		pr_err("%s: port %d is invalid\n", __func__, p);
 		return -EINVAL;
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 
 	local_irq_save(flags);
 

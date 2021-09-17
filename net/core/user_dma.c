@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright(c) 2004 - 2006 Intel Corporation. All rights reserved.
  * Portions based on net/core/datagram.c and copyrighted by their authors.
@@ -31,15 +34,15 @@
 #include <net/tcp.h>
 #include <net/netdma.h>
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
-#ifdef CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
+#if defined(MY_DEF_HERE)
+#ifdef MY_DEF_HERE
 #define NET_DMA_DEFAULT_COPYBREAK 8192
-#else /* CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE */
+#else /* MY_DEF_HERE */
 #define NET_DMA_DEFAULT_COPYBREAK  (1 << 20) /* don't enable NET_DMA by default */
-#endif /* CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE */
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
+#else /* MY_DEF_HERE */
 #define NET_DMA_DEFAULT_COPYBREAK 4096
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 int sysctl_tcp_dma_copybreak = NET_DMA_DEFAULT_COPYBREAK;
 EXPORT_SYMBOL(sysctl_tcp_dma_copybreak);
@@ -60,7 +63,7 @@ int dma_skb_copy_datagram_iovec(struct dma_chan *chan,
 {
 	int start = skb_headlen(skb);
 	int i, copy = start - offset;
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	dma_cookie_t cookie = 0;
 	struct sg_table	*dst_sgt;
 	struct sg_table	*src_sgt;
@@ -70,15 +73,15 @@ int dma_skb_copy_datagram_iovec(struct dma_chan *chan,
 	int		src_sg_len = skb_shinfo(skb)->nr_frags;
 	size_t	dst_len = len;
 	size_t	dst_offset = offset;
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	struct sk_buff *frag_iter;
 	dma_cookie_t cookie = 0;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
-#ifdef CONFIG_SYNO_ALPINE_FIX_DMA_RECVFILE
+#endif /* MY_DEF_HERE */
+#ifdef MY_DEF_HERE
 	int retry_limit = 10;
-#endif /* CONFIG_SYNO_ALPINE_FIX_DMA_RECVFILE */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	pr_debug("%s %d copy %d len %d nr_iovecs %d skb frags %d\n",
 			__func__, __LINE__, copy, len, pinned_list->nr_iovecs,
 			src_sg_len);
@@ -93,13 +96,13 @@ int dma_skb_copy_datagram_iovec(struct dma_chan *chan,
 	dst_sg = dst_sgt->sgl;
 	src_sg = src_sgt->sgl;
 	src_sg_len = 0;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	/* Copy header. */
 	if (copy > 0) {
 		if (copy > len)
 			copy = len;
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 		sg_set_buf(src_sg, skb->data + offset, copy);
 		pr_debug("%s %d: add src buf page %p. addr %p len 0x%x\n", __func__,
 				__LINE__, virt_to_page(skb->data),
@@ -111,7 +114,7 @@ int dma_skb_copy_datagram_iovec(struct dma_chan *chan,
 			goto fill_dst_sg;
 		offset += copy;
 		src_sg = sg_next(src_sg);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 		cookie = dma_memcpy_to_iovec(chan, to, pinned_list,
 					    skb->data + offset, copy);
 		if (cookie < 0)
@@ -120,7 +123,7 @@ int dma_skb_copy_datagram_iovec(struct dma_chan *chan,
 		if (len == 0)
 			goto end;
 		offset += copy;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	}
 
 	/* Copy paged appendix. Hmm... why does this look so complicated? */
@@ -138,7 +141,7 @@ int dma_skb_copy_datagram_iovec(struct dma_chan *chan,
 			if (copy > len)
 				copy = len;
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 			sg_set_page(src_sg, page, copy, frag->page_offset +
 					offset - start);
 			pr_debug("%s %d: add src buf [%d] page %p. len 0x%x\n", __func__,
@@ -148,7 +151,7 @@ int dma_skb_copy_datagram_iovec(struct dma_chan *chan,
 			len -= copy;
 			if (len == 0)
 				break;
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 			cookie = dma_memcpy_pg_to_iovec(chan, to, pinned_list, page,
 					frag->page_offset + offset - start, copy);
 			if (cookie < 0)
@@ -156,26 +159,26 @@ int dma_skb_copy_datagram_iovec(struct dma_chan *chan,
 			len -= copy;
 			if (len == 0)
 				goto end;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 			offset += copy;
 		}
 		start = end;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 fill_dst_sg:
 	dst_sg_len = dma_memcpy_fill_sg_from_iovec(chan, to, pinned_list, dst_sg, dst_offset, dst_len);
 	BUG_ON(dst_sg_len <= 0);
 
-#ifdef CONFIG_SYNO_ALPINE_FIX_DMA_RECVFILE
+#ifdef MY_DEF_HERE
 retry:
-#endif /* CONFIG_SYNO_ALPINE_FIX_DMA_RECVFILE */
+#endif /* MY_DEF_HERE */
 	cookie = dma_async_memcpy_sg_to_sg(chan,
 					dst_sgt->sgl,
 					dst_sg_len,
 					src_sgt->sgl,
 					src_sg_len);
-#ifdef CONFIG_SYNO_ALPINE_FIX_DMA_RECVFILE
+#ifdef MY_DEF_HERE
 	if (unlikely(cookie == -ENOMEM)) {
 		if (retry_limit-- > 0) {
 			udelay(50);
@@ -184,8 +187,8 @@ retry:
 			printk(KERN_ERR "Cannot retrieve DMA buffer!\n");
 		}
 	}
-#endif /* CONFIG_SYNO_ALPINE_FIX_DMA_RECVFILE */
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
+#else /* MY_DEF_HERE */
 	skb_walk_frags(skb, frag_iter) {
 		int end;
 
@@ -211,16 +214,16 @@ retry:
 	}
 
 end:
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	if (!len) {
 		skb->dma_cookie = cookie;
 		return cookie;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 // do nothing
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 fault:
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	return -EFAULT;
 }

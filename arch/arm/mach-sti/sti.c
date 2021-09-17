@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2013 STMicroelectronics Limited
  * Author: Srinivas Kandagatla <srinivas.kandagatla@st.com>
@@ -24,12 +27,12 @@
 #include <linux/of.h>
 #include <linux/of_fdt.h>
 
-#if defined(CONFIG_SYNO_MONACO)
+#if defined(MY_DEF_HERE)
 #include <linux/fs.h>
 #include <linux/uaccess.h>
 #include <linux/delay.h>
 
-#if defined(CONFIG_SYNO_MONACO_SUPPORT_WOL)
+#if defined(MY_DEF_HERE)
 extern int (*syno_standby_power_enable)(void);
 #endif
 
@@ -72,7 +75,7 @@ static void synology_power_off(void)
 		writel(1, microp_base + 0x10); /* int */
 		writel(0x1189, microp_base + 0x0c); /* ctrl */
 
-#if defined(CONFIG_SYNO_MONACO_SUPPORT_WOL)
+#if defined(MY_DEF_HERE)
 		if (NULL != syno_standby_power_enable) {
 			if (syno_standby_power_enable())
 				writel('l', microp_base + 0x4);
@@ -91,7 +94,7 @@ END:
 
 }
 
-#endif /* CONFIG_SYNO_MONACO */
+#endif /* MY_DEF_HERE */
 /*
  * Temporary function to enable clocks in ClockgenTel:
  * -VCO to 540 MHz
@@ -199,17 +202,17 @@ void __init sti_init_machine_late(void)
 		gpio_request_one(TSOUT1_BYTECLK_GPIO,
 			GPIOF_OUT_INIT_LOW, "tsout1_byteclk");
 
-#if defined(CONFIG_SYNO_MONACO)
+#if defined(MY_DEF_HERE)
 	pm_power_off = synology_power_off;
 #endif
 }
 
 void __init sti_init_machine(void)
 {
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 	struct platform_device_info devinfo = { .name = "cpufreq-cpu0", };
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	struct device *parent = NULL;
 
 	parent = sti_soc_device_init();
@@ -218,13 +221,13 @@ void __init sti_init_machine(void)
 
 	if (of_machine_is_compatible("st,stid127"))
 		stid127_setup_clockgentel();
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 
 	platform_device_register_full(&devinfo);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 }
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 static int sti_register_cpufreqcpu0(void)
 {
 	struct platform_device_info devinfo = { .name = "cpufreq-cpu0", };
@@ -233,4 +236,4 @@ static int sti_register_cpufreqcpu0(void)
 	return 0;
 }
 late_initcall(sti_register_cpufreqcpu0);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Probe module for 8250/16550-type PCI serial ports.
  *
@@ -1557,7 +1560,7 @@ pci_xr17v35x_setup(struct serial_private *priv,
 	 * Setup Multipurpose Input/Output pins.
 	 */
 
-#ifdef CONFIG_SYNO_XR17V35X_SERIAL
+#ifdef MY_DEF_HERE
 	if (idx == 0) {
 		writeb(0x01, p + 0x8f); /*MPIOINT[7:0]*/
 		writeb(0x00, p + 0x90); /*MPIOLVL[7:0]*/

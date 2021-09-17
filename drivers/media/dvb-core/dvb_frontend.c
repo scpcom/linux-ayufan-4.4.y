@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * dvb_frontend.c: DVB frontend tuning interface/thread
  *
@@ -1031,10 +1034,10 @@ static struct dtv_cmds_h dtv_cmds[DTV_MAX_COMMAND + 1] = {
 	_DTV_CMD(DTV_DVBT2_PLP_ID_LEGACY, 1, 0),
 	_DTV_CMD(DTV_LNA, 1, 0),
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	_DTV_CMD(DTV_RF_INPUT_SOURCE_SELECT, 1, 0),
 
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	/* Get */
 	_DTV_CMD(DTV_DISEQC_SLAVE_REPLY, 0, 1),
 	_DTV_CMD(DTV_API_VERSION, 0, 0),
@@ -1057,10 +1060,10 @@ static struct dtv_cmds_h dtv_cmds[DTV_MAX_COMMAND + 1] = {
 	_DTV_CMD(DTV_ATSCMH_SCCC_CODE_MODE_B, 0, 0),
 	_DTV_CMD(DTV_ATSCMH_SCCC_CODE_MODE_C, 0, 0),
 	_DTV_CMD(DTV_ATSCMH_SCCC_CODE_MODE_D, 0, 0),
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	_DTV_CMD(DTV_RF_INPUT_SOURCE_MAX, 0, 0),
 
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 	/* Statistics API */
 	_DTV_CMD(DTV_STAT_SIGNAL_STRENGTH, 0, 0),
@@ -1461,11 +1464,11 @@ static int dtv_property_process_get(struct dvb_frontend *fe,
 		tvp->u.data = c->lna;
 		break;
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	case DTV_RF_INPUT_SOURCE_MAX:
 		tvp->u.data = c->rf_input_max;
 		break;
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 	/* Fill quality measures */
 	case DTV_STAT_SIGNAL_STRENGTH:
@@ -1897,14 +1900,14 @@ static int dtv_property_process_set(struct dvb_frontend *fe,
 		if (fe->ops.set_lna)
 			r = fe->ops.set_lna(fe);
 		break;
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 
 	case DTV_RF_INPUT_SOURCE_SELECT:
 		c->rf_input_src = tvp->u.data;
 		if (fe->ops.set_rf_input_src)
 			r = fe->ops.set_rf_input_src(fe);
 		break;
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 	default:
 		return -EINVAL;

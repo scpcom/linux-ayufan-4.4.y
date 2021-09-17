@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Driver for Marvell NETA network card for Armada XP and Armada 370 SoCs.
  *
@@ -1365,11 +1368,11 @@ static void mvneta_rxq_drop_pkts(struct mvneta_port *pp,
 
 		dev_kfree_skb_any(skb);
 		dma_unmap_single(pp->dev->dev.parent, rx_desc->buf_phys_addr,
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 				 MVNETA_RX_BUF_SIZE(pp->pkt_size), DMA_FROM_DEVICE);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 				 rx_desc->data_size, DMA_FROM_DEVICE);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	}
 
 	if (rx_done)
@@ -1417,11 +1420,11 @@ static int mvneta_rx(struct mvneta_port *pp, int rx_todo,
 		}
 
 		dma_unmap_single(pp->dev->dev.parent, rx_desc->buf_phys_addr,
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 				 MVNETA_RX_BUF_SIZE(pp->pkt_size), DMA_FROM_DEVICE);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 				 rx_desc->data_size, DMA_FROM_DEVICE);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 		rx_bytes = rx_desc->data_size -
 			(ETH_FCS_LEN + MVNETA_MH_SIZE);
@@ -2354,17 +2357,17 @@ static int mvneta_mdio_probe(struct mvneta_port *pp)
 {
 	struct phy_device *phy_dev;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	if (pp->phy_node)
 		phy_dev = of_phy_connect(pp->dev, pp->phy_node, mvneta_adjust_link, 0,
 					 pp->phy_interface);
 	else
 		phy_dev = of_phy_connect_fixed_link(pp->dev, mvneta_adjust_link,
 						    pp->phy_interface);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	phy_dev = of_phy_connect(pp->dev, pp->phy_node, mvneta_adjust_link, 0,
 				 pp->phy_interface);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	if (!phy_dev) {
 		netdev_err(pp->dev, "could not find the PHY\n");
 		return -ENODEV;
@@ -2715,7 +2718,7 @@ static int mvneta_probe(struct platform_device *pdev)
 
 	phy_node = of_parse_phandle(dn, "phy", 0);
 	if (!phy_node) {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		/* No 'phy' found, see if we have a 'fixed-link'
 		 * property */
 		err = of_phy_register_fixed_link(dn);
@@ -2723,11 +2726,11 @@ static int mvneta_probe(struct platform_device *pdev)
 			dev_err(&pdev->dev, "no 'phy' or 'fixed-link' properties\n");
 			goto err_free_irq;
 		}
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		dev_err(&pdev->dev, "no associated PHY\n");
 		err = -ENODEV;
 		goto err_free_irq;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	}
 
 	phy_mode = of_get_phy_mode(dn);
@@ -2842,11 +2845,11 @@ static int mvneta_remove(struct platform_device *pdev)
 	irq_dispose_mapping(dev->irq);
 	free_netdev(dev);
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
-#else /* CONFIG_SYNO_LSP_MONACO */
+#if defined (MY_DEF_HERE)
+#else /* MY_DEF_HERE */
 	platform_set_drvdata(pdev, NULL);
 
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	return 0;
 }
 

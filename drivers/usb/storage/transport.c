@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* Driver for USB Mass Storage compliant devices
  *
  * Current development and maintenance by:
@@ -49,9 +52,9 @@
 #include <linux/export.h>
 
 #include <linux/usb/quirks.h>
-#ifdef CONFIG_SYNO_USB_DEVICE_QUIRKS
+#ifdef MY_ABC_HERE
 #include <linux/usb/syno_quirks.h>
-#endif /* CONFIG_SYNO_USB_DEVICE_QUIRKS */
+#endif /* MY_ABC_HERE */
 
 #include <scsi/scsi.h>
 #include <scsi/scsi_eh.h>
@@ -66,9 +69,9 @@
 #include <linux/blkdev.h>
 #include "../../scsi/sd.h"
 
-#ifdef CONFIG_SYNO_USB_STOR_EXTRA_DELAY
+#ifdef MY_ABC_HERE
 #include <linux/module.h>
-#endif /* CONFIG_SYNO_USB_STOR_EXTRA_DELAY */
+#endif /* MY_ABC_HERE */
 
 /***********************************************************************
  * Data transfer routines
@@ -594,7 +597,7 @@ static void last_sector_hacks(struct us_data *us, struct scsi_cmnd *srb)
 		us->last_sector_retries = 0;
 }
 
-#ifdef CONFIG_SYNO_PHISON_USB_FACTORY
+#ifdef MY_ABC_HERE
 int phison_downgrade_cmnd(struct scsi_cmnd *srb)
 {
 	if (0x06 == srb->cmnd[0] &&
@@ -613,7 +616,7 @@ int phison_downgrade_cmnd(struct scsi_cmnd *srb)
 		return 1;
 	return 0;
 }
-#endif /* CONFIG_SYNO_PHISON_USB_FACTORY */
+#endif /* MY_ABC_HERE */
 
 /* Invoke the transport and basic error-handling/recovery methods
  *
@@ -625,7 +628,7 @@ void usb_stor_invoke_transport(struct scsi_cmnd *srb, struct us_data *us)
 	int need_auto_sense;
 	int result;
 
-#ifdef CONFIG_SYNO_PHISON_USB_FACTORY
+#ifdef MY_ABC_HERE
 	extern unsigned syno_phison_downgrade;
 	/* Phison USB3-downgrade command */
 	if (phison_downgrade_cmnd(srb)) {
@@ -640,9 +643,9 @@ void usb_stor_invoke_transport(struct scsi_cmnd *srb, struct us_data *us)
 				us->pusb_dev->descriptor.idProduct);
 		}
 	}
-#endif /* CONFIG_SYNO_PHISON_USB_FACTORY */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_SYNCHRONIZE_CACHE_FILTER
+#ifdef MY_ABC_HERE
 	if (unlikely((us->pusb_dev->syno_quirks &
 					SYNO_USB_QUIRK_SYNCHRONIZE_CACHE_FILTER) &&
 				 SYNCHRONIZE_CACHE == srb->cmnd[0])) {
@@ -650,7 +653,7 @@ void usb_stor_invoke_transport(struct scsi_cmnd *srb, struct us_data *us)
 		msleep(3000);
 		return;
 	}
-#endif /* CONFIG_SYNO_SYNCHRONIZE_CACHE_FILTER */
+#endif /* MY_ABC_HERE */
 
 	/* send the command to the transport layer */
 	scsi_set_resid(srb, 0);
@@ -1102,7 +1105,7 @@ int usb_stor_Bulk_max_lun(struct us_data *us)
 	return 0;
 }
 
-#ifdef CONFIG_SYNO_USB_STOR_EXTRA_DELAY
+#ifdef MY_ABC_HERE
 int extra_delay = 0;
 module_param(extra_delay, int, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 int extra_delay_time = 0;
@@ -1121,7 +1124,7 @@ static inline void usb_stor_delay(struct us_data *us)
 		return;
 	}
 }
-#endif /* CONFIG_SYNO_USB_STOR_EXTRA_DELAY */
+#endif /* MY_ABC_HERE */
 
 int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 {
@@ -1163,9 +1166,9 @@ int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 		     bcb->Length);
 	result = usb_stor_bulk_transfer_buf(us, us->send_bulk_pipe,
 				bcb, cbwlen, NULL);
-#ifdef CONFIG_SYNO_USB_STOR_EXTRA_DELAY
+#ifdef MY_ABC_HERE
 	usb_stor_delay(us);
-#endif /* CONFIG_SYNO_USB_STOR_EXTRA_DELAY */
+#endif /* MY_ABC_HERE */
 	usb_stor_dbg(us, "Bulk command transfer result=%d\n", result);
 	if (result != USB_STOR_XFER_GOOD)
 		return USB_STOR_TRANSPORT_ERROR;
@@ -1183,9 +1186,9 @@ int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 		unsigned int pipe = srb->sc_data_direction == DMA_FROM_DEVICE ? 
 				us->recv_bulk_pipe : us->send_bulk_pipe;
 		result = usb_stor_bulk_srb(us, pipe, srb);
-#ifdef CONFIG_SYNO_USB_STOR_EXTRA_DELAY
+#ifdef MY_ABC_HERE
 		usb_stor_delay(us);
-#endif /* CONFIG_SYNO_USB_STOR_EXTRA_DELAY */
+#endif /* MY_ABC_HERE */
 		usb_stor_dbg(us, "Bulk data transfer result 0x%x\n", result);
 		if (result == USB_STOR_XFER_ERROR)
 			return USB_STOR_TRANSPORT_ERROR;
@@ -1233,9 +1236,9 @@ int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 	usb_stor_dbg(us, "Attempting to get CSW...\n");
 	result = usb_stor_bulk_transfer_buf(us, us->recv_bulk_pipe,
 				bcs, US_BULK_CS_WRAP_LEN, &cswlen);
-#ifdef CONFIG_SYNO_USB_STOR_EXTRA_DELAY
+#ifdef MY_ABC_HERE
 		usb_stor_delay(us);
-#endif /* CONFIG_SYNO_USB_STOR_EXTRA_DELAY */
+#endif /* MY_ABC_HERE */
 	/* Some broken devices add unnecessary zero-length packets to the
 	 * end of their data transfers.  Such packets show up as 0-length
 	 * CSWs.  If we encounter such a thing, try to read the CSW again.
@@ -1244,9 +1247,9 @@ int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 		usb_stor_dbg(us, "Received 0-length CSW; retrying...\n");
 		result = usb_stor_bulk_transfer_buf(us, us->recv_bulk_pipe,
 				bcs, US_BULK_CS_WRAP_LEN, &cswlen);
-#ifdef CONFIG_SYNO_USB_STOR_EXTRA_DELAY
+#ifdef MY_ABC_HERE
 		usb_stor_delay(us);
-#endif /* CONFIG_SYNO_USB_STOR_EXTRA_DELAY */
+#endif /* MY_ABC_HERE */
 	}
 
 	/* did the attempt to read the CSW fail? */
@@ -1256,9 +1259,9 @@ int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 		usb_stor_dbg(us, "Attempting to get CSW (2nd try)...\n");
 		result = usb_stor_bulk_transfer_buf(us, us->recv_bulk_pipe,
 				bcs, US_BULK_CS_WRAP_LEN, NULL);
-#ifdef CONFIG_SYNO_USB_STOR_EXTRA_DELAY
+#ifdef MY_ABC_HERE
 		usb_stor_delay(us);
-#endif /* CONFIG_SYNO_USB_STOR_EXTRA_DELAY */
+#endif /* MY_ABC_HERE */
 	}
 
 	/* if we still have a failure at this point, we're in trouble */

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * include/linux/platform_data/pxa_sdhci.h
  *
@@ -59,9 +62,9 @@ struct sdhci_pxa_platdata {
 struct sdhci_pxa {
 	u8	clk_enable;
 	u8	power_mode;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	void	__iomem *sdio3_conf_reg;
 	void	__iomem *mbus_win_regs;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 };
 #endif /* _PXA_SDHCI_H_ */

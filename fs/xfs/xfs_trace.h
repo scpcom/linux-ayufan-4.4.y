@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (c) 2009, Christoph Hellwig
  * All Rights Reserved.
@@ -997,11 +1000,11 @@ DECLARE_EVENT_CLASS(xfs_page_class,
 		__entry->delalloc = delalloc;
 		__entry->unwritten = unwritten;
 	),
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 	TP_printk("dev %d:%d ino 0x%llx pgoff 0x%llx size 0x%llx offset %lx "
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	TP_printk("dev %d:%d ino 0x%llx pgoff 0x%lx size 0x%llx offset %lx "
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 		  "delalloc %d unwritten %d",
 		  MAJOR(__entry->dev), MINOR(__entry->dev),
 		  __entry->ino,

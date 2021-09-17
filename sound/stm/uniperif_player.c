@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *   STMicroelectronics System-on-Chips' Uniperipheral player driver
  *
@@ -54,12 +57,12 @@
 
 #define MIN_IEC958_SAMPLE_RATE	32000
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 #define PARKING_SUBBLOCKS	2
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 #define PARKING_SUBBLOCKS	4
 #define PARKING_NBFRAMES	4
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 #define PARKING_BUFFER_SIZE	128	/* Optimal FDMA transfer is 128-bytes */
 
 #define UNIPERIF_FIFO_SIZE	70	/* FIFO is 70 cells deep */
@@ -142,9 +145,9 @@ struct uniperif_player {
 	unsigned long fifo_phys_address;
 	unsigned int irq;
 	int fdma_channel;
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	spinlock_t lock;
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	/* Environment settings */
 	struct snd_stm_clk *clock;
@@ -473,9 +476,9 @@ static int uniperif_player_open(struct snd_pcm_substream *substream)
 	struct uniperif_player *player = snd_pcm_substream_chip(substream);
 	struct snd_pcm_runtime *runtime = substream->runtime;
 	int result;
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	unsigned long irqflags;
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	dev_dbg(player->dev, "%s(substream=%p)", __func__, substream);
 
@@ -488,11 +491,11 @@ static int uniperif_player_open(struct snd_pcm_substream *substream)
 	BUG_ON(player->state == UNIPERIF_PLAYER_STATE_UNDERFLOW);
 
 	snd_pcm_set_sync(substream);  /* TODO: ??? */
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	pm_runtime_get_sync(player->dev);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	pm_runtime_get(player->dev);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	/* Request the dma and converter group resources */
 	result = uniperif_player_resources_request(player);
@@ -526,8 +529,8 @@ static int uniperif_player_open(struct snd_pcm_substream *substream)
 		goto error;
 	}
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 	/* Make the period (so buffer as well) length (in bytes) a multiple
 	 * of a FDMA transfer bytes (which varies depending on channels
 	 * number and sample bytes) */
@@ -537,14 +540,14 @@ static int uniperif_player_open(struct snd_pcm_substream *substream)
 		dev_err(player->dev, "Failed to constrain buffer bytes");
 		goto error;
 	}
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	runtime->hw = player->hardware;
 
 	/* Interrupt handler will need the substream pointer... */
 	player->substream = substream;
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	/* prepare clock */
 	spin_lock_irqsave(&player->lock, irqflags);
 	result = snd_stm_clk_prepare(player->clock);
@@ -554,7 +557,7 @@ static int uniperif_player_open(struct snd_pcm_substream *substream)
 		return result;
 	}
 	spin_unlock_irqrestore(&player->lock, irqflags);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	return 0;
 
@@ -567,10 +570,10 @@ error:
 static int uniperif_player_close(struct snd_pcm_substream *substream)
 {
 	struct uniperif_player *player = snd_pcm_substream_chip(substream);
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	int result;
 	unsigned long irqflags;
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	dev_dbg(player->dev, "%s(substream=%p)", __func__, substream);
 
@@ -586,11 +589,11 @@ static int uniperif_player_close(struct snd_pcm_substream *substream)
 		if (player->info->suspend_delay !=
 				UNIPERIF_PLAYER_NO_SUSPEND) {
 			pm_runtime_mark_last_busy(player->dev);
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 			pm_runtime_put_sync_autosuspend(player->dev);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 			pm_runtime_put_autosuspend(player->dev);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 		}
 		return 0;
 	}
@@ -601,7 +604,7 @@ static int uniperif_player_close(struct snd_pcm_substream *substream)
 	/* Clear the substream pointer */
 	player->substream = NULL;
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	/* unprepare clock */
 	spin_lock_irqsave(&player->lock, irqflags);
 	result = snd_stm_clk_unprepare(player->clock);
@@ -611,7 +614,7 @@ static int uniperif_player_close(struct snd_pcm_substream *substream)
 		return result;
 	}
 	spin_unlock_irqrestore(&player->lock, irqflags);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	return 0;
 }
@@ -729,12 +732,12 @@ static int uniperif_player_hw_params(struct snd_pcm_substream *substream,
 
 	BUG_ON(trigger_limit % 2);
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 	/* Fifo utilisation should not cross period or buffer boundary */
 	BUG_ON(period_bytes % transfer_bytes);
 	BUG_ON(buffer_bytes % transfer_bytes);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	/* Trigger limit must be an even number */
 	BUG_ON(trigger_limit != 1 && transfer_size % 2);
@@ -1412,9 +1415,9 @@ static int uniperif_player_start(struct snd_pcm_substream *substream)
 	if (result) {
 		dev_err(player->dev, "Failed to set clock rate");
 		snd_stm_clk_disable(player->clock);
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 		snd_stm_clk_unprepare(player->clock);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 		return result;
 	}
 
@@ -1649,12 +1652,12 @@ static snd_pcm_uframes_t uniperif_player_pointer(
 		residue = state.residue;
 		hwptr = (runtime->dma_bytes - residue) % runtime->dma_bytes;
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 		/* Set hwptr to the start of current period */
 		hwptr /= player->period_bytes;
 		hwptr *= player->period_bytes;
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	}
 
 	return bytes_to_frames(runtime, hwptr);
@@ -2570,9 +2573,9 @@ static int uniperif_player_probe(struct platform_device *pdev)
 	BUG_ON(player->info->ver == SND_STM_UNIPERIF_VERSION_UNKOWN);
 	player->ver = player->info->ver;
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	spin_lock_init(&player->lock);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	spin_lock_init(&player->default_settings_lock);
 
 	dev_notice(&pdev->dev, "'%s'", player->info->name);
@@ -2771,17 +2774,17 @@ static int uniperif_player_remove(struct platform_device *pdev)
  */
 
 #ifdef CONFIG_PM
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 static int uniperif_player_runtime_suspend(struct device *dev)
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 static int uniperif_player_suspend(struct device *dev)
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 {
 	struct uniperif_player *player = dev_get_drvdata(dev);
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 	struct snd_card *card = snd_stm_card_get(SND_STM_CARD_TYPE_AUDIO);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	dev_dbg(dev, "%s(dev=%p)", __func__, dev);
 
@@ -2820,12 +2823,12 @@ static int uniperif_player_suspend(struct device *dev)
 		}
 	}
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 	/* Indicate power off (with power) and suspend all streams */
 	snd_power_change_state(card, SNDRV_CTL_POWER_D3hot);
 	snd_pcm_suspend_all(player->pcm);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	/* pinctrl: switch pinstate to sleep */
 	pinctrl_pm_select_sleep_state(dev);
@@ -2833,7 +2836,7 @@ static int uniperif_player_suspend(struct device *dev)
 	return 0;
 }
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 static int uniperif_player_runtime_resume(struct device *dev)
 {
 	dev_dbg(dev, "%s(dev=%p)", __func__, dev);
@@ -2871,7 +2874,7 @@ static int uniperif_player_suspend(struct device *dev)
 	return result;
 }
 #endif
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 static int uniperif_player_resume(struct device *dev)
 {
 	struct snd_card *card = snd_stm_card_get(SND_STM_CARD_TYPE_AUDIO);
@@ -2899,18 +2902,18 @@ static int uniperif_player_runtime_suspend(struct device *dev)
 
 	return result;
 }
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 const struct dev_pm_ops uniperif_player_pm_ops = {
 	SET_SYSTEM_SLEEP_PM_OPS(uniperif_player_suspend,
 				uniperif_player_resume)
 
 	SET_RUNTIME_PM_OPS(uniperif_player_runtime_suspend,
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 			   uniperif_player_runtime_resume, NULL)
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 			   uniperif_player_resume, NULL)
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 };
 
 #define UNIPERIF_PLAYER_PM_OPS	(&uniperif_player_pm_ops)

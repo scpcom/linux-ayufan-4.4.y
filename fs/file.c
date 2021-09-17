@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/file.c
  *
@@ -598,11 +601,11 @@ int __close_fd(struct files_struct *files, unsigned fd)
 	file = fdt->fd[fd];
 	if (!file)
 		goto out_unlock;
-#ifdef CONFIG_SYNO_FS_RECVFILE
+#ifdef MY_ABC_HERE
 	if (file->f_mapping->a_ops->aggregate_write_end &&
 	      file->f_inode && (file->f_inode->aggregate_flag & AGGREGATE_RECVFILE_DOING))
 		flush_aggregate_recvfile(fd);
-#endif /* CONFIG_SYNO_FS_RECVFILE */
+#endif /* MY_ABC_HERE */
 	rcu_assign_pointer(fdt->fd[fd], NULL);
 	__clear_close_on_exec(fd, fdt);
 	__put_unused_fd(files, fd);
@@ -910,9 +913,9 @@ SYSCALL_DEFINE1(dup, unsigned int, fildes)
 	}
 	return ret;
 }
-#if defined(CONFIG_SYNO_ARMADA) && defined(CONFIG_SYNO_USE_OCF_LINUX)
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
 EXPORT_SYMBOL(sys_dup);
-#endif /* CONFIG_SYNO_ARMADA && CONFIG_SYNO_USE_OCF_LINUX */
+#endif /* MY_ABC_HERE && CONFIG_SYNO_USE_OCF_LINUX */
 
 int f_dupfd(unsigned int from, struct file *file, unsigned flags)
 {

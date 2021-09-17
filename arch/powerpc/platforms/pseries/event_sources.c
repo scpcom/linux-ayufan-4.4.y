@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2001 Dave Engebretsen IBM Corporation
  *
@@ -25,11 +28,11 @@ void request_event_sources_irqs(struct device_node *np,
 				const char *name)
 {
 	int i, index, count = 0;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	struct of_phandle_args oirq;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	struct of_irq oirq;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	const u32 *opicprop;
 	unsigned int opicplen;
 	unsigned int virqs[16];
@@ -59,21 +62,21 @@ void request_event_sources_irqs(struct device_node *np,
 	/* Else use normal interrupt tree parsing */
 	else {
 		/* First try to do a proper OF tree parsing */
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		for (index = 0; of_irq_parse_one(np, index, &oirq) == 0;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		for (index = 0; of_irq_map_one(np, index, &oirq) == 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 		     index++) {
 			if (count > 15)
 				break;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 			virqs[count] = irq_create_of_mapping(&oirq);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 			virqs[count] = irq_create_of_mapping(oirq.controller,
 							    oirq.specifier,
 							    oirq.size);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 			if (virqs[count] == NO_IRQ) {
 				pr_err("event-sources: Unable to allocate "
 				       "interrupt number for %s\n",

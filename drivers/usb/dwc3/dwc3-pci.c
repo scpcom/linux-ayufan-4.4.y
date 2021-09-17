@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /**
  * dwc3-pci.c - PCI Specific glue layer
  *
@@ -209,7 +212,7 @@ static DEFINE_PCI_DEVICE_TABLE(dwc3_pci_id_table) = {
 	{
 		PCI_DEVICE(PCI_VENDOR_ID_SYNOPSYS,
 				PCI_DEVICE_ID_SYNOPSYS_HAPSUSB3),
-#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_USB_DWC3_AL)
+#if defined(MY_DEF_HERE) && defined(CONFIG_USB_DWC3_AL)
 		PCI_DEVICE(PCI_VENDOR_ID_ANNAPURNA_LABS,
 				PCI_DEVICE_ID_AL_USB)
 #endif
@@ -220,7 +223,7 @@ static DEFINE_PCI_DEVICE_TABLE(dwc3_pci_id_table) = {
 };
 MODULE_DEVICE_TABLE(pci, dwc3_pci_id_table);
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_PM_SLEEP
 static int dwc3_pci_suspend(struct device *dev)
 {
@@ -257,7 +260,7 @@ static const struct dev_pm_ops dwc3_pci_dev_pm_ops = {
 #else
 #define DEV_PM_OPS	NULL
 #endif /* CONFIG_PM */
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 #ifdef CONFIG_PM
 static int dwc3_pci_suspend(struct device *dev)
 {
@@ -292,7 +295,7 @@ static const struct dev_pm_ops dwc3_pci_dev_pm_ops = {
 #else
 #define DEV_PM_OPS	NULL
 #endif /* CONFIG_PM */
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 static struct pci_driver dwc3_pci_driver = {
 	.name		= "dwc3-pci",

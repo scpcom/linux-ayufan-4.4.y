@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * File operations used by nfsd. Some of these have been ripped from
  * other parts of the kernel because they weren't exported, others
@@ -41,9 +44,9 @@
 #include "nfsd.h"
 #include "vfs.h"
 
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 #include "../synoacl_int.h"
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 #define NFSDDBG_FACILITY		NFSDDBG_FILEOP
 
 /*
@@ -73,9 +76,9 @@ struct raparm_hbucket {
 #define RAPARM_HASH_MASK	(RAPARM_HASH_SIZE-1)
 static struct raparm_hbucket	raparm_hash[RAPARM_HASH_SIZE];
 
-#ifdef CONFIG_SYNO_NFSD_UNIX_PRI
+#ifdef MY_ABC_HERE
 extern u32 bl_unix_pri_enable;
-#endif /*CONFIG_SYNO_NFSD_UNIX_PRI*/
+#endif /*MY_ABC_HERE*/
 
 /*
  * Called from nfsd_lookup and encode_dirent. Check if we have crossed
@@ -306,17 +309,17 @@ commit_metadata(struct svc_fh *fhp)
  * Go over the attributes and take care of the small differences between
  * NFS semantics and what Linux expects.
  */
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 static void
 nfsd_sanitize_attrs(struct dentry *dentry, struct iattr *iap)
 #else
 static void
 nfsd_sanitize_attrs(struct inode *inode, struct iattr *iap)
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 {
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 	struct inode *inode = dentry->d_inode;
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 	/*
 	 * NFSv2 does not differentiate between "set-[ac]time-to-now"
 	 * which only requires access, and "set-[ac]time-to-X" which
@@ -342,7 +345,7 @@ nfsd_sanitize_attrs(struct inode *inode, struct iattr *iap)
 		time_t delta = iap->ia_atime.tv_sec - get_seconds();
 		if (delta < 0)
 			delta = -delta;
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 		if (delta < MAX_TOUCH_TIME_ERROR) {
 			if (IS_SYNOACL(dentry)) {
 				if (0 > synoacl_op_inode_chg_ok(dentry, iap)) {
@@ -362,7 +365,7 @@ nfsd_sanitize_attrs(struct inode *inode, struct iattr *iap)
 			 */
 			iap->ia_valid &= ~BOTH_TIME_SET;
 		}
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 	}
 
 	/* sanitize the mode change */
@@ -456,12 +459,12 @@ nfsd_setattr(struct svc_rqst *rqstp, struct svc_fh *fhp, struct iattr *iap,
 	dentry = fhp->fh_dentry;
 	inode = dentry->d_inode;
 
-#ifdef CONFIG_SYNO_NFSD_UNIX_PRI
+#ifdef MY_ABC_HERE
 	//Ignore chmod when !bl_unix_pri_enable & the share is ACL share
 	if (!bl_unix_pri_enable && IS_SYNOACL(dentry)) {
 		iap->ia_valid &= ~ATTR_MODE;
 	}
-#endif /*CONFIG_SYNO_NFSD_UNIX_PRI*/
+#endif /*MY_ABC_HERE*/
 
 	/* Ignore any mode updates on symlinks */
 	if (S_ISLNK(inode->i_mode))
@@ -470,11 +473,11 @@ nfsd_setattr(struct svc_rqst *rqstp, struct svc_fh *fhp, struct iattr *iap,
 	if (!iap->ia_valid)
 		goto out;
 
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 	nfsd_sanitize_attrs(dentry, iap);
 #else
 	nfsd_sanitize_attrs(inode, iap);
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 
 	/*
 	 * The size case is special, it changes the file in addition to the
@@ -740,7 +743,7 @@ static struct accessmap	nfs3_anyaccess[] = {
 	{	0,			0				}
 };
 
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 static struct accessmap	nfs3_synoacl_regaccess[] = {
 	{	NFS3_ACCESS_READ, MAY_READ },
 	{	NFS3_ACCESS_EXECUTE, MAY_EXEC },
@@ -757,7 +760,7 @@ static struct accessmap	nfs3_synoacl_diraccess[] = {
 	{	NFS3_ACCESS_DELETE,	MAY_DEL },
 	{	0, 0 }
 };
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 
 __be32
 nfsd_access(struct svc_rqst *rqstp, struct svc_fh *fhp, u32 *access, u32 *supported)
@@ -767,11 +770,11 @@ nfsd_access(struct svc_rqst *rqstp, struct svc_fh *fhp, u32 *access, u32 *suppor
 	struct dentry		*dentry;
 	u32			query, result = 0, sresult = 0;
 	__be32			error;
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 	int isInodeInACLMode = 0;
 	int isFSInACLMode = 0;
 	struct inode *inode = NULL;
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 
 	error = fh_verify(rqstp, fhp, 0, NFSD_MAY_NOP);
 	if (error)
@@ -779,7 +782,7 @@ nfsd_access(struct svc_rqst *rqstp, struct svc_fh *fhp, u32 *access, u32 *suppor
 
 	export = fhp->fh_export;
 	dentry = fhp->fh_dentry;
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 	inode = dentry->d_inode;
 	isFSInACLMode = IS_FS_SYNOACL(inode);
 	isInodeInACLMode = IS_INODE_SYNOACL(inode, dentry) && isFSInACLMode;
@@ -792,7 +795,7 @@ nfsd_access(struct svc_rqst *rqstp, struct svc_fh *fhp, u32 *access, u32 *suppor
 		else
 			map = nfs3_synoacl_regaccess;
 	} else
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 	if (S_ISREG(dentry->d_inode->i_mode))
 		map = nfs3_regaccess;
 	else if (S_ISDIR(dentry->d_inode->i_mode))
@@ -807,7 +810,7 @@ nfsd_access(struct svc_rqst *rqstp, struct svc_fh *fhp, u32 *access, u32 *suppor
 
 			sresult |= map->access;
 
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 			if (isInodeInACLMode){
 				if (inode->i_op) {
 					err2 = nfserrno(synoacl_op_perm(dentry, map->how));
@@ -818,7 +821,7 @@ nfsd_access(struct svc_rqst *rqstp, struct svc_fh *fhp, u32 *access, u32 *suppor
 			} else if (isFSInACLMode && (NFS3_ACCESS_DELETE == map->access)) {
 				err2 = nfserrno(synoacl_op_may_delete(dentry, dentry->d_parent->d_inode));
 			} else
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 			err2 = nfsd_permission(rqstp, export, dentry, map->how);
 			switch (err2) {
 			case nfs_ok:
@@ -2202,7 +2205,7 @@ static int exp_rdonly(struct svc_rqst *rqstp, struct svc_export *exp)
 	return nfsexp_flags(rqstp, exp) & NFSEXP_READONLY;
 }
 
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 static int syno_acl_nfs_perm_switch(struct inode *inode, int acc)
 {
 	int synoPerm = 0;
@@ -2239,7 +2242,7 @@ static int syno_acl_nfs_perm_switch(struct inode *inode, int acc)
 
 	return synoPerm;
 }
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 /*
  * Check for a user's access permissions to this inode.
  */
@@ -2309,7 +2312,7 @@ nfsd_permission(struct svc_rqst *rqstp, struct svc_export *exp,
 	 * We must trust the client to do permission checking - using "ACCESS"
 	 * with NFSv3.
 	 */
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 	if (IS_SYNOACL(dentry)) {
 		if ((acc & NFSD_MAY_OWNER_OVERRIDE) && is_synoacl_owner(dentry))
 			return 0;
@@ -2318,7 +2321,7 @@ nfsd_permission(struct svc_rqst *rqstp, struct svc_export *exp,
 		}
 		err = synoacl_op_perm(dentry, syno_acl_nfs_perm_switch(inode, acc));
 	} else {
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 
 	if ((acc & NFSD_MAY_OWNER_OVERRIDE) &&
 		uid_eq(inode->i_uid, current_fsuid()))
@@ -2327,14 +2330,14 @@ nfsd_permission(struct svc_rqst *rqstp, struct svc_export *exp,
 	/* This assumes  NFSD_MAY_{READ,WRITE,EXEC} == MAY_{READ,WRITE,EXEC} */
 	err = inode_permission(inode, acc & (MAY_READ|MAY_WRITE|MAY_EXEC));
 
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 	}
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 	/* Allow read access to binaries even when mode 111 */
 	if (err == -EACCES && S_ISREG(inode->i_mode) &&
 		 (acc == (NFSD_MAY_READ | NFSD_MAY_OWNER_OVERRIDE) ||
 		  acc == (NFSD_MAY_READ | NFSD_MAY_READ_IF_EXEC)))
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 	{
 		if (IS_SYNOACL(dentry)){
 			err = synoacl_op_perm(dentry, MAY_EXEC);
@@ -2344,7 +2347,7 @@ nfsd_permission(struct svc_rqst *rqstp, struct svc_export *exp,
 	}
 #else
 		err = inode_permission(inode, MAY_EXEC);
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 
 	return err? nfserrno(err) : 0;
 }

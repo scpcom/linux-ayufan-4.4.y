@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Copyright (c) 2008-2013 STMicroelectronics Limited
  *  Author: Angus Clark <Angus.Clark@st.com>
@@ -509,7 +512,7 @@ static int spi_st_remove(struct platform_device *pdev)
 
 	return 0;
 }
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_PM_SLEEP
 static int spi_st_suspend(struct device *dev)
 {
@@ -549,7 +552,7 @@ static SIMPLE_DEV_PM_OPS(spi_st_pm, spi_st_suspend, spi_st_resume);
 #else
 #define SPI_ST_PM	NULL
 #endif
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 #ifdef CONFIG_PM
 static int spi_st_suspend(struct device *dev)
 {
@@ -589,7 +592,7 @@ static SIMPLE_DEV_PM_OPS(spi_st_pm, spi_st_suspend, spi_st_resume);
 #else
 #define SPI_ST_PM	NULL
 #endif
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 static struct of_device_id stm_spi_match[] = {
 	{ .compatible = "st,comms-ssc-spi", },

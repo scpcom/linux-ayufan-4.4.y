@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * drivers/base/power/wakeup.c - System wakeup events framework
  *
@@ -14,9 +17,9 @@
 #include <linux/suspend.h>
 #include <linux/seq_file.h>
 #include <linux/debugfs.h>
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 #include <linux/notifier.h>
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 #include <trace/events/power.h>
 
 #include "power.h"
@@ -33,9 +36,9 @@ bool events_check_enabled __read_mostly;
  * atomic variable to hold them both.
  */
 static atomic_t combined_event_count = ATOMIC_INIT(0);
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 static BLOCKING_NOTIFIER_HEAD(wakeup_source_cb);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 #define IN_PROGRESS_BITS	(sizeof(int) * 4)
 #define MAX_IN_PROGRESS		((1 << IN_PROGRESS_BITS) - 1)
@@ -236,10 +239,10 @@ int device_wakeup_enable(struct device *dev)
 	ret = device_wakeup_attach(dev, ws);
 	if (ret)
 		wakeup_source_unregister(ws);
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	blocking_notifier_call_chain(&wakeup_source_cb, WAKEUP_SOURCE_ADDED,
 		(void *)dev);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 	return ret;
 }
@@ -277,21 +280,21 @@ int device_wakeup_disable(struct device *dev)
 		return -EINVAL;
 
 	ws = device_wakeup_detach(dev);
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	if (ws) {
 		blocking_notifier_call_chain(&wakeup_source_cb,
 			WAKEUP_SOURCE_REMOVED, (void *)dev);
 		wakeup_source_unregister(ws);
 	}
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 	if (ws)
 		wakeup_source_unregister(ws);
 
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	return 0;
 }
 EXPORT_SYMBOL_GPL(device_wakeup_disable);
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 void wakeup_source_notifier_register(struct notifier_block *nb)
 {
 	if (!nb)
@@ -307,7 +310,7 @@ void wakeup_source_notifier_unregister(struct notifier_block *nb)
 	blocking_notifier_chain_unregister(&wakeup_source_cb, nb);
 }
 EXPORT_SYMBOL_GPL(wakeup_source_notifier_unregister);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 /**
  * device_set_wakeup_capable - Set/reset device wakeup capability flag.
@@ -376,7 +379,7 @@ int device_set_wakeup_enable(struct device *dev, bool enable)
 	return enable ? device_wakeup_enable(dev) : device_wakeup_disable(dev);
 }
 EXPORT_SYMBOL_GPL(device_set_wakeup_enable);
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 /* callback for device_child_may_wakeup */
 static int __device_child_may_wakeup(struct device *dev, void *c)
 {
@@ -399,7 +402,7 @@ bool device_child_may_wakeup(struct device *parent)
 	return device_for_each_child(parent, NULL, __device_child_may_wakeup);
 }
 EXPORT_SYMBOL_GPL(device_child_may_wakeup);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 /*
  * The functions below use the observation that each wakeup event starts a

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * OF helpers for the MDIO (Ethernet PHY) API
  *
@@ -14,9 +17,9 @@
 #include <linux/netdevice.h>
 #include <linux/err.h>
 #include <linux/phy.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #include <linux/phy_fixed.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 #include <linux/of.h>
 #include <linux/of_irq.h>
 #include <linux/of_mdio.h>
@@ -219,15 +222,15 @@ EXPORT_SYMBOL(of_phy_connect);
  * @hndlr: Link state callback for the network device
  * @iface: PHY data interface type
  */
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 // do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 /*
  * This function is a temporary stop-gap and will be removed soon.  It is
  * only to support the fs_enet, ucc_geth and gianfar Ethernet drivers.  Do
  * not call this function from new drivers.
  */
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 struct phy_device *of_phy_connect_fixed_link(struct net_device *dev,
 					     void (*hndlr)(struct net_device *),
 					     phy_interface_t iface)
@@ -256,7 +259,7 @@ struct phy_device *of_phy_connect_fixed_link(struct net_device *dev,
 }
 EXPORT_SYMBOL(of_phy_connect_fixed_link);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_FIXED_PHY)
+#if defined(MY_ABC_HERE) && defined(CONFIG_FIXED_PHY)
 /**
  * of_phy_register_fixed_link - Parse fixed-link property and register a dummy phy
  * @np: pointer to the OF device node that contains the "fixed-link"
@@ -285,4 +288,4 @@ int of_phy_register_fixed_link(struct device_node *np)
 			     &status);
 }
 EXPORT_SYMBOL(of_phy_register_fixed_link);
-#endif /* CONFIG_SYNO_LSP_ARMADA && CONFIG_FIXED_PHY */
+#endif /* MY_ABC_HERE && CONFIG_FIXED_PHY */

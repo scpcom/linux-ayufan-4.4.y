@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * machine_kexec.c - handle transition of Linux booting another kernel
  */
@@ -8,9 +11,9 @@
 #include <linux/reboot.h>
 #include <linux/io.h>
 #include <linux/irq.h>
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 #include <linux/cpu.h>
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 #include <linux/memblock.h>
 #include <asm/pgtable.h>
 #include <linux/of_fdt.h>
@@ -79,15 +82,15 @@ void machine_crash_nonpanic_core(void *unused)
 
 	set_cpu_online(smp_processor_id(), false);
 	atomic_dec(&waiting_for_crash_ipi);
-#if defined (CONFIG_SYNO_LSP_MONACO)
-#if defined(CONFIG_SYNO_LSP_MONACO_SDK2_15_4)
+#if defined (MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
 	while (1)
 		cpu_relax();
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
-#else /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
+#else /* MY_DEF_HERE */
 	while (1)
 		cpu_relax();
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 }
 
 static void machine_kexec_mask_interrupts(void)
@@ -119,12 +122,12 @@ void machine_crash_shutdown(struct pt_regs *regs)
 
 	local_irq_disable();
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
-#if defined (CONFIG_SYNO_LSP_MONACO_SDK2_15_4)
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#if defined (MY_DEF_HERE)
+#if defined (MY_DEF_HERE)
+#else /* MY_DEF_HERE */
 	system_state = SYSTEM_RESTART;
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
+#endif /* MY_DEF_HERE */
 	atomic_set(&waiting_for_crash_ipi, num_online_cpus() - 1);
 	smp_call_function(machine_crash_nonpanic_core, NULL, false);
 	msecs = 1000; /* Wait at most a second for the other cpus to stop */
@@ -137,12 +140,12 @@ void machine_crash_shutdown(struct pt_regs *regs)
 
 	crash_save_cpu(regs, smp_processor_id());
 	machine_kexec_mask_interrupts();
-#if defined (CONFIG_SYNO_LSP_MONACO)
-#if defined (CONFIG_SYNO_LSP_MONACO_SDK2_15_4)
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#if defined (MY_DEF_HERE)
+#if defined (MY_DEF_HERE)
+#else /* MY_DEF_HERE */
 	disable_nonboot_cpus();
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
+#endif /* MY_DEF_HERE */
 
 	printk(KERN_INFO "Loading crashdump kernel...\n");
 }

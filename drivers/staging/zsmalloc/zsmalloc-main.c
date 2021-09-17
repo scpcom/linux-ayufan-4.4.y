@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * zsmalloc memory allocator
  *
@@ -114,11 +117,11 @@
  * If this definition of MAX_PHYSMEM_BITS is used, OBJ_INDEX_BITS will just
  * be PAGE_SHIFT
  */
-#if defined(CONFIG_SYNO_ALPINE) && defined(CONFIG_ARM_LPAE)
+#if defined(MY_DEF_HERE) && defined(CONFIG_ARM_LPAE)
 #define MAX_PHYSMEM_BITS PHYS_MASK_SHIFT
 #else /* CONFIG_SYNO_ALPINE && CONFIG_ARM_LPAE */
 #define MAX_PHYSMEM_BITS BITS_PER_LONG
-#endif /* CONFIG_SYNO_ALPINE && CONFIG_ARM_LPAE */
+#endif /* MY_DEF_HERE && CONFIG_ARM_LPAE */
 #endif
 #endif
 #define _PFN_BITS		(MAX_PHYSMEM_BITS - PAGE_SHIFT)
@@ -144,16 +147,16 @@
  *  ZS_MIN_ALLOC_SIZE and ZS_SIZE_CLASS_DELTA must be multiple of ZS_ALIGN
  *  (reason above)
  */
-#ifdef CONFIG_SYNO_ZRAM_32KB_PAGE_SUPPORT
+#ifdef MY_DEF_HERE
 /*
  * Fix the delta value to 16 to avoid an issue which makes get_size_class_index()
  * return 256 (should be 0) for class_idx and causes the BUG_ON()
  * in zs_malloc()
  */
 #define ZS_SIZE_CLASS_DELTA	(1 << 4)
-#else /* CONFIG_SYNO_ZRAM_32KB_PAGE_SUPPORT */
+#else /* MY_DEF_HERE */
 #define ZS_SIZE_CLASS_DELTA	(PAGE_SIZE >> 8)
-#endif /* CONFIG_SYNO_ZRAM_32KB_PAGE_SUPPORT */
+#endif /* MY_DEF_HERE */
 #define ZS_SIZE_CLASSES		((ZS_MAX_ALLOC_SIZE - ZS_MIN_ALLOC_SIZE) / \
 					ZS_SIZE_CLASS_DELTA + 1)
 

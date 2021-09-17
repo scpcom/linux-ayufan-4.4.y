@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Fixed MDIO bus (MDIO bus emulation with fixed PHYs)
  *
@@ -195,9 +198,9 @@ int fixed_phy_add(unsigned int irq, int phy_id,
 
 	list_add_tail(&fp->node, &fmb->phys);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	mdiobus_scan(fmb->mii_bus, phy_id);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	return 0;
 

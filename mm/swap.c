@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/mm/swap.c
  *
@@ -203,7 +206,7 @@ void put_page(struct page *page)
 }
 EXPORT_SYMBOL(put_page);
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 void put_page_n(struct page *page, unsigned int c)
 {
 	if (c == 1) {
@@ -217,7 +220,7 @@ void put_page_n(struct page *page, unsigned int c)
 		__put_single_page(page);
 }
 EXPORT_SYMBOL(put_page_n);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 /*
  * This function is exported but must not be called by anything other

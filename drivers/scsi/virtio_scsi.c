@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Virtio SCSI HBA driver
  *
@@ -23,7 +26,7 @@
 #include <linux/virtio_config.h>
 #include <linux/virtio_scsi.h>
 #include <linux/cpu.h>
-#if defined(CONFIG_SYNO_KVMX64) && defined(CONFIG_SYNO_FIXED_DISK_NAME)
+#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
 #include <linux/pci.h>
 #endif
 #include <scsi/scsi_host.h>
@@ -606,7 +609,7 @@ static int virtscsi_tmf(struct virtio_scsi *vscsi, struct virtio_scsi_cmd *cmd)
 	DECLARE_COMPLETION_ONSTACK(comp);
 	int ret = FAILED;
 
-#ifdef CONFIG_SYNO_VHOST_SCSI_TMF_UNSUPPORTED
+#ifdef MY_DEF_HERE
 	ret = SUCCESS;
 	goto out;
 #endif
@@ -706,7 +709,7 @@ static void virtscsi_target_destroy(struct scsi_target *starget)
 	kfree(tgt);
 }
 
-#if defined(CONFIG_SYNO_KVMX64) && defined(CONFIG_SYNO_FIXED_DISK_NAME)
+#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
 int virtscsi_index_get(struct Scsi_Host *host, uint cahnnel, uint id, uint lun)
 {
 	int index = 0;
@@ -725,7 +728,7 @@ int virtscsi_index_get(struct Scsi_Host *host, uint cahnnel, uint id, uint lun)
 	}
 	return index;
 }
-#endif /* CONFIG_SYNO_KVMX64 && CONFIG_SYNO_FIXED_DISK_NAME */
+#endif /* MY_DEF_HERE && CONFIG_SYNO_FIXED_DISK_NAME */
 
 static struct scsi_host_template virtscsi_host_template_single = {
 	.module = THIS_MODULE,
@@ -741,9 +744,9 @@ static struct scsi_host_template virtscsi_host_template_single = {
 	.use_clustering = ENABLE_CLUSTERING,
 	.target_alloc = virtscsi_target_alloc,
 	.target_destroy = virtscsi_target_destroy,
-#if defined(CONFIG_SYNO_KVMX64) && defined(CONFIG_SYNO_FIXED_DISK_NAME)
+#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
 	.syno_index_get = virtscsi_index_get,
-#endif /* CONFIG_SYNO_KVMX64 && CONFIG_SYNO_FIXED_DISK_NAME */
+#endif /* MY_DEF_HERE && CONFIG_SYNO_FIXED_DISK_NAME */
 };
 
 static struct scsi_host_template virtscsi_host_template_multi = {

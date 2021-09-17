@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #undef DEBUG
 
 /*
@@ -16,10 +19,10 @@
 #include <linux/platform_device.h>
 #include <linux/pm_runtime.h>
 #include <linux/uaccess.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #include <linux/irq.h>
 #include <linux/irqdesc.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 #include <asm/irq_regs.h>
 #include <asm/pmu.h>
@@ -302,7 +305,7 @@ validate_group(struct perf_event *event)
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_MONACO)
+#if defined(MY_DEF_HERE)
 static irqreturn_t armpmu_dispatch_irq(int irq, void *dev)
 {
     struct pmu_hw_events *cpuc  = (struct pmu_hw_events *)dev;
@@ -319,7 +322,7 @@ static irqreturn_t armpmu_dispatch_irq(int irq, void *dev)
 
     return ret;
 }
-#elif defined(CONFIG_SYNO_LSP_ARMADA)
+#elif defined(MY_ABC_HERE)
 static irqreturn_t armpmu_dispatch_irq(int irq, void *dev)
 {
 	int ret;

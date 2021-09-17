@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Marvell MVEBU clock gating control.
  *
@@ -17,18 +20,18 @@
 #include <linux/clk/mvebu.h>
 #include <linux/of.h>
 #include <linux/of_address.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #include <linux/syscore_ops.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 struct mvebu_gating_ctrl {
 	spinlock_t lock;
 	struct clk **gates;
 	int num_gates;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	void __iomem *base;
 	u32 saved_reg;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 };
 
 struct mvebu_soc_descr {
@@ -39,18 +42,18 @@ struct mvebu_soc_descr {
 
 #define to_clk_gate(_hw) container_of(_hw, struct clk_gate, hw)
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static struct mvebu_gating_ctrl *ctrl;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static struct clk *mvebu_clk_gating_get_src(
 	struct of_phandle_args *clkspec, void *data)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	struct mvebu_gating_ctrl *ctrl = (struct mvebu_gating_ctrl *)data;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	int n;
 
 	if (clkspec->args_count < 1)
@@ -65,7 +68,7 @@ static struct clk *mvebu_clk_gating_get_src(
 	return ERR_PTR(-ENODEV);
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static int mvebu_clk_gating_suspend(void)
 {
 	ctrl->saved_reg = readl(ctrl->base);
@@ -81,27 +84,27 @@ static struct syscore_ops clk_gate_syscore_ops = {
 	.suspend = mvebu_clk_gating_suspend,
 	.resume = mvebu_clk_gating_resume,
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static void __init mvebu_clk_gating_setup(
 	struct device_node *np, const struct mvebu_soc_descr *descr)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	struct mvebu_gating_ctrl *ctrl;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	struct clk *clk;
 	void __iomem *base;
 	const char *default_parent = NULL;
 	int n;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	if (ctrl) {
 		pr_err("mvebu-clk-gating: cannot instantiate more than one gatable clock device\n");
 		return;
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	base = of_iomap(np, 0);
 
@@ -117,9 +120,9 @@ static void __init mvebu_clk_gating_setup(
 
 	spin_lock_init(&ctrl->lock);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	ctrl->base = base;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	/*
 	 * Count, allocate, and register clock gates
@@ -155,9 +158,9 @@ static void __init mvebu_clk_gating_setup(
 	}
 	of_clk_add_provider(np, mvebu_clk_gating_get_src, ctrl);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	register_syscore_ops(&clk_gate_syscore_ops);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 }
 
 /*
@@ -171,13 +174,13 @@ static const struct mvebu_soc_descr __initconst armada_370_gating_descr[] = {
 	{ "pex1_en", NULL,  2 },
 	{ "ge1", NULL, 3 },
 	{ "ge0", NULL, 4 },
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	{ "pex0", "pex0_en", 5 },
 	{ "pex1", "pex1_en", 9 },
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	{ "pex0", NULL, 5 },
 	{ "pex1", NULL, 9 },
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	{ "sata0", NULL, 15 },
 	{ "sdio", NULL, 17 },
 	{ "tdm", NULL, 25 },
@@ -187,7 +190,7 @@ static const struct mvebu_soc_descr __initconst armada_370_gating_descr[] = {
 };
 #endif
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #ifdef CONFIG_MACH_ARMADA_375
 static const struct mvebu_soc_descr __initconst armada_375_gating_descr[] = {
 	{ "tdmmc", NULL, 0 },
@@ -253,7 +256,7 @@ static const struct mvebu_soc_descr __initconst armada_380_gating_descr[] = {
 	{ }
 };
 #endif
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 #ifdef CONFIG_MACH_ARMADA_XP
 static const struct mvebu_soc_descr __initconst armada_xp_gating_descr[] = {
@@ -262,7 +265,7 @@ static const struct mvebu_soc_descr __initconst armada_xp_gating_descr[] = {
 	{ "ge2", NULL,  2 },
 	{ "ge1", NULL, 3 },
 	{ "ge0", NULL, 4 },
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	{ "pex00", NULL, 5 },
 	{ "pex01", NULL, 6 },
 	{ "pex02", NULL, 7 },
@@ -271,12 +274,12 @@ static const struct mvebu_soc_descr __initconst armada_xp_gating_descr[] = {
 	{ "pex11", NULL, 10 },
 	{ "pex12", NULL, 11 },
 	{ "pex13", NULL, 12 },
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	{ "pex0", NULL, 5 },
 	{ "pex1", NULL, 6 },
 	{ "pex2", NULL, 7 },
 	{ "pex3", NULL, 8 },
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	{ "bp", NULL, 13 },
 	{ "sata0lnk", NULL, 14 },
 	{ "sata0", "sata0lnk", 15 },
@@ -288,10 +291,10 @@ static const struct mvebu_soc_descr __initconst armada_xp_gating_descr[] = {
 	{ "xor0", NULL, 22 },
 	{ "crypto", NULL, 23 },
 	{ "tdm", NULL, 25 },
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	{ "pex20", NULL, 26 },
 	{ "pex30", NULL, 27 },
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	{ "xor1", NULL, 28 },
 	{ "sata1lnk", NULL, 29 },
 	{ "sata1", "sata1lnk", 30 },
@@ -353,7 +356,7 @@ static const __initdata struct of_device_id clk_gating_match[] = {
 	},
 #endif
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #ifdef CONFIG_MACH_ARMADA_375
 	{
 		.compatible = "marvell,armada-375-gating-clock",
@@ -367,7 +370,7 @@ static const __initdata struct of_device_id clk_gating_match[] = {
 		.data = armada_380_gating_descr,
 	},
 #endif
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 #ifdef CONFIG_MACH_ARMADA_XP
 	{

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2014 Facebook.  All rights reserved.
  *
@@ -97,10 +100,10 @@ int btrfs_qgroup_inherit(struct btrfs_trans_handle *trans,
 int btrfs_qgroup_reserve(struct btrfs_root *root, u64 num_bytes);
 void btrfs_qgroup_free(struct btrfs_root *root, u64 num_bytes);
 
-#ifdef CONFIG_SYNO_BTRFS_QGROUP_QUERY
+#ifdef MY_ABC_HERE
 void btrfs_qgroup_query(struct btrfs_fs_info *fs_info, u64 qgroupid,
                         struct btrfs_ioctl_qgroup_query_args *qqa);
-#endif /* CONFIG_SYNO_BTRFS_QGROUP_QUERY */
+#endif /* MY_ABC_HERE */
 void assert_qgroups_uptodate(struct btrfs_trans_handle *trans);
 
 #ifdef CONFIG_BTRFS_FS_RUN_SANITY_TESTS

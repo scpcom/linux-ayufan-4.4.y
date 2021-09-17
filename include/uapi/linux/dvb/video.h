@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * video.h
  *
@@ -114,13 +117,13 @@ struct video_command {
 		struct {
 			__u32 data[16];
 		} raw;
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 
 		struct {
 			__u32 option;
 			__u32 value;
 		} option;
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	};
 };
 

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_GENHD_H
 #define _LINUX_GENHD_H
 
@@ -203,9 +206,9 @@ struct gendisk {
 	struct blk_integrity *integrity;
 #endif
 	int node_id;
-#ifdef CONFIG_SYNO_FIXED_DISK_NAME
+#ifdef MY_ABC_HERE
 	int systemDisk;
-#endif /* CONFIG_SYNO_FIXED_DISK_NAME */
+#endif /* MY_ABC_HERE */
 };
 
 static inline struct gendisk *part_to_disk(struct hd_struct *part)

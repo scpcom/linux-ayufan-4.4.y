@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * INET		An implementation of the TCP/IP protocol suite for the LINUX
  *		operating system.  INET is implemented using the  BSD Socket
@@ -51,11 +54,11 @@ int sysctl_tcp_retrans_collapse __read_mostly = 1;
 int sysctl_tcp_workaround_signed_windows __read_mostly = 0;
 
 /* Default TSQ limit of two TSO segments */
-#ifdef CONFIG_SYNO_INCREASE_TSQ_SIZE
+#ifdef MY_ABC_HERE
 int sysctl_tcp_limit_output_bytes __read_mostly = 262144;
-#else /*CONFIG_SYNO_INCREASE_TSQ_SIZE*/
+#else /*MY_ABC_HERE*/
 int sysctl_tcp_limit_output_bytes __read_mostly = 131072;
-#endif /*CONFIG_SYNO_INCREASE_TSQ_SIZE*/
+#endif /*MY_ABC_HERE*/
 
 /* This limits the percentage of the congestion window which we
  * will allow a single TSO frame to consume.  Building TSO frames
@@ -902,12 +905,12 @@ static int tcp_transmit_skb(struct sock *sk, struct sk_buff *skb, int clone_it,
 
 	skb_orphan(skb);
 	skb->sk = sk;
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	skb->destructor = (sysctl_tcp_limit_output_bytes > 0) ?
 			  tcp_wfree : sock_wfree;
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	skb->destructor = tcp_wfree;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	atomic_add(skb->truesize, &sk->sk_wmem_alloc);
 
 	/* Build TCP header and checksum it. */
@@ -1643,11 +1646,11 @@ static bool tcp_tso_should_defer(struct sock *sk, struct sk_buff *skb)
 
 	/* If a full-sized TSO skb can be sent, do it. */
 	if (limit >= min_t(unsigned int, sk->sk_gso_max_size,
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 			   sk->sk_gso_max_segs * tp->mss_cache))
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 			   tp->xmit_size_goal_segs * tp->mss_cache))
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 		goto send_now;
 
 	/* Middle in queue won't get any more data, full sendable already? */
@@ -1884,11 +1887,11 @@ static bool tcp_write_xmit(struct sock *sk, unsigned int mss_now, int nonagle,
 				break;
 		}
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 		/* TSQ : sk_wmem_alloc accounts skb truesize,
 		 * including skb overhead. But thats OK.
 		 */
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 		/* TCP Small Queues :
 		 * Control number of packets in qdisc/devices to two packets / or ~1 ms.
 		 * This allows for :
@@ -1899,15 +1902,15 @@ static bool tcp_write_xmit(struct sock *sk, unsigned int mss_now, int nonagle,
 		 * of queued bytes to ensure line rate.
 		 * One example is wifi aggregation (802.11 AMPDU)
 		 */
-#endif /* CONFIG_SYNO_LSP_ALPINE */
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
 		if (atomic_read(&sk->sk_wmem_alloc) >= sysctl_tcp_limit_output_bytes) {
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 		limit = max_t(unsigned int, sysctl_tcp_limit_output_bytes,
 			      sk->sk_pacing_rate >> 10);
 
 		if (atomic_read(&sk->sk_wmem_alloc) > limit) {
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 			set_bit(TSQ_THROTTLED, &tp->tsq_flags);
 			/* It is possible TX completion already happened
 			 * before we set TSQ_THROTTLED, so we must
@@ -1916,12 +1919,12 @@ static bool tcp_write_xmit(struct sock *sk, unsigned int mss_now, int nonagle,
 			 * there is no smp_mb__after_set_bit() yet
 			 */
 			smp_mb__after_clear_bit();
-#if defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE)
 			// FIXME: still cannot determine whether this should be applied
 			if (atomic_read(&sk->sk_wmem_alloc) >= sysctl_tcp_limit_output_bytes)
-#else /* CONFIG_SYNO_ALPINE */
+#else /* MY_DEF_HERE */
 			if (atomic_read(&sk->sk_wmem_alloc) > limit)
-#endif /* CONFIG_SYNO_ALPINE */
+#endif /* MY_DEF_HERE */
 				break;
 		}
 

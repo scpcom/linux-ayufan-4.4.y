@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -120,9 +123,9 @@ extern int pp2_port_vbase[MV_ETH_MAX_PORTS];
 
 #define MV_ETH_MAX_RXQ			8
 #define MV_ETH_MAX_TXQ			8
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 #define MV_ETH_TX_CSUM_MIN_SIZE		2048
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 #define MV_ETH_TX_CSUM_MAX_SIZE		9800
 #define MV_PNC_TCAM_LINES		1024    /* TCAM num of entries */
 #define MV_BM_WIN_ID		12

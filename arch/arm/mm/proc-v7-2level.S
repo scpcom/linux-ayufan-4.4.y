@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * arch/arm/mm/proc-v7-2level.S
  *
@@ -62,11 +65,11 @@ ENTRY(cpu_v7_switch_mm)
 	mov	pc, lr
 ENDPROC(cpu_v7_switch_mm)
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 .macro flush_pte adr
 	mcr	p15, 0, \adr, c7, c10, 1	@ flush_pte
 .endm
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 /*
  *	cpu_v7_set_pte_ext(ptep, pte)
@@ -82,7 +85,7 @@ ENTRY(cpu_v7_set_pte_ext)
 #ifdef CONFIG_MMU
 	str	r1, [r0]			@ linux version
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	/* Calc HW PTE Entry Offset */
 #ifdef CONFIG_MV_LARGE_PAGE_SUPPORT
 #ifdef CONFIG_MV_8KB_SW_PAGE_SIZE_SUPPORT
@@ -121,12 +124,12 @@ ENTRY(cpu_v7_set_pte_ext)
 #else
 	orr	r3, r3, #PTE_EXT_AP0 | 2
 #endif
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	bic	r3, r1, #0x000003f0
 	bic	r3, r3, #PTE_TYPE_MASK
 	orr	r3, r3, r2
 	orr	r3, r3, #PTE_EXT_AP0 | 2
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	tst	r1, #1 << 4
 	orrne	r3, r3, #PTE_EXT_TEX(1)
@@ -151,7 +154,7 @@ ENTRY(cpu_v7_set_pte_ext)
  THUMB(	add	r0, r0, #2048 )
  THUMB(	str	r3, [r0] )
 #endif /* CONFIG_MMU */
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #ifdef CONFIG_MMU
 #ifdef CONFIG_MV_LARGE_PAGE_SUPPORT
 #ifdef CONFIG_MV_64KB_MMU_PAGE_SIZE_SUPPORT
@@ -221,12 +224,12 @@ ENTRY(cpu_v7_set_pte_ext)
 	flush_pte	r0
 #endif /* CONFIG_MV_LARGE_PAGE_SUPPORT */
 #endif /* CONFIG_MMU */
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 #ifdef CONFIG_MMU
 	ALT_SMP(W(nop))
 	ALT_UP (mcr	p15, 0, r0, c7, c10, 1)		@ flush_pte
 #endif
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	mov	pc, lr
 ENDPROC(cpu_v7_set_pte_ext)
 

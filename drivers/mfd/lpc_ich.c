@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  lpc_ich.c - LPC interface for Intel ICH
  *
@@ -66,9 +69,9 @@
 #include <linux/mfd/core.h>
 #include <linux/mfd/lpc_ich.h>
 
-#ifdef CONFIG_SYNO_AVOTON
+#ifdef MY_DEF_HERE
 #include <linux/synobios.h>
-#endif /* CONFIG_SYNO_AVOTON */
+#endif /* MY_DEF_HERE */
 #define ACPIBASE		0x40
 #define ACPIBASE_GPE_OFF	0x28
 #define ACPIBASE_GPE_END	0x2f
@@ -795,7 +798,7 @@ static int lpc_ich_check_conflict_gpio(struct resource *res)
 	return use_gpio ? use_gpio : ret;
 }
 
-#ifdef CONFIG_SYNO_ICH_GPIO_CTRL
+#ifdef MY_ABC_HERE
 static u32 gpiobase = 0;
 static u32 *writable_pin = NULL;
 static u32 SynoGpioCount = 0;
@@ -807,7 +810,7 @@ static u32 c226_writable_pin[] = {5, 16, 18, 19, 20, 21, 23, 32, 33, 34, 35, 36,
 static u32 avoton_writable_pin[] = {10, 15, 16, 17, 49, 50, 53, 54};
 static u32 broadwell_writable_pin[] = {3, 4, 28, 45, 70, 71};
 
-#ifdef CONFIG_SYNO_AVOTON
+#ifdef MY_DEF_HERE
 /* for avoton gpio we define that
  * CORE WELL gpio (GPIOS_X) start from 0 to 31
  * SUS WELL gpio (GPIO_SUSX) start from 32 to 63
@@ -816,15 +819,15 @@ static u32 coreWellGpio = 0;
 static u32 susWellGpio = 0;
 static u32 avoton_corewell_gpioin_pin = 0x18041831; //pin 15 16 and 17 used as output pin for DS415+, so we don't read these pin from CPU
 static u32 avoton_suswell_gpioin_pin = 0xC181114;
-#endif /* CONFIG_SYNO_AVOTON */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_AVOTON)
+#if defined(MY_DEF_HERE)
 // avoton gpio pin 0~63
 #define GPIO_MAX_PIN 63
 #else
 // other x64 platform gpio pin 0~95
 #define GPIO_MAX_PIN 95
-#endif /* CONFIG_SYNO_AVOTON */
+#endif /* MY_DEF_HERE */
 
 u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite)
 {
@@ -834,12 +837,12 @@ u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite)
     int i = 0;
     u32 addr_use_select, addr_io_select, addr_lvl;
 	u32 val_lvl;
-#if defined(CONFIG_SYNO_AVOTON)
+#if defined(MY_DEF_HERE)
 	u32 *pVal_lvl = NULL;
 	u32 gpioin_pin = 0;
-#else /* CONFIG_SYNO_AVOTON */
+#else /* MY_DEF_HERE */
     u32 val_use_select, val_io_select;
-#endif /* CONFIG_SYNO_AVOTON */
+#endif /* MY_DEF_HERE */
     u32 mppPin = pin;
     u32 tmpVal;
 
@@ -867,23 +870,23 @@ u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite)
     if (mppPin < 32) {
         addr_use_select = gpiobase + 0x00;
         addr_io_select = gpiobase + 0x04;
-#if defined(CONFIG_SYNO_AVOTON)
+#if defined(MY_DEF_HERE)
 		addr_lvl = gpiobase + 0x08;
 		pVal_lvl = &coreWellGpio;
 		gpioin_pin = avoton_corewell_gpioin_pin;
-#else /* CONFIG_SYNO_AVOTON */
+#else /* MY_DEF_HERE */
         addr_lvl = gpiobase + 0x0c;
-#endif /* CONFIG_SYNO_AVOTON */
+#endif /* MY_DEF_HERE */
     } else if (mppPin < 64) {
         addr_use_select = gpiobase + 0x30;
         addr_io_select = gpiobase + 0x34;
-#if defined(CONFIG_SYNO_AVOTON)
+#if defined(MY_DEF_HERE)
 		addr_lvl = gpiobase + 0x88;
 		pVal_lvl = &susWellGpio;
 		gpioin_pin = avoton_suswell_gpioin_pin;
-#else /* CONFIG_SYNO_AVOTON */
+#else /* MY_DEF_HERE */
         addr_lvl = gpiobase + 0x38;
-#endif /* CONFIG_SYNO_AVOTON */
+#endif /* MY_DEF_HERE */
         mppPin %= 32;
     } else {
         addr_use_select = gpiobase + 0x40;
@@ -895,7 +898,7 @@ u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite)
  * If Avoton GPIO pin set ouput, we can't read the value from register
  * so we need to store the gpio values in kernel instead of register
  */
-#ifdef CONFIG_SYNO_AVOTON
+#ifdef MY_DEF_HERE
 	if (0 == isWrite) {
         //out put value
 		if ((1 << mppPin) & gpioin_pin) {
@@ -916,7 +919,7 @@ u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite)
 			outl(*pVal_lvl, addr_lvl);
 		}
 	}
-#else /* CONFIG_SYNO_AVOTON */
+#else /* MY_DEF_HERE */
     if (0 == isWrite) {
         //change use select to GPIO
         val_use_select = inl(addr_use_select);
@@ -953,7 +956,7 @@ u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite)
             outl(val_lvl, addr_lvl);
         }
     }
-#endif /* CONFIG_SYNO_AVOTON */
+#endif /* MY_DEF_HERE */
     ret = 0;
 
 UNLOCK:
@@ -997,7 +1000,7 @@ static int syno_gpio_init(struct pci_dev *dev)
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_ICH_GPIO_CTRL */
+#endif /* MY_ABC_HERE */
 
 static int lpc_ich_init_gpio(struct pci_dev *dev)
 {
@@ -1042,10 +1045,10 @@ gpe0_done:
 		ret = -ENODEV;
 		goto gpio_done;
 	}
-#ifdef CONFIG_SYNO_ICH_GPIO_CTRL
+#ifdef MY_ABC_HERE
 	gpiobase = base_addr;
 	syno_gpio_init(dev);
-#ifdef CONFIG_SYNO_AVOTON
+#ifdef MY_DEF_HERE
 	/* For Avoton models
 	 * gpio_sus18 and gpio_sus22 is output pin and the default valuse is 1
 	 * gpio sus21 is for ds415+ phy reset
@@ -1056,8 +1059,8 @@ gpe0_done:
 	} else {
 		susWellGpio = 0x440000;
 	}
-#endif /* CONFIG_SYNO_AVOTON */
-#endif /* CONFIG_SYNO_ICH_GPIO_CTRL */
+#endif /* MY_DEF_HERE */
+#endif /* MY_ABC_HERE */
 
 	/* Older devices provide fewer GPIO and have a smaller resource size. */
 	res = &gpio_ich_res[ICH_RES_GPIO];

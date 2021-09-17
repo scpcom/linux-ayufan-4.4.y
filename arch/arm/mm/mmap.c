@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/arch/arm/mm/mmap.c
  */
@@ -146,11 +149,11 @@ arch_get_unmapped_area_topdown(struct file *filp, const unsigned long addr0,
 
 	info.flags = VM_UNMAPPED_AREA_TOPDOWN;
 	info.length = len;
-#if defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE)
 	info.low_limit = PAGE_SIZE;
-#else /* CONFIG_SYNO_ALPINE */
+#else /* MY_DEF_HERE */
 	info.low_limit = FIRST_USER_ADDRESS;
-#endif /* CONFIG_SYNO_ALPINE */
+#endif /* MY_DEF_HERE */
 	info.high_limit = mm->mmap_base;
 	info.align_mask = do_align ? (PAGE_MASK & (SHMLBA - 1)) : 0;
 	info.align_offset = pgoff << PAGE_SHIFT;

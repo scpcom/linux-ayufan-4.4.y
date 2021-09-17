@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2013 STMicroelectronics Limited
  * Author: Srinivas Kandagatla <srinivas.kandagatla@st.com>
@@ -370,7 +373,7 @@ err:
 	return ret;
 }
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_PM_SLEEP
 static int st_rc_suspend(struct device *dev)
 {
@@ -448,7 +451,7 @@ static SIMPLE_DEV_PM_OPS(st_rc_pm_ops, st_rc_suspend, st_rc_resume);
 #else
 #define DEV_PM_OPS	NULL
 #endif
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 #ifdef CONFIG_PM
 static int st_rc_suspend(struct device *dev)
 {
@@ -522,7 +525,7 @@ static int st_rc_resume(struct device *dev)
 
 static SIMPLE_DEV_PM_OPS(st_rc_pm_ops, st_rc_suspend, st_rc_resume);
 #endif
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 static void st_rc_shutdown(struct platform_device *pdev)
 {
@@ -548,13 +551,13 @@ static struct platform_driver st_rc_driver = {
 		.name = IR_ST_NAME,
 		.owner	= THIS_MODULE,
 		.of_match_table = of_match_ptr(st_rc_match),
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 		.pm     = DEV_PM_OPS,
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 #ifdef CONFIG_PM
 		.pm     = &st_rc_pm_ops,
 #endif
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	},
 	.probe = st_rc_probe,
 	.shutdown = st_rc_shutdown,

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (c) 2010-2011 Samsung Electronics Co., Ltd.
  *		http://www.samsung.com
@@ -283,11 +286,11 @@ static int __init exynos_cpufreq_init(void)
 {
 	int ret = -EINVAL;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	exynos_info = kzalloc(sizeof(*exynos_info), GFP_KERNEL);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	exynos_info = kzalloc(sizeof(struct exynos_dvfs_info), GFP_KERNEL);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	if (!exynos_info)
 		return -ENOMEM;
 

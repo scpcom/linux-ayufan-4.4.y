@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * dmx.h
  *
@@ -73,7 +76,7 @@ typedef enum dmx_ts_pes
 	DMX_PES_TELETEXT3,
 	DMX_PES_SUBTITLE3,
 	DMX_PES_PCR3,
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 
 	DMX_PES_OTHER,
 
@@ -246,9 +249,9 @@ typedef enum dmx_ts_pes
 	DMX_PES_PCR31,
 
 	DMX_PES_LAST
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 	DMX_PES_OTHER
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 } dmx_pes_type_t;
 
 #define DMX_PES_AUDIO    DMX_PES_AUDIO0
@@ -295,7 +298,7 @@ typedef enum {
 	DMX_SOURCE_FRONT1,
 	DMX_SOURCE_FRONT2,
 	DMX_SOURCE_FRONT3,
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	DMX_SOURCE_FRONT4,
 	DMX_SOURCE_FRONT5,
 	DMX_SOURCE_FRONT6,
@@ -308,11 +311,11 @@ typedef enum {
 	DMX_SOURCE_FRONT13,
 	DMX_SOURCE_FRONT14,
 	DMX_SOURCE_FRONT15,
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	DMX_SOURCE_DVR0   = 16,
 	DMX_SOURCE_DVR1,
 	DMX_SOURCE_DVR2,
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	DMX_SOURCE_DVR3,
 	DMX_SOURCE_DVR4,
 	DMX_SOURCE_DVR5,
@@ -326,9 +329,9 @@ typedef enum {
 	DMX_SOURCE_DVR13,
 	DMX_SOURCE_DVR14,
 	DMX_SOURCE_DVR15
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 	DMX_SOURCE_DVR3
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 } dmx_source_t;
 
 struct dmx_stc {

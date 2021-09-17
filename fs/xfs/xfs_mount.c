@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (c) 2000-2005 Silicon Graphics, Inc.
  * All Rights Reserved.
@@ -296,11 +299,11 @@ xfs_sb_validate_fsb_count(
 	ASSERT(sbp->sb_blocklog >= BBSHIFT);
 
 #if XFS_BIG_BLKNOS     /* Limited by ULONG_MAX of page cache index */
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 	if (nblocks >> (PAGE_CACHE_SHIFT - sbp->sb_blocklog) > PGOFF_MAX)
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	if (nblocks >> (PAGE_CACHE_SHIFT - sbp->sb_blocklog) > ULONG_MAX)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 		return EFBIG;
 #else                  /* Limited by UINT_MAX of sectors */
 	if (nblocks << (sbp->sb_blocklog - BBSHIFT) > UINT_MAX)

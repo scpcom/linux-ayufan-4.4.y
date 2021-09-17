@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (c) 2008 Intel Corporation
  * Author: Matthew Wilcox <willy@linux.intel.com>
@@ -37,10 +40,10 @@ static noinline void __down(struct semaphore *sem);
 static noinline int __down_interruptible(struct semaphore *sem);
 static noinline int __down_killable(struct semaphore *sem);
 static noinline int __down_timeout(struct semaphore *sem, long jiffies);
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 static noinline int __down_timeout_interruptible(struct semaphore *sem,
 		long jiffies);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 static noinline void __up(struct semaphore *sem);
 
 /**
@@ -172,7 +175,7 @@ int down_timeout(struct semaphore *sem, long jiffies)
 }
 EXPORT_SYMBOL(down_timeout);
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 /**
  * down_timeout_interruptible - acquire the semaphore within a specified time
  * @sem: the semaphore to be acquired
@@ -198,7 +201,7 @@ int down_timeout_interruptible(struct semaphore *sem, long jiffies)
 	return result;
 }
 EXPORT_SYMBOL(down_timeout_interruptible);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 /**
  * up - release the semaphore
@@ -284,13 +287,13 @@ static noinline int __sched __down_timeout(struct semaphore *sem, long jiffies)
 {
 	return __down_common(sem, TASK_UNINTERRUPTIBLE, jiffies);
 }
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 static noinline int __sched __down_timeout_interruptible(struct semaphore *sem,
 		long jiffies)
 {
 	return __down_common(sem, TASK_INTERRUPTIBLE, jiffies);
 }
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 static noinline void __sched __up(struct semaphore *sem)
 {

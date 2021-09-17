@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * core.c  --  Voltage/Current Regulator framework.
  *
@@ -1409,7 +1412,7 @@ struct regulator *regulator_get_exclusive(struct device *dev, const char *id)
 }
 EXPORT_SYMBOL_GPL(regulator_get_exclusive);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 /**
  * regulator_get_optional - obtain optional access to a regulator.
  * @dev: device for regulator "consumer"
@@ -1468,7 +1471,7 @@ struct regulator *devm_regulator_get_optional(struct device *dev,
 	return regulator;
 }
 EXPORT_SYMBOL_GPL(devm_regulator_get_optional);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 /* regulator_list_mutex lock held by regulator_put() */
 static void _regulator_put(struct regulator *regulator)

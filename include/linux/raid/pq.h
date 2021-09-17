@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* -*- linux-c -*- ------------------------------------------------------- *
  *
  *   Copyright 2003 H. Peter Anvin - All Rights Reserved
@@ -72,9 +75,9 @@ extern const char raid6_empty_zero_page[PAGE_SIZE];
 /* Routine choices */
 struct raid6_calls {
 	void (*gen_syndrome)(int, size_t, void **);
-#ifdef CONFIG_SYNO_MD_RAID6_RMW
+#ifdef MY_ABC_HERE
 	void (*xor_syndrome)(int, int, int, size_t, void **);
-#endif /* CONFIG_SYNO_MD_RAID6_RMW */
+#endif /* MY_ABC_HERE */
 	int  (*valid)(void);	/* Returns 1 if this routine set is usable */
 	const char *name;	/* Name of this routine set */
 	int prefer;		/* Has special performance attribute */

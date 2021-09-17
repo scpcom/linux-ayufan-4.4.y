@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Algorithm testing framework and tests.
  *
@@ -1770,7 +1773,7 @@ static const struct alg_test_desc alg_test_descs[] = {
 			}
 		}
 	}, {
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 		.alg = "authenc(hmac(sha384),cbc(aes))",
 		.test = alg_test_aead,
 		.fips_allowed = 1,
@@ -1783,7 +1786,7 @@ static const struct alg_test_desc alg_test_descs[] = {
 			}
 		}
 	}, {
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 		.alg = "authenc(hmac(sha512),cbc(aes))",
 		.test = alg_test_aead,
 		.fips_allowed = 1,

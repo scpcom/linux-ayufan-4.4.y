@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/buffer.c
  *
@@ -111,15 +114,15 @@ static int quiet_error(struct buffer_head *bh)
 static void buffer_io_error(struct buffer_head *bh)
 {
 	char b[BDEVNAME_SIZE];
-#ifdef CONFIG_SYNO_IO_ERROR_LIMIT_MSG
+#ifdef MY_ABC_HERE
 	if (printk_ratelimit()) {
-#endif /* CONFIG_SYNO_IO_ERROR_LIMIT_MSG */
+#endif /* MY_ABC_HERE */
 	printk(KERN_ERR "Buffer I/O error on device %s, logical block %Lu\n",
 			bdevname(bh->b_bdev, b),
 			(unsigned long long)bh->b_blocknr);
-#ifdef CONFIG_SYNO_IO_ERROR_LIMIT_MSG
+#ifdef MY_ABC_HERE
 	}
-#endif /* CONFIG_SYNO_IO_ERROR_LIMIT_MSG */
+#endif /* MY_ABC_HERE */
 }
 
 /*
@@ -988,13 +991,13 @@ grow_dev_page(struct block_device *bdev, sector_t block,
 		bh = page_buffers(page);
 		if (bh->b_size == size) {
 			end_block = init_page_buffers(page, bdev,
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 				(sector_t)((sector_t)index <<
 					(sector_t)sizebits), size);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 						(sector_t)index << sizebits,
 						size);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 			goto done;
 		}
 		if (!try_to_free_buffers(page))
@@ -1015,12 +1018,12 @@ grow_dev_page(struct block_device *bdev, sector_t block,
 	 */
 	spin_lock(&inode->i_mapping->private_lock);
 	link_dev_buffers(page, bh);
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	end_block = init_page_buffers(page, bdev,
 			(sector_t)((sector_t)index << (sector_t)sizebits),
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	end_block = init_page_buffers(page, bdev, (sector_t)index << sizebits,
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 			size);
 	spin_unlock(&inode->i_mapping->private_lock);
 done:

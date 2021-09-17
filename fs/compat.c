@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/compat.c
  *
@@ -48,7 +51,7 @@
 #include <linux/slab.h>
 #include <linux/pagemap.h>
 #include <linux/aio.h>
-#ifdef CONFIG_SYNO_FS_CREATE_TIME
+#ifdef MY_ABC_HERE
 #include <linux/mount.h>
 #endif
 
@@ -57,14 +60,14 @@
 #include <asm/ioctls.h>
 #include "internal.h"
 
-#ifdef CONFIG_SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 #include <linux/synolib.h>
 extern int syno_hibernation_log_level;
-#endif /* CONFIG_SYNO_DEBUG_FLAG */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 #include "synoacl_int.h"
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 
 int compat_log = 1;
 
@@ -1084,11 +1087,11 @@ asmlinkage long compat_sys_getdents64(unsigned int fd,
  */
 COMPAT_SYSCALL_DEFINE3(open, const char __user *, filename, int, flags, umode_t, mode)
 {
-#ifdef CONFIG_SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
         if(syno_hibernation_log_level > 0) {
                 syno_do_hibernation_filename_log(filename);
         }
-#endif /* CONFIG_SYNO_DEBUG_FLAG */
+#endif /* MY_ABC_HERE */
 
 	return do_sys_open(AT_FDCWD, filename, flags, mode);
 }
@@ -1480,7 +1483,7 @@ COMPAT_SYSCALL_DEFINE3(open_by_handle_at, int, mountdirfd,
 }
 #endif
 
-#ifdef CONFIG_SYNO_FS_RECVFILE
+#ifdef MY_ABC_HERE
 COMPAT_SYSCALL_DEFINE5(recvfile, int, fd, int, s, loff_t *, offset, size_t, nbytes, compat_size_t __user *, rwbytes32)
 {
 	int err = 0;
@@ -1510,9 +1513,9 @@ COMPAT_SYSCALL_DEFINE5(recvfile, int, fd, int, s, loff_t *, offset, size_t, nbyt
 
 	return ret;
 }
-#endif /* CONFIG_SYNO_FS_RECVFILE */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_FS_CREATE_TIME
+#ifdef MY_ABC_HERE
 /**
  * sys_SYNOUtime() is used to update create time.
  *
@@ -1554,7 +1557,7 @@ COMPAT_SYSCALL_DEFINE2(SYNOUtime, const char __user *, filename, struct compat_t
 
 	inode = path.dentry->d_inode;
 	if (!inode_owner_or_capable(inode)) {
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 		if (IS_SYNOACL(path.dentry)) {
 			error = synoacl_op_perm(path.dentry, MAY_WRITE_ATTR | MAY_WRITE_EXT_ATTR);
 			if (error) 
@@ -1568,10 +1571,10 @@ COMPAT_SYSCALL_DEFINE2(SYNOUtime, const char __user *, filename, struct compat_t
 			if (error)
 				goto drop_write;
 		} else {
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 		error = -EPERM;
 		goto drop_write;
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 		}
 #endif
 	}
@@ -1585,4 +1588,4 @@ dput_and_out:
 out:
 	return error;
 }
-#endif /* CONFIG_SYNO_FS_CREATE_TIME */
+#endif /* MY_ABC_HERE */

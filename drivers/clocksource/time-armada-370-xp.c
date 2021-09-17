@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Marvell Armada 370/XP SoC timer handling.
  *
@@ -14,7 +17,7 @@
  * Timer 0 is used as free-running clocksource, while timer 1 is
  * used as clock_event_device.
  */
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 /*
  * ---
  * Clocksource driver for Armada 370, Armada 375 and Armada XP SoC.
@@ -34,7 +37,7 @@
  *
  * See Documentation/devicetree/bindings/timer/marvell,armada-370-xp-timer.txt
  */
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 #include <linux/init.h>
 #include <linux/platform_device.h>
@@ -52,15 +55,15 @@
 #include <asm/sched_clock.h>
 #include <asm/localtimer.h>
 #include <linux/percpu.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #include <linux/syscore_ops.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 /*
  * Timer block registers.
  */
 #define TIMER_CTRL_OFF		0x0000
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #define  TIMER0_EN		 BIT(0)
 #define  TIMER0_RELOAD_EN	 BIT(1)
 #define  TIMER0_25MHZ            BIT(11)
@@ -68,7 +71,7 @@
 #define  TIMER1_EN		 BIT(2)
 #define  TIMER1_RELOAD_EN	 BIT(3)
 #define  TIMER1_25MHZ            BIT(12)
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 #define  TIMER0_EN		 0x0001
 #define  TIMER0_RELOAD_EN	 0x0002
 #define  TIMER0_25MHZ            0x0800
@@ -76,7 +79,7 @@
 #define  TIMER1_EN		 0x0004
 #define  TIMER1_RELOAD_EN	 0x0008
 #define  TIMER1_25MHZ            0x1000
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 #define  TIMER1_DIV(div)         ((div) << 22)
 #define TIMER_EVENTS_STATUS	0x0004
 #define  TIMER0_CLR_MASK         (~0x1)
@@ -106,7 +109,7 @@ static u32 ticks_per_jiffy;
 
 static struct clock_event_device __percpu **percpu_armada_370_xp_evt;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static void timer_ctrl_clrset(u32 clr, u32 set)
 {
 	writel((readl(timer_base + TIMER_CTRL_OFF) & ~clr) | set,
@@ -118,7 +121,7 @@ static void local_timer_ctrl_clrset(u32 clr, u32 set)
 	writel((readl(local_base + TIMER_CTRL_OFF) & ~clr) | set,
 		local_base + TIMER_CTRL_OFF);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static u32 notrace armada_370_xp_read_sched_clock(void)
 {
@@ -132,11 +135,11 @@ static int
 armada_370_xp_clkevt_next_event(unsigned long delta,
 				struct clock_event_device *dev)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	u32 u;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	/*
 	 * Clear clockevent timer interrupt.
 	 */
@@ -151,15 +154,15 @@ armada_370_xp_clkevt_next_event(unsigned long delta,
 	 * Enable the timer.
 	 */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	local_timer_ctrl_clrset(TIMER0_RELOAD_EN,
 				TIMER0_EN | TIMER0_DIV(TIMER_DIVIDER_SHIFT));
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	u = readl(local_base + TIMER_CTRL_OFF);
 	u = ((u & ~TIMER0_RELOAD_EN) | TIMER0_EN |
 	     TIMER0_DIV(TIMER_DIVIDER_SHIFT));
 	writel(u, local_base + TIMER_CTRL_OFF);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	return 0;
 }
 
@@ -167,11 +170,11 @@ static void
 armada_370_xp_clkevt_mode(enum clock_event_mode mode,
 			  struct clock_event_device *dev)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	u32 u;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	if (mode == CLOCK_EVT_MODE_PERIODIC) {
 
@@ -185,27 +188,27 @@ armada_370_xp_clkevt_mode(enum clock_event_mode mode,
 		 * Enable timer.
 		 */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		local_timer_ctrl_clrset(0, TIMER0_RELOAD_EN |
 					   TIMER0_EN |
 					   TIMER0_DIV(TIMER_DIVIDER_SHIFT));
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		u = readl(local_base + TIMER_CTRL_OFF);
 
 		writel((u | TIMER0_EN | TIMER0_RELOAD_EN |
 			TIMER0_DIV(TIMER_DIVIDER_SHIFT)),
 			local_base + TIMER_CTRL_OFF);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	} else {
 		/*
 		 * Disable timer.
 		 */
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		local_timer_ctrl_clrset(TIMER0_EN, 0);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		u = readl(local_base + TIMER_CTRL_OFF);
 		writel(u & ~TIMER0_EN, local_base + TIMER_CTRL_OFF);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 		/*
 		 * ACK pending timer interrupt.
@@ -241,30 +244,30 @@ static irqreturn_t armada_370_xp_timer_interrupt(int irq, void *dev_id)
  */
 static int __cpuinit armada_370_xp_timer_setup(struct clock_event_device *evt)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	u32 clr = 0, set = 0;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	u32 u;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	int cpu = smp_processor_id();
 
 	/* Use existing clock_event for cpu 0 */
 	if (!smp_processor_id())
 		return 0;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	if (timer25Mhz)
 		set = TIMER0_25MHZ;
 	else
 		clr = TIMER0_25MHZ;
 	local_timer_ctrl_clrset(clr, set);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	u = readl(local_base + TIMER_CTRL_OFF);
 	if (timer25Mhz)
 		writel(u | TIMER0_25MHZ, local_base + TIMER_CTRL_OFF);
 	else
 		writel(u & ~TIMER0_25MHZ, local_base + TIMER_CTRL_OFF);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	evt->name		= armada_370_xp_clkevt.name;
 	evt->irq		= armada_370_xp_clkevt.irq;
@@ -294,7 +297,7 @@ static struct local_timer_ops armada_370_xp_local_timer_ops __cpuinitdata = {
 	.stop	=  armada_370_xp_timer_stop,
 };
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static u32 timer0_ctrl_reg, timer0_local_ctrl_reg;
 
 static int armada_370_xp_timer_suspend(void)
@@ -436,7 +439,7 @@ static void __init armada_380_timer_init(struct device_node *np)
 }
 CLOCKSOURCE_OF_DECLARE(armada_380, "marvell,armada-380-timer",
 		       armada_380_timer_init);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 void __init armada_370_xp_timer_init(void)
 {
 	u32 u;
@@ -525,4 +528,4 @@ void __init armada_370_xp_timer_init(void)
 #endif
 	}
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */

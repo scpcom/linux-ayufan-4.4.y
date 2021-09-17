@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * linux/sound/soc.h -- ALSA SoC Layer
  *
@@ -19,10 +22,10 @@
 #include <linux/workqueue.h>
 #include <linux/interrupt.h>
 #include <linux/kernel.h>
-#if defined(CONFIG_SYNO_IGNORE_TRACE_SND_SOC)
+#if defined(MY_ABC_HERE)
 #else
 #include <linux/regmap.h>
-#endif /*CONFIG_SYNO_IGNORE_TRACE_SND_SOC*/
+#endif /*MY_ABC_HERE*/
 #include <linux/log2.h>
 #include <sound/core.h>
 #include <sound/pcm.h>
@@ -372,9 +375,9 @@ int snd_soc_codec_set_pll(struct snd_soc_codec *codec, int pll_id, int source,
 
 int snd_soc_register_card(struct snd_soc_card *card);
 int snd_soc_unregister_card(struct snd_soc_card *card);
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 int devm_snd_soc_register_card(struct device *dev, struct snd_soc_card *card);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 int snd_soc_suspend(struct device *dev);
 int snd_soc_resume(struct device *dev);
 int snd_soc_poweroff(struct device *dev);
@@ -392,11 +395,11 @@ void snd_soc_unregister_codec(struct device *dev);
 int snd_soc_register_component(struct device *dev,
 			 const struct snd_soc_component_driver *cmpnt_drv,
 			 struct snd_soc_dai_driver *dai_drv, int num_dai);
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 int devm_snd_soc_register_component(struct device *dev,
 			 const struct snd_soc_component_driver *cmpnt_drv,
 			 struct snd_soc_dai_driver *dai_drv, int num_dai);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 void snd_soc_unregister_component(struct device *dev);
 int snd_soc_codec_volatile_register(struct snd_soc_codec *codec,
 				    unsigned int reg);
@@ -1198,7 +1201,7 @@ static inline bool snd_soc_volsw_is_stereo(struct soc_mixer_control *mc)
 	return 1;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 /**
  * snd_soc_kcontrol_codec() - Returns the CODEC that registered the control
  * @kcontrol: The control for which to get the CODEC
@@ -1212,7 +1215,7 @@ static inline struct snd_soc_codec *snd_soc_kcontrol_codec(
 {
 	return snd_kcontrol_chip(kcontrol);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 int snd_soc_util_init(void);
 void snd_soc_util_exit(void);

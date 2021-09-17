@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * kobject.c - library routines for handling generic kernel objects
  *
@@ -708,7 +711,7 @@ const struct sysfs_ops kobj_sysfs_ops = {
 	.show	= kobj_attr_show,
 	.store	= kobj_attr_store,
 };
-#ifdef CONFIG_SYNO_BTRFS_PORTING
+#ifdef MY_ABC_HERE
 EXPORT_SYMBOL(kobj_sysfs_ops);
 #endif
 

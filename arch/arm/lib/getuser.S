@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/arch/arm/lib/getuser.S
  *
@@ -66,7 +69,7 @@ ENTRY(__get_user_4)
 	mov	pc, lr
 ENDPROC(__get_user_4)
 
-#ifdef CONFIG_SYNO_EXT4_FIX_RESIZE_16TB_IN_32BIT
+#ifdef MY_ABC_HERE
 ENTRY(__get_user_8)
 	check_uaccess r0, 8, r1, r2, __get_user_bad
 #ifdef CONFIG_THUMB2_KERNEL
@@ -79,7 +82,7 @@ ENTRY(__get_user_8)
 	mov	r0, #0
 	mov	pc, lr
 ENDPROC(__get_user_8)
-#endif /* CONFIG_SYNO_EXT4_FIX_RESIZE_16TB_IN_32BIT */
+#endif /* MY_ABC_HERE */
 
 __get_user_bad:
 	mov	r2, #0
@@ -92,8 +95,8 @@ ENDPROC(__get_user_bad)
 	.long	2b, __get_user_bad
 	.long	3b, __get_user_bad
 	.long	4b, __get_user_bad
-#ifdef CONFIG_SYNO_EXT4_FIX_RESIZE_16TB_IN_32BIT
+#ifdef MY_ABC_HERE
 	.long	5b, __get_user_bad
 	.long	6b, __get_user_bad
-#endif /* CONFIG_SYNO_EXT4_FIX_RESIZE_16TB_IN_32BIT */
+#endif /* MY_ABC_HERE */
 .popsection

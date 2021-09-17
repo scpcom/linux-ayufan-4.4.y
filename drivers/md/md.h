@@ -27,13 +27,13 @@
 #include <linux/wait.h>
 #include <linux/workqueue.h>
 
-#ifdef CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP
+#ifdef MY_ABC_HERE
 #define CHECKINTERVAL (7UL*HZ)
-#endif /* CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_MD_SECTOR_STATUS_REPORT
+#ifdef MY_ABC_HERE
 #include <linux/raid/libmd-report.h>
-#endif /* CONFIG_SYNO_MD_SECTOR_STATUS_REPORT */
+#endif /* MY_ABC_HERE */
 
 #define MaxSector (~(sector_t)0)
 
@@ -44,12 +44,12 @@
  */
 #define MD_MAX_BADBLOCKS	(PAGE_SIZE/8)
 
-#ifdef CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP
+#ifdef MY_ABC_HERE
 typedef struct _tag_SYNO_WAKEUP_DEVICE_WORK{
     struct work_struct work;
     struct mddev *mddev;
 } SYNO_WAKEUP_DEVICE_WORK;
-#endif /* CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP */
+#endif /* MY_ABC_HERE */
 
 /*
  * MD's 'extended' device
@@ -70,9 +70,9 @@ struct md_rdev {
 	struct block_device *bdev;	/* block device handle */
 
 	struct page	*sb_page, *bb_page;
-#ifdef CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP
+#ifdef MY_ABC_HERE
 	struct page	*wakeup_page;
-#endif /* CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP */
+#endif /* MY_ABC_HERE */
 	int		sb_loaded;
 	__u64		sb_events;
 	sector_t	data_offset;	/* start of data in array */
@@ -148,12 +148,12 @@ struct md_rdev {
 	} badblocks;
 };
 
-#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+#ifdef MY_ABC_HERE
 typedef struct _tag_SYNO_UPDATE_SB_WORK{
     struct work_struct work;
     struct mddev *mddev;
 } SYNO_UPDATE_SB_WORK;
-#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
+#endif /* MY_ABC_HERE */
 
 enum flag_bits {
 	Faulty,			/* device is known to have a fault */
@@ -199,9 +199,9 @@ enum flag_bits {
 				 * a want_replacement device with same
 				 * raid_disk number.
 				 */
-#ifdef CONFIG_SYNO_MD_STATUS_DISKERROR
+#ifdef MY_ABC_HERE
 	DiskError,	/* device is know to have a fault in degraded state */
-#endif /* CONFIG_SYNO_MD_STATUS_DISKERROR */
+#endif /* MY_ABC_HERE */
 };
 
 #define BB_LEN_MASK	(0x00000000000001FFULL)
@@ -376,7 +376,7 @@ struct mddev {
 	 * takes a copy of this number and does not attempt recovery again
 	 * until this number changes.
 	 */
-#ifdef CONFIG_SYNO_MD_FIX_RAID5_RESHAPE_HANG
+#ifdef MY_ABC_HERE
 	/* Resolve the raid 5 hang problem during expansion with disk error
 	 * or hotplug out.
 	 *
@@ -387,7 +387,7 @@ struct mddev {
 	 * necessary when device is set to error or disapear.
 	 */
 	int	reshape_interrupt;
-#endif /* CONFIG_SYNO_MD_FIX_RAID5_RESHAPE_HANG */
+#endif /* MY_ABC_HERE */
 	int				recovery_disabled;
 
 	int				in_sync;	/* know to not need resync */
@@ -467,14 +467,14 @@ struct mddev {
 
 	atomic_t 			max_corr_read_errors; /* max read retries */
 	struct list_head		all_mddevs;
-#ifdef CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP
+#ifdef MY_ABC_HERE
 	unsigned char			blActive;  /* to record whether this md is in active or not */
 	spinlock_t				ActLock;   /* lock for Active attr. */
 	unsigned long			ulLastReq; /* the last time received request */
-#endif /* CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP */
-#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
     unsigned char           nodev_and_crashed;     // 1 ==> nodev && crashed. deny make_request
-#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
+#endif /* MY_ABC_HERE */
 #ifdef CONFIG_SYNO_MD_BAD_SECTOR_AUTO_REMAP
 #define MD_AUTO_REMAP_MODE_FORCE_OFF 0
 #define MD_AUTO_REMAP_MODE_FORCE_ON 1
@@ -527,14 +527,14 @@ struct md_personality
 	int (*run)(struct mddev *mddev);
 	int (*stop)(struct mddev *mddev);
 	void (*status)(struct seq_file *seq, struct mddev *mddev);
-#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+#ifdef MY_ABC_HERE
 	/**
 	 *  for our special purpose, like raid1, there is not exist a
 	 *  easy way for distinguish between hotplug or read/write error
 	 *  on last one disk which is in sync
 	 */
 	void (*syno_error_handler)(struct mddev *mddev, struct md_rdev *rdev);
-#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
+#endif /* MY_ABC_HERE */
 	/* error_handler must set ->faulty and clear ->in_sync
 	 * if appropriate, and should abort recovery if needed 
 	 */
@@ -649,13 +649,13 @@ static inline void safe_put_page(struct page *p)
 	if (p) put_page(p);
 }
 
-#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+#ifdef MY_ABC_HERE
 extern void SynoUpdateSBTask(struct work_struct *work);
-#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
-#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
 extern void syno_md_error (struct mddev *mddev, struct md_rdev *rdev);
 extern int IsDeviceDisappear(struct block_device *bdev);
-#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
+#endif /* MY_ABC_HERE */
 extern int register_md_personality(struct md_personality *p);
 extern int unregister_md_personality(struct md_personality *p);
 extern struct md_thread *md_register_thread(
@@ -697,9 +697,9 @@ void SynoAutoRemapReport(struct mddev *mddev, sector_t sector, struct block_devi
 void RaidRemapModeSet(struct block_device *, unsigned char);
 #endif /* CONFIG_SYNO_MD_BAD_SECTOR_AUTO_REMAP */
 
-#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+#ifdef MY_ABC_HERE
 void SYNORaidRdevUnplug(struct mddev *mddev, struct md_rdev *rdev);
-#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
+#endif /* MY_ABC_HERE */
 extern void mddev_init(struct mddev *mddev);
 extern int md_run(struct mddev *mddev);
 extern void md_stop(struct mddev *mddev);

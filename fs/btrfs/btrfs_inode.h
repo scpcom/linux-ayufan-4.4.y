@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2007 Oracle.  All rights reserved.
  *
@@ -144,11 +147,11 @@ struct btrfs_inode {
 	 */
 	u64 index_cnt;
 
-#ifdef CONFIG_SYNO_BTRFS_REVERT_DELAYED_DELETE_INODE
+#ifdef MY_ABC_HERE
 #else
 	/* Cache the directory index number to speed the dir/file remove */
 	u64 dir_index;
-#endif /* CONFIG_SYNO_BTRFS_REVERT_DELAYED_DELETE_INODE */
+#endif /* MY_ABC_HERE */
 
 	/* the fsync log has some corner cases that mean we have to check
 	 * directories to see if any unlinks have been done before

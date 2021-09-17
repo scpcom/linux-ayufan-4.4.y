@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/isofs/inode.c
  *
@@ -376,7 +379,7 @@ static int parse_options(char *options, struct iso9660_options *popt)
 {
 	char *p;
 	int option;
-#ifdef CONFIG_SYNO_ISOFS_UINT_UID_GID
+#ifdef MY_ABC_HERE
 	unsigned long ulOption;
 #endif
 	popt->map = 'n';
@@ -466,7 +469,7 @@ static int parse_options(char *options, struct iso9660_options *popt)
 		case Opt_ignore:
 			break;
 		case Opt_uid:
-#ifdef  CONFIG_SYNO_ISOFS_UINT_UID_GID
+#ifdef MY_ABC_HERE
 			if (SYNO_get_option_ul(&args[0], &ulOption))
 				return 0;
 			popt->uid = make_kuid(current_user_ns(), ulOption);
@@ -474,13 +477,13 @@ static int parse_options(char *options, struct iso9660_options *popt)
 			if (match_int(&args[0], &option))
 				return 0;
 			popt->uid = make_kuid(current_user_ns(), option);
-#endif /* CONFIG_SYNO_ISOFS_UINT_UID_GID */
+#endif /* MY_ABC_HERE */
 			if (!uid_valid(popt->uid))
 				return 0;
 			popt->uid_set = 1;
 			break;
 		case Opt_gid:
-#ifdef CONFIG_SYNO_ISOFS_UINT_UID_GID
+#ifdef MY_ABC_HERE
 			if (SYNO_get_option_ul(&args[0], &ulOption))
 				return 0;
 			popt->gid = make_kgid(current_user_ns(), ulOption);
@@ -488,7 +491,7 @@ static int parse_options(char *options, struct iso9660_options *popt)
 			if (match_int(&args[0], &option))
 				return 0;
 			popt->gid = make_kgid(current_user_ns(), option);
-#endif /* CONFIG_SYNO_ISOFS_UINT_UID_GID */
+#endif /* MY_ABC_HERE */
 			if (!gid_valid(popt->gid))
 				return 0;
 			popt->gid_set = 1;

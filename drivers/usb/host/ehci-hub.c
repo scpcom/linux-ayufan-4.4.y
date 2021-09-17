@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2001-2004 by David Brownell
  *
@@ -70,7 +73,7 @@ static void ehci_handover_companion_ports(struct ehci_hcd *ehci)
 	}
 
 	/* Give the connections some time to appear */
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	port = HCS_N_PORTS(ehci->hcs_params);
 	while (port--) {
 		if (test_bit(port, &ehci->owned_ports)) {
@@ -82,9 +85,9 @@ static void ehci_handover_companion_ports(struct ehci_hcd *ehci)
 					 port + 1);
 		}
 	}
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	msleep(20);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	spin_lock_irq(&ehci->lock);
 	port = HCS_N_PORTS(ehci->hcs_params);
@@ -1049,11 +1052,11 @@ static int ehci_hub_control (
 			set_bit(wIndex, &ehci->suspended_ports);
 			break;
 		case USB_PORT_FEAT_POWER:
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 			if (!(temp & PORT_OC) && HCS_PPC(ehci->hcs_params))
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 			if (HCS_PPC (ehci->hcs_params))
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 				ehci_writel(ehci, temp | PORT_POWER,
 						status_reg);
 			break;

@@ -5,7 +5,7 @@
 #ifndef __SYNO_H_
 #define __SYNO_H_
 
-#if defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3)
+#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
 
 #ifdef MY_DEF_HERE
 #define SYNO_EVANSPORT_TTYS1_PORT	0x2F8
@@ -16,8 +16,8 @@
 #endif
 #endif
 
-#ifdef	CONFIG_SYNO_USB_FLASH_BOOT
-#ifdef	CONFIG_SYNO_X64
+#ifdef	MY_DEF_HERE
+#ifdef	MY_DEF_HERE
 #define IS_SYNO_USBBOOT_ID_VENDOR(VENDOR) (0xF400 == (VENDOR) || 0xF401 == (VENDOR))
 #define IS_SYNO_USBBOOT_ID_PRODUCT(PRODUCT) (0xF400 == (PRODUCT) || 0xF401 == (PRODUCT))
 #else  
@@ -46,11 +46,11 @@
 #define SYNO_CREATE_TIME_SWAP_VERSION 3719
 #endif
 
-#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+#ifdef MY_ABC_HERE
 #define SYNO_SMB_PSTRING_LEN 1024
 #endif
 
-#if defined(CONFIG_MV_XOR_MEMCOPY) && (defined(CONFIG_SYNO_LIO) || defined(MY_ABC_HERE))
+#if defined(CONFIG_MV_XOR_MEMCOPY) && (defined(MY_DEF_HERE) || defined(MY_ABC_HERE))
 #define SYNO_MV_PERF
 #endif  
 
@@ -74,11 +74,11 @@
 #define SYNO_NFSD_UDP_DEF_PACKET_SIZE 8192
 #endif
 
-#ifdef CONFIG_SYNO_FIXED_DISK_NAME
+#ifdef MY_ABC_HERE
  
 #define SYNO_ISCSI_DEVICE_INDEX    (26 + 25 * 26)     
 
-#ifdef CONFIG_SYNO_ARMADA
+#ifdef MY_ABC_HERE
  
 #define SYNO_INTERNAL_MICROSD_NAME "4-4"
 #endif  

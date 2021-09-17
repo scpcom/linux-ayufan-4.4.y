@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * MTD partitioning layer definitions
  *
@@ -61,11 +64,11 @@ struct mtd_part_parser_data {
 	struct device_node *of_node;
 };
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 struct mtd_info *get_mtd_partition_slave(struct mtd_info *master, char *name,
 					 uint64_t *offset);
 
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 /*
  * Functions dealing with the various ways of partitioning the space
  */

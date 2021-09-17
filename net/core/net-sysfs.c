@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * net-sysfs.c - network device class and attributes
  *
@@ -670,7 +673,7 @@ static ssize_t store_rps_dev_flow_table_cnt(struct netdev_rx_queue *queue,
 	return len;
 }
 
-#ifdef CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
+#ifdef MY_DEF_HERE
 static int init_rps_dev_flow_table_cnt(struct netdev_rx_queue *queue)
 {
 	int i = 0;
@@ -710,7 +713,7 @@ static int init_rps_dev_flow_table_cnt(struct netdev_rx_queue *queue)
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE */
+#endif /* MY_DEF_HERE */
 
 static struct rx_queue_attribute rps_cpus_attribute =
 	__ATTR(rps_cpus, S_IRUGO | S_IWUSR, show_rps_map, store_rps_map);
@@ -767,9 +770,9 @@ static int rx_queue_add_kobject(struct net_device *net, int index)
 		return error;
 	}
 
-#ifdef CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
+#ifdef MY_DEF_HERE
 	init_rps_dev_flow_table_cnt(queue);
-#endif /* CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE */
+#endif /* MY_DEF_HERE */
 	kobject_uevent(kobj, KOBJ_ADD);
 	dev_hold(queue->dev);
 

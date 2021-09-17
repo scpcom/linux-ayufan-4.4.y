@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
   FUSE: Filesystem in Userspace
   Copyright (C) 2001-2008  Miklos Szeredi <miklos@szeredi.hu>
@@ -952,7 +955,7 @@ static size_t fuse_send_write_pages(struct fuse_req *req, struct file *file,
 	return res;
 }
 
-#ifdef CONFIG_SYNO_FS_RECVFILE
+#ifdef MY_ABC_HERE
 static int fuse_write_begin(struct file *file, struct address_space *mapping,
                        loff_t pos, unsigned len, unsigned flags,
                        struct page **pagep, void **fsdata)
@@ -1092,7 +1095,7 @@ static int fuse_aggregate_write_end(struct file *file, struct address_space *map
 
 	return res;
 }
-#endif /* CONFIG_SYNO_FS_RECVFILE */
+#endif /* MY_ABC_HERE */
 
 static ssize_t fuse_fill_write_pages(struct fuse_req *req,
 			       struct address_space *mapping,
@@ -2621,10 +2624,10 @@ static long fuse_file_fallocate(struct file *file, int mode, loff_t offset,
 	int err;
 	bool lock_inode = !(mode & FALLOC_FL_KEEP_SIZE) ||
 			   (mode & FALLOC_FL_PUNCH_HOLE);
-#ifdef CONFIG_SYNO_FUSE_PUNCH_HOLE_BUG_ON
+#ifdef MY_ABC_HERE
 	loff_t first_page, last_page;
 	loff_t first_page_offset, last_page_offset;
-#endif /* CONFIG_SYNO_FUSE_PUNCH_HOLE_BUG_ON */
+#endif /* MY_ABC_HERE */
 
 	if (fc->no_fallocate)
 		return -EOPNOTSUPP;
@@ -2671,7 +2674,7 @@ static long fuse_file_fallocate(struct file *file, int mode, loff_t offset,
 	if (!(mode & FALLOC_FL_KEEP_SIZE))
 		fuse_write_update_size(inode, offset + length);
 
-#ifdef CONFIG_SYNO_FUSE_PUNCH_HOLE_BUG_ON
+#ifdef MY_ABC_HERE
 	if (mode & FALLOC_FL_PUNCH_HOLE) {
 		first_page = (offset) >> PAGE_CACHE_SHIFT;
 		last_page = (offset + length - 1) >> PAGE_CACHE_SHIFT;
@@ -2687,7 +2690,7 @@ static long fuse_file_fallocate(struct file *file, int mode, loff_t offset,
 #else
 	if (mode & FALLOC_FL_PUNCH_HOLE)
 		truncate_pagecache_range(inode, offset, offset + length - 1);
-#endif /* CONFIG_SYNO_FUSE_PUNCH_HOLE_BUG_ON */
+#endif /* MY_ABC_HERE */
 
 	fuse_invalidate_attr(inode);
 
@@ -2743,11 +2746,11 @@ static const struct address_space_operations fuse_file_aops  = {
 	.readpage	= fuse_readpage,
 	.writepage	= fuse_writepage,
 	.launder_page	= fuse_launder_page,
-#ifdef CONFIG_SYNO_FS_RECVFILE
+#ifdef MY_ABC_HERE
 	.write_begin    = fuse_write_begin,
 	.write_end      = fuse_write_end,
 	.aggregate_write_end	= fuse_aggregate_write_end,
-#endif /* CONFIG_SYNO_FS_RECVFILE */
+#endif /* MY_ABC_HERE */
 	.readpages	= fuse_readpages,
 	.set_page_dirty	= __set_page_dirty_nobuffers,
 	.bmap		= fuse_bmap,
@@ -2758,7 +2761,7 @@ void fuse_init_file_inode(struct inode *inode)
 {
 	inode->i_fop = &fuse_file_operations;
 	inode->i_data.a_ops = &fuse_file_aops;
-#ifdef CONFIG_SYNO_FS_RECVFILE
+#ifdef MY_ABC_HERE
 	inode->aggregate_flag = 0;
-#endif /* CONFIG_SYNO_FS_RECVFILE */
+#endif /* MY_ABC_HERE */
 }

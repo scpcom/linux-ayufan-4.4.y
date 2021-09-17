@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Profiling infrastructure declarations.
  *
@@ -21,10 +24,10 @@
  * gcc and need to be kept as close to the original definition as possible to
  * remain compatible.
  */
-#if defined (CONFIG_SYNO_LSP_MONACO)
-#else /* CONFIG_SYNO_LSP_MONACO */
+#if defined (MY_DEF_HERE)
+#else /* MY_DEF_HERE */
 #define GCOV_COUNTERS		5
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 #define GCOV_DATA_MAGIC		((unsigned int) 0x67636461)
 #define GCOV_TAG_FUNCTION	((unsigned int) 0x01000000)
 #define GCOV_TAG_COUNTER_BASE	((unsigned int) 0x01a10000)
@@ -37,7 +40,7 @@ typedef long gcov_type;
 typedef long long gcov_type;
 #endif
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 /* Opaque gcov_info. The gcov structures can change as for example in gcc 4.7 so
  * we cannot use full definition here and they need to be placed in gcc specific
  * implementation of gcov. This also means no direct access to the members in
@@ -51,7 +54,7 @@ struct gcov_info *gcov_info_next(struct gcov_info *info);
 void gcov_info_link(struct gcov_info *info);
 void gcov_info_unlink(struct gcov_info *prev, struct gcov_info *info);
 
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 /**
  * struct gcov_fn_info - profiling meta data per function
  * @ident: object file-unique function identifier
@@ -106,7 +109,7 @@ struct gcov_info {
 	unsigned int			ctr_mask;
 	struct gcov_ctr_info		counts[0];
 };
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 /* Base interface. */
 enum gcov_action {

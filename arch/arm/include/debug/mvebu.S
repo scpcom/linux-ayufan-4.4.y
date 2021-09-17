@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Early serial output macro for Marvell  SoC
  *
@@ -11,7 +14,7 @@
  * published by the Free Software Foundation.
 */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_DEBUG_MVEBU_UART_ALTERNATE)
+#if defined(MY_ABC_HERE) && defined(CONFIG_DEBUG_MVEBU_UART_ALTERNATE)
 #define ARMADA_370_XP_REGS_PHYS_BASE	0xf1000000
 #else
 #define ARMADA_370_XP_REGS_PHYS_BASE	0xd0000000

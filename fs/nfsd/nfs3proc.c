@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Process version 3 NFS requests.
  *
@@ -15,11 +18,11 @@
 #define NFSDDBG_FACILITY		NFSDDBG_PROC
 
 #define RETURN_STATUS(st)	{ resp->status = (st); return (st); }
-#ifdef CONFIG_SYNO_NFSD_UDP_PACKET
+#ifdef MY_ABC_HERE
 	extern u32 nfs_udp_f_rtpref;
 	extern u32 nfs_udp_f_wtpref;
-#endif /*CONFIG_SYNO_NFSD_UDP_PACKET*/
-#ifdef CONFIG_SYNO_NFSD_UNIX_PRI
+#endif /*MY_ABC_HERE*/
+#ifdef MY_ABC_HERE
 extern u32 bl_unix_pri_enable;
 #endif
 
@@ -544,7 +547,7 @@ nfsd3_proc_fsinfo(struct svc_rqst * rqstp, struct nfsd_fhandle    *argp,
 				SVCFH_fmt(&argp->fh));
 
 	resp->f_rtmax  = max_blocksize;
-#ifdef CONFIG_SYNO_NFSD_UDP_PACKET
+#ifdef MY_ABC_HERE
 	if (IPPROTO_UDP == rqstp->rq_prot) {
 		if (CONFIG_SYNO_NFSD_UDP_MIN_PACKET_SIZE <= nfs_udp_f_rtpref && CONFIG_SYNO_NFSD_UDP_MAX_PACKET_SIZE >= nfs_udp_f_rtpref) {
 			resp->f_rtpref = nfs_udp_f_rtpref;
@@ -564,12 +567,12 @@ nfsd3_proc_fsinfo(struct svc_rqst * rqstp, struct nfsd_fhandle    *argp,
 	}
 #else
 	resp->f_rtpref = max_blocksize;
-#endif /* CONFIG_SYNO_NFSD_UDP_PACKET */
+#endif /* MY_ABC_HERE */
 	resp->f_rtmult = PAGE_SIZE;
 	resp->f_wtmax  = max_blocksize;
-#ifndef CONFIG_SYNO_NFSD_UDP_PACKET
+#ifndef MY_ABC_HERE
 	resp->f_wtpref = max_blocksize;
-#endif /* CONFIG_SYNO_NFSD_UDP_PACKET */
+#endif /* MY_ABC_HERE */
 	resp->f_wtmult = PAGE_SIZE;
 	resp->f_dtpref = PAGE_SIZE;
 	resp->f_maxfilesize = ~(u32) 0;

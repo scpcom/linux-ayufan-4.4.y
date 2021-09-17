@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Power Management Service Unit(PMSU) support for Armada 370/XP platforms.
  *
@@ -16,46 +19,46 @@
  * other SOC units
  */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #define pr_fmt(fmt) "mvebu-pmsu: " fmt
 
 #include <linux/clk.h>
 #include <linux/cpu_pm.h>
 #include <linux/cpu.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 #include <linux/cpufreq-dt.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 #include <linux/delay.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/of_address.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #include <linux/of_device.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 #include <linux/io.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #include <linux/kernel.h>
 #include <linux/mbus.h>
 #include <linux/mvebu-v7-cpuidle.h>
 #include <linux/of_address.h>
 #include <linux/platform_device.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 #include <linux/pm_opp.h>
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 #include <linux/opp.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
+#endif /* MY_ABC_HERE */
 #include <linux/smp.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #include <linux/resource.h>
 #include <linux/slab.h>
 #include <asm/cacheflush.h>
 #include <asm/cp15.h>
 #include <asm/smp_scu.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 #include <asm/smp_plat.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #include <asm/suspend.h>
 #include <asm/tlbflush.h>
 #include "common.h"
@@ -117,42 +120,42 @@ extern void ll_enable_coherency(void);
 
 extern void armada_370_xp_cpu_resume(void);
 extern void armada_38x_cpu_resume(void);
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 // do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 extern struct clk *get_cpu_clk(int cpu);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 void __iomem *scu_base;
 
 static phys_addr_t pmsu_mp_phys_base;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 static void __iomem *pmsu_mp_base;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 
 static void *mvebu_cpu_resume;
 static int (*mvebu_pmsu_dfs_request_ptr)(int cpu);
 
 static void __iomem *sram_wa_virt_base[2];
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static void __iomem *pmsu_reset_base;
 
 #define PMSU_BOOT_ADDR_REDIRECT_OFFSET(cpu)	((cpu * 0x100) + 0x24)
 #define PMSU_RESET_CTL_OFFSET(cpu)		(cpu * 0x8)
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static struct of_device_id of_pmsu_table[] = {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	{ .compatible = "marvell,armada-370-pmsu", },
 	{ .compatible = "marvell,armada-370-xp-pmsu", },
 	{ .compatible = "marvell,armada-380-pmsu", },
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	{.compatible = "marvell,armada-370-xp-pmsu"},
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	{ /* end of list */ },
 };
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 void mvebu_pmsu_set_cpu_boot_addr(int hw_cpu, void *boot_addr)
 {
 	writel(virt_to_phys(boot_addr), pmsu_mp_base +
@@ -219,12 +222,12 @@ int armada_38x_cpuidle_wa(void)
 	tmp++;
 	*tmp = 0x2C;					/* Save size */
 	tmp++;
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(MY_ABC_HERE)
 	memcpy(tmp, (void *)(sleep_save_sp[hw_cpu] + 0xC0000000), 0x2C); /* Copy from virtual address (mmu enabled) */
 	return 0;
-#else /* CONFIG_SYNO_ARMADA */
+#else /* MY_ABC_HERE */
 	memcpy(tmp, sleep_save_sp[hw_cpu] + 0xC0000000, 0x2C); /* Copy from virtual address (mmu enabled) */
-#endif /* CONFIG_SYNO_ARMADA */
+#endif /* MY_ABC_HERE */
 }
 
 static int __init mvebu_v7_pmsu_init(void)
@@ -419,14 +422,14 @@ void mvebu_v7_pmsu_idle_exit(void)
 	/* cancel ask HW to power down the L2 Cache if possible */
 	reg = readl(pmsu_mp_base + PMSU_CONTROL_AND_CONFIG(hw_cpu));
 	reg &= ~PMSU_CONTROL_AND_CONFIG_L2_PWDDN;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	/*
 	 * When exiting from idle state such as cpuidle or hotplug,
 	 * Enable PMU wait for the CPU to enter WFI when doing DFS
 	 * by setting CPUx Frequency ID to 1
 	 */
 	reg |= (1 << 4);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	writel(reg, pmsu_mp_base + PMSU_CONTROL_AND_CONFIG(hw_cpu));
 
 	/* cancel Enable wakeup events and mask interrupts */
@@ -438,7 +441,7 @@ void mvebu_v7_pmsu_idle_exit(void)
 	writel(reg, pmsu_mp_base + PMSU_STATUS_AND_MASK(hw_cpu));
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 void mvebu_v7_pmsu_disable_dfs_cpu(int hw_cpu)
 {
 	u32 reg;
@@ -452,7 +455,7 @@ void mvebu_v7_pmsu_disable_dfs_cpu(int hw_cpu)
 	reg &= ~(0xf << 4);
 	writel(reg, pmsu_mp_base + PMSU_CONTROL_AND_CONFIG(hw_cpu));
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 static int mvebu_v7_cpu_pm_notify(struct notifier_block *self,
 				    unsigned long action, void *hcpu)
@@ -689,21 +692,21 @@ int armada_xp_pmsu_dfs_request(int cpu)
 
 int armada_380_pmsu_dfs_request(int cpu)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	/*
 	 * Protect CPU DFS from changing the number of online cpus number during
 	 * frequency transition by temporarily disable cpu hotplug
 	 */
 	cpu_hotplug_disable();
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	/* Trigger the DFS on the appropriate CPU */
 	on_each_cpu(mvebu_pmsu_dfs_request_local,
 				 NULL, false);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	cpu_hotplug_enable();
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	return 0;
 }
@@ -713,7 +716,7 @@ int mvebu_pmsu_dfs_request(int cpu)
 	return mvebu_pmsu_dfs_request_ptr(cpu);
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 struct cpufreq_dt_platform_data armada_xp_cpufreq_dt_pd = {
 	.independent_clocks = true,
 };
@@ -721,16 +724,16 @@ struct cpufreq_dt_platform_data armada_xp_cpufreq_dt_pd = {
 struct cpufreq_dt_platform_data armada_380_cpufreq_dt_pd = {
 	.independent_clocks = false,
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 static int mvebu_v7_pmsu_register_cpufreq(int cpu)
 {
 	struct device *cpu_dev;
 	struct clk *clk;
 	int ret;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	struct device_node *np;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	/*
 	* registers the operating points
@@ -739,7 +742,7 @@ static int mvebu_v7_pmsu_register_cpufreq(int cpu)
 	* of doing the PMSU part of a frequency transition.
 	*/
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	for_each_child_of_node(of_find_node_by_path("/cpus"), np)
 		if (of_get_property(np, "clock-names", NULL))
 			break;
@@ -748,7 +751,7 @@ static int mvebu_v7_pmsu_register_cpufreq(int cpu)
 		pr_err("failed to find cpufreq node\n");
 		return -ENOENT;
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	cpu_dev = get_cpu_device(cpu);
 	if (!cpu_dev) {
@@ -756,9 +759,9 @@ static int mvebu_v7_pmsu_register_cpufreq(int cpu)
 		return 0;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	cpu_dev->of_node = np;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	clk = clk_get(cpu_dev, 0);
 	if (!clk) {
@@ -772,21 +775,21 @@ static int mvebu_v7_pmsu_register_cpufreq(int cpu)
 	 * no function to do so), and simply cancel the
 	 * registration of the cpufreq device.
 	 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 		ret = dev_pm_opp_add(cpu_dev, clk_get_rate(clk), 0);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 		ret = opp_add(cpu_dev, clk_get_rate(clk), 0);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	if (ret) {
 		clk_put(clk);
 		return ret;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 		ret = dev_pm_opp_add(cpu_dev, clk_get_rate(clk) / 2, 0);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 		ret = opp_add(cpu_dev, clk_get_rate(clk) / 2, 0);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	if (ret) {
 		clk_put(clk);
 		return ret;
@@ -830,7 +833,7 @@ static int __init mvebu_v7_pmsu_cpufreq_init(void)
 			return ret;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	if (of_machine_is_compatible("marvell,armada38x")) {
 		if (num_online_cpus() == 1)
 			mvebu_v7_pmsu_disable_dfs_cpu(1);
@@ -844,13 +847,13 @@ static int __init mvebu_v7_pmsu_cpufreq_init(void)
 
 	} else
 		return 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	return 0;
 }
 
 device_initcall(mvebu_v7_pmsu_cpufreq_init);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 #ifdef CONFIG_SMP
 int armada_xp_boot_cpu(unsigned int cpu_id, void *boot_addr)
 {
@@ -890,4 +893,4 @@ int __init armada_370_xp_pmsu_init(void)
 }
 
 early_initcall(armada_370_xp_pmsu_init);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */

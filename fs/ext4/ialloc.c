@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/ext4/ialloc.c
  *
@@ -23,9 +26,9 @@
 #include <linux/bitops.h>
 #include <linux/blkdev.h>
 #include <asm/byteorder.h>
-#ifdef CONFIG_SYNO_EXT4_FIX_RESIZE_16TB_IN_32BIT
+#ifdef MY_ABC_HERE
 #include <asm/div64.h>
-#endif /* CONFIG_SYNO_EXT4_FIX_RESIZE_16TB_IN_32BIT */
+#endif /* MY_ABC_HERE */
 
 #include "ext4.h"
 #include "ext4_jbd2.h"
@@ -326,7 +329,7 @@ error_return:
 	ext4_std_error(sb, fatal);
 }
 
-#ifdef CONFIG_SYNO_EXT4_OLDALLOC
+#ifdef MY_ABC_HERE
 /*
  * There are two policies for allocating an inode.  If the new inode is
  * a directory, then a forward search is made for a block group with both
@@ -347,7 +350,7 @@ static int find_group_dir(struct super_block *sb, struct inode *parent,
 	int ret = -1;
 
 	freei = percpu_counter_read_positive(&EXT4_SB(sb)->s_freeinodes_counter);
-#ifdef CONFIG_SYNO_EXT4_FIX_RESIZE_16TB_IN_32BIT
+#ifdef MY_ABC_HERE
 	avefreei = freei;
 	do_div(avefreei, ngroups);
 #else
@@ -460,7 +463,7 @@ found_flexbg:
 out:
 	return 0;
 }
-#endif /* CONFIG_SYNO_EXT4_OLDALLOC */
+#endif /* MY_ABC_HERE */
 
 struct orlov_stats {
 	__u64 free_clusters;
@@ -546,7 +549,7 @@ static int find_group_orlov(struct super_block *sb, struct inode *parent,
 	}
 
 	freei = percpu_counter_read_positive(&sbi->s_freeinodes_counter);
-#ifdef CONFIG_SYNO_EXT4_FIX_RESIZE_16TB_IN_32BIT
+#ifdef MY_ABC_HERE
 	avefreei = freei;
 	do_div(avefreei, ngroups);
 #else
@@ -645,7 +648,7 @@ static int find_group_orlov(struct super_block *sb, struct inode *parent,
 
 fallback:
 	ngroups = real_ngroups;
-#ifdef CONFIG_SYNO_EXT4_FIX_RESIZE_16TB_IN_32BIT
+#ifdef MY_ABC_HERE
 	avefreei = freei;
 	do_div(avefreei, ngroups);
 #else
@@ -800,7 +803,7 @@ struct inode *__ext4_new_inode(handle_t *handle, struct inode *dir,
 	int ret2, err = 0;
 	struct inode *ret;
 	ext4_group_t i;
-#ifdef CONFIG_SYNO_EXT4_OLDALLOC
+#ifdef MY_ABC_HERE
 	static int once = 1;
 #endif
 	ext4_group_t flex_group;
@@ -845,7 +848,7 @@ struct inode *__ext4_new_inode(handle_t *handle, struct inode *dir,
 		goto got_group;
 	}
 
-#ifdef CONFIG_SYNO_EXT4_OLDALLOC
+#ifdef MY_ABC_HERE
 	if (sbi->s_log_groups_per_flex && test_opt(sb, OLDALLOC)) {
 		ret2 = find_group_flex(sb, dir, &group);
 		if (ret2 == -1) {
@@ -869,7 +872,7 @@ struct inode *__ext4_new_inode(handle_t *handle, struct inode *dir,
 #else
 	if (S_ISDIR(mode))
 		ret2 = find_group_orlov(sb, dir, &group, mode, qstr);
-#endif /* CONFIG_SYNO_EXT4_OLDALLOC */
+#endif /* MY_ABC_HERE */
 	else
 		ret2 = find_group_other(sb, dir, &group, mode);
 
@@ -879,7 +882,7 @@ got_group:
 	if (ret2 == -1)
 		goto out;
 
-#ifdef CONFIG_SYNO_EXT4_INODE_NUM_OVERFLOW_FIX
+#ifdef MY_DEF_HERE
 #define MAX_U32_IN_U64 ((u64)(~0U))
 	if (MAX_U32_IN_U64 < (u64)group*EXT4_INODES_PER_GROUP(sb)) {
 		u32 max_group =	(u32)((MAX_U32_IN_U64 + 1) / EXT4_INODES_PER_GROUP(sb));
@@ -949,7 +952,7 @@ repeat_in_this_group:
 		if (ino < EXT4_INODES_PER_GROUP(sb))
 			goto repeat_in_this_group;
 next_group:
-#ifdef CONFIG_SYNO_EXT4_INODE_NUM_OVERFLOW_FIX
+#ifdef MY_DEF_HERE
 		if (++group == ngroups || (MAX_U32_IN_U64 < (u64)group*EXT4_INODES_PER_GROUP(sb))) {
 			group = 0;
 		}
@@ -1080,10 +1083,10 @@ got:
 	inode->i_mtime = inode->i_atime = inode->i_ctime = ei->i_crtime =
 						       ext4_current_time(inode);
 
-#ifdef CONFIG_SYNO_EXT4_CREATE_TIME
+#ifdef MY_ABC_HERE
 	inode->i_create_time = ei->i_crtime;
 #endif
-#ifdef CONFIG_SYNO_EXT4_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	if (!EXT4_HAS_RO_COMPAT_FEATURE(sb, EXT4_FEATURE_RO_COMPAT_METADATA_CSUM)) {
 		inode->i_archive_bit = ALL_SYNO_ARCHIVE;	/* set archive bit on creation */
 	}

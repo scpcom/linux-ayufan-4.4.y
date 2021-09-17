@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 
 #include <linux/device.h>
 #include <linux/io.h>
@@ -225,7 +228,7 @@ int of_pci_address_to_resource(struct device_node *dev, int bar,
 }
 EXPORT_SYMBOL_GPL(of_pci_address_to_resource);
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 struct of_pci_range_iter *of_pci_process_ranges(struct of_pci_range_iter *iter,
 						struct device_node *node)
 {
@@ -278,9 +281,9 @@ struct of_pci_range_iter *of_pci_process_ranges(struct of_pci_range_iter *iter,
 	return iter;
 }
 EXPORT_SYMBOL_GPL(of_pci_process_ranges);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_MONACO)
+#if defined(MY_DEF_HERE)
 int of_pci_range_parser_init(struct of_pci_range_parser *parser,
 		struct device_node *node)
 {
@@ -346,9 +349,9 @@ struct of_pci_range *of_pci_range_parser_one(struct of_pci_range_parser *parser,
 	return range;
 }
 EXPORT_SYMBOL_GPL(of_pci_range_parser_one);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 int of_pci_range_parser_init(struct of_pci_range_parser *parser,
 				struct device_node *node)
 {
@@ -414,7 +417,7 @@ struct of_pci_range *of_pci_range_parser_one(struct of_pci_range_parser *parser,
 	return range;
 }
 EXPORT_SYMBOL_GPL(of_pci_range_parser_one);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 #endif /* CONFIG_PCI */
 
@@ -620,11 +623,11 @@ static u64 __of_translate_address(struct device_node *dev,
 	int na, ns, pna, pns;
 	u64 result = OF_BAD_ADDR;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	pr_debug("OF: ** translation for device %s **\n", of_node_full_name(dev));
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	pr_debug("OF: ** translation for device %s **\n", dev->full_name);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	/* Increase refcount at current level */
 	of_node_get(dev);
@@ -639,21 +642,21 @@ static u64 __of_translate_address(struct device_node *dev,
 	bus->count_cells(dev, &na, &ns);
 	if (!OF_CHECK_COUNTS(na, ns)) {
 		printk(KERN_ERR "prom_parse: Bad cell count for %s\n",
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		       of_node_full_name(dev));
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		       dev->full_name);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 		goto bail;
 	}
 	memcpy(addr, in_addr, na * 4);
 
 	pr_debug("OF: bus is %s (na=%d, ns=%d) on %s\n",
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	    bus->name, na, ns, of_node_full_name(parent));
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	    bus->name, na, ns, parent->full_name);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	of_dump_addr("OF: translating address:", addr, na);
 
 	/* Translate */
@@ -675,20 +678,20 @@ static u64 __of_translate_address(struct device_node *dev,
 		pbus->count_cells(dev, &pna, &pns);
 		if (!OF_CHECK_COUNTS(pna, pns)) {
 			printk(KERN_ERR "prom_parse: Bad cell count for %s\n",
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 			       of_node_full_name(dev));
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 			       dev->full_name);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 			break;
 		}
 
 		pr_debug("OF: parent bus is %s (na=%d, ns=%d) on %s\n",
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		    pbus->name, pna, pns, of_node_full_name(parent));
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		    pbus->name, pna, pns, parent->full_name);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 		/* Apply bus translation */
 		if (of_translate_one(dev, bus, pbus, addr, na, ns, pna, rprop))

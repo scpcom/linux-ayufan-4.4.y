@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* Intel Sandy Bridge -EN/-EP/-EX Memory Controller kernel module
  *
  * This driver supports the memory controllers found on the Intel
@@ -49,13 +52,13 @@ static int probed;
 /*
  * Get a bit field at register value <v>, from bit <lo> to bit <hi>
  */
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 #define GET_BITFIELD(v, lo, hi)	\
 	(((v) & GENMASK_ULL(hi, lo)) >> (lo))
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 #define GET_BITFIELD(v, lo, hi)	\
 	(((v) & ((1ULL << ((hi) - (lo) + 1)) - 1) << (lo)) >> (lo))
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 /*
  * sbridge Memory Controller Registers

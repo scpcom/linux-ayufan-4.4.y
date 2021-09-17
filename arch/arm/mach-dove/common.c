@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * arch/arm/mach-dove/common.c
  *
@@ -28,7 +31,7 @@
 #include <plat/time.h>
 #include "common.h"
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 /* These can go away once Dove uses the mvebu-mbus DT binding */
 #define DOVE_MBUS_PCIE0_MEM_TARGET    0x4
 #define DOVE_MBUS_PCIE0_MEM_ATTR      0xe8
@@ -44,7 +47,7 @@
 #define DOVE_MBUS_BOOTROM_ATTR        0xfd
 #define DOVE_MBUS_SCRATCHPAD_TARGET   0xd
 #define DOVE_MBUS_SCRATCHPAD_ATTR     0x0
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 /*****************************************************************************
  * I/O Address Mapping
@@ -127,13 +130,13 @@ static void __init dove_clk_init(void)
 	orion_clkdev_add(NULL, "sdhci-dove.1", sdio1);
 	orion_clkdev_add(NULL, "orion_nand", nand);
 	orion_clkdev_add(NULL, "cafe1000-ccic.0", camera);
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	orion_clkdev_add(NULL, "mvebu-audio.0", i2s0);
 	orion_clkdev_add(NULL, "mvebu-audio.1", i2s1);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	orion_clkdev_add(NULL, "kirkwood-i2s.0", i2s0);
 	orion_clkdev_add(NULL, "kirkwood-i2s.1", i2s1);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	orion_clkdev_add(NULL, "mv_crypto", crypto);
 	orion_clkdev_add(NULL, "dove-ac97", ac97);
 	orion_clkdev_add(NULL, "dove-pdma", pdma);
@@ -354,7 +357,7 @@ void __init dove_sdio1_init(void)
 
 void __init dove_setup_cpu_wins(void)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	/*
 	 * The PCIe windows will no longer be statically allocated
 	 * here once Dove is migrated to the pci-mvebu driver. The
@@ -391,7 +394,7 @@ void __init dove_setup_cpu_wins(void)
 				    DOVE_MBUS_SCRATCHPAD_ATTR,
 				    DOVE_SCRATCHPAD_PHYS_BASE,
 				    DOVE_SCRATCHPAD_SIZE);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	/*
 	 * The PCIe windows will no longer be statically allocated
 	 * here once Dove is migrated to the pci-mvebu driver.
@@ -422,7 +425,7 @@ void __init dove_setup_cpu_wins(void)
 					  DOVE_BOOTROM_SIZE);
 	mvebu_mbus_add_window("scratchpad", DOVE_SCRATCHPAD_PHYS_BASE,
 					  DOVE_SCRATCHPAD_SIZE);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 }
 
 void __init dove_init(void)

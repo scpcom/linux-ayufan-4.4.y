@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *	sc520_freq.c: cpufreq driver for the AMD Elan sc520
  *
@@ -143,11 +146,11 @@ static struct cpufreq_driver sc520_freq_driver = {
 	.init	= sc520_freq_cpu_init,
 	.exit	= sc520_freq_cpu_exit,
 	.name	= "sc520_freq",
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	.owner	= THIS_MODULE,
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	.attr	= sc520_freq_attr,
 };
 

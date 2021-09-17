@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *   STMicroelectronics Uniperipheral TDM driver
  *
@@ -1314,11 +1317,11 @@ static int uniperif_tdm_clk_get(struct uniperif_tdm *tdm)
 	}
 
 	/* Enable clock here as it must be permanently on */
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	result = snd_stm_clk_prepare_enable(tdm->clk);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	result = snd_stm_clk_enable(tdm->clk);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	if (result) {
 		dev_err(tdm->dev, "Failed to enable clk");
 		goto error_clk_enable;
@@ -1334,11 +1337,11 @@ static int uniperif_tdm_clk_get(struct uniperif_tdm *tdm)
 	return 0;
 
 error_clk_set_rate:
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	snd_stm_clk_disable_unprepare(tdm->clk);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	snd_stm_clk_disable(tdm->clk);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 error_clk_enable:
 	snd_stm_clk_put(tdm->clk);
 	return result;
@@ -1353,11 +1356,11 @@ static void uniperif_tdm_clk_put(struct uniperif_tdm *tdm)
 
 	if (!IS_ERR(tdm->clk)) {
 		/* Disable the clock */
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 		snd_stm_clk_disable_unprepare(tdm->clk);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 		snd_stm_clk_disable(tdm->clk);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 		/* Relinquish the clock */
 		snd_stm_clk_put(tdm->clk);
 		/* Null the clock pointer */
@@ -1388,11 +1391,11 @@ static int uniperif_tdm_pclk_get(struct uniperif_tdm *tdm)
 	}
 
 	/* Enable pclk here as it must be permanently on */
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	result = snd_stm_clk_prepare_enable(tdm->pclk);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	result = snd_stm_clk_enable(tdm->pclk);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	if (result) {
 		dev_err(tdm->dev, "Failed to enable pclk");
 		goto error_pclk_enable;
@@ -1408,11 +1411,11 @@ static int uniperif_tdm_pclk_get(struct uniperif_tdm *tdm)
 	return 0;
 
 error_pclk_set_rate:
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	snd_stm_clk_disable_unprepare(tdm->pclk);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	snd_stm_clk_disable(tdm->pclk);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 error_pclk_enable:
 	snd_stm_clk_put(tdm->pclk);
 	return result;
@@ -1427,11 +1430,11 @@ static void uniperif_tdm_pclk_put(struct uniperif_tdm *tdm)
 
 	if (!IS_ERR(tdm->pclk)) {
 		/* Disable the clock */
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 		snd_stm_clk_disable_unprepare(tdm->pclk);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 		snd_stm_clk_disable(tdm->pclk);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 		/* Relinquish the clock */
 		snd_stm_clk_put(tdm->pclk);
 		/* Null the clock pointer */

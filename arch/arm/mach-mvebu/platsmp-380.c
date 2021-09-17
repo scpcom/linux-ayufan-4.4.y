@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Symmetric Multi Processing (SMP) support for Armada 380/385
  *
@@ -14,9 +17,9 @@
 
 #include <linux/init.h>
 #include <linux/io.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 #include <linux/clk.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 #include <linux/of.h>
 #include <linux/smp.h>
 #include <linux/cpu.h>
@@ -27,7 +30,7 @@
 
 #include "pmsu.h"
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 static struct clk *__init get_cpu_clk(int cpu)
 {
 	struct clk *cpu_clk;
@@ -55,7 +58,7 @@ static void __init set_secondary_cpus_clock(void)
 		return;
 	clk_prepare_enable(cpu_clk);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 extern void a380_secondary_startup(void);
 static struct notifier_block armada_380_secondary_cpu_notifier;
@@ -111,12 +114,12 @@ static void __init armada_380_smp_prepare_cpus(unsigned int max_cpus)
 	 */
 	register_cpu_notifier(&armada_380_secondary_cpu_notifier);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	set_secondary_cpus_clock();
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 /*
  * When a CPU is brought back online, either through CPU hotplug, or
  * because of the boot of a kexec'ed kernel, the PMSU configuration
@@ -129,7 +132,7 @@ static void armada_38x_secondary_init(unsigned int cpu)
 {
 	mvebu_v7_pmsu_idle_exit();
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 #ifdef CONFIG_HOTPLUG_CPU
 static void armada_38x_cpu_die(unsigned int cpu)
@@ -141,7 +144,7 @@ static void armada_38x_cpu_die(unsigned int cpu)
 	armada_38x_do_cpu_suspend(true);
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 /*
  * We need a dummy function, so that platform_can_cpu_hotplug() knows
  * we support CPU hotplug. However, the function does not need to do
@@ -152,21 +155,21 @@ static int armada_38x_cpu_kill(unsigned int cpu)
 {
 	return 1;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 #endif
 
 struct smp_operations armada_380_smp_ops __initdata = {
 	.smp_init_cpus		= armada_380_smp_init_cpus,
 	.smp_prepare_cpus	= armada_380_smp_prepare_cpus,
 	.smp_boot_secondary	= armada_380_boot_secondary,
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	.smp_secondary_init     = armada_38x_secondary_init,
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 #ifdef CONFIG_HOTPLUG_CPU
 	.cpu_die		= armada_38x_cpu_die,
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	.cpu_kill               = armada_38x_cpu_kill,
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 #endif
 };
 

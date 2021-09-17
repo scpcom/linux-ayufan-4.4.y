@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  arch/arm/include/asm/glue-cache.h
  *
@@ -102,35 +105,35 @@
 #endif
 
 #if defined(CONFIG_CPU_V6) || defined(CONFIG_CPU_V6K)
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 /*# ifdef _CACHE */
 #  define MULTI_CACHE 1
 /* # else */
 /* #  define _CACHE v6 */
 /* # endif */
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 # ifdef _CACHE
 #  define MULTI_CACHE 1
 # else
 #  define _CACHE v6
 # endif
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 #endif
 
 #if defined(CONFIG_CPU_V7)
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 /* # ifdef _CACHE */
 #  define MULTI_CACHE 1
 /* # else */
 /* #  define _CACHE v7 */
 /* # endif */
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 # ifdef _CACHE
 #  define MULTI_CACHE 1
 # else
 #  define _CACHE v7
 # endif
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 #endif
 
 #if !defined(_CACHE) && !defined(MULTI_CACHE)

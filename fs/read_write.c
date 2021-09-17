@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/read_write.c
  *
@@ -22,14 +25,14 @@
 #include <asm/uaccess.h>
 #include <asm/unistd.h>
 
-#ifdef CONFIG_SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 #include <linux/synolib.h>
 extern int syno_hibernation_log_level;
-#endif /* CONFIG_SYNO_DEBUG_FLAG */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_FS_RECVFILE
+#ifdef MY_ABC_HERE
 DEFINE_SPINLOCK(aggregate_lock);
-#endif /* CONFIG_SYNO_FS_RECVFILE */
+#endif /* MY_ABC_HERE */
 
 typedef ssize_t (*io_fn_t)(struct file *, char __user *, size_t, loff_t *);
 typedef ssize_t (*iov_fn_t)(struct kiocb *, const struct iovec *,
@@ -338,9 +341,9 @@ int rw_verify_area(int read_write, struct file *file, loff_t *ppos, size_t count
 		return retval;
 	return count > MAX_RW_COUNT ? MAX_RW_COUNT : count;
 }
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4) && defined(CONFIG_SYNO_ARMADA)
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
 EXPORT_SYMBOL(rw_verify_area);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 && CONFIG_SYNO_ARMADA */
+#endif /* MY_ABC_HERE && CONFIG_SYNO_ARMADA */
 
 ssize_t do_sync_read(struct file *filp, char __user *buf, size_t len, loff_t *ppos)
 {
@@ -486,11 +489,11 @@ SYSCALL_DEFINE3(read, unsigned int, fd, char __user *, buf, size_t, count)
 	struct fd f = fdget(fd);
 	ssize_t ret = -EBADF;
 
-#ifdef CONFIG_SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 	if(syno_hibernation_log_level > 0) {
 		syno_do_hibernation_fd_log(fd);
 	}
-#endif /* CONFIG_SYNO_DEBUG_FLAG */
+#endif /* MY_ABC_HERE */
 
 	if (f.file) {
 		loff_t pos = file_pos_read(f.file);
@@ -507,11 +510,11 @@ SYSCALL_DEFINE3(write, unsigned int, fd, const char __user *, buf,
 	struct fd f = fdget(fd);
 	ssize_t ret = -EBADF;
 
-#ifdef CONFIG_SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 	if(syno_hibernation_log_level > 0) {
 		syno_do_hibernation_fd_log(fd);
 	}
-#endif /* CONFIG_SYNO_DEBUG_FLAG */
+#endif /* MY_ABC_HERE */
 
 	if (f.file) {
 		loff_t pos = file_pos_read(f.file);
@@ -1124,10 +1127,10 @@ static ssize_t do_sendfile(int out_fd, int in_fd, loff_t *ppos,
 	if (!(out.file->f_mode & FMODE_WRITE))
 		goto fput_out;
 	retval = -EINVAL;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	if (!out.file->f_op || !out.file->f_op->sendpage)
 		goto fput_out;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	in_inode = file_inode(in.file);
 	out_inode = file_inode(out.file);
 	out_pos = out.file->f_pos;
@@ -1260,8 +1263,8 @@ COMPAT_SYSCALL_DEFINE4(sendfile64, int, out_fd, int, in_fd,
 }
 #endif
 
-#ifdef CONFIG_SYNO_SYSTEM_CALL
-#ifdef CONFIG_SYNO_FS_RECVFILE
+#ifdef MY_ABC_HERE
+#ifdef MY_ABC_HERE
 int aggregate_fd = -1;
 atomic_t syno_aggregate_recvfile_count = ATOMIC_INIT(0);
 
@@ -1509,5 +1512,5 @@ SYSCALL_DEFINE1(SYNOFlushAggregate, int, fd)
 {
 	return 0;
 }
-#endif /* CONFIG_SYNO_FS_RECVFILE */
-#endif /* CONFIG_SYNO_SYSTEM_CALL */
+#endif /* MY_ABC_HERE */
+#endif /* MY_ABC_HERE */

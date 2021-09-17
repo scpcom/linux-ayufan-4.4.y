@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * mm/page-writeback.c
  *
@@ -691,13 +694,13 @@ static unsigned long bdi_position_ratio(struct backing_dev_info *bdi,
 	 *     => fast response on large errors; small oscillation near setpoint
 	 */
 	setpoint = (freerun + limit) / 2;
-#ifdef CONFIG_SYNO_FIX_WRITEBACK_DIV_BY_ZERO
+#ifdef MY_ABC_HERE
 	x = div_s64(((s64)setpoint - (s64)dirty) << RATELIMIT_CALC_SHIFT,
 		    (limit - setpoint) | 1);
-#else /* CONFIG_SYNO_FIX_WRITEBACK_DIV_BY_ZERO */
+#else /* MY_ABC_HERE */
 	x = div_s64(((s64)setpoint - (s64)dirty) << RATELIMIT_CALC_SHIFT,
 		    limit - setpoint + 1);
-#endif /* CONFIG_SYNO_FIX_WRITEBACK_DIV_BY_ZERO */
+#endif /* MY_ABC_HERE */
 	pos_ratio = x;
 	pos_ratio = pos_ratio * x >> RATELIMIT_CALC_SHIFT;
 	pos_ratio = pos_ratio * x >> RATELIMIT_CALC_SHIFT;
@@ -748,11 +751,11 @@ static unsigned long bdi_position_ratio(struct backing_dev_info *bdi,
 	 * scale global setpoint to bdi's:
 	 *	bdi_setpoint = setpoint * bdi_thresh / thresh
 	 */
-#ifdef CONFIG_SYNO_FIX_WRITEBACK_DIV_BY_ZERO
+#ifdef MY_ABC_HERE
 	x = div_u64((u64)bdi_thresh << 16, thresh | 1);
-#else /* CONFIG_SYNO_FIX_WRITEBACK_DIV_BY_ZERO */
+#else /* MY_ABC_HERE */
 	x = div_u64((u64)bdi_thresh << 16, thresh + 1);
-#endif /* CONFIG_SYNO_FIX_WRITEBACK_DIV_BY_ZERO */
+#endif /* MY_ABC_HERE */
 	bdi_setpoint = setpoint * (u64)x >> 16;
 	/*
 	 * Use span=(8*write_bw) in single bdi case as indicated by
@@ -766,13 +769,13 @@ static unsigned long bdi_position_ratio(struct backing_dev_info *bdi,
 	x_intercept = bdi_setpoint + span;
 
 	if (bdi_dirty < x_intercept - span / 4) {
-#ifdef CONFIG_SYNO_FIX_WRITEBACK_DIV_BY_ZERO
+#ifdef MY_ABC_HERE
 		pos_ratio = div_u64(pos_ratio * (x_intercept - bdi_dirty),
 				    (x_intercept - bdi_setpoint) | 1);
-#else /* CONFIG_SYNO_FIX_WRITEBACK_DIV_BY_ZERO */
+#else /* MY_ABC_HERE */
 		pos_ratio = div_u64(pos_ratio * (x_intercept - bdi_dirty),
 				    x_intercept - bdi_setpoint + 1);
-#endif /* CONFIG_SYNO_FIX_WRITEBACK_DIV_BY_ZERO */
+#endif /* MY_ABC_HERE */
 	} else
 		pos_ratio /= 4;
 
@@ -1759,11 +1762,11 @@ int write_cache_pages(struct address_space *mapping,
 			cycled = 1;
 		else
 			cycled = 0;
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 		end = PGOFF_MAX;
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 		end = -1;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	} else {
 		index = wbc->range_start >> PAGE_CACHE_SHIFT;
 		end = wbc->range_end >> PAGE_CACHE_SHIFT;

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Advanced Linux Sound Architecture
  *  Copyright (c) by Jaroslav Kysela <perex@perex.cz>
@@ -333,7 +336,7 @@ static int find_snd_minor(int type, struct snd_card *card, int dev)
 	return -1;
 }
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 /* This function is added for Havana so that ksound-core can
  * access the sound minor devices
  */
@@ -347,7 +350,7 @@ int snd_find_minor(int type, int card_num, int dev)
 }
 EXPORT_SYMBOL(snd_find_minor);
 
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 /**
  * snd_unregister_device - unregister the device on the given card
  * @type: the device type, SNDRV_DEVICE_TYPE_XXX

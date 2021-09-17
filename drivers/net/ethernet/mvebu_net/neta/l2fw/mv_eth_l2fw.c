@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -419,13 +422,13 @@ inline void l2fw_copy_and_swap_mac(unsigned char *rx_buff, unsigned char *tx_buf
 	}
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 static inline struct sk_buff *eth_l2fw_copy_packet_withoutXor(struct eth_port *pp, struct sk_buff *skb,
 								struct neta_rx_desc *rx_desc)
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 static inline
 struct sk_buff *eth_l2fw_copy_packet_withoutXor(struct sk_buff *skb, struct neta_rx_desc *rx_desc)
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 {
 	MV_U8 *pSrc;
 	MV_U8 *pDst;
@@ -434,11 +437,11 @@ struct sk_buff *eth_l2fw_copy_packet_withoutXor(struct sk_buff *skb, struct neta
 	int bytes = rx_desc->dataSize - MV_ETH_MH_SIZE;
 	int pool_id = NETA_RX_GET_BPID(rx_desc);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	mvOsCacheInvalidate(pp->dev->dev.parent, skb->data, bytes);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	mvOsCacheInvalidate(NULL, skb->data, bytes);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	pool = &mv_eth_pool[pool_id];
 	skb_new = mv_eth_pool_get(pool);
@@ -457,13 +460,13 @@ struct sk_buff *eth_l2fw_copy_packet_withoutXor(struct sk_buff *skb, struct neta
 }
 
 #ifdef CONFIG_MV_INCLUDE_XOR
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 static inline struct sk_buff *eth_l2fw_copy_packet_withXor(struct eth_port *pp, struct sk_buff *skb,
 							struct neta_rx_desc *rx_desc)
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 static inline
 struct sk_buff *eth_l2fw_copy_packet_withXor(struct sk_buff *skb, struct neta_rx_desc *rx_desc)
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 {
 	struct sk_buff *skb_new = NULL;
 	struct bm_pool *pool;
@@ -483,11 +486,11 @@ struct sk_buff *eth_l2fw_copy_packet_withXor(struct sk_buff *skb, struct neta_rx
 	/* sync between giga and XOR to avoid errors (like checksum errors in TX)
 	   when working with IOCC */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	mvOsCacheIoSync(pp->dev->dev.parent);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	mvOsCacheIoSync(NULL);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	bufPhysAddr =  virt_to_phys(skb->data);
 	eth_xor_desc->srcAdd0    = bufPhysAddr + skb_headroom(skb) + MV_ETH_MH_SIZE + 30;
@@ -500,28 +503,28 @@ struct sk_buff *eth_l2fw_copy_packet_withXor(struct sk_buff *skb, struct neta_rx
 	eth_xor_desc->status         = BIT31;
 	/* we had changed only the first part of eth_xor_desc, so flush only one
 	 line of cache */
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	mvOsCacheLineFlush(pp->dev->dev.parent, eth_xor_desc);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	mvOsCacheLineFlush(NULL, eth_xor_desc);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	MV_REG_WRITE(XOR_NEXT_DESC_PTR_REG(1, XOR_CHAN(0)), eth_xor_desc_phys_addr);
 
 	MV_REG_WRITE(XOR_ACTIVATION_REG(1, XOR_CHAN(0)), XEXACTR_XESTART_MASK);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	mvOsCacheLineInv(pp->dev->dev.parent, skb->data);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	mvOsCacheLineInv(NULL, skb->data);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	pSrc = skb->data + MV_ETH_MH_SIZE;
 	pDst = skb_new->data + MV_ETH_MH_SIZE;
 	l2fw_copy_mac(pSrc, pDst);
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	mvOsCacheLineFlush(pp->dev->dev.parent, skb->data);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	mvOsCacheLineFlush(NULL, skb->data);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	return skb_new;
 }
@@ -730,11 +733,11 @@ static inline int mv_eth_l2fw_rx(struct eth_port *pp, int rx_todo, int rxq)
 	int pool_id, bytes;
 
 	rx_done = mvNetaRxqBusyDescNumGet(pp->port, rxq);
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	mvOsCacheIoSync(pp->dev->dev.parent);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	mvOsCacheIoSync(NULL);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	if (rx_todo > rx_done)
 		rx_todo = rx_done;
 	rx_done = 0;
@@ -748,11 +751,11 @@ static inline int mv_eth_l2fw_rx(struct eth_port *pp, int rx_todo, int rxq)
 			printk(KERN_INFO "rx_desc is NULL in %s\n", __func__);
 #else
 		rx_desc = mvNetaRxqNextDescGet(rx_ctrl);
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 		mvOsCacheLineInv(pp->dev->dev.parent, rx_desc);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 		mvOsCacheLineInv(NULL, rx_desc);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 		prefetch(rx_desc);
 #endif /* CONFIG_MV_ETH_RX_DESC_PREFETCH */
 
@@ -787,21 +790,21 @@ static inline int mv_eth_l2fw_rx(struct eth_port *pp, int rx_todo, int rxq)
 		if (MV_NETA_PNC_CAP()) {
 			ipOffset = NETA_RX_GET_IPHDR_OFFSET(rx_desc);
 		} else {
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 			if (NETA_RX_IS_VLAN(rx_desc))
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 			if ((rx_desc->status & ETH_RX_VLAN_TAGGED_FRAME_MASK))
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 				ipOffset = MV_ETH_MH_SIZE + sizeof(MV_802_3_HEADER) + MV_VLAN_HLEN;
 			else
 				ipOffset = MV_ETH_MH_SIZE + sizeof(MV_802_3_HEADER);
 		}
 #else
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 		if (NETA_RX_IS_VLAN(rx_desc))
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 		if ((rx_desc->status & ETH_RX_VLAN_TAGGED_FRAME_MASK))
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 			ipOffset = MV_ETH_MH_SIZE + sizeof(MV_802_3_HEADER) + MV_VLAN_HLEN;
 		else
 			ipOffset = MV_ETH_MH_SIZE + sizeof(MV_802_3_HEADER);
@@ -844,37 +847,37 @@ static inline int mv_eth_l2fw_rx(struct eth_port *pp, int rx_todo, int rxq)
 			break;
 
 		case CMD_L2FW_SWAP_MAC:
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 			mvOsCacheLineInv(pp->dev->dev.parent, skb->head + NET_SKB_PAD);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 			mvOsCacheLineInv(NULL, skb->head + NET_SKB_PAD);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 			l2fw_swap_mac(skb->data);
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 			mvOsCacheLineFlush(pp->dev->dev.parent, skb->head + NET_SKB_PAD);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 			mvOsCacheLineFlush(NULL, skb->head + NET_SKB_PAD);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 			status = mv_eth_l2fw_tx(skb, new_pp, 0, rx_desc);
 			break;
 
 		case CMD_L2FW_COPY_SWAP:
 #ifdef CONFIG_MV_INCLUDE_XOR
 			if (bytes >= ppl2fw->xorThreshold) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 				skb_new = eth_l2fw_copy_packet_withXor(pp, skb, rx_desc);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 				skb_new = eth_l2fw_copy_packet_withXor(skb, rx_desc);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 				pr_err("%s: xor is not supported\n", __func__);
 			} else
 #endif /* CONFIG_MV_INCLUDE_XOR */
 			{
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 				skb_new = eth_l2fw_copy_packet_withoutXor(pp, skb, rx_desc);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 				skb_new = eth_l2fw_copy_packet_withoutXor(skb, rx_desc);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 				if (skb_new)
 					status = mv_eth_l2fw_tx(skb, new_pp, 0, rx_desc);
 				else
@@ -895,19 +898,19 @@ static inline int mv_eth_l2fw_rx(struct eth_port *pp, int rx_todo, int rxq)
 		if (status == MV_OK) {
 			if (mv_eth_pool_bm(pool)) {
 				/* BM - no refill */
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 				mvOsCacheLineInv(pp->dev->dev.parent, rx_desc);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 				mvOsCacheLineInv(NULL, rx_desc);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 			} else {
 				if (mv_eth_refill(pp, rxq, pool, rx_desc)) {
 					printk(KERN_ERR "%s: Linux processing - Can't refill\n", __func__);
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 					atomic_inc(&pp->rxq_ctrl[rxq].missed);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 					pp->rxq_ctrl[rxq].missed++;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 				}
 			}
 			/* we do not need the pkt , we do not do anything with it*/

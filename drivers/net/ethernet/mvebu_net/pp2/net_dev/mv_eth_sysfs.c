@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -257,11 +260,11 @@ static DEVICE_ATTR(isrRegs,	S_IWUSR, NULL, mv_pp2_port_store);
 static DEVICE_ATTR(gmacRegs,	S_IWUSR, NULL, mv_pp2_port_store);
 static DEVICE_ATTR(dropCntrs,	S_IWUSR, NULL, mv_pp2_port_store);
 static DEVICE_ATTR(stats,       S_IWUSR, NULL, mv_pp2_port_store);
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(MY_ABC_HERE)
 // do nothing
-#else /* CONFIG_SYNO_ARMADA */
+#else /* MY_ABC_HERE */
 static DEVICE_ATTR(mac,	S_IWUSR, NULL, mv_pp2_port_store);
-#endif /* CONFIG_SYNO_ARMADA */
+#endif /* MY_ABC_HERE */
 static DEVICE_ATTR(pnc,		S_IWUSR, NULL, mv_pp2_port_store);
 static DEVICE_ATTR(skb,         S_IWUSR, NULL, mv_pp2_port_store);
 

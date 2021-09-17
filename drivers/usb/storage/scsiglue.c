@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* Driver for USB Mass Storage compliant devices
  * SCSI layer glue code
  *
@@ -529,7 +532,7 @@ static ssize_t store_max_sectors(struct device *dev, struct device_attribute *at
 static DEVICE_ATTR(max_sectors, S_IRUGO | S_IWUSR, show_max_sectors,
 		store_max_sectors);
 
-#ifdef CONFIG_SYNO_HAS_SDCARDREADER
+#ifdef MY_ABC_HERE
 extern int blIsCardReader(struct usb_device *usbdev);
 static ssize_t show_syno_cardreader(struct device *dev, struct device_attribute *attr, char *buf)
 {
@@ -544,13 +547,13 @@ static ssize_t show_syno_cardreader(struct device *dev, struct device_attribute 
 	}
 }
 static DEVICE_ATTR(syno_cardreader, S_IRUGO, show_syno_cardreader, NULL);
-#endif /* CONFIG_SYNO_HAS_SDCARDREADER */
+#endif /* MY_ABC_HERE */
 
 static struct device_attribute *sysfs_device_attr_list[] = {
 		&dev_attr_max_sectors,
-#ifdef CONFIG_SYNO_HAS_SDCARDREADER
+#ifdef MY_ABC_HERE
 		&dev_attr_syno_cardreader,
-#endif /* CONFIG_SYNO_HAS_SDCARDREADER */
+#endif /* MY_ABC_HERE */
 		NULL,
 		};
 
@@ -606,9 +609,9 @@ struct scsi_host_template usb_stor_host_template = {
 	/* sysfs device attributes */
 	.sdev_attrs =			sysfs_device_attr_list,
 
-#ifdef CONFIG_SYNO_FIXED_DISK_NAME
+#ifdef MY_ABC_HERE
 	.syno_port_type         = SYNO_PORT_TYPE_USB,
-#endif /* CONFIG_SYNO_FIXED_DISK_NAME */
+#endif /* MY_ABC_HERE */
 
 	/* module management */
 	.module =			THIS_MODULE

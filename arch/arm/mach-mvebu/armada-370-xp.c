@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Device Tree support for Armada 370 and XP platforms.
  *
@@ -15,22 +18,22 @@
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/of_address.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #include <linux/of_platform.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 #include <linux/io.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #include <linux/clocksource.h>
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 #include <linux/time-armada-370-xp.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 #include <linux/clk/mvebu.h>
 #include <linux/dma-mapping.h>
 #include <linux/mbus.h>
 #include <linux/irqchip.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #include <linux/slab.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 #include <asm/hardware/cache-l2x0.h>
 #include <asm/mach/arch.h>
 #include <asm/mach/map.h>
@@ -38,7 +41,7 @@
 #include "armada-370-xp.h"
 #include "common.h"
 #include "coherency.h"
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #include "mvebu-soc-id.h"
 
 static void __init armada_370_xp_map_io(void)
@@ -125,7 +128,7 @@ DT_MACHINE_START(ARMADA_XP_DT, "Marvell Armada XP (Device Tree)")
 	.flags          = (MACHINE_NEEDS_CPOLICY_WRITEALLOC |
 			   MACHINE_NEEDS_SHAREABLE_PAGES),
 MACHINE_END
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 
 static struct map_desc armada_370_xp_io_desc[] __initdata = {
 	{
@@ -192,4 +195,4 @@ DT_MACHINE_START(ARMADA_XP_DT, "Marvell Armada 370/XP (Device Tree)")
 	.restart	= mvebu_restart,
 	.dt_compat	= armada_370_xp_dt_compat,
 MACHINE_END
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */

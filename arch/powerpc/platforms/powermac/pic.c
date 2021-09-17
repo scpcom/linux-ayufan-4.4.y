@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Support for the interrupt controllers found on Power Macintosh,
  *  currently Apple's "Grand Central" interrupt controller in all
@@ -393,13 +396,13 @@ static void __init pmac_pic_probe_oldstyle(void)
 #endif
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 int of_irq_parse_oldworld(struct device_node *device, int index,
 			struct of_phandle_args *out_irq)
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 int of_irq_map_oldworld(struct device_node *device, int index,
 			struct of_irq *out_irq)
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 {
 	const u32 *ints = NULL;
 	int intlen;
@@ -427,15 +430,15 @@ int of_irq_map_oldworld(struct device_node *device, int index,
 	if (index >= intlen)
 		return -EINVAL;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	out_irq->np = NULL;
 	out_irq->args[0] = ints[index];
 	out_irq->args_count = 1;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	out_irq->controller = NULL;
 	out_irq->specifier[0] = ints[index];
 	out_irq->size = 1;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	return 0;
 }

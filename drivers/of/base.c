@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Procedures for creating, accessing and interpreting the device tree.
  *
@@ -18,9 +21,9 @@
  *      2 of the License, or (at your option) any later version.
  */
 #include <linux/ctype.h>
-#if defined(CONFIG_SYNO_LSP_MONACO_SDK2_15_4) || defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 #include <linux/cpu.h>
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 || CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_DEF_HERE || MY_ABC_HERE */
 #include <linux/module.h>
 #include <linux/of.h>
 #include <linux/spinlock.h>
@@ -233,7 +236,7 @@ const void *of_get_property(const struct device_node *np, const char *name,
 }
 EXPORT_SYMBOL(of_get_property);
 
-#if defined(CONFIG_SYNO_LSP_MONACO_SDK2_15_4) || defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 /*
  * arch_match_cpu_phys_id - Match the given logical CPU and physical id
  *
@@ -327,7 +330,7 @@ struct device_node *of_get_cpu_node(int cpu, unsigned int *thread)
 	return NULL;
 }
 EXPORT_SYMBOL(of_get_cpu_node);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 || CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_DEF_HERE || MY_ABC_HERE */
 
 /** Checks if the given "compat" string matches one of the strings in
  * the device's "compatible" property
@@ -1191,7 +1194,7 @@ EXPORT_SYMBOL(of_parse_phandle);
  * To get a device_node of the `node2' node you may call this:
  * of_parse_phandle_with_args(node3, "list", "#list-cells", 1, &args);
  */
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 void of_print_phandle_args(const char *msg, const struct of_phandle_args *args)
 {
 	int i;
@@ -1200,16 +1203,16 @@ void of_print_phandle_args(const char *msg, const struct of_phandle_args *args)
 		printk(i ? ",%08x" : ":%08x", args->args[i]);
 	printk("\n");
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static int __of_parse_phandle_with_args(const struct device_node *np,
 					const char *list_name,
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 					const char *cells_name,
 					int cell_count, int index,
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 					const char *cells_name, int index,
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 					struct of_phandle_args *out_args)
 {
 	const __be32 *list, *list_end;
@@ -1246,7 +1249,7 @@ static int __of_parse_phandle_with_args(const struct device_node *np,
 				goto err;
 			}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 			if (cells_name) {
 				if (of_property_read_u32(node, cells_name,
 							 &count)) {
@@ -1258,14 +1261,14 @@ static int __of_parse_phandle_with_args(const struct device_node *np,
 			} else {
 				count = cell_count;
 			}
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 			if (of_property_read_u32(node, cells_name, &count)) {
 				pr_err("%s: could not get %s for %s\n",
 					 np->full_name, cells_name,
 					 node->full_name);
 				goto err;
 			}
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 			/*
 			 * Make sure that the arguments actually fit in the
@@ -1330,16 +1333,16 @@ int of_parse_phandle_with_args(const struct device_node *np, const char *list_na
 {
 	if (index < 0)
 		return -EINVAL;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	return __of_parse_phandle_with_args(np, list_name, cells_name, 0,
 					    index, out_args);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	return __of_parse_phandle_with_args(np, list_name, cells_name, index, out_args);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 }
 EXPORT_SYMBOL(of_parse_phandle_with_args);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 /**
  * of_parse_phandle_with_fixed_args() - Find a node pointed by phandle in a list
  * @np:		pointer to a device tree node containing a list
@@ -1380,7 +1383,7 @@ int of_parse_phandle_with_fixed_args(const struct device_node *np,
 					   index, out_args);
 }
 EXPORT_SYMBOL(of_parse_phandle_with_fixed_args);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 /**
  * of_count_phandle_with_args() - Find the number of phandles references in a property
@@ -1400,12 +1403,12 @@ EXPORT_SYMBOL(of_parse_phandle_with_fixed_args);
 int of_count_phandle_with_args(const struct device_node *np, const char *list_name,
 				const char *cells_name)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	return __of_parse_phandle_with_args(np, list_name, cells_name, 0, -1,
 					    NULL);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	return __of_parse_phandle_with_args(np, list_name, cells_name, -1, NULL);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 }
 EXPORT_SYMBOL(of_count_phandle_with_args);
 

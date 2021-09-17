@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * STMicroelectronics HCD (Host Controller Driver) for USB 2.0 and 1.1.
  *
@@ -23,9 +26,9 @@
 #include <linux/module.h>
 #include <linux/reset.h>
 #include <linux/regmap.h>
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 #include <linux/st_amba_bridge.h>
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 #include <linux/phy/phy.h>
 #include <linux/mfd/syscon.h>
 #include <linux/usb/ohci_pdriver.h>
@@ -286,13 +289,13 @@ static int st_hcd_probe_resets(struct platform_device *pdev,
 static int st_hcd_probe_ehci_setup(struct platform_device *pdev)
 {
 	struct resource *res;
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	struct st_amba_bridge *amba_bridge;
 	struct st_amba_bridge_config *amba_config;
 	void __iomem *amba_base;
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	void __iomem *ehci_regs;
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "protocol");
 	if (!res)
 		return -ENODEV;
@@ -309,7 +312,7 @@ static int st_hcd_probe_ehci_setup(struct platform_device *pdev)
 		return PTR_ERR(amba_bridge);
 
 	st_amba_bridge_init(amba_bridge);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	/*
 	 * We need to do some integration specific setup in the EHCI

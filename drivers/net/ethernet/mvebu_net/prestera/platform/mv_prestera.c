@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
    Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -581,11 +584,11 @@ static int prestera_ioctl(struct inode *inode, struct file *filp, unsigned int c
 	}
 
 #ifdef MV_DEBUG
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	if (cmd != PRESTERA_IOC_WAIT && cmd != PRESTERA_IOC_INTENABLE)
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	if (cmd != PRESTERA_IOC_WAIT)
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 		ioctl_cmd_pr(cmd);
 #endif
 
@@ -647,13 +650,13 @@ static int prestera_ioctl(struct inode *inode, struct file *filp, unsigned int c
 		break;
 
 	case PRESTERA_IOC_INTENABLE:
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 		// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 		/* clear the mask reg on device 0x10 */
 		if (arg > 64)
 			send_sig_info(SIGSTOP, (struct siginfo *)1, current);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 		enable_irq(arg);
 		break;
 
@@ -847,7 +850,7 @@ static int prestera_ioctl(struct inode *inode, struct file *filp, unsigned int c
 			printk(KERN_ERR "copy_from_user failed\n");
 			return -EFAULT;
 		}
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 4, 69) || defined(CONFIG_ARCH_MSYS) || (defined(CONFIG_MACH_ARMADA_XP_AMC) && defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4))
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 4, 69) || defined(CONFIG_ARCH_MSYS) || (defined(CONFIG_MACH_ARMADA_XP_AMC) && defined(MY_ABC_HERE))
 		pci_map_single(NULL, (void *)range.address, range.length, PCI_DMA_TODEVICE);
 #else
 		consistent_sync((void *)range.address, range.length, PCI_DMA_TODEVICE);
@@ -860,7 +863,7 @@ static int prestera_ioctl(struct inode *inode, struct file *filp, unsigned int c
 			printk(KERN_ERR "copy_from_user failed\n");
 			return -EFAULT;
 		}
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 4, 69) || defined(CONFIG_ARCH_MSYS) || (defined(CONFIG_MACH_ARMADA_XP_AMC) && defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4))
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 4, 69) || defined(CONFIG_ARCH_MSYS) || (defined(CONFIG_MACH_ARMADA_XP_AMC) && defined(MY_ABC_HERE))
 		pci_map_single(NULL, (void *)range.address, range.length, PCI_DMA_FROMDEVICE);
 #else
 		consistent_sync((void *)range.address, range.length, PCI_DMA_FROMDEVICE);
@@ -1324,13 +1327,13 @@ static int dumpregs(char *page, int len, struct mem_region *mem, struct dumpregs
 }
 #endif
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 static struct dumpregs_stc ppConf_pci[] = {
 	{ "\toff",  0x41804, 0x41804 },
 	{ "\toff",  0x41808, 0x41808 },
 	{ NULL, 0, 0 }
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 static struct dumpregs_stc ppConf[] = {
 	{ "\toff",  0,   0x10 },
@@ -1394,10 +1397,10 @@ int prestera_read_proc_mem(char		*page,
 
 		len = dumpregs(page, len, &(ppdev->config), ppConf);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 		if (ppdev->on_pci_bus)
 			len = dumpregs(page, len, &(ppdev->config), ppConf_pci);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 		len += sprintf(page + len, "\tppregs 0x%lx(user virt), phys: 0x%lx, len: 0x%lx\n",
 				ppdev->ppregs.mmapbase, ppdev->ppregs.phys, ppdev->ppregs.size);
@@ -1530,7 +1533,7 @@ static int prestera_syscall_restore(void)
 static int prestera_dma_init(struct device *dev)
 {
 	dma_len  = _2M;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	struct device *local_device = NULL;
 
 /* - LK3.10: (A38x) during dma_alloc_coherent, arch specific dma ops are called.
@@ -1542,9 +1545,9 @@ static int prestera_dma_init(struct device *dev)
 #endif
 
 	dma_area = dma_alloc_coherent(local_device, dma_len, (dma_addr_t *)&dma_base,
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	dma_area = dma_alloc_coherent(dev, dma_len, (dma_addr_t *)&dma_base,
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 				      GFP_DMA | GFP_KERNEL);
 
 	if (!dma_area) {
@@ -1556,11 +1559,11 @@ static int prestera_dma_init(struct device *dev)
 			dma_area, dma_base, dma_len);
 
 	/* allocate temp area for bspDma operations */
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	dma_tmp_virt = dma_alloc_coherent(local_device, PAGE_SIZE, &dma_tmp_phys,
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	dma_tmp_virt = dma_alloc_coherent(dev, PAGE_SIZE, &dma_tmp_phys,
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 					  GFP_DMA | GFP_KERNEL);
 
 	if (!dma_tmp_virt) {
@@ -1586,7 +1589,7 @@ static void prestera_cleanup(struct device *dev)
 {
 	int		i;
 	struct pp_dev	*ppdev;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	struct device *local_device = NULL;
 
 /* - LK3.10: (A38x) during dma_alloc_coherent, arch specific dma ops are called.
@@ -1596,7 +1599,7 @@ static void prestera_cleanup(struct device *dev)
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 10, 0)
 	local_device = dev;
 #endif
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	prestera_int_cleanup();
 
@@ -1611,20 +1614,20 @@ static void prestera_cleanup(struct device *dev)
 	prestera_dev->founddevs = 0;
 
 	if (dma_tmp_virt) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 		dma_free_coherent(local_device, PAGE_SIZE, dma_tmp_virt, dma_tmp_phys);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 		dma_free_coherent(dev, PAGE_SIZE, dma_tmp_virt, dma_tmp_phys);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 		dma_tmp_virt = NULL;
 	}
 
 	if (dma_area) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 		dma_free_coherent(local_device, dma_len, (dma_addr_t *)&dma_base,
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 		dma_free_coherent(dev, dma_len, (dma_addr_t *)&dma_base,
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 				  GFP_DMA | GFP_KERNEL);
 		dma_area = NULL;
 	}
@@ -1778,10 +1781,10 @@ static int proc_status_show(struct seq_file *m, void *v)
 
 		dumpregs(m, &(ppdev->config), ppConf);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 		if (ppdev->on_pci_bus)
 			dumpregs(m, &(ppdev->config), ppConf_pci);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 		seq_printf(m, "\tppregs 0x%lx(user virt), phys: 0x%lx, len: 0x%lx\n",
 				ppdev->ppregs.mmapbase, ppdev->ppregs.phys, ppdev->ppregs.size);

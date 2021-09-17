@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  inode.c - part of debugfs, a tiny little debug file system
  *
@@ -578,7 +581,7 @@ void debugfs_remove_recursive(struct dentry *dentry)
 }
 EXPORT_SYMBOL_GPL(debugfs_remove_recursive);
 
-#ifdef CONFIG_SYNO_FS_NOTIFY
+#ifdef MY_ABC_HERE
 extern struct synotify_rename_path * get_rename_path_list(struct dentry *old_dentry, struct dentry *new_dentry);
 extern void free_rename_path_list(struct synotify_rename_path * rename_path_list);
 #endif
@@ -608,7 +611,7 @@ struct dentry *debugfs_rename(struct dentry *old_dir, struct dentry *old_dentry,
 	int error;
 	struct dentry *dentry = NULL, *trap;
 	const char *old_name;
-#ifdef CONFIG_SYNO_FS_NOTIFY
+#ifdef MY_ABC_HERE
 	struct synotify_rename_path *rename_path_list = NULL;
 #endif
 
@@ -625,7 +628,7 @@ struct dentry *debugfs_rename(struct dentry *old_dir, struct dentry *old_dentry,
 	if (IS_ERR(dentry) || dentry == trap || dentry->d_inode)
 		goto exit;
 
-#ifdef CONFIG_SYNO_FS_NOTIFY
+#ifdef MY_ABC_HERE
 	rename_path_list = get_rename_path_list(old_dentry, dentry);
 #endif
 	old_name = fsnotify_oldname_init(old_dentry->d_name.name);
@@ -637,7 +640,7 @@ struct dentry *debugfs_rename(struct dentry *old_dir, struct dentry *old_dentry,
 		goto exit;
 	}
 	d_move(old_dentry, dentry);
-#ifdef CONFIG_SYNO_FS_NOTIFY
+#ifdef MY_ABC_HERE
 	fsnotify_move(old_dir->d_inode, new_dir->d_inode, old_name,
 		S_ISDIR(old_dentry->d_inode->i_mode),
 		NULL, old_dentry, rename_path_list);
@@ -655,7 +658,7 @@ struct dentry *debugfs_rename(struct dentry *old_dir, struct dentry *old_dentry,
 	rename_path_list = NULL;
 	return old_dentry;
 exit:
-#ifdef CONFIG_SYNO_FS_NOTIFY
+#ifdef MY_ABC_HERE
 	free_rename_path_list(rename_path_list);
 #endif
 	if (dentry && !IS_ERR(dentry))

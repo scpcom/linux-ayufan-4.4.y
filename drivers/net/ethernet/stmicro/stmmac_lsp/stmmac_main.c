@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
   This is the driver for the ST MAC 10/100/1000 on-chip Ethernet controllers.
   ST Ethernet IPs are built around a Synopsys IP Core.
@@ -69,11 +72,11 @@ static int phyaddr = -1;
 module_param(phyaddr, int, S_IRUGO);
 MODULE_PARM_DESC(phyaddr, "Physical device address");
 
-#if defined (CONFIG_SYNO_MONACO_PERF_ENHANCED)
+#if defined (MY_DEF_HERE)
 #define DMA_TX_SIZE 192
-#else /* CONFIG_SYNO_MONACO_PERF_ENHANCED */
+#else /* MY_DEF_HERE */
 #define DMA_TX_SIZE 256
-#endif /* CONFIG_SYNO_MONACO_PERF_ENHANCED */
+#endif /* MY_DEF_HERE */
 static int dma_txsize = DMA_TX_SIZE;
 module_param(dma_txsize, int, S_IRUGO | S_IWUSR);
 MODULE_PARM_DESC(dma_txsize, "Number of descriptors in the TX list");
@@ -1000,11 +1003,11 @@ static int stmmac_set_bfsize(int mtu, int bufsize)
 	else if (mtu > DEFAULT_BUFSIZE)
 		ret = BUF_SIZE_2KiB;
 	else
-#ifdef CONFIG_SYNO_INCREASE_SKB_SIZE
+#ifdef MY_DEF_HERE
 		ret = BUF_SIZE_2KiB;
-#else /* CONFIG_SYNO_INCREASE_SKB_SIZE */
+#else /* MY_DEF_HERE */
 		ret = DEFAULT_BUFSIZE;
-#endif /* CONFIG_SYNO_INCREASE_SKB_SIZE */
+#endif /* MY_DEF_HERE */
 
 	return ret;
 }
@@ -2200,20 +2203,20 @@ static inline void stmmac_rx_refill(struct stmmac_priv *priv)
 			skb = netdev_alloc_skb_ip_align(priv->dev, bfsize);
 			if (unlikely(!skb)) {
 				/* so for a while no zero-copy! */
-#if defined(CONFIG_SYNO_MONACO_JUMBO_FRAME)
+#if defined(MY_DEF_HERE)
 				if(bfsize > DEFAULT_BUFSIZE )
 					priv->rx_zeroc_thresh = STMMAC_RX_THRESH(priv)*2;
 				else
-#endif /* CONFIG_SYNO_MONACO_JUMBO_FRAME */
+#endif /* MY_DEF_HERE */
 					priv->rx_zeroc_thresh = STMMAC_RX_THRESH(priv);
 
 				if (unlikely(net_ratelimit()))
 					dev_err(priv->device,
 						"fail to alloc skb entry %d\n",
 						entry);
-#if defined(CONFIG_SYNO_MONACO_JUMBO_FRAME)
+#if defined(MY_DEF_HERE)
 				priv->dev->stats.rx_dropped++;
-#endif /* CONFIG_SYNO_MONACO_JUMBO_FRAME */
+#endif /* MY_DEF_HERE */
 				break;
 			}
 

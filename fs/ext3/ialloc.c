@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/ext3/ialloc.c
  *
@@ -474,10 +477,10 @@ got:
 	/* This is the optimal IO size (for stat), not the fs block size */
 	inode->i_blocks = 0;
 	inode->i_mtime = inode->i_atime = inode->i_ctime = CURRENT_TIME_SEC;
-#ifdef CONFIG_SYNO_EXT3_CREATE_TIME
+#ifdef MY_ABC_HERE
 	inode->i_create_time = CURRENT_TIME_SEC;
 #endif
-#ifdef CONFIG_SYNO_EXT3_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	inode->i_archive_bit = ALL_SYNO_ARCHIVE;
 #endif
 

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright(c) 1999 - 2004 Intel Corporation. All rights reserved.
  *
@@ -1837,7 +1840,7 @@ void bond_alb_clear_vlan(struct bonding *bond, unsigned short vlan_id)
 	}
 }
 
-#ifdef CONFIG_SYNO_NET_BOND_ALB_INFO
+#ifdef MY_ABC_HERE
 void bond_alb_info_show(struct seq_file *seq)
 {
 	struct bonding *bond = seq->private;
@@ -1924,4 +1927,4 @@ void bond_alb_info_show(struct seq_file *seq)
 
 	_unlock_tx_hashtbl_bh(bond);
 }
-#endif /* CONFIG_SYNO_NET_BOND_ALB_INFO */
+#endif /* MY_ABC_HERE */

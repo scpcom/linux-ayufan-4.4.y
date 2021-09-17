@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * ST Thermal Sensor Driver for STi series of SoCs
  * Author: Ajit Pal Singh <ajitpal.singh@st.com>
@@ -28,25 +31,25 @@ enum {
 	DCORRECT,
 	OVERFLOW,
 	DATA,
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	DATARDY,
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	INT_ENABLE,
 	INT_THRESH_LOW,
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	DC_CALIB,
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	/* keep last */
 	MAX_REGFIELDS
 };
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 enum {
 	TH_REGS,
 	TH_CALIB,
 	MAX_IOBASE
 };
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 /* Thermal sensor power states */
 enum st_thermal_power_state {
@@ -112,30 +115,30 @@ struct st_thermal_sensor {
 	const struct st_thermal_compat_data *data;
 	struct clk *clk;
 	unsigned int passive_temp;
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	unsigned int dc_offset;
 	struct regmap *regmap[MAX_IOBASE];
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	struct regmap *regmap;
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	struct regmap_field *pwr;
 	struct regmap_field *dcorrect;
 	struct regmap_field *overflow;
 	struct regmap_field *temp_data;
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	struct regmap_field *datardy;
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	struct regmap_field *int_thresh_hi;
 	struct regmap_field *int_thresh_low;
 	struct regmap_field *int_enable;
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	struct regmap_field *dc_calib;
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	int irq;
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 	void __iomem *mmio_base;
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 };
 
 /* Helper macros */

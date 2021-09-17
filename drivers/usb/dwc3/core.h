@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /**
  * core.h - DesignWare USB3 DRD Core Header
  *
@@ -50,10 +53,10 @@
 #include <linux/usb/ch9.h>
 #include <linux/usb/gadget.h>
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 #include <linux/phy/phy.h>
 
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 /* Global constants */
 #define DWC3_EP0_BOUNCE_SIZE	512
 #define DWC3_ENDPOINTS_NUM	32
@@ -367,9 +370,9 @@
 
 /* Structures */
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 struct dwc3_cfg_ops;
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 struct dwc3_trb;
 
 /**
@@ -695,11 +698,11 @@ struct dwc3 {
 
 	struct usb_phy		*usb2_phy;
 	struct usb_phy		*usb3_phy;
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 
 	struct phy		*usb2_generic_phy;
 	struct phy		*usb3_generic_phy;
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 	void __iomem		*regs;
 	size_t			regs_size;
@@ -765,10 +768,10 @@ struct dwc3 {
 
 	u8			test_mode;
 	u8			test_mode_nr;
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	struct dwc3_cfg_ops     *cfg_ops;
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_USB_DWC3_AL_RMN_2648
 	void __iomem *		serdes_regs_base;
 	u32			serdes_group;
@@ -779,9 +782,9 @@ struct dwc3 {
 	int			vbus_gpio;
 	struct delayed_work	vbus_work;
 #endif
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 };
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 /**
  * struct dwc3_cfg_ops - configuration ops for dwc3 registers
  * these ops may are requrired for some hardware.
@@ -789,7 +792,7 @@ struct dwc3 {
 struct dwc3_cfg_ops {
 	u32 (*dwc3_gsbuscfg)(struct device *dev, int index);
 };
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 /* -------------------------------------------------------------------------- */
 

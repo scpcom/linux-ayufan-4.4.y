@@ -1,10 +1,13 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/kernel.h>
 #include <linux/export.h>
 #include <linux/of.h>
 #include <linux/of_pci.h>
 #include <asm/prom.h>
 
-#if defined(CONFIG_SYNO_LSP_ALPINE) || defined(CONFIG_SYNO_LSP_MONACO) || defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 static inline int __of_pci_pci_compare(struct device_node *node,
 				       unsigned int data)
 {
@@ -16,7 +19,7 @@ static inline int __of_pci_pci_compare(struct device_node *node,
 
 	return devfn == data;
 }
-#else /* CONFIG_SYNO_LSP_ALPINE || CONFIG_SYNO_LSP_MONACO || CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_DEF_HERE || CONFIG_SYNO_LSP_MONACO || MY_ABC_HERE */
 static inline int __of_pci_pci_compare(struct device_node *node,
 				       unsigned int devfn)
 {
@@ -27,7 +30,7 @@ static inline int __of_pci_pci_compare(struct device_node *node,
 		return 0;
 	return ((be32_to_cpup(&reg[0]) >> 8) & 0xff) == devfn;
 }
-#endif /* CONFIG_SYNO_LSP_ALPINE || CONFIG_SYNO_LSP_MONACO || CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_DEF_HERE || CONFIG_SYNO_LSP_MONACO || MY_ABC_HERE */
 
 struct device_node *of_pci_find_child_device(struct device_node *parent,
 					     unsigned int devfn)
@@ -55,7 +58,7 @@ struct device_node *of_pci_find_child_device(struct device_node *parent,
 }
 EXPORT_SYMBOL_GPL(of_pci_find_child_device);
 
-#if defined(CONFIG_SYNO_LSP_ALPINE) || defined(CONFIG_SYNO_LSP_MONACO) || defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 /**
  * of_pci_get_devfn() - Get device and function numbers for a device node
  * @np: device node
@@ -103,9 +106,9 @@ int of_pci_parse_bus_range(struct device_node *node, struct resource *res)
 	return 0;
 }
 EXPORT_SYMBOL_GPL(of_pci_parse_bus_range);
-#endif /* CONFIG_SYNO_LSP_ALPINE || CONFIG_SYNO_LSP_MONACO || CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_DEF_HERE || CONFIG_SYNO_LSP_MONACO || MY_ABC_HERE */
 
-#if defined(CONFIG_SYNO_LSP_MONACO) || defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 
 #ifdef CONFIG_PCI_MSI
 
@@ -152,4 +155,4 @@ EXPORT_SYMBOL_GPL(of_pci_find_msi_chip_by_node);
 
 #endif /* CONFIG_PCI_MSI */
 
-#endif /* CONFIG_SYNO_LSP_MONACO || CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_DEF_HERE || MY_ABC_HERE */

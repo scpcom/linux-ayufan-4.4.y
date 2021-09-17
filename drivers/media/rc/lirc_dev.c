@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * LIRC base driver
  *
@@ -35,9 +38,9 @@
 #include <linux/device.h>
 #include <linux/cdev.h>
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 #include <media/rc-core.h>
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 #include <media/lirc.h>
 #include <media/lirc_dev.h>
 
@@ -468,14 +471,14 @@ int lirc_dev_fop_open(struct inode *inode, struct file *file)
 		retval = -EBUSY;
 		goto error;
 	}
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 
 	if (ir->d.rdev) {
 		retval = rc_open(ir->d.rdev);
 		if (retval)
 			goto error;
 	}
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 	cdev = ir->cdev;
 	if (try_module_get(cdev->owner)) {
@@ -520,11 +523,11 @@ int lirc_dev_fop_close(struct inode *inode, struct file *file)
 	dev_dbg(ir->d.dev, LOGHEAD "close called\n", ir->d.name, ir->d.minor);
 
 	WARN_ON(mutex_lock_killable(&lirc_dev_lock));
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 
 	if (ir->d.rdev)
 		rc_close(ir->d.rdev);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 	ir->open--;
 	if (ir->attached) {

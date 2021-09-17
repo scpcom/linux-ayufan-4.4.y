@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Video for Linux Two controls header file
  *
@@ -60,9 +63,9 @@
 #define V4L2_CTRL_CLASS_IMAGE_PROC	0x009f0000	/* Image processing controls */
 #define V4L2_CTRL_CLASS_DV		0x00a00000	/* Digital Video controls */
 #define V4L2_CTRL_CLASS_FM_RX		0x00a10000	/* Digital Video controls */
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 #define V4L2_CTRL_CLASS_TSMUX		0x00b00000	/* SDK2 STM tsmux controls */
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 /* User-class control IDs */
 
@@ -847,11 +850,11 @@ enum v4l2_deemphasis {
 };
 
 #define V4L2_CID_RDS_RECEPTION			(V4L2_CID_FM_RX_CLASS_BASE + 2)
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 
 /*  TSMUX-class control IDs defined by V4L2 */
 #define V4L2_CID_TSMUX_CLASS_BASE		(V4L2_CTRL_CLASS_TSMUX | 0x900)
 #define V4L2_CID_TSMUX_CLASS			(V4L2_CTRL_CLASS_TSMUX | 1)
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 #endif

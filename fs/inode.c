@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * (C) 1997 Linus Torvalds
  * (C) 1999 Andrea Arcangeli <andrea@suse.de> (dynamic inode allocation)
@@ -49,9 +52,9 @@
  * iunique_lock
  *   inode_hash_lock
  */
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 #include "synoacl_int.h"
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 
 static unsigned int i_hash_mask __read_mostly;
 static unsigned int i_hash_shift __read_mostly;
@@ -59,9 +62,9 @@ static struct hlist_head *inode_hashtable __read_mostly;
 static __cacheline_aligned_in_smp DEFINE_SPINLOCK(inode_hash_lock);
 
 __cacheline_aligned_in_smp DEFINE_SPINLOCK(inode_sb_list_lock);
-#if defined(CONFIG_SYNO_BTRFS_FREE_EXTENT_MAPS) || defined(CONFIG_AUFS_FHSM)
+#if defined(MY_ABC_HERE) || defined(CONFIG_AUFS_FHSM)
 EXPORT_SYMBOL(inode_sb_list_lock);
-#endif /* CONFIG_SYNO_BTRFS_FREE_EXTENT_MAPS || CONFIG_AUFS_FHSM */
+#endif /* MY_ABC_HERE || CONFIG_AUFS_FHSM */
 
 /*
  * Empty aops. Can be used for the cases where the user does not
@@ -119,11 +122,11 @@ int proc_nr_inodes(ctl_table *table, int write,
 }
 #endif
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #include <linux/moduleparam.h>
 static int fshighmem = 1;
 core_param(fshighmem, fshighmem, int, 0444);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 /**
  * inode_init_always - perform inode structure intialisation
@@ -163,13 +166,13 @@ int inode_init_always(struct super_block *sb, struct inode *inode)
 	inode->i_rdev = 0;
 	inode->dirtied_when = 0;
 
-#ifdef CONFIG_SYNO_FS_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	inode->i_archive_bit = 0; /* set archive bit on creation */
 #endif
-#ifdef CONFIG_SYNO_FS_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	inode->i_archive_version = 0;
 #endif
-#ifdef CONFIG_SYNO_FS_CREATE_TIME
+#ifdef MY_ABC_HERE
 	inode->i_create_time.tv_sec = 0;
 	inode->i_create_time.tv_nsec = 0;
 #endif
@@ -180,7 +183,7 @@ int inode_init_always(struct super_block *sb, struct inode *inode)
 
 	mutex_init(&inode->i_mutex);
 	lockdep_set_class(&inode->i_mutex, &sb->s_type->i_mutex_key);
-#ifdef CONFIG_SYNO_FS_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	mutex_init(&inode->i_syno_mutex);
 	lockdep_set_class(&inode->i_syno_mutex, &sb->s_type->i_syno_mutex_key);
 #endif
@@ -190,14 +193,14 @@ int inode_init_always(struct super_block *sb, struct inode *inode)
 	mapping->a_ops = &empty_aops;
 	mapping->host = inode;
 	mapping->flags = 0;
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	if (fshighmem)
 		mapping_set_gfp_mask(mapping, GFP_HIGHUSER_MOVABLE);
 	else
 		mapping_set_gfp_mask(mapping, GFP_USER | __GFP_MOVABLE);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	mapping_set_gfp_mask(mapping, GFP_HIGHUSER_MOVABLE);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	mapping->private_data = NULL;
 	mapping->backing_dev_info = &default_backing_dev_info;
 	mapping->writeback_index = 0;
@@ -216,12 +219,12 @@ int inode_init_always(struct super_block *sb, struct inode *inode)
 	inode->i_private = NULL;
 	inode->i_mapping = mapping;
 	INIT_HLIST_HEAD(&inode->i_dentry);	/* buggered by rcu freeing */
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 	inode->i_syno_acl = ACL_NOT_CACHED;
 	inode->i_acl = ACL_NOT_CACHED;
 #elif defined(CONFIG_FS_POSIX_ACL)
 	inode->i_acl = inode->i_default_acl = ACL_NOT_CACHED;
-#endif /* CONFIG_SYNO_FS_WINACL CONFIG_FS_POSIX_ACL */
+#endif /* MY_ABC_HERE CONFIG_FS_POSIX_ACL */
 
 #ifdef CONFIG_FSNOTIFY
 	inode->i_fsnotify_mask = 0;
@@ -274,7 +277,7 @@ void __destroy_inode(struct inode *inode)
 		atomic_long_dec(&inode->i_sb->s_remove_count);
 	}
 
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 	if (inode->i_syno_acl && inode->i_syno_acl != ACL_NOT_CACHED)
 		syno_acl_release(inode->i_syno_acl);
 #elif defined(CONFIG_FS_POSIX_ACL)
@@ -282,7 +285,7 @@ void __destroy_inode(struct inode *inode)
 		posix_acl_release(inode->i_acl);
 	if (inode->i_default_acl && inode->i_default_acl != ACL_NOT_CACHED)
 		posix_acl_release(inode->i_default_acl);
-#endif /* CONFIG_SYNO_FS_WINACL CONFIG_FS_POSIX_ACL */
+#endif /* MY_ABC_HERE CONFIG_FS_POSIX_ACL */
 	this_cpu_dec(nr_inodes);
 }
 EXPORT_SYMBOL(__destroy_inode);
@@ -426,7 +429,7 @@ void __iget(struct inode *inode)
 {
 	atomic_inc(&inode->i_count);
 }
-#ifdef CONFIG_SYNO_BTRFS_FREE_EXTENT_MAPS
+#ifdef MY_ABC_HERE
 EXPORT_SYMBOL(__iget);
 #endif
 
@@ -1012,7 +1015,7 @@ void unlock_new_inode(struct inode *inode)
 {
 	lockdep_annotate_inode_mutex_key(inode);
 	spin_lock(&inode->i_lock);
-#ifdef CONFIG_SYNO_FS_SKIP_RO_NEW_INODE_WARNING
+#ifdef MY_ABC_HERE
 	if (!(inode->i_state & I_NEW)) {
 		printk(KERN_ERR "FS: inode->i_state is not I_NEW. File system should be remount read-only.\n");
 	}

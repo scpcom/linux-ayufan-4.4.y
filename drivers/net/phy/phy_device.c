@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * drivers/net/phy/phy_device.c
  *
@@ -37,7 +40,7 @@
 #include <asm/io.h>
 #include <asm/irq.h>
 #include <asm/uaccess.h>
-#ifdef CONFIG_SYNO_ALPINE_MALFUNCTIONAL_PHY_WORKAROUND
+#ifdef MY_DEF_HERE
 #include <linux/synobios.h>
 #endif
 
@@ -123,7 +126,7 @@ static int phy_needs_fixup(struct phy_device *phydev, struct phy_fixup *fixup)
 		if (strcmp(fixup->bus_id, PHY_ANY_ID) != 0)
 			return 0;
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	if (!phydev->is_c45) {
 		if ((fixup->phy_uid & fixup->phy_uid_mask) !=
 				(phydev->phy_id & fixup->phy_uid_mask))
@@ -143,12 +146,12 @@ static int phy_needs_fixup(struct phy_device *phydev, struct phy_fixup *fixup)
 					return 0;
 		}
 	}
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	if ((fixup->phy_uid & fixup->phy_uid_mask) !=
 			(phydev->phy_id & fixup->phy_uid_mask))
 		if (fixup->phy_uid != PHY_ANY_UID)
 			return 0;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 	return 1;
 }
@@ -211,7 +214,7 @@ struct phy_device *phy_device_create(struct mii_bus *bus, int addr, int phy_id,
 	dev_set_name(&dev->dev, PHY_ID_FMT, bus->id, addr);
 
 	dev->state = PHY_DOWN;
-#ifdef CONFIG_SYNO_ALPINE_MALFUNCTIONAL_PHY_WORKAROUND
+#ifdef MY_DEF_HERE
 	dev->is_phyerr_reset = 0;
 #endif
 
@@ -399,7 +402,7 @@ int phy_device_register(struct phy_device *phydev)
 		goto out;
 	}
 
-#if defined(CONFIG_SYNO_PHY_INIT)
+#if defined(MY_ABC_HERE)
 	/* Init phy config if config_init is exist */
 	if (phydev->drv && phydev->drv->config_init) {
 		err = phydev->drv->config_init(phydev);
@@ -408,7 +411,7 @@ int phy_device_register(struct phy_device *phydev)
 			goto out;
 		}
 	}
-#endif /* CONFIG_SYNO_PHY_INIT */
+#endif /* MY_ABC_HERE */
 
 	return 0;
 
@@ -789,7 +792,7 @@ EXPORT_SYMBOL(genphy_restart_aneg);
 int genphy_config_aneg(struct phy_device *phydev)
 {
 	int result;
-#ifdef CONFIG_SYNO_ALPINE_MALFUNCTIONAL_PHY_WORKAROUND
+#ifdef MY_DEF_HERE
 	int reg_val = 0;
 
 	if (!syno_is_hw_version(HW_DS2015xs)) {

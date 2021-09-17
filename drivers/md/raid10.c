@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * raid10.c : Multiple Devices driver for Linux
  *
@@ -98,7 +101,7 @@ static int max_queued_requests = 1024;
 static void allow_barrier(struct r10conf *conf);
 static void lower_barrier(struct r10conf *conf);
 
-#ifdef CONFIG_SYNO_MD_STATUS_DISKERROR
+#ifdef MY_ABC_HERE
 static unsigned char
 IsDiskErrorSet(struct mddev *mddev)
 {
@@ -117,7 +120,7 @@ IsDiskErrorSet(struct mddev *mddev)
 END:
 	return res;
 }
-#endif /* CONFIG_SYNO_MD_STATUS_DISKERROR */
+#endif /* MY_ABC_HERE */
 
 static int enough(struct r10conf *conf, int ignore);
 static int _enough(struct r10conf *conf, int previous, int ignore);
@@ -127,9 +130,9 @@ static void reshape_request_write(struct mddev *mddev, struct r10bio *r10_bio);
 static void end_reshape_write(struct bio *bio, int error);
 static void end_reshape(struct r10conf *conf);
 
-#if defined(CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY)
+#if defined(MY_ABC_HERE)
 static int blRaid10Enough(struct r10conf *conf, struct md_rdev *rdev);
-#endif /* defined(CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY) */
+#endif /* defined(MY_ABC_HERE) */
 
 static void * r10bio_pool_alloc(gfp_t gfp_flags, void *data)
 {
@@ -427,15 +430,15 @@ static void raid10_end_read_request(struct bio *bio, int error)
 		 */
 		unsigned long flags;
 		spin_lock_irqsave(&conf->device_lock, flags);
-#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+#ifdef MY_ABC_HERE
 		if (!blRaid10Enough(conf, conf->mirrors[dev].rdev))
-#else /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
+#else /* MY_ABC_HERE */
 		if (!enough(conf, rdev->raid_disk))
 #endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUB_NOTIFY */
 			uptodate = 1;
 		spin_unlock_irqrestore(&conf->device_lock, flags);
 
-#ifdef CONFIG_SYNO_MD_SECTOR_STATUS_REPORT
+#ifdef MY_ABC_HERE
 		if (!IsDeviceDisappear(conf->mirrors[dev].rdev->bdev)) {
 #ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
 			if (bio_flagged(bio, BIO_AUTO_REMAP)) {
@@ -447,9 +450,9 @@ static void raid10_end_read_request(struct bio *bio, int error)
 								conf->mddev->md_minor, conf->mirrors[dev].rdev->bdev, __FUNCTION__);
 #endif /* CONFIG_SYNO_MD_AUTO_REMAP_REPORT */
 		}
-#endif /* CONFIG_SYNO_MD_SECTOR_STATUS_REPORT */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_MD_STATUS_DISKERROR
+#ifdef MY_ABC_HERE
 		/*
 		 * If this rdev is the last drive,
 		 * then this raid10 is crashed because there is no any chance to retry.
@@ -457,7 +460,7 @@ static void raid10_end_read_request(struct bio *bio, int error)
 		if (uptodate) {
 			md_error(r10_bio->mddev, conf->mirrors[dev].rdev);
 		}
-#endif /* CONFIG_SYNO_MD_STATUS_DISKERROR */
+#endif /* MY_ABC_HERE */
 	}
 
 	if (uptodate) {
@@ -532,12 +535,12 @@ static void raid10_end_write_request(struct bio *bio, int error)
 			 */
 			md_error(rdev->mddev, rdev);
 		else {
-#ifdef CONFIG_SYNO_MD_SECTOR_STATUS_REPORT
+#ifdef MY_ABC_HERE
 			if (!IsDeviceDisappear(conf->mirrors[dev].rdev->bdev)) {
 				SynoReportBadSector(bio->bi_sector, WRITE, conf->mddev->md_minor,
 									conf->mirrors[dev].rdev->bdev, __FUNCTION__);
 			}
-#endif /* CONFIG_SYNO_MD_SECTOR_STATUS_REPORT */
+#endif /* MY_ABC_HERE */
 			set_bit(WriteErrorSeen,	&rdev->flags);
 			if (!test_and_set_bit(WantReplacement, &rdev->flags))
 				set_bit(MD_RECOVERY_NEEDED,
@@ -1249,16 +1252,16 @@ static void make_request(struct mddev *mddev, struct bio * bio)
 		return;
 	}
 
-#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
-#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+#ifdef MY_ABC_HERE
+#ifdef MY_ABC_HERE
 	if (mddev->nodev_and_crashed) {
-#else /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
+#else /* MY_ABC_HERE */
 	if (!blRaid10Enough(conf, NULL)) {
-#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
+#endif /* MY_ABC_HERE */
 		bio_endio(bio, 0);
 		return;
 	}
-#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
+#endif /* MY_ABC_HERE */
 
 	/* If this request crosses a chunk boundary, we need to
 	 * split it.  This will only happen for 1 PAGE (or less) requests.
@@ -1700,15 +1703,15 @@ static void status(struct seq_file *seq, struct mddev *mddev)
 	seq_printf(seq, " [%d/%d] [", conf->geo.raid_disks,
 					conf->geo.raid_disks - mddev->degraded);
 	for (i = 0; i < conf->geo.raid_disks; i++)
-#ifdef CONFIG_SYNO_MD_STATUS_DISKERROR
+#ifdef MY_ABC_HERE
 		seq_printf(seq, "%s",
 				   conf->mirrors[i].rdev && test_bit(In_sync, &conf->mirrors[i].rdev->flags) ?
 				   (test_bit(DiskError, &conf->mirrors[i].rdev->flags) ?  "E" : "U") : "_");
-#else /* CONFIG_SYNO_MD_STATUS_DISKERROR */
+#else /* MY_ABC_HERE */
 		seq_printf(seq, "%s",
 			      conf->mirrors[i].rdev &&
 			      test_bit(In_sync, &conf->mirrors[i].rdev->flags) ? "U" : "_");
-#endif /* CONFIG_SYNO_MD_STATUS_DISKERROR */
+#endif /* MY_ABC_HERE */
 	seq_printf(seq, "]");
 }
 
@@ -1764,7 +1767,7 @@ static int enough(struct r10conf *conf, int ignore)
 		_enough(conf, 1, ignore);
 }
 
-#if defined(CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY)
+#if defined(MY_ABC_HERE)
 #ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
 static inline void SynoSetRdevAutoRemap(struct mddev *mddev)
 {
@@ -1901,9 +1904,9 @@ blRaid10Enough(struct r10conf *conf,
 END:
 	return ret;
 }
-#endif /* defined(CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY) */
+#endif /* defined(MY_ABC_HERE) */
 
-#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+#ifdef MY_ABC_HERE
 static void
 syno_error_common(struct mddev *mddev,
 				  struct md_rdev *rdev)
@@ -1916,14 +1919,14 @@ syno_error_common(struct mddev *mddev,
 		spin_lock_irqsave(&conf->device_lock, flags);
 		mddev->degraded++;
 
-#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+#ifdef MY_ABC_HERE
 		if (!blRaid10Enough(conf, rdev)) {
 			mddev->nodev_and_crashed = 1;
 		}
-#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
-#ifdef CONFIG_SYNO_MD_STATUS_DISKERROR
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
 		clear_bit(DiskError, &rdev->flags);
-#endif /* CONFIG_SYNO_MD_STATUS_DISKERROR */
+#endif /* MY_ABC_HERE */
 		spin_unlock_irqrestore(&conf->device_lock, flags);
 	}
 	/*
@@ -1985,7 +1988,7 @@ void syno_error_for_internal(struct mddev *mddev,
 	if (test_bit(In_sync, &rdev->flags)
 	    && blRaid10Enough(conf, NULL) &&
 		!blRaid10Enough(conf, rdev)) {
-#ifdef CONFIG_SYNO_MD_STATUS_DISKERROR
+#ifdef MY_ABC_HERE
 			/**
 			 * set it to DiskError, scemd would remount read only as soon as
 			 * possible. File system would also remount read only when it
@@ -1995,7 +1998,7 @@ void syno_error_for_internal(struct mddev *mddev,
 				set_bit(DiskError, &rdev->flags);
 				set_bit(MD_CHANGE_DEVS, &mddev->flags);
 			}
-#endif /* CONFIG_SYNO_MD_STATUS_DISKERROR */
+#endif /* MY_ABC_HERE */
 			/* remove other disk which are buiding parity currently,
 			 * so the disk is released. And user space can do something on this member.
 			 */
@@ -2020,7 +2023,7 @@ void syno_error_for_internal(struct mddev *mddev,
 	syno_error_common(mddev, rdev);
 }
 
-#else /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
+#else /* MY_ABC_HERE */
 static void error(struct mddev *mddev, struct md_rdev *rdev)
 {
 	char b[BDEVNAME_SIZE];
@@ -2057,7 +2060,7 @@ static void error(struct mddev *mddev, struct md_rdev *rdev)
 	       mdname(mddev), bdevname(rdev->bdev, b),
 	       mdname(mddev), conf->geo.raid_disks - mddev->degraded);
 }
-#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
+#endif /* MY_ABC_HERE */
 
 static void print_conf(struct r10conf *conf)
 {
@@ -2100,11 +2103,11 @@ static int raid10_spare_active(struct mddev *mddev)
 	int count = 0;
 	unsigned long flags;
 
-#ifdef CONFIG_SYNO_MD_STATUS_DISKERROR
+#ifdef MY_ABC_HERE
 	if (IsDiskErrorSet(mddev)) {
 		return 0;
 	}
-#endif /* CONFIG_SYNO_MD_STATUS_DISKERROR */
+#endif /* MY_ABC_HERE */
 
 	/*
 	 * Find all non-in_sync disks within the RAID10 configuration
@@ -2155,7 +2158,7 @@ static int raid10_add_disk(struct mddev *mddev, struct md_rdev *rdev)
 	int last = conf->geo.raid_disks - 1;
 	struct request_queue *q = bdev_get_queue(rdev->bdev);
 
-#ifdef CONFIG_SYNO_MD_STATUS_DISKERROR
+#ifdef MY_ABC_HERE
 	if (IsDiskErrorSet(mddev)) {
 		return -EINVAL;
 	}
@@ -2163,7 +2166,7 @@ static int raid10_add_disk(struct mddev *mddev, struct md_rdev *rdev)
 	if (!blRaid10Enough(conf, NULL)) {
 		return -EINVAL;
 	}
-#endif /* CONFIG_SYNO_MD_STATUS_DISKERROR */
+#endif /* MY_ABC_HERE */
 
 	if (mddev->recovery_cp < MaxSector)
 		/* only hot-add to in-sync arrays, as recovery is
@@ -2323,7 +2326,7 @@ static void end_sync_read(struct bio *bio, int error)
 	if (test_bit(BIO_UPTODATE, &bio->bi_flags))
 		set_bit(R10BIO_Uptodate, &r10_bio->state);
 	else
-#ifdef CONFIG_SYNO_MD_SECTOR_STATUS_REPORT
+#ifdef MY_ABC_HERE
 	{
 		if (!IsDeviceDisappear(conf->mirrors[d].rdev->bdev)) {
 			SynoReportBadSector(bio->bi_sector, READ,
@@ -2332,13 +2335,13 @@ static void end_sync_read(struct bio *bio, int error)
 		atomic_add(r10_bio->sectors,
 				&conf->mirrors[d].rdev->corrected_errors);
 	}
-#else /* CONFIG_SYNO_MD_SECTOR_STATUS_REPORT */
+#else /* MY_ABC_HERE */
 		/* The write handler will notice the lack of
 		 * R10BIO_Uptodate and record any errors etc
 		 */
 		atomic_add(r10_bio->sectors,
 			   &conf->mirrors[d].rdev->corrected_errors);
-#endif /* CONFIG_SYNO_MD_SECTOR_STATUS_REPORT */
+#endif /* MY_ABC_HERE */
 
 	/* for reconstruct, we always reschedule after a read.
 	 * for resync, only after all reads
@@ -2403,7 +2406,7 @@ static void end_sync_write(struct bio *bio, int error)
 		if (repl)
 			md_error(mddev, rdev);
 		else {
-#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+#ifdef MY_ABC_HERE
 			if (IsDeviceDisappear(rdev->bdev)) {
 				set_bit(WriteErrorSeen, &rdev->flags);
 				if (!test_and_set_bit(WantReplacement, &rdev->flags))
@@ -2411,7 +2414,7 @@ static void end_sync_write(struct bio *bio, int error)
 						&rdev->mddev->recovery);
 				set_bit(R10BIO_WriteError, &r10_bio->state);
 			} else {
-#ifdef CONFIG_SYNO_MD_SECTOR_STATUS_REPORT
+#ifdef MY_ABC_HERE
 				if (-EIO == error) {
 					/**
 					 * A really bad I/O
@@ -2437,15 +2440,15 @@ static void end_sync_write(struct bio *bio, int error)
 				} else {
 					;
 				}
-#endif /* CONFIG_SYNO_MD_SECTOR_STATUS_REPORT */
+#endif /* MY_ABC_HERE */
 			}
-#else /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
+#else /* MY_ABC_HERE */
 			set_bit(WriteErrorSeen, &rdev->flags);
 			if (!test_and_set_bit(WantReplacement, &rdev->flags))
 				set_bit(MD_RECOVERY_NEEDED,
 					&rdev->mddev->recovery);
 			set_bit(R10BIO_WriteError, &r10_bio->state);
-#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
+#endif /* MY_ABC_HERE */
 		}
 	} else if (is_badblock(rdev,
 			     r10_bio->devs[slot].addr,
@@ -2660,10 +2663,10 @@ static void fix_recovery_read_error(struct r10bio *r10_bio)
 			if (rdev != conf->mirrors[dw].rdev) {
 				/* need bad block on destination too */
 				struct md_rdev *rdev2 = conf->mirrors[dw].rdev;
-#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+#ifdef MY_ABC_HERE
 				char b1[BDEVNAME_SIZE];
 				char b2[BDEVNAME_SIZE];
-#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
+#endif /* MY_ABC_HERE */
 				addr = r10_bio->devs[1].addr + sect;
 				ok = rdev_set_badblocks(rdev2, addr, s, 0);
 				if (!ok) {
@@ -2672,10 +2675,10 @@ static void fix_recovery_read_error(struct r10bio *r10_bio)
 					       "md/raid10:%s: recovery aborted"
 					       " due to read error\n",
 					       mdname(mddev));
-#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+#ifdef MY_ABC_HERE
 					printk("md/raid10:%s: Failed to sync from %s to %s\n", mdname(mddev), bdevname(rdev->bdev, b1), bdevname(rdev2->bdev, b2));
 					md_error(mddev, rdev);
-#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
+#endif /* MY_ABC_HERE */
 
 					conf->mirrors[dw].recovery_disabled
 						= mddev->recovery_disabled;
@@ -3071,18 +3074,18 @@ static void handle_read_error(struct mddev *mddev, struct r10bio *r10_bio)
 	 * frozen.
 	 */
 	bio = r10_bio->devs[slot].bio;
-#ifdef CONFIG_SYNO_MD_FIX_ACCESS_RELEASED_DEVICE
-#else /* CONFIG_SYNO_MD_FIX_ACCESS_RELEASED_DEVICE */
+#ifdef MY_ABC_HERE
+#else /* MY_ABC_HERE */
 	bdevname(bio->bi_bdev, b);
-#endif /* CONFIG_SYNO_MD_FIX_ACCESS_RELEASED_DEVICE */
+#endif /* MY_ABC_HERE */
 	bio_put(bio);
 	r10_bio->devs[slot].bio = NULL;
 
-#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+#ifdef MY_ABC_HERE
 	if (!rdev || IsDeviceDisappear(rdev->bdev)) {
 		syno_md_error(mddev, rdev);
 	} else
-#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
+#endif /* MY_ABC_HERE */
 	if (mddev->ro == 0) {
 		freeze_array(conf, 1);
 		fix_read_error(conf, mddev, r10_bio);
@@ -3095,25 +3098,25 @@ static void handle_read_error(struct mddev *mddev, struct r10bio *r10_bio)
 read_more:
 	rdev = read_balance(conf, r10_bio, &max_sectors);
 	if (rdev == NULL) {
-#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+#ifdef MY_ABC_HERE
 		if (mddev->nodev_and_crashed) {
 			/* Oringinal raid10 didn't think about this */
 			printk(KERN_ALERT "md/raid10: no bdev: unrecoverable I/O"
 					" read error for block %llu\n",
 					(unsigned long long)r10_bio->sector);
 		} else
-#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
-#ifdef CONFIG_SYNO_MD_FIX_ACCESS_RELEASED_DEVICE
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
 		printk(KERN_ALERT "md/raid10:%s: unrecoverable I/O"
 		       " read error for block %llu\n",
 		       mdname(mddev),
 		       (unsigned long long)r10_bio->sector);
-#else /* CONFIG_SYNO_MD_FIX_ACCESS_RELEASED_DEVICE */
+#else /* MY_ABC_HERE */
 		printk(KERN_ALERT "md/raid10:%s: %s: unrecoverable I/O"
 		       " read error for block %llu\n",
 		       mdname(mddev), b,
 		       (unsigned long long)r10_bio->sector);
-#endif /* CONFIG_SYNO_MD_FIX_ACCESS_RELEASED_DEVICE */
+#endif /* MY_ABC_HERE */
 		raid_end_bio_io(r10_bio);
 		return;
 	}
@@ -3196,11 +3199,11 @@ static void handle_write_completed(struct r10conf *conf, struct r10bio *r10_bio)
 					r10_bio->devs[m].addr,
 					r10_bio->sectors, 0);
 			} else {
-#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+#ifdef MY_ABC_HERE
 				if (IsDeviceDisappear(rdev->bdev)) {
 					syno_md_error(conf->mddev, rdev);
 				} else
-#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
+#endif /* MY_ABC_HERE */
 				if (!rdev_set_badblocks(
 					    rdev,
 					    r10_bio->devs[m].addr,
@@ -3238,13 +3241,13 @@ static void handle_write_completed(struct r10conf *conf, struct r10bio *r10_bio)
 				rdev_dec_pending(rdev, conf->mddev);
 			} else if (bio != NULL &&
 				   !test_bit(BIO_UPTODATE, &bio->bi_flags)) {
-#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+#ifdef MY_ABC_HERE
 				if (IsDeviceDisappear(rdev->bdev)) {
 					syno_md_error(conf->mddev, rdev);
 					set_bit(R10BIO_Degraded,
 						&r10_bio->state);
 				} else
-#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
+#endif /* MY_ABC_HERE */
 				if (!narrow_write_error(r10_bio, m)) {
 					md_error(conf->mddev, rdev);
 					set_bit(R10BIO_Degraded,
@@ -3382,9 +3385,9 @@ static sector_t sync_request(struct mddev *mddev, sector_t sector_nr,
 	sector_t max_sector, nr_sectors;
 	int i;
 	int max_sync;
-#if defined(CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY)
+#if defined(MY_ABC_HERE)
 	int blStopSync = 0;
-#endif /* defined(CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY) */
+#endif /* defined(MY_ABC_HERE) */
 	sector_t sync_blocks;
 	sector_t sectors_skipped = 0;
 	int chunks_skipped = 0;
@@ -3394,18 +3397,18 @@ static sector_t sync_request(struct mddev *mddev, sector_t sector_nr,
 		if (init_resync(conf))
 			return 0;
 
-#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+#ifdef MY_ABC_HERE
 	if (!blRaid10Enough(conf, NULL)) {
 		blStopSync = 1;
 	}
-#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_MD_STATUS_DISKERROR
+#ifdef MY_ABC_HERE
 	if (IsDiskErrorSet(mddev))
 		blStopSync = 1;
-#endif /* CONFIG_SYNO_MD_STATUS_DISKERROR */
+#endif /* MY_ABC_HERE */
 
-#if defined(CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY)
+#if defined(MY_ABC_HERE)
 	/**
 	 * when last one disk has bad sector or r/w error.
 	 * We just freeze any sync request. Because it is crashed now.
@@ -3416,7 +3419,7 @@ static sector_t sync_request(struct mddev *mddev, sector_t sector_nr,
 		/* Stop infinity loop sync while creating. */
 		mddev->recovery_cp = MaxSector;
 	}
-#endif /* defined(CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY) */
+#endif /* defined(MY_ABC_HERE) */
 
 	/*
 	 * Allow skipping a full rebuild for incremental assembly
@@ -3438,11 +3441,11 @@ static sector_t sync_request(struct mddev *mddev, sector_t sector_nr,
 	if (test_bit(MD_RECOVERY_SYNC, &mddev->recovery) ||
 	    test_bit(MD_RECOVERY_RESHAPE, &mddev->recovery))
 		max_sector = mddev->resync_max_sectors;
-#if defined(CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY)
+#if defined(MY_ABC_HERE)
 	if (sector_nr >= max_sector || *skipped == 1) {
-#else /* defined(CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY) */
+#else /* defined(MY_ABC_HERE) */
 	if (sector_nr >= max_sector) {
-#endif /* defined(CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY) */
+#endif /* defined(MY_ABC_HERE) */
 		/* If we aborted, we need to abort the
 		 * sync on the 'current' bitmap chucks (there can
 		 * be several when recovering multiple devices).
@@ -4199,22 +4202,22 @@ static int run(struct mddev *mddev)
 						  mddev->queue);
 	}
 	/* need to check that every block has at least one working mirror */
-#if defined(CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY)
+#if defined(MY_ABC_HERE)
 	/* Original enough is not right for offset and far layout. */
 	if (!blRaid10Enough(conf, NULL)) {
-#else /* defined(CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY) */
+#else /* defined(MY_ABC_HERE) */
 	if (!enough(conf, -1)) {
-#endif /* defined(CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY) */
-#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+#endif /* defined(MY_ABC_HERE) */
+#ifdef MY_ABC_HERE
 		mddev->nodev_and_crashed = 1;
-#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
+#endif /* MY_ABC_HERE */
 		printk(KERN_ERR "md/raid10:%s: not enough operational mirrors.\n",
 		       mdname(mddev));
-#ifdef CONFIG_SYNO_MD_STATUS_GET
+#ifdef MY_ABC_HERE
 		// DS 2.2 #10254
-#else /* CONFIG_SYNO_MD_STATUS_GET */
+#else /* MY_ABC_HERE */
 		goto out_free_conf;
-#endif /* CONFIG_SYNO_MD_STATUS_GET */
+#endif /* MY_ABC_HERE */
 	}
 
 	if (conf->reshape_progress != MaxSector) {
@@ -5220,12 +5223,12 @@ static struct md_personality raid10_personality =
 	.run		= run,
 	.stop		= stop,
 	.status		= status,
-#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+#ifdef MY_ABC_HERE
 	.error_handler	= syno_error_for_internal,
 	.syno_error_handler = syno_error_for_hotplug,
-#else /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
+#else /* MY_ABC_HERE */
 	.error_handler	= error,
-#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
+#endif /* MY_ABC_HERE */
 	.hot_add_disk	= raid10_add_disk,
 	.hot_remove_disk= raid10_remove_disk,
 	.spare_active	= raid10_spare_active,

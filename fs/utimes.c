@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/compiler.h>
 #include <linux/file.h>
 #include <linux/fs.h>
@@ -11,9 +14,9 @@
 #include <asm/uaccess.h>
 #include <asm/unistd.h>
 
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 #include "synoacl_int.h"
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 
 #ifdef __ARCH_WANT_SYS_UTIME
 
@@ -99,14 +102,14 @@ static int utimes_common(struct path *path, struct timespec *times)
                 if (IS_IMMUTABLE(inode))
 			goto mnt_drop_write_and_out;
 
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 		if (IS_SYNOACL(path->dentry)) {
 			error = synoacl_op_perm(path->dentry, MAY_WRITE_ATTR | MAY_WRITE_EXT_ATTR);
 			if (error) {
 				goto mnt_drop_write_and_out;
 			}
 		} else
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 		if (!inode_owner_or_capable(inode)) {
 			error = inode_permission(inode, MAY_WRITE);
 			if (error)
@@ -239,7 +242,7 @@ SYSCALL_DEFINE2(utimes, char __user *, filename,
 	return sys_futimesat(AT_FDCWD, filename, utimes);
 }
 
-#ifdef CONFIG_SYNO_FS_CREATE_TIME
+#ifdef MY_ABC_HERE
 /**
  * sys_SYNOUtime() is used to update create time.
  *
@@ -272,7 +275,7 @@ SYSCALL_DEFINE2(SYNOUtime, const char __user *, filename, struct timespec __user
 
 	inode = path.dentry->d_inode;
 	if (!inode_owner_or_capable(inode)) {
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 		if (IS_SYNOACL(path.dentry)) {
 			error = synoacl_op_perm(path.dentry, MAY_WRITE_ATTR | MAY_WRITE_EXT_ATTR);
 			if (error)
@@ -286,12 +289,12 @@ SYSCALL_DEFINE2(SYNOUtime, const char __user *, filename, struct timespec __user
 			if (error)
 				goto drop_write;
 		} else {
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 		error = -EPERM;
 		goto drop_write;
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 		}
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 	}
 
 	error = syno_op_set_crtime(path.dentry, &time);
@@ -304,4 +307,4 @@ out:
 	return error;
 	return 0;
 }
-#endif /* CONFIG_SYNO_FS_CREATE_TIME */
+#endif /* MY_ABC_HERE */

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *	Pentium 4/Xeon CPU on demand clock modulation/speed scaling
  *	(C) 2002 - 2003 Dominik Brodowski <linux@brodo.de>
@@ -271,11 +274,11 @@ static struct cpufreq_driver p4clockmod_driver = {
 	.exit		= cpufreq_p4_cpu_exit,
 	.get		= cpufreq_p4_get,
 	.name		= "p4-clockmod",
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	.owner		= THIS_MODULE,
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	.attr		= p4clockmod_attr,
 };
 

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *	Routines having to do with the 'struct sk_buff' memory handlers.
  *
@@ -487,7 +490,7 @@ static void skb_release_data(struct sk_buff *skb)
 			       &skb_shinfo(skb)->dataref)) {
 		if (skb_shinfo(skb)->nr_frags) {
 			int i;
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 			int nr_frags = skb_shinfo(skb)->nr_frags;
 
 			if(nr_frags > 1) {
@@ -509,10 +512,10 @@ static void skb_release_data(struct sk_buff *skb)
 				for (i = 0; i < nr_frags; i++)
 					skb_frag_unref(skb, i);
 			}
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 			for (i = 0; i < skb_shinfo(skb)->nr_frags; i++)
 				skb_frag_unref(skb, i);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 		}
 
 		/*
@@ -531,14 +534,14 @@ static void skb_release_data(struct sk_buff *skb)
 			skb_drop_fraglist(skb);
 
 		skb_free_head(skb);
-#if defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_NET_SKB_RECYCLE)
+#if defined(MY_ABC_HERE) && defined(CONFIG_NET_SKB_RECYCLE)
 		/* Workaround for the cases when recycle callback was not called */
 		if (skb->skb_recycle) {
 			/* Sign that skb is not available for recycle */
 			skb->hw_cookie |= BIT(0);
 			skb->skb_recycle(skb);
 		}
-#endif /* CONFIG_SYNO_LSP_ARMADA && CONFIG_NET_SKB_RECYCLE */
+#endif /* MY_ABC_HERE && CONFIG_NET_SKB_RECYCLE */
 	}
 }
 
@@ -576,11 +579,11 @@ static void kfree_skbmem(struct sk_buff *skb)
 	}
 }
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 void skb_release_head_state(struct sk_buff *skb)
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 static void skb_release_head_state(struct sk_buff *skb)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 {
 	skb_dst_drop(skb);
 #ifdef CONFIG_XFRM
@@ -604,9 +607,9 @@ static void skb_release_head_state(struct sk_buff *skb)
 #endif
 #endif
 }
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 EXPORT_SYMBOL(skb_release_head_state);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 /* Free everything but the sk_buff shell. */
 static void skb_release_all(struct sk_buff *skb)
@@ -627,10 +630,10 @@ static void skb_release_all(struct sk_buff *skb)
 
 void __kfree_skb(struct sk_buff *skb)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_NET_SKB_RECYCLE)
+#if defined(MY_ABC_HERE) && defined(CONFIG_NET_SKB_RECYCLE)
 	if (skb->skb_recycle && !skb->skb_recycle(skb))
 		return;
-#endif /* CONFIG_SYNO_LSP_ARMADA && CONFIG_NET_SKB_RECYCLE */
+#endif /* MY_ABC_HERE && CONFIG_NET_SKB_RECYCLE */
 	skb_release_all(skb);
 	kfree_skbmem(skb);
 }
@@ -708,7 +711,7 @@ void consume_skb(struct sk_buff *skb)
 }
 EXPORT_SYMBOL(consume_skb);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_NET_SKB_RECYCLE)
+#if defined(MY_ABC_HERE) && defined(CONFIG_NET_SKB_RECYCLE)
 /**
  *	skb_recycle - clean up an skb for reuse
  *	@skb: buffer
@@ -755,7 +758,7 @@ bool skb_recycle_check(struct sk_buff *skb, int skb_size)
 	return true;
 }
 EXPORT_SYMBOL(skb_recycle_check);
-#endif /* CONFIG_SYNO_LSP_ARMADA && CONFIG_NET_SKB_RECYCLE */
+#endif /* MY_ABC_HERE && CONFIG_NET_SKB_RECYCLE */
 
 static void __copy_skb_header(struct sk_buff *new, const struct sk_buff *old)
 {
@@ -825,10 +828,10 @@ static struct sk_buff *__skb_clone(struct sk_buff *n, struct sk_buff *skb)
 	n->cloned = 1;
 	n->nohdr = 0;
 	n->destructor = NULL;
-#if defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_NET_SKB_RECYCLE)
+#if defined(MY_ABC_HERE) && defined(CONFIG_NET_SKB_RECYCLE)
 	n->skb_recycle = NULL;
 	n->hw_cookie = 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA && CONFIG_NET_SKB_RECYCLE */
+#endif /* MY_ABC_HERE && CONFIG_NET_SKB_RECYCLE */
 
 	C(tail);
 	C(end);
@@ -3486,14 +3489,14 @@ EXPORT_SYMBOL(__skb_warn_lro_forwarding);
 void kfree_skb_partial(struct sk_buff *skb, bool head_stolen)
 {
 	if (head_stolen) {
-#if defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_NET_SKB_RECYCLE)
+#if defined(MY_ABC_HERE) && defined(CONFIG_NET_SKB_RECYCLE)
 		/* Workaround for the cases when recycle callback was not called */
 		if (skb->skb_recycle) {
 			/* Sign that skb is not available for recycle */
 			skb->hw_cookie |= BIT(0);
 			skb->skb_recycle(skb);
 		}
-#endif /* CONFIG_SYNO_LSP_ARMADA && CONFIG_NET_SKB_RECYCLE */
+#endif /* MY_ABC_HERE && CONFIG_NET_SKB_RECYCLE */
 
 		skb_release_head_state(skb);
 		kmem_cache_free(skbuff_head_cache, skb);

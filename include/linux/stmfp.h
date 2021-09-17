@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
   Header file for stmfp platform data
   Copyright (C) 2009  STMicroelectronics Ltd
@@ -61,9 +64,9 @@ struct plat_fpif_data {
 	struct stmfp_mdio_bus_data *mdio_bus_data;
 	int buf_thr;
 	int q_idx;
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	const char *mac_addr;
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 };
 
 struct stmfp_of_data {

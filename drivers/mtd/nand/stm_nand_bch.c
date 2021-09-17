@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  ------------------------------------------------------------------------
  *  stm_nand_bch.c Support for STMicroelectronics NANDi BCH Controller
@@ -2532,7 +2535,7 @@ static void bch_calc_timing_registers(struct nand_timing_spec *spec,
 		       (n_telqv & 0xff) << 24);
 }
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 static void nandi_clk_enable(struct nandi_controller *nandi, bool enable)
 {
 	if (nandi->emi_clk)
@@ -2543,7 +2546,7 @@ static void nandi_clk_enable(struct nandi_controller *nandi, bool enable)
 		enable ? clk_prepare_enable(nandi->bch_clk) :
 			clk_disable_unprepare(nandi->bch_clk);
 }
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 static void nandi_clk_enable(struct nandi_controller *nandi)
 {
 	if (nandi->emi_clk)
@@ -2559,7 +2562,7 @@ static void nandi_clk_disable(struct nandi_controller *nandi)
 	if (nandi->bch_clk)
 		clk_disable_unprepare(nandi->bch_clk);
 }
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 static struct clk *nandi_clk_setup(struct nandi_controller *nandi,
 	char *clkn)
@@ -3092,16 +3095,16 @@ static int stm_nand_bch_remove(struct platform_device *pdev)
 	nand_release(&nandi->info.mtd);
 	nandi_exit_controller(nandi);
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	nandi_clk_enable(nandi, false);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	nandi_clk_disable(nandi);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	return 0;
 }
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_PM_SLEEP
 static int stm_nand_bch_suspend(struct device *dev)
 {
@@ -3131,7 +3134,7 @@ SIMPLE_DEV_PM_OPS(stm_nand_bch_pm_ops, stm_nand_bch_suspend,
 #else
 #define STM_NAND_BCH_PM_OPS	NULL
 #endif
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 #ifdef CONFIG_PM
 static int stm_nand_bch_suspend(struct device *dev)
 {
@@ -3160,7 +3163,7 @@ SIMPLE_DEV_PM_OPS(stm_nand_bch_pm_ops, stm_nand_bch_suspend,
 #else
 #define STM_NAND_BCH_PM_OPS	NULL
 #endif
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 #ifdef CONFIG_OF
 static struct of_device_id nand_bch_match[] = {

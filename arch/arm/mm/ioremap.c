@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/arch/arm/mm/ioremap.c
  *
@@ -437,14 +440,14 @@ void __arm_iounmap(volatile void __iomem *io_addr)
 EXPORT_SYMBOL(__arm_iounmap);
 
 #ifdef CONFIG_PCI
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static int pci_ioremap_mem_type = MT_DEVICE;
 
 void pci_ioremap_set_mem_type(int mem_type)
 {
 	pci_ioremap_mem_type = mem_type;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 int pci_ioremap_io(unsigned int offset, phys_addr_t phys_addr)
 {
@@ -453,11 +456,11 @@ int pci_ioremap_io(unsigned int offset, phys_addr_t phys_addr)
 	return ioremap_page_range(PCI_IO_VIRT_BASE + offset,
 				  PCI_IO_VIRT_BASE + offset + SZ_64K,
 				  phys_addr,
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 				  __pgprot(get_mem_type(pci_ioremap_mem_type)->prot_pte));
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 				  __pgprot(get_mem_type(MT_DEVICE)->prot_pte));
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 }
 EXPORT_SYMBOL_GPL(pci_ioremap_io);
 #endif

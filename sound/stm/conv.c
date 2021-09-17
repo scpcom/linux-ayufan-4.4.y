@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *   STMicroelectronics System-on-Chips' generic converters infrastructure
  *
@@ -91,11 +94,11 @@ struct snd_stm_conv_source {
 };
 
 static LIST_HEAD(snd_stm_conv_sources); /* Sources list */
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 spinlock_t snd_stm_conv_lock;
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 static DEFINE_MUTEX(snd_stm_conv_mutex); /* Big Converters Structure Lock ;-) */
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 /*
  * Converter control interface implementation
@@ -481,11 +484,11 @@ static int snd_stm_conv_ctl_route_info(struct snd_kcontrol *kcontrol,
 	uinfo->type = SNDRV_CTL_ELEM_TYPE_ENUMERATED;
 	uinfo->count = 1;
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	spin_lock(&snd_stm_conv_lock);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	mutex_lock(&snd_stm_conv_mutex);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	list_for_each_entry(group, &source->groups, list) {
 		if (list_is_last(&group->list, &source->groups) &&
@@ -499,11 +502,11 @@ static int snd_stm_conv_ctl_route_info(struct snd_kcontrol *kcontrol,
 
 	uinfo->value.enumerated.items = item;
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	spin_unlock(&snd_stm_conv_lock);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	mutex_unlock(&snd_stm_conv_mutex);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	return 0;
 }
@@ -521,11 +524,11 @@ static int snd_stm_conv_ctl_route_get(struct snd_kcontrol *kcontrol,
 	BUG_ON(!source);
 	BUG_ON(!snd_stm_magic_valid(source));
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	spin_lock(&snd_stm_conv_lock);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	mutex_lock(&snd_stm_conv_mutex);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	ucontrol->value.enumerated.item[0] = 0; /* First is default ;-) */
 
@@ -537,11 +540,11 @@ static int snd_stm_conv_ctl_route_get(struct snd_kcontrol *kcontrol,
 		item++;
 	};
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	spin_unlock(&snd_stm_conv_lock);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	mutex_unlock(&snd_stm_conv_mutex);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	return 0;
 }
@@ -560,11 +563,11 @@ static int snd_stm_conv_ctl_route_put(struct snd_kcontrol *kcontrol,
 	BUG_ON(!source);
 	BUG_ON(!snd_stm_magic_valid(source));
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	spin_lock(&snd_stm_conv_lock);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	mutex_lock(&snd_stm_conv_mutex);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	list_for_each_entry(group, &source->groups, list) {
 		if (item == ucontrol->value.enumerated.item[0]) {
@@ -577,11 +580,11 @@ static int snd_stm_conv_ctl_route_put(struct snd_kcontrol *kcontrol,
 		item++;
 	}
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	spin_unlock(&snd_stm_conv_lock);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	mutex_unlock(&snd_stm_conv_mutex);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	return changed;
 }
@@ -644,10 +647,10 @@ static struct snd_stm_conv_source *snd_stm_conv_get_source(
 	BUG_ON(!bus);
 	BUG_ON(!bus_id);
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 	mutex_lock(&snd_stm_conv_mutex);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	list_for_each_entry(source, &snd_stm_conv_sources, list)
 		if ((bus == source->bus) && (bus_id == source->bus_id))
@@ -669,10 +672,10 @@ static struct snd_stm_conv_source *snd_stm_conv_get_source(
 	list_add_tail(&source->list, &snd_stm_conv_sources);
 
 done:
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 	mutex_unlock(&snd_stm_conv_mutex);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	return source;
 }
@@ -708,11 +711,11 @@ struct snd_stm_conv_source *snd_stm_conv_register_source(struct bus_type *bus,
 	source->card = card;
 	source->card_device = card_device;
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	spin_lock(&snd_stm_conv_lock);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	mutex_lock(&snd_stm_conv_mutex);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	/* Add route ALSA control if needed */
 
@@ -738,11 +741,11 @@ struct snd_stm_conv_source *snd_stm_conv_register_source(struct bus_type *bus,
 		}
 	}
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	spin_unlock(&snd_stm_conv_lock);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	mutex_unlock(&snd_stm_conv_mutex);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	return source;
 }
@@ -756,11 +759,11 @@ int snd_stm_conv_unregister_source(struct snd_stm_conv_source *source)
 	BUG_ON(!source);
 	BUG_ON(!snd_stm_magic_valid(source));
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	spin_lock(&snd_stm_conv_lock);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	mutex_lock(&snd_stm_conv_mutex);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	list_del(&source->list);
 	source->channels_num = 0;
@@ -771,11 +774,11 @@ int snd_stm_conv_unregister_source(struct snd_stm_conv_source *source)
 		kfree(source);
 	}
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	spin_unlock(&snd_stm_conv_lock);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	mutex_unlock(&snd_stm_conv_mutex);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	return 0;
 }
@@ -796,11 +799,11 @@ static struct snd_stm_conv_group *snd_stm_conv_get_group(
 	/* Random memory fuse */
 	BUG_ON(strlen(name) > 1024);
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	spin_lock(&snd_stm_conv_lock);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	mutex_lock(&snd_stm_conv_mutex);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	list_for_each_entry(group, &source->groups, list)
 		if (strcmp(name, group->name) == 0)
@@ -834,11 +837,11 @@ static struct snd_stm_conv_group *snd_stm_conv_get_group(
 		snd_stm_conv_ctl_route_add(source);
 
 done:
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	spin_unlock(&snd_stm_conv_lock);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	mutex_unlock(&snd_stm_conv_mutex);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	return group;
 }
@@ -955,20 +958,20 @@ struct snd_stm_conv_converter *snd_stm_conv_register_converter(
 		snd_stm_printe("WARNING! Adding a converter to an active "
 				"group!\n");
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	spin_lock(&snd_stm_conv_lock);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	mutex_lock(&snd_stm_conv_mutex);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	converter->group = group;
 	list_add_tail(&converter->list, &group->converters);
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	spin_unlock(&snd_stm_conv_lock);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	mutex_unlock(&snd_stm_conv_mutex);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	/* Add mute ALSA control if muting is supported and source is known */
 
@@ -1010,11 +1013,11 @@ int snd_stm_conv_unregister_converter(struct snd_stm_conv_converter *converter)
 	BUG_ON(!group);
 	BUG_ON(!snd_stm_magic_valid(group));
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	spin_lock(&snd_stm_conv_lock);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	mutex_lock(&snd_stm_conv_mutex);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	list_del(&converter->list);
 
@@ -1027,11 +1030,11 @@ int snd_stm_conv_unregister_converter(struct snd_stm_conv_converter *converter)
 	if (list_empty(&group->converters))
 		snd_stm_conv_remove_group(group);
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	spin_unlock(&snd_stm_conv_lock);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	mutex_unlock(&snd_stm_conv_mutex);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	return 0;
 }
@@ -1058,19 +1061,19 @@ struct snd_stm_conv_group *snd_stm_conv_request_group(
 	BUG_ON(!snd_stm_magic_valid(source));
 	BUG_ON(source->group_active);
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	spin_lock(&snd_stm_conv_lock);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	mutex_lock(&snd_stm_conv_mutex);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	source->group_active = source->group_selected;
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	spin_unlock(&snd_stm_conv_lock);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	mutex_unlock(&snd_stm_conv_mutex);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	return source->group_active;
 }
@@ -1086,19 +1089,19 @@ int snd_stm_conv_release_group(struct snd_stm_conv_group *group)
 	BUG_ON(!snd_stm_magic_valid(group->source));
 	BUG_ON(group != group->source->group_active);
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	spin_lock(&snd_stm_conv_lock);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	mutex_lock(&snd_stm_conv_mutex);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	group->source->group_active = NULL;
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	spin_unlock(&snd_stm_conv_lock);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	mutex_unlock(&snd_stm_conv_mutex);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	return 0;
 }

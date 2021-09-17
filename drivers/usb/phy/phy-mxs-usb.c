@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright 2012 Freescale Semiconductor, Inc.
  * Copyright (C) 2012 Marek Vasut <marex@denx.de>
@@ -95,46 +98,46 @@ static int mxs_phy_suspend(struct usb_phy *x, int suspend)
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+#if defined(MY_DEF_HERE)
 static int mxs_phy_on_connect(struct usb_phy *phy, struct usb_device *udev)
-#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#else /* MY_DEF_HERE */
 static int mxs_phy_on_connect(struct usb_phy *phy,
 		enum usb_device_speed speed)
-#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#endif /* MY_DEF_HERE */
 {
 	dev_dbg(phy->dev, "%s speed device has connected\n",
-#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+#if defined(MY_DEF_HERE)
 		(udev->speed == USB_SPEED_HIGH) ? "high" : "non-high");
 
 	if (udev->speed == USB_SPEED_HIGH)
-#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#else /* MY_DEF_HERE */
 		(speed == USB_SPEED_HIGH) ? "high" : "non-high");
 
 	if (speed == USB_SPEED_HIGH)
-#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#endif /* MY_DEF_HERE */
 		writel(BM_USBPHY_CTRL_ENHOSTDISCONDETECT,
 		       phy->io_priv + HW_USBPHY_CTRL_SET);
 
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+#if defined(MY_DEF_HERE)
 static int mxs_phy_on_disconnect(struct usb_phy *phy, struct usb_device *udev)
-#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#else /* MY_DEF_HERE */
 static int mxs_phy_on_disconnect(struct usb_phy *phy,
 		enum usb_device_speed speed)
-#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#endif /* MY_DEF_HERE */
 {
 	dev_dbg(phy->dev, "%s speed device has disconnected\n",
-#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+#if defined(MY_DEF_HERE)
 		(udev->speed == USB_SPEED_HIGH) ? "high" : "non-high");
 
 	if (udev->speed == USB_SPEED_HIGH)
-#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#else /* MY_DEF_HERE */
 		(speed == USB_SPEED_HIGH) ? "high" : "non-high");
 
 	if (speed == USB_SPEED_HIGH)
-#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#endif /* MY_DEF_HERE */
 		writel(BM_USBPHY_CTRL_ENHOSTDISCONDETECT,
 		       phy->io_priv + HW_USBPHY_CTRL_CLR);
 

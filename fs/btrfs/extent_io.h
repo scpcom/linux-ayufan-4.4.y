@@ -1,10 +1,13 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef __EXTENTIO__
 #define __EXTENTIO__
 
 #include <linux/rbtree.h>
-#if defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE)
 #include <linux/pagemap.h>
-#endif /* CONFIG_SYNO_ALPINE */
+#endif /* MY_DEF_HERE */
 
 /* bits for the extent state */
 #define EXTENT_DIRTY 1
@@ -48,9 +51,9 @@
 #define EXTENT_BUFFER_DUMMY 9
 #define EXTENT_BUFFER_IN_TREE 10
 #define EXTENT_BUFFER_WRITE_ERR 11    /* write IO error */
-#ifdef CONFIG_SYNO_BTRFS_FIX_PAGE_LEAK_WHILE_CLONE_EXTENT_BUFFER
+#ifdef MY_ABC_HERE
 #define EXTENT_BUFFER_CLONE 63
-#endif /* CONFIG_SYNO_BTRFS_FIX_PAGE_LEAK_WHILE_CLONE_EXTENT_BUFFER */
+#endif /* MY_ABC_HERE */
 
 /* these are flags for extent_clear_unlock_delalloc */
 #define PAGE_UNLOCK		(1 << 0)

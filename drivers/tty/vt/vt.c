@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Copyright (C) 1991, 1992  Linus Torvalds
  */
@@ -2431,12 +2434,12 @@ int vt_kmsg_redirect(int new)
  * The console must be locked when we get here.
  */
 
-#ifdef CONFIG_SYNO_X86_TTY_CONSOLE_OUTPUT
+#ifdef MY_DEF_HERE
 /* 
  * virtual terminal is not actvated in our implementation,
  * so the related functions is not needed.
  */
-#else /* CONFIG_SYNO_X86_TTY_CONSOLE_OUTPUT */
+#else /* MY_DEF_HERE */
 static void vt_console_print(struct console *co, const char *b, unsigned count)
 {
 	struct vc_data *vc = vc_cons[fg_console].d;
@@ -2543,7 +2546,7 @@ static struct console vt_console_driver = {
 	.flags		= CON_PRINTBUFFER,
 	.index		= -1,
 };
-#endif /* CONFIG_SYNO_X86_TTY_CONSOLE_OUTPUT */
+#endif /* MY_DEF_HERE */
 #endif
 
 /*
@@ -2916,15 +2919,15 @@ static int __init con_init(void)
 
 	console_unlock();
 
-#ifdef CONFIG_SYNO_X86_TTY_CONSOLE_OUTPUT
+#ifdef MY_DEF_HERE
 /*
  * virtual terminal is not actvated in our implementation,
  * so the related functions is not needed.
  */
-#else /* CONFIG_SYNO_X86_TTY_CONSOLE_OUTPUT */
+#else /* MY_DEF_HERE */
 #ifdef CONFIG_VT_CONSOLE
 	register_console(&vt_console_driver);
-#endif /* CONFIG_SYNO_X86_TTY_CONSOLE_OUTPUT */
+#endif /* MY_DEF_HERE */
 #endif
 	return 0;
 }

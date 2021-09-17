@@ -1,18 +1,21 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/kernel.h>
 #include <linux/of_pci.h>
 #include <linux/of_irq.h>
 #include <linux/export.h>
 #include <asm/prom.h>
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 /**
  * of_irq_parse_pci - Resolve the interrupt for a PCI device
  */
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 /**
  * of_irq_map_pci - Resolve the interrupt for a PCI device
  */
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 /**
  * of_irq_parse_pci - Resolve the interrupt for a PCI device
  * @pdev:       the device whose interrupt is to be resolved
@@ -24,11 +27,11 @@
  * PCI tree until an device-node is found, at which point it will finish
  * resolving using the OF tree walking.
  */
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 int of_irq_parse_pci(const struct pci_dev *pdev, struct of_phandle_args *out_irq)
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 int of_irq_map_pci(const struct pci_dev *pdev, struct of_irq *out_irq)
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 {
 	struct device_node *dn, *ppnode;
 	struct pci_dev *ppdev;
@@ -43,11 +46,11 @@ int of_irq_map_pci(const struct pci_dev *pdev, struct of_irq *out_irq)
 	 */
 	dn = pci_device_to_OF_node(pdev);
 	if (dn) {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		rc = of_irq_parse_one(dn, 0, out_irq);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		rc = of_irq_map_one(dn, 0, out_irq);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 		if (!rc)
 			return rc;
 	}
@@ -102,7 +105,7 @@ int of_irq_map_pci(const struct pci_dev *pdev, struct of_irq *out_irq)
 		pdev = ppdev;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	out_irq->np = ppnode;
 	out_irq->args_count = 1;
 	out_irq->args[0] = lspec;
@@ -110,15 +113,15 @@ int of_irq_map_pci(const struct pci_dev *pdev, struct of_irq *out_irq)
 	laddr[0] = cpu_to_be32((pdev->bus->number << 16) | (pdev->devfn << 8));
 	laddr[1] = laddr[2] = cpu_to_be32(0);
 	return of_irq_parse_raw(laddr, out_irq);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	lspec_be = cpu_to_be32(lspec);
 	laddr[0] = cpu_to_be32((pdev->bus->number << 16) | (pdev->devfn << 8));
 	laddr[1]  = laddr[2] = cpu_to_be32(0);
 	return of_irq_map_raw(ppnode, &lspec_be, 1, laddr, out_irq);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 }
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 EXPORT_SYMBOL_GPL(of_irq_parse_pci);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 EXPORT_SYMBOL_GPL(of_irq_map_pci);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */

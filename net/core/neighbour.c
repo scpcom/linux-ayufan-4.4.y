@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *	Generic address resolution entity
  *
@@ -2761,12 +2764,12 @@ void neigh_app_ns(struct neighbour *n)
 EXPORT_SYMBOL(neigh_app_ns);
 #endif /* CONFIG_ARPD */
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 int hh_output_relaxed __read_mostly = 0;
-#if defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE)
 EXPORT_SYMBOL(hh_output_relaxed);
-#endif /* CONFIG_SYNO_ALPINE */
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
+#endif /* MY_DEF_HERE */
 
 #ifdef CONFIG_SYSCTL
 static int zero;

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *   STMicroelectronics audio DAC buffer (amplifier) driver
  *
@@ -232,7 +235,7 @@ static int dac_buffer_parse_dt(struct i2c_client *client,
 	return 0;
 }
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_PM_SLEEP
 static int dac_buffer_suspend(struct device *dev)
 {
@@ -270,7 +273,7 @@ static SIMPLE_DEV_PM_OPS(dac_buff_pm_ops,
 #else
 #define DAC_BUFF_PM_OPS NULL
 #endif
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 static int dac_buffer_probe(struct i2c_client *client,
 		const struct i2c_device_id *id)
@@ -329,12 +332,12 @@ static int dac_buffer_probe(struct i2c_client *client,
 
 	dac_buffer_setting(conv);
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	/* store context in drivers */
 	i2c_set_clientdata(client, conv);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	dev_info(&client->dev, "Audio buffer st6440 probed\n");
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	return 0;
 }
@@ -347,18 +350,18 @@ static int dac_buffer_remove(struct i2c_client *client)
 	BUG_ON(!snd_stm_magic_valid(conv));
 
 	/* Put the buffer into mute */
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	dac_buffer_set_muted(1, conv);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	dac_buffer_set_muted(AUDIO_OUT_MUTED,  conv->i2c_client);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	/*put the buffer into standby */
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	dac_buffer_set_enabled(0, conv);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	dac_buffer_set_enabled(AUDIO_OUT_OFF, conv->i2c_client);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	snd_stm_magic_clear(conv);
 
@@ -376,18 +379,18 @@ static struct i2c_driver dac_buffer_driver = {
 	.driver = {
 		.name = "snd_dac_buffer",
 		.owner = THIS_MODULE,
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 		.pm = DAC_BUFF_PM_OPS,
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	},
 	.probe = dac_buffer_probe,
 	.remove = dac_buffer_remove,
 	.id_table = dac_buffer_i2c_ids,
 };
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 module_i2c_driver(dac_buffer_driver);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 static int dac_buffer_init(void)
 {
 	return i2c_add_driver(&dac_buffer_driver);
@@ -399,7 +402,7 @@ static void dac_buffer_exit(void)
 	i2c_del_driver(&dac_buffer_driver);
 }
 module_exit(dac_buffer_exit);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 MODULE_AUTHOR("Guillaume Kouadio Carry <guillaume.kouadio-carry@st.com>");
 MODULE_DESCRIPTION("STMicroelectronics st6440 audio buffer driver");

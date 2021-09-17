@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *   (Tentative) USB Audio Driver for ALSA
  *
@@ -894,7 +897,7 @@ static void volume_control_quirks(struct usb_mixer_elem_info *cval,
 		}
 		break;
 
-#ifdef CONFIG_SYNO_STATIC_HIDDEV_MINOR
+#ifdef MY_ABC_HERE
 	/* There is one case that cval->max = -1 , cval->min = -9473 , so -1-(-9473) = 9472
 	 * 9472 is larger than 384 , it causes warn on in function build_feature_ctl()
 	 * So we add a quirk of it
@@ -904,7 +907,7 @@ static void volume_control_quirks(struct usb_mixer_elem_info *cval,
 			cval->res = 37;
 		}
 		break;
-#endif /* CONFIG_SYNO_STATIC_HIDDEV_MINOR */
+#endif /* MY_ABC_HERE */
 	}
 }
 

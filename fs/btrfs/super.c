@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2007 Oracle.  All rights reserved.
  *
@@ -44,9 +47,9 @@
 #include <linux/btrfs.h>
 #include "delayed-inode.h"
 #include "ctree.h"
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #include "csum.h"
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 #include "disk-io.h"
 #include "transaction.h"
 #include "btrfs_inode.h"
@@ -68,9 +71,9 @@
 
 static const struct super_operations btrfs_super_ops;
 static struct file_system_type btrfs_fs_type;
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 static unsigned long btrfs_csum_initialized;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 static int btrfs_remount(struct super_block *sb, int *flags, char *data);
 
@@ -336,10 +339,10 @@ enum {
 	Opt_commit_interval, Opt_barrier, Opt_nodefrag, Opt_nodiscard,
 	Opt_noenospc_debug, Opt_noflushoncommit, Opt_acl, Opt_datacow,
 	Opt_datasum, Opt_treelog, Opt_noinode_cache,
-#ifdef CONFIG_SYNO_BTRFS_FLUSHONCOMMIT_THRESHOLD
+#ifdef MY_ABC_HERE
 	Opt_flushoncommit_threshold,
 #endif
-#ifdef CONFIG_SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+#ifdef MY_ABC_HERE
 	Opt_no_block_group_hint,
 #endif
 	Opt_err,
@@ -372,7 +375,7 @@ static match_table_t tokens = {
 	{Opt_treelog, "treelog"},
 	{Opt_flushoncommit, "flushoncommit"},
 	{Opt_noflushoncommit, "noflushoncommit"},
-#ifdef CONFIG_SYNO_BTRFS_FLUSHONCOMMIT_THRESHOLD
+#ifdef MY_ABC_HERE
 	{Opt_flushoncommit_threshold, "flushoncommit_threshold=%d"},
 #endif
 	{Opt_ratio, "metadata_ratio=%d"},
@@ -397,7 +400,7 @@ static match_table_t tokens = {
 	{Opt_rescan_uuid_tree, "rescan_uuid_tree"},
 	{Opt_fatal_errors, "fatal_errors=%s"},
 	{Opt_commit_interval, "commit=%d"},
-#ifdef CONFIG_SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+#ifdef MY_ABC_HERE
 	{Opt_no_block_group_hint, "no_block_group_hint"},
 #endif
 	{Opt_err, NULL},
@@ -619,7 +622,7 @@ int btrfs_parse_options(struct btrfs_root *root, char *options)
 			btrfs_clear_and_info(root, NOTREELOG,
 					     "enabling tree log");
 			break;
-#ifdef CONFIG_SYNO_BTRFS_FLUSHONCOMMIT_THRESHOLD
+#ifdef MY_ABC_HERE
 		case Opt_flushoncommit_threshold:
 			ret = match_int(&args[0], &intarg);
 			if (ret) {
@@ -774,7 +777,7 @@ int btrfs_parse_options(struct btrfs_root *root, char *options)
 				info->commit_interval = BTRFS_DEFAULT_COMMIT_INTERVAL;
 			}
 			break;
-#ifdef CONFIG_SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+#ifdef MY_ABC_HERE
 		case Opt_no_block_group_hint:
 			info->no_block_group_hint = 1;
 			break;
@@ -967,7 +970,7 @@ setup_root:
 	return dentry;
 }
 
-#ifdef CONFIG_SYNO_BTRFS_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 static void syno_load_sb_archive_ver(struct super_block *sb, struct inode *inode)
 {
 	struct syno_xattr_archive_version value;
@@ -980,7 +983,7 @@ static void syno_load_sb_archive_ver(struct super_block *sb, struct inode *inode
 		sb->s_archive_version = 0;
 	}
 }
-#endif /* CONFIG_SYNO_BTRFS_ARCHIVE_VERSION */
+#endif /* MY_ABC_HERE */
 
 static int btrfs_fill_super(struct super_block *sb,
 			    struct btrfs_fs_devices *fs_devices,
@@ -1022,7 +1025,7 @@ static int btrfs_fill_super(struct super_block *sb,
 		err = -ENOMEM;
 		goto fail_close;
 	}
-#ifdef CONFIG_SYNO_BTRFS_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	syno_load_sb_archive_ver(sb, inode);
 #endif
 
@@ -1135,7 +1138,7 @@ static int btrfs_show_options(struct seq_file *seq, struct dentry *dentry)
 		seq_printf(seq, ",check_int_print_mask=%d",
 				info->check_integrity_print_mask);
 #endif
-#ifdef CONFIG_SYNO_BTRFS_FLUSHONCOMMIT_THRESHOLD
+#ifdef MY_ABC_HERE
 	if (info->flushoncommit_threshold)
 		seq_printf(seq, ",flushoncommit_threshold=%d",
 				info->flushoncommit_threshold);
@@ -1147,7 +1150,7 @@ static int btrfs_show_options(struct seq_file *seq, struct dentry *dentry)
 		seq_puts(seq, ",fatal_errors=panic");
 	if (info->commit_interval != BTRFS_DEFAULT_COMMIT_INTERVAL)
 		seq_printf(seq, ",commit=%d", info->commit_interval);
-#ifdef CONFIG_SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+#ifdef MY_ABC_HERE
 	if (info->no_block_group_hint)
 		seq_puts(seq, ",no_block_group_hint");
 #endif
@@ -1307,7 +1310,7 @@ static struct dentry *btrfs_mount(struct file_system_type *fs_type, int flags,
 	if (!(flags & MS_RDONLY))
 		mode |= FMODE_WRITE;
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	/* Initialize the data structures needed for
 	 * Btrfs checksum calculation- this is only
 	 * performed once and is freed on module exit
@@ -1318,7 +1321,7 @@ static struct dentry *btrfs_mount(struct file_system_type *fs_type, int flags,
 		if (error)
 			return ERR_PTR(error);
 	}
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 	error = btrfs_parse_early_options(data, mode, fs_type,
 					  &subvol_name, &subvol_objectid,
@@ -1759,7 +1762,7 @@ static int btrfs_statfs(struct dentry *dentry, struct kstatfs *buf)
 	int bits = dentry->d_sb->s_blocksize_bits;
 	__be32 *fsid = (__be32 *)fs_info->fsid;
 	int ret;
-#ifdef CONFIG_SYNO_BTRFS_METADATA_RESERVE
+#ifdef MY_ABC_HERE
 	u64 total_metadata = 0;
 #endif
 
@@ -1772,7 +1775,7 @@ static int btrfs_statfs(struct dentry *dentry, struct kstatfs *buf)
 			total_free_data -=
 				btrfs_account_ro_block_groups_free_space(found);
 		}
-#ifdef CONFIG_SYNO_BTRFS_METADATA_RESERVE
+#ifdef MY_ABC_HERE
 		if (found->flags & BTRFS_BLOCK_GROUP_METADATA) {
 			total_metadata += found->disk_total;
 		}
@@ -1794,7 +1797,7 @@ static int btrfs_statfs(struct dentry *dentry, struct kstatfs *buf)
 		return ret;
 	}
 	buf->f_bavail += total_free_data;
-#ifdef CONFIG_SYNO_BTRFS_METADATA_RESERVE
+#ifdef MY_ABC_HERE
 	if (fs_info->metadata_ratio) {
 		u64 reserved_for_metadata = btrfs_super_total_bytes(disk_super);
 
@@ -1940,7 +1943,7 @@ static int btrfs_show_devname(struct seq_file *m, struct dentry *root)
 	return 0;
 }
 
-#ifdef CONFIG_SYNO_BTRFS_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 static int btrfs_syno_set_sb_archive_ver(struct super_block *sb, u32 archive_ver)
 {
 	struct dentry *dentry = sb->s_root;
@@ -1966,9 +1969,9 @@ static int btrfs_syno_get_sb_archive_ver(struct super_block *sb, u32 *version)
 	*version = sb->s_archive_version;
 	return 0;
 }
-#endif /* CONFIG_SYNO_BTRFS_ARCHIVE_VERSION */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_BTRFS_FREE_EXTENT_MAPS
+#ifdef MY_ABC_HERE
 static int btrfs_nr_cached_objects(struct super_block *sb)
 {
 	return (int)atomic_read(&btrfs_sb(sb)->nr_extent_maps);
@@ -2056,11 +2059,11 @@ static void btrfs_free_cached_objects(struct super_block *sb, int nr_to_drop)
 #endif
 
 static const struct super_operations btrfs_super_ops = {
-#ifdef CONFIG_SYNO_BTRFS_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	.syno_set_sb_archive_ver = btrfs_syno_set_sb_archive_ver,
 	.syno_get_sb_archive_ver = btrfs_syno_get_sb_archive_ver,
 #endif
-#ifdef CONFIG_SYNO_BTRFS_FREE_EXTENT_MAPS
+#ifdef MY_ABC_HERE
 	.nr_cached_objects = btrfs_nr_cached_objects,
 	.free_cached_objects = btrfs_free_cached_objects,
 #endif
@@ -2250,9 +2253,9 @@ static void __exit exit_btrfs_fs(void)
 	extent_map_exit();
 	extent_io_exit();
 	btrfs_interface_exit();
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	btrfs_csum_exit();
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	unregister_filesystem(&btrfs_fs_type);
 	btrfs_exit_sysfs();
 	btrfs_cleanup_fs_uuids();

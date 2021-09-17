@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *   fs/cifs/file.c
  *
@@ -1786,7 +1789,7 @@ refind_writable:
 					&cifs_inode->openFileList);
 			spin_unlock(&cifs_file_list_lock);
 			cifsFileInfo_put(inv_file);
-#ifdef CONFIG_SYNO_CIFS_FIX_DOUBLE_FREE_INVALID_FILE
+#ifdef MY_ABC_HERE
 			inv_file = NULL;
 #endif
 			spin_lock(&cifs_file_list_lock);
@@ -1887,11 +1890,11 @@ retry:
 		pgoff_t next = 0, tofind;
 		struct page **pages;
 
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 		tofind = min((pgoff_t)((cifs_sb->wsize / PAGE_CACHE_SIZE) - 1),
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 		tofind = min((cifs_sb->wsize / PAGE_CACHE_SIZE) - 1,
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 				end - index) + 1;
 
 		wdata = cifs_writedata_alloc((unsigned int)tofind,
@@ -3180,11 +3183,11 @@ cifs_readpages_read_into_pages(struct TCP_Server_Info *server,
 	/* determine the eof that the server (probably) has */
 	eof = CIFS_I(rdata->mapping->host)->server_eof;
 	eof_index = eof ? (eof - 1) >> PAGE_CACHE_SHIFT : 0;
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 	cifs_dbg(FYI, "eof=%llu eof_index=%llu\n", eof, (unsigned long long)eof_index);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	cifs_dbg(FYI, "eof=%llu eof_index=%lu\n", eof, eof_index);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 	rdata->tailsz = PAGE_CACHE_SIZE;
 	for (i = 0; i < nr_pages; i++) {
@@ -3194,23 +3197,23 @@ cifs_readpages_read_into_pages(struct TCP_Server_Info *server,
 			/* enough data to fill the page */
 			iov.iov_base = kmap(page);
 			iov.iov_len = PAGE_CACHE_SIZE;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 			cifs_dbg(FYI, "%u: idx=%llu iov_base=%p iov_len=%zu\n",
 				 i, page->index, iov.iov_base, iov.iov_len);
-#else /* CONFIG_SYNO_ALPINE */
+#else /* MY_DEF_HERE */
 			cifs_dbg(FYI, "%u: idx=%lu iov_base=%p iov_len=%zu\n",
 				 i, page->index, iov.iov_base, iov.iov_len);
-#endif /* CONFIG_SYNO_ALPINE */
+#endif /* MY_DEF_HERE */
 			len -= PAGE_CACHE_SIZE;
 		} else if (len > 0) {
 			/* enough for partial page, fill and zero the rest */
 			iov.iov_base = kmap(page);
 			iov.iov_len = len;
-#ifdef CONFIG_SYNO_ALPINE
+#ifdef MY_DEF_HERE
 			cifs_dbg(FYI, "%u: idx=%llu iov_base=%p iov_len=%zu\n",
-#else /* CONFIG_SYNO_ALPINE */
+#else /* MY_DEF_HERE */
 			cifs_dbg(FYI, "%u: idx=%lu iov_base=%p iov_len=%zu\n",
-#endif /* CONFIG_SYNO_ALPINE */
+#endif /* MY_DEF_HERE */
 				 i, page->index, iov.iov_base, iov.iov_len);
 			memset(iov.iov_base + len,
 				'\0', PAGE_CACHE_SIZE - len);

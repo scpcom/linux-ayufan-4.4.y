@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * al_eth.c: AnnapurnaLabs Unified 1GbE and 10GbE ethernet driver header.
  *
@@ -305,9 +308,9 @@ struct al_eth_adapter {
 
 	bool			an_en;	/* run kr auto-negotiation */
 	bool			lt_en;	/* run kr link-training */
-#ifdef CONFIG_SYNO_ALPINE_ADJUST_RX_EQUAL
+#ifdef MY_DEF_HERE
 	bool			rx_eq_en;
-#endif /* CONFIG_SYNO_ALPINE_ADJUST_RX_EQUAL */
+#endif /* MY_DEF_HERE */
 
 	al_bool		sfp_detection_needed; /**< true if need to run sfp detection */
 	bool		auto_speed; /**< true if allowed to change SerDes speed configuration */

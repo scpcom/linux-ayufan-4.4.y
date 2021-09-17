@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  libata-core.c - helper library for ATA
  *
@@ -101,9 +104,9 @@ static void ata_dev_xfermask(struct ata_device *dev);
 static unsigned long ata_dev_blacklisted(const struct ata_device *dev);
 
 atomic_t ata_print_id = ATOMIC_INIT(0);
-#ifdef CONFIG_SYNO_ATA_AHCI_LED_SWITCH
+#ifdef MY_DEF_HERE
 EXPORT_SYMBOL(ata_print_id);
-#endif /* CONFIG_SYNO_ATA_AHCI_LED_SWITCH */
+#endif /* MY_DEF_HERE */
 
 struct ata_force_param {
 	const char	*name;
@@ -126,7 +129,7 @@ static int ata_force_tbl_size;
 
 static char ata_force_param_buf[PAGE_SIZE] __initdata;
 
-#if defined(CONFIG_SYNO_GPIO)
+#if defined(MY_ABC_HERE)
 #include <linux/syno_gpio.h>
 
 extern SYNO_GPIO syno_gpio;
@@ -335,13 +338,13 @@ int SYNO_CTRL_HDD_ACT_NOTIFY(int index)
 }
 EXPORT_SYMBOL(SYNO_CTRL_HDD_ACT_NOTIFY);
 
-#elif defined(CONFIG_SYNO_ATA_PWR_CTRL)
+#elif defined(MY_ABC_HERE)
 extern int SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER(void);
 extern int SYNO_CTRL_HDD_POWERON(int index, int value);
 extern int SYNO_CHECK_HDD_PRESENT(int index);
 #endif
 
-#ifndef CONFIG_SYNO_SATA_WCACHE_DISABLE
+#ifndef MY_ABC_HERE
 static int glob_match (const char *text, const char *pattern);
 #endif
 
@@ -1743,7 +1746,7 @@ static void ata_qc_complete_internal(struct ata_queued_cmd *qc)
 	complete(waiting);
 }
 
-#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 /**
  * Main for our gpio query. ata_exec_internal_sg don't concern
  * about qc_defer. But it is very important because some sata
@@ -1878,7 +1881,7 @@ unsigned syno_ata_exec_internal_gpio(struct ata_device *dev,
 
 	return err_mask;
 }
-#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
+#endif /* MY_ABC_HERE */
 /**
  *	ata_exec_internal_sg - execute libata internal command
  *	@dev: Device to which the command is sent
@@ -2093,9 +2096,9 @@ unsigned ata_exec_internal(struct ata_device *dev,
 {
 	struct scatterlist *psg = NULL, sg;
 	unsigned int n_elem = 0;
-#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	struct ata_eh_context *ehc = &dev->link->ap->link.eh_context;
-#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
+#endif /* MY_ABC_HERE */
 
 	if (dma_dir != DMA_NONE) {
 		WARN_ON(!buf);
@@ -2104,7 +2107,7 @@ unsigned ata_exec_internal(struct ata_device *dev,
 		n_elem++;
 	}
 
-#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	if (IS_SYNO_PMP_CMD(tf) &&
 		(!(ehc->i.action & ATA_EH_REVALIDATE)
 	   )) {
@@ -2127,7 +2130,7 @@ unsigned ata_exec_internal(struct ata_device *dev,
 		return syno_ata_exec_internal_gpio(dev, tf, timeout);
 	}
 	else
-#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
+#endif /* MY_ABC_HERE */
 	return ata_exec_internal_sg(dev, tf, cdb, dma_dir, psg, n_elem,
 				    timeout);
 }
@@ -2431,11 +2434,11 @@ retry:
 
 	*p_class = class;
 
-#ifdef CONFIG_SYNO_SATA_SSD_DETECT
+#ifdef MY_ABC_HERE
 	if (syno_ata_id_is_ssd(id)) {
 		dev->is_ssd = 1;
 	}
-#endif /* CONFIG_SYNO_SATA_SSD_DETECT */
+#endif /* MY_ABC_HERE */
 
 	return 0;
 
@@ -2535,7 +2538,7 @@ static int ata_dev_config_ncq(struct ata_device *dev,
 	return 0;
 }
 
-#ifdef CONFIG_SYNO_PMP_HORKAGE
+#ifdef MY_ABC_HERE
 static void syno_pmp_horkage(struct ata_port *ap, struct ata_device **dev) {
 	unsigned char model_num[ATA_ID_PROD_LEN + 1];
 
@@ -2550,7 +2553,7 @@ static void syno_pmp_horkage(struct ata_port *ap, struct ata_device **dev) {
 END:
 	return;
 }
-#endif /* CONFIG_SYNO_PMP_HORKAGE */
+#endif /* MY_ABC_HERE */
 
 /**
  *	ata_dev_configure - Configure the specified ATA/ATAPI device
@@ -2577,7 +2580,7 @@ int ata_dev_configure(struct ata_device *dev)
 	char fwrevbuf[ATA_ID_FW_REV_LEN+1];
 	char modelbuf[ATA_ID_PROD_LEN+1];
 	int rc;
-#ifdef CONFIG_SYNO_DISK_NCQ_COMPATIBILITY
+#ifdef MY_ABC_HERE
 	struct pci_dev *pdev = NULL;
 #endif
 
@@ -2591,7 +2594,7 @@ int ata_dev_configure(struct ata_device *dev)
 
 	/* set horkage */
 	dev->horkage |= ata_dev_blacklisted(dev);
-#if defined(CONFIG_SYNO_SATA_PM_DEVICE_GPIO) && defined(CONFIG_SYNO_HW_VERSION)
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
 	if(ap->nr_pmp_links) {
 		/*
 		 * DX510 has {ICRC, ABRT} problem under heavy loading IO,
@@ -2639,13 +2642,13 @@ int ata_dev_configure(struct ata_device *dev)
 				sata_set_spd(&ap->link);
 			}
 		}
-#ifdef CONFIG_SYNO_PMP_HORKAGE
+#ifdef MY_ABC_HERE
 		syno_pmp_horkage(ap, &dev);
-#endif /* CONFIG_SYNO_PMP_HORKAGE */
+#endif /* MY_ABC_HERE */
 	}
-#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO && CONFIG_SYNO_HW_VERSION */
+#endif /* MY_ABC_HERE && CONFIG_SYNO_HW_VERSION */
 
-#ifdef CONFIG_SYNO_HW_VERSION
+#ifdef MY_ABC_HERE
 	// We limit DS1815+ internal SiI3132 port to 1.5Gbps to avoid ata error
 	if (syno_is_hw_version(HW_DS1815p)) {
 		if(ap && (ap->print_id == 7 || ap->print_id == 8)) {
@@ -2730,7 +2733,7 @@ int ata_dev_configure(struct ata_device *dev)
 	ata_id_c_string(dev->id, modelbuf, ATA_ID_PROD,
 			sizeof(modelbuf));
 
-#ifdef CONFIG_SYNO_DISK_NCQ_COMPATIBILITY
+#ifdef MY_ABC_HERE
 	/* We disable ncq cmd of WD7500BPKX on 88SE9215 ports to avoid ata error
 	 * The ncq compatibility of WD5000BPKX on 88SE9215 is not tested.
 	 * However, it may have some problem, we disable it.
@@ -2855,7 +2858,7 @@ int ata_dev_configure(struct ata_device *dev)
 		}
 
 		dev->cdb_len = 16;
-#ifdef CONFIG_SYNO_SATA_WCACHE_DISABLE
+#ifdef MY_ABC_HERE
 		if ((dev->horkage & ATA_HORKAGE_NOWCACHE) &&
 			!(dev->flags & ATA_DFLAG_NO_WCACHE)) {
 			unsigned int err_mask;
@@ -2869,7 +2872,7 @@ int ata_dev_configure(struct ata_device *dev)
 					"failed to dsiable write cache "
 					"(err_mask=0x%x)\n", err_mask);
 		}
-#endif /* CONFIG_SYNO_SATA_WCACHE_DISABLE */
+#endif /* MY_ABC_HERE */
 	}
 
 	/* ATAPI-specific feature tests */
@@ -3201,11 +3204,11 @@ int ata_bus_probe(struct ata_port *ap)
  *	LOCKING:
  *	None.
  */
-#ifdef CONFIG_SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 void sata_print_link_status(struct ata_link *link)
-#else /* CONFIG_SYNO_DEBUG_FLAG */
+#else /* MY_ABC_HERE */
 static void sata_print_link_status(struct ata_link *link)
-#endif /* CONFIG_SYNO_DEBUG_FLAG */
+#endif /* MY_ABC_HERE */
 {
 	u32 sstatus, scontrol, tmp;
 
@@ -3388,19 +3391,19 @@ int sata_set_spd(struct ata_link *link)
 	if (!__sata_set_spd_needed(link, &scontrol))
 		return 0;
 
-#ifdef CONFIG_SYNO_SIL3132_PM_WORKAROUND
+#ifdef MY_ABC_HERE
 	/* Sil3132 PM doesn't have PHY-off(DET=4h) mode,
 	 * so use RESET(DET=1h) mode to reconfiguing speed.
 	 */
 	if (link->uiStsFlags & SYNO_STATUS_IS_SIL3132PM) {
 		scontrol = (scontrol & 0x0f0) | 0x301;
 	}
-#endif /* CONFIG_SYNO_SIL3132_PM_WORKAROUND */
+#endif /* MY_ABC_HERE */
 
 	if ((rc = sata_scr_write(link, SCR_CONTROL, scontrol)))
 		return rc;
 
-#ifdef CONFIG_SYNO_SIL3132_PM_WORKAROUND
+#ifdef MY_ABC_HERE
 	/* After reconfiguing speed, need to write again
 	 * after a 1ms delay. Otherwise the speed won't
 	 * configue correctly.
@@ -3411,7 +3414,7 @@ int sata_set_spd(struct ata_link *link)
 			return rc;
 		}
 	}
-#endif /* CONFIG_SYNO_SIL3132_PM_WORKAROUND */
+#endif /* MY_ABC_HERE */
 	return 1;
 }
 
@@ -4369,9 +4372,9 @@ int sata_link_hardreset(struct ata_link *link, const unsigned long *timing,
 			*online = false;
 		ata_link_err(link, "COMRESET failed (errno=%d)\n", rc);
 	}
-#ifdef CONFIG_SYNO_SIL3132_PM_WORKAROUND
+#ifdef MY_ABC_HERE
 	link->uiStsFlags &= ~SYNO_STATUS_IS_SIL3132PM;
-#endif /* CONFIG_SYNO_SIL3132_PM_WORKAROUND */
+#endif /* MY_ABC_HERE */
 	DPRINTK("EXIT, rc=%d\n", rc);
 	return rc;
 }
@@ -4608,9 +4611,9 @@ int ata_dev_revalidate(struct ata_device *dev, unsigned int new_class,
 	return rc;
 }
 
-#ifdef CONFIG_SYNO_SATA_WCACHE_DISABLE
+#ifdef MY_ABC_HERE
 struct ata_blacklist_entry ata_device_blacklist [] = {
-#else /* CONFIG_SYNO_SATA_WCACHE_DISABLE */
+#else /* MY_ABC_HERE */
 struct ata_blacklist_entry {
 	const char *model_num;
 	const char *model_rev;
@@ -4618,7 +4621,7 @@ struct ata_blacklist_entry {
 };
 
 static const struct ata_blacklist_entry ata_device_blacklist [] = {
-#endif /* CONFIG_SYNO_SATA_WCACHE_DISABLE */
+#endif /* MY_ABC_HERE */
 	/* Devices with DMA related problems under Linux */
 	{ "WDC AC11000H",	NULL,		ATA_HORKAGE_NODMA },
 	{ "WDC AC22100H",	NULL,		ATA_HORKAGE_NODMA },
@@ -4730,10 +4733,10 @@ static const struct ata_blacklist_entry ata_device_blacklist [] = {
 	 * Devices which choke on SETXFER.  Applies only if both the
 	 * device and controller are SATA.
 	 */
-#ifdef CONFIG_SYNO_SATA_WCACHE_DISABLE
+#ifdef MY_ABC_HERE
 	//{ "SAMSUNG HD204UI",	"1AQ10001",		ATA_HORKAGE_NOWCACHE},
-#endif /* CONFIG_SYNO_SATA_WCACHE_DISABLE */
-#ifdef CONFIG_SYNO_SATA_FORCE_1_5GBPS
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
 	//Ultrastar 7K3000
 	{ "Hitachi HUA723030ALA640",	NULL,	ATA_HORKAGE_1_5_GBPS, },
 	{ "Hitachi HUA723030ALA641",	NULL,	ATA_HORKAGE_1_5_GBPS, },
@@ -4749,7 +4752,7 @@ static const struct ata_blacklist_entry ata_device_blacklist [] = {
 	{ "Hitachi HDS5C3030ALA630",	NULL,	ATA_HORKAGE_1_5_GBPS, },
 	{ "Hitachi HDS5C3020ALA632",	NULL,	ATA_HORKAGE_1_5_GBPS, },
 	{ "Hitachi HDS5C3015ALA632",	NULL,	ATA_HORKAGE_1_5_GBPS, },
-#endif /* CONFIG_SYNO_SATA_FORCE_1_5GBPS */
+#endif /* MY_ABC_HERE */
 	{ "PIONEER DVD-RW  DVRTD08",	NULL,	ATA_HORKAGE_NOSETXFER },
 	{ "PIONEER DVD-RW  DVRTD08A",	NULL,	ATA_HORKAGE_NOSETXFER },
 	{ "PIONEER DVD-RW  DVR-215",	NULL,	ATA_HORKAGE_NOSETXFER },
@@ -4804,11 +4807,11 @@ static const struct ata_blacklist_entry ata_device_blacklist [] = {
  *	RETURNS:
  *	0 on match, 1 otherwise.
  */
-#ifdef CONFIG_SYNO_SATA_WCACHE_DISABLE
+#ifdef MY_ABC_HERE
 int glob_match (const char *text, const char *pattern)
-#else /* CONFIG_SYNO_SATA_WCACHE_DISABLE */
+#else /* MY_ABC_HERE */
 static int glob_match (const char *text, const char *pattern)
-#endif /* CONFIG_SYNO_SATA_WCACHE_DISABLE */
+#endif /* MY_ABC_HERE */
 {
 	do {
 		/* Match single character or a '?' wildcard */
@@ -5483,9 +5486,9 @@ static void ata_verify_xfer(struct ata_queued_cmd *qc)
 void ata_qc_complete(struct ata_queued_cmd *qc)
 {
 	struct ata_port *ap = qc->ap;
-#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	struct ata_taskfile *tf = &qc->tf;
-#endif /* CONFIG_SYNO_SPINUP_DELAY || CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
+#endif /* MY_ABC_HERE || MY_ABC_HERE */
 
 	/* XXX: New EH and old EH use different mechanisms to
 	 * synchronize EH with regular execution path.
@@ -5524,18 +5527,18 @@ void ata_qc_complete(struct ata_queued_cmd *qc)
 		if (unlikely(qc->flags & ATA_QCFLAG_FAILED)) {
 			fill_result_tf(qc);
 
-#if defined(CONFIG_SYNO_SATA_PM_DEVICE_GPIO)
+#if defined(MY_ABC_HERE)
 			if ((IS_SYNO_PMP_CMD(tf) && NULL == qc->scsicmd))
 			{
 				__ata_qc_complete(qc);
 			} else
-#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
-#ifdef CONFIG_SYNO_SPINUP_DELAY
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
 			if (IS_SYNO_SPINUP_CMD(qc))
 			{
 				__ata_qc_complete(qc);
 			} else
-#endif /* CONFIG_SYNO_SPINUP_DELAY */
+#endif /* MY_ABC_HERE */
 			ata_qc_schedule_eh(qc);
 			return;
 		}
@@ -6197,11 +6200,11 @@ void ata_link_init(struct ata_port *ap, struct ata_link *link, int pmp)
 #ifdef CONFIG_ATA_ACPI
 		dev->gtf_filter = ata_acpi_gtf_filter;
 #endif
-#ifdef CONFIG_SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 		dev->ulSpinupState = 0;
 		dev->ulLastCmd = 0;
 		dev->iCheckPwr = 0;
-#endif /* CONFIG_SYNO_SPINUP_DELAY */
+#endif /* MY_ABC_HERE */
 		ata_dev_init(dev);
 	}
 }
@@ -6278,9 +6281,9 @@ struct ata_port *ata_port_alloc(struct ata_host *host)
 
 	mutex_init(&ap->scsi_scan_mutex);
 	INIT_DELAYED_WORK(&ap->hotplug_task, ata_scsi_hotplug);
-#ifdef CONFIG_SYNO_PMP_HOTPLUG_TASK
+#ifdef MY_ABC_HERE
 	INIT_DELAYED_WORK(&ap->syno_pmp_task, ata_syno_pmp_hotplug);
-#endif /* CONFIG_SYNO_PMP_HOTPLUG_TASK */
+#endif /* MY_ABC_HERE */
 	INIT_WORK(&ap->scsi_rescan_task, ata_scsi_dev_rescan);
 	INIT_LIST_HEAD(&ap->eh_done_q);
 	init_waitqueue_head(&ap->eh_wait_q);
@@ -6386,10 +6389,10 @@ struct ata_host *ata_host_alloc(struct device *dev, int max_ports)
 
 	devres_remove_group(dev, NULL);
 
-#ifdef CONFIG_SYNO_FIXED_DISK_NAME
+#ifdef MY_ABC_HERE
 	host->host_no = gSynoSataHostCnt;
 	gSynoSataHostCnt += 1;
-#endif /* CONFIG_SYNO_FIXED_DISK_NAME */
+#endif /* MY_ABC_HERE */
 
 	return host;
 
@@ -6673,7 +6676,7 @@ void ata_host_init(struct ata_host *host, struct device *dev,
 	host->ops = ops;
 }
 
-#ifdef CONFIG_SYNO_ATA_PWR_CTRL
+#ifdef MY_ABC_HERE
 static void HddPowerOn(struct ata_port *pAp) {
 	int iSynoDiskIdx = -1;
 
@@ -6690,11 +6693,11 @@ static void HddPowerOn(struct ata_port *pAp) {
 	}
 
 	/* Power on the disk if it has presented. */
-#ifdef CONFIG_SYNO_GPIO
+#ifdef MY_ABC_HERE
 	if (1 == SYNO_CHECK_HDD_DETECT(iSynoDiskIdx)) {
 #else
 	if (1 == SYNO_CHECK_HDD_PRESENT(iSynoDiskIdx)) {
-#endif /* CONFIG_SYNO_GPIO */
+#endif /* MY_ABC_HERE */
 		SYNO_CTRL_HDD_POWERON(iSynoDiskIdx, 1);
 		SleepForLatency();
 	}
@@ -6702,9 +6705,9 @@ static void HddPowerOn(struct ata_port *pAp) {
 END:
 	return;
 }
-#endif /* CONFIG_SYNO_ATA_PWR_CTRL */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 /*
  * May do poweron for this port and sleep for hw ready
  *
@@ -6714,7 +6717,7 @@ END:
 static void DelayForHWCtl(struct ata_port *pAp)
 {
 	int iSynoDiskIdx = -1;
-#ifdef CONFIG_SYNO_ATA_PWR_CTRL
+#ifdef MY_ABC_HERE
 	int iIsDoLatency = 0;
 #endif
 
@@ -6730,19 +6733,19 @@ static void DelayForHWCtl(struct ata_port *pAp)
 		goto END;
 	}
 
-#ifdef CONFIG_SYNO_ATA_PWR_CTRL
+#ifdef MY_ABC_HERE
 	if(SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER()) {
 		/* disk doesn't present, no need to delay */
-#ifdef CONFIG_SYNO_GPIO
+#ifdef MY_ABC_HERE
 		if (0 == SYNO_CHECK_HDD_DETECT(iSynoDiskIdx)) {
 #else
 		if (0 == SYNO_CHECK_HDD_PRESENT(iSynoDiskIdx)) {
-#endif /* CONFIG_SYNO_GPIO */
+#endif /* MY_ABC_HERE */
 			goto END;
 		}
 		iIsDoLatency = 1;
 	}
-#endif /* CONFIG_SYNO_ATA_PWR_CTRL */
+#endif /* MY_ABC_HERE */
 
 	if (!(pAp->host->flags & ATA_HOST_LLD_SPINUP_DELAY)) {
 		/* 710+, 411+ is also power on each HD ports every 7s, so we use old delay 10s */
@@ -6751,18 +6754,18 @@ static void DelayForHWCtl(struct ata_port *pAp)
 			syno_is_hw_version(HW_DS411pII)) {
 			SleepForHD(pAp->print_id);
 		} else { /* New model needn't dely 10s, so we speed it up useing new SleepForHW function */
-#ifdef CONFIG_SYNO_ATA_PWR_CTRL
+#ifdef MY_ABC_HERE
 			SleepForHW(iSynoDiskIdx, iIsDoLatency);
 #else
 			SleepForHW(iSynoDiskIdx, 0);
-#endif /* CONFIG_SYNO_ATA_PWR_CTRL */
+#endif /* MY_ABC_HERE */
 		}
 	}
 
 END:
 	return;
 }
-#endif /* CONFIG_SYNO_SPINUP_DELAY */
+#endif /* MY_ABC_HERE */
 
 void __ata_port_probe(struct ata_port *ap)
 {
@@ -6786,29 +6789,29 @@ void __ata_port_probe(struct ata_port *ap)
 int ata_port_probe(struct ata_port *ap)
 {
 	int rc = 0;
-#ifdef CONFIG_SYNO_PMP_HOTPLUG_TASK
+#ifdef MY_ABC_HERE
 	unsigned long flags;
 #endif /* ONFIG_SYNO_PMP_HOTPLUG_TASK */
 
-#ifdef CONFIG_SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 	/* delay Xs to avoid probe disks in the same time(consume too much power)
 	 * If this async_port_probe(..) function is run asynchronously this code is not work,
 	 * so we must disable async_enabled before call async_port_probe(..) */
 	DelayForHWCtl(ap);
-#endif /* CONFIG_SYNO_SPINUP_DELAY */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_ATA_PWR_CTRL
+#ifdef MY_ABC_HERE
 	/* If the machine supports disk power control, switch to power on */
 	if (SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER()) {
 		HddPowerOn(ap);
 	}
-#endif /* CONFIG_SYNO_ATA_PWR_CTRL */
+#endif /* MY_ABC_HERE */
 
 	if (ap->ops->error_handler) {
 		__ata_port_probe(ap);
 		ata_port_wait_eh(ap);
 
-#ifdef CONFIG_SYNO_PMP_HOTPLUG_TASK
+#ifdef MY_ABC_HERE
 		spin_lock_irqsave(ap->lock, flags);
 		if (ap->pflags & ATA_PFLAG_PMP_DISCONNECT ||
 				 ap->pflags & ATA_PFLAG_PMP_CONNECT) {
@@ -6817,7 +6820,7 @@ int ata_port_probe(struct ata_port *ap)
 			ap->pflags &= ~ATA_PFLAG_PMP_CONNECT;
 		}
 		spin_unlock_irqrestore(ap->lock, flags);
-#endif /* CONFIG_SYNO_PMP_HOTPLUG_TASK */
+#endif /* MY_ABC_HERE */
 	} else {
 		DPRINTK("ata%u: bus probe begin\n", ap->print_id);
 		rc = ata_bus_probe(ap);
@@ -6929,7 +6932,7 @@ int ata_host_register(struct ata_host *host, struct scsi_host_template *sht)
 		} else
 			ata_port_info(ap, "DUMMY\n");
 	}
-#if defined(CONFIG_SYNO_SPINUP_DELAY)
+#if defined(MY_ABC_HERE)
 	/* Some SATA I chips can sleep earlier to prevent the
 	 * disk drop problem due to power cable and sata cable order mismatch.
 	 * this mismatch case is only happen in cable model ex. CS407e
@@ -6941,23 +6944,23 @@ int ata_host_register(struct ata_host *host, struct scsi_host_template *sht)
 			SleepForHD(ap->print_id);
 		}
 	}
-#endif /* CONFIG_SYNO_SPINUP_DELAY */
+#endif /* MY_ABC_HERE */
 
 	/* perform each probe asynchronously */
 	for (i = 0; i < host->n_ports; i++) {
 		struct ata_port *ap = host->ports[i];
-#ifdef CONFIG_SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 		if ( 0 == g_syno_hdd_powerup_seq ) {
 			async_schedule(async_port_probe, ap);
 		} else {
 			ata_port_probe(ap);
 			ata_scsi_scan_host(ap, 1);
 		}
-#else /* CONFIG_SYNO_SPINUP_DELAY */
+#else /* MY_ABC_HERE */
 		async_schedule(async_port_probe, ap);
-#endif /* CONFIG_SYNO_SPINUP_DELAY */
+#endif /* MY_ABC_HERE */
 	}
-#ifdef CONFIG_SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 	if (0 != g_syno_hdd_powerup_seq) {
 		for (i = 0; i < host->n_ports; i++) {
 			struct ata_port *ap = host->ports[i];
@@ -6968,7 +6971,7 @@ int ata_host_register(struct ata_host *host, struct scsi_host_template *sht)
 	if (host->flags & ATA_HOST_LLD_SPINUP_DELAY) {
 		host->flags &= ~ATA_HOST_LLD_SPINUP_DELAY;
 	}
-#endif /* CONFIG_SYNO_SPINUP_DELAY */
+#endif /* MY_ABC_HERE */
 
 	return 0;
 
@@ -7566,7 +7569,7 @@ const struct ata_port_info ata_dummy_port_info = {
 	.port_ops		= &ata_dummy_port_ops,
 };
 
-#ifdef CONFIG_SYNO_SATA_INFO
+#ifdef MY_ABC_HERE
 void syno_ata_info_print(struct ata_port *ap)
 {
 	u32 sstatus;
@@ -7599,7 +7602,7 @@ void syno_ata_info_print(struct ata_port *ap)
 }
 
 EXPORT_SYMBOL(syno_ata_info_print);
-#endif /* CONFIG_SYNO_SATA_INFO */
+#endif /* MY_ABC_HERE */
 
 /*
  * Utility print functions
@@ -7803,10 +7806,10 @@ EXPORT_SYMBOL(funcSYNOSendDiskResetPwrEvent);
 int (*funcSYNOSendDiskPortDisEvent)(unsigned int, unsigned int) = NULL;
 EXPORT_SYMBOL(funcSYNOSendDiskPortDisEvent);
 
-#ifdef CONFIG_SYNO_SATA_EBOX_REFRESH
+#ifdef MY_ABC_HERE
 int (*funcSYNOSendEboxRefreshEvent)(int portIndex) = NULL;
 EXPORT_SYMBOL(funcSYNOSendEboxRefreshEvent);
-#endif /* CONFIG_SYNO_SATA_EBOX_REFRESH */
+#endif /* MY_ABC_HERE */
 
 int (*funcSYNOSataErrorReport)(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int) = NULL;
 EXPORT_SYMBOL(funcSYNOSataErrorReport);

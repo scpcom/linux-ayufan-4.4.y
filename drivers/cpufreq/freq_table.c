@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * linux/drivers/cpufreq/freq_table.c
  *
@@ -11,15 +14,15 @@
 
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 #include <linux/cpufreq.h>
 #include <linux/module.h>
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/cpufreq.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 /*********************************************************************
  *                     FREQUENCY TABLE HELPERS                       *
@@ -39,17 +42,17 @@ int cpufreq_frequency_table_cpuinfo(struct cpufreq_policy *policy,
 
 			continue;
 		}
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 		if (!cpufreq_boost_enabled()
 		    && table[i].driver_data == CPUFREQ_BOOST_FREQ)
 			continue;
 
 		pr_debug("table entry %u: %u kHz, %u driver_data\n",
 					i, freq, table[i].driver_data);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 		pr_debug("table entry %u: %u kHz, %u index\n",
 					i, freq, table[i].index);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 		if (freq < min_freq)
 			min_freq = freq;
 		if (freq > max_freq)
@@ -69,19 +72,19 @@ EXPORT_SYMBOL_GPL(cpufreq_frequency_table_cpuinfo);
 int cpufreq_frequency_table_verify(struct cpufreq_policy *policy,
 				   struct cpufreq_frequency_table *table)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	unsigned int next_larger = ~0, freq, i = 0;
 	bool found = false;
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	unsigned int next_larger = ~0;
 	unsigned int i;
 	unsigned int count = 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	pr_debug("request for verification of policy (%u - %u kHz) for cpu %u\n",
 					policy->min, policy->max, policy->cpu);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	cpufreq_verify_within_cpu_limits(policy);
 
 	for (; freq = table[i].frequency, freq != CPUFREQ_TABLE_END; i++) {
@@ -100,7 +103,7 @@ int cpufreq_frequency_table_verify(struct cpufreq_policy *policy,
 		policy->max = next_larger;
 		cpufreq_verify_within_cpu_limits(policy);
 	}
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	cpufreq_verify_within_limits(policy, policy->cpuinfo.min_freq,
 				     policy->cpuinfo.max_freq);
 
@@ -119,7 +122,7 @@ int cpufreq_frequency_table_verify(struct cpufreq_policy *policy,
 
 	cpufreq_verify_within_limits(policy, policy->cpuinfo.min_freq,
 				     policy->cpuinfo.max_freq);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	pr_debug("verification lead to (%u - %u kHz) for cpu %u\n",
 				policy->min, policy->max, policy->cpu);
@@ -128,7 +131,7 @@ int cpufreq_frequency_table_verify(struct cpufreq_policy *policy,
 }
 EXPORT_SYMBOL_GPL(cpufreq_frequency_table_verify);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 /*
  * Generic routine to verify policy & frequency table, requires driver to set
  * policy->freq_table prior to it.
@@ -143,7 +146,7 @@ int cpufreq_generic_frequency_table_verify(struct cpufreq_policy *policy)
 	return cpufreq_frequency_table_verify(policy, table);
 }
 EXPORT_SYMBOL_GPL(cpufreq_generic_frequency_table_verify);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 int cpufreq_frequency_table_target(struct cpufreq_policy *policy,
 				   struct cpufreq_frequency_table *table,
@@ -152,19 +155,19 @@ int cpufreq_frequency_table_target(struct cpufreq_policy *policy,
 				   unsigned int *index)
 {
 	struct cpufreq_frequency_table optimal = {
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 		.driver_data = ~0,
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 		.index = ~0,
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 		.frequency = 0,
 	};
 	struct cpufreq_frequency_table suboptimal = {
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 		.driver_data = ~0,
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 		.index = ~0,
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 		.frequency = 0,
 	};
 	unsigned int i;
@@ -192,20 +195,20 @@ int cpufreq_frequency_table_target(struct cpufreq_policy *policy,
 			if (freq <= target_freq) {
 				if (freq >= optimal.frequency) {
 					optimal.frequency = freq;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 					optimal.driver_data = i;
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 					optimal.index = i;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 				}
 			} else {
 				if (freq <= suboptimal.frequency) {
 					suboptimal.frequency = freq;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 					suboptimal.driver_data = i;
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 					suboptimal.index = i;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 				}
 			}
 			break;
@@ -213,26 +216,26 @@ int cpufreq_frequency_table_target(struct cpufreq_policy *policy,
 			if (freq >= target_freq) {
 				if (freq <= optimal.frequency) {
 					optimal.frequency = freq;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 					optimal.driver_data = i;
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 					optimal.index = i;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 				}
 			} else {
 				if (freq >= suboptimal.frequency) {
 					suboptimal.frequency = freq;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 					suboptimal.driver_data = i;
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 					suboptimal.index = i;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 				}
 			}
 			break;
 		}
 	}
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	if (optimal.driver_data > i) {
 		if (suboptimal.driver_data > i)
 			return -EINVAL;
@@ -242,7 +245,7 @@ int cpufreq_frequency_table_target(struct cpufreq_policy *policy,
 
 	pr_debug("target is %u (%u kHz, %u)\n", *index, table[*index].frequency,
 		table[*index].driver_data);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	if (optimal.index > i) {
 		if (suboptimal.index > i)
 			return -EINVAL;
@@ -252,13 +255,13 @@ int cpufreq_frequency_table_target(struct cpufreq_policy *policy,
 
 	pr_debug("target is %u (%u kHz, %u)\n", *index, table[*index].frequency,
 		table[*index].index);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	return 0;
 }
 EXPORT_SYMBOL_GPL(cpufreq_frequency_table_target);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 int cpufreq_frequency_table_get_index(struct cpufreq_policy *policy,
 		unsigned int freq)
 {
@@ -279,28 +282,28 @@ int cpufreq_frequency_table_get_index(struct cpufreq_policy *policy,
 	return -EINVAL;
 }
 EXPORT_SYMBOL_GPL(cpufreq_frequency_table_get_index);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 static DEFINE_PER_CPU(struct cpufreq_frequency_table *, cpufreq_show_table);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 /**
  * show_available_freqs - show available frequencies for the specified CPU
  */
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 static ssize_t show_available_freqs(struct cpufreq_policy *policy, char *buf,
 				    bool show_boost)
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 static ssize_t show_available_freqs(struct cpufreq_policy *policy, char *buf)
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 {
 	unsigned int i = 0;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	ssize_t count = 0;
 	struct cpufreq_frequency_table *table = policy->freq_table;
 
 	if (!table)
 		return -ENODEV;
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	unsigned int cpu = policy->cpu;
 	ssize_t count = 0;
 	struct cpufreq_frequency_table *table;
@@ -309,12 +312,12 @@ static ssize_t show_available_freqs(struct cpufreq_policy *policy, char *buf)
 		return -ENODEV;
 
 	table = per_cpu(cpufreq_show_table, cpu);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	for (i = 0; (table[i].frequency != CPUFREQ_TABLE_END); i++) {
 		if (table[i].frequency == CPUFREQ_ENTRY_INVALID)
 			continue;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 		/*
 		 * show_boost = true and driver_data = BOOST freq
 		 * display BOOST freqs
@@ -328,7 +331,7 @@ static ssize_t show_available_freqs(struct cpufreq_policy *policy, char *buf)
 		 */
 		if (show_boost ^ (table[i].driver_data == CPUFREQ_BOOST_FREQ))
 			continue;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 		count += sprintf(&buf[count], "%d ", table[i].frequency);
 	}
@@ -338,7 +341,7 @@ static ssize_t show_available_freqs(struct cpufreq_policy *policy, char *buf)
 
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 #define cpufreq_attr_available_freq(_name)	  \
 struct freq_attr cpufreq_freq_attr_##_name##_freqs =     \
 __ATTR_RO(_name##_frequencies)
@@ -353,17 +356,17 @@ static ssize_t scaling_available_frequencies_show(struct cpufreq_policy *policy,
 	return show_available_freqs(policy, buf, false);
 }
 cpufreq_attr_available_freq(scaling_available);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 struct freq_attr cpufreq_freq_attr_scaling_available_freqs = {
 	.attr = { .name = "scaling_available_frequencies",
 		  .mode = 0444,
 		},
 	.show = show_available_freqs,
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 EXPORT_SYMBOL_GPL(cpufreq_freq_attr_scaling_available_freqs);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 /**
  * show_available_boost_freqs - show available boost frequencies for
  * the specified CPU
@@ -404,7 +407,7 @@ struct cpufreq_frequency_table *cpufreq_frequency_get_table(unsigned int cpu)
 	struct cpufreq_policy *policy = cpufreq_cpu_get_raw(cpu);
 	return policy ? policy->freq_table : NULL;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 /*
  * if you use these, you must assure that the frequency table is valid
  * all the time between get_attr and put_attr!
@@ -437,7 +440,7 @@ struct cpufreq_frequency_table *cpufreq_frequency_get_table(unsigned int cpu)
 {
 	return per_cpu(cpufreq_show_table, cpu);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 EXPORT_SYMBOL_GPL(cpufreq_frequency_get_table);
 
 MODULE_AUTHOR("Dominik Brodowski <linux@brodo.de>");

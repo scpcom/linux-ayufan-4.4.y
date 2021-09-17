@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2008 Oracle.  All rights reserved.
  *
@@ -161,10 +164,10 @@ static int start_log_trans(struct btrfs_trans_handle *trans,
 		if (ctx) {
 			index = root->log_transid % 2;
 			list_add_tail(&ctx->list, &root->log_ctxs[index]);
-#ifdef CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 #else
 			ctx->log_transid = root->log_transid;
-#endif /* CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS */
+#endif /* MY_ABC_HERE */
 		}
 		mutex_unlock(&root->log_mutex);
 		return 0;
@@ -190,10 +193,10 @@ static int start_log_trans(struct btrfs_trans_handle *trans,
 	if (ctx) {
 		index = root->log_transid % 2;
 		list_add_tail(&ctx->list, &root->log_ctxs[index]);
-#ifdef CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 #else
 		ctx->log_transid = root->log_transid;
-#endif /* CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS */
+#endif /* MY_ABC_HERE */
 	}
 out:
 	mutex_unlock(&root->log_mutex);
@@ -2465,21 +2468,21 @@ static void wait_log_commit(struct btrfs_trans_handle *trans,
 				&wait, TASK_UNINTERRUPTIBLE);
 		mutex_unlock(&root->log_mutex);
 
-#ifdef CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 		if (root->log_transid < transid + 2 &&
 #else
 		if (root->log_transid_committed < transid &&
-#endif /* CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS */
+#endif /* MY_ABC_HERE */
 		    atomic_read(&root->log_commit[index]))
 			schedule();
 
 		finish_wait(&root->log_commit_wait[index], &wait);
 		mutex_lock(&root->log_mutex);
-#ifdef CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 	} while (root->log_transid < transid + 2 &&
 #else
 	} while (root->log_transid_committed < transid &&
-#endif /* CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS */
+#endif /* MY_ABC_HERE */
 		 atomic_read(&root->log_commit[index]));
 }
 
@@ -2556,7 +2559,7 @@ int btrfs_sync_log(struct btrfs_trans_handle *trans,
 	struct blk_plug plug;
 
 	mutex_lock(&root->log_mutex);
-#ifdef CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 	log_transid = root->log_transid;
 	index1 = root->log_transid % 2;
 #else
@@ -2567,29 +2570,29 @@ int btrfs_sync_log(struct btrfs_trans_handle *trans,
 	}
 
 	index1 = log_transid % 2;
-#endif /* CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS */
+#endif /* MY_ABC_HERE */
 	if (atomic_read(&root->log_commit[index1])) {
-#ifdef CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 		wait_log_commit(trans, root, root->log_transid);
 #else
 		wait_log_commit(trans, root, log_transid);
-#endif /* CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS */
+#endif /* MY_ABC_HERE */
 		mutex_unlock(&root->log_mutex);
 		return ctx->log_ret;
 	}
-#ifdef CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 #else
 	ASSERT(log_transid == root->log_transid);
-#endif /* CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS */
+#endif /* MY_ABC_HERE */
 	atomic_set(&root->log_commit[index1], 1);
 
 	/* wait for previous tree log sync to complete */
 	if (atomic_read(&root->log_commit[(index1 + 1) % 2]))
-#ifdef CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 		wait_log_commit(trans, root, root->log_transid - 1);
 #else
 		wait_log_commit(trans, root, log_transid - 1);
-#endif /* CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS */
+#endif /* MY_ABC_HERE */
 
 	while (1) {
 		int batch = atomic_read(&root->log_batch);
@@ -2644,21 +2647,21 @@ int btrfs_sync_log(struct btrfs_trans_handle *trans,
 	 */
 	mutex_unlock(&root->log_mutex);
 
-#ifdef CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 #else
 	btrfs_init_log_ctx(&root_log_ctx);
-#endif /* CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS */
+#endif /* MY_ABC_HERE */
 
 	mutex_lock(&log_root_tree->log_mutex);
 	atomic_inc(&log_root_tree->log_batch);
 	atomic_inc(&log_root_tree->log_writers);
 
-#ifdef CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 #else
 	index2 = log_root_tree->log_transid % 2;
 	list_add_tail(&root_log_ctx.list, &log_root_tree->log_ctxs[index2]);
 	root_log_ctx.log_transid = log_root_tree->log_transid;
-#endif /* CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS */
+#endif /* MY_ABC_HERE */
 
 	mutex_unlock(&log_root_tree->log_mutex);
 
@@ -2672,11 +2675,11 @@ int btrfs_sync_log(struct btrfs_trans_handle *trans,
 	}
 
 	if (ret) {
-#ifdef CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 #else
 		if (!list_empty(&root_log_ctx.list))
 			list_del_init(&root_log_ctx.list);
-#endif /* CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS */
+#endif /* MY_ABC_HERE */
 
 		blk_finish_plug(&plug);
 		btrfs_set_log_full_commit(root->fs_info, trans);
@@ -2693,52 +2696,52 @@ int btrfs_sync_log(struct btrfs_trans_handle *trans,
 		goto out;
 	}
 
-#ifdef CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 	index2 = log_root_tree->log_transid % 2;
 
 	btrfs_init_log_ctx(&root_log_ctx);
 	list_add_tail(&root_log_ctx.list, &log_root_tree->log_ctxs[index2]);
 #else
 	if (log_root_tree->log_transid_committed >= root_log_ctx.log_transid) {
-#ifdef CONFIG_SYNO_BTRFS_ADD_MISSING_FINISH_PLUG_FOR_TREE_LOG
+#ifdef MY_ABC_HERE
 		blk_finish_plug(&plug);
-#endif /* CONFIG_SYNO_BTRFS_ADD_MISSING_FINISH_PLUG_FOR_TREE_LOG */
+#endif /* MY_ABC_HERE */
 		mutex_unlock(&log_root_tree->log_mutex);
 		ret = root_log_ctx.log_ret;
 		goto out;
 	}
 
 	index2 = root_log_ctx.log_transid % 2;
-#endif /* CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS */
+#endif /* MY_ABC_HERE */
 	if (atomic_read(&log_root_tree->log_commit[index2])) {
 		blk_finish_plug(&plug);
 		ret = btrfs_wait_marked_extents(log, &log->dirty_log_pages,
 						mark);
 		wait_log_commit(trans, log_root_tree,
-#ifdef CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 				log_root_tree->log_transid);
 #else
 				root_log_ctx.log_transid);
-#endif /* CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS */
+#endif /* MY_ABC_HERE */
 		btrfs_free_logged_extents(log, log_transid);
 		mutex_unlock(&log_root_tree->log_mutex);
 		if (!ret)
 			ret = root_log_ctx.log_ret;
 		goto out;
 	}
-#ifdef CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 #else
 	ASSERT(root_log_ctx.log_transid == log_root_tree->log_transid);
-#endif /* CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS */
+#endif /* MY_ABC_HERE */
 	atomic_set(&log_root_tree->log_commit[index2], 1);
 
 	if (atomic_read(&log_root_tree->log_commit[(index2 + 1) % 2])) {
 		wait_log_commit(trans, log_root_tree,
-#ifdef CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 				log_root_tree->log_transid - 1);
 #else
 				root_log_ctx.log_transid - 1);
-#endif /* CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS */
+#endif /* MY_ABC_HERE */
 	}
 
 	wait_for_writer(trans, log_root_tree);
@@ -2814,7 +2817,7 @@ out_wake_log_root:
 	 */
 	btrfs_remove_all_log_ctxs(log_root_tree, index2, ret);
 
-#ifdef CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 	/*
 	 * It is dangerous if log_commit is changed before we set
 	 * ->log_ret of log ctx. Because the readers may not get
@@ -2824,13 +2827,13 @@ out_wake_log_root:
 #else
 	mutex_lock(&log_root_tree->log_mutex);
 	log_root_tree->log_transid_committed++;
-#endif /* CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS */
+#endif /* MY_ABC_HERE */
 	atomic_set(&log_root_tree->log_commit[index2], 0);
-#ifdef CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 	smp_mb();
 #else
 	mutex_unlock(&log_root_tree->log_mutex);
-#endif /* CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS */
+#endif /* MY_ABC_HERE */
 
 	if (waitqueue_active(&log_root_tree->log_commit_wait[index2]))
 		wake_up(&log_root_tree->log_commit_wait[index2]);
@@ -2838,19 +2841,19 @@ out:
 	/* See above. */
 	btrfs_remove_all_log_ctxs(root, index1, ret);
 
-#ifdef CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 	/* See above. */
 	smp_wmb();
 #else
 	mutex_lock(&root->log_mutex);
 	root->log_transid_committed++;
-#endif /* CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS */
+#endif /* MY_ABC_HERE */
 	atomic_set(&root->log_commit[index1], 0);
-#ifdef CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 	smp_mb();
 #else
 	mutex_unlock(&root->log_mutex);
-#endif /* CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS */
+#endif /* MY_ABC_HERE */
 
 	if (waitqueue_active(&root->log_commit_wait[index1]))
 		wake_up(&root->log_commit_wait[index1]);
@@ -2870,7 +2873,7 @@ static void free_log_tree(struct btrfs_trans_handle *trans,
 
 	ret = walk_log_tree(trans, log, &wc);
 	/* I don't think this can happen but just in case */
-#ifdef CONFIG_SYNO_BTRFS_UMOUNT_ERROR_VOLUME
+#ifdef MY_ABC_HERE
 	if (ret && trans)
 #else
 	if (ret)

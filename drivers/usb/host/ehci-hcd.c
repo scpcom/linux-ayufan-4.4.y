@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Enhanced Host Controller Interface (EHCI) driver for USB.
  *
@@ -35,9 +38,9 @@
 #include <linux/interrupt.h>
 #include <linux/usb.h>
 #include <linux/usb/hcd.h>
-#ifdef CONFIG_SYNO_USB_DEVICE_QUIRKS
+#ifdef MY_ABC_HERE
 #include <linux/usb/syno_quirks.h>
-#endif /* CONFIG_SYNO_USB_DEVICE_QUIRKS */
+#endif /* MY_ABC_HERE */
 #include <linux/moduleparam.h>
 #include <linux/dma-mapping.h>
 #include <linux/debugfs.h>
@@ -101,11 +104,11 @@ module_param (park, uint, S_IRUGO);
 MODULE_PARM_DESC (park, "park setting; 1-3 back-to-back async packets");
 
 /* for flakey hardware, ignore overcurrent indicators */
-#ifdef CONFIG_SYNO_MONACO
+#ifdef MY_DEF_HERE
 static bool ignore_oc = 1;
 #else
 static bool ignore_oc = 0;
-#endif /* CONFIG_SYNO_MONACO */
+#endif /* MY_DEF_HERE */
 module_param (ignore_oc, bool, S_IRUGO);
 MODULE_PARM_DESC (ignore_oc, "ignore bogus hardware overcurrent indications");
 
@@ -229,12 +232,12 @@ static void tdi_reset (struct ehci_hcd *ehci)
 
 	tmp = ehci_readl(ehci, &ehci->regs->usbmode);
 	tmp |= USBMODE_CM_HC;
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(MY_ABC_HERE)
 	/*
 	 * MRVL: Disable USB Streaming
 	 */
 	tmp |= (1 << 4);
-#endif /* CONFIG_SYNO_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	/* The default byte access to MMR space is LE after
 	 * controller reset. Set the required endian mode

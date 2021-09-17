@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*-
  * Linux port done by David McCullough <david_mccullough@mcafee.com>
  * Copyright (C) 2006-2010 David McCullough
@@ -820,8 +823,8 @@ crypto_dispatch(struct cryptop *crp)
 	crp->crp_flags &= ~CRYPTO_F_DONE;
 	crp->crp_etype = 0;
 
-#if (defined(CONFIG_SYNO_LSP_ARMADA) && (defined(CONFIG_MV_CESA_OCF) || defined(CONFIG_MV_CESA_OCF_KW2))) || \
-	(defined(CONFIG_SYNO_ARMADA) && defined(CONFIG_MV_CESA))
+#if (defined(MY_ABC_HERE) && (defined(CONFIG_MV_CESA_OCF) || defined(CONFIG_MV_CESA_OCF_KW2))) || \
+	(defined(MY_ABC_HERE) && defined(CONFIG_MV_CESA))
 
 	CRYPTO_Q_UNLOCK();
 
@@ -848,7 +851,7 @@ crypto_dispatch(struct cryptop *crp)
 		CRYPTO_Q_UNLOCK();
 	}
 
-#elif defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_OF) && defined(CONFIG_MV_INCLUDE_CESA)
+#elif defined(MY_ABC_HERE) && defined(CONFIG_OF) && defined(CONFIG_MV_INCLUDE_CESA)
 	if (mv_cesa_mode == CESA_OCF_M) {
 		dprintk("%s:cesa mode %d\n", __func__, mv_cesa_mode);
 
@@ -1369,11 +1372,11 @@ crypto_proc(void *arg)
 	struct cryptocap *cap;
 	u_int32_t hid;
 	int result, hint;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	unsigned long q_flags, wait_flags;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	unsigned long q_flags;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	int loopcount = 0;
 
 	set_current_state(TASK_INTERRUPTIBLE);
@@ -1530,18 +1533,18 @@ crypto_proc(void *arg)
 					list_empty(&crp_kq), crypto_all_kqblocked);
 			loopcount = 0;
 			CRYPTO_Q_UNLOCK();
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 			spin_lock_irqsave(&cryptoproc_wait.lock, wait_flags);
 			wait_event_interruptible_locked_irq(cryptoproc_wait,
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 			wait_event_interruptible(cryptoproc_wait,
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 					!(list_empty(&crp_q) || crypto_all_qblocked) ||
 					!(list_empty(&crp_kq) || crypto_all_kqblocked) ||
 					kthread_should_stop());
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 			spin_unlock_irqrestore(&cryptoproc_wait.lock, wait_flags);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 			if (signal_pending (current)) {
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
 				spin_lock_irq(&current->sigmask_lock);
@@ -1582,11 +1585,11 @@ crypto_ret_proc(void *arg)
 {
 	struct cryptop *crpt;
 	struct cryptkop *krpt;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	unsigned long  r_flags, wait_flags;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	unsigned long  r_flags;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	set_current_state(TASK_INTERRUPTIBLE);
 
@@ -1622,18 +1625,18 @@ crypto_ret_proc(void *arg)
 			 */
 			dprintk("%s - sleeping\n", __FUNCTION__);
 			CRYPTO_RETQ_UNLOCK();
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 			spin_lock_irqsave(&cryptoretproc_wait.lock, wait_flags);
 			wait_event_interruptible_locked_irq(cryptoretproc_wait,
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 			wait_event_interruptible(cryptoretproc_wait,
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 					!list_empty(&crp_ret_q) ||
 					!list_empty(&crp_ret_kq) ||
 					kthread_should_stop());
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 			spin_unlock_irqrestore(&cryptoretproc_wait.lock, wait_flags);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 			if (signal_pending (current)) {
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
 				spin_lock_irq(&current->sigmask_lock);

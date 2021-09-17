@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  libahci.c - Common AHCI SATA low-level routines
  *
@@ -43,29 +46,29 @@
 #include <linux/device.h>
 #include <scsi/scsi_host.h>
 #include <scsi/scsi_cmnd.h>
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #include <linux/gpio.h>
-#endif /* CONFIG_SYNO_LSP_ALPINE */
-#ifdef CONFIG_SYNO_ATA_AHCI_LED_SGPIO
+#endif /* MY_DEF_HERE */
+#ifdef MY_DEF_HERE
 #include <scsi/scsi_device.h>
-#endif /* CONFIG_SYNO_ATA_AHCI_LED_SGPIO */
+#endif /* MY_DEF_HERE */
 #include <linux/libata.h>
-#ifdef CONFIG_SYNO_AHCI_SOFTWARE_ACITIVITY
+#ifdef MY_DEF_HERE
 #include <linux/pci.h>
 #include <linux/leds.h>
-#if defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE)
 #include <linux/pci_ids.h>
-#endif /* CONFIG_SYNO_ALPINE */
-#endif /* CONFIG_SYNO_AHCI_SOFTWARE_ACITIVITY */
+#endif /* MY_DEF_HERE */
+#endif /* MY_DEF_HERE */
 #include "ahci.h"
 #include "libata.h"
-#ifdef CONFIG_SYNO_AHCI_SOFTWARE_ACITIVITY
+#ifdef MY_DEF_HERE
 extern void syno_ledtrig_active_set(int iLedNum);
 extern int *gpGreenLedMap;
-#if defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE)
 extern int SYNO_CTRL_HDD_ACT_NOTIFY(int index);
-#endif /* CONFIG_SYNO_ALPINE */
-#endif /* CONFIG_SYNO_AHCI_SOFTWARE_ACITIVITY */
+#endif /* MY_DEF_HERE */
+#endif /* MY_DEF_HERE */
 
 static int ahci_skip_host_reset;
 int ahci_ignore_sss;
@@ -139,7 +142,7 @@ static DEVICE_ATTR(ahci_host_cap2, S_IRUGO, ahci_show_host_cap2, NULL);
 static DEVICE_ATTR(ahci_host_version, S_IRUGO, ahci_show_host_version, NULL);
 static DEVICE_ATTR(ahci_port_cmd, S_IRUGO, ahci_show_port_cmd, NULL);
 
-#ifdef CONFIG_SYNO_ATA_AHCI_LED_SGPIO
+#ifdef MY_DEF_HERE
 static ssize_t
 ata_ahci_locate_show(struct device *dev, struct device_attribute *attr,
 		char *buf)
@@ -216,10 +219,10 @@ void sata_syno_ahci_diskled_set(int iHostNum, int iPresent, int iFault)
 		goto RELEASESRC;
 	}
 
-#ifdef CONFIG_SYNO_ATA_AHCI_LED_SWITCH
+#ifdef MY_DEF_HERE
 	iPresent &= giSynoHddLedEnabled;
 	iFault &= giSynoHddLedEnabled;
-#endif /* CONFIG_SYNO_ATA_AHCI_LED_SWITCH */
+#endif /* MY_DEF_HERE */
 	//for each devices of each links in port ap
 	ata_for_each_link(pAtaLink, pAp, EDGE) {
 		ata_for_each_dev(pAtaDev, pAtaLink, ALL) {
@@ -259,7 +262,7 @@ ata_ahci_fault_store(struct device *dev, struct device_attribute *attr,
 	return -EINVAL;
 }
 DEVICE_ATTR(sw_fault, S_IWUSR | S_IRUGO, ata_ahci_fault_show, ata_ahci_fault_store);
-#endif /* CONFIG_SYNO_ATA_AHCI_LED_SGPIO */
+#endif /* MY_DEF_HERE */
 
 static DEVICE_ATTR(em_buffer, S_IWUSR | S_IRUGO,
 		   ahci_read_em_buffer, ahci_store_em_buffer);
@@ -275,17 +278,17 @@ struct device_attribute *ahci_shost_attrs[] = {
 	&dev_attr_ahci_port_cmd,
 	&dev_attr_em_buffer,
 	&dev_attr_em_message_supported,
-#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	&dev_attr_syno_manutil_power_disable,
 	&dev_attr_syno_pm_gpio,
 	&dev_attr_syno_pm_info,
-#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
-#ifdef CONFIG_SYNO_TRANS_HOST_TO_DISK
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
 	&dev_attr_syno_diskname_trans,
-#endif /* CONFIG_SYNO_TRANS_HOST_TO_DISK */
-#ifdef CONFIG_SYNO_SATA_DISK_LED_CONTROL
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
 	&dev_attr_syno_sata_disk_led_ctrl,
-#endif /* CONFIG_SYNO_SATA_DISK_LED_CONTROL */
+#endif /* MY_ABC_HERE */
 	NULL
 };
 EXPORT_SYMBOL_GPL(ahci_shost_attrs);
@@ -293,16 +296,16 @@ EXPORT_SYMBOL_GPL(ahci_shost_attrs);
 struct device_attribute *ahci_sdev_attrs[] = {
 	&dev_attr_sw_activity,
 	&dev_attr_unload_heads,
-#ifdef CONFIG_SYNO_SATA_WCACHE_DISABLE
+#ifdef MY_ABC_HERE
 	&dev_attr_syno_wcache,
-#endif /* CONFIG_SYNO_SATA_WCACHE_DISABLE */
+#endif /* MY_ABC_HERE */
 #ifdef CONFIG_SYNO_SATA_DISK_SERIAL
 	&dev_attr_syno_disk_serial,
 #endif /* CONFIG_SYNO_SATA_DISK_SERIAL */
-#ifdef CONFIG_SYNO_ATA_AHCI_LED_SGPIO
+#ifdef MY_DEF_HERE
 	&dev_attr_sw_locate,
 	&dev_attr_sw_fault,
-#endif /* CONFIG_SYNO_ATA_AHCI_LED_SGPIO */
+#endif /* MY_DEF_HERE */
 	NULL
 };
 EXPORT_SYMBOL_GPL(ahci_sdev_attrs);
@@ -335,9 +338,9 @@ struct ata_port_operations ahci_ops = {
 	.em_store		= ahci_led_store,
 	.sw_activity_show	= ahci_activity_show,
 	.sw_activity_store	= ahci_activity_store,
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	.transmit_led_message	= ahci_transmit_led_message,
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 #ifdef CONFIG_PM
 	.port_suspend		= ahci_port_suspend,
 	.port_resume		= ahci_port_resume,
@@ -916,7 +919,7 @@ static void ahci_power_down(struct ata_port *ap)
 }
 #endif
 
-#ifdef CONFIG_SYNO_AHCI_SOFTWARE_ACITIVITY
+#ifdef MY_DEF_HERE
 static int syno_need_ahci_software_activity(struct ata_port *ap)
 {
 	struct pci_dev *pdev = NULL;
@@ -940,7 +943,7 @@ static int syno_need_ahci_software_activity(struct ata_port *ap)
 					break;
 			}
 		}
-#if defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE)
 		if (pdev != NULL && pdev->vendor == PCI_VENDOR_ID_ANNAPURNA_LABS) {
 			switch (pdev->device) {
 				case 0x0031:
@@ -950,7 +953,7 @@ static int syno_need_ahci_software_activity(struct ata_port *ap)
 					break;
 			}
 		}
-#endif /* CONFIG_SYNO_ALPINE */
+#endif /* MY_DEF_HERE */
 	}
 
 END:
@@ -959,14 +962,14 @@ END:
 
 static void syno_sw_activity(struct ata_port *ap)
 {
-#if defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE)
 	SYNO_CTRL_HDD_ACT_NOTIFY(ap->syno_disk_index);
-#else /* CONFIG_SYNO_ALPINE */
+#else /* MY_DEF_HERE */
 	if(NULL == gpGreenLedMap){
 		return;
 	}
 	syno_ledtrig_active_set(gpGreenLedMap[ap->syno_disk_index]);		
-#endif /* CONFIG_SYNO_ALPINE */
+#endif /* MY_DEF_HERE */
 }
 
 /**
@@ -1022,7 +1025,7 @@ END:
 	return ret;
 }
 EXPORT_SYMBOL(syno_ahci_disk_led_enable);
-#endif /* CONFIG_SYNO_AHCI_SOFTWARE_ACITIVITY */
+#endif /* MY_DEF_HERE */
 
 static void ahci_start_port(struct ata_port *ap)
 {
@@ -1047,11 +1050,11 @@ static void ahci_start_port(struct ata_port *ap)
 
 			/* EM Transmit bit maybe busy during init */
 			for (i = 0; i < EM_MAX_RETRY; i++) {
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 				rc = ap->ops->transmit_led_message(ap,
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 				rc = ahci_transmit_led_message(ap,
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 							       emp->led_state,
 							       4);
 				if (rc == -EBUSY)
@@ -1062,15 +1065,15 @@ static void ahci_start_port(struct ata_port *ap)
 		}
 	}
 
-#ifdef CONFIG_SYNO_AHCI_SOFTWARE_ACITIVITY
+#ifdef MY_DEF_HERE
 	if (syno_need_ahci_software_activity(ap)) {
 		ap->flags |= ATA_FLAG_SW_ACTIVITY;
 	}
 	/* monaco platform force inable sw activity */
-#if defined(CONFIG_SYNO_MONACO)
+#if defined(MY_DEF_HERE)
 	ap->flags |= ATA_FLAG_SW_ACTIVITY;
-#endif /* CONFIG_SYNO_MONACO */
-#endif /* CONFIG_SYNO_AHCI_SOFTWARE_ACITIVITY */
+#endif /* MY_DEF_HERE */
+#endif /* MY_DEF_HERE */
 
 	if (ap->flags & ATA_FLAG_SW_ACTIVITY)
 		ata_for_each_link(link, ap, EDGE)
@@ -1153,11 +1156,11 @@ static void ahci_sw_activity(struct ata_link *link)
 	struct ahci_port_priv *pp = ap->private_data;
 	struct ahci_em_priv *emp = &pp->em_priv[link->pmp];
 
-#ifdef CONFIG_SYNO_ATA_AHCI_LED_SWITCH
+#ifdef MY_DEF_HERE
         if (!giSynoHddLedEnabled) {
                 return;
         }
-#endif /* CONFIG_SYNO_ATA_AHCI_LED_SWITCH */
+#endif /* MY_DEF_HERE */
 	if (!(link->flags & ATA_LFLAG_SW_ACTIVITY))
 		return;
 
@@ -1166,7 +1169,7 @@ static void ahci_sw_activity(struct ata_link *link)
 		mod_timer(&emp->timer, jiffies + msecs_to_jiffies(10));
 }
 
-#ifdef CONFIG_SYNO_ATA_AHCI_LED_SGPIO
+#ifdef MY_DEF_HERE
 static void ahci_sw_locate_set(struct ata_link *link, u8 blEnable)
 {
 	struct ata_port *ap = link->ap;
@@ -1224,7 +1227,7 @@ static void ahci_sw_fault_set(struct ata_link *link, u8 blEnable)
 END:
 	return;
 }
-#endif /* CONFIG_SYNO_ATA_AHCI_LED_SGPIO */
+#endif /* MY_DEF_HERE */
 
 static void ahci_sw_activity_blink(unsigned long arg)
 {
@@ -1233,10 +1236,10 @@ static void ahci_sw_activity_blink(unsigned long arg)
 	struct ahci_port_priv *pp = ap->private_data;
 	struct ahci_em_priv *emp = &pp->em_priv[link->pmp];
 	unsigned long led_message = emp->led_state;
-#ifdef CONFIG_SYNO_AHCI_SOFTWARE_ACITIVITY
-#else /* CONFIG_SYNO_AHCI_SOFTWARE_ACITIVITY */
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 	u32 activity_led_state;
-#endif /* CONFIG_SYNO_AHCI_SOFTWARE_ACITIVITY */
+#endif /* MY_DEF_HERE */
 	unsigned long flags;
 
 	led_message &= EM_MSG_LED_VALUE;
@@ -1246,7 +1249,7 @@ static void ahci_sw_activity_blink(unsigned long arg)
 	 * toggle state of LED and reset timer.  If not,
 	 * turn LED to desired idle state.
 	 */
-#ifdef CONFIG_SYNO_AHCI_SOFTWARE_ACITIVITY
+#ifdef MY_DEF_HERE
 	spin_lock_irqsave(ap->lock, flags);
 	if (emp->saved_activity != emp->activity) {
 		emp->saved_activity = emp->activity;
@@ -1256,7 +1259,7 @@ static void ahci_sw_activity_blink(unsigned long arg)
 		mod_timer(&emp->timer, jiffies + msecs_to_jiffies(100));
 	}
 	spin_unlock_irqrestore(ap->lock, flags);
-#else /* CONFIG_SYNO_AHCI_SOFTWARE_ACITIVITY */
+#else /* MY_DEF_HERE */
 	spin_lock_irqsave(ap->lock, flags);
 	if (emp->saved_activity != emp->activity) {
 		emp->saved_activity = emp->activity;
@@ -1277,22 +1280,22 @@ static void ahci_sw_activity_blink(unsigned long arg)
 	} else {
 		/* switch to idle */
 		led_message &= ~EM_MSG_LED_VALUE_ACTIVITY;
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 		if ((ata_phys_link_online(link)) || (emp->blink_policy == BLINK_OFF))
 			led_message |= (1 << 16);
 		mod_timer(&emp->timer, jiffies + msecs_to_jiffies(500));
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 		if (emp->blink_policy == BLINK_OFF)
 			led_message |= (1 << 16);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	}
 	spin_unlock_irqrestore(ap->lock, flags);
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	ap->ops->transmit_led_message(ap, led_message, 4);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	ahci_transmit_led_message(ap, led_message, 4);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
-#endif /* CONFIG_SYNO_AHCI_SOFTWARE_ACITIVITY */
+#endif /* MY_DEF_HERE */
+#endif /* MY_DEF_HERE */
 }
 
 static void ahci_init_sw_activity(struct ata_link *link)
@@ -1303,16 +1306,16 @@ static void ahci_init_sw_activity(struct ata_link *link)
 
 	/* init activity stats, setup timer */
 	emp->saved_activity = emp->activity = 0;
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	emp->blink_policy = BLINK_ON;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	setup_timer(&emp->timer, ahci_sw_activity_blink, (unsigned long)link);
 
 	/* check our blink policy and set flag for link if it's enabled */
-#ifdef CONFIG_SYNO_AHCI_SOFTWARE_ACITIVITY
-#else /* CONFIG_SYNO_AHCI_SOFTWARE_ACITIVITY */
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 	if (emp->blink_policy)
-#endif /* CONFIG_SYNO_AHCI_SOFTWARE_ACITIVITY */
+#endif /* MY_DEF_HERE */
 		link->flags |= ATA_LFLAG_SW_ACTIVITY;
 }
 
@@ -1331,7 +1334,7 @@ int ahci_reset_em(struct ata_host *host)
 }
 EXPORT_SYMBOL_GPL(ahci_reset_em);
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 ssize_t al_ahci_transmit_led_message(struct ata_port *ap, u32 state,
 					    ssize_t size)
 {
@@ -1365,7 +1368,7 @@ ssize_t al_ahci_transmit_led_message(struct ata_port *ap, u32 state,
 	spin_unlock_irqrestore(&ap->host->lock, flags);
 	return size;
 }
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 static ssize_t ahci_transmit_led_message(struct ata_port *ap, u32 state,
 					ssize_t size)
@@ -1463,11 +1466,11 @@ static ssize_t ahci_led_store(struct ata_port *ap, const char *buf,
 	if (emp->blink_policy)
 		state &= ~EM_MSG_LED_VALUE_ACTIVITY;
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	return ap->ops->transmit_led_message(ap, state, size);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	return ahci_transmit_led_message(ap, state, size);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 }
 
 static ssize_t ahci_activity_store(struct ata_device *dev, enum sw_activity val)
@@ -1486,11 +1489,11 @@ static ssize_t ahci_activity_store(struct ata_device *dev, enum sw_activity val)
 		/* set the LED to OFF */
 		port_led_state &= EM_MSG_LED_VALUE_OFF;
 		port_led_state |= (ap->port_no | (link->pmp << 8));
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 		ap->ops->transmit_led_message(ap, port_led_state, 4);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 		ahci_transmit_led_message(ap, port_led_state, 4);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	} else {
 		link->flags |= ATA_LFLAG_SW_ACTIVITY;
 		if (val == BLINK_OFF) {
@@ -1498,11 +1501,11 @@ static ssize_t ahci_activity_store(struct ata_device *dev, enum sw_activity val)
 			port_led_state &= EM_MSG_LED_VALUE_OFF;
 			port_led_state |= (ap->port_no | (link->pmp << 8));
 			port_led_state |= EM_MSG_LED_VALUE_ON; /* check this */
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 			ap->ops->transmit_led_message(ap, port_led_state, 4);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 			ahci_transmit_led_message(ap, port_led_state, 4);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 		}
 	}
 	emp->blink_policy = val;
@@ -1742,7 +1745,7 @@ int ahci_do_softreset(struct ata_link *link, unsigned int *class,
 
 	/* issue the second D2H Register FIS */
 	tf.ctl &= ~ATA_SRST;
-#ifdef CONFIG_SYNO_MV_9235_SRST_FIX
+#ifdef MY_ABC_HERE
 	if ((hpriv->flags & AHCI_HFLAG_YES_MV9235_FIX)) {
 		/* 9235 may fail at 2nd D2H, so we use the same check as 1st D2H */
 		msecs = 0;
@@ -1755,11 +1758,11 @@ int ahci_do_softreset(struct ata_link *link, unsigned int *class,
 			goto fail;
 		}
 	} else {
-#endif /* CONFIG_SYNO_MV_9235_SRST_FIX */
+#endif /* MY_ABC_HERE */
 	ahci_exec_polled_cmd(ap, pmp, &tf, 0, 0, 0);
-#ifdef CONFIG_SYNO_MV_9235_SRST_FIX
+#ifdef MY_ABC_HERE
 	}
-#endif /* CONFIG_SYNO_MV_9235_SRST_FIX */
+#endif /* MY_ABC_HERE */
 
 	/* wait for link to become ready */
 	rc = ata_wait_after_reset(link, deadline, check_ready);
@@ -1787,11 +1790,11 @@ int ahci_do_softreset(struct ata_link *link, unsigned int *class,
 
  fail:
 	ata_link_err(link, "softreset failed (%s)\n", reason);
-#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	/* re-enable FBS if disabled before */
 	if (fbs_disabled)
 		ahci_enable_fbs(ap);
-#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
+#endif /* MY_ABC_HERE */
 	return rc;
 }
 
@@ -1939,7 +1942,7 @@ static unsigned int ahci_fill_sg(struct ata_queued_cmd *qc, void *cmd_tbl)
 	return si;
 }
 
-#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 int sata_syno_ahci_defer_cmd(struct ata_queued_cmd *qc)
 {
 	struct ata_link *link = qc->dev->link;
@@ -1964,9 +1967,9 @@ int sata_syno_ahci_defer_cmd(struct ata_queued_cmd *qc)
 	return ATA_DEFER_PORT;
 }
 EXPORT_SYMBOL_GPL(sata_syno_ahci_defer_cmd);
-#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_AHCI_PMP_SII3x26_DEFER_CMD
+#ifdef MY_ABC_HERE
 int ahci_syno_pmp_3x26_qc_defer(struct ata_queued_cmd *qc)
 {
 	struct ata_port *ap = qc->ap;
@@ -2069,12 +2072,12 @@ static void ahci_error_intr(struct ata_port *ap, u32 irq_stat)
 		u32 fbs = readl(port_mmio + PORT_FBS);
 		int pmp = fbs >> PORT_FBS_DWE_OFFSET;
 
-#ifdef CONFIG_SYNO_AHCI_PM_DEADLOCK_FIX
+#ifdef MY_ABC_HERE
 		if ((fbs & PORT_FBS_SDE) && (pmp < ap->nr_pmp_links)) {
-#else /* CONFIG_SYNO_AHCI_PM_DEADLOCK_FIX */
+#else /* MY_ABC_HERE */
 		if ((fbs & PORT_FBS_SDE) && (pmp < ap->nr_pmp_links) &&
 		    ata_link_online(&ap->pmp_link[pmp])) {
-#endif /* CONFIG_SYNO_AHCI_PM_DEADLOCK_FIX */
+#endif /* MY_ABC_HERE */
 			link = &ap->pmp_link[pmp];
 			fbs_need_dec = true;
 		}
@@ -2151,14 +2154,14 @@ static void ahci_error_intr(struct ata_port *ap, u32 irq_stat)
 	}
 
 	if (irq_stat & (PORT_IRQ_CONNECT | PORT_IRQ_PHYRDY)) {
-#ifdef CONFIG_SYNO_SATA_INFO
+#ifdef MY_ABC_HERE
 		syno_ata_info_print(ap);
-#endif /* CONFIG_SYNO_SATA_INFO */
-#ifdef CONFIG_SYNO_ATA_FAST_PROBE
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
 		if (irq_stat & PORT_IRQ_CONNECT) {
 			ap->pflags |= ATA_PFLAG_SYNO_BOOT_PROBE;
 		}
-#endif /* CONFIG_SYNO_ATA_FAST_PROBE */
+#endif /* MY_ABC_HERE */
 		ata_ehi_hotplugged(host_ehi);
 		ata_ehi_push_desc(host_ehi, "%s",
 			irq_stat & PORT_IRQ_CONNECT ?
@@ -2305,9 +2308,9 @@ void ahci_hw_port_interrupt(struct ata_port *ap)
 	pp->intr_status |= status;
 }
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 EXPORT_SYMBOL_GPL(ahci_hw_port_interrupt);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 irqreturn_t ahci_hw_interrupt(int irq, void *dev_instance)
 {
@@ -2937,12 +2940,12 @@ void ahci_set_em_messages(struct ahci_host_priv *hpriv,
 		pi->flags |= ATA_FLAG_EM;
 		if (!(em_ctl & EM_CTL_ALHD))
 			pi->flags |= ATA_FLAG_SW_ACTIVITY;
-#ifdef CONFIG_SYNO_ATA_AHCI_LED_SGPIO
+#ifdef MY_DEF_HERE
 		if (em_ctl & EM_CTL_LED) {
 			pi->flags |= ATA_FLAG_SW_LOCATE;
 			pi->flags |= ATA_FLAG_SW_FAULT;
 		}
-#endif /* CONFIG_SYNO_ATA_AHCI_LED_SGPIO */
+#endif /* MY_DEF_HERE */
 	}
 }
 EXPORT_SYMBOL_GPL(ahci_set_em_messages);

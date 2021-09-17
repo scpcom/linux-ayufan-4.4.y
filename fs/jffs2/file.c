@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * JFFS2 -- Journalling Flash File System, Version 2.
  *
@@ -87,13 +90,13 @@ static int jffs2_do_readpage_nolock (struct inode *inode, struct page *pg)
 	unsigned char *pg_buf;
 	int ret;
 
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 	jffs2_dbg(2, "%s(): ino #%lu, page at offset 0x%llx\n",
 		  __func__, inode->i_ino, (unsigned long long)pg->index << PAGE_CACHE_SHIFT);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	jffs2_dbg(2, "%s(): ino #%lu, page at offset 0x%lx\n",
 		  __func__, inode->i_ino, pg->index << PAGE_CACHE_SHIFT);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 	BUG_ON(!PageLocked(pg));
 
@@ -259,15 +262,15 @@ static int jffs2_write_end(struct file *filp, struct address_space *mapping,
 	int ret = 0;
 	uint32_t writtenlen = 0;
 
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 	jffs2_dbg(1, "%s(): ino #%lu, page at 0x%llx, range %d-%d, flags %lx\n",
 		  __func__, inode->i_ino, (unsigned long long)pg->index << PAGE_CACHE_SHIFT,
 		  start, end, pg->flags);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	jffs2_dbg(1, "%s(): ino #%lu, page at 0x%lx, range %d-%d, flags %lx\n",
 		  __func__, inode->i_ino, pg->index << PAGE_CACHE_SHIFT,
 		  start, end, pg->flags);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 	/* We need to avoid deadlock with page_cache_read() in
 	   jffs2_garbage_collect_pass(). So the page must be

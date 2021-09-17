@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (c) 2000-2005 Silicon Graphics, Inc.
  * All Rights Reserved.
@@ -1121,7 +1124,7 @@ xlog_iodone(xfs_buf_t *bp)
 	/* log I/O is always issued ASYNC */
 	ASSERT(XFS_BUF_ISASYNC(bp));
 	xlog_state_done_syncing(iclog, aborted);
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 
 	/*
 	 * drop the buffer lock now that we are done. Nothing references
@@ -1130,13 +1133,13 @@ xlog_iodone(xfs_buf_t *bp)
 	 * (bp) after the unlock as we could race with it being freed.
 	 */
 	xfs_buf_unlock(bp);
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 	/*
 	 * do not reference the buffer (bp) here as we could race
 	 * with it being freed after writing the unmount record to the
 	 * log.
 	 */
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 }
 
 /*
@@ -1319,7 +1322,7 @@ xlog_alloc_log(
 	if (!bp)
 		goto out_free_log;
 	bp->b_iodone = xlog_iodone;
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	/*
 	 * The iclogbuf buffer locks are held over IO but we are not going to do
 	 * IO yet.  Hence unlock the buffer so that the log IO path can grab it
@@ -1329,9 +1332,9 @@ xlog_alloc_log(
 	xfs_buf_unlock(bp);
 
 	bp->b_iodone = xlog_iodone;
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 	ASSERT(xfs_buf_islocked(bp));
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	log->l_xbuf = bp;
 
 	spin_lock_init(&log->l_icloglock);
@@ -1360,11 +1363,11 @@ xlog_alloc_log(
 		if (!bp)
 			goto out_free_iclog;
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 		ASSERT(xfs_buf_islocked(bp));
 		xfs_buf_unlock(bp);
 
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 		bp->b_iodone = xlog_iodone;
 		iclog->ic_bp = bp;
 		iclog->ic_data = bp->b_addr;
@@ -1389,10 +1392,10 @@ xlog_alloc_log(
 		iclog->ic_callback_tail = &(iclog->ic_callback);
 		iclog->ic_datap = (char *)iclog->ic_data + log->l_iclog_hsize;
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
-#else /* CONFIG_SYNO_LSP_MONACO */
+#if defined (MY_DEF_HERE)
+#else /* MY_DEF_HERE */
 		ASSERT(xfs_buf_islocked(iclog->ic_bp));
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 		init_waitqueue_head(&iclog->ic_force_wait);
 		init_waitqueue_head(&iclog->ic_write_wait);
 
@@ -1615,9 +1618,9 @@ xlog_bdstrat(
 {
 	struct xlog_in_core	*iclog = bp->b_fspriv;
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	xfs_buf_lock(bp);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	if (iclog->ic_state & XLOG_STATE_IOERROR) {
 		xfs_buf_ioerror(bp, EIO);
 		xfs_buf_stale(bp);
@@ -1828,7 +1831,7 @@ xlog_dealloc_log(
 
 	xlog_cil_destroy(log);
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	/*
 	 * Cycle all the iclogbuf locks to make sure all log IO completion
 	 * is done before we tear down these buffers.
@@ -1847,12 +1850,12 @@ xlog_dealloc_log(
 	 */
 	xfs_buf_lock(log->l_xbuf);
 	xfs_buf_unlock(log->l_xbuf);
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 	/*
 	 * always need to ensure that the extra buffer does not point to memory
 	 * owned by another log buffer before we free it.
 	 */
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	xfs_buf_set_empty(log->l_xbuf, BTOBB(log->l_iclog_size));
 	xfs_buf_free(log->l_xbuf);
 

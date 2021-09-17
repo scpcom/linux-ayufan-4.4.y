@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Driver for /dev/crypto device (aka CryptoDev)
  *
@@ -707,9 +710,9 @@ static inline void tfm_info_to_alg_info(struct alg_info *dst, struct crypto_tfm 
 			"%s", crypto_tfm_alg_driver_name(tfm));
 }
 
-#if defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE)
 // Alpine do not need is_known_accelerated()
-#else /* CONFIG_SYNO_ALPINE */
+#else /* MY_DEF_HERE */
 static unsigned int is_known_accelerated(struct crypto_tfm *tfm)
 {
 const char* name = crypto_tfm_alg_driver_name(tfm);
@@ -742,7 +745,7 @@ const char* name = crypto_tfm_alg_driver_name(tfm);
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_ALPINE */
+#endif /* MY_DEF_HERE */
 
 static int get_session_info(struct fcrypt *fcr, struct session_info_op *siop)
 {
@@ -1078,11 +1081,11 @@ static const struct file_operations cryptodev_fops = {
 };
 
 static struct miscdevice cryptodev = {
-#if defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE)
 	.minor = CRYPTODEV_MINOR,
-#else /* CONFIG_SYNO_ALPINE */
+#else /* MY_DEF_HERE */
 	.minor = MISC_DYNAMIC_MINOR,
-#endif /* CONFIG_SYNO_ALPINE */
+#endif /* MY_DEF_HERE */
 	.name = "crypto",
 	.fops = &cryptodev_fops,
 	.mode = S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH,

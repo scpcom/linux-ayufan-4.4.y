@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * OF helpers for regulator framework
  *
@@ -16,12 +19,12 @@
 #include <linux/regulator/machine.h>
 #include <linux/regulator/of_regulator.h>
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 const char *const regulator_states[PM_SUSPEND_MAX + 1] = {
 	[PM_SUSPEND_MEM]	= "regulator-state-mem",
 	[PM_SUSPEND_MAX]	= "regulator-state-disk",
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 
 static void of_get_regulation_constraints(struct device_node *np,
 					struct regulator_init_data **init_data)
@@ -29,11 +32,11 @@ static void of_get_regulation_constraints(struct device_node *np,
 	const __be32 *min_uV, *max_uV, *uV_offset;
 	const __be32 *min_uA, *max_uA, *ramp_delay;
 	struct regulation_constraints *constraints = &(*init_data)->constraints;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 	struct regulator_state *suspend_state;
 	struct device_node *suspend_np;
 	int i;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 
 	constraints->name = of_get_property(np, "regulator-name", NULL);
 
@@ -77,7 +80,7 @@ static void of_get_regulation_constraints(struct device_node *np,
 	if (ramp_delay)
 		constraints->ramp_delay = be32_to_cpu(*ramp_delay);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 	for (i = 0; i < ARRAY_SIZE(regulator_states); i++) {
 		switch (i) {
 		case PM_SUSPEND_MEM:
@@ -108,7 +111,7 @@ static void of_get_regulation_constraints(struct device_node *np,
 		suspend_state = NULL;
 		suspend_np = NULL;
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 }
 
 /**

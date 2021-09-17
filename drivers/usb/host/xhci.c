@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * xHCI host controller driver
  *
@@ -27,9 +30,9 @@
 #include <linux/moduleparam.h>
 #include <linux/slab.h>
 #include <linux/dmi.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 #include <linux/kthread.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 #include "xhci.h"
 
@@ -170,7 +173,7 @@ int xhci_reset(struct xhci_hcd *xhci)
 	command |= CMD_RESET;
 	xhci_writel(xhci, command, &xhci->op_regs->command);
 
-#ifdef CONFIG_SYNO_XHCI_RESET_DELAY
+#ifdef MY_DEF_HERE
 	mdelay(100);
 #endif
 
@@ -181,7 +184,7 @@ int xhci_reset(struct xhci_hcd *xhci)
 
 	xhci_dbg(xhci, "Wait for controller to be ready for doorbell rings\n");
 
-#ifdef CONFIG_SYNO_XHCI_RESET_DELAY
+#ifdef MY_DEF_HERE
 	mdelay(100);
 #endif
 
@@ -344,7 +347,7 @@ static void xhci_cleanup_msix(struct xhci_hcd *xhci)
 	return;
 }
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_PM
 static void xhci_msix_sync_irqs(struct xhci_hcd *xhci)
 {
@@ -356,7 +359,7 @@ static void xhci_msix_sync_irqs(struct xhci_hcd *xhci)
 	}
 }
 #endif
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 static void xhci_msix_sync_irqs(struct xhci_hcd *xhci)
 {
 	int i;
@@ -366,7 +369,7 @@ static void xhci_msix_sync_irqs(struct xhci_hcd *xhci)
 			synchronize_irq(xhci->msix_entries[i].vector);
 	}
 }
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 static int xhci_try_enable_msi(struct usb_hcd *hcd)
 {
@@ -429,17 +432,17 @@ static inline void xhci_cleanup_msix(struct xhci_hcd *xhci)
 {
 }
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_PM
 static void xhci_msix_sync_irqs(struct xhci_hcd *xhci)
 {
 }
 #endif
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 static inline void xhci_msix_sync_irqs(struct xhci_hcd *xhci)
 {
 }
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 #endif
 
@@ -619,14 +622,14 @@ static void xhci_event_ring_work(unsigned long arg)
 }
 #endif
 
-#ifdef CONFIG_SYNO_FACTORY_USB3_DISABLE
+#ifdef MY_ABC_HERE
 extern int gSynoFactoryUSB3Disable;
-#endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_FACTORY_USB_FAST_RESET
+#ifdef MY_ABC_HERE
 extern int gSynoFactoryUSBFastReset;
 extern unsigned int blk_timeout_factory; // defined in blk-timeout.c
-#endif /* CONFIG_SYNO_FACTORY_USB_FAST_RESET */
+#endif /* MY_ABC_HERE */
 
 static int xhci_run_finished(struct xhci_hcd *xhci)
 {
@@ -642,13 +645,13 @@ static int xhci_run_finished(struct xhci_hcd *xhci)
 
 	xhci_dbg(xhci, "Finished xhci_run for USB3 roothub\n");
 
-#ifdef CONFIG_SYNO_FACTORY_USB3_DISABLE
+#ifdef MY_ABC_HERE
 	if (1 == gSynoFactoryUSB3Disable) {
 		printk("xhci USB3 ports are disabled!\n");
 	}
-#endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_FACTORY_USB_FAST_RESET
+#ifdef MY_ABC_HERE
 	if (1 == gSynoFactoryUSBFastReset) {
 		printk("USB_FAST_RESET enabled!\n");
 		blk_timeout_factory = 1;
@@ -818,7 +821,7 @@ void xhci_stop(struct usb_hcd *hcd)
 	xhci_dbg(xhci, "xhci_stop completed - status = %x\n",
 		    xhci_readl(xhci, &xhci->op_regs->status));
 
-#ifdef CONFIG_SYNO_FACTORY_USB_FAST_RESET
+#ifdef MY_ABC_HERE
 	if (1 == gSynoFactoryUSBFastReset) {
 		printk("USB_FAST_RESET disabled!\n");
 		blk_timeout_factory = 0;
@@ -1425,13 +1428,13 @@ int xhci_urb_enqueue(struct usb_hcd *hcd, struct urb *urb, gfp_t mem_flags)
 					"not having streams.\n");
 			ret = -EINVAL;
 		} else {
-#ifdef CONFIG_SYNO_FORCE_EMPTY_UNAVAILABLE_XHCI_TD
+#ifdef MY_DEF_HERE
 			if (xhci->devs[slot_id]->disconnected) {
 				xhci_warn(xhci, "Ignore URB enqueuing while device "
 						"is disconnecting\n");
 				ret = -ENOTCONN;
 			} else
-#endif /* CONFIG_SYNO_FORCE_EMPTY_UNAVAILABLE_XHCI_TD */
+#endif /* MY_DEF_HERE */
 			ret = xhci_queue_bulk_tx(xhci, GFP_ATOMIC, urb,
 					slot_id, ep_index);
 		}
@@ -3571,11 +3574,11 @@ void xhci_free_dev(struct usb_hcd *hcd, struct usb_device *udev)
 {
 	struct xhci_hcd *xhci = hcd_to_xhci(hcd);
 	struct xhci_virt_device *virt_dev;
-#if defined (CONFIG_SYNO_LSP_MONACO) || defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined (MY_DEF_HERE) || defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_MONACO || CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_DEF_HERE || MY_ABC_HERE */
 	struct device *dev = hcd->self.controller;
-#endif /* CONFIG_SYNO_LSP_MONACO || CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_DEF_HERE || MY_ABC_HERE */
 	unsigned long flags;
 	u32 state;
 	int i, ret;
@@ -3586,13 +3589,13 @@ void xhci_free_dev(struct usb_hcd *hcd, struct usb_device *udev)
 	 * Decrement the counter here to allow controller to runtime suspend
 	 * if no devices remain.
 	 */
-#if defined (CONFIG_SYNO_LSP_MONACO) || defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined (MY_DEF_HERE) || defined(MY_ABC_HERE)
 	if (xhci->quirks & XHCI_RESET_ON_RESUME)
 		pm_runtime_put_noidle(hcd->self.controller);
-#else /* CONFIG_SYNO_LSP_MONACO || CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_DEF_HERE || MY_ABC_HERE */
 	if (xhci->quirks & XHCI_RESET_ON_RESUME)
 		pm_runtime_put_noidle(dev);
-#endif /* CONFIG_SYNO_LSP_MONACO || CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_DEF_HERE || MY_ABC_HERE */
 #endif
 
 	ret = xhci_check_args(hcd, udev, NULL, 0, true, __func__);
@@ -3665,19 +3668,19 @@ static int xhci_reserve_host_control_ep_resources(struct xhci_hcd *xhci)
 int xhci_alloc_dev(struct usb_hcd *hcd, struct usb_device *udev)
 {
 	struct xhci_hcd *xhci = hcd_to_xhci(hcd);
-#if defined (CONFIG_SYNO_LSP_MONACO) || defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined (MY_DEF_HERE) || defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_MONACO || CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_DEF_HERE || MY_ABC_HERE */
 	struct device *dev = hcd->self.controller;
-#endif /* CONFIG_SYNO_LSP_MONACO || CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_DEF_HERE || MY_ABC_HERE */
 	unsigned long flags;
 	int timeleft;
 	int ret;
 	union xhci_trb *cmd_trb;
 
-#ifdef CONFIG_SYNO_USB3_RESET_WAIT
+#ifdef MY_ABC_HERE
 	msleep(1000); // wait device ready
-#endif /* CONFIG_SYNO_USB3_RESET_WAIT */
+#endif /* MY_ABC_HERE */
 
 	spin_lock_irqsave(&xhci->lock, flags);
 	cmd_trb = xhci_find_next_enqueue(xhci->cmd_ring);
@@ -3732,13 +3735,13 @@ int xhci_alloc_dev(struct usb_hcd *hcd, struct usb_device *udev)
 	 * If resetting upon resume, we can't put the controller into runtime
 	 * suspend if there is a device attached.
 	 */
-#if defined (CONFIG_SYNO_LSP_MONACO) || defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined (MY_DEF_HERE) || defined(MY_ABC_HERE)
 	if (xhci->quirks & XHCI_RESET_ON_RESUME)
 		pm_runtime_get_noresume(hcd->self.controller);
-#else /* CONFIG_SYNO_LSP_MONACO || CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_DEF_HERE || MY_ABC_HERE */
 	if (xhci->quirks & XHCI_RESET_ON_RESUME)
 		pm_runtime_get_noresume(dev);
-#endif /* CONFIG_SYNO_LSP_MONACO || CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_DEF_HERE || MY_ABC_HERE */
 #endif
 
 	/* Is this a LS or FS device under a HS hub? */
@@ -3753,7 +3756,7 @@ disable_slot:
 	spin_unlock_irqrestore(&xhci->lock, flags);
 	return 0;
 }
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 
 /*
  * Issue an Address Device command and optionally send a corresponding
@@ -3766,7 +3769,7 @@ disable_slot:
  */
 static int xhci_setup_device(struct usb_hcd *hcd, struct usb_device *udev,
 			     enum xhci_setup_dev setup)
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 
 /*
  * Issue an Address Device command (which will issue a SetAddress request to
@@ -3778,7 +3781,7 @@ static int xhci_setup_device(struct usb_hcd *hcd, struct usb_device *udev,
  * uses address 1 for the root hubs (even though they're not really devices).
  */
 int xhci_address_device(struct usb_hcd *hcd, struct usb_device *udev)
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 {
 	unsigned long flags;
 	int timeleft;
@@ -3828,13 +3831,13 @@ int xhci_address_device(struct usb_hcd *hcd, struct usb_device *udev)
 
 	spin_lock_irqsave(&xhci->lock, flags);
 	cmd_trb = xhci_find_next_enqueue(xhci->cmd_ring);
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	ret = xhci_queue_address_device(xhci, virt_dev->in_ctx->dma,
 					udev->slot_id, setup);
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 	ret = xhci_queue_address_device(xhci, virt_dev->in_ctx->dma,
 					udev->slot_id);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	if (ret) {
 		spin_unlock_irqrestore(&xhci->lock, flags);
 		xhci_dbg(xhci, "FIXME: allocate a command ring segment\n");
@@ -3920,7 +3923,7 @@ int xhci_address_device(struct usb_hcd *hcd, struct usb_device *udev)
 
 	return 0;
 }
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 
 int xhci_address_device(struct usb_hcd *hcd, struct usb_device *udev)
 {
@@ -3931,7 +3934,7 @@ int xhci_enable_device(struct usb_hcd *hcd, struct usb_device *udev)
 {
 	return xhci_setup_device(hcd, udev, SETUP_CONTEXT_ONLY);
 }
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 /*
  * Transfer the port index into real index in the HW port status
@@ -4258,7 +4261,7 @@ static u16 xhci_get_timeout_no_hub_lpm(struct usb_device *udev,
 				state_name, pel);
 	return USB3_LPM_DISABLED;
 }
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 
 /* The U1 timeout should be the maximum of the following values:
  *  - For control endpoints, U1 system exit latency (SEL) * 3
@@ -4271,7 +4274,7 @@ static u16 xhci_get_timeout_no_hub_lpm(struct usb_device *udev,
 static unsigned long long xhci_calculate_intel_u1_timeout(
 		struct usb_device *udev,
 		struct usb_endpoint_descriptor *desc)
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 
 /* Returns the hub-encoded U1 timeout value.
  * The U1 timeout should be the maximum of the following values:
@@ -4284,7 +4287,7 @@ static unsigned long long xhci_calculate_intel_u1_timeout(
  */
 static u16 xhci_calculate_intel_u1_timeout(struct usb_device *udev,
 		struct usb_endpoint_descriptor *desc)
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 {
 	unsigned long long timeout_ns;
 	int ep_type;
@@ -4315,9 +4318,9 @@ static u16 xhci_calculate_intel_u1_timeout(struct usb_device *udev,
 		return 0;
 	}
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	return timeout_ns;
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 	/* The U1 timeout is encoded in 1us intervals. */
 	timeout_ns = DIV_ROUND_UP_ULL(timeout_ns, 1000);
 	/* Don't return a timeout of zero, because that's USB3_LPM_DISABLED. */
@@ -4332,10 +4335,10 @@ static u16 xhci_calculate_intel_u1_timeout(struct usb_device *udev,
 	dev_dbg(&udev->dev, "Hub-initiated U1 disabled "
 			"due to long timeout %llu ms\n", timeout_ns);
 	return xhci_get_timeout_no_hub_lpm(udev, USB3_LPM_U1);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 }
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 /* Returns the hub-encoded U1 timeout value. */
 static u16 xhci_calculate_u1_timeout(struct xhci_hcd *xhci,
 		struct usb_device *udev,
@@ -4365,9 +4368,9 @@ static u16 xhci_calculate_u1_timeout(struct xhci_hcd *xhci,
 			"due to long timeout %llu ms\n", timeout_ns);
 	return xhci_get_timeout_no_hub_lpm(udev, USB3_LPM_U1);
 }
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 /* The U2 timeout should be the maximum of:
  *  - 10 ms (to avoid the bandwidth impact on the scheduler)
  *  - largest bInterval of any active periodic endpoint (to avoid going
@@ -4377,7 +4380,7 @@ static u16 xhci_calculate_u1_timeout(struct xhci_hcd *xhci,
 static unsigned long long xhci_calculate_intel_u2_timeout(
 		struct usb_device *udev,
 		struct usb_endpoint_descriptor *desc)
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 
 /* Returns the hub-encoded U2 timeout value.
  * The U2 timeout should be the maximum of:
@@ -4388,7 +4391,7 @@ static unsigned long long xhci_calculate_intel_u2_timeout(
  */
 static u16 xhci_calculate_intel_u2_timeout(struct usb_device *udev,
 		struct usb_endpoint_descriptor *desc)
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 {
 	unsigned long long timeout_ns;
 	unsigned long long u2_del_ns;
@@ -4403,9 +4406,9 @@ static u16 xhci_calculate_intel_u2_timeout(struct usb_device *udev,
 	if (u2_del_ns > timeout_ns)
 		timeout_ns = u2_del_ns;
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	return timeout_ns;
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 	/* The U2 timeout is encoded in 256us intervals */
 	timeout_ns = DIV_ROUND_UP_ULL(timeout_ns, 256 * 1000);
 	/* If the necessary timeout value is bigger than what we can set in the
@@ -4416,10 +4419,10 @@ static u16 xhci_calculate_intel_u2_timeout(struct usb_device *udev,
 	dev_dbg(&udev->dev, "Hub-initiated U2 disabled "
 			"due to long timeout %llu ms\n", timeout_ns);
 	return xhci_get_timeout_no_hub_lpm(udev, USB3_LPM_U2);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 }
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 /* Returns the hub-encoded U2 timeout value. */
 static u16 xhci_calculate_u2_timeout(struct xhci_hcd *xhci,
 		struct usb_device *udev,
@@ -4444,7 +4447,7 @@ static u16 xhci_calculate_u2_timeout(struct xhci_hcd *xhci,
 	return xhci_get_timeout_no_hub_lpm(udev, USB3_LPM_U2);
 }
 
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 static u16 xhci_call_host_update_timeout_for_endpoint(struct xhci_hcd *xhci,
 		struct usb_device *udev,
@@ -4452,12 +4455,12 @@ static u16 xhci_call_host_update_timeout_for_endpoint(struct xhci_hcd *xhci,
 		enum usb3_link_state state,
 		u16 *timeout)
 {
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	if (state == USB3_LPM_U1)
 		return xhci_calculate_u1_timeout(xhci, udev, desc);
 	else if (state == USB3_LPM_U2)
 		return xhci_calculate_u2_timeout(xhci, udev, desc);
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 	if (state == USB3_LPM_U1) {
 		if (xhci->quirks & XHCI_INTEL_HOST)
 			return xhci_calculate_intel_u1_timeout(udev, desc);
@@ -4465,7 +4468,7 @@ static u16 xhci_call_host_update_timeout_for_endpoint(struct xhci_hcd *xhci,
 		if (xhci->quirks & XHCI_INTEL_HOST)
 			return xhci_calculate_intel_u2_timeout(udev, desc);
 	}
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 	return USB3_LPM_DISABLED;
 }
@@ -4542,12 +4545,12 @@ static int xhci_check_tier_policy(struct xhci_hcd *xhci,
 {
 	if (xhci->quirks & XHCI_INTEL_HOST)
 		return xhci_check_intel_tier_policy(udev, state);
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	else
 		return 0;
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 	return -EINVAL;
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 }
 
 /* Returns the U1 or U2 timeout that should be enabled.
@@ -4892,7 +4895,7 @@ int xhci_get_frame(struct usb_hcd *hcd)
 	return xhci_readl(xhci, &xhci->run_regs->microframe_index) >> 3;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 static struct task_struct *kxhcd_task;
 static DECLARE_WAIT_QUEUE_HEAD(kxhcd_wait);
 static int __init xhci_hcd_init(void);
@@ -4981,18 +4984,18 @@ static int xhc_thread(void *data)
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 int xhci_gen_setup(struct usb_hcd *hcd, xhci_get_quirks_t get_quirks)
 {
 	struct xhci_hcd		*xhci;
 	struct device		*dev = hcd->self.controller;
 	int			retval;
-#if defined (CONFIG_SYNO_LSP_MONACO) || defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined (MY_DEF_HERE) || defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_MONACO || CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_DEF_HERE || MY_ABC_HERE */
 	u32			temp;
-#endif /* CONFIG_SYNO_LSP_MONACO || CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_DEF_HERE || MY_ABC_HERE */
 
 	/* Accept arbitrarily long scatter-gather lists */
 	hcd->self.sg_tablesize = ~0;
@@ -5020,9 +5023,9 @@ int xhci_gen_setup(struct usb_hcd *hcd, xhci_get_quirks_t get_quirks)
 		/* xHCI private pointer was set in xhci_pci_probe for the second
 		 * registered roothub.
 		 */
-#if defined (CONFIG_SYNO_LSP_MONACO) || defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined (MY_DEF_HERE) || defined(MY_ABC_HERE)
 		// do nothing
-#else /* CONFIG_SYNO_LSP_MONACO || CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_DEF_HERE || MY_ABC_HERE */
 		xhci = hcd_to_xhci(hcd);
 		temp = xhci_readl(xhci, &xhci->cap_regs->hcc_params);
 		if (HCC_64BIT_ADDR(temp)) {
@@ -5031,18 +5034,18 @@ int xhci_gen_setup(struct usb_hcd *hcd, xhci_get_quirks_t get_quirks)
 		} else {
 			dma_set_mask(hcd->self.controller, DMA_BIT_MASK(32));
 		}
-#endif /* CONFIG_SYNO_LSP_MONACO || CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_DEF_HERE || MY_ABC_HERE */
 		return 0;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	kxhcd_task = kthread_run(xhc_thread, xhci, "kxhcd");
 
 	if (IS_ERR(kxhcd_task)) {
 		xhci_warn(xhci, "unable to start kxhcd\n");
 		return -ENOMEM;
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	xhci->cap_regs = hcd->regs;
 	xhci->op_regs = hcd->regs +
@@ -5079,7 +5082,7 @@ int xhci_gen_setup(struct usb_hcd *hcd, xhci_get_quirks_t get_quirks)
 		goto error;
 	xhci_dbg(xhci, "Reset complete\n");
 
-#if defined (CONFIG_SYNO_LSP_MONACO) || defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined (MY_DEF_HERE) || defined(MY_ABC_HERE)
 	/* Set dma_mask and coherent_dma_mask to 64-bits,
 	 * if xHC supports 64-bit addressing */
 	if (HCC_64BIT_ADDR(xhci->hcc_params) &&
@@ -5087,7 +5090,7 @@ int xhci_gen_setup(struct usb_hcd *hcd, xhci_get_quirks_t get_quirks)
 		xhci_dbg(xhci, "Enabling 64-bit DMA addresses.\n");
 		dma_set_coherent_mask(dev, DMA_BIT_MASK(64));
 	}
-#else /* CONFIG_SYNO_LSP_MONACO || CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_DEF_HERE || MY_ABC_HERE */
 	temp = xhci_readl(xhci, &xhci->cap_regs->hcc_params);
 	if (HCC_64BIT_ADDR(temp)) {
 		xhci_dbg(xhci, "Enabling 64-bit DMA addresses.\n");
@@ -5095,7 +5098,7 @@ int xhci_gen_setup(struct usb_hcd *hcd, xhci_get_quirks_t get_quirks)
 	} else {
 		dma_set_mask(hcd->self.controller, DMA_BIT_MASK(32));
 	}
-#endif /* CONFIG_SYNO_LSP_MONACO || CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_DEF_HERE || MY_ABC_HERE */
 
 	xhci_dbg(xhci, "Calling HCD init\n");
 	/* Initialize HCD and host controller data structures. */
@@ -5153,9 +5156,9 @@ module_init(xhci_hcd_init);
 
 static void __exit xhci_hcd_cleanup(void)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	kthread_stop(kxhcd_task);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	xhci_unregister_pci();
 	xhci_unregister_plat();
 }

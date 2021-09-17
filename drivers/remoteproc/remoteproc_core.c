@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Remote Processor Framework
  *
@@ -35,9 +38,9 @@
 #include <linux/debugfs.h>
 #include <linux/remoteproc.h>
 #include <linux/iommu.h>
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 #include <linux/io.h>
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 #include <linux/idr.h>
 #include <linux/elf.h>
 #include <linux/crc32.h>
@@ -57,9 +60,9 @@ static DEFINE_IDA(rproc_dev_index);
 
 static const char * const rproc_crash_names[] = {
 	[RPROC_MMUFAULT]	= "mmufault",
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	[RPROC_WATCHDOG]	= "watchdog timeout",
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 };
 
 /* translate rproc_crash_type to string */
@@ -511,18 +514,18 @@ static int rproc_handle_devmem(struct rproc *rproc, struct fw_rsc_devmem *rsc,
 		return -ENOMEM;
 	}
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	if (rproc->domain) {
 		ret = iommu_map(rproc->domain, rsc->da, rsc->pa, rsc->len,
 				rsc->flags);
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 	ret = iommu_map(rproc->domain, rsc->da, rsc->pa, rsc->len, rsc->flags);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	if (ret) {
 		dev_err(dev, "failed to map devmem: %d\n", ret);
 		goto out;
 	}
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	} else {
 		mapping->va = ioremap(rsc->pa, rsc->len);
 		if (!mapping->va) {
@@ -531,7 +534,7 @@ static int rproc_handle_devmem(struct rproc *rproc, struct fw_rsc_devmem *rsc,
 			goto out;
 		}
 	}
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 	/*
 	 * We'll need this info later when we'll want to unmap everything
@@ -603,8 +606,8 @@ static int rproc_handle_carveout(struct rproc *rproc,
 		return -ENOMEM;
 	}
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
-#else /* CONFIG_SYNO_LSP_MONACO */
+#if defined (MY_DEF_HERE)
+#else /* MY_DEF_HERE */
 	va = dma_alloc_coherent(dev->parent, rsc->len, &dma, GFP_KERNEL);
 	if (!va) {
 		dev_err(dev->parent, "dma_alloc_coherent err: %d\n", rsc->len);
@@ -614,7 +617,7 @@ static int rproc_handle_carveout(struct rproc *rproc,
 
 	dev_dbg(dev, "carveout va %p, dma %llx, len 0x%x\n", va,
 					(unsigned long long)dma, rsc->len);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 	/*
 	 * Ok, this is non-standard.
@@ -634,7 +637,7 @@ static int rproc_handle_carveout(struct rproc *rproc,
 	 * physical address in this case.
 	 */
 	if (rproc->domain) {
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 
 		va = dma_alloc_coherent(dev->parent, rsc->len, &dma,
 					GFP_KERNEL);
@@ -645,7 +648,7 @@ static int rproc_handle_carveout(struct rproc *rproc,
 			goto free_carv;
 		}
 
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 		mapping = kzalloc(sizeof(*mapping), GFP_KERNEL);
 		if (!mapping) {
 			dev_err(dev, "kzalloc mapping failed\n");
@@ -673,7 +676,7 @@ static int rproc_handle_carveout(struct rproc *rproc,
 
 		dev_dbg(dev, "carveout mapped 0x%x to 0x%llx\n",
 					rsc->da, (unsigned long long)dma);
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	} else {
 		/*
 		 * Without a DMA we fall back to using ioremap.
@@ -690,13 +693,13 @@ static int rproc_handle_carveout(struct rproc *rproc,
 		 * will be unmapped on shutdown.
 		 */
 		dma = 0;
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	}
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 
 	dev_dbg(dev, "carveout va %p, dma %llx, len 0x%x\n", va,
 					(unsigned long long)dma, rsc->len);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 	/*
 	 * Some remote processors might need to know the pa
@@ -824,15 +827,15 @@ static void rproc_resource_cleanup(struct rproc *rproc)
 
 	/* clean up carveout allocations */
 	list_for_each_entry_safe(entry, tmp, &rproc->carveouts, node) {
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 		if (entry->dma)
 			dma_free_coherent(dev->parent, entry->len, entry->va,
 					  entry->dma);
 		else
 			iounmap(entry->va);
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 		dma_free_coherent(dev->parent, entry->len, entry->va, entry->dma);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 		list_del(&entry->node);
 		kfree(entry);
 	}
@@ -841,7 +844,7 @@ static void rproc_resource_cleanup(struct rproc *rproc)
 	list_for_each_entry_safe(entry, tmp, &rproc->mappings, node) {
 		size_t unmapped;
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 		if (rproc->domain) {
 			unmapped = iommu_unmap(rproc->domain, entry->da,
 					       entry->len);
@@ -852,14 +855,14 @@ static void rproc_resource_cleanup(struct rproc *rproc)
 		}
 		} else
 			iounmap(entry->va);
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 		unmapped = iommu_unmap(rproc->domain, entry->da, entry->len);
 		if (unmapped != entry->len) {
 			/* nothing much to do besides complaining */
 			dev_err(dev, "failed to unmap %u/%zu\n", entry->len,
 								unmapped);
 		}
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 		list_del(&entry->node);
 		kfree(entry);

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Algorithm testing framework and tests.
  *
@@ -14098,7 +14101,7 @@ static struct aead_testvec hmac_sha256_aes_cbc_enc_tv_template[] = {
 	},
 };
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #define HMAC_SHA384_AES_CBC_ENC_TEST_VECTORS 7
 
 static struct aead_testvec hmac_sha384_aes_cbc_enc_tv_template[] = {
@@ -14392,7 +14395,7 @@ static struct aead_testvec hmac_sha384_aes_cbc_enc_tv_template[] = {
 	},
 };
 
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 static struct aead_testvec hmac_sha512_aes_cbc_enc_tv_template[] = {
 	{ /* RFC 3602 Case 1 */

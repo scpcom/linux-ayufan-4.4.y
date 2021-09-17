@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2013 STMicroelectronics
  *
@@ -111,12 +114,12 @@ static const struct miphy_initval miphylp28_initvals_sata[] = {
 	/* Number of PLL Calibrations */
 	{0xd3, 0x00},
 	/* Unbanked Settings */
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	{0x4e, 0xd1}, {0x99, 0x5f}, {0x0a, 0x40},
 	{0x97, 0xc0},
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	{0x4e, 0xd1}, {0x99, 0x1f}, {0x0a, 0x40},
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	/* Banked settings */
 	/* Gen 1 */
 	{0x0f, 0x00},
@@ -140,10 +143,10 @@ static const struct miphy_initval miphylp28_initvals_sata[] = {
 	/* Poll for HFC ready after reset release */
 	/* Compensation measurement */
 	{0x01, 0x05}, {0xe9, 0x00}, {0x3a, 0x40}, {0x01, 0x00}, {0xe9, 0x40},
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	/* Enable Rx bias boost */
 	{0x62, 0x02}, {0x65, 0xC0},
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 };
 
 static const struct miphy_initval miphylp28_initvals0_pcie[] = {
@@ -233,9 +236,9 @@ static inline int miphy_is_ready(struct miphy28lp_phy *phy_miphy)
 	unsigned long finish = jiffies + 5 * HZ;
 	u8 mask = MIPHY_PLL_HFC_RDY;
 	u8 val;
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	bool phyrdy = false, offcmp = false;
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	struct miphy28lp_dev *miphy_dev = to_miphy28lp_dev(phy_miphy);
 
 	/*
@@ -250,7 +253,7 @@ static inline int miphy_is_ready(struct miphy28lp_phy *phy_miphy)
 		if ((val & mask) != mask)
 			cpu_relax();
 		else
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 			phyrdy = true;
 	} while ((phyrdy == false) && (!time_after_eq(jiffies, finish)));
 
@@ -291,12 +294,12 @@ static inline int miphy_is_ready(struct miphy28lp_phy *phy_miphy)
 		return -EBUSY;
 
 	return 0;
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 			return 0;
 	} while (!time_after_eq(jiffies, finish));
 
 	return -EBUSY;
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 }
 
 static int miphy_osc_is_ready(struct miphy28lp_dev *miphy_dev)

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Memory-mapped interface driver for DW SPI Core
  *
@@ -16,9 +19,9 @@
 #include <linux/spi/spi.h>
 #include <linux/scatterlist.h>
 #include <linux/module.h>
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #include <linux/of.h>
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 #include "spi-dw.h"
 
@@ -35,9 +38,9 @@ static int dw_spi_mmio_probe(struct platform_device *pdev)
 	struct dw_spi *dws;
 	struct resource *mem, *ioarea;
 	int ret;
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	int num_cs, bus_num;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 	dwsmmio = kzalloc(sizeof(struct dw_spi_mmio), GFP_KERNEL);
 	if (!dwsmmio) {
@@ -84,7 +87,7 @@ static int dw_spi_mmio_probe(struct platform_device *pdev)
 	}
 	clk_enable(dwsmmio->clk);
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	ret = of_property_read_u32(pdev->dev.of_node, "bus-num", &bus_num);
 	if (ret < 0)
 		dws->bus_num = 0;
@@ -98,11 +101,11 @@ static int dw_spi_mmio_probe(struct platform_device *pdev)
 		dws->num_cs = num_cs;
 
 	dws->parent_dev = &pdev->dev;
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	dws->parent_dev = &pdev->dev;
 	dws->bus_num = 0;
 	dws->num_cs = 4;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	dws->max_freq = clk_get_rate(dwsmmio->clk);
 
 	ret = dw_spi_add_host(dws);
@@ -149,13 +152,13 @@ static int dw_spi_mmio_remove(struct platform_device *pdev)
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 static struct of_device_id dw_spi_mmio_of_match[] = {
 		{ .compatible = "snps,dw-spi-mmio", },
 		{ /* sentinel */}
 };
 MODULE_DEVICE_TABLE(of, dw_spi_mmio_of_match);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 static struct platform_driver dw_spi_mmio_driver = {
 	.probe		= dw_spi_mmio_probe,
@@ -163,9 +166,9 @@ static struct platform_driver dw_spi_mmio_driver = {
 	.driver		= {
 		.name	= DRIVER_NAME,
 		.owner	= THIS_MODULE,
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 		.of_match_table = dw_spi_mmio_of_match,
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	},
 };
 module_platform_driver(dw_spi_mmio_driver);

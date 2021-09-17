@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /**
  * eCryptfs: Linux filesystem encryption layer
  * In-kernel key management code.  Includes functions to parse and
@@ -46,9 +49,9 @@ static int process_request_key_err(long err_code)
 
 	switch (err_code) {
 	case -ENOKEY:
-#ifdef CONFIG_SYNO_ECRYPTFS_SKIP_AUTH_WARNING
+#ifdef MY_ABC_HERE
 		if (printk_ratelimit())
-#endif /* CONFIG_SYNO_ECRYPTFS_SKIP_AUTH_WARNING */
+#endif /* MY_ABC_HERE */
 		ecryptfs_printk(KERN_WARNING, "No key\n");
 		rc = -ENOENT;
 		break;
@@ -990,9 +993,9 @@ ecryptfs_parse_tag_70_packet(char **filename, size_t *filename_size,
 					    &s->auth_tok, mount_crypt_stat,
 					    s->fnek_sig_hex);
 	if (rc) {
-#ifdef CONFIG_SYNO_ECRYPTFS_SKIP_AUTH_WARNING
+#ifdef MY_ABC_HERE
 		if (printk_ratelimit())
-#endif /* CONFIG_SYNO_ECRYPTFS_SKIP_AUTH_WARNING */
+#endif /* MY_ABC_HERE */
 		printk(KERN_ERR "%s: Error attempting to find auth tok for "
 		       "fnek sig [%s]; rc = [%d]\n", __func__, s->fnek_sig_hex,
 		       rc);
@@ -1253,14 +1256,14 @@ parse_tag_1_packet(struct ecryptfs_crypt_stat *crypt_stat,
 	size_t body_size;
 	struct ecryptfs_auth_tok_list_item *auth_tok_list_item;
 	size_t length_size;
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	u8 tag_version;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	int rc = 0;
 
 	(*packet_size) = 0;
 	(*new_auth_tok) = NULL;
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	/**
 	 * This format is inspired by OpenPGP; see RFC 2440
 	 * packet tag 1
@@ -1274,7 +1277,7 @@ parse_tag_1_packet(struct ecryptfs_crypt_stat *crypt_stat,
 	 *
 	 * 12 bytes minimum packet size
 	 */
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	/**
 	 * This format is inspired by OpenPGP; see RFC 2440
 	 * packet tag 1
@@ -1288,7 +1291,7 @@ parse_tag_1_packet(struct ecryptfs_crypt_stat *crypt_stat,
 	 *
 	 * 12 bytes minimum packet size
 	 */
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	if (unlikely(max_packet_size < 12)) {
 		printk(KERN_ERR "Invalid max packet size; must be >=12\n");
 		rc = -EINVAL;
@@ -1329,23 +1332,23 @@ parse_tag_1_packet(struct ecryptfs_crypt_stat *crypt_stat,
 		rc = -EINVAL;
 		goto out_free;
 	}
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	tag_version = data[(*packet_size)++];
 	if (unlikely(tag_version != 0x03 && tag_version != 0x04)) {
 		printk(KERN_WARNING "Unknown version number [%d]\n",
 		       tag_version);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	if (unlikely(data[(*packet_size)++] != 0x03)) {
 		printk(KERN_WARNING "Unknown version number [%d]\n",
 		       data[(*packet_size) - 1]);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 		rc = -EINVAL;
 		goto out_free;
 	}
 	ecryptfs_to_hex((*new_auth_tok)->token.private_key.signature,
 			&data[(*packet_size)], ECRYPTFS_SIG_SIZE);
 	*packet_size += ECRYPTFS_SIG_SIZE;
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	if (tag_version == 0x03) {
 		/* This byte is skipped because the kernel does not need to
 		 * know which public key encryption algorithm was used */
@@ -1360,11 +1363,11 @@ parse_tag_1_packet(struct ecryptfs_crypt_stat *crypt_stat,
 		if (rc)
 			goto out_free;
 	}
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	/* This byte is skipped because the kernel does not need to
 	 * know which public key encryption algorithm was used */
 	(*packet_size)++;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	(*new_auth_tok)->session_key.encrypted_key_size =
 		body_size - (ECRYPTFS_SIG_SIZE + 2);
 	if ((*new_auth_tok)->session_key.encrypted_key_size
@@ -1428,15 +1431,15 @@ parse_tag_3_packet(struct ecryptfs_crypt_stat *crypt_stat,
 	size_t body_size;
 	struct ecryptfs_auth_tok_list_item *auth_tok_list_item;
 	size_t length_size;
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	size_t min_body_size;
 	u8 file_version;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	int rc = 0;
 
 	(*packet_size) = 0;
 	(*new_auth_tok) = NULL;
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	/* This format is inspired by OpenPGP; see RFC 2440
 	 * packet tag 3
 	 *
@@ -1468,7 +1471,7 @@ parse_tag_3_packet(struct ecryptfs_crypt_stat *crypt_stat,
 	 *
 	 * (ECRYPTFS_SALT_SIZE + 7) minimum packet size
 	 */
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	/**
 	 *This format is inspired by OpenPGP; see RFC 2440
 	 * packet tag 3
@@ -1485,9 +1488,9 @@ parse_tag_3_packet(struct ecryptfs_crypt_stat *crypt_stat,
 	 *
 	 * (ECRYPTFS_SALT_SIZE + 7) minimum packet size
 	 */
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	/* Holds the minimum amount of data for a version 0x04 packet */
 	min_body_size = (1 /* Version */
 			   + 1 /* Cipher Code */
@@ -1496,7 +1499,7 @@ parse_tag_3_packet(struct ecryptfs_crypt_stat *crypt_stat,
 			   + ECRYPTFS_SALT_SIZE
 			   + 1 /* Hash Iterations */
 			  );
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 	if (max_packet_size < (ECRYPTFS_SALT_SIZE + 7)) {
 		printk(KERN_ERR "Max packet size too large\n");
@@ -1526,11 +1529,11 @@ parse_tag_3_packet(struct ecryptfs_crypt_stat *crypt_stat,
 		       rc);
 		goto out_free;
 	}
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	if (unlikely(body_size < min_body_size)) {
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	if (unlikely(body_size < (ECRYPTFS_SALT_SIZE + 5))) {
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 		printk(KERN_WARNING "Invalid body size ([%td])\n", body_size);
 		rc = -EINVAL;
 		goto out_free;
@@ -1541,7 +1544,7 @@ parse_tag_3_packet(struct ecryptfs_crypt_stat *crypt_stat,
 		rc = -EINVAL;
 		goto out_free;
 	}
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	file_version = data[(*packet_size)++];
 	if (unlikely(file_version != 0x04 && file_version != 0x05)) {
 		printk(KERN_WARNING "Unknown version number [%d]\n",
@@ -1555,10 +1558,10 @@ parse_tag_3_packet(struct ecryptfs_crypt_stat *crypt_stat,
 	}
 	(*new_auth_tok)->session_key.encrypted_key_size =
 			body_size - min_body_size;
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	(*new_auth_tok)->session_key.encrypted_key_size =
 		(body_size - (ECRYPTFS_SALT_SIZE + 5));
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	if ((*new_auth_tok)->session_key.encrypted_key_size
 	    > ECRYPTFS_MAX_ENCRYPTED_KEY_BYTES) {
 		printk(KERN_WARNING "Tag 3 packet contains key larger "
@@ -1566,16 +1569,16 @@ parse_tag_3_packet(struct ecryptfs_crypt_stat *crypt_stat,
 		rc = -EINVAL;
 		goto out_free;
 	}
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	if (unlikely(data[(*packet_size)++] != 0x04)) {
 		printk(KERN_WARNING "Unknown version number [%d]\n",
 		       data[(*packet_size) - 1]);
 		rc = -EINVAL;
 		goto out_free;
 	}
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	rc = ecryptfs_cipher_code_to_string(crypt_stat->cipher,
 					    (u16)data[(*packet_size)]);
 	if (rc)
@@ -1590,7 +1593,7 @@ parse_tag_3_packet(struct ecryptfs_crypt_stat *crypt_stat,
 		crypt_stat->key_size =
 			(*new_auth_tok)->session_key.encrypted_key_size;
 	}
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	/* Read the cipher mode if it is present */
 	if (file_version != 0x04) {
 		rc = ecryptfs_cipher_mode_code_to_string(
@@ -1601,7 +1604,7 @@ parse_tag_3_packet(struct ecryptfs_crypt_stat *crypt_stat,
 	} else {
 		strcpy(crypt_stat->cipher_mode, "cbc");
 	}
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 	rc = ecryptfs_init_crypt_ctx(crypt_stat);
 	if (rc)
@@ -1770,9 +1773,9 @@ int ecryptfs_keyring_auth_tok_for_sig(struct key **auth_tok_key,
 	if (!(*auth_tok_key) || IS_ERR(*auth_tok_key)) {
 		(*auth_tok_key) = ecryptfs_get_encrypted_key(sig);
 		if (!(*auth_tok_key) || IS_ERR(*auth_tok_key)) {
-#ifdef CONFIG_SYNO_ECRYPTFS_SKIP_AUTH_WARNING
+#ifdef MY_ABC_HERE
 			if (printk_ratelimit())
-#endif /* CONFIG_SYNO_ECRYPTFS_SKIP_AUTH_WARNING */
+#endif /* MY_ABC_HERE */
 			printk(KERN_ERR "Could not find key with description: [%s]\n",
 			      sig);
 			rc = process_request_key_err(PTR_ERR(*auth_tok_key));
@@ -2169,9 +2172,9 @@ write_tag_1_packet(char *dest, size_t *remaining_bytes,
 	size_t encrypted_session_key_valid = 0;
 	size_t packet_size_length;
 	size_t max_packet_size;
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	u8 cipher_mode_code;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	int rc = 0;
 
 	(*packet_size) = 0;
@@ -2210,11 +2213,11 @@ encrypted_session_key_set:
 			   + 3                       /* Max Tag 1 packet size */
 			   + 1                       /* Version */
 			   + ECRYPTFS_SIG_SIZE       /* Key identifier */
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 			   + 1                       /* Cipher mode code */
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 			   + 1                       /* Cipher identifier */
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 			   + key_rec->enc_key_size); /* Encrypted key size */
 	if (max_packet_size > (*remaining_bytes)) {
 		printk(KERN_ERR "Packet length larger than maximum allowable; "
@@ -2233,7 +2236,7 @@ encrypted_session_key_set:
 		goto out;
 	}
 	(*packet_size) += packet_size_length;
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	cipher_mode_code =
 		ecryptfs_code_for_cipher_mode_string(crypt_stat->cipher_mode);
 	if (cipher_mode_code == 0) {
@@ -2256,12 +2259,12 @@ encrypted_session_key_set:
 	} else {
 		dest[(*packet_size)++] = cipher_mode_code;
 	}
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	dest[(*packet_size)++] = 0x03; /* version 3 */
 	memcpy(&dest[(*packet_size)], key_rec->sig, ECRYPTFS_SIG_SIZE);
 	(*packet_size) += ECRYPTFS_SIG_SIZE;
 	dest[(*packet_size)++] = RFC2440_CIPHER_RSA;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	memcpy(&dest[(*packet_size)], key_rec->enc_key,
 	       key_rec->enc_key_size);
 	(*packet_size) += key_rec->enc_key_size;
@@ -2359,9 +2362,9 @@ write_tag_3_packet(char *dest, size_t *remaining_bytes,
 	struct scatterlist src_sg[2];
 	struct mutex *tfm_mutex = NULL;
 	u8 cipher_code;
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	u8 cipher_mode_code;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	size_t packet_size_length;
 	size_t max_packet_size;
 	struct ecryptfs_mount_crypt_stat *mount_crypt_stat =
@@ -2487,7 +2490,7 @@ write_tag_3_packet(char *dest, size_t *remaining_bytes,
 encrypted_session_key_set:
 	/* This format is inspired by OpenPGP; see RFC 2440
 	 * packet tag 3 */
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	/* This packet format deviates from the RFC in two ways:
 	 * 1. There is an additional field describing which cipher
 	 * mode was used.
@@ -2518,7 +2521,7 @@ encrypted_session_key_set:
 		rc = -EINVAL;
 		goto out;
 	}
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 	max_packet_size = (1                         /* Tag 3 identifier */
 			   + 3                       /* Max Tag 3 packet size */
@@ -2530,11 +2533,11 @@ encrypted_session_key_set:
 			   + 1                       /* Hash iterations */
 			   + key_rec->enc_key_size); /* Encrypted key size */
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	if (cipher_mode_code != ECRYPTFS_CIPHER_MODE_CBC) {
 		max_packet_size += 1; /* Cipher mode code. 1 Byte */
 	}
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 	if (max_packet_size > (*remaining_bytes)) {
 		printk(KERN_ERR "Packet too large; need up to [%td] bytes, but "
@@ -2555,16 +2558,16 @@ encrypted_session_key_set:
 		goto out;
 	}
 	(*packet_size) += packet_size_length;
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	/* Write out tag version */
 	if (cipher_mode_code == ECRYPTFS_CIPHER_MODE_CBC) {
 			dest[(*packet_size)++] = 0x04;
 	} else {
 			dest[(*packet_size)++] = 0x05;
 	}
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	dest[(*packet_size)++] = 0x04; /* version 4 */
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	/* TODO: Break from RFC2440 so that arbitrary ciphers can be
 	 * specified with strings */
 	cipher_code = ecryptfs_code_for_cipher_string(crypt_stat->cipher,
@@ -2577,10 +2580,10 @@ encrypted_session_key_set:
 	}
 
 	dest[(*packet_size)++] = cipher_code;
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	if (cipher_mode_code != ECRYPTFS_CIPHER_MODE_CBC)
 		dest[(*packet_size)++] = cipher_mode_code;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	dest[(*packet_size)++] = 0x03;	/* S2K */
 	dest[(*packet_size)++] = 0x01;	/* MD5 (TODO: parameterize) */
 	memcpy(&dest[(*packet_size)], auth_tok->token.password.salt,

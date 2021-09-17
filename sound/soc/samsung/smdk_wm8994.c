@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  smdk_wm8994.c
  *
@@ -91,9 +94,9 @@ static int smdk_wm8994_init_paiftx(struct snd_soc_pcm_runtime *rtd)
 	struct snd_soc_codec *codec = rtd->codec;
 	struct snd_soc_dapm_context *dapm = &codec->dapm;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	/* HeadPhone */
 	snd_soc_dapm_enable_pin(dapm, "HPOUT1R");
 	snd_soc_dapm_enable_pin(dapm, "HPOUT1L");
@@ -105,7 +108,7 @@ static int smdk_wm8994_init_paiftx(struct snd_soc_pcm_runtime *rtd)
 	/* LineIn */
 	snd_soc_dapm_enable_pin(dapm, "IN2LN");
 	snd_soc_dapm_enable_pin(dapm, "IN2RN");
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	/* Other pins NC */
 	snd_soc_dapm_nc_pin(dapm, "HPOUT2P");

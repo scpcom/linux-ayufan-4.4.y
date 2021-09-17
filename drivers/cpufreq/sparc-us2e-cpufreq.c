@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* us2e_cpufreq.c: UltraSPARC-IIe cpu frequency support
  *
  * Copyright (C) 2003 David S. Miller (davem@redhat.com)
@@ -351,20 +354,20 @@ static int __init us2e_freq_init(void)
 		struct cpufreq_driver *driver;
 
 		ret = -ENOMEM;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 		driver = kzalloc(sizeof(*driver), GFP_KERNEL);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 		driver = kzalloc(sizeof(struct cpufreq_driver), GFP_KERNEL);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 		if (!driver)
 			goto err_out;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 		us2e_freq_table = kzalloc((NR_CPUS * sizeof(*us2e_freq_table)),
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 		us2e_freq_table = kzalloc(
 			(NR_CPUS * sizeof(struct us2e_freq_percpu_info)),
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 			GFP_KERNEL);
 		if (!us2e_freq_table)
 			goto err_out;
@@ -374,11 +377,11 @@ static int __init us2e_freq_init(void)
 		driver->target = us2e_freq_target;
 		driver->get = us2e_freq_get;
 		driver->exit = us2e_freq_cpu_exit;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 		// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 		driver->owner = THIS_MODULE,
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 		strcpy(driver->name, "UltraSPARC-IIe");
 
 		cpufreq_us2e_driver = driver;

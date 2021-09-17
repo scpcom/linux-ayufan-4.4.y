@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Core registration and callback routines for MTD
  * drivers and users.
@@ -379,12 +382,12 @@ int add_mtd_device(struct mtd_info *mtd)
 			       mtd->name);
 	}
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	/* Set MTD_SPANS_MASTER for non-slave MTD devices */
 	if (!(mtd->flags & MTD_SLAVE_PARTITION))
 		mtd->flags |= MTD_SPANS_MASTER;
 
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	/* Caller should have set dev.parent to match the
 	 * physical device.
 	 */

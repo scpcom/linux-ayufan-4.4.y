@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Driver for the RTC in Marvell SoCs.
  *
@@ -222,9 +225,9 @@ static int __init mv_rtc_probe(struct platform_device *pdev)
 	struct rtc_plat_data *pdata;
 	resource_size_t size;
 	u32 rtc_time;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	u32 rtc_date;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	int ret = 0;
 
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
@@ -268,7 +271,7 @@ static int __init mv_rtc_probe(struct platform_device *pdev)
 		}
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	/*
 	 * A date after January 19th, 2038 does not fit on 32 bits and
 	 * will confuse the kernel and userspace. Reset to a sane date
@@ -279,7 +282,7 @@ static int __init mv_rtc_probe(struct platform_device *pdev)
 		dev_info(&pdev->dev, "invalid RTC date, resetting to January, 1st 2013\n");
 		writel(0x130101, pdata->ioaddr + RTC_DATE_REG_OFFS);
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	pdata->irq = platform_get_irq(pdev, 0);
 

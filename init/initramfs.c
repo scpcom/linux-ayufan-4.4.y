@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Many of the syscalls used in this file expect some of the arguments
  * to be __user pointers not __kernel pointers.  To limit the sparse
@@ -467,7 +470,7 @@ static char * __init unpack_to_rootfs(char *buf, unsigned len)
 					 compress_name);
 				message = msg_buf;
 			}
-#ifdef CONFIG_SYNO_INITRAMFS_DECOMPRESS_ONCE
+#ifdef MY_ABC_HERE
 		} else {
 			/* It's workaround. For backward supporting inaccurate size of rd
 			 * in boot arguments, eg.: initrd=0x2000040,4M */

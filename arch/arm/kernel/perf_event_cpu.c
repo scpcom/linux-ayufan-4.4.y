@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -25,12 +28,12 @@
 #include <linux/platform_device.h>
 #include <linux/slab.h>
 #include <linux/spinlock.h>
-#if defined (CONFIG_SYNO_LSP_MONACO) || defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined (MY_DEF_HERE) || defined(MY_ABC_HERE)
 #include <linux/irq.h>
-#endif /* CONFIG_SYNO_LSP_MONACO || CONFIG_SYNO_LSP_ARMADA */
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#endif /* MY_DEF_HERE || MY_ABC_HERE */
+#if defined(MY_ABC_HERE)
 #include <linux/irqdesc.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 #include <asm/cputype.h>
 #include <asm/irq_regs.h>
@@ -39,9 +42,9 @@
 /* Set at runtime when we know what CPU type we are. */
 static struct arm_pmu *cpu_pmu;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static DEFINE_PER_CPU(struct arm_pmu *, percpu_pmu);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 static DEFINE_PER_CPU(struct perf_event * [ARMPMU_MAX_HWEVENTS], hw_events);
 static DEFINE_PER_CPU(unsigned long [BITS_TO_LONGS(ARMPMU_MAX_HWEVENTS)], used_mask);
 static DEFINE_PER_CPU(struct pmu_hw_events, cpu_hw_events);
@@ -80,7 +83,7 @@ static struct pmu_hw_events *cpu_pmu_get_cpu_events(void)
 	return &__get_cpu_var(cpu_hw_events);
 }
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 /* Wrap enable_percpu_irq up as a smp_call_func_t */
 static void cpu_pmu_enable_percpu_irq(void *irq)
 {
@@ -92,9 +95,9 @@ static void cpu_pmu_disable_percpu_irq(void *irq)
 {
 	disable_percpu_irq((int)irq);
 }
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static void cpu_pmu_enable_percpu_irq(void *data)
 {
 	struct arm_pmu *cpu_pmu = data;
@@ -114,7 +117,7 @@ static void cpu_pmu_disable_percpu_irq(void *data)
 	cpumask_clear_cpu(smp_processor_id(), &cpu_pmu->active_irqs);
 	disable_percpu_irq(irq);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static void cpu_pmu_free_irq(struct arm_pmu *cpu_pmu)
 {
@@ -123,7 +126,7 @@ static void cpu_pmu_free_irq(struct arm_pmu *cpu_pmu)
 
 	irqs = min(pmu_device->num_resources, num_possible_cpus());
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	irq = platform_get_irq(pmu_device, 0);
 	if (irq >= 0 && irq_is_percpu(irq)) {
 		on_each_cpu(cpu_pmu_disable_percpu_irq, cpu_pmu, 1);
@@ -136,12 +139,12 @@ static void cpu_pmu_free_irq(struct arm_pmu *cpu_pmu)
 			if (irq >= 0)
 				free_irq(irq, cpu_pmu);
 		}
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	for (i = 0; i < irqs; ++i) {
 		if (!cpumask_test_and_clear_cpu(i, &cpu_pmu->active_irqs))
 			continue;
 		irq = platform_get_irq(pmu_device, i);
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 		if (irq >= 0) {
 			if (irq_is_per_cpu(irq)) {
 				WARN_ON(irqs > 1);
@@ -151,11 +154,11 @@ static void cpu_pmu_free_irq(struct arm_pmu *cpu_pmu)
 			} else
 				free_irq(irq, &per_cpu(cpu_hw_events, i));
 		}
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 		if (irq >= 0)
 			free_irq(irq, cpu_pmu);
-#endif /* CONFIG_SYNO_LSP_MONACO */
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_DEF_HERE */
+#endif /* MY_ABC_HERE */
 	}
 }
 
@@ -173,7 +176,7 @@ static int cpu_pmu_request_irq(struct arm_pmu *cpu_pmu, irq_handler_t handler)
 		return -ENODEV;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	irq = platform_get_irq(pmu_device, 0);
 	if (irq >= 0 && irq_is_percpu(irq)) {
 		err = request_percpu_irq(irq, handler, "arm-pmu", &percpu_pmu);
@@ -210,13 +213,13 @@ static int cpu_pmu_request_irq(struct arm_pmu *cpu_pmu, irq_handler_t handler)
 				return err;
 			}
 		}
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	for (i = 0; i < irqs; ++i) {
 		err = 0;
 		irq = platform_get_irq(pmu_device, i);
 		if (irq < 0)
 			continue;
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 		if (irq_is_per_cpu(irq)) {
 			/*
 			 * We assume that if the PMU IRQ is per-cpu, then
@@ -255,7 +258,7 @@ static int cpu_pmu_request_irq(struct arm_pmu *cpu_pmu, irq_handler_t handler)
 			return err;
 		}
 		}
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 
 		/*
 		 * If we have a single PMU interrupt that we can't shift,
@@ -275,8 +278,8 @@ static int cpu_pmu_request_irq(struct arm_pmu *cpu_pmu, irq_handler_t handler)
 				irq);
 			return err;
 		}
-#endif /* CONFIG_SYNO_LSP_MONACO */
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_DEF_HERE */
+#endif /* MY_ABC_HERE */
 
 		cpumask_set_cpu(i, &cpu_pmu->active_irqs);
 	}
@@ -291,13 +294,13 @@ static void cpu_pmu_init(struct arm_pmu *cpu_pmu)
 		struct pmu_hw_events *events = &per_cpu(cpu_hw_events, cpu);
 		events->events = per_cpu(hw_events, cpu);
 		events->used_mask = per_cpu(used_mask, cpu);
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 		events->pmu = &cpu_pmu->pmu;
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 		raw_spin_lock_init(&events->pmu_lock);
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		per_cpu(percpu_pmu, cpu) = cpu_pmu;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	}
 
 	cpu_pmu->get_hw_events	= cpu_pmu_get_cpu_events;

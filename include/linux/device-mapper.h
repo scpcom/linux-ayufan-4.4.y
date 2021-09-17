@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2001 Sistina Software (UK) Limited.
  * Copyright (C) 2004-2008 Red Hat, Inc. All rights reserved.
@@ -102,11 +105,11 @@ typedef int (*iterate_devices_callout_fn) (struct dm_target *ti,
 typedef int (*dm_iterate_devices_fn) (struct dm_target *ti,
 				      iterate_devices_callout_fn fn,
 				      void *data);
-#ifdef CONFIG_SYNO_MD_FLASHCACHE_4KN_SUPPORT
+#ifdef MY_ABC_HERE
 typedef int (*dm_handle_4kn_target_support_fn) (struct dm_target *ti,
 				      iterate_devices_callout_fn fn,
 				      void *data);
-#endif /* CONFIG_SYNO_MD_FLASHCACHE_4KN_SUPPORT */
+#endif /* MY_ABC_HERE */
 
 typedef void (*dm_io_hints_fn) (struct dm_target *ti,
 				struct queue_limits *limits);
@@ -170,9 +173,9 @@ struct target_type {
 	dm_merge_fn merge;
 	dm_busy_fn busy;
 	dm_iterate_devices_fn iterate_devices;
-#ifdef CONFIG_SYNO_MD_FLASHCACHE_4KN_SUPPORT
+#ifdef MY_ABC_HERE
 	dm_handle_4kn_target_support_fn handle_4kn_target_support;
-#endif /* CONFIG_SYNO_MD_FLASHCACHE_4KN_SUPPORT */
+#endif /* MY_ABC_HERE */
 	dm_io_hints_fn io_hints;
 #ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
 	dm_lvinfoset_fn lvinfoset;
@@ -402,10 +405,10 @@ void *dm_get_mdptr(struct mapped_device *md);
  */
 int dm_suspend(struct mapped_device *md, unsigned suspend_flags);
 int dm_resume(struct mapped_device *md);
-#ifdef CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP
+#ifdef MY_ABC_HERE
 int dm_active_get(struct mapped_device *md);
 int dm_active_set(struct mapped_device *md, int value);
-#endif /* CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP */
+#endif /* MY_ABC_HERE */
 
 /*
  * Event functions.
@@ -599,7 +602,7 @@ extern struct ratelimit_state dm_ratelimit_state;
  */
 #define dm_target_offset(ti, sector) ((sector) - (ti)->begin)
 
-#ifdef CONFIG_SYNO_DM_TO_SECTOR_FIX
+#ifdef MY_DEF_HERE
 static inline sector_t to_sector(unsigned long long n)
 #else
 static inline sector_t to_sector(unsigned long n)

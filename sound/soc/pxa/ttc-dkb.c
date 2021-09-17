@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * linux/sound/soc/pxa/ttc_dkb.c
  *
@@ -78,14 +81,14 @@ static int ttc_pm860x_init(struct snd_soc_pcm_runtime *rtd)
 	struct snd_soc_codec *codec = rtd->codec;
 	struct snd_soc_dapm_context *dapm = &codec->dapm;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	/* connected pins */
 	snd_soc_dapm_enable_pin(dapm, "Ext Speaker");
 	snd_soc_dapm_enable_pin(dapm, "Ext Mic 1");
 	snd_soc_dapm_enable_pin(dapm, "Ext Mic 3");
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	snd_soc_dapm_disable_pin(dapm, "Headset Mic 2");
 	snd_soc_dapm_disable_pin(dapm, "Headset Stereophone");
 

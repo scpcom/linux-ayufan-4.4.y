@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * frontend.h
  *
@@ -363,14 +366,14 @@ struct dvb_frontend_event {
 #define DTV_STAT_ERROR_BLOCK_COUNT	68
 #define DTV_STAT_TOTAL_BLOCK_COUNT	69
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 #define DTV_RF_INPUT_SOURCE_SELECT	70
 #define DTV_RF_INPUT_SOURCE_MAX		71
 
 #define DTV_MAX_COMMAND		DTV_RF_INPUT_SOURCE_MAX
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 #define DTV_MAX_COMMAND		DTV_STAT_TOTAL_BLOCK_COUNT
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 typedef enum fe_pilot {
 	PILOT_ON,

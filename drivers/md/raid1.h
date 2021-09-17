@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _RAID1_H
 #define _RAID1_H
 
@@ -122,10 +125,10 @@ struct r1bio {
 	int			read_disk;
 
 	struct list_head	retry_list;
-#ifdef CONFIG_SYNO_MD_SECTOR_STATUS_REPORT
+#ifdef MY_ABC_HERE
 	unsigned int read_failed;
 	int orig_disk_idx;
-#endif /* CONFIG_SYNO_MD_SECTOR_STATUS_REPORT */
+#endif /* MY_ABC_HERE */
 	/* Next two are only valid when R1BIO_BehindIO is set */
 	struct bio_vec		*behind_bvecs;
 	int			behind_page_count;
@@ -133,7 +136,7 @@ struct r1bio {
 	 * if the IO is in WRITE direction, then multiple bios are used.
 	 * We choose the number when they are allocated.
 	 */
-#ifdef CONFIG_SYNO_MD_RAID1_BUGON_MAGIC_WORKAROUND
+#ifdef MY_ABC_HERE
 	/*
 	 * For issue #88948, add a dummy structure to avoid it
 	 */

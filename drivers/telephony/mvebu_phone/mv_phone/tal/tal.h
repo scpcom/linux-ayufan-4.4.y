@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 ********************************************************************************
@@ -22,9 +25,9 @@ disclaimer.
 #define _TAL_H_
 
 #include "mvOs.h"
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 #include "voiceband/tdm/mvTdm.h"
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 /* Defines */
 #define TAL_MAX_PHONE_LINES	32

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * xHCI host controller driver PCI Bus Glue.
  *
@@ -31,11 +34,11 @@
 #define PCI_DEVICE_ID_ETRON_EJ168	0x7023
 #define PCI_DEVICE_ID_ETRON_EJ188	0x7052
 
-#ifdef CONFIG_SYNO_APPLY_ETRON_DEFER_QUEUE_BULK_TD
+#ifdef MY_DEF_HERE
 static const char hcd_name[] = "etxhci_hcd_150526_syno";
 #else
 static const char hcd_name[] = "etxhci_hcd-150603d1";
-#endif /* CONFIG_SYNO_APPLY_ETRON_DEFER_QUEUE_BULK_TD */
+#endif /* MY_DEF_HERE */
 
 /* called after powerup, by probe or system-pm "wakeup" */
 static int xhci_pci_reinit(struct xhci_hcd *xhci, struct pci_dev *pdev)
@@ -67,14 +70,14 @@ static void xhci_pci_quirks(struct device *dev, struct xhci_hcd *xhci)
 		xhci_init_ejxxx(xhci);
 
 		if (pdev->device == PCI_DEVICE_ID_ETRON_EJ168)
-#ifdef CONFIG_SYNO_APPLY_ETRON_DEFER_QUEUE_BULK_TD
+#ifdef MY_DEF_HERE
 		{
-#endif  /* CONFIG_SYNO_APPLY_ETRON_DEFER_QUEUE_BULK_TD */
+#endif  /* MY_DEF_HERE */
 			hcd->chip_id = HCD_CHIP_ID_ETRON_EJ168;
-#ifdef CONFIG_SYNO_APPLY_ETRON_DEFER_QUEUE_BULK_TD
+#ifdef MY_DEF_HERE
 			xhci->quirks |= XHCI_BULK_XFER_QUIRK;
 		}
-#endif /* CONFIG_SYNO_APPLY_ETRON_DEFER_QUEUE_BULK_TD */
+#endif /* MY_DEF_HERE */
 		else if (pdev->device == PCI_DEVICE_ID_ETRON_EJ188) {
 			hcd->chip_id = HCD_CHIP_ID_ETRON_EJ188;
 			xhci->quirks |= XHCI_BULK_XFER_QUIRK;

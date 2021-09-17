@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *	linux/kernel/softirq.c
  *
@@ -253,7 +256,7 @@ restart:
 			h->action(h);
 			trace_softirq_exit(vec_nr);
 			if (unlikely(prev_count != preempt_count())) {
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 				/* Nested kprobes might appear to cause an
 				 * inconsistent preemption count */
 				printk(KERN_ERR "huh, entered softirq %u %s %p"
@@ -262,7 +265,7 @@ restart:
 				       softirq_to_name[vec_nr], h->action,
 				       prev_count, preempt_count());
 				preempt_count() = prev_count;
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 			}
 
 			rcu_bh_qs(cpu);

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2007 Red Hat.  All rights reserved.
  *
@@ -20,15 +23,15 @@
 #define __XATTR__
 
 #include <linux/xattr.h>
-#if defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE)
 #include "transaction.h"
-#endif /* CONFIG_SYNO_ALPINE */
+#endif /* MY_DEF_HERE */
 
 extern const struct xattr_handler btrfs_xattr_acl_access_handler;
 extern const struct xattr_handler btrfs_xattr_acl_default_handler;
-#ifdef CONFIG_SYNO_BTRFS_XATTR
+#ifdef MY_ABC_HERE
 extern const struct xattr_handler btrfs_xattr_syno_handler;
-#endif /* CONFIG_SYNO_BTRFS_XATTR */
+#endif /* MY_ABC_HERE */
 extern const struct xattr_handler *btrfs_xattr_handlers[];
 
 extern ssize_t __btrfs_getxattr(struct inode *inode, const char *name,

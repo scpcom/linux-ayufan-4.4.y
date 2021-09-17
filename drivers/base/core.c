@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * drivers/base/core.c - core driver model code (device registration, etc)
  *
@@ -299,14 +302,14 @@ static int dev_uevent(struct kset *kset, struct kobject *kobj,
 			kfree(tmp);
 		}
 	}
-#ifdef CONFIG_SYNO_PMP_HOTPLUG_TASK
+#ifdef MY_ABC_HERE
 	/* host with dev->devt 0, if we want to get hotplug of CABLE_CONNECT/CABLE_DISCONNECT
 	 * we must add DEVNAME in env to pass it to hotplug.
 	 **/
 	else {
 		add_uevent_var(env, "DEVNAME=%s", dev_name(dev));
 	}
-#endif /* CONFIG_SYNO_PMP_HOTPLUG_TASK */
+#endif /* MY_ABC_HERE */
 
 	if (dev->type && dev->type->name)
 		add_uevent_var(env, "DEVTYPE=%s", dev->type->name);
@@ -314,7 +317,7 @@ static int dev_uevent(struct kset *kset, struct kobject *kobj,
 	if (dev->driver)
 		add_uevent_var(env, "DRIVER=%s", dev->driver->name);
 
-#if defined(CONFIG_SYSFS_DEPRECATED) || defined(CONFIG_SYNO_DEPRECATED_UEVENT_ENV)
+#if defined(CONFIG_SYSFS_DEPRECATED) || defined(MY_ABC_HERE)
 	if (dev->class) {
 		struct device *parent = dev->parent;
 
@@ -343,7 +346,7 @@ static int dev_uevent(struct kset *kset, struct kobject *kobj,
 			add_uevent_var(env, "PHYSDEVDRIVER=%s",
 							 dev->driver->name);
 	}
-#endif /* CONFIG_SYSFS_DEPRECATED || CONFIG_SYNO_DEPRECATED_UEVENT_ENV */
+#endif /* CONFIG_SYSFS_DEPRECATED || MY_ABC_HERE */
 
 	/* Add common DT information about the device */
 	of_device_uevent(dev, env);

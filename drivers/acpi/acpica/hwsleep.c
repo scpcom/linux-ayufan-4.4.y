@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /******************************************************************************
  *
  * Name: hwsleep.c - ACPI Hardware Sleep/Wake Support functions for the
@@ -45,9 +48,9 @@
 #include <acpi/acpi.h>
 #include <linux/acpi.h>
 #include "accommon.h"
-#ifdef CONFIG_SYNO_POWEROFF_INFO_PRINT
+#ifdef MY_DEF_HERE
 #include <linux/delay.h>
-#endif /* CONFIG_SYNO_POWEROFF_INFO_PRINT */
+#endif /* MY_DEF_HERE */
 
 #define _COMPONENT          ACPI_HARDWARE
 ACPI_MODULE_NAME("hwsleep")
@@ -142,10 +145,10 @@ acpi_status acpi_hw_legacy_sleep(u8 sleep_state)
 	/* Write #1: write the SLP_TYP data to the PM1 Control registers */
 
 	status = acpi_hw_write_pm1_control(pm1a_control, pm1b_control);
-#ifdef CONFIG_SYNO_POWEROFF_INFO_PRINT
+#ifdef MY_DEF_HERE
 	printk("Confirm SLP_TYP poweroff status %x pm1a %x pm1b %x\n", status, pm1a_control, pm1b_control);
 	mdelay(10);
-#endif /* CONFIG_SYNO_POWEROFF_INFO_PRINT */
+#endif /* MY_DEF_HERE */
 	if (ACPI_FAILURE(status)) {
 		return_ACPI_STATUS(status);
 	}
@@ -161,10 +164,10 @@ acpi_status acpi_hw_legacy_sleep(u8 sleep_state)
 
 	status = acpi_os_prepare_sleep(sleep_state, pm1a_control,
 				       pm1b_control);
-#ifdef CONFIG_SYNO_POWEROFF_INFO_PRINT
+#ifdef MY_DEF_HERE
 	printk("Confirm OS poweroff status %x pm1a %x pm1b %x\n", status, pm1a_control, pm1b_control);
 	mdelay(10);
-#endif /* CONFIG_SYNO_POWEROFF_INFO_PRINT */
+#endif /* MY_DEF_HERE */
 	if (ACPI_SKIP(status))
 		return_ACPI_STATUS(AE_OK);
 	if (ACPI_FAILURE(status))
@@ -172,9 +175,9 @@ acpi_status acpi_hw_legacy_sleep(u8 sleep_state)
 	/* Write #2: Write both SLP_TYP + SLP_EN */
 
 	status = acpi_hw_write_pm1_control(pm1a_control, pm1b_control);
-#ifdef CONFIG_SYNO_POWEROFF_INFO_PRINT
+#ifdef MY_DEF_HERE
 	printk("Confirm SLP_EN poweroff status %x pm1a %x pm1b %x\n", status, pm1a_control, pm1b_control);
-#endif /* CONFIG_SYNO_POWEROFF_INFO_PRINT */
+#endif /* MY_DEF_HERE */
 	if (ACPI_FAILURE(status)) {
 		return_ACPI_STATUS(status);
 	}

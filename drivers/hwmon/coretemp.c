@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * coretemp.c - Linux kernel module for hardware monitoring
  *
@@ -447,11 +450,11 @@ static struct temp_data __cpuinit *init_temp_data(unsigned int cpu,
 	tdata->is_pkg_data = pkg_flag;
 	tdata->cpu = cpu;
 	tdata->cpu_core_id = TO_CORE_ID(cpu);
-#ifdef CONFIG_SYNO_X86_CORETEMP
+#ifdef MY_DEF_HERE
 	/* if the cpu temp can't read, syno_cpu_temperature() still return this value,
 	 * so we must set a valid value(default 20 degree C) when init*/
 	tdata->temp = 20 * 1000;
-#endif /* CONFIG_SYNO_X86_CORETEMP */
+#endif /* MY_DEF_HERE */
 	tdata->attr_size = MAX_CORE_ATTRS;
 	mutex_init(&tdata->update_lock);
 	return tdata;
@@ -861,7 +864,7 @@ static void __exit coretemp_exit(void)
 	platform_driver_unregister(&coretemp_driver);
 }
 
-#ifdef CONFIG_SYNO_X86_CORETEMP
+#ifdef MY_DEF_HERE
 #include <linux/synobios.h>
 /* update core temp
  * p.s. copy from "show_temp(..)"
@@ -940,7 +943,7 @@ int syno_cpu_temperature(struct _SynoCpuTemp *pCpuTemp)
 	return 0;
 }
 EXPORT_SYMBOL(syno_cpu_temperature);
-#endif /* CONFIG_SYNO_X86_CORETEMP */
+#endif /* MY_DEF_HERE */
 
 MODULE_AUTHOR("Rudolf Marek <r.marek@assembler.cz>");
 MODULE_DESCRIPTION("Intel Core temperature monitor");

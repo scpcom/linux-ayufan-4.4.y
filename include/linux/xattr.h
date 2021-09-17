@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
   File: linux/xattr.h
 
@@ -29,7 +32,7 @@ struct xattr_handler {
 		   size_t size, int flags, int handler_flags);
 };
 
-#ifdef CONFIG_SYNO_FS_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 struct syno_xattr_archive_version {
 	__le16	v_magic;
 	__le16	v_struct_version;

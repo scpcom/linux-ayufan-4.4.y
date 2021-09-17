@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright © 1999-2010 David Woodhouse <dwmw2@infradead.org>
  *
@@ -37,10 +40,10 @@
 #include <linux/mtd/map.h>
 
 #include <asm/uaccess.h>
-#ifdef CONFIG_SYNO_MTD_ALLOC
+#ifdef MY_ABC_HERE
 #include <linux/syscalls.h>
 #include <linux/semaphore.h>
-#endif /* CONFIG_SYNO_MTD_ALLOC */
+#endif /* MY_ABC_HERE */
 
 #include "mtdcore.h"
 
@@ -283,7 +286,7 @@ static ssize_t mtdchar_read(struct file *file, char __user *buf, size_t count,
 	return total_retlen;
 } /* mtdchar_read */
 
-#ifdef CONFIG_SYNO_MTD_ALLOC
+#ifdef MY_ABC_HERE
 static int syno_write_buf_size = 0x1000;
 
 char *kbuf;
@@ -345,26 +348,26 @@ End:
 	up(&write_kbuf_sem);
 	return retval;
 } /* sys_SYNOMTDAlloc() */
-#endif /* CONFIG_SYNO_MTD_ALLOC */
+#endif /* MY_ABC_HERE */
 
 static ssize_t mtdchar_write(struct file *file, const char __user *buf, size_t count,
 			loff_t *ppos)
 {
 	struct mtd_file_info *mfi = file->private_data;
 	struct mtd_info *mtd = mfi->mtd;
-#ifdef CONFIG_SYNO_MTD_ALLOC
+#ifdef MY_ABC_HERE
 	// do nothing
-#else /* CONFIG_SYNO_MTD_ALLOC */
+#else /* MY_ABC_HERE */
 	size_t size = count;
 	char *kbuf;
-#endif /* CONFIG_SYNO_MTD_ALLOC */
+#endif /* MY_ABC_HERE */
 	size_t retlen;
 	size_t total_retlen=0;
 	int ret=0;
 	int len;
 
 	pr_debug("MTD_write\n");
-#ifdef CONFIG_SYNO_MTD_ALLOC
+#ifdef MY_ABC_HERE
 	if (syno_write_buf_size < mtd->writesize) {
 		printk(KERN_ERR "mtd kmalloc size small than mtd driver minimal write size !!\n");
 		WARN_ON(1);
@@ -373,7 +376,7 @@ static ssize_t mtdchar_write(struct file *file, const char __user *buf, size_t c
 			sys_SYNOMTDAlloc(false);
 		printk(KERN_ERR "mtd kmalloc size replace with mtd driver minimal write size !!\n");
 	}
-#endif /* CONFIG_SYNO_MTD_ALLOC */
+#endif /* MY_ABC_HERE */
 
 	if (*ppos == mtd->size)
 		return -ENOSPC;
@@ -384,35 +387,35 @@ static ssize_t mtdchar_write(struct file *file, const char __user *buf, size_t c
 	if (!count)
 		return 0;
 
-#ifdef CONFIG_SYNO_MTD_ALLOC
+#ifdef MY_ABC_HERE
 	if (!write_kbuf_len) {
 		ret = sys_SYNOMTDAlloc(true);
 		if (ret != 0)
 			return ret;
 	}
 	down(&write_kbuf_sem);
-#else /* CONFIG_SYNO_MTD_ALLOC */
+#else /* MY_ABC_HERE */
 	kbuf = mtd_kmalloc_up_to(mtd, &size);
 	if (!kbuf)
 		return -ENOMEM;
-#endif /* CONFIG_SYNO_MTD_ALLOC */
+#endif /* MY_ABC_HERE */
 
 	while (count) {
-#ifdef CONFIG_SYNO_MTD_ALLOC
+#ifdef MY_ABC_HERE
 		if (count > syno_write_buf_size)
 			len = syno_write_buf_size;
 		else
 			len = count;
-#else /* CONFIG_SYNO_MTD_ALLOC */
+#else /* MY_ABC_HERE */
 		len = min_t(size_t, count, size);
-#endif /* CONFIG_SYNO_MTD_ALLOC */
+#endif /* MY_ABC_HERE */
 
 		if (copy_from_user(kbuf, buf, len)) {
-#ifdef CONFIG_SYNO_MTD_ALLOC
+#ifdef MY_ABC_HERE
 			up(&write_kbuf_sem);
-#else /* CONFIG_SYNO_MTD_ALLOC */
+#else /* MY_ABC_HERE */
 			kfree(kbuf);
-#endif /* CONFIG_SYNO_MTD_ALLOC */
+#endif /* MY_ABC_HERE */
 			return -EFAULT;
 		}
 
@@ -450,31 +453,31 @@ static ssize_t mtdchar_write(struct file *file, const char __user *buf, size_t c
 			buf += retlen;
 		}
 		else {
-#ifdef CONFIG_SYNO_MTD_ALLOC
+#ifdef MY_ABC_HERE
 			up(&write_kbuf_sem);
-#else /* CONFIG_SYNO_MTD_ALLOC */
+#else /* MY_ABC_HERE */
 			kfree(kbuf);
-#endif /* CONFIG_SYNO_MTD_ALLOC */
+#endif /* MY_ABC_HERE */
 			return ret;
 		}
 	}
 
-#ifdef CONFIG_SYNO_MTD_ALLOC
+#ifdef MY_ABC_HERE
 	up(&write_kbuf_sem);
-#else /* CONFIG_SYNO_MTD_ALLOC */
+#else /* MY_ABC_HERE */
 	kfree(kbuf);
-#endif /* CONFIG_SYNO_MTD_ALLOC */
+#endif /* MY_ABC_HERE */
 	return total_retlen;
 } /* mtdchar_write */
 
-#ifdef CONFIG_SYNO_SYSTEM_CALL
-#ifdef CONFIG_SYNO_MTD_ALLOC
+#ifdef MY_ABC_HERE
+#ifdef MY_ABC_HERE
 SYSCALL_DEFINE1(SYNOMTDAlloc, bool, blMalloc)
 {
 	return sys_SYNOMTDAlloc(blMalloc);
 }
-#endif /* CONFIG_SYNO_MTD_ALLOC */
-#endif /* CONFIG_SYNO_SYSTEM_CALL */
+#endif /* MY_ABC_HERE */
+#endif /* MY_ABC_HERE */
 
 /*======================================================================
 
@@ -650,9 +653,9 @@ static int shrink_ecclayout(const struct nand_ecclayout *from,
 		to->oobavail += from->oobfree[i].length;
 		to->oobfree[i] = from->oobfree[i];
 	}
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	to->eccbytes = from->eccbytes;
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 	return 0;
 }
@@ -1066,7 +1069,7 @@ static int mtdchar_ioctl(struct file *file, u_int cmd, u_long arg)
 		break;
 	}
 
-#ifdef  CONFIG_SYNO_MTD_INFO
+#ifdef MY_ABC_HERE
 	case MEMMODIFYPARTINFO:
 	{
 		unsigned long adrs[2];
@@ -1099,7 +1102,7 @@ static int mtdchar_ioctl(struct file *file, u_int cmd, u_long arg)
 
 		break;
 	}
-#endif /* CONFIG_SYNO_MTD_INFO */
+#endif /* MY_ABC_HERE */
 
 	/* This ioctl is being deprecated - it truncates the ECC layout */
 	case ECCGETLAYOUT:
@@ -1359,10 +1362,10 @@ int __init init_mtdchar(void)
 		goto err_unregister_chdev;
 	}
 
-#ifdef CONFIG_SYNO_MTD_ALLOC
+#ifdef MY_ABC_HERE
 	/* Allocate buffer and init spinlock */
 	sema_init(&write_kbuf_sem, 1);
-#endif /* CONFIG_SYNO_MTD_ALLOC */
+#endif /* MY_ABC_HERE */
 
 	return ret;
 

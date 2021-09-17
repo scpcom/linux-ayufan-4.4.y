@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* USB OTG (On The Go) defines */
 /*
  *
@@ -103,17 +106,17 @@ struct usb_phy {
 				int suspend);
 
 	/* notify phy connect status change */
-#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+#if defined(MY_DEF_HERE)
 	int	(*notify_connect)(struct usb_phy *x,
 			struct usb_device *udev);
 	int	(*notify_disconnect)(struct usb_phy *x,
 			struct usb_device *udev);
-#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#else /* MY_DEF_HERE */
 	int	(*notify_connect)(struct usb_phy *x,
 			enum usb_device_speed speed);
 	int	(*notify_disconnect)(struct usb_phy *x,
 			enum usb_device_speed speed);
-#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#endif /* MY_DEF_HERE */
 };
 
 /**
@@ -140,26 +143,26 @@ extern void usb_remove_phy(struct usb_phy *);
 /* helpers for direct access thru low-level io interface */
 static inline int usb_phy_io_read(struct usb_phy *x, u32 reg)
 {
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	if (x && x->io_ops && x->io_ops->read)
 		return x->io_ops->read(x, reg);
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 	if (x->io_ops && x->io_ops->read)
 		return x->io_ops->read(x, reg);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 	return -EINVAL;
 }
 
 static inline int usb_phy_io_write(struct usb_phy *x, u32 val, u32 reg)
 {
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	if (x && x->io_ops && x->io_ops->write)
 		return x->io_ops->write(x, val, reg);
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 	if (x->io_ops && x->io_ops->write)
 		return x->io_ops->write(x, val, reg);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 	return -EINVAL;
 }
@@ -167,13 +170,13 @@ static inline int usb_phy_io_write(struct usb_phy *x, u32 val, u32 reg)
 static inline int
 usb_phy_init(struct usb_phy *x)
 {
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	if (x && x->init)
 		return x->init(x);
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 	if (x->init)
 		return x->init(x);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 	return 0;
 }
@@ -181,25 +184,25 @@ usb_phy_init(struct usb_phy *x)
 static inline void
 usb_phy_shutdown(struct usb_phy *x)
 {
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	if (x && x->shutdown)
 		x->shutdown(x);
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 	if (x->shutdown)
 		x->shutdown(x);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 }
 
 static inline int
 usb_phy_vbus_on(struct usb_phy *x)
 {
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	if (!x || !x->set_vbus)
 		return 0;
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 	if (!x->set_vbus)
 		return 0;
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 	return x->set_vbus(x, true);
 }
@@ -207,13 +210,13 @@ usb_phy_vbus_on(struct usb_phy *x)
 static inline int
 usb_phy_vbus_off(struct usb_phy *x)
 {
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	if (!x || !x->set_vbus)
 		return 0;
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 	if (!x->set_vbus)
 		return 0;
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 	return x->set_vbus(x, false);
 }
@@ -286,61 +289,61 @@ usb_phy_set_power(struct usb_phy *x, unsigned mA)
 static inline int
 usb_phy_set_suspend(struct usb_phy *x, int suspend)
 {
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	if (x && x->set_suspend != NULL)
 		return x->set_suspend(x, suspend);
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 	if (x->set_suspend != NULL)
 		return x->set_suspend(x, suspend);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	else
 		return 0;
 }
 
-#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+#if defined(MY_DEF_HERE)
 static inline int
 usb_phy_notify_connect(struct usb_phy *x, struct usb_device *udev)
-#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#else /* MY_DEF_HERE */
 static inline int
 usb_phy_notify_connect(struct usb_phy *x, enum usb_device_speed speed)
-#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#endif /* MY_DEF_HERE */
 {
-#if defined (CONFIG_SYNO_LSP_MONACO)
-#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+#if defined (MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
 	if (x && x->notify_connect && udev)
 		return x->notify_connect(x, udev);
-#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#else /* MY_DEF_HERE */
 	if (x && x->notify_connect)
 		return x->notify_connect(x, speed);
-#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
-#else /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
+#else /* MY_DEF_HERE */
 	if (x->notify_connect)
 		return x->notify_connect(x, speed);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	else
 		return 0;
 }
 
-#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+#if defined(MY_DEF_HERE)
 static inline int
 usb_phy_notify_disconnect(struct usb_phy *x, struct usb_device *udev)
-#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#else /* MY_DEF_HERE */
 static inline int
 usb_phy_notify_disconnect(struct usb_phy *x, enum usb_device_speed speed)
-#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#endif /* MY_DEF_HERE */
 {
-#if defined (CONFIG_SYNO_LSP_MONACO)
-#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+#if defined (MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
 	if (x && x->notify_disconnect && udev)
 		return x->notify_disconnect(x, udev);
-#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#else /* MY_DEF_HERE */
 	if (x && x->notify_disconnect)
 		return x->notify_disconnect(x, speed);
-#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
-#else /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
+#else /* MY_DEF_HERE */
 	if (x->notify_disconnect)
 		return x->notify_disconnect(x, speed);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	else
 		return 0;
 }

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Address map functions for Marvell EBU SoCs (Kirkwood, Armada
  * 370/XP, Dove, Orion5x and MV78xx0)
@@ -33,7 +36,7 @@
  *   devices have to configure those device -> SDRAM windows to ensure
  *   that DMA works properly.
  */
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 /*
  * - Provides an API for platform code or device drivers to
  *   dynamically add or remove address decoding windows for the CPU ->
@@ -41,7 +44,7 @@
  *   mvebu_mbus_add_window_remap_by_id() and
  *   mvebu_mbus_del_window().
  */
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 /*
  * - Provides an API for platform code or device drivers to
  *   dynamically add or remove address decoding windows for the CPU ->
@@ -53,7 +56,7 @@
  *   knowing the mapping between the name of a device and its
  *   corresponding (target, attribute) in the current SoC family.
  */
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 /*
  * - Provides a debugfs interface in /sys/kernel/debug/mvebu-mbus/ to
  *   see the list of CPU -> SDRAM windows and their configuration
@@ -61,9 +64,9 @@
  *   configuration (file 'devices').
  */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 #include <linux/kernel.h>
 #include <linux/module.h>
@@ -74,7 +77,7 @@
 #include <linux/of.h>
 #include <linux/of_address.h>
 #include <linux/debugfs.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #include <linux/syscore_ops.h>
 #include <linux/log2.h>
 
@@ -85,7 +88,7 @@
 #else
 #define dprintk(a...)
 #endif
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 /*
  * DDR target is the same on all platforms.
@@ -123,7 +126,7 @@
 
 #define DOVE_DDR_BASE_CS_OFF(n) ((n) << 4)
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 /* Relative to mbusbridge_base */
 #define MBUS_BRIDGE_CTRL_OFF	0x0
 #define  MBUS_BRIDGE_SIZE_MASK  0xffff0000
@@ -132,7 +135,7 @@
 
 /* Maximum number of windows, for all known platforms */
 #define MBUS_WINS_MAX		20
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 struct mvebu_mbus_mapping {
 	const char *name;
 	u8 target;
@@ -159,11 +162,11 @@ struct mvebu_mbus_mapping {
 /* Macro used to define one mvebu_mbus_mapping entry */
 #define MAPDEF(__n, __t, __a, __m) \
 	{ .name = __n, .target = __t, .attr = __a, .attrmask = __m }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 struct mvebu_mbus_state;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 struct mvebu_mbus_soc_data {
 	unsigned int num_wins;
 	unsigned int (*win_cfg_offset)(const int win);
@@ -184,7 +187,7 @@ struct mvebu_mbus_win_data {
 	u32 remap_lo;
 	u32 remap_hi;
 };
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 struct mvebu_mbus_soc_data {
 	unsigned int num_wins;
 	unsigned int num_remappable_wins;
@@ -194,31 +197,31 @@ struct mvebu_mbus_soc_data {
 			   struct seq_file *seq, void *v);
 	const struct mvebu_mbus_mapping *map;
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 struct mvebu_mbus_state {
 	void __iomem *mbuswins_base;
 	void __iomem *sdramwins_base;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	void __iomem *mbusbridge_base;
 	phys_addr_t sdramwins_phys_base;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	struct dentry *debugfs_root;
 	struct dentry *debugfs_sdram;
 	struct dentry *debugfs_devs;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	struct resource pcie_mem_aperture;
 	struct resource pcie_io_aperture;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	const struct mvebu_mbus_soc_data *soc;
 	int hw_io_coherency;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	/* Used during suspend/resume */
 	u32 mbus_bridge_ctrl;
 	u32 mbus_bridge_base;
 	struct mvebu_mbus_win_data wins[MBUS_WINS_MAX];
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 };
 
 static struct mvebu_mbus_state mbus_state;
@@ -230,7 +233,7 @@ const struct mbus_dram_target_info *mv_mbus_dram_info(void)
 }
 EXPORT_SYMBOL_GPL(mv_mbus_dram_info);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 /* Checks whether the given window has remap capability */
 static bool mvebu_mbus_window_is_remappable(struct mvebu_mbus_state *mbus,
 					    const int win)
@@ -239,7 +242,7 @@ static bool mvebu_mbus_window_is_remappable(struct mvebu_mbus_state *mbus,
 
 	return offset != MVEBU_MBUS_NO_REMAP;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 /*
  * Functions to manipulate the address decoding windows
@@ -272,18 +275,18 @@ static void mvebu_mbus_read_window(struct mvebu_mbus_state *mbus,
 		*attr = (ctrlreg & WIN_CTRL_ATTR_MASK) >> WIN_CTRL_ATTR_SHIFT;
 
 	if (remap) {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		if (mvebu_mbus_window_is_remappable(mbus, win)) {
 			u32 remap_low, remap_hi;
 			addr = mbus->mbuswins_base +
 					mbus->soc->win_remap_offset(win);
 			remap_low = readl(addr + WIN_REMAP_LO_OFF);
 			remap_hi  = readl(addr + WIN_REMAP_HI_OFF);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		if (win < mbus->soc->num_remappable_wins) {
 			u32 remap_low = readl(addr + WIN_REMAP_LO_OFF);
 			u32 remap_hi  = readl(addr + WIN_REMAP_HI_OFF);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 			*remap = ((u64)remap_hi << 32) | remap_low;
 		} else
 			*remap = 0;
@@ -300,12 +303,12 @@ static void mvebu_mbus_disable_window(struct mvebu_mbus_state *mbus,
 	writel(0, addr + WIN_BASE_OFF);
 	writel(0, addr + WIN_CTRL_OFF);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	if (mvebu_mbus_window_is_remappable(mbus, win)) {
 		addr = mbus->mbuswins_base + mbus->soc->win_remap_offset(win);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	if (win < mbus->soc->num_remappable_wins) {
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 		writel(0, addr + WIN_REMAP_LO_OFF);
 		writel(0, addr + WIN_REMAP_HI_OFF);
 	}
@@ -402,13 +405,13 @@ static int mvebu_mbus_setup_window(struct mvebu_mbus_state *mbus,
 {
 	void __iomem *addr = mbus->mbuswins_base +
 		mbus->soc->win_cfg_offset(win);
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	void __iomem *addr_rmp = mbus->mbuswins_base +
 		mbus->soc->win_remap_offset(win);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	u32 ctrl, remap_addr;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	if (!is_power_of_2(size)) {
 		WARN(true, "Invalid MBus window size: 0x%zx\n", size);
 		return -EINVAL;
@@ -419,7 +422,7 @@ static int mvebu_mbus_setup_window(struct mvebu_mbus_state *mbus,
 		     size);
 		return -EINVAL;
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	ctrl = ((size - 1) & WIN_CTRL_SIZE_MASK) |
 		(attr << WIN_CTRL_ATTR_SHIFT)    |
@@ -429,32 +432,32 @@ static int mvebu_mbus_setup_window(struct mvebu_mbus_state *mbus,
 	writel(base & WIN_BASE_LOW, addr + WIN_BASE_OFF);
 	writel(ctrl, addr + WIN_CTRL_OFF);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	if (mvebu_mbus_window_is_remappable(mbus, win)) {
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	if (win < mbus->soc->num_remappable_wins) {
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 		if (remap == MVEBU_MBUS_NO_REMAP)
 			remap_addr = base;
 		else
 			remap_addr = remap;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		writel(remap_addr & WIN_REMAP_LOW, addr_rmp + WIN_REMAP_LO_OFF);
 		writel(0, addr_rmp + WIN_REMAP_HI_OFF);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		writel(remap_addr & WIN_REMAP_LOW, addr + WIN_REMAP_LO_OFF);
 		writel(0, addr + WIN_REMAP_HI_OFF);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	dprintk("== %s: decoding window ==\n", __func__);
 	dprintk("base_phys: 0x%x, base_low 0x%x, ctrl 0x%x, remap_addr 0x%x\n",
 	    base, base & WIN_BASE_LOW, ctrl, remap_addr);
 
 	dprintk("base_addr: %p, ctrl_addr: %p\n",
 	    addr + WIN_BASE_OFF, addr + WIN_CTRL_OFF);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	return 0;
 }
@@ -467,39 +470,39 @@ static int mvebu_mbus_alloc_window(struct mvebu_mbus_state *mbus,
 	int win;
 
 	if (remap == MVEBU_MBUS_NO_REMAP) {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		for (win = 0; win < mbus->soc->num_wins; win++) {
 			if (mvebu_mbus_window_is_remappable(mbus, win))
 				continue;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		for (win = mbus->soc->num_remappable_wins;
 		     win < mbus->soc->num_wins; win++)
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 			if (mvebu_mbus_window_is_free(mbus, win))
 				return mvebu_mbus_setup_window(mbus, win, base,
 							       size, remap,
 							       target, attr);
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		}
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	for (win = 0; win < mbus->soc->num_wins; win++) {
 		/* Skip window if need remap but is not supported */
 		if ((remap != MVEBU_MBUS_NO_REMAP) &&
 		    (!mvebu_mbus_window_is_remappable(mbus, win)))
 			continue;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	for (win = 0; win < mbus->soc->num_wins; win++)
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 		if (mvebu_mbus_window_is_free(mbus, win))
 			return mvebu_mbus_setup_window(mbus, win, base, size,
 						       remap, target, attr);
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	return -ENOMEM;
 }
@@ -592,12 +595,12 @@ static int mvebu_devs_debug_show(struct seq_file *seq, void *v)
 		u64 wbase, wremap;
 		u32 wsize;
 		u8 wtarget, wattr;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		int enabled;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		int enabled, i;
 		const char *name;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 		mvebu_mbus_read_window(mbus, win,
 				       &enabled, &wbase, &wsize,
@@ -608,7 +611,7 @@ static int mvebu_devs_debug_show(struct seq_file *seq, void *v)
 			continue;
 		}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		seq_printf(seq, "[%02d] %016llx - %016llx : %04x:%04x",
 			   win, (unsigned long long)wbase,
 			   (unsigned long long)(wbase + wsize), wtarget, wattr);
@@ -618,7 +621,7 @@ static int mvebu_devs_debug_show(struct seq_file *seq, void *v)
 			seq_puts(seq, " (Invalid base/size!!)");
 
 		if (mvebu_mbus_window_is_remappable(mbus, win)) {
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		for (i = 0; mbus->soc->map[i].name; i++)
 			if (mbus->soc->map[i].target == wtarget &&
 			    mbus->soc->map[i].attr ==
@@ -632,7 +635,7 @@ static int mvebu_devs_debug_show(struct seq_file *seq, void *v)
 			   (unsigned long long)(wbase + wsize), name);
 
 		if (win < mbus->soc->num_remappable_wins) {
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 			seq_printf(seq, " (remap %016llx)\n",
 				   (unsigned long long)wremap);
 		} else
@@ -658,16 +661,16 @@ static const struct file_operations mvebu_devs_debug_fops = {
  * SoC-specific functions and definitions
  */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static unsigned int generic_mbus_win_cfg_offset(int win)
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static unsigned int orion_mbus_win_offset(int win)
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 {
 	return win << 4;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static unsigned int generic_mbus_win_remap_2_offset(int win)
 {
 	if (win < 2)
@@ -701,13 +704,13 @@ static unsigned int armada_xp_mbus_win_remap_offset(int win)
 	else
 		return MVEBU_MBUS_NO_REMAP;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static unsigned int armada_370_xp_mbus_win_cfg_offset(int win)
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static unsigned int armada_370_xp_mbus_win_offset(int win)
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 {
 	/* The register layout is a bit annoying and the below code
 	 * tries to cope with it.
@@ -727,11 +730,11 @@ static unsigned int armada_370_xp_mbus_win_offset(int win)
 		return 0x90 + ((win - 8) << 3);
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static unsigned int mv78xx0_mbus_win_cfg_offset(int win)
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static unsigned int mv78xx0_mbus_win_offset(int win)
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 {
 	if (win < 8)
 		return win << 4;
@@ -744,7 +747,7 @@ mvebu_mbus_default_setup_cpu_target(struct mvebu_mbus_state *mbus)
 {
 	int i;
 	int cs;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	struct mvebu_mbus_state *s = &mbus_state;
 	u32 mbus_bridge_base = 0, mbus_bridge_size = 0;
 	u64 mbus_bridge_end = 0;
@@ -758,12 +761,12 @@ mvebu_mbus_default_setup_cpu_target(struct mvebu_mbus_state *mbus)
 			 ~MBUS_BRIDGE_SIZE_MASK) + 1;
 		mbus_bridge_end = (u64)mbus_bridge_base + mbus_bridge_size;
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	mvebu_mbus_dram_info.mbus_dram_target_id = TARGET_DDR;
 
 	for (i = 0, cs = 0; i < 4; i++) {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		u64 base = readl(mbus->sdramwins_base + DDR_BASE_CS_OFF(i));
 		u64 size = readl(mbus->sdramwins_base + DDR_SIZE_CS_OFF(i));
 		u64 end;
@@ -827,7 +830,7 @@ mvebu_mbus_default_setup_cpu_target(struct mvebu_mbus_state *mbus)
 		w->size = size;
 	}
 	mvebu_mbus_dram_info.num_cs = cs;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		u32 base = readl(mbus->sdramwins_base + DDR_BASE_CS_OFF(i));
 		u32 size = readl(mbus->sdramwins_base + DDR_SIZE_CS_OFF(i));
 
@@ -851,10 +854,10 @@ mvebu_mbus_default_setup_cpu_target(struct mvebu_mbus_state *mbus)
 		}
 	}
 	mvebu_mbus_dram_info.num_cs = cs;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static int
 mvebu_mbus_default_save_cpu_target(struct mvebu_mbus_state *mbus,
 				   u32 *store_addr)
@@ -876,7 +879,7 @@ mvebu_mbus_default_save_cpu_target(struct mvebu_mbus_state *mbus,
 	/* We've written 16 words to the store address */
 	return 16;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static void __init
 mvebu_mbus_dove_setup_cpu_target(struct mvebu_mbus_state *mbus)
@@ -908,12 +911,12 @@ mvebu_mbus_dove_setup_cpu_target(struct mvebu_mbus_state *mbus)
 	mvebu_mbus_dram_info.num_cs = cs;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 int mvebu_mbus_save_cpu_target(u32 *store_addr)
 {
 	return mbus_state.soc->save_cpu_target(&mbus_state, store_addr);
 }
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static const struct mvebu_mbus_mapping armada_370_map[] = {
 	MAPDEF("bootrom",     1, 0xe0, MAPDEF_NOMASK),
 	MAPDEF("devbus-boot", 1, 0x2f, MAPDEF_NOMASK),
@@ -925,30 +928,30 @@ static const struct mvebu_mbus_mapping armada_370_map[] = {
 	MAPDEF("pcie1.0",     8, 0xe0, MAPDEF_PCIMASK),
 	{},
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static const struct mvebu_mbus_soc_data armada_370_mbus_data = {
 	.num_wins            = 20,
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	.win_cfg_offset      = armada_370_xp_mbus_win_cfg_offset,
 	.win_remap_offset    = generic_mbus_win_remap_8_offset,
 	.save_cpu_target     = mvebu_mbus_default_save_cpu_target,
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	.num_remappable_wins = 8,
 	.win_cfg_offset      = armada_370_xp_mbus_win_offset,
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	.setup_cpu_target    = mvebu_mbus_default_setup_cpu_target,
 	.show_cpu_target     = mvebu_sdram_debug_show_orion,
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	.map                 = armada_370_map,
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 };
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 // do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static const struct mvebu_mbus_mapping armada_xp_map[] = {
 	MAPDEF("bootrom",     1, 0x1d, MAPDEF_NOMASK),
 	MAPDEF("devbus-boot", 1, 0x2f, MAPDEF_NOMASK),
@@ -968,31 +971,31 @@ static const struct mvebu_mbus_mapping armada_xp_map[] = {
 	MAPDEF("pcie3.0",     8, 0xf0, MAPDEF_PCIMASK),
 	{},
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static const struct mvebu_mbus_soc_data armada_xp_mbus_data = {
 	.num_wins            = 20,
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	.has_mbus_bridge     = true,
 	.win_cfg_offset      = armada_370_xp_mbus_win_cfg_offset,
 	.win_remap_offset    = armada_xp_mbus_win_remap_offset,
 	.save_cpu_target     = mvebu_mbus_default_save_cpu_target,
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	.num_remappable_wins = 8,
 	.win_cfg_offset      = armada_370_xp_mbus_win_offset,
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	.setup_cpu_target    = mvebu_mbus_default_setup_cpu_target,
 	.show_cpu_target     = mvebu_sdram_debug_show_orion,
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	.map                 = armada_xp_map,
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 };
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 // do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static const struct mvebu_mbus_mapping kirkwood_map[] = {
 	MAPDEF("pcie0.0", 4, 0xe0, MAPDEF_PCIMASK),
 	MAPDEF("pcie1.0", 4, 0xd0, MAPDEF_PCIMASK),
@@ -1000,29 +1003,29 @@ static const struct mvebu_mbus_mapping kirkwood_map[] = {
 	MAPDEF("nand",    1, 0x2f, MAPDEF_NOMASK),
 	{},
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static const struct mvebu_mbus_soc_data kirkwood_mbus_data = {
 	.num_wins            = 8,
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	.win_cfg_offset      = generic_mbus_win_cfg_offset,
 	.win_remap_offset    = generic_mbus_win_remap_4_offset,
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	.num_remappable_wins = 4,
 	.win_cfg_offset      = orion_mbus_win_offset,
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	.setup_cpu_target    = mvebu_mbus_default_setup_cpu_target,
 	.show_cpu_target     = mvebu_sdram_debug_show_orion,
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	.map                 = kirkwood_map,
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 };
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 // do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static const struct mvebu_mbus_mapping dove_map[] = {
 	MAPDEF("pcie0.0",    0x4, 0xe0, MAPDEF_PCIMASK),
 	MAPDEF("pcie1.0",    0x8, 0xe0, MAPDEF_PCIMASK),
@@ -1031,29 +1034,29 @@ static const struct mvebu_mbus_mapping dove_map[] = {
 	MAPDEF("scratchpad", 0xd, 0x0, MAPDEF_NOMASK),
 	{},
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static const struct mvebu_mbus_soc_data dove_mbus_data = {
 	.num_wins            = 8,
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	.win_cfg_offset      = generic_mbus_win_cfg_offset,
 	.win_remap_offset    = generic_mbus_win_remap_4_offset,
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	.num_remappable_wins = 4,
 	.win_cfg_offset      = orion_mbus_win_offset,
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	.setup_cpu_target    = mvebu_mbus_dove_setup_cpu_target,
 	.show_cpu_target     = mvebu_sdram_debug_show_dove,
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	.map                 = dove_map,
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 };
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 // do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static const struct mvebu_mbus_mapping orion5x_map[] = {
 	MAPDEF("pcie0.0",     4, 0x51, MAPDEF_ORIONPCIMASK),
 	MAPDEF("pci0.0",      3, 0x51, MAPDEF_ORIONPCIMASK),
@@ -1064,7 +1067,7 @@ static const struct mvebu_mbus_mapping orion5x_map[] = {
 	MAPDEF("sram",        0, 0x00, MAPDEF_NOMASK),
 	{},
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 /*
  * Some variants of Orion5x have 4 remappable windows, some other have
@@ -1072,43 +1075,43 @@ static const struct mvebu_mbus_mapping orion5x_map[] = {
  */
 static const struct mvebu_mbus_soc_data orion5x_4win_mbus_data = {
 	.num_wins            = 8,
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	.win_cfg_offset      = generic_mbus_win_cfg_offset,
 	.win_remap_offset    = generic_mbus_win_remap_4_offset,
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	.num_remappable_wins = 4,
 	.win_cfg_offset      = orion_mbus_win_offset,
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	.setup_cpu_target    = mvebu_mbus_default_setup_cpu_target,
 	.show_cpu_target     = mvebu_sdram_debug_show_orion,
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	.map                 = orion5x_map,
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 };
 
 static const struct mvebu_mbus_soc_data orion5x_2win_mbus_data = {
 	.num_wins            = 8,
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	.win_cfg_offset      = generic_mbus_win_cfg_offset,
 	.win_remap_offset    = generic_mbus_win_remap_2_offset,
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	.num_remappable_wins = 2,
 	.win_cfg_offset      = orion_mbus_win_offset,
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	.setup_cpu_target    = mvebu_mbus_default_setup_cpu_target,
 	.show_cpu_target     = mvebu_sdram_debug_show_orion,
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	.map                 = orion5x_map,
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 };
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 // do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static const struct mvebu_mbus_mapping mv78xx0_map[] = {
 	MAPDEF("pcie0.0", 4, 0xe0, MAPDEF_PCIMASK),
 	MAPDEF("pcie0.1", 4, 0xd0, MAPDEF_PCIMASK),
@@ -1122,24 +1125,24 @@ static const struct mvebu_mbus_mapping mv78xx0_map[] = {
 	MAPDEF("pcie3.0", 8, 0xf0, MAPDEF_PCIMASK),
 	{},
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static const struct mvebu_mbus_soc_data mv78xx0_mbus_data = {
 	.num_wins            = 14,
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	.win_cfg_offset      = mv78xx0_mbus_win_cfg_offset,
 	.win_remap_offset    = generic_mbus_win_remap_8_offset,
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	.num_remappable_wins = 8,
 	.win_cfg_offset      = mv78xx0_mbus_win_offset,
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	.setup_cpu_target    = mvebu_mbus_default_setup_cpu_target,
 	.show_cpu_target     = mvebu_sdram_debug_show_orion,
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	.map                 = mv78xx0_map,
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 };
 
 /*
@@ -1151,12 +1154,12 @@ static const struct mvebu_mbus_soc_data mv78xx0_mbus_data = {
 static const struct of_device_id of_mvebu_mbus_ids[] = {
 	{ .compatible = "marvell,armada370-mbus",
 	  .data = &armada_370_mbus_data, },
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	{ .compatible = "marvell,armada375-mbus",
 	  .data = &armada_xp_mbus_data, },
 	{ .compatible = "marvell,armada380-mbus",
 	  .data = &armada_xp_mbus_data, },
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	{ .compatible = "marvell,armadaxp-mbus",
 	  .data = &armada_xp_mbus_data, },
 	{ .compatible = "marvell,kirkwood-mbus",
@@ -1179,7 +1182,7 @@ static const struct of_device_id of_mvebu_mbus_ids[] = {
 /*
  * Public API of the driver
  */
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 int mvebu_mbus_add_window_remap_by_id(unsigned int target,
 				      unsigned int attribute,
 				      phys_addr_t base, size_t size,
@@ -1195,7 +1198,7 @@ int mvebu_mbus_add_window_remap_by_id(unsigned int target,
 
 	return mvebu_mbus_alloc_window(s, base, size, remap, target, attribute);
 }
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 int mvebu_mbus_add_window_remap_flags(const char *devname, phys_addr_t base,
 				      size_t size, phys_addr_t remap,
 				      unsigned int flags)
@@ -1233,22 +1236,22 @@ int mvebu_mbus_add_window_remap_flags(const char *devname, phys_addr_t base,
 	return mvebu_mbus_alloc_window(s, base, size, remap, target, attr);
 
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 int mvebu_mbus_add_window_by_id(unsigned int target, unsigned int attribute,
 				phys_addr_t base, size_t size)
 {
 	return mvebu_mbus_add_window_remap_by_id(target, attribute, base,
 						 size, MVEBU_MBUS_NO_REMAP);
 }
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 int mvebu_mbus_add_window(const char *devname, phys_addr_t base, size_t size)
 {
 	return mvebu_mbus_add_window_remap_flags(devname, base, size,
 						 MVEBU_MBUS_NO_REMAP, 0);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 int mvebu_mbus_del_window(phys_addr_t base, size_t size)
 {
@@ -1262,7 +1265,7 @@ int mvebu_mbus_del_window(phys_addr_t base, size_t size)
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 void mvebu_mbus_get_pcie_mem_aperture(struct resource *res)
 {
 	if (!res)
@@ -1308,10 +1311,10 @@ int mvebu_mbus_get_addr_win_info(phys_addr_t phyaddr, u8 *trg_id, u8 *attr)
 
 	return 0;
 }
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 EXPORT_SYMBOL(mvebu_mbus_get_addr_win_info);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
+#endif /* MY_ABC_HERE */
 
 static __init int mvebu_mbus_debugfs_init(void)
 {
@@ -1339,7 +1342,7 @@ static __init int mvebu_mbus_debugfs_init(void)
 }
 fs_initcall(mvebu_mbus_debugfs_init);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static int mvebu_mbus_suspend(void)
 {
 	struct mvebu_mbus_state *s = &mbus_state;
@@ -1455,7 +1458,7 @@ int __init mvebu_mbus_init(const char *soc, phys_addr_t mbuswins_phys_base,
 			sdramwins_phys_base,
 			sdramwins_size, 0, 0);
 }
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 int __init mvebu_mbus_init(const char *soc, phys_addr_t mbuswins_phys_base,
 			   size_t mbuswins_size,
 			   phys_addr_t sdramwins_phys_base,
@@ -1496,9 +1499,9 @@ int __init mvebu_mbus_init(const char *soc, phys_addr_t mbuswins_phys_base,
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #ifdef CONFIG_OF
 /*
  * The window IDs in the ranges DT property have the following format:
@@ -1750,9 +1753,9 @@ int mvebu_mbus_win_addr_get(u8 target_id, u8 attribute, u32 *phy_base, u32 *size
 	}
 	return 0;
 }
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 EXPORT_SYMBOL(mvebu_mbus_win_addr_get);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 #ifdef MBUS_DEBUG
 void mbus_debug_window()
@@ -1805,4 +1808,4 @@ void mbus_debug_window()
 }
 #endif /* MBUS_DEBUG */
 #endif /* CONFIG_OF */
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2013 STMicroelectronics (R&D) Limited.
  * Authors:
@@ -799,8 +802,8 @@ static int st_gpio_direction_output(struct gpio_chip *chip,
 	return 0;
 }
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 static int st_gpio_xlate(struct gpio_chip *gc,
 			const struct of_phandle_args *gpiospec, u32 *flags)
 {
@@ -815,7 +818,7 @@ static int st_gpio_xlate(struct gpio_chip *gc,
 
 	return gpiospec->args[0];
 }
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 /* Pinctrl Groups */
 static int st_pctl_get_groups_count(struct pinctrl_dev *pctldev)
@@ -1530,11 +1533,11 @@ static struct gpio_chip st_gpio_template = {
 	.direction_input	= st_gpio_direction_input,
 	.direction_output	= st_gpio_direction_output,
 	.ngpio			= ST_GPIO_PINS_PER_BANK,
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 	.of_gpio_n_cells	= 1,
 	.of_xlate		= st_gpio_xlate,
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	.to_irq			= st_gpio_to_irq,
 };
 
@@ -1658,7 +1661,7 @@ static int st_gpiolib_register_bank(struct st_pinctrl *info,
 	return 0;
 }
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_PM_SLEEP
 static void st_pctl_get_function(struct st_pio_control *pc,
 				int pin_id, int *function)
@@ -1798,7 +1801,7 @@ SIMPLE_DEV_PM_OPS(st_pctl_pm_ops, st_pctl_suspend, st_pctl_resume);
 #else
 #define ST_PCTL_PM	NULL
 #endif /* CONFIG_PM_SLEEP */
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 static void st_pctl_get_function(struct st_pio_control *pc,
 				int pin_id, int *function)
 {
@@ -1931,7 +1934,7 @@ static int st_pctl_resume(struct platform_device *pdev)
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 static struct of_device_id st_pctl_of_match[] = {
 	{ .compatible = "st,stih415-sbc-pinctrl", .data = &stih415_sbc_data },
@@ -2107,18 +2110,18 @@ static struct platform_driver st_pctl_driver = {
 		.name = "st-pinctrl",
 		.owner = THIS_MODULE,
 		.of_match_table = st_pctl_of_match,
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 		.pm = ST_PCTL_PM,
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	},
 	.probe = st_pctl_probe,
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 #ifdef CONFIG_PM
 	.suspend = st_pctl_suspend,
 	.resume = st_pctl_resume,
 #endif
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 };
 

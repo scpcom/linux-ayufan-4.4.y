@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /**************************************************************************
 
   ST  Fastpath Interface driver
@@ -142,9 +145,9 @@ static int stmfp_if_config_dt(struct platform_device *pdev,
 				struct device_node *node, int version)
 {
 	int ret = 0;
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	const char *mac;
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	if (of_get_property(node, "fixed-link", NULL)) {
 		plat->phy_bus_name = devm_kzalloc(&pdev->dev,
@@ -185,14 +188,14 @@ static int stmfp_if_config_dt(struct platform_device *pdev,
 		dev_warn(&pdev->dev, "Incorrect interface names in DT\n");
 		ret = -ENODEV;
 	}
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	/* Get MAC address if available */
 	mac =  of_get_mac_address(node);
 	if (mac) {
 		dev_info(&pdev->dev,"%s MAC address: %pM\n", plat->ifname, mac);
 		plat->mac_addr = mac;
 	}
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	return ret;
 }
@@ -2215,13 +2218,13 @@ static int fpif_init(struct fpif_grp *fpgrp)
 		netdev->hard_header_len += FP_HDR_SIZE;
 		strncpy(netdev->name, priv->plat->ifname,
 			sizeof(priv->plat->ifname));
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 		netdev->watchdog_timeo = 5 * HZ;
 		if (fpif_data->mac_addr)
 			memcpy(netdev->dev_addr, fpif_data->mac_addr, ETH_ALEN);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 		netdev->watchdog_timeo = 5 * HZ,
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 		priv->promisc_idx = TCAM_IDX_INV;
 		priv->allmulti_idx = TCAM_IDX_INV;

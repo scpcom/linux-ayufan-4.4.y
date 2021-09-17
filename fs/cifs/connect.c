@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *   fs/cifs/connect.c
  *
@@ -1352,9 +1355,9 @@ cifs_parse_mount_options(const char *mountdata, const char *devname,
 			vol->no_linux_ext = 1;
 			break;
 		case Opt_nocase:
-#ifdef CONFIG_SYNO_CIFS_MOUNT_CASELESS
+#ifdef MY_ABC_HERE
 			SynoPosixSemanticsEnabled = 0;
-#endif /* CONFIG_SYNO_CIFS_MOUNT_CASELESS */
+#endif /* MY_ABC_HERE */
 			vol->nocase = 1;
 			break;
 		case Opt_brl:

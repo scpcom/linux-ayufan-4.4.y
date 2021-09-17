@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _ASM_HIGHMEM_H
 #define _ASM_HIGHMEM_H
 
@@ -48,11 +51,11 @@ extern void kunmap_high(struct page *page);
 #undef ARCH_NEEDS_KMAP_HIGH_GET
 #endif
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #if __LINUX_ARM_ARCH__ >= 7
 #undef ARCH_NEEDS_KMAP_HIGH_GET
 #endif
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 #ifdef ARCH_NEEDS_KMAP_HIGH_GET
 extern void *kmap_high_get(struct page *page);

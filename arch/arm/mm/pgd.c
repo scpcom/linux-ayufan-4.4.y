@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/arch/arm/mm/pgd.c
  *
@@ -87,18 +90,18 @@ pgd_t *pgd_alloc(struct mm_struct *mm)
 		init_pud = pud_offset(init_pgd, 0);
 		init_pmd = pmd_offset(init_pud, 0);
 		init_pte = pte_offset_map(init_pmd, 0);
-#if defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE)
 		set_pte_ext(new_pte, *init_pte, 0);
-#else /* CONFIG_SYNO_ALPINE */
+#else /* MY_DEF_HERE */
 		set_pte_ext(new_pte + 0, init_pte[0], 0);
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #ifndef CONFIG_MV_LARGE_PAGE_SUPPORT
 		set_pte_ext(new_pte + 1, init_pte[1], 0);
 #endif
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		set_pte_ext(new_pte + 1, init_pte[1], 0);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
-#endif /* CONFIG_SYNO_ALPINE */
+#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 		pte_unmap(init_pte);
 		pte_unmap(new_pte);
 	}

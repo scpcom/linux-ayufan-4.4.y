@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * fs/direct-io.c
  *
@@ -1140,11 +1143,11 @@ do_blockdev_direct_IO(int rw, struct kiocb *iocb, struct inode *inode,
 	 * returning in this case.
 	 */
 	dio->is_async = !is_sync_kiocb(iocb) && !((rw & WRITE) &&
-#ifdef CONFIG_SYNO_BTRFS_FIX_ASYNC_DIRECT_IO_CSUM_FAILED
+#ifdef MY_ABC_HERE
 		(end > i_size_read(inode))) && !(dio->flags & DIO_NO_ASYNC);
 #else
 		(end > i_size_read(inode)));
-#endif /* CONFIG_SYNO_BTRFS_FIX_ASYNC_DIRECT_IO_CSUM_FAILED */
+#endif /* MY_ABC_HERE */
 
 	retval = 0;
 

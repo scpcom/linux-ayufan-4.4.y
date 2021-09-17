@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  fs/anon_inodes.c
  *
@@ -83,9 +86,9 @@ static struct inode *anon_inode_mkinode(struct super_block *s)
 	inode->i_atime = inode->i_mtime = inode->i_ctime = CURRENT_TIME;
 	return inode;
 }
-#ifdef CONFIG_SYNO_DRM_I915_BACKPORT
+#ifdef MY_DEF_HERE
 EXPORT_SYMBOL_GPL(anon_inode_mkinode);
-#endif /* CONFIG_SYNO_DRM_I915_BACKPORT */
+#endif /* MY_DEF_HERE */
 
 static struct dentry *anon_inodefs_mount(struct file_system_type *fs_type,
 				int flags, const char *dev_name, void *data)

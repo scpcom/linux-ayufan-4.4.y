@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /**
  * gadget.c - DesignWare USB3 DRD Controller Gadget Framework Link
  *
@@ -54,7 +57,7 @@
 #include "gadget.h"
 #include "io.h"
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_USB_DWC3_AL_RMN_2648
 #include <linux/of.h>
 #include <mach/alpine_machine.h>
@@ -67,7 +70,7 @@
 #include <linux/of_gpio.h>
 #include "linux/workqueue.h"
 #endif
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 /**
  * dwc3_gadget_set_test_mode - Enables USB2 Test Modes
@@ -1078,9 +1081,9 @@ static int __dwc3_gadget_ep_queue(struct dwc3_ep *dep, struct dwc3_request *req)
 	req->direction		= dep->direction;
 	req->epnum		= dep->number;
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	/*
 	 * We only add to our list of requests now and
 	 * start consuming the list once we get XferNotReady
@@ -1093,7 +1096,7 @@ static int __dwc3_gadget_ep_queue(struct dwc3_ep *dep, struct dwc3_request *req)
 	 * This will also avoid Host cancelling URBs due to too
 	 * many NAKs.
 	 */
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	ret = usb_gadget_map_request(&dwc->gadget, &req->request,
 			dep->direction);
 	if (ret)
@@ -1151,14 +1154,14 @@ static int __dwc3_gadget_ep_queue(struct dwc3_ep *dep, struct dwc3_request *req)
 		return ret;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	ret = __dwc3_gadget_kick_transfer(dep, 0, 1);
 	if (ret && ret != -EBUSY) {
 		dev_dbg(dwc->dev, "%s: failed to kick transfers\n",
 				dep->name);
 		return ret;
 	}
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 	return 0;
 }
@@ -1950,9 +1953,9 @@ static void dwc3_endpoint_interrupt(struct dwc3 *dwc,
 {
 	struct dwc3_ep		*dep;
 	u8			epnum = event->endpoint_number;
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	int ret;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 	dep = dwc->eps[epnum];
 
@@ -1979,12 +1982,12 @@ static void dwc3_endpoint_interrupt(struct dwc3 *dwc,
 
 		dwc3_endpoint_transfer_complete(dwc, dep, event, 1);
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 		ret = __dwc3_gadget_kick_transfer(dep, 0, 1);
 		if (!ret || ret == -EBUSY)
 			dev_dbg(dwc->dev, "%s: failed to kick transfers\n",
 					dep->name);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 		break;
 	case DWC3_DEPEVT_XFERINPROGRESS:
 		if (!usb_endpoint_xfer_isoc(dep->endpoint.desc)) {
@@ -1995,14 +1998,14 @@ static void dwc3_endpoint_interrupt(struct dwc3 *dwc,
 
 		dwc3_endpoint_transfer_complete(dwc, dep, event, 0);
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 		ret = __dwc3_gadget_kick_transfer(dep, 0, 0);
 		if (!ret || ret == -EBUSY) {
 			dev_dbg(dwc->dev, "%s: failed to kick transfers\n",
 					dep->name);
 			return;
 		}
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 		break;
 	case DWC3_DEPEVT_XFERNOTREADY:
 		if (usb_endpoint_xfer_isoc(dep->endpoint.desc)) {
@@ -2415,7 +2418,7 @@ static void dwc3_gadget_wakeup_interrupt(struct dwc3 *dwc)
 	dwc->gadget_driver->resume(&dwc->gadget);
 }
 
-#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_USB_DWC3_AL_RMN_2648)
+#if defined(MY_DEF_HERE) && defined(CONFIG_USB_DWC3_AL_RMN_2648)
 #define DWC3_GDBGLTSSM_LINK_STATE_MASK		0x03C00000
 #define DWC3_GDBGLTSSM_LINK_STATE_SHIFT		22
 #define DWC3_GDBGLTSSM_LINK_SUB_STATE_MASK	0x003C0000
@@ -2593,7 +2596,7 @@ static inline void dwc3_al_rmn_2648(struct dwc3 *dwc)
 			DWC3_GDBGLTSSM_LINK_STATE_SHIFT) ==
 					DWC3_LINK_STATE_POLL);
 }
-#endif /* CONFIG_SYNO_LSP_ALPINE && CONFIG_USB_DWC3_AL_RMN_2648 */
+#endif /* MY_DEF_HERE && CONFIG_USB_DWC3_AL_RMN_2648 */
 
 static void dwc3_gadget_linksts_change_interrupt(struct dwc3 *dwc,
 		unsigned int evtinfo)
@@ -2674,7 +2677,7 @@ static void dwc3_gadget_linksts_change_interrupt(struct dwc3 *dwc,
 		}
 	}
 
-#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_USB_DWC3_AL_RMN_2648)
+#if defined(MY_DEF_HERE) && defined(CONFIG_USB_DWC3_AL_RMN_2648)
 	if (next == DWC3_LINK_STATE_POLL) {
 		/*
 		 * Addressing RMN: 2648
@@ -2701,7 +2704,7 @@ static void dwc3_gadget_linksts_change_interrupt(struct dwc3 *dwc,
 		 */
 		dwc3_al_rmn_2648(dwc);
 	}
-#endif /* CONFIG_SYNO_LSP_ALPINE && CONFIG_USB_DWC3_AL_RMN_2648 */
+#endif /* MY_DEF_HERE && CONFIG_USB_DWC3_AL_RMN_2648 */
 	dwc->link_state = next;
 
 	dev_vdbg(dwc->dev, "%s link %d\n", __func__, dwc->link_state);
@@ -2855,7 +2858,7 @@ static irqreturn_t dwc3_interrupt(int irq, void *_dwc)
 	return ret;
 }
 
-#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_USB_DWC3_AL_VBUS_GPIO)
+#if defined(MY_DEF_HERE) && defined(CONFIG_USB_DWC3_AL_VBUS_GPIO)
 static void dwc3_vbus_work(struct work_struct *work)
 {
 	struct dwc3 *dwc = container_of(work, struct dwc3, vbus_work.work);
@@ -2893,7 +2896,7 @@ static irqreturn_t dwc3_vbus_irq(int irq, void *data)
 
 	return IRQ_HANDLED;
 }
-#endif /* CONFIG_SYNO_LSP_ALPINE && CONFIG_USB_DWC3_AL_VBUS_GPIO */
+#endif /* MY_DEF_HERE && CONFIG_USB_DWC3_AL_VBUS_GPIO */
 
 /**
  * dwc3_gadget_init - Initializes gadget related registers
@@ -2905,12 +2908,12 @@ int dwc3_gadget_init(struct dwc3 *dwc)
 {
 	u32					reg;
 	int					ret;
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #if defined(CONFIG_USB_DWC3_AL_RMN_2648) || \
 		defined(CONFIG_USB_DWC3_AL_VBUS_GPIO)
 	struct device_node			*np;
 #endif
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 	dwc->ctrl_req = dma_alloc_coherent(dwc->dev, sizeof(*dwc->ctrl_req),
 			&dwc->ctrl_req_addr, GFP_KERNEL);
@@ -2959,7 +2962,7 @@ int dwc3_gadget_init(struct dwc3 *dwc)
 	if (ret)
 		goto err4;
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_USB_DWC3_AL_RMN_2648
 	np = of_find_compatible_node(NULL, NULL, "annapurna-labs,al-usb");
 	if (!np) {
@@ -3020,7 +3023,7 @@ int dwc3_gadget_init(struct dwc3 *dwc)
 		}
 	}
 #endif
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 	reg = dwc3_readl(dwc->regs, DWC3_DCFG);
 	reg |= DWC3_DCFG_LPM_CAP;
@@ -3035,16 +3038,16 @@ int dwc3_gadget_init(struct dwc3 *dwc)
 	ret = usb_add_gadget_udc(dwc->dev, &dwc->gadget);
 	if (ret) {
 		dev_err(dwc->dev, "failed to register udc\n");
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 		goto err7;
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 		goto err5;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	}
 
 	return 0;
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 err7:
 #ifdef CONFIG_USB_DWC3_AL_VBUS_GPIO
 	if (gpio_is_valid(dwc->vbus_gpio))
@@ -3056,7 +3059,7 @@ err6:
 	if (gpio_is_valid(dwc->vbus_gpio))
 		gpio_free(dwc->vbus_gpio);
 #endif
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 err5:
 	dwc3_gadget_free_endpoints(dwc);
@@ -3086,12 +3089,12 @@ void dwc3_gadget_exit(struct dwc3 *dwc)
 {
 	usb_del_gadget_udc(&dwc->gadget);
 
-#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_USB_DWC3_AL_VBUS_GPIO)
+#if defined(MY_DEF_HERE) && defined(CONFIG_USB_DWC3_AL_VBUS_GPIO)
 	if (gpio_is_valid(dwc->vbus_gpio)) {
 		free_irq(gpio_to_irq(dwc->vbus_gpio), dwc);
 		gpio_free(dwc->vbus_gpio);
 	}
-#endif /* CONFIG_SYNO_LSP_ALPINE && CONFIG_USB_DWC3_AL_VBUS_GPIO */
+#endif /* MY_DEF_HERE && CONFIG_USB_DWC3_AL_VBUS_GPIO */
 
 	dwc3_gadget_free_endpoints(dwc);
 

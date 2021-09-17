@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *
  *	V 4 L 2   D R I V E R   H E L P E R   A P I
@@ -40,13 +43,13 @@ struct v4l2_ioctl_ops {
 					      struct v4l2_fmtdesc *f);
 	int (*vidioc_enum_fmt_vid_out_mplane)(struct file *file, void *fh,
 					      struct v4l2_fmtdesc *f);
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 		/* next two for STM tsmux */
 	int (*vidioc_enum_fmt_dvb_cap)     (struct file *file, void *fh,
 					    struct v4l2_fmtdesc *f);
 	int (*vidioc_enum_fmt_dvb_out)     (struct file *file, void *fh,
 					    struct v4l2_fmtdesc *f);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 	/* VIDIOC_G_FMT handlers */
 	int (*vidioc_g_fmt_vid_cap)    (struct file *file, void *fh,
@@ -69,13 +72,13 @@ struct v4l2_ioctl_ops {
 					   struct v4l2_format *f);
 	int (*vidioc_g_fmt_vid_out_mplane)(struct file *file, void *fh,
 					   struct v4l2_format *f);
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 		/* next two for STM tsmux */
 	int (*vidioc_g_fmt_dvb_cap)    (struct file *file, void *fh,
 					struct v4l2_format *f);
 	int (*vidioc_g_fmt_dvb_out)    (struct file *file, void *fh,
 					struct v4l2_format *f);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 	/* VIDIOC_S_FMT handlers */
 	int (*vidioc_s_fmt_vid_cap)    (struct file *file, void *fh,
@@ -98,13 +101,13 @@ struct v4l2_ioctl_ops {
 					   struct v4l2_format *f);
 	int (*vidioc_s_fmt_vid_out_mplane)(struct file *file, void *fh,
 					   struct v4l2_format *f);
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 		/* next two for STM tsmux */
 	int (*vidioc_s_fmt_dvb_cap)    (struct file *file, void *fh,
 					struct v4l2_format *f);
 	int (*vidioc_s_fmt_dvb_out)    (struct file *file, void *fh,
 					struct v4l2_format *f);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 	/* VIDIOC_TRY_FMT handlers */
 	int (*vidioc_try_fmt_vid_cap)    (struct file *file, void *fh,
@@ -127,13 +130,13 @@ struct v4l2_ioctl_ops {
 					     struct v4l2_format *f);
 	int (*vidioc_try_fmt_vid_out_mplane)(struct file *file, void *fh,
 					     struct v4l2_format *f);
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 		/* next two for STM tsmux */
 	int (*vidioc_try_fmt_dvb_cap)    (struct file *file, void *fh,
 					  struct v4l2_format *f);
 	int (*vidioc_try_fmt_dvb_out)    (struct file *file, void *fh,
 					  struct v4l2_format *f);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 	/* Buffer handlers */
 	int (*vidioc_reqbufs) (struct file *file, void *fh, struct v4l2_requestbuffers *b);

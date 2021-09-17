@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * PCIe driver for Marvell Armada 370 and Armada XP SoCs
  *
@@ -892,11 +895,11 @@ static int mvebu_get_tgt_attr(struct device_node *np, int devfn,
 		u32 flags = of_read_number(range, 1);
 		u32 slot = of_read_number(range, 2);
 		u64 cpuaddr = of_read_number(range + na, pna);
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(MY_ABC_HERE)
 		unsigned long rtype = 0;
-#else /* CONFIG_SYNO_ARMADA */
+#else /* MY_ABC_HERE */
 		unsigned long rtype;
-#endif /* CONFIG_SYNO_ARMADA */
+#endif /* MY_ABC_HERE */
 
 		if (DT_FLAGS_TO_TYPE(flags) == DT_TYPE_IO)
 			rtype = IORESOURCE_IO;
@@ -937,12 +940,12 @@ int mvebu_pcie_resume(void)
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 static const struct dev_pm_ops mvebu_pcie_pm_ops = {
 	.suspend_noirq        = mvebu_pcie_suspend,
 	.resume_noirq         = mvebu_pcie_resume,
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 static int __init mvebu_pcie_probe(struct platform_device *pdev)
 {
@@ -1097,23 +1100,23 @@ static const struct of_device_id mvebu_pcie_of_match_table[] = {
 MODULE_DEVICE_TABLE(of, mvebu_pcie_of_match_table);
 
 static struct platform_driver mvebu_pcie_driver = {
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 #ifdef CONFIG_PM
 	.suspend        = mvebu_pcie_suspend,
 	/* Move PCIe resume to ealier stage in the resume sequence to avoid resume failures - TBD */
 	/* .resume         = mvebu_pcie_resume, */
 #endif
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	.driver = {
 		.owner = THIS_MODULE,
 		.name = "mvebu-pcie",
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 #ifdef CONFIG_PM
 		.pm = &mvebu_pcie_pm_ops,
 #endif
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 		.of_match_table =
 		   of_match_ptr(mvebu_pcie_of_match_table),
 	},

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
   File: linux/xattr.h
 
@@ -17,7 +20,7 @@
 #define XATTR_OS2_PREFIX "os2."
 #define XATTR_OS2_PREFIX_LEN (sizeof(XATTR_OS2_PREFIX) - 1)
 
-#ifdef CONFIG_SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 #define XATTR_MAC_OSX_PREFIX ""
 #else
 #define XATTR_MAC_OSX_PREFIX "osx."
@@ -39,19 +42,19 @@
 #define XATTR_USER_PREFIX "user."
 #define XATTR_USER_PREFIX_LEN (sizeof(XATTR_USER_PREFIX) - 1)
 
-#ifdef CONFIG_SYNO_FS_XATTR
+#ifdef MY_ABC_HERE
 #define XATTR_SYNO_PREFIX "syno."
 #define XATTR_SYNO_PREFIX_LEN (sizeof (XATTR_SYNO_PREFIX) - 1)
 #endif
 
-#ifdef CONFIG_SYNO_FS_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 #define XATTR_SYNO_ARCHIVE_BIT "archive_bit"
 #endif
-#ifdef CONFIG_SYNO_FS_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 #define XATTR_SYNO_ARCHIVE_VERSION "archive_version"
 #define XATTR_SYNO_ARCHIVE_VERSION_VOLUME "archive_version_volume"
 #endif
-#ifdef CONFIG_SYNO_FS_CREATE_TIME
+#ifdef MY_ABC_HERE
 #define XATTR_SYNO_CREATE_TIME "create_time"
 #endif
 

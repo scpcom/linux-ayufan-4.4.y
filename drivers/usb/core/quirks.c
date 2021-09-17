@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * USB device quirk handling logic and table
  *
@@ -13,9 +16,9 @@
 
 #include <linux/usb.h>
 #include <linux/usb/quirks.h>
-#ifdef CONFIG_SYNO_USB_DEVICE_QUIRKS
+#ifdef MY_ABC_HERE
 #include <linux/usb/syno_quirks.h>
-#endif /* CONFIG_SYNO_USB_DEVICE_QUIRKS */
+#endif /* MY_ABC_HERE */
 #include "usb.h"
 
 /* Lists of quirky USB devices, split in device quirks and interface quirks.
@@ -160,16 +163,16 @@ static const struct usb_device_id usb_quirk_list[] = {
 	/* INTEL VALUE SSD */
 	{ USB_DEVICE(0x8086, 0xf1a5), .driver_info = USB_QUIRK_RESET_RESUME },
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	/* Kingston Technology */
 	{ USB_DEVICE(0x13fe, 0x3e00), .driver_info = USB_QUIRK_RESET },
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	{ }  /* terminating entry must be last */
 };
 
 /* List of quirky USB devices which should be applied with Synology USB quirks
  */
-#ifdef CONFIG_SYNO_USB_DEVICE_QUIRKS
+#ifdef MY_ABC_HERE
 static const struct usb_device_id syno_usb_quirk_list[] = {
 	/* Cyper Power UPSes */
 	{ USB_DEVICE(0x0764, 0x0005), .driver_info =
@@ -206,7 +209,7 @@ static const struct usb_device_id syno_usb_quirk_list[] = {
 
 	{ }  /* terminating entry must be last */
 };
-#endif /* CONFIG_SYNO_USB_DEVICE_QUIRKS */
+#endif /* MY_ABC_HERE */
 
 static const struct usb_device_id usb_interface_quirk_list[] = {
 	/* Logitech UVC Cameras */
@@ -271,9 +274,9 @@ static u32 __usb_detect_quirks(struct usb_device *udev,
 void usb_detect_quirks(struct usb_device *udev)
 {
 	udev->quirks = __usb_detect_quirks(udev, usb_quirk_list);
-#ifdef CONFIG_SYNO_USB_DEVICE_QUIRKS
+#ifdef MY_ABC_HERE
 	udev->syno_quirks = __usb_detect_quirks(udev, syno_usb_quirk_list);
-#endif /* CONFIG_SYNO_USB_DEVICE_QUIRKS */
+#endif /* MY_ABC_HERE */
 	if (udev->quirks)
 		dev_dbg(&udev->dev, "USB quirks for this device: %x\n",
 			udev->quirks);

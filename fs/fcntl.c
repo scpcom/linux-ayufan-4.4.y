@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/fcntl.c
  *
@@ -26,12 +29,12 @@
 #include <asm/siginfo.h>
 #include <asm/uaccess.h>
 
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 #include "synoacl_int.h"
 #define ACL_MASK_NONE 0
 #endif
 
-#ifdef CONFIG_SYNO_FS_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 
 #include <linux/mount.h>
 
@@ -49,7 +52,7 @@ static struct syno_archive_map rgSynoAr[] = {
 	{S2_SMB_HIDDEN, 0},             /* F_CLRSMB_HIDDEN */
 	{S2_SMB_SYSTEM, 0},             /* F_CLRSMB_SYSTEM */
 	{S3_IARCHIVE, 0},               /* F_CLEAR_S3_ARCHIVE */
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 	{S2_SMB_READONLY, 0},           /* F_CLRSMB_READONLY */
 	{S2_SMB_READONLY, 1},           /* F_SETSMB_READONLY */
 	{S2_SYNO_ACL_INHERIT, 0},       /* F_CLRACL_INHERIT */
@@ -60,10 +63,10 @@ static struct syno_archive_map rgSynoAr[] = {
 	{S2_SYNO_ACL_SUPPORT, 1},       /* F_SETACL_SUPPORT */
 	{S2_SYNO_ACL_IS_OWNER_GROUP, 0},/* F_CLRACL_OWNER_IS_GROUP */
 	{S2_SYNO_ACL_IS_OWNER_GROUP, 1},/* F_SETACL_OWNER_IS_GROUP */
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 };
 
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 const int rgSynoArAclTag[] = {
 	PROTECT_BY_ACL,                 /* F_CLEAR_ARCHIVE */
 	PROTECT_BY_ACL,                 /* F_SETSMB_ARCHIVE */
@@ -125,7 +128,7 @@ static struct syno_archive_permission_mapping rgSynoArPermission[] = {
 	{S2_SYNO_ACL_SUPPORT, MAY_WRITE_PERMISSION},
 	{0, -1}
 };
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 
 long __SYNOArchiveSet(struct dentry *dentry, unsigned int cmd)
 {
@@ -143,18 +146,18 @@ long __SYNOArchiveSet(struct dentry *dentry, unsigned int cmd)
 		err = 0;
 		goto unlock;
 	}
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 	if (0 > (err = synoacl_op_arbit_chg_ok(dentry, cmd, rgSynoArAclTag[i], rgSynoArAclMask[i]))){
 		goto unlock;
 	}
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 	if (rgSynoAr[i].isSetCmd) {
 		archive_bit |= rgSynoAr[i].sAr;
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 		if (S2_SYNO_ACL_INHERIT == rgSynoAr[i].sAr) {
 			archive_bit |= S2_SYNO_ACL_SUPPORT;
 		}
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 	} else {
 		archive_bit &= ~rgSynoAr[i].sAr;
 	}
@@ -171,7 +174,7 @@ long __SYNOArchiveOverwrite(struct dentry *dentry, unsigned int flags)
 	struct inode *inode = dentry->d_inode;
 	int err = 0;
 	u32 archive_bit;
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 	int permissionCheck = 0;
 	int i = 0;
 #endif
@@ -180,7 +183,7 @@ long __SYNOArchiveOverwrite(struct dentry *dentry, unsigned int flags)
 	if (err)
 		goto unlock;
 
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 	if (IS_SYNOACL(dentry)) {
 		for (i = 0; -1 != rgSynoArPermission[i].permission; i++) {
 			if ((archive_bit & rgSynoArPermission[i].sAr) == (flags & rgSynoArPermission[i].sAr)) {
@@ -224,7 +227,7 @@ long __SYNOArchiveOverwrite(struct dentry *dentry, unsigned int flags)
 		err = -EPERM;
 		goto unlock;
 	}
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 	if ((~ALL_ARCHIVE_BIT) & flags) {
 		err = -EINVAL;
 		goto unlock;
@@ -239,11 +242,11 @@ unlock:
 	return err;
 }
 EXPORT_SYMBOL(__SYNOArchiveOverwrite);
-#endif /* CONFIG_SYNO_FS_ARCHIVE_BIT */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 #include "synoacl_int.h"
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 #define SETFL_MASK (O_APPEND | O_NONBLOCK | O_NDELAY | O_DIRECT | O_NOATIME)
 
 static int setfl(int fd, struct file * filp, unsigned long arg)
@@ -545,7 +548,7 @@ static long do_fcntl(int fd, unsigned int cmd, unsigned long arg,
 	case F_GETPIPE_SZ:
 		err = pipe_fcntl(filp, cmd, arg);
 		break;
-#ifdef CONFIG_SYNO_FS_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	case SYNO_FCNTL_BASE ... SYNO_FCNTL_LAST:
 		err = mnt_want_write(filp->f_path.mnt);
 		if (err)
@@ -553,7 +556,7 @@ static long do_fcntl(int fd, unsigned int cmd, unsigned long arg,
 		err = __SYNOArchiveSet(filp->f_dentry, cmd);
 		mnt_drop_write(filp->f_path.mnt);
 		break;
-#endif /* CONFIG_SYNO_FS_ARCHIVE_BIT */
+#endif /* MY_ABC_HERE */
 	default:
 		break;
 	}

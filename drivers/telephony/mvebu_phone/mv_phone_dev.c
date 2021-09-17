@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -394,7 +397,7 @@ static int mvebu_phone_remove(struct platform_device *pdev)
 #ifdef CONFIG_PM_SLEEP
 static int mvebu_phone_suspend(struct device *dev)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 	int i;
 
 	for (i = 0; i < TDM_CTRL_REGS_NUM; i++)
@@ -407,7 +410,7 @@ static int mvebu_phone_suspend(struct device *dev)
 	priv->tdm_spi_mux_reg = MV_REG_READ(TDM_SPI_MUX_REG);
 	priv->tdm_mbus_config_reg = MV_REG_READ(TDM_MBUS_CONFIG_REG);
 	priv->tdm_misc_reg = MV_REG_READ(TDM_MISC_REG);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 
 	return 0;
 }
@@ -415,11 +418,11 @@ static int mvebu_phone_suspend(struct device *dev)
 static int mvebu_phone_resume(struct device *dev)
 {
 	struct platform_device *pdev = priv->parent;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 	int err, i;
 #else
 	int err;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 
 	err = mv_conf_mbus_windows(dev, priv->tdm_base,
 				   mv_mbus_dram_info());
@@ -433,7 +436,7 @@ static int mvebu_phone_resume(struct device *dev)
 			return err;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 	for (i = 0; i < TDM_CTRL_REGS_NUM; i++)
 		writel(priv->tdm_ctrl_regs[i], priv->tdm_base + i);
 
@@ -446,7 +449,7 @@ static int mvebu_phone_resume(struct device *dev)
 	MV_REG_WRITE(TDM_MISC_REG, priv->tdm_misc_reg);
 #else
 	mvSysTdmInit(priv->tdm_params);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 
 	return 0;
 }

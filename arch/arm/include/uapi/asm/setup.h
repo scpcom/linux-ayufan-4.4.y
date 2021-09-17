@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/include/asm/setup.h
  *
@@ -16,11 +19,11 @@
 
 #include <linux/types.h>
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 #define COMMAND_LINE_SIZE 2048
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 #define COMMAND_LINE_SIZE 1024
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 /* The list ends with an ATAG_NONE node. */
 #define ATAG_NONE	0x00000000

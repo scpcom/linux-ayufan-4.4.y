@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/ext4/file.c
  *
@@ -20,23 +23,23 @@
 
 #include <linux/time.h>
 #include <linux/fs.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 #include <linux/fsnotify.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 #include <linux/jbd2.h>
 #include <linux/mount.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 #include <linux/swap.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 #include <linux/path.h>
 #include <linux/aio.h>
 #include <linux/quotaops.h>
 #include <linux/pagevec.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 #include <linux/socket.h>
 #include <linux/net.h>
 #include <net/sock.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 #include "ext4.h"
 #include "ext4_jbd2.h"
 #include "xattr.h"
@@ -290,7 +293,7 @@ static int ext4_file_open(struct inode * inode, struct file * filp)
 	return dquot_file_open(inode, filp);
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 ssize_t ext4_splice_from_socket(struct file *file, struct socket *sock,
 				loff_t __user *ppos, size_t count_req)
 {
@@ -542,7 +545,7 @@ done:
 
 	return written ? written : err;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 
 /*
  * Here we use ext4_map_blocks() to get a block mapping for a extent-based
@@ -904,21 +907,21 @@ const struct file_operations ext4_file_operations = {
 	.fsync		= ext4_sync_file,
 	.splice_read	= generic_file_splice_read,
 	.splice_write	= generic_file_splice_write,
-#if defined(CONFIG_SYNO_LSP_ARMADA)
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
+#if defined(MY_ABC_HERE)
 	.splice_from_socket = ext4_splice_from_socket,
 #else
 	.splice_from_socket = generic_splice_from_socket,
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
+#endif /* MY_ABC_HERE */
 	.fallocate	= ext4_fallocate,
 };
 
 const struct inode_operations ext4_file_inode_operations = {
-#ifdef CONFIG_SYNO_EXT4_STAT
+#ifdef MY_ABC_HERE
 	.syno_getattr	= ext4_syno_getattr,
 #endif
-#ifdef CONFIG_SYNO_EXT4_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	.syno_get_archive_ver	= ext4_syno_get_archive_ver,
 	.syno_set_archive_ver	= ext4_syno_set_archive_ver,
 #endif

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * st-asc.c: ST Asynchronous serial controller (ASC) driver
  *
@@ -34,11 +37,11 @@
 #include <linux/st-asc.h>
 
 #define DRIVER_NAME "st-asc"
-#if defined(CONFIG_SYNO_MONACO)
+#if defined(MY_DEF_HERE)
 #define ASC_SERIAL_NAME "ttyS"
-#else /* CONFIG_SYNO_MONACO */
+#else /* MY_DEF_HERE */
 #define ASC_SERIAL_NAME "ttyAS"
-#endif /* CONFIG_SYNO_MONACO */
+#endif /* MY_DEF_HERE */
 #define ASC_FIFO_SIZE 16
 #define ASC_MAX_PORTS 8
 
@@ -817,7 +820,7 @@ static struct uart_driver asc_uart_driver = {
 	.owner		= THIS_MODULE,
 	.driver_name	= DRIVER_NAME,
 	.dev_name	= ASC_SERIAL_NAME,
-#if defined(CONFIG_SYNO_MONACO)
+#if defined(MY_DEF_HERE)
 	.major		= TTY_MAJOR,
 	.minor		= 64,
 #else

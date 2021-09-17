@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /**
  * dwc3-st.c Support for dwc3 platform devices on Stmicroelectronics platforms
  *
@@ -134,7 +137,7 @@ static void st_dwc3_dt_get_pdata(struct platform_device *pdev,
 	    of_property_read_bool(np, "st,dwc3-drd-device");
 }
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 static u32 st_dwc3_gsbuscfg_setup(struct device *dev, int index)
 {
 	struct device_node *np = dev->of_node;
@@ -150,7 +153,7 @@ static u32 st_dwc3_gsbuscfg_setup(struct device *dev, int index)
 		return -EINVAL;
 	}
 }
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 /**
  * st_dwc3_probe: main probe function
  * @pdev: platform_device
@@ -160,9 +163,9 @@ static u32 st_dwc3_gsbuscfg_setup(struct device *dev, int index)
 static int st_dwc3_probe(struct platform_device *pdev)
 {
 	struct st_dwc3 *dwc3_data;
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	struct dwc3_cfg_ops cfg_ops;
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	struct resource *res;
 	struct device *dev = &pdev->dev;
 	struct device_node *node = dev->of_node;
@@ -209,7 +212,7 @@ static int st_dwc3_probe(struct platform_device *pdev)
 
 	/* Soft reset DWC3 + Miphy */
 	reset_control_deassert(dwc3_data->rstc_s);
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	memset(&cfg_ops, 0, sizeof(cfg_ops));
 
 	if (of_find_property(node, "st,gsbuscfg", NULL)) {
@@ -222,7 +225,7 @@ static int st_dwc3_probe(struct platform_device *pdev)
 		dev_err(dwc3_data->dev, "failed to add platform data to dwc3 core\n");
 		return ret;
 	}
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	if (node) {
 		st_dwc3_dt_get_pdata(pdev, dwc3_data);

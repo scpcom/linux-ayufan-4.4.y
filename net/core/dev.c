@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * 	NET3	Protocol independent device support routines.
  *
@@ -150,12 +153,12 @@ struct list_head ptype_base[PTYPE_HASH_SIZE] __read_mostly;
 struct list_head ptype_all __read_mostly;	/* Taps */
 static struct list_head offload_base __read_mostly;
 
-#if defined(CONFIG_SYNO_E1000E_LED_SWITCH) || defined(CONFIG_SYNO_IGB_LED_SWITCH)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 void (*funcSynoNicLedCtrl)(int iEnable) = NULL;
 EXPORT_SYMBOL(funcSynoNicLedCtrl);
-#endif /* CONFIG_SYNO_E1000E_LED_SWITCH || CONFIG_SYNO_IGB_LED_SWITCH */
+#endif /* MY_DEF_HERE || MY_DEF_HERE */
 
-#ifdef CONFIG_SYNO_MAC_ADDRESS
+#ifdef MY_ABC_HERE
 static unsigned int str_to_hex(char ch)
 {
 	if ((ch >= '0') && (ch <= '9'))
@@ -235,9 +238,9 @@ END:
 int syno_get_dev_vendor_mac(const char *szDev, char *szMac)
 {
 	extern unsigned char grgbLanMac[SYNO_MAC_MAX_NUMBER][16];
-#ifdef CONFIG_SYNO_INTERNAL_NETIF_NUM
+#ifdef MY_ABC_HERE
 	extern unsigned long g_internal_netif_num;
-#endif /* CONFIG_SYNO_INTERNAL_NETIF_NUM */
+#endif /* MY_ABC_HERE */
 	int err = SYNO_VENDOR_MAC_FAIL;
 	char szIFPrefix[IFNAMSIZ] = "eth";
 	int iMacIndex = 0;
@@ -252,12 +255,12 @@ int syno_get_dev_vendor_mac(const char *szDev, char *szMac)
 	if (!strncmp(szDev, szIFPrefix, strlen(szIFPrefix))) {
 		pMacIndex = szDev + strlen(szIFPrefix);
 		iMacIndex = simple_strtol(pMacIndex, NULL, 10);
-#ifdef CONFIG_SYNO_INTERNAL_NETIF_NUM
+#ifdef MY_ABC_HERE
 		if (0 > iMacIndex || g_internal_netif_num <= iMacIndex) {
 			err = SYNO_VENDOR_MAC_FAIL;
 			goto ERR;
 		}
-#endif /* CONFIG_SYNO_INTERNAL_NETIF_NUM */
+#endif /* MY_ABC_HERE */
 		if (1 == (iMatch = syno_skip_bond_vender_mac(iMacIndex))) {
 			err = SYNO_VENDOR_MAC_EMPTY;
 			goto ERR;
@@ -281,7 +284,7 @@ ERR:
 	return err;
 }
 EXPORT_SYMBOL(syno_get_dev_vendor_mac);
-#endif /* CONFIG_SYNO_MAC_ADDRESS */
+#endif /* MY_ABC_HERE */
 
 /*
  * The @dev_base_head list is protected by @dev_base_lock and the rtnl
@@ -779,9 +782,9 @@ __setup("netdev=", netdev_boot_setup);
 
 *******************************************************************************/
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 int netdev_skb_tstamp __read_mostly = 1;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 /**
  *	__dev_get_by_name	- find a device by its name
@@ -1733,32 +1736,32 @@ EXPORT_SYMBOL(net_disable_timestamp);
 static inline void net_timestamp_set(struct sk_buff *skb)
 {
 	skb->tstamp.tv64 = 0;
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	if (static_key_false(&netstamp_needed)) {
 		if (netdev_skb_tstamp)
 			__net_timestamp(skb);
 	}
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	if (static_key_false(&netstamp_needed))
 		__net_timestamp(skb);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 }
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #define net_timestamp_check(COND, SKB)			\
 	if (static_key_false(&netstamp_needed)) {		\
 		if (netdev_skb_tstamp && (COND) && !(SKB)->tstamp.tv64)	\
 			__net_timestamp(SKB);		\
 	}						\
 
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 #define net_timestamp_check(COND, SKB)			\
 	if (static_key_false(&netstamp_needed)) {		\
 		if ((COND) && !(SKB)->tstamp.tv64)	\
 			__net_timestamp(SKB);		\
 	}						\
 
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 static inline bool is_skb_forwardable(struct net_device *dev,
 				      struct sk_buff *skb)
@@ -4001,7 +4004,7 @@ static gro_result_t napi_skb_finish(gro_result_t ret, struct sk_buff *skb)
 		break;
 
 	case GRO_MERGED_FREE:
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		if (NAPI_GRO_CB(skb)->free == NAPI_GRO_FREE_STOLEN_HEAD) {
 #ifdef CONFIG_NET_SKB_RECYCLE
 			/* Workaround for the cases when recycle callback was not called */
@@ -4013,10 +4016,10 @@ static gro_result_t napi_skb_finish(gro_result_t ret, struct sk_buff *skb)
 #endif /* CONFIG_NET_SKB_RECYCLE */
 			kmem_cache_free(skbuff_head_cache, skb);
 		}
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		if (NAPI_GRO_CB(skb)->free == NAPI_GRO_FREE_STOLEN_HEAD)
 			kmem_cache_free(skbuff_head_cache, skb);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 		else
 			__kfree_skb(skb);
 		break;
@@ -5767,11 +5770,11 @@ struct rtnl_link_stats64 *dev_get_stats(struct net_device *dev,
 	} else {
 		netdev_stats_to_stats64(storage, &dev->stats);
 	}
-#ifdef CONFIG_SYNO_SKIP_RXDROP_BY_CORE
+#ifdef MY_ABC_HERE
 	/* skip the rx_drop from kernel core, only count rx_drop by device driver */
 #else
 	storage->rx_dropped += atomic_long_read(&dev->rx_dropped);
-#endif /* CONFIG_SYNO_SKIP_RXDROP_BY_CORE */
+#endif /* MY_ABC_HERE */
 	return storage;
 }
 EXPORT_SYMBOL(dev_get_stats);

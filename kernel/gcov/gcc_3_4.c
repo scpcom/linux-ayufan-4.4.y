@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  This code provides functions to handle gcc's profiling data format
  *  introduced with gcc 3.4. Future versions of gcc may change the gcov
@@ -21,7 +24,7 @@
 #include <linux/vmalloc.h>
 #include "gcov.h"
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 #define GCOV_COUNTERS		5
 
 static struct gcov_info *gcov_info_head;
@@ -137,7 +140,7 @@ void gcov_info_unlink(struct gcov_info *prev, struct gcov_info *info)
 		gcov_info_head = info->next;
 }
 
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 /* Symbolic links to be created for each profiling data file. */
 const struct gcov_link gcov_link[] = {
 	{ OBJ_TREE, "gcno" },	/* Link to .gcno file in $(objtree). */

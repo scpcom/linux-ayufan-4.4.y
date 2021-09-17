@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2013 Marvell
  *
@@ -13,7 +16,7 @@
 #include <linux/of_address.h>
 #include <linux/io.h>
 #include <linux/reset-controller.h>
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(MY_ABC_HERE)
 #include <linux/delay.h>
 #include <linux/pm.h>
 #include <linux/serial_reg.h>
@@ -47,7 +50,7 @@ static void synology_restart(char mode, const char *cmd)
 	local_irq_disable();
 	while (1);
 }
-#endif /* CONFIG_SYNO_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static struct of_device_id of_cpu_reset_table[] = {
 	{.compatible = "marvell,armada-370-cpu-reset", .data = (void*) 1 },
@@ -110,10 +113,10 @@ int __init mvebu_cpu_reset_init(void)
 			(unsigned int) match->data;
 		reset_controller_register(&mvebu_cpu_reset_dev);
 	}
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(MY_ABC_HERE)
 	pm_power_off = synology_power_off;
 	arm_pm_restart = synology_restart;
-#endif /* CONFIG_SYNO_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	return 0;
 }

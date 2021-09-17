@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/hfsplus/options.c
  *
@@ -50,7 +53,7 @@ void hfsplus_fill_defaults(struct hfsplus_sb_info *opts)
 	if (!opts)
 		return;
 
-#ifdef CONFIG_SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 	opts->creator = 0;
 	opts->type = 0;
 #else
@@ -240,7 +243,7 @@ int hfsplus_show_options(struct seq_file *seq, struct dentry *root)
 		seq_printf(seq, ",nodecompose");
 	if (test_bit(HFSPLUS_SB_NOBARRIER, &sbi->flags))
 		seq_printf(seq, ",nobarrier");
-#ifdef CONFIG_SYNO_HFSPLUS_SHOW_CASELESS_INFO
+#ifdef MY_ABC_HERE
 	if (test_bit(HFSPLUS_SB_CASEFOLD, &sbi->flags))
 		seq_printf(seq, ",caseless");
 #endif

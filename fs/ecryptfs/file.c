@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /**
  * eCryptfs: Linux filesystem encryption layer
  *
@@ -32,7 +35,7 @@
 #include <linux/compat.h>
 #include <linux/fs_stack.h>
 #include <linux/aio.h>
-#ifdef CONFIG_SYNO_ECRYPTFS_BLOCK_BTRFS_CLONE
+#ifdef MY_ABC_HERE
 #include <linux/btrfs.h>
 #endif
 #include "ecryptfs_kernel.h"
@@ -312,7 +315,7 @@ ecryptfs_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 	struct file *lower_file = NULL;
 	long rc = -ENOTTY;
 
-#ifdef CONFIG_SYNO_ECRYPTFS_BLOCK_BTRFS_CLONE
+#ifdef MY_ABC_HERE
 	if (cmd == BTRFS_IOC_CLONE || cmd == BTRFS_IOC_CLONE_RANGE)
 		return -EXDEV;
 #endif
@@ -330,7 +333,7 @@ ecryptfs_compat_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 	struct file *lower_file = NULL;
 	long rc = -ENOIOCTLCMD;
 
-#ifdef CONFIG_SYNO_ECRYPTFS_BLOCK_BTRFS_CLONE
+#ifdef MY_ABC_HERE
 	if (cmd == BTRFS_IOC_CLONE || cmd == BTRFS_IOC_CLONE_RANGE)
 		return -EXDEV;
 #endif

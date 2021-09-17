@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * FireDTV driver (formerly known as FireSAT)
  *
@@ -132,29 +135,29 @@ int fdtv_stop_feed(struct dvb_demux_feed *dvbdmxfeed)
 	      (demux->dmx.frontend->source != DMX_MEMORY_FE))) {
 
 		if (dvbdmxfeed->ts_type & TS_DECODER) {
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 			if (dvbdmxfeed->pes_type >= DMX_PES_LAST ||
 			    !demux->pesfilter[dvbdmxfeed->pes_type])
 				return -EINVAL;
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 			if (dvbdmxfeed->pes_type >= DMX_PES_OTHER ||
 			    !demux->pesfilter[dvbdmxfeed->pes_type])
 				return -EINVAL;
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 			demux->pids[dvbdmxfeed->pes_type] |= 0x8000;
 			demux->pesfilter[dvbdmxfeed->pes_type] = NULL;
 		}
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 		if (!(dvbdmxfeed->ts_type & TS_DECODER &&
 		      dvbdmxfeed->pes_type < DMX_PES_LAST))
 			return 0;
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 		if (!(dvbdmxfeed->ts_type & TS_DECODER &&
 		      dvbdmxfeed->pes_type < DMX_PES_OTHER))
 			return 0;
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	}
 
 	if (mutex_lock_interruptible(&fdtv->demux_mutex))

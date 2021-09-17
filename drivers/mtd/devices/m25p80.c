@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * MTD SPI driver for ST M25Pxx (and similar) serial flash chips
  *
@@ -195,7 +198,7 @@ static int wait_till_ready(struct m25p *flash)
 
 	return 1;
 }
-#ifdef CONFIG_SYNO_MTD_LOCK_UNLOCK
+#ifdef MY_ABC_HERE
 static int unlock_chip(struct mtd_info *mtd, loff_t ofs, uint64_t len)
 {
 	return 0;
@@ -205,7 +208,7 @@ static int lock_chip(struct mtd_info *mtd, loff_t ofs, uint64_t len)
 {
 	return 0;
 }
-#endif /* CONFIG_SYNO_MTD_LOCK_UNLOCK */
+#endif /* MY_ABC_HERE */
 
 /*
  * Erase the whole flash memory
@@ -719,14 +722,14 @@ struct flash_info {
  * have been converging on command sets which including JEDEC ID.
  */
 static const struct spi_device_id m25p_ids[] = {
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	/* spi_flash_jedec_detection --
 	 *   using this configuration means the user is counting on this driver
 	 *   to perform memory device detection automatically (using jedec
 	 *   probe).
 	 */
 	{ "spi_flash_jedec_detection", INFO(0xD373C7, 0, 0, 0, 0) },
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	/* Atmel -- some are (confusingly) marketed as "DataFlash" */
 	{ "at25fs010",  INFO(0x1f6601, 0, 32 * 1024,   4, SECT_4K) },
 	{ "at25fs040",  INFO(0x1f6604, 0, 64 * 1024,   8, SECT_4K) },
@@ -771,12 +774,12 @@ static const struct spi_device_id m25p_ids[] = {
 	{ "mx25l6405d",  INFO(0xc22017, 0, 64 * 1024, 128, 0) },
 	{ "mx25l12805d", INFO(0xc22018, 0, 64 * 1024, 256, 0) },
 	{ "mx25l12855e", INFO(0xc22618, 0, 64 * 1024, 256, 0) },
-#if defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE)
 	{ "mx25u6435f",  INFO(0xc22537, 0, 64 * 1024, 128, 0) },
-#endif /* CONFIG_SYNO_ALPINE */
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
 	{ "mx25u12835f", INFO(0xc22538, 0, 64 * 1024, 256, 0) },
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	{ "mx25l25635e", INFO(0xc22019, 0, 64 * 1024, 512, 0) },
 	{ "mx25l25655e", INFO(0xc22619, 0, 64 * 1024, 512, 0) },
 	{ "mx66l51235l", INFO(0xc2201a, 0, 64 * 1024, 1024, 0) },
@@ -852,14 +855,14 @@ static const struct spi_device_id m25p_ids[] = {
 	{ "m25px32",    INFO(0x207116,  0, 64 * 1024, 64, SECT_4K) },
 	{ "m25px32-s0", INFO(0x207316,  0, 64 * 1024, 64, SECT_4K) },
 	{ "m25px32-s1", INFO(0x206316,  0, 64 * 1024, 64, SECT_4K) },
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	{ "m25px64",    INFO(0x207117,  0, 64 * 1024, 128, SECT_4K) },
 
 	/* Numonyx devices */
 	{ "n25q128", INFO(0x20ba18, 0, 64 * 1024, 256, 0) },
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 	{ "m25px64",    INFO(0x207117,  0, 64 * 1024, 128, 0) },
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 	/* Winbond -- w25x "blocks" are 64K, "sectors" are 4KiB */
 	{ "w25x10", INFO(0xef3011, 0, 64 * 1024,  2,  SECT_4K) },
@@ -941,9 +944,9 @@ static int m25p_probe(struct spi_device *spi)
 	struct mtd_part_parser_data	ppdata;
 	struct device_node __maybe_unused *np = spi->dev.of_node;
 
-#if defined(CONFIG_SYNO_ALPINE) || defined(CONFIG_SYNO_ARMADA)
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 	memset(&ppdata, 0x0, sizeof(ppdata));
-#endif /* CONFIG_SYNO_ALPINE || CONFIG_SYNO_ARMADA */
+#endif /* MY_DEF_HERE || MY_ABC_HERE */
 #ifdef CONFIG_MTD_OF_PARTS
 	if (!of_device_is_available(np))
 		return -ENODEV;
@@ -1031,10 +1034,10 @@ static int m25p_probe(struct spi_device *spi)
 	flash->mtd.size = info->sector_size * info->n_sectors;
 	flash->mtd._erase = m25p80_erase;
 	flash->mtd._read = m25p80_read;
-#ifdef CONFIG_SYNO_MTD_LOCK_UNLOCK
+#ifdef MY_ABC_HERE
 	flash->mtd._lock = lock_chip;
 	flash->mtd._unlock = unlock_chip;
-#endif /* CONFIG_SYNO_MTD_LOCK_UNLOCK */
+#endif /* MY_ABC_HERE */
 
 	/* flash protection support for STmicro chips */
 	if (JEDEC_MFR(info->jedec_id) == CFI_MFR_ST) {

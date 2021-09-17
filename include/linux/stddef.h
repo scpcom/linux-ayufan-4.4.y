@@ -1,9 +1,12 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_STDDEF_H
 #define _LINUX_STDDEF_H
 
 #include <uapi/linux/stddef.h>
 
-#ifdef CONFIG_SYNO_MONACO_SDK_BUILD_FAILED_FIX
+#ifdef MY_DEF_HERE
 #if !defined(__cplusplus)
 #undef NULL
 #define NULL ((void *)0)
@@ -21,7 +24,7 @@ enum {
 	false	= 0,
 	true	= 1
 };
-#endif /* CONFIG_SYNO_MONACO_SDK_BUILD_FAILED_FIX */
+#endif /* MY_DEF_HERE */
 
 #undef offsetof
 #ifdef __compiler_offsetof

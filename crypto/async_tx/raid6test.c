@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * asynchronous raid6 recovery self test
  * Copyright (c) 2009, Intel Corporation.
@@ -78,11 +81,11 @@ static void raid6_dual_recov(int disks, size_t bytes, int faila, int failb, stru
 	if (failb == disks-1) {
 		if (faila == disks-2) {
 			/* P+Q failure.  Just rebuild the syndrome. */
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 			init_async_submit(&submit, ASYNC_TX_FENCE, NULL, NULL, NULL, addr_conv);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 			init_async_submit(&submit, 0, NULL, NULL, NULL, addr_conv);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 			tx = async_gen_syndrome(ptrs, 0, disks, bytes, &submit);
 		} else {
 			struct page *blocks[disks];
@@ -99,37 +102,37 @@ static void raid6_dual_recov(int disks, size_t bytes, int faila, int failb, stru
 				blocks[count++] = ptrs[i];
 			}
 			dest = ptrs[faila];
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 			init_async_submit(&submit, ASYNC_TX_FENCE | ASYNC_TX_XOR_ZERO_DST, NULL,
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 			init_async_submit(&submit, ASYNC_TX_XOR_ZERO_DST, NULL,
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 					  NULL, NULL, addr_conv);
 			tx = async_xor(dest, blocks, 0, count, bytes, &submit);
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 			init_async_submit(&submit, ASYNC_TX_FENCE, tx, NULL, NULL, addr_conv);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 			init_async_submit(&submit, 0, tx, NULL, NULL, addr_conv);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 			tx = async_gen_syndrome(ptrs, 0, disks, bytes, &submit);
 		}
 	} else {
 		if (failb == disks-2) {
 			/* data+P failure. */
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 			init_async_submit(&submit, ASYNC_TX_FENCE, NULL, NULL, NULL, addr_conv);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 			init_async_submit(&submit, 0, NULL, NULL, NULL, addr_conv);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 			tx = async_raid6_datap_recov(disks, bytes, faila, ptrs, &submit);
 		} else {
 			/* data+data failure. */
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 			init_async_submit(&submit, ASYNC_TX_FENCE, NULL, NULL, NULL, addr_conv);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 			init_async_submit(&submit, 0, NULL, NULL, NULL, addr_conv);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 			tx = async_raid6_2data_recov(disks, bytes, faila, failb, ptrs, &submit);
 		}
 	}

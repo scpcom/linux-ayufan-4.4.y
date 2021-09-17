@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * drivers/mtd/nand/pxa3xx_nand.c
  *
@@ -8,11 +11,11 @@
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
  */
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 /*
  * See Documentation/mtd/nand/pxa3xx-nand.txt for more details.
  */
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 #include <linux/kernel.h>
 #include <linux/module.h>
@@ -29,7 +32,7 @@
 #include <linux/slab.h>
 #include <linux/of.h>
 #include <linux/of_device.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #include <linux/of_mtd.h>
 
 #if defined(CONFIG_ARCH_PXA) || defined(CONFIG_ARCH_MMP)
@@ -39,27 +42,27 @@
 #ifdef ARCH_HAS_DMA
 #include <mach/dma.h>
 #endif
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 #include <mach/dma.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 #include <linux/platform_data/mtd-nand-pxa3xx.h>
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #define NAND_DEV_READY_TIMEOUT  50
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 #define	CHIP_DELAY_TIMEOUT	(2 * HZ/10)
 #define NAND_STOP_DELAY		(2 * HZ/50)
 #define PAGE_CHUNK_SIZE		(2048)
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 /*
  * Define a buffer size for the initial command that detects the flash device:
  * STATUS, READID and PARAM. The largest of these is the PARAM command,
  * needing 256 bytes.
  */
 #define INIT_BUFFER_SIZE	256
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 /* registers and bit definitions */
 #define NDCR		(0x00) /* Control register */
@@ -69,9 +72,9 @@
 #define NDPCR		(0x18) /* Page Count Register */
 #define NDBDR0		(0x1C) /* Bad Block Register 0 */
 #define NDBDR1		(0x20) /* Bad Block Register 1 */
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #define NDECCCTRL	(0x28) /* ECC control */
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 #define NDDB		(0x40) /* Data Buffer */
 #define NDCB0		(0x48) /* Command Buffer0 */
 #define NDCB1		(0x4C) /* Command Buffer1 */
@@ -98,11 +101,11 @@
 #define NDCR_INT_MASK           (0xFFF)
 
 #define NDSR_MASK		(0xfff)
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #define NDSR_ERR_CNT_OFF	(16)
 #define NDSR_ERR_CNT_MASK       (0x1f)
 #define NDSR_ERR_CNT(sr)	((sr >> NDSR_ERR_CNT_OFF) & NDSR_ERR_CNT_MASK)
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 #define NDSR_RDY                (0x1 << 12)
 #define NDSR_FLASH_RDY          (0x1 << 11)
 #define NDSR_CS0_PAGED		(0x1 << 10)
@@ -111,27 +114,27 @@
 #define NDSR_CS1_CMDD		(0x1 << 7)
 #define NDSR_CS0_BBD		(0x1 << 6)
 #define NDSR_CS1_BBD		(0x1 << 5)
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #define NDSR_UNCORERR		(0x1 << 4)
 #define NDSR_CORERR		(0x1 << 3)
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 #define NDSR_DBERR		(0x1 << 4)
 #define NDSR_SBERR		(0x1 << 3)
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 #define NDSR_WRDREQ		(0x1 << 2)
 #define NDSR_RDDREQ		(0x1 << 1)
 #define NDSR_WRCMDREQ		(0x1)
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #define NDCB0_LEN_OVRD		(0x1 << 28)
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 #define NDCB0_ST_ROW_EN         (0x1 << 26)
 #define NDCB0_AUTO_RS		(0x1 << 25)
 #define NDCB0_CSEL		(0x1 << 24)
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #define NDCB0_EXT_CMD_TYPE_MASK	(0x7 << 29)
 #define NDCB0_EXT_CMD_TYPE(x)	(((x) << 29) & NDCB0_EXT_CMD_TYPE_MASK)
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 #define NDCB0_CMD_TYPE_MASK	(0x7 << 21)
 #define NDCB0_CMD_TYPE(x)	(((x) << 21) & NDCB0_CMD_TYPE_MASK)
 #define NDCB0_NC		(0x1 << 20)
@@ -142,7 +145,7 @@
 #define NDCB0_CMD1_MASK		(0xff)
 #define NDCB0_ADDR_CYC_SHIFT	(16)
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #define EXT_CMD_TYPE_DISPATCH	6 /* Command dispatch */
 #define EXT_CMD_TYPE_NAKED_RW	5 /* Naked read or Naked write */
 #define EXT_CMD_TYPE_READ	4 /* Read */
@@ -150,7 +153,7 @@
 #define EXT_CMD_TYPE_FINAL	3 /* Final command */
 #define EXT_CMD_TYPE_LAST_RW	1 /* Last naked read/write */
 #define EXT_CMD_TYPE_MONO	0 /* Monolithic read/write */
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 /* macros for registers read/write */
 #define nand_writel(info, off, val)	\
@@ -164,15 +167,15 @@ enum {
 	ERR_NONE	= 0,
 	ERR_DMABUSERR	= -1,
 	ERR_SENDCMD	= -2,
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	ERR_UNCORERR	= -3,
 	ERR_BBERR	= -4,
 	ERR_CORERR	= -5,
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	ERR_DBERR	= -3,
 	ERR_BBERR	= -4,
 	ERR_SBERR	= -5,
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 };
 
 enum {
@@ -188,14 +191,14 @@ enum {
 	STATE_READY,
 };
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 enum pxa3xx_nand_variant {
 	PXA3XX_NAND_VARIANT_PXA,
 	PXA3XX_NAND_VARIANT_ARMADA370,
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 struct pxa3xx_nand_host {
 	struct nand_chip	chip;
 	struct mtd_info         *mtd;
@@ -210,7 +213,7 @@ struct pxa3xx_nand_host {
 	unsigned int		row_addr_cycles;
 	size_t			read_id_bytes;
 };
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 struct pxa3xx_nand_host {
 	struct nand_chip	chip;
 	struct pxa3xx_nand_cmdset *cmdset;
@@ -232,7 +235,7 @@ struct pxa3xx_nand_host {
 	uint32_t		ndtr0cs0;
 	uint32_t		ndtr1cs0;
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 struct pxa3xx_nand_info {
 	struct nand_hw_control	controller;
@@ -241,19 +244,19 @@ struct pxa3xx_nand_info {
 	struct clk		*clk;
 	void __iomem		*mmio_base;
 	unsigned long		mmio_phys;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	struct completion	cmd_complete, dev_ready;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	struct completion	cmd_complete;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	unsigned int 		buf_start;
 	unsigned int		buf_count;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	unsigned int		buf_size;
 	unsigned int		data_buff_pos;
 	unsigned int		oob_buff_pos;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	/* DMA information */
 	int			drcmr_dat;
@@ -269,7 +272,7 @@ struct pxa3xx_nand_info {
 	struct pxa3xx_nand_host *host[NUM_CHIP_SELECT];
 	unsigned int		state;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	/*
 	 * This driver supports NFCv1 (as found in PXA SoC)
 	 * and NFCv2 (as found in Armada 370/XP SoC).
@@ -302,7 +305,7 @@ struct pxa3xx_nand_info {
 	uint32_t		ndcb1;
 	uint32_t		ndcb2;
 	uint32_t		ndcb3;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	int			cs;
 	int			use_ecc;	/* use HW ECC ? */
 	int			use_dma;	/* use DMA ? */
@@ -317,16 +320,16 @@ struct pxa3xx_nand_info {
 	uint32_t		ndcb0;
 	uint32_t		ndcb1;
 	uint32_t		ndcb2;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 };
 
 static bool use_dma = 1;
 module_param(use_dma, bool, 0444);
 MODULE_PARM_DESC(use_dma, "enable DMA for data transferring to/from NAND HW");
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 // do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 /*
  * Default NAND flash controller configuration setup by the
  * bootloader. This configuration is used only when pdata->keep_config is set
@@ -343,7 +346,7 @@ static struct pxa3xx_nand_cmdset default_cmdset = {
 	.unlock		= 0x2423,
 	.lock_status	= 0x007A,
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static struct pxa3xx_nand_timing timing[] = {
 	{ 40, 80, 60, 100, 80, 100, 90000, 400, 40, },
@@ -364,7 +367,7 @@ static struct pxa3xx_nand_flash builtin_flash_types[] = {
 { "256MiB 16-bit", 0xba20,  64, 2048, 16, 16, 2048, &timing[3] },
 };
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static u8 bbt_pattern[] = {'M', 'V', 'B', 'b', 't', '0' };
 static u8 bbt_mirror_pattern[] = {'1', 't', 'b', 'B', 'V', 'M' };
 
@@ -422,16 +425,16 @@ static struct nand_ecclayout ecc_layout_4KB_bch8bit = {
 		56,  57,  58,  59,  60,  61,  62,  63},
 	.oobfree = { }
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 /* Define a default flash type setting serve as flash detecting only */
 #define DEFAULT_FLASH_TYPE (&builtin_flash_types[0])
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 // do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 const char *mtd_names[] = {"pxa3xx_nand-0", "pxa3xx_nand-1", NULL};
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 #define NDTR0_tCH(c)	(min((c), 7) << 19)
 #define NDTR0_tCS(c)	(min((c), 7) << 16)
@@ -447,7 +450,7 @@ const char *mtd_names[] = {"pxa3xx_nand-0", "pxa3xx_nand-1", NULL};
 /* convert nano-seconds to nand flash controller clock cycles */
 #define ns2cycle(ns, clk)	(int)((ns) * (clk / 1000000) / 1000)
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static struct of_device_id pxa3xx_nand_dt_ids[] = {
 	{
 		.compatible = "marvell,pxa3xx-nand",
@@ -470,7 +473,7 @@ pxa3xx_nand_get_variant(struct platform_device *pdev)
 		return PXA3XX_NAND_VARIANT_PXA;
 	return (enum pxa3xx_nand_variant)of_id->data;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static void pxa3xx_nand_set_timing(struct pxa3xx_nand_host *host,
 				   const struct pxa3xx_nand_timing *t)
@@ -490,18 +493,18 @@ static void pxa3xx_nand_set_timing(struct pxa3xx_nand_host *host,
 		NDTR1_tWHR(ns2cycle(t->tWHR, nand_clk)) |
 		NDTR1_tAR(ns2cycle(t->tAR, nand_clk));
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	info->ndtr0cs0 = ndtr0;
 	info->ndtr1cs0 = ndtr1;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	host->ndtr0cs0 = ndtr0;
 	host->ndtr1cs0 = ndtr1;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	nand_writel(info, NDTR0CS0, ndtr0);
 	nand_writel(info, NDTR1CS0, ndtr1);
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 /*
  * Set the data and OOB size, depending on the selected
  * spare and ECC configuration.
@@ -520,7 +523,7 @@ static void pxa3xx_set_datasize(struct pxa3xx_nand_info *info,
 	if (!info->use_ecc)
 		info->oob_size += info->ecc_size;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static void pxa3xx_set_datasize(struct pxa3xx_nand_info *info)
 {
 	struct pxa3xx_nand_host *host = info->host[info->cs];
@@ -541,7 +544,7 @@ static void pxa3xx_set_datasize(struct pxa3xx_nand_info *info)
 		break;
 	}
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 /**
  * NOTE: it is a must to set ND_RUN firstly, then write
@@ -551,7 +554,7 @@ static void pxa3xx_set_datasize(struct pxa3xx_nand_info *info)
  */
 static void pxa3xx_nand_start(struct pxa3xx_nand_info *info)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	uint32_t ndcr;
 
 	ndcr = info->reg_ndcr;
@@ -575,14 +578,14 @@ static void pxa3xx_nand_start(struct pxa3xx_nand_info *info)
 		ndcr |= NDCR_SPARE_EN;
 	else
 		ndcr &= ~NDCR_SPARE_EN;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	struct pxa3xx_nand_host *host = info->host[info->cs];
 	uint32_t ndcr;
 
 	ndcr = host->reg_ndcr;
 	ndcr |= info->use_ecc ? NDCR_ECC_EN : 0;
 	ndcr |= info->use_dma ? NDCR_DMA_EN : 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	ndcr |= NDCR_ND_RUN;
 
 	/* clear status bits and run */
@@ -611,12 +614,12 @@ static void pxa3xx_nand_stop(struct pxa3xx_nand_info *info)
 	nand_writel(info, NDSR, NDSR_MASK);
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static void __maybe_unused
 enable_int(struct pxa3xx_nand_info *info, uint32_t int_mask)
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static void enable_int(struct pxa3xx_nand_info *info, uint32_t int_mask)
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 {
 	uint32_t ndcr;
 
@@ -632,7 +635,7 @@ static void disable_int(struct pxa3xx_nand_info *info, uint32_t int_mask)
 	nand_writel(info, NDCR, ndcr | int_mask);
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static void handle_data_pio(struct pxa3xx_nand_info *info)
 {
 	unsigned int do_bytes = min(info->data_size, info->chunk_size);
@@ -669,7 +672,7 @@ static void handle_data_pio(struct pxa3xx_nand_info *info)
 	info->oob_buff_pos += info->oob_size;
 	info->data_size -= do_bytes;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static void handle_data_pio(struct pxa3xx_nand_info *info)
 {
 	switch (info->state) {
@@ -693,9 +696,9 @@ static void handle_data_pio(struct pxa3xx_nand_info *info)
 		BUG();
 	}
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
-#if !defined(CONFIG_SYNO_LSP_ARMADA) || (defined(CONFIG_SYNO_LSP_ARMADA) && defined(ARCH_HAS_DMA))
+#if !defined(MY_ABC_HERE) || (defined(MY_ABC_HERE) && defined(ARCH_HAS_DMA))
 static void start_data_dma(struct pxa3xx_nand_info *info)
 {
 	struct pxa_dma_desc *desc = info->data_desc;
@@ -750,11 +753,11 @@ static void start_data_dma(struct pxa3xx_nand_info *info)
 static irqreturn_t pxa3xx_nand_irq(int irq, void *devid)
 {
 	struct pxa3xx_nand_info *info = devid;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	unsigned int status, is_completed = 0, is_ready = 0;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	unsigned int status, is_completed = 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	unsigned int ready, cmd_done;
 
 	if (info->cs == 0) {
@@ -767,7 +770,7 @@ static irqreturn_t pxa3xx_nand_irq(int irq, void *devid)
 
 	status = nand_readl(info, NDSR);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	if (status & NDSR_UNCORERR)
 		info->retcode = ERR_UNCORERR;
 	if (status & NDSR_CORERR) {
@@ -787,12 +790,12 @@ static irqreturn_t pxa3xx_nand_irq(int irq, void *devid)
 					   info->max_bitflips,
 					   info->ecc_err_cnt);
 	}
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	if (status & NDSR_DBERR)
 		info->retcode = ERR_DBERR;
 	if (status & NDSR_SBERR)
 		info->retcode = ERR_SBERR;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	if (status & (NDSR_RDDREQ | NDSR_WRDREQ)) {
 		/* whether use dma to transfer data */
 		if (info->use_dma) {
@@ -812,13 +815,13 @@ static irqreturn_t pxa3xx_nand_irq(int irq, void *devid)
 		is_completed = 1;
 	}
 	if (status & ready) {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		info->state = STATE_READY;
 		is_ready = 1;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		info->is_ready = 1;
 		info->state = STATE_READY;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	}
 
 	if (status & NDSR_WRCMDREQ) {
@@ -826,7 +829,7 @@ static irqreturn_t pxa3xx_nand_irq(int irq, void *devid)
 		status &= ~NDSR_WRCMDREQ;
 		info->state = STATE_CMD_HANDLE;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		/*
 		 * Command buffer registers NDCB{0-2} (and optionally NDCB3)
 		 * must be loaded by writing directly either 12 or 16
@@ -835,26 +838,26 @@ static irqreturn_t pxa3xx_nand_irq(int irq, void *devid)
 		 * Direct write access to NDCB1, NDCB2 and NDCB3 is ignored
 		 * but each NDCBx register can be read.
 		 */
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 		nand_writel(info, NDCB0, info->ndcb0);
 		nand_writel(info, NDCB0, info->ndcb1);
 		nand_writel(info, NDCB0, info->ndcb2);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		/* NDCB3 register is available in NFCv2 (Armada 370/XP SoC) */
 		if (info->variant == PXA3XX_NAND_VARIANT_ARMADA370)
 			nand_writel(info, NDCB0, info->ndcb3);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	}
 
 	/* clear NDSR to let the controller exit the IRQ */
 	nand_writel(info, NDSR, status);
 	if (is_completed)
 		complete(&info->cmd_complete);
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	if (is_ready)
 		complete(&info->dev_ready);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 NORMAL_IRQ_EXIT:
 	return IRQ_HANDLED;
 }
@@ -867,7 +870,7 @@ static inline int is_buf_blank(uint8_t *buf, size_t len)
 	return 1;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static void set_command_address(struct pxa3xx_nand_info *info,
 		unsigned int page_size, uint16_t column, int page_addr)
 {
@@ -935,18 +938,18 @@ static void prepare_start_command(struct pxa3xx_nand_info *info, int command)
 	}
 
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static int prepare_set_command(struct pxa3xx_nand_info *info, int command,
 		int ext_cmd_type, uint16_t column, int page_addr)
 {
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static int prepare_command_pool(struct pxa3xx_nand_info *info, int command,
 		uint16_t column, int page_addr)
 {
 	uint16_t cmd;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	int addr_cycle, exec_cmd;
 	struct pxa3xx_nand_host *host;
 	struct mtd_info *mtd;
@@ -956,9 +959,9 @@ static int prepare_command_pool(struct pxa3xx_nand_info *info, int command,
 	addr_cycle = 0;
 	exec_cmd = 1;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	/* reset data and oob column point to handle data */
 	info->buf_start		= 0;
 	info->buf_count		= 0;
@@ -966,17 +969,17 @@ static int prepare_command_pool(struct pxa3xx_nand_info *info, int command,
 	info->use_ecc		= 0;
 	info->is_ready		= 0;
 	info->retcode		= ERR_NONE;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	if (info->cs != 0)
 		info->ndcb0 = NDCB0_CSEL;
 	else
 		info->ndcb0 = 0;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	if (command == NAND_CMD_SEQIN)
 		exec_cmd = 0;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	switch (command) {
 	case NAND_CMD_READ0:
 	case NAND_CMD_PAGEPROG:
@@ -992,7 +995,7 @@ static int prepare_command_pool(struct pxa3xx_nand_info *info, int command,
 		info->ndcb2 = 0;
 		break;
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	addr_cycle = NDCB0_ADDR_CYC(host->row_addr_cycles
 				    + host->col_addr_cycles);
@@ -1000,7 +1003,7 @@ static int prepare_command_pool(struct pxa3xx_nand_info *info, int command,
 	switch (command) {
 	case NAND_CMD_READOOB:
 	case NAND_CMD_READ0:
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		info->buf_start = column;
 		info->ndcb0 |= NDCB0_CMD_TYPE(0)
 				| addr_cycle
@@ -1008,7 +1011,7 @@ static int prepare_command_pool(struct pxa3xx_nand_info *info, int command,
 
 		if (command == NAND_CMD_READOOB)
 			info->buf_start += mtd->writesize;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		cmd = host->cmdset->read1;
 		if (command == NAND_CMD_READOOB)
 			info->buf_start = mtd->writesize + column;
@@ -1024,9 +1027,9 @@ static int prepare_command_pool(struct pxa3xx_nand_info *info, int command,
 					| NDCB0_DBC
 					| addr_cycle
 					| cmd;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		/*
 		 * Multiple page read needs an 'extended command type' field,
 		 * which is either naked-read or last-read according to the
@@ -1044,10 +1047,10 @@ static int prepare_command_pool(struct pxa3xx_nand_info *info, int command,
 
 		set_command_address(info, mtd->writesize, column, page_addr);
 		break;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	case NAND_CMD_SEQIN:
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		info->buf_start = column;
 		set_command_address(info, mtd->writesize, 0, page_addr);
 
@@ -1064,7 +1067,7 @@ static int prepare_command_pool(struct pxa3xx_nand_info *info, int command,
 			info->data_size = 0;
 			exec_cmd = 1;
 		}
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		/* small page addr setting */
 		if (unlikely(host->page_size < PAGE_CHUNK_SIZE)) {
 			info->ndcb1 = ((page_addr & 0xFFFFFF) << 8)
@@ -1083,7 +1086,7 @@ static int prepare_command_pool(struct pxa3xx_nand_info *info, int command,
 
 		info->buf_count = mtd->writesize + mtd->oobsize;
 		memset(info->data_buff, 0xFF, info->buf_count);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 		break;
 
@@ -1094,7 +1097,7 @@ static int prepare_command_pool(struct pxa3xx_nand_info *info, int command,
 			break;
 		}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		/* Second command setting for large pages */
 		if (mtd->writesize > PAGE_CHUNK_SIZE) {
 			/*
@@ -1129,7 +1132,7 @@ static int prepare_command_pool(struct pxa3xx_nand_info *info, int command,
 					| NAND_CMD_SEQIN
 					| addr_cycle;
 		}
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		cmd = host->cmdset->program;
 		info->ndcb0 |= NDCB0_CMD_TYPE(0x1)
 				| NDCB0_AUTO_RS
@@ -1137,10 +1140,10 @@ static int prepare_command_pool(struct pxa3xx_nand_info *info, int command,
 				| NDCB0_DBC
 				| cmd
 				| addr_cycle;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 		break;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	case NAND_CMD_PARAM:
 		info->buf_count = 256;
 		info->ndcb0 |= NDCB0_CMD_TYPE(0)
@@ -1151,71 +1154,71 @@ static int prepare_command_pool(struct pxa3xx_nand_info *info, int command,
 		info->ndcb3 = 256;
 		info->data_size = 256;
 		break;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	case NAND_CMD_READID:
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		info->buf_count = host->read_id_bytes;
 		info->ndcb0 |= NDCB0_CMD_TYPE(3)
 				| NDCB0_ADDR_CYC(1)
 				| command;
 		info->ndcb1 = (column & 0xFF);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		cmd = host->cmdset->read_id;
 		info->buf_count = host->read_id_bytes;
 		info->ndcb0 |= NDCB0_CMD_TYPE(3)
 				| NDCB0_ADDR_CYC(1)
 				| cmd;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 		info->data_size = 8;
 		break;
 	case NAND_CMD_STATUS:
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		info->buf_count = 1;
 		info->ndcb0 |= NDCB0_CMD_TYPE(4)
 				| NDCB0_ADDR_CYC(1)
 				| command;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		cmd = host->cmdset->read_status;
 		info->buf_count = 1;
 		info->ndcb0 |= NDCB0_CMD_TYPE(4)
 				| NDCB0_ADDR_CYC(1)
 				| cmd;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 		info->data_size = 8;
 		break;
 
 	case NAND_CMD_ERASE1:
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		info->ndcb0 |= NDCB0_CMD_TYPE(2)
 				| NDCB0_AUTO_RS
 				| NDCB0_ADDR_CYC(3)
 				| NDCB0_DBC
 				| (NAND_CMD_ERASE2 << 8)
 				| NAND_CMD_ERASE1;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		cmd = host->cmdset->erase;
 		info->ndcb0 |= NDCB0_CMD_TYPE(2)
 				| NDCB0_AUTO_RS
 				| NDCB0_ADDR_CYC(3)
 				| NDCB0_DBC
 				| cmd;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 		info->ndcb1 = page_addr;
 		info->ndcb2 = 0;
 
 		break;
 	case NAND_CMD_RESET:
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		info->ndcb0 |= NDCB0_CMD_TYPE(5)
 				| command;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		cmd = host->cmdset->reset;
 		info->ndcb0 |= NDCB0_CMD_TYPE(5)
 				| cmd;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 		break;
 
@@ -1233,13 +1236,13 @@ static int prepare_command_pool(struct pxa3xx_nand_info *info, int command,
 	return exec_cmd;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static void nand_cmdfunc(struct mtd_info *mtd, unsigned command,
 			 int column, int page_addr)
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static void pxa3xx_nand_cmdfunc(struct mtd_info *mtd, unsigned command,
 				int column, int page_addr)
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 {
 	struct pxa3xx_nand_host *host = mtd->priv;
 	struct pxa3xx_nand_info *info = host->info_data;
@@ -1250,11 +1253,11 @@ static void pxa3xx_nand_cmdfunc(struct mtd_info *mtd, unsigned command,
 	 * "byte" address into a "word" address appropriate
 	 * for indexing a word-oriented device
 	 */
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	if (info->reg_ndcr & NDCR_DWIDTH_M)
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	if (host->reg_ndcr & NDCR_DWIDTH_M)
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 		column /= 2;
 
 	/*
@@ -1264,31 +1267,31 @@ static void pxa3xx_nand_cmdfunc(struct mtd_info *mtd, unsigned command,
 	 */
 	if (info->cs != host->cs) {
 		info->cs = host->cs;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		nand_writel(info, NDTR0CS0, info->ndtr0cs0);
 		nand_writel(info, NDTR1CS0, info->ndtr1cs0);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		nand_writel(info, NDTR0CS0, host->ndtr0cs0);
 		nand_writel(info, NDTR1CS0, host->ndtr1cs0);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	prepare_start_command(info, command);
 
 	info->state = STATE_PREPARED;
 	exec_cmd = prepare_set_command(info, command, 0, column, page_addr);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	info->state = STATE_PREPARED;
 	exec_cmd = prepare_command_pool(info, command, column, page_addr);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	if (exec_cmd) {
 		init_completion(&info->cmd_complete);
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		init_completion(&info->dev_ready);
 		info->need_wait = 1;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 		pxa3xx_nand_start(info);
 
 		ret = wait_for_completion_timeout(&info->cmd_complete,
@@ -1302,7 +1305,7 @@ static void pxa3xx_nand_cmdfunc(struct mtd_info *mtd, unsigned command,
 	info->state = STATE_IDLE;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static void nand_cmdfunc_extended(struct mtd_info *mtd,
 				  const unsigned command,
 				  int column, int page_addr)
@@ -1413,7 +1416,7 @@ static void nand_cmdfunc_extended(struct mtd_info *mtd,
 
 	info->state = STATE_IDLE;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static int pxa3xx_nand_write_page_hwecc(struct mtd_info *mtd,
 		struct nand_chip *chip, const uint8_t *buf, int oob_required)
@@ -1434,7 +1437,7 @@ static int pxa3xx_nand_read_page_hwecc(struct mtd_info *mtd,
 	chip->read_buf(mtd, buf, mtd->writesize);
 	chip->read_buf(mtd, chip->oob_poi, mtd->oobsize);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	if (info->retcode == ERR_CORERR && info->use_ecc) {
 		mtd->ecc_stats.corrected += info->ecc_err_cnt;
 
@@ -1451,7 +1454,7 @@ static int pxa3xx_nand_read_page_hwecc(struct mtd_info *mtd,
 	}
 
 	return info->max_bitflips;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	if (info->retcode == ERR_SBERR) {
 		switch (info->use_ecc) {
 		case 1:
@@ -1474,7 +1477,7 @@ static int pxa3xx_nand_read_page_hwecc(struct mtd_info *mtd,
 	}
 
 	return 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 }
 
 static uint8_t pxa3xx_nand_read_byte(struct mtd_info *mtd)
@@ -1533,7 +1536,7 @@ static int pxa3xx_nand_waitfunc(struct mtd_info *mtd, struct nand_chip *this)
 {
 	struct pxa3xx_nand_host *host = mtd->priv;
 	struct pxa3xx_nand_info *info = host->info_data;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	int ret;
 
 	if (info->need_wait) {
@@ -1545,16 +1548,16 @@ static int pxa3xx_nand_waitfunc(struct mtd_info *mtd, struct nand_chip *this)
 			return NAND_STATUS_FAIL;
 		}
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	/* pxa3xx_nand_send_command has waited for command complete */
 	if (this->state == FL_WRITING || this->state == FL_ERASING) {
 		if (info->retcode == ERR_NONE)
 			return 0;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		else
 			return NAND_STATUS_FAIL;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		else {
 			/*
 			 * any error make it return 0x01 which will tell
@@ -1562,25 +1565,25 @@ static int pxa3xx_nand_waitfunc(struct mtd_info *mtd, struct nand_chip *this)
 			 */
 			return 0x01;
 		}
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	return NAND_STATUS_READY;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	return 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 }
 
 static int pxa3xx_nand_config_flash(struct pxa3xx_nand_info *info,
 				    const struct pxa3xx_nand_flash *f)
 {
 	struct platform_device *pdev = info->pdev;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	struct pxa3xx_nand_platform_data *pdata = dev_get_platdata(&pdev->dev);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	struct pxa3xx_nand_platform_data *pdata = pdev->dev.platform_data;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	struct pxa3xx_nand_host *host = info->host[info->cs];
 	uint32_t ndcr = 0x0; /* enable all interrupts */
 
@@ -1595,12 +1598,12 @@ static int pxa3xx_nand_config_flash(struct pxa3xx_nand_info *info,
 	}
 
 	/* calculate flash information */
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	host->cmdset = &default_cmdset;
 	host->page_size = f->page_size;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	host->read_id_bytes = (f->page_size == 2048) ? 4 : 2;
 
 	/* calculate addressing information */
@@ -1621,11 +1624,11 @@ static int pxa3xx_nand_config_flash(struct pxa3xx_nand_info *info,
 	ndcr |= NDCR_RD_ID_CNT(host->read_id_bytes);
 	ndcr |= NDCR_SPARE_EN; /* enable spare by default */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	info->reg_ndcr = ndcr;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	host->reg_ndcr = ndcr;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	pxa3xx_nand_set_timing(host, f->timing);
 	return 0;
@@ -1640,7 +1643,7 @@ static int pxa3xx_nand_detect_config(struct pxa3xx_nand_info *info)
 	struct pxa3xx_nand_host *host = info->host[0];
 	uint32_t ndcr = nand_readl(info, NDCR);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	if (ndcr & NDCR_PAGE_SZ) {
 		/* Controller's FIFO size */
 		info->chunk_size = 2048;
@@ -1649,7 +1652,7 @@ static int pxa3xx_nand_detect_config(struct pxa3xx_nand_info *info)
 		info->chunk_size = 512;
 		host->read_id_bytes = 2;
 	}
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	if (ndcr & NDCR_PAGE_SZ) {
 		host->page_size = 2048;
 		host->read_id_bytes = 4;
@@ -1657,60 +1660,60 @@ static int pxa3xx_nand_detect_config(struct pxa3xx_nand_info *info)
 		host->page_size = 512;
 		host->read_id_bytes = 2;
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	/* Set an initial chunk size */
 	info->reg_ndcr = ndcr & ~NDCR_INT_MASK;
 	info->ndtr0cs0 = nand_readl(info, NDTR0CS0);
 	info->ndtr1cs0 = nand_readl(info, NDTR1CS0);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	host->reg_ndcr = ndcr & ~NDCR_INT_MASK;
 	host->cmdset = &default_cmdset;
 
 	host->ndtr0cs0 = nand_readl(info, NDTR0CS0);
 	host->ndtr1cs0 = nand_readl(info, NDTR1CS0);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 // do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 /* the maximum possible buffer size for large page with OOB data
  * is: 2048 + 64 = 2112 bytes, allocate a page here for both the
  * data buffer and the DMA descriptor
  */
 #define MAX_BUFF_SIZE	PAGE_SIZE
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
-#if !defined(CONFIG_SYNO_LSP_ARMADA) || (defined(CONFIG_SYNO_LSP_ARMADA) && defined(ARCH_HAS_DMA))
+#if !defined(MY_ABC_HERE) || (defined(MY_ABC_HERE) && defined(ARCH_HAS_DMA))
 static int pxa3xx_nand_init_buff(struct pxa3xx_nand_info *info)
 {
 	struct platform_device *pdev = info->pdev;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	int data_desc_offset = info->buf_size - sizeof(struct pxa_dma_desc);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	int data_desc_offset = MAX_BUFF_SIZE - sizeof(struct pxa_dma_desc);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	if (use_dma == 0) {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		info->data_buff = kmalloc(info->buf_size, GFP_KERNEL);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		info->data_buff = kmalloc(MAX_BUFF_SIZE, GFP_KERNEL);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 		if (info->data_buff == NULL)
 			return -ENOMEM;
 		return 0;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	info->data_buff = dma_alloc_coherent(&pdev->dev, info->buf_size,
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	info->data_buff = dma_alloc_coherent(&pdev->dev, MAX_BUFF_SIZE,
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 				&info->data_buff_phys, GFP_KERNEL);
 	if (info->data_buff == NULL) {
 		dev_err(&pdev->dev, "failed to allocate dma buffer\n");
@@ -1724,26 +1727,26 @@ static int pxa3xx_nand_init_buff(struct pxa3xx_nand_info *info)
 				pxa3xx_nand_data_dma_irq, info);
 	if (info->data_dma_ch < 0) {
 		dev_err(&pdev->dev, "failed to request data dma\n");
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		dma_free_coherent(&pdev->dev, info->buf_size,
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		dma_free_coherent(&pdev->dev, MAX_BUFF_SIZE,
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 				info->data_buff, info->data_buff_phys);
 		return info->data_dma_ch;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	/*
 	 * Now that DMA buffers are allocated we turn on
 	 * DMA proper for I/O operations.
 	 */
 	info->use_dma = 1;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static void pxa3xx_nand_free_buff(struct pxa3xx_nand_info *info)
 {
 	struct platform_device *pdev = info->pdev;
@@ -1755,7 +1758,7 @@ static void pxa3xx_nand_free_buff(struct pxa3xx_nand_info *info)
 		kfree(info->data_buff);
 	}
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 #else
 static int pxa3xx_nand_init_buff(struct pxa3xx_nand_info *info)
 {
@@ -1774,38 +1777,38 @@ static void pxa3xx_nand_free_buff(struct pxa3xx_nand_info *info)
 static int pxa3xx_nand_sensing(struct pxa3xx_nand_info *info)
 {
 	struct mtd_info *mtd;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	struct nand_chip *chip;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	int ret;
 
 	mtd = info->host[info->cs]->mtd;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	/* use the common timing to make a try */
 	ret = pxa3xx_nand_config_flash(info, &builtin_flash_types[0]);
 	if (ret)
 		return ret;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	chip->cmdfunc(mtd, NAND_CMD_RESET, 0, 0);
 	ret = chip->waitfunc(mtd, chip);
 	if (ret & NAND_STATUS_FAIL)
 		return -ENODEV;
 
 	return 0;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	pxa3xx_nand_cmdfunc(mtd, NAND_CMD_RESET, 0, 0);
 	if (info->is_ready)
 		return 0;
 
 	return -ENODEV;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static int pxa_ecc_init(struct pxa3xx_nand_info *info,
 			struct nand_ecc_ctrl *ecc,
 			int strength, int ecc_stepsize, int page_size)
@@ -1871,27 +1874,27 @@ static int pxa_ecc_init(struct pxa3xx_nand_info *info,
 	}
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static int pxa3xx_nand_scan(struct mtd_info *mtd)
 {
 	struct pxa3xx_nand_host *host = mtd->priv;
 	struct pxa3xx_nand_info *info = host->info_data;
 	struct platform_device *pdev = info->pdev;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	struct pxa3xx_nand_platform_data *pdata = dev_get_platdata(&pdev->dev);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	struct pxa3xx_nand_platform_data *pdata = pdev->dev.platform_data;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	struct nand_flash_dev pxa3xx_flash_ids[2], *def = NULL;
 	const struct pxa3xx_nand_flash *f = NULL;
 	struct nand_chip *chip = mtd->priv;
 	uint32_t id = -1;
 	uint64_t chipsize;
 	int i, ret, num;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	uint16_t ecc_strength, ecc_step;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	if (pdata->keep_config && !pxa3xx_nand_detect_config(info))
 		goto KEEP_CONFIG;
@@ -1950,26 +1953,26 @@ static int pxa3xx_nand_scan(struct mtd_info *mtd)
 	pxa3xx_flash_ids[1].name = NULL;
 	def = pxa3xx_flash_ids;
 KEEP_CONFIG:
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	if (info->reg_ndcr & NDCR_DWIDTH_M)
 		chip->options |= NAND_BUSWIDTH_16;
 
 	/* Device detection must be done with ECC disabled */
 	if (info->variant == PXA3XX_NAND_VARIANT_ARMADA370)
 		nand_writel(info, NDECCCTRL, 0x0);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	chip->ecc.mode = NAND_ECC_HW;
 	chip->ecc.size = host->page_size;
 	chip->ecc.strength = 1;
 
 	if (host->reg_ndcr & NDCR_DWIDTH_M)
 		chip->options |= NAND_BUSWIDTH_16;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	if (nand_scan_ident(mtd, 1, def))
 		return -ENODEV;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	if (pdata->flash_bbt) {
 		/*
 		 * We'll use a bad block table stored in-flash and don't
@@ -2013,7 +2016,7 @@ KEEP_CONFIG:
 			chip->ecc_strength_ds, mtd->writesize);
 		return -ENODEV;
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	/* calculate addressing information */
 	if (mtd->writesize >= 2048)
@@ -2021,7 +2024,7 @@ KEEP_CONFIG:
 	else
 		host->col_addr_cycles = 1;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	/* release the initial buffer */
 	kfree(info->data_buff);
 
@@ -2030,18 +2033,18 @@ KEEP_CONFIG:
 	ret = pxa3xx_nand_init_buff(info);
 	if (ret)
 		return ret;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	info->oob_buff = info->data_buff + mtd->writesize;
 	if ((mtd->size >> chip->page_shift) > 65536)
 		host->row_addr_cycles = 3;
 	else
 		host->row_addr_cycles = 2;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	mtd->name = mtd_names[0];
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	return nand_scan_tail(mtd);
 }
 
@@ -2055,13 +2058,13 @@ static int alloc_nand_resource(struct platform_device *pdev)
 	struct resource *r;
 	int ret, irq, cs;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	pdata = dev_get_platdata(&pdev->dev);
 	info = devm_kzalloc(&pdev->dev, sizeof(*info) + (sizeof(*mtd) +
 			    sizeof(*host)) * pdata->num_cs, GFP_KERNEL);
 	if (!info)
 		return -ENOMEM;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	pdata = pdev->dev.platform_data;
 	info = kzalloc(sizeof(*info) + (sizeof(*mtd) +
 		       sizeof(*host)) * pdata->num_cs, GFP_KERNEL);
@@ -2069,12 +2072,12 @@ static int alloc_nand_resource(struct platform_device *pdev)
 		dev_err(&pdev->dev, "failed to allocate memory\n");
 		return -ENOMEM;
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	info->pdev = pdev;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	info->variant = pxa3xx_nand_get_variant(pdev);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	for (cs = 0; cs < pdata->num_cs; cs++) {
 		mtd = (struct mtd_info *)((unsigned int)&info[1] +
 		      (sizeof(*mtd) + sizeof(*host)) * cs);
@@ -2092,24 +2095,24 @@ static int alloc_nand_resource(struct platform_device *pdev)
 		chip->controller        = &info->controller;
 		chip->waitfunc		= pxa3xx_nand_waitfunc;
 		chip->select_chip	= pxa3xx_nand_select_chip;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		chip->cmdfunc		= pxa3xx_nand_cmdfunc;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 		chip->read_word		= pxa3xx_nand_read_word;
 		chip->read_byte		= pxa3xx_nand_read_byte;
 		chip->read_buf		= pxa3xx_nand_read_buf;
 		chip->write_buf		= pxa3xx_nand_write_buf;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		chip->options		|= NAND_NO_SUBPAGE_WRITE;
 		chip->cmdfunc		= nand_cmdfunc;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	}
 
 	spin_lock_init(&chip->controller->lock);
 	init_waitqueue_head(&chip->controller->wq);
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	info->clk = devm_clk_get(&pdev->dev, NULL);
 	if (IS_ERR(info->clk)) {
 		dev_err(&pdev->dev, "failed to get nand clock\n");
@@ -2192,7 +2195,7 @@ fail_free_buf:
 fail_disable_clk:
 	clk_disable_unprepare(info->clk);
 	return ret;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	info->clk = clk_get(&pdev->dev, NULL);
 	if (IS_ERR(info->clk)) {
 		dev_err(&pdev->dev, "failed to get nand clock\n");
@@ -2292,24 +2295,24 @@ fail_put_clk:
 fail_free_mtd:
 	kfree(info);
 	return ret;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 }
 
 static int pxa3xx_nand_remove(struct platform_device *pdev)
 {
 	struct pxa3xx_nand_info *info = platform_get_drvdata(pdev);
 	struct pxa3xx_nand_platform_data *pdata;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	struct resource *r;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	int irq, cs;
 
 	if (!info)
 		return 0;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	pdata = dev_get_platdata(&pdev->dev);
 
 	irq = platform_get_irq(pdev, 0);
@@ -2321,7 +2324,7 @@ static int pxa3xx_nand_remove(struct platform_device *pdev)
 
 	for (cs = 0; cs < pdata->num_cs; cs++)
 		nand_release(info->host[cs]->mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	pdata = pdev->dev.platform_data;
 	platform_set_drvdata(pdev, NULL);
 
@@ -2345,13 +2348,13 @@ static int pxa3xx_nand_remove(struct platform_device *pdev)
 	for (cs = 0; cs < pdata->num_cs; cs++)
 		nand_release(info->host[cs]->mtd);
 	kfree(info);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 // do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 #ifdef CONFIG_OF
 static struct of_device_id pxa3xx_nand_dt_ids[] = {
 	{ .compatible = "marvell,pxa3xx-nand" },
@@ -2359,9 +2362,9 @@ static struct of_device_id pxa3xx_nand_dt_ids[] = {
 };
 MODULE_DEVICE_TABLE(of, i2c_pxa_dt_ids);
 #endif
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
-#if defined(CONFIG_OF) || defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(CONFIG_OF) || defined(MY_ABC_HERE)
 static int pxa3xx_nand_probe_dt(struct platform_device *pdev)
 {
 	struct pxa3xx_nand_platform_data *pdata;
@@ -2381,23 +2384,23 @@ static int pxa3xx_nand_probe_dt(struct platform_device *pdev)
 	if (of_get_property(np, "marvell,nand-keep-config", NULL))
 		pdata->keep_config = 1;
 	of_property_read_u32(np, "num-cs", &pdata->num_cs);
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	pdata->flash_bbt = of_get_nand_on_flash_bbt(np);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	pdev->dev.platform_data = pdata;
 
 	return 0;
 }
 #else
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 // do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static inline int pxa3xx_nand_probe_dt(struct platform_device *pdev)
 {
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 #endif
 
 static int pxa3xx_nand_probe(struct platform_device *pdev)
@@ -2407,7 +2410,7 @@ static int pxa3xx_nand_probe(struct platform_device *pdev)
 	struct pxa3xx_nand_info *info;
 	int ret, cs, probe_success;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #ifndef ARCH_HAS_DMA
 	if (use_dma) {
 		use_dma = 0;
@@ -2415,16 +2418,16 @@ static int pxa3xx_nand_probe(struct platform_device *pdev)
 			 "This platform can't do DMA on this device\n");
 	}
 #endif
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	ret = pxa3xx_nand_probe_dt(pdev);
 	if (ret)
 		return ret;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	pdata = dev_get_platdata(&pdev->dev);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	pdata = pdev->dev.platform_data;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	if (!pdata) {
 		dev_err(&pdev->dev, "no platform data defined\n");
 		return -ENODEV;
@@ -2439,7 +2442,7 @@ static int pxa3xx_nand_probe(struct platform_device *pdev)
 	info = platform_get_drvdata(pdev);
 	probe_success = 0;
 	for (cs = 0; cs < pdata->num_cs; cs++) {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		struct mtd_info *mtd = info->host[cs]->mtd;
 
 		/*
@@ -2450,10 +2453,10 @@ static int pxa3xx_nand_probe(struct platform_device *pdev)
 		mtd->name = "pxa3xx_nand-0";
 		info->cs = cs;
 		ret = pxa3xx_nand_scan(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		info->cs = cs;
 		ret = pxa3xx_nand_scan(info->host[cs]->mtd);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 		if (ret) {
 			dev_warn(&pdev->dev, "failed to scan nand at cs %d\n",
 				cs);
@@ -2461,11 +2464,11 @@ static int pxa3xx_nand_probe(struct platform_device *pdev)
 		}
 
 		ppdata.of_node = pdev->dev.of_node;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		ret = mtd_device_parse_register(mtd, NULL,
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		ret = mtd_device_parse_register(info->host[cs]->mtd, NULL,
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 						&ppdata, pdata->parts[cs],
 						pdata->nr_parts[cs]);
 		if (!ret)
@@ -2488,11 +2491,11 @@ static int pxa3xx_nand_suspend(struct platform_device *pdev, pm_message_t state)
 	struct mtd_info *mtd;
 	int cs;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	pdata = dev_get_platdata(&pdev->dev);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	pdata = pdev->dev.platform_data;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	if (info->state) {
 		dev_err(&pdev->dev, "driver busy, state = %d\n", info->state);
 		return -EAGAIN;
@@ -2513,11 +2516,11 @@ static int pxa3xx_nand_resume(struct platform_device *pdev)
 	struct mtd_info *mtd;
 	int cs;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	pdata = dev_get_platdata(&pdev->dev);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	pdata = pdev->dev.platform_data;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	/* We don't want to handle interrupt without calling mtd routine */
 	disable_int(info, NDCR_INT_MASK);
 
@@ -2550,11 +2553,11 @@ static int pxa3xx_nand_resume(struct platform_device *pdev)
 static struct platform_driver pxa3xx_nand_driver = {
 	.driver = {
 		.name	= "pxa3xx-nand",
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		.of_match_table = pxa3xx_nand_dt_ids,
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		.of_match_table = of_match_ptr(pxa3xx_nand_dt_ids),
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	},
 	.probe		= pxa3xx_nand_probe,
 	.remove		= pxa3xx_nand_remove,

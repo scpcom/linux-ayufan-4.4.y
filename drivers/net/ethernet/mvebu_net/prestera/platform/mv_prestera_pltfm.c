@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
    Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -499,14 +502,14 @@ static int prestera_pltfm_probe(struct platform_device *pdev)
 	/* if initialization proceeded successfully and the KernelExt is
 	 * enabled - initialize it
 	 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 #ifdef CONFIG_MV_INCLUDE_PRESTERA_KERNELEXT
 		mvKernelExt_init();
 #endif
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	if (IS_ENABLED(CONFIG_MV_INCLUDE_PRESTERA_KERNELEXT))
 		mvKernelExt_init();
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	return 0;
 }
 
@@ -517,14 +520,14 @@ static int prestera_pltfm_probe(struct platform_device *pdev)
 *******************************************************************************/
 static int prestera_pltfm_cleanup(struct platform_device *pdev)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 #ifdef CONFIG_MV_INCLUDE_PRESTERA_KERNELEXT
 		mvKernelExt_cleanup();
 #endif
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	if (IS_ENABLED(CONFIG_MV_INCLUDE_PRESTERA_KERNELEXT))
 		mvKernelExt_cleanup();
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	/* ppdev is freed during char-dev clean-up (prestera_cleanup) so no need
 	 * to do it here
 	 */

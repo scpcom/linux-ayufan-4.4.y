@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2013 STMicroelectronics (R&D) Limited.
  * Author(s): Srinivas Kandagatla <srinivas.kandagatla@st.com>
@@ -113,8 +116,8 @@ static const char *sti_dt_match[] __initdata = {
 	NULL
 };
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 void __init sti_init_early(void)
 {
 #ifdef CONFIG_STM_PCIE_TRACKER_BUG
@@ -125,14 +128,14 @@ void __init sti_init_early(void)
 		stm_hook_ioremap();
 #endif
 }
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 DT_MACHINE_START(STM, "STi SoC with Flattened Device Tree")
 	.map_io		= debug_ll_io_init,
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 	.init_early	= sti_init_early,
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	.init_late	= sti_init_machine_late,
 	.init_time	= sti_timer_init,
 	.init_machine	= sti_init_machine,

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2014 STMicroelectronics Limited
  *
@@ -138,11 +141,11 @@
  * SBC can send trace data to host using this command
  */
 #define LPM_MSG_TRACE_DATA	0x43
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 #define LPM_MSG_TRACE_DATA_SIZE	0x2
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 #define LPM_MSG_TRACE_DATA_SIZE	0x0
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 /* Command id to read message from SBC memory */
 #define LPM_MSG_BKBD_READ	0x44
@@ -224,8 +227,8 @@
 
 /* Common reset buff data, applied to SBC pen holding var to set it to ~0 */
 #define LPM_DMEM_PEN_HOLD_VAR_RESET	{0xFF, 0xFF, 0xFF, 0xFF}
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 #define LPM_POWER_STATUS 0x48
 #define XP70_IDLE_MODE 0xF
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 #endif /*__LPM_DEF_H*/

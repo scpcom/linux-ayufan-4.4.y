@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  arch/arm/include/asm/uaccess.h
  *
@@ -100,9 +103,9 @@ static inline void set_fs(mm_segment_t fs)
 extern int __get_user_1(void *);
 extern int __get_user_2(void *);
 extern int __get_user_4(void *);
-#ifdef CONFIG_SYNO_EXT4_FIX_RESIZE_16TB_IN_32BIT
+#ifdef MY_ABC_HERE
 extern int __get_user_8(void *);
-#endif /* CONFIG_SYNO_EXT4_FIX_RESIZE_16TB_IN_32BIT */
+#endif /* MY_ABC_HERE */
 
 #define __GUP_CLOBBER_1	"lr", "cc"
 #ifdef CONFIG_CPU_USE_DOMAINS
@@ -111,9 +114,9 @@ extern int __get_user_8(void *);
 #define __GUP_CLOBBER_2 "lr", "cc"
 #endif
 #define __GUP_CLOBBER_4	"lr", "cc"
-#ifdef CONFIG_SYNO_EXT4_FIX_RESIZE_16TB_IN_32BIT
+#ifdef MY_ABC_HERE
 #define __GUP_CLOBBER_8	"lr", "cc"
-#endif /* CONFIG_SYNO_EXT4_FIX_RESIZE_16TB_IN_32BIT */
+#endif /* MY_ABC_HERE */
 
 #define __get_user_x(__r2,__p,__e,__l,__s)				\
 	   __asm__ __volatile__ (					\
@@ -131,7 +134,7 @@ extern int __get_user_8(void *);
 #define __get_user_xb __get_user_x
 #endif
 
-#ifdef CONFIG_SYNO_EXT4_FIX_RESIZE_16TB_IN_32BIT
+#ifdef MY_ABC_HERE
 #define __get_user_check(x,p)							\
 	({								\
 		unsigned long __limit = current_thread_info()->addr_limit - 1; \
@@ -160,7 +163,7 @@ extern int __get_user_8(void *);
 		x = (typeof(*(p))) __r2;				\
 		__e;							\
 	})
-#else /* CONFIG_SYNO_EXT4_FIX_RESIZE_16TB_IN_32BIT */
+#else /* MY_ABC_HERE */
 #define __get_user_check(x,p)							\
 	({								\
 		unsigned long __limit = current_thread_info()->addr_limit - 1; \
@@ -183,7 +186,7 @@ extern int __get_user_8(void *);
 		x = (typeof(*(p))) __r2;				\
 		__e;							\
 	})
-#endif /* CONFIG_SYNO_EXT4_FIX_RESIZE_16TB_IN_32BIT */
+#endif /* MY_ABC_HERE */
 
 #define get_user(x,p)							\
 	({								\
@@ -319,7 +322,7 @@ do {									\
 	: "cc")
 
 #ifndef __ARMEB__
-#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_VHOST_NET)
+#if defined(MY_DEF_HERE) && defined(CONFIG_VHOST_NET)
 #define __get_user_asm_half(x,addr,err)				\
 	__asm__ __volatile__(					\
 	"1:	" TUSER(ldrh) "	%1,[%2],#0\n"			\
@@ -345,7 +348,7 @@ do {									\
 	__get_user_asm_byte(__b2, __gu_addr + 1, err);		\
 	(x) = __b1 | (__b2 << 8);				\
 })
-#endif /* CONFIG_SYNO_LSP_ALPINE && CONFIG_VHOST_NET */
+#endif /* MY_DEF_HERE && CONFIG_VHOST_NET */
 #else /* ARMEB */
 #define __get_user_asm_half(x,__gu_addr,err)			\
 ({								\
@@ -420,7 +423,7 @@ do {									\
 	: "cc")
 
 #ifndef __ARMEB__
-#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_VHOST_NET)
+#if defined(MY_DEF_HERE) && defined(CONFIG_VHOST_NET)
 #define __put_user_asm_half(x,__pu_addr,err)			\
 	__asm__ __volatile__(					\
 	"1:	" TUSER(strh) "	%1,[%2],#0\n"			\
@@ -444,7 +447,7 @@ do {									\
 	__put_user_asm_byte(__temp, __pu_addr, err);		\
 	__put_user_asm_byte(__temp >> 8, __pu_addr + 1, err);	\
 })
-#endif /* CONFIG_SYNO_LSP_ALPINE && CONFIG_VHOST_NET */
+#endif /* MY_DEF_HERE && CONFIG_VHOST_NET */
 #else /* ARMEB */
 #define __put_user_asm_half(x,__pu_addr,err)			\
 ({								\

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Marvell Armada 380/385 pinctrl driver based on mvebu pinctrl core
  *
@@ -384,12 +387,12 @@ static struct of_device_id armada_38x_pinctrl_of_match[] = {
 		.compatible = "marvell,mv88f6820-pinctrl",
 		.data       = (void *) V_88F6820,
 	},
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	{
 		.compatible = "marvell,mv88f6824-pinctrl",
 		.data       = (void *) V_88F6828,
 	},
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	{
 		.compatible = "marvell,mv88f6828-pinctrl",
 		.data       = (void *) V_88F6828,

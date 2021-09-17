@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_DMA_MAPPING_H
 #define _LINUX_DMA_MAPPING_H
 
@@ -97,7 +100,7 @@ static inline int dma_set_coherent_mask(struct device *dev, u64 mask)
 }
 #endif
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 /*
  * Set both the DMA mask and the coherent DMA mask to the same thing.
  * Note that we don't check the return value from dma_set_coherent_mask()
@@ -121,7 +124,7 @@ static inline int dma_coerce_mask_and_coherent(struct device *dev, u64 mask)
 	dev->dma_mask = &dev->coherent_dma_mask;
 	return dma_set_mask_and_coherent(dev, mask);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 extern u64 dma_get_required_mask(struct device *dev);
 

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * "splice": joining two ropes together by interweaving their strands.
  *
@@ -19,9 +22,9 @@
  */
 #include <linux/fs.h>
 #include <linux/file.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #include <linux/fsnotify.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 #include <linux/pagemap.h>
 #include <linux/splice.h>
 #include <linux/memcontrol.h>
@@ -29,21 +32,21 @@
 #include <linux/swap.h>
 #include <linux/writeback.h>
 #include <linux/export.h>
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #include <linux/buffer_head.h>
 #include <linux/module.h>
 #include <linux/sizes.h>
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 #include <linux/syscalls.h>
 #include <linux/uio.h>
 #include <linux/security.h>
 #include <linux/gfp.h>
 #include <linux/socket.h>
 #include <linux/compat.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #include <linux/net.h>
 #include <net/sock.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 #include "internal.h"
 
 /*
@@ -548,15 +551,15 @@ ssize_t generic_file_splice_read(struct file *in, loff_t *ppos,
 		len = left;
 
 	ret = __generic_file_splice_read(in, ppos, pipe, len, flags);
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	if (ret > 0)
 		*ppos += ret;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	if (ret > 0) {
 		*ppos += ret;
 		file_accessed(in);
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	return ret;
 }
@@ -729,7 +732,7 @@ static int pipe_to_sendpage(struct pipe_inode_info *pipe,
 	struct file *file = sd->u.file;
 	loff_t pos = sd->pos;
 	int more;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	int ret;
 
 	ret = buf->ops->confirm(pipe, buf);
@@ -743,7 +746,7 @@ static int pipe_to_sendpage(struct pipe_inode_info *pipe,
 	}
 
 	return ret;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 
 	if (!likely(file->f_op && file->f_op->sendpage))
 		return -EINVAL;
@@ -755,7 +758,7 @@ static int pipe_to_sendpage(struct pipe_inode_info *pipe,
 
 	return file->f_op->sendpage(file, buf->page, buf->offset,
 				    sd->len, &pos, more);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 }
 
 /*
@@ -1066,18 +1069,18 @@ generic_file_splice_write(struct pipe_inode_info *pipe, struct file *out,
 
 		mutex_lock_nested(&inode->i_mutex, I_MUTEX_CHILD);
 		ret = file_remove_suid(out);
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		if (!ret)
 			ret = splice_from_pipe_feed(pipe, &sd,
 						    pipe_to_file);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		if (!ret) {
 			ret = file_update_time(out);
 			if (!ret)
 				ret = splice_from_pipe_feed(pipe, &sd,
 							    pipe_to_file);
 		}
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 		mutex_unlock(&inode->i_mutex);
 	} while (ret > 0);
 	splice_from_pipe_end(pipe, &sd);
@@ -1475,7 +1478,7 @@ static long do_splice(struct file *in, loff_t __user *off_in,
 	return -EINVAL;
 }
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #include <net/sock.h>
 struct RECV_FILE_CONTROL_BLOCK
 {
@@ -1485,9 +1488,9 @@ struct RECV_FILE_CONTROL_BLOCK
 	void *rv_fsdata;
 };
 
-#if defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE)
 // we use the definitions in include/linux/fs.h and socket.h
-#else /* CONFIG_SYNO_ALPINE */
+#else /* MY_DEF_HERE */
 #ifdef CONFIG_ARM_PAGE_SIZE_32KB
 #define MAX_PAGES_PER_RECVFILE (SZ_1M / PAGE_SIZE)
 #else
@@ -1495,7 +1498,7 @@ struct RECV_FILE_CONTROL_BLOCK
 #endif
 #define MSG_KERNSPACE			0x1000000
 #define MSG_NOCATCHSIGNAL		0x2000000
-#endif /* CONFIG_SYNO_ALPINE */
+#endif /* MY_DEF_HERE */
 
 static ssize_t do_splice_from_socket(struct file *file, struct socket *sock,
 					loff_t __user *ppos,size_t count)
@@ -1635,10 +1638,10 @@ done:
 	else
 		return count;
 }
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
+#if defined(MY_ABC_HERE)
 // do nothing
 #else
 ssize_t generic_splice_from_socket(struct file *file, struct socket *sock,
@@ -1798,8 +1801,8 @@ cleanup:
 err:
 	return written ? written : ret;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
+#endif /* MY_ABC_HERE */
 
 /*
  * Map an iov into an array of pages and offset/length tupples. With the
@@ -2127,21 +2130,21 @@ SYSCALL_DEFINE6(splice, int, fd_in, loff_t __user *, off_in,
 		size_t, len, unsigned int, flags)
 {
 	struct fd in, out;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	int error;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	long error;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
-#if defined(CONFIG_SYNO_LSP_ALPINE) || defined(CONFIG_SYNO_LSP_ARMADA)
+#endif /* MY_ABC_HERE */
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 	struct socket *sock = NULL;
-#endif /* CONFIG_SYNO_LSP_ALPINE || CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_DEF_HERE || MY_ABC_HERE */
 
 	if (unlikely(!len))
 		return 0;
 
 	error = -EBADF;
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	/* check fd_in is socket fd */
 	sock = sockfd_lookup(fd_in, (int *)&error);
 	if(sock){
@@ -2166,9 +2169,9 @@ done:
 		fput(sock->file);
 		return error;
 	}
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	/* check if fd_in is a socket */
 	sock = sockfd_lookup(fd_in, &error);
 	if (sock) {
@@ -2188,7 +2191,7 @@ nosock:
 		fput(sock->file);
 		return error;
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	in = fdget(fd_in);
 	if (in.file) {

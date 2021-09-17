@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * originally based on the dummy device.
  *
@@ -513,7 +516,7 @@ static void bond_del_vlans_from_slave(struct bonding *bond,
 
 /*------------------------------- Link status -------------------------------*/
 
-#ifdef CONFIG_SYNO_BONDING_INIT_STATUS
+#ifdef MY_ABC_HERE
 static void default_operstate(struct net_device *dev)
 {
 	if (!netif_carrier_ok(dev)) {
@@ -525,7 +528,7 @@ static void default_operstate(struct net_device *dev)
 		dev->operstate = IF_OPER_UP;
 	}
 }
-#endif /* CONFIG_SYNO_BONDING_INIT_STATUS */
+#endif /* MY_ABC_HERE */
 
 /*
  * Set the carrier state for the master according to the state of its
@@ -1349,16 +1352,16 @@ static void bond_netpoll_cleanup(struct net_device *bond_dev)
 static void bond_set_dev_addr(struct net_device *bond_dev,
 			      struct net_device *slave_dev)
 {
-#ifdef CONFIG_SYNO_MAC_ADDRESS
+#ifdef MY_ABC_HERE
 	unsigned char szMac[MAX_ADDR_LEN];
 	memset(szMac, 0, sizeof(szMac));
-#endif /* CONFIG_SYNO_MAC_ADDRESS */
+#endif /* MY_ABC_HERE */
 
 	pr_debug("bond_dev=%p\n", bond_dev);
 	pr_debug("slave_dev=%p\n", slave_dev);
 	pr_debug("slave_dev->addr_len=%d\n", slave_dev->addr_len);
 
-#ifdef CONFIG_SYNO_MAC_ADDRESS
+#ifdef MY_ABC_HERE
 	if (syno_get_dev_vendor_mac(slave_dev->name, szMac)) {
 		printk("%s:%s(%d) dev:[%s] get vendor mac fail\n",
 				__FILE__, __FUNCTION__, __LINE__, slave_dev->name);
@@ -1373,9 +1376,9 @@ static void bond_set_dev_addr(struct net_device *bond_dev,
 		/* Normal case: set to syno vendor mac */
 		memcpy(bond_dev->dev_addr, szMac, ETH_ALEN);
 	}
-#else /* CONFIG_SYNO_MAC_ADDRESS */
+#else /* MY_ABC_HERE */
 	memcpy(bond_dev->dev_addr, slave_dev->dev_addr, slave_dev->addr_len);
-#endif /* CONFIG_SYNO_MAC_ADDRESS */
+#endif /* MY_ABC_HERE */
 	bond_dev->addr_assign_type = NET_ADDR_SET;
 	call_netdevice_notifiers(NETDEV_CHANGEADDR, bond_dev);
 }
@@ -1396,9 +1399,9 @@ static netdev_features_t bond_fix_features(struct net_device *dev,
 		goto out;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	features &= ~(NETIF_F_GSO_SOFTWARE | NETIF_F_GSO_ROBUST);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	mask = features;
 	features &= ~NETIF_F_ONE_FOR_ALL;
 	features |= NETIF_F_ALL_FOR_ALL;
@@ -1415,15 +1418,15 @@ out:
 	return features;
 }
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #define BOND_VLAN_FEATURES	(NETIF_F_ALL_CSUM | NETIF_F_SG | \
 				 NETIF_F_FRAGLIST | \
 				 NETIF_F_HIGHDMA | NETIF_F_LRO)
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 #define BOND_VLAN_FEATURES	(NETIF_F_ALL_CSUM | NETIF_F_SG | \
 				 NETIF_F_FRAGLIST | NETIF_F_ALL_TSO | \
 				 NETIF_F_HIGHDMA | NETIF_F_LRO)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 static void bond_compute_features(struct bonding *bond)
 {
@@ -1582,9 +1585,9 @@ int bond_enslave(struct net_device *bond_dev, struct net_device *slave_dev)
 	struct sockaddr addr;
 	int link_reporting;
 	int res = 0;
-#ifdef CONFIG_SYNO_MAC_ADDRESS
+#ifdef MY_ABC_HERE
 	unsigned char szMac[MAX_ADDR_LEN] = {0};
-#endif /* CONFIG_SYNO_MAC_ADDRESS */
+#endif /* MY_ABC_HERE */
 
 	if (!bond->params.use_carrier &&
 	    slave_dev->ethtool_ops->get_link == NULL &&
@@ -1719,7 +1722,7 @@ int bond_enslave(struct net_device *bond_dev, struct net_device *slave_dev)
 	 * that need it, and for restoring it upon release, and then
 	 * set it to the master's address
 	 */
-#ifdef CONFIG_SYNO_MAC_ADDRESS
+#ifdef MY_ABC_HERE
 	memset(szMac, 0, sizeof(szMac));
 
 	if (syno_get_dev_vendor_mac(slave_dev->name, szMac)){
@@ -1736,9 +1739,9 @@ int bond_enslave(struct net_device *bond_dev, struct net_device *slave_dev)
 		/* Normal case: set to syno vendor mac */
 		memcpy(new_slave->perm_hwaddr, szMac, ETH_ALEN);
 	}
-#else /* CONFIG_SYNO_MAC_ADDRESS */
+#else /* MY_ABC_HERE */
 	memcpy(new_slave->perm_hwaddr, slave_dev->dev_addr, ETH_ALEN);
-#endif /* CONFIG_SYNO_MAC_ADDRESS */
+#endif /* MY_ABC_HERE */
 
 	if (!bond->params.fail_over_mac) {
 		/*
@@ -1941,9 +1944,9 @@ int bond_enslave(struct net_device *bond_dev, struct net_device *slave_dev)
 	write_unlock_bh(&bond->curr_slave_lock);
 
 	bond_set_carrier(bond);
-#ifdef CONFIG_SYNO_BONDING_INIT_STATUS
+#ifdef MY_ABC_HERE
 	default_operstate(bond->dev);
-#endif /* CONFIG_SYNO_BONDING_INIT_STATUS */
+#endif /* MY_ABC_HERE */
 
 #ifdef CONFIG_NET_POLL_CONTROLLER
 	slave_dev->npinfo = bond_netpoll_info(bond);
@@ -2486,7 +2489,7 @@ static void bond_miimon_commit(struct bonding *bond)
 				/* prevent it from being the active one */
 				bond_set_backup_slave(slave);
 
-#ifdef CONFIG_SYNO_BONDING_FIX_ACTIVE
+#ifdef MY_ABC_HERE
 				/* While keep changing the MTU of a bonding interface in active backup mode,
 				 * there is a chance that
 				 * (1) the speed of the current active slave remains unknown, or
@@ -2507,7 +2510,7 @@ static void bond_miimon_commit(struct bonding *bond)
 				}
 				write_unlock_bh(&bond->curr_slave_lock);
 				unblock_netpoll_tx();
-#endif /* CONFIG_SYNO_BONDING_FIX_ACTIVE */
+#endif /* MY_ABC_HERE */
 			}
 
 			pr_info("%s: link status definitely up for interface %s, %u Mbps %s duplex.\n",

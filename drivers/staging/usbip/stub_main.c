@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2003-2008 Takahiro Hirofuchi
  *
@@ -120,7 +123,7 @@ int del_match_busid(char *busid)
 	/* found */
 	ret = 0;
 
-#ifdef CONFIG_SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 	if (busid_table[idx].status == STUB_BUSID_ADDED)
 		busid_table[idx].status = STUB_BUSID_OTHER;
 #endif
@@ -128,7 +131,7 @@ int del_match_busid(char *busid)
 	if (busid_table[idx].status == STUB_BUSID_OTHER)
 		memset(busid_table[idx].name, 0, BUSID_SIZE);
 
-#ifdef CONFIG_SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 	if (busid_table[idx].status != STUB_BUSID_OTHER)
 #else
 	if ((busid_table[idx].status != STUB_BUSID_OTHER) &&

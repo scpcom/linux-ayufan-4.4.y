@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/init.h>
 #include <linux/linkage.h>
 
@@ -126,13 +129,13 @@
 	.endm
 
 	.macro	get_thread_info, rd
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	mov	\rd, sp, lsr #(PAGE_SHIFT + THREAD_SIZE_ORDER)
 	mov	\rd, \rd, lsl #(PAGE_SHIFT + THREAD_SIZE_ORDER)
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	mov	\rd, sp, lsr #13
 	mov	\rd, \rd, lsl #13
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	.endm
 
 	@

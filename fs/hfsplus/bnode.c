@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/hfsplus/bnode.c
  *
@@ -39,7 +42,7 @@ void hfs_bnode_read(struct hfs_bnode *node, void *buf, int off, int len)
 	}
 }
 
-#ifdef CONFIG_SYNO_HFSPLUS_EA
+#ifdef MY_ABC_HERE
 u32 hfs_bnode_read_u32(struct hfs_bnode *node, int off)
 {
 	__be32 data;
@@ -466,10 +469,10 @@ static struct hfs_bnode *__hfs_bnode_create(struct hfs_btree *tree, u32 cnid)
 			page_cache_release(page);
 			goto fail;
 		}
-#ifdef CONFIG_SYNO_HFSPLUS_GET_PAGE_IF_IN_USE
+#ifdef MY_ABC_HERE
 #else
 		page_cache_release(page);
-#endif /* CONFIG_SYNO_HFSPLUS_GET_PAGE_IF_IN_USE */
+#endif /* MY_ABC_HERE */
 		node->page[i] = page;
 	}
 
@@ -588,13 +591,13 @@ void hfs_bnode_free(struct hfs_bnode *node)
 		if (node->page[i])
 			page_cache_release(node->page[i]);
 #endif
-#ifdef CONFIG_SYNO_HFSPLUS_GET_PAGE_IF_IN_USE
+#ifdef MY_ABC_HERE
 	int i;
 
 	for (i = 0; i < node->tree->pages_per_bnode; i++)
 		if (node->page[i])
 			page_cache_release(node->page[i]);
-#endif /* CONFIG_SYNO_HFSPLUS_GET_PAGE_IF_IN_USE */
+#endif /* MY_ABC_HERE */
 	kfree(node);
 }
 
@@ -608,7 +611,7 @@ struct hfs_bnode *hfs_bnode_create(struct hfs_btree *tree, u32 num)
 	node = hfs_bnode_findhash(tree, num);
 	spin_unlock(&tree->hash_lock);
 	if (node) {
-#ifdef CONFIG_SYNO_HFSPLUS_ERROR_HANDLE_ENHANCE
+#ifdef MY_ABC_HERE
 		tree->sb->s_flags |= MS_RDONLY;
 		pr_crit("new node %u already hashed?\n", num);
 		return ERR_PTR(-EIO);
@@ -662,7 +665,7 @@ void hfs_bnode_put(struct hfs_bnode *node)
 		hfs_dbg(BNODE_REFS, "put_node(%d:%d): %d\n",
 			node->tree->cnid, node->this,
 			atomic_read(&node->refcnt));
-#ifdef CONFIG_SYNO_HFSPLUS_ERROR_HANDLE_ENHANCE
+#ifdef MY_ABC_HERE
 		if (!atomic_read(&node->refcnt)) {
 			printk("hfsplus:node refcnt wrong (%d).\n", atomic_read(&node->refcnt));
 			tree->sb->s_flags |= MS_RDONLY;

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * GPIO driver for Marvell SoCs
  *
@@ -44,9 +47,9 @@
 #include <linux/of_device.h>
 #include <linux/clk.h>
 #include <linux/pinctrl/consumer.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #include <linux/irqchip/chained_irq.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 /*
  * GPIO unit register offsets.
@@ -85,14 +88,14 @@ struct mvebu_gpio_chip {
 	int		   irqbase;
 	struct irq_domain *domain;
 	int                soc_variant;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	u32		out_reg;
 	u32		io_conf_reg;
 	u32		blink_en_reg;
 	u32		in_pol_reg;
 	u32		edge_mask_regs[4];
 	u32		level_mask_regs[4];
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 };
 
 /*
@@ -449,18 +452,18 @@ static int mvebu_gpio_irq_set_type(struct irq_data *d, unsigned int type)
 static void mvebu_gpio_irq_handler(unsigned int irq, struct irq_desc *desc)
 {
 	struct mvebu_gpio_chip *mvchip = irq_get_handler_data(irq);
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	struct irq_chip *chip = irq_desc_get_chip(desc);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	u32 cause, type;
 	int i;
 
 	if (mvchip == NULL)
 		return;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	chained_irq_enter(chip, desc);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	cause = readl_relaxed(mvebu_gpioreg_data_in(mvchip)) &
 		readl_relaxed(mvebu_gpioreg_level_mask(mvchip));
@@ -486,9 +489,9 @@ static void mvebu_gpio_irq_handler(unsigned int irq, struct irq_desc *desc)
 		}
 		generic_handle_irq(irq);
 	}
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	chained_irq_exit(chip, desc);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 }
 
 #ifdef CONFIG_DEBUG_FS
@@ -568,7 +571,7 @@ static struct of_device_id mvebu_gpio_of_match[] = {
 };
 MODULE_DEVICE_TABLE(of, mvebu_gpio_of_match);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static int mvebu_gpio_suspend(struct platform_device *pdev, pm_message_t state)
 {
 	struct mvebu_gpio_chip *mvchip = platform_get_drvdata(pdev);
@@ -655,7 +658,7 @@ static int mvebu_gpio_resume(struct platform_device *pdev)
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static int mvebu_gpio_probe(struct platform_device *pdev)
 {
@@ -688,9 +691,9 @@ static int mvebu_gpio_probe(struct platform_device *pdev)
 		return -ENOMEM;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	platform_set_drvdata(pdev, mvchip);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	if (of_property_read_u32(pdev->dev.of_node, "ngpios", &ngpios)) {
 		dev_err(&pdev->dev, "Missing ngpios OF property\n");
@@ -849,10 +852,10 @@ static struct platform_driver mvebu_gpio_driver = {
 		.of_match_table = mvebu_gpio_of_match,
 	},
 	.probe		= mvebu_gpio_probe,
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	.suspend        = mvebu_gpio_suspend,
 	.resume         = mvebu_gpio_resume,
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 };
 
 static int __init mvebu_gpio_init(void)

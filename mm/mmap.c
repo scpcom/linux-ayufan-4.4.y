@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * mm/mmap.c
  *
@@ -2019,7 +2022,7 @@ struct vm_area_struct *find_vma(struct mm_struct *mm, unsigned long addr)
 			vma_tmp = rb_entry(rb_node,
 					   struct vm_area_struct, vm_rb);
 
-#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_ARM_PAGE_SIZE_64KB)
+#if defined(MY_DEF_HERE) && defined(CONFIG_ARM_PAGE_SIZE_64KB)
 	/* Take into account a wrap-around of the vm_end field to 0x0.
 	** This happends on last arm page with 64KB page sizes.
 	** vm_start =0xFFFF0000, size 64KB.
@@ -2030,7 +2033,7 @@ struct vm_area_struct *find_vma(struct mm_struct *mm, unsigned long addr)
 					WARN(!(vma_tmp->vm_end),
 						"find vma found the last page,"
 						"ending in address 0x0");
-#elif defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT)
+#elif defined(MY_ABC_HERE) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT)
 			/* Take into account a wrap-around of the
 				** vm_end field to 0x0. e.g. vm_start =
 				** 0xFFFF0000 size PAGE_SIZE.

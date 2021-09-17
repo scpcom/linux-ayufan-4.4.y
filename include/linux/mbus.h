@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Marvell MBUS common definitions.
  *
@@ -11,9 +14,9 @@
 #ifndef __LINUX_MBUS_H
 #define __LINUX_MBUS_H
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 struct resource;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 struct mbus_dram_target_info
 {
@@ -63,7 +66,7 @@ static inline const struct mbus_dram_target_info *mv_mbus_dram_info(void)
 }
 #endif
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 int mvebu_mbus_save_cpu_target(u32 *store_addr);
 void mvebu_mbus_get_pcie_mem_aperture(struct resource *res);
 void mvebu_mbus_get_pcie_io_aperture(struct resource *res);
@@ -73,21 +76,21 @@ int mvebu_mbus_add_window_remap_by_id(unsigned int target,
 				      phys_addr_t remap);
 int mvebu_mbus_add_window_by_id(unsigned int target, unsigned int attribute,
 				phys_addr_t base, size_t size);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 int mvebu_mbus_add_window_remap_flags(const char *devname, phys_addr_t base,
 				      size_t size, phys_addr_t remap,
 				      unsigned int flags);
 int mvebu_mbus_add_window(const char *devname, phys_addr_t base,
 			  size_t size);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 int mvebu_mbus_del_window(phys_addr_t base, size_t size);
 int mvebu_mbus_init(const char *soc, phys_addr_t mbus_phys_base,
 		    size_t mbus_size, phys_addr_t sdram_phys_base,
 		    size_t sdram_size);
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 int mvebu_mbus_dt_init(bool is_coherent);
 int mvebu_mbus_get_addr_win_info(phys_addr_t phyaddr, u8 *trg_id, u8 *attr);
 int mvebu_mbus_win_addr_get(u8 target_id, u8 attribute, u32 *phy_base, u32 *size);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 #endif /* __LINUX_MBUS_H */

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* auditfilter.c -- filtering of audit events
  *
  * Copyright 2003-2004 Red Hat, Inc.
@@ -423,11 +426,11 @@ static struct audit_entry *audit_data_to_entry(struct audit_rule_data *data,
 		f->lsm_rule = NULL;
 
 		/* Support legacy tests for a valid loginuid */
-#if defined(CONFIG_SYNO_ALPINE) || defined(CONFIG_SYNO_ARMADA)
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 		if ((f->type == AUDIT_LOGINUID) && (f->val == 4294967295U)) {
-#else /* CONFIG_SYNO_ALPINE || CONFIG_SYNO_ARMADA */
+#else /* MY_DEF_HERE || MY_ABC_HERE */
 		if ((f->type == AUDIT_LOGINUID) && (f->val == 4294967295)) {
-#endif /* CONFIG_SYNO_ALPINE || CONFIG_SYNO_ARMADA */
+#endif /* MY_DEF_HERE || MY_ABC_HERE */
 			f->type = AUDIT_LOGINUID_SET;
 			f->val = 0;
 		}

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * xHCI host controller driver
  *
@@ -992,7 +995,7 @@ fail:
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 void mrvl_refresh_ring_seg(struct xhci_segment *seg, unsigned int cycle_state)
 {
 	union xhci_trb *current_trb = seg->trbs;
@@ -1018,7 +1021,7 @@ void mrvl_refresh_ring(struct xhci_ring *ring, unsigned int cycle_state)
 	mrvl_refresh_ring_seg(current_seg, cycle_state);
 	xhci_initialize_ring_info(ring, cycle_state);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 void xhci_copy_ep0_dequeue_into_input_ctx(struct xhci_hcd *xhci,
 		struct usb_device *udev)
@@ -1037,7 +1040,7 @@ void xhci_copy_ep0_dequeue_into_input_ctx(struct xhci_hcd *xhci,
 	 * configured device has reset, so all control transfers should have
 	 * been completed or cancelled before the reset.
 	 */
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #define MRVL_XHCI_RELEASE_3_0		1
 #if defined(MRVL_XHCI_RELEASE_3_0) && MRVL_XHCI_RELEASE_3_0
 	/*walk around for address dev fail*/
@@ -1049,11 +1052,11 @@ void xhci_copy_ep0_dequeue_into_input_ctx(struct xhci_hcd *xhci,
 							ep_ring->enqueue)
 				   | ep_ring->cycle_state);
 #endif
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	ep0_ctx->deq = cpu_to_le64(xhci_trb_virt_to_dma(ep_ring->enq_seg,
 							ep_ring->enqueue)
 				   | ep_ring->cycle_state);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 }
 
 /*
@@ -2486,10 +2489,10 @@ int xhci_mem_init(struct xhci_hcd *xhci, gfp_t flags)
 	for (i = 0; i < USB_MAXCHILDREN; ++i) {
 		xhci->bus_state[0].resume_done[i] = 0;
 		xhci->bus_state[1].resume_done[i] = 0;
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 		/* Only the USB 2.0 completions will ever be used. */
 		init_completion(&xhci->bus_state[1].rexit_done[i]);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	}
 
 	if (scratchpad_alloc(xhci, flags))

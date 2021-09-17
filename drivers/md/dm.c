@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2001, 2002 Sistina Software (UK) Limited.
  * Copyright (C) 2004-2008 Red Hat, Inc. All rights reserved.
@@ -7,9 +10,9 @@
 
 #include "dm.h"
 #include "dm-uevent.h"
-#ifdef CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP
+#ifdef MY_ABC_HERE
 #include "md.h"
-#endif /* CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP */
+#endif /* MY_ABC_HERE */
 
 #include <linux/init.h>
 #include <linux/module.h>
@@ -43,12 +46,12 @@ EXPORT_SYMBOL(dm_ratelimit_state);
  */
 #define DM_COOKIE_ENV_VAR_NAME "DM_COOKIE"
 #define DM_COOKIE_LENGTH 24
-#ifdef CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP
+#ifdef MY_ABC_HERE
 void SynoMDWakeUpDevices(void *md);
-#ifdef CONFIG_SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 extern int SynoDebugFlag;
-#endif /* CONFIG_SYNO_DEBUG_FLAG */
-#endif /* CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP */
+#endif /* MY_ABC_HERE */
+#endif /* MY_ABC_HERE */
 
 static const char *_name = DM_NAME;
 
@@ -212,7 +215,7 @@ struct mapped_device {
 
 	/* zero-length flush that will be cloned and submitted to targets */
 	struct bio flush_bio;
-#ifdef CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP
+#ifdef MY_ABC_HERE
 	/* to record whether this LV is in active or not */
 	int blActive;
 
@@ -221,7 +224,7 @@ struct mapped_device {
 
 	/* the last time received request */
 	unsigned long ulLastReq;
-#endif /* CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP */
+#endif /* MY_ABC_HERE */
 };
 
 /*
@@ -1569,7 +1572,7 @@ static int dm_request_based(struct mapped_device *md)
 static void dm_request(struct request_queue *q, struct bio *bio)
 {
 	struct mapped_device *md = q->queuedata;
-#ifdef CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP
+#ifdef MY_ABC_HERE
 	struct dm_dev_internal *dd = NULL;
 	struct dm_table *map = NULL;
 	char b[BDEVNAME_SIZE] = {'\0'};
@@ -1588,12 +1591,12 @@ static void dm_request(struct request_queue *q, struct bio *bio)
 			list_for_each_entry (dd, dm_table_get_devices(map), list) {
 
 				if (dd && dd->dm_dev.bdev && NULL != strstr(bdevname(dd->dm_dev.bdev, b), "md")) {
-#ifdef CONFIG_SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 					if (0 < SynoDebugFlag) {
 						printk("dm request get [%s], push down wakeup no work\n",
 								bdevname(dd->dm_dev.bdev, b));
 					}
-#endif /* CONFIG_SYNO_DEBUG_FLAG */
+#endif /* MY_ABC_HERE */
 					if (dd->dm_dev.bdev->bd_disk && dd->dm_dev.bdev->bd_disk->private_data) {
 						SynoMDWakeUpDevices(dd->dm_dev.bdev->bd_disk->private_data);
 					}
@@ -1605,7 +1608,7 @@ static void dm_request(struct request_queue *q, struct bio *bio)
 
 	/* update the last request time */
 	md->ulLastReq = jiffies;
-#endif /* CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP */
+#endif /* MY_ABC_HERE */
 
 	if (dm_request_based(md))
 		blk_queue_bio(q, bio);
@@ -2045,11 +2048,11 @@ static struct mapped_device *alloc_dev(int minor)
 	spin_unlock(&_minor_lock);
 
 	BUG_ON(old_md != MINOR_ALLOCED);
-#ifdef CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP
+#ifdef MY_ABC_HERE
 	spin_lock_init(&md->ActLock);
 	md->blActive = 0;
 	md->ulLastReq = jiffies;
-#endif /* CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP */
+#endif /* MY_ABC_HERE */
 	return md;
 
 bad_bdev:
@@ -2872,7 +2875,7 @@ int dm_suspended(struct dm_target *ti)
 }
 EXPORT_SYMBOL_GPL(dm_suspended);
 
-#ifdef CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP
+#ifdef MY_ABC_HERE
 int dm_active_get(struct mapped_device *md)
 {
 	unsigned char blActive = 0;
@@ -2903,12 +2906,12 @@ int dm_active_set(struct mapped_device *md, int value)
 	if (map) {
 		list_for_each_entry (dd, dm_table_get_devices(map), list) {
 			if (dd && dd->dm_dev.bdev && NULL != strstr(bdevname(dd->dm_dev.bdev, b), "md")) {
-#ifdef CONFIG_SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 				if (0 < SynoDebugFlag) {
 					printk("dm active set [%s], value %d iNeedWake %d\n",
 							bdevname(dd->dm_dev.bdev, b), value, iNeedWake);
 				}
-#endif /* CONFIG_SYNO_DEBUG_FLAG */
+#endif /* MY_ABC_HERE */
 				if (dd->dm_dev.bdev->bd_disk && dd->dm_dev.bdev->bd_disk->private_data) {
 					struct mddev *mddev = dd->dm_dev.bdev->bd_disk->private_data;
 					if (iNeedWake) {
@@ -2925,7 +2928,7 @@ int dm_active_set(struct mapped_device *md, int value)
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP */
+#endif /* MY_ABC_HERE */
 
 int dm_noflush_suspending(struct dm_target *ti)
 {

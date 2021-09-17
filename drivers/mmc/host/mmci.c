@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/drivers/mmc/host/mmci.c - ARM PrimeCell MMCI PL180/1 driver
  *
@@ -1307,10 +1310,10 @@ static void mmci_dt_populate_generic_pdata(struct device_node *np,
 		pr_warn("%s: Unsupported bus width\n", np->full_name);
 	}
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	if (!pdata->ocr_mask)
 		of_property_read_u32(np, "ocr-mask", &pdata->ocr_mask);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 }
 #else
 static void mmci_dt_populate_generic_pdata(struct device_node *np,

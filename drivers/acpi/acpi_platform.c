@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * ACPI support for platform bus type.
  *
@@ -29,9 +32,9 @@ ACPI_MODULE_NAME("platform");
 static const struct acpi_device_id acpi_platform_device_ids[] = {
 
 	{ "PNP0D40" },
-#ifdef CONFIG_SYNO_PINCTRL_CHERRYVIEW
+#ifdef MY_DEF_HERE
 	{ "INT33FF" }, // Braswell GPIO controller
-#endif /* CONFIG_SYNO_PINCTRL_CHERRYVIEW */
+#endif /* MY_DEF_HERE */
 
 	{ }
 };

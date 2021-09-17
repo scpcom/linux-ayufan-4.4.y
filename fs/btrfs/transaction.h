@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2007 Oracle.  All rights reserved.
  *
@@ -59,7 +62,7 @@ struct btrfs_transaction {
 	struct list_head switch_commits;
 	struct btrfs_delayed_ref_root delayed_refs;
 	int aborted;
-#ifdef CONFIG_SYNO_BTRFS_CLEAR_SPACE_FULL
+#ifdef MY_ABC_HERE
 	bool clear_full;
 #endif
 };
@@ -111,10 +114,10 @@ struct btrfs_trans_handle {
 	struct seq_list delayed_ref_elem;
 	struct list_head qgroup_ref_list;
 	struct list_head new_bgs;
-#ifdef CONFIG_SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT
+#ifdef MY_ABC_HERE
 	struct btrfs_pending_snapshot *pending_snap;
 	bool pending_snap_rm;
-#endif /* CONFIG_SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT */
+#endif /* MY_ABC_HERE */
 };
 
 struct btrfs_pending_snapshot {

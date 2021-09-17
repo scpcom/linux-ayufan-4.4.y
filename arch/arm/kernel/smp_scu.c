@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/arch/arm/kernel/smp_scu.c
  *
@@ -22,17 +25,17 @@
 #define SCU_INVALIDATE		0x0c
 #define SCU_FPGA_REVISION	0x10
 
-#if defined(CONFIG_SMP) || defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(CONFIG_SMP) || defined(MY_ABC_HERE)
 /*
  * Get the number of CPU cores from the SCU configuration
  */
 unsigned int __init scu_get_core_count(void __iomem *scu_base)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	unsigned int ncores = readl_relaxed(scu_base + SCU_CONFIG);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	unsigned int ncores = __raw_readl(scu_base + SCU_CONFIG);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	return (ncores & 0x03) + 1;
 }
 
@@ -46,39 +49,39 @@ void scu_enable(void __iomem *scu_base)
 #ifdef CONFIG_ARM_ERRATA_764369
 	/* Cortex-A9 only */
 	if ((read_cpuid_id() & 0xff0ffff0) == 0x410fc090) {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		scu_ctrl = readl_relaxed(scu_base + 0x30);
 		if (!(scu_ctrl & 1))
 			writel_relaxed(scu_ctrl | 0x1, scu_base + 0x30);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		scu_ctrl = __raw_readl(scu_base + 0x30);
 		if (!(scu_ctrl & 1))
 			__raw_writel(scu_ctrl | 0x1, scu_base + 0x30);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	}
 #endif
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	scu_ctrl = readl_relaxed(scu_base + SCU_CTRL);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	scu_ctrl = __raw_readl(scu_base + SCU_CTRL);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	/* Enable SCU standby mode To allow L2 cache controller idle mode */
 	scu_ctrl |= BIT(5);
 	__raw_writel(scu_ctrl, scu_base + SCU_CTRL);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	/* already enabled? */
 	if (scu_ctrl & 1)
 		return;
 
 	scu_ctrl |= 1;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	writel_relaxed(scu_ctrl, scu_base + SCU_CTRL);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	__raw_writel(scu_ctrl, scu_base + SCU_CTRL);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	/*
 	 * Ensure that the data accessed by CPU0 before the SCU was
@@ -104,15 +107,15 @@ int scu_power_mode(void __iomem *scu_base, unsigned int mode)
 	if (mode > 3 || mode == 1 || cpu > 3)
 		return -EINVAL;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	val = readb_relaxed(scu_base + SCU_CPU_STATUS + cpu) & ~0x03;
 	val |= mode;
 	writeb_relaxed(val, scu_base + SCU_CPU_STATUS + cpu);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	val = __raw_readb(scu_base + SCU_CPU_STATUS + cpu) & ~0x03;
 	val |= mode;
 	__raw_writeb(val, scu_base + SCU_CPU_STATUS + cpu);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	return 0;
 }

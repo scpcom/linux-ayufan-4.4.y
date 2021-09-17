@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -757,9 +760,9 @@ static int mv_set_prio(mv_priority_stc *param)
     return 0;
 }
 
-#if defined(CONFIG_SYNO_ARMADA) && defined(CONFIG_OF)
+#if defined(MY_ABC_HERE) && defined(CONFIG_OF)
 // do nothing
-#else /* CONFIG_SYNO_ARMADA */
+#else /* MY_ABC_HERE */
 /*******************************************************************************
 * mvKernelExt_read_proc_mem
 *
@@ -845,7 +848,7 @@ static int mvKernelExt_read_proc_mem(
 
     return len;
 }
-#endif /* CONFIG_SYNO_ARMADA */
+#endif /* MY_ABC_HERE */
 
 /************************************************************************
 * mvKernelExt_cleanup

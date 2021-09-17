@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/arch/arm/kernel/entry-common.S
  *
@@ -388,13 +391,13 @@ ENTRY(vector_swi)
 #else
  USER(	ldr	r10, [lr, #-4]		)	@ get SWI instruction
 #endif
-#if defined(CONFIG_SYNO_LSP_ALPINE) || defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
  ARM_BE8(rev	r10, r10)			@ little endian instruction
-#else /* CONFIG_SYNO_LSP_ALPINE || CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_DEF_HERE || MY_ABC_HERE */
 #ifdef CONFIG_CPU_ENDIAN_BE8
 	rev	r10, r10			@ little endian instruction
 #endif
-#endif /* CONFIG_SYNO_LSP_ALPINE || CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_DEF_HERE || MY_ABC_HERE */
 
 #elif defined(CONFIG_AEABI)
 
@@ -557,7 +560,7 @@ sys_fstatfs64_wrapper:
 		b	sys_fstatfs64
 ENDPROC(sys_fstatfs64_wrapper)
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 sys_mmap2:
 		str	r5, [sp, #4]
 #if (PAGE_SHIFT > 12)
@@ -565,13 +568,13 @@ sys_mmap2:
 #else /* PAGE_SHIFT > 12 */
 		b	sys_mmap_pgoff
 #endif /* PAGE_SHIFT > 12 */
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 /*
  * Note: off_4k (r5) is always units of 4K.  If we can't do the requested
  * offset, we return EINVAL.
  */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #ifdef CONFIG_MV_8KB_SW_PAGE_SIZE_SUPPORT
 #define PGOFF_MASK 0x1
 #define PGOFF_SHIFT 1
@@ -591,10 +594,10 @@ sys_mmap2:
 #define PGOFF_MASK 0x0
 #define PGOFF_SHIFT 0
 #endif
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 sys_mmap2:
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #ifdef CONFIG_MV_LARGE_PAGE_SUPPORT
 		tst	r5, #PGOFF_MASK
 		moveq	r5, r5, lsr #PGOFF_SHIFT
@@ -606,7 +609,7 @@ sys_mmap2:
 		str	r5, [sp, #4]
 		b	sys_mmap_pgoff
 #endif
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 #if PAGE_SHIFT > 12
 		tst	r5, #PGOFF_MASK
 		moveq	r5, r5, lsr #PAGE_SHIFT - 12
@@ -618,8 +621,8 @@ sys_mmap2:
 		str	r5, [sp, #4]
 		b	sys_mmap_pgoff
 #endif
-#endif /* CONFIG_SYNO_LSP_ARMADA */
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
 ENDPROC(sys_mmap2)
 
 #ifdef CONFIG_OABI_COMPAT

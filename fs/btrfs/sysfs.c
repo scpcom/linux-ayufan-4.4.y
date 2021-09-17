@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2007 Oracle.  All rights reserved.
  *
@@ -431,7 +434,7 @@ static ssize_t btrfs_clone_alignment_show(struct kobject *kobj,
 
 BTRFS_ATTR_RW(clone_alignment, 0444, btrfs_clone_alignment_show, btrfs_no_store);
 
-#ifdef CONFIG_SYNO_BTRFS_CHECK_INTEGRITY
+#ifdef MY_ABC_HERE
 static ssize_t btrfs_check_integrity_show(struct kobject *kobj,
 				struct kobj_attribute *a, char *buf)
 {
@@ -467,7 +470,7 @@ static struct attribute *btrfs_attrs[] = {
 	BTRFS_ATTR_PTR(nodesize),
 	BTRFS_ATTR_PTR(sectorsize),
 	BTRFS_ATTR_PTR(clone_alignment),
-#ifdef CONFIG_SYNO_BTRFS_CHECK_INTEGRITY
+#ifdef MY_ABC_HERE
 	BTRFS_ATTR_PTR(check_integrity),
 #endif
 	NULL,

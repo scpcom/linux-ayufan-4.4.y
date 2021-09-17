@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef __LINUX_REGMAP_H
 #define __LINUX_REGMAP_H
 
@@ -25,9 +28,9 @@ struct irq_domain;
 struct spi_device;
 struct regmap;
 struct regmap_range_cfg;
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 struct regmap_field;
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 /* An enum of all the supported cache types */
 enum regcache_type {
@@ -415,7 +418,7 @@ static inline bool regmap_reg_in_range(unsigned int reg,
 bool regmap_reg_in_ranges(unsigned int reg,
 			  const struct regmap_range *ranges,
 			  unsigned int nranges);
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 
 /**
  * Description of an register field
@@ -446,7 +449,7 @@ void devm_regmap_field_free(struct device *dev,	struct regmap_field *field);
 
 int regmap_field_read(struct regmap_field *field, unsigned int *val);
 int regmap_field_write(struct regmap_field *field, unsigned int val);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 /**
  * Description of an IRQ for the generic regmap irq_chip.

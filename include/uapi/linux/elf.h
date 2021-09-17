@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _UAPI_LINUX_ELF_H
 #define _UAPI_LINUX_ELF_H
 
@@ -30,11 +33,11 @@ typedef __s64	Elf64_Sxword;
 #define PT_SHLIB   5
 #define PT_PHDR    6
 #define PT_TLS     7               /* Thread local storage segment */
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 #ifdef CONFIG_ST_ELF_EXTENSIONS
 #define PT_ST_INFO	0x50000000	/* ST auxiliary ELF info */
 #endif /* CONFIG_ST_ELF_EXTENSIONS */
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 #define PT_LOOS    0x60000000      /* OS-specific */
 #define PT_HIOS    0x6fffffff      /* OS-specific */
 #define PT_LOPROC  0x70000000
@@ -243,12 +246,12 @@ typedef struct elf64_hdr {
 #define PF_R		0x4
 #define PF_W		0x2
 #define PF_X		0x1
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 #ifdef CONFIG_ST_ELF_EXTENSIONS
 #define PF_ZLIB		(1 << 8)	/* Segment compressed with zlib */
 #define PF_AUX		(1 << 9)	/* ST aux ELF info required */
 #endif /* CONFIG_ST_ELF_EXTENSIONS */
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 typedef struct elf32_phdr{
   Elf32_Word	p_type;
@@ -286,32 +289,32 @@ typedef struct elf64_phdr {
 #define SHT_SHLIB	10
 #define SHT_DYNSYM	11
 #define SHT_NUM		12
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 #ifdef CONFIG_ST_ELF_EXTENSIONS
 #define SHT_ST_INFO	0x50000000	/* ST auxiliary ELF info */
 #endif /* CONFIG_ST_ELF_EXTENSIONS */
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 #define SHT_LOPROC	0x70000000
 #define SHT_HIPROC	0x7fffffff
 #define SHT_LOUSER	0x80000000
 #define SHT_HIUSER	0xffffffff
 
 /* sh_flags */
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
  /* sh_flags */
 #define SHF_NULL	0x0
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 #define SHF_WRITE	0x1
 #define SHF_ALLOC	0x2
 #define SHF_EXECINSTR	0x4
 #define SHF_MASKPROC	0xf0000000
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 #define SHF_MERGE	0x10
 #define SHF_STRINGS	0x20
 #ifdef CONFIG_ST_ELF_EXTENSIONS
 #define SHF_COMPRESSED	(1 << 12)	/* Section data has been compressed */
 #endif /* CONFIG_ST_ELF_EXTENSIONS */
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 /* special section indexes */
 #define SHN_UNDEF	0

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2008, 2009 Provigent Ltd.
  *
@@ -272,7 +275,7 @@ static int pl061_probe(struct amba_device *adev, const struct amba_id *id)
 		irq_base = pdata->irq_base;
 		if (irq_base <= 0)
 			return -ENODEV;
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	} else if (adev->dev.of_node) {
 		const void *ptr;
 		unsigned int baseidx = -1; /* GPIO dynamic allocation */
@@ -281,14 +284,14 @@ static int pl061_probe(struct amba_device *adev, const struct amba_id *id)
 		if (ptr)
 			baseidx = be32_to_cpup(ptr);
 		chip->gc.base = baseidx;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	} else {
 		chip->gc.base = -1;
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 		// do nothing
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 		irq_base = 0;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	}
 
 	if (!devm_request_mem_region(dev, adev->res.start,

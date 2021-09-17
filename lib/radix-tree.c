@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2001 Momchil Velikov
  * Portions Copyright (C) 2001 Christoph Hellwig
@@ -37,10 +40,10 @@
 #define RADIX_TREE_1	1ULL
 #define RADIX_TREE_BITS_PER_KEY		64
 #else /* CONFIG_LFS_ON_32CPU */
-#if defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE)
 #define RADIX_TREE_1	1UL
 #define RADIX_TREE_BITS_PER_KEY		BITS_PER_LONG
-#endif /* CONFIG_SYNO_ALPINE */
+#endif /* MY_DEF_HERE */
 #endif /* CONFIG_LFS_ON_32CPU */
 
 #ifdef __KERNEL__
@@ -49,11 +52,11 @@
 #define RADIX_TREE_MAP_SHIFT	3	/* For more stressful testing */
 #endif
 
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 #define RADIX_TREE_MAP_SIZE	(RADIX_TREE_1 << RADIX_TREE_MAP_SHIFT)
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 #define RADIX_TREE_MAP_SIZE	(1UL << RADIX_TREE_MAP_SHIFT)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 #define RADIX_TREE_MAP_MASK	(RADIX_TREE_MAP_SIZE-1)
 
 #define RADIX_TREE_TAG_LONGS	\
@@ -70,11 +73,11 @@ struct radix_tree_node {
 	unsigned long	tags[RADIX_TREE_MAX_TAGS][RADIX_TREE_TAG_LONGS];
 };
 
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 #define RADIX_TREE_INDEX_BITS  (8 /* CHAR_BIT */ * sizeof(rdx_t))
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 #define RADIX_TREE_INDEX_BITS  (8 /* CHAR_BIT */ * sizeof(unsigned long))
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 #define RADIX_TREE_MAX_PATH (DIV_ROUND_UP(RADIX_TREE_INDEX_BITS, \
 					  RADIX_TREE_MAP_SHIFT))
 
@@ -82,11 +85,11 @@ struct radix_tree_node {
  * The height_to_maxindex array needs to be one deeper than the maximum
  * path as height 0 holds only 1 entry.
  */
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 static rdx_t height_to_maxindex[RADIX_TREE_MAX_PATH + 1] __read_mostly;
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 static unsigned long height_to_maxindex[RADIX_TREE_MAX_PATH + 1] __read_mostly;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 /*
  * Radix tree node cache.
@@ -99,21 +102,21 @@ static struct kmem_cache *radix_tree_node_cachep;
  * branch to existing items if the size has to be increased (by
  * radix_tree_extend).
  */
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 /*
  * The worst case is a zero height tree with just a single item at index 0,
  * and then inserting an item at index RDX_TREE_KEY_MAX_VALUE. This requires 2
  * new branches of RADIX_TREE_MAX_PATH size to be created, with only the root
  * node shared. Hence:
  */
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 /*
  * The worst case is a zero height tree with just a single item at index 0,
  * and then inserting an item at index ULONG_MAX. This requires 2 new branches
  * of RADIX_TREE_MAX_PATH size to be created, with only the root node shared.
  * Hence:
  */
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 #define RADIX_TREE_PRELOAD_SIZE (RADIX_TREE_MAX_PATH * 2 - 1)
 
 /*
@@ -325,11 +328,11 @@ EXPORT_SYMBOL(radix_tree_preload);
  *	Return the maximum key which can be store into a
  *	radix tree with height HEIGHT.
  */
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 static inline rdx_t radix_tree_maxindex(unsigned int height)
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 static inline unsigned long radix_tree_maxindex(unsigned int height)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 {
 	return height_to_maxindex[height];
 }
@@ -337,11 +340,11 @@ static inline unsigned long radix_tree_maxindex(unsigned int height)
 /*
  *	Extend a radix tree so it can store key @index.
  */
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 static int radix_tree_extend(struct radix_tree_root *root, rdx_t index)
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 static int radix_tree_extend(struct radix_tree_root *root, unsigned long index)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 {
 	struct radix_tree_node *node;
 	struct radix_tree_node *slot;
@@ -397,11 +400,11 @@ out:
  *	Insert an item into the radix tree at position @index.
  */
 int radix_tree_insert(struct radix_tree_root *root,
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 			rdx_t index, void *item)
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 			unsigned long index, void *item)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 {
 	struct radix_tree_node *node = NULL, *slot;
 	unsigned int height, shift;
@@ -468,11 +471,11 @@ EXPORT_SYMBOL(radix_tree_insert);
  * is_slot == 0 : search for the node.
  */
 static void *radix_tree_lookup_element(struct radix_tree_root *root,
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 				rdx_t index, int is_slot)
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 				unsigned long index, int is_slot)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 {
 	unsigned int height, shift;
 	struct radix_tree_node *node, **slot;
@@ -521,11 +524,11 @@ static void *radix_tree_lookup_element(struct radix_tree_root *root,
  *	exclusive from other writers. Any dereference of the slot must be done
  *	using radix_tree_deref_slot.
  */
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 void **radix_tree_lookup_slot(struct radix_tree_root *root, rdx_t index)
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 void **radix_tree_lookup_slot(struct radix_tree_root *root, unsigned long index)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 {
 	return (void **)radix_tree_lookup_element(root, index, 1);
 }
@@ -543,11 +546,11 @@ EXPORT_SYMBOL(radix_tree_lookup_slot);
  *	them safely). No RCU barriers are required to access or modify the
  *	returned item, however.
  */
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 void *radix_tree_lookup(struct radix_tree_root *root, rdx_t index)
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 void *radix_tree_lookup(struct radix_tree_root *root, unsigned long index)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 {
 	return radix_tree_lookup_element(root, index, 0);
 }
@@ -567,11 +570,11 @@ EXPORT_SYMBOL(radix_tree_lookup);
  *	item is a bug.
  */
 void *radix_tree_tag_set(struct radix_tree_root *root,
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 			rdx_t index, unsigned int tag)
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 			unsigned long index, unsigned int tag)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 {
 	unsigned int height, shift;
 	struct radix_tree_node *slot;
@@ -617,11 +620,11 @@ EXPORT_SYMBOL(radix_tree_tag_set);
  *	has the same return value and semantics as radix_tree_lookup().
  */
 void *radix_tree_tag_clear(struct radix_tree_root *root,
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 			rdx_t index, unsigned int tag)
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 			unsigned long index, unsigned int tag)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 {
 	struct radix_tree_node *node = NULL;
 	struct radix_tree_node *slot = NULL;
@@ -685,11 +688,11 @@ EXPORT_SYMBOL(radix_tree_tag_clear);
  * from concurrency.
  */
 int radix_tree_tag_get(struct radix_tree_root *root,
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 			rdx_t index, unsigned int tag)
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 			unsigned long index, unsigned int tag)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 {
 	unsigned int height, shift;
 	struct radix_tree_node *node;
@@ -743,11 +746,11 @@ void **radix_tree_next_chunk(struct radix_tree_root *root,
 {
 	unsigned shift, tag = flags & RADIX_TREE_ITER_TAG_MASK;
 	struct radix_tree_node *rnode, *node;
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 	rdx_t index, offset;
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	unsigned long index, offset;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 	if ((flags & RADIX_TREE_ITER_TAGGED) && !root_tag_get(root, tag))
 		return NULL;
@@ -875,23 +878,23 @@ EXPORT_SYMBOL(radix_tree_next_chunk);
  * The function returns number of leaves where the tag was set and sets
  * *first_indexp to the first unscanned index.
  */
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 /**
  * WARNING! *first_indexp can wrap if last_index is RDX_TREE_KEY_MAX_VALUE.
  * Caller must be prepared to handle that.
  */
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 /**
  * WARNING! *first_indexp can wrap if last_index is ULONG_MAX. Caller must
  * be prepared to handle that.
  */
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 unsigned long radix_tree_range_tag_if_tagged(struct radix_tree_root *root,
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 		rdx_t *first_indexp, rdx_t last_index,
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 		unsigned long *first_indexp, unsigned long last_index,
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 		unsigned long nr_to_tag,
 		unsigned int iftag, unsigned int settag)
 {
@@ -900,11 +903,11 @@ unsigned long radix_tree_range_tag_if_tagged(struct radix_tree_root *root,
 	struct radix_tree_node *slot;
 	unsigned int shift;
 	unsigned long tagged = 0;
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 	rdx_t index = *first_indexp;
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	unsigned long index = *first_indexp;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 	last_index = min(last_index, radix_tree_maxindex(height));
 	if (index > last_index)
@@ -925,11 +928,11 @@ unsigned long radix_tree_range_tag_if_tagged(struct radix_tree_root *root,
 	slot = indirect_to_ptr(root->rnode);
 
 	for (;;) {
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 		rdx_t upindex;
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 		unsigned long upindex;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 		int offset;
 
 		offset = (index >> shift) & RADIX_TREE_MAP_MASK;
@@ -1021,17 +1024,17 @@ EXPORT_SYMBOL(radix_tree_range_tag_if_tagged);
  *	radix_tree_next_hole covering both indexes may return 10 if called
  *	under rcu_read_lock.
  */
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 rdx_t radix_tree_next_hole(struct radix_tree_root *root,
 				rdx_t index, rdx_t max_scan)
 {
 	rdx_t i;
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 unsigned long radix_tree_next_hole(struct radix_tree_root *root,
 				unsigned long index, unsigned long max_scan)
 {
 	unsigned long i;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 	for (i = 0; i < max_scan; i++) {
 		if (!radix_tree_lookup(root, index))
@@ -1054,20 +1057,20 @@ EXPORT_SYMBOL(radix_tree_next_hole);
  *	Search backwards in the range [max(index-max_scan+1, 0), index]
  *	for the first hole.
  */
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 /**
  *	Returns: the index of the hole if found, otherwise returns an index
  *	outside of the set specified (in which case 'index - return >= max_scan'
  *	will be true). In rare cases of wrap-around, RDX_TREE_KEY_MAX_VALUE
  *	will be returned.
  */
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 /**
  *	Returns: the index of the hole if found, otherwise returns an index
  *	outside of the set specified (in which case 'index - return >= max_scan'
  *	will be true). In rare cases of wrap-around, ULONG_MAX will be returned.
  */
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 /**
  *	radix_tree_next_hole may be called under rcu_read_lock. However, like
  *	radix_tree_gang_lookup, this will not atomically search a snapshot of
@@ -1076,27 +1079,27 @@ EXPORT_SYMBOL(radix_tree_next_hole);
  *	radix_tree_prev_hole covering both indexes may return 5 if called under
  *	rcu_read_lock.
  */
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 rdx_t radix_tree_prev_hole(struct radix_tree_root *root,
 				   rdx_t index, rdx_t max_scan)
 {
 	rdx_t i;
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 unsigned long radix_tree_prev_hole(struct radix_tree_root *root,
 				   unsigned long index, unsigned long max_scan)
 {
 	unsigned long i;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 	for (i = 0; i < max_scan; i++) {
 		if (!radix_tree_lookup(root, index))
 			break;
 		index--;
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 		if (index == RDX_TREE_KEY_MAX_VALUE)
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 		if (index == ULONG_MAX)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 			break;
 	}
 
@@ -1125,11 +1128,11 @@ EXPORT_SYMBOL(radix_tree_prev_hole);
  */
 unsigned int
 radix_tree_gang_lookup(struct radix_tree_root *root, void **results,
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 			rdx_t first_index, unsigned int max_items)
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 			unsigned long first_index, unsigned int max_items)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 {
 	struct radix_tree_iter iter;
 	void **slot;
@@ -1170,13 +1173,13 @@ EXPORT_SYMBOL(radix_tree_gang_lookup);
  */
 unsigned int
 radix_tree_gang_lookup_slot(struct radix_tree_root *root,
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 			void ***results, rdx_t *indices,
 			rdx_t first_index, unsigned int max_items)
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 			void ***results, unsigned long *indices,
 			unsigned long first_index, unsigned int max_items)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 {
 	struct radix_tree_iter iter;
 	void **slot;
@@ -1212,11 +1215,11 @@ EXPORT_SYMBOL(radix_tree_gang_lookup_slot);
  */
 unsigned int
 radix_tree_gang_lookup_tag(struct radix_tree_root *root, void **results,
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 		rdx_t first_index, unsigned int max_items,
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 		unsigned long first_index, unsigned int max_items,
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 		unsigned int tag)
 {
 	struct radix_tree_iter iter;
@@ -1253,11 +1256,11 @@ EXPORT_SYMBOL(radix_tree_gang_lookup_tag);
  */
 unsigned int
 radix_tree_gang_lookup_tag_slot(struct radix_tree_root *root, void ***results,
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 		rdx_t first_index, unsigned int max_items,
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 		unsigned long first_index, unsigned int max_items,
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 		unsigned int tag)
 {
 	struct radix_tree_iter iter;
@@ -1283,20 +1286,20 @@ EXPORT_SYMBOL(radix_tree_gang_lookup_tag_slot);
 /*
  * This linear search is at present only useful to shmem_unuse_inode().
  */
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 static rdx_t __locate(struct radix_tree_node *slot, void *item,
 			      rdx_t index, rdx_t *found_index)
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 static unsigned long __locate(struct radix_tree_node *slot, void *item,
 			      unsigned long index, unsigned long *found_index)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 {
 	unsigned int shift, height;
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 	rdx_t i;
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	unsigned long i;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 	height = slot->height;
 	shift = (height-1) * RADIX_TREE_MAP_SHIFT;
@@ -1306,13 +1309,13 @@ static unsigned long __locate(struct radix_tree_node *slot, void *item,
 		for (;;) {
 			if (slot->slots[i] != NULL)
 				break;
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 			index &= ~((RADIX_TREE_1 << shift) - 1);
 			index += RADIX_TREE_1 << shift;
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 			index &= ~((1UL << shift) - 1);
 			index += 1UL << shift;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 			if (index == 0)
 				goto out;	/* 32-bit wraparound */
 			i++;
@@ -1348,22 +1351,22 @@ out:
  *	Caller must hold no lock (since this time-consuming function needs
  *	to be preemptible), and must check afterwards if item is still there.
  */
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 rdx_t radix_tree_locate_item(struct radix_tree_root *root, void *item)
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 unsigned long radix_tree_locate_item(struct radix_tree_root *root, void *item)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 {
 	struct radix_tree_node *node;
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 	rdx_t max_index;
 	rdx_t cur_index = 0;
 	rdx_t found_index = -1;
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	unsigned long max_index;
 	unsigned long cur_index = 0;
 	unsigned long found_index = -1;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 	do {
 		rcu_read_lock();
@@ -1388,11 +1391,11 @@ unsigned long radix_tree_locate_item(struct radix_tree_root *root, void *item)
 	return found_index;
 }
 #else
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 rdx_t radix_tree_locate_item(struct radix_tree_root *root, void *item)
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 unsigned long radix_tree_locate_item(struct radix_tree_root *root, void *item)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 {
 	return -1;
 }
@@ -1471,11 +1474,11 @@ static inline void radix_tree_shrink(struct radix_tree_root *root)
  *
  *	Returns the address of the deleted item, or NULL if it was not present.
  */
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 void *radix_tree_delete(struct radix_tree_root *root, rdx_t index)
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 void *radix_tree_delete(struct radix_tree_root *root, unsigned long index)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 {
 	struct radix_tree_node *node = NULL;
 	struct radix_tree_node *slot = NULL;
@@ -1573,28 +1576,28 @@ radix_tree_node_ctor(void *node)
 	memset(node, 0, sizeof(struct radix_tree_node));
 }
 
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 static __init rdx_t __maxindex(unsigned int height)
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 static __init unsigned long __maxindex(unsigned int height)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 {
 	unsigned int width = height * RADIX_TREE_MAP_SHIFT;
 	int shift = RADIX_TREE_INDEX_BITS - width;
 
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 	if (shift < 0)
 		return RDX_TREE_KEY_MAX_VALUE;
 	if (shift >= RADIX_TREE_BITS_PER_KEY)
 		return (rdx_t)0;
 	return RDX_TREE_KEY_MAX_VALUE >> shift;
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	if (shift < 0)
 		return ~0UL;
 	if (shift >= BITS_PER_LONG)
 		return 0UL;
 	return ~0UL >> shift;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 }
 
 static __init void radix_tree_init_maxindex(void)

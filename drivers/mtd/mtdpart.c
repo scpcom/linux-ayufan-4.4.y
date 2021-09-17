@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Simple MTD partitioning layer
  *
@@ -34,17 +37,17 @@
 
 #include "mtdcore.h"
 
-#ifdef CONFIG_SYNO_MAC_ADDRESS
+#ifdef MY_ABC_HERE
 extern unsigned char grgbLanMac[SYNO_MAC_MAX_NUMBER][16];
 extern int giVenderFormatVersion;
-#endif /* CONFIG_SYNO_MAC_ADDRESS */
-#ifdef CONFIG_SYNO_SERIAL
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
 extern char gszSerialNum[];
 extern char gszCustomSerialNum[];
 #define SYNO_SN_TAG "SN="
 #define SYNO_CHKSUM_TAG "CHK="
 #define SYNO_SN_12_SIG SYNO_SN_TAG  // signature for 12 serial number
-#endif /* CONFIG_SYNO_SERIAL */
+#endif /* MY_ABC_HERE */
 
 /* Our partition linked list */
 static LIST_HEAD(mtd_partitions);
@@ -120,9 +123,9 @@ static int part_read_oob(struct mtd_info *mtd, loff_t from,
 		struct mtd_oob_ops *ops)
 {
 	struct mtd_part *part = PART(mtd);
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	struct mtd_ecc_stats stats;
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	int res;
 
 	if (from >= mtd->size)
@@ -130,10 +133,10 @@ static int part_read_oob(struct mtd_info *mtd, loff_t from,
 	if (ops->datbuf && from + ops->len > mtd->size)
 		return -EINVAL;
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	stats = part->master->ecc_stats;
 
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	/*
 	 * If OOB is also requested, make sure that we do not read past the end
 	 * of this partition.
@@ -152,7 +155,7 @@ static int part_read_oob(struct mtd_info *mtd, loff_t from,
 	}
 
 	res = part->master->_read_oob(part->master, from + part->offset, ops);
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 
 	mtd->ecc_stats.corrected += part->master->ecc_stats.corrected -
 		stats.corrected;
@@ -160,14 +163,14 @@ static int part_read_oob(struct mtd_info *mtd, loff_t from,
 		mtd->ecc_stats.failed += part->master->ecc_stats.failed -
 			stats.failed;
 
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 	if (unlikely(res)) {
 		if (mtd_is_bitflip(res))
 			mtd->ecc_stats.corrected++;
 		if (mtd_is_eccerr(res))
 			mtd->ecc_stats.failed++;
 	}
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	return res;
 }
 
@@ -400,11 +403,11 @@ static struct mtd_part *allocate_partition(struct mtd_info *master,
 	slave->mtd.owner = master->owner;
 	slave->mtd.backing_dev_info = master->backing_dev_info;
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	/* Flag MTD device as a slave partition */
 	slave->mtd.flags |= MTD_SLAVE_PARTITION;
 
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	/* NOTE:  we don't arrange MTDs as a tree; it'd be error-prone
 	 * to have the same data be in two different partitions.
 	 */
@@ -563,14 +566,14 @@ static struct mtd_part *allocate_partition(struct mtd_info *master,
 		}
 	}
 
-#if defined(CONFIG_SYNO_LSP_MONACO)
+#if defined(MY_DEF_HERE)
 	/* Set MTD_SPANS_MASTER if slave MTD spans entire master MTD */
 	if (slave->offset == 0 && slave->mtd.size == master->size)
 		slave->mtd.flags |= MTD_SPANS_MASTER;
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 out_register:
-#if defined(CONFIG_SYNO_MAC_ADDRESS) || defined(CONFIG_SYNO_SERIAL)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 	if ((memcmp(part->name, "vender", 7)==0) ||
 		(memcmp(part->name, "vendor", 7)==0)) {
 		u_char rgbszBuf[128];
@@ -578,23 +581,23 @@ out_register:
 		size_t retlen;
 		unsigned int Sum;
 		u_char ucSum;
-#ifdef CONFIG_SYNO_MAC_ADDRESS
+#ifdef MY_ABC_HERE
 		int n = 0;
 		int MacNumber = 0;
 		char rgbLanMac[SYNO_MAC_MAX_NUMBER][6];
-#endif /* CONFIG_SYNO_MAC_ADDRESS */
-#ifdef CONFIG_SYNO_SERIAL
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
 		char szSerialBuffer[32];
 		char *ptr;
 		char szSerial[32];
 		char szCheckSum[32];
 		unsigned long ulchksum = 0;
 		unsigned long ulTemp = 0;
-#endif /* CONFIG_SYNO_SERIAL */
+#endif /* MY_ABC_HERE */
 
 		part_read(&slave->mtd, 0, 128, &retlen, rgbszBuf);
 
-#ifdef CONFIG_SYNO_MAC_ADDRESS
+#ifdef MY_ABC_HERE
 		/**
 		 * FIXME: current vender structure on arm platform only support
 		 * max 4 lans instead of SYNO_MAC_MAX_NUMBER.
@@ -646,8 +649,8 @@ out_register:
 
 			x++;
 		}
-#endif /* CONFIG_SYNO_MAC_ADDRESS */
-#ifdef CONFIG_SYNO_SERIAL
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
 		memset(szSerial, 0, sizeof(szSerial));
 		memset(szCheckSum, 0, sizeof(szCheckSum));
 		memset(gszSerialNum, 0, 32);
@@ -729,9 +732,9 @@ SKIP_SERIAL:
 		} else {
 			printk("Custom Serial Number: %s\n", gszCustomSerialNum);
 		}
-#endif /* CONFIG_SYNO_SERIAL */
+#endif /* MY_ABC_HERE */
 	}
-#endif /* CONFIG_SYNO_MAC_ADDRESS || CONFIG_SYNO_SERIAL */
+#endif /* MY_ABC_HERE || MY_ABC_HERE */
 	return slave;
 }
 
@@ -850,7 +853,7 @@ int add_mtd_partitions(struct mtd_info *master,
 
 	return 0;
 }
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 
 /*
  * Retrieve a master's MTD slave object for the partition named @name.  If
@@ -871,7 +874,7 @@ struct mtd_info *get_mtd_partition_slave(struct mtd_info *master, char *name,
 	return NULL;
 }
 EXPORT_SYMBOL(get_mtd_partition_slave);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 static DEFINE_SPINLOCK(part_parser_lock);
 static LIST_HEAD(part_parsers);
@@ -919,9 +922,9 @@ EXPORT_SYMBOL_GPL(deregister_mtd_parser);
  * are changing this array!
  */
 static const char * const default_mtd_part_types[] = {
-#if defined(CONFIG_SYNO_ALPINE) || defined(CONFIG_SYNO_MONACO) || defined(CONFIG_SYNO_ARMADA)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 	"RedBoot",
-#endif /* CONFIG_SYNO_ALPINE || CONFIG_SYNO_MONACO || CONFIG_SYNO_ARMADA */
+#endif /* MY_DEF_HERE || CONFIG_SYNO_MONACO || MY_ABC_HERE */
 	"cmdlinepart",
 	"ofpart",
 	NULL
@@ -1001,7 +1004,7 @@ uint64_t mtd_get_device_size(const struct mtd_info *mtd)
 }
 EXPORT_SYMBOL_GPL(mtd_get_device_size);
 
-#ifdef CONFIG_SYNO_MTD_INFO
+#ifdef MY_ABC_HERE
 int SYNOMTDModifyPartInfo(struct mtd_info *mtd, unsigned long offset, unsigned long length)
 {
 	struct mtd_part *part = PART(mtd);
@@ -1017,4 +1020,4 @@ int SYNOMTDModifyPartInfo(struct mtd_info *mtd, unsigned long offset, unsigned l
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_MTD_INFO */
+#endif /* MY_ABC_HERE */

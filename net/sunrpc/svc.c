@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * linux/net/sunrpc/svc.c
  *
@@ -28,7 +31,7 @@
 #include <linux/sunrpc/clnt.h>
 #include <linux/sunrpc/bc_xprt.h>
 
-#ifdef CONFIG_SYNO_NFS4_DISABLE_UDP
+#ifdef MY_ABC_HERE
 #include <uapi/linux/nfs.h>
 #endif
 
@@ -961,11 +964,11 @@ int svc_register(const struct svc_serv *serv, struct net *net,
 			if (progp->pg_vers[i]->vs_hidden)
 				continue;
 
-#ifdef CONFIG_SYNO_NFS4_DISABLE_UDP
+#ifdef MY_ABC_HERE
 			if (NFS_PROGRAM == progp->pg_prog && 4 == i && IPPROTO_UDP == proto) {
 				continue;
 			}
-#endif /*CONFIG_SYNO_NFS4_DISABLE_UDP*/
+#endif /*MY_ABC_HERE*/
 			error = __svc_register(net, progp->pg_name, progp->pg_prog,
 						i, family, proto, port);
 			if (error < 0)

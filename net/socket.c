@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * NET		An implementation of the SOCKET network access protocol.
  *
@@ -1814,12 +1817,12 @@ SYSCALL_DEFINE6(recvfrom, int, fd, void __user *, ubuf, size_t, size,
 {
 	struct socket *sock;
 	struct iovec iov;
-#ifdef CONFIG_SYNO_FS_RECVFILE
+#ifdef MY_ABC_HERE
 	// Fix bug 4511 in DS2.0. This is a workaround method.
 	struct msghdr msg = {0};
 #else
 	struct msghdr msg;
-#endif /* CONFIG_SYNO_FS_RECVFILE */
+#endif /* MY_ABC_HERE */
 	struct sockaddr_storage address;
 	int err, err2;
 	int fput_needed;
@@ -1834,9 +1837,9 @@ SYSCALL_DEFINE6(recvfrom, int, fd, void __user *, ubuf, size_t, size,
 	msg.msg_controllen = 0;
 	msg.msg_iovlen = 1;
 	msg.msg_iov = &iov;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	msg.msg_flags = 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	iov.iov_len = size;
 	iov.iov_base = ubuf;
 	/* Save some cycles and don't copy the address if not needed */

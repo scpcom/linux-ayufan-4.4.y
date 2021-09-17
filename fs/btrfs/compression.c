@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2008 Oracle.  All rights reserved.
  *
@@ -128,11 +131,11 @@ static int check_compressed_csum(struct inode *inode,
 		kunmap_atomic(kaddr);
 
 		if (csum != *cb_sum) {
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 			btrfs_err(BTRFS_I(inode)->root->fs_info,
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 			btrfs_info(BTRFS_I(inode)->root->fs_info,
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 			   "csum failed ino %llu extent %llu csum %u wanted %u mirror %d",
 			   btrfs_ino(inode), disk_start, csum, *cb_sum,
 			   cb->mirror_num);
@@ -589,7 +592,7 @@ int btrfs_submit_compressed_read(struct inode *inode, struct bio *bio,
 	em_tree = &BTRFS_I(inode)->extent_tree;
 
 	/* we need the actual starting offset of this extent in the file */
-#ifdef CONFIG_SYNO_BTRFS_FREE_EXTENT_MAPS
+#ifdef MY_ABC_HERE
 	em = btrfs_get_extent(inode, NULL, 0, page_offset(bio->bi_io_vec->bv_page), PAGE_CACHE_SIZE, 0);
 #else
 	read_lock(&em_tree->lock);

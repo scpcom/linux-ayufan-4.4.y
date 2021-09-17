@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *	TCP over IPv6
  *	Linux INET6 implementation
@@ -185,7 +188,7 @@ static int tcp_v6_connect(struct sock *sk, struct sockaddr *uaddr,
 			sk->sk_bound_dev_if = usin->sin6_scope_id;
 		}
 
-#ifdef CONFIG_SYNO_IPV6_LINKLOCAL
+#ifdef MY_ABC_HERE
 		if (__ipv6_addr_is_link_local(addr_type) && !sk->sk_bound_dev_if) {
 			struct net_device *dev = NULL;
 			for_each_netdev(sock_net(sk), dev) {
@@ -197,7 +200,7 @@ static int tcp_v6_connect(struct sock *sk, struct sockaddr *uaddr,
 				}
 			}
 		}
-#endif /* CONFIG_SYNO_IPV6_LINKLOCAL */
+#endif /* MY_ABC_HERE */
 
 		/* Connect to link-local address requires an interface */
 		if (!sk->sk_bound_dev_if)
@@ -1516,11 +1519,11 @@ process:
 	if (!sock_owned_by_user(sk)) {
 #ifdef CONFIG_NET_DMA
 		struct tcp_sock *tp = tcp_sk(sk);
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 		if (!tp->ucopy.dma_chan && tp->ucopy.pinned)
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 		if (!tp->ucopy.dma_chan && tp->ucopy.pinned_list)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 			tp->ucopy.dma_chan = net_dma_find_channel();
 		if (tp->ucopy.dma_chan)
 			ret = tcp_v6_do_rcv(sk, skb);

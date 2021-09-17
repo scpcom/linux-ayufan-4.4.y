@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  arch/arm/mach-sti/platsmp.c
  *
@@ -20,10 +23,10 @@
 #include <linux/io.h>
 #include <linux/of.h>
 #include <linux/of_address.h>
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 #include <linux/reboot.h>
 #include <linux/notifier.h>
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 #include <asm/cacheflush.h>
 #include <asm/smp_plat.h>
@@ -36,7 +39,7 @@
 
 static void __iomem *sbc_base;
 static unsigned long sbc_ph_base;
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 void *abap_prg_base;
 static unsigned long abap_ph_base;
 
@@ -54,7 +57,7 @@ static struct notifier_block kexec_notifier = {
 	.notifier_call = kexec_notify_cb,
 };
 #endif
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 static void __cpuinit write_pen_release(int val)
 {
@@ -146,22 +149,22 @@ void __init sti_smp_prepare_cpus(unsigned int max_cpus)
 		of_node_put(np);
 
 		if (max_cpus > 1) {
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 			/*
 			 * register a shutdown notification to catch
 			 * kexec call
 			 */
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 			/*
 			 * Tell the boot monitor the
 			 * address of sti_secondary_startup
 			 */
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#endif /* MY_DEF_HERE */
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_KEXEC
 			register_reboot_notifier(&kexec_notifier);
 #endif
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 			np = of_find_compatible_node(NULL, NULL, "st,lpm");
 
 			/*
@@ -178,7 +181,7 @@ void __init sti_smp_prepare_cpus(unsigned int max_cpus)
 				__cpuc_flush_dcache_area(cpu_strt_ptr, 4);
 				outer_clean_range(__pa(cpu_strt_ptr),
 						  __pa(cpu_strt_ptr + 1));
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 
 				np = of_find_node_by_name(NULL, "abap-regs");
 				if (IS_ERR_OR_NULL(np))
@@ -205,7 +208,7 @@ void __init sti_smp_prepare_cpus(unsigned int max_cpus)
 #ifndef CONFIG_KEXEC
 				iounmap(abap_prg_base);
 #endif
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 				return;
 			}
 
@@ -218,11 +221,11 @@ void __init sti_smp_prepare_cpus(unsigned int max_cpus)
 				return;
 
 			writel(entry_pa, sbc_base + sbc_offset);
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 #ifndef CONFIG_KEXEC
 			iounmap(sbc_base);
 #endif
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 		}
 	}
 }
@@ -267,11 +270,11 @@ static inline void cpu_leave_lowpower(void)
 	  : "cc");
 }
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 static inline void platform_do_lowpower(unsigned int cpu, int *spurious)
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 static inline void platform_do_lowpower_ram(unsigned int cpu, int *spurious)
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 {
 	/*
 	 * there is no power-control hardware on this platform, so all
@@ -300,7 +303,7 @@ static inline void platform_do_lowpower_ram(unsigned int cpu, int *spurious)
 	}
 }
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_KEXEC
 static void kexec_sleep(unsigned int cpu)
 {
@@ -352,7 +355,7 @@ static void kexec_sleep(unsigned int cpu)
 	/* Should never get here. */
 }
 #endif
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 static void platform_do_lowpower_lpm(unsigned int cpu)
 {
 	unsigned long val;
@@ -388,7 +391,7 @@ static void platform_do_lowpower_lpm(unsigned int cpu)
 	phys_reset(sbc_ph_base + DATA_OFFSET + PEN_HOLD_VAR_OFFSET_4xx + 4 + 1);
 	/* Should never get here. */
 }
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 /*
  * platform-specific code to shutdown a CPU
@@ -399,7 +402,7 @@ void __ref sti_cpu_die(unsigned int cpu)
 {
 	int spurious = 0;
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	/*
 	 * We're ready for shutdown now, so do it.
 	 * First check if it came here beacuse of
@@ -421,7 +424,7 @@ void __ref sti_cpu_die(unsigned int cpu)
 	cpu_enter_lowpower();
 
 	platform_do_lowpower(cpu, &spurious);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	/*
 	 * We're ready for shutdown now, so do it.
 	 * First try a lpm base powerdown of the
@@ -439,7 +442,7 @@ void __ref sti_cpu_die(unsigned int cpu)
 	cpu_enter_lowpower();
 
 	platform_do_lowpower_ram(cpu, &spurious);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	/*
 	 * bring this CPU back into the world of cache

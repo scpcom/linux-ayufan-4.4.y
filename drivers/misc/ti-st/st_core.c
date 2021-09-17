@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Shared Transport Line discipline driver Core
  *	This hooks up ST KIM driver and ST LL driver
@@ -488,14 +491,14 @@ void st_tx_wakeup(struct st_data_s *st_data)
 	clear_bit(ST_TX_SENDING, &st_data->tx_state);
 }
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 static void st_tx_wakeup_work(struct work_struct *work)
 {
 	struct st_data_s *st_data = container_of(work, struct st_data_s,
 						 wakeup_work);
 	st_tx_wakeup(st_data);
 }
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 /********************************************************************/
 /* functions called from ST KIM
 */
@@ -808,11 +811,11 @@ static void st_tty_wakeup(struct tty_struct *tty)
 	clear_bit(TTY_DO_WRITE_WAKEUP, &tty->flags);
 
 	/* call our internal wakeup */
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	schedule_work(&st_gdata->wakeup_work);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	st_tx_wakeup((void *)st_gdata);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 }
 
 static void st_tty_flush_buffer(struct tty_struct *tty)
@@ -867,9 +870,9 @@ int st_core_init(struct st_data_s **core_data)
 	 */
 	skb_queue_head_init(&st_gdata->txq);
 	skb_queue_head_init(&st_gdata->tx_waitq);
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	INIT_WORK(&st_gdata->wakeup_work, st_tx_wakeup_work);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	/* Locking used in st_int_enqueue() to avoid multiple execution */
 	spin_lock_init(&st_gdata->lock);

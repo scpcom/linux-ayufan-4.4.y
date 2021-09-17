@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * stm_spi_fsm.c	Support for STM SPI Serial Flash Controller
  *
@@ -747,10 +750,10 @@ static struct flash_info flash_types[] = {
 		   FLASH_CAPS_WRITE_1_1_4	| \
 		   FLASH_CAPS_WRITE_1_4_4	| \
 		   FLASH_CAPS_BLK_LOCKING)
-#if defined(CONFIG_SYNO_MONACO)
+#if defined(MY_DEF_HERE)
 	JEDEC_INFO("n25q064", 0x20ba17, 64 * 1024,  128,
 		   N25Q_CAPS, 108, n25q_config, n25q_resume),
-#endif /* CONFIG_SYNO_MONACO */
+#endif /* MY_DEF_HERE */
 	JEDEC_INFO("n25q128", 0x20ba18, 64 * 1024,  256,
 		   N25Q_CAPS, 108, n25q_config, n25q_resume),
 
@@ -3221,7 +3224,7 @@ static int fsm_mtd_erase(struct mtd_info *mtd, struct erase_info *instr)
  */
 static int fsm_mtd_lock(struct mtd_info *mtd, loff_t ofs, uint64_t len)
 {
-#if defined(CONFIG_SYNO_MONACO_SPI_WITHOUT_LOCK)
+#if defined(MY_DEF_HERE)
 	/* stm no longer lock spi flash */
 	return 0;
 #endif
@@ -3636,7 +3639,7 @@ static int stm_spi_fsm_probe(struct platform_device *pdev)
 	if (pdev->dev.of_node)
 		ppdata.of_node = of_parse_phandle(pdev->dev.of_node,
 							"partitions", 0);
-#if defined(CONFIG_SYNO_LSP_MONACO)
+#if defined(MY_DEF_HERE)
 	memset(&ppdata, 0, sizeof(struct mtd_part_parser_data));
 #endif
 	ret = mtd_device_parse_register(&fsm->mtd, NULL, &ppdata,
@@ -3695,7 +3698,7 @@ static struct of_device_id spi_fsm_match[] = {
 MODULE_DEVICE_TABLE(of, spi_fsm_match);
 #endif
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_PM_SLEEP
 static int stm_spi_fsm_suspend(struct device *dev)
 {
@@ -3729,7 +3732,7 @@ SIMPLE_DEV_PM_OPS(stm_spi_fsm_pm_ops, stm_spi_fsm_suspend, stm_spi_fsm_resume);
 #else
 #define STM_SPI_PM_OPS	NULL
 #endif
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 #ifdef CONFIG_PM
 static int stm_spi_fsm_suspend(struct device *dev)
 {
@@ -3763,7 +3766,7 @@ SIMPLE_DEV_PM_OPS(stm_spi_fsm_pm_ops, stm_spi_fsm_suspend, stm_spi_fsm_resume);
 #else
 #define STM_SPI_PM_OPS	NULL
 #endif
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 static struct platform_driver stm_spi_fsm_driver = {
 	.probe		= stm_spi_fsm_probe,

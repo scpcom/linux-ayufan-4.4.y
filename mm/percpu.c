@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * mm/percpu.c - percpu memory allocator
  *
@@ -228,9 +231,9 @@ static void pcpu_set_page_chunk(struct page *page, struct pcpu_chunk *pcpu)
 /* obtain pointer to a chunk from a page struct */
 static struct pcpu_chunk *pcpu_get_page_chunk(struct page *page)
 {
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	BUG_ON(page->index > (pgoff_t)(~(unsigned long)0));
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	return (struct pcpu_chunk *)page->index;
 }
 

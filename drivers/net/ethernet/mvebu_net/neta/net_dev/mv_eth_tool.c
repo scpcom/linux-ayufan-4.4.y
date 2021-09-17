@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -127,11 +130,11 @@ int mv_eth_tool_restore_settings(struct net_device *netdev)
 					mvNetaLinkStatus(priv->port, &ps);
 
 					if (!ps.linkup)
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 						err = -EINVAL;
 #else
 						err = 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 				}
 			}
 		}
@@ -212,17 +215,17 @@ int mv_eth_tool_get_settings(struct net_device *netdev, struct ethtool_cmd *cmd)
 	/* check if speed and duplex are AN */
 	mvNetaSpeedDuplexGet(priv->port, &speed, &duplex);
 	if (speed == MV_ETH_SPEED_AN && duplex == MV_ETH_DUPLEX_AN) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 		MV_U16 advertise;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 		cmd->lp_advertising = cmd->advertising = 0;
 		cmd->autoneg = AUTONEG_ENABLE;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 		mvEthPhyAdvertiseGet(phy_addr, &advertise);
 		cmd->advertising = advertise;
 #else
 		mvEthPhyAdvertiseGet(phy_addr, (MV_U16 *)&(cmd->advertising));
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 
 		mvEthPhyRegRead(phy_addr, MII_LPA, &lp_ad);
 		if (lp_ad & LPA_LPACK)
@@ -242,9 +245,9 @@ int mv_eth_tool_get_settings(struct net_device *netdev, struct ethtool_cmd *cmd)
 		if (stat1000 & LPA_1000FULL)
 			cmd->lp_advertising |= ADVERTISED_1000baseT_Full;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 		cmd->advertising = cmd->lp_advertising;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 	} else
 		cmd->autoneg = AUTONEG_DISABLE;
 
@@ -290,9 +293,9 @@ int mv_eth_tool_set_settings(struct net_device *dev, struct ethtool_cmd *cmd)
 		priv->speed_cfg = _speed;
 		priv->autoneg_cfg = _autoneg;
 		priv->advertise_cfg = _advertise;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 		err = mv_eth_tool_restore_settings(dev);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 	}
 	return err;
 }
@@ -875,7 +878,7 @@ void mv_eth_tool_get_ethtool_stats(struct net_device *netdev,
 
 }
 
-#if defined(CONFIG_SYNO_ARMADA_SUPPORT_WOL)
+#if defined(MY_ABC_HERE)
 extern spinlock_t mii_lock;
 
 MV_U32 syno_wol_support(struct eth_port *pp)
@@ -967,7 +970,7 @@ int mv_eth_tool_write_phy_reg(int phy_addr, u16 page, u16 reg, u16 data)
 
 	return status;
 }
-#endif /* CONFIG_SYNO_ARMADA_SUPPORT_WOL */
+#endif /* MY_ABC_HERE */
 
 const struct ethtool_ops mv_eth_tool_ops = {
 	.get_settings				= mv_eth_tool_get_settings,
@@ -975,10 +978,10 @@ const struct ethtool_ops mv_eth_tool_ops = {
 	.get_drvinfo				= mv_eth_tool_get_drvinfo,
 	.get_regs_len				= mv_eth_tool_get_regs_len,
 	.get_regs				= mv_eth_tool_get_regs,
-#if defined(CONFIG_SYNO_ARMADA_SUPPORT_WOL)
+#if defined(MY_ABC_HERE)
 	.get_wol				= syno_get_wol,
 	.set_wol				= syno_set_wol,
-#endif /* CONFIG_SYNO_ARMADA_SUPPORT_WOL */
+#endif /* MY_ABC_HERE */
 	.nway_reset				= mv_eth_tool_nway_reset,
 	.get_link				= mv_eth_tool_get_link,
 	.get_coalesce				= mv_eth_tool_get_coalesce,

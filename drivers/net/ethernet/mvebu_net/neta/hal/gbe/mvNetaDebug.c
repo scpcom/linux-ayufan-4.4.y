@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -490,11 +493,11 @@ void mvNetaRxqShow(int port, int rxq, int mode)
 				   i, pRxDesc, pRxDesc->status,
 				   pRxDesc->dataSize, (MV_U32) pRxDesc->bufPhysAddr, (MV_U32) pRxDesc->bufCookie);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 			mvOsCacheLineInv(pPortCtrl->osHandle, pRxDesc);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 			mvOsCacheLineInv(NULL, pRxDesc);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 		}
 	}
 }
@@ -545,11 +548,11 @@ void mvNetaTxqShow(int port, int txp, int txq, int mode)
 				   i, pTxDesc, pTxDesc->command, pTxDesc->dataSize,
 				   (MV_U32) pTxDesc->bufPhysAddr, pTxDesc->hw_cmd);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 			mvOsCacheLineInv(pPortCtrl->osHandle, pTxDesc);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 			mvOsCacheLineInv(NULL, pTxDesc);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 		}
 	}
 }

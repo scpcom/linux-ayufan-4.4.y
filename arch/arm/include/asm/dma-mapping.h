@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef ASMARM_DMA_MAPPING_H
 #define ASMARM_DMA_MAPPING_H
 
@@ -127,10 +130,10 @@ extern int arm_dma_set_mask(struct device *dev, u64 dma_mask);
  */
 extern void *arm_dma_alloc(struct device *dev, size_t size, dma_addr_t *handle,
 			   gfp_t gfp, struct dma_attrs *attrs);
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 extern void *arm_coherent_dma_alloc(struct device *dev, size_t size,
 				    dma_addr_t *handle, gfp_t gfp, struct dma_attrs *attrs);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 #define dma_alloc_coherent(d, s, h, f) dma_alloc_attrs(d, s, h, f, NULL)
 
@@ -163,10 +166,10 @@ static inline void *dma_alloc_attrs(struct device *dev, size_t size,
  */
 extern void arm_dma_free(struct device *dev, size_t size, void *cpu_addr,
 			 dma_addr_t handle, struct dma_attrs *attrs);
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 extern void arm_coherent_dma_free(struct device *dev, size_t size, void *cpu_addr,
 				  dma_addr_t handle, struct dma_attrs *attrs);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 #define dma_free_coherent(d, s, c, h) dma_free_attrs(d, s, c, h, NULL)
 

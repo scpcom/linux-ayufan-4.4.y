@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifdef CONFIG_MMU
 #include <linux/list.h>
 #include <linux/vmalloc.h>
@@ -18,54 +21,54 @@ extern pmd_t *top_pmd;
 /* PFN alias flushing, for VIPT caches */
 #define FLUSH_ALIAS_START	0xffff4000
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static inline pmd_t *pmd_off_k(unsigned long virt)
 {
 	return pmd_offset(pud_offset(pgd_offset_k(virt), virt), virt);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static inline void set_top_pte(unsigned long va, pte_t pte)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	pte_t *ptep;
 #ifdef CONFIG_MV_LARGE_PAGE_SUPPORT
 	ptep = pte_offset_kernel(pmd_off_k(va), va);
 #else /* CONFIG_MV_LARGE_PAGE_SUPPORT */
 	ptep = pte_offset_kernel(top_pmd, va);
 #endif /* CONFIG_MV_LARGE_PAGE_SUPPORT */
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	pte_t *ptep = pte_offset_kernel(top_pmd, va);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	set_pte_ext(ptep, pte, 0);
 	local_flush_tlb_kernel_page(va);
 }
 
 static inline pte_t get_top_pte(unsigned long va)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	pte_t *ptep;
 #ifdef CONFIG_MV_LARGE_PAGE_SUPPORT
 	ptep = pte_offset_kernel(pmd_off_k(va), va);
 #else /* CONFIG_MV_LARGE_PAGE_SUPPORT */
 	ptep = pte_offset_kernel(top_pmd, va);
 #endif /* CONFIG_MV_LARGE_PAGE_SUPPORT */
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	pte_t *ptep = pte_offset_kernel(top_pmd, va);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	return *ptep;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 // do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static inline pmd_t *pmd_off_k(unsigned long virt)
 {
 	return pmd_offset(pud_offset(pgd_offset_k(virt), virt), virt);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 static inline void set_fix_pte(unsigned long va, pte_t pte)
 {
 #if defined (CONFIG_ARM_PAGE_SIZE_LARGE) && defined(CONFIG_HIGHMEM)
@@ -86,7 +89,7 @@ static inline pte_t get_fix_pte(unsigned long va)
 	return get_top_pte(va);
 #endif
 }
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 struct mem_type {
 	pteval_t prot_pte;
@@ -133,11 +136,11 @@ extern __init void add_static_vm_early(struct static_vm *svm);
 #ifdef CONFIG_ZONE_DMA
 extern phys_addr_t arm_dma_limit;
 #else
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #define arm_dma_limit ((phys_addr_t)PHYS_MASK)
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 #define arm_dma_limit ((phys_addr_t)~0)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 #endif
 
 extern phys_addr_t arm_lowmem_limit;

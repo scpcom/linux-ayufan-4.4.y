@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2008 Red Hat, Inc. All rights reserved.
  *
@@ -18,11 +21,11 @@ struct dm_sysfs_attr {
 struct dm_sysfs_attr dm_attr_##_name = \
 	__ATTR(_name, S_IRUGO, dm_attr_##_name##_show, NULL)
 
-#ifdef CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP
+#ifdef MY_ABC_HERE
 #define DM_ATTR_RW(_name) \
 struct dm_sysfs_attr dm_attr_##_name = \
 	__ATTR(_name, S_IRUGO|S_IWUSR, dm_attr_##_name##_show, dm_attr_##_name##_store)
-#endif /* CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP */
+#endif /* MY_ABC_HERE */
 
 static ssize_t dm_attr_show(struct kobject *kobj, struct attribute *attr,
 			    char *page)
@@ -63,7 +66,7 @@ static ssize_t dm_attr_uuid_show(struct mapped_device *md, char *buf)
 	return strlen(buf);
 }
 
-#ifdef CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP
+#ifdef MY_ABC_HERE
 static ssize_t dm_attr_store(struct kobject *kobj, struct attribute *attr, const char *buf, size_t len)
 {
 	struct dm_sysfs_attr *dm_attr = NULL;
@@ -97,7 +100,7 @@ static ssize_t dm_attr_active_store(struct mapped_device *md, char *buf)
 	return 0;
 }
 static DM_ATTR_RW(active);
-#endif /* CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP */
+#endif /* MY_ABC_HERE */
 
 static ssize_t dm_attr_suspended_show(struct mapped_device *md, char *buf)
 {
@@ -114,17 +117,17 @@ static struct attribute *dm_attrs[] = {
 	&dm_attr_name.attr,
 	&dm_attr_uuid.attr,
 	&dm_attr_suspended.attr,
-#ifdef CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP
+#ifdef MY_ABC_HERE
 	&dm_attr_active.attr,
-#endif /* CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP */
+#endif /* MY_ABC_HERE */
 	NULL,
 };
 
 static const struct sysfs_ops dm_sysfs_ops = {
 	.show	= dm_attr_show,
-#ifdef CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP
+#ifdef MY_ABC_HERE
 	.store	= dm_attr_store,
-#endif /* CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP */
+#endif /* MY_ABC_HERE */
 };
 
 /*

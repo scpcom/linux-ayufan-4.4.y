@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* 
  * ASCII values for a number of symbolic constants, printing functions,
  * etc.
@@ -345,11 +348,11 @@ void scsi_print_command(struct scsi_cmnd *cmd)
 	if (cmd->cmnd == NULL)
 		return;
 
-#ifdef CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE
+#ifdef MY_DEF_HERE
 	scmd_printk(KERN_NOTICE, cmd, "CDB: ");
-#else /* CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE */
+#else /* MY_DEF_HERE */
 	scmd_printk(KERN_INFO, cmd, "CDB: ");
-#endif /* CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE */
+#endif /* MY_DEF_HERE */
 	print_opcode_name(cmd->cmnd, cmd->cmd_len);
 
 	/* print out all bytes in cdb */

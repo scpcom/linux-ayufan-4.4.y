@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2010-2011 Canonical Ltd <jeremy.kerr@canonical.com>
  * Copyright (C) 2011-2012 Linaro Ltd <mturquette@linaro.org>
@@ -99,7 +102,7 @@ static struct dentry *rootdir;
 static struct dentry *orphandir;
 static int inited = 0;
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 static void clk_summary_show_one(struct seq_file *s, struct clk *c, int level)
 {
 	const char *parent_name;
@@ -163,7 +166,7 @@ static void clk_summary_show_one(struct seq_file *s, struct clk *c, int level)
 		   rate_name, c->rate);
 	seq_printf(s, "\n");
 }
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 static void clk_summary_show_one(struct seq_file *s, struct clk *c, int level)
 {
 	if (!c)
@@ -175,7 +178,7 @@ static void clk_summary_show_one(struct seq_file *s, struct clk *c, int level)
 		   c->enable_count, c->prepare_count, c->rate);
 	seq_printf(s, "\n");
 }
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 static void clk_summary_show_subtree(struct seq_file *s, struct clk *c,
 				     int level)
@@ -195,15 +198,15 @@ static int clk_summary_show(struct seq_file *s, void *data)
 {
 	struct clk *c;
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	seq_printf(s, "                                                         -----HW Status-----\n");
 	seq_printf(s, "   clock                        enable_cnt  prepare_cnt  enabled/parent/rate  rate\n");
 	seq_printf(s, "------------------------------------------------------------------------------------------\n");
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 	seq_printf(s, "   clock                        enable_cnt  prepare_cnt  rate\n");
 	seq_printf(s, "---------------------------------------------------------------------\n");
 
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 	clk_prepare_lock();
 
@@ -1285,14 +1288,14 @@ int clk_set_rate(struct clk *clk, unsigned long rate)
 
 	/* prevent racing with updates to the clock topology */
 	clk_prepare_lock();
-#if defined (CONFIG_SYNO_LSP_MONACO)
-#else /* CONFIG_SYNO_LSP_MONACO */
+#if defined (MY_DEF_HERE)
+#else /* MY_DEF_HERE */
 
 	/* bail early if nothing to do */
 	if (rate == clk->rate)
 		goto out;
 
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	if ((clk->flags & CLK_SET_RATE_GATE) && clk->prepare_count) {
 		ret = -EBUSY;
 		goto out;
@@ -1383,10 +1386,10 @@ static struct clk *__clk_init_parent(struct clk *clk)
 	 */
 
 	index = clk->ops->get_parent(clk->hw);
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	if (index >= clk->num_parents)
 		goto out;
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 	if (!clk->parents)
 		clk->parents =
@@ -1549,13 +1552,13 @@ int clk_set_parent(struct clk *clk, struct clk *parent)
 
 	/* prevent racing with updates to the clock topology */
 	clk_prepare_lock();
-#if defined (CONFIG_SYNO_LSP_MONACO)
-#else /* CONFIG_SYNO_LSP_MONACO */
+#if defined (MY_DEF_HERE)
+#else /* MY_DEF_HERE */
 
 	if (clk->parent == parent)
 		goto out;
 
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	/* check that we are allowed to re-parent if the clock is in use */
 	if ((clk->flags & CLK_SET_PARENT_GATE) && clk->prepare_count) {
 		ret = -EBUSY;
@@ -1713,9 +1716,9 @@ int __clk_init(struct device *dev, struct clk *clk)
 	hlist_for_each_entry_safe(orphan, tmp2, &clk_orphan_list, child_node) {
 		if (orphan->ops->get_parent) {
 			i = orphan->ops->get_parent(orphan->hw);
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 			if (i < orphan->num_parents)
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 			if (!strcmp(clk->name, orphan->parent_names[i]))
 				__clk_reparent(orphan, clk);
 			continue;

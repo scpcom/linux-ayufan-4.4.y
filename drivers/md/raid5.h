@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _RAID5_H
 #define _RAID5_H
 
@@ -231,11 +234,11 @@ struct stripe_head {
 		 */
 		struct bio	req, rreq;
 		struct bio_vec	vec, rvec;
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 		struct page	*page, *orig_page;
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 		struct page	*page;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 		struct bio	*toread, *read, *towrite, *written;
 		sector_t	sector;			/* sector of this page */
 		unsigned long	flags;
@@ -302,9 +305,9 @@ enum r5dev_flags {
 			 * data in, and now is a good time to write it out.
 			 */
 	R5_Discard,	/* Discard the stripe */
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	R5_SkipCopy, /* Don't copy data from bio to stripe cache */
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 };
 
 /*
@@ -332,9 +335,9 @@ enum {
 	STRIPE_ON_UNPLUG_LIST,
 	STRIPE_DISCARD,
 	STRIPE_ON_RELEASE_LIST,
-#ifdef CONFIG_SYNO_MD_STATUS_DISKERROR
+#ifdef MY_ABC_HERE
 	STRIPE_NORETRY,
-#endif /* CONFIG_SYNO_MD_STATUS_DISKERROR */
+#endif /* MY_ABC_HERE */
 };
 
 /*
@@ -348,7 +351,7 @@ enum {
 	STRIPE_OP_RECONSTRUCT,
 	STRIPE_OP_CHECK,
 };
-#ifdef CONFIG_SYNO_MD_RAID6_RMW
+#ifdef MY_ABC_HERE
 
 /*
  * RAID parity calculation preferences
@@ -367,7 +370,7 @@ enum {
 	SYNDROME_SRC_WANT_DRAIN,
 	SYNDROME_SRC_WRITTEN,
 };
-#endif /* CONFIG_SYNO_MD_RAID6_RMW */
+#endif /* MY_ABC_HERE */
 /*
  * Plugging:
  *
@@ -413,11 +416,11 @@ struct r5conf {
 	struct hlist_head	*stripe_hashtbl;
 	struct mddev		*mddev;
 	int			chunk_sectors;
-#ifdef CONFIG_SYNO_MD_RAID6_RMW
+#ifdef MY_ABC_HERE
 	int			level, algorithm, rmw_level;
-#else /* CONFIG_SYNO_MD_RAID6_RMW */
+#else /* MY_ABC_HERE */
 	int			level, algorithm;
-#endif /* CONFIG_SYNO_MD_RAID6_RMW */
+#endif /* MY_ABC_HERE */
 	int			max_degraded;
 	int			raid_disks;
 	int			max_nr_stripes;
@@ -457,12 +460,12 @@ struct r5conf {
 	atomic_t		pending_full_writes; /* full write backlog */
 	int			bypass_count; /* bypassed prereads */
 	int			bypass_threshold; /* preread nice */
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	int			skip_copy;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
-#ifdef CONFIG_SYNO_MD_STRIPE_MEMORY_ESTIMATION
+#endif /* MY_DEF_HERE */
+#ifdef MY_ABC_HERE
 	int         stripe_cache_memory_usage;
-#endif /* CONFIG_SYNO_MD_STRIPE_MEMORY_ESTIMATION */
+#endif /* MY_ABC_HERE */
 	struct list_head	*last_hold; /* detect hold_list promotions */
 
 	atomic_t		reshape_stripes; /* stripes with pending writes for reshape */

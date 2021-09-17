@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Driver core interface to the pinctrl subsystem.
  *
@@ -48,7 +51,7 @@ int pinctrl_bind_pins(struct device *dev)
 		goto cleanup_get;
 	}
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 #ifdef CONFIG_PM
 	/*
 	 * If power management is enabled, we also look for the optional
@@ -67,7 +70,7 @@ int pinctrl_bind_pins(struct device *dev)
 		/* Not supplying this state is perfectly legal */
 		dev_dbg(dev, "no idle pinctrl state\n");
 #endif
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	return 0;
 
 	/*

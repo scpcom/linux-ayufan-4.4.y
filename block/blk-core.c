@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 1991, 1992 Linus Torvalds
  * Copyright (C) 1994,      Karl Keyte: Added support for disk statistics
@@ -38,10 +41,10 @@
 #include "blk.h"
 #include "blk-cgroup.h"
 
-#ifdef CONFIG_SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 #include <linux/synolib.h>
 extern int syno_hibernation_log_level;
-#endif /* CONFIG_SYNO_DEBUG_FLAG */
+#endif /* MY_ABC_HERE */
 
 EXPORT_TRACEPOINT_SYMBOL_GPL(block_bio_remap);
 EXPORT_TRACEPOINT_SYMBOL_GPL(block_rq_remap);
@@ -1610,18 +1613,18 @@ static inline void blk_partition_remap(struct bio *bio)
 static void handle_bad_sector(struct bio *bio)
 {
 	char b[BDEVNAME_SIZE];
-#ifdef CONFIG_SYNO_BLOCK_LIMIT_BAD_SECTOR_MSG
+#ifdef MY_ABC_HERE
     if (printk_ratelimit()) {
-#endif /* CONFIG_SYNO_BLOCK_LIMIT_BAD_SECTOR_MSG */
+#endif /* MY_ABC_HERE */
 	printk(KERN_INFO "attempt to access beyond end of device\n");
 	printk(KERN_INFO "%s: rw=%ld, want=%Lu, limit=%Lu\n",
 			bdevname(bio->bi_bdev, b),
 			bio->bi_rw,
 			(unsigned long long)bio_end_sector(bio),
 			(long long)(i_size_read(bio->bi_bdev->bd_inode) >> 9));
-#ifdef CONFIG_SYNO_BLOCK_LIMIT_BAD_SECTOR_MSG
+#ifdef MY_ABC_HERE
     }
-#endif /* CONFIG_SYNO_BLOCK_LIMIT_BAD_SECTOR_MSG */
+#endif /* MY_ABC_HERE */
 
 	set_bit(BIO_EOF, &bio->bi_flags);
 }
@@ -1899,12 +1902,12 @@ void submit_bio(int rw, struct bio *bio)
 				count);
 		}
 
-#ifdef CONFIG_SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 		if(syno_hibernation_log_level > 0) {
 			char b[BDEVNAME_SIZE];
 			syno_do_hibernation_bio_log(bdevname(bio->bi_bdev, b));
 		}
-#endif /* CONFIG_SYNO_DEBUG_FLAG */
+#endif /* MY_ABC_HERE */
 
 	}
 
@@ -2349,16 +2352,16 @@ bool blk_update_request(struct request *req, int error, unsigned int nr_bytes)
 			error_type = "I/O";
 			break;
 		}
-#ifdef CONFIG_SYNO_IO_ERROR_LIMIT_MSG
+#ifdef MY_ABC_HERE
 		if (printk_ratelimit()) {
-#endif /* CONFIG_SYNO_IO_ERROR_LIMIT_MSG */
+#endif /* MY_ABC_HERE */
 		printk_ratelimited(KERN_ERR "end_request: %s error, dev %s, sector %llu\n",
 				   error_type, req->rq_disk ?
 				   req->rq_disk->disk_name : "?",
 				   (unsigned long long)blk_rq_pos(req));
-#ifdef CONFIG_SYNO_IO_ERROR_LIMIT_MSG
+#ifdef MY_ABC_HERE
 		}
-#endif /* CONFIG_SYNO_IO_ERROR_LIMIT_MSG */
+#endif /* MY_ABC_HERE */
 
 	}
 
@@ -3206,7 +3209,7 @@ void blk_post_runtime_resume(struct request_queue *q, int err)
 }
 EXPORT_SYMBOL(blk_post_runtime_resume);
 #endif
-#ifdef CONFIG_SYNO_MD_FLASHCACHE_SUPPORT
+#ifdef MY_ABC_HERE
 void syno_flashcache_return_error(struct bio *bio)
 {
 	/* defined in blk_types.h */
@@ -3218,7 +3221,7 @@ void syno_flashcache_return_error(struct bio *bio)
 	}
 }
 EXPORT_SYMBOL(syno_flashcache_return_error);
-#endif /* CONFIG_SYNO_MD_FLASHCACHE_SUPPORT */
+#endif /* MY_ABC_HERE */
 
 int __init blk_dev_init(void)
 {

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* handling of writes to regular files and writing back to the server
  *
  * Copyright (C) 2007 Red Hat, Inc. All Rights Reserved.
@@ -281,22 +284,22 @@ static void afs_kill_pages(struct afs_vnode *vnode, bool error,
 	struct pagevec pv;
 	unsigned count, loop;
 
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 	_enter("{%x:%u},%llx-%llx",
 	       vnode->fid.vid, vnode->fid.vnode, (unsigned long long)first, (unsigned long long)last);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	_enter("{%x:%u},%lx-%lx",
 	       vnode->fid.vid, vnode->fid.vnode, first, last);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 	pagevec_init(&pv, 0);
 
 	do {
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 		_debug("kill %llx-%llx", (unsigned long long)first, (unsigned long long)last);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 		_debug("kill %lx-%lx", first, last);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 		count = last - first + 1;
 		if (count > PAGEVEC_SIZE)

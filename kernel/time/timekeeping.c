@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/kernel/time/timekeeping.c
  *
@@ -475,7 +478,7 @@ void do_gettimeofday(struct timeval *tv)
 {
 	struct timespec now;
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_ARCH_ALPINE
 	if (!al_gettimeofday_use_jiffies) {
 #endif /* CONFIG_ARCH_ALPINE */
@@ -488,11 +491,11 @@ void do_gettimeofday(struct timeval *tv)
 		tv->tv_usec = 0;
 	}
 #endif /* CONFIG_ARCH_ALPINE */
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	getnstimeofday(&now);
 	tv->tv_sec = now.tv_sec;
 	tv->tv_usec = now.tv_nsec/1000;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 }
 EXPORT_SYMBOL(do_gettimeofday);
 

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  arch/arm/include/asm/pgtable.h
  *
@@ -24,9 +27,9 @@
 #include <asm/memory.h>
 #include <asm/pgtable-hwdef.h>
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #include <asm/tlbflush.h>
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 #ifdef CONFIG_ARM_LPAE
 #include <asm/pgtable-3level.h>
@@ -44,11 +47,11 @@
  */
 #define VMALLOC_OFFSET		(8*1024*1024)
 #define VMALLOC_START		(((unsigned long)high_memory + VMALLOC_OFFSET) & ~(VMALLOC_OFFSET-1))
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #define VMALLOC_END		0xfff00000UL
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 #define VMALLOC_END		0xff000000UL
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 #define LIBRARY_TEXT_START	0x0c000000
 
@@ -66,19 +69,19 @@ extern void __pgd_error(const char *file, int line, pgd_t);
  * mapping to be mapped at.  This is particularly important for
  * non-high vector CPUs.
  */
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #ifndef CONFIG_MV_LARGE_PAGE_SUPPORT
 #define FIRST_USER_ADDRESS	(PAGE_SIZE * 2)
 #else /* CONFIG_MV_LARGE_PAGE_SUPPORT */
 #define FIRST_USER_ADDRESS	PAGE_SIZE
 #endif /* CONFIG_MV_LARGE_PAGE_SUPPORT */
-#else /* CONFIG_SYNO_LSP_ARMADA */
-#if defined(CONFIG_SYNO_ALPINE)
+#else /* MY_ABC_HERE */
+#if defined(MY_DEF_HERE)
 #define FIRST_USER_ADDRESS	(PAGE_SIZE)
-#else /* CONFIG_SYNO_ALPINE */
+#else /* MY_DEF_HERE */
 #define FIRST_USER_ADDRESS	(PAGE_SIZE * 2)
-#endif /* CONFIG_SYNO_ALPINE */
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_DEF_HERE */
+#endif /* MY_ABC_HERE */
 
 /*
  * Use TASK_SIZE as the ceiling argument for free_pgtables() and
@@ -202,11 +205,11 @@ extern pgd_t swapper_pg_dir[PTRS_PER_PGD];
 
 static inline pte_t *pmd_page_vaddr(pmd_t pmd)
 {
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	return __va(pmd_val(pmd) & PHYS_MASK & (s32)PTE_HWTABLE_MASK);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	return __va(pmd_val(pmd) & PHYS_MASK & (s32)PAGE_MASK);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 }
 
 #define pmd_page(pmd)		pfn_to_page(__phys_to_pfn(pmd_val(pmd) & PHYS_MASK))

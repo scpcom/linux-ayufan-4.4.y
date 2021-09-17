@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * ST PCI express Driver for STMicroelectronics SoCs
  * ST PCIe IPs are built around a Synopsys IP Core.
@@ -207,9 +210,9 @@ struct st_pcie_ops {
  */
 struct st_pcie {
 	struct device *dev;
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	u8 root_bus_nr;
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	void __iomem *cntrl;
 	void __iomem *ahb;
@@ -513,7 +516,7 @@ static inline unsigned config_addr(int where, int is_root_bus)
 {
 	return (where & ~3) | (!is_root_bus << 12);
 }
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 static int st_pcie_valid_config(struct st_pcie *pp,
 				struct pci_bus *bus, int dev)
 {
@@ -536,23 +539,23 @@ static int st_pcie_valid_config(struct st_pcie *pp,
 
 	return 1;
 }
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 static int st_pcie_config_read(struct pci_bus *bus, unsigned int devfn,
 				int where, int size, u32 *val)
 {
 	u32 bdf;
 	u32 data;
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 	int slot = PCI_SLOT(devfn);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	unsigned long flags;
 	struct st_pcie *priv = sys_to_pcie(bus->sysdata);
 	int is_root_bus = pci_is_root_bus(bus);
 	int retry_count = 0;
 	int ret;
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	if (st_pcie_valid_config(priv, bus, PCI_SLOT(devfn)) == 0) {
 		*val = 0xffffffff;
 		return PCIBIOS_DEVICE_NOT_FOUND;
@@ -565,7 +568,7 @@ static int st_pcie_config_read(struct pci_bus *bus, unsigned int devfn,
 		return PCIBIOS_SUCCESSFUL;
 	}
 
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 #ifdef CONFIG_STM_PCIE_TRACKER_BUG
 	void __iomem *raw_config_area = priv->config_area;
 	raw_config_area = __stm_unfrob(priv->config_area);
@@ -585,7 +588,7 @@ static int st_pcie_config_read(struct pci_bus *bus, unsigned int devfn,
 		return PCIBIOS_DEVICE_NOT_FOUND;
 	}
 
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	bdf = bdf_num(bus->number, devfn, is_root_bus);
 
 retry:
@@ -609,8 +612,8 @@ retry:
 	atomic_set(&abort_flag, 0);
 	ret = PCIBIOS_SUCCESSFUL;
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 #ifdef CONFIG_STM_PCIE_TRACKER_BUG
 	/*
 	 * We must take the IO spinlock here, to prevent the other CPU issuing
@@ -619,7 +622,7 @@ retry:
 	 */
 	spin_lock(&stm_pcie_io_spinlock);
 #endif
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	/*
 	 * Get the addresses of where we expect the aborts to happen. These are
@@ -635,11 +638,11 @@ retry:
 	 * the case on our ARM platforms.
 	 */
 config_read_start:
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	/* Read the dword aligned data */
 	data = readl(priv->config_area + config_addr(where,
 		     bus->parent->number == priv->root_bus_nr));
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 #ifndef CONFIG_STM_PCIE_TRACKER_BUG
 	/* Read the dword aligned data */
 	data = readl(priv->config_area + config_addr(where, is_root_bus));
@@ -661,18 +664,18 @@ config_read_start:
 			   config_addr(where, is_root_bus));
 
 #endif // CONFIG_STM_PCIE_TRACKER_BUG
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	mb(); /* Barrier to force bus error to go no further than here */
 
 config_read_end:
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 #ifdef CONFIG_STM_PCIE_TRACKER_BUG
 	spin_unlock(&stm_pcie_io_spinlock);
 #endif
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	/* If the trap handler has fired, then set the data to 0xffffffff */
 	if (atomic_read(&abort_flag)) {
 		ret = PCIBIOS_DEVICE_NOT_FOUND;
@@ -729,28 +732,28 @@ static int st_pcie_config_write(struct pci_bus *bus, unsigned int devfn,
 	unsigned long flags;
 	u32 bdf;
 	u32 data = 0;
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 	int slot = PCI_SLOT(devfn);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	struct st_pcie *priv = sys_to_pcie(bus->sysdata);
 	int is_root_bus = pci_is_root_bus(bus);
 	int ret;
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 #ifdef CONFIG_STM_PCIE_TRACKER_BUG
 	void __iomem *raw_config_area = priv->config_area;
 	raw_config_area = __stm_unfrob(priv->config_area);
 #endif
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	if (st_pcie_valid_config(priv, bus, PCI_SLOT(devfn)) == 0)
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	if (!priv || (is_root_bus && slot != 1) || !link_up(priv))
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 		return PCIBIOS_DEVICE_NOT_FOUND;
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	if (is_root_bus) {
 		/* write own conf */
 		data = dbi_readl(priv, (where & ~0x3));
@@ -758,7 +761,7 @@ static int st_pcie_config_write(struct pci_bus *bus, unsigned int devfn,
 		dbi_writel(priv, data, (where & ~0x3));
 		return PCIBIOS_SUCCESSFUL;
 	}
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	bdf = bdf_num(bus->number, devfn, is_root_bus);
 
@@ -774,8 +777,8 @@ static int st_pcie_config_write(struct pci_bus *bus, unsigned int devfn,
 
 	atomic_set(&abort_flag, 0);
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 #ifdef CONFIG_STM_PCIE_TRACKER_BUG
 	/*
 	 * We must take the IO spinlock here, to prevent the other CPU issuing
@@ -784,7 +787,7 @@ static int st_pcie_config_write(struct pci_bus *bus, unsigned int devfn,
 	 */
 	spin_lock(&stm_pcie_io_spinlock);
 #endif
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	abort_start = (unsigned long)&&config_write_start;
 	abort_end = (unsigned long)&&config_write_end;
@@ -792,12 +795,12 @@ static int st_pcie_config_write(struct pci_bus *bus, unsigned int devfn,
 	/* We can expect bus errors for the read and the write */
 config_write_start:
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	/* Read the dword aligned data */
 	if (size != 4)
 		data = readl(priv->config_area + config_addr(where,
 			     bus->parent->number == priv->root_bus_nr));
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 #ifndef CONFIG_STM_PCIE_TRACKER_BUG
 	/* Read the dword aligned data */
 	if (size != 4)
@@ -809,32 +812,32 @@ config_write_start:
 		data = __raw_readl(raw_config_area +
 			     config_addr(where, is_root_bus));
 #endif
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	mb();
 
 	data = shift_data_write(where, size, val, data);
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	writel(data, priv->config_area + config_addr(where,
 	       bus->parent->number == priv->root_bus_nr));
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 #ifndef CONFIG_STM_PCIE_TRACKER_BUG
 	writel(data, priv->config_area + config_addr(where, is_root_bus));
 #else
 	__raw_writel(data, raw_config_area + config_addr(where, is_root_bus));
 #endif
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	mb();
 
 config_write_end:
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 #ifdef CONFIG_STM_PCIE_TRACKER_BUG
 	spin_unlock(&stm_pcie_io_spinlock);
 #endif
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	ret = atomic_read(&abort_flag) ? PCIBIOS_DEVICE_NOT_FOUND
 				       : PCIBIOS_SUCCESSFUL;
 
@@ -923,7 +926,7 @@ static int st_pcie_hw_setup(struct st_pcie *priv,
 	st_pcie_board_reset(priv);
 
 	/* Re-enable the link */
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	err = priv->data->enable_ltssm(priv);
 	if (err)
 		return err;
@@ -932,9 +935,9 @@ static int st_pcie_hw_setup(struct st_pcie *priv,
 	dbi_writew(priv, PCI_CLASS_BRIDGE_PCI, PCI_CLASS_DEVICE);
 
 	return err;
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	return priv->data->enable_ltssm(priv);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 }
 
 static int remap_named_resource(struct platform_device *pdev,
@@ -973,11 +976,11 @@ static irqreturn_t st_pcie_sys_err(int irq, void *dev_data)
 static int st_pcie_map_irq(const struct pci_dev *dev, u8 slot, u8 pin)
 {
 	struct st_pcie *pcie = sys_to_pcie(dev->bus->sysdata);
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	int i = (slot + pin - 1) % 4;
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	int i = (slot - 1 + pin - 1) % 4;
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	if (i >= pcie->irq_lines)
 		i = 0;
@@ -1017,9 +1020,9 @@ static struct pci_bus *st_pcie_scan(int nr, struct pci_sys_data *sys)
 {
 	struct st_pcie *pcie = sys_to_pcie(sys);
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	pcie->root_bus_nr = sys->busnr;
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	return pci_scan_root_bus(pcie->dev, sys->busnr, &st_pcie_config_ops,
 				 sys, &sys->resources);
 }

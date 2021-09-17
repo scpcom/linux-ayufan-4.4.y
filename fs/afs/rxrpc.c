@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* Maintain an RxRPC server socket to do AFS communications through
  *
  * Copyright (C) 2007 Red Hat, Inc. All Rights Reserved.
@@ -255,11 +258,11 @@ static int afs_send_pages(struct afs_call *call, struct msghdr *msg,
 	call->first_offset = 0;
 
 	do {
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 		_debug("attach %llx-%llx", (unsigned long long)first, (unsigned long long)last);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 		_debug("attach %lx-%lx", first, last);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 		count = last - first + 1;
 		if (count > ARRAY_SIZE(pages))

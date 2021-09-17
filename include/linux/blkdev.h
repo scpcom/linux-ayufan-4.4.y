@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_BLKDEV_H
 #define _LINUX_BLKDEV_H
 
@@ -36,11 +39,11 @@ struct bsg_job;
 struct blkcg_gq;
 
 #define BLKDEV_MIN_RQ	4
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #define BLKDEV_MAX_RQ	1024	/* Default maximum */
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 #define BLKDEV_MAX_RQ	128	/* Default maximum */
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 /*
  * Maximum number of blkcg policies allowed to be registered concurrently.
@@ -921,9 +924,9 @@ extern void blk_queue_max_segments(struct request_queue *, unsigned short);
 extern void blk_queue_max_segment_size(struct request_queue *, unsigned int);
 extern void blk_queue_max_discard_sectors(struct request_queue *q,
 		unsigned int max_discard_sectors);
-#ifdef CONFIG_SYNO_MD_FLASHCACHE_4KN_SUPPORT
+#ifdef MY_ABC_HERE
 extern void syno_limits_logical_block_size(struct queue_limits *limits, unsigned short size);
-#endif /* CONFIG_SYNO_MD_FLASHCACHE_4KN_SUPPORT */
+#endif /* MY_ABC_HERE */
 extern void blk_queue_max_write_same_sectors(struct request_queue *q,
 		unsigned int max_write_same_sectors);
 extern void blk_queue_logical_block_size(struct request_queue *, unsigned short);
@@ -1025,9 +1028,9 @@ extern struct blk_plug_cb *blk_check_plugged(blk_plug_cb_fn unplug,
 extern void blk_start_plug(struct blk_plug *);
 extern void blk_finish_plug(struct blk_plug *);
 extern void blk_flush_plug_list(struct blk_plug *, bool);
-#ifdef  CONFIG_SYNO_MD_FLASHCACHE_SUPPORT
+#ifdef MY_ABC_HERE
 extern void syno_flashcache_return_error(struct bio *bio);
-#endif /* CONFIG_SYNO_MD_FLASHCACHE_SUPPORT */
+#endif /* MY_ABC_HERE */
 
 static inline void blk_flush_plug(struct task_struct *tsk)
 {

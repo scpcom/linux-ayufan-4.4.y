@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* AFS vnode management
  *
  * Copyright (C) 2002, 2007 Red Hat, Inc. All Rights Reserved.
@@ -773,7 +776,7 @@ int afs_vnode_store_data(struct afs_writeback *wb, pgoff_t first, pgoff_t last,
 	struct afs_vnode *vnode = wb->vnode;
 	int ret;
 
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 	_enter("%s{%x:%u.%u},%x,%llx,%llx,%x,%x",
 	       vnode->volume->vlocation->vldb.name,
 	       vnode->fid.vid,
@@ -781,7 +784,7 @@ int afs_vnode_store_data(struct afs_writeback *wb, pgoff_t first, pgoff_t last,
 	       vnode->fid.unique,
 	       key_serial(wb->key),
 	       (unsigned long long)first, (unsigned long long)last, offset, to);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	_enter("%s{%x:%u.%u},%x,%lx,%lx,%x,%x",
 	       vnode->volume->vlocation->vldb.name,
 	       vnode->fid.vid,
@@ -789,7 +792,7 @@ int afs_vnode_store_data(struct afs_writeback *wb, pgoff_t first, pgoff_t last,
 	       vnode->fid.unique,
 	       key_serial(wb->key),
 	       first, last, offset, to);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 	/* this op will fetch the status */
 	spin_lock(&vnode->lock);

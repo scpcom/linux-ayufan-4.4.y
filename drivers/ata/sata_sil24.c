@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * sata_sil24.c - Driver for Silicon Image 3124/3132 SATA-2 controllers
  *
@@ -29,17 +32,17 @@
 #include <scsi/scsi_host.h>
 #include <scsi/scsi_cmnd.h>
 #include <linux/libata.h>
-#ifdef CONFIG_SYNO_SIL3132_ACTIVITY
+#ifdef MY_DEF_HERE
 #include <linux/leds.h>
-#endif /* CONFIG_SYNO_SIL3132_ACTIVITY */
+#endif /* MY_DEF_HERE */
 
 #define DRV_NAME	"sata_sil24"
 #define DRV_VERSION	"1.1"
 
-#ifdef CONFIG_SYNO_SIL3132_ACTIVITY
+#ifdef MY_DEF_HERE
 extern void syno_ledtrig_active_set(int iLedNum);
 extern int *gpGreenLedMap;
-#endif /* CONFIG_SYNO_SIL3132_ACTIVITY */
+#endif /* MY_DEF_HERE */
 
 /*
  * Port request block (PRB) 32 bytes
@@ -327,13 +330,13 @@ static const struct sil24_cerr_info {
 				    "FIS received while sending service FIS" },
 };
 
-#ifdef CONFIG_SYNO_SIL3132_ACTIVITY
+#ifdef MY_DEF_HERE
 struct sil3132_em_priv {
 	struct timer_list timer;
 	unsigned long saved_activity;
 	unsigned long activity;
 };
-#endif /* CONFIG_SYNO_SIL3132_ACTIVITY */
+#endif /* MY_DEF_HERE */
 
 /*
  * ap->private_data
@@ -345,9 +348,9 @@ struct sil24_port_priv {
 	union sil24_cmd_block *cmd_block;	/* 32 cmd blocks */
 	dma_addr_t cmd_block_dma;		/* DMA base addr for them */
 	int do_port_rst;
-#ifdef CONFIG_SYNO_SIL3132_ACTIVITY
+#ifdef MY_DEF_HERE
 	struct sil3132_em_priv em_st;
-#endif /* CONFIG_SYNO_SIL3132_ACTIVITY */
+#endif /* MY_DEF_HERE */
 };
 
 static void sil24_dev_config(struct ata_device *dev);
@@ -399,29 +402,29 @@ static struct pci_driver sil24_pci_driver = {
 #endif
 };
 
-#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 static struct device_attribute *sil24_shost_attrs[] = {
 	&dev_attr_syno_manutil_power_disable,
 	&dev_attr_syno_pm_gpio,
 	&dev_attr_syno_pm_info,
-#ifdef CONFIG_SYNO_TRANS_HOST_TO_DISK
+#ifdef MY_ABC_HERE
 	&dev_attr_syno_diskname_trans,
-#endif /* CONFIG_SYNO_TRANS_HOST_TO_DISK */
-#ifdef CONFIG_SYNO_SATA_DISK_LED_CONTROL
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
 	&dev_attr_syno_sata_disk_led_ctrl,
-#endif /* CONFIG_SYNO_SATA_DISK_LED_CONTROL */
+#endif /* MY_ABC_HERE */
 	NULL
 };
-#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
+#endif /* MY_ABC_HERE */
 
 static struct scsi_host_template sil24_sht = {
 	ATA_NCQ_SHT(DRV_NAME),
 	.can_queue		= SIL24_MAX_CMDS,
 	.sg_tablesize		= SIL24_MAX_SGE,
 	.dma_boundary		= ATA_DMA_BOUNDARY,
-#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	.shost_attrs 		= sil24_shost_attrs,
-#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
+#endif /* MY_ABC_HERE */
 };
 
 static struct ata_port_operations sil24_ops = {
@@ -695,9 +698,9 @@ static int sil24_softreset(struct ata_link *link, unsigned int *class,
 	struct ata_taskfile tf;
 	const char *reason;
 	int rc;
-#ifdef CONFIG_SYNO_SATA_SIL3132_HD_DETECT
+#ifdef MY_ABC_HERE
 	int retry_count = 0;
-#endif /* CONFIG_SYNO_SATA_SIL3132_HD_DETECT */
+#endif /* MY_ABC_HERE */
 
 	DPRINTK("ENTER\n");
 
@@ -711,9 +714,9 @@ static int sil24_softreset(struct ata_link *link, unsigned int *class,
 	if (time_after(deadline, jiffies))
 		timeout_msec = jiffies_to_msecs(deadline - jiffies);
 
-#ifdef CONFIG_SYNO_SATA_SIL3132_HD_DETECT
+#ifdef MY_ABC_HERE
 retry:
-#endif /* CONFIG_SYNO_SATA_SIL3132_HD_DETECT */
+#endif /* MY_ABC_HERE */
 	ata_tf_init(link->device, &tf);	/* doesn't really matter */
 	rc = sil24_exec_polled_cmd(ap, pmp, &tf, 0, PRB_CTRL_SRST,
 				   timeout_msec);
@@ -721,7 +724,7 @@ retry:
 		reason = "timeout";
 		goto err;
 	} else if (rc) {
-#ifdef CONFIG_SYNO_SATA_SIL3132_HD_DETECT
+#ifdef MY_ABC_HERE
 		/* retry once. And we don't retry port multiplier itself */
 		if (retry_count < 1 && 0xf != link->pmp) {
 			sata_std_hardreset(link, class, deadline+HZ);
@@ -733,10 +736,10 @@ retry:
 			reason = "SRST command error";
 			goto err;
 		}
-#else /* CONFIG_SYNO_SATA_SIL3132_HD_DETECT */
+#else /* MY_ABC_HERE */
 		reason = "SRST command error";
 		goto err;
-#endif /* CONFIG_SYNO_SATA_SIL3132_HD_DETECT */
+#endif /* MY_ABC_HERE */
 	}
 
 	sil24_read_tf(ap, 0, &tf);
@@ -761,9 +764,9 @@ static int sil24_hardreset(struct ata_link *link, unsigned int *class,
 	int tout_msec, rc;
 	u32 tmp;
 
-#ifdef CONFIG_SYNO_SIL3132_INTEL_SSD_WORKAROUND
+#ifdef MY_ABC_HERE
 	link->uiStsFlags |= SYNO_STATUS_IS_SIL3132;
-#endif /* CONFIG_SYNO_SIL3132_INTEL_SSD_WORKAROUND */
+#endif /* MY_ABC_HERE */
 
  retry:
 	/* Sometimes, DEV_RST is not enough to recover the controller.
@@ -787,7 +790,7 @@ static int sil24_hardreset(struct ata_link *link, unsigned int *class,
 		did_port_rst = 1;
 	}
 
-#ifdef CONFIG_SYNO_SATA_SIL3132_HITACHI_WORKAROUND
+#ifdef MY_ABC_HERE
 	sil24_scr_read(link, SCR_STATUS, &tmp);
 	if (0x1 == tmp) {
 		/* No IPM, speed negotiate and phy is not well communicated.  */
@@ -801,7 +804,7 @@ static int sil24_hardreset(struct ata_link *link, unsigned int *class,
 		link->sata_spd_limit = 0x1;
 		ata_link_printk(link, KERN_WARNING, "limiting SATA link speed to 1.5Gbps and disable IPM\n");
 	}
-#endif /* CONFIG_SYNO_SATA_SIL3132_HITACHI_WORKAROUND */
+#endif /* MY_ABC_HERE */
 
 	/* sil24 does the right thing(tm) without any protection */
 	sata_set_spd(link);
@@ -902,7 +905,7 @@ static int sil24_qc_defer(struct ata_queued_cmd *qc)
 				return ATA_DEFER_PORT;
 			qc->flags |= ATA_QCFLAG_CLEAR_EXCL;
 		} else
-#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 		{
 			if (!ap->nr_active_links) {
 				/* Since we are here now, just preempt */
@@ -919,7 +922,7 @@ static int sil24_qc_defer(struct ata_queued_cmd *qc)
 		}
 #else
 			return ATA_DEFER_PORT;
-#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
+#endif /* MY_ABC_HERE */
 	} else if (unlikely(is_excl)) {
 		ap->excl_link = link;
 		if (ap->nr_active_links)
@@ -976,7 +979,7 @@ static void sil24_qc_prep(struct ata_queued_cmd *qc)
 		sil24_fill_sg(qc, sge);
 }
 
-#ifdef CONFIG_SYNO_SIL3132_ACTIVITY
+#ifdef MY_DEF_HERE
 static void sil3132_sw_activity(struct ata_port *ap)
 {
 	struct sil24_port_priv *pp = ap->private_data;
@@ -991,7 +994,7 @@ static void sil3132_sw_activity(struct ata_port *ap)
 		mod_timer(&emp->timer, jiffies + msecs_to_jiffies(10));
 	}
 }
-#endif /* CONFIG_SYNO_SIL3132_ACTIVITY */
+#endif /* MY_DEF_HERE */
 
 static unsigned int sil24_qc_issue(struct ata_queued_cmd *qc)
 {
@@ -1012,9 +1015,9 @@ static unsigned int sil24_qc_issue(struct ata_queued_cmd *qc)
 	wmb();
 	writel((u32)paddr, activate);
 	writel((u64)paddr >> 32, activate + 4);
-#ifdef CONFIG_SYNO_SIL3132_ACTIVITY
+#ifdef MY_DEF_HERE
 	sil3132_sw_activity(ap);
-#endif /* CONFIG_SYNO_SIL3132_ACTIVITY */
+#endif /* MY_DEF_HERE */
 
 	return 0;
 }
@@ -1059,9 +1062,9 @@ static int sil24_pmp_hardreset(struct ata_link *link, unsigned int *class,
 		return rc;
 	}
 
-#ifdef CONFIG_SYNO_SIL3132_PM_WORKAROUND
+#ifdef MY_ABC_HERE
 	link->uiStsFlags |= SYNO_STATUS_IS_SIL3132PM;
-#endif /* CONFIG_SYNO_SIL3132_PM_WORKAROUND */
+#endif /* MY_ABC_HERE */
 	return sata_std_hardreset(link, class, deadline);
 }
 
@@ -1115,12 +1118,12 @@ static void sil24_error_intr(struct ata_port *ap)
 	}
 
 	if (irq_stat & (PORT_IRQ_PHYRDY_CHG | PORT_IRQ_DEV_XCHG)) {
-#ifdef CONFIG_SYNO_SATA_INFO
+#ifdef MY_ABC_HERE
 		syno_ata_info_print(ap);
-#endif /* CONFIG_SYNO_SATA_INFO */
-#ifdef CONFIG_SYNO_ATA_FAST_PROBE
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
 		ap->pflags |= ATA_PFLAG_SYNO_BOOT_PROBE;
-#endif /* CONFIG_SYNO_ATA_FAST_PROBE */
+#endif /* MY_ABC_HERE */
 		ata_ehi_hotplugged(ehi);
 		ata_ehi_push_desc(ehi, "%s",
 				  irq_stat & PORT_IRQ_PHYRDY_CHG ?
@@ -1316,7 +1319,7 @@ static void sil24_post_internal_cmd(struct ata_queued_cmd *qc)
 		ata_eh_freeze_port(ap);
 }
 
-#ifdef CONFIG_SYNO_SIL3132_ACTIVITY
+#ifdef MY_DEF_HERE
 static void sil3132_sw_activity_blink(unsigned long arg)
 {
 	struct ata_port *ap = (struct ata_port *)arg;
@@ -1389,7 +1392,7 @@ END:
 	return ret;
 }
 EXPORT_SYMBOL(syno_sil3132_disk_led_enable);
-#endif /* CONFIG_SYNO_SIL3132_ACTIVITY */
+#endif /* MY_DEF_HERE */
 
 static int sil24_port_start(struct ata_port *ap)
 {
@@ -1450,7 +1453,7 @@ static void sil24_init_controller(struct ata_host *host)
 				dev_err(host->dev,
 					"failed to clear port RST\n");
 		}
-#ifdef CONFIG_SYNO_INCREASE_SIL3132_OUT_SWING
+#ifdef MY_DEF_HERE
 		tmp = readl(port + PORT_PHY_CFG);
 		tmp &= ~0x1f;
 		if (syno_is_hw_version(HW_DS1815p)) {
@@ -1467,13 +1470,13 @@ static void sil24_init_controller(struct ata_host *host)
 			tmp |= 0x0f;
 		}
 		writel(tmp, port + PORT_PHY_CFG);
-#endif /* CONFIG_SYNO_INCREASE_SIL3132_OUT_SWING */
+#endif /* MY_DEF_HERE */
 
 		/* configure port */
 		sil24_config_port(ap);
-#ifdef CONFIG_SYNO_SATA_SIL3132_ABRT_WORKAROUND
+#ifdef MY_ABC_HERE
 		mdelay(1000);
-#endif /* CONFIG_SYNO_SATA_SIL3132_ABRT_WORKAROUND */
+#endif /* MY_ABC_HERE */
 	}
 
 	/* Turn on interrupts */

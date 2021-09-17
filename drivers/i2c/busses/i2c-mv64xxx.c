@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Driver for the i2c controller on the Marvell line of host bridges
  * (e.g, gt642[46]0, mv643[46]0, mv644[46]0, and Orion SoC family).
@@ -19,22 +22,22 @@
 #include <linux/platform_device.h>
 #include <linux/io.h>
 #include <linux/of.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #include <linux/of_device.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 #include <linux/of_irq.h>
 #include <linux/of_i2c.h>
 #include <linux/clk.h>
 #include <linux/err.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #include <linux/delay.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #define MV64XXX_I2C_ADDR_ADDR(val)			((val & 0x7f) << 1)
 #define MV64XXX_I2C_BAUD_DIV_N(val)			(val & 0x7)
 #define MV64XXX_I2C_BAUD_DIV_M(val)			((val & 0xf) << 3)
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 /* Register defines */
 #define	MV64XXX_I2C_REG_SLAVE_ADDR			0x00
 #define	MV64XXX_I2C_REG_DATA				0x04
@@ -43,7 +46,7 @@
 #define	MV64XXX_I2C_REG_BAUD				0x0c
 #define	MV64XXX_I2C_REG_EXT_SLAVE_ADDR			0x10
 #define	MV64XXX_I2C_REG_SOFT_RESET			0x1c
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 #define	MV64XXX_I2C_REG_CONTROL_ACK			0x00000004
 #define	MV64XXX_I2C_REG_CONTROL_IFLG			0x00000008
@@ -71,7 +74,7 @@
 #define	MV64XXX_I2C_STATUS_MAST_RD_ADDR_2_NO_ACK	0xe8
 #define	MV64XXX_I2C_STATUS_NO_STATUS			0xf8
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 /* Register defines (I2C bridge) */
 #define	MV64XXX_I2C_REG_TX_DATA_LO			0xc0
 #define	MV64XXX_I2C_REG_TX_DATA_HI			0xc4
@@ -96,7 +99,7 @@
 #define	MV64XXX_I2C_BRIDGE_STATUS_ERROR			0x00000001
 #define	MV64XXX_I2C_STATUS_OFFLOAD_ERROR		0xf0000001
 #define	MV64XXX_I2C_STATUS_OFFLOAD_OK			0xf0000000
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 /* Driver states */
 enum {
@@ -116,21 +119,21 @@ enum {
 	MV64XXX_I2C_ACTION_CONTINUE,
 	MV64XXX_I2C_ACTION_SEND_START,
 	MV64XXX_I2C_ACTION_SEND_RESTART,
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	MV64XXX_I2C_ACTION_OFFLOAD_RESTART,
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	MV64XXX_I2C_ACTION_SEND_ADDR_1,
 	MV64XXX_I2C_ACTION_SEND_ADDR_2,
 	MV64XXX_I2C_ACTION_SEND_DATA,
 	MV64XXX_I2C_ACTION_RCV_DATA,
 	MV64XXX_I2C_ACTION_RCV_DATA_STOP,
 	MV64XXX_I2C_ACTION_SEND_STOP,
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	MV64XXX_I2C_ACTION_OFFLOAD_SEND_STOP,
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 };
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 struct mv64xxx_i2c_regs {
 	u8	addr;
 	u8	ext_addr;
@@ -140,25 +143,25 @@ struct mv64xxx_i2c_regs {
 	u8	clock;
 	u8	soft_reset;
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 struct mv64xxx_i2c_data {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	struct i2c_msg		*msgs;
 	int			num_msgs;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	int			irq;
 	u32			state;
 	u32			action;
 	u32			aborting;
 	u32			cntl_bits;
 	void __iomem		*reg_base;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	struct mv64xxx_i2c_regs	reg_offsets;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	u32			reg_base_p;
 	u32			reg_size;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	u32			addr1;
 	u32			addr2;
 	u32			bytes_left;
@@ -175,14 +178,14 @@ struct mv64xxx_i2c_data {
 	spinlock_t		lock;
 	struct i2c_msg		*msg;
 	struct i2c_adapter	adapter;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	bool			offload_enabled;
 /* 5us delay in order to avoid repeated start timing violation */
 	bool			errata_delay;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 };
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static struct mv64xxx_i2c_regs mv64xxx_i2c_regs_mv64xxx = {
 	.addr		= 0x00,
 	.ext_addr	= 0x10,
@@ -293,7 +296,7 @@ mv64xxx_i2c_update_offload_data(struct mv64xxx_i2c_data *drv_data)
 	}
 
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 /*
  *****************************************************************************
@@ -307,7 +310,7 @@ mv64xxx_i2c_update_offload_data(struct mv64xxx_i2c_data *drv_data)
 static void
 mv64xxx_i2c_hw_init(struct mv64xxx_i2c_data *drv_data)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	if (drv_data->offload_enabled) {
 		writel(0, drv_data->reg_base + MV64XXX_I2C_REG_BRIDGE_CONTROL);
 		writel(0, drv_data->reg_base + MV64XXX_I2C_REG_BRIDGE_TIMING);
@@ -324,7 +327,7 @@ mv64xxx_i2c_hw_init(struct mv64xxx_i2c_data *drv_data)
 	writel(0, drv_data->reg_base + drv_data->reg_offsets.ext_addr);
 	writel(MV64XXX_I2C_REG_CONTROL_TWSIEN | MV64XXX_I2C_REG_CONTROL_STOP,
 		drv_data->reg_base + drv_data->reg_offsets.control);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	writel(0, drv_data->reg_base + MV64XXX_I2C_REG_SOFT_RESET);
 	writel((((drv_data->freq_m & 0xf) << 3) | (drv_data->freq_n & 0x7)),
 		drv_data->reg_base + MV64XXX_I2C_REG_BAUD);
@@ -332,7 +335,7 @@ mv64xxx_i2c_hw_init(struct mv64xxx_i2c_data *drv_data)
 	writel(0, drv_data->reg_base + MV64XXX_I2C_REG_EXT_SLAVE_ADDR);
 	writel(MV64XXX_I2C_REG_CONTROL_TWSIEN | MV64XXX_I2C_REG_CONTROL_STOP,
 		drv_data->reg_base + MV64XXX_I2C_REG_CONTROL);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	drv_data->state = MV64XXX_I2C_STATE_IDLE;
 }
 
@@ -372,11 +375,11 @@ mv64xxx_i2c_fsm(struct mv64xxx_i2c_data *drv_data, u32 status)
 		if ((drv_data->bytes_left == 0)
 				|| (drv_data->aborting
 					&& (drv_data->byte_posn != 0))) {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 			if (drv_data->send_stop || drv_data->aborting) {
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 			if (drv_data->send_stop) {
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 				drv_data->action = MV64XXX_I2C_ACTION_SEND_STOP;
 				drv_data->state = MV64XXX_I2C_STATE_IDLE;
 			} else {
@@ -433,14 +436,14 @@ mv64xxx_i2c_fsm(struct mv64xxx_i2c_data *drv_data, u32 status)
 		/* Doesn't seem to be a device at other end */
 		drv_data->action = MV64XXX_I2C_ACTION_SEND_STOP;
 		drv_data->state = MV64XXX_I2C_STATE_IDLE;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		drv_data->rc = -ENXIO;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		drv_data->rc = -ENODEV;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 		break;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	case MV64XXX_I2C_STATUS_OFFLOAD_OK:
 		if (drv_data->send_stop || drv_data->aborting) {
 			drv_data->action = MV64XXX_I2C_ACTION_OFFLOAD_SEND_STOP;
@@ -450,7 +453,7 @@ mv64xxx_i2c_fsm(struct mv64xxx_i2c_data *drv_data, u32 status)
 			drv_data->state = MV64XXX_I2C_STATE_WAITING_FOR_RESTART;
 		}
 		break;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	default:
 		dev_err(&drv_data->adapter.dev,
@@ -468,7 +471,7 @@ static void
 mv64xxx_i2c_do_action(struct mv64xxx_i2c_data *drv_data)
 {
 	switch(drv_data->action) {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	case MV64XXX_I2C_ACTION_OFFLOAD_RESTART:
 		mv64xxx_i2c_update_offload_data(drv_data);
 		writel(0, drv_data->reg_base +	MV64XXX_I2C_REG_BRIDGE_CONTROL);
@@ -555,7 +558,7 @@ mv64xxx_i2c_do_action(struct mv64xxx_i2c_data *drv_data)
 
 		wake_up(&drv_data->waitq);
 		break;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	case MV64XXX_I2C_ACTION_SEND_RESTART:
 		drv_data->cntl_bits |= MV64XXX_I2C_REG_CONTROL_START;
 		drv_data->cntl_bits &= ~MV64XXX_I2C_REG_CONTROL_INTEN;
@@ -612,7 +615,7 @@ mv64xxx_i2c_do_action(struct mv64xxx_i2c_data *drv_data)
 		drv_data->block = 0;
 		wake_up(&drv_data->waitq);
 		break;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	case MV64XXX_I2C_ACTION_INVALID:
 	default:
@@ -624,16 +627,16 @@ mv64xxx_i2c_do_action(struct mv64xxx_i2c_data *drv_data)
 	case MV64XXX_I2C_ACTION_SEND_STOP:
 		drv_data->cntl_bits &= ~MV64XXX_I2C_REG_CONTROL_INTEN;
 		writel(drv_data->cntl_bits | MV64XXX_I2C_REG_CONTROL_STOP,
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 			drv_data->reg_base + drv_data->reg_offsets.control);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 			drv_data->reg_base + MV64XXX_I2C_REG_CONTROL);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 		drv_data->block = 0;
 		wake_up(&drv_data->waitq);
 		break;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	case MV64XXX_I2C_ACTION_OFFLOAD_SEND_STOP:
 		mv64xxx_i2c_update_offload_data(drv_data);
 		writel(0, drv_data->reg_base +	MV64XXX_I2C_REG_BRIDGE_CONTROL);
@@ -642,7 +645,7 @@ mv64xxx_i2c_do_action(struct mv64xxx_i2c_data *drv_data)
 		drv_data->block = 0;
 		wake_up(&drv_data->waitq);
 		break;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	}
 }
 
@@ -655,7 +658,7 @@ mv64xxx_i2c_intr(int irq, void *dev_id)
 	irqreturn_t	rc = IRQ_NONE;
 
 	spin_lock_irqsave(&drv_data->lock, flags);
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	if (drv_data->offload_enabled) {
 		while (readl(drv_data->reg_base +
 				MV64XXX_I2C_REG_BRIDGE_INTR_CAUSE)) {
@@ -673,11 +676,11 @@ mv64xxx_i2c_intr(int irq, void *dev_id)
 	while (readl(drv_data->reg_base + drv_data->reg_offsets.control) &
 						MV64XXX_I2C_REG_CONTROL_IFLG) {
 		status = readl(drv_data->reg_base + drv_data->reg_offsets.status);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	while (readl(drv_data->reg_base + MV64XXX_I2C_REG_CONTROL) &
 						MV64XXX_I2C_REG_CONTROL_IFLG) {
 		status = readl(drv_data->reg_base + MV64XXX_I2C_REG_STATUS);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 		mv64xxx_i2c_fsm(drv_data, status);
 		mv64xxx_i2c_do_action(drv_data);
 		rc = IRQ_HANDLED;
@@ -694,9 +697,9 @@ mv64xxx_i2c_intr(int irq, void *dev_id)
  *
  *****************************************************************************
  */
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 // do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static void
 mv64xxx_i2c_prepare_for_io(struct mv64xxx_i2c_data *drv_data,
 	struct i2c_msg *msg)
@@ -722,7 +725,7 @@ mv64xxx_i2c_prepare_for_io(struct mv64xxx_i2c_data *drv_data,
 		drv_data->addr2 = 0;
 	}
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static void
 mv64xxx_i2c_wait_for_completion(struct mv64xxx_i2c_data *drv_data)
@@ -764,20 +767,20 @@ mv64xxx_i2c_wait_for_completion(struct mv64xxx_i2c_data *drv_data)
 
 static int
 mv64xxx_i2c_execute_msg(struct mv64xxx_i2c_data *drv_data, struct i2c_msg *msg,
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 				int is_last)
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 				int is_first, int is_last)
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 {
 	unsigned long	flags;
 
 	spin_lock_irqsave(&drv_data->lock, flags);
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 
 	drv_data->action = MV64XXX_I2C_ACTION_SEND_START;
 	drv_data->state = MV64XXX_I2C_STATE_WAITING_FOR_START_COND;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	mv64xxx_i2c_prepare_for_io(drv_data, msg);
 
 	if (unlikely(msg->flags & I2C_M_NOSTART)) { /* Skip start/addr phases */
@@ -803,7 +806,7 @@ mv64xxx_i2c_execute_msg(struct mv64xxx_i2c_data *drv_data, struct i2c_msg *msg,
 				MV64XXX_I2C_STATE_WAITING_FOR_ADDR_1_ACK;
 		}
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	drv_data->send_stop = is_last;
 	drv_data->block = 1;
@@ -831,7 +834,7 @@ static int
 mv64xxx_i2c_xfer(struct i2c_adapter *adap, struct i2c_msg msgs[], int num)
 {
 	struct mv64xxx_i2c_data *drv_data = i2c_get_adapdata(adap);
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	int rc, ret = num;
 
 	BUG_ON(drv_data->msgs != NULL);
@@ -853,7 +856,7 @@ mv64xxx_i2c_xfer(struct i2c_adapter *adap, struct i2c_msg msgs[], int num)
 	drv_data->msgs = NULL;
 
 	return ret;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	int	i, rc;
 
 	for (i = 0; i < num; i++) {
@@ -864,7 +867,7 @@ mv64xxx_i2c_xfer(struct i2c_adapter *adap, struct i2c_msg msgs[], int num)
 	}
 
 	return num;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 }
 
 static const struct i2c_algorithm mv64xxx_i2c_algo = {
@@ -879,7 +882,7 @@ static const struct i2c_algorithm mv64xxx_i2c_algo = {
  *
  *****************************************************************************
  */
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static const struct of_device_id mv64xxx_i2c_of_match_table[] = {
 	{ .compatible = "marvell,mv64xxx-i2c", .data = &mv64xxx_i2c_regs_mv64xxx},
 	{ .compatible = "marvell,mv78230-i2c", .data = &mv64xxx_i2c_regs_mv64xxx},
@@ -887,7 +890,7 @@ static const struct of_device_id mv64xxx_i2c_of_match_table[] = {
 	{}
 };
 MODULE_DEVICE_TABLE(of, mv64xxx_i2c_of_match_table);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static int
 mv64xxx_i2c_map_regs(struct platform_device *pd,
 	struct mv64xxx_i2c_data *drv_data)
@@ -921,7 +924,7 @@ mv64xxx_i2c_unmap_regs(struct mv64xxx_i2c_data *drv_data)
 	drv_data->reg_base = NULL;
 	drv_data->reg_base_p = 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 #ifdef CONFIG_OF
 static int
@@ -956,19 +959,19 @@ mv64xxx_find_baud_factors(const u32 req_freq, const u32 tclk, u32 *best_n,
 
 static int
 mv64xxx_of_config(struct mv64xxx_i2c_data *drv_data,
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		  struct device *dev)
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		  struct device_node *np)
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	const struct of_device_id *device;
 	struct device_node *np = dev->of_node;
 	u32 bus_freq, tclk, timeout;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	u32 bus_freq, tclk;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	int rc = 0;
 
 	/* CLK is mandatory when using DT to describe the i2c bus. We
@@ -984,14 +987,14 @@ mv64xxx_of_config(struct mv64xxx_i2c_data *drv_data,
 		goto out;
 	}
 	tclk = clk_get_rate(drv_data->clk);
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 
 	rc = of_property_read_u32(np, "clock-frequency", &bus_freq);
 	if (rc)
 		bus_freq = 100000; /* 100kHz by default */
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	of_property_read_u32(np, "clock-frequency", &bus_freq);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	if (!mv64xxx_find_baud_factors(bus_freq, tclk,
 				       &drv_data->freq_n, &drv_data->freq_m)) {
@@ -1000,7 +1003,7 @@ mv64xxx_of_config(struct mv64xxx_i2c_data *drv_data,
 	}
 	drv_data->irq = irq_of_parse_and_map(np, 0);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	if (of_property_read_u32(np, "timeout-ms", &timeout))
 		timeout = 1000; /* 1000ms by default */
 	drv_data->adapter.timeout = msecs_to_jiffies(timeout);
@@ -1024,12 +1027,12 @@ mv64xxx_of_config(struct mv64xxx_i2c_data *drv_data,
 		drv_data->offload_enabled = false;
 		drv_data->errata_delay = true;
 	}
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	/* Its not yet defined how timeouts will be specified in device tree.
 	 * So hard code the value to 1 second.
 	 */
 	drv_data->adapter.timeout = HZ;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 out:
 	return rc;
 #endif
@@ -1037,11 +1040,11 @@ out:
 #else /* CONFIG_OF */
 static int
 mv64xxx_of_config(struct mv64xxx_i2c_data *drv_data,
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		  struct device *dev)
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		  struct device_node *np)
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 {
 	return -ENODEV;
 }
@@ -1052,34 +1055,34 @@ mv64xxx_i2c_probe(struct platform_device *pd)
 {
 	struct mv64xxx_i2c_data		*drv_data;
 	struct mv64xxx_i2c_pdata	*pdata = pd->dev.platform_data;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	struct resource	*r;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	int	rc;
 
 	if ((!pdata && !pd->dev.of_node))
 		return -ENODEV;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	drv_data = devm_kzalloc(&pd->dev, sizeof(struct mv64xxx_i2c_data),
 				GFP_KERNEL);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	drv_data = kzalloc(sizeof(struct mv64xxx_i2c_data), GFP_KERNEL);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	if (!drv_data)
 		return -ENOMEM;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	r = platform_get_resource(pd, IORESOURCE_MEM, 0);
 	drv_data->reg_base = devm_ioremap_resource(&pd->dev, r);
 	if (IS_ERR(drv_data->reg_base))
 		return PTR_ERR(drv_data->reg_base);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	if (mv64xxx_i2c_map_regs(pd, drv_data)) {
 		rc = -ENODEV;
 		goto exit_kfree;
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	strlcpy(drv_data->adapter.name, MV64XXX_I2C_CTLR_NAME " adapter",
 		sizeof(drv_data->adapter.name));
@@ -1089,11 +1092,11 @@ mv64xxx_i2c_probe(struct platform_device *pd)
 
 #if defined(CONFIG_HAVE_CLK)
 	/* Not all platforms have a clk */
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	drv_data->clk = devm_clk_get(&pd->dev, NULL);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	drv_data->clk = clk_get(&pd->dev, NULL);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	if (!IS_ERR(drv_data->clk)) {
 		clk_prepare(drv_data->clk);
 		clk_enable(drv_data->clk);
@@ -1104,28 +1107,28 @@ mv64xxx_i2c_probe(struct platform_device *pd)
 		drv_data->freq_n = pdata->freq_n;
 		drv_data->irq = platform_get_irq(pd, 0);
 		drv_data->adapter.timeout = msecs_to_jiffies(pdata->timeout);
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		drv_data->offload_enabled = false;
 		memcpy(&drv_data->reg_offsets, &mv64xxx_i2c_regs_mv64xxx, sizeof(drv_data->reg_offsets));
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	} else if (pd->dev.of_node) {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		rc = mv64xxx_of_config(drv_data, &pd->dev);
 		if (rc)
 			goto exit_clk;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		rc = mv64xxx_of_config(drv_data, pd->dev.of_node);
 		if (rc)
 			goto exit_unmap_regs;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	}
 	if (drv_data->irq < 0) {
 		rc = -ENXIO;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		goto exit_clk;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		goto exit_unmap_regs;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	}
 
 	drv_data->adapter.dev.parent = &pd->dev;
@@ -1139,7 +1142,7 @@ mv64xxx_i2c_probe(struct platform_device *pd)
 
 	mv64xxx_i2c_hw_init(drv_data);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	rc = request_irq(drv_data->irq, mv64xxx_i2c_intr, 0,
 			 MV64XXX_I2C_CTLR_NAME, drv_data);
 	if (rc) {
@@ -1147,7 +1150,7 @@ mv64xxx_i2c_probe(struct platform_device *pd)
 			"mv64xxx: Can't register intr handler irq%d: %d\n",
 			drv_data->irq, rc);
 		goto exit_clk;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	if (request_irq(drv_data->irq, mv64xxx_i2c_intr, 0,
 			MV64XXX_I2C_CTLR_NAME, drv_data)) {
 		dev_err(&drv_data->adapter.dev,
@@ -1155,7 +1158,7 @@ mv64xxx_i2c_probe(struct platform_device *pd)
 			drv_data->irq);
 		rc = -EINVAL;
 		goto exit_unmap_regs;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	} else if ((rc = i2c_add_numbered_adapter(&drv_data->adapter)) != 0) {
 		dev_err(&drv_data->adapter.dev,
 			"mv64xxx: Can't add i2c adapter, rc: %d\n", -rc);
@@ -1166,15 +1169,15 @@ mv64xxx_i2c_probe(struct platform_device *pd)
 
 	return 0;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 exit_free_irq:
 	free_irq(drv_data->irq, drv_data);
 exit_clk:
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	exit_free_irq:
 		free_irq(drv_data->irq, drv_data);
 	exit_unmap_regs:
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 #if defined(CONFIG_HAVE_CLK)
 	/* Not all platforms have a clk */
 	if (!IS_ERR(drv_data->clk)) {
@@ -1182,13 +1185,13 @@ exit_clk:
 		clk_unprepare(drv_data->clk);
 	}
 #endif
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		mv64xxx_i2c_unmap_regs(drv_data);
 	exit_kfree:
 		kfree(drv_data);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	return rc;
 }
 
@@ -1199,11 +1202,11 @@ mv64xxx_i2c_remove(struct platform_device *dev)
 
 	i2c_del_adapter(&drv_data->adapter);
 	free_irq(drv_data->irq, drv_data);
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	mv64xxx_i2c_unmap_regs(drv_data);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 #if defined(CONFIG_HAVE_CLK)
 	/* Not all platforms have a clk */
 	if (!IS_ERR(drv_data->clk)) {
@@ -1211,16 +1214,16 @@ mv64xxx_i2c_remove(struct platform_device *dev)
 		clk_unprepare(drv_data->clk);
 	}
 #endif
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	kfree(drv_data);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static int mv64xxx_i2c_resume(struct platform_device *dev)
 {
 	struct mv64xxx_i2c_data *drv_data = platform_get_drvdata(dev);
@@ -1229,20 +1232,20 @@ static int mv64xxx_i2c_resume(struct platform_device *dev)
 
 	return 0;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static const struct of_device_id mv64xxx_i2c_of_match_table[] = {
 	{ .compatible = "marvell,mv64xxx-i2c", },
 	{}
 };
 MODULE_DEVICE_TABLE(of, mv64xxx_i2c_of_match_table);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static struct platform_driver mv64xxx_i2c_driver = {
 	.probe	= mv64xxx_i2c_probe,
 	.remove	= mv64xxx_i2c_remove,
-#if defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_PM)
+#if defined(MY_ABC_HERE) && defined(CONFIG_PM)
 	.resume = mv64xxx_i2c_resume,
-#endif /* CONFIG_SYNO_LSP_ARMADA && CONFIG_PM */
+#endif /* MY_ABC_HERE && CONFIG_PM */
 	.driver	= {
 		.owner	= THIS_MODULE,
 		.name	= MV64XXX_I2C_CTLR_NAME,

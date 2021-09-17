@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/of.h>	/* linux/of.h gets to determine #include ordering */
 #ifndef _POWERPC_PROM_H
 #define _POWERPC_PROM_H
@@ -43,12 +46,12 @@ void of_parse_dma_window(struct device_node *dn, const void *dma_window_prop,
 
 extern void kdump_move_device_tree(void);
 
-#if defined(CONFIG_SYNO_LSP_MONACO_SDK2_15_4) || defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 // do nothing
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 || CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_DEF_HERE || MY_ABC_HERE */
 /* CPU OF node matching */
 struct device_node *of_get_cpu_node(int cpu, unsigned int *thread);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 || CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_DEF_HERE || MY_ABC_HERE */
 
 /* cache lookup */
 struct device_node *of_find_next_cache_node(struct device_node *np);

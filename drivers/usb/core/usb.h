@@ -1,4 +1,7 @@
-#if !defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4) || (defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4) && !defined(__INCusbh))
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if !defined(MY_ABC_HERE) || (defined(MY_ABC_HERE) && !defined(__INCusbh))
 #define __INCusbh
 
 #include <linux/pm.h>

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Generic EDAC defs
  *
@@ -255,7 +258,7 @@ enum edac_type {
  * SCRUB_HW_TUNABLE:		Hardware scrub frequency is tunable
  */
 enum scrub_type {
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	SCRUB_UNKNOWN		= BIT(0),
 	SCRUB_NONE		= BIT(1),
 	SCRUB_SW_PROG		= BIT(2),
@@ -266,7 +269,7 @@ enum scrub_type {
 	SCRUB_HW_SRC		= BIT(7),
 	SCRUB_HW_PROG_SRC	= BIT(8),
 	SCRUB_HW_TUNABLE	= BIT(9),
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	SCRUB_UNKNOWN =	0,
 	SCRUB_NONE,
 	SCRUB_SW_PROG,
@@ -277,10 +280,10 @@ enum scrub_type {
 	SCRUB_HW_SRC,
 	SCRUB_HW_PROG_SRC,
 	SCRUB_HW_TUNABLE
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 };
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #define SCRUB_FLAG_SW_PROG	SCRUB_SW_PROG
 #define SCRUB_FLAG_SW_SRC	SCRUB_SW_SRC
 #define SCRUB_FLAG_SW_PROG_SRC	SCRUB_SW_PROG_SRC
@@ -289,7 +292,7 @@ enum scrub_type {
 #define SCRUB_FLAG_HW_SRC	SCRUB_HW_SRC
 #define SCRUB_FLAG_HW_PROG_SRC	SCRUB_HW_PROG_SRC
 #define SCRUB_FLAG_HW_TUN	SCRUB_HW_TUNABLE
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 #define SCRUB_FLAG_SW_PROG	BIT(SCRUB_SW_PROG)
 #define SCRUB_FLAG_SW_SRC	BIT(SCRUB_SW_SRC)
 #define SCRUB_FLAG_SW_PROG_SRC	BIT(SCRUB_SW_PROG_SRC)
@@ -298,7 +301,7 @@ enum scrub_type {
 #define SCRUB_FLAG_HW_SRC	BIT(SCRUB_HW_SRC)
 #define SCRUB_FLAG_HW_PROG_SRC	BIT(SCRUB_HW_PROG_SRC)
 #define SCRUB_FLAG_HW_TUN	BIT(SCRUB_HW_TUNABLE)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 /* FIXME - should have notify capabilities: NMI, LOG, PROC, etc */
 

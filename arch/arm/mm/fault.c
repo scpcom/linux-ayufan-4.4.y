@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/arch/arm/mm/fault.c
  *
@@ -112,7 +115,7 @@ void show_pte(struct mm_struct *mm, unsigned long addr)
 		pte = pte_offset_map(pmd, addr);
 		printk(", *pte=%08llx", (long long)pte_val(*pte));
 #ifndef CONFIG_ARM_LPAE
-#if defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT)
+#if defined(MY_ABC_HERE) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT)
 		{
 			unsigned long pte_ptr = (unsigned long)pte;
 			unsigned long tmp = pte_ptr;
@@ -130,7 +133,7 @@ void show_pte(struct mm_struct *mm, unsigned long addr)
 #else /* CONFIG_SYNO_LSP_ARMADA && CONFIG_MV_LARGE_PAGE_SUPPORT */
 		printk(", *ppte=%08llx",
 		       (long long)pte_val(pte[PTE_HWTABLE_PTRS]));
-#endif /* CONFIG_SYNO_LSP_ARMADA && CONFIG_MV_LARGE_PAGE_SUPPORT */
+#endif /* MY_ABC_HERE && CONFIG_MV_LARGE_PAGE_SUPPORT */
 #endif /* CONFIG_ARM_LPAE */
 		pte_unmap(pte);
 	} while(0);
@@ -507,9 +510,9 @@ do_translation_fault(unsigned long addr, unsigned int fsr,
 }
 #endif					/* CONFIG_MMU */
 
-#if defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE)
 // Alpine do not need do_sect_fault()
-#else /* CONFIG_SYNO_ALPINE */
+#else /* MY_DEF_HERE */
 /*
  * Some section permission faults need to be handled gracefully.
  * They can happen due to a __{get,put}_user during an oops.
@@ -520,7 +523,7 @@ do_sect_fault(unsigned long addr, unsigned int fsr, struct pt_regs *regs)
 	do_bad_area(addr, fsr, regs);
 	return 0;
 }
-#endif /* CONFIG_SYNO_ALPINE */
+#endif /* MY_DEF_HERE */
 
 /*
  * This abort handler always returns "fault".

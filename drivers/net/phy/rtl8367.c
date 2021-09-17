@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Platform driver for the Realtek RTL8367R/M ethernet switches
  *
@@ -2317,9 +2320,9 @@ static const struct dev_pm_ops rtl8367_pm_ops = {
 	.resume_early = rtl8367_pm_resume,
 	.suspend = rtl8367_pm_suspend,
 };
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 #define	rtl8367_pm_ops	(&rtl8367_pm_ops)
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 #else
 #define	rtl8367_pm_ops	NULL
 #endif
@@ -2328,11 +2331,11 @@ static struct platform_driver rtl8367_driver = {
 	.driver = {
 		.name		= RTL8367_DRIVER_NAME,
 		.owner		= THIS_MODULE,
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 		.pm		= rtl8367_pm_ops,
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 		.pm		= &rtl8367_pm_ops,
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 #ifdef CONFIG_OF
 		.of_match_table = of_match_ptr(rtl8367_match),
 #endif

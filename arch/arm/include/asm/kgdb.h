@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * ARM KGDB support
  *
@@ -11,9 +14,9 @@
 #define __ARM_KGDB_H__
 
 #include <linux/ptrace.h>
-#if defined(CONFIG_SYNO_LSP_ALPINE) || defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 #include <asm/opcodes.h>
-#endif /* CONFIG_SYNO_LSP_ALPINE || CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_DEF_HERE || MY_ABC_HERE */
 
 /*
  * GDB assumes that we're a user process being debugged, so
@@ -44,11 +47,11 @@
 
 static inline void arch_kgdb_breakpoint(void)
 {
-#if defined(CONFIG_SYNO_LSP_ALPINE) || defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 	asm(__inst_arm(0xe7ffdeff));
-#else /* CONFIG_SYNO_LSP_ALPINE || CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_DEF_HERE || MY_ABC_HERE */
 	asm(".word 0xe7ffdeff");
-#endif /* CONFIG_SYNO_LSP_ALPINE || CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_DEF_HERE || MY_ABC_HERE */
 }
 
 extern void kgdb_handle_bus_error(void);

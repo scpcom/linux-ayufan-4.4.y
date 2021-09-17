@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  arch/arm/include/asm/unistd.h
  *
@@ -15,12 +18,12 @@
 
 #include <uapi/asm/unistd.h>
 
-#ifdef CONFIG_SYNO_SYSTEM_CALL
+#ifdef MY_ABC_HERE
 #include <asm-generic/bitsperlong.h>
 #define __NR_syscalls  (380 + 48)
-#else /* CONFIG_SYNO_SYSTEM_CALL */
+#else /* MY_ABC_HERE */
 #define __NR_syscalls  (380)
-#endif /* CONFIG_SYNO_SYSTEM_CALL */
+#endif /* MY_ABC_HERE */
 
 #define __ARM_NR_cmpxchg		(__ARM_NR_BASE+0x00fff0)
 
@@ -55,21 +58,21 @@
 #define __IGNORE_fadvise64_64
 #define __IGNORE_migrate_pages
 
-#ifdef CONFIG_SYNO_SYSTEM_CALL
-#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+#ifdef MY_ABC_HERE
+#ifdef MY_ABC_HERE
 #if BITS_PER_LONG == 32
 #define __IGNORE_SYNOCaselessStat
 #define __IGNORE_SYNOCaselessLStat
 #endif /* BITS_PER_LONG == 32 */
-#endif /* CONFIG_SYNO_FS_CASELESS_STAT */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_FS_STAT
+#ifdef MY_ABC_HERE
 #if BITS_PER_LONG == 32
 #define __IGNORE_SYNOStat
 #define __IGNORE_SYNOFStat
 #define __IGNORE_SYNOLStat
 #endif /* BITS_PER_LONG == 32 */
-#endif /* CONFIG_SYNO_FS_STAT */
-#endif /* CONFIG_SYNO_SYSTEM_CALL */
+#endif /* MY_ABC_HERE */
+#endif /* MY_ABC_HERE */
 
 #endif /* __ASM_ARM_UNISTD_H */

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/include/linux/cpu_cooling.h
  *
@@ -24,9 +27,9 @@
 #ifndef __CPU_COOLING_H__
 #define __CPU_COOLING_H__
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 #include <linux/of.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 #include <linux/thermal.h>
 #include <linux/cpumask.h>
 
@@ -38,7 +41,7 @@
 struct thermal_cooling_device *
 cpufreq_cooling_register(const struct cpumask *clip_cpus);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 /**
  * of_cpufreq_cooling_register - create cpufreq cooling device based on DT.
  * @np: a valid struct device_node to the cooling device device tree node.
@@ -56,7 +59,7 @@ of_cpufreq_cooling_register(struct device_node *np,
 	return NULL;
 }
 #endif
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 /**
  * cpufreq_cooling_unregister - function to remove cpufreq cooling device.
@@ -71,14 +74,14 @@ cpufreq_cooling_register(const struct cpumask *clip_cpus)
 {
 	return NULL;
 }
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 static inline struct thermal_cooling_device *
 of_cpufreq_cooling_register(struct device_node *np,
 			    const struct cpumask *clip_cpus)
 {
 	return NULL;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 static inline
 void cpufreq_cooling_unregister(struct thermal_cooling_device *cdev)
 {

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Device Tree support for Alpine platforms.
  *
@@ -57,7 +60,7 @@
 static void __iomem *wd0_base;
 static void __iomem *serdes_base;
 
-#if defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE)
 #include <linux/syno.h>
 #include <linux/serial_reg.h>
 #define UART1_REG(x)            (AL_UART_BASE(1) + ((UART_##x) << 2))
@@ -65,12 +68,12 @@ static void __iomem *serdes_base;
 #define SOFTWARE_SHUTDOWN       0x31
 #define SOFTWARE_REBOOT         0x43
 
-#ifdef CONFIG_SYNO_ALPINE_SUPPORT_WOL
+#ifdef MY_DEF_HERE
 #include <linux/netdevice.h>
 #include <linux/ethtool.h>
 extern void syno_alpine_wol_set(void);
-#endif /* CONFIG_SYNO_ALPINE_SUPPORT_WOL */
-#endif /* CONFIG_SYNO_ALPINE */
+#endif /* MY_DEF_HERE */
+#endif /* MY_DEF_HERE */
 
 static const __initconst struct of_device_id clk_match[] = {
 	{ .compatible = "fixed-clock", .data = of_fixed_clk_setup, },
@@ -97,12 +100,12 @@ static void __init al_timer_init(void)
 	clocksource_of_init();
 }
 
-#if defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE)
 static void synology_power_off(void)
 {
-#ifdef CONFIG_SYNO_ALPINE_SUPPORT_WOL
+#ifdef MY_DEF_HERE
 	syno_alpine_wol_set();
-#endif /* CONFIG_SYNO_ALPINE_SUPPORT_WOL */
+#endif /* MY_DEF_HERE */
 	printk(KERN_EMERG "Synology shutdown\n");
 	writel(SET8N1, UART1_REG(LCR));
 	writel(SOFTWARE_SHUTDOWN, UART1_REG(TX));
@@ -114,7 +117,7 @@ static void synology_restart(char mode, const char *cmd)
 	writel(SET8N1, UART1_REG(LCR));
 	writel(SOFTWARE_REBOOT, UART1_REG(TX));
 }
-#else /* CONFIG_SYNO_ALPINE */
+#else /* MY_DEF_HERE */
 static void al_power_off(void)
 {
 	printk(KERN_EMERG "Unable to shutdown\n");
@@ -133,7 +136,7 @@ static void al_restart(char str, const char *cmd)
 	while (1)
 		;
 }
-#endif /* CONFIG_SYNO_ALPINE */
+#endif /* MY_DEF_HERE */
 
 static void __init al_map_io(void)
 {
@@ -294,11 +297,11 @@ EXPORT_SYMBOL(alpine_serdes_eth_group_unlock);
 
 static void __init al_init(void)
 {
-#if defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE)
 	pm_power_off = synology_power_off;
-#else /* CONFIG_SYNO_ALPINE */
+#else /* MY_DEF_HERE */
 	pm_power_off = al_power_off;
-#endif /* CONFIG_SYNO_ALPINE */
+#endif /* MY_DEF_HERE */
 
 	/*
 	 * Power Management Services Initialization
@@ -357,9 +360,9 @@ DT_MACHINE_START(AL_DT, "AnnapurnaLabs Alpine (Device Tree)")
 	.init_time	= al_timer_init,
 	.init_machine	= al_init,
 	.dt_compat	= al_match,
-#if defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE)
 	.restart	= synology_restart,
-#else /* CONFIG_SYNO_ALPINE */
+#else /* MY_DEF_HERE */
 	.restart	= al_restart,
-#endif /* CONFIG_SYNO_ALPINE */
+#endif /* MY_DEF_HERE */
 MACHINE_END

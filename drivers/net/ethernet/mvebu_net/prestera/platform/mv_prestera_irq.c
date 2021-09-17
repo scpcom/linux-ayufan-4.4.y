@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
    Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -244,9 +247,9 @@ int prestera_int_connect(struct pp_dev		*ppdev,
 	unsigned int		status, intVec = ppdev->irq_data.intVec;
 	struct intData		*irq_data = &ppdev->irq_data;
 	struct tasklet_struct	*tasklet;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	unsigned long       flags;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	tasklet = kmalloc(sizeof(struct tasklet_struct), GFP_KERNEL);
 	if (NULL == tasklet) {
@@ -280,24 +283,24 @@ int prestera_int_connect(struct pp_dev		*ppdev,
 
 	printk(KERN_DEBUG "%s: connected Prestera IRQ - %d\n", __func__, intVec);
 	disable_irq_nosync(intVec);
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	local_irq_save(flags);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	local_irq_disable();
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	if (assinged_irq_nr < PRESTERA_MAX_INTERRUPTS) {
 		assigned_irq[assinged_irq_nr++] = ppdev;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 		local_irq_restore(flags);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 		local_irq_enable();
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	} else {
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 		local_irq_restore(flags);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 		local_irq_enable();
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 		printk(KERN_DEBUG "%s: too many irqs assigned\n", __func__);
 	}
 

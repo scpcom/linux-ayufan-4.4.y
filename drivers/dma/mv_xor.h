@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2007, 2008, Marvell International Ltd.
  *
@@ -24,7 +27,7 @@
 #include <linux/interrupt.h>
 
 #define USE_TIMER
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #define MV_XOR_SLOT_SIZE		64
 /* allocating 3072 descriptors for each pool */
 #define MV_XOR_POOL_SIZE		(MV_XOR_SLOT_SIZE*3072)
@@ -43,7 +46,7 @@
 #define XOR_DESC_OPERATION_CRC32C         (1 << 24)
 #define XOR_DESC_OPERATION_MEMCPY         (2 << 24)
 #define XOR_DESC_OPERATION_PQ             (5 << 24)
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 #define MV_XOR_POOL_SIZE		PAGE_SIZE
 #define MV_XOR_SLOT_SIZE		64
 #define MV_XOR_THRESHOLD		1
@@ -52,7 +55,7 @@
 #define XOR_OPERATION_MODE_XOR		0
 #define XOR_OPERATION_MODE_MEMCPY	2
 #define XOR_OPERATION_MODE_MEMSET	4
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 #define XOR_CURR_DESC(chan)	(chan->mmr_base + 0x210 + (chan->idx * 4))
 #define XOR_NEXT_DESC(chan)	(chan->mmr_base + 0x200 + (chan->idx * 4))
@@ -68,11 +71,11 @@
 #define XOR_INTR_MASK(chan)	(chan->mmr_base + 0x40)
 #define XOR_ERROR_CAUSE(chan)	(chan->mmr_base + 0x50)
 #define XOR_ERROR_ADDR(chan)	(chan->mmr_base + 0x60)
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #define XOR_INTR_MASK_VALUE	0x3F7
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 #define XOR_INTR_MASK_VALUE	0x3F5
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 #define WINDOW_BASE(w)		(0x250 + ((w) << 2))
 #define WINDOW_SIZE(w)		(0x270 + ((w) << 2))
@@ -87,13 +90,13 @@ struct mv_xor_device {
 	struct mv_xor_chan   *channels[MV_XOR_MAX_CHANNELS];
 };
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 /* Stores certain registers during suspend to RAM */
 struct mv_xor_suspend_regs {
 	int config;
 	int int_mask;
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 /**
  * struct mv_xor_chan - internal representation of a XOR channel
@@ -103,7 +106,7 @@ struct mv_xor_suspend_regs {
  * @idx: the index of the xor channel
  * @chain: device chain view of the descriptors
  */
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 /*
  * @free_slots: free slots usable by the channel
  * @allocated_slots: slots allocated by the driver
@@ -114,7 +117,7 @@ struct mv_xor_suspend_regs {
  * @irq_tasklet: bottom half where mv_xor_slot_cleanup runs
  * @op_in_desc: new mode of driver, each op is writen to descriptor.
  */
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 /*
  * @completed_slots: slots completed by HW but still need to be acked
  * @device: parent device
@@ -124,7 +127,7 @@ struct mv_xor_suspend_regs {
  * @slots_allocated: records the actual size of the descriptor slot pool
  * @irq_tasklet: bottom half where mv_xor_slot_cleanup runs
  */
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 struct mv_xor_chan {
 	int			pending;
 	spinlock_t		lock; /* protects the descriptor slot pool */
@@ -132,31 +135,31 @@ struct mv_xor_chan {
 	unsigned int		idx;
 	int                     irq;
 	enum dma_transaction_type	current_type;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	struct mv_xor_suspend_regs	suspend_regs;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	struct list_head	chain;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	struct list_head	free_slots;
 	struct list_head	allocated_slots;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	struct list_head	completed_slots;
 	dma_addr_t		dma_desc_pool;
 	void			*dma_desc_pool_virt;
 	size_t                  pool_size;
 	struct dma_device	dmadev;
 	struct dma_chan		dmachan;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	struct mv_xor_desc_slot	*last_used;
 	struct list_head	all_slots;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	int			slots_allocated;
 	struct tasklet_struct	irq_tasklet;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	int			op_in_desc;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 #ifdef USE_TIMER
 	unsigned long		cleanup_time;
 	u32			current_on_last_cleanup;
@@ -166,7 +169,7 @@ struct mv_xor_chan {
 /**
  * struct mv_xor_desc_slot - software descriptor
  */
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 /*
  * @node: node on the mv_xor_chan lists
  * @hw_desc: virtual address of the hardware descriptor chain
@@ -176,7 +179,7 @@ struct mv_xor_chan {
  * @unmap_src_cnt: number of xor sources
  * @unmap_len: transaction bytecount
  */
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 /*
  * @slot_node: node on the mv_xor_chan.all_slots list
  * @chain_node: node on the mv_xor_chan.chain list
@@ -191,14 +194,14 @@ struct mv_xor_chan {
  * @unmap_len: transaction bytecount
  * @tx_list: list of slots that make up a multi-descriptor transaction
  */
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 /*
  * @async_tx: support for the async_tx api
  * @xor_check_result: result of zero sum
  * @crc32_result: result crc calculation
  */
 struct mv_xor_desc_slot {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	struct list_head	node;
 	enum dma_transaction_type	type;
 	void			*hw_desc;
@@ -206,7 +209,7 @@ struct mv_xor_desc_slot {
 	u16			unmap_src_cnt;
 	u32			value;
 	size_t			unmap_len;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	struct list_head	slot_node;
 	struct list_head	chain_node;
 	struct list_head	completed_node;
@@ -220,7 +223,7 @@ struct mv_xor_desc_slot {
 	u32			value;
 	size_t			unmap_len;
 	struct list_head	tx_list;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	struct dma_async_tx_descriptor	async_tx;
 	union {
 		u32		*xor_check_result;
@@ -232,7 +235,7 @@ struct mv_xor_desc_slot {
 #endif
 };
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 /*
  * This structure describes XOR descriptor size 64bytes. The
  * mv_phy_src_idx() macro must be used when indexing the values of the
@@ -269,7 +272,7 @@ struct mv_xor_desc {
 };
 #define mv_phy_src_idx(src_idx) (src_idx ^ 1)
 #endif
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 /* This structure describes XOR descriptor size 64bytes	*/
 struct mv_xor_desc {
 	u32 status;		/* descriptor execution status */
@@ -282,7 +285,7 @@ struct mv_xor_desc {
 	u32 reserved0;
 	u32 reserved1;
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 #define to_mv_sw_desc(addr_hw_desc)		\
 	container_of(addr_hw_desc, struct mv_xor_desc_slot, hw_desc)

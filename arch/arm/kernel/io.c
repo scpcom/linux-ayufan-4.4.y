@@ -1,7 +1,10 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/export.h>
 #include <linux/types.h>
 #include <linux/io.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #include <linux/spinlock.h>
 
 static DEFINE_RAW_SPINLOCK(__io_lock);
@@ -37,7 +40,7 @@ void atomic_io_modify(void __iomem *reg, u32 mask, u32 set)
 	raw_spin_unlock_irqrestore(&__io_lock, flags);
 }
 EXPORT_SYMBOL(atomic_io_modify);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 /*
  * Copy data from IO memory space to "real" memory space.

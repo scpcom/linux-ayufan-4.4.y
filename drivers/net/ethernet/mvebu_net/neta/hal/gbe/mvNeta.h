@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -344,10 +347,10 @@ typedef struct {
 #define MV_NETA_QUEUE_PREV_DESC(pQueueCtrl, descIdx)  \
     (((descIdx) > 0) ? ((descIdx) - 1) : (pQueueCtrl)->lastDesc)
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 #define MV_NETA_RX_LAST_DESC_PTR(pQueueCtrl)  \
 	(((NETA_RX_DESC *)pQueueCtrl.pFirst) + pQueueCtrl.lastDesc)
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 typedef struct {
 	MV_NETA_QUEUE_CTRL queueCtrl;
@@ -625,7 +628,7 @@ static INLINE NETA_RX_DESC *mvNetaRxqNextDescGet(MV_NETA_RXQ_CTRL *pRxq)
 	return pRxDesc;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 /* Get the next desc pointer following current desc */
 static INLINE NETA_RX_DESC *mvNetaRxqNextDescPtr(MV_NETA_RXQ_CTRL *pRxq, NETA_RX_DESC *pRxDesc)
 {
@@ -638,7 +641,7 @@ static INLINE NETA_RX_DESC *mvNetaRxqNextDescPtr(MV_NETA_RXQ_CTRL *pRxq, NETA_RX
 
 	return pNextDesc;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 static INLINE NETA_RX_DESC *mvNetaRxqDescGet(MV_NETA_RXQ_CTRL *pRxq)
 {

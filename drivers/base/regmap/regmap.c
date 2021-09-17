@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Register map access API
  *
@@ -801,7 +804,7 @@ struct regmap *devm_regmap_init(struct device *dev,
 }
 EXPORT_SYMBOL_GPL(devm_regmap_init);
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 static void regmap_field_init(struct regmap_field *rm_field,
 	struct regmap *regmap, struct reg_field reg_field)
 {
@@ -889,7 +892,7 @@ void regmap_field_free(struct regmap_field *field)
 	kfree(field);
 }
 EXPORT_SYMBOL_GPL(regmap_field_free);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 /**
  * regmap_reinit_cache(): Reinitialise the current register cache
  *
@@ -1337,7 +1340,7 @@ int regmap_raw_write(struct regmap *map, unsigned int reg,
 	return ret;
 }
 EXPORT_SYMBOL_GPL(regmap_raw_write);
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 /**
  * regmap_field_write(): Write a value to a single register field
  *
@@ -1353,7 +1356,7 @@ int regmap_field_write(struct regmap_field *field, unsigned int val)
 				field->mask, val << field->shift);
 }
 EXPORT_SYMBOL_GPL(regmap_field_write);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 /*
  * regmap_bulk_write(): Write multiple registers to the device
@@ -1636,7 +1639,7 @@ int regmap_raw_read(struct regmap *map, unsigned int reg, void *val,
 	return ret;
 }
 EXPORT_SYMBOL_GPL(regmap_raw_read);
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 /**
  * regmap_field_read(): Read a value to a single register field
  *
@@ -1661,7 +1664,7 @@ int regmap_field_read(struct regmap_field *field, unsigned int *val)
 	return ret;
 }
 EXPORT_SYMBOL_GPL(regmap_field_read);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 /**
  * regmap_bulk_read(): Read multiple registers from the device

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _ASMARM_BUG_H
 #define _ASMARM_BUG_H
 
@@ -32,7 +35,7 @@
  * avoid multiple copies of the string appearing in the kernel image.
  */
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #define __BUG(__file, __line, __value)				\
 do {								\
 	asm volatile("1:\t" BUG_INSTR(__value) "\n"  \
@@ -45,7 +48,7 @@ do {								\
 		".popsection");					\
 	unreachable();						\
 } while (0)
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 #define __BUG(__file, __line, __value)				\
 do {								\
 	asm volatile("1:\t" BUG_INSTR(__value) "\n"  \
@@ -58,23 +61,23 @@ do {								\
 		".popsection");					\
 	unreachable();						\
 } while (0)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 #else  /* not CONFIG_DEBUG_BUGVERBOSE */
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #define __BUG(__file, __line, __value)				\
 do {								\
 	asm volatile(BUG_INSTR(__value) "\n");			\
 	unreachable();						\
 } while (0)
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 #define __BUG(__file, __line, __value)				\
 do {								\
 	asm volatile(BUG_INSTR(__value) "\n");			\
 	unreachable();						\
 } while (0)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 #endif  /* CONFIG_DEBUG_BUGVERBOSE */
 
 #define HAVE_ARCH_BUG

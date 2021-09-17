@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * descriptions + helper functions for simple dvb plls.
  *
@@ -116,7 +119,7 @@ static struct dvb_pll_desc dvb_pll_thomson_dtt759x = {
 	},
 };
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 static void thomson_dtt7546x_bw(struct dvb_frontend *fe, u8 *buf)
 {
 	/* set CB2 reg - set ATC, XTO */
@@ -146,7 +149,7 @@ static struct dvb_pll_desc dvb_pll_thomson_dtt7546x = {
 	},
 };
 
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 static void thomson_dtt7520x_bw(struct dvb_frontend *fe, u8 *buf)
 {
 	u32 bw = fe->dtv_property_cache.bandwidth_hz;
@@ -570,9 +573,9 @@ static struct dvb_pll_desc *pll_list[] = {
 	[DVB_PLL_THOMSON_DTT7579]        = &dvb_pll_thomson_dtt7579,
 	[DVB_PLL_THOMSON_DTT759X]        = &dvb_pll_thomson_dtt759x,
 	[DVB_PLL_THOMSON_DTT7520X]       = &dvb_pll_thomson_dtt7520x,
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	[DVB_PLL_THOMSON_DTT7546X]       = &dvb_pll_thomson_dtt7546x,
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	[DVB_PLL_LG_Z201]                = &dvb_pll_lg_z201,
 	[DVB_PLL_UNKNOWN_1]              = &dvb_pll_unknown_1,
 	[DVB_PLL_TUA6010XS]              = &dvb_pll_tua6010xs,

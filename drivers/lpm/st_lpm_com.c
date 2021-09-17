@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * This driver implements communication with Standby Controller
  * in some STMicroelectronics devices
@@ -156,7 +159,7 @@ int st_lpm_read_edid(unsigned char *data, u8 block_num)
 }
 EXPORT_SYMBOL(st_lpm_read_edid);
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 /*
  * st_lpm_setup_tracedata - Set trace data parameters
  * @trace_modules - peripherals for which trace data to be enabled
@@ -173,7 +176,7 @@ int st_lpm_setup_tracedata(u16 trace_modules)
 	return st_lpm_ops->setup_tracedata(trace_modules, st_lpm_private_data);
 }
 EXPORT_SYMBOL(st_lpm_setup_tracedata);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 /**
  * st_lpm_write_dmem()	To write to SBC-DMEM
@@ -359,8 +362,8 @@ int st_lpm_setup_ir(u8 num_keys, struct st_lpm_ir_keyinfo *ir_key_info)
 }
 EXPORT_SYMBOL(st_lpm_setup_ir);
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 /**
  * lpm_get_trigger_data - to get which device woken up the system
  * @wakeup_device:      Which device did the wakeup
@@ -397,7 +400,7 @@ int st_lpm_get_trigger_data(enum st_lpm_wakeup_devices wakeup_device,
 	return err;
 }
 EXPORT_SYMBOL(st_lpm_get_trigger_data);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 /**
  * st_lpm_get_wakeup_info() - To get additional info about wakeup device
@@ -412,11 +415,11 @@ EXPORT_SYMBOL(st_lpm_get_trigger_data);
  * Return - 1 if data available with SBC is > datasize
  * Return - negative error on failure
 */
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 int st_lpm_get_wakeup_info(enum st_lpm_wakeup_devices wakeupdevice,
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 int st_lpm_get_wakeup_info(enum st_lpm_wakeup_devices *wakeupdevice,
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 			s16 *validsize, u16 datasize, char *data)
 {
 	int err = 0;
@@ -426,13 +429,13 @@ int st_lpm_get_wakeup_info(enum st_lpm_wakeup_devices *wakeupdevice,
 		.command_id = LPM_MSG_GET_IRQ,
 	};
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	command.buf[0] = wakeupdevice;
 	command.buf[1] = (wakeupdevice & 0xFF00) >> 8;
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	command.buf[0] = *wakeupdevice;
 	command.buf[1] = (*wakeupdevice & 0xFF00) >> 8;
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	/* Copy size requested */
 	put_unaligned_le16(datasize, &command.buf[2]);
@@ -895,9 +898,9 @@ int st_lpm_set_adv_feature(u8 enabled, struct st_lpm_adv_feature *feature)
 	struct lpm_message command = {
 		.command_id = LPM_MSG_SET_ADV_FEA,
 	};
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	int ret;
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	if (unlikely(feature == NULL))
 		return -EINVAL;
@@ -906,7 +909,7 @@ int st_lpm_set_adv_feature(u8 enabled, struct st_lpm_adv_feature *feature)
 	command.buf[0] = feature->feature_name;
 	command.buf[1] = enabled;
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	/*
 	 * No response expected from  SBC in case it is
 	 * set to IDLE mode
@@ -917,9 +920,9 @@ int st_lpm_set_adv_feature(u8 enabled, struct st_lpm_adv_feature *feature)
 		ret = st_lpm_ops_exchange_msg(&command, &response);
 
 	return ret;
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	return st_lpm_ops_exchange_msg(&command, &response);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 }
 EXPORT_SYMBOL(st_lpm_set_adv_feature);
 
@@ -1190,7 +1193,7 @@ int st_lpm_notify(enum st_lpm_callback_type type)
 }
 EXPORT_SYMBOL(st_lpm_notify);
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 int st_lpm_reload_fw_prepare(void)
 {
 	if (!st_lpm_ops || !st_lpm_ops->reload_fw_prepare)
@@ -1212,4 +1215,4 @@ int st_start_loaded_fw(void)
 	return 0;
 }
 EXPORT_SYMBOL(st_start_loaded_fw);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2004-2007 Atmel Corporation
  *
@@ -108,11 +111,11 @@ static int __init at32_cpufreq_driver_init(struct cpufreq_policy *policy)
 
 static struct cpufreq_driver at32_driver = {
 	.name		= "at32ap",
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	.owner		= THIS_MODULE,
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	.init		= at32_cpufreq_driver_init,
 	.verify		= at32_verify_speed,
 	.target		= at32_set_target,

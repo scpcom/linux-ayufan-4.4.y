@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Marvell MVEBU pinctrl core driver
  *
@@ -30,11 +33,11 @@
 #define MPP_BITS	4
 #define MPP_MASK	0xf
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #define PINCTRL_REGS_SAVE_NUM	10
 
 static u32 pinctrl_save[PINCTRL_REGS_SAVE_NUM];
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 struct mvebu_pinctrl_function {
 	const char *name;
@@ -766,7 +769,7 @@ int mvebu_pinctrl_remove(struct platform_device *pdev)
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #ifdef CONFIG_PM
 int mvebu_pinctrl_suspend(struct platform_device *pdev, pm_message_t state)
 {
@@ -796,4 +799,4 @@ int mvebu_pinctrl_resume(struct platform_device *pdev)
 	return 0;
 }
 #endif
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */

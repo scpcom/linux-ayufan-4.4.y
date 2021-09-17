@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/kernel/sys.c
  *
@@ -329,9 +332,9 @@ void kernel_restart_prepare(char *cmd)
 	system_state = SYSTEM_RESTART;
 	usermodehelper_disable();
 	device_shutdown();
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	syscore_shutdown();
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 }
 
 /**
@@ -440,15 +443,15 @@ EXPORT_SYMBOL_GPL(kernel_halt);
  *
  *	Shutdown everything and perform a clean system power_off.
  */
-#ifdef CONFIG_SYNO_X86_AUTO_POWER_ON
+#ifdef MY_DEF_HERE
 extern int syno_schedule_power_on_prepare(void);
-#endif /* CONFIG_SYNO_X86_AUTO_POWER_ON */
+#endif /* MY_DEF_HERE */
 void kernel_power_off(void)
 {
 	kernel_shutdown_prepare(SYSTEM_POWER_OFF);
-#ifdef CONFIG_SYNO_X86_AUTO_POWER_ON 
+#ifdef MY_DEF_HERE 
 	syno_schedule_power_on_prepare();
-#endif /* CONFIG_SYNO_X86_AUTO_POWER_ON */
+#endif /* MY_DEF_HERE */
 	if (pm_power_off_prepare)
 		pm_power_off_prepare();
 	migrate_to_reboot_cpu();
@@ -459,12 +462,12 @@ void kernel_power_off(void)
 }
 EXPORT_SYMBOL_GPL(kernel_power_off);
 
-#if defined(CONFIG_SYNO_MICROP_CTRL) && defined(CONFIG_SYNO_X64)
+#if defined(MY_ABC_HERE) && defined(MY_DEF_HERE)
 #define UART_TTYS_INDEX 1
 
 #define UART_CMD_REBOOT 67 // "C"
 #define UART_CMD_POWEROFF   49 // "1"
-#endif /* CONFIG_SYNO_MICROP_CTRL && CONFIG_SYNO_X64 */
+#endif /* MY_ABC_HERE && CONFIG_SYNO_X64 */
 
 static DEFINE_MUTEX(reboot_mutex);
 
@@ -481,7 +484,7 @@ SYSCALL_DEFINE4(reboot, int, magic1, int, magic2, unsigned int, cmd,
 {
 	struct pid_namespace *pid_ns = task_active_pid_ns(current);
 	char buffer[256];
-#if defined(CONFIG_SYNO_MICROP_CTRL) && defined(CONFIG_SYNO_X64)
+#if defined(MY_ABC_HERE) && defined(MY_DEF_HERE)
 	char szBuf[2];
 #endif
 	int ret = 0;
@@ -516,11 +519,11 @@ SYSCALL_DEFINE4(reboot, int, magic1, int, magic2, unsigned int, cmd,
 	mutex_lock(&reboot_mutex);
 	switch (cmd) {
 	case LINUX_REBOOT_CMD_RESTART:
-#if defined(CONFIG_SYNO_MICROP_CTRL) && defined(CONFIG_SYNO_X64)
+#if defined(MY_ABC_HERE) && defined(MY_DEF_HERE)
 		szBuf[0] = UART_CMD_REBOOT;
 		szBuf[1] = '\0';
 		syno_ttys_write(UART_TTYS_INDEX, szBuf);
-#endif /* CONFIG_SYNO_MICROP_CTRL && CONFIG_SYNO_X64 */
+#endif /* MY_ABC_HERE && CONFIG_SYNO_X64 */
 		kernel_restart(NULL);
 		break;
 
@@ -538,11 +541,11 @@ SYSCALL_DEFINE4(reboot, int, magic1, int, magic2, unsigned int, cmd,
 		panic("cannot halt");
 
 	case LINUX_REBOOT_CMD_POWER_OFF:
-#if defined(CONFIG_SYNO_MICROP_CTRL) && defined(CONFIG_SYNO_X64)
+#if defined(MY_ABC_HERE) && defined(MY_DEF_HERE)
 		szBuf[0] = UART_CMD_POWEROFF;
 		szBuf[1] = '\0';
 		syno_ttys_write(UART_TTYS_INDEX, szBuf);
-#endif /* CONFIG_SYNO_MICROP_CTRL && CONFIG_SYNO_X64 */
+#endif /* MY_ABC_HERE && CONFIG_SYNO_X64 */
 		kernel_power_off();
 		do_exit(0);
 		break;

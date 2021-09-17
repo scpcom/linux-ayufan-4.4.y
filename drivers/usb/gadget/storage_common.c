@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * storage_common.c -- Common definitions for mass storage functionality
  *
@@ -26,9 +29,9 @@
 #include <linux/usb/storage.h>
 #include <scsi/scsi.h>
 #include <asm/unaligned.h>
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #include <linux/sizes.h>
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 /*
  * Thanks to NetChip Technologies for donating this product ID.
@@ -172,27 +175,27 @@ MODULE_PARM_DESC(num_buffers, "Number of pipeline buffers");
 /* check if fsg_num_buffers is within a valid range */
 static inline int fsg_num_buffers_validate(void)
 {
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	if (fsg_num_buffers >= 2 && fsg_num_buffers <= 1024)
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	if (fsg_num_buffers >= 2 && fsg_num_buffers <= 4)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 		return 0;
 	pr_err("fsg_num_buffers %u is out of range (%d to %d)\n",
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	       fsg_num_buffers, 2 ,1024);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	       fsg_num_buffers, 2 ,4);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	return -EINVAL;
 }
 
 /* Default size of buffer length. */
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #define FSG_BUFLEN	((u32)SZ_128K)
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 #define FSG_BUFLEN	((u32)16384)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 /* Maximal number of LUNs supported in mass storage function */
 #define FSG_MAX_LUNS	8
@@ -207,12 +210,12 @@ struct fsg_buffhd {
 	void				*buf;
 	enum fsg_buffer_state		state;
 	struct fsg_buffhd		*next;
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	struct fsg_buffhd		*next_to_write;
 	struct file				*file;
 	loff_t					file_offset;
 	size_t amount;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 	/*
 	 * The NetChip 2280 is faster, and handles some protocol faults

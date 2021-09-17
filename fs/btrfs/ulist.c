@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2011 STRATO AG
  * written by Arne Jansen <sensille@gmx.net>
@@ -250,7 +253,7 @@ struct ulist_node *ulist_next(struct ulist *ulist, struct ulist_iterator *uiter)
 	return node;
 }
 
-#if defined(CONFIG_SYNO_BTRFS_COMPR_CTL)
+#if defined(MY_ABC_HERE)
 int ulist_add_lru_adjust(struct ulist *ulist, u64 val, gfp_t gfp_mask)
 {
 	int ret;

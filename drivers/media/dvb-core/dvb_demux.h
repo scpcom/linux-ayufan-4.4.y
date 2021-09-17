@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * dvb_demux.h: DVB kernel demux API
  *
@@ -119,13 +122,13 @@ struct dvb_demux {
 
 	struct list_head frontend_list;
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	struct dvb_demux_feed *pesfilter[DMX_PES_LAST];
 	u16 pids[DMX_PES_LAST];
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 	struct dvb_demux_feed *pesfilter[DMX_PES_OTHER];
 	u16 pids[DMX_PES_OTHER];
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	int playing;
 	int recording;
 

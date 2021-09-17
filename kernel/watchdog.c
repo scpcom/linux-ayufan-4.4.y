@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Detect hard and soft lockups on a system
  *
@@ -47,7 +50,7 @@ static DEFINE_PER_CPU(bool, watchdog_nmi_touch);
 static DEFINE_PER_CPU(unsigned long, hrtimer_interrupts_saved);
 static DEFINE_PER_CPU(struct perf_event *, watchdog_ev);
 #endif
-#ifdef CONFIG_SYNO_SOFTLOCKUP_COUNTER
+#ifdef MY_ABC_HERE
 static DEFINE_PER_CPU(unsigned long, softlockup_counter);
 #endif
 
@@ -108,7 +111,7 @@ __setup("nosoftlockup", nosoftlockup_setup);
  */
 static int get_softlockup_thresh(void)
 {
-#ifdef CONFIG_SYNO_SOFTLOCKUP_THRESH_EXTENSION
+#ifdef MY_ABC_HERE
 	return watchdog_thresh * 4;
 #else
 	return watchdog_thresh * 2;
@@ -134,7 +137,7 @@ static void set_sample_period(void)
 	 * and hard thresholds) to increment before the
 	 * hardlockup detector generates a warning
 	 */
-#ifdef CONFIG_SYNO_SOFTLOCKUP_THRESH_EXTENSION
+#ifdef MY_ABC_HERE
 	sample_period = (get_softlockup_thresh() / 2) * ((u64)NSEC_PER_SEC / 5);
 #else
 	sample_period = get_softlockup_thresh() * ((u64)NSEC_PER_SEC / 5);
@@ -324,7 +327,7 @@ static enum hrtimer_restart watchdog_timer_fn(struct hrtimer *hrtimer)
 		if (__this_cpu_read(soft_watchdog_warn) == true)
 			return HRTIMER_RESTART;
 
-#ifdef CONFIG_SYNO_SOFTLOCKUP_COUNTER
+#ifdef MY_ABC_HERE
 		if (__this_cpu_read(softlockup_counter) >= CONFIG_SYNO_SOFTLOCKUP_COUNTER_MAX) {
 			__this_cpu_write(soft_watchdog_warn, false);
 			return HRTIMER_RESTART;

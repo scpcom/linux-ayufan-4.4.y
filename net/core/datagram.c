@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *	SUCS NET3:
  *
@@ -128,7 +131,7 @@ out_noerr:
 	goto out;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 /*
  *	skb_copy_datagram_to_kernel_iovec - Copy a datagram to a kernel iovec structure.
  *	@skb: buffer to copy
@@ -187,7 +190,7 @@ next_skb:
 
 	return -EFAULT;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 /**
  *	__skb_recv_datagram - Receive a datagram skbuff
@@ -447,7 +450,7 @@ fault:
 }
 EXPORT_SYMBOL(skb_copy_datagram_iovec);
 
-#ifdef CONFIG_SYNO_FS_RECVFILE
+#ifdef MY_ABC_HERE
 /**
  *	skb_copy_datagram_iovec - Copy a datagram to an iovec.
  *	@skb: buffer to copy
@@ -546,7 +549,7 @@ int skb_copy_datagram_iovec1(const struct sk_buff *skb, int offset,
 fault:
 	return -EFAULT;
 }
-#endif /* CONFIG_SYNO_FS_RECVFILE */
+#endif /* MY_ABC_HERE */
 
 /**
  *	skb_copy_datagram_const_iovec - Copy a datagram to an iovec.

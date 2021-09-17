@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright 2012 Sascha Hauer, Pengutronix
  *
@@ -20,11 +23,11 @@
 
 static void __init imx27_dt_init(void)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	struct platform_device_info devinfo = { .name = "cpufreq-dt", };
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	struct platform_device_info devinfo = { .name = "cpufreq-cpu0", };
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	of_platform_populate(NULL, of_default_bus_match_table, NULL, NULL);
 

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *   fs/cifs/cifsglob.h
  *
@@ -1465,9 +1468,9 @@ GLOBAL_EXTERN unsigned int global_secflags;	/* if on, session setup sent
 				with more secure ntlmssp2 challenge/resp */
 GLOBAL_EXTERN unsigned int sign_CIFS_PDUs;  /* enable smb packet signing */
 GLOBAL_EXTERN unsigned int linuxExtEnabled;/*enable Linux/Unix CIFS extensions*/
-#ifdef CONFIG_SYNO_CIFS_MOUNT_CASELESS
+#ifdef MY_ABC_HERE
 GLOBAL_EXTERN unsigned int SynoPosixSemanticsEnabled;/*enable POSIX SEMANTICS*/
-#endif /* CONFIG_SYNO_CIFS_MOUNT_CASELESS */
+#endif /* MY_ABC_HERE */
 GLOBAL_EXTERN unsigned int CIFSMaxBufSize;  /* max size not including hdr */
 GLOBAL_EXTERN unsigned int cifs_min_rcv;    /* min size of big ntwrk buf pool */
 GLOBAL_EXTERN unsigned int cifs_min_small;  /* min size of small buf pool */

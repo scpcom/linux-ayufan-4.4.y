@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Device Tree support for Armada 380/385 platforms.
  *
@@ -108,11 +111,11 @@ static void __init armada_380_mbus_optimization(void)
 {
 	struct device_node *np;
 	void __iomem *mbus_units_base;
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_ARMADA */
+#else /* MY_ABC_HERE */
 	u32 val;
-#endif /* CONFIG_SYNO_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	np = of_find_matching_node(NULL, of_mbusc_table);
 	if (np) {
@@ -126,11 +129,11 @@ static void __init armada_380_mbus_optimization(void)
 
 		/* Fabric Units Priority Control Register -
 		Prioritize CPUs requests */
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 		__raw_writel(0x3000A, mbus_units_base + 0x4);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 		__raw_writel(0xA, mbus_units_base + 0x4);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 		/* MBUS Units Prefetch Control Register -
 		Pre-fetch enable for all IO masters */

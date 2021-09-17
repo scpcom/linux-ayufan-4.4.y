@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  arch/arm/include/asm/memory.h
  *
@@ -80,7 +83,7 @@
  */
 #define IOREMAP_MAX_ORDER	24
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 /*
  * Size of DMA-consistent memory region.  Must be multiple of 2M,
  * between 2MB and 14MB inclusive.
@@ -88,16 +91,16 @@
 #ifndef CONSISTENT_DMA_SIZE
 #define CONSISTENT_DMA_SIZE	SZ_2M
 #endif /* !CONSISTENT_DMA_SIZE */
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && defined(CONFIG_HIGHMEM)
+#if defined(MY_ABC_HERE) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && defined(CONFIG_HIGHMEM)
 #define CONSISTENT_END		(0xffc00000UL)
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 #define CONSISTENT_END		(0xffe00000UL)
-#endif /* CONFIG_SYNO_LSP_ARMADA */
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#endif /* MY_ABC_HERE */
+#if defined(MY_DEF_HERE)
 #define CONSISTENT_BASE		(CONSISTENT_END - CONSISTENT_DMA_SIZE)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 #else /* CONFIG_MMU */
 

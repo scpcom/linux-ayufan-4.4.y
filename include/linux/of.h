@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_OF_H
 #define _LINUX_OF_H
 /*
@@ -226,7 +229,7 @@ static inline int of_get_child_count(const struct device_node *np)
 	return num;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static inline int of_get_available_child_count(const struct device_node *np)
 {
 	struct device_node *child;
@@ -237,7 +240,7 @@ static inline int of_get_available_child_count(const struct device_node *np)
 
 	return num;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 extern struct device_node *of_find_node_with_property(
 	struct device_node *from, const char *prop_name);
@@ -277,9 +280,9 @@ extern int of_device_is_available(const struct device_node *device);
 extern const void *of_get_property(const struct device_node *node,
 				const char *name,
 				int *lenp);
-#if defined(CONFIG_SYNO_LSP_MONACO_SDK2_15_4) || defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 extern struct device_node *of_get_cpu_node(int cpu, unsigned int *thread);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 || CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_DEF_HERE || MY_ABC_HERE */
 #define for_each_property_of_node(dn, pp) \
 	for (pp = dn->properties; pp != NULL; pp = pp->next)
 
@@ -288,20 +291,20 @@ extern int of_n_size_cells(struct device_node *np);
 extern const struct of_device_id *of_match_node(
 	const struct of_device_id *matches, const struct device_node *node);
 extern int of_modalias_node(struct device_node *node, char *modalias, int len);
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 extern void of_print_phandle_args(const char *msg, const struct of_phandle_args *args);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 extern struct device_node *of_parse_phandle(const struct device_node *np,
 					    const char *phandle_name,
 					    int index);
 extern int of_parse_phandle_with_args(const struct device_node *np,
 	const char *list_name, const char *cells_name, int index,
 	struct of_phandle_args *out_args);
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 extern int of_parse_phandle_with_fixed_args(const struct device_node *np,
 	const char *list_name, int cells_count, int index,
 	struct of_phandle_args *out_args);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 extern int of_count_phandle_with_args(const struct device_node *np,
 	const char *list_name, const char *cells_name);
 
@@ -403,12 +406,12 @@ static inline int of_get_child_count(const struct device_node *np)
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static inline int of_get_available_child_count(const struct device_node *np)
 {
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static inline int of_device_is_compatible(const struct device_node *device,
 					  const char *name)
@@ -481,13 +484,13 @@ static inline const void *of_get_property(const struct device_node *node,
 {
 	return NULL;
 }
-#if defined(CONFIG_SYNO_LSP_MONACO_SDK2_15_4) || defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 static inline struct device_node *of_get_cpu_node(int cpu,
 					unsigned int *thread)
 {
 	return NULL;
 }
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 || CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_DEF_HERE || MY_ABC_HERE */
 
 static inline int of_property_read_u64(const struct device_node *np,
 				       const char *propname, u64 *out_value)
@@ -518,14 +521,14 @@ static inline int of_parse_phandle_with_args(struct device_node *np,
 	return -ENOSYS;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static inline int of_parse_phandle_with_fixed_args(const struct device_node *np,
 	const char *list_name, int cells_count, int index,
 	struct of_phandle_args *out_args)
 {
 	return -ENOSYS;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static inline int of_count_phandle_with_args(struct device_node *np,
 					     const char *list_name,

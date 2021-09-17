@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * xHCI host controller driver
  *
@@ -231,11 +234,11 @@ u32 xhci_port_state_to_neutral(u32 state)
 	return (state & XHCI_PORT_RO) | (state & XHCI_PORT_RWS);
 }
 
-#ifdef CONFIG_SYNO_FACTORY_USB3_DISABLE
+#ifdef MY_ABC_HERE
 #include <linux/pci.h>
 
 extern int gSynoFactoryUSB3Disable;
-#endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
+#endif /* MY_ABC_HERE */
 
 /*
  * find slot id based on port number.
@@ -414,7 +417,7 @@ static int xhci_get_ports(struct usb_hcd *hcd, __le32 __iomem ***port_array)
 	return max_ports;
 }
 
-#ifdef CONFIG_SYNO_USB3_WD_FIX
+#ifdef MY_ABC_HERE
 /*
  * get the mapping port array.
  * if hcd is usb3, return usb2's port_array, and vice versa.
@@ -434,7 +437,7 @@ static int xhci_get_ports_map(struct usb_hcd *hcd, __le32 __iomem ***port_array)
 
 	return max_ports;
 }
-#endif /* CONFIG_SYNO_USB3_WD_FIX */
+#endif /* MY_ABC_HERE */
 
 void xhci_set_link_state(struct xhci_hcd *xhci, __le32 __iomem **port_array,
 				int port_id, u32 link_state)
@@ -563,7 +566,7 @@ void xhci_del_comp_mod_timer(struct xhci_hcd *xhci, u32 status, u16 wIndex)
 	}
 }
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 /*
  * Converts a raw xHCI port status into the format that external USB 2.0 or USB
  * 3.0 hubs use.
@@ -701,7 +704,7 @@ static u32 xhci_get_port_status(struct usb_hcd *hcd,
 	return status;
 }
 
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		u16 wIndex, char *buf, u16 wLength)
 {
@@ -709,11 +712,11 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 	int max_ports;
 	unsigned long flags;
 	u32 temp, status;
-#ifdef CONFIG_SYNO_USB3_WD_FIX
+#ifdef MY_ABC_HERE
 	u32 temp_map;
 	__le32 __iomem **port_array_map = NULL;
 	struct pci_dev *pdev = to_pci_dev(hcd->self.controller);
-#endif /* CONFIG_SYNO_USB3_WD_FIX */
+#endif /* MY_ABC_HERE */
 	int retval = 0;
 	__le32 __iomem **port_array;
 	int slot_id;
@@ -723,11 +726,11 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 	u16 timeout = 0;
 
 	max_ports = xhci_get_ports(hcd, &port_array);
-#if CONFIG_SYNO_USB3_WD_FIX
+#ifdef MY_ABC_HERE
 	if (pdev->vendor == PCI_VENDOR_ID_NEC) {
 		xhci_get_ports_map(hcd, &port_array_map); // max_ports should be the same, only for NEC fixes
 	}
-#endif /* CONFIG_SYNO_USB3_WD_FIX */
+#endif /* MY_ABC_HERE */
 	bus_state = &xhci->bus_state[hcd_index(hcd)];
 
 	spin_lock_irqsave(&xhci->lock, flags);
@@ -776,16 +779,16 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		if (!wIndex || wIndex > max_ports)
 			goto error;
 		wIndex--;
-#if defined (CONFIG_SYNO_LSP_MONACO)
-#else /* CONFIG_SYNO_LSP_MONACO */
+#if defined (MY_DEF_HERE)
+#else /* MY_DEF_HERE */
 		status = 0;
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 		temp = xhci_readl(xhci, port_array[wIndex]);
 		if (temp == 0xffffffff) {
 			retval = -ENODEV;
 			break;
 		}
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 		status = xhci_get_port_status(hcd, bus_state, port_array,
 				wIndex, temp, flags);
 		if (status == 0xffffffff)
@@ -794,7 +797,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		xhci_dbg(xhci, "get port status, actual port %d status  = 0x%x\n",
 				wIndex, temp);
 		xhci_dbg(xhci, "Get port status returned 0x%x\n", status);
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 		xhci_dbg(xhci, "get port status, actual port %d status  = 0x%x\n", wIndex, temp);
 
 		/* wPortChange bits */
@@ -887,7 +890,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		if (bus_state->port_c_suspend & (1 << wIndex))
 			status |= 1 << USB_PORT_FEAT_C_SUSPEND;
 		xhci_dbg(xhci, "Get port status returned 0x%x\n", status);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 		put_unaligned(cpu_to_le32(status), (__le32 *) buf);
 		break;
 	case SetPortFeature:
@@ -954,9 +957,9 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		case USB_PORT_FEAT_LINK_STATE:
 			temp = xhci_readl(xhci, port_array[wIndex]);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 			// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 			/* Disable port */
 			if (link_state == USB_SS_PORT_LS_SS_DISABLED) {
 				xhci_dbg(xhci, "Disable port %d\n", wIndex);
@@ -982,25 +985,25 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 				temp = xhci_readl(xhci, port_array[wIndex]);
 				break;
 			}
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 			/* Software should not attempt to set
 			 * port link state above '5' (Rx.Detect) and the port
 			 * must be enabled.
 			 */
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 			/* Software should not attempt to set
 			 * port link state above '3' (U3) and the port
 			 * must be enabled.
 			 */
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 			if ((temp & PORT_PE) == 0 ||
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 				(link_state > USB_SS_PORT_LS_RX_DETECT)) {
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 				(link_state > USB_SS_PORT_LS_U3)) {
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 				xhci_warn(xhci, "Cannot set link state.\n");
 				goto error;
 			}
@@ -1036,8 +1039,8 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 			 * However, khubd will ignore the roothub events until
 			 * the roothub is registered.
 			 */
-#if defined(CONFIG_SYNO_FACTORY_USB3_DISABLE) \
-			&& !defined(CONFIG_SYNO_DISABLE_USB3_DOWNGRADE)
+#if defined(MY_ABC_HERE) \
+			&& !defined(MY_DEF_HERE)
 			xhci_dbg(xhci, "set port power. hcd->speed:%d.\n",hcd->speed);
 			if (1 == gSynoFactoryUSB3Disable && hcd->speed == HCD_USB3) {
 				xhci_writel(xhci, temp & ~PORT_POWER,
@@ -1046,13 +1049,13 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 				msleep(500);
 				spin_lock_irqsave(&xhci->lock, flags);
 			} else {
-#endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
+#endif /* MY_ABC_HERE */
 			xhci_writel(xhci, temp | PORT_POWER,
 					port_array[wIndex]);
-#if defined(CONFIG_SYNO_FACTORY_USB3_DISABLE) \
-			&& !defined(CONFIG_SYNO_DISABLE_USB3_DOWNGRADE)
+#if defined(MY_ABC_HERE) \
+			&& !defined(MY_DEF_HERE)
 			}
-#endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
+#endif /* MY_ABC_HERE */
 
 			temp = xhci_readl(xhci, port_array[wIndex]);
 			xhci_dbg(xhci, "set port power, actual port %d status  = 0x%x\n", wIndex, temp);
@@ -1062,21 +1065,21 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 					wIndex);
 
 			if (temp)
-#if defined(CONFIG_SYNO_FACTORY_USB3_DISABLE) \
-			&& !defined(CONFIG_SYNO_DISABLE_USB3_DOWNGRADE)
+#if defined(MY_ABC_HERE) \
+			&& !defined(MY_DEF_HERE)
 			{
 				if (1 == gSynoFactoryUSB3Disable && hcd->speed == HCD_USB3) {
 					usb_acpi_set_power_state(hcd->self.root_hub,
 						wIndex, false);
 				} else {
-#endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
+#endif /* MY_ABC_HERE */
 				usb_acpi_set_power_state(hcd->self.root_hub,
 					wIndex, true);
-#if defined(CONFIG_SYNO_FACTORY_USB3_DISABLE) \
-			&& !defined(CONFIG_SYNO_DISABLE_USB3_DOWNGRADE)
+#if defined(MY_ABC_HERE) \
+			&& !defined(MY_DEF_HERE)
 				}
 			}
-#endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
+#endif /* MY_ABC_HERE */
 
 			spin_lock_irqsave(&xhci->lock, flags);
 			break;
@@ -1086,7 +1089,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 
 			temp = xhci_readl(xhci, port_array[wIndex]);
 			xhci_dbg(xhci, "set port reset, actual port %d status  = 0x%x\n", wIndex, temp);
-#ifdef CONFIG_SYNO_USB3_WD_FIX
+#ifdef MY_ABC_HERE
 			if (pdev->vendor == PCI_VENDOR_ID_NEC) {
 				temp_map = xhci_readl(xhci, port_array_map[wIndex]);
 				xhci_dbg(xhci, "set port reset map, actual port %d status  = 0x%x\n", wIndex, temp_map);
@@ -1099,7 +1102,7 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 					temp_map = xhci_readl(xhci, port_array_map[wIndex]);
 				}
 			}
-#endif /* CONFIG_SYNO_USB3_WD_FIX */
+#endif /* MY_ABC_HERE */
 			break;
 		case USB_PORT_FEAT_REMOTE_WAKE_MASK:
 			xhci_set_remote_wake_mask(xhci, port_array,

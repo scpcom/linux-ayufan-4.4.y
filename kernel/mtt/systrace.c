@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* System Trace Module Platform driver.
  *
  * (c) 2012 STMicroelectronics
@@ -641,7 +644,7 @@ static int systrace_probe(struct platform_device *pdev)
 	return 0;
 }
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_PM
 static int systrace_suspend(struct device *dev)
 {
@@ -670,7 +673,7 @@ static SIMPLE_DEV_PM_OPS(systrace_pm_ops,
 #else
 #define SYSTRACE_PM_OPS                ((void *)NULL)
 #endif
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 MODULE_DEVICE_TABLE(of, st_stm_systrace_match);
 static struct platform_driver systrace_driver = {
@@ -679,9 +682,9 @@ static struct platform_driver systrace_driver = {
 	.driver = {
 		   .owner = THIS_MODULE,
 		   .name = "stm-systrace",
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 		   .pm = SYSTRACE_PM_OPS,
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 		   .of_match_table = st_stm_systrace_match,
 	},
 };

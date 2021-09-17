@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
    Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -88,9 +91,9 @@
 #include "mv_servicecpu/servicecpu.h"
 #endif
 #ifdef CONFIG_MV_INCLUDE_DRAGONITE_XCAT
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 #include <linux/miscdevice.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 #include "mv_drivers_lsp/mv_dragonite/dragonite_xcat.h"
 #endif
 
@@ -140,11 +143,11 @@ static struct pci_decoding_window ac3_pci_sysmap[] = {
 	{DFXW,		PXWCR_WIN_BAR_MAP_BAR2,	DFX_BASE,	DFX_SIZE,	0x0,
 					DFX_TARGET_ID,			0x0,	ENABLE},
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	{SCPUW,		PXWCR_WIN_BAR_MAP_BAR2,	SCPU_BASE,	SCPU_SIZE,	0xFFE00000,
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	{SCPUW,		PXWCR_WIN_BAR_MAP_BAR2,	SCPU_BASE,	SCPU_SIZE,	0xFFF80000,
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 					RAM_TARGET_ID,	SHARED_RAM_ATTR_ID,	ENABLE},
 
 	{DITCMW,	PXWCR_WIN_BAR_MAP_BAR2, ITCM_BASE,	ITCM_SIZE,	0x0,
@@ -169,11 +172,11 @@ static struct pci_decoding_window bc2_pci_sysmap[] = {
 	{DFXW,		PXWCR_WIN_BAR_MAP_BAR2,	DFX_BASE,	DFX_SIZE,	0x0,
 					DFX_TARGET_ID,			0x0,	ENABLE},
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	{SCPUW,		PXWCR_WIN_BAR_MAP_BAR2,	SCPU_BASE,	SCPU_SIZE,	0xFFE00000,
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	{SCPUW,		PXWCR_WIN_BAR_MAP_BAR2,	SCPU_BASE,	SCPU_SIZE,	0xFFF80000,
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 					RAM_TARGET_ID,	SHARED_RAM_ATTR_ID,	ENABLE},
 
 	{0xff,		PXWCR_WIN_BAR_MAP_BAR2,	0x0,		0,		0x0,
@@ -732,11 +735,11 @@ int __init mv_msys_dragonite_init(struct pci_dev *pdev, struct pci_decoding_wind
 	dragonite_pci_data->host2poe_irq_reg = (void *)(switch_reg + DRAGONITE_HOST2POE_IRQ_REG);
 
 	mv_dragonite_dev->name		= "dragonite_xcat";
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	mv_dragonite_dev->id		= 1;
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	mv_dragonite_dev->id		= -1;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	mv_dragonite_dev->dev.platform_data = dragonite_pci_data;
 	mv_dragonite_dev->num_resources	= 4;
 	mv_dragonite_dev->resource	= dragonite_resources;

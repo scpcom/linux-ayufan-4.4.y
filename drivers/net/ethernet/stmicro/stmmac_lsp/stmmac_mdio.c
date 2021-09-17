@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
   STMMAC Ethernet Driver -- MDIO bus implementation
   Provides Bus interface for MII registers
@@ -138,10 +141,10 @@ int stmmac_mdio_reset(struct mii_bus *bus)
 
 #ifdef CONFIG_OF
 	if (priv->device->of_node) {
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 		int reset_gpio, active_low;
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 		if (data->reset_gpio < 0) {
 			struct device_node *np = priv->device->of_node;
@@ -157,10 +160,10 @@ int stmmac_mdio_reset(struct mii_bus *bus)
 						"snps,reset-active-low");
 			of_property_read_u32_array(np,
 				"snps,reset-delays-us", data->delays, 3);
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 			if (gpio_request(data->reset_gpio, "mdio-reset"))
 				return 0;
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 		}
 
 		reset_gpio = data->reset_gpio;
@@ -173,9 +176,9 @@ int stmmac_mdio_reset(struct mii_bus *bus)
 			udelay(data->delays[1]);
 			gpio_set_value(reset_gpio, active_low ? 1 : 0);
 			udelay(data->delays[2]);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 		}
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 		gpio_direction_output(data->reset_gpio,
 				      data->active_low ? 1 : 0);
 		udelay(data->delays[0]);
@@ -183,7 +186,7 @@ int stmmac_mdio_reset(struct mii_bus *bus)
 		udelay(data->delays[1]);
 		gpio_set_value(data->reset_gpio, data->active_low ? 1 : 0);
 		udelay(data->delays[2]);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	}
 #endif
 

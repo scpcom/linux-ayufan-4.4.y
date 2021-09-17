@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Machine check handler.
  *
@@ -89,10 +92,10 @@ static DECLARE_WAIT_QUEUE_HEAD(mce_chrdev_wait);
 static DEFINE_PER_CPU(struct mce, mces_seen);
 static int			cpu_missing;
 
-#ifdef CONFIG_SYNO_ECC_NOTIFICATION
+#ifdef MY_DEF_HERE
 int (*funcSYNOECCNotification)(unsigned int type, unsigned int syndrome, u64 memAddr) = NULL;
 EXPORT_SYMBOL(funcSYNOECCNotification);
-#endif /* CONFIG_SYNO_ECC_NOTIFICATION */
+#endif /* MY_DEF_HERE */
 
 /* MCA banks polled by the period polling timer for corrected events */
 DEFINE_PER_CPU(mce_banks_t, mce_poll_banks) = {
@@ -586,9 +589,9 @@ DEFINE_PER_CPU(unsigned, mce_poll_count);
 void machine_check_poll(enum mcp_flags flags, mce_banks_t *b)
 {
 	struct mce m;
-#ifdef CONFIG_SYNO_ECC_NOTIFICATION
+#ifdef MY_DEF_HERE
 	u64 mstatus, eccsyndrome;
-#endif /* CONFIG_SYNO_ECC_NOTIFICATION */
+#endif /* MY_DEF_HERE */
 	int i;
 
 	this_cpu_inc(mce_poll_count);
@@ -621,7 +624,7 @@ void machine_check_poll(enum mcp_flags flags, mce_banks_t *b)
 
 		mce_read_aux(&m, i);
 
-#ifdef CONFIG_SYNO_ECC_NOTIFICATION
+#ifdef MY_DEF_HERE
 		mstatus = ((m.status & SYNO_MCI_STATUS_ECC) >> SYNO_MCI_STATUS_UECC_SHIFT);
 		eccsyndrome = ((m.status & SYNO_MCI_STATUS_ECC_SYNDROME) >> SYNO_MCI_STATUS_ECC_SYNDROME_SHIFT);
 		if (funcSYNOECCNotification &&
@@ -629,7 +632,7 @@ void machine_check_poll(enum mcp_flags flags, mce_banks_t *b)
 			funcSYNOECCNotification(((unsigned int *)(void *)&mstatus)[0], 
 					((unsigned int *)(void *)&eccsyndrome)[0], m.addr);
 		}
-#endif /* CONFIG_SYNO_ECC_NOTIFICATION */
+#endif /* MY_DEF_HERE */
 
 		if (!(flags & MCP_TIMESTAMP))
 			m.tsc = 0;

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -181,11 +184,11 @@ MV_STATUS mvTdmHalInit(MV_TDM_PARAMS *tdmParams, MV_TDM_HAL_DATA *halData)
 
 	/* Config TDM */
 	MV_REG_BIT_RESET(TDM_SPI_MUX_REG, BIT0);	/* enable TDM/SPI interface */
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	MV_REG_BIT_SET(TDM_MISC_REG, BIT0);		/* sw reset to TDM for 5181L-A1 & up */
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	MV_REG_WRITE(INT_RESET_SELECT_REG, CLEAR_ON_ZERO);	/* int cause is not clear on read */
 	MV_REG_WRITE(INT_EVENT_MASK_REG, 0x3ffff);	/* all interrupt bits latched in status */
 	MV_REG_WRITE(INT_STATUS_MASK_REG, 0);	/* disable interrupts */
@@ -312,10 +315,10 @@ MV_VOID mvTdmRelease(MV_VOID)
 	for (ch = 0; ch < MV_TDM2C_TOTAL_CHANNELS; ch++)
 		mvTdmChRemove(ch);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	/* Disable TDM/SPI interface */
 	MV_REG_BIT_SET(TDM_SPI_MUX_REG, BIT0);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	MV_TRC_REC("<-%s\n", __func__);
 }
@@ -1089,7 +1092,7 @@ MV_VOID mvTdmPcmIfReset(MV_VOID)
 {
 	MV_TRC_REC("->%s\n", __func__);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	/* SW PCM reset assert */
 	MV_REG_BIT_RESET(TDM_MISC_REG, BIT0);
 
@@ -1100,7 +1103,7 @@ MV_VOID mvTdmPcmIfReset(MV_VOID)
 
 	/* Wait a bit more - might be fine tuned */
 	mvOsDelay(50);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	MV_REG_BIT_RESET(PCM_CTRL_REG, BIT0);
 
 	/* Wait a bit - might be fine tuned */
@@ -1112,7 +1115,7 @@ MV_VOID mvTdmPcmIfReset(MV_VOID)
 
 	/* Wait a bit more - might be fine tuned */
 	mvOsDelay(100);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	MV_TRC_REC("<-%s\n", __func__);
 }

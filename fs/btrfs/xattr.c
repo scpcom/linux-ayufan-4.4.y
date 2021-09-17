@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2007 Red Hat.  All rights reserved.
  *
@@ -330,12 +333,12 @@ ssize_t btrfs_listxattr(struct dentry *dentry, char *buffer, size_t size)
 		read_extent_buffer(leaf, buffer, name_ptr, name_len);
 		buffer[name_len] = '\0';
 
-#ifdef CONFIG_SYNO_BTRFS_XATTR
+#ifdef MY_ABC_HERE
 		if (!strncmp(buffer, XATTR_SYNO_PREFIX, XATTR_SYNO_PREFIX_LEN)) {
 			total_size -= name_len + 1;
 			goto next;
 		}
-#endif /* CONFIG_SYNO_BTRFS_XATTR */
+#endif /* MY_ABC_HERE */
 
 		size_left -= name_len + 1;
 		buffer += name_len + 1;
@@ -359,9 +362,9 @@ const struct xattr_handler *btrfs_xattr_handlers[] = {
 	&btrfs_xattr_acl_access_handler,
 	&btrfs_xattr_acl_default_handler,
 #endif
-#ifdef CONFIG_SYNO_BTRFS_XATTR
+#ifdef MY_ABC_HERE
 	&btrfs_xattr_syno_handler,
-#endif /* CONFIG_SYNO_BTRFS_XATTR */
+#endif /* MY_ABC_HERE */
 	NULL,
 };
 
@@ -377,9 +380,9 @@ static bool btrfs_is_valid_xattr(const char *name)
 			XATTR_SECURITY_PREFIX_LEN) ||
 	       !strncmp(name, XATTR_SYSTEM_PREFIX, XATTR_SYSTEM_PREFIX_LEN) ||
 	       !strncmp(name, XATTR_TRUSTED_PREFIX, XATTR_TRUSTED_PREFIX_LEN) ||
-#ifdef CONFIG_SYNO_BTRFS_XATTR
+#ifdef MY_ABC_HERE
 	       !strncmp(name, XATTR_SYNO_PREFIX, XATTR_SYNO_PREFIX_LEN) ||
-#endif /* CONFIG_SYNO_BTRFS_XATTR */
+#endif /* MY_ABC_HERE */
 	       !strncmp(name, XATTR_USER_PREFIX, XATTR_USER_PREFIX_LEN) ||
 		!strncmp(name, XATTR_BTRFS_PREFIX, XATTR_BTRFS_PREFIX_LEN);
 }
@@ -417,12 +420,12 @@ int btrfs_setxattr(struct dentry *dentry, const char *name, const void *value,
 	 * namespace use the generic infrastructure to resolve a handler
 	 * for it via sb->s_xattr.
 	 */
-#ifdef CONFIG_SYNO_BTRFS_XATTR
+#ifdef MY_ABC_HERE
 	if (!strncmp(name, XATTR_SYSTEM_PREFIX, XATTR_SYSTEM_PREFIX_LEN) ||
 		!strncmp(name, XATTR_SYNO_PREFIX, XATTR_SYNO_PREFIX_LEN))
 #else
 	if (!strncmp(name, XATTR_SYSTEM_PREFIX, XATTR_SYSTEM_PREFIX_LEN))
-#endif /* CONFIG_SYNO_BTRFS_XATTR */
+#endif /* MY_ABC_HERE */
 		return generic_setxattr(dentry, name, value, size, flags);
 
 	if (!btrfs_is_valid_xattr(name))

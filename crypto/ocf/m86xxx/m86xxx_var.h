@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*-----------------------------------------------------------------------
 //
 // Proprietary Information of Elliptic Semiconductor
@@ -49,7 +52,7 @@
 
 #include <asm/io.h>
 #include "m86xxx_utils.h"
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_DEF_HERE)
 #include "../ocf-compat.h"
 #else
 #include "ocf-compat.h"

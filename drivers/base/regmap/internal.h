@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Register map access API internal header
  *
@@ -174,7 +177,7 @@ struct regmap_range_node {
 	unsigned int window_len;
 };
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 struct regmap_field {
 	struct regmap *regmap;
 	unsigned int mask;
@@ -182,7 +185,7 @@ struct regmap_field {
 	unsigned int shift;
 	unsigned int reg;
 };
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 #ifdef CONFIG_DEBUG_FS
 extern void regmap_debugfs_initcall(void);
 extern void regmap_debugfs_init(struct regmap *map, const char *name);

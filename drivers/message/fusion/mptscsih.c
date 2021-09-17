@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/drivers/message/fusion/mptscsih.c
  *      For use with LSI PCI chip/adapter(s)
@@ -1706,13 +1709,13 @@ mptscsih_abort(struct scsi_cmnd * SCpnt)
 	}
 
 	ioc = hd->ioc;
-#ifdef CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE
+#ifdef MY_DEF_HERE
 	printk(MYIOC_s_NOTE_FMT "attempting task abort! (sc=%p)\n",
 	       ioc->name, SCpnt);
-#else /* CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE */
+#else /* MY_DEF_HERE */
 	printk(MYIOC_s_INFO_FMT "attempting task abort! (sc=%p)\n",
 	       ioc->name, SCpnt);
-#endif /* CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE */
+#endif /* MY_DEF_HERE */
 	scsi_print_command(SCpnt);
 
 	vdevice = SCpnt->device->hostdata;
@@ -1796,15 +1799,15 @@ mptscsih_abort(struct scsi_cmnd * SCpnt)
 	}
 
  out:
-#ifdef CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE
+#ifdef MY_DEF_HERE
 	printk(MYIOC_s_NOTE_FMT "task abort: %s (rv=%04x) (sc=%p)\n",
 	    ioc->name, ((retval == SUCCESS) ? "SUCCESS" : "FAILED"), retval,
 	    SCpnt);
-#else /* CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE */
+#else /* MY_DEF_HERE */
 	printk(MYIOC_s_INFO_FMT "task abort: %s (rv=%04x) (sc=%p)\n",
 	    ioc->name, ((retval == SUCCESS) ? "SUCCESS" : "FAILED"), retval,
 	    SCpnt);
-#endif /* CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE */
+#endif /* MY_DEF_HERE */
 
 	return retval;
 }

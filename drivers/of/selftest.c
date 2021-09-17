@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Self tests for device tree subsystem
  */
@@ -9,15 +12,15 @@
 #include <linux/errno.h>
 #include <linux/module.h>
 #include <linux/of.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #include <linux/of_irq.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 #include <linux/list.h>
 #include <linux/mutex.h>
 #include <linux/slab.h>
 #include <linux/device.h>
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static struct selftest_results {
 	int passed;
 	int failed;
@@ -32,7 +35,7 @@ static struct selftest_results {
 		pr_debug("pass %s():%i\n", __func__, __LINE__); \
 	} \
 }
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static bool selftest_passed = true;
 
 #define selftest(result, fmt, ...) { \
@@ -43,7 +46,7 @@ static bool selftest_passed = true;
 		pr_info("pass %s:%i\n", __FILE__, __LINE__); \
 	} \
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static void __init of_selftest_parse_phandle_with_args(void)
 {
@@ -229,7 +232,7 @@ static void __init of_selftest_property_string(void)
 	selftest(rc == 1 && strings[1] == NULL, "Overwrote end of string array; rc=%i, str='%s'\n", rc, strings[1]);
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static void __init of_selftest_parse_interrupts(void)
 {
 	struct device_node *np;
@@ -370,7 +373,7 @@ static void __init of_selftest_parse_interrupts_extended(void)
 	}
 	of_node_put(np);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static int __init of_selftest(void)
 {
@@ -386,14 +389,14 @@ static int __init of_selftest(void)
 	pr_info("start of selftest - you will see error messages\n");
 	of_selftest_parse_phandle_with_args();
 	of_selftest_property_string();
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	of_selftest_parse_interrupts();
 	of_selftest_parse_interrupts_extended();
 	pr_info("end of selftest - %i passed, %i failed\n",
 		selftest_results.passed, selftest_results.failed);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	pr_info("end of selftest - %s\n", selftest_passed ? "PASS" : "FAIL");
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	return 0;
 }
 late_initcall(of_selftest);

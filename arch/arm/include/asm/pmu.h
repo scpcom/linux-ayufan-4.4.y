@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/arch/arm/include/asm/pmu.h
  *
@@ -60,10 +63,10 @@ struct pmu_hw_events {
 	 * read/modify/write sequences.
 	 */
 	raw_spinlock_t		pmu_lock;
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 
 	struct pmu		*pmu;
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 };
 
 struct arm_pmu {

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (c) 2001-2002 by David Brownell
  *
@@ -110,9 +113,9 @@ struct usb_hcd {
 #define HCD_FLAG_WAKEUP_PENDING		4	/* root hub is resuming? */
 #define HCD_FLAG_RH_RUNNING		5	/* root hub is running? */
 #define HCD_FLAG_DEAD			6	/* controller has died? */
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 #define HCD_FLAG_RH_CLEANED		7	/* HCRST Test*/
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	/* The flags can be tested using these macros; they are likely to
 	 * be slightly faster than test_bit().
@@ -181,12 +184,12 @@ struct usb_hcd {
 #define HCD_CHIP_ID_ETRON_EJ188 0x20
 #endif /* CONFIG_USB_ETRON_HUB */
 
-#if defined (CONFIG_SYNO_USB_POWER_RESET)
+#if defined (MY_ABC_HERE)
 	/* A38X only support 1 port per HC */
 	int vbus_gpio_pin;
 	/* Support power control */
 	int power_control_support;
-#endif /* CONFIG_SYNO_USB_POWER_RESET */
+#endif /* MY_ABC_HERE */
 
 	/* more shared queuing code would be good; it should support
 	 * smarter scheduling, handle transaction translators, etc;
@@ -352,10 +355,10 @@ struct hc_driver {
 	void	(*reset_bandwidth)(struct usb_hcd *, struct usb_device *);
 		/* Returns the hardware-chosen device address */
 	int	(*address_device)(struct usb_hcd *, struct usb_device *udev);
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 		/* prepares the hardware to send commands to the device */
 	int	(*enable_device)(struct usb_hcd *, struct usb_device *udev);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 		/* Notifies the HCD after a hub descriptor is fetched.
 		 * Will block.
 		 */
@@ -453,10 +456,10 @@ void hcd_buffer_free(struct usb_bus *bus, size_t size,
 extern irqreturn_t usb_hcd_irq(int irq, void *__hcd);
 
 extern void usb_hc_died(struct usb_hcd *hcd);
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 extern void usb_hc_pre_reset(struct usb_hcd *hcd);
 extern void usb_hc_post_reset(struct usb_hcd *hcd);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 extern void usb_hcd_poll_rh_status(struct usb_hcd *hcd);
 extern void usb_wakeup_notification(struct usb_device *hdev,
 		unsigned int portnum);

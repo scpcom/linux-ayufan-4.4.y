@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * STMicroelectronics' System-on-Chips audio subsystem commons
  */
@@ -116,15 +119,15 @@ struct snd_stm_clk;
 struct snd_stm_clk *snd_stm_clk_get(struct device *dev, const char *id,
 		struct snd_card *card, int card_device);
 void snd_stm_clk_put(struct snd_stm_clk *clk);
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 int snd_stm_clk_prepare_enable(struct snd_stm_clk *clk);
 int snd_stm_clk_prepare(struct snd_stm_clk *clk);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 int snd_stm_clk_enable(struct snd_stm_clk *clk);
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 int snd_stm_clk_disable_unprepare(struct snd_stm_clk *clk);
 int snd_stm_clk_unprepare(struct snd_stm_clk *clk);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 int snd_stm_clk_disable(struct snd_stm_clk *clk);
 int snd_stm_clk_set_rate(struct snd_stm_clk *clk, unsigned long rate);
 

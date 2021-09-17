@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Interface file for st lpm driver
  *
@@ -361,12 +364,12 @@ struct st_lpm_cec_custom_msg {
 
 enum st_lpm_inform_host_event {
 	ST_LPM_LONG_PIO_PRESS = 1,
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	ST_LPM_ALARM_TIMER,
 	ST_LPM_TRACE_DATA,
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	ST_LPM_ALARM_TIMER
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 };
 
 #define ST_LPM_CEC_MAX_OSD_NAME_LENGTH	14
@@ -379,7 +382,7 @@ struct st_lpm_cec_osd_msg {
 #define ST_LPM_EDID_BLK_SIZE		128
 #define ST_LPM_EDID_MAX_BLK_NUM		3
 #define ST_LPM_EDID_BLK_END		0xFF
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 /**
  * enum st_lpm_trace_mask- define module mask for which trace data is needed
  */
@@ -400,7 +403,7 @@ enum st_lpm_trace_mask {
 	ST_LPM_TRACE_SPI = BIT(12),
 	ST_LPM_TRACE_GENERAL = BIT(13)
 };
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 /**
  * union st_lpm_cec_params - to define CEC params
@@ -415,7 +418,7 @@ union st_lpm_cec_params {
 
 int st_lpm_configure_wdt(u16 time_in_ms, u8 wdt_type);
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_ST_LPM
 int st_lpm_get_fw_state(enum st_lpm_sbc_state *fw_state);
 #else
@@ -424,24 +427,24 @@ static inline int st_lpm_get_fw_state(enum st_lpm_sbc_state *fw_state)
 	return -EINVAL;
 }
 #endif
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 int st_lpm_get_fw_state(enum st_lpm_sbc_state *fw_state);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 int st_lpm_get_wakeup_device(enum st_lpm_wakeup_devices *wakeupdevice);
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 int st_lpm_get_trigger_data(enum st_lpm_wakeup_devices wakeup_device,
 		unsigned int size_max, unsigned int size_min,
 		char *data);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 int st_lpm_get_wakeup_info(enum st_lpm_wakeup_devices wakeupdevice,
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 int st_lpm_get_wakeup_info(enum st_lpm_wakeup_devices *wakeupdevice,
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	s16 *validsize, u16 datasize, char  *data);
 
 int st_lpm_write_edid(u8 *data, u8 block_num);
@@ -485,9 +488,9 @@ int st_lpm_get_adv_feature(bool all_features, bool custom_feature,
 enum st_lpm_callback_type {
 	ST_LPM_FP_PIO_PRESS,
 	ST_LPM_RTC,
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	ST_LPM_GPIO_WAKEUP,
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	ST_LPM_MAX, /* to mark the max allowed */
 };
 
@@ -497,11 +500,11 @@ int st_lpm_register_callback(enum st_lpm_callback_type type,
 
 int st_lpm_notify(enum st_lpm_callback_type type);
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 int st_lpm_reload_fw_prepare(void);
 
 int st_start_loaded_fw(void);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 /**
  * function - st_lpm_setup_fp_pio
@@ -553,9 +556,9 @@ int st_lpm_config_reboot(enum st_lpm_config_reboot_type type);
 int st_lpm_sbc_ir_enable(bool enable);
 
 int st_lpm_poweroff(void);
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 int st_lpm_setup_tracedata(u16 trace_modules);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 /**
  * lpm_message - LPM message for cross CPU communication
@@ -593,13 +596,13 @@ struct st_lpm_ops {
 
 	int (*read_edid)(u8 *edid_buf, u8 block_num, void *data);
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	int (*reload_fw_prepare)(void *data);
 
 	int (*start_loaded_fw)(void *data);
 
 	int (*setup_tracedata)(u16 trace_modules, void *data);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 };
 
 int st_lpm_set_ops(struct st_lpm_ops *ops, void *private_data);

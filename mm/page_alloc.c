@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/mm/page_alloc.c
  *
@@ -2593,14 +2596,14 @@ rebalance:
 	}
 
 nopage:
-#ifdef CONFIG_SYNO_HIDE_LOWMEM_WARNING
+#ifdef MY_ABC_HERE
 /*
  * Do not show nowait page allocation fail warning to prevent
  * QC team panic when they stress new platform.
  */
-#else /* CONFIG_SYNO_HIDE_LOWMEM_WARNING */
+#else /* MY_ABC_HERE */
 	warn_alloc_failed(gfp_mask, order, NULL);
-#endif /* CONFIG_SYNO_HIDE_LOWMEM_WARNING */
+#endif /* MY_ABC_HERE */
 	return page;
 got_pg:
 	if (kmemcheck_enabled)
@@ -6259,17 +6262,17 @@ static void dump_page_flags(unsigned long flags)
 
 void dump_page(struct page *page)
 {
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	printk(KERN_ALERT
 	       "page:%p count:%d mapcount:%d mapping:%p index:%#llx\n",
 		page, atomic_read(&page->_count), page_mapcount(page),
 		page->mapping, (unsigned long long)page->index);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	printk(KERN_ALERT
 	       "page:%p count:%d mapcount:%d mapping:%p index:%#lx\n",
 		page, atomic_read(&page->_count), page_mapcount(page),
 		page->mapping, page->index);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	dump_page_flags(page->flags);
 	mem_cgroup_print_bad_page(page);
 }

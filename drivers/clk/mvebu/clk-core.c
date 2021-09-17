@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Marvell EBU clock core handling defined at reset
  *
@@ -313,7 +316,7 @@ static const struct core_clocks armada_xp_core_clocks = {
 
 #endif /* CONFIG_MACH_ARMADA_370_XP */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #ifdef CONFIG_MACH_ARMADA_375
 /*
  * For Armada 375 Sample At Reset the CPU, DDR and L2 clock are all
@@ -463,18 +466,18 @@ static u32 __init armada_380_get_tclk_freq(void __iomem *sar)
 }
 
 static const u32 __initconst armada_380_cpu_frequencies[] = {
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	666 * 1000 * 1000, 0, 800 * 1000 * 1000, 0,
 	1066 * 1000 * 1000, 0, 1200 * 1000 * 1000, 0,
 	1332 * 1000 * 1000, 0, 0, 0,
 	1600 * 1000 * 1000, 0, 0, 0,
 	1866 * 1000 * 1000, 0, 0, 2000 * 1000 * 1000,
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	0, 0, 0, 0,
 	1066 * 1000 * 1000, 0, 0, 0,
 	1332 * 1000 * 1000, 0, 0, 0,
 	1600 * 1000 * 1000,
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 };
 
 static u32 __init armada_380_get_cpu_freq(void __iomem *sar)
@@ -549,7 +552,7 @@ static const struct core_clocks armada_380_core_clocks = {
 };
 
 #endif /* CONFIG_MACH_ARMADA_380 */
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 /*
  * Dove PLL sample-at-reset configuration
@@ -879,7 +882,7 @@ static const __initdata struct of_device_id clk_core_match[] = {
 		.data = &armada_xp_core_clocks,
 	},
 #endif
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #ifdef CONFIG_MACH_ARMADA_375
 	{
 		.compatible = "marvell,armada-375-core-clock",
@@ -892,7 +895,7 @@ static const __initdata struct of_device_id clk_core_match[] = {
 		.data = &armada_380_core_clocks,
 	},
 #endif
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 #ifdef CONFIG_ARCH_DOVE
 	{
 		.compatible = "marvell,dove-core-clock",

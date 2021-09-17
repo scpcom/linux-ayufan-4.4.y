@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * devices.c
  * (C) Copyright 1999 Randy Dunlap.
@@ -58,9 +61,9 @@
 #include <linux/usb/hcd.h>
 #include <linux/mutex.h>
 #include <linux/uaccess.h>
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(MY_ABC_HERE)
 #include <linux/synobios.h>
-#endif /* CONFIG_SYNO_ARMADA */
+#endif /* MY_ABC_HERE */
 
 #include "usb.h"
 
@@ -164,13 +167,13 @@ static const struct class_info clas_info[] = {
 
 /*****************************************************************/
 
-#ifdef CONFIG_SYNO_SD_COPY
+#ifdef MY_ABC_HERE
 #define SDCOPY_PORT_LOCATION 98
-#endif /* CONFIG_SYNO_SD_COPY */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_USB_COPY
+#ifdef MY_ABC_HERE
 #define USBCOPY_PORT_LOCATION 99
-#endif /* CONFIG_SYNO_USB_COPY */
+#endif /* MY_ABC_HERE */
 
 void usbfs_conn_disc_event(void)
 {
@@ -492,7 +495,7 @@ static char *usb_dump_string(char *start, char *end,
 
 #endif /* PROC_EXTRA */
 
-#ifdef CONFIG_SYNO_USB_COPY
+#ifdef MY_ABC_HERE
 int blIsUSBDeviceAtFrontPort(struct usb_device *usbdev)
 {
 	char buf[256];
@@ -500,27 +503,27 @@ int blIsUSBDeviceAtFrontPort(struct usb_device *usbdev)
 	if(usbdev && usbdev->bus) {
 		memset(buf, 0, sizeof(buf));
 		sprintf(buf, "%s-%s", usbdev->bus->bus_name, usbdev->devpath);
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(MY_ABC_HERE)
 		if (syno_is_hw_version(HW_DS216)) {
 			if(!strcmp(buf,"f1058000.usb-1")) {
 			return 1;
 			}
 		}
 #endif
-#if defined(CONFIG_SYNO_BRASWELL)
+#if defined(MY_DEF_HERE)
 		if(!strcmp(buf,"0000:00:14.0-2")) {
 			return 1;
 		}
-#endif /* CONFIG_SYNO_BRASWELL */
-#if defined(CONFIG_SYNO_X86)
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
 #if defined(CONFIG_ARCH_GEN3)
 		if(!strcmp(buf,"0000:01:0d.0-1")) {
 			return 1;
 		}
 #endif /* defined(CONFIG_ARCH_GEN3) */
-#endif /* defined(CONFIG_SYNO_X86) */
-#if defined(CONFIG_SYNO_X64)
-#if defined(CONFIG_SYNO_CEDARVIEW)
+#endif /* defined(MY_DEF_HERE) */
+#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
 		if(!strcmp(buf,"0000:00:1d.7-2")) {
 			return 1;
 		}
@@ -528,20 +531,20 @@ int blIsUSBDeviceAtFrontPort(struct usb_device *usbdev)
 		if(!strcmp(buf,"0000:00:1d.7-3") || !strcmp(buf,"0000:00:1d.1-1")) {
 			return 1;
 		}
-#endif /*CONFIG_SYNO_CEDARVIEW*/
-#endif /*CONFIG_SYNO_X64*/
-#if defined(CONFIG_SYNO_ARMADA) && defined(CONFIG_ARMADA_XP)
+#endif /*MY_DEF_HERE*/
+#endif /*MY_DEF_HERE*/
+#if defined(MY_ABC_HERE) && defined(CONFIG_ARMADA_XP)
 		if(!strcmp(buf, "ehci_marvell.1-1") ||
 		   !strcmp(buf, "ehci_marvell.0-1")) {
 			return 1;
 		}
-#endif /* defined(CONFIG_SYNO_ARMADA) && defined(CONFIG_ARMADA_XP) */
+#endif /* defined(MY_ABC_HERE) && defined(CONFIG_ARMADA_XP) */
 	}
 	return 0;
 }
-#endif /* CONFIG_SYNO_USB_COPY */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_HAS_SDCARDREADER
+#ifdef MY_ABC_HERE
 int blIsCardReader(struct usb_device *usbdev)
 {
 	char buf[256];
@@ -550,29 +553,29 @@ int blIsCardReader(struct usb_device *usbdev)
 		memset(buf, 0, sizeof(buf));
 		sprintf(buf, "%s-%s", usbdev->bus->bus_name, usbdev->devpath);
 
-#if defined(CONFIG_SYNO_X86)
+#if defined(MY_DEF_HERE)
 #if defined(CONFIG_ARCH_GEN3)
 		if (syno_is_hw_version(HW_DS214play)) {
 			if(!strcmp(buf,"0000:01:0d.1-1")) {
 			return 1;
 			}
 		}
-#endif /* defined(CONFIG_SYNO_X86) */
+#endif /* defined(MY_DEF_HERE) */
 #endif /* defined(CONFIG_ARCH_GEN3) */
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(MY_ABC_HERE)
 		if (syno_is_hw_version(HW_US3v10)) {
 			if (!strcmp(buf, "0000:00:00.0-1")) {
 				return 1;
 			}
 		}
-#endif /* defined(CONFIG_SYNO_ARMADA) */
+#endif /* defined(MY_ABC_HERE) */
 
 	}
 	return 0;
 }
 EXPORT_SYMBOL(blIsCardReader);
-#endif /* CONFIG_SYNO_HAS_SDCARDREADER */
+#endif /* MY_ABC_HERE */
 
 /*****************************************************************/
 
@@ -595,9 +598,9 @@ static ssize_t usb_device_dump(char __user **buffer, size_t *nbytes,
 	unsigned int length;
 	ssize_t total_written = 0;
 	struct usb_device *childdev = NULL;
-#if defined(CONFIG_SYNO_USB_COPY) || defined(CONFIG_SYNO_SD_COPY)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 	int port = 0;
-#endif /* defined(CONFIG_SYNO_USB_COPY) || defined(CONFIG_SYNO_SD_COPY) */
+#endif /* defined(MY_ABC_HERE) || defined(MY_ABC_HERE) */
 	/* don't bother with anything else if we're not writing any data */
 	if (*nbytes <= 0)
 		return 0;
@@ -630,13 +633,13 @@ static ssize_t usb_device_dump(char __user **buffer, size_t *nbytes,
 	default:
 		speed = "??";
 	}
-#if defined(CONFIG_SYNO_USB_COPY) || defined(CONFIG_SYNO_SD_COPY)
-#if defined(CONFIG_SYNO_USB_COPY)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(MY_ABC_HERE)
 	if(blIsUSBDeviceAtFrontPort(usbdev)) {
 		port = USBCOPY_PORT_LOCATION;
 	}
 #endif
-#if defined(CONFIG_SYNO_SD_COPY)
+#if defined(MY_ABC_HERE)
 	if(blIsCardReader(usbdev)) {
 		port = SDCOPY_PORT_LOCATION;
 	}
@@ -648,16 +651,16 @@ static ssize_t usb_device_dump(char __user **buffer, size_t *nbytes,
 				port, count, usbdev->devnum,
 				speed, usbdev->maxchild);
 	} else {
-#endif /* defined(CONFIG_SYNO_USB_COPY) || defined(CONFIG_SYNO_SD_COPY) */
+#endif /* defined(MY_ABC_HERE) || defined(MY_ABC_HERE) */
 
 	data_end = pages_start + sprintf(pages_start, format_topo,
 			bus->busnum, level, parent_devnum,
 			index, count, usbdev->devnum,
 			speed, usbdev->maxchild);
 
-#if defined(CONFIG_SYNO_USB_COPY) || defined(CONFIG_SYNO_SD_COPY)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 	}
-#endif /* defined(CONFIG_SYNO_USB_COPY) || defined(CONFIG_SYNO_SD_COPY) */
+#endif /* defined(MY_ABC_HERE) || defined(MY_ABC_HERE) */
 
 	/*
 	 * level = topology-tier level;
@@ -717,19 +720,19 @@ static ssize_t usb_device_dump(char __user **buffer, size_t *nbytes,
 	/* Now look at all of this device's children. */
 	usb_hub_for_each_child(usbdev, chix, childdev) {
 		usb_lock_device(childdev);
-#if defined(CONFIG_SYNO_USB_COPY) || defined(CONFIG_SYNO_SD_COPY)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 		if (port) {
 			ret = usb_device_dump(buffer, nbytes, skip_bytes, file_offset, childdev,
 										  bus, level + 1, port, ++cnt);
 		} else {
-#endif /* defined(CONFIG_SYNO_USB_COPY) || defined(CONFIG_SYNO_SD_COPY) */
+#endif /* defined(MY_ABC_HERE) || defined(MY_ABC_HERE) */
 		ret = usb_device_dump(buffer, nbytes, skip_bytes,
 				      file_offset, childdev, bus,
 				      level + 1, chix - 1, ++cnt);
 
-#if defined(CONFIG_SYNO_USB_COPY) || defined(CONFIG_SYNO_SD_COPY)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 		}
-#endif /* defined(CONFIG_SYNO_USB_COPY) || defined(CONFIG_SYNO_SD_COPY) */
+#endif /* defined(MY_ABC_HERE) || defined(MY_ABC_HERE) */
 
 		usb_unlock_device(childdev);
 		if (ret == -EFAULT)

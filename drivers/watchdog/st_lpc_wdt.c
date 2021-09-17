@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * st-lpc-wdt.c
  *
@@ -215,7 +218,7 @@ static struct watchdog_device lpc_wdt_dev = {
 	.max_timeout = WATCHDOG_MAX32,
 };
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_PM_SLEEP
 static int st_lpc_wdt_suspend(struct device *dev)
 {
@@ -250,7 +253,7 @@ SIMPLE_DEV_PM_OPS(st_lpc_wdt_pm_ops, st_lpc_wdt_suspend, st_lpc_wdt_resume);
 #else
 #define ST_LPC_WDT_PM	NULL
 #endif
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 #ifdef CONFIG_PM
 static int st_lpc_wdt_suspend(struct device *dev)
 {
@@ -285,7 +288,7 @@ SIMPLE_DEV_PM_OPS(st_lpc_wdt_pm_ops, st_lpc_wdt_suspend, st_lpc_wdt_resume);
 #else
 #define ST_LPC_WDT_PM	NULL
 #endif
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 static int st_lpc_wdt_probe(struct platform_device *pdev)
 {

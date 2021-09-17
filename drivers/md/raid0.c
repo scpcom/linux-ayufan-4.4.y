@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
    raid0.c : Multiple Devices driver for Linux
              Copyright (C) 1994-96 Marc ZYNGIER
@@ -33,7 +36,7 @@ static int raid0_congested(void *data, int bits)
 	int raid_disks = conf->strip_zone[0].nb_dev;
 	int i, ret = 0;
 
-#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+#ifdef MY_ABC_HERE
 	/* when raid0 lose one of disks, it is not normally,
 	 * So we just do a fake report that it is fine,
 	 * Nor will encounter NULL pointer access in devlist[i]->bdev.
@@ -42,7 +45,7 @@ static int raid0_congested(void *data, int bits)
 		/* just report it's fine */
 		return ret;
 	}
-#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
+#endif /* MY_ABC_HERE */
 
 	if (mddev_congested(mddev, bits))
 		return 1;
@@ -219,15 +222,15 @@ static int create_strip_zones(struct mddev *mddev, struct r0conf **private_conf)
 	if (cnt != mddev->raid_disks) {
 		printk(KERN_ERR "md/raid0:%s: too few disks (%d of %d) - "
 		       "aborting!\n", mdname(mddev), cnt, mddev->raid_disks);
-#ifdef CONFIG_SYNO_MD_STATUS_GET
+#ifdef MY_ABC_HERE
 		/* for raid0 status consistense to other raid type */
 		mddev->degraded = mddev->raid_disks - cnt;
 		zone->nb_dev = mddev->raid_disks;
 		mddev->private = conf;
 		return -ENOMEM;
-#else /* CONFIG_SYNO_MD_STATUS_GET */
+#else /* MY_ABC_HERE */
 		goto abort;
-#endif /* CONFIG_SYNO_MD_STATUS_GET */
+#endif /* MY_ABC_HERE */
 	}
 	zone->nb_dev = cnt;
 	zone->zone_end = smallest->sectors * cnt;
@@ -448,9 +451,9 @@ static int raid0_run(struct mddev *mddev)
 	struct r0conf *conf;
 	int ret;
 
-#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+#ifdef MY_ABC_HERE
 	mddev->degraded = 0;
-#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
+#endif /* MY_ABC_HERE */
 
 	if (mddev->chunk_sectors == 0) {
 		printk(KERN_ERR "md/raid0:%s: chunk size must be set.\n",
@@ -466,11 +469,11 @@ static int raid0_run(struct mddev *mddev)
 	/* if private is not null, we are here after takeover */
 	if (mddev->private == NULL) {
 		ret = create_strip_zones(mddev, &conf);
-#ifdef CONFIG_SYNO_MD_STATUS_GET
+#ifdef MY_ABC_HERE
 		if (ret < 0) {
-#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+#ifdef MY_ABC_HERE
 			mddev->nodev_and_crashed = 1;
-#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
+#endif /* MY_ABC_HERE */
 			/* The size must greater than zero,
 			 * otherwise this partition would not present in /proc/partitions
 			 */
@@ -478,10 +481,10 @@ static int raid0_run(struct mddev *mddev)
 			/* pretend success for printing mdstatus otherwise it will not show raid0 status when it fail on boot */
 			return 0;
 		}
-#else /* CONFIG_SYNO_MD_STATUS_GET */
+#else /* MY_ABC_HERE */
 		if (ret < 0)
 			return ret;
-#endif /* CONFIG_SYNO_MD_STATUS_GET */
+#endif /* MY_ABC_HERE */
 		mddev->private = conf;
 	}
 	conf = mddev->private;
@@ -530,7 +533,7 @@ static int raid0_stop(struct mddev *mddev)
 	return 0;
 }
 
-#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+#ifdef MY_ABC_HERE
 /**
  * This is end_io callback function.
  * We can use this for bad sector report and device error
@@ -562,7 +565,7 @@ static void Raid0EndRequest(struct bio *bio, int error)
 			syno_md_error(mddev, rdev);
 		} else {
 			/* Let raid0 could keep read.(md_error would let it become read-only) */
-#ifdef CONFIG_SYNO_MD_SECTOR_STATUS_REPORT
+#ifdef MY_ABC_HERE
 #ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
 			if (bio_flagged(bio, BIO_AUTO_REMAP)) {
 				SynoReportBadSector(bio->bi_sector, bio->bi_rw, mddev->md_minor, bio->bi_bdev, __FUNCTION__);
@@ -570,7 +573,7 @@ static void Raid0EndRequest(struct bio *bio, int error)
 #else /* CONFIG_SYNO_MD_AUTO_REMAP_REPORT */
 			SynoReportBadSector(bio->bi_sector, bio->bi_rw, mddev->md_minor, bio->bi_bdev, __FUNCTION__);
 #endif /* CONFIG_SYNO_MD_AUTO_REMAP_REPORT */
-#endif /* CONFIG_SYNO_MD_SECTOR_STATUS_REPORT */
+#endif /* MY_ABC_HERE */
 			md_error(mddev, rdev);
 		}
 	}
@@ -580,7 +583,7 @@ static void Raid0EndRequest(struct bio *bio, int error)
 	/* Let mount could successful and bad sector could keep accessing */
 	bio_endio(bio, 0);
 }
-#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
+#endif /* MY_ABC_HERE */
 /*
  * Is io distribute over 1 or more chunks ?
 */
@@ -602,9 +605,9 @@ static void raid0_make_request(struct mddev *mddev, struct bio *bio)
 	unsigned int chunk_sects;
 	sector_t sector_offset;
 	struct strip_zone *zone;
-#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+#ifdef MY_ABC_HERE
 	struct bio *data_bio;
-#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
+#endif /* MY_ABC_HERE */
 	struct md_rdev *tmp_dev;
 
 	if (unlikely(bio->bi_rw & REQ_FLUSH)) {
@@ -612,24 +615,24 @@ static void raid0_make_request(struct mddev *mddev, struct bio *bio)
 		return;
 	}
 
-#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+#ifdef MY_ABC_HERE
 	/**
 	* if there has any device offline, we don't make any request to
 	* our raid0 md array
 	*/
-#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+#ifdef MY_ABC_HERE
 	if (mddev->nodev_and_crashed) {
-#else /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
+#else /* MY_ABC_HERE */
 	if (mddev->degraded) {
-#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
-#ifdef  CONFIG_SYNO_MD_FLASHCACHE_SUPPORT
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
 		syno_flashcache_return_error(bio);
 #else
 		bio_endio(bio, 0);
-#endif /* CONFIG_SYNO_MD_FLASHCACHE_SUPPORT */
+#endif /* MY_ABC_HERE */
 		return;
 	}
-#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
+#endif /* MY_ABC_HERE */
 
 	chunk_sects = mddev->chunk_sectors;
 	if (unlikely(!is_io_in_chunk_boundary(mddev, chunk_sects, bio))) {
@@ -668,7 +671,7 @@ static void raid0_make_request(struct mddev *mddev, struct bio *bio)
 		return;
 	}
 
-#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+#ifdef MY_ABC_HERE
 	data_bio = bio_clone(bio, GFP_NOIO);
 
 	if (data_bio) {
@@ -680,7 +683,7 @@ static void raid0_make_request(struct mddev *mddev, struct bio *bio)
 		bio->bi_end_io = Raid0EndRequest;
 		bio->bi_private = data_bio;
 	}
-#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
+#endif /* MY_ABC_HERE */
 	generic_make_request(bio);
 	return;
 
@@ -694,7 +697,7 @@ bad_map:
 	return;
 }
 
-#ifdef CONFIG_SYNO_MD_STATUS_GET
+#ifdef MY_ABC_HERE
 static void
 syno_raid0_status(struct seq_file *seq, struct mddev *mddev)
 {
@@ -707,28 +710,28 @@ syno_raid0_status(struct seq_file *seq, struct mddev *mddev)
 	for (k = 0; k < conf->strip_zone[0].nb_dev; k++) {
 		rdev = conf->devlist[k];
 		if(rdev) {
-#ifdef CONFIG_SYNO_MD_STATUS_DISKERROR
+#ifdef MY_ABC_HERE
 			seq_printf (seq, "%s", 
 						test_bit(In_sync, &rdev->flags) ? 
 						(test_bit(DiskError, &rdev->flags) ? "E" : "U") : "_");
-#else /* CONFIG_SYNO_MD_STATUS_DISKERROR */
+#else /* MY_ABC_HERE */
 			seq_printf (seq, "%s", "U");
-#endif /* CONFIG_SYNO_MD_STATUS_DISKERROR */
+#endif /* MY_ABC_HERE */
 		} else {
 			seq_printf (seq, "%s", "_");
 		}
 	}
 	seq_printf (seq, "]");
 }
-#else /* CONFIG_SYNO_MD_STATUS_GET */
+#else /* MY_ABC_HERE */
 static void raid0_status(struct seq_file *seq, struct mddev *mddev)
 {
 	seq_printf(seq, " %dk chunks", mddev->chunk_sectors / 2);
 	return;
 }
-#endif /* CONFIG_SYNO_MD_STATUS_GET */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+#ifdef MY_ABC_HERE
 int SynoRaid0RemoveDisk(struct mddev *mddev, struct md_rdev *rdev)
 {
 	int err = 0;
@@ -775,13 +778,13 @@ static void SynoRaid0Error(struct mddev *mddev, struct md_rdev *rdev)
 		if (mddev->degraded < mddev->raid_disks) {
 			SYNO_UPDATE_SB_WORK *update_sb = NULL;
 			mddev->degraded++;
-#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+#ifdef MY_ABC_HERE
 			mddev->nodev_and_crashed = 1;
-#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
+#endif /* MY_ABC_HERE */
 			set_bit(Faulty, &rdev->flags);
-#ifdef CONFIG_SYNO_MD_STATUS_DISKERROR
+#ifdef MY_ABC_HERE
 			clear_bit(DiskError, &rdev->flags);
-#endif /* CONFIG_SYNO_MD_STATUS_DISKERROR */
+#endif /* MY_ABC_HERE */
 			set_bit(MD_CHANGE_DEVS, &mddev->flags);
 
 			if (NULL == (update_sb = kzalloc(sizeof(SYNO_UPDATE_SB_WORK), GFP_ATOMIC))) {
@@ -814,7 +817,7 @@ END:
  */
 static void SynoRaid0ErrorInternal(struct mddev *mddev, struct md_rdev *rdev)
 {
-#ifdef CONFIG_SYNO_MD_STATUS_DISKERROR
+#ifdef MY_ABC_HERE
 	if (!test_bit(DiskError, &rdev->flags)) {
 		SYNO_UPDATE_SB_WORK *update_sb = NULL;
 
@@ -831,10 +834,10 @@ static void SynoRaid0ErrorInternal(struct mddev *mddev, struct md_rdev *rdev)
 	}
 
 END:
-#endif /* CONFIG_SYNO_MD_STATUS_DISKERROR */
+#endif /* MY_ABC_HERE */
 	return;
 }
-#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
+#endif /* MY_ABC_HERE */
 
 static void *raid0_takeover_raid45(struct mddev *mddev)
 {
@@ -997,17 +1000,17 @@ static struct md_personality raid0_personality=
 	.make_request	= raid0_make_request,
 	.run		= raid0_run,
 	.stop		= raid0_stop,
-#ifdef CONFIG_SYNO_MD_STATUS_GET
+#ifdef MY_ABC_HERE
 	.status		= syno_raid0_status,
-#else /* CONFIG_SYNO_MD_STATUS_GET */
+#else /* MY_ABC_HERE */
 	.status		= raid0_status,
-#endif /* CONFIG_SYNO_MD_STATUS_GET */
+#endif /* MY_ABC_HERE */
 	.size		= raid0_size,
-#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+#ifdef MY_ABC_HERE
 	.hot_remove_disk = SynoRaid0RemoveDisk,
 	.error_handler = SynoRaid0ErrorInternal,
 	.syno_error_handler	 = SynoRaid0Error,
-#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
+#endif /* MY_ABC_HERE */
 	.takeover	= raid0_takeover,
 	.quiesce	= raid0_quiesce,
 };

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Scsi Host Layer for MPT (Message Passing Technology) based controllers
  *
@@ -7521,9 +7524,9 @@ static struct scsi_host_template scsih_driver_template = {
 	.use_clustering			= ENABLE_CLUSTERING,
 	.shost_attrs			= mpt2sas_host_attrs,
 	.sdev_attrs			= mpt2sas_dev_attrs,
-#ifdef CONFIG_SYNO_FIXED_DISK_NAME
+#ifdef MY_ABC_HERE
 	.syno_port_type		= SYNO_PORT_TYPE_SAS,
-#endif /* CONFIG_SYNO_FIXED_DISK_NAME */
+#endif /* MY_ABC_HERE */
 };
 
 /**
@@ -7543,9 +7546,9 @@ _scsih_expander_node_remove(struct MPT2SAS_ADAPTER *ioc,
 {
 	struct _sas_port *mpt2sas_port, *next;
 
-#ifdef CONFIG_SYNO_SAS_RECOVER_REMOVED_ENCS
+#ifdef MY_DEF_HERE
 	msleep(100);
-#endif /* CONFIG_SYNO_SAS_RECOVER_REMOVED_ENCS */
+#endif /* MY_DEF_HERE */
 	/* remove sibling ports attached to this expander */
 	list_for_each_entry_safe(mpt2sas_port, next,
 	   &sas_expander->sas_port_list, port_list) {
@@ -7665,9 +7668,9 @@ _scsih_shutdown(struct pci_dev *pdev)
 	unsigned long flags;
 
 	ioc->remove_host = 1;
-#ifdef CONFIG_SYNO_SAS_MPT2_RESET_ON_REBOOT
+#ifdef MY_DEF_HERE
 	ioc->shutdown = 1;
-#endif /* CONFIG_SYNO_SAS_MPT2_RESET_ON_REBOOT */
+#endif /* MY_DEF_HERE */
 	_scsih_fw_event_cleanup_queue(ioc);
 
 	spin_lock_irqsave(&ioc->fw_event_lock, flags);

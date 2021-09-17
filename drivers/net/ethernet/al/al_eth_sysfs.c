@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* al_eth_sysfs.c: AnnapurnaLabs Unified 1GbE and 10GbE ethernet driver.
  *
  * Copyright (c) 2013 AnnapurnaLabs
@@ -153,7 +156,7 @@ static struct device_attribute dev_attr_link_training_enable = {
 	.store = al_eth_store_link_training_enable,
 };
 
-#ifdef CONFIG_SYNO_ALPINE_ADJUST_RX_EQUAL
+#ifdef MY_DEF_HERE
 static ssize_t al_eth_store_rx_equal_enable(struct device *dev,
 						  struct device_attribute *attr,
 						  const char *buf, size_t len)
@@ -190,7 +193,7 @@ static struct device_attribute dev_attr_rx_equal_enable = {
 	.show = al_eth_show_rx_equal_enable,
 	.store = al_eth_store_rx_equal_enable,
 };
-#endif /* CONFIG_SYNO_ALPINE_ADJUST_RX_EQUAL */
+#endif /* MY_DEF_HERE */
 
 static ssize_t al_eth_store_force_1000_base_x(struct device *dev,
 					      struct device_attribute *attr,
@@ -441,10 +444,10 @@ int al_eth_sysfs_init(
 	if (device_create_file(dev, &dev_attr_link_training_enable))
 		dev_info(dev, "failed to create link_training_enable sysfs entry");
 
-#ifdef CONFIG_SYNO_ALPINE_ADJUST_RX_EQUAL
+#ifdef MY_DEF_HERE
 	if (device_create_file(dev, &dev_attr_rx_equal_enable))
 		dev_info(dev, "failed to create rx_equal_enable sysfs entry");
-#endif /* CONFIG_SYNO_ALPINE_ADJUST_RX_EQUAL */
+#endif /* MY_DEF_HERE */
 
 	if (device_create_file(dev, &dev_attr_force_1000_base_x))
 		dev_info(dev, "failed to create force_1000_base_x sysfs entry");
@@ -490,9 +493,9 @@ void al_eth_sysfs_terminate(
 	device_remove_file(dev, &dev_attr_link_management_debug);
 	device_remove_file(dev, &dev_attr_max_rx_buff_alloc_size);
 	device_remove_file(dev, &dev_attr_link_training_enable);
-#ifdef CONFIG_SYNO_ALPINE_ADJUST_RX_EQUAL
+#ifdef MY_DEF_HERE
 	device_remove_file(dev, &dev_attr_rx_equal_enable);
-#endif /* CONFIG_SYNO_ALPINE_ADJUST_RX_EQUAL */
+#endif /* MY_DEF_HERE */
 	device_remove_file(dev, &dev_attr_force_1000_base_x);
 
 	for (i = 0; i < ARRAY_SIZE(dev_attr_udma_debug); i++)

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
    Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -82,21 +85,21 @@
 
 /* BAR 2 sizes */
 #define DFX_SIZE			_1M
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 #define SCPU_SIZE			_2M
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 #define SCPU_SIZE			_512K
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 #define ITCM_SIZE			_64K
 #define DTCM_SIZE			_64K
 
 /* BAR 2 bases */
 #define DFX_BASE			0x0
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 #define SCPU_BASE			(DFX_BASE + DFX_SIZE + _1M)/* keep aligned to the window size */
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 #define SCPU_BASE			(DFX_BASE + DFX_SIZE)
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 #define ITCM_BASE			(SCPU_BASE + SCPU_SIZE)
 #define DTCM_BASE			(ITCM_BASE + ITCM_SIZE)
 

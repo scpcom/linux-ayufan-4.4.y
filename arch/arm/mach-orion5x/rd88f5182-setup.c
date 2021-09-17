@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * arch/arm/mach-orion5x/rd88f5182-setup.c
  *
@@ -264,7 +267,7 @@ static void __init rd88f5182_init(void)
 	orion5x_uart0_init();
 	orion5x_xor_init();
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	mvebu_mbus_add_window_by_id(ORION_MBUS_DEVBUS_BOOT_TARGET,
 				    ORION_MBUS_DEVBUS_BOOT_ATTR,
 				    RD88F5182_NOR_BOOT_BASE,
@@ -273,13 +276,13 @@ static void __init rd88f5182_init(void)
 				    ORION_MBUS_DEVBUS_ATTR(1),
 				    RD88F5182_NOR_BASE,
 				    RD88F5182_NOR_SIZE);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	mvebu_mbus_add_window("devbus-boot", RD88F5182_NOR_BOOT_BASE,
 			      RD88F5182_NOR_BOOT_SIZE);
 
 	mvebu_mbus_add_window("devbus-cs1", RD88F5182_NOR_BASE,
 			      RD88F5182_NOR_SIZE);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	platform_device_register(&rd88f5182_nor_flash);
 	platform_device_register(&rd88f5182_gpio_leds);
 

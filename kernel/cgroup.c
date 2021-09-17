@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Generic process-grouping system.
  *
@@ -4637,11 +4640,11 @@ int __init cgroup_init_early(void)
 	return 0;
 }
 
-#ifdef CONFIG_SYNO_CGROUP_MEM_DISABLE
+#ifdef MY_ABC_HERE
 
 static unsigned int SynoCgroupMemIsDisabled = 1;
 
-#endif /* CONFIG_SYNO_CGROUP_MEM_DISABLE */
+#endif /* MY_ABC_HERE */
 
 /**
  * cgroup_init - cgroup initialization
@@ -4671,7 +4674,7 @@ int __init cgroup_init(void)
 		if (ss->use_id)
 			cgroup_init_idr(ss, init_css_set.subsys[ss->subsys_id]);
 
-#ifdef CONFIG_SYNO_CGROUP_MEM_DISABLE
+#ifdef MY_ABC_HERE
 
 		/* default disable cgroup memory subsys  */
 		if (SynoCgroupMemIsDisabled && !strcmp("memory", ss->name)) {
@@ -5142,7 +5145,7 @@ static int __init cgroup_disable(char *str)
 }
 __setup("cgroup_disable=", cgroup_disable);
 
-#ifdef CONFIG_SYNO_CGROUP_MEM_DISABLE
+#ifdef MY_ABC_HERE
 
 static int __init SynoCGroupMemEnable(char *str) {
 
@@ -5172,7 +5175,7 @@ static int __init SynoCGroupMemEnable(char *str) {
 
 __setup("cgroup_memory", SynoCGroupMemEnable);
 
-#endif /* CONFIG_SYNO_CGROUP_MEM_DISABLE */
+#endif /* MY_ABC_HERE */
 
 /*
  * Functons for CSS ID.

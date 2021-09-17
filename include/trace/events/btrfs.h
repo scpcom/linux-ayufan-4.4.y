@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #undef TRACE_SYSTEM
 #define TRACE_SYSTEM btrfs
 
@@ -326,7 +329,7 @@ DECLARE_EVENT_CLASS(btrfs__writepage,
 				 BTRFS_I(inode)->root->root_key.objectid;
 	),
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	TP_printk("root = %llu(%s), ino = %lu, page_index = %llu, "
 		  "nr_to_write = %ld, pages_skipped = %ld, range_start = %llu, "
 		  "range_end = %llu, for_kupdate = %d, "
@@ -338,7 +341,7 @@ DECLARE_EVENT_CLASS(btrfs__writepage,
 		  __entry->for_kupdate,
 		  __entry->for_reclaim, __entry->range_cyclic,
 		  (unsigned long long)__entry->writeback_index)
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	TP_printk("root = %llu(%s), ino = %lu, page_index = %lu, "
 		  "nr_to_write = %ld, pages_skipped = %ld, range_start = %llu, "
 		  "range_end = %llu, for_kupdate = %d, "
@@ -350,7 +353,7 @@ DECLARE_EVENT_CLASS(btrfs__writepage,
 		  __entry->for_kupdate,
 		  __entry->for_reclaim, __entry->range_cyclic,
 		  (unsigned long)__entry->writeback_index)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 );
 
 DEFINE_EVENT(btrfs__writepage, __extent_writepage,

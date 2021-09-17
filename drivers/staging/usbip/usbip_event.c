@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2003-2008 Takahiro Hirofuchi
  *
@@ -119,7 +122,7 @@ int usbip_event_happened(struct usbip_device *ud)
 	int happened = 0;
 
 	spin_lock(&ud->lock);
-#ifdef CONFIG_SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 	if (0 != ud->event && USBIP_EH_RESET != ud->event) {
 		happened = 1;
 	}

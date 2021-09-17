@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -165,7 +168,7 @@ extern void mv_early_printk(char *fmt, ...);
 #define mvOsCacheUnmap(pDev, phys, size)                          \
 	dma_unmap_single((pDev), (dma_addr_t)(phys), (size), DMA_FROM_DEVICE)
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 #define mvOsCachePageFlush(pDev, page, offset, size)              \
 	(COHERENCY_FABRIC_HARD_MODE() ? (pfn_to_dma((pDev), page_to_pfn(page)) + (offset)) :             \
 	dma_map_page((pDev), (page), (offset), (size), DMA_TO_DEVICE))
@@ -173,7 +176,7 @@ extern void mv_early_printk(char *fmt, ...);
 #define mvOsCachePageInvalidate(pDev, page, offset, size)         \
 	(COHERENCY_FABRIC_HARD_MODE() ? (pfn_to_dma((pDev), page_to_pfn(page)) + (offset)) :             \
 	dma_map_page((pDev), (page), (offset), (size), DMA_FROM_DEVICE))
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 #define CPU_PHY_MEM(x)              ((MV_U32)x)
 #define CPU_MEMIO_CACHED_ADDR(x)    ((void *)x)

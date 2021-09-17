@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * External Interrupt Controller on Spider South Bridge
  *
@@ -235,18 +238,18 @@ static unsigned int __init spider_find_cascade_and_node(struct spider_pic *pic)
 	/* First, we check whether we have a real "interrupts" in the device
 	 * tree in case the device-tree is ever fixed
 	 */
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	struct of_phandle_args oirq;
 	if (of_irq_parse_one(pic->host->of_node, 0, &oirq) == 0)
 		return irq_create_of_mapping(&oirq);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	struct of_irq oirq;
 	if (of_irq_map_one(pic->host->of_node, 0, &oirq) == 0) {
 		virq = irq_create_of_mapping(oirq.controller, oirq.specifier,
 					     oirq.size);
 		return virq;
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	/* Now do the horrible hacks */
 	tmp = of_get_property(pic->host->of_node, "#interrupt-cells", NULL);

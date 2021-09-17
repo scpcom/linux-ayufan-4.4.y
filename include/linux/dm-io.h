@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2003 Sistina Software
  * Copyright (C) 2004 - 2008 Red Hat, Inc. All rights reserved.
@@ -77,10 +80,10 @@ void dm_io_client_destroy(struct dm_io_client *client);
  * Each bit in the optional 'sync_error_bits' bitset indicates whether an
  * error occurred doing io to the corresponding region.
  */
-#ifdef CONFIG_SYNO_MD_FLASHCACHE_SUPPORT
+#ifdef MY_ABC_HERE
 int syno_dm_io(struct dm_io_request *io_req, unsigned num_regions,
 	  struct dm_io_region *region, unsigned long *sync_error_bits);
-#endif /* CONFIG_SYNO_MD_FLASHCACHE_SUPPORT */
+#endif /* MY_ABC_HERE */
 int dm_io(struct dm_io_request *io_req, unsigned num_regions,
 	  struct dm_io_region *region, unsigned long *sync_error_bits);
 

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Kernel-based Virtual Machine driver for Linux
  *
@@ -2175,7 +2178,7 @@ int kvm_set_msr_common(struct kvm_vcpu *vcpu, struct msr_data *msr_info)
 				    msr, data);
 			return 1;
 		} else {
-#ifndef CONFIG_SYNO_KVM_IGNORE_MSRS
+#ifndef MY_DEF_HERE
 			vcpu_unimpl(vcpu, "ignored wrmsr: 0x%x data %llx\n",
 				    msr, data);
 #endif
@@ -2474,7 +2477,7 @@ int kvm_get_msr_common(struct kvm_vcpu *vcpu, u32 msr, u64 *pdata)
 			vcpu_unimpl(vcpu, "unhandled rdmsr: 0x%x\n", msr);
 			return 1;
 		} else {
-#ifndef CONFIG_SYNO_KVM_IGNORE_MSRS
+#ifndef MY_DEF_HERE
 			vcpu_unimpl(vcpu, "ignored rdmsr: 0x%x\n", msr);
 #endif
 			data = 0;

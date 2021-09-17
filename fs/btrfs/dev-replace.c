@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) STRATO AG 2012.  All rights reserved.
  *
@@ -431,7 +434,7 @@ leave_no_lock:
 	return ret;
 }
 
-#ifdef CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#ifdef MY_ABC_HERE
 #else
 /*
  * blocked until all flighting bios are finished.
@@ -461,7 +464,7 @@ static void btrfs_rm_dev_replace_unblocked(struct btrfs_fs_info *fs_info)
 	if (waitqueue_active(&fs_info->replace_wait))
 		wake_up(&fs_info->replace_wait);
 }
-#endif /* CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING */
+#endif /* MY_ABC_HERE */
 
 static int btrfs_dev_replace_finishing(struct btrfs_fs_info *fs_info,
 				       int scrub_ret)
@@ -490,13 +493,13 @@ static int btrfs_dev_replace_finishing(struct btrfs_fs_info *fs_info,
 	src_device = dev_replace->srcdev;
 	btrfs_dev_replace_unlock(dev_replace);
 
-#ifdef CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#ifdef MY_ABC_HERE
 	/* replace old device with new one in mapping tree */
 	if (!scrub_ret)
 		btrfs_dev_replace_update_device_in_mapping_tree(fs_info,
 								src_device,
 								tgt_device);
-#endif /* CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING */
+#endif /* MY_ABC_HERE */
 
 	/*
 	 * flush all outstanding I/O and inode extent mappings before the
@@ -529,7 +532,7 @@ static int btrfs_dev_replace_finishing(struct btrfs_fs_info *fs_info,
 	dev_replace->time_stopped = get_seconds();
 	dev_replace->item_needs_writeback = 1;
 
-#ifdef CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#ifdef MY_ABC_HERE
 	if (scrub_ret) {
 #else
 	/* replace old device with new one in mapping tree */
@@ -538,7 +541,7 @@ static int btrfs_dev_replace_finishing(struct btrfs_fs_info *fs_info,
 								src_device,
 								tgt_device);
 	} else {
-#endif /* CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING */
+#endif /* MY_ABC_HERE */
 		printk_in_rcu(KERN_ERR
 			      "BTRFS: btrfs_scrub_dev(%s, %llu, %s) failed %d\n",
 			      src_device->missing ? "<missing disk>" :
@@ -581,17 +584,17 @@ static int btrfs_dev_replace_finishing(struct btrfs_fs_info *fs_info,
 	btrfs_kobj_rm_device(fs_info, src_device);
 	btrfs_kobj_add_device(fs_info, tgt_device);
 
-#ifdef CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#ifdef MY_ABC_HERE
 #else
 	btrfs_rm_dev_replace_blocked(fs_info);
-#endif /* CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING */
+#endif /* MY_ABC_HERE */
 
 	btrfs_rm_dev_replace_srcdev(fs_info, src_device);
 
-#ifdef CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#ifdef MY_ABC_HERE
 #else
 	btrfs_rm_dev_replace_unblocked(fs_info);
-#endif /* CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING*/
+#endif /* MY_ABC_HERE*/
 
 	/*
 	 * this is again a consistent state where no dev_replace procedure
@@ -923,7 +926,7 @@ void btrfs_dev_replace_unlock(struct btrfs_dev_replace *dev_replace)
 	}
 }
 
-#ifdef CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#ifdef MY_ABC_HERE
 #else
 void btrfs_bio_counter_inc_noblocked(struct btrfs_fs_info *fs_info)
 {
@@ -952,4 +955,4 @@ again:
 	}
 
 }
-#endif /* CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING */
+#endif /* MY_ABC_HERE */

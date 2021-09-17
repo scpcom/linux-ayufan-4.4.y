@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -95,9 +98,9 @@ static int              mv_num_semaphores = MV_SEMAPHORES_DEF;
 
 module_param(mv_num_semaphores, int, S_IRUGO);
 
-#if defined(CONFIG_SYNO_ARMADA) && defined(CONFIG_OF)
+#if defined(MY_ABC_HERE) && defined(CONFIG_OF)
 // do nothing
-#else /* CONFIG_SYNO_ARMADA */
+#else /* MY_ABC_HERE */
 /*******************************************************************************
 * mvKernelExtSem_read_proc_mem
 *
@@ -181,7 +184,7 @@ static int mvKernelExtSem_read_proc_mem(
 
     return len;
 }
-#endif /* CONFIG_SYNO_ARMADA */
+#endif /* MY_ABC_HERE */
 
 #ifdef CONFIG_OF
 static int proc_status_show(struct seq_file *m, void *v) {

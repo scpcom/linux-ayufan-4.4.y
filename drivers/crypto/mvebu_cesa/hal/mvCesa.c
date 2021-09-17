@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -1025,7 +1028,7 @@ MV_STATUS mvCesaAction(MV_U8 chan, MV_CESA_COMMAND *pCmd)
 				return MV_OUT_OF_CPU_MEM;
 			}
 			status = mvCesaFragReqProcess(chan, pReq, frag);
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 			if (status == MV_OK && frag) {
 				pReq->dma[frag - 1].pDmaLast->phyNextDescPtr =
 					MV_32BIT_LE(mvCesaVirtToPhys(&pReq->dmaDescBuf,
@@ -1034,7 +1037,7 @@ MV_STATUS mvCesaAction(MV_U8 chan, MV_CESA_COMMAND *pCmd)
 					       sizeof(MV_DMA_DESC));
 			}
 			frag++;
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 			if (status == MV_OK) {
 #if defined(MV_CESA_CHAIN_MODE) || defined(MV_CESA_INT_COALESCING_SUPPORT) || \
 							     defined(CONFIG_OF)
@@ -1055,7 +1058,7 @@ MV_STATUS mvCesaAction(MV_U8 chan, MV_CESA_COMMAND *pCmd)
 #endif /* MV_CESA_CHAIN_MODE || MV_CESA_INT_COALESCING_SUPPORT || CONFIG_OF*/
 				frag++;
 			}
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 		}
 		pReq->frags.numFrag = frag;
 
@@ -1292,7 +1295,7 @@ MV_STATUS mvCesaReadyGet(MV_U8 chan, MV_CESA_RESULT *pResult)
 		int frag;
 
 #if defined(MV_CESA_CHAIN_MODE) || defined(MV_CESA_INT_COALESCING_SUPPORT) || \
-							     defined(CONFIG_OF) || defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+							     defined(CONFIG_OF) || defined(MY_ABC_HERE)
 		pReq->frags.nextFrag = 1;
 		while (pReq->frags.nextFrag <= pReq->frags.numFrag) {
 #endif
@@ -1338,10 +1341,10 @@ MV_STATUS mvCesaReadyGet(MV_U8 chan, MV_CESA_RESULT *pResult)
 				}
 				readyStatus = MV_OK;
 			}
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 			pReq->frags.nextFrag++;
 		}
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 #if defined(MV_CESA_CHAIN_MODE) || defined(MV_CESA_INT_COALESCING_SUPPORT) || \
 							     defined(CONFIG_OF)
 #ifdef CONFIG_OF
@@ -1355,7 +1358,7 @@ MV_STATUS mvCesaReadyGet(MV_U8 chan, MV_CESA_RESULT *pResult)
 #endif /* CONFIG_OF */
 	}
 #endif /* MV_CESA_CHAIN_MODE || MV_CESA_INT_COALESCING_SUPPORT || CONFIG_OF */
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	} else {
 		mvCesaMbufCacheUnmap(pReq->pCmd->pDst, 0, pReq->pCmd->pDst->mbufSize);
 

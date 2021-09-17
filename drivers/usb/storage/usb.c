@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* Driver for USB Mass Storage compliant devices
  *
  * Current development and maintenance by:
@@ -857,11 +860,11 @@ static void quiesce_and_remove_host(struct us_data *us)
 	if (test_bit(US_FLIDX_SCAN_PENDING, &us->dflags))
 		usb_autopm_put_interface_no_suspend(us->pusb_intf);
 
-#ifdef CONFIG_SYNO_ENHANCE_STORAGE_DISCONNECTION
+#ifdef MY_ABC_HERE
 	scsi_lock(host);
 	usb_stor_stop_transport(us);
 	scsi_unlock(host);
-#endif /* CONFIG_SYNO_ENHANCE_STORAGE_DISCONNECTION */
+#endif /* MY_ABC_HERE */
 
 	/* Removing the host will perform an orderly shutdown: caches
 	 * synchronized, disks spun down, etc.

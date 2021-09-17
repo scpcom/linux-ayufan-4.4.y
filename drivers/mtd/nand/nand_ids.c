@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  drivers/mtd/nandids.c
  *
@@ -114,10 +117,10 @@ struct nand_flash_dev nand_flash_ids[] = {
 	/* 8 Gigabit */
 	EXTENDED_ID_NAND("NAND 1GiB 1,8V 8-bit",  0xA3, 1024, LP_OPTIONS),
 	EXTENDED_ID_NAND("NAND 1GiB 3,3V 8-bit",  0xD3, 1024, LP_OPTIONS),
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	{"NAND 1GiB 3,3V 8-bit", { { .dev_id = 0x38 } },
 		  4096, 1024, 524288, LP_OPTIONS},
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	EXTENDED_ID_NAND("NAND 1GiB 1,8V 16-bit", 0xB3, 1024, LP_OPTIONS16),
 	EXTENDED_ID_NAND("NAND 1GiB 3,3V 16-bit", 0xC3, 1024, LP_OPTIONS16),
 
@@ -129,7 +132,7 @@ struct nand_flash_dev nand_flash_ids[] = {
 
 	/* 32 Gigabit */
 	EXTENDED_ID_NAND("NAND 4GiB 1,8V 8-bit",  0xA7, 4096, LP_OPTIONS),
-#if defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_MTD_NAND_NFC_MLC_SUPPORT)
+#if defined(MY_ABC_HERE) && defined(CONFIG_MTD_NAND_NFC_MLC_SUPPORT)
 	/* 32 Gigabit - wrongly detected due to changes in READ_ID decoding */
 	{"NAND 4GiB 3,3V 8-bit", { { .dev_id = 0xD7 } },
 		4096, 4096, 524288, LP_OPTIONS},
@@ -188,7 +191,7 @@ struct nand_manufacturers nand_manuf_ids[] = {
 EXPORT_SYMBOL(nand_manuf_ids);
 EXPORT_SYMBOL(nand_flash_ids);
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 /*
  * ONFI NAND Timing Mode Specifications
  *
@@ -838,7 +841,7 @@ int nand_decode_readid(struct mtd_info *mtd,
 }
 EXPORT_SYMBOL(nand_decode_readid);
 
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Thomas Gleixner <tglx@linutronix.de>");
 MODULE_DESCRIPTION("Nand device & manufacturer IDs");

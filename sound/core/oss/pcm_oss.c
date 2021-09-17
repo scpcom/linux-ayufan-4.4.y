@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Digital Audio (PCM) abstract layer / OSS compatible
  *  Copyright (c) by Jaroslav Kysela <perex@perex.cz>
@@ -218,9 +221,9 @@ static int snd_pcm_hw_param_mask(struct snd_pcm_substream *pcm,
 	}
 	return 0;
 }
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 EXPORT_SYMBOL_GPL(snd_pcm_hw_param_mask);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 static int _snd_pcm_hw_param_min(struct snd_pcm_hw_params *params,
 				 snd_pcm_hw_param_t var, unsigned int val,
@@ -252,9 +255,9 @@ static int _snd_pcm_hw_param_min(struct snd_pcm_hw_params *params,
 	}
 	return changed;
 }
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 EXPORT_SYMBOL_GPL(_snd_pcm_hw_param_min);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 /**
  * snd_pcm_hw_param_min
@@ -474,9 +477,9 @@ static int snd_pcm_hw_param_near(struct snd_pcm_substream *pcm,
 	snd_BUG_ON(v < 0);
 	return v;
 }
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 EXPORT_SYMBOL_GPL(snd_pcm_hw_param_near);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 static int _snd_pcm_hw_param_set(struct snd_pcm_hw_params *params,
 				 snd_pcm_hw_param_t var, unsigned int val,
@@ -553,9 +556,9 @@ static int snd_pcm_hw_param_set(struct snd_pcm_substream *pcm,
 	}
 	return snd_pcm_hw_param_value(params, var, NULL);
 }
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 EXPORT_SYMBOL_GPL(snd_pcm_hw_param_set);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 static int _snd_pcm_hw_param_setinteger(struct snd_pcm_hw_params *params,
 					snd_pcm_hw_param_t var)
@@ -568,9 +571,9 @@ static int _snd_pcm_hw_param_setinteger(struct snd_pcm_hw_params *params,
 	}
 	return changed;
 }
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 EXPORT_SYMBOL_GPL(_snd_pcm_hw_param_setinteger);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	
 /*
  * plugin
@@ -735,11 +738,11 @@ static int snd_pcm_oss_period_size(struct snd_pcm_substream *substream,
 	oss_buffer_size = snd_pcm_plug_client_size(substream,
 						   snd_pcm_hw_param_value_max(slave_params, SNDRV_PCM_HW_PARAM_BUFFER_SIZE, NULL)) * oss_frame_size;
 	oss_buffer_size = 1 << ld2(oss_buffer_size);
-#if defined(CONFIG_SYNO_AUDIO_SMALLER_BUFFER)
+#if defined(MY_ABC_HERE)
 	if (oss_buffer_size > 65536) {
 		oss_buffer_size = 65536;
 	}
-#endif /* CONFIG_SYNO_AUDIO_SMALLER_BUFFER */
+#endif /* MY_ABC_HERE */
 	if (atomic_read(&substream->mmap_count)) {
 		if (oss_buffer_size > runtime->oss.mmap_bytes)
 			oss_buffer_size = runtime->oss.mmap_bytes;

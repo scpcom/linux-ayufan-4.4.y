@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Cherryview/Braswell pinctrl driver
  *
@@ -28,9 +31,9 @@
 #include <linux/pinctrl/pinconf-generic.h>
 #include <linux/platform_device.h>
 
-#ifdef CONFIG_SYNO_CHERRYVIEW_GPIO_WRITE_RETRY
+#ifdef MY_DEF_HERE
 #include <linux/delay.h>
-#endif /* CONFIG_SYNO_CHERRYVIEW_GPIO_WRITE_RETRY */
+#endif /* MY_DEF_HERE */
 
 #define CHV_INTSTAT			0x300
 #define CHV_INTMASK			0x380
@@ -152,9 +155,9 @@ struct chv_community {
 	const struct chv_gpio_pinrange *gpio_ranges;
 	size_t ngpio_ranges;
 	size_t ngpios;
-#ifdef CONFIG_SYNO_X86_PINCTRL_GPIO
+#ifdef MY_DEF_HERE
 	int base;
-#endif /* CONFIG_SYNO_X86_PINCTRL_GPIO */
+#endif /* MY_DEF_HERE */
 };
 
 struct chv_pin_context {
@@ -409,9 +412,9 @@ static const struct chv_community southwest_community = {
 	.gpio_ranges = southwest_gpio_ranges,
 	.ngpio_ranges = ARRAY_SIZE(southwest_gpio_ranges),
 	.ngpios = ARRAY_SIZE(southwest_pins),
-#ifdef CONFIG_SYNO_X86_PINCTRL_GPIO
+#ifdef MY_DEF_HERE
 	.base = 0 ,
-#endif /* CONFIG_SYNO_X86_PINCTRL_GPIO */
+#endif /* MY_DEF_HERE */
 };
 
 static const struct pinctrl_pin_desc north_pins[] = {
@@ -495,9 +498,9 @@ static const struct chv_community north_community = {
 	.gpio_ranges = north_gpio_ranges,
 	.ngpio_ranges = ARRAY_SIZE(north_gpio_ranges),
 	.ngpios = ARRAY_SIZE(north_pins),
-#ifdef CONFIG_SYNO_X86_PINCTRL_GPIO
+#ifdef MY_DEF_HERE
     .base = 56 ,
-#endif /* CONFIG_SYNO_X86_PINCTRL_GPIO */
+#endif /* MY_DEF_HERE */
 };
 
 static const struct pinctrl_pin_desc east_pins[] = {
@@ -540,9 +543,9 @@ static const struct chv_community east_community = {
 	.gpio_ranges = east_gpio_ranges,
 	.ngpio_ranges = ARRAY_SIZE(east_gpio_ranges),
 	.ngpios = ARRAY_SIZE(east_pins),
-#ifdef CONFIG_SYNO_X86_PINCTRL_GPIO
+#ifdef MY_DEF_HERE
     .base = 115 ,
-#endif /* CONFIG_SYNO_X86_PINCTRL_GPIO */
+#endif /* MY_DEF_HERE */
 };
 
 static const struct pinctrl_pin_desc southeast_pins[] = {
@@ -668,9 +671,9 @@ static const struct chv_community southeast_community = {
 	.gpio_ranges = southeast_gpio_ranges,
 	.ngpio_ranges = ARRAY_SIZE(southeast_gpio_ranges),
 	.ngpios = ARRAY_SIZE(southeast_pins),
-#ifdef CONFIG_SYNO_X86_PINCTRL_GPIO
+#ifdef MY_DEF_HERE
     .base = 139 ,
-#endif /* CONFIG_SYNO_X86_PINCTRL_GPIO */
+#endif /* MY_DEF_HERE */
 };
 
 static const struct chv_community *chv_communities[] = {
@@ -778,7 +781,7 @@ static struct pinctrl_desc chv_pinctrl_desc = {
 	.owner = THIS_MODULE,
 };
 
-#ifdef CONFIG_SYNO_X86_PINCTRL_GPIO
+#ifdef MY_DEF_HERE
 static int chv_gpio_request(struct gpio_chip *chip, unsigned offset)
 {
 	int iRet = -EBUSY; // We do not want native function pin to be muxed
@@ -805,7 +808,7 @@ static void chv_gpio_free(struct gpio_chip *chip, unsigned offset)
 {
     // we don't want GPIO pin to be freed
 }
-#else /* CONFIG_SYNO_X86_PINCTRL_GPIO */
+#else /* MY_DEF_HERE */
 static int chv_gpio_request(struct gpio_chip *chip, unsigned offset)
 {
 	return pinctrl_request_gpio(chip->base + offset);
@@ -815,7 +818,7 @@ static void chv_gpio_free(struct gpio_chip *chip, unsigned offset)
 {
 	pinctrl_free_gpio(chip->base + offset);
 }
-#endif /* CONFIG_SYNO_X86_PINCTRL_GPIO */
+#endif /* MY_DEF_HERE */
 
 static unsigned chv_gpio_offset_to_pin(struct chv_pinctrl *pctrl,
 				       unsigned offset)
@@ -846,9 +849,9 @@ static void chv_gpio_set(struct gpio_chip *chip, unsigned offset, int value)
 	unsigned long flags;
 	void __iomem *reg;
 	u32 ctrl0;
-#ifdef CONFIG_SYNO_CHERRYVIEW_GPIO_WRITE_RETRY
+#ifdef MY_DEF_HERE
 	int iRetry = 0;
-#endif /* CONFIG_SYNO_CHERRYVIEW_GPIO_WRITE_RETRY */
+#endif /* MY_DEF_HERE */
 
 	spin_lock_irqsave(&pctrl->lock, flags);
 
@@ -862,7 +865,7 @@ static void chv_gpio_set(struct gpio_chip *chip, unsigned offset, int value)
 
 	chv_writel(ctrl0, reg);
 
-#ifdef CONFIG_SYNO_CHERRYVIEW_GPIO_WRITE_RETRY
+#ifdef MY_DEF_HERE
 	do {
 		mdelay(10);
 		if (ctrl0 == readl(reg)) {
@@ -876,7 +879,7 @@ static void chv_gpio_set(struct gpio_chip *chip, unsigned offset, int value)
 	if (iRetry != 0) {
 		printk("finish GPIO rewrite %d retry\n", iRetry);
 	}
-#endif /* CONFIG_SYNO_CHERRYVIEW_GPIO_WRITE_RETRY */
+#endif /* MY_DEF_HERE */
 
 	spin_unlock_irqrestore(&pctrl->lock, flags);
 }
@@ -894,7 +897,7 @@ static int chv_gpio_get_direction(struct gpio_chip *chip, unsigned offset)
 
 	return direction != CHV_PADCTRL0_GPIOCFG_GPO;
 }
-#ifdef CONFIG_SYNO_X86_PINCTRL_GPIO
+#ifdef MY_DEF_HERE
 /* we do not want the direction to be changed at all */
 static int chv_gpio_direction_input(struct gpio_chip *chip, unsigned offset)
 {
@@ -906,7 +909,7 @@ static int chv_gpio_direction_output(struct gpio_chip *chip, unsigned offset,
 {
 	return -ENOSYS;
 }
-#else /* CONFIG_SYNO_X86_PINCTRL_GPIO */
+#else /* MY_DEF_HERE */
 static int chv_gpio_direction_input(struct gpio_chip *chip, unsigned offset)
 {
 	return pinctrl_gpio_direction_input(chip->base + offset);
@@ -918,7 +921,7 @@ static int chv_gpio_direction_output(struct gpio_chip *chip, unsigned offset,
 	chv_gpio_set(chip, offset, value);
 	return pinctrl_gpio_direction_output(chip->base + offset);
 }
-#endif /* CONFIG_SYNO_X86_PINCTRL_GPIO */
+#endif /* MY_DEF_HERE */
 static const struct gpio_chip chv_gpio_chip = {
 	.owner = THIS_MODULE,
 	.request = chv_gpio_request,
@@ -941,12 +944,12 @@ static int chv_gpio_probe(struct chv_pinctrl *pctrl, int irq)
 	chip->ngpio = pctrl->community->ngpios;
 	chip->label = dev_name(pctrl->dev);
 	chip->dev = pctrl->dev;
-#ifdef CONFIG_SYNO_X86_PINCTRL_GPIO
+#ifdef MY_DEF_HERE
 	chip->base = pctrl->community->base; // Use the pre-coded GPIO base insteaded of dynamic assignment
 	printk(KERN_INFO"cherryview-pinctrl: Adding GPIO Controller - Pin ranged %d ~ %d \n", chip->base, (chip->base + chip->ngpio - 1));
-#else /* CONFIG_SYNO_X86_PINCTRL_GPIO */
+#else /* MY_DEF_HERE */
 	chip->base = -1;
-#endif /* CONFIG_SYNO_X86_PINCTRL_GPIO */
+#endif /* MY_DEF_HERE */
 	ret = gpiochip_add(chip);
 	if (ret) {
 		dev_err(pctrl->dev, "Failed to register gpiochip\n");

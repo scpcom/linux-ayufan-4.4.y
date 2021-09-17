@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * arch/arm/mach-sti/include/mach/io.h
  *
@@ -34,8 +37,8 @@
 
 #define __io(a)		__typesafe_io((a) & IO_SPACE_LIMIT)
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 #ifdef CONFIG_STM_PCIE_TRACKER_BUG
 
 #include <linux/spinlock.h>
@@ -263,6 +266,6 @@ extern void __iomem *ioport_map(unsigned long port, unsigned int nr);
 extern void ioport_unmap(void __iomem *addr);
 
 #endif  /* CONFIG_STM_PCIE_TRACKER_BUG */
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 #endif

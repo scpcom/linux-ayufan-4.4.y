@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * drivers/usb/driver.c - most of the driver model stuff for usb
  *
@@ -31,7 +34,7 @@
 
 #include "usb.h"
 
-#ifdef CONFIG_SYNO_HAS_SDCARDREADER
+#ifdef MY_ABC_HERE
 #include <linux/synobios.h>
 
 extern int (*funcSYNOGetHwCapability)(CAPABILITY *);
@@ -56,11 +59,11 @@ END:
 	return ret;
 }
 
-#endif /* CONFIG_SYNO_HAS_SDCARDREADER */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_USB_COPY
+#ifdef MY_ABC_HERE
 extern int blIsUSBDeviceAtFrontPort(struct usb_device *usbdev);
-#endif /* CONFIG_SYNO_USB_COPY */
+#endif /* MY_ABC_HERE */
 
 /*
  * Adds a new dynamic USBdevice ID to this driver,
@@ -841,21 +844,21 @@ static int usb_uevent(struct device *dev, struct kobj_uevent_env *env)
 			   usb_dev->descriptor.bDeviceProtocol))
 		return -ENOMEM;
 
-#ifdef CONFIG_SYNO_USB_COPY
+#ifdef MY_ABC_HERE
 	if (blIsUSBDeviceAtFrontPort(usb_dev)) {
 		if (add_uevent_var(env, "FRONTPORT=1"))
 			return -ENOMEM;
 	}
-#endif /* CONFIG_SYNO_USB_COPY */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_HAS_SDCARDREADER
+#ifdef MY_ABC_HERE
 	if(has_cardreader()) {
 		if (blIsCardReader(usb_dev)) {
 			if (add_uevent_var(env, "CARDREADER=1"))
 				return -ENOMEM;
 		}
 	}
-#endif /* CONFIG_SYNO_HAS_SDCARDREADER */
+#endif /* MY_ABC_HERE */
 
 	return 0;
 }
@@ -1491,7 +1494,7 @@ int usb_resume(struct device *dev, pm_message_t msg)
  */
 void usb_enable_autosuspend(struct usb_device *udev)
 {
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	/*
 	 * FIXME: This patch is a WA to avoid issue when a hub is used and PM_RUNTIME
 	 * is enabled. So we keep system PM_runtime ON and only prevent usb to autosuspend
@@ -1499,9 +1502,9 @@ void usb_enable_autosuspend(struct usb_device *udev)
 	 */
 
 /*        pm_runtime_allow(&udev->dev);*/
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	pm_runtime_allow(&udev->dev);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 }
 EXPORT_SYMBOL_GPL(usb_enable_autosuspend);
 

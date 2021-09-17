@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Multi-Target Trace solution
  *
@@ -278,10 +281,10 @@ static struct mtt_component_obj *create_mtt_component_obj(int comp_id,
 							  int early)
 {
 	struct mtt_component_obj *mtt_component;
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 	int retval;
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	/* Allocate the memory for the whole object */
 	mtt_component = kzalloc(sizeof(*mtt_component), GFP_KERNEL);
@@ -296,7 +299,7 @@ static struct mtt_component_obj *create_mtt_component_obj(int comp_id,
 
 	/* Some early or internal components will not have a kobj */
 	if (!early) {
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 		char sname[16];
 		const char *pname;
 
@@ -327,7 +330,7 @@ static struct mtt_component_obj *create_mtt_component_obj(int comp_id,
 			}
 		} else
 			return mtt_component;
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 		mtt_component->kobj.kset = component_kset;
 		/* Initialize and add the kobject to the kernel. */
 		if (name)
@@ -344,7 +347,7 @@ static struct mtt_component_obj *create_mtt_component_obj(int comp_id,
 			kfree(mtt_component);
 			return NULL;
 		}
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 		kobject_uevent(&mtt_component->kobj, KOBJ_ADD);
 	}

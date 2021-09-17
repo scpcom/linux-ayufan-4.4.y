@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  libata-sff.c - helper library for PCI IDE BMDMA
  *
@@ -1008,7 +1011,7 @@ static void ata_hsm_qc_complete(struct ata_queued_cmd *qc, int in_wq)
 			 */
 			qc = ata_qc_from_tag(ap, qc->tag);
 			if (qc) {
-#ifdef CONFIG_SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 				if (IS_SYNO_SPINUP_CMD(qc)) {
 					ata_sff_irq_on(ap);
 					/* read result TF if requested, copy from ata_qc_complete() and fill_result_tf() */
@@ -1022,10 +1025,10 @@ static void ata_hsm_qc_complete(struct ata_queued_cmd *qc, int in_wq)
 				} else if (likely(!(qc->err_mask & AC_ERR_HSM))) {
 #else
 				if (likely(!(qc->err_mask & AC_ERR_HSM))) {
-#endif /* CONFIG_SYNO_SPINUP_DELAY */
+#endif /* MY_ABC_HERE */
 					ata_sff_irq_on(ap);
 					ata_qc_complete(qc);
-#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 				} else {
 					if (NULL == qc->scsicmd && !ata_tag_internal(qc->tag)) {
 						DBGMESG("disk %d:its our insert cmd,don't freeze. cmd 0x%x tag %d feature 0x%x\n",
@@ -1038,12 +1041,12 @@ static void ata_hsm_qc_complete(struct ata_queued_cmd *qc, int in_wq)
 #else
 				} else
 					ata_port_freeze(ap);
-#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
+#endif /* MY_ABC_HERE */
 			}
 
 			spin_unlock_irqrestore(ap->lock, flags);
 		} else {
-#ifdef CONFIG_SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 			if (IS_SYNO_SPINUP_CMD(qc)) {
 				/* read result TF if requested, copy from ata_qc_complete() and fill_result_tf() */
 				if (qc->err_mask ||
@@ -1056,9 +1059,9 @@ static void ata_hsm_qc_complete(struct ata_queued_cmd *qc, int in_wq)
 			} else if (likely(!(qc->err_mask & AC_ERR_HSM)))
 #else
 			if (likely(!(qc->err_mask & AC_ERR_HSM)))
-#endif /* CONFIG_SYNO_SPINUP_DELAY */
+#endif /* MY_ABC_HERE */
 				ata_qc_complete(qc);
-#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 			else {
 				if (NULL == qc->scsicmd && !ata_tag_internal(qc->tag)) {
 					DBGMESG("disk %d:its our insert cmd,don't freeze. cmd 0x%x tag %d feature 0x%x\n",
@@ -1071,7 +1074,7 @@ static void ata_hsm_qc_complete(struct ata_queued_cmd *qc, int in_wq)
 #else
 			else
 				ata_port_freeze(ap);
-#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
+#endif /* MY_ABC_HERE */
 		}
 	} else {
 		if (in_wq) {
@@ -1099,32 +1102,32 @@ int ata_sff_hsm_move(struct ata_port *ap, struct ata_queued_cmd *qc,
 {
 	struct ata_link *link = qc->dev->link;
 	struct ata_eh_info *ehi = &link->eh_info;
-#if defined(CONFIG_SYNO_SPINUP_DELAY) && defined(CONFIG_SYNO_SATA_PM_DEVICE_GPIO)
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
 	struct ata_taskfile *tf = &qc->tf;
-#endif /* CONFIG_SYNO_SPINUP_DELAY && CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
+#endif /* MY_ABC_HERE && CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
 	unsigned long flags = 0;
 	int poll_next;
 
-#ifdef CONFIG_SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 	/* if our ATA_CMD_FPDMA_READ command timeout,
 	 * it will be flushed (ATA_QCFLAG_ACTIVE = 0).
 	 * But it still in workqueue, so we should be ignore it when called by ata_pio_task
 	 */
 	if (IS_SYNO_SPINUP_CMD(qc)
-#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 		|| !(IS_SYNO_PMP_CMD(tf))
-#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
+#endif /* MY_ABC_HERE */
 		) {
 		WARN_ON_ONCE((qc->flags & ATA_QCFLAG_ACTIVE) == 0);
 	}
-#else /* CONFIG_SYNO_SPINUP_DELAY */
+#else /* MY_ABC_HERE */
 
 	/* Make sure ata_sff_qc_issue() does not throw things
 	 * like DMA polling into the workqueue. Notice that
 	 * in_wq is not equivalent to (qc->tf.flags & ATA_TFLAG_POLLING).
 	 */
 	WARN_ON_ONCE(in_wq != ata_hsm_ok_in_wq(ap, qc));
-#endif /* CONFIG_SYNO_SPINUP_DELAY */
+#endif /* MY_ABC_HERE */
 
 fsm_start:
 	DPRINTK("ata%u: protocol %d task_state %d (dev_stat 0x%X)\n",
@@ -1401,7 +1404,7 @@ void ata_sff_flush_pio_task(struct ata_port *ap)
 
 	cancel_delayed_work_sync(&ap->sff_pio_task);
 
-#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	/*
 	 * FIXME:
 	 * The following kernel upstream fix doesn't apply to our kernel
@@ -1414,7 +1417,7 @@ void ata_sff_flush_pio_task(struct ata_port *ap)
 	 * space and will be preempted by EH, EH also use internal commands. This
 	 * spin_lock_irq may cause deadlock, so we remove it.
 	 */
-#else /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
+#else /* MY_ABC_HERE */
 	/*
 	 * We wanna reset the HSM state to IDLE.  If we do so without
 	 * grabbing the port lock, critical sections protected by it which
@@ -1424,13 +1427,13 @@ void ata_sff_flush_pio_task(struct ata_port *ap)
 	 * ata_sff_hsm_move() causing ata_sff_hsm_move() to BUG().
 	 */
 	spin_lock_irq(ap->lock);
-#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
+#endif /* MY_ABC_HERE */
 	ap->hsm_task_state = HSM_ST_IDLE;
-#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	/* Please see above FIXME */
-#else /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
+#else /* MY_ABC_HERE */
 	spin_unlock_irq(ap->lock);
-#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
+#endif /* MY_ABC_HERE */
 
 	ap->sff_pio_task_link = NULL;
 

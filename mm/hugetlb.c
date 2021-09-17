@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Generic hugetlb support.
  * (C) Nadia Yvette Chambers, April 2004
@@ -2261,13 +2264,13 @@ static void hugetlb_vm_op_close(struct vm_area_struct *vma)
 	struct resv_map *reservations = vma_resv_map(vma);
 	struct hugepage_subpool *spool = subpool_vma(vma);
 	unsigned long reserve;
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 	pgoff_t start;
 	pgoff_t end;
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	unsigned long start;
 	unsigned long end;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 	if (reservations) {
 		start = vma_hugecache_offset(h, vma, vma->vm_start);
@@ -2762,11 +2765,11 @@ static int hugetlb_no_page(struct mm_struct *mm, struct vm_area_struct *vma,
 	int ret = VM_FAULT_SIGBUS;
 	int anon_rmap = 0;
 	pgoff_t idx;
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 	loff_t size;
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	unsigned long size;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	struct page *page;
 	struct address_space *mapping;
 	pte_t new_pte;

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Asynchronous RAID-6 recovery calculations ASYNC_TX API.
  * Copyright(c) 2009 Intel Corporation
@@ -43,11 +46,11 @@ async_sum_product(struct page *dest, struct page **srcs, unsigned char *coef,
 		dma_addr_t dma_src[2];
 		struct device *dev = dma->dev;
 		struct dma_async_tx_descriptor *tx;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		enum dma_ctrl_flags dma_flags = DMA_PREP_PQ_DISABLE_P | DMA_PREP_PQ_SUM_PRODUCT;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		enum dma_ctrl_flags dma_flags = DMA_PREP_PQ_DISABLE_P;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 		if (submit->flags & ASYNC_TX_FENCE)
 			dma_flags |= DMA_PREP_FENCE;
@@ -101,11 +104,11 @@ async_mult(struct page *dest, struct page *src, u8 coef, size_t len,
 		dma_addr_t dma_src[1];
 		struct device *dev = dma->dev;
 		struct dma_async_tx_descriptor *tx;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		enum dma_ctrl_flags dma_flags = DMA_PREP_PQ_DISABLE_P | DMA_PREP_PQ_MULT;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		enum dma_ctrl_flags dma_flags = DMA_PREP_PQ_DISABLE_P;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 		if (submit->flags & ASYNC_TX_FENCE)
 			dma_flags |= DMA_PREP_FENCE;

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * ethtool.h: Defines for Linux ethtool.
  *
@@ -972,9 +975,9 @@ enum ethtool_sfeatures_retval_bits {
 #define SPEED_100		100
 #define SPEED_1000		1000
 #define SPEED_2500		2500
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #define SPEED_5000		5000
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 #define SPEED_10000		10000
 #define SPEED_UNKNOWN		-1
 

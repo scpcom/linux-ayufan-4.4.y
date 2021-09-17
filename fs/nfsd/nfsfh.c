@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * NFS server file handle treatment.
  *
@@ -14,10 +17,10 @@
 #include "vfs.h"
 #include "auth.h"
 
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 #include "../synoacl_int.h"
 #include <linux/magic.h>
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 
 #define NFSDDBG_FACILITY		NFSDDBG_FH
 
@@ -34,7 +37,7 @@ static int nfsd_acceptable(void *expv, struct dentry *dentry)
 	struct dentry *tdentry;
 	struct dentry *parent;
 
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
        // if dentry disconnect && dentry is the d_obtain_alias default dentry. The ACL inherit will not correct
        // We can't accept this kind of dentry.
        // linux-2.6.32 d_obtain_alias default dentry = ""
@@ -44,7 +47,7 @@ static int nfsd_acceptable(void *expv, struct dentry *dentry)
                ('\0' == dentry->d_iname[0]))) {
                return 0;
        }
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 	if (exp->ex_flags & NFSEXP_NOSUBTREECHECK)
 		return 1;
 
@@ -53,11 +56,11 @@ static int nfsd_acceptable(void *expv, struct dentry *dentry)
 		/* make sure parents give x permission to user */
 		int err;
 		parent = dget_parent(tdentry);
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 		if (IS_SYNOACL(parent)) {
 			err = synoacl_op_perm(parent, MAY_EXEC);
 		} else 
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 		err = inode_permission(parent->d_inode, MAY_EXEC);
 		if (err < 0) {
 			dput(parent);
@@ -285,7 +288,7 @@ out:
 	return error;
 }
 
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 static int CheckPermInFileSystem(int access)
 {
 	if (access & NFSD_MAY_SATTR) {
@@ -296,7 +299,7 @@ static int CheckPermInFileSystem(int access)
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 
 /**
  * fh_verify - filehandle lookup and access checking
@@ -391,11 +394,11 @@ fh_verify(struct svc_rqst *rqstp, struct svc_fh *fhp, umode_t type, int access)
 
 skip_pseudoflavor_check:
 	/* Finally, check access permissions. */
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 	if (IS_SYNOACL(dentry) && CheckPermInFileSystem(access)) {
 		access |= NFSD_MAY_SYNO_NOP;
 	}
-#endif //CONFIG_SYNO_FS_WINACL
+#endif //MY_ABC_HERE
 	error = nfsd_permission(rqstp, exp, dentry, access);
 
 	if (error) {
@@ -426,7 +429,7 @@ static void _fh_update(struct svc_fh *fhp, struct svc_export *exp,
 			(fhp->fh_handle.fh_auth + fhp->fh_handle.fh_size/4 - 1);
 		int maxsize = (fhp->fh_maxsize - fhp->fh_handle.fh_size)/4;
 		int subtreecheck = !(exp->ex_flags & NFSEXP_NOSUBTREECHECK);
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 		// ESXi nfs client cannot handle FILEID_BTRFS_WITH_PARENT properly,
 		// such that we can't enable subtreecheck to solve WINACL inheritance problem
 		if (dentry->d_sb->s_magic != BTRFS_SUPER_MAGIC) {
@@ -434,7 +437,7 @@ static void _fh_update(struct svc_fh *fhp, struct svc_export *exp,
 			// We need force encode fh to add parent ino into fid
 			subtreecheck = 1;
 		}
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 		fhp->fh_handle.fh_fileid_type =
 			exportfs_encode_fh(dentry, fid, &maxsize, subtreecheck);
 		fhp->fh_handle.fh_size += maxsize * 4;

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Board-level suspend/resume support.
  *
@@ -80,24 +83,24 @@ static void mvebu_armada_xp_gp_pm_enter(void __iomem *sdram_reg, u32 srcmd)
 		  [ackcmd] "r" (ackcmd), [gpio_ctrl] "r" (gpio_ctrl[pic_gpios_num-1]) : "r1");
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 static int __init mvebu_armada_xp_gp_pm_init(void)
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 static int mvebu_armada_xp_gp_pm_init(void)
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 {
 	struct device_node *np;
 	struct device_node *gpio_ctrl_np;
 	int ret = 0, i;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	if (!of_machine_is_compatible("marvell,axp-gp") &&
 		!of_machine_is_compatible("marvell,a388-db-gp") &&
 		!of_machine_is_compatible("marvell,a385-db-ap"))
 		return -ENODEV;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	np = of_find_node_by_name(NULL, "pm_pic");
 	if (!np)
@@ -159,18 +162,18 @@ static int mvebu_armada_xp_gp_pm_init(void)
 		}
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	mvebu_pm_suspend_init(mvebu_armada_xp_gp_pm_enter);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	mvebu_pm_init(mvebu_armada_xp_gp_pm_enter);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 out:
 	of_node_put(np);
 	return ret;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 int __init mvebu_armada_xp_gp_pm_register(void)
 {
 	if (of_machine_is_compatible("marvell,axp-gp") ||
@@ -180,6 +183,6 @@ int __init mvebu_armada_xp_gp_pm_register(void)
 	return 0;
 }
 arch_initcall(mvebu_armada_xp_gp_pm_register);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 late_initcall(mvebu_armada_xp_gp_pm_init);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */

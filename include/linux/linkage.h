@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_LINKAGE_H
 #define _LINUX_LINKAGE_H
 
@@ -6,21 +9,21 @@
 #include <linux/export.h>
 #include <asm/linkage.h>
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
-#else /* CONFIG_SYNO_LSP_MONACO */
+#if defined (MY_DEF_HERE)
+#else /* MY_DEF_HERE */
 #ifdef __cplusplus
 #define CPP_ASMLINKAGE extern "C"
 #else
 #define CPP_ASMLINKAGE
 #endif
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 #ifndef asmlinkage
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 #define asmlinkage
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 #define asmlinkage CPP_ASMLINKAGE
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 #endif
 
 #ifndef cond_syscall

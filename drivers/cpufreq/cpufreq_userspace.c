@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 
 /*
  *  linux/drivers/cpufreq/cpufreq_userspace.c
@@ -13,11 +16,11 @@
 
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 #include <linux/cpufreq.h>
 #include <linux/init.h>
 #include <linux/module.h>
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/smp.h>
@@ -29,10 +32,10 @@
 #include <linux/types.h>
 #include <linux/fs.h>
 #include <linux/sysfs.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 #include <linux/mutex.h>
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 static DEFINE_PER_CPU(unsigned int, cpu_is_managed);
 static DEFINE_MUTEX(userspace_mutex);
 
@@ -103,7 +106,7 @@ static int cpufreq_governor_userspace(struct cpufreq_policy *policy,
 	}
 	return rc;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 /**
  * A few values needed by the userspace governor
  */
@@ -260,7 +263,7 @@ static int cpufreq_governor_userspace(struct cpufreq_policy *policy,
 	}
 	return rc;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 #ifndef CONFIG_CPU_FREQ_DEFAULT_GOV_USERSPACE
 static

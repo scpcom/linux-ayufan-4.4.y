@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * arch/arm/mach-kirkwood/include/mach/bridge-regs.h
  *
@@ -20,9 +23,9 @@
 #define CPU_RESET		0x00000002
 
 #define RSTOUTn_MASK		(BRIDGE_VIRT_BASE + 0x0108)
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #define RSTOUTn_MASK_PHYS	(BRIDGE_PHYS_BASE + 0x0108)
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 #define WDT_RESET_OUT_EN	0x00000002
 #define SOFT_RESET_OUT_EN	0x00000004
 

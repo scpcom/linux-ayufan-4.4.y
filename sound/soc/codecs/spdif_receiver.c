@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * ALSA SoC SPDIF DIR (Digital Interface Reciever) driver
  *
@@ -21,9 +24,9 @@
 #include <sound/soc.h>
 #include <sound/pcm.h>
 #include <sound/initval.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #include <linux/of.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 #define STUB_RATES	SNDRV_PCM_RATE_8000_192000
 #define STUB_FORMATS	(SNDRV_PCM_FMTBIT_S16_LE | \
@@ -54,7 +57,7 @@ static int spdif_dir_remove(struct platform_device *pdev)
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #ifdef CONFIG_OF
 static const struct of_device_id spdif_dir_dt_ids[] = {
 	{ .compatible = "linux,spdif-dir", },
@@ -62,7 +65,7 @@ static const struct of_device_id spdif_dir_dt_ids[] = {
 };
 MODULE_DEVICE_TABLE(of, spdif_dir_dt_ids);
 #endif
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static struct platform_driver spdif_dir_driver = {
 	.probe		= spdif_dir_probe,
@@ -70,9 +73,9 @@ static struct platform_driver spdif_dir_driver = {
 	.driver		= {
 		.name	= "spdif-dir",
 		.owner	= THIS_MODULE,
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		.of_match_table = of_match_ptr(spdif_dir_dt_ids),
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	},
 };
 

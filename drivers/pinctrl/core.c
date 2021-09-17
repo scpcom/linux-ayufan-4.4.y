@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Core driver for the pin control subsystem
  *
@@ -1204,7 +1207,7 @@ int pinctrl_force_default(struct pinctrl_dev *pctldev)
 }
 EXPORT_SYMBOL_GPL(pinctrl_force_default);
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 #ifdef CONFIG_PM
 
 /**
@@ -1268,7 +1271,7 @@ int pinctrl_pm_select_idle_state(struct device *dev)
 EXPORT_SYMBOL_GPL(pinctrl_pm_select_idle_state);
 #endif
 
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 #ifdef CONFIG_DEBUG_FS
 
 static int pinctrl_pins_show(struct seq_file *s, void *what)

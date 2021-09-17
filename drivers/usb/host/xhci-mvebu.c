@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2013 Marvell
  * Author: Gregory CLEMENT <gregory.clement@free-electrons.com>
@@ -47,7 +50,7 @@ static void mv_usb3_conf_mbus_windows(void __iomem *base,
 	}
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 static void xhci_mvebu_quirks(struct platform_device *pdev)
 {
 	struct usb_hcd *hcd = platform_get_drvdata(pdev);
@@ -55,7 +58,7 @@ static void xhci_mvebu_quirks(struct platform_device *pdev)
 
 	xhci->quirks |= XHCI_RESET_ON_RESUME;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 int xhci_mvebu_probe(struct platform_device *pdev)
 {
@@ -100,9 +103,9 @@ int xhci_mvebu_probe(struct platform_device *pdev)
 		clk_disable_unprepare(clk);
 		return ret;
 	}
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	xhci_mvebu_quirks(pdev);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	return ret;
 }

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /**
  * eCryptfs: Linux filesystem encryption layer
  * This is where eCryptfs coordinates the symmetric encryption and
@@ -68,15 +71,15 @@ static int ecryptfs_writepage(struct page *page, struct writeback_control *wbc)
 
 	rc = ecryptfs_encrypt_page(page);
 	if (rc) {
-#ifdef CONFIG_SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING
+#ifdef MY_ABC_HERE
 		if (-EDQUOT != rc && -ENOSPC != rc)
-#endif /* CONFIG_SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING */
+#endif /* MY_ABC_HERE */
 		ecryptfs_printk(KERN_WARNING, "Error encrypting "
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 				"page (upper index [0x%.16llx])\n", (unsigned long long)page->index);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 				"page (upper index [0x%.16lx])\n", page->index);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 		ClearPageUptodate(page);
 		goto out;
 	}
@@ -244,13 +247,13 @@ out:
 		ClearPageUptodate(page);
 	else
 		SetPageUptodate(page);
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 	ecryptfs_printk(KERN_DEBUG, "Unlocking page with index = [0x%.16llx]\n",
 			(unsigned long long)page->index);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	ecryptfs_printk(KERN_DEBUG, "Unlocking page with index = [0x%.16lx]\n",
 			page->index);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	unlock_page(page);
 	return rc;
 }
@@ -354,17 +357,17 @@ static int ecryptfs_write_begin(struct file *file,
 			} else if (len < PAGE_CACHE_SIZE) {
 				rc = ecryptfs_decrypt_page(page);
 				if (rc) {
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 					printk(KERN_ERR "%s: Error decrypting "
 					       "page at index [%lld]; "
 					       "rc = [%d]\n",
 					       __func__, (unsigned long long)page->index, rc);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 					printk(KERN_ERR "%s: Error decrypting "
 					       "page at index [%ld]; "
 					       "rc = [%d]\n",
 					       __func__, page->index, rc);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 					ClearPageUptodate(page);
 					goto out;
 				}
@@ -422,10 +425,10 @@ static int ecryptfs_write_inode_size_to_header(struct inode *ecryptfs_inode)
 	rc = ecryptfs_write_lower(ecryptfs_inode, file_size_virt, 0,
 				  sizeof(u64));
 	kfree(file_size_virt);
-#ifdef CONFIG_SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING
+#ifdef MY_ABC_HERE
 	if (-EDQUOT == rc || -ENOSPC == rc)
 		return rc;  // skip error msg
-#endif /* CONFIG_SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING */
+#endif /* MY_ABC_HERE */
 	if (rc < 0)
 		printk(KERN_ERR "%s: Error writing file size to header; "
 		       "rc = [%d]\n", __func__, rc);
@@ -512,11 +515,11 @@ static int ecryptfs_write_end(struct file *file,
 	int rc;
 
 	ecryptfs_printk(KERN_DEBUG, "Calling fill_zeros_to_end_of_page"
-#ifdef CONFIG_SYNO_LSP_ALPINE
+#ifdef MY_DEF_HERE
 			"(page w/ index = [0x%.16llx], to = [%d])\n", (unsigned long long)index, to);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 			"(page w/ index = [0x%.16lx], to = [%d])\n", index, to);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	if (!(crypt_stat->flags & ECRYPTFS_ENCRYPTED)) {
 		rc = ecryptfs_write_lower_page_segment(ecryptfs_inode, page, 0,
 						       to);
@@ -538,24 +541,24 @@ static int ecryptfs_write_end(struct file *file,
 	rc = fill_zeros_to_end_of_page(page, to);
 	if (rc) {
 		ecryptfs_printk(KERN_WARNING, "Error attempting to fill "
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 			"zeros in page with index = [0x%.16llxlx]\n", (unsigned long long)index);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 			"zeros in page with index = [0x%.16lx]\n", index);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 		goto out;
 	}
 	rc = ecryptfs_encrypt_page(page);
 	if (rc) {
-#ifdef CONFIG_SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING
+#ifdef MY_ABC_HERE
 		if (-EDQUOT != rc && -ENOSPC != rc)
-#endif /* CONFIG_SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING */
+#endif /* MY_ABC_HERE */
 		ecryptfs_printk(KERN_WARNING, "Error encrypting page (upper "
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 				"index [0x%.16llx])\n", (unsigned long long)index);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 				"index [0x%.16lx])\n", index);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 		goto out;
 	}
 	if (pos + copied > i_size_read(ecryptfs_inode)) {
@@ -565,11 +568,11 @@ static int ecryptfs_write_end(struct file *file,
 			(unsigned long long)i_size_read(ecryptfs_inode));
 	}
 	rc = ecryptfs_write_inode_size_to_metadata(ecryptfs_inode);
-#ifdef CONFIG_SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING
+#ifdef MY_ABC_HERE
 	if (-EDQUOT == rc || -ENOSPC == rc) {
 		goto out; //skip following error message
 	}
-#endif /* CONFIG_SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING */
+#endif /* MY_ABC_HERE */
 	if (rc)
 		printk(KERN_ERR "Error writing inode size to metadata; "
 		       "rc = [%d]\n", rc);

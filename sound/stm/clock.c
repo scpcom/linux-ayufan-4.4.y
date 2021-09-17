@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *   STMicroelectronics SOC audio clocks wrapper
  *
@@ -106,7 +109,7 @@ static struct snd_kcontrol_new snd_stm_clk_adjustment_ctl = {
 
 /* Sound Clock interface */
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 int snd_stm_clk_prepare_enable(struct snd_stm_clk *clk)
 {
 	int result = 0;
@@ -142,7 +145,7 @@ int snd_stm_clk_prepare(struct snd_stm_clk *clk)
 	return result;
 }
 EXPORT_SYMBOL(snd_stm_clk_prepare);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 int snd_stm_clk_enable(struct snd_stm_clk *clk)
 {
@@ -156,22 +159,22 @@ int snd_stm_clk_enable(struct snd_stm_clk *clk)
 	if (atomic_cmpxchg(&clk->enabled, 0, 1))
 		return 0;
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	result = clk_enable(clk->clk);
 	if (result)
 		atomic_set(&clk->enabled, 0);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	result = clk_prepare_enable(clk->clk);
 	if (result) {
 		atomic_set(&clk->enabled, 0);
 	}
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	return result;
 }
 EXPORT_SYMBOL(snd_stm_clk_enable);
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 int snd_stm_clk_unprepare(struct snd_stm_clk *clk)
 {
 	snd_stm_printd(1, "%s(clk=%p)\n", __func__, clk);
@@ -184,7 +187,7 @@ int snd_stm_clk_unprepare(struct snd_stm_clk *clk)
 	return 0;
 }
 EXPORT_SYMBOL(snd_stm_clk_unprepare);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 int snd_stm_clk_disable(struct snd_stm_clk *clk)
 {
@@ -196,18 +199,18 @@ int snd_stm_clk_disable(struct snd_stm_clk *clk)
 	if (!atomic_read(&clk->enabled))
 		return 0;
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	clk_disable(clk->clk);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	clk_disable_unprepare(clk->clk);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	atomic_set(&clk->enabled, 0);
 
 	return 0;
 }
 EXPORT_SYMBOL(snd_stm_clk_disable);
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 int snd_stm_clk_disable_unprepare(struct snd_stm_clk *clk)
 {
 	snd_stm_printd(1, "%s(clk=%p)\n", __func__, clk);
@@ -225,7 +228,7 @@ int snd_stm_clk_disable_unprepare(struct snd_stm_clk *clk)
 	return 0;
 }
 EXPORT_SYMBOL(snd_stm_clk_disable_unprepare);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 int snd_stm_clk_set_rate(struct snd_stm_clk *clk, unsigned long rate)
 {

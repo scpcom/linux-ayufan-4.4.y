@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_SCHED_H
 #define _LINUX_SCHED_H
 
@@ -656,7 +659,7 @@ struct user_struct {
 	atomic_t inotify_watches; /* How many inotify watches does this user have? */
 	atomic_t inotify_devs;	/* How many inotify devs does this user have opened? */
 #endif
-#ifdef CONFIG_SYNO_FS_NOTIFY
+#ifdef MY_ABC_HERE
 	atomic_t synotify_instances;
 #endif
 #ifdef CONFIG_FANOTIFY

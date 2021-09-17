@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * linux/arch/arm/include/asm/hardware/coresight.h
  *
@@ -23,15 +26,15 @@
 
 #define TRACER_TIMEOUT 10000
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #define etm_writel(t, v, x) \
 	(writel_relaxed((v), (t)->etm_regs + (x)))
 #define etm_readl(t, x) (readl_relaxed((t)->etm_regs + (x)))
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 #define etm_writel(t, v, x) \
 	(__raw_writel((v), (t)->etm_regs + (x)))
 #define etm_readl(t, x) (__raw_readl((t)->etm_regs + (x)))
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 /* CoreSight Management Registers */
 #define CSMR_LOCKACCESS 0xfb0
@@ -147,15 +150,15 @@
 #define ETBFF_TRIGEVT		BIT(9)
 #define ETBFF_TRIGFL		BIT(10)
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #define etb_writel(t, v, x) \
 	(writel_relaxed((v), (t)->etb_regs + (x)))
 #define etb_readl(t, x) (readl_relaxed((t)->etb_regs + (x)))
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 #define etb_writel(t, v, x) \
 	(__raw_writel((v), (t)->etb_regs + (x)))
 #define etb_readl(t, x) (__raw_readl((t)->etb_regs + (x)))
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 #define etm_lock(t) do { etm_writel((t), 0, CSMR_LOCKACCESS); } while (0)
 #define etm_unlock(t) \

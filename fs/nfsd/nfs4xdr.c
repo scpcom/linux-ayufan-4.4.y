@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Server-side XDR for NFSv4
  *
@@ -1993,7 +1996,7 @@ static int get_parent_attributes(struct svc_export *exp, struct kstat *stat)
 			break;
 	}
 	err = vfs_getattr(&path, stat);
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 	if (!err && IS_SYNOACL(path.dentry) && uid_eq(current_fsuid(), GLOBAL_ROOT_UID))
 			stat->mode |= (S_IRWXU|S_IRWXG|S_IRWXO);
 #endif
@@ -2051,7 +2054,7 @@ nfsd4_encode_fattr(struct svc_fh *fhp, struct svc_export *exp,
 	err = vfs_getattr(&path, &stat);
 	if (err)
 		goto out_nfserr;
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 	if (IS_SYNOACL(dentry) && uid_eq(current_fsuid(), GLOBAL_ROOT_UID))
 		stat.mode |= (S_IRWXU|S_IRWXG|S_IRWXO);
 #endif

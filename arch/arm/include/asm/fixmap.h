@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _ASM_FIXMAP_H
 #define _ASM_FIXMAP_H
 
@@ -13,10 +16,10 @@
  * 0xfffe0000 and 0xfffeffff.
  */
 
-#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE) && defined(CONFIG_HIGHMEM)
+#if defined(MY_DEF_HERE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE) && defined(CONFIG_HIGHMEM)
 #define FIXADDR_START		0xff400000UL
 #define FIXADDR_TOP		0xff800000UL
-#elif defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && defined(CONFIG_HIGHMEM)
+#elif defined(MY_ABC_HERE) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && defined(CONFIG_HIGHMEM)
 #define FIXADDR_START		0xffc00000UL
 #define FIXADDR_TOP		0xfff00000UL
 #else

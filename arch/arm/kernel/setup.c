@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/arch/arm/kernel/setup.c
  *
@@ -59,9 +62,9 @@
 
 #include "atags.h"
 
-#ifdef CONFIG_SYNO_DYN_MODULE_INSTALL
+#ifdef MY_DEF_HERE
 extern int gSynoHasDynModule;
-#endif /*CONFIG_SYNO_DYN_MODULE_INSTALL*/
+#endif /*MY_DEF_HERE*/
 
 #if defined(CONFIG_FPE_NWFPE) || defined(CONFIG_FPE_FASTFPE)
 char fpe_type[8];
@@ -75,7 +78,7 @@ static int __init fpe_setup(char *line)
 __setup("fpe=", fpe_setup);
 #endif
 
-#ifdef CONFIG_SYNO_DYN_MODULE_INSTALL
+#ifdef MY_DEF_HERE
 static int __init early_is_dyn_module(char *p)
 {
 	int iLen = 0;
@@ -95,7 +98,7 @@ END:
 	return 1;
 }
 __setup("syno_dyn_module=", early_is_dyn_module);
-#endif /*CONFIG_SYNO_DYN_MODULE_INSTALL*/
+#endif /*MY_DEF_HERE*/
 
 extern void paging_init(struct machine_desc *desc);
 extern void sanity_check_meminfo(void);
@@ -123,10 +126,10 @@ EXPORT_SYMBOL(system_serial_high);
 unsigned int elf_hwcap __read_mostly;
 EXPORT_SYMBOL(elf_hwcap);
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 unsigned long cpu_clock_freq = 0;
 EXPORT_SYMBOL(cpu_clock_freq);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 #ifdef MULTI_CPU
 struct processor processor __read_mostly;
@@ -942,12 +945,12 @@ static int c_show(struct seq_file *m, void *v)
 		seq_printf(m, "model name\t: %s rev %d (%s)\n",
 			   cpu_name, cpuid & 15, elf_platform);
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 		if (cpu_clock_freq)
 			seq_printf(m, "Speed\t\t: %lu.%01luGHz\n",
 				cpu_clock_freq / 1000000000,
 				(cpu_clock_freq / 100000000) % 10);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 #if defined(CONFIG_SMP)
 		seq_printf(m, "BogoMIPS\t: %lu.%02lu\n",
 			   per_cpu(cpu_data, i).loops_per_jiffy / (500000UL/HZ),
@@ -957,7 +960,7 @@ static int c_show(struct seq_file *m, void *v)
 			   loops_per_jiffy / (500000/HZ),
 			   (loops_per_jiffy / (5000/HZ)) % 100);
 #endif
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 		/* dump out the processor features */
 		seq_puts(m, "Features\t: ");

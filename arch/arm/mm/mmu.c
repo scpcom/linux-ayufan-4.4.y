@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/arch/arm/mm/mmu.c
  *
@@ -29,8 +32,8 @@
 #include <asm/system_info.h>
 #include <asm/traps.h>
 
-#if (defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE) && defined(CONFIG_HIGHMEM)) ||\
-	(defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && defined(CONFIG_HIGHMEM))
+#if (defined(MY_DEF_HERE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE) && defined(CONFIG_HIGHMEM)) ||\
+	(defined(MY_ABC_HERE) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && defined(CONFIG_HIGHMEM))
 #include <asm/fixmap.h>
 #endif
 
@@ -343,11 +346,11 @@ EXPORT_SYMBOL(get_mem_type);
 /*
  * Adjust the PMD section entries according to the CPU in use.
  */
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static void __init build_mem_type_table(const struct machine_desc *mdesc)
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static void __init build_mem_type_table(void)
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 {
 	struct cachepolicy *cp;
 	unsigned int cr = get_cr();
@@ -370,11 +373,11 @@ static void __init build_mem_type_table(void)
 			cachepolicy = CPOLICY_WRITEBACK;
 		ecc_mask = 0;
 	}
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	if (is_smp() || (mdesc->flags & MACHINE_NEEDS_CPOLICY_WRITEALLOC))
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	if (is_smp())
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 		cachepolicy = CPOLICY_WRITEALLOC;
 
 	/*
@@ -495,13 +498,13 @@ static void __init build_mem_type_table(void)
 		mem_types[MT_CACHECLEAN].prot_sect |= PMD_SECT_APX|PMD_SECT_AP_WRITE;
 #endif
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_ARM_UNIPROCESSOR_IOCC
 		{
 #else /* CONFIG_ARM_UNIPROCESSOR_IOCC */
 		if (is_smp()) {
 #endif /* CONFIG_ARM_UNIPROCESSOR_IOCC */
-#elif defined(CONFIG_SYNO_LSP_ARMADA)
+#elif defined(MY_ABC_HERE)
 		/*
 		 * On Cortex-A9 systems, configured in !SMP, proc-v7.S
 		 * has not set the SMP bit and the TLB broadcast
@@ -646,11 +649,11 @@ static void __init *early_alloc(unsigned long sz)
 static pte_t * __init early_pte_alloc(pmd_t *pmd, unsigned long addr, unsigned long prot)
 {
 	if (pmd_none(*pmd)) {
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 		pte_t *pte = early_alloc(max_t(size_t,
 					PTE_HWTABLE_OFF + PTE_HWTABLE_SIZE,
 					PAGE_SIZE));
-#elif defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT)
+#elif defined(MY_ABC_HERE) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT)
 		pte_t *pte = early_alloc(PAGE_SIZE);
 #else
 		pte_t *pte = early_alloc(PTE_HWTABLE_OFF + PTE_HWTABLE_SIZE);
@@ -1013,7 +1016,7 @@ void __init debug_ll_io_init(void)
 static void * __initdata vmalloc_min =
 	(void *)(VMALLOC_END - (240 << 20) - VMALLOC_OFFSET);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && defined(CONFIG_HIGHMEM)
+#if defined(MY_ABC_HERE) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && defined(CONFIG_HIGHMEM)
 /* Create L1 Mapping for High-Mem pages. */
 static void __init map_highmem_pages(void)
 {
@@ -1240,7 +1243,7 @@ void __init arm_mm_memblock_reserve(void)
 #endif
 }
 
-#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE) && defined(CONFIG_HIGHMEM)
+#if defined(MY_DEF_HERE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE) && defined(CONFIG_HIGHMEM)
 /* Prepare all levels for mapping highmem pages except the pte.
  * This function isn't needed if FIXADDR is inside the already-existing
  * mapping 0xfff0000 - 0xffffffff
@@ -1262,7 +1265,7 @@ static void __init prepare_highmem_tables(void)
 		set_fix_pte(addr,__pte(0));
 	}
 }
-#endif /* CONFIG_SYNO_LSP_ALPINE && CONFIG_ARM_PAGE_SIZE_LARGE && CONFIG_HIGHMEM */
+#endif /* MY_DEF_HERE && CONFIG_ARM_PAGE_SIZE_LARGE && CONFIG_HIGHMEM */
 
 /*
  * Set up the device mappings.  Since we clear out the page tables for all
@@ -1346,13 +1349,13 @@ static void __init devicemaps_init(struct machine_desc *mdesc)
 	map.type = MT_LOW_VECTORS;
 	create_mapping(&map);
 
-#if defined(CONFIG_SYNO_LSP_ALPINE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE) && defined(CONFIG_HIGHMEM)
+#if defined(MY_DEF_HERE) && defined(CONFIG_ARM_PAGE_SIZE_LARGE) && defined(CONFIG_HIGHMEM)
 	prepare_highmem_tables();
-#endif /* CONFIG_SYNO_LSP_ALPINE && CONFIG_ARM_PAGE_SIZE_LARGE && CONFIG_HIGHMEM */
+#endif /* MY_DEF_HERE && CONFIG_ARM_PAGE_SIZE_LARGE && CONFIG_HIGHMEM */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && defined(CONFIG_HIGHMEM)
+#if defined(MY_ABC_HERE) && defined(CONFIG_MV_LARGE_PAGE_SUPPORT) && defined(CONFIG_HIGHMEM)
 	map_highmem_pages();
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	/*
 	 * Ask the machine support to map in the statically mapped devices.
@@ -1416,11 +1419,11 @@ void __init paging_init(struct machine_desc *mdesc)
 
 	memblock_set_current_limit(arm_lowmem_limit);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	build_mem_type_table(mdesc);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	build_mem_type_table();
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	prepare_page_table();
 	map_lowmem();
 	dma_contiguous_remap();

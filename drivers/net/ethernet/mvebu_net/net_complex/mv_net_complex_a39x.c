@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -450,7 +453,7 @@ static void mv_net_complex_mac_to_xaui(u32 port, enum mvNetComplexPhase phase)
 	}
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 int mv_net_complex_dynamic_init(u32 net_comp_config)
 {
 	u32 i;
@@ -485,7 +488,7 @@ int mv_net_complex_dynamic_init(u32 net_comp_config)
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 int mv_net_complex_init(u32 net_comp_config, enum mvNetComplexPhase phase)
 {
@@ -543,23 +546,23 @@ int mv_net_complex_init(u32 net_comp_config, enum mvNetComplexPhase phase)
 		/* Enable the NSS (PPv3) instead of the NetA (PPv1) */
 		mv_net_complex_nss_select(1);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	if (phase == MV_NETC_SECOND_PHASE) {
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	else if (phase == MV_NETC_SECOND_PHASE) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 		/* Enable the GOP internal clock logic */
 		mv_net_complex_gop_clock_logic_set(1);
 		/* De-assert GOP unit reset */
 		mv_net_complex_gop_reset(1);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 		// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 		/* WA for A390 Z1 - when NSS wake up from reset
 		registers default values are wrong */
 		mv_net_restore_regs_defaults();
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	}
 
 	return 0;
@@ -624,18 +627,18 @@ static int mv_net_complex_plat_data_get(struct platform_device *pdev)
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 u32 net_complex = 0x421;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 static int mv_net_complex_probe(struct platform_device *pdev)
 {
 	int ret;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	u32 net_complex;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	ret = mv_net_complex_plat_data_get(pdev);
 	if (ret) {
@@ -644,24 +647,24 @@ static int mv_net_complex_probe(struct platform_device *pdev)
 	}
 
 	/* TODO -- Static initialize net complex temp, after fdt ready, fix it */
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	pr_info("\nRun with net_complex = 0x%x\n", net_complex);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	net_complex = 0x421;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	mv_net_complex_init(net_complex, 0);
 	mv_net_complex_init(net_complex, 1);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	/* WA for A390 Z1 - when NSS wake up from reset
 	registers default values are wrong */
 	mv_net_restore_regs_defaults();
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 static int mv_nss_cmdline_config(char *s)
 {
 	int f;
@@ -674,7 +677,7 @@ static int mv_nss_cmdline_config(char *s)
 	return 1;
 }
 __setup("netcomplex=", mv_nss_cmdline_config);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 static int mv_net_complex_remove(struct platform_device *pdev)
 {

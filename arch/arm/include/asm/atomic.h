@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  arch/arm/include/asm/atomic.h
  *
@@ -302,13 +305,13 @@ static inline void atomic64_add(long long i, atomic64_t *v)
 
 	__asm__ __volatile__("@ atomic64_add\n"
 "1:	ldrexd	%0, %H0, [%3]\n"
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 "	adds	%Q0, %Q0, %Q4\n"
 "	adc	%R0, %R0, %R4\n"
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 "	adds	%0, %0, %4\n"
 "	adc	%H0, %H0, %H4\n"
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 "	strexd	%1, %0, %H0, [%3]\n"
 "	teq	%1, #0\n"
 "	bne	1b"
@@ -326,13 +329,13 @@ static inline long long atomic64_add_return(long long i, atomic64_t *v)
 
 	__asm__ __volatile__("@ atomic64_add_return\n"
 "1:	ldrexd	%0, %H0, [%3]\n"
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 "	adds	%Q0, %Q0, %Q4\n"
 "	adc	%R0, %R0, %R4\n"
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 "	adds	%0, %0, %4\n"
 "	adc	%H0, %H0, %H4\n"
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 "	strexd	%1, %0, %H0, [%3]\n"
 "	teq	%1, #0\n"
 "	bne	1b"
@@ -352,13 +355,13 @@ static inline void atomic64_sub(long long i, atomic64_t *v)
 
 	__asm__ __volatile__("@ atomic64_sub\n"
 "1:	ldrexd	%0, %H0, [%3]\n"
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 "	subs	%Q0, %Q0, %Q4\n"
 "	sbc	%R0, %R0, %R4\n"
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 "	subs	%0, %0, %4\n"
 "	sbc	%H0, %H0, %H4\n"
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 "	strexd	%1, %0, %H0, [%3]\n"
 "	teq	%1, #0\n"
 "	bne	1b"
@@ -376,13 +379,13 @@ static inline long long atomic64_sub_return(long long i, atomic64_t *v)
 
 	__asm__ __volatile__("@ atomic64_sub_return\n"
 "1:	ldrexd	%0, %H0, [%3]\n"
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 "	subs	%Q0, %Q0, %Q4\n"
 "	sbc	%R0, %R0, %R4\n"
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 "	subs	%0, %0, %4\n"
 "	sbc	%H0, %H0, %H4\n"
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 "	strexd	%1, %0, %H0, [%3]\n"
 "	teq	%1, #0\n"
 "	bne	1b"
@@ -450,15 +453,15 @@ static inline long long atomic64_dec_if_positive(atomic64_t *v)
 
 	__asm__ __volatile__("@ atomic64_dec_if_positive\n"
 "1:	ldrexd	%0, %H0, [%3]\n"
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 "	subs	%Q0, %Q0, #1\n"
 "	sbc	%R0, %R0, #0\n"
 "	teq	%R0, #0\n"
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 "	subs	%0, %0, #1\n"
 "	sbc	%H0, %H0, #0\n"
 "	teq	%H0, #0\n"
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 "	bmi	2f\n"
 "	strexd	%1, %0, %H0, [%3]\n"
 "	teq	%1, #0\n"
@@ -487,13 +490,13 @@ static inline int atomic64_add_unless(atomic64_t *v, long long a, long long u)
 "	teqeq	%H0, %H5\n"
 "	moveq	%1, #0\n"
 "	beq	2f\n"
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 "	adds	%Q0, %Q0, %Q6\n"
 "	adc	%R0, %R0, %R6\n"
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 "	adds	%0, %0, %6\n"
 "	adc	%H0, %H0, %H6\n"
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 "	strexd	%2, %0, %H0, [%4]\n"
 "	teq	%2, #0\n"
 "	bne	1b\n"

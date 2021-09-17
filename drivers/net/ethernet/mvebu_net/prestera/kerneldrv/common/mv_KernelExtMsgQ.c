@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 * mv_KervelExtMsgQ.c
 *
@@ -40,9 +43,9 @@ static int              mv_num_queues = MV_QUEUES_DEF;
 
 module_param(mv_num_queues, int, S_IRUGO);
 
-#if defined(CONFIG_SYNO_ARMADA) && defined(CONFIG_OF)
+#if defined(MY_ABC_HERE) && defined(CONFIG_OF)
 // do nothing
-#else /* CONFIG_SYNO_ARMADA */
+#else /* MY_ABC_HERE */
 /*******************************************************************************
 * mvKernelExtMsgQ_read_proc_mem
 *
@@ -127,16 +130,16 @@ static int mvKernelExtMsgQ_read_proc_mem(
 
     return len;
 }
-#endif /* CONFIG_SYNO_ARMADA */
+#endif /* MY_ABC_HERE */
 
 #ifdef CONFIG_OF
 static int proc_status_show_msq(struct seq_file *m, void *v) {
 
-#if defined(CONFIG_SYNO_ARMADA)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_ARMADA */
+#else /* MY_ABC_HERE */
     int len;
-#endif /* CONFIG_SYNO_ARMADA */
+#endif /* MY_ABC_HERE */
     int k;
 
     seq_printf(m, "id msgs waitRx waitTx");

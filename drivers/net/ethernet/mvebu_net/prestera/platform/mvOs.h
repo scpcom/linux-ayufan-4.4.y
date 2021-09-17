@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -85,13 +88,13 @@ disclaimer.
 #error "CPU endianess isn't defined!\n"
 #endif
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 #ifndef INTER_REGS_VIRT_BASE
 #define INTER_REGS_VIRT_BASE 0
 #endif
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 #define INTER_REGS_VIRT_BASE 0
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 /*XXX: looks like error - should be 0x72000 - check
  * neta + documentation for AC3 0x00072004 and bits e.g.

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * (C) Copyright Linus Torvalds 1999
  * (C) Copyright Johannes Erdfelt 1999-2001
@@ -45,9 +48,9 @@
 #include <linux/usb/hcd.h>
 
 #include "usb.h"
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 #include "hub.h"
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 /*-------------------------------------------------------------------------*/
 
@@ -2231,7 +2234,7 @@ irqreturn_t usb_hcd_irq (int irq, void *__hcd)
 }
 EXPORT_SYMBOL_GPL(usb_hcd_irq);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 void usb_hc_post_reset(struct usb_hcd *hcd)
 {
 	struct usb_hub *hub = usb_hub_to_struct_hub(hcd->self.root_hub);
@@ -2284,7 +2287,7 @@ void usb_hc_pre_reset(struct usb_hcd *hcd)
 	/* Make sure that the other roothub is also deallocated. */
 }
 EXPORT_SYMBOL_GPL(usb_hc_pre_reset);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 /*-------------------------------------------------------------------------*/
 

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -87,7 +90,7 @@ extern int mv_ctrl_txdone;
 
 #define RX_BUF_SIZE(pkt_size)   ((pkt_size) + NET_SKB_PAD)
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 /* SKB magic, mainly used for skb recycle, here it is the address of skb */
 #define MV_NETA_SKB_MAGIC(skb)                       ((unsigned int)skb)
 /* Cb to store magic and bpid, IPv6 TCP will consume the most cb[] with 44 bytes, so the last 4 bytes is safe to use */
@@ -119,7 +122,7 @@ extern int mv_ctrl_txdone;
 /* Get bpid */
 #define MV_NETA_SKB_RECYCLE_BPID_GET(skb)                    (MV_NETA_SKB_RECYCLE_CB(skb) & MV_BM_POOLS_MASK)
 #endif /* CONFIG_MV_NETA_SKB_RECYCLE */
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 
 #ifdef CONFIG_MV_NETA_SKB_RECYCLE
 extern int mv_ctrl_swf_recycle;
@@ -234,9 +237,9 @@ struct port_stats {
 	u32 tx_done_timer_add[CONFIG_NR_CPUS];
 	u32 tx_done;
 	u32 cleanup_timer;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	u32 cleanup_timer_skb;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	u32 link;
 	u32 netdev_stop;
 
@@ -364,13 +367,13 @@ struct tx_queue {
 struct rx_queue {
 	MV_NETA_RXQ_CTRL    *q;
 	int                 rxq_size;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	atomic_t            missed;
 	NETA_RX_DESC        *missed_desc;
 	atomic_t            refill_stop;
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	int                 missed;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	MV_U32	            rxq_pkts_coal;
 	MV_U32	            rxq_time_coal;
 };
@@ -406,9 +409,9 @@ struct cpu_ctrl {
 
 };
 
-#if defined(CONFIG_SYNO_ARMADA_SUPPORT_WOL)
+#if defined(MY_ABC_HERE)
 #define MV_PHY_ID_151X 0x01410DD0
-#endif /* CONFIG_SYNO_ARMADA_SUPPORT_WOL */
+#endif /* MY_ABC_HERE */
 
 struct eth_port {
 	int                 port;
@@ -471,11 +474,11 @@ struct eth_port {
 	struct cpu_ctrl	    *cpu_config[CONFIG_NR_CPUS];
 	MV_U32              sgmii_serdes;
 	int	                pm_mode;
-#if defined(CONFIG_SYNO_ARMADA_SUPPORT_WOL)
+#if defined(MY_ABC_HERE)
 	MV_U32              phy_chip;
 	MV_U32              phy_id;
 	MV_U32              wol;
-#endif /* CONFIG_SYNO_ARMADA_SUPPORT_WOL */
+#endif /* MY_ABC_HERE */
 };
 
 struct eth_netdev {
@@ -529,11 +532,11 @@ struct bm_pool {
 	MV_STACK    *stack;
 	spinlock_t  lock;
 	u32         port_map;
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	atomic_t    missed;		/* FIXME: move to stats */
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	int         missed;		/* FIXME: move to stats */
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	atomic_t    in_use;
 	int         in_use_thresh;
 	struct pool_stats  stats;
@@ -781,11 +784,11 @@ static inline void mv_eth_rxq_refill(struct eth_port *pp, int rxq,
 		/* Refill BM pool */
 		STAT_DBG(pool->stats.bm_put++);
 		mvBmPoolPut(pool->pool, (MV_ULONG)pa);
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 		// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 		mvOsCacheLineInv(pp->dev->dev.parent, rx_desc);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	} else {
 		/* Refill Rx descriptor */
 		STAT_DBG(pp->stats.rxq_fill[rxq]++);

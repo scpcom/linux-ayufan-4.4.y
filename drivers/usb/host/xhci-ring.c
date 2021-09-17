@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * xHCI host controller driver
  *
@@ -396,8 +399,8 @@ int xhci_cancel_cmd(struct xhci_hcd *xhci, struct xhci_command *command,
 		xhci_err(xhci, "Abort command ring failed\n");
 		if (unlikely(retval == -ESHUTDOWN)) {
 			spin_unlock_irqrestore(&xhci->lock, flags);
-#if defined(CONFIG_SYNO_USB_IMPROVE_MARVELL_HCRST)
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4) && defined(XHCI_MV_HCRST_DEBUG) && (XHCI_MV_HCRST_DEBUG == 1)
+#if defined(MY_ABC_HERE)
+#if defined(MY_ABC_HERE) && defined(XHCI_MV_HCRST_DEBUG) && (XHCI_MV_HCRST_DEBUG == 1)
 			xhci_dbg(xhci, "Calling usb_hc_pre_reset()\n");
 			usb_hc_pre_reset(xhci_to_hcd(xhci)->primary_hcd);
 			xhci_kick_kxhcd(xhci);
@@ -405,7 +408,7 @@ int xhci_cancel_cmd(struct xhci_hcd *xhci, struct xhci_command *command,
 			usb_hc_died(xhci_to_hcd(xhci)->primary_hcd);
 			xhci_dbg(xhci, "xHCI host controller is dead.\n");
 #endif
-#endif /* CONFIG_SYNO_USB_IMPROVE_MARVELL_HCRST */
+#endif /* MY_ABC_HERE */
 			return retval;
 		}
 	}
@@ -958,7 +961,7 @@ void xhci_stop_endpoint_command_watchdog(unsigned long arg)
 
 	ret = xhci_halt(xhci);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4) && defined(XHCI_MV_HCRST_DEBUG) && (XHCI_MV_HCRST_DEBUG == 1)
+#if defined(MY_ABC_HERE) && defined(XHCI_MV_HCRST_DEBUG) && (XHCI_MV_HCRST_DEBUG == 1)
 	xhci_dbg(xhci, "Calling usb_hc_pre_reset()\n");
 	usb_hc_pre_reset(xhci_to_hcd(xhci)->primary_hcd);
 #endif
@@ -1012,7 +1015,7 @@ void xhci_stop_endpoint_command_watchdog(unsigned long arg)
 		}
 	}
 	spin_unlock_irqrestore(&xhci->lock, flags);
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4) && defined(XHCI_MV_HCRST_DEBUG) && (XHCI_MV_HCRST_DEBUG == 1)
+#if defined(MY_ABC_HERE) && defined(XHCI_MV_HCRST_DEBUG) && (XHCI_MV_HCRST_DEBUG == 1)
 	xhci_kick_kxhcd(xhci);
 #else
 	xhci_dbg(xhci, "Calling usb_hc_died()\n");
@@ -1020,7 +1023,7 @@ void xhci_stop_endpoint_command_watchdog(unsigned long arg)
 	xhci_dbg(xhci, "xHCI host controller is dead.\n");
 #endif
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4) && defined(CONFIG_USB_XHCI_HCD_DEBUGGING)
+#if defined(MY_ABC_HERE) && defined(CONFIG_USB_XHCI_HCD_DEBUGGING)
 	/* Tell the event ring poll function not to reschedule */
 	xhci->zombie = 1;
 	del_timer_sync(&xhci->event_ring_timer);
@@ -1556,7 +1559,7 @@ static void handle_vendor_event(struct xhci_hcd *xhci,
 		handle_cmd_completion(xhci, &event->event_cmd);
 }
 
-#ifdef CONFIG_SYNO_FORCE_EMPTY_UNAVAILABLE_XHCI_TD
+#ifdef MY_DEF_HERE
 static void xhci_giveback_error_urb(struct xhci_hcd *xhci,
 		int slot_id)
 {
@@ -1581,7 +1584,7 @@ static void xhci_giveback_error_urb(struct xhci_hcd *xhci,
 		}
 	}
 }
-#endif /* CONFIG_SYNO_FORCE_EMPTY_UNAVAILABLE_XHCI_TD */
+#endif /* MY_DEF_HERE */
 
 /* @port_id: the one-based port ID from the hardware (indexed from array of all
  * port registers -- USB 3.0 and USB 2.0).
@@ -1712,13 +1715,13 @@ static void handle_port_status(struct xhci_hcd *xhci,
 			port_id);
 
 	temp = xhci_readl(xhci, port_array[faked_port_index]);
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	if (temp & PORT_CEC) {
 		xhci_dbg(xhci, "port failed to configure its link partner.\n");
 		xhci_test_and_clear_bit(xhci, port_array,
 				faked_port_index, PORT_CEC);
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	if (hcd->state == HC_STATE_SUSPENDED) {
 		xhci_dbg(xhci, "resume root hub\n");
@@ -1761,7 +1764,7 @@ static void handle_port_status(struct xhci_hcd *xhci,
 		}
 	}
 
-#ifdef CONFIG_SYNO_FORCE_EMPTY_UNAVAILABLE_XHCI_TD
+#ifdef MY_DEF_HERE
 	if (!(temp & PORT_CONNECT) &&
 		(temp & PORT_WRC)) {
 		slot_id = xhci_find_slot_id_by_port(hcd, xhci,
@@ -1772,7 +1775,7 @@ static void handle_port_status(struct xhci_hcd *xhci,
 			xhci_giveback_error_urb(xhci, slot_id);
 		}
 	}
-#endif /* CONFIG_SYNO_FORCE_EMPTY_UNAVAILABLE_XHCI_TD */
+#endif /* MY_DEF_HERE */
 
 	if ((temp & PORT_PLC) && (temp & PORT_PLS_MASK) == XDEV_U0 &&
 			DEV_SUPERSPEED(temp)) {
@@ -1800,7 +1803,7 @@ static void handle_port_status(struct xhci_hcd *xhci,
 		}
 	}
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	/*
 	 * Check to see if xhci-hub.c is waiting on RExit to U0 transition (or
 	 * RExit to a disconnect state).  If so, let the the driver know it's
@@ -1814,7 +1817,7 @@ static void handle_port_status(struct xhci_hcd *xhci,
 		goto cleanup;
 	}
 
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	if (hcd->speed != HCD_USB3)
 		xhci_test_and_clear_bit(xhci, port_array, faked_port_index,
 					PORT_PLC);
@@ -4015,7 +4018,7 @@ int xhci_queue_slot_control(struct xhci_hcd *xhci, u32 trb_type, u32 slot_id)
 }
 
 /* Queue an address device command TRB */
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 int xhci_queue_address_device(struct xhci_hcd *xhci, dma_addr_t in_ctx_ptr,
 			      u32 slot_id, enum xhci_setup_dev setup)
 {
@@ -4024,7 +4027,7 @@ int xhci_queue_address_device(struct xhci_hcd *xhci, dma_addr_t in_ctx_ptr,
 			TRB_TYPE(TRB_ADDR_DEV) | SLOT_ID_FOR_TRB(slot_id)
 			| (setup == SETUP_CONTEXT_ONLY ? TRB_BSR : 0), false);
 }
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 int xhci_queue_address_device(struct xhci_hcd *xhci, dma_addr_t in_ctx_ptr,
 		u32 slot_id)
 {
@@ -4033,7 +4036,7 @@ int xhci_queue_address_device(struct xhci_hcd *xhci, dma_addr_t in_ctx_ptr,
 			TRB_TYPE(TRB_ADDR_DEV) | SLOT_ID_FOR_TRB(slot_id),
 			false);
 }
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 int xhci_queue_vendor_command(struct xhci_hcd *xhci,
 		u32 field1, u32 field2, u32 field3, u32 field4)

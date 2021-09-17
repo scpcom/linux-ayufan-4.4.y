@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Coherency fabric: low level functions
  *
@@ -20,13 +23,13 @@
 #define ARMADA_XP_CFB_CTL_REG_OFFSET 0x0
 #define ARMADA_XP_CFB_CFG_REG_OFFSET 0x4
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #include <asm/assembler.h>
 #include <asm/cp15.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	.text
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 /* Returns the coherency base address in r1 (r0 is untouched) */
 ENTRY(ll_get_coherency_base)
 	mrc	p15, 0, r1, c1, c0, 0
@@ -51,9 +54,9 @@ ENTRY(ll_get_coherency_base)
 2:
 	mov	pc, lr
 ENDPROC(ll_get_coherency_base)
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 /*
  * Returns the coherency CPU mask in r3 (r0 is untouched). This
  * coherency CPU mask can be used with the coherency fabric
@@ -152,7 +155,7 @@ ENDPROC(ll_disable_coherency)
 	.align 2
 3:
 	.long	coherency_phys_base - .
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 /*
  * r0: Coherency fabric base register address
  * r1: HW CPU id
@@ -185,4 +188,4 @@ ENTRY(ll_set_cpu_coherent)
 	mov	r0, #0
 	mov	pc, lr
 ENDPROC(ll_set_cpu_coherent)
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */

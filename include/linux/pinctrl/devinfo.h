@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Per-device information from the pin control system.
  * This is the stuff that get included into the device
@@ -28,12 +31,12 @@
 struct dev_pin_info {
 	struct pinctrl *p;
 	struct pinctrl_state *default_state;
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 #ifdef CONFIG_PM
 	struct pinctrl_state *sleep_state;
 	struct pinctrl_state *idle_state;
 #endif
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 };
 
 extern int pinctrl_bind_pins(struct device *dev);

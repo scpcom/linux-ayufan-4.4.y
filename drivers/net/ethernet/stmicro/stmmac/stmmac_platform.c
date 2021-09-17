@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
   This contains the functions to handle the platform driver.
 
@@ -242,11 +245,11 @@ struct platform_driver stmmac_pltfr_driver = {
 	.driver = {
 		   .name = STMMAC_RESOURCE_NAME,
 		   .owner = THIS_MODULE,
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 		   .pm = &stmmac_pltfr_pm_ops,
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 		   .pm = DEV_PM_OPS,
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 		   .of_match_table = of_match_ptr(stmmac_dt_ids),
 		   },
 };

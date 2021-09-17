@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *	IPv6 Address [auto]configuration
  *	Linux INET6 implementation
@@ -83,7 +86,7 @@
 #include <linux/if_tunnel.h>
 #include <linux/rtnetlink.h>
 #include <linux/netconf.h>
-#ifdef CONFIG_SYNO_IPV6_EXPORT_IN6ADDR_ANY
+#ifdef MY_ABC_HERE
 #include <linux/module.h>
 #endif
 
@@ -204,11 +207,11 @@ static struct ipv6_devconf ipv6_devconf __read_mostly = {
 	.proxy_ndp		= 0,
 	.accept_source_route	= 0,	/* we do not accept RH0 by default. */
 	.disable_ipv6		= 0,
-#ifdef CONFIG_SYNO_IPV6_RFC_4862
+#ifdef MY_ABC_HERE
 	.accept_dad     = 2,
 #else
 	.accept_dad		= 1,
-#endif /* CONFIG_SYNO_IPV6_RFC_4862 */
+#endif /* MY_ABC_HERE */
 };
 
 static struct ipv6_devconf ipv6_devconf_dflt __read_mostly = {
@@ -242,16 +245,16 @@ static struct ipv6_devconf ipv6_devconf_dflt __read_mostly = {
 	.proxy_ndp		= 0,
 	.accept_source_route	= 0,	/* we do not accept RH0 by default. */
 	.disable_ipv6		= 0,
-#ifdef CONFIG_SYNO_IPV6_RFC_4862
+#ifdef MY_ABC_HERE
     .accept_dad     = 2,
 #else
 	.accept_dad		= 1,
-#endif /* CONFIG_SYNO_IPV6_RFC_4862 */
+#endif /* MY_ABC_HERE */
 };
 
 /* IPv6 Wildcard Address and Loopback Address defined by RFC2553 */
 const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
-#ifdef CONFIG_SYNO_IPV6_EXPORT_IN6ADDR_ANY
+#ifdef MY_ABC_HERE
 EXPORT_SYMBOL(in6addr_any);
 #endif
 const struct in6_addr in6addr_loopback = IN6ADDR_LOOPBACK_INIT;

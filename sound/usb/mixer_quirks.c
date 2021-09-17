@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *   USB Audio Driver for ALSA
  *
@@ -487,7 +490,7 @@ static int snd_xonar_u1_controls_create(struct usb_mixer_interface *mixer)
 	if (err < 0)
 		return err;
 	mixer->xonar_u1_status = 0x05;
-#if defined(CONFIG_SYNO_AUDIO_ACTIVE_DIGITAL)
+#if defined(MY_ABC_HERE)
 	{
 		u8 status = mixer->xonar_u1_status | 0x02;
 
@@ -498,7 +501,7 @@ static int snd_xonar_u1_controls_create(struct usb_mixer_interface *mixer)
 			mixer->xonar_u1_status = status;
 		}
 	}
-#endif /*CONFIG_SYNO_AUDIO_ACTIVE_DIGITAL*/
+#endif /*MY_ABC_HERE*/
 	return 0;
 }
 

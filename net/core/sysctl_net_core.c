@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* -*- linux-c -*-
  * sysctl_net_core.c: sysctl interface to net core subsystem.
  *
@@ -21,17 +24,17 @@
 #include <net/net_ratelimit.h>
 
 static int zero = 0;
-#if defined(CONFIG_SYNO_ARMADA) || defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 // do nothing
-#else /* CONFIG_SYNO_ARMADA || CONFIG_SYNO_ALPINE */
+#else /* MY_ABC_HERE || MY_DEF_HERE */
 static int one = 1;
-#endif /* CONFIG_SYNO_ARMADA || CONFIG_SYNO_ALPINE */
+#endif /* MY_ABC_HERE || MY_DEF_HERE */
 static int ushort_max = USHRT_MAX;
 static int min_sndbuf = SOCK_MIN_SNDBUF;
 static int min_rcvbuf = SOCK_MIN_RCVBUF;
 
 #ifdef CONFIG_RPS
-#ifdef CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
+#ifdef MY_DEF_HERE
 static int rps_sock_flow_init(void)
 {
 	unsigned int orig_size = 0, size = 256;
@@ -68,7 +71,7 @@ static int rps_sock_flow_init(void)
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE */
+#endif /* MY_DEF_HERE */
 
 static int rps_sock_flow_sysctl(ctl_table *table, int write,
 				void __user *buffer, size_t *lenp, loff_t *ppos)
@@ -198,7 +201,7 @@ static struct ctl_table net_core_table[] = {
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec
 	},
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	{
 		.procname	= "hh_output_relaxed",
 		.data		= &hh_output_relaxed,
@@ -206,7 +209,7 @@ static struct ctl_table net_core_table[] = {
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec
 	},
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 	{
 		.procname	= "message_cost",
 		.data		= &net_ratelimit_state.interval,
@@ -228,7 +231,7 @@ static struct ctl_table net_core_table[] = {
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec
 	},
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	{
 		.procname	= "netdev_skb_tstamp",
 		.data		= &netdev_skb_tstamp,
@@ -236,7 +239,7 @@ static struct ctl_table net_core_table[] = {
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec
 	},
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 #ifdef CONFIG_RPS
 	{
 		.procname	= "rps_sock_flow_entries",
@@ -327,11 +330,11 @@ static __net_initdata struct pernet_operations sysctl_core_ops = {
 static __init int sysctl_core_init(void)
 {
 	register_net_sysctl(&init_net, "net/core", net_core_table);
-#ifdef CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE
+#ifdef MY_DEF_HERE
 	if (0 != rps_sock_flow_init()) {
 		printk("Error! Failed to init RFS for networking!\n");
 	}
-#endif /* CONFIG_SYNO_ALPINE_TUNING_NETWORK_PERFORMANCE */
+#endif /* MY_DEF_HERE */
 	return register_pernet_subsys(&sysctl_core_ops);
 }
 

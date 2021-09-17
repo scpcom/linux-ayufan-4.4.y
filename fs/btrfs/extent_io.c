@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/bitops.h>
 #include <linux/slab.h>
 #include <linux/bio.h>
@@ -830,7 +833,7 @@ __set_extent_bit(struct extent_io_tree *tree, u64 start, u64 end,
 	struct rb_node **p;
 	struct rb_node *parent;
 	int err = 0;
-#ifdef CONFIG_SYNO_BTRFS_ALLOC_EXTENT_STATE_RETRY
+#ifdef MY_ABC_HERE
 	int counter = 0;
 #endif
 	u64 last_start;
@@ -842,7 +845,7 @@ __set_extent_bit(struct extent_io_tree *tree, u64 start, u64 end,
 again:
 	if (!prealloc && (mask & __GFP_WAIT)) {
 		prealloc = alloc_extent_state(mask);
-#ifdef CONFIG_SYNO_BTRFS_ALLOC_EXTENT_STATE_RETRY
+#ifdef MY_ABC_HERE
 		if (!prealloc) {
 			if (10 > counter) {
 				counter++;
@@ -3372,13 +3375,13 @@ static noinline_for_stack int __extent_writepage_io(struct inode *inode,
 			set_range_writeback(tree, cur, cur + iosize - 1);
 			if (!PageWriteback(page)) {
 				btrfs_err(BTRFS_I(inode)->root->fs_info,
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 					   "page %llu not writeback, cur %llu end %llu",
 				       (unsigned long long)page->index, cur, end);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 					   "page %lu not writeback, cur %llu end %llu",
 				       page->index, cur, end);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 			}
 
 			ret = submit_extent_page(write_flags, tree, page,
@@ -3438,7 +3441,7 @@ static int __extent_writepage(struct page *page, struct writeback_control *wbc,
 	pg_offset = i_size & (PAGE_CACHE_SIZE - 1);
 	if (page->index > end_index ||
 	   (page->index == end_index && !pg_offset)) {
-#ifdef CONFIG_SYNO_BTRFS_PORTING
+#ifdef MY_ABC_HERE
 		page->mapping->a_ops->invalidatepage(page, 0);
 #else
 		page->mapping->a_ops->invalidatepage(page, 0, PAGE_CACHE_SIZE);
@@ -4500,11 +4503,11 @@ static void btrfs_release_extent_buffer_page(struct extent_buffer *eb,
 	unsigned long num_pages;
 	struct page *page;
 	int mapped = !test_bit(EXTENT_BUFFER_DUMMY, &eb->bflags);
-#ifdef CONFIG_SYNO_BTRFS_FIX_PAGE_LEAK_WHILE_CLONE_EXTENT_BUFFER
+#ifdef MY_ABC_HERE
 	int cloned = test_bit(EXTENT_BUFFER_CLONE, &eb->bflags);
-#endif /* CONFIG_SYNO_BTRFS_FIX_PAGE_LEAK_WHILE_CLONE_EXTENT_BUFFER */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_BTRFS_FIX_PAGE_WRITEBACK
+#ifdef MY_ABC_HERE
 	if (unlikely(extent_buffer_under_io(eb))) {
 		printk(KERN_ERR "EXTENT_BUFFER_WRITEBACK = %d,  EXTENT_BUFFER_DIRTY = %d\n",
 				test_bit(EXTENT_BUFFER_WRITEBACK, &eb->bflags), test_bit(EXTENT_BUFFER_DIRTY, &eb->bflags));
@@ -4531,12 +4534,12 @@ static void btrfs_release_extent_buffer_page(struct extent_buffer *eb,
 	do {
 		index--;
 		page = extent_buffer_page(eb, index);
-#ifdef CONFIG_SYNO_BTRFS_FIX_PAGE_LEAK_WHILE_CLONE_EXTENT_BUFFER
+#ifdef MY_ABC_HERE
 		if (page && (cloned || mapped)) {
 			if (!cloned) // cloned extent buffer has no mapping to lock
 #else
 		if (page && mapped) {
-#endif /* CONFIG_SYNO_BTRFS_FIX_PAGE_LEAK_WHILE_CLONE_EXTENT_BUFFER */
+#endif /* MY_ABC_HERE */
 			spin_lock(&page->mapping->private_lock);
 			/*
 			 * We do this since we'll remove the pages after we've
@@ -4548,7 +4551,7 @@ static void btrfs_release_extent_buffer_page(struct extent_buffer *eb,
 			if (PagePrivate(page) &&
 			    page->private == (unsigned long)eb) {
 				BUG_ON(test_bit(EXTENT_BUFFER_DIRTY, &eb->bflags));
-#ifdef CONFIG_SYNO_BTRFS_FIX_PAGE_WRITEBACK
+#ifdef MY_ABC_HERE
 				if (PageDirty(page) || PageWriteback(page)) {
 					smp_mb();
 					BUG_ON(PageDirty(page));
@@ -4567,9 +4570,9 @@ static void btrfs_release_extent_buffer_page(struct extent_buffer *eb,
 				/* One for the page private */
 				page_cache_release(page);
 			}
-#ifdef CONFIG_SYNO_BTRFS_FIX_PAGE_LEAK_WHILE_CLONE_EXTENT_BUFFER
+#ifdef MY_ABC_HERE
 			if (!cloned) // cloned extent buffer has no mapping to unlock
-#endif /* CONFIG_SYNO_BTRFS_FIX_PAGE_LEAK_WHILE_CLONE_EXTENT_BUFFER */
+#endif /* MY_ABC_HERE */
 			spin_unlock(&page->mapping->private_lock);
 
 		}
@@ -4655,9 +4658,9 @@ struct extent_buffer *btrfs_clone_extent_buffer(struct extent_buffer *src)
 	copy_extent_buffer(new, src, 0, 0, src->len);
 	set_bit(EXTENT_BUFFER_UPTODATE, &new->bflags);
 	set_bit(EXTENT_BUFFER_DUMMY, &new->bflags);
-#ifdef CONFIG_SYNO_BTRFS_FIX_PAGE_LEAK_WHILE_CLONE_EXTENT_BUFFER
+#ifdef MY_ABC_HERE
 	set_bit(EXTENT_BUFFER_CLONE, &new->bflags);
-#endif /* CONFIG_SYNO_BTRFS_FIX_PAGE_LEAK_WHILE_CLONE_EXTENT_BUFFER */
+#endif /* MY_ABC_HERE */
 
 	return new;
 }

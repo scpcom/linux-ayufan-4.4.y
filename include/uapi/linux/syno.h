@@ -23,14 +23,14 @@
 #define SYNO_MAXNAME    491
 #endif
 
-#ifdef CONFIG_SYNO_FS_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 #if defined (F_CLEAR_ARCHIVE) || defined (F_SETSMB_ARCHIVE) || defined (F_SETSMB_HIDDEN) || \
 	defined (F_SETSMB_SYSTEM) || defined (F_CLRSMB_ARCHIVE) || defined (F_CLRSMB_HIDDEN) || \
 	defined (F_CLRSMB_SYSTEM) || defined (F_CLEAR_S3_ARCHIVE)
 #error "Samba archive bit redefine."
 #endif
 
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 
 #if defined (F_CLRSMB_READONLY) || defined (F_SETSMB_READONLY) || \
 	defined (F_CLRACL_INHERIT)  || defined (F_SETACL_INHERIT)  || \
@@ -50,7 +50,7 @@
 #define F_CLRSMB_SYSTEM             (SYNO_FCNTL_BASE + 6)
 #define F_CLEAR_S3_ARCHIVE          (SYNO_FCNTL_BASE + 7)
 
-#ifdef CONFIG_SYNO_FS_WINACL 
+#ifdef MY_ABC_HERE 
 #define F_CLRSMB_READONLY           (SYNO_FCNTL_BASE + 8)
 #define F_SETSMB_READONLY           (SYNO_FCNTL_BASE + 9)
 #define F_CLRACL_INHERIT            (SYNO_FCNTL_BASE + 10)
@@ -68,11 +68,11 @@
 
 #endif  
 
-#ifdef CONFIG_SYNO_USB_COPY
+#ifdef MY_ABC_HERE
 #define USBCOPY_PORT_LOCATION 99
 #endif  
 
-#ifdef CONFIG_SYNO_SD_COPY
+#ifdef MY_ABC_HERE
 #define SDCOPY_PORT_LOCATION 98
 #endif  
 

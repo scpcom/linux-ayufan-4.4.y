@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_MISCDEVICE_H
 #define _LINUX_MISCDEVICE_H
 #include <linux/major.h>
@@ -19,15 +22,15 @@
 #define APOLLO_MOUSE_MINOR	7
 #define PC110PAD_MINOR		9
 /*#define ADB_MOUSE_MINOR	10	FIXME OBSOLETE */
-#if defined(CONFIG_SYNO_ECRYPTFS_OCF) || defined(CONFIG_SYNO_ALPINE) || defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 /* for kernel 3.10.x proting */
 #define CRYPTODEV_MINOR     70
-#endif /*CONFIG_SYNO_ECRYPTFS_OCF*/
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#endif /*MY_ABC_HERE*/
+#if defined(MY_ABC_HERE)
 #define CESADEV_MINOR		71	/* marvell CESA */
 #define SLICDEV_MINOR		73	/* Marvell SLIC control device */
 #define TALDEV_MINOR		74	/* Marvell TAL device */
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 #define WATCHDOG_MINOR		130	/* Watchdog timer     */
 #define TEMP_MINOR		131	/* Temperature Sensor */
 #define RTC_MINOR		135

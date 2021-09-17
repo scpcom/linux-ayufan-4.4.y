@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2007 Oracle.  All rights reserved.
  *
@@ -18,9 +21,9 @@
 
 #ifndef __BTRFS_ORDERED_DATA__
 #define __BTRFS_ORDERED_DATA__
-#if defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE)
 #include "ctree.h"
-#endif /* CONFIG_SYNO_ALPINE */
+#endif /* MY_DEF_HERE */
 
 /* one of these per inode */
 struct btrfs_ordered_inode_tree {

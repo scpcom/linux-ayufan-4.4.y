@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) 2013 Annapurna Labs Ltd.
 
@@ -1907,11 +1910,11 @@ static int al_eth_mdio_lock(struct al_hal_eth_adapter *adapter)
 		}
 		al_udelay(AL_ETH_MDIO_DELAY_PERIOD);
 	}while(count++ < (AL_ETH_MDIO_DELAY_COUNT * 4));
-#if defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE)
 	al_dbg(" %s mdio failed to take ownership. MDIO info reg: 0x%08x\n",
-#else /* CONFIG_SYNO_ALPINE */
+#else /* MY_DEF_HERE */
 	al_err(" %s mdio failed to take ownership. MDIO info reg: 0x%08x\n",
-#endif /* CONFIG_SYNO_ALPINE */
+#endif /* MY_DEF_HERE */
 		adapter->name, al_reg_read32(&adapter->mac_regs_base->gen.mdio_1));
 
 	return -ETIMEDOUT;

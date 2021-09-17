@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*-----------------------------------------------------------------------
 //
 // Proprietary Information of Elliptic Semiconductor
@@ -150,7 +153,7 @@ void   mfree(void *buf);
 
 #define PDUMPWORD(t,b,s,m,e)     do {if(1){ dumpword(b,s,m);}}  while(0)
 
-#if defined(CONFIG_SYNO_COMCERTO)
+#if defined(MY_DEF_HERE)
 
 extern int elp_debug;
 #define	DPRINTF(flags, a...)	if (flags&ELP_ERR) {\

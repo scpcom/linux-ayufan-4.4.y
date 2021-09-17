@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright © 1999-2010 David Woodhouse <dwmw2@infradead.org> et al.
  *
@@ -90,7 +93,7 @@ struct mtd_write_req {
 	__u8 padding[7];
 };
 
-#ifdef  CONFIG_SYNO_MTD_INFO
+#ifdef MY_ABC_HERE
 struct SYNO_MTD_FIS_INFO {
 	unsigned char name[16]; // Null terminated name
 	u_int32_t offset;
@@ -101,7 +104,7 @@ struct SYNO_MTD_FIS_INFO {
 #define SYNO_MSYS_FLASH_BLOCK_SIZE  ( 16 * 1024 )
 #define SYNO_MSYS_PARTITION_NUMBER  8
 #define SYNO_MSYS_TOTAL_UNITS       967
-#endif /* CONFIG_SYNO_MTD_INFO */
+#endif /* MY_ABC_HERE */
 
 #define MTD_ABSENT		0
 #define MTD_RAM			1
@@ -116,10 +119,10 @@ struct SYNO_MTD_FIS_INFO {
 #define MTD_BIT_WRITEABLE	0x800	/* Single bits can be flipped */
 #define MTD_NO_ERASE		0x1000	/* No erase necessary */
 #define MTD_POWERUP_LOCK	0x2000	/* Always locked after reset */
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 #define MTD_SLAVE_PARTITION	0x00010000	/* MTD Slave Partition */
 #define MTD_SPANS_MASTER	0x00020000	/* MTD spans entire master */
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 /* Some common devices / combinations of capabilities */
 #define MTD_CAP_ROM		0
@@ -209,7 +212,7 @@ struct otp_info {
 #define MEMERASE64		_IOW('M', 20, struct erase_info_user64)
 /* Write data to OOB (64-bit version) */
 #define MEMWRITEOOB64		_IOWR('M', 21, struct mtd_oob_buf64)
-#ifndef CONFIG_SYNO_MTD_INFO
+#ifndef MY_ABC_HERE
 /* Read data from OOB (64-bit version) */
 #define MEMREADOOB64		_IOWR('M', 22, struct mtd_oob_buf64)
 /* Check if chip is locked (for MTD that supports it) */
@@ -222,7 +225,7 @@ struct otp_info {
 #define MSYSMEMPARTITIONINFO    _IOR('M', 26, int*)
 #define MEMREADOOB64        _IOWR('M', 27, struct mtd_oob_buf64)
 #define MEMISLOCKED     _IOR('M', 28, struct erase_info_user)
-#endif /* CONFIG_SYNO_MTD_INFO */
+#endif /* MY_ABC_HERE */
 
 /*
  * Most generic write interface; can write in-band and/or out-of-band in various

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Information interface for ALSA driver
  *  Copyright (c) by Jaroslav Kysela <perex@perex.cz>
@@ -36,12 +39,12 @@
 /*
  *
  */
-#if defined(CONFIG_SYNO_AUDIO_KEEP_VOLUME)
+#if defined(MY_ABC_HERE)
 int gSynoAudioVolume = 50;
 EXPORT_SYMBOL(gSynoAudioVolume);
 static int snd_info_syno_audio_volume_init(void);
 static int snd_info_syno_audio_volume_done(void);
-#endif /* CONFIG_SYNO_AUDIO_KEEP_VOLUME */
+#endif /* MY_ABC_HERE */
 
 #ifdef CONFIG_PROC_FS
 
@@ -559,9 +562,9 @@ int __init snd_info_init(void)
 	}
 #endif
 	snd_info_version_init();
-#if defined(CONFIG_SYNO_AUDIO_KEEP_VOLUME)
+#if defined(MY_ABC_HERE)
 	snd_info_syno_audio_volume_init();
-#endif /*CONFIG_SYNO_AUDIO_KEEP_VOLUME*/
+#endif /*MY_ABC_HERE*/
 	snd_minor_info_init();
 	snd_minor_info_oss_init();
 	snd_card_info_init();
@@ -574,9 +577,9 @@ int __exit snd_info_done(void)
 	snd_minor_info_oss_done();
 	snd_minor_info_done();
 	snd_info_version_done();
-#if defined(CONFIG_SYNO_AUDIO_KEEP_VOLUME)
+#if defined(MY_ABC_HERE)
 	snd_info_syno_audio_volume_done();
-#endif /*CONFIG_SYNO_AUDIO_KEEP_VOLUME*/
+#endif /*MY_ABC_HERE*/
 	if (snd_proc_root) {
 #if defined(CONFIG_SND_SEQUENCER) || defined(CONFIG_SND_SEQUENCER_MODULE)
 		snd_info_free_entry(snd_seq_root);
@@ -1011,7 +1014,7 @@ static int __exit snd_info_version_done(void)
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_AUDIO_KEEP_VOLUME)
+#if defined(MY_ABC_HERE)
 static struct snd_info_entry *snd_info_syno_audio_volume_entry;
 
 static void snd_info_syno_audio_volume_read(struct snd_info_entry *entry, struct snd_info_buffer *buffer)
@@ -1041,5 +1044,5 @@ static int __exit snd_info_syno_audio_volume_done(void)
        snd_info_free_entry(snd_info_syno_audio_volume_entry);
        return 0;
 }
-#endif /*CONFIG_SYNO_AUDIO_KEEP_VOLUME*/
+#endif /*MY_ABC_HERE*/
 #endif /* CONFIG_PROC_FS */

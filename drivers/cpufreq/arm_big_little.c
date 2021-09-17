@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * ARM big.LITTLE Platforms CPUFreq support
  *
@@ -25,11 +28,11 @@
 #include <linux/cpumask.h>
 #include <linux/export.h>
 #include <linux/of_platform.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 #include <linux/pm_opp.h>
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 #include <linux/opp.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 #include <linux/slab.h>
 #include <linux/topology.h>
 #include <linux/types.h>
@@ -104,11 +107,11 @@ static void put_cluster_clk_and_freq_table(struct device *cpu_dev)
 
 	if (!atomic_dec_return(&cluster_usage[cluster])) {
 		clk_put(clk[cluster]);
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 		dev_pm_opp_free_cpufreq_table(cpu_dev, &freq_table[cluster]);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 		opp_free_cpufreq_table(cpu_dev, &freq_table[cluster]);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 		dev_dbg(cpu_dev, "%s: cluster: %d\n", __func__, cluster);
 	}
 }
@@ -129,11 +132,11 @@ static int get_cluster_clk_and_freq_table(struct device *cpu_dev)
 		goto atomic_dec;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	ret = dev_pm_opp_init_cpufreq_table(cpu_dev, &freq_table[cluster]);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	ret = opp_init_cpufreq_table(cpu_dev, &freq_table[cluster]);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	if (ret) {
 		dev_err(cpu_dev, "%s: failed to init cpufreq table, cpu: %d, err: %d\n",
 				__func__, cpu_dev->id, ret);
@@ -152,11 +155,11 @@ static int get_cluster_clk_and_freq_table(struct device *cpu_dev)
 	dev_err(cpu_dev, "%s: Failed to get clk for cpu: %d, cluster: %d\n",
 			__func__, cpu_dev->id, cluster);
 	ret = PTR_ERR(clk[cluster]);
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	dev_pm_opp_free_cpufreq_table(cpu_dev, &freq_table[cluster]);
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	opp_free_cpufreq_table(cpu_dev, &freq_table[cluster]);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 atomic_dec:
 	atomic_dec(&cluster_usage[cluster]);
@@ -232,22 +235,22 @@ static struct freq_attr *bL_cpufreq_attr[] = {
 
 static struct cpufreq_driver bL_cpufreq_driver = {
 	.name			= "arm-big-little",
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	.flags			= CPUFREQ_STICKY |
 					CPUFREQ_HAVE_GOVERNOR_PER_POLICY,
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	.flags			= CPUFREQ_STICKY,
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	.verify			= bL_cpufreq_verify_policy,
 	.target			= bL_cpufreq_set_target,
 	.get			= bL_cpufreq_get,
 	.init			= bL_cpufreq_init,
 	.exit			= bL_cpufreq_exit,
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	.have_governor_per_policy = true,
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	.attr			= bL_cpufreq_attr,
 };
 

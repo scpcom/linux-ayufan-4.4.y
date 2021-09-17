@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) 2014 Annapurna Labs Ltd.
 
@@ -165,7 +168,7 @@ static struct al_serdes_adv_tx_params da_tx_params = {
 
 static struct al_serdes_adv_rx_params da_rx_params = {
 	.override		= AL_TRUE,
-#ifdef CONFIG_SYNO_ALPINE_ADJUST_RX_EQUAL
+#ifdef MY_DEF_HERE
 	// empirical values, tested by using DS2015xs and Foxconn DA cable
 	.dcgain			= 0x7,
 	.dfe_3db_freq		= 0x7,
@@ -177,7 +180,7 @@ static struct al_serdes_adv_rx_params da_rx_params = {
 	.low_freq_agc_gain	= 0x7,
 	.precal_code_sel	= 0,
 	.high_freq_agc_boost	= 0x1b,
-#else /* CONFIG_SYNO_ALPINE_ADJUST_RX_EQUAL */
+#else /* MY_DEF_HERE */
 	.dcgain			= 0x4,
 	.dfe_3db_freq		= 0x4,
 	.dfe_gain		= 0x3,
@@ -188,7 +191,7 @@ static struct al_serdes_adv_rx_params da_rx_params = {
 	.low_freq_agc_gain	= 0x7,
 	.precal_code_sel	= 0,
 	.high_freq_agc_boost	= 0x1d,
-#endif /* CONFIG_SYNO_ALPINE_ADJUST_RX_EQUAL */
+#endif /* MY_DEF_HERE */
 };
 
 static struct al_serdes_adv_tx_params optic_tx_params = {

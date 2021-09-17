@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * probe.c - PCI detection and setup code
  */
@@ -174,12 +177,12 @@ int __pci_read_base(struct pci_dev *dev, enum pci_bar_type type,
 	bool bar_too_big = false, bar_disabled = false;
 
 	mask = type ? PCI_ROM_ADDRESS_MASK : ~0;
-#ifdef CONFIG_SYNO_ICH_UHCI_NO_MMIO_OFF
+#ifdef MY_DEF_HERE
 	if (PCI_VENDOR_ID_INTEL == dev->vendor && 0x2934 == dev->device) {
 		dev_printk(KERN_INFO, &dev->dev, "[%04x:%04x] Reading BAR - reg %x\n",
 		   dev->vendor, dev->device, pos);
 	}
-#endif /* CONFIG_SYNO_ICH_UHCI_NO_MMIO_OFF */
+#endif /* MY_DEF_HERE */
 
 	/* No printks while decoding is disabled! */
 	if (!dev->mmio_always_on) {
@@ -284,12 +287,12 @@ fail:
 out:
 	if (!dev->mmio_always_on)
 		pci_write_config_word(dev, PCI_COMMAND, orig_cmd);
-#ifdef CONFIG_SYNO_ICH_UHCI_NO_MMIO_OFF
+#ifdef MY_DEF_HERE
 	if (PCI_VENDOR_ID_INTEL == dev->vendor && 0x2934 == dev->device) {
 		dev_printk(KERN_INFO, &dev->dev, "[%04x:%04x] Sizing Complete - reg %x\n",
 		   dev->vendor, dev->device, pos);
 	}
-#endif /* CONFIG_SYNO_ICH_UHCI_NO_MMIO_OFF */
+#endif /* MY_DEF_HERE */
 	if (bar_too_big)
 		dev_err(&dev->dev, "reg %x: can't handle 64-bit BAR\n", pos);
 	if (res->flags && !bar_disabled)
@@ -645,9 +648,9 @@ static struct pci_bus *pci_alloc_child_bus(struct pci_bus *parent,
 
 	child->parent = parent;
 	child->ops = parent->ops;
-#if defined (CONFIG_SYNO_LSP_MONACO) || defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined (MY_DEF_HERE) || defined(MY_ABC_HERE)
 	child->msi = parent->msi;
-#endif /* CONFIG_SYNO_LSP_MONACO || CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_DEF_HERE || MY_ABC_HERE */
 	child->sysdata = parent->sysdata;
 	child->bus_flags = parent->bus_flags;
 
@@ -1568,11 +1571,11 @@ static void pcie_write_mrrs(struct pci_dev *dev)
 			"with pci=pcie_bus_safe.\n");
 }
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 int pcie_bus_configure_set(struct pci_dev *dev, void *data)
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 static int pcie_bus_configure_set(struct pci_dev *dev, void *data)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 {
 	int mps, orig_mps;
 

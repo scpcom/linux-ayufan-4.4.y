@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *   Core routines for STMicroelectronics' SoCs audio drivers
  *
@@ -490,7 +493,7 @@ int snd_stm_buffer_mmap(struct snd_pcm_substream *substream,
 }
 EXPORT_SYMBOL(snd_stm_buffer_mmap);
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 int snd_stm_pcm_transfer_bytes(unsigned int bytes_per_frame,
 		unsigned int max_transfer_bytes)
 {
@@ -508,7 +511,7 @@ int snd_stm_pcm_transfer_bytes(unsigned int bytes_per_frame,
 	return transfer_bytes;
 }
 EXPORT_SYMBOL(snd_stm_pcm_transfer_bytes);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 /*
  * Common ALSA parameters constraints
  */
@@ -610,7 +613,7 @@ EXPORT_SYMBOL(snd_stm_pcm_hw_constraint_transfer_bytes);
 
 #endif
 
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 /*
  * Common ALSA controls routines
  */

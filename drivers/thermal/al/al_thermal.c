@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Annapurna Labs thermal driver.
  *
@@ -114,9 +117,9 @@ static int al_thermal_resume(struct device *dev)
 static SIMPLE_DEV_PM_OPS(al_thermal_pm_ops, al_thermal_suspend,
 		al_thermal_resume);
 
-#ifdef CONFIG_SYNO_ALPINE_CPU_TEMPERATURE
+#ifdef MY_DEF_HERE
 struct thermal_zone_device *g_syno_al_thermal = NULL;
-#endif /* CONFIG_SYNO_ALPINE_CPU_TEMPERATURE */
+#endif /* MY_DEF_HERE */
 
 static int al_thermal_probe(struct platform_device *pdev)
 {
@@ -171,9 +174,9 @@ static int al_thermal_probe(struct platform_device *pdev)
 		err = PTR_ERR(al_thermal);
 		return err;
 	}
-#ifdef CONFIG_SYNO_ALPINE_CPU_TEMPERATURE
+#ifdef MY_DEF_HERE
 	g_syno_al_thermal = al_thermal;
-#endif /* CONFIG_SYNO_ALPINE_CPU_TEMPERATURE */
+#endif /* MY_DEF_HERE */
 
 	platform_set_drvdata(pdev, al_thermal);
 
@@ -183,7 +186,7 @@ static int al_thermal_probe(struct platform_device *pdev)
 	return 0;
 }
 
-#ifdef CONFIG_SYNO_ALPINE_CPU_TEMPERATURE
+#ifdef MY_DEF_HERE
 int syno_alpine_get_cpu_temperature(int *temperature)
 {
 	int ret = -EIO;
@@ -203,7 +206,7 @@ int syno_alpine_get_cpu_temperature(int *temperature)
 	return 0;
 }
 EXPORT_SYMBOL(syno_alpine_get_cpu_temperature);
-#endif /* CONFIG_SYNO_ALPINE_CPU_TEMPERATURE */
+#endif /* MY_DEF_HERE */
 
 static int al_thermal_exit(struct platform_device *pdev)
 {

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_IRQDESC_H
 #define _LINUX_IRQDESC_H
 
@@ -158,7 +161,7 @@ static inline int irq_balancing_disabled(unsigned int irq)
 	return desc->status_use_accessors & IRQ_NO_BALANCING_MASK;
 }
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 static inline int irq_is_per_cpu(unsigned int irq)
 {
 	struct irq_desc *desc;
@@ -166,9 +169,9 @@ static inline int irq_is_per_cpu(unsigned int irq)
 	desc = irq_to_desc(irq);
 	return desc->status_use_accessors & IRQ_PER_CPU;
 }
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static inline int irq_is_percpu(unsigned int irq)
 {
 	struct irq_desc *desc;
@@ -176,7 +179,7 @@ static inline int irq_is_percpu(unsigned int irq)
 	desc = irq_to_desc(irq);
 	return desc->status_use_accessors & IRQ_PER_CPU;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static inline void
 irq_set_lockdep_class(unsigned int irq, struct lock_class_key *class)

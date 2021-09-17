@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
   This contains the functions to handle the platform driver.
 
@@ -332,7 +335,7 @@ static void stmmac_pltfr_shutdown(struct platform_device *pdev)
 		stmmac_set_mac(priv->ioaddr, true);
 	}
 }
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_PM_SLEEP
 static int stmmac_pltfr_suspend(struct device *dev)
 {
@@ -366,7 +369,7 @@ static SIMPLE_DEV_PM_OPS(stmmac_pltfr_pm_ops,
 #else
 #define DEV_PM_OPS     NULL
 #endif /* CONFIG_PM_SLEEP */
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 #ifdef CONFIG_PM
 static int stmmac_pltfr_suspend(struct device *dev)
 {
@@ -398,7 +401,7 @@ static int stmmac_pltfr_resume(struct device *dev)
 
 static SIMPLE_DEV_PM_OPS(stmmac_pltfr_pm_ops,
 			stmmac_pltfr_suspend, stmmac_pltfr_resume);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 struct platform_driver stmmac_pltfr_driver = {
 	.probe = stmmac_pltfr_probe,
@@ -407,11 +410,11 @@ struct platform_driver stmmac_pltfr_driver = {
 	.driver = {
 		   .name = STMMAC_RESOURCE_NAME,
 		   .owner = THIS_MODULE,
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 		   .pm = DEV_PM_OPS,
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 		   .pm = &stmmac_pltfr_pm_ops,
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 		   .of_match_table = of_match_ptr(stmmac_dt_ids),
 		   },
 };

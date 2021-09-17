@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Marvell MMC/SD/SDIO driver
  *
@@ -858,7 +861,7 @@ static int mvsd_resume(struct platform_device *dev)
 #define mvsd_resume	NULL
 #endif
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 void mvsd_shutdown(struct platform_device *pdev)
 {
 	struct mmc_host *mmc = platform_get_drvdata(pdev);
@@ -867,7 +870,7 @@ void mvsd_shutdown(struct platform_device *pdev)
 	if (!IS_ERR(host->clk))
 		clk_disable_unprepare(host->clk);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static const struct of_device_id mvsdio_dt_ids[] = {
 	{ .compatible = "marvell,orion-sdio" },
@@ -879,9 +882,9 @@ static struct platform_driver mvsd_driver = {
 	.remove		= __exit_p(mvsd_remove),
 	.suspend	= mvsd_suspend,
 	.resume		= mvsd_resume,
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	.shutdown	= mvsd_shutdown,
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	.driver		= {
 		.name	= DRIVER_NAME,
 		.of_match_table = mvsdio_dt_ids,

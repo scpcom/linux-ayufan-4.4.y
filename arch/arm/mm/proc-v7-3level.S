@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * arch/arm/mm/proc-v7-3level.S
  *
@@ -86,7 +89,7 @@ ENTRY(cpu_v7_set_pte_ext)
 	orrne	rl, #PTE_AP2
 	biceq	rl, #PTE_AP2
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 1:
 #if (HW_PAGES_PER_PAGE >= 2)
 	/* note: the first address is PAGE_SIZE-aligned
@@ -124,11 +127,11 @@ ENTRY(cpu_v7_set_pte_ext)
 	ALT_SMP(W(nop))
 	ALT_UP (mcr	p15, 0, r0, c7, c10, 1)		@ flush_pte
 #endif /* HW_PAGES_PER_PAGE >= 2 */
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 1:	strd	r2, r3, [r0]
 	ALT_SMP(W(nop))
 	ALT_UP (mcr	p15, 0, r0, c7, c10, 1)		@ flush_pte
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 #endif /* CONFIG_MMU */
 	mov	pc, lr
 ENDPROC(cpu_v7_set_pte_ext)

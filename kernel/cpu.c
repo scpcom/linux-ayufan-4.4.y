@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* CPU control.
  * (C) 2001, 2002, 2003, 2004 Rusty Russell
  *
@@ -314,11 +317,11 @@ static int __ref _cpu_down(unsigned int cpu, int tasks_frozen)
 	err = __stop_machine(take_cpu_down, &tcd_param, cpumask_of(cpu));
 	if (err) {
 		/* CPU didn't die: tell everyone.  Can't complain. */
-#ifdef CONFIG_SYNO_FIX_SMPBOOT_RACE
+#ifdef MY_DEF_HERE
 		/* Remove code */
-#else /* CONFIG_SYNO_FIX_SMPBOOT_RACE */
+#else /* MY_DEF_HERE */
 		smpboot_unpark_threads(cpu);
-#endif /* CONFIG_SYNO_FIX_SMPBOOT_RACE */
+#endif /* MY_DEF_HERE */
 		cpu_notify_nofail(CPU_DOWN_FAILED | mod, hcpu);
 		goto out_release;
 	}
@@ -369,7 +372,7 @@ out:
 EXPORT_SYMBOL(cpu_down);
 #endif /*CONFIG_HOTPLUG_CPU*/
 
-#ifdef CONFIG_SYNO_FIX_SMPBOOT_RACE
+#ifdef MY_DEF_HERE
 /*
  * Unpark per-CPU smpboot kthreads at CPU-online time.
  */
@@ -401,7 +404,7 @@ void smpboot_thread_init(void)
 {
 	register_cpu_notifier(&smpboot_thread_notifier);
 }
-#endif /* CONFIG_SYNO_FIX_SMPBOOT_RACE */
+#endif /* MY_DEF_HERE */
 
 /* Requires cpu_add_remove_lock to be held */
 static int __cpuinit _cpu_up(unsigned int cpu, int tasks_frozen)
@@ -442,12 +445,12 @@ static int __cpuinit _cpu_up(unsigned int cpu, int tasks_frozen)
 		goto out_notify;
 	BUG_ON(!cpu_online(cpu));
 
-#ifdef CONFIG_SYNO_FIX_SMPBOOT_RACE
+#ifdef MY_DEF_HERE
 	/* Remove code */
-#else /* CONFIG_SYNO_FIX_SMPBOOT_RACE */
+#else /* MY_DEF_HERE */
 	/* Wake the per cpu threads */
 	smpboot_unpark_threads(cpu);
-#endif /* CONFIG_SYNO_FIX_SMPBOOT_RACE */
+#endif /* MY_DEF_HERE */
 
 	/* Now call notifier in preparation. */
 	cpu_notify(CPU_ONLINE | mod, hcpu);

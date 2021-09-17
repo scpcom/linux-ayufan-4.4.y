@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * INET		An implementation of the TCP/IP protocol suite for the LINUX
  *		operating system.  INET is implemented using the  BSD Socket
@@ -280,21 +283,21 @@
 #include <asm/uaccess.h>
 #include <asm/ioctls.h>
 
-#ifdef CONFIG_SYNO_FS_RECVFILE
+#ifdef MY_ABC_HERE
 #include <linux/pci.h>
-#endif /* CONFIG_SYNO_FS_RECVFILE */
+#endif /* MY_ABC_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #if defined(CONFIG_ARCH_ALPINE) && defined(CONFIG_NET_DMA)
 #include <mach/al_fabric.h>
 #endif
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 int sysctl_tcp_fin_timeout __read_mostly = TCP_FIN_TIMEOUT;
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 // do nothing
-#elif defined(CONFIG_SYNO_LSP_ARMADA)
+#elif defined(MY_ABC_HERE)
 int sysctl_tcp_min_tso_segs __read_mostly = 22;
 #else
 int sysctl_tcp_min_tso_segs __read_mostly = 2;
@@ -804,12 +807,12 @@ static unsigned int tcp_xmit_size_goal(struct sock *sk, u32 mss_now,
 	xmit_size_goal = mss_now;
 
 	if (large_allowed && sk_can_gso(sk)) {
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 		xmit_size_goal = ((sk->sk_gso_max_size - 1) -
 				  inet_csk(sk)->icsk_af_ops->net_header_len -
 				  inet_csk(sk)->icsk_ext_hdr_len -
 				  tp->tcp_header_len);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 		u32 gso_size, hlen;
 
 		/* Maybe we should/could use sk->sk_prot->max_header here ? */
@@ -828,15 +831,15 @@ static unsigned int tcp_xmit_size_goal(struct sock *sk, u32 mss_now,
 
 		xmit_size_goal = min_t(u32, gso_size,
 				       sk->sk_gso_max_size - 1 - hlen);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 		/* TSQ : try to have two TSO segments in flight */
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 		/* TSQ : try to have at least two segments in flight
 		 * (one in NIC TX ring, another in Qdisc)
 		 */
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 		xmit_size_goal = tcp_bound_to_half_wnd(tp, xmit_size_goal);
 
 		/* We try hard to avoid divides here */
@@ -1382,11 +1385,11 @@ void tcp_cleanup_rbuf(struct sock *sk, int copied)
 		    * receive. */
 		if (icsk->icsk_ack.blocked ||
 		    /* Once-per-two-segments ACK was not sent by tcp_input.c */
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 		    tp->rcv_nxt - tp->rcv_wup > (icsk->icsk_ack.rcv_mss * sysctl_tcp_default_delack_segs) ||
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 		    tp->rcv_nxt - tp->rcv_wup > icsk->icsk_ack.rcv_mss ||
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 		    /*
 		     * If this read emptied read buffer, we send ACK, if
 		     * connection is not bidirectional, user drained
@@ -1455,10 +1458,10 @@ static void tcp_service_net_dma(struct sock *sk, bool wait)
 	if (!tp->ucopy.dma_chan)
 		return;
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	if (!tp->ucopy.pinned)
 		return;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 	last_issued = tp->ucopy.dma_cookie;
 	dma_async_issue_pending(tp->ucopy.dma_chan);
@@ -1588,9 +1591,9 @@ int tcp_read_sock(struct sock *sk, read_descriptor_t *desc,
 }
 EXPORT_SYMBOL(tcp_read_sock);
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 extern int hwcc;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 /*
  *	This routine copies from a sock struct into the user buffer.
  *
@@ -1615,7 +1618,7 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 	struct sk_buff *skb;
 	u32 urg_hole = 0;
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_NET_DMA
 #ifdef CONFIG_ARCH_ALPINE
 	int hwcc_enabled = al_fabric_hwcc_enabled();
@@ -1623,7 +1626,7 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 	int hwcc_enabled = 0;
 #endif
 #endif
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 	lock_sock(sk);
 
@@ -1667,11 +1670,11 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 	{
 		int available = 0;
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 		if ((available < target) && hwcc_enabled &&
-#if defined(CONFIG_SYNO_ALPINE)
+#if defined(MY_DEF_HERE)
 		    (msg->msg_flags & MSG_KERNSPACE) && (flags & MSG_KERNSPACE) &&
-#endif /* CONFIG_SYNO_ALPINE */
+#endif /* MY_DEF_HERE */
 		    (len > sysctl_tcp_dma_copybreak) && !(flags & MSG_PEEK) &&
 		    skb && !skb_has_frag_list(skb) && !sysctl_tcp_low_latency &&
 		    net_dma_find_channel()) {
@@ -1681,10 +1684,10 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 		} else {
 			preempt_enable_no_resched();
 		}
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 		if (skb)
 			available = TCP_SKB_CB(skb)->seq + skb->len - (*seq);
-#if defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_SPLICE_NET_DMA_SUPPORT)
+#if defined(MY_ABC_HERE) && defined(CONFIG_SPLICE_NET_DMA_SUPPORT)
 		if (msg->msg_flags & MSG_KERNSPACE) {
 			if ((available >= target) &&
 			    (len > sysctl_tcp_dma_copybreak) && !(flags & MSG_PEEK) &&
@@ -1708,15 +1711,15 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 		} else {
 			preempt_enable_no_resched();
 		}
-#endif /* CONFIG_SYNO_LSP_ARMADA && CONFIG_SPLICE_NET_DMA_SUPPORT */
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_ABC_HERE && CONFIG_SPLICE_NET_DMA_SUPPORT */
+#endif /* MY_DEF_HERE */
 	}
 #endif
 
 	do {
 		u32 offset;
 
-#ifdef CONFIG_SYNO_FS_RECVFILE
+#ifdef MY_ABC_HERE
         if(flags &  MSG_NOCATCHSIGNAL) {
 			/* Original when we have recvfile(), we remove the following
 			 * sygnal_pending(). But it would cause system hang when smbd
@@ -1740,7 +1743,7 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 			}
         }
         else
-#endif /* CONFIG_SYNO_FS_RECVFILE */
+#endif /* MY_ABC_HERE */
 		/* Are we at urgent data? Stop if we have read anything or have SIGURG pending. */
 		if (tp->urg_data && tp->urg_seq == *seq) {
 			if (copied)
@@ -1792,11 +1795,11 @@ int tcp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 				break;
 
 			if (sk->sk_err) {
-#ifdef CONFIG_SYNO_FS_RECVFILE
+#ifdef MY_ABC_HERE
 				if ( (msg->msg_flags & MSG_KERNSPACE) &&
 					ECONNRESET == sk->sk_err )
 					printk("connection reset by peer.\n");
-#endif /* CONFIG_SYNO_FS_RECVFILE */
+#endif /* MY_ABC_HERE */
 				copied = sock_error(sk);
 				break;
 			}
@@ -1953,11 +1956,11 @@ do_prequeue:
 
 		if (!(flags & MSG_TRUNC)) {
 #ifdef CONFIG_NET_DMA
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 			if (!tp->ucopy.dma_chan && tp->ucopy.pinned)
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 			if (!tp->ucopy.dma_chan && tp->ucopy.pinned_list)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 				tp->ucopy.dma_chan = net_dma_find_channel();
 
 			if (tp->ucopy.dma_chan) {
@@ -1985,12 +1988,12 @@ do_prequeue:
 			} else
 #endif
 			{
-#if defined(CONFIG_SYNO_FS_RECVFILE) || \
-	(defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_SPLICE_NET_DMA_SUPPORT))
+#if defined(MY_ABC_HERE) || \
+	(defined(MY_ABC_HERE) && defined(CONFIG_SPLICE_NET_DMA_SUPPORT))
 				if(msg->msg_flags & MSG_KERNSPACE)
 					err = skb_copy_datagram_iovec1(skb, offset, msg->msg_iov, used);
 				else
-#endif /* CONFIG_SYNO_FS_RECVFILE || (CONFIG_SYNO_LSP_ARMADA && CONFIG_SPLICE_NET_DMA_SUPPORT)*/
+#endif /* MY_ABC_HERE || (CONFIG_SYNO_LSP_ARMADA && CONFIG_SPLICE_NET_DMA_SUPPORT)*/
 				err = skb_copy_datagram_iovec(skb, offset,
 						msg->msg_iov, used);
 				if (err) {
@@ -2057,22 +2060,22 @@ skip_copy:
 	tcp_service_net_dma(sk, true);  /* Wait for queue to drain */
 	tp->ucopy.dma_chan = NULL;
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	if (tp->ucopy.pinned) {
 		dma_unpin_iovec_pages(tp->ucopy.pinned_list);
 		tp->ucopy.pinned = false;
 	}
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	if (tp->ucopy.pinned_list) {
-#if defined(CONFIG_SYNO_LSP_ARMADA) && defined(CONFIG_SPLICE_NET_DMA_SUPPORT)
+#if defined(MY_ABC_HERE) && defined(CONFIG_SPLICE_NET_DMA_SUPPORT)
 		if(msg->msg_flags & MSG_KERNSPACE)
 			dma_unpin_kernel_iovec_pages(tp->ucopy.pinned_list);
 		else
-#endif /* CONFIG_SYNO_LSP_ARMADA && CONFIG_SPLICE_NET_DMA_SUPPORT */
+#endif /* MY_ABC_HERE && CONFIG_SPLICE_NET_DMA_SUPPORT */
 		dma_unpin_iovec_pages(tp->ucopy.pinned_list);
 		tp->ucopy.pinned_list = NULL;
 	}
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 #endif
 
 	/* According to UNIX98, msg_name/msg_namelen are ignored
@@ -2419,9 +2422,9 @@ int tcp_disconnect(struct sock *sk, int flags)
 	__skb_queue_purge(&tp->out_of_order_queue);
 #ifdef CONFIG_NET_DMA
 	__skb_queue_purge(&sk->sk_async_wait_queue);
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	dma_free_iovec_data(tp);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 #endif
 
 	inet->inet_dport = 0;
@@ -3593,7 +3596,7 @@ void __init tcp_init(void)
 	sysctl_tcp_rmem[0] = SK_MEM_QUANTUM;
 	sysctl_tcp_rmem[1] = 87380;
 	sysctl_tcp_rmem[2] = max(87380, max_rshare);
-#ifdef CONFIG_SYNO_KVMX64
+#ifdef MY_DEF_HERE
 	sysctl_tcp_rmem[0] *= 2;
 	sysctl_tcp_rmem[1] *= 2;
 #endif

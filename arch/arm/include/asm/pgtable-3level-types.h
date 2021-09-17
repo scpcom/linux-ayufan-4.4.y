@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * arch/arm/include/asm/pgtable-3level-types.h
  *
@@ -33,15 +36,15 @@ typedef u64 pgdval_t;
 /*
  * These are used to make use of C type-checking..
  */
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 typedef struct { pteval_t pte;
 #if HW_PAGES_PER_PAGE > 1
 	pteval_t unused[HW_PAGES_PER_PAGE-1];
 #endif /* HW_PAGES_PER_PAGE > 1 */
 } pte_t;
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 typedef struct { pteval_t pte; } pte_t;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 typedef struct { pmdval_t pmd; } pmd_t;
 typedef struct { pgdval_t pgd; } pgd_t;
 typedef struct { pteval_t pgprot; } pgprot_t;
@@ -51,44 +54,44 @@ typedef struct { pteval_t pgprot; } pgprot_t;
 #define pgd_val(x)	((x).pgd)
 #define pgprot_val(x)   ((x).pgprot)
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #define __pte(x)        ({pte_t __pte = { .pte = (x) }; __pte; })
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 #define __pte(x)        ((pte_t) { (x) } )
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 #define __pmd(x)        ((pmd_t) { (x) } )
 #define __pgd(x)	((pgd_t) { (x) } )
 #define __pgprot(x)     ((pgprot_t) { (x) } )
 
 #else	/* !STRICT_MM_TYPECHECKS */
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 typedef struct { pteval_t pte;
 #if HW_PAGES_PER_PAGE > 1
 	pteval_t unused[HW_PAGES_PER_PAGE-1];
 #endif /* HW_PAGES_PER_PAGE > 1 */
 } pte_t;
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 typedef pteval_t pte_t;
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 typedef pmdval_t pmd_t;
 typedef pgdval_t pgd_t;
 typedef pteval_t pgprot_t;
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #define pte_val(x)	((x).pte)
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 #define pte_val(x)	(x)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 #define pmd_val(x)	(x)
 #define pgd_val(x)	(x)
 #define pgprot_val(x)	(x)
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #define __pte(x)	({pte_t __pte = { .pte = (x) }; __pte; })
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 #define __pte(x)	(x)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 #define __pmd(x)	(x)
 #define __pgd(x)	(x)
 #define __pgprot(x)	(x)

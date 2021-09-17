@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Copyright (C) 2008 Red Hat, Inc., Eric Paris <eparis@redhat.com>
  *
@@ -28,7 +31,7 @@
 #include "fsnotify.h"
 #include "../mount.h"
 
-#ifdef CONFIG_SYNO_FS_NOTIFY
+#ifdef MY_ABC_HERE
 #include <linux/nsproxy.h>
 #endif
 
@@ -300,7 +303,7 @@ out:
 }
 EXPORT_SYMBOL_GPL(fsnotify);
 
-#ifdef CONFIG_SYNO_FS_NOTIFY
+#ifdef MY_ABC_HERE
 /*
  * notify_event
  *
@@ -451,7 +454,7 @@ ERR:
 	return ret;
 }
 EXPORT_SYMBOL(SYNONotify);
-#endif /* CONFIG_SYNO_FS_NOTIFY */
+#endif /* MY_ABC_HERE */
 
 static __init int fsnotify_init(void)
 {

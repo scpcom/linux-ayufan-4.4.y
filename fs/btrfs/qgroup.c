@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2011 STRATO.  All rights reserved.
  *
@@ -1123,7 +1126,7 @@ out:
 	return ret;
 }
 
-#ifdef CONFIG_SYNO_BTRFS_QGROUP_QUERY
+#ifdef MY_ABC_HERE
 /*
  * struct btrfs_ioctl_qgroup_query_args should be initialized to zero
  */
@@ -1157,7 +1160,7 @@ void btrfs_qgroup_query(struct btrfs_fs_info *fs_info, u64 qgroupid,
 unlock:
 	mutex_unlock(&fs_info->qgroup_ioctl_lock);
 }
-#endif /* CONFIG_SYNO_BTRFS_QGROUP_QUERY */
+#endif /* MY_ABC_HERE */
 
 int btrfs_remove_qgroup(struct btrfs_trans_handle *trans,
 			struct btrfs_fs_info *fs_info, u64 qgroupid)

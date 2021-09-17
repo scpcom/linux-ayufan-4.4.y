@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  (C) 2001-2004  Dave Jones. <davej@redhat.com>
  *  (C) 2002  Padraig Brady. <padraig@antefacto.com>
@@ -419,11 +422,11 @@ static int guess_fsb(int mult)
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 static int longhaul_get_ranges(void)
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 static int __cpuinit longhaul_get_ranges(void)
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 {
 	unsigned int i, j, k = 0;
 	unsigned int ratio;
@@ -526,11 +529,11 @@ static int __cpuinit longhaul_get_ranges(void)
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 static void longhaul_setup_voltagescaling(void)
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 static void __cpuinit longhaul_setup_voltagescaling(void)
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 {
 	union msr_longhaul longhaul;
 	struct mV_pos minvid, maxvid, vid;
@@ -781,11 +784,11 @@ static int longhaul_setup_southbridge(void)
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 static int longhaul_cpu_init(struct cpufreq_policy *policy)
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 static int __cpuinit longhaul_cpu_init(struct cpufreq_policy *policy)
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 {
 	struct cpuinfo_x86 *c = &cpu_data(0);
 	char *cpuname = NULL;
@@ -953,11 +956,11 @@ static struct cpufreq_driver longhaul_driver = {
 	.init	= longhaul_cpu_init,
 	.exit	= longhaul_cpu_exit,
 	.name	= "longhaul",
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	.owner	= THIS_MODULE,
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 	.attr	= longhaul_attr,
 };
 

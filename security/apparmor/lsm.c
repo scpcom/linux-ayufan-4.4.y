@@ -551,11 +551,11 @@ static int apparmor_file_mprotect(struct vm_area_struct *vma,
 			   !(vma->vm_flags & VM_SHARED) ? MAP_PRIVATE : 0);
 }
 
-#if defined(CONFIG_SYNO_ALPINE) || defined(CONFIG_SYNO_ARMADA)
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 static int apparmor_sb_mount(const char *dev_name, struct path *path, const char *type,
-#else /* CONFIG_SYNO_ALPINE || CONFIG_SYNO_ARMADA */
+#else /* MY_DEF_HERE || MY_ABC_HERE */
 static int apparmor_sb_mount(char *dev_name, struct path *path, char *type,
-#endif /* CONFIG_SYNO_ALPINE || CONFIG_SYNO_ARMADA */
+#endif /* MY_DEF_HERE || MY_ABC_HERE */
 			     unsigned long flags, void *data)
 {
 	struct aa_profile *profile;

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * arch/arm/plat-orion/common.c
  *
@@ -594,26 +597,26 @@ void __init orion_spi_1_init(unsigned long mapbase)
 /*****************************************************************************
  * Watchdog
  ****************************************************************************/
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static struct resource orion_wdt_resource[] = {
 		DEFINE_RES_MEM(TIMER_PHYS_BASE, 0x04),
 		DEFINE_RES_MEM(RSTOUTn_MASK_PHYS, 0x04),
 };
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static struct resource orion_wdt_resource =
 		DEFINE_RES_MEM(TIMER_PHYS_BASE, 0x28);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static struct platform_device orion_wdt_device = {
 	.name		= "orion_wdt",
 	.id		= -1,
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	.num_resources	= ARRAY_SIZE(orion_wdt_resource),
 	.resource	= orion_wdt_resource,
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	.num_resources	= 1,
 	.resource	= &orion_wdt_resource,
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 };
 
 void __init orion_wdt_init(void)

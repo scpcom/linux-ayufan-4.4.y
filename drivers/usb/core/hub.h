@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * usb hub driver head file
  *
@@ -24,9 +27,9 @@
 #include <linux/usb/hcd.h>
 #include "usb.h"
 
-#ifdef CONFIG_SYNO_USB_CONNECT_DEBOUNCER
+#ifdef MY_ABC_HERE
 #define SYNO_CONNECT_BOUNCE 0x400
-#endif /* CONFIG_SYNO_USB_CONNECT_DEBOUNCER */
+#endif /* MY_ABC_HERE */
 
 struct usb_hub {
 	struct device		*intfdev;	/* the "interface" device */
@@ -83,7 +86,7 @@ struct usb_hub {
 	struct delayed_work	init_work;
 	struct usb_port		**ports;
 
-#ifdef CONFIG_SYNO_USB_UPS_DISCONNECT_FILTER
+#ifdef MY_ABC_HERE
 	struct timer_list	ups_discon_flt_timer;
 	int			ups_discon_flt_port;
 	unsigned long		ups_discon_flt_last; /* last filtered time */
@@ -91,7 +94,7 @@ struct usb_hub {
 #define SYNO_UPS_DISCON_FLT_STATUS_DEFERRED		1
 #define SYNO_UPS_DISCON_FLT_STATUS_TIMEOUT		2
 	unsigned int		ups_discon_flt_status;
-#endif /* CONFIG_SYNO_USB_UPS_DISCONNECT_FILTER */
+#endif /* MY_ABC_HERE */
 };
 
 /**
@@ -112,20 +115,20 @@ struct usb_port {
 	u8 portnum;
 	unsigned power_is_on:1;
 	unsigned did_runtime_put:1;
-#if defined (CONFIG_SYNO_USB_POWER_RESET)
+#if defined (MY_ABC_HERE)
 	unsigned int power_cycle_counter;
-#endif /* CONFIG_SYNO_USB_POWER_RESET */
-#ifdef CONFIG_SYNO_CASTRATED_XHC
+#endif /* MY_ABC_HERE */
+#ifdef MY_DEF_HERE
 #define SYNO_USB_PORT_CASTRATED_XHC 0x01
 	unsigned int flag;
-#endif /* CONFIG_SYNO_CASTRATED_XHC */
-#ifdef CONFIG_SYNO_USB_VBUS_GPIO_CONTROL
+#endif /* MY_DEF_HERE */
+#ifdef MY_DEF_HERE
 	unsigned syno_vbus_gpp;
-#endif /* CONFIG_SYNO_USB_VBUS_GPIO_CONTROL */
+#endif /* MY_DEF_HERE */
 };
-#if defined (CONFIG_SYNO_USB_POWER_RESET)
+#if defined (MY_ABC_HERE)
 #define SYNO_POWER_CYCLE_TRIES	(3)
-#endif /* CONFIG_SYNO_USB_POWER_RESET */
+#endif /* MY_ABC_HERE */
 
 #define to_usb_port(_dev) \
 	container_of(_dev, struct usb_port, dev)
@@ -141,9 +144,9 @@ extern int hub_port_debounce(struct usb_hub *hub, int port1,
 		bool must_be_connected);
 extern int usb_clear_port_feature(struct usb_device *hdev,
 		int port1, int feature);
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 extern void root_hub_recovery(struct usb_hub *hub);
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 static inline int hub_port_debounce_be_connected(struct usb_hub *hub,
 		int port1)

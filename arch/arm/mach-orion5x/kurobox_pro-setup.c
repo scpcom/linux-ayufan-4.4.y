@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * arch/arm/mach-orion5x/kurobox_pro-setup.c
  *
@@ -359,27 +362,27 @@ static void __init kurobox_pro_init(void)
 	orion5x_uart1_init();
 	orion5x_xor_init();
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	mvebu_mbus_add_window_by_id(ORION_MBUS_DEVBUS_BOOT_TARGET,
 				    ORION_MBUS_DEVBUS_BOOT_ATTR,
 				    KUROBOX_PRO_NOR_BOOT_BASE,
 				    KUROBOX_PRO_NOR_BOOT_SIZE);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	mvebu_mbus_add_window("devbus-boot", KUROBOX_PRO_NOR_BOOT_BASE,
 			      KUROBOX_PRO_NOR_BOOT_SIZE);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	platform_device_register(&kurobox_pro_nor_flash);
 
 	if (machine_is_kurobox_pro()) {
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		mvebu_mbus_add_window_by_id(ORION_MBUS_DEVBUS_TARGET(0),
 					    ORION_MBUS_DEVBUS_ATTR(0),
 					    KUROBOX_PRO_NAND_BASE,
 					    KUROBOX_PRO_NAND_SIZE);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		mvebu_mbus_add_window("devbus-cs0", KUROBOX_PRO_NAND_BASE,
 				      KUROBOX_PRO_NAND_SIZE);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 		platform_device_register(&kurobox_pro_nand_flash);
 	}
 

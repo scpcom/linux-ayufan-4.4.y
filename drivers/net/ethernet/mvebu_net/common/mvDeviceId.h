@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -398,12 +401,12 @@ extern "C" {
 #define MV_6811_DEV_ID		0x6811
 #define MV_6820_DEV_ID		0x6820
 #define MV_6828_DEV_ID		0x6828
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 #define MV_6W22_DEV_ID		0x6823 /* 6W22=A383 */
 #define MV_6W23_DEV_ID		0x6824 /* 6W23=A384 */
 #define MV_6W22_DEV_NAME	"6W22"
 #define MV_6W23_DEV_NAME	"6W23"
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 /* A38x revisions */
 #define MV_88F68XX_Z1_ID		0x0
@@ -441,7 +444,7 @@ extern "C" {
 	MV_BOBCAT2_A0_NAME,\
 	MV_BOBCAT2_B0_NAME,\
 }
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 /* BobK  Family */
 #define MV_BOBK_DEV_ID		0xBC00
 
@@ -457,15 +460,15 @@ extern "C" {
 #define MV_BOBK_ID_ARRAY { \
 	 MV_BOBK_A0_NAME,\
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
  /* Lion2  Family */
 #define MV_LION2_DEV_ID		0x8000
 
 /* AlleyCat3  Family */
 #define MV_ALLEYCAT3_DEV_ID		0xF400
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 #define MV_ALLEYCAT3_MAX_DEV_ID		0xF4FF
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 /* AlleyCat3  Revisions */
 #define MV_ALLEYCAT3_A0_ID		0x3

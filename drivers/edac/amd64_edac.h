@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * AMD64 class Memory Controller kernel module
  *
@@ -159,8 +162,8 @@
 #define ON true
 #define OFF false
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
-#else /* CONFIG_SYNO_LSP_MONACO */
+#if defined (MY_DEF_HERE)
+#else /* MY_DEF_HERE */
 /*
  * Create a contiguous bitmask starting at bit position @lo and ending at
  * position @hi. For example
@@ -168,7 +171,7 @@
  * GENMASK(21, 39) gives us the 64bit vector 0x000000ffffe00000.
  */
 #define GENMASK(lo, hi)			(((1ULL << ((hi) - (lo) + 1)) - 1) << (lo))
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 /*
  * PCI-defined configuration space registers

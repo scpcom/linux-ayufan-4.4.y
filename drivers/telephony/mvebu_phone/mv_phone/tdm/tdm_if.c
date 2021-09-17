@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -339,15 +342,15 @@ MV_STATUS tdm_if_init(tal_params_t *tal_params)
 	/* Assign TDM parameters */
 	memcpy(&tdm_params, tal_params, sizeof(MV_TDM_PARAMS));
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	// do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	/* Soft reset to PCM I/F */
 #ifdef CONFIG_MV_TDM2C_SUPPORT
 	if (MV_TDM_UNIT_TDM2C == tdm_if_unit_type_get())
 		mvTdmPcmIfReset();
 #endif
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	/* TDM init */
 	if (mvSysTdmInit(&tdm_params) != MV_OK) {
@@ -356,13 +359,13 @@ MV_STATUS tdm_if_init(tal_params_t *tal_params)
 	}
 	tdm_init = 1;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	/* Soft reset to PCM I/F */
 #ifdef CONFIG_MV_TDM2C_SUPPORT
 	if (MV_TDM_UNIT_TDM2C == tdm_if_unit_type_get())
 		mvTdmPcmIfReset();
 #endif
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
 	/* Register TDM interrupt */
 #ifdef CONFIG_MV_PHONE_USE_FIQ_PROCESSING

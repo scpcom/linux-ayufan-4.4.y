@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2013 STMicroelectronics
  *
@@ -20,31 +23,31 @@
 #include <linux/regmap.h>
 #include <linux/reset.h>
 #include <linux/delay.h>
-#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
-#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#if defined(MY_DEF_HERE)
+#else /* MY_DEF_HERE */
 #include <linux/mfd/syscon.h>
-#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#endif /* MY_DEF_HERE */
 #include <linux/usb/phy.h>
 
-#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+#if defined(MY_DEF_HERE)
 #include "phy-st-usb3.h"
-#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
-#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#if defined(MY_DEF_HERE)
+#else /* MY_DEF_HERE */
 #define phy_to_priv(x)	container_of((x), struct sti_usb3_miphy, phy)
 
 #define SSC_ON	0x11
 #define SSC_OFF	0x01
-#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#endif /* MY_DEF_HERE */
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
-#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+#ifdef MY_DEF_HERE
+#if defined(MY_DEF_HERE)
 /* module param to disable MIPHY SSC */
 static int miphy_ssc_off;
 module_param(miphy_ssc_off, int, S_IRUGO | S_IWUSR);
 MODULE_PARM_DESC(miphy_ssc_off, "turn off miphy ssc");
-#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#endif /* MY_DEF_HERE */
 /* Set MIPHY timer to 2s */
 #define MIPHY_DEFAULT_TIMER	2000
 static int miphy_timer_msecs = MIPHY_DEFAULT_TIMER;
@@ -52,8 +55,8 @@ module_param(miphy_timer_msecs, int, S_IRUGO | S_IWUSR);
 MODULE_PARM_DESC(miphy_timer_msecs, "miphy timer init in msecs");
 #define MIPHY_TIMER(x)	(jiffies + msecs_to_jiffies(x))
 
-#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
-#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#if defined(MY_DEF_HERE)
+#else /* MY_DEF_HERE */
 /* MiPHY_2 RX status */
 #define MIPHY2_RX_CAL_COMPLETED		BIT(0)
 #define MIPHY2_RX_OFFSET		BIT(1)
@@ -63,9 +66,9 @@ MODULE_PARM_DESC(miphy_timer_msecs, "miphy timer init in msecs");
 /* MiPHY2 Status */
 #define MiPHY2_STATUS_1			0x2
 #define MIPHY2_PHY_READY		BIT(0)
-#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
-#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+#endif /* MY_DEF_HERE */
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
 /* This is the list of VID/PID for buggy HDDs that turn OFF SSC*/
 static struct usb_device_id usb_blacklist[] = {
 	{USB_DEVICE(0x07ab, 0xfc9f)},	/* USB3.0 freecom */
@@ -130,7 +133,7 @@ static int sti_usb3_miphy_on_disconnect(struct usb_phy *phy_dev,
 
 	return 0;
 }
-#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#else /* MY_DEF_HERE */
 /* MiPHY_2 Control */
 #define	SYSCFG5071			0x11c
 #define MIPHY2_PX_TX_POLARITY		BIT(0)
@@ -158,12 +161,12 @@ struct sti_usb3_miphy {
 	struct reset_control *rstc;
 	void __iomem *usb3_base;
 	void __iomem *pipe_base;
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	struct timer_list miphy_timer;
 	struct workqueue_struct *miphy_queue;
 	struct work_struct miphy_work;
 	spinlock_t lock;
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 };
 
 static struct sti_usb3_cfg sti_usb3_miphy_cfg = {
@@ -187,11 +190,11 @@ static const struct miphy_initval initvals[] = {
 	{0x00, 0x01}, {0x04, 0x1C},
 	/* PLL calibration */
 	{0xEB, 0x1D}, {0x0D, 0x1E}, {0x0F, 0x00}, {0xC4, 0x70},
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	{0xC9, 0x22}, {0xCA, 0x22}, {0xCB, 0x22}, {0xCC, 0x2A},
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	{0xC9, 0x02}, {0xCA, 0x02}, {0xCB, 0x02}, {0xCC, 0x0A},
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	/* Writing The PLL Ratio */
 	{0xD4, 0xA6}, {0xD5, 0xAA}, {0xD6, 0xAA}, {0xD7, 0x04},
 	{0xD3, 0x00},
@@ -201,11 +204,11 @@ static const struct miphy_initval initvals[] = {
 	{0xC2, 0x1C}, {0x97, 0x51}, {0x98, 0x70}, {0x99, 0x5F},
 	{0x9A, 0x22}, {0x9F, 0x0E},
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	{0x7A, 0x05}, {0x7B, 0x05}, {0x7F, 0x78}, {0x30, 0x1B},
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	{0x7A, 0x05}, {0x7F, 0x78}, {0x30, 0x1B},
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	/* Enable GENSEL_SEL and SSC */
 	/* TX_SEL=0 swing preemp forced by pipe registres */
 	{0x0A, SSC_ON},
@@ -257,8 +260,8 @@ static int sti_usb3_miphy_autocalibration(struct usb_phy *phy_dev,
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#endif /* MY_DEF_HERE */
+#ifdef MY_DEF_HERE
 static void sti_usb3_miphy_work(struct work_struct *work)
 {
 	struct sti_usb3_miphy *miphy =
@@ -316,9 +319,9 @@ static void sti_usb3_miphy_timer_init(struct sti_usb3_miphy *phy_dev)
 	dev_info(phy_dev->dev, "USB3 MIPHY28LP timer initialized\n");
 
 }
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+#if defined(MY_DEF_HERE)
 static void sti_miphy_reset(struct sti_usb3_miphy *phy_dev, bool do_reset)
 {
 	if (do_reset) {
@@ -634,7 +637,7 @@ static void sti_usb3_miphy28lp(struct sti_usb3_miphy *phy_dev)
 	/* configure MIPHY pipew */
 	sti_pipew_cfg(phy_dev);
 }
-#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#else /* MY_DEF_HERE */
 static void sti_usb3_miphy28lp(struct sti_usb3_miphy *phy_dev)
 {
 	int i;
@@ -676,15 +679,15 @@ static void sti_usb3_miphy28lp(struct sti_usb3_miphy *phy_dev)
 	writeb_relaxed(0X67, phy_dev->pipe_base + 0x6E);
 	writeb_relaxed(0X0D, phy_dev->pipe_base + 0x6F);
 }
-#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#endif /* MY_DEF_HERE */
 
 static int sti_usb3_miphy_init(struct usb_phy *phy)
 {
 	struct sti_usb3_miphy *phy_dev = phy_to_priv(phy);
-#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+#if defined(MY_DEF_HERE)
 	if (!IS_ERR(phy_dev->rstc))
 		reset_control_deassert(phy_dev->rstc);
-#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#else /* MY_DEF_HERE */
 	int ret;
 
 	ret = regmap_update_bits(phy_dev->regmap, phy_dev->cfg->syscfg,
@@ -693,14 +696,14 @@ static int sti_usb3_miphy_init(struct usb_phy *phy)
 		return ret;
 
 	reset_control_deassert(phy_dev->rstc);
-#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#endif /* MY_DEF_HERE */
 
 	/* Program the MiPHY2 internal registers */
 	sti_usb3_miphy28lp(phy_dev);
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	/* Start polling timer to get MIPHY2 status*/
 	sti_usb3_miphy_timer_init(phy_dev);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	return 0;
 }
@@ -709,15 +712,15 @@ static void sti_usb3_miphy_shutdown(struct usb_phy *phy)
 {
 	struct sti_usb3_miphy *phy_dev = phy_to_priv(phy);
 
-#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+#if defined(MY_DEF_HERE)
 	if (!IS_ERR(phy_dev->rstc))
 		reset_control_assert(phy_dev->rstc);
-#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#else /* MY_DEF_HERE */
 	reset_control_assert(phy_dev->rstc);
-#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#endif /* MY_DEF_HERE */
+#ifdef MY_DEF_HERE
 	del_timer(&phy_dev->miphy_timer);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 }
 
 static const struct of_device_id sti_usb3_miphy_of_match[];
@@ -727,36 +730,36 @@ static int sti_usb3_miphy_probe(struct platform_device *pdev)
 	struct device_node *np = pdev->dev.of_node;
 	const struct of_device_id *match;
 	struct sti_usb3_miphy *phy_dev;
-#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+#if defined(MY_DEF_HERE)
 	struct miphy_pll *phy_pll;
-#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#endif /* MY_DEF_HERE */
 	struct device *dev = &pdev->dev;
 	struct usb_phy *phy;
 	struct resource *res;
-#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+#if defined(MY_DEF_HERE)
 	struct clk *clk;
 	unsigned long rate;
 	u32 ret;
 
 	if (!np)
 		return -ENODEV;
-#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#endif /* MY_DEF_HERE */
 
 	phy_dev = devm_kzalloc(dev, sizeof(*phy_dev), GFP_KERNEL);
 	if (!phy_dev)
 		return -ENOMEM;
 
-#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+#if defined(MY_DEF_HERE)
 	phy_pll = devm_kzalloc(dev, sizeof(*phy_pll), GFP_KERNEL);
 	if (!phy_pll)
 		return -ENOMEM;
-#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#endif /* MY_DEF_HERE */
 
 	match = of_match_device(sti_usb3_miphy_of_match, &pdev->dev);
 	if (!match)
 		return -ENODEV;
 
-#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+#if defined(MY_DEF_HERE)
 	clk = devm_clk_get(dev, "miphy_osc");
 	if (IS_ERR(clk)) {
 		dev_err(dev, "miphy_osc clk not found\n");
@@ -767,7 +770,7 @@ static int sti_usb3_miphy_probe(struct platform_device *pdev)
 	if (ret) {
 		dev_err(phy_dev->dev, "Failed to enable miphy osc clock\n");
 		return ret;
-#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#else /* MY_DEF_HERE */
 	phy_dev->cfg = match->data;
 	phy_dev->dev = dev;
 
@@ -775,10 +778,10 @@ static int sti_usb3_miphy_probe(struct platform_device *pdev)
 	if (IS_ERR(phy_dev->rstc)) {
 		dev_err(dev, "failed to ctrl MiPHY2 USB3 reset\n");
 		return PTR_ERR(phy_dev->rstc);
-#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#endif /* MY_DEF_HERE */
 	}
 
-#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+#if defined(MY_DEF_HERE)
 	rate = clk_get_rate(clk);
 	phy_pll->refclk = rate / 1000000;
 
@@ -798,7 +801,7 @@ static int sti_usb3_miphy_probe(struct platform_device *pdev)
 	else {
 		dev_dbg(dev, "MiPHY2 USB3 reset!\n");
 		reset_control_deassert(phy_dev->rstc);
-#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#else /* MY_DEF_HERE */
 	dev_info(dev, "reset MiPHY\n");
 	reset_control_deassert(phy_dev->rstc);
 
@@ -806,16 +809,16 @@ static int sti_usb3_miphy_probe(struct platform_device *pdev)
 	if (IS_ERR(phy_dev->regmap)) {
 		dev_err(dev, "No syscfg phandle specified\n");
 		return PTR_ERR(phy_dev->regmap);
-#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#endif /* MY_DEF_HERE */
 	}
 
 	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "usb3-uport");
 	if (res) {
-#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+#if defined(MY_DEF_HERE)
 		phy_dev->usb3_base = devm_ioremap_resource(&pdev->dev, res);
-#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#else /* MY_DEF_HERE */
 		phy_dev->usb3_base = devm_request_and_ioremap(&pdev->dev, res);
-#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#endif /* MY_DEF_HERE */
 		if (!phy_dev->usb3_base) {
 			dev_err(&pdev->dev, "Unable to map base registers\n");
 			return -ENOMEM;
@@ -824,11 +827,11 @@ static int sti_usb3_miphy_probe(struct platform_device *pdev)
 	/* Check for PIPE registers */
 	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "pipew");
 	if (res) {
-#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+#if defined(MY_DEF_HERE)
 		phy_dev->pipe_base = devm_ioremap_resource(&pdev->dev, res);
-#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#else /* MY_DEF_HERE */
 		phy_dev->pipe_base = devm_request_and_ioremap(&pdev->dev, res);
-#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#endif /* MY_DEF_HERE */
 		if (!phy_dev->pipe_base) {
 			dev_err(&pdev->dev, "Unable to map PIPE registers\n");
 			return -ENOMEM;
@@ -837,7 +840,7 @@ static int sti_usb3_miphy_probe(struct platform_device *pdev)
 
 	dev_info(dev, "usb3 ioaddr 0x%p, pipew ioaddr 0x%p\n",
 		 phy_dev->usb3_base, phy_dev->pipe_base);
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	spin_lock_init(&phy_dev->lock);
 
 	phy_dev->miphy_queue =
@@ -848,13 +851,13 @@ static int sti_usb3_miphy_probe(struct platform_device *pdev)
 	}
 
 	INIT_WORK(&phy_dev->miphy_work, sti_usb3_miphy_work);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
-#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
 	phy_dev->sw_auto_calib =
 		of_property_read_bool(np, "st,auto-calibration");
 
 	phy_dev->no_ssc = of_property_read_bool(np, "st,no-ssc");
-#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#endif /* MY_DEF_HERE */
 
 	phy = &phy_dev->phy;
 	phy->dev = dev;
@@ -862,13 +865,13 @@ static int sti_usb3_miphy_probe(struct platform_device *pdev)
 	phy->init = sti_usb3_miphy_init;
 	phy->type = USB_PHY_TYPE_USB3;
 	phy->shutdown = sti_usb3_miphy_shutdown;
-#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+#if defined(MY_DEF_HERE)
 	phy->notify_connect = sti_usb3_miphy_on_connect;
 	phy->notify_disconnect = sti_usb3_miphy_on_disconnect;
-#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#else /* MY_DEF_HERE */
 	if (of_property_read_bool(np, "st,auto-calibration"))
 		phy->notify_disconnect = sti_usb3_miphy_autocalibration;
-#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#endif /* MY_DEF_HERE */
 
 	usb_add_phy_dev(phy);
 
@@ -883,33 +886,33 @@ static int sti_usb3_miphy_remove(struct platform_device *pdev)
 {
 	struct sti_usb3_miphy *phy_dev = platform_get_drvdata(pdev);
 
-#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+#if defined(MY_DEF_HERE)
 	if (!IS_ERR(phy_dev->rstc))
 		reset_control_assert(phy_dev->rstc);
-#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#else /* MY_DEF_HERE */
 	reset_control_assert(phy_dev->rstc);
-#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#endif /* MY_DEF_HERE */
 
 	usb_remove_phy(&phy_dev->phy);
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	del_timer(&phy_dev->miphy_timer);
 
 	if (phy_dev->miphy_queue)
 		destroy_workqueue(phy_dev->miphy_queue);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	return 0;
 }
 
 static const struct of_device_id sti_usb3_miphy_of_match[] = {
 	{
-#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+#if defined(MY_DEF_HERE)
 	 .compatible = "st,sti-usb3phy"
 	},
-#else /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#else /* MY_DEF_HERE */
 	 .compatible = "st,sti-usb3phy",
 	 .data = &sti_usb3_miphy_cfg},
-#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#endif /* MY_DEF_HERE */
 	{},
 };
 
@@ -927,7 +930,7 @@ static struct platform_driver sti_usb3_miphy_driver = {
 
 module_platform_driver(sti_usb3_miphy_driver);
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 #ifndef MODULE
 static int __init miphy_cmdline_opt(char *str)
 {
@@ -940,12 +943,12 @@ static int __init miphy_cmdline_opt(char *str)
 			if (kstrtoint(opt + 18, 0, &miphy_timer_msecs))
 				goto err;
 		}
-#if defined(CONFIG_SYNO_MONACO_USB_PHY_FIX)
+#if defined(MY_DEF_HERE)
 		if (!strncmp(opt, "miphy_ssc_off:", 14)) {
 			if (kstrtoint(opt + 14, 0, &miphy_ssc_off))
 				goto err;
 		}
-#endif /* CONFIG_SYNO_MONACO_USB_PHY_FIX */
+#endif /* MY_DEF_HERE */
 	}
 	return 0;
 
@@ -956,7 +959,7 @@ err:
 
 __setup("miphy_st=", miphy_cmdline_opt);
 #endif /* MODULE */
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 MODULE_AUTHOR("Giuseppe Cavallaro <peppe.cavallaro@st.com>");
 MODULE_DESCRIPTION("STMicroelectronics USB3 MiPHY for STiH407/STi8416 SoC");

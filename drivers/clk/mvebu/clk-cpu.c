@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Marvell MVEBU CPU clock handling.
  *
@@ -16,12 +19,12 @@
 #include <linux/io.h>
 #include <linux/of.h>
 #include <linux/delay.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #include <linux/mvebu-pmsu.h>
 #include <asm/smp_plat.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 #define SYS_CTRL_CLK_DIVIDER_CTRL_OFFSET               0x0
 #define   SYS_CTRL_CLK_DIVIDER_CTRL_RESET_ALL          0xff
 #define   SYS_CTRL_CLK_DIVIDER_CTRL_RESET_SHIFT        8
@@ -44,19 +47,19 @@
 
 #define PMU_DFS_RATIO_SHIFT 16
 #define PMU_DFS_RATIO_MASK  0x3F
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 #define SYS_CTRL_CLK_DIVIDER_CTRL_OFFSET    0x0
 #define SYS_CTRL_CLK_DIVIDER_VALUE_OFFSET   0xC
 #define SYS_CTRL_CLK_DIVIDER_MASK	    0x3F
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 #define MAX_CPU	    4
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 struct cpu_clk_regs {
 	u32 clk_divider_value_offset;
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 struct cpu_clk {
 	struct clk_hw hw;
@@ -64,11 +67,11 @@ struct cpu_clk {
 	const char *clk_name;
 	const char *parent_name;
 	void __iomem *reg_base;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	void __iomem *pmu_dfs;
 	void __iomem *dfx_server_base;
 	const struct cpu_clk_regs *clk_regs;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 };
 
 static struct clk **clks;
@@ -77,26 +80,26 @@ static struct clk_onecell_data clk_data;
 
 #define to_cpu_clk(p) container_of(p, struct cpu_clk, hw)
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static unsigned long armada_xp_clk_cpu_recalc_rate(struct clk_hw *hwclk,
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static unsigned long clk_cpu_recalc_rate(struct clk_hw *hwclk,
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 					 unsigned long parent_rate)
 {
 	struct cpu_clk *cpuclk = to_cpu_clk(hwclk);
 	u32 reg, div;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	reg = readl(cpuclk->reg_base + cpuclk->clk_regs->clk_divider_value_offset);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	reg = readl(cpuclk->reg_base + SYS_CTRL_CLK_DIVIDER_VALUE_OFFSET);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	div = (reg >> (cpuclk->cpu * 8)) & SYS_CTRL_CLK_DIVIDER_MASK;
 	return parent_rate / div;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static unsigned long armada_380_clk_cpu_recalc_rate(struct clk_hw *hwclk,
 					 unsigned long parent_rate)
 {
@@ -112,7 +115,7 @@ static unsigned long armada_380_clk_cpu_recalc_rate(struct clk_hw *hwclk,
 	div = reg & SYS_CTRL_CLK_DIVIDER_MASK;
 	return parent_rate / div;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 static long clk_cpu_round_rate(struct clk_hw *hwclk, unsigned long rate,
 			       unsigned long *parent_rate)
@@ -129,31 +132,31 @@ static long clk_cpu_round_rate(struct clk_hw *hwclk, unsigned long rate,
 	return *parent_rate / div;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static int armada_xp_clk_cpu_off_set_rate(struct clk_hw *hwclk, unsigned long rate,
 				unsigned long parent_rate)
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static int clk_cpu_set_rate(struct clk_hw *hwclk, unsigned long rate,
 			    unsigned long parent_rate)
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 {
 	struct cpu_clk *cpuclk = to_cpu_clk(hwclk);
 	u32 reg, div;
 	u32 reload_mask;
 
 	div = parent_rate / rate;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	reg = (readl(cpuclk->reg_base + cpuclk->clk_regs->clk_divider_value_offset)
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	reg = (readl(cpuclk->reg_base + SYS_CTRL_CLK_DIVIDER_VALUE_OFFSET)
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 		& (~(SYS_CTRL_CLK_DIVIDER_MASK << (cpuclk->cpu * 8))))
 		| (div << (cpuclk->cpu * 8));
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	writel(reg, cpuclk->reg_base + cpuclk->clk_regs->clk_divider_value_offset);
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	writel(reg, cpuclk->reg_base + SYS_CTRL_CLK_DIVIDER_VALUE_OFFSET);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	/* Set clock divider reload smooth bit mask */
 	reload_mask = 1 << (20 + cpuclk->cpu);
 
@@ -175,7 +178,7 @@ static int clk_cpu_set_rate(struct clk_hw *hwclk, unsigned long rate,
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static int armada_xp_clk_cpu_on_set_rate(struct clk_hw *hwclk, unsigned long rate,
 			       unsigned long parent_rate)
 {
@@ -280,9 +283,9 @@ static int armada_380_clk_cpu_set_rate(struct clk_hw *hwclk, unsigned long rate,
 
 	return mvebu_pmsu_dfs_request(cpuclk->cpu);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 static const struct clk_ops armada_xp_cpu_ops = {
 	.recalc_rate = armada_xp_clk_cpu_recalc_rate,
 	.round_rate = clk_cpu_round_rate,
@@ -302,29 +305,29 @@ static const struct cpu_clk_regs armada_xp_cpu_clk_regs = {
 static const struct cpu_clk_regs armada_380_cpu_clk_regs = {
 	.clk_divider_value_offset = 0x4,
 };
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 static const struct clk_ops cpu_ops = {
 	.recalc_rate = clk_cpu_recalc_rate,
 	.round_rate = clk_cpu_round_rate,
 	.set_rate = clk_cpu_set_rate,
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 void __init of_cpu_clk_setup(struct device_node *node)
 {
 	struct cpu_clk *cpuclk;
 	void __iomem *clock_complex_base = of_iomap(node, 0);
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	void __iomem *pmu_dfs_base = of_iomap(node, 1);
 	void __iomem *dfx_server_base = of_iomap(node, 2);
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	int ncpus = 0;
 	struct device_node *dn;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	const struct clk_ops *cpu_ops = NULL;
 	const struct cpu_clk_regs *cpu_regs = NULL;
 	bool independent_clocks = true;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	if (clock_complex_base == NULL) {
 		pr_err("%s: clock-complex base register not set\n",
@@ -332,16 +335,16 @@ void __init of_cpu_clk_setup(struct device_node *node)
 		return;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 	if (pmu_dfs_base == NULL)
 		pr_warn("%s: pmu-dfs base register not set, dynamic frequency scaling not available\n",
 			__func__);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 	if (of_machine_is_compatible("marvell,armada38x")) {
-#else /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#else /* MY_ABC_HERE */
 	if (of_machine_is_compatible("marvell,armada380")) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 		if (dfx_server_base == NULL) {
 			pr_err("%s: DFX server base register not set\n",
 			__func__);
@@ -357,10 +360,10 @@ void __init of_cpu_clk_setup(struct device_node *node)
 		for_each_node_by_type(dn, "cpu")
 			ncpus++;
 	}
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 	for_each_node_by_type(dn, "cpu")
 		ncpus++;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 
 	cpuclk = kzalloc(ncpus * sizeof(*cpuclk), GFP_KERNEL);
 	if (WARN_ON(!cpuclk))
@@ -391,7 +394,7 @@ void __init of_cpu_clk_setup(struct device_node *node)
 		cpuclk[cpu].clk_name = clk_name;
 		cpuclk[cpu].cpu = cpu;
 		cpuclk[cpu].reg_base = clock_complex_base;
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		if (pmu_dfs_base)
 			cpuclk[cpu].pmu_dfs = pmu_dfs_base + 4 * cpu;
 
@@ -401,11 +404,11 @@ void __init of_cpu_clk_setup(struct device_node *node)
 
 		init.name = cpuclk[cpu].clk_name;
 		init.ops = cpu_ops;
-#else /* CONFIG_SYNO_LSP_ARMADA */
+#else /* MY_ABC_HERE */
 		cpuclk[cpu].hw.init = &init;
 		init.name = cpuclk[cpu].clk_name;
 		init.ops = &cpu_ops;
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 		init.flags = 0;
 		init.parent_names = &cpuclk[cpu].parent_name;
 		init.num_parents = 1;
@@ -415,12 +418,12 @@ void __init of_cpu_clk_setup(struct device_node *node)
 			goto bail_out;
 		clks[cpu] = clk;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA)
+#if defined(MY_ABC_HERE)
 		if (independent_clocks == false) {
 			/* use 1 clock to all cpus */
 			break;
 		}
-#endif /* CONFIG_SYNO_LSP_ARMADA */
+#endif /* MY_ABC_HERE */
 	}
 	clk_data.clk_num = MAX_CPU;
 	clk_data.clks = clks;

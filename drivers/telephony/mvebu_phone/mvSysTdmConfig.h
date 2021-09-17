@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -121,18 +124,18 @@ extern int tdm_base, use_pclk_external;
 #define TRC_REC(...)
 #define TRC_OUTPUT(...)
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4)
+#if defined(MY_ABC_HERE)
 #ifdef CONFIG_MV_TDM_EXT_STATS
 	#define MV_TDM_EXT_STATS
 #endif
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p4 */
+#endif /* MY_ABC_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 /* TDM control/SPI registers used for suspend/resume */
 #define TDM_CTRL_REGS_NUM         36
 #define TDM_SPI_REGS_OFFSET           0x3100
 #define TDM_SPI_REGS_NUM          16
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 
 struct mv_phone_dev {
 	void __iomem *tdm_base;
@@ -145,14 +148,14 @@ struct mv_phone_dev {
 	u32 pclk_freq_mhz;
 	int irq;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7)
+#if defined(MY_ABC_HERE)
 	/* Used to preserve TDM registers across suspend/resume */
 	u32 tdm_ctrl_regs[TDM_CTRL_REGS_NUM];
 	u32 tdm_spi_regs[TDM_SPI_REGS_NUM];
 	u32 tdm_spi_mux_reg;
 	u32 tdm_mbus_config_reg;
 	u32 tdm_misc_reg;
-#endif /* CONFIG_SYNO_LSP_ARMADA_2015_T1_1p7 */
+#endif /* MY_ABC_HERE */
 };
 
 /* This enumerator defines the Marvell Units ID */

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/arch/arm/kernel/devtree.c
  *
@@ -28,7 +31,7 @@
 
 void __init early_init_dt_add_memory_arch(u64 base, u64 size)
 {
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_ARM_LPAE
 	// do nothing
 #else /* CONFIG_ARM_LPAE */
@@ -51,7 +54,7 @@ void __init early_init_dt_add_memory_arch(u64 base, u64 size)
 		size = sz_4g - base - PAGE_SIZE;
 	}
 #endif /* CONFIG_ARM_LPAE */
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 	arm_add_memory(base, size);
 }

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *   STMicroelectronics System-on-Chips' internal (sysconf controlled)
  *   audio DAC driver
@@ -169,11 +172,11 @@ static int conv_dac_sc_set_enabled(int enabled, void *priv)
 			enabled ? "En" : "Dis", conv->bus_id);
 
 	if (enabled) {
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 		/* take the DAC analog bits out of standby */
 		if (conv->sbana)
 			regmap_field_write(conv->sbana, 0);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 		/* Take the DAC out of standby */
 		if (conv->nsb)
 			regmap_field_write(conv->nsb, 1);
@@ -193,11 +196,11 @@ static int conv_dac_sc_set_enabled(int enabled, void *priv)
 			regmap_field_write(conv->nsb, 0);
 		if (conv->sb)
 			regmap_field_write(conv->sb, 1);
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 		/* Put the DAC analog bits into standby */
 		if (conv->sbana)
 			regmap_field_write(conv->sbana, 1);
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	}
 
 	return 0;
@@ -232,7 +235,7 @@ static struct snd_stm_conv_ops conv_dac_sc_ops = {
 	.set_muted	  = conv_dac_sc_set_muted,
 };
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 static int conv_dac_sc_set_idle(struct conv_dac_sc *conv)
 {
 	BUG_ON(!conv);
@@ -270,7 +273,7 @@ static int conv_dac_sc_set_idle(struct conv_dac_sc *conv)
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 /*
  * ALSA low-level device implementation
@@ -280,17 +283,17 @@ static int conv_dac_sc_register(struct snd_device *snd_device)
 {
 	struct conv_dac_sc *conv = snd_device->device_data;
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 	BUG_ON(!conv);
 	BUG_ON(!snd_stm_magic_valid(conv));
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 	dev_dbg(conv->dev, "%s(snd_device=%p)", __func__, snd_device);
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	return conv_dac_sc_set_idle(conv);
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 	/* Put the DAC into reset */
 	if (conv->nrst)
 		reset_control_assert(conv->nrst);
@@ -322,7 +325,7 @@ static int conv_dac_sc_register(struct snd_device *snd_device)
 		regmap_field_write(conv->pndbg, 1);
 
 	return 0;
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 }
 
 static int conv_dac_sc_disconnect(struct snd_device *snd_device)
@@ -593,7 +596,7 @@ static int conv_dac_sc_remove(struct platform_device *pdev)
 	return 0;
 }
 
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_PM_SLEEP
 static int conv_dac_sc_resume(struct device *dev)
 {
@@ -610,7 +613,7 @@ SIMPLE_DEV_PM_OPS(conv_dac_sc_pm_ops, NULL, conv_dac_sc_resume);
 #else
 #define CONV_DAC_SC_PM_OPS	NULL
 #endif
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 
 /*
  * Module initialization.
@@ -633,9 +636,9 @@ MODULE_DEVICE_TABLE(of, conv_dac_sc_match);
 static struct platform_driver conv_dac_sc_platform_driver = {
 	.driver.name	= "snd_conv_dac_sc",
 	.driver.of_match_table = conv_dac_sc_match,
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 	.driver.pm	= CONV_DAC_SC_PM_OPS,
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 	.probe		= conv_dac_sc_probe,
 	.remove		= conv_dac_sc_remove,
 };

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * drivers/uio/uio.c
  *
@@ -650,11 +653,11 @@ static const struct vm_operations_struct uio_physical_vm_ops = {
 #endif
 };
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 static int uio_mmap_physical(struct vm_area_struct *vma, int cacheable)
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 static int uio_mmap_physical(struct vm_area_struct *vma)
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 {
 	struct uio_device *idev = vma->vm_private_data;
 	int mi = uio_find_mem_index(vma);
@@ -668,12 +671,12 @@ static int uio_mmap_physical(struct vm_area_struct *vma)
 
 	vma->vm_ops = &uio_physical_vm_ops;
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	if (!cacheable)
 		vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 	vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 	/*
 	 * We cannot use the vm_iomap_memory() helper here,
@@ -721,18 +724,18 @@ static int uio_mmap(struct file *filep, struct vm_area_struct *vma)
 
 	switch (idev->info->mem[mi].memtype) {
 		case UIO_MEM_PHYS:
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 			return uio_mmap_physical(vma, 0);
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 			return uio_mmap_physical(vma);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 		case UIO_MEM_LOGICAL:
 		case UIO_MEM_VIRTUAL:
 			return uio_mmap_logical(vma);
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 		case UIO_MEM_PHYS_CACHEABLE:
 			return uio_mmap_physical(vma, 1);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 		default:
 			return -EINVAL;
 	}

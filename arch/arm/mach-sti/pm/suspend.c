@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * -------------------------------------------------------------------------
  * Copyright (C) 2014  STMicroelectronics
@@ -397,11 +400,11 @@ static int __init sti_suspend_setup(void)
 
 		/* This will be true for CPS */
 		if (!ret && hw_state->init_time_prepare == 0x1) {
-#ifdef CONFIG_SYNO_LSP_MONACO_SDK2_15_4
+#ifdef MY_DEF_HERE
 			sti_suspend.index = sti_suspend.hw_state_nr;
-#else /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#else /* MY_DEF_HERE */
 			sti_suspend.index = i;
-#endif /* CONFIG_SYNO_LSP_MONACO_SDK2_15_4 */
+#endif /* MY_DEF_HERE */
 			ret = sti_suspend_prepare();
 			hw_state->init_time_prepare = -1;
 		}

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * v4l2-event.c
  *
@@ -319,7 +322,7 @@ int v4l2_event_subdev_unsubscribe(struct v4l2_subdev *sd, struct v4l2_fh *fh,
 }
 EXPORT_SYMBOL_GPL(v4l2_event_subdev_unsubscribe);
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 static void v4l2_event_src_replace(struct v4l2_event *old,
 				const struct v4l2_event *new)
 {
@@ -355,4 +358,4 @@ int v4l2_src_change_event_subdev_subscribe(struct v4l2_subdev *sd,
 	return v4l2_src_change_event_subscribe(fh, sub);
 }
 EXPORT_SYMBOL_GPL(v4l2_src_change_event_subdev_subscribe);
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */

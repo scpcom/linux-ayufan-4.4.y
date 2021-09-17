@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) Neil Brown 2002
  * Copyright (C) Christoph Hellwig 2007
@@ -17,7 +20,7 @@
 #include <linux/sched.h>
 
 #define dprintk(fmt, args...) do{}while(0)
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 #include <linux/magic.h>
 #endif
 
@@ -441,7 +444,7 @@ struct dentry *exportfs_decode_fh(struct vfsmount *mnt, struct fid *fid,
 		 * file handle.  If this fails we'll have to give up.
 		 */
 		err = -ESTALE;
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 		if (result->d_sb->s_magic == BTRFS_SUPER_MAGIC) {
 			target_dir = nop->get_parent(result);
 			if (!target_dir || IS_ERR(target_dir))
@@ -461,7 +464,7 @@ fh_to_parent:
 		if (IS_ERR(target_dir))
 			goto err_result;
 
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 reconnect_target_dir:
 #endif
 		/*

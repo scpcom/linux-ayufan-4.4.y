@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * dmxdev.c - DVB demultiplexer device
  *
@@ -159,12 +162,12 @@ static int dvb_dvr_open(struct inode *inode, struct file *file)
 	}
 
 	if ((file->f_flags & O_ACCMODE) == O_WRONLY) {
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 		if (!dvbdev->writers) {
 			mutex_unlock(&dmxdev->mutex);
 			return -EBUSY;
 		}
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 		dmxdev->dvr_orig_fe = dmxdev->demux->frontend;
 
 		if (!dmxdev->demux->write) {
@@ -180,9 +183,9 @@ static int dvb_dvr_open(struct inode *inode, struct file *file)
 		}
 		dmxdev->demux->disconnect_frontend(dmxdev->demux);
 		dmxdev->demux->connect_frontend(dmxdev->demux, front);
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 		dvbdev->writers--;
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	}
 	dvbdev->users++;
 	mutex_unlock(&dmxdev->mutex);
@@ -197,9 +200,9 @@ static int dvb_dvr_release(struct inode *inode, struct file *file)
 	mutex_lock(&dmxdev->mutex);
 
 	if ((file->f_flags & O_ACCMODE) == O_WRONLY) {
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 		dvbdev->writers++;
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 		dmxdev->demux->disconnect_frontend(dmxdev->demux);
 		dmxdev->demux->connect_frontend(dmxdev->demux,
 						dmxdev->dvr_orig_fe);
@@ -585,17 +588,17 @@ static int dvb_dmxdev_start_feed(struct dmxdev *dmxdev,
 
 	ts_pes = para->pes_type;
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	if (ts_pes != DMX_PES_OTHER)
 		ts_type = TS_DECODER;
 	else
 		ts_type = 0;
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 	if (ts_pes < DMX_PES_OTHER)
 		ts_type = TS_DECODER;
 	else
 		ts_type = 0;
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 	if (otype == DMX_OUT_TS_TAP)
 		ts_type |= TS_PACKET;
@@ -892,14 +895,14 @@ static int dvb_dmxdev_pes_filter_set(struct dmxdev *dmxdev,
 	dvb_dmxdev_filter_stop(dmxdevfilter);
 	dvb_dmxdev_filter_reset(dmxdevfilter);
 
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	if ((unsigned)params->pes_type >= DMX_PES_LAST)
 		return -EINVAL;
-#else /* CONFIG_SYNO_LSP_MONACO */
+#else /* MY_DEF_HERE */
 	if ((unsigned)params->pes_type > DMX_PES_OTHER)
 		return -EINVAL;
 
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 
 	dmxdevfilter->type = DMXDEV_TYPE_PES;
 	memcpy(&dmxdevfilter->params, params,
@@ -1237,9 +1240,9 @@ static const struct file_operations dvb_dvr_fops = {
 static struct dvb_device dvbdev_dvr = {
 	.priv = NULL,
 	.readers = 1,
-#if defined (CONFIG_SYNO_LSP_MONACO)
+#if defined (MY_DEF_HERE)
 	.writers = 1,
-#endif /* CONFIG_SYNO_LSP_MONACO */
+#endif /* MY_DEF_HERE */
 	.users = 1,
 	.fops = &dvb_dvr_fops
 };

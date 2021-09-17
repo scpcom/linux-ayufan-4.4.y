@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/arch/arm/common/gic.c
  *
@@ -95,11 +98,11 @@ struct irq_chip gic_arch_extn = {
 };
 
 #ifndef MAX_GIC_NR
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 #define MAX_GIC_NR	2
-#else /* CONFIG_SYNO_LSP_ALPINE */
+#else /* MY_DEF_HERE */
 #define MAX_GIC_NR	1
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 #endif
 
 static struct gic_chip_data gic_data[MAX_GIC_NR] __read_mostly;
@@ -597,7 +600,7 @@ static void gic_cpu_restore(unsigned int gic_nr)
 	writel_relaxed(1, cpu_base + GIC_CPU_CTRL);
 }
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 static void gic_cpu_mask(unsigned int gic_nr)
 {
 	void __iomem *cpu_base;
@@ -614,7 +617,7 @@ static void gic_cpu_mask(unsigned int gic_nr)
 	 * do not bypass to legacy_irq and legacy_fiq legs*/
 	writel_relaxed(0 | (3<<5), cpu_base + GIC_CPU_CTRL);
 }
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 static int gic_notifier(struct notifier_block *self, unsigned long cmd,	void *v)
 {
@@ -644,11 +647,11 @@ static int gic_notifier(struct notifier_block *self, unsigned long cmd,	void *v)
 		}
 	}
 
-#if defined(CONFIG_SYNO_LSP_ALPINE)
+#if defined(MY_DEF_HERE)
 	/*do not accept interrupt from main gic*/
 	if (cmd == CPU_PM_ENTER)
 		gic_cpu_mask(0);
-#endif /* CONFIG_SYNO_LSP_ALPINE */
+#endif /* MY_DEF_HERE */
 
 	return NOTIFY_OK;
 }
