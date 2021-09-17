@@ -54,7 +54,6 @@
  */
 #define __IGNORE_fadvise64_64
 #define __IGNORE_migrate_pages
-#define __IGNORE_kcmp
 
 #ifdef CONFIG_SYNO_SYSTEM_CALL
 #ifdef CONFIG_SYNO_FS_CASELESS_STAT

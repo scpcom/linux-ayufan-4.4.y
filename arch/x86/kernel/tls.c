@@ -55,7 +55,7 @@ static void set_tls_desc(struct task_struct *p, int idx,
 	cpu = get_cpu();
 
 	while (n-- > 0) {
-		if (LDT_empty(info))
+		if (LDT_empty(info) || LDT_zero(info))
 			desc->a = desc->b = 0;
 		else
 			fill_ldt(desc, info);

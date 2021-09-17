@@ -543,7 +543,7 @@ static int wm8904_get_deemph(struct snd_kcontrol *kcontrol,
 #endif /* CONFIG_SYNO_LSP_ARMADA */
 	struct wm8904_priv *wm8904 = snd_soc_codec_get_drvdata(codec);
 
-	ucontrol->value.enumerated.item[0] = wm8904->deemph;
+	ucontrol->value.integer.value[0] = wm8904->deemph;
 	return 0;
 }
 
@@ -556,7 +556,7 @@ static int wm8904_put_deemph(struct snd_kcontrol *kcontrol,
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
 #endif /* CONFIG_SYNO_LSP_ARMADA */
 	struct wm8904_priv *wm8904 = snd_soc_codec_get_drvdata(codec);
-	int deemph = ucontrol->value.enumerated.item[0];
+	int deemph = ucontrol->value.integer.value[0];
 
 	if (deemph > 1)
 		return -EINVAL;

@@ -36,7 +36,7 @@
 #define PAGE_SHIFT		12
 #endif
 #define PAGE_SIZE		(_AC(1,UL) << PAGE_SHIFT)
-#define PAGE_MASK		(~(PAGE_SIZE-1))
+#define PAGE_MASK		(~((1 << PAGE_SHIFT) - 1))
 
 #if defined(CONFIG_SYNO_LSP_ALPINE)
 /* H/W pages are always 4KB.

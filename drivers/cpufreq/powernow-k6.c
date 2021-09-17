@@ -28,27 +28,29 @@ static unsigned int                     max_multiplier;
 
 /* Clock ratio multiplied by 10 - see table 27 in AMD#23446 */
 static struct cpufreq_frequency_table clock_ratio[] = {
-	{45,  /* 000 -> 4.5x */ 0},
-	{50,  /* 001 -> 5.0x */ 0},
-	{40,  /* 010 -> 4.0x */ 0},
-	{55,  /* 011 -> 5.5x */ 0},
-	{20,  /* 100 -> 2.0x */ 0},
-	{30,  /* 101 -> 3.0x */ 0},
 	{60,  /* 110 -> 6.0x */ 0},
+	{55,  /* 011 -> 5.5x */ 0},
+	{50,  /* 001 -> 5.0x */ 0},
+	{45,  /* 000 -> 4.5x */ 0},
+	{40,  /* 010 -> 4.0x */ 0},
 	{35,  /* 111 -> 3.5x */ 0},
+	{30,  /* 101 -> 3.0x */ 0},
+	{20,  /* 100 -> 2.0x */ 0},
 	{0, CPUFREQ_TABLE_END}
 };
 
 /**
  * powernow_k6_get_cpu_multiplier - returns the current FSB multiplier
  *
- *   Returns the current setting of the frequency multiplier. Core clock
+ * Returns the current setting of the frequency multiplier. Core clock
  * speed is frequency of the Front-Side Bus multiplied with this value.
  */
 static int powernow_k6_get_cpu_multiplier(void)
 {
-	u64 invalue = 0;
+	unsigned long invalue = 0;
 	u32 msrval;
+
+	local_irq_disable();
 
 	msrval = POWERNOW_IOPORT + 0x1;
 	wrmsr(MSR_K6_EPMR, msrval, 0); /* enable the PowerNow port */
@@ -56,7 +58,9 @@ static int powernow_k6_get_cpu_multiplier(void)
 	msrval = POWERNOW_IOPORT + 0x0;
 	wrmsr(MSR_K6_EPMR, msrval, 0); /* disable it again */
 
-	return clock_ratio[(invalue >> 5)&7].index;
+	local_irq_enable();
+
+	return clock_ratio[register_to_index[(invalue >> 5)&7]].index;
 }
 
 /**
@@ -68,8 +72,6 @@ static int powernow_k6_get_cpu_multiplier(void)
 static void powernow_k6_set_state(struct cpufreq_policy *policy,
 		unsigned int best_i)
 {
-	unsigned long outvalue = 0, invalue = 0;
-	unsigned long msrval;
 	struct cpufreq_freqs freqs;
 
 	if (clock_ratio[best_i].index > max_multiplier) {
@@ -82,18 +84,7 @@ static void powernow_k6_set_state(struct cpufreq_policy *policy,
 
 	cpufreq_notify_transition(policy, &freqs, CPUFREQ_PRECHANGE);
 
-	/* we now need to transform best_i to the BVC format, see AMD#23446 */
-
-	outvalue = (1<<12) | (1<<10) | (1<<9) | (best_i<<5);
-
-	msrval = POWERNOW_IOPORT + 0x1;
-	wrmsr(MSR_K6_EPMR, msrval, 0); /* enable the PowerNow port */
-	invalue = inl(POWERNOW_IOPORT + 0x8);
-	invalue = invalue & 0xf;
-	outvalue = outvalue | invalue;
-	outl(outvalue , (POWERNOW_IOPORT + 0x8));
-	msrval = POWERNOW_IOPORT + 0x0;
-	wrmsr(MSR_K6_EPMR, msrval, 0); /* disable it again */
+	powernow_k6_set_cpu_multiplier(best_i);
 
 	cpufreq_notify_transition(policy, &freqs, CPUFREQ_POSTCHANGE);
 
@@ -140,13 +131,53 @@ static int powernow_k6_cpu_init(struct cpufreq_policy *policy)
 {
 	unsigned int i, f;
 	int result;
+	unsigned khz;
 
 	if (policy->cpu != 0)
 		return -ENODEV;
 
-	/* get frequencies */
-	max_multiplier = powernow_k6_get_cpu_multiplier();
-	busfreq = cpu_khz / max_multiplier;
+	max_multiplier = 0;
+	khz = cpu_khz;
+	for (i = 0; i < ARRAY_SIZE(usual_frequency_table); i++) {
+		if (khz >= usual_frequency_table[i].freq - FREQ_RANGE &&
+		    khz <= usual_frequency_table[i].freq + FREQ_RANGE) {
+			khz = usual_frequency_table[i].freq;
+			max_multiplier = usual_frequency_table[i].mult;
+			break;
+		}
+	}
+	if (param_max_multiplier) {
+		for (i = 0; (clock_ratio[i].frequency != CPUFREQ_TABLE_END); i++) {
+			if (clock_ratio[i].index == param_max_multiplier) {
+				max_multiplier = param_max_multiplier;
+				goto have_max_multiplier;
+			}
+		}
+		printk(KERN_ERR "powernow-k6: invalid max_multiplier parameter, valid parameters 20, 30, 35, 40, 45, 50, 55, 60\n");
+		return -EINVAL;
+	}
+
+	if (!max_multiplier) {
+		printk(KERN_WARNING "powernow-k6: unknown frequency %u, cannot determine current multiplier\n", khz);
+		printk(KERN_WARNING "powernow-k6: use module parameters max_multiplier and bus_frequency\n");
+		return -EOPNOTSUPP;
+	}
+
+have_max_multiplier:
+	param_max_multiplier = max_multiplier;
+
+	if (param_busfreq) {
+		if (param_busfreq >= 50000 && param_busfreq <= 150000) {
+			busfreq = param_busfreq / 10;
+			goto have_busfreq;
+		}
+		printk(KERN_ERR "powernow-k6: invalid bus_frequency parameter, allowed range 50000 - 150000 kHz\n");
+		return -EINVAL;
+	}
+
+	busfreq = khz / max_multiplier;
+have_busfreq:
+	param_busfreq = busfreq * 10;
 
 	/* table init */
 	for (i = 0; (clock_ratio[i].frequency != CPUFREQ_TABLE_END); i++) {
@@ -158,7 +189,7 @@ static int powernow_k6_cpu_init(struct cpufreq_policy *policy)
 	}
 
 	/* cpuinfo and default policy values */
-	policy->cpuinfo.transition_latency = 200000;
+	policy->cpuinfo.transition_latency = 500000;
 	policy->cur = busfreq * max_multiplier;
 
 	result = cpufreq_frequency_table_cpuinfo(policy, clock_ratio);

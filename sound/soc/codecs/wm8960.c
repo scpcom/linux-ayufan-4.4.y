@@ -185,7 +185,7 @@ static int wm8960_get_deemph(struct snd_kcontrol *kcontrol,
 #endif /* CONFIG_SYNO_LSP_ARMADA */
 	struct wm8960_priv *wm8960 = snd_soc_codec_get_drvdata(codec);
 
-	ucontrol->value.enumerated.item[0] = wm8960->deemph;
+	ucontrol->value.integer.value[0] = wm8960->deemph;
 	return 0;
 }
 
@@ -198,7 +198,7 @@ static int wm8960_put_deemph(struct snd_kcontrol *kcontrol,
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
 #endif /* CONFIG_SYNO_LSP_ARMADA */
 	struct wm8960_priv *wm8960 = snd_soc_codec_get_drvdata(codec);
-	int deemph = ucontrol->value.enumerated.item[0];
+	int deemph = ucontrol->value.integer.value[0];
 
 	if (deemph > 1)
 		return -EINVAL;
@@ -563,7 +563,7 @@ static struct {
 	{ 22050, 2 },
 	{ 24000, 2 },
 	{ 16000, 3 },
-	{ 11250, 4 },
+	{ 11025, 4 },
 	{ 12000, 4 },
 	{  8000, 5 },
 };

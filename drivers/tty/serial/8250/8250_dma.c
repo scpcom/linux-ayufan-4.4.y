@@ -218,6 +218,11 @@ int serial8250_request_dma(struct uart_8250_port *p)
 					p->port.state->xmit.buf,
 					UART_XMIT_SIZE,
 					DMA_TO_DEVICE);
+	if (dma_mapping_error(dma->txchan->device->dev, dma->tx_addr)) {
+		dma_free_coherent(dma->rxchan->device->dev, dma->rx_size,
+				  dma->rx_buf, dma->rx_addr);
+		goto err;
+	}
 
 #if defined(CONFIG_SYNO_ARMADA)
 	if (dma_mapping_error(dma->txchan->device->dev, dma->tx_addr)) {
