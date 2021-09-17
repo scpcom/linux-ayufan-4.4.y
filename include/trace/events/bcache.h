@@ -88,6 +88,7 @@ DECLARE_EVENT_CLASS(bcache_bio,
 		  __entry->nr_sector, __entry->comm)
 );
 
+
 DEFINE_EVENT(bcache_bio, bcache_passthrough,
 
 	TP_PROTO(struct bio *bio),
@@ -248,6 +249,7 @@ DECLARE_EVENT_CLASS(bcache_gc,
 
 	TP_printk("%pU", __entry->uuid)
 );
+
 
 DEFINE_EVENT(bcache_gc, bcache_gc_start,
 
