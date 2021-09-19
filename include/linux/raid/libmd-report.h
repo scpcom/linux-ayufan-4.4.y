@@ -16,11 +16,5 @@ void SynoReportBadSector(sector_t sector, unsigned long rw,
 void SynoReportCorrectBadSector(sector_t sector, int md_minor,
 								struct block_device *bdev, const char *szFuncName);
 
-#endif 
-
-#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
-extern int (*funcSYNOSendAutoRemapLVMEvent)(const char*, unsigned long long, unsigned int);
-extern int (*funcSYNOSendAutoRemapRaidEvent)(unsigned int, unsigned long long, unsigned int);
-#endif 
-
-#endif 
+#endif  
+#endif  

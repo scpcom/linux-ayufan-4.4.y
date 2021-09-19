@@ -59,19 +59,18 @@ struct stat64 {
 } __attribute__((packed));
 
 #ifdef MY_ABC_HERE
-
+ 
 struct SYNOSTAT64_EXTRA {
 	struct compat_timespec create_time;
 	unsigned int archive_version;
 	unsigned int archive_bit;
-	unsigned int last_component;
 };
 
 struct SYNOSTAT64 {
 	struct stat64 st;
 	struct SYNOSTAT64_EXTRA ext;
 };
-#endif 
+#endif  
 
 #define IA32_STACK_TOP IA32_PAGE_OFFSET
 

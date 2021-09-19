@@ -314,27 +314,21 @@ SynoLinearEndRequest(struct bio *bio, int error)
 			syno_md_error(mddev, rdev);
 		} else {
 #ifdef MY_ABC_HERE
-#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
-			if (bio_flagged(bio, BIO_AUTO_REMAP)) {
-				SynoReportBadSector(bio->bi_sector, bio->bi_rw, mddev->md_minor, bio->bi_bdev, __FUNCTION__);
-			}
-#else 
 			SynoReportBadSector(bio->bi_sector, bio->bi_rw, mddev->md_minor, bio->bi_bdev, __FUNCTION__);
-#endif 
-#endif 
+#endif  
 			md_error(mddev, rdev);
 		}
-#else 
+#else  
 		md_error(mddev, rdev);
-#endif 
+#endif  
 	}
 
 	atomic_dec(&rdev->nr_pending);
 	bio_put(data_bio);
-	
+	 
 	bio_endio(bio, 0);
 }
-#endif 
+#endif  
 
 static void linear_make_request(struct mddev *mddev, struct bio *bio)
 {

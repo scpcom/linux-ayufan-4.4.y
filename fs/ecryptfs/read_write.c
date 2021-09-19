@@ -1,12 +1,43 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-
-
+ 
 #include <linux/fs.h>
 #include <linux/pagemap.h>
 #include "ecryptfs_kernel.h"
 
+#ifdef MY_DEF_HERE
+#include <linux/fsnotify.h>
+
+static ssize_t ecryptfs_kernel_write(struct file *file, const char *buf, size_t count, loff_t pos)
+{
+	mm_segment_t old_fs;
+	const char __user *p = buf;
+	ssize_t ret;
+
+	if (!(file->f_mode & FMODE_WRITE))
+		return -EBADF;
+	if (!file->f_op || (!file->f_op->write && !file->f_op->aio_write))
+		return -EINVAL;
+
+	old_fs = get_fs();
+	set_fs(get_ds());
+	file_start_write(file);
+	if (file->f_op->write)
+		ret = file->f_op->write(file, p, count, &pos);
+	else
+		ret = do_sync_write(file, p, count, &pos);
+	if (ret > 0) {
+		fsnotify_modify(file);
+		add_wchar(current, ret);
+	}
+	inc_syscw(current);
+	file_end_write(file);
+	set_fs(old_fs);
+
+	return ret;
+}
+#endif  
 
 int ecryptfs_write_lower(struct inode *ecryptfs_inode, char *data,
 			 loff_t offset, size_t size)
@@ -17,11 +48,14 @@ int ecryptfs_write_lower(struct inode *ecryptfs_inode, char *data,
 	lower_file = ecryptfs_inode_to_private(ecryptfs_inode)->lower_file;
 	if (!lower_file)
 		return -EIO;
+#ifdef MY_DEF_HERE
+	rc = ecryptfs_kernel_write(lower_file, data, size, offset);
+#else
 	rc = kernel_write(lower_file, data, size, offset);
+#endif  
 	mark_inode_dirty_sync(ecryptfs_inode);
 	return rc;
 }
-
 
 int ecryptfs_write_lower_page_segment(struct inode *ecryptfs_inode,
 				      struct page *page_for_lower,

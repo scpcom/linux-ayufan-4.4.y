@@ -830,32 +830,33 @@ struct raid_kobject {
 struct btrfs_space_info {
 	spinlock_t lock;
 
-	u64 total_bytes;	
-	u64 bytes_used;		
-	u64 bytes_pinned;	
-	u64 bytes_reserved;	
-	u64 bytes_may_use;	
-	u64 bytes_readonly;	
+	u64 total_bytes;	 
+	u64 bytes_used;		 
+	u64 bytes_pinned;	 
+	u64 bytes_reserved;	 
+	u64 bytes_may_use;	 
+	u64 bytes_readonly;	 
 
-	unsigned int full:1;	
-	unsigned int chunk_alloc:1;	
+	u64 max_extent_size;	 
 
-	unsigned int flush:1;		
+	unsigned int full:1;	 
+	unsigned int chunk_alloc:1;	 
 
-	unsigned int force_alloc;	
+	unsigned int flush:1;		 
 
-	u64 disk_used;		
-	u64 disk_total;		
+	unsigned int force_alloc;	 
+
+	u64 disk_used;		 
+	u64 disk_total;		 
 
 	u64 flags;
 
-	
 	struct percpu_counter total_bytes_pinned;
 
 	struct list_head list;
 
 	struct rw_semaphore groups_sem;
-	
+	 
 	struct list_head block_groups[BTRFS_NR_RAID_TYPES];
 	wait_queue_head_t wait;
 
@@ -881,23 +882,23 @@ struct btrfs_block_rsv {
 	unsigned short failfast;
 };
 
-
 struct btrfs_free_cluster {
 	spinlock_t lock;
 	spinlock_t refill_lock;
 	struct rb_root root;
 
-	
 	u64 max_size;
 
-	
 	u64 window_start;
 
 #ifdef MY_ABC_HERE
 	u64 reserve_bytes;
 #endif
+
+	bool fragmented;
+
 	struct btrfs_block_group_cache *block_group;
-	
+	 
 	struct list_head block_group_list;
 };
 
@@ -1022,40 +1023,37 @@ struct btrfs_fs_info {
 	struct btrfs_root *block_group_hint_root;
 #endif
 
-	
 	struct btrfs_root *log_root_tree;
 
 	spinlock_t fs_roots_radix_lock;
 	struct radix_tree_root fs_roots_radix;
 
-	
 	spinlock_t block_group_cache_lock;
 	u64 first_logical_byte;
 	struct rb_root block_group_cache_tree;
 
-	
 	spinlock_t free_chunk_lock;
 	u64 free_chunk_space;
 
 	struct extent_io_tree freed_extents[2];
 	struct extent_io_tree *pinned_extents;
 
-	
 	struct btrfs_mapping_tree mapping_tree;
 
 #ifdef MY_ABC_HERE
 	atomic_t nr_extent_maps;
+	struct list_head extent_map_inode_list;
+	spinlock_t extent_map_inode_list_lock;
 #endif
 
-	
 	struct btrfs_block_rsv global_block_rsv;
-	
+	 
 	struct btrfs_block_rsv delalloc_block_rsv;
-	
+	 
 	struct btrfs_block_rsv trans_block_rsv;
-	
+	 
 	struct btrfs_block_rsv chunk_block_rsv;
-	
+	 
 	struct btrfs_block_rsv delayed_block_rsv;
 
 	struct btrfs_block_rsv empty_block_rsv;

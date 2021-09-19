@@ -20,19 +20,20 @@ enum btrfs_trans_state {
 
 struct btrfs_transaction {
 	u64 transid;
-	
+	 
 	atomic_t num_extwriters;
-	
+	 
 	atomic_t num_writers;
 	atomic_t use_count;
+	atomic_t pending_ordered;
 
-	
 	enum btrfs_trans_state state;
 	struct list_head list;
 	struct extent_io_tree dirty_pages;
 	unsigned long start_time;
 	wait_queue_head_t writer_wait;
 	wait_queue_head_t commit_wait;
+	wait_queue_head_t pending_wait;
 	struct list_head pending_snapshots;
 	struct list_head pending_chunks;
 	struct list_head switch_commits;
@@ -110,9 +111,11 @@ struct btrfs_pending_snapshot {
 static inline void btrfs_set_inode_last_trans(struct btrfs_trans_handle *trans,
 					      struct inode *inode)
 {
+	spin_lock(&BTRFS_I(inode)->lock);
 	BTRFS_I(inode)->last_trans = trans->transaction->transid;
 	BTRFS_I(inode)->last_sub_trans = BTRFS_I(inode)->root->log_transid;
 	BTRFS_I(inode)->last_log_commit = BTRFS_I(inode)->root->last_log_commit;
+	spin_unlock(&BTRFS_I(inode)->lock);
 }
 
 int btrfs_end_transaction(struct btrfs_trans_handle *trans,

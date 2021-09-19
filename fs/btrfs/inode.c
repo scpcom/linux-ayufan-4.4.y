@@ -3240,9 +3240,11 @@ cache_index:
 		BTRFS_I(inode)->dir_index = btrfs_inode_extref_index(leaf,
 								     extref);
 	}
-#endif 
+#endif  
 cache_acl:
-	
+
+	BTRFS_I(inode)->last_unlink_trans = BTRFS_I(inode)->last_trans;
+
 	maybe_acls = acls_after_inode_item(leaf, path->slots[0],
 					   btrfs_ino(inode), &first_xattr_slot);
 	if (first_xattr_slot != -1) {
@@ -4313,6 +4315,12 @@ static void evict_inode_truncate_pages(struct inode *inode)
 	ASSERT(inode->i_state & I_FREEING);
 	truncate_inode_pages(&inode->i_data, 0);
 
+#ifdef MY_ABC_HERE
+	spin_lock(&fs_info->extent_map_inode_list_lock);
+	WARN_ON(atomic_read(&BTRFS_I(inode)->free_extent_map_counts) != 0);
+	list_del_init(&BTRFS_I(inode)->free_extent_map_inode);
+	spin_unlock(&fs_info->extent_map_inode_list_lock);
+#endif
 	write_lock(&map_tree->lock);
 	while (!RB_EMPTY_ROOT(&map_tree->map)) {
 		struct extent_map *em;
@@ -7468,6 +7476,8 @@ struct inode *btrfs_alloc_inode(struct super_block *sb)
 	extent_map_tree_init(&ei->extent_tree);
 #ifdef MY_ABC_HERE
 	ei->extent_tree.inode = ei;
+	INIT_LIST_HEAD(&ei->free_extent_map_inode);
+	atomic_set(&ei->free_extent_map_counts, 0);
 #endif
 	extent_io_tree_init(&ei->io_tree, &inode->i_data);
 	extent_io_tree_init(&ei->io_failure_tree, &inode->i_data);
@@ -8184,6 +8194,7 @@ static int __btrfs_prealloc_file_range(struct inode *inode, int mode,
 	u64 cur_offset = start;
 	u64 i_size;
 	u64 cur_bytes;
+	u64 last_alloc = (u64)-1;
 	int ret = 0;
 	bool own_trans = true;
 
@@ -8200,6 +8211,8 @@ static int __btrfs_prealloc_file_range(struct inode *inode, int mode,
 
 		cur_bytes = min(num_bytes, 256ULL * 1024 * 1024);
 		cur_bytes = max(cur_bytes, min_size);
+		 
+		cur_bytes = min(cur_bytes, last_alloc);
 		ret = btrfs_reserve_extent(root, cur_bytes, min_size, 0,
 					   *alloc_hint, &ins, 1, 0);
 		if (ret) {
@@ -8208,6 +8221,7 @@ static int __btrfs_prealloc_file_range(struct inode *inode, int mode,
 			break;
 		}
 
+		last_alloc = ins.offset;
 		ret = insert_reserved_file_extent(trans, inode,
 						  cur_offset, ins.objectid,
 						  ins.offset, ins.offset,

@@ -1795,26 +1795,25 @@ static int btrfs_drop_extent_maps(struct inode *inode, int nr_to_drop)
 		}
 		remove_extent_mapping(em_tree, em);
 		write_unlock(&em_tree->lock);
-		
+		 
 		free_extent_map(em);
-		
+		 
 		free_extent_map(em);
 		dropped++;
 	}
 	return dropped;
 }
 
-extern spinlock_t inode_sb_list_lock;
 static void btrfs_free_cached_objects(struct super_block *sb, int nr_to_drop)
 {
 	struct inode *inode;
 	struct inode *toput_inode = NULL;
 	struct btrfs_inode *binode;
 	struct btrfs_fs_info *fs_info = btrfs_sb(sb);
-	u64 rootid = 0;
 
-	spin_lock(&inode_sb_list_lock);
-	list_for_each_entry(inode, &fs_info->sb->s_inodes, i_sb_list) {
+	spin_lock(&fs_info->extent_map_inode_list_lock);
+	list_for_each_entry(binode, &fs_info->extent_map_inode_list, free_extent_map_inode) {
+		inode = &binode->vfs_inode;
 		spin_lock(&inode->i_sb->s_inode_lru_lock);
 		if (!list_empty(&inode->i_lru)) {
 			spin_unlock(&inode->i_sb->s_inode_lru_lock);
@@ -1828,25 +1827,27 @@ static void btrfs_free_cached_objects(struct super_block *sb, int nr_to_drop)
 		}
 		__iget(inode);
 		spin_unlock(&inode->i_lock);
-		spin_unlock(&inode_sb_list_lock);
-
-		binode = BTRFS_I(inode);
-		if (binode->root && !btrfs_is_free_space_inode(inode)) {
-			rootid = binode->root->objectid;
-
-			if (rootid == BTRFS_FS_TREE_OBJECTID ||
-			    (rootid >= BTRFS_FIRST_FREE_OBJECTID && rootid <= BTRFS_LAST_FREE_OBJECTID)) {
-				nr_to_drop -= btrfs_drop_extent_maps(inode, nr_to_drop);
-			}
+		atomic_inc(&binode->free_extent_map_counts);
+		if (toput_inode && (atomic_read(&BTRFS_I(toput_inode)->free_extent_map_counts) == 0) && (atomic_read(&(BTRFS_I(toput_inode)->extent_tree.nr_extent_maps)) == 0)) {
+			list_del_init(&BTRFS_I(toput_inode)->free_extent_map_inode);
 		}
+		spin_unlock(&fs_info->extent_map_inode_list_lock);
+
+		nr_to_drop -= btrfs_drop_extent_maps(inode, nr_to_drop);
+
 		iput(toput_inode);
 		toput_inode = inode;
-		spin_lock(&inode_sb_list_lock);
+		spin_lock(&fs_info->extent_map_inode_list_lock);
+		WARN_ON(atomic_read(&binode->free_extent_map_counts) == 0);
+		atomic_dec(&binode->free_extent_map_counts);
 		if (nr_to_drop <= 0) {
 			break;
 		}
 	}
-	spin_unlock(&inode_sb_list_lock);
+	if (toput_inode && (atomic_read(&BTRFS_I(toput_inode)->free_extent_map_counts) == 0) && (atomic_read(&(BTRFS_I(toput_inode)->extent_tree.nr_extent_maps)) == 0)) {
+		list_del_init(&BTRFS_I(toput_inode)->free_extent_map_inode);
+	}
+	spin_unlock(&fs_info->extent_map_inode_list_lock);
 	iput(toput_inode);
 }
 #endif

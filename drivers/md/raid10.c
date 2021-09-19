@@ -293,58 +293,44 @@ static void raid10_end_read_request(struct bio *bio, int error)
 	slot = r10_bio->read_slot;
 	dev = r10_bio->devs[slot].devnum;
 	rdev = r10_bio->devs[slot].rdev;
-	
+	 
 	update_head_pos(slot, r10_bio);
 
-#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
-	if (bio_flagged(bio, BIO_AUTO_REMAP)) {
-		printk("%s:%s(%d) BIO_AUTO_REMAP detected\n", __FILE__, __FUNCTION__, __LINE__);
-		SynoAutoRemapReport(conf->mddev, r10_bio->sector, conf->mirrors[dev].rdev->bdev);
-	}
-#endif
-
 	if (uptodate) {
-		
+		 
 		set_bit(R10BIO_Uptodate, &r10_bio->state);
 	} else {
-		
+		 
 		unsigned long flags;
 		spin_lock_irqsave(&conf->device_lock, flags);
 #ifdef MY_ABC_HERE
 		if (!blRaid10Enough(conf, conf->mirrors[dev].rdev))
-#else 
+#else  
 		if (!enough(conf, rdev->raid_disk))
-#endif 
+#endif  
 			uptodate = 1;
 		spin_unlock_irqrestore(&conf->device_lock, flags);
 
 #ifdef MY_ABC_HERE
 		if (!IsDeviceDisappear(conf->mirrors[dev].rdev->bdev)) {
-#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
-			if (bio_flagged(bio, BIO_AUTO_REMAP)) {
-				SynoReportBadSector(bio->bi_sector, READ,
-								conf->mddev->md_minor, conf->mirrors[dev].rdev->bdev, __FUNCTION__);
-			}
-#else 
 			SynoReportBadSector(bio->bi_sector, READ,
 								conf->mddev->md_minor, conf->mirrors[dev].rdev->bdev, __FUNCTION__);
-#endif 
 		}
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
-		
+		 
 		if (uptodate) {
 			md_error(r10_bio->mddev, conf->mirrors[dev].rdev);
 		}
-#endif 
+#endif  
 	}
 
 	if (uptodate) {
 		raid_end_bio_io(r10_bio);
 		rdev_dec_pending(rdev, conf->mddev);
 	} else {
-		
+		 
 		char b[BDEVNAME_SIZE];
 		printk_ratelimited(KERN_ERR
 				   "md/raid10:%s: %s: rescheduling sector %llu\n",
@@ -1412,105 +1398,12 @@ out:
 
 static int enough(struct r10conf *conf, int ignore)
 {
-	
+	 
 	return _enough(conf, 0, ignore) &&
 		_enough(conf, 1, ignore);
 }
 
 #if defined(MY_ABC_HERE)
-#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
-static inline void SynoSetRdevAutoRemap(struct mddev *mddev)
-{
-	struct r10conf *conf = mddev->private;
-	struct geom* geo = &conf->geo;
-	struct md_rdev *rdev;
-	char b[BDEVNAME_SIZE];
-	int rdev_idx = 0;
-
-	if (1 >= geo->near_copies || (geo->raid_disks % geo->near_copies)) {
-		printk("md: %s: not a standard RAID 10, does not support auto remap mode", mdname(mddev));
-		return;
-	}
-
-	
-	rdev_for_each(rdev, mddev) {
-		RaidRemapModeSet(rdev->bdev, MD_AUTO_REMAP_MODE_FORCE_OFF);
-	}
-
-	do {
-		int num_data_copies = conf->copies;
-		int survival_cnt = 0;
-		int last_survival_rdev = -1;
-
-		
-		while (num_data_copies--) {
-			if (conf->mirrors[rdev_idx].rdev &&
-				!test_bit(Faulty, &conf->mirrors[rdev_idx].rdev->flags) &&
-				test_bit(In_sync, &conf->mirrors[rdev_idx].rdev->flags)) {
-				survival_cnt++;
-				last_survival_rdev = rdev_idx;
-			}
-			rdev_idx = (rdev_idx + 1) % geo->raid_disks;
-		}
-
-		
-		if (1 == survival_cnt) {
-			RaidRemapModeSet(conf->mirrors[last_survival_rdev].rdev->bdev, MD_AUTO_REMAP_MODE_FORCE_ON);
-		}
-	} while (0 != rdev_idx);
-
-	
-	rdev_for_each(rdev, mddev) {
-		if (rdev && rdev->bdev && rdev->bdev->bd_part) {
-			bdevname(rdev->bdev, b);
-			printk("md: %s: set %s to auto_remap [%d]\n", mdname(mddev), b, rdev->bdev->bd_part->auto_remap);
-		}
-	}
-}
-
-static inline unsigned char SynoIsRaidReachMaxDegrade(struct mddev *mddev)
-{
-	struct r10conf *conf = mddev->private;
-	int first = 0;
-	int first_orig = first;
-	int blStandardRaid10 = 0;
-	int ret = 0;
-	struct geom* geo = &conf->geo;
-
-	
-	if (1 < geo->near_copies && !(geo->raid_disks % geo->near_copies)) {
-		blStandardRaid10 = 1;
-	}
-
-	do {
-		int n = conf->copies;
-		int cnt = 0;
-
-		while (n--) {
-			if (conf->mirrors[first].rdev &&
-				!test_bit(Faulty, &conf->mirrors[first].rdev->flags) &&
-				test_bit(In_sync, &conf->mirrors[first].rdev->flags)) {
-				cnt++;
-			}
-			first = (first+1) % geo->raid_disks;
-		}
-
-		if (cnt <= 1) {
-			ret = 1;
-			goto END;
-		}
-
-		if (!blStandardRaid10) {
-			first_orig = (first_orig+1) % geo->raid_disks;
-			first = first_orig;
-		}
-	} while (first != 0);
-
-END:
-	return ret;
-}
-#endif 
-
 static int
 blRaid10Enough(struct r10conf *conf,
 			   struct md_rdev *rdev)
@@ -1908,17 +1801,11 @@ static void end_sync_read(struct bio *bio, int error)
 	int d;
 
 	if (bio == r10_bio->master_bio) {
-		
-		d = r10_bio->read_slot; 
+		 
+		d = r10_bio->read_slot;  
 	} else
 		d = find_bio_disk(conf, r10_bio, bio, NULL, NULL);
 
-#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
-	if (bio_flagged(bio, BIO_AUTO_REMAP)) {
-		printk("%s:%s(%d) BIO_AUTO_REMAP detected\n", __FILE__, __FUNCTION__, __LINE__);
-		SynoAutoRemapReport(conf->mddev, r10_bio->sector, conf->mirrors[d].rdev->bdev);
-	}
-#endif
 	if (test_bit(BIO_UPTODATE, &bio->bi_flags))
 		set_bit(R10BIO_Uptodate, &r10_bio->state);
 	else
@@ -4449,10 +4336,6 @@ static struct md_personality raid10_personality =
 	.quiesce	= raid10_quiesce,
 	.size		= raid10_size,
 	.resize		= raid10_resize,
-#ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
-	.ismaxdegrade = SynoIsRaidReachMaxDegrade,
-	.syno_set_rdev_auto_remap = SynoSetRdevAutoRemap,
-#endif 
 	.takeover	= raid10_takeover,
 	.check_reshape	= raid10_check_reshape,
 	.start_reshape	= raid10_start_reshape,

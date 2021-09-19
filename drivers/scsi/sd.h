@@ -4,21 +4,16 @@
 #ifndef _SCSI_DISK_H
 #define _SCSI_DISK_H
 
-
 #define SD_MAJORS	16
 
-
-#ifdef MY_DEF_HERE
-#define SD_TIMEOUT		(1024 * HZ)
-#elif defined(MY_ABC_HERE)
-#define SD_TIMEOUT		(60 * HZ)
+#ifdef MY_ABC_HERE
+#define SD_TIMEOUT		(CONFIG_SYNO_SD_DEFAULT_TIMEOUT * HZ)
 #else
 #define SD_TIMEOUT		(30 * HZ)
-#endif 
+#endif  
 #define SD_MOD_TIMEOUT		(75 * HZ)
 #define SD_FLUSH_TIMEOUT	(60 * HZ)
 #define SD_WRITE_SAME_TIMEOUT	(120 * HZ)
-
 
 #define SD_MAX_RETRIES		5
 #define SD_PASSTHROUGH_RETRIES	1
@@ -26,17 +21,15 @@
 #define SD_MAX_MEDIUM_TIMEOUTS 1024
 #else
 #define SD_MAX_MEDIUM_TIMEOUTS	2
-#endif 
-
+#endif  
 
 #define SD_BUF_SIZE		512
-
 
 #define SD_LAST_BUGGY_SECTORS	8
 
 enum {
-	SD_EXT_CDB_SIZE = 32,	
-	SD_MEMPOOL_SIZE = 2,	
+	SD_EXT_CDB_SIZE = 32,	 
+	SD_MEMPOOL_SIZE = 2,	 
 };
 
 enum {

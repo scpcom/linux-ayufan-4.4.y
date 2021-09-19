@@ -1258,35 +1258,30 @@ extern int syno_libata_index_get(struct Scsi_Host *host, uint channel, uint id, 
 								  SATA_PMP_GSCR_9705_GPI == ((tf->hob_feature << 8) | tf->feature) || \
 								  IS_SYNO_PMP_GSCR_9705_CONFIG(tf)))
 #define IS_SYNO_PMP_CMD(tf) (IS_SYNO_PMP_READ_CMD(tf) || IS_SYNO_PMP_WRITE_CMD(tf))
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 extern char giDiskSeqReverse[];
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 #define IS_SYNO_SPINUP_CMD(qc) (NULL == qc->scsicmd && !ata_tag_internal(qc->tag) && \
 			(ATA_CMD_FPDMA_READ == qc->tf.command || ATA_CMD_READ == qc->tf.command || \
 			 ATA_CMD_READ_EXT == qc->tf.command || ATA_CMD_PIO_READ == qc->tf.command || ATA_CMD_PIO_READ_EXT == qc->tf.command || \
 			 ATA_CMD_READ_MULTI == qc->tf.command || ATA_CMD_READ_MULTI_EXT == qc->tf.command))
-#endif 
-
+#endif  
 
 extern const struct ata_port_operations ata_base_port_ops;
 extern const struct ata_port_operations sata_port_ops;
 extern struct device_attribute *ata_common_sdev_attrs[];
 #ifdef MY_ABC_HERE
 extern unsigned int gSynoSataHostCnt;
-#endif 
+extern int syno_libata_disk_map_table_gen(int *iDiskMapTable);
+#endif  
 
 #ifdef MY_ABC_HERE
 extern char gszDiskIdxMap[];
-extern int syno_libata_disk_map_table_gen(int *iDiskMapTable);
-#endif 
-
-#ifdef MY_DEF_HERE
-extern char gszDiskIdxMapMv14xx[];
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 #define	SYNO_FIXED_DISK_NAME_MACRO		\

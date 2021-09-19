@@ -240,16 +240,6 @@ qsize_t *ext4_get_reserved_space(struct inode *inode)
 }
 #endif
 
-
-static int ext4_calc_metadata_amount(struct inode *inode, ext4_lblk_t lblock)
-{
-	if (ext4_test_inode_flag(inode, EXT4_INODE_EXTENTS))
-		return ext4_ext_calc_metadata_amount(inode, lblock);
-
-	return ext4_ind_calc_metadata_amount(inode, lblock);
-}
-
-
 void ext4_da_update_reserve_space(struct inode *inode,
 					int used, int quota_claim)
 {
@@ -267,42 +257,18 @@ void ext4_da_update_reserve_space(struct inode *inode,
 		used = ei->i_reserved_data_blocks;
 	}
 
-	if (unlikely(ei->i_allocated_meta_blocks > ei->i_reserved_meta_blocks)) {
-		ext4_warning(inode->i_sb, "ino %lu, allocated %d "
-			"with only %d reserved metadata blocks "
-			"(releasing %d blocks with reserved %d data blocks)",
-			inode->i_ino, ei->i_allocated_meta_blocks,
-			     ei->i_reserved_meta_blocks, used,
-			     ei->i_reserved_data_blocks);
-		WARN_ON(1);
-		ei->i_allocated_meta_blocks = ei->i_reserved_meta_blocks;
-	}
-
-	
 	ei->i_reserved_data_blocks -= used;
-	ei->i_reserved_meta_blocks -= ei->i_allocated_meta_blocks;
-	percpu_counter_sub(&sbi->s_dirtyclusters_counter,
-			   used + ei->i_allocated_meta_blocks);
-	ei->i_allocated_meta_blocks = 0;
+	percpu_counter_sub(&sbi->s_dirtyclusters_counter, used);
 
-	if (ei->i_reserved_data_blocks == 0) {
-		
-		percpu_counter_sub(&sbi->s_dirtyclusters_counter,
-				   ei->i_reserved_meta_blocks);
-		ei->i_reserved_meta_blocks = 0;
-		ei->i_da_metadata_calc_len = 0;
-	}
 	spin_unlock(&EXT4_I(inode)->i_block_reservation_lock);
 
-	
 	if (quota_claim)
 		dquot_claim_block(inode, EXT4_C2B(sbi, used));
 	else {
-		
+		 
 		dquot_release_reservation_block(inode, EXT4_C2B(sbi, used));
 	}
 
-	
 	if ((ei->i_reserved_data_blocks == 0) &&
 	    (atomic_read(&inode->i_writecount) == 0))
 		ext4_discard_preallocations(inode);
@@ -990,74 +956,31 @@ static int ext4_journalled_write_end(struct file *file,
 	return ret ? ret : copied;
 }
 
-
-static int ext4_da_reserve_metadata(struct inode *inode, ext4_lblk_t lblock)
-{
-	struct ext4_sb_info *sbi = EXT4_SB(inode->i_sb);
-	struct ext4_inode_info *ei = EXT4_I(inode);
-	unsigned int md_needed;
-	ext4_lblk_t save_last_lblock;
-	int save_len;
-
-	
-	spin_lock(&ei->i_block_reservation_lock);
-	
-	save_len = ei->i_da_metadata_calc_len;
-	save_last_lblock = ei->i_da_metadata_calc_last_lblock;
-	md_needed = EXT4_NUM_B2C(sbi,
-				 ext4_calc_metadata_amount(inode, lblock));
-	trace_ext4_da_reserve_space(inode, md_needed);
-
-	
-	if (ext4_claim_free_clusters(sbi, md_needed, 0)) {
-		ei->i_da_metadata_calc_len = save_len;
-		ei->i_da_metadata_calc_last_lblock = save_last_lblock;
-		spin_unlock(&ei->i_block_reservation_lock);
-		return -ENOSPC;
-	}
-	ei->i_reserved_meta_blocks += md_needed;
-	spin_unlock(&ei->i_block_reservation_lock);
-
-	return 0;       
-}
-
-
 static int ext4_da_reserve_space(struct inode *inode, ext4_lblk_t lblock)
 {
 	struct ext4_sb_info *sbi = EXT4_SB(inode->i_sb);
 	struct ext4_inode_info *ei = EXT4_I(inode);
 	unsigned int md_needed;
 	int ret;
-	ext4_lblk_t save_last_lblock;
-	int save_len;
 
-	
 	ret = dquot_reserve_block(inode, EXT4_C2B(sbi, 1));
 	if (ret)
 		return ret;
 
-	
 	spin_lock(&ei->i_block_reservation_lock);
-	
-	save_len = ei->i_da_metadata_calc_len;
-	save_last_lblock = ei->i_da_metadata_calc_last_lblock;
-	md_needed = EXT4_NUM_B2C(sbi,
-				 ext4_calc_metadata_amount(inode, lblock));
-	trace_ext4_da_reserve_space(inode, md_needed);
+	 
+	md_needed = 0;
+	trace_ext4_da_reserve_space(inode, 0);
 
-	
-	if (ext4_claim_free_clusters(sbi, md_needed + 1, 0)) {
-		ei->i_da_metadata_calc_len = save_len;
-		ei->i_da_metadata_calc_last_lblock = save_last_lblock;
+	if (ext4_claim_free_clusters(sbi, 1, 0)) {
 		spin_unlock(&ei->i_block_reservation_lock);
 		dquot_release_reservation_block(inode, EXT4_C2B(sbi, 1));
 		return -ENOSPC;
 	}
 	ei->i_reserved_data_blocks++;
-	ei->i_reserved_meta_blocks += md_needed;
 	spin_unlock(&ei->i_block_reservation_lock);
 
-	return 0;       
+	return 0;        
 }
 
 static void ext4_da_release_space(struct inode *inode, int to_free)
@@ -1082,15 +1005,6 @@ static void ext4_da_release_space(struct inode *inode, int to_free)
 	}
 	ei->i_reserved_data_blocks -= to_free;
 
-	if (ei->i_reserved_data_blocks == 0) {
-		
-		percpu_counter_sub(&sbi->s_dirtyclusters_counter,
-				   ei->i_reserved_meta_blocks);
-		ei->i_reserved_meta_blocks = 0;
-		ei->i_da_metadata_calc_len = 0;
-	}
-
-	
 	percpu_counter_sub(&sbi->s_dirtyclusters_counter, to_free);
 
 	spin_unlock(&EXT4_I(inode)->i_block_reservation_lock);
@@ -1288,13 +1202,8 @@ static void ext4_print_free_blocks(struct inode *inode)
 	ext4_msg(sb, KERN_CRIT, "Block reservation details");
 	ext4_msg(sb, KERN_CRIT, "i_reserved_data_blocks=%u",
 		 ei->i_reserved_data_blocks);
-	ext4_msg(sb, KERN_CRIT, "i_reserved_meta_blocks=%u",
-	       ei->i_reserved_meta_blocks);
-	ext4_msg(sb, KERN_CRIT, "i_allocated_meta_blocks=%u",
-	       ei->i_allocated_meta_blocks);
 	return;
 }
-
 
 static void mpage_da_map_and_submit(struct mpage_da_data *mpd)
 {
@@ -1515,19 +1424,11 @@ static int ext4_da_map_blocks(struct inode *inode, sector_t iblock,
 add_delayed:
 	if (retval == 0) {
 		int ret;
-		
-		
+		 
 		if (!(map->m_flags & EXT4_MAP_FROM_CLUSTER)) {
 			ret = ext4_da_reserve_space(inode, iblock);
 			if (ret) {
-				
-				retval = ret;
-				goto out_unlock;
-			}
-		} else {
-			ret = ext4_da_reserve_metadata(inode, iblock);
-			if (ret) {
-				
+				 
 				retval = ret;
 				goto out_unlock;
 			}
@@ -2193,19 +2094,15 @@ out:
 	return;
 }
 
-
 int ext4_alloc_da_blocks(struct inode *inode)
 {
 	trace_ext4_alloc_da_blocks(inode);
 
-	if (!EXT4_I(inode)->i_reserved_data_blocks &&
-	    !EXT4_I(inode)->i_reserved_meta_blocks)
+	if (!EXT4_I(inode)->i_reserved_data_blocks)
 		return 0;
 
-	
 	return filemap_flush(inode->i_mapping);
 }
-
 
 static sector_t ext4_bmap(struct address_space *mapping, sector_t block)
 {
@@ -2213,20 +2110,18 @@ static sector_t ext4_bmap(struct address_space *mapping, sector_t block)
 	journal_t *journal;
 	int err;
 
-	
 	if (ext4_has_inline_data(inode))
 		return 0;
 
 	if (mapping_tagged(mapping, PAGECACHE_TAG_DIRTY) &&
 			test_opt(inode->i_sb, DELALLOC)) {
-		
+		 
 		filemap_write_and_wait(mapping);
 	}
 
 	if (EXT4_JOURNAL(inode) &&
 	    ext4_test_inode_state(inode, EXT4_STATE_JDATA)) {
-		
-
+		 
 		ext4_clear_inode_state(inode, EXT4_STATE_JDATA);
 		journal = EXT4_JOURNAL(inode);
 		jbd2_journal_lock_updates(journal);
@@ -3272,9 +3167,10 @@ struct inode *ext4_iget(struct super_block *sb, unsigned long ino)
 		inode->i_create_time.tv_nsec = raw_inode->i_crtime_extra;
 	}
 #else
-	inode->i_create_time = ei->i_crtime;
-#endif 
-#endif 
+	inode->i_create_time.tv_sec = (signed)le32_to_cpu(raw_inode->i_crtime);
+	inode->i_create_time.tv_nsec = (signed)le32_to_cpu(raw_inode->i_crtime_extra);
+#endif  
+#endif  
 #ifdef MY_ABC_HERE
 	if (!EXT4_HAS_RO_COMPAT_FEATURE(sb, EXT4_FEATURE_RO_COMPAT_METADATA_CSUM)) {
 		inode->i_archive_bit = le16_to_cpu(raw_inode->ext4_archive_bit);
@@ -3448,13 +3344,15 @@ static int ext4_do_update_inode(handle_t *handle,
 		raw_inode->i_crtime_extra = inode->i_create_time.tv_nsec;
 	}
 #else
-	ei->i_crtime = inode->i_create_time;
-#endif 
-#endif 
+	raw_inode->i_crtime = cpu_to_le32(inode->i_create_time.tv_sec);
+	raw_inode->i_crtime_extra = cpu_to_le32(inode->i_create_time.tv_nsec);
+#endif  
+#else
 	EXT4_EINODE_SET_XTIME(i_crtime, ei, raw_inode);
+#endif  
 #ifdef MY_ABC_HERE
 	if (!EXT4_HAS_RO_COMPAT_FEATURE(inode->i_sb, EXT4_FEATURE_RO_COMPAT_METADATA_CSUM)) {
-		raw_inode->ext4_archive_bit = cpu_to_le16(inode->i_archive_bit); 
+		raw_inode->ext4_archive_bit = cpu_to_le16(inode->i_archive_bit);  
 	}
 #endif
 

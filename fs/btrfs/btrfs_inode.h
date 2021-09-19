@@ -23,100 +23,81 @@
 #define BTRFS_INODE_IN_DELALLOC_LIST		9
 #define BTRFS_INODE_READDIO_NEED_LOCK		10
 #define BTRFS_INODE_HAS_PROPS		        11
-
+ 
 #define BTRFS_INODE_BTREE_ERR		        12
 #define BTRFS_INODE_BTREE_LOG1_ERR		13
 #define BTRFS_INODE_BTREE_LOG2_ERR		14
 
-
 struct btrfs_inode {
-	
+	 
 	struct btrfs_root *root;
 
-	
 	struct btrfs_key location;
 
-	
 	spinlock_t lock;
 
-	
 	struct extent_map_tree extent_tree;
 
-	
 	struct extent_io_tree io_tree;
 
-	
 	struct extent_io_tree io_failure_tree;
 
-	
 	struct mutex log_mutex;
 
-	
 	struct mutex delalloc_mutex;
 
-	
 	struct btrfs_ordered_inode_tree ordered_tree;
 
-	
 	struct list_head delalloc_inodes;
 
-	
 	struct rb_node rb_node;
 
 	unsigned long runtime_flags;
 
-	
 	atomic_t sync_writers;
 
-	
 	u64 generation;
 
-	
 	u64 last_trans;
 
-	
 	u64 logged_trans;
 
-	
 	int last_sub_trans;
 
-	
 	int last_log_commit;
 
-	
 	u64 delalloc_bytes;
 
-	
 	u64 disk_i_size;
 
-	
 	u64 index_cnt;
 
 #ifdef MY_ABC_HERE
 #else
-	
+	 
 	u64 dir_index;
-#endif 
+#endif  
 
-	
 	u64 last_unlink_trans;
 
-	
 	u64 csum_bytes;
 
-	
 	u32 flags;
 
-	
 	unsigned outstanding_extents;
 	unsigned reserved_extents;
 
-	
 	unsigned force_compress;
 
 	struct btrfs_delayed_node *delayed_node;
 
 	struct inode vfs_inode;
+
+#ifdef MY_ABC_HERE
+	struct list_head free_extent_map_inode;
+	atomic_t free_extent_map_counts;
+#endif
+
 };
 
 extern unsigned char btrfs_filetype_table[];
@@ -174,17 +155,21 @@ static inline bool btrfs_is_free_space_inode(struct inode *inode)
 
 static inline int btrfs_inode_in_log(struct inode *inode, u64 generation)
 {
+	int ret = 0;
+
+	spin_lock(&BTRFS_I(inode)->lock);
 	if (BTRFS_I(inode)->logged_trans == generation &&
 	    BTRFS_I(inode)->last_sub_trans <=
 	    BTRFS_I(inode)->last_log_commit &&
 	    BTRFS_I(inode)->last_sub_trans <=
 	    BTRFS_I(inode)->root->last_log_commit) {
-		
+		 
 		smp_mb();
 		if (list_empty(&BTRFS_I(inode)->extent_tree.modified_extents))
-			return 1;
+			ret = 1;
 	}
-	return 0;
+	spin_unlock(&BTRFS_I(inode)->lock);
+	return ret;
 }
 
 struct btrfs_dio_private {

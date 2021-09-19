@@ -481,7 +481,7 @@ static int ecryptfs_aggregate_write_end(struct file *file, struct address_space 
 		}
 	}
 	if (to % PAGE_CACHE_SIZE) {
-		zero_user_segment(pages[page_num-1], to & (PAGE_CACHE_SIZE - 1), PAGE_CACHE_SIZE);
+		fill_zeros_to_end_of_page(pages[page_num-1], to);
 	}
 	for (i = 0;i < page_num;i++) {
 		rc = ecryptfs_encrypt_page(pages[i]);

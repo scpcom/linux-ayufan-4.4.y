@@ -177,6 +177,7 @@ static int __btrfs_add_ordered_extent(struct inode *inode, u64 file_offset,
 	INIT_LIST_HEAD(&entry->work_list);
 	init_completion(&entry->completion);
 	INIT_LIST_HEAD(&entry->log_list);
+	INIT_LIST_HEAD(&entry->trans_list);
 
 	trace_btrfs_ordered_extent_add(inode, entry);
 
@@ -359,21 +360,30 @@ out:
 	return ret == 0;
 }
 
-
 void btrfs_get_logged_extents(struct inode *inode,
-			      struct list_head *logged_list)
+			      struct list_head *logged_list,
+			      const loff_t start,
+			      const loff_t end)
 {
 	struct btrfs_ordered_inode_tree *tree;
 	struct btrfs_ordered_extent *ordered;
 	struct rb_node *n;
+	struct rb_node *prev;
 
 	tree = &BTRFS_I(inode)->ordered_tree;
 	spin_lock_irq(&tree->lock);
-	for (n = rb_first(&tree->tree); n; n = rb_next(n)) {
+	n = __tree_search(&tree->tree, end, &prev);
+	if (!n)
+		n = prev;
+	for (; n; n = rb_prev(n)) {
 		ordered = rb_entry(n, struct btrfs_ordered_extent, rb_node);
-		if (!list_empty(&ordered->log_list))
+		if (ordered->file_offset > end)
 			continue;
-		list_add_tail(&ordered->log_list, logged_list);
+		if (entry_end(ordered) <= start)
+			break;
+		if (test_and_set_bit(BTRFS_ORDERED_LOGGED, &ordered->flags))
+			continue;
+		list_add(&ordered->log_list, logged_list);
 		atomic_inc(&ordered->refs);
 	}
 	spin_unlock_irq(&tree->lock);
@@ -402,22 +412,24 @@ void btrfs_submit_logged_extents(struct list_head *logged_list,
 	spin_unlock_irq(&log->log_extents_lock[index]);
 }
 
-void btrfs_wait_logged_extents(struct btrfs_root *log, u64 transid)
+void btrfs_wait_logged_extents(struct btrfs_trans_handle *trans,
+			       struct btrfs_root *log, u64 transid)
 {
 	struct btrfs_ordered_extent *ordered;
 	int index = transid % 2;
 
 	spin_lock_irq(&log->log_extents_lock[index]);
 	while (!list_empty(&log->logged_list[index])) {
+		struct inode *inode;
 		ordered = list_first_entry(&log->logged_list[index],
 					   struct btrfs_ordered_extent,
 					   log_list);
 		list_del_init(&ordered->log_list);
+		inode = ordered->inode;
 		spin_unlock_irq(&log->log_extents_lock[index]);
 
 		if (!test_bit(BTRFS_ORDERED_IO_DONE, &ordered->flags) &&
 		    !test_bit(BTRFS_ORDERED_DIRECT, &ordered->flags)) {
-			struct inode *inode = ordered->inode;
 			u64 start = ordered->file_offset;
 			u64 end = ordered->file_offset + ordered->len - 1;
 
@@ -427,6 +439,17 @@ void btrfs_wait_logged_extents(struct btrfs_root *log, u64 transid)
 		wait_event(ordered->wait, test_bit(BTRFS_ORDERED_IO_DONE,
 						   &ordered->flags));
 
+		if (!test_bit(BTRFS_ORDERED_COMPLETE, &ordered->flags)) {
+			struct btrfs_ordered_inode_tree *tree;
+
+			tree = &BTRFS_I(inode)->ordered_tree;
+			spin_lock_irq(&tree->lock);
+			if (!test_bit(BTRFS_ORDERED_COMPLETE, &ordered->flags)) {
+				set_bit(BTRFS_ORDERED_PENDING, &ordered->flags);
+				atomic_inc(&trans->transaction->pending_ordered);
+			}
+			spin_unlock_irq(&tree->lock);
+		}
 		btrfs_put_ordered_extent(ordered);
 		spin_lock_irq(&log->log_extents_lock[index]);
 	}
@@ -471,13 +494,13 @@ void btrfs_put_ordered_extent(struct btrfs_ordered_extent *entry)
 	}
 }
 
-
 void btrfs_remove_ordered_extent(struct inode *inode,
 				 struct btrfs_ordered_extent *entry)
 {
 	struct btrfs_ordered_inode_tree *tree;
 	struct btrfs_root *root = BTRFS_I(inode)->root;
 	struct rb_node *node;
+	bool dec_pending_ordered = false;
 
 	tree = &BTRFS_I(inode)->ordered_tree;
 	spin_lock_irq(&tree->lock);
@@ -486,7 +509,26 @@ void btrfs_remove_ordered_extent(struct inode *inode,
 	if (tree->last == node)
 		tree->last = NULL;
 	set_bit(BTRFS_ORDERED_COMPLETE, &entry->flags);
+	if (test_and_clear_bit(BTRFS_ORDERED_PENDING, &entry->flags))
+		dec_pending_ordered = true;
 	spin_unlock_irq(&tree->lock);
+
+	if (dec_pending_ordered) {
+		struct btrfs_transaction *trans;
+
+		spin_lock(&root->fs_info->trans_lock);
+		trans = root->fs_info->running_transaction;
+		if (trans)
+			atomic_inc(&trans->use_count);
+		spin_unlock(&root->fs_info->trans_lock);
+
+		ASSERT(trans);
+		if (trans) {
+			if (atomic_dec_and_test(&trans->pending_ordered))
+				wake_up(&trans->pending_wait);
+			btrfs_put_transaction(trans);
+		}
+	}
 
 	spin_lock(&root->ordered_extent_lock);
 	list_del_init(&entry->root_extent_list);
@@ -745,6 +787,19 @@ out:
 	return entry;
 }
 
+bool btrfs_have_ordered_extents_in_range(struct inode *inode,
+					 u64 file_offset,
+					 u64 len)
+{
+	struct btrfs_ordered_extent *oe;
+
+	oe = btrfs_lookup_ordered_range(inode, file_offset, len);
+	if (oe) {
+		btrfs_put_ordered_extent(oe);
+		return true;
+	}
+	return false;
+}
 
 struct btrfs_ordered_extent *
 btrfs_lookup_first_ordered_extent(struct inode *inode, u64 file_offset)
