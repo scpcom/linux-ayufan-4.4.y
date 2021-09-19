@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/blkdev.h>
 #include <linux/module.h>
@@ -338,7 +335,7 @@ void scsi_print_command(struct scsi_cmnd *cmd)
 	if (cmd->cmnd == NULL)
 		return;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE
 	scmd_printk(KERN_WARNING, cmd, "CDB: ");
 #else  
 	scmd_printk(KERN_INFO, cmd, "CDB: ");

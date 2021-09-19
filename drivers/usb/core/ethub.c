@@ -1473,7 +1473,7 @@ static int usb_enumerate_device(struct usb_device *udev)
 		udev->serial = usb_cache_string(udev, udev->descriptor.iSerialNumber);
 	} while (!udev->serial && retry--);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_GET_SN_WORKAROUNDS
 	if (0x054c == le16_to_cpu(udev->descriptor.idVendor) &&
 		0x05bf == le16_to_cpu(udev->descriptor.idProduct) &&
 		NULL == udev->serial) {

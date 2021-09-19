@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/kernel.h>
 #include <linux/string.h>
@@ -450,7 +447,7 @@ static int m88e1118_config_aneg(struct phy_device *phydev)
 	return 0;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PHY_INIT_88E1514
 static int m88e1514_config_init(struct phy_device *phydev)
 {
 	int err;
@@ -922,7 +919,7 @@ static struct phy_driver marvell_drivers[] = {
 		.config_intr = &marvell_config_intr,
 		.driver = { .owner = THIS_MODULE },
 	},
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PHY_INIT_88E1514
 	{
 		.phy_id = MARVELL_PHY_ID_88E1514,
 		.phy_id_mask = MARVELL_PHY_ID_MASK | 0xf,  
@@ -961,7 +958,7 @@ static struct mdio_device_id __maybe_unused marvell_tbl[] = {
 	{ 0x01410e50, 0xfffffff0 },
 	{ 0x01410e30, 0xfffffff0 },
 	{ 0x01410e90, 0xfffffff0 },
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_PHY_INIT_88E1514
 	{ 0x01410dd1, 0xffffffff },
 #endif
 	{ }

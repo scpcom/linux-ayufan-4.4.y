@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 
 #ifndef __LINUX_XHCI_HCD_H
 #define __LINUX_XHCI_HCD_H
@@ -577,7 +574,7 @@ struct xhci_virt_device {
 	struct xhci_tt_bw_info		*tt_info;
 	 
 	u16				current_mel;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FORCE_EMPTY_UNAVAILABLE_XHCI_TD
 	bool			disconnected;
 #endif  
 };

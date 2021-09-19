@@ -17,7 +17,7 @@
 #define SD_IOCTL_SUPPORT_SLEEP 4747
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_HOST_DISK_LED_CTRL
 #define SD_IOCTL_SASHOST_DISK_LED 4755
 #endif  
 

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/init.h>
@@ -1359,7 +1356,7 @@ pci_xr17v35x_setup(struct serial_private *priv,
 
 	port->port.flags |= UPF_EXAR_EFR;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_XR17V35X_SERIAL
 	if (idx == 0) {
 		writeb(0x01, p + 0x8f);  
 		writeb(0x00, p + 0x90);  

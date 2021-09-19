@@ -2737,7 +2737,7 @@ static void mv6_enable_leds(struct mv_host_priv *hpriv, void __iomem *mmio)
 		writel(0x00000000, mmio + GPIO_CTL_DATA);
 	}else{
 #endif  
-#ifdef	MY_DEF_HERE
+#ifdef	CONFIG_SYNO_OSS_SATA_LED
 		DBGMESG("set mv led");
 		writel(0x0000007C, mmio + GPIO_PORT_CTL);
 #else  

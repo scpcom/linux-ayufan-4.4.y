@@ -63,7 +63,7 @@ extern int giSynoAtaDebug;
 #define ISSUEREADTIMEOUT (30UL*HZ)
 #endif  
 
-#ifdef MY_DEF_HERE 
+#ifdef CONFIG_SYNO_ATA_AHCI_LED_SWITCH 
 extern int giSynoHddLedEnabled;
 #endif  
 

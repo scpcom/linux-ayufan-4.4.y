@@ -7,7 +7,7 @@
 #include <linux/synobios.h>
 #include <linux/syno_gpio.h>
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_BRASWELL
 static SYNO_GPIO_INFO hdd_detect = {
 	.name           = "hdd detect",
 	.nr_gpio        = 4,
@@ -28,7 +28,7 @@ SYNO_GPIO syno_gpio = {
 	.hdd_fail_led =NULL,
 	.hdd_present_led =NULL,
 	.hdd_act_led =NULL,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_BRASWELL
 	.hdd_detect = &hdd_detect,
 	.hdd_enable = &hdd_enable,
 #else

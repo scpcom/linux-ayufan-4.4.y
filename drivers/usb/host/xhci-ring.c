@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/scatterlist.h>
 #include <linux/slab.h>
@@ -1154,7 +1151,7 @@ static void handle_vendor_event(struct xhci_hcd *xhci,
 		handle_cmd_completion(xhci, &event->event_cmd);
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FORCE_EMPTY_UNAVAILABLE_XHCI_TD
 static void xhci_giveback_error_urb(struct xhci_hcd *xhci,
 		int slot_id)
 {
@@ -1317,7 +1314,7 @@ static void handle_port_status(struct xhci_hcd *xhci,
 		}
 	}
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FORCE_EMPTY_UNAVAILABLE_XHCI_TD
 	if (!(temp & PORT_CONNECT) &&
 		(temp & PORT_WRC)) {
 		slot_id = xhci_find_slot_id_by_port(hcd, xhci,

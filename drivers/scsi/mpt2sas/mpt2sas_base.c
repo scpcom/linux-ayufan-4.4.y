@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/kernel.h>
 #include <linux/module.h>
@@ -3435,7 +3432,7 @@ mpt2sas_base_free_resources(struct MPT2SAS_ADAPTER *ioc)
 
 	_base_mask_interrupts(ioc);
 	ioc->shost_recovery = 1;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_MPT2_RESET_ON_REBOOT
 	if (ioc->shutdown == 1) {
 		_base_make_ioc_ready(ioc, CAN_SLEEP, FORCE_BIG_HAMMER);
 		ioc->shutdown = 0;

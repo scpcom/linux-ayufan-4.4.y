@@ -117,7 +117,7 @@ static int ses_set_page2_descriptor(struct enclosure_device *edev,
 			desc_ptr += 4;
 
 			if (type_ptr[0] != ENCLOSURE_COMPONENT_DEVICE &&
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_ENCOLURE_PWR_CTL
 			    type_ptr[0] != ENCLOSURE_COMPONENT_ARRAY_DEVICE &&
 			    type_ptr[0] != ENCLOSURE_COMPONENT_ENCLOSURE)
 #else  
@@ -133,7 +133,7 @@ static int ses_set_page2_descriptor(struct enclosure_device *edev,
 				desc_ptr[0] &= 0xf0;
 			}
 		}
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_ENCOLURE_PWR_CTL
 		desc_ptr += 4;
 #endif  
 	}
@@ -156,7 +156,7 @@ static unsigned char *ses_get_page2_descriptor(struct enclosure_device *edev,
 		for (j = 0; j < type_ptr[1]; j++) {
 			desc_ptr += 4;
 			if (type_ptr[0] != ENCLOSURE_COMPONENT_DEVICE &&
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_ENCOLURE_PWR_CTL
 			    type_ptr[0] != ENCLOSURE_COMPONENT_ARRAY_DEVICE &&
 			    type_ptr[0] != ENCLOSURE_COMPONENT_ENCLOSURE)
 #else  
@@ -166,7 +166,7 @@ static unsigned char *ses_get_page2_descriptor(struct enclosure_device *edev,
 			if (count++ == descriptor)
 				return desc_ptr;
 		}
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_ENCOLURE_PWR_CTL
 		desc_ptr += 4;
 #endif  
 	}
@@ -244,7 +244,7 @@ static int ses_set_locate(struct enclosure_device *edev,
 	return ses_set_page2_descriptor(edev, ecomp, desc);
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_ENCOLURE_PWR_CTL
 static int syno_ses_set_poweroff(struct enclosure_device *edev,
 					struct enclosure_component *ecomp)
 {
@@ -444,7 +444,7 @@ static void ses_enclosure_data_process(struct enclosure_device *edev,
 			}
 
 			if (type_ptr[0] == ENCLOSURE_COMPONENT_DEVICE ||
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_ENCOLURE_PWR_CTL
 			    type_ptr[0] == ENCLOSURE_COMPONENT_ARRAY_DEVICE ||
 			    type_ptr[0] == ENCLOSURE_COMPONENT_ENCLOSURE) {
 #else  
@@ -606,7 +606,7 @@ static int ses_intf_add(struct device *cdev,
 
 	for (i = 0; i < types && type_ptr < buf + len; i++, type_ptr += 4) {
 		if (type_ptr[0] == ENCLOSURE_COMPONENT_DEVICE ||
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_ENCOLURE_PWR_CTL
 		    type_ptr[0] == ENCLOSURE_COMPONENT_ARRAY_DEVICE ||
 		    type_ptr[0] == ENCLOSURE_COMPONENT_ENCLOSURE)
 #else  
@@ -693,7 +693,7 @@ static int ses_intf_add(struct device *cdev,
 	return err;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_ENCOLURE_PWR_CTL
 static void syno_ses_shutdown(struct device *dev)
 {
 	struct scsi_device *sdev = to_scsi_device(dev);
@@ -729,7 +729,7 @@ static int ses_remove(struct device *dev)
 static void ses_intf_remove_component(struct scsi_device *sdev)
 {
 	struct enclosure_device *edev, *prev = NULL;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_DISK_LED_CONTROL
 	 
 	struct enclosure_component *cdev;
 	struct ses_component *scomp;
@@ -739,7 +739,7 @@ static void ses_intf_remove_component(struct scsi_device *sdev)
 	while ((edev = enclosure_find(&sdev->host->shost_gendev, prev)) != NULL) {
 		prev = edev;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_DISK_LED_CONTROL
 		for (i = 0; i < edev->components; i++) {
 			cdev = &edev->component[i];
 			scomp = edev->component[i].scratch;
@@ -802,7 +802,7 @@ static struct scsi_driver ses_template = {
 		.name		= "ses",
 		.probe		= ses_probe,
 		.remove		= ses_remove,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_ENCOLURE_PWR_CTL
 		.shutdown	= syno_ses_shutdown,
 #endif  
 	},

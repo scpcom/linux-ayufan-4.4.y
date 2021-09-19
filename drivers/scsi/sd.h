@@ -77,7 +77,7 @@ struct scsi_disk {
 #ifdef MY_ABC_HERE
 	SYNO_DISK_TYPE	synodisktype;
 #endif  
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_SAS_DISK_NAME) || defined(MY_DEF_HERE)
 	u32		synoindex;
 #endif  
 	unsigned int	physical_block_size;

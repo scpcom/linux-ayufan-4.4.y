@@ -178,7 +178,7 @@ void sata_syno_ahci_diskled_set(int iHostNum, int iPresent, int iFault)
 		goto RELEASESRC;
 	}
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ATA_AHCI_LED_SWITCH
 	iPresent &= giSynoHddLedEnabled;
 	iFault &= giSynoHddLedEnabled;
 #endif  
@@ -1022,7 +1022,7 @@ static void ahci_sw_activity(struct ata_link *link)
 	struct ahci_port_priv *pp = ap->private_data;
 	struct ahci_em_priv *emp = &pp->em_priv[link->pmp];
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ATA_AHCI_LED_SWITCH
         if (!giSynoHddLedEnabled) {
                 return;
         }

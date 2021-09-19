@@ -68,7 +68,7 @@ extern int gSynoFactoryUSBFastReset;
 extern int gSynoFactoryUSB3Disable;
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_MEM_MODE_INFO
 extern int gSynoMemMode;
 #endif  
 
@@ -77,19 +77,19 @@ extern unsigned int gSwitchDev;
 extern char gDevPCIName[CONFIG_SYNO_MAX_SWITCHABLE_NET_DEVICE][CONFIG_SYNO_NET_DEVICE_ENCODING_LENGTH];
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
 extern long g_is_sas_model;
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_DUAL_HEAD
 extern int gSynoDualHead;
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
 extern int gSynoSASWriteConflictPanic;
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_HBA_IDX
 extern char gSynoSASHBAAddr[CONFIG_SYNO_SAS_MAX_HBA_SLOT][13];
 #endif  
 
@@ -105,7 +105,7 @@ extern char g_ahci_switch;
 extern char gszSataPortMap[8];
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_CASTRATED_XHC
 extern char gSynoCastratedXhcAddr[CONFIG_SYNO_NUM_CASTRATED_XHC][13];
 extern unsigned int gSynoCastratedXhcPortBitmap[CONFIG_SYNO_NUM_CASTRATED_XHC];
 #endif  
@@ -555,7 +555,7 @@ static int __init early_sataled_special(char *p)
 __setup("SataLedSpecial=", early_sataled_special);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_MEM_MODE_INFO
 static int __init early_mem_mode(int *p)
 {
 	gSynoMemMode = simple_strtol(p, NULL, 10);
@@ -615,7 +615,7 @@ static int __init early_sataport_map(char *p)
 __setup("SataPortMap=", early_sataport_map);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
 static int __init early_SASmodel(char *p)
 {
 	g_is_sas_model = simple_strtol(p, NULL, 10);
@@ -629,14 +629,14 @@ static int __init early_SASmodel(char *p)
 __setup("SASmodel=", early_SASmodel);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_DUAL_HEAD
 static int __init early_dual_head(char *p)
 {
 	gSynoDualHead = simple_strtol(p, NULL, 10);
 #ifdef MY_DEF_HERE
 	gSynoBootSATADOM = gSynoDualHead;
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
 	gSynoSASWriteConflictPanic = gSynoDualHead;
 #endif
 
@@ -647,7 +647,7 @@ static int __init early_dual_head(char *p)
 __setup("dual_head=", early_dual_head);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
 static int __init early_sas_reservation_write_conflict(char *p)
 {
 	gSynoSASWriteConflictPanic = simple_strtol(p, NULL, 10);
@@ -659,7 +659,7 @@ static int __init early_sas_reservation_write_conflict(char *p)
 __setup("sas_reservation_write_conflict=", early_sas_reservation_write_conflict);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_HBA_IDX
 static int __init early_sas_hba_idx(char *p)
 {
 	char iCount = 0;
@@ -709,7 +709,7 @@ static int __init early_ahci_switch(char *p)
 __setup("ahci=", early_ahci_switch);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_CASTRATED_XHC
 static int __init early_castrated_xhc(char *p)
 {
 	int iCount = 0;

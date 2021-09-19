@@ -5,19 +5,19 @@
 #ifndef __SYNO_H_
 #define __SYNO_H_
 
-#if defined(MY_ABC_HERE) && defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) && defined(CONFIG_SYNO_CEDARVIEW)
 #define SYNO_CEDARVIEW_USE_EFI_REBOOT
 #endif
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
+#if defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3)
 #define SYNO_EVANSPORT_FLASH_PART
 #endif
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
+#if defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3)
 #define SYNO_EVANSPORT_GPIO_CTRL
 #endif
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
+#if defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3)
 #define SYNO_EVANSPORT_POWEROFF
 
 #ifdef SYNO_EVANSPORT_POWEROFF
@@ -29,19 +29,19 @@
 #endif
 #endif
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
+#if defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3)
 #define SYNO_EVANSPORT_EXPORT_SYMBOL
 #endif
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
+#if defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3)
 #define SYNO_EVANSPORT_NON_PREEMPT_SMB
 #endif
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
+#if defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3)
 #define SYNO_EVANSPORT_WOL_WORKAROUND
 #endif
 
-#if defined(MY_DEF_HERE) && defined(CONFIG_ARCH_GEN3)
+#if defined(CONFIG_SYNO_X86) && defined(CONFIG_ARCH_GEN3)
 #define SYNO_EVANSPORT_IPV4_ROUTE_WORKAROUND
 #endif
 
@@ -122,7 +122,7 @@
 #define SYNO_LIBATA_JMB_BEHAVIOR
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_MV_9170_GPIO_CTRL
 #define SYNO_MV_9170_GPIO_CTRL
 #endif  
 
@@ -166,7 +166,7 @@
  
 #define SYNO_ISCSI_DEVICE_INDEX    (26 + 25 * 26)     
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA
  
 #define SYNO_INTERNAL_MICROSD_NAME "4-4"
 #endif  

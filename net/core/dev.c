@@ -78,7 +78,7 @@ struct list_head ptype_base[PTYPE_HASH_SIZE] __read_mostly;
 struct list_head ptype_all __read_mostly;	 
 static struct list_head offload_base __read_mostly;
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_E1000E_LED_SWITCH) || defined(MY_DEF_HERE)
 void (*funcSynoNicLedCtrl)(int iEnable) = NULL;
 EXPORT_SYMBOL(funcSynoNicLedCtrl);
 #endif  

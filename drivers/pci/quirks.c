@@ -2525,7 +2525,7 @@ static void mv9170_non_spi_programming(struct pci_dev *dev)
 DECLARE_PCI_FIXUP_FINAL(0x1b4b, 0x9170, mv9170_non_spi_programming);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LYNXPOINT_XHCI_QUIRK
  
 static void intel_lynxpoint_xhci_quirk(struct pci_dev *dev)
 {

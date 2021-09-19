@@ -75,7 +75,7 @@ MODULE_ALIAS_SCSI_DEVICE(TYPE_RBC);
 extern int gSynoBootSATADOM;
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY
 
 struct SpinupQueue {
 	spinlock_t q_lock;
@@ -127,7 +127,7 @@ static DEFINE_IDA(cache_index_ida);
 extern u8 syno_is_synology_pm(const struct ata_port *ap);
 #endif  
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
 static DEFINE_IDA(usb_index_ida);
 static DEFINE_IDA(sas_index_ida);
 #ifdef MY_ABC_HERE
@@ -135,7 +135,7 @@ static DEFINE_IDA(iscsi_index_ida);
 #endif  
 extern int g_is_sas_model;
  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_PLATFORM_HAS_INTERNAL_EXPANDER
 #define SCSI_HOST_SEARCH_DEPTH 7 
 #else
  
@@ -237,7 +237,7 @@ sd_store_manage_start_stop(struct device *dev, struct device_attribute *attr,
 	return count;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY
 
 #ifdef CONFIG_SYNO_SAS_SPINUP_DELAY_DEBUG
 static void
@@ -557,7 +557,7 @@ sd_show_manage_start_stop(struct device *dev, struct device_attribute *attr,
 	return snprintf(buf, 20, "%u\n", sdp->manage_start_stop);
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY
 static ssize_t
 sd_show_spinup_queue_id(struct device *dev, struct device_attribute *attr,
 			  char *buf)
@@ -770,7 +770,7 @@ static struct device_attribute sd_disk_attrs[] = {
 	       sd_store_allow_restart),
 	__ATTR(manage_start_stop, S_IRUGO|S_IWUSR, sd_show_manage_start_stop,
 	       sd_store_manage_start_stop),
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY
 	__ATTR(spinup_queue_id, S_IRUGO|S_IWUSR, sd_show_spinup_queue_id,
 	       sd_store_spinup_queue_id),
 #endif  
@@ -1502,7 +1502,7 @@ static int sd_ioctl(struct block_device *bdev, fmode_t mode,
 			return 0;
 		}
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_HOST_DISK_LED_CTRL
 		case SD_IOCTL_SASHOST_DISK_LED:
 			if (NULL == sdp->host->hostt->syno_set_sashost_disk_led){
 				break;
@@ -2570,7 +2570,7 @@ static void sd_read_block_limits(struct scsi_disk *sdkp)
 
 		sdkp->unmap_granularity = get_unaligned_be32(&buffer[28]);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_FIX_TRIM_GRANULARITY
 #define SYNO_MD_CHUNK_SIZE 65536
 	 
 	if (1 == g_is_sas_model && (SYNO_MD_CHUNK_SIZE >> 9) < sdkp->unmap_granularity) {
@@ -2708,7 +2708,7 @@ static int sd_revalidate_disk(struct gendisk *disk)
 		goto out;
 	}
 
-#if defined(MY_DEF_HERE) && defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_SAS_SPINUP_DELAY) && defined(CONFIG_SYNO_SAS_DISK_NAME)
 	if (1 == g_is_sas_model) {
 		 
 		while (MAX_ALLOWED_SPINUP_NUM < atomic_read(&(gSpinupCmdNum))) {
@@ -2721,7 +2721,7 @@ static int sd_revalidate_disk(struct gendisk *disk)
 	} else {
 #endif  
 	sd_spinup_disk(sdkp);
-#if defined(MY_DEF_HERE) && defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_SAS_SPINUP_DELAY) && defined(CONFIG_SYNO_SAS_DISK_NAME)
 	}
 #endif  
 
@@ -2762,7 +2762,7 @@ static int sd_revalidate_disk(struct gendisk *disk)
 extern int syno_ida_get_new(struct ida *idp, int starting_id, int *id);
 #endif  
 
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_SAS_DISK_NAME) || defined(MY_DEF_HERE)
  
 static int syno_sd_format_numeric_disk_name(char *prefix, int synoindex, char *buf, int buflen)
 {
@@ -3040,7 +3040,7 @@ static int sd_probe(struct device *dev)
 	u32 cache_idx = 0;
 #endif  
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
 	u32 synoidx;
 	struct device *searchDev = dev;
 	int i = 0;
@@ -3075,7 +3075,7 @@ static int sd_probe(struct device *dev)
 		}
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
 		if (1 == g_is_sas_model) {
 			 
 			switch(sdkp->synodisktype) {
@@ -3111,7 +3111,7 @@ static int sd_probe(struct device *dev)
 		switch(sdkp->synodisktype) {
 #ifdef MY_ABC_HERE
 			case SYNO_DISK_ISCSI:
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
 				if (1 == g_is_sas_model) {
 					error = syno_ida_get_new(&iscsi_index_ida, 0, &synoidx);
 					want_idx = 0;
@@ -3127,14 +3127,14 @@ static int sd_probe(struct device *dev)
 				break;
 #endif  
 			case SYNO_DISK_USB:
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
 				if (1 == g_is_sas_model) {
 					error = syno_ida_get_new(&usb_index_ida, 0, &synoidx);
 					want_idx = 0;
 					break;
 				}
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_BROADWELL
 				 
 				if (syno_is_hw_version(HW_RS4017xsp))
 					want_idx = 24;
@@ -3159,7 +3159,7 @@ static int sd_probe(struct device *dev)
 			case SYNO_DISK_SATA:
 			default:
 				 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
 				if (1 == g_is_sas_model) {
 					error = syno_ida_get_new(&sas_index_ida, 0, &synoidx);
 					want_idx = 0;
@@ -3176,7 +3176,7 @@ static int sd_probe(struct device *dev)
 #if defined(MY_DEF_HERE)
 					}
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIXED_DISK_NAME_MV14XX
 					 
 					ap = ata_shost_to_port(sdp->host);
 					ap->syno_disk_index = want_idx;
@@ -3195,7 +3195,7 @@ static int sd_probe(struct device *dev)
 		}
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
 		if ((1 == g_is_sas_model)
 #ifdef MY_DEF_HERE
 			&& (SYNO_DISK_CACHE != sdkp->synodisktype)
@@ -3223,7 +3223,7 @@ static int sd_probe(struct device *dev)
 			printk("want_idx %d index %d\n", want_idx, index);
 			iRetry++;
 		}
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
 SYNO_SKIP_WANT_RETRY:
 #endif  
 
@@ -3243,7 +3243,7 @@ SYNO_SKIP_WANT_RETRY:
 	switch(sdkp->synodisktype) {
 #ifdef MY_ABC_HERE
 		case SYNO_DISK_ISCSI:
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
 			if (1 == g_is_sas_model) {
 				error = syno_sd_format_numeric_disk_name(CONFIG_SYNO_SAS_ISCSI_DEVICE_PREFIX, synoidx, gd->disk_name, DISK_NAME_LEN);
 				printk("got iSCSI disk[%d]\n", synoidx);
@@ -3264,7 +3264,7 @@ SYNO_SKIP_WANT_RETRY:
 #endif 
 
 		case SYNO_DISK_SAS:
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
 			error = syno_sd_format_numeric_disk_name(CONFIG_SYNO_SAS_DEVICE_PREFIX, synoidx, gd->disk_name, DISK_NAME_LEN);
 			for (i = 0;i < SCSI_HOST_SEARCH_DEPTH && NULL != searchDev;i++) {
 				if (scsi_is_host_device(searchDev)) {
@@ -3294,7 +3294,7 @@ SYNO_SKIP_WANT_RETRY:
 #endif  
 		case SYNO_DISK_USB:
 		default:
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
 			if (1 == g_is_sas_model) {
 				error = syno_sd_format_numeric_disk_name(CONFIG_SYNO_SAS_USB_DEVICE_PREFIX, synoidx, gd->disk_name, DISK_NAME_LEN);
 				break;
@@ -3354,7 +3354,7 @@ SYNO_SKIP_WANT_RETRY:
 		ida_remove(&cache_index_ida, cache_idx);
 	}
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
 	if (1 == g_is_sas_model) {
 		switch(sdkp->synodisktype) {
 #ifdef MY_ABC_HERE
@@ -3417,7 +3417,7 @@ static void scsi_disk_release(struct device *dev)
 		ida_remove(&cache_index_ida, sdkp->synoindex);
 	}
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
 	if (1 == g_is_sas_model) {
 		switch(sdkp->synodisktype) {
 #ifdef MY_ABC_HERE
@@ -3541,7 +3541,7 @@ done:
 	return ret;
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY
 struct workqueue_struct *spinup_workqueue = NULL;
 #endif  
  
@@ -3583,7 +3583,7 @@ static int __init init_sd(void)
 	if (err)
 		goto err_out_driver;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY
 	spinup_workqueue = create_workqueue("spinup_wq");
 	if (NULL == spinup_workqueue) {
 		printk(KERN_ERR "sd: can't init spinup_wq, fall back to global queue\n");
@@ -3648,7 +3648,7 @@ int SynoSCSIGetDeviceIndex(struct block_device *bdev)
 	BUG_ON(bdev == NULL);
 	disk = bdev->bd_disk;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
 	if (g_is_sas_model) {
 		return container_of(disk->private_data, struct scsi_disk, driver)->synoindex;
 	}

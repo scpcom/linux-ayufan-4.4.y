@@ -17,7 +17,7 @@
 #include <linux/ecryptfs.h>
 #include <linux/crypto.h>
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ECRYPTFS_OCF
 #include <cryptodev.h>
 #endif  
 
@@ -202,7 +202,7 @@ struct ecryptfs_crypt_stat {
 	size_t extent_shift;
 	unsigned int extent_mask;
 	struct ecryptfs_mount_crypt_stat *mount_crypt_stat;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ECRYPTFS_OCF
 	struct cryptoini cr_dm;  
 #else  
 	struct crypto_ablkcipher *tfm;

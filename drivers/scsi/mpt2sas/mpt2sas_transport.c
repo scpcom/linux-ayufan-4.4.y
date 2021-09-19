@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -808,7 +805,7 @@ mpt2sas_transport_update_links(struct MPT2SAS_ADAPTER *ioc,
 		    &mpt2sas_phy->remote_identify);
 		_transport_add_phy_to_an_existing_port(ioc, sas_node,
 		    mpt2sas_phy, mpt2sas_phy->remote_identify.sas_address);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_MPT2_HOTPLUG_PHY
 	} else {
 		mpt2sas_phy->attached_handle = (u16)0;
 		memset(&mpt2sas_phy->remote_identify, 0 , sizeof(struct

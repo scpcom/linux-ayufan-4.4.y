@@ -528,7 +528,7 @@ static const struct pci_device_id ahci_pci_tbl[] = {
 	{ }	 
 };
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_MV_9170_GPIO_CTRL
  
 enum {
 	MV_9170_GPIO_DATA_OUT			= 0x220,
@@ -1803,7 +1803,7 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	}
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_MV_9170_GPIO_CTRL
 	if (pdev->vendor == 0x1b4b && pdev->device == 0x9170) {
 		syno_mv_9170_gpio_active_init(host);
 	}

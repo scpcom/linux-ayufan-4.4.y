@@ -46,7 +46,7 @@ static struct svc_pool_map {
 	unsigned int *to_pool;		 
 } svc_pool_map = {
 	.count = 0,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_NFSD_NUMA_SVC_POOL_PERNODE
 	.mode = SVC_POOL_PERNODE
 #else
 	.mode = SVC_POOL_DEFAULT

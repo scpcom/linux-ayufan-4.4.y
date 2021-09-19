@@ -17,7 +17,7 @@
 #include <linux/pinctrl/pinconf-generic.h>
 #include <linux/platform_device.h>
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_CHERRYVIEW_GPIO_WRITE_RETRY
 #include <linux/delay.h>
 #endif  
 
@@ -769,7 +769,7 @@ static void chv_gpio_set(struct gpio_chip *chip, unsigned offset, int value)
 	unsigned long flags;
 	void __iomem *reg;
 	u32 ctrl0;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_CHERRYVIEW_GPIO_WRITE_RETRY
 	int iRetry = 0;
 #endif  
 
@@ -785,7 +785,7 @@ static void chv_gpio_set(struct gpio_chip *chip, unsigned offset, int value)
 
 	chv_writel(ctrl0, reg);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_CHERRYVIEW_GPIO_WRITE_RETRY
 	do {
 		mdelay(10);
 		if (ctrl0 == readl(reg)) {

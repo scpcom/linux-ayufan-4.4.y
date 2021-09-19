@@ -1070,7 +1070,7 @@ syno_trans_host_to_disk_show(struct device *dev, struct device_attribute *attr, 
 	int iStartIdx = 0;
 	char szTmp[BDEVNAME_SIZE] = {'\0'};
 	struct Scsi_Host *pShost = NULL;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_DISK_NAME
 	extern int g_is_sas_model;
 
 	if (1 == g_is_sas_model) {

@@ -258,7 +258,7 @@ void * __init extend_brk(size_t size, size_t align)
 	return ret;
 }
 
-#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE) && !defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE) && !defined(CONFIG_SYNO_BRASWELL)
  
 #define SYNO_MAX_HDD_PRZ	4
 #define GPIO_UNDEF			0xFF
@@ -267,7 +267,7 @@ static u8 SYNO_GET_HDD_ENABLE_PIN(const int index)
 {
 	u8 ret = GPIO_UNDEF;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_CEDARVIEW)
 	u8 HddEnPinMap[] = {16, 20, 21, 32};
 #elif defined(MY_DEF_HERE)
 	u8 HddEnPinMap[] = {10, 15, 16, 17};
@@ -375,7 +375,7 @@ static u8 SYNO_GET_HDD_PRESENT_PIN(const int index)
 {
 	u8 ret = GPIO_UNDEF;
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_CEDARVIEW)
 	u8 przPinMap[]   = {33, 35, 49, 18};
 #elif defined(MY_DEF_HERE)
 	u8 przPinMap[] = {18, 28, 34, 44};
@@ -464,7 +464,7 @@ EXPORT_SYMBOL(SYNO_GET_HDD_PRESENT_PIN);
 EXPORT_SYMBOL(SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_ENCOLURE_PWR_CTL
  
 int SynoProcEncPwrCtl(struct ctl_table *table, int write,
 		void __user *buffer, size_t *lenp, loff_t *ppos)

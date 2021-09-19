@@ -66,7 +66,7 @@ static void ata_dev_xfermask(struct ata_device *dev);
 static unsigned long ata_dev_blacklisted(const struct ata_device *dev);
 
 atomic_t ata_print_id = ATOMIC_INIT(0);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ATA_AHCI_LED_SWITCH
 EXPORT_SYMBOL(ata_print_id);
 #endif  
 
@@ -498,7 +498,7 @@ static void ata_force_link_limits(struct ata_link *link)
 		}
 	}
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_EXTERNAL_SPEED_LIMIT
 	if ((syno_is_hw_version(HW_DS216p) || syno_is_hw_version(HW_DS216pII)) && 3 == link->ap->print_id) {
 		link->hw_sata_spd_limit = 0x3;
 		ata_link_notice(link, "FORCE: PHY spd limit set to 3.0 Gbps\n");

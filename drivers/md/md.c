@@ -7460,7 +7460,7 @@ void md_do_sync(struct md_thread *thread)
 
 #ifdef MY_ABC_HERE
 	 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_LOWER_MD_RESYNC_NICE
 	set_user_nice(current, 10);
 #endif
 #endif  

@@ -1611,7 +1611,7 @@ extern struct dentry *mount_pseudo(struct file_system_type *, char *,
 #define fops_put(fops) \
 	do { if (fops) module_put((fops)->owner); } while(0)
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_DRM_I915_BACKPORT
  
 #define replace_fops(f, fops) \
 	do {    \

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/cred.h>
 #include <linux/file.h>
@@ -59,7 +56,7 @@ static struct inode *anon_inode_mkinode(struct super_block *s)
 	inode->i_atime = inode->i_mtime = inode->i_ctime = CURRENT_TIME;
 	return inode;
 }
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_DRM_I915_BACKPORT
 EXPORT_SYMBOL_GPL(anon_inode_mkinode);
 #endif  
 

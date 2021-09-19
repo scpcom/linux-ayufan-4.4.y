@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef _CRYPTO_CRYPTO_H_
 #define _CRYPTO_CRYPTO_H_
@@ -9,7 +6,7 @@
 #include <linux/in.h>
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_ARMADA_V2
 #ifdef CONFIG_OF
 #include "../../arch/arm/mach-mvebu/include/mach/mvTypes.h"
 #include "../../drivers/crypto/mvebu_cesa/mvSysCesaConfig.h"

@@ -10,7 +10,7 @@
 #include <linux/module.h>
 #include <linux/mutex.h>
 #include <linux/slab.h>
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_SHOW_DISK_PHY_INFO
 #include <scsi/scsi_device.h>
 #endif  
 
@@ -18,7 +18,7 @@ static LIST_HEAD(container_list);
 static DEFINE_MUTEX(container_list_lock);
 static struct class enclosure_class;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_FIX_ENCLOSURE_POWEROFF_WARNON
  
 static void enclosure_remove_links(struct enclosure_component *cdev);
 #endif  
@@ -115,10 +115,10 @@ static struct enclosure_component_callbacks enclosure_null_callbacks;
 void enclosure_unregister(struct enclosure_device *edev)
 {
 	int i;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_FIX_ENCLOSURE_POWEROFF_WARNON
 	struct enclosure_component *cdev = NULL;
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_SHOW_DISK_PHY_INFO
 	struct scsi_device *scsi_dev;
 	struct scsi_device *scsi_enc;
 #endif  
@@ -127,13 +127,13 @@ void enclosure_unregister(struct enclosure_device *edev)
 	list_del(&edev->node);
 	mutex_unlock(&container_list_lock);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_FIX_ENCLOSURE_POWEROFF_WARNON
 	for (i = 0; i < edev->components; i++) {
 		if (edev->component[i].number != -1) {
 			 
 			cdev = &edev->component[i];
 			if (cdev->dev != NULL) {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_SHOW_DISK_PHY_INFO
 				if (ENCLOSURE_COMPONENT_ARRAY_DEVICE == cdev->type) {
 					scsi_dev = to_scsi_device(cdev->dev);
 					scsi_enc = to_scsi_device(edev->edev.parent);
@@ -214,7 +214,7 @@ static void enclosure_release(struct device *cdev)
 
 static void enclosure_component_release(struct device *dev)
 {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_FIX_ENCLOSURE_POWEROFF_WARNON
 	 
 #else  
 	struct enclosure_component *cdev = to_enclosure_component(dev);
@@ -267,7 +267,7 @@ enclosure_component_register(struct enclosure_device *edev,
 		return ERR_PTR(err);
 	}
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_DISK_LED_CONTROL
 	 
 	if (ENCLOSURE_COMPONENT_ARRAY_DEVICE == ecomp->type && edev->cb->set_locate) {
 		edev->cb->set_locate(edev, ecomp, 0);
@@ -282,7 +282,7 @@ int enclosure_add_device(struct enclosure_device *edev, int component,
 			 struct device *dev)
 {
 	struct enclosure_component *cdev;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_SHOW_DISK_PHY_INFO
 	struct scsi_device *scsi_dev;
 	struct scsi_device *scsi_enc;
 #endif  
@@ -301,13 +301,13 @@ int enclosure_add_device(struct enclosure_device *edev, int component,
 	put_device(cdev->dev);
 	cdev->dev = get_device(dev);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_DISK_LED_CONTROL
 	 
 	if (ENCLOSURE_COMPONENT_ARRAY_DEVICE == cdev->type && edev->cb->set_locate) {
 		edev->cb->set_locate(edev, cdev, 1);
 	}
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_SHOW_DISK_PHY_INFO
 	if (ENCLOSURE_COMPONENT_ARRAY_DEVICE == cdev->type) {
 		scsi_dev = to_scsi_device(dev);
 		scsi_enc = to_scsi_device(edev->edev.parent);
@@ -330,7 +330,7 @@ EXPORT_SYMBOL_GPL(enclosure_add_device);
 int enclosure_remove_device(struct enclosure_device *edev, struct device *dev)
 {
 	struct enclosure_component *cdev;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_SHOW_DISK_PHY_INFO
 	struct scsi_device *scsi_dev;
 	struct scsi_device *scsi_enc;
 #endif  
@@ -342,13 +342,13 @@ int enclosure_remove_device(struct enclosure_device *edev, struct device *dev)
 	for (i = 0; i < edev->components; i++) {
 		cdev = &edev->component[i];
 		if (cdev->dev == dev) {
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_DISK_LED_CONTROL
 			 
 			if (ENCLOSURE_COMPONENT_ARRAY_DEVICE == cdev->type && edev->cb->set_locate) {
 				edev->cb->set_locate(edev, cdev, 0);
 			}
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_SHOW_DISK_PHY_INFO
 			if (ENCLOSURE_COMPONENT_ARRAY_DEVICE == cdev->type) {
 				scsi_dev = to_scsi_device(dev);
 				scsi_enc = to_scsi_device(edev->edev.parent);

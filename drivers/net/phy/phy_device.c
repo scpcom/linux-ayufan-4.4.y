@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
@@ -275,7 +272,7 @@ int phy_device_register(struct phy_device *phydev)
 		goto out;
 	}
 
-#if defined(MY_DEF_HERE)
+#if defined(CONFIG_SYNO_PHY_INIT)
 	 
 	if (phydev->drv && phydev->drv->config_init) {
 		err = phydev->drv->config_init(phydev);

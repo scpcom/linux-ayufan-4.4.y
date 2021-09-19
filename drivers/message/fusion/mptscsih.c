@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -1300,7 +1297,7 @@ mptscsih_abort(struct scsi_cmnd * SCpnt)
 	}
 
 	ioc = hd->ioc;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE
 	printk(MYIOC_s_NOTE_FMT "attempting task abort! (sc=%p)\n",
 	       ioc->name, SCpnt);
 #else  
@@ -1375,7 +1372,7 @@ mptscsih_abort(struct scsi_cmnd * SCpnt)
 	}
 
  out:
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE
 	printk(MYIOC_s_NOTE_FMT "task abort: %s (rv=%04x) (sc=%p)\n",
 	    ioc->name, ((retval == SUCCESS) ? "SUCCESS" : "FAILED"), retval,
 	    SCpnt);

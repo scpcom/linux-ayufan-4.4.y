@@ -3744,7 +3744,7 @@ port_speed_morph:
 #ifdef MY_ABC_HERE
 		&& 0 == gSynoFactoryUSB3Disable
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_CASTRATED_XHC
 		&& !(SYNO_USB_PORT_CASTRATED_XHC & hub->ports[port1 - 1]->flag)
 #endif  
 #ifdef MY_ABC_HERE

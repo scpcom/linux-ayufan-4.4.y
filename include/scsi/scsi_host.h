@@ -171,11 +171,11 @@ struct scsi_host_template {
 #endif  
 
 	u64 vendor_id;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_GET_DISK_SPEED
 	unsigned char (* syno_get_disk_speed)(struct Scsi_Host *host, unsigned int phy_id);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_HOST_DISK_LED_CTRL
 	int (*syno_set_sashost_disk_led)(struct scsi_device *, int);
 #endif
 };

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/init.h>
 #include <linux/bitmap.h>
@@ -598,7 +595,7 @@ static struct intel_iommu *device_to_iommu(struct device *dev, u8 *bus, u8 *devf
 	if (dev_is_pci(dev)) {
 		pdev = to_pci_dev(dev);
 		segment = pci_domain_nr(pdev->bus);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_WORKAROUND_NOT_PORTING_ACPI_COMPANION
 	}
 #else
 	} else if (ACPI_COMPANION(dev))
@@ -2515,7 +2512,7 @@ static int __init init_dmars(void)
 	if (iommu_pass_through)
 		iommu_identity_mapping |= IDENTMAP_ALL;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_IOMMU_PASSTHROUGH
 	printk(KERN_INFO "IOMMU passthrough mode = %d\n", iommu_pass_through);
 #endif  
 #ifdef CONFIG_INTEL_IOMMU_BROKEN_GFX_WA

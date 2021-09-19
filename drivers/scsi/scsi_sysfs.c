@@ -634,7 +634,7 @@ END:
 static DEVICE_ATTR(syno_standby_syncing, S_IRUGO | S_IWUSR, sdev_show_syno_standby_syncing, sdev_store_syno_standby_syncing);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_GET_DISK_SPEED
 const char *disk_spd_string(unsigned char spd)
 {
 	char *szRet;
@@ -937,7 +937,7 @@ static struct attribute *scsi_sdev_attrs[] = {
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_scmd_min_timeout.attr,
 #endif  
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_GET_DISK_SPEED
 	&dev_attr_syno_disk_spd.attr,
 #endif  
 #ifdef MY_ABC_HERE
@@ -963,7 +963,7 @@ sdev_store_queue_depth_rw(struct device *dev, struct device_attribute *attr,
 	int depth, retval;
 	struct scsi_device *sdev = to_scsi_device(dev);
 	struct scsi_host_template *sht = sdev->host->hostt;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SCSI_MAX_QUEUE_DEPTH_LOCK
 	unsigned long flags;
 #endif  
 
@@ -975,7 +975,7 @@ sdev_store_queue_depth_rw(struct device *dev, struct device_attribute *attr,
 	if (depth < 1)
 		return -EINVAL;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SCSI_MAX_QUEUE_DEPTH_LOCK
 	 
 	spin_lock_irqsave(sdev->host->host_lock, flags);
 #endif  
@@ -983,7 +983,7 @@ sdev_store_queue_depth_rw(struct device *dev, struct device_attribute *attr,
 	retval = sht->change_queue_depth(sdev, depth,
 					 SCSI_QDEPTH_DEFAULT);
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SCSI_MAX_QUEUE_DEPTH_LOCK
 	if (retval < 0) {
 		spin_unlock_irqrestore(sdev->host->host_lock, flags);
 		return retval;
@@ -994,7 +994,7 @@ sdev_store_queue_depth_rw(struct device *dev, struct device_attribute *attr,
 #endif  
 
 	sdev->max_queue_depth = sdev->queue_depth;
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SCSI_MAX_QUEUE_DEPTH_LOCK
 	spin_unlock_irqrestore(sdev->host->host_lock, flags);
 #endif  
 
@@ -1210,7 +1210,7 @@ void scsi_remove_device(struct scsi_device *sdev)
 	mutex_lock(&shost->scan_mutex);
 	__scsi_remove_device(sdev);
 	mutex_unlock(&shost->scan_mutex);
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY
 	SynoSpinupRemove(sdev);
 #endif  
 #ifdef MY_ABC_HERE

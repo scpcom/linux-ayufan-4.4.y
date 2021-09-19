@@ -172,7 +172,7 @@ struct scsi_device {
 	struct scsi_dh_data	*scsi_dh_data;
 	enum scsi_device_state sdev_state;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY
 	 
 	unsigned int	    spinup_queue_id;
 	 
@@ -287,7 +287,7 @@ static inline struct scsi_target *scsi_target(struct scsi_device *sdev)
 #define starget_printk(prefix, starget, fmt, a...)	\
 	dev_printk(prefix, &(starget)->dev, fmt, ##a)
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY
 int SynoSpinupBegin(struct scsi_device *device);
 void SynoSpinupEnd(struct scsi_device *sdev);
 int SynoSpinupRemove(struct scsi_device *sdev);

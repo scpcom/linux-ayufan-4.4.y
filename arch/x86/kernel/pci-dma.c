@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 #include <linux/dma-mapping.h>
 #include <linux/dma-debug.h>
 #include <linux/dmar.h>
@@ -33,7 +30,7 @@ int panic_on_overflow __read_mostly = 0;
 int force_iommu __read_mostly = 0;
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_IOMMU_PASSTHROUGH
 int iommu_merge __read_mostly = 1;
 #else  
 int iommu_merge __read_mostly = 0;
@@ -43,7 +40,7 @@ int no_iommu __read_mostly;
  
 int iommu_detected __read_mostly = 0;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_IOMMU_PASSTHROUGH
 int iommu_pass_through __read_mostly = 1;
 #else  
 int iommu_pass_through __read_mostly;
