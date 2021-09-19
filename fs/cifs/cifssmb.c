@@ -1229,11 +1229,10 @@ openRetry:
 }
 
 static int
-cifs_readv_discard(struct TCP_Server_Info *server, struct mid_q_entry *mid)
+discard_remaining_data(struct TCP_Server_Info *server)
 {
 	unsigned int rfclen = get_rfc1002_length(server->smallbuf);
 	int remaining = rfclen + 4 - server->total_read;
-	struct cifs_readdata *rdata = mid->callback_data;
 
 	while (remaining > 0) {
 		int length;
@@ -1247,8 +1246,18 @@ cifs_readv_discard(struct TCP_Server_Info *server, struct mid_q_entry *mid)
 		remaining -= length;
 	}
 
-	dequeue_mid(mid, rdata->result);
 	return 0;
+}
+
+static int
+cifs_readv_discard(struct TCP_Server_Info *server, struct mid_q_entry *mid)
+{
+	int length;
+	struct cifs_readdata *rdata = mid->callback_data;
+
+	length = discard_remaining_data(server);
+	dequeue_mid(mid, rdata->result);
+	return length;
 }
 
 int

@@ -157,7 +157,7 @@ static struct ext4_new_flex_group_data *alloc_flex_gd(unsigned long flexbg_size)
 	if (flex_gd == NULL)
 		goto out3;
 
-	if (flexbg_size >= UINT_MAX / sizeof(struct ext4_new_flex_group_data))
+	if (flexbg_size >= UINT_MAX / sizeof(struct ext4_new_group_data))
 		goto out2;
 	flex_gd->count = flexbg_size;
 
@@ -903,7 +903,7 @@ static void update_backups(struct super_block *sb, int blk_off, char *data,
 		group = ext4_list_backups(sb, &three, &five, &seven);
 		last = sbi->s_groups_count;
 	} else {
-		group = ext4_meta_bg_first_group(sb, group) + 1;
+		group = ext4_get_group_number(sb, blk_off) + 1;
 		last = (ext4_group_t)(group + EXT4_DESC_PER_BLOCK(sb) - 2);
 	}
 

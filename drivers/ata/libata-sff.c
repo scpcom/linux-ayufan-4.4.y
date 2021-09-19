@@ -609,7 +609,6 @@ static inline int ata_hsm_ok_in_wq(struct ata_port *ap,
 static void ata_hsm_qc_complete(struct ata_queued_cmd *qc, int in_wq)
 {
 	struct ata_port *ap = qc->ap;
-	unsigned long flags;
 
 	if (ap->ops->error_handler) {
 		if (in_wq) {
@@ -649,8 +648,6 @@ static void ata_hsm_qc_complete(struct ata_queued_cmd *qc, int in_wq)
 					ata_port_freeze(ap);
 #endif  
 			}
-
-			spin_unlock_irqrestore(ap->lock, flags);
 		} else {
 #ifdef MY_ABC_HERE
 			if (IS_SYNO_SPINUP_CMD(qc)) {
@@ -684,10 +681,8 @@ static void ata_hsm_qc_complete(struct ata_queued_cmd *qc, int in_wq)
 		}
 	} else {
 		if (in_wq) {
-			spin_lock_irqsave(ap->lock, flags);
 			ata_sff_irq_on(ap);
 			ata_qc_complete(qc);
-			spin_unlock_irqrestore(ap->lock, flags);
 		} else
 			ata_qc_complete(qc);
 	}
@@ -950,12 +945,14 @@ static void ata_sff_pio_task(struct work_struct *work)
 	u8 status;
 	int poll_next;
 
+	spin_lock_irq(ap->lock);
+
 	BUG_ON(ap->sff_pio_task_link == NULL);
 	 
 	qc = ata_qc_from_tag(ap, link->active_tag);
 	if (!qc) {
 		ap->sff_pio_task_link = NULL;
-		return;
+		goto out_unlock;
 	}
 
 fsm_start:
@@ -963,11 +960,14 @@ fsm_start:
 
 	status = ata_sff_busy_wait(ap, ATA_BUSY, 5);
 	if (status & ATA_BUSY) {
+		spin_unlock_irq(ap->lock);
 		ata_msleep(ap, 2);
+		spin_lock_irq(ap->lock);
+
 		status = ata_sff_busy_wait(ap, ATA_BUSY, 10);
 		if (status & ATA_BUSY) {
 			ata_sff_queue_pio_task(link, ATA_SHORT_PAUSE);
-			return;
+			goto out_unlock;
 		}
 	}
 
@@ -977,6 +977,8 @@ fsm_start:
 
 	if (poll_next)
 		goto fsm_start;
+out_unlock:
+	spin_unlock_irq(ap->lock);
 }
 
 unsigned int ata_sff_qc_issue(struct ata_queued_cmd *qc)
