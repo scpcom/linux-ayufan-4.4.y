@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  *   fs/cifs_debug.c
  *
@@ -37,27 +34,9 @@
 void
 cifs_dump_mem(char *label, void *data, int length)
 {
-	int i, j;
-	int *intptr = data;
-	char *charptr = data;
-	char buf[10], line[80];
-
-	printk(KERN_DEBUG "%s: dump of %d bytes of data at 0x%p\n",
-		label, length, data);
-	for (i = 0; i < length; i += 16) {
-		line[0] = 0;
-		for (j = 0; (j < 4) && (i + j * 4 < length); j++) {
-			sprintf(buf, " %08x", intptr[i / 4 + j]);
-			strcat(line, buf);
-		}
-		buf[0] = ' ';
-		buf[2] = 0;
-		for (j = 0; (j < 16) && (i + j < length); j++) {
-			buf[1] = isprint(charptr[i + j]) ? charptr[i + j] : '.';
-			strcat(line, buf);
-		}
-		printk(KERN_DEBUG "%s\n", line);
-	}
+	pr_debug("%s: dump of %d bytes of data at 0x%p\n", label, length, data);
+	print_hex_dump(KERN_DEBUG, "", DUMP_PREFIX_OFFSET, 16, 4,
+		       data, length, true);
 }
 
 #ifdef CONFIG_CIFS_DEBUG
@@ -70,11 +49,8 @@ void cifs_vfs_err(const char *fmt, ...)
 
 	vaf.fmt = fmt;
 	vaf.va = &args;
-#ifdef MY_ABC_HERE
-	printk_ratelimited(KERN_ERR "CIFS VFS: %pV", &vaf);
-#else
-	printk(KERN_ERR "CIFS VFS: %pV", &vaf);
-#endif /* MY_ABC_HERE */
+
+	pr_err_ratelimited("CIFS VFS: %pV", &vaf);
 
 	va_end(args);
 }
@@ -176,6 +152,7 @@ static int cifs_debug_data_proc_show(struct seq_file *m, void *v)
 	list_for_each(tmp1, &cifs_tcp_ses_list) {
 		server = list_entry(tmp1, struct TCP_Server_Info,
 				    tcp_ses_list);
+		seq_printf(m, "\nNumber of credits: %d", server->credits);
 		i++;
 		list_for_each(tmp2, &server->smb_ses_list) {
 			ses = list_entry(tmp2, struct cifs_ses,
@@ -219,7 +196,7 @@ static int cifs_debug_data_proc_show(struct seq_file *m, void *v)
 						   tcon->nativeFileSystem);
 				}
 				seq_printf(m, "DevInfo: 0x%x Attributes: 0x%x"
-					"\nPathComponentMax: %d Status: 0x%d",
+					"\n\tPathComponentMax: %d Status: %d",
 					le32_to_cpu(tcon->fsDevInfo.DeviceCharacteristics),
 					le32_to_cpu(tcon->fsAttrInfo.Attributes),
 					le32_to_cpu(tcon->fsAttrInfo.MaxPathNameComponentLength),
@@ -230,6 +207,8 @@ static int cifs_debug_data_proc_show(struct seq_file *m, void *v)
 					seq_puts(m, " type: CDROM ");
 				else
 					seq_printf(m, " type: %d ", dev_type);
+				if (server->ops->dump_share_caps)
+					server->ops->dump_share_caps(m, tcon);
 
 				if (tcon->need_reconnect)
 					seq_puts(m, "\tDISCONNECTED ");
@@ -601,9 +580,38 @@ static int cifs_security_flags_proc_open(struct inode *inode, struct file *file)
 	return single_open(file, cifs_security_flags_proc_show, NULL);
 }
 
+/*
+ * Ensure that if someone sets a MUST flag, that we disable all other MAY
+ * flags except for the ones corresponding to the given MUST flag. If there are
+ * multiple MUST flags, then try to prefer more secure ones.
+ */
+static void
+cifs_security_flags_handle_must_flags(unsigned int *flags)
+{
+	unsigned int signflags = *flags & CIFSSEC_MUST_SIGN;
+
+	if ((*flags & CIFSSEC_MUST_KRB5) == CIFSSEC_MUST_KRB5)
+		*flags = CIFSSEC_MUST_KRB5;
+	else if ((*flags & CIFSSEC_MUST_NTLMSSP) == CIFSSEC_MUST_NTLMSSP)
+		*flags = CIFSSEC_MUST_NTLMSSP;
+	else if ((*flags & CIFSSEC_MUST_NTLMV2) == CIFSSEC_MUST_NTLMV2)
+		*flags = CIFSSEC_MUST_NTLMV2;
+	else if ((*flags & CIFSSEC_MUST_NTLM) == CIFSSEC_MUST_NTLM)
+		*flags = CIFSSEC_MUST_NTLM;
+	else if (CIFSSEC_MUST_LANMAN &&
+		 (*flags & CIFSSEC_MUST_LANMAN) == CIFSSEC_MUST_LANMAN)
+		*flags = CIFSSEC_MUST_LANMAN;
+	else if (CIFSSEC_MUST_PLNTXT &&
+		 (*flags & CIFSSEC_MUST_PLNTXT) == CIFSSEC_MUST_PLNTXT)
+		*flags = CIFSSEC_MUST_PLNTXT;
+
+	*flags |= signflags;
+}
+
 static ssize_t cifs_security_flags_proc_write(struct file *file,
 		const char __user *buffer, size_t count, loff_t *ppos)
 {
+	int rc;
 	unsigned int flags;
 	char flags_string[12];
 	char c;
@@ -626,26 +634,35 @@ static ssize_t cifs_security_flags_proc_write(struct file *file,
 			global_secflags = CIFSSEC_MAX;
 			return count;
 		} else if (!isdigit(c)) {
-			cifs_dbg(VFS, "invalid flag %c\n", c);
+			cifs_dbg(VFS, "Invalid SecurityFlags: %s\n",
+					flags_string);
 			return -EINVAL;
 		}
 	}
-	/* else we have a number */
 
-	flags = simple_strtoul(flags_string, NULL, 0);
+	/* else we have a number */
+	rc = kstrtouint(flags_string, 0, &flags);
+	if (rc) {
+		cifs_dbg(VFS, "Invalid SecurityFlags: %s\n",
+				flags_string);
+		return rc;
+	}
 
 	cifs_dbg(FYI, "sec flags 0x%x\n", flags);
 
-	if (flags <= 0)  {
-		cifs_dbg(VFS, "invalid security flags %s\n", flags_string);
+	if (flags == 0)  {
+		cifs_dbg(VFS, "Invalid SecurityFlags: %s\n", flags_string);
 		return -EINVAL;
 	}
 
 	if (flags & ~CIFSSEC_MASK) {
-		cifs_dbg(VFS, "attempt to set unsupported security flags 0x%x\n",
+		cifs_dbg(VFS, "Unsupported security flags: 0x%x\n",
 			 flags & ~CIFSSEC_MASK);
 		return -EINVAL;
 	}
+
+	cifs_security_flags_handle_must_flags(&flags);
+
 	/* flags look ok - update the global security flags for cifs module */
 	global_secflags = flags;
 	if (global_secflags & CIFSSEC_MUST_SIGN) {

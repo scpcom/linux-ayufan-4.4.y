@@ -7,6 +7,9 @@
 # please edit the section [platform kernel] in config/project.depends
 # ========================================================================
 
+# Copy key file
+cp -sv /lnxscripts/config/{signing_key,trusted_certificates,untrusted_certificates} .
+
 export ARCH=${ARCH}
 case "$BUILD_TARGET" in
 	X64|BROMOLOW|GRANTLEY|CEDARVIEW|AVOTON|DOCKERX64|BRASWELL|BROADWELL|KVMX64)

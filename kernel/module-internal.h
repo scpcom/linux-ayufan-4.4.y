@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* Module internals
  *
  * Copyright (C) 2012 Red Hat, Inc. All Rights Reserved.
@@ -10,5 +13,8 @@
  */
 
 extern struct key *modsign_keyring;
+#ifdef MY_ABC_HERE
+extern struct key *modsign_blacklist;
+#endif
 
 extern int mod_verify_sig(const void *mod, unsigned long *_modlen);

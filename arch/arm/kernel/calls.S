@@ -392,7 +392,6 @@
 		CALL(sys_process_vm_writev)
 		CALL(sys_kcmp)
 		CALL(sys_finit_module)
-#ifdef MY_ABC_HERE
 /* 380 */	CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)
@@ -404,10 +403,11 @@
 		CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)
 /* 390 */	CALL(sys_ni_syscall)
+		CALL(sys_copy_file_range)
 		CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)
-		CALL(sys_ni_syscall)
+#ifdef MY_ABC_HERE
 /* 395 */	CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)
 		CALL(sys_ni_syscall)

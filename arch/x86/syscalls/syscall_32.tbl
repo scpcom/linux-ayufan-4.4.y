@@ -357,6 +357,7 @@
 348	i386	process_vm_writev	sys_process_vm_writev		compat_sys_process_vm_writev
 349	i386	kcmp			sys_kcmp
 350	i386	finit_module		sys_finit_module
+377	i386	copy_file_range		sys_copy_file_range
 
 #
 # start - CONFIG_SYNO_SYSTEM_CALL

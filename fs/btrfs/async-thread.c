@@ -55,6 +55,9 @@ BTRFS_WORK_HELPER(submit_helper);
 BTRFS_WORK_HELPER(fixup_helper);
 BTRFS_WORK_HELPER(endio_helper);
 BTRFS_WORK_HELPER(endio_meta_helper);
+#ifdef MY_DEF_HERE
+BTRFS_WORK_HELPER(endio_meta_fix_helper);
+#endif  
 BTRFS_WORK_HELPER(endio_meta_write_helper);
 BTRFS_WORK_HELPER(endio_raid56_helper);
 BTRFS_WORK_HELPER(rmw_helper);
@@ -62,7 +65,7 @@ BTRFS_WORK_HELPER(endio_write_helper);
 BTRFS_WORK_HELPER(freespace_write_helper);
 BTRFS_WORK_HELPER(delayed_meta_helper);
 BTRFS_WORK_HELPER(readahead_helper);
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 BTRFS_WORK_HELPER(reada_path_start_helper);
 #endif
 BTRFS_WORK_HELPER(qgroup_rescan_helper);

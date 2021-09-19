@@ -161,9 +161,9 @@ void ext4_evict_inode(struct inode *inode)
 
 	if (inode->i_nlink) {
 		 
-		if (ext4_should_journal_data(inode) &&
-		    (S_ISLNK(inode->i_mode) || S_ISREG(inode->i_mode)) &&
-		    inode->i_ino != EXT4_JOURNAL_INO) {
+		if (inode->i_ino != EXT4_JOURNAL_INO &&
+		    ext4_should_journal_data(inode) &&
+		    (S_ISLNK(inode->i_mode) || S_ISREG(inode->i_mode))) {
 			journal_t *journal = EXT4_SB(inode->i_sb)->s_journal;
 			tid_t commit_tid = EXT4_I(inode)->i_datasync_tid;
 
@@ -2052,11 +2052,7 @@ static int ext4_da_should_update_i_disksize(struct page *page,
 	for (i = 0; i < idx; i++)
 		bh = bh->b_this_page;
 
-#ifdef MY_ABC_HERE
-	if (!buffer_mapped(bh) || buffer_unwritten(bh))
-#else
 	if (!buffer_mapped(bh) || (buffer_delay(bh)) || buffer_unwritten(bh))
-#endif  
 		return 0;
 	return 1;
 }
@@ -2649,7 +2645,7 @@ int ext4_punch_hole(struct file *file, loff_t offset, loff_t length)
 
 	trace_ext4_punch_hole(inode, offset, length);
 
-	if (mapping->nrpages && mapping_tagged(mapping, PAGECACHE_TAG_DIRTY)) {
+	if (mapping_tagged(mapping, PAGECACHE_TAG_DIRTY)) {
 		ret = filemap_write_and_wait_range(mapping, offset,
 						   offset + length - 1);
 		if (ret)
@@ -3351,7 +3347,10 @@ static int ext4_do_update_inode(handle_t *handle,
 		raw_inode->i_uid_low = cpu_to_le16(low_16_bits(i_uid));
 		raw_inode->i_gid_low = cpu_to_le16(low_16_bits(i_gid));
  
-		if (!ei->i_dtime) {
+		if (ei->i_dtime && list_empty(&ei->i_orphan)) {
+			raw_inode->i_uid_high = 0;
+			raw_inode->i_gid_high = 0;
+		} else {
 			raw_inode->i_uid_high =
 				cpu_to_le16(high_16_bits(i_uid));
 			raw_inode->i_gid_high =

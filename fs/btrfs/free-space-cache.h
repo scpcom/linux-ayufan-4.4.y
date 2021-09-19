@@ -98,7 +98,7 @@ void btrfs_dump_free_space(struct btrfs_block_group_cache *block_group,
 int btrfs_find_space_cluster(struct btrfs_root *root,
 			     struct btrfs_block_group_cache *block_group,
 			     struct btrfs_free_cluster *cluster,
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 			     u64 offset, u64 bytes, u64 empty_size, u64 reserve_bytes);
 #else
 			     u64 offset, u64 bytes, u64 empty_size);

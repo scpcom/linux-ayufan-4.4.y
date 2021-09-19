@@ -88,7 +88,7 @@ typedef enum {
 #ifdef MY_ABC_HERE
 #define SYNO_PM_VIRTUAL_SCSI_CHANNEL 15
 #endif  
-
+ 
 #define HAVE_LIBATA_MSG 1
 
 enum {
@@ -1277,9 +1277,7 @@ extern char giDiskSeqReverse[];
 
 #ifdef MY_ABC_HERE
 #define IS_SYNO_SPINUP_CMD(qc) (NULL == qc->scsicmd && !ata_tag_internal(qc->tag) && \
-			(ATA_CMD_FPDMA_READ == qc->tf.command || ATA_CMD_READ == qc->tf.command || \
-			 ATA_CMD_READ_EXT == qc->tf.command || ATA_CMD_PIO_READ == qc->tf.command || ATA_CMD_PIO_READ_EXT == qc->tf.command || \
-			 ATA_CMD_READ_MULTI == qc->tf.command || ATA_CMD_READ_MULTI_EXT == qc->tf.command))
+			ATA_CMD_IDLEIMMEDIATE == qc->tf.command)
 #endif  
 
 extern const struct ata_port_operations ata_base_port_ops;

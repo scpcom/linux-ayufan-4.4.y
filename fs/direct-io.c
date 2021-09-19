@@ -94,11 +94,27 @@ static inline int dio_refill_pages(struct dio *dio, struct dio_submit *sdio)
 	int nr_pages;
 
 	nr_pages = min(sdio->total_pages - sdio->curr_page, DIO_PAGES);
+#ifdef MY_ABC_HERE
+	if (virt_addr_valid(sdio->curr_user_address)) {
+		int i;
+		for (i = 0; i < nr_pages; i++) {
+			dio->pages[i] = virt_to_page(sdio->curr_user_address + i * PAGE_SIZE);
+			get_page(dio->pages[i]);
+		}
+
+		ret = i;
+	} else {
+		ret = get_user_pages_fast(
+#else
 	ret = get_user_pages_fast(
+#endif
 		sdio->curr_user_address,		 
 		nr_pages,			 
 		dio->rw == READ,		 
 		&dio->pages[0]);		 
+#ifdef MY_ABC_HERE
+	}
+#endif
 
 	if (ret < 0 && sdio->blocks_available && (dio->rw & WRITE)) {
 		struct page *page = ZERO_PAGE(0);
@@ -756,7 +772,7 @@ do_blockdev_direct_IO(int rw, struct kiocb *iocb, struct inode *inode,
 	atomic_inc(&inode->i_dio_count);
 
 	dio->is_async = !is_sync_kiocb(iocb) && !((rw & WRITE) &&
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 		(end > i_size_read(inode))) && !(dio->flags & DIO_NO_ASYNC);
 #else
 		(end > i_size_read(inode)));

@@ -450,7 +450,7 @@ static int __init early_pci_sata_cache(char *p)
 		if (',' ==  *ptr) {
 			index = 0;
 			gPciAddrNum ++;
-			if (PCI_ADDR_NUM_MAX >= gPciAddrNum){
+			if (PCI_ADDR_NUM_MAX <= gPciAddrNum){
 				goto FMT_ERR;
 			}
 		} else {

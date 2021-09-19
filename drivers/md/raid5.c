@@ -849,8 +849,10 @@ async_copy_data(int frombio, struct bio *bio, struct page *page,
 #ifdef MY_ABC_HERE
 			if (frombio) {
 				if (sh->raid_conf->skip_copy &&
+#ifdef MY_ABC_HERE
 					sh->raid_conf->mddev->degraded == 0 &&
 					!test_bit(MD_RECOVERY_RUNNING, &sh->raid_conf->mddev->recovery) &&
+#endif  
 					b_offset == 0 && page_offset == 0 &&
 					clen == STRIPE_SIZE)
 					*page = bio_page;
@@ -3321,10 +3323,15 @@ static void handle_stripe_clean_event(struct r5conf *conf,
 			} else if (test_bit(R5_Discard, &dev->flags))
 				discard_pending = 1;
 #ifdef MY_ABC_HERE
+#ifdef MY_ABC_HERE
 			if (!test_bit(R5_LOCKED, &dev->flags)) {
 				WARN_ON(test_bit(R5_SkipCopy, &dev->flags));
 				WARN_ON(dev->page != dev->orig_page);
 			}
+#else  
+			WARN_ON(test_bit(R5_SkipCopy, &dev->flags));
+			WARN_ON(dev->page != dev->orig_page);
+#endif  
 #endif  
 		}
 	if (!discard_pending &&
@@ -5725,8 +5732,15 @@ raid5_store_skip_copy(struct mddev *mddev, const char *page, size_t len)
 	mddev_suspend(mddev);
 	conf->skip_copy = new;
 	if (new)
+#ifdef MY_ABC_HERE
+	{
+		mddev->queue->backing_dev_info.capabilities |= BDI_CAP_STABLE_WRITES;
+		syno_backing_dev_info.capabilities |= BDI_CAP_STABLE_WRITES;
+	}
+#else  
 		mddev->queue->backing_dev_info.capabilities |=
 			BDI_CAP_STABLE_WRITES;
+#endif  
 	else
 		mddev->queue->backing_dev_info.capabilities &=
 			~BDI_CAP_STABLE_WRITES;
@@ -6093,6 +6107,7 @@ static struct r5conf *setup_conf(struct mddev *mddev)
 #ifdef MY_ABC_HERE
 	conf->skip_copy = 1;
 	mddev->queue->backing_dev_info.capabilities |= BDI_CAP_STABLE_WRITES;
+	syno_backing_dev_info.capabilities |= BDI_CAP_STABLE_WRITES;
 #endif  
 	conf->recovery_disabled = mddev->recovery_disabled - 1;
 

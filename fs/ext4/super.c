@@ -2070,7 +2070,6 @@ static __le16 ext4_group_desc_csum(struct ext4_sb_info *sbi, __u32 block_group,
 	if ((sbi->s_es->s_feature_ro_compat &
 	     cpu_to_le32(EXT4_FEATURE_RO_COMPAT_METADATA_CSUM))) {
 		 
-		__le16 save_csum;
 		__u32 csum32;
 		__u16 dummy_csum = 0;
 
@@ -2277,10 +2276,6 @@ static void ext4_orphan_cleanup(struct super_block *sb,
 	while (es->s_last_orphan) {
 		struct inode *inode;
 
-		/*
-		 * We may have encountered an error during cleanup; if
-		 * so, skip the rest.
-		 */
 		if (EXT4_SB(sb)->s_mount_state & EXT4_ERROR_FS) {
 			jbd_debug(1, "Skipping orphan recovery on fs with errors.\n");
 			es->s_last_orphan = 0;

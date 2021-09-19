@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2000-2016 Synology Inc. All rights reserved.
+# Copyright (c) 2000-2017 Synology Inc. All rights reserved.
 
 skip=0
 
@@ -22,7 +22,6 @@ ModCrypto=" \
 	${KernelDir}/crypto/md5.ko \
 	${KernelDir}/crypto/sha1_generic.ko \
 	${KernelDir}/crypto/sha256_generic.ko \
-	${KernelDir}/crypto/sha512_generic.ko \
 	${KernelDir}/crypto/cts.ko \
 	"
 #FIXME: The modules below should be included when porting is done
@@ -45,6 +44,7 @@ ModFS=" \
 	${KernelDir}/lib/zlib_deflate/zlib_deflate.ko \
 	${KernelDir}/lib/libcrc32c.ko \
 	${KernelDir}/fs/hfsplus/hfsplus.ko \
+	${KernelDir}/drivers/md/dm-flakey.ko \
 	"
 ModEncFS=" \
 	${KernelDir}/fs/ecryptfs/ecryptfs.ko \
@@ -252,6 +252,7 @@ ModAlsa=" \
 ModDocker=" \
 	${KernelDir}/drivers/net/macvlan.ko \
 	${KernelDir}/drivers/net/veth.ko \
+	${KernelDir}/drivers/net/vxlan.ko \
 	${KernelDir}/net/netfilter/xt_addrtype.ko \
 	${KernelDir}/net/netfilter/xt_conntrack.ko \
 	${KernelDir}/fs/aufs/aufs.ko \
@@ -278,6 +279,14 @@ ModVirtualization=" \
 	${KernelDir}/drivers/vhost/vhost_net.ko \
 	${KernelDir}/drivers/pci/pci-stub.ko \
 	"
+
+ModFIPS=" \
+	${KernelDir}/crypto/crypto_user.ko \
+	${KernelDir}/crypto/af_alg.ko \
+	${KernelDir}/crypto/algif_hash.ko \
+	${KernelDir}/crypto/algif_skcipher.ko \
+	"
+
 ModuleList=" \
 	${ModCrypto} \
 	${ModFS} \
@@ -361,7 +370,6 @@ case "$BUILD_TARGET" in
 	X64)
 		ModuleList="${ModuleList} ${KernelDir}/net/ipv4/netfilter/ipt_MASQUERADE.ko"
 		ModuleList="${ModuleList} ${KernelDir}/lib/zlib_deflate/zlib_deflate.ko"
-		ModuleList="${ModuleList} ${KernelDir}/fs/btrfs/btrfs.ko"
 		ModuleList="${ModuleList} ${KernelDir}/crypto/arc4.ko"
 		ModuleList="${ModuleList} ${KernelDir}/drivers/i2c/algos/i2c-algo-bit.ko"
 		ModuleList="${ModuleList} ${KernelDir}/drivers/video/output.ko"
@@ -437,6 +445,7 @@ case "$BUILD_TARGET" in
 		ModuleList="${ModuleList} ${ModIPv6Tun}"
 		ModuleList="${ModuleList} ${ModVirtualization}"
 		ModuleList="${ModuleList} ${ModNFQ}"
+		ModuleList="${ModuleList} ${ModFIPS}"
 
 		;;
 	GRANTLEY)
@@ -488,6 +497,7 @@ case "$BUILD_TARGET" in
 		ModuleList="${ModuleList} ${ModIPMI}"
 		ModuleList="${ModuleList} ${ModNFQ}"
 		ModuleList="${ModuleList} ${ModVirtualization}"
+		ModuleList="${ModuleList} ${ModFIPS}"
 
 		;;
 	CEDARVIEW)
@@ -570,7 +580,6 @@ case "$BUILD_TARGET" in
 	DOCKERX64)
 		ModuleList="${ModuleList} ${KernelDir}/net/ipv4/netfilter/ipt_MASQUERADE.ko"
 		ModuleList="${ModuleList} ${KernelDir}/lib/zlib_deflate/zlib_deflate.ko"
-		ModuleList="${ModuleList} ${KernelDir}/fs/btrfs/btrfs.ko"
 		ModuleList="${ModuleList} ${KernelDir}/crypto/arc4.ko"
 		ModuleList="${ModuleList} ${KernelDir}/crypto/cryptd.ko"
 		ModuleList="${ModuleList} ${KernelDir}/arch/x86/crypto/crc32c-intel.ko"
@@ -783,6 +792,7 @@ case "$BUILD_TARGET" in
 		ModuleList="${ModuleList} ${ModIPv6Tun}"
 		ModuleList="${ModuleList} ${ModVirtualization}"
 		ModuleList="${ModuleList} ${ModNFQ}"
+		ModuleList="${ModuleList} ${ModFIPS}"
 
 		;;
 	*)
@@ -858,6 +868,8 @@ if [ -r "$VmLinux" ]; then
 	cp -fv $VmLinux ${DebDevBuild}/image/synodebug/
 	gzip -f9 ${DebDevBuild}/image/synodebug/vmlinux
 fi
+
+install -Dm755 "scripts/sign-file" "${DebDevBuild}/usr/syno/bin/sign-file"
 
 # shellcheck source=/dev/null
 source "$ScriptsDir/include/kernel-devel"

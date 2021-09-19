@@ -918,7 +918,7 @@ static void btrfs_release_delayed_inode(struct btrfs_delayed_node *delayed_node)
 	}
 }
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #else
 static void btrfs_release_delayed_iref(struct btrfs_delayed_node *delayed_node)
 {
@@ -941,7 +941,7 @@ static int __btrfs_update_delayed_inode(struct btrfs_trans_handle *trans,
 	struct btrfs_key key;
 	struct btrfs_inode_item *inode_item;
 	struct extent_buffer *leaf;
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #else
 	int mod;
 #endif  
@@ -951,7 +951,7 @@ static int __btrfs_update_delayed_inode(struct btrfs_trans_handle *trans,
 	btrfs_set_key_type(&key, BTRFS_INODE_ITEM_KEY);
 	key.offset = 0;
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	ret = btrfs_lookup_inode(trans, root, path, &key, 1);
 #else
 	if (test_bit(BTRFS_DELAYED_NODE_DEL_IREF, &node->flags))
@@ -968,7 +968,7 @@ static int __btrfs_update_delayed_inode(struct btrfs_trans_handle *trans,
 		return ret;
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	btrfs_unlock_up_safe(path, 1);
 #endif  
 	leaf = path->nodes[0];
@@ -977,7 +977,7 @@ static int __btrfs_update_delayed_inode(struct btrfs_trans_handle *trans,
 	write_extent_buffer(leaf, &node->inode_item, (unsigned long)inode_item,
 			    sizeof(struct btrfs_inode_item));
 	btrfs_mark_buffer_dirty(leaf);
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	btrfs_release_path(path);
 
 	btrfs_delayed_inode_release_metadata(root, node);
@@ -1677,6 +1677,8 @@ int btrfs_fill_inode(struct inode *inode, u32 *rdev)
 	set_nlink(inode, btrfs_stack_inode_nlink(inode_item));
 	inode_set_bytes(inode, btrfs_stack_inode_nbytes(inode_item));
 	BTRFS_I(inode)->generation = btrfs_stack_inode_generation(inode_item);
+        BTRFS_I(inode)->last_trans = btrfs_stack_inode_transid(inode_item);
+
 	inode->i_version = btrfs_stack_inode_sequence(inode_item);
 	inode->i_rdev = 0;
 	*rdev = btrfs_stack_inode_rdev(inode_item);
@@ -1736,7 +1738,7 @@ release_node:
 	return ret;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #else
 int btrfs_delayed_delete_inode_ref(struct inode *inode)
 {
@@ -1782,7 +1784,7 @@ static void __btrfs_kill_delayed_node(struct btrfs_delayed_node *delayed_node)
 		btrfs_release_delayed_item(prev_item);
 	}
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #else
 	if (test_bit(BTRFS_DELAYED_NODE_DEL_IREF, &delayed_node->flags))
 		btrfs_release_delayed_iref(delayed_node);

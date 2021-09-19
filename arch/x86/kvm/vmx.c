@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Kernel-based Virtual Machine driver for Linux
  *
@@ -7499,6 +7502,12 @@ static void prepare_vmcs02(struct kvm_vcpu *vcpu, struct vmcs12 *vmcs12)
 				  page_to_phys(vmx->nested.apic_access_page));
 		}
 
+#ifdef MY_DEF_HERE
+		exec_control &= ~(SECONDARY_EXEC_VIRTUALIZE_APIC_ACCESSES |
+				SECONDARY_EXEC_VIRTUAL_INTR_DELIVERY |
+				SECONDARY_EXEC_APIC_REGISTER_VIRT |
+				SECONDARY_EXEC_PAUSE_LOOP_EXITING);
+#endif /* MY_DEF_HERE */
 		vmcs_write32(SECONDARY_VM_EXEC_CONTROL, exec_control);
 	}
 
@@ -7581,7 +7590,12 @@ static void prepare_vmcs02(struct kvm_vcpu *vcpu, struct vmcs12 *vmcs12)
 		vcpu->arch.efer &= ~(EFER_LMA | EFER_LME);
 	/* Note: modifies VM_ENTRY/EXIT_CONTROLS and GUEST/HOST_IA32_EFER */
 	vmx_set_efer(vcpu, vcpu->arch.efer);
-
+#ifdef MY_DEF_HERE
+	exec_control = vmcs12->pin_based_vm_exec_control;
+	exec_control |= vmcs_config.pin_based_exec_ctrl;
+	exec_control &= ~(PIN_BASED_VMX_PREEMPTION_TIMER|PIN_BASED_POSTED_INTR);
+	vmcs_write32(PIN_BASED_VM_EXEC_CONTROL, exec_control);
+#endif /* MY_DEF_HERE */
 	/*
 	 * This sets GUEST_CR0 to vmcs12->guest_cr0, with possibly a modified
 	 * TS bit (for lazy fpu) and bits which we consider mandatory enabled.

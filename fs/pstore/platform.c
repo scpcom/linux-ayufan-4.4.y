@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Persistent Storage - platform driver interface parts.
  *
@@ -132,6 +135,9 @@ static void pstore_dump(struct kmsg_dumper *dumper,
 	unsigned long	flags = 0;
 	int		is_locked = 0;
 	int		ret;
+#ifdef MY_DEF_HERE
+	struct timespec boot_time;
+#endif /* MY_DEF_HERE */
 
 	why = get_reason_str(reason);
 
@@ -144,6 +150,10 @@ static void pstore_dump(struct kmsg_dumper *dumper,
 	} else
 		spin_lock_irqsave(&psinfo->buf_lock, flags);
 	oopscount++;
+
+#ifdef MY_DEF_HERE
+	getboottime(&boot_time);
+#endif /* MY_DEF_HERE */
 	while (total < kmsg_bytes) {
 		char *dst;
 		unsigned long size;
@@ -151,7 +161,12 @@ static void pstore_dump(struct kmsg_dumper *dumper,
 		size_t len;
 
 		dst = psinfo->buf;
+#ifdef MY_DEF_HERE
+		hsize = sprintf(dst, "%s#%d Part%d, btime %d\n", why, oopscount,
+									part, (int)boot_time.tv_sec);
+#else
 		hsize = sprintf(dst, "%s#%d Part%d\n", why, oopscount, part);
+#endif /* MY_DEF_HERE */
 		size = psinfo->bufsize - hsize;
 		dst += hsize;
 
@@ -274,6 +289,9 @@ int pstore_register(struct pstore_info *psi)
 		add_timer(&pstore_timer);
 	}
 
+#ifdef MY_DEF_HERE
+	pr_info("Registered %s as persistent store backend\n", psi->name);
+#endif /* MY_DEF_HERE */
 	return 0;
 }
 EXPORT_SYMBOL_GPL(pstore_register);

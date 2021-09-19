@@ -1747,39 +1747,6 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	}
 #endif  
 
-#ifdef MY_ABC_HERE
-	if (syno_is_hw_version(HW_RS815p) || syno_is_hw_version(HW_RS815rpp)) {
-		if (0x1b4b == pdev->vendor && 0x9170 == pdev->device) {
-			host->ports[0]->flags &= ~ATA_FLAG_NCQ;
-			host->ports[0]->flags &= ~ATA_FLAG_FPDMA_AA;
-			host->ports[1]->flags &= ~ATA_FLAG_NCQ;
-			host->ports[1]->flags &= ~ATA_FLAG_FPDMA_AA;
-		}
-	}
-#ifdef MY_DEF_HERE
-	if (syno_is_hw_version(HW_DS1517p)) {
-		if (0x1b4b == pdev->vendor && 0x9235 == pdev->device && 0x02 == PCI_SLOT(pdev->bus->self->devfn)) {
-			 
-			host->ports[0]->flags &= ~ATA_FLAG_NCQ;
-			host->ports[0]->flags &= ~ATA_FLAG_FPDMA_AA;
-		}
-		if (0x1b4b == pdev->vendor && 0x9170 == pdev->device && 0x03 == PCI_SLOT(pdev->bus->self->devfn)) {
-			host->ports[0]->flags &= ~ATA_FLAG_NCQ;
-			host->ports[0]->flags &= ~ATA_FLAG_FPDMA_AA;
-		}
-	}
-	if (syno_is_hw_version(HW_DS1817p)) {
-		if (0x1b4b == pdev->vendor && 0x9235 == pdev->device) {
-			if (NULL == pdev_cur) {
-				 
-				host->ports[0]->flags &= ~ATA_FLAG_NCQ;
-				host->ports[0]->flags &= ~ATA_FLAG_FPDMA_AA;
-			}
-		}
-	}
-#endif  
-#endif  
-
 #ifdef MY_DEF_HERE
 	if (syno_is_hw_version(HW_DS916p) ||
 			syno_is_hw_version(HW_DS416play)) {

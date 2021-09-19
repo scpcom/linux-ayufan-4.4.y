@@ -23,9 +23,8 @@
 #define BTRFS_INODE_IN_DELALLOC_LIST		9
 #define BTRFS_INODE_READDIO_NEED_LOCK		10
 #define BTRFS_INODE_HAS_PROPS		        11
-#ifdef MY_ABC_HERE
-#define BTRFS_INODE_IN_SYNO_DEFRAG			31
-#endif  
+ 
+#define BTRFS_INODE_DIO_READY		        12
  
 #define BTRFS_INODE_BTREE_ERR		        12
 #define BTRFS_INODE_BTREE_LOG1_ERR		13
@@ -71,11 +70,13 @@ struct btrfs_inode {
 
 	u64 delalloc_bytes;
 
+	u64 defrag_bytes;
+
 	u64 disk_i_size;
 
 	u64 index_cnt;
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #else
 	 
 	u64 dir_index;
@@ -96,7 +97,7 @@ struct btrfs_inode {
 
 	struct inode vfs_inode;
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	struct list_head free_extent_map_inode;
 	atomic_t free_extent_map_counts;
 #endif

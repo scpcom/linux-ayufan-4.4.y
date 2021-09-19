@@ -22,7 +22,7 @@
 void amp_ctrl_get(struct amp_ctrl *ctrl)
 {
 	BT_DBG("ctrl %p orig refcnt %d", ctrl,
-	       atomic_read(&ctrl->kref.refcount));
+	       kref_read(&ctrl->kref));
 
 	kref_get(&ctrl->kref);
 }
@@ -40,7 +40,7 @@ static void amp_ctrl_destroy(struct kref *kref)
 int amp_ctrl_put(struct amp_ctrl *ctrl)
 {
 	BT_DBG("ctrl %p orig refcnt %d", ctrl,
-	       atomic_read(&ctrl->kref.refcount));
+	       kref_read(&ctrl->kref));
 
 	return kref_put(&ctrl->kref, &amp_ctrl_destroy);
 }

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* Public keys for module signature verification
  *
  * Copyright (C) 2012 Red Hat, Inc. All Rights Reserved.
@@ -17,9 +20,16 @@
 #include "module-internal.h"
 
 struct key *modsign_keyring;
+#ifdef MY_ABC_HERE
+struct key *modsign_blacklist;
+#endif
 
 extern __initdata const u8 modsign_certificate_list[];
 extern __initdata const u8 modsign_certificate_list_end[];
+#ifdef MY_ABC_HERE
+extern __initdata const u8 modsign_certificate_list_untrusted[];
+extern __initdata const u8 modsign_certificate_list_untrusted_end[];
+#endif
 
 /*
  * We need to make sure ccache doesn't cache the .o file as it doesn't notice
@@ -42,6 +52,17 @@ static __init int module_verify_init(void)
 					KEY_ALLOC_NOT_IN_QUOTA, NULL);
 	if (IS_ERR(modsign_keyring))
 		panic("Can't allocate module signing keyring\n");
+
+#ifdef MY_ABC_HERE
+	modsign_blacklist = keyring_alloc(".module_sign_blacklist",
+				    KUIDT_INIT(0), KGIDT_INIT(0),
+				    current_cred(),
+				    (KEY_POS_ALL & ~KEY_POS_SETATTR) |
+				    KEY_USR_VIEW | KEY_USR_READ,
+				    KEY_ALLOC_NOT_IN_QUOTA, NULL);
+	if (IS_ERR(modsign_blacklist))
+		panic("Can't allocate module signing blacklist keyring\n");
+#endif
 
 	return 0;
 }
@@ -102,3 +123,57 @@ dodgy_cert:
 	return 0;
 }
 late_initcall(load_module_signing_keys);
+
+#ifdef MY_ABC_HERE
+/*
+ * Load the compiled-in blacklist keys
+ */
+static __init int load_module_signing_blacklist_keys(void)
+{
+	key_ref_t key;
+	const u8 *p, *end;
+	size_t plen;
+
+	pr_notice("Loading module verification blacklist certificates\n");
+
+	end = modsign_certificate_list_untrusted_end;
+	p = modsign_certificate_list_untrusted;
+	while (p < end) {
+		/* Each cert begins with an ASN.1 SEQUENCE tag and must be more
+		 * than 256 bytes in size.
+		 */
+		if (end - p < 4)
+			goto dodgy_cert;
+		if (p[0] != 0x30 &&
+		    p[1] != 0x82)
+			goto dodgy_cert;
+		plen = (p[2] << 8) | p[3];
+		plen += 4;
+		if (plen > end - p)
+			goto dodgy_cert;
+
+		key = key_create_or_update(make_key_ref(modsign_blacklist, 1),
+					   "asymmetric",
+					   NULL,
+					   p,
+					   plen,
+					   (KEY_POS_ALL & ~KEY_POS_SETATTR) |
+					   KEY_USR_VIEW,
+					   KEY_ALLOC_NOT_IN_QUOTA);
+		if (IS_ERR(key))
+			pr_err("MODSIGN: Problem loading in-kernel X.509 certificate (%ld)\n",
+			       PTR_ERR(key));
+		else
+			pr_notice("MODSIGN: Loaded cert '%s'\n",
+				  key_ref_to_ptr(key)->description);
+		p += plen;
+	}
+
+	return 0;
+
+dodgy_cert:
+	pr_err("MODSIGN: Problem parsing in-kernel X.509 certificate blacklist\n");
+	return 0;
+}
+late_initcall(load_module_signing_blacklist_keys);
+#endif

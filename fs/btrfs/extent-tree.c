@@ -27,7 +27,7 @@
 
 #undef SCRAMBLE_DELAYED_REFS
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #define READA_BLOCK_GROUP_THREAD_MAX 10
 #endif
 
@@ -2146,11 +2146,11 @@ static noinline int __btrfs_run_delayed_refs(struct btrfs_trans_handle *trans,
 		if (ref && ref->seq &&
 		    btrfs_check_delayed_seq(fs_info, delayed_refs, ref->seq)) {
 			spin_unlock(&locked_ref->lock);
-			btrfs_delayed_ref_unlock(locked_ref);
 			spin_lock(&delayed_refs->lock);
 			locked_ref->processing = 0;
 			delayed_refs->num_heads_ready++;
 			spin_unlock(&delayed_refs->lock);
+			btrfs_delayed_ref_unlock(locked_ref);
 			locked_ref = NULL;
 			cond_resched();
 			count++;
@@ -2182,7 +2182,10 @@ static noinline int __btrfs_run_delayed_refs(struct btrfs_trans_handle *trans,
 					 
 					if (must_insert_reserved)
 						locked_ref->must_insert_reserved = 1;
+					spin_lock(&delayed_refs->lock);
 					locked_ref->processing = 0;
+					delayed_refs->num_heads_ready++;
+					spin_unlock(&delayed_refs->lock);
 					btrfs_debug(fs_info, "run_delayed_extent_op returned %d", ret);
 					btrfs_delayed_ref_unlock(locked_ref);
 					return ret;
@@ -2232,7 +2235,10 @@ static noinline int __btrfs_run_delayed_refs(struct btrfs_trans_handle *trans,
 
 		btrfs_free_delayed_extent_op(extent_op);
 		if (ret) {
+			spin_lock(&delayed_refs->lock);
 			locked_ref->processing = 0;
+			delayed_refs->num_heads_ready++;
+			spin_unlock(&delayed_refs->lock);
 			btrfs_delayed_ref_unlock(locked_ref);
 			btrfs_put_delayed_ref(ref);
 			btrfs_debug(fs_info, "run_one_delayed_ref returned %d", ret);
@@ -2905,7 +2911,7 @@ again:
 
 	spin_lock(&block_group->lock);
 	if (block_group->cached != BTRFS_CACHE_FINISHED ||
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 		 
 		block_group->fs_info->log_root_recovering ||
 #endif  
@@ -3399,12 +3405,14 @@ int btrfs_check_data_free_space(struct inode *inode, u64 bytes)
 	struct btrfs_root *root = BTRFS_I(inode)->root;
 	struct btrfs_fs_info *fs_info = root->fs_info;
 	u64 used;
-	int ret = 0, committed = 0, alloc_chunk = 1;
+	int ret = 0;
+	int need_commit = 2;
+	int have_pinned_space;
 
 	bytes = ALIGN(bytes, root->sectorsize);
 
 	if (btrfs_is_free_space_inode(inode)) {
-		committed = 1;
+		need_commit = 0;
 		ASSERT(current->journal_info);
 	}
 
@@ -3422,7 +3430,7 @@ again:
 	if (used + bytes > data_sinfo->total_bytes) {
 		struct btrfs_trans_handle *trans;
 
-		if (!data_sinfo->full && alloc_chunk) {
+		if (!data_sinfo->full) {
 			u64 alloc_target;
 
 			data_sinfo->force_alloc = CHUNK_ALLOC_FORCE;
@@ -3441,8 +3449,10 @@ alloc:
 			if (ret < 0) {
 				if (ret != -ENOSPC)
 					return ret;
-				else
+				else {
+					have_pinned_space = 1;
 					goto commit_trans;
+				}
 			}
 
 			if (!data_sinfo)
@@ -3451,23 +3461,35 @@ alloc:
 			goto again;
 		}
 
-		if (percpu_counter_compare(&data_sinfo->total_bytes_pinned,
-					   bytes) < 0)
-			committed = 1;
+		have_pinned_space = percpu_counter_compare(
+			&data_sinfo->total_bytes_pinned,
+			used + bytes - data_sinfo->total_bytes);
 		spin_unlock(&data_sinfo->lock);
 
 commit_trans:
-		if (!committed &&
+		if (need_commit &&
 		    !atomic_read(&root->fs_info->open_ioctl_trans)) {
-			committed = 1;
+			need_commit--;
+
+			if (need_commit > 0)
+				btrfs_wait_ordered_roots(fs_info, -1);
 
 			trans = btrfs_join_transaction(root);
 			if (IS_ERR(trans))
 				return PTR_ERR(trans);
-			ret = btrfs_commit_transaction(trans, root);
-			if (ret)
-				return ret;
-			goto again;
+			if (have_pinned_space >= 0 ||
+			    trans->transaction->have_free_bgs ||
+			    need_commit > 0) {
+				ret = btrfs_commit_transaction(trans, root);
+				if (ret)
+					return ret;
+				 
+				down_write(&root->fs_info->delayed_iput_sem);
+				up_write(&root->fs_info->delayed_iput_sem);
+				goto again;
+			} else {
+				btrfs_end_transaction(trans, root);
+			}
 		}
 
 		trace_btrfs_space_reservation(root->fs_info,
@@ -3499,7 +3521,7 @@ void btrfs_free_reserved_data_space(struct inode *inode, u64 bytes)
 	spin_unlock(&data_sinfo->lock);
 }
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #else
 static void force_metadata_allocation(struct btrfs_fs_info *info)
 {
@@ -3616,7 +3638,7 @@ void check_system_chunk(struct btrfs_trans_handle *trans,
 	}
 }
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 static void check_metadata_chunk(struct btrfs_trans_handle *trans,
 			       struct btrfs_root *root, u64 data_total_bytes)
 {
@@ -3685,7 +3707,7 @@ again:
 		flags |= (BTRFS_BLOCK_GROUP_DATA | BTRFS_BLOCK_GROUP_METADATA);
 
 	if (flags & BTRFS_BLOCK_GROUP_DATA && fs_info->metadata_ratio) {
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 		check_metadata_chunk(trans, extent_root, space_info->total_bytes);
 #else
 		fs_info->data_chunk_allocations++;
@@ -3726,7 +3748,7 @@ static int can_overcommit(struct btrfs_root *root,
 	u64 avail;
 	u64 used;
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	used = space_info->bytes_used + space_info->bytes_reserved +
 		space_info->bytes_readonly;
 #else
@@ -3740,7 +3762,7 @@ static int can_overcommit(struct btrfs_root *root,
 	if (used + space_size >= space_info->total_bytes)
 		return 0;
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	used += space_info->bytes_may_use + space_info->bytes_pinned;
 #else
 	used += space_info->bytes_may_use;
@@ -4432,48 +4454,21 @@ void btrfs_block_rsv_release(struct btrfs_root *root,
 				num_bytes);
 }
 
-static u64 calc_global_metadata_size(struct btrfs_fs_info *fs_info)
-{
-	struct btrfs_space_info *sinfo;
-	u64 num_bytes;
-	u64 meta_used;
-	u64 data_used;
-	int csum_size = btrfs_super_csum_size(fs_info->super_copy);
-
-	sinfo = __find_space_info(fs_info, BTRFS_BLOCK_GROUP_DATA);
-	spin_lock(&sinfo->lock);
-	data_used = sinfo->bytes_used;
-	spin_unlock(&sinfo->lock);
-
-	sinfo = __find_space_info(fs_info, BTRFS_BLOCK_GROUP_METADATA);
-	spin_lock(&sinfo->lock);
-	if (sinfo->flags & BTRFS_BLOCK_GROUP_DATA)
-		data_used = 0;
-	meta_used = sinfo->bytes_used;
-	spin_unlock(&sinfo->lock);
-
-	num_bytes = (data_used >> fs_info->sb->s_blocksize_bits) *
-		    csum_size * 2;
-	num_bytes += div64_u64(data_used + meta_used, 50);
-
-	if (num_bytes * 3 > meta_used)
-		num_bytes = div64_u64(meta_used, 3);
-
-	return ALIGN(num_bytes, fs_info->extent_root->leafsize << 10);
-}
-
 static void update_global_block_rsv(struct btrfs_fs_info *fs_info)
 {
 	struct btrfs_block_rsv *block_rsv = &fs_info->global_block_rsv;
 	struct btrfs_space_info *sinfo = block_rsv->space_info;
 	u64 num_bytes;
 
-	num_bytes = calc_global_metadata_size(fs_info);
+	num_bytes = btrfs_root_used(&fs_info->extent_root->root_item) +
+		btrfs_root_used(&fs_info->csum_root->root_item) +
+		btrfs_root_used(&fs_info->tree_root->root_item);
+	num_bytes = max_t(u64, num_bytes, 0x01000000);
 
 	spin_lock(&sinfo->lock);
 	spin_lock(&block_rsv->lock);
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	if (fs_info->super_copy->total_bytes > 80ULL * 1024 * 1024 * 1024) {
 		num_bytes = max_t(u64, num_bytes, 256 * 1024 * 1024);
 	}
@@ -4577,7 +4572,8 @@ int btrfs_orphan_reserve_metadata(struct btrfs_trans_handle *trans,
 				  struct inode *inode)
 {
 	struct btrfs_root *root = BTRFS_I(inode)->root;
-	struct btrfs_block_rsv *src_rsv = get_block_rsv(trans, root);
+	 
+	struct btrfs_block_rsv *src_rsv = trans->block_rsv;
 	struct btrfs_block_rsv *dst_rsv = root->orphan_block_rsv;
 
 	u64 num_bytes = btrfs_calc_trans_metadata_size(root, 1);
@@ -4643,13 +4639,18 @@ void btrfs_subvolume_release_metadata(struct btrfs_root *root,
 		btrfs_qgroup_free(root, qgroup_reserved);
 }
 
-static unsigned drop_outstanding_extent(struct inode *inode)
+static unsigned drop_outstanding_extent(struct inode *inode, u64 num_bytes)
 {
 	unsigned drop_inode_space = 0;
 	unsigned dropped_extents = 0;
+	unsigned num_extents = 0;
 
-	BUG_ON(!BTRFS_I(inode)->outstanding_extents);
-	BTRFS_I(inode)->outstanding_extents--;
+	num_extents = (unsigned)div64_u64(num_bytes +
+					  BTRFS_MAX_EXTENT_SIZE - 1,
+					  BTRFS_MAX_EXTENT_SIZE);
+	ASSERT(num_extents);
+	ASSERT(BTRFS_I(inode)->outstanding_extents >= num_extents);
+	BTRFS_I(inode)->outstanding_extents -= num_extents;
 
 	if (BTRFS_I(inode)->outstanding_extents == 0 &&
 	    test_and_clear_bit(BTRFS_INODE_DELALLOC_META_RESERVED,
@@ -4734,7 +4735,11 @@ int btrfs_delalloc_reserve_metadata(struct inode *inode, u64 num_bytes)
 	num_bytes = ALIGN(num_bytes, root->sectorsize);
 
 	spin_lock(&BTRFS_I(inode)->lock);
-	BTRFS_I(inode)->outstanding_extents++;
+	nr_extents = (unsigned)div64_u64(num_bytes +
+					 BTRFS_MAX_EXTENT_SIZE - 1,
+					 BTRFS_MAX_EXTENT_SIZE);
+	BTRFS_I(inode)->outstanding_extents += nr_extents;
+	nr_extents = 0;
 
 	if (BTRFS_I(inode)->outstanding_extents >
 	    BTRFS_I(inode)->reserved_extents)
@@ -4788,7 +4793,7 @@ int btrfs_delalloc_reserve_metadata(struct inode *inode, u64 num_bytes)
 
 out_fail:
 	spin_lock(&BTRFS_I(inode)->lock);
-	dropped = drop_outstanding_extent(inode);
+	dropped = drop_outstanding_extent(inode, num_bytes);
 	 
 	if (BTRFS_I(inode)->csum_bytes == csum_bytes) {
 		calc_csum_metadata_size(inode, num_bytes, 0);
@@ -4832,13 +4837,16 @@ void btrfs_delalloc_release_metadata(struct inode *inode, u64 num_bytes)
 
 	num_bytes = ALIGN(num_bytes, root->sectorsize);
 	spin_lock(&BTRFS_I(inode)->lock);
-	dropped = drop_outstanding_extent(inode);
+	dropped = drop_outstanding_extent(inode, num_bytes);
 
 	if (num_bytes)
 		to_free = calc_csum_metadata_size(inode, num_bytes, 0);
 	spin_unlock(&BTRFS_I(inode)->lock);
 	if (dropped > 0)
 		to_free += btrfs_calc_trans_metadata_size(root, dropped);
+
+	if (btrfs_test_is_dummy_root(root))
+		return;
 
 	trace_btrfs_space_reservation(root->fs_info, "delalloc",
 				      btrfs_ino(inode), to_free, 0);
@@ -4874,7 +4882,7 @@ void btrfs_delalloc_release_space(struct inode *inode, u64 num_bytes)
 	btrfs_free_reserved_data_space(inode, num_bytes);
 }
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 static int should_add_to_unused_bgs(struct btrfs_fs_info *fs_info, u64 flags)
 {
 	struct btrfs_space_info *space_info_metadata, *space_info_data;
@@ -4959,7 +4967,7 @@ static int update_block_group(struct btrfs_trans_handle *trans,
 					 bytenr, bytenr + num_bytes - 1,
 					 GFP_NOFS | __GFP_NOFAIL);
 			 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 			if (old_val == 0 && should_add_to_unused_bgs(info, cache->flags)) {
 #else
 			if (old_val == 0) {
@@ -5880,7 +5888,7 @@ enum btrfs_loop_type {
 	LOOP_CACHING_NOWAIT = 0,
 	LOOP_CACHING_WAIT = 1,
 	LOOP_ALLOC_CHUNK = 2,
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	LOOP_NO_RESERVE = 3,
 	LOOP_NO_EMPTY_SIZE = 4,
 #else
@@ -5973,7 +5981,7 @@ static noinline int find_free_extent(struct btrfs_root *orig_root,
 	bool failed_alloc = false;
 	bool use_cluster = true;
 	bool have_caching_bg = false;
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	u64 reserve_bytes = 0;
 #endif
 	bool orig_have_caching_bg = false;
@@ -6139,7 +6147,7 @@ refill_cluster:
 						empty_cluster + empty_size,
 					      block_group->full_stripe_len);
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 			if ((flags & BTRFS_BLOCK_GROUP_METADATA) && loop < LOOP_NO_RESERVE) {
 				 
 				reserve_bytes = block_group->key.offset >> 2;
@@ -6151,7 +6159,7 @@ refill_cluster:
 			ret = btrfs_find_space_cluster(root, block_group,
 						       last_ptr, search_start,
 						       num_bytes,
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 						       aligned_cluster, reserve_bytes);
 #else
 						       aligned_cluster);
@@ -6255,7 +6263,7 @@ loop:
 		failed_alloc = false;
 		BUG_ON(index != get_block_group_index(block_group));
 		btrfs_release_block_group(block_group, delalloc);
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 		cond_resched();
 #endif  
 	}
@@ -6302,7 +6310,7 @@ loop:
 					     CHUNK_ALLOC_FORCE);
 
 			if (ret == -ENOSPC)
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 			{
 				if (flags & BTRFS_BLOCK_GROUP_METADATA)
 					loop = LOOP_NO_RESERVE;
@@ -6324,7 +6332,7 @@ loop:
 				goto out;
 		}
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 		if (!(flags & BTRFS_BLOCK_GROUP_METADATA) && loop == LOOP_NO_RESERVE) {
 			loop++;
 		}
@@ -6702,11 +6710,11 @@ int btrfs_alloc_logged_file_extent(struct btrfs_trans_handle *trans,
 
 static struct extent_buffer *
 btrfs_init_new_buffer(struct btrfs_trans_handle *trans, struct btrfs_root *root,
-		      u64 bytenr, u32 blocksize, int level)
+		      u64 bytenr, int level)
 {
 	struct extent_buffer *buf;
 
-	buf = btrfs_find_create_tree_block(root, bytenr, blocksize);
+	buf = btrfs_find_create_tree_block(root, bytenr, root->nodesize);
 	if (!buf)
 		return ERR_PTR(-ENOMEM);
 	btrfs_set_header_generation(buf, trans->transid);
@@ -6803,6 +6811,7 @@ struct extent_buffer *btrfs_alloc_free_block(struct btrfs_trans_handle *trans,
 	struct btrfs_key ins;
 	struct btrfs_block_rsv *block_rsv;
 	struct extent_buffer *buf;
+	struct btrfs_delayed_extent_op *extent_op;
 	u64 flags = 0;
 	int ret;
 	bool skinny_metadata = btrfs_fs_incompat(root->fs_info,
@@ -6810,7 +6819,7 @@ struct extent_buffer *btrfs_alloc_free_block(struct btrfs_trans_handle *trans,
 
 	if (btrfs_test_is_dummy_root(root)) {
 		buf = btrfs_init_new_buffer(trans, root, root->alloc_bytenr,
-					    blocksize, level);
+					    level);
 		if (!IS_ERR(buf))
 			root->alloc_bytenr += blocksize;
 		return buf;
@@ -6822,14 +6831,14 @@ struct extent_buffer *btrfs_alloc_free_block(struct btrfs_trans_handle *trans,
 
 	ret = btrfs_reserve_extent(root, blocksize, blocksize,
 				   empty_size, hint, &ins, 0, 0);
-	if (ret) {
-		unuse_block_rsv(root->fs_info, block_rsv, blocksize);
-		return ERR_PTR(ret);
-	}
+	if (ret)
+		goto out_unuse;
 
-	buf = btrfs_init_new_buffer(trans, root, ins.objectid,
-				    blocksize, level);
-	BUG_ON(IS_ERR(buf));  
+	buf = btrfs_init_new_buffer(trans, root, ins.objectid, level);
+	if (IS_ERR(buf)) {
+		ret = PTR_ERR(buf);
+		goto out_free_reserved;
+	}
 
 	if (root_objectid == BTRFS_TREE_RELOC_OBJECTID) {
 		if (parent == 0)
@@ -6839,9 +6848,11 @@ struct extent_buffer *btrfs_alloc_free_block(struct btrfs_trans_handle *trans,
 		BUG_ON(parent > 0);
 
 	if (root_objectid != BTRFS_TREE_LOG_OBJECTID) {
-		struct btrfs_delayed_extent_op *extent_op;
 		extent_op = btrfs_alloc_delayed_extent_op();
-		BUG_ON(!extent_op);  
+		if (!extent_op) {
+			ret = -ENOMEM;
+			goto out_free_buf;
+		}
 		if (key)
 			memcpy(&extent_op->key, key, sizeof(extent_op->key));
 		else
@@ -6856,13 +6867,24 @@ struct extent_buffer *btrfs_alloc_free_block(struct btrfs_trans_handle *trans,
 		extent_op->level = level;
 
 		ret = btrfs_add_delayed_tree_ref(root->fs_info, trans,
-					ins.objectid,
-					ins.offset, parent, root_objectid,
-					level, BTRFS_ADD_DELAYED_EXTENT,
-					extent_op, 0);
-		BUG_ON(ret);  
+						 ins.objectid, ins.offset,
+						 parent, root_objectid, level,
+						 BTRFS_ADD_DELAYED_EXTENT,
+						 extent_op, 0);
+		if (ret)
+			goto out_free_delayed;
 	}
 	return buf;
+
+out_free_delayed:
+	btrfs_free_delayed_extent_op(extent_op);
+out_free_buf:
+	free_extent_buffer(buf);
+out_free_reserved:
+	btrfs_free_reserved_extent(root, ins.objectid, ins.offset, 0);
+out_unuse:
+	unuse_block_rsv(root->fs_info, block_rsv, blocksize);
+	return ERR_PTR(ret);
 }
 
 struct walk_control {
@@ -7319,7 +7341,7 @@ int btrfs_drop_snapshot(struct btrfs_root *root,
 	int ret;
 	int level;
 	bool root_dropped = false;
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	struct btrfs_fs_info *fs_info = root->fs_info;
 	u64 qgroupid = root->root_key.objectid;
 #endif
@@ -7465,7 +7487,7 @@ int btrfs_drop_snapshot(struct btrfs_root *root,
 	if (err)
 		goto out_end_trans;
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	if (fs_info->quota_enabled && !for_reloc) {
 		ret = btrfs_remove_qgroup(trans, fs_info, qgroupid);
 		if (0 != ret) {
@@ -8113,7 +8135,7 @@ btrfs_create_block_group_cache(struct btrfs_root *root, u64 start, u64 size)
 	return cache;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 static void reada_root(struct btrfs_root *root)
 {
 	struct extent_buffer *node;
@@ -8224,7 +8246,7 @@ int btrfs_read_block_groups(struct btrfs_root *root)
 	struct extent_buffer *leaf;
 	int need_clear = 0;
 	u64 cache_gen;
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	struct btrfs_path *hint_path;
 #endif
 
@@ -8236,7 +8258,7 @@ int btrfs_read_block_groups(struct btrfs_root *root)
 	if (!path)
 		return -ENOMEM;
 	path->reada = 1;
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	hint_path = btrfs_alloc_path();
 	if (!hint_path) {
 		ret = -ENOMEM;
@@ -8252,7 +8274,7 @@ int btrfs_read_block_groups(struct btrfs_root *root)
 	if (btrfs_test_opt(root, CLEAR_CACHE))
 		need_clear = 1;
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	atomic_set(&info->reada_block_group_threads, 0);
 	reada_root(root);
 	if (info->block_group_hint_root) {
@@ -8264,7 +8286,7 @@ int btrfs_read_block_groups(struct btrfs_root *root)
 #endif
 
 	while (1) {
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 		if (info->block_group_hint_root && info->reada_path_workers)
 			reada_block_group_item(info, hint_path);
 #endif
@@ -8352,7 +8374,7 @@ int btrfs_read_block_groups(struct btrfs_root *root)
 		set_avail_alloc_bits(root->fs_info, cache->flags);
 		if (btrfs_chunk_readonly(root, cache->key.objectid)) {
 			set_block_group_ro(cache, 1);
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 		} else if (btrfs_block_group_used(&cache->item) == 0 && should_add_to_unused_bgs(root->fs_info, cache->flags)) {
 #else
 		} else if (btrfs_block_group_used(&cache->item) == 0) {
@@ -8391,7 +8413,7 @@ int btrfs_read_block_groups(struct btrfs_root *root)
 	ret = 0;
 error:
 	btrfs_free_path(path);
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	btrfs_free_path(hint_path);
 #endif
 	return ret;
@@ -8405,7 +8427,7 @@ void btrfs_create_pending_block_groups(struct btrfs_trans_handle *trans,
 	struct btrfs_block_group_item item;
 	struct btrfs_key key;
 	int ret = 0;
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	struct btrfs_fs_info *fs_info = root->fs_info;
 	struct btrfs_root *block_group_hint_root;
 
@@ -8437,7 +8459,7 @@ void btrfs_create_pending_block_groups(struct btrfs_trans_handle *trans,
 		if (ret)
 			btrfs_abort_transaction(trans, extent_root, ret);
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 		if (fs_info->block_group_hint_root) {
 			ret = btrfs_insert_item(trans, fs_info->block_group_hint_root, &key, &item,
 					sizeof(item));
@@ -8563,7 +8585,7 @@ int btrfs_remove_block_group(struct btrfs_trans_handle *trans,
 	int factor;
 	struct btrfs_caching_control *caching_ctl = NULL;
 	bool remove_em;
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	struct btrfs_fs_info *fs_info = root->fs_info;
 #endif
 
@@ -8724,9 +8746,19 @@ int btrfs_remove_block_group(struct btrfs_trans_handle *trans,
 
 	spin_lock(&block_group->space_info->lock);
 	list_del_init(&block_group->ro_list);
+
+	if (btrfs_test_opt(root, ENOSPC_DEBUG)) {
+		WARN_ON(block_group->space_info->total_bytes
+			< block_group->key.offset);
+		WARN_ON(block_group->space_info->bytes_readonly
+			< block_group->key.offset);
+		WARN_ON(block_group->space_info->disk_total
+			< block_group->key.offset * factor);
+	}
 	block_group->space_info->total_bytes -= block_group->key.offset;
 	block_group->space_info->bytes_readonly -= block_group->key.offset;
 	block_group->space_info->disk_total -= block_group->key.offset * factor;
+
 	spin_unlock(&block_group->space_info->lock);
 
 	memcpy(&key, &block_group->key, sizeof(key));
@@ -8776,7 +8808,7 @@ int btrfs_remove_block_group(struct btrfs_trans_handle *trans,
 
 	ret = btrfs_del_item(trans, root, path);
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	if (fs_info->block_group_hint_root) {
 		int search_ret;
 		btrfs_release_path(path);
@@ -8885,7 +8917,17 @@ void btrfs_delete_unused_bgs(struct btrfs_fs_info *fs_info)
 		}
 		mutex_unlock(&fs_info->unused_bg_unpin_mutex);
 
+		spin_lock(&space_info->lock);
+		spin_lock(&block_group->lock);
+
+		space_info->bytes_pinned -= block_group->pinned;
+		space_info->bytes_readonly += block_group->pinned;
+		percpu_counter_add(&space_info->total_bytes_pinned,
+				   -block_group->pinned);
 		block_group->pinned = 0;
+
+		spin_unlock(&block_group->lock);
+		spin_unlock(&space_info->lock);
 
 		ret = btrfs_remove_chunk(trans, root,
 					 block_group->key.objectid);
@@ -8973,7 +9015,7 @@ int btrfs_trim_fs(struct btrfs_root *root, struct fstrim_range *range)
 		end = min(range->start + range->len,
 				cache->key.objectid + cache->key.offset);
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 		if (end - start >= range->minlen &&
 				!(cache->flags & BTRFS_BLOCK_GROUP_SYSTEM)) {
 #else

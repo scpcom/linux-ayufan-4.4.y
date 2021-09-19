@@ -1035,7 +1035,7 @@ out:
 	return ret;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
  
 void btrfs_qgroup_query(struct btrfs_fs_info *fs_info, u64 qgroupid,
                         struct btrfs_ioctl_qgroup_query_args *qqa)

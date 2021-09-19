@@ -288,7 +288,7 @@ static int inherit_props(struct btrfs_trans_handle *trans,
 			 struct inode *parent)
 {
 	const struct prop_handler *h;
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #else
 	struct btrfs_root *root = BTRFS_I(inode)->root;
 #endif
@@ -300,7 +300,7 @@ static int inherit_props(struct btrfs_trans_handle *trans,
 
 	for (h = &prop_handlers[0]; h->xattr_name; h++) {
 		const char *value;
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #else
 		u64 num_bytes;
 #endif
@@ -312,7 +312,7 @@ static int inherit_props(struct btrfs_trans_handle *trans,
 		if (!value)
 			continue;
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #else
 		num_bytes = btrfs_calc_trans_metadata_size(root, 1);
 		ret = btrfs_block_rsv_add(root, trans->block_rsv,
@@ -322,7 +322,7 @@ static int inherit_props(struct btrfs_trans_handle *trans,
 #endif
 		ret = __btrfs_set_prop(trans, inode, h->xattr_name,
 				       value, strlen(value), 0);
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #else
 		btrfs_block_rsv_release(root, trans->block_rsv, num_bytes);
 #endif

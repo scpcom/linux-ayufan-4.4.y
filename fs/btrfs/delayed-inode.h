@@ -30,7 +30,7 @@ struct btrfs_delayed_root {
 
 #define BTRFS_DELAYED_NODE_IN_LIST	0
 #define BTRFS_DELAYED_NODE_INODE_DIRTY	1
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #else
 #define BTRFS_DELAYED_NODE_DEL_IREF	2
 #endif  
@@ -107,7 +107,7 @@ int btrfs_commit_inode_delayed_inode(struct inode *inode);
 int btrfs_delayed_update_inode(struct btrfs_trans_handle *trans,
 			       struct btrfs_root *root, struct inode *inode);
 int btrfs_fill_inode(struct inode *inode, u32 *rdev);
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 #else
 int btrfs_delayed_delete_inode_ref(struct inode *inode);
 #endif  

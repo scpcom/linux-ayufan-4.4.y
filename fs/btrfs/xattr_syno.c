@@ -20,7 +20,7 @@ static int btrfs_xattr_syno_set(struct dentry *dentry, const char *name,
 	snprintf(complete_name, sizeof(XATTR_SYNO_PREFIX) + strlen(name), XATTR_SYNO_PREFIX"%s", name);
 	ret = __btrfs_setxattr(NULL, dentry->d_inode, complete_name, value, size, flags);
 	if (!ret) {
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 		if (!strcmp(name, XATTR_SYNO_ARCHIVE_BIT)) {
 			const __le32 *archive_bit_le32 = value;
 			dentry->d_inode->i_archive_bit = le32_to_cpu(*archive_bit_le32);

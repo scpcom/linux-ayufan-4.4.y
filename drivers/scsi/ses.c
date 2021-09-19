@@ -562,6 +562,13 @@ static int ses_intf_add(struct device *cdev,
 		return -ENODEV;
 	}
 
+#ifdef MY_ABC_HERE
+	if (sdev->host && sdev->host->hostt && sdev->host->hostt->syno_port_type &&
+			SYNO_PORT_TYPE_USB == sdev->host->hostt->syno_port_type) {
+		return -ENODEV;
+	}
+#endif  
+
 	if (sdev->type != TYPE_ENCLOSURE)
 		sdev_printk(KERN_NOTICE, sdev, "Embedded Enclosure Device\n");
 

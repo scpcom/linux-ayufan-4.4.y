@@ -210,8 +210,8 @@ EXPORT_SYMBOL(gPciAddrNum);
 #endif  
 
 #ifdef MY_DEF_HERE
-int gPciDeferStart = M2SATA_START_IDX;
-EXPORT_SYMBOL(gPciDeferStart);
+int g_nvc_map_index = 0;
+EXPORT_SYMBOL(g_nvc_map_index);
 #endif  
 
 #ifdef MY_ABC_HERE
@@ -251,7 +251,7 @@ EXPORT_SYMBOL(gDevPCIName);
 unsigned int gSynoCPUInfoCore = 0;
 EXPORT_SYMBOL(gSynoCPUInfoCore);
 #ifdef MY_DEF_HERE
-unsigned int gSynoMultiCPUInfoCore[CONFIG_SYNO_GRANTLEY_MAX_CPU_NUM];
+unsigned int gSynoMultiCPUInfoCore[CONFIG_SYNO_MULTI_CPU_NUM];
 EXPORT_SYMBOL(gSynoMultiCPUInfoCore);
 #endif
 char gSynoCPUInfoClock[16];
@@ -326,6 +326,11 @@ EXPORT_SYMBOL(syno_valid_lsi3008_led);
 #ifdef MY_DEF_HERE
 int (*syno_disk_map_table_gen_mv14xx)(int *iDiskMapTable, int iPortMax);
 EXPORT_SYMBOL(syno_disk_map_table_gen_mv14xx);
+#endif  
+
+#ifdef MY_DEF_HERE
+int g_syno_nvc_index_map[SATA_REMAP_MAX] = {-1};
+EXPORT_SYMBOL(g_syno_nvc_index_map);
 #endif  
 
 #ifdef MY_DEF_HERE

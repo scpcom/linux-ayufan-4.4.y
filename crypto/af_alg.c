@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * af_alg: User-space algorithm interface
  *
@@ -248,6 +251,16 @@ static int alg_setsockopt(struct socket *sock, int level, int optname,
 			goto unlock;
 
 		err = alg_setkey(sk, optval, optlen);
+#ifdef MY_DEF_HERE
+		break;
+	case ALG_SET_AEAD_AUTHSIZE:
+		if (sock->state == SS_CONNECTED)
+			goto unlock;
+		if (!type->setauthsize)
+			goto unlock;
+
+		err = type->setauthsize(ask->private, optlen);
+#endif
 	}
 
 unlock:
@@ -464,6 +477,13 @@ int af_alg_cmsg_send(struct msghdr *msg, struct af_alg_control *con)
 			con->op = *(u32 *)CMSG_DATA(cmsg);
 			break;
 
+#ifdef MY_DEF_HERE
+		case ALG_SET_AEAD_ASSOCLEN:
+			if (cmsg->cmsg_len < CMSG_LEN(sizeof(u32)))
+				return -EINVAL;
+			con->aead_assoclen = *(u32 *)CMSG_DATA(cmsg);
+			break;
+#endif
 		default:
 			return -EINVAL;
 		}

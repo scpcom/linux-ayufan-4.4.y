@@ -267,10 +267,10 @@ enum {
 	Opt_commit_interval, Opt_barrier, Opt_nodefrag, Opt_nodiscard,
 	Opt_noenospc_debug, Opt_noflushoncommit, Opt_acl, Opt_datacow,
 	Opt_datasum, Opt_treelog, Opt_noinode_cache,
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	Opt_flushoncommit_threshold,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	Opt_no_block_group_hint,
 #endif
 	Opt_err,
@@ -303,7 +303,7 @@ static match_table_t tokens = {
 	{Opt_treelog, "treelog"},
 	{Opt_flushoncommit, "flushoncommit"},
 	{Opt_noflushoncommit, "noflushoncommit"},
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	{Opt_flushoncommit_threshold, "flushoncommit_threshold=%d"},
 #endif
 	{Opt_ratio, "metadata_ratio=%d"},
@@ -329,7 +329,7 @@ static match_table_t tokens = {
 	{Opt_rescan_uuid_tree, "rescan_uuid_tree"},
 	{Opt_fatal_errors, "fatal_errors=%s"},
 	{Opt_commit_interval, "commit=%d"},
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	{Opt_no_block_group_hint, "no_block_group_hint"},
 #endif
 	{Opt_err, NULL},
@@ -340,18 +340,29 @@ int btrfs_parse_options(struct btrfs_root *root, char *options)
 	struct btrfs_fs_info *info = root->fs_info;
 	substring_t args[MAX_OPT_ARGS];
 	char *p, *num, *orig = NULL;
+#ifdef MY_DEF_HERE
+#else
 	u64 cache_gen;
+#endif  
 	int intarg;
 	int ret = 0;
 	char *compress_type;
 	bool compress_force = false;
 	bool compress = false;
 
+#ifdef MY_DEF_HERE
+#else
 	cache_gen = btrfs_super_cache_generation(root->fs_info->super_copy);
+#endif  
 	if (btrfs_fs_compat_ro(root->fs_info, FREE_SPACE_TREE))
 		btrfs_set_opt(info->mount_opt, FREE_SPACE_TREE);
+#ifdef MY_DEF_HERE
+	else if (btrfs_fs_compat_ro(root->fs_info, FREE_SPACE_TREE_VALID))
+		btrfs_set_opt(info->mount_opt, FREE_SPACE_TREE);
+#else
 	else if (cache_gen)
 		btrfs_set_opt(info->mount_opt, SPACE_CACHE);
+#endif  
 
 	if (!options)
 		goto out;
@@ -541,7 +552,7 @@ int btrfs_parse_options(struct btrfs_root *root, char *options)
 			btrfs_clear_and_info(root, NOTREELOG,
 					     "enabling tree log");
 			break;
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 		case Opt_flushoncommit_threshold:
 			ret = match_int(&args[0], &intarg);
 			if (ret) {
@@ -716,7 +727,7 @@ int btrfs_parse_options(struct btrfs_root *root, char *options)
 				info->commit_interval = BTRFS_DEFAULT_COMMIT_INTERVAL;
 			}
 			break;
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 		case Opt_no_block_group_hint:
 			info->no_block_group_hint = 1;
 			break;
@@ -733,8 +744,9 @@ out:
 	if (btrfs_fs_compat_ro(root->fs_info, FREE_SPACE_TREE) &&
 	    !btrfs_test_opt(root, FREE_SPACE_TREE) &&
 	    !btrfs_test_opt(root, CLEAR_CACHE)) {
-		 
-		btrfs_set_and_info(root, FREE_SPACE_TREE, "enabling free space tree");
+		btrfs_err(root->fs_info, "cannot disable free space tree");
+		ret = -EINVAL;
+
 	}
 	if (!ret && btrfs_test_opt(root, SPACE_CACHE))
 		btrfs_info(root->fs_info, "disk space caching is enabled");
@@ -898,7 +910,7 @@ setup_root:
 	return dentry;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 static void syno_load_sb_archive_ver(struct super_block *sb, struct inode *inode)
 {
 	struct syno_xattr_archive_version value;
@@ -953,7 +965,7 @@ static int btrfs_fill_super(struct super_block *sb,
 		err = -ENOMEM;
 		goto fail_close;
 	}
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	syno_load_sb_archive_ver(sb, inode);
 #endif
 
@@ -1068,7 +1080,7 @@ static int btrfs_show_options(struct seq_file *seq, struct dentry *dentry)
 		seq_printf(seq, ",check_int_print_mask=%d",
 				info->check_integrity_print_mask);
 #endif
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	if (info->flushoncommit_threshold)
 		seq_printf(seq, ",flushoncommit_threshold=%d",
 				info->flushoncommit_threshold);
@@ -1080,7 +1092,7 @@ static int btrfs_show_options(struct seq_file *seq, struct dentry *dentry)
 		seq_puts(seq, ",fatal_errors=panic");
 	if (info->commit_interval != BTRFS_DEFAULT_COMMIT_INTERVAL)
 		seq_printf(seq, ",commit=%d", info->commit_interval);
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	if (info->no_block_group_hint)
 		seq_puts(seq, ",no_block_group_hint");
 #endif
@@ -1608,7 +1620,7 @@ static int btrfs_statfs(struct dentry *dentry, struct kstatfs *buf)
 	int bits = dentry->d_sb->s_blocksize_bits;
 	__be32 *fsid = (__be32 *)fs_info->fsid;
 	int ret;
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	u64 total_metadata = 0;
 #endif
 
@@ -1620,7 +1632,7 @@ static int btrfs_statfs(struct dentry *dentry, struct kstatfs *buf)
 			total_free_data -=
 				btrfs_account_ro_block_groups_free_space(found);
 		}
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 		if (found->flags & BTRFS_BLOCK_GROUP_METADATA) {
 			total_metadata += found->disk_total;
 		}
@@ -1642,7 +1654,7 @@ static int btrfs_statfs(struct dentry *dentry, struct kstatfs *buf)
 		return ret;
 	}
 	buf->f_bavail += total_free_data;
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	if (fs_info->metadata_ratio) {
 		u64 reserved_for_metadata = btrfs_super_total_bytes(disk_super);
 
@@ -1782,7 +1794,7 @@ static int btrfs_show_devname(struct seq_file *m, struct dentry *root)
 	return 0;
 }
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 static int btrfs_syno_set_sb_archive_ver(struct super_block *sb, u32 archive_ver)
 {
 	struct dentry *dentry = sb->s_root;
@@ -1810,7 +1822,7 @@ static int btrfs_syno_get_sb_archive_ver(struct super_block *sb, u32 *version)
 }
 #endif  
 
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 static int btrfs_nr_cached_objects(struct super_block *sb)
 {
 	return (int)atomic_read(&btrfs_sb(sb)->nr_extent_maps);
@@ -1955,11 +1967,11 @@ static void btrfs_free_cached_objects(struct super_block *sb, int nr_to_drop)
 #endif
 
 static const struct super_operations btrfs_super_ops = {
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	.syno_set_sb_archive_ver = btrfs_syno_set_sb_archive_ver,
 	.syno_get_sb_archive_ver = btrfs_syno_get_sb_archive_ver,
 #endif
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	.nr_cached_objects = btrfs_nr_cached_objects,
 	.free_cached_objects = btrfs_free_cached_objects,
 #endif

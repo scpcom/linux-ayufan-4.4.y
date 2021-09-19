@@ -150,7 +150,7 @@ struct ulist_node *ulist_next(struct ulist *ulist, struct ulist_iterator *uiter)
 	return node;
 }
 
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 int ulist_add_lru_adjust(struct ulist *ulist, u64 val, u64 aux, gfp_t gfp_mask)
 {
 	int ret;
@@ -195,8 +195,8 @@ void ulist_remove_first(struct ulist *ulist)
 }
 #endif  
 
-#if defined(MY_ABC_HERE) || \
-    defined(MY_ABC_HERE)
+#if defined(MY_DEF_HERE) || \
+    defined(MY_DEF_HERE)
 struct ulist_node * ulist_search(struct ulist *ulist, u64 val)
 {
 	struct rb_node *n = ulist->root.rb_node;

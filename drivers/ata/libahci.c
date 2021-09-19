@@ -1933,7 +1933,7 @@ static void ahci_handle_port_interrupt(struct ata_port *ap,
 	}
 
 	if (status & PORT_IRQ_SDB_FIS) {
-			 
+		 
 		if (hpriv->cap & HOST_CAP_SNTF)
 			sata_async_notification(ap);
 		else {

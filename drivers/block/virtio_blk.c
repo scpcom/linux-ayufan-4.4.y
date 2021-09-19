@@ -840,7 +840,7 @@ static void virtblk_remove(struct virtio_device *vdev)
 
 	flush_work(&vblk->config_work);
 
-	refc = atomic_read(&disk_to_dev(vblk->disk)->kobj.kref.refcount);
+	refc = kref_read(&disk_to_dev(vblk->disk)->kobj.kref);
 	put_disk(vblk->disk);
 	mempool_destroy(vblk->pool);
 	vdev->config->del_vqs(vdev);

@@ -36,6 +36,18 @@ config SYNO_IO_ERROR_LIMIT_MSG_SHIFT
 	depends on SYNO_IO_ERROR_LIMIT_MSG
 	default "12"
 
+if MODULES
+
+config SYNO_KEY
+	bool "use keys supply by our system"
+	depends on MODULE_SIG
+
+config SYNO_MODULE_SIG_BLACKLIST
+	bool "Provide keyring for untrusted keys"
+	depends on MODULE_SIG
+
+endif # MODULES
+
 config SYNO_EMULATE_U64_DIVISOR
 	bool "Emulate caculating of u64 remainder"
 	default y
@@ -75,6 +87,26 @@ config SYNO_DYNAMIC_IDENTIFY_CPU_NAME
 	bool "dynamic identify CPU name"
 	default y
 	depends on SYNO_BROADWELL
+
+config SYNO_NESTED_VM_WORKAROUND
+	bool "nested vm work around for grantely"
+	default y
+	depends on SYNO_GRANTLEY
+
+config SYNO_PSTORE
+	bool "Synology enhancement of Pstore mechanism"
+	default n
+	depends on PSTORE
+
+config SYNO_CRYOTO_PATCH_FOR_LIBKCAPI
+	bool "required patch set from cryptodev-2.6 for libkcapi for FIPS 140-2 validation"
+	default n
+	depends on CRYPTO_USER
+
+config SYNO_FIX_RTC_WAKE_AFTER_POWER_FAILURE
+	bool "fix rtc wake after power failure"
+	default y
+	depends on SYNO_X64
 
 endmenu #MISC Features
 

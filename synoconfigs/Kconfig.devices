@@ -131,14 +131,25 @@ config SYNO_MD_RAID5D_PROXY
 	default y
 
 config SYNO_MD_RAID5_SKIP_COPY
-	bool "Fix data corruption in image backup"
+	bool "Support raid5 skip_copy"
 	default y
+
+config SYNO_MD_RAID5_SKIP_COPY_ENHANCE
+	bool "Enhance raid5 skip_copy due to our stress results"
+	default y
+	depends on SYNO_MD_RAID5_SKIP_COPY
 
 config SYNO_MD_SYNC_STATUS_REPORT
 	bool "Report sync status to user space"
 	default y
 
 endmenu #MD
+
+menu "SCSI"
+
+config SYNO_SCSI_WAIT_DISK_READY
+	bool "Wait for SCSI device ready when boot up"
+	default y
 
 menu "SATA"
 
@@ -527,6 +538,20 @@ config SYNO_LINK_RETRY_AFTER_COMRESET
 	bool "SATA link retry after COMRESET"
 	default y
 
+config SYNO_PMP_NCQ_COMPATIBILITY
+	bool "Disable ncq on combination of SIL3xxx and MV9170"
+	default y
+	depends on SYNO_AVOTON
+
+config SYNO_WAKEUPCMD_IDLEIMMED
+	bool "change disk wakeup command to idle immediate"
+	depends on SYNO_SPINUP_DELAY
+	default y
+
+config SYNO_NONCQ_BASH_ERROR_FIX
+	bool "Fix error return while setting devices which is not supported ncq"
+	default y
+
 endmenu #SATA
 
 menu "SAS"
@@ -644,6 +669,8 @@ config SYNO_MPT3_SATA_DEFAULT_NCQ_OFF
 	default n
 
 endmenu #SAS
+
+endmenu #SCSI
 
 menu "Network"
 
@@ -817,6 +844,10 @@ config SYNO_TURN_OFF_VBUS_GPIO_BEFORE_POWEROFF
 	bool "Turn off USB vbus gpio before poweroff"
 	default y
 	depends on SYNO_USB_VBUS_GPIO_CONTROL && SYNO_AVOTON
+
+config SYNO_USB_FIX_SET_INTERFACE
+	bool "Fix usb_set_interface hang"
+	default y
 
 endmenu #USB
 

@@ -1017,7 +1017,8 @@ struct inode *ext4_orphan_get(struct super_block *sb, unsigned long ino)
 	if (IS_ERR(inode))
 		goto iget_failed;
 
-	if (inode->i_nlink && !ext4_can_truncate(inode))
+	if ((inode->i_nlink && !ext4_can_truncate(inode)) ||
+	    is_bad_inode(inode))
 		goto bad_orphan;
 
 	if (NEXT_ORPHAN(inode) > max_ino)

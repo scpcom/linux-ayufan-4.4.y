@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Crypto user configuration API.
  *
@@ -201,10 +204,14 @@ static int crypto_report(struct sk_buff *in_skb, struct nlmsghdr *in_nlh,
 	if (!null_terminated(p->cru_name) || !null_terminated(p->cru_driver_name))
 		return -EINVAL;
 
+#ifdef MY_DEF_HERE
+	alg = crypto_alg_match(p, 0);
+#else
 	if (!p->cru_driver_name[0])
 		return -EINVAL;
 
 	alg = crypto_alg_match(p, 1);
+#endif
 	if (!alg)
 		return -ENOENT;
 

@@ -67,13 +67,13 @@ cifs_mark_open_files_invalid(struct cifs_tcon *tcon)
 	struct list_head *tmp;
 	struct list_head *tmp1;
 
-	spin_lock(&cifs_file_list_lock);
+	spin_lock(&tcon->open_file_lock);
 	list_for_each_safe(tmp, tmp1, &tcon->openFileList) {
 		open_file = list_entry(tmp, struct cifsFileInfo, tlist);
 		open_file->invalidHandle = true;
 		open_file->oplock_break_cancelled = true;
 	}
-	spin_unlock(&cifs_file_list_lock);
+	spin_unlock(&tcon->open_file_lock);
 	 
 }
 
@@ -84,6 +84,9 @@ cifs_reconnect_tcon(struct cifs_tcon *tcon, int smb_command)
 	struct cifs_ses *ses;
 	struct TCP_Server_Info *server;
 	struct nls_table *nls_codepage;
+#ifdef MY_ABC_HERE
+	u16 origin_dialect;  
+#endif  
 
 	if (!tcon)
 		return 0;
@@ -124,6 +127,9 @@ cifs_reconnect_tcon(struct cifs_tcon *tcon, int smb_command)
 #endif  
 
 	mutex_lock(&ses->session_mutex);
+#ifdef MY_ABC_HERE
+	origin_dialect = server->dialect;
+#endif  
 	rc = cifs_negotiate_protocol(0, ses);
 	if (rc == 0 && ses->need_reconnect)
 		rc = cifs_setup_session(0, ses, nls_codepage);
@@ -134,7 +140,11 @@ cifs_reconnect_tcon(struct cifs_tcon *tcon, int smb_command)
 	}
 
 	cifs_mark_open_files_invalid(tcon);
+#ifdef MY_ABC_HERE
+	rc = ses->server->ops->tree_connect(0, ses, tcon->treeName, tcon, nls_codepage);
+#else
 	rc = CIFSTCon(0, ses, tcon->treeName, tcon, nls_codepage);
+#endif  
 	mutex_unlock(&ses->session_mutex);
 	cifs_dbg(FYI, "reconnect tcon rc = %d\n", rc);
 
@@ -145,6 +155,12 @@ cifs_reconnect_tcon(struct cifs_tcon *tcon, int smb_command)
 
 	if (ses->capabilities & CAP_UNIX)
 		reset_cifs_unix_caps(0, tcon, NULL, NULL);
+
+#ifdef MY_ABC_HERE
+	if (server->dialect != origin_dialect) {
+		rc = -EAGAIN;
+	}
+#endif  
 
 out:
 	 
@@ -279,6 +295,163 @@ vt2_err:
 	return -EINVAL;
 }
 
+static int
+decode_ext_sec_blob(struct cifs_ses *ses, NEGOTIATE_RSP *pSMBr)
+{
+	int	rc = 0;
+	u16	count;
+	char	*guid = pSMBr->u.extended_response.GUID;
+	struct TCP_Server_Info *server = ses->server;
+
+	count = get_bcc(&pSMBr->hdr);
+	if (count < SMB1_CLIENT_GUID_SIZE)
+		return -EIO;
+
+	spin_lock(&cifs_tcp_ses_lock);
+	if (server->srv_count > 1) {
+		spin_unlock(&cifs_tcp_ses_lock);
+		if (memcmp(server->server_GUID, guid, SMB1_CLIENT_GUID_SIZE) != 0) {
+			cifs_dbg(FYI, "server UID changed\n");
+			memcpy(server->server_GUID, guid, SMB1_CLIENT_GUID_SIZE);
+		}
+	} else {
+		spin_unlock(&cifs_tcp_ses_lock);
+		memcpy(server->server_GUID, guid, SMB1_CLIENT_GUID_SIZE);
+	}
+
+	if (count == SMB1_CLIENT_GUID_SIZE) {
+		server->sec_ntlmssp = true;
+	} else {
+		count -= SMB1_CLIENT_GUID_SIZE;
+		rc = decode_negTokenInit(
+			pSMBr->u.extended_response.SecurityBlob, count, server);
+		if (rc != 1)
+			return -EINVAL;
+	}
+
+	return 0;
+}
+
+int
+cifs_enable_signing(struct TCP_Server_Info *server, bool mnt_sign_required)
+{
+	bool srv_sign_required = server->sec_mode & server->vals->signing_required;
+	bool srv_sign_enabled = server->sec_mode & server->vals->signing_enabled;
+	bool mnt_sign_enabled = global_secflags & CIFSSEC_MAY_SIGN;
+
+	if (!mnt_sign_required)
+		mnt_sign_required = ((global_secflags & CIFSSEC_MUST_SIGN) ==
+						CIFSSEC_MUST_SIGN);
+
+	mnt_sign_enabled = mnt_sign_required ? mnt_sign_required :
+				(global_secflags & CIFSSEC_MAY_SIGN);
+
+	if (srv_sign_required) {
+		if (!mnt_sign_enabled) {
+			cifs_dbg(VFS, "Server requires signing, but it's disabled in SecurityFlags!");
+			return -ENOTSUPP;
+		}
+		server->sign = true;
+	}
+
+	if (mnt_sign_required) {
+		if (!srv_sign_enabled) {
+			cifs_dbg(VFS, "Server does not support signing!");
+			return -ENOTSUPP;
+		}
+		server->sign = true;
+	}
+
+	return 0;
+}
+
+#ifdef CONFIG_CIFS_WEAK_PW_HASH
+static int
+decode_lanman_negprot_rsp(struct TCP_Server_Info *server, NEGOTIATE_RSP *pSMBr)
+{
+	__s16 tmp;
+	struct lanman_neg_rsp *rsp = (struct lanman_neg_rsp *)pSMBr;
+
+	if (server->dialect != LANMAN_PROT && server->dialect != LANMAN2_PROT)
+		return -EOPNOTSUPP;
+
+	server->sec_mode = le16_to_cpu(rsp->SecurityMode);
+	server->maxReq = min_t(unsigned int,
+			       le16_to_cpu(rsp->MaxMpxCount),
+			       cifs_max_pending);
+	set_credits(server, server->maxReq);
+	server->maxBuf = le16_to_cpu(rsp->MaxBufSize);
+	 
+	if ((le16_to_cpu(rsp->RawMode) & RAW_ENABLE) == RAW_ENABLE) {
+		server->max_rw = 0xFF00;
+		server->capabilities = CAP_MPX_MODE | CAP_RAW_MODE;
+	} else {
+		server->max_rw = 0; 
+		server->capabilities = CAP_MPX_MODE;
+	}
+	tmp = (__s16)le16_to_cpu(rsp->ServerTimeZone);
+	if (tmp == -1) {
+		 
+		int val, seconds, remain, result;
+		struct timespec ts, utc;
+		utc = CURRENT_TIME;
+		ts = cnvrtDosUnixTm(rsp->SrvTime.Date,
+				    rsp->SrvTime.Time, 0);
+		cifs_dbg(FYI, "SrvTime %d sec since 1970 (utc: %d) diff: %d\n",
+			 (int)ts.tv_sec, (int)utc.tv_sec,
+			 (int)(utc.tv_sec - ts.tv_sec));
+		val = (int)(utc.tv_sec - ts.tv_sec);
+		seconds = abs(val);
+		result = (seconds / MIN_TZ_ADJ) * MIN_TZ_ADJ;
+		remain = seconds % MIN_TZ_ADJ;
+		if (remain >= (MIN_TZ_ADJ / 2))
+			result += MIN_TZ_ADJ;
+		if (val < 0)
+			result = -result;
+		server->timeAdj = result;
+	} else {
+		server->timeAdj = (int)tmp;
+		server->timeAdj *= 60;  
+	}
+	cifs_dbg(FYI, "server->timeAdj: %d seconds\n", server->timeAdj);
+
+	if (rsp->EncryptionKeyLength ==
+			cpu_to_le16(CIFS_CRYPTO_KEY_SIZE)) {
+		memcpy(server->cryptkey, rsp->EncryptionKey,
+			CIFS_CRYPTO_KEY_SIZE);
+	} else if (server->sec_mode & SECMODE_PW_ENCRYPT) {
+		return -EIO;  
+	}
+
+	cifs_dbg(FYI, "LANMAN negotiated\n");
+	return 0;
+}
+#else
+static inline int
+decode_lanman_negprot_rsp(struct TCP_Server_Info *server, NEGOTIATE_RSP *pSMBr)
+{
+	cifs_dbg(VFS, "mount failed, cifs module not built with CIFS_WEAK_PW_HASH support\n");
+	return -EOPNOTSUPP;
+}
+#endif
+
+static bool
+should_set_ext_sec_flag(enum securityEnum sectype)
+{
+	switch (sectype) {
+	case RawNTLMSSP:
+	case Kerberos:
+		return true;
+	case Unspecified:
+		if (global_secflags &
+		    (CIFSSEC_MAY_KRB5 | CIFSSEC_MAY_NTLMSSP))
+			return true;
+		 
+	default:
+		return false;
+	}
+}
+
 int
 CIFSSMBNegotiate(const unsigned int xid, struct cifs_ses *ses)
 {
@@ -287,40 +460,24 @@ CIFSSMBNegotiate(const unsigned int xid, struct cifs_ses *ses)
 	int rc = 0;
 	int bytes_returned;
 	int i;
-	struct TCP_Server_Info *server;
+	struct TCP_Server_Info *server = ses->server;
 	u16 count;
-	unsigned int secFlags;
 
-	if (ses->server)
-		server = ses->server;
-	else {
-		rc = -EIO;
-		return rc;
+	if (!server) {
+		WARN(1, "%s: server is NULL!\n", __func__);
+		return -EIO;
 	}
+
 	rc = smb_init(SMB_COM_NEGOTIATE, 0, NULL   ,
 		      (void **) &pSMB, (void **) &pSMBr);
 	if (rc)
 		return rc;
 
-	if (ses->overrideSecFlg & (~(CIFSSEC_MUST_SIGN | CIFSSEC_MUST_SEAL)))
-		secFlags = ses->overrideSecFlg;   
-	else  
-		secFlags = global_secflags | ses->overrideSecFlg;
-
-	cifs_dbg(FYI, "secFlags 0x%x\n", secFlags);
-
 	pSMB->hdr.Mid = get_next_mid(server);
 	pSMB->hdr.Flags2 |= (SMBFLG2_UNICODE | SMBFLG2_ERR_STATUS);
 
-	if ((secFlags & CIFSSEC_MUST_KRB5) == CIFSSEC_MUST_KRB5)
-		pSMB->hdr.Flags2 |= SMBFLG2_EXT_SEC;
-	else if ((secFlags & CIFSSEC_AUTH_MASK) == CIFSSEC_MAY_KRB5) {
-		cifs_dbg(FYI, "Kerberos only mechanism, enable extended security\n");
-		pSMB->hdr.Flags2 |= SMBFLG2_EXT_SEC;
-	} else if ((secFlags & CIFSSEC_MUST_NTLMSSP) == CIFSSEC_MUST_NTLMSSP)
-		pSMB->hdr.Flags2 |= SMBFLG2_EXT_SEC;
-	else if ((secFlags & CIFSSEC_AUTH_MASK) == CIFSSEC_MAY_NTLMSSP) {
-		cifs_dbg(FYI, "NTLMSSP only mechanism, enable extended security\n");
+	if (should_set_ext_sec_flag(ses->sectype)) {
+		cifs_dbg(FYI, "Requesting extended security.");
 		pSMB->hdr.Flags2 |= SMBFLG2_EXT_SEC;
 	}
 
@@ -345,80 +502,10 @@ CIFSSMBNegotiate(const unsigned int xid, struct cifs_ses *ses)
 		 
 		rc = -EOPNOTSUPP;
 		goto neg_err_exit;
-#ifdef CONFIG_CIFS_WEAK_PW_HASH
-	} else if ((pSMBr->hdr.WordCount == 13)
-			&& ((server->dialect == LANMAN_PROT)
-				|| (server->dialect == LANMAN2_PROT))) {
-		__s16 tmp;
-		struct lanman_neg_rsp *rsp = (struct lanman_neg_rsp *)pSMBr;
-
-		if ((secFlags & CIFSSEC_MAY_LANMAN) ||
-			(secFlags & CIFSSEC_MAY_PLNTXT))
-			server->secType = LANMAN;
-		else {
-			cifs_dbg(VFS, "mount failed weak security disabled in /proc/fs/cifs/SecurityFlags\n");
-			rc = -EOPNOTSUPP;
-			goto neg_err_exit;
-		}
-		server->sec_mode = le16_to_cpu(rsp->SecurityMode);
-		server->maxReq = min_t(unsigned int,
-				       le16_to_cpu(rsp->MaxMpxCount),
-				       cifs_max_pending);
-		set_credits(server, server->maxReq);
-		server->maxBuf = le16_to_cpu(rsp->MaxBufSize);
-		server->max_vcs = le16_to_cpu(rsp->MaxNumberVcs);
-		 
-		if ((le16_to_cpu(rsp->RawMode) & RAW_ENABLE) == RAW_ENABLE) {
-			server->max_rw = 0xFF00;
-			server->capabilities = CAP_MPX_MODE | CAP_RAW_MODE;
-		} else {
-			server->max_rw = 0; 
-			server->capabilities = CAP_MPX_MODE;
-		}
-		tmp = (__s16)le16_to_cpu(rsp->ServerTimeZone);
-		if (tmp == -1) {
-			 
-			int val, seconds, remain, result;
-			struct timespec ts, utc;
-			utc = CURRENT_TIME;
-			ts = cnvrtDosUnixTm(rsp->SrvTime.Date,
-					    rsp->SrvTime.Time, 0);
-			cifs_dbg(FYI, "SrvTime %d sec since 1970 (utc: %d) diff: %d\n",
-				 (int)ts.tv_sec, (int)utc.tv_sec,
-				 (int)(utc.tv_sec - ts.tv_sec));
-			val = (int)(utc.tv_sec - ts.tv_sec);
-			seconds = abs(val);
-			result = (seconds / MIN_TZ_ADJ) * MIN_TZ_ADJ;
-			remain = seconds % MIN_TZ_ADJ;
-			if (remain >= (MIN_TZ_ADJ / 2))
-				result += MIN_TZ_ADJ;
-			if (val < 0)
-				result = -result;
-			server->timeAdj = result;
-		} else {
-			server->timeAdj = (int)tmp;
-			server->timeAdj *= 60;  
-		}
-		cifs_dbg(FYI, "server->timeAdj: %d seconds\n", server->timeAdj);
-
-		if (rsp->EncryptionKeyLength ==
-				cpu_to_le16(CIFS_CRYPTO_KEY_SIZE)) {
-			memcpy(ses->server->cryptkey, rsp->EncryptionKey,
-				CIFS_CRYPTO_KEY_SIZE);
-		} else if (server->sec_mode & SECMODE_PW_ENCRYPT) {
-			rc = -EIO;  
-			goto neg_err_exit;
-		}
-
-		cifs_dbg(FYI, "LANMAN negotiated\n");
-		 
-		goto signing_check;
-#else  
 	} else if (pSMBr->hdr.WordCount == 13) {
-		cifs_dbg(VFS, "mount failed, cifs module not built with CIFS_WEAK_PW_HASH support\n");
-		rc = -EOPNOTSUPP;
-#endif  
-		goto neg_err_exit;
+		server->negflavor = CIFS_NEGFLAVOR_LANMAN;
+		rc = decode_lanman_negprot_rsp(server, pSMBr);
+		goto signing_check;
 	} else if (pSMBr->hdr.WordCount != 17) {
 		 
 		rc = -EOPNOTSUPP;
@@ -429,30 +516,6 @@ CIFSSMBNegotiate(const unsigned int xid, struct cifs_ses *ses)
 	if ((server->sec_mode & SECMODE_USER) == 0)
 		cifs_dbg(FYI, "share mode security\n");
 
-	if ((server->sec_mode & SECMODE_PW_ENCRYPT) == 0)
-#ifdef CONFIG_CIFS_WEAK_PW_HASH
-		if ((secFlags & CIFSSEC_MAY_PLNTXT) == 0)
-#endif  
-			cifs_dbg(VFS, "Server requests plain text password but client support disabled\n");
-
-	if ((secFlags & CIFSSEC_MUST_NTLMV2) == CIFSSEC_MUST_NTLMV2)
-		server->secType = NTLMv2;
-	else if (secFlags & CIFSSEC_MAY_NTLM)
-		server->secType = NTLM;
-	else if (secFlags & CIFSSEC_MAY_NTLMV2)
-		server->secType = NTLMv2;
-	else if (secFlags & CIFSSEC_MAY_KRB5)
-		server->secType = Kerberos;
-	else if (secFlags & CIFSSEC_MAY_NTLMSSP)
-		server->secType = RawNTLMSSP;
-	else if (secFlags & CIFSSEC_MAY_LANMAN)
-		server->secType = LANMAN;
-	else {
-		rc = -EOPNOTSUPP;
-		cifs_dbg(VFS, "Invalid security type\n");
-		goto neg_err_exit;
-	}
-	 
 	server->maxReq = min_t(unsigned int, le16_to_cpu(pSMBr->MaxMpxCount),
 			       cifs_max_pending);
 	set_credits(server, server->maxReq);
@@ -463,89 +526,25 @@ CIFSSMBNegotiate(const unsigned int xid, struct cifs_ses *ses)
 	server->capabilities = le32_to_cpu(pSMBr->Capabilities);
 	server->timeAdj = (int)(__s16)le16_to_cpu(pSMBr->ServerTimeZone);
 	server->timeAdj *= 60;
+
 	if (pSMBr->EncryptionKeyLength == CIFS_CRYPTO_KEY_SIZE) {
+		server->negflavor = CIFS_NEGFLAVOR_UNENCAP;
 		memcpy(ses->server->cryptkey, pSMBr->u.EncryptionKey,
 		       CIFS_CRYPTO_KEY_SIZE);
-	} else if ((pSMBr->hdr.Flags2 & SMBFLG2_EXT_SEC ||
-			server->capabilities & CAP_EXTENDED_SECURITY) &&
-				(pSMBr->EncryptionKeyLength == 0)) {
-		 
-		count = get_bcc(&pSMBr->hdr);
-		if (count < 16) {
-			rc = -EIO;
-			goto neg_err_exit;
-		}
-		spin_lock(&cifs_tcp_ses_lock);
-		if (server->srv_count > 1) {
-			spin_unlock(&cifs_tcp_ses_lock);
-			if (memcmp(server->server_GUID,
-				   pSMBr->u.extended_response.
-				   GUID, 16) != 0) {
-				cifs_dbg(FYI, "server UID changed\n");
-				memcpy(server->server_GUID,
-					pSMBr->u.extended_response.GUID,
-					16);
-			}
-		} else {
-			spin_unlock(&cifs_tcp_ses_lock);
-			memcpy(server->server_GUID,
-			       pSMBr->u.extended_response.GUID, 16);
-		}
-
-		if (count == 16) {
-			server->secType = RawNTLMSSP;
-		} else {
-			rc = decode_negTokenInit(pSMBr->u.extended_response.
-						 SecurityBlob, count - 16,
-						 server);
-			if (rc == 1)
-				rc = 0;
-			else
-				rc = -EINVAL;
-			if (server->secType == Kerberos) {
-				if (!server->sec_kerberos &&
-						!server->sec_mskerberos)
-					rc = -EOPNOTSUPP;
-			} else if (server->secType == RawNTLMSSP) {
-				if (!server->sec_ntlmssp)
-					rc = -EOPNOTSUPP;
-			} else
-					rc = -EOPNOTSUPP;
-		}
+	} else if (pSMBr->hdr.Flags2 & SMBFLG2_EXT_SEC ||
+			server->capabilities & CAP_EXTENDED_SECURITY) {
+		server->negflavor = CIFS_NEGFLAVOR_EXTENDED;
+		rc = decode_ext_sec_blob(ses, pSMBr);
 	} else if (server->sec_mode & SECMODE_PW_ENCRYPT) {
 		rc = -EIO;  
-		goto neg_err_exit;
-	} else
-		server->capabilities &= ~CAP_EXTENDED_SECURITY;
-
-#ifdef CONFIG_CIFS_WEAK_PW_HASH
-signing_check:
-#endif
-	if ((secFlags & CIFSSEC_MAY_SIGN) == 0) {
-		 
-		cifs_dbg(FYI, "Signing disabled\n");
-		if (server->sec_mode & SECMODE_SIGN_REQUIRED) {
-			cifs_dbg(VFS, "Server requires packet signing to be enabled in /proc/fs/cifs/SecurityFlags\n");
-			rc = -EOPNOTSUPP;
-		}
-		server->sec_mode &=
-			~(SECMODE_SIGN_ENABLED | SECMODE_SIGN_REQUIRED);
-	} else if ((secFlags & CIFSSEC_MUST_SIGN) == CIFSSEC_MUST_SIGN) {
-		 
-		cifs_dbg(FYI, "Must sign - secFlags 0x%x\n", secFlags);
-		if ((server->sec_mode &
-			(SECMODE_SIGN_ENABLED | SECMODE_SIGN_REQUIRED)) == 0) {
-			cifs_dbg(VFS, "signing required but server lacks support\n");
-			rc = -EOPNOTSUPP;
-		} else
-			server->sec_mode |= SECMODE_SIGN_REQUIRED;
 	} else {
-		 
-		if ((server->sec_mode & SECMODE_SIGN_REQUIRED) == 0)
-			server->sec_mode &=
-				~(SECMODE_SIGN_ENABLED | SECMODE_SIGN_REQUIRED);
+		server->negflavor = CIFS_NEGFLAVOR_UNENCAP;
+		server->capabilities &= ~CAP_EXTENDED_SECURITY;
 	}
 
+signing_check:
+	if (!rc)
+		rc = cifs_enable_signing(server, ses->sign);
 neg_err_exit:
 	cifs_buf_release(pSMB);
 
@@ -587,7 +586,9 @@ cifs_echo_callback(struct mid_q_entry *mid)
 {
 	struct TCP_Server_Info *server = mid->callback_data;
 
+	mutex_lock(&server->srv_mutex);
 	DeleteMidQEntry(mid);
+	mutex_unlock(&server->srv_mutex);
 	add_credits(server, 1, CIFS_ECHO_OP);
 }
 
@@ -647,9 +648,8 @@ CIFSSMBLogoff(const unsigned int xid, struct cifs_ses *ses)
 
 	pSMB->hdr.Mid = get_next_mid(ses->server);
 
-	if (ses->server->sec_mode &
-		   (SECMODE_SIGN_REQUIRED | SECMODE_SIGN_ENABLED))
-			pSMB->hdr.Flags2 |= SMBFLG2_SECURITY_SIGNATURE;
+	if (ses->server->sign)
+		pSMB->hdr.Flags2 |= SMBFLG2_SECURITY_SIGNATURE;
 
 	pSMB->hdr.Uid = ses->Suid;
 
@@ -747,7 +747,7 @@ CIFSSMBDelFile(const unsigned int xid, struct cifs_tcon *tcon, const char *name,
 	int rc = 0;
 	int bytes_returned;
 	int name_len;
-	int remap = cifs_sb->mnt_cifs_flags & CIFS_MOUNT_MAP_SPECIAL_CHR;
+	int remap = cifs_remap(cifs_sb);
 
 DelFileRetry:
 	rc = smb_init(SMB_COM_DELETE, 1, tcon, (void **) &pSMB,
@@ -793,7 +793,7 @@ CIFSSMBRmDir(const unsigned int xid, struct cifs_tcon *tcon, const char *name,
 	int rc = 0;
 	int bytes_returned;
 	int name_len;
-	int remap = cifs_sb->mnt_cifs_flags & CIFS_MOUNT_MAP_SPECIAL_CHR;
+	int remap = cifs_remap(cifs_sb);
 
 	cifs_dbg(FYI, "In CIFSSMBRmDir\n");
 RmDirRetry:
@@ -838,7 +838,7 @@ CIFSSMBMkDir(const unsigned int xid, struct cifs_tcon *tcon, const char *name,
 	CREATE_DIRECTORY_RSP *pSMBr = NULL;
 	int bytes_returned;
 	int name_len;
-	int remap = cifs_sb->mnt_cifs_flags & CIFS_MOUNT_MAP_SPECIAL_CHR;
+	int remap = cifs_remap(cifs_sb);
 
 	cifs_dbg(FYI, "In CIFSSMBMkDir\n");
 MkDirRetry:
@@ -1129,102 +1129,114 @@ OldOpenRetry:
 }
 
 int
-CIFSSMBOpen(const unsigned int xid, struct cifs_tcon *tcon,
-	    const char *fileName, const int openDisposition,
-	    const int access_flags, const int create_options, __u16 *netfid,
-	    int *pOplock, FILE_ALL_INFO *pfile_info,
-	    const struct nls_table *nls_codepage, int remap)
+CIFS_open(const unsigned int xid, struct cifs_open_parms *oparms, int *oplock,
+	  FILE_ALL_INFO *buf)
 {
 	int rc = -EACCES;
-	OPEN_REQ *pSMB = NULL;
-	OPEN_RSP *pSMBr = NULL;
+	OPEN_REQ *req = NULL;
+	OPEN_RSP *rsp = NULL;
 	int bytes_returned;
 	int name_len;
 	__u16 count;
+	struct cifs_sb_info *cifs_sb = oparms->cifs_sb;
+	struct cifs_tcon *tcon = oparms->tcon;
+	int remap = cifs_remap(cifs_sb);
+	const struct nls_table *nls = cifs_sb->local_nls;
+	int create_options = oparms->create_options;
+	int desired_access = oparms->desired_access;
+	int disposition = oparms->disposition;
+	const char *path = oparms->path;
 
 openRetry:
-	rc = smb_init(SMB_COM_NT_CREATE_ANDX, 24, tcon, (void **) &pSMB,
-		      (void **) &pSMBr);
+	rc = smb_init(SMB_COM_NT_CREATE_ANDX, 24, tcon, (void **)&req,
+		      (void **)&rsp);
 	if (rc)
 		return rc;
 
-	pSMB->AndXCommand = 0xFF;	 
+	req->AndXCommand = 0xFF;
 
-	if (pSMB->hdr.Flags2 & SMBFLG2_UNICODE) {
-		count = 1;	 
-		name_len =
-		    cifsConvertToUTF16((__le16 *) (pSMB->fileName + 1),
-				       fileName, PATH_MAX, nls_codepage, remap);
-		name_len++;	 
+	if (req->hdr.Flags2 & SMBFLG2_UNICODE) {
+		 
+		count = 1;
+		name_len = cifsConvertToUTF16((__le16 *)(req->fileName + 1),
+					      path, PATH_MAX, nls, remap);
+		 
+		name_len++;
 		name_len *= 2;
-		pSMB->NameLength = cpu_to_le16(name_len);
-	} else {		 
-		count = 0;	 
-		name_len = strnlen(fileName, PATH_MAX);
-		name_len++;	 
-		pSMB->NameLength = cpu_to_le16(name_len);
-		strncpy(pSMB->fileName, fileName, name_len);
+		req->NameLength = cpu_to_le16(name_len);
+	} else {
+		 
+		count = 0;
+		name_len = strnlen(path, PATH_MAX);
+		 
+		name_len++;
+		req->NameLength = cpu_to_le16(name_len);
+		strncpy(req->fileName, path, name_len);
 	}
-	if (*pOplock & REQ_OPLOCK)
-		pSMB->OpenFlags = cpu_to_le32(REQ_OPLOCK);
-	else if (*pOplock & REQ_BATCHOPLOCK)
-		pSMB->OpenFlags = cpu_to_le32(REQ_BATCHOPLOCK);
-	pSMB->DesiredAccess = cpu_to_le32(access_flags);
-	pSMB->AllocationSize = 0;
-	 
+
+	if (*oplock & REQ_OPLOCK)
+		req->OpenFlags = cpu_to_le32(REQ_OPLOCK);
+	else if (*oplock & REQ_BATCHOPLOCK)
+		req->OpenFlags = cpu_to_le32(REQ_BATCHOPLOCK);
+
+	req->DesiredAccess = cpu_to_le32(desired_access);
+	req->AllocationSize = 0;
+
 	if (create_options & CREATE_OPTION_SPECIAL)
-		pSMB->FileAttributes = cpu_to_le32(ATTR_SYSTEM);
+		req->FileAttributes = cpu_to_le32(ATTR_SYSTEM);
 	else
-		pSMB->FileAttributes = cpu_to_le32(ATTR_NORMAL);
+		req->FileAttributes = cpu_to_le32(ATTR_NORMAL);
 
 #ifdef MY_ABC_HERE
 	if (tcon->ses->capabilities & CAP_UNIX && SynoPosixSemanticsEnabled)
 #else
 	if (tcon->ses->capabilities & CAP_UNIX)
 #endif  
-		pSMB->FileAttributes |= cpu_to_le32(ATTR_POSIX_SEMANTICS);
+		req->FileAttributes |= cpu_to_le32(ATTR_POSIX_SEMANTICS);
 
 	if (create_options & CREATE_OPTION_READONLY)
-		pSMB->FileAttributes |= cpu_to_le32(ATTR_READONLY);
+		req->FileAttributes |= cpu_to_le32(ATTR_READONLY);
 
-	pSMB->ShareAccess = cpu_to_le32(FILE_SHARE_ALL);
-	pSMB->CreateDisposition = cpu_to_le32(openDisposition);
-	pSMB->CreateOptions = cpu_to_le32(create_options & CREATE_OPTIONS_MASK);
-	 
-	pSMB->ImpersonationLevel = cpu_to_le32(SECURITY_IMPERSONATION);
-	pSMB->SecurityFlags =
-	    SECURITY_CONTEXT_TRACKING | SECURITY_EFFECTIVE_ONLY;
+	req->ShareAccess = cpu_to_le32(FILE_SHARE_ALL);
+	req->CreateDisposition = cpu_to_le32(disposition);
+	req->CreateOptions = cpu_to_le32(create_options & CREATE_OPTIONS_MASK);
+
+	req->ImpersonationLevel = cpu_to_le32(SECURITY_IMPERSONATION);
+	req->SecurityFlags = SECURITY_CONTEXT_TRACKING|SECURITY_EFFECTIVE_ONLY;
 
 	count += name_len;
-	inc_rfc1001_len(pSMB, count);
+	inc_rfc1001_len(req, count);
 
-	pSMB->ByteCount = cpu_to_le16(count);
-	 
-	rc = SendReceive(xid, tcon->ses, (struct smb_hdr *) pSMB,
-			(struct smb_hdr *)pSMBr, &bytes_returned, 0);
+	req->ByteCount = cpu_to_le16(count);
+	rc = SendReceive(xid, tcon->ses, (struct smb_hdr *)req,
+			 (struct smb_hdr *)rsp, &bytes_returned, 0);
 	cifs_stats_inc(&tcon->stats.cifs_stats.num_opens);
 	if (rc) {
 		cifs_dbg(FYI, "Error in Open = %d\n", rc);
-	} else {
-		*pOplock = pSMBr->OplockLevel;  
-		*netfid = pSMBr->Fid;	 
-		 
-		if (cpu_to_le32(FILE_CREATE) == pSMBr->CreateAction)
-			*pOplock |= CIFS_CREATE_ACTION;
-		if (pfile_info) {
-			memcpy((char *)pfile_info, (char *)&pSMBr->CreationTime,
-				36  );
-			 
-			pfile_info->AllocationSize = pSMBr->AllocationSize;
-			pfile_info->EndOfFile = pSMBr->EndOfFile;
-			pfile_info->NumberOfLinks = cpu_to_le32(1);
-			pfile_info->DeletePending = 0;
-		}
+		cifs_buf_release(req);
+		if (rc == -EAGAIN)
+			goto openRetry;
+		return rc;
 	}
 
-	cifs_buf_release(pSMB);
-	if (rc == -EAGAIN)
-		goto openRetry;
+	*oplock = rsp->OplockLevel;
+	 
+	oparms->fid->netfid = rsp->Fid;
+
+	if (cpu_to_le32(FILE_CREATE) == rsp->CreateAction)
+		*oplock |= CIFS_CREATE_ACTION;
+
+	if (buf) {
+		 
+		memcpy((char *)buf, (char *)&rsp->CreationTime, 36);
+		 
+		buf->AllocationSize = rsp->AllocationSize;
+		buf->EndOfFile = rsp->EndOfFile;
+		buf->NumberOfLinks = cpu_to_le32(1);
+		buf->DeletePending = 0;
+	}
+
+	cifs_buf_release(req);
 	return rc;
 }
 
@@ -1381,8 +1393,7 @@ cifs_readv_callback(struct mid_q_entry *mid)
 	switch (mid->mid_state) {
 	case MID_RESPONSE_RECEIVED:
 		 
-		if (server->sec_mode &
-		    (SECMODE_SIGN_REQUIRED | SECMODE_SIGN_ENABLED)) {
+		if (server->sign) {
 			int rc = 0;
 
 			rc = cifs_verify_signature(&rqst, server,
@@ -1404,7 +1415,9 @@ cifs_readv_callback(struct mid_q_entry *mid)
 	}
 
 	queue_work(cifsiod_wq, &rdata->work);
+	mutex_lock(&server->srv_mutex);
 	DeleteMidQEntry(mid);
+	mutex_unlock(&server->srv_mutex);
 	add_credits(server, 1, 0);
 }
 
@@ -1558,10 +1571,7 @@ CIFSSMBRead(const unsigned int xid, struct cifs_io_parms *io_parms,
 	}
 
 	if (*buf) {
-		if (resp_buf_type == CIFS_SMALL_BUFFER)
-			cifs_small_buf_release(iov[0].iov_base);
-		else if (resp_buf_type == CIFS_LARGE_BUFFER)
-			cifs_buf_release(iov[0].iov_base);
+		free_rsp_buf(resp_buf_type, iov[0].iov_base);
 	} else if (resp_buf_type != CIFS_NO_BUFFER) {
 		 
 		*buf = iov[0].iov_base;
@@ -1701,28 +1711,80 @@ cifs_writedata_release(struct kref *refcount)
 static void
 cifs_writev_requeue(struct cifs_writedata *wdata)
 {
-	int i, rc;
+	int i, rc = 0;
 	struct inode *inode = wdata->cfile->dentry->d_inode;
 	struct TCP_Server_Info *server;
+	unsigned int rest_len;
 
-	for (i = 0; i < wdata->nr_pages; i++) {
-		lock_page(wdata->pages[i]);
-		clear_page_dirty_for_io(wdata->pages[i]);
-	}
-
+	server = tlink_tcon(wdata->cfile->tlink)->ses->server;
+	i = 0;
+	rest_len = wdata->bytes;
 	do {
-		server = tlink_tcon(wdata->cfile->tlink)->ses->server;
-		rc = server->ops->async_writev(wdata);
-	} while (rc == -EAGAIN);
+		struct cifs_writedata *wdata2;
+		unsigned int j, nr_pages, wsize, tailsz, cur_len;
 
-	for (i = 0; i < wdata->nr_pages; i++) {
-		unlock_page(wdata->pages[i]);
-		if (rc != 0) {
-			SetPageError(wdata->pages[i]);
-			end_page_writeback(wdata->pages[i]);
-			page_cache_release(wdata->pages[i]);
+		wsize = server->ops->wp_retry_size(inode);
+		if (wsize < rest_len) {
+			nr_pages = wsize / PAGE_CACHE_SIZE;
+			if (!nr_pages) {
+				rc = -ENOTSUPP;
+				break;
+			}
+			cur_len = nr_pages * PAGE_CACHE_SIZE;
+			tailsz = PAGE_CACHE_SIZE;
+		} else {
+			nr_pages = DIV_ROUND_UP(rest_len, PAGE_CACHE_SIZE);
+			cur_len = rest_len;
+			tailsz = rest_len - (nr_pages - 1) * PAGE_CACHE_SIZE;
 		}
-	}
+
+		wdata2 = cifs_writedata_alloc(nr_pages, cifs_writev_complete);
+		if (!wdata2) {
+			rc = -ENOMEM;
+			break;
+		}
+
+		for (j = 0; j < nr_pages; j++) {
+			wdata2->pages[j] = wdata->pages[i + j];
+			lock_page(wdata2->pages[j]);
+			clear_page_dirty_for_io(wdata2->pages[j]);
+		}
+
+		wdata2->sync_mode = wdata->sync_mode;
+		wdata2->nr_pages = nr_pages;
+		wdata2->offset = page_offset(wdata2->pages[0]);
+		wdata2->pagesz = PAGE_CACHE_SIZE;
+		wdata2->tailsz = tailsz;
+		wdata2->bytes = cur_len;
+
+		wdata2->cfile = find_writable_file(CIFS_I(inode), false);
+		if (!wdata2->cfile) {
+			cifs_dbg(VFS, "No writable handles for inode\n");
+			rc = -EBADF;
+			break;
+		}
+		wdata2->pid = wdata2->cfile->pid;
+		rc = server->ops->async_writev(wdata2, cifs_writedata_release);
+
+		for (j = 0; j < nr_pages; j++) {
+			unlock_page(wdata2->pages[j]);
+			if (rc != 0 && rc != -EAGAIN) {
+				SetPageError(wdata2->pages[j]);
+				end_page_writeback(wdata2->pages[j]);
+				page_cache_release(wdata2->pages[j]);
+			}
+		}
+
+		if (rc) {
+			kref_put(&wdata2->refcount, cifs_writedata_release);
+			if (rc == -EAGAIN)
+				continue;
+			break;
+		}
+
+		rest_len -= cur_len;
+		i += nr_pages;
+	} while (i < wdata->nr_pages);
 
 	mapping_set_error(inode->i_mapping, rc);
 	kref_put(&wdata->refcount, cifs_writedata_release);
@@ -1764,13 +1826,8 @@ cifs_writedata_alloc(unsigned int nr_pages, work_func_t complete)
 {
 	struct cifs_writedata *wdata;
 
-	if (nr_pages == 0) {
-		cifs_dbg(VFS, "%s: called with nr_pages == 0!\n", __func__);
-		return NULL;
-	}
-
 	wdata = kzalloc(sizeof(*wdata) +
-			sizeof(struct page *) * (nr_pages - 1), GFP_NOFS);
+			sizeof(struct page *) * nr_pages, GFP_NOFS);
 	if (wdata != NULL) {
 		kref_init(&wdata->refcount);
 		INIT_LIST_HEAD(&wdata->list);
@@ -1785,6 +1842,7 @@ cifs_writev_callback(struct mid_q_entry *mid)
 {
 	struct cifs_writedata *wdata = mid->callback_data;
 	struct cifs_tcon *tcon = tlink_tcon(wdata->cfile->tlink);
+	struct TCP_Server_Info *server = tcon->ses->server;
 	unsigned int written;
 	WRITE_RSP *smb = (WRITE_RSP *)mid->resp_buf;
 
@@ -1816,12 +1874,15 @@ cifs_writev_callback(struct mid_q_entry *mid)
 	}
 
 	queue_work(cifsiod_wq, &wdata->work);
+	mutex_lock(&server->srv_mutex);
 	DeleteMidQEntry(mid);
+	mutex_unlock(&server->srv_mutex);
 	add_credits(tcon->ses->server, 1, 0);
 }
 
 int
-cifs_async_writev(struct cifs_writedata *wdata)
+cifs_async_writev(struct cifs_writedata *wdata,
+		  void (*release)(struct kref *kref))
 {
 	int rc = -EACCES;
 	WRITE_REQ *smb = NULL;
@@ -1894,7 +1955,7 @@ cifs_async_writev(struct cifs_writedata *wdata)
 	if (rc == 0)
 		cifs_stats_inc(&tcon->stats.cifs_stats.num_writes);
 	else
-		kref_put(&wdata->refcount, cifs_writedata_release);
+		kref_put(&wdata->refcount, release);
 
 async_writev_out:
 	cifs_small_buf_release(smb);
@@ -1989,10 +2050,7 @@ CIFSSMBWrite2(const unsigned int xid, struct cifs_io_parms *io_parms,
 			*nbytes &= 0xFFFF;
 	}
 
-	if (resp_buf_type == CIFS_SMALL_BUFFER)
-		cifs_small_buf_release(iov[0].iov_base);
-	else if (resp_buf_type == CIFS_LARGE_BUFFER)
-		cifs_buf_release(iov[0].iov_base);
+	free_rsp_buf(resp_buf_type, iov[0].iov_base);
 
 	return rc;
 }
@@ -2210,14 +2268,14 @@ CIFSSMBPosixLock(const unsigned int xid, struct cifs_tcon *tcon,
 		}
 		parm_data = (struct cifs_posix_lock *)
 			((char *)&pSMBr->hdr.Protocol + data_offset);
-		if (parm_data->lock_type == __constant_cpu_to_le16(CIFS_UNLCK))
+		if (parm_data->lock_type == cpu_to_le16(CIFS_UNLCK))
 			pLockData->fl_type = F_UNLCK;
 		else {
 			if (parm_data->lock_type ==
-					__constant_cpu_to_le16(CIFS_RDLCK))
+					cpu_to_le16(CIFS_RDLCK))
 				pLockData->fl_type = F_RDLCK;
 			else if (parm_data->lock_type ==
-					__constant_cpu_to_le16(CIFS_WRLCK))
+					cpu_to_le16(CIFS_WRLCK))
 				pLockData->fl_type = F_WRLCK;
 
 			pLockData->fl_start = le64_to_cpu(parm_data->start);
@@ -2231,10 +2289,7 @@ plk_err_exit:
 	if (pSMB)
 		cifs_small_buf_release(pSMB);
 
-	if (resp_buf_type == CIFS_SMALL_BUFFER)
-		cifs_small_buf_release(iov[0].iov_base);
-	else if (resp_buf_type == CIFS_LARGE_BUFFER)
-		cifs_buf_release(iov[0].iov_base);
+	free_rsp_buf(resp_buf_type, iov[0].iov_base);
 
 	return rc;
 }
@@ -2302,7 +2357,7 @@ CIFSSMBRename(const unsigned int xid, struct cifs_tcon *tcon,
 	int bytes_returned;
 	int name_len, name_len2;
 	__u16 count;
-	int remap = cifs_sb->mnt_cifs_flags & CIFS_MOUNT_MAP_SPECIAL_CHR;
+	int remap = cifs_remap(cifs_sb);
 
 	cifs_dbg(FYI, "In CIFSSMBRename\n");
 renameRetry:
@@ -2511,7 +2566,7 @@ copyRetry:
 int
 CIFSUnixCreateSymLink(const unsigned int xid, struct cifs_tcon *tcon,
 		      const char *fromName, const char *toName,
-		      const struct nls_table *nls_codepage)
+		      const struct nls_table *nls_codepage, int remap)
 {
 	TRANSACTION2_SPI_REQ *pSMB = NULL;
 	TRANSACTION2_SPI_RSP *pSMBr = NULL;
@@ -2531,9 +2586,9 @@ createSymLinkRetry:
 
 	if (pSMB->hdr.Flags2 & SMBFLG2_UNICODE) {
 		name_len =
-		    cifs_strtoUTF16((__le16 *) pSMB->FileName, fromName,
-				     
-				    PATH_MAX, nls_codepage);
+		    cifsConvertToUTF16((__le16 *) pSMB->FileName, fromName,
+				 
+					PATH_MAX, nls_codepage, remap);
 		name_len++;	 
 		name_len *= 2;
 
@@ -2555,9 +2610,9 @@ createSymLinkRetry:
 	data_offset = (char *) (&pSMB->hdr.Protocol) + offset;
 	if (pSMB->hdr.Flags2 & SMBFLG2_UNICODE) {
 		name_len_target =
-		    cifs_strtoUTF16((__le16 *) data_offset, toName, PATH_MAX
-				     
-				    , nls_codepage);
+		    cifsConvertToUTF16((__le16 *) data_offset, toName,
+				 
+					PATH_MAX, nls_codepage, remap);
 		name_len_target++;	 
 		name_len_target *= 2;
 	} else {	 
@@ -2695,7 +2750,7 @@ CIFSCreateHardLink(const unsigned int xid, struct cifs_tcon *tcon,
 	int bytes_returned;
 	int name_len, name_len2;
 	__u16 count;
-	int remap = cifs_sb->mnt_cifs_flags & CIFS_MOUNT_MAP_SPECIAL_CHR;
+	int remap = cifs_remap(cifs_sb);
 
 	cifs_dbg(FYI, "In CIFSCreateHardLink\n");
 winCreateHardLinkRetry:
@@ -2760,7 +2815,7 @@ winCreateHardLinkRetry:
 int
 CIFSSMBUnixQuerySymLink(const unsigned int xid, struct cifs_tcon *tcon,
 			const unsigned char *searchName, char **symlinkinfo,
-			const struct nls_table *nls_codepage)
+			const struct nls_table *nls_codepage, int remap)
 {
  
 	TRANSACTION2_QPI_REQ *pSMB = NULL;
@@ -2781,8 +2836,9 @@ querySymLinkRetry:
 
 	if (pSMB->hdr.Flags2 & SMBFLG2_UNICODE) {
 		name_len =
-			cifs_strtoUTF16((__le16 *) pSMB->FileName, searchName,
-					PATH_MAX, nls_codepage);
+			cifsConvertToUTF16((__le16 *) pSMB->FileName,
+					   searchName, PATH_MAX, nls_codepage,
+					   remap);
 		name_len++;	 
 		name_len *= 2;
 	} else {	 
@@ -2849,21 +2905,24 @@ querySymLinkRetry:
 	return rc;
 }
 
-#ifdef CONFIG_CIFS_SYMLINK_EXPERIMENTAL
- 
 int
-CIFSSMBQueryReparseLinkInfo(const unsigned int xid, struct cifs_tcon *tcon,
-			const unsigned char *searchName,
-			char *symlinkinfo, const int buflen, __u16 fid,
-			const struct nls_table *nls_codepage)
+CIFSSMBQuerySymLink(const unsigned int xid, struct cifs_tcon *tcon,
+		    __u16 fid, char **symlinkinfo,
+		    const struct nls_table *nls_codepage)
 {
 	int rc = 0;
 	int bytes_returned;
 	struct smb_com_transaction_ioctl_req *pSMB;
 	struct smb_com_transaction_ioctl_rsp *pSMBr;
+	bool is_unicode;
+	unsigned int sub_len;
+	char *sub_start;
+	struct reparse_symlink_data *reparse_buf;
+	struct reparse_posix_data *posix_buf;
+	__u32 data_offset, data_count;
+	char *end_of_smb;
 
-	cifs_dbg(FYI, "In Windows reparse style QueryLink for path %s\n",
-		 searchName);
+	cifs_dbg(FYI, "In Windows reparse style QueryLink for fid %u\n", fid);
 	rc = smb_init(SMB_COM_NT_TRANSACT, 23, tcon, (void **) &pSMB,
 		      (void **) &pSMBr);
 	if (rc)
@@ -2892,62 +2951,125 @@ CIFSSMBQueryReparseLinkInfo(const unsigned int xid, struct cifs_tcon *tcon,
 			 (struct smb_hdr *) pSMBr, &bytes_returned, 0);
 	if (rc) {
 		cifs_dbg(FYI, "Send error in QueryReparseLinkInfo = %d\n", rc);
-	} else {		 
-		__u32 data_offset = le32_to_cpu(pSMBr->DataOffset);
-		__u32 data_count = le32_to_cpu(pSMBr->DataCount);
-		if (get_bcc(&pSMBr->hdr) < 2 || data_offset > 512) {
-			 
-			rc = -EIO;	 
-			goto qreparse_out;
-		}
-		if (data_count && (data_count < 2048)) {
-			char *end_of_smb = 2   +
-			       get_bcc(&pSMBr->hdr) + (char *)&pSMBr->ByteCount;
-
-			struct reparse_data *reparse_buf =
-						(struct reparse_data *)
-						((char *)&pSMBr->hdr.Protocol
-								 + data_offset);
-			if ((char *)reparse_buf >= end_of_smb) {
-				rc = -EIO;
-				goto qreparse_out;
-			}
-			if ((reparse_buf->LinkNamesBuf +
-				reparse_buf->TargetNameOffset +
-				reparse_buf->TargetNameLen) > end_of_smb) {
-				cifs_dbg(FYI, "reparse buf beyond SMB\n");
-				rc = -EIO;
-				goto qreparse_out;
-			}
-
-			if (pSMBr->hdr.Flags2 & SMBFLG2_UNICODE) {
-				cifs_from_ucs2(symlinkinfo, (__le16 *)
-						(reparse_buf->LinkNamesBuf +
-						reparse_buf->TargetNameOffset),
-						buflen,
-						reparse_buf->TargetNameLen,
-						nls_codepage, 0);
-			} else {  
-				strncpy(symlinkinfo,
-					reparse_buf->LinkNamesBuf +
-					reparse_buf->TargetNameOffset,
-					min_t(const int, buflen,
-					   reparse_buf->TargetNameLen));
-			}
-		} else {
-			rc = -EIO;
-			cifs_dbg(FYI, "Invalid return data count on get reparse info ioctl\n");
-		}
-		symlinkinfo[buflen] = 0;  
-		cifs_dbg(FYI, "readlink result - %s\n", symlinkinfo);
+		goto qreparse_out;
 	}
 
+	data_offset = le32_to_cpu(pSMBr->DataOffset);
+	data_count = le32_to_cpu(pSMBr->DataCount);
+	if (get_bcc(&pSMBr->hdr) < 2 || data_offset > 512) {
+		 
+		rc = -EIO;	 
+		goto qreparse_out;
+	}
+	if (!data_count || (data_count > 2048)) {
+		rc = -EIO;
+		cifs_dbg(FYI, "Invalid return data count on get reparse info ioctl\n");
+		goto qreparse_out;
+	}
+	end_of_smb = 2 + get_bcc(&pSMBr->hdr) + (char *)&pSMBr->ByteCount;
+	reparse_buf = (struct reparse_symlink_data *)
+				((char *)&pSMBr->hdr.Protocol + data_offset);
+	if ((char *)reparse_buf >= end_of_smb) {
+		rc = -EIO;
+		goto qreparse_out;
+	}
+	if (reparse_buf->ReparseTag == cpu_to_le32(IO_REPARSE_TAG_NFS)) {
+		cifs_dbg(FYI, "NFS style reparse tag\n");
+		posix_buf =  (struct reparse_posix_data *)reparse_buf;
+
+		if (posix_buf->InodeType != cpu_to_le64(NFS_SPECFILE_LNK)) {
+			cifs_dbg(FYI, "unsupported file type 0x%llx\n",
+				 le64_to_cpu(posix_buf->InodeType));
+			rc = -EOPNOTSUPP;
+			goto qreparse_out;
+		}
+		is_unicode = true;
+		sub_len = le16_to_cpu(reparse_buf->ReparseDataLength);
+		if (posix_buf->PathBuffer + sub_len > end_of_smb) {
+			cifs_dbg(FYI, "reparse buf beyond SMB\n");
+			rc = -EIO;
+			goto qreparse_out;
+		}
+		*symlinkinfo = cifs_strndup_from_utf16(posix_buf->PathBuffer,
+				sub_len, is_unicode, nls_codepage);
+		goto qreparse_out;
+	} else if (reparse_buf->ReparseTag !=
+			cpu_to_le32(IO_REPARSE_TAG_SYMLINK)) {
+		rc = -EOPNOTSUPP;
+		goto qreparse_out;
+	}
+
+	sub_start = le16_to_cpu(reparse_buf->SubstituteNameOffset) +
+				reparse_buf->PathBuffer;
+	sub_len = le16_to_cpu(reparse_buf->SubstituteNameLength);
+	if (sub_start + sub_len > end_of_smb) {
+		cifs_dbg(FYI, "reparse buf beyond SMB\n");
+		rc = -EIO;
+		goto qreparse_out;
+	}
+	if (pSMBr->hdr.Flags2 & SMBFLG2_UNICODE)
+		is_unicode = true;
+	else
+		is_unicode = false;
+
+	*symlinkinfo = cifs_strndup_from_utf16(sub_start, sub_len, is_unicode,
+					       nls_codepage);
+	if (!*symlinkinfo)
+		rc = -ENOMEM;
 qreparse_out:
 	cifs_buf_release(pSMB);
 
 	return rc;
 }
-#endif    
+
+int
+CIFSSMB_set_compression(const unsigned int xid, struct cifs_tcon *tcon,
+		    __u16 fid)
+{
+	int rc = 0;
+	int bytes_returned;
+	struct smb_com_transaction_compr_ioctl_req *pSMB;
+	struct smb_com_transaction_ioctl_rsp *pSMBr;
+
+	cifs_dbg(FYI, "Set compression for %u\n", fid);
+	rc = smb_init(SMB_COM_NT_TRANSACT, 23, tcon, (void **) &pSMB,
+		      (void **) &pSMBr);
+	if (rc)
+		return rc;
+
+	pSMB->compression_state = cpu_to_le16(COMPRESSION_FORMAT_DEFAULT);
+
+	pSMB->TotalParameterCount = 0;
+	pSMB->TotalDataCount = cpu_to_le32(2);
+	pSMB->MaxParameterCount = 0;
+	pSMB->MaxDataCount = 0;
+	pSMB->MaxSetupCount = 4;
+	pSMB->Reserved = 0;
+	pSMB->ParameterOffset = 0;
+	pSMB->DataCount = cpu_to_le32(2);
+	pSMB->DataOffset =
+		cpu_to_le32(offsetof(struct smb_com_transaction_compr_ioctl_req,
+				compression_state) - 4);   
+	pSMB->SetupCount = 4;
+	pSMB->SubCommand = cpu_to_le16(NT_TRANSACT_IOCTL);
+	pSMB->ParameterCount = 0;
+	pSMB->FunctionCode = cpu_to_le32(FSCTL_SET_COMPRESSION);
+	pSMB->IsFsctl = 1;  
+	pSMB->IsRootFlag = 0;
+	pSMB->Fid = fid;  
+	 
+	pSMB->ByteCount = cpu_to_le16(5);
+	inc_rfc1001_len(pSMB, 5);
+
+	rc = SendReceive(xid, tcon->ses, (struct smb_hdr *) pSMB,
+			 (struct smb_hdr *) pSMBr, &bytes_returned, 0);
+	if (rc)
+		cifs_dbg(FYI, "Send error in SetCompression = %d\n", rc);
+
+	cifs_buf_release(pSMB);
+
+	return rc;
+}
 
 #ifdef CONFIG_CIFS_POSIX
 
@@ -3057,10 +3179,10 @@ static __u16 ACL_to_cifs_posix(char *parm_data, const char *pACL,
 	cifs_acl->version = cpu_to_le16(1);
 	if (acl_type == ACL_TYPE_ACCESS) {
 		cifs_acl->access_entry_count = cpu_to_le16(count);
-		cifs_acl->default_entry_count = __constant_cpu_to_le16(0xFFFF);
+		cifs_acl->default_entry_count = cpu_to_le16(0xFFFF);
 	} else if (acl_type == ACL_TYPE_DEFAULT) {
 		cifs_acl->default_entry_count = cpu_to_le16(count);
-		cifs_acl->access_entry_count = __constant_cpu_to_le16(0xFFFF);
+		cifs_acl->access_entry_count = cpu_to_le16(0xFFFF);
 	} else {
 		cifs_dbg(FYI, "unknown ACL type %d\n", acl_type);
 		return 0;
@@ -3491,10 +3613,7 @@ CIFSSMBGetCIFSACL(const unsigned int xid, struct cifs_tcon *tcon, __u16 fid,
 		}
 	}
 qsec_out:
-	if (buf_type == CIFS_SMALL_BUFFER)
-		cifs_small_buf_release(iov[0].iov_base);
-	else if (buf_type == CIFS_LARGE_BUFFER)
-		cifs_buf_release(iov[0].iov_base);
+	free_rsp_buf(buf_type, iov[0].iov_base);
    
 	return rc;
 }
@@ -3669,11 +3788,12 @@ QFileInfoRetry:
 	pSMB->Pad = 0;
 	pSMB->Fid = netfid;
 	inc_rfc1001_len(pSMB, byte_count);
+	pSMB->t2.ByteCount = cpu_to_le16(byte_count);
 
 	rc = SendReceive(xid, tcon->ses, (struct smb_hdr *) pSMB,
 			 (struct smb_hdr *) pSMBr, &bytes_returned, 0);
 	if (rc) {
-		cifs_dbg(FYI, "Send error in QPathInfo = %d\n", rc);
+		cifs_dbg(FYI, "Send error in QFileInfo = %d", rc);
 	} else {		 
 		rc = validate_t2((struct smb_t2_rsp *)pSMBr);
 
@@ -3829,11 +3949,12 @@ UnixQFileInfoRetry:
 	pSMB->Pad = 0;
 	pSMB->Fid = netfid;
 	inc_rfc1001_len(pSMB, byte_count);
+	pSMB->t2.ByteCount = cpu_to_le16(byte_count);
 
 	rc = SendReceive(xid, tcon->ses, (struct smb_hdr *) pSMB,
 			 (struct smb_hdr *) pSMBr, &bytes_returned, 0);
 	if (rc) {
-		cifs_dbg(FYI, "Send error in QPathInfo = %d\n", rc);
+		cifs_dbg(FYI, "Send error in UnixQFileInfo = %d", rc);
 	} else {		 
 		rc = validate_t2((struct smb_t2_rsp *)pSMBr);
 
@@ -3917,7 +4038,7 @@ UnixQPathInfoRetry:
 	rc = SendReceive(xid, tcon->ses, (struct smb_hdr *) pSMB,
 			 (struct smb_hdr *) pSMBr, &bytes_returned, 0);
 	if (rc) {
-		cifs_dbg(FYI, "Send error in QPathInfo = %d\n", rc);
+		cifs_dbg(FYI, "Send error in UnixQPathInfo = %d", rc);
 	} else {		 
 		rc = validate_t2((struct smb_t2_rsp *)pSMBr);
 
@@ -3964,7 +4085,7 @@ findFirstRetry:
 		return rc;
 
 	nls_codepage = cifs_sb->local_nls;
-	remap = cifs_sb->mnt_cifs_flags & CIFS_MOUNT_MAP_SPECIAL_CHR;
+	remap = cifs_remap(cifs_sb);
 
 	if (pSMB->hdr.Flags2 & SMBFLG2_UNICODE) {
 		name_len =
@@ -4480,11 +4601,8 @@ getDFSRetry:
 		strncpy(pSMB->RequestFileName, search_name, name_len);
 	}
 
-	if (ses->server) {
-		if (ses->server->sec_mode &
-		   (SECMODE_SIGN_REQUIRED | SECMODE_SIGN_ENABLED))
-			pSMB->hdr.Flags2 |= SMBFLG2_SECURITY_SIGNATURE;
-	}
+	if (ses->server && ses->server->sign)
+		pSMB->hdr.Flags2 |= SMBFLG2_SECURITY_SIGNATURE;
 
 	pSMB->hdr.Uid = ses->Suid;
 
@@ -5078,7 +5196,7 @@ CIFSSMBSetEOF(const unsigned int xid, struct cifs_tcon *tcon,
 	int name_len;
 	int rc = 0;
 	int bytes_returned = 0;
-	int remap = cifs_sb->mnt_cifs_flags & CIFS_MOUNT_MAP_SPECIAL_CHR;
+	int remap = cifs_remap(cifs_sb);
 
 	__u16 params, byte_count, data_count, param_offset, offset;
 
@@ -5742,6 +5860,9 @@ QAllEAsRetry:
 	cifs_dbg(FYI, "ea length %d\n", list_len);
 	if (list_len <= 8) {
 		cifs_dbg(FYI, "empty EA list returned from server\n");
+		 
+		if (ea_name)
+			rc = -ENODATA;
 		goto QAllEAsOut;
 	}
 
