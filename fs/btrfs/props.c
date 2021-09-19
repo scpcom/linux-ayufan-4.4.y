@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2014 Filipe David Borba Manana <fdmanana@gmail.com>
  *
@@ -302,7 +305,7 @@ static int inherit_props(struct btrfs_trans_handle *trans,
 			 struct inode *parent)
 {
 	const struct prop_handler *h;
-#ifdef CONFIG_SYNO_BTRFS_RESERVE_PROP_SPACE_FOR_COMPRESSION
+#ifdef MY_ABC_HERE
 #else
 	struct btrfs_root *root = BTRFS_I(inode)->root;
 #endif
@@ -314,7 +317,7 @@ static int inherit_props(struct btrfs_trans_handle *trans,
 
 	for (h = &prop_handlers[0]; h->xattr_name; h++) {
 		const char *value;
-#ifdef CONFIG_SYNO_BTRFS_RESERVE_PROP_SPACE_FOR_COMPRESSION
+#ifdef MY_ABC_HERE
 #else
 		u64 num_bytes;
 #endif
@@ -326,7 +329,7 @@ static int inherit_props(struct btrfs_trans_handle *trans,
 		if (!value)
 			continue;
 
-#ifdef CONFIG_SYNO_BTRFS_RESERVE_PROP_SPACE_FOR_COMPRESSION
+#ifdef MY_ABC_HERE
 #else
 		num_bytes = btrfs_calc_trans_metadata_size(root, 1);
 		ret = btrfs_block_rsv_add(root, trans->block_rsv,
@@ -336,7 +339,7 @@ static int inherit_props(struct btrfs_trans_handle *trans,
 #endif
 		ret = __btrfs_set_prop(trans, inode, h->xattr_name,
 				       value, strlen(value), 0);
-#ifdef CONFIG_SYNO_BTRFS_RESERVE_PROP_SPACE_FOR_COMPRESSION
+#ifdef MY_ABC_HERE
 #else
 		btrfs_block_rsv_release(root, trans->block_rsv, num_bytes);
 #endif

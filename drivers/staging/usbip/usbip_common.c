@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2003-2008 Takahiro Hirofuchi
  *
@@ -592,7 +595,7 @@ void usbip_header_correct_endian(struct usbip_header *pdu, int send)
 	case USBIP_RET_UNLINK:
 		correct_endian_ret_unlink(&pdu->u.ret_unlink, send);
 		break;
-#ifdef CONFIG_SYNO_USB_USBIP
+#ifdef MY_ABC_HERE
 	case USBIP_RESET_DEV:
 		if(send) {
 			correct_endian_ret_submit(&pdu->u.ret_submit, send);

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Copyright (C) 1995  Linus Torvalds
  *
@@ -112,25 +115,25 @@
 #include <asm/alternative.h>
 #include <asm/prom.h>
 
-#if defined(CONFIG_SYNO_ATA_PWR_CTRL) && defined(CONFIG_SYNO_X64)
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
 #include  <linux/synobios.h>
 
-#ifdef CONFIG_SYNO_X86_PINCTRL_GPIO
+#ifdef MY_DEF_HERE
 #include <linux/gpio.h>
-#endif /* CONFIG_SYNO_X86_PINCTRL_GPIO */
+#endif /* MY_DEF_HERE */
 
-#ifdef CONFIG_SYNO_ICH_GPIO_CTRL
+#ifdef MY_ABC_HERE
 extern u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite);
-#endif /* CONFIG_SYNO_ICH_GPIO_CTRL */
-#endif /* CONFIG_SYNO_ATA_PWR_CTRL && CONFIG_SYNO_X64 */
+#endif /* MY_ABC_HERE */
+#endif /* MY_ABC_HERE && CONFIG_SYNO_X64 */
 
-#ifdef CONFIG_SYNO_DYN_MODULE_INSTALL
+#ifdef MY_ABC_HERE
 extern int gSynoHasDynModule;
-#endif /*CONFIG_SYNO_DYN_MODULE_INSTALL*/
+#endif /*MY_ABC_HERE*/
 
-#ifdef CONFIG_SYNO_INTERNAL_HD_NUM
+#ifdef MY_ABC_HERE
 extern long g_syno_hdd_powerup_seq;
-#endif /* CONFIG_SYNO_INTERNAL_HD_NUM */
+#endif /* MY_ABC_HERE */
 
 /*
  * max_low_pfn_mapped: highest direct mapped pfn under 4GB
@@ -296,7 +299,7 @@ void * __init extend_brk(size_t size, size_t align)
 	return ret;
 }
 
-#if defined(CONFIG_SYNO_ATA_PWR_CTRL) && defined(CONFIG_SYNO_X64) && !defined(CONFIG_SYNO_BRASWELL)
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE) && !defined(MY_DEF_HERE)
 /*
  * Synology sata power control functions
  */
@@ -312,9 +315,9 @@ static u8 SYNO_GET_HDD_ENABLE_PIN(const int index)
 {
 	u8 ret = GPIO_UNDEF;
 
-#if defined(CONFIG_SYNO_CEDARVIEW)
+#if defined(MY_DEF_HERE)
 	u8 HddEnPinMap[] = {16, 20, 21, 32};
-#elif defined(CONFIG_SYNO_AVOTON)
+#elif defined(MY_DEF_HERE)
 	u8 HddEnPinMap[] = {10, 15, 16, 17};
 #else
 	u8 *HddEnPinMap = NULL;
@@ -340,9 +343,9 @@ END:
 static u32 SYNO_X86_GPIO_PIN_SET(int pin, int *pValue)
 {
 	u32 ret = 0;
-#if defined(CONFIG_SYNO_ICH_GPIO_CTRL)
+#if defined(MY_ABC_HERE)
 	ret = syno_pch_lpc_gpio_pin(pin, pValue, 1);
-#elif defined(CONFIG_SYNO_X86_PINCTRL_GPIO)
+#elif defined(MY_DEF_HERE)
 	ret = syno_gpio_value_set(pin, *pValue);
 #endif
 	return ret;
@@ -427,9 +430,9 @@ static u8 SYNO_GET_HDD_PRESENT_PIN(const int index)
 {
 	u8 ret = GPIO_UNDEF;
 
-#if defined(CONFIG_SYNO_CEDARVIEW)
+#if defined(MY_DEF_HERE)
 	u8 przPinMap[]   = {33, 35, 49, 18};
-#elif defined(CONFIG_SYNO_AVOTON)
+#elif defined(MY_DEF_HERE)
 	u8 przPinMap[] = {18, 28, 34, 44};
 #else
 	u8 *przPinMap = NULL;
@@ -463,7 +466,7 @@ int SYNO_CHECK_HDD_PRESENT(int index)
 	u8 iPin = SYNO_GET_HDD_PRESENT_PIN(index);
 
 	/* please check spec with HW */
-#if defined(CONFIG_SYNO_AVOTON)
+#if defined(MY_DEF_HERE)
 	const int iInverseValue = 1;
 #else
 	const int iInverseValue = 0;
@@ -478,9 +481,9 @@ int SYNO_CHECK_HDD_PRESENT(int index)
 		goto END;
 	}
 
-#if defined(CONFIG_SYNO_ICH_GPIO_CTRL)
+#if defined(MY_ABC_HERE)
 	syno_pch_lpc_gpio_pin(iPin, &iPrzVal, 0);
-#elif defined(CONFIG_SYNO_X86_PINCTRL_GPIO)
+#elif defined(MY_DEF_HERE)
 	syno_gpio_value_get(iPin, &iPrzVal);
 #endif
 
@@ -525,9 +528,9 @@ END:
 EXPORT_SYMBOL(SYNO_CTRL_HDD_POWERON);
 EXPORT_SYMBOL(SYNO_CHECK_HDD_PRESENT);
 EXPORT_SYMBOL(SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER);
-#endif /* CONFIG_SYNO_ATA_PWR_CTRL && CONFIG_SYNO_X64 */
+#endif /* MY_ABC_HERE && CONFIG_SYNO_X64 */
 
-#ifdef CONFIG_SYNO_SAS_ENCOLURE_PWR_CTL
+#ifdef MY_DEF_HERE
 /* Export Sysctl interface for RXD1215sas power control
  *
  * Drive GPIO20 to low for poweroff process. udev will
@@ -547,7 +550,7 @@ int SynoProcEncPwrCtl(struct ctl_table *table, int write,
 	return proc_dointvec(table, write, buffer, lenp, ppos);
 }
 EXPORT_SYMBOL(SynoProcEncPwrCtl);
-#endif /* CONFIG_SYNO_SAS_ENCOLURE_PWR_CTL */
+#endif /* MY_DEF_HERE */
 
 #ifdef CONFIG_X86_32
 static void __init cleanup_highmap(void)
@@ -763,7 +766,7 @@ static void __init memblock_x86_reserve_range_setup_data(void)
 	}
 }
 
-#ifdef CONFIG_SYNO_DYN_MODULE_INSTALL
+#ifdef MY_ABC_HERE
 static int __init early_is_dyn_module(char *p)
 {
 	int iLen = 0;
@@ -783,7 +786,7 @@ END:
 	return 1;
 }
 __setup("syno_dyn_module=", early_is_dyn_module);
-#endif /* CONFIG_SYNO_DYN_MODULE_INSTALL */
+#endif /* MY_ABC_HERE */
 
 /*
  * --------- Crashkernel reservation ------------------------------

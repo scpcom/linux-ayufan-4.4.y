@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/file_table.c
  *
@@ -29,9 +32,9 @@
 
 #include <linux/atomic.h>
 
-#ifdef CONFIG_SYNO_FS_UNMOUNT
+#ifdef MY_ABC_HERE
 #include "mount.h"
-#endif /* CONFIG_SYNO_FS_UNMOUNT */
+#endif /* MY_ABC_HERE */
 
 #include "internal.h"
 
@@ -479,7 +482,7 @@ void mark_files_ro(struct super_block *sb)
 	lg_global_unlock(&files_lglock);
 }
 
-#ifdef CONFIG_SYNO_FS_UNMOUNT
+#ifdef MY_ABC_HERE
 #define MAX_SHOWN_OPENED_FILE 10
 void fs_show_opened_file(struct mount *mnt)
 {
@@ -517,7 +520,7 @@ over:
 	kfree(file_name_buf);
 	kfree(mnt_point_buf);
 }
-#endif /* CONFIG_SYNO_FS_UNMOUNT */
+#endif /* MY_ABC_HERE */
 
 void __init files_init(unsigned long mempages)
 { 

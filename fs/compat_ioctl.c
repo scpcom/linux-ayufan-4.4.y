@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * ioctl32.c: Conversion between 32bit and 64bit native ioctls.
  *
@@ -116,7 +119,7 @@
 #include <asm/fbio.h>
 #endif
 
-#ifdef CONFIG_SYNO_X64
+#ifdef MY_ABC_HERE
 #include <linux/synobios.h>
 #endif
 
@@ -228,7 +231,7 @@ static int do_video_set_spu_palette(unsigned int fd, unsigned int cmd,
 	return err;
 }
 
-#ifdef CONFIG_SYNO_COMPACT_DTV_IOCTL
+#ifdef MY_ABC_HERE
 struct compat_dtv_property {
 	__u32 cmd;
 	__u32 reserved[3];
@@ -361,7 +364,7 @@ static int do_fe_get_property(unsigned int fd, unsigned int cmd,
 
 	return err;
 }
-#endif /* CONFIG_SYNO_COMPACT_DTV_IOCTL */
+#endif /* MY_ABC_HERE */
 
 #ifdef CONFIG_BLOCK
 typedef struct sg_io_hdr32 {
@@ -1033,17 +1036,17 @@ COMPATIBLE_IOCTL(FIGETBSZ)
 /* 'X' - originally XFS but some now in the VFS */
 COMPATIBLE_IOCTL(FIFREEZE)
 COMPATIBLE_IOCTL(FITHAW)
-#ifdef CONFIG_SYNO_FS_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 COMPATIBLE_IOCTL(FIGETVERSION)
 COMPATIBLE_IOCTL(FISETVERSION)
 COMPATIBLE_IOCTL(FIINCVERSION)
 COMPATIBLE_IOCTL(FISETFILEVERSION)
-#ifdef CONFIG_SYNO_EXT4_ARCHIVE_VERSION_FIX
+#ifdef MY_ABC_HERE
 COMPATIBLE_IOCTL(FIGETBADVERSION)
 COMPATIBLE_IOCTL(FICLEARBADVERSION)
 COMPATIBLE_IOCTL(FISETBADVERSION)
-#endif /* CONFIG_SYNO_EXT4_ARCHIVE_VERSION_FIX */
-#endif /* CONFIG_SYNO_FS_ARCHIVE_VERSION */
+#endif /* MY_ABC_HERE */
+#endif /* MY_ABC_HERE */
 COMPATIBLE_IOCTL(KDGETKEYCODE)
 COMPATIBLE_IOCTL(KDSETKEYCODE)
 COMPATIBLE_IOCTL(KDGKBTYPE)
@@ -1536,25 +1539,25 @@ COMPATIBLE_IOCTL(JSIOCGAXES)
 COMPATIBLE_IOCTL(JSIOCGBUTTONS)
 COMPATIBLE_IOCTL(JSIOCGNAME(0))
 
-#ifdef CONFIG_SYNO_SUPPORT_EUP
+#ifdef MY_ABC_HERE
 COMPATIBLE_IOCTL(SYNOIO_SUPERIO_READ)
 COMPATIBLE_IOCTL(SYNOIO_SUPERIO_WRITE)
 COMPATIBLE_IOCTL(SYNOIO_IS_FULLY_SUPPORT_EUP)
-#endif /* CONFIG_SYNO_SUPPORT_EUP */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_MD_STATUS_GET
+#ifdef MY_ABC_HERE
 COMPATIBLE_IOCTL(GET_SYNC_STATUS)
 COMPATIBLE_IOCTL(GET_ARRAY_STATUS)
-#endif /* CONFIG_SYNO_MD_STATUS_GET */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_DISK_HIBERNATION
+#ifdef MY_ABC_HERE
 COMPATIBLE_IOCTL(SD_IOCTL_IDLE)
 COMPATIBLE_IOCTL(SD_IOCTL_SUPPORT_SLEEP)
-#endif /* CONFIG_SYNO_DISK_HIBERNATION */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_BADSECTOR_TEST
+#ifdef MY_ABC_HERE
 COMPATIBLE_IOCTL(SCSI_IOCTL_SET_BADSECTORS)
-#endif /* CONFIG_SYNO_BADSECTOR_TEST */
+#endif /* MY_ABC_HERE */
 
 #ifdef TIOCGLTC
 COMPATIBLE_IOCTL(TIOCGLTC)
@@ -1651,12 +1654,12 @@ static long do_ioctl_trans(int fd, unsigned int cmd,
 		return do_video_stillpicture(fd, cmd, argp);
 	case VIDEO_SET_SPU_PALETTE:
 		return do_video_set_spu_palette(fd, cmd, argp);
-#ifdef CONFIG_SYNO_COMPACT_DTV_IOCTL
+#ifdef MY_ABC_HERE
 	case FE_SET_PROPERTY32:
 		return do_fe_set_property(fd, cmd, argp);
 	case FE_GET_PROPERTY32:
 		return do_fe_get_property(fd, cmd, argp);
-#endif /* CONFIG_SYNO_COMPACT_DTV_IOCTL */
+#endif /* MY_ABC_HERE */
 	}
 
 	/*
@@ -1739,17 +1742,17 @@ asmlinkage long compat_sys_ioctl(unsigned int fd, unsigned int cmd,
 	case FIONBIO:
 	case FIOASYNC:
 	case FIOQSIZE:
-#ifdef CONFIG_SYNO_FS_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	case FIGETVERSION:
 	case FISETVERSION:
 	case FIINCVERSION:
 	case FISETFILEVERSION:
-#ifdef CONFIG_SYNO_EXT4_ARCHIVE_VERSION_FIX
+#ifdef MY_ABC_HERE
 	case FIGETBADVERSION:
 	case FICLEARBADVERSION:
 	case FISETBADVERSION:
-#endif /* CONFIG_SYNO_EXT4_ARCHIVE_VERSION_FIX */
-#endif /* CONFIG_SYNO_FS_ARCHIVE_VERSION */
+#endif /* MY_ABC_HERE */
+#endif /* MY_ABC_HERE */
 		break;
 
 #if defined(CONFIG_IA64) || defined(CONFIG_X86_64)

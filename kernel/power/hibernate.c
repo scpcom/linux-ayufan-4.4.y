@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * kernel/power/hibernate.c - Hibernation (a.k.a suspend-to-disk) support.
  *
@@ -505,7 +508,7 @@ int hibernation_restore(int platform_mode)
 	return error;
 }
 
-#ifdef CONFIG_SYNO_X86_AUTO_POWER_ON
+#ifdef MY_ABC_HERE
 void syno_schedule_power_on_prepare(void)
 {
 	if (!hibernation_ops) {
@@ -515,7 +518,7 @@ void syno_schedule_power_on_prepare(void)
 	hibernation_ops->begin();
 	hibernation_ops->end();
 }
-#endif /* CONFIG_SYNO_X86_AUTO_POWER_ON */
+#endif /* MY_ABC_HERE */
 
 /**
  * hibernation_platform_enter - Power off the system using the platform driver.

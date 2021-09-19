@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/ext4/symlink.c
  *
@@ -31,10 +34,10 @@ static void *ext4_follow_link(struct dentry *dentry, struct nameidata *nd)
 }
 
 const struct inode_operations ext4_symlink_inode_operations = {
-#ifdef CONFIG_SYNO_EXT4_STAT
+#ifdef MY_ABC_HERE
 	.syno_getattr	= ext4_syno_getattr,
 #endif
-#ifdef CONFIG_SYNO_EXT4_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	.syno_get_archive_ver = ext4_syno_get_archive_ver,
 	.syno_set_archive_ver = ext4_syno_set_archive_ver,
 #endif
@@ -49,10 +52,10 @@ const struct inode_operations ext4_symlink_inode_operations = {
 };
 
 const struct inode_operations ext4_fast_symlink_inode_operations = {
-#ifdef CONFIG_SYNO_EXT4_STAT
+#ifdef MY_ABC_HERE
 	.syno_getattr	= ext4_syno_getattr,
 #endif
-#ifdef CONFIG_SYNO_EXT4_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	.syno_get_archive_ver = ext4_syno_get_archive_ver,
 	.syno_set_archive_ver = ext4_syno_set_archive_ver,
 #endif

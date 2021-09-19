@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2007 Oracle.  All rights reserved.
  *
@@ -1032,7 +1035,7 @@ static int contains_pending_extent(struct btrfs_trans_handle *trans,
 	struct extent_map *em;
 	struct list_head *search_list = &trans->transaction->pending_chunks;
 	int ret = 0;
-#ifdef CONFIG_SYNO_BTRFS_FIX_ALLOC_CHUNK
+#ifdef MY_ABC_HERE
 	u64 physical_start = *start;
 #endif
 
@@ -1045,7 +1048,7 @@ again:
 		for (i = 0; i < map->num_stripes; i++) {
 			if (map->stripes[i].dev != device)
 				continue;
-#ifdef CONFIG_SYNO_BTRFS_FIX_ALLOC_CHUNK
+#ifdef MY_ABC_HERE
 			if (map->stripes[i].physical >= physical_start + len ||
 			    map->stripes[i].physical + em->orig_block_len <=
 			    physical_start)
@@ -1176,7 +1179,7 @@ again:
 			if (contains_pending_extent(trans, device,
 						    &search_start,
 						    hole_size))
-#ifdef CONFIG_SYNO_BTRFS_FIX_ALLOC_CHUNK
+#ifdef MY_ABC_HERE
 			{
 				if (key.offset >= search_start)
 					hole_size = key.offset - search_start;
@@ -2554,7 +2557,7 @@ int btrfs_remove_chunk(struct btrfs_trans_handle *trans,
 			spin_unlock(&root->fs_info->free_chunk_lock);
 			btrfs_clear_space_info_full(root->fs_info);
 			unlock_chunks(root);
-#ifdef CONFIG_SYNO_BTRFS_CLEAR_SPACE_FULL
+#ifdef MY_ABC_HERE
 			trans->transaction->clear_full = true;
 #endif
 
@@ -4189,7 +4192,7 @@ static int __btrfs_alloc_chunk(struct btrfs_trans_handle *trans,
 	ncopies = btrfs_raid_array[index].ncopies;
 
 	if (type & BTRFS_BLOCK_GROUP_DATA) {
-#ifdef CONFIG_SYNO_BTRFS_BIG_BLOCK_GROUP
+#ifdef MY_ABC_HERE
 		if (info->super_copy->total_bytes > 1024ULL * 1024 * 1024 * 1024) {
 			max_stripe_size = 10ULL * 1024 * 1024 * 1024;
 			max_chunk_size = 2 * max_stripe_size;
@@ -5444,10 +5447,10 @@ int btrfs_rmap_block(struct btrfs_mapping_tree *map_tree,
 static void btrfs_end_bio(struct bio *bio, int err)
 {
 	struct btrfs_bio *bbio = bio->bi_private;
-#ifdef CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#ifdef MY_ABC_HERE
 #else
 	struct btrfs_device *dev = bbio->stripes[0].dev;
-#endif /* CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING */
+#endif /* MY_ABC_HERE */
 	int is_orig_bio = 0;
 
 	if (err) {
@@ -5455,9 +5458,9 @@ static void btrfs_end_bio(struct bio *bio, int err)
 		if (err == -EIO || err == -EREMOTEIO) {
 			unsigned int stripe_index =
 				btrfs_io_bio(bio)->stripe_index;
-#ifdef CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#ifdef MY_ABC_HERE
 			struct btrfs_device *dev;
-#endif /* CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING */
+#endif /* MY_ABC_HERE */
 
 			BUG_ON(stripe_index >= bbio->num_stripes);
 			dev = bbio->stripes[stripe_index].dev;
@@ -5479,10 +5482,10 @@ static void btrfs_end_bio(struct bio *bio, int err)
 	if (bio == bbio->orig_bio)
 		is_orig_bio = 1;
 
-#ifdef CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#ifdef MY_ABC_HERE
 #else
 	btrfs_bio_counter_dec(bbio->fs_info);
-#endif /* CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING */
+#endif /* MY_ABC_HERE */
 
 	if (atomic_dec_and_test(&bbio->stripes_pending)) {
 		if (!is_orig_bio) {
@@ -5626,10 +5629,10 @@ static void submit_stripe_bio(struct btrfs_root *root, struct btrfs_bio *bbio,
 #endif
 	bio->bi_bdev = dev->bdev;
 
-#ifdef CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#ifdef MY_ABC_HERE
 #else
 	btrfs_bio_counter_inc_noblocked(root->fs_info);
-#endif /* CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING */
+#endif /* MY_ABC_HERE */
 
 	if (async)
 		btrfs_schedule_bio(root, dev, rw, bio);
@@ -5699,13 +5702,13 @@ int btrfs_map_bio(struct btrfs_root *root, int rw, struct bio *bio,
 	length = bio->bi_size;
 	map_length = length;
 
-#ifdef CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#ifdef MY_ABC_HERE
 #else
 	btrfs_bio_counter_inc_blocked(root->fs_info);
-#endif /* CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING */
+#endif /* MY_ABC_HERE */
 	ret = __btrfs_map_block(root->fs_info, rw, logical, &map_length, &bbio,
 			      mirror_num, &raid_map);
-#ifdef CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#ifdef MY_ABC_HERE
 	if (ret) /* -ENOMEM */
 		return ret;
 #else
@@ -5713,22 +5716,22 @@ int btrfs_map_bio(struct btrfs_root *root, int rw, struct bio *bio,
 		btrfs_bio_counter_dec(root->fs_info);
 		return ret;
 	}
-#endif /* CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING */
+#endif /* MY_ABC_HERE */
 
 	total_devs = bbio->num_stripes;
 	bbio->orig_bio = first_bio;
 	bbio->private = first_bio->bi_private;
 	bbio->end_io = first_bio->bi_end_io;
-#ifdef CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#ifdef MY_ABC_HERE
 #else
 	bbio->fs_info = root->fs_info;
-#endif /* CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING */
+#endif /* MY_ABC_HERE */
 	atomic_set(&bbio->stripes_pending, bbio->num_stripes);
 
 	if (raid_map) {
 		/* In this case, map_length has been set to the length of
 		   a single stripe; not the whole write */
-#ifdef CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#ifdef MY_ABC_HERE
 		if (rw & WRITE) {
 			return raid56_parity_write(root, bio, bbio,
 						   raid_map, map_length);
@@ -5752,7 +5755,7 @@ int btrfs_map_bio(struct btrfs_root *root, int rw, struct bio *bio,
 		 */
 		btrfs_bio_counter_dec(root->fs_info);
 		return ret;
-#endif /* CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING */
+#endif /* MY_ABC_HERE */
 	}
 
 	if (map_length < length) {
@@ -5794,10 +5797,10 @@ int btrfs_map_bio(struct btrfs_root *root, int rw, struct bio *bio,
 				  async_submit);
 		dev_nr++;
 	}
-#ifdef CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#ifdef MY_ABC_HERE
 #else
 	btrfs_bio_counter_dec(root->fs_info);
-#endif /* CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING */
+#endif /* MY_ABC_HERE */
 	return 0;
 }
 

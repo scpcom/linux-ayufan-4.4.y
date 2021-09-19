@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/buffer.c
  *
@@ -111,15 +114,15 @@ static int quiet_error(struct buffer_head *bh)
 static void buffer_io_error(struct buffer_head *bh)
 {
 	char b[BDEVNAME_SIZE];
-#ifdef CONFIG_SYNO_IO_ERROR_LIMIT_MSG
+#ifdef MY_ABC_HERE
 	if (printk_ratelimit()) {
-#endif /* CONFIG_SYNO_IO_ERROR_LIMIT_MSG */
+#endif /* MY_ABC_HERE */
 	printk(KERN_ERR "Buffer I/O error on device %s, logical block %Lu\n",
 			bdevname(bh->b_bdev, b),
 			(unsigned long long)bh->b_blocknr);
-#ifdef CONFIG_SYNO_IO_ERROR_LIMIT_MSG
+#ifdef MY_ABC_HERE
 	}
-#endif /* CONFIG_SYNO_IO_ERROR_LIMIT_MSG */
+#endif /* MY_ABC_HERE */
 }
 
 /*

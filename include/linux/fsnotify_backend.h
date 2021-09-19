@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Filesystem access notification for Linux
  *
@@ -160,12 +163,12 @@ struct fsnotify_group {
 			struct user_struct      *user;
 		} inotify_data;
 #endif
-#ifdef CONFIG_SYNO_FS_NOTIFY
+#ifdef MY_ABC_HERE
 		struct synotify_group_private_data {
 			struct user_struct *user;
 			unsigned int max_watchers;
 		} synotify_data;
-#endif /* CONFIG_SYNO_FS_NOTIFY */
+#endif /* MY_ABC_HERE */
 #ifdef CONFIG_FANOTIFY
 		struct fanotify_group_private_data {
 #ifdef CONFIG_FANOTIFY_ACCESS_PERMISSIONS
@@ -238,7 +241,7 @@ struct fsnotify_event {
 #define FSNOTIFY_EVENT_NONE	0
 #define FSNOTIFY_EVENT_PATH	1
 #define FSNOTIFY_EVENT_INODE	2
-#ifdef CONFIG_SYNO_FS_NOTIFY
+#ifdef MY_ABC_HERE
 #define FSNOTIFY_EVENT_SYNO	3
 #endif
 	int data_type;		/* which of the above union we have */
@@ -247,11 +250,11 @@ struct fsnotify_event {
 
 	u32 sync_cookie;	/* used to corrolate events, namely inotify mv events */
 	const unsigned char *file_name;
-#ifdef CONFIG_SYNO_FS_NOTIFY
+#ifdef MY_ABC_HERE
 	const unsigned char *full_name;
 #endif
 	size_t name_len;
-#ifdef CONFIG_SYNO_FS_NOTIFY
+#ifdef MY_ABC_HERE
 	size_t full_name_len;
 #endif
 	struct pid *tgid;
@@ -325,7 +328,7 @@ extern int __fsnotify_parent(struct path *path, struct dentry *dentry, __u32 mas
 extern void __fsnotify_inode_delete(struct inode *inode);
 extern void __fsnotify_vfsmount_delete(struct vfsmount *mnt);
 extern u32 fsnotify_get_cookie(void);
-#ifdef CONFIG_SYNO_FS_NOTIFY
+#ifdef MY_ABC_HERE
 extern int SYNOFsnotify(__u32 mask, void *data, int data_is,
 	     const unsigned char *file_name, u32 cookie);
 #endif

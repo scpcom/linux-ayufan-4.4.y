@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /**
  * eCryptfs: Linux filesystem encryption layer
  *
@@ -145,7 +148,7 @@ int ecryptfs_privileged_open(struct file **lower_file,
 	 * lower file is fput() when all eCryptfs files for the inode are
 	 * released. */
 	flags |= IS_RDONLY(lower_dentry->d_inode) ? O_RDONLY : O_RDWR;
-#ifdef CONFIG_SYNO_FS_ECRYPTFS_LOWER_INIT
+#ifdef MY_ABC_HERE
 	lower_dentry->d_inode->i_opflags |= IOP_ECRYPTFS_LOWER_INIT;
 #endif
 	(*lower_file) = dentry_open(&req.path, flags, cred);

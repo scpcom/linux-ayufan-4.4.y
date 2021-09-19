@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/open.c
  *
@@ -33,7 +36,7 @@
 #include <linux/compat.h>
 
 #include "internal.h"
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 #include "synoacl_int.h"
 #endif
 
@@ -85,7 +88,7 @@ long vfs_truncate(struct path *path, loff_t length)
 	if (error)
 		goto out;
 
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 	if (IS_SYNOACL(path->dentry)) {
 		error = synoacl_op_perm(path->dentry, MAY_WRITE);
 	} else
@@ -301,9 +304,9 @@ SYSCALL_DEFINE4(fallocate, int, fd, int, mode, loff_t, offset, loff_t, len)
 	return error;
 }
 
-#if defined(CONFIG_SYNO_FS_EXPORT_SYMBOL_FALLOCATE) || defined(CONFIG_AUFS_FHSM)
+#if defined(MY_ABC_HERE) || defined(CONFIG_AUFS_FHSM)
 EXPORT_SYMBOL(do_fallocate);
-#endif /* CONFIG_SYNO_FS_EXPORT_SYMBOL_FALLOCATE || CONFIG_AUFS_FHSM */
+#endif /* MY_ABC_HERE || CONFIG_AUFS_FHSM */
 
 /*
  * access() needs to use the real uid/gid, not the effective uid/gid.
@@ -357,7 +360,7 @@ retry:
 			goto out_path_release;
 	}
 
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 	if (IS_SYNOACL(path.dentry)) {
 		res = synoacl_op_access(path.dentry, mode, 0);
 	} else
@@ -401,7 +404,7 @@ SYSCALL_DEFINE1(chdir, const char __user *, filename)
 	struct path path;
 	int error;
 	unsigned int lookup_flags = LOOKUP_FOLLOW | LOOKUP_DIRECTORY;
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 	struct inode *inode;
 #endif
 retry:
@@ -409,7 +412,7 @@ retry:
 	if (error)
 		goto out;
 
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 	inode = path.dentry->d_inode;
 	if (IS_SYNOACL(path.dentry)) {
 		error = synoacl_op_perm(path.dentry, MAY_EXEC);
@@ -450,11 +453,11 @@ SYSCALL_DEFINE1(fchdir, unsigned int, fd)
 	if (!S_ISDIR(inode->i_mode))
 		goto out_putf;
 
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 	if (IS_SYNOACL(f.file->f_path.dentry)) {
 		error = synoacl_op_perm(f.file->f_path.dentry, MAY_EXEC);
 	} else
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 	error = inode_permission(inode, MAY_EXEC | MAY_CHDIR);
 	if (!error)
 		set_fs_pwd(current->fs, &f.file->f_path);
@@ -469,15 +472,15 @@ SYSCALL_DEFINE1(chroot, const char __user *, filename)
 	struct path path;
 	int error;
 	unsigned int lookup_flags = LOOKUP_FOLLOW | LOOKUP_DIRECTORY;
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 	struct inode *inode;
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 retry:
 	error = user_path_at(AT_FDCWD, filename, lookup_flags, &path);
 	if (error)
 		goto out;
 
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 	inode = path.dentry->d_inode;
 	if (IS_SYNOACL(path.dentry)) {
 		error = synoacl_op_perm(path.dentry, MAY_EXEC);
@@ -486,7 +489,7 @@ retry:
 	}
 #else
 	error = inode_permission(path.dentry->d_inode, MAY_EXEC | MAY_CHDIR);
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 	if (error)
 		goto dput_and_out;
 
@@ -731,7 +734,7 @@ static int do_dentry_open(struct file *f,
 
 	f->f_op = fops_get(inode->i_fop);
 
-#ifdef CONFIG_SYNO_FS_ECRYPTFS_LOWER_INIT
+#ifdef MY_ABC_HERE
 	if (inode->i_opflags & IOP_ECRYPTFS_LOWER_INIT) {
 		inode->i_opflags &= ~IOP_ECRYPTFS_LOWER_INIT;
 	} else {
@@ -739,7 +742,7 @@ static int do_dentry_open(struct file *f,
 	error = security_file_open(f, cred);
 	if (error)
 		goto cleanup_all;
-#ifdef CONFIG_SYNO_FS_ECRYPTFS_LOWER_INIT
+#ifdef MY_ABC_HERE
 	}
 #endif
 
@@ -997,21 +1000,21 @@ long do_sys_open(int dfd, const char __user *filename, int flags, umode_t mode)
 	return fd;
 }
 
-#ifdef CONFIG_SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 #include <linux/synolib.h>
 extern int syno_hibernation_log_level;
-#endif /* CONFIG_SYNO_DEBUG_FLAG */
+#endif /* MY_ABC_HERE */
 
 SYSCALL_DEFINE3(open, const char __user *, filename, int, flags, umode_t, mode)
 {
 	if (force_o_largefile())
 		flags |= O_LARGEFILE;
 
-#ifdef CONFIG_SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 	if(syno_hibernation_log_level > 0) {
 		syno_do_hibernation_filename_log(filename);
 	}
-#endif /* CONFIG_SYNO_DEBUG_FLAG */
+#endif /* MY_ABC_HERE */
 
 	return do_sys_open(AT_FDCWD, filename, flags, mode);
 }
@@ -1126,7 +1129,7 @@ int nonseekable_open(struct inode *inode, struct file *filp)
 
 EXPORT_SYMBOL(nonseekable_open);
 
-#ifdef CONFIG_SYNO_FS_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 extern long __SYNOArchiveSet(struct dentry *dentry, unsigned int cmd);
 SYSCALL_DEFINE2(SYNOArchiveBit, const char __user *, filename, int, cmd)
 {
@@ -1175,9 +1178,9 @@ fput_out:
 	fput_light(file, fput_needed);
 	return ret;
 }
-#endif /* CONFIG_SYNO_FS_ARCHIVE_BIT */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_ECRYPTFS_FILENAME_SYSCALL
+#ifdef MY_ABC_HERE
 #include "../fs/ecryptfs/ecryptfs_kernel.h"
 int (*fecryptfs_decode_and_decrypt_filename)(char **plaintext_name,
                                         size_t *plaintext_name_size,
@@ -1316,4 +1319,4 @@ OUT_RELEASE:
 
 	return err;
 }
-#endif /* CONFIG_SYNO_ECRYPTFS_FILENAME_SYSCALL */
+#endif /* MY_ABC_HERE */

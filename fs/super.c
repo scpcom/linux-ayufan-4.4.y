@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/super.c
  *
@@ -215,7 +218,7 @@ static struct super_block *alloc_super(struct file_system_type *type, int flags)
 		s->s_op = &default_op;
 		s->s_time_gran = 1000000000;
 		s->cleancache_poolid = -1;
-#ifdef CONFIG_SYNO_FS_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 		mutex_init(&s->s_archive_mutex);
 		s->s_archive_version = 0;
 #endif

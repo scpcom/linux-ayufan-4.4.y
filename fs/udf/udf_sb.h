@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef __LINUX_UDF_SB_H
 #define __LINUX_UDF_SB_H
 
@@ -32,7 +35,7 @@
 #define UDF_FLAG_SESSION_SET	17
 #define UDF_FLAG_LASTBLOCK_SET	18
 #define UDF_FLAG_BLOCKSIZE_SET	19
-#ifdef CONFIG_SYNO_UDF_CASELESS
+#ifdef MY_ABC_HERE
 #define SYNO_UDF_FLAG_CASELESS 20
 #endif
 

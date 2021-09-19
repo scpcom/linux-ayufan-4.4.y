@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2001 Sistina Software (UK) Limited.
  * Copyright (C) 2004-2008 Red Hat, Inc. All rights reserved.
@@ -482,7 +485,7 @@ int dm_get_device(struct dm_target *ti, const char *path, fmode_t mode,
 }
 EXPORT_SYMBOL(dm_get_device);
 
-#ifdef CONFIG_SYNO_MD_FLASHCACHE_4KN_SUPPORT
+#ifdef MY_ABC_HERE
 int dm_handle_4kn_target_support(struct dm_target *ti, struct dm_dev *dev,
 			 sector_t start, sector_t len, void *data)
 {
@@ -509,7 +512,7 @@ int dm_handle_4kn_target_support(struct dm_target *ti, struct dm_dev *dev,
 }
 
 EXPORT_SYMBOL_GPL(dm_handle_4kn_target_support);
-#endif /* CONFIG_SYNO_MD_FLASHCACHE_4KN_SUPPORT */
+#endif /* MY_ABC_HERE */
 
 int dm_set_device_limits(struct dm_target *ti, struct dm_dev *dev,
 			 sector_t start, sector_t len, void *data)
@@ -1314,12 +1317,12 @@ int dm_calculate_queue_limits(struct dm_table *table,
 
 combine_limits:
 
-#ifdef CONFIG_SYNO_MD_FLASHCACHE_4KN_SUPPORT
+#ifdef MY_ABC_HERE
 		if (ti->type->handle_4kn_target_support) {
 			ti->type->handle_4kn_target_support(ti, dm_handle_4kn_target_support,
 						  &ti_limits);
 		}
-#endif /* CONFIG_SYNO_MD_FLASHCACHE_4KN_SUPPORT */
+#endif /* MY_ABC_HERE */
 		/*
 		 * Merge this target's queue limits into the overall limits
 		 * for the table.

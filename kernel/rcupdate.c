@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Read-Copy Update mechanism for mutual exclusion
  *
@@ -424,7 +427,7 @@ EXPORT_SYMBOL_GPL(do_trace_rcu_torture_read);
 #define RCU_STALL_DELAY_DELTA	       0
 #endif
 
-#ifdef CONFIG_SYNO_RCU_CPU_STALL_SUPPRESS
+#ifdef MY_ABC_HERE
 int rcu_cpu_stall_suppress __read_mostly = 1; /* 1 = suppress stall warnings. */
 #else
 int rcu_cpu_stall_suppress __read_mostly; /* 1 = suppress stall warnings. */

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef __LINUX_GPIO_H
 #define __LINUX_GPIO_H
 
@@ -40,10 +43,10 @@ struct gpio {
 };
 
 #ifdef CONFIG_GPIOLIB
-#ifdef CONFIG_SYNO_X86_PINCTRL_GPIO
+#ifdef MY_DEF_HERE
 extern int syno_gpio_value_set(int iPin, int iValue);
 extern int syno_gpio_value_get(int iPin, int *pValue);
-#endif /* CONFIG_SYNO_X86_PINCTRL_GPIO */
+#endif /* MY_DEF_HERE */
 
 #ifdef CONFIG_ARCH_HAVE_CUSTOM_GPIO_H
 #include <asm/gpio.h>

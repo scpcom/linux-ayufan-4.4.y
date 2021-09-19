@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/ext3/super.c
  *
@@ -62,14 +65,14 @@ static int ext3_statfs (struct dentry * dentry, struct kstatfs * buf);
 static int ext3_unfreeze(struct super_block *sb);
 static int ext3_freeze(struct super_block *sb);
 
-#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
+#ifdef MY_ABC_HERE
 extern struct dentry_operations ext3_dentry_operations;
 
 spinlock_t ext3_namei_buf_lock;  /* lock for ext3_utf8_namei_buf[] in fs/ext3/namei.c */
 spinlock_t ext3_hash_buf_lock;   /* lock for ext3_utf8_hash_buf[] in fs/ext3/namei.c */
 static int ext3_namei_lock_init = 0;
 static int ext3_hash_lock_init = 0;
-#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
+#endif /* MY_ABC_HERE */
 
 /*
  * Wrappers for journal_start/end.
@@ -595,9 +598,9 @@ static char *data_mode_string(unsigned long mode)
 	return "unknown";
 }
 
-#if defined(CONFIG_SYNO_DEBUG_FLAG)
+#if defined(MY_ABC_HERE)
 extern int SynoDebugFlag;
-#endif /* CONFIG_SYNO_DEBUG_FLAG */
+#endif /* MY_ABC_HERE */
 
 /*
  * Show an option if
@@ -748,7 +751,7 @@ static int bdev_try_to_free_page(struct super_block *sb, struct page *page,
 	return try_to_free_buffers(page);
 }
 
-#ifdef CONFIG_SYNO_EXT3_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 static int ext3_syno_set_sb_archive_ver(struct super_block *sb, u32 archive_ver)
 {
 	struct ext3_super_block *es = EXT3_SB(sb)->s_es;
@@ -782,7 +785,7 @@ static int ext3_syno_get_sb_archive_ver(struct super_block *sb, u32 *archive_ver
 	*archive_ver = sb->s_archive_version;
 	return 0;
 }
-#endif /* CONFIG_SYNO_EXT3_ARCHIVE_VERSION */
+#endif /* MY_ABC_HERE */
 
 #ifdef CONFIG_QUOTA
 #define QTYPE2NAME(t) ((t)==USRQUOTA?"user":"group")
@@ -823,7 +826,7 @@ static const struct quotactl_ops ext3_qctl_operations = {
 #endif
 
 static const struct super_operations ext3_sops = {
-#ifdef CONFIG_SYNO_EXT3_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	.syno_set_sb_archive_ver = ext3_syno_set_sb_archive_ver,
 	.syno_get_sb_archive_ver = ext3_syno_get_sb_archive_ver,
 #endif
@@ -1379,7 +1382,7 @@ static int ext3_setup_super(struct super_block *sb, struct ext3_super_block *es,
 		ext3_msg(sb, KERN_WARNING,
 			"warning: mounting fs with errors, "
 			"running e2fsck is recommended");
-#ifdef CONFIG_SYNO_EXT_SKIP_FSCK_REMINDER
+#ifdef MY_ABC_HERE
 #else
 	else if ((__s16) le16_to_cpu(es->s_max_mnt_count) > 0 &&
 		 le16_to_cpu(es->s_mnt_count) >=
@@ -2088,9 +2091,9 @@ static int ext3_fill_super (struct super_block *sb, void *data, int silent)
 		ext3_msg(sb, KERN_ERR, "error: corrupt root inode, run e2fsck");
 		goto failed_mount3;
 	}
-#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
+#ifdef MY_ABC_HERE
 	sb->s_d_op = &ext3_dentry_operations;
-#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
+#endif /* MY_ABC_HERE */
 	sb->s_root = d_make_root(root);
 	if (!sb->s_root) {
 		ext3_msg(sb, KERN_ERR, "error: get root dentry failed");
@@ -2098,11 +2101,11 @@ static int ext3_fill_super (struct super_block *sb, void *data, int silent)
 		goto failed_mount3;
 	}
 
-#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
+#ifdef MY_ABC_HERE
 	// root is mounted, attach our dentry operations
 	sb->s_root->d_op = &ext3_dentry_operations;
-#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
-#ifdef CONFIG_SYNO_EXT3_ARCHIVE_VERSION
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
 	sb->s_archive_version = le32_to_cpu(es->s_archive_version);
 #endif
 
@@ -2120,7 +2123,7 @@ static int ext3_fill_super (struct super_block *sb, void *data, int silent)
 		test_opt(sb,DATA_FLAGS) == EXT3_MOUNT_JOURNAL_DATA ? "journal":
 		test_opt(sb,DATA_FLAGS) == EXT3_MOUNT_ORDERED_DATA ? "ordered":
 		"writeback");
-#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
+#ifdef MY_ABC_HERE
 	if (!ext3_namei_lock_init) {
 		spin_lock_init(&ext3_namei_buf_lock);
 		ext3_namei_lock_init=1;
@@ -2129,7 +2132,7 @@ static int ext3_fill_super (struct super_block *sb, void *data, int silent)
 		spin_lock_init(&ext3_hash_buf_lock);
 		ext3_hash_lock_init=1;
 	}
-#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
+#endif /* MY_ABC_HERE */
 
 	return 0;
 

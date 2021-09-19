@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* -*- mode: c; c-basic-offset:8; -*-
  * vim: noexpandtab sw=8 ts=8 sts=0:
  *

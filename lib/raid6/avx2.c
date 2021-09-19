@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* -*- linux-c -*- ------------------------------------------------------- *
  *
  *   Copyright (C) 2012 Intel Corporation
@@ -89,9 +92,9 @@ static void raid6_avx21_gen_syndrome(int disks, size_t bytes, void **ptrs)
 
 const struct raid6_calls raid6_avx2x1 = {
 	raid6_avx21_gen_syndrome,
-#ifdef CONFIG_SYNO_MD_RAID6_RMW
+#ifdef MY_ABC_HERE
 	NULL,			/* XOR not yet implemented */
-#endif /* CONFIG_SYNO_MD_RAID6_RMW */
+#endif /* MY_ABC_HERE */
 	raid6_have_avx2,
 	"avx2x1",
 	1			/* Has cache hints */
@@ -153,9 +156,9 @@ static void raid6_avx22_gen_syndrome(int disks, size_t bytes, void **ptrs)
 
 const struct raid6_calls raid6_avx2x2 = {
 	raid6_avx22_gen_syndrome,
-#ifdef CONFIG_SYNO_MD_RAID6_RMW
+#ifdef MY_ABC_HERE
 	NULL,			/* XOR not yet implemented */
-#endif /* CONFIG_SYNO_MD_RAID6_RMW */
+#endif /* MY_ABC_HERE */
 	raid6_have_avx2,
 	"avx2x2",
 	1			/* Has cache hints */
@@ -248,9 +251,9 @@ static void raid6_avx24_gen_syndrome(int disks, size_t bytes, void **ptrs)
 
 const struct raid6_calls raid6_avx2x4 = {
 	raid6_avx24_gen_syndrome,
-#ifdef CONFIG_SYNO_MD_RAID6_RMW
+#ifdef MY_ABC_HERE
 	NULL,			/* XOR not yet implemented */
-#endif /* CONFIG_SYNO_MD_RAID6_RMW */
+#endif /* MY_ABC_HERE */
 	raid6_have_avx2,
 	"avx2x4",
 	1			/* Has cache hints */

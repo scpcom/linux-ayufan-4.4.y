@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2008 Red Hat.  All rights reserved.
  *
@@ -2449,7 +2452,7 @@ u64 btrfs_alloc_from_cluster(struct btrfs_block_group_cache *block_group,
 	if (cluster->block_group != block_group)
 		goto out;
 
-#ifdef CONFIG_SYNO_BTRFS_CLUSTER_RESERVE
+#ifdef MY_ABC_HERE
 	if (ctl->free_space < cluster->reserve_bytes + bytes) {
 		goto out;
 	}
@@ -2733,7 +2736,7 @@ setup_cluster_bitmap(struct btrfs_block_group_cache *block_group,
 int btrfs_find_space_cluster(struct btrfs_root *root,
 			     struct btrfs_block_group_cache *block_group,
 			     struct btrfs_free_cluster *cluster,
-#ifdef CONFIG_SYNO_BTRFS_CLUSTER_RESERVE
+#ifdef MY_ABC_HERE
 			     u64 offset, u64 bytes, u64 empty_size, u64 reserve_bytes)
 #else
 			     u64 offset, u64 bytes, u64 empty_size)
@@ -2768,7 +2771,7 @@ int btrfs_find_space_cluster(struct btrfs_root *root,
 	 * If we know we don't have enough space to make a cluster don't even
 	 * bother doing all the work to try and find one.
 	 */
-#ifdef CONFIG_SYNO_BTRFS_CLUSTER_RESERVE
+#ifdef MY_ABC_HERE
 	if (ctl->free_space < (reserve_bytes + bytes + empty_size)) {
 #else
 	if (ctl->free_space < bytes) {
@@ -2806,7 +2809,7 @@ int btrfs_find_space_cluster(struct btrfs_root *root,
 		list_add_tail(&cluster->block_group_list,
 			      &block_group->cluster_list);
 		cluster->block_group = block_group;
-#ifdef CONFIG_SYNO_BTRFS_CLUSTER_RESERVE
+#ifdef MY_ABC_HERE
 		cluster->reserve_bytes = reserve_bytes;
 #endif
 	} else {
@@ -2828,7 +2831,7 @@ void btrfs_init_free_cluster(struct btrfs_free_cluster *cluster)
 	spin_lock_init(&cluster->refill_lock);
 	cluster->root = RB_ROOT;
 	cluster->max_size = 0;
-#ifdef CONFIG_SYNO_BTRFS_CLUSTER_RESERVE
+#ifdef MY_ABC_HERE
 	cluster->reserve_bytes = 0;
 #endif
 	INIT_LIST_HEAD(&cluster->block_group_list);

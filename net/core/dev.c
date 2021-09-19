@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * 	NET3	Protocol independent device support routines.
  *
@@ -150,12 +153,12 @@ struct list_head ptype_base[PTYPE_HASH_SIZE] __read_mostly;
 struct list_head ptype_all __read_mostly;	/* Taps */
 static struct list_head offload_base __read_mostly;
 
-#if defined(CONFIG_SYNO_E1000E_LED_SWITCH) || defined(CONFIG_SYNO_IGB_LED_SWITCH)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 void (*funcSynoNicLedCtrl)(int iEnable) = NULL;
 EXPORT_SYMBOL(funcSynoNicLedCtrl);
-#endif /* CONFIG_SYNO_E1000E_LED_SWITCH || CONFIG_SYNO_IGB_LED_SWITCH */
+#endif /* MY_DEF_HERE || MY_DEF_HERE */
 
-#ifdef CONFIG_SYNO_MAC_ADDRESS
+#ifdef MY_ABC_HERE
 static unsigned int str_to_hex(char ch)
 {
 	if ((ch >= '0') && (ch <= '9'))
@@ -235,9 +238,9 @@ END:
 int syno_get_dev_vendor_mac(const char *szDev, char *szMac)
 {
 	extern unsigned char grgbLanMac[SYNO_MAC_MAX_NUMBER][16];
-#ifdef CONFIG_SYNO_INTERNAL_NETIF_NUM
+#ifdef MY_ABC_HERE
 	extern unsigned long g_internal_netif_num;
-#endif /* CONFIG_SYNO_INTERNAL_NETIF_NUM */
+#endif /* MY_ABC_HERE */
 	int err = SYNO_VENDOR_MAC_FAIL;
 	char szIFPrefix[IFNAMSIZ] = "eth";
 	int iMacIndex = 0;
@@ -252,12 +255,12 @@ int syno_get_dev_vendor_mac(const char *szDev, char *szMac)
 	if (!strncmp(szDev, szIFPrefix, strlen(szIFPrefix))) {
 		pMacIndex = szDev + strlen(szIFPrefix);
 		iMacIndex = simple_strtol(pMacIndex, NULL, 10);
-#ifdef CONFIG_SYNO_INTERNAL_NETIF_NUM
+#ifdef MY_ABC_HERE
 		if (0 > iMacIndex || g_internal_netif_num <= iMacIndex) {
 			err = SYNO_VENDOR_MAC_FAIL;
 			goto ERR;
 		}
-#endif /* CONFIG_SYNO_INTERNAL_NETIF_NUM */
+#endif /* MY_ABC_HERE */
 		if (1 == (iMatch = syno_skip_bond_vender_mac(iMacIndex))) {
 			err = SYNO_VENDOR_MAC_EMPTY;
 			goto ERR;
@@ -281,7 +284,7 @@ ERR:
 	return err;
 }
 EXPORT_SYMBOL(syno_get_dev_vendor_mac);
-#endif /* CONFIG_SYNO_MAC_ADDRESS */
+#endif /* MY_ABC_HERE */
 
 /*
  * The @dev_base_head list is protected by @dev_base_lock and the rtnl
@@ -5732,11 +5735,11 @@ struct rtnl_link_stats64 *dev_get_stats(struct net_device *dev,
 	} else {
 		netdev_stats_to_stats64(storage, &dev->stats);
 	}
-#ifdef CONFIG_SYNO_SKIP_RXDROP_BY_CORE
+#ifdef MY_ABC_HERE
 	/* skip the rx_drop from kernel core, only count rx_drop by device driver */
 #else
 	storage->rx_dropped += atomic_long_read(&dev->rx_dropped);
-#endif /* CONFIG_SYNO_SKIP_RXDROP_BY_CORE */
+#endif /* MY_ABC_HERE */
 	return storage;
 }
 EXPORT_SYMBOL(dev_get_stats);

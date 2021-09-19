@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
   FUSE: Filesystem in Userspace
   Copyright (C) 2001-2008  Miklos Szeredi <miklos@szeredi.hu>
@@ -24,29 +27,29 @@
 #include <linux/workqueue.h>
 
 /** Max number of pages that can be used in a single read request */
-#ifdef CONFIG_SYNO_FS_RECVFILE
+#ifdef MY_ABC_HERE
 #define FUSE_MAX_PAGES_PER_REQ 256
 #else
 #define FUSE_MAX_PAGES_PER_REQ 32
-#endif /* CONFIG_SYNO_FS_RECVFILE */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_FUSE_STAT
+#ifdef MY_ABC_HERE
 #define SYNO_FUSE_ENTRY_NAME_LEN 255
 #define FUSE_SYNOSTAT_SIZE (SYNO_FUSE_ENTRY_NAME_LEN + 1 + sizeof(struct fuse_synostat))
-#endif /* CONFIG_SYNO_FUSE_STAT */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_FUSE_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 #define XATTR_SYNO_ARCHIVE_VERSION_GLUSTER "archive_version_gluster"
 #define XATTR_SYNO_ARCHIVE_VERSION_VOLUME_GLUSTER "archive_version_volume_gluster"
-#endif /* CONFIG_SYNO_FUSE_ARCHIVE_VERSION */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_FUSE_CREATE_TIME
+#ifdef MY_ABC_HERE
 // GlusterFS create time xattr format, for 32/64bit packing compatibility
 struct syno_gf_xattr_crtime {
 	__le64 sec;
 	__le32 nsec;
 } __attribute__ ((__packed__));
-#endif /* CONFIG_SYNO_FUSE_CREATE_TIME */
+#endif /* MY_ABC_HERE */
 
 /** Bias for fi->writectr, meaning new writepages must not be sent */
 #define FUSE_NOWRITE INT_MIN
@@ -648,14 +651,14 @@ struct inode *fuse_iget(struct super_block *sb, u64 nodeid,
 			int generation, struct fuse_attr *attr,
 			u64 attr_valid, u64 attr_version);
 
-#ifdef CONFIG_SYNO_FUSE_STAT
+#ifdef MY_ABC_HERE
 int fuse_lookup_name(struct super_block *sb, u64 nodeid, struct qstr *name,
 		     struct fuse_entry_out *outarg, struct inode **inode,
 		     struct fuse_synostat *synostat, int syno_stat_flags);
 #else
 int fuse_lookup_name(struct super_block *sb, u64 nodeid, struct qstr *name,
 		     struct fuse_entry_out *outarg, struct inode **inode);
-#endif /* CONFIG_SYNO_FUSE_STAT */
+#endif /* MY_ABC_HERE */
 
 /**
  * Send FORGET command
@@ -899,12 +902,12 @@ void fuse_write_update_size(struct inode *inode, loff_t pos);
 int fuse_do_setattr(struct inode *inode, struct iattr *attr,
 		    struct file *file);
 
-#ifdef CONFIG_SYNO_FUSE_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 ssize_t fuse_getxattr(struct dentry *entry, const char *name,
 			     void *value, size_t size);
 
 int fuse_setxattr(struct dentry *entry, const char *name,
 			 const void *value, size_t size, int flags);
-#endif /* CONFIG_SYNO_FUSE_ARCHIVE_VERSION */
+#endif /* MY_ABC_HERE */
 
 #endif /* _FS_FUSE_I_H */

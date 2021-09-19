@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef __SOUND_CORE_H
 #define __SOUND_CORE_H
 
@@ -148,9 +151,9 @@ struct snd_card {
 	struct snd_mixer_oss *mixer_oss;
 	int mixer_oss_change_count;
 #endif
-#if defined(CONFIG_SYNO_AUDIO_USE_EXTERNAL_SPEAKER)
+#if defined(MY_ABC_HERE)
 	unsigned int low_level_dev_id;
-#endif /*CONFIG_SYNO_AUDIO_USE_EXTERNAL_SPEAKER*/
+#endif /*MY_ABC_HERE*/
 };
 
 #ifdef CONFIG_PM

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2012 Alexander Block.  All rights reserved.
  * Copyright (C) 2012 STRATO.  All rights reserved.
@@ -87,7 +90,7 @@ enum btrfs_send_cmd {
 
 	BTRFS_SEND_C_END,
 	BTRFS_SEND_C_UPDATE_EXTENT,
-#ifdef CONFIG_SYNO_BTRFS_SEND_SUBVOL_FLAG
+#ifdef MY_ABC_HERE
 	BTRFS_SEND_C_SUBVOL_FLAG,
 #endif
 	__BTRFS_SEND_C_MAX,
@@ -128,7 +131,7 @@ enum {
 	BTRFS_SEND_A_CLONE_OFFSET,
 	BTRFS_SEND_A_CLONE_LEN,
 
-#ifdef CONFIG_SYNO_BTRFS_SEND_SUBVOL_FLAG
+#ifdef MY_ABC_HERE
 	BTRFS_SEND_A_FLAG,
 #endif
 	__BTRFS_SEND_A_MAX,

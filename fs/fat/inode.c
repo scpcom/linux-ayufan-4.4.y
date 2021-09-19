@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/fat/inode.c
  *
@@ -161,14 +164,14 @@ static int fat_write_begin(struct file *file, struct address_space *mapping,
 	err = cont_write_begin(file, mapping, pos, len, flags,
 				pagep, fsdata, fat_get_block,
 				&MSDOS_I(mapping->host)->mmu_private);
-#ifdef CONFIG_SYNO_FS_RECVFILE
+#ifdef MY_ABC_HERE
 	if (err >= 0 && (flags & AOP_FLAG_RECVFILE)) {
 		if (pos+len > mapping->host->i_size) {
 			i_size_write(mapping->host, pos+len);
 			mark_inode_dirty(mapping->host);
 		}
 	} else
-#endif /* CONFIG_SYNO_FS_RECVFILE */
+#endif /* MY_ABC_HERE */
 	if (err < 0)
 		fat_write_failed(mapping, pos + len);
 	return err;
@@ -442,13 +445,13 @@ int fat_fill_inode(struct inode *inode, struct msdos_dir_entry *de)
 
 	fat_time_fat2unix(sbi, &inode->i_mtime, de->time, de->date, 0);
 	if (sbi->options.isvfat) {
-#ifdef CONFIG_SYNO_FAT_CREATE_TIME
+#ifdef MY_ABC_HERE
 		fat_time_fat2unix(sbi, &inode->i_create_time, de->ctime,
 				  de->cdate, de->ctime_cs);
 #else
 		fat_time_fat2unix(sbi, &inode->i_ctime, de->ctime,
 				  de->cdate, de->ctime_cs);
-#endif /* CONFIG_SYNO_FAT_CREATE_TIME */
+#endif /* MY_ABC_HERE */
 		fat_time_fat2unix(sbi, &inode->i_atime, 0, de->adate, 0);
 	} else
 		inode->i_ctime = inode->i_atime = inode->i_mtime;
@@ -726,13 +729,13 @@ retry:
 			  &raw_entry->date, NULL);
 	if (sbi->options.isvfat) {
 		__le16 atime;
-#ifdef CONFIG_SYNO_FAT_CREATE_TIME
+#ifdef MY_ABC_HERE
 		fat_time_unix2fat(sbi, &inode->i_create_time, &raw_entry->ctime,
 				  &raw_entry->cdate, &raw_entry->ctime_cs);
 #else
 		fat_time_unix2fat(sbi, &inode->i_ctime, &raw_entry->ctime,
 				  &raw_entry->cdate, &raw_entry->ctime_cs);
-#endif /* CONFIG_SYNO_FAT_CREATE_TIME */
+#endif /* MY_ABC_HERE */
 		fat_time_unix2fat(sbi, &inode->i_atime, &atime,
 				  &raw_entry->adate, NULL);
 	}
@@ -879,7 +882,7 @@ enum {
 	Opt_charset, Opt_shortname_lower, Opt_shortname_win95,
 	Opt_shortname_winnt, Opt_shortname_mixed, Opt_utf8_no, Opt_utf8_yes,
 	Opt_uni_xl_no, Opt_uni_xl_yes, Opt_nonumtail_no, Opt_nonumtail_yes,
-#ifdef CONFIG_SYNO_FAT_DEFAULT_MNT_FLUSH
+#ifdef MY_ABC_HERE
 	Opt_obsolete, Opt_flush, Opt_noflush, Opt_tz_utc, Opt_rodir, Opt_err_cont,
 #else
 	Opt_obsolete, Opt_flush, Opt_tz_utc, Opt_rodir, Opt_err_cont,
@@ -909,7 +912,7 @@ static const match_table_t fat_tokens = {
 	{Opt_debug, "debug"},
 	{Opt_immutable, "sys_immutable"},
 	{Opt_flush, "flush"},
-#ifdef CONFIG_SYNO_FAT_DEFAULT_MNT_FLUSH
+#ifdef MY_ABC_HERE
 	{Opt_noflush, "noflush"},
 #endif
 	{Opt_tz_utc, "tz=UTC"},
@@ -1003,7 +1006,7 @@ static int parse_options(struct super_block *sb, char *options, int is_vfat,
 	opts->tz_set = 0;
 	opts->nfs = 0;
 	opts->errors = FAT_ERRORS_RO;
-#ifdef CONFIG_SYNO_FAT_DEFAULT_MNT_FLUSH
+#ifdef MY_ABC_HERE
 	opts->flush = 1;
 #endif
 	*debug = 0;
@@ -1099,7 +1102,7 @@ static int parse_options(struct super_block *sb, char *options, int is_vfat,
 		case Opt_flush:
 			opts->flush = 1;
 			break;
-#ifdef CONFIG_SYNO_FAT_DEFAULT_MNT_FLUSH
+#ifdef MY_ABC_HERE
 		case Opt_noflush:
 			opts->flush = 0;
 			break;
@@ -1519,7 +1522,7 @@ int fat_fill_super(struct super_block *sb, void *data, int silent, int isvfat,
 	sprintf(buf, "cp%d", sbi->options.codepage);
 	sbi->nls_disk = load_nls(buf);
 	if (!sbi->nls_disk) {
-#ifdef CONFIG_SYNO_FAT_LOAD_DEF_NLS_IF_FAIL
+#ifdef MY_ABC_HERE
 		if(!silent) {
 			fat_msg(sb, KERN_ERR, "FAT: nls_disk load default table\n");
 		}
@@ -1538,7 +1541,7 @@ int fat_fill_super(struct super_block *sb, void *data, int silent, int isvfat,
 	if (sbi->options.isvfat) {
 		sbi->nls_io = load_nls(sbi->options.iocharset);
 		if (!sbi->nls_io) {
-#ifdef CONFIG_SYNO_FAT_LOAD_DEF_NLS_IF_FAIL
+#ifdef MY_ABC_HERE
 			if(!silent) {
 				fat_msg(sb, KERN_ERR, "FAT: nls_io load default table\n");
 			}

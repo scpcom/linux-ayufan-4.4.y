@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 // Copyright (c) 2000-2014 Synology Inc. All rights reserved.
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -6,7 +9,7 @@
 #include <linux/delay.h>
 #include <linux/timer.h>
 
-#ifdef CONFIG_SYNO_LEDS_TRIGGER
+#ifdef MY_DEF_HERE
 
 typedef struct _tag_SYNO_LED_TRIGGER_TIMER {
 	struct timer_list Timer;
@@ -134,4 +137,4 @@ static void __exit syno_ledtrig_exit(void)
 }
 module_exit(syno_ledtrig_exit);
 
-#endif // CONFIG_SYNO_LEDS_TRIGGER
+#endif // MY_DEF_HERE

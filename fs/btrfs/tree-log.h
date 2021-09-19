@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2008 Oracle.  All rights reserved.
  *
@@ -27,10 +30,10 @@
 
 struct btrfs_log_ctx {
 	int log_ret;
-#ifdef CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 #else
 	int log_transid;
-#endif /* CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS */
+#endif /* MY_ABC_HERE */
 	int io_err;
 	struct list_head list;
 };
@@ -38,7 +41,7 @@ struct btrfs_log_ctx {
 static inline void btrfs_init_log_ctx(struct btrfs_log_ctx *ctx)
 {
 	ctx->log_ret = 0;
-#ifdef CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 #else
 	ctx->log_transid = 0;
 #endif /* CONFIG_CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS */

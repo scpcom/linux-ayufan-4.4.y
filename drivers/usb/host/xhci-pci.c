@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * xHCI host controller driver PCI Bus Glue.
  *
@@ -92,9 +95,9 @@ static void xhci_pci_quirks(struct device *dev, struct xhci_hcd *xhci)
 		xhci->quirks |= XHCI_TRUST_TX_LENGTH;
 
 	if (pdev->vendor == PCI_VENDOR_ID_INTEL) {
-#ifdef CONFIG_SYNO_INTEL_USB3_LPM_ENABLE
+#ifdef MY_ABC_HERE
 		xhci->quirks |= XHCI_LPM_SUPPORT;
-#endif /* CONFIG_SYNO_INTEL_USB3_LPM_ENABLE */
+#endif /* MY_ABC_HERE */
 		xhci->quirks |= XHCI_INTEL_HOST;
 		xhci->quirks |= XHCI_AVOID_BEI;
 	}

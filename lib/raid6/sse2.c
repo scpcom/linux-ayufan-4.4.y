@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* -*- linux-c -*- ------------------------------------------------------- *
  *
  *   Copyright 2002 H. Peter Anvin - All Rights Reserved
@@ -88,7 +91,7 @@ static void raid6_sse21_gen_syndrome(int disks, size_t bytes, void **ptrs)
 	kernel_fpu_end();
 }
 
-#ifdef CONFIG_SYNO_MD_RAID6_RMW
+#ifdef MY_ABC_HERE
 static void raid6_sse21_xor_syndrome(int disks, int start, int stop,
 				     size_t bytes, void **ptrs)
  {
@@ -137,12 +140,12 @@ static void raid6_sse21_xor_syndrome(int disks, int start, int stop,
 	kernel_fpu_end();
 }
 
-#endif /* CONFIG_SYNO_MD_RAID6_RMW */
+#endif /* MY_ABC_HERE */
 const struct raid6_calls raid6_sse2x1 = {
 	raid6_sse21_gen_syndrome,
-#ifdef CONFIG_SYNO_MD_RAID6_RMW
+#ifdef MY_ABC_HERE
 	raid6_sse21_xor_syndrome,
-#endif /* CONFIG_SYNO_MD_RAID6_RMW */
+#endif /* MY_ABC_HERE */
 	raid6_have_sse2,
 	"sse2x1",
 	1			/* Has cache hints */
@@ -203,7 +206,7 @@ static void raid6_sse22_gen_syndrome(int disks, size_t bytes, void **ptrs)
 	kernel_fpu_end();
 }
 
-#ifdef CONFIG_SYNO_MD_RAID6_RMW
+#ifdef MY_ABC_HERE
  static void raid6_sse22_xor_syndrome(int disks, int start, int stop,
 				     size_t bytes, void **ptrs)
  {
@@ -271,12 +274,12 @@ static void raid6_sse22_gen_syndrome(int disks, size_t bytes, void **ptrs)
 	kernel_fpu_end();
  }
 
-#endif /* CONFIG_SYNO_MD_RAID6_RMW */
+#endif /* MY_ABC_HERE */
 const struct raid6_calls raid6_sse2x2 = {
 	raid6_sse22_gen_syndrome,
-#ifdef CONFIG_SYNO_MD_RAID6_RMW
+#ifdef MY_ABC_HERE
 	raid6_sse22_xor_syndrome,
-#endif /* CONFIG_SYNO_MD_RAID6_RMW */
+#endif /* MY_ABC_HERE */
 	raid6_have_sse2,
 	"sse2x2",
 	1			/* Has cache hints */
@@ -373,7 +376,7 @@ static void raid6_sse24_gen_syndrome(int disks, size_t bytes, void **ptrs)
 	kernel_fpu_end();
 }
 
-#ifdef CONFIG_SYNO_MD_RAID6_RMW
+#ifdef MY_ABC_HERE
  static void raid6_sse24_xor_syndrome(int disks, int start, int stop,
 				     size_t bytes, void **ptrs)
  {
@@ -481,12 +484,12 @@ static void raid6_sse24_gen_syndrome(int disks, size_t bytes, void **ptrs)
 	kernel_fpu_end();
  }
 
-#endif /* CONFIG_SYNO_MD_RAID6_RMW */
+#endif /* MY_ABC_HERE */
 const struct raid6_calls raid6_sse2x4 = {
 	raid6_sse24_gen_syndrome,
-#ifdef CONFIG_SYNO_MD_RAID6_RMW
+#ifdef MY_ABC_HERE
 	raid6_sse24_xor_syndrome,
-#endif /* CONFIG_SYNO_MD_RAID6_RMW */
+#endif /* MY_ABC_HERE */
 	raid6_have_sse2,
 	"sse2x4",
 	1			/* Has cache hints */

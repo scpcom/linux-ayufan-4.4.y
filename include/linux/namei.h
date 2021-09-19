@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_NAMEI_H
 #define _LINUX_NAMEI_H
 
@@ -20,11 +23,11 @@ struct nameidata {
 	int		last_type;
 	unsigned	depth;
 	char *saved_names[MAX_NESTED_LINKS + 1];
-#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+#ifdef MY_ABC_HERE
 	unsigned char *real_filename;
 	unsigned char *real_filename_cur_locate;
 	unsigned int real_filename_len;
-#endif /* CONFIG_SYNO_FS_CASELESS_STAT */
+#endif /* MY_ABC_HERE */
 };
 
 /*
@@ -60,17 +63,17 @@ enum {LAST_NORM, LAST_ROOT, LAST_DOT, LAST_DOTDOT, LAST_BIND};
 #define LOOKUP_JUMPED		0x1000
 #define LOOKUP_ROOT		0x2000
 #define LOOKUP_EMPTY		0x4000
-#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+#ifdef MY_ABC_HERE
 /* this namei has done to the last component */
 #define LOOKUP_TO_LASTCOMPONENT 0x8000
 #define LOOKUP_MOUNTED			0x10000
 #define LOOKUP_CASELESS_COMPARE 0x20000
-#endif /* CONFIG_SYNO_FS_CASELESS_STAT */
+#endif /* MY_ABC_HERE */
 
 extern int user_path_at(int, const char __user *, unsigned, struct path *);
-#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+#ifdef MY_ABC_HERE
 extern int syno_user_path_at(int, const char __user *, unsigned, struct path *, char **, int *);
-#endif /* CONFIG_SYNO_FS_CASELESS_STAT */
+#endif /* MY_ABC_HERE */
 extern int user_path_at_empty(int, const char __user *, unsigned, struct path *, int *empty);
 
 #define user_path(name, path) user_path_at(AT_FDCWD, name, LOOKUP_FOLLOW, path)
@@ -87,16 +90,16 @@ extern struct dentry *kern_path_locked(const char *, struct path *);
 extern int vfs_path_lookup(struct dentry *, struct vfsmount *,
 			   const char *, unsigned int, struct path *);
 
-#ifdef CONFIG_SYNO_FS_EXPORT_SYMBOL_LOOKUP_HASH
+#ifdef MY_ABC_HERE
 extern struct dentry *lookup_hash(struct nameidata *nd);
-#endif /* CONFIG_SYNO_FS_EXPORT_SYMBOL_LOOKUP_HASH */
+#endif /* MY_ABC_HERE */
 extern struct dentry *lookup_one_len(const char *, struct dentry *, int);
 
 extern int follow_down_one(struct path *);
 extern int follow_down(struct path *);
 extern int follow_up(struct path *);
 
-#ifdef CONFIG_SYNO_FS_NOTIFY
+#ifdef MY_ABC_HERE
 extern int syno_fetch_mountpoint_fullpath(struct vfsmount *, size_t, char *);
 #endif
 

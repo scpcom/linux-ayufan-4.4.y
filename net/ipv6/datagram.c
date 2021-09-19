@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *	common UDP/RAW code
  *	Linux INET6 implementation
@@ -138,7 +141,7 @@ ipv4_connected:
 		if (!sk->sk_bound_dev_if && (addr_type & IPV6_ADDR_MULTICAST))
 			sk->sk_bound_dev_if = np->mcast_oif;
 
-#ifdef CONFIG_SYNO_IPV6_LINKLOCAL
+#ifdef MY_ABC_HERE
 		if (__ipv6_addr_is_link_local(addr_type) && !sk->sk_bound_dev_if) {
 			struct net_device *dev = NULL;
 			for_each_netdev(sock_net(sk), dev) {
@@ -150,7 +153,7 @@ ipv4_connected:
 				}
 			}
 		}
-#endif /* CONFIG_SYNO_IPV6_LINKLOCAL */
+#endif /* MY_ABC_HERE */
 
 		/* Connect to link-local address requires an interface */
 		if (!sk->sk_bound_dev_if) {

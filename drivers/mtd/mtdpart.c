@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Simple MTD partitioning layer
  *
@@ -34,17 +37,17 @@
 
 #include "mtdcore.h"
 
-#ifdef CONFIG_SYNO_MAC_ADDRESS
+#ifdef MY_ABC_HERE
 extern unsigned char grgbLanMac[SYNO_MAC_MAX_NUMBER][16];
 extern int giVenderFormatVersion;
-#endif /* CONFIG_SYNO_MAC_ADDRESS */
-#ifdef CONFIG_SYNO_SERIAL
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
 extern char gszSerialNum[];
 extern char gszCustomSerialNum[];
 #define SYNO_SN_TAG "SN="
 #define SYNO_CHKSUM_TAG "CHK="
 #define SYNO_SN_12_SIG SYNO_SN_TAG  // signature for 12 serial number
-#endif /* CONFIG_SYNO_SERIAL */
+#endif /* MY_ABC_HERE */
 
 /* Our partition linked list */
 static LIST_HEAD(mtd_partitions);
@@ -542,7 +545,7 @@ static struct mtd_part *allocate_partition(struct mtd_info *master,
 	}
 
 out_register:
-#if defined(CONFIG_SYNO_MAC_ADDRESS) || defined(CONFIG_SYNO_SERIAL)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 	if ((memcmp(part->name, "vender", 7)==0) ||
 		(memcmp(part->name, "vendor", 7)==0)) {
 		u_char rgbszBuf[128];
@@ -550,23 +553,23 @@ out_register:
 		size_t retlen;
 		unsigned int Sum;
 		u_char ucSum;
-#ifdef CONFIG_SYNO_MAC_ADDRESS
+#ifdef MY_ABC_HERE
 		int n = 0;
 		int MacNumber = 0;
 		char rgbLanMac[SYNO_MAC_MAX_NUMBER][6];
-#endif /* CONFIG_SYNO_MAC_ADDRESS */
-#ifdef CONFIG_SYNO_SERIAL
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
 		char szSerialBuffer[32];
 		char *ptr;
 		char szSerial[32];
 		char szCheckSum[32];
 		unsigned int uichksum = 0;
 		unsigned int uiTemp = 0;
-#endif /* CONFIG_SYNO_SERIAL */
+#endif /* MY_ABC_HERE */
 
 		part_read(&slave->mtd, 0, 128, &retlen, rgbszBuf);
 
-#ifdef CONFIG_SYNO_MAC_ADDRESS
+#ifdef MY_ABC_HERE
 		/**
 		 * FIXME: current vender structure on arm platform only support
 		 * max 4 lans instead of SYNO_MAC_MAX_NUMBER.
@@ -609,8 +612,8 @@ out_register:
 
 			x++;
 		}
-#endif /* CONFIG_SYNO_MAC_ADDRESS */
-#ifdef CONFIG_SYNO_SERIAL
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
 		memset(szSerial, 0, sizeof(szSerial));
 		memset(szCheckSum, 0, sizeof(szCheckSum));
 		memset(gszSerialNum, 0, 32);
@@ -692,9 +695,9 @@ SKIP_SERIAL:
 		} else {
 			printk("Custom Serial Number: %s\n", gszCustomSerialNum);
 		}
-#endif /* CONFIG_SYNO_SERIAL */
+#endif /* MY_ABC_HERE */
 	}
-#endif /* CONFIG_SYNO_MAC_ADDRESS || CONFIG_SYNO_SERIAL */
+#endif /* MY_ABC_HERE || MY_ABC_HERE */
 	return slave;
 }
 
@@ -939,7 +942,7 @@ uint64_t mtd_get_device_size(const struct mtd_info *mtd)
 }
 EXPORT_SYMBOL_GPL(mtd_get_device_size);
 
-#ifdef CONFIG_SYNO_MTD_INFO
+#ifdef MY_ABC_HERE
 int SYNOMTDModifyPartInfo(struct mtd_info *mtd, unsigned long offset, unsigned long length)
 {
 	struct mtd_part *part = PART(mtd);
@@ -955,4 +958,4 @@ int SYNOMTDModifyPartInfo(struct mtd_info *mtd, unsigned long offset, unsigned l
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_MTD_INFO */
+#endif /* MY_ABC_HERE */

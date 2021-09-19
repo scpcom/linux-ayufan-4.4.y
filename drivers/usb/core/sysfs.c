@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * drivers/usb/core/sysfs.c
  *
@@ -203,7 +206,7 @@ show_quirks(struct device *dev, struct device_attribute *attr, char *buf)
 }
 static DEVICE_ATTR(quirks, S_IRUGO, show_quirks, NULL);
 
-#ifdef CONFIG_SYNO_USB_DEVICE_QUIRKS
+#ifdef MY_ABC_HERE
 static ssize_t
 show_syno_quirks(struct device *dev, struct device_attribute *attr, char *buf)
 {
@@ -230,7 +233,7 @@ set_syno_quirks(struct device *dev, struct device_attribute *attr,
 }
 static DEVICE_ATTR(syno_quirks, S_IWUSR | S_IRUGO,
 		show_syno_quirks, set_syno_quirks);
-#endif /* CONFIG_SYNO_USB_DEVICE_QUIRKS */
+#endif /* MY_ABC_HERE */
 
 static ssize_t
 show_avoid_reset_quirk(struct device *dev, struct device_attribute *attr, char *buf)
@@ -696,9 +699,9 @@ static struct attribute *dev_attrs[] = {
 	&dev_attr_version.attr,
 	&dev_attr_maxchild.attr,
 	&dev_attr_quirks.attr,
-#ifdef CONFIG_SYNO_USB_DEVICE_QUIRKS
+#ifdef MY_ABC_HERE
 	&dev_attr_syno_quirks.attr,
-#endif /* CONFIG_SYNO_USB_DEVICE_QUIRKS */
+#endif /* MY_ABC_HERE */
 	&dev_attr_avoid_reset_quirk.attr,
 	&dev_attr_authorized.attr,
 	&dev_attr_remove.attr,

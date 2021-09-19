@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * soc-dapm.c  --  ALSA SoC Dynamic Audio Power Management
  *
@@ -43,10 +46,10 @@
 #include <sound/soc.h>
 #include <sound/initval.h>
 
-#if defined(CONFIG_SYNO_IGNORE_TRACE_SND_SOC)
+#if defined(MY_ABC_HERE)
 #else
 #include <trace/events/asoc.h>
-#endif /*CONFIG_SYNO_IGNORE_TRACE_SND_SOC*/
+#endif /*MY_ABC_HERE*/
 
 #define DAPM_UPDATE_STAT(widget, val) widget->dapm->card->dapm_stats.val++;
 
@@ -307,10 +310,10 @@ static int snd_soc_dapm_set_bias_level(struct snd_soc_dapm_context *dapm,
 	struct snd_soc_card *card = dapm->card;
 	int ret = 0;
 
-#if defined(CONFIG_SYNO_IGNORE_TRACE_SND_SOC)
+#if defined(MY_ABC_HERE)
 #else
 	trace_snd_soc_bias_level_start(card, level);
-#endif /*CONFIG_SYNO_IGNORE_TRACE_SND_SOC*/
+#endif /*MY_ABC_HERE*/
 
 	if (card && card->set_bias_level)
 		ret = card->set_bias_level(card, dapm, level);
@@ -333,10 +336,10 @@ static int snd_soc_dapm_set_bias_level(struct snd_soc_dapm_context *dapm,
 	if (card && card->set_bias_level_post)
 		ret = card->set_bias_level_post(card, dapm, level);
 out:
-#if defined(CONFIG_SYNO_IGNORE_TRACE_SND_SOC)
+#if defined(MY_ABC_HERE)
 #else
 	trace_snd_soc_bias_level_done(card, level);
-#endif /*CONFIG_SYNO_IGNORE_TRACE_SND_SOC*/
+#endif /*MY_ABC_HERE*/
 
 	return ret;
 }
@@ -1290,15 +1293,15 @@ static void dapm_seq_check_event(struct snd_soc_dapm_context *dapm,
 	if (w->event && (w->event_flags & event)) {
 		pop_dbg(dapm->dev, card->pop_time, "pop test : %s %s\n",
 			w->name, ev_name);
-#if defined(CONFIG_SYNO_IGNORE_TRACE_SND_SOC)
+#if defined(MY_ABC_HERE)
 #else
 		trace_snd_soc_dapm_widget_event_start(w, event);
-#endif /*CONFIG_SYNO_IGNORE_TRACE_SND_SOC*/
+#endif /*MY_ABC_HERE*/
 		ret = w->event(w, NULL, event);
-#if defined(CONFIG_SYNO_IGNORE_TRACE_SND_SOC)
+#if defined(MY_ABC_HERE)
 #else
 		trace_snd_soc_dapm_widget_event_done(w, event);
-#endif /*CONFIG_SYNO_IGNORE_TRACE_SND_SOC*/
+#endif /*MY_ABC_HERE*/
 		if (ret < 0)
 			dev_err(dapm->dev, "ASoC: %s: %s event failed: %d\n",
 			       ev_name, w->name, ret);
@@ -1590,10 +1593,10 @@ static void dapm_widget_set_power(struct snd_soc_dapm_widget *w, bool power,
 	if (w->power == power)
 		return;
 
-#if defined(CONFIG_SYNO_IGNORE_TRACE_SND_SOC)
+#if defined(MY_ABC_HERE)
 #else
 	trace_snd_soc_dapm_widget_power(w, power);
-#endif /*CONFIG_SYNO_IGNORE_TRACE_SND_SOC*/
+#endif /*MY_ABC_HERE*/
 
 	/* If we changed our power state perhaps our neigbours changed
 	 * also.
@@ -1669,10 +1672,10 @@ static int dapm_power_widgets(struct snd_soc_dapm_context *dapm, int event)
 	ASYNC_DOMAIN_EXCLUSIVE(async_domain);
 	enum snd_soc_bias_level bias;
 
-#if defined(CONFIG_SYNO_IGNORE_TRACE_SND_SOC)
+#if defined(MY_ABC_HERE)
 #else
 	trace_snd_soc_dapm_start(card);
-#endif /*CONFIG_SYNO_IGNORE_TRACE_SND_SOC*/
+#endif /*MY_ABC_HERE*/
 
 	list_for_each_entry(d, &card->dapm_list, list) {
 		if (d->idle_bias_off)
@@ -1743,10 +1746,10 @@ static int dapm_power_widgets(struct snd_soc_dapm_context *dapm, int event)
 		if (!d->idle_bias_off)
 			d->target_bias_level = bias;
 
-#if defined(CONFIG_SYNO_IGNORE_TRACE_SND_SOC)
+#if defined(MY_ABC_HERE)
 #else
 	trace_snd_soc_dapm_walk_done(card);
-#endif /*CONFIG_SYNO_IGNORE_TRACE_SND_SOC*/
+#endif /*MY_ABC_HERE*/
 
 	/* Run all the bias changes in parallel */
 	list_for_each_entry(d, &dapm->card->dapm_list, list)
@@ -1778,10 +1781,10 @@ static int dapm_power_widgets(struct snd_soc_dapm_context *dapm, int event)
 		"DAPM sequencing finished, waiting %dms\n", card->pop_time);
 	pop_wait(card->pop_time);
 
-#if defined(CONFIG_SYNO_IGNORE_TRACE_SND_SOC)
+#if defined(MY_ABC_HERE)
 #else
 	trace_snd_soc_dapm_done(card);
-#endif /*CONFIG_SYNO_IGNORE_TRACE_SND_SOC*/
+#endif /*MY_ABC_HERE*/
 
 	return 0;
 }

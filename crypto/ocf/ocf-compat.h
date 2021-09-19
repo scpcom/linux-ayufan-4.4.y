@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _BSD_COMPAT_H_
 #define _BSD_COMPAT_H_ 1
 /****************************************************************************/
@@ -237,7 +240,7 @@ typedef irqreturn_t (*irq_handler_t)(int irq, void *arg, struct pt_regs *regs);
 /*
  * common debug for all
  */
-#ifdef CONFIG_SYNO_ARMADA_V2
+#ifdef MY_DEF_HERE
 #undef dprintk
 #endif
 

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (c) 2001-2002 by David Brownell
  *
@@ -178,12 +181,12 @@ struct usb_hcd {
 #define HCD_CHIP_ID_ETRON_EJ188 0x20
 #endif /* CONFIG_USB_ETRON_HUB */
 
-#if defined (CONFIG_SYNO_USB_POWER_RESET)
+#if defined (MY_DEF_HERE)
 	/* A38X only support 1 port per HC */
 	int vbus_gpio_pin;
 	/* Support power control */
 	int power_control_support;
-#endif /* CONFIG_SYNO_USB_POWER_RESET */
+#endif /* MY_DEF_HERE */
 
 	/* more shared queuing code would be good; it should support
 	 * smarter scheduling, handle transaction translators, etc;

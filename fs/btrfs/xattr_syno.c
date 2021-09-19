@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * linux/fs/btrfs/xattr_syno.c
  *
@@ -22,12 +25,12 @@ static int btrfs_xattr_syno_set(struct dentry *dentry, const char *name,
 	snprintf(complete_name, sizeof(XATTR_SYNO_PREFIX) + strlen(name), XATTR_SYNO_PREFIX"%s", name);
 	ret = __btrfs_setxattr(NULL, dentry->d_inode, complete_name, value, size, flags);
 	if (!ret) {
-#ifdef CONFIG_SYNO_BTRFS_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 		if (!strcmp(name, XATTR_SYNO_ARCHIVE_BIT)) {
 			const __le32 *archive_bit_le32 = value;
 			dentry->d_inode->i_archive_bit = le32_to_cpu(*archive_bit_le32);
 		}
-#endif /* CONFIG_SYNO_BTRFS_ARCHIVE_BIT */
+#endif /* MY_ABC_HERE */
 	}
 out:
 	kfree(complete_name);

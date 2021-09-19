@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * INET		An implementation of the TCP/IP protocol suite for the LINUX
  *		operating system.  INET is implemented using the  BSD Socket
@@ -280,7 +283,7 @@ int eth_prepare_mac_addr_change(struct net_device *dev, void *p)
 {
 	struct sockaddr *addr = p;
 
-#ifdef CONFIG_SYNO_MAC_ADDRESS
+#ifdef MY_ABC_HERE
 	/**
 	 * In linux-2.6.24, kernel call dev->set_mac_address() directly to
 	 * set mac address. But in linux-2.6.32, kernel call a middle layer
@@ -289,10 +292,10 @@ int eth_prepare_mac_addr_change(struct net_device *dev, void *p)
 	 * interface is on or not. If network interface is running, it returns
 	 * -EBUSY and set mac address action failed.
 	 */
-#else /* CONFIG_SYNO_MAC_ADDRESS */
+#else /* MY_ABC_HERE */
 	if (!(dev->priv_flags & IFF_LIVE_ADDR_CHANGE) && netif_running(dev))
 		return -EBUSY;
-#endif /* CONFIG_SYNO_MAC_ADDRESS */
+#endif /* MY_ABC_HERE */
 	if (!is_valid_ether_addr(addr->sa_data))
 		return -EADDRNOTAVAIL;
 	return 0;

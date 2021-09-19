@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Written by Stephen C. Tweedie <sct@redhat.com>, 1999
  *
@@ -320,11 +323,11 @@ struct ext3_inode {
 #define i_gid_high	osd2.linux2.l_i_gid_high
 #define i_reserved2	osd2.linux2.l_i_reserved2
 
-#ifdef CONFIG_SYNO_EXT3_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 #define ext3_archive_bit		i_reserved2
 #endif
 
-#ifdef CONFIG_SYNO_EXT3_CREATE_TIME
+#ifdef MY_ABC_HERE
 #define ext3_create_time	i_reserved1
 #endif
 /*
@@ -491,14 +494,14 @@ struct ext3_super_block {
 	__u8	s_log_groups_per_flex;  /* FLEX_BG group size */
 	__u8	s_reserved_char_pad2;
 	__le16  s_reserved_pad;
-#if defined(CONFIG_SYNO_EXT3_ARCHIVE_VERSION) || defined(CONFIG_SYNO_EXT3_CASELESS_STAT)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 	__u32	s_reserved[159];	/* Padding to the end of the block */
 	__le32	s_archive_version;	/* Last archived version */
 	__le32	s_archive_version_obsoleted;
 	__le32  s_syno_hash_magic;	/* reserved for syno_hash_magic */
 #else
 	__u32   s_reserved[162];        /* Padding to the end of the block */
-#endif /* CONFIG_SYNO_EXT3_ARCHIVE_VERSION || CONFIG_SYNO_EXT3_CASELESS_STAT */
+#endif /* MY_ABC_HERE || MY_ABC_HERE */
 };
 
 /* data type for block offset of block group */
@@ -908,7 +911,7 @@ static inline __le16 ext3_rec_len_to_disk(unsigned len)
  * (c) Daniel Phillips, 2001
  */
 
-#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
+#ifdef MY_ABC_HERE
 #define SYNO_HASH_MAGIC       0x01856E96      // 25521814
 #define is_dx(dir) ((EXT3_SB(dir->i_sb)->s_es->s_syno_hash_magic == cpu_to_le32(SYNO_HASH_MAGIC)) && \
 					!(EXT3_HAS_COMPAT_FEATURE(dir->i_sb, \
@@ -918,7 +921,7 @@ static inline __le16 ext3_rec_len_to_disk(unsigned len)
 #define is_dx(dir) (EXT3_HAS_COMPAT_FEATURE(dir->i_sb, \
 				      EXT3_FEATURE_COMPAT_DIR_INDEX) && \
 		      (EXT3_I(dir)->i_flags & EXT3_INDEX_FL))
-#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
+#endif /* MY_ABC_HERE */
 #define EXT3_DIR_LINK_MAX(dir) (!is_dx(dir) && (dir)->i_nlink >= EXT3_LINK_MAX)
 #define EXT3_DIR_LINK_EMPTY(dir) ((dir)->i_nlink == 2 || (dir)->i_nlink == 1)
 
@@ -1077,10 +1080,10 @@ extern void ext3_get_inode_flags(struct ext3_inode_info *);
 extern void ext3_set_aops(struct inode *inode);
 extern int ext3_fiemap(struct inode *inode, struct fiemap_extent_info *fieinfo,
 		       u64 start, u64 len);
-#ifdef CONFIG_SYNO_EXT3_STAT
+#ifdef MY_ABC_HERE
 extern int ext3_syno_getattr(struct dentry *d, struct kstat *stat, int flags);
 #endif
-#ifdef CONFIG_SYNO_EXT3_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 extern int ext3_syno_get_archive_ver(struct dentry *, u32 *);
 extern int ext3_syno_set_archive_ver(struct dentry *, u32);
 #endif

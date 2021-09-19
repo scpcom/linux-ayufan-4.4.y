@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * MTD SPI driver for ST M25Pxx (and similar) serial flash chips
  *
@@ -195,7 +198,7 @@ static int wait_till_ready(struct m25p *flash)
 
 	return 1;
 }
-#ifdef CONFIG_SYNO_MTD_LOCK_UNLOCK
+#ifdef MY_DEF_HERE
 static int unlock_chip(struct mtd_info *mtd, loff_t ofs, uint64_t len)
 {
 	return 0;
@@ -205,7 +208,7 @@ static int lock_chip(struct mtd_info *mtd, loff_t ofs, size_t len)
 {
 	return 0;
 }
-#endif /* CONFIG_SYNO_MTD_LOCK_UNLOCK */
+#endif /* MY_DEF_HERE */
 
 /*
  * Erase the whole flash memory
@@ -1007,10 +1010,10 @@ static int m25p_probe(struct spi_device *spi)
 	flash->mtd.size = info->sector_size * info->n_sectors;
 	flash->mtd._erase = m25p80_erase;
 	flash->mtd._read = m25p80_read;
-#ifdef CONFIG_SYNO_MTD_LOCK_UNLOCK
+#ifdef MY_DEF_HERE
 	flash->mtd.lock    = lock_chip;
 	flash->mtd.unlock  = unlock_chip;
-#endif /* CONFIG_SYNO_MTD_LOCK_UNLOCK */
+#endif /* MY_DEF_HERE */
 
 	/* flash protection support for STmicro chips */
 	if (JEDEC_MFR(info->jedec_id) == CFI_MFR_ST) {

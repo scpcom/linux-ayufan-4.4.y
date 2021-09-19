@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Security plug functions
  *
@@ -562,9 +565,9 @@ int security_inode_permission(struct inode *inode, int mask)
 		return 0;
 	return security_ops->inode_permission(inode, mask);
 }
-#if defined(CONFIG_SYNO_FS_WINACL) || defined(CONFIG_AUFS_FHSM)
+#if defined(MY_ABC_HERE) || defined(CONFIG_AUFS_FHSM)
 EXPORT_SYMBOL(security_inode_permission);
-#endif /* CONFIG_SYNO_FS_WINACL || CONFIG_AUFS_FHSM*/
+#endif /* MY_ABC_HERE || CONFIG_AUFS_FHSM*/
 
 int security_inode_setattr(struct dentry *dentry, struct iattr *attr)
 {

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Many of the syscalls used in this file expect some of the arguments
  * to be __user pointers not __kernel pointers.  To limit the sparse
@@ -381,7 +384,7 @@ void __init mount_block_root(char *name, int flags)
 	const char *b = name;
 #endif
 
-#ifdef CONFIG_SYNO_EXT4_DEFAULT_MNTOPT_BARRIER_ROOTFS
+#ifdef MY_ABC_HERE
 	char *mnt_opts = NULL;
 	size_t len;
 
@@ -416,7 +419,7 @@ void __init mount_block_root(char *name, int flags)
 	get_fs_names(fs_names);
 retry:
 	for (p = fs_names; *p; p += strlen(p)+1) {
-#ifdef CONFIG_SYNO_EXT4_DEFAULT_MNTOPT_BARRIER_ROOTFS
+#ifdef MY_ABC_HERE
 		int err = do_mount_root(name, p, flags, mnt_opts);
 #else
 		int err = do_mount_root(name, p, flags, root_mount_data);
@@ -461,7 +464,7 @@ retry:
 #endif
 	panic("VFS: Unable to mount root fs on %s", b);
 out:
-#ifdef CONFIG_SYNO_EXT4_DEFAULT_MNTOPT_BARRIER_ROOTFS
+#ifdef MY_ABC_HERE
 	kfree(mnt_opts);
 #endif
 	put_page(page);

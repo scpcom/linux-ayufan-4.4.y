@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * xHCI host controller driver
  *
@@ -1532,7 +1535,7 @@ static void handle_vendor_event(struct xhci_hcd *xhci,
 		handle_cmd_completion(xhci, &event->event_cmd);
 }
 
-#ifdef CONFIG_SYNO_FORCE_EMPTY_UNAVAILABLE_XHCI_TD
+#ifdef MY_DEF_HERE
 static void xhci_giveback_error_urb(struct xhci_hcd *xhci,
 		int slot_id)
 {
@@ -1557,7 +1560,7 @@ static void xhci_giveback_error_urb(struct xhci_hcd *xhci,
 		}
 	}
 }
-#endif /* CONFIG_SYNO_FORCE_EMPTY_UNAVAILABLE_XHCI_TD */
+#endif /* MY_DEF_HERE */
 
 /* @port_id: the one-based port ID from the hardware (indexed from array of all
  * port registers -- USB 3.0 and USB 2.0).
@@ -1729,7 +1732,7 @@ static void handle_port_status(struct xhci_hcd *xhci,
 		}
 	}
 
-#ifdef CONFIG_SYNO_FORCE_EMPTY_UNAVAILABLE_XHCI_TD
+#ifdef MY_DEF_HERE
 	if (!(temp & PORT_CONNECT) &&
 		(temp & PORT_WRC)) {
 		slot_id = xhci_find_slot_id_by_port(hcd, xhci,
@@ -1740,7 +1743,7 @@ static void handle_port_status(struct xhci_hcd *xhci,
 			xhci_giveback_error_urb(xhci, slot_id);
 		}
 	}
-#endif /* CONFIG_SYNO_FORCE_EMPTY_UNAVAILABLE_XHCI_TD */
+#endif /* MY_DEF_HERE */
 
 	if ((temp & PORT_PLC) && (temp & PORT_PLS_MASK) == XDEV_U0 &&
 			DEV_SUPERSPEED(temp)) {

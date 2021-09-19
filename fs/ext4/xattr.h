@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
   File: fs/ext4/xattr.h
 
@@ -23,7 +26,7 @@
 #define EXT4_XATTR_INDEX_SECURITY	        6
 #define EXT4_XATTR_INDEX_SYSTEM			7
 #define EXT4_XATTR_INDEX_RICHACL		8
-#ifdef CONFIG_SYNO_EXT4_XATTR
+#ifdef MY_ABC_HERE
 #define EXT4_XATTR_INDEX_SYNO			EXT4_XATTR_INDEX_RICHACL // 8
 #endif
 
@@ -97,7 +100,7 @@ struct ext4_xattr_ibody_find {
 	struct ext4_iloc iloc;
 };
 
-#ifdef CONFIG_SYNO_EXT4_XATTR
+#ifdef MY_ABC_HERE
 extern struct xattr_handler ext4_xattr_syno_handler;
 #endif
 extern const struct xattr_handler ext4_xattr_user_handler;

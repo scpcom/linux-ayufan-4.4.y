@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Copyright (C) 1995  Linus Torvalds
  *  Copyright (C) 2001, 2002 Andi Kleen, SuSE Labs.
@@ -706,7 +709,7 @@ show_signal_msg(struct pt_regs *regs, unsigned long error_code,
 	if (!printk_ratelimit())
 		return;
 
-#ifdef CONFIG_SYNO_ELEVATE_LOG_LEVEL
+#ifdef MY_ABC_HERE
 	printk("%s%s[%d]: segfault at %lx ip %p sp %p error %lx",
 		task_pid_nr(tsk) > 1 ? KERN_WARNING : KERN_EMERG,
 		tsk->comm, task_pid_nr(tsk), address,
@@ -716,7 +719,7 @@ show_signal_msg(struct pt_regs *regs, unsigned long error_code,
 		task_pid_nr(tsk) > 1 ? KERN_INFO : KERN_EMERG,
 		tsk->comm, task_pid_nr(tsk), address,
 		(void *)regs->ip, (void *)regs->sp, error_code);
-#endif /*CONFIG_SYNO_ELEVATE_LOG_LEVEL*/
+#endif /*MY_ABC_HERE*/
 
 	print_vma_addr(KERN_CONT " in ", regs->ip);
 

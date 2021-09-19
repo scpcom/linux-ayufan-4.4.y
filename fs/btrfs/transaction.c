@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2007 Oracle.  All rights reserved.
  *
@@ -227,7 +230,7 @@ loop:
 	cur_trans->transid = fs_info->generation;
 	fs_info->running_transaction = cur_trans;
 	cur_trans->aborted = 0;
-#ifdef CONFIG_SYNO_BTRFS_CLEAR_SPACE_FULL
+#ifdef MY_ABC_HERE
 	cur_trans->clear_full = false;
 #endif
 	spin_unlock(&fs_info->trans_lock);
@@ -489,10 +492,10 @@ again:
 	h->allocating_chunk = false;
 	h->reloc_reserved = false;
 	h->sync = false;
-#ifdef CONFIG_SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT
+#ifdef MY_ABC_HERE
 	h->pending_snap = NULL;
 	h->pending_snap_rm = true;
-#endif /* CONFIG_SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT */
+#endif /* MY_ABC_HERE */
 	INIT_LIST_HEAD(&h->qgroup_ref_list);
 	INIT_LIST_HEAD(&h->new_bgs);
 
@@ -784,13 +787,13 @@ static int __btrfs_end_transaction(struct btrfs_trans_handle *trans,
 
 	btrfs_trans_release_metadata(trans, root);
 	trans->block_rsv = NULL;
-#ifdef CONFIG_SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT
+#ifdef MY_ABC_HERE
 	if (trans->pending_snap && trans->pending_snap_rm) {
 		spin_lock(&info->trans_lock);
 		list_del(&trans->pending_snap->list);
 		spin_unlock(&info->trans_lock);
 	}
-#endif /* CONFIG_SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT */
+#endif /* MY_ABC_HERE */
 
 	if (!list_empty(&trans->new_bgs))
 		btrfs_create_pending_block_groups(trans, root);
@@ -837,9 +840,9 @@ static int __btrfs_end_transaction(struct btrfs_trans_handle *trans,
 		wake_up_process(info->transaction_kthread);
 		err = -EIO;
 	}
-#ifdef CONFIG_SYNO_BTRFS_REMOVE_RAID_CRASH_QGROUP_BUG_ON
+#ifdef MY_ABC_HERE
 	if (likely(!test_bit(BTRFS_FS_STATE_ERROR, &root->fs_info->fs_state)))
-#endif /* CONFIG_SYNO_BTRFS_REMOVE_RAID_CRASH_QGROUP_BUG_ON */
+#endif /* MY_ABC_HERE */
 	assert_qgroups_uptodate(trans);
 
 	kmem_cache_free(btrfs_trans_handle_cachep, trans);
@@ -1323,11 +1326,11 @@ static noinline int create_pending_snapshot(struct btrfs_trans_handle *trans,
 	memcpy(new_root_item->uuid, new_uuid.b, BTRFS_UUID_SIZE);
 	memcpy(new_root_item->parent_uuid, root->root_item.uuid,
 			BTRFS_UUID_SIZE);
-#ifdef CONFIG_SYNO_BTRFS_SEND
+#ifdef MY_ABC_HERE
 	if (root_flags & BTRFS_ROOT_SUBVOL_RDONLY) {
 		memcpy(new_root_item->received_uuid, new_uuid.b, BTRFS_UUID_SIZE);
 	}
-#endif /* CONFIG_SYNO_BTRFS_SEND */
+#endif /* MY_ABC_HERE */
 	if (!(root_flags & BTRFS_ROOT_SUBVOL_RDONLY)) {
 		memset(new_root_item->received_uuid, 0,
 		       sizeof(new_root_item->received_uuid));
@@ -1698,7 +1701,7 @@ static inline int btrfs_start_delalloc_flush(struct btrfs_fs_info *fs_info)
 {
 	if (btrfs_test_opt(fs_info->tree_root, FLUSHONCOMMIT))
 		return btrfs_start_delalloc_roots(fs_info, 1, -1);
-#ifdef CONFIG_SYNO_BTRFS_FLUSHONCOMMIT_THRESHOLD
+#ifdef MY_ABC_HERE
 	else if (fs_info->delalloc_inodes_nr > fs_info->flushoncommit_threshold)
 		return btrfs_start_delalloc_roots(fs_info, 1, -1);
 #endif
@@ -1709,7 +1712,7 @@ static inline void btrfs_wait_delalloc_flush(struct btrfs_fs_info *fs_info)
 {
 	if (btrfs_test_opt(fs_info->tree_root, FLUSHONCOMMIT))
 		btrfs_wait_ordered_roots(fs_info, -1);
-#ifdef CONFIG_SYNO_BTRFS_FLUSHONCOMMIT_THRESHOLD
+#ifdef MY_ABC_HERE
 	else if (fs_info->ordered_extent_nr > fs_info->flushoncommit_threshold) {
 		btrfs_wait_ordered_roots(fs_info, -1);
 	}
@@ -1765,9 +1768,9 @@ int btrfs_commit_transaction(struct btrfs_trans_handle *trans,
 		return ret;
 	}
 
-#ifdef CONFIG_SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT
+#ifdef MY_ABC_HERE
 	trans->pending_snap_rm = false;
-#endif /* CONFIG_SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT */
+#endif /* MY_ABC_HERE */
 	spin_lock(&root->fs_info->trans_lock);
 	if (cur_trans->state >= TRANS_STATE_COMMIT_START) {
 		spin_unlock(&root->fs_info->trans_lock);
@@ -1991,7 +1994,7 @@ int btrfs_commit_transaction(struct btrfs_trans_handle *trans,
 		goto scrub_continue;
 	}
 
-#ifdef CONFIG_SYNO_BTRFS_CLEAR_SPACE_FULL
+#ifdef MY_ABC_HERE
 	if (cur_trans->clear_full)
 		btrfs_clear_space_info_full(root->fs_info);
 #endif

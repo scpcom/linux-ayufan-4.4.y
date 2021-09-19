@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * soc-core.c  --  ALSA SoC Audio Layer
  *
@@ -42,11 +45,11 @@
 #include <sound/soc-dpcm.h>
 #include <sound/initval.h>
 
-#if defined(CONFIG_SYNO_IGNORE_TRACE_SND_SOC)
+#if defined(MY_ABC_HERE)
 #else
 #define CREATE_TRACE_POINTS
 #include <trace/events/asoc.h>
-#endif /*CONFIG_SYNO_IGNORE_TRACE_SND_SOC*/
+#endif /*MY_ABC_HERE*/
 
 #define NAME_SIZE	32
 
@@ -2021,10 +2024,10 @@ int snd_soc_platform_read(struct snd_soc_platform *platform,
 
 	ret = platform->driver->read(platform, reg);
 	dev_dbg(platform->dev, "read %x => %x\n", reg, ret);
-#if defined(CONFIG_SYNO_IGNORE_TRACE_SND_SOC)
+#if defined(MY_ABC_HERE)
 #else
 	trace_snd_soc_preg_read(platform, reg, ret);
-#endif /*CONFIG_SYNO_IGNORE_TRACE_SND_SOC*/
+#endif /*MY_ABC_HERE*/
 
 	return ret;
 }
@@ -2039,10 +2042,10 @@ int snd_soc_platform_write(struct snd_soc_platform *platform,
 	}
 
 	dev_dbg(platform->dev, "write %x = %x\n", reg, val);
-#if defined(CONFIG_SYNO_IGNORE_TRACE_SND_SOC)
+#if defined(MY_ABC_HERE)
 #else
 	trace_snd_soc_preg_write(platform, reg, val);
-#endif /*CONFIG_SYNO_IGNORE_TRACE_SND_SOC*/
+#endif /*MY_ABC_HERE*/
 	return platform->driver->write(platform, reg, val);
 }
 EXPORT_SYMBOL_GPL(snd_soc_platform_write);
@@ -2114,10 +2117,10 @@ unsigned int snd_soc_read(struct snd_soc_codec *codec, unsigned int reg)
 
 	ret = codec->read(codec, reg);
 	dev_dbg(codec->dev, "read %x => %x\n", reg, ret);
-#if defined(CONFIG_SYNO_IGNORE_TRACE_SND_SOC)
+#if defined(MY_ABC_HERE)
 #else
 	trace_snd_soc_reg_read(codec, reg, ret);
-#endif /*CONFIG_SYNO_IGNORE_TRACE_SND_SOC*/
+#endif /*MY_ABC_HERE*/
 
 	return ret;
 }
@@ -2127,10 +2130,10 @@ unsigned int snd_soc_write(struct snd_soc_codec *codec,
 			   unsigned int reg, unsigned int val)
 {
 	dev_dbg(codec->dev, "write %x = %x\n", reg, val);
-#if defined(CONFIG_SYNO_IGNORE_TRACE_SND_SOC)
+#if defined(MY_ABC_HERE)
 #else
 	trace_snd_soc_reg_write(codec, reg, val);
-#endif /*CONFIG_SYNO_IGNORE_TRACE_SND_SOC*/
+#endif /*MY_ABC_HERE*/
 	return codec->write(codec, reg, val);
 }
 EXPORT_SYMBOL_GPL(snd_soc_write);

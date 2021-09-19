@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Digital Audio (PCM) abstract layer / OSS compatible
  *  Copyright (c) by Jaroslav Kysela <perex@perex.cz>
@@ -720,11 +723,11 @@ static int snd_pcm_oss_period_size(struct snd_pcm_substream *substream,
 	oss_buffer_size = snd_pcm_plug_client_size(substream,
 						   snd_pcm_hw_param_value_max(slave_params, SNDRV_PCM_HW_PARAM_BUFFER_SIZE, NULL)) * oss_frame_size;
 	oss_buffer_size = 1 << ld2(oss_buffer_size);
-#if defined(CONFIG_SYNO_AUDIO_SMALLER_BUFFER)
+#if defined(MY_ABC_HERE)
 	if (oss_buffer_size > 65536) {
 		oss_buffer_size = 65536;
 	}
-#endif /* CONFIG_SYNO_AUDIO_SMALLER_BUFFER */
+#endif /* MY_ABC_HERE */
 	if (atomic_read(&substream->mmap_count)) {
 		if (oss_buffer_size > runtime->oss.mmap_bytes)
 			oss_buffer_size = runtime->oss.mmap_bytes;

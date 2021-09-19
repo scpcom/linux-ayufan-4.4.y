@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Parse RedBoot-style Flash Image System (FIS) tables and
  * produce a Linux partition array to match.
@@ -28,7 +31,7 @@
 
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/partitions.h>
-#ifdef CONFIG_SYNO_MTD_INFO
+#ifdef MY_ABC_HERE
 #include <linux/sched.h>
 #endif
 #include <linux/module.h>
@@ -311,7 +314,7 @@ static void __exit redboot_parser_exit(void)
 	deregister_mtd_parser(&redboot_parser);
 }
 
-#ifdef CONFIG_SYNO_MTD_INFO
+#ifdef MY_ABC_HERE
 static void mtd_erase_callback_in_redboot (struct erase_info *instr)
 {
 	wake_up((wait_queue_head_t *)instr->priv);
@@ -417,7 +420,7 @@ out:
 	kfree(buf);
 	return ret;
 }
-#endif /* CONFIG_SYNO_MTD_INFO */
+#endif /* MY_ABC_HERE */
 
 module_init(redboot_parser_init);
 module_exit(redboot_parser_exit);

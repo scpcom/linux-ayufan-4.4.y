@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * scsi_scan.c
  *
@@ -47,7 +50,7 @@
 #include "scsi_priv.h"
 #include "scsi_logging.h"
 
-#ifdef CONFIG_SYNO_INQUIRY_STANDARD
+#ifdef MY_ABC_HERE
 #define SYNO_INQUIRY_TMP_LEN 32
 #define SZ_STAT_DISK_VENDOR "ATA     "
 #define SYNO_INQUIRY_VENDOR_LEN 8
@@ -64,18 +67,18 @@ SYNO_DISK_VENDOR gDiskVendor[] = {
 	{NULL, 0}
 };
 
-#ifdef CONFIG_SYNO_INCREASE_DISK_MODEL_NAME_LENGTH
+#ifdef MY_ABC_HERE
 #define SYNO_RESULT_LEN 512
 /* The IDENTIFY DEVICE command will get most 40 characters */
 #define SYNO_IDENTIFY_DEVICE_TMP_LEN 40
 extern int syno_get_ata_identity(struct scsi_device *sdev, u16 *id);
-#endif /* CONFIG_SYNO_INCREASE_DISK_MODEL_NAME_LENGTH */
-#endif /* CONFIG_SYNO_INQUIRY_STANDARD */
-#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+#endif /* MY_ABC_HERE */
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
 #include <linux/libata.h>
 #define to_ata_port(d) container_of(d, struct ata_port, tdev)
 extern u8 syno_is_synology_pm(const struct ata_port *ap);
-#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
+#endif /* MY_ABC_HERE */
 
 #define ALLOC_FAILURE_MSG	KERN_ERR "%s: Allocation failure during" \
 	" SCSI scanning, some SCSI devices might not be configured\n"
@@ -268,10 +271,10 @@ static struct scsi_device *scsi_alloc_sdev(struct scsi_target *starget,
 		goto out;
 
 	sdev->vendor = scsi_null_device_strs;
-#ifdef CONFIG_SYNO_INCREASE_DISK_MODEL_NAME_LENGTH
-#else /* CONFIG_SYNO_INCREASE_DISK_MODEL_NAME_LENGTH */
+#ifdef MY_ABC_HERE
+#else /* MY_ABC_HERE */
 	sdev->model = scsi_null_device_strs;
-#endif /* CONFIG_SYNO_INCREASE_DISK_MODEL_NAME_LENGTH */
+#endif /* MY_ABC_HERE */
 	sdev->rev = scsi_null_device_strs;
 	sdev->host = shost;
 	sdev->queue_ramp_up_period = SCSI_DEFAULT_RAMP_UP_PERIOD;
@@ -287,12 +290,12 @@ static struct scsi_device *scsi_alloc_sdev(struct scsi_target *starget,
 	spin_lock_init(&sdev->list_lock);
 	INIT_WORK(&sdev->event_work, scsi_evt_thread);
 	INIT_WORK(&sdev->requeue_work, scsi_requeue_run_queue);
-#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY
+#ifdef MY_DEF_HERE
 	INIT_LIST_HEAD(&sdev->spinup_list);
 	sdev->spinup_in_process = 0;
 	sdev->spinup_timer = 0;
 	sdev->spinup_queue = NULL;
-#endif /* CONFIG_SYNO_SAS_SPINUP_DELAY */
+#endif /* MY_DEF_HERE */
 
 	sdev->sdev_gendev.parent = get_device(&starget->dev);
 	sdev->sdev_target = starget;
@@ -561,7 +564,7 @@ void scsi_target_reap(struct scsi_target *starget)
 	scsi_target_reap_ref_put(starget);
 }
 
-#ifdef CONFIG_SYNO_INQUIRY_STANDARD
+#ifdef MY_ABC_HERE
 /**
  * ssyno_standard_inquiry_strin - refine the vendor and model strings of SATA disks
  * @szInqStr: INQUIRY result string to be refined
@@ -668,9 +671,9 @@ static void syno_standard_vendor_string(unsigned char *szInqStr, unsigned int ui
 END:
 	return;
 }
-#endif /* CONFIG_SYNO_INQUIRY_STANDARD */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_INCREASE_DISK_MODEL_NAME_LENGTH
+#ifdef MY_ABC_HERE
 /**
  * Description:
  * 	The result of SCSI INQUIRY from a SATA disk might set vendor as "ATA"
@@ -761,7 +764,7 @@ static void scsi_ata_identify_device_get_model_name(struct scsi_device *sdev, un
 
 	return;
 }
-#endif /* CONFIG_SYNO_INCREASE_DISK_MODEL_NAME_LENGTH */
+#endif /* MY_ABC_HERE */
 
 /**
  * sanitize_inquiry_string - remove non-graphical chars from an INQUIRY result string
@@ -789,7 +792,7 @@ static void sanitize_inquiry_string(unsigned char *s, int len)
 	}
 }
 
-#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 static int syno_is_pmp_device(struct device *dev)
 {
 	struct ata_port *pPmPort = NULL;
@@ -812,7 +815,7 @@ static int syno_is_pmp_device(struct device *dev)
 End:
 	return iRet;
 }
-#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
+#endif /* MY_ABC_HERE */
 
 /**
  * scsi_probe_lun - probe a single LUN using a SCSI INQUIRY
@@ -836,7 +839,7 @@ static int scsi_probe_lun(struct scsi_device *sdev, unsigned char *inq_result,
 	int response_len = 0;
 	int pass, count, result;
 	struct scsi_sense_hdr sshdr;
-#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 	/* Standard Inquiry Data for Virtual Device */
 	unsigned char SYNO_INQUIRY_VIRTUALD_DATA[] = {
 					0x03,0x00,0x04,0x02,0x20,0x00,0x00,0x00,
@@ -846,7 +849,7 @@ static int scsi_probe_lun(struct scsi_device *sdev, unsigned char *inq_result,
 					0x31,0x2E,0x30,0x30
 					};
 	int iVirtualInquiryLen = 36;
-#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
+#endif /* MY_ABC_HERE */
 
 	*bflags = 0;
 
@@ -872,7 +875,7 @@ static int scsi_probe_lun(struct scsi_device *sdev, unsigned char *inq_result,
 
 		memset(inq_result, 0, try_inquiry_len);
 
-#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 		if (sdev->channel == SYNO_PM_VIRTUAL_SCSI_CHANNEL) {
 			if (syno_is_pmp_device(&sdev->sdev_gendev)) {
 				result = 0;
@@ -881,15 +884,15 @@ static int scsi_probe_lun(struct scsi_device *sdev, unsigned char *inq_result,
 				sdev->inquiry_len = iVirtualInquiryLen;
 			}
 		} else {
-#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
+#endif /* MY_ABC_HERE */
 		result = scsi_execute_req(sdev,  scsi_cmd, DMA_FROM_DEVICE,
 					  inq_result, try_inquiry_len, &sshdr,
 					  HZ / 2 + HZ * scsi_inq_timeout, 3,
 					  &resid);
 
-#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 		}
-#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
+#endif /* MY_ABC_HERE */
 		SCSI_LOG_SCAN_BUS(3, printk(KERN_INFO "scsi scan: INQUIRY %s "
 				"with code 0x%x\n",
 				result ? "failed" : "successful", result));
@@ -922,7 +925,7 @@ static int scsi_probe_lun(struct scsi_device *sdev, unsigned char *inq_result,
 	}
 
 	if (result == 0) {
-#ifdef CONFIG_SYNO_INQUIRY_STANDARD
+#ifdef MY_ABC_HERE
 		/*
 		 * Only transfering the strings that vendor is ATA.
 		 * vendor set as "ATA" means the disk is a SATA disk
@@ -932,7 +935,7 @@ static int scsi_probe_lun(struct scsi_device *sdev, unsigned char *inq_result,
 		} else {
 			syno_standard_vendor_string(&inq_result[8], 8);
 		}
-#endif /* CONFIG_SYNO_INQUIRY_STANDARD */
+#endif /* MY_ABC_HERE */
 		sanitize_inquiry_string(&inq_result[8], 8);
 		sanitize_inquiry_string(&inq_result[16], 16);
 		sanitize_inquiry_string(&inq_result[32], 4);
@@ -1058,9 +1061,9 @@ static int scsi_add_lun(struct scsi_device *sdev, unsigned char *inq_result,
 		int *bflags, int async)
 {
 	int ret;
-#ifdef CONFIG_SYNO_INCREASE_DISK_MODEL_NAME_LENGTH
+#ifdef MY_ABC_HERE
 	unsigned char szDiskModel[CONFIG_SYNO_DISK_MODEL_NUM + 4] = {'\0'};
-#endif /* CONFIG_SYNO_INCREASE_DISK_MODEL_NAME_LENGTH */
+#endif /* MY_ABC_HERE */
 
 	/*
 	 * XXX do not save the inquiry, since it can change underneath us,
@@ -1089,12 +1092,12 @@ static int scsi_add_lun(struct scsi_device *sdev, unsigned char *inq_result,
 		return SCSI_SCAN_NO_RESPONSE;
 
 	sdev->vendor = (char *) (sdev->inquiry + 8);
-#ifdef CONFIG_SYNO_INCREASE_DISK_MODEL_NAME_LENGTH
+#ifdef MY_ABC_HERE
 	if(!(SYNO_PORT_TYPE_USB == sdev->host->hostt->syno_port_type)) {
-#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 		if(sdev->channel != SYNO_PM_VIRTUAL_SCSI_CHANNEL ||
 				!syno_is_pmp_device(&sdev->sdev_gendev))
-#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
+#endif /* MY_ABC_HERE */
 		scsi_ata_identify_device_get_model_name(sdev, (unsigned char *)&szDiskModel);
 	}
 
@@ -1114,9 +1117,9 @@ static int scsi_add_lun(struct scsi_device *sdev, unsigned char *inq_result,
 		return SCSI_SCAN_NO_RESPONSE;
 
 	sanitize_inquiry_string((unsigned char *) sdev->model, CONFIG_SYNO_DISK_MODEL_NUM);
-#else /* CONFIG_SYNO_INCREASE_DISK_MODEL_NAME_LENGTH */
+#else /* MY_ABC_HERE */
 	sdev->model = (char *) (sdev->inquiry + 16);
-#endif /* CONFIG_SYNO_INCREASE_DISK_MODEL_NAME_LENGTH */
+#endif /* MY_ABC_HERE */
 	sdev->rev = (char *) (sdev->inquiry + 32);
 
 	if (strncmp(sdev->vendor, "ATA     ", 8) == 0) {
@@ -1197,11 +1200,11 @@ static int scsi_add_lun(struct scsi_device *sdev, unsigned char *inq_result,
 	if (inq_result[7] & 0x10)
 		sdev->sdtr = 1;
 
-#ifdef CONFIG_SYNO_INCREASE_DISK_MODEL_NAME_LENGTH
+#ifdef MY_ABC_HERE
 	sdev_printk(KERN_NOTICE, sdev, "%s %.8s %."CONFIG_SYNO_DISK_MODEL_LEN"s %.4s PQ: %d "
-#else /* CONFIG_SYNO_INCREASE_DISK_MODEL_NAME_LENGTH */
+#else /* MY_ABC_HERE */
 	sdev_printk(KERN_NOTICE, sdev, "%s %.8s %.16s %.4s PQ: %d "
-#endif /* CONFIG_SYNO_INCREASE_DISK_MODEL_NAME_LENGTH */
+#endif /* MY_ABC_HERE */
 			"ANSI: %d%s\n", scsi_device_type(sdev->type),
 			sdev->vendor, sdev->model, sdev->rev,
 			sdev->inq_periph_qual, inq_result[2] & 0x07,

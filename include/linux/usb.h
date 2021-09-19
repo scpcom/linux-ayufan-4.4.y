@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef __LINUX_USB_H
 #define __LINUX_USB_H
 
@@ -577,9 +580,9 @@ struct usb_device {
 	int maxchild;
 
 	u32 quirks;
-#ifdef CONFIG_SYNO_USB_DEVICE_QUIRKS
+#ifdef MY_ABC_HERE
 	u32 syno_quirks;
-#endif /* CONFIG_SYNO_USB_DEVICE_QUIRKS */
+#endif /* MY_ABC_HERE */
 	atomic_t urbnum;
 
 	unsigned long active_duration;
@@ -1162,10 +1165,10 @@ extern void usb_deregister_device_driver(struct usb_device_driver *);
 
 extern int usb_register_dev(struct usb_interface *intf,
 			    struct usb_class_driver *class_driver);
-#ifdef CONFIG_SYNO_STATIC_HIDDEV_MINOR
+#ifdef MY_ABC_HERE
 extern int usb_register_dev1(struct usb_interface *intf,
 				struct usb_class_driver *class_driver, int minor_offset);
-#endif /* CONFIG_SYNO_STATIC_HIDDEV_MINOR */
+#endif /* MY_ABC_HERE */
 extern void usb_deregister_dev(struct usb_interface *intf,
 			       struct usb_class_driver *class_driver);
 

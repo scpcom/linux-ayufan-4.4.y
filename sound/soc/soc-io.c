@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * soc-io.c  --  ASoC register I/O helpers
  *
@@ -13,17 +16,17 @@
 
 #include <linux/i2c.h>
 #include <linux/spi/spi.h>
-#if defined(CONFIG_SYNO_IGNORE_TRACE_SND_SOC)
+#if defined(MY_ABC_HERE)
 #else
 #include <linux/regmap.h>
-#endi /*CONFIG_SYNO_IGNORE_TRACE_SND_SOC*/
+#endi /*MY_ABC_HERE*/
 #include <linux/export.h>
 #include <sound/soc.h>
 
-#if defined(CONFIG_SYNO_IGNORE_TRACE_SND_SOC)
+#if defined(MY_ABC_HERE)
 #else
 #include <trace/events/asoc.h>
-#endif /*CONFIG_SYNO_IGNORE_TRACE_SND_SOC*/
+#endif /*MY_ABC_HERE*/
 
 #ifdef CONFIG_REGMAP
 static int hw_write(struct snd_soc_codec *codec, unsigned int reg,

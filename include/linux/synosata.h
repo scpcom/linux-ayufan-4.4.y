@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 // Copyright (c) 2003-2008 Synology Inc. All rights reserved.
 #ifndef __SYNO_SATA_H_
 #define __SYNO_SATA_H_
@@ -21,19 +24,19 @@
  *  0 : do not spinup delay
  * >0 : The number that we would delay
  */
-#ifdef CONFIG_SYNO_INTERNAL_HD_NUM
+#ifdef MY_ABC_HERE
 extern long g_syno_hdd_powerup_seq;
 extern long syno_boot_hd_count;
-#endif /* CONFIG_SYNO_INTERNAL_HD_NUM */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_ATA_PWR_CTRL
+#ifdef MY_ABC_HERE
 static inline void SleepForLatency(void)
 {
 	mdelay(3000);
 }
-#endif /* CONFIG_SYNO_ATA_PWR_CTRL */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_SPINUP_DELAY
+#ifdef MY_ABC_HERE
 static inline void SleepForHD(int i)
 {
 	if ((syno_boot_hd_count != g_syno_hdd_powerup_seq - 1) && /* the last disk shouldn't wait */
@@ -70,9 +73,9 @@ static inline void SleepForHW(int iDisk, int iIsDoLatency)
 	}
 	syno_boot_hd_count++;
 }
-#endif /* CONFIG_SYNO_SPINUP_DELAY */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 #include <linux/fs.h>
 
 #define GPIO_3XXX_CMD_POWER_CTL 0x40
@@ -490,9 +493,9 @@ is_ebox_support(void)
 	ret = 1;
 	return ret;
 }
-#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_SATA_SSD_DETECT
+#ifdef MY_ABC_HERE
 
 /*
  *back porting from linux 2.6.28. add SYNO prefix in order to not mixed with libata
@@ -575,12 +578,12 @@ syno_ata_id_is_ssd(const unsigned short *id)
 END:
 	return res;
 }
-#endif /* CONFIG_SYNO_SATA_SSD_DETECT */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_PMP_HOTPLUG_TASK
+#ifdef MY_ABC_HERE
 #define SZK_PMP_UEVENT "SYNO_PMP_EVENT"
 #define SZV_PMP_CONNECT "CABLE_CONNECT"
 #define SZV_PMP_DISCONNECT "CABLE_DISCONNECT"
-#endif /* CONFIG_SYNO_PMP_HOTPLUG_TASK */
+#endif /* MY_ABC_HERE */
 
 #endif /* __SYNO_SATA_H_ */

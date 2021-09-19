@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * xHCI host controller driver
  *
@@ -231,11 +234,11 @@ u32 etxhci_port_state_to_neutral(u32 state)
 	return (state & XHCI_PORT_RO) | (state & XHCI_PORT_RWS);
 }
 
-#ifdef CONFIG_SYNO_FACTORY_USB3_DISABLE
+#ifdef MY_ABC_HERE
 #include <linux/pci.h>
 
 extern int gSynoFactoryUSB3Disable;
-#endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
+#endif /* MY_ABC_HERE */
 
 /*
  * find slot id based on port number.
@@ -791,7 +794,7 @@ int etxhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 			 * However, khubd will ignore the roothub events until
 			 * the roothub is registered.
 			 */
-#ifdef CONFIG_SYNO_FACTORY_USB3_DISABLE
+#ifdef MY_ABC_HERE
 			xhci_dbg(xhci, "set port power. hcd->speed:%d.\n",hcd->speed);
 			if (1 == gSynoFactoryUSB3Disable && hcd->speed == HCD_USB3) {
 				xhci_writel(xhci, temp & ~PORT_POWER,
@@ -800,12 +803,12 @@ int etxhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 				msleep(500);
 				spin_lock_irqsave(&xhci->lock, flags);
 			} else {
-#endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
+#endif /* MY_ABC_HERE */
 			xhci_writel(xhci, temp | PORT_POWER,
 					port_array[wIndex]);
-#ifdef CONFIG_SYNO_FACTORY_USB3_DISABLE
+#ifdef MY_ABC_HERE
 			}
-#endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
+#endif /* MY_ABC_HERE */
 
 			temp = xhci_readl(xhci, port_array[wIndex]);
 			xhci_dbg(xhci, "set port power, actual port %d status  = 0x%x\n", wIndex, temp);
@@ -814,19 +817,19 @@ int etxhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 			temp = usb_acpi_power_manageable(hcd->self.root_hub,
 					wIndex);
 			if (temp)
-#ifdef CONFIG_SYNO_FACTORY_USB3_DISABLE
+#ifdef MY_ABC_HERE
 			{
 				if (1 == gSynoFactoryUSB3Disable && hcd->speed == HCD_USB3) {
 					usb_acpi_set_power_state(hcd->self.root_hub,
 						wIndex, false);
 				} else {
-#endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
+#endif /* MY_ABC_HERE */
 				usb_acpi_set_power_state(hcd->self.root_hub,
 					wIndex, true);
-#ifdef CONFIG_SYNO_FACTORY_USB3_DISABLE
+#ifdef MY_ABC_HERE
 				}
 			}
-#endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
+#endif /* MY_ABC_HERE */
 			spin_lock_irqsave(&xhci->lock, flags);
 			break;
 		case USB_PORT_FEAT_RESET:

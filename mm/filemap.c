@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *	linux/mm/filemap.c
  *
@@ -45,10 +48,10 @@
 
 #include <asm/mman.h>
 
-#ifdef CONFIG_SYNO_FS_RECVFILE
+#ifdef MY_ABC_HERE
 #include <linux/tcp.h>
 #include <net/tcp.h>
-#endif /* CONFIG_SYNO_FS_RECVFILE */
+#endif /* MY_ABC_HERE */
 
 /*
  * Shared mappings implemented 30.11.1994. It's not fully working yet,
@@ -2198,7 +2201,7 @@ int pagecache_write_end(struct file *file, struct address_space *mapping,
 }
 EXPORT_SYMBOL(pagecache_write_end);
 
-#ifdef CONFIG_SYNO_FS_RECVFILE
+#ifdef MY_ABC_HERE
 static int sock2iov(struct socket *sock, struct kvec *iov,
 			int page_count, int start_page, size_t bytes_to_received, size_t *bytes_received)
 {
@@ -2527,7 +2530,7 @@ out:
 	return ret;
 }
 EXPORT_SYMBOL(flush_aggregate_recvfile);
-#endif /* CONFIG_SYNO_FS_RECVFILE */
+#endif /* MY_ABC_HERE */
 
 ssize_t
 generic_file_direct_write(struct kiocb *iocb, const struct iovec *iov,

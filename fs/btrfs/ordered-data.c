@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2007 Oracle.  All rights reserved.
  *
@@ -230,7 +233,7 @@ static int __btrfs_add_ordered_extent(struct inode *inode, u64 file_offset,
 	spin_lock(&root->ordered_extent_lock);
 	list_add_tail(&entry->root_extent_list,
 		      &root->ordered_extents);
-#ifdef CONFIG_SYNO_BTRFS_FLUSHONCOMMIT_THRESHOLD
+#ifdef MY_ABC_HERE
 	root->fs_info->ordered_extent_nr++;
 #endif
 	root->nr_ordered_extents++;
@@ -563,7 +566,7 @@ void btrfs_remove_ordered_extent(struct inode *inode,
 
 	spin_lock(&root->ordered_extent_lock);
 	list_del_init(&entry->root_extent_list);
-#ifdef CONFIG_SYNO_BTRFS_FLUSHONCOMMIT_THRESHOLD
+#ifdef MY_ABC_HERE
 	root->fs_info->ordered_extent_nr--;
 #endif
 	root->nr_ordered_extents--;
@@ -585,7 +588,7 @@ static void btrfs_run_ordered_extent_work(struct btrfs_work *work)
 	struct btrfs_ordered_extent *ordered;
 
 	ordered = container_of(work, struct btrfs_ordered_extent, flush_work);
-#ifdef CONFIG_SYNO_BTRFS_ADD_LOCK_ON_FLUSH_ORDERED_EXTENT
+#ifdef MY_ABC_HERE
 	btrfs_start_ordered_extent(ordered->inode, ordered, 2);
 #else
 	btrfs_start_ordered_extent(ordered->inode, ordered, 1);
@@ -689,7 +692,7 @@ void btrfs_start_ordered_extent(struct inode *inode,
 				       struct btrfs_ordered_extent *entry,
 				       int wait)
 {
-#ifdef CONFIG_SYNO_BTRFS_ADD_LOCK_ON_FLUSH_ORDERED_EXTENT
+#ifdef MY_ABC_HERE
 	struct btrfs_root *root = BTRFS_I(entry->inode)->root;;
 #endif
 	u64 start = entry->file_offset;
@@ -703,7 +706,7 @@ void btrfs_start_ordered_extent(struct inode *inode,
 	 * for the flusher thread to find them
 	 */
 	if (!test_bit(BTRFS_ORDERED_DIRECT, &entry->flags))
-#ifdef CONFIG_SYNO_BTRFS_ADD_LOCK_ON_FLUSH_ORDERED_EXTENT
+#ifdef MY_ABC_HERE
 	{
 		if (2 == wait)mutex_lock(&root->ordered_extent_worker_mutex);
 		filemap_fdatawrite_range(inode->i_mapping, start, end);

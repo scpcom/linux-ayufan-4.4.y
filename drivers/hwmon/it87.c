@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  it87.c - Part of lm_sensors, Linux kernel modules for hardware
  *           monitoring.
@@ -2617,7 +2620,7 @@ static void __exit sm_it87_exit(void)
 	platform_driver_unregister(&it87_driver);
 }
 
-#ifdef CONFIG_SYNO_IT87_SYS_TEMPERATURE
+#ifdef MY_ABC_HERE
 int syno_sys_temperature(int *Temperature)
 {
 	unsigned short address;
@@ -2647,9 +2650,9 @@ int syno_sys_temperature(int *Temperature)
 	return 0;
 }
 EXPORT_SYMBOL(syno_sys_temperature);
-#endif /* CONFIG_SYNO_IT87_SYS_TEMPERATURE */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_IT87_SUPERIO_RW
+#ifdef MY_ABC_HERE
 struct writable_pin {
 	u32         pin;
 	u32         en_reg;
@@ -2755,9 +2758,9 @@ u32 syno_superio_gpio_pin(int pin, int *pValue, int isWrite)
 	return ret;
 }
 EXPORT_SYMBOL(syno_superio_gpio_pin);
-#endif /* CONFIG_SYNO_IT87_SUPERIO_RW */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_SUPPORT_EUP
+#ifdef MY_ABC_HERE
 int syno_superio_regist_read(u8 ldn, u8 reg, u8 *value)
 {
 	int iRet = -1;
@@ -2785,7 +2788,7 @@ int syno_superio_regist_write(u8 ldn, u8 reg, u8 value)
 	return iRet;
 }
 EXPORT_SYMBOL(syno_superio_regist_write);
-#endif /* CONFIG_SYNO_SUPPORT_EUP */
+#endif /* MY_ABC_HERE */
 
 MODULE_AUTHOR("Chris Gauthron, Jean Delvare <khali@linux-fr.org>");
 MODULE_DESCRIPTION("IT8705F/IT871xF/IT872xF hardware monitoring driver");

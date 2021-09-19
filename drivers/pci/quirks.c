@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  This file contains work-arounds for many known PCI hardware
  *  bugs.  Devices present only on certain architectures (host
@@ -44,9 +47,9 @@ static void quirk_mmio_always_on(struct pci_dev *dev)
 }
 DECLARE_PCI_FIXUP_CLASS_EARLY(PCI_ANY_ID, PCI_ANY_ID,
 				PCI_CLASS_BRIDGE_HOST, 8, quirk_mmio_always_on);
-#ifdef CONFIG_SYNO_ICH_UHCI_NO_MMIO_OFF
+#ifdef MY_ABC_HERE
 DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_INTEL, 0x2934, quirk_mmio_always_on);
-#endif /* CONFIG_SYNO_ICH_UHCI_NO_MMIO_OFF */
+#endif /* MY_ABC_HERE */
 
 /* The Mellanox Tavor device gives false positive parity errors
  * Mark this device with a broken_parity_status, to allow
@@ -2963,7 +2966,7 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_CHELSIO, 0x0030,
 			 quirk_broken_intx_masking);
 DECLARE_PCI_FIXUP_HEADER(0x1814, 0x0601, /* Ralink RT2800 802.11n PCI */
 			 quirk_broken_intx_masking);
-#ifdef CONFIG_SYNO_MV_9235_PORTING
+#ifdef MY_ABC_HERE
 /*
  * Marvell provide PCI Programming steps for 88SE9235 without SPI flash
  * to slove some compatibility issue.
@@ -3026,9 +3029,9 @@ static void mv9235_non_spi_programming(struct pci_dev *dev)
 }
 DECLARE_PCI_FIXUP_FINAL(0x1b4b, 0x9235, mv9235_non_spi_programming);
 DECLARE_PCI_FIXUP_FINAL(0x1b4b, 0x9215, mv9235_non_spi_programming);
-#endif /* CONFIG_SYNO_MV_9235_PORTING */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_MV_9170_PORTING
+#ifdef MY_ABC_HERE
 /*
  * Marvell provide PCI Programming steps for 88SE9170 without SPI flash
  * to slove some compatibility issue.
@@ -3137,9 +3140,9 @@ static void mv9170_non_spi_programming(struct pci_dev *dev)
 	ndelay(80);
 }
 DECLARE_PCI_FIXUP_FINAL(0x1b4b, 0x9170, mv9170_non_spi_programming);
-#endif /* CONFIG_SYNO_MV_9170_PORTING */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_LYNXPOINT_XHCI_QUIRK
+#ifdef MY_DEF_HERE
 /*
  * The XHCI of Denlow platform has some additional programming code in ACPI method _PS0,
  * but this method doesn't execute during boot time at linux-3.10.x. This change lead to
@@ -3182,7 +3185,7 @@ static void intel_lynxpoint_xhci_quirk(struct pci_dev *dev)
 	pci_iounmap(dev, mmio_base);
 }
 DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_INTEL, 0x8c31, intel_lynxpoint_xhci_quirk);
-#endif /* CONFIG_SYNO_LYNXPOINT_XHCI_QUIRK */
+#endif /* MY_DEF_HERE */
 
 static void pci_do_fixups(struct pci_dev *dev, struct pci_fixup *f,
 			  struct pci_fixup *end)
@@ -3510,11 +3513,11 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_MARVELL_EXT, 0x9230,
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_JMICRON,
 			 PCI_DEVICE_ID_JMICRON_JMB388_ESD,
 			 quirk_dma_func1_alias);
-#ifdef CONFIG_SYNO_MV_9235_PORTING
+#ifdef MY_ABC_HERE
 /* 88SE9235 has the same DMA alias issue with 88SE9230 */
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_MARVELL_EXT, 0x9235,
 			 quirk_dma_func1_alias);
-#endif /* CONFIG_SYNO_MV_9235_PORTING */
+#endif /* MY_ABC_HERE */
 
 /*
  * A few PCIe-to-PCI bridges fail to expose a PCIe capability, resulting in

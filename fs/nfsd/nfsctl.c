@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Syscall interface to knfsd.
  *
@@ -49,12 +52,12 @@ enum {
 	NFSD_Gracetime,
 	NFSD_RecoveryDir,
 #endif
-#ifdef CONFIG_SYNO_NFSD_UDP_PACKET
+#ifdef MY_ABC_HERE
 	NFSD_UDP_Size,
-#endif /*CONFIG_SYNO_NFSD_UDP_PACKET*/
-#ifdef CONFIG_SYNO_NFSD_UNIX_PRI
+#endif /*MY_ABC_HERE*/
+#ifdef MY_ABC_HERE
 	NFSD_UNIX_PRI,
-#endif /*CONFIG_SYNO_NFSD_UNIX_PRI*/
+#endif /*MY_ABC_HERE*/
 };
 
 /*
@@ -73,12 +76,12 @@ static ssize_t write_leasetime(struct file *file, char *buf, size_t size);
 static ssize_t write_gracetime(struct file *file, char *buf, size_t size);
 static ssize_t write_recoverydir(struct file *file, char *buf, size_t size);
 #endif
-#ifdef CONFIG_SYNO_NFSD_UDP_PACKET
+#ifdef MY_ABC_HERE
 static ssize_t write_udp_size(struct file *file, char *buf, size_t size);
-#endif /*CONFIG_SYNO_NFSD_UDP_PACKET*/
-#ifdef CONFIG_SYNO_NFSD_UNIX_PRI
+#endif /*MY_ABC_HERE*/
+#ifdef MY_ABC_HERE
 static ssize_t write_unix_enable(struct file *file, char *buf, size_t size);
-#endif /*CONFIG_SYNO_NFSD_UNIX_PRI*/
+#endif /*MY_ABC_HERE*/
 
 static ssize_t (*write_op[])(struct file *, char *, size_t) = {
 	[NFSD_Fh] = write_filehandle,
@@ -94,12 +97,12 @@ static ssize_t (*write_op[])(struct file *, char *, size_t) = {
 	[NFSD_Gracetime] = write_gracetime,
 	[NFSD_RecoveryDir] = write_recoverydir,
 #endif
-#ifdef CONFIG_SYNO_NFSD_UDP_PACKET
+#ifdef MY_ABC_HERE
 	[NFSD_UDP_Size] = write_udp_size,
-#endif /*CONFIG_SYNO_NFSD_UDP_PACKET*/
-#ifdef CONFIG_SYNO_NFSD_UNIX_PRI
+#endif /*MY_ABC_HERE*/
+#ifdef MY_ABC_HERE
 	[NFSD_UNIX_PRI] = write_unix_enable,
-#endif /*CONFIG_SYNO_NFSD_UNIX_PRI*/
+#endif /*MY_ABC_HERE*/
 };
 
 static ssize_t nfsctl_transaction_write(struct file *file, const char __user *buf, size_t size, loff_t *pos)
@@ -547,7 +550,7 @@ out_free:
 	return rv;
 }
 
-#ifdef CONFIG_SYNO_NFSD_UDP_PACKET
+#ifdef MY_ABC_HERE
 u32 nfs_udp_f_rtpref;
 u32 nfs_udp_f_wtpref;
 
@@ -584,9 +587,9 @@ End:
 		return scnprintf(buf, SIMPLE_TRANSACTION_LIMIT, "rsize=%d,wsize=%d\n", nfs_udp_f_rtpref, nfs_udp_f_wtpref);
 	}
 }
-#endif /*CONFIG_SYNO_NFSD_UDP_PACKET*/
+#endif /*MY_ABC_HERE*/
 
-#ifdef CONFIG_SYNO_NFSD_UNIX_PRI
+#ifdef MY_ABC_HERE
 u32 bl_unix_pri_enable;
 
 static ssize_t write_unix_enable(struct file *file, char *buf, size_t size)
@@ -620,7 +623,7 @@ End:
 		return scnprintf(buf, SIMPLE_TRANSACTION_LIMIT, "%u\n", bl_unix_pri_enable);
 	}
 }
-#endif /*CONFIG_SYNO_NFSD_UNIX_PRI*/
+#endif /*MY_ABC_HERE*/
 
 static ssize_t __write_versions(struct file *file, char *buf, size_t size)
 {
@@ -1163,12 +1166,12 @@ static int nfsd_fill_super(struct super_block * sb, void * data, int silent)
 		[NFSD_Gracetime] = {"nfsv4gracetime", &transaction_ops, S_IWUSR|S_IRUSR},
 		[NFSD_RecoveryDir] = {"nfsv4recoverydir", &transaction_ops, S_IWUSR|S_IRUSR},
 #endif
-#ifdef CONFIG_SYNO_NFSD_UDP_PACKET
+#ifdef MY_ABC_HERE
 		[NFSD_UDP_Size] = {"udppacketsize", &transaction_ops, S_IWUSR|S_IRUGO},
-#endif /* CONFIG_SYNO_NFSD_UDP_PACKET */
-#ifdef CONFIG_SYNO_NFSD_UNIX_PRI
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
 		[NFSD_UNIX_PRI] = {"unix_privilege_enable", &transaction_ops, S_IWUSR|S_IRUGO},
-#endif /*CONFIG_SYNO_NFSD_UNIX_PRI*/
+#endif /*MY_ABC_HERE*/
 		/* last one */ {""}
 	};
 	struct net *net = data;
@@ -1267,14 +1270,14 @@ static int __init init_nfsd(void)
 	int retval;
 	printk(KERN_INFO "Installing knfsd (copyright (C) 1996 okir@monad.swb.de).\n");
 
-#ifdef CONFIG_SYNO_NFSD_UDP_PACKET
+#ifdef MY_ABC_HERE
 	/*initial default udp packet size*/
 	nfs_udp_f_rtpref = CONFIG_SYNO_NFSD_UDP_DEF_PACKET_SIZE;
 	nfs_udp_f_wtpref = CONFIG_SYNO_NFSD_UDP_DEF_PACKET_SIZE;
-#endif /*CONFIG_SYNO_NFSD_UDP_PACKET*/
-#ifdef CONFIG_SYNO_NFSD_UNIX_PRI
+#endif /*MY_ABC_HERE*/
+#ifdef MY_ABC_HERE
 	bl_unix_pri_enable = 1;
-#endif /*CONFIG_SYNO_NFSD_UNIX_PRI*/
+#endif /*MY_ABC_HERE*/
 
 	retval = register_cld_notifier();
 	if (retval)

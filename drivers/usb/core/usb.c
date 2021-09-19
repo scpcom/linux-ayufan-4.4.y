@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * drivers/usb/core/usb.c
  *
@@ -36,9 +39,9 @@
 #include <linux/mutex.h>
 #include <linux/workqueue.h>
 #include <linux/debugfs.h>
-#ifdef CONFIG_SYNO_ENABLE_USBFS_ENTRY
+#ifdef MY_ABC_HERE
 #include <linux/proc_fs.h>
-#endif /* CONFIG_SYNO_ENABLE_USBFS_ENTRY */
+#endif /* MY_ABC_HERE */
 
 #include <asm/io.h>
 #include <linux/scatterlist.h>
@@ -966,9 +969,9 @@ struct dentry *usb_debug_root;
 EXPORT_SYMBOL_GPL(usb_debug_root);
 
 static struct dentry *usb_debug_devices;
-#ifdef CONFIG_SYNO_ENABLE_USBFS_ENTRY
+#ifdef MY_ABC_HERE
 static struct proc_dir_entry *usbdir = NULL;
-#endif /* CONFIG_SYNO_ENABLE_USBFS_ENTRY */
+#endif /* MY_ABC_HERE */
 
 static int usb_debugfs_init(void)
 {
@@ -985,13 +988,13 @@ static int usb_debugfs_init(void)
 		return -ENOENT;
 	}
 
-#ifdef CONFIG_SYNO_ENABLE_USBFS_ENTRY
+#ifdef MY_ABC_HERE
 	/* create mount point for /proc/bus/usb */
 	usbdir = proc_mkdir("bus/usb", NULL);
 	if (!usbdir) {
 		printk(KERN_ERR "Fail to create /proc/bus/usb\n");
 	}
-#endif /* CONFIG_SYNO_ENABLE_USBFS_ENTRY */
+#endif /* MY_ABC_HERE */
 
 	return 0;
 }
@@ -1000,10 +1003,10 @@ static void usb_debugfs_cleanup(void)
 {
 	debugfs_remove(usb_debug_devices);
 	debugfs_remove(usb_debug_root);
-#ifdef CONFIG_SYNO_ENABLE_USBFS_ENTRY
+#ifdef MY_ABC_HERE
 	if (usbdir)
 		remove_proc_entry("bus/usb", NULL);
-#endif /* CONFIG_SYNO_ENABLE_USBFS_ENTRY */
+#endif /* MY_ABC_HERE */
 }
 
 /*

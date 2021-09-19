@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *	SUCS NET3:
  *
@@ -386,7 +389,7 @@ fault:
 }
 EXPORT_SYMBOL(skb_copy_datagram_iovec);
 
-#ifdef CONFIG_SYNO_FS_RECVFILE
+#ifdef MY_ABC_HERE
 /**
  *	skb_copy_datagram_iovec - Copy a datagram to an iovec.
  *	@skb: buffer to copy
@@ -485,7 +488,7 @@ int skb_copy_datagram_iovec1(const struct sk_buff *skb, int offset,
 fault:
 	return -EFAULT;
 }
-#endif /* CONFIG_SYNO_FS_RECVFILE */
+#endif /* MY_ABC_HERE */
 
 /**
  *	skb_copy_datagram_const_iovec - Copy a datagram to an iovec.

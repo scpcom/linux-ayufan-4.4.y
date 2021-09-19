@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _UAPI_LINUX_FS_H
 #define _UAPI_LINUX_FS_H
 
@@ -84,9 +87,9 @@ struct inodes_stat_t {
 #define MS_KERNMOUNT	(1<<22) /* this is a kern_mount call */
 #define MS_I_VERSION	(1<<23) /* Update inode I_version field */
 #define MS_STRICTATIME	(1<<24) /* Always perform atime updates */
-#ifdef CONFIG_SYNO_FS_WINACL  
+#ifdef MY_ABC_HERE  
 #define MS_SYNOACL	(1<<25)	/* Synology ACL */
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 
 /* These sb flags are internal to the kernel */
 #define MS_NOSEC	(1<<28)
@@ -155,17 +158,17 @@ struct inodes_stat_t {
 #define FITHAW		_IOWR('X', 120, int)	/* Thaw */
 #define FITRIM		_IOWR('X', 121, struct fstrim_range)	/* Trim */
 
-#ifdef CONFIG_SYNO_FS_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 #define FIGETVERSION			_IOWR('x', 122, unsigned int)	/* get syno archive version */
 #define FISETVERSION			_IOWR('x', 123, unsigned int)	/* set syno archive version */
 #define FIINCVERSION			_IO('x', 124)	/* increase syno archive version by 1 */
 #define FISETFILEVERSION		_IOWR('x', 125, unsigned int)	/* set file syno archive version */
-#ifdef CONFIG_SYNO_EXT4_ARCHIVE_VERSION_FIX
+#ifdef MY_ABC_HERE
 #define FIGETBADVERSION			_IOWR('x', 126, unsigned int)	/* fix bad archive version */
 #define FICLEARBADVERSION		_IO('x', 127)	/* fix bad archive version */
 #define FISETBADVERSION			_IOWR('x', 128, unsigned int)	/* fix bad archive version */
-#endif /* CONFIG_SYNO_EXT4_ARCHIVE_VERSION_FIX */
-#endif /* CONFIG_SYNO_FS_ARCHIVE_VERSION */
+#endif /* MY_ABC_HERE */
+#endif /* MY_ABC_HERE */
 
 #define	FS_IOC_GETFLAGS			_IOR('f', 1, long)
 #define	FS_IOC_SETFLAGS			_IOW('f', 2, long)

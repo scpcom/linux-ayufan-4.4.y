@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/mm/page_alloc.c
  *
@@ -2593,14 +2596,14 @@ rebalance:
 	}
 
 nopage:
-#ifdef CONFIG_SYNO_HIDE_LOWMEM_WARNING
+#ifdef MY_ABC_HERE
 /*
  * Do not show nowait page allocation fail warning to prevent
  * QC team panic when they stress new platform.
  */
-#else /* CONFIG_SYNO_HIDE_LOWMEM_WARNING */
+#else /* MY_ABC_HERE */
 	warn_alloc_failed(gfp_mask, order, NULL);
-#endif /* CONFIG_SYNO_HIDE_LOWMEM_WARNING */
+#endif /* MY_ABC_HERE */
 	return page;
 got_pg:
 	if (kmemcheck_enabled)

@@ -1,107 +1,110 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 // Copyright (c) 2003-2015 Synology Inc. All rights reserved.
 #include <linux/kernel.h>
 #include <linux/synolib.h>
 
-#ifdef CONFIG_SYNO_DISK_INDEX_MAP
+#ifdef MY_ABC_HERE
 extern char gszDiskIdxMap[16];
-#endif /* CONFIG_SYNO_DISK_INDEX_MAP */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_HW_REVISION
+#ifdef MY_ABC_HERE
 extern char gszSynoHWRevision[];
-#endif /* CONFIG_SYNO_HW_REVISION */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_HW_VERSION
+#ifdef MY_ABC_HERE
 extern char gszSynoHWVersion[];
-#endif /* CONFIG_SYNO_HW_VERSION */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_INTERNAL_HD_NUM
+#ifdef MY_ABC_HERE
 extern long g_syno_hdd_powerup_seq;
-#endif /* CONFIG_SYNO_INTERNAL_HD_NUM */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_HDD_HOTPLUG
+#ifdef MY_ABC_HERE
 extern long g_hdd_hotplug;
-#endif /* CONFIG_SYNO_HDD_HOTPLUG */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_MAC_ADDRESS
+#ifdef MY_ABC_HERE
 extern unsigned char grgbLanMac[SYNO_MAC_MAX_NUMBER][16];
 extern int giVenderFormatVersion;
 extern char gszSkipVenderMacInterfaces[256];
-#endif /* CONFIG_SYNO_MAC_ADDRESS */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_SERIAL
+#ifdef MY_ABC_HERE
 extern char gszSerialNum[32];
 extern char gszCustomSerialNum[32];
-#endif /* CONFIG_SYNO_SERIAL */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_SATA_DISK_SEQ_REVERSE
+#ifdef MY_ABC_HERE
 extern char giDiskSeqReverse[8];
-#endif /* CONFIG_SYNO_SATA_DISK_SEQ_REVERSE */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_INTERNAL_NETIF_NUM
+#ifdef MY_ABC_HERE
 extern long g_internal_netif_num;
-#endif /* CONFIG_SYNO_INTERNAL_NETIF_NUM*/
+#endif /* MY_ABC_HERE*/
 
-#ifdef CONFIG_SYNO_SATA_MV_LED
+#ifdef MY_ABC_HERE
 extern long g_sata_mv_led;
-#endif /* CONFIG_SYNO_SATA_MV_LED */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_FACTORY_USB_FAST_RESET
+#ifdef MY_ABC_HERE
 extern int gSynoFactoryUSBFastReset;
-#endif /* CONFIG_SYNO_FACTORY_USB_FAST_RESET */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_FACTORY_USB3_DISABLE
+#ifdef MY_ABC_HERE
 extern int gSynoFactoryUSB3Disable;
-#endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_MEM_MODE_INFO
+#ifdef MY_DEF_HERE
 extern int gSynoMemMode;
-#endif /* CONFIG_SYNO_MEM_MODE_INFO */
+#endif /* MY_DEF_HERE */
 
 #ifdef CONFIG_SYNO_SWITCH_NET_DEVICE_NAME
 extern unsigned int gSwitchDev;
 extern char gDevPCIName[CONFIG_SYNO_MAX_SWITCHABLE_NET_DEVICE][CONFIG_SYNO_NET_DEVICE_ENCODING_LENGTH];
 #endif /* CONFIG_SYNO_SWITCH_NET_DEVICE_NAME */
 
-#ifdef CONFIG_SYNO_SAS_DISK_NAME
+#ifdef MY_DEF_HERE
 extern long g_is_sas_model;
-#endif /* CONFIG_SYNO_SAS_DISK_NAME */
+#endif /* MY_DEF_HERE */
 
-#ifdef CONFIG_SYNO_DUAL_HEAD
+#ifdef MY_DEF_HERE
 extern int gSynoDualHead;
-#endif /* CONFIG_SYNO_DUAL_HEAD */
+#endif /* MY_DEF_HERE */
 
-#ifdef CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
+#ifdef MY_DEF_HERE
 extern int gSynoSASWriteConflictPanic;
-#endif /* CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC */
+#endif /* MY_DEF_HERE */
 
-#ifdef CONFIG_SYNO_BOOT_SATA_DOM
+#ifdef MY_DEF_HERE
 extern int gSynoBootSATADOM;
-#endif /* CONFIG_SYNO_BOOT_SATA_DOM */
+#endif /* MY_DEF_HERE */
 
-#ifdef CONFIG_SYNO_AHCI_SWITCH
+#ifdef MY_ABC_HERE
 extern char g_ahci_switch;
-#endif /* CONFIG_SYNO_AHCI_SWITCH */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_SATA_PORT_MAP
+#ifdef MY_ABC_HERE
 extern char gszSataPortMap[8];
-#endif /* CONFIG_SYNO_SATA_PORT_MAP */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_FIXED_DISK_NAME_MV14XX
+#ifdef MY_DEF_HERE
 extern char gszDiskIdxMapMv14xx[8];
-#endif /* CONFIG_SYNO_FIXED_DISK_NAME_MV14XX */
+#endif /* MY_DEF_HERE */
 
-#ifdef CONFIG_SYNO_CASTRATED_XHC
+#ifdef MY_DEF_HERE
 extern char gSynoCastratedXhcAddr[CONFIG_SYNO_NUM_CASTRATED_XHC][13];
 extern unsigned int gSynoCastratedXhcPortBitmap[CONFIG_SYNO_NUM_CASTRATED_XHC];
-#endif /* CONFIG_SYNO_CASTRATED_XHC */
+#endif /* MY_DEF_HERE */
 
-#ifdef CONFIG_SYNO_USB_VBUS_GPIO_CONTROL
+#ifdef MY_DEF_HERE
 extern char gSynoUsbVbusHostAddr[CONFIG_SYNO_USB_VBUS_NUM_GPIO][13];
 extern int gSynoUsbVbusPort[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
 extern unsigned gSynoUsbVbusGpp[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
-#endif /* CONFIG_SYNO_USB_VBUS_GPIO_CONTROL */
+#endif /* MY_DEF_HERE */
 
-#ifdef CONFIG_SYNO_DISK_INDEX_MAP
+#ifdef MY_ABC_HERE
 static int __init early_disk_idx_map(char *p)
 {
 	snprintf(gszDiskIdxMap, sizeof(gszDiskIdxMap), "%s", p);
@@ -113,9 +116,9 @@ static int __init early_disk_idx_map(char *p)
 	return 1;
 }
 __setup("DiskIdxMap=", early_disk_idx_map);
-#endif /* CONFIG_SYNO_DISK_INDEX_MAP */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_HW_REVISION
+#ifdef MY_ABC_HERE
 static int __init early_hw_revision(char *p)
 {
        snprintf(gszSynoHWRevision, 4, "%s", p);
@@ -125,9 +128,9 @@ static int __init early_hw_revision(char *p)
        return 1;
 }
 __setup("rev=", early_hw_revision);
-#endif /* CONFIG_SYNO_HW_REVISION */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_HW_VERSION
+#ifdef MY_ABC_HERE
 static int __init early_hw_version(char *p)
 {
 	char *szPtr;
@@ -146,9 +149,9 @@ static int __init early_hw_version(char *p)
 	return 1;
 }
 __setup("syno_hw_version=", early_hw_version);
-#endif /* CONFIG_SYNO_HW_VERSION */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_INTERNAL_HD_NUM
+#ifdef MY_ABC_HERE
 /* It is recommanded to use syno_hdd_powerup_seq instead of ihd_num.
  * Because the actual usage of the variable is represented the powerup seq,
  * the syno_hdd_powerup_seq is designed to replace ihd_num.
@@ -172,9 +175,9 @@ static int __init syno_hdd_powerup_seq(char *p)
         return 1;
 }
 __setup("syno_hdd_powerup_seq=", syno_hdd_powerup_seq);
-#endif /* CONFIG_SYNO_INTERNAL_HD_NUM */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_HDD_HOTPLUG
+#ifdef MY_ABC_HERE
 /* It is recommanded to use enable_hdd_hotplug instead of HddHotplug.
  * Beacuse the bootarg is referred to a bool variable,
  * the enable_hdd_hotplug is designed to replace HddHotplug.
@@ -202,9 +205,9 @@ static int __init enable_hdd_hotplug(char *p)
 	return 1;
 }
 __setup("enable_hdd_hotplug=", enable_hdd_hotplug);
-#endif /* CONFIG_SYNO_HDD_HOTPLUG */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_MAC_ADDRESS
+#ifdef MY_ABC_HERE
 static int __init early_mac1(char *p)
 {
 	snprintf(grgbLanMac[0], sizeof(grgbLanMac[0]), "%s", p);
@@ -286,9 +289,9 @@ static int __init early_skip_vender_mac_interfaces(char *p)
 	return 1;
 }
 __setup("skip_vender_mac_interfaces=", early_skip_vender_mac_interfaces);
-#endif /* CONFIG_SYNO_MAC_ADDRESS */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_SERIAL
+#ifdef MY_ABC_HERE
 static int __init early_sn(char *p)
 {
 	snprintf(gszSerialNum, sizeof(gszSerialNum), "%s", p);
@@ -304,9 +307,9 @@ static int __init early_custom_sn(char *p)
 	return 1;
 }
 __setup("custom_sn=", early_custom_sn);
-#endif /* CONFIG_SYNO_SERIAL */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_FACTORY_USB_FAST_RESET
+#ifdef MY_ABC_HERE
 static int __init early_factory_usb_fast_reset(char *p)
 {
 	gSynoFactoryUSBFastReset = simple_strtol(p, NULL, 10);
@@ -316,9 +319,9 @@ static int __init early_factory_usb_fast_reset(char *p)
 	return 1;
 }
 __setup("syno_usb_fast_reset=", early_factory_usb_fast_reset);
-#endif /* CONFIG_SYNO_FACTORY_USB_FAST_RESET */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_FACTORY_USB3_DISABLE
+#ifdef MY_ABC_HERE
 static int __init early_factory_usb3_disable(char *p)
 {
 	gSynoFactoryUSB3Disable = simple_strtol(p, NULL, 10);
@@ -328,9 +331,9 @@ static int __init early_factory_usb3_disable(char *p)
 	return 1;
 }
 __setup("syno_disable_usb3=", early_factory_usb3_disable);
-#endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_SATA_DISK_SEQ_REVERSE
+#ifdef MY_ABC_HERE
 static int __init early_disk_seq_reserve(char *p)
 {
 	snprintf(giDiskSeqReverse, sizeof(giDiskSeqReverse), "%s", p);
@@ -342,9 +345,9 @@ static int __init early_disk_seq_reserve(char *p)
 	return 1;
 }
 __setup("DiskSeqReverse=", early_disk_seq_reserve);
-#endif /* CONFIG_SYNO_SATA_DISK_SEQ_REVERSE */
+#endif /* MY_ABC_HERE */
 
-#ifdef  CONFIG_SYNO_INTERNAL_NETIF_NUM
+#ifdef MY_ABC_HERE
 static int __init early_internal_netif_num(char *p)
 {
 	g_internal_netif_num = simple_strtol(p, NULL, 10);
@@ -356,9 +359,9 @@ static int __init early_internal_netif_num(char *p)
 	return 1;
 }
 __setup("netif_num=", early_internal_netif_num);
-#endif /* CONFIG_SYNO_INTERNAL_NETIF_NUM */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_SATA_MV_LED
+#ifdef MY_ABC_HERE
 static int __init early_sataled_special(char *p)
 {
 	g_sata_mv_led = simple_strtol(p, NULL, 10);
@@ -370,9 +373,9 @@ static int __init early_sataled_special(char *p)
 	return 1;
 }
 __setup("SataLedSpecial=", early_sataled_special);
-#endif /* CONFIG_SYNO_SATA_MV_LED */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_MEM_MODE_INFO
+#ifdef MY_DEF_HERE
 static int __init early_mem_mode(int *p)
 {
 	gSynoMemMode = simple_strtol(p, NULL, 10);
@@ -382,7 +385,7 @@ static int __init early_mem_mode(int *p)
 	return 1;
 }
 __setup("syno_mem_mode=", early_mem_mode);
-#endif /* CONFIG_SYNO_MEM_MODE_INFO */
+#endif /* MY_DEF_HERE */
 
 #ifdef CONFIG_SYNO_SWITCH_NET_DEVICE_NAME
 static int __init early_netif_seq(char *p)
@@ -432,7 +435,7 @@ static int __init early_netif_seq(char *p)
 __setup("netif_seq=",early_netif_seq);
 #endif /* CONFIG_SYNO_SWITCH_NET_DEVICE_NAME */
 
-#ifdef CONFIG_SYNO_FIXED_DISK_NAME_MV14XX
+#ifdef MY_DEF_HERE
 static int __init early_disk_idx_map_mv14xx(char *p)
 {
 	snprintf(gszDiskIdxMapMv14xx, sizeof(gszDiskIdxMapMv14xx), "%s", p);
@@ -444,9 +447,9 @@ static int __init early_disk_idx_map_mv14xx(char *p)
 	return 1;
 }
 __setup("DiskIdxMapMv14xx=", early_disk_idx_map_mv14xx);
-#endif /* CONFIG_SYNO_FIXED_DISK_NAME_MV14XX */
+#endif /* MY_DEF_HERE */
 
-#ifdef CONFIG_SYNO_SATA_PORT_MAP
+#ifdef MY_ABC_HERE
 static int __init early_sataport_map(char *p)
 {
 	snprintf(gszSataPortMap, sizeof(gszSataPortMap), "%s", p);
@@ -458,9 +461,9 @@ static int __init early_sataport_map(char *p)
 	return 1;
 }
 __setup("SataPortMap=", early_sataport_map);
-#endif /* CONFIG_SYNO_SATA_PORT_MAP */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_SAS_DISK_NAME
+#ifdef MY_DEF_HERE
 static int __init early_SASmodel(char *p)
 {
 	g_is_sas_model = simple_strtol(p, NULL, 10);
@@ -472,16 +475,16 @@ static int __init early_SASmodel(char *p)
 	return 1;
 }
 __setup("SASmodel=", early_SASmodel);
-#endif /* CONFIG_SYNO_SAS_DISK_NAME */
+#endif /* MY_DEF_HERE */
 
-#ifdef CONFIG_SYNO_DUAL_HEAD
+#ifdef MY_DEF_HERE
 static int __init early_dual_head(char *p)
 {
 	gSynoDualHead = simple_strtol(p, NULL, 10);
-#ifdef CONFIG_SYNO_BOOT_SATA_DOM
+#ifdef MY_DEF_HERE
 	gSynoBootSATADOM = gSynoDualHead;
-#endif /* CONFIG_SYNO_BOOT_SATA_DOM */
-#ifdef CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
+#endif /* MY_DEF_HERE */
+#ifdef MY_DEF_HERE
 	gSynoSASWriteConflictPanic = gSynoDualHead;
 #endif
 
@@ -490,9 +493,9 @@ static int __init early_dual_head(char *p)
 	return 1;
 }
 __setup("dual_head=", early_dual_head);
-#endif /* CONFIG_SYNO_DUAL_HEAD */
+#endif /* MY_DEF_HERE */
 
-#ifdef CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
+#ifdef MY_DEF_HERE
 static int __init early_sas_reservation_write_conflict(char *p)
 {
 	gSynoSASWriteConflictPanic = simple_strtol(p, NULL, 10);
@@ -502,9 +505,9 @@ static int __init early_sas_reservation_write_conflict(char *p)
 	return 1;
 }
 __setup("sas_reservation_write_conflict=", early_sas_reservation_write_conflict);
-#endif /* CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC */
+#endif /* MY_DEF_HERE */
 
-#ifdef CONFIG_SYNO_BOOT_SATA_DOM
+#ifdef MY_DEF_HERE
 static int __init early_synoboot_satadom(char *p)
 {
 	gSynoBootSATADOM = simple_strtol(p, NULL, 10);
@@ -514,9 +517,9 @@ static int __init early_synoboot_satadom(char *p)
 	return 1;
 }
 __setup("synoboot_satadom=", early_synoboot_satadom);
-#endif /* CONFIG_SYNO_BOOT_SATA_DOM */
+#endif /* MY_DEF_HERE */
 
-#ifdef  CONFIG_SYNO_AHCI_SWITCH
+#ifdef MY_ABC_HERE
 static int __init early_ahci_switch(char *p)
 {
 	g_ahci_switch = p[0];
@@ -529,9 +532,9 @@ static int __init early_ahci_switch(char *p)
 	return 1;
 }
 __setup("ahci=", early_ahci_switch);
-#endif /* CONFIG_SYNO_AHCI_SWITCH */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_CASTRATED_XHC
+#ifdef MY_DEF_HERE
 static int __init early_castrated_xhc(char *p)
 {
 	int iCount = 0;
@@ -562,9 +565,9 @@ static int __init early_castrated_xhc(char *p)
 	return 1;
 }
 __setup("syno_castrated_xhc=", early_castrated_xhc);
-#endif /* CONFIG_SYNO_CASTRATED_XHC */
+#endif /* MY_DEF_HERE */
 
-#ifdef CONFIG_SYNO_USB_VBUS_GPIO_CONTROL
+#ifdef MY_DEF_HERE
 static int __init early_usb_vbus_gpio(char *p)
 {
 	int iCount = 0;
@@ -625,4 +628,4 @@ static int __init early_usb_vbus_gpio(char *p)
 	return 1;
 }
 __setup("syno_usb_vbus_gpio=", early_usb_vbus_gpio);
-#endif /* CONFIG_SYNO_USB_VBUS_GPIO_CONTROL */
+#endif /* MY_DEF_HERE */

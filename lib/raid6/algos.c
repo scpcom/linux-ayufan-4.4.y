@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* -*- linux-c -*- ------------------------------------------------------- *
  *
  *   Copyright 2002 H. Peter Anvin - All Rights Reserved
@@ -122,20 +125,20 @@ static inline const struct raid6_recov_calls *raid6_choose_recov(void)
 static inline const struct raid6_calls *raid6_choose_gen(
 	void *(*const dptrs)[(65536/PAGE_SIZE)+2], const int disks)
 {
-#ifdef CONFIG_SYNO_MD_RAID6_RMW
+#ifdef MY_ABC_HERE
 	unsigned long perf, bestgenperf, bestxorperf, j0, j1;
 	int start = (disks>>1)-1, stop = disks-3;	/* work on the second half of the disks */
-#else /* CONFIG_SYNO_MD_RAID6_RMW */
+#else /* MY_ABC_HERE */
 	unsigned long perf, bestperf, j0, j1;
-#endif /* CONFIG_SYNO_MD_RAID6_RMW */
+#endif /* MY_ABC_HERE */
 	const struct raid6_calls *const *algo;
 	const struct raid6_calls *best;
 
-#ifdef CONFIG_SYNO_MD_RAID6_RMW
+#ifdef MY_ABC_HERE
 	for (bestgenperf = 0, bestxorperf = 0, best = NULL, algo = raid6_algos; *algo; algo++) {
-#else /* CONFIG_SYNO_MD_RAID6_RMW */
+#else /* MY_ABC_HERE */
 	for (bestperf = 0, best = NULL, algo = raid6_algos; *algo; algo++) {
-#endif /* CONFIG_SYNO_MD_RAID6_RMW */
+#endif /* MY_ABC_HERE */
 		if (!best || (*algo)->prefer >= best->prefer) {
 			if ((*algo)->valid && !(*algo)->valid())
 				continue;
@@ -153,22 +156,22 @@ static inline const struct raid6_calls *raid6_choose_gen(
 			}
 			preempt_enable();
 
-#ifdef CONFIG_SYNO_MD_RAID6_RMW
+#ifdef MY_ABC_HERE
 			if (perf > bestgenperf) {
 				bestgenperf = perf;
-#else /* CONFIG_SYNO_MD_RAID6_RMW */
+#else /* MY_ABC_HERE */
 			if (perf > bestperf) {
 				bestperf = perf;
-#endif /* CONFIG_SYNO_MD_RAID6_RMW */
+#endif /* MY_ABC_HERE */
 				best = *algo;
 			}
-#ifdef CONFIG_SYNO_MD_RAID6_RMW
+#ifdef MY_ABC_HERE
 			printk("raid6: %-8s gen() %5ld MB/s\n", (*algo)->name,
-#else /* CONFIG_SYNO_MD_RAID6_RMW */
+#else /* MY_ABC_HERE */
 			printk("raid6: %-8s %5ld MB/s\n", (*algo)->name,
-#endif /* CONFIG_SYNO_MD_RAID6_RMW */
+#endif /* MY_ABC_HERE */
 			       (perf*HZ) >> (20-16+RAID6_TIME_JIFFIES_LG2));
-#ifdef CONFIG_SYNO_MD_RAID6_RMW
+#ifdef MY_ABC_HERE
 
 			if (!(*algo)->xor_syndrome)
 				continue;
@@ -192,27 +195,27 @@ static inline const struct raid6_calls *raid6_choose_gen(
 
 			printk("raid6: %-8s xor() %5ld MB/s\n", (*algo)->name,
 				(perf*HZ) >> (20-16+RAID6_TIME_JIFFIES_LG2+1));
-#endif /* CONFIG_SYNO_MD_RAID6_RMW */
+#endif /* MY_ABC_HERE */
 		}
 	}
 
 	if (best) {
-#ifdef CONFIG_SYNO_MD_RAID6_RMW
+#ifdef MY_ABC_HERE
 		printk("raid6: using algorithm %s gen() (%ld MB/s)\n",
-#else /* CONFIG_SYNO_MD_RAID6_RMW */
+#else /* MY_ABC_HERE */
 		printk("raid6: using algorithm %s (%ld MB/s)\n",
-#endif /* CONFIG_SYNO_MD_RAID6_RMW */
+#endif /* MY_ABC_HERE */
 		       best->name,
-#ifdef CONFIG_SYNO_MD_RAID6_RMW
+#ifdef MY_ABC_HERE
 		       (bestgenperf*HZ) >> (20-16+RAID6_TIME_JIFFIES_LG2));
-#else /* CONFIG_SYNO_MD_RAID6_RMW */
+#else /* MY_ABC_HERE */
 		       (bestperf*HZ) >> (20-16+RAID6_TIME_JIFFIES_LG2));
-#endif /* CONFIG_SYNO_MD_RAID6_RMW */
-#ifdef CONFIG_SYNO_MD_RAID6_RMW
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
 		if (best->xor_syndrome)
 			printk("raid6: .... xor() %ld MB/s, rmw enabled\n",
 			       (bestxorperf*HZ) >> (20-16+RAID6_TIME_JIFFIES_LG2+1));
-#endif /* CONFIG_SYNO_MD_RAID6_RMW */
+#endif /* MY_ABC_HERE */
 		raid6_call = *best;
 	} else
 		printk("raid6: Yikes!  No algorithm found!\n");

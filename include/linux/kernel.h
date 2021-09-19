@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_KERNEL_H
 #define _LINUX_KERNEL_H
 
@@ -663,7 +666,7 @@ ftrace_vprintk(const char *fmt, va_list ap)
 static inline void ftrace_dump(enum ftrace_dump_mode oops_dump_mode) { }
 #endif /* CONFIG_TRACING */
 
-#ifdef CONFIG_SYNO_NET_BOND_ALB_INFO
+#ifdef MY_ABC_HERE
 /*
  *      Display an IP address in readable format.
  */
@@ -673,7 +676,7 @@ static inline void ftrace_dump(enum ftrace_dump_mode oops_dump_mode) { }
     ((unsigned char *)&addr)[2], \
     ((unsigned char *)&addr)[3]
 #define NIPQUAD_FMT "%u.%u.%u.%u"
-#endif /* CONFIG_SYNO_NET_BOND_ALB_INFO */
+#endif /* MY_ABC_HERE */
 
 /*
  * min()/max()/clamp() macros that also do

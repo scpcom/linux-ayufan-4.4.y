@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *   fs/cifs/cifssmb.c
  *
@@ -171,11 +174,11 @@ cifs_reconnect_tcon(struct cifs_tcon *tcon, int smb_command)
 	if (!ses->need_reconnect && !tcon->need_reconnect)
 		return 0;
 
-#ifdef CONFIG_SYNO_CIFS_TCON_RECONNECT_CODEPAGE_UTF8
+#ifdef MY_ABC_HERE
 	nls_codepage = load_nls("utf8");
 #else
 	nls_codepage = load_nls_default();
-#endif /* CONFIG_SYNO_CIFS_TCON_RECONNECT_CODEPAGE_UTF8 */
+#endif /* MY_ABC_HERE */
 
 	/*
 	 * need to prevent multiple threads trying to simultaneously
@@ -1339,11 +1342,11 @@ openRetry:
 	/* XP does not handle ATTR_POSIX_SEMANTICS */
 	/* but it helps speed up case sensitive checks for other
 	servers such as Samba */
-#ifdef CONFIG_SYNO_CIFS_MOUNT_CASELESS
+#ifdef MY_ABC_HERE
 	if (tcon->ses->capabilities & CAP_UNIX && SynoPosixSemanticsEnabled)
 #else
 	if (tcon->ses->capabilities & CAP_UNIX)
-#endif /* CONFIG_SYNO_CIFS_MOUNT_CASELESS */
+#endif /* MY_ABC_HERE */
 		pSMB->FileAttributes |= cpu_to_le32(ATTR_POSIX_SEMANTICS);
 
 	if (create_options & CREATE_OPTION_READONLY)

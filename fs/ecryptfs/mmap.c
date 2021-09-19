@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /**
  * eCryptfs: Linux filesystem encryption layer
  * This is where eCryptfs coordinates the symmetric encryption and
@@ -68,9 +71,9 @@ static int ecryptfs_writepage(struct page *page, struct writeback_control *wbc)
 
 	rc = ecryptfs_encrypt_page(page);
 	if (rc) {
-#ifdef CONFIG_SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING
+#ifdef MY_ABC_HERE
 		if (-EDQUOT != rc && -ENOSPC != rc)
-#endif /* CONFIG_SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING */
+#endif /* MY_ABC_HERE */
 		ecryptfs_printk(KERN_WARNING, "Error encrypting "
 				"page (upper index [0x%.16lx])\n", page->index);
 		ClearPageUptodate(page);
@@ -406,10 +409,10 @@ static int ecryptfs_write_inode_size_to_header(struct inode *ecryptfs_inode)
 	rc = ecryptfs_write_lower(ecryptfs_inode, file_size_virt, 0,
 				  sizeof(u64));
 	kfree(file_size_virt);
-#ifdef CONFIG_SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING
+#ifdef MY_ABC_HERE
 	if (-EDQUOT == rc || -ENOSPC == rc)
 		return rc;  // skip error msg
-#endif /* CONFIG_SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING */
+#endif /* MY_ABC_HERE */
 	if (rc < 0)
 		printk(KERN_ERR "%s: Error writing file size to header; "
 		       "rc = [%d]\n", __func__, rc);
@@ -523,9 +526,9 @@ static int ecryptfs_write_end(struct file *file,
 	}
 	rc = ecryptfs_encrypt_page(page);
 	if (rc) {
-#ifdef CONFIG_SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING
+#ifdef MY_ABC_HERE
 		if (-EDQUOT != rc && -ENOSPC != rc)
-#endif /* CONFIG_SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING */
+#endif /* MY_ABC_HERE */
 		ecryptfs_printk(KERN_WARNING, "Error encrypting page (upper "
 				"index [0x%.16lx])\n", index);
 		goto out;
@@ -537,11 +540,11 @@ static int ecryptfs_write_end(struct file *file,
 			(unsigned long long)i_size_read(ecryptfs_inode));
 	}
 	rc = ecryptfs_write_inode_size_to_metadata(ecryptfs_inode);
-#ifdef CONFIG_SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING
+#ifdef MY_ABC_HERE
 	if (-EDQUOT == rc || -ENOSPC == rc) {
 		goto out; //skip following error message
 	}
-#endif /* CONFIG_SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING */
+#endif /* MY_ABC_HERE */
 	if (rc)
 		printk(KERN_ERR "Error writing inode size to metadata; "
 		       "rc = [%d]\n", rc);
@@ -553,7 +556,7 @@ out:
 	return rc;
 }
 
-#ifdef CONFIG_SYNO_FS_RECVFILE
+#ifdef MY_ABC_HERE
 static int ecryptfs_aggregate_write_end(struct file *file, struct address_space *mapping,
 			loff_t pos, unsigned len, unsigned copied,
 			struct page **pages, void *fsdata, unsigned page_num)
@@ -599,9 +602,9 @@ static int ecryptfs_aggregate_write_end(struct file *file, struct address_space 
 		rc = ecryptfs_encrypt_page(pages[i]);
 	}
 	if (rc) {
-#ifdef CONFIG_SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING
+#ifdef MY_ABC_HERE
 		if (-EDQUOT != rc && -ENOSPC != rc)
-#endif /* CONFIG_SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING */
+#endif /* MY_ABC_HERE */
 		ecryptfs_printk(KERN_WARNING, "Error encrypting page (upper "
 				"index [0x%.16lx])\n", index);
 		goto out;
@@ -613,11 +616,11 @@ static int ecryptfs_aggregate_write_end(struct file *file, struct address_space 
 			(unsigned long long)i_size_read(ecryptfs_inode));
 	}
 	rc = ecryptfs_write_inode_size_to_metadata(ecryptfs_inode);
-#ifdef CONFIG_SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING
+#ifdef MY_ABC_HERE
 	if (-EDQUOT == rc || -ENOSPC == rc) {
 		goto out; //skip following error message
 	}
-#endif /* CONFIG_SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING */
+#endif /* MY_ABC_HERE */
 	if (rc)
 		printk(KERN_ERR "Error writing inode size to metadata; "
 		       "rc = [%d]\n", rc);
@@ -652,7 +655,7 @@ const struct address_space_operations ecryptfs_aops = {
 	.write_begin = ecryptfs_write_begin,
 	.write_end = ecryptfs_write_end,
 	.bmap = ecryptfs_bmap,
-#ifdef CONFIG_SYNO_FS_RECVFILE
+#ifdef MY_ABC_HERE
 	.aggregate_write_end	= ecryptfs_aggregate_write_end,
 #endif
 };

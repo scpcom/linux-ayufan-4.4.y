@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Copyright (C) 1991, 1992  Linus Torvalds
  */
@@ -1118,7 +1121,7 @@ static inline ssize_t do_tty_write(
 		if (size > chunk)
 			size = chunk;
 		ret = -EFAULT;
-#if defined(CONFIG_SYNO_MICROP_CTRL) && defined(CONFIG_SYNO_X64)
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
 		if (0 == strcmp(tty->name, "ttyS1")) {
 			if (access_ok(VERIFY_READ, buf, size)) {
 				if (copy_from_user(tty->write_buf, buf, size)) {
@@ -1128,12 +1131,12 @@ static inline ssize_t do_tty_write(
 				memcpy(tty->write_buf, buf, size);
 			}
 		} else {
-#endif /* CONFIG_SYNO_MICROP_CTRL && CONFIG_SYNO_X64 */
+#endif /* MY_ABC_HERE && CONFIG_SYNO_X64 */
 		if (copy_from_user(tty->write_buf, buf, size))
 			break;
-#if defined(CONFIG_SYNO_MICROP_CTRL) && defined(CONFIG_SYNO_X64)
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
 		}
-#endif /* CONFIG_SYNO_MICROP_CTRL && CONFIG_SYNO_X64 */
+#endif /* MY_ABC_HERE && CONFIG_SYNO_X64 */
 		ret = write(tty, file, tty->write_buf, size);
 		if (ret <= 0)
 			break;
@@ -1219,7 +1222,7 @@ static ssize_t tty_write(struct file *file, const char __user *buf,
 	if (!ld->ops->write)
 		ret = -EIO;
 	else
-#if defined(CONFIG_SYNO_MICROP_CTRL) && defined(CONFIG_SYNO_X64)
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
 	{
 		if (0 == strcmp(tty->name, "ttyS1"))
 			do_tty_write(ld->ops->write, tty, file, "-", 1);
@@ -1227,7 +1230,7 @@ static ssize_t tty_write(struct file *file, const char __user *buf,
 	}
 #else /* CONFIG_SYNO_MICROP_CTRL && CONFIG_SYNO_X64 */
 		ret = do_tty_write(ld->ops->write, tty, file, buf, count);
-#endif /* CONFIG_SYNO_MICROP_CTRL && CONFIG_SYNO_X64 */
+#endif /* MY_ABC_HERE && CONFIG_SYNO_X64 */
 	tty_ldisc_deref(ld);
 	return ret;
 }
@@ -3080,17 +3083,17 @@ void deinitialize_tty_struct(struct tty_struct *tty)
 
 int tty_put_char(struct tty_struct *tty, unsigned char ch)
 {
-#ifdef CONFIG_SYNO_MICROP_CTRL
+#ifdef MY_ABC_HERE
 	if (tty->ops->put_char && 0 != strcmp(tty->name, "ttyS1"))
-#else /* CONFIG_SYNO_MICROP_CTRL */
+#else /* MY_ABC_HERE */
 	if (tty->ops->put_char)
-#endif /* CONFIG_SYNO_MICROP_CTRL */
+#endif /* MY_ABC_HERE */
 		return tty->ops->put_char(tty, ch);
 	return tty->ops->write(tty, &ch, 1);
 }
 EXPORT_SYMBOL_GPL(tty_put_char);
 
-#ifdef CONFIG_SYNO_MICROP_CTRL
+#ifdef MY_ABC_HERE
 int syno_ttys_write(const int index, const char* szBuf)
 {
 	size_t i = 0;
@@ -3108,9 +3111,9 @@ int syno_ttys_write(const int index, const char* szBuf)
 		    continue;
 		}
 		tty = drv->ttys[index];
-#ifdef CONFIG_SYNO_X64
+#ifdef MY_ABC_HERE
 		tty_put_char(tty, '-');
-#endif /* CONFIG_SYNO_X64 */
+#endif /* MY_ABC_HERE */
 		for( i = 0; i < strlen(szBuf); ++i ) {
 		    tty_put_char(tty, szBuf[i]);
 		}
@@ -3119,7 +3122,7 @@ int syno_ttys_write(const int index, const char* szBuf)
 	return 0;
 }
 EXPORT_SYMBOL(syno_ttys_write);
-#endif /* CONFIG_SYNO_MICROP_CTRL */
+#endif /* MY_ABC_HERE */
 
 struct class *tty_class;
 

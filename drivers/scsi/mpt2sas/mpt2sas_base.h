@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * This is the Fusion MPT base driver providing common API layer interface
  * for access to MPT (Message Passing Technology) firmware.
@@ -989,9 +992,9 @@ struct MPT2SAS_ADAPTER {
 	u8		mfg_pg10_hide_flag;
 	u8		hide_drives;
 
-#ifdef CONFIG_SYNO_SAS_MPT2_RESET_ON_REBOOT
+#ifdef MY_DEF_HERE
 	u8		shutdown;
-#endif /* CONFIG_SYNO_SAS_MPT2_RESET_ON_REBOOT */
+#endif /* MY_DEF_HERE */
 };
 
 typedef u8 (*MPT_CALLBACK)(struct MPT2SAS_ADAPTER *ioc, u16 smid, u8 msix_index,

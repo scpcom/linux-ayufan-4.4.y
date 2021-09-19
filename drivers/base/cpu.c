@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * CPU subsystem support
  */
@@ -16,9 +19,9 @@
 
 #include "base.h"
 
-#if defined(CONFIG_SYNO_LIMIT_CPU_CORES)
+#if defined(MY_ABC_HERE)
 #include <linux/synobios.h>
-#endif /* CONFIG_SYNO_LIMIT_CPU_CORES */
+#endif /* MY_ABC_HERE */
 
 struct bus_type cpu_subsys = {
 	.name = "cpu",
@@ -56,7 +59,7 @@ static ssize_t __ref store_online(struct device *dev,
 	int from_nid, to_nid;
 	ssize_t ret;
 
-#ifdef CONFIG_SYNO_LIMIT_CPU_CORES
+#ifdef MY_ABC_HERE
 	if(syno_is_hw_version(HW_DS712pv20)) {
 		if( 1 == cpuid || 3 == cpuid ) {
 			printk(KERN_ERR "This model does not allow changing the specified cpu state.\n");
@@ -64,7 +67,7 @@ static ssize_t __ref store_online(struct device *dev,
 			goto END;
 		}
 	}
-#endif /* CONFIG_SYNO_LIMIT_CPU_CORES */
+#endif /* MY_ABC_HERE */
 
 	cpu_hotplug_driver_lock();
 	switch (buf[0]) {
@@ -96,9 +99,9 @@ static ssize_t __ref store_online(struct device *dev,
 	if (ret >= 0)
 		ret = count;
 
-#ifdef CONFIG_SYNO_LIMIT_CPU_CORES
+#ifdef MY_ABC_HERE
 END:
-#endif /* CONFIG_SYNO_LIMIT_CPU_CORES */
+#endif /* MY_ABC_HERE */
 
 	return ret;
 }

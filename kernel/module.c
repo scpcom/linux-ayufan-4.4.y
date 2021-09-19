@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
    Copyright (C) 2002 Richard Henderson
    Copyright (C) 2001 Rusty Russell, 2002, 2010 Rusty Russell IBM.
@@ -3851,7 +3854,7 @@ void module_layout(struct module *mod,
 EXPORT_SYMBOL(module_layout);
 #endif
 
-#ifdef CONFIG_SYNO_OOM_DUMP_MODULE
+#ifdef MY_ABC_HERE
 void syno_dump_modules(void)
 {
 	struct module *mod;
@@ -3866,4 +3869,4 @@ void syno_dump_modules(void)
 	}
 }
 EXPORT_SYMBOL_GPL(syno_dump_modules);
-#endif /* CONFIG_SYNO_OOM_DUMP_MODULE */
+#endif /* MY_ABC_HERE */

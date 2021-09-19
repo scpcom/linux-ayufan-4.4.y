@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  scsi_lib.c Copyright (C) 1999 Eric Youngdale
  *
@@ -35,7 +38,7 @@
 #define SG_MEMPOOL_NR		ARRAY_SIZE(scsi_sg_pools)
 #define SG_MEMPOOL_SIZE		2
 
-#ifdef CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
+#ifdef MY_DEF_HERE
 extern int gSynoSASWriteConflictPanic;
 #endif
 
@@ -69,10 +72,10 @@ static struct scsi_host_sg_pool scsi_sg_pools[] = {
 };
 #undef SP
 
-#ifdef CONFIG_SYNO_BADSECTOR_TEST
+#ifdef MY_ABC_HERE
 SDBADSECTORS  grgSdBadSectors[CONFIG_SYNO_MAX_INTERNAL_DISK];
 int     gBadSectorTest = 0;
-#endif /* CONFIG_SYNO_BADSECTOR_TEST */
+#endif /* MY_ABC_HERE */
 struct kmem_cache *scsi_sdb_cache;
 
 #ifdef CONFIG_ACPI
@@ -255,11 +258,11 @@ int scsi_execute(struct scsi_device *sdev, const unsigned char *cmd,
 	req->sense = sense;
 	req->sense_len = 0;
 	req->retries = retries;
-#ifdef CONFIG_SYNO_CUSTOM_SCMD_TIMEOUT
+#ifdef MY_ABC_HERE
 	req->timeout = ((sdev->scmd_timeout_sec*HZ) > timeout ? (sdev->scmd_timeout_sec*HZ) : timeout);
-#else /* CONFIG_SYNO_CUSTOM_SCMD_TIMEOUT */
+#else /* MY_ABC_HERE */
 	req->timeout = timeout;
-#endif /* CONFIG_SYNO_CUSTOM_SCMD_TIMEOUT */
+#endif /* MY_ABC_HERE */
 	req->cmd_type = REQ_TYPE_BLOCK_PC;
 	req->cmd_flags |= flags | REQ_QUIET | REQ_PREEMPT;
 
@@ -688,7 +691,7 @@ static void __scsi_release_buffers(struct scsi_cmnd *cmd, int do_bidi_check)
 		scsi_free_sgtable(cmd->prot_sdb);
 }
 
-#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY
+#ifdef MY_DEF_HERE
 static void SynoSpinupDone(struct request *req, int uptodate)
 {
 	struct scsi_device *sdev = req->q->queuedata;
@@ -727,7 +730,7 @@ static void SynoSpinupDisk(struct scsi_device *device)
 		SynoSubmitSpinupReq(device);
 	}
 }
-#endif /* CONFIG_SYNO_SAS_SPINUP_DELAY */
+#endif /* MY_DEF_HERE */
 
 /*
  * Function:    scsi_release_buffers()
@@ -831,7 +834,7 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 			sense_deferred = scsi_sense_is_deferred(&sshdr);
 	}
 
-#ifdef CONFIG_SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
+#ifdef MY_DEF_HERE
 	// only dual head model for now
 	if (1 == gSynoSASWriteConflictPanic) {
 		if (unlikely(RESERVATION_CONFLICT == status_byte(cmd->result) && COMMAND_COMPLETE == msg_byte(cmd->result) &&
@@ -856,7 +859,7 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 	}
 #endif
 
-#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY
+#ifdef MY_DEF_HERE
 #ifdef CONFIG_SYNO_SAS_SPINUP_DELAY_DEBUG
 	if (0x1b == cmd->cmnd[0]) {
     sdev_printk(KERN_ERR, cmd->device,
@@ -901,7 +904,7 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 				break;
 		}
 	}
-#endif /* CONFIG_SYNO_SAS_SPINUP_DELAY */
+#endif /* MY_DEF_HERE */
 
 	if (req->cmd_type == REQ_TYPE_BLOCK_PC) { /* SG_IO ioctl from block level */
 		if (result) {
@@ -1121,9 +1124,9 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 		action = ACTION_FAIL;
 	}
 
-#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY
+#ifdef MY_DEF_HERE
 handle_cmd:
-#endif /* CONFIG_SYNO_SAS_SPINUP_DELAY */
+#endif /* MY_DEF_HERE */
 	switch (action) {
 	case ACTION_FAIL:
 		/* Give up and fail the remainder of the request */
@@ -1205,7 +1208,7 @@ int scsi_init_io(struct scsi_cmnd *cmd, gfp_t gfp_mask)
 	if (error)
 		goto err_exit;
 
-#ifdef CONFIG_SYNO_BADSECTOR_TEST
+#ifdef MY_ABC_HERE
 	if (gBadSectorTest > 0) {
 		sector_t    badSector, curSector;
 		int i;
@@ -1253,7 +1256,7 @@ int scsi_init_io(struct scsi_cmnd *cmd, gfp_t gfp_mask)
 			}
 		}
 	}
-#endif /* CONFIG_SYNO_BADSECTOR_TEST */
+#endif /* MY_ABC_HERE */
 
 	if (blk_bidi_rq(rq)) {
 		struct scsi_data_buffer *bidi_sdb = kmem_cache_zalloc(
@@ -1422,14 +1425,14 @@ int scsi_prep_state_check(struct scsi_device *sdev, struct request *req)
 			 * commands.  The device must be brought online
 			 * before trying any recovery commands.
 			 */
-#ifdef CONFIG_SYNO_IO_ERROR_LIMIT_MSG
+#ifdef MY_ABC_HERE
 			if (printk_ratelimit()) {
-#endif /* CONFIG_SYNO_IO_ERROR_LIMIT_MSG */
+#endif /* MY_ABC_HERE */
 			sdev_printk(KERN_ERR, sdev,
 				    "rejecting I/O to offline device\n");
-#ifdef CONFIG_SYNO_IO_ERROR_LIMIT_MSG
+#ifdef MY_ABC_HERE
 			}
-#endif /* CONFIG_SYNO_IO_ERROR_LIMIT_MSG */
+#endif /* MY_ABC_HERE */
 			ret = BLKPREP_KILL;
 			break;
 		case SDEV_DEL:
@@ -1762,14 +1765,14 @@ static void scsi_request_fn(struct request_queue *q)
 			break;
 
 		if (unlikely(!scsi_device_online(sdev))) {
-#ifdef CONFIG_SYNO_IO_ERROR_LIMIT_MSG
+#ifdef MY_ABC_HERE
 			if (printk_ratelimit()) {
-#endif /* CONFIG_SYNO_IO_ERROR_LIMIT_MSG */
+#endif /* MY_ABC_HERE */
 			sdev_printk(KERN_ERR, sdev,
 				    "rejecting I/O to offline device\n");
-#ifdef CONFIG_SYNO_IO_ERROR_LIMIT_MSG
+#ifdef MY_ABC_HERE
 			}
-#endif /* CONFIG_SYNO_IO_ERROR_LIMIT_MSG */
+#endif /* MY_ABC_HERE */
 			scsi_kill_request(req, q);
 			continue;
 		}

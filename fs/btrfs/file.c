@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2007 Oracle.  All rights reserved.
  *
@@ -2772,11 +2775,11 @@ const struct file_operations btrfs_file_operations = {
 	.fallocate	= btrfs_fallocate,
 	.unlocked_ioctl	= btrfs_ioctl,
 #ifdef CONFIG_COMPAT
-#ifdef CONFIG_SYNO_BTRFS_COMPAT_IOCTL
+#ifdef MY_ABC_HERE
 	.compat_ioctl	= btrfs_compat_ioctl,
 #else
 	.compat_ioctl	= btrfs_ioctl,
-#endif /* CONFIG_SYNO_BTRFS_COMPAT_IOCTL */
+#endif /* MY_ABC_HERE */
 #endif
 };
 

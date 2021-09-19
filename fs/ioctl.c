@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/ioctl.c
  *
@@ -18,7 +21,7 @@
 
 #include <asm/ioctls.h>
 
-#ifdef CONFIG_SYNO_FS_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 #include <linux/mount.h>
 #endif
 
@@ -469,7 +472,7 @@ static int file_ioctl(struct file *filp, unsigned int cmd,
 	return vfs_ioctl(filp, cmd, arg);
 }
 
-#ifdef CONFIG_SYNO_FS_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 static int archive_check_capable(struct inode *inode)
 {
 	if((!S_ISDIR(inode->i_mode)) && (!S_ISREG(inode->i_mode)))
@@ -573,7 +576,7 @@ static int ioctl_set_file_version(struct file *filp, unsigned int version)
 	mnt_drop_write(filp->f_path.mnt);
 	return error;
 }
-#ifdef CONFIG_SYNO_EXT4_ARCHIVE_VERSION_FIX
+#ifdef MY_ABC_HERE
 static int ioctl_get_bad_version(struct inode *inode, unsigned int *p_ver)
 {
 	int error;
@@ -653,8 +656,8 @@ static int ioctl_set_bad_version(struct file *filp, unsigned int version)
 	mnt_drop_write(filp->f_path.mnt);
 	return error;
 }
-#endif /* CONFIG_SYNO_EXT4_ARCHIVE_VERSION_FIX */
-#endif /* CONFIG_SYNO_FS_ARCHIVE_VERSION */
+#endif /* MY_ABC_HERE */
+#endif /* MY_ABC_HERE */
 
 static int ioctl_fionbio(struct file *filp, int __user *argp)
 {
@@ -739,7 +742,7 @@ int do_vfs_ioctl(struct file *filp, unsigned int fd, unsigned int cmd,
 {
 	int error = 0;
 	int __user *argp = (int __user *)arg;
-#ifdef CONFIG_SYNO_FS_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	unsigned int ver = 0;
 #endif
 	struct inode *inode = file_inode(filp);
@@ -785,7 +788,7 @@ int do_vfs_ioctl(struct file *filp, unsigned int fd, unsigned int cmd,
 	case FIGETBSZ:
 		return put_user(inode->i_sb->s_blocksize, argp);
 
-#ifdef CONFIG_SYNO_FS_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	case FIGETVERSION:
 		error = ioctl_get_version(inode, &ver);
 		if (!error) {
@@ -805,7 +808,7 @@ int do_vfs_ioctl(struct file *filp, unsigned int fd, unsigned int cmd,
 			break;
 		error = ioctl_set_file_version(filp, ver);
 		break;
-#ifdef CONFIG_SYNO_EXT4_ARCHIVE_VERSION_FIX
+#ifdef MY_ABC_HERE
 	case FIGETBADVERSION:
 		error = ioctl_get_bad_version(inode, &ver);
 		if (!error) {
@@ -820,8 +823,8 @@ int do_vfs_ioctl(struct file *filp, unsigned int fd, unsigned int cmd,
 			break;
 		error = ioctl_set_bad_version(filp, ver);
 		break;
-#endif /* CONFIG_SYNO_EXT4_ARCHIVE_VERSION_FIX */
-#endif /* CONFIG_SYNO_FS_ARCHIVE_VERSION */
+#endif /* MY_ABC_HERE */
+#endif /* MY_ABC_HERE */
 
 	default:
 		if (S_ISREG(inode->i_mode))

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * usb port device code
  *
@@ -154,19 +157,19 @@ int usb_hub_create_port_device(struct usb_hub *hub, int port1)
 {
 	struct usb_port *port_dev = NULL;
 	int retval;
-#if defined(CONFIG_SYNO_CASTRATED_XHC) ||\
-	defined(CONFIG_SYNO_USB_VBUS_GPIO_CONTROL)
+#if defined(MY_DEF_HERE) ||\
+	defined(MY_DEF_HERE)
 	struct usb_device *hdev = hub->hdev;
-#endif /* CONFIG_SYNO_CASTRATED_XHC || CONFIG_SYNO_USB_VBUS_GPIO_CONTROL */
-#ifdef CONFIG_SYNO_CASTRATED_XHC
+#endif /* MY_DEF_HERE || MY_DEF_HERE */
+#ifdef MY_DEF_HERE
 	extern char gSynoCastratedXhcAddr[CONFIG_SYNO_NUM_CASTRATED_XHC][13];
 	extern unsigned gSynoCastratedXhcPortBitmap[CONFIG_SYNO_NUM_CASTRATED_XHC];
-#endif /* CONFIG_SYNO_CASTRATED_XHC */
-#ifdef CONFIG_SYNO_USB_VBUS_GPIO_CONTROL
+#endif /* MY_DEF_HERE */
+#ifdef MY_DEF_HERE
 	extern char gSynoUsbVbusHostAddr[CONFIG_SYNO_USB_VBUS_NUM_GPIO][13];
 	extern int gSynoUsbVbusPort[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
 	extern unsigned gSynoUsbVbusGpp[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
-#endif /* CONFIG_SYNO_USB_VBUS_GPIO_CONTROL */
+#endif /* MY_DEF_HERE */
 
 	port_dev = kzalloc(sizeof(*port_dev), GFP_KERNEL);
 	if (!port_dev) {
@@ -181,11 +184,11 @@ int usb_hub_create_port_device(struct usb_hub *hub, int port1)
 	port_dev->dev.groups = port_dev_group;
 	port_dev->dev.type = &usb_port_device_type;
 	dev_set_name(&port_dev->dev, "port%d", port1);
-#if defined (CONFIG_SYNO_USB_POWER_RESET)
+#if defined (MY_DEF_HERE)
 	port_dev->power_cycle_counter = SYNO_POWER_CYCLE_TRIES;
-#endif /* CONFIG_SYNO_USB_POWER_RESET */
+#endif /* MY_DEF_HERE */
 
-#ifdef CONFIG_SYNO_CASTRATED_XHC
+#ifdef MY_DEF_HERE
 	if (hdev && hdev->serial) {
 		int i;
 		for (i = 0; i < CONFIG_SYNO_NUM_CASTRATED_XHC; i++) {
@@ -201,9 +204,9 @@ int usb_hub_create_port_device(struct usb_hub *hub, int port1)
 			}
 		}
 	}
-#endif /* CONFIG_SYNO_CASTRATED_XHC */
+#endif /* MY_DEF_HERE */
 
-#ifdef CONFIG_SYNO_USB_VBUS_GPIO_CONTROL
+#ifdef MY_DEF_HERE
 	if (hdev && hdev->serial) {
 		int i;
 		for (i = 0; i < CONFIG_SYNO_USB_VBUS_NUM_GPIO; i++) {
@@ -219,7 +222,7 @@ int usb_hub_create_port_device(struct usb_hub *hub, int port1)
 			}
 		}
 	}
-#endif /* CONFIG_SYNO_USB_VBUS_GPIO_CONTROL */
+#endif /* MY_DEF_HERE */
 	retval = device_register(&port_dev->dev);
 	if (retval)
 		goto error_register;

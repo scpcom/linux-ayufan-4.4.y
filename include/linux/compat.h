@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_COMPAT_H
 #define _LINUX_COMPAT_H
 /*
@@ -686,9 +689,9 @@ asmlinkage long compat_sys_fanotify_mark(int, unsigned int, __u32, __u32,
 
 #define is_compat_task() (0)
 
-#ifdef CONFIG_SYNO_SYSTEM_CALL
+#ifdef MY_ABC_HERE
 asmlinkage long compat_sys_SYNOUtime(char __user *filename, struct compat_timespec __user *ctime);
-#endif /* CONFIG_SYNO_SYSTEM_CALL */
+#endif /* MY_ABC_HERE */
 
 #endif /* CONFIG_COMPAT */
 #endif /* _LINUX_COMPAT_H */

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * ext4_jbd2.h
  *
@@ -133,7 +136,7 @@ static inline int ext4_jbd2_credits_xattr(struct inode *inode)
 #define EXT4_HT_MIGRATE          8
 #define EXT4_HT_MOVE_EXTENTS     9
 #define EXT4_HT_XATTR           10
-#ifdef CONFIG_SYNO_EXT4_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 #define EXT4_HT_SYNO			11
 #define EXT4_HT_MAX				12
 #else

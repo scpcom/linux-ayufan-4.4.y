@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/namespace.c
  *
@@ -29,21 +32,21 @@
 #define HASH_SHIFT ilog2(PAGE_SIZE / sizeof(struct list_head))
 #define HASH_SIZE (1UL << HASH_SHIFT)
 
-#ifdef CONFIG_SYNO_DYN_MODULE_INSTALL
+#ifdef MY_ABC_HERE
 extern int gSynoHasDynModule;
-#endif /*CONFIG_SYNO_DYN_MODULE_INSTALL*/
+#endif /*MY_ABC_HERE*/
 
-#ifdef CONFIG_SYNO_EXT4_ERROR_REPORT
+#ifdef MY_ABC_HERE
 extern void ext4_fill_mount_path(struct super_block *sb, const char *szPath);
 #endif
 
-#ifdef CONFIG_SYNO_FS_UNMOUNT
+#ifdef MY_ABC_HERE
 extern void fs_show_opened_file(struct mount *mnt);
-#endif /* CONFIG_SYNO_FS_UNMOUNT */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_MD_RESHAPE_AND_MOUNT_DEADLOCK_WORKAROUND
+#ifdef MY_ABC_HERE
 extern struct rw_semaphore s_reshape_mount_key;
-#endif /* CONFIG_SYNO_MD_RESHAPE_AND_MOUNT_DEADLOCK_WORKAROUND */
+#endif /* MY_ABC_HERE */
 
 static int event;
 static DEFINE_IDA(mnt_id_ida);
@@ -1318,11 +1321,11 @@ static int do_umount(struct mount *mnt, int flags)
 			umount_tree(mnt, 1);
 		retval = 0;
 	}
-#ifdef CONFIG_SYNO_FS_UNMOUNT
+#ifdef MY_ABC_HERE
 	if (-EBUSY == retval) {
 		fs_show_opened_file(mnt);
 	}
-#endif /* CONFIG_SYNO_FS_UNMOUNT */
+#endif /* MY_ABC_HERE */
 	br_write_unlock(&vfsmount_lock);
 	namespace_unlock();
 	return retval;
@@ -1377,13 +1380,13 @@ SYSCALL_DEFINE2(umount, char __user *, name, int, flags)
 dput_and_out:
 	/* we mustn't call path_put() as that would clear mnt_expiry_mark */
 	dput(path.dentry);
-#ifdef CONFIG_SYNO_MD_RESHAPE_AND_MOUNT_DEADLOCK_WORKAROUND
+#ifdef MY_ABC_HERE
 	down_read(&s_reshape_mount_key);
-#endif /* CONFIG_SYNO_MD_RESHAPE_AND_MOUNT_DEADLOCK_WORKAROUND */
+#endif /* MY_ABC_HERE */
 	mntput_no_expire(mnt);
-#ifdef CONFIG_SYNO_MD_RESHAPE_AND_MOUNT_DEADLOCK_WORKAROUND
+#ifdef MY_ABC_HERE
 	up_read(&s_reshape_mount_key);
-#endif /* CONFIG_SYNO_MD_RESHAPE_AND_MOUNT_DEADLOCK_WORKAROUND */
+#endif /* MY_ABC_HERE */
 out:
 	return retval;
 }
@@ -2089,7 +2092,7 @@ static int do_new_mount(struct path *path, const char *fstype, int flags,
 		return PTR_ERR(mnt);
 
 	err = do_add_mount(real_mount(mnt), path, mnt_flags);
-#ifdef CONFIG_SYNO_EXT4_ERROR_REPORT
+#ifdef MY_ABC_HERE
 	if (!err && !strcmp(fstype, "ext4")) {
 		char buf[SYNO_MOUNT_PATH_LEN] = {'\0'};
 		ext4_fill_mount_path(mnt->mnt_sb, d_path(path, buf, sizeof(buf)));
@@ -2356,17 +2359,17 @@ long do_mount(const char *dev_name, const char *dir_name,
 	int retval = 0;
 	int mnt_flags = 0;
 
-#ifdef CONFIG_SYNO_INSTALL_FLAG
+#ifdef MY_ABC_HERE
 	extern int gSynoInstallFlag;
 	if ( 0 == gSynoInstallFlag &&
-#ifdef CONFIG_SYNO_DYN_MODULE_INSTALL
+#ifdef MY_ABC_HERE
 			gSynoHasDynModule &&
-#endif /*CONFIG_SYNO_DYN_MODULE_INSTALL*/
+#endif /*MY_ABC_HERE*/
 			NULL != dev_name &&
 			strstr(dev_name, CONFIG_SYNO_USB_FLASH_DEVICE_PATH)) {
 		return -EINVAL;
 	}
-#endif /*CONFIG_SYNO_INSTALL_FLAG*/
+#endif /*MY_ABC_HERE*/
 
 	/* Discard magic */
 	if ((flags & MS_MGC_MSK) == MS_MGC_VAL)
@@ -2424,9 +2427,9 @@ long do_mount(const char *dev_name, const char *dir_name,
 		   MS_NOATIME | MS_NODIRATIME | MS_RELATIME| MS_KERNMOUNT |
 		   MS_STRICTATIME);
 
-#ifdef CONFIG_SYNO_MD_RESHAPE_AND_MOUNT_DEADLOCK_WORKAROUND
+#ifdef MY_ABC_HERE
 	down_read(&s_reshape_mount_key);
-#endif /* CONFIG_SYNO_MD_RESHAPE_AND_MOUNT_DEADLOCK_WORKAROUND */
+#endif /* MY_ABC_HERE */
 	if (flags & MS_REMOUNT)
 		retval = do_remount(&path, flags & ~MS_REMOUNT, mnt_flags,
 				    data_page);
@@ -2439,9 +2442,9 @@ long do_mount(const char *dev_name, const char *dir_name,
 	else
 		retval = do_new_mount(&path, type_page, flags, mnt_flags,
 				      dev_name, data_page);
-#ifdef CONFIG_SYNO_MD_RESHAPE_AND_MOUNT_DEADLOCK_WORKAROUND
+#ifdef MY_ABC_HERE
 	up_read(&s_reshape_mount_key);
-#endif /* CONFIG_SYNO_MD_RESHAPE_AND_MOUNT_DEADLOCK_WORKAROUND */
+#endif /* MY_ABC_HERE */
 
 dput_out:
 	path_put(&path);

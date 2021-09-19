@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright 2012 Texas Instruments
  *
@@ -53,9 +56,9 @@ struct lp3943_led_node {
 	u8 prescale;
 	enum lp3943_led_channel *channel;
 	int num_channels;
-#ifdef CONFIG_SYNO_LP3943_FEATURES
+#ifdef MY_DEF_HERE
 	char *default_trigger;
-#endif /* CONFIG_SYNO_LP3943_FEATURES */
+#endif /* MY_DEF_HERE */
 };
 
 /*
@@ -68,8 +71,8 @@ struct lp3943_platform_data {
 	int num_nodes;
 };
 
-#ifdef CONFIG_SYNO_LP3943_FEATURES
+#ifdef MY_DEF_HERE
 static void (*funcSYNOLEDBrightnessSet) (u8 brightness, enum lp3943_led_mode *mode, enum lp3943_led_mode nodeMode);
-#endif /* CONFIG_SYNO_LP3943_FEATURES */
+#endif /* MY_DEF_HERE */
 
 #endif

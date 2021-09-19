@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * xHCI host controller driver
  *
@@ -493,14 +496,14 @@ static void xhci_event_ring_work(unsigned long arg)
 }
 #endif /* CONFIG_USB_ETRON_HCD_DEBUGGING */
 
-#ifdef CONFIG_SYNO_FACTORY_USB3_DISABLE
+#ifdef MY_ABC_HERE
 extern int gSynoFactoryUSB3Disable;
-#endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_FACTORY_USB_FAST_RESET
+#ifdef MY_ABC_HERE
 extern int gSynoFactoryUSBFastReset;
 extern unsigned int blk_timeout_factory; // defined in blk-timeout.c
-#endif /* CONFIG_SYNO_FACTORY_USB_FAST_RESET */
+#endif /* MY_ABC_HERE */
 
 static int xhci_run_finished(struct xhci_hcd *xhci)
 {
@@ -513,18 +516,18 @@ static int xhci_run_finished(struct xhci_hcd *xhci)
 
 	xhci_dbg(xhci, "Finished xhci_run for USB3 roothub\n");
 
-#ifdef CONFIG_SYNO_FACTORY_USB3_DISABLE
+#ifdef MY_ABC_HERE
 	if (1 == gSynoFactoryUSB3Disable) {
 		printk("xhci USB3 ports are disabled!\n");
 	}
-#endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_FACTORY_USB_FAST_RESET
+#ifdef MY_ABC_HERE
 	if (1 == gSynoFactoryUSBFastReset) {
 		printk("USB_FAST_RESET enabled!\n");
 		blk_timeout_factory = 1;
 	}
-#endif /* CONFIG_SYNO_FACTORY_USB_FAST_RESET */
+#endif /* MY_ABC_HERE */
 
 	return 0;
 }
@@ -673,12 +676,12 @@ void etxhci_stop(struct usb_hcd *hcd)
 	etxhci_mem_cleanup(xhci);
 	xhci_dbg(xhci, "xhci_stop completed - status = %x\n",
 		    xhci_readl(xhci, &xhci->op_regs->status));
-#ifdef CONFIG_SYNO_FACTORY_USB_FAST_RESET
+#ifdef MY_ABC_HERE
 	if (1 == gSynoFactoryUSBFastReset) {
 		printk("USB_FAST_RESET disabled!\n");
 		blk_timeout_factory = 0;
 	}
-#endif /* CONFIG_SYNO_FACTORY_USB_FAST_RESET */
+#endif /* MY_ABC_HERE */
 }
 
 /*

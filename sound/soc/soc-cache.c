@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * soc-cache.c  --  ASoC register cache helpers
  *
@@ -18,10 +21,10 @@
 #include <linux/rbtree.h>
 #include <linux/export.h>
 
-#if defined(CONFIG_SYNO_IGNORE_TRACE_SND_SOC)
+#if defined(MY_ABC_HERE)
 #else
 #include <trace/events/asoc.h>
-#endif /*CONFIG_SYNO_IGNORE_TRACE_SND_SOC*/
+#endif /*MY_ABC_HERE*/
 
 static bool snd_soc_set_cache_val(void *base, unsigned int idx,
 				  unsigned int val, unsigned int word_size)
@@ -270,17 +273,17 @@ int snd_soc_cache_sync(struct snd_soc_codec *codec)
 	if (codec->cache_ops->name)
 		dev_dbg(codec->dev, "ASoC: Syncing %s cache for %s codec\n",
 			codec->cache_ops->name, codec->name);
-#if defined(CONFIG_SYNO_IGNORE_TRACE_SND_SOC)
+#if defined(MY_ABC_HERE)
 #else
 	trace_snd_soc_cache_sync(codec, name, "start");
-#endif /*CONFIG_SYNO_IGNORE_TRACE_SND_SOC*/
+#endif /*MY_ABC_HERE*/
 	ret = codec->cache_ops->sync(codec);
 	if (!ret)
 		codec->cache_sync = 0;
-#if defined(CONFIG_SYNO_IGNORE_TRACE_SND_SOC)
+#if defined(MY_ABC_HERE)
 #else
 	trace_snd_soc_cache_sync(codec, name, "end");
-#endif /*CONFIG_SYNO_IGNORE_TRACE_SND_SOC*/
+#endif /*MY_ABC_HERE*/
 	return ret;
 }
 EXPORT_SYMBOL_GPL(snd_soc_cache_sync);

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Block data types and constants.  Directly include this file only to
  * break include dependency loop.
@@ -122,13 +125,13 @@ struct bio {
 #ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
 #define BIO_AUTO_REMAP 14	/* record if auto-remap occurred */
 #endif /* CONFIG_SYNO_MD_AUTO_REMAP_REPORT */
-#ifdef CONFIG_SYNO_MD_FLASHCACHE_SUPPORT
+#ifdef MY_ABC_HERE
 /*
  * Currently, our RAID1 device won't return error on make_reuest() when RAID1 is crashed
  * So we add this flag to told md layer that is should eturn error for flashcache * devices
  */
 #define BIO_MD_RETURN_ERROR 15
-#endif /* CONFIG_SYNO_MD_FLASHCACHE_SUPPORT */
+#endif /* MY_ABC_HERE */
 
 #define bio_flagged(bio, flag)	((bio)->bi_flags & (1 << (flag)))
 

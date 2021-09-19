@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2007 Oracle.  All rights reserved.
  * Copyright (C) 2014 Fujitsu.  All rights reserved.
@@ -79,7 +82,7 @@ BTRFS_WORK_HELPER(endio_write_helper);
 BTRFS_WORK_HELPER(freespace_write_helper);
 BTRFS_WORK_HELPER(delayed_meta_helper);
 BTRFS_WORK_HELPER(readahead_helper);
-#ifdef CONFIG_SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+#ifdef MY_ABC_HERE
 BTRFS_WORK_HELPER(reada_path_start_helper);
 #endif
 BTRFS_WORK_HELPER(qgroup_rescan_helper);

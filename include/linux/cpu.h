@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * include/linux/cpu.h - generic cpu definition
  *
@@ -73,9 +76,9 @@ enum {
 	/* migration should happen before other stuff but after perf */
 	CPU_PRI_PERF		= 20,
 	CPU_PRI_MIGRATION	= 10,
-#ifdef CONFIG_SYNO_FIX_SMPBOOT_RACE
+#ifdef MY_DEF_HERE
 	CPU_PRI_SMPBOOT		= 9,
-#endif /* CONFIG_SYNO_FIX_SMPBOOT_RACE */
+#endif /* MY_DEF_HERE */
 	/* bring up workqueues before normal notifiers and down after */
 	CPU_PRI_WORKQUEUE_UP	= 5,
 	CPU_PRI_WORKQUEUE_DOWN	= -5,
@@ -143,9 +146,9 @@ static inline void unregister_cpu_notifier(struct notifier_block *nb)
 }
 #endif
 
-#ifdef CONFIG_SYNO_FIX_SMPBOOT_RACE
+#ifdef MY_DEF_HERE
 void smpboot_thread_init(void);
-#endif /* CONFIG_SYNO_FIX_SMPBOOT_RACE */
+#endif /* MY_DEF_HERE */
 int cpu_up(unsigned int cpu);
 void notify_cpu_starting(unsigned int cpu);
 extern void cpu_maps_update_begin(void);
@@ -172,11 +175,11 @@ static inline void cpu_maps_update_done(void)
 {
 }
 
-#ifdef CONFIG_SYNO_FIX_SMPBOOT_RACE
+#ifdef MY_DEF_HERE
 static inline void smpboot_thread_init(void)
 {
 }
-#endif /* CONFIG_SYNO_FIX_SMPBOOT_RACE */
+#endif /* MY_DEF_HERE */
 
 #endif /* CONFIG_SMP */
 extern struct bus_type cpu_subsys;

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * xHCI host controller driver
  *
@@ -167,7 +170,7 @@ int xhci_reset(struct xhci_hcd *xhci)
 	command |= CMD_RESET;
 	xhci_writel(xhci, command, &xhci->op_regs->command);
 
-#ifdef CONFIG_SYNO_XHCI_RESET_DELAY
+#ifdef MY_DEF_HERE
 	mdelay(100);
 #endif
 
@@ -178,7 +181,7 @@ int xhci_reset(struct xhci_hcd *xhci)
 
 	xhci_dbg(xhci, "Wait for controller to be ready for doorbell rings\n");
 
-#ifdef CONFIG_SYNO_XHCI_RESET_DELAY
+#ifdef MY_DEF_HERE
 	mdelay(100);
 #endif
 
@@ -594,14 +597,14 @@ static void xhci_event_ring_work(unsigned long arg)
 }
 #endif
 
-#ifdef CONFIG_SYNO_FACTORY_USB3_DISABLE
+#ifdef MY_ABC_HERE
 extern int gSynoFactoryUSB3Disable;
-#endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_FACTORY_USB_FAST_RESET
+#ifdef MY_ABC_HERE
 extern int gSynoFactoryUSBFastReset;
 extern unsigned int blk_timeout_factory; // defined in blk-timeout.c
-#endif /* CONFIG_SYNO_FACTORY_USB_FAST_RESET */
+#endif /* MY_ABC_HERE */
 
 static int xhci_run_finished(struct xhci_hcd *xhci)
 {
@@ -617,13 +620,13 @@ static int xhci_run_finished(struct xhci_hcd *xhci)
 
 	xhci_dbg(xhci, "Finished xhci_run for USB3 roothub\n");
 
-#ifdef CONFIG_SYNO_FACTORY_USB3_DISABLE
+#ifdef MY_ABC_HERE
 	if (1 == gSynoFactoryUSB3Disable) {
 		printk("xhci USB3 ports are disabled!\n");
 	}
-#endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_FACTORY_USB_FAST_RESET
+#ifdef MY_ABC_HERE
 	if (1 == gSynoFactoryUSBFastReset) {
 		printk("USB_FAST_RESET enabled!\n");
 		blk_timeout_factory = 1;
@@ -793,7 +796,7 @@ void xhci_stop(struct usb_hcd *hcd)
 	xhci_dbg(xhci, "xhci_stop completed - status = %x\n",
 		    xhci_readl(xhci, &xhci->op_regs->status));
 
-#ifdef CONFIG_SYNO_FACTORY_USB_FAST_RESET
+#ifdef MY_ABC_HERE
 	if (1 == gSynoFactoryUSBFastReset) {
 		printk("USB_FAST_RESET disabled!\n");
 		blk_timeout_factory = 0;
@@ -1400,13 +1403,13 @@ int xhci_urb_enqueue(struct usb_hcd *hcd, struct urb *urb, gfp_t mem_flags)
 					"not having streams.\n");
 			ret = -EINVAL;
 		} else {
-#ifdef CONFIG_SYNO_FORCE_EMPTY_UNAVAILABLE_XHCI_TD
+#ifdef MY_DEF_HERE
 			if (xhci->devs[slot_id]->disconnected) {
 				xhci_warn(xhci, "Ignore URB enqueuing while device "
 						"is disconnecting\n");
 				ret = -ENOTCONN;
 			} else
-#endif /* CONFIG_SYNO_FORCE_EMPTY_UNAVAILABLE_XHCI_TD */
+#endif /* MY_DEF_HERE */
 			ret = xhci_queue_bulk_tx(xhci, GFP_ATOMIC, urb,
 					slot_id, ep_index);
 		}
@@ -3637,9 +3640,9 @@ int xhci_alloc_dev(struct usb_hcd *hcd, struct usb_device *udev)
 	int ret;
 	union xhci_trb *cmd_trb;
 
-#ifdef CONFIG_SYNO_USB3_RESET_WAIT
+#ifdef MY_ABC_HERE
 	msleep(1000); // wait device ready
-#endif /* CONFIG_SYNO_USB3_RESET_WAIT */
+#endif /* MY_ABC_HERE */
 
 	spin_lock_irqsave(&xhci->lock, flags);
 	cmd_trb = xhci_find_next_enqueue(xhci->cmd_ring);

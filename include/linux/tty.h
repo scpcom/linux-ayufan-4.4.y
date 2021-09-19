@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_TTY_H
 #define _LINUX_TTY_H
 
@@ -332,7 +335,7 @@ static inline void tty_set_flow_change(struct tty_struct *tty, int val)
 }
 
 #ifdef CONFIG_TTY
-#if defined(CONFIG_SYNO_MICROP_CTRL) && defined(CONFIG_SYNO_X64)
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
 extern int syno_ttys_write(const int index, const char* szBuf);
 #endif
 extern void console_init(void);

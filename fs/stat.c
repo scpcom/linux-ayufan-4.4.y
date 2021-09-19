@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/stat.c
  *
@@ -18,15 +21,15 @@
 #include <asm/uaccess.h>
 #include <asm/unistd.h>
 
-#ifdef CONFIG_SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 #include <linux/synolib.h>
 extern int SynoDebugFlag;
 extern int syno_hibernation_log_level;
-#endif /* CONFIG_SYNO_DEBUG_FLAG */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 #include "synoacl_int.h"
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 void generic_fillattr(struct inode *inode, struct kstat *stat)
 {
 	stat->dev = inode->i_sb->s_dev;
@@ -55,7 +58,7 @@ int vfs_getattr(struct path *path, struct kstat *stat)
 	if (retval)
 		return retval;
 
-#ifdef CONFIG_SYNO_FS_WINACL
+#ifdef MY_ABC_HERE
 	if (IS_SYNOACL(path->dentry)) {
 		if (inode->i_op->getattr) {
 			if (0 != (retval = inode->i_op->getattr(path->mnt, path->dentry, stat)))
@@ -68,7 +71,7 @@ int vfs_getattr(struct path *path, struct kstat *stat)
 
 		return 0;
 	}
-#endif /* CONFIG_SYNO_FS_WINACL */
+#endif /* MY_ABC_HERE */
 
 	if (inode->i_op->getattr)
 		return inode->i_op->getattr(path->mnt, path->dentry, stat);
@@ -135,7 +138,7 @@ int vfs_lstat(const char __user *name, struct kstat *stat)
 }
 EXPORT_SYMBOL(vfs_lstat);
 
-#ifdef CONFIG_SYNO_FS_STAT
+#ifdef MY_ABC_HERE
 int __always_inline syno_vfs_getattr(struct path *path, struct kstat *stat, int stat_flags)
 {
 	int error = 0;
@@ -147,13 +150,13 @@ int __always_inline syno_vfs_getattr(struct path *path, struct kstat *stat, int 
 		if (inode->i_op->syno_getattr) {
 			error = inode->i_op->syno_getattr(path->dentry, stat, stat_flags);
 		} else {
-#ifdef CONFIG_SYNO_FS_CREATE_TIME
+#ifdef MY_ABC_HERE
 			stat->syno_create_time = inode->i_create_time;
 #endif
-#ifdef CONFIG_SYNO_FS_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 			stat->syno_archive_bit = inode->i_archive_bit;
 #endif
-#ifdef CONFIG_SYNO_FS_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 			stat->syno_archive_version = inode->i_archive_version;
 #endif
 		}
@@ -196,7 +199,7 @@ out:
 	return error;
 }
 EXPORT_SYMBOL(syno_vfs_fstatat);
-#endif /* CONFIG_SYNO_FS_STAT */
+#endif /* MY_ABC_HERE */
 
 #ifdef __ARCH_WANT_OLD_STAT
 
@@ -247,11 +250,11 @@ SYSCALL_DEFINE2(stat, const char __user *, filename,
 	struct kstat stat;
 	int error;
 
-#ifdef CONFIG_SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 	if(syno_hibernation_log_level > 0) {
 		syno_do_hibernation_filename_log(filename);
 	}
-#endif /* CONFIG_SYNO_DEBUG_FLAG */
+#endif /* MY_ABC_HERE */
 
 	error = vfs_stat(filename, &stat);
 	if (error)
@@ -340,7 +343,7 @@ SYSCALL_DEFINE2(newstat, const char __user *, filename,
 		struct stat __user *, statbuf)
 {
 	struct kstat stat;
-#ifdef CONFIG_SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 	int error;
 
 	if(syno_hibernation_log_level > 0) {
@@ -349,7 +352,7 @@ SYSCALL_DEFINE2(newstat, const char __user *, filename,
 	error = vfs_stat(filename, &stat);
 #else
 	int error = vfs_stat(filename, &stat);
-#endif /* CONFIG_SYNO_DEBUG_FLAG */
+#endif /* MY_ABC_HERE */
 
 	if (error)
 		return error;
@@ -386,7 +389,7 @@ SYSCALL_DEFINE4(newfstatat, int, dfd, const char __user *, filename,
 SYSCALL_DEFINE2(newfstat, unsigned int, fd, struct stat __user *, statbuf)
 {
 	struct kstat stat;
-#ifdef CONFIG_SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 	int error;
 
 	if(syno_hibernation_log_level > 0) {
@@ -395,7 +398,7 @@ SYSCALL_DEFINE2(newfstat, unsigned int, fd, struct stat __user *, statbuf)
 	error = vfs_fstat(fd, &stat);
 #else
 	int error = vfs_fstat(fd, &stat);
-#endif /* CONFIG_SYNO_DEBUG_FLAG */
+#endif /* MY_ABC_HERE */
 	if (!error)
 		error = cp_new_stat(&stat, statbuf);
 
@@ -491,11 +494,11 @@ SYSCALL_DEFINE2(stat64, const char __user *, filename,
 {
 	struct kstat stat;
 
-#ifdef CONFIG_SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 	if(syno_hibernation_log_level > 0) {
 		syno_do_hibernation_filename_log(filename);
 	}
-#endif /* CONFIG_SYNO_DEBUG_FLAG */
+#endif /* MY_ABC_HERE */
 	int error = vfs_stat(filename, &stat);
 
 	if (!error)
@@ -540,7 +543,7 @@ SYSCALL_DEFINE4(fstatat64, int, dfd, const char __user *, filename,
 }
 #endif /* __ARCH_WANT_STAT64 || __ARCH_WANT_COMPAT_STAT64 */
 
-#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+#ifdef MY_ABC_HERE
 /* This stat is used by caseless protocol.
  * The filename will be convert to real filename and return to user space.
  * In caller, the length of filename must equal or be larger than SYNO_SMB_PSTRING_LEN.
@@ -558,7 +561,7 @@ int __SYNOCaselessStat(char __user * filename, int nofollowLink, struct kstat *s
 		return -ENOMEM;
 	}
 
-#ifdef CONFIG_SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 	if(!nofollowLink && syno_hibernation_log_level > 0) {
 		syno_do_hibernation_filename_log(filename);
 	}
@@ -566,7 +569,7 @@ int __SYNOCaselessStat(char __user * filename, int nofollowLink, struct kstat *s
 	if (SynoDebugFlag) {
 		printk("%s(%d) orig name:[%s] len:[%u]\n", __FUNCTION__, __LINE__, filename, (unsigned int)strlen(filename));
 	}
-#endif /* CONFIG_SYNO_DEBUG_FLAG */
+#endif /* MY_ABC_HERE */
 	if (nofollowLink) {
 		f = LOOKUP_CASELESS_COMPARE;
 	} else {
@@ -577,31 +580,31 @@ int __SYNOCaselessStat(char __user * filename, int nofollowLink, struct kstat *s
 		error = syno_vfs_getattr(&path, stat, flags);
 		path_put(&path);
 		if (real_filename_len) {
-#ifdef CONFIG_SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 			if (SynoDebugFlag) {
 				printk("%s(%d) convert name:[%s]\n",__FUNCTION__,__LINE__,filename);
 			}
-#endif /* CONFIG_SYNO_DEBUG_FLAG */
+#endif /* MY_ABC_HERE */
 			error = copy_to_user(filename, real_filename, real_filename_len) ? -EFAULT : error;
 		}
 	}
-#ifdef CONFIG_SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 	if (error && SynoDebugFlag) {
 		printk("%s(%d) convert name:[%s], error:[%d]\n",__FUNCTION__,__LINE__,filename, error);
 	}
-#endif /* CONFIG_SYNO_DEBUG_FLAG */
+#endif /* MY_ABC_HERE */
 
 	kfree(real_filename);
 	return error;
 }
 EXPORT_SYMBOL(__SYNOCaselessStat);
-#endif /* CONFIG_SYNO_FS_CASELESS_STAT */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_SYSTEM_CALL
+#ifdef MY_ABC_HERE
 #if defined(__ARCH_WANT_STAT64) || defined(__ARCH_WANT_COMPAT_STAT64)
 SYSCALL_DEFINE2(SYNOCaselessStat64, char __user *, filename, struct stat64 __user *, statbuf)
 {
-#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+#ifdef MY_ABC_HERE
 	long error = -1;
 	struct kstat stat;
 
@@ -613,12 +616,12 @@ SYSCALL_DEFINE2(SYNOCaselessStat64, char __user *, filename, struct stat64 __use
 	return error;
 #else
 	return -EOPNOTSUPP;
-#endif /* CONFIG_SYNO_FS_CASELESS_STAT */
+#endif /* MY_ABC_HERE */
 }
 
 SYSCALL_DEFINE2(SYNOCaselessLStat64, char __user *, filename, struct stat64 __user *, statbuf)
 {
-#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+#ifdef MY_ABC_HERE
 	long error = -1;
 	struct kstat stat;
 
@@ -630,13 +633,13 @@ SYSCALL_DEFINE2(SYNOCaselessLStat64, char __user *, filename, struct stat64 __us
 	return error;
 #else
 	return -EOPNOTSUPP;
-#endif /* CONFIG_SYNO_FS_CASELESS_STAT */
+#endif /* MY_ABC_HERE */
 }
 
 #else /* !(__ARCH_WANT_STAT64 || __ARCH_WANT_COMPAT_STAT64) */
 SYSCALL_DEFINE2(SYNOCaselessStat, char __user *, filename, struct stat __user *, statbuf)
 {
-#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+#ifdef MY_ABC_HERE
 	long error = -1;
 	struct kstat stat;
 
@@ -648,12 +651,12 @@ SYSCALL_DEFINE2(SYNOCaselessStat, char __user *, filename, struct stat __user *,
 	return error;
 #else
 	return -EOPNOTSUPP;
-#endif /* CONFIG_SYNO_FS_CASELESS_STAT */
+#endif /* MY_ABC_HERE */
 }
 
 SYSCALL_DEFINE2(SYNOCaselessLStat, char __user *, filename, struct stat __user *, statbuf)
 {
-#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+#ifdef MY_ABC_HERE
 	long error = -1;
 	struct kstat stat;
 
@@ -665,12 +668,12 @@ SYSCALL_DEFINE2(SYNOCaselessLStat, char __user *, filename, struct stat __user *
 	return error;
 #else
 	return -EOPNOTSUPP;
-#endif /* CONFIG_SYNO_FS_CASELESS_STAT */
+#endif /* MY_ABC_HERE */
 }
 #endif /* __ARCH_WANT_STAT64 || __ARCH_WANT_COMPAT_STAT64 */
-#endif /* CONFIG_SYNO_SYSTEM_CALL */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_FS_STAT
+#ifdef MY_ABC_HERE
 
 #if defined(__ARCH_WANT_STAT64) || defined(__ARCH_WANT_COMPAT_STAT64)
 struct SYNOSTAT64 {
@@ -693,7 +696,7 @@ static long SYNOStat64CopyToUser(struct kstat *pKst, unsigned int flags, struct 
 		}
 	}
 
-#ifdef CONFIG_SYNO_FS_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	if (flags & SYNOST_ARCHIVE_BIT) {
 		if (__put_user(pKst->syno_archive_bit, &statbuf->ext.archive_bit)) {
 			goto Out;
@@ -701,7 +704,7 @@ static long SYNOStat64CopyToUser(struct kstat *pKst, unsigned int flags, struct 
 	}
 #endif
 
-#ifdef CONFIG_SYNO_FS_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	if (flags & SYNOST_ARCHIVE_VER) {
 		if (__put_user(pKst->syno_archive_version, &statbuf->ext.archive_version)) {
 			goto Out;
@@ -709,7 +712,7 @@ static long SYNOStat64CopyToUser(struct kstat *pKst, unsigned int flags, struct 
 	}
 #endif
 
-#ifdef CONFIG_SYNO_FS_CREATE_TIME
+#ifdef MY_ABC_HERE
 	if (flags & SYNOST_CREATE_TIME) {
 		if (copy_to_user(&statbuf->ext.create_time, &pKst->syno_create_time, sizeof(statbuf->ext.create_time))){
 			goto Out;
@@ -728,20 +731,20 @@ static int do_SYNOStat64(char __user * filename, int no_follow_link, int flags, 
 	struct kstat kst;
 
 	if (flags & SYNOST_IS_CASELESS) {
-#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+#ifdef MY_ABC_HERE
 		error = __SYNOCaselessStat(filename, no_follow_link, &kst, flags);
 #else
 		error = -EOPNOTSUPP;
-#endif /* CONFIG_SYNO_FS_CASELESS_STAT */
+#endif /* MY_ABC_HERE */
 	} else {
 		if (no_follow_link) {
 			error = syno_vfs_fstatat(filename, &kst, 0, flags);
 		} else {
-#ifdef CONFIG_SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 			if(syno_hibernation_log_level > 0) {
 				syno_do_hibernation_filename_log(filename);
 			}
-#endif /* CONFIG_SYNO_DEBUG_FLAG */
+#endif /* MY_ABC_HERE */
 			error = syno_vfs_fstatat(filename, &kst, LOOKUP_FOLLOW, flags);
 		}
 	}
@@ -795,7 +798,7 @@ static int SYNOStatCopyToUser(struct kstat *pKst, unsigned int flags, struct SYN
 		}
 	}
 
-#ifdef CONFIG_SYNO_FS_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	if (flags & SYNOST_ARCHIVE_BIT) {
 		if (__put_user(pKst->syno_archive_bit, &statbuf->ext.archive_bit)) {
 			goto Out;
@@ -803,7 +806,7 @@ static int SYNOStatCopyToUser(struct kstat *pKst, unsigned int flags, struct SYN
 	}
 #endif
 
-#ifdef CONFIG_SYNO_FS_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	if (flags & SYNOST_ARCHIVE_VER) {
 		if (__put_user(pKst->syno_archive_version, &statbuf->ext.archive_version)) {
 			goto Out;
@@ -811,7 +814,7 @@ static int SYNOStatCopyToUser(struct kstat *pKst, unsigned int flags, struct SYN
 	}
 #endif
 
-#ifdef CONFIG_SYNO_FS_CREATE_TIME
+#ifdef MY_ABC_HERE
 	if (flags & SYNOST_CREATE_TIME) {
 		if (copy_to_user(&statbuf->ext.create_time, &pKst->syno_create_time, sizeof(statbuf->ext.create_time))){
 			goto Out;
@@ -830,20 +833,20 @@ static int do_SYNOStat(char __user * filename, int no_follow_link, int flags, st
 	struct kstat kst;
 
 	if (flags & SYNOST_IS_CASELESS) {
-#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+#ifdef MY_ABC_HERE
 		error = __SYNOCaselessStat(filename, no_follow_link, &kst, flags);
 #else
 		error = -EOPNOTSUPP;
-#endif /* CONFIG_SYNO_FS_CASELESS_STAT */
+#endif /* MY_ABC_HERE */
 	} else {
 		if (no_follow_link) {
 			error = syno_vfs_fstatat(filename, &kst, 0, flags);
 		} else {
-#ifdef CONFIG_SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 			if(syno_hibernation_log_level > 0) {
 				syno_do_hibernation_filename_log(filename);
 			}
-#endif /* CONFIG_SYNO_DEBUG_FLAG */
+#endif /* MY_ABC_HERE */
 			error = syno_vfs_fstatat(filename, &kst, LOOKUP_FOLLOW, flags);
 		}
 	}
@@ -881,7 +884,7 @@ SYSCALL_DEFINE3(SYNOLStat, char __user *, filename, unsigned int, flags, struct 
 }
 
 #endif /* __ARCH_WANT_STAT64 || __ARCH_WANT_COMPAT_STAT64 */
-#endif /* CONFIG_SYNO_FS_STAT */
+#endif /* MY_ABC_HERE */
 
 /* Caller is here responsible for sufficient locking (ie. inode->i_lock) */
 void __inode_add_bytes(struct inode *inode, loff_t bytes)

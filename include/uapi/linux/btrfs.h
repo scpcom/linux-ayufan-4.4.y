@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2007 Oracle.  All rights reserved.
  *
@@ -40,9 +43,9 @@ struct btrfs_ioctl_vol_args {
 #define BTRFS_SUBVOL_CREATE_ASYNC	(1ULL << 0)
 #define BTRFS_SUBVOL_RDONLY		(1ULL << 1)
 #define BTRFS_SUBVOL_QGROUP_INHERIT	(1ULL << 2)
-#ifdef CONFIG_SYNO_BTRFS_SUBVOLUME_HIDE
+#ifdef MY_ABC_HERE
 #define BTRFS_SUBVOL_HIDE (1ULL << 32)
-#endif /* CONFIG_SYNO_BTRFS_SUBVOLUME_HIDE */
+#endif /* MY_ABC_HERE */
 #define BTRFS_FSID_SIZE 16
 #define BTRFS_UUID_SIZE 16
 #define BTRFS_UUID_UNPARSED_SIZE	37
@@ -451,7 +454,7 @@ struct btrfs_ioctl_qgroup_create_args {
 	__u64 qgroupid;
 };
 
-#ifdef CONFIG_SYNO_BTRFS_QGROUP_QUERY
+#ifdef MY_ABC_HERE
 struct btrfs_ioctl_qgroup_query_args {
 	/* state */
 	__u64 rfer;
@@ -468,7 +471,7 @@ struct btrfs_ioctl_qgroup_query_args {
 	/* reservation tracking */
 	__u64 reserved;
 };
-#endif /* CONFIG_SYNO_BTRFS_QGROUP_QUERY */
+#endif /* MY_ABC_HERE */
 
 struct btrfs_ioctl_timespec {
 	__u64 sec;
@@ -482,15 +485,15 @@ struct btrfs_ioctl_received_subvol_args {
 	struct btrfs_ioctl_timespec stime; /* in */
 	struct btrfs_ioctl_timespec rtime; /* out */
 	__u64	flags;			/* in */
-#ifdef CONFIG_SYNO_BTRFS_SEND
+#ifdef MY_ABC_HERE
 	struct btrfs_ioctl_timespec otime; /* in */
 	__u64	reserved[14];		/* in */
 #else
 	__u64	reserved[16];		/* in */
-#endif /* CONFIG_SYNO_BTRFS_SEND */
+#endif /* MY_ABC_HERE */
 };
 
-#ifdef CONFIG_SYNO_BTRFS_SEND
+#ifdef MY_ABC_HERE
 struct btrfs_ioctl_subvol_info_args {
 	/* this root's id */
 	__u64 root_id;
@@ -504,7 +507,7 @@ struct btrfs_ioctl_subvol_info_args {
 	__u8 puuid[BTRFS_UUID_SIZE];
 	__u8 ruuid[BTRFS_UUID_SIZE];
 };
-#endif /* CONFIG_SYNO_BTRFS_SEND */
+#endif /* MY_ABC_HERE */
 /*
  * Caller doesn't want file data in the send stream, even if the
  * search of clone sources doesn't find an extent. UPDATE_EXTENT
@@ -525,7 +528,7 @@ struct btrfs_ioctl_subvol_info_args {
  */
 #define BTRFS_SEND_FLAG_OMIT_END_CMD		0x4
 
-#ifdef CONFIG_SYNO_BTRFS_SEND_CALCULATE_TOTAL_DATA_SIZE
+#ifdef MY_ABC_HERE
 /*
  * Calculate the amount (in bytes) of new file data between the send and
  * parent snapshots, or in case of a full send, the total amount of file data
@@ -548,7 +551,7 @@ struct btrfs_ioctl_subvol_info_args {
 	(BTRFS_SEND_FLAG_NO_FILE_DATA | \
 	 BTRFS_SEND_FLAG_OMIT_STREAM_HEADER | \
 	 BTRFS_SEND_FLAG_OMIT_END_CMD)
-#endif /* CONFIG_SYNO_BTRFS_SEND_CALCULATE_TOTAL_DATA_SIZE */
+#endif /* MY_ABC_HERE */
 
 struct btrfs_ioctl_send_args {
 	__s64 send_fd;			/* in */
@@ -556,14 +559,14 @@ struct btrfs_ioctl_send_args {
 	__u64 __user *clone_sources;	/* in */
 	__u64 parent_root;		/* in */
 	__u64 flags;			/* in */
-#ifdef CONFIG_SYNO_BTRFS_SEND_CALCULATE_TOTAL_DATA_SIZE
+#ifdef MY_ABC_HERE
 	__u64 total_data_size;   /* out */
 	int g_verbose;
 #endif
 	__u64 reserved[4];		/* in */
 };
 
-#ifdef CONFIG_SYNO_BTRFS_COMPR_CTL
+#ifdef MY_ABC_HERE
 /* flags for the compression ioctl */
 #define BTRFS_COMPR_CTL_SET			0x1
 #define BTRFS_COMPR_CTL_COMPR_FL	0x2
@@ -574,7 +577,7 @@ struct btrfs_ioctl_compr_ctl_args {
 	__u64	compressed_size;	/* out */
 	__u64	reserved[1];
 };
-#endif /* CONFIG_SYNO_BTRFS_COMPR_CTL */
+#endif /* MY_ABC_HERE */
 
 /* Error codes as returned by the kernel */
 enum btrfs_err_code {
@@ -719,19 +722,19 @@ static inline char *btrfs_err_str(enum btrfs_err_code err_code)
 #define BTRFS_IOC_GET_SUPPORTED_FEATURES _IOR(BTRFS_IOCTL_MAGIC, 57, \
 				   struct btrfs_ioctl_feature_flags[3])
 
-#ifdef CONFIG_SYNO_BTRFS_COMPR_CTL
+#ifdef MY_ABC_HERE
 #define BTRFS_IOC_COMPR_CTL _IOR(BTRFS_IOCTL_MAGIC, 248, \
 									struct btrfs_ioctl_compr_ctl_args)
-#endif /* CONFIG_SYNO_BTRFS_COMPR_CTL */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_BTRFS_SEND
+#ifdef MY_ABC_HERE
 #define BTRFS_IOC_SUBVOL_GETINFO _IOR(BTRFS_IOCTL_MAGIC, 249, \
 				   struct btrfs_ioctl_subvol_info_args)
-#endif /* CONFIG_SYNO_BTRFS_SEND */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_BTRFS_QGROUP_QUERY
+#ifdef MY_ABC_HERE
 #define BTRFS_IOC_QGROUP_QUERY _IOR(BTRFS_IOCTL_MAGIC, 253, \
                                     struct btrfs_ioctl_qgroup_query_args)
-#endif /* CONFIG_SYNO_BTRFS_QGROUP_QUERY */
+#endif /* MY_ABC_HERE */
 
 #endif /* _UAPI_LINUX_BTRFS_H */

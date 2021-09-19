@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (c) 2003-2006, Cluster File Systems, Inc, info@clusterfs.com
  * Written by Alex Tomas <alex@clusterfs.com>
@@ -26,9 +29,9 @@
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <trace/events/ext4.h>
-#ifdef CONFIG_SYNO_EXT4_MBALLOC_RANDOM
+#ifdef MY_ABC_HERE
 #include <linux/random.h>
-#endif /* CONFIG_SYNO_EXT4_MBALLOC_RANDOM */
+#endif /* MY_ABC_HERE */
 
 #ifdef CONFIG_EXT4_DEBUG
 ushort ext4_mballoc_debug __read_mostly;
@@ -2099,11 +2102,11 @@ ext4_mb_regular_allocator(struct ext4_allocation_context *ac)
 	 */
 repeat:
 	for (; cr < 4 && ac->ac_status == AC_STATUS_CONTINUE; cr++) {
-#ifdef CONFIG_SYNO_EXT4_MBALLOC_RANDOM
+#ifdef MY_ABC_HERE
 #define SYNO_MBALLOC_RANDOM_THRES 1024
 		ext4_group_t random_interval;
 		random_interval = ngroups / (SYNO_MBALLOC_RANDOM_THRES / 2);
-#endif /* CONFIG_SYNO_EXT4_MBALLOC_RANDOM */
+#endif /* MY_ABC_HERE */
 		ac->ac_criteria = cr;
 		/*
 		 * searching for the right group start
@@ -2112,7 +2115,7 @@ repeat:
 		group = ac->ac_g_ex.fe_group;
 
 		for (i = 0; i < ngroups; group++, i++) {
-#ifdef CONFIG_SYNO_EXT4_MBALLOC_RANDOM
+#ifdef MY_ABC_HERE
 			if (0 == cr) { // only do it on cr==0 for safety
 				if (i >= SYNO_MBALLOC_RANDOM_THRES &&
 						ngroups > 2 * SYNO_MBALLOC_RANDOM_THRES) {
@@ -2137,7 +2140,7 @@ repeat:
 			 */
 			if (group >= ngroups)
 				group = 0;
-#endif /* CONFIG_SYNO_EXT4_MBALLOC_RANDOM */
+#endif /* MY_ABC_HERE */
 			/* This now checks without needing the buddy page */
 			if (!ext4_mb_good_group(ac, group, cr))
 				continue;
@@ -4935,9 +4938,9 @@ int ext4_group_add_blocks(handle_t *handle, struct super_block *sb,
 	    in_range(block, ext4_inode_table(sb, desc), sbi->s_itb_per_group) ||
 	    in_range(block + count - 1, ext4_inode_table(sb, desc),
 		     sbi->s_itb_per_group)) {
-#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+#ifdef MY_ABC_HERE
 		if (printk_ratelimit())
-#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
+#endif /* MY_ABC_HERE */
 		ext4_error(sb, "Adding blocks in system zones - "
 			   "Block = %llu, count = %lu",
 			   block, count);

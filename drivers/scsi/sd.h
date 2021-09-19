@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _SCSI_DISK_H
 #define _SCSI_DISK_H
 
@@ -11,13 +14,13 @@
 /*
  * Time out in seconds for disks and Magneto-opticals (which are slower).
  */
-#ifdef CONFIG_SYNO_VHOST_SCSI_TMF_UNSUPPORTED
+#ifdef MY_DEF_HERE
 #define SD_TIMEOUT		(1024 * HZ)
-#elif defined(CONFIG_SYNO_SPINUP_DELAY)
+#elif defined(MY_ABC_HERE)
 #define SD_TIMEOUT		(60 * HZ)
 #else
 #define SD_TIMEOUT		(30 * HZ)
-#endif /* CONFIG_SYNO_SPINUP_DELAY */
+#endif /* MY_ABC_HERE */
 #define SD_MOD_TIMEOUT		(75 * HZ)
 #define SD_FLUSH_TIMEOUT	(60 * HZ)
 #define SD_WRITE_SAME_TIMEOUT	(120 * HZ)
@@ -27,11 +30,11 @@
  */
 #define SD_MAX_RETRIES		5
 #define SD_PASSTHROUGH_RETRIES	1
-#ifdef CONFIG_SYNO_KVMX64_MAX_MEDIUM_ACCESS_TIMEOUTS
+#ifdef MY_DEF_HERE
 #define SD_MAX_MEDIUM_TIMEOUTS 1024
 #else
 #define SD_MAX_MEDIUM_TIMEOUTS	2
-#endif /* CONFIG_SYNO_KVMX64_MAX_MEDIUM_ACCESS_TIMEOUTS */
+#endif /* MY_DEF_HERE */
 
 /*
  * Size of the initial data buffer for mode and read capacity data
@@ -63,7 +66,7 @@ enum {
 	SD_LBP_DISABLE,		/* Discard disabled due to failed cmd */
 };
 
-#ifdef CONFIG_SYNO_FIXED_DISK_NAME
+#ifdef MY_ABC_HERE
 // FIXME: we need share kernel devices type with user space,
 // so this enum must sync with libsynosdk/lib/fs/fs.h DISK_PORT_TYPE
 typedef enum __syno_disk_type {
@@ -75,7 +78,7 @@ typedef enum __syno_disk_type {
 	SYNO_DISK_SAS,
 	SYNO_DISK_END, // end of enum
 }SYNO_DISK_TYPE;
-#endif /* CONFIG_SYNO_FIXED_DISK_NAME */
+#endif /* MY_ABC_HERE */
 
 struct scsi_disk {
 	struct scsi_driver *driver;	/* always &sd_template */
@@ -89,12 +92,12 @@ struct scsi_disk {
 	u32		unmap_granularity;
 	u32		unmap_alignment;
 	u32		index;
-#ifdef CONFIG_SYNO_FIXED_DISK_NAME
+#ifdef MY_ABC_HERE
 	SYNO_DISK_TYPE	synodisktype;
-#endif /* CONFIG_SYNO_FIXED_DISK_NAME */
-#ifdef CONFIG_SYNO_SAS_DISK_NAME
+#endif /* MY_ABC_HERE */
+#ifdef MY_DEF_HERE
 	u32		synoindex;
-#endif /* CONFIG_SYNO_SAS_DISK_NAME */
+#endif /* MY_DEF_HERE */
 	unsigned int	physical_block_size;
 	unsigned int	max_medium_access_timeouts;
 	unsigned int	medium_access_timed_out;

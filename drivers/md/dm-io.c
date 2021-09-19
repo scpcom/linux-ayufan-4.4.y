@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2003 Sistina Software
  * Copyright (C) 2006 Red Hat GmbH
@@ -41,9 +44,9 @@ struct io {
 	void *context;
 	void *vma_invalidate_address;
 	unsigned long vma_invalidate_size;
-#ifdef CONFIG_SYNO_MD_FLASHCACHE_SUPPORT
+#ifdef MY_ABC_HERE
 	int is_return_err;
-#endif /* CONFIG_SYNO_MD_FLASHCACHE_SUPPORT */
+#endif /* MY_ABC_HERE */
 } __attribute__((aligned(DM_IO_MAX_REGIONS)));
 
 static struct kmem_cache *_dm_io_cache;
@@ -318,11 +321,11 @@ static void do_region(int rw, unsigned region, struct dm_io_region *where,
 		bio->bi_sector = where->sector + (where->count - remaining);
 		bio->bi_bdev = where->bdev;
 		bio->bi_end_io = endio;
-#ifdef CONFIG_SYNO_MD_FLASHCACHE_SUPPORT
+#ifdef MY_ABC_HERE
 		if (1 == io->is_return_err) {
 			set_bit(BIO_MD_RETURN_ERROR, &bio->bi_flags);
 		}
-#endif /* CONFIG_SYNO_MD_FLASHCACHE_SUPPORT */
+#endif /* MY_ABC_HERE */
 		store_io_and_region_in_bio(bio, io, region);
 
 		if (rw & REQ_DISCARD) {
@@ -389,7 +392,7 @@ static void dispatch_io(int rw, unsigned int num_regions,
 	dec_count(io, 0, 0);
 }
 
-#ifdef CONFIG_SYNO_MD_FLASHCACHE_SUPPORT
+#ifdef MY_ABC_HERE
 static int sync_io(struct dm_io_client *client, unsigned int num_regions,
 		   struct dm_io_region *where, int rw, struct dpages *dp,
 		   unsigned long *error_bits, int is_return_err)
@@ -397,7 +400,7 @@ static int sync_io(struct dm_io_client *client, unsigned int num_regions,
 static int sync_io(struct dm_io_client *client, unsigned int num_regions,
 		   struct dm_io_region *where, int rw, struct dpages *dp,
 		   unsigned long *error_bits)
-#endif /* CONFIG_SYNO_MD_FLASHCACHE_SUPPORT */
+#endif /* MY_ABC_HERE */
 {
 	/*
 	 * gcc <= 4.3 can't do the alignment for stack variables, so we must
@@ -421,9 +424,9 @@ static int sync_io(struct dm_io_client *client, unsigned int num_regions,
 
 	io->vma_invalidate_address = dp->vma_invalidate_address;
 	io->vma_invalidate_size = dp->vma_invalidate_size;
-#ifdef CONFIG_SYNO_MD_FLASHCACHE_SUPPORT
+#ifdef MY_ABC_HERE
 	io->is_return_err = is_return_err;
-#endif /* CONFIG_SYNO_MD_FLASHCACHE_SUPPORT */
+#endif /* MY_ABC_HERE */
 
 	dispatch_io(rw, num_regions, where, dp, io, 1);
 
@@ -435,7 +438,7 @@ static int sync_io(struct dm_io_client *client, unsigned int num_regions,
 	return io->error_bits ? -EIO : 0;
 }
 
-#ifdef CONFIG_SYNO_MD_FLASHCACHE_SUPPORT
+#ifdef MY_ABC_HERE
 static int async_io(struct dm_io_client *client, unsigned int num_regions,
 		    struct dm_io_region *where, int rw, struct dpages *dp,
 		    io_notify_fn fn, void *context, int is_return_err)
@@ -443,7 +446,7 @@ static int async_io(struct dm_io_client *client, unsigned int num_regions,
 static int async_io(struct dm_io_client *client, unsigned int num_regions,
 		    struct dm_io_region *where, int rw, struct dpages *dp,
 		    io_notify_fn fn, void *context)
-#endif /* CONFIG_SYNO_MD_FLASHCACHE_SUPPORT */
+#endif /* MY_ABC_HERE */
 {
 	struct io *io;
 
@@ -460,9 +463,9 @@ static int async_io(struct dm_io_client *client, unsigned int num_regions,
 	io->client = client;
 	io->callback = fn;
 	io->context = context;
-#ifdef CONFIG_SYNO_MD_FLASHCACHE_SUPPORT
+#ifdef MY_ABC_HERE
 	io->is_return_err = is_return_err;
-#endif /* CONFIG_SYNO_MD_FLASHCACHE_SUPPORT */
+#endif /* MY_ABC_HERE */
 
 	io->vma_invalidate_address = dp->vma_invalidate_address;
 	io->vma_invalidate_size = dp->vma_invalidate_size;
@@ -507,7 +510,7 @@ static int dp_init(struct dm_io_request *io_req, struct dpages *dp,
 
 	return 0;
 }
-#ifdef CONFIG_SYNO_MD_FLASHCACHE_SUPPORT
+#ifdef MY_ABC_HERE
 int syno_dm_io(struct dm_io_request *io_req, unsigned num_regions,
 	  struct dm_io_region *where, unsigned long *sync_error_bits)
 {
@@ -527,7 +530,7 @@ int syno_dm_io(struct dm_io_request *io_req, unsigned num_regions,
 			&dp, io_req->notify.fn, io_req->notify.context, is_return_err);
 }
 EXPORT_SYMBOL(syno_dm_io);
-#endif /* CONFIG_SYNO_MD_FLASHCACHE_SUPPORT */
+#endif /* MY_ABC_HERE */
 
 /*
  * New collapsed (a)synchronous interface.
@@ -547,7 +550,7 @@ int dm_io(struct dm_io_request *io_req, unsigned num_regions,
 	if (r)
 		return r;
 
-#ifdef CONFIG_SYNO_MD_FLASHCACHE_SUPPORT
+#ifdef MY_ABC_HERE
 	if (!io_req->notify.fn)
 		return sync_io(io_req->client, num_regions, where,
 			       io_req->bi_rw, &dp, sync_error_bits, 0);
@@ -560,7 +563,7 @@ int dm_io(struct dm_io_request *io_req, unsigned num_regions,
 
 	return async_io(io_req->client, num_regions, where, io_req->bi_rw,
 			&dp, io_req->notify.fn, io_req->notify.context);
-#endif /* CONFIG_SYNO_MD_FLASHCACHE_SUPPORT */
+#endif /* MY_ABC_HERE */
 }
 EXPORT_SYMBOL(dm_io);
 

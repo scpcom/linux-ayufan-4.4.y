@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_MATH64_H
 #define _LINUX_MATH64_H
 
@@ -120,7 +123,7 @@ __iter_div_u64_rem(u64 dividend, u32 divisor, u64 *remainder)
 	return ret;
 }
 
-#ifdef CONFIG_SYNO_EMULATE_U64_DIVISOR
+#ifdef MY_ABC_HERE
 static inline u64 mod_u64_rem64(u64 dividend, u64 divisor)
 {
 #ifdef CONFIG_32BIT
@@ -135,6 +138,6 @@ static inline u64 mod_u64_rem64(u64 dividend, u64 divisor)
         return dividend % divisor;
 #endif
 }
-#endif /* CONFIG_SYNO_EMULATE_U64_DIVISOR */
+#endif /* MY_ABC_HERE */
 
 #endif /* _LINUX_MATH64_H */

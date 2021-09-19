@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/smp.h>
 #include <linux/timex.h>
 #include <linux/string.h>

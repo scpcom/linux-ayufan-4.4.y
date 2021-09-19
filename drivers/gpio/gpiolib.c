@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/interrupt.h>
@@ -2167,7 +2170,7 @@ subsys_initcall(gpiolib_debugfs_init);
 
 #endif	/* DEBUG_FS */
 
-#ifdef CONFIG_SYNO_X86_PINCTRL_GPIO
+#ifdef MY_DEF_HERE
 int syno_gpio_value_set(int iPin, int iValue)
 {
 	int iRet = -1;
@@ -2208,4 +2211,4 @@ END:
 	return iRet;
 }
 EXPORT_SYMBOL(syno_gpio_value_get);
-#endif /* CONFIG_SYNO_X86_PINCTRL_GPIO */
+#endif /* MY_DEF_HERE */

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2007 Oracle.  All rights reserved.
  *
@@ -102,7 +105,7 @@ struct btrfs_ordered_sum;
 /* for storing items that use the BTRFS_UUID_KEY* types */
 #define BTRFS_UUID_TREE_OBJECTID 9ULL
 
-#ifdef CONFIG_SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+#ifdef MY_ABC_HERE
 #define BTRFS_BLOCK_GROUP_HINT_TREE_OBJECTID 202ULL
 #endif
 
@@ -355,10 +358,10 @@ static inline unsigned long btrfs_chunk_item_size(int num_stripes)
 #define BTRFS_FS_STATE_ERROR		0
 #define BTRFS_FS_STATE_REMOUNTING	1
 #define BTRFS_FS_STATE_TRANS_ABORTED	2
-#ifdef CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#ifdef MY_ABC_HERE
 #else
 #define BTRFS_FS_STATE_DEV_REPLACING	3
-#endif /* CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING */
+#endif /* MY_ABC_HERE */
 
 /* Super block flags */
 /* Errors detected */
@@ -717,7 +720,7 @@ enum btrfs_compression_type {
 	BTRFS_COMPRESS_LZO   = 2,
 	BTRFS_COMPRESS_TYPES = 2,
 	BTRFS_COMPRESS_LAST  = 3,
-#ifdef CONFIG_SYNO_BTRFS_COMPR_DEFAULT_SETTING
+#ifdef MY_ABC_HERE
 	BTRFS_COMPRESS_DEFAULT = 2,
 #endif
 };
@@ -764,7 +767,7 @@ struct btrfs_dir_item {
 } __attribute__ ((__packed__));
 
 #define BTRFS_ROOT_SUBVOL_RDONLY	(1ULL << 0)
-#ifdef CONFIG_SYNO_BTRFS_SUBVOLUME_HIDE
+#ifdef MY_ABC_HERE
 #define BTRFS_ROOT_SUBVOL_HIDE		(1ULL << 32)
 #endif
 /*
@@ -1226,7 +1229,7 @@ struct btrfs_free_cluster {
 	/* first extent starting offset */
 	u64 window_start;
 
-#ifdef CONFIG_SYNO_BTRFS_CLUSTER_RESERVE
+#ifdef MY_ABC_HERE
 	u64 reserve_bytes;
 #endif
 	struct btrfs_block_group_cache *block_group;
@@ -1374,7 +1377,7 @@ struct btrfs_fs_info {
 	struct btrfs_root *csum_root;
 	struct btrfs_root *quota_root;
 	struct btrfs_root *uuid_root;
-#ifdef CONFIG_SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+#ifdef MY_ABC_HERE
 	struct btrfs_root *block_group_hint_root;
 #endif
 
@@ -1399,7 +1402,7 @@ struct btrfs_fs_info {
 	/* logical->physical extent mapping */
 	struct btrfs_mapping_tree mapping_tree;
 
-#ifdef CONFIG_SYNO_BTRFS_FREE_EXTENT_MAPS
+#ifdef MY_ABC_HERE
 	atomic_t nr_extent_maps;
 #endif
 
@@ -1577,7 +1580,7 @@ struct btrfs_fs_info {
 	struct btrfs_workqueue *submit_workers;
 	struct btrfs_workqueue *caching_workers;
 	struct btrfs_workqueue *readahead_workers;
-#ifdef CONFIG_SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+#ifdef MY_ABC_HERE
 	struct btrfs_workqueue *reada_path_workers;
 #endif
 
@@ -1658,7 +1661,7 @@ struct btrfs_fs_info {
 	struct btrfs_balance_control *balance_ctl;
 	wait_queue_head_t balance_wait_q;
 
-#ifdef CONFIG_SYNO_BTRFS_METADATA_RESERVE
+#ifdef MY_ABC_HERE
 #else
 	unsigned data_chunk_allocations;
 #endif
@@ -1681,7 +1684,7 @@ struct btrfs_fs_info {
 #ifdef CONFIG_BTRFS_FS_CHECK_INTEGRITY
 	u32 check_integrity_print_mask;
 #endif
-#ifdef CONFIG_SYNO_BTRFS_FLUSHONCOMMIT_THRESHOLD
+#ifdef MY_ABC_HERE
 	int ordered_extent_nr;
 	int delalloc_inodes_nr;
 	int flushoncommit_threshold;
@@ -1753,13 +1756,13 @@ struct btrfs_fs_info {
 
 	atomic_t mutually_exclusive_operation_running;
 
-#ifdef CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#ifdef MY_ABC_HERE
 #else
 	struct percpu_counter bio_counter;
 	wait_queue_head_t replace_wait;
-#endif /* CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_BTRFS_CHECK_INTEGRITY
+#ifdef MY_ABC_HERE
 	unsigned int check_integrity; // 0 -> no check, 1 -> WARN() if fail, 2 -> BUG() if fail
 #endif
 
@@ -1779,7 +1782,7 @@ struct btrfs_fs_info {
 	 */
 	struct list_head pinned_chunks;
 
-#ifdef CONFIG_SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+#ifdef MY_ABC_HERE
 	atomic_t reada_block_group_threads; // Number of running threads; use atomic type since threads can modify it.
 	spinlock_t block_group_hint_tree_lock; // Portect block group hint tree creation.
 	unsigned int no_block_group_hint:1;
@@ -1852,12 +1855,12 @@ struct btrfs_root {
 	atomic_t log_commit[2];
 	atomic_t log_batch;
 	int log_transid;
-#ifdef CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+#ifdef MY_ABC_HERE
 #else
 	/* No matter the commit succeeds or not*/
 	int log_transid_committed;
 	/* Just be updated when the commit succeeds. */
-#endif /* CONFIG_SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS */
+#endif /* MY_ABC_HERE */
 	int last_log_commit;
 	pid_t log_start_pid;
 
@@ -1931,7 +1934,7 @@ struct btrfs_root {
 	u64 nr_delalloc_inodes;
 
 	struct mutex ordered_extent_mutex;
-#ifdef CONFIG_SYNO_BTRFS_ADD_LOCK_ON_FLUSH_ORDERED_EXTENT
+#ifdef MY_ABC_HERE
 	struct mutex ordered_extent_worker_mutex;
 #endif
 	/*
@@ -2894,12 +2897,12 @@ static inline bool btrfs_root_readonly(struct btrfs_root *root)
 	return (root->root_item.flags & cpu_to_le64(BTRFS_ROOT_SUBVOL_RDONLY)) != 0;
 }
 
-#ifdef CONFIG_SYNO_BTRFS_SUBVOLUME_HIDE
+#ifdef MY_ABC_HERE
 static inline bool btrfs_root_hide(struct btrfs_root *root)
 {
 	return (root->root_item.flags & cpu_to_le64(BTRFS_ROOT_SUBVOL_HIDE)) != 0;
 }
-#endif /* CONFIG_SYNO_BTRFS_SUBVOLUME_HIDE */
+#endif /* MY_ABC_HERE */
 
 static inline bool btrfs_root_dead(struct btrfs_root *root)
 {
@@ -3963,7 +3966,7 @@ void btrfs_get_block_group_info(struct list_head *groups_list,
 				struct btrfs_ioctl_space_info *space);
 void update_ioctl_balance_args(struct btrfs_fs_info *fs_info, int lock,
 			       struct btrfs_ioctl_balance_args *bargs);
-#if defined(CONFIG_COMPAT) && defined(CONFIG_SYNO_BTRFS_COMPAT_IOCTL)
+#if defined(CONFIG_COMPAT) && defined(MY_ABC_HERE)
 long btrfs_compat_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
 #endif /* CONFIG_COMPAT && CONFIG_SYNO_BTRFS_COMPAT_IOCTL */
 
@@ -4190,13 +4193,13 @@ int btrfs_scrub_cancel_dev(struct btrfs_fs_info *info,
 int btrfs_scrub_progress(struct btrfs_root *root, u64 devid,
 			 struct btrfs_scrub_progress *progress);
 
-#ifdef CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
+#ifdef MY_ABC_HERE
 #else
 /* dev-replace.c */
 void btrfs_bio_counter_inc_blocked(struct btrfs_fs_info *fs_info);
 void btrfs_bio_counter_inc_noblocked(struct btrfs_fs_info *fs_info);
 void btrfs_bio_counter_dec(struct btrfs_fs_info *fs_info);
-#endif /* CONFIG_SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING */
+#endif /* MY_ABC_HERE */
 
 /* reada.c */
 struct reada_control {

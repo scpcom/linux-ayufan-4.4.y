@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/mm.h>
 #include <linux/slab.h>
 #include <linux/string.h>
@@ -477,7 +480,7 @@ out_mm:
 out:
 	return res;
 }
-#ifdef CONFIG_SYNO_EXPORT_GET_CMDLINE
+#ifdef MY_ABC_HERE
 EXPORT_SYMBOL(get_cmdline);
 #endif
 

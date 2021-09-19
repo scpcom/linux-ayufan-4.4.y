@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Driver for 8250/16550-type serial ports
  *
@@ -1534,7 +1537,7 @@ static int serial8250_default_handle_irq(struct uart_port *port)
 	return serial8250_handle_irq(port, iir);
 }
 
-#ifdef CONFIG_SYNO_XR17V35X_SERIAL
+#ifdef MY_DEF_HERE
 int gSynoBuzzerMutePressed = 0;
 EXPORT_SYMBOL(gSynoBuzzerMutePressed);
 #endif
@@ -1554,7 +1557,7 @@ static int exar_handle_irq(struct uart_port *port)
 
 	if ((port->type == PORT_XR17V35X) ||
 	   (port->type == PORT_XR17D15X)) {
-#ifdef CONFIG_SYNO_XR17V35X_SERIAL
+#ifdef MY_DEF_HERE
 		unsigned long flags;
 		unsigned char mpiolow, mpiohigh;
 		spin_lock_irqsave(&port->lock, flags);
@@ -1563,7 +1566,7 @@ static int exar_handle_irq(struct uart_port *port)
 		int1 = serial_port_in(port, 0x81);
 		int2 = serial_port_in(port, 0x82);
 		int3 = serial_port_in(port, 0x83);
-#ifdef CONFIG_SYNO_XR17V35X_SERIAL
+#ifdef MY_DEF_HERE
 		if (int1 & 0x6) {
 			mpiolow = serial_port_in(port, 0x90);
 			mpiohigh = serial_port_in(port, 0x96);
@@ -2927,11 +2930,11 @@ serial8250_console_write(struct console *co, const char *s, unsigned int count)
 static int __init serial8250_console_setup(struct console *co, char *options)
 {
 	struct uart_port *port;
-#ifdef CONFIG_SYNO_X86_TTY_CONSOLE_OUTPUT
+#ifdef MY_ABC_HERE
         int baud = 115200;
 #else
 	int baud = 9600;
-#endif /* CONFIG_SYNO_X86_TTY_CONSOLE_OUTPUT */
+#endif /* MY_ABC_HERE */
 	int bits = 8;
 	int parity = 'n';
 	int flow = 'n';

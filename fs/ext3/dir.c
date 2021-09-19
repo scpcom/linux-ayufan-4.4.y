@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/ext3/dir.c
  *
@@ -51,7 +54,7 @@ static int is_dx_dir(struct inode *inode)
 {
 	struct super_block *sb = inode->i_sb;
 
-#ifdef CONFIG_SYNO_EXT3_CASELESS_STAT
+#ifdef MY_ABC_HERE
 	if ((EXT3_SB(inode->i_sb)->s_es->s_syno_hash_magic !=
 		     cpu_to_le32(SYNO_HASH_MAGIC)) &&
 		!EXT3_HAS_COMPAT_FEATURE(inode->i_sb,
@@ -59,7 +62,7 @@ static int is_dx_dir(struct inode *inode)
 #else
 	if (EXT3_HAS_COMPAT_FEATURE(inode->i_sb,
 		     EXT3_FEATURE_COMPAT_DIR_INDEX) &&
-#endif /* CONFIG_SYNO_EXT3_CASELESS_STAT */
+#endif /* MY_ABC_HERE */
 	    ((EXT3_I(inode)->i_flags & EXT3_INDEX_FL) ||
 	     ((inode->i_size >> sb->s_blocksize_bits) == 1)))
 		return 1;
@@ -88,9 +91,9 @@ int ext3_check_dir_entry (const char * function, struct inode * dir,
 		error_msg = "inode out of bounds";
 
 	if (unlikely(error_msg != NULL))
-#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+#ifdef MY_ABC_HERE
 		if (printk_ratelimit())
-#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
+#endif /* MY_ABC_HERE */
 		ext3_error (dir->i_sb, function,
 			"bad entry in directory #%lu: %s - "
 			"offset=%lu, inode=%lu, rec_len=%d, name_len=%d",

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_STAT_H
 #define _LINUX_STAT_H
 
@@ -21,10 +24,10 @@ struct kstat {
 	u64		ino;
 	dev_t		dev;
 	umode_t		mode;
-#ifdef CONFIG_SYNO_FS_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	__u32		syno_archive_bit;
 #endif
-#ifdef CONFIG_SYNO_FS_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	__u32		syno_archive_version;
 #endif
 	unsigned int	nlink;
@@ -35,7 +38,7 @@ struct kstat {
 	struct timespec  atime;
 	struct timespec	mtime;
 	struct timespec	ctime;
-#ifdef CONFIG_SYNO_FS_CREATE_TIME
+#ifdef MY_ABC_HERE
 	struct timespec syno_create_time;
 #endif
 	unsigned long	blksize;

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright © 1999-2010 David Woodhouse <dwmw2@infradead.org>
  *
@@ -357,12 +360,12 @@ static ssize_t mtdchar_write(struct file *file, const char __user *buf, size_t c
 	return total_retlen;
 } /* mtdchar_write */
 
-#ifdef CONFIG_SYNO_SYSTEM_CALL // FIXME
+#ifdef MY_ABC_HERE // FIXME
 SYSCALL_DEFINE1(SYNOMTDAlloc, int, alloc)
 {
 	return 0;
 }
-#endif /* CONFIG_SYNO_SYSTEM_CALL */
+#endif /* MY_ABC_HERE */
 
 /*======================================================================
 
@@ -951,7 +954,7 @@ static int mtdchar_ioctl(struct file *file, u_int cmd, u_long arg)
 		break;
 	}
 
-#ifdef  CONFIG_SYNO_MTD_INFO
+#ifdef MY_ABC_HERE
 	case MEMMODIFYPARTINFO:
 	{
 		unsigned long adrs[2];
@@ -984,7 +987,7 @@ static int mtdchar_ioctl(struct file *file, u_int cmd, u_long arg)
 
 		break;
 	}
-#endif /* CONFIG_SYNO_MTD_INFO */
+#endif /* MY_ABC_HERE */
 
 	/* This ioctl is being deprecated - it truncates the ECC layout */
 	case ECCGETLAYOUT:

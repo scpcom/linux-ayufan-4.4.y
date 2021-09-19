@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * linux/drivers/scsi/scsi_proc.c
  *
@@ -193,11 +196,11 @@ static int proc_print_scsidevice(struct device *dev, void *data)
 	}
 
 	seq_printf(s, " Model: ");
-#ifdef CONFIG_SYNO_INCREASE_DISK_MODEL_NAME_LENGTH
+#ifdef MY_ABC_HERE
 	for (i = 0; i < CONFIG_SYNO_DISK_MODEL_NUM; i++) {
-#else /* CONFIG_SYNO_INCREASE_DISK_MODEL_NAME_LENGTH */
+#else /* MY_ABC_HERE */
 	for (i = 0; i < 16; i++) {
-#endif /* CONFIG_SYNO_INCREASE_DISK_MODEL_NAME_LENGTH */
+#endif /* MY_ABC_HERE */
 		if (sdev->model[i] >= 0x20)
 			seq_printf(s, "%c", sdev->model[i]);
 		else

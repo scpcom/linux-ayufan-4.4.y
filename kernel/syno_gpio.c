@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Synology NAS Board GPIO Setup
  *
@@ -25,7 +28,7 @@
 #include <linux/synobios.h>
 #include <linux/syno_gpio.h>
 
-#ifdef CONFIG_SYNO_BRASWELL
+#ifdef MY_DEF_HERE
 static SYNO_GPIO_INFO hdd_detect = {
 	.name           = "hdd detect",
 	.nr_gpio        = 4,
@@ -46,7 +49,7 @@ SYNO_GPIO syno_gpio = {
 	.hdd_fail_led =NULL,
 	.hdd_present_led =NULL,
 	.hdd_act_led =NULL,
-#ifdef CONFIG_SYNO_BRASWELL
+#ifdef MY_DEF_HERE
 	.hdd_detect = &hdd_detect,
 	.hdd_enable = &hdd_enable,
 #else
@@ -64,7 +67,7 @@ EXPORT_SYMBOL(syno_gpio);
 
 int SYNO_GPIO_READ(int pin)
 {
-#if defined(CONFIG_SYNO_X86_PINCTRL_GPIO)
+#if defined(MY_DEF_HERE)
 	int iVal=0;
 	syno_gpio_value_get(pin, &iVal);
 	return iVal;
@@ -76,7 +79,7 @@ EXPORT_SYMBOL(SYNO_GPIO_READ);
 
 void SYNO_GPIO_WRITE(int pin, int pValue)
 {
-#if defined(CONFIG_SYNO_X86_PINCTRL_GPIO)
+#if defined(MY_DEF_HERE)
 	syno_gpio_value_set(pin, pValue);
 #else
 	gpio_set_value(pin, pValue);

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * INET		An implementation of the TCP/IP protocol suite for the LINUX
  *		operating system.  INET is implemented using the  BSD Socket
@@ -2811,9 +2814,9 @@ static inline bool netif_supports_nofcs(struct net_device *dev)
 
 extern struct pernet_operations __net_initdata loopback_net_ops;
 
-#ifdef CONFIG_SYNO_MAC_ADDRESS
+#ifdef MY_ABC_HERE
 extern int syno_get_dev_vendor_mac(const char *szDev, char *szMac);
-#endif /* CONFIG_SYNO_MAC_ADDRESS */
+#endif /* MY_ABC_HERE */
 
 /* Logging, debugging and troubleshooting/diagnostic helpers. */
 

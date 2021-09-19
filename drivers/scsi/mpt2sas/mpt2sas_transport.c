@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * SAS Transport Layer for MPT (Message Passing Technology) based controllers
  *
@@ -1004,18 +1007,18 @@ mpt2sas_transport_update_links(struct MPT2SAS_ADAPTER *ioc,
 		    &mpt2sas_phy->remote_identify);
 		_transport_add_phy_to_an_existing_port(ioc, sas_node,
 		    mpt2sas_phy, mpt2sas_phy->remote_identify.sas_address);
-#ifdef CONFIG_SYNO_SAS_MPT2_HOTPLUG_PHY
+#ifdef MY_DEF_HERE
 	} else {
 		mpt2sas_phy->attached_handle = (u16)0;
 		memset(&mpt2sas_phy->remote_identify, 0 , sizeof(struct
 		    sas_identify));
 		_transport_del_phy_from_an_existing_port(ioc, sas_node, mpt2sas_phy);
 	}
-#else /* CONFIG_SYNO_SAS_MPT2_HOTPLUG_PHY */
+#else /* MY_DEF_HERE */
 	} else
 		memset(&mpt2sas_phy->remote_identify, 0 , sizeof(struct
 		    sas_identify));
-#endif /* CONFIG_SYNO_SAS_MPT2_HOTPLUG_PHY */
+#endif /* MY_DEF_HERE */
 
 	if (mpt2sas_phy->phy)
 		mpt2sas_phy->phy->negotiated_linkrate =

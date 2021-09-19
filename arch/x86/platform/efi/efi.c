@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Common EFI (Extensible Firmware Interface) support functions
  * Based on Extensible Firmware Interface Specification version 1.0
@@ -89,7 +92,7 @@ int efi_enabled(int facility)
 }
 EXPORT_SYMBOL(efi_enabled);
 
-#ifdef CONFIG_SYNO_EFI
+#ifdef MY_DEF_HERE
 static bool __initdata disable_runtime = true;
 static int __init setup_withefi(char *arg)
 {
@@ -97,7 +100,7 @@ static int __init setup_withefi(char *arg)
 	return 0;
 }
 early_param("withefi", setup_withefi);
-#else /* CONFIG_SYNO_EFI */
+#else /* MY_DEF_HERE */
 static bool __initdata disable_runtime = false;
 static int __init setup_noefi(char *arg)
 {
@@ -105,7 +108,7 @@ static int __init setup_noefi(char *arg)
 	return 0;
 }
 early_param("noefi", setup_noefi);
-#endif /* CONFIG_SYNO_EFI */
+#endif /* MY_DEF_HERE */
 
 int add_efi_memmap;
 EXPORT_SYMBOL(add_efi_memmap);
@@ -775,7 +778,7 @@ void __init efi_init(void)
 
 	set_bit(EFI_MEMMAP, &x86_efi_facility);
 
-#ifdef CONFIG_SYNO_CEDARVIEW_USE_EFI_REBOOT
+#ifdef MY_DEF_HERE
 	/* Set reboot by EFI */
 	reboot_type = BOOT_EFI;
 #endif

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * cifs_unicode:  Unicode kernel case support
  *
@@ -51,11 +54,11 @@
 #define UNI_LESSTHAN    (__u16) ('<' + 0xF000)
 #define UNI_PIPE        (__u16) ('|' + 0xF000)
 #define UNI_SLASH       (__u16) ('\\' + 0xF000)
-#ifdef CONFIG_SYNO_CIFS_SPECIAL_CHAR_CONVER
+#ifdef MY_ABC_HERE
 #define UNI_DQUOT       (__u16) ('"' + 0xF000)
 #define UNI_DIVSLASH       (__u16) ('/' + 0xF000)
 #define UNI_CRGRET       (__u16) ('\r' + 0xF000)
-#endif /* CONFIG_SYNO_CIFS_SPECIAL_CHAR_CONVER */
+#endif /* MY_ABC_HERE */
 
 /* Just define what we want from uniupr.h.  We don't want to define the tables
  * in each source file.
@@ -84,9 +87,9 @@ int cifs_from_utf16(char *to, const __le16 *from, int tolen, int fromlen,
 int cifs_utf16_bytes(const __le16 *from, int maxbytes,
 		     const struct nls_table *codepage);
 int cifs_strtoUTF16(__le16 *, const char *, int, const struct nls_table *);
-#ifdef CONFIG_SYNO_CIFS_NO_SPECIAL_CHAR_LOGON
+#ifdef MY_ABC_HERE
 int cifs_strtoUTF16_NoSpecialChar(__le16 *, const char *, int, const struct nls_table *);
-#endif /* CONFIG_SYNO_CIFS_NO_SPECIAL_CHAR_LOGON */
+#endif /* MY_ABC_HERE */
 char *cifs_strndup_from_utf16(const char *src, const int maxlen,
 			      const bool is_unicode,
 			      const struct nls_table *codepage);

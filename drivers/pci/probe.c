@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * probe.c - PCI detection and setup code
  */
@@ -174,12 +177,12 @@ int __pci_read_base(struct pci_dev *dev, enum pci_bar_type type,
 	bool bar_too_big = false, bar_disabled = false;
 
 	mask = type ? PCI_ROM_ADDRESS_MASK : ~0;
-#ifdef CONFIG_SYNO_ICH_UHCI_NO_MMIO_OFF
+#ifdef MY_ABC_HERE
 	if (PCI_VENDOR_ID_INTEL == dev->vendor && 0x2934 == dev->device) {
 		dev_printk(KERN_INFO, &dev->dev, "[%04x:%04x] Reading BAR - reg %x\n",
 		   dev->vendor, dev->device, pos);
 	}
-#endif /* CONFIG_SYNO_ICH_UHCI_NO_MMIO_OFF */
+#endif /* MY_ABC_HERE */
 
 	/* No printks while decoding is disabled! */
 	if (!dev->mmio_always_on) {
@@ -284,12 +287,12 @@ fail:
 out:
 	if (!dev->mmio_always_on)
 		pci_write_config_word(dev, PCI_COMMAND, orig_cmd);
-#ifdef CONFIG_SYNO_ICH_UHCI_NO_MMIO_OFF
+#ifdef MY_ABC_HERE
 	if (PCI_VENDOR_ID_INTEL == dev->vendor && 0x2934 == dev->device) {
 		dev_printk(KERN_INFO, &dev->dev, "[%04x:%04x] Sizing Complete - reg %x\n",
 		   dev->vendor, dev->device, pos);
 	}
-#endif /* CONFIG_SYNO_ICH_UHCI_NO_MMIO_OFF */
+#endif /* MY_ABC_HERE */
 	if (bar_too_big)
 		dev_err(&dev->dev, "reg %x: can't handle 64-bit BAR\n", pos);
 	if (res->flags && !bar_disabled)

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/ext4/dir.c
  *
@@ -43,7 +46,7 @@ static int is_dx_dir(struct inode *inode)
 {
 	struct super_block *sb = inode->i_sb;
 
-#ifdef CONFIG_SYNO_EXT4_CASELESS_STAT
+#ifdef MY_ABC_HERE
 	if ((EXT4_SB(inode->i_sb)->s_es->s_syno_hash_magic != 
 		     cpu_to_le32(SYNO_HASH_MAGIC)) &&
 		!EXT4_HAS_COMPAT_FEATURE(inode->i_sb,
@@ -51,7 +54,7 @@ static int is_dx_dir(struct inode *inode)
 #else
 	if (EXT4_HAS_COMPAT_FEATURE(inode->i_sb,
 		     EXT4_FEATURE_COMPAT_DIR_INDEX) &&
-#endif /* CONFIG_SYNO_EXT4_CASELESS_STAT */
+#endif /* MY_ABC_HERE */
 	    ((ext4_test_inode_flag(inode, EXT4_INODE_INDEX)) ||
 	     ((inode->i_size >> sb->s_blocksize_bits) == 1) ||
 	     ext4_has_inline_data(inode)))
@@ -92,7 +95,7 @@ int __ext4_check_dir_entry(const char *function, unsigned int line,
 	else
 		return 0;
 
-#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+#ifdef MY_ABC_HERE
 	if (filp) {
 		if (printk_ratelimit())
 			ext4_error_file(filp, function, line, bh->b_blocknr,
@@ -102,7 +105,7 @@ int __ext4_check_dir_entry(const char *function, unsigned int line,
 				offset, le32_to_cpu(de->inode),
 				rlen, de->name_len);
 	}
-#else /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
+#else /* MY_ABC_HERE */
 	if (filp)
 		ext4_error_file(filp, function, line, bh->b_blocknr,
 				"bad entry in directory: %s - offset=%u(%u), "
@@ -110,11 +113,11 @@ int __ext4_check_dir_entry(const char *function, unsigned int line,
 				error_msg, (unsigned) (offset % size),
 				offset, le32_to_cpu(de->inode),
 				rlen, de->name_len);
-#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
+#endif /* MY_ABC_HERE */
 	else
-#ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
+#ifdef MY_ABC_HERE
 		if (printk_ratelimit())
-#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
+#endif /* MY_ABC_HERE */
 		ext4_error_inode(dir, function, line, bh->b_blocknr,
 				"bad entry in directory: %s - offset=%u(%u), "
 				"inode=%u, rec_len=%d, name_len=%d",

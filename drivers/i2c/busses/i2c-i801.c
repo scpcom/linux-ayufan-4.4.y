@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
     Copyright (c) 1998 - 2002  Frodo Looijaard <frodol@dds.nl>,
     Philip Edelbrock <phil@netroedge.com>, and Mark D. Studebaker
@@ -1160,9 +1163,9 @@ static int i801_probe(struct pci_dev *dev, const struct pci_device_id *id)
 	}
 	priv->features &= ~disable_features;
 
-#ifdef CONFIG_SYNO_I2C_I801_POLL
+#ifdef MY_DEF_HERE
 	priv->features &= ~FEATURE_IRQ;
-#endif /* CONFIG_SYNO_I2C_I801_POLL */
+#endif /* MY_DEF_HERE */
 
 	err = pci_enable_device(dev);
 	if (err) {

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/arch/arm/kernel/setup.c
  *
@@ -59,9 +62,9 @@
 
 #include "atags.h"
 
-#ifdef CONFIG_SYNO_DYN_MODULE_INSTALL
+#ifdef MY_ABC_HERE
 extern int gSynoHasDynModule;
-#endif /*CONFIG_SYNO_DYN_MODULE_INSTALL*/
+#endif /*MY_ABC_HERE*/
 
 #if defined(CONFIG_FPE_NWFPE) || defined(CONFIG_FPE_FASTFPE)
 char fpe_type[8];
@@ -75,7 +78,7 @@ static int __init fpe_setup(char *line)
 __setup("fpe=", fpe_setup);
 #endif
 
-#ifdef CONFIG_SYNO_DYN_MODULE_INSTALL
+#ifdef MY_ABC_HERE
 static int __init early_is_dyn_module(char *p)
 {
 	int iLen = 0;
@@ -95,7 +98,7 @@ END:
 	return 1;
 }
 __setup("syno_dyn_module=", early_is_dyn_module);
-#endif /*CONFIG_SYNO_DYN_MODULE_INSTALL*/
+#endif /*MY_ABC_HERE*/
 
 extern void paging_init(struct machine_desc *desc);
 extern void sanity_check_meminfo(void);

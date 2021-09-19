@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  ahci.c - AHCI SATA support
  *
@@ -45,22 +48,22 @@
 #include <linux/gfp.h>
 #include <scsi/scsi_host.h>
 #include <scsi/scsi_cmnd.h>
-#ifdef CONFIG_SYNO_ATA_AHCI_LED_SGPIO
+#ifdef MY_ABC_HERE
 #include <scsi/scsi.h>
 #include <scsi/scsi_eh.h>
 #include <scsi/scsi_device.h>
 #include <scsi/scsi_tcq.h>
 #include <scsi/scsi_transport.h>
-#endif /* CONFIG_SYNO_ATA_AHCI_LED_SGPIO */
+#endif /* MY_ABC_HERE */
 #include <linux/libata.h>
 #include "ahci.h"
 
 #define DRV_NAME	"ahci"
 #define DRV_VERSION	"3.0"
 
-#ifdef CONFIG_SYNO_AHCI_SWITCH
+#ifdef MY_ABC_HERE
 extern char g_ahci_switch;
-#endif /* CONFIG_SYNO_AHCI_SWITCH */
+#endif /* MY_ABC_HERE */
 
 enum {
 	AHCI_PCI_BAR_STA2X11	= 0,
@@ -76,9 +79,9 @@ enum board_ids {
 	board_ahci_noncq,
 	board_ahci_nosntf,
 	board_ahci_yes_fbs,
-#ifdef CONFIG_SYNO_SATA_AHCI_FBS_NONCQ
+#ifdef MY_ABC_HERE
 	board_ahci_yes_fbs_no_ncq,
-#endif /* CONFIG_SYNO_SATA_AHCI_FBS_NONCQ */
+#endif /* MY_ABC_HERE */
 
 	/* board IDs for specific chipsets in alphabetical order */
 	board_ahci_mcp65,
@@ -110,13 +113,13 @@ static struct scsi_host_template ahci_sht = {
 	AHCI_SHT("ahci"),
 };
 
-#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 static struct ata_port_operations ahci_pmp_ops = {
 	.inherits		= &ahci_ops,
 
 	.qc_defer		= sata_syno_ahci_defer_cmd,
 };
-#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
+#endif /* MY_ABC_HERE */
 
 static struct ata_port_operations ahci_vt8251_ops = {
 	.inherits		= &ahci_ops,
@@ -162,11 +165,11 @@ static const struct ata_port_info ahci_port_info[] = {
 		.flags		= AHCI_FLAG_COMMON,
 		.pio_mask	= ATA_PIO4,
 		.udma_mask	= ATA_UDMA6,
-#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+#ifdef MY_ABC_HERE
 		.port_ops	= &ahci_pmp_ops,
 #else
 		.port_ops	= &ahci_ops,
-#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
+#endif /* MY_ABC_HERE */
 	},
 	[board_ahci_yes_fbs] = {
 		AHCI_HFLAGS	(AHCI_HFLAG_YES_FBS),
@@ -175,7 +178,7 @@ static const struct ata_port_info ahci_port_info[] = {
 		.udma_mask	= ATA_UDMA6,
 		.port_ops	= &ahci_ops,
 	},
-#ifdef CONFIG_SYNO_SATA_AHCI_FBS_NONCQ
+#ifdef MY_ABC_HERE
 	[board_ahci_yes_fbs_no_ncq] =
 	{
 		AHCI_HFLAGS	(AHCI_HFLAG_YES_FBS | AHCI_HFLAG_NO_NCQ),
@@ -184,7 +187,7 @@ static const struct ata_port_info ahci_port_info[] = {
 		.udma_mask	= ATA_UDMA6,
 		.port_ops	= &ahci_ops,
 	},
-#endif /* CONFIG_SYNO_SATA_AHCI_FBS_NONCQ */
+#endif /* MY_ABC_HERE */
 	/* by chipsets */
 	[board_ahci_mcp65] = {
 		AHCI_HFLAGS	(AHCI_HFLAG_NO_FPDMA_AA | AHCI_HFLAG_NO_PMP |
@@ -514,16 +517,16 @@ static const struct pci_device_id ahci_pci_tbl[] = {
 	  .driver_data = board_ahci_yes_fbs },
 	{ PCI_DEVICE(PCI_VENDOR_ID_TTI, 0x0642),
 	  .driver_data = board_ahci_yes_fbs },
-#ifdef CONFIG_SYNO_MV_9235_PORTING
+#ifdef MY_ABC_HERE
 	{ PCI_DEVICE(PCI_VENDOR_ID_MARVELL_EXT, 0x9235),
 	  .driver_data = board_ahci_yes_fbs },			/* 88se9235 */
 	{ PCI_DEVICE(PCI_VENDOR_ID_MARVELL_EXT, 0x9215),
 	  .driver_data = board_ahci_yes_fbs },			/* 88se9215 */
-#endif /* CONFIG_SYNO_MV_9235_PORTING */
-#ifdef CONFIG_SYNO_SATA_AHCI_FBS_NONCQ
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
 	{ PCI_DEVICE(PCI_VENDOR_ID_MARVELL_EXT, 0x9170),
 	  .driver_data = board_ahci_yes_fbs_no_ncq },   /* 88se9170 */
-#endif /* CONFIG_SYNO_SATA_AHCI_FBS_NONCQ */
+#endif /* MY_ABC_HERE */
 
 	/* Promise */
 	{ PCI_VDEVICE(PROMISE, 0x3f20), board_ahci },	/* PDC42819 */
@@ -552,7 +555,7 @@ static const struct pci_device_id ahci_pci_tbl[] = {
 	{ }	/* terminate list */
 };
 
-#ifdef CONFIG_SYNO_MV_9170_GPIO_CTRL
+#ifdef MY_DEF_HERE
 /*
  * 9170 gpio mmio address, to control 9170 GPIO, please read register manual(AN-ML-10-051513_GPIO)
  */
@@ -692,9 +695,9 @@ END:
 	return ret;
 }
 EXPORT_SYMBOL(syno_mv_9170_disk_led_set);
-#endif /* CONFIG_SYNO_MV_9170_GPIO_CTRL*/
+#endif /* MY_DEF_HERE*/
 
-#ifdef CONFIG_SYNO_MV_9235_GPIO_CTRL
+#ifdef MY_DEF_HERE
 
 #define MV_GEN 3
 #define MV_PORT 4
@@ -924,7 +927,7 @@ END:
 }
 
 EXPORT_SYMBOL(syno_mv_9235_disk_led_set);
-#endif /* CONFIG_SYNO_MV_9235_GPIO_CTRL*/
+#endif /* MY_DEF_HERE*/
 
 static struct pci_driver ahci_pci_driver = {
 	.name			= DRV_NAME,
@@ -1657,13 +1660,13 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 
 	VPRINTK("ENTER\n");
 
-#ifdef CONFIG_SYNO_AHCI_SWITCH
+#ifdef MY_ABC_HERE
 	if('0' == g_ahci_switch) {
 		printk("AHCI is disabled.\n");
 		return 0;
 	}
 
-#endif /* CONFIG_SYNO_AHCI_SWITCH */
+#endif /* MY_ABC_HERE */
 
 	WARN_ON((int)ATA_MAX_QUEUE > AHCI_MAX_CMDS);
 
@@ -1797,22 +1800,22 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	 * determining the maximum port number requires looking at
 	 * both CAP.NP and port_map.
 	 */
-#ifdef CONFIG_SYNO_SATA_PORT_MAP
+#ifdef MY_ABC_HERE
 	if(gSynoSataHostCnt < sizeof(gszSataPortMap) && 0 != gszSataPortMap[gSynoSataHostCnt]) {
 		n_ports = gszSataPortMap[gSynoSataHostCnt] - '0';
 	}else{
-#endif /* CONFIG_SYNO_SATA_PORT_MAP */
+#endif /* MY_ABC_HERE */
 	n_ports = max(ahci_nr_ports(hpriv->cap), fls(hpriv->port_map));
-#ifdef CONFIG_SYNO_SATA_PORT_MAP
+#ifdef MY_ABC_HERE
 	}
-#endif /* CONFIG_SYNO_SATA_PORT_MAP */
+#endif /* MY_ABC_HERE */
 
 	host = ata_host_alloc_pinfo(&pdev->dev, ppi, n_ports);
 	if (!host)
 		return -ENOMEM;
 	host->private_data = hpriv;
 
-#ifdef CONFIG_SYNO_MV_9235_PORTING
+#ifdef MY_ABC_HERE
 	if (pdev->vendor == 0x1b4b && pdev->device == 0x9235) {
 		hpriv->flags |= AHCI_HFLAG_YES_MV9235_FIX;
 
@@ -1821,7 +1824,7 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 			ap->link.uiStsFlags |= SYNO_STATUS_IS_MV9235;
 		}
 	}
-#endif /* CONFIG_SYNO_MV_9235_PORTING */
+#endif /* MY_ABC_HERE */
 
 	if (!(hpriv->cap & HOST_CAP_SSS) || ahci_ignore_sss)
 		host->flags |= ATA_HOST_PARALLEL_SCAN;
@@ -1847,7 +1850,7 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 			ap->ops = &ata_dummy_port_ops;
 	}
 
-#ifdef CONFIG_SYNO_AHCI_PMP_SII3x26_DEFER_CMD
+#ifdef MY_DEF_HERE
 	if (pdev->vendor == 0x1b4b) {
 		for (i = 0; i < host->n_ports; i++) {
 			printk("Change defer qc mode on external port for compatibility\n");
@@ -1855,14 +1858,14 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 			ap->ops->qc_defer = &ahci_syno_pmp_3x26_qc_defer;
 		}
 	}
-#endif /* CONFIG_SYNO_AHCI_PMP_SII3x26_DEFER_CMD */
+#endif /* MY_DEF_HERE */
 
 /* On Marvell 9215 the external port compatibility is
  * not well that we get many DRDY messages after stressing.
  * but some model use it as internel port so we need to
  * use port number to limit it.
  */
-#ifdef CONFIG_SYNO_MV9215_EXTPORT_NCQ_OFF
+#ifdef MY_DEF_HERE
 	if (syno_is_hw_version(HW_DS916p) ||
 			syno_is_hw_version(HW_DS416play)) {
 		if (pdev->vendor == 0x1b4b && pdev->device == 0x9215) {
@@ -1870,7 +1873,7 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 			host->ports[2]->flags &= ~ATA_FLAG_FPDMA_AA;
 		}
 	}
-#endif /* CONFIG_SYNO_MV9215_EXTPORT_NCQ_OFF */
+#endif /* MY_DEF_HERE */
 	/* apply workaround for ASUS P5W DH Deluxe mainboard */
 	ahci_p5wdh_workaround(host);
 
@@ -1890,20 +1893,20 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	ahci_pci_print_info(host);
 
 	pci_set_master(pdev);
-#ifdef CONFIG_SYNO_MV_9235_GPIO_CTRL
+#ifdef MY_DEF_HERE
 	if (pdev->vendor == 0x1b4b && (pdev->device == 0x9235 || pdev->device == 0x9215)) {
 		syno_mv_9235_gpio_active_init(host);
 	}
 	if (pdev->vendor == 0x1b4b && (pdev->device == 0x9235 || pdev->device == 0x9215 || pdev->device == 0x9170)) {
 		syno_mv_9xxx_amp_adjust(host);
 	}
-#endif /* CONFIG_SYNO_MV_9235_GPIO_CTRL */
+#endif /* MY_DEF_HERE */
 
-#ifdef CONFIG_SYNO_MV_9170_GPIO_CTRL
+#ifdef MY_DEF_HERE
 	if (pdev->vendor == 0x1b4b && pdev->device == 0x9170) {
 		syno_mv_9170_gpio_active_init(host);
 	}
-#endif /* CONFIG_SYNO_MV_9170_GPIO_CTRL */
+#endif /* MY_DEF_HERE */
 
 	if (hpriv->flags & AHCI_HFLAG_MULTI_MSI)
 		return ahci_host_activate(host, pdev->irq, n_msis);

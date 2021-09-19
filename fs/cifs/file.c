@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *   fs/cifs/file.c
  *
@@ -1786,7 +1789,7 @@ refind_writable:
 					&cifs_inode->openFileList);
 			spin_unlock(&cifs_file_list_lock);
 			cifsFileInfo_put(inv_file);
-#ifdef CONFIG_SYNO_CIFS_FIX_DOUBLE_FREE_INVALID_FILE
+#ifdef MY_ABC_HERE
 			inv_file = NULL;
 #endif
 			spin_lock(&cifs_file_list_lock);

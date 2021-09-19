@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
   FUSE: Filesystem in Userspace
   Copyright (C) 2001-2008  Miklos Szeredi <miklos@szeredi.hu>
@@ -21,7 +24,7 @@
 #include <linux/sched.h>
 #include <linux/exportfs.h>
 
-#ifdef CONFIG_SYNO_FUSE_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 #include <linux/xattr.h>
 #endif /* CONFIG_SYNO_FUSE_ARCHIVE_VESION */
 
@@ -342,9 +345,9 @@ int fuse_reverse_inval_inode(struct super_block *sb, u64 nodeid,
 
 static void fuse_umount_begin(struct super_block *sb)
 {
-#ifdef CONFIG_SYNO_FS_RECVFILE
+#ifdef MY_ABC_HERE
 	flush_aggregate_recvfile(-1);
-#endif /* CONFIG_SYNO_FS_RECVFILE */
+#endif /* MY_ABC_HERE */
 	fuse_abort_conn(get_fuse_conn_super(sb));
 }
 
@@ -581,7 +584,7 @@ static int fuse_show_options(struct seq_file *m, struct dentry *root)
 	return 0;
 }
 
-#ifdef CONFIG_SYNO_FUSE_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 static int fuse_syno_set_sb_archive_ver(struct super_block *sb, u32 archive_version)
 {
 	int err = 0;
@@ -625,7 +628,7 @@ static int fuse_syno_get_sb_archive_ver(struct super_block *sb, u32 *version)
 
 	return err;
 }
-#endif /* CONFIG_SYNO_FUSE_ARCHIVE_VERSION */
+#endif /* MY_ABC_HERE */
 
 void fuse_conn_init(struct fuse_conn *fc)
 {
@@ -712,13 +715,13 @@ static struct dentry *fuse_get_dentry(struct super_block *sb,
 
 		name.len = 1;
 		name.name = ".";
-#ifdef CONFIG_SYNO_FUSE_STAT
+#ifdef MY_ABC_HERE
 		err = fuse_lookup_name(sb, handle->nodeid, &name, &outarg,
 				       &inode, NULL, 0);
 #else
 		err = fuse_lookup_name(sb, handle->nodeid, &name, &outarg,
 				       &inode);
-#endif /* CONFIG_SYNO_FUSE_STAT */
+#endif /* MY_ABC_HERE */
 		if (err && err != -ENOENT)
 			goto out_err;
 		if (err || !inode) {
@@ -820,13 +823,13 @@ static struct dentry *fuse_get_parent(struct dentry *child)
 
 	name.len = 2;
 	name.name = "..";
-#ifdef CONFIG_SYNO_FUSE_STAT
+#ifdef MY_ABC_HERE
 	err = fuse_lookup_name(child_inode->i_sb, get_node_id(child_inode),
 			       &name, &outarg, &inode, NULL, 0);
 #else
 	err = fuse_lookup_name(child_inode->i_sb, get_node_id(child_inode),
 			       &name, &outarg, &inode);
-#endif /* CONFIG_SYNO_FUSE_STAT */
+#endif /* MY_ABC_HERE */
 	if (err) {
 		if (err == -ENOENT)
 			return ERR_PTR(-ESTALE);
@@ -857,10 +860,10 @@ static const struct super_operations fuse_super_operations = {
 	.umount_begin	= fuse_umount_begin,
 	.statfs		= fuse_statfs,
 	.show_options	= fuse_show_options,
-#ifdef CONFIG_SYNO_FUSE_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	.syno_set_sb_archive_ver = fuse_syno_set_sb_archive_ver,
 	.syno_get_sb_archive_ver = fuse_syno_get_sb_archive_ver,
-#endif /* CONFIG_SYNO_FUSE_ARCHIVE_VERSION */
+#endif /* MY_ABC_HERE */
 };
 
 static void sanitize_global_limit(unsigned *limit)

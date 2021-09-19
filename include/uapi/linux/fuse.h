@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
     This file defines the kernel interface of FUSE
     Copyright (C) 2001-2008  Miklos Szeredi <miklos@szeredi.hu>
@@ -155,7 +158,7 @@ struct fuse_attr {
 	uint32_t	padding;
 };
 
-#ifdef CONFIG_SYNO_FUSE_STAT
+#ifdef MY_ABC_HERE
 struct fuse_synostat {
 	uint64_t	create_time_sec;
 	uint32_t	create_time_nsec;
@@ -164,7 +167,7 @@ struct fuse_synostat {
 	uint32_t	name_len;
 	char		name[0];
 };
-#endif /* CONFIG_SYNO_FUSE_STAT */
+#endif /* MY_ABC_HERE */
 
 struct fuse_kstatfs {
 	uint64_t	blocks;
@@ -555,11 +558,11 @@ struct fuse_lk_out {
 
 struct fuse_access_in {
 	uint32_t	mask;
-#ifdef CONFIG_SYNO_FUSE_WINACL
+#ifdef MY_ABC_HERE
 	uint32_t	syno_acl_access;
 #else
 	uint32_t	padding;
-#endif /* CONFIG_SYNO_FUSE_WINACL */
+#endif /* MY_ABC_HERE */
 };
 
 struct fuse_init_in {

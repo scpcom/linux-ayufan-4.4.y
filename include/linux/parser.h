@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * linux/include/linux/parser.h
  *
@@ -31,6 +34,6 @@ int match_hex(substring_t *, int *result);
 size_t match_strlcpy(char *, const substring_t *, size_t);
 char *match_strdup(const substring_t *);
 
-#if defined(CONFIG_SYNO_ISOFS_UINT_UID_GID) || defined(CONFIG_SYNO_UDF_UINT_UID_GID)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 int SYNO_get_option_ul(substring_t *args, unsigned long *option);
 #endif

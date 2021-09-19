@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * sys_ia32.c: Conversion between 32bit and 64bit native syscalls. Based on
  *             sys_sparc32
@@ -94,19 +97,19 @@ static int cp_stat64(struct stat64 __user *ubuf, struct kstat *stat)
 	return 0;
 }
 
-#ifdef CONFIG_SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 #include <linux/synolib.h>
 extern int syno_hibernation_log_level;
-#endif /* CONFIG_SYNO_DEBUG_FLAG */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+#ifdef MY_ABC_HERE
 extern int __SYNOCaselessStat(char __user * filename, int no_follow_link, struct kstat *stat, int *last_component, int flags);
-#endif /* CONFIG_SYNO_FS_CASELESS_STAT */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_SYSTEM_CALL
+#ifdef MY_ABC_HERE
 asmlinkage long sys32_SYNOCaselessStat64(char __user *filename, struct stat64 __user *statbuf)
 {
-#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+#ifdef MY_ABC_HERE
 	int last_component = 0;
 	long error = -1;
 	struct kstat stat;
@@ -119,12 +122,12 @@ asmlinkage long sys32_SYNOCaselessStat64(char __user *filename, struct stat64 __
 	return error;
 #else
 	return -EOPNOTSUPP;
-#endif /* CONFIG_SYNO_FS_CASELESS_STAT */
+#endif /* MY_ABC_HERE */
 }
 
 asmlinkage long sys32_SYNOCaselessLStat64(char __user *filename, struct stat64 __user *statbuf)
 {
-#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+#ifdef MY_ABC_HERE
 	int last_component = 0;
 	long error = -1;
 	struct kstat stat;
@@ -137,11 +140,11 @@ asmlinkage long sys32_SYNOCaselessLStat64(char __user *filename, struct stat64 _
 	return error;
 #else
 	return -EOPNOTSUPP;
-#endif /* CONFIG_SYNO_FS_CASELESS_STAT */
+#endif /* MY_ABC_HERE */
 }
-#endif /* CONFIG_SYNO_SYSTEM_CALL */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_FS_STAT
+#ifdef MY_ABC_HERE
 
 #include <linux/namei.h>
 
@@ -158,23 +161,23 @@ static int SYNOStat64CopyToUser(struct kstat *pKst, unsigned int flags, struct S
 			goto Out;
 		}
 	}
-#ifdef CONFIG_SYNO_FS_ARCHIVE_BIT
+#ifdef MY_ABC_HERE
 	if (flags & SYNOST_ARCHIVE_BIT) {
 		if (__put_user(pKst->syno_archive_bit, &pSt->ext.archive_bit)){
 			goto Out;
 		}
 	}
-#endif /* CONFIG_SYNO_FS_ARCHIVE_BIT */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_FS_ARCHIVE_VERSION
+#ifdef MY_ABC_HERE
 	if (flags & SYNOST_ARCHIVE_VER) {
 		if (__put_user(pKst->syno_archive_version, &pSt->ext.archive_version)){
 			goto Out;
 		}
 	}
-#endif /* CONFIG_SYNO_FS_ARCHIVE_VERSION */
+#endif /* MY_ABC_HERE */
 
-#ifdef CONFIG_SYNO_FS_CREATE_TIME
+#ifdef MY_ABC_HERE
 	if (flags & SYNOST_CREATE_TIME) {
 		if (__put_user(pKst->syno_create_time.tv_sec, &pSt->ext.create_time.tv_sec)){
 			goto Out;
@@ -183,7 +186,7 @@ static int SYNOStat64CopyToUser(struct kstat *pKst, unsigned int flags, struct S
 			goto Out;
 		}
 	}
-#endif /* CONFIG_SYNO_FS_CREATE_TIME */
+#endif /* MY_ABC_HERE */
 	error = 0;
 Out:
 	return error;
@@ -195,7 +198,7 @@ static long do_SYNOStat64(char __user * filename, int no_follow_link, unsigned i
 	struct kstat kst;
 
 	if (flags & SYNOST_IS_CASELESS) {
-#ifdef CONFIG_SYNO_FS_CASELESS_STAT
+#ifdef MY_ABC_HERE
 		int last_component = 0;
 		error = __SYNOCaselessStat(filename, no_follow_link, &kst, &last_component, flags);
 		if (-ENOENT == error) {
@@ -205,15 +208,15 @@ static long do_SYNOStat64(char __user * filename, int no_follow_link, unsigned i
 		}
 #else
 		error = -EOPNOTSUPP;
-#endif /* CONFIG_SYNO_FS_CASELESS_STAT */
+#endif /* MY_ABC_HERE */
 	} else if (no_follow_link) {
 		error = syno_vfs_fstatat(filename, &kst, 0, flags);
 	} else {
-#ifdef CONFIG_SYNO_DEBUG_FLAG
+#ifdef MY_ABC_HERE
 			if(syno_hibernation_log_level > 0) {
 				syno_do_hibernation_filename_log(filename);
 			}
-#endif /* CONFIG_SYNO_DEBUG_FLAG */
+#endif /* MY_ABC_HERE */
 		error = syno_vfs_fstatat(filename, &kst, LOOKUP_FOLLOW, flags);
 	}
 
@@ -247,7 +250,7 @@ asmlinkage long sys32_SYNOLStat64(char __user * filename, unsigned int flags, st
 {
 	return do_SYNOStat64(filename, 1, flags, pSt);
 }
-#endif /* CONFIG_SYNO_FS_STAT */
+#endif /* MY_ABC_HERE */
 
 asmlinkage long sys32_stat64(const char __user *filename,
 			     struct stat64 __user *statbuf)

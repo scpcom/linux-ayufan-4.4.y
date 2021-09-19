@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* -*- linux-c -*- ------------------------------------------------------- *
  *
  *   Copyright 2002-2007 H. Peter Anvin - All Rights Reserved
@@ -28,19 +31,19 @@ char *dataptrs[NDISKS];
 char data[NDISKS][PAGE_SIZE];
 char recovi[PAGE_SIZE], recovj[PAGE_SIZE];
 
-#ifdef CONFIG_SYNO_MD_RAID6_RMW
+#ifdef MY_ABC_HERE
 static void makedata(int start, int stop)
-#else /* CONFIG_SYNO_MD_RAID6_RMW */
+#else /* MY_ABC_HERE */
 static void makedata(void)
-#endif /* CONFIG_SYNO_MD_RAID6_RMW */
+#endif /* MY_ABC_HERE */
 {
 	int i, j;
 
-#ifdef CONFIG_SYNO_MD_RAID6_RMW
+#ifdef MY_ABC_HERE
 	for (i = start; i <= stop; i++) {
-#else /* CONFIG_SYNO_MD_RAID6_RMW */
+#else /* MY_ABC_HERE */
 	for (i = 0; i < NDISKS; i++) {
-#endif /* CONFIG_SYNO_MD_RAID6_RMW */
+#endif /* MY_ABC_HERE */
 		for (j = 0; j < PAGE_SIZE; j++)
 			data[i][j] = rand();
 
@@ -99,18 +102,18 @@ int main(int argc, char *argv[])
 {
 	const struct raid6_calls *const *algo;
 	const struct raid6_recov_calls *const *ra;
-#ifdef CONFIG_SYNO_MD_RAID6_RMW
+#ifdef MY_ABC_HERE
 	int i, j, p1, p2;
-#else /* CONFIG_SYNO_MD_RAID6_RMW */
+#else /* MY_ABC_HERE */
 	int i, j;
-#endif /* CONFIG_SYNO_MD_RAID6_RMW */
+#endif /* MY_ABC_HERE */
 	int err = 0;
 
-#ifdef CONFIG_SYNO_MD_RAID6_RMW
+#ifdef MY_ABC_HERE
 	makedata(0, NDISKS-1);
-#else /* CONFIG_SYNO_MD_RAID6_RMW */
+#else /* MY_ABC_HERE */
 	makedata();
-#endif /* CONFIG_SYNO_MD_RAID6_RMW */
+#endif /* MY_ABC_HERE */
 
 	for (ra = raid6_recov_algos; *ra; ra++) {
 		if ((*ra)->valid  && !(*ra)->valid())
@@ -122,7 +125,7 @@ int main(int argc, char *argv[])
 		printf("using recovery %s\n", (*ra)->name);
 
 		for (algo = raid6_algos; *algo; algo++) {
-#ifdef CONFIG_SYNO_MD_RAID6_RMW
+#ifdef MY_ABC_HERE
 			if ((*algo)->valid && !(*algo)->valid())
 				continue;
 
@@ -157,7 +160,7 @@ int main(int argc, char *argv[])
 							err += test_disks(i, j);
 				}
 
-#else /* CONFIG_SYNO_MD_RAID6_RMW */
+#else /* MY_ABC_HERE */
 			if (!(*algo)->valid || (*algo)->valid()) {
 				raid6_call = **algo;
 
@@ -172,7 +175,7 @@ int main(int argc, char *argv[])
 					for (j = i+1; j < NDISKS; j++)
 						err += test_disks(i, j);
 			}
-#endif /* CONFIG_SYNO_MD_RAID6_RMW */
+#endif /* MY_ABC_HERE */
 		}
 		printf("\n");
 	}
