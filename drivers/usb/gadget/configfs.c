@@ -20,7 +20,7 @@ int check_user_usb_string(const char *name,
 	primary_lang = num & 0x3ff;
 	sub_lang = num >> 10;
 
-	/* simple sanity check for valid langid */
+	
 	switch (primary_lang) {
 	case 0:
 	case 0x62 ... 0xfe:
@@ -371,11 +371,7 @@ static int config_usb_cfg_link(
 	int ret;
 
 	mutex_lock(&gi->lock);
-	/*
-	 * Make sure this function is from within our _this_ gadget and not
-	 * from another gadget or a random directory.
-	 * Also a function instance can only be linked once.
-	 */
+	
 	list_for_each_entry(a_fi, &gi->available_func, cfs_list) {
 		if (a_fi == fi)
 			break;
@@ -398,7 +394,7 @@ static int config_usb_cfg_link(
 		goto out;
 	}
 
-	/* stash the function until we bind it to the gadget */
+	
 	list_add_tail(&f->list, &cfg->func_list);
 	ret = 0;
 out:
@@ -419,12 +415,7 @@ static int config_usb_cfg_unlink(
 			struct usb_function_instance, group);
 	struct usb_function *f;
 
-	/*
-	 * ideally I would like to forbid to unlink functions while a gadget is
-	 * bound to an UDC. Since this isn't possible at the moment, we simply
-	 * force an unbind, the function is available here and then we can
-	 * remove the function.
-	 */
+	
 	mutex_lock(&gi->lock);
 	if (gi->udc_name)
 		unregister_gadget(gi);
@@ -775,13 +766,13 @@ static int configfs_composite_bind(struct usb_gadget *gadget,
 	unsigned			i;
 	int				ret;
 
-	/* the gi->lock is hold by the caller */
+	
 	cdev->gadget = gadget;
 	set_gadget_data(gadget, cdev);
 	ret = composite_dev_prepare(composite, cdev);
 	if (ret)
 		return ret;
-	/* and now the gadget bind */
+	
 	ret = -EINVAL;
 
 	if (list_empty(&gi->cdev.configs)) {
@@ -803,7 +794,7 @@ static int configfs_composite_bind(struct usb_gadget *gadget,
 		}
 	}
 
-	/* init all strings */
+	
 	if (!list_empty(&gi->string_list)) {
 		struct gadget_strings *gs;
 
@@ -831,7 +822,7 @@ static int configfs_composite_bind(struct usb_gadget *gadget,
 		gi->cdev.desc.iSerialNumber = s[USB_GADGET_SERIAL_IDX].id;
 	}
 
-	/* Go through all configs, attach all functions */
+	
 	list_for_each_entry(c, &gi->cdev.configs, list) {
 		struct config_usb_cfg *cfg;
 		struct usb_function *f;
@@ -879,7 +870,7 @@ static void configfs_composite_unbind(struct usb_gadget *gadget)
 	struct usb_composite_dev	*cdev;
 	struct gadget_info		*gi;
 
-	/* the gi->lock is hold by the caller */
+	
 
 	cdev = get_gadget_data(gadget);
 	gi = container_of(cdev, struct gadget_info, cdev);

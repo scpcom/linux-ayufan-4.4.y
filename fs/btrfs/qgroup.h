@@ -1,47 +1,10 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * Copyright (C) 2014 Facebook.  All rights reserved.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public
- * License v2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 021110-1307, USA.
- */
-
+ 
 #ifndef __BTRFS_QGROUP__
 #define __BTRFS_QGROUP__
 
-/*
- * A description of the operations, all of these operations only happen when we
- * are adding the 1st reference for that subvolume in the case of adding space
- * or on the last reference delete in the case of subtraction.  The only
- * exception is the last one, which is added for confusion.
- *
- * BTRFS_QGROUP_OPER_ADD_EXCL: adding bytes where this subvolume is the only
- * one pointing at the bytes we are adding.  This is called on the first
- * allocation.
- *
- * BTRFS_QGROUP_OPER_ADD_SHARED: adding bytes where this bytenr is going to be
- * shared between subvols.  This is called on the creation of a ref that already
- * has refs from a different subvolume, so basically reflink.
- *
- * BTRFS_QGROUP_OPER_SUB_EXCL: removing bytes where this subvolume is the only
- * one referencing the range.
- *
- * BTRFS_QGROUP_OPER_SUB_SHARED: removing bytes where this subvolume shares with
- * refs with other subvolumes.
- */
 enum btrfs_qgroup_operation_type {
 	BTRFS_QGROUP_OPER_ADD_EXCL,
 	BTRFS_QGROUP_OPER_ADD_SHARED,
@@ -103,7 +66,7 @@ void btrfs_qgroup_free(struct btrfs_root *root, u64 num_bytes);
 #ifdef MY_ABC_HERE
 void btrfs_qgroup_query(struct btrfs_fs_info *fs_info, u64 qgroupid,
                         struct btrfs_ioctl_qgroup_query_args *qqa);
-#endif /* MY_ABC_HERE */
+#endif  
 void assert_qgroups_uptodate(struct btrfs_trans_handle *trans);
 
 #ifdef CONFIG_BTRFS_FS_RUN_SANITY_TESTS
@@ -111,4 +74,4 @@ int btrfs_verify_qgroup_counts(struct btrfs_fs_info *fs_info, u64 qgroupid,
 			       u64 rfer, u64 excl);
 #endif
 
-#endif /* __BTRFS_QGROUP__ */
+#endif  

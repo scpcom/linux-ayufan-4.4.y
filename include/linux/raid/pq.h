@@ -1,38 +1,23 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/* -*- linux-c -*- ------------------------------------------------------- *
- *
- *   Copyright 2003 H. Peter Anvin - All Rights Reserved
- *
- *   This program is free software; you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, Inc., 53 Temple Place Ste 330,
- *   Boston MA 02111-1307, USA; either version 2 of the License, or
- *   (at your option) any later version; incorporated herein by reference.
- *
- * ----------------------------------------------------------------------- */
-
+ 
 #ifndef LINUX_RAID_RAID6_H
 #define LINUX_RAID_RAID6_H
 
 #ifdef __KERNEL__
 
-/* Set to 1 to use kernel-wide empty_zero_page */
 #define RAID6_USE_EMPTY_ZERO_PAGE 0
 #include <linux/blkdev.h>
 
-/* We need a pre-zeroed page... if we don't want to use the kernel-provided
-   one define it here */
 #if RAID6_USE_EMPTY_ZERO_PAGE
 # define raid6_empty_zero_page empty_zero_page
 #else
 extern const char raid6_empty_zero_page[PAGE_SIZE];
 #endif
 
-#else /* ! __KERNEL__ */
-/* Used for testing in user space */
-
+#else  
+ 
 #include <errno.h>
 #include <inttypes.h>
 #include <limits.h>
@@ -40,7 +25,6 @@ extern const char raid6_empty_zero_page[PAGE_SIZE];
 #include <sys/mman.h>
 #include <sys/types.h>
 
-/* Not standard, but glibc defines it */
 #define BITS_PER_LONG __WORDSIZE
 
 typedef uint8_t  u8;
@@ -70,23 +54,20 @@ extern const char raid6_empty_zero_page[PAGE_SIZE];
 #define MODULE_DESCRIPTION(desc)
 #define subsys_initcall(x)
 #define module_exit(x)
-#endif /* __KERNEL__ */
+#endif  
 
-/* Routine choices */
 struct raid6_calls {
 	void (*gen_syndrome)(int, size_t, void **);
 #ifdef MY_ABC_HERE
 	void (*xor_syndrome)(int, int, int, size_t, void **);
-#endif /* MY_ABC_HERE */
-	int  (*valid)(void);	/* Returns 1 if this routine set is usable */
-	const char *name;	/* Name of this routine set */
-	int prefer;		/* Has special performance attribute */
+#endif  
+	int  (*valid)(void);	 
+	const char *name;	 
+	int prefer;		 
 };
 
-/* Selected algorithm */
 extern struct raid6_calls raid6_call;
 
-/* Various routine sets */
 extern const struct raid6_calls raid6_intx1;
 extern const struct raid6_calls raid6_intx2;
 extern const struct raid6_calls raid6_intx4;
@@ -120,25 +101,21 @@ extern const struct raid6_recov_calls raid6_recov_intx1;
 extern const struct raid6_recov_calls raid6_recov_ssse3;
 extern const struct raid6_recov_calls raid6_recov_avx2;
 
-/* Algorithm list */
 extern const struct raid6_calls * const raid6_algos[];
 extern const struct raid6_recov_calls *const raid6_recov_algos[];
 int raid6_select_algo(void);
 
-/* Return values from chk_syndrome */
 #define RAID6_OK	0
 #define RAID6_P_BAD	1
 #define RAID6_Q_BAD	2
 #define RAID6_PQ_BAD	3
 
-/* Galois field tables */
 extern const u8 raid6_gfmul[256][256] __attribute__((aligned(256)));
 extern const u8 raid6_vgfmul[256][32] __attribute__((aligned(256)));
 extern const u8 raid6_gfexp[256]      __attribute__((aligned(256)));
 extern const u8 raid6_gfinv[256]      __attribute__((aligned(256)));
 extern const u8 raid6_gfexi[256]      __attribute__((aligned(256)));
 
-/* Recovery routines */
 extern void (*raid6_2data_recov)(int disks, size_t bytes, int faila, int failb,
 		       void **ptrs);
 extern void (*raid6_datap_recov)(int disks, size_t bytes, int faila,
@@ -146,7 +123,6 @@ extern void (*raid6_datap_recov)(int disks, size_t bytes, int faila,
 void raid6_dual_recov(int disks, size_t bytes, int faila, int failb,
 		      void **ptrs);
 
-/* Some definitions to allow code to be compiled for testing in userspace */
 #ifndef __KERNEL__
 
 # define jiffies	raid6_jiffies()
@@ -160,7 +136,7 @@ void raid6_dual_recov(int disks, size_t bytes, int faila, int failb,
 
 static inline void cpu_relax(void)
 {
-	/* Nothing */
+	 
 }
 
 #undef  HZ
@@ -172,6 +148,6 @@ static inline uint32_t raid6_jiffies(void)
 	return tv.tv_sec*1000 + tv.tv_usec/1000;
 }
 
-#endif /* ! __KERNEL__ */
+#endif  
 
-#endif /* LINUX_RAID_RAID6_H */
+#endif  

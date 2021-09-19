@@ -4,52 +4,39 @@
 #ifndef _SCSI_DISK_H
 #define _SCSI_DISK_H
 
-/*
- * More than enough for everybody ;)  The huge number of majors
- * is a leftover from 16bit dev_t days, we don't really need that
- * much numberspace.
- */
+
 #define SD_MAJORS	16
 
-/*
- * Time out in seconds for disks and Magneto-opticals (which are slower).
- */
+
 #ifdef MY_DEF_HERE
 #define SD_TIMEOUT		(1024 * HZ)
 #elif defined(MY_ABC_HERE)
 #define SD_TIMEOUT		(60 * HZ)
 #else
 #define SD_TIMEOUT		(30 * HZ)
-#endif /* MY_ABC_HERE */
+#endif 
 #define SD_MOD_TIMEOUT		(75 * HZ)
 #define SD_FLUSH_TIMEOUT	(60 * HZ)
 #define SD_WRITE_SAME_TIMEOUT	(120 * HZ)
 
-/*
- * Number of allowed retries
- */
+
 #define SD_MAX_RETRIES		5
 #define SD_PASSTHROUGH_RETRIES	1
 #ifdef MY_DEF_HERE
 #define SD_MAX_MEDIUM_TIMEOUTS 1024
 #else
 #define SD_MAX_MEDIUM_TIMEOUTS	2
-#endif /* MY_DEF_HERE */
+#endif 
 
-/*
- * Size of the initial data buffer for mode and read capacity data
- */
+
 #define SD_BUF_SIZE		512
 
-/*
- * Number of sectors at the end of the device to avoid multi-sector
- * accesses to in the case of last_sector_bug
- */
+
 #define SD_LAST_BUGGY_SECTORS	8
 
 enum {
-	SD_EXT_CDB_SIZE = 32,	/* Extended CDB size */
-	SD_MEMPOOL_SIZE = 2,	/* CDB pool size */
+	SD_EXT_CDB_SIZE = 32,	
+	SD_MEMPOOL_SIZE = 2,	
 };
 
 enum {
@@ -58,17 +45,16 @@ enum {
 };
 
 enum {
-	SD_LBP_FULL = 0,	/* Full logical block provisioning */
-	SD_LBP_UNMAP,		/* Use UNMAP command */
-	SD_LBP_WS16,		/* Use WRITE SAME(16) with UNMAP bit */
-	SD_LBP_WS10,		/* Use WRITE SAME(10) with UNMAP bit */
-	SD_LBP_ZERO,		/* Use WRITE SAME(10) with zero payload */
-	SD_LBP_DISABLE,		/* Discard disabled due to failed cmd */
+	SD_LBP_FULL = 0,	 
+	SD_LBP_UNMAP,		 
+	SD_LBP_WS16,		 
+	SD_LBP_WS10,		 
+	SD_LBP_ZERO,		 
+	SD_LBP_DISABLE,		 
 };
 
 #ifdef MY_ABC_HERE
-// FIXME: we need share kernel devices type with user space,
-// so this enum must sync with libsynosdk/lib/fs/fs.h DISK_PORT_TYPE
+ 
 typedef enum __syno_disk_type {
 	SYNO_DISK_UNKNOWN = 0,
 	SYNO_DISK_SATA,
@@ -76,17 +62,17 @@ typedef enum __syno_disk_type {
 	SYNO_DISK_SYNOBOOT,
 	SYNO_DISK_ISCSI,
 	SYNO_DISK_SAS,
-	SYNO_DISK_END, // end of enum
+	SYNO_DISK_END,  
 }SYNO_DISK_TYPE;
-#endif /* MY_ABC_HERE */
+#endif  
 
 struct scsi_disk {
-	struct scsi_driver *driver;	/* always &sd_template */
+	struct scsi_driver *driver;	 
 	struct scsi_device *device;
 	struct device	dev;
 	struct gendisk	*disk;
 	atomic_t	openers;
-	sector_t	capacity;	/* size in 512-byte sectors */
+	sector_t	capacity;	 
 	u32		max_ws_blocks;
 	u32		max_unmap_blocks;
 	u32		unmap_granularity;
@@ -94,22 +80,22 @@ struct scsi_disk {
 	u32		index;
 #ifdef MY_ABC_HERE
 	SYNO_DISK_TYPE	synodisktype;
-#endif /* MY_ABC_HERE */
+#endif  
 #ifdef MY_DEF_HERE
 	u32		synoindex;
-#endif /* MY_DEF_HERE */
+#endif  
 	unsigned int	physical_block_size;
 	unsigned int	max_medium_access_timeouts;
 	unsigned int	medium_access_timed_out;
 	u8		media_present;
 	u8		write_prot;
-	u8		protection_type;/* Data Integrity Field */
+	u8		protection_type; 
 	u8		provisioning_mode;
-	unsigned	ATO : 1;	/* state of disk ATO bit */
-	unsigned	cache_override : 1; /* temp override of WCE,RCD */
-	unsigned	WCE : 1;	/* state of disk WCE bit */
-	unsigned	RCD : 1;	/* state of disk RCD bit, unused */
-	unsigned	DPOFUA : 1;	/* state of disk DPOFUA bit */
+	unsigned	ATO : 1;	 
+	unsigned	cache_override : 1;  
+	unsigned	WCE : 1;	 
+	unsigned	RCD : 1;	 
+	unsigned	DPOFUA : 1;	 
 	unsigned	first_scan : 1;
 	unsigned	lbpme : 1;
 	unsigned	lbprz : 1;
@@ -165,20 +151,6 @@ static inline int scsi_medium_access_command(struct scsi_cmnd *scmd)
 	return 0;
 }
 
-/*
- * A DIF-capable target device can be formatted with different
- * protection schemes.  Currently 0 through 3 are defined:
- *
- * Type 0 is regular (unprotected) I/O
- *
- * Type 1 defines the contents of the guard and reference tags
- *
- * Type 2 defines the contents of the guard and reference tags and
- * uses 32-byte commands to seed the latter
- *
- * Type 3 defines the contents of the guard tag only
- */
-
 enum sd_dif_target_protection_types {
 	SD_DIF_TYPE0_PROTECTION = 0x0,
 	SD_DIF_TYPE1_PROTECTION = 0x1,
@@ -186,13 +158,10 @@ enum sd_dif_target_protection_types {
 	SD_DIF_TYPE3_PROTECTION = 0x3,
 };
 
-/*
- * Data Integrity Field tuple.
- */
 struct sd_dif_tuple {
-       __be16 guard_tag;	/* Checksum */
-       __be16 app_tag;		/* Opaque storage */
-       __be32 ref_tag;		/* Target LBA or indirect LBA */
+       __be16 guard_tag;	 
+       __be16 app_tag;		 
+       __be32 ref_tag;		 
 };
 
 #ifdef CONFIG_BLK_DEV_INTEGRITY
@@ -201,7 +170,7 @@ extern void sd_dif_config_host(struct scsi_disk *);
 extern void sd_dif_prepare(struct request *rq, sector_t, unsigned int);
 extern void sd_dif_complete(struct scsi_cmnd *, unsigned int);
 
-#else /* CONFIG_BLK_DEV_INTEGRITY */
+#else  
 
 static inline void sd_dif_config_host(struct scsi_disk *disk)
 {
@@ -214,6 +183,6 @@ static inline void sd_dif_complete(struct scsi_cmnd *cmd, unsigned int a)
 {
 }
 
-#endif /* CONFIG_BLK_DEV_INTEGRITY */
+#endif  
 
-#endif /* _SCSI_DISK_H */
+#endif  

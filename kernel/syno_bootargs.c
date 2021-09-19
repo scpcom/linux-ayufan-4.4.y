@@ -1,108 +1,108 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-// Copyright (c) 2003-2015 Synology Inc. All rights reserved.
+
 #include <linux/kernel.h>
 #include <linux/synolib.h>
 
 #ifdef MY_ABC_HERE
 extern char gszDiskIdxMap[16];
-#endif /* MY_ABC_HERE */
+#endif 
 
 #ifdef MY_ABC_HERE
 extern char gszSynoHWRevision[];
-#endif /* MY_ABC_HERE */
+#endif 
 
 #ifdef MY_ABC_HERE
 extern char gszSynoHWVersion[];
-#endif /* MY_ABC_HERE */
+#endif 
 
 #ifdef MY_ABC_HERE
 extern long g_syno_hdd_powerup_seq;
-#endif /* MY_ABC_HERE */
+#endif 
 
 #ifdef MY_ABC_HERE
 extern long g_hdd_hotplug;
-#endif /* MY_ABC_HERE */
+#endif 
 
 #ifdef MY_ABC_HERE
 extern unsigned char grgbLanMac[SYNO_MAC_MAX_NUMBER][16];
 extern int giVenderFormatVersion;
 extern char gszSkipVenderMacInterfaces[256];
-#endif /* MY_ABC_HERE */
+#endif 
 
 #ifdef MY_ABC_HERE
 extern char gszSerialNum[32];
 extern char gszCustomSerialNum[32];
-#endif /* MY_ABC_HERE */
+#endif 
 
 #ifdef MY_ABC_HERE
 extern char giDiskSeqReverse[8];
-#endif /* MY_ABC_HERE */
+#endif 
 
 #ifdef MY_ABC_HERE
 extern long g_internal_netif_num;
-#endif /* MY_ABC_HERE*/
+#endif 
 
 #ifdef MY_ABC_HERE
 extern long g_sata_mv_led;
-#endif /* MY_ABC_HERE */
+#endif 
 
 #ifdef MY_ABC_HERE
 extern int gSynoFactoryUSBFastReset;
-#endif /* MY_ABC_HERE */
+#endif 
 
 #ifdef MY_ABC_HERE
 extern int gSynoFactoryUSB3Disable;
-#endif /* MY_ABC_HERE */
+#endif 
 
 #ifdef MY_DEF_HERE
 extern int gSynoMemMode;
-#endif /* MY_DEF_HERE */
+#endif 
 
 #ifdef CONFIG_SYNO_SWITCH_NET_DEVICE_NAME
 extern unsigned int gSwitchDev;
 extern char gDevPCIName[CONFIG_SYNO_MAX_SWITCHABLE_NET_DEVICE][CONFIG_SYNO_NET_DEVICE_ENCODING_LENGTH];
-#endif /* CONFIG_SYNO_SWITCH_NET_DEVICE_NAME */
+#endif 
 
 #ifdef MY_DEF_HERE
 extern long g_is_sas_model;
-#endif /* MY_DEF_HERE */
+#endif 
 
 #ifdef MY_DEF_HERE
 extern int gSynoDualHead;
-#endif /* MY_DEF_HERE */
+#endif 
 
 #ifdef MY_DEF_HERE
 extern int gSynoSASWriteConflictPanic;
-#endif /* MY_DEF_HERE */
+#endif 
 
 #ifdef MY_DEF_HERE
 extern int gSynoBootSATADOM;
-#endif /* MY_DEF_HERE */
+#endif 
 
 #ifdef MY_ABC_HERE
 extern char g_ahci_switch;
-#endif /* MY_ABC_HERE */
+#endif 
 
 #ifdef MY_ABC_HERE
 extern char gszSataPortMap[8];
-#endif /* MY_ABC_HERE */
+#endif 
 
 #ifdef MY_DEF_HERE
 extern char gszDiskIdxMapMv14xx[8];
-#endif /* MY_DEF_HERE */
+#endif 
 
 #ifdef MY_DEF_HERE
 extern char gSynoCastratedXhcAddr[CONFIG_SYNO_NUM_CASTRATED_XHC][13];
 extern unsigned int gSynoCastratedXhcPortBitmap[CONFIG_SYNO_NUM_CASTRATED_XHC];
-#endif /* MY_DEF_HERE */
+#endif 
 
 #ifdef MY_DEF_HERE
 extern char gSynoUsbVbusHostAddr[CONFIG_SYNO_USB_VBUS_NUM_GPIO][13];
 extern int gSynoUsbVbusPort[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
 extern unsigned gSynoUsbVbusGpp[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
-#endif /* MY_DEF_HERE */
+#endif 
 
 #ifdef MY_ABC_HERE
 static int __init early_disk_idx_map(char *p)
@@ -116,7 +116,7 @@ static int __init early_disk_idx_map(char *p)
 	return 1;
 }
 __setup("DiskIdxMap=", early_disk_idx_map);
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef MY_ABC_HERE
 static int __init early_hw_revision(char *p)
@@ -128,7 +128,7 @@ static int __init early_hw_revision(char *p)
        return 1;
 }
 __setup("rev=", early_hw_revision);
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef MY_ABC_HERE
 static int __init early_hw_version(char *p)
@@ -149,13 +149,10 @@ static int __init early_hw_version(char *p)
 	return 1;
 }
 __setup("syno_hw_version=", early_hw_version);
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef MY_ABC_HERE
-/* It is recommanded to use syno_hdd_powerup_seq instead of ihd_num.
- * Because the actual usage of the variable is represented the powerup seq,
- * the syno_hdd_powerup_seq is designed to replace ihd_num.
- * */
+ 
 static int __init early_internal_hd_num(char *p)
 {
         g_syno_hdd_powerup_seq = simple_strtol(p, NULL, 10);
@@ -175,13 +172,10 @@ static int __init syno_hdd_powerup_seq(char *p)
         return 1;
 }
 __setup("syno_hdd_powerup_seq=", syno_hdd_powerup_seq);
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef MY_ABC_HERE
-/* It is recommanded to use enable_hdd_hotplug instead of HddHotplug.
- * Beacuse the bootarg is referred to a bool variable,
- * the enable_hdd_hotplug is designed to replace HddHotplug.
- * */
+ 
 static int __init early_hdd_hotplug(char *p)
 {
 	g_hdd_hotplug = simple_strtol(p, NULL, 10);
@@ -205,7 +199,7 @@ static int __init enable_hdd_hotplug(char *p)
 	return 1;
 }
 __setup("enable_hdd_hotplug=", enable_hdd_hotplug);
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef MY_ABC_HERE
 static int __init early_mac1(char *p)
@@ -289,7 +283,7 @@ static int __init early_skip_vender_mac_interfaces(char *p)
 	return 1;
 }
 __setup("skip_vender_mac_interfaces=", early_skip_vender_mac_interfaces);
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef MY_ABC_HERE
 static int __init early_sn(char *p)
@@ -307,7 +301,7 @@ static int __init early_custom_sn(char *p)
 	return 1;
 }
 __setup("custom_sn=", early_custom_sn);
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef MY_ABC_HERE
 static int __init early_factory_usb_fast_reset(char *p)
@@ -319,7 +313,7 @@ static int __init early_factory_usb_fast_reset(char *p)
 	return 1;
 }
 __setup("syno_usb_fast_reset=", early_factory_usb_fast_reset);
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef MY_ABC_HERE
 static int __init early_factory_usb3_disable(char *p)
@@ -331,7 +325,7 @@ static int __init early_factory_usb3_disable(char *p)
 	return 1;
 }
 __setup("syno_disable_usb3=", early_factory_usb3_disable);
-#endif /* MY_ABC_HERE */
+#endif 
 
 #ifdef MY_ABC_HERE
 static int __init early_disk_seq_reserve(char *p)
@@ -345,9 +339,9 @@ static int __init early_disk_seq_reserve(char *p)
 	return 1;
 }
 __setup("DiskSeqReverse=", early_disk_seq_reserve);
-#endif /* MY_ABC_HERE */
+#endif  
 
-#ifdef MY_ABC_HERE
+#ifdef  MY_ABC_HERE
 static int __init early_internal_netif_num(char *p)
 {
 	g_internal_netif_num = simple_strtol(p, NULL, 10);
@@ -359,7 +353,7 @@ static int __init early_internal_netif_num(char *p)
 	return 1;
 }
 __setup("netif_num=", early_internal_netif_num);
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef MY_ABC_HERE
 static int __init early_sataled_special(char *p)
@@ -373,7 +367,7 @@ static int __init early_sataled_special(char *p)
 	return 1;
 }
 __setup("SataLedSpecial=", early_sataled_special);
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef MY_DEF_HERE
 static int __init early_mem_mode(int *p)
@@ -385,7 +379,7 @@ static int __init early_mem_mode(int *p)
 	return 1;
 }
 __setup("syno_mem_mode=", early_mem_mode);
-#endif /* MY_DEF_HERE */
+#endif  
 
 #ifdef CONFIG_SYNO_SWITCH_NET_DEVICE_NAME
 static int __init early_netif_seq(char *p)
@@ -393,24 +387,10 @@ static int __init early_netif_seq(char *p)
 	int len;
 	int netDevCount;
 
-	// no net device switch required
 	if ((NULL == p) || (0 == (len = strlen(p)))) {
 		return 1;
 	}
 
-	/**
-	 *	We change the way that we represent the net device name is due to a truth that
-	 *	when a PCIE extension card is plugged in, the pcie name will change
-	 *	So we give up the pci-name as our matching condition, we use NIC up sequence instead.
-	 *	Because the NIC layout is fixed on our board, we the NIC up sequence won't change.
-	 *	And according to this sequence, we assign the device name to NIC
-	 *
-	 *	Following codes are designed to compatible with bromolow/x64 which has already been produced.
-	 *	Based on the truth that our bromolow/x64 has at least 2 internal lan so far (2011/5/24)
-	 *	And 2 internal lan needs netif_seq whose length is 12
-	 *	So we judge that if netif_seq is less than 12, then it should be new version of netif_seq
-	 *	2411+ has 2 internal lans now so we use 12 as our boundary condition
-	 */
 	if (len <= CONFIG_SYNO_MAX_SWITCHABLE_NET_DEVICE) {
 		netDevCount = len;
 		for(gSwitchDev = 0 ; gSwitchDev < netDevCount && gSwitchDev < CONFIG_SYNO_MAX_SWITCHABLE_NET_DEVICE ; gSwitchDev++) {
@@ -425,7 +405,7 @@ static int __init early_netif_seq(char *p)
 	}
 
 	for(gSwitchDev = 0 ; gSwitchDev < netDevCount && gSwitchDev < CONFIG_SYNO_MAX_SWITCHABLE_NET_DEVICE ; gSwitchDev++) {
-		// the format of netif_seq string is device seq (1 character) + device pci name (last 5 characters only)
+		 
 		memcpy(gDevPCIName[gSwitchDev], p, CONFIG_SYNO_NET_DEVICE_ENCODING_LENGTH);
 		p += CONFIG_SYNO_NET_DEVICE_ENCODING_LENGTH;
 	}
@@ -433,7 +413,7 @@ static int __init early_netif_seq(char *p)
 }
 
 __setup("netif_seq=",early_netif_seq);
-#endif /* CONFIG_SYNO_SWITCH_NET_DEVICE_NAME */
+#endif 
 
 #ifdef MY_DEF_HERE
 static int __init early_disk_idx_map_mv14xx(char *p)
@@ -447,7 +427,7 @@ static int __init early_disk_idx_map_mv14xx(char *p)
 	return 1;
 }
 __setup("DiskIdxMapMv14xx=", early_disk_idx_map_mv14xx);
-#endif /* MY_DEF_HERE */
+#endif 
 
 #ifdef MY_ABC_HERE
 static int __init early_sataport_map(char *p)
@@ -461,7 +441,7 @@ static int __init early_sataport_map(char *p)
 	return 1;
 }
 __setup("SataPortMap=", early_sataport_map);
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef MY_DEF_HERE
 static int __init early_SASmodel(char *p)
@@ -475,7 +455,7 @@ static int __init early_SASmodel(char *p)
 	return 1;
 }
 __setup("SASmodel=", early_SASmodel);
-#endif /* MY_DEF_HERE */
+#endif  
 
 #ifdef MY_DEF_HERE
 static int __init early_dual_head(char *p)
@@ -483,7 +463,7 @@ static int __init early_dual_head(char *p)
 	gSynoDualHead = simple_strtol(p, NULL, 10);
 #ifdef MY_DEF_HERE
 	gSynoBootSATADOM = gSynoDualHead;
-#endif /* MY_DEF_HERE */
+#endif  
 #ifdef MY_DEF_HERE
 	gSynoSASWriteConflictPanic = gSynoDualHead;
 #endif
@@ -493,7 +473,7 @@ static int __init early_dual_head(char *p)
 	return 1;
 }
 __setup("dual_head=", early_dual_head);
-#endif /* MY_DEF_HERE */
+#endif  
 
 #ifdef MY_DEF_HERE
 static int __init early_sas_reservation_write_conflict(char *p)
@@ -505,7 +485,7 @@ static int __init early_sas_reservation_write_conflict(char *p)
 	return 1;
 }
 __setup("sas_reservation_write_conflict=", early_sas_reservation_write_conflict);
-#endif /* MY_DEF_HERE */
+#endif 
 
 #ifdef MY_DEF_HERE
 static int __init early_synoboot_satadom(char *p)
@@ -517,9 +497,9 @@ static int __init early_synoboot_satadom(char *p)
 	return 1;
 }
 __setup("synoboot_satadom=", early_synoboot_satadom);
-#endif /* MY_DEF_HERE */
+#endif  
 
-#ifdef MY_ABC_HERE
+#ifdef  MY_ABC_HERE
 static int __init early_ahci_switch(char *p)
 {
 	g_ahci_switch = p[0];
@@ -532,7 +512,7 @@ static int __init early_ahci_switch(char *p)
 	return 1;
 }
 __setup("ahci=", early_ahci_switch);
-#endif /* MY_ABC_HERE */
+#endif  
 
 #ifdef MY_DEF_HERE
 static int __init early_castrated_xhc(char *p)
@@ -565,7 +545,7 @@ static int __init early_castrated_xhc(char *p)
 	return 1;
 }
 __setup("syno_castrated_xhc=", early_castrated_xhc);
-#endif /* MY_DEF_HERE */
+#endif  
 
 #ifdef MY_DEF_HERE
 static int __init early_usb_vbus_gpio(char *p)
@@ -628,4 +608,4 @@ static int __init early_usb_vbus_gpio(char *p)
 	return 1;
 }
 __setup("syno_usb_vbus_gpio=", early_usb_vbus_gpio);
-#endif /* MY_DEF_HERE */
+#endif  

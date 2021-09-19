@@ -1,19 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * xhci-plat.c - xHCI host controller driver platform Bus Glue.
- *
- * Copyright (C) 2012 Texas Instruments Incorporated - http://www.ti.com
- * Author: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
- *
- * A lot of code borrowed from the Linux xHCI driver.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * version 2 as published by the Free Software Foundation.
- */
-
+ 
 #include <linux/platform_device.h>
 #include <linux/module.h>
 #include <linux/slab.h>
@@ -22,15 +10,10 @@
 
 static void xhci_plat_quirks(struct device *dev, struct xhci_hcd *xhci)
 {
-	/*
-	 * As of now platform drivers don't provide MSI support so we ensure
-	 * here that the generic code does not try to make a pci_dev from our
-	 * dev struct in order to setup MSI
-	 */
+	 
 	xhci->quirks |= XHCI_PLAT;
 }
 
-/* called during probe() after chip reset completes */
 static int xhci_plat_setup(struct usb_hcd *hcd)
 {
 	return xhci_gen_setup(hcd, xhci_plat_quirks);
@@ -41,23 +24,14 @@ static const struct hc_driver xhci_plat_xhci_driver = {
 	.product_desc =		"xHCI Host Controller",
 	.hcd_priv_size =	sizeof(struct xhci_hcd *),
 
-	/*
-	 * generic hardware linkage
-	 */
 	.irq =			xhci_irq,
 	.flags =		HCD_MEMORY | HCD_USB3 | HCD_SHARED,
 
-	/*
-	 * basic lifecycle operations
-	 */
 	.reset =		xhci_plat_setup,
 	.start =		xhci_run,
 	.stop =			xhci_stop,
 	.shutdown =		xhci_shutdown,
 
-	/*
-	 * managing i/o requests and associated device resources
-	 */
 	.urb_enqueue =		xhci_urb_enqueue,
 	.urb_dequeue =		xhci_urb_dequeue,
 	.alloc_dev =		xhci_alloc_dev,
@@ -73,12 +47,8 @@ static const struct hc_driver xhci_plat_xhci_driver = {
 	.update_hub_device =	xhci_update_hub_device,
 	.reset_device =		xhci_discover_or_reset_device,
 
-	/*
-	 * scheduling support
-	 */
 	.get_frame_number =	xhci_get_frame,
 
-	/* Root hub support */
 	.hub_control =		xhci_hub_control,
 	.hub_status_data =	xhci_hub_status_data,
 	.bus_suspend =		xhci_bus_suspend,
@@ -90,7 +60,7 @@ static int xhci_plat_probe(struct platform_device *pdev)
 #if defined (MY_DEF_HERE)
 	struct device_node	*node = pdev->dev.of_node;
 	u32 vbus_gpio_pin = 0;
-#endif /* MY_DEF_HERE */
+#endif  
 	const struct hc_driver	*driver;
 	struct xhci_hcd		*xhci;
 	struct resource         *res;
@@ -141,10 +111,7 @@ static int xhci_plat_probe(struct platform_device *pdev)
 		}
 		if (of_property_read_bool(node, "vbus-gpio")) {
 			of_property_read_u32(node, "vbus-gpio", &vbus_gpio_pin);
-			/* hcd->vbus_gpio_pin' is an integer, but vbus_gpio_pin is
-			 * an unsigned integer. It should be safe because it's enough
-			 * for gpio number.
-			 */
+			 
 			hcd->vbus_gpio_pin = vbus_gpio_pin;
 		} else {
 			hcd->vbus_gpio_pin = -1;
@@ -153,12 +120,11 @@ static int xhci_plat_probe(struct platform_device *pdev)
 	}
 	dev_info(&pdev->dev, "USB2 Vbus gpio %d\n", hcd->vbus_gpio_pin);
 	dev_info(&pdev->dev, "power control %s\n", hcd->power_control_support ? "enabled" : "disabled");
-#endif /* MY_DEF_HERE */
+#endif  
 	ret = usb_add_hcd(hcd, irq, IRQF_SHARED);
 	if (ret)
 		goto unmap_registers;
 
-	/* USB 2.0 roothub is stored in the platform_device now. */
 	hcd = dev_get_drvdata(&pdev->dev);
 	xhci = hcd_to_xhci(hcd);
 	xhci->shared_hcd = usb_create_shared_hcd(driver, &pdev->dev,
@@ -172,11 +138,8 @@ static int xhci_plat_probe(struct platform_device *pdev)
 	xhci->shared_hcd->power_control_support = hcd->power_control_support;
 	dev_info(&pdev->dev, "USB3 Vbus gpio %d\n", xhci->shared_hcd->vbus_gpio_pin);
 	dev_info(&pdev->dev, "power control %s\n", hcd->power_control_support ? "enabled" : "disabled");
-#endif /* MY_DEF_HERE */
-	/*
-	 * Set the xHCI pointer before xhci_plat_setup() (aka hcd_driver.reset)
-	 * is called by usb_add_hcd().
-	 */
+#endif  
+	 
 	*((struct xhci_hcd **) xhci->shared_hcd->hcd_priv) = xhci;
 
 	ret = usb_add_hcd(xhci->shared_hcd, irq, IRQF_SHARED);

@@ -20,7 +20,7 @@ extern long g_internal_hd_num;
 
 #ifdef MY_ABC_HERE
 extern long g_hdd_hotplug;
-#endif /* MY_ABC_HERE */
+#endif  
 
 #define GPIO_UNDEF				0xFF
 
@@ -30,7 +30,7 @@ extern int SYNO_CTRL_HDD_POWERON(int index, int value);
 extern int SYNO_CHECK_HDD_DETECT(int index);
 #else
 extern int SYNO_CHECK_HDD_PRESENT(int index);
-#endif /* MY_DEF_HERE */
+#endif  
 
 typedef struct __SynoHddMonData {
 	int iProcessingIdx;
@@ -54,7 +54,7 @@ static int syno_hddmon_data_init(SynoHddMonData_t *pData)
 
 #ifdef MY_ABC_HERE
 	pData->blHddHotPlugSupport = g_hdd_hotplug;
-#endif /* MY_ABC_HERE */
+#endif  
 
 	pData->iMaxHddNum = g_syno_hdd_powerup_seq;
 
@@ -103,7 +103,7 @@ static int syno_hddmon_unplug_monitor(void *args)
 			iPrzPinVal = SYNO_CHECK_HDD_DETECT(iIdx);
 #else
 			iPrzPinVal = SYNO_CHECK_HDD_PRESENT(iIdx);
-#endif /* MY_DEF_HERE */
+#endif  
 
 			if (iPrzPinVal) {
 				continue;
@@ -145,12 +145,12 @@ static void syno_hddmon_task(SynoHddMonData_t *pData)
 		iPrzPinVal = SYNO_CHECK_HDD_DETECT(iIdx);
 #else
 		iPrzPinVal = SYNO_CHECK_HDD_PRESENT(iIdx);
-#endif /* MY_DEF_HERE */
+#endif  
 
 		if (pData->blHddEnStat[iIdx-1] != iPrzPinVal) {
 
 			if (iPrzPinVal) {
-				//while starting a port, monitoring other ports for the disks unplugged
+				 
 				pUnplugMonitor = kthread_run(syno_hddmon_unplug_monitor, pData, SYNO_HDDMON_UPLG_STR);
 			}
 
@@ -194,16 +194,12 @@ static void syno_hddmon_sync(SynoHddMonData_t *pData)
 		iPrzPinVal = SYNO_CHECK_HDD_PRESENT(iIdx);
 #endif
 
-		/* HDD Enable pins must be high just after boot-up,
-		 * so turns the pins to low if the hdds do not present.
-		 */
 		if (!iPrzPinVal) {
 			mdelay(200);
 			SYNO_CTRL_HDD_POWERON(iIdx, iPrzPinVal);
 			pData->blHddEnStat[iIdx-1] = iPrzPinVal;
 		}
 
-		/*sync the states*/
 		pData->blHddEnStat[iIdx-1] = iPrzPinVal;
 
 	}
@@ -253,7 +249,6 @@ static int __init syno_hddmon_init(void)
 
 	syno_hddmon_sync(&synoHddMonData);
 
-	/* processing */
 	pHddPrzPolling = kthread_create(syno_hddmon_routine, &synoHddMonData, SYNO_HDDMON_STR);
 
 	if (IS_ERR(pHddPrzPolling)) {

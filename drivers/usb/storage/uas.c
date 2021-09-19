@@ -1,16 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * USB Attached SCSI
- * Note that this is not the same as the USB Mass Storage driver
- *
- * Copyright Matthew Wilcox for Intel Corp, 2010
- * Copyright Sarah Sharp for Intel Corp, 2010
- *
- * Distributed under the terms of the GNU GPL, version two.
- */
-
+ 
 #include <linux/blkdev.h>
 #include <linux/slab.h>
 #include <linux/types.h>
@@ -27,10 +18,6 @@
 #include <scsi/scsi_host.h>
 #include <scsi/scsi_tcq.h>
 
-/*
- * The r00-r01c specs define this version of the SENSE IU data structure.
- * It's still in use by several different firmware releases.
- */
 struct sense_iu_old {
 	__u8 iu_id;
 	__u8 rsvd1;
@@ -73,7 +60,6 @@ enum {
 	IS_IN_WORK_LIST         = (1 << 14),
 };
 
-/* Overrides scsi_pointer */
 struct uas_cmd_info {
 	unsigned int state;
 	unsigned int stream;
@@ -83,7 +69,6 @@ struct uas_cmd_info {
 	struct list_head list;
 };
 
-/* I hate forward declarations, but I actually have a loop */
 static int uas_submit_urbs(struct scsi_cmnd *cmnd,
 				struct uas_dev_info *devinfo, gfp_t gfp);
 static void uas_do_work(struct work_struct *work);
@@ -98,11 +83,6 @@ static void uas_unlink_data_urbs(struct uas_dev_info *devinfo,
 {
 	unsigned long flags;
 
-	/*
-	 * The UNLINK_DATA_URBS flag makes sure uas_try_complete
-	 * (called by urb completion) doesn't release cmdinfo
-	 * underneath us.
-	 */
 	spin_lock_irqsave(&devinfo->lock, flags);
 	cmdinfo->state |= UNLINK_DATA_URBS;
 	spin_unlock_irqrestore(&devinfo->lock, flags);
@@ -171,14 +151,12 @@ static void uas_abort_work(struct uas_dev_info *devinfo)
 			cmdinfo->state |= COMMAND_ABORTED;
 			cmdinfo->state &= ~IS_IN_WORK_LIST;
 			if (devinfo->resetting) {
-				/* uas_stat_cmplt() will not do that
-				 * when a device reset is in
-				 * progress */
+				 
 				cmdinfo->state &= ~COMMAND_INFLIGHT;
 			}
 			uas_try_complete(cmnd, __func__);
 		} else {
-			/* not our uas device, relink into list */
+			 
 			list_del(&cmdinfo->list);
 			spin_lock_irq(&uas_work_lock);
 			list_add_tail(&cmdinfo->list, &uas_work_list);
@@ -327,7 +305,7 @@ static void uas_stat_cmplt(struct urb *urb)
 
 	if (!cmnd) {
 		if (iu->iu_id == IU_ID_RESPONSE) {
-			/* store results for uas_eh_task_mgmt() */
+			 
 			memcpy(&devinfo->response, iu, sizeof(devinfo->response));
 		}
 		usb_free_urb(urb);
@@ -348,7 +326,7 @@ static void uas_stat_cmplt(struct urb *urb)
 		else
 			uas_sense(urb, cmnd);
 		if (cmnd->result != 0) {
-			/* cancel data transfers on error */
+			 
 			spin_unlock_irqrestore(&devinfo->lock, flags);
 			uas_unlink_data_urbs(devinfo, cmdinfo);
 			spin_lock_irqsave(&devinfo->lock, flags);
@@ -388,7 +366,7 @@ static void uas_data_cmplt(struct urb *urb)
 	}
 	BUG_ON(sdb == NULL);
 	if (urb->status) {
-		/* error: no data transfered */
+		 
 		sdb->resid = sdb->length;
 	} else {
 		sdb->resid = sdb->length - urb->actual_length;
@@ -529,12 +507,6 @@ err:
 	usb_free_urb(urb);
 	return err;
 }
-
-/*
- * Why should I request the Status IU before sending the Command IU?  Spec
- * says to, but also says the device may receive them in any order.  Seems
- * daft to me.
- */
 
 static int uas_submit_sense_urb(struct Scsi_Host *shost,
 				gfp_t gfp, unsigned int stream)
@@ -690,7 +662,7 @@ static int uas_queuecommand_lck(struct scsi_cmnd *cmnd,
 
 	err = uas_submit_urbs(cmnd, devinfo, GFP_ATOMIC);
 	if (err) {
-		/* If we did nothing, give up now */
+		 
 		if (cmdinfo->state & SUBMIT_STATUS_URB) {
 			spin_unlock_irqrestore(&devinfo->lock, flags);
 			return SCSI_MLQUEUE_DEVICE_BUSY;
@@ -838,21 +810,21 @@ static struct scsi_host_template uas_host_template = {
 	.eh_abort_handler = uas_eh_abort_handler,
 	.eh_device_reset_handler = uas_eh_device_reset_handler,
 	.eh_bus_reset_handler = uas_eh_bus_reset_handler,
-	.can_queue = 65536,	/* Is there a limit on the _host_ ? */
+	.can_queue = 65536,	 
 	.this_id = -1,
 	.sg_tablesize = SG_NONE,
-	.cmd_per_lun = 1,	/* until we override it */
+	.cmd_per_lun = 1,	 
 	.skip_settle_delay = 1,
 	.ordered_tag = 1,
 #ifdef MY_ABC_HERE
 	.syno_port_type = SYNO_PORT_TYPE_USB,
-#endif /* MY_ABC_HERE */
+#endif  
 };
 
 static struct usb_device_id uas_usb_ids[] = {
 	{ USB_INTERFACE_INFO(USB_CLASS_MASS_STORAGE, USB_SC_SCSI, USB_PR_BULK) },
 	{ USB_INTERFACE_INFO(USB_CLASS_MASS_STORAGE, USB_SC_SCSI, USB_PR_UAS) },
-	/* 0xaa is a prototype device I happen to have access to */
+	 
 	{ USB_INTERFACE_INFO(USB_CLASS_MASS_STORAGE, USB_SC_SCSI, 0xaa) },
 	{ }
 };
@@ -924,11 +896,6 @@ static void uas_configure_endpoints(struct uas_dev_info *devinfo)
 		}
 	}
 
-	/*
-	 * Assume that if we didn't find a control pipe descriptor, we're
-	 * using a device with old firmware that happens to be set up like
-	 * this.
-	 */
 	if (!eps[0]) {
 		devinfo->cmd_pipe = usb_sndbulkpipe(udev, 1);
 		devinfo->status_pipe = usb_rcvbulkpipe(udev, 1);
@@ -970,12 +937,6 @@ static void uas_free_streams(struct uas_dev_info *devinfo)
 	usb_free_streams(devinfo->intf, eps, 3, GFP_KERNEL);
 }
 
-/*
- * XXX: What I'd like to do here is register a SCSI host for each USB host in
- * the system.  Follow usb-storage's design of registering a SCSI host for
- * each USB device for the moment.  Can implement this by walking up the
- * USB hierarchy until we find a USB host.
- */
 static int uas_probe(struct usb_interface *intf, const struct usb_device_id *id)
 {
 	int result;
@@ -1035,13 +996,13 @@ deconfig_eps:
 
 static int uas_pre_reset(struct usb_interface *intf)
 {
-/* XXX: Need to return 1 if it's not our device in error handling */
+ 
 	return 0;
 }
 
 static int uas_post_reset(struct usb_interface *intf)
 {
-/* XXX: Need to return 1 if it's not our device in error handling */
+ 
 	return 0;
 }
 
@@ -1060,10 +1021,6 @@ static void uas_disconnect(struct usb_interface *intf)
 	kfree(devinfo);
 }
 
-/*
- * XXX: Should this plug into libusual so we can auto-upgrade devices from
- * Bulk-Only to UAS?
- */
 static struct usb_driver uas_driver = {
 	.name = "uas",
 	.probe = uas_probe,

@@ -1,25 +1,13 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * drivers/usb/core/sysfs.c
- *
- * (C) Copyright 2002 David Brownell
- * (C) Copyright 2002,2004 Greg Kroah-Hartman
- * (C) Copyright 2002,2004 IBM Corp.
- *
- * All of the sysfs file attributes for usb devices and interfaces.
- *
- */
-
-
+ 
 #include <linux/kernel.h>
 #include <linux/string.h>
 #include <linux/usb.h>
 #include <linux/usb/quirks.h>
 #include "usb.h"
 
-/* Active configuration fields */
 #define usb_actconfig_show(field, format_string)			\
 static ssize_t  show_##field(struct device *dev,			\
 		struct device_attribute *attr, char *buf)		\
@@ -71,7 +59,6 @@ static ssize_t show_configuration_string(struct device *dev,
 }
 static DEVICE_ATTR(configuration, S_IRUGO, show_configuration_string, NULL);
 
-/* configuration value is always present, and r/w */
 usb_actconfig_show(bConfigurationValue, "%u\n");
 
 static ssize_t
@@ -92,7 +79,6 @@ set_bConfigurationValue(struct device *dev, struct device_attribute *attr,
 static DEVICE_ATTR_IGNORE_LOCKDEP(bConfigurationValue, S_IRUGO | S_IWUSR,
 		show_bConfigurationValue, set_bConfigurationValue);
 
-/* String fields */
 #define usb_string_attr(name)						\
 static ssize_t  show_##name(struct device *dev,				\
 		struct device_attribute *attr, char *buf)		\
@@ -233,7 +219,7 @@ set_syno_quirks(struct device *dev, struct device_attribute *attr,
 }
 static DEVICE_ATTR(syno_quirks, S_IWUSR | S_IRUGO,
 		show_syno_quirks, set_syno_quirks);
-#endif /* MY_ABC_HERE */
+#endif  
 
 static ssize_t
 show_avoid_reset_quirk(struct device *dev, struct device_attribute *attr, char *buf)
@@ -324,7 +310,6 @@ set_persist(struct device *dev, struct device_attribute *attr,
 	struct usb_device *udev = to_usb_device(dev);
 	int value;
 
-	/* Hubs are always enabled for USB_PERSIST */
 	if (udev->descriptor.bDeviceClass == USB_CLASS_HUB)
 		return -EPERM;
 
@@ -346,9 +331,6 @@ static int add_persist_attributes(struct device *dev)
 	if (is_usb_device(dev)) {
 		struct usb_device *udev = to_usb_device(dev);
 
-		/* Hubs are automatically enabled for USB_PERSIST,
-		 * no point in creating the attribute file.
-		 */
 		if (udev->descriptor.bDeviceClass != USB_CLASS_HUB)
 			rc = sysfs_add_file_to_group(&dev->kobj,
 					&dev_attr_persist.attr,
@@ -368,7 +350,7 @@ static void remove_persist_attributes(struct device *dev)
 #define add_persist_attributes(dev)	0
 #define remove_persist_attributes(dev)	do {} while (0)
 
-#endif	/* CONFIG_PM */
+#endif	 
 
 #ifdef	CONFIG_PM_RUNTIME
 
@@ -384,13 +366,6 @@ show_connected_duration(struct device *dev, struct device_attribute *attr,
 
 static DEVICE_ATTR(connected_duration, S_IRUGO, show_connected_duration, NULL);
 
-/*
- * If the device is resumed, the last time the device was suspended has
- * been pre-subtracted from active_duration.  We add the current time to
- * get the duration that the device was actually active.
- *
- * If the device is suspended, the active_duration is up-to-date.
- */
 static ssize_t
 show_active_duration(struct device *dev, struct device_attribute *attr,
 		char *buf)
@@ -576,10 +551,8 @@ static void remove_power_attributes(struct device *dev)
 #define add_power_attributes(dev)	0
 #define remove_power_attributes(dev)	do {} while (0)
 
-#endif	/* CONFIG_PM_RUNTIME */
+#endif	 
 
-
-/* Descriptor fields */
 #define usb_descriptor_attr_le16(field, format_string)			\
 static ssize_t								\
 show_##field(struct device *dev, struct device_attribute *attr,	\
@@ -615,9 +588,6 @@ usb_descriptor_attr(bDeviceProtocol, "%02x\n")
 usb_descriptor_attr(bNumConfigurations, "%d\n")
 usb_descriptor_attr(bMaxPacketSize0, "%d\n")
 
-
-
-/* show if the device is authorized (1) or not (0) */
 static ssize_t usb_dev_authorized_show(struct device *dev,
 				       struct device_attribute *attr,
 				       char *buf)
@@ -626,12 +596,6 @@ static ssize_t usb_dev_authorized_show(struct device *dev,
 	return snprintf(buf, PAGE_SIZE, "%u\n", usb_dev->authorized);
 }
 
-
-/*
- * Authorize a device to be used in the system
- *
- * Writing a 0 deauthorizes the device, writing a 1 authorizes it.
- */
 static ssize_t usb_dev_authorized_store(struct device *dev,
 					struct device_attribute *attr,
 					const char *buf, size_t size)
@@ -652,7 +616,6 @@ static ssize_t usb_dev_authorized_store(struct device *dev,
 static DEVICE_ATTR_IGNORE_LOCKDEP(authorized, 0644,
 	    usb_dev_authorized_show, usb_dev_authorized_store);
 
-/* "Safely remove a device" */
 static ssize_t usb_remove_store(struct device *dev,
 		struct device_attribute *attr,
 		const char *buf, size_t count)
@@ -663,7 +626,6 @@ static ssize_t usb_remove_store(struct device *dev,
 	usb_lock_device(udev);
 	if (udev->state != USB_STATE_NOTATTACHED) {
 
-		/* To avoid races, first unconfigure and then remove */
 		usb_set_configuration(udev, -1);
 		rc = usb_remove_device(udev);
 	}
@@ -674,15 +636,14 @@ static ssize_t usb_remove_store(struct device *dev,
 }
 static DEVICE_ATTR_IGNORE_LOCKDEP(remove, 0200, NULL, usb_remove_store);
 
-
 static struct attribute *dev_attrs[] = {
-	/* current configuration's attributes */
+	 
 	&dev_attr_configuration.attr,
 	&dev_attr_bNumInterfaces.attr,
 	&dev_attr_bConfigurationValue.attr,
 	&dev_attr_bmAttributes.attr,
 	&dev_attr_bMaxPower.attr,
-	/* device attributes */
+	 
 	&dev_attr_urbnum.attr,
 	&dev_attr_idVendor.attr,
 	&dev_attr_idProduct.attr,
@@ -701,7 +662,7 @@ static struct attribute *dev_attrs[] = {
 	&dev_attr_quirks.attr,
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_quirks.attr,
-#endif /* MY_ABC_HERE */
+#endif  
 	&dev_attr_avoid_reset_quirk.attr,
 	&dev_attr_authorized.attr,
 	&dev_attr_remove.attr,
@@ -713,9 +674,6 @@ static struct attribute_group dev_attr_grp = {
 	.attrs = dev_attrs,
 };
 
-/* When modifying this list, be sure to modify dev_string_attrs_are_visible()
- * accordingly.
- */
 static struct attribute *dev_string_attrs[] = {
 	&dev_attr_manufacturer.attr,
 	&dev_attr_product.attr,
@@ -753,8 +711,6 @@ const struct attribute_group *usb_device_groups[] = {
 	NULL
 };
 
-/* Binary descriptors */
-
 static ssize_t
 read_descriptors(struct file *filp, struct kobject *kobj,
 		struct bin_attribute *attr,
@@ -767,10 +723,6 @@ read_descriptors(struct file *filp, struct kobject *kobj,
 	int cfgno;
 	void *src;
 
-	/* The binary attribute begins with the device descriptor.
-	 * Following that are the raw descriptor entries for all the
-	 * configurations (config plus subsidiary descriptors).
-	 */
 	for (cfgno = -1; cfgno < udev->descriptor.bNumConfigurations &&
 			nleft > 0; ++cfgno) {
 		if (cfgno < 0) {
@@ -797,7 +749,7 @@ read_descriptors(struct file *filp, struct kobject *kobj,
 static struct bin_attribute dev_bin_attr_descriptors = {
 	.attr = {.name = "descriptors", .mode = 0444},
 	.read = read_descriptors,
-	.size = 18 + 65535,	/* dev descr + max-size raw descriptor */
+	.size = 18 + 65535,	 
 };
 
 int usb_create_sysfs_dev_files(struct usb_device *udev)
@@ -831,7 +783,6 @@ void usb_remove_sysfs_dev_files(struct usb_device *udev)
 	device_remove_bin_file(dev, &dev_bin_attr_descriptors);
 }
 
-/* Interface Accociation Descriptor fields */
 #define usb_intf_assoc_attr(field, format_string)			\
 static ssize_t								\
 show_iad_##field(struct device *dev, struct device_attribute *attr,	\
@@ -850,7 +801,6 @@ usb_intf_assoc_attr(bFunctionClass, "%02x\n")
 usb_intf_assoc_attr(bFunctionSubClass, "%02x\n")
 usb_intf_assoc_attr(bFunctionProtocol, "%02x\n")
 
-/* Interface fields */
 #define usb_intf_attr(field, format_string)				\
 static ssize_t								\
 show_##field(struct device *dev, struct device_attribute *attr,	\
@@ -878,7 +828,7 @@ static ssize_t show_interface_string(struct device *dev,
 
 	intf = to_usb_interface(dev);
 	string = intf->cur_altsetting->string;
-	barrier();		/* The altsetting might change! */
+	barrier();		 
 
 	if (!string)
 		return 0;
@@ -923,7 +873,7 @@ static ssize_t show_supports_autosuspend(struct device *dev,
 	udev = interface_to_usbdev(intf);
 
 	usb_lock_device(udev);
-	/* Devices will be autosuspended even when an interface isn't claimed */
+	 
 	if (!intf->dev.driver ||
 			to_usb_driver(intf->dev.driver)->supports_autosuspend)
 		ret = sprintf(buf, "%u\n", 1);
@@ -992,7 +942,7 @@ void usb_create_sysfs_intf_files(struct usb_interface *intf)
 	if (!alt->string && !(udev->quirks & USB_QUIRK_CONFIG_INTF_STRINGS))
 		alt->string = usb_cache_string(udev, alt->desc.iInterface);
 	if (alt->string && device_create_file(&intf->dev, &dev_attr_interface))
-		;	/* We don't actually care if the function fails. */
+		;	 
 	intf->sysfs_files_created = 1;
 }
 

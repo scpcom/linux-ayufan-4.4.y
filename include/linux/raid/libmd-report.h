@@ -1,7 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-// Copyright (c) 2000-2014 Synology Inc. All rights reserved.
+ 
 #ifndef _LIBMD_REPORT_H
 #define _LIBMD_REPORT_H
 
@@ -16,11 +16,11 @@ void SynoReportBadSector(sector_t sector, unsigned long rw,
 void SynoReportCorrectBadSector(sector_t sector, int md_minor,
 								struct block_device *bdev, const char *szFuncName);
 
-#endif /* MY_ABC_HERE */
+#endif 
 
 #ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
 extern int (*funcSYNOSendAutoRemapLVMEvent)(const char*, unsigned long long, unsigned int);
 extern int (*funcSYNOSendAutoRemapRaidEvent)(unsigned int, unsigned long long, unsigned int);
-#endif /* CONFIG_SYNO_MD_AUTO_REMAP_REPORT */
+#endif 
 
-#endif /* _LIBMD_REPORT_H */
+#endif 

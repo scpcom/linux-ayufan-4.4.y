@@ -1,9 +1,4 @@
-/*
- * Copyright (C) 2001-2003 Sistina Software (UK) Limited.
- *
- * This file is released under the GPL.
- */
-
+ 
 #include "dm.h"
 #include <linux/module.h>
 #include <linux/init.h>
@@ -14,17 +9,11 @@
 
 #define DM_MSG_PREFIX "linear"
 
-/*
- * Linear: maps a linear range of a device.
- */
 struct linear_c {
 	struct dm_dev *dev;
 	sector_t start;
 };
 
-/*
- * Construct a linear mapping: <dev_path> <offset>
- */
 static int linear_ctr(struct dm_target *ti, unsigned int argc, char **argv)
 {
 	struct linear_c *lc;
@@ -119,9 +108,6 @@ static int linear_ioctl(struct dm_target *ti, unsigned int cmd,
 	struct dm_dev *dev = lc->dev;
 	int r = 0;
 
-	/*
-	 * Only pass ioctls through if the device sizes match exactly.
-	 */
 	if (lc->start ||
 	    ti->len != i_size_read(dev->bdev->bd_inode) >> SECTOR_SHIFT)
 		r = scsi_verify_blk_ioctl(NULL, cmd);
@@ -171,7 +157,7 @@ static sector_t linear_lg_sector_get(sector_t sector, struct dm_target *ti)
 	lg_sector = sector - lc->start + ti->begin;
 	return lg_sector;
 }
-#endif /* CONFIG_SYNO_MD_AUTO_REMAP_REPORT */
+#endif 
 
 static struct target_type linear_target = {
 	.name   = "linear",
@@ -186,7 +172,7 @@ static struct target_type linear_target = {
 #ifdef CONFIG_SYNO_MD_AUTO_REMAP_REPORT
 	.lvinfoset = linear_lv_info_set,
 	.lg_sector_get = linear_lg_sector_get,
-#endif /* CONFIG_SYNO_MD_AUTO_REMAP_REPORT */
+#endif 
 	.iterate_devices = linear_iterate_devices,
 };
 

@@ -3,20 +3,16 @@
 #endif
 #ifndef _LINUX_COMPAT_H
 #define _LINUX_COMPAT_H
-/*
- * These are the type definitions for the architecture specific
- * syscall compatibility layer.
- */
-
+ 
 #ifdef CONFIG_COMPAT
 
 #include <linux/stat.h>
-#include <linux/param.h>	/* for HZ */
+#include <linux/param.h>	 
 #include <linux/sem.h>
 #include <linux/socket.h>
 #include <linux/if.h>
 #include <linux/fs.h>
-#include <linux/aio_abi.h>	/* for aio_context_t */
+#include <linux/aio_abi.h>	 
 
 #include <asm/compat.h>
 #include <asm/siginfo.h>
@@ -56,7 +52,7 @@
 #ifndef compat_user_stack_pointer
 #define compat_user_stack_pointer() current_user_stack_pointer()
 #endif
-#ifndef compat_sigaltstack	/* we'll need that for MIPS */
+#ifndef compat_sigaltstack	 
 typedef struct compat_sigaltstack {
 	compat_uptr_t			ss_sp;
 	int				ss_flags;
@@ -142,9 +138,6 @@ struct compat_sigaction {
 	compat_sigset_t			sa_mask __packed;
 };
 
-/*
- * These functions operate strictly on struct compat_time*
- */
 extern int get_compat_timespec(struct timespec *,
 			       const struct compat_timespec __user *);
 extern int put_compat_timespec(const struct timespec *,
@@ -153,11 +146,7 @@ extern int get_compat_timeval(struct timeval *,
 			      const struct compat_timeval __user *);
 extern int put_compat_timeval(const struct timeval *,
 			      struct compat_timeval __user *);
-/*
- * These functions operate on 32- or 64-bit specs depending on
- * COMPAT_USE_64BIT_TIME, hence the void user pointer arguments and the
- * naming as compat_get/put_ rather than get/put_compat_.
- */
+ 
 extern int compat_get_timespec(struct timespec *, const void __user *);
 extern int compat_put_timespec(const struct timespec *, void __user *);
 extern int compat_get_timeval(struct timeval *, const void __user *);
@@ -242,14 +231,14 @@ struct compat_ifmap {
 };
 
 struct compat_if_settings {
-	unsigned int type;	/* Type of physical device or protocol */
-	unsigned int size;	/* Size of the data allocated by the caller */
-	compat_uptr_t ifs_ifsu;	/* union of pointers */
+	unsigned int type;	 
+	unsigned int size;	 
+	compat_uptr_t ifs_ifsu;	 
 };
 
 struct compat_ifreq {
 	union {
-		char	ifrn_name[IFNAMSIZ];    /* if name, e.g. "en0" */
+		char	ifrn_name[IFNAMSIZ];     
 	} ifr_ifrn;
 	union {
 		struct	sockaddr ifru_addr;
@@ -261,7 +250,7 @@ struct compat_ifreq {
 		compat_int_t	ifru_ivalue;
 		compat_int_t	ifru_mtu;
 		struct	compat_ifmap ifru_map;
-		char	ifru_slave[IFNAMSIZ];   /* Just fits the size */
+		char	ifru_slave[IFNAMSIZ];    
 		char	ifru_newname[IFNAMSIZ];
 		compat_caddr_t	ifru_data;
 		struct	compat_if_settings ifru_settings;
@@ -269,7 +258,7 @@ struct compat_ifreq {
 };
 
 struct compat_ifconf {
-	compat_int_t	ifc_len;                /* size of buffer */
+	compat_int_t	ifc_len;                 
 	compat_caddr_t  ifcbuf;
 };
 
@@ -425,10 +414,8 @@ asmlinkage long compat_sys_ptrace(compat_long_t request, compat_long_t pid,
 				  compat_long_t addr, compat_long_t data);
 
 asmlinkage long compat_sys_lookup_dcookie(u32, u32, char __user *, compat_size_t);
-/*
- * epoll (fs/eventpoll.c) compat bits follow ...
- */
-struct epoll_event;	/* fortunately, this one is fixed-layout */
+ 
+struct epoll_event;	 
 asmlinkage long compat_sys_epoll_pwait(int epfd,
 			struct epoll_event __user *events,
 			int maxevents, int timeout,
@@ -691,7 +678,7 @@ asmlinkage long compat_sys_fanotify_mark(int, unsigned int, __u32, __u32,
 
 #ifdef MY_ABC_HERE
 asmlinkage long compat_sys_SYNOUtime(char __user *filename, struct compat_timespec __user *ctime);
-#endif /* MY_ABC_HERE */
+#endif  
 
-#endif /* CONFIG_COMPAT */
-#endif /* _LINUX_COMPAT_H */
+#endif  
+#endif  

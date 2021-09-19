@@ -1,50 +1,7 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-/*
- * This is the Fusion MPT base driver providing common API layer interface
- * for access to MPT (Message Passing Technology) firmware.
- *
- * This code is based on drivers/scsi/mpt2sas/mpt2_base.c
- * Copyright (C) 2007-2012  LSI Corporation
- *  (mailto:DL-MPTFusionLinux@lsi.com)
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * NO WARRANTY
- * THE PROGRAM IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OR
- * CONDITIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED INCLUDING, WITHOUT
- * LIMITATION, ANY WARRANTIES OR CONDITIONS OF TITLE, NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Each Recipient is
- * solely responsible for determining the appropriateness of using and
- * distributing the Program and assumes all risks associated with its
- * exercise of rights under this Agreement, including but not limited to
- * the risks and costs of program errors, damage to or loss of data,
- * programs or equipment, and unavailability or interruption of operations.
-
- * DISCLAIMER OF LIABILITY
- * NEITHER RECIPIENT NOR ANY CONTRIBUTORS SHALL HAVE ANY LIABILITY FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING WITHOUT LIMITATION LOST PROFITS), HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
- * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
- * USE OR DISTRIBUTION OF THE PROGRAM OR THE EXERCISE OF ANY RIGHTS GRANTED
- * HEREUNDER, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES
-
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
- * USA.
- */
-
+ 
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/errno.h>
@@ -67,7 +24,7 @@
 
 static MPT_CALLBACK	mpt_callbacks[MPT_MAX_CALLBACKS];
 
-#define FAULT_POLLING_INTERVAL 1000 /* in milliseconds */
+#define FAULT_POLLING_INTERVAL 1000  
 
 #define MAX_HBA_QUEUE_DEPTH	30000
 #define MAX_CHAIN_DEPTH		100000
@@ -91,10 +48,6 @@ static int disable_discovery = -1;
 module_param(disable_discovery, int, 0);
 MODULE_PARM_DESC(disable_discovery, " disable discovery ");
 
-/**
- * _scsih_set_fwfault_debug - global setting of ioc->fwfault_debug.
- *
- */
 static int
 _scsih_set_fwfault_debug(const char *val, struct kernel_param *kp)
 {
@@ -113,13 +66,6 @@ _scsih_set_fwfault_debug(const char *val, struct kernel_param *kp)
 module_param_call(mpt2sas_fwfault_debug, _scsih_set_fwfault_debug,
     param_get_int, &mpt2sas_fwfault_debug, 0644);
 
-/**
- *  mpt2sas_remove_dead_ioc_func - kthread context to remove dead ioc
- * @arg: input argument, used to derive ioc
- *
- * Return 0 if controller is removed from pci subsystem.
- * Return -1 for other case.
- */
 static int mpt2sas_remove_dead_ioc_func(void *arg)
 {
 		struct MPT2SAS_ADAPTER *ioc = (struct MPT2SAS_ADAPTER *)arg;
@@ -135,13 +81,6 @@ static int mpt2sas_remove_dead_ioc_func(void *arg)
 		return 0;
 }
 
-/**
- * _base_fault_reset_work - workq handling ioc fault conditions
- * @work: input argument, used to derive ioc
- * Context: sleep.
- *
- * Return nothing.
- */
 static void
 _base_fault_reset_work(struct work_struct *work)
 {
@@ -162,34 +101,16 @@ _base_fault_reset_work(struct work_struct *work)
 		printk(MPT2SAS_INFO_FMT "%s : SAS host is non-operational !!!!\n",
 			ioc->name, __func__);
 
-		/* It may be possible that EEH recovery can resolve some of
-		 * pci bus failure issues rather removing the dead ioc function
-		 * by considering controller is in a non-operational state. So
-		 * here priority is given to the EEH recovery. If it doesn't
-		 * not resolve this issue, mpt2sas driver will consider this
-		 * controller to non-operational state and remove the dead ioc
-		 * function.
-		 */
 		if (ioc->non_operational_loop++ < 5) {
 			spin_lock_irqsave(&ioc->ioc_reset_in_progress_lock,
 							 flags);
 			goto rearm_timer;
 		}
 
-		/*
-		 * Call _scsih_flush_pending_cmds callback so that we flush all
-		 * pending commands back to OS. This call is required to aovid
-		 * deadlock at block layer. Dead IOC will fail to do diag reset,
-		 * and this call is safe since dead ioc will never return any
-		 * command back from HW.
-		 */
 		ioc->schedule_dead_ioc_flush_running_cmds(ioc);
-		/*
-		 * Set remove_host flag early since kernel thread will
-		 * take some time to execute.
-		 */
+		 
 		ioc->remove_host = 1;
-		/*Remove the Dead Host */
+		 
 		p = kthread_run(mpt2sas_remove_dead_ioc_func, ioc,
 		    "mpt2sas_dead_ioc_%d", ioc->id);
 		if (IS_ERR(p)) {
@@ -202,7 +123,7 @@ _base_fault_reset_work(struct work_struct *work)
 			ioc->name, __func__);
 		}
 
-		return; /* don't rearm timer */
+		return;  
 	}
 
 	ioc->non_operational_loop = 0;
@@ -227,13 +148,6 @@ _base_fault_reset_work(struct work_struct *work)
 	spin_unlock_irqrestore(&ioc->ioc_reset_in_progress_lock, flags);
 }
 
-/**
- * mpt2sas_base_start_watchdog - start the fault_reset_work_q
- * @ioc: per adapter object
- * Context: sleep.
- *
- * Return nothing.
- */
 void
 mpt2sas_base_start_watchdog(struct MPT2SAS_ADAPTER *ioc)
 {
@@ -242,7 +156,6 @@ mpt2sas_base_start_watchdog(struct MPT2SAS_ADAPTER *ioc)
 	if (ioc->fault_reset_work_q)
 		return;
 
-	/* initialize fault polling */
 	INIT_DELAYED_WORK(&ioc->fault_reset_work, _base_fault_reset_work);
 	snprintf(ioc->fault_reset_work_q_name,
 	    sizeof(ioc->fault_reset_work_q_name), "poll_%d_status", ioc->id);
@@ -261,13 +174,6 @@ mpt2sas_base_start_watchdog(struct MPT2SAS_ADAPTER *ioc)
 	spin_unlock_irqrestore(&ioc->ioc_reset_in_progress_lock, flags);
 }
 
-/**
- * mpt2sas_base_stop_watchdog - stop the fault_reset_work_q
- * @ioc: per adapter object
- * Context: sleep.
- *
- * Return nothing.
- */
 void
 mpt2sas_base_stop_watchdog(struct MPT2SAS_ADAPTER *ioc)
 {
@@ -285,13 +191,6 @@ mpt2sas_base_stop_watchdog(struct MPT2SAS_ADAPTER *ioc)
 	}
 }
 
-/**
- * mpt2sas_base_fault_info - verbose translation of firmware FAULT code
- * @ioc: per adapter object
- * @fault_code: fault code
- *
- * Return nothing.
- */
 void
 mpt2sas_base_fault_info(struct MPT2SAS_ADAPTER *ioc , u16 fault_code)
 {
@@ -299,15 +198,6 @@ mpt2sas_base_fault_info(struct MPT2SAS_ADAPTER *ioc , u16 fault_code)
 	    ioc->name, fault_code);
 }
 
-/**
- * mpt2sas_halt_firmware - halt's mpt controller firmware
- * @ioc: per adapter object
- *
- * For debugging timeout related issues.  Writing 0xCOFFEE00
- * to the doorbell register will halt controller firmware. With
- * the purpose to stop both driver and firmware, the enduser can
- * obtain a ring buffer from controller UART.
- */
 void
 mpt2sas_halt_firmware(struct MPT2SAS_ADAPTER *ioc)
 {
@@ -331,14 +221,7 @@ mpt2sas_halt_firmware(struct MPT2SAS_ADAPTER *ioc)
 }
 
 #ifdef CONFIG_SCSI_MPT2SAS_LOGGING
-/**
- * _base_sas_ioc_info - verbose translation of the ioc status
- * @ioc: per adapter object
- * @mpi_reply: reply mf payload returned from firmware
- * @request_hdr: request mf
- *
- * Return nothing.
- */
+ 
 static void
 _base_sas_ioc_info(struct MPT2SAS_ADAPTER *ioc, MPI2DefaultReply_t *mpi_reply,
      MPI2RequestHeader_t *request_hdr)
@@ -349,7 +232,6 @@ _base_sas_ioc_info(struct MPT2SAS_ADAPTER *ioc, MPI2DefaultReply_t *mpi_reply,
 	u16 frame_sz;
 	char *func_str = NULL;
 
-	/* SCSI_IO, RAID_PASS are handled from _scsih_scsi_ioc_info */
 	if (request_hdr->Function == MPI2_FUNCTION_SCSI_IO_REQUEST ||
 	    request_hdr->Function == MPI2_FUNCTION_RAID_SCSI_IO_PASSTHROUGH ||
 	    request_hdr->Function == MPI2_FUNCTION_EVENT_NOTIFICATION)
@@ -359,10 +241,6 @@ _base_sas_ioc_info(struct MPT2SAS_ADAPTER *ioc, MPI2DefaultReply_t *mpi_reply,
 		return;
 
 	switch (ioc_status) {
-
-/****************************************************************************
-*  Common IOCStatus values for all replies
-****************************************************************************/
 
 	case MPI2_IOCSTATUS_INVALID_FUNCTION:
 		desc = "invalid function";
@@ -392,10 +270,6 @@ _base_sas_ioc_info(struct MPT2SAS_ADAPTER *ioc, MPI2DefaultReply_t *mpi_reply,
 		desc = "op state not supported";
 		break;
 
-/****************************************************************************
-*  Config IOCStatus values
-****************************************************************************/
-
 	case MPI2_IOCSTATUS_CONFIG_INVALID_ACTION:
 		desc = "config invalid action";
 		break;
@@ -415,10 +289,6 @@ _base_sas_ioc_info(struct MPT2SAS_ADAPTER *ioc, MPI2DefaultReply_t *mpi_reply,
 		desc = "config cant commit";
 		break;
 
-/****************************************************************************
-*  SCSI IO Reply
-****************************************************************************/
-
 	case MPI2_IOCSTATUS_SCSI_RECOVERED_ERROR:
 	case MPI2_IOCSTATUS_SCSI_INVALID_DEVHANDLE:
 	case MPI2_IOCSTATUS_SCSI_DEVICE_NOT_THERE:
@@ -433,10 +303,6 @@ _base_sas_ioc_info(struct MPT2SAS_ADAPTER *ioc, MPI2DefaultReply_t *mpi_reply,
 	case MPI2_IOCSTATUS_SCSI_EXT_TERMINATED:
 		break;
 
-/****************************************************************************
-*  For use by SCSI Initiator and SCSI Target end-to-end data protection
-****************************************************************************/
-
 	case MPI2_IOCSTATUS_EEDP_GUARD_ERROR:
 		desc = "eedp guard error";
 		break;
@@ -446,10 +312,6 @@ _base_sas_ioc_info(struct MPT2SAS_ADAPTER *ioc, MPI2DefaultReply_t *mpi_reply,
 	case MPI2_IOCSTATUS_EEDP_APP_TAG_ERROR:
 		desc = "eedp app tag error";
 		break;
-
-/****************************************************************************
-*  SCSI Target values
-****************************************************************************/
 
 	case MPI2_IOCSTATUS_TARGET_INVALID_IO_INDEX:
 		desc = "target invalid io index";
@@ -482,20 +344,12 @@ _base_sas_ioc_info(struct MPT2SAS_ADAPTER *ioc, MPI2DefaultReply_t *mpi_reply,
 		desc = "target nak received";
 		break;
 
-/****************************************************************************
-*  Serial Attached SCSI values
-****************************************************************************/
-
 	case MPI2_IOCSTATUS_SAS_SMP_REQUEST_FAILED:
 		desc = "smp request failed";
 		break;
 	case MPI2_IOCSTATUS_SAS_SMP_DATA_OVERRUN:
 		desc = "smp data overrun";
 		break;
-
-/****************************************************************************
-*  Diagnostic Buffer Post / Diagnostic Release values
-****************************************************************************/
 
 	case MPI2_IOCSTATUS_DIAGNOSTIC_RELEASED:
 		desc = "diagnostic released";
@@ -548,13 +402,6 @@ _base_sas_ioc_info(struct MPT2SAS_ADAPTER *ioc, MPI2DefaultReply_t *mpi_reply,
 	_debug_dump_mf(request_hdr, frame_sz/4);
 }
 
-/**
- * _base_display_event_data - verbose translation of firmware asyn events
- * @ioc: per adapter object
- * @mpi_reply: reply mf payload returned from firmware
- *
- * Return nothing.
- */
 static void
 _base_display_event_data(struct MPT2SAS_ADAPTER *ioc,
     Mpi2EventNotificationReply_t *mpi_reply)
@@ -640,13 +487,6 @@ _base_display_event_data(struct MPT2SAS_ADAPTER *ioc,
 }
 #endif
 
-/**
- * _base_sas_log_info - verbose translation of firmware log info
- * @ioc: per adapter object
- * @log_info: log info
- *
- * Return nothing.
- */
 static void
 _base_sas_log_info(struct MPT2SAS_ADAPTER *ioc , u32 log_info)
 {
@@ -663,14 +503,12 @@ _base_sas_log_info(struct MPT2SAS_ADAPTER *ioc , u32 log_info)
 	char *originator_str = NULL;
 
 	sas_loginfo.loginfo = log_info;
-	if (sas_loginfo.dw.bus_type != 3 /*SAS*/)
+	if (sas_loginfo.dw.bus_type != 3  )
 		return;
 
-	/* each nexus loss loginfo */
 	if (log_info == 0x31170000)
 		return;
 
-	/* eat the loginfos associated with task aborts */
 	if (ioc->ignore_loginfos && (log_info == 0x30050000 || log_info ==
 	    0x31140000 || log_info == 0x31130000))
 		return;
@@ -696,15 +534,6 @@ _base_sas_log_info(struct MPT2SAS_ADAPTER *ioc , u32 log_info)
 	     sas_loginfo.dw.subcode);
 }
 
-/**
- * _base_display_reply_info -
- * @ioc: per adapter object
- * @smid: system request message index
- * @msix_index: MSIX table index supplied by the OS
- * @reply: reply message frame(lower 32bit addr)
- *
- * Return nothing.
- */
 static void
 _base_display_reply_info(struct MPT2SAS_ADAPTER *ioc, u16 smid, u8 msix_index,
     u32 reply)
@@ -730,16 +559,6 @@ _base_display_reply_info(struct MPT2SAS_ADAPTER *ioc, u16 smid, u8 msix_index,
 		_base_sas_log_info(ioc, le32_to_cpu(mpi_reply->IOCLogInfo));
 }
 
-/**
- * mpt2sas_base_done - base internal command completion routine
- * @ioc: per adapter object
- * @smid: system request message index
- * @msix_index: MSIX table index supplied by the OS
- * @reply: reply message frame(lower 32bit addr)
- *
- * Return 1 meaning mf should be freed from _base_interrupt
- *        0 means the mf is freed from this function.
- */
 u8
 mpt2sas_base_done(struct MPT2SAS_ADAPTER *ioc, u16 smid, u8 msix_index,
     u32 reply)
@@ -764,15 +583,6 @@ mpt2sas_base_done(struct MPT2SAS_ADAPTER *ioc, u16 smid, u8 msix_index,
 	return 1;
 }
 
-/**
- * _base_async_event - main callback handler for firmware asyn events
- * @ioc: per adapter object
- * @msix_index: MSIX table index supplied by the OS
- * @reply: reply message frame(lower 32bit addr)
- *
- * Return 1 meaning mf should be freed from _base_interrupt
- *        0 means the mf is freed from this function.
- */
 static u8
 _base_async_event(struct MPT2SAS_ADAPTER *ioc, u8 msix_index, u32 reply)
 {
@@ -802,28 +612,19 @@ _base_async_event(struct MPT2SAS_ADAPTER *ioc, u8 msix_index, u32 reply)
 	ack_request->Function = MPI2_FUNCTION_EVENT_ACK;
 	ack_request->Event = mpi_reply->Event;
 	ack_request->EventContext = mpi_reply->EventContext;
-	ack_request->VF_ID = 0;  /* TODO */
+	ack_request->VF_ID = 0;   
 	ack_request->VP_ID = 0;
 	mpt2sas_base_put_smid_default(ioc, smid);
 
  out:
 
-	/* scsih callback handler */
 	mpt2sas_scsih_event_callback(ioc, msix_index, reply);
 
-	/* ctl callback handler */
 	mpt2sas_ctl_event_callback(ioc, msix_index, reply);
 
 	return 1;
 }
 
-/**
- * _base_get_cb_idx - obtain the callback index
- * @ioc: per adapter object
- * @smid: system request message index
- *
- * Return callback index.
- */
 static u8
 _base_get_cb_idx(struct MPT2SAS_ADAPTER *ioc, u16 smid)
 {
@@ -844,14 +645,6 @@ _base_get_cb_idx(struct MPT2SAS_ADAPTER *ioc, u16 smid)
 	return cb_idx;
 }
 
-/**
- * _base_mask_interrupts - disable interrupts
- * @ioc: per adapter object
- *
- * Disabling ResetIRQ, Reply and Doorbell Interrupts
- *
- * Return nothing.
- */
 static void
 _base_mask_interrupts(struct MPT2SAS_ADAPTER *ioc)
 {
@@ -864,14 +657,6 @@ _base_mask_interrupts(struct MPT2SAS_ADAPTER *ioc)
 	readl(&ioc->chip->HostInterruptMask);
 }
 
-/**
- * _base_unmask_interrupts - enable interrupts
- * @ioc: per adapter object
- *
- * Enabling only Reply Interrupts
- *
- * Return nothing.
- */
 static void
 _base_unmask_interrupts(struct MPT2SAS_ADAPTER *ioc)
 {
@@ -891,14 +676,6 @@ union reply_descriptor {
 	} u;
 };
 
-/**
- * _base_interrupt - MPT adapter (IOC) specific interrupt handler.
- * @irq: irq number (not used)
- * @bus_id: bus identifier cookie == pointer to MPT_ADAPTER structure
- * @r: pt_regs pointer (not used)
- *
- * Return IRQ_HANDLE if processed, else IRQ_NONE.
- */
 static irqreturn_t
 _base_interrupt(int irq, void *bus_id)
 {
@@ -965,7 +742,6 @@ _base_interrupt(int irq, void *bus_id)
 		if (!smid)
 			_base_async_event(ioc, msix_index, reply);
 
-		/* reply free queue handling */
 		if (reply) {
 			ioc->reply_free_host_index =
 			    (ioc->reply_free_host_index ==
@@ -1016,11 +792,6 @@ _base_interrupt(int irq, void *bus_id)
 	return IRQ_HANDLED;
 }
 
-/**
- * _base_is_controller_msix_enabled - is controller support muli-reply queues
- * @ioc: per adapter object
- *
- */
 static inline int
 _base_is_controller_msix_enabled(struct MPT2SAS_ADAPTER *ioc)
 {
@@ -1028,56 +799,30 @@ _base_is_controller_msix_enabled(struct MPT2SAS_ADAPTER *ioc)
 	    MPI2_IOCFACTS_CAPABILITY_MSI_X_INDEX) && ioc->msix_enable;
 }
 
-/**
- * mpt2sas_base_flush_reply_queues - flushing the MSIX reply queues
- * @ioc: per adapter object
- * Context: ISR conext
- *
- * Called when a Task Management request has completed. We want
- * to flush the other reply queues so all the outstanding IO has been
- * completed back to OS before we process the TM completetion.
- *
- * Return nothing.
- */
 void
 mpt2sas_base_flush_reply_queues(struct MPT2SAS_ADAPTER *ioc)
 {
 	struct adapter_reply_queue *reply_q;
 
-	/* If MSIX capability is turned off
-	 * then multi-queues are not enabled
-	 */
 	if (!_base_is_controller_msix_enabled(ioc))
 		return;
 
 	list_for_each_entry(reply_q, &ioc->reply_queue_list, list) {
 		if (ioc->shost_recovery)
 			return;
-		/* TMs are on msix_index == 0 */
+		 
 		if (reply_q->msix_index == 0)
 			continue;
 		_base_interrupt(reply_q->vector, (void *)reply_q);
 	}
 }
 
-/**
- * mpt2sas_base_release_callback_handler - clear interrupt callback handler
- * @cb_idx: callback index
- *
- * Return nothing.
- */
 void
 mpt2sas_base_release_callback_handler(u8 cb_idx)
 {
 	mpt_callbacks[cb_idx] = NULL;
 }
 
-/**
- * mpt2sas_base_register_callback_handler - obtain index for the interrupt callback handler
- * @cb_func: callback function
- *
- * Returns cb_func.
- */
 u8
 mpt2sas_base_register_callback_handler(MPT_CALLBACK cb_func)
 {
@@ -1091,11 +836,6 @@ mpt2sas_base_register_callback_handler(MPT_CALLBACK cb_func)
 	return cb_idx;
 }
 
-/**
- * mpt2sas_base_initialize_callback_handler - initialize the interrupt callback handler
- *
- * Return nothing.
- */
 void
 mpt2sas_base_initialize_callback_handler(void)
 {
@@ -1105,17 +845,6 @@ mpt2sas_base_initialize_callback_handler(void)
 		mpt2sas_base_release_callback_handler(cb_idx);
 }
 
-/**
- * mpt2sas_base_build_zero_len_sge - build zero length sg entry
- * @ioc: per adapter object
- * @paddr: virtual address for SGE
- *
- * Create a zero length scatter gather entry to insure the IOCs hardware has
- * something to use if the target device goes brain dead and tries
- * to send data even when none is asked for.
- *
- * Return nothing.
- */
 void
 mpt2sas_base_build_zero_len_sge(struct MPT2SAS_ADAPTER *ioc, void *paddr)
 {
@@ -1126,14 +855,6 @@ mpt2sas_base_build_zero_len_sge(struct MPT2SAS_ADAPTER *ioc, void *paddr)
 	ioc->base_add_sg_single(paddr, flags_length, -1);
 }
 
-/**
- * _base_add_sg_single_32 - Place a simple 32 bit SGE at address pAddr.
- * @paddr: virtual address for SGE
- * @flags_length: SGE flags and data transfer length
- * @dma_addr: Physical address
- *
- * Return nothing.
- */
 static void
 _base_add_sg_single_32(void *paddr, u32 flags_length, dma_addr_t dma_addr)
 {
@@ -1145,14 +866,6 @@ _base_add_sg_single_32(void *paddr, u32 flags_length, dma_addr_t dma_addr)
 	sgel->Address = cpu_to_le32(dma_addr);
 }
 
-/**
- * _base_add_sg_single_64 - Place a simple 64 bit SGE at address pAddr.
- * @paddr: virtual address for SGE
- * @flags_length: SGE flags and data transfer length
- * @dma_addr: Physical address
- *
- * Return nothing.
- */
 static void
 _base_add_sg_single_64(void *paddr, u32 flags_length, dma_addr_t dma_addr)
 {
@@ -1166,13 +879,6 @@ _base_add_sg_single_64(void *paddr, u32 flags_length, dma_addr_t dma_addr)
 
 #define convert_to_kb(x) ((x) << (PAGE_SHIFT - 10))
 
-/**
- * _base_config_dma_addressing - set dma addressing
- * @ioc: per adapter object
- * @pdev: PCI device struct
- *
- * Returns 0 for success, non-zero for failure.
- */
 static int
 _base_config_dma_addressing(struct MPT2SAS_ADAPTER *ioc, struct pci_dev *pdev)
 {
@@ -1208,21 +914,12 @@ _base_config_dma_addressing(struct MPT2SAS_ADAPTER *ioc, struct pci_dev *pdev)
 	return 0;
 }
 
-/**
- * _base_check_enable_msix - checks MSIX capabable.
- * @ioc: per adapter object
- *
- * Check to see if card is capable of MSIX, and set number
- * of available msix vectors
- */
 static int
 _base_check_enable_msix(struct MPT2SAS_ADAPTER *ioc)
 {
 	int base;
 	u16 message_control;
 
-	/* Check whether controller SAS2008 B0 controller,
-	   if it is SAS2008 B0 controller use IO-APIC instead of MSIX */
 	if (ioc->pdev->device == MPI2_MFGPAGE_DEVID_SAS2008 &&
 	    ioc->pdev->revision == 0x01) {
 		return -EINVAL;
@@ -1235,8 +932,6 @@ _base_check_enable_msix(struct MPT2SAS_ADAPTER *ioc)
 		return -EINVAL;
 	}
 
-	/* get msix vector count */
-	/* NUMA_IO not supported for older controllers */
 	if (ioc->pdev->device == MPI2_MFGPAGE_DEVID_SAS2004 ||
 	    ioc->pdev->device == MPI2_MFGPAGE_DEVID_SAS2008 ||
 	    ioc->pdev->device == MPI2_MFGPAGE_DEVID_SAS2108_1 ||
@@ -1255,12 +950,6 @@ _base_check_enable_msix(struct MPT2SAS_ADAPTER *ioc)
 	return 0;
 }
 
-/**
- * _base_free_irq - free irq
- * @ioc: per adapter object
- *
- * Freeing respective reply_queue from the list.
- */
 static void
 _base_free_irq(struct MPT2SAS_ADAPTER *ioc)
 {
@@ -1277,14 +966,6 @@ _base_free_irq(struct MPT2SAS_ADAPTER *ioc)
 	}
 }
 
-/**
- * _base_request_irq - request irq
- * @ioc: per adapter object
- * @index: msix index into vector table
- * @vector: irq vector
- *
- * Inserting respective reply_queue into the list.
- */
 static int
 _base_request_irq(struct MPT2SAS_ADAPTER *ioc, u8 index, u32 vector)
 {
@@ -1321,15 +1002,6 @@ _base_request_irq(struct MPT2SAS_ADAPTER *ioc, u8 index, u32 vector)
 	return 0;
 }
 
-/**
- * _base_assign_reply_queues - assigning msix index for each cpu
- * @ioc: per adapter object
- *
- * The enduser would need to set the affinity via /proc/irq/#/smp_affinity
- *
- * It would nice if we could call irq_set_affinity, however it is not
- * an exported symbol
- */
 static void
 _base_assign_reply_queues(struct MPT2SAS_ADAPTER *ioc)
 {
@@ -1341,9 +1013,7 @@ _base_assign_reply_queues(struct MPT2SAS_ADAPTER *ioc)
 		return;
 
 	memset(ioc->cpu_msix_table, 0, ioc->cpu_msix_table_sz);
-	/* when there are more cpus than available msix vectors,
-	 * then group cpus togeather on same irq
-	 */
+	 
 	if (ioc->cpu_count > ioc->msix_vector_count) {
 		grouping = ioc->cpu_count / ioc->msix_vector_count;
 		grouping_mod = ioc->cpu_count % ioc->msix_vector_count;
@@ -1382,11 +1052,6 @@ _base_assign_reply_queues(struct MPT2SAS_ADAPTER *ioc)
 	}
 }
 
-/**
- * _base_disable_msix - disables msix
- * @ioc: per adapter object
- *
- */
 static void
 _base_disable_msix(struct MPT2SAS_ADAPTER *ioc)
 {
@@ -1396,11 +1061,6 @@ _base_disable_msix(struct MPT2SAS_ADAPTER *ioc)
 	}
 }
 
-/**
- * _base_enable_msix - enables msix, failback to io_apic
- * @ioc: per adapter object
- *
- */
 static int
 _base_enable_msix(struct MPT2SAS_ADAPTER *ioc)
 {
@@ -1457,7 +1117,6 @@ _base_enable_msix(struct MPT2SAS_ADAPTER *ioc)
 	kfree(entries);
 	return 0;
 
-/* failback to io_apic interrupt routing */
  try_ioapic:
 
 	r = _base_request_irq(ioc, 0, ioc->pdev->irq);
@@ -1465,12 +1124,6 @@ _base_enable_msix(struct MPT2SAS_ADAPTER *ioc)
 	return r;
 }
 
-/**
- * mpt2sas_base_map_resources - map in controller resources (io/irq/memap)
- * @ioc: per adapter object
- *
- * Returns 0 for success, non-zero for failure.
- */
 int
 mpt2sas_base_map_resources(struct MPT2SAS_ADAPTER *ioc)
 {
@@ -1500,7 +1153,6 @@ mpt2sas_base_map_resources(struct MPT2SAS_ADAPTER *ioc)
 		goto out_fail;
 	}
 
-	/* AER (Advanced Error Reporting) hooks */
 	pci_enable_pcie_error_reporting(pdev);
 
 	pci_set_master(pdev);
@@ -1521,7 +1173,7 @@ mpt2sas_base_map_resources(struct MPT2SAS_ADAPTER *ioc)
 		} else {
 			if (memap_sz)
 				continue;
-			/* verify memory resource is valid before using */
+			 
 			if (pci_resource_flags(pdev, i) & IORESOURCE_MEM) {
 				ioc->chip_phys = pci_resource_start(pdev, i);
 				chip_phys = (u64)ioc->chip_phys;
@@ -1552,7 +1204,6 @@ mpt2sas_base_map_resources(struct MPT2SAS_ADAPTER *ioc)
 	printk(MPT2SAS_INFO_FMT "ioport(0x%016llx), size(%d)\n",
 	    ioc->name, (unsigned long long)pio_chip, pio_sz);
 
-	/* Save PCI configuration state for recovery from PCI AER/EEH errors */
 	pci_save_state(pdev);
 
 	return 0;
@@ -1567,39 +1218,18 @@ mpt2sas_base_map_resources(struct MPT2SAS_ADAPTER *ioc)
 	return r;
 }
 
-/**
- * mpt2sas_base_get_msg_frame - obtain request mf pointer
- * @ioc: per adapter object
- * @smid: system request message index(smid zero is invalid)
- *
- * Returns virt pointer to message frame.
- */
 void *
 mpt2sas_base_get_msg_frame(struct MPT2SAS_ADAPTER *ioc, u16 smid)
 {
 	return (void *)(ioc->request + (smid * ioc->request_sz));
 }
 
-/**
- * mpt2sas_base_get_sense_buffer - obtain a sense buffer assigned to a mf request
- * @ioc: per adapter object
- * @smid: system request message index
- *
- * Returns virt pointer to sense buffer.
- */
 void *
 mpt2sas_base_get_sense_buffer(struct MPT2SAS_ADAPTER *ioc, u16 smid)
 {
 	return (void *)(ioc->sense + ((smid - 1) * SCSI_SENSE_BUFFERSIZE));
 }
 
-/**
- * mpt2sas_base_get_sense_buffer_dma - obtain a sense buffer assigned to a mf request
- * @ioc: per adapter object
- * @smid: system request message index
- *
- * Returns phys pointer to the low 32bit address of the sense buffer.
- */
 __le32
 mpt2sas_base_get_sense_buffer_dma(struct MPT2SAS_ADAPTER *ioc, u16 smid)
 {
@@ -1607,13 +1237,6 @@ mpt2sas_base_get_sense_buffer_dma(struct MPT2SAS_ADAPTER *ioc, u16 smid)
 			((smid - 1) * SCSI_SENSE_BUFFERSIZE));
 }
 
-/**
- * mpt2sas_base_get_reply_virt_addr - obtain reply frames virt address
- * @ioc: per adapter object
- * @phys_addr: lower 32 physical addr of the reply
- *
- * Converts 32bit lower physical addr into a virt address.
- */
 void *
 mpt2sas_base_get_reply_virt_addr(struct MPT2SAS_ADAPTER *ioc, u32 phys_addr)
 {
@@ -1622,13 +1245,6 @@ mpt2sas_base_get_reply_virt_addr(struct MPT2SAS_ADAPTER *ioc, u32 phys_addr)
 	return ioc->reply + (phys_addr - (u32)ioc->reply_dma);
 }
 
-/**
- * mpt2sas_base_get_smid - obtain a free smid from internal queue
- * @ioc: per adapter object
- * @cb_idx: callback index
- *
- * Returns smid (zero is invalid)
- */
 u16
 mpt2sas_base_get_smid(struct MPT2SAS_ADAPTER *ioc, u8 cb_idx)
 {
@@ -1653,14 +1269,6 @@ mpt2sas_base_get_smid(struct MPT2SAS_ADAPTER *ioc, u8 cb_idx)
 	return smid;
 }
 
-/**
- * mpt2sas_base_get_smid_scsiio - obtain a free smid from scsiio queue
- * @ioc: per adapter object
- * @cb_idx: callback index
- * @scmd: pointer to scsi command object
- *
- * Returns smid (zero is invalid)
- */
 u16
 mpt2sas_base_get_smid_scsiio(struct MPT2SAS_ADAPTER *ioc, u8 cb_idx,
     struct scsi_cmnd *scmd)
@@ -1687,13 +1295,6 @@ mpt2sas_base_get_smid_scsiio(struct MPT2SAS_ADAPTER *ioc, u8 cb_idx,
 	return smid;
 }
 
-/**
- * mpt2sas_base_get_smid_hpr - obtain a free smid from hi-priority queue
- * @ioc: per adapter object
- * @cb_idx: callback index
- *
- * Returns smid (zero is invalid)
- */
 u16
 mpt2sas_base_get_smid_hpr(struct MPT2SAS_ADAPTER *ioc, u8 cb_idx)
 {
@@ -1716,13 +1317,6 @@ mpt2sas_base_get_smid_hpr(struct MPT2SAS_ADAPTER *ioc, u8 cb_idx)
 	return smid;
 }
 
-/**
- * mpt2sas_base_free_smid - put smid back on free_list
- * @ioc: per adapter object
- * @smid: system request message index
- *
- * Return nothing.
- */
 void
 mpt2sas_base_free_smid(struct MPT2SAS_ADAPTER *ioc, u16 smid)
 {
@@ -1732,7 +1326,7 @@ mpt2sas_base_free_smid(struct MPT2SAS_ADAPTER *ioc, u16 smid)
 
 	spin_lock_irqsave(&ioc->scsi_lookup_lock, flags);
 	if (smid < ioc->hi_priority_smid) {
-		/* scsiio queue */
+		 
 		i = smid - 1;
 		if (!list_empty(&ioc->scsi_lookup[i].chain_list)) {
 			list_for_each_entry_safe(chain_req, next,
@@ -1749,10 +1343,6 @@ mpt2sas_base_free_smid(struct MPT2SAS_ADAPTER *ioc, u16 smid)
 		    &ioc->free_list);
 		spin_unlock_irqrestore(&ioc->scsi_lookup_lock, flags);
 
-		/*
-		 * See _wait_for_commands_to_complete() call with regards
-		 * to this code.
-		 */
 		if (ioc->shost_recovery && ioc->pending_io_count) {
 			if (ioc->pending_io_count == 1)
 				wake_up(&ioc->reset_wq);
@@ -1760,13 +1350,13 @@ mpt2sas_base_free_smid(struct MPT2SAS_ADAPTER *ioc, u16 smid)
 		}
 		return;
 	} else if (smid < ioc->internal_smid) {
-		/* hi-priority */
+		 
 		i = smid - ioc->hi_priority_smid;
 		ioc->hpr_lookup[i].cb_idx = 0xFF;
 		list_add_tail(&ioc->hpr_lookup[i].tracker_list,
 		    &ioc->hpr_free_list);
 	} else if (smid <= ioc->hba_queue_depth) {
-		/* internal queue */
+		 
 		i = smid - ioc->internal_smid;
 		ioc->internal_lookup[i].cb_idx = 0xFF;
 		list_add_tail(&ioc->internal_lookup[i].tracker_list,
@@ -1775,17 +1365,6 @@ mpt2sas_base_free_smid(struct MPT2SAS_ADAPTER *ioc, u16 smid)
 	spin_unlock_irqrestore(&ioc->scsi_lookup_lock, flags);
 }
 
-/**
- * _base_writeq - 64 bit write to MMIO
- * @ioc: per adapter object
- * @b: data payload
- * @addr: address in MMIO space
- * @writeq_lock: spin lock
- *
- * Glue for handling an atomic 64 bit word to MMIO. This special handling takes
- * care of 32 bit environment where its not quarenteed to send the entire word
- * in one transfer.
- */
 #ifndef writeq
 static inline void _base_writeq(__u64 b, volatile void __iomem *addr,
     spinlock_t *writeq_lock)
@@ -1812,14 +1391,6 @@ _base_get_msix_index(struct MPT2SAS_ADAPTER *ioc)
 	return ioc->cpu_msix_table[raw_smp_processor_id()];
 }
 
-/**
- * mpt2sas_base_put_smid_scsi_io - send SCSI_IO request to firmware
- * @ioc: per adapter object
- * @smid: system request message index
- * @handle: device handle
- *
- * Return nothing.
- */
 void
 mpt2sas_base_put_smid_scsi_io(struct MPT2SAS_ADAPTER *ioc, u16 smid, u16 handle)
 {
@@ -1835,13 +1406,6 @@ mpt2sas_base_put_smid_scsi_io(struct MPT2SAS_ADAPTER *ioc, u16 smid, u16 handle)
 	    &ioc->scsi_lookup_lock);
 }
 
-/**
- * mpt2sas_base_put_smid_hi_priority - send Task Management request to firmware
- * @ioc: per adapter object
- * @smid: system request message index
- *
- * Return nothing.
- */
 void
 mpt2sas_base_put_smid_hi_priority(struct MPT2SAS_ADAPTER *ioc, u16 smid)
 {
@@ -1858,13 +1422,6 @@ mpt2sas_base_put_smid_hi_priority(struct MPT2SAS_ADAPTER *ioc, u16 smid)
 	    &ioc->scsi_lookup_lock);
 }
 
-/**
- * mpt2sas_base_put_smid_default - Default, primarily used for config pages
- * @ioc: per adapter object
- * @smid: system request message index
- *
- * Return nothing.
- */
 void
 mpt2sas_base_put_smid_default(struct MPT2SAS_ADAPTER *ioc, u16 smid)
 {
@@ -1880,14 +1437,6 @@ mpt2sas_base_put_smid_default(struct MPT2SAS_ADAPTER *ioc, u16 smid)
 	    &ioc->scsi_lookup_lock);
 }
 
-/**
- * mpt2sas_base_put_smid_target_assist - send Target Assist/Status to firmware
- * @ioc: per adapter object
- * @smid: system request message index
- * @io_index: value used to track the IO
- *
- * Return nothing.
- */
 void
 mpt2sas_base_put_smid_target_assist(struct MPT2SAS_ADAPTER *ioc, u16 smid,
     u16 io_index)
@@ -1905,12 +1454,6 @@ mpt2sas_base_put_smid_target_assist(struct MPT2SAS_ADAPTER *ioc, u16 smid,
 	    &ioc->scsi_lookup_lock);
 }
 
-/**
- * _base_display_dell_branding - Disply branding string
- * @ioc: per adapter object
- *
- * Return nothing.
- */
 static void
 _base_display_dell_branding(struct MPT2SAS_ADAPTER *ioc)
 {
@@ -1963,12 +1506,6 @@ _base_display_dell_branding(struct MPT2SAS_ADAPTER *ioc)
 	    ioc->pdev->subsystem_device);
 }
 
-/**
- * _base_display_intel_branding - Display branding string
- * @ioc: per adapter object
- *
- * Return nothing.
- */
 static void
 _base_display_intel_branding(struct MPT2SAS_ADAPTER *ioc)
 {
@@ -2031,12 +1568,6 @@ _base_display_intel_branding(struct MPT2SAS_ADAPTER *ioc)
 	}
 }
 
-/**
- * _base_display_hp_branding - Display branding string
- * @ioc: per adapter object
- *
- * Return nothing.
- */
 static void
 _base_display_hp_branding(struct MPT2SAS_ADAPTER *ioc)
 {
@@ -2079,12 +1610,6 @@ _base_display_hp_branding(struct MPT2SAS_ADAPTER *ioc)
 	}
 }
 
-/**
- * _base_display_ioc_capabilities - Disply IOC's capabilities.
- * @ioc: per adapter object
- *
- * Return nothing.
- */
 static void
 _base_display_ioc_capabilities(struct MPT2SAS_ADAPTER *ioc)
 {
@@ -2190,18 +1715,6 @@ _base_display_ioc_capabilities(struct MPT2SAS_ADAPTER *ioc)
 	printk(")\n");
 }
 
-/**
- * mpt2sas_base_update_missing_delay - change the missing delay timers
- * @ioc: per adapter object
- * @device_missing_delay: amount of time till device is reported missing
- * @io_missing_delay: interval IO is returned when there is a missing device
- *
- * Return nothing.
- *
- * Passed on the command line, this function will modify the device missing
- * delay, as well as the io missing delay. This should be called at driver
- * load time.
- */
 void
 mpt2sas_base_update_missing_delay(struct MPT2SAS_ADAPTER *ioc,
 	u16 device_missing_delay, u8 io_missing_delay)
@@ -2240,7 +1753,6 @@ mpt2sas_base_update_missing_delay(struct MPT2SAS_ADAPTER *ioc,
 		goto out;
 	}
 
-	/* device missing delay */
 	dmd = sas_iounit_pg1->ReportDeviceMissingDelay;
 	if (dmd & MPI2_SASIOUNIT1_REPORT_MISSING_UNIT_16)
 		dmd = (dmd & MPI2_SASIOUNIT1_REPORT_MISSING_TIMEOUT_MASK) * 16;
@@ -2256,7 +1768,6 @@ mpt2sas_base_update_missing_delay(struct MPT2SAS_ADAPTER *ioc,
 		dmd = device_missing_delay;
 	sas_iounit_pg1->ReportDeviceMissingDelay = dmd;
 
-	/* io missing delay */
 	io_missing_delay_original = sas_iounit_pg1->IODeviceMissingDelay;
 	sas_iounit_pg1->IODeviceMissingDelay = io_missing_delay;
 
@@ -2281,12 +1792,6 @@ out:
 	kfree(sas_iounit_pg1);
 }
 
-/**
- * _base_static_config_pages - static start of day config pages
- * @ioc: per adapter object
- *
- * Return nothing.
- */
 static void
 _base_static_config_pages(struct MPT2SAS_ADAPTER *ioc)
 {
@@ -2304,10 +1809,6 @@ _base_static_config_pages(struct MPT2SAS_ADAPTER *ioc)
 	mpt2sas_config_get_iounit_pg1(ioc, &mpi_reply, &ioc->iounit_pg1);
 	_base_display_ioc_capabilities(ioc);
 
-	/*
-	 * Enable task_set_full handling in iounit_pg1 when the
-	 * facts capabilities indicate that its supported.
-	 */
 	iounit_pg1_flags = le32_to_cpu(ioc->iounit_pg1.Flags);
 	if ((ioc->facts.IOCCapabilities &
 	    MPI2_IOCFACTS_CAPABILITY_TASK_SET_FULL_HANDLING))
@@ -2321,14 +1822,6 @@ _base_static_config_pages(struct MPT2SAS_ADAPTER *ioc)
 
 }
 
-/**
- * _base_release_memory_pools - release memory
- * @ioc: per adapter object
- *
- * Free memory allocated from _base_allocate_memory_pools.
- *
- * Return nothing.
- */
 static void
 _base_release_memory_pools(struct MPT2SAS_ADAPTER *ioc)
 {
@@ -2412,13 +1905,6 @@ _base_release_memory_pools(struct MPT2SAS_ADAPTER *ioc)
 	}
 }
 
-/**
- * _base_allocate_memory_pools - allocate start of day memory pools
- * @ioc: per adapter object
- * @sleep_flag: CAN_SLEEP or NO_SLEEP
- *
- * Returns 0 success, anything else error
- */
 static int
 _base_allocate_memory_pools(struct MPT2SAS_ADAPTER *ioc,  int sleep_flag)
 {
@@ -2436,7 +1922,6 @@ _base_allocate_memory_pools(struct MPT2SAS_ADAPTER *ioc,  int sleep_flag)
 	retry_sz = 0;
 	facts = &ioc->facts;
 
-	/* command line tunables  for max sgl entries */
 	if (max_sgl_entries != -1) {
 		ioc->shost->sg_tablesize = (max_sgl_entries <
 		    MPT2SAS_SG_DEPTH) ? max_sgl_entries :
@@ -2445,7 +1930,6 @@ _base_allocate_memory_pools(struct MPT2SAS_ADAPTER *ioc,  int sleep_flag)
 		ioc->shost->sg_tablesize = MPT2SAS_SG_DEPTH;
 	}
 
-	/* command line tunables  for max controller queue depth */
 	if (max_queue_depth != -1 && max_queue_depth != 0) {
 		max_request_credit = min_t(u16, max_queue_depth +
 			ioc->hi_priority_depth + ioc->internal_depth,
@@ -2460,20 +1944,17 @@ _base_allocate_memory_pools(struct MPT2SAS_ADAPTER *ioc,  int sleep_flag)
 	ioc->hi_priority_depth = facts->HighPriorityCredit;
 	ioc->internal_depth = ioc->hi_priority_depth + 5;
 
-	/* request frame size */
 	ioc->request_sz = facts->IOCRequestFrameSize * 4;
 
-	/* reply frame size */
 	ioc->reply_sz = facts->ReplyFrameSize * 4;
 
  retry_allocation:
 	total_sz = 0;
-	/* calculate number of sg elements left over in the 1st frame */
+	 
 	max_sge_elements = ioc->request_sz - ((sizeof(Mpi2SCSIIORequest_t) -
 	    sizeof(Mpi2SGEIOUnion_t)) + ioc->sge_size);
 	ioc->max_sges_in_main_message = max_sge_elements/ioc->sge_size;
 
-	/* now do the same for a chain buffer */
 	max_sge_elements = ioc->request_sz - ioc->sge_size;
 	ioc->max_sges_in_chain_message = max_sge_elements/ioc->sge_size;
 
@@ -2481,9 +1962,6 @@ _base_allocate_memory_pools(struct MPT2SAS_ADAPTER *ioc,  int sleep_flag)
 	    ((sizeof(Mpi2SCSIIORequest_t) - sizeof(Mpi2SGEIOUnion_t)) +
 	     (ioc->max_sges_in_chain_message * ioc->sge_size)) / 4;
 
-	/*
-	 *  MPT2SAS_SG_DEPTH = CONFIG_FUSION_MAX_SGE
-	 */
 	chains_needed_per_io = ((ioc->shost->sg_tablesize -
 	   ioc->max_sges_in_main_message)/ioc->max_sges_in_chain_message)
 	    + 1;
@@ -2495,10 +1973,8 @@ _base_allocate_memory_pools(struct MPT2SAS_ADAPTER *ioc,  int sleep_flag)
 	}
 	ioc->chains_needed_per_io = chains_needed_per_io;
 
-	/* reply free queue sizing - taking into account for 64 FW events */
 	ioc->reply_free_queue_depth = ioc->hba_queue_depth + 64;
 
-	/* align the reply post queue on the next 16 count boundary */
 	if (!ioc->reply_free_queue_depth % 16)
 		ioc->reply_post_queue_depth = ioc->reply_free_queue_depth + 16;
 	else
@@ -2523,23 +1999,15 @@ _base_allocate_memory_pools(struct MPT2SAS_ADAPTER *ioc,  int sleep_flag)
 	ioc->scsiio_depth = ioc->hba_queue_depth -
 	    ioc->hi_priority_depth - ioc->internal_depth;
 
-	/* set the scsi host can_queue depth
-	 * with some internal commands that could be outstanding
-	 */
 	ioc->shost->can_queue = ioc->scsiio_depth;
 	dinitprintk(ioc, printk(MPT2SAS_INFO_FMT "scsi host: "
 	    "can_queue depth (%d)\n", ioc->name, ioc->shost->can_queue));
 
-	/* contiguous pool for request and chains, 16 byte align, one extra "
-	 * "frame for smid=0
-	 */
 	ioc->chain_depth = ioc->chains_needed_per_io * ioc->scsiio_depth;
 	sz = ((ioc->scsiio_depth + 1) * ioc->request_sz);
 
-	/* hi-priority queue */
 	sz += (ioc->hi_priority_depth * ioc->request_sz);
 
-	/* internal queue */
 	sz += (ioc->internal_depth * ioc->request_sz);
 
 	ioc->request_dma_sz = sz;
@@ -2562,13 +2030,11 @@ _base_allocate_memory_pools(struct MPT2SAS_ADAPTER *ioc,  int sleep_flag)
 		    "total(%d kb)\n", ioc->name, ioc->hba_queue_depth,
 		    ioc->chains_needed_per_io, ioc->request_sz, sz/1024);
 
-	/* hi-priority queue */
 	ioc->hi_priority = ioc->request + ((ioc->scsiio_depth + 1) *
 	    ioc->request_sz);
 	ioc->hi_priority_dma = ioc->request_dma + ((ioc->scsiio_depth + 1) *
 	    ioc->request_sz);
 
-	/* internal queue */
 	ioc->internal = ioc->hi_priority + (ioc->hi_priority_depth *
 	    ioc->request_sz);
 	ioc->internal_dma = ioc->hi_priority_dma + (ioc->hi_priority_depth *
@@ -2630,7 +2096,6 @@ chain_done:
 	    ioc->chain_depth, ioc->request_sz, ((ioc->chain_depth *
 	    ioc->request_sz))/1024));
 
-	/* initialize hi-priority queue smid's */
 	ioc->hpr_lookup = kcalloc(ioc->hi_priority_depth,
 	    sizeof(struct request_tracker), GFP_KERNEL);
 	if (!ioc->hpr_lookup) {
@@ -2643,7 +2108,6 @@ chain_done:
 	    "depth(%d), start smid(%d)\n", ioc->name, ioc->hi_priority,
 	    ioc->hi_priority_depth, ioc->hi_priority_smid));
 
-	/* initialize internal queue smid's */
 	ioc->internal_lookup = kcalloc(ioc->internal_depth,
 	    sizeof(struct request_tracker), GFP_KERNEL);
 	if (!ioc->internal_lookup) {
@@ -2656,7 +2120,6 @@ chain_done:
 	    "depth(%d), start smid(%d)\n", ioc->name, ioc->internal,
 	     ioc->internal_depth, ioc->internal_smid));
 
-	/* sense buffers, 4 byte align */
 	sz = ioc->scsiio_depth * SCSI_SENSE_BUFFERSIZE;
 	ioc->sense_dma_pool = pci_pool_create("sense pool", ioc->pdev, sz, 4,
 	    0);
@@ -2680,7 +2143,6 @@ chain_done:
 	    ioc->name, (unsigned long long)ioc->sense_dma));
 	total_sz += sz;
 
-	/* reply pool, 4 byte align */
 	sz = ioc->reply_free_queue_depth * ioc->reply_sz;
 	ioc->reply_dma_pool = pci_pool_create("reply pool", ioc->pdev, sz, 4,
 	    0);
@@ -2705,7 +2167,6 @@ chain_done:
 	    ioc->name, (unsigned long long)ioc->reply_dma));
 	total_sz += sz;
 
-	/* reply free queue, 16 byte align */
 	sz = ioc->reply_free_queue_depth * 4;
 	ioc->reply_free_dma_pool = pci_pool_create("reply_free pool",
 	    ioc->pdev, sz, 16, 0);
@@ -2729,7 +2190,6 @@ chain_done:
 	    "(0x%llx)\n", ioc->name, (unsigned long long)ioc->reply_free_dma));
 	total_sz += sz;
 
-	/* reply post queue, 16 byte align */
 	reply_post_free_sz = ioc->reply_post_queue_depth *
 	    sizeof(Mpi2DefaultReplyDescriptor_t);
 	if (_base_is_controller_msix_enabled(ioc))
@@ -2787,14 +2247,6 @@ chain_done:
 	return -ENOMEM;
 }
 
-/**
- * mpt2sas_base_get_iocstate - Get the current state of a MPT adapter.
- * @ioc: Pointer to MPT_ADAPTER structure
- * @cooked: Request raw or cooked IOC state
- *
- * Returns all IOC Doorbell register bits if cooked==0, else just the
- * Doorbell bits in MPI_IOC_STATE_MASK.
- */
 u32
 mpt2sas_base_get_iocstate(struct MPT2SAS_ADAPTER *ioc, int cooked)
 {
@@ -2805,14 +2257,6 @@ mpt2sas_base_get_iocstate(struct MPT2SAS_ADAPTER *ioc, int cooked)
 	return cooked ? sc : s;
 }
 
-/**
- * _base_wait_on_iocstate - waiting on a particular ioc state
- * @ioc_state: controller state { READY, OPERATIONAL, or RESET }
- * @timeout: timeout in second
- * @sleep_flag: CAN_SLEEP or NO_SLEEP
- *
- * Returns 0 for success, non-zero for failure.
- */
 static int
 _base_wait_on_iocstate(struct MPT2SAS_ADAPTER *ioc, u32 ioc_state, int timeout,
     int sleep_flag)
@@ -2838,17 +2282,6 @@ _base_wait_on_iocstate(struct MPT2SAS_ADAPTER *ioc, u32 ioc_state, int timeout,
 	return current_state;
 }
 
-/**
- * _base_wait_for_doorbell_int - waiting for controller interrupt(generated by
- * a write to the doorbell)
- * @ioc: per adapter object
- * @timeout: timeout in second
- * @sleep_flag: CAN_SLEEP or NO_SLEEP
- *
- * Returns 0 for success, non-zero for failure.
- *
- * Notes: MPI2_HIS_IOC2SYS_DB_STATUS - set to one when IOC writes to doorbell.
- */
 static int
 _base_wait_for_doorbell_int(struct MPT2SAS_ADAPTER *ioc, int timeout,
     int sleep_flag)
@@ -2878,17 +2311,6 @@ _base_wait_for_doorbell_int(struct MPT2SAS_ADAPTER *ioc, int timeout,
 	return -EFAULT;
 }
 
-/**
- * _base_wait_for_doorbell_ack - waiting for controller to read the doorbell.
- * @ioc: per adapter object
- * @timeout: timeout in second
- * @sleep_flag: CAN_SLEEP or NO_SLEEP
- *
- * Returns 0 for success, non-zero for failure.
- *
- * Notes: MPI2_HIS_SYS2IOC_DB_STATUS - set to one when host writes to
- * doorbell.
- */
 static int
 _base_wait_for_doorbell_ack(struct MPT2SAS_ADAPTER *ioc, int timeout,
     int sleep_flag)
@@ -2929,15 +2351,6 @@ _base_wait_for_doorbell_ack(struct MPT2SAS_ADAPTER *ioc, int timeout,
 	return -EFAULT;
 }
 
-/**
- * _base_wait_for_doorbell_not_used - waiting for doorbell to not be in use
- * @ioc: per adapter object
- * @timeout: timeout in second
- * @sleep_flag: CAN_SLEEP or NO_SLEEP
- *
- * Returns 0 for success, non-zero for failure.
- *
- */
 static int
 _base_wait_for_doorbell_not_used(struct MPT2SAS_ADAPTER *ioc, int timeout,
     int sleep_flag)
@@ -2967,15 +2380,6 @@ _base_wait_for_doorbell_not_used(struct MPT2SAS_ADAPTER *ioc, int timeout,
 	return -EFAULT;
 }
 
-/**
- * _base_send_ioc_reset - send doorbell reset
- * @ioc: per adapter object
- * @reset_type: currently only supports: MPI2_FUNCTION_IOC_MESSAGE_UNIT_RESET
- * @timeout: timeout in second
- * @sleep_flag: CAN_SLEEP or NO_SLEEP
- *
- * Returns 0 for success, non-zero for failure.
- */
 static int
 _base_send_ioc_reset(struct MPT2SAS_ADAPTER *ioc, u8 reset_type, int timeout,
     int sleep_flag)
@@ -3015,18 +2419,6 @@ _base_send_ioc_reset(struct MPT2SAS_ADAPTER *ioc, u8 reset_type, int timeout,
 	return r;
 }
 
-/**
- * _base_handshake_req_reply_wait - send request thru doorbell interface
- * @ioc: per adapter object
- * @request_bytes: request length
- * @request: pointer having request payload
- * @reply_bytes: reply length
- * @reply: pointer to reply payload
- * @timeout: timeout in second
- * @sleep_flag: CAN_SLEEP or NO_SLEEP
- *
- * Returns 0 for success, non-zero for failure.
- */
 static int
 _base_handshake_req_reply_wait(struct MPT2SAS_ADAPTER *ioc, int request_bytes,
     u32 *request, int reply_bytes, u16 *reply, int timeout, int sleep_flag)
@@ -3037,19 +2429,16 @@ _base_handshake_req_reply_wait(struct MPT2SAS_ADAPTER *ioc, int request_bytes,
 	u16 dummy;
 	__le32 *mfp;
 
-	/* make sure doorbell is not in use */
 	if ((readl(&ioc->chip->Doorbell) & MPI2_DOORBELL_USED)) {
 		printk(MPT2SAS_ERR_FMT "doorbell is in use "
 		    " (line=%d)\n", ioc->name, __LINE__);
 		return -EFAULT;
 	}
 
-	/* clear pending doorbell interrupts from previous state changes */
 	if (readl(&ioc->chip->HostInterruptStatus) &
 	    MPI2_HIS_IOC2SYS_DB_STATUS)
 		writel(0, &ioc->chip->HostInterruptStatus);
 
-	/* send message to ioc */
 	writel(((MPI2_FUNCTION_HANDSHAKE<<MPI2_DOORBELL_FUNCTION_SHIFT) |
 	    ((request_bytes/4)<<MPI2_DOORBELL_ADD_DWORDS_SHIFT)),
 	    &ioc->chip->Doorbell);
@@ -3067,7 +2456,6 @@ _base_handshake_req_reply_wait(struct MPT2SAS_ADAPTER *ioc, int request_bytes,
 		return -EFAULT;
 	}
 
-	/* send message 32-bits at a time */
 	for (i = 0, failed = 0; i < request_bytes/4 && !failed; i++) {
 		writel(cpu_to_le32(request[i]), &ioc->chip->Doorbell);
 		if ((_base_wait_for_doorbell_ack(ioc, 5, sleep_flag)))
@@ -3080,14 +2468,12 @@ _base_handshake_req_reply_wait(struct MPT2SAS_ADAPTER *ioc, int request_bytes,
 		return -EFAULT;
 	}
 
-	/* now wait for the reply */
 	if ((_base_wait_for_doorbell_int(ioc, timeout, sleep_flag))) {
 		printk(MPT2SAS_ERR_FMT "doorbell handshake "
 		   "int failed (line=%d)\n", ioc->name, __LINE__);
 		return -EFAULT;
 	}
 
-	/* read the first two 16-bits, it gives the total length of the reply */
 	reply[0] = le16_to_cpu(readl(&ioc->chip->Doorbell)
 	    & MPI2_DOORBELL_DATA_MASK);
 	writel(0, &ioc->chip->HostInterruptStatus);
@@ -3107,7 +2493,7 @@ _base_handshake_req_reply_wait(struct MPT2SAS_ADAPTER *ioc, int request_bytes,
 			    __LINE__);
 			return -EFAULT;
 		}
-		if (i >=  reply_bytes/2) /* overflow case */
+		if (i >=  reply_bytes/2)  
 			dummy = readl(&ioc->chip->Doorbell);
 		else
 			reply[i] = le16_to_cpu(readl(&ioc->chip->Doorbell)
@@ -3132,20 +2518,6 @@ _base_handshake_req_reply_wait(struct MPT2SAS_ADAPTER *ioc, int request_bytes,
 	return 0;
 }
 
-/**
- * mpt2sas_base_sas_iounit_control - send sas iounit control to FW
- * @ioc: per adapter object
- * @mpi_reply: the reply payload from FW
- * @mpi_request: the request payload sent to FW
- *
- * The SAS IO Unit Control Request message allows the host to perform low-level
- * operations, such as resets on the PHYs of the IO Unit, also allows the host
- * to obtain the IOC assigned device handles for a device if it has other
- * identifying information about the device, in addition allows the host to
- * remove IOC resources associated with the device.
- *
- * Returns 0 for success, non-zero for failure.
- */
 int
 mpt2sas_base_sas_iounit_control(struct MPT2SAS_ADAPTER *ioc,
     Mpi2SasIoUnitControlReply_t *mpi_reply,
@@ -3240,17 +2612,6 @@ mpt2sas_base_sas_iounit_control(struct MPT2SAS_ADAPTER *ioc,
 	return rc;
 }
 
-/**
- * mpt2sas_base_scsi_enclosure_processor - sending request to sep device
- * @ioc: per adapter object
- * @mpi_reply: the reply payload from FW
- * @mpi_request: the request payload sent to FW
- *
- * The SCSI Enclosure Processor request message causes the IOC to
- * communicate with SES devices to control LED status signals.
- *
- * Returns 0 for success, non-zero for failure.
- */
 int
 mpt2sas_base_scsi_enclosure_processor(struct MPT2SAS_ADAPTER *ioc,
     Mpi2SepReply_t *mpi_reply, Mpi2SepRequest_t *mpi_request)
@@ -3337,13 +2698,6 @@ mpt2sas_base_scsi_enclosure_processor(struct MPT2SAS_ADAPTER *ioc,
 	return rc;
 }
 
-/**
- * _base_get_port_facts - obtain port facts reply and save in ioc
- * @ioc: per adapter object
- * @sleep_flag: CAN_SLEEP or NO_SLEEP
- *
- * Returns 0 for success, non-zero for failure.
- */
 static int
 _base_get_port_facts(struct MPT2SAS_ADAPTER *ioc, int port, int sleep_flag)
 {
@@ -3380,13 +2734,6 @@ _base_get_port_facts(struct MPT2SAS_ADAPTER *ioc, int port, int sleep_flag)
 	return 0;
 }
 
-/**
- * _base_get_ioc_facts - obtain ioc facts reply and save in ioc
- * @ioc: per adapter object
- * @sleep_flag: CAN_SLEEP or NO_SLEEP
- *
- * Returns 0 for success, non-zero for failure.
- */
 static int
 _base_get_ioc_facts(struct MPT2SAS_ADAPTER *ioc, int sleep_flag)
 {
@@ -3452,13 +2799,6 @@ _base_get_ioc_facts(struct MPT2SAS_ADAPTER *ioc, int sleep_flag)
 	return 0;
 }
 
-/**
- * _base_send_ioc_init - send ioc_init to firmware
- * @ioc: per adapter object
- * @sleep_flag: CAN_SLEEP or NO_SLEEP
- *
- * Returns 0 for success, non-zero for failure.
- */
 static int
 _base_send_ioc_init(struct MPT2SAS_ADAPTER *ioc, int sleep_flag)
 {
@@ -3474,7 +2814,7 @@ _base_send_ioc_init(struct MPT2SAS_ADAPTER *ioc, int sleep_flag)
 	memset(&mpi_request, 0, sizeof(Mpi2IOCInitRequest_t));
 	mpi_request.Function = MPI2_FUNCTION_IOC_INIT;
 	mpi_request.WhoInit = MPI2_WHOINIT_HOST_DRIVER;
-	mpi_request.VF_ID = 0; /* TODO */
+	mpi_request.VF_ID = 0;  
 	mpi_request.VP_ID = 0;
 	mpi_request.MsgVersion = cpu_to_le16(MPI2_VERSION);
 	mpi_request.HeaderVersion = cpu_to_le16(MPI2_HEADER_VERSION);
@@ -3498,9 +2838,6 @@ _base_send_ioc_init(struct MPT2SAS_ADAPTER *ioc, int sleep_flag)
 	mpi_request.ReplyDescriptorPostQueueAddress =
 	    cpu_to_le64((u64)ioc->reply_post_free_dma);
 
-	/* This time stamp specifies number of milliseconds
-	 * since epoch ~ midnight January 1, 1970.
-	 */
 	do_gettimeofday(&current_time);
 	mpi_request.TimeStamp = cpu_to_le64((u64)current_time.tv_sec * 1000 +
 	    (current_time.tv_usec / 1000));
@@ -3537,16 +2874,6 @@ _base_send_ioc_init(struct MPT2SAS_ADAPTER *ioc, int sleep_flag)
 	return 0;
 }
 
-/**
- * mpt2sas_port_enable_done - command completion routine for port enable
- * @ioc: per adapter object
- * @smid: system request message index
- * @msix_index: MSIX table index supplied by the OS
- * @reply: reply message frame(lower 32bit addr)
- *
- * Return 1 meaning mf should be freed from _base_interrupt
- *        0 means the mf is freed from this function.
- */
 u8
 mpt2sas_port_enable_done(struct MPT2SAS_ADAPTER *ioc, u16 smid, u8 msix_index,
 	u32 reply)
@@ -3588,13 +2915,6 @@ mpt2sas_port_enable_done(struct MPT2SAS_ADAPTER *ioc, u16 smid, u8 msix_index,
 	return 1;
 }
 
-/**
- * _base_send_port_enable - send port_enable(discovery stuff) to firmware
- * @ioc: per adapter object
- * @sleep_flag: CAN_SLEEP or NO_SLEEP
- *
- * Returns 0 for success, non-zero for failure.
- */
 static int
 _base_send_port_enable(struct MPT2SAS_ADAPTER *ioc, int sleep_flag)
 {
@@ -3657,12 +2977,6 @@ _base_send_port_enable(struct MPT2SAS_ADAPTER *ioc, int sleep_flag)
 	return r;
 }
 
-/**
- * mpt2sas_port_enable - initiate firmware discovery (don't wait for reply)
- * @ioc: per adapter object
- *
- * Returns 0 for success, non-zero for failure.
- */
 int
 mpt2sas_port_enable(struct MPT2SAS_ADAPTER *ioc)
 {
@@ -3694,46 +3008,24 @@ mpt2sas_port_enable(struct MPT2SAS_ADAPTER *ioc)
 	return 0;
 }
 
-/**
- * _base_determine_wait_on_discovery - desposition
- * @ioc: per adapter object
- *
- * Decide whether to wait on discovery to complete. Used to either
- * locate boot device, or report volumes ahead of physical devices.
- *
- * Returns 1 for wait, 0 for don't wait
- */
 static int
 _base_determine_wait_on_discovery(struct MPT2SAS_ADAPTER *ioc)
 {
-	/* We wait for discovery to complete if IR firmware is loaded.
-	 * The sas topology events arrive before PD events, so we need time to
-	 * turn on the bit in ioc->pd_handles to indicate PD
-	 * Also, it maybe required to report Volumes ahead of physical
-	 * devices when MPI2_IOCPAGE8_IRFLAGS_LOW_VOLUME_MAPPING is set.
-	 */
+	 
 	if (ioc->ir_firmware)
 		return 1;
 
-	/* if no Bios, then we don't need to wait */
 	if (!ioc->bios_pg3.BiosVersion)
 		return 0;
 
-	/* Bios is present, then we drop down here.
-	 *
-	 * If there any entries in the Bios Page 2, then we wait
-	 * for discovery to complete.
-	 */
-
-	/* Current Boot Device */
 	if ((ioc->bios_pg2.CurrentBootDeviceForm &
 	    MPI2_BIOSPAGE2_FORM_MASK) ==
 	    MPI2_BIOSPAGE2_FORM_NO_DEVICE_SPECIFIED &&
-	/* Request Boot Device */
+	 
 	   (ioc->bios_pg2.ReqBootDeviceForm &
 	    MPI2_BIOSPAGE2_FORM_MASK) ==
 	    MPI2_BIOSPAGE2_FORM_NO_DEVICE_SPECIFIED &&
-	/* Alternate Request Boot Device */
+	 
 	   (ioc->bios_pg2.ReqAltBootDeviceForm &
 	    MPI2_BIOSPAGE2_FORM_MASK) ==
 	    MPI2_BIOSPAGE2_FORM_NO_DEVICE_SPECIFIED)
@@ -3742,13 +3034,6 @@ _base_determine_wait_on_discovery(struct MPT2SAS_ADAPTER *ioc)
 	return 1;
 }
 
-/**
- * _base_unmask_events - turn on notification for this event
- * @ioc: per adapter object
- * @event: firmware event
- *
- * The mask is stored in ioc->event_masks.
- */
 static void
 _base_unmask_events(struct MPT2SAS_ADAPTER *ioc, u16 event)
 {
@@ -3769,13 +3054,6 @@ _base_unmask_events(struct MPT2SAS_ADAPTER *ioc, u16 event)
 		ioc->event_masks[3] &= ~desired_event;
 }
 
-/**
- * _base_event_notification - send event notification
- * @ioc: per adapter object
- * @sleep_flag: CAN_SLEEP or NO_SLEEP
- *
- * Returns 0 for success, non-zero for failure.
- */
 static int
 _base_event_notification(struct MPT2SAS_ADAPTER *ioc, int sleep_flag)
 {
@@ -3805,7 +3083,7 @@ _base_event_notification(struct MPT2SAS_ADAPTER *ioc, int sleep_flag)
 	ioc->base_cmds.smid = smid;
 	memset(mpi_request, 0, sizeof(Mpi2EventNotificationRequest_t));
 	mpi_request->Function = MPI2_FUNCTION_EVENT_NOTIFICATION;
-	mpi_request->VF_ID = 0; /* TODO */
+	mpi_request->VF_ID = 0;  
 	mpi_request->VP_ID = 0;
 	for (i = 0; i < MPI2_EVENT_NOTIFY_EVENTMASK_WORDS; i++)
 		mpi_request->EventMasks[i] =
@@ -3829,14 +3107,6 @@ _base_event_notification(struct MPT2SAS_ADAPTER *ioc, int sleep_flag)
 	return r;
 }
 
-/**
- * mpt2sas_base_validate_event_type - validating event types
- * @ioc: per adapter object
- * @event: firmware event
- *
- * This will turn on firmware event notification when application
- * ask for that event. We don't mask events that are already enabled.
- */
 void
 mpt2sas_base_validate_event_type(struct MPT2SAS_ADAPTER *ioc, u32 *event_type)
 {
@@ -3866,13 +3136,6 @@ mpt2sas_base_validate_event_type(struct MPT2SAS_ADAPTER *ioc, u32 *event_type)
 	mutex_unlock(&ioc->base_cmds.mutex);
 }
 
-/**
- * _base_diag_reset - the "big hammer" start of day reset
- * @ioc: per adapter object
- * @sleep_flag: CAN_SLEEP or NO_SLEEP
- *
- * Returns 0 for success, non-zero for failure.
- */
 static int
 _base_diag_reset(struct MPT2SAS_ADAPTER *ioc, int sleep_flag)
 {
@@ -3887,9 +3150,7 @@ _base_diag_reset(struct MPT2SAS_ADAPTER *ioc, int sleep_flag)
 
 	count = 0;
 	do {
-		/* Write magic sequence to WriteSequence register
-		 * Loop until in diagnostic mode
-		 */
+		 
 		drsprintk(ioc, printk(MPT2SAS_INFO_FMT "write magic "
 		    "sequence\n", ioc->name));
 		writel(MPI2_WRSEQ_FLUSH_KEY_VALUE, &ioc->chip->WriteSequence);
@@ -3900,7 +3161,6 @@ _base_diag_reset(struct MPT2SAS_ADAPTER *ioc, int sleep_flag)
 		writel(MPI2_WRSEQ_5TH_KEY_VALUE, &ioc->chip->WriteSequence);
 		writel(MPI2_WRSEQ_6TH_KEY_VALUE, &ioc->chip->WriteSequence);
 
-		/* wait 100 msec */
 		if (sleep_flag == CAN_SLEEP)
 			msleep(100);
 		else
@@ -3923,10 +3183,8 @@ _base_diag_reset(struct MPT2SAS_ADAPTER *ioc, int sleep_flag)
 	writel(host_diagnostic | MPI2_DIAG_RESET_ADAPTER,
 	     &ioc->chip->HostDiagnostic);
 
-	/* don't access any registers for 50 milliseconds */
 	msleep(50);
 
-	/* 300 second max wait */
 	for (count = 0; count < 3000000 ; count++) {
 
 		host_diagnostic = readl(&ioc->chip->HostDiagnostic);
@@ -3936,7 +3194,6 @@ _base_diag_reset(struct MPT2SAS_ADAPTER *ioc, int sleep_flag)
 		if (!(host_diagnostic & MPI2_DIAG_RESET_ADAPTER))
 			break;
 
-		/* wait 100 msec */
 		if (sleep_flag == CAN_SLEEP)
 			msleep(1);
 		else
@@ -3985,14 +3242,6 @@ _base_diag_reset(struct MPT2SAS_ADAPTER *ioc, int sleep_flag)
 	return -EFAULT;
 }
 
-/**
- * _base_make_ioc_ready - put controller in READY state
- * @ioc: per adapter object
- * @sleep_flag: CAN_SLEEP or NO_SLEEP
- * @type: FORCE_BIG_HAMMER or SOFT_RESET
- *
- * Returns 0 for success, non-zero for failure.
- */
 static int
 _base_make_ioc_ready(struct MPT2SAS_ADAPTER *ioc, int sleep_flag,
     enum reset_type type)
@@ -4041,13 +3290,6 @@ _base_make_ioc_ready(struct MPT2SAS_ADAPTER *ioc, int sleep_flag,
 	return rc;
 }
 
-/**
- * _base_make_ioc_operational - put controller in OPERATIONAL state
- * @ioc: per adapter object
- * @sleep_flag: CAN_SLEEP or NO_SLEEP
- *
- * Returns 0 for success, non-zero for failure.
- */
 static int
 _base_make_ioc_operational(struct MPT2SAS_ADAPTER *ioc, int sleep_flag)
 {
@@ -4064,7 +3306,6 @@ _base_make_ioc_operational(struct MPT2SAS_ADAPTER *ioc, int sleep_flag)
 	dinitprintk(ioc, printk(MPT2SAS_INFO_FMT "%s\n", ioc->name,
 	    __func__));
 
-	/* clean the delayed target reset list */
 	list_for_each_entry_safe(delayed_tr, delayed_tr_next,
 	    &ioc->delayed_tr_list, list) {
 		list_del(&delayed_tr->list);
@@ -4077,7 +3318,6 @@ _base_make_ioc_operational(struct MPT2SAS_ADAPTER *ioc, int sleep_flag)
 		kfree(delayed_tr);
 	}
 
-	/* initialize the scsi lookup free list */
 	spin_lock_irqsave(&ioc->scsi_lookup_lock, flags);
 	INIT_LIST_HEAD(&ioc->free_list);
 	smid = 1;
@@ -4091,7 +3331,6 @@ _base_make_ioc_operational(struct MPT2SAS_ADAPTER *ioc, int sleep_flag)
 		    &ioc->free_list);
 	}
 
-	/* hi-priority queue */
 	INIT_LIST_HEAD(&ioc->hpr_free_list);
 	smid = ioc->hi_priority_smid;
 	for (i = 0; i < ioc->hi_priority_depth; i++, smid++) {
@@ -4101,7 +3340,6 @@ _base_make_ioc_operational(struct MPT2SAS_ADAPTER *ioc, int sleep_flag)
 		    &ioc->hpr_free_list);
 	}
 
-	/* internal queue */
 	INIT_LIST_HEAD(&ioc->internal_free_list);
 	smid = ioc->internal_smid;
 	for (i = 0; i < ioc->internal_depth; i++, smid++) {
@@ -4111,7 +3349,6 @@ _base_make_ioc_operational(struct MPT2SAS_ADAPTER *ioc, int sleep_flag)
 		    &ioc->internal_free_list);
 	}
 
-	/* chain pool */
 	INIT_LIST_HEAD(&ioc->free_chain_list);
 	for (i = 0; i < ioc->chain_depth; i++)
 		list_add_tail(&ioc->chain_lookup[i].tracker_list,
@@ -4119,17 +3356,14 @@ _base_make_ioc_operational(struct MPT2SAS_ADAPTER *ioc, int sleep_flag)
 
 	spin_unlock_irqrestore(&ioc->scsi_lookup_lock, flags);
 
-	/* initialize Reply Free Queue */
 	for (i = 0, reply_address = (u32)ioc->reply_dma ;
 	    i < ioc->reply_free_queue_depth ; i++, reply_address +=
 	    ioc->reply_sz)
 		ioc->reply_free[i] = cpu_to_le32(reply_address);
 
-	/* initialize reply queues */
 	if (ioc->is_driver_loading)
 		_base_assign_reply_queues(ioc);
 
-	/* initialize Reply Post Free Queue */
 	reply_post_free = (long)ioc->reply_post_free;
 	reply_post_free_sz = ioc->reply_post_queue_depth *
 	    sizeof(Mpi2DefaultReplyDescriptor_t);
@@ -4150,11 +3384,9 @@ _base_make_ioc_operational(struct MPT2SAS_ADAPTER *ioc, int sleep_flag)
 	if (r)
 		return r;
 
-	/* initialize reply free host index */
 	ioc->reply_free_host_index = ioc->reply_free_queue_depth - 1;
 	writel(ioc->reply_free_host_index, &ioc->chip->ReplyFreeHostIndex);
 
-	/* initialize reply post host index */
 	list_for_each_entry(reply_q, &ioc->reply_queue_list, list) {
 		writel(reply_q->msix_index << MPI2_RPHI_MSIX_INDEX_SHIFT,
 		    &ioc->chip->ReplyPostHostIndex);
@@ -4184,7 +3416,7 @@ _base_make_ioc_operational(struct MPT2SAS_ADAPTER *ioc, int sleep_flag)
 		}
 		ioc->wait_for_discovery_to_complete =
 		    _base_determine_wait_on_discovery(ioc);
-		return r; /* scan_start and scan_finished support */
+		return r;  
 	}
 	r = _base_send_port_enable(ioc, sleep_flag);
 	if (r)
@@ -4193,12 +3425,6 @@ _base_make_ioc_operational(struct MPT2SAS_ADAPTER *ioc, int sleep_flag)
 	return r;
 }
 
-/**
- * mpt2sas_base_free_resources - free resources controller resources (io/irq/memap)
- * @ioc: per adapter object
- *
- * Return nothing.
- */
 void
 mpt2sas_base_free_resources(struct MPT2SAS_ADAPTER *ioc)
 {
@@ -4216,9 +3442,9 @@ mpt2sas_base_free_resources(struct MPT2SAS_ADAPTER *ioc)
 	} else {
 		_base_make_ioc_ready(ioc, CAN_SLEEP, SOFT_RESET);
 	}
-#else /* MY_DEF_HERE */
+#else  
 	_base_make_ioc_ready(ioc, CAN_SLEEP, SOFT_RESET);
-#endif /* MY_DEF_HERE */
+#endif  
 	ioc->shost_recovery = 0;
 	_base_free_irq(ioc);
 	_base_disable_msix(ioc);
@@ -4231,12 +3457,6 @@ mpt2sas_base_free_resources(struct MPT2SAS_ADAPTER *ioc)
 	return;
 }
 
-/**
- * mpt2sas_base_attach - attach controller instance
- * @ioc: per adapter object
- *
- * Returns 0 for success, non-zero for failure.
- */
 int
 mpt2sas_base_attach(struct MPT2SAS_ADAPTER *ioc)
 {
@@ -4246,7 +3466,6 @@ mpt2sas_base_attach(struct MPT2SAS_ADAPTER *ioc)
 	dinitprintk(ioc, printk(MPT2SAS_INFO_FMT "%s\n", ioc->name,
 	    __func__));
 
-	/* setup cpu_msix_table */
 	ioc->cpu_count = num_online_cpus();
 	for_each_online_cpu(cpu_id)
 		last_cpu_id = cpu_id;
@@ -4312,7 +3531,7 @@ mpt2sas_base_attach(struct MPT2SAS_ADAPTER *ioc)
 		goto out_free_resources;
 
 	init_waitqueue_head(&ioc->reset_wq);
-	/* allocate memory pd handle bitmask list */
+	 
 	ioc->pd_handles_sz = (ioc->facts.MaxDevHandle / 8);
 	if (ioc->facts.MaxDevHandle % 8)
 		ioc->pd_handles_sz++;
@@ -4330,36 +3549,29 @@ mpt2sas_base_attach(struct MPT2SAS_ADAPTER *ioc)
 	}
 	ioc->fwfault_debug = mpt2sas_fwfault_debug;
 
-	/* base internal command bits */
 	mutex_init(&ioc->base_cmds.mutex);
 	ioc->base_cmds.reply = kzalloc(ioc->reply_sz, GFP_KERNEL);
 	ioc->base_cmds.status = MPT2_CMD_NOT_USED;
 
-	/* port_enable command bits */
 	ioc->port_enable_cmds.reply = kzalloc(ioc->reply_sz, GFP_KERNEL);
 	ioc->port_enable_cmds.status = MPT2_CMD_NOT_USED;
 
-	/* transport internal command bits */
 	ioc->transport_cmds.reply = kzalloc(ioc->reply_sz, GFP_KERNEL);
 	ioc->transport_cmds.status = MPT2_CMD_NOT_USED;
 	mutex_init(&ioc->transport_cmds.mutex);
 
-	/* scsih internal command bits */
 	ioc->scsih_cmds.reply = kzalloc(ioc->reply_sz, GFP_KERNEL);
 	ioc->scsih_cmds.status = MPT2_CMD_NOT_USED;
 	mutex_init(&ioc->scsih_cmds.mutex);
 
-	/* task management internal command bits */
 	ioc->tm_cmds.reply = kzalloc(ioc->reply_sz, GFP_KERNEL);
 	ioc->tm_cmds.status = MPT2_CMD_NOT_USED;
 	mutex_init(&ioc->tm_cmds.mutex);
 
-	/* config page internal command bits */
 	ioc->config_cmds.reply = kzalloc(ioc->reply_sz, GFP_KERNEL);
 	ioc->config_cmds.status = MPT2_CMD_NOT_USED;
 	mutex_init(&ioc->config_cmds.mutex);
 
-	/* ctl module internal command bits */
 	ioc->ctl_cmds.reply = kzalloc(ioc->reply_sz, GFP_KERNEL);
 	ioc->ctl_cmds.sense = kzalloc(SCSI_SENSE_BUFFERSIZE, GFP_KERNEL);
 	ioc->ctl_cmds.status = MPT2_CMD_NOT_USED;
@@ -4383,7 +3595,6 @@ mpt2sas_base_attach(struct MPT2SAS_ADAPTER *ioc)
 	for (i = 0; i < MPI2_EVENT_NOTIFY_EVENTMASK_WORDS; i++)
 		ioc->event_masks[i] = -1;
 
-	/* here we enable the events we care about */
 	_base_unmask_events(ioc, MPI2_EVENT_SAS_DISCOVERY);
 	_base_unmask_events(ioc, MPI2_EVENT_SAS_BROADCAST_PRIMITIVE);
 	_base_unmask_events(ioc, MPI2_EVENT_SAS_TOPOLOGY_CHANGE_LIST);
@@ -4432,12 +3643,6 @@ mpt2sas_base_attach(struct MPT2SAS_ADAPTER *ioc)
 	return r;
 }
 
-/**
- * mpt2sas_base_detach - remove controller instance
- * @ioc: per adapter object
- *
- * Return nothing.
- */
 void
 mpt2sas_base_detach(struct MPT2SAS_ADAPTER *ioc)
 {
@@ -4465,18 +3670,6 @@ mpt2sas_base_detach(struct MPT2SAS_ADAPTER *ioc)
 	kfree(ioc->config_cmds.reply);
 }
 
-/**
- * _base_reset_handler - reset callback handler (for base)
- * @ioc: per adapter object
- * @reset_phase: phase
- *
- * The handler for doing any required cleanup or initialization.
- *
- * The reset phase can be MPT2_IOC_PRE_RESET, MPT2_IOC_AFTER_RESET,
- * MPT2_IOC_DONE_RESET
- *
- * Return nothing.
- */
 static void
 _base_reset_handler(struct MPT2SAS_ADAPTER *ioc, int reset_phase)
 {
@@ -4528,14 +3721,6 @@ _base_reset_handler(struct MPT2SAS_ADAPTER *ioc, int reset_phase)
 	}
 }
 
-/**
- * _wait_for_commands_to_complete - reset controller
- * @ioc: Pointer to MPT_ADAPTER structure
- * @sleep_flag: CAN_SLEEP or NO_SLEEP
- *
- * This function waiting(3s) for all pending commands to complete
- * prior to putting controller in reset.
- */
 static void
 _wait_for_commands_to_complete(struct MPT2SAS_ADAPTER *ioc, int sleep_flag)
 {
@@ -4551,7 +3736,6 @@ _wait_for_commands_to_complete(struct MPT2SAS_ADAPTER *ioc, int sleep_flag)
 	if ((ioc_state & MPI2_IOC_STATE_MASK) != MPI2_IOC_STATE_OPERATIONAL)
 		return;
 
-	/* pending command count */
 	spin_lock_irqsave(&ioc->scsi_lookup_lock, flags);
 	for (i = 0; i < ioc->scsiio_depth; i++)
 		if (ioc->scsi_lookup[i].cb_idx != 0xFF)
@@ -4561,18 +3745,9 @@ _wait_for_commands_to_complete(struct MPT2SAS_ADAPTER *ioc, int sleep_flag)
 	if (!ioc->pending_io_count)
 		return;
 
-	/* wait for pending commands to complete */
 	wait_event_timeout(ioc->reset_wq, ioc->pending_io_count == 0, 10 * HZ);
 }
 
-/**
- * mpt2sas_base_hard_reset_handler - reset controller
- * @ioc: Pointer to MPT_ADAPTER structure
- * @sleep_flag: CAN_SLEEP or NO_SLEEP
- * @type: FORCE_BIG_HAMMER or SOFT_RESET
- *
- * Returns 0 for success, non-zero for failure.
- */
 int
 mpt2sas_base_hard_reset_handler(struct MPT2SAS_ADAPTER *ioc, int sleep_flag,
     enum reset_type type)
@@ -4593,14 +3768,8 @@ mpt2sas_base_hard_reset_handler(struct MPT2SAS_ADAPTER *ioc, int sleep_flag,
 	if (mpt2sas_fwfault_debug)
 		mpt2sas_halt_firmware(ioc);
 
-	/* TODO - What we really should be doing is pulling
-	 * out all the code associated with NO_SLEEP; its never used.
-	 * That is legacy code from mpt fusion driver, ported over.
-	 * I will leave this BUG_ON here for now till its been resolved.
-	 */
 	BUG_ON(sleep_flag == NO_SLEEP);
 
-	/* wait for an active reset in progress to complete */
 	if (!mutex_trylock(&ioc->reset_in_progress_mutex)) {
 		do {
 			ssleep(1);
@@ -4622,9 +3791,6 @@ mpt2sas_base_hard_reset_handler(struct MPT2SAS_ADAPTER *ioc, int sleep_flag,
 		goto out;
 	_base_reset_handler(ioc, MPT2_IOC_AFTER_RESET);
 
-	/* If this hard reset is called while port enable is active, then
-	 * there is no reason to call make_ioc_operational
-	 */
 	if (ioc->is_driver_loading && ioc->port_enable_failed) {
 		ioc->remove_host = 1;
 		r = -EFAULT;

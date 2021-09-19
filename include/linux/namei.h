@@ -17,7 +17,7 @@ struct nameidata {
 	struct path	path;
 	struct qstr	last;
 	struct path	root;
-	struct inode	*inode; /* path.dentry.d_inode */
+	struct inode	*inode;  
 	unsigned int	flags;
 	unsigned	seq;
 	int		last_type;
@@ -27,23 +27,11 @@ struct nameidata {
 	unsigned char *real_filename;
 	unsigned char *real_filename_cur_locate;
 	unsigned int real_filename_len;
-#endif /* MY_ABC_HERE */
+#endif  
 };
 
-/*
- * Type of the last component on LOOKUP_PARENT
- */
 enum {LAST_NORM, LAST_ROOT, LAST_DOT, LAST_DOTDOT, LAST_BIND};
 
-/*
- * The bitmask for a lookup event:
- *  - follow links at the end
- *  - require a directory
- *  - ending slashes ok even for nonexistent files
- *  - internal "there are more path components" flag
- *  - dentry cache is untrusted; force a real lookup
- *  - suppress terminal automount
- */
 #define LOOKUP_FOLLOW		0x0001
 #define LOOKUP_DIRECTORY	0x0002
 #define LOOKUP_AUTOMOUNT	0x0004
@@ -52,9 +40,6 @@ enum {LAST_NORM, LAST_ROOT, LAST_DOT, LAST_DOTDOT, LAST_BIND};
 #define LOOKUP_REVAL		0x0020
 #define LOOKUP_RCU		0x0040
 
-/*
- * Intent data
- */
 #define LOOKUP_OPEN		0x0100
 #define LOOKUP_CREATE		0x0200
 #define LOOKUP_EXCL		0x0400
@@ -64,16 +49,16 @@ enum {LAST_NORM, LAST_ROOT, LAST_DOT, LAST_DOTDOT, LAST_BIND};
 #define LOOKUP_ROOT		0x2000
 #define LOOKUP_EMPTY		0x4000
 #ifdef MY_ABC_HERE
-/* this namei has done to the last component */
+ 
 #define LOOKUP_TO_LASTCOMPONENT 0x8000
 #define LOOKUP_MOUNTED			0x10000
 #define LOOKUP_CASELESS_COMPARE 0x20000
-#endif /* MY_ABC_HERE */
+#endif  
 
 extern int user_path_at(int, const char __user *, unsigned, struct path *);
 #ifdef MY_ABC_HERE
 extern int syno_user_path_at(int, const char __user *, unsigned, struct path *, char **, int *);
-#endif /* MY_ABC_HERE */
+#endif  
 extern int user_path_at_empty(int, const char __user *, unsigned, struct path *, int *empty);
 
 #define user_path(name, path) user_path_at(AT_FDCWD, name, LOOKUP_FOLLOW, path)
@@ -92,7 +77,7 @@ extern int vfs_path_lookup(struct dentry *, struct vfsmount *,
 
 #ifdef MY_ABC_HERE
 extern struct dentry *lookup_hash(struct nameidata *nd);
-#endif /* MY_ABC_HERE */
+#endif  
 extern struct dentry *lookup_one_len(const char *, struct dentry *, int);
 
 extern int follow_down_one(struct path *);
@@ -123,20 +108,10 @@ static inline void nd_terminate_link(void *name, size_t len, size_t maxlen)
 	((char *) name)[min(len, maxlen)] = '\0';
 }
 
-/**
- * retry_estale - determine whether the caller should retry an operation
- * @error: the error that would currently be returned
- * @flags: flags being used for next lookup attempt
- *
- * Check to see if the error code was -ESTALE, and then determine whether
- * to retry the call based on whether "flags" already has LOOKUP_REVAL set.
- *
- * Returns true if the caller should try the operation again.
- */
 static inline bool
 retry_estale(const long error, const unsigned int flags)
 {
 	return error == -ESTALE && !(flags & LOOKUP_REVAL);
 }
 
-#endif /* _LINUX_NAMEI_H */
+#endif  
