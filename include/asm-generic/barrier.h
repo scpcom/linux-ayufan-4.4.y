@@ -29,6 +29,9 @@
 #define mb()	asm volatile ("": : :"memory")
 #define rmb()	mb()
 #define wmb()	asm volatile ("": : :"memory")
+#ifndef gmb
+#define gmb()	do { } while (0)
+#endif
 
 #ifdef CONFIG_SMP
 #define smp_mb()	mb()

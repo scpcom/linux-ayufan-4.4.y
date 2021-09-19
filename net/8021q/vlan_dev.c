@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* -*- linux-c -*-
  * INET		802.1Q VLAN
  *		Ethernet-type device handling.
@@ -704,6 +707,15 @@ static netdev_features_t vlan_dev_fix_features(struct net_device *dev,
 	return features;
 }
 
+#if defined(MY_ABC_HERE)
+static int vlan_ethtool_get_link_ksettings(struct net_device *dev,
+					   struct ethtool_link_ksettings *cmd)
+{
+	const struct vlan_dev_priv *vlan = vlan_dev_priv(dev);
+
+	return __ethtool_get_link_ksettings(vlan->real_dev, cmd);
+}
+#else /* MY_ABC_HERE */
 static int vlan_ethtool_get_settings(struct net_device *dev,
 				     struct ethtool_cmd *cmd)
 {
@@ -711,6 +723,7 @@ static int vlan_ethtool_get_settings(struct net_device *dev,
 
 	return __ethtool_get_settings(vlan->real_dev, cmd);
 }
+#endif /* MY_ABC_HERE */
 
 static void vlan_ethtool_get_drvinfo(struct net_device *dev,
 				     struct ethtool_drvinfo *info)
@@ -803,7 +816,11 @@ static void vlan_dev_netpoll_cleanup(struct net_device *dev)
 #endif /* CONFIG_NET_POLL_CONTROLLER */
 
 static const struct ethtool_ops vlan_ethtool_ops = {
+#if defined(MY_ABC_HERE)
+	.get_link_ksettings	= vlan_ethtool_get_link_ksettings,
+#else /* MY_ABC_HERE */
 	.get_settings	        = vlan_ethtool_get_settings,
+#endif /* MY_ABC_HERE */
 	.get_drvinfo	        = vlan_ethtool_get_drvinfo,
 	.get_link		= ethtool_op_get_link,
 };

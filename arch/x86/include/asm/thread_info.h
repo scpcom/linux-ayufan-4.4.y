@@ -167,7 +167,8 @@ struct thread_info {
  * preempt_count needs to be 1 initially, until the scheduler is functional.
  */
 #ifndef __ASSEMBLY__
-
+DECLARE_PER_CPU_USER_MAPPED(unsigned int, kaiser_enabled_pcp);
+DECLARE_PER_CPU_USER_MAPPED(unsigned int, spec_ctrl_pcp);
 
 /* how to get the current stack pointer from C */
 register unsigned long current_stack_pointer asm("esp") __used;

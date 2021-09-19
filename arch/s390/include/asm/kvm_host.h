@@ -22,6 +22,8 @@
 #define KVM_MAX_VCPUS 64
 #define KVM_USER_MEM_SLOTS 32
 
+#define KVM_HALT_POLL_NS_DEFAULT 0
+
 struct sca_entry {
 	atomic_t scn;
 	__u32	reserved;
@@ -116,6 +118,9 @@ struct kvm_vcpu_stat {
 	u32 exit_stop_request;
 	u32 exit_validity;
 	u32 exit_instruction;
+	u32 halt_successful_poll;
+	u32 halt_attempted_poll;
+	u32 halt_wakeup;
 	u32 instruction_lctl;
 	u32 instruction_lctlg;
 	u32 exit_program_interruption;

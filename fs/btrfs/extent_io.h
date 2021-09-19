@@ -265,15 +265,25 @@ int extent_fiemap(struct inode *inode, struct fiemap_extent_info *fieinfo,
 int get_state_private(struct extent_io_tree *tree, u64 start, u64 *private);
 void set_page_extent_mapped(struct page *page);
 
+#ifdef MY_DEF_HERE
+struct extent_buffer *alloc_extent_buffer(struct btrfs_root *root,
+					  u64 start);
+#else
 struct extent_buffer *alloc_extent_buffer(struct btrfs_fs_info *fs_info,
 					  u64 start);
+#endif  
 struct extent_buffer *__alloc_dummy_extent_buffer(struct btrfs_fs_info *fs_info,
 						  u64 start, unsigned long len);
 struct extent_buffer *alloc_dummy_extent_buffer(struct btrfs_fs_info *fs_info,
 						u64 start);
 struct extent_buffer *btrfs_clone_extent_buffer(struct extent_buffer *src);
+#ifdef MY_DEF_HERE
+struct extent_buffer *find_extent_buffer(struct btrfs_root *root,
+					 u64 start);
+#else
 struct extent_buffer *find_extent_buffer(struct btrfs_fs_info *fs_info,
 					 u64 start);
+#endif  
 void free_extent_buffer(struct extent_buffer *eb);
 void free_extent_buffer_stale(struct extent_buffer *eb);
 #define WAIT_NONE	0

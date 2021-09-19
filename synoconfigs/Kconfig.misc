@@ -83,6 +83,10 @@ config SYNO_ELEVATE_LOG_LEVEL
 	bool "Elevate log level of kernel log"
 	default y
 
+config SYNO_DEGRADE_LOG_LEVEL
+	bool "degrade log level"
+	default y
+
 config SYNO_DYNAMIC_IDENTIFY_CPU_NAME
 	bool "dynamic identify CPU name"
 	default y
@@ -108,7 +112,26 @@ config SYNO_FIX_RTC_WAKE_AFTER_POWER_FAILURE
 	default y
 	depends on SYNO_X64
 
+config SYNO_KPTI_DEFAULT_OFF
+	bool "Set KPTI to default off"
+	default n
+	depends on KAISER
+
+config SYNO_REVERT_PERCPU_COUNTER_COMPARE_BATCH
+	bool "revert percpu_counter compare batch"
+	default n
+	depends on SYNO_X64 && !BTRFS_FS 
+
 endmenu #MISC Features
+
+menu "Cgroup"
+
+endmenu #Cgroup
+
+config SYNO_CGROUP_SKIP_MEMCG
+	bool "skip memcg check in critical path"
+	default y
+	depends on MEMCG
 
 menu "Encryption"
 

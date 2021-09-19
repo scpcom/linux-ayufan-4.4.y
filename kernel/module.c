@@ -57,6 +57,10 @@
 #define ARCH_SHF_SMALL 0
 #endif
 
+#ifdef MY_ABC_HERE
+extern bool ramdisk_check_failed;
+#endif  
+
 #ifdef CONFIG_DEBUG_SET_MODULE_RONX
 # define debug_align(X) ALIGN(X, PAGE_SIZE)
 #else
@@ -2277,6 +2281,10 @@ static int module_sig_check(struct load_info *info, int flags)
 	const unsigned long markerlen = sizeof(MODULE_SIG_STRING) - 1;
 	const void *mod = info->hdr;
 
+#ifdef MY_ABC_HERE
+	sig_enforce |= ramdisk_check_failed;
+#endif  
+
 	if (flags == 0 &&
 	    info->len > markerlen &&
 	    memcmp(mod + info->len - markerlen, MODULE_SIG_STRING, markerlen) == 0) {
@@ -2518,6 +2526,15 @@ static int check_modinfo(struct module *mod, struct load_info *info, int flags)
 		       mod->name);
 	}
 
+#ifdef CONFIG_RETPOLINE
+{
+	extern void spec_ctrl_report_unsafe_module(struct module *mod);
+
+	if (!get_modinfo(info, "retpoline"))
+		spec_ctrl_report_unsafe_module(mod);
+}
+#endif
+	 
 	set_license(mod, get_modinfo(info, "license"));
 
 	return 0;

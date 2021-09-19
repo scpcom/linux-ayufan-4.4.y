@@ -403,6 +403,9 @@ void ata_scsi_error(struct Scsi_Host *host)
 	LIST_HEAD(eh_work_q);
 
 	DPRINTK("ENTER\n");
+#ifdef MY_ABC_HERE
+	ap->error_handling = 1;
+#endif  
 
 	spin_lock_irqsave(host->host_lock, flags);
 	list_splice_init(&host->eh_cmd_q, &eh_work_q);
@@ -414,6 +417,9 @@ void ata_scsi_error(struct Scsi_Host *host)
 
 	WARN_ON(!list_empty(&eh_work_q));
 
+#ifdef MY_ABC_HERE
+	ap->error_handling = 0;
+#endif  
 	DPRINTK("EXIT\n");
 }
 
@@ -1477,14 +1483,14 @@ static int syno_media_error_retry(struct ata_queued_cmd *qc)
 {
 	int iRet = 1;
 
-#ifdef MY_ABC_HERE
-	if (qc && syno_is_hw_version(HW_DS1815p)) {
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+	if (qc && (syno_is_hw_version(HW_DS1815p) || syno_is_hw_version(HW_DS1515p) || syno_is_hw_version(HW_DS415p))) {
 		struct ata_port *ap = qc->ap;
-		if (ap && (ap->print_id == 7 || ap->print_id == 8)) {
+		if (ap && (ap->link.uiStsFlags & SYNO_STATUS_IS_SIL)) {
 			iRet = 0;
 		}
 	}
-#endif
+#endif  
 
 	return iRet;
 }

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* memcontrol.c - Memory Controller
  *
  * Copyright IBM Corporation, 2007
@@ -2702,6 +2705,10 @@ static int __mem_cgroup_try_charge(struct mm_struct *mm,
 		     || fatal_signal_pending(current)))
 		goto bypass;
 
+#ifdef MY_ABC_HERE
+	if (task_skip_memcg_account(current))
+		goto bypass;
+#endif
 	if (unlikely(task_in_memcg_oom(current)))
 		goto bypass;
 

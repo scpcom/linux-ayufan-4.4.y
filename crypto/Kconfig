@@ -1417,6 +1417,11 @@ config CRYPTO_USER_API_SKCIPHER
 source "drivers/crypto/Kconfig"
 source crypto/asymmetric_keys/Kconfig
 
+comment "Synology Codesign Mechanism"
+
+config SYNO_RAMDISK_INTEGRITY_CHECK
+	tristate "Confirm the integrity of ramdisk (rd.gz) is correct and prevent to suffer tampering"
+
 endif	# if CRYPTO
 
 source "crypto/ocf/Kconfig"

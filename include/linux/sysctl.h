@@ -44,7 +44,11 @@ extern int proc_do_large_bitmap(struct ctl_table *, int,
 extern int SynoProcDoStringVec(struct ctl_table *, int,
 				void __user *, size_t *, loff_t *);
 #endif  
-
+#ifdef MY_DEF_HERE
+extern int SynoProcDoIntVec(struct ctl_table *, int,
+				void __user *, size_t *, loff_t *);
+#endif  
+ 
 struct ctl_table_poll {
 	atomic_t event;
 	wait_queue_head_t wait;

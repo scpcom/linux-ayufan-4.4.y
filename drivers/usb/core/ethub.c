@@ -24,6 +24,10 @@
 #include <linux/mutex.h>
 #include <linux/freezer.h>
 #include <linux/pm_qos.h>
+#ifdef MY_DEF_HERE
+#include <linux/pci.h>
+#include <linux/synobios.h>
+#endif  
 
 #include <asm/uaccess.h>
 #include <asm/byteorder.h>
@@ -35,6 +39,13 @@
 #define CONFIG_USB_ANNOUNCE_NEW_DEVICES
 #endif
 #endif
+
+#ifdef MY_DEF_HERE
+#define SYNO_SERIAL_EXT_CONTROLLER "syno.ext.controller"
+#define PCI_VENDOR_ID_ETRON		0x1b6f
+#define PCI_DEVICE_ID_ETRON_EJ168	0x7023
+#define PCI_DEVICE_ID_ETRON_EJ188	0x7052
+#endif  
 
 static inline int hub_is_superspeed(struct usb_device *hdev)
 {
@@ -58,6 +69,10 @@ static const char ethub_name[] = "ethub";
 #define HUB_DEBOUNCE_TIMEOUT	2000
 #define HUB_DEBOUNCE_STEP	  25
 #define HUB_DEBOUNCE_STABLE	 100
+
+#ifdef MY_DEF_HERE
+static int is_syno_etron_ext_controller(struct usb_device *udev);
+#endif  
 
 static int usb_reset_and_verify_device(struct usb_device *udev);
 
@@ -1603,6 +1618,11 @@ int ethub_usb_new_device(struct usb_device *udev)
 
 #ifdef MY_ABC_HERE
 #define SERIAL_LEN 33
+#ifdef MY_DEF_HERE
+	if (0 == is_syno_etron_ext_controller(udev)) {
+		snprintf(udev->serial, SERIAL_LEN, "%s", SYNO_SERIAL_EXT_CONTROLLER);
+	}
+#endif  
 	 
 	if ( NULL == udev->product ) {
 		udev->product = kmalloc(16, GFP_KERNEL);
@@ -3671,3 +3691,32 @@ int usb_is_etron_hcd(struct usb_device *udev)
 	return 0;
 }
 EXPORT_SYMBOL_GPL(usb_is_etron_hcd);
+
+#ifdef MY_DEF_HERE
+static int is_syno_etron_ext_controller(struct usb_device *udev)
+{
+	int ret = -1;
+	struct device *dev = udev->bus->controller;
+	struct pci_dev	*pdev = to_pci_dev(dev);
+
+	if(NULL == udev) {
+		goto END;
+	}
+
+	if(0 == udev->level) {
+		if (syno_is_hw_version(HW_RS1219p)) {
+			if (USB_SPEED_SUPER == udev->speed || USB_SPEED_HIGH == udev->speed) {
+				if (pdev->vendor == PCI_VENDOR_ID_ETRON && (pdev->device == PCI_DEVICE_ID_ETRON_EJ168 || pdev->device == PCI_DEVICE_ID_ETRON_EJ188)) {
+					 
+					if (0x04 == PCI_SLOT(pdev->bus->self->devfn)) {
+						ret = 0;
+					}
+				}
+			}
+		}
+	}
+
+	END:
+		return ret;
+}
+#endif  

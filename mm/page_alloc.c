@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/stddef.h>
 #include <linux/mm.h>
@@ -2001,11 +1998,7 @@ rebalance:
 	}
 
 nopage:
-#ifdef MY_ABC_HERE
- 
-#else  
 	warn_alloc_failed(gfp_mask, order, NULL);
-#endif  
 	return page;
 got_pg:
 	if (kmemcheck_enabled)

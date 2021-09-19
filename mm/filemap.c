@@ -551,6 +551,21 @@ repeat:
 }
 EXPORT_SYMBOL(find_or_create_page);
 
+#ifdef MY_ABC_HERE
+struct page *find_or_create_page_no_memcg(struct address_space *mapping,
+		pgoff_t index, gfp_t gfp_mask)
+{
+	struct page *page;
+
+	memcg_stop_account();
+	page = find_or_create_page(mapping, index, gfp_mask);
+	memcg_resume_account();
+
+	return page;
+}
+EXPORT_SYMBOL(find_or_create_page_no_memcg);
+#endif
+
 unsigned find_get_pages(struct address_space *mapping, pgoff_t start,
 			    unsigned int nr_pages, struct page **pages)
 {

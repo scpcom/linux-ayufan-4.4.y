@@ -3115,7 +3115,7 @@ static int __init uncore_type_init(struct intel_uncore_type *type)
 
 	pmus = kzalloc(sizeof(*pmus) * type->num_boxes, GFP_KERNEL);
 	if (!pmus)
-		return -ENOMEM;
+		goto fail;
 
 	type->unconstrainted = (struct event_constraint)
 		__EVENT_CONSTRAINT(0, (1ULL << type->num_counters) - 1,

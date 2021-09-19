@@ -1259,12 +1259,6 @@ out_nfserr:
 
 #ifdef CONFIG_NFSD_V3
 
-static inline int nfsd_create_is_exclusive(int createmode)
-{
-	return createmode == NFS3_CREATE_EXCLUSIVE
-		   || createmode == NFS4_CREATE_EXCLUSIVE4_1;
-}
-
 __be32
 do_nfsd_create(struct svc_rqst *rqstp, struct svc_fh *fhp,
 		char *fname, int flen, struct iattr *iap,

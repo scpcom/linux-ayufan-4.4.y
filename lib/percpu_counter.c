@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Fast batching percpu counters.
  */
@@ -190,13 +193,21 @@ static int __cpuinit percpu_counter_hotcpu_callback(struct notifier_block *nb,
  * Compare counter against given value.
  * Return 1 if greater, 0 if equal and -1 if less
  */
+#ifdef MY_ABC_HERE
 int percpu_counter_compare(struct percpu_counter *fbc, s64 rhs)
+#else
+int __percpu_counter_compare(struct percpu_counter *fbc, s64 rhs, s32 batch)
+#endif /* MY_ABC_HERE */
 {
 	s64	count;
 
 	count = percpu_counter_read(fbc);
 	/* Check to see if rough count will be sufficient for comparison */
+#ifdef MY_ABC_HERE
 	if (abs(count - rhs) > (percpu_counter_batch*num_online_cpus())) {
+#else
+	if (abs(count - rhs) > (batch * num_online_cpus())) {
+#endif /* MY_ABC_HERE */
 		if (count > rhs)
 			return 1;
 		else
@@ -211,7 +222,11 @@ int percpu_counter_compare(struct percpu_counter *fbc, s64 rhs)
 	else
 		return 0;
 }
+#ifdef MY_ABC_HERE
 EXPORT_SYMBOL(percpu_counter_compare);
+#else
+EXPORT_SYMBOL(__percpu_counter_compare);
+#endif /* MY_ABC_HERE */
 
 static int __init percpu_counter_startup(void)
 {

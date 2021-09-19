@@ -76,6 +76,10 @@
 #include <linux/nmi.h>
 #endif
 
+#ifdef MY_DEF_HERE
+#include <linux/syno.h>
+#endif  
+
 #if defined(CONFIG_SYSCTL)
 #ifdef MY_ABC_HERE
 int SynoDebugFlag = 0;
@@ -187,11 +191,6 @@ EXPORT_SYMBOL(gSynoRaidSyncFlag);
 #endif  
 
 #ifdef MY_ABC_HERE
-DECLARE_RWSEM(s_reshape_mount_key);
-EXPORT_SYMBOL(s_reshape_mount_key);
-#endif  
-
-#ifdef MY_ABC_HERE
 int g_syno_sata_remap[SATA_REMAP_MAX] = {SATA_REMAP_NOT_INIT};
 EXPORT_SYMBOL(g_syno_sata_remap);
 int g_use_sata_remap = 0;
@@ -210,6 +209,8 @@ EXPORT_SYMBOL(gPciAddrNum);
 #endif  
 
 #ifdef MY_DEF_HERE
+int gPciDeferStart = M2SATA_START_IDX;
+EXPORT_SYMBOL(gPciDeferStart);
 int g_nvc_map_index = 0;
 EXPORT_SYMBOL(g_nvc_map_index);
 #endif  
@@ -294,7 +295,7 @@ EXPORT_SYMBOL(gSynoCastratedXhcPortBitmap);
 #endif  
 
 #ifdef MY_DEF_HERE
-char gSynoUsbVbusHostAddr[CONFIG_SYNO_USB_VBUS_NUM_GPIO][13] = {{0}};
+char gSynoUsbVbusHostAddr[CONFIG_SYNO_USB_VBUS_NUM_GPIO][20] = {{0}};
 int gSynoUsbVbusPort[CONFIG_SYNO_USB_VBUS_NUM_GPIO] = {0};
 unsigned gSynoUsbVbusGpp[CONFIG_SYNO_USB_VBUS_NUM_GPIO] = {0};
 EXPORT_SYMBOL(gSynoUsbVbusHostAddr);
@@ -339,10 +340,46 @@ EXPORT_SYMBOL(g_syno_ds1815p_speed_limit);
 #endif  
 
 #ifdef MY_ABC_HERE
-int giSynoDsikEhFlag = 0;
-EXPORT_SYMBOL(giSynoDsikEhFlag);
+int giSynoDiskEhFlag = 0;
+EXPORT_SYMBOL(giSynoDiskEhFlag);
 unsigned long guSynoScsiCmdSN = 0;
 EXPORT_SYMBOL(guSynoScsiCmdSN);
+#endif  
+
+#ifdef MY_DEF_HERE
+unsigned int SynoDiskLatencyType = 0x6;
+EXPORT_SYMBOL(SynoDiskLatencyType);
+unsigned int gSynoDiskLatencyRank[SYNO_DISK_LATENCY_RANK_NUM] = {99, 90, 70, 50, 0};
+EXPORT_SYMBOL(gSynoDiskLatencyRank);
+#endif  
+#ifdef MY_DEF_HERE
+
+#define SZ_IF_PREFIX "eth"
+#define SYNO_SFP_UNSUPPORT_NOTIFY_SIZE 64
+int gSynoSfpUnsupportNotify[SYNO_SFP_UNSUPPORT_NOTIFY_SIZE] = {0};
+
+void SynoSfpUnsupportNotifySet(const char* ethName, SYNO_SFP_UNSUPPORTED_NOTIFY_TYPE val)
+{
+	long int ethNum = -1;
+
+	if (0 != strncmp(ethName, SZ_IF_PREFIX, strlen(SZ_IF_PREFIX))) {
+		goto err;
+	}
+	if (0 != strict_strtol(ethName + strlen(SZ_IF_PREFIX), 10, &ethNum)) {
+		goto err;
+	}
+	if (ethNum >= SYNO_SFP_UNSUPPORT_NOTIFY_SIZE) {
+		goto err;
+	}
+
+	gSynoSfpUnsupportNotify[ethNum] = val;
+	return;
+
+err:
+	printk(KERN_ERR "Syno SFP+ notification failed: %s\n", ethName);
+}
+EXPORT_SYMBOL(SynoSfpUnsupportNotifySet);
+
 #endif  
 
 extern int sysctl_overcommit_memory;
@@ -1570,11 +1607,36 @@ static struct ctl_table kern_table[] = {
 #ifdef MY_ABC_HERE
        {
                .procname       = "syno_disk_eh_flag",
-               .data           = &giSynoDsikEhFlag,
+               .data           = &giSynoDiskEhFlag,
                .maxlen         = sizeof (int),
                .mode           = 0444,
                .proc_handler   = &proc_dointvec,
        },
+#endif  
+#ifdef MY_DEF_HERE
+	{
+		.procname       = "syno_unsupported_sfp_notify",
+		.data           = &gSynoSfpUnsupportNotify,
+		.maxlen         = sizeof(gSynoSfpUnsupportNotify),
+		.mode           = 0644,
+		.proc_handler   = SynoProcDoIntVec,
+	},
+#endif  
+#ifdef MY_DEF_HERE
+	{
+		.procname       = "syno_disk_latency_type",
+		.data           = &SynoDiskLatencyType,
+		.maxlen         = sizeof (int),
+		.mode           = 0644,
+		.proc_handler   = proc_dointvec,
+	},
+	{
+		.procname       = "syno_disk_latency_rank",
+		.data           = &gSynoDiskLatencyRank,
+		.maxlen         = sizeof (gSynoDiskLatencyRank),
+		.mode           = 0644,
+		.proc_handler   = proc_dointvec,
+	},
 #endif  
 	{ }
 };
@@ -3023,6 +3085,96 @@ int SynoProcDoStringVec(struct ctl_table *table, int write,
 }
 #endif  
 
+#ifdef MY_DEF_HERE
+ 
+int SynoProcDoIntVec(struct ctl_table *table, int write,
+	void __user *buffer, size_t *lenp, loff_t *ppos)
+{
+	int *i = 0, vleft, first = 1, err = 0, writeVal = 0, getWriteVal = 0;
+	unsigned long page = 0;
+	size_t left;
+	char *kbuf;
+
+	if (!table->data || !table->maxlen || !*lenp || (*ppos && !write)) {
+		*lenp = 0;
+		return 0;
+	}
+
+	i = (int *) table->data;
+	vleft = table->maxlen / sizeof(*i);
+	left = *lenp;
+
+	if (write) {
+		if (left > PAGE_SIZE - 1)
+			left = PAGE_SIZE - 1;
+		page = __get_free_page(GFP_TEMPORARY);
+		kbuf = (char *) page;
+		if (!kbuf)
+			return -ENOMEM;
+		if (copy_from_user(kbuf, buffer, left)) {
+			err = -EFAULT;
+			goto free;
+		}
+		kbuf[left] = 0;
+	}
+
+	for (; left && vleft--; i++, first=0) {
+		unsigned long lval;
+		bool neg;
+
+		if (write) {
+			left -= proc_skip_spaces(&kbuf);
+
+			if (!left)
+				break;
+			err = proc_get_long(&kbuf, &left, &lval, &neg,
+					     proc_wspace_sep,
+					     sizeof(proc_wspace_sep), NULL);
+			if (err)
+				break;
+			 
+			if (0 == getWriteVal) {
+				getWriteVal = 1;
+				writeVal = lval;
+				continue;
+			}
+			if (lval >= (table->maxlen / sizeof(*i)) || neg) {
+				err = -EINVAL;
+				break;
+			}
+			((int*)table->data)[lval] = writeVal;
+			 
+		} else {
+			if (do_proc_dointvec_conv(&neg, &lval, i, 0, NULL)) {
+				err = -EINVAL;
+				break;
+			}
+			if (!first)
+				err = proc_put_char(&buffer, &left, '\t');
+			if (err)
+				break;
+			err = proc_put_long(&buffer, &left, lval, neg);
+			if (err)
+				break;
+		}
+	}
+
+	if (!write && !first && left && !err)
+		err = proc_put_char(&buffer, &left, '\n');
+	if (write && !err && left)
+		left -= proc_skip_spaces(&kbuf);
+free:
+	if (write) {
+		free_page(page);
+		if (first)
+			return err ? : -EINVAL;
+	}
+	*lenp -= left;
+	*ppos += *lenp;
+	return err;
+}
+#endif  
+
 #else  
 
 int proc_dostring(struct ctl_table *table, int write,
@@ -3076,6 +3228,14 @@ int proc_doulongvec_ms_jiffies_minmax(struct ctl_table *table, int write,
 
 #if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 int SynoProcDoStringVec(struct ctl_table *table, int write,
+			void __user *buffer, size_t *lenp, loff_t *ppos)
+{
+    return -ENOSYS;
+}
+#endif  
+
+#ifdef MY_DEF_HERE
+int SynoProcDoIntVec(struct ctl_table *table, int write,
 			void __user *buffer, size_t *lenp, loff_t *ppos)
 {
     return -ENOSYS;

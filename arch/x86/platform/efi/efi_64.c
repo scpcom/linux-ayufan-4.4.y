@@ -73,6 +73,7 @@ void __init efi_call_phys_prelog(void)
 		save_pgd[pgd] = *pgd_offset_k(pgd * PGDIR_SIZE);
 		vaddress = (unsigned long)__va(pgd * PGDIR_SIZE);
 		set_pgd(pgd_offset_k(pgd * PGDIR_SIZE), *pgd_offset_k(vaddress));
+		pgd_offset_k(pgd * PGDIR_SIZE)->pgd &= ~_PAGE_NX;
 	}
 	__flush_tlb_all();
 }
@@ -84,8 +85,9 @@ void __init efi_call_phys_epilog(void)
 	 */
 	int pgd;
 	int n_pgds = DIV_ROUND_UP((max_pfn << PAGE_SHIFT) , PGDIR_SIZE);
-	for (pgd = 0; pgd < n_pgds; pgd++)
+	for (pgd = 0; pgd < n_pgds; pgd++) {
 		set_pgd(pgd_offset_k(pgd * PGDIR_SIZE), save_pgd[pgd]);
+	}
 	kfree(save_pgd);
 	__flush_tlb_all();
 	early_code_mapping_set_exec(0);

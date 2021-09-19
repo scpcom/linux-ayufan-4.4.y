@@ -39,6 +39,7 @@
 #include <asm/processor.h>
 #include <asm/mce.h>
 #include <asm/msr.h>
+#include <asm/traps.h>
 
 #include "mce-internal.h"
 
@@ -1273,6 +1274,11 @@ static void unexpected_machine_check(struct pt_regs *regs, long error_code)
 
 void (*machine_check_vector)(struct pt_regs *, long error_code) =
 						unexpected_machine_check;
+
+dotraplinkage void do_mce(struct pt_regs *regs, long error_code)
+{
+	machine_check_vector(regs, error_code);
+}
 
 void __cpuinit mcheck_cpu_init(struct cpuinfo_x86 *c)
 {

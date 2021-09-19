@@ -40,6 +40,12 @@
 #include <linux/pci.h>
 #endif  
 
+#ifdef MY_DEF_HERE
+#include <linux/synolib.h>
+#include <linux/math64.h>
+#include <linux/sort.h>
+#endif  
+
 #ifdef MY_ABC_HERE
 #include <linux/random.h>
 
@@ -51,7 +57,7 @@ static unsigned long gulLastWake = 0;
 DEFINE_SPINLOCK(SYNOLastWakeLock);
 #endif  
 
-#ifdef MY_ABC_HERE
+#ifdef CONFIG_SYNO_EUNIT_DEADLOCK_FIX
 DEFINE_SPINLOCK(SYNOEUnitLock);
 #endif  
 
@@ -474,14 +480,9 @@ syno_gpio_write_with_sdev(struct ata_port *ap, struct scsi_device *sdev, u32 inp
 
 struct ata_port *SynoEunitFindMaster(struct ata_port *ap)
 {
-	struct Scsi_Host *pMaster_host = NULL;
 	struct ata_port *pAp_master = NULL;
 	int i = 0;
 	int unique = 0;
-	int iAtaPrintIdMax;
-#ifdef MY_ABC_HERE
-	unsigned long flags;
-#endif  
 
 	if (!syno_is_synology_pm(ap)) {
 		goto END;
@@ -491,27 +492,15 @@ struct ata_port *SynoEunitFindMaster(struct ata_port *ap)
 		pAp_master = ap;
 		goto END;
 	}
-
 	unique = SYNO_UNIQUE(ap->PMSynoUnique);
-	iAtaPrintIdMax = atomic_read(&ata_print_id) + 1;
-	for (i = 1; i < iAtaPrintIdMax; i++) {
-#ifdef MY_ABC_HERE
-		spin_lock_irqsave(&SYNOEUnitLock, flags);
-		pMaster_host = scsi_host_lookup(i - 1);
-		spin_unlock_irqrestore(&SYNOEUnitLock, flags);
-		if (NULL == pMaster_host) {
-			continue;
-		}
-#else
-		if (NULL == (pMaster_host = scsi_host_lookup(i - 1))) {
-			continue;
-		}
-#endif  
+	 
+	for (i = 0; i < ap->host->n_ports; i++) {
+		pAp_master = ap->host->ports[i];
 
-		if (NULL == (pAp_master = ata_shost_to_port(pMaster_host))) {
+		if (NULL == pAp_master) {
 			goto CONTINUE_FOR;
 		}
-
+		 
 		if (!syno_is_synology_pm(pAp_master)) {
 			goto CONTINUE_FOR;
 		}
@@ -519,61 +508,38 @@ struct ata_port *SynoEunitFindMaster(struct ata_port *ap)
 		if (unique != SYNO_UNIQUE(pAp_master->PMSynoUnique)) {
 			goto CONTINUE_FOR;
 		}
-
-		if (ap->host == pAp_master->host || ap->port_no == pAp_master->port_no) {
-			 
-			if(0 == pAp_master->PMSynoEMID) {
-				break;
-			}
+		 
+		if (0 == pAp_master->PMSynoEMID) {
+			break;
 		}
 CONTINUE_FOR:
-		scsi_host_put(pMaster_host);
-		pMaster_host = NULL;
 		pAp_master = NULL;
 	}
 
 END:
-	if (NULL != pMaster_host) {
-		scsi_host_put(pMaster_host);
-	}
 	return pAp_master;
 }
 
-void SynoEunitFlagSet(struct ata_port *pAp_master, bool blset, unsigned int flag)
+void SynoEunitFlagSet(struct ata_port *pAp_master, bool blset, unsigned int flag, bool blWithLink)
 {
-	struct Scsi_Host *ap_host = NULL;
 	struct ata_port *ap = NULL;
+	struct ata_link *link;
 	int i = 0;
 	int unique = 0;
-	int iAtaPrintIdMax;
-#ifdef MY_ABC_HERE
-	unsigned long flags;
-#endif  
+	unsigned long flags_ap;
+	bool blAnyLink = false;
 
 	if (!syno_is_synology_pm(pAp_master)) {
 		goto END;
 	}
-
 	unique = SYNO_UNIQUE(pAp_master->PMSynoUnique);
-	iAtaPrintIdMax = atomic_read(&ata_print_id) + 1;
-	for (i = 1; i < iAtaPrintIdMax; i++) {
-#ifdef MY_ABC_HERE
-		spin_lock_irqsave(&SYNOEUnitLock, flags);
-		ap_host = scsi_host_lookup(i - 1);
-		spin_unlock_irqrestore(&SYNOEUnitLock, flags);
-		if (NULL == ap_host) {
+
+	for (i = 0; i < pAp_master->host->n_ports; i++) {
+		ap = pAp_master->host->ports[i];
+
+		if (NULL == ap) {
 			continue;
 		}
-#else  
-		if (NULL == (ap_host = scsi_host_lookup(i - 1))) {
-			continue;
-		}
-#endif  
-
-		if (NULL == (ap = ata_shost_to_port(ap_host))) {
-			goto CONTINUE_FOR;
-		}
-
 		if (!syno_is_synology_pm(ap)) {
 			goto CONTINUE_FOR;
 		}
@@ -581,7 +547,7 @@ void SynoEunitFlagSet(struct ata_port *pAp_master, bool blset, unsigned int flag
 		if (unique != SYNO_UNIQUE(ap->PMSynoUnique)) {
 			goto CONTINUE_FOR;
 		}
-
+		 
 		if (IS_SYNOLOGY_RX4(ap->PMSynoUnique) ||
 				IS_SYNOLOGY_DX5(ap->PMSynoUnique) ||
 				IS_SYNOLOGY_DX513(ap->PMSynoUnique) ||
@@ -590,15 +556,27 @@ void SynoEunitFlagSet(struct ata_port *pAp_master, bool blset, unsigned int flag
 				IS_SYNOLOGY_RX415(ap->PMSynoUnique) ||
 				IS_SYNOLOGY_DX517(ap->PMSynoUnique) ||
 				IS_SYNOLOGY_RX418(ap->PMSynoUnique)) {
-			if (ap->host == pAp_master->host && ap->port_no == pAp_master->port_no) {
-				unsigned long flags;
-				spin_lock_irqsave(ap->lock, flags);
+			if (ap->port_no == pAp_master->port_no) {
+				if (blWithLink) {
+					 
+					ata_for_each_link(link, ap, EDGE) {
+						if (0 != link->sata_spd) {
+							blAnyLink = true;
+							break;
+						}
+					}
+					 
+					if (!blAnyLink) {
+						goto CONTINUE_FOR;
+					}
+				}
+				spin_lock_irqsave(ap->lock, flags_ap);
 				if (blset) {
 					ap->pflags |= flag;
 				} else {
 					ap->pflags &= ~flag;
 				}
-				spin_unlock_irqrestore(ap->lock, flags);
+				spin_unlock_irqrestore(ap->lock, flags_ap);
 			}
 		}
 
@@ -607,26 +585,33 @@ void SynoEunitFlagSet(struct ata_port *pAp_master, bool blset, unsigned int flag
 				IS_SYNOLOGY_RX1214(ap->PMSynoUnique) ||
 				IS_SYNOLOGY_RX1217(ap->PMSynoUnique) ||
 				IS_SYNOLOGY_DX1215(ap->PMSynoUnique)) {
-			if (ap->host == pAp_master->host) {
-				unsigned long flags;
-				spin_lock_irqsave(ap->lock, flags);
-				if (blset) {
-					ap->pflags |= flag;
-				} else {
-					ap->pflags &= ~flag;
+			if (blWithLink) {
+				 
+				ata_for_each_link(link, ap, EDGE) {
+					if (0 != link->sata_spd) {
+						blAnyLink = true;
+						break;
+					}
 				}
-				spin_unlock_irqrestore(ap->lock, flags);
+				 
+				if (!blAnyLink) {
+					goto CONTINUE_FOR;
+				}
 			}
+			spin_lock_irqsave(ap->lock, flags_ap);
+			if (blset) {
+				ap->pflags |= flag;
+			} else {
+				ap->pflags &= ~flag;
+			}
+			spin_unlock_irqrestore(ap->lock, flags_ap);
 		}
 CONTINUE_FOR:
-		scsi_host_put(ap_host);
-		ap_host = NULL;
 		ap = NULL;
 	}
+
 END:
-	if (NULL != ap_host) {
-		scsi_host_put(ap_host);
-	}
+	return;
 }
 
 static ssize_t
@@ -1347,6 +1332,303 @@ DEVICE_ATTR(sw_activity, S_IWUSR | S_IRUGO, ata_scsi_activity_show,
 			ata_scsi_activity_store);
 EXPORT_SYMBOL_GPL(dev_attr_sw_activity);
 
+#ifdef MY_DEF_HERE
+static ssize_t
+syno_latency_hist_show(struct device *device,
+		struct device_attribute *attr, char *buf)
+{
+	struct scsi_device *sdev = to_scsi_device(device);
+	struct ata_port *ap = ata_shost_to_port(sdev->host);
+	struct ata_device *dev;
+	struct ata_link *link;
+	ssize_t len				= 0;
+	unsigned long flags		= 0;
+	unsigned int j			= 0;
+	unsigned int i			= 0;
+	int iTime				= 0;
+	char* szTime			= "";
+	char szTmp[512]			= {'\0'};
+
+	spin_lock_irqsave(ap->lock, flags);
+	dev = ata_scsi_find_dev(ap, sdev);
+	if (!dev) {
+		goto UNLOCK;
+	}
+	link = dev->link;
+
+	snprintf(szTmp, sizeof(szTmp), "\tread\tread_r\twrite\twrite_r\toth oth_r\n");
+	len += strlen(szTmp);
+	strncat(buf, szTmp, PAGE_SIZE - len - 1);
+
+	for (j = 0; j < 3; j++) {
+		if (0 == j) {
+			 
+			iTime = 32;
+			szTime = "us";
+			i = 0;
+		} else if (1 == j) {
+			 
+			iTime = 1;
+			szTime = "ms";
+			i = 1;
+		} else if (2 == j) {
+			 
+			iTime = 32;
+			szTime = "ms";
+			i = 1;
+		}
+		for (; i < 32; i++) {
+			snprintf(szTmp, sizeof(szTmp), "%4d %s\t%5u\t%5u\t%5u\t%5u\t%u %u\n",
+							((i+1) * iTime), szTime,
+							link->ata_latency.u32TimeBuckets[1][j][i],
+							link->ata_latency.u32RespTimeBuckets[1][j][i],
+							link->ata_latency.u32TimeBuckets[2][j][i],
+							link->ata_latency.u32RespTimeBuckets[2][j][i],
+							link->ata_latency.u32TimeBuckets[0][j][i],
+							link->ata_latency.u32RespTimeBuckets[0][j][i]);
+			len += strlen(szTmp);
+			strncat(buf, szTmp, PAGE_SIZE - len - 1);
+		}
+	}
+
+UNLOCK:
+	spin_unlock_irqrestore(ap->lock, flags);
+	return len;
+}
+DEVICE_ATTR(syno_disk_latency_hist, S_IRUGO, syno_latency_hist_show, NULL);
+EXPORT_SYMBOL_GPL(dev_attr_syno_disk_latency_hist);
+
+extern unsigned int SynoDiskLatencyType;
+extern unsigned int gSynoDiskLatencyRank[SYNO_DISK_LATENCY_RANK_NUM];
+static int reverse_cmpint(const void *l, const void *r)
+{
+	return *((unsigned int *) r) - *((unsigned int *) l);
+}
+
+static void disk_latency_rank_calculate(
+						const u64 u64TotalIoCount[SYNO_LATENCY_TYPE_COUNT],
+						u32 u32TimeBuckets[SYNO_LATENCY_TYPE_COUNT][3][32],
+						const unsigned int iPrCmdPoint[],
+						u32 u32PrCmdTime[SYNO_LATENCY_TYPE_COUNT][SYNO_DISK_LATENCY_RANK_NUM])
+{
+	int iType = 0;
+	int iStep = 0;
+	int iBucket = 0;
+	int iPrPoint = 0;
+	u64 u64PrCmdSum = 0;
+	u64 u64PrCmdCntTarget = 0;
+	u32 u32PrInterCnt = 0;
+	u32 u32PrInterTime = 0;
+	for (iType = 0; iType < SYNO_LATENCY_TYPE_COUNT; iType++) {
+		u64PrCmdSum = 0;
+		iPrPoint = 0;
+		if (0 == u64TotalIoCount[iType]) {
+			continue;
+		}
+		u64PrCmdCntTarget = div64_u64(u64TotalIoCount[iType] * (100 - iPrCmdPoint[iPrPoint]), 100);
+		u64PrCmdCntTarget = (0 == u64PrCmdCntTarget) ? 1 : u64PrCmdCntTarget;
+		for (iBucket = 2; iBucket >= 0 && iPrPoint < SYNO_DISK_LATENCY_RANK_NUM; iBucket--) {
+			for (iStep = 31; iStep >= 0 && iPrPoint < SYNO_DISK_LATENCY_RANK_NUM; iStep--) {
+				u64PrCmdSum += u32TimeBuckets[iType][iBucket][iStep];
+				 
+				for (;u64PrCmdSum >= u64PrCmdCntTarget
+						&& iPrPoint < SYNO_DISK_LATENCY_RANK_NUM
+						&& 0 != iPrCmdPoint[iPrPoint]; iPrPoint++) {
+					u32PrInterCnt = u64PrCmdSum - u64PrCmdCntTarget;
+					u32PrInterTime = 1 << (5 * (iBucket + 1));
+					u32PrCmdTime[iType][iPrPoint] = (iStep * u32PrInterTime)
+												+ ((u32PrInterTime * u32PrInterCnt)
+														/ u32TimeBuckets[iType][iBucket][iStep]);
+					u64PrCmdCntTarget = div64_u64(u64TotalIoCount[iType] * (100 - iPrCmdPoint[iPrPoint+1]), 100);
+					u64PrCmdCntTarget = (0 == u64PrCmdCntTarget) ? 1 : u64PrCmdCntTarget;
+				}
+			}
+		}
+	}
+	return;
+}
+
+static ssize_t
+syno_latency_stat_show(struct device *device,
+		   struct device_attribute *attr, char *buf)
+{
+	int i = 0;
+	unsigned int iPrCmdPoint[SYNO_DISK_LATENCY_RANK_NUM + 1] = {0};
+	int iType						= 0;
+	int iPrPoint					= 0;
+
+	struct scsi_device *sdev = to_scsi_device(device);
+	struct ata_port *ap = ata_shost_to_port(sdev->host);
+	struct ata_device *dev;
+	struct ata_link *link;
+	ssize_t len						= 0;
+	unsigned long ulFlags			= 0;
+	SYNO_LATENCY_TYPE display_type = SYNO_LATENCY_READ | SYNO_LATENCY_WRITE;
+
+	u64 u64TotalBytes				= 0;
+	u64 u64TotalBatchTime			= 0;
+	u64 u64TotalBatchTimeSec		= 0;
+	u64 u64TotalPendingTime			= 0;
+	u64 u64ReportTimeInterval		= 0;
+	u64 u64TotalCmdTime				= 0;
+	u64 u64TotalCmdRespTime			= 0;
+	u64 u64TotalCount				= 0;
+	u64 u64TotalBatchCount			= 0;
+	u64 u64CurReportTime			= 0;
+	u64 u64CurBatchTimeOffset		= 0;
+	u64 u64TotalIoCount[SYNO_LATENCY_TYPE_COUNT] = {0};
+	u32 u32PrCmdTime[SYNO_LATENCY_TYPE_COUNT][SYNO_DISK_LATENCY_RANK_NUM] = {{0}};
+	u32 u32PrCmdRespTime[SYNO_LATENCY_TYPE_COUNT][SYNO_DISK_LATENCY_RANK_NUM] = {{0}};
+
+	char szTmp[512]					= {'\0'};
+
+	for (i = 0; i < SYNO_DISK_LATENCY_RANK_NUM; i++) {
+		iPrCmdPoint[i] = gSynoDiskLatencyRank[i];
+		iPrCmdPoint[i] = (iPrCmdPoint[i] < 100) ? iPrCmdPoint[i] : 0;
+	}
+
+	sort(iPrCmdPoint, SYNO_DISK_LATENCY_RANK_NUM,
+						sizeof(unsigned int), reverse_cmpint, NULL);
+
+	spin_lock_irqsave(ap->lock, ulFlags);
+	dev = ata_scsi_find_dev(ap, sdev);
+	if (!dev) {
+		goto UNLOCK;
+	}
+	link = dev->link;
+	u64CurReportTime = cpu_clock(0);
+
+	display_type = (SYNO_LATENCY_TYPE)SynoDiskLatencyType;
+
+	for (iType = 0; iType < SYNO_LATENCY_TYPE_COUNT; iType++) {
+		u64TotalIoCount[iType] = link->latency_stat.u64TotalCount[iType]
+								- link->prev_latency_stat.u64TotalCount[iType];
+	}
+
+	if (display_type & SYNO_LATENCY_OTHERS) {
+		u64TotalCount += u64TotalIoCount[0];
+		 
+		u64TotalBytes += ((link->latency_stat.u64TotalBytes[0]
+						- link->prev_latency_stat.u64TotalBytes[0]) >> 10);
+		u64TotalCmdTime += div64_u64((link->latency_stat.u64TotalTime[0]
+						- link->prev_latency_stat.u64TotalTime[0]), 1000);
+		u64TotalCmdRespTime += div64_u64((link->latency_stat.u64TotalRespTime[0]
+						- link->prev_latency_stat.u64TotalRespTime[0]), 1000);
+	}
+	if (display_type & SYNO_LATENCY_READ) {
+		u64TotalCount += u64TotalIoCount[1];
+		 
+		u64TotalBytes += ((link->latency_stat.u64TotalBytes[1]
+						- link->prev_latency_stat.u64TotalBytes[1]) >> 10);
+		u64TotalCmdTime += div64_u64((link->latency_stat.u64TotalTime[1]
+						- link->prev_latency_stat.u64TotalTime[1]), 1000);
+		u64TotalCmdRespTime += div64_u64((link->latency_stat.u64TotalRespTime[1]
+						- link->prev_latency_stat.u64TotalRespTime[1]), 1000);
+	}
+	if (display_type & SYNO_LATENCY_WRITE) {
+		u64TotalCount += u64TotalIoCount[2];
+		 
+		u64TotalBytes += ((link->latency_stat.u64TotalBytes[2]
+						- link->prev_latency_stat.u64TotalBytes[2]) >> 10);
+		u64TotalCmdTime += div64_u64((link->latency_stat.u64TotalTime[2]
+						- link->prev_latency_stat.u64TotalTime[2]), 1000);
+		u64TotalCmdRespTime += div64_u64((link->latency_stat.u64TotalRespTime[2]
+						- link->prev_latency_stat.u64TotalRespTime[2]), 1000);
+	}
+	u64TotalBatchCount = (link->latency_stat.u64TotalBatchCount
+						- link->prev_latency_stat.u64TotalBatchCount);
+	 
+	u64ReportTimeInterval =
+		div64_u64((u64CurReportTime - link->ata_latency.u64LastReportTime), 1000000);
+
+	u64TotalBatchTime = (link->latency_stat.u64TotalBatchTime
+						- link->prev_latency_stat.u64TotalBatchTime);
+
+	if (link->ata_latency.u64BatchIssue >= link->ata_latency.u64BatchComplete) {
+		u64CurBatchTimeOffset = u64CurReportTime - link->ata_latency.u64BatchIssue;
+		u64TotalBatchTime += u64CurBatchTimeOffset;
+	}
+
+	u64TotalBatchTime -= link->ata_latency.u64LastBatchTimeOffset;
+	u64TotalBatchTime = div64_u64(u64TotalBatchTime, 1000000);  
+	u64TotalBatchTimeSec = div64_u64(u64TotalBatchTime, 1000);
+	u64TotalPendingTime = u64ReportTimeInterval - u64TotalBatchTime;
+
+	snprintf(szTmp, sizeof(szTmp), "IO Time: %llu ms\t"
+										"Bytes: %llu MB\t"
+										"CmdNum: %llu\t",
+										u64ReportTimeInterval,
+										(u64TotalBytes >> 10),
+										u64TotalCount);
+	len += strlen(szTmp);
+	strncat(buf, szTmp, PAGE_SIZE - len - 1);
+
+	snprintf(szTmp, sizeof(szTmp),
+				"IO TP: %llu MBs\t"
+				"IOPS: %llu \t"
+				"Pending: %llu ms (%llu%%)\t"
+				"BatchNum: %llu\t"
+				"Batch TP: %3llu MBs\t"
+				"AvgCmdTime: %llu us\t"
+				"AvgCmdResp: %llu us\n",
+				((0 == u64ReportTimeInterval) ? 0
+					: div64_u64(u64TotalBytes, u64ReportTimeInterval)),
+				((0 == u64TotalBatchTimeSec) ? 0
+					: div64_u64(u64TotalCount, u64TotalBatchTimeSec)),
+				u64TotalPendingTime,
+				((0 == u64ReportTimeInterval) ? 100
+					: div64_u64((u64TotalPendingTime*100), u64ReportTimeInterval)),
+				u64TotalBatchCount,
+				((0 == u64TotalBatchTime) ? 0
+					: div64_u64(u64TotalBytes, u64TotalBatchTime)),
+				((0 == u64TotalCount) ? 0
+					: div64_u64(u64TotalCmdTime, u64TotalCount)),
+				((0 == u64TotalCount) ? 0
+					: div64_u64(u64TotalCmdRespTime, u64TotalCount)));
+
+	len += strlen(szTmp);
+	strncat(buf, szTmp, PAGE_SIZE - len - 1);
+
+	disk_latency_rank_calculate(u64TotalIoCount,
+								link->ata_latency.u32TimeBuckets,
+								iPrCmdPoint,
+								u32PrCmdTime);
+	disk_latency_rank_calculate(u64TotalIoCount,
+								link->ata_latency.u32RespTimeBuckets,
+								iPrCmdPoint,
+								u32PrCmdRespTime);
+	for (iPrPoint = SYNO_DISK_LATENCY_RANK_NUM - 1; iPrPoint >= 0; iPrPoint--) {
+		if (0 == iPrCmdPoint[iPrPoint]) {
+			continue;
+		}
+		snprintf(szTmp, sizeof(szTmp),
+				"lat %2dth: \tr: %7u\tr_r: %7u\tw: %7u\tw_r: %7u\toth: %7u\toth_r: %7u\n",
+							iPrCmdPoint[iPrPoint],
+							u32PrCmdTime[1][iPrPoint], u32PrCmdRespTime[1][iPrPoint],
+							u32PrCmdTime[2][iPrPoint], u32PrCmdRespTime[2][iPrPoint],
+							u32PrCmdTime[0][iPrPoint], u32PrCmdRespTime[0][iPrPoint]);
+		len += strlen(szTmp);
+		strncat(buf, szTmp, PAGE_SIZE - len - 1);
+	}
+
+	link->ata_latency.u64LastReportTime = u64CurReportTime;
+	link->ata_latency.u64LastBatchTimeOffset = u64CurBatchTimeOffset;
+	memcpy(&(link->prev_latency_stat), &(link->latency_stat),
+										sizeof(link->prev_latency_stat));
+
+	memset(&(link->ata_latency.u32TimeBuckets), 0,
+						sizeof(link->ata_latency.u32TimeBuckets));
+	memset(&(link->ata_latency.u32RespTimeBuckets), 0,
+						sizeof(link->ata_latency.u32RespTimeBuckets));
+
+UNLOCK:
+	spin_unlock_irqrestore(ap->lock, ulFlags);
+	return len;
+}
+DEVICE_ATTR(syno_disk_latency_stat, S_IRUGO, syno_latency_stat_show, NULL);
+EXPORT_SYMBOL_GPL(dev_attr_syno_disk_latency_stat);
+#endif  
+
 struct device_attribute *ata_common_sdev_attrs[] = {
 	&dev_attr_unload_heads,
 #ifdef MY_ABC_HERE
@@ -1354,6 +1636,10 @@ struct device_attribute *ata_common_sdev_attrs[] = {
 #endif  
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_sata_disk_led_ctrl,
+#endif  
+#ifdef MY_DEF_HERE
+	&dev_attr_syno_disk_latency_hist,
+	&dev_attr_syno_disk_latency_stat,
 #endif  
 	NULL
 };
@@ -2369,8 +2655,17 @@ static unsigned int ata_scsi_rw_xlat(struct ata_queued_cmd *qc)
 	u32 n_block;
 	int rc;
 
+#ifdef MY_DEF_HERE
+	if (cdb[0] == WRITE_10 || cdb[0] == WRITE_6 || cdb[0] == WRITE_16) {
+		tf_flags |= ATA_TFLAG_WRITE;
+		qc->qc_stat.u8QcType = 2;
+	} else if (cdb[0] == READ_10 || cdb[0] == READ_6 || cdb[0] == READ_16) {
+		qc->qc_stat.u8QcType = 1;
+	}
+#else  
 	if (cdb[0] == WRITE_10 || cdb[0] == WRITE_6 || cdb[0] == WRITE_16)
 		tf_flags |= ATA_TFLAG_WRITE;
+#endif  
 
 	switch (cdb[0]) {
 	case READ_10:
@@ -2558,7 +2853,7 @@ static int SynoIssueWakeUpCmd(struct ata_device *dev)
 	struct scatterlist *psg = NULL;
 	int rc;
 	u16 *buf = (void *)dev->link->ap->sector_buf;
-#if defined(MY_ABC_HERE)
+#if defined(MY_DEF_HERE)
 #else  
 	u64 block;
 #endif  
@@ -2581,7 +2876,7 @@ static int SynoIssueWakeUpCmd(struct ata_device *dev)
 	psg = kmalloc(ATA_SECT_SIZE, GFP_ATOMIC); 
 	sg_init_one(psg, buf, ATA_SECT_SIZE);
 	ata_sg_init(qc, psg, 1);
-#if defined(MY_ABC_HERE)
+#if defined(MY_DEF_HERE)
 	 
 	qc->tf.command = ATA_CMD_IDLEIMMEDIATE;
 	qc->tf.flags |= ATA_TFLAG_DEVICE | ATA_TFLAG_ISADDR;
@@ -3972,8 +4267,9 @@ static inline int __ata_scsi_queuecmd(struct scsi_cmnd *scmd,
 		} else {
 			if (test_bit(CHKPOWER_FIRST_WAIT, &(dev->ulSpinupState))) {
 				if (time_after(jiffies, dev->ulLastCmd + ISSUEREADTIMEOUT)) {
-					DBGMESG("ata%u: checking issue READ timeout\n", dev->link->ap->print_id);
+					ata_link_printk(dev->link, KERN_ERR, "checking issue READ timeout\n");
 					WARN_ON(1 != dev->link->ap->nr_active_links);
+					dev->link->eh_info.action |= ATA_EH_RESET;
 					ata_port_schedule_eh(dev->link->ap);
 				}
 				goto RETRY;
@@ -4159,8 +4455,9 @@ int ata_scsi_add_hosts(struct ata_host *host, struct scsi_host_template *sht)
 			syno_insert_sata_index_remap(
 						host->ports[0]->print_id - 1,
 						host->n_ports,
-						0);
+						gPciDeferStart);
 		}
+		gPciDeferStart += host->n_ports;
 	}
 #endif  
 

@@ -22,6 +22,9 @@
 #include <linux/sched.h>
 #include <linux/slab.h>
 #include <linux/rbtree.h>
+#ifdef MY_DEF_HERE
+#include <linux/xattr.h>
+#endif /* MY_DEF_HERE */
 #include "ctree.h"
 #include "disk-io.h"
 #include "transaction.h"
@@ -1560,6 +1563,7 @@ noinline int btrfs_cow_block(struct btrfs_trans_handle *trans,
 		       trans->transid, root->fs_info->generation);
 
 	if (!should_cow_block(trans, root, buf)) {
+		trans->dirty = true;
 		*cow_ret = buf;
 		return 0;
 	}
@@ -1734,20 +1738,6 @@ int btrfs_realloc_node(struct btrfs_trans_handle *trans,
 }
 
 /*
- * The leaf data grows from end-to-front in the node.
- * this returns the address of the start of the last item,
- * which is the stop of the leaf data stack
- */
-static inline unsigned int leaf_data_end(struct btrfs_root *root,
-					 struct extent_buffer *leaf)
-{
-	u32 nr = btrfs_header_nritems(leaf);
-	if (nr == 0)
-		return BTRFS_LEAF_DATA_SIZE(root);
-	return btrfs_item_offset_nr(leaf, nr - 1);
-}
-
-/*
  * search for key in the extent_buffer.  The items start at offset p,
  * and they are item_size apart.  There are 'max' items in p.
  *
@@ -1861,7 +1851,6 @@ static void root_sub_used(struct btrfs_root *root, u32 size)
 
 /* given a node and slot number, this reads the blocks it points to.  The
  * extent buffer is returned with a reference taken (but unlocked).
- * NULL is returned on error.
  */
 static noinline struct extent_buffer *read_node_slot(struct btrfs_root *root,
 				   struct extent_buffer *parent, int slot)
@@ -1869,10 +1858,8 @@ static noinline struct extent_buffer *read_node_slot(struct btrfs_root *root,
 	int level = btrfs_header_level(parent);
 	struct extent_buffer *eb;
 
-	if (slot < 0)
-		return NULL;
-	if (slot >= btrfs_header_nritems(parent))
-		return NULL;
+	if (slot < 0 || slot >= btrfs_header_nritems(parent))
+		return ERR_PTR(-ENOENT);
 
 	BUG_ON(level == 0);
 
@@ -1881,7 +1868,10 @@ static noinline struct extent_buffer *read_node_slot(struct btrfs_root *root,
 			     btrfs_node_ptr_generation(parent, slot));
 	if (eb && !extent_buffer_uptodate(eb)) {
 		free_extent_buffer(eb);
-		eb = NULL;
+		eb = ERR_PTR(-EIO);
+	}
+	if (!eb) {
+		eb = ERR_PTR(-EIO);
 	}
 
 	return eb;
@@ -1934,8 +1924,8 @@ static noinline int balance_level(struct btrfs_trans_handle *trans,
 
 		/* promote the child to a root */
 		child = read_node_slot(root, mid, 0);
-		if (!child) {
-			ret = -EROFS;
+		if (IS_ERR(child)) {
+			ret = PTR_ERR(child);
 			btrfs_std_error(root->fs_info, ret);
 			goto enospc;
 		}
@@ -1973,6 +1963,9 @@ static noinline int balance_level(struct btrfs_trans_handle *trans,
 		return 0;
 
 	left = read_node_slot(root, parent, pslot - 1);
+	if (IS_ERR(left))
+		left = NULL;
+
 	if (left) {
 		btrfs_tree_lock(left);
 		btrfs_set_lock_blocking(left);
@@ -1983,7 +1976,11 @@ static noinline int balance_level(struct btrfs_trans_handle *trans,
 			goto enospc;
 		}
 	}
+
 	right = read_node_slot(root, parent, pslot + 1);
+	if (IS_ERR(right))
+		right = NULL;
+
 	if (right) {
 		btrfs_tree_lock(right);
 		btrfs_set_lock_blocking(right);
@@ -2138,6 +2135,8 @@ static noinline int push_nodes_for_insert(struct btrfs_trans_handle *trans,
 		return 1;
 
 	left = read_node_slot(root, parent, pslot - 1);
+	if (IS_ERR(left))
+		left = NULL;
 
 	/* first, try to make some room in the middle buffer */
 	if (left) {
@@ -2188,6 +2187,8 @@ static noinline int push_nodes_for_insert(struct btrfs_trans_handle *trans,
 		free_extent_buffer(left);
 	}
 	right = read_node_slot(root, parent, pslot + 1);
+	if (IS_ERR(right))
+		right = NULL;
 
 	/*
 	 * then try to empty the right most buffer into the middle
@@ -2793,8 +2794,10 @@ again:
 			 * then we don't want to set the path blocking,
 			 * so we test it here
 			 */
-			if (!should_cow_block(trans, root, b))
+			if (!should_cow_block(trans, root, b)) {
+				trans->dirty = true;
 				goto cow_done;
+			}
 
 			btrfs_set_path_blocking(p);
 
@@ -3785,7 +3788,11 @@ static int push_leaf_right(struct btrfs_trans_handle *trans, struct btrfs_root
 	btrfs_assert_tree_locked(path->nodes[1]);
 
 	right = read_node_slot(root, upper, slot + 1);
-	if (right == NULL)
+	/*
+	 * slot + 1 is not valid or we fail to read the right node,
+	 * no big deal, just return.
+	 */
+	if (IS_ERR(right))
 		return 1;
 
 	btrfs_tree_lock(right);
@@ -4015,7 +4022,11 @@ static int push_leaf_left(struct btrfs_trans_handle *trans, struct btrfs_root
 	btrfs_assert_tree_locked(path->nodes[1]);
 
 	left = read_node_slot(root, path->nodes[1], slot - 1);
-	if (left == NULL)
+	/*
+	 * slot - 1 is not valid or we fail to read the left node,
+	 * no big deal, just return.
+	 */
+	if (IS_ERR(left))
 		return 1;
 
 	btrfs_tree_lock(left);
@@ -5223,7 +5234,10 @@ find_next_key:
 		}
 		btrfs_set_path_blocking(path);
 		cur = read_node_slot(root, cur, slot);
-		BUG_ON(!cur); /* -ENOMEM */
+		if (IS_ERR(cur)) {
+			ret = PTR_ERR(cur);
+			goto out;
+		}
 
 		btrfs_tree_read_lock(cur);
 
@@ -5242,15 +5256,21 @@ out:
 	return ret;
 }
 
-static void tree_move_down(struct btrfs_root *root,
+static int tree_move_down(struct btrfs_root *root,
 			   struct btrfs_path *path,
 			   int *level, int root_level)
 {
+	struct extent_buffer *eb;
+
 	BUG_ON(*level == 0);
-	path->nodes[*level - 1] = read_node_slot(root, path->nodes[*level],
-					path->slots[*level]);
+	eb = read_node_slot(root, path->nodes[*level], path->slots[*level]);
+	if (IS_ERR(eb))
+		return PTR_ERR(eb);
+
+	path->nodes[*level - 1] = eb;
 	path->slots[*level - 1] = 0;
 	(*level)--;
+	return 0;
 }
 
 static int tree_move_next_or_upnext(struct btrfs_root *root,
@@ -5295,8 +5315,7 @@ static int tree_advance(struct btrfs_root *root,
 	if (*level == 0 || !allow_down) {
 		ret = tree_move_next_or_upnext(root, path, level, root_level);
 	} else {
-		tree_move_down(root, path, level, root_level);
-		ret = 0;
+		ret = tree_move_down(root, path, level, root_level);
 	}
 	if (ret >= 0) {
 		if (*level == 0)
@@ -5308,6 +5327,66 @@ static int tree_advance(struct btrfs_root *root,
 	}
 	return ret;
 }
+
+#ifdef MY_DEF_HERE
+static int syno_send_check_skip_xattr(struct btrfs_root *root, u64 ino, const char* name)
+{
+	int ret;
+	struct btrfs_dir_item *di;
+	struct btrfs_path *path;
+	struct extent_buffer *leaf;
+	unsigned long data_ptr;
+	u32 data_len;
+	const char* sz_true = "true";
+	char buf[8];
+
+	path = btrfs_alloc_path();
+	if (!path)
+		return -ENOMEM;
+
+	/* lookup the xattr by name */
+	di = btrfs_lookup_xattr(NULL, root, path, ino, name, strlen(name), 0);
+	if (!di) {
+		ret = 0;
+		goto out;
+	} else if (IS_ERR(di)) {
+		ret = PTR_ERR(di);
+		goto out;
+	}
+
+	leaf = path->nodes[0];
+	data_len = btrfs_dir_data_len(leaf, di);
+	if (data_len != strlen(sz_true)) {
+		ret = 0;
+		goto out;
+	}
+
+	/*
+	 * The way things are packed into the leaf is like this
+	 * |struct btrfs_dir_item|name|data|
+	 * where name is the xattr name, so security.foo, and data is the
+	 * content of the xattr.  data_ptr points to the location in memory
+	 * where the data starts in the in memory leaf
+	 */
+	data_ptr = (unsigned long)((char *)(di + 1) +
+				   btrfs_dir_name_len(leaf, di));
+	read_extent_buffer(leaf, buf, data_ptr, data_len);
+	buf[data_len] = '\0';
+	if (strcmp(buf, sz_true) == 0)
+		ret = 1;
+	else
+		ret = 0;
+out:
+	btrfs_free_path(path);
+	return ret;
+}
+
+#define SYNO_SEND_SKIP_CLONE "btrfs_send_skip_clone"
+int syno_send_skip_clone(struct btrfs_root *root, u64 ino)
+{
+	return syno_send_check_skip_xattr(root, ino, XATTR_SYNO_PREFIX SYNO_SEND_SKIP_CLONE);
+}
+#endif /* MY_DEF_HERE */
 
 static int tree_compare_item(struct btrfs_root *left_root,
 			     struct btrfs_path *left_path,
@@ -5439,12 +5518,24 @@ int btrfs_compare_trees(struct btrfs_root *left_root,
 	down_read(&left_root->fs_info->commit_root_sem);
 	left_level = btrfs_header_level(left_root->commit_root);
 	left_root_level = left_level;
-	left_path->nodes[left_level] = left_root->commit_root;
+	left_path->nodes[left_level] =
+			btrfs_clone_extent_buffer(left_root->commit_root);
+	if (!left_path->nodes[left_level]) {
+		up_read(&left_root->fs_info->commit_root_sem);
+		ret = -ENOMEM;
+		goto out;
+	}
 	extent_buffer_get(left_path->nodes[left_level]);
 
 	right_level = btrfs_header_level(right_root->commit_root);
 	right_root_level = right_level;
-	right_path->nodes[right_level] = right_root->commit_root;
+	right_path->nodes[right_level] =
+			btrfs_clone_extent_buffer(right_root->commit_root);
+	if (!right_path->nodes[right_level]) {
+		up_read(&left_root->fs_info->commit_root_sem);
+		ret = -ENOMEM;
+		goto out;
+	}
 	extent_buffer_get(right_path->nodes[right_level]);
 	up_read(&left_root->fs_info->commit_root_sem);
 
@@ -5470,8 +5561,10 @@ int btrfs_compare_trees(struct btrfs_root *left_root,
 					left_root_level,
 					advance_left != ADVANCE_ONLY_NEXT,
 					&left_key);
-			if (ret < 0)
+			if (ret == -1)
 				left_end_reached = ADVANCE;
+			else if (ret < 0)
+				goto out;
 			advance_left = 0;
 		}
 		if (advance_right && !right_end_reached) {
@@ -5479,8 +5572,10 @@ int btrfs_compare_trees(struct btrfs_root *left_root,
 					right_root_level,
 					advance_right != ADVANCE_ONLY_NEXT,
 					&right_key);
-			if (ret < 0)
+			if (ret == -1)
 				right_end_reached = ADVANCE;
+			else if (ret < 0)
+				goto out;
 			advance_right = 0;
 		}
 
@@ -5910,7 +6005,10 @@ int btrfs_snapshot_size_query(struct file *file,
 	}
 
 	/*
-	 * The whole while loop could break into 3 parts.
+	 * The loop are composed of 3 parts:
+	 * 1> Check whether the given node is shared or not.
+	 * 2> Check shared EXTENT_ITEM and make statistic about the usage
+	 * 3> Travel deeper node
 	 */
 	while (!RB_EMPTY_ROOT(&ctx->root)) {
 		u64 bytenr;
@@ -5919,16 +6017,16 @@ int btrfs_snapshot_size_query(struct file *file,
 		struct rb_node *next_node;
 
 		if (signal_pending(current)) {
-			ret = -EAGAIN;
+			ret = -EINTR;
 			break;
 		}
+		cond_resched();
 
 		/*
 		 * 1st part:
-		 * Check if a given node is shared or not. Share here means that this node is pointed by
-		 * subvolumes other than the ones provided to this ioctl. If the callback function returns
-		 * >0, we know this node is shared. All the descendants must be shared as well.
-		 * In this case, We don't need to go down the tree.
+		 * Check if the given node is shared or not, that is to say, we check whether the node is pointed by
+		 * subvolumes that are not given by ioctl(). The node is shared if the callback function returns >0
+		 * and we make sure all descendants are shared and it has no need of deeper traveling of the tree.
 		 */
 		ret = 0;
 		node = rb_first(&ctx->root);
@@ -5947,10 +6045,9 @@ int btrfs_snapshot_size_query(struct file *file,
 
 		/*
 		 * 2nd part:
-		 * If this node is leaf, we will process all the slots in it at once.
-		 * We only care about EXTENT_DATA that is not hole(bytenr == 0).
-		 * When EXTENT_ITEM is found to be not shared, add to largest
-		 * subvolume that holds it.
+		 * All slots in the leaf node are processed at the same time.
+		 * If the slot is not a hole(bytenr ==0) and EXTENT_ITEM is only referred by the given subvolumes,
+		 * the usage of subvolume with the largest ID that pointer to it should be accumulated.
 		 */
 		nritems = btrfs_header_nritems(entry->path->nodes[entry->level]);
 		while (entry->level == 0 && entry->path->slots[entry->level] < nritems) {
@@ -5958,6 +6055,12 @@ int btrfs_snapshot_size_query(struct file *file,
 					entry->path->slots[0]);
 			if (entry->key.type != BTRFS_EXTENT_DATA_KEY)
 				goto next;
+
+			if (signal_pending(current)) {
+				ret = -EINTR;
+				break;
+			}
+			cond_resched();
 
 			ei = btrfs_item_ptr(entry->path->nodes[0], entry->path->slots[0],
 						struct btrfs_file_extent_item);

@@ -79,7 +79,6 @@ struct btrfs_trans_handle {
 	u64 qgroup_reserved;
 	unsigned long use_count;
 	unsigned long blocks_reserved;
-	unsigned long blocks_used;
 	unsigned long delayed_ref_updates;
 	struct btrfs_transaction *transaction;
 	struct btrfs_block_rsv *block_rsv;
@@ -89,6 +88,7 @@ struct btrfs_trans_handle {
 	bool allocating_chunk;
 	bool reloc_reserved;
 	bool sync;
+	bool dirty;
 	unsigned int type;
 	 
 	struct btrfs_root *root;
@@ -126,6 +126,10 @@ static inline void btrfs_set_inode_last_trans(struct btrfs_trans_handle *trans,
 	spin_unlock(&BTRFS_I(inode)->lock);
 }
 
+#ifdef MY_DEF_HERE
+int btrfs_end_transaction_nosync_delayed(struct btrfs_trans_handle *trans,
+			  struct btrfs_root *root);
+#endif  
 int btrfs_end_transaction(struct btrfs_trans_handle *trans,
 			  struct btrfs_root *root);
 struct btrfs_trans_handle *btrfs_start_transaction(struct btrfs_root *root,
@@ -145,6 +149,9 @@ struct btrfs_trans_handle *btrfs_start_ioctl_transaction(struct btrfs_root *root
 int btrfs_wait_for_commit(struct btrfs_root *root, u64 transid);
 
 void btrfs_add_dead_root(struct btrfs_root *root);
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+void btrfs_add_dead_root_head(struct btrfs_root *root);
+#endif  
 int btrfs_defrag_root(struct btrfs_root *root);
 int btrfs_clean_one_deleted_snapshot(struct btrfs_root *root);
 int btrfs_commit_transaction(struct btrfs_trans_handle *trans,

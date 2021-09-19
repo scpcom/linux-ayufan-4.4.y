@@ -1220,26 +1220,16 @@ exit_journal:
 				EXT4_FEATURE_INCOMPAT_META_BG);
 		sector_t old_gdb = 0;
 
-#ifdef CONFIG_SYNO_EXT4_META_BG_BACKUP_DESC_FIX
-		update_backups(sb, sbi->s_sbh->b_blocknr, (char *)es,
-			       sizeof(struct ext4_super_block), 0, 0);
-#else
 		update_backups(sb, sbi->s_sbh->b_blocknr, (char *)es,
 			       sizeof(struct ext4_super_block), 0);
-#endif  
 		for (; gdb_num <= gdb_num_end; gdb_num++) {
 			struct buffer_head *gdb_bh;
 
 			gdb_bh = sbi->s_group_desc[gdb_num];
 			if (old_gdb == gdb_bh->b_blocknr)
 				continue;
-#ifdef CONFIG_SYNO_EXT4_META_BG_BACKUP_DESC_FIX
-			update_backups(sb, gdb_bh->b_blocknr, gdb_bh->b_data,
-				       gdb_bh->b_size, meta_bg, group);
-#else
 			update_backups(sb, gdb_bh->b_blocknr, gdb_bh->b_data,
 				       gdb_bh->b_size, meta_bg);
-#endif  
 			old_gdb = gdb_bh->b_blocknr;
 		}
 	}
@@ -1417,13 +1407,8 @@ errout:
 		if (test_opt(sb, DEBUG))
 			printk(KERN_DEBUG "EXT4-fs: extended group to %llu "
 			       "blocks\n", ext4_blocks_count(es));
-#ifdef CONFIG_SYNO_EXT4_META_BG_BACKUP_DESC_FIX
-		update_backups(sb, EXT4_SB(sb)->s_sbh->b_blocknr,
-			       (char *)es, sizeof(struct ext4_super_block), 0, 0);
-#else
 		update_backups(sb, EXT4_SB(sb)->s_sbh->b_blocknr,
 			       (char *)es, sizeof(struct ext4_super_block), 0);
-#endif  
 	}
 	return err;
 }

@@ -508,7 +508,7 @@ static int virtscsi_tmf(struct virtio_scsi *vscsi, struct virtio_scsi_cmd *cmd)
 	DECLARE_COMPLETION_ONSTACK(comp);
 	int ret = FAILED;
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_VHOST_SCSI_TMF_UNSUPPORTED
 	ret = SUCCESS;
 	goto out;
 #endif

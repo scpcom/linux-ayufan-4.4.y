@@ -69,6 +69,9 @@ struct blk_plug;
 
 extern unsigned long avenrun[];		 
 extern void get_avenrun(unsigned long *loads, unsigned long offset, int shift);
+#ifdef MY_ABC_HERE
+extern void get_avenrun_split(unsigned long *io_loads, unsigned long *cpu_loads, unsigned long offset, int shift);
+#endif  
 
 #define FSHIFT		11		 
 #define FIXED_1		(1<<FSHIFT)	 
@@ -87,6 +90,7 @@ extern int nr_threads;
 DECLARE_PER_CPU(unsigned long, process_counts);
 extern int nr_processes(void);
 extern unsigned long nr_running(void);
+extern bool single_task_running(void);
 extern unsigned long nr_iowait(void);
 extern unsigned long nr_iowait_cpu(int cpu);
 extern unsigned long this_cpu_load(void);
@@ -1143,6 +1147,9 @@ struct task_struct {
 		unsigned long nr_pages;	 
 		unsigned long memsw_nr_pages;  
 	} memcg_batch;
+#ifdef MY_ABC_HERE
+	unsigned int memcg_skip_account;
+#endif
 	unsigned int memcg_kmem_skip_account;
 	struct memcg_oom_info {
 		struct mem_cgroup *memcg;
@@ -2005,7 +2012,7 @@ static inline int signal_pending_state(long state, struct task_struct *p)
 	return (state & TASK_INTERRUPTIBLE) || __fatal_signal_pending(p);
 }
 
-static inline int need_resched(void)
+static __always_inline int need_resched(void)
 {
 	return unlikely(test_thread_flag(TIF_NEED_RESCHED));
 }

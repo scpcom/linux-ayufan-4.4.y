@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
  
 #include <linux/mm.h>
 #include <linux/module.h>
@@ -1541,6 +1544,12 @@ unsigned long nr_running(void)
 	return sum;
 }
 
+bool single_task_running(void)
+{
+	return raw_rq()->nr_running == 1;
+}
+EXPORT_SYMBOL(single_task_running);
+
 unsigned long long nr_context_switches(void)
 {
 	int i;
@@ -1575,8 +1584,16 @@ unsigned long this_cpu_load(void)
 }
 
 static atomic_long_t calc_load_tasks;
+#ifdef MY_ABC_HERE
+static atomic_long_t calc_io_load_tasks;
+static atomic_long_t calc_cpu_load_tasks;
+#endif  
 static unsigned long calc_load_update;
 unsigned long avenrun[3];
+#ifdef MY_ABC_HERE
+unsigned long avenrun_io[3];
+unsigned long avenrun_cpu[3];
+#endif  
 EXPORT_SYMBOL(avenrun);  
 
 void get_avenrun(unsigned long *loads, unsigned long offset, int shift)
@@ -1586,6 +1603,42 @@ void get_avenrun(unsigned long *loads, unsigned long offset, int shift)
 	loads[2] = (avenrun[2] + offset) << shift;
 }
 
+#ifdef MY_ABC_HERE
+void get_avenrun_split(unsigned long *io_loads, unsigned long *cpu_loads,
+			        unsigned long offset, int shift)
+{
+	io_loads[0] = (avenrun_io[0] + offset) << shift;
+	io_loads[1] = (avenrun_io[1] + offset) << shift;
+	io_loads[2] = (avenrun_io[2] + offset) << shift;
+
+	cpu_loads[0] = (avenrun_cpu[0] + offset) << shift;
+	cpu_loads[1] = (avenrun_cpu[1] + offset) << shift;
+	cpu_loads[2] = (avenrun_cpu[2] + offset) << shift;
+}
+
+static void calc_load_fold_active(struct rq *this_rq, long delta[])
+{
+	long nr_active, nr_io_active, nr_cpu_active;
+
+	nr_io_active = (long)this_rq->nr_uninterruptible;
+	if (nr_io_active != this_rq->calc_io_load_active) {
+		delta[1] = nr_io_active - this_rq->calc_io_load_active;
+		this_rq->calc_io_load_active = nr_io_active;
+	}
+
+	nr_cpu_active = this_rq->nr_running;
+	if (nr_cpu_active != this_rq->calc_cpu_load_active) {
+		delta[2] = nr_cpu_active - this_rq->calc_cpu_load_active;
+		this_rq->calc_cpu_load_active = nr_cpu_active;
+	}
+
+	nr_active = nr_io_active + nr_cpu_active;
+	if (nr_active != this_rq->calc_load_active) {
+		delta[0] = nr_active - this_rq->calc_load_active;
+		this_rq->calc_load_active = nr_active;
+	}
+}
+#else
 static long calc_load_fold_active(struct rq *this_rq)
 {
 	long nr_active, delta = 0;
@@ -1600,6 +1653,7 @@ static long calc_load_fold_active(struct rq *this_rq)
 
 	return delta;
 }
+#endif  
 
 static unsigned long
 calc_load(unsigned long load, unsigned long exp, unsigned long active)
@@ -1613,6 +1667,10 @@ calc_load(unsigned long load, unsigned long exp, unsigned long active)
 #ifdef CONFIG_NO_HZ_COMMON
  
 static atomic_long_t calc_load_idle[2];
+#ifdef MY_ABC_HERE
+static atomic_long_t calc_io_load_idle[2];
+static atomic_long_t calc_cpu_load_idle[2];
+#endif  
 static int calc_load_idx;
 
 static inline int calc_load_write_idx(void)
@@ -1635,13 +1693,28 @@ static inline int calc_load_read_idx(void)
 void calc_load_enter_idle(void)
 {
 	struct rq *this_rq = this_rq();
+#ifdef MY_ABC_HERE
+	long delta[3] = {0};
+#else
 	long delta;
+#endif  
 
+#ifdef MY_ABC_HERE
+	calc_load_fold_active(this_rq, delta);
+	if (delta[0] || delta[1] || delta[2]) {
+		int idx = calc_load_write_idx();
+
+		atomic_long_add(delta[0], &calc_load_idle[idx]);
+		atomic_long_add(delta[1], &calc_io_load_idle[idx]);
+		atomic_long_add(delta[2], &calc_cpu_load_idle[idx]);
+	}
+#else
 	delta = calc_load_fold_active(this_rq);
 	if (delta) {
 		int idx = calc_load_write_idx();
 		atomic_long_add(delta, &calc_load_idle[idx]);
 	}
+#endif  
 }
 
 void calc_load_exit_idle(void)
@@ -1656,6 +1729,21 @@ void calc_load_exit_idle(void)
 		this_rq->calc_load_update += LOAD_FREQ;
 }
 
+#ifdef MY_ABC_HERE
+static void calc_load_fold_idle(long delta[])
+{
+	int idx = calc_load_read_idx();
+
+	if (atomic_long_read(&calc_load_idle[idx]))
+		delta[0] = atomic_long_xchg(&calc_load_idle[idx], 0);
+
+	if (atomic_long_read(&calc_io_load_idle[idx]))
+		delta[1] = atomic_long_xchg(&calc_io_load_idle[idx], 0);
+
+	if (atomic_long_read(&calc_cpu_load_idle[idx]))
+		delta[2] = atomic_long_xchg(&calc_cpu_load_idle[idx], 0);
+}
+#else
 static long calc_load_fold_idle(void)
 {
 	int idx = calc_load_read_idx();
@@ -1666,6 +1754,7 @@ static long calc_load_fold_idle(void)
 
 	return delta;
 }
+#endif  
 
 static unsigned long
 fixed_power_int(unsigned long x, unsigned int frac_bits, unsigned int n)
@@ -1699,7 +1788,11 @@ calc_load_n(unsigned long load, unsigned long exp,
 
 static void calc_global_nohz(void)
 {
+#ifdef MY_ABC_HERE
+	long delta, active, io_active, cpu_active, n;
+#else
 	long delta, active, n;
+#endif  
 
 	if (!time_before(jiffies, calc_load_update + 10)) {
 		 
@@ -1713,6 +1806,22 @@ static void calc_global_nohz(void)
 		avenrun[1] = calc_load_n(avenrun[1], EXP_5, active, n);
 		avenrun[2] = calc_load_n(avenrun[2], EXP_15, active, n);
 
+#ifdef MY_ABC_HERE
+		io_active = atomic_long_read(&calc_io_load_tasks);
+		io_active = io_active > 0 ? io_active * FIXED_1 : 0;
+
+		avenrun_io[0] = calc_load_n(avenrun_io[0], EXP_1, io_active, n);
+		avenrun_io[1] = calc_load_n(avenrun_io[1], EXP_5, io_active, n);
+		avenrun_io[2] = calc_load_n(avenrun_io[2], EXP_15, io_active, n);
+
+		cpu_active = atomic_long_read(&calc_cpu_load_tasks);
+		cpu_active = cpu_active > 0 ? cpu_active * FIXED_1 : 0;
+
+		avenrun_cpu[0] = calc_load_n(avenrun_cpu[0], EXP_1, cpu_active, n);
+		avenrun_cpu[1] = calc_load_n(avenrun_cpu[1], EXP_5, cpu_active, n);
+		avenrun_cpu[2] = calc_load_n(avenrun_cpu[2], EXP_15, cpu_active, n);
+#endif  
+
 		calc_load_update += n * LOAD_FREQ;
 	}
 
@@ -1721,21 +1830,40 @@ static void calc_global_nohz(void)
 }
 #else  
 
+#ifdef MY_ABC_HERE
+static inline void calc_load_fold_idle(long delta[]) { }
+#else
 static inline long calc_load_fold_idle(void) { return 0; }
+#endif  
 static inline void calc_global_nohz(void) { }
 
 #endif  
 
 void calc_global_load(unsigned long ticks)
 {
+#ifdef MY_ABC_HERE
+	long active, io_active, cpu_active;
+	long delta[3] = {0};
+#else
 	long active, delta;
+#endif  
 
 	if (time_before(jiffies, calc_load_update + 10))
 		return;
 
+#ifdef MY_ABC_HERE
+	calc_load_fold_idle(delta);
+	if (delta[0])
+		atomic_long_add(delta[0], &calc_load_tasks);
+	if (delta[1])
+		atomic_long_add(delta[1], &calc_io_load_tasks);
+	if (delta[2])
+		atomic_long_add(delta[2], &calc_cpu_load_tasks);
+#else
 	delta = calc_load_fold_idle();
 	if (delta)
 		atomic_long_add(delta, &calc_load_tasks);
+#endif  
 
 	active = atomic_long_read(&calc_load_tasks);
 	active = active > 0 ? active * FIXED_1 : 0;
@@ -1744,6 +1872,22 @@ void calc_global_load(unsigned long ticks)
 	avenrun[1] = calc_load(avenrun[1], EXP_5, active);
 	avenrun[2] = calc_load(avenrun[2], EXP_15, active);
 
+#ifdef MY_ABC_HERE
+	io_active = atomic_long_read(&calc_io_load_tasks);
+	io_active = io_active > 0 ? io_active * FIXED_1 : 0;
+
+	avenrun_io[0] = calc_load(avenrun_io[0], EXP_1, io_active);
+	avenrun_io[1] = calc_load(avenrun_io[1], EXP_5, io_active);
+	avenrun_io[2] = calc_load(avenrun_io[2], EXP_15, io_active);
+
+	cpu_active = atomic_long_read(&calc_cpu_load_tasks);
+	cpu_active = cpu_active > 0 ? cpu_active * FIXED_1 : 0;
+
+	avenrun_cpu[0] = calc_load(avenrun_cpu[0], EXP_1, cpu_active);
+	avenrun_cpu[1] = calc_load(avenrun_cpu[1], EXP_5, cpu_active);
+	avenrun_cpu[2] = calc_load(avenrun_cpu[2], EXP_15, cpu_active);
+#endif  
+
 	calc_load_update += LOAD_FREQ;
 
 	calc_global_nohz();
@@ -1751,14 +1895,28 @@ void calc_global_load(unsigned long ticks)
 
 static void calc_load_account_active(struct rq *this_rq)
 {
+#ifdef MY_ABC_HERE
+	long delta[3] = {0};
+#else
 	long delta;
+#endif  
 
 	if (time_before(jiffies, this_rq->calc_load_update))
 		return;
 
+#ifdef MY_ABC_HERE
+	calc_load_fold_active(this_rq, delta);
+	if (delta[0])
+		atomic_long_add(delta[0], &calc_load_tasks);
+	if (delta[1])
+		atomic_long_add(delta[1], &calc_io_load_tasks);
+	if (delta[2])
+		atomic_long_add(delta[2], &calc_cpu_load_tasks);
+#else
 	delta  = calc_load_fold_active(this_rq);
 	if (delta)
 		atomic_long_add(delta, &calc_load_tasks);
+#endif  
 
 	this_rq->calc_load_update += LOAD_FREQ;
 }
@@ -3515,9 +3673,20 @@ void idle_task_exit(void)
 
 static void calc_load_migrate(struct rq *rq)
 {
+#ifdef MY_ABC_HERE
+	long delta[3] = {0};
+	calc_load_fold_active(rq, delta);
+	if (delta[0])
+		atomic_long_add(delta[0], &calc_load_tasks);
+	if (delta[1])
+		atomic_long_add(delta[1], &calc_io_load_tasks);
+	if (delta[2])
+		atomic_long_add(delta[2], &calc_cpu_load_tasks);
+#else
 	long delta = calc_load_fold_active(rq);
 	if (delta)
 		atomic_long_add(delta, &calc_load_tasks);
+#endif  
 }
 
 static void migrate_tasks(unsigned int dead_cpu)
@@ -5293,6 +5462,10 @@ void __init sched_init(void)
 		raw_spin_lock_init(&rq->lock);
 		rq->nr_running = 0;
 		rq->calc_load_active = 0;
+#ifdef MY_ABC_HERE
+		rq->calc_io_load_active = 0;
+		rq->calc_cpu_load_active = 0;
+#endif  
 		rq->calc_load_update = jiffies + LOAD_FREQ;
 		init_cfs_rq(&rq->cfs);
 		init_rt_rq(&rq->rt, rq);

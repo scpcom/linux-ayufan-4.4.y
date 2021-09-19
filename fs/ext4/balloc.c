@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/ext4/balloc.c
  *
@@ -370,9 +373,13 @@ void ext4_validate_block_bitmap(struct super_block *sb,
 	}
 	if (unlikely(!ext4_block_bitmap_csum_verify(sb, block_group,
 			desc, bh))) {
+#ifdef MY_ABC_HERE
+		ext4_msg(sb, KERN_CRIT, "bg %u: bad block bitmap checksum", block_group);
+#else
 		ext4_unlock_group(sb, block_group);
 		ext4_error(sb, "bg %u: bad block bitmap checksum", block_group);
 		return;
+#endif
 	}
 	set_buffer_verified(bh);
 	ext4_unlock_group(sb, block_group);
@@ -611,8 +618,7 @@ ext4_fsblk_t ext4_new_meta_blocks(handle_t *handle, struct inode *inode,
 	 * Account for the allocated meta blocks.  We will never
 	 * fail EDQUOT for metdata, but we do account for it.
 	 */
-	if (!(*errp) &&
-	    ext4_test_inode_state(inode, EXT4_STATE_DELALLOC_RESERVED)) {
+	if (!(*errp) && (flags & EXT4_MB_DELALLOC_RESERVED)) {
 		spin_lock(&EXT4_I(inode)->i_block_reservation_lock);
 		spin_unlock(&EXT4_I(inode)->i_block_reservation_lock);
 		dquot_alloc_block_nofail(inode,

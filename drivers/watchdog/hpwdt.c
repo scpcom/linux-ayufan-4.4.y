@@ -368,7 +368,11 @@ asm(".text                      \n\t"
     "movl       16(%r9),%esi    \n\t"
     "movl       20(%r9),%edi    \n\t"
     "movl       (%r9),%eax      \n\t"
+#ifdef CONFIG_RETPOLINE
+    "call	__x86_indirect_thunk_r12\n\t"
+#else /* CONFIG_RETPOLINE */
     "call       *%r12           \n\t"
+#endif /* CONFIG_RETPOLINE */
     "pushfq                     \n\t"
     "popq        %r12           \n\t"
     "movl       %eax, (%r9)     \n\t"

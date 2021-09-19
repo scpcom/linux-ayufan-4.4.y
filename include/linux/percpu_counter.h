@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_PERCPU_COUNTER_H
 #define _LINUX_PERCPU_COUNTER_H
 /*
@@ -40,7 +43,16 @@ void percpu_counter_destroy(struct percpu_counter *fbc);
 void percpu_counter_set(struct percpu_counter *fbc, s64 amount);
 void __percpu_counter_add(struct percpu_counter *fbc, s64 amount, s32 batch);
 s64 __percpu_counter_sum(struct percpu_counter *fbc);
+#ifdef MY_ABC_HERE
 int percpu_counter_compare(struct percpu_counter *fbc, s64 rhs);
+#else
+int __percpu_counter_compare(struct percpu_counter *fbc, s64 rhs, s32 batch);
+
+static inline int percpu_counter_compare(struct percpu_counter *fbc, s64 rhs)
+{
+	return __percpu_counter_compare(fbc, rhs, percpu_counter_batch);
+}
+#endif /* MY_ABC_HERE */
 
 static inline void percpu_counter_add(struct percpu_counter *fbc, s64 amount)
 {
@@ -113,6 +125,15 @@ static inline int percpu_counter_compare(struct percpu_counter *fbc, s64 rhs)
 	else
 		return 0;
 }
+
+#ifdef MY_ABC_HERE
+#else
+static inline int
+__percpu_counter_compare(struct percpu_counter *fbc, s64 rhs, s32 batch)
+{
+	return percpu_counter_compare(fbc, rhs);
+}
+#endif /* MY_ABC_HERE */
 
 static inline void
 percpu_counter_add(struct percpu_counter *fbc, s64 amount)

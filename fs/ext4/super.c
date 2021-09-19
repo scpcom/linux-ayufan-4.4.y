@@ -363,7 +363,7 @@ static void __save_error_info(struct super_block *sb, const char *func,
 			&& (0 == sbi->s_new_error_fs_event_flag)
 			&& (sbi->s_last_notify_time == 0 ||
 			    time_after(jiffies, sbi->s_last_notify_time + 24*60*60*HZ))
-			&& (es->s_syno_hash_magic == cpu_to_le32(SYNO_HASH_MAGIC))) {
+			&& is_syno_ext(sb)) {
 		sbi->s_new_error_fs_event_flag = 1;
 		sbi->s_last_notify_time = jiffies;
 		SYNOExt4GetDSMVersion(es->s_volume_name, szDsmVersion);
@@ -2200,10 +2200,13 @@ static int ext4_check_descriptors(struct super_block *sb,
 				 "Checksum for group %u failed (%u!=%u)",
 				 i, le16_to_cpu(ext4_group_desc_csum(sbi, i,
 				     gdp)), le16_to_cpu(gdp->bg_checksum));
+#ifdef MY_ABC_HERE
+#else
 			if (!(sb->s_flags & MS_RDONLY)) {
 				ext4_unlock_group(sb, i);
 				return 0;
 			}
+#endif  
 		}
 		ext4_unlock_group(sb, i);
 		if (!flexbg_flag)
@@ -3152,7 +3155,7 @@ static int set_journal_csum_feature_set(struct super_block *sb)
 				       EXT4_FEATURE_RO_COMPAT_METADATA_CSUM)) {
 		 
 		compat = 0;
-		incompat = JBD2_FEATURE_INCOMPAT_CSUM_V2;
+		incompat = JBD2_FEATURE_INCOMPAT_CSUM_V3;
 	} else {
 		 
 		compat = JBD2_FEATURE_COMPAT_CHECKSUM;
@@ -3174,6 +3177,7 @@ static int set_journal_csum_feature_set(struct super_block *sb)
 		jbd2_journal_clear_features(sbi->s_journal,
 				JBD2_FEATURE_COMPAT_CHECKSUM, 0,
 				JBD2_FEATURE_INCOMPAT_ASYNC_COMMIT |
+				JBD2_FEATURE_INCOMPAT_CSUM_V3 |
 				JBD2_FEATURE_INCOMPAT_CSUM_V2);
 	}
 
@@ -3463,8 +3467,11 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 	if (!ext4_superblock_csum_verify(sb, es)) {
 		ext4_msg(sb, KERN_ERR, "VFS: Found ext4 filesystem with "
 			 "invalid superblock checksum.  Run e2fsck?");
+#ifdef MY_ABC_HERE
+#else
 		silent = 1;
 		goto cantfind_ext4;
+#endif  
 	}
 
 	if (EXT4_HAS_RO_COMPAT_FEATURE(sb,
@@ -3689,7 +3696,7 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 		sbi->s_hash_seed[i] = le32_to_cpu(es->s_hash_seed[i]);
 	sbi->s_def_hash_version = es->s_def_hash_version;
 #ifdef MY_ABC_HERE
-	if (es->s_syno_hash_magic == cpu_to_le32(SYNO_HASH_MAGIC) ||
+	if (is_syno_ext(sb) ||
 	     EXT4_HAS_COMPAT_FEATURE(sb, EXT4_FEATURE_COMPAT_DIR_INDEX)) {
 #else
 	if (EXT4_HAS_COMPAT_FEATURE(sb, EXT4_FEATURE_COMPAT_DIR_INDEX)) {
@@ -4776,8 +4783,11 @@ static int ext4_remount(struct super_block *sb, int *flags, char *data)
 	       "ext4_remount: Checksum for group %u failed (%u!=%u)",
 		g, le16_to_cpu(ext4_group_desc_csum(sbi, g, gdp)),
 					       le16_to_cpu(gdp->bg_checksum));
+#ifdef MY_ABC_HERE
+#else
 					err = -EINVAL;
 					goto restore_opts;
+#endif  
 				}
 			}
 

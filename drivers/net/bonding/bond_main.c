@@ -456,6 +456,37 @@ down:
 	return 0;
 }
 
+#if defined(MY_ABC_HERE)
+static void bond_update_speed_duplex(struct slave *slave)
+{
+	struct net_device *slave_dev = slave->dev;
+	struct ethtool_link_ksettings ecmd;
+	int res;
+
+	slave->speed = SPEED_UNKNOWN;
+	slave->duplex = DUPLEX_UNKNOWN;
+
+	res = __ethtool_get_link_ksettings(slave_dev, &ecmd);
+	if (res < 0)
+		return;
+
+	if (ecmd.base.speed == 0 || ecmd.base.speed == ((__u32)-1))
+		return;
+
+	switch (ecmd.base.duplex) {
+	case DUPLEX_FULL:
+	case DUPLEX_HALF:
+		break;
+	default:
+		return;
+	}
+
+	slave->speed = ecmd.base.speed;
+	slave->duplex = ecmd.base.duplex;
+
+	return;
+}
+#else  
 static void bond_update_speed_duplex(struct slave *slave)
 {
 	struct net_device *slave_dev = slave->dev;
@@ -487,6 +518,7 @@ static void bond_update_speed_duplex(struct slave *slave)
 
 	return;
 }
+#endif  
 
 static int bond_check_dev_link(struct bonding *bond,
 			       struct net_device *slave_dev, int reporting)

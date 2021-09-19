@@ -26,6 +26,7 @@
 #define KVM_PRIVATE_MEM_SLOTS 	0
 
 #define KVM_COALESCED_MMIO_PAGE_OFFSET 1
+#define KVM_HALT_POLL_NS_DEFAULT 500000
 
 /* Don't support huge pages */
 #define KVM_HPAGE_GFN_SHIFT(x)	0
@@ -100,6 +101,8 @@ struct kvm_vcpu_stat {
 	u32 resvd_inst_exits;
 	u32 break_inst_exits;
 	u32 flush_dcache_exits;
+	u32 halt_successful_poll;
+	u32 halt_attempted_poll;
 	u32 halt_wakeup;
 };
 

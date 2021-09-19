@@ -20,6 +20,9 @@
 #include <linux/pagemap.h>
 #include <linux/btrfs.h>
 #include <linux/workqueue.h>
+#ifdef MY_DEF_HERE
+#include <linux/sizes.h>
+#endif  
 #include "extent_io.h"
 #include "extent_map.h"
 #include "async-thread.h"
@@ -1043,6 +1046,13 @@ enum btrfs_fix_meta_key_state {
 };
 #endif  
 
+#ifdef MY_DEF_HERE
+enum btrfs_check_cross_ref_type {
+	CHECK_CROSS_REF_NORMAL = 0,
+	CHECK_CROSS_REF_SKIP_FAST_SNAPSHOT = 1,
+};
+#endif  
+
 struct btrfs_stripe_hash {
 	struct list_head hash_list;
 	wait_queue_head_t wait;
@@ -1200,6 +1210,9 @@ struct btrfs_fs_info {
 	struct btrfs_workqueue *workers;
 	struct btrfs_workqueue *delalloc_workers;
 	struct btrfs_workqueue *flush_workers;
+#ifdef MY_DEF_HERE
+	struct btrfs_workqueue *flush_meta_workers;
+#endif  
 	struct btrfs_workqueue *endio_workers;
 	struct btrfs_workqueue *endio_meta_workers;
 #ifdef MY_DEF_HERE
@@ -1228,10 +1241,16 @@ struct btrfs_fs_info {
 	struct kobject super_kobj;
 	struct kobject *space_info_kobj;
 	struct kobject *device_dir_kobj;
+#ifdef MY_DEF_HERE
+	struct kobject *free_space_tree_kobj;
+#endif  
 	struct completion kobj_unregister;
 	int do_barriers;
 	int closing;
 	int log_root_recovering;
+#ifdef MY_DEF_HERE
+	int avoid_fs_root_null_pointer_dereference;
+#endif  
 	int open;
 
 	u64 total_pinned;
@@ -1240,6 +1259,10 @@ struct btrfs_fs_info {
 	struct percpu_counter delalloc_bytes;
 	s32 dirty_metadata_batch;
 	s32 delalloc_batch;
+
+#ifdef MY_DEF_HERE
+	atomic_t btree_flusher;
+#endif  
 
 	struct list_head dirty_cowonly_roots;
 
@@ -1257,6 +1280,11 @@ struct btrfs_fs_info {
 
 	spinlock_t defrag_inodes_lock;
 	struct rb_root defrag_inodes;
+#ifdef MY_DEF_HERE
+	 
+	struct list_head defrag_inodes_list[2];
+	int reclaim_space_entry_count;
+#endif  
 	atomic_t defrag_running;
 
 	seqlock_t profiles_lock;
@@ -1297,9 +1325,8 @@ struct btrfs_fs_info {
 #endif
 #ifdef MY_DEF_HERE
 	int ordered_extent_nr;
-	int delalloc_inodes_nr;
-	int flushoncommit_threshold;
-#endif
+	int ordered_extent_throttle;
+#endif  
 
 	unsigned int quota_enabled:1;
 
@@ -1355,6 +1382,10 @@ struct btrfs_fs_info {
 	unsigned long can_fix_meta_key;
 #endif  
 
+#ifdef MY_DEF_HERE
+	unsigned int snapshot_cleaner;  
+#endif  
+
 	struct semaphore uuid_tree_rescan_sem;
 	unsigned int update_uuid_tree_gen:1;
 
@@ -1369,10 +1400,40 @@ struct btrfs_fs_info {
 	int creating_free_space_tree;
 
 #ifdef MY_DEF_HERE
+	unsigned int abort_free_space_tree:1;
+	unsigned free_space_tree_processed_block_group_cnt;
+#endif  
+
+#ifdef MY_DEF_HERE
 	atomic_t reada_block_group_threads;  
-	spinlock_t block_group_hint_tree_lock;  
+	struct mutex block_group_hint_tree_mutex;  
 	unsigned int no_block_group_hint:1;
 #endif
+
+#ifdef MY_DEF_HERE
+	unsigned block_group_cnt;
+#endif  
+
+	int fs_frozen;
+#ifdef MY_DEF_HERE
+	atomic_t syno_writeback_thread_count;
+	int syno_writeback_thread_max;
+	 
+	int dev_replace_may_start;
+#endif  
+
+#ifdef MY_DEF_HERE
+	struct dentry *btrfs_pervolume_debugfs_root_dentry;
+
+	struct percpu_counter eb_hit;
+	struct percpu_counter eb_miss;
+	struct percpu_counter meta_write_pages;
+	struct percpu_counter data_write_pages;
+	struct percpu_counter delayed_meta_ref;
+	struct percpu_counter delayed_data_ref;
+	struct percpu_counter write_flush;
+	struct percpu_counter write_fua;
+#endif  
 };
 
 struct btrfs_subvolume_writers {
@@ -1502,29 +1563,12 @@ struct btrfs_root {
 	int send_in_progress;
 	struct btrfs_subvolume_writers *subv_writers;
 	atomic_t will_be_snapshoted;
-};
-
-struct btrfs_ioctl_defrag_range_args {
-	 
-	__u64 start;
-
-	__u64 len;
-
-	__u64 flags;
-
-	__u32 extent_thresh;
-
-	__u32 compress_type;
 
 #ifdef MY_DEF_HERE
-	 
-	__u16 syno_thresh;
-	 
-	__u8 syno_ratio_denom;
-	__u8 syno_ratio_nom;
-	__u32 unused[3];
-#else
-	__u32 unused[4];
+	 struct percpu_counter eb_hit;
+	 struct percpu_counter eb_miss;
+	 struct dentry *eb_hit_dentry;
+	 struct dentry *eb_miss_dentry;
 #endif  
 };
 
@@ -1643,6 +1687,18 @@ struct btrfs_snapshot_size_ctx {
 #define BTRFS_MOUNT_RESCAN_UUID_TREE	(1 << 23)
 #define	BTRFS_MOUNT_CHANGE_INODE_CACHE	(1 << 24)
 #define BTRFS_MOUNT_FREE_SPACE_TREE	(1 << 26)
+#define BTRFS_MOUNT_NOLOGREPLAY		(1 << 27)
+
+#ifdef MY_DEF_HERE
+#define BTRFS_MOUNT_NO_QUOTA_TREE	(1 << 28)
+#endif  
+#ifdef MY_DEF_HERE
+#define BTRFS_MOUNT_NO_BLOCK_GROUP     (1 << 29)
+#endif  
+
+#ifdef MY_DEF_HERE
+#define BTRFS_MOUNT_AUTO_RECLAIM_SPACE	(1 << 30)
+#endif  
 
 #define BTRFS_DEFAULT_COMMIT_INTERVAL	(30)
 
@@ -2565,6 +2621,16 @@ static inline unsigned long btrfs_leaf_data(struct extent_buffer *l)
 	return offsetof(struct btrfs_leaf, items);
 }
 
+static inline unsigned int leaf_data_end(struct btrfs_root *root,
+					 struct extent_buffer *leaf)
+{
+	u32 nr = btrfs_header_nritems(leaf);
+
+	if (nr == 0)
+		return BTRFS_LEAF_DATA_SIZE(root);
+	return btrfs_item_offset_nr(leaf, nr - 1);
+}
+
 BTRFS_SETGET_FUNCS(file_extent_type, struct btrfs_file_extent_item, type, 8);
 BTRFS_SETGET_STACK_FUNCS(stack_file_extent_disk_bytenr,
 			 struct btrfs_file_extent_item, disk_bytenr, 64);
@@ -2806,9 +2872,13 @@ int btrfs_pin_extent_for_log_replay(struct btrfs_root *root,
 				    u64 bytenr, u64 num_bytes);
 int btrfs_exclude_logged_extents(struct btrfs_root *root,
 				 struct extent_buffer *eb);
-int btrfs_cross_ref_exist(struct btrfs_trans_handle *trans,
-			  struct btrfs_root *root,
+#ifdef MY_DEF_HERE
+int btrfs_cross_ref_exist(struct btrfs_root *root,
+			  u64 objectid, u64 offset, u64 bytenr, u64 mode);
+#else
+int btrfs_cross_ref_exist(struct btrfs_root *root,
 			  u64 objectid, u64 offset, u64 bytenr);
+#endif  
 struct btrfs_block_group_cache *btrfs_lookup_block_group(
 						 struct btrfs_fs_info *info,
 						 u64 bytenr);
@@ -2996,6 +3066,9 @@ int btrfs_compare_trees(struct btrfs_root *left_root,
 			struct btrfs_root *right_root,
 			btrfs_changed_cb_t cb, void *ctx);
 #ifdef MY_DEF_HERE
+int syno_send_skip_clone(struct btrfs_root *root, u64 ino);
+#endif  
+#ifdef MY_DEF_HERE
 int btrfs_snapshot_size_query(struct file *file,
 				  struct btrfs_ioctl_snapshot_size_query_args *snap_args,
 				  int (*cb)(struct btrfs_fs_info *, u64,
@@ -3113,8 +3186,25 @@ static inline int btrfs_need_cleaner_sleep(struct btrfs_root *root)
 		btrfs_fs_closing(root->fs_info));
 }
 
+#ifdef MY_DEF_HERE
+static inline void perf_stats_monitor_destroy(struct btrfs_fs_info *fs_info)
+{
+	percpu_counter_destroy(&fs_info->eb_hit);
+	percpu_counter_destroy(&fs_info->eb_miss);
+	percpu_counter_destroy(&fs_info->meta_write_pages);
+	percpu_counter_destroy(&fs_info->data_write_pages);
+	percpu_counter_destroy(&fs_info->delayed_meta_ref);
+	percpu_counter_destroy(&fs_info->delayed_data_ref);
+	percpu_counter_destroy(&fs_info->write_flush);
+	percpu_counter_destroy(&fs_info->write_fua);
+}
+#endif  
+
 static inline void free_fs_info(struct btrfs_fs_info *fs_info)
 {
+#ifdef MY_DEF_HERE
+	perf_stats_monitor_destroy(fs_info);
+#endif  
 	kfree(fs_info->balance_ctl);
 	kfree(fs_info->delayed_root);
 	kfree(fs_info->extent_root);
@@ -3288,6 +3378,9 @@ struct btrfs_delalloc_work {
 	struct inode *inode;
 	int wait;
 	int delay_iput;
+#ifdef MY_DEF_HERE
+	int syno_writeback;
+#endif  
 	struct completion completion;
 	struct list_head list;
 	struct btrfs_work work;
@@ -3337,6 +3430,9 @@ int btrfs_truncate_inode_items(struct btrfs_trans_handle *trans,
 			       struct inode *inode, u64 new_size,
 			       u32 min_type);
 
+#ifdef MY_DEF_HERE
+void syno_writeback_balance_dirty_pages(struct btrfs_root *root, struct inode *inode);
+#endif  
 int btrfs_start_delalloc_inodes(struct btrfs_root *root, int delay_iput);
 int btrfs_start_delalloc_roots(struct btrfs_fs_info *fs_info, int delay_iput,
 			       int nr);
@@ -3407,8 +3503,16 @@ long btrfs_compat_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
 
 int btrfs_auto_defrag_init(void);
 void btrfs_auto_defrag_exit(void);
+#ifdef MY_DEF_HERE
+#define BTRFS_INODE_DEFRAG_NORMAL (1 << 0)
+#define BTRFS_INODE_DEFRAG_SYNO (1 << 1)
+int btrfs_add_inode_defrag(struct btrfs_trans_handle *trans,
+			   struct inode *inode, u64 start, u64 end,
+			   int defrag_type);
+#else
 int btrfs_add_inode_defrag(struct btrfs_trans_handle *trans,
 			   struct inode *inode);
+#endif  
 int btrfs_run_defrag_inodes(struct btrfs_fs_info *fs_info);
 void btrfs_cleanup_defrag_inodes(struct btrfs_fs_info *fs_info);
 int btrfs_sync_file(struct file *file, loff_t start, loff_t end, int datasync);
@@ -3418,6 +3522,10 @@ extern const struct file_operations btrfs_file_operations;
 int __btrfs_drop_extents(struct btrfs_trans_handle *trans,
 			 struct btrfs_root *root, struct inode *inode,
 			 struct btrfs_path *path, u64 start, u64 end,
+#ifdef MY_DEF_HERE
+			 u64 *first_punch_pos, u64 *last_punch_pos,
+			 int *partial_punch,
+#endif  
 			 u64 *drop_end, int drop_cache,
 			 int replace_extent,
 			 u32 extent_item_size,
@@ -3446,10 +3554,15 @@ int btrfs_init_sysfs(void);
 void btrfs_exit_sysfs(void);
 int btrfs_sysfs_add_one(struct btrfs_fs_info *fs_info);
 void btrfs_sysfs_remove_one(struct btrfs_fs_info *fs_info);
+#ifdef MY_DEF_HERE
+int btrfs_debugfs_add_one(struct btrfs_fs_info *fs_info);
+void btrfs_debugfs_remove_one(struct btrfs_fs_info *fs_info);
+#endif  
 
 ssize_t btrfs_listxattr(struct dentry *dentry, char *buffer, size_t size);
 
-int btrfs_parse_options(struct btrfs_root *root, char *options);
+int btrfs_parse_options(struct btrfs_root *root, char *options,
+			unsigned long new_flags);
 int btrfs_sync_fs(struct super_block *sb, int wait);
 
 #ifdef CONFIG_PRINTK

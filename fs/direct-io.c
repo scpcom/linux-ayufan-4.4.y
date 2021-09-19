@@ -70,6 +70,7 @@ struct dio {
 	spinlock_t bio_lock;		 
 	int page_errors;		 
 	int is_async;			 
+	bool should_dirty;		 
 	int io_error;			 
 	unsigned long refcount;		 
 	struct bio *bio_list;		 
@@ -179,7 +180,8 @@ static ssize_t dio_complete(struct dio *dio, loff_t offset, ssize_t ret, bool is
 		dio->end_io(dio->iocb, offset, transferred,
 			    dio->private, ret, is_async);
 	} else {
-		inode_dio_done(dio->inode);
+		if (!(dio->flags & DIO_SKIP_DIO_COUNT))
+			inode_dio_end(dio->inode);
 		if (is_async)
 			aio_complete(dio->iocb, ret, 0);
 	}
@@ -264,7 +266,7 @@ static inline void dio_bio_submit(struct dio *dio, struct dio_submit *sdio)
 	dio->refcount++;
 	spin_unlock_irqrestore(&dio->bio_lock, flags);
 
-	if (dio->is_async && dio->rw == READ)
+	if (dio->is_async && dio->rw == READ && dio->should_dirty)
 		bio_set_pages_dirty(bio);
 
 	if (sdio->submit_io)
@@ -317,13 +319,14 @@ static int dio_bio_complete(struct dio *dio, struct bio *bio)
 	if (!uptodate)
 		dio->io_error = -EIO;
 
-	if (dio->is_async && dio->rw == READ) {
+	if (dio->is_async && dio->rw == READ && dio->should_dirty) {
 		bio_check_pages_dirty(bio);	 
 	} else {
 		bio_for_each_segment_all(bvec, bio, i) {
 			struct page *page = bvec->bv_page;
 
-			if (dio->rw == READ && !PageCompound(page))
+			if (dio->rw == READ && !PageCompound(page) &&
+					dio->should_dirty)
 				set_page_dirty_lock(page);
 			page_cache_release(page);
 		}
@@ -769,7 +772,8 @@ do_blockdev_direct_IO(int rw, struct kiocb *iocb, struct inode *inode,
 		}
 	}
 
-	atomic_inc(&inode->i_dio_count);
+	if (!(dio->flags & DIO_SKIP_DIO_COUNT))
+		inode_dio_begin(inode);
 
 	dio->is_async = !is_sync_kiocb(iocb) && !((rw & WRITE) &&
 #ifdef MY_DEF_HERE
@@ -797,6 +801,12 @@ do_blockdev_direct_IO(int rw, struct kiocb *iocb, struct inode *inode,
 
 	spin_lock_init(&dio->bio_lock);
 	dio->refcount = 1;
+
+#ifdef MY_ABC_HERE
+	dio->should_dirty = !virt_addr_valid(iov->iov_base);
+#else
+	dio->should_dirty = true;
+#endif
 
 	if (unlikely(sdio.blkfactor))
 		sdio.pages_in_io = 2;

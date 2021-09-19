@@ -138,11 +138,16 @@ verify:
 	if (!buffer_verified(bh) &&
 	    !ext4_inode_bitmap_csum_verify(sb, block_group, desc, bh,
 					   EXT4_INODES_PER_GROUP(sb) / 8)) {
+#ifdef MY_ABC_HERE
+		ext4_msg(sb, KERN_CRIT, "Corrupt inode bitmap - block_group = %u, "
+			   "inode_bitmap = %llu", block_group, bitmap_blk);
+#else
 		ext4_unlock_group(sb, block_group);
 		put_bh(bh);
 		ext4_error(sb, "Corrupt inode bitmap - block_group = %u, "
 			   "inode_bitmap = %llu", block_group, bitmap_blk);
 		return NULL;
+#endif
 	}
 	ext4_unlock_group(sb, block_group);
 	set_buffer_verified(bh);
@@ -888,9 +893,7 @@ got:
 	inode->i_create_time = ei->i_crtime;
 #endif
 #ifdef MY_ABC_HERE
-	if (!EXT4_HAS_RO_COMPAT_FEATURE(sb, EXT4_FEATURE_RO_COMPAT_METADATA_CSUM)) {
-		inode->i_archive_bit = ALL_SYNO_ARCHIVE;	 
-	}
+	inode->i_archive_bit = ALL_SYNO_ARCHIVE;	 
 #endif
 
 	memset(ei->i_data, 0, sizeof(ei->i_data));

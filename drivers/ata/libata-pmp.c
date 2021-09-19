@@ -767,13 +767,6 @@ syno_pmp_ports_num(struct ata_port *ap)
 			}
 		}
 #endif  
-#if defined (MY_ABC_HERE) && defined (MY_ABC_HERE)
-		 
-		if (IS_SYNOLOGY_DX517(ap->PMSynoUnique) && (ap->link.uiStsFlags & SYNO_STATUS_IS_SIL)) {
-			ata_port_printk(ap, KERN_ERR, "This expansion unit is unsupported\n");
-			ret = 0;
-		}
-#endif  
 	}
 	return ret;
 }
@@ -821,42 +814,25 @@ syno_9705_workaround(struct ata_port *ap)
 	struct Scsi_Host *pMaster_host = NULL;
 	struct ata_port *pAp_master = NULL;
 	int i = 0;
-	int iAtaPrintIdMax;
 
-	iAtaPrintIdMax = atomic_read(&ata_print_id) + 1;
-	for (i = 1; i < iAtaPrintIdMax; i++) {
-		if (NULL == (pMaster_host = scsi_host_lookup(i - 1))) {
+	for (i = 0; i < ap->host->n_ports; i++) {
+		pAp_master = ap->host->ports[i];
+		if (NULL == pAp_master) {
 			continue;
 		}
 
-		if (NULL == (pAp_master = ata_shost_to_port(pMaster_host))) {
-			goto CONTINUE_FOR;
-		}
-
-		if (ap->host == pAp_master->host || ap->port_no == pAp_master->port_no) {
-			if (ap->PMSynoUnique != pAp_master->PMSynoUnique) {
-				if (syno_pm_is_synology_9705(pAp_master)) {
-					ata_port_printk(ap, KERN_ERR,
-							"replace unique %x with master unique %x\n",
-							ap->PMSynoUnique, pAp_master->PMSynoUnique);
-					ap->PMSynoUnique = pAp_master->PMSynoUnique;
-				} else {
-					ata_port_printk(ap, KERN_ERR,
-							"WARNING : master unique is not syno 9705, don't replace\n");
-				}
-
-				break;
+		if (ap->PMSynoUnique != pAp_master->PMSynoUnique) {
+			if (syno_pm_is_synology_9705(pAp_master)) {
+				ata_port_printk(ap, KERN_ERR,
+						"replace unique %x with master unique %x\n",
+						ap->PMSynoUnique, pAp_master->PMSynoUnique);
+				ap->PMSynoUnique = pAp_master->PMSynoUnique;
+			} else {
+				ata_port_printk(ap, KERN_ERR,
+						"WARNING : master unique is not syno 9705, don't replace\n");
 			}
+			break;
 		}
-
-CONTINUE_FOR:
-		scsi_host_put(pMaster_host);
-		pMaster_host = NULL;
-		pAp_master = NULL;
-	}
-
-	if (NULL != pMaster_host) {
-		scsi_host_put(pMaster_host);
 	}
 }
 
@@ -895,7 +871,6 @@ syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo)
 							&pm_pkg);
 	if (syno_sata_pmp_read_gpio(&(ap->link), &pm_pkg)) {
 		printk("ata%d pm unique read fail\n", ap->print_id);
-		ap->uiStsFlags |= SYNO_STATUS_DEEP_SLEEP_FAILED;
 		goto END;
 	}
 
@@ -1399,18 +1374,6 @@ int sata_pmp_attach(struct ata_device *dev)
 					"DX213 workaround, limit the speed to 1.5 GBPS\n");
 
 			link->sata_spd_limit = target_limit;
-		}
-	} else if (IS_SYNOLOGY_DX517(ap->PMSynoUnique) &&
-			(syno_is_hw_version(HW_DS916p))) {
-		target_limit = 0;
-
-		if(link->sata_spd_limit != target_limit) {
-			ata_dev_printk(dev, KERN_ERR,
-					"recover DX517 link speed to default configuration and reattach\n");
-
-			link->sata_spd_limit = 0;
-			rc = -EAGAIN;
-			goto fail;
 		}
 	}
 #endif  

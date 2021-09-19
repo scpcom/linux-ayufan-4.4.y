@@ -312,7 +312,14 @@ enum {
 	MM_FILEPAGES,
 	MM_ANONPAGES,
 	MM_SWAPENTS,
-	NR_MM_COUNTERS
+	NR_MM_COUNTERS,
+	/*
+	 * Resident shared memory pages
+	 *
+	 * We can't expand *_rss_stat without breaking kABI
+	 * MM_SHMEMPAGES need to be set apart
+	 */
+	MM_SHMEMPAGES = NR_MM_COUNTERS
 };
 
 #if USE_SPLIT_PTLOCKS && defined(CONFIG_MMU)
@@ -451,6 +458,9 @@ struct mm_struct {
 	bool tlb_flush_pending;
 #endif
 	struct uprobes_state uprobes_state;
+
+	/* porting KAISER(KPTI) from RHEL*/
+	atomic_long_t mm_shmempages;
 };
 
 /* first nid will either be a valid NID or one of these values */

@@ -30,6 +30,7 @@
 #define KVM_PRIVATE_MEM_SLOTS 4
 #define KVM_COALESCED_MMIO_PAGE_OFFSET 1
 #define KVM_HAVE_ONE_REG
+#define KVM_HALT_POLL_NS_DEFAULT 500000
 
 #define KVM_VCPU_MAX_FEATURES 1
 
@@ -143,6 +144,8 @@ struct kvm_vm_stat {
 };
 
 struct kvm_vcpu_stat {
+	u32 halt_successful_poll;
+	u32 halt_attempted_poll;
 	u32 halt_wakeup;
 };
 

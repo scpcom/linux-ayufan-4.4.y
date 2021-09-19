@@ -18,6 +18,11 @@
 #include <linux/syscalls.h>
 #include <linux/utime.h>
 
+#ifdef MY_ABC_HERE
+#include <crypto/hydrogen.h>
+bool ramdisk_check_failed;
+#endif  
+
 static __initdata char *message;
 static void __init error(char *x)
 {
@@ -460,7 +465,7 @@ static char * __init unpack_to_rootfs(char *buf, unsigned len)
 					 compress_name);
 				message = msg_buf;
 			}
-#ifdef MY_ABC_HERE
+#ifdef CONFIG_SYNO_INITRAMFS_DECOMPRESS_ONCE
 		} else {
 			 
 			break;
@@ -471,6 +476,13 @@ static char * __init unpack_to_rootfs(char *buf, unsigned len)
 #endif
 		if (state != Reset)
 			error("junk in compressed archive");
+
+#ifdef MY_ABC_HERE
+		if (my_inptr == 0) {
+			printk(KERN_INFO "decompress cpio completed and skip redundant lzma\n");
+			break;
+		}
+#endif  
 		this_header = saved_offset + my_inptr;
 		buf += my_inptr;
 		len -= my_inptr;
@@ -578,6 +590,27 @@ static int __init populate_rootfs(void)
 	char *err = unpack_to_rootfs(__initramfs_start, __initramfs_size);
 	if (err)
 		panic(err);	 
+
+#ifdef MY_ABC_HERE
+	const char *ctx = "synology";
+	size_t rd_len = initrd_end - initrd_start - hydro_sign_BYTES;
+
+	uint8_t pk[] = {
+		__RAMDISK_SIGN_PUBLIC_KEY__
+	};
+
+	uint8_t sig[hydro_sign_BYTES];
+	memcpy(sig, initrd_start + rd_len, hydro_sign_BYTES);
+
+	if (hydro_sign_verify(sig, initrd_start, rd_len, ctx, pk)) {
+		ramdisk_check_failed = true;
+		printk(KERN_ERR "ramdisk corrupt");
+	} else {
+		ramdisk_check_failed = false;
+		initrd_end -= hydro_sign_BYTES;
+	}
+#endif  
+
 	if (initrd_start) {
 #ifdef CONFIG_BLK_DEV_RAM
 		int fd;

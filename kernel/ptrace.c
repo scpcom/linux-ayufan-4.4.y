@@ -222,17 +222,15 @@ static int ptrace_has_cap(struct user_namespace *ns, unsigned int mode)
 }
 
 /* Returns 0 on success, -errno on denial. */
-static int __ptrace_may_access(struct task_struct *task, unsigned int mode)
+int ___ptrace_may_access(struct task_struct *tracer,
+			 const struct cred *cred, /* tracer cred */
+			 struct task_struct *task,
+			 unsigned int mode)
 {
-	const struct cred *cred = current_cred(), *tcred;
+	const struct cred *tcred;
 	int dumpable = 0;
 	kuid_t caller_uid;
 	kgid_t caller_gid;
-
-	if (!(mode & PTRACE_MODE_FSCREDS) == !(mode & PTRACE_MODE_REALCREDS)) {
-		WARN(1, "denying ptrace access check without PTRACE_MODE_*CREDS\n");
-		return -EPERM;
-	}
 
 	/* May we inspect the given task?
 	 * This check is used both for attaching with ptrace
@@ -247,6 +245,14 @@ static int __ptrace_may_access(struct task_struct *task, unsigned int mode)
 	if (same_thread_group(task, current))
 		return 0;
 	rcu_read_lock();
+	if (!cred) {
+		WARN_ON_ONCE(tracer == current);
+		WARN_ON_ONCE(task != current);
+		cred = __task_cred(tracer);
+	} else {
+		WARN_ON_ONCE(tracer != current);
+		WARN_ON_ONCE(task == current);
+	}
 	if (mode & PTRACE_MODE_FSCREDS) {
 		caller_uid = cred->fsuid;
 		caller_gid = cred->fsgid;
@@ -287,7 +293,15 @@ ok:
 	}
 	rcu_read_unlock();
 
-	return security_ptrace_access_check(task, mode);
+	if (!(mode & PTRACE_MODE_NOACCESS_CHK))
+		return security_ptrace_access_check(task, mode);
+
+	return 0;
+}
+
+int __ptrace_may_access(struct task_struct *task, unsigned int mode)
+{
+	return ___ptrace_may_access(current, current_cred(), task, mode);
 }
 
 bool ptrace_may_access(struct task_struct *task, unsigned int mode)

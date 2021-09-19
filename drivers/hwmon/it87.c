@@ -19,6 +19,9 @@
 #include <linux/dmi.h>
 #include <linux/acpi.h>
 #include <linux/io.h>
+#ifdef MY_ABC_HERE
+#include <linux/synobios.h>
+#endif  
 
 #define DRVNAME "it87"
 
@@ -2366,7 +2369,7 @@ static void __exit sm_it87_exit(void)
 }
 
 #ifdef MY_ABC_HERE
-int syno_sys_temperature(int *Temperature)
+int syno_sys_temperature(struct _SynoThermalTemp *pThermalTemp)
 {
 	unsigned short address;
 	resource_size_t res_start;
@@ -2388,7 +2391,7 @@ int syno_sys_temperature(int *Temperature)
 	res_start = address + IT87_EC_OFFSET;
 
 	outb_p(IT87_REG_TEMP(0), res_start + IT87_ADDR_REG_OFFSET);
-	*Temperature = inb_p(res_start + IT87_DATA_REG_OFFSET)<<1;
+	pThermalTemp->temperature = inb_p(res_start + IT87_DATA_REG_OFFSET);
 
 	superio_exit();
 

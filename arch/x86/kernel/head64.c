@@ -46,7 +46,7 @@ static void __init reset_early_page_tables(void)
 
 	next_early_pgt = 0;
 
-	write_cr3(__pa(early_level4_pgt));
+	__load_cr3(__pa(early_level4_pgt));
 }
 
 /* Create a new PMD entry */

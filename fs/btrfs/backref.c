@@ -1522,7 +1522,7 @@ again:
 		 
 		delayed_refs = &trans->transaction->delayed_refs;
 		spin_lock(&delayed_refs->lock);
-		head = btrfs_find_delayed_ref_head(trans, bytenr);
+		head = btrfs_find_delayed_ref_head(delayed_refs, bytenr);
 		if (head) {
 #ifdef MY_DEF_HERE
 			if (in_run_delayed) {

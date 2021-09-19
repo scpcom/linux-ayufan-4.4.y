@@ -164,6 +164,10 @@ config SYNO_DISK_EH_FLAG
 	bool "report to userspace if kernel is in SCSI error handling"
 	default y
 
+config SYNO_LOAD_AVERAGE
+	bool "Split load average into cpu and io part"
+	default y
+
 endmenu #System Features
 
 menu "Boot Arguments"
@@ -241,10 +245,6 @@ config SYNO_RCU_CPU_STALL_SUPPRESS
 
 config SYNO_KERNEL_UTC_TIME
 	bool "Keep UTC Time In Kernel And RTC"
-	default y
-
-config SYNO_HIDE_LOWMEM_WARNING
-	bool "Do Not Show Nowait Page Allocating Fail Warning"
 	default y
 
 config SYNO_SOFTLOCKUP_COUNTER

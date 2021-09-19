@@ -262,6 +262,10 @@ struct device_attribute *ahci_sdev_attrs[] = {
 	&dev_attr_sw_locate,
 	&dev_attr_sw_fault,
 #endif  
+#ifdef MY_DEF_HERE
+	&dev_attr_syno_disk_latency_hist,
+	&dev_attr_syno_disk_latency_stat,
+#endif  
 	NULL
 };
 EXPORT_SYMBOL_GPL(ahci_sdev_attrs);

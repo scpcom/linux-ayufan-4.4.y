@@ -65,4 +65,8 @@ config SYNO_NF_NAT_WORKAROUND
 	bool "Fix BUG_ON on nf_nat_setup_info"
 	default y
 
+config SYNO_BACKPORT_GLINKSETTINGS
+	bool "ethtool get_link_ksettings/set_link_ksettings"
+	default y
+
 endmenu #Network

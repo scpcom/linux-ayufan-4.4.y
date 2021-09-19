@@ -409,7 +409,6 @@ again:
 
 	h->transid = cur_trans->transid;
 	h->transaction = cur_trans;
-	h->blocks_used = 0;
 	h->bytes_reserved = 0;
 	h->chunk_bytes_reserved = 0;
 	h->root = root;
@@ -646,8 +645,13 @@ int btrfs_should_end_transaction(struct btrfs_trans_handle *trans,
 	return should_end_transaction(trans, root);
 }
 
+#ifdef MY_DEF_HERE
+static int __btrfs_end_transaction(struct btrfs_trans_handle *trans,
+			  struct btrfs_root *root, int throttle, int nosync_delayed)
+#else
 static int __btrfs_end_transaction(struct btrfs_trans_handle *trans,
 			  struct btrfs_root *root, int throttle)
+#endif  
 {
 	struct btrfs_transaction *cur_trans = trans->transaction;
 	struct btrfs_fs_info *info = root->fs_info;
@@ -675,7 +679,12 @@ static int __btrfs_end_transaction(struct btrfs_trans_handle *trans,
 		cur = max_t(unsigned long, cur, 32);
 
 		if (must_run_delayed_refs == 1 &&
+#ifdef MY_DEF_HERE
+		    (nosync_delayed ||
+			 (trans->type & (__TRANS_JOIN_NOLOCK | __TRANS_ATTACH))))
+#else
 		    (trans->type & (__TRANS_JOIN_NOLOCK | __TRANS_ATTACH)))
+#endif  
 			must_run_delayed_refs = 2;
 	}
 
@@ -753,6 +762,25 @@ static int __btrfs_end_transaction(struct btrfs_trans_handle *trans,
 	return err;
 }
 
+#ifdef MY_DEF_HERE
+int btrfs_end_transaction_nosync_delayed(struct btrfs_trans_handle *trans,
+			  struct btrfs_root *root)
+{
+	return __btrfs_end_transaction(trans, root, 0, 1);
+}
+
+int btrfs_end_transaction(struct btrfs_trans_handle *trans,
+			  struct btrfs_root *root)
+{
+	return __btrfs_end_transaction(trans, root, 0, 0);
+}
+
+int btrfs_end_transaction_throttle(struct btrfs_trans_handle *trans,
+				   struct btrfs_root *root)
+{
+	return __btrfs_end_transaction(trans, root, 1, 0);
+}
+#else
 int btrfs_end_transaction(struct btrfs_trans_handle *trans,
 			  struct btrfs_root *root)
 {
@@ -764,6 +792,7 @@ int btrfs_end_transaction_throttle(struct btrfs_trans_handle *trans,
 {
 	return __btrfs_end_transaction(trans, root, 1);
 }
+#endif  
 
 int btrfs_write_marked_extents(struct btrfs_root *root,
 			       struct extent_io_tree *dirty_pages, int mark)
@@ -998,6 +1027,16 @@ void btrfs_add_dead_root(struct btrfs_root *root)
 	spin_unlock(&root->fs_info->trans_lock);
 }
 
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+void btrfs_add_dead_root_head(struct btrfs_root *root)
+{
+	spin_lock(&root->fs_info->trans_lock);
+	if (list_empty(&root->root_list))
+		list_add(&root->root_list, &root->fs_info->dead_roots);
+	spin_unlock(&root->fs_info->trans_lock);
+}
+#endif  
+ 
 static noinline int commit_fs_roots(struct btrfs_trans_handle *trans,
 				    struct btrfs_root *root)
 {
@@ -1525,10 +1564,6 @@ static inline int btrfs_start_delalloc_flush(struct btrfs_fs_info *fs_info)
 {
 	if (btrfs_test_opt(fs_info->tree_root, FLUSHONCOMMIT))
 		return btrfs_start_delalloc_roots(fs_info, 1, -1);
-#ifdef MY_DEF_HERE
-	else if (fs_info->flushoncommit_threshold && fs_info->delalloc_inodes_nr > fs_info->flushoncommit_threshold)
-		return btrfs_start_delalloc_roots(fs_info, 1, -1);
-#endif
 	return 0;
 }
 
@@ -1536,11 +1571,6 @@ static inline void btrfs_wait_delalloc_flush(struct btrfs_fs_info *fs_info)
 {
 	if (btrfs_test_opt(fs_info->tree_root, FLUSHONCOMMIT))
 		btrfs_wait_ordered_roots(fs_info, -1);
-#ifdef MY_DEF_HERE
-	else if (fs_info->flushoncommit_threshold && fs_info->ordered_extent_nr > fs_info->flushoncommit_threshold) {
-		btrfs_wait_ordered_roots(fs_info, -1);
-	}
-#endif
 }
 
 static inline void
@@ -1825,7 +1855,8 @@ int btrfs_commit_transaction(struct btrfs_trans_handle *trans,
 
 	kmem_cache_free(btrfs_trans_handle_cachep, trans);
 
-	if (current != root->fs_info->transaction_kthread)
+	if (current != root->fs_info->transaction_kthread &&
+	    !root->fs_info->fs_frozen)
 		btrfs_run_delayed_iputs(root);
 
 	return ret;

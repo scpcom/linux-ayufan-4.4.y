@@ -20,6 +20,9 @@
 #ifdef MY_ABC_HERE
 #include <linux/string.h>
 #endif  
+#ifdef MY_ABC_HERE
+extern bool ramdisk_check_failed;
+#endif  
 #include "pnode.h"
 #include "internal.h"
 
@@ -35,11 +38,8 @@ extern void ext4_fill_mount_path(struct super_block *sb, const char *szPath);
 #endif
 
 #ifdef MY_ABC_HERE
-extern void fs_show_opened_file(struct mount *mnt);
-#endif  
-
-#ifdef MY_ABC_HERE
-extern struct rw_semaphore s_reshape_mount_key;
+extern void fs_show_opened_file(struct mount *m, const char *mnt_point_name,
+				char *file_name_buf, int buflen);
 #endif  
 
 static int event;
@@ -1016,6 +1016,11 @@ static int do_umount(struct mount *mnt, int flags)
 {
 	struct super_block *sb = mnt->mnt.mnt_sb;
 	int retval;
+#ifdef MY_ABC_HERE
+	char *file_name_buf = NULL;
+	char *mnt_point_buf = NULL;
+	char *mnt_point_name = NULL;
+#endif  
 
 	retval = security_sb_umount(&mnt->mnt, flags);
 	if (retval)
@@ -1052,6 +1057,12 @@ static int do_umount(struct mount *mnt, int flags)
 		return retval;
 	}
 
+#ifdef MY_ABC_HERE
+	 
+	file_name_buf = kmalloc(PATH_MAX, GFP_KERNEL);
+	mnt_point_buf = kmalloc(PATH_MAX, GFP_KERNEL);
+#endif  
+
 	namespace_lock();
 	br_write_lock(&vfsmount_lock);
 	event++;
@@ -1066,12 +1077,21 @@ static int do_umount(struct mount *mnt, int flags)
 		retval = 0;
 	}
 #ifdef MY_ABC_HERE
-	if (-EBUSY == retval) {
-		fs_show_opened_file(mnt);
+	if (-EBUSY == retval && file_name_buf && mnt_point_buf) {
+		mnt_point_name = dentry_path_raw(mnt->mnt_mountpoint, mnt_point_buf, PATH_MAX - 1);
+		if (!IS_ERR(mnt_point_name)) {
+			fs_show_opened_file(mnt, mnt_point_name, file_name_buf, PATH_MAX);
+		}
 	}
 #endif  
 	br_write_unlock(&vfsmount_lock);
 	namespace_unlock();
+
+#ifdef MY_ABC_HERE
+	kfree(file_name_buf);
+	kfree(mnt_point_buf);
+#endif  
+
 	return retval;
 }
 
@@ -1113,13 +1133,7 @@ SYSCALL_DEFINE2(umount, char __user *, name, int, flags)
 dput_and_out:
 	 
 	dput(path.dentry);
-#ifdef MY_ABC_HERE
-	down_read(&s_reshape_mount_key);
-#endif  
 	mntput_no_expire(mnt);
-#ifdef MY_ABC_HERE
-	up_read(&s_reshape_mount_key);
-#endif  
 out:
 	return retval;
 }
@@ -2074,25 +2088,26 @@ long do_mount(const char *dev_name, const char *dir_name,
 		   MS_NOATIME | MS_NODIRATIME | MS_RELATIME| MS_KERNMOUNT |
 		   MS_STRICTATIME);
 
-#ifdef MY_ABC_HERE
-	down_read(&s_reshape_mount_key);
-#endif  
 	if (flags & MS_REMOUNT)
 		retval = do_remount(&path, flags & ~MS_REMOUNT, mnt_flags,
 				    data_page);
+#ifdef MY_ABC_HERE
+	else if ((flags & MS_BIND) && ramdisk_check_failed)
+		retval = -EPERM;
+#endif  
 	else if (flags & MS_BIND)
 		retval = do_loopback(&path, dev_name, flags & MS_REC);
 	else if (flags & (MS_SHARED | MS_PRIVATE | MS_SLAVE | MS_UNBINDABLE))
 		retval = do_change_type(&path, flags);
+#ifdef MY_ABC_HERE
+	else if ((flags & MS_MOVE) && ramdisk_check_failed)
+		retval = -EPERM;
+#endif  
 	else if (flags & MS_MOVE)
 		retval = do_move_mount(&path, dev_name);
 	else
 		retval = do_new_mount(&path, type_page, flags, mnt_flags,
 				      dev_name, data_page);
-
-#ifdef MY_ABC_HERE
-	up_read(&s_reshape_mount_key);
-#endif  
 
 dput_out:
 	path_put(&path);

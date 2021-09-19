@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 
 #include <linux/sched.h>
 #include <linux/sched/sysctl.h>
@@ -489,6 +492,10 @@ struct rq {
 	/* calc_load related fields */
 	unsigned long calc_load_update;
 	long calc_load_active;
+#ifdef MY_ABC_HERE
+	long calc_io_load_active;
+	long calc_cpu_load_active;
+#endif /* MY_ABC_HERE */
 
 #ifdef CONFIG_SCHED_HRTICK
 #ifdef CONFIG_SMP

@@ -30,6 +30,7 @@ struct mm_struct;
 #include <linux/init.h>
 #include <linux/err.h>
 #include <linux/irqflags.h>
+#include <linux/magic.h>
 
 /*
  * We handle most unaligned accesses in hardware.  On the other hand
@@ -130,6 +131,13 @@ struct cpuinfo_x86 {
 	u32			microcode;
 } __attribute__((__aligned__(SMP_CACHE_BYTES)));
 
+enum cpuid_regs_idx {
+	CPUID_EAX = 0,
+	CPUID_EBX,
+	CPUID_ECX,
+	CPUID_EDX,
+};
+
 #define X86_VENDOR_INTEL	0
 #define X86_VENDOR_CYRIX	1
 #define X86_VENDOR_AMD		2
@@ -171,6 +179,9 @@ extern void identify_secondary_cpu(struct cpuinfo_x86 *);
 extern void print_cpu_info(struct cpuinfo_x86 *);
 void print_cpu_msr(struct cpuinfo_x86 *);
 extern void init_scattered_cpuid_features(struct cpuinfo_x86 *c);
+extern u32 get_scattered_cpuid_leaf(unsigned int level,
+				    unsigned int sub_leaf,
+				    enum cpuid_regs_idx reg);
 extern unsigned int init_intel_cacheinfo(struct cpuinfo_x86 *c);
 extern void init_amd_cacheinfo(struct cpuinfo_x86 *c);
 
@@ -196,11 +207,6 @@ static inline void native_cpuid(unsigned int *eax, unsigned int *ebx,
 	      "=d" (*edx)
 	    : "0" (*eax), "2" (*ecx)
 	    : "memory");
-}
-
-static inline void load_cr3(pgd_t *pgdir)
-{
-	write_cr3(__pa(pgdir));
 }
 
 #ifdef CONFIG_X86_32
@@ -278,11 +284,30 @@ struct tss_struct {
 	/*
 	 * .. and then another 0x100 bytes for the emergency kernel stack:
 	 */
+	unsigned long		stack_canary;
 	unsigned long		stack[64];
 
-} ____cacheline_aligned;
+		/*
+         *
+         * The Intel SDM says (Volume 3, 7.2.1):
+         *
+         *  Avoid placing a page boundary in the part of the TSS that the
+         *  processor reads during a task switch (the first 104 bytes). The
+         *  processor may not correctly perform address translations if a
+         *  boundary occurs in this area. During a task switch, the processor
+         *  reads and writes into the first 104 bytes of each TSS (using
+         *  contiguous physical addresses beginning with the physical address
+         *  of the first byte of the TSS). So, after TSS access begins, if
+         *  part of the 104 bytes is not physically contiguous, the processor
+         *  will access incorrect information without generating a page-fault
+         *  exception.
+         *
+         * There are also a lot of errata involving the TSS spanning a page
+         * boundary.  Assert that we're not doing that.
+         */
+} __attribute__((__aligned__(PAGE_SIZE)));
 
-DECLARE_PER_CPU_SHARED_ALIGNED(struct tss_struct, init_tss);
+DECLARE_PER_CPU_PAGE_ALIGNED_USER_MAPPED(struct tss_struct, init_tss);
 
 /*
  * Save the original ist values for checking stack pointers during debugging
@@ -557,8 +582,13 @@ static inline void set_in_cr4(unsigned long mask)
 	unsigned long cr4;
 
 	mmu_cr4_features |= mask;
-	if (trampoline_cr4_features)
-		*trampoline_cr4_features = mmu_cr4_features;
+	if (trampoline_cr4_features) {
+                /*
+                 * Mask off features that don't work outside long mode (just
+                 * PCIDE for now).
+                 */
+                *trampoline_cr4_features = mmu_cr4_features & ~X86_CR4_PCIDE;
+    }
 	cr4 = read_cr4();
 	cr4 |= mask;
 	write_cr4(cr4);
@@ -690,7 +720,7 @@ static inline void sync_core(void)
 #endif
 }
 
-static inline void __monitor(const void *eax, unsigned long ecx,
+static __always_inline void __monitor(const void *eax, unsigned long ecx,
 			     unsigned long edx)
 {
 	/* "monitor %eax, %ecx, %edx;" */
@@ -698,7 +728,7 @@ static inline void __monitor(const void *eax, unsigned long ecx,
 		     :: "a" (eax), "c" (ecx), "d"(edx));
 }
 
-static inline void __mwait(unsigned long eax, unsigned long ecx)
+static __always_inline void __mwait(unsigned long eax, unsigned long ecx)
 {
 	/* "mwait %eax, %ecx;" */
 	asm volatile(".byte 0x0f, 0x01, 0xc9;"
@@ -902,7 +932,8 @@ extern unsigned long thread_saved_pc(struct task_struct *tsk);
 }
 
 #define INIT_TSS  { \
-	.x86_tss.sp0 = (unsigned long)&init_stack + sizeof(init_stack) \
+	.x86_tss.sp0 = (unsigned long)&init_stack + sizeof(init_stack), \
+	.stack_canary		= STACK_END_MAGIC, \
 }
 
 /*

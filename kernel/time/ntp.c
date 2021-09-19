@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * NTP state machine interfaces and logic.
  *
@@ -469,6 +472,9 @@ static void sync_cmos_clock(struct work_struct *work)
 	struct timespec now, next;
 	int fail = 1;
 
+#ifdef MY_ABC_HERE
+	return;
+#endif
 	/*
 	 * If we have an externally synchronized Linux clock, then update
 	 * CMOS clock accordingly every ~11 minutes. Set_rtc_mmss() has to be

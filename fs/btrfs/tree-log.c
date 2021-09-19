@@ -3472,7 +3472,11 @@ static int log_one_extent(struct btrfs_trans_handle *trans,
 	btrfs_init_map_token(&token);
 
 	ret = __btrfs_drop_extents(trans, log, inode, path, em->start,
+#ifdef MY_DEF_HERE
+				   em->start + em->len, NULL, NULL, NULL, NULL, 0, 1,
+#else
 				   em->start + em->len, NULL, 0, 1,
+#endif  
 				   sizeof(*fi), &extent_inserted);
 	if (ret)
 		return ret;
@@ -3976,6 +3980,10 @@ static int btrfs_log_inode(struct btrfs_trans_handle *trans,
 		ins_nr = 0;
 		ret = btrfs_search_forward(root, &min_key,
 					   path, trans->transid);
+		if (ret < 0) {
+			err = ret;
+			goto out_unlock;
+		}
 		if (ret != 0)
 			break;
 again:
