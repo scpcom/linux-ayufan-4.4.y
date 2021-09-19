@@ -1705,7 +1705,7 @@ suppress_allocation:
 }
 EXPORT_SYMBOL(__sk_mem_schedule);
 
-void __sk_mem_reclaim(struct sock *sk)
+void __sk_mem_reclaim(struct sock *sk, int amount)
 {
 	amount >>= SK_MEM_QUANTUM_SHIFT;
 	sk_memory_allocated_sub(sk, amount);

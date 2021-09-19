@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  * INET		An implementation of the TCP/IP protocol suite for the LINUX
  *		operating system.  INET is implemented using the  BSD Socket
@@ -91,11 +88,7 @@ int sysctl_tcp_adv_win_scale __read_mostly = 1;
 EXPORT_SYMBOL(sysctl_tcp_adv_win_scale);
 
 /* rfc5961 challenge ack rate limiting */
-#ifdef MY_ABC_HERE
 int sysctl_tcp_challenge_ack_limit = 1000;
-#else
-int sysctl_tcp_challenge_ack_limit = 100;
-#endif /* MY_ABC_HERE */
 
 int sysctl_tcp_stdurg __read_mostly;
 int sysctl_tcp_rfc1337 __read_mostly;
@@ -3295,32 +3288,20 @@ static void tcp_send_challenge_ack(struct sock *sk)
 	/* unprotected vars, we dont care of overwrites */
 	static u32 challenge_timestamp;
 	static unsigned int challenge_count;
-#ifdef MY_ABC_HERE
-	u32 count;
-#endif /* MY_ABC_HERE */
 	u32 now = jiffies / HZ;
 	u32 count;
 
 	if (now != challenge_timestamp) {
-#ifdef MY_ABC_HERE
 		u32 half = (sysctl_tcp_challenge_ack_limit + 1) >> 1;
 
-#endif /* MY_ABC_HERE */
 		challenge_timestamp = now;
-#ifdef MY_ABC_HERE
-		WRITE_ONCE(challenge_count, half +
-			   prandom_u32_max(sysctl_tcp_challenge_ack_limit));
-#else
-		challenge_count = 0;
-#endif /* MY_ABC_HERE */
+		ACCESS_ONCE(challenge_count) = half +
+				  reciprocal_divide(prandom_u32(),
+					sysctl_tcp_challenge_ack_limit);
 	}
-#ifdef MY_ABC_HERE
-	count = READ_ONCE(challenge_count);
+	count = ACCESS_ONCE(challenge_count);
 	if (count > 0) {
-		WRITE_ONCE(challenge_count, count - 1);
-#else
-	if (++challenge_count <= sysctl_tcp_challenge_ack_limit) {
-#endif /* MY_ABC_HERE */
+		ACCESS_ONCE(challenge_count) = count - 1;
 		NET_INC_STATS_BH(sock_net(sk), LINUX_MIB_TCPCHALLENGEACK);
 		tcp_send_ack(sk);
 	}

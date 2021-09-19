@@ -1550,9 +1550,13 @@ void addrconf_dad_failure(struct inet6_ifaddr *ifp)
 	}
 
 	spin_lock_bh(&ifp->state_lock);
-	/* transition from _POSTDAD to _ERRDAD */
+	 
 	ifp->state = INET6_IFADDR_STATE_ERRDAD;
 	spin_unlock_bh(&ifp->state_lock);
+
+	addrconf_mod_dad_work(ifp, 0);
+	in6_ifa_put(ifp);
+}
 
 void addrconf_join_solict(struct net_device *dev, const struct in6_addr *addr)
 {
@@ -2440,7 +2444,7 @@ static void init_loopback(struct net_device *dev)
 
 			if (sp_ifa->rt) {
 				 
-				if (sp_ifa->rt->dst.obsolete > 0) {
+				if (!atomic_read(&sp_ifa->rt->rt6i_ref)) {
 					ip6_rt_put(sp_ifa->rt);
 					sp_ifa->rt = NULL;
 				} else {
@@ -2798,6 +2802,8 @@ static int addrconf_ifdown(struct net_device *dev, int how)
 
 	write_lock_bh(&idev->lock);
 
+	addrconf_del_rs_timer(idev);
+
 	if (!how)
 		idev->if_flags &= ~(IF_RS_SENT|IF_RA_RCVD|IF_READY);
 
@@ -2878,22 +2884,18 @@ static void addrconf_rs_timer(unsigned long data)
 	if (idev->if_flags & IF_RA_RCVD)
 		goto out;
 
-	spin_lock(&ifp->lock);
-	if (ifp->probes++ < idev->cnf.rtr_solicits) {
-		 
-		addrconf_mod_timer(ifp, AC_RS,
-				   (ifp->probes == idev->cnf.rtr_solicits) ?
-				   idev->cnf.rtr_solicit_delay :
-				   idev->cnf.rtr_solicit_interval);
-		spin_unlock(&ifp->lock);
+	if (idev->rs_probes++ < idev->cnf.rtr_solicits) {
+		if (!__ipv6_get_lladdr(idev, &lladdr, IFA_F_TENTATIVE))
+			ndisc_send_rs(idev->dev, &lladdr,
+				      &in6addr_linklocal_allrouters);
+		else
+			goto out;
 
-		/* The wait after the last probe can be shorter */
 		addrconf_mod_rs_timer(idev, (idev->rs_probes ==
 					     idev->cnf.rtr_solicits) ?
 				      idev->cnf.rtr_solicit_delay :
 				      idev->cnf.rtr_solicit_interval);
 	} else {
-		spin_unlock(&ifp->lock);
 		 
 		pr_debug("%s: no IPv6 routers present\n", idev->dev->name);
 	}
@@ -3027,7 +3029,7 @@ static void addrconf_dad_work(struct work_struct *w)
 		goto out;
 	}
 
-	if (ifp->probes == 0) {
+	if (ifp->dad_probes == 0) {
 		 
 		ifp->flags &= ~(IFA_F_TENTATIVE|IFA_F_OPTIMISTIC|IFA_F_DADFAILED);
 		spin_unlock(&ifp->lock);
@@ -3064,7 +3066,11 @@ static void addrconf_dad_completed(struct inet6_ifaddr *ifp)
 	    (dev->flags&IFF_LOOPBACK) == 0 &&
 	    (ipv6_addr_type(&ifp->addr) & IPV6_ADDR_LINKLOCAL)) {
 		 
-		ndisc_send_rs(ifp->idev->dev, &ifp->addr, &in6addr_linklocal_allrouters);
+		if (!ipv6_get_lladdr(dev, &lladdr, IFA_F_TENTATIVE))
+			ndisc_send_rs(dev, &lladdr,
+				      &in6addr_linklocal_allrouters);
+		else
+			return;
 
 		write_lock_bh(&ifp->idev->lock);
 		spin_lock(&ifp->lock);
@@ -3265,7 +3271,7 @@ int ipv6_chk_home_addr(struct net *net, const struct in6_addr *addr)
 }
 #endif
 
-static void addrconf_verify(unsigned long foo)
+static void addrconf_verify_rtnl(void)
 {
 	unsigned long now, next, next_sec, next_sched;
 	struct inet6_ifaddr *ifp;
@@ -4826,6 +4832,12 @@ int __init addrconf_init(void)
 	err = register_pernet_subsys(&addrconf_ops);
 	if (err < 0)
 		goto out_addrlabel;
+
+	addrconf_wq = create_workqueue("ipv6_addrconf");
+	if (!addrconf_wq) {
+		err = -ENOMEM;
+		goto out_nowq;
+	}
 
 	rtnl_lock();
 	if (!ipv6_add_dev(init_net.loopback_dev))
