@@ -213,6 +213,7 @@ static void dm9000_inblk_8bit(void __iomem *reg, void *data, int count)
 	ioread8_rep(reg, data, count);
 }
 
+
 static void dm9000_inblk_16bit(void __iomem *reg, void *data, int count)
 {
 	ioread16_rep(reg, data, (count+1) >> 1);
@@ -375,6 +376,7 @@ static void dm9000_set_io(struct board_info *db, int byte_width)
 		db->outblk  = dm9000_outblk_8bit;
 		db->inblk   = dm9000_inblk_8bit;
 		break;
+
 
 	case 3:
 		dev_dbg(db->dev, ": 3 byte IO, falling back to 16bit\n");
@@ -1593,6 +1595,7 @@ dm9000_probe(struct platform_device *pdev)
 		eth_hw_addr_random(ndev);
 		mac_src = "random";
 	}
+
 
 	platform_set_drvdata(pdev, ndev);
 	ret = register_netdev(ndev);

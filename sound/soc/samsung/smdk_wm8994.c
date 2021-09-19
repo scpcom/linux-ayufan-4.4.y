@@ -150,6 +150,7 @@ static struct snd_soc_card smdk = {
 	.num_links = ARRAY_SIZE(smdk_dai),
 };
 
+
 static int smdk_audio_probe(struct platform_device *pdev)
 {
 	int ret;

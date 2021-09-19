@@ -382,6 +382,7 @@ void ktime_get_ts(struct timespec *ts)
 }
 EXPORT_SYMBOL_GPL(ktime_get_ts);
 
+
 /**
  * timekeeping_clocktai - Returns the TAI time of day in a timespec
  * @ts:		pointer to the timespec to be set
@@ -409,6 +410,7 @@ void timekeeping_clocktai(struct timespec *ts)
 
 }
 EXPORT_SYMBOL(timekeeping_clocktai);
+
 
 /**
  * ktime_get_clocktai - Returns the TAI time of day in a ktime
@@ -561,6 +563,7 @@ error: /* even if we error out, we forwarded the time, so call update */
 	return ret;
 }
 EXPORT_SYMBOL(timekeeping_inject_offset);
+
 
 /**
  * timekeeping_get_tai_offset - Returns current TAI offset from UTC
@@ -1336,6 +1339,8 @@ static inline void old_vsyscall_fixup(struct timekeeper *tk)
 #else
 #define old_vsyscall_fixup(tk)
 #endif
+
+
 
 /**
  * update_wall_time - Uses the current clocksource to increment the wall time

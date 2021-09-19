@@ -329,6 +329,7 @@ static int mvebu_mbus_alloc_window(struct mvebu_mbus_state *mbus,
 							       target, attr);
 	}
 
+
 	for (win = 0; win < mbus->soc->num_wins; win++)
 		if (mvebu_mbus_window_is_free(mbus, win))
 			return mvebu_mbus_setup_window(mbus, win, base, size,
@@ -436,6 +437,7 @@ static int mvebu_devs_debug_show(struct seq_file *seq, void *v)
 			seq_printf(seq, "[%02d] disabled\n", win);
 			continue;
 		}
+
 
 		for (i = 0; mbus->soc->map[i].name; i++)
 			if (mbus->soc->map[i].target == wtarget &&

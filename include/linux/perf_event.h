@@ -549,6 +549,7 @@ extern void perf_pmu_migrate_context(struct pmu *pmu,
 extern u64 perf_event_read_value(struct perf_event *event,
 				 u64 *enabled, u64 *running);
 
+
 struct perf_sample_data {
 	u64				type;
 
@@ -819,6 +820,7 @@ do {									\
 		(void *)(unsigned long)cpu);				\
 	register_cpu_notifier(&fn##_nb);				\
 } while (0)
+
 
 struct perf_pmu_events_attr {
 	struct device_attribute attr;

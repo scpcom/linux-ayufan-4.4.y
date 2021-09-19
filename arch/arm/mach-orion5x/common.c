@@ -59,6 +59,7 @@ void __init orion5x_map_io(void)
 	iotable_init(orion5x_io_desc, ARRAY_SIZE(orion5x_io_desc));
 }
 
+
 /*****************************************************************************
  * CLK tree
  ****************************************************************************/
@@ -81,6 +82,7 @@ void __init orion5x_ehci0_init(void)
 			EHCI_PHY_ORION);
 }
 
+
 /*****************************************************************************
  * EHCI1
  ****************************************************************************/
@@ -88,6 +90,7 @@ void __init orion5x_ehci1_init(void)
 {
 	orion_ehci_1_init(ORION5X_USB1_PHYS_BASE, IRQ_ORION5X_USB1_CTRL);
 }
+
 
 /*****************************************************************************
  * GE00
@@ -100,6 +103,7 @@ void __init orion5x_eth_init(struct mv643xx_eth_platform_data *eth_data)
 			MV643XX_TX_CSUM_DEFAULT_LIMIT);
 }
 
+
 /*****************************************************************************
  * Ethernet switch
  ****************************************************************************/
@@ -107,6 +111,7 @@ void __init orion5x_eth_switch_init(struct dsa_platform_data *d, int irq)
 {
 	orion_ge00_switch_init(d, irq);
 }
+
 
 /*****************************************************************************
  * I2C
@@ -117,6 +122,7 @@ void __init orion5x_i2c_init(void)
 
 }
 
+
 /*****************************************************************************
  * SATA
  ****************************************************************************/
@@ -125,6 +131,7 @@ void __init orion5x_sata_init(struct mv_sata_platform_data *sata_data)
 	orion_sata_init(sata_data, ORION5X_SATA_PHYS_BASE, IRQ_ORION5X_SATA);
 }
 
+
 /*****************************************************************************
  * SPI
  ****************************************************************************/
@@ -132,6 +139,7 @@ void __init orion5x_spi_init()
 {
 	orion_spi_init(SPI_PHYS_BASE);
 }
+
 
 /*****************************************************************************
  * UART0
@@ -179,6 +187,7 @@ void __init orion5x_wdt_init(void)
 {
 	orion_wdt_init();
 }
+
 
 /*****************************************************************************
  * Time handling
@@ -252,6 +261,7 @@ void __init orion5x_timer_init(void)
 	orion_time_init(ORION5X_BRIDGE_VIRT_BASE, BRIDGE_INT_TIMER1_CLR,
 			IRQ_ORION5X_BRIDGE, orion5x_tclk);
 }
+
 
 /*****************************************************************************
  * General

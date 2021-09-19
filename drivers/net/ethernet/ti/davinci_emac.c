@@ -303,6 +303,7 @@ static const char emac_version_string[] = "TI DaVinci EMAC Linux v6.1";
 #define EMAC_DM646X_CMINTMAX_INTVL	(1000 / EMAC_DM646X_CMINTMIN_CNT)
 #define EMAC_DM646X_CMINTMIN_INTVL	((1000 / EMAC_DM646X_CMINTMAX_CNT) + 1)
 
+
 /* EMAC EOI codes for C0 */
 #define EMAC_DM646X_MAC_EOI_C0_RXEN	(0x01)
 #define EMAC_DM646X_MAC_EOI_C0_TXEN	(0x02)
@@ -613,6 +614,7 @@ static int emac_set_coalesce(struct net_device *ndev,
 	return 0;
 
 }
+
 
 /* ethtool_ops: DaVinci EMAC Ethtool structure
  *
@@ -1860,6 +1862,7 @@ static int davinci_emac_probe(struct platform_device *pdev)
 	struct clk *emac_clk;
 	unsigned long emac_bus_frequency;
 
+
 	/* obtain emac clock from kernel */
 	emac_clk = devm_clk_get(&pdev->dev, NULL);
 	if (IS_ERR(emac_clk)) {
@@ -1995,6 +1998,7 @@ static int davinci_emac_probe(struct platform_device *pdev)
 		rc = -ENODEV;
 		goto no_cpdma_chan;
 	}
+
 
 	if (netif_msg_probe(priv)) {
 		dev_notice(emac_dev, "DaVinci EMAC Probe found device "\

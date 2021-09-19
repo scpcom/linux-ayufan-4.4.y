@@ -18,6 +18,7 @@
 #define BUG_INSTR_TYPE ".word "
 #endif
 
+
 #define BUG() _BUG(__FILE__, __LINE__, BUG_INSTR_VALUE)
 #define _BUG(file, line, value) __BUG(file, line, value)
 

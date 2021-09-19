@@ -516,6 +516,7 @@ static struct {
 	{ { 384, 2 }, { 256, 3 }, { 192, 4 }, { 128, 5 }, {64, 0 }, { 0, 0 } },
 };
 
+
 /**
  * sta32x_set_dai_sysclk - configure MCLK
  * @codec_dai: the codec DAI

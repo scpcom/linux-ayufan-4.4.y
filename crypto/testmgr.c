@@ -1342,6 +1342,7 @@ static int test_pcomp(struct crypto_pcomp *tfm,
 	return 0;
 }
 
+
 static int test_cprng(struct crypto_rng *tfm, struct cprng_testvec *template,
 		      unsigned int tcount)
 {

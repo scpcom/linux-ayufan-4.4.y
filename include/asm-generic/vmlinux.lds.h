@@ -424,6 +424,7 @@
 	MEM_KEEP(exit.text)						\
 		*(.text.unlikely)
 
+
 /* sched.text is aling to function alignment to secure we have same
  * address even at second ld pass when generating System.map */
 #define SCHED_TEXT							\
@@ -779,10 +780,12 @@
 		PERCPU_INPUT(cacheline)					\
 	}
 
+
 /*
  * Definition of the high level *_SECTION macros
  * They will fit only a subset of the architectures
  */
+
 
 /*
  * Writeable data.

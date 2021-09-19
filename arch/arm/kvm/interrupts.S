@@ -85,6 +85,7 @@ ENTRY(__kvm_flush_vm_context)
 	bx	lr
 ENDPROC(__kvm_flush_vm_context)
 
+
 /********************************************************************
  *  Hypervisor world-switch code
  *

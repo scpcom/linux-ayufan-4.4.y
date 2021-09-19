@@ -330,6 +330,7 @@ static inline int tkey_mismatch(t_key a, int offset, t_key b)
   The bits from (n->pos) to (n->pos + n->bits - 1) - "C" - are the index into
   n's child array, and will of course be different for each child.
 
+
   The rest of the bits, from (n->pos + n->bits) onward, are completely unknown
   at this point.
 
@@ -663,6 +664,7 @@ static struct rt_trie_node *resize(struct trie *t, struct tnode *tn)
 		}
 	}
 
+
 	/* Only one child remains */
 	if (tn->empty_children == tnode_child_length(tn) - 1) {
 one_child:
@@ -682,6 +684,7 @@ one_child:
 	}
 	return (struct rt_trie_node *) tn;
 }
+
 
 static void tnode_clean_free(struct tnode *tn)
 {
@@ -1806,6 +1809,7 @@ static struct leaf *trie_leafindex(struct trie *t, int index)
 	return l;
 }
 
+
 /*
  * Caller must hold RTNL.
  */
@@ -1958,6 +1962,7 @@ void __init fib_trie_init(void)
 					       sizeof(struct leaf_info)),
 					   0, SLAB_PANIC, NULL);
 }
+
 
 struct fib_table *fib_trie_table(u32 id)
 {
@@ -2164,6 +2169,7 @@ static void fib_table_print(struct seq_file *seq, struct fib_table *tb)
 	else
 		seq_printf(seq, "Id %d:\n", tb->tb_id);
 }
+
 
 static int fib_triestat_seq_show(struct seq_file *seq, void *v)
 {

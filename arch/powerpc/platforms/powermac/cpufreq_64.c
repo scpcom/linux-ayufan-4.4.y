@@ -147,6 +147,7 @@ static void g5_vdnap_switch_volt(int speed_mode)
 		printk(KERN_WARNING "cpufreq: Timeout in clock slewing !\n");
 }
 
+
 /*
  * SCOM based frequency switching for 970FX rev3
  */
@@ -310,6 +311,7 @@ static int g5_pfunc_query_freq(void)
 	return val ? CPUFREQ_HIGH : CPUFREQ_LOW;
 }
 
+
 /*
  * Common interface to the cpufreq core
  */
@@ -366,6 +368,7 @@ static int g5_cpufreq_cpu_init(struct cpufreq_policy *policy)
 		g5_cpu_freqs);
 }
 
+
 static struct cpufreq_driver g5_cpufreq_driver = {
 	.name		= "powermac",
 	.owner		= THIS_MODULE,
@@ -376,6 +379,7 @@ static struct cpufreq_driver g5_cpufreq_driver = {
 	.get		= g5_cpufreq_get_speed,
 	.attr 		= g5_cpu_freqs_attr,
 };
+
 
 #ifdef CONFIG_PMAC_SMU
 
@@ -531,6 +535,7 @@ static int __init g5_neo2_cpufreq_init(struct device_node *cpus)
 }
 
 #endif /* CONFIG_PMAC_SMU */
+
 
 static int __init g5_pm72_cpufreq_init(struct device_node *cpus)
 {
@@ -736,5 +741,6 @@ static int __init g5_cpufreq_init(void)
 }
 
 module_init(g5_cpufreq_init);
+
 
 MODULE_LICENSE("GPL");

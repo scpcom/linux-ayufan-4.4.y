@@ -91,6 +91,8 @@ static inline void snd_leave_user(mm_segment_t fs)
 	set_fs(fs);
 }
 
+
+
 int snd_pcm_info(struct snd_pcm_substream *substream, struct snd_pcm_info *info)
 {
 	struct snd_pcm_runtime *runtime;
@@ -1585,6 +1587,7 @@ static int snd_pcm_drop(struct snd_pcm_substream *substream)
 
 	return result;
 }
+
 
 /* WARNING: Don't forget to fput back the file */
 static struct file *snd_pcm_file_fd(int fd, int *fput_needed)

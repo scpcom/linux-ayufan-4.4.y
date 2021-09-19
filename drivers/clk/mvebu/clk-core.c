@@ -234,6 +234,7 @@ static void __init armada_370_get_clk_ratio(
 	armada_370_xp_get_clk_ratio(opt, sar, id, mult, div);
 }
 
+
 static const struct core_clocks armada_370_core_clocks = {
 	.get_tclk_freq = armada_370_get_tclk_freq,
 	.get_cpu_freq = armada_370_get_cpu_freq,

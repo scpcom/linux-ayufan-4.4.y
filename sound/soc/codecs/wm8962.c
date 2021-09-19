@@ -1660,6 +1660,7 @@ static const char *cap_hpf_mode_text[] = {
 static const struct soc_enum cap_hpf_mode =
 	SOC_ENUM_SINGLE(WM8962_ADC_DAC_CONTROL_2, 10, 2, cap_hpf_mode_text);
 
+
 static const char *cap_lhpf_mode_text[] = {
 	"LPF", "HPF"
 };
@@ -2358,6 +2359,7 @@ static int wm8962_add_widgets(struct snd_soc_codec *codec)
 		snd_soc_add_codec_controls(codec, wm8962_spk_stereo_controls,
 				     ARRAY_SIZE(wm8962_spk_stereo_controls));
 
+
 	snd_soc_dapm_new_controls(dapm, wm8962_dapm_widgets,
 				  ARRAY_SIZE(wm8962_dapm_widgets));
 	if (pdata && pdata->spk_mono)
@@ -2375,6 +2377,7 @@ static int wm8962_add_widgets(struct snd_soc_codec *codec)
 	else
 		snd_soc_dapm_add_routes(dapm, wm8962_spk_stereo_intercon,
 					ARRAY_SIZE(wm8962_spk_stereo_intercon));
+
 
 	snd_soc_dapm_disable_pin(dapm, "Beep");
 
@@ -3432,6 +3435,7 @@ static int wm8962_probe(struct snd_soc_codec *codec)
 		if (pdata->spk_mono)
 			snd_soc_update_bits(codec, WM8962_CLASS_D_CONTROL_2,
 				WM8962_SPK_MONO_MASK, WM8962_SPK_MONO);
+
 
 		/* Micbias setup, detection enable and detection
 		 * threasholds. */

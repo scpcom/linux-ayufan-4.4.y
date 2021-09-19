@@ -2037,6 +2037,7 @@ static u32 amd64_csrow_nr_pages(struct amd64_pvt *pvt, u8 dct, int csrow_nr)
 	u32 cs_mode, nr_pages;
 	u32 dbam = dct ? pvt->dbam1 : pvt->dbam0;
 
+
 	/*
 	 * The math on this doesn't look right on the surface because x/2*4 can
 	 * be simplified to x*2 but this expression makes use of the fact that
@@ -2271,6 +2272,7 @@ static void restore_ecc_error_reporting(struct ecc_settings *s, u16 nid,
 					struct pci_dev *F3)
 {
 	u32 value, mask = 0x3;		/* UECC/CECC enable */
+
 
 	if (!s->nbctl_valid)
 		return;

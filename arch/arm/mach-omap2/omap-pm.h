@@ -62,6 +62,7 @@ void omap_pm_if_exit(void);
  * Device-driver-originated constraints (via board-*.c files, platform_data)
  */
 
+
 /**
  * omap_pm_set_max_mpu_wakeup_lat - set the maximum MPU wakeup latency
  * @dev: struct device * requesting the constraint
@@ -98,6 +99,7 @@ void omap_pm_if_exit(void);
  */
 int omap_pm_set_max_mpu_wakeup_lat(struct device *dev, long t);
 
+
 /**
  * omap_pm_set_min_bus_tput - set minimum bus throughput needed by device
  * @dev: struct device * requesting the constraint
@@ -129,6 +131,7 @@ int omap_pm_set_max_mpu_wakeup_lat(struct device *dev, long t);
  */
 int omap_pm_set_min_bus_tput(struct device *dev, u8 agent_id, unsigned long r);
 
+
 /**
  * omap_pm_set_max_dev_wakeup_lat - set the maximum device enable latency
  * @req_dev: struct device * requesting the constraint, or NULL if none
@@ -158,6 +161,7 @@ int omap_pm_set_min_bus_tput(struct device *dev, u8 agent_id, unsigned long r);
 int omap_pm_set_max_dev_wakeup_lat(struct device *req_dev, struct device *dev,
 				   long t);
 
+
 /**
  * omap_pm_set_max_sdma_lat - set the maximum system DMA transfer start latency
  * @dev: struct device *
@@ -186,6 +190,7 @@ int omap_pm_set_max_dev_wakeup_lat(struct device *req_dev, struct device *dev,
  * is not satisfiable, or 0 upon success.
  */
 int omap_pm_set_max_sdma_lat(struct device *dev, long t);
+
 
 /**
  * omap_pm_set_min_clk_rate - set minimum clock rate requested by @dev
@@ -283,6 +288,7 @@ void omap_pm_dsp_set_min_opp(u8 opp_id);
  */
 u8 omap_pm_dsp_get_opp(void);
 
+
 /*
  * CPUFreq-originated constraint
  *
@@ -316,6 +322,7 @@ void omap_pm_cpu_set_freq(unsigned long f);
  * Returns the current MPU frequency, or 0 upon error.
  */
 unsigned long omap_pm_cpu_get_freq(void);
+
 
 /*
  * Device context loss tracking

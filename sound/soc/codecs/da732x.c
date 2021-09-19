@@ -32,6 +32,7 @@
 #include "da732x.h"
 #include "da732x_reg.h"
 
+
 struct da732x_priv {
 	struct regmap *regmap;
 	struct snd_soc_codec *codec;
@@ -342,6 +343,7 @@ static const struct soc_enum da732x_adc2_voice_filter_enum[] = {
 	SOC_ENUM_SINGLE(DA732X_REG_ADC2_HPF, DA732X_HPF_VOICE_SHIFT,
 			DA732X_HPF_VOICE_MAX, da732x_hpf_voice)
 };
+
 
 static int da732x_hpf_set(struct snd_kcontrol *kcontrol,
 			  struct snd_ctl_elem_value *ucontrol)
@@ -1131,6 +1133,8 @@ static int da732x_set_dai_fmt(struct snd_soc_dai *dai, u32 fmt)
 	return 0;
 }
 
+
+
 static int da732x_set_dai_pll(struct snd_soc_codec *codec, int pll_id,
 			      int source, unsigned int freq_in,
 			      unsigned int freq_out)
@@ -1285,6 +1289,7 @@ static const struct regmap_config da732x_regmap = {
 	.num_reg_defaults	= ARRAY_SIZE(da732x_reg_cache),
 	.cache_type		= REGCACHE_RBTREE,
 };
+
 
 static void da732x_dac_offset_adjust(struct snd_soc_codec *codec)
 {
@@ -1627,6 +1632,7 @@ static struct i2c_driver da732x_i2c_driver = {
 };
 
 module_i2c_driver(da732x_i2c_driver);
+
 
 MODULE_DESCRIPTION("ASoC DA732X driver");
 MODULE_AUTHOR("Michal Hajduk <michal.hajduk@diasemi.com>");

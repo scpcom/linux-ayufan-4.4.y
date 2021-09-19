@@ -360,3 +360,4 @@ MACHINE_START(BIGDISK, "LaCie Big Disk Network")
 	.restart	= orion5x_restart,
 MACHINE_END
 #endif
+

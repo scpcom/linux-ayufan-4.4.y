@@ -121,3 +121,4 @@ void atmel_pcm_free(struct snd_pcm *pcm)
 	}
 }
 EXPORT_SYMBOL_GPL(atmel_pcm_free);
+

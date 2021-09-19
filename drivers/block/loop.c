@@ -626,6 +626,7 @@ out:
 	complete(&p->wait);
 }
 
+
 /*
  * loop_change_fd switched the backing store of a loopback device to
  * a new file. This is useful for operating system installers to free up

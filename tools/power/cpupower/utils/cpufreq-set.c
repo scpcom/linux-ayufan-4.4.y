@@ -4,6 +4,7 @@
  *  Licensed under the terms of the GNU GPL License version 2.
  */
 
+
 #include <unistd.h>
 #include <stdio.h>
 #include <errno.h>
@@ -162,6 +163,7 @@ static int do_new_policy(unsigned int cpu, struct cpufreq_policy *new_pol)
 	return ret;
 }
 
+
 static int do_one_cpu(unsigned int cpu, struct cpufreq_policy *new_pol,
 		unsigned long freq, unsigned int pc)
 {
@@ -306,6 +308,7 @@ int cmd_freq_set(int argc, char **argv)
 			cpufreq_put_related_cpus(cpus);
 		}
 	}
+
 
 	/* loop over CPUs */
 	for (cpu = bitmask_first(cpus_chosen);

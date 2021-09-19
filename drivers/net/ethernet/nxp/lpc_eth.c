@@ -1177,6 +1177,7 @@ static void lpc_eth_set_multicast_list(struct net_device *ndev)
 
 	writel(tmp32, LPC_ENET_RXFILTER_CTRL(pldat->net_base));
 
+
 	/* Set initial hash table */
 	hashlo = 0x0;
 	hashhi = 0x0;

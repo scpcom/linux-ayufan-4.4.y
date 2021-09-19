@@ -23,9 +23,11 @@
  * The valid range of num_buffers is: num >= 2 && num <= 4.
  */
 
+
 #include <linux/usb/storage.h>
 #include <scsi/scsi.h>
 #include <asm/unaligned.h>
+
 
 /*
  * Thanks to NetChip Technologies for donating this product ID.
@@ -36,7 +38,9 @@
 #define FSG_VENDOR_ID	0x0525	/* NetChip */
 #define FSG_PRODUCT_ID	0xa4a5	/* Linux-USB File-backed Storage Gadget */
 
+
 /*-------------------------------------------------------------------------*/
+
 
 #ifndef DEBUG
 #undef VERBOSE_DEBUG
@@ -53,6 +57,7 @@
 #define LERROR(lun, fmt, args...) dev_err (&(lun)->dev, fmt, ## args)
 #define LWARN(lun, fmt, args...)  dev_warn(&(lun)->dev, fmt, ## args)
 #define LINFO(lun, fmt, args...)  dev_info(&(lun)->dev, fmt, ## args)
+
 
 #ifdef DUMP_MSGS
 
@@ -111,7 +116,9 @@
 #define ASC(x)		((u8) ((x) >> 8))
 #define ASCQ(x)		((u8) (x))
 
+
 /*-------------------------------------------------------------------------*/
+
 
 struct fsg_lun {
 	struct file	*filp;
@@ -145,6 +152,7 @@ static inline struct fsg_lun *fsg_lun_from_dev(struct device *dev)
 {
 	return container_of(dev, struct fsg_lun, dev);
 }
+
 
 /* Big enough to hold our biggest descriptor */
 #define EP0_BUFSIZE	256
@@ -229,18 +237,23 @@ enum data_direction {
 	DATA_DIR_NONE
 };
 
+
 /*-------------------------------------------------------------------------*/
+
 
 static inline u32 get_unaligned_be24(u8 *buf)
 {
 	return 0xffffff & (u32) get_unaligned_be32(buf - 1);
 }
 
+
 /*-------------------------------------------------------------------------*/
+
 
 enum {
 	FSG_STRING_INTERFACE
 };
+
 
 /* There is only one interface. */
 
@@ -288,6 +301,7 @@ static struct usb_descriptor_header *fsg_fs_function[] = {
 	NULL,
 };
 
+
 /*
  * USB 2.0 devices need to expose both high speed and full speed
  * descriptors, unless they only run at full speed.
@@ -316,6 +330,7 @@ fsg_hs_bulk_out_desc = {
 	.wMaxPacketSize =	cpu_to_le16(512),
 	.bInterval =		1,	/* NAK every 1 uframe */
 };
+
 
 static struct usb_descriptor_header *fsg_hs_function[] = {
 	(struct usb_descriptor_header *) &fsg_intf_desc,
@@ -378,6 +393,7 @@ static struct usb_gadget_strings	fsg_stringtab = {
 	.strings	= fsg_strings,
 };
 
+
  /*-------------------------------------------------------------------------*/
 
 /*
@@ -393,6 +409,7 @@ static void fsg_lun_close(struct fsg_lun *curlun)
 		curlun->filp = NULL;
 	}
 }
+
 
 static int fsg_lun_open(struct fsg_lun *curlun, const char *filename)
 {
@@ -492,6 +509,7 @@ out:
 	return rc;
 }
 
+
 /*-------------------------------------------------------------------------*/
 
 /*
@@ -525,7 +543,9 @@ static void store_cdrom_address(u8 *dest, int msf, u32 addr)
 	}
 }
 
+
 /*-------------------------------------------------------------------------*/
+
 
 static ssize_t fsg_show_ro(struct device *dev, struct device_attribute *attr,
 			   char *buf)
@@ -571,6 +591,7 @@ static ssize_t fsg_show_file(struct device *dev, struct device_attribute *attr,
 	up_read(filesem);
 	return rc;
 }
+
 
 static ssize_t fsg_store_ro(struct device *dev, struct device_attribute *attr,
 			    const char *buf, size_t count)

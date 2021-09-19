@@ -283,6 +283,7 @@ void __init armada_370_xp_timer_init(void)
 
 	percpu_armada_370_xp_evt = alloc_percpu(struct clock_event_device *);
 
+
 	/*
 	 * Setup clockevent timer (interrupt-driven).
 	 */

@@ -16,6 +16,7 @@
 #ifndef LINUX_PCI_H
 #define LINUX_PCI_H
 
+
 #include <linux/mod_devicetable.h>
 
 #include <linux/types.h>
@@ -1116,6 +1117,7 @@ struct msix_entry {
 	u16	entry;	/* driver uses to specify entry, OS writes */
 };
 
+
 #ifndef CONFIG_PCI_MSI
 static inline int pci_enable_msi_block(struct pci_dev *dev, unsigned int nvec)
 {
@@ -1487,6 +1489,7 @@ static inline const char *pci_name(const struct pci_dev *pdev)
 	return dev_name(&pdev->dev);
 }
 
+
 /* Some archs don't want to expose struct resource to userland as-is
  * in sysfs and /proc
  */
@@ -1499,6 +1502,7 @@ static inline void pci_resource_to_user(const struct pci_dev *dev, int bar,
 	*end = rsrc->end;
 }
 #endif /* HAVE_ARCH_PCI_RESOURCE_TO_USER */
+
 
 /*
  *  The world is not perfect and supplies us with broken PCI devices.

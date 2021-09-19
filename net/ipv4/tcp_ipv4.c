@@ -89,6 +89,7 @@ int sysctl_tcp_tw_reuse __read_mostly;
 int sysctl_tcp_low_latency __read_mostly;
 EXPORT_SYMBOL(sysctl_tcp_low_latency);
 
+
 #ifdef CONFIG_TCP_MD5SIG
 static int tcp_v4_md5_hash_hdr(char *md5_hash, const struct tcp_md5sig_key *key,
 			       __be32 daddr, __be32 saddr, const struct tcphdr *th);
@@ -894,6 +895,8 @@ bool tcp_syn_flood_action(struct sock *sk,
 	bool want_cookie = false;
 	struct listen_sock *lopt;
 
+
+
 #ifdef CONFIG_SYN_COOKIES
 	if (sysctl_tcp_syncookies) {
 		msg = "Sending cookies";
@@ -1631,6 +1634,7 @@ drop:
 }
 EXPORT_SYMBOL(tcp_v4_conn_request);
 
+
 /*
  * The three way handshake has completed - we got a valid synack -
  * now create the new socket.
@@ -1783,6 +1787,7 @@ static __sum16 tcp_v4_checksum_init(struct sk_buff *skb)
 	}
 	return 0;
 }
+
 
 /* The socket must have it's spinlock held when we get
  * here.

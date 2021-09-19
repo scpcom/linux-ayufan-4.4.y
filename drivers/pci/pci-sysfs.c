@@ -14,6 +14,7 @@
  *
  */
 
+
 #include <linux/kernel.h>
 #include <linux/sched.h>
 #include <linux/pci.h>
@@ -90,6 +91,7 @@ static ssize_t local_cpus_show(struct device *dev,
 	buf[len] = '\0';
 	return len;
 }
+
 
 static ssize_t local_cpulist_show(struct device *dev,
 			struct device_attribute *attr, char *buf)
@@ -408,6 +410,7 @@ static ssize_t sriov_totalvfs_show(struct device *dev,
 
 	return sprintf(buf, "%u\n", pci_sriov_get_totalvfs(pdev));
 }
+
 
 static ssize_t sriov_numvfs_show(struct device *dev,
 				 struct device_attribute *attr,

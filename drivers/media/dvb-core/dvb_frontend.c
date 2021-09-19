@@ -2145,6 +2145,7 @@ static int dtv_set_frontend(struct dvb_frontend *fe)
 	return 0;
 }
 
+
 static int dvb_frontend_ioctl_legacy(struct file *file,
 			unsigned int cmd, void *parg)
 {
@@ -2394,6 +2395,7 @@ static int dvb_frontend_ioctl_legacy(struct file *file,
 
 	return err;
 }
+
 
 static unsigned int dvb_frontend_poll(struct file *file, struct poll_table_struct *wait)
 {

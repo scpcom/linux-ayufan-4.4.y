@@ -1858,6 +1858,7 @@ out:
 	return ret;
 }
 
+
 /**
  * nand_write_page_raw - [INTERN] raw page write function
  * @mtd: mtd info structure
@@ -1977,6 +1978,7 @@ static int nand_write_page_hwecc(struct mtd_info *mtd, struct nand_chip *chip,
 	return 0;
 }
 
+
 /**
  * nand_write_subpage_hwecc - [REPLACABLE] hardware ECC based subpage write
  * @mtd:	mtd info structure
@@ -2035,6 +2037,7 @@ static int nand_write_subpage_hwecc(struct mtd_info *mtd,
 
 	return 0;
 }
+
 
 /**
  * nand_write_page_syndrome - [REPLACEABLE] hardware ECC syndrome based page write
@@ -3402,6 +3405,7 @@ int nand_scan_ident(struct mtd_info *mtd, int maxchips,
 	return 0;
 }
 EXPORT_SYMBOL(nand_scan_ident);
+
 
 /**
  * nand_scan_tail - [NAND Interface] Scan for the NAND device

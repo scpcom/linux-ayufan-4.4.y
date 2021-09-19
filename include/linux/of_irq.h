@@ -57,6 +57,7 @@ static inline int of_irq_map_oldworld(struct device_node *device, int index,
 }
 #endif /* CONFIG_PPC32 && CONFIG_PPC_PMAC */
 
+
 extern int of_irq_map_raw(struct device_node *parent, const __be32 *intspec,
 			  u32 ointsize, const __be32 *addr,
 			  struct of_irq *out_irq);

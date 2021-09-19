@@ -145,6 +145,7 @@ static int clk_summary_show(struct seq_file *s, void *data)
 	return 0;
 }
 
+
 static int clk_summary_open(struct inode *inode, struct file *file)
 {
 	return single_open(file, clk_summary_show, inode->i_private);
@@ -211,6 +212,7 @@ static int clk_dump(struct seq_file *s, void *data)
 	seq_printf(s, "}");
 	return 0;
 }
+
 
 static int clk_dump_open(struct inode *inode, struct file *file)
 {
@@ -1724,6 +1726,7 @@ static int _clk_register(struct device *dev, struct clk_hw *hw, struct clk *clk)
 		ret = -ENOMEM;
 		goto fail_parent_names;
 	}
+
 
 	/* copy each string name in case parent_names is __initdata */
 	for (i = 0; i < clk->num_parents; i++) {

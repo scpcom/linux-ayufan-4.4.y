@@ -193,6 +193,7 @@
  * of the Gadget, USB Mass Storage, and SCSI protocols.
  */
 
+
 /* #define VERBOSE_DEBUG */
 /* #define DUMP_MSGS */
 
@@ -219,6 +220,7 @@
 
 #include "gadget_chips.h"
 
+
 /*------------------------------------------------------------------------*/
 
 #define FSG_DRIVER_DESC		"Mass Storage Function"
@@ -227,6 +229,7 @@
 static const char fsg_string_interface[] = "Mass Storage";
 
 #include "storage_common.c"
+
 
 /*-------------------------------------------------------------------------*/
 
@@ -385,6 +388,7 @@ static void set_bulk_out_req_length(struct fsg_common *common,
 	bh->outreq->length = length;
 }
 
+
 /*-------------------------------------------------------------------------*/
 
 static int fsg_set_halt(struct fsg_dev *fsg, struct usb_ep *ep)
@@ -400,6 +404,7 @@ static int fsg_set_halt(struct fsg_dev *fsg, struct usb_ep *ep)
 	DBG(fsg, "%s set halt\n", name);
 	return usb_ep_set_halt(ep);
 }
+
 
 /*-------------------------------------------------------------------------*/
 
@@ -435,6 +440,7 @@ static void raise_exception(struct fsg_common *common, enum fsg_state new_state)
 	spin_unlock_irqrestore(&common->lock, flags);
 }
 
+
 /*-------------------------------------------------------------------------*/
 
 static int ep0_queue(struct fsg_common *common)
@@ -450,6 +456,7 @@ static int ep0_queue(struct fsg_common *common)
 	}
 	return rc;
 }
+
 
 /*-------------------------------------------------------------------------*/
 
@@ -553,6 +560,7 @@ static int fsg_setup(struct usb_function *f,
 	return -EOPNOTSUPP;
 }
 
+
 /*-------------------------------------------------------------------------*/
 
 /* All the following routines run in process context */
@@ -628,6 +636,7 @@ static int sleep_thread(struct fsg_common *common)
 	smp_rmb();	/* ensure the latest bh->state is visible */
 	return rc;
 }
+
 
 /*-------------------------------------------------------------------------*/
 
@@ -758,6 +767,7 @@ static int do_read(struct fsg_common *common)
 
 	return -EIO;		/* No default reply */
 }
+
 
 /*-------------------------------------------------------------------------*/
 
@@ -948,6 +958,7 @@ static int do_write(struct fsg_common *common)
 	return -EIO;		/* No default reply */
 }
 
+
 /*-------------------------------------------------------------------------*/
 
 static int do_synchronize_cache(struct fsg_common *common)
@@ -962,6 +973,7 @@ static int do_synchronize_cache(struct fsg_common *common)
 		curlun->sense_data = SS_WRITE_ERROR;
 	return 0;
 }
+
 
 /*-------------------------------------------------------------------------*/
 
@@ -1073,6 +1085,7 @@ static int do_verify(struct fsg_common *common)
 	}
 	return 0;
 }
+
 
 /*-------------------------------------------------------------------------*/
 
@@ -1409,6 +1422,7 @@ static int do_mode_select(struct fsg_common *common, struct fsg_buffhd *bh)
 	return -EINVAL;
 }
 
+
 /*-------------------------------------------------------------------------*/
 
 static int halt_bulk_in_endpoint(struct fsg_dev *fsg)
@@ -1666,6 +1680,7 @@ static int send_status(struct fsg_common *common)
 	common->next_buffhd_to_fill = bh->next;
 	return 0;
 }
+
 
 /*-------------------------------------------------------------------------*/
 
@@ -2090,6 +2105,7 @@ unknown_cmnd:
 	return 0;
 }
 
+
 /*-------------------------------------------------------------------------*/
 
 static int received_cbw(struct fsg_dev *fsg, struct fsg_buffhd *bh)
@@ -2201,6 +2217,7 @@ static int get_next_command(struct fsg_common *common)
 	return rc;
 }
 
+
 /*-------------------------------------------------------------------------*/
 
 static int alloc_request(struct fsg_common *common, struct usb_ep *ep,
@@ -2305,6 +2322,7 @@ reset:
 	return rc;
 }
 
+
 /****************************** ALT CONFIGS ******************************/
 
 static int fsg_set_alt(struct usb_function *f, unsigned intf, unsigned alt)
@@ -2321,6 +2339,7 @@ static void fsg_disable(struct usb_function *f)
 	fsg->common->new_fsg = NULL;
 	raise_exception(fsg->common, FSG_STATE_CONFIG_CHANGE);
 }
+
 
 /*-------------------------------------------------------------------------*/
 
@@ -2469,6 +2488,7 @@ static void handle_exception(struct fsg_common *common)
 	}
 }
 
+
 /*-------------------------------------------------------------------------*/
 
 static int fsg_main_thread(void *common_)
@@ -2555,6 +2575,7 @@ static int fsg_main_thread(void *common_)
 	complete_and_exit(&common->thread_notifier, 0);
 }
 
+
 /*************************** DEVICE ATTRIBUTES ***************************/
 
 static DEVICE_ATTR(ro, 0644, fsg_show_ro, fsg_store_ro);
@@ -2565,6 +2586,7 @@ static struct device_attribute dev_attr_ro_cdrom =
 	__ATTR(ro, 0444, fsg_show_ro, NULL);
 static struct device_attribute dev_attr_file_nonremovable =
 	__ATTR(file, 0444, fsg_show_file, NULL);
+
 
 /****************************** FSG COMMON ******************************/
 
@@ -2836,6 +2858,7 @@ static void fsg_common_release(struct kref *ref)
 		kfree(common);
 }
 
+
 /*-------------------------------------------------------------------------*/
 
 static void fsg_unbind(struct usb_configuration *c, struct usb_function *f)
@@ -2958,6 +2981,7 @@ static int fsg_bind_config(struct usb_composite_dev *cdev,
 		fsg_common_get(fsg->common);
 	return rc;
 }
+
 
 /************************* Module parameters *************************/
 

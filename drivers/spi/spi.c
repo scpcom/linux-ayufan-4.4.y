@@ -236,6 +236,7 @@ struct bus_type spi_bus_type = {
 };
 EXPORT_SYMBOL_GPL(spi_bus_type);
 
+
 static int spi_drv_probe(struct device *dev)
 {
 	const struct spi_driver		*sdrv = to_spi_driver(dev->driver);
@@ -367,6 +368,7 @@ int spi_add_device(struct spi_device *spi)
 	/* Set the bus ID string */
 	dev_set_name(&spi->dev, "%s.%u", dev_name(&spi->master->dev),
 			spi->chip_select);
+
 
 	/* We need to make sure there's no other device with this
 	 * chipselect **BEFORE** we call setup(), else we'll trash
@@ -1009,6 +1011,8 @@ static struct class spi_master_class = {
 	.dev_release	= spi_master_release,
 };
 
+
+
 /**
  * spi_alloc_master - allocate SPI master controller
  * @dev: the controller, possibly using the platform_bus
@@ -1282,6 +1286,7 @@ struct spi_master *spi_busnum_to_master(u16 bus_num)
 }
 EXPORT_SYMBOL_GPL(spi_busnum_to_master);
 
+
 /*-------------------------------------------------------------------------*/
 
 /* Core methods for SPI master protocol drivers.  Some of the
@@ -1482,6 +1487,7 @@ int spi_async_locked(struct spi_device *spi, struct spi_message *message)
 
 }
 EXPORT_SYMBOL_GPL(spi_async_locked);
+
 
 /*-------------------------------------------------------------------------*/
 
@@ -1740,3 +1746,4 @@ err0:
  * include needing to have boardinfo data structures be much more public.
  */
 postcore_initcall(spi_init);
+

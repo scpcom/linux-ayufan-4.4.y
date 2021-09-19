@@ -183,4 +183,5 @@ struct tagtable {
 #define for_each_tag(t,base)		\
 	for (t = base; t->hdr.size; t = tag_next(t))
 
+
 #endif /* _UAPI__ASMARM_SETUP_H */

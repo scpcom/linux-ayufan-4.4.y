@@ -1233,6 +1233,7 @@ static struct regulator_dev *regulator_dev_lookup(struct device *dev,
 			return map->regulator;
 	}
 
+
 	return NULL;
 }
 
