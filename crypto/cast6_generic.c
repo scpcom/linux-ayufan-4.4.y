@@ -17,6 +17,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
 
+
 #include <asm/byteorder.h>
 #include <linux/init.h>
 #include <linux/crypto.h>
@@ -291,3 +292,4 @@ module_exit(cast6_mod_fini);
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Cast6 Cipher Algorithm");
 MODULE_ALIAS_CRYPTO("cast6");
+MODULE_ALIAS_CRYPTO("cast6-generic");

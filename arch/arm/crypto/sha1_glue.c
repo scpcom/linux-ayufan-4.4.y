@@ -33,6 +33,7 @@ struct SHA1_CTX {
 asmlinkage void sha1_block_data_order(struct SHA1_CTX *digest,
 		const unsigned char *data, unsigned int rounds);
 
+
 static int sha1_init(struct shash_desc *desc)
 {
 	struct SHA1_CTX *sctx = shash_desc_ctx(desc);
@@ -44,6 +45,7 @@ static int sha1_init(struct shash_desc *desc)
 	sctx->h4 = SHA1_H4;
 	return 0;
 }
+
 
 static int __sha1_update(struct SHA1_CTX *sctx, const u8 *data,
 			       unsigned int len, unsigned int partial)
@@ -68,6 +70,7 @@ static int __sha1_update(struct SHA1_CTX *sctx, const u8 *data,
 	return 0;
 }
 
+
 static int sha1_update(struct shash_desc *desc, const u8 *data,
 			     unsigned int len)
 {
@@ -84,6 +87,7 @@ static int sha1_update(struct shash_desc *desc, const u8 *data,
 	res = __sha1_update(sctx, data, len, partial);
 	return res;
 }
+
 
 /* Add padding and return the message digest. */
 static int sha1_final(struct shash_desc *desc, u8 *out)
@@ -117,6 +121,7 @@ static int sha1_final(struct shash_desc *desc, u8 *out)
 	return 0;
 }
 
+
 static int sha1_export(struct shash_desc *desc, void *out)
 {
 	struct SHA1_CTX *sctx = shash_desc_ctx(desc);
@@ -124,12 +129,14 @@ static int sha1_export(struct shash_desc *desc, void *out)
 	return 0;
 }
 
+
 static int sha1_import(struct shash_desc *desc, const void *in)
 {
 	struct SHA1_CTX *sctx = shash_desc_ctx(desc);
 	memcpy(sctx, in, sizeof(*sctx));
 	return 0;
 }
+
 
 static struct shash_alg alg = {
 	.digestsize	=	SHA1_DIGEST_SIZE,
@@ -150,15 +157,18 @@ static struct shash_alg alg = {
 	}
 };
 
+
 static int __init sha1_mod_init(void)
 {
 	return crypto_register_shash(&alg);
 }
 
+
 static void __exit sha1_mod_fini(void)
 {
 	crypto_unregister_shash(&alg);
 }
+
 
 module_init(sha1_mod_init);
 module_exit(sha1_mod_fini);

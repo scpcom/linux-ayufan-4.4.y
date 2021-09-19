@@ -68,6 +68,10 @@
 #define ANY_GROUP NUMA_NO_NODE
 
 static struct workqueue_struct *raid5_wq;
+static bool devices_handle_discard_safely = false;
+module_param(devices_handle_discard_safely, bool, 0644);
+MODULE_PARM_DESC(devices_handle_discard_safely,
+		 "Set to Y if all devices in each array reliably return zeroes on reads from discarded regions");
 /*
  * Stripe cache
  */

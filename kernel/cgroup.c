@@ -1271,6 +1271,7 @@ static int parse_cgroupfs_options(char *data, struct cgroup_sb_opts *opts)
 	if ((opts->flags & CGRP_ROOT_NOPREFIX) && (opts->subsys_mask & mask))
 		return -EINVAL;
 
+
 	/* Can't specify "none" and some subsystems */
 	if (opts->subsys_mask && opts->none)
 		return -EINVAL;
@@ -1910,6 +1911,7 @@ int cgroup_taskset_size(struct cgroup_taskset *tset)
 	return tset->tc_array ? tset->tc_array_len : 1;
 }
 EXPORT_SYMBOL_GPL(cgroup_taskset_size);
+
 
 /*
  * cgroup_task_migrate - move a task from one cgroup to another.
@@ -3552,6 +3554,7 @@ err:
 	return ret;
 }
 
+
 /*
  * seq_file methods for the tasks/procs files. The seq_file position is the
  * next pid to display; the seq_file iterator is a pointer to the pid
@@ -4637,12 +4640,6 @@ int __init cgroup_init_early(void)
 	return 0;
 }
 
-#ifdef CONFIG_SYNO_CGROUP_MEM_DISABLE
-
-static unsigned int SynoCgroupMemIsDisabled = 1;
-
-#endif /* CONFIG_SYNO_CGROUP_MEM_DISABLE */
-
 /**
  * cgroup_init - cgroup initialization
  *
@@ -4665,22 +4662,10 @@ int __init cgroup_init(void)
 		/* at bootup time, we don't worry about modular subsystems */
 		if (!ss || ss->module)
 			continue;
-
 		if (!ss->early_init)
 			cgroup_init_subsys(ss);
 		if (ss->use_id)
 			cgroup_init_idr(ss, init_css_set.subsys[ss->subsys_id]);
-
-#ifdef CONFIG_SYNO_CGROUP_MEM_DISABLE
-
-		/* default disable cgroup memory subsys  */
-		if (SynoCgroupMemIsDisabled && !strcmp("memory", ss->name)) {
-			ss->disabled = 1;
-			printk(KERN_INFO "Disabling %s control group"
-				" subsystem\n", ss->name);
-		}
-
-#endif
 	}
 
 	/* Add init_css_set to the hash table */
@@ -5141,38 +5126,6 @@ static int __init cgroup_disable(char *str)
 	return 1;
 }
 __setup("cgroup_disable=", cgroup_disable);
-
-#ifdef CONFIG_SYNO_CGROUP_MEM_DISABLE
-
-static int __init SynoCGroupMemEnable(char *str) {
-
-	int i;
-
-	SynoCgroupMemIsDisabled = 0;
-
-	for (i = 0; i < CGROUP_SUBSYS_COUNT; i++) {
-		struct cgroup_subsys *ss = subsys[i];
-
-		/*
-		 * cgroup_disable, being at boot time, can't
-		 * know about module subsystems, so we don't
-		 * worry about them.
-		 */
-		if (!ss || ss->module)
-			continue;
-
-		if (!strcmp("memory", ss->name)) {
-			ss->disabled = 0;
-			printk(KERN_INFO "Enabling %s control group"
-				" subsystem\n", ss->name);
-			break;
-		}
-	}
-}
-
-__setup("cgroup_memory", SynoCGroupMemEnable);
-
-#endif /* CONFIG_SYNO_CGROUP_MEM_DISABLE */
 
 /*
  * Functons for CSS ID.

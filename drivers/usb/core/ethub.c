@@ -4398,10 +4398,19 @@ int ethub_usb_reset_device(struct usb_device *udev)
 				else if (cintf->condition ==
 						USB_INTERFACE_BOUND)
 					rebind = 1;
+#if (LINUX_VERSION_CODE > KERNEL_VERSION(3,10,35))
+				if (rebind)
+					cintf->needs_binding = 1;
+#endif
 			}
+#if (LINUX_VERSION_CODE <= KERNEL_VERSION(3,10,35))
 			if (ret == 0 && rebind)
 				usb_rebind_intf(cintf);
+#endif
 		}
+#if (LINUX_VERSION_CODE > KERNEL_VERSION(3,10,35))
+		usb_unbind_and_rebind_marked_interfaces(udev);
+#endif
 	}
 
 	usb_autosuspend_device(udev);
