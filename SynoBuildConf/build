@@ -1,0 +1,136 @@
+#!/bin/bash
+# Copyright (c) 2000-2016 Synology Inc. All rights reserved.
+# vim:ft=sh
+
+# ========================================================================
+# To specify which platform depends on this kernel,
+# please edit the section [platform kernel] in config/project.depends
+# ========================================================================
+
+export ARCH=${ARCH}
+case "$BUILD_TARGET" in
+	X64|BROMOLOW|GRANTLEY|CEDARVIEW|AVOTON|DOCKERX64|BRASWELL|BROADWELL|KVMX64)
+		export CROSS_COMPILE=${ToolChainPrefix64} CC=${CC64}
+		KERNEL_CC=${CC64}
+		;;
+	*)
+		CC=`echo ${CC} | awk -F" " '{print $1}'`
+		export CROSS_COMPILE=${ToolChainPrefix} CC="${CC}"
+		KERNEL_CC="${CC}"
+		;;
+esac
+
+case ${MakeClean} in
+	[Yy][Ee][Ss])
+		[ -f Makefile ] && make distclean
+		;;
+esac
+
+case ${CleanOnly} in
+	[Yy][Ee][Ss])
+		return
+		;;
+esac
+
+# Version Infomation
+LNXVERSION="${KernelDir}/.version"
+if [ -f ${VERSION_FILE} ]; then
+	expr $(GetDSMBuildNumber) - 1 > ${LNXVERSION}
+fi
+
+mkdir -p ${ImageDir}/modules
+
+
+case "$BUILD_TARGET" in
+	X64)
+		KernelImage=${KernelDir}/arch/x86_64/boot/bzImage
+		KernelConfig=synoconfigs/x86_64
+		KernelTarget=bzImage
+		;;
+	BROMOLOW)
+		KernelImage=${KernelDir}/arch/x86_64/boot/bzImage
+		KernelConfig=synoconfigs/bromolow
+		KernelTarget=bzImage
+		;;
+	GRANTLEY)
+		KernelImage=${KernelDir}/arch/x86_64/boot/bzImage
+		KernelConfig=synoconfigs/grantley
+		KernelTarget=bzImage
+		;;
+	CEDARVIEW)
+		KernelImage=${KernelDir}/arch/x86_64/boot/bzImage
+		KernelConfig=synoconfigs/cedarview
+		KernelTarget=bzImage
+		;;
+	AVOTON)
+		KernelImage=${KernelDir}/arch/x86_64/boot/bzImage
+		KernelConfig=synoconfigs/avoton
+		KernelTarget=bzImage
+		;;
+	DOCKERX64)
+		KernelImage=${KernelDir}/arch/x86_64/boot/bzImage
+		KernelConfig=synoconfigs/dockerx64
+		KernelTarget=bzImage
+		;;
+	BRASWELL)
+		KernelImage=${KernelDir}/arch/x86_64/boot/bzImage
+		KernelConfig=synoconfigs/braswell
+		KernelTarget=bzImage
+		;;
+	STM_MONACO)
+		KernelImage=${KernelDir}/arch/arm/boot/uImage
+		KernelConfig=synoconfigs/monaco
+		KernelTarget=uImage
+		;;
+	KVMX64)
+		KernelImage=${KernelDir}/arch/x86_64/boot/bzImage
+		KernelConfig=synoconfigs/kvmx64
+		KernelTarget=bzImage
+		;;
+	BROADWELL)
+		KernelImage=${KernelDir}/arch/x86_64/boot/bzImage
+		KernelConfig=synoconfigs/broadwell
+		KernelTarget=bzImage
+		;;
+	*)
+		return
+		;;
+esac
+
+# Build kernel and modules
+rm -f ${KernelImage}
+rm -f ${ImageDir}/modules/*
+
+cp -f ${KernelConfig} .config
+mkdir -p include/linux/modules
+make oldconfig
+
+echo "=====Build Synology Linux kernel 3.10.x ====="
+make ${MAKE_FLAGS} ${KernelTarget} modules CC=${KERNEL_CC}
+
+# Check if kernel is built correctly
+if [ ! -f "${KernelImage}" ]; then
+	echo "Error! ${KernelImage} does not exist!"
+	exit 1;
+fi
+
+
+./scripts/syno_gen_usbmodem_table.sh create-table
+
+# Compare kernel config with re-generated one to see
+# if any changes or new options not reapplied to ${KernelConfig}.
+ConfigDiff=`diff -bu ${KernelConfig} .config`
+if [ -z "$ConfigDiff" ]; then
+	echo
+	echo "Kernel config matches generated .config"
+	echo
+else
+	echo ========== diff -bu ${KernelConfig} .config
+	diff -bu ${KernelConfig} .config
+	echo ========== END of diff
+
+	echo
+	echo "!!! Diff EXISTS between ${KernelConfig} & generated .config"
+	echo "!!! Recheck before committing."
+	echo
+fi
