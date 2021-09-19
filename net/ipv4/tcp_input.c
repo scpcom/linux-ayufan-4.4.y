@@ -71,6 +71,7 @@
 #include <linux/module.h>
 #include <linux/sysctl.h>
 #include <linux/kernel.h>
+#include <linux/reciprocal_div.h>
 #include <net/dst.h>
 #include <net/tcp.h>
 #include <net/inet_common.h>
@@ -3298,6 +3299,7 @@ static void tcp_send_challenge_ack(struct sock *sk)
 	u32 count;
 #endif /* MY_ABC_HERE */
 	u32 now = jiffies / HZ;
+	u32 count;
 
 	if (now != challenge_timestamp) {
 #ifdef MY_ABC_HERE

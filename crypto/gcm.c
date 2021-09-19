@@ -109,7 +109,7 @@ static int crypto_gcm_setkey(struct crypto_aead *aead, const u8 *key,
 	struct crypto_ablkcipher *ctr = ctx->ctr;
 	struct {
 		be128 hash;
-		u8 iv[8];
+		u8 iv[16];
 
 		struct crypto_gcm_setkey_result result;
 
@@ -716,7 +716,9 @@ static struct crypto_instance *crypto_gcm_alloc_common(struct rtattr **tb,
 
 	ghash_alg = crypto_find_alg(ghash_name, &crypto_ahash_type,
 				    CRYPTO_ALG_TYPE_HASH,
-				    CRYPTO_ALG_TYPE_AHASH_MASK);
+				    CRYPTO_ALG_TYPE_AHASH_MASK |
+				    crypto_requires_sync(algt->type,
+							 algt->mask));
 	if (IS_ERR(ghash_alg))
 		return ERR_CAST(ghash_alg);
 

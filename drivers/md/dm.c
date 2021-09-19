@@ -2045,6 +2045,7 @@ EXPORT_SYMBOL_GPL(dm_device_name);
 
 static void __dm_destroy(struct mapped_device *md, bool wait)
 {
+	struct request_queue *q = md->queue;
 	struct dm_table *map;
 	int srcu_idx;
 
