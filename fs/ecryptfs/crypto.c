@@ -1408,6 +1408,10 @@ int ecryptfs_write_metadata(struct dentry *ecryptfs_dentry,
 {
 	struct ecryptfs_crypt_stat *crypt_stat =
 		&ecryptfs_inode_to_private(ecryptfs_inode)->crypt_stat;
+#ifdef MY_ABC_HERE
+	struct ecryptfs_mount_crypt_stat *mount_crypt_stat =
+		&ecryptfs_superblock_to_private(ecryptfs_inode->i_sb)->mount_crypt_stat;
+#endif  
 	unsigned int order;
 	char *virt;
 	size_t virt_len;
@@ -1443,12 +1447,24 @@ int ecryptfs_write_metadata(struct dentry *ecryptfs_dentry,
 		       __func__, rc);
 		goto out_free;
 	}
+#ifdef MY_ABC_HERE
+	if (mount_crypt_stat->flags & ECRYPTFS_GLOBAL_FAST_LOOKUP_ENABLED) {
+		rc = ecryptfs_write_metadata_to_contents(ecryptfs_inode, virt, virt_len);
+		if(!rc)
+			rc = ecryptfs_write_metadata_to_xattr(ecryptfs_dentry, virt, ECRYPTFS_SIZE_AND_MARKER_BYTES);
+	}
+	else {
+#endif  
 	if (crypt_stat->flags & ECRYPTFS_METADATA_IN_XATTR)
 		rc = ecryptfs_write_metadata_to_xattr(ecryptfs_dentry, virt,
 						      size);
 	else
 		rc = ecryptfs_write_metadata_to_contents(ecryptfs_inode, virt,
 							 virt_len);
+
+#ifdef MY_ABC_HERE
+	}
+#endif  
 	if (rc) {
 #ifdef MY_ABC_HERE
 		if (-EDQUOT != rc && -ENOSPC != rc)
@@ -1591,7 +1607,37 @@ int ecryptfs_read_and_validate_xattr_region(struct dentry *dentry,
 	u8 file_size[ECRYPTFS_SIZE_AND_MARKER_BYTES];
 	u8 *marker = file_size + ECRYPTFS_FILE_SIZE_BYTES;
 	int rc;
+#ifdef MY_ABC_HERE
+	char *page_virt = NULL;
+	struct ecryptfs_mount_crypt_stat *mount_crypt_stat =
+		&ecryptfs_superblock_to_private(inode->i_sb)->mount_crypt_stat;
+	if (mount_crypt_stat->flags & ECRYPTFS_GLOBAL_FAST_LOOKUP_ENABLED) {
+		page_virt = kmem_cache_alloc(ecryptfs_header_cache, GFP_USER);
+		if (!page_virt) {
+			rc = -ENOMEM;
+			printk(KERN_ERR "%s: Unable to allocate page_virt\n",
+			       __func__);
+			goto out;
+		}
 
+		rc = ecryptfs_getxattr_lower(ecryptfs_dentry_to_lower(dentry),
+					     ECRYPTFS_XATTR_NAME, page_virt,
+					     PAGE_CACHE_SIZE);
+		if (rc < ((int)ECRYPTFS_SIZE_AND_MARKER_BYTES)) {
+			rc = rc >= 0 ? -EINVAL : rc;
+			goto out;
+		}
+		rc = ecryptfs_validate_marker(page_virt+ECRYPTFS_FILE_SIZE_BYTES);
+		if (!rc)
+			ecryptfs_i_size_init(page_virt, inode);
+out:
+		if (page_virt) {
+			memset(page_virt, 0, PAGE_CACHE_SIZE);
+			kmem_cache_free(ecryptfs_header_cache, page_virt);
+		}
+		return rc;
+	}
+#endif  
 	rc = ecryptfs_getxattr_lower(ecryptfs_dentry_to_lower(dentry),
 				     ECRYPTFS_XATTR_NAME, file_size,
 				     ECRYPTFS_SIZE_AND_MARKER_BYTES);

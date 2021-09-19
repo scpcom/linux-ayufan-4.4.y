@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * linux/fs/ext4/page-io.c
  *
@@ -214,9 +217,24 @@ ext4_io_end_t *ext4_init_io_end(struct inode *inode, gfp_t flags)
 static void buffer_io_error(struct buffer_head *bh)
 {
 	char b[BDEVNAME_SIZE];
+#ifdef MY_ABC_HERE
+	static unsigned long long b_blocknr_last = 0;
+	if (b_blocknr_last == (unsigned long long)bh->b_blocknr) {
+		printk_ratelimited(KERN_ERR "Buffer I/O error on device %s, logical block %llu\n",
+			bdevname(bh->b_bdev, b),
+			b_blocknr_last);
+	} else {
+		b_blocknr_last = (unsigned long long)bh->b_blocknr;
+		printk_ratelimited(KERN_ERR "Buffer I/O error on device %s, logical block in range %llu + 0-2(%d)\n",
+			bdevname(bh->b_bdev, b),
+			(b_blocknr_last >> CONFIG_SYNO_IO_ERROR_LIMIT_MSG_SHIFT) << CONFIG_SYNO_IO_ERROR_LIMIT_MSG_SHIFT,
+			CONFIG_SYNO_IO_ERROR_LIMIT_MSG_SHIFT);
+	}
+#else
 	printk(KERN_ERR "Buffer I/O error on device %s, logical block %llu\n",
 			bdevname(bh->b_bdev, b),
 			(unsigned long long)bh->b_blocknr);
+#endif /* MY_ABC_HERE */
 }
 
 static void ext4_end_bio(struct bio *bio, int error)
@@ -226,6 +244,9 @@ static void ext4_end_bio(struct bio *bio, int error)
 	int i;
 	int blocksize;
 	sector_t bi_sector = bio->bi_sector;
+#ifdef MY_ABC_HERE
+	static unsigned long long i_blkbits_last = 0;
+#endif /* MY_ABC_HERE */
 
 	BUG_ON(!io_end);
 	inode = io_end->inode;
@@ -277,6 +298,26 @@ static void ext4_end_bio(struct bio *bio, int error)
 
 	if (error) {
 		io_end->flag |= EXT4_IO_END_ERROR;
+#ifdef MY_ABC_HERE
+		if (i_blkbits_last == (unsigned long long)bi_sector >> (inode->i_blkbits - 9)) {
+			ext4_warning(inode->i_sb, "I/O error writing to inode %lu "
+					"(offset %llu size %ld starting block %llu)",
+					inode->i_ino,
+					(unsigned long long) io_end->offset,
+					(long) io_end->size,
+					i_blkbits_last);
+		} else {
+			i_blkbits_last = (unsigned long long)bi_sector >> (inode->i_blkbits - 9);
+			ext4_warning(inode->i_sb, "I/O error writing to inode %lu "
+					"(offset %llu size %ld starting block in range %llu + 0-2(%d))",
+					inode->i_ino,
+					(unsigned long long) io_end->offset,
+					(long) io_end->size,
+					(unsigned long long)
+					(i_blkbits_last >> CONFIG_SYNO_IO_ERROR_LIMIT_MSG_SHIFT) << CONFIG_SYNO_IO_ERROR_LIMIT_MSG_SHIFT,
+					CONFIG_SYNO_IO_ERROR_LIMIT_MSG_SHIFT);
+		}
+#else
 		ext4_warning(inode->i_sb, "I/O error writing to inode %lu "
 			     "(offset %llu size %ld starting block %llu)",
 			     inode->i_ino,
@@ -284,6 +325,7 @@ static void ext4_end_bio(struct bio *bio, int error)
 			     (long) io_end->size,
 			     (unsigned long long)
 			     bi_sector >> (inode->i_blkbits - 9));
+#endif /* MY_ABC_HERE */
 	}
 
 	if (!(io_end->flag & EXT4_IO_END_UNWRITTEN)) {

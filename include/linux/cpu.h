@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #ifndef _LINUX_CPU_H_
 #define _LINUX_CPU_H_
@@ -50,7 +47,7 @@ enum {
 
 	CPU_PRI_PERF		= 20,
 	CPU_PRI_MIGRATION	= 10,
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIX_SMPBOOT_RACE
 	CPU_PRI_SMPBOOT		= 9,
 #endif  
 	 
@@ -109,7 +106,7 @@ static inline void unregister_cpu_notifier(struct notifier_block *nb)
 }
 #endif
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIX_SMPBOOT_RACE
 void smpboot_thread_init(void);
 #endif  
 int cpu_up(unsigned int cpu);
@@ -138,7 +135,7 @@ static inline void cpu_maps_update_done(void)
 {
 }
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIX_SMPBOOT_RACE
 static inline void smpboot_thread_init(void)
 {
 }

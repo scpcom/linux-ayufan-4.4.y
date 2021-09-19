@@ -585,27 +585,6 @@ struct move_extent {
 	<= (EXT4_GOOD_OLD_INODE_SIZE +			\
 	    (einode)->i_extra_isize))			\
 
-/*
- * We use an encoding that preserves the times for extra epoch "00":
- *
- * extra  msb of                         adjust for signed
- * epoch  32-bit                         32-bit tv_sec to
- * bits   time    decoded 64-bit tv_sec  64-bit tv_sec      valid time range
- * 0 0    1    -0x80000000..-0x00000001  0x000000000 1901-12-13..1969-12-31
- * 0 0    0    0x000000000..0x07fffffff  0x000000000 1970-01-01..2038-01-19
- * 0 1    1    0x080000000..0x0ffffffff  0x100000000 2038-01-19..2106-02-07
- * 0 1    0    0x100000000..0x17fffffff  0x100000000 2106-02-07..2174-02-25
- * 1 0    1    0x180000000..0x1ffffffff  0x200000000 2174-02-25..2242-03-16
- * 1 0    0    0x200000000..0x27fffffff  0x200000000 2242-03-16..2310-04-04
- * 1 1    1    0x280000000..0x2ffffffff  0x300000000 2310-04-04..2378-04-22
- * 1 1    0    0x300000000..0x37fffffff  0x300000000 2378-04-22..2446-05-10
- *
- * Note that previous versions of the kernel on 64-bit systems would
- * incorrectly use extra epoch bits 1,1 for dates between 1901 and
- * 1970.  e2fsck will correct this, assuming that it is run on the
- * affected filesystem before 2242.
- */
-
 static inline __le32 ext4_encode_extra_time(struct timespec *time)
 {
 	u32 extra = sizeof(time->tv_sec) > 4 ?
@@ -618,13 +597,7 @@ static inline void ext4_decode_extra_time(struct timespec *time, __le32 extra)
 	if (unlikely(sizeof(time->tv_sec) > 4 &&
 			(extra & cpu_to_le32(EXT4_EPOCH_MASK)))) {
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,20,0)
-		/* Handle legacy encoding of pre-1970 dates with epoch
-		 * bits 1,1.  We assume that by kernel version 4.20,
-		 * everyone will have run fsck over the affected
-		 * filesystems to correct the problem.  (This
-		 * backwards compatibility may be removed before this
-		 * time, at the discretion of the ext4 developers.)
-		 */
+		 
 		u64 extra_bits = le32_to_cpu(extra) & EXT4_EPOCH_MASK;
 		if (extra_bits == 3 && ((time->tv_sec) & 0x80000000) != 0)
 			extra_bits = 0;
@@ -746,6 +719,8 @@ struct ext4_inode_info {
 	struct rw_semaphore i_data_sem;
 	struct inode vfs_inode;
 	struct jbd2_inode *jinode;
+
+	spinlock_t i_raw_lock;	 
 
 	struct timespec i_crtime;
 
@@ -1099,12 +1074,18 @@ struct ext4_sb_info {
 #ifdef MY_ABC_HERE
 	int s_new_error_fs_event_flag;
 	char *s_mount_path;
+	unsigned long s_last_notify_time;
 #endif
 #ifdef CONFIG_SYNO_EXT4_CREATE_TIME_BIG_ENDIAN_SWAP
 	int s_swap_create_time;
 #endif
 
 	struct workqueue_struct *dio_unwritten_wq;
+
+#ifdef MY_ABC_HERE
+	atomic_t reada_group_desc_threads;  
+	struct workqueue_struct *group_desc_readahead_wq;
+#endif  
 
 	struct timer_list s_err_report;
 

@@ -854,6 +854,8 @@ struct btrfs_space_info {
 	struct percpu_counter total_bytes_pinned;
 
 	struct list_head list;
+	 
+	struct list_head ro_bgs;
 
 	struct rw_semaphore groups_sem;
 	 
@@ -915,7 +917,6 @@ enum btrfs_disk_cache_state {
 	BTRFS_DC_ERROR		= 1,
 	BTRFS_DC_CLEAR		= 2,
 	BTRFS_DC_SETUP		= 3,
-	BTRFS_DC_NEED_WRITE	= 4,
 };
 
 struct btrfs_caching_control {
@@ -926,6 +927,20 @@ struct btrfs_caching_control {
 	struct btrfs_block_group_cache *block_group;
 	u64 progress;
 	atomic_t count;
+};
+
+struct btrfs_io_ctl {
+	void *cur, *orig;
+	struct page *page;
+	struct page **pages;
+	struct btrfs_root *root;
+	struct inode *inode;
+	unsigned long size;
+	int index;
+	int num_pages;
+	int entries;
+	int bitmaps;
+	unsigned check_crcs:1;
 };
 
 struct btrfs_block_group_cache {
@@ -947,7 +962,6 @@ struct btrfs_block_group_cache {
 	unsigned long full_stripe_len;
 
 	unsigned int ro:1;
-	unsigned int dirty:1;
 	unsigned int iref:1;
 	unsigned int has_caching_ctl:1;
 	unsigned int removed:1;
@@ -972,7 +986,14 @@ struct btrfs_block_group_cache {
 
 	struct list_head bg_list;
 
+	struct list_head ro_list;
+
 	atomic_t trimming;
+
+	struct list_head dirty_list;
+	struct list_head io_list;
+
+	struct btrfs_io_ctl io_ctl;
 };
 
 struct seq_list {
@@ -1088,6 +1109,8 @@ struct btrfs_fs_info {
 	struct mutex cleaner_mutex;
 	struct mutex chunk_mutex;
 	struct mutex volume_mutex;
+
+	struct mutex ro_block_group_mutex;
 
 	struct btrfs_stripe_hash_table *stripe_hash_table;
 
@@ -1322,6 +1345,7 @@ struct btrfs_subvolume_writers {
 #define BTRFS_ROOT_DEFRAG_RUNNING	6
 #define BTRFS_ROOT_FORCE_COW		7
 #define BTRFS_ROOT_MULTI_LOG_TASKS	8
+#define BTRFS_ROOT_DIRTY		9
 
 struct btrfs_root {
 	struct extent_buffer *node;
@@ -1450,8 +1474,35 @@ struct btrfs_ioctl_defrag_range_args {
 
 	__u32 compress_type;
 
+#ifdef MY_ABC_HERE
+	 
+	__u16 syno_thresh;
+	 
+	__u8 syno_ratio_denom;
+	__u8 syno_ratio_nom;
+	__u32 unused[3];
+#else
 	__u32 unused[4];
+#endif  
 };
+
+#ifdef MY_ABC_HERE
+struct btrfs_snapshot_size_entry {
+	u64 root_id;
+	struct btrfs_root *root;
+	struct btrfs_path *path;
+	struct btrfs_key key;
+	struct rb_node node;
+	int root_level;
+	int level;
+};
+
+struct btrfs_snapshot_size_ctx {
+	u64 size;
+	struct rb_root root;
+	struct btrfs_snapshot_size_entry snaps[0];
+};
+#endif  
 
 #define BTRFS_INODE_ITEM_KEY		1
 #define BTRFS_INODE_REF_KEY		12
@@ -2752,8 +2803,13 @@ int btrfs_inc_extent_ref(struct btrfs_trans_handle *trans,
 			 struct btrfs_root *root,
 			 u64 bytenr, u64 num_bytes, u64 parent,
 			 u64 root_objectid, u64 owner, u64 offset, int no_quota);
+
+int btrfs_start_dirty_block_groups(struct btrfs_trans_handle *trans,
+				   struct btrfs_root *root);
 int btrfs_write_dirty_block_groups(struct btrfs_trans_handle *trans,
 				    struct btrfs_root *root);
+int btrfs_setup_space_cache(struct btrfs_trans_handle *trans,
+			    struct btrfs_root *root);
 int btrfs_extent_readonly(struct btrfs_root *root, u64 bytenr);
 int btrfs_free_block_groups(struct btrfs_fs_info *info);
 int btrfs_read_block_groups(struct btrfs_root *root);
@@ -2882,6 +2938,15 @@ typedef int (*btrfs_changed_cb_t)(struct btrfs_root *left_root,
 int btrfs_compare_trees(struct btrfs_root *left_root,
 			struct btrfs_root *right_root,
 			btrfs_changed_cb_t cb, void *ctx);
+#ifdef MY_ABC_HERE
+int btrfs_snapshot_size_query(struct file *file,
+				  struct btrfs_ioctl_snapshot_size_query_args *snap_args,
+				  struct ulist *root_list,
+				  int (*cb)(struct btrfs_fs_info *, u64,
+				            u64, struct ulist *,
+				            struct btrfs_snapshot_size_entry *,
+				            struct btrfs_snapshot_size_ctx *));
+#endif  
 int btrfs_cow_block(struct btrfs_trans_handle *trans,
 		    struct btrfs_root *root, struct extent_buffer *buf,
 		    struct extent_buffer *parent, int parent_slot,
@@ -3306,6 +3371,7 @@ int btrfs_dirty_pages(struct btrfs_root *root, struct inode *inode,
 		      struct page **pages, size_t num_pages,
 		      loff_t pos, size_t write_bytes,
 		      struct extent_state **cached);
+int btrfs_fdatawrite_range(struct inode *inode, loff_t start, loff_t end);
 
 int btrfs_defrag_leaves(struct btrfs_trans_handle *trans,
 			struct btrfs_root *root);

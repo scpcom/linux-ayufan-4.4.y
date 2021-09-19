@@ -55,6 +55,9 @@ typedef enum __syno_disk_type {
 	SYNO_DISK_SYNOBOOT,
 	SYNO_DISK_ISCSI,
 	SYNO_DISK_SAS,
+#ifdef MY_DEF_HERE
+	SYNO_DISK_CACHE,
+#endif  
 	SYNO_DISK_END,  
 }SYNO_DISK_TYPE;
 #endif  
@@ -74,7 +77,7 @@ struct scsi_disk {
 #ifdef MY_ABC_HERE
 	SYNO_DISK_TYPE	synodisktype;
 #endif  
-#ifdef MY_DEF_HERE
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	u32		synoindex;
 #endif  
 	unsigned int	physical_block_size;

@@ -536,6 +536,7 @@ EXPORT_SYMBOL(ata_scsi_cmd_error_handler);
 void ata_scsi_port_error_handler(struct Scsi_Host *host, struct ata_port *ap)
 {
 	unsigned long flags;
+	int iDeepTries = 0;
 
 #ifdef MY_ABC_HERE
 	spin_lock_irqsave(ap->lock, flags);

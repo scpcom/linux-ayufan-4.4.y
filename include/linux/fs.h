@@ -95,6 +95,13 @@ typedef void (dio_iodone_t)(struct kiocb *iocb, loff_t offset,
 
 #define MASK_RDONLY_CHECK (MAY_WRITE|MAY_APPEND|MAY_WRITE_ATTR|MAY_WRITE_EXT_ATTR|MAY_WRITE_PERMISSION|MAY_DEL|MAY_DEL_CHILD|MAY_GET_OWNER_SHIP)
 
+enum bypass_synoacl_type {
+	BYPASS_SYNOACL_SYNOUTIME,
+	BYPASS_SYNOACL_SYNOARCHIVE_OVERWRITE,
+	BYPASS_SYNOACL_SYNOARCHIVE_OVERWRITE_ACL,
+	BYPASS_SYNOACL_SYNOACL_XATTR,
+	BYPASS_SYNOACL_MAX
+};
 #else  
 #define MAY_EXEC		0x00000001
 #define MAY_WRITE		0x00000002
@@ -1133,6 +1140,10 @@ struct super_block {
 	atomic_long_t s_remove_count;
 
 	int s_readonly_remount;
+#ifdef MY_ABC_HERE
+	 
+	long relatime_period;
+#endif  
 };
 
 #ifdef MY_ABC_HERE
@@ -1480,7 +1491,7 @@ enum file_time_flags {
 	S_VERSION = 8,
 };
 
-extern void touch_atime(struct path *);
+extern void touch_atime(const struct path *);
 static inline void file_accessed(struct file *file)
 {
 	if (!(file->f_flags & O_NOATIME))

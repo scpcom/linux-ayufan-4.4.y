@@ -108,6 +108,9 @@ struct usb_hub *usb_hub_to_struct_hub(struct usb_device *hdev)
 static int usb_device_supports_lpm(struct usb_device *udev)
 {
 	 
+	if (udev->quirks & USB_QUIRK_NO_LPM)
+		return 0;
+
 	if (udev->speed == USB_SPEED_HIGH) {
 		if (udev->bos->ext_cap &&
 			(USB_LPM_SUPPORT &
@@ -3606,12 +3609,7 @@ port_speed_morph:
 						r = -EPROTO;
 					break;
 				}
-				/*
-				 * Some devices time out if they are powered on
-				 * when already connected. They need a second
-				 * reset. But only on the first attempt,
-				 * lest we get into a time out/reset loop
-				 */
+				 
 				if (r == 0  || (r == -ETIMEDOUT && j == 0))
 					break;
 			}
@@ -3722,6 +3720,8 @@ port_speed_morph:
 			retval = -ENOMSG;
 		goto fail;
 	}
+
+	usb_detect_quirks(udev);
 
 #if defined (MY_ABC_HERE)
 	if (IS_XHCI(hcd)

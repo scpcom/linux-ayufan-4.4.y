@@ -192,10 +192,19 @@ EXPORT_SYMBOL(s_reshape_mount_key);
 #endif  
 
 #ifdef MY_ABC_HERE
-unsigned char g_syno_sata_remap[SATA_REMAP_MAX] = {SATA_REMAP_NOT_INIT};
+int g_syno_sata_remap[SATA_REMAP_MAX] = {SATA_REMAP_NOT_INIT};
 EXPORT_SYMBOL(g_syno_sata_remap);
 int g_use_sata_remap = 0;
 EXPORT_SYMBOL(g_use_sata_remap);
+#endif  
+
+#ifdef MY_DEF_HERE
+char gszPciAddrList[PCI_ADDR_NUM_MAX][PCI_ADDR_LEN_MAX] = {{0}};
+int gPciAddrNum = 0;
+int gPciDeferStart = M2SATA_START_IDX;
+EXPORT_SYMBOL(gszPciAddrList);
+EXPORT_SYMBOL(gPciAddrNum);
+EXPORT_SYMBOL(gPciDeferStart);
 #endif  
 
 #ifdef MY_ABC_HERE
@@ -300,6 +309,21 @@ EXPORT_SYMBOL(gSynoSASHBAAddr);
 #ifdef MY_DEF_HERE
 int (*syno_test_list)(unsigned char, struct tty_struct *);
 EXPORT_SYMBOL(syno_test_list);
+#endif  
+
+#ifdef MY_DEF_HERE
+int (*syno_valid_lsi3008_led)(u8 cmd);
+EXPORT_SYMBOL(syno_valid_lsi3008_led);
+#endif  
+
+#ifdef MY_DEF_HERE
+int (*syno_disk_map_table_gen_mv14xx)(int *iDiskMapTable, int iPortMax);
+EXPORT_SYMBOL(syno_disk_map_table_gen_mv14xx);
+#endif  
+
+#ifdef MY_DEF_HERE
+int g_syno_ds1815p_speed_limit = 1;
+EXPORT_SYMBOL(g_syno_ds1815p_speed_limit);
 #endif  
 
 extern int sysctl_overcommit_memory;

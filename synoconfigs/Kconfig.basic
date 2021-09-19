@@ -82,6 +82,11 @@ config SYNO_ISCSI_DEVICE
 	default y
 	depends on SYNO_FIXED_DISK_NAME
 
+config SYNO_ISCSI_LOOPBACK_DEVICE
+	bool "Loopback Iscsi device name"
+	default y
+	depends on SYNO_FIXED_DISK_NAME
+
 config SYNO_ISCSI_DEVICE_PREFIX
 	string "The prefix of iSCSI device"
 	default "isd"
@@ -91,6 +96,11 @@ config SYNO_SATA_DEVICE_PREFIX
 	string "The prefix of sata device"
 	default "sd"
 	depends on SYNO_FIXED_DISK_NAME
+
+config SYNO_CACHE_DEVICE_PREFIX
+	string "The prefix of sata cache device"
+	default "nvc"
+	depends on SYNO_PCI_HOST_SATA_CACHE
 
 config SYNO_X86_AUTO_POWER_ON
 	bool "Supporting Auto-Poweron on X86_64 Platforms"
@@ -138,6 +148,8 @@ config SYNO_KVM_IGNORE_MSRS
 	depends on KVM
 
 config SYNO_EXPORT_GET_CMDLINE
+	bool "export the helper function to get the cmdline of a task_struct" 
+	default y 
 
 config SYNO_GPIO
 	  bool "Employ refactored GPIO-functions"

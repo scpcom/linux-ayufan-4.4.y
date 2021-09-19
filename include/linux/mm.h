@@ -1387,6 +1387,7 @@ static inline struct page *follow_page(struct vm_area_struct *vma,
 #define FOLL_HWPOISON	0x100	 
 #define FOLL_NUMA	0x200	 
 #define FOLL_MIGRATION	0x400	 
+#define FOLL_COW	0x4000	 
 
 typedef int (*pte_fn_t)(pte_t *pte, pgtable_t token, unsigned long addr,
 			void *data);

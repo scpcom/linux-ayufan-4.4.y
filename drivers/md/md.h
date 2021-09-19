@@ -142,6 +142,31 @@ extern int rdev_clear_badblocks(struct md_rdev *rdev, sector_t s, int sectors,
 				int is_new);
 extern void md_ack_all_badblocks(struct badblocks *bb);
 
+#ifdef CONFIG_SYNO_MD_DATA_CORRECTION
+struct md_self_heal_record {
+	struct list_head record_list;
+	void             *private;
+	struct bio       *bio;
+	struct mddev     *mddev;
+	u32              u32_last_hash;
+	int              retry_cnt;
+	int              max_retry_cnt;
+	int              is_hashed;  
+	int              request_cnt;  
+	sector_t         sector_start;
+	sector_t         sector_leng;
+};
+
+u32 syno_self_heal_hash_bio_page(struct bio *bio);
+int syno_self_heal_is_valid_md_stat(struct mddev *mddev);
+int syno_self_heal_record_hash_value(struct md_self_heal_record *heal_record, struct bio *bio);
+void syno_self_heal_del_all_record(struct mddev *mddev);
+void syno_self_heal_find_and_del_record(struct mddev *mddev, struct bio *bio);
+void syno_self_heal_modify_bio_info(struct md_self_heal_record *heal_record, struct bio *bio);
+struct md_self_heal_record* syno_self_heal_init_record(struct mddev *mddev, struct bio *bio, int max_retry_cnt);
+struct md_self_heal_record* syno_self_heal_find_record(struct mddev *mddev, struct bio *bio);
+#endif  
+
 struct mddev {
 	void				*private;
 	struct md_personality		*pers;
@@ -296,6 +321,16 @@ struct mddev {
 #ifdef MY_ABC_HERE
     unsigned char           nodev_and_crashed;      
 #endif  
+#ifdef MY_ABC_HERE
+#define MD_AUTO_REMAP_MODE_FORCE_OFF 0
+#define MD_AUTO_REMAP_MODE_FORCE_ON 1
+#define MD_AUTO_REMAP_MODE_ISMAXDEGRADE 2
+	unsigned char			auto_remap;
+#endif  
+#ifdef MY_ABC_HERE
+	void                            *syno_private;     
+	char                            lv_name[16];
+#endif  
 
 #ifdef MY_ABC_HERE
 	mempool_t	*syno_mdio_mempool;
@@ -352,6 +387,10 @@ struct md_personality
 	 
 	void (*quiesce) (struct mddev *mddev, int state);
 	 
+#ifdef MY_ABC_HERE
+	unsigned char (*ismaxdegrade) (struct mddev *mddev);
+	void (*syno_set_rdev_auto_remap) (struct mddev *mddev);
+#endif  
 	void *(*takeover) (struct mddev *mddev);
 };
 
@@ -467,6 +506,13 @@ extern int md_integrity_register(struct mddev *mddev);
 extern void md_integrity_add_rdev(struct md_rdev *rdev, struct mddev *mddev);
 extern int strict_strtoul_scaled(const char *cp, unsigned long *res, int scale);
 extern void restore_bitmap_write_access(struct file *file);
+
+#ifdef MY_ABC_HERE
+void SynoAutoRemapReport(struct mddev *mddev, sector_t sector, struct block_device *bdev);
+#endif  
+#ifdef MY_ABC_HERE
+void RaidRemapModeSet(struct block_device *, unsigned char);
+#endif  
 
 #ifdef MY_ABC_HERE
 void SYNORaidRdevUnplug(struct mddev *mddev, struct md_rdev *rdev);

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *   fs/cifs_debug.c
  *
@@ -67,8 +70,11 @@ void cifs_vfs_err(const char *fmt, ...)
 
 	vaf.fmt = fmt;
 	vaf.va = &args;
-
+#ifdef MY_ABC_HERE
+	printk_ratelimited(KERN_ERR "CIFS VFS: %pV", &vaf);
+#else
 	printk(KERN_ERR "CIFS VFS: %pV", &vaf);
+#endif /* MY_ABC_HERE */
 
 	va_end(args);
 }

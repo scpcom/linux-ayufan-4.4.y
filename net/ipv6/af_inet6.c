@@ -94,6 +94,9 @@ static int inet6_create(struct net *net, struct socket *sock, int protocol,
 	    !inet_ehash_secret)
 		build_ehash_secret();
 
+	if (protocol < 0 || protocol >= IPPROTO_MAX)
+		return -EINVAL;
+
 lookup_protocol:
 	err = -ESOCKTNOSUPPORT;
 	rcu_read_lock();
@@ -283,11 +286,9 @@ int inet6_bind(struct socket *sock, struct sockaddr *uaddr, int addr_len)
 #ifdef MY_ABC_HERE
 				if (__ipv6_addr_is_link_local(addr_type) && !sk->sk_bound_dev_if) {
 					for_each_netdev(net, dev) {
-						unsigned flags = dev_get_flags(dev);
 						struct inet6_ifaddr *ifp = ipv6_get_ifaddr(net, &addr->sin6_addr, dev, 1);
 
-						if (ifp != NULL && (flags & IFF_RUNNING) &&
-							!(flags & (IFF_LOOPBACK | IFF_SLAVE))) {
+						if (ifp != NULL) {
 							sk->sk_bound_dev_if = dev->ifindex;
 							in6_ifa_put(ifp);
 							break;

@@ -7,7 +7,6 @@
 #include <linux/syno.h>
 #include <linux/synobios.h>
 #include <linux/delay.h>
-#include <linux/libata.h>
 
 MODULE_LICENSE("Proprietary");
 
@@ -17,6 +16,7 @@ MODULE_LICENSE("Proprietary");
 #define SYNO_HDDMON_STR "Syno_HDDMon"
 #define SYNO_HDDMON_UPLG_STR "Syno_HDDMon_UPLGM"
 extern long g_internal_hd_num;
+extern long g_syno_hdd_powerup_seq;
 
 #ifdef MY_ABC_HERE
 extern long g_hdd_hotplug;

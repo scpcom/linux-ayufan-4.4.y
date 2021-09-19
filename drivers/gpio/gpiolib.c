@@ -658,7 +658,6 @@ static int gpiod_export(struct gpio_desc *desc, bool direction_may_change)
 
 	mutex_lock(&sysfs_lock);
 
-	/* check if chip is being removed */
 	if (!chip || !chip->exported) {
 		status = -ENODEV;
 		goto fail_unlock;
@@ -907,7 +906,7 @@ static void gpiochip_unexport(struct gpio_chip *chip)
 		sysfs_remove_group(&dev->kobj, &gpiochip_attr_group);
 		put_device(dev);
 		device_unregister(dev);
-		/* prevent further gpiod exports */
+		 
 		chip->exported = 0;
 		status = 0;
 	} else
@@ -918,7 +917,6 @@ static void gpiochip_unexport(struct gpio_chip *chip)
 		pr_debug("%s: chip %s status %d\n", __func__,
 				chip->label, status);
 
-	/* unregister gpiod class devices owned by sysfs */
 	for (i = 0; i < chip->ngpio; i++) {
 		desc = &chip->desc[i];
 		if (test_and_clear_bit(FLAG_SYSFS, &desc->flags))

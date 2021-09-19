@@ -275,6 +275,8 @@ enum {
 
 	ATA_TMOUT_PMP_SRST_WAIT	= 5000,
 
+	ATA_TMOUT_SPURIOUS_PHY	= 10000,
+
 	BUS_UNKNOWN		= 0,
 	BUS_DMA			= 1,
 	BUS_IDLE		= 2,
@@ -385,6 +387,7 @@ enum {
 #ifdef MY_ABC_HERE
 	ATA_HORKAGE_NOWCACHE	= (1 << 22),	 
 #endif  
+	ATA_HORKAGE_NOTRIM = (1 << 24),		 
 
 	ATA_DMA_MASK_ATA	= (1 << 0),	 
 	ATA_DMA_MASK_ATAPI	= (1 << 1),	 
@@ -434,6 +437,9 @@ enum {
 #endif  
 #ifdef MY_ABC_HERE
 	SYNO_STATUS_IS_MV9235		= 1 << 3,
+#endif  
+#ifdef MY_ABC_HERE
+	SYNO_STATUS_IS_SIL			= 1 << 4,
 #endif  
 	 
 #ifdef MY_DEF_HERE
@@ -661,7 +667,7 @@ struct ata_device {
 	union {
 		u16		id[ATA_ID_WORDS];  
 		u32		gscr[SATA_PMP_GSCR_DWORDS];  
-	};
+	} ____cacheline_aligned;
 
 	u8			devslp_timing[ATA_LOG_DEVSLP_SIZE];
 
@@ -734,6 +740,7 @@ struct ata_link {
 	struct ata_device	device[ATA_MAX_DEVICES];
 
 	unsigned long		last_lpm_change;  
+
 #if defined(MY_ABC_HERE) || \
 	defined(MY_ABC_HERE) || \
 	defined(MY_ABC_HERE) || \
@@ -966,9 +973,6 @@ extern struct device_attribute dev_attr_syno_pm_info;
 
 #ifdef MY_ABC_HERE
 extern struct device_attribute dev_attr_syno_wcache;
-#endif  
-#ifdef CONFIG_SYNO_SATA_DISK_SERIAL
-extern struct device_attribute dev_attr_syno_disk_serial;
 #endif  
 #ifdef MY_ABC_HERE
 extern struct device_attribute dev_attr_syno_diskname_trans;
@@ -1250,7 +1254,8 @@ extern int syno_libata_index_get(struct Scsi_Host *host, uint channel, uint id, 
 #ifdef MY_ABC_HERE
 #define IS_SYNO_PMP_GSCR_9705_CONFIG(tf) (SATA_PMP_GSCR_9705_GPO_EN == ((tf->hob_feature << 8) | tf->feature) || \
 										  SATA_PMP_GSCR_9705_GPI_POLARITY == ((tf->hob_feature << 8) | tf->feature) || \
-										  SATA_PMP_GSCR_9705_SATA_BLINK_RATE == ((tf->hob_feature << 8) | tf->feature))
+										  SATA_PMP_GSCR_9705_SATA_0_TO_3_BLINK_RATE == ((tf->hob_feature << 8) | tf->feature) || \
+										  SATA_PMP_GSCR_9705_SATA_4_BLINK_RATE == ((tf->hob_feature << 8) | tf->feature))
 
 #define IS_SYNO_PMP_WRITE_CMD(tf) (ATA_CMD_PMP_WRITE == tf->command && \
 								  (SATA_PMP_GSCR_3XXX_GPIO == tf->feature || \

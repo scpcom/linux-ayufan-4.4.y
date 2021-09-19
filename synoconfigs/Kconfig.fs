@@ -65,6 +65,10 @@ config SYNO_FS_NOTIFY
 	default y
 	depends on FSNOTIFY && ANON_INODES
 
+config SYNO_FS_RELATIME_PERIOD
+	bool "Add mount option to set update period of relatime"
+	default y
+
 endmenu #Basic
 
 menu "CIFS"
@@ -243,11 +247,6 @@ config SYNO_EXT4_SKIP_ADD_RESERVED_BLOCKS
 	default y
 	depends on EXT4_FS
 
-config SYNO_EXT4_META_BG_BACKUP_DESC_FIX
-	bool "Fix update correct backup descriptor in meta_bg"
-	default y
-	depends on EXT4_FS
-
 config SYNO_EXT4_SKIP_JOURNAL_SYMLINK
 	bool "Use writeback mode instead of jounal mode when doing ext4 symlink"
 	default y
@@ -270,6 +269,11 @@ config SYNO_EXT4_PROTECT_DISKSIZE_WRITE
 
 config SYNO_EXT4_FORCE_UPDATE_DA_FILE_SIZE
 	bool "Force update file size on buffer_delay if the file is growing"
+	default y
+	depends on EXT4_FS
+
+config SYNO_EXT4_PARALLEL_GROUP_DESC_PREFETCH_WHEN_MOUNT
+	bool "Add parallel group desc prefetching to enhance mount time."
 	default y
 	depends on EXT4_FS
 
@@ -389,11 +393,6 @@ config SYNO_BTRFS_QGROUP_QUERY
 
 config SYNO_BTRFS_RENAME_READONLY_SUBVOL
 	bool "Fix rename readonly subvol fail"
-	default y
-	depends on BTRFS_FS
-
-config SYNO_BTRFS_CORRECT_SPACEINFO_LOCK
-	bool "Correct btrfs statfs block group list lock"
 	default y
 	depends on BTRFS_FS
 
@@ -527,13 +526,48 @@ config SYNO_BTRFS_TREE_LOG_RECOVER_FIX
 	default y
 	depends on BTRFS_FS
 
+config SYNO_BTRFS_SEND_SUPPORT_PAUSE_RESUME
+	bool "add btrfs send support pause/resume"
+	default y
+	depends on BTRFS_FS
+
 config SYNO_BTRFS_MERGE_HOLES
 	bool "file hole can be merged with both previous and next hole items"
 	default y
 	depends on BTRFS_FS
 
+config SYNO_BTRFS_DEFRAG
+	bool "add support for doing defrag on nocow file"
+	default y
+	depends on BTRFS_FS
+
 config SYNO_BTRFS_FIX_PUNCH_HOLE_ENOSPC
 	bool "fix punch hole no space when split leaf, may lead to BUG_ON"
+	default y
+	depends on BTRFS_FS
+
+config SYNO_BTRFS_FIX_SNAPSHOT_HANG
+	bool "fix snapshot hang"
+	default y
+	depends on BTRFS_FS
+
+config SYNO_BTRFS_SEND_ASYNC_PAGECACHE_RA
+	bool "btrfs send uses async page cache readhead to accelerate"
+	default y
+	depends on BTRFS_FS
+
+config SYNO_BTRFS_BACKREF
+	bool "provide backref walking mechanism framework"
+	default y
+	depends on BTRFS_FS
+
+config SYNO_BTRFS_SNAPSHOT_SIZE_CALCULATION
+	bool "add ioctl to calculate actual disk size of snapshots"
+	default y
+	depends on BTRFS_FS && SYNO_BTRFS_BACKREF
+
+config SYNO_BTRFS_AVOID_CACHE_BLOCK_GROUP_SOFT_LOCKUP
+	bool "Avoid soft lockup when cache_block_group with mount option nospace_cache"
 	default y
 	depends on BTRFS_FS
 
@@ -601,6 +635,16 @@ config SYNO_FS_ECRYPTFS_LOWER_INIT
 	default y
 	depends on ECRYPT_FS
 
+config SYNO_ECRYPTFS_SKIP_KERNEL_WRITE_CHECK
+	bool "Skip security check during kernel_write."
+	default y
+	depends on ECRYPT_FS
+
+config SYNO_ECRYPTFS_FAST_LOOKUP
+	bool "Fast lookup, read i_size from xattr"
+	default y
+	depends on ECRYPT_FS
+
 endmenu #ECRYPT
 menu "NFS"
 
@@ -633,6 +677,14 @@ config SYNO_NFSD_UNIX_PRI
 
 config SYNO_NFS4_DISABLE_UDP
 	bool "disable NFSv4 over UDP"
+	default y
+
+config SYNO_NFSD_HIDDEN_FILE
+	bool "Hide system directories"
+	default y
+
+config SYNO_NFSD_AVOID_HUNG_TASK_WHEN_UNLINK_BIG_FILE
+	bool "Avoid parent mutex hung task when unlink big file"
 	default y
 
 endmenu #NFS
@@ -681,11 +733,6 @@ config SYNO_HFSPLUS_EA
 
 config SYNO_HFSPLUS_BREC_FIND_RET_CHECK
 	bool "Check brec_find return value while update parent"
-	default y
-	depends on HFSPLUS_FS
-
-config SYNO_HFSPLUS_GET_PAGE_IF_IN_USE
-	bool "Add page get/put mech for bnode page to prevent bad page"
 	default y
 	depends on HFSPLUS_FS
 

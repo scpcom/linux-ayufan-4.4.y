@@ -31,6 +31,11 @@ config SYNO_IO_ERROR_LIMIT_MSG
 	bool "Reduce the rate of IO error print messages"
 	default y
 
+config SYNO_IO_ERROR_LIMIT_MSG_SHIFT
+	int "Reduce the rate of IO error print messages - for the variable number"
+	depends on SYNO_IO_ERROR_LIMIT_MSG
+	default "12"
+
 config SYNO_EMULATE_U64_DIVISOR
 	bool "Emulate caculating of u64 remainder"
 	default y

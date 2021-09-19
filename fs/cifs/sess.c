@@ -425,9 +425,7 @@ int build_ntlmssp_auth_blob(unsigned char *pbuffer,
 		sec_blob->NtChallengeResponse.MaximumLength =
 				cpu_to_le16(ses->auth_key.len - CIFS_SESS_KEY_SIZE);
 	} else {
-		/*
-		 * don't send an NT Response for anonymous access
-		 */
+		 
 		sec_blob->NtChallengeResponse.Length = 0;
 		sec_blob->NtChallengeResponse.MaximumLength = 0;
 	}

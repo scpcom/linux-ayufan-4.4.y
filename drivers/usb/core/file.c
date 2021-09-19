@@ -145,7 +145,7 @@ int usb_register_dev1(struct usb_interface *intf,
 #endif
 	intf->minor = -1;
 
-	dev_dbg("looking for a minor, starting at %d\n", minor_base);
+	dev_dbg(&intf->dev, "looking for a minor, starting at %d\n", minor_base);
 
 	if (class_driver->fops == NULL)
 		goto exit;

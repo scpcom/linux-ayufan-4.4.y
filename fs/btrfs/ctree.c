@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2007,2008 Oracle.  All rights reserved.
  *
@@ -213,11 +216,19 @@ static struct extent_buffer *btrfs_read_lock_root_node(struct btrfs_root *root)
  */
 static void add_root_to_dirty_list(struct btrfs_root *root)
 {
+	if (test_bit(BTRFS_ROOT_DIRTY, &root->state) ||
+	    !test_bit(BTRFS_ROOT_TRACK_DIRTY, &root->state))
+		return;
+
 	spin_lock(&root->fs_info->trans_lock);
-	if (test_bit(BTRFS_ROOT_TRACK_DIRTY, &root->state) &&
-	    list_empty(&root->dirty_list)) {
-		list_add(&root->dirty_list,
-			 &root->fs_info->dirty_cowonly_roots);
+	if (!test_and_set_bit(BTRFS_ROOT_DIRTY, &root->state)) {
+		/* Want the extent tree to be the last on the list */
+		if (root->objectid == BTRFS_EXTENT_TREE_OBJECTID)
+			list_move_tail(&root->dirty_list,
+				       &root->fs_info->dirty_cowonly_roots);
+		else
+			list_move(&root->dirty_list,
+				  &root->fs_info->dirty_cowonly_roots);
 	}
 	spin_unlock(&root->fs_info->trans_lock);
 }
@@ -1775,10 +1786,12 @@ static noinline int generic_bin_search(struct extent_buffer *eb,
 			if (!err) {
 				tmp = (struct btrfs_disk_key *)(kaddr + offset -
 							map_start);
-			} else {
+			} else if (err == 1) {
 				read_extent_buffer(eb, &unaligned,
 						   offset, sizeof(unaligned));
 				tmp = &unaligned;
+			} else {
+				return err;
 			}
 
 		} else {
@@ -2828,6 +2841,8 @@ cow_done:
 		}
 
 		ret = key_search(b, key, level, &prev_cmp, &slot);
+		if (ret < 0)
+			goto done;
 
 		if (level != 0) {
 			int dec = 0;
@@ -5319,6 +5334,9 @@ static int tree_compare_item(struct btrfs_root *left_root,
 
 #define ADVANCE 1
 #define ADVANCE_ONLY_NEXT -1
+#ifdef MY_ABC_HERE
+#define ADVANCE_ONLY_UPNEXT 0
+#endif /* MY_ABC_HERE */
 
 /*
  * This function compares two trees and calls the provided callback for
@@ -5575,6 +5593,336 @@ out:
 	kfree(tmp_buf);
 	return ret;
 }
+
+#ifdef MY_ABC_HERE
+static int tree_move_upnext(struct btrfs_root *root,
+				    struct btrfs_path *path,
+				    int *level, int root_level)
+{
+	int nritems;
+	nritems = btrfs_header_nritems(path->nodes[*level]);
+
+	do {
+		if (*level == root_level)
+			return -1;
+		path->slots[*level] = 0;
+		free_extent_buffer(path->nodes[*level]);
+		path->nodes[*level] = NULL;
+		(*level)++;
+
+		path->slots[*level]++;
+
+		nritems = btrfs_header_nritems(path->nodes[*level]);
+	} while (path->slots[*level] >= nritems);
+
+	return 0;
+}
+
+static int tree_advance_with_mode(struct btrfs_root *root,
+			struct btrfs_path *path,
+			int *level, int root_level,
+			int mode,
+			struct btrfs_key *key)
+{
+	int ret;
+
+	if (mode == ADVANCE_ONLY_UPNEXT) {
+		ret = tree_move_upnext(root, path, level, root_level);
+	} else if (*level == 0 || mode == ADVANCE_ONLY_NEXT) {
+		ret = tree_move_next_or_upnext(root, path, level, root_level);
+	} else {
+		tree_move_down(root, path, level, root_level);
+		ret = 0;
+	}
+	if (ret >= 0) {
+		if (*level == 0)
+			btrfs_item_key_to_cpu(path->nodes[*level], key,
+					path->slots[*level]);
+		else
+			btrfs_node_key_to_cpu(path->nodes[*level], key,
+					path->slots[*level]);
+	}
+	return ret;
+}
+
+static int compare_snapshot_entry(struct btrfs_snapshot_size_entry *e1,
+		struct btrfs_snapshot_size_entry *e2)
+{
+	int cmp;
+	u64 e1_blockptr;
+	u64 e2_blockptr;
+	u64 e1_gen;
+	u64 e2_gen;
+
+	/*
+	 * We process the in the order
+	 * 1. lower key first
+	 * 2. "higher" level first
+	 * 3. lower block bytenr first
+	 */
+	cmp = btrfs_comp_cpu_keys(&e1->key, &e2->key);
+	if (cmp != 0)
+		return cmp;
+	if (e1->level > e2->level)
+		return -1;
+	if (e1->level < e2->level)
+		return 1;
+	if (e1->level != 0) {
+		e1_blockptr = btrfs_node_blockptr(
+				e1->path->nodes[e1->level],
+				e1->path->slots[e1->level]);
+		e2_blockptr = btrfs_node_blockptr(
+				e2->path->nodes[e2->level],
+				e2->path->slots[e2->level]);
+		e1_gen = btrfs_node_ptr_generation(
+				e1->path->nodes[e1->level],
+				e1->path->slots[e1->level]);
+		e2_gen = btrfs_node_ptr_generation(
+				e2->path->nodes[e2->level],
+				e2->path->slots[e2->level]);
+		if (e1_blockptr == e2_blockptr &&
+		    e1_gen == e2_gen)
+			return 0;
+		if (e1_blockptr < e2_blockptr)
+			return -1;
+		if (e1_blockptr > e2_blockptr)
+			return 1;
+		else
+			WARN_ON(1);
+	} else {
+		e1_blockptr = e1->path->nodes[e1->level]->start;
+		e2_blockptr = e2->path->nodes[e2->level]->start;
+		if (e1_blockptr < e2_blockptr)
+			return -1;
+		if (e1_blockptr > e2_blockptr)
+			return 1;
+	}
+	return 0;
+}
+
+static int snap_entry_insert(struct btrfs_snapshot_size_ctx *ctx,
+			struct btrfs_snapshot_size_entry **insert, int replace)
+{
+	struct rb_node **p = &ctx->root.rb_node;
+	struct rb_node *parent_node = NULL;
+	struct btrfs_snapshot_size_entry *entry;
+	int cmp = 0;
+
+	while (*p) {
+		parent_node = *p;
+		entry = rb_entry(parent_node, struct btrfs_snapshot_size_entry, node);
+
+		cmp = compare_snapshot_entry(*insert, entry);
+		if (cmp < 0) {
+			p = &(*p)->rb_left;
+		} else if (cmp > 0) {
+			p = &(*p)->rb_right;
+		} else {
+			/*
+			 * If the newly added entry shares the same key with the existing node in
+			 * rbtree, and the added entry has smaller subvolume id. We need to keep
+			 * that entry, and advance the exsiting node in rbtree.
+			 */
+			if (replace && (*insert)->root_id < entry->root_id) {
+				rb_replace_node(*p, &(*insert)->node, &ctx->root);
+				*insert = entry;
+			}
+			return 1;
+		}
+	}
+
+	rb_link_node(&(*insert)->node, parent_node, p);
+	rb_insert_color(&(*insert)->node, &ctx->root);
+	return 0;
+}
+
+int btrfs_snapshot_size_query(struct file *file,
+		struct btrfs_ioctl_snapshot_size_query_args *snap_args,
+		struct ulist *roots,
+		int (*cb)(struct btrfs_fs_info *, u64,
+			      u64, struct ulist *,
+			      struct btrfs_snapshot_size_entry *,
+			      struct btrfs_snapshot_size_ctx *))
+{
+	int i;
+	int ret = 0;
+	int level;
+	int nritems;
+	u64 snap_count = snap_args->snap_count;
+	struct btrfs_root *snap_root = NULL;
+	struct btrfs_key location;
+	struct btrfs_fs_info *fs_info = BTRFS_I(file_inode(file))->root->fs_info;
+	struct rb_node *node;
+	struct btrfs_snapshot_size_ctx *ctx;
+	struct btrfs_snapshot_size_entry *entry;
+
+	ctx = kzalloc(sizeof(*ctx) + sizeof(struct btrfs_snapshot_size_entry) * snap_count, GFP_KERNEL);
+	if (!ctx) {
+		ret = -ENOMEM;
+		goto out;
+	}
+	ctx->root = RB_ROOT;
+
+	for (i = 0; i < snap_count; ++i) {
+		location.objectid = snap_args->snap_id[i];
+		location.type = BTRFS_ROOT_ITEM_KEY;
+		location.offset = (u64) -1;
+		snap_root = btrfs_read_fs_root_no_name(fs_info, &location);
+		if (IS_ERR(snap_root)) {
+			ret = PTR_ERR(snap_root);
+			goto out;
+		}
+		if (btrfs_root_dead(snap_root)) {
+			ret = -EPERM;
+			goto out;
+		}
+		if (!btrfs_root_readonly(snap_root)) {
+			ret = -EPERM;
+			goto out;
+		}
+		entry = &ctx->snaps[i];
+		entry->root_id = snap_args->snap_id[i];
+		entry->root = snap_root;
+		spin_lock(&snap_root->root_item_lock);
+		snap_root->send_in_progress++;
+		spin_unlock(&snap_root->root_item_lock);
+
+		entry->path = btrfs_alloc_path();
+		if (!ctx->snaps[i].path) {
+			ret = -ENOMEM;
+			goto out;
+		}
+		entry->path->search_commit_root = 1;
+		entry->path->skip_locking = 1;
+
+		down_read(&snap_root->fs_info->commit_root_sem);
+		level = btrfs_header_level(snap_root->commit_root);
+		entry->root_level = entry->level = level;
+		entry->path->nodes[level] = snap_root->commit_root;
+		extent_buffer_get(entry->path->nodes[level]);
+		up_read(&snap_root->fs_info->commit_root_sem);
+
+		if (level == 0)
+			btrfs_item_key_to_cpu(entry->path->nodes[level],
+			&entry->key, entry->path->slots[level]);
+		else
+			btrfs_node_key_to_cpu(entry->path->nodes[level],
+			&entry->key, entry->path->slots[level]);
+
+		while (snap_entry_insert(ctx, &entry, 0)) {
+			if (0 > tree_advance_with_mode(entry->root, entry->path,
+				   &entry->level, entry->root_level, ADVANCE_ONLY_NEXT, &entry->key)) {
+				break;
+			}
+		}
+	}
+
+	while (!RB_EMPTY_ROOT(&ctx->root)) {
+		u64 bytenr;
+		int advance = ADVANCE;
+		int node_removed = 0;
+		struct btrfs_snapshot_size_entry *next_entry;
+		struct rb_node *next_node;
+
+		ret = 0;
+		node = rb_first(&ctx->root);
+		entry = rb_entry(node, struct btrfs_snapshot_size_entry, node);
+		/*
+		 * Only skip level > 2. If we could skip one node at level 3,
+		 * due to shared node, we could save time traversing level 0~2.
+		 * Shared nodes usually happen at higher level.
+		 */
+		if (entry->path->slots[entry->level] == 0 && entry->level > 2) {
+			bytenr = entry->path->nodes[entry->level]->start;
+			ret = cb(fs_info, bytenr, 0, roots, entry, ctx);
+			if (ret < 0) {
+				goto out;
+			} else if (ret > 0) {
+				advance = ADVANCE_ONLY_UPNEXT;
+				goto advance;
+			}
+		}
+
+		nritems = btrfs_header_nritems(entry->path->nodes[entry->level]);
+		while (entry->level == 0 && entry->key.type != BTRFS_EXTENT_DATA_KEY) {
+			if (0 > tree_advance_with_mode(entry->root, entry->path, &entry->level,
+					entry->root_level, ADVANCE, &entry->key)) {
+				rb_erase(node, &ctx->root);
+				node_removed = 1;
+				break;
+			}
+			if (entry->path->slots[entry->level] == nritems - 1)
+				break;
+		}
+		if (node_removed)
+			continue;
+
+		/*
+		 * OK the leaf containing BTRFS_EXTENT_DATA_KEY is not shared.
+		 * Now we check EXTENT_ITEM itself.
+		 */
+		if (entry->level == 0 && entry->key.type == BTRFS_EXTENT_DATA_KEY) {
+			struct btrfs_file_extent_item *ei;
+			u64 datao;
+			u8 type;
+
+			ei = btrfs_item_ptr(entry->path->nodes[0], entry->path->slots[0],
+					    struct btrfs_file_extent_item);
+			bytenr = btrfs_file_extent_disk_bytenr(entry->path->nodes[0], ei);
+			datao = btrfs_file_extent_offset(entry->path->nodes[0], ei);
+			type = btrfs_file_extent_type(entry->path->nodes[0], ei);
+			if (type == BTRFS_FILE_EXTENT_PREALLOC ||
+			    (type == BTRFS_FILE_EXTENT_REG && bytenr != 0)) {
+				ret = cb(fs_info, bytenr, datao, roots, entry, ctx);
+				if (0 > ret)
+					goto out;
+				if (ret == 0)
+					ctx->size += btrfs_file_extent_disk_num_bytes(entry->path->nodes[0], ei);
+			}
+		}
+advance:
+		next_node = rb_next(node);
+		if (next_node)
+			next_entry = rb_entry(next_node, struct btrfs_snapshot_size_entry, node);
+		do {
+			int cmp = 0;
+			if (0 > tree_advance_with_mode(entry->root, entry->path,
+					&entry->level, entry->root_level, advance, &entry->key)) {
+				rb_erase(node, &ctx->root);
+				break;
+			}
+			if (!next_node)
+				break;
+			advance = ADVANCE_ONLY_NEXT;
+			if (node_removed)
+				continue;
+			cmp = compare_snapshot_entry(entry, next_entry);
+			/*
+			 * After advance if this entry is still the lowest key in the tree,
+			 * don't move it out and insert again. Is's just waste of time.
+			 */
+			if (cmp < 0)
+				break;
+			rb_erase(node, &ctx->root);
+			node_removed = 1;
+		} while (snap_entry_insert(ctx, &entry, 1));
+	}
+out:
+	if (ctx) {
+		snap_args->calc_size = ctx->size;
+		for (i = 0; i < snap_count; ++i) {
+			btrfs_free_path(ctx->snaps[i].path);
+			if (ctx->snaps[i].root) {
+				spin_lock(&ctx->snaps[i].root->root_item_lock);
+				ctx->snaps[i].root->send_in_progress--;
+				spin_unlock(&ctx->snaps[i].root->root_item_lock);
+			}
+		}
+	}
+	kfree(ctx);
+	return ret;
+}
+#endif /* MY_ABC_HERE */
 
 /*
  * this is similar to btrfs_next_leaf, but does not try to preserve

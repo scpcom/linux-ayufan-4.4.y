@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #define DEBUG		 
 
@@ -301,7 +298,7 @@ static noinline void __init_refok rest_init(void)
 	int pid;
 
 	rcu_scheduler_starting();
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIX_SMPBOOT_RACE
 	smpboot_thread_init();
 #endif  
 	 

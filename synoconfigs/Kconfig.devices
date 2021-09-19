@@ -43,6 +43,15 @@ config SYNO_MD_DISK_SORT
 	bool "Sort the disk in autoastart array"
 	default y
 
+config SYNO_MD_BAD_SECTOR_AUTO_REMAP
+	bool "Auto remap bad sector in SATA layer"
+	default y
+
+config SYNO_MD_RAID5_BS_REWRITE
+	bool "remap bad sector on raid5 read error"
+	default y
+	depends on SYNO_MD_BAD_SECTOR_AUTO_REMAP && SYNO_MD_EIO_NODEV_HANDLER
+
 config SYNO_MD_STRIPE_MEMORY_ESTIMATION
 	bool "Raid5/6 stripe cache memory usage"
 	default y
@@ -75,6 +84,11 @@ config SYNO_MD_SECTOR_STATUS_REPORT
 	bool "report read/write error to user space through scemd and synobios"
 	default y
 	depends on SYNO_MD_EIO_NODEV_HANDLER && SYNO_SCSI_DEVICE_INDEX
+
+config SYNO_MD_AUTO_REMAP_REPORT
+	bool "report LVM/ MD remapped sector through scemd and synobios"
+	default y
+	depends on SYNO_MD_BAD_SECTOR_AUTO_REMAP && SYNO_MD_SECTOR_STATUS_REPORT
 
 config SYNO_MD_FIX_LINEAR_ACCESS_NULL_RDEV
 	bool "Fix an issue that md might access NULL hotpluged redv"
@@ -112,6 +126,14 @@ config SYNO_MD_SB_RETRY
 	bool "Add an one-time retry for EIO error when updating superblock"
 	default y
 
+config SYNO_MD_RAID5D_PROXY
+	bool "run proxy thread when raid5 finish reshaping"
+	default y
+
+config SYNO_MD_RAID5_SKIP_COPY
+	bool "Fix data corruption in image backup"
+	default y
+
 endmenu #MD
 
 menu "SATA"
@@ -144,6 +166,17 @@ config SYNO_SATA_REMAP
 	bool "Re-map Disk Name Sequence"
 	depends on SYNO_FIXED_DISK_NAME
 	default y
+
+config SYNO_MAX_PCI_SLOT
+	int "Maximun number of PCIe slot"
+	depends on SYNO_PCI_HOST_SATA_CACHE
+	default "1"
+
+config SYNO_PCI_HOST_SATA_CACHE
+	bool "Force SATA SSD on specific PCI slot used as cache device "
+	select SYNO_FIXED_DISK_NAME
+	select SYNO_SATA_REMAP
+	default n
 
 config SYNO_SATA_DISK_SEQ_REVERSE
 	bool "Reverse Disk Port Sequence"
@@ -437,6 +470,11 @@ config SYNO_AHCI_PMP_SII3x26_DEFER_CMD
 	depends on (SYNO_BRASWELL || SYNO_ALPINE || SYNO_AVOTON) && SYNO_SATA_PM_DEVICE_GPIO
 	default n
 
+config SYNO_DISABLE_SIL3x26
+	bool "Disable SiI3x26 with 88SE9170 for DS1517+"
+	depends on SYNO_AVOTON && SYNO_SATA_PM_DEVICE_GPIO
+	default n
+
 config SYNO_SATA_LINK_SPEED_RETRY
 	bool "Enable SATA Link Speed Retry"
 	default y
@@ -476,6 +514,19 @@ config SYNO_GET_DISK_SPEED
 config SYNO_EUNIT_SPD_UNKNOWN_RESCAN
 	bool "Rescan sata speed after thaw port"
 	default n
+
+config SYNO_AHCI_IMPL_WORKAROUND
+	bool "Force enable PORTS_IMPL workaround"
+	default n
+
+config SYNO_DS1815P_SPEED_LIMIT
+	bool "Force limit sata link speed for DS1815+"
+	default y
+	depends on SYNO_AVOTON
+
+config SYNO_SIL_PORTING
+	bool "Silicon Image SATA controller workarounds"
+	default y
 
 endmenu #SATA
 
@@ -571,7 +622,7 @@ config SYNO_SCSI_MAX_QUEUE_DEPTH_LOCK
 
 config SYNO_SAS_HBA_IDX
 	bool "Indexing Synology SAS HBA"
-	depends on SYNO_GRANTLEY
+	depends on SYNO_GRANTLEY || SYNO_BROADWELL
         default n
 
 config SYNO_SAS_MAX_HBA_SLOT
@@ -879,6 +930,16 @@ menu "IOMMU"
 
 config SYNO_IOMMU_PASSTHROUGH
 	bool "enable iommu=pt by default"
+	default y
+
+config SYNO_WORKAROUND_NOT_PORTING_ACPI_COMPANION
+	bool "disable logic using ACPI_COMPANION"
+	depends on INTEL_IOMMU
+	default y
+
+config SYNO_SKIP_IOMMU
+	bool "skip some PCIe deivce to avoid DMAR error"
+	depends on INTEL_IOMMU
 	default y
 
 endmenu #IOMMU

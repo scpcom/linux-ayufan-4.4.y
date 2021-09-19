@@ -1479,6 +1479,7 @@ static ssize_t __btrfs_direct_write(struct kiocb *iocb,
 {
 	struct file *file = iocb->ki_filp;
 	struct iov_iter i;
+	struct inode *inode = file_inode(file);
 	ssize_t written;
 	ssize_t written_buffered;
 	loff_t endbyte;
@@ -1499,7 +1500,10 @@ static ssize_t __btrfs_direct_write(struct kiocb *iocb,
 		goto out;
 	}
 	endbyte = pos + written_buffered - 1;
-	err = filemap_write_and_wait_range(file->f_mapping, pos, endbyte);
+	err = btrfs_fdatawrite_range(inode, pos, endbyte);
+	if (err)
+		goto out;
+	err = filemap_fdatawait_range(inode->i_mapping, pos, endbyte);
 	if (err)
 		goto out;
 	written += written_buffered;
@@ -1640,10 +1644,7 @@ static int start_ordered_ops(struct inode *inode, loff_t start, loff_t end)
 	int ret;
 
 	atomic_inc(&BTRFS_I(inode)->sync_writers);
-	ret = filemap_fdatawrite_range(inode->i_mapping, start, end);
-	if (!ret && test_bit(BTRFS_INODE_HAS_ASYNC_EXTENT,
-			     &BTRFS_I(inode)->runtime_flags))
-		ret = filemap_fdatawrite_range(inode->i_mapping, start, end);
+	ret = btrfs_fdatawrite_range(inode, start, end);
 	atomic_dec(&BTRFS_I(inode)->sync_writers);
 
 	return ret;
@@ -2503,4 +2504,16 @@ int btrfs_auto_defrag_init(void)
 		return -ENOMEM;
 
 	return 0;
+}
+
+int btrfs_fdatawrite_range(struct inode *inode, loff_t start, loff_t end)
+{
+	int ret;
+
+	ret = filemap_fdatawrite_range(inode->i_mapping, start, end);
+	if (!ret && test_bit(BTRFS_INODE_HAS_ASYNC_EXTENT,
+			     &BTRFS_I(inode)->runtime_flags))
+		ret = filemap_fdatawrite_range(inode->i_mapping, start, end);
+
+	return ret;
 }

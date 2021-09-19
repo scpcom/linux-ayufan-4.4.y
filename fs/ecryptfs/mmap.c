@@ -361,9 +361,22 @@ out:
 int ecryptfs_write_inode_size_to_metadata(struct inode *ecryptfs_inode)
 {
 	struct ecryptfs_crypt_stat *crypt_stat;
-
+#ifdef MY_ABC_HERE
+	int rc = -1;
+	struct ecryptfs_mount_crypt_stat *mount_crypt_stat =
+		&ecryptfs_superblock_to_private(ecryptfs_inode->i_sb)->mount_crypt_stat;
+#endif  
 	crypt_stat = &ecryptfs_inode_to_private(ecryptfs_inode)->crypt_stat;
 	BUG_ON(!(crypt_stat->flags & ECRYPTFS_ENCRYPTED));
+#ifdef MY_ABC_HERE
+	if (mount_crypt_stat->flags & ECRYPTFS_GLOBAL_FAST_LOOKUP_ENABLED) {
+		rc = ecryptfs_write_inode_size_to_xattr(ecryptfs_inode);
+		if (rc) {
+			return rc;
+		}
+		return ecryptfs_write_inode_size_to_header(ecryptfs_inode);
+	}
+#endif  
 	if (crypt_stat->flags & ECRYPTFS_METADATA_IN_XATTR)
 		return ecryptfs_write_inode_size_to_xattr(ecryptfs_inode);
 	else

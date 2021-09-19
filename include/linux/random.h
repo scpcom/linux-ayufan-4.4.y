@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * include/linux/random.h
  *
@@ -32,6 +35,25 @@ void prandom_seed(u32 seed);
 
 u32 prandom_u32_state(struct rnd_state *);
 void prandom_bytes_state(struct rnd_state *state, void *buf, int nbytes);
+
+#ifdef MY_ABC_HERE
+/**
+ * prandom_u32_max - returns a pseudo-random number in interval [0, ep_ro)
+ * @ep_ro: right open interval endpoint
+ *
+ * Returns a pseudo-random number that is in interval [0, ep_ro). Note
+ * that the result depends on PRNG being well distributed in [0, ~0U]
+ * u32 space. Here we use maximally equidistributed combined Tausworthe
+ * generator, that is, prandom_u32(). This is useful when requesting a
+ * random index of an array containing ep_ro elements, for example.
+ *
+ * Returns: pseudo-random number in interval [0, ep_ro)
+ */
+static inline u32 prandom_u32_max(u32 ep_ro)
+{
+	return (u32)(((u64) prandom_u32() * ep_ro) >> 32);
+}
+#endif /* MY_ABC_HERE */
 
 /*
  * Handle minimum values for seeds

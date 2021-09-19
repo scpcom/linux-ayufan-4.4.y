@@ -403,7 +403,7 @@ static void register_disk(struct gendisk *disk)
 	struct hd_struct *part;
 	int err;
 #ifdef MY_DEF_HERE
-	int error;
+	int error = -1;
 #endif  
 
 	ddev->parent = disk->driverfs_dev;

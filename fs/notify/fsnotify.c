@@ -16,6 +16,7 @@
 
 #ifdef MY_ABC_HERE
 #include <linux/nsproxy.h>
+extern struct rw_semaphore namespace_sem;
 #endif
 
 void __fsnotify_inode_delete(struct inode *inode)
@@ -377,6 +378,7 @@ int SYNONotify(struct dentry *dentry, __u32 mask)
 	if (nsproxy) {
 		struct mnt_namespace *mnt_space = nsproxy->mnt_ns;
 		if (mnt_space) {
+			down_read(&namespace_sem);
 			list_for_each(head, &mnt_space->list) {
 				struct mount *mnt = list_entry(head, struct mount, mnt_list);
 				if (mnt && mnt->mnt.mnt_sb == dentry->d_sb) {
@@ -386,6 +388,7 @@ int SYNONotify(struct dentry *dentry, __u32 mask)
 					mntput(vfsmnt);
 				}
 			}
+			up_read(&namespace_sem);
 		}
 	}
 

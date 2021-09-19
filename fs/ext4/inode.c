@@ -768,7 +768,7 @@ retry_journal:
 		ext4_journal_stop(handle);
 		goto retry_grab;
 	}
-	/* In case writeback began while the page was unlocked */
+	 
 	wait_for_stable_page(page);
 
 	if (ext4_should_dioread_nolock(inode))
@@ -1551,6 +1551,7 @@ static int __ext4_journalled_writepage(struct page *page,
 				       NULL, bget_one);
 	}
 	 
+	get_page(page);
 	unlock_page(page);
 
 	handle = ext4_journal_start(inode, EXT4_HT_WRITE_PAGE,
@@ -1565,7 +1566,7 @@ static int __ext4_journalled_writepage(struct page *page,
 	lock_page(page);
 	put_page(page);
 	if (page->mapping != mapping) {
-		/* The page got truncated from under us */
+		 
 		ext4_journal_stop(handle);
 		ret = 0;
 		goto out;
@@ -1841,9 +1842,15 @@ retry:
 					    needed_blocks);
 		if (IS_ERR(handle)) {
 			ret = PTR_ERR(handle);
+#ifdef MY_ABC_HERE
+		if (printk_ratelimit()) {
+#endif  
 			ext4_msg(inode->i_sb, KERN_CRIT, "%s: jbd2_start: "
 			       "%ld pages, ino %lu; err %d", __func__,
 				wbc->nr_to_write, inode->i_ino, ret);
+#ifdef MY_ABC_HERE
+		}
+#endif  
 			blk_finish_plug(&plug);
 			goto out_writepages;
 		}
@@ -1994,7 +2001,7 @@ retry_journal:
 		goto retry_grab;
 	}
 	 
-	wait_on_page_writeback(page);
+	wait_for_stable_page(page);
 
 	ret = __block_write_begin(page, pos, len, ext4_da_get_block_prep);
 	if (ret < 0) {
@@ -3319,10 +3326,13 @@ static int ext4_do_update_inode(handle_t *handle,
 	struct ext4_inode *raw_inode = ext4_raw_inode(iloc);
 	struct ext4_inode_info *ei = EXT4_I(inode);
 	struct buffer_head *bh = iloc->bh;
+	struct super_block *sb = inode->i_sb;
 	int err = 0, rc, block;
-	int need_datasync = 0;
+	int need_datasync = 0, set_large_file = 0;
 	uid_t i_uid;
 	gid_t i_gid;
+
+	spin_lock(&ei->i_raw_lock);
 
 	if (ext4_test_inode_state(inode, EXT4_STATE_NEW))
 		memset(raw_inode, 0, EXT4_SB(inode->i_sb)->s_inode_size);
@@ -3377,8 +3387,10 @@ static int ext4_do_update_inode(handle_t *handle,
 	}
 #endif
 
-	if (ext4_inode_blocks_set(handle, raw_inode, ei))
+	if (ext4_inode_blocks_set(handle, raw_inode, ei)) {
+		spin_unlock(&ei->i_raw_lock);
 		goto out_brelse;
+	}
 	raw_inode->i_dtime = cpu_to_le32(ei->i_dtime);
 	raw_inode->i_flags = cpu_to_le32(ei->i_flags & 0xFFFFFFFF);
 	if (EXT4_SB(inode->i_sb)->s_es->s_creator_os !=
@@ -3391,22 +3403,11 @@ static int ext4_do_update_inode(handle_t *handle,
 		need_datasync = 1;
 	}
 	if (ei->i_disksize > 0x7fffffffULL) {
-		struct super_block *sb = inode->i_sb;
 		if (!EXT4_HAS_RO_COMPAT_FEATURE(sb,
 				EXT4_FEATURE_RO_COMPAT_LARGE_FILE) ||
 				EXT4_SB(sb)->s_es->s_rev_level ==
-				cpu_to_le32(EXT4_GOOD_OLD_REV)) {
-			 
-			err = ext4_journal_get_write_access(handle,
-					EXT4_SB(sb)->s_sbh);
-			if (err)
-				goto out_brelse;
-			ext4_update_dynamic_rev(sb);
-			EXT4_SET_RO_COMPAT_FEATURE(sb,
-					EXT4_FEATURE_RO_COMPAT_LARGE_FILE);
-			ext4_handle_sync(handle);
-			err = ext4_handle_dirty_super(handle, sb);
-		}
+		    cpu_to_le32(EXT4_GOOD_OLD_REV))
+			set_large_file = 1;
 	}
 	raw_inode->i_generation = cpu_to_le32(inode->i_generation);
 	if (S_ISCHR(inode->i_mode) || S_ISBLK(inode->i_mode)) {
@@ -3435,12 +3436,23 @@ static int ext4_do_update_inode(handle_t *handle,
 
 	ext4_inode_csum_set(inode, raw_inode, ei);
 
+	spin_unlock(&ei->i_raw_lock);
+
 	BUFFER_TRACE(bh, "call ext4_handle_dirty_metadata");
 	rc = ext4_handle_dirty_metadata(handle, NULL, bh);
 	if (!err)
 		err = rc;
 	ext4_clear_inode_state(inode, EXT4_STATE_NEW);
-
+	if (set_large_file) {
+		err = ext4_journal_get_write_access(handle, EXT4_SB(sb)->s_sbh);
+		if (err)
+			goto out_brelse;
+		ext4_update_dynamic_rev(sb);
+		EXT4_SET_RO_COMPAT_FEATURE(sb,
+					   EXT4_FEATURE_RO_COMPAT_LARGE_FILE);
+		ext4_handle_sync(handle);
+		err = ext4_handle_dirty_super(handle, sb);
+	}
 	ext4_update_inode_fsync_trans(handle, inode, need_datasync);
 out_brelse:
 	brelse(bh);

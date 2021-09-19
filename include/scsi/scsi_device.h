@@ -77,6 +77,9 @@ struct scsi_device {
 #ifdef MY_ABC_HERE
 	char syno_disk_name[BDEVNAME_SIZE];		 
 #endif  
+#ifdef MY_ABC_HERE
+	unsigned char auto_remap;
+#endif  
 
 	unsigned int manufacturer;	 
 	unsigned sector_size;	 
@@ -156,6 +159,7 @@ struct scsi_device {
 	unsigned long   idle;    
 	unsigned char	spindown;
 	unsigned char   nospindown;
+	unsigned char   do_standby_syncing;
 #endif  
 
 	struct device		sdev_gendev,
@@ -187,7 +191,7 @@ struct scsi_device {
 
 	unsigned long		sdev_data[0];
 #ifdef MY_ABC_HERE
-#define SERIAL_NUM_SIZE	20	 
+#define SERIAL_NUM_SIZE	36	 
 	char syno_disk_serial[SERIAL_NUM_SIZE + 1];
 #endif  
 } __attribute__((aligned(sizeof(unsigned long))));

@@ -37,8 +37,13 @@ extern char gszCustomSerialNum[32];
 #endif  
 
 #ifdef MY_ABC_HERE
-extern unsigned char g_syno_sata_remap[SATA_REMAP_MAX];
+extern int g_syno_sata_remap[SATA_REMAP_MAX];
 extern int g_use_sata_remap;
+#endif  
+
+#ifdef MY_DEF_HERE
+extern char gszPciAddrList[PCI_ADDR_NUM_MAX][PCI_ADDR_LEN_MAX];
+extern int gPciAddrNum;
 #endif  
 
 #ifdef MY_ABC_HERE
@@ -107,6 +112,10 @@ extern unsigned int gSynoCastratedXhcPortBitmap[CONFIG_SYNO_NUM_CASTRATED_XHC];
 extern char gSynoUsbVbusHostAddr[CONFIG_SYNO_USB_VBUS_NUM_GPIO][13];
 extern int gSynoUsbVbusPort[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
 extern unsigned gSynoUsbVbusGpp[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
+#endif  
+
+#ifdef MY_DEF_HERE
+extern int g_syno_ds1815p_speed_limit;
 #endif  
 
 #ifdef MY_ABC_HERE
@@ -387,6 +396,42 @@ FMT_ERR:
 }
 
 __setup("sata_remap=", early_sata_remap);
+#endif  
+
+#ifdef MY_DEF_HERE
+static int __init early_pci_sata_cache(char *p)
+{
+	int index = 0;
+	char *ptr = p;
+
+	while(ptr && *ptr){
+		if (',' ==  *ptr) {
+			index = 0;
+			gPciAddrNum ++;
+			if (PCI_ADDR_NUM_MAX >= gPciAddrNum){
+				goto FMT_ERR;
+			}
+		} else {
+			if (PCI_ADDR_LEN_MAX <= index) {
+				goto FMT_ERR;
+			}
+			gszPciAddrList[gPciAddrNum][index] = *ptr;
+			index++;
+		}
+		ptr++;
+	}
+	gPciAddrNum ++;
+
+	printk(KERN_ERR "Syno Bootargs : pci_sata_cache initialized\n");
+	return 0;
+
+FMT_ERR:
+	gPciAddrNum = 0;
+	printk(KERN_ERR "SYNO: pci_sata_cache format error, ignore.\n" );
+	return 0;
+
+}
+__setup("pci_sata_cache=", early_pci_sata_cache);
 #endif  
 
 #ifdef MY_ABC_HERE
@@ -679,4 +724,14 @@ static int __init early_usb_vbus_gpio(char *p)
 	return 1;
 }
 __setup("syno_usb_vbus_gpio=", early_usb_vbus_gpio);
+#endif  
+
+#ifdef MY_DEF_HERE
+static int __init early_ds1815p_speed_limit(char *p)
+{
+        g_syno_ds1815p_speed_limit = simple_strtol(p, NULL, 10);
+
+        return 1;
+}
+__setup("1815p_speed_limit=", early_ds1815p_speed_limit);
 #endif  

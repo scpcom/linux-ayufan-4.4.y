@@ -1095,6 +1095,9 @@ EXPORT_SYMBOL(bmap);
 static int relatime_need_update(struct vfsmount *mnt, struct inode *inode,
 			     struct timespec now)
 {
+#ifdef MY_ABC_HERE
+	long relatime_period = 1;
+#endif  
 
 	if (!(mnt->mnt_flags & MNT_RELATIME))
 		return 1;
@@ -1105,8 +1108,16 @@ static int relatime_need_update(struct vfsmount *mnt, struct inode *inode,
 	if (timespec_compare(&inode->i_ctime, &inode->i_atime) >= 0)
 		return 1;
 
+#ifdef MY_ABC_HERE
+	if (inode->i_sb->relatime_period > 0)
+		relatime_period = inode->i_sb->relatime_period;
+
+	if ((long)(now.tv_sec - inode->i_atime.tv_sec) >= relatime_period*24*60*60)
+		return 1;
+#else
 	if ((long)(now.tv_sec - inode->i_atime.tv_sec) >= 24*60*60)
 		return 1;
+#endif  
 	 
 	return 0;
 }
@@ -1135,7 +1146,7 @@ static int update_time(struct inode *inode, struct timespec *time, int flags)
 EXPORT_SYMBOL(update_time);
 #endif  
 
-void touch_atime(struct path *path)
+void touch_atime(const struct path *path)
 {
 	struct vfsmount *mnt = path->mnt;
 	struct inode *inode = path->dentry->d_inode;

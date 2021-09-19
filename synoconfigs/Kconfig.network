@@ -61,4 +61,8 @@ config SYNO_IPV6_EXPORT_IN6ADDR_ANY
 	bool "Export in6addr_any value for modules"
 	default y
 
+config SYNO_CVE_2016_5696
+	bool "Fix CVE-2016-5696"
+	default y
+
 endmenu #Network

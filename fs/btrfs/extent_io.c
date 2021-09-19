@@ -1712,8 +1712,7 @@ struct io_failure_record {
 	int in_validation;
 };
 
-static int free_io_failure(struct inode *inode, struct io_failure_record *rec,
-				int did_repair)
+static int free_io_failure(struct inode *inode, struct io_failure_record *rec)
 {
 	int ret;
 	int err = 0;
@@ -1810,7 +1809,6 @@ int repair_eb_io_failure(struct btrfs_root *root, struct extent_buffer *eb,
 	u64 start = eb->start;
 	unsigned long i, num_pages = num_extent_pages(eb->start, eb->len);
 	int ret = 0;
-
 	if (root->fs_info->sb->s_flags & MS_RDONLY)
 		return -EROFS;
 
@@ -1835,7 +1833,6 @@ static int clean_io_failure(u64 start, struct page *page)
 	struct btrfs_fs_info *fs_info = BTRFS_I(inode)->root->fs_info;
 	struct extent_state *state;
 	int num_copies;
-	int did_repair = 0;
 	int ret;
 
 	private = 0;
@@ -1856,7 +1853,6 @@ static int clean_io_failure(u64 start, struct page *page)
 		 
 		pr_debug("clean_io_failure: freeing dummy error at %llu\n",
 			 failrec->start);
-		did_repair = 1;
 		goto out;
 	}
 	if (fs_info->sb->s_flags & MS_RDONLY)
@@ -1873,19 +1869,44 @@ static int clean_io_failure(u64 start, struct page *page)
 		num_copies = btrfs_num_copies(fs_info, failrec->logical,
 					      failrec->len);
 		if (num_copies > 1)  {
-			ret = repair_io_failure(fs_info, start, failrec->len,
-						failrec->logical, page,
-						failrec->failed_mirror);
-			did_repair = !ret;
+			repair_io_failure(fs_info, start, failrec->len,
+					  failrec->logical, page,
+					  failrec->failed_mirror);
 		}
-		ret = 0;
 	}
 
 out:
-	if (!ret)
-		ret = free_io_failure(inode, failrec, did_repair);
+	free_io_failure(inode, failrec);
 
-	return ret;
+	return 0;
+}
+
+void btrfs_free_io_failure_record(struct inode *inode, u64 start, u64 end)
+{
+	struct extent_io_tree *failure_tree = &BTRFS_I(inode)->io_failure_tree;
+	struct io_failure_record *failrec;
+	struct extent_state *state, *next;
+
+	if (RB_EMPTY_ROOT(&failure_tree->state))
+		return;
+
+	spin_lock(&failure_tree->lock);
+	state = find_first_extent_bit_state(failure_tree, start, EXTENT_DIRTY);
+	while (state) {
+		if (state->start > end)
+			break;
+
+		ASSERT(state->end <= end);
+
+		next = next_state(state);
+
+		failrec = (struct io_failure_record *)state->private;
+		free_extent_state(state);
+		kfree(failrec);
+
+		state = next;
+	}
+	spin_unlock(&failure_tree->lock);
 }
 
 static int bio_readpage_error(struct bio *failed_bio, u64 phy_offset,
@@ -1972,13 +1993,14 @@ static int bio_readpage_error(struct bio *failed_bio, u64 phy_offset,
 			 failrec->in_validation);
 		 
 	}
+
 	num_copies = btrfs_num_copies(BTRFS_I(inode)->root->fs_info,
 				      failrec->logical, failrec->len);
 	if (num_copies == 1) {
 		 
 		pr_debug("bio_readpage_error: cannot repair, num_copies=%d, next_mirror %d, failed_mirror %d\n",
 			 num_copies, failrec->this_mirror, failed_mirror);
-		free_io_failure(inode, failrec, 0);
+		free_io_failure(inode, failrec);
 		return -EIO;
 	}
 
@@ -2005,13 +2027,13 @@ static int bio_readpage_error(struct bio *failed_bio, u64 phy_offset,
 	if (failrec->this_mirror > num_copies) {
 		pr_debug("bio_readpage_error: (fail) num_copies=%d, next_mirror %d, failed_mirror %d\n",
 			 num_copies, failrec->this_mirror, failed_mirror);
-		free_io_failure(inode, failrec, 0);
+		free_io_failure(inode, failrec);
 		return -EIO;
 	}
 
 	bio = btrfs_io_bio_alloc(GFP_NOFS, 1);
 	if (!bio) {
-		free_io_failure(inode, failrec, 0);
+		free_io_failure(inode, failrec);
 		return -EIO;
 	}
 	bio->bi_end_io = failed_bio->bi_end_io;
@@ -2041,6 +2063,11 @@ static int bio_readpage_error(struct bio *failed_bio, u64 phy_offset,
 	ret = tree->ops->submit_bio_hook(inode, read_mode, bio,
 					 failrec->this_mirror,
 					 failrec->bio_flags, 0);
+	if (ret) {
+		free_io_failure(inode, failrec);
+		bio_put(bio);
+	}
+
 	return ret;
 }
 
@@ -2131,7 +2158,6 @@ static void end_bio_extent_readpage(struct bio *bio, int err)
 	u64 extent_len = 0;
 	int mirror;
 	int ret;
-
 	if (err)
 		uptodate = 0;
 
@@ -2461,7 +2487,7 @@ static int __do_readpage(struct extent_io_tree *tree,
 	sector_t sector;
 	struct extent_map *em;
 	struct block_device *bdev;
-	int ret;
+	int ret = 0;
 	int nr = 0;
 	int parent_locked = *bio_flags & EXTENT_BIO_PARENT_LOCKED;
 	size_t pg_offset = 0;
@@ -2599,6 +2625,7 @@ static int __do_readpage(struct extent_io_tree *tree,
 			SetPageError(page);
 			if (!parent_locked)
 				unlock_extent(tree, cur, cur + iosize - 1);
+			goto out;
 		}
 		cur = cur + iosize;
 		pg_offset += iosize;
@@ -2609,7 +2636,7 @@ out:
 			SetPageUptodate(page);
 		unlock_page(page);
 	}
-	return 0;
+	return ret;
 }
 
 static inline void __do_contiguous_readpages(struct extent_io_tree *tree,
@@ -4449,6 +4476,7 @@ int read_extent_buffer_pages(struct extent_io_tree *tree,
 			all_uptodate = 0;
 		}
 	}
+
 	if (all_uptodate) {
 		if (start_i == 0)
 			set_bit(EXTENT_BUFFER_UPTODATE, &eb->bflags);
@@ -4460,14 +4488,24 @@ int read_extent_buffer_pages(struct extent_io_tree *tree,
 	atomic_set(&eb->io_pages, num_reads);
 	for (i = start_i; i < num_pages; i++) {
 		page = extent_buffer_page(eb, i);
+
 		if (!PageUptodate(page)) {
+			if (ret) {
+				atomic_dec(&eb->io_pages);
+				unlock_page(page);
+				continue;
+			}
+
 			ClearPageError(page);
 			err = __extent_read_full_page(tree, page,
 						      get_extent, &bio,
 						      mirror_num, &bio_flags,
 						      READ | REQ_META);
-			if (err)
+			if (err) {
 				ret = err;
+				 
+				atomic_dec(&eb->io_pages);
+			}
 		} else {
 			unlock_page(page);
 		}
@@ -4585,7 +4623,7 @@ int map_private_extent_buffer(struct extent_buffer *eb, unsigned long start,
 		PAGE_CACHE_SHIFT;
 
 	if (i != end_i)
-		return -EINVAL;
+		return 1;
 
 	if (i == 0) {
 		offset = start_offset;

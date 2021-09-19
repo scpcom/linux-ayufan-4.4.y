@@ -33,6 +33,16 @@ static inline struct inode *d_inode(const struct dentry *dentry)
 	return dentry->d_inode;
 }
 
+static inline bool d_really_is_positive(const struct dentry *dentry)
+{
+	return dentry->d_inode != NULL;
+}
+
+static inline bool d_really_is_negative(const struct dentry *dentry)
+{
+	return dentry->d_inode == NULL;
+}
+
 static inline void inode_lock(struct inode *inode)
 {
 	mutex_lock(&inode->i_mutex);

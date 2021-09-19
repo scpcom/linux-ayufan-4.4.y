@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
  
 #include <linux/proc_fs.h>
 #include <linux/smp.h>
@@ -247,7 +244,7 @@ static int __ref _cpu_down(unsigned int cpu, int tasks_frozen)
 	err = __stop_machine(take_cpu_down, &tcd_param, cpumask_of(cpu));
 	if (err) {
 		 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIX_SMPBOOT_RACE
 		 
 #else  
 		smpboot_unpark_threads(cpu);
@@ -293,7 +290,7 @@ out:
 EXPORT_SYMBOL(cpu_down);
 #endif  
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIX_SMPBOOT_RACE
  
 static int smpboot_thread_call(struct notifier_block *nfb,
 			       unsigned long action, void *hcpu)
@@ -362,7 +359,7 @@ static int __cpuinit _cpu_up(unsigned int cpu, int tasks_frozen)
 		goto out_notify;
 	BUG_ON(!cpu_online(cpu));
 
-#ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_FIX_SMPBOOT_RACE
 	 
 #else  
 	 

@@ -869,13 +869,8 @@ exit_free:
 	return err;
 }
 
-#ifdef MY_ABC_HERE
-static void update_backups(struct super_block *sb, int blk_off, char *data,
-			   int size, int meta_bg, int group_num)
-#else
-static void update_backups(struct super_block *sb, int blk_off, char *data,
+static void update_backups(struct super_block *sb, sector_t blk_off, char *data,
 			   int size, int meta_bg)
-#endif  
 {
 	struct ext4_sb_info *sbi = EXT4_SB(sb);
 	ext4_group_t last;
@@ -883,11 +878,7 @@ static void update_backups(struct super_block *sb, int blk_off, char *data,
 	unsigned three = 1;
 	unsigned five = 5;
 	unsigned seven = 7;
-#ifdef MY_ABC_HERE
-	ext4_group_t group = meta_bg ? group_num : 0;
-#else
 	ext4_group_t group = 0;
-#endif  
 	int rest = sb->s_blocksize - size;
 	handle_t *handle;
 	int err = 0, err2;
@@ -1229,7 +1220,7 @@ exit_journal:
 				EXT4_FEATURE_INCOMPAT_META_BG);
 		sector_t old_gdb = 0;
 
-#ifdef MY_ABC_HERE
+#ifdef CONFIG_SYNO_EXT4_META_BG_BACKUP_DESC_FIX
 		update_backups(sb, sbi->s_sbh->b_blocknr, (char *)es,
 			       sizeof(struct ext4_super_block), 0, 0);
 #else
@@ -1242,7 +1233,7 @@ exit_journal:
 			gdb_bh = sbi->s_group_desc[gdb_num];
 			if (old_gdb == gdb_bh->b_blocknr)
 				continue;
-#ifdef MY_ABC_HERE
+#ifdef CONFIG_SYNO_EXT4_META_BG_BACKUP_DESC_FIX
 			update_backups(sb, gdb_bh->b_blocknr, gdb_bh->b_data,
 				       gdb_bh->b_size, meta_bg, group);
 #else
@@ -1426,7 +1417,7 @@ errout:
 		if (test_opt(sb, DEBUG))
 			printk(KERN_DEBUG "EXT4-fs: extended group to %llu "
 			       "blocks\n", ext4_blocks_count(es));
-#ifdef MY_ABC_HERE
+#ifdef CONFIG_SYNO_EXT4_META_BG_BACKUP_DESC_FIX
 		update_backups(sb, EXT4_SB(sb)->s_sbh->b_blocknr,
 			       (char *)es, sizeof(struct ext4_super_block), 0, 0);
 #else

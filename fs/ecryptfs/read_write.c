@@ -6,7 +6,7 @@
 #include <linux/pagemap.h>
 #include "ecryptfs_kernel.h"
 
-#ifdef MY_DEF_HERE
+#ifdef MY_ABC_HERE
 #include <linux/fsnotify.h>
 
 static ssize_t ecryptfs_kernel_write(struct file *file, const char *buf, size_t count, loff_t pos)
@@ -48,7 +48,7 @@ int ecryptfs_write_lower(struct inode *ecryptfs_inode, char *data,
 	lower_file = ecryptfs_inode_to_private(ecryptfs_inode)->lower_file;
 	if (!lower_file)
 		return -EIO;
-#ifdef MY_DEF_HERE
+#ifdef MY_ABC_HERE
 	rc = ecryptfs_kernel_write(lower_file, data, size, offset);
 #else
 	rc = kernel_write(lower_file, data, size, offset);

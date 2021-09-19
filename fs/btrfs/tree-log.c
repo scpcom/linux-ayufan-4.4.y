@@ -1549,9 +1549,6 @@ static noinline int check_item_in_log(struct btrfs_trans_handle *trans,
 	char *name;
 	struct inode *inode;
 	struct btrfs_key location;
-#ifdef MY_ABC_HERE
-	struct btrfs_key log_location;
-#endif  
 
 again:
 	eb = path->nodes[0];
@@ -1586,15 +1583,6 @@ again:
 						     dir_key->offset,
 						     name, name_len, 0);
 		}
-#ifdef MY_ABC_HERE
-		if (log_di && !IS_ERR(log_di)) {
-			btrfs_dir_item_key_to_cpu(eb, di, &location);
-			btrfs_dir_item_key_to_cpu(log_path->nodes[0], di, &log_location);
-			if (log_location.objectid != location.objectid) {
-				log_di = NULL;
-			}
-		}
-#endif  
 		if (!log_di || (IS_ERR(log_di) && PTR_ERR(log_di) == -ENOENT)) {
 			btrfs_dir_item_key_to_cpu(eb, di, &location);
 			btrfs_release_path(path);

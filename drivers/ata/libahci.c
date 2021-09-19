@@ -27,6 +27,9 @@
 extern void syno_ledtrig_active_set(int iLedNum);
 extern int *gpGreenLedMap;
 #endif  
+#ifdef MY_ABC_HERE
+#include <linux/synolib.h>
+#endif  
 
 static int ahci_skip_host_reset;
 int ahci_ignore_sss;
@@ -254,9 +257,6 @@ struct device_attribute *ahci_sdev_attrs[] = {
 	&dev_attr_unload_heads,
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_wcache,
-#endif  
-#ifdef CONFIG_SYNO_SATA_DISK_SERIAL
-	&dev_attr_syno_disk_serial,
 #endif  
 #ifdef MY_ABC_HERE
 	&dev_attr_sw_locate,
@@ -574,7 +574,11 @@ void ahci_save_initial_config(struct device *dev,
 		}
 	}
 
+#ifdef MY_ABC_HERE
 	if (!port_map) {
+#else  
+	if (!port_map && vers < 0x10300) {
+#endif  
 		port_map = (1 << ahci_nr_ports(cap)) - 1;
 		dev_warn(dev, "forcing PORTS_IMPL to 0x%x\n", port_map);
 
@@ -890,6 +894,25 @@ END:
 	return ret;
 }
 EXPORT_SYMBOL(syno_ahci_disk_led_enable);
+
+#ifdef MY_ABC_HERE
+ 
+int syno_ahci_disk_led_enable_by_port(const unsigned short diskPort, const int iValue)
+{
+	int i = 0;
+	unsigned short scsiHostNum = 0;
+	 
+	for (i = 0; i < SATA_REMAP_MAX; i++) {
+		if ((unsigned short)syno_get_remap_idx(i) == (diskPort - 1)) {
+			scsiHostNum = (unsigned short) i;
+			break;
+		}
+	}
+
+	return syno_ahci_disk_led_enable(scsiHostNum, iValue);
+}
+EXPORT_SYMBOL(syno_ahci_disk_led_enable_by_port);
+#endif  
 #endif  
 
 static void ahci_start_port(struct ata_port *ap)
@@ -1412,6 +1435,14 @@ static int ahci_exec_polled_cmd(struct ata_port *ap, int pmp,
 	ata_tf_to_fis(tf, pmp, is_cmd, fis);
 	ahci_fill_cmd_slot(pp, 0, cmd_fis_len | flags | (pmp << 12));
 
+	if (pp->fbs_enabled && pp->fbs_last_dev != pmp) {
+		tmp = readl(port_mmio + PORT_FBS);
+		tmp &= ~(PORT_FBS_DEV_MASK | PORT_FBS_DEC);
+		tmp |= pmp << PORT_FBS_DEV_OFFSET;
+		writel(tmp, port_mmio + PORT_FBS);
+		pp->fbs_last_dev = pmp;
+	}
+
 	writel(1, port_mmio + PORT_CMD_ISSUE);
 
 	if (timeout_msec) {
@@ -1651,24 +1682,38 @@ int sata_syno_ahci_defer_cmd(struct ata_queued_cmd *qc)
 {
 	struct ata_link *link = qc->dev->link;
 	struct ata_port *ap = link->ap;
+	u8 prot = qc->tf.protocol;
 
-	if (ap->excl_link == NULL || ap->excl_link == link) {
-		if (ap->nr_active_links == 0 || ata_link_active(link)) {
+	int is_excl = (ata_is_atapi(prot) ||
+		       (qc->flags & ATA_QCFLAG_RESULT_TF));
+
+	if (unlikely(ap->excl_link)) {
+		if (link == ap->excl_link) {
+			if (ap->nr_active_links)
+				return ATA_DEFER_PORT;
 			qc->flags |= ATA_QCFLAG_CLEAR_EXCL;
-			return ata_std_qc_defer(qc);
+		} else {
+			if (!ap->nr_active_links) {
+				 
+				if (is_excl) {
+					ap->excl_link = link;
+					qc->flags |= ATA_QCFLAG_CLEAR_EXCL;
+				} else {
+					 
+					ap->excl_link = NULL;
+				}
+			} else {
+				return ATA_DEFER_PORT;
+			}
 		}
-
+	} else if (unlikely(is_excl)) {
 		ap->excl_link = link;
-	} else {
-		 
-		if (!ap->nr_active_links) {
-			ap->excl_link = link;
-			qc->flags |= ATA_QCFLAG_CLEAR_EXCL;
-			return ata_std_qc_defer(qc);
-		}
+		if (ap->nr_active_links)
+			return ATA_DEFER_PORT;
+		qc->flags |= ATA_QCFLAG_CLEAR_EXCL;
 	}
 
-	return ATA_DEFER_PORT;
+	return ata_std_qc_defer(qc);
 }
 EXPORT_SYMBOL_GPL(sata_syno_ahci_defer_cmd);
 #endif  
@@ -1877,7 +1922,7 @@ static void ahci_handle_port_interrupt(struct ata_port *ap,
 	if (unlikely(resetting))
 		status &= ~PORT_IRQ_BAD_PMP;
 
-	if (ap->link.lpm_policy > ATA_LPM_MAX_POWER) {
+	if (sata_lpm_ignore_phy_events(&ap->link)) {
 		status &= ~PORT_IRQ_PHYRDY;
 		ahci_scr_write(&ap->link, SCR_ERROR, SERR_PHYRDY_CHG);
 	}
@@ -1888,7 +1933,7 @@ static void ahci_handle_port_interrupt(struct ata_port *ap,
 	}
 
 	if (status & PORT_IRQ_SDB_FIS) {
-		 
+			 
 		if (hpriv->cap & HOST_CAP_SNTF)
 			sata_async_notification(ap);
 		else {

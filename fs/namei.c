@@ -34,6 +34,9 @@
 #endif  
 #include "internal.h"
 #include "mount.h"
+#ifdef MY_ABC_HERE
+extern struct rw_semaphore namespace_sem;
+#endif  
 
 #ifdef MY_ABC_HERE
 int syno_utf8chr_to_utf16chr(u_int16_t *p, const u_int8_t *s, int n);
@@ -1223,14 +1226,9 @@ int follow_down(struct path *path)
 }
 
 #ifdef MY_ABC_HERE
-static void follow_mount(struct nameidata *nd)
-#else
-static void follow_mount(struct path *path)
-#endif  
+static void follow_mount_with_nameidata(struct nameidata *nd)
 {
-#ifdef MY_ABC_HERE
 	struct path *path = &nd->path;
-#endif  
 	while (d_mountpoint(path->dentry)) {
 		struct vfsmount *mounted = lookup_mnt(path);
 		if (!mounted)
@@ -1239,9 +1237,21 @@ static void follow_mount(struct path *path)
 		mntput(path->mnt);
 		path->mnt = mounted;
 		path->dentry = dget(mounted->mnt_root);
-#ifdef MY_ABC_HERE
 		nd->flags |= LOOKUP_MOUNTED;
+	}
+}
 #endif  
+
+static void follow_mount(struct path *path)
+{
+	while (d_mountpoint(path->dentry)) {
+		struct vfsmount *mounted = lookup_mnt(path);
+		if (!mounted)
+			break;
+		dput(path->dentry);
+		mntput(path->mnt);
+		path->mnt = mounted;
+		path->dentry = dget(mounted->mnt_root);
 	}
 }
 
@@ -1270,7 +1280,7 @@ static int follow_dotdot(struct nameidata *nd)
 			break;
 	}
 #ifdef MY_ABC_HERE
-	follow_mount(nd);
+	follow_mount_with_nameidata(nd);
 #else
 	follow_mount(&nd->path);
 #endif  
@@ -2290,6 +2300,146 @@ user_path_parent(int dfd, const char __user *path, struct nameidata *nd,
 
 	return s;
 }
+
+static int
+mountpoint_last(struct nameidata *nd, struct path *path)
+{
+	int error = 0;
+	struct dentry *dentry;
+	struct dentry *dir = nd->path.dentry;
+
+	if (nd->flags & LOOKUP_RCU) {
+		if (unlazy_walk(nd, NULL)) {
+			error = -ECHILD;
+			goto out;
+		}
+	}
+
+	nd->flags &= ~LOOKUP_PARENT;
+
+	if (unlikely(nd->last_type != LAST_NORM)) {
+		error = handle_dots(nd, nd->last_type);
+		if (error)
+			goto out;
+		dentry = dget(nd->path.dentry);
+		goto done;
+	}
+
+	mutex_lock(&dir->d_inode->i_mutex);
+	dentry = d_lookup(dir, &nd->last);
+	if (!dentry) {
+		 
+		dentry = d_alloc(dir, &nd->last);
+		if (!dentry) {
+			error = -ENOMEM;
+			mutex_unlock(&dir->d_inode->i_mutex);
+			goto out;
+		}
+		dentry = lookup_real(dir->d_inode, dentry, nd->flags);
+		error = PTR_ERR(dentry);
+		if (IS_ERR(dentry)) {
+			mutex_unlock(&dir->d_inode->i_mutex);
+			goto out;
+		}
+	}
+	mutex_unlock(&dir->d_inode->i_mutex);
+
+done:
+	if (!dentry->d_inode) {
+		error = -ENOENT;
+		dput(dentry);
+		goto out;
+	}
+	path->dentry = dentry;
+	path->mnt = mntget(nd->path.mnt);
+	if (should_follow_link(dentry->d_inode, nd->flags & LOOKUP_FOLLOW))
+		return 1;
+	follow_mount(path);
+	error = 0;
+out:
+	terminate_walk(nd);
+	return error;
+}
+
+static int
+path_mountpoint(int dfd, const char *name, struct path *path, unsigned int flags)
+{
+	struct file *base = NULL;
+	struct nameidata nd;
+	int err;
+
+	err = path_init(dfd, name, flags | LOOKUP_PARENT, &nd, &base);
+	if (unlikely(err))
+		return err;
+
+	current->total_link_count = 0;
+	err = link_path_walk(name, &nd);
+	if (err)
+		goto out;
+
+	err = mountpoint_last(&nd, path);
+	while (err > 0) {
+		void *cookie;
+		struct path link = *path;
+		err = may_follow_link(&link, &nd);
+		if (unlikely(err))
+			break;
+		nd.flags |= LOOKUP_PARENT;
+		err = follow_link(&link, &nd, &cookie);
+		if (err)
+			break;
+		err = mountpoint_last(&nd, path);
+		put_link(&nd, &link, cookie);
+	}
+out:
+	if (base)
+		fput(base);
+
+	if (nd.root.mnt && !(nd.flags & LOOKUP_ROOT))
+		path_put(&nd.root);
+
+	return err;
+}
+
+static int
+filename_mountpoint(int dfd, struct filename *s, struct path *path,
+			unsigned int flags)
+{
+#ifdef MY_ABC_HERE
+	int error = path_mountpoint(dfd, s->name, path, flags);
+#else
+	int error = path_mountpoint(dfd, s->name, path, flags | LOOKUP_RCU);
+	if (unlikely(error == -ECHILD))
+		error = path_mountpoint(dfd, s->name, path, flags);
+#endif  
+	if (unlikely(error == -ESTALE))
+		error = path_mountpoint(dfd, s->name, path, flags | LOOKUP_REVAL);
+	if (likely(!error))
+		audit_inode(s, path->dentry, 0);
+	return error;
+}
+
+int
+user_path_mountpoint_at(int dfd, const char __user *name, unsigned int flags,
+			struct path *path)
+{
+	struct filename *s = getname(name);
+	int error;
+	if (IS_ERR(s))
+		return PTR_ERR(s);
+	error = filename_mountpoint(dfd, s, path, flags);
+	putname(s);
+	return error;
+}
+
+int
+kern_path_mountpoint(int dfd, const char *name, struct path *path,
+			unsigned int flags)
+{
+	struct filename s = {.name = name};
+	return filename_mountpoint(dfd, &s, path, flags);
+}
+EXPORT_SYMBOL(kern_path_mountpoint);
 
 static inline int check_sticky(struct inode *dir, struct inode *inode)
 {
@@ -3907,6 +4057,7 @@ inline struct synotify_rename_path * get_rename_path_list(struct dentry *old_den
 		return NULL;
 	}
 
+	down_read(&namespace_sem);
 	list_for_each(list_head, &mnt_space->list) {
 		struct mount *mnt = list_entry(list_head, struct mount, mnt_list);
 		struct synotify_rename_path *rename_path = NULL;
@@ -3946,6 +4097,7 @@ inline struct synotify_rename_path * get_rename_path_list(struct dentry *old_den
 			}
 		}
 	}  
+	up_read(&namespace_sem);
 
 	return head;
 }

@@ -37,11 +37,17 @@ struct btrfs_transaction {
 	struct list_head pending_snapshots;
 	struct list_head pending_chunks;
 	struct list_head switch_commits;
+	struct list_head dirty_bgs;
+	struct list_head io_bgs;
+
+	struct mutex cache_write_mutex;
+	spinlock_t dirty_bgs_lock;
 	struct btrfs_delayed_ref_root delayed_refs;
 	int aborted;
 #ifdef MY_ABC_HERE
 	bool clear_full;
 #endif
+	int dirty_bg_run;
 };
 
 #define __TRANS_FREEZABLE	(1U << 0)

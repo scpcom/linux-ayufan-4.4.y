@@ -2156,7 +2156,6 @@ static void layout_symtab(struct module *mod, struct load_info *info)
 					 info->index.str) | INIT_OFFSET_MASK;
 	pr_debug("\t%s\n", info->secstrings + strsect->sh_name);
 
-	/* We'll tack temporary mod_kallsyms on the end. */
 	mod->init_size = ALIGN(mod->init_size,
 			       __alignof__(struct mod_kallsyms));
 	info->mod_kallsyms_init_off = mod->init_size;
@@ -2164,11 +2163,6 @@ static void layout_symtab(struct module *mod, struct load_info *info)
 	mod->init_size = debug_align(mod->init_size);
 }
 
-/*
- * We use the full symtab and strtab which layout_symtab arranged to
- * be appended to the init section.  Later we switch to the cut-down
- * core-only ones.
- */
 static void add_kallsyms(struct module *mod, const struct load_info *info)
 {
 	unsigned int i, ndst;
@@ -2853,7 +2847,7 @@ static int do_init_module(struct module *mod)
 	module_put(mod);
 	trim_init_extable(mod);
 #ifdef CONFIG_KALLSYMS
-	/* Switch to core kallsyms now init is done: kallsyms may be walking! */
+	 
 	rcu_assign_pointer(mod->kallsyms, &mod->core_kallsyms);
 #endif
 	unset_module_init_ro_nx(mod);
@@ -3305,7 +3299,7 @@ int module_kallsyms_on_each_symbol(int (*fn)(void *, const char *,
 	int ret;
 
 	list_for_each_entry(mod, &modules, list) {
-		/* We hold module_mutex: no need for rcu_dereference_sched */
+		 
 		struct mod_kallsyms *kallsyms = mod->kallsyms;
 
 		if (mod->state == MODULE_STATE_UNFORMED)

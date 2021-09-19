@@ -1556,6 +1556,10 @@ bool blk_update_request(struct request *req, int error, unsigned int nr_bytes)
 {
 	int total_bytes;
 
+#ifdef MY_ABC_HERE
+	static unsigned long long blk_rq_pos_last = 0;
+#endif  
+
 	if (!req->bio)
 		return false;
 
@@ -1584,14 +1588,24 @@ bool blk_update_request(struct request *req, int error, unsigned int nr_bytes)
 			break;
 		}
 #ifdef MY_ABC_HERE
-		if (printk_ratelimit()) {
-#endif  
+		if (blk_rq_pos_last == (unsigned long long)blk_rq_pos(req)) {
+			printk_ratelimited(KERN_ERR "end_request: %s error, dev %s, sector %llu\n",
+					error_type, req->rq_disk ?
+					req->rq_disk->disk_name : "?",
+					blk_rq_pos_last);
+		} else {
+			blk_rq_pos_last = (unsigned long long)blk_rq_pos(req);
+			printk_ratelimited(KERN_ERR "end_request: %s error, dev %s, sector in range %llu + 0-2(%d)\n",
+					error_type, req->rq_disk ?
+					req->rq_disk->disk_name : "?",
+					(blk_rq_pos_last >> CONFIG_SYNO_IO_ERROR_LIMIT_MSG_SHIFT) << CONFIG_SYNO_IO_ERROR_LIMIT_MSG_SHIFT,
+					CONFIG_SYNO_IO_ERROR_LIMIT_MSG_SHIFT);
+		}
+#else
 		printk_ratelimited(KERN_ERR "end_request: %s error, dev %s, sector %llu\n",
 				   error_type, req->rq_disk ?
 				   req->rq_disk->disk_name : "?",
 				   (unsigned long long)blk_rq_pos(req));
-#ifdef MY_ABC_HERE
-		}
 #endif  
 
 	}

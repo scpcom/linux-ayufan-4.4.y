@@ -70,6 +70,7 @@ static void ext4_clear_request_list(void);
 static int ext4_reserve_clusters(struct ext4_sb_info *, ext4_fsblk_t);
 
 #ifdef MY_ABC_HERE
+struct kmem_cache *ext4_syno_caseless_cachep;
 extern struct dentry_operations ext4_dentry_operations;
 
 spinlock_t ext4_namei_buf_lock;   
@@ -366,8 +367,11 @@ static void __save_error_info(struct super_block *sb, const char *func,
 	 
 	if ((0 != strcmp(es->s_last_mounted, "/"))
 			&& (0 == sbi->s_new_error_fs_event_flag)
+			&& (sbi->s_last_notify_time == 0 ||
+			    time_after(jiffies, sbi->s_last_notify_time + 24*60*60*HZ))
 			&& (es->s_syno_hash_magic == cpu_to_le32(SYNO_HASH_MAGIC))) {
 		sbi->s_new_error_fs_event_flag = 1;
+		sbi->s_last_notify_time = jiffies;
 		SYNOExt4GetDSMVersion(es->s_volume_name, szDsmVersion);
 		if ('\0' != szDsmVersion[0]) {
 			SynoAutoErrorFsReport(szDsmVersion ,(unsigned int)es->s_error_count);
@@ -445,8 +449,13 @@ void __ext4_error(struct super_block *sb, const char *function,
 	va_start(args, fmt);
 	vaf.fmt = fmt;
 	vaf.va = &args;
+#ifdef MY_ABC_HERE
+	printk_ratelimited(KERN_CRIT "EXT4-fs error (device %s): %s:%d: comm %s: %pV\n",
+	       sb->s_id, function, line, current->comm, &vaf);
+#else
 	printk(KERN_CRIT "EXT4-fs error (device %s): %s:%d: comm %s: %pV\n",
 	       sb->s_id, function, line, current->comm, &vaf);
+#endif  
 	va_end(args);
 	save_error_info(sb, function, line);
 
@@ -468,15 +477,29 @@ void ext4_error_inode(struct inode *inode, const char *function,
 	vaf.fmt = fmt;
 	vaf.va = &args;
 	if (block)
+#ifdef MY_ABC_HERE
+		printk_ratelimited(KERN_CRIT "EXT4-fs error (device %s): %s:%d: "
+		       "inode #%lu: block %llu: comm %s: %pV\n",
+		       inode->i_sb->s_id, function, line, inode->i_ino,
+		       block, current->comm, &vaf);
+#else
 		printk(KERN_CRIT "EXT4-fs error (device %s): %s:%d: "
 		       "inode #%lu: block %llu: comm %s: %pV\n",
 		       inode->i_sb->s_id, function, line, inode->i_ino,
 		       block, current->comm, &vaf);
+#endif  
 	else
+#ifdef MY_ABC_HERE
+		printk_ratelimited(KERN_CRIT "EXT4-fs error (device %s): %s:%d: "
+		       "inode #%lu: comm %s: %pV\n",
+		       inode->i_sb->s_id, function, line, inode->i_ino,
+		       current->comm, &vaf);
+#else
 		printk(KERN_CRIT "EXT4-fs error (device %s): %s:%d: "
 		       "inode #%lu: comm %s: %pV\n",
 		       inode->i_sb->s_id, function, line, inode->i_ino,
 		       current->comm, &vaf);
+#endif  
 	va_end(args);
 
 	ext4_handle_error(inode->i_sb);
@@ -561,8 +584,13 @@ void __ext4_std_error(struct super_block *sb, const char *function,
 		return;
 
 	errstr = ext4_decode_error(sb, errno, nbuf);
+#ifdef MY_ABC_HERE
+	printk_ratelimited(KERN_CRIT "EXT4-fs error (device %s) in %s:%d: %s\n",
+	       sb->s_id, function, line, errstr);
+#else
 	printk(KERN_CRIT "EXT4-fs error (device %s) in %s:%d: %s\n",
 	       sb->s_id, function, line, errstr);
+#endif  
 	save_error_info(sb, function, line);
 
 	ext4_handle_error(sb);
@@ -618,8 +646,13 @@ void __ext4_warning(struct super_block *sb, const char *function,
 	va_start(args, fmt);
 	vaf.fmt = fmt;
 	vaf.va = &args;
+#ifdef MY_ABC_HERE
+	printk_ratelimited(KERN_WARNING "EXT4-fs warning (device %s): %s:%d: %pV\n",
+	       sb->s_id, function, line, &vaf);
+#else
 	printk(KERN_WARNING "EXT4-fs warning (device %s): %s:%d: %pV\n",
 	       sb->s_id, function, line, &vaf);
+#endif  
 	va_end(args);
 }
 
@@ -746,6 +779,11 @@ static void ext4_put_super(struct super_block *sb)
 
 	flush_workqueue(sbi->dio_unwritten_wq);
 	destroy_workqueue(sbi->dio_unwritten_wq);
+#ifdef MY_ABC_HERE
+	if (sbi->group_desc_readahead_wq) {
+		destroy_workqueue(sbi->group_desc_readahead_wq);
+	}
+#endif  
 
 	if (sbi->s_journal) {
 		err = jbd2_journal_destroy(sbi->s_journal);
@@ -829,6 +867,7 @@ static struct inode *ext4_alloc_inode(struct super_block *sb)
 		return NULL;
 
 	ei->vfs_inode.i_version = 1;
+	spin_lock_init(&ei->i_raw_lock);
 	INIT_LIST_HEAD(&ei->i_prealloc_list);
 	spin_lock_init(&ei->i_prealloc_lock);
 	ext4_es_init_tree(&ei->i_es_tree);
@@ -3238,6 +3277,74 @@ static int ext4_reserve_clusters(struct ext4_sb_info *sbi, ext4_fsblk_t count)
 	return 0;
 }
 
+#ifdef MY_ABC_HERE
+struct group_desc_reada_arg {
+	struct super_block *sb;
+	ext4_fsblk_t logical_sb_block;
+	unsigned int db_count;
+	unsigned int current_nr;
+};
+
+struct group_desc_reada {
+	struct super_block *sb;
+	ext4_fsblk_t logical_sb_block;
+	unsigned int nr;
+	struct work_struct work;
+};
+
+static void group_desc_reada_start(struct work_struct *work)
+{
+	struct group_desc_reada *group_desc_reada;
+	struct ext4_sb_info *sbi;
+	struct buffer_head *bh = NULL;
+	ext4_fsblk_t block;
+
+	group_desc_reada = container_of(work, struct group_desc_reada, work);
+	sbi = EXT4_SB(group_desc_reada->sb);
+	block = descriptor_loc(group_desc_reada->sb, group_desc_reada->logical_sb_block, group_desc_reada->nr);
+	bh = sb_bread(group_desc_reada->sb, block);
+	if (bh != NULL) {
+		brelse(bh);
+	}
+	kfree(group_desc_reada);
+	atomic_dec(&sbi->reada_group_desc_threads);
+}
+
+#define READA_GROUP_DESC_THREAD_MAX 30
+ 
+static void reada_group_desc_block(struct group_desc_reada_arg* group_desc_reada_arg)
+{
+	struct ext4_sb_info *sbi;
+	struct group_desc_reada *group_desc_reada;
+	int i;
+
+	if (group_desc_reada_arg->current_nr >= group_desc_reada_arg->db_count) {
+		return;
+	}
+
+	sbi = EXT4_SB(group_desc_reada_arg->sb);
+	for (i = 0; i + atomic_read(&sbi->reada_group_desc_threads) < READA_GROUP_DESC_THREAD_MAX; i++) {
+		group_desc_reada = kmalloc(sizeof(struct group_desc_reada), GFP_NOFS);
+		if (!group_desc_reada) {
+			return;
+		}
+
+		group_desc_reada->sb = group_desc_reada_arg->sb;
+		group_desc_reada->logical_sb_block = group_desc_reada_arg->logical_sb_block;
+		group_desc_reada->nr = group_desc_reada_arg->current_nr;
+
+		INIT_WORK(&group_desc_reada->work, group_desc_reada_start);
+		queue_work(sbi->group_desc_readahead_wq, &group_desc_reada->work);
+		atomic_inc(&sbi->reada_group_desc_threads);
+
+		group_desc_reada_arg->current_nr++;
+		if (group_desc_reada_arg->current_nr >= group_desc_reada_arg->db_count) {
+			return;
+		}
+	}
+}
+#endif  
+
 static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 {
 	char *orig_data = kstrdup(data, GFP_KERNEL);
@@ -3262,6 +3369,9 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 	int err = 0;
 	unsigned int journal_ioprio = DEFAULT_JOURNAL_IOPRIO;
 	ext4_group_t first_not_zeroed;
+#ifdef MY_ABC_HERE
+	struct group_desc_reada_arg group_desc_reada_arg;
+#endif  
 
 	sbi = kzalloc(sizeof(*sbi), GFP_KERNEL);
 	if (!sbi)
@@ -3697,7 +3807,23 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 
 	bgl_lock_init(sbi->s_blockgroup_lock);
 
+#ifdef MY_ABC_HERE
+	EXT4_SB(sb)->group_desc_readahead_wq =
+		alloc_workqueue("ext4-group-desc-readahead", WQ_MEM_RECLAIM | WQ_UNBOUND, min_t(unsigned long, num_online_cpus() + 2, 8));
+
+	group_desc_reada_arg.sb = sb;
+	group_desc_reada_arg.logical_sb_block = logical_sb_block;
+	group_desc_reada_arg.db_count = db_count;
+	group_desc_reada_arg.current_nr = 0;
+	atomic_set(&sbi->reada_group_desc_threads, 0);
+#endif  
+
 	for (i = 0; i < db_count; i++) {
+#ifdef MY_ABC_HERE
+		if (EXT4_SB(sb)->group_desc_readahead_wq) {
+			reada_group_desc_block(&group_desc_reada_arg);
+		}
+#endif  
 		block = descriptor_loc(sb, logical_sb_block, i);
 		sbi->s_group_desc[i] = sb_bread(sb, block);
 		if (!sbi->s_group_desc[i]) {
@@ -4064,6 +4190,11 @@ failed_mount3:
 	if (sbi->s_mmp_tsk)
 		kthread_stop(sbi->s_mmp_tsk);
 failed_mount2:
+#ifdef MY_ABC_HERE
+	if (EXT4_SB(sb)->group_desc_readahead_wq) {
+		destroy_workqueue(EXT4_SB(sb)->group_desc_readahead_wq);
+	}
+#endif  
 	for (i = 0; i < db_count; i++)
 		brelse(sbi->s_group_desc[i]);
 	ext4_kvfree(sbi->s_group_desc);
@@ -4330,8 +4461,14 @@ static int ext4_commit_super(struct super_block *sb, int sync)
 		return error;
 	if (buffer_write_io_error(sbh)) {
 		 
+#ifdef MY_ABC_HERE
+		if (printk_ratelimit()) {
+#endif  
 		ext4_msg(sb, KERN_ERR, "previous I/O error to "
 		       "superblock detected");
+#ifdef MY_ABC_HERE
+		}
+#endif  
 		clear_buffer_write_io_error(sbh);
 		set_buffer_uptodate(sbh);
 	}
@@ -5221,12 +5358,24 @@ static int __init ext4_init_fs(void)
 		goto out1;
 	register_as_ext3();
 	register_as_ext2();
+
+#ifdef MY_ABC_HERE
+	ext4_syno_caseless_cachep = kmem_cache_create("ext4_syno_caseless",
+			(NAME_MAX+1)*2, 0,
+			SLAB_RECLAIM_ACCOUNT | SLAB_MEM_SPREAD, NULL);
+	if (!ext4_syno_caseless_cachep)
+		goto out;
+#endif
 	err = register_filesystem(&ext4_fs_type);
 	if (err)
 		goto out;
 
 	return 0;
 out:
+
+#ifdef MY_ABC_HERE
+	kmem_cache_destroy(ext4_syno_caseless_cachep);
+#endif
 	unregister_as_ext2();
 	unregister_as_ext3();
 	destroy_inodecache();
@@ -5253,6 +5402,9 @@ out7:
 static void __exit ext4_exit_fs(void)
 {
 	ext4_destroy_lazyinit_thread();
+#ifdef MY_ABC_HERE
+	kmem_cache_destroy(ext4_syno_caseless_cachep);
+#endif
 	unregister_as_ext2();
 	unregister_as_ext3();
 	unregister_filesystem(&ext4_fs_type);

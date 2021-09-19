@@ -294,6 +294,11 @@ struct Scsi_Host {
 
 	struct device *dma_dev;
 
+#ifdef MY_DEF_HERE
+	 
+	int isCacheSSD;
+#endif
+
 	unsigned long hostdata[0]   
 		__attribute__ ((aligned (sizeof(unsigned long))));
 };

@@ -18,6 +18,7 @@
 #ifdef CONFIG_USE_GENERIC_SMP_HELPERS
 enum {
 	CSD_FLAG_LOCK		= 0x01,
+	CSD_FLAG_WAIT		= 0x02,
 };
 
 struct call_function_data {
@@ -121,7 +122,7 @@ static void csd_lock(struct call_single_data *csd)
 
 static void csd_unlock(struct call_single_data *csd)
 {
-	WARN_ON(!(csd->flags & CSD_FLAG_LOCK));
+	WARN_ON((csd->flags & CSD_FLAG_WAIT) && !(csd->flags & CSD_FLAG_LOCK));
 
 	/*
 	 * ensure we're all done before releasing data:
@@ -136,12 +137,14 @@ static void csd_unlock(struct call_single_data *csd)
  * for execution on the given CPU. data must already have
  * ->func, ->info, and ->flags set.
  */
-static
-void generic_exec_single(int cpu, struct call_single_data *csd, int wait)
+static void generic_exec_single(int cpu, struct call_single_data *csd, int wait)
 {
 	struct call_single_queue *dst = &per_cpu(call_single_queue, cpu);
 	unsigned long flags;
 	int ipi;
+
+	if (wait)
+		csd->flags |= CSD_FLAG_WAIT;
 
 	raw_spin_lock_irqsave(&dst->lock, flags);
 	ipi = list_empty(&dst->list);
@@ -318,18 +321,18 @@ EXPORT_SYMBOL_GPL(smp_call_function_any);
 /**
  * __smp_call_function_single(): Run a function on a specific CPU
  * @cpu: The CPU to run on.
- * @data: Pre-allocated and setup data structure
+ * @csd: Pre-allocated and setup data structure
  * @wait: If true, wait until function has completed on specified CPU.
  *
  * Like smp_call_function_single(), but allow caller to pass in a
  * pre-allocated data structure. Useful for embedding @data inside
  * other structures, for instance.
  */
-void __smp_call_function_single(int cpu, struct call_single_data *csd,
-				int wait)
+int __smp_call_function_single(int cpu, struct call_single_data *csd, int wait)
 {
 	unsigned int this_cpu;
 	unsigned long flags;
+	int err = 0;
 
 	this_cpu = get_cpu();
 	/*
@@ -345,12 +348,16 @@ void __smp_call_function_single(int cpu, struct call_single_data *csd,
 		local_irq_save(flags);
 		csd->func(csd->info);
 		local_irq_restore(flags);
-	} else {
+	} else if ((unsigned)cpu < nr_cpu_ids && cpu_online(cpu)) {
 		csd_lock(csd);
 		generic_exec_single(cpu, csd, wait);
+	} else {
+		err = -ENXIO;	/* CPU not online */
 	}
 	put_cpu();
+	return err;
 }
+EXPORT_SYMBOL_GPL(__smp_call_function_single);
 
 /**
  * smp_call_function_many(): Run a function on a set of other CPUs.
@@ -586,8 +593,10 @@ EXPORT_SYMBOL(on_each_cpu);
  *
  * If @wait is true, then returns once @func has returned.
  *
- * You must not call this function with disabled interrupts or
- * from a hardware interrupt handler or from a bottom half handler.
+ * You must not call this function with disabled interrupts or from a
+ * hardware interrupt handler or from a bottom half handler.  The
+ * exception is that it may be used during early boot while
+ * early_boot_irqs_disabled is set.
  */
 void on_each_cpu_mask(const struct cpumask *mask, smp_call_func_t func,
 			void *info, bool wait)
@@ -596,9 +605,10 @@ void on_each_cpu_mask(const struct cpumask *mask, smp_call_func_t func,
 
 	smp_call_function_many(mask, func, info, wait);
 	if (cpumask_test_cpu(cpu, mask)) {
-		local_irq_disable();
+		unsigned long flags;
+		local_irq_save(flags);
 		func(info);
-		local_irq_enable();
+		local_irq_restore(flags);
 	}
 	put_cpu();
 }

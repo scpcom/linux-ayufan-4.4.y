@@ -56,6 +56,9 @@ struct stripe_head {
 		struct bio	req, rreq;
 		struct bio_vec	vec, rvec;
 		struct page	*page;
+#ifdef MY_ABC_HERE
+		struct page	*orig_page;
+#endif  
 		struct bio	*toread, *read, *towrite, *written;
 		sector_t	sector;			 
 		unsigned long	flags;
@@ -104,6 +107,9 @@ enum r5dev_flags {
 	R5_NeedReplace,	 
 	R5_WantReplace,  
 	R5_Discard,	 
+#ifdef MY_ABC_HERE
+	R5_SkipCopy,	 
+#endif  
 };
 
 enum {
@@ -209,6 +215,9 @@ struct r5conf {
 	int			bypass_count;  
 	int			bypass_threshold;  
 #ifdef MY_ABC_HERE
+	int			skip_copy;
+#endif  
+#ifdef MY_ABC_HERE
 	int         stripe_cache_memory_usage;
 #endif  
 	struct list_head	*last_hold;  
@@ -234,6 +243,11 @@ struct r5conf {
 	struct notifier_block	cpu_notify;
 #endif
 
+#ifdef MY_ABC_HERE
+	atomic_t            proxy_enable;
+	struct md_thread   *proxy_thread;
+#endif  
+	 
 	atomic_t		active_stripes;
 	struct list_head	inactive_list;
 	struct llist_head	released_stripes;
@@ -291,4 +305,9 @@ static inline int algorithm_is_DDF(int layout)
 extern int md_raid5_congested(struct mddev *mddev, int bits);
 extern void md_raid5_kick_device(struct r5conf *conf);
 extern int raid5_set_cache_size(struct mddev *mddev, int size);
+
+#ifdef MY_ABC_HERE
+#define sector_mod(a,b) sector_div(a,b)
+#endif  
+
 #endif

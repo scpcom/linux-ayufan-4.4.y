@@ -491,6 +491,7 @@ static int btree_readpage_end_io_hook(struct btrfs_io_bio *io_bio,
 		goto err;
 
 	eb->read_mirror = mirror;
+
 	if (test_bit(EXTENT_BUFFER_READ_ERR, &eb->bflags)) {
 		ret = -EIO;
 		goto err;
@@ -2184,6 +2185,7 @@ int open_ctree(struct super_block *sb,
 	mutex_init(&fs_info->transaction_kthread_mutex);
 	mutex_init(&fs_info->cleaner_mutex);
 	mutex_init(&fs_info->volume_mutex);
+	mutex_init(&fs_info->ro_block_group_mutex);
 	init_rwsem(&fs_info->commit_root_sem);
 	init_rwsem(&fs_info->cleanup_work_sem);
 	init_rwsem(&fs_info->subvol_sem);
@@ -2200,7 +2202,10 @@ int open_ctree(struct super_block *sb,
 #ifdef MY_ABC_HERE
 	fs_info->ordered_extent_nr = 0;
 	fs_info->delalloc_inodes_nr = 0;
-	fs_info->flushoncommit_threshold = 1000;
+	if (totalram_pages > ((2ULL*1024*1024*1024)/PAGE_SIZE))
+		fs_info->flushoncommit_threshold = 0;
+	else
+		fs_info->flushoncommit_threshold = 1000;
 #endif
 
 	spin_lock_init(&fs_info->qgroup_lock);
