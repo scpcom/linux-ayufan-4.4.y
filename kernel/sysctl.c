@@ -62,6 +62,7 @@
 #include <linux/capability.h>
 #include <linux/binfmts.h>
 #include <linux/sched/sysctl.h>
+#include <linux/synolib.h>
 
 #include <asm/uaccess.h>
 #include <asm/processor.h>
@@ -162,9 +163,9 @@ EXPORT_SYMBOL(gszSynoHWVersion);
 #endif /* CONFIG_SYNO_HW_VERSION */
 
 #ifdef CONFIG_SYNO_INTERNAL_HD_NUM
-long g_internal_hd_num = -1;
+long g_syno_hdd_powerup_seq = -1;
 long syno_boot_hd_count = 0;
-EXPORT_SYMBOL(g_internal_hd_num);
+EXPORT_SYMBOL(g_syno_hdd_powerup_seq);
 #endif /* CONFIG_SYNO_INTERNAL_HD_NUM */
 
 #ifdef CONFIG_SYNO_AHCI_SWITCH
@@ -197,10 +198,20 @@ EUNIT_PWRON_TYPE (*funcSynoEunitPowerctlType)(void) = NULL;
 EXPORT_SYMBOL(funcSynoEunitPowerctlType);
 #endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
 
+#ifdef CONFIG_SYNO_MV1475_SGPIO_LED_CTRL
+int (*funcSYNOCtrlDiskLedBy1475)(unsigned short, unsigned short) = NULL;
+EXPORT_SYMBOL(funcSYNOCtrlDiskLedBy1475);
+#endif /* CONFIG_SYNO_MV1475_SGPIO_LED_CTRL */
+
 #ifdef  CONFIG_SYNO_MD_STATUS_GET
 int gSynoRaidSyncFlag = 0;
 EXPORT_SYMBOL(gSynoRaidSyncFlag);
 #endif /* CONFIG_SYNO_MD_STATUS_GET */
+
+#ifdef CONFIG_SYNO_MD_RESHAPE_AND_MOUNT_DEADLOCK_WORKAROUND
+DECLARE_RWSEM(s_reshape_mount_key);
+EXPORT_SYMBOL(s_reshape_mount_key);
+#endif /* CONFIG_SYNO_MD_RESHAPE_AND_MOUNT_DEADLOCK_WORKAROUND */
 
 #ifdef CONFIG_SYNO_SATA_DISK_SEQ_REVERSE
 char giDiskSeqReverse[8] = {0};
@@ -213,11 +224,11 @@ EXPORT_SYMBOL(g_internal_netif_num);
 #endif /* CONFIG_SYNO_INTERNAL_NETIF_NUM */
 
 #ifdef CONFIG_SYNO_MAC_ADDRESS
-unsigned char grgbLanMac[CONFIG_SYNO_MAC_MAX][16];
+unsigned char grgbLanMac[SYNO_MAC_MAX_NUMBER][16];
 EXPORT_SYMBOL(grgbLanMac);
 int giVenderFormatVersion = 1;
 EXPORT_SYMBOL(giVenderFormatVersion);
-static int iSynoMacMax = CONFIG_SYNO_MAC_MAX;
+static int iSynoMacMax = SYNO_MAC_MAX_NUMBER;
 static int iMacEntrySize = 16;
 char gszSkipVenderMacInterfaces[256] = {'\0'};
 EXPORT_SYMBOL(gszSkipVenderMacInterfaces);
@@ -275,11 +286,20 @@ EXPORT_SYMBOL(gSynoFactoryUSB3Disable);
 #endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
 
 #ifdef CONFIG_SYNO_CASTRATED_XHC
-char gSynoCastratedXhcAddr[CONFIG_SYNO_NUM_CASTRATED_XHC][13] = {'\0'};
+char gSynoCastratedXhcAddr[CONFIG_SYNO_NUM_CASTRATED_XHC][13] = {{0}};
 unsigned int gSynoCastratedXhcPortBitmap[CONFIG_SYNO_NUM_CASTRATED_XHC] = {0};
 EXPORT_SYMBOL(gSynoCastratedXhcAddr);
 EXPORT_SYMBOL(gSynoCastratedXhcPortBitmap);
 #endif /* CONFIG_SYNO_CASTRATED_XHC */
+
+#ifdef CONFIG_SYNO_USB_VBUS_GPIO_CONTROL
+char gSynoUsbVbusHostAddr[CONFIG_SYNO_USB_VBUS_NUM_GPIO][13] = {{0}};
+int gSynoUsbVbusPort[CONFIG_SYNO_USB_VBUS_NUM_GPIO] = {0};
+unsigned gSynoUsbVbusGpp[CONFIG_SYNO_USB_VBUS_NUM_GPIO] = {0};
+EXPORT_SYMBOL(gSynoUsbVbusHostAddr);
+EXPORT_SYMBOL(gSynoUsbVbusPort);
+EXPORT_SYMBOL(gSynoUsbVbusGpp);
+#endif /* CONFIG_SYNO_USB_VBUS_GPIO_CONTROL */
 
 #ifdef CONFIG_SYNO_SAS_ENCOLURE_PWR_CTL
 int giSynoEncPwrCtl = 0;
@@ -1337,7 +1357,7 @@ static struct ctl_table kern_table[] = {
 #ifdef CONFIG_SYNO_INTERNAL_HD_NUM
 	{
 		.procname	= "syno_internal_hd_num",
-		.data		= &g_internal_hd_num,
+		.data		= &g_syno_hdd_powerup_seq,
 		.maxlen		= sizeof (int),
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec,
@@ -3227,3 +3247,35 @@ EXPORT_SYMBOL(proc_dointvec_ms_jiffies);
 EXPORT_SYMBOL(proc_dostring);
 EXPORT_SYMBOL(proc_doulongvec_minmax);
 EXPORT_SYMBOL(proc_doulongvec_ms_jiffies_minmax);
+
+#ifdef CONFIG_SYNO_HW_VERSION
+char* syno_get_hw_version(void)
+{
+	static char SynoHwVersion[16] = {0};
+	char *ptr = gszSynoHWVersion + strlen(gszSynoHWVersion) - 2;
+
+	if (ptr && 0 == strcmp(ptr, "-j")) {
+		strncpy(SynoHwVersion, gszSynoHWVersion,
+				(strlen(gszSynoHWVersion) - 2) < (sizeof(SynoHwVersion) - 1) ?
+				(strlen(gszSynoHWVersion) - 2) : (sizeof(SynoHwVersion) - 1));
+	} else {
+		strncpy(SynoHwVersion, gszSynoHWVersion, sizeof(SynoHwVersion) - 1);
+	}
+	return SynoHwVersion;
+}
+EXPORT_SYMBOL(syno_get_hw_version);
+
+int syno_is_hw_version(const char *hw_version)
+{
+	if (NULL == hw_version) {
+		return 0;
+	}
+
+	if (0 == strcmp(syno_get_hw_version(), hw_version)) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+EXPORT_SYMBOL(syno_is_hw_version);
+#endif /* CONFIG_SYNO_HW_VERSION */

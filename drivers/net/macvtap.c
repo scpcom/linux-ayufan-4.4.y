@@ -886,7 +886,10 @@ static ssize_t macvtap_do_read(struct macvtap_queue *q, struct kiocb *iocb,
 			continue;
 		}
 		ret = macvtap_put_user(q, skb, iv, len);
-		kfree_skb(skb);
+		if (unlikely(ret < 0))
+			kfree_skb(skb);
+		else
+			consume_skb(skb);
 		break;
 	}
 

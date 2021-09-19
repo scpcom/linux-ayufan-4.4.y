@@ -2621,6 +2621,10 @@ static long fuse_file_fallocate(struct file *file, int mode, loff_t offset,
 	int err;
 	bool lock_inode = !(mode & FALLOC_FL_KEEP_SIZE) ||
 			   (mode & FALLOC_FL_PUNCH_HOLE);
+#ifdef CONFIG_SYNO_FUSE_PUNCH_HOLE_BUG_ON
+	loff_t first_page, last_page;
+	loff_t first_page_offset, last_page_offset;
+#endif /* CONFIG_SYNO_FUSE_PUNCH_HOLE_BUG_ON */
 
 	if (fc->no_fallocate)
 		return -EOPNOTSUPP;
@@ -2667,8 +2671,23 @@ static long fuse_file_fallocate(struct file *file, int mode, loff_t offset,
 	if (!(mode & FALLOC_FL_KEEP_SIZE))
 		fuse_write_update_size(inode, offset + length);
 
+#ifdef CONFIG_SYNO_FUSE_PUNCH_HOLE_BUG_ON
+	if (mode & FALLOC_FL_PUNCH_HOLE) {
+		first_page = (offset) >> PAGE_CACHE_SHIFT;
+		last_page = (offset + length - 1) >> PAGE_CACHE_SHIFT;
+
+		first_page_offset = first_page << PAGE_CACHE_SHIFT;
+		last_page_offset = last_page << PAGE_CACHE_SHIFT;
+
+		/* Now release the pages */
+		if (last_page_offset > first_page_offset) {
+			truncate_pagecache_range(inode, first_page_offset, last_page_offset + PAGE_CACHE_SIZE - 1);
+		}
+	}
+#else
 	if (mode & FALLOC_FL_PUNCH_HOLE)
 		truncate_pagecache_range(inode, offset, offset + length - 1);
+#endif /* CONFIG_SYNO_FUSE_PUNCH_HOLE_BUG_ON */
 
 	fuse_invalidate_attr(inode);
 

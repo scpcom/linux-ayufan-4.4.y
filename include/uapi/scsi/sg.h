@@ -32,20 +32,20 @@ Major new features in SG 3.x driver (cf SG 2.x drivers)
 	- scatter/gather in user space, direct IO, and mmap supported
 
  The normal action of this driver is to use the adapter (HBA) driver to DMA
- data into kernel buffers and then use the CPU to copy the data into the 
- user space (vice versa for writes). That is called "indirect" IO due to 
+ data into kernel buffers and then use the CPU to copy the data into the
+ user space (vice versa for writes). That is called "indirect" IO due to
  the double handling of data. There are two methods offered to remove the
  redundant copy: 1) direct IO and 2) using the mmap() system call to map
  the reserve buffer (this driver has one reserve buffer per fd) into the
  user space. Both have their advantages.
- In terms of absolute speed mmap() is faster. If speed is not a concern, 
+ In terms of absolute speed mmap() is faster. If speed is not a concern,
  indirect IO should be fine. Read the documentation for more information.
 
  ** N.B. To use direct IO 'echo 1 > /proc/scsi/sg/allow_dio' or
          'echo 1 > /sys/module/sg/parameters/allow_dio' is needed.
          That attribute is 0 by default. **
- 
- Historical note: this SCSI pass-through driver has been known as "sg" for 
+
+ Historical note: this SCSI pass-through driver has been known as "sg" for
  a decade. In broader kernel discussions "sg" is used to refer to scatter
  gather techniques. The context should clarify which "sg" is referred to.
 
@@ -65,7 +65,7 @@ Major new features in SG 3.x driver (cf SG 2.x drivers)
 	http://www.torque.net/sg/p/scsi-generic_long.txt
  Also available: <kernel_source>/Documentation/scsi/scsi-generic.txt
 
- Utility and test programs are available at the sg web site. They are 
+ Utility and test programs are available at the sg web site. They are
  packaged as sg3_utils (for the lk 2.4 and 2.6 series) and sg_utils
  (for the lk 2.2 series).
 */
@@ -218,7 +218,7 @@ typedef struct sg_req_info { /* used by SG_GET_REQUEST_TABLE ioctl() */
 #define SG_GET_KEEP_ORPHAN 0x2288
 
 /* yields scsi midlevel's access_count for this SCSI device */
-#define SG_GET_ACCESS_COUNT 0x2289  
+#define SG_GET_ACCESS_COUNT 0x2289
 
 #define SG_SCATTER_SZ (8 * 4096)
 /* Largest size (in bytes) a single scatter-gather list element can have.

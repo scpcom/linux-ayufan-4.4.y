@@ -28,11 +28,19 @@ char *dataptrs[NDISKS];
 char data[NDISKS][PAGE_SIZE];
 char recovi[PAGE_SIZE], recovj[PAGE_SIZE];
 
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+static void makedata(int start, int stop)
+#else /* CONFIG_SYNO_MD_RAID6_RMW */
 static void makedata(void)
+#endif /* CONFIG_SYNO_MD_RAID6_RMW */
 {
 	int i, j;
 
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+	for (i = start; i <= stop; i++) {
+#else /* CONFIG_SYNO_MD_RAID6_RMW */
 	for (i = 0; i < NDISKS; i++) {
+#endif /* CONFIG_SYNO_MD_RAID6_RMW */
 		for (j = 0; j < PAGE_SIZE; j++)
 			data[i][j] = rand();
 
@@ -91,20 +99,65 @@ int main(int argc, char *argv[])
 {
 	const struct raid6_calls *const *algo;
 	const struct raid6_recov_calls *const *ra;
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+	int i, j, p1, p2;
+#else /* CONFIG_SYNO_MD_RAID6_RMW */
 	int i, j;
+#endif /* CONFIG_SYNO_MD_RAID6_RMW */
 	int err = 0;
 
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+	makedata(0, NDISKS-1);
+#else /* CONFIG_SYNO_MD_RAID6_RMW */
 	makedata();
+#endif /* CONFIG_SYNO_MD_RAID6_RMW */
 
 	for (ra = raid6_recov_algos; *ra; ra++) {
 		if ((*ra)->valid  && !(*ra)->valid())
 			continue;
+
 		raid6_2data_recov = (*ra)->data2;
 		raid6_datap_recov = (*ra)->datap;
 
 		printf("using recovery %s\n", (*ra)->name);
 
 		for (algo = raid6_algos; *algo; algo++) {
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+			if ((*algo)->valid && !(*algo)->valid())
+				continue;
+
+			raid6_call = **algo;
+
+			/* Nuke syndromes */
+			memset(data[NDISKS-2], 0xee, 2*PAGE_SIZE);
+
+			/* Generate assumed good syndrome */
+			raid6_call.gen_syndrome(NDISKS, PAGE_SIZE,
+						(void **)&dataptrs);
+
+			for (i = 0; i < NDISKS-1; i++)
+				for (j = i+1; j < NDISKS; j++)
+					err += test_disks(i, j);
+
+			if (!raid6_call.xor_syndrome)
+				continue;
+
+			for (p1 = 0; p1 < NDISKS-2; p1++)
+				for (p2 = p1; p2 < NDISKS-2; p2++) {
+
+					/* Simulate rmw run */
+					raid6_call.xor_syndrome(NDISKS, p1, p2, PAGE_SIZE,
+								(void **)&dataptrs);
+					makedata(p1, p2);
+					raid6_call.xor_syndrome(NDISKS, p1, p2, PAGE_SIZE,
+                                                                (void **)&dataptrs);
+
+					for (i = 0; i < NDISKS-1; i++)
+						for (j = i+1; j < NDISKS; j++)
+							err += test_disks(i, j);
+				}
+
+#else /* CONFIG_SYNO_MD_RAID6_RMW */
 			if (!(*algo)->valid || (*algo)->valid()) {
 				raid6_call = **algo;
 
@@ -119,6 +172,7 @@ int main(int argc, char *argv[])
 					for (j = i+1; j < NDISKS; j++)
 						err += test_disks(i, j);
 			}
+#endif /* CONFIG_SYNO_MD_RAID6_RMW */
 		}
 		printf("\n");
 	}

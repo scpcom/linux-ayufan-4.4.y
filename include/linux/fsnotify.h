@@ -50,7 +50,7 @@ static inline void SYNO_ArchiveModify(struct inode *inode, int blSetSMBArchive)
 
 #ifdef CONFIG_SYNO_FS_ARCHIVE_BIT
 	mutex_lock(&inode->i_syno_mutex);
-	if (syno_op_get_archive_bit(dentry, &old_archive_bit)) {
+	if (IS_GLUSTER_FS(inode) || syno_op_get_archive_bit(dentry, &old_archive_bit)) {
 		goto next;
 	}
 
@@ -91,7 +91,6 @@ out:
 
 #ifdef CONFIG_SYNO_FS_NOTIFY
 extern int SYNONotify(struct dentry *dentry, __u32 mask);
-extern struct vfsmount *get_vfsmount_by_sb(struct super_block *sb);
 #endif
 
 /*
@@ -158,13 +157,23 @@ static inline void fsnotify_link_count(struct inode *inode)
 	fsnotify(inode, FS_ATTRIB, inode, FSNOTIFY_EVENT_INODE, NULL, 0);
 }
 
+#ifdef CONFIG_SYNO_FS_NOTIFY
+struct synotify_rename_path {
+	char *old_full_path;
+	char *new_full_path;
+	struct vfsmount *vfs_mnt;
+	struct synotify_rename_path *next;
+};
+
+#endif
 /*
  * fsnotify_move - file old_name at old_dir was moved to new_name at new_dir
  */
 #ifdef CONFIG_SYNO_FS_NOTIFY
 static inline void fsnotify_move(struct inode *old_dir, struct inode *new_dir,
 				 const unsigned char *old_name,
-				 int isdir, struct inode *target, struct dentry *moved, char *old_full_name, char *new_full_name)
+				 int isdir, struct inode *target, struct dentry *moved, struct synotify_rename_path *path_list)
+
 #else
 static inline void fsnotify_move(struct inode *old_dir, struct inode *new_dir,
 				 const unsigned char *old_name,
@@ -177,10 +186,6 @@ static inline void fsnotify_move(struct inode *old_dir, struct inode *new_dir,
 	__u32 new_dir_mask = (FS_EVENT_ON_CHILD | FS_MOVED_TO);
 	const unsigned char *new_name = moved->d_name.name;
 
-#ifdef CONFIG_SYNO_FS_NOTIFY
-	struct path path;
-	memset (&path, 0, sizeof(struct path));
-#endif
 	if (old_dir == new_dir)
 		old_dir_mask |= FS_DN_RENAME;
 
@@ -198,17 +203,24 @@ static inline void fsnotify_move(struct inode *old_dir, struct inode *new_dir,
 	 */
 
 	// prepare source notify data
-	path.mnt = get_vfsmount_by_sb(old_dir->i_sb);
-	if(path.mnt){
-		mntget(path.mnt);
-		SYNOFsnotify(old_dir_mask, &path, FSNOTIFY_EVENT_SYNO, old_full_name, fs_cookie);
-		SYNOFsnotify(new_dir_mask, &path, FSNOTIFY_EVENT_SYNO, new_full_name, fs_cookie);
-		mntput(path.mnt);
+	while(path_list) {
+		struct synotify_rename_path *tmp = path_list;
+		struct path tmp_path;
+		memset (&tmp_path, 0, sizeof(struct path));
+
+		tmp_path.mnt = tmp->vfs_mnt;
+
+		SYNOFsnotify(old_dir_mask, &tmp_path, FSNOTIFY_EVENT_SYNO, tmp->old_full_path, fs_cookie);
+		SYNOFsnotify(new_dir_mask, &tmp_path, FSNOTIFY_EVENT_SYNO, tmp->new_full_path, fs_cookie);
+
+		path_list = path_list->next;
 	}
 #endif
 
-	fsnotify(old_dir, old_dir_mask, old_dir, FSNOTIFY_EVENT_INODE, old_name, fs_cookie);
-	fsnotify(new_dir, new_dir_mask, new_dir, FSNOTIFY_EVENT_INODE, new_name, fs_cookie);
+	fsnotify(old_dir, old_dir_mask, source, FSNOTIFY_EVENT_INODE, old_name,
+		 fs_cookie);
+	fsnotify(new_dir, new_dir_mask, source, FSNOTIFY_EVENT_INODE, new_name,
+		 fs_cookie);
 
 #if defined(CONFIG_SYNO_FS_ARCHIVE_BIT) || defined(CONFIG_SYNO_FS_ARCHIVE_VERSION)
 	SYNO_ArchiveModify(old_dir, 0);

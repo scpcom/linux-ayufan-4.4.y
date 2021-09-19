@@ -21,6 +21,10 @@
 #include <linux/sched.h>
 #include <linux/exportfs.h>
 
+#ifdef CONFIG_SYNO_FUSE_ARCHIVE_VERSION
+#include <linux/xattr.h>
+#endif /* CONFIG_SYNO_FUSE_ARCHIVE_VESION */
+
 MODULE_AUTHOR("Miklos Szeredi <miklos@szeredi.hu>");
 MODULE_DESCRIPTION("Filesystem in Userspace");
 MODULE_LICENSE("GPL");
@@ -135,6 +139,7 @@ static void fuse_evict_inode(struct inode *inode)
 
 static int fuse_remount_fs(struct super_block *sb, int *flags, char *data)
 {
+	sync_filesystem(sb);
 	if (*flags & MS_MANDLOCK)
 		return -EINVAL;
 
@@ -576,6 +581,52 @@ static int fuse_show_options(struct seq_file *m, struct dentry *root)
 	return 0;
 }
 
+#ifdef CONFIG_SYNO_FUSE_ARCHIVE_VERSION
+static int fuse_syno_set_sb_archive_ver(struct super_block *sb, u32 archive_version)
+{
+	int err = 0;
+	struct syno_xattr_archive_version value;
+	struct dentry *root = sb->s_root;
+
+	if (!IS_GLUSTER_FS_SB(sb)) {
+		return -EOPNOTSUPP;
+	}
+
+	value.v_magic = cpu_to_le16(0x2552);
+	value.v_struct_version = cpu_to_le16(1);
+	value.v_archive_version = cpu_to_le32(archive_version);
+
+	err = fuse_setxattr(root, XATTR_SYNO_PREFIX""XATTR_SYNO_ARCHIVE_VERSION_VOLUME_GLUSTER, &value, sizeof(value), 0);
+
+	return err;
+}
+
+static int fuse_syno_get_sb_archive_ver(struct super_block *sb, u32 *version)
+{
+	int err = 0;
+	struct syno_xattr_archive_version value;
+	struct dentry *root = sb->s_root;
+
+	if (!IS_GLUSTER_FS_SB(sb)) {
+		return -EOPNOTSUPP;
+	}
+
+	memset(&value, 0, sizeof(value));
+	err = fuse_getxattr(root, XATTR_SYNO_PREFIX""XATTR_SYNO_ARCHIVE_VERSION_VOLUME_GLUSTER, &value, sizeof(value));
+	if (0 < err) {
+		*version = le32_to_cpu(value.v_archive_version);
+		err = 0;
+	} else {
+		if (-ENODATA == err) {
+			err = 0;
+		}
+		*version = 0;
+	}
+
+	return err;
+}
+#endif /* CONFIG_SYNO_FUSE_ARCHIVE_VERSION */
+
 void fuse_conn_init(struct fuse_conn *fc)
 {
 	memset(fc, 0, sizeof(*fc));
@@ -661,8 +712,13 @@ static struct dentry *fuse_get_dentry(struct super_block *sb,
 
 		name.len = 1;
 		name.name = ".";
+#ifdef CONFIG_SYNO_FUSE_STAT
+		err = fuse_lookup_name(sb, handle->nodeid, &name, &outarg,
+				       &inode, NULL, 0);
+#else
 		err = fuse_lookup_name(sb, handle->nodeid, &name, &outarg,
 				       &inode);
+#endif /* CONFIG_SYNO_FUSE_STAT */
 		if (err && err != -ENOENT)
 			goto out_err;
 		if (err || !inode) {
@@ -764,8 +820,13 @@ static struct dentry *fuse_get_parent(struct dentry *child)
 
 	name.len = 2;
 	name.name = "..";
+#ifdef CONFIG_SYNO_FUSE_STAT
+	err = fuse_lookup_name(child_inode->i_sb, get_node_id(child_inode),
+			       &name, &outarg, &inode, NULL, 0);
+#else
 	err = fuse_lookup_name(child_inode->i_sb, get_node_id(child_inode),
 			       &name, &outarg, &inode);
+#endif /* CONFIG_SYNO_FUSE_STAT */
 	if (err) {
 		if (err == -ENOENT)
 			return ERR_PTR(-ESTALE);
@@ -796,6 +857,10 @@ static const struct super_operations fuse_super_operations = {
 	.umount_begin	= fuse_umount_begin,
 	.statfs		= fuse_statfs,
 	.show_options	= fuse_show_options,
+#ifdef CONFIG_SYNO_FUSE_ARCHIVE_VERSION
+	.syno_set_sb_archive_ver = fuse_syno_set_sb_archive_ver,
+	.syno_get_sb_archive_ver = fuse_syno_get_sb_archive_ver,
+#endif /* CONFIG_SYNO_FUSE_ARCHIVE_VERSION */
 };
 
 static void sanitize_global_limit(unsigned *limit)

@@ -159,18 +159,20 @@ static int SYNOFetchFullName(struct fsnotify_event *event, gfp_t gfp)
 	char *mnt_full_path = NULL;
 	char *dentry_path = NULL;
 	struct vfsmount *mnt = event->path.mnt;
-	struct dentry *dentry = event->path.dentry;
 	int ret = -1;
 	int data_type = event->data_type;
 
 	if(data_type == FSNOTIFY_EVENT_PATH) {
+		struct path root_path;
+		root_path.mnt = mnt;
+		root_path.dentry = mnt->mnt_root;
 		dentry_path_buf = kmalloc(PATH_MAX, gfp);
 		if (unlikely(!dentry_path_buf)) {
 			ret = -ENOMEM;
 			goto ERR;
 		}
-		dentry_path = dentry_path_raw(dentry, dentry_path_buf, PATH_MAX - 1);
-		if (unlikely(IS_ERR(dentry_path))) {
+		dentry_path = __d_path(&event->path, &root_path, dentry_path_buf, PATH_MAX-1);
+		if (unlikely(IS_ERR_OR_NULL(dentry_path))) {
 			ret = PTR_ERR(dentry_path);
 			goto ERR;
 		}
@@ -289,9 +291,6 @@ alloc_holder:
 		goto alloc_holder;
 	}
 
-	group->q_len++;
-	holder->event = event;
-
 #ifdef CONFIG_SYNO_FS_NOTIFY
 	/* we fetch full name after it is decided to inqueue. */
 	if (event->data_type == FSNOTIFY_EVENT_SYNO || event->data_type == FSNOTIFY_EVENT_PATH)
@@ -307,6 +306,10 @@ alloc_holder:
 		}
 	}
 #endif
+
+	group->q_len++;
+	holder->event = event;
+
 	fsnotify_get_event(event);
 	list_add_tail(&holder->event_list, list);
 	if (priv)

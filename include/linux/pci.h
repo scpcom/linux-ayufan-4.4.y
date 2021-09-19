@@ -16,7 +16,6 @@
 #ifndef LINUX_PCI_H
 #define LINUX_PCI_H
 
-
 #include <linux/mod_devicetable.h>
 
 #include <linux/types.h>
@@ -165,11 +164,17 @@ enum pci_dev_flags {
 	/* INTX_DISABLE in PCI_COMMAND register disables MSI
 	 * generation too.
 	 */
-	PCI_DEV_FLAGS_MSI_INTX_DISABLE_BUG = (__force pci_dev_flags_t) 1,
+	PCI_DEV_FLAGS_MSI_INTX_DISABLE_BUG = (__force pci_dev_flags_t) (1 << 0),
 	/* Device configuration is irrevocably lost if disabled into D3 */
-	PCI_DEV_FLAGS_NO_D3 = (__force pci_dev_flags_t) 2,
+	PCI_DEV_FLAGS_NO_D3 = (__force pci_dev_flags_t) (1 << 1),
 	/* Provide indication device is assigned by a Virtual Machine Manager */
-	PCI_DEV_FLAGS_ASSIGNED = (__force pci_dev_flags_t) 4,
+	PCI_DEV_FLAGS_ASSIGNED = (__force pci_dev_flags_t) (1 << 2),
+	/* Flag for quirk use to store if quirk-specific ACS is enabled */
+	PCI_DEV_FLAGS_ACS_ENABLED_QUIRK = (__force pci_dev_flags_t) (1 << 3),
+	/* Flag to indicate the device uses dma_alias_devfn */
+	PCI_DEV_FLAGS_DMA_ALIAS_DEVFN = (__force pci_dev_flags_t) (1 << 4),
+	/* Use a PCIe-to-PCI bridge alias even if !pci_is_pcie */
+	PCI_DEV_FLAG_PCIE_BRIDGE_ALIAS = (__force pci_dev_flags_t) (1 << 5),
 };
 
 enum pci_irq_reroute_variant {
@@ -251,8 +256,9 @@ struct pci_dev {
 	u8		msix_cap;	/* MSI-X capability offset */
 	u8		pcie_mpss:3;	/* PCI-E Max Payload Size Supported */
 	u8		rom_base_reg;	/* which config register controls the ROM */
-	u8		pin;  		/* which interrupt pin this device uses */
-	u16		pcie_flags_reg;	/* cached PCI-E Capabilities Register */
+	u8		pin;		/* which interrupt pin this device uses */
+	u16		pcie_flags_reg;	/* cached PCIe Capabilities Register */
+	u8		dma_alias_devfn;/* devfn of DMA alias, if any */
 
 	struct pci_driver *driver;	/* which driver has allocated this device */
 	u64		dma_mask;	/* Mask of the bits of bus address this
@@ -1118,7 +1124,6 @@ struct msix_entry {
 	u16	entry;	/* driver uses to specify entry, OS writes */
 };
 
-
 #ifndef CONFIG_PCI_MSI
 static inline int pci_enable_msi_block(struct pci_dev *dev, unsigned int nvec)
 {
@@ -1490,7 +1495,6 @@ static inline const char *pci_name(const struct pci_dev *pdev)
 	return dev_name(&pdev->dev);
 }
 
-
 /* Some archs don't want to expose struct resource to userland as-is
  * in sysfs and /proc
  */
@@ -1503,7 +1507,6 @@ static inline void pci_resource_to_user(const struct pci_dev *dev, int bar,
 	*end = rsrc->end;
 }
 #endif /* HAVE_ARCH_PCI_RESOURCE_TO_USER */
-
 
 /*
  *  The world is not perfect and supplies us with broken PCI devices.
@@ -1873,6 +1876,10 @@ static inline struct eeh_dev *pci_dev_to_eeh_dev(struct pci_dev *pdev)
 	return pdev->dev.archdata.edev;
 }
 #endif
+
+int pci_for_each_dma_alias(struct pci_dev *pdev,
+			   int (*fn)(struct pci_dev *pdev,
+				     u16 alias, void *data), void *data);
 
 /**
  * pci_find_upstream_pcie_bridge - find upstream PCIe-to-PCI bridge of a device

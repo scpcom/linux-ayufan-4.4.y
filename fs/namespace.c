@@ -37,6 +37,14 @@ extern int gSynoHasDynModule;
 extern void ext4_fill_mount_path(struct super_block *sb, const char *szPath);
 #endif
 
+#ifdef CONFIG_SYNO_FS_UNMOUNT
+extern void fs_show_opened_file(struct mount *mnt);
+#endif /* CONFIG_SYNO_FS_UNMOUNT */
+
+#ifdef CONFIG_SYNO_MD_RESHAPE_AND_MOUNT_DEADLOCK_WORKAROUND
+extern struct rw_semaphore s_reshape_mount_key;
+#endif /* CONFIG_SYNO_MD_RESHAPE_AND_MOUNT_DEADLOCK_WORKAROUND */
+
 static int event;
 static DEFINE_IDA(mnt_id_ida);
 static DEFINE_IDA(mnt_group_ida);
@@ -1310,6 +1318,11 @@ static int do_umount(struct mount *mnt, int flags)
 			umount_tree(mnt, 1);
 		retval = 0;
 	}
+#ifdef CONFIG_SYNO_FS_UNMOUNT
+	if (-EBUSY == retval) {
+		fs_show_opened_file(mnt);
+	}
+#endif /* CONFIG_SYNO_FS_UNMOUNT */
 	br_write_unlock(&vfsmount_lock);
 	namespace_unlock();
 	return retval;
@@ -1364,7 +1377,13 @@ SYSCALL_DEFINE2(umount, char __user *, name, int, flags)
 dput_and_out:
 	/* we mustn't call path_put() as that would clear mnt_expiry_mark */
 	dput(path.dentry);
+#ifdef CONFIG_SYNO_MD_RESHAPE_AND_MOUNT_DEADLOCK_WORKAROUND
+	down_read(&s_reshape_mount_key);
+#endif /* CONFIG_SYNO_MD_RESHAPE_AND_MOUNT_DEADLOCK_WORKAROUND */
 	mntput_no_expire(mnt);
+#ifdef CONFIG_SYNO_MD_RESHAPE_AND_MOUNT_DEADLOCK_WORKAROUND
+	up_read(&s_reshape_mount_key);
+#endif /* CONFIG_SYNO_MD_RESHAPE_AND_MOUNT_DEADLOCK_WORKAROUND */
 out:
 	return retval;
 }
@@ -2405,6 +2424,9 @@ long do_mount(const char *dev_name, const char *dir_name,
 		   MS_NOATIME | MS_NODIRATIME | MS_RELATIME| MS_KERNMOUNT |
 		   MS_STRICTATIME);
 
+#ifdef CONFIG_SYNO_MD_RESHAPE_AND_MOUNT_DEADLOCK_WORKAROUND
+	down_read(&s_reshape_mount_key);
+#endif /* CONFIG_SYNO_MD_RESHAPE_AND_MOUNT_DEADLOCK_WORKAROUND */
 	if (flags & MS_REMOUNT)
 		retval = do_remount(&path, flags & ~MS_REMOUNT, mnt_flags,
 				    data_page);
@@ -2417,6 +2439,10 @@ long do_mount(const char *dev_name, const char *dir_name,
 	else
 		retval = do_new_mount(&path, type_page, flags, mnt_flags,
 				      dev_name, data_page);
+#ifdef CONFIG_SYNO_MD_RESHAPE_AND_MOUNT_DEADLOCK_WORKAROUND
+	up_read(&s_reshape_mount_key);
+#endif /* CONFIG_SYNO_MD_RESHAPE_AND_MOUNT_DEADLOCK_WORKAROUND */
+
 dput_out:
 	path_put(&path);
 	return retval;
@@ -2995,6 +3021,3 @@ const struct proc_ns_operations mntns_operations = {
 	.install	= mntns_install,
 	.inum		= mntns_inum,
 };
-
-int (*funcSYNOSendErrorFsBtrfsEvent)(const u8*) = NULL;
-EXPORT_SYMBOL(funcSYNOSendErrorFsBtrfsEvent);

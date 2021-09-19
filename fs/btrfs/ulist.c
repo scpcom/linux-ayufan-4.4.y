@@ -249,3 +249,51 @@ struct ulist_node *ulist_next(struct ulist *ulist, struct ulist_iterator *uiter)
 #endif
 	return node;
 }
+
+#if defined(CONFIG_SYNO_BTRFS_COMPR_CTL)
+int ulist_add_lru_adjust(struct ulist *ulist, u64 val, gfp_t gfp_mask)
+{
+	int ret;
+	struct ulist_node *node;
+
+	node = ulist_rbtree_search(ulist, val);
+	if (node) {
+		list_del(&node->list);
+		list_add_tail(&node->list, &ulist->nodes);
+		return 0;
+	}
+	node = kmalloc(sizeof(*node), gfp_mask);
+	if (!node)
+		return -ENOMEM;
+
+	node->val = val;
+#ifdef CONFIG_BTRFS_DEBUG
+	node->seqnum = ulist->nnodes;
+#endif
+
+	ret = ulist_rbtree_insert(ulist, node);
+	ASSERT(!ret);
+	list_add_tail(&node->list, &ulist->nodes);
+	ulist->nnodes++;
+
+	return 1;
+}
+
+/*
+ * ulist_remove_first - Remove first node from list (FIFO order)
+ * It just detach the node from list
+ */
+void ulist_remove_first(struct ulist *ulist)
+{
+	struct ulist_node *node;
+
+	if (!ulist->nnodes)
+		return;
+
+	node = list_entry(ulist->nodes.next, struct ulist_node, list);
+	rb_erase(&node->rb_node, &ulist->root);
+	list_del(&node->list);
+	ulist->nnodes--;
+	kfree(node);
+}
+#endif

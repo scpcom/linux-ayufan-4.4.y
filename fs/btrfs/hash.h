@@ -38,5 +38,4 @@ static inline u64 btrfs_extref_hash(u64 parent_objectid, const char *name,
 {
 	return (u64) btrfs_crc32c(parent_objectid, name, len);
 }
-
 #endif

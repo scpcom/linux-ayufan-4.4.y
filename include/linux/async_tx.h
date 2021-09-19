@@ -60,12 +60,19 @@ struct dma_chan_ref {
  * dependency chain
  * @ASYNC_TX_FENCE: specify that the next operation in the dependency
  * chain uses this operation's result as an input
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+ * @ASYNC_TX_PQ_XOR_DST: do not overwrite the syndrome but XOR it with the
+ * input data. Required for rmw case.
+#endif
  */
 enum async_tx_flags {
 	ASYNC_TX_XOR_ZERO_DST	 = (1 << 0),
 	ASYNC_TX_XOR_DROP_DST	 = (1 << 1),
 	ASYNC_TX_ACK		 = (1 << 2),
 	ASYNC_TX_FENCE		 = (1 << 3),
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+	ASYNC_TX_PQ_XOR_DST	 = (1 << 4),
+#endif /* CONFIG_SYNO_MD_RAID6_RMW */
 };
 
 /**

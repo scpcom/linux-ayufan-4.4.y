@@ -782,6 +782,14 @@ static inline __must_check int sk_add_backlog(struct sock *sk, struct sk_buff *s
 	if (sk_rcvqueues_full(sk, skb, limit))
 		return -ENOBUFS;
 
+	/*
+	 * If the skb was allocated from pfmemalloc reserves, only
+	 * allow SOCK_MEMALLOC sockets to use it as this socket is
+	 * helping free memory
+	 */
+	if (skb_pfmemalloc(skb) && !sock_flag(sk, SOCK_MEMALLOC))
+		return -ENOMEM;
+
 	__sk_add_backlog(sk, skb);
 	sk->sk_backlog.len += skb->truesize;
 	return 0;
@@ -1083,7 +1091,6 @@ static inline struct cg_proto *parent_cg_proto(struct proto *proto,
 }
 #endif
 
-
 static inline bool sk_has_memory_pressure(const struct sock *sk)
 {
 	return sk->sk_prot->memory_pressure != NULL;
@@ -1266,7 +1273,6 @@ proto_memory_pressure(struct proto *prot)
 	return !!*prot->memory_pressure;
 }
 
-
 #ifdef CONFIG_PROC_FS
 /* Called with local bh disabled */
 extern void sock_prot_inuse_add(struct net *net, struct proto *prot, int inc);
@@ -1277,7 +1283,6 @@ static inline void sock_prot_inuse_add(struct net *net, struct proto *prot,
 {
 }
 #endif
-
 
 /* With per-bucket locks this operation is not-atomic, so that
  * this version is not worse.
@@ -1492,7 +1497,6 @@ static inline void unlock_sock_fast(struct sock *sk, bool slow)
 	else
 		spin_unlock_bh(&sk->sk_lock.slock);
 }
-
 
 extern struct sock		*sk_alloc(struct net *net, int family,
 					  gfp_t priority,

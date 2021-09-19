@@ -1,3 +1,80 @@
+BUG ID: <Snapshot & Replication> #1490 - suspicious log "io_stat stopped"
+Commit Hashes:
+	a90902531a06a030a252a07fbff7f45a189a64fe
+	a3b609ef9f8b1dbfe97034ccad6cd3fe71fbe7ab
+
+First Ready Kernel version: 3.15
+
+BUG ID: <DSM> #85506 - Some backports of lio-5.x from linux-4.4
+Commit Hashes:
+	9a9e3415edd567813d52c8de402042b9720c54f5
+	870823e629ea194e6cf8e82a9694ac62cad49512
+	1d88aa441f25811a55c0ed688add108c0a45613e
+	c6686931335757c2b348fc9a74ff564d8bd10f0a
+	f6b1fe7c27800adba0ccf6063ee97478046eeafe
+
+First Ready Kernel version: 4.4
+
+BUG ID: <DSM> #88732 - kernel BUG at kernel/smpboot.c:134
+Commit Hashes:
+	dd9d3843755da95f63dd3a376f62b3e45c011210 v4.2-rc8-1-gdd9d384	sched: Fix cpu_active_mask/cpu_online_mask race
+	927da9dfd13aec358496de9488384f1a663c679a v4.1-rc3-8-g927da9d	cpu: Remove new instance of __cpuinit that crept back in
+	64eaf974218d576812919c8b1a8d87ded4e695d9 v4.1-rc3-7-g64eaf974	cpu: Handle smpboot_unpark_threads() uniformly
+	590ee7dbd569a012df705a5204fc5f1066f52b8c v4.0-rc5-156-g590ee7d	cpu: Provide smpboot_thread_init() on !CONFIG_SMP kernels as well
+	00df35f991914db6b8bde8cf09808e19a9cffc3d v4.0-rc5-155-g00df35f	cpu: Defer smpboot kthread unparking until CPU known to scheduler
+
+First Ready Kernel version: 4.2
+
+
+BUG ID: <DSM> #88074 - BUG_ON when using nfs to transfer files
+Commit Hashes:
+	dec23a559fd24701c59f322b669bae73820b257d
+
+First Ready Kernel version: 3.10.92
+
+BUG ID: <DSM> #85506 - Some backports of lio-5.x from linux-4.2
+Commit Hashes:
+	d229bdfc60015234b3b2d62a2b9aa6257edab208
+	6f8c96d81fe3c4ed208047577f399a1c9bb9f425
+	0a1694b78b874de936182eba3cac98fe1f9ac4b6
+	27c2e0c4c8136a14e398cf54bc49cecada88c52b
+	86e8e0f15992d2397f8f2723a06268b09cfab80b
+	531d70365f3ffd7bf003b70cdfd37d7318557cdc
+	0e5c18f1c8cdcbd9d8bb48d413c9af955dab0012
+	64f4c3a50aa77e67c6c3759e963cf36cb19d5efe
+	6ac5cc0722eaffc9cc759e1ce8cc4947ea9f5b17
+	66b4a57d65805f5b63a9c7b137666880a7d13382
+
+First Ready Kernel version: 3.15
+
+BUG ID: <Virtualization> #260 - NULL Pointer Dereference While Detaching Disks
+Commit Hashes:
+	208a32525b1e7f05b3fede521c2c382aa6d5aa01
+
+First Ready Kernel version: 3.13
+
+BUG ID: <DSM> #79549 - PCI/iommu: Fix DMA alias problems
+Commit Hashes:
+	91d2160948f2e8ae279ebf7afa156ef5515f451b
+	bc3acc72798468371b5262e196d684c23b2b34ac
+	be2c5300999e30edc176b4545bfa0c47dec3c8aa
+	566429a3583d177e5ba560d5a86e73e4ccd3355a
+	8a4762880f609817cb2c007582577bdb99b350ad
+	f8c917e5bcb7da7d7bfab320efd31aa3738acc7d
+	d9f099c2875a704082ba5ccb361a2fe3d06e145a
+	23f9457d8c0bdef98c3c689e321dc58bb853c77e
+	38f8dd4e5d59751d50b7a95dfec7546f27b951cc
+	b62f85c55205b9d4eee20188de6a3f4bbf8a0064
+	558db7e2d82e14c42684f75049a145eeffc1dc54
+
+First Ready Kernel version: 3.17
+
+BUG ID: <DSM> #75594 - don't reset host when mpt2sas driver load
+Commit Hashes:
+	eb0f7653373499386aaeac8e00d4ca0e4b7fd3bf
+
+First Ready Kernel version: 4.0
+
 BUG ID: <DSM> #78072 - Braswell SMBUS I2C Controller Support
 Commit Hashes:
 	0b6c7ed34596489f45998d2df9911226321d749f
@@ -832,3 +909,14 @@ Commit Hashes:
 	4be63a1538baf70bfbae9bc8935daae6efe715dd
 
 First Ready Kernel version: 3.10.38
+
+BUG ID: <DSM> #73962 - Btrfs: incremental send, clear name from cache after orphanization
+Commit Hashes:
+	c02661b2a4aca5b99ad74c4786cb879fea8d8571
+	278c85722f0f35a16a49a08672b9dbfc939357f7
+	39c7a13dcc4b9be05b2a335e18948c3dc82b2ec8
+	d0d7d51c17bfb6fe87306ebd1d98d563e8409c93
+	2fc40c159f67b9630690bd956e4184e584c860ea
+	c1ce51238f116f0deba635dccef113bcb314ecb2
+
+First Ready Kernel version: 4.0

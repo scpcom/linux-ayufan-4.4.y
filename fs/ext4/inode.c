@@ -41,6 +41,7 @@
 #ifdef CONFIG_SYNO_EXT4_ARCHIVE_VERSION
 #include <linux/xattr.h>
 #endif
+
 #include <linux/bitops.h>
 
 #include "ext4_jbd2.h"
@@ -629,6 +630,7 @@ int ext4_map_blocks(handle_t *handle, struct inode *inode,
 		status = map->m_flags & EXT4_MAP_UNWRITTEN ?
 				EXTENT_STATUS_UNWRITTEN : EXTENT_STATUS_WRITTEN;
 		if (!(flags & EXT4_GET_BLOCKS_DELALLOC_RESERVE) &&
+		    !(status & EXTENT_STATUS_WRITTEN) &&
 		    ext4_find_delalloc_range(inode, map->m_lblk,
 					     map->m_lblk + map->m_len - 1))
 			status |= EXTENT_STATUS_DELAYED;
@@ -739,6 +741,7 @@ found:
 		status = map->m_flags & EXT4_MAP_UNWRITTEN ?
 				EXTENT_STATUS_UNWRITTEN : EXTENT_STATUS_WRITTEN;
 		if (!(flags & EXT4_GET_BLOCKS_DELALLOC_RESERVE) &&
+		    !(status & EXTENT_STATUS_WRITTEN) &&
 		    ext4_find_delalloc_range(inode, map->m_lblk,
 					     map->m_lblk + map->m_len - 1))
 			status |= EXTENT_STATUS_DELAYED;
@@ -2756,7 +2759,8 @@ retry_journal:
 		handle = ext4_journal_start(inode, EXT4_HT_WRITE_PAGE, MAX_PAGES_PER_RECVFILE);
 	} else
 #endif /* CONFIG_SYNO_FS_RECVFILE */
-	handle = ext4_journal_start(inode, EXT4_HT_WRITE_PAGE, 1);
+	handle = ext4_journal_start(inode, EXT4_HT_WRITE_PAGE,
+				ext4_da_write_credits(inode, pos, len));
 	if (IS_ERR(handle)) {
 		page_cache_release(page);
 		return PTR_ERR(handle);
@@ -4367,8 +4371,7 @@ struct inode *ext4_iget(struct super_block *sb, unsigned long ino)
 		inode->i_create_time.tv_nsec = raw_inode->i_crtime_extra;
 	}
 #else
-	inode->i_create_time.tv_sec = (signed)le32_to_cpu(raw_inode->i_crtime);
-	inode->i_create_time.tv_nsec = (signed)le32_to_cpu(raw_inode->i_crtime_extra);
+	inode->i_create_time = ei->i_crtime;
 #endif /* CONFIG_SYNO_EXT4_CREATE_TIME_BIG_ENDIAN_SWAP */
 #endif /* CONFIG_SYNO_EXT4_CREATE_TIME */
 #ifdef CONFIG_SYNO_EXT4_ARCHIVE_BIT
@@ -4562,12 +4565,10 @@ static int ext4_do_update_inode(handle_t *handle,
 		raw_inode->i_crtime_extra = inode->i_create_time.tv_nsec;
 	}
 #else
-	raw_inode->i_crtime = cpu_to_le32(inode->i_create_time.tv_sec);
-	raw_inode->i_crtime_extra = cpu_to_le32(inode->i_create_time.tv_nsec);
+	ei->i_crtime = inode->i_create_time;
 #endif /* CONFIG_SYNO_EXT4_CREATE_TIME_BIG_ENDIAN_SWAP */
-#else
-	EXT4_EINODE_SET_XTIME(i_crtime, ei, raw_inode);
 #endif /* CONFIG_SYNO_EXT4_CREATE_TIME */
+	EXT4_EINODE_SET_XTIME(i_crtime, ei, raw_inode);
 #ifdef CONFIG_SYNO_EXT4_ARCHIVE_BIT
 	if (!EXT4_HAS_RO_COMPAT_FEATURE(inode->i_sb, EXT4_FEATURE_RO_COMPAT_METADATA_CSUM)) {
 		raw_inode->ext4_archive_bit = cpu_to_le16(inode->i_archive_bit); /* we'll lost upper 16 bits flags */

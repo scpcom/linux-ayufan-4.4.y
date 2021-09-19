@@ -359,7 +359,7 @@ retry:
 
 #ifdef CONFIG_SYNO_FS_WINACL
 	if (IS_SYNOACL(path.dentry)) {
-		res = synoacl_op_access(path.dentry, mode | MAY_ACCESS);
+		res = synoacl_op_access(path.dentry, mode, 0);
 	} else
 #endif
 	res = inode_permission(inode, mode | MAY_ACCESS);
@@ -731,9 +731,17 @@ static int do_dentry_open(struct file *f,
 
 	f->f_op = fops_get(inode->i_fop);
 
+#ifdef CONFIG_SYNO_FS_ECRYPTFS_LOWER_INIT
+	if (inode->i_opflags & IOP_ECRYPTFS_LOWER_INIT) {
+		inode->i_opflags &= ~IOP_ECRYPTFS_LOWER_INIT;
+	} else {
+#endif
 	error = security_file_open(f, cred);
 	if (error)
 		goto cleanup_all;
+#ifdef CONFIG_SYNO_FS_ECRYPTFS_LOWER_INIT
+	}
+#endif
 
 	error = break_lease(inode, f->f_flags);
 	if (error)
@@ -845,7 +853,7 @@ struct file *dentry_open(const struct path *path, int flags,
 				fput(f);
 				f = ERR_PTR(error);
 			}
-		} else { 
+		} else {
 			put_filp(f);
 			f = ERR_PTR(error);
 		}
@@ -1193,7 +1201,7 @@ SYSCALL_DEFINE2(SYNOEcryptName, const char __user *, src, char __user *, dst)
 	if (err) {
 		return -ENOENT;
 	}
-	if (!path.dentry->d_inode->i_sb->s_type || 
+	if (!path.dentry->d_inode->i_sb->s_type ||
 		strcmp(path.dentry->d_inode->i_sb->s_type->name, "ecryptfs")) {
 		err = -EINVAL;
 		goto OUT_RELEASE;

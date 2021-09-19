@@ -798,7 +798,7 @@ static int sil24_hardreset(struct ata_link *link, unsigned int *class,
 		sil24_scr_write(link, SCR_CONTROL, tmp);
 
 		/* force speed to 1.5Gbps,  sata_set_spd would set it*/
-		link->sata_spd_limit = (1 << 4);
+		link->sata_spd_limit = 0x1;
 		ata_link_printk(link, KERN_WARNING, "limiting SATA link speed to 1.5Gbps and disable IPM\n");
 	}
 #endif /* CONFIG_SYNO_SATA_SIL3132_HITACHI_WORKAROUND */

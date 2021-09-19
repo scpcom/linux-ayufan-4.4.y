@@ -78,11 +78,17 @@ extern int SynoDebugFlag;
 #endif /* CONFIG_SYNO_DEBUG_FLAG */
 #endif /* CONFIG_SYNO_MD_FAST_VOLUME_WAKEUP */
 
+#ifdef CONFIG_SYNO_MD_RESHAPE_AND_MOUNT_DEADLOCK_WORKAROUND
+extern struct rw_semaphore s_reshape_mount_key;
+#endif /* CONFIG_SYNO_MD_RESHAPE_AND_MOUNT_DEADLOCK_WORKAROUND */
+
 #ifndef MODULE
 static void autostart_arrays(int part);
 #endif
 
+#ifdef CONFIG_SYNO_MD_FIX_RAID5_RESHAPE_SUSPEND_DEADLOCK
 static void md_update_sb(struct mddev * mddev, int force_change);
+#endif /* CONFIG_SYNO_MD_FIX_RAID5_RESHAPE_SUSPEND_DEADLOCK */
 
 #ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
 extern int (*funcSYNORaidDiskUnplug)(char *szDiskName);
@@ -441,10 +447,11 @@ static void md_make_request(struct request_queue *q, struct bio *bio)
  */
 void mddev_suspend(struct mddev *mddev)
 {
-	sector_t ori_suspend_lo, ori_suspend_hi;
 	BUG_ON(mddev->suspended);
 	mddev->suspended = 1;
 	synchronize_rcu();
+#ifdef CONFIG_SYNO_MD_FIX_RAID5_RESHAPE_SUSPEND_DEADLOCK
+	sector_t ori_suspend_lo, ori_suspend_hi;
 	ori_suspend_lo = mddev->suspend_lo;
 	ori_suspend_hi = mddev->suspend_hi;
 	mddev->suspend_lo = 0;
@@ -463,6 +470,9 @@ void mddev_suspend(struct mddev *mddev)
 
 	mddev->suspend_lo = ori_suspend_lo;
 	mddev->suspend_hi = ori_suspend_hi;
+#else /* CONFIG_SYNO_MD_FIX_RAID5_RESHAPE_SUSPEND_DEADLOCK */
+	wait_event(mddev->sb_wait, atomic_read(&mddev->active_io) == 0);
+#endif /* CONFIG_SYNO_MD_FIX_RAID5_RESHAPE_SUSPEND_DEADLOCK */
 	mddev->pers->quiesce(mddev, 1);
 
 	del_timer_sync(&mddev->safemode_timer);
@@ -5576,6 +5586,11 @@ int md_run(struct mddev *mddev)
 #ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
 	mddev->nodev_and_crashed = 0;
 #endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
+#ifdef CONFIG_SYNO_MD_ROOT_SWAP_PARALLEL_RESYNC
+	if (0 == strcmp("md0", mdname(mddev)) || 0 == strcmp("md1", mdname(mddev))) {
+		mddev->parallel_resync = 1;
+	}
+#endif /* CONFIG_SYNO_MD_ROOT_SWAP_PARALLEL_RESYNC */
 
 	if (start_readonly && mddev->ro == 0)
 		mddev->ro = 2; /* read-only, but switch on first write */
@@ -8267,7 +8282,15 @@ void md_do_sync(struct md_thread *thread)
 		}
 #endif /* CONFIG_SYNO_MD_FIX_RAID5_RESHAPE_HANG */
 	}
+#ifdef CONFIG_SYNO_MD_SYNC_MSG
+	if (test_bit(MD_RECOVERY_INTR, &mddev->recovery)) {
+		printk(KERN_WARNING "md: %s: %s stop due to MD_RECOVERY_INTR set.\n", mdname(mddev), desc);
+	} else {
+		printk(KERN_WARNING "md: %s: %s done.\n",mdname(mddev), desc);
+	}
+#else /* CONFIG_SYNO_MD_SYNC_MSG */
 	printk(KERN_INFO "md: %s: %s done.\n",mdname(mddev), desc);
+#endif /* CONFIG_SYNO_MD_SYNC_MSG */
 	/*
 	 * this also signals 'finished resyncing' to md_stop
 	 */
@@ -8334,8 +8357,12 @@ void md_do_sync(struct md_thread *thread)
 	/*
 	 * got a signal, exit.
 	 */
+#ifdef CONFIG_SYNO_MD_SYNC_MSG
+	printk(KERN_WARNING "md: md_do_sync() got signal ... exiting\n");
+#else /* CONFIG_SYNO_MD_SYNC_MSG */
 	printk(KERN_INFO
 	       "md: md_do_sync() got signal ... exiting\n");
+#endif /* CONFIG_SYNO_MD_SYNC_MSG */
 	set_bit(MD_RECOVERY_INTR, &mddev->recovery);
 	goto out;
 
@@ -8443,12 +8470,17 @@ no_add:
  */
 void md_check_recovery(struct mddev *mddev)
 {
-	if (mddev->suspended) {
+	if (mddev->suspended)
+#ifdef CONFIG_SYNO_MD_FIX_RAID5_RESHAPE_SUSPEND_DEADLOCK
+	{
 		if (mddev->flags & MD_UPDATE_SB_FLAGS) {
 			wake_up(&mddev->sb_wait);
 		}
 		return;
 	}
+#else /* CONFIG_SYNO_MD_FIX_RAID5_RESHAPE_SUSPEND_DEADLOCK */
+		return;
+#endif /* CONFIG_SYNO_MD_FIX_RAID5_RESHAPE_SUSPEND_DEADLOCK */
 
 	if (mddev->bitmap)
 		bitmap_daemon_work(mddev);
@@ -8523,7 +8555,15 @@ void md_check_recovery(struct mddev *mddev)
 			goto unlock;
 		}
 		if (mddev->sync_thread) {
+#ifdef CONFIG_SYNO_MD_RESHAPE_AND_MOUNT_DEADLOCK_WORKAROUND
+			if (0 == down_write_trylock(&s_reshape_mount_key)) {
+				goto unlock;
+			}
 			md_reap_sync_thread(mddev);
+			up_write(&s_reshape_mount_key);
+#else /* CONFIG_SYNO_MD_RESHAPE_AND_MOUNT_DEADLOCK_WORKAROUND */
+			md_reap_sync_thread(mddev);
+#endif /* CONFIG_SYNO_MD_RESHAPE_AND_MOUNT_DEADLOCK_WORKAROUND */
 			goto unlock;
 		}
 		/* Set RUNNING before clearing NEEDED to avoid

@@ -2532,6 +2532,9 @@ int btrfs_remove_chunk(struct btrfs_trans_handle *trans,
 		return -EINVAL;
 	}
 	map = (struct map_lookup *)em->bdev;
+	lock_chunks(root->fs_info->chunk_root);
+	check_system_chunk(trans, extent_root, map->type, false);
+	unlock_chunks(root->fs_info->chunk_root);
 
 	for (i = 0; i < map->num_stripes; i++) {
 		struct btrfs_device *device = map->stripes[i].dev;
@@ -2614,7 +2617,8 @@ static int btrfs_relocate_chunk(struct btrfs_root *root,
 	if (ret)
 		return ret;
 
-	trans = btrfs_start_transaction(root, 0);
+	trans = btrfs_start_trans_remove_block_group(root->fs_info,
+						     chunk_offset);
 	if (IS_ERR(trans)) {
 		ret = PTR_ERR(trans);
 		btrfs_std_error(root->fs_info, ret);
@@ -4412,6 +4416,9 @@ static int __btrfs_alloc_chunk(struct btrfs_trans_handle *trans,
 	if (ret)
 		goto error_del_extent;
 
+	for (i = 0; i < map->num_stripes; i++)
+		map->stripes[i].dev->bytes_used += stripe_size;
+
 	free_extent_map(em);
 	check_raid56_incompat_flag(extent_root->fs_info, type);
 
@@ -4485,7 +4492,6 @@ int btrfs_finish_chunk_alloc(struct btrfs_trans_handle *trans,
 		device = map->stripes[i].dev;
 		dev_offset = map->stripes[i].physical;
 
-		device->bytes_used += stripe_size;
 		ret = btrfs_update_device(trans, device);
 		if (ret)
 			goto out;
@@ -5880,7 +5886,8 @@ struct btrfs_device *btrfs_alloc_device(struct btrfs_fs_info *fs_info,
 	else
 		generate_random_uuid(dev->uuid);
 
-	btrfs_init_work(&dev->work, pending_bios_fn, NULL, NULL);
+	btrfs_init_work(&dev->work, btrfs_submit_helper,
+			pending_bios_fn, NULL, NULL);
 
 	return dev;
 }

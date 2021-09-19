@@ -47,7 +47,6 @@
 #include <asm/iommu.h>
 
 #include "irq_remapping.h"
-#include "pci.h"
 
 #define ROOT_SIZE		VTD_PAGE_SIZE
 #define CONTEXT_SIZE		VTD_PAGE_SIZE
@@ -1677,51 +1676,51 @@ static int domain_context_mapping_one(struct dmar_domain *domain, int segment,
 	return 0;
 }
 
+struct domain_context_mapping_data {
+	struct dmar_domain *domain;
+	struct intel_iommu *iommu;
+	int translation;
+};
+
+static int domain_context_mapping_cb(struct pci_dev *pdev,
+				     u16 alias, void *opaque)
+{
+	struct domain_context_mapping_data *data = opaque;
+
+	return domain_context_mapping_one(data->domain, pci_domain_nr(pdev->bus),
+					  PCI_BUS_NUM(alias), alias & 0xff,
+					  data->translation);
+}
+
 static int
 domain_context_mapping(struct dmar_domain *domain, struct pci_dev *pdev,
 			int translation)
 {
-	int ret;
-	struct pci_dev *tmp, *parent;
+	struct intel_iommu *iommu;
+	struct domain_context_mapping_data data;
 
-	ret = domain_context_mapping_one(domain, pci_domain_nr(pdev->bus),
-					 pdev->bus->number, pdev->devfn,
-					 translation);
-	if (ret)
-		return ret;
+	iommu = device_to_iommu(pci_domain_nr(pdev->bus), pdev->bus->number,
+				pdev->devfn);
+	if (!iommu)
+		return -ENODEV;
 
-	/* dependent device mapping */
-	tmp = pci_find_upstream_pcie_bridge(pdev);
-	if (!tmp)
-		return 0;
-	/* Secondary interface's bus number and devfn 0 */
-	parent = pdev->bus->self;
-	while (parent != tmp) {
-		ret = domain_context_mapping_one(domain,
-						 pci_domain_nr(parent->bus),
-						 parent->bus->number,
-						 parent->devfn, translation);
-		if (ret)
-			return ret;
-		parent = parent->bus->self;
-	}
-	if (pci_is_pcie(tmp)) /* this is a PCIe-to-PCI bridge */
-		return domain_context_mapping_one(domain,
-					pci_domain_nr(tmp->subordinate),
-					tmp->subordinate->number, 0,
-					translation);
-	else /* this is a legacy PCI bridge */
-		return domain_context_mapping_one(domain,
-						  pci_domain_nr(tmp->bus),
-						  tmp->bus->number,
-						  tmp->devfn,
-						  translation);
+	data.domain = domain;
+	data.iommu = iommu;
+	data.translation = translation;
+
+	return pci_for_each_dma_alias(pdev, &domain_context_mapping_cb, &data);
+}
+
+static int domain_context_mapped_cb(struct pci_dev *pdev,
+				    u16 alias, void *opaque)
+{
+	struct intel_iommu *iommu = opaque;
+
+	return !device_context_mapped(iommu, PCI_BUS_NUM(alias), alias & 0xff);
 }
 
 static int domain_context_mapped(struct pci_dev *pdev)
 {
-	int ret;
-	struct pci_dev *tmp, *parent;
 	struct intel_iommu *iommu;
 
 	iommu = device_to_iommu(pci_domain_nr(pdev->bus), pdev->bus->number,
@@ -1729,28 +1728,7 @@ static int domain_context_mapped(struct pci_dev *pdev)
 	if (!iommu)
 		return -ENODEV;
 
-	ret = device_context_mapped(iommu, pdev->bus->number, pdev->devfn);
-	if (!ret)
-		return ret;
-	/* dependent device mapping */
-	tmp = pci_find_upstream_pcie_bridge(pdev);
-	if (!tmp)
-		return ret;
-	/* Secondary interface's bus number and devfn 0 */
-	parent = pdev->bus->self;
-	while (parent != tmp) {
-		ret = device_context_mapped(iommu, parent->bus->number,
-					    parent->devfn);
-		if (!ret)
-			return ret;
-		parent = parent->bus->self;
-	}
-	if (pci_is_pcie(tmp))
-		return device_context_mapped(iommu, tmp->subordinate->number,
-					     0);
-	else
-		return device_context_mapped(iommu, tmp->bus->number,
-					     tmp->devfn);
+	return !pci_for_each_dma_alias(pdev, domain_context_mapped_cb, iommu);
 }
 
 /* Returns a number of VTD pages, but aligned to MM page size */
@@ -1967,141 +1945,144 @@ find_domain(struct pci_dev *pdev)
 	return NULL;
 }
 
+static inline struct device_domain_info *
+dmar_search_domain_by_dev_info(int segment, int bus, int devfn)
+{
+	struct device_domain_info *info;
+
+	list_for_each_entry(info, &device_domain_list, global)
+		if (info->iommu->segment == segment && info->bus == bus &&
+		    info->devfn == devfn)
+			return info;
+
+	return NULL;
+}
+
+static struct dmar_domain *dmar_insert_dev_info(struct intel_iommu *iommu,
+						int bus, int devfn,
+						struct pci_dev *pdev,
+						struct dmar_domain *domain)
+{
+	struct dmar_domain *found = NULL;
+	struct device_domain_info *info;
+	unsigned long flags;
+
+	info = alloc_devinfo_mem();
+	if (!info)
+		return NULL;
+
+	info->bus = bus;
+	info->devfn = devfn;
+	info->dev = pdev;
+	info->segment = iommu->segment;
+	info->domain = domain;
+	info->iommu = iommu;
+	if (!pdev)
+		domain->flags |= DOMAIN_FLAG_P2P_MULTIPLE_DEVICES;
+
+	spin_lock_irqsave(&device_domain_lock, flags);
+	if (pdev)
+		found = find_domain(pdev);
+	else {
+		struct device_domain_info *info2;
+		info2 = dmar_search_domain_by_dev_info(iommu->segment, bus, devfn);
+		if (info2)
+			found = info2->domain;
+	}
+	if (found) {
+		spin_unlock_irqrestore(&device_domain_lock, flags);
+		free_devinfo_mem(info);
+		/* Caller must free the original domain */
+		return found;
+	}
+
+	list_add(&info->link, &domain->devices);
+	list_add(&info->global, &device_domain_list);
+	if (pdev)
+		pdev->dev.archdata.iommu = info;
+	spin_unlock_irqrestore(&device_domain_lock, flags);
+
+	return domain;
+}
+
+static int get_last_alias(struct pci_dev *pdev, u16 alias, void *opaque)
+{
+	*(u16 *)opaque = alias;
+	return 0;
+}
+
 /* domain is initialized */
 static struct dmar_domain *get_domain_for_dev(struct pci_dev *pdev, int gaw)
 {
-	struct dmar_domain *domain, *found = NULL;
+	struct dmar_domain *domain, *tmp;
 	struct intel_iommu *iommu;
-	struct dmar_drhd_unit *drhd;
-	struct device_domain_info *info, *tmp;
-	struct pci_dev *dev_tmp;
+	struct device_domain_info *info;
+	u16 dma_alias;
 	unsigned long flags;
-	int bus = 0, devfn = 0;
-	int segment;
-	int ret;
 
 	domain = find_domain(pdev);
 	if (domain)
 		return domain;
 
-	segment = pci_domain_nr(pdev->bus);
+	iommu = device_to_iommu(pci_domain_nr(pdev->bus), pdev->bus->number,
+				pdev->devfn);
+	if (!iommu)
+		return NULL;
 
-	dev_tmp = pci_find_upstream_pcie_bridge(pdev);
-	if (dev_tmp) {
-		if (pci_is_pcie(dev_tmp)) {
-			bus = dev_tmp->subordinate->number;
-			devfn = 0;
-		} else {
-			bus = dev_tmp->bus->number;
-			devfn = dev_tmp->devfn;
-		}
-		spin_lock_irqsave(&device_domain_lock, flags);
-		list_for_each_entry(info, &device_domain_list, global) {
-			if (info->segment == segment &&
-			    info->bus == bus && info->devfn == devfn) {
-				found = info->domain;
-				break;
-			}
-		}
-		spin_unlock_irqrestore(&device_domain_lock, flags);
-		/* pcie-pci bridge already has a domain, uses it */
-		if (found) {
-			domain = found;
-			goto found_domain;
-		}
+	pci_for_each_dma_alias(pdev, get_last_alias, &dma_alias);
+
+	spin_lock_irqsave(&device_domain_lock, flags);
+	info = dmar_search_domain_by_dev_info(pci_domain_nr(pdev->bus),
+						    PCI_BUS_NUM(dma_alias),
+						    dma_alias & 0xff);
+	if (info) {
+		iommu = info->iommu;
+		domain = info->domain;
 	}
+	spin_unlock_irqrestore(&device_domain_lock, flags);
 
+	/* DMA alias already has a domain, uses it */
+	if (info)
+		goto found_domain;
+
+	/* Allocate and initialize new domain for the device */
 	domain = alloc_domain();
 	if (!domain)
-		goto error;
+		return NULL;
 
-	/* Allocate new domain for the device */
-	drhd = dmar_find_matched_drhd_unit(pdev);
-	if (!drhd) {
-		printk(KERN_ERR "IOMMU: can't find DMAR for device %s\n",
-			pci_name(pdev));
+	domain->flags = false;
+
+	if (iommu_attach_domain(domain, iommu)) {
 		free_domain_mem(domain);
 		return NULL;
-	}
-	iommu = drhd->iommu;
-
-	ret = iommu_attach_domain(domain, iommu);
-	if (ret) {
-		free_domain_mem(domain);
-		goto error;
 	}
 
 	if (domain_init(domain, gaw)) {
 		domain_exit(domain);
-		goto error;
+		return NULL;
 	}
 
-	/* register pcie-to-pci device */
-	if (dev_tmp) {
-		info = alloc_devinfo_mem();
-		if (!info) {
-			domain_exit(domain);
-			goto error;
-		}
-		info->segment = segment;
-		info->bus = bus;
-		info->devfn = devfn;
-		info->dev = NULL;
-		info->domain = domain;
-		/* This domain is shared by devices under p2p bridge */
-		domain->flags |= DOMAIN_FLAG_P2P_MULTIPLE_DEVICES;
+	/* register PCI DMA alias device */
+	tmp = dmar_insert_dev_info(iommu, PCI_BUS_NUM(dma_alias),
+				   dma_alias & 0xff, NULL, domain);
 
-		/* pcie-to-pci bridge already has a domain, uses it */
-		found = NULL;
-		spin_lock_irqsave(&device_domain_lock, flags);
-		list_for_each_entry(tmp, &device_domain_list, global) {
-			if (tmp->segment == segment &&
-			    tmp->bus == bus && tmp->devfn == devfn) {
-				found = tmp->domain;
-				break;
-			}
-		}
-		if (found) {
-			spin_unlock_irqrestore(&device_domain_lock, flags);
-			free_devinfo_mem(info);
-			domain_exit(domain);
-			domain = found;
-		} else {
-			list_add(&info->link, &domain->devices);
-			list_add(&info->global, &device_domain_list);
-			spin_unlock_irqrestore(&device_domain_lock, flags);
-		}
+	if (!tmp || tmp != domain) {
+		domain_exit(domain);
+		domain = tmp;
 	}
+
+	if (!domain)
+		return NULL;
 
 found_domain:
-	info = alloc_devinfo_mem();
-	if (!info)
-		goto error;
-	info->segment = segment;
-	info->bus = pdev->bus->number;
-	info->devfn = pdev->devfn;
-	info->dev = pdev;
-	info->domain = domain;
-	spin_lock_irqsave(&device_domain_lock, flags);
-	/* somebody is fast */
-	found = find_domain(pdev);
-	if (found != NULL) {
-		spin_unlock_irqrestore(&device_domain_lock, flags);
-		if (found != domain) {
-			domain_exit(domain);
-			domain = found;
-		}
-		free_devinfo_mem(info);
-		return domain;
+	tmp = dmar_insert_dev_info(iommu, pdev->bus->number, pdev->devfn, pdev, domain);
+
+	if (!tmp || tmp != domain) {
+		domain_exit(domain);
+		domain = tmp;
 	}
-	list_add(&info->link, &domain->devices);
-	list_add(&info->global, &device_domain_list);
-	pdev->dev.archdata.iommu = info;
-	spin_unlock_irqrestore(&device_domain_lock, flags);
+
 	return domain;
-error:
-	/* recheck it here, maybe others set it */
-	return find_domain(pdev);
 }
 
 static int iommu_identity_mapping;
@@ -3749,31 +3730,27 @@ int __init intel_iommu_init(void)
 	return 0;
 }
 
+static int iommu_detach_dev_cb(struct pci_dev *pdev, u16 alias, void *opaque)
+{
+	struct intel_iommu *iommu = opaque;
+
+	iommu_detach_dev(iommu, PCI_BUS_NUM(alias), alias & 0xff);
+	return 0;
+}
+
+/*
+ * NB - intel-iommu lacks any sort of reference counting for the users of
+ * dependent devices.  If multiple endpoints have intersecting dependent
+ * devices, unbinding the driver from any one of them will possibly leave
+ * the others unable to operate.
+ */
 static void iommu_detach_dependent_devices(struct intel_iommu *iommu,
 					   struct pci_dev *pdev)
 {
-	struct pci_dev *tmp, *parent;
-
 	if (!iommu || !pdev)
 		return;
 
-	/* dependent device detach */
-	tmp = pci_find_upstream_pcie_bridge(pdev);
-	/* Secondary interface's bus number and devfn 0 */
-	if (tmp) {
-		parent = pdev->bus->self;
-		while (parent != tmp) {
-			iommu_detach_dev(iommu, parent->bus->number,
-					 parent->devfn);
-			parent = parent->bus->self;
-		}
-		if (pci_is_pcie(tmp)) /* this is a PCIe-to-PCI bridge */
-			iommu_detach_dev(iommu,
-				tmp->subordinate->number, 0);
-		else /* this is a legacy PCI bridge */
-			iommu_detach_dev(iommu, tmp->bus->number,
-					 tmp->devfn);
-	}
+	pci_for_each_dma_alias(pdev, &iommu_detach_dev_cb, iommu);
 }
 
 static void domain_remove_one_dev_info(struct dmar_domain *domain,
@@ -4153,78 +4130,22 @@ static int intel_iommu_domain_has_cap(struct iommu_domain *domain,
 	return 0;
 }
 
-#define REQ_ACS_FLAGS	(PCI_ACS_SV | PCI_ACS_RR | PCI_ACS_CR | PCI_ACS_UF)
-
 static int intel_iommu_add_device(struct device *dev)
 {
-	struct pci_dev *pdev = to_pci_dev(dev);
-	struct pci_dev *bridge, *dma_pdev = NULL;
 	struct iommu_group *group;
-	int ret;
-
+	struct pci_dev *pdev = to_pci_dev(dev);
+	
 	if (!device_to_iommu(pci_domain_nr(pdev->bus),
 			     pdev->bus->number, pdev->devfn))
 		return -ENODEV;
 
-	bridge = pci_find_upstream_pcie_bridge(pdev);
-	if (bridge) {
-		if (pci_is_pcie(bridge))
-			dma_pdev = pci_get_domain_bus_and_slot(
-						pci_domain_nr(pdev->bus),
-						bridge->subordinate->number, 0);
-		if (!dma_pdev)
-			dma_pdev = pci_dev_get(bridge);
-	} else
-		dma_pdev = pci_dev_get(pdev);
+	group = iommu_group_get_for_dev(dev);
 
-	/* Account for quirked devices */
-	swap_pci_ref(&dma_pdev, pci_get_dma_source(dma_pdev));
-
-	/*
-	 * If it's a multifunction device that does not support our
-	 * required ACS flags, add to the same group as function 0.
-	 */
-	if (dma_pdev->multifunction &&
-	    !pci_acs_enabled(dma_pdev, REQ_ACS_FLAGS))
-		swap_pci_ref(&dma_pdev,
-			     pci_get_slot(dma_pdev->bus,
-					  PCI_DEVFN(PCI_SLOT(dma_pdev->devfn),
-					  0)));
-
-	/*
-	 * Devices on the root bus go through the iommu.  If that's not us,
-	 * find the next upstream device and test ACS up to the root bus.
-	 * Finding the next device may require skipping virtual buses.
-	 */
-	while (!pci_is_root_bus(dma_pdev->bus)) {
-		struct pci_bus *bus = dma_pdev->bus;
-
-		while (!bus->self) {
-			if (!pci_is_root_bus(bus))
-				bus = bus->parent;
-			else
-				goto root_bus;
-		}
-
-		if (pci_acs_path_enabled(bus->self, NULL, REQ_ACS_FLAGS))
-			break;
-
-		swap_pci_ref(&dma_pdev, pci_dev_get(bus->self));
-	}
-
-root_bus:
-	group = iommu_group_get(&dma_pdev->dev);
-	pci_dev_put(dma_pdev);
-	if (!group) {
-		group = iommu_group_alloc();
-		if (IS_ERR(group))
-			return PTR_ERR(group);
-	}
-
-	ret = iommu_group_add_device(group, dev);
+	if (IS_ERR(group))
+		return PTR_ERR(group);
 
 	iommu_group_put(group);
-	return ret;
+	return 0;
 }
 
 static void intel_iommu_remove_device(struct device *dev)

@@ -87,6 +87,10 @@ struct usb_hub {
 	struct timer_list	ups_discon_flt_timer;
 	int			ups_discon_flt_port;
 	unsigned long		ups_discon_flt_last; /* last filtered time */
+#define SYNO_UPS_DISCON_FLT_STATUS_NONE			0
+#define SYNO_UPS_DISCON_FLT_STATUS_DEFERRED		1
+#define SYNO_UPS_DISCON_FLT_STATUS_TIMEOUT		2
+	unsigned int		ups_discon_flt_status;
 #endif /* CONFIG_SYNO_USB_UPS_DISCONNECT_FILTER */
 };
 
@@ -115,6 +119,9 @@ struct usb_port {
 #define SYNO_USB_PORT_CASTRATED_XHC 0x01
 	unsigned int flag;
 #endif /* CONFIG_SYNO_CASTRATED_XHC */
+#ifdef CONFIG_SYNO_USB_VBUS_GPIO_CONTROL
+	unsigned syno_vbus_gpp;
+#endif /* CONFIG_SYNO_USB_VBUS_GPIO_CONTROL */
 };
 #if defined (CONFIG_SYNO_USB_POWER_RESET)
 #define SYNO_POWER_CYCLE_TRIES	(3)

@@ -35,6 +35,9 @@
 #include <linux/interrupt.h>
 #include <linux/usb.h>
 #include <linux/usb/hcd.h>
+#ifdef CONFIG_SYNO_USB_DEVICE_QUIRKS
+#include <linux/usb/syno_quirks.h>
+#endif /* CONFIG_SYNO_USB_DEVICE_QUIRKS */
 #include <linux/moduleparam.h>
 #include <linux/dma-mapping.h>
 #include <linux/debugfs.h>

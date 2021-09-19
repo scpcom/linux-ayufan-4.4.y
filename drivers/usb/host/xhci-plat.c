@@ -84,6 +84,10 @@ static const struct hc_driver xhci_plat_xhci_driver = {
 
 static int xhci_plat_probe(struct platform_device *pdev)
 {
+#if defined (CONFIG_SYNO_USB_POWER_RESET)
+	struct device_node	*node = pdev->dev.of_node;
+	u32 vbus_gpio_pin = 0;
+#endif /* CONFIG_SYNO_USB_POWER_RESET */
 	const struct hc_driver	*driver;
 	struct xhci_hcd		*xhci;
 	struct resource         *res;
@@ -125,6 +129,28 @@ static int xhci_plat_probe(struct platform_device *pdev)
 		goto release_mem_region;
 	}
 
+#if defined (CONFIG_SYNO_USB_POWER_RESET)
+	if (node) {
+		if (of_property_read_bool(node, "power-control-capable")) {
+			hcd->power_control_support = 1;
+		} else {
+			hcd->power_control_support = 0;
+		}
+		if (of_property_read_bool(node, "vbus-gpio")) {
+			of_property_read_u32(node, "vbus-gpio", &vbus_gpio_pin);
+			/* hcd->vbus_gpio_pin' is an integer, but vbus_gpio_pin is
+			 * an unsigned integer. It should be safe because it's enough
+			 * for gpio number.
+			 */
+			hcd->vbus_gpio_pin = vbus_gpio_pin;
+		} else {
+			hcd->vbus_gpio_pin = -1;
+			dev_warn(&pdev->dev, "failed to get Vbus gpio\n");
+		}
+	}
+	dev_info(&pdev->dev, "USB2 Vbus gpio %d\n", hcd->vbus_gpio_pin);
+	dev_info(&pdev->dev, "power control %s\n", hcd->power_control_support ? "enabled" : "disabled");
+#endif /* CONFIG_SYNO_USB_POWER_RESET */
 	ret = usb_add_hcd(hcd, irq, IRQF_SHARED);
 	if (ret)
 		goto unmap_registers;
@@ -138,7 +164,12 @@ static int xhci_plat_probe(struct platform_device *pdev)
 		ret = -ENOMEM;
 		goto dealloc_usb2_hcd;
 	}
-
+#if defined (CONFIG_SYNO_USB_POWER_RESET)
+	xhci->shared_hcd->vbus_gpio_pin = hcd->vbus_gpio_pin;
+	xhci->shared_hcd->power_control_support = hcd->power_control_support;
+	dev_info(&pdev->dev, "USB3 Vbus gpio %d\n", xhci->shared_hcd->vbus_gpio_pin);
+	dev_info(&pdev->dev, "power control %s\n", hcd->power_control_support ? "enabled" : "disabled");
+#endif /* CONFIG_SYNO_USB_POWER_RESET */
 	/*
 	 * Set the xHCI pointer before xhci_plat_setup() (aka hcd_driver.reset)
 	 * is called by usb_add_hcd().

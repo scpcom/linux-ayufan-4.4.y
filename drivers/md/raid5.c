@@ -68,7 +68,11 @@
 #define ANY_GROUP NUMA_NO_NODE
 
 static struct workqueue_struct *raid5_wq;
+#ifdef CONFIG_SYNO_MD_RAID5_ENABLE_SSD_TRIM
+static bool devices_handle_discard_safely = true;
+#else /* CONFIG_SYNO_MD_RAID5_ENABLE_SSD_TRIM */
 static bool devices_handle_discard_safely = false;
+#endif /* CONFIG_SYNO_MD_RAID5_ENABLE_SSD_TRIM */
 module_param(devices_handle_discard_safely, bool, 0644);
 MODULE_PARM_DESC(devices_handle_discard_safely,
 		 "Set to Y if all devices in each array reliably return zeroes on reads from discarded regions");
@@ -1081,7 +1085,13 @@ ops_run_compute5(struct stripe_head *sh, struct raid5_percpu *percpu)
  * destination buffer is recorded in srcs[count] and the Q destination
  * is recorded in srcs[count+1]].
  */
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+static int set_syndrome_sources(struct page **srcs,
+				struct stripe_head *sh,
+				int srctype)
+#else /* CONFIG_SYNO_MD_RAID6_RMW */
 static int set_syndrome_sources(struct page **srcs, struct stripe_head *sh)
+#endif /* CONFIG_SYNO_MD_RAID6_RMW */
 {
 	int disks = sh->disks;
 	int syndrome_disks = sh->ddf_layout ? disks : (disks - 2);
@@ -1089,6 +1099,9 @@ static int set_syndrome_sources(struct page **srcs, struct stripe_head *sh)
 	int count;
 	int i;
 
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+	BUG_ON(NULL == srcs);
+#endif /* CONFIG_SYNO_MD_RAID6_RMW */
 	for (i = 0; i < disks; i++)
 		srcs[i] = NULL;
 
@@ -1096,8 +1109,20 @@ static int set_syndrome_sources(struct page **srcs, struct stripe_head *sh)
 	i = d0_idx;
 	do {
 		int slot = raid6_idx_to_slot(i, sh, &count, syndrome_disks);
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+		struct r5dev *dev = &sh->dev[i];
+
+		if (i == sh->qd_idx || i == sh->pd_idx ||
+		    (srctype == SYNDROME_SRC_ALL) ||
+		    (srctype == SYNDROME_SRC_WANT_DRAIN &&
+		     test_bit(R5_Wantdrain, &dev->flags)) ||
+		    (srctype == SYNDROME_SRC_WRITTEN &&
+		     dev->written))
+			srcs[slot] = sh->dev[i].page;
+#else /* CONFIG_SYNO_MD_RAID6_RMW */
 
 		srcs[slot] = sh->dev[i].page;
+#endif /* CONFIG_SYNO_MD_RAID6_RMW */
 		i = raid6_next_disk(i, disks);
 	} while (i != d0_idx);
 
@@ -1136,7 +1161,11 @@ ops_run_compute6_1(struct stripe_head *sh, struct raid5_percpu *percpu)
 	atomic_inc(&sh->count);
 
 	if (target == qd_idx) {
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+		count = set_syndrome_sources(blocks, sh, SYNDROME_SRC_ALL);
+#else /* CONFIG_SYNO_MD_RAID6_RMW */
 		count = set_syndrome_sources(blocks, sh);
+#endif /* CONFIG_SYNO_MD_RAID6_RMW */
 		blocks[count] = NULL; /* regenerating p is not necessary */
 		BUG_ON(blocks[count+1] != dest); /* q should already be set */
 		init_async_submit(&submit, ASYNC_TX_FENCE, NULL,
@@ -1243,7 +1272,11 @@ ops_run_compute6_2(struct stripe_head *sh, struct raid5_percpu *percpu)
 			tx = async_xor(dest, blocks, 0, count, STRIPE_SIZE,
 				       &submit);
 
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+			count = set_syndrome_sources(blocks, sh, SYNDROME_SRC_ALL);
+#else /* CONFIG_SYNO_MD_RAID6_RMW */
 			count = set_syndrome_sources(blocks, sh);
+#endif /* CONFIG_SYNO_MD_RAID6_RMW */
 			init_async_submit(&submit, ASYNC_TX_FENCE, tx,
 					  ops_complete_compute, sh,
 					  to_addr_conv(sh, percpu));
@@ -1277,8 +1310,13 @@ static void ops_complete_prexor(void *stripe_head_ref)
 }
 
 static struct dma_async_tx_descriptor *
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+ops_run_prexor5(struct stripe_head *sh, struct raid5_percpu *percpu,
+		struct dma_async_tx_descriptor *tx)
+#else /* CONFIG_SYNO_MD_RAID6_RMW */
 ops_run_prexor(struct stripe_head *sh, struct raid5_percpu *percpu,
 	       struct dma_async_tx_descriptor *tx)
+#endif /* CONFIG_SYNO_MD_RAID6_RMW */
 {
 	int disks = sh->disks;
 	struct page **xor_srcs = percpu->scribble;
@@ -1304,6 +1342,29 @@ ops_run_prexor(struct stripe_head *sh, struct raid5_percpu *percpu,
 
 	return tx;
 }
+
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+static struct dma_async_tx_descriptor *
+ops_run_prexor6(struct stripe_head *sh, struct raid5_percpu *percpu,
+		struct dma_async_tx_descriptor *tx)
+{
+	struct page **blocks = percpu->scribble;
+	int count;
+	struct async_submit_ctl submit;
+
+	pr_debug("%s: stripe %llu\n", __func__,
+		(unsigned long long)sh->sector);
+
+	BUG_ON(NULL == blocks);
+	count = set_syndrome_sources(blocks, sh, SYNDROME_SRC_WANT_DRAIN);
+
+	init_async_submit(&submit, ASYNC_TX_FENCE|ASYNC_TX_PQ_XOR_DST, tx,
+			  ops_complete_prexor, sh, to_addr_conv(sh, percpu));
+	tx = async_gen_syndrome(blocks, 0, count+2, STRIPE_SIZE,  &submit);
+
+	return tx;
+}
+#endif /* CONFIG_SYNO_MD_RAID6_RMW */
 
 static struct dma_async_tx_descriptor *
 ops_run_biodrain(struct stripe_head *sh, struct dma_async_tx_descriptor *tx)
@@ -1463,7 +1524,11 @@ ops_run_reconstruct6(struct stripe_head *sh, struct raid5_percpu *percpu,
 	struct async_submit_ctl submit;
 	struct page **blocks = percpu->scribble;
 	int count, i;
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+	int synflags;
+	unsigned long txflags;
 
+#endif /* CONFIG_SYNO_MD_RAID6_RMW */
 	pr_debug("%s: stripe %llu\n", __func__, (unsigned long long)sh->sector);
 
 	for (i = 0; i < sh->disks; i++) {
@@ -1480,11 +1545,27 @@ ops_run_reconstruct6(struct stripe_head *sh, struct raid5_percpu *percpu,
 		return;
 	}
 
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+	if (sh->reconstruct_state == reconstruct_state_prexor_drain_run) {
+		synflags = SYNDROME_SRC_WRITTEN;
+		txflags = ASYNC_TX_ACK | ASYNC_TX_PQ_XOR_DST;
+	} else {
+		synflags = SYNDROME_SRC_ALL;
+		txflags = ASYNC_TX_ACK;
+	}
+
+	count = set_syndrome_sources(blocks, sh, synflags);
+#else /* CONFIG_SYNO_MD_RAID6_RMW */
 	count = set_syndrome_sources(blocks, sh);
+#endif /* CONFIG_SYNO_MD_RAID6_RMW */
 
 	atomic_inc(&sh->count);
 
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+	init_async_submit(&submit, txflags, tx, ops_complete_reconstruct,
+#else /* CONFIG_SYNO_MD_RAID6_RMW */
 	init_async_submit(&submit, ASYNC_TX_ACK, tx, ops_complete_reconstruct,
+#endif /* CONFIG_SYNO_MD_RAID6_RMW */
 			  sh, to_addr_conv(sh, percpu));
 	async_gen_syndrome(blocks, 0, count+2, STRIPE_SIZE,  &submit);
 }
@@ -1544,7 +1625,11 @@ static void ops_run_check_pq(struct stripe_head *sh, struct raid5_percpu *percpu
 	pr_debug("%s: stripe %llu checkp: %d\n", __func__,
 		(unsigned long long)sh->sector, checkp);
 
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+	count = set_syndrome_sources(srcs, sh, SYNDROME_SRC_ALL);
+#else /* CONFIG_SYNO_MD_RAID6_RMW */
 	count = set_syndrome_sources(srcs, sh);
+#endif /* CONFIG_SYNO_MD_RAID6_RMW */
 	if (!checkp)
 		srcs[count] = NULL;
 
@@ -1585,8 +1670,17 @@ static void raid_run_ops(struct stripe_head *sh, unsigned long ops_request)
 			async_tx_ack(tx);
 	}
 
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+	if (test_bit(STRIPE_OP_PREXOR, &ops_request)) {
+		if (level < 6)
+			tx = ops_run_prexor5(sh, percpu, tx);
+		else
+			tx = ops_run_prexor6(sh, percpu, tx);
+	}
+#else /* CONFIG_SYNO_MD_RAID6_RMW */
 	if (test_bit(STRIPE_OP_PREXOR, &ops_request))
 		tx = ops_run_prexor(sh, percpu, tx);
+#endif /* CONFIG_SYNO_MD_RAID6_RMW */
 
 	if (test_bit(STRIPE_OP_BIODRAIN, &ops_request)) {
 		tx = ops_run_biodrain(sh, tx);
@@ -2921,7 +3015,11 @@ static void
 schedule_reconstruction(struct stripe_head *sh, struct stripe_head_state *s,
 			 int rcw, int expand)
 {
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+	int i, pd_idx = sh->pd_idx, qd_idx = sh->qd_idx, disks = sh->disks;
+#else /* CONFIG_SYNO_MD_RAID6_RMW */
 	int i, pd_idx = sh->pd_idx, disks = sh->disks;
+#endif /* CONFIG_SYNO_MD_RAID6_RMW */
 	struct r5conf *conf = sh->raid_conf;
 	int level = conf->level;
 
@@ -2957,13 +3055,23 @@ schedule_reconstruction(struct stripe_head *sh, struct stripe_head_state *s,
 			if (!test_and_set_bit(STRIPE_FULL_WRITE, &sh->state))
 				atomic_inc(&conf->pending_full_writes);
 	} else {
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+		BUG_ON(level == 6 &&
+			(!(test_bit(R5_UPTODATE, &sh->dev[qd_idx].flags) ||
+			   test_bit(R5_Wantcompute, &sh->dev[qd_idx].flags))));
+#else /* CONFIG_SYNO_MD_RAID6_RMW */
 		BUG_ON(level == 6);
+#endif /* CONFIG_SYNO_MD_RAID6_RMW */
 		BUG_ON(!(test_bit(R5_UPTODATE, &sh->dev[pd_idx].flags) ||
 			test_bit(R5_Wantcompute, &sh->dev[pd_idx].flags)));
 
 		for (i = disks; i--; ) {
 			struct r5dev *dev = &sh->dev[i];
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+			if (i == pd_idx || i == qd_idx)
+#else /* CONFIG_SYNO_MD_RAID6_RMW */
 			if (i == pd_idx)
+#endif /* CONFIG_SYNO_MD_RAID6_RMW */
 				continue;
 
 			if (dev->towrite &&
@@ -3459,6 +3567,15 @@ static void handle_stripe_dirtying(struct r5conf *conf,
 	int rmw = 0, rcw = 0, i;
 	sector_t recovery_cp = conf->mddev->recovery_cp;
 
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+	/* Check whether resync is now happening or should start.
+	 * If yes, then the array is dirty (after unclean shutdown or
+	 * initial creation), so parity in some stripes might be inconsistent.
+	 * In this case, we need to always do reconstruct-write, to ensure
+	 * that in case of drive failure or read-error correction, we
+	 * generate correct data from the parity.
+	 */
+#else /* CONFIG_SYNO_MD_RAID6_RMW */
 	/* RAID6 requires 'rcw' in current implementation.
 	 * Otherwise, check whether resync is now happening or should start.
 	 * If yes, then the array is dirty (after unclean shutdown or
@@ -3467,20 +3584,36 @@ static void handle_stripe_dirtying(struct r5conf *conf,
 	 * that in case of drive failure or read-error correction, we
 	 * generate correct data from the parity.
 	 */
+#endif /* CONFIG_SYNO_MD_RAID6_RMW */
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+	if (conf->rmw_level == PARITY_DISABLE_RMW ||
+	    (recovery_cp < MaxSector && sh->sector >= recovery_cp &&
+	     s->failed == 0)) {
+#else /* CONFIG_SYNO_MD_RAID6_RMW */
 	if (conf->max_degraded == 2 ||
 	    (recovery_cp < MaxSector && sh->sector >= recovery_cp &&
 	     s->failed == 0)) {
+#endif /* CONFIG_SYNO_MD_RAID6_RMW */
 		/* Calculate the real rcw later - for now make it
 		 * look like rcw is cheaper
 		 */
 		rcw = 1; rmw = 2;
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+		pr_debug("force RCW rmw_level=%u, recovery_cp=%llu sh->sector=%llu\n",
+			 conf->rmw_level, (unsigned long long)recovery_cp,
+#else /* CONFIG_SYNO_MD_RAID6_RMW */
 		pr_debug("force RCW max_degraded=%u, recovery_cp=%llu sh->sector=%llu\n",
 			 conf->max_degraded, (unsigned long long)recovery_cp,
+#endif /* CONFIG_SYNO_MD_RAID6_RMW */
 			 (unsigned long long)sh->sector);
 	} else for (i = disks; i--; ) {
 		/* would I have to read this buffer for read_modify_write */
 		struct r5dev *dev = &sh->dev[i];
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+		if ((dev->towrite || i == sh->pd_idx || i == sh->qd_idx) &&
+#else /* CONFIG_SYNO_MD_RAID6_RMW */
 		if ((dev->towrite || i == sh->pd_idx) &&
+#endif /* CONFIG_SYNO_MD_RAID6_RMW */
 		    !test_bit(R5_LOCKED, &dev->flags) &&
 		    !(test_bit(R5_UPTODATE, &dev->flags) ||
 		      test_bit(R5_Wantcompute, &dev->flags))) {
@@ -3490,7 +3623,12 @@ static void handle_stripe_dirtying(struct r5conf *conf,
 				rmw += 2*disks;  /* cannot read it */
 		}
 		/* Would I have to read this buffer for reconstruct_write */
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+		if (!test_bit(R5_OVERWRITE, &dev->flags) &&
+			i != sh->pd_idx && i != sh->qd_idx &&
+#else /* CONFIG_SYNO_MD_RAID6_RMW */
 		if (!test_bit(R5_OVERWRITE, &dev->flags) && i != sh->pd_idx &&
+#endif /* CONFIG_SYNO_MD_RAID6_RMW */
 		    !test_bit(R5_LOCKED, &dev->flags) &&
 		    !(test_bit(R5_UPTODATE, &dev->flags) ||
 		    test_bit(R5_Wantcompute, &dev->flags))) {
@@ -3502,7 +3640,11 @@ static void handle_stripe_dirtying(struct r5conf *conf,
 	pr_debug("for sector %llu, rmw=%d rcw=%d\n",
 		(unsigned long long)sh->sector, rmw, rcw);
 	set_bit(STRIPE_HANDLE, &sh->state);
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+	if ((rmw < rcw || (rmw == rcw && conf->rmw_level == PARITY_ENABLE_RMW)) && rmw > 0) {
+#else /* CONFIG_SYNO_MD_RAID6_RMW */
 	if (rmw < rcw && rmw > 0) {
+#endif /* CONFIG_SYNO_MD_RAID6_RMW */
 		/* prefer read-modify-write, but need to get some data */
 		if (conf->mddev->queue)
 			blk_add_trace_msg(conf->mddev->queue,
@@ -3510,7 +3652,11 @@ static void handle_stripe_dirtying(struct r5conf *conf,
 					  (unsigned long long)sh->sector, rmw);
 		for (i = disks; i--; ) {
 			struct r5dev *dev = &sh->dev[i];
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+			if ((dev->towrite || i == sh->pd_idx || i == sh->qd_idx) &&
+#else /* CONFIG_SYNO_MD_RAID6_RMW */
 			if ((dev->towrite || i == sh->pd_idx) &&
+#endif /* CONFIG_SYNO_MD_RAID6_RMW */
 			    !test_bit(R5_LOCKED, &dev->flags) &&
 			    !(test_bit(R5_UPTODATE, &dev->flags) ||
 			    test_bit(R5_Wantcompute, &dev->flags)) &&
@@ -3529,7 +3675,11 @@ static void handle_stripe_dirtying(struct r5conf *conf,
 			}
 		}
 	}
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+	if ((rcw < rmw || (rcw == rmw && conf->rmw_level != PARITY_ENABLE_RMW)) && rcw > 0) {
+#else /* CONFIG_SYNO_MD_RAID6_RMW */
 	if (rcw <= rmw && rcw > 0) {
+#endif /* CONFIG_SYNO_MD_RAID6_RMW */
 		/* want reconstruct write, but need to get some data */
 		int qread =0;
 		rcw = 0;
@@ -5916,6 +6066,71 @@ raid5_stripecache_size = __ATTR(stripe_cache_size, S_IRUGO | S_IWUSR,
 				raid5_show_stripe_cache_size,
 				raid5_store_stripe_cache_size);
 
+#ifdef CONFIG_SYNO_MD_STRIPE_MEMORY_ESTIMATION
+static ssize_t
+stripe_cache_memory_usage_show(struct mddev *mddev, char *page)
+{
+	struct r5conf *conf = mddev->private;
+	size_t oneObjSize = 0; 
+	int devs = 0;
+
+	if (conf) {
+		devs = max(conf->raid_disks, conf->previous_raid_disks);
+		oneObjSize = sizeof(struct stripe_head) + (devs - 1) * sizeof(struct r5dev) + devs * (sizeof(struct page) + PAGE_SIZE);
+		return sprintf(page, "%d\n", conf->max_nr_stripes * (int)oneObjSize / 1024);
+	} else {
+		return 0;
+	}
+}
+
+static struct md_sysfs_entry
+raid5_stripecache_memory_usage = __ATTR_RO(stripe_cache_memory_usage);
+#endif /* CONFIG_SYNO_MD_STRIPE_MEMORY_ESTIMATION */
+
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+static ssize_t
+raid5_show_rmw_level(struct mddev  *mddev, char *page)
+{
+	struct r5conf *conf = mddev->private;
+	if (conf)
+		return sprintf(page, "%d\n", conf->rmw_level);
+	else
+		return 0;
+}
+
+static ssize_t
+raid5_store_rmw_level(struct mddev  *mddev, const char *page, size_t len)
+{
+	struct r5conf *conf = mddev->private;
+	unsigned long new;
+
+	if (!conf)
+		return -ENODEV;
+
+	if (len >= PAGE_SIZE)
+		return -EINVAL;
+
+	if (kstrtoul(page, 10, &new))
+		return -EINVAL;
+
+	if (new != PARITY_DISABLE_RMW && !raid6_call.xor_syndrome)
+		return -EINVAL;
+
+	if (new != PARITY_DISABLE_RMW &&
+	    new != PARITY_ENABLE_RMW &&
+	    new != PARITY_PREFER_RMW)
+		return -EINVAL;
+
+	conf->rmw_level = new;
+	return len;
+}
+
+static struct md_sysfs_entry
+raid5_rmw_level = __ATTR(rmw_level, S_IRUGO | S_IWUSR,
+			 raid5_show_rmw_level,
+			 raid5_store_rmw_level);
+
+#endif /* CONFIG_SYNO_MD_RAID6_RMW */
 static ssize_t
 raid5_show_preread_threshold(struct mddev *mddev, char *page)
 {
@@ -6037,6 +6252,13 @@ static struct attribute *raid5_attrs[] =  {
 	&raid5_stripecache_size.attr,
 	&raid5_stripecache_active.attr,
 	&raid5_preread_bypass_threshold.attr,
+	&raid5_group_thread_cnt.attr,
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+	&raid5_rmw_level.attr,
+#endif /* CONFIG_SYNO_MD_RAID6_RMW */
+#ifdef CONFIG_SYNO_MD_STRIPE_MEMORY_ESTIMATION
+	&raid5_stripecache_memory_usage.attr,
+#endif /* CONFIG_SYNO_MD_STRIPE_MEMORY_ESTIMATION */
 	NULL,
 };
 static struct attribute_group raid5_attrs_group = {
@@ -6341,10 +6563,23 @@ static struct r5conf *setup_conf(struct mddev *mddev)
 
 	conf->chunk_sectors = mddev->new_chunk_sectors;
 	conf->level = mddev->new_level;
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+	if (conf->level == 6) {
+		conf->max_degraded = 2;
+		if (raid6_call.xor_syndrome)
+			conf->rmw_level = PARITY_ENABLE_RMW;
+		else
+			conf->rmw_level = PARITY_DISABLE_RMW;
+	} else {
+		conf->max_degraded = 1;
+		conf->rmw_level = PARITY_ENABLE_RMW;
+	}
+#else /* CONFIG_SYNO_MD_RAID6_RMW */
 	if (conf->level == 6)
 		conf->max_degraded = 2;
 	else
 		conf->max_degraded = 1;
+#endif /* CONFIG_SYNO_MD_RAID6_RMW */
 	conf->algorithm = mddev->new_layout;
 	conf->max_nr_stripes = NR_STRIPES;
 	conf->reshape_progress = mddev->reshape_position;

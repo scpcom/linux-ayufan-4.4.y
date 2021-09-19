@@ -3494,6 +3494,10 @@ void __init tcp_init(void)
 	sysctl_tcp_rmem[0] = SK_MEM_QUANTUM;
 	sysctl_tcp_rmem[1] = 87380;
 	sysctl_tcp_rmem[2] = max(87380, max_rshare);
+#ifdef CONFIG_SYNO_KVMX64
+	sysctl_tcp_rmem[0] *= 2;
+	sysctl_tcp_rmem[1] *= 2;
+#endif
 
 	pr_info("Hash tables configured (established %u bind %u)\n",
 		tcp_hashinfo.ehash_mask + 1, tcp_hashinfo.bhash_size);

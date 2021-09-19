@@ -16,6 +16,13 @@ config SYNO_FS_XATTR
 	  <DSM> #12362
 	  Support syno extended attribute.
 
+config SYNO_FS_UNMOUNT
+	bool "syno umount dump opened file"
+	default y
+	help
+	  <DSM> #82220
+	  Dump opened path of files in mount point when vfs do_umount encounters device busy.
+
 config SYNO_FS_ARCHIVE_BIT
 	bool "syno archive bit"
 	default y
@@ -131,7 +138,7 @@ config SYNO_CIFS_REPLACE_NATIVE_OS
 	bool "Identify Synology CIFS mount"
 	default y
 	help
-	  DSM#25749 
+	  DSM#25749
 	  The "Native OS" in SMB packets sent by cifs.mount will be
 	  replaced with "Linux version 2.6.32". However, we have to
 	  identify those packets to export @eaDir for such clients.
@@ -153,7 +160,7 @@ config SYNO_CIFS_INIT_NLINK
 	  DSM#29931
 	  Initialize fattr with "cf_nlink = 1" in cifs_dir_info_to_fattr.
 	  Without this, st_nlink for directory will be zero in cifs filesystem.
-  
+
 config SYNO_CIFS_SPECIAL_CHAR_CONVER
 	bool "CIFS convert special char for MAC"
 	default y
@@ -215,6 +222,14 @@ config SYNO_FAT_LOAD_DEF_NLS_IF_FAIL
 	help
 	  When we fail to load default codepage, which is assigned by mount option or
 	  config FAT_DEFAULT_CODEPAGE, try config NLS_DEFAULT as codepage setting.
+
+config SYNO_FAT_CREATE_TIME
+	bool "FAT syno create time"
+	default y
+	depends on SYNO_FS_CREATE_TIME && FAT_FS
+	help
+	  Support syno create time in FAT
+	  Split from SYNO_CREATE_TIME
 
 endmenu
 
@@ -503,6 +518,7 @@ menu "BTRFS"
 config SYNO_BTRFS_PORTING
 	bool "Btrfs back porting"
 	default y
+	depends on BTRFS_FS
 	help
 	  <DSM> #47400
 	  Add support for back porting btrfs
@@ -535,6 +551,7 @@ config SYNO_BTRFS_ARCHIVE_BIT
 config SYNO_BTRFS_AVOID_SEARCH_EXTENT_STATE_WHILE_EVICT_INODE
 	bool "Avoid search extent_state again while evict inode to skip unnecessary split extent_state."
 	default y
+	depends on BTRFS_FS
 	help
 	  <DSM> #69930
 	  Fix deadlock in rm with ecryptfs on btrfs.
@@ -542,22 +559,16 @@ config SYNO_BTRFS_AVOID_SEARCH_EXTENT_STATE_WHILE_EVICT_INODE
 config SYNO_BTRFS_PIN_LOG_ON_DELETE_INODE
 	bool "Pin tree-log while unlink to prevent deadlock."
 	default y
+	depends on BTRFS_FS
 	help
 	  <FS Snapshot> #271
 	  <DSM> #69252
 	  Fix deadlock between btrfs unlink and sync tree log.
 
-config SYNO_BTRFS_PREVENT_FLUSH_STUCK_IN_BALANCE_DIRTY_PAGES
-	bool "Skip balance dirty pages in flush-btrfs-X  to prevent deadlock."
-	default y
-	help
-	  <FS Snapshot> #248
-	  flush-btrfs-X will stuck in balance_dirty_pages(). It may be fixed in new kernel.
-	  We can pass it safely because page will be balance every command.
-
 config SYNO_BTRFS_METADATA_OVERCOMMIT_POLICY
 	bool "Change metadata over commit policy to prevent file system crash."
 	default y
+	depends on BTRFS_FS
 	help
 	  <FS Snapshot> #174
 	  Because of btrfs metadata delayed allocation,
@@ -566,6 +577,7 @@ config SYNO_BTRFS_METADATA_OVERCOMMIT_POLICY
 config SYNO_BTRFS_FLUSHONCOMMIT_THRESHOLD
 	bool "Release btrfs ordered extent to prevent OOM"
 	default y
+	depends on BTRFS_FS
 	help
 	  <FS Snapshot> #110
 	  In btrfs, ordered extent will keep in memory via delayed allocation.
@@ -574,6 +586,7 @@ config SYNO_BTRFS_FLUSHONCOMMIT_THRESHOLD
 config SYNO_BTRFS_FIX_PAGE_LEAK_WHILE_CLONE_EXTENT_BUFFER
 	bool "Fix btrfs memory leak on clone extent buffer."
 	default y
+	depends on BTRFS_FS
 	help
 	  <FS Snapshot> #171
 	  Fix memory leak for btrfs quota group.
@@ -582,6 +595,7 @@ config SYNO_BTRFS_FIX_PAGE_LEAK_WHILE_CLONE_EXTENT_BUFFER
 config SYNO_BTRFS_ADD_MISSING_FINISH_PLUG_FOR_TREE_LOG
 	bool "Add missing finish plug for btrfs tree log."
 	default y
+	depends on BTRFS_FS
 	help
 	  <FS Snapshot> #121
 	  In 3.15 patches, 0cb5320747cd177a1962c61bb039d3425698089b.
@@ -590,6 +604,7 @@ config SYNO_BTRFS_ADD_MISSING_FINISH_PLUG_FOR_TREE_LOG
 config SYNO_BTRFS_CLONE_CHECK_QUOTA
 	bool "Add quota check for IOC_CLONE ioctl command"
 	default y
+	depends on BTRFS_FS
 	help
 	  <FS Snapshot> #152
 	  add quota check for IOC_CLONE ioctl command
@@ -597,6 +612,7 @@ config SYNO_BTRFS_CLONE_CHECK_QUOTA
 config SYNO_BTRFS_FREE_EXTENT_MAPS
 	bool "Add a machanisim to drop extent map cache"
 	default y
+	depends on BTRFS_FS
 	help
 	  <FS Snapshot> #291
 	  Add a machanisim to drop extent map cache
@@ -667,14 +683,6 @@ config SYNO_BTRFS_FIX_ASYNC_DIRECT_IO_CSUM_FAILED
 	  <DSM> #71627
 	  Disable btrfs async read on direct io to prevent btrfs csum failed.
 
-config SYNO_BTRFS_FIX_NOSPC_DEL_NOUSED_BLOCKGROUP
-	bool "Fix nospc problem when delete unused blockgroup"
-	default y
-	depends on BTRFS_FS
-	help
-	  <DSM> #75194
-	  Fix nospc problem when delete unused blockgroup
-
 config SYNO_BTRFS_SUPPORT_FULLY_CLONE_BETWEEN_CSUM_AND_NOCSUM_DIR
 	bool "Fix cp --reflink failed between csum/nocsum"
 	default y
@@ -736,14 +744,14 @@ config SYNO_BTRFS_REMOVE_UNUSED_QGROUP
 	  <FS Snapshot> #243
 	  Remove qgroup item when snapshot got deleted.
 
-config SYNO_BTRFS_BIG_BLOCK_GROUP
-	bool "Use big block group to reduce mount time on big volume"
+config SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
+	bool "Revert commit: wait or commit self transaction"
 	default y
 	depends on BTRFS_FS
 	help
-	  <DSM> #75730
-	  Use big block group to reduce mount time on big volume. It
-	  will be applied only on volumes who have size larger than 1T.
+	  <FS Snapshot> #145
+	  Open source - Btrfs: just wait or commit our own log sub-transaction
+	  will cause btrfs panic everywhere. This config revert that commit.
 
 config SYNO_BTRFS_BIG_BLOCK_GROUP
 	bool "Use big block group to reduce mount time on big volume"
@@ -754,15 +762,6 @@ config SYNO_BTRFS_BIG_BLOCK_GROUP
 	  Use big block group to reduce mount time on big volume. It
 	  will be applied only on volumes who have size larger than 1T.
 
-config SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
-	bool "Revert commit: wait or commit self transaction"
-	default y
-	depends on BTRFS_FS
-	help
-	  <FS Snapshot> #145
-	  Open source - Btrfs: just wait or commit our own log sub-transaction
-	  will cause btrfs panic everywhere. This config revert that commit.
-
 config SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
 	bool "Fix btrfs hang on btrfs_end_io*"
 	default y
@@ -771,6 +770,22 @@ config SYNO_BTRFS_REVERT_BIO_COUNT_FOR_DEV_REPLACING
 	  <FS Snapshot> #149
 	  Open source - Btrfs: fix use-after-free in the finishing procedure of the device replace
 	  will cause bio_couter inc/dec call trace. This config revert that patch.
+
+config SYNO_BTRFS_SEND_CALCULATE_TOTAL_DATA_SIZE
+	bool "add btrfs calculate send data size"
+	default y
+	depends on BTRFS_FS
+	help
+	  <DSM> #73483
+	  Support btrfs send/receive progress.
+
+config SYNO_BTRFS_SEND_SUBVOL_FLAG
+	bool "add btrfs send subvol flag"
+	default y
+	depends on BTRFS_FS
+	help
+	  <DSM> #73782
+	  Support btrfs subvol flag with send/receive
 
 config SYNO_BTRFS_REVERT_DELAYED_DELETE_INODE
 	bool "Fix dbench hang on delayed_delete_inode"
@@ -787,7 +802,7 @@ config SYNO_BTRFS_UMOUNT_ERROR_VOLUME
 	default y
 	depends on BTRFS_FS
 	help
-	  <DSM> #76402
+	  <DSM> #76391
 	  Fix a infinite loop and a null pointer dereference bug so that umount
 	  process will not stuck or killed when unmount a error Btrfs volume.
 
@@ -798,6 +813,34 @@ config SYNO_BTRFS_ALLOC_EXTENT_STATE_RETRY
 	help
 	  <DSM> #72318
 	  Btrfs will trigger BUG_ON if kmalloc failed on alloc extent state. We make it by retry.
+
+config SYNO_BTRFS_DISABLE_CLONE_BETWEEN_COMPR_AND_NOCOMPR_DIR
+	bool "Prevent clone files between compress/nocompress share folders"
+	default y
+	depends on BTRFS_FS
+	help
+	  <DSM> #77093
+	  Btrfs allow clone file between the share which is compressed or uncompressed.
+	  But we do not want a file compressed if it is in an uncompressed share.
+	  It prevent file partly compressed through file clone.
+
+config SYNO_BTRFS_COMPR_CTL
+	bool "Operate compressed files"
+	default y
+	depends on BTRFS_FS
+	help
+	  <DSM> #77351
+	  Add an ioctl to set/get info of compressed file.
+	  Currently it only supports to get compressed size, uncompressed size and c flag.
+
+config SYNO_BTRFS_COMPR_DEFAULT_SETTING
+	bool "Apply default setting of syno compression"
+	default y
+	depends on BTRFS_FS
+	help
+	  <DSM> #77361
+	  Apply default setting of syno compression:
+	  Default compression method is lzo
 
 config SYNO_BTRFS_METADATA_RESERVE
 	bool "Pre-allocate btrfs metadata chunk with metadata_ratio."
@@ -813,7 +856,7 @@ config SYNO_BTRFS_FIX_PAGE_WRITEBACK
 	default y
 	depends on BTRFS_FS
 	help
-	  <DSM> #75451
+	  <DSM> #72565
 	  Use memory barrier to fix page writeback BUG_ON. We don't know
 	  exactly why it works but it passed our stress and the fix has no
 	  harm.
@@ -828,6 +871,14 @@ config SYNO_BTRFS_REMOVE_RAID_CRASH_QGROUP_BUG_ON
 	  filesystem is already readonly. If filesystem is already changed to readonly,
 	  skip bug_on.
 
+config SYNO_BTRFS_FIX_INCREMENTAL_SEND
+	bool "fix btrfs send incremental send"
+	default y
+	depends on BTRFS_FS
+	help
+	  <DSM> #76786
+	  fix btrfs incremental send serval case.
+
 config SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT
 	bool "Avoid NULL pointer dereference at create_pending_snapshots"
 	default y
@@ -838,8 +889,8 @@ config SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT
 	  when trying to delete pending_snapshot from list. If last ioctl of creating snapshot
 	  failed at commit transaction before it is deleted from pending snapshot list, the entry
 	  would be freed while it was still in the list. This causes call trace on next commit
-	  transctioncall to create_pending_snapshots. This patch add a check: If this entry has
-	  not been deleted from list right before it is about to free, delete it.
+	  transctioncall to create_pending_snapshots. This patch fix by: If commit transaction
+	  failed without being aborted, then remove pending_snapshot from pending_snapshots list.
 
 config SYNO_BTRFS_ADD_LOCK_ON_FLUSH_ORDERED_EXTENT
 	bool "Add mutex lock on btrfs ordered extent flush to prevent memory leak."
@@ -862,15 +913,42 @@ config SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
 	  mounting volume, we can lookup this tree, knowing the keys of following block
 	  group items, and readahead theses items to speedup mounting time.
 
+config SYNO_BTRFS_RESERVE_PROP_SPACE_FOR_COMPRESSION
+	bool "Reserve space for compression props on start_transaction."
+	default y
+	depends on BTRFS_FS
+	help
+	  <DSM> #84137
+	  Btrfs compression will add a xattr "btrfs.compression.lzo"(or zlib) prop for
+	  every new_inode if parent is compressed. Before the fix, it will reserve space
+	  for trans on add xattr time. Now it will add on start_transaction.
+
 config SYNO_BTRFS_AVOID_TRIM_SYS_CHUNK
 	bool "Avoid trim system chunk."
 	default y
 	depends on BTRFS_FS
 	help
-	  <DSM> #84616
+	  <DSM> #84617
 	  Btrfs trimming doesn't check block reserve, leading ENOSPC if we do chunk item
 	  operation while trimming system chunk. Since system chunk is usually small and
 	  seldom updates, we avoid trimming system chunk to workarond this problem.
+
+config SYNO_BTRFS_GLOBAL_RESERVE_MINIMAL_VALUE
+	bool "Keep btrfs global reserve more than 256MB if the fs is larger than 10G."
+	default y
+	depends on BTRFS_FS
+	help
+	  <DSM> #84722
+	  Make sure btrfs have enough global reserve space to prevent file system crash on delete.
+
+config SYNO_BTRFS_CHECK_INTEGRITY
+	bool "Check leaf integrity every time we call btrfs_mark_buffer_dirty()."
+	default y
+	depends on BTRFS_FS
+	help
+	  <DSM> #89283
+	  For debug use. Add an entry in /sys/fs/btrfs/[fsid]/check_integrity. 0 -> no check,
+	  1 -> WARN() in fail, and 2 -> BUG().
 
 endmenu #BTRFS
 
@@ -960,6 +1038,26 @@ config SYNO_ECRYPTFS_OCF
 	  <DSM> No Bug Entry
 	  combine ecryptfs and ocf framework.
 	  Only open this function when OCF framework is used.
+
+config SYNO_ECRYPTFS_BLOCK_BTRFS_CLONE
+	bool "Ecryptfs should block Btrfs clone ioctl"
+	default y
+	depends on ECRYPT_FS && BTRFS_FS
+	help
+	  <DSM> #83888
+	  We should block Btrfs clone in encrytion share, otherwise we could share data
+	  between ecrypted and non-ecrypted share. Even we have two ecrypted shares, they
+	  may not use same key. We block BTRFS_IOC_CLONE and BTRFS_IOC_CLONE_RANGE.
+
+config SYNO_FS_ECRYPTFS_LOWER_INIT
+	bool "Ecryptfs always initial lower file with rw, ignore security check on initialization"
+	default y
+	depends on ECRYPT_FS
+	help
+	  <DSM> #85515
+	  Ecryptfs always initial lower file with read-write, except read-only file system,
+	  even current process is reading. It will trigger apparmor warning that reading process
+	  try to write. We skip security check on ecryptfs doing lower file initialization.
 
 endmenu #ECRYPT
 menu "NFS"
@@ -1164,5 +1262,69 @@ config SYNO_ISOFS_UINT_UID_GID
 	  module to parse unsigned long type options.
 
 endmenu #ISOFS
+
+menu "FUSE"
+
+config SYNO_FUSE_PUNCH_HOLE_BUG_ON
+	bool "Fuse mount punch hole bug on."
+	default y
+	depends on FUSE_FS
+	help
+	  <Clustered Share> #16
+	  Fix punch hole offset/len alignment PAGE_CACHE_SIZE.
+
+config SYNO_FUSE_GLUSTER
+	bool "Let fuse handle gluster specifically"
+	default y
+	depends on FUSE_FS
+	help
+	  <PetaSpace> #13
+	  Let fuse handle gluster specifically. Some code in fuse only works
+	  on gluster, so subtype glusterfs check is needed.
+
+config SYNO_FUSE_STAT
+	bool "Gluster FS support synostat and caseless stat"
+	default y
+	depends on FUSE_FS && SYNO_FS_STAT && SYNO_FS_CASELESS_STAT
+	help
+	  <Clustered Share> #13
+	  Let gluster support synostat and syno caseless stat
+
+config SYNO_FUSE_ARCHIVE_VERSION
+	bool "Gluster FS support archive verion"
+	default y
+	depends on FUSE_FS && SYNO_FS_ARCHIVE_VERSION
+	help
+	  <PetaSpace> #12
+	  Let gluster support syno archive version. Archive version on local filesystem
+	  could not be used directly because superblock archive version might be different
+	  across all bricks. Therefore, we use another xattr entry to store gluster archive
+	  version.
+
+config SYNO_FUSE_CREATE_TIME
+	bool "Gluster FS support syno create time"
+	default y
+	depends on FUSE_FS && SYNO_FS_CREATE_TIME
+	help
+	  <PetaSpace> #13
+	  Let gluster support syno create time.
+
+config SYNO_FUSE_WINACL
+	bool "Gluster FS support synoacl"
+	default y
+	depends on FUSE_FS && SYNO_FS_WINACL && SYNO_FS_ARCHIVE_BIT && SYNO_FUSE_GLUSTER
+	help
+	  <Clustered Share> #3
+	  Let glusterfs support SYNOACL.
+
+config SYNO_FUSE_ARCHIVE_BIT
+	bool "Gluster FS support syno archive bit"
+	default y
+	depends on FUSE_FS && SYNO_FS_ARCHIVE_BIT && SYNO_FUSE_GLUSTER
+	help
+	  <Clustered Share> #3
+	  Let gluster support syno archive bit
+
+endmenu #FUSE
 
 endmenu #File Systems

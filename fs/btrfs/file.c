@@ -1432,7 +1432,7 @@ static noinline int check_can_nocow(struct inode *inode, loff_t pos,
 	u64 num_bytes;
 	int ret;
 
-	ret = btrfs_start_nocow_write(root);
+	ret = btrfs_start_write_no_snapshoting(root);
 	if (!ret)
 		return -ENOSPC;
 
@@ -1455,7 +1455,7 @@ static noinline int check_can_nocow(struct inode *inode, loff_t pos,
 	ret = can_nocow_extent(inode, lockstart, &num_bytes, NULL, NULL, NULL);
 	if (ret <= 0) {
 		ret = 0;
-		btrfs_end_nocow_write(root);
+		btrfs_end_write_no_snapshoting(root);
 	} else {
 		*write_bytes = min_t(size_t, *write_bytes ,
 				     num_bytes - pos + lockstart);
@@ -1549,7 +1549,7 @@ static noinline ssize_t __btrfs_buffered_write(struct file *file,
 				btrfs_free_reserved_data_space(inode,
 							       reserve_bytes);
 			else
-				btrfs_end_nocow_write(root);
+				btrfs_end_write_no_snapshoting(root);
 			break;
 		}
 
@@ -1639,7 +1639,7 @@ again:
 
 		release_bytes = 0;
 		if (only_release_metadata)
-			btrfs_end_nocow_write(root);
+			btrfs_end_write_no_snapshoting(root);
 
 		if (only_release_metadata && copied > 0) {
 			u64 lockstart = round_down(pos, root->sectorsize);
@@ -1668,7 +1668,7 @@ again:
 
 	if (release_bytes) {
 		if (only_release_metadata) {
-			btrfs_end_nocow_write(root);
+			btrfs_end_write_no_snapshoting(root);
 			btrfs_delalloc_release_metadata(inode, release_bytes);
 		} else {
 			btrfs_delalloc_release_space(inode, release_bytes);
@@ -1846,6 +1846,8 @@ out:
 
 int btrfs_release_file(struct inode *inode, struct file *filp)
 {
+	if (filp->private_data)
+		btrfs_ioctl_trans_end(filp);
 	/*
 	 * ordered_data_close is set by settattr when we are about to truncate
 	 * a file from a non-zero size to a zero size.  This tries to
@@ -1853,26 +1855,8 @@ int btrfs_release_file(struct inode *inode, struct file *filp)
 	 * application were using truncate to replace a file in place.
 	 */
 	if (test_and_clear_bit(BTRFS_INODE_ORDERED_DATA_CLOSE,
-			       &BTRFS_I(inode)->runtime_flags)) {
-		struct btrfs_trans_handle *trans;
-		struct btrfs_root *root = BTRFS_I(inode)->root;
-
-		/*
-		 * We need to block on a committing transaction to keep us from
-		 * throwing a ordered operation on to the list and causing
-		 * something like sync to deadlock trying to flush out this
-		 * inode.
-		 */
-		trans = btrfs_start_transaction(root, 0);
-		if (IS_ERR(trans))
-			return PTR_ERR(trans);
-		btrfs_add_ordered_operation(trans, BTRFS_I(inode)->root, inode);
-		btrfs_end_transaction(trans, root);
-		if (inode->i_size > BTRFS_ORDERED_OPERATIONS_FLUSH_LIMIT)
+			       &BTRFS_I(inode)->runtime_flags))
 			filemap_flush(inode->i_mapping);
-	}
-	if (filp->private_data)
-		btrfs_ioctl_trans_end(filp);
 	return 0;
 }
 
@@ -2002,7 +1986,7 @@ int btrfs_sync_file(struct file *file, loff_t start, loff_t end, int datasync)
 
 	btrfs_init_log_ctx(&ctx);
 
-	ret = btrfs_log_dentry_safe(trans, root, dentry, &ctx);
+	ret = btrfs_log_dentry_safe(trans, root, dentry, start, end, &ctx);
 	if (ret < 0) {
 		/* Fallthrough and commit/free transaction. */
 		ret = 1;
@@ -2019,6 +2003,25 @@ int btrfs_sync_file(struct file *file, loff_t start, loff_t end, int datasync)
 	 * inside btrfs_sync_log to keep things safe.
 	 */
 	mutex_unlock(&inode->i_mutex);
+
+	/*
+	 * If any of the ordered extents had an error, just return it to user
+	 * space, so that the application knows some writes didn't succeed and
+	 * can take proper action (retry for e.g.). Blindly committing the
+	 * transaction in this case, would fool userspace that everything was
+	 * successful. And we also want to make sure our log doesn't contain
+	 * file extent items pointing to extents that weren't fully written to -
+	 * just like in the non fast fsync path, where we check for the ordered
+	 * operation's error flag before writing to the log tree and return -EIO
+	 * if any of them had this flag set (btrfs_wait_ordered_range) -
+	 * therefore we need to check for errors in the ordered operations,
+	 * which are indicated by ctx.io_err.
+	 */
+	if (ctx.io_err) {
+		btrfs_end_transaction(trans, root);
+		ret = ctx.io_err;
+		goto out;
+	}
 
 	if (ret != BTRFS_NO_LOG_SYNC) {
 		if (!ret) {

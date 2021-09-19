@@ -2122,11 +2122,14 @@ static int ext4_add_entry(handle_t *handle, struct dentry *dentry,
 		if (blocks == 1 && !dx_fallback &&
 #ifdef CONFIG_SYNO_EXT4_CASELESS_STAT
 			(EXT4_SB(sb)->s_es->s_syno_hash_magic == cpu_to_le32(SYNO_HASH_MAGIC)) &&
-			!EXT4_HAS_COMPAT_FEATURE(sb, EXT4_FEATURE_COMPAT_DIR_INDEX))
+			!EXT4_HAS_COMPAT_FEATURE(sb, EXT4_FEATURE_COMPAT_DIR_INDEX)) {
 #else
-		    EXT4_HAS_COMPAT_FEATURE(sb, EXT4_FEATURE_COMPAT_DIR_INDEX))
+		    EXT4_HAS_COMPAT_FEATURE(sb, EXT4_FEATURE_COMPAT_DIR_INDEX)) {
 #endif /* CONFIG_SYNO_EXT4_CASELESS_STAT */
-			return make_indexed_dir(handle, dentry, inode, bh);
+			retval = make_indexed_dir(handle, dentry, inode, bh);
+			bh = NULL; /* make_indexed_dir releases bh */
+			goto out;
+		}
 		brelse(bh);
 	}
 	bh = ext4_append(handle, dir, &block);

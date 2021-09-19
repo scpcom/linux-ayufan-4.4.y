@@ -53,7 +53,7 @@ MODULE_PARM_DESC(link_quirk, "Don't clear the chain bit on a link TRB");
  * handshake done).  There are two failure modes:  "usec" have passed (major
  * hardware flakeout), or the register reads as all-ones (hardware removed).
  */
-int xhci_handshake(struct xhci_hcd *xhci, void __iomem *ptr,
+int etxhci_handshake(struct xhci_hcd *xhci, void __iomem *ptr,
 		      u32 mask, u32 done, int usec)
 {
 	u32	result;
@@ -104,7 +104,7 @@ int etxhci_halt(struct xhci_hcd *xhci)
 	xhci_dbg(xhci, "// Halt the HC\n");
 	etxhci_quiesce(xhci);
 
-	ret = xhci_handshake(xhci, &xhci->op_regs->status,
+	ret = etxhci_handshake(xhci, &xhci->op_regs->status,
 			STS_HALT, STS_HALT, XHCI_MAX_HALT_USEC);
 	if (!ret) {
 		xhci->xhc_state |= XHCI_STATE_HALTED;
@@ -133,7 +133,7 @@ static int xhci_start(struct xhci_hcd *xhci)
 	 * Wait for the HCHalted Status bit to be 0 to indicate the host is
 	 * running.
 	 */
-	ret = xhci_handshake(xhci, &xhci->op_regs->status,
+	ret = etxhci_handshake(xhci, &xhci->op_regs->status,
 			STS_HALT, 0, XHCI_MAX_HALT_USEC);
 	if (ret == -ETIMEDOUT)
 		xhci_err(xhci, "Host took too long to start, "
@@ -168,7 +168,7 @@ int etxhci_reset(struct xhci_hcd *xhci)
 	command |= CMD_RESET;
 	xhci_writel(xhci, command, &xhci->op_regs->command);
 
-	ret = xhci_handshake(xhci, &xhci->op_regs->command,
+	ret = etxhci_handshake(xhci, &xhci->op_regs->command,
 			CMD_RESET, 0, 250 * 1000);
 	if (ret)
 		return ret;
@@ -178,7 +178,7 @@ int etxhci_reset(struct xhci_hcd *xhci)
 	 * xHCI cannot write to any doorbells or operational registers other
 	 * than status until the "Controller Not Ready" flag is cleared.
 	 */
-	ret = xhci_handshake(xhci, &xhci->op_regs->status, STS_CNR, 0, 250 * 1000);
+	ret = etxhci_handshake(xhci, &xhci->op_regs->status, STS_CNR, 0, 250 * 1000);
 
 	for (i = 0; i < 2; ++i) {
 		xhci->bus_state[i].port_c_suspend = 0;
@@ -816,7 +816,7 @@ int etxhci_suspend(struct xhci_hcd *xhci)
 	command = xhci_readl(xhci, &xhci->op_regs->command);
 	command &= ~CMD_RUN;
 	xhci_writel(xhci, command, &xhci->op_regs->command);
-	if (xhci_handshake(xhci, &xhci->op_regs->status,
+	if (etxhci_handshake(xhci, &xhci->op_regs->status,
 		      STS_HALT, STS_HALT, XHCI_MAX_HALT_USEC)) {
 		xhci_warn(xhci, "WARN: xHC CMD_RUN timeout\n");
 		spin_unlock_irq(&xhci->lock);
@@ -831,7 +831,7 @@ int etxhci_suspend(struct xhci_hcd *xhci)
 	command = xhci_readl(xhci, &xhci->op_regs->command);
 	command |= CMD_CSS;
 	xhci_writel(xhci, command, &xhci->op_regs->command);
-	if (xhci_handshake(xhci, &xhci->op_regs->status, STS_SAVE, 0, 10 * 1000)) {
+	if (etxhci_handshake(xhci, &xhci->op_regs->status, STS_SAVE, 0, 10 * 1000)) {
 		xhci_warn(xhci, "WARN: xHC save state timeout\n");
 		spin_unlock_irq(&xhci->lock);
 		return -ETIMEDOUT;
@@ -883,7 +883,7 @@ int etxhci_resume(struct xhci_hcd *xhci, bool hibernated)
 		command = xhci_readl(xhci, &xhci->op_regs->command);
 		command |= CMD_CRS;
 		xhci_writel(xhci, command, &xhci->op_regs->command);
-		if (xhci_handshake(xhci, &xhci->op_regs->status,
+		if (etxhci_handshake(xhci, &xhci->op_regs->status,
 			      STS_RESTORE, 0, 10 * 1000)) {
 			xhci_warn(xhci, "WARN: xHC restore state timeout\n");
 			spin_unlock_irq(&xhci->lock);
@@ -951,7 +951,7 @@ int etxhci_resume(struct xhci_hcd *xhci, bool hibernated)
 	command = xhci_readl(xhci, &xhci->op_regs->command);
 	command |= CMD_RUN;
 	xhci_writel(xhci, command, &xhci->op_regs->command);
-	xhci_handshake(xhci, &xhci->op_regs->status, STS_HALT,
+	etxhci_handshake(xhci, &xhci->op_regs->status, STS_HALT,
 		  0, 250 * 1000);
 
 	/* step 5: walk topology and initialize portsc,
@@ -1955,7 +1955,7 @@ static int xhci_configure_endpoint(struct xhci_hcd *xhci,
 					"configure endpoint" :
 					"evaluate context");
 		/* cancel the configure endpoint command */
-		ret = xhci_cancel_cmd(xhci, command, cmd_trb);
+		ret = etxhci_cancel_cmd(xhci, command, cmd_trb);
 		if (ret < 0)
 			return ret;
 		return -ETIME;
@@ -3080,7 +3080,7 @@ int etxhci_alloc_dev(struct usb_hcd *hcd, struct usb_device *udev)
 		xhci_warn(xhci, "%s while waiting for a slot\n",
 				timeleft == 0 ? "Timeout" : "Signal");
 		/* cancel the enable slot request */
-		return xhci_cancel_cmd(xhci, NULL, cmd_trb);
+		return etxhci_cancel_cmd(xhci, NULL, cmd_trb);
 	}
 
 	if (!xhci->slot_id) {
@@ -3217,7 +3217,7 @@ int etxhci_address_device(struct usb_hcd *hcd, struct usb_device *udev)
 		xhci_warn(xhci, "%s while waiting for address device command\n",
 				timeleft == 0 ? "Timeout" : "Signal");
 		/* cancel the address device command */
-		ret = xhci_cancel_cmd(xhci, NULL, cmd_trb);
+		ret = etxhci_cancel_cmd(xhci, NULL, cmd_trb);
 		if (ret < 0)
 			return ret;
 		return -ETIME;

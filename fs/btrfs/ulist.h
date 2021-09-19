@@ -62,4 +62,10 @@ struct ulist_node *ulist_next(struct ulist *ulist,
 
 #define ULIST_ITER_INIT(uiter) ((uiter)->cur_list = NULL)
 
+#if defined(CONFIG_SYNO_BTRFS_COMPR_CTL)
+#define ULIST_NODES_MAX 16384 // 128MiB / 4KiB / 2 = 16384; 16384 ulist_node = 7MiB
+int ulist_add_lru_adjust(struct ulist *ulist, u64 val, gfp_t gfp_mask);
+void ulist_remove_first(struct ulist *ulist);
+#endif
+
 #endif

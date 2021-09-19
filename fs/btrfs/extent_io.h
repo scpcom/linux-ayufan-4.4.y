@@ -41,9 +41,10 @@
 #define EXTENT_BUFFER_TREE_REF 5
 #define EXTENT_BUFFER_STALE 6
 #define EXTENT_BUFFER_WRITEBACK 7
-#define EXTENT_BUFFER_IOERR 8
+#define EXTENT_BUFFER_READ_ERR 8        /* read IO error */
 #define EXTENT_BUFFER_DUMMY 9
 #define EXTENT_BUFFER_IN_TREE 10
+#define EXTENT_BUFFER_WRITE_ERR 11    /* write IO error */
 #ifdef CONFIG_SYNO_BTRFS_FIX_PAGE_LEAK_WHILE_CLONE_EXTENT_BUFFER
 #define EXTENT_BUFFER_CLONE 63
 #endif /* CONFIG_SYNO_BTRFS_FIX_PAGE_LEAK_WHILE_CLONE_EXTENT_BUFFER */
@@ -54,6 +55,7 @@
 #define PAGE_SET_WRITEBACK	(1 << 2)
 #define PAGE_END_WRITEBACK	(1 << 3)
 #define PAGE_SET_PRIVATE2	(1 << 4)
+#define PAGE_SET_ERROR		(1 << 5)
 
 /*
  * page->private values.  Every page that is controlled by the extent
@@ -144,7 +146,9 @@ struct extent_buffer {
 	atomic_t blocking_readers;
 	atomic_t spinning_readers;
 	atomic_t spinning_writers;
-	int lock_nested;
+	short lock_nested;
+	/* >= 0 if eb belongs to a log tree, -1 otherwise */
+	short log_index;
 
 	/* protects write locks */
 	rwlock_t lock;

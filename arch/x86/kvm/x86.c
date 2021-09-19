@@ -925,6 +925,7 @@ void kvm_enable_efer_bits(u64 mask)
 }
 EXPORT_SYMBOL_GPL(kvm_enable_efer_bits);
 
+
 /*
  * Writes msr value into into the appropriate "register".
  * Returns 0 on success, non-0 otherwise.
@@ -2176,8 +2177,10 @@ int kvm_set_msr_common(struct kvm_vcpu *vcpu, struct msr_data *msr_info)
 				    msr, data);
 			return 1;
 		} else {
+#ifndef CONFIG_SYNO_KVM_IGNORE_MSRS
 			vcpu_unimpl(vcpu, "ignored wrmsr: 0x%x data %llx\n",
 				    msr, data);
+#endif
 			break;
 		}
 	}
@@ -2474,7 +2477,9 @@ int kvm_get_msr_common(struct kvm_vcpu *vcpu, u32 msr, u64 *pdata)
 			vcpu_unimpl(vcpu, "unhandled rdmsr: 0x%x\n", msr);
 			return 1;
 		} else {
+#ifndef CONFIG_SYNO_KVM_IGNORE_MSRS
 			vcpu_unimpl(vcpu, "ignored rdmsr: 0x%x\n", msr);
+#endif
 			data = 0;
 		}
 		break;

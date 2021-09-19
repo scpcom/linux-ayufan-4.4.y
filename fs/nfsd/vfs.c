@@ -77,20 +77,20 @@ static struct raparm_hbucket	raparm_hash[RAPARM_HASH_SIZE];
 extern u32 bl_unix_pri_enable;
 #endif /*CONFIG_SYNO_NFSD_UNIX_PRI*/
 
-/* 
- * Called from nfsd_lookup and encode_dirent. Check if we have crossed 
+/*
+ * Called from nfsd_lookup and encode_dirent. Check if we have crossed
  * a mount point.
  * Returns -EAGAIN or -ETIMEDOUT leaving *dpp and *expp unchanged,
  *  or nfs_ok having possibly changed *dpp and *expp
  */
 int
-nfsd_cross_mnt(struct svc_rqst *rqstp, struct dentry **dpp, 
-		        struct svc_export **expp)
+nfsd_cross_mnt(struct svc_rqst *rqstp, struct dentry **dpp,
+				struct svc_export **expp)
 {
 	struct svc_export *exp = *expp, *exp2 = NULL;
 	struct dentry *dentry = *dpp;
 	struct path path = {.mnt = mntget(exp->ex_path.mnt),
-			    .dentry = dget(dentry)};
+				.dentry = dget(dentry)};
 	int err = 0;
 
 	err = follow_down(&path);
@@ -147,7 +147,7 @@ static int nfsd_lookup_parent(struct svc_rqst *rqstp, struct dentry *dparent, st
 {
 	struct svc_export *exp2;
 	struct path path = {.mnt = mntget((*exp)->ex_path.mnt),
-			    .dentry = dget(dparent)};
+				.dentry = dget(dparent)};
 
 	follow_to_parent(&path);
 
@@ -331,7 +331,7 @@ nfsd_sanitize_attrs(struct inode *inode, struct iattr *iap)
 #define BOTH_TIME_SET (ATTR_ATIME_SET | ATTR_MTIME_SET)
 #define	MAX_TOUCH_TIME_ERROR (30*60)
 	if ((iap->ia_valid & BOTH_TIME_SET) == BOTH_TIME_SET &&
-	    iap->ia_mtime.tv_sec == iap->ia_atime.tv_sec) {
+		iap->ia_mtime.tv_sec == iap->ia_atime.tv_sec) {
 		/*
 		 * Looks probable.
 		 *
@@ -354,7 +354,7 @@ nfsd_sanitize_attrs(struct inode *inode, struct iattr *iap)
 		}
 #else
 		if (delta < MAX_TOUCH_TIME_ERROR &&
-		    inode_change_ok(inode, iap) != 0) {
+			inode_change_ok(inode, iap) != 0) {
 			/*
 			 * Turn off ATTR_[AM]TIME_SET but leave ATTR_[AM]TIME.
 			 * This will cause notify_change to set these times
@@ -373,8 +373,8 @@ nfsd_sanitize_attrs(struct inode *inode, struct iattr *iap)
 
 	/* Revoke setuid/setgid on chown */
 	if (!S_ISDIR(inode->i_mode) &&
-	    (((iap->ia_valid & ATTR_UID) && !uid_eq(iap->ia_uid, inode->i_uid)) ||
-	     ((iap->ia_valid & ATTR_GID) && !gid_eq(iap->ia_gid, inode->i_gid)))) {
+		(((iap->ia_valid & ATTR_UID) && !uid_eq(iap->ia_uid, inode->i_uid)) ||
+		 ((iap->ia_valid & ATTR_GID) && !gid_eq(iap->ia_gid, inode->i_gid)))) {
 		iap->ia_valid |= ATTR_KILL_PRIV;
 		if (iap->ia_valid & ATTR_MODE) {
 			/* we're setting mode too, just clear the s*id bits */
@@ -424,7 +424,7 @@ out_nfserrno:
  */
 __be32
 nfsd_setattr(struct svc_rqst *rqstp, struct svc_fh *fhp, struct iattr *iap,
-	     int check_guard, time_t guardtime)
+		 int check_guard, time_t guardtime)
 {
 	struct dentry	*dentry;
 	struct inode	*inode;
@@ -514,8 +514,8 @@ out:
 }
 
 #if defined(CONFIG_NFSD_V2_ACL) || \
-    defined(CONFIG_NFSD_V3_ACL) || \
-    defined(CONFIG_NFSD_V4)
+	defined(CONFIG_NFSD_V3_ACL) || \
+	defined(CONFIG_NFSD_V4)
 static ssize_t nfsd_getxattr(struct dentry *dentry, char *key, void **buf)
 {
 	ssize_t buflen;
@@ -568,7 +568,7 @@ out:
 
 __be32
 nfsd4_set_nfs4_acl(struct svc_rqst *rqstp, struct svc_fh *fhp,
-    struct nfs4_acl *acl)
+	struct nfs4_acl *acl)
 {
 	__be32 error;
 	int host_error;
@@ -706,22 +706,22 @@ struct accessmap {
 	int		how;
 };
 static struct accessmap	nfs3_regaccess[] = {
-    {	NFS3_ACCESS_READ,	NFSD_MAY_READ			},
-    {	NFS3_ACCESS_EXECUTE,	NFSD_MAY_EXEC			},
-    {	NFS3_ACCESS_MODIFY,	NFSD_MAY_WRITE|NFSD_MAY_TRUNC	},
-    {	NFS3_ACCESS_EXTEND,	NFSD_MAY_WRITE			},
+	{	NFS3_ACCESS_READ,	NFSD_MAY_READ			},
+	{	NFS3_ACCESS_EXECUTE,	NFSD_MAY_EXEC			},
+	{	NFS3_ACCESS_MODIFY,	NFSD_MAY_WRITE|NFSD_MAY_TRUNC	},
+	{	NFS3_ACCESS_EXTEND,	NFSD_MAY_WRITE			},
 
-    {	0,			0				}
+	{	0,			0				}
 };
 
 static struct accessmap	nfs3_diraccess[] = {
-    {	NFS3_ACCESS_READ,	NFSD_MAY_READ			},
-    {	NFS3_ACCESS_LOOKUP,	NFSD_MAY_EXEC			},
-    {	NFS3_ACCESS_MODIFY,	NFSD_MAY_EXEC|NFSD_MAY_WRITE|NFSD_MAY_TRUNC},
-    {	NFS3_ACCESS_EXTEND,	NFSD_MAY_EXEC|NFSD_MAY_WRITE	},
-    {	NFS3_ACCESS_DELETE,	NFSD_MAY_REMOVE			},
+	{	NFS3_ACCESS_READ,	NFSD_MAY_READ			},
+	{	NFS3_ACCESS_LOOKUP,	NFSD_MAY_EXEC			},
+	{	NFS3_ACCESS_MODIFY,	NFSD_MAY_EXEC|NFSD_MAY_WRITE|NFSD_MAY_TRUNC},
+	{	NFS3_ACCESS_EXTEND,	NFSD_MAY_EXEC|NFSD_MAY_WRITE	},
+	{	NFS3_ACCESS_DELETE,	NFSD_MAY_REMOVE			},
 
-    {	0,			0				}
+	{	0,			0				}
 };
 
 static struct accessmap	nfs3_anyaccess[] = {
@@ -732,30 +732,30 @@ static struct accessmap	nfs3_anyaccess[] = {
 	 * mainly at mode bits, and we make sure to ignore read-only
 	 * filesystem checks
 	 */
-    {	NFS3_ACCESS_READ,	NFSD_MAY_READ			},
-    {	NFS3_ACCESS_EXECUTE,	NFSD_MAY_EXEC			},
-    {	NFS3_ACCESS_MODIFY,	NFSD_MAY_WRITE|NFSD_MAY_LOCAL_ACCESS	},
-    {	NFS3_ACCESS_EXTEND,	NFSD_MAY_WRITE|NFSD_MAY_LOCAL_ACCESS	},
+	{	NFS3_ACCESS_READ,	NFSD_MAY_READ			},
+	{	NFS3_ACCESS_EXECUTE,	NFSD_MAY_EXEC			},
+	{	NFS3_ACCESS_MODIFY,	NFSD_MAY_WRITE|NFSD_MAY_LOCAL_ACCESS	},
+	{	NFS3_ACCESS_EXTEND,	NFSD_MAY_WRITE|NFSD_MAY_LOCAL_ACCESS	},
 
-    {	0,			0				}
+	{	0,			0				}
 };
 
 #ifdef CONFIG_SYNO_FS_WINACL
 static struct accessmap	nfs3_synoacl_regaccess[] = {
-    {	NFS3_ACCESS_READ, MAY_READ },
-    {	NFS3_ACCESS_EXECUTE, MAY_EXEC },
-    {	NFS3_ACCESS_MODIFY,	MAY_WRITE | MAY_APPEND },
-    {	NFS3_ACCESS_EXTEND,	MAY_WRITE | MAY_APPEND },
-    {	0, 0 }
+	{	NFS3_ACCESS_READ, MAY_READ },
+	{	NFS3_ACCESS_EXECUTE, MAY_EXEC },
+	{	NFS3_ACCESS_MODIFY,	MAY_WRITE | MAY_APPEND },
+	{	NFS3_ACCESS_EXTEND,	MAY_WRITE | MAY_APPEND },
+	{	0, 0 }
 };
 
 static struct accessmap	nfs3_synoacl_diraccess[] = {
-    {	NFS3_ACCESS_READ, MAY_READ },
-    {	NFS3_ACCESS_LOOKUP,	MAY_EXEC },
-    {	NFS3_ACCESS_MODIFY,	MAY_WRITE },
-    {	NFS3_ACCESS_EXTEND,	MAY_APPEND },
-    {	NFS3_ACCESS_DELETE,	MAY_DEL },
-    {	0, 0 }
+	{	NFS3_ACCESS_READ, MAY_READ },
+	{	NFS3_ACCESS_LOOKUP,	MAY_EXEC },
+	{	NFS3_ACCESS_MODIFY,	MAY_WRITE },
+	{	NFS3_ACCESS_EXTEND,	MAY_APPEND },
+	{	NFS3_ACCESS_DELETE,	MAY_DEL },
+	{	0, 0 }
 };
 #endif /* CONFIG_SYNO_FS_WINACL */
 
@@ -824,7 +824,7 @@ nfsd_access(struct svc_rqst *rqstp, struct svc_fh *fhp, u32 *access, u32 *suppor
 			case nfs_ok:
 				result |= map->access;
 				break;
-				
+
 			/* the following error codes just mean the access was not allowed,
 			 * rather than an error occurred */
 			case nfserr_rofs:
@@ -977,7 +977,7 @@ nfsd_get_raparms(dev_t dev, ino_t ino)
 			frap = rap;
 	}
 	depth = nfsdstats.ra_size;
-	if (!frap) {	
+	if (!frap) {
 		spin_unlock(&rab->pb_lock);
 		return NULL;
 	}
@@ -1034,14 +1034,14 @@ nfsd_splice_actor(struct pipe_inode_info *pipe, struct pipe_buffer *buf,
 }
 
 static int nfsd_direct_splice_actor(struct pipe_inode_info *pipe,
-				    struct splice_desc *sd)
+					struct splice_desc *sd)
 {
 	return __splice_from_pipe(pipe, sd, nfsd_splice_actor);
 }
 
 static __be32
 nfsd_vfs_read(struct svc_rqst *rqstp, struct svc_fh *fhp, struct file *file,
-              loff_t offset, struct kvec *vec, int vlen, unsigned long *count)
+			  loff_t offset, struct kvec *vec, int vlen, unsigned long *count)
 {
 	mm_segment_t	oldfs;
 	__be32		err;
@@ -1071,7 +1071,7 @@ nfsd_vfs_read(struct svc_rqst *rqstp, struct svc_fh *fhp, struct file *file,
 		*count = host_err;
 		err = 0;
 		fsnotify_access(file);
-	} else 
+	} else
 		err = nfserrno(host_err);
 	return err;
 }
@@ -1108,7 +1108,7 @@ static int wait_for_concurrent_writes(struct file *file)
 	int err = 0;
 
 	if (atomic_read(&inode->i_writecount) > 1
-	    || (last_ino == inode->i_ino && last_dev == inode->i_sb->s_dev)) {
+		|| (last_ino == inode->i_ino && last_dev == inode->i_sb->s_dev)) {
 		dprintk("nfsd: write defer %d\n", task_pid_nr(current));
 		msleep(10);
 		dprintk("nfsd: write resume %d\n", task_pid_nr(current));
@@ -1264,7 +1264,7 @@ nfsd_write(struct svc_rqst *rqstp, struct svc_fh *fhp, struct file *file,
 
 		if (cnt)
 			err = nfsd_vfs_write(rqstp, fhp, file, offset, vec, vlen,
-					     cnt, stablep);
+						 cnt, stablep);
 		nfsd_close(file);
 	}
 out:
@@ -1283,7 +1283,7 @@ out:
  */
 __be32
 nfsd_commit(struct svc_rqst *rqstp, struct svc_fh *fhp,
-               loff_t offset, unsigned long count)
+			   loff_t offset, unsigned long count)
 {
 	struct file	*file;
 	loff_t		end = LLONG_MAX;
@@ -1352,7 +1352,7 @@ nfsd_check_ignore_resizing(struct iattr *iap)
 }
 
 /*
- * Create a file (regular, directory, device, fifo); UNIX sockets 
+ * Create a file (regular, directory, device, fifo); UNIX sockets
  * not yet implemented.
  * If the response fh has been verified, the parent directory should
  * already be locked. Note that the parent directory is left locked.
@@ -1425,7 +1425,7 @@ nfsd_create(struct svc_rqst *rqstp, struct svc_fh *fhp,
 	if (dchild->d_inode) {
 		dprintk("nfsd_create: dentry %s/%s not negative!\n",
 			dentry->d_name.name, dchild->d_name.name);
-		goto out; 
+		goto out;
 	}
 
 	if (!(iap->ia_valid & ATTR_MODE))
@@ -1435,7 +1435,7 @@ nfsd_create(struct svc_rqst *rqstp, struct svc_fh *fhp,
 	err = nfserr_inval;
 	if (!S_ISREG(type) && !S_ISDIR(type) && !special_file(type)) {
 		printk(KERN_WARNING "nfsd: bad file type %o in nfsd_create\n",
-		       type);
+			   type);
 		goto out;
 	}
 
@@ -1493,7 +1493,7 @@ out_nfserr:
 static inline int nfsd_create_is_exclusive(int createmode)
 {
 	return createmode == NFS3_CREATE_EXCLUSIVE
-	       || createmode == NFS4_CREATE_EXCLUSIVE4_1;
+		   || createmode == NFS4_CREATE_EXCLUSIVE4_1;
 }
 
 /*
@@ -1503,7 +1503,7 @@ __be32
 do_nfsd_create(struct svc_rqst *rqstp, struct svc_fh *fhp,
 		char *fname, int flen, struct iattr *iap,
 		struct svc_fh *resfhp, int createmode, u32 *verifier,
-	        bool *truncp, bool *created)
+			bool *truncp, bool *created)
 {
 	struct dentry	*dentry, *dchild = NULL;
 	struct inode	*dirp;
@@ -1567,7 +1567,7 @@ do_nfsd_create(struct svc_rqst *rqstp, struct svc_fh *fhp,
 		v_mtime = verifier[0]&0x7fffffff;
 		v_atime = verifier[1]&0x7fffffff;
 	}
-	
+
 	if (dchild->d_inode) {
 		err = 0;
 
@@ -1592,16 +1592,16 @@ do_nfsd_create(struct svc_rqst *rqstp, struct svc_fh *fhp,
 			break;
 		case NFS3_CREATE_EXCLUSIVE:
 			if (   dchild->d_inode->i_mtime.tv_sec == v_mtime
-			    && dchild->d_inode->i_atime.tv_sec == v_atime
-			    && dchild->d_inode->i_size  == 0 ) {
+				&& dchild->d_inode->i_atime.tv_sec == v_atime
+				&& dchild->d_inode->i_size  == 0 ) {
 				if (created)
 					*created = 1;
 				break;
 			}
 		case NFS4_CREATE_EXCLUSIVE4_1:
 			if (   dchild->d_inode->i_mtime.tv_sec == v_mtime
-			    && dchild->d_inode->i_atime.tv_sec == v_atime
-			    && dchild->d_inode->i_size  == 0 ) {
+				&& dchild->d_inode->i_atime.tv_sec == v_atime
+				&& dchild->d_inode->i_size  == 0 ) {
 				if (created)
 					*created = 1;
 				goto set_attr;
@@ -1628,7 +1628,7 @@ do_nfsd_create(struct svc_rqst *rqstp, struct svc_fh *fhp,
 		/* Cram the verifier into atime/mtime */
 		iap->ia_valid = ATTR_MTIME|ATTR_ATIME
 			| ATTR_MTIME_SET|ATTR_ATIME_SET;
-		/* XXX someone who knows this better please fix it for nsec */ 
+		/* XXX someone who knows this better please fix it for nsec */
 		iap->ia_mtime.tv_sec = v_mtime;
 		iap->ia_atime.tv_sec = v_atime;
 		iap->ia_mtime.tv_nsec = 0;
@@ -1655,8 +1655,8 @@ do_nfsd_create(struct svc_rqst *rqstp, struct svc_fh *fhp,
 	if (dchild && !IS_ERR(dchild))
 		dput(dchild);
 	fh_drop_write(fhp);
- 	return err;
- 
+	return err;
+
  out_nfserr:
 	err = nfserrno(host_err);
 	goto out;
@@ -1861,7 +1861,7 @@ out_nfserr:
  */
 __be32
 nfsd_rename(struct svc_rqst *rqstp, struct svc_fh *ffhp, char *fname, int flen,
-			    struct svc_fh *tfhp, char *tname, int tlen)
+				struct svc_fh *tfhp, char *tname, int tlen)
 {
 	struct dentry	*fdentry, *tdentry, *odentry, *ndentry, *trap;
 	struct inode	*fdir, *tdir;
@@ -2064,7 +2064,7 @@ static int nfsd_buffered_filldir(void *__buf, const char *name, int namlen,
 }
 
 static __be32 nfsd_buffered_readdir(struct file *file, filldir_t func,
-				    struct readdir_cd *cdp, loff_t *offsetp)
+					struct readdir_cd *cdp, loff_t *offsetp)
 {
 	struct readdir_data buf;
 	struct buffered_dirent *de;
@@ -2119,7 +2119,7 @@ static __be32 nfsd_buffered_readdir(struct file *file, filldir_t func,
 				break;
 
 			reclen = ALIGN(sizeof(*de) + de->namlen,
-				       sizeof(u64));
+					   sizeof(u64));
 			size -= reclen;
 			de = (struct buffered_dirent *)((char *)de + reclen);
 		}
@@ -2144,8 +2144,8 @@ static __be32 nfsd_buffered_readdir(struct file *file, filldir_t func,
  * The  NFSv3/4 verifier we ignore for now.
  */
 __be32
-nfsd_readdir(struct svc_rqst *rqstp, struct svc_fh *fhp, loff_t *offsetp, 
-	     struct readdir_cd *cdp, filldir_t func)
+nfsd_readdir(struct svc_rqst *rqstp, struct svc_fh *fhp, loff_t *offsetp,
+		 struct readdir_cd *cdp, filldir_t func)
 {
 	__be32		err;
 	struct file	*file;
@@ -2209,7 +2209,7 @@ static int syno_acl_nfs_perm_switch(struct inode *inode, int acc)
 
 	if (NFSD_MAY_EXEC & acc) {
 		synoPerm |= MAY_EXEC;
-	} 
+	}
 	if ((NFSD_MAY_TRUNC|NFSD_MAY_WRITE) & acc) {
 		synoPerm |= MAY_WRITE;
 	}
@@ -2220,20 +2220,20 @@ static int syno_acl_nfs_perm_switch(struct inode *inode, int acc)
 		synoPerm |= MAY_APPEND;
 	}
 
-	/* 
+	/*
 	 * NFSD_MAY_SATTR
-	 * NFSD_MAY_CREATE 
-	 * NFSD_MAY_REMOVE 
-	 *  
-	 * 	check permission in File System layer 
+	 * NFSD_MAY_CREATE
+	 * NFSD_MAY_REMOVE
+	 *
+	 * 	check permission in File System layer
 	 */
 
-	/* 
+	/*
 	 * NFSD_MAY_LOCK
-	 * NFSD_MAY_LOCAL_ACCESS 
-	 * NFSD_MAY_BYPASS_GSS_ON_ROOT 
+	 * NFSD_MAY_LOCAL_ACCESS
+	 * NFSD_MAY_BYPASS_GSS_ON_ROOT
 	 * NFSD_MAY_OWNER_OVERRIDE (owner can do anything)
-	 *  
+	 *
 	 * 	NFS specific.
 	 */
 
@@ -2271,13 +2271,13 @@ nfsd_permission(struct svc_rqst *rqstp, struct svc_export *exp,
 #endif
 
 	/* Normally we reject any write/sattr etc access on a read-only file
-	 * system.  But if it is IRIX doing check on write-access for a 
+	 * system.  But if it is IRIX doing check on write-access for a
 	 * device special file, we ignore rofs.
 	 */
 	if (!(acc & NFSD_MAY_LOCAL_ACCESS))
 		if (acc & (NFSD_MAY_WRITE | NFSD_MAY_SATTR | NFSD_MAY_TRUNC)) {
 			if (exp_rdonly(rqstp, exp) ||
-			    __mnt_is_readonly(exp->ex_path.mnt))
+				__mnt_is_readonly(exp->ex_path.mnt))
 				return nfserr_rofs;
 			if (/* (acc & NFSD_MAY_WRITE) && */ IS_IMMUTABLE(inode))
 				return nfserr_perm;
@@ -2321,7 +2321,7 @@ nfsd_permission(struct svc_rqst *rqstp, struct svc_export *exp,
 #endif /* CONFIG_SYNO_FS_WINACL */
 
 	if ((acc & NFSD_MAY_OWNER_OVERRIDE) &&
-	    uid_eq(inode->i_uid, current_fsuid()))
+		uid_eq(inode->i_uid, current_fsuid()))
 		return 0;
 
 	/* This assumes  NFSD_MAY_{READ,WRITE,EXEC} == MAY_{READ,WRITE,EXEC} */
@@ -2332,8 +2332,8 @@ nfsd_permission(struct svc_rqst *rqstp, struct svc_export *exp,
 #endif /* CONFIG_SYNO_FS_WINACL */
 	/* Allow read access to binaries even when mode 111 */
 	if (err == -EACCES && S_ISREG(inode->i_mode) &&
-	     (acc == (NFSD_MAY_READ | NFSD_MAY_OWNER_OVERRIDE) ||
-	      acc == (NFSD_MAY_READ | NFSD_MAY_READ_IF_EXEC)))
+		 (acc == (NFSD_MAY_READ | NFSD_MAY_OWNER_OVERRIDE) ||
+		  acc == (NFSD_MAY_READ | NFSD_MAY_READ_IF_EXEC)))
 #ifdef CONFIG_SYNO_FS_WINACL
 	{
 		if (IS_SYNOACL(dentry)){
@@ -2452,7 +2452,7 @@ nfsd_set_posix_acl(struct svc_fh *fhp, int type, struct posix_acl *acl)
 	int error;
 
 	if (!IS_POSIXACL(inode) ||
-	    !inode->i_op->setxattr || !inode->i_op->removexattr)
+		!inode->i_op->setxattr || !inode->i_op->removexattr)
 		return -EOPNOTSUPP;
 	switch(type) {
 		case ACL_TYPE_ACCESS:

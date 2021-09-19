@@ -126,14 +126,220 @@ static int ata_force_tbl_size;
 
 static char ata_force_param_buf[PAGE_SIZE] __initdata;
 
-int (*funcSYNODeepSleepEvent)(unsigned int, unsigned int) = NULL;
-EXPORT_SYMBOL(funcSYNODeepSleepEvent);
+#if defined(CONFIG_SYNO_GPIO)
+#include <linux/syno_gpio.h>
 
-#ifdef CONFIG_SYNO_ATA_PWR_CTRL
+extern SYNO_GPIO syno_gpio;
+
+static SYNO_GPIO_INFO hdd_detect = {
+	.name 			= "hdd detect",
+	.nr_gpio		= 0,
+	.gpio_port 		= {0},
+	.gpio_polarity	= ACTIVE_LOW,
+};
+static SYNO_GPIO_INFO hdd_enable = {
+	.name 			= "hdd enable",
+	.nr_gpio		= 0,
+	.gpio_port		= {0},
+	.gpio_polarity	= ACTIVE_HIGH,
+};
+static SYNO_GPIO_INFO hdd_act_led = {
+	.name 			= "hdd act led",
+	.nr_gpio		= 0,
+	.gpio_port		= {0},
+	.gpio_polarity	= ACTIVE_HIGH,
+};
+
+/* hdd_bootargs_parser
+ * Parse the hdd bootargs
+ * input: args expected to looks like "10,11,12,13,..."
+ * output: 0 on success, -EINVAL if error parameter, -EMSGSIZE if too many arguments
+ */
+
+static int hdd_bootargs_parser (SYNO_GPIO_INFO *gpio_info, char *args)
+{
+	int pin_num = 0;
+	char *endp;
+
+	if (NULL == args || NULL == gpio_info) {
+		return -EINVAL;
+	}
+
+	while (1) {
+		if(SYNO_GPIO_PIN_MAX_NUM < pin_num) {
+			return -EMSGSIZE;
+		}
+
+		gpio_info->gpio_port[pin_num] = simple_strtol(args, &endp, 10) & 0xFF;
+		pin_num++;
+
+		// endp will point to a non digit position
+		// Break if reach the end of string
+		if (*endp == '\0') {
+			break;
+		}
+		args = ++endp;
+	}
+	gpio_info->nr_gpio = pin_num;
+	return 0;
+}
+
+static int __init early_hdd_detect(char *p)
+{
+	int i, ret;
+
+	// no hdd detect pin
+	if ((NULL == p) || (0 == strlen(p))) {
+		return 1;
+	}
+
+	printk("SYNO GPIO hdd detect pin: ");
+	ret = hdd_bootargs_parser(&hdd_detect, p);
+	if (-EINVAL == ret) {
+		printk("Error parameters, %s\n", p);
+	} else if (-EMSGSIZE == ret) {
+		printk("Too many arguments, %s\n", p);
+	} else {
+		syno_gpio.hdd_detect = &hdd_detect;
+
+		for (i = 0; i < syno_gpio.hdd_detect->nr_gpio; i++) {
+			printk("%d ", HDD_DETECT_PIN(i + 1));
+		}
+		printk("\n");
+	}
+
+	return 1;
+}
+__setup("syno_hdd_detect=", early_hdd_detect);
+
+static int __init early_hdd_act_led(char *p)
+{
+	int i, ret;
+
+	// no hdd act led pin
+	if ((NULL == p) || (0 == strlen(p))) {
+		return 1;
+	}
+
+	printk("SYNO GPIO hdd active led pin: ");
+	ret = hdd_bootargs_parser(&hdd_act_led, p);
+	if (-EINVAL == ret) {
+		printk("Error parameters, %s\n", p);
+	} else if (-EMSGSIZE == ret) {
+		printk("Too many arguments, %s\n", p);
+	} else {
+		syno_gpio.hdd_act_led = &hdd_act_led;
+
+		for (i = 0; i < syno_gpio.hdd_act_led->nr_gpio; i++) {
+			printk("%d ", HDD_ACT_LED_PIN(i + 1));
+		}
+		printk("\n");
+	}
+
+	return 1;
+}
+__setup("syno_hdd_act_led=", early_hdd_act_led);
+
+static int __init early_hdd_enable(char *p)
+{
+	int i, ret;
+
+	// no hdd enable pin
+	if ((NULL == p) || (0 == strlen(p))) {
+		return 1;
+	}
+
+	printk("SYNO GPIO hdd enable pin: ");
+	ret = hdd_bootargs_parser(&hdd_enable, p);
+	if (-EINVAL == ret) {
+		printk("Error parameters, %s\n", p);
+	} else if (-EMSGSIZE == ret) {
+		printk("Too many arguments, %s\n", p);
+	} else {
+		syno_gpio.hdd_enable = &hdd_enable;
+
+		for (i = 0; i < syno_gpio.hdd_enable->nr_gpio; i++) {
+			printk("%d ", HDD_ENABLE_PIN(i + 1));
+		}
+		printk("\n");
+	}
+
+	return 1;
+}
+__setup("syno_hdd_enable=", early_hdd_enable);
+
+int SYNO_CTRL_HDD_POWERON(int index, int value)
+{
+	if (!HAVE_HDD_ENABLE(index)) { // index is 1-based
+		printk("No such hdd enable pin. Index: %d\n", index);
+		WARN_ON(1);
+		return -EINVAL;
+	}
+
+	gpio_set_value(HDD_ENABLE_PIN(index), value);
+	return 0;
+}
+EXPORT_SYMBOL(SYNO_CTRL_HDD_POWERON);
+
+/* SYNO_CHECK_HDD_DETECT
+ * Query HDD present check .
+ * output: 1 - present, 0 - not present.
+ */
+int SYNO_CHECK_HDD_DETECT(int index)
+{
+	int ret;
+
+	if (!HAVE_HDD_DETECT(index)) { // index is 1-based
+		/* defult is present */
+		return 1;
+	}
+	ret = gpio_get_value(HDD_DETECT_PIN(index));
+	/* hdd detect pin is low active so the result must be inverted*/
+	if (ACTIVE_LOW == HDD_DETECT_POLARITY()) {
+		return !ret;
+	}
+	return ret;
+}
+EXPORT_SYMBOL(SYNO_CHECK_HDD_DETECT);
+
+/* SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER
+ * Query support HDD dynamic Power .
+ * output: 1 - support, 0 - not support.
+ */
+int SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER(void)
+{
+	/* if exists enable pin return 1 */
+	if (HAVE_HDD_ENABLE(1)) {
+		return 1;
+	}
+	return 0;
+}
+EXPORT_SYMBOL(SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER);
+
+int SYNO_CTRL_HDD_ACT_NOTIFY(int index)
+{
+	int value = 0;
+	static u32 disk_act_value[SYNO_GPIO_PIN_MAX_NUM] = {0};
+
+	if (!HAVE_HDD_ACT_LED(index + 1)) { // index is 0-based
+		printk("No such hdd act led pin. Index: %d\n", index);
+		WARN_ON(1);
+		return -EINVAL;
+	}
+
+	disk_act_value[index] = !disk_act_value[index];
+	value = disk_act_value[index];
+
+	gpio_set_value(HDD_ACT_LED_PIN(index + 1), value);
+	return 0;
+}
+EXPORT_SYMBOL(SYNO_CTRL_HDD_ACT_NOTIFY);
+
+#elif defined(CONFIG_SYNO_ATA_PWR_CTRL)
 extern int SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER(void);
 extern int SYNO_CTRL_HDD_POWERON(int index, int value);
 extern int SYNO_CHECK_HDD_PRESENT(int index);
-#endif /* CONFIG_SYNO_ATA_PWR_CTRL */
+#endif
 
 #ifndef CONFIG_SYNO_SATA_WCACHE_DISABLE
 static int glob_match (const char *text, const char *pattern);
@@ -2329,6 +2535,23 @@ static int ata_dev_config_ncq(struct ata_device *dev,
 	return 0;
 }
 
+#ifdef CONFIG_SYNO_PMP_HORKAGE
+static void syno_pmp_horkage(struct ata_port *ap, struct ata_device **dev) {
+	unsigned char model_num[ATA_ID_PROD_LEN + 1];
+
+	if (!ap || !dev || !*dev) {
+		goto END;
+	}
+
+	ata_id_c_string((*dev)->id, model_num, ATA_ID_PROD, sizeof(model_num));
+	if (syno_pm_is_synology_9705(ap) && !glob_match(model_num, "WDC WD?0EFRX-*")) {
+		(*dev)->horkage |= ATA_HORKAGE_1_5_GBPS;
+	}
+END:
+	return;
+}
+#endif /* CONFIG_SYNO_PMP_HORKAGE */
+
 /**
  *	ata_dev_configure - Configure the specified ATA/ATAPI device
  *	@dev: Target device to configure
@@ -2401,11 +2624,11 @@ int ata_dev_configure(struct ata_device *dev)
 			}
 		/*For DS412+, qoriq, DS212+ with DX213, the link should be limited to 1.5G*/
 		} else if (IS_SYNOLOGY_DX213(ap->PMSynoUnique) &&
-				(0 == strncmp(gszSynoHWVersion, HW_DS412p, strlen(HW_DS412p)) ||
-				 0 == strncmp(gszSynoHWVersion, HW_DS213pv10, strlen(HW_DS213pv10)) ||
-				 0 == strncmp(gszSynoHWVersion, HW_DS413, strlen(HW_DS413)) ||
-				 0 == strncmp(gszSynoHWVersion, HW_DS212pv10, strlen(HW_DS212pv10)) ||
-				 0 == strncmp(gszSynoHWVersion, HW_DS212pv20, strlen(HW_DS212pv20)))) {
+				(syno_is_hw_version(HW_DS412p) ||
+				 syno_is_hw_version(HW_DS213pv10) ||
+				 syno_is_hw_version(HW_DS413) ||
+				 syno_is_hw_version(HW_DS212pv10) ||
+				 syno_is_hw_version(HW_DS212pv20))) {
 			if (!(dev->horkage & ATA_HORKAGE_1_5_GBPS)) {
 				ata_dev_printk(dev, KERN_ERR,
 						"DX213 workaround, limit the speed to 1.5 GBPS\n");
@@ -2416,6 +2639,9 @@ int ata_dev_configure(struct ata_device *dev)
 				sata_set_spd(&ap->link);
 			}
 		}
+#ifdef CONFIG_SYNO_PMP_HORKAGE
+		syno_pmp_horkage(ap, &dev);
+#endif /* CONFIG_SYNO_PMP_HORKAGE */
 	}
 #endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO && CONFIG_SYNO_HW_VERSION */
 
@@ -3151,25 +3377,13 @@ int sata_set_spd(struct ata_link *link)
 {
 	u32 scontrol;
 	int rc;
-#ifdef CONFIG_SYNO_MV_9235_6G_WORKAROUND
-	struct pci_dev *pdev = NULL;
-#endif /* CONFIG_SYNO_MV_9235_6G_WORKAROUND */
 
 	if ((rc = sata_scr_read(link, SCR_CONTROL, &scontrol)))
 		return rc;
 
 	if (!__sata_set_spd_needed(link, &scontrol))
 		return 0;
-#ifdef CONFIG_SYNO_MV_9235_6G_WORKAROUND
-	if (link->ap->host != NULL) {
-		pdev = to_pci_dev(link->ap->host->dev);
-		// to fix WD Red link up 3.0 Gbps only issue
-		// to prevent side effect on other chips, it only works on 9235 & 9215
-		if (pdev != NULL && pdev->vendor == 0x1b4b && (pdev->device == 0x9235 || pdev->device == 0x9215)) {
-			scontrol |= 0x30;
-		}
-	}
-#endif /* CONFIG_SYNO_MV_9235_6G_WORKAROUND */
+
 #ifdef CONFIG_SYNO_SIL3132_PM_WORKAROUND
 	/* Sil3132 PM doesn't have PHY-off(DET=4h) mode,
 	 * so use RESET(DET=1h) mode to reconfiguing speed.
@@ -6467,12 +6681,16 @@ static void HddPowerOn(struct ata_port *pAp) {
 
 	/* we ignored non-internal disks here, but one bay internal hd num is 0, we must check it,
 	 * and let it go ahead */
-	if (0 < g_internal_hd_num && g_internal_hd_num < iSynoDiskIdx) {
+	if (0 < g_syno_hdd_powerup_seq && g_syno_hdd_powerup_seq < iSynoDiskIdx) {
 		goto END;
 	}
 
 	/* Power on the disk if it has presented. */
+#ifdef CONFIG_SYNO_GPIO
+	if (1 == SYNO_CHECK_HDD_DETECT(iSynoDiskIdx)) {
+#else
 	if (1 == SYNO_CHECK_HDD_PRESENT(iSynoDiskIdx)) {
+#endif /* CONFIG_SYNO_GPIO */
 		SYNO_CTRL_HDD_POWERON(iSynoDiskIdx, 1);
 		SleepForLatency();
 	}
@@ -6504,14 +6722,18 @@ static void DelayForHWCtl(struct ata_port *pAp)
 
 	/* we ignored non-internal disks here, but one bay internal hd num is 0, we must check it,
 	 * and let it go ahead */
-	if (0 < g_internal_hd_num && g_internal_hd_num < iSynoDiskIdx) {
+	if (0 < g_syno_hdd_powerup_seq && g_syno_hdd_powerup_seq < iSynoDiskIdx) {
 		goto END;
 	}
 
 #ifdef CONFIG_SYNO_ATA_PWR_CTRL
 	if(SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER()) {
 		/* disk doesn't present, no need to delay */
+#ifdef CONFIG_SYNO_GPIO
+		if (0 == SYNO_CHECK_HDD_DETECT(iSynoDiskIdx)) {
+#else
 		if (0 == SYNO_CHECK_HDD_PRESENT(iSynoDiskIdx)) {
+#endif /* CONFIG_SYNO_GPIO */
 			goto END;
 		}
 		iIsDoLatency = 1;
@@ -6721,7 +6943,7 @@ int ata_host_register(struct ata_host *host, struct scsi_host_template *sht)
 	for (i = 0; i < host->n_ports; i++) {
 		struct ata_port *ap = host->ports[i];
 #ifdef CONFIG_SYNO_SPINUP_DELAY
-		if ( 0 == g_internal_hd_num ) {
+		if ( 0 == g_syno_hdd_powerup_seq ) {
 			async_schedule(async_port_probe, ap);
 		} else {
 			ata_port_probe(ap);
@@ -6732,7 +6954,7 @@ int ata_host_register(struct ata_host *host, struct scsi_host_template *sht)
 #endif /* CONFIG_SYNO_SPINUP_DELAY */
 	}
 #ifdef CONFIG_SYNO_SPINUP_DELAY
-	if (0 != g_internal_hd_num) {
+	if (0 != g_syno_hdd_powerup_seq) {
 		for (i = 0; i < host->n_ports; i++) {
 			struct ata_port *ap = host->ports[i];
 			ata_port_wait_eh(ap);
@@ -7586,5 +7808,7 @@ int (*funcSYNOSataErrorReport)(unsigned int, unsigned int, unsigned int, unsigne
 EXPORT_SYMBOL(funcSYNOSataErrorReport);
 int (*funcSYNODiskRetryReport)(unsigned int, unsigned int) = NULL;
 EXPORT_SYMBOL(funcSYNODiskRetryReport);
+int (*funcSYNODeepSleepEvent)(unsigned int, unsigned int) = NULL;
+EXPORT_SYMBOL(funcSYNODeepSleepEvent);
 int (*funcSYNODiskPowerShortBreakReport)(unsigned int, unsigned int) = NULL;
 EXPORT_SYMBOL(funcSYNODiskPowerShortBreakReport);

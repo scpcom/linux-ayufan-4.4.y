@@ -49,6 +49,9 @@
 #include <linux/export.h>
 
 #include <linux/usb/quirks.h>
+#ifdef CONFIG_SYNO_USB_DEVICE_QUIRKS
+#include <linux/usb/syno_quirks.h>
+#endif /* CONFIG_SYNO_USB_DEVICE_QUIRKS */
 
 #include <scsi/scsi.h>
 #include <scsi/scsi_eh.h>
@@ -591,6 +594,27 @@ static void last_sector_hacks(struct us_data *us, struct scsi_cmnd *srb)
 		us->last_sector_retries = 0;
 }
 
+#ifdef CONFIG_SYNO_PHISON_USB_FACTORY
+int phison_downgrade_cmnd(struct scsi_cmnd *srb)
+{
+	if (0x06 == srb->cmnd[0] &&
+		0xcd == srb->cmnd[1] &&
+		12 == srb->cmd_len &&
+		0x00 == srb->cmnd[2] &&
+		0x00 == srb->cmnd[3] &&
+		0x00 == srb->cmnd[4] &&
+		0x00 == srb->cmnd[5] &&
+		0x00 == srb->cmnd[6] &&
+		0x00 == srb->cmnd[7] &&
+		0x00 == srb->cmnd[8] &&
+		0x00 == srb->cmnd[9] &&
+		0x00 == srb->cmnd[10] &&
+		0x00 == srb->cmnd[11])
+		return 1;
+	return 0;
+}
+#endif /* CONFIG_SYNO_PHISON_USB_FACTORY */
+
 /* Invoke the transport and basic error-handling/recovery methods
  *
  * This is used by the protocol layers to actually send the message to
@@ -601,10 +625,27 @@ void usb_stor_invoke_transport(struct scsi_cmnd *srb, struct us_data *us)
 	int need_auto_sense;
 	int result;
 
+#ifdef CONFIG_SYNO_PHISON_USB_FACTORY
+	extern unsigned syno_phison_downgrade;
+	/* Phison USB3-downgrade command */
+	if (phison_downgrade_cmnd(srb)) {
+		if (0x13fe == le16_to_cpu(us->pusb_dev->descriptor.idVendor) &&
+			0x5200 == le16_to_cpu(us->pusb_dev->descriptor.idProduct)) {
+			syno_phison_downgrade = 1;
+		} else {
+			dev_warn(&us->pusb_intf->dev,
+				"WARNING: the usb vid/pid=%04x/%04x isn't the specified device"
+				" for USB-speed downgrade\n",
+				us->pusb_dev->descriptor.idVendor,
+				us->pusb_dev->descriptor.idProduct);
+		}
+	}
+#endif /* CONFIG_SYNO_PHISON_USB_FACTORY */
+
 #ifdef CONFIG_SYNO_SYNCHRONIZE_CACHE_FILTER
-	if (SYNCHRONIZE_CACHE == srb->cmnd[0] &&
-		0x0984 == le16_to_cpu(us->pusb_dev->descriptor.idVendor) &&
-		0x1403 == le16_to_cpu(us->pusb_dev->descriptor.idProduct)) {
+	if (unlikely((us->pusb_dev->syno_quirks &
+					SYNO_USB_QUIRK_SYNCHRONIZE_CACHE_FILTER) &&
+				 SYNCHRONIZE_CACHE == srb->cmnd[0])) {
 		srb->result = SAM_STAT_GOOD;
 		msleep(3000);
 		return;

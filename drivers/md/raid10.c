@@ -1924,14 +1924,14 @@ syno_error_common(struct mddev *mddev,
 #ifdef CONFIG_SYNO_MD_STATUS_DISKERROR
 		clear_bit(DiskError, &rdev->flags);
 #endif /* CONFIG_SYNO_MD_STATUS_DISKERROR */
-		set_bit(Faulty, &rdev->flags);
 		spin_unlock_irqrestore(&conf->device_lock, flags);
-		/*
-		 * if recovery is running, make sure it aborts.
-		 */
-		set_bit(MD_RECOVERY_INTR, &mddev->recovery);
-	} else
-		set_bit(Faulty, &rdev->flags);
+	}
+	/*
+	 * if recovery is running, make sure it aborts.
+	 */
+	set_bit(MD_RECOVERY_INTR, &mddev->recovery);
+	set_bit(Blocked, &rdev->flags);
+	set_bit(Faulty, &rdev->flags);
 	set_bit(MD_CHANGE_DEVS, &mddev->flags);
 	printk(KERN_ALERT "raid10: Disk failure on %s, disabling device. \n"
 		"	Operation continuing on %d devices\n",
@@ -2025,7 +2025,6 @@ static void error(struct mddev *mddev, struct md_rdev *rdev)
 {
 	char b[BDEVNAME_SIZE];
 	struct r10conf *conf = mddev->private;
-	unsigned long flags;
 
 	/*
 	 * If it is not operational, then we have already marked it as dead
@@ -2033,21 +2032,17 @@ static void error(struct mddev *mddev, struct md_rdev *rdev)
 	 * next level up know.
 	 * else mark the drive as failed
 	 */
-	spin_lock_irqsave(&conf->device_lock, flags);
 	if (test_bit(In_sync, &rdev->flags)
-	    && !enough(conf, rdev->raid_disk)) {
+	    && !enough(conf, rdev->raid_disk))
 		/*
 		 * Don't fail the drive, just return an IO error.
 		 */
-		spin_unlock_irqrestore(&conf->device_lock, flags);
 		return;
-	}
 	if (test_and_clear_bit(In_sync, &rdev->flags)) {
+		unsigned long flags;
+		spin_lock_irqsave(&conf->device_lock, flags);
 		mddev->degraded++;
-			/*
-		 * if recovery is running, make sure it aborts.
-		 */
-		set_bit(MD_RECOVERY_INTR, &mddev->recovery);
+		spin_unlock_irqrestore(&conf->device_lock, flags);
 	}
 	/*
 	 * If recovery is running, make sure it aborts.
@@ -2056,7 +2051,6 @@ static void error(struct mddev *mddev, struct md_rdev *rdev)
 	set_bit(Blocked, &rdev->flags);
 	set_bit(Faulty, &rdev->flags);
 	set_bit(MD_CHANGE_DEVS, &mddev->flags);
-	spin_unlock_irqrestore(&conf->device_lock, flags);
 	printk(KERN_ALERT
 	       "md/raid10:%s: Disk failure on %s, disabling device.\n"
 	       "md/raid10:%s: Operation continuing on %d devices.\n",
@@ -2666,6 +2660,10 @@ static void fix_recovery_read_error(struct r10bio *r10_bio)
 			if (rdev != conf->mirrors[dw].rdev) {
 				/* need bad block on destination too */
 				struct md_rdev *rdev2 = conf->mirrors[dw].rdev;
+#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+				char b1[BDEVNAME_SIZE];
+				char b2[BDEVNAME_SIZE];
+#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
 				addr = r10_bio->devs[1].addr + sect;
 				ok = rdev_set_badblocks(rdev2, addr, s, 0);
 				if (!ok) {
@@ -2674,6 +2672,10 @@ static void fix_recovery_read_error(struct r10bio *r10_bio)
 					       "md/raid10:%s: recovery aborted"
 					       " due to read error\n",
 					       mdname(mddev));
+#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+					printk("md/raid10:%s: Failed to sync from %s to %s\n", mdname(mddev), bdevname(rdev->bdev, b1), bdevname(rdev2->bdev, b2));
+					md_error(mddev, rdev);
+#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
 
 					conf->mirrors[dw].recovery_disabled
 						= mddev->recovery_disabled;

@@ -367,6 +367,9 @@ static noinline void __init_refok rest_init(void)
 	int pid;
 
 	rcu_scheduler_starting();
+#ifdef CONFIG_SYNO_FIX_SMPBOOT_RACE
+	smpboot_thread_init();
+#endif /* CONFIG_SYNO_FIX_SMPBOOT_RACE */
 	/*
 	 * We need to spawn init first so that it obtains pid 1, however
 	 * the init task will end up wanting to create kthreads, which, if

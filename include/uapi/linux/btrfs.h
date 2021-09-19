@@ -21,6 +21,10 @@
 #include <linux/types.h>
 #include <linux/ioctl.h>
 
+#ifdef __KERNEL__
+#include <linux/file.h>
+#endif
+
 #define BTRFS_IOCTL_MAGIC 0x94
 #define BTRFS_VOL_NAME_MAX 255
 
@@ -521,10 +525,30 @@ struct btrfs_ioctl_subvol_info_args {
  */
 #define BTRFS_SEND_FLAG_OMIT_END_CMD		0x4
 
+#ifdef CONFIG_SYNO_BTRFS_SEND_CALCULATE_TOTAL_DATA_SIZE
+/*
+ * Calculate the amount (in bytes) of new file data between the send and
+ * parent snapshots, or in case of a full send, the total amount of file data
+ * we will send.
+ * This corresponds to the sum of the data lengths of each write, clone and
+ * fallocate commands that are sent through the send stream. The receiving end
+ * can use this information to compute progress.
+ *
+ * Added in send stream version 2, and implies producing a version 2 stream.
+ */
+#define BTRFS_SEND_FLAG_CALCULATE_DATA_SIZE    0x8
+
+#define BTRFS_SEND_FLAG_MASK \
+	(BTRFS_SEND_FLAG_NO_FILE_DATA | \
+	 BTRFS_SEND_FLAG_OMIT_STREAM_HEADER | \
+	 BTRFS_SEND_FLAG_OMIT_END_CMD | \
+	 BTRFS_SEND_FLAG_CALCULATE_DATA_SIZE)
+#else
 #define BTRFS_SEND_FLAG_MASK \
 	(BTRFS_SEND_FLAG_NO_FILE_DATA | \
 	 BTRFS_SEND_FLAG_OMIT_STREAM_HEADER | \
 	 BTRFS_SEND_FLAG_OMIT_END_CMD)
+#endif /* CONFIG_SYNO_BTRFS_SEND_CALCULATE_TOTAL_DATA_SIZE */
 
 struct btrfs_ioctl_send_args {
 	__s64 send_fd;			/* in */
@@ -532,8 +556,25 @@ struct btrfs_ioctl_send_args {
 	__u64 __user *clone_sources;	/* in */
 	__u64 parent_root;		/* in */
 	__u64 flags;			/* in */
+#ifdef CONFIG_SYNO_BTRFS_SEND_CALCULATE_TOTAL_DATA_SIZE
+	__u64 total_data_size;   /* out */
+	int g_verbose;
+#endif
 	__u64 reserved[4];		/* in */
 };
+
+#ifdef CONFIG_SYNO_BTRFS_COMPR_CTL
+/* flags for the compression ioctl */
+#define BTRFS_COMPR_CTL_SET			0x1
+#define BTRFS_COMPR_CTL_COMPR_FL	0x2
+
+struct btrfs_ioctl_compr_ctl_args {
+	__u64	flags;				/* in/out */
+	__u64	size;				/* out */
+	__u64	compressed_size;	/* out */
+	__u64	reserved[1];
+};
+#endif /* CONFIG_SYNO_BTRFS_COMPR_CTL */
 
 /* Error codes as returned by the kernel */
 enum btrfs_err_code {
@@ -677,6 +718,12 @@ static inline char *btrfs_err_str(enum btrfs_err_code err_code)
 				   struct btrfs_ioctl_feature_flags[2])
 #define BTRFS_IOC_GET_SUPPORTED_FEATURES _IOR(BTRFS_IOCTL_MAGIC, 57, \
 				   struct btrfs_ioctl_feature_flags[3])
+
+#ifdef CONFIG_SYNO_BTRFS_COMPR_CTL
+#define BTRFS_IOC_COMPR_CTL _IOR(BTRFS_IOCTL_MAGIC, 248, \
+									struct btrfs_ioctl_compr_ctl_args)
+#endif /* CONFIG_SYNO_BTRFS_COMPR_CTL */
+
 #ifdef CONFIG_SYNO_BTRFS_SEND
 #define BTRFS_IOC_SUBVOL_GETINFO _IOR(BTRFS_IOCTL_MAGIC, 249, \
 				   struct btrfs_ioctl_subvol_info_args)
@@ -686,4 +733,5 @@ static inline char *btrfs_err_str(enum btrfs_err_code err_code)
 #define BTRFS_IOC_QGROUP_QUERY _IOR(BTRFS_IOCTL_MAGIC, 253, \
                                     struct btrfs_ioctl_qgroup_query_args)
 #endif /* CONFIG_SYNO_BTRFS_QGROUP_QUERY */
+
 #endif /* _UAPI_LINUX_BTRFS_H */

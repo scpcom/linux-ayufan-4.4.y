@@ -83,6 +83,9 @@
 #include <linux/if_tunnel.h>
 #include <linux/rtnetlink.h>
 #include <linux/netconf.h>
+#ifdef CONFIG_SYNO_IPV6_EXPORT_IN6ADDR_ANY
+#include <linux/module.h>
+#endif
 
 #ifdef CONFIG_IPV6_PRIVACY
 #include <linux/random.h>
@@ -248,6 +251,9 @@ static struct ipv6_devconf ipv6_devconf_dflt __read_mostly = {
 
 /* IPv6 Wildcard Address and Loopback Address defined by RFC2553 */
 const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
+#ifdef CONFIG_SYNO_IPV6_EXPORT_IN6ADDR_ANY
+EXPORT_SYMBOL(in6addr_any);
+#endif
 const struct in6_addr in6addr_loopback = IN6ADDR_LOOPBACK_INIT;
 const struct in6_addr in6addr_linklocal_allnodes = IN6ADDR_LINKLOCAL_ALLNODES_INIT;
 const struct in6_addr in6addr_linklocal_allrouters = IN6ADDR_LINKLOCAL_ALLROUTERS_INIT;

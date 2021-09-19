@@ -190,7 +190,6 @@ bool sk_net_capable(const struct sock *sk, int cap)
 }
 EXPORT_SYMBOL(sk_net_capable);
 
-
 #ifdef CONFIG_MEMCG_KMEM
 int mem_cgroup_sockets_init(struct mem_cgroup *memcg, struct cgroup_subsys *ss)
 {
@@ -313,7 +312,11 @@ static struct lock_class_key af_callback_keys[AF_MAX];
 /* Run time adjustable parameters. */
 __u32 sysctl_wmem_max __read_mostly = SK_WMEM_MAX;
 EXPORT_SYMBOL(sysctl_wmem_max);
+#ifdef CONFIG_SYNO_KVMX64
+__u32 sysctl_rmem_max __read_mostly = 2 * SK_RMEM_MAX;
+#else
 __u32 sysctl_rmem_max __read_mostly = SK_RMEM_MAX;
+#endif
 EXPORT_SYMBOL(sysctl_rmem_max);
 __u32 sysctl_wmem_default __read_mostly = SK_WMEM_MAX;
 __u32 sysctl_rmem_default __read_mostly = SK_RMEM_MAX;
@@ -429,7 +432,6 @@ static void sock_disable_timestamp(struct sock *sk, unsigned long flags)
 			net_disable_timestamp();
 	}
 }
-
 
 int sock_queue_rcv_skb(struct sock *sk, struct sk_buff *skb)
 {
@@ -955,7 +957,6 @@ set_rcvbuf:
 	return ret;
 }
 EXPORT_SYMBOL(sock_setsockopt);
-
 
 void cred_to_ucred(struct pid *pid, const struct cred *cred,
 		   struct ucred *ucred)
@@ -1576,7 +1577,6 @@ EXPORT_SYMBOL_GPL(sk_setup_caps);
  *	Simple resource managers for sockets.
  */
 
-
 /*
  * Write buffer destructor automatically called from kfree_skb.
  */
@@ -1741,7 +1741,6 @@ static long sock_wait_for_wmem(struct sock *sk, long timeo)
 	finish_wait(sk_sleep(sk), &wait);
 	return timeo;
 }
-
 
 /*
  *	Generic send/receive buffer handlers
@@ -2062,7 +2061,6 @@ void __sk_mem_reclaim(struct sock *sk)
 		sk_leave_memory_pressure(sk);
 }
 EXPORT_SYMBOL(__sk_mem_reclaim);
-
 
 /*
  * Set of default routines for initialising struct proto_ops when
@@ -2882,7 +2880,6 @@ static __net_exit void proto_exit_net(struct net *net)
 {
 	remove_proc_entry("protocols", net->proc_net);
 }
-
 
 static __net_initdata struct pernet_operations proto_net_ops = {
 	.init = proto_init_net,

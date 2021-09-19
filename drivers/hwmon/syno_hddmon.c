@@ -4,6 +4,7 @@
 #include <linux/syno.h>
 #include <linux/synobios.h>
 #include <linux/delay.h>
+#include <linux/libata.h>
 
 MODULE_LICENSE("Proprietary");
 
@@ -22,7 +23,11 @@ extern long g_hdd_hotplug;
 
 extern int SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER(void);
 extern int SYNO_CTRL_HDD_POWERON(int index, int value);
+#ifdef CONFIG_SYNO_GPIO
+extern int SYNO_CHECK_HDD_DETECT(int index);
+#else
 extern int SYNO_CHECK_HDD_PRESENT(int index);
+#endif /* CONFIG_SYNO_GPIO */
 
 typedef struct __SynoHddMonData {
 	int iProcessingIdx;
@@ -48,17 +53,17 @@ static int syno_hddmon_data_init(SynoHddMonData_t *pData)
 	pData->blHddHotPlugSupport = g_hdd_hotplug;
 #endif /* CONFIG_SYNO_HDD_HOTPLUG */
 
-	pData->iMaxHddNum = g_internal_hd_num;
+	pData->iMaxHddNum = g_syno_hdd_powerup_seq;
 
-	if(SYNO_MAX_HDD_PRZ < pData->iMaxHddNum) {
+	if (SYNO_MAX_HDD_PRZ < pData->iMaxHddNum) {
 		goto END;
 	}
 
-	if(!SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER()){
+	if (!SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER()) {
 		pData->blHddHotPlugSupport = 0;
 	}
 
-	if(0 == pData->blHddHotPlugSupport) {
+	if (0 == pData->blHddHotPlugSupport) {
 		goto END;
 	}
 
@@ -81,17 +86,21 @@ static int syno_hddmon_unplug_monitor(void *args)
 
 	pData = (SynoHddMonData_t *) args;
 
-	while(1) {
+	while (1) {
 		if (kthread_should_stop()) {
 			break;
 		}
 
-		for(iIdx = 1; iIdx <= pData->iMaxHddNum; iIdx++) {
-			if(pData->iProcessingIdx == iIdx) {
+		for (iIdx = 1; iIdx <= pData->iMaxHddNum; iIdx++) {
+			if (pData->iProcessingIdx == iIdx) {
 				continue;
 			}
 
+#ifdef CONFIG_SYNO_GPIO
+			iPrzPinVal = SYNO_CHECK_HDD_DETECT(iIdx);
+#else
 			iPrzPinVal = SYNO_CHECK_HDD_PRESENT(iIdx);
+#endif /* CONFIG_SYNO_GPIO */
 
 			if (iPrzPinVal) {
 				continue;
@@ -103,10 +112,10 @@ static int syno_hddmon_unplug_monitor(void *args)
 		}
 
 		uiTimeout = SYNO_HDDMON_POLL_SEC * HZ;
-		do{
+		do {
 			set_current_state(TASK_UNINTERRUPTIBLE);
 			uiTimeout = schedule_timeout(uiTimeout);
-		}while(uiTimeout);
+		} while (uiTimeout);
 	}
 
 	iRet = 0;
@@ -125,15 +134,19 @@ static void syno_hddmon_task(SynoHddMonData_t *pData)
 		goto END;
 	}
 
-	for(iIdx = 1; iIdx <= pData->iMaxHddNum; iIdx++) {
+	for (iIdx = 1; iIdx <= pData->iMaxHddNum; iIdx++) {
 		pUnplugMonitor = NULL;
 		pData->iProcessingIdx = iIdx;
 
+#ifdef CONFIG_SYNO_GPIO
+		iPrzPinVal = SYNO_CHECK_HDD_DETECT(iIdx);
+#else
 		iPrzPinVal = SYNO_CHECK_HDD_PRESENT(iIdx);
+#endif /* CONFIG_SYNO_GPIO */
 
-		if(pData->blHddEnStat[iIdx-1] != iPrzPinVal) {
+		if (pData->blHddEnStat[iIdx-1] != iPrzPinVal) {
 
-			if(iPrzPinVal) {
+			if (iPrzPinVal) {
 				//while starting a port, monitoring other ports for the disks unplugged
 				pUnplugMonitor = kthread_run(syno_hddmon_unplug_monitor, pData, SYNO_HDDMON_UPLG_STR);
 			}
@@ -142,15 +155,15 @@ static void syno_hddmon_task(SynoHddMonData_t *pData)
 			SYNO_CTRL_HDD_POWERON(iIdx, iPrzPinVal);
 			pData->blHddEnStat[iIdx-1] = iPrzPinVal;
 
-			if(iPrzPinVal) {
+			if (iPrzPinVal) {
 				uiTimeout = SYNO_HDDMON_EN_WAIT_SEC * HZ;
-				do{
+				do {
 					set_current_state(TASK_UNINTERRUPTIBLE);
 					uiTimeout = schedule_timeout(uiTimeout);
-				}while(uiTimeout);
+				} while (uiTimeout);
 			}
 
-			if(NULL != pUnplugMonitor) {
+			if (NULL != pUnplugMonitor) {
 				kthread_stop(pUnplugMonitor);
 			}
 		}
@@ -169,15 +182,19 @@ static void syno_hddmon_sync(SynoHddMonData_t *pData)
 		goto END;
 	}
 
-	for(iIdx = 1; iIdx <= pData->iMaxHddNum; iIdx++) {
+	for (iIdx = 1; iIdx <= pData->iMaxHddNum; iIdx++) {
 		pData->iProcessingIdx = iIdx;
 
+#ifdef CONFIG_SYNO_GPIO
+		iPrzPinVal = SYNO_CHECK_HDD_DETECT(iIdx);
+#else
 		iPrzPinVal = SYNO_CHECK_HDD_PRESENT(iIdx);
+#endif
 
 		/* HDD Enable pins must be high just after boot-up,
 		 * so turns the pins to low if the hdds do not present.
 		 */
-		if(!iPrzPinVal) {
+		if (!iPrzPinVal) {
 			mdelay(200);
 			SYNO_CTRL_HDD_POWERON(iIdx, iPrzPinVal);
 			pData->blHddEnStat[iIdx-1] = iPrzPinVal;
@@ -203,7 +220,7 @@ static int syno_hddmon_routine(void *args)
 
 	pData = (SynoHddMonData_t *) args;
 
-	while(1) {
+	while (1) {
 		if (kthread_should_stop()) {
 			break;
 		}
@@ -211,10 +228,10 @@ static int syno_hddmon_routine(void *args)
 		syno_hddmon_task(pData);
 
 		uiTimeout = SYNO_HDDMON_POLL_SEC * HZ;
-		do{
+		do {
 			set_current_state(TASK_UNINTERRUPTIBLE);
 			uiTimeout = schedule_timeout(uiTimeout);
-		}while(uiTimeout);
+		} while (uiTimeout);
 	}
 
 	iRet = 0;
@@ -227,7 +244,7 @@ static int __init syno_hddmon_init(void)
 	int iRet = -1;
 
 	iRet = syno_hddmon_data_init(&synoHddMonData);
-	if( 0 > iRet) {
+	if (0 > iRet) {
 		goto END;
 	}
 
@@ -253,9 +270,9 @@ END:
 
 static void __exit syno_hddman_exit(void)
 {
-	if(pHddPrzPolling) {
-        printk("###\n");
-        WARN_ON(1);
+	if (pHddPrzPolling) {
+		printk("###\n");
+		WARN_ON(1);
 		kthread_stop(pHddPrzPolling);
 	}
 }

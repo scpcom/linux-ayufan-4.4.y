@@ -70,6 +70,7 @@ struct uas_dev_info {
 	struct usb_anchor cmd_urbs;
 	struct usb_anchor sense_urbs;
 	struct usb_anchor data_urbs;
+	wait_queue_head_t wait;
 	struct list_head busy_list;
 
 	spinlock_t lock;
@@ -179,6 +180,11 @@ static int configure_endpoints(struct uas_dev_info *devinfo)
 	unsigned char *extra;
 	int i, len, max_streams, ret;
 
+	if (udev->state != USB_STATE_CONFIGURED) {
+		dev_err(&udev->dev, "%s: Failed to configure endpoints\n", __func__);
+		return -ENODEV;
+	}
+
 	for (i = 0; i < intf->cur_altsetting->desc.bNumEndpoints; i++) {
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,35))
 		struct usb_host_ss_ep_comp *comp = intf->cur_altsetting->endpoint[i].ss_ep_comp;
@@ -192,7 +198,7 @@ static int configure_endpoints(struct uas_dev_info *devinfo)
 		extra = intf->cur_altsetting->endpoint[i].extra;
 		len = intf->cur_altsetting->endpoint[i].extralen;
 #endif
-		while (len > 1) {
+		while (len >= 3) {
 			if (extra[1] == USB_DT_PIPE_USAGE) {
 				unsigned pipe_id = extra[2];
 
@@ -207,20 +213,20 @@ static int configure_endpoints(struct uas_dev_info *devinfo)
 	}
 
 	if (NULL != eps[0]) {
-		devinfo->cmd_pipe		= usb_sndbulkpipe(udev, eps[0]->desc.bEndpointAddress);
-		devinfo->status_pipe	= usb_rcvbulkpipe(udev, eps[1]->desc.bEndpointAddress);
-		devinfo->data_in_pipe	= usb_rcvbulkpipe(udev, eps[2]->desc.bEndpointAddress);
-		devinfo->data_out_pipe	= usb_sndbulkpipe(udev, eps[3]->desc.bEndpointAddress);
+		devinfo->cmd_pipe		= usb_sndbulkpipe(udev, usb_endpoint_num(&eps[0]->desc));
+		devinfo->status_pipe	= usb_rcvbulkpipe(udev, usb_endpoint_num(&eps[1]->desc));
+		devinfo->data_in_pipe	= usb_rcvbulkpipe(udev, usb_endpoint_num(&eps[2]->desc));
+		devinfo->data_out_pipe	= usb_sndbulkpipe(udev, usb_endpoint_num(&eps[3]->desc));
 
 		max_streams = (!(devinfo->quirks & UAS_QUIRK_ONE_STREAM_ID)) ? UAS_MAX_AVAILABLE_STREAMS : 2;
-		ret = usb_alloc_streams(devinfo->intf, eps + 1, 3, max_streams, GFP_KERNEL);
+		ret = usb_alloc_streams(devinfo->intf, eps + 1, 3, max_streams, GFP_NOIO);
 		if (ret < 0) {
 			dev_err(&udev->dev, "%s: Failed to allocate streams (%d)\n", __func__, ret);
 		}
 		else {
 			dev_info(&udev->dev, "%s: Streams allocated = %d\n", __func__, ret);
 			devinfo->total_stream_ids = ret;
-			if (devinfo->quirks & UAS_QUIRK_SERIAL_STREAM_ID) {
+			if (!(devinfo->quirks & UAS_QUIRK_ONE_STREAM_ID)) {
 				initialize_stream_id(devinfo);
 			}
 		}
@@ -241,7 +247,7 @@ static void deconfigure_endpoints(struct uas_dev_info *devinfo)
 	eps[0] = usb_pipe_endpoint(udev, devinfo->status_pipe);
 	eps[1] = usb_pipe_endpoint(udev, devinfo->data_in_pipe);
 	eps[2] = usb_pipe_endpoint(udev, devinfo->data_out_pipe);
-	usb_free_streams(devinfo->intf, eps, 3, GFP_KERNEL);
+	usb_free_streams(devinfo->intf, eps, 3, GFP_NOIO);
 }
 
 static void adjust_device_quirks(struct uas_dev_info *devinfo, const struct usb_device_id *id)
@@ -506,7 +512,7 @@ static int scsi_command_completion(struct scsi_cmnd *cmnd)
 		usb_free_urb(cmdinfo->siu_urb);
 	}
 
-	if (devinfo->quirks & UAS_QUIRK_SERIAL_STREAM_ID) {
+	if (!(devinfo->quirks & UAS_QUIRK_ONE_STREAM_ID)) {
 		release_stream_id(devinfo, cmdinfo->stream_id);
 	}
 
@@ -526,11 +532,6 @@ static void transfer_urb_completion(struct urb *urb)
 		kfree(urb->sg);
 	}
 #endif
-
-	if (test_bit(UAS_FLAG_RESETTING, &devinfo->flags)) {
-		usb_free_urb(urb);
-		return;
-	}
 
 	spin_lock(&devinfo->lock);
 	switch (urb->status) {
@@ -559,6 +560,10 @@ static void transfer_urb_completion(struct urb *urb)
 			}
 
 			list_del_init(&cmdinfo->list);
+			if (list_empty(&devinfo->busy_list)) {
+				wake_up(&devinfo->wait);
+			}
+
 			cmdinfo->state &= ~COMMAND_INFLIGHT;
 		}
 		else {
@@ -574,29 +579,42 @@ static void transfer_urb_completion(struct urb *urb)
 		break;
 
 	case -ENOENT:
-		if (test_bit(UAS_FLAG_DISCONNECTING, &devinfo->flags)) {
-			if (urb == cmdinfo->siu_urb) {
+		if (urb == cmdinfo->siu_urb) {
+			list_del_init(&cmdinfo->list);
+			if (list_empty(&devinfo->busy_list)) {
+				wake_up(&devinfo->wait);
+			}
+
+			if (test_bit(UAS_FLAG_DISCONNECTING, &devinfo->flags)) {
 				cmdinfo->state &= ~COMMAND_INFLIGHT;
 				cmnd->result = DID_NO_CONNECT << 16;
 			}
-			else {
+		}
+		else {
+			if (test_bit(UAS_FLAG_DISCONNECTING, &devinfo->flags)) {
 				cmdinfo->state &= ~DATA_INFLIGHT;
 			}
+		}
+
+		if (test_bit(UAS_FLAG_RESETTING, &devinfo->flags)) {
+			usb_free_urb(urb);
+			spin_unlock(&devinfo->lock);
+			return;
 		}
 		break;
 
 	default:
 		scmd_printk(KERN_DEBUG, cmnd, "Bad URB status (%d) received\n", urb->status);
-		set_bit(UAS_FLAG_QUIESCING, &devinfo->flags);
-		while (!list_empty(&devinfo->busy_list)) {
-			cmdinfo = list_first_entry(&devinfo->busy_list, struct uas_cmd_info, list);
-			list_del_init(&cmdinfo->list);
-			cmdinfo->state &= ~(DATA_INFLIGHT | COMMAND_INFLIGHT);
-			cmdinfo->state |= COMMAND_ERROR;
+		if (!test_bit(UAS_FLAG_QUIESCING, &devinfo->flags)) {
+			set_bit(UAS_FLAG_QUIESCING, &devinfo->flags);
+			list_for_each_entry(cmdinfo, &devinfo->busy_list, list) {
+				cmdinfo->state &= ~(DATA_INFLIGHT | COMMAND_INFLIGHT);
+				cmdinfo->state |= COMMAND_ERROR;
 
-			cmnd = cmdinfo_to_scmnd(cmdinfo);
-			cmnd->result = (DID_OK << 16) | (INITIATOR_ERROR << 8);
-			scsi_command_completion(cmnd);
+				cmnd = cmdinfo_to_scmnd(cmdinfo);
+				cmnd->result = (DID_OK << 16) | (INITIATOR_ERROR << 8);
+				scsi_command_completion(cmnd);
+			}
 		}
 		spin_unlock(&devinfo->lock);
 		return;
@@ -626,13 +644,14 @@ static int submit_siu_urb(struct scsi_cmnd *cmnd, gfp_t gfp)
 	siu_urb->stream_id = cmdinfo->stream_id;
 	siu_urb->transfer_flags |= URB_FREE_BUFFER;
 
+	usb_anchor_urb(siu_urb, &devinfo->sense_urbs);
 	ret = usb_submit_urb(siu_urb, gfp);
 	if (ret < 0) {
+		usb_unanchor_urb(siu_urb);
 		usb_free_urb(siu_urb);
 	}
 	else {
 		cmdinfo->siu_urb = siu_urb;
-		usb_anchor_urb(siu_urb, &devinfo->sense_urbs);
 	}
 	return ret;
 
@@ -679,8 +698,10 @@ static int submit_data_urb(struct scsi_cmnd *cmnd, gfp_t gfp)
 	usb_fill_bulk_urb(data_urb, devinfo->udev, pipe,
 			NULL, scsi_bufflen(cmnd), transfer_urb_completion, cmnd);
 
+	usb_anchor_urb(data_urb, &devinfo->data_urbs);
 	ret = usb_submit_urb(data_urb, gfp);
 	if (ret < 0) {
+		usb_unanchor_urb(data_urb);
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,35))
 		kfree(data_urb->sg);
 #endif
@@ -688,7 +709,6 @@ static int submit_data_urb(struct scsi_cmnd *cmnd, gfp_t gfp)
 	}
 	else {
 		cmdinfo->data_urb = data_urb;
-		usb_anchor_urb(data_urb, &devinfo->data_urbs);
 	}
 	return ret;
 
@@ -729,12 +749,11 @@ static int submit_ciu_urb(struct scsi_cmnd *cmnd, gfp_t gfp)
 			ciu, sizeof(*ciu) + len, usb_free_urb, NULL);
 	ciu_urb->transfer_flags |= URB_FREE_BUFFER;
 
+	usb_anchor_urb(ciu_urb, &devinfo->cmd_urbs);
 	ret = usb_submit_urb(ciu_urb, gfp);
 	if (ret < 0) {
+		usb_unanchor_urb(ciu_urb);
 		usb_free_urb(ciu_urb);
-	}
-	else {
-		usb_anchor_urb(ciu_urb, &devinfo->cmd_urbs);
 	}
 
 #ifdef CONFIG_USB_ETRON_UAS_DEBUG
@@ -797,36 +816,13 @@ static int submit_urbs(struct scsi_cmnd *cmnd, gfp_t gfp)
 static int generate_stream_id(struct scsi_cmnd *cmnd)
 {
 	struct uas_dev_info *devinfo = scmnd_to_devinfo(cmnd);
-	int stream_id = UAS_INVALID_STREAM_ID;
+	int stream_id = CIU_TAG_UNTAGGED;
 
-	if (devinfo->quirks & UAS_QUIRK_ONE_STREAM_ID) {
-		stream_id = CIU_TAG_UNTAGGED;
-		devinfo->untagged = cmnd;
-	}
-	else if (devinfo->quirks & UAS_QUIRK_SERIAL_STREAM_ID) {
+	devinfo->untagged = cmnd;
+	if (!(devinfo->quirks & UAS_QUIRK_ONE_STREAM_ID)) {
 		stream_id = acquire_stream_id(devinfo);
-		devinfo->untagged = cmnd;
-	}
-	else {
-		stream_id = CIU_TAG_UNTAGGED;
-		devinfo->untagged = cmnd;
-		if (blk_rq_tagged(cmnd->request)) {
-			switch (cmnd->cmnd[0]) {
-			case READ_6:
-			case READ_10:
-			case READ_12:
-			case READ_16:
-			case WRITE_6:
-			case WRITE_10:
-			case WRITE_12:
-			case WRITE_16:
-				stream_id = cmnd->request->tag + CIU_TAG_OFFSET;
-				devinfo->untagged = NULL;
-				break;
-
-			default:
-				break;
-			}
+		if (!(devinfo->quirks & UAS_QUIRK_SERIAL_STREAM_ID)) {
+			devinfo->untagged = NULL;
 		}
 	}
 
@@ -905,25 +901,68 @@ static void log_scsi_command_state(struct scsi_cmnd *cmnd)
 
 static int scsi_slave_alloc(struct scsi_device *sdev)
 {
-	sdev->hostdata = (void *)sdev->host->hostdata[0];
+	sdev->hostdata = (void *)sdev->host->hostdata;
+
+	/* USB has unusual DMA-alignment requirements: Although the
+	 * starting address of each scatter-gather element doesn't matter,
+	 * the length of each element except the last must be divisible
+	 * by the Bulk maxpacket value.  There's currently no way to
+	 * express this by block-layer constraints, so we'll cop out
+	 * and simply require addresses to be aligned at 512-byte
+	 * boundaries.	This is okay since most block I/O involves
+	 * hardware sectors that are multiples of 512 bytes in length,
+	 * and since host controllers up through USB 2.0 have maxpacket
+	 * values no larger than 512.
+	 *
+	 * But it doesn't suffice for Wireless USB, where Bulk maxpacket
+	 * values can be as large as 2048.	To make that work properly
+	 * will require changes to the block layer.
+	 */
+	blk_queue_update_dma_alignment(sdev->request_queue, (512 - 1));
+
 	return 0;
 }
 
 static int scsi_slave_configure(struct scsi_device *sdev)
 {
 	struct uas_dev_info *devinfo = sdev->hostdata;
+	int tagged = 0, tags = 1;
+
+	if (!IS_ONE_COMMAND_ONLY(devinfo->quirks)) {
+		tagged = MSG_ORDERED_TAG;
+		tags = devinfo->total_stream_ids;
+	}
+
+	scsi_adjust_queue_depth(sdev, tagged, tags);
 
 	blk_queue_rq_timeout(sdev->request_queue, 5 * HZ);
-	if (!IS_ONE_COMMAND_ONLY(devinfo->quirks)) {
-		scsi_set_tag_type(sdev, MSG_ORDERED_TAG);
-		scsi_activate_tcq(sdev, devinfo->total_stream_ids - CIU_TAG_OFFSET);
-	}
-	else {
-		scsi_adjust_queue_depth(sdev, 0, 1);
-	}
 
+	/* Many disks only accept MODE SENSE transfer lengths of
+	 * 192 bytes (that's what Windows uses). */
 	sdev->use_192_bytes_for_3f = 1;
+
+	/* A number of devices have problems with MODE SENSE for
+	 * page x08, so we will skip it. */
 	sdev->skip_ms_page_8 = 1;
+
+#if (LINUX_VERSION_CODE > KERNEL_VERSION(3,4,0))
+	/* Some devices don't handle VPD pages correctly */
+	sdev->skip_vpd_pages = 1;
+
+	/*
+	 * Many devices do not respond properly to READ_CAPACITY_16.
+	 * Tell the SCSI layer to try READ_CAPACITY_10 first.
+	 */
+	sdev->try_rc_10_first = 1;
+#endif
+
+#if (LINUX_VERSION_CODE > KERNEL_VERSION(3,6,0))
+	/* Do not attempt to use REPORT SUPPORTED OPERATION CODES */
+	sdev->no_report_opcodes = 1;
+
+	/* Do not attempt to use WRITE SAME */
+	sdev->no_write_same = 1;
+#endif
 
 	return 0;
 }
@@ -1010,9 +1049,6 @@ static int scsi_reset_bus_handler(struct scsi_cmnd *cmnd)
 			usb_unlock_device(devinfo->udev);
 
 			if (!ret) {
-				devinfo->untagged = NULL;
-				INIT_LIST_HEAD(&devinfo->busy_list);
-				configure_endpoints(devinfo);
 				clear_bit(UAS_FLAG_RESETTING, &devinfo->flags);
 				shost_printk(KERN_INFO, cmnd->device->host, "%s SUCCESS\n", __func__);
 				return SUCCESS;
@@ -1046,12 +1082,6 @@ static struct scsi_host_template uas_host_template = {
 	.eh_bus_reset_handler	= scsi_reset_bus_handler,
 };
 
-/*
- * XXX: What I'd like to do here is register a SCSI host for each USB host in
- * the system.  Follow usb-storage's design of registering a SCSI host for
- * each USB device for the moment.  Can implement this by walking up the
- * USB hierarchy until we find a USB host.
- */
 static int probe_device(struct usb_interface *intf, const struct usb_device_id *id)
 {
 	struct usb_device *udev = interface_to_usbdev(intf);
@@ -1065,13 +1095,13 @@ static int probe_device(struct usb_interface *intf, const struct usb_device_id *
 
 	dev_info(&udev->dev, "UAS device detected\n");
 
-	devinfo = kzalloc(sizeof(struct uas_dev_info), GFP_KERNEL);
-	shost = scsi_host_alloc(&uas_host_template, sizeof(void *));
-	if (NULL == devinfo || NULL == shost) {
+	shost = scsi_host_alloc(&uas_host_template, sizeof(struct uas_dev_info));
+	if (NULL == shost) {
 		ret = -ENOMEM;
-		goto free;
+		goto set_alt0;
 	}
 
+	devinfo = (struct uas_dev_info *)shost->hostdata;
 	devinfo->intf = intf;
 	devinfo->udev = udev;
 	devinfo->shost = shost;
@@ -1081,23 +1111,20 @@ static int probe_device(struct usb_interface *intf, const struct usb_device_id *
 	init_usb_anchor(&devinfo->cmd_urbs);
 	init_usb_anchor(&devinfo->sense_urbs);
 	init_usb_anchor(&devinfo->data_urbs);
+	init_waitqueue_head(&devinfo->wait);
 	adjust_device_quirks(devinfo, id);
 	ret = configure_endpoints(devinfo);
 	if (ret < 0) {
-		goto free;
+		goto set_alt0;
 	}
+
+	usb_set_intfdata(intf, devinfo);
 
 	shost->max_id = 1;
+	shost->max_lun = 256;
+	shost->max_channel = 0;
 	shost->max_cmd_len = 16 + 252;
 	shost->sg_tablesize = udev->bus->sg_tablesize;
-	if (!IS_ONE_COMMAND_ONLY(devinfo->quirks)) {
-		ret = scsi_init_shared_tag_map(shost, devinfo->total_stream_ids - CIU_TAG_OFFSET);
-		if (ret) {
-			goto deconfig_eps;
-		}
-	}
-
-	shost->hostdata[0] = (unsigned long)devinfo;
 	ret = scsi_add_host(shost, &intf->dev);
 	if (ret < 0) {
 		goto deconfig_eps;
@@ -1105,17 +1132,15 @@ static int probe_device(struct usb_interface *intf, const struct usb_device_id *
 
 	scsi_scan_host(shost);
 
-	usb_set_intfdata(intf, devinfo);
 	setup_device_options(intf, UAS_STATE_PROBE);
 	return ret;
 
 deconfig_eps:
 	deconfigure_endpoints(devinfo);
+	usb_set_intfdata(intf, NULL);
 
-free:
-	if (devinfo) {
-		kfree(devinfo);
-	}
+set_alt0:
+	usb_set_interface(udev, intf->altsetting[0].desc.bInterfaceNumber, 0);
 
 	if (shost) {
 		scsi_host_put(shost);
@@ -1136,24 +1161,61 @@ static void disconnect_device(struct usb_interface *intf)
 	scsi_remove_host(devinfo->shost);
 
 	deconfigure_endpoints(devinfo);
-	kfree(devinfo);
+	scsi_host_put(devinfo->shost);
 
 	setup_device_options(intf, UAS_STATE_DISCONNECT);
 }
 
 static int prev_reset_device(struct usb_interface *intf)
 {
+	struct uas_dev_info *devinfo = usb_get_intfdata(intf);
+	struct Scsi_Host *shost = devinfo->shost;
+	unsigned long flags;
+
 	setup_device_options(intf, UAS_STATE_PREV_RESET);
+
+	/* Block new requests */
+	spin_lock_irqsave(shost->host_lock, flags);
+	scsi_block_requests(shost);
+	spin_unlock_irqrestore(shost->host_lock, flags);
+
+	/* Wait for any pending request to complete */
+	if (wait_event_timeout(devinfo->wait, list_empty(&devinfo->busy_list),
+		msecs_to_jiffies(5000)) == 0) {
+		shost_printk(KERN_ERR, shost, "%s Timed out\n", __func__);
+		return 1;
+	}
+
+	deconfigure_endpoints(devinfo);
+
 	return 0;
 }
 
 static int post_reset_device(struct usb_interface *intf)
 {
+	struct uas_dev_info *devinfo = usb_get_intfdata(intf);
+	struct Scsi_Host *shost = devinfo->shost;
+	unsigned long flags;
+
 	setup_device_options(intf, UAS_STATE_POST_RESET);
+
+	devinfo->untagged = NULL;
+	INIT_LIST_HEAD(&devinfo->busy_list);
+	if (configure_endpoints(devinfo) < 0) {
+		return 1;
+	}
+
+	spin_lock_irqsave(shost->host_lock, flags);
+	scsi_report_bus_reset(shost, 0);
+	spin_unlock_irqrestore(shost->host_lock, flags);
+
+	scsi_unblock_requests(shost);
+
 	return 0;
 }
 
 static struct usb_device_id uas_usb_ids[] = {
+	{ USB_DEVICE_VER(0x4971, 0x1013, 0x4896, 0x4896), .driver_info = UAS_QUIRK_INCOMPATIBLE_DEVICE },
 	{ USB_DEVICE_VER(0x4971, 0x1012, 0x4798, 0x4798), .driver_info = UAS_QUIRK_INCOMPATIBLE_DEVICE },
 	{ USB_DEVICE_VER(0x059b, 0x0070, 0x0006, 0x0006), .driver_info = UAS_QUIRK_INCOMPATIBLE_DEVICE },
 	{ USB_DEVICE_VER(0x1759, 0x5002, 0x2270, 0x2270), .driver_info = UAS_QUIRK_NO_TEST_UNIT_READY },

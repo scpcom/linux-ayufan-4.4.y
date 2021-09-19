@@ -148,6 +148,10 @@ static int ehci_orion_drv_probe(struct platform_device *pdev)
 	void __iomem *regs;
 	int irq, err;
 	enum orion_ehci_phy_ver phy_version;
+#if defined (CONFIG_SYNO_USB_POWER_RESET)
+	struct device_node	*node = pdev->dev.of_node;
+	u32 vbus_gpio_pin = 0;
+#endif /* CONFIG_SYNO_USB_POWER_RESET */
 
 	if (usb_disabled())
 		return -ENODEV;
@@ -214,6 +218,27 @@ static int ehci_orion_drv_probe(struct platform_device *pdev)
 		goto err3;
 	}
 
+#if defined (CONFIG_SYNO_USB_POWER_RESET)
+	if (node) {
+		if (of_property_read_bool(node, "power-control-capable")) {
+			hcd->power_control_support = 1;
+		} else {
+			hcd->power_control_support = 0;
+		}
+		if (of_property_read_bool(node, "vbus-gpio")) {
+			of_property_read_u32(node, "vbus-gpio", &vbus_gpio_pin);
+			/* hcd->vbus_gpio_pin' is an integer, but vbus_gpio_pin is
+			 * an unsigned integer. It should be safe because it's enough
+			 * for gpio number.
+			 */
+			hcd->vbus_gpio_pin = vbus_gpio_pin;
+		} else {
+			hcd->vbus_gpio_pin = -1;
+			dev_warn(&pdev->dev, "failed to get Vbus gpio\n");
+		}
+	}
+#endif /* CONFIG_SYNO_USB_POWER_RESET */
+
 	hcd->rsrc_start = res->start;
 	hcd->rsrc_len = resource_size(res);
 	hcd->regs = regs;
@@ -248,7 +273,10 @@ static int ehci_orion_drv_probe(struct platform_device *pdev)
 	default:
 		printk(KERN_WARNING "Orion ehci -USB phy version isn't supported.\n");
 	}
-
+#if defined (CONFIG_SYNO_USB_POWER_RESET)
+	dev_info(&pdev->dev, "USB2 Vbus gpio %d\n", hcd->vbus_gpio_pin);
+	dev_info(&pdev->dev, "power control %s\n", hcd->power_control_support ? "enabled" : "disabled");
+#endif /* CONFIG_SYNO_USB_POWER_RESET */
 	err = usb_add_hcd(hcd, irq, IRQF_SHARED);
 	if (err)
 		goto err4;

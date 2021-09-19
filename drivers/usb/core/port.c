@@ -18,6 +18,7 @@
 
 #include <linux/slab.h>
 #include <linux/pm_qos.h>
+#include <linux/gpio.h>
 
 #include "hub.h"
 
@@ -153,11 +154,19 @@ int usb_hub_create_port_device(struct usb_hub *hub, int port1)
 {
 	struct usb_port *port_dev = NULL;
 	int retval;
-#ifdef CONFIG_SYNO_CASTRATED_XHC
+#if defined(CONFIG_SYNO_CASTRATED_XHC) ||\
+	defined(CONFIG_SYNO_USB_VBUS_GPIO_CONTROL)
 	struct usb_device *hdev = hub->hdev;
+#endif /* CONFIG_SYNO_CASTRATED_XHC || CONFIG_SYNO_USB_VBUS_GPIO_CONTROL */
+#ifdef CONFIG_SYNO_CASTRATED_XHC
 	extern char gSynoCastratedXhcAddr[CONFIG_SYNO_NUM_CASTRATED_XHC][13];
 	extern unsigned gSynoCastratedXhcPortBitmap[CONFIG_SYNO_NUM_CASTRATED_XHC];
 #endif /* CONFIG_SYNO_CASTRATED_XHC */
+#ifdef CONFIG_SYNO_USB_VBUS_GPIO_CONTROL
+	extern char gSynoUsbVbusHostAddr[CONFIG_SYNO_USB_VBUS_NUM_GPIO][13];
+	extern int gSynoUsbVbusPort[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
+	extern unsigned gSynoUsbVbusGpp[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
+#endif /* CONFIG_SYNO_USB_VBUS_GPIO_CONTROL */
 
 	port_dev = kzalloc(sizeof(*port_dev), GFP_KERNEL);
 	if (!port_dev) {
@@ -194,6 +203,23 @@ int usb_hub_create_port_device(struct usb_hub *hub, int port1)
 	}
 #endif /* CONFIG_SYNO_CASTRATED_XHC */
 
+#ifdef CONFIG_SYNO_USB_VBUS_GPIO_CONTROL
+	if (hdev && hdev->serial) {
+		int i;
+		for (i = 0; i < CONFIG_SYNO_USB_VBUS_NUM_GPIO; i++) {
+			if (0 == strcmp(gSynoUsbVbusHostAddr[i], hdev->serial)) {
+				if (0 == gpio_get_value(gSynoUsbVbusGpp[i])) {
+					gpio_set_value(gSynoUsbVbusGpp[i], 1);
+					printk(KERN_INFO " port%d is going to power up Vbus by"
+							"GPIO#%d\n", port1, gSynoUsbVbusGpp[i]);
+					mdelay(100);
+				}
+				if (port1 == gSynoUsbVbusPort[i])
+					port_dev->syno_vbus_gpp = gSynoUsbVbusGpp[i];
+			}
+		}
+	}
+#endif /* CONFIG_SYNO_USB_VBUS_GPIO_CONTROL */
 	retval = device_register(&port_dev->dev);
 	if (retval)
 		goto error_register;

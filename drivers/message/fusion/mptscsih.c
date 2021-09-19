@@ -1710,8 +1710,13 @@ mptscsih_abort(struct scsi_cmnd * SCpnt)
 	}
 
 	ioc = hd->ioc;
+#ifdef CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE
+	printk(MYIOC_s_NOTE_FMT "attempting task abort! (sc=%p)\n",
+	       ioc->name, SCpnt);
+#else /* CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE */
 	printk(MYIOC_s_INFO_FMT "attempting task abort! (sc=%p)\n",
 	       ioc->name, SCpnt);
+#endif /* CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE */
 	scsi_print_command(SCpnt);
 
 	vdevice = SCpnt->device->hostdata;
@@ -1795,9 +1800,15 @@ mptscsih_abort(struct scsi_cmnd * SCpnt)
 	}
 
  out:
+#ifdef CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE
+	printk(MYIOC_s_NOTE_FMT "task abort: %s (rv=%04x) (sc=%p)\n",
+	    ioc->name, ((retval == SUCCESS) ? "SUCCESS" : "FAILED"), retval,
+	    SCpnt);
+#else /* CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE */
 	printk(MYIOC_s_INFO_FMT "task abort: %s (rv=%04x) (sc=%p)\n",
 	    ioc->name, ((retval == SUCCESS) ? "SUCCESS" : "FAILED"), retval,
 	    SCpnt);
+#endif /* CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE */
 
 	return retval;
 }

@@ -3446,21 +3446,32 @@ int ext3_syno_get_archive_ver(struct dentry *dentry, u32 *version)
 	struct inode *inode = dentry->d_inode;
 	struct syno_xattr_archive_version value;
 	int err;
+	u32 archive_version = 0;
+	u32 archive_version_bad = 0;
 
 	if (IS_ARCHIVE_VERSION_CACHED(inode)) {
 		*version = inode->i_archive_version;
 		return 0;
 	}
 
+	/* wrong place to store xattr in linux-3.10.x */
+	err = ext3_xattr_get(inode, EXT3_XATTR_INDEX_SYNO_BAD, XATTR_SYNO_ARCHIVE_VERSION, &value, sizeof(value));
+	if (0 < err) {
+		archive_version_bad = le32_to_cpu(value.v_archive_version);
+	}
+
 	err = ext3_xattr_get(inode, EXT3_XATTR_INDEX_SYNO, XATTR_SYNO_ARCHIVE_VERSION, &value, sizeof(value));
 	if (0 < err) {
-		inode->i_archive_version = le32_to_cpu(value.v_archive_version);
+		archive_version = le32_to_cpu(value.v_archive_version);
 	} else if (-ENODATA == err) {
-		inode->i_archive_version = 0;
+		archive_version = 0;
 	} else {
 		*version = 0;
 		return err;
 	}
+
+	/* pick greater one */
+	inode->i_archive_version = (archive_version_bad > archive_version) ? archive_version_bad : archive_version;
 	*version = inode->i_archive_version;
 	inode->i_flags |= S_ARCHIVE_VERSION_CACHED;
 	return 0;

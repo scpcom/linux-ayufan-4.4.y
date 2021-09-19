@@ -553,6 +553,85 @@ out:
 	return rc;
 }
 
+#ifdef CONFIG_SYNO_FS_RECVFILE
+static int ecryptfs_aggregate_write_end(struct file *file, struct address_space *mapping,
+			loff_t pos, unsigned len, unsigned copied,
+			struct page **pages, void *fsdata, unsigned page_num)
+{
+	pgoff_t index = pos >> PAGE_CACHE_SHIFT;
+	unsigned from = pos & (PAGE_CACHE_SIZE - 1);
+	unsigned to = from + copied;
+	struct inode *ecryptfs_inode = mapping->host;
+	struct ecryptfs_crypt_stat *crypt_stat =
+		&ecryptfs_inode_to_private(ecryptfs_inode)->crypt_stat;
+	int rc = 0, i;
+	struct file *lower_file = ecryptfs_inode_to_private(ecryptfs_inode)->lower_file;
+
+	ecryptfs_printk(KERN_DEBUG, "Calling fill_zeros_to_end_of_page"
+			"(page w/ index = [0x%.16lx], to = [%d])\n", index, to);
+	if (!page_num)
+		goto out;
+	if (!(crypt_stat->flags & ECRYPTFS_ENCRYPTED)) {
+		for (i = 0;i < page_num;i++) {
+			rc = ecryptfs_write_lower_page_segment(ecryptfs_inode, pages[i], 0,
+							       PAGE_CACHE_SIZE);
+			if (!rc) {
+				rc += PAGE_CACHE_SIZE;
+				fsstack_copy_inode_size(ecryptfs_inode,
+					ecryptfs_inode_to_lower(ecryptfs_inode));
+			}
+		}
+		goto out;
+	}
+	for (i = 0;i < page_num;i++) {
+		if (!PageUptodate(pages[i])) {
+			if (i == 0 && copied < PAGE_CACHE_SIZE) {
+				rc = 0;
+				goto out;
+			}
+			SetPageUptodate(pages[i]);
+		}
+	}
+	if (to % PAGE_CACHE_SIZE) {
+		zero_user_segment(pages[page_num-1], to & (PAGE_CACHE_SIZE - 1), PAGE_CACHE_SIZE);
+	}
+	for (i = 0;i < page_num;i++) {
+		rc = ecryptfs_encrypt_page(pages[i]);
+	}
+	if (rc) {
+#ifdef CONFIG_SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING
+		if (-EDQUOT != rc && -ENOSPC != rc)
+#endif /* CONFIG_SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING */
+		ecryptfs_printk(KERN_WARNING, "Error encrypting page (upper "
+				"index [0x%.16lx])\n", index);
+		goto out;
+	}
+	if (pos + copied > i_size_read(ecryptfs_inode)) {
+		i_size_write(ecryptfs_inode, pos + copied);
+		ecryptfs_printk(KERN_DEBUG, "Expanded file size to "
+			"[0x%.16llx]\n",
+			(unsigned long long)i_size_read(ecryptfs_inode));
+	}
+	rc = ecryptfs_write_inode_size_to_metadata(ecryptfs_inode);
+#ifdef CONFIG_SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING
+	if (-EDQUOT == rc || -ENOSPC == rc) {
+		goto out; //skip following error message
+	}
+#endif /* CONFIG_SYNO_ECRYPTFS_SKIP_EDQUOT_WARNING */
+	if (rc)
+		printk(KERN_ERR "Error writing inode size to metadata; "
+		       "rc = [%d]\n", rc);
+	else
+		rc = copied;
+out:
+	for (i = 0;i < page_num;i++) {
+		unlock_page(pages[i]);
+		page_cache_release(pages[i]);
+	}
+	return rc;
+}
+#endif
+
 static sector_t ecryptfs_bmap(struct address_space *mapping, sector_t block)
 {
 	int rc = 0;
@@ -573,4 +652,7 @@ const struct address_space_operations ecryptfs_aops = {
 	.write_begin = ecryptfs_write_begin,
 	.write_end = ecryptfs_write_end,
 	.bmap = ecryptfs_bmap,
+#ifdef CONFIG_SYNO_FS_RECVFILE
+	.aggregate_write_end	= ecryptfs_aggregate_write_end,
+#endif
 };

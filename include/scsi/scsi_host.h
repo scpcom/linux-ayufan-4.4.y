@@ -547,6 +547,9 @@ struct scsi_host_template {
 	 *   scsi_netlink.h
 	 */
 	u64 vendor_id;
+#ifdef CONFIG_SYNO_GET_DISK_SPEED
+	unsigned char (* syno_get_disk_speed)(struct Scsi_Host *host, unsigned int phy_id);
+#endif /* CONFIG_SYNO_GET_DISK_SPEED */
 };
 
 /*

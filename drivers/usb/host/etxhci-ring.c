@@ -316,7 +316,7 @@ static int xhci_abort_cmd_ring(struct xhci_hcd *xhci)
 	 * seconds), then it should assume that the there are
 	 * larger problems with the xHC and assert HCRST.
 	 */
-	ret = xhci_handshake(xhci, &xhci->op_regs->cmd_ring,
+	ret = etxhci_handshake(xhci, &xhci->op_regs->cmd_ring,
 			CMD_RING_RUNNING, 0, 5 * 1000 * 1000);
 	if (ret < 0) {
 		xhci_err(xhci, "Stopped the command ring failed, "
@@ -356,7 +356,7 @@ static int xhci_queue_cd(struct xhci_hcd *xhci,
  * should intervene to recover the command ring.
  * See Section 4.6.1.1 and 4.6.1.2
  */
-int xhci_cancel_cmd(struct xhci_hcd *xhci, struct xhci_command *command,
+int etxhci_cancel_cmd(struct xhci_hcd *xhci, struct xhci_command *command,
 		union xhci_trb *cmd_trb)
 {
 	int retval = 0;
@@ -1170,9 +1170,8 @@ static void handle_reset_ep_completion(struct xhci_hcd *xhci,
 				false);
 		etxhci_ring_cmd_db(xhci);
 	} else {
-		/* Clear our internal halted state and restart the ring(s) */
+		/* Clear our internal halted state */
 		xhci->devs[slot_id]->eps[ep_index].ep_state &= ~EP_HALTED;
-		ring_doorbell_for_active_rings(xhci, slot_id, ep_index);
 	}
 }
 
@@ -2112,7 +2111,7 @@ static int process_ctrl_td(struct xhci_hcd *xhci, struct xhci_td *td,
 	if (event_trb != ep_ring->dequeue) {
 		/* The event was for the status stage */
 		if (event_trb == td->last_trb) {
-			if (td->urb->actual_length != 0) {
+			if (td->urb_length_set) {
 				/* Don't overwrite a previously set error code
 				 */
 				if ((*status == -EINPROGRESS || *status == 0) &&
@@ -2126,7 +2125,13 @@ static int process_ctrl_td(struct xhci_hcd *xhci, struct xhci_td *td,
 					td->urb->transfer_buffer_length;
 			}
 		} else {
-		/* Maybe the event was for the data stage? */
+			/*
+			 * Maybe the event was for the data stage? If so, update
+			 * already the actual_length of the URB and flag it as
+			 * set, so that it is not overwritten in the event for
+			 * the last TRB.
+			 */
+			td->urb_length_set = true;
 			td->urb->actual_length =
 				td->urb->transfer_buffer_length -
 				TRB_LEN(le32_to_cpu(event->transfer_len));
@@ -2538,25 +2543,14 @@ static int handle_tx_event(struct xhci_hcd *xhci,
 		 * TD list.
 		 */
 		if (list_empty(&ep_ring->td_list)) {
-#ifdef CONFIG_SYNO_USB3_SURPRESS_WARN
-			/*
-			 * A stopped endpoint may generate an extra completion
-			 * event if the device was suspended.  Don't print
-			 * warnings.
-			 */
-			if (!(trb_comp_code == COMP_STOP ||
-						trb_comp_code == COMP_STOP_INVAL)) {
-#endif /* CONFIG_SYNO_USB3_SUPRESS_WARN */
-				xhci_warn(xhci, "WARN Event TRB for slot %d ep %d with no TDs queued?\n",
-						TRB_TO_SLOT_ID(le32_to_cpu(event->flags)),
-						ep_index);
-				xhci_dbg(xhci, "Event TRB with TRB type ID %u\n",
-						(le32_to_cpu(event->flags) &
-						 TRB_TYPE_BITMASK)>>10);
-				etxhci_print_trb_offsets(xhci, (union xhci_trb *) event);
-#ifdef CONFIG_SYNO_USB3_SURPRESS_WARN
-			}
-#endif /* CONFIG_SYNO_USB3_SUPRESS_WARN */
+			xhci_warn(xhci, "WARN Event TRB for slot %d ep %d "
+					"with no TDs queued?\n",
+				  TRB_TO_SLOT_ID(le32_to_cpu(event->flags)),
+				  ep_index);
+			xhci_dbg(xhci, "Event TRB with TRB type ID %u\n",
+				 (le32_to_cpu(event->flags) &
+				  TRB_TYPE_BITMASK)>>10);
+			etxhci_print_trb_offsets(xhci, (union xhci_trb *) event);
 			if (ep->skip) {
 				ep->skip = false;
 				xhci_dbg(xhci, "td_list is empty while skip "

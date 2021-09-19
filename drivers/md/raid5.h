@@ -341,6 +341,26 @@ enum {
 	STRIPE_OP_RECONSTRUCT,
 	STRIPE_OP_CHECK,
 };
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+
+/*
+ * RAID parity calculation preferences
+ */
+enum {
+	PARITY_DISABLE_RMW = 0,
+	PARITY_ENABLE_RMW,
+	PARITY_PREFER_RMW,
+};
+
+/*
+ * Pages requested from set_syndrome_sources()
+ */
+enum {
+	SYNDROME_SRC_ALL,
+	SYNDROME_SRC_WANT_DRAIN,
+	SYNDROME_SRC_WRITTEN,
+};
+#endif /* CONFIG_SYNO_MD_RAID6_RMW */
 /*
  * Plugging:
  *
@@ -386,7 +406,11 @@ struct r5conf {
 	struct hlist_head	*stripe_hashtbl;
 	struct mddev		*mddev;
 	int			chunk_sectors;
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+	int			level, algorithm, rmw_level;
+#else /* CONFIG_SYNO_MD_RAID6_RMW */
 	int			level, algorithm;
+#endif /* CONFIG_SYNO_MD_RAID6_RMW */
 	int			max_degraded;
 	int			raid_disks;
 	int			max_nr_stripes;
@@ -426,6 +450,9 @@ struct r5conf {
 	atomic_t		pending_full_writes; /* full write backlog */
 	int			bypass_count; /* bypassed prereads */
 	int			bypass_threshold; /* preread nice */
+#ifdef CONFIG_SYNO_MD_STRIPE_MEMORY_ESTIMATION
+	int         stripe_cache_memory_usage;
+#endif /* CONFIG_SYNO_MD_STRIPE_MEMORY_ESTIMATION */
 	struct list_head	*last_hold; /* detect hold_list promotions */
 
 	atomic_t		reshape_stripes; /* stripes with pending writes for reshape */

@@ -650,8 +650,9 @@ static int __init lp3943_init(void)
 		goto END;
 	}
 	if (syno_is_hw_version(HW_DS415p) || syno_is_hw_version(HW_DS1515p) || syno_is_hw_version(HW_DS1815p) ||
-			syno_is_hw_version(HW_RS815p) || syno_is_hw_version(HW_RS815rpp) ||
-			syno_is_hw_version(HW_DS416p) || syno_is_hw_version(HW_DS716p) || syno_is_hw_version(HW_DS216p)) {
+			syno_is_hw_version(HW_RS815p) || syno_is_hw_version(HW_RS815rpp) || syno_is_hw_version(HW_DS416play) ||
+			syno_is_hw_version(HW_DS916p) || syno_is_hw_version(HW_DS716p) || syno_is_hw_version(HW_DS216p) ||
+			syno_is_hw_version(HW_DS216pII) || syno_is_hw_version(HW_DS716pII)) {
 		funcSYNOLEDBrightnessSet = lp3943_syno_brightness_reverse_set;
 	} else {
 		funcSYNOLEDBrightnessSet = lp3943_syno_brightness_set;

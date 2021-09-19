@@ -59,7 +59,7 @@ config SYNO_ICH_GPIO_CTRL
 	help
 	  GPIO control for x86 chipset south bridge PCH/ICH.
 	  Merged SYNO_PCH_GPIO_CTRL & SYNO_LPC_ICH_GPIO_CTRL.
-	  
+
 config SYNO_X86_PINCTRL_GPIO
 	bool "X86 GPIO Control With Pinctrl Subsystem"
 	default y
@@ -68,7 +68,7 @@ config SYNO_X86_PINCTRL_GPIO
 	select GPIOLIB
 	help
 	  GPIO control for x86 chipset with pinctrl subsystem.
-	  
+
 config SYNO_X86_CORETEMP
 	bool "X86 Core Temperature Detection"
 	default y
@@ -190,6 +190,55 @@ config SYNO_IT87_SUPERIO_RW
 	  Support IT87 super IO pins r/w.
 	  Writable pins are defined in table writable_pin_setting[].
 
+config SYNO_KVMX64_PCI_SLOT_SYSTEM
+	int "Fixed disk name support for virtio scsi disk"
+	default 11
+	depends on SYNO_KVMX64 && SYNO_FIXED_DISK_NAME
+	help
+	  <Virtualization> #8
+	  Fixed disk name support for virtio scsi disk
+
+config SYNO_KVMX64_PCI_SLOT_BOOT
+	int "Reserve virtio pci slot for synoboot"
+	default 10
+	depends on SYNO_KVMX64 && SYNO_USB_FLASH_BOOT
+	help
+	  <Virtualization> #8
+	  Reserve virtio pci slot for synoboot
+
+config SYNO_VHOST_SCSI_TMF_UNSUPPORTED
+	bool "scsi command abort when using vhost-scsi"
+	default y
+	depends on SYNO_KVMX64
+	help
+	  <Virtualization> #57
+	  scsi command abort when using vhost-scsi
+
+config SYNO_KVM_IGNORE_MSRS
+	bool "skip logging of ignored MSRS"
+	default y
+	depends on KVM
+	help
+	  <Virtualization> #362
+	  skip logging of ignored MSRS
+
+config SYNO_EXPORT_GET_CMDLINE
+	bool "export the helper function to get the cmdline of a task_struct"
+	default y
+	help
+	  <Snapshot & Replication> #1490
+	  log the cmdline in lio-4.x
+
+config SYNO_GPIO
+	  bool "Employ refactored GPIO-functions"
+	  default n
+	  help
+	    <DSM> No Bug Entry
+	    This config is to employ refactored GPIO-related functions. Most GPIO
+	    functions are moved to synobios and the others which needed by kernel
+	    are still kept in kernel. Extra information from bootargs is needed for
+	    GPIO functions kept in kernel.
+
 endmenu #System Features
 
 menu "Boot Arguments"
@@ -203,7 +252,7 @@ config SYNO_HW_VERSION
 	  So user mode can get the hardware version by using the
 	  following command:
 	  $ cat /proc/sys/kernel/syno_hw_version
-	
+
 
 config SYNO_HW_REVISION
 	bool "Hardware Revision String"
@@ -214,22 +263,22 @@ config SYNO_HW_REVISION
 	  So user mode can get the hardware version by using the
 	  following command:
 	  $ cat /proc/sys/kernel/syno_hw_revision
-	
+
 
 config SYNO_INTERNAL_HD_NUM
 	bool "Internal HDDs For Sequential Spin-Up"
 	default y
 	help
-	
+
 
 config SYNO_INTERNAL_NETIF_NUM
 	bool "Number Of Network Interfaces"
 	default y
 	help
 	  <DSM> No Bug Entry (see <Linux Kernel Porting - linux-2.6.32> #112)
-	  Parse bootloader command to judge how many network interface used. 
+	  Parse bootloader command to judge how many network interface used.
 	  A kernel environment g_internal_netif_num is added
-	
+
 config SYNO_E1000_LED_SWITCH
 	bool "LED Configuration Of E1000 NIC"
 	default y
@@ -262,19 +311,6 @@ config SYNO_MAC_ADDRESS
 		a fixed location of a specific mtd partition. The mac addresses are
 		read at boot and are written into internal net interface. A kernel
 		environment	grgbLanMac is added.
-
-config SYNO_MAC_MAX
-	int "The max number of mac addresses supported in vendor file"
-	default 8
-	depends on SYNO_MAC_ADDRESS
-	help
-	  <DSM> #52055
-		Originally the vendor file can only support 4 macs because of the
-		preserved space is not enough. New vendor file format can extend
-		to infinite number of macs but currently we limit it to 8.
-		The vendor format version is passed from grub, so mantool knows
-		which vendor version is used by the following command:
-		$ cat /proc/sys/kernel/syno_vender_format_version
 
 config SYNO_DEBUG_FLAG
 	bool "Debug Flag"
@@ -341,14 +377,6 @@ config SYNO_INITRAMFS_DECOMPRESS_ONCE
 	  Some platform can not decompress initramfs file (rd.gz) correctly when
 	  passing inaccurate size of initrd by boot argument. eg.: initrd=0x2000040,4M
 
-config SYNO_CGROUP_MEM_DISABLE
-	bool "default disable cgroup subsys memory"
-	depends on CGROUPS
-	default y
-	help
-	  <DSM> #75786
-	  Because cgroup subsys memory will impact system performance, thus we default disable it.
-
 endmenu #Boot Arguments
 
 menu "Kernel Core Enhancements"
@@ -368,11 +396,6 @@ config SYNO_KERNEL_UTC_TIME
 	  <DSM> #1454
 	  Keeps UTC time in Kernel and RTC, donot wrap time.
 	  our user space code will handle this.
-
-config SYNO_MM_OVERCOMMIT_ALWAYS
-	bool "Set Memory Overcommit Policy"
-	default y
-	help
 
 config SYNO_HIDE_LOWMEM_WARNING
 	bool "Do Not Show Nowait Page Allocating Fail Warning"
@@ -403,5 +426,20 @@ config SYNO_SOFTLOCKUP_THRESH_EXTENSION
 	  <DSM> #66061
 	  The time to spin up disks in 4bay model may be larger than 7*3=21s,so we extend
 	  the threshold of soft lockup from 20s to 40s to prevent false alarm call trace.
+
+config SYNO_FIX_WRITEBACK_DIV_BY_ZERO
+	bool "v4.0-7478-g464d138 writeback: use |1 instead of +1 to protect against div by zero"
+	default y
+	help
+	  <DSM> #87770
+	  Fix div-by-zero bug in mm/page-writeback.c. Port fix from v4.0-7478-g464d138.
+
+config SYNO_FIX_SMPBOOT_RACE
+	bool "Fix cpu online/active mask race at smpboot"
+	default y if SYNO_KVMX64
+	default n if !SYNO_KVMX64
+	help
+	  <DSM> #88732
+	  Fix race condition to prevent calltrace/hang at boot.
 
 endmenu #Kernel Core Enhancements

@@ -364,9 +364,6 @@ SYSCALL_DEFINE1(SYNONotifyInit, unsigned int, flags)
 	int fd = 0;
 	struct user_struct *user;
 
-	if (!capable(CAP_SYS_ADMIN))
-		return -EPERM;
-
 	pr_debug("%s: flags=%x\n",__func__, flags);
 
 	if(flags & ~(SYNO_NONBLOCK | SYNO_CLOEXEC))
@@ -380,6 +377,9 @@ SYSCALL_DEFINE1(SYNONotifyInit, unsigned int, flags)
 	}
 
 	user = get_current_user();
+	if (user->uid != 0) {
+		return -EPERM;
+	}
 	if (atomic_read(&user->synotify_instances) > SYNOTIFY_DEFAULT_MAX_INSTANCES) {
 		free_uid(user);
 		return -EMFILE;

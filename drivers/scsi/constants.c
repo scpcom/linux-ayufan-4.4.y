@@ -349,7 +349,11 @@ void scsi_print_command(struct scsi_cmnd *cmd)
 	if (cmd->cmnd == NULL)
 		return;
 
+#ifdef CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE
+	scmd_printk(KERN_NOTICE, cmd, "CDB: ");
+#else /* CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE */
 	scmd_printk(KERN_INFO, cmd, "CDB: ");
+#endif /* CONFIG_SYNO_SAS_TASK_ABORT_MESSAGE */
 	print_opcode_name(cmd->cmnd, cmd->cmd_len);
 
 	/* print out all bytes in cdb */

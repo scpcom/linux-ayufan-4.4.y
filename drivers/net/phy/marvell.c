@@ -518,12 +518,25 @@ static int m88e1514_config_init(struct phy_device *phydev)
 	if (err < 0)
 		return err;
 
-	/* Write Register 18 to change LED blink rate
+	/* Write Register 18 to change LED blink rate and disable WOL
 	 * Blink Rate (8:10): 170 ms => 010
+	 * LED[2] / WOL (7) : LED[2] => 0
 	 * */
 	status = phy_read(phydev, 0x12);
 	status &= 0xf8ff;
 	status |= 0x0200;
+	status &= 0xff7f;
+	err = phy_write(phydev, 0x12, status);
+	if (err < 0)
+		return err;
+
+	/* To disable WOL interrupt, switch to extension Page0 first */
+	err = phy_write(phydev, MII_MARVELL_PHY_PAGE, 0x0);
+	if (err < 0)
+		return err;
+
+	status = phy_read(phydev, 0x12);
+	status &= 0xff7f;
 	err = phy_write(phydev, 0x12, status);
 	if (err < 0)
 		return err;

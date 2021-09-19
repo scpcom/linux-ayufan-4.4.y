@@ -334,10 +334,17 @@ int inet6_bind(struct socket *sock, struct sockaddr *uaddr, int addr_len)
 				if (__ipv6_addr_is_link_local(addr_type) && !sk->sk_bound_dev_if) {
 					for_each_netdev(net, dev) {
 						unsigned flags = dev_get_flags(dev);
-						if ((flags & IFF_RUNNING) &&
+						struct inet6_ifaddr *ifp = ipv6_get_ifaddr(net, &addr->sin6_addr, dev, 1);
+
+						if (ifp != NULL && (flags & IFF_RUNNING) &&
 							!(flags & (IFF_LOOPBACK | IFF_SLAVE))) {
 							sk->sk_bound_dev_if = dev->ifindex;
+							in6_ifa_put(ifp);
 							break;
+						}
+
+						if (ifp) {
+							in6_ifa_put(ifp);
 						}
 					}
 				}

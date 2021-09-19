@@ -103,7 +103,11 @@ static inline unsigned char SynoIsRaidReachMaxDegrade(struct mddev *mddev)
 static void * r1bio_pool_alloc(gfp_t gfp_flags, void *data)
 {
 	struct pool_info *pi = data;
+#ifdef CONFIG_SYNO_MD_RAID1_BUGON_MAGIC_WORKAROUND
+	int size = sizeof(struct r1bio) + sizeof(struct bio *) * pi->raid_disks;
+#else
 	int size = offsetof(struct r1bio, bios[pi->raid_disks]);
+#endif
 
 	/* allocate a r1bio with room for raid_disks entries in the bios array */
 	return kzalloc(size, gfp_flags);
@@ -1007,7 +1011,7 @@ static void unfreeze_array(struct r1conf *conf)
 	spin_unlock_irq(&conf->resync_lock);
 }
 
-/* duplicate the data pages for behind I/O 
+/* duplicate the data pages for behind I/O
  */
 static void alloc_behind_pages(struct bio *bio, struct r1bio *r1_bio)
 {
@@ -1493,6 +1497,7 @@ void syno_error_common(struct mddev *mddev, struct md_rdev *rdev)
 	char b[BDEVNAME_SIZE];
 	struct r1conf *conf = mddev->private;
 
+	set_bit(Blocked, &rdev->flags);
 	if (test_and_clear_bit(In_sync, &rdev->flags)) {
 		unsigned long flags;
 		spin_lock_irqsave(&conf->device_lock, flags);
@@ -1509,12 +1514,12 @@ void syno_error_common(struct mddev *mddev, struct md_rdev *rdev)
 #endif /* CONFIG_SYNO_MD_STATUS_DISKERROR */
 		set_bit(Faulty, &rdev->flags);
 		spin_unlock_irqrestore(&conf->device_lock, flags);
-		/*
-		 * if recovery is running, make sure it aborts.
-		 */
-		set_bit(MD_RECOVERY_INTR, &mddev->recovery);
 	} else
 		set_bit(Faulty, &rdev->flags);
+	/*
+	 * if recovery is running, make sure it aborts.
+	 */
+	set_bit(MD_RECOVERY_INTR, &mddev->recovery);
 	set_bit(MD_CHANGE_DEVS, &mddev->flags);
 	printk(KERN_ALERT "raid1: Disk failure on %s, disabling device. \n"
 		"	Operation continuing on %d devices\n",
@@ -1555,7 +1560,7 @@ void syno_error_for_hotplug(struct mddev *mddev, struct md_rdev *rdev)
 			if(!test_bit(Faulty, &rdev_tmp->flags) &&
 			   !test_bit(In_sync, &rdev_tmp->flags) &&
 			   0 != strcmp(bdevname(rdev_tmp->bdev, b1), bdevname(rdev->bdev, b2))) {
-				printk("[%s] %d: %s is being to unplug, but %s is sync now, disable both\n", 
+				printk("[%s] %d: %s is being to unplug, but %s is sync now, disable both\n",
 					   __FILE__, __LINE__, bdevname(rdev->bdev, b2), bdevname(rdev_tmp->bdev, b1));
 				SYNORaidRdevUnplug(mddev, rdev_tmp);
 			}
@@ -1725,7 +1730,7 @@ static int raid1_spare_active(struct mddev *mddev)
 #endif /* CONFIG_SYNO_MD_STATUS_DISKERROR */
 
 	/*
-	 * Find all failed disks within the RAID1 configuration 
+	 * Find all failed disks within the RAID1 configuration
 	 * and mark them readable.
 	 * Called under mddev lock, so rcu protection not needed.
 	 */
@@ -2091,7 +2096,25 @@ static int fix_sync_read_error(struct r1bio *r1_bio)
 				if (!rdev || test_bit(Faulty, &rdev->flags))
 					continue;
 				if (!rdev_set_badblocks(rdev, sect, s, 0))
+#ifdef CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY
+				{
+#ifdef CONFIG_SYNO_MD_STATUS_DISKERROR
+					if (test_bit(In_sync, &rdev->flags) && !test_bit(DiskError, &rdev->flags)) {
+						printk(KERN_ERR "md/raid1:%s: mard disk error on %s due to unrecoverable sync read error\n", mdname(mddev), bdevname(rdev->bdev, b));
+						set_bit(DiskError, &rdev->flags);
+						set_bit(MD_CHANGE_DEVS, &mddev->flags);
+					} else
+#endif /* CONFIG_SYNO_MD_STATUS_DISKERROR */
+					if (!test_bit(Faulty, &rdev->flags) && !test_bit(In_sync, &rdev->flags)) {
+						printk(KERN_ERR "md/raid1:%s: remove %s from raid due to unrecoverable sync read error\n", mdname(mddev), bdevname(rdev->bdev, b));
+						SYNORaidRdevUnplug(mddev, rdev);
+					}
+					mddev->recovery_disabled = 1;
 					abort = 1;
+				}
+#else /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
+					abort = 1;
+#endif /* CONFIG_SYNO_MD_DEVICE_HOTPLUG_NOTIFY */
 			}
 			if (abort) {
 				conf->recovery_disabled =
@@ -3195,9 +3218,9 @@ static int run(struct mddev *mddev)
 		printk(KERN_NOTICE "md/raid1:%s: not clean"
 		       " -- starting background reconstruction\n",
 		       mdname(mddev));
-	printk(KERN_INFO 
+	printk(KERN_INFO
 		"md/raid1:%s: active with %d out of %d mirrors\n",
-		mdname(mddev), mddev->raid_disks - mddev->degraded, 
+		mdname(mddev), mddev->raid_disks - mddev->degraded,
 		mddev->raid_disks);
 
 	/*

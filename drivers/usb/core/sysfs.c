@@ -203,6 +203,35 @@ show_quirks(struct device *dev, struct device_attribute *attr, char *buf)
 }
 static DEVICE_ATTR(quirks, S_IRUGO, show_quirks, NULL);
 
+#ifdef CONFIG_SYNO_USB_DEVICE_QUIRKS
+static ssize_t
+show_syno_quirks(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	struct usb_device *udev;
+
+	udev = to_usb_device(dev);
+	return sprintf(buf, "0x%x\n", udev->syno_quirks);
+}
+
+static ssize_t
+set_syno_quirks(struct device *dev, struct device_attribute *attr,
+		const char * buf, size_t count)
+{
+	struct usb_device *udev;
+	unsigned int val;
+
+	if (0 > kstrtouint(buf, 16, &val))
+		return -EINVAL;
+
+	udev = to_usb_device(dev);
+	udev->syno_quirks = val;
+
+	return count;
+}
+static DEVICE_ATTR(syno_quirks, S_IWUSR | S_IRUGO,
+		show_syno_quirks, set_syno_quirks);
+#endif /* CONFIG_SYNO_USB_DEVICE_QUIRKS */
+
 static ssize_t
 show_avoid_reset_quirk(struct device *dev, struct device_attribute *attr, char *buf)
 {
@@ -667,6 +696,9 @@ static struct attribute *dev_attrs[] = {
 	&dev_attr_version.attr,
 	&dev_attr_maxchild.attr,
 	&dev_attr_quirks.attr,
+#ifdef CONFIG_SYNO_USB_DEVICE_QUIRKS
+	&dev_attr_syno_quirks.attr,
+#endif /* CONFIG_SYNO_USB_DEVICE_QUIRKS */
 	&dev_attr_avoid_reset_quirk.attr,
 	&dev_attr_authorized.attr,
 	&dev_attr_remove.attr,

@@ -99,7 +99,7 @@ config SYNO_SFP_UNSUPPORTED_NOTIFY
 
 config SYNO_PHY_INIT
 	bool "syno initialization of phy device"
-	default y
+	default n
 	help
 	  Adjust registers to match HW spec.
 
@@ -109,5 +109,12 @@ config SYNO_PHY_INIT_88E1514
 	depends on SYNO_PHY_INIT
 	help
 	  Enable phy driver of the phy 88E1514.
+
+config SYNO_IPV6_EXPORT_IN6ADDR_ANY
+	bool "Export in6addr_any value for modules"
+	default y
+	help
+	  <Snapshot & Replication> #817
+	  export symbol in6addr_any for rodsp ipv6 support
 
 endmenu #Network

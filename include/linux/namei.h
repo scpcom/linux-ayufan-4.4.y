@@ -69,7 +69,7 @@ enum {LAST_NORM, LAST_ROOT, LAST_DOT, LAST_DOTDOT, LAST_BIND};
 
 extern int user_path_at(int, const char __user *, unsigned, struct path *);
 #ifdef CONFIG_SYNO_FS_CASELESS_STAT
-extern int syno_user_path_at(int, const char __user *, unsigned, struct path *, char **, int *, int *);
+extern int syno_user_path_at(int, const char __user *, unsigned, struct path *, char **, int *);
 #endif /* CONFIG_SYNO_FS_CASELESS_STAT */
 extern int user_path_at_empty(int, const char __user *, unsigned, struct path *, int *empty);
 

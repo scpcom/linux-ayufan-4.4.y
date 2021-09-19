@@ -1874,10 +1874,11 @@ EXPORT_SYMBOL_GPL(sata_syno_ahci_defer_cmd);
 int ahci_syno_pmp_3x26_qc_defer(struct ata_queued_cmd *qc)
 {
 	struct ata_port *ap = qc->ap;
-	if (!sata_pmp_attached(ap))
-		return ata_std_qc_defer(qc);
-	else
+	if (sata_pmp_attached(ap) && (ap->uiStsFlags & SYNO_STATUS_IS_SIL3x26)) {
 		return sata_syno_ahci_defer_cmd(qc);
+	}
+	else
+		return ata_std_qc_defer(qc);
 }
 EXPORT_SYMBOL_GPL(ahci_syno_pmp_3x26_qc_defer);
 #endif

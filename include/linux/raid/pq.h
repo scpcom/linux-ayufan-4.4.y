@@ -72,6 +72,9 @@ extern const char raid6_empty_zero_page[PAGE_SIZE];
 /* Routine choices */
 struct raid6_calls {
 	void (*gen_syndrome)(int, size_t, void **);
+#ifdef CONFIG_SYNO_MD_RAID6_RMW
+	void (*xor_syndrome)(int, int, int, size_t, void **);
+#endif /* CONFIG_SYNO_MD_RAID6_RMW */
 	int  (*valid)(void);	/* Returns 1 if this routine set is usable */
 	const char *name;	/* Name of this routine set */
 	int prefer;		/* Has special performance attribute */

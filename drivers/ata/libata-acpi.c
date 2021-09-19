@@ -1105,6 +1105,10 @@ static int ata_acpi_bind_device(struct ata_port *ap, struct scsi_device *sdev,
 	if (ap->flags & ATA_FLAG_ACPI_SATA) {
 		if (!sata_pmp_attached(ap))
 			ata_dev = &ap->link.device[sdev->id];
+#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
+		else if(sdev->channel == SYNO_PM_VIRTUAL_SCSI_CHANNEL && syno_is_synology_pm(ap))
+			ata_dev = &ap->link.device[0];
+#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
 		else
 			ata_dev = &ap->pmp_link[sdev->channel].device[sdev->id];
 	}

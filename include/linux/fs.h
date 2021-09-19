@@ -30,6 +30,9 @@
 #ifdef CONFIG_SYNO_FS_RECVFILE
 #include <linux/net.h>
 #endif /* CONFIG_SYNO_FS_RECVFILE */
+#if defined(CONFIG_SYNO_FS_ARCHIVE_BIT) || defined(CONFIG_SYNO_FS_CREATE_TIME)
+#include <linux/time.h>
+#endif /* CONFIG_SYNO_FS_ARCHIVE_BIT || CONFIG_SYNO_FS_CREATE_TIME */
 
 #include <asm/byteorder.h>
 #include <uapi/linux/fs.h>
@@ -68,8 +71,8 @@ typedef void (dio_iodone_t)(struct kiocb *iocb, loff_t offset,
 			ssize_t bytes, void *private, int ret,
 			bool is_async);
 
-#ifdef CONFIG_SYNO_FS_WINACL 
-/* 
+#ifdef CONFIG_SYNO_FS_WINACL
+/*
    Note!!!!! It should be consistent with SYNO_ACL_MAY_XXXXX in <linux/syno_acl_xattr_ds.h>
 */
 #define MAY_EXEC		(0x0001)
@@ -272,7 +275,7 @@ struct iattr {
  */
 #include <linux/quota.h>
 
-/** 
+/**
  * enum positive_aop_returns - aop return codes with specific semantics
  *
  * @AOP_WRITEPAGE_ACTIVATE: Informs the caller that page writeback has
@@ -282,7 +285,7 @@ struct iattr {
  * 			    be a candidate for writeback again in the near
  * 			    future.  Other callers must be careful to unlock
  * 			    the page if they get this return.  Returned by
- * 			    writepage(); 
+ * 			    writepage();
  *
  * @AOP_TRUNCATED_PAGE: The AOP method that was handed a locked page has
  *  			unlocked it and the page might have been truncated.
@@ -555,6 +558,9 @@ struct syno_acl;
 #define IOP_FASTPERM	0x0001
 #define IOP_LOOKUP	0x0002
 #define IOP_NOFOLLOW	0x0004
+#ifdef CONFIG_SYNO_FS_ECRYPTFS_LOWER_INIT
+#define IOP_ECRYPTFS_LOWER_INIT	0x0040
+#endif
 
 /*
  * Keep mostly read-only and often accessed (especially for
@@ -932,10 +938,10 @@ static inline int file_check_writeable(struct file *filp)
 
 #define	MAX_NON_LFS	((1UL<<31) - 1)
 
-/* Page cache limit. The filesystems should put that into their s_maxbytes 
-   limits, otherwise bad things can happen in VM. */ 
+/* Page cache limit. The filesystems should put that into their s_maxbytes
+   limits, otherwise bad things can happen in VM. */
 #if BITS_PER_LONG==32
-#define MAX_LFS_FILESIZE	(((loff_t)PAGE_CACHE_SIZE << (BITS_PER_LONG-1))-1) 
+#define MAX_LFS_FILESIZE	(((loff_t)PAGE_CACHE_SIZE << (BITS_PER_LONG-1))-1)
 #elif BITS_PER_LONG==64
 #define MAX_LFS_FILESIZE 	((loff_t)0x7fffffffffffffffLL)
 #endif
@@ -1397,6 +1403,12 @@ struct super_block {
 	int s_readonly_remount;
 };
 
+#ifdef CONFIG_SYNO_FUSE_GLUSTER
+#define SZ_FS_GLUSTER	"glusterfs"
+#define IS_GLUSTER_FS(inode) (inode->i_sb->s_subtype && !strcmp(SZ_FS_GLUSTER, inode->i_sb->s_subtype))
+#define IS_GLUSTER_FS_SB(sb) (sb->s_subtype && !strcmp(SZ_FS_GLUSTER, sb->s_subtype))
+#endif /* CONFIG_SYNO_FUSE_GLUSTER */
+
 /* superblock cache pruning functions */
 extern void prune_icache_sb(struct super_block *sb, int nr_to_scan);
 extern void prune_dcache_sb(struct super_block *sb, int nr_to_scan);
@@ -1648,13 +1660,17 @@ struct inode_operations {
 	int (*syno_acl_xattr_get)(struct dentry *, int, void *, size_t);
 	int (*syno_permission)(struct dentry *, int);
 	int (*syno_exec_permission)(struct dentry *);
-	int (*syno_acl_access)(struct dentry *, int);
+	int (*syno_acl_access)(struct dentry *, int, int);
 	int (*syno_may_delete)(struct dentry *, struct inode *);
 	int (*syno_inode_change_ok)(struct dentry *, struct iattr *);
 	int (*syno_arbit_chg_ok)(struct dentry *, unsigned int cmd, int tag, int mask);
 	int (*syno_setattr_post)(struct dentry *, struct iattr *);
 	int (*syno_acl_init)(struct dentry *, struct inode *);
 	void (*syno_acl_to_mode)(struct dentry *, struct kstat *);
+	int (*syno_acl_sys_get_perm)(struct dentry *, int *mask);
+	int (*syno_acl_sys_check_perm)(struct dentry *, int mask);
+	int (*syno_acl_sys_is_support)(struct dentry *, int tag);
+	int (*syno_bypass_is_synoacl)(struct dentry *, int cmd, int reterr);
 #endif /* CONFIG_SYNO_FS_WINACL */
 #ifdef CONFIG_SYNO_FS_ARCHIVE_BIT
 	int (*syno_get_archive_bit)(struct dentry *, unsigned int *);
@@ -1925,7 +1941,7 @@ int sync_inode_metadata(struct inode *inode, int wait);
 struct file_system_type {
 	const char *name;
 	int fs_flags;
-#define FS_REQUIRES_DEV		1 
+#define FS_REQUIRES_DEV		1
 #define FS_BINARY_MOUNTDATA	2
 #define FS_HAS_SUBTYPE		4
 #define FS_USERNS_MOUNT		8	/* Can be mounted by userns root */
@@ -2438,7 +2454,7 @@ extern int do_pipe_flags(int *, int);
 extern int kernel_read(struct file *, loff_t, char *, unsigned long);
 extern ssize_t kernel_write(struct file *, const char *, size_t, loff_t);
 extern struct file * open_exec(const char *);
- 
+
 /* fs/dcache.c -- generic fs support functions */
 extern int is_subdir(struct dentry *, struct dentry *);
 extern int path_is_under(struct path *, struct path *);
@@ -2532,6 +2548,7 @@ int generic_write_checks(struct file *file, loff_t *pos, size_t *count, int isbl
 * "2^(17 - PAGE_SHIFT)".
 */
 #define MAX_PAGES_PER_RECVFILE (1 << (17 - PAGE_SHIFT))
+#define MAX_RECVFILE_BUF (MAX_PAGES_PER_RECVFILE * PAGE_SIZE)
 extern int do_recvfile(struct file *, struct socket *, loff_t , size_t , size_t * , size_t *);
 /**
 * Description for page buffer in recvfile:
@@ -2894,6 +2911,7 @@ static inline int syno_op_set_archive_bit_nolock(struct dentry *dentry, unsigned
 		err = inode->i_op->syno_set_archive_bit(dentry, arbit);
 	} else {
 		inode->i_archive_bit = arbit;
+		inode->i_ctime = CURRENT_TIME;
 		mark_inode_dirty_sync(inode);
 	}
 
@@ -2915,6 +2933,11 @@ static inline int syno_op_set_archive_bit(struct dentry *dentry, unsigned int ar
 
 static inline int is_syno_arbit_enable(struct inode *inode, struct dentry * dentry, unsigned int arbit)
 {
+	if (NULL == inode) {
+		// debug log DSM#84014
+		printk(KERN_WARNING "NULL pointer on dentry inode\n");
+		return 0;
+	}
 	if (inode->i_op->syno_get_archive_bit) {
 		unsigned int tmp = 0;
 		int err = inode->i_op->syno_get_archive_bit(dentry, &tmp);
@@ -2941,8 +2964,8 @@ static inline int is_syno_arbit_enable(struct inode *inode, struct dentry * dent
 #define IS_SYNOACL_OWNER_IS_GROUP(dentry)	is_syno_arbit_enable(dentry->d_inode, dentry, S2_SYNO_ACL_IS_OWNER_GROUP)
 
 #define IS_FS_SYNOACL(inode)			__IS_FLG(inode, MS_SYNOACL)
-#define IS_SYNOACL(dentry)			(IS_INODE_SYNOACL(dentry->d_inode, dentry) && IS_FS_SYNOACL(dentry->d_inode))
-#define IS_SYNOACL_INODE(inode, dentry)		(IS_INODE_SYNOACL(inode, dentry) && IS_FS_SYNOACL(inode))
+#define IS_SYNOACL(dentry)			(IS_FS_SYNOACL(dentry->d_inode) && IS_INODE_SYNOACL(dentry->d_inode, dentry))
+#define IS_SYNOACL_INODE(inode, dentry)		(IS_FS_SYNOACL(inode) && IS_INODE_SYNOACL(inode, dentry))
 
 #define is_synoacl_owner(dentry)		IS_SYNOACL_OWNER_IS_GROUP(dentry)?in_group_p(dentry->d_inode->i_gid):(dentry->d_inode->i_uid == current_fsuid())
 #define is_synoacl_owner_or_capable(dentry)	(is_synoacl_owner(dentry) || capable(CAP_FOWNER))
@@ -2962,6 +2985,7 @@ static inline int syno_op_set_crtime(struct dentry *dentry, struct timespec *tim
 		error = inode->i_op->syno_set_crtime(dentry, time);
 	} else {
 		inode->i_create_time = timespec_trunc(*time, inode->i_sb->s_time_gran);
+		inode->i_ctime = CURRENT_TIME;
 		mark_inode_dirty(inode);
 	}
 
@@ -2970,7 +2994,7 @@ static inline int syno_op_set_crtime(struct dentry *dentry, struct timespec *tim
 }
 #endif /* CONFIG_SYNO_FS_CREATE_TIME */
 
-#ifdef CONFIG_SYNO_EXT4_ERROR_REPORT
+#if defined(CONFIG_SYNO_EXT4_ERROR_REPORT)
 #define SYNO_MOUNT_PATH_LEN 128
 #endif
 

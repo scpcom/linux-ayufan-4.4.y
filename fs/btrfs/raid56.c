@@ -1413,7 +1413,8 @@ cleanup:
 
 static void async_rmw_stripe(struct btrfs_raid_bio *rbio)
 {
-	btrfs_init_work(&rbio->work, rmw_work, NULL, NULL);
+	btrfs_init_work(&rbio->work, btrfs_rmw_helper,
+			rmw_work, NULL, NULL);
 
 	btrfs_queue_work(rbio->fs_info->rmw_workers,
 			 &rbio->work);
@@ -1421,7 +1422,8 @@ static void async_rmw_stripe(struct btrfs_raid_bio *rbio)
 
 static void async_read_rebuild(struct btrfs_raid_bio *rbio)
 {
-	btrfs_init_work(&rbio->work, read_rebuild_work, NULL, NULL);
+	btrfs_init_work(&rbio->work, btrfs_rmw_helper,
+			read_rebuild_work, NULL, NULL);
 
 	btrfs_queue_work(rbio->fs_info->rmw_workers,
 			 &rbio->work);
@@ -1662,7 +1664,8 @@ static void btrfs_raid_unplug(struct blk_plug_cb *cb, bool from_schedule)
 	plug = container_of(cb, struct btrfs_plug_cb, cb);
 
 	if (from_schedule) {
-		btrfs_init_work(&plug->work, unplug_work, NULL, NULL);
+		btrfs_init_work(&plug->work, btrfs_rmw_helper,
+				unplug_work, NULL, NULL);
 		btrfs_queue_work(plug->info->rmw_workers,
 				 &plug->work);
 		return;
