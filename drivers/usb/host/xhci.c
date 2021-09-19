@@ -167,12 +167,21 @@ int xhci_reset(struct xhci_hcd *xhci)
 	command |= CMD_RESET;
 	xhci_writel(xhci, command, &xhci->op_regs->command);
 
+#ifdef CONFIG_SYNO_XHCI_RESET_DELAY
+	mdelay(100);
+#endif
+
 	ret = xhci_handshake(xhci, &xhci->op_regs->command,
 			CMD_RESET, 0, 10 * 1000 * 1000);
 	if (ret)
 		return ret;
 
 	xhci_dbg(xhci, "Wait for controller to be ready for doorbell rings\n");
+
+#ifdef CONFIG_SYNO_XHCI_RESET_DELAY
+	mdelay(100);
+#endif
+
 	/*
 	 * xHCI cannot write to any doorbells or operational registers other
 	 * than status until the "Controller Not Ready" flag is cleared.
@@ -1387,6 +1396,13 @@ int xhci_urb_enqueue(struct usb_hcd *hcd, struct urb *urb, gfp_t mem_flags)
 					"not having streams.\n");
 			ret = -EINVAL;
 		} else {
+#ifdef CONFIG_SYNO_FORCE_EMPTY_UNAVAILABLE_XHCI_TD
+			if (xhci->devs[slot_id]->disconnected) {
+				xhci_warn(xhci, "Ignore URB enqueuing while device "
+						"is disconnecting\n");
+				ret = -ENOTCONN;
+			} else
+#endif /* CONFIG_SYNO_FORCE_EMPTY_UNAVAILABLE_XHCI_TD */
 			ret = xhci_queue_bulk_tx(xhci, GFP_ATOMIC, urb,
 					slot_id, ep_index);
 		}

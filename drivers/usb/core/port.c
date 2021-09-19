@@ -22,6 +22,7 @@
 #include "hub.h"
 
 static const struct attribute_group *port_dev_group[];
+extern inline int hub_is_superspeed(struct usb_device *hdev);
 
 static ssize_t show_port_connect_type(struct device *dev,
 	struct device_attribute *attr, char *buf)
@@ -152,6 +153,11 @@ int usb_hub_create_port_device(struct usb_hub *hub, int port1)
 {
 	struct usb_port *port_dev = NULL;
 	int retval;
+#ifdef CONFIG_SYNO_CASTRATED_XHC
+	struct usb_device *hdev = hub->hdev;
+	extern char gSynoCastratedXhcAddr[CONFIG_SYNO_NUM_CASTRATED_XHC][13];
+	extern unsigned gSynoCastratedXhcPortBitmap[CONFIG_SYNO_NUM_CASTRATED_XHC];
+#endif /* CONFIG_SYNO_CASTRATED_XHC */
 
 	port_dev = kzalloc(sizeof(*port_dev), GFP_KERNEL);
 	if (!port_dev) {
@@ -166,6 +172,27 @@ int usb_hub_create_port_device(struct usb_hub *hub, int port1)
 	port_dev->dev.groups = port_dev_group;
 	port_dev->dev.type = &usb_port_device_type;
 	dev_set_name(&port_dev->dev, "port%d", port1);
+#if defined (CONFIG_SYNO_USB_POWER_RESET)
+	port_dev->power_cycle_counter = SYNO_POWER_CYCLE_TRIES;
+#endif /* CONFIG_SYNO_USB_POWER_RESET */
+
+#ifdef CONFIG_SYNO_CASTRATED_XHC
+	if (hdev && hdev->serial) {
+		int i;
+		for (i = 0; i < CONFIG_SYNO_NUM_CASTRATED_XHC; i++) {
+			if (0 == strcmp(gSynoCastratedXhcAddr[i], hdev->serial) &&
+				gSynoCastratedXhcPortBitmap[i] & (0x01 << (port1 - 1))) {
+				/* Castrated xHC-port is an outer USB-port which is serviced by
+				 * a xHCI and without physical links of USB3 (i.e. without USB3
+				 * capability.
+				 */
+				port_dev->flag |= SYNO_USB_PORT_CASTRATED_XHC;
+				if (hub_is_superspeed(hdev))
+					dev_info (&port_dev->dev, "is a castrated xHC-port\n");
+			}
+		}
+	}
+#endif /* CONFIG_SYNO_CASTRATED_XHC */
 
 	retval = device_register(&port_dev->dev);
 	if (retval)

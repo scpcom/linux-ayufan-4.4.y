@@ -127,6 +127,11 @@ char gszDiskIdxMap[16] = {0};
 EXPORT_SYMBOL(gszDiskIdxMap);
 #endif /* CONFIG_SYNO_DISK_INDEX_MAP */
 
+#ifdef CONFIG_SYNO_FIXED_DISK_NAME_MV14XX
+char gszDiskIdxMapMv14xx[8] = {0};
+EXPORT_SYMBOL(gszDiskIdxMapMv14xx);
+#endif /* CONFIG_SYNO_FIXED_DISK_NAME_MV14XX */
+
 #ifdef CONFIG_SYNO_HDD_HOTPLUG
 long g_hdd_hotplug = 0;
 EXPORT_SYMBOL(g_hdd_hotplug);
@@ -268,6 +273,13 @@ EXPORT_SYMBOL(gSynoFactoryUSBFastReset);
 int gSynoFactoryUSB3Disable = 0;
 EXPORT_SYMBOL(gSynoFactoryUSB3Disable);
 #endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
+
+#ifdef CONFIG_SYNO_CASTRATED_XHC
+char gSynoCastratedXhcAddr[CONFIG_SYNO_NUM_CASTRATED_XHC][13] = {'\0'};
+unsigned int gSynoCastratedXhcPortBitmap[CONFIG_SYNO_NUM_CASTRATED_XHC] = {0};
+EXPORT_SYMBOL(gSynoCastratedXhcAddr);
+EXPORT_SYMBOL(gSynoCastratedXhcPortBitmap);
+#endif /* CONFIG_SYNO_CASTRATED_XHC */
 
 #ifdef CONFIG_SYNO_SAS_ENCOLURE_PWR_CTL
 int giSynoEncPwrCtl = 0;

@@ -218,62 +218,6 @@ look_up_scsi_dev_from_ap(struct ata_port *ap)
 EXPORT_SYMBOL(look_up_scsi_dev_from_ap);
 #endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
 
-#ifdef CONFIG_SYNO_CUSTOM_SCMD_TIMEOUT
-/**
- * Show customized timeout of the disk
- */
-static ssize_t
-syno_scmd_min_timeout_show (struct device *dev, struct device_attribute *attr, char *buf)
-{
-	struct scsi_device *sdev = to_scsi_device(dev);
-	ssize_t len = -EIO;
-
-	if (!sdev) {
-		goto END;
-	}
-
-	if (0 == sdev->scmd_timeout_sec) {
-		len = sprintf(buf, "%s", "<not set>\n");
-	} else {
-		len = sprintf(buf, "%d%s", sdev->scmd_timeout_sec, "\n");
-	}
-
-END:
-	return len;
-}
-
-/**
- * Set customized timeout of the disk
- */
-static ssize_t
-syno_scmd_min_timeout_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
-{
-	struct scsi_device *sdev = to_scsi_device(dev);
-	int iTimeoutSec = 0;
-	ssize_t ret = -EIO;
-
-	if (!sdev) {
-		goto END;
-	}
-
-	/* Check the input value is in the available range [1 - 60] */
-	sscanf(buf, "%d", &iTimeoutSec);
-	if (0 >= iTimeoutSec || 60 < iTimeoutSec) {
-		printk(KERN_ERR "Invalid argument !!\n");
-		goto END;
-	}
-	sdev->scmd_timeout_sec = iTimeoutSec;
-
-	ret = count;
-
-END:
-	return ret;
-}
-
-DEVICE_ATTR(syno_scmd_min_timeout, S_IRUGO | S_IWUGO, syno_scmd_min_timeout_show, syno_scmd_min_timeout_store);
-EXPORT_SYMBOL(dev_attr_syno_scmd_min_timeout);
-#endif /* CONFIG_SYNO_CUSTOM_SCMD_TIMEOUT */
-
 #ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
 /**
  * Eliminate CPU usage in scemd. while there is no disks in the
@@ -1529,9 +1473,6 @@ struct device_attribute *ata_common_sdev_attrs[] = {
 #ifdef CONFIG_SYNO_SATA_DISK_LED_CONTROL
 	&dev_attr_syno_sata_disk_led_ctrl,
 #endif /* CONFIG_SYNO_SATA_DISK_LED_CONTROL */
-#ifdef CONFIG_SYNO_CUSTOM_SCMD_TIMEOUT
-	&dev_attr_syno_scmd_min_timeout,
-#endif /* CONFIG_SYNO_CUSTOM_SCMD_TIMEOUT */
 	NULL
 };
 EXPORT_SYMBOL_GPL(ata_common_sdev_attrs);
@@ -5930,7 +5871,7 @@ END:
 	return ret;
 }
 
-int syno_libata_disk_map_table_gen(int *iDiskMapTable)
+int syno_disk_map_table_gen_from_disk_idx_map(int *iDiskMapTable)
 {
 	int iAtaHostCount = 0;
 	int iAtaHostMax;
@@ -5977,11 +5918,10 @@ int syno_libata_disk_map_table_gen(int *iDiskMapTable)
 
 	}
 
-        iErr = 0;
+	iErr = 0;
 END:
-        return iErr;
+	return iErr;
 }
-EXPORT_SYMBOL(syno_libata_disk_map_table_gen);
 #endif /* CONFIG_SYNO_DISK_INDEX_MAP */
 
 #ifdef CONFIG_SYNO_SATA_REMAP
@@ -6000,6 +5940,7 @@ EXPORT_SYMBOL(syno_libata_disk_map_table_gen);
 #define SATA_REMAP_MAX  32
 #define SATA_REMAP_NOT_INIT 0xff
 static u8 syno_sata_remap[SATA_REMAP_MAX] = {SATA_REMAP_NOT_INIT};
+static int use_sata_remap = 0;
 
 static int get_remap_idx(int origin_idx)
 {
@@ -6055,6 +5996,7 @@ static int __init early_sata_remap(char *p)
 
 	printk(KERN_INFO "SYNO: sata remap initialized\n");
 
+	use_sata_remap = 1;
 	return 0;
 
 FMT_ERR:
@@ -6065,6 +6007,29 @@ FMT_ERR:
 }
 
 __setup("sata_remap=", early_sata_remap);
+
+int syno_disk_map_table_gen_from_sata_remap (int *iDiskMapTable)
+{
+	int iAtaHostCount = 0;
+	int iAtaHostMax;
+	int iDiskIdx;
+	int iErr = -1;
+
+	if(NULL == iDiskMapTable) {
+		goto END;
+	}
+
+	iAtaHostMax = atomic_read(&ata_print_id);
+	while (iAtaHostCount < iAtaHostMax) {
+		iDiskIdx = get_remap_idx(iAtaHostCount);
+		iDiskMapTable[iDiskIdx] = iAtaHostCount;
+		iAtaHostCount++;
+	}
+
+	iErr = 0;
+END:
+	return iErr;
+}
 #endif /* CONFIG_SYNO_SATA_REMAP */
 
 #ifdef CONFIG_SYNO_SATA_DISK_SEQ_REVERSE
@@ -6120,6 +6085,34 @@ END:
 #endif /* CONFIG_SYNO_SATA_DISK_SEQ_REVERSE */
 
 #ifdef CONFIG_SYNO_FIXED_DISK_NAME
+/*
+ * Return disk map table for synobios
+ */
+int syno_libata_disk_map_table_gen(int *iDiskMapTable)
+{
+	int iErr = -1;
+
+	if (NULL == iDiskMapTable) {
+		goto END;
+	}
+
+#ifdef CONFIG_SYNO_DISK_INDEX_MAP
+	if (0 < strlen(gszDiskIdxMap)) {
+		iErr = syno_disk_map_table_gen_from_disk_idx_map(iDiskMapTable);
+	}
+#endif /* CONFIG_SYNO_DISK_INDEX_MAP */
+
+#ifdef CONFIG_SYNO_SATA_REMAP
+	if (1 == use_sata_remap) {
+		iErr = syno_disk_map_table_gen_from_sata_remap(iDiskMapTable);
+	}
+#endif /* CONFIG_SYNO_SATA_REMAP */
+
+END:
+	return iErr;
+}
+EXPORT_SYMBOL(syno_libata_disk_map_table_gen);
+
 /*
  * DO NOT add anymore model in this function!!
  */

@@ -198,7 +198,7 @@ typedef struct _SynoMsgPkt {
 #define SYNO_EVENT_ERROR_FS 0x2900
 #endif
 
-#ifdef SYNO_SATA_ERROR_REPORT
+#ifdef MY_DEF_HERE
 #define SYNO_EVENT_SATA_ERROR_REPORT 0x2a00
 #endif
 
@@ -206,17 +206,17 @@ typedef struct _SynoMsgPkt {
 #define SYNO_EVENT_WAKE_FROM_DEEP_SLEEP 0x2b00
 #endif
 
-#ifdef SYNO_SATA_ERROR_REPORT
+#ifdef MY_DEF_HERE
 #define SYNO_EVENT_DISK_RETRY_REPORT 0x2c00
 #endif
 
-#ifdef SYNO_BTRFS_ERROR_FS_REPORT
+#ifdef MY_DEF_HERE
 #define SYNO_EVENT_ERROR_FS_BTRFS 0x2d00
 #endif
 
-#ifdef SYNO_DETECT_DISK_POWER_SHORT_BREAK
+#ifdef MY_DEF_HERE
 #define SYNO_EVENT_DSIK_POWER_SHORT_BREAK 0x2e00
-#endif /* SYNO_DETECT_DISK_POWER_SHORT_BREAK */
+#endif /* MY_DEF_HERE */
 
 #define SYNO_EVENT_BACK_TEMP_CRITICAL   0x4004
 #define SYNO_EVENT_BACK_TEMP_HIGH       0x4003
@@ -565,10 +565,9 @@ typedef enum {
 }DUAL_POWER_T;
 
 typedef enum {
-	USBCOPY_UNKNOWN,
-	USBCOPY_YES,
-	USBCOPY_NO,
-	USBCOPY_MUTE,
+	USBCOPY_NO = 0,
+	USBCOPY_MICROP,
+	USBCOPY_GPIO,
 }USBCOPY_T;
 
 typedef enum {
@@ -695,10 +694,12 @@ typedef enum {
 	MICROP_ID_RS3614rpxs = 0x5C, /* 'W' RS3614rpxs */
 	MICROP_ID_RC18015xsp = 0x4d, /* 'M' Temporarily using the same microp ID as 10613 */
 	MICROP_ID_RS18016xsp = 0x4d, /* 'M' */
-	MICROP_ID_RR36015xsppp = 0x4d, /* 'M' */
+	MICROP_ID_RS18016Dxsp = 0x4d, /* 'M' */
 	MICROP_ID_DS2414xs = 0x57, /* 'W' DS2414xs */
 	MICROP_ID_RS3415xsp = 0x60, /* '`' RS3415xs+ cheese cake*/
 	MICROP_ID_3615xs = 0x5D, /* ']' DS3615xs*/
+	MICROP_ID_RS3614xsR1 = 0x64, /* 'd' RS3614xs R1 */
+	MICROP_ID_RS3614rpxsR1 = 0x65, /* 'e' RS3614rpxs R1 */
 	MICROP_ID_UNKNOW = 0xFF,
 } SYNO_MICROP_ID;
 
@@ -733,6 +734,8 @@ typedef enum {
 	CPU_88F6702,
 	CPU_88F6707,
 	CPU_88F6720,
+	CPU_88F6820,
+	CPU_88F6828,
 	CPU_MV78230,
 	CPU_8241,
 	CPU_8533e,
@@ -746,13 +749,19 @@ typedef enum {
 	CPU_BCM58622,
 	CPU_J1800,
 	CPU_HI3535,
-	CPU_H410
+	CPU_H412,
+	CPU_N3000,
+	CPU_N3050,
+	CPU_N3150,
+	CPU_N3700,
+	CPU_NVR
 } CPU_ARCH_INFO_T;
 
 typedef enum {
 	CRYPTO_HW_NONE,
 	CRYPTO_A370,
 	CRYPTO_A375,
+	CRYPTO_A38X,
 	CRYPTO_AXP,
 	CRYPTO_COMCERTO2K,
 	CRYPTO_ALPINE,
@@ -920,7 +929,7 @@ typedef struct {
 #define HW_DS114p      "DS114+"      //"DS114+"
 #define HW_RC18015xsp  "RC18015xs+"    //"RC18015xs+"
 #define HW_RS18016xsp  "RS18016xs+"    //"RS18016xs+"
-#define HW_RR36015xsppp  "RR36015xs+++"    //"RR36015xs+++"
+#define HW_RS18016Dxsp  "RS18016Dxs+"    //"RS18016Dxs+"
 #define HW_DS714v10    "DS714v10"
 #define HW_RS814p      "RS814+"        //"RS814+"
 #define HW_RS814rpp    "RS814rp+"      //"RS814rp+"
@@ -947,7 +956,19 @@ typedef struct {
 #define HW_RS2416rpp   "RS2416rp+"     //"RS2416rp+"
 #define HW_DS216play		"DS216play"
 #define HW_DS216se	   "DS216se"      //DS216se
-#define HW_DS416play	"DS416play"      //DS416play
+#define HW_DS416p	   "DS416+"      //DS416+
+#define HW_DS416j	"DS416j"      //DS416j
+#define HW_DS416slim	"DS416slim"      //DS416slim
+#define HW_DS716p	"DS716+"      //DS716+
+#define HW_RSD18016xsp  "RSD18016xs+"    //"RSD18016xs+"
+#define HW_DS1616p      "DS1616+"       //"DS1616+"
+#define HW_DS216	"DS216"      //DS216
+#define HW_RS3616xs  "RS3616xs"    //"RS3616xs"
+#define HW_RS3616rpxs  "RS3616rpxs"    //"RS3616rpxs"
+#define HW_RS3616xsp  "RS3616xs+"    //"RS3616xs+"
+#define HW_DS216p  "DS216+"    //"DS216+"
+#define HW_DS216j  "DS216j"    //"DS216j"
+#define HW_RS816  "RS816"     //"RS816"
 #define HW_UNKNOWN     "DSUnknown"
 
 typedef struct _tag_HwCapability {
@@ -1099,13 +1120,25 @@ typedef enum {
 	MODEL_DS1515,
 	MODEL_DS215p,
 	MODEL_DS416,
-	MODEL_RR36015xsppp,
+	MODEL_RS18016Dxsp,
 	MODEL_RS2416p,
 	MODEL_RS2416rpp, //140
 	MODEL_DS216play,
 	MODEL_DS216se,
-	MODEL_DS416play,
-	MODEL_DS716nvr,
+	MODEL_DS416p,
+	MODEL_NVR216,
+	MODEL_DS416j,
+	MODEL_DS416slim,
+	MODEL_RSD18016xsp,
+	MODEL_DS1616p,
+	MODEL_DS216,
+	MODEL_DS716p,
+	MODEL_RS3616xs,
+	MODEL_RS3616rpxs,
+	MODEL_RS3616xsp,
+	MODEL_DS216p,
+	MODEL_DS216j,
+	MODEL_RS816,
 	MODEL_INVALID
 } PRODUCT_MODEL;
 
@@ -1252,6 +1285,7 @@ typedef struct _tag_SYNO_CPU_INFO {
 #define SYNOIO_WRITE_MEM		_IOWR(SYNOBIOS_IOC_MAGIC, 43, SYNO_MEM_ACCESS)
 #define SYNOIO_READ_MEM			_IOWR(SYNOBIOS_IOC_MAGIC, 44, SYNO_MEM_ACCESS)
 #define SYNOIO_SET_AHA_LED     _IOWR(SYNOBIOS_IOC_MAGIC, 45, SYNO_AHA_LED)
+#define SYNOIO_GET_COPY_BUTTON _IOWR(SYNOBIOS_IOC_MAGIC, 46, int) // for matching userspace usage, button pressed = 0, else = 1
 
 #define SYNOIO_MANUTIL_MODE       _IOWR(SYNOBIOS_IOC_MAGIC, 128, int)
 #define SYNOIO_RECORD_EVENT       _IOWR(SYNOBIOS_IOC_MAGIC, 129, int)
@@ -1563,6 +1597,7 @@ struct synobios_ops {
 	int		(*write_memory)(SYNO_MEM_ACCESS*);
 	void		(*get_cpu_info)(SYNO_CPU_INFO*, const unsigned int);
 	int     (*set_aha_led)(struct synobios_ops *, SYNO_AHA_LED);
+	int              (*get_copy_button_status)(void); // for matching userspace usage, button pressed = 0, else = 1
 };
 
 /* TODO: Because user space also need this define, so we define them here.

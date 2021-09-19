@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * linux/fs/hfsplus/xattr.c
  *
@@ -643,7 +646,7 @@ ssize_t hfsplus_listxattr(struct dentry *dentry, char *buffer, size_t size)
 #ifdef CONFIG_SYNO_HFSPLUS_EA
 	res += hfsplus_listxattr_rfork(dentry, buffer + res, size);
 	if (res < 0) {
-#ifdef SYNO_HFSPLUS_ADD_MUTEX_FOR_VFS_OPERATION
+#ifdef MY_DEF_HERE
 		mutex_unlock(&syno_hfsplus_global_mutex);
 #endif
 		return res;

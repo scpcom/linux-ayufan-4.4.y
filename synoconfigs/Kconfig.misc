@@ -82,6 +82,23 @@ config SYNO_FIX_DM_DISK_ALIGNMENT
 	help
 	  <DSM> #62671
 	  Tune the chunk size from dmsetup input to fit the disk alignment
+ 
+config SYNO_DRM_I915_BACKPORT
+	bool "API support for back-ported i915 graphic driver"
+	depends on DRM_I915
+	default y
+	help
+	  <DSM> #79464
+	  To support the back-port driver provided by Intel,
+	  some modification need to be made to the current API.
+	  Say yes if you do not want to build fail.
+
+config SYNO_OOM_DUMP_MODULE
+	bool "Dump modules and occupied memory sizes while OOM"
+	default y
+	help
+	  <DSM> #77534
+	  Dump modules and occupied memory sizes while OOM to help debug
 
 endmenu #MISC Features
 

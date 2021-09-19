@@ -1617,6 +1617,9 @@ static void btrfs_add_delalloc_inodes(struct btrfs_root *root,
 		set_bit(BTRFS_INODE_IN_DELALLOC_LIST,
 			&BTRFS_I(inode)->runtime_flags);
 		root->nr_delalloc_inodes++;
+#ifdef CONFIG_SYNO_BTRFS_FLUSHONCOMMIT_THRESHOLD
+		root->fs_info->delalloc_inodes_nr++;
+#endif
 		if (root->nr_delalloc_inodes == 1) {
 			spin_lock(&root->fs_info->delalloc_root_lock);
 			BUG_ON(!list_empty(&root->delalloc_root));
@@ -1637,6 +1640,9 @@ static void btrfs_del_delalloc_inode(struct btrfs_root *root,
 		clear_bit(BTRFS_INODE_IN_DELALLOC_LIST,
 			  &BTRFS_I(inode)->runtime_flags);
 		root->nr_delalloc_inodes--;
+#ifdef CONFIG_SYNO_BTRFS_FLUSHONCOMMIT_THRESHOLD
+		root->fs_info->delalloc_inodes_nr--;
+#endif
 		if (!root->nr_delalloc_inodes) {
 			spin_lock(&root->fs_info->delalloc_root_lock);
 			BUG_ON(list_empty(&root->delalloc_root));
@@ -3766,7 +3772,8 @@ noinline int btrfs_update_inode(struct btrfs_trans_handle *trans,
 	 * without delay
 	 */
 	if (!btrfs_is_free_space_inode(inode)
-	    && root->root_key.objectid != BTRFS_DATA_RELOC_TREE_OBJECTID) {
+	    && root->root_key.objectid != BTRFS_DATA_RELOC_TREE_OBJECTID
+	    && !root->fs_info->log_root_recovering) {
 		btrfs_update_root_times(trans, root);
 
 		ret = btrfs_delayed_update_inode(trans, root, inode);
@@ -7216,7 +7223,6 @@ static int btrfs_get_blocks_direct(struct inode *inode, sector_t iblock,
 	    ((BTRFS_I(inode)->flags & BTRFS_INODE_NODATACOW) &&
 	     em->block_start != EXTENT_MAP_HOLE)) {
 		int type;
-		int ret;
 		u64 block_start, orig_start, orig_block_len, ram_bytes;
 
 		if (test_bit(EXTENT_FLAG_PREALLOC, &em->flags))

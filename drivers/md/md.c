@@ -8098,7 +8098,11 @@ void md_do_sync(struct md_thread *thread)
 		rcu_read_unlock();
 	}
 
+#ifdef CONFIG_SYNO_MD_SYNC_MSG
+	printk(KERN_WARNING "md: %s of RAID array %s\n", desc, mdname(mddev));
+#else /* CONFIG_SYNO_MD_SYNC_MSG */
 	printk(KERN_INFO "md: %s of RAID array %s\n", desc, mdname(mddev));
+#endif /* CONFIG_SYNO_MD_SYNC_MSG */
 	printk(KERN_INFO "md: minimum _guaranteed_  speed:"
 		" %d KB/sec/disk.\n", speed_min(mddev));
 	printk(KERN_INFO "md: using maximum available idle IO bandwidth "
@@ -9797,6 +9801,10 @@ AGAIN:
 	}
 
 END:
+	if (!res) {
+		/* schedule out to avoid rescheduled task occupy CPU and lock mddev quickly */
+		msleep(1000);
+	}
 	return res;
 }
 

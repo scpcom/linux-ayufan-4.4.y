@@ -866,7 +866,8 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 			 * However, khubd will ignore the roothub events until
 			 * the roothub is registered.
 			 */
-#ifdef CONFIG_SYNO_FACTORY_USB3_DISABLE
+#if defined(CONFIG_SYNO_FACTORY_USB3_DISABLE) \
+			&& !defined(CONFIG_SYNO_DISABLE_USB3_DOWNGRADE)
 			xhci_dbg(xhci, "set port power. hcd->speed:%d.\n",hcd->speed);
 			if (1 == gSynoFactoryUSB3Disable && hcd->speed == HCD_USB3) {
 				xhci_writel(xhci, temp & ~PORT_POWER,
@@ -878,7 +879,8 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 #endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
 			xhci_writel(xhci, temp | PORT_POWER,
 					port_array[wIndex]);
-#ifdef CONFIG_SYNO_FACTORY_USB3_DISABLE
+#if defined(CONFIG_SYNO_FACTORY_USB3_DISABLE) \
+			&& !defined(CONFIG_SYNO_DISABLE_USB3_DOWNGRADE)
 			}
 #endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
 
@@ -890,7 +892,8 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 					wIndex);
 
 			if (temp)
-#ifdef CONFIG_SYNO_FACTORY_USB3_DISABLE
+#if defined(CONFIG_SYNO_FACTORY_USB3_DISABLE) \
+			&& !defined(CONFIG_SYNO_DISABLE_USB3_DOWNGRADE)
 			{
 				if (1 == gSynoFactoryUSB3Disable && hcd->speed == HCD_USB3) {
 					usb_acpi_set_power_state(hcd->self.root_hub,
@@ -899,7 +902,8 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 #endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */
 				usb_acpi_set_power_state(hcd->self.root_hub,
 					wIndex, true);
-#ifdef CONFIG_SYNO_FACTORY_USB3_DISABLE
+#if defined(CONFIG_SYNO_FACTORY_USB3_DISABLE) \
+			&& !defined(CONFIG_SYNO_DISABLE_USB3_DOWNGRADE)
 				}
 			}
 #endif /* CONFIG_SYNO_FACTORY_USB3_DISABLE */

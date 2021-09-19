@@ -107,6 +107,14 @@ extern int giSynoHddLedEnabled;
 	}							\
 })
 
+#ifdef CONFIG_SYNO_SATA_PM_LINK_RETRY
+typedef enum {
+	PM_NO_RETRY = 0,
+	PM_RETRY,
+	PM_ALWAYS_RETRY,
+} SYNO_PM_RETRY_TYPE;
+#endif /* CONFIG_SYNO_SATA_PM_LINK_RETRY */
+
 /* NEW: debug levels */
 #define HAVE_LIBATA_MSG 1
 
@@ -933,7 +941,7 @@ struct ata_port {
 	int			syno_disk_index;
 #endif /* CONFIG_SYNO_FIXED_DISK_NAME */
 #ifdef CONFIG_SYNO_SATA_PM_LINK_RETRY
-	u8				isFirstAttach;
+	SYNO_PM_RETRY_TYPE	syno_pm_need_retry;
 #endif
 };
 
@@ -1091,9 +1099,6 @@ extern struct device_attribute dev_attr_syno_diskname_trans;
 #ifdef CONFIG_SYNO_SATA_DISK_LED_CONTROL
 extern struct device_attribute dev_attr_syno_sata_disk_led_ctrl;
 #endif /* CONFIG_SYNO_SATA_DISK_LED_CONTROL */
-#ifdef CONFIG_SYNO_CUSTOM_SCMD_TIMEOUT
-extern struct device_attribute dev_attr_syno_scmd_min_timeout;
-#endif /* CONFIG_SYNO_CUSTOM_SCMD_TIMEOUT */
 
 extern const unsigned long sata_deb_timing_normal[];
 extern const unsigned long sata_deb_timing_hotplug[];
@@ -1430,6 +1435,10 @@ extern unsigned int gSynoSataHostCnt;
 extern char gszDiskIdxMap[];
 extern int syno_libata_disk_map_table_gen(int *iDiskMapTable);
 #endif /* CONFIG_SYNO_DISK_INDEX_MAP */
+
+#ifdef CONFIG_SYNO_FIXED_DISK_NAME_MV14XX
+extern char gszDiskIdxMapMv14xx[];
+#endif /* CONFIG_SYNO_FIXED_DISK_NAME_MV14XX */
 
 #ifdef CONFIG_SYNO_FIXED_DISK_NAME
 #define	SYNO_FIXED_DISK_NAME_MACRO		\

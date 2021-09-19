@@ -624,6 +624,60 @@ END:
 static DEVICE_ATTR(syno_spindown, S_IRUGO, sdev_show_syno_spindown, NULL);
 #endif /* CONFIG_SYNO_DISK_HIBERNATION */
 
+#ifdef CONFIG_SYNO_CUSTOM_SCMD_TIMEOUT
+/**
+ * Show customized timeout of the disk
+ */
+static ssize_t
+syno_scmd_min_timeout_show (struct device *dev, struct device_attribute *attr, char *buf)
+{
+	struct scsi_device *sdev = to_scsi_device(dev);
+	ssize_t len = -EIO;
+
+	if (!sdev) {
+		goto END;
+	}
+
+	if (0 == sdev->scmd_timeout_sec) {
+		len = sprintf(buf, "%s", "<not set>\n");
+	} else {
+		len = sprintf(buf, "%d%s", sdev->scmd_timeout_sec, "\n");
+	}
+
+END:
+	return len;
+}
+
+/**
+ * Set customized timeout of the disk
+ */
+static ssize_t
+syno_scmd_min_timeout_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+	struct scsi_device *sdev = to_scsi_device(dev);
+	int iTimeoutSec = 0;
+	ssize_t ret = -EIO;
+
+	if (!sdev) {
+		goto END;
+	}
+
+	/* Check the input value is in the available range [1 - 60] */
+	sscanf(buf, "%d", &iTimeoutSec);
+	if (0 >= iTimeoutSec || 60 < iTimeoutSec) {
+		printk(KERN_ERR "Invalid argument !!\n");
+		goto END;
+	}
+	sdev->scmd_timeout_sec = iTimeoutSec;
+
+	ret = count;
+
+END:
+	return ret;
+}
+DEVICE_ATTR(syno_scmd_min_timeout, S_IRUGO | S_IWUGO, syno_scmd_min_timeout_show, syno_scmd_min_timeout_store);
+#endif /* CONFIG_SYNO_CUSTOM_SCMD_TIMEOUT */
+
 /*
  * Create the actual show/store functions and data structures.
  */
@@ -839,6 +893,9 @@ static struct attribute *scsi_sdev_attrs[] = {
 	&dev_attr_syno_idle_time.attr,
 	&dev_attr_syno_spindown.attr,
 #endif /* CONFIG_SYNO_DISK_HIBERNATION */
+#ifdef CONFIG_SYNO_CUSTOM_SCMD_TIMEOUT
+	&dev_attr_syno_scmd_min_timeout.attr,
+#endif /* CONFIG_SYNO_CUSTOM_SCMD_TIMEOUT */
 	REF_EVT(media_change),
 	NULL
 };

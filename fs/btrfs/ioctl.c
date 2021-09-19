@@ -653,6 +653,10 @@ static int create_snapshot(struct btrfs_root *root, struct inode *dir,
 	struct inode *inode;
 	struct btrfs_pending_snapshot *pending_snapshot;
 	struct btrfs_trans_handle *trans;
+#ifdef CONFIG_SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT
+	bool add_pending_list = false;
+	bool grab_pending_snapshots_lock = false;
+#endif /* CONFIG_SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT */
 	int ret;
 
 	if (!test_bit(BTRFS_ROOT_REF_COWS, &root->state))
@@ -704,10 +708,19 @@ static int create_snapshot(struct btrfs_root *root, struct inode *dir,
 		goto fail;
 	}
 
+#ifdef CONFIG_SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT
+	mutex_lock(&root->fs_info->pending_snapshots_mutex);
+#else
 	spin_lock(&root->fs_info->trans_lock);
+#endif /* CONFIG_SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT */
 	list_add(&pending_snapshot->list,
 		 &trans->transaction->pending_snapshots);
+#ifdef CONFIG_SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT
+	add_pending_list = true;
+	mutex_unlock(&root->fs_info->pending_snapshots_mutex);
+#else
 	spin_unlock(&root->fs_info->trans_lock);
+#endif /* CONFIG_SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT */
 	if (async_transid) {
 		*async_transid = trans->transid;
 		ret = btrfs_commit_transaction_async(trans,
@@ -767,11 +780,26 @@ static int create_snapshot(struct btrfs_root *root, struct inode *dir,
 	d_instantiate(dentry, inode);
 	ret = 0;
 fail:
+#ifdef CONFIG_SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT
+	mutex_lock(&root->fs_info->pending_snapshots_mutex);
+	grab_pending_snapshots_lock = true;
+#endif /* CONFIG_SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT */
 	btrfs_subvolume_release_metadata(BTRFS_I(dir)->root,
 					 &pending_snapshot->block_rsv,
 					 pending_snapshot->qgroup_reserved);
 free:
+#ifdef CONFIG_SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT
+	if (!grab_pending_snapshots_lock)
+		mutex_lock(&root->fs_info->pending_snapshots_mutex);
+	if (add_pending_list && pending_snapshot->list.next != LIST_POISON1) {
+		btrfs_err(root->fs_info, "Hit bug #78512, please refer to tracker dir(%lu) [%.*s]", dir->i_ino, namelen, name);
+		list_del(&pending_snapshot->list);
+	}
 	kfree(pending_snapshot);
+	mutex_unlock(&root->fs_info->pending_snapshots_mutex);
+#else
+	kfree(pending_snapshot);
+#endif /* CONFIG_SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT */
 out:
 	atomic_dec(&root->will_be_snapshoted);
 	return ret;
@@ -3525,7 +3553,7 @@ process_slot:
 #ifdef CONFIG_SYNO_BTRFS_CLONE_CHECK_QUOTA
 					if (NULL != reserved_size && *reserved_size >= diskl) {
 						if (root->fs_info->quota_enabled) {
-							btrfs_qgroup_free(root, diskl, 0);
+							btrfs_qgroup_free(root, diskl);
 						}
 						*reserved_size -= diskl;
 					}
@@ -3602,7 +3630,8 @@ process_slot:
 			btrfs_mark_buffer_dirty(leaf);
 			btrfs_release_path(path);
 
-			last_dest_end = new_key.offset + datal;
+			last_dest_end = ALIGN(new_key.offset + datal,
+					      root->sectorsize);
 			ret = clone_finish_inode_update(trans, inode,
 							last_dest_end,
 							destoff, olen);
@@ -3769,6 +3798,11 @@ static noinline long btrfs_ioctl_clone(struct file *file, unsigned long srcfd,
 	if (off + len == src->i_size)
 		len = ALIGN(src->i_size, bs) - off;
 
+	if (len == 0) {
+		ret = 0;
+		goto out_unlock;
+	}
+
 	/* verify the end result is block aligned */
 	if (!IS_ALIGNED(off, bs) || !IS_ALIGNED(off + len, bs) ||
 	    !IS_ALIGNED(destoff, bs))
@@ -3828,16 +3862,7 @@ static noinline long btrfs_ioctl_clone(struct file *file, unsigned long srcfd,
 out_unlock:
 #ifdef CONFIG_SYNO_BTRFS_CLONE_CHECK_QUOTA
 	if (root->fs_info->quota_enabled)
-#ifdef CONFIG_SYNO_BTRFS_FIX_QGROUP_OVERRUN
-	{
-		if (ret)
-			btrfs_qgroup_free(root, reserve_size, 1);
-		else
-			btrfs_qgroup_free(root, reserve_size, 0);
-	}
-#else
 		btrfs_qgroup_free(root, reserve_size);
-#endif
 fail_qgroup:
 #endif /* CONFIG_SYNO_BTRFS_CLONE_CHECK_QUOTA */
 	if (!same_inode) {

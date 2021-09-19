@@ -25,6 +25,11 @@ static struct kmem_cache *extent_state_cache;
 static struct kmem_cache *extent_buffer_cache;
 static struct bio_set *btrfs_bioset;
 
+static inline bool extent_state_in_tree(const struct extent_state *state)
+{
+	return !RB_EMPTY_NODE(&state->rb_node);
+}
+
 #ifdef CONFIG_BTRFS_DEBUG
 static LIST_HEAD(buffers);
 static LIST_HEAD(states);
@@ -59,9 +64,9 @@ void btrfs_leak_debug_check(void)
 
 	while (!list_empty(&states)) {
 		state = list_entry(states.next, struct extent_state, leak_list);
-		printk(KERN_ERR "BTRFS: state leak: start %llu end %llu "
-		       "state %lu in tree %p refs %d\n",
-		       state->start, state->end, state->state, state->tree,
+		pr_err("BTRFS: state leak: start %llu end %llu state %lu in tree %d refs %d\n",
+		       state->start, state->end, state->state,
+		       extent_state_in_tree(state),
 		       atomic_read(&state->refs));
 		list_del(&state->leak_list);
 		kmem_cache_free(extent_state_cache, state);
@@ -209,7 +214,7 @@ static struct extent_state *alloc_extent_state(gfp_t mask)
 		return state;
 	state->state = 0;
 	state->private = 0;
-	state->tree = NULL;
+	RB_CLEAR_NODE(&state->rb_node);
 	btrfs_leak_debug_add(&state->leak_list, &states);
 	atomic_set(&state->refs, 1);
 	init_waitqueue_head(&state->wq);
@@ -222,7 +227,7 @@ void free_extent_state(struct extent_state *state)
 	if (!state)
 		return;
 	if (atomic_dec_and_test(&state->refs)) {
-		WARN_ON(state->tree);
+		WARN_ON(extent_state_in_tree(state));
 		btrfs_leak_debug_del(&state->leak_list);
 		trace_free_extent_state(state, _RET_IP_);
 		kmem_cache_free(extent_state_cache, state);
@@ -371,8 +376,8 @@ static void merge_state(struct extent_io_tree *tree,
 		    other->state == state->state) {
 			merge_cb(tree, state, other);
 			state->start = other->start;
-			other->tree = NULL;
 			rb_erase(&other->rb_node, &tree->state);
+			RB_CLEAR_NODE(&other->rb_node);
 			free_extent_state(other);
 		}
 	}
@@ -383,8 +388,8 @@ static void merge_state(struct extent_io_tree *tree,
 		    other->state == state->state) {
 			merge_cb(tree, state, other);
 			state->end = other->end;
-			other->tree = NULL;
 			rb_erase(&other->rb_node, &tree->state);
+			RB_CLEAR_NODE(&other->rb_node);
 			free_extent_state(other);
 		}
 	}
@@ -442,7 +447,6 @@ static int insert_state(struct extent_io_tree *tree,
 		       found->start, found->end, start, end);
 		return -EEXIST;
 	}
-	state->tree = tree;
 	merge_state(tree, state);
 	return 0;
 }
@@ -486,7 +490,6 @@ static int split_state(struct extent_io_tree *tree, struct extent_state *orig,
 		free_extent_state(prealloc);
 		return -EEXIST;
 	}
-	prealloc->tree = tree;
 	return 0;
 }
 
@@ -524,9 +527,9 @@ static struct extent_state *clear_state_bit(struct extent_io_tree *tree,
 		wake_up(&state->wq);
 	if (state->state == 0) {
 		next = next_state(state);
-		if (state->tree) {
+		if (extent_state_in_tree(state)) {
 			rb_erase(&state->rb_node, &tree->state);
-			state->tree = NULL;
+			RB_CLEAR_NODE(&state->rb_node);
 			free_extent_state(state);
 		} else {
 			WARN_ON(1);
@@ -606,8 +609,8 @@ again:
 			cached_state = NULL;
 		}
 
-		if (cached && cached->tree && cached->start <= start &&
-		    cached->end > start) {
+		if (cached && extent_state_in_tree(cached) &&
+		    cached->start <= start && cached->end > start) {
 			if (clear)
 				atomic_dec(&cached->refs);
 			state = cached;
@@ -827,6 +830,9 @@ __set_extent_bit(struct extent_io_tree *tree, u64 start, u64 end,
 	struct rb_node **p;
 	struct rb_node *parent;
 	int err = 0;
+#ifdef CONFIG_SYNO_BTRFS_ALLOC_EXTENT_STATE_RETRY
+	int counter = 0;
+#endif
 	u64 last_start;
 	u64 last_end;
 
@@ -836,14 +842,25 @@ __set_extent_bit(struct extent_io_tree *tree, u64 start, u64 end,
 again:
 	if (!prealloc && (mask & __GFP_WAIT)) {
 		prealloc = alloc_extent_state(mask);
+#ifdef CONFIG_SYNO_BTRFS_ALLOC_EXTENT_STATE_RETRY
+		if (!prealloc) {
+			if (10 > counter) {
+				counter++;
+				cond_resched();
+				goto again;
+			}
+			BUG_ON(!prealloc);
+		}
+#else
 		BUG_ON(!prealloc);
+#endif
 	}
 
 	spin_lock(&tree->lock);
 	if (cached_state && *cached_state) {
 		state = *cached_state;
 		if (state->start <= start && state->end > start &&
-		    state->tree) {
+		    extent_state_in_tree(state)) {
 			node = &state->rb_node;
 			goto hit_next;
 		}
@@ -1068,7 +1085,7 @@ again:
 	if (cached_state && *cached_state) {
 		state = *cached_state;
 		if (state->start <= start && state->end > start &&
-		    state->tree) {
+		    extent_state_in_tree(state)) {
 			node = &state->rb_node;
 			goto hit_next;
 		}
@@ -1458,7 +1475,7 @@ int find_first_extent_bit(struct extent_io_tree *tree, u64 start,
 	spin_lock(&tree->lock);
 	if (cached_state && *cached_state) {
 		state = *cached_state;
-		if (state->end == start - 1 && state->tree) {
+		if (state->end == start - 1 && extent_state_in_tree(state)) {
 			n = rb_next(&state->rb_node);
 			while (n) {
 				state = rb_entry(n, struct extent_state,
@@ -1904,7 +1921,7 @@ int test_range_bit(struct extent_io_tree *tree, u64 start, u64 end,
 	int bitset = 0;
 
 	spin_lock(&tree->lock);
-	if (cached && cached->tree && cached->start <= start &&
+	if (cached && extent_state_in_tree(cached) && cached->start <= start &&
 	    cached->end > start)
 		node = &cached->rb_node;
 	else
@@ -4417,7 +4434,14 @@ static void btrfs_release_extent_buffer_page(struct extent_buffer *eb,
 	int cloned = test_bit(EXTENT_BUFFER_CLONE, &eb->bflags);
 #endif /* CONFIG_SYNO_BTRFS_FIX_PAGE_LEAK_WHILE_CLONE_EXTENT_BUFFER */
 
+#ifdef CONFIG_SYNO_BTRFS_FIX_PAGE_WRITEBACK
+	if (unlikely(extent_buffer_under_io(eb))) {
+		smp_mb();
+		BUG_ON(extent_buffer_under_io(eb));
+	}
+#else
 	BUG_ON(extent_buffer_under_io(eb));
+#endif
 
 	num_pages = num_extent_pages(eb->start, eb->len);
 	index = start_idx + num_pages;
@@ -4444,8 +4468,16 @@ static void btrfs_release_extent_buffer_page(struct extent_buffer *eb,
 			if (PagePrivate(page) &&
 			    page->private == (unsigned long)eb) {
 				BUG_ON(test_bit(EXTENT_BUFFER_DIRTY, &eb->bflags));
+#ifdef CONFIG_SYNO_BTRFS_FIX_PAGE_WRITEBACK
+				if (PageDirty(page) || PageWriteback(page)) {
+					smp_mb();
+					BUG_ON(PageDirty(page));
+					BUG_ON(PageWriteback(page));
+				}
+#else
 				BUG_ON(PageDirty(page));
 				BUG_ON(PageWriteback(page));
+#endif
 				/*
 				 * We need to make sure we haven't be attached
 				 * to a new eb.

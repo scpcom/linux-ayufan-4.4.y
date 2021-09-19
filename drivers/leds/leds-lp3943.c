@@ -18,6 +18,7 @@
 #include <linux/leds-lp3943.h>
 #ifdef CONFIG_SYNO_LP3943_FEATURES
 #include <linux/spinlock.h>
+#include <linux/synobios.h>
 #endif /* CONFIG_SYNO_LP3943_FEATURES */
 
 #define MAX_NUM_LEDS		16
@@ -389,6 +390,38 @@ static int lp3943_update_pwm(struct lp3943 *lp, enum lp3943_led_mode mode,
 
 	return lp3943_write_byte(lp, addr, pwm);
 }
+#ifdef CONFIG_SYNO_LP3943_FEATURES
+static void lp3943_syno_brightness_set(u8 brightness, enum lp3943_led_mode *mode, enum lp3943_led_mode nodeMode)
+{
+	if (!mode) {
+		goto END;
+	}
+	*mode = brightness == 0 ? LP3943_LED_OFF : nodeMode;
+
+END:
+	return;
+}
+static void lp3943_syno_brightness_reverse_set(u8 brightness, enum lp3943_led_mode *mode, enum lp3943_led_mode nodeMode)
+{
+	if (!mode) {
+		goto END;
+	}
+	switch (brightness) {
+		case 0:
+			*mode = LP3943_LED_ON;
+			break;
+		case 255:
+			*mode = LP3943_LED_OFF;
+			break;
+		default:
+			*mode = nodeMode;
+			break;
+	}
+
+END:
+	return;
+}
+#endif /* CONFIG_SYNO_LP3943_FEATURES */
 
 static int lp3943_update_brightness(struct lp3943_led *led)
 {
@@ -401,18 +434,7 @@ static int lp3943_update_brightness(struct lp3943_led *led)
 	for (i = 0 ; i < node->num_channels ; i++) {
 		channel = node->channel + i;
 #ifdef CONFIG_SYNO_LP3943_FEATURES
-		/*The brightness associated on/of state are inverted to match the hardware design.*/
-		switch (led->brightness){
-		case 0:
-			mode = LP3943_LED_ON;
-			break;
-		case 255:
-			mode = LP3943_LED_OFF;
-			break;
-		default:
-			mode = node->mode;
-			break;
-		}
+		funcSYNOLEDBrightnessSet(led->brightness, &mode, node->mode);
 #else
 		mode = led->brightness == 0 ? LP3943_LED_OFF : node->mode;
 #endif /* CONFIG_SYNO_LP3943_FEATURES */
@@ -627,7 +649,13 @@ static int __init lp3943_init(void)
 		printk(KERN_ERR "led-lp3943 initial error: failed to initial device\n");
 		goto END;
 	}
-
+	if (syno_is_hw_version(HW_DS415p) || syno_is_hw_version(HW_DS1515p) || syno_is_hw_version(HW_DS1815p) ||
+			syno_is_hw_version(HW_RS815p) || syno_is_hw_version(HW_RS815rpp) ||
+			syno_is_hw_version(HW_DS416p) || syno_is_hw_version(HW_DS716p) || syno_is_hw_version(HW_DS216p)) {
+		funcSYNOLEDBrightnessSet = lp3943_syno_brightness_reverse_set;
+	} else {
+		funcSYNOLEDBrightnessSet = lp3943_syno_brightness_set;
+	}
 	iErr = i2c_add_driver(&lp3943_driver);
 
 END:

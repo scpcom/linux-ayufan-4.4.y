@@ -29,6 +29,9 @@ ACPI_MODULE_NAME("platform");
 static const struct acpi_device_id acpi_platform_device_ids[] = {
 
 	{ "PNP0D40" },
+#ifdef CONFIG_SYNO_PINCTRL_CHERRYVIEW
+	{ "INT33FF" }, // Braswell GPIO controller
+#endif /* CONFIG_SYNO_PINCTRL_CHERRYVIEW */
 
 	{ }
 };

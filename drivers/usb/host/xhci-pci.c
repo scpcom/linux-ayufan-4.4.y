@@ -88,7 +88,9 @@ static void xhci_pci_quirks(struct device *dev, struct xhci_hcd *xhci)
 	if (pdev->vendor == PCI_VENDOR_ID_AMD && usb_amd_find_chipset_info())
 		xhci->quirks |= XHCI_AMD_PLL_FIX;
 	if (pdev->vendor == PCI_VENDOR_ID_INTEL) {
+#ifdef CONFIG_SYNO_INTEL_USB3_LPM_ENABLE
 		xhci->quirks |= XHCI_LPM_SUPPORT;
+#endif /* CONFIG_SYNO_INTEL_USB3_LPM_ENABLE */
 		xhci->quirks |= XHCI_INTEL_HOST;
 	}
 	if (pdev->vendor == PCI_VENDOR_ID_INTEL &&

@@ -362,6 +362,10 @@ extern struct ata_port_operations ahci_pmp_retry_srst_ops;
 extern int sata_syno_ahci_defer_cmd(struct ata_queued_cmd *qc);
 #endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
 
+#ifdef CONFIG_SYNO_AHCI_PMP_SII3x26_DEFER_CMD
+extern int ahci_syno_pmp_3x26_qc_defer(struct ata_queued_cmd *qc);
+#endif /* CONFIG_SYNO_AHCI_PMP_SII3x26_DEFER_CMD */
+
 #ifdef CONFIG_SYNO_ATA_AHCI_LED_SGPIO
 extern struct ata_device *ata_scsi_find_dev(struct ata_port *ap,
                                             const struct scsi_device *scsidev);

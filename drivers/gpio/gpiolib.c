@@ -2157,3 +2157,46 @@ static int __init gpiolib_debugfs_init(void)
 subsys_initcall(gpiolib_debugfs_init);
 
 #endif	/* DEBUG_FS */
+
+#ifdef CONFIG_SYNO_X86_PINCTRL_GPIO
+int syno_gpio_value_set(int iPin, int iValue)
+{
+	int iRet = -1;
+	struct gpio_desc *desc;
+	desc = gpio_to_desc(iPin); //pin validation is checked here
+
+	if (!desc) {
+		goto END;
+	}
+
+	if (GPIOF_DIR_OUT != gpiod_get_direction(desc)) {
+		printk("pin %d is not writable.\n", iPin);
+        goto END;
+	}
+
+	gpiod_set_value(desc, iValue);
+
+	iRet = 0;
+END:
+	return iRet;
+}
+EXPORT_SYMBOL(syno_gpio_value_set);
+
+int syno_gpio_value_get(int iPin, int *pValue)
+{
+	int iRet = -1;
+	struct gpio_desc *desc;
+	desc = gpio_to_desc(iPin); //pin validation is checked here
+
+	if (!desc) {
+		goto END;
+	}
+
+	*pValue = gpiod_get_value(desc);
+
+	iRet = 0;
+END:
+	return iRet;
+}
+EXPORT_SYMBOL(syno_gpio_value_get);
+#endif /* CONFIG_SYNO_X86_PINCTRL_GPIO */

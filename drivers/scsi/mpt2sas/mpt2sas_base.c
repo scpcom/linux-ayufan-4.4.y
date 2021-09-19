@@ -4206,7 +4206,16 @@ mpt2sas_base_free_resources(struct MPT2SAS_ADAPTER *ioc)
 
 	_base_mask_interrupts(ioc);
 	ioc->shost_recovery = 1;
+#ifdef CONFIG_SYNO_SAS_MPT2_RESET_ON_REBOOT
+	if (ioc->shutdown == 1) {
+		_base_make_ioc_ready(ioc, CAN_SLEEP, FORCE_BIG_HAMMER);
+		ioc->shutdown = 0;
+	} else {
+		_base_make_ioc_ready(ioc, CAN_SLEEP, SOFT_RESET);
+	}
+#else /* CONFIG_SYNO_SAS_MPT2_RESET_ON_REBOOT */
 	_base_make_ioc_ready(ioc, CAN_SLEEP, SOFT_RESET);
+#endif /* CONFIG_SYNO_SAS_MPT2_RESET_ON_REBOOT */
 	ioc->shost_recovery = 0;
 	_base_free_irq(ioc);
 	_base_disable_msix(ioc);

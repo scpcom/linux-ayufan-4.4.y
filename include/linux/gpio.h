@@ -40,6 +40,10 @@ struct gpio {
 };
 
 #ifdef CONFIG_GPIOLIB
+#ifdef CONFIG_SYNO_X86_PINCTRL_GPIO
+extern int syno_gpio_value_set(int iPin, int iValue);
+extern int syno_gpio_value_get(int iPin, int *pValue);
+#endif /* CONFIG_SYNO_X86_PINCTRL_GPIO */
 
 #ifdef CONFIG_ARCH_HAVE_CUSTOM_GPIO_H
 #include <asm/gpio.h>

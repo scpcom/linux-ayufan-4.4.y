@@ -102,6 +102,10 @@ struct btrfs_ordered_sum;
 /* for storing items that use the BTRFS_UUID_KEY* types */
 #define BTRFS_UUID_TREE_OBJECTID 9ULL
 
+#ifdef CONFIG_SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+#define BTRFS_BLOCK_GROUP_HINT_TREE_OBJECTID 202ULL
+#endif
+
 /* for storing balance parameters in the root tree */
 #define BTRFS_BALANCE_OBJECTID -4ULL
 
@@ -1368,6 +1372,9 @@ struct btrfs_fs_info {
 	struct btrfs_root *csum_root;
 	struct btrfs_root *quota_root;
 	struct btrfs_root *uuid_root;
+#ifdef CONFIG_SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+	struct btrfs_root *block_group_hint_root;
+#endif
 
 	/* the log root tree is a directory of all the other log roots */
 	struct btrfs_root *log_root_tree;
@@ -1503,6 +1510,9 @@ struct btrfs_fs_info {
 	 * during commit to protect us from the relocation code
 	 */
 	struct mutex reloc_mutex;
+#ifdef CONFIG_SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT
+	struct mutex pending_snapshots_mutex;
+#endif /* CONFIG_SYNO_BTRFS_AVOID_NULL_ACCESS_IN_PENDING_SNAPSHOT */
 
 	struct list_head trans_list;
 	struct list_head dead_roots;
@@ -1568,6 +1578,9 @@ struct btrfs_fs_info {
 	struct btrfs_workqueue *submit_workers;
 	struct btrfs_workqueue *caching_workers;
 	struct btrfs_workqueue *readahead_workers;
+#ifdef CONFIG_SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+	struct btrfs_workqueue *reada_path_workers;
+#endif
 
 	/*
 	 * fixup workers take dirty pages that didn't properly go through
@@ -1646,7 +1659,10 @@ struct btrfs_fs_info {
 	struct btrfs_balance_control *balance_ctl;
 	wait_queue_head_t balance_wait_q;
 
+#ifdef CONFIG_SYNO_BTRFS_METADATA_RESERVE
+#else
 	unsigned data_chunk_allocations;
+#endif
 	unsigned metadata_ratio;
 
 	void *bdev_holder;
@@ -1665,6 +1681,11 @@ struct btrfs_fs_info {
 
 #ifdef CONFIG_BTRFS_FS_CHECK_INTEGRITY
 	u32 check_integrity_print_mask;
+#endif
+#ifdef CONFIG_SYNO_BTRFS_FLUSHONCOMMIT_THRESHOLD
+	int ordered_extent_nr;
+	int delalloc_inodes_nr;
+	int flushoncommit_threshold;
 #endif
 
 	/*
@@ -1753,6 +1774,12 @@ struct btrfs_fs_info {
 	 * and will be latter freed. Protected by fs_info->chunk_mutex.
 	 */
 	struct list_head pinned_chunks;
+
+#ifdef CONFIG_SYNO_BTRFS_BLOCK_GROUP_HINT_TREE
+	atomic_t reada_block_group_threads; // Number of running threads; use atomic type since threads can modify it.
+	spinlock_t block_group_hint_tree_lock; // Portect block group hint tree creation.
+	unsigned int no_block_group_hint:1;
+#endif
 };
 
 struct btrfs_subvolume_writers {
@@ -1900,6 +1927,9 @@ struct btrfs_root {
 	u64 nr_delalloc_inodes;
 
 	struct mutex ordered_extent_mutex;
+#ifdef CONFIG_SYNO_BTRFS_ADD_LOCK_ON_FLUSH_ORDERED_EXTENT
+	struct mutex ordered_extent_worker_mutex;
+#endif
 	/*
 	 * this is used by the balancing code to wait for all the pending
 	 * ordered extents
@@ -1922,6 +1952,7 @@ struct btrfs_root {
 	int send_in_progress;
 	struct btrfs_subvolume_writers *subv_writers;
 	atomic_t will_be_snapshoted;
+
 };
 
 struct btrfs_ioctl_defrag_range_args {
@@ -3362,9 +3393,9 @@ int btrfs_reserve_extent(struct btrfs_root *root, u64 num_bytes,
 			 u64 min_alloc_size, u64 empty_size, u64 hint_byte,
 			 struct btrfs_key *ins, int is_data, int delalloc);
 int btrfs_inc_ref(struct btrfs_trans_handle *trans, struct btrfs_root *root,
-		  struct extent_buffer *buf, int full_backref, int no_quota);
+		  struct extent_buffer *buf, int full_backref);
 int btrfs_dec_ref(struct btrfs_trans_handle *trans, struct btrfs_root *root,
-		  struct extent_buffer *buf, int full_backref, int no_quota);
+		  struct extent_buffer *buf, int full_backref);
 int btrfs_set_disk_extent_flags(struct btrfs_trans_handle *trans,
 				struct btrfs_root *root,
 				u64 bytenr, u64 num_bytes, u64 flags,

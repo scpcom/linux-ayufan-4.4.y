@@ -919,6 +919,9 @@ struct xhci_virt_device {
 	struct xhci_tt_bw_info		*tt_info;
 	/* The current max exit latency for the enabled USB3 link states. */
 	u16				current_mel;
+#ifdef CONFIG_SYNO_FORCE_EMPTY_UNAVAILABLE_XHCI_TD
+	bool			disconnected;
+#endif /* CONFIG_SYNO_FORCE_EMPTY_UNAVAILABLE_XHCI_TD */
 };
 
 /*

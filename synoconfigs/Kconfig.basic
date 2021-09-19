@@ -59,7 +59,16 @@ config SYNO_ICH_GPIO_CTRL
 	help
 	  GPIO control for x86 chipset south bridge PCH/ICH.
 	  Merged SYNO_PCH_GPIO_CTRL & SYNO_LPC_ICH_GPIO_CTRL.
-
+	  
+config SYNO_X86_PINCTRL_GPIO
+	bool "X86 GPIO Control With Pinctrl Subsystem"
+	default y
+	depends on X86_64
+	select PINCTRL
+	select GPIOLIB
+	help
+	  GPIO control for x86 chipset with pinctrl subsystem.
+	  
 config SYNO_X86_CORETEMP
 	bool "X86 Core Temperature Detection"
 	default y

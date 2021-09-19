@@ -294,9 +294,6 @@ struct device_attribute *ahci_sdev_attrs[] = {
 	&dev_attr_sw_locate,
 	&dev_attr_sw_fault,
 #endif /* CONFIG_SYNO_ATA_AHCI_LED_SGPIO */
-#ifdef CONFIG_SYNO_CUSTOM_SCMD_TIMEOUT
-	&dev_attr_syno_scmd_min_timeout,
-#endif /* CONFIG_SYNO_CUSTOM_SCMD_TIMEOUT */
 	NULL
 };
 EXPORT_SYMBOL_GPL(ahci_sdev_attrs);
@@ -913,13 +910,16 @@ static int syno_need_ahci_software_activity(struct ata_port *ap)
 	struct pci_dev *pdev = NULL;
 	int ret = 0;
 
-	if (syno_is_hw_version(HW_DS2415p)) {
+	/*These Avoton models do not need SW ACT*/
+	if (syno_is_hw_version(HW_DS2415p) || syno_is_hw_version(HW_RS2416p) || syno_is_hw_version(HW_RS2416rpp)) {
 		goto END;
 	}
+
 	if (ap != NULL) {
 		pdev = to_pci_dev(ap->dev);
 		if (pdev != NULL && pdev->vendor == 0x8086) {
 			switch (pdev->device) {
+				/* Avoton internal SATA chip */
 				case 0x1f22:
 				case 0x1f32:
 					ret = 1;
@@ -941,6 +941,60 @@ static void syno_sw_activity(struct ata_port *ap)
 	}
 	syno_ledtrig_active_set(gpGreenLedMap[ap->syno_disk_index]);		
 }
+
+/**
+ * This function is used for AHCI software activity led,
+ *
+ * hostnum is scsi_host index
+ */
+int syno_ahci_disk_led_enable(const unsigned short hostnum, const int iValue)
+{
+	struct Scsi_Host *shost = scsi_host_lookup(hostnum);
+	struct ata_port *ap = NULL;
+	int ret = -EINVAL;
+	struct ahci_port_priv *pp = NULL;
+	struct ahci_em_priv *emp = NULL;
+	struct ata_link *link = NULL;
+	unsigned long flags;
+
+	if (NULL == shost) {
+		goto END;
+	}
+
+	if (NULL == (ap = ata_shost_to_port(shost))) {
+		goto END;
+	}
+
+	// del old timer
+	pp = ap->private_data;
+	spin_lock_irqsave(ap->lock, flags);
+	ata_for_each_link(link, ap, EDGE) {
+		emp = &pp->em_priv[link->pmp];
+		emp->saved_activity = emp->activity = 0;
+		del_timer(&emp->timer);
+	}
+
+	if (iValue) {
+		ap->flags |= ATA_FLAG_SW_ACTIVITY;
+		ata_for_each_link(link, ap, EDGE) {
+			ahci_init_sw_activity(link);
+		}
+	} else {
+		ap->flags &= ~ATA_FLAG_SW_ACTIVITY;
+		ata_for_each_link(link, ap, EDGE) {
+			link->flags &= ~ATA_LFLAG_SW_ACTIVITY;
+		}
+	}
+	spin_unlock_irqrestore(ap->lock, flags);
+	ret = 0;
+
+END:
+	if (shost) {
+		scsi_host_put(shost);
+	}
+	return ret;
+}
+EXPORT_SYMBOL(syno_ahci_disk_led_enable);
 #endif /* CONFIG_SYNO_AHCI_SOFTWARE_ACITIVITY */
 
 static void ahci_start_port(struct ata_port *ap)
@@ -1816,6 +1870,18 @@ int sata_syno_ahci_defer_cmd(struct ata_queued_cmd *qc)
 EXPORT_SYMBOL_GPL(sata_syno_ahci_defer_cmd);
 #endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
 
+#ifdef CONFIG_SYNO_AHCI_PMP_SII3x26_DEFER_CMD
+int ahci_syno_pmp_3x26_qc_defer(struct ata_queued_cmd *qc)
+{
+	struct ata_port *ap = qc->ap;
+	if (!sata_pmp_attached(ap))
+		return ata_std_qc_defer(qc);
+	else
+		return sata_syno_ahci_defer_cmd(qc);
+}
+EXPORT_SYMBOL_GPL(ahci_syno_pmp_3x26_qc_defer);
+#endif
+
 static int ahci_pmp_qc_defer(struct ata_queued_cmd *qc)
 {
 	struct ata_port *ap = qc->ap;
@@ -1824,11 +1890,7 @@ static int ahci_pmp_qc_defer(struct ata_queued_cmd *qc)
 	if (!sata_pmp_attached(ap) || pp->fbs_enabled)
 		return ata_std_qc_defer(qc);
 	else
-#ifdef CONFIG_SYNO_SATA_PM_DEVICE_GPIO
-		return sata_syno_ahci_defer_cmd(qc);
-#else
 		return sata_pmp_qc_defer_cmd_switch(qc);
-#endif /* CONFIG_SYNO_SATA_PM_DEVICE_GPIO */
 }
 
 static void ahci_qc_prep(struct ata_queued_cmd *qc)

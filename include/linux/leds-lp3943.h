@@ -68,4 +68,8 @@ struct lp3943_platform_data {
 	int num_nodes;
 };
 
+#ifdef CONFIG_SYNO_LP3943_FEATURES
+static void (*funcSYNOLEDBrightnessSet) (u8 brightness, enum lp3943_led_mode *mode, enum lp3943_led_mode nodeMode);
+#endif /* CONFIG_SYNO_LP3943_FEATURES */
+
 #endif

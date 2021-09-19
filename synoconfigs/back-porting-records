@@ -1,3 +1,16 @@
+BUG ID: <DSM> #78072 - Braswell SMBUS I2C Controller Support
+Commit Hashes:
+	0b6c7ed34596489f45998d2df9911226321d749f
+
+First Ready Kernel version: 3.17
+
+BUG ID: <DSM> #78201 - Braswell Uart Controller Support
+Commit Hashes:
+	923d438568cfb7b26abf39bf6eb6d24c784e6a0a
+	b77e8c46bf1cefc0236d4b40f3bdca1e23663ca1
+
+First Ready Kernel version: 3.17
+
 BUG ID: <DSM> #50642 - Enable Zram
 Commit Hashes:
 	08d87c9b849b5c9603a943a6cb63135d11cb0af8

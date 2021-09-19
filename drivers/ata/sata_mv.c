@@ -3728,7 +3728,7 @@ void syno_sata_mv_gpio_write(u8 blFaulty, const unsigned short hostnum)
 	if(NULL == (host_mmio = mv_host_base(ap->host))) {
 		goto END;
 	}
-	
+
 	led_idx = ap->print_id - ap->host->ports[0]->print_id;
 
 	gpio_value = readl(host_mmio + GPIO_CTL_DATA);

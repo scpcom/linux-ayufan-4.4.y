@@ -1989,6 +1989,20 @@ extern struct dentry *mount_pseudo(struct file_system_type *, char *,
 #define fops_put(fops) \
 	do { if (fops) module_put((fops)->owner); } while(0)
 
+#ifdef CONFIG_SYNO_DRM_I915_BACKPORT
+/*
+* This one is to be used *ONLY* from ->open() instances.
+* fops must be non-NULL, pinned down *and* module dependencies
+* should be sufficient to pin the caller down as well.
+*/
+#define replace_fops(f, fops) \
+	do {    \
+			struct file *__file = (f); \
+			fops_put(__file->f_op); \
+			BUG_ON(!(__file->f_op = (fops))); \
+	} while(0)
+#endif /* CONFIG_SYNO_DRM_I915_BACKPORT */
+
 extern int register_filesystem(struct file_system_type *);
 extern int unregister_filesystem(struct file_system_type *);
 extern struct vfsmount *kern_mount_data(struct file_system_type *, void *data);
@@ -2641,6 +2655,7 @@ extern void generic_fillattr(struct inode *, struct kstat *);
 extern int vfs_getattr(struct path *, struct kstat *);
 void __inode_add_bytes(struct inode *inode, loff_t bytes);
 void inode_add_bytes(struct inode *inode, loff_t bytes);
+void __inode_sub_bytes(struct inode *inode, loff_t bytes);
 void inode_sub_bytes(struct inode *inode, loff_t bytes);
 loff_t inode_get_bytes(struct inode *inode);
 void inode_set_bytes(struct inode *inode, loff_t bytes);

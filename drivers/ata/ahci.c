@@ -522,6 +522,13 @@ static const struct pci_device_id ahci_pci_tbl[] = {
 
 #ifdef CONFIG_SYNO_MV_9235_GPIO_CTRL
 
+#define MV_GEN 3
+#define MV_PORT 4
+/* The register addrs are provided by Marvell and no description on spec */
+const unsigned int mv_sata_gen[MV_GEN] = {0x8D, 0x8F, 0x91};
+const unsigned mv_port_addr[MV_PORT] = {0x178, 0x1f8, 0x278, 0x2f8};
+const unsigned mv_port_data[MV_PORT] = {0x17c, 0x1fc, 0x27c, 0x2fc};
+
 /*
  * 9235 gpio mmio address, to control 9235 GPIO, please read register manual section 1.6
  */
@@ -577,6 +584,45 @@ END:
 }
 
 /*
+ *	Get value from 9xxx vendor spec register2
+ */
+static u32 syno_mv_9xxx_reg_get(struct ata_host *host, const unsigned int reg_addr, unsigned int addr_offset, unsigned int data_offset)
+{
+	void __iomem *host_mmio = NULL;
+	u32 value = 0;
+
+	if(NULL == (host_mmio = ahci_host_base(host))) {
+		goto END;
+	}
+
+	// write to 9xxx from register
+	writel(reg_addr, host_mmio + addr_offset);
+	// read original value from register
+	value = readl(host_mmio + data_offset);
+END:
+	return value;
+}
+
+/*
+ *	Set value to 9xxx vendor spec register2
+ */
+static void syno_mv_9xxx_reg_set(struct ata_host *host, const unsigned int reg_addr, u32 value, const unsigned int addr_offset, const unsigned int data_offset)
+{
+	void __iomem *host_mmio = NULL;
+
+	if(NULL == (host_mmio = ahci_host_base(host))) {
+		goto END;
+	}
+
+	// set 9xxx register for writting
+	writel(reg_addr, host_mmio + addr_offset);
+	// then write value to it
+	writel(value, host_mmio + data_offset);
+END:
+	return;
+}
+
+/*
  *	9235 GPIO init
  */
 void syno_mv_9235_gpio_active_init(struct ata_host *host)
@@ -586,6 +632,50 @@ void syno_mv_9235_gpio_active_init(struct ata_host *host)
 	syno_mv_9235_gpio_reg_set(host, MV_9235_GPIO_DATA_OUT, 0x0);
 	// set the lower 4 GPIO as link/active to disk 1~4 and upper 4 GPIO as faulty to disk 1~4
 	syno_mv_9235_gpio_reg_set(host, MV_9235_GPIO_ACTIVE, 0x00B6D8D1);
+}
+
+void syno_mv_9xxx_amp_adjust_by_port(struct ata_host *host, u32 val, unsigned int addr_offset, const unsigned int data_offset, const unsigned int reg_addr)
+{
+	u32 reg_val = 0;
+
+	reg_val = syno_mv_9xxx_reg_get(host, 0x0E, addr_offset, data_offset);
+	syno_mv_9xxx_reg_set(host, 0xE, reg_val & ~0x100, addr_offset, data_offset);
+	reg_val = syno_mv_9xxx_reg_get(host, reg_addr, addr_offset, data_offset);
+	reg_val &= ~0xFBE;
+	reg_val |= val;
+	syno_mv_9xxx_reg_set(host, reg_addr, reg_val, addr_offset, data_offset);
+}
+
+void syno_mv_9xxx_amp_adjust(struct ata_host *host)
+{
+	int port = 0;
+
+	if (syno_is_hw_version(HW_RS2416p) || syno_is_hw_version(HW_RS2416rpp)) {
+		for (port = 0; port < 4; port++) {
+			// set G3_TX_EMPH_EN = 1, G3_TX_EMPH_AMP = 0xF, G3_TX_AMP = 0x1F
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xFBE, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+		}
+	} else if (syno_is_hw_version(HW_DS416p)) {
+		// set port1 & port2 G3_TX_EMPH_EN = 1, G3_TX_EMPH_AMP = 0xF, G3_TX_AMP = 0x1F
+		port = 1;
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xFBE, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+
+		// ESATA port
+		port = 2;
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xFBE, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+	} else if (syno_is_hw_version(HW_DS716p)) {
+		// set port0  GX_TX_EMPH_EN = 1, GX_TX_EMPH_AMP = 0xF, GX_TX_AMP = 0x1F
+		port = 0;
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xFBE, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xFBE, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xFBE, mv_port_addr[port], mv_port_data[port], mv_sata_gen[0]);
+	} else if (syno_is_hw_version(HW_DS1616p)) {
+		// set port0 port1 G2_TX_EMPH_EN = 1, G2_TX_EMPH_AMP = 0xC, G2_TX_AMP = 0x1F
+		port = 0;
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xE3E, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+		port = 1;
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xE3E, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+	}
 }
 
 int syno_mv_9235_disk_led_get(const unsigned short hostnum)
@@ -1581,6 +1671,19 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 			ap->ops = &ata_dummy_port_ops;
 	}
 
+#ifdef CONFIG_SYNO_AHCI_PMP_SII3x26_DEFER_CMD
+	if (syno_is_hw_version(HW_DS1616p) ||
+			syno_is_hw_version(HW_DS1515) ||
+			syno_is_hw_version(HW_DS416p) ||
+			syno_is_hw_version(HW_DS716p)) {
+		printk("Change defer qc mode on external port for compatibility\n");
+		for (i = 0; i < host->n_ports; i++) {
+			struct ata_port *ap = host->ports[i];
+			ap->ops->qc_defer = &ahci_syno_pmp_3x26_qc_defer;
+		}
+	}
+#endif /* CONFIG_SYNO_AHCI_PMP_SII3x26_DEFER_CMD */
+
 	/* apply workaround for ASUS P5W DH Deluxe mainboard */
 	ahci_p5wdh_workaround(host);
 
@@ -1603,6 +1706,9 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 #ifdef CONFIG_SYNO_MV_9235_GPIO_CTRL
 	if (pdev->vendor == 0x1b4b && (pdev->device == 0x9235 || pdev->device == 0x9215)) {
 		syno_mv_9235_gpio_active_init(host);
+	}
+	if (pdev->vendor == 0x1b4b && (pdev->device == 0x9235 || pdev->device == 0x9215 || pdev->device == 0x9170)) {
+		syno_mv_9xxx_amp_adjust(host);
 	}
 #endif /* CONFIG_SYNO_MV_9235_GPIO_CTRL */
 

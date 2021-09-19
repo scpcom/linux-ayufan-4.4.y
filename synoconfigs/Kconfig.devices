@@ -193,6 +193,23 @@ config SYNO_MD_FIX_RAID5_RESHAPE_HANG
 
 		Previous Naming: SYNO_FIX_RAID5_RESHAPE_HANG
 
+config SYNO_MD_SYNC_MSG
+	bool "Let md sync action log be stored in /var/log/messages."
+	default y
+	help
+		<DSM> #80528
+		Let md sync action log be stored in /var/log/messages.
+
+config SYNO_MD_FIX_RAID5_RESHAPE_READ_FROM_OLD_LAYOUT
+	bool "Fix raid 5 read data from old layout during expansion."
+	default y
+	help
+		<DSM> #76897
+		There is a race between reading and writing raid 5 layout config when reshaping.
+		When this happened, raid 5 used old layout to read logical address, and get wrong data.
+		It is a temporary read error, since after that specific time, raid 5 will use new layout to read.
+		But, it may cause some problems (e.g. file system error) if someone tries to write to that logical address.
+
 endmenu #MD
 
 menu "SATA"
@@ -217,8 +234,8 @@ config SYNO_BADSECTOR_TEST
 config SYNO_MAX_INTERNAL_DISK
 	int "Maximum Internal Disk Number"
 	depends on SYNO_FIXED_DISK_NAME || SYNO_BADSECTOR_TEST
-	default "19" if SYNO_BROMOLOW || SYNO_GRANTLEY
-	default "15" if !SYNO_BROMOLOW && !SYNO_GRANTLEY
+	default "19" if SYNO_BROMOLOW || SYNO_GRANTLEY || SYNO_BROADWELL
+	default "15" if !SYNO_BROMOLOW && !SYNO_GRANTLEY && !SYNO_BROADWELL
 	help
 	  <DSM> No Bug Entry
 	  Maximum SCSI internal disk. We will reserve device name for
@@ -289,6 +306,14 @@ config SYNO_SATA_DISK_SEQ_REVERSE
 	    3rd chip - [sdj, sdi, sdk, sdl]
 	    4th chip - [sdo, sdn, sdm, sdp]
 
+config SYNO_FIXED_DISK_NAME_MV14XX
+	bool "Re-map Disk name on Marvell-1475"
+	depends on SYNO_FIXED_DISK_NAME
+	default y
+	help
+		<DSM> #84462
+			Add boot argument DiskIdxMapMv14xx to adjust the disk ports of Marvell 1475.
+
 config SYNO_SCSI_GET_ATA_IDENTITY
 	bool "Get ata identity via ATA PASS THRU command in scsi layer"
 	default y
@@ -346,7 +371,7 @@ config SYNO_ATA_AHCI_LED_SWITCH
 
 config SYNO_ATA_PWR_CTRL
     bool "Disk Power Control"
-	depends on SYNO_INTERNAL_HD_NUM && SYNO_ICH_GPIO_CTRL && SYNO_HW_VERSION
+	depends on SYNO_INTERNAL_HD_NUM && SYNO_HW_VERSION && (SYNO_ICH_GPIO_CTRL || SYNO_X86_PINCTRL_GPIO)
 	default y
 	help
 	  <DSM> No Bug Entry
@@ -855,6 +880,36 @@ config SYNO_SII3132_MEDIA_ERROR_RETRY
 	help
 	  SiI3132 may get media error in some models, we could add retry for them
 
+config SYNO_AHCI_PMP_SII3x26_DEFER_CMD
+	bool "Enable SiI3x26 defer function in ahci driver"
+	depends on (SYNO_BRASWELL || SYNO_ALPINE || SYNO_AVOTON) && SYNO_SATA_PM_DEVICE_GPIO
+	default n
+	help
+	  Marvell 88se9215 with PMP SiI3x26 often occurred "DRDY (timeout)" issue
+	  We add defer function to fix this bug.
+
+config SYNO_EARLY_NCQ_ANALYZE
+	bool "Analyze NCQ Error Early"
+	default y
+	help
+	  Libata use ata_eh_analyze_ncq_error() to send READ_LOG_EXT 10h and analyze the
+	  NCQ error, but the function need to be executed before port freeze. If there
+	  are non-completed commands, the port will be freeze in the early EH and then
+	  ata_eh_analyze_ncq_error() will immediately return without any analysis. At
+	  this situation, the real error qc can't be found until NCQ disable.
+
+	  This problem usually occurred with port multiplier.
+
+	  Analyze NCQ error in early EH stage to find the real error qc.
+
+config SYNO_DISK_NCQ_COMPATIBILITY
+	bool "Disable ncq on WD7500BPKX"
+	default y
+	help
+	  <DSM> #84910
+	  The system would do untar before hotplugd initialized after DSM update.
+	  Therefore, we should disable ncq in kernel to prevent the ncq error.
+
 endmenu #SATA
 
 menu "SAS"
@@ -977,6 +1032,15 @@ config SYNO_SAS_MPT2_HOTPLUG_PHY
 	  The driver need to add phys to relative port or remove phys from it when hotplug phys.
 	  For example, when a SAS port with 8 phys, one cable with 4 phys are removed, we need to know that in kernel.
 	  But in original driver, we won't unless the wide port are removed.
+
+config SYNO_SAS_MPT2_RESET_ON_REBOOT
+	bool "Issue hard reset on LSI 2308 SAS controller when rebooting"
+	default n
+	depends on SCSI_MPT2SAS
+	help
+	  On Synology SAS card, we exclude PCI reset signal from LSI 2308 and it leads to a topology discovery problem after reboot.
+	  Our workaround here is to issue hard reset when system power off or reboot.
+	  Every platform which uses Synology SAS card is suggested to enable this config, except bromolow.
 
 config SYNO_SAS_SPINUP_DELAY
 	bool "Support SAS disk spinup queue"
@@ -1166,6 +1230,125 @@ config SYNO_USB3_RESET_WAIT
 	  Add extra delay time for USB reset.
 	  NEC Chip has a compatibility issue on specific device during USB reset time.
 	  The USB device may meet "read descripter error" or "set address error".
+
+config SYNO_USB_STOR_EXTRA_DELAY
+	bool "Add an extra delay time for USB storage"
+	default y
+	help
+	  <DSM> #78779
+	  Add an extra delay time in module parameter of USB storage.
+	  It is used in support case to improve USB compatibility.
+
+config SYNO_INTEL_USB3_LPM_ENABLE
+	bool "Enable USB 3.0 LPM on Intel HCs"
+	default y
+	depends on X86_64
+	help
+	  <DSM> #80664
+	  This is used to enable link power management. When link error rate (which
+	  might be caused by eletronic interferences or other disturbing factors in
+	  physical layer) is high, to enable LPM would cause USB 3.0 devices
+	  disconnect abnormally from the host sometimes.
+	  Note that this only affects Intel USB host controllers, for other
+	  controllers this would be ignored.
+
+config SYNO_GET_SN_WORKAROUNDS
+	bool "Try to get serial number workarounds"
+	default y
+	depends on SYNO_BRASWELL
+	help
+	  <HW_DS716+/play_Braswell> #45
+	  Workarounds that try to get string descriptor of serial number from USB
+	  device which has qurik that returns a string with NULL prefix.
+	  For now it's only used Braswell's EJ168 chip.
+
+config SYNO_USB_UPS_DISCONNECT_FILTER
+	bool "Filter abnormal disconnect from UPS via USB"
+	default y
+	help
+	  For some UPS devices which generate link violation or EMI through USB
+	  cable lead USB host receiving port disconnect events or port disable
+	  events, which can be annoying. This is workarounds which filter them on
+	  USB hub driver.
+
+config SYNO_XHCI_RESET_DELAY
+	bool "Add extra delay in xhci_reset"
+	default y
+	depends on SYNO_BRASWELL || SYNO_BROADWELL
+	help
+	  <DSM> #82116
+	  Add extra delay time for XHCI reset.
+	  Braswell SoC USB would hang on reset, we add delay before hangshake.
+
+config SYNO_USB_CONNECT_DEBOUNCER
+	bool "Add connect-debouncer during USB reset"
+	default y
+	help
+	  Apply connect-debouncer which is to avoid USB disconnect during USB reset.
+
+config SYNO_DISABLE_USB3_DOWNGRADE
+	bool "Disable USB3 downgrade for factory"
+	default n
+	depends on SYNO_BRASWELL
+	help
+	  Let the syno_disable_usb3 flag do not affect the USB3 ports of SoC for
+	  Braswell for factory.
+
+config SYNO_USB_POWER_RESET
+	bool "Support power cycle before USB re-enumeration"
+	default n
+	help
+	  When a USB device can not be detected, USB driver will power cycle the
+	  USB device before USB re-enumeration.
+
+config SYNO_XHCI_SPEED_DOWNGRADE_RECOVERY
+	bool "Reset the USB device when speed is downgraded on XHCI"
+	default y
+	help
+	  Try to recover speed downgrade issue on USB 3.0 port by USB reset.
+
+config SYNO_SYNCHRONIZE_CACHE_FILTER
+	bool "Filter the SYNCHRONIZE_CACHE command for some buggy USB storage"
+	default y
+	help
+	  Some iStoragePro series (Vendor=0984 ProdID=1403 Rev= 2.13) have a bug
+	  with SYNCHRONIZE_CACHE (a SCSI command), which they do not response their
+	  CSW to the host (i.e. cannot finish the command) sometimes and then cause
+	  the USB-storage driver reset them. Because USB resetting leads iStorages
+	  to launch their "auto-lock", so SYNCHRONIZE_CACHE could cause their
+	  disconnection.
+
+config SYNO_USB3_SURPRESS_WARN
+	bool "Surpress the usb warning messages from some devices"
+	default y
+	help
+	  When a device attached to the roothub is suspended, the endpoint rings
+	  are stopped.  The host may generate a completion event with the
+	  completion code set to 'Stopped' or 'Stopped Invalid' when the ring is
+	  halted.  The current xHCI code prints a warning in that case, which can
+	  be really annoying if the USB device is coming into and out of suspend.
+
+config SYNO_FORCE_EMPTY_UNAVAILABLE_XHCI_TD
+	bool "Empty transfer rings with a disconnected USB device"
+	default y
+	help
+	  There is a chance that can't delete scsi disk of USB device after plugged
+	  out USB device until timeout of a SCSI command. That is because there
+	  are some urbs waiting for completion of the corresponding xHCI TDs.
+
+config SYNO_CASTRATED_XHC
+	bool "special treatment for ports of xHC without defferential pairs of USB3"
+	default n
+	help
+	  When a port of its corresponding xHC is without differential pairs of USB3
+	  (i.e. without Rx and Tx pairs), we should identify them as USB3 incapable.
+
+config SYNO_NUM_CASTRATED_XHC
+	int "Maximun number of castrated xHC"
+	depends on SYNO_CASTRATED_XHC
+	default "5"
+	help
+	  Maximum number of castrated xHC
 
 endmenu #USB
 

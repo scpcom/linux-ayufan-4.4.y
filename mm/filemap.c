@@ -2217,7 +2217,7 @@ static int sock2iov(struct socket *sock, struct kvec *iov,
 	sock->sk->sk_rcvtimeo = 64 * HZ;
 
 	kmsg_ret = kernel_recvmsg(
-			sock, &msg, &iov[0], page_count, bytes_to_received,
+			sock, &msg, &iov[start_page], page_count, bytes_to_received,
 			MSG_WAITALL | MSG_NOCATCHSIGNAL);
 
 	sock->sk->sk_rcvtimeo = rcvtimeo;
@@ -2359,8 +2359,6 @@ release_pages:
 								bytes, bytes, page, fsdata);
 			/* Keep error code if write_end() failed for some reason */
 			if (0 > write_end_ret) {
-				printk("write_end failed. file:%s, pos:%lld, ret:%d\n",
-				      file->f_dentry->d_name.name, pos, write_end_ret);
 				if (!failed_write_flag) {
 					failed_write_flag = 1;
 					if (page_index) {

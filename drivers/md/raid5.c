@@ -4151,7 +4151,7 @@ static void analyse_stripe(struct stripe_head *sh, struct stripe_head_state *s)
 			 */
 			set_bit(R5_Insync, &dev->flags);
 
-		if (rdev && test_bit(R5_WriteError, &dev->flags)) {
+		if (test_bit(R5_WriteError, &dev->flags)) {
 			/* This flag does not apply to '.replacement'
 			 * only to .rdev, so make sure to check that*/
 			struct md_rdev *rdev2 = rcu_dereference(
@@ -4164,7 +4164,7 @@ static void analyse_stripe(struct stripe_head *sh, struct stripe_head_state *s)
 			} else
 				clear_bit(R5_WriteError, &dev->flags);
 		}
-		if (rdev && test_bit(R5_MadeGood, &dev->flags)) {
+		if (test_bit(R5_MadeGood, &dev->flags)) {
 			/* This flag does not apply to '.replacement'
 			 * only to .rdev, so make sure to check that*/
 			struct md_rdev *rdev2 = rcu_dereference(
@@ -4556,14 +4556,20 @@ finish:
 				/* We own a safe reference to the rdev */
 				rdev = conf->disks[i].rdev;
 #ifdef CONFIG_SYNO_MD_EIO_NODEV_HANDLER
-				if (rdev && IsDeviceDisappear(rdev->bdev)) {
-					syno_md_error(conf->mddev, rdev);
-				} else
-#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
+				if (rdev) {
+					if (IsDeviceDisappear(rdev->bdev)) {
+						syno_md_error(conf->mddev, rdev);
+					} else if (!rdev_set_badblocks(rdev, sh->sector, STRIPE_SECTORS, 0)) {
+						md_error(conf->mddev, rdev);
+					}
+					rdev_dec_pending(rdev, conf->mddev);
+				}
+#else /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
 				if (!rdev_set_badblocks(rdev, sh->sector,
 							STRIPE_SECTORS, 0))
 					md_error(conf->mddev, rdev);
 				rdev_dec_pending(rdev, conf->mddev);
+#endif /* CONFIG_SYNO_MD_EIO_NODEV_HANDLER */
 			}
 			if (test_and_clear_bit(R5_MadeGood, &dev->flags)) {
 				rdev = conf->disks[i].rdev;
@@ -6025,7 +6031,6 @@ static struct attribute *raid5_attrs[] =  {
 	&raid5_stripecache_size.attr,
 	&raid5_stripecache_active.attr,
 	&raid5_preread_bypass_threshold.attr,
-	&raid5_group_thread_cnt.attr,
 	NULL,
 };
 static struct attribute_group raid5_attrs_group = {
@@ -7121,6 +7126,10 @@ static int raid5_start_reshape(struct mddev *mddev)
 		return -EINVAL;
 	}
 
+#ifdef CONFIG_SYNO_MD_FIX_RAID5_RESHAPE_READ_FROM_OLD_LAYOUT
+	mddev_suspend(mddev);
+#endif
+
 	atomic_set(&conf->reshape_stripes, 0);
 	spin_lock_irq(&conf->device_lock);
 	write_seqcount_begin(&conf->gen_lock);
@@ -7143,12 +7152,15 @@ static int raid5_start_reshape(struct mddev *mddev)
 	write_seqcount_end(&conf->gen_lock);
 	spin_unlock_irq(&conf->device_lock);
 
+#ifdef CONFIG_SYNO_MD_FIX_RAID5_RESHAPE_READ_FROM_OLD_LAYOUT
+#else /* This part is cherry-pick from open source */
 	/* Now make sure any requests that proceeded on the assumption
 	 * the reshape wasn't running - like Discard or Read - have
 	 * completed.
 	 */
 	mddev_suspend(mddev);
 	mddev_resume(mddev);
+#endif
 
 	/* Add some new drives, as many as will fit.
 	 * We know there are enough to make the newly sized array work.
@@ -7193,6 +7205,9 @@ static int raid5_start_reshape(struct mddev *mddev)
 	clear_bit(MD_RECOVERY_CHECK, &mddev->recovery);
 	set_bit(MD_RECOVERY_RESHAPE, &mddev->recovery);
 	set_bit(MD_RECOVERY_RUNNING, &mddev->recovery);
+#ifdef CONFIG_SYNO_MD_FIX_RAID5_RESHAPE_READ_FROM_OLD_LAYOUT
+	mddev_resume(mddev);
+#endif
 	mddev->sync_thread = md_register_thread(md_do_sync, mddev,
 						"reshape");
 	if (!mddev->sync_thread) {

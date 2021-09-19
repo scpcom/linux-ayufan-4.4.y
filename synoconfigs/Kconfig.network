@@ -97,4 +97,17 @@ config SYNO_SFP_UNSUPPORTED_NOTIFY
 	  Provides an interface at /proc/driver/syno_unsupported_sfp_notify
 	  to inform userspace that if an unsupported SFP+ module inserted.
 
+config SYNO_PHY_INIT
+	bool "syno initialization of phy device"
+	default y
+	help
+	  Adjust registers to match HW spec.
+
+config SYNO_PHY_INIT_88E1514
+	bool "Enable phy driver of the phy 88E1514"
+	default y
+	depends on SYNO_PHY_INIT
+	help
+	  Enable phy driver of the phy 88E1514.
+
 endmenu #Network

@@ -40,10 +40,15 @@ config SYNO_KVMX64
 	depends on X86_64
 	help
 
+config SYNO_BROADWELL
+	bool "Intel-Broadwell"
+	depends on X86_64
+	help
+
 config SYNO_DUAL_HEAD
 	bool "Synology Dual Head Host"
 	default n
-	depends on SYNO_BROMOLOW && SYNO_USB_FLASH_BOOT
+	depends on (SYNO_BROMOLOW || SYNO_BROADWELL) && SYNO_USB_FLASH_BOOT
 	help
 		Dual head host use SATA DOM as the synoboot device. In this model SATA
 		controller & SAS expander exist simultaneously.
@@ -51,7 +56,7 @@ config SYNO_DUAL_HEAD
 config SYNO_SAS_RESERVATION_WRITE_CONFLICT_KERNEL_PANIC
 	bool "Let kernel panic if sas reservation write conflict"
 	default n
-	depends on SYNO_BROMOLOW
+	depends on SYNO_BROMOLOW || SYNO_BROADWELL
 	help
 		Check if sas reservation write conflict. If yes, kernel panic and then reboot.
 

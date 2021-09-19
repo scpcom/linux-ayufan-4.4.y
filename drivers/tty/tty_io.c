@@ -1119,12 +1119,21 @@ static inline ssize_t do_tty_write(
 			size = chunk;
 		ret = -EFAULT;
 #if defined(CONFIG_SYNO_MICROP_CTRL) && defined(CONFIG_SYNO_X64)
-		if (0 == strcmp(tty->name, "ttyS1"))
-			memcpy(tty->write_buf, buf, size);
-		else
+		if (0 == strcmp(tty->name, "ttyS1")) {
+			if (access_ok(VERIFY_READ, buf, size)) {
+				if (copy_from_user(tty->write_buf, buf, size)) {
+					printk(KERN_DEBUG "error attempted to copy_from_user\n");
+				}
+			} else {
+				memcpy(tty->write_buf, buf, size);
+			}
+		} else {
 #endif /* CONFIG_SYNO_MICROP_CTRL && CONFIG_SYNO_X64 */
 		if (copy_from_user(tty->write_buf, buf, size))
 			break;
+#if defined(CONFIG_SYNO_MICROP_CTRL) && defined(CONFIG_SYNO_X64)
+		}
+#endif /* CONFIG_SYNO_MICROP_CTRL && CONFIG_SYNO_X64 */
 		ret = write(tty, file, tty->write_buf, size);
 		if (ret <= 0)
 			break;
