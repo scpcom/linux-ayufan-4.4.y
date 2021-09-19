@@ -23,7 +23,10 @@
 #include <asm/debugreg.h>
 #include <asm/fpu-internal.h> /* pcntxt_mask */
 #include <asm/cpu.h>
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #include <asm/mmu_context.h>
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 #ifdef CONFIG_X86_32
 unsigned long saved_context_ebx;
@@ -183,6 +186,9 @@ static void __restore_processor_state(struct saved_context *ctxt)
 	write_cr8(ctxt->cr8);
 	write_cr4(ctxt->cr4);
 #endif
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	write_cr3(ctxt->cr3);
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	write_cr2(ctxt->cr2);
 	write_cr0(ctxt->cr0);
 
@@ -224,11 +230,14 @@ static void __restore_processor_state(struct saved_context *ctxt)
 	wrmsrl(MSR_KERNEL_GS_BASE, ctxt->gs_kernel_base);
 #endif
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	/*
 	 * __load_cr3 requires kernel %gs to be initialized to be able
 	 * to access per-cpu areas.
 	 */
 	__load_cr3(ctxt->cr3);
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 	/*
 	 * restore XCR0 for xsave capable cpu's.
@@ -242,7 +251,10 @@ static void __restore_processor_state(struct saved_context *ctxt)
 	x86_platform.restore_sched_clock_state();
 	mtrr_bp_restore();
 	perf_restore_debug_store();
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	spec_ctrl_cpu_init();
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 }
 
 /* Needed by apm.c */

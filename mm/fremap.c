@@ -27,6 +27,26 @@ static void zap_pte(struct mm_struct *mm, struct vm_area_struct *vma,
 			unsigned long addr, pte_t *ptep)
 {
 	pte_t pte = *ptep;
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+
+	if (pte_present(pte)) {
+		struct page *page;
+
+		flush_cache_page(vma, addr, pte_pfn(pte));
+		pte = ptep_clear_flush(vma, addr, ptep);
+		page = vm_normal_page(vma, addr, pte);
+		if (page) {
+			if (pte_dirty(pte))
+				set_page_dirty(page);
+			page_remove_rmap(page);
+			page_cache_release(page);
+			update_hiwater_rss(mm);
+			dec_mm_counter(mm, MM_FILEPAGES);
+		}
+	} else {
+		if (!pte_file(pte))
+			free_swap_and_cache(pte_to_swp_entry(pte));
+#else
 	struct page *page;
 	swp_entry_t entry;
 
@@ -56,6 +76,7 @@ static void zap_pte(struct mm_struct *mm, struct vm_area_struct *vma,
 				dec_mm_counter(mm, MM_SWAPENTS);
 			}
 		}
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 		pte_clear_not_present_full(mm, addr, ptep, 0);
 	}
 }

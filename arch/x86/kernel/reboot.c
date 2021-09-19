@@ -181,9 +181,12 @@ void __noreturn machine_real_restart(unsigned int type)
 #else
 	write_cr3(real_mode_header->trampoline_pgd);
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	/* Exiting long mode will fail if CR4.PCIDE is set. */
 	if (static_cpu_has(X86_FEATURE_PCID))
 		clear_in_cr4(X86_CR4_PCIDE);
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 #endif
 
 	/* Jump to the identity-mapped low memory code */

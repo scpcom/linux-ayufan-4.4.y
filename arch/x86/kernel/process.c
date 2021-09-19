@@ -36,7 +36,11 @@
  * section. Since TSS's are completely CPU-local, we want them
  * on exact cacheline boundaries, to eliminate cacheline ping-pong.
  */
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+DEFINE_PER_CPU_SHARED_ALIGNED(struct tss_struct, init_tss) = INIT_TSS;
+#else
 DEFINE_PER_CPU_PAGE_ALIGNED_USER_MAPPED(struct tss_struct, init_tss) = INIT_TSS;
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 #ifdef CONFIG_X86_64
 static DEFINE_PER_CPU(unsigned char, is_idle);

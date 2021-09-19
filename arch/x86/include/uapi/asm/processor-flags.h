@@ -79,8 +79,12 @@
 #define X86_CR3_PWT		_BITUL(X86_CR3_PWT_BIT)
 #define X86_CR3_PCD_BIT		4 /* Page Cache Disable */
 #define X86_CR3_PCD		_BITUL(X86_CR3_PCD_BIT)
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#define X86_CR3_PCID_MASK	_AC(0x00000fff,UL) /* PCID Mask */
+#else
 #define X86_CR3_PCID_NOFLUSH_BIT 63 /* Preserve old PCID */
 #define X86_CR3_PCID_NOFLUSH    _BITULL(X86_CR3_PCID_NOFLUSH_BIT)
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 /*
  * Intel CPU features in CR4

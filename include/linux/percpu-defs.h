@@ -1,11 +1,14 @@
 #ifndef _LINUX_PERCPU_DEFS_H
 #define _LINUX_PERCPU_DEFS_H
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #ifdef CONFIG_KAISER
 #define USER_MAPPED_SECTION "..user_mapped"
 #else
 #define USER_MAPPED_SECTION ""
 #endif
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 /*
  * Base implementations of per-CPU variable declarations and definitions, where
@@ -96,11 +99,14 @@
 #define DEFINE_PER_CPU(type, name)					\
 	DEFINE_PER_CPU_SECTION(type, name, "")
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #define DECLARE_PER_CPU_USER_MAPPED(type, name)				\
 	DECLARE_PER_CPU_SECTION(type, name, USER_MAPPED_SECTION)
 
 #define DEFINE_PER_CPU_USER_MAPPED(type, name)				\
 	DEFINE_PER_CPU_SECTION(type, name, USER_MAPPED_SECTION)
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 /*
  * Declaration/definition used for per-CPU variables that must come first in
@@ -131,6 +137,8 @@
 	DEFINE_PER_CPU_SECTION(type, name, PER_CPU_SHARED_ALIGNED_SECTION) \
 	____cacheline_aligned_in_smp
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #define DECLARE_PER_CPU_SHARED_ALIGNED_USER_MAPPED(type, name)		\
 	DECLARE_PER_CPU_SECTION(type, name, USER_MAPPED_SECTION PER_CPU_SHARED_ALIGNED_SECTION) \
 	____cacheline_aligned_in_smp
@@ -138,6 +146,7 @@
 #define DEFINE_PER_CPU_SHARED_ALIGNED_USER_MAPPED(type, name)		\
 	DEFINE_PER_CPU_SECTION(type, name, USER_MAPPED_SECTION PER_CPU_SHARED_ALIGNED_SECTION) \
 	____cacheline_aligned_in_smp
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 #define DECLARE_PER_CPU_ALIGNED(type, name)				\
 	DECLARE_PER_CPU_SECTION(type, name, PER_CPU_ALIGNED_SECTION)	\
@@ -157,6 +166,8 @@
 #define DEFINE_PER_CPU_PAGE_ALIGNED(type, name)				\
 	DEFINE_PER_CPU_SECTION(type, name, "..page_aligned")		\
 	__aligned(PAGE_SIZE)
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 /*
  * Declaration/definition used for per-CPU variables that must be page aligned and need to be mapped in user mode.
  */
@@ -167,6 +178,7 @@
 #define DEFINE_PER_CPU_PAGE_ALIGNED_USER_MAPPED(type, name)		\
 	DEFINE_PER_CPU_SECTION(type, name, USER_MAPPED_SECTION"..page_aligned") \
 	__aligned(PAGE_SIZE)
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 /*
  * Declaration/definition used for per-CPU variables that must be read mostly.

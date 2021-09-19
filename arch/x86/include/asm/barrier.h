@@ -24,6 +24,8 @@
 #define wmb()	asm volatile("sfence" ::: "memory")
 #endif
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #define gmb() alternative(ASM_NOP3, "lfence", X86_FEATURE_LFENCE_RDTSC)
 
 /**
@@ -49,6 +51,7 @@ static inline unsigned long array_index_mask_nospec(unsigned long index,
 
 /* Override the default implementation from linux/nospec.h. */
 #define array_index_mask_nospec array_index_mask_nospec
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 /**
  * read_barrier_depends - Flush all pending reads that subsequents reads
@@ -135,6 +138,9 @@ static inline unsigned long array_index_mask_nospec(unsigned long index,
  */
 static __always_inline void rdtsc_barrier(void)
 {
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	alternative(ASM_NOP3, "mfence", X86_FEATURE_MFENCE_RDTSC);
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	alternative(ASM_NOP3, "lfence", X86_FEATURE_LFENCE_RDTSC);
 }
 

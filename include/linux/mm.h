@@ -841,17 +841,24 @@ extern int mprotect_fixup(struct vm_area_struct *vma,
 int __get_user_pages_fast(unsigned long start, int nr_pages, int write,
 			  struct page **pages);
  
- static inline atomic_long_t *__get_mm_counter(struct mm_struct *mm, int member)
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
+static inline atomic_long_t *__get_mm_counter(struct mm_struct *mm, int member)
 {
 	if (member == MM_SHMEMPAGES)
 		return &mm->mm_shmempages;
 	else
 		return &mm->rss_stat.count[member];
 }
+#endif	 
 
 static inline unsigned long get_mm_counter(struct mm_struct *mm, int member)
 {
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	long val = atomic_long_read(&mm->rss_stat.count[member]);
+#else
 	long val = atomic_long_read(__get_mm_counter(mm, member));
+#endif	 
 
 #ifdef SPLIT_RSS_COUNTING
 	 
@@ -863,19 +870,34 @@ static inline unsigned long get_mm_counter(struct mm_struct *mm, int member)
 
 static inline void add_mm_counter(struct mm_struct *mm, int member, long value)
 {
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	atomic_long_add(value, &mm->rss_stat.count[member]);
+#else
 	atomic_long_add(value, __get_mm_counter(mm, member));
+#endif	 
 }
 
 static inline void inc_mm_counter(struct mm_struct *mm, int member)
 {
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	atomic_long_inc(&mm->rss_stat.count[member]);
+#else
 	atomic_long_inc(__get_mm_counter(mm, member));
+#endif	 
 }
 
 static inline void dec_mm_counter(struct mm_struct *mm, int member)
 {
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	atomic_long_dec(&mm->rss_stat.count[member]);
+#else
 	atomic_long_dec(__get_mm_counter(mm, member));
+#endif	 
 }
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
+ 
 static inline int mm_counter_file(struct page *page)
 {
 	if (PageSwapBacked(page))
@@ -889,12 +911,17 @@ static inline int mm_counter(struct page *page)
 		return MM_ANONPAGES;
 	return mm_counter_file(page);
 }
+#endif	 
 
 static inline unsigned long get_mm_rss(struct mm_struct *mm)
 {
 	return get_mm_counter(mm, MM_FILEPAGES) +
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+		get_mm_counter(mm, MM_ANONPAGES);
+#else
 		get_mm_counter(mm, MM_ANONPAGES) +
 		get_mm_counter(mm, MM_SHMEMPAGES);
+#endif	 
 }
 
 static inline unsigned long get_mm_hiwater_rss(struct mm_struct *mm)

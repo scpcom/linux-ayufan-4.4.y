@@ -2113,6 +2113,7 @@ extern int do_recvfile(struct file *, struct socket *, loff_t , size_t , size_t 
 extern void aggregate_recvfile_flush_only(struct file *file);
 extern int do_aggregate_recvfile(struct file *file, struct socket *sock, loff_t pos, size_t count, size_t *rbytes , size_t *wbytes, unsigned flush_only);
 extern int flush_aggregate_recvfile(int fd);
+extern int flush_aggregate_recvfile_filp(struct file *file);
 #endif  
 extern ssize_t generic_file_aio_read(struct kiocb *, const struct iovec *, unsigned long, loff_t);
 extern ssize_t __generic_file_aio_write(struct kiocb *, const struct iovec *, unsigned long,

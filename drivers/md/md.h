@@ -14,6 +14,10 @@
 #include <linux/wait.h>
 #include <linux/workqueue.h>
 
+#ifdef CONFIG_SYNO_MD_RAID_F1
+#define SYNO_RAID_LEVEL_F1 45
+
+#endif  
 #ifdef MY_ABC_HERE
 #define CHECKINTERVAL (7UL*HZ)
 #endif  
@@ -237,6 +241,9 @@ struct mddev {
 #define MD_RECOVERY_RESHAPE	8
 #define	MD_RECOVERY_FROZEN	9
 #define	MD_RECOVERY_ERROR	10
+#ifdef CONFIG_SYNO_MD_RAID_F1
+#define	MD_RESHAPE_START	11
+#endif  
 
 	unsigned long			recovery;
 	 
@@ -308,8 +315,15 @@ struct mddev {
 	unsigned char			auto_remap;
 #endif  
 #ifdef MY_ABC_HERE
-	void                            *syno_private;     
-	char                            lv_name[16];
+	unsigned char			enable_rmw;      
+#endif  
+#ifdef MY_ABC_HERE
+	#define MD_SYNC_DEBUG_OFF 0
+	#define MD_SYNC_DEBUG_ON 1
+	unsigned char           sync_debug;
+#endif  
+#ifdef CONFIG_SYNO_MD_RAID_F1
+	unsigned char           resync_mode;
 #endif  
 
 #ifdef MY_ABC_HERE

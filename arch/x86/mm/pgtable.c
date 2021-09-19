@@ -260,6 +260,8 @@ static void pgd_prepopulate_pmd(struct mm_struct *mm, pgd_t *pgd, pmd_t *pmds[])
 	}
 }
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #ifdef CONFIG_KAISER
 /*
  * Instead of one pgd, we aquire two pgds.  Being order-1, it is
@@ -270,13 +272,18 @@ static void pgd_prepopulate_pmd(struct mm_struct *mm, pgd_t *pgd, pmd_t *pmds[])
 #else
 #define PGD_ALLOCATION_ORDER 0
 #endif
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 pgd_t *pgd_alloc(struct mm_struct *mm)
 {
 	pgd_t *pgd;
 	pmd_t *pmds[PREALLOCATED_PMDS];
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	pgd = (pgd_t *)__get_free_page(PGALLOC_GFP);
+#else
 	pgd = (pgd_t *)__get_free_pages(PGALLOC_GFP, PGD_ALLOCATION_ORDER);
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 	if (pgd == NULL)
 		goto out;
@@ -306,7 +313,11 @@ pgd_t *pgd_alloc(struct mm_struct *mm)
 out_free_pmds:
 	free_pmds(pmds);
 out_free_pgd:
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	free_page((unsigned long)pgd);
+#else
 	free_pages((unsigned long)pgd, PGD_ALLOCATION_ORDER);
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 out:
 	return NULL;
 }
@@ -316,7 +327,11 @@ void pgd_free(struct mm_struct *mm, pgd_t *pgd)
 	pgd_mop_up_pmds(mm, pgd);
 	pgd_dtor(pgd);
 	paravirt_pgd_free(mm, pgd);
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	free_page((unsigned long)pgd);
+#else
 	free_pages((unsigned long)pgd, PGD_ALLOCATION_ORDER);
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 }
 
 /*

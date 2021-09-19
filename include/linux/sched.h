@@ -2012,7 +2012,11 @@ static inline int signal_pending_state(long state, struct task_struct *p)
 	return (state & TASK_INTERRUPTIBLE) || __fatal_signal_pending(p);
 }
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+static inline int need_resched(void)
+#else
 static __always_inline int need_resched(void)
+#endif	 
 {
 	return unlikely(test_thread_flag(TIF_NEED_RESCHED));
 }

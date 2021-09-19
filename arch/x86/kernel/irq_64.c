@@ -16,7 +16,10 @@
 #include <linux/ftrace.h>
 #include <linux/uaccess.h>
 #include <linux/smp.h>
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #include <linux/magic.h>
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 #include <asm/io_apic.h>
 #include <asm/idle.h>
 #include <asm/apic.h>
@@ -45,8 +48,11 @@ static inline void stack_overflow_check(struct pt_regs *regs)
 	u64 estack_top, estack_bottom;
 	u64 curbase = (u64)task_stack_page(current);
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	if (WARN_ON(__this_cpu_read(init_tss.stack_canary) != STACK_END_MAGIC))
 				__this_cpu_write(init_tss.stack_canary, STACK_END_MAGIC);
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	if (user_mode_vm(regs))
 		return;
 

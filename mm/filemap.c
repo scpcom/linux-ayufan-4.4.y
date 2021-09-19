@@ -1873,17 +1873,11 @@ void aggregate_recvfile_flush_only(struct file *file)
 }
 EXPORT_SYMBOL(aggregate_recvfile_flush_only);
 
-int flush_aggregate_recvfile(int fd)
+int __flush_aggregate_recvfile(struct file *file)
 {
 	int ret = 0;
 	struct inode *inode = NULL;
-	struct file *file = NULL;                 
 
-	if (-1 != fd) {
-		file = fget(fd);
-	} else {
-		file = fget(aggregate_fd);
-	}
 	if (!file || !file->f_mapping->a_ops->aggregate_write_end) {
 		goto out;
 	}
@@ -1914,6 +1908,24 @@ out:
 		fput(file);
 
 	return ret;
+}
+
+int flush_aggregate_recvfile_filp(struct file *file)
+{
+	return __flush_aggregate_recvfile(file);
+}
+EXPORT_SYMBOL(flush_aggregate_recvfile_filp);
+
+int flush_aggregate_recvfile(int fd)
+{
+	struct file *file = NULL;
+
+	if (-1 != fd) {
+		file = fget(fd);
+	} else {
+		file = fget(aggregate_fd);
+	}
+	return __flush_aggregate_recvfile(file);
 }
 EXPORT_SYMBOL(flush_aggregate_recvfile);
 #endif  

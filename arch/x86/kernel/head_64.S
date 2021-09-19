@@ -441,6 +441,8 @@ early_idt_ripmsg:
 	.balign	PAGE_SIZE; \
 GLOBAL(name)
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #ifdef CONFIG_KAISER
 /*
  * Each PGD needs to be 8k long and 8k aligned.  We do not
@@ -461,6 +463,7 @@ GLOBAL(name)
 #define NEXT_PGD_PAGE(name) NEXT_PAGE(name)
 #define KAISER_USER_PGD_FILL	0
 #endif
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 /* Automate the creation of 1 to 1 mapping pmd entries */
 #define PMDS(START, PERM, COUNT)			\
@@ -471,10 +474,16 @@ GLOBAL(name)
 	.endr
 
 	__INITDATA
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+NEXT_PAGE(early_level4_pgt)
+	.fill	511,8,0
+	.quad	level3_kernel_pgt - __START_KERNEL_map + _PAGE_TABLE
+#else
 NEXT_PGD_PAGE(early_level4_pgt)
 	.fill	511,8,0
 	.quad	level3_kernel_pgt - __START_KERNEL_map + _PAGE_TABLE
 	.fill	KAISER_USER_PGD_FILL,8,0
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 NEXT_PAGE(early_dynamic_pgts)
 	.fill	512*EARLY_DYNAMIC_PAGE_TABLES,8,0
@@ -482,9 +491,23 @@ NEXT_PAGE(early_dynamic_pgts)
 	.data
 
 #ifndef CONFIG_XEN
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+NEXT_PAGE(init_level4_pgt)
+	.fill	512,8,0
+#else
 NEXT_PGD_PAGE(init_level4_pgt)
 	.fill	512,8,0
 	.fill	KAISER_USER_PGD_FILL,8,0
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
+#else
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+NEXT_PAGE(init_level4_pgt)
+	.quad   level3_ident_pgt - __START_KERNEL_map + _KERNPG_TABLE
+	.org    init_level4_pgt + L4_PAGE_OFFSET*8, 0
+	.quad   level3_ident_pgt - __START_KERNEL_map + _KERNPG_TABLE
+	.org    init_level4_pgt + L4_START_KERNEL*8, 0
+	/* (2^48-(2*1024*1024*1024))/(2^39) = 511 */
+	.quad   level3_kernel_pgt - __START_KERNEL_map + _PAGE_TABLE
 #else
 NEXT_PGD_PAGE(init_level4_pgt)
 	.quad   level3_ident_pgt - __START_KERNEL_map + _KERNPG_TABLE
@@ -494,6 +517,7 @@ NEXT_PGD_PAGE(init_level4_pgt)
 	/* (2^48-(2*1024*1024*1024))/(2^39) = 511 */
 	.quad   level3_kernel_pgt - __START_KERNEL_map + _PAGE_TABLE
 	.fill	KAISER_USER_PGD_FILL,8,0
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 NEXT_PAGE(level3_ident_pgt)
 	.quad	level2_ident_pgt - __START_KERNEL_map + _KERNPG_TABLE

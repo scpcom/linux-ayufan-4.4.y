@@ -478,10 +478,17 @@ try_preserve_large_page(pte_t *kpte, unsigned long address,
 	 * a non present pmd. The canon_pgprot will clear _PAGE_GLOBAL
 	 * for the ancient hardware that doesn't support it.
 	 */
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	if (pgprot_val(req_prot) & _PAGE_PRESENT)
+		pgprot_val(req_prot) |= _PAGE_PSE | _PAGE_GLOBAL;
+	else
+		pgprot_val(req_prot) &= ~(_PAGE_PSE | _PAGE_GLOBAL);
+#else
 	if (pgprot_val(req_prot) & _PAGE_PRESENT)
 		pgprot_val(req_prot) |= _PAGE_PSE | __PAGE_KERNEL_GLOBAL;
 	else
 		pgprot_val(req_prot) &= ~(_PAGE_PSE | __PAGE_KERNEL_GLOBAL);
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 	req_prot = canon_pgprot(req_prot);
 
@@ -593,10 +600,17 @@ __split_large_page(pte_t *kpte, unsigned long address, struct page *base)
 	 * present pmd/pte. The canon_pgprot will clear _PAGE_GLOBAL
 	 * for the ancient hardware that doesn't support it.
 	 */
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	if (pgprot_val(ref_prot) & _PAGE_PRESENT)
+		pgprot_val(ref_prot) |= _PAGE_GLOBAL;
+	else
+		pgprot_val(ref_prot) &= ~_PAGE_GLOBAL;
+#else
 	if (pgprot_val(ref_prot) & _PAGE_PRESENT)
 		pgprot_val(ref_prot) |= __PAGE_KERNEL_GLOBAL;
 	else
 		pgprot_val(ref_prot) &= ~__PAGE_KERNEL_GLOBAL;
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 	/*
 	 * Get the target pfn from the original entry:
@@ -722,10 +736,17 @@ repeat:
 		 * _PAGE_GLOBAL for the ancient hardware that doesn't
 		 * support it.
 		 */
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+		if (pgprot_val(new_prot) & _PAGE_PRESENT)
+			pgprot_val(new_prot) |= _PAGE_GLOBAL;
+		else
+			pgprot_val(new_prot) &= ~_PAGE_GLOBAL;
+#else
 		if (pgprot_val(new_prot) & _PAGE_PRESENT)
 			pgprot_val(new_prot) |= __PAGE_KERNEL_GLOBAL;
 		else
 			pgprot_val(new_prot) &= ~__PAGE_KERNEL_GLOBAL;
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 		/*
 		 * We need to keep the pfn from the existing PTE,

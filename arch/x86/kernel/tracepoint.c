@@ -4,6 +4,8 @@
  * Copyright (C) 2013 Seiji Aguchi <seiji.aguchi@hds.com>
  *
  */
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #include <asm/hw_irq.h>
 #include <asm/desc.h>
 #include <linux/atomic.h>
@@ -57,3 +59,4 @@ void trace_irq_vector_unregfunc(void)
 	}
 	mutex_unlock(&irq_vector_mutex);
 }
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */

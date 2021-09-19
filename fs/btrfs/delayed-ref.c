@@ -416,11 +416,20 @@ update_existing_ref(struct btrfs_trans_handle *trans,
 }
 
 static noinline void
-update_existing_head_ref(struct btrfs_delayed_ref_node *existing,
+#ifdef MY_DEF_HERE
+update_existing_head_ref(struct btrfs_fs_info *fs_info,
+			 struct btrfs_delayed_ref_root *delayed_refs,
+			 struct btrfs_delayed_ref_node *existing,
 			 struct btrfs_delayed_ref_node *update)
+#else
+update_existing_head_ref(struct btrfs_delayed_ref_root *delayed_refs,
+			 struct btrfs_delayed_ref_node *existing,
+			 struct btrfs_delayed_ref_node *update)
+#endif  
 {
 	struct btrfs_delayed_ref_head *existing_ref;
 	struct btrfs_delayed_ref_head *ref;
+	int old_ref_mod;
 
 	existing_ref = btrfs_delayed_node_to_head(existing);
 	ref = btrfs_delayed_node_to_head(update);
@@ -454,7 +463,28 @@ update_existing_head_ref(struct btrfs_delayed_ref_node *existing,
 		}
 	}
 	 
+	old_ref_mod = existing_ref->total_ref_mod;
 	existing->ref_mod += update->ref_mod;
+	existing_ref->total_ref_mod += update->ref_mod;
+
+	if (existing_ref->is_data) {
+#ifdef MY_DEF_HERE
+		u64 csum_leaves = btrfs_csum_bytes_to_leaves(fs_info->tree_root, existing->num_bytes);
+		if (existing_ref->total_ref_mod >= 0 && old_ref_mod < 0) {
+			delayed_refs->pending_csums -= existing->num_bytes;
+			delayed_refs->num_pending_csums_leafs -= csum_leaves;
+		}
+		if (existing_ref->total_ref_mod < 0 && old_ref_mod >= 0) {
+			delayed_refs->pending_csums += existing->num_bytes;
+			delayed_refs->num_pending_csums_leafs += csum_leaves;
+		}
+#else
+		if (existing_ref->total_ref_mod >= 0 && old_ref_mod < 0)
+			delayed_refs->pending_csums -= existing->num_bytes;
+		if (existing_ref->total_ref_mod < 0 && old_ref_mod >= 0)
+			delayed_refs->pending_csums += existing->num_bytes;
+#endif  
+	}
 	spin_unlock(&existing_ref->lock);
 }
 
@@ -497,6 +527,7 @@ add_delayed_ref_head(struct btrfs_fs_info *fs_info,
 	head_ref->is_data = is_data;
 	head_ref->ref_root = RB_ROOT;
 	head_ref->processing = 0;
+	head_ref->total_ref_mod = count_mod;
 
 	spin_lock_init(&head_ref->lock);
 	mutex_init(&head_ref->mutex);
@@ -506,11 +537,24 @@ add_delayed_ref_head(struct btrfs_fs_info *fs_info,
 	existing = htree_insert(&delayed_refs->href_root,
 				&head_ref->href_node);
 	if (existing) {
-		update_existing_head_ref(&existing->node, ref);
+#ifdef MY_DEF_HERE
+		update_existing_head_ref(fs_info, delayed_refs, &existing->node, ref);
+#else
+		update_existing_head_ref(delayed_refs, &existing->node, ref);
+#endif  
 		 
 		kmem_cache_free(btrfs_delayed_ref_head_cachep, head_ref);
 		head_ref = existing;
 	} else {
+#ifdef MY_DEF_HERE
+		if (is_data && count_mod < 0) {
+			delayed_refs->pending_csums += num_bytes;
+			delayed_refs->num_pending_csums_leafs += btrfs_csum_bytes_to_leaves(fs_info->tree_root, num_bytes);
+		}
+#else
+		if (is_data && count_mod < 0)
+			delayed_refs->pending_csums += num_bytes;
+#endif  
 		delayed_refs->num_heads++;
 		delayed_refs->num_heads_ready++;
 		atomic_inc(&delayed_refs->num_entries);

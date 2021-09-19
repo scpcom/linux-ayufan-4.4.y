@@ -1930,6 +1930,13 @@ SMB2_echo(struct TCP_Server_Info *server)
 
 	cifs_dbg(FYI, "In echo request\n");
 
+#ifdef MY_ABC_HERE
+	if (server && CifsGood != server->tcpStatus) {
+		cifs_dbg(FYI, "tcpStatus not Good (%d); Don't send echo\n",
+				server->tcpStatus);
+		return rc;
+	}
+#endif /* MY_ABC_HERE */
 	if (server->tcpStatus == CifsNeedNegotiate) {
 		/* No need to send echo on newly established connections */
 		queue_delayed_work(cifsiod_wq, &server->reconnect, 0);

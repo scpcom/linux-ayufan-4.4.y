@@ -1,5 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #ifndef __NOSPEC_BRANCH_H__
 #define __NOSPEC_BRANCH_H__
 
@@ -209,3 +211,4 @@ static inline void fill_RSB(void)
 
 #endif /* __ASSEMBLY__ */
 #endif /* __NOSPEC_BRANCH_H__ */
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */

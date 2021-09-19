@@ -36,16 +36,23 @@ static inline void fill_ldt(struct desc_struct *desc, const struct user_desc *in
 
 extern struct desc_ptr idt_descr;
 extern gate_desc idt_table[];
-extern struct desc_ptr debug_idt_descr;
-extern gate_desc debug_idt_table[];
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
 extern struct desc_ptr nmi_idt_descr;
 extern gate_desc nmi_idt_table[];
+#else
+extern struct desc_ptr debug_idt_descr;
+extern gate_desc debug_idt_table[];
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 struct gdt_page {
 	struct desc_struct gdt[GDT_ENTRIES];
 } __attribute__((aligned(PAGE_SIZE)));
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+DECLARE_PER_CPU_PAGE_ALIGNED(struct gdt_page, gdt_page);
+#else
 DECLARE_PER_CPU_PAGE_ALIGNED_USER_MAPPED(struct gdt_page, gdt_page);
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 static inline struct desc_struct *get_cpu_gdt_table(unsigned int cpu)
 {
@@ -326,10 +333,17 @@ static inline void set_nmi_gate(int gate, void *addr)
 	gate_desc s;
 
 	pack_gate(&s, GATE_INTERRUPT, (unsigned long)addr, 0, 0, __KERNEL_CS);
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
 	write_idt_entry(nmi_idt_table, gate, &s);
+#else
+	write_idt_entry(debug_idt_table, gate, &s);
+#endif /* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
+
 }
 #endif
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #ifdef CONFIG_TRACING
 extern struct desc_ptr trace_idt_descr;
 extern gate_desc trace_idt_table[];
@@ -357,6 +371,7 @@ static inline void write_trace_idt_entry(int entry, const gate_desc *gate)
 
 #define _trace_set_gate(gate, type, addr, dpl, ist, seg)
 #endif
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 static inline void _set_gate(int gate, unsigned type, void *addr,
 			     unsigned dpl, unsigned ist, unsigned seg)
@@ -381,7 +396,10 @@ static inline void set_intr_gate(unsigned int n, void *addr)
 {
 	BUG_ON((unsigned)n > 0xFF);
 	_set_gate(n, GATE_INTERRUPT, addr, 0, 0, __KERNEL_CS);
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	_trace_set_gate(n, GATE_INTERRUPT, (void *)trace_##addr, 0, 0, __KERNEL_CS);
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 }
 
 extern int first_system_vector;
@@ -444,6 +462,8 @@ static inline void set_system_intr_gate_ist(int n, void *addr, unsigned ist)
 	_set_gate(n, GATE_INTERRUPT, addr, 0x3, ist, __KERNEL_CS);
 }
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #ifdef CONFIG_X86_64
 DECLARE_PER_CPU(u32, debug_idt_ctr);
 static inline bool is_debug_idt_enabled(void)
@@ -510,4 +530,5 @@ static inline void load_current_idt(void)
 	else
 		load_idt((const struct desc_ptr *)&idt_descr);
 }
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 #endif /* _ASM_X86_DESC_H */

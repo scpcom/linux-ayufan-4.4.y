@@ -1773,6 +1773,12 @@ dont_test_tx_en:
 	up->lsr_saved_flags = 0;
 	up->msr_saved_flags = 0;
 
+#ifdef MY_ABC_HERE
+	 
+	if (uart_console(port))
+		up->dma = NULL;
+#endif  
+
 	if (up->dma) {
 		retval = serial8250_request_dma(up);
 		if (retval) {

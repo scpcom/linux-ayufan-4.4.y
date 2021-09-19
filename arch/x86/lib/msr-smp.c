@@ -47,6 +47,8 @@ int rdmsr_on_cpu(unsigned int cpu, u32 msr_no, u32 *l, u32 *h)
 }
 EXPORT_SYMBOL(rdmsr_on_cpu);
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 int rdmsrl_on_cpu(unsigned int cpu, u32 msr_no, u64 *q)
 {
 	int err;
@@ -61,6 +63,7 @@ int rdmsrl_on_cpu(unsigned int cpu, u32 msr_no, u64 *q)
 	return err;
 }
 EXPORT_SYMBOL(rdmsrl_on_cpu);
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 int wrmsr_on_cpu(unsigned int cpu, u32 msr_no, u32 l, u32 h)
 {
@@ -78,6 +81,8 @@ int wrmsr_on_cpu(unsigned int cpu, u32 msr_no, u32 l, u32 h)
 }
 EXPORT_SYMBOL(wrmsr_on_cpu);
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 int wrmsrl_on_cpu(unsigned int cpu, u32 msr_no, u64 q)
 {
 	int err;
@@ -93,6 +98,7 @@ int wrmsrl_on_cpu(unsigned int cpu, u32 msr_no, u64 q)
 	return err;
 }
 EXPORT_SYMBOL(wrmsrl_on_cpu);
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 static void __rwmsr_on_cpus(const struct cpumask *mask, u32 msr_no,
 			    struct msr *msrs,
@@ -190,6 +196,8 @@ int wrmsr_safe_on_cpu(unsigned int cpu, u32 msr_no, u32 l, u32 h)
 }
 EXPORT_SYMBOL(wrmsr_safe_on_cpu);
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 int wrmsrl_safe_on_cpu(unsigned int cpu, u32 msr_no, u64 q)
 {
 	int err;
@@ -220,6 +228,7 @@ int rdmsrl_safe_on_cpu(unsigned int cpu, u32 msr_no, u64 *q)
 	return err ? err : rv.err;
 }
 EXPORT_SYMBOL(rdmsrl_safe_on_cpu);
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 /*
  * These variants are significantly slower, but allows control over

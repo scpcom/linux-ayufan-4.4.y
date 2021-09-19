@@ -6,7 +6,10 @@
 #ifndef _ASM_X86_MACH_DEFAULT_APM_H
 #define _ASM_X86_MACH_DEFAULT_APM_H
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #include <asm/spec_ctrl.h>
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 #ifdef APM_ZERO_SEGS
 #	define APM_DO_ZERO_SEGS \
@@ -29,9 +32,12 @@ static inline void apm_bios_call_asm(u32 func, u32 ebx_in, u32 ecx_in,
 					u32 *eax, u32 *ebx, u32 *ecx,
 					u32 *edx, u32 *esi)
 {
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	bool ibrs_on;
 
 	ibrs_on = unprotected_firmware_begin();
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	/*
 	 * N.B. We do NOT need a cld after the BIOS call
 	 * because we always save and restore the flags.
@@ -48,7 +54,10 @@ static inline void apm_bios_call_asm(u32 func, u32 ebx_in, u32 ecx_in,
 		  "=S" (*esi)
 		: "a" (func), "b" (ebx_in), "c" (ecx_in)
 		: "memory", "cc");
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	unprotected_firmware_end(ibrs_on);
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 }
 
 static inline u8 apm_bios_call_simple_asm(u32 func, u32 ebx_in,
@@ -57,7 +66,10 @@ static inline u8 apm_bios_call_simple_asm(u32 func, u32 ebx_in,
 	int	cx, dx, si;
 	u8	error;
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	ibrs_on = unprotected_firmware_begin();
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	/*
 	 * N.B. We do NOT need a cld after the BIOS call
 	 * because we always save and restore the flags.
@@ -74,7 +86,10 @@ static inline u8 apm_bios_call_simple_asm(u32 func, u32 ebx_in,
 		  "=S" (si)
 		: "a" (func), "b" (ebx_in), "c" (ecx_in)
 		: "memory", "cc");
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	unprotected_firmware_end(ibrs_on);
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	return error;
 }
 

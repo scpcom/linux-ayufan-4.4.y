@@ -2812,6 +2812,13 @@ state_store(struct md_rdev *rdev, const char *buf, size_t len)
 		err = 0;
 	} else if (cmd_match(buf, "want_replacement")) {
 		 
+#ifdef CONFIG_SYNO_MD_RAID_F1
+		if (2 != rdev->mddev->resync_mode) {
+			printk(KERN_ERR "md: %s: cannot set %s to be want_replacement\n", mdname(rdev->mddev), rdev->bdev->bd_disk->disk_name);
+			err = -EINVAL;
+			goto ERR;
+		}
+#endif  
 		if (rdev->raid_disk >= 0 &&
 		    !test_bit(Replacement, &rdev->flags))
 			set_bit(WantReplacement, &rdev->flags);
@@ -2839,6 +2846,9 @@ state_store(struct md_rdev *rdev, const char *buf, size_t len)
 			err = 0;
 		}
 	}
+#ifdef CONFIG_SYNO_MD_RAID_F1
+ERR:
+#endif  
 	if (!err)
 		sysfs_notify_dirent_safe(rdev->sysfs_state);
 	return err ? err : len;
@@ -4688,6 +4698,87 @@ static struct md_sysfs_entry md_active =
 __ATTR(active, S_IRUGO|S_IWUSR, md_active_show, md_active_store);
 #endif  
 
+#ifdef MY_ABC_HERE
+static ssize_t
+enable_rmw_show(struct mddev *mddev, char *page)
+{
+	return sprintf(page, "%d\n", mddev->enable_rmw);
+}
+
+static ssize_t
+enable_rmw_store(struct mddev *mddev, const char *page, size_t len)
+{
+	if (!mddev->pers){
+		len = -EINVAL;
+		goto END;
+	}
+
+	if (cmd_match(page, "1")) {
+		mddev->enable_rmw = 1;
+	} else if (cmd_match(page, "0")) {
+		mddev->enable_rmw = 0;
+	} else {
+		printk("md: %s: enable_rmw, error input\n", mdname(mddev));
+		goto END;
+	}
+
+END:
+	return len;
+}
+
+static struct md_sysfs_entry md_enable_rmw =
+__ATTR(enable_rmw, S_IRUGO|S_IWUSR, enable_rmw_show, enable_rmw_store);
+#endif  
+
+#ifdef MY_ABC_HERE
+static ssize_t
+sync_debug_show(struct mddev *mddev, char *page)
+{
+    return sprintf(page, "%d\n", mddev->sync_debug);
+}
+
+static ssize_t
+sync_debug_store(struct mddev *mddev, const char *page, size_t len)
+{
+    if (cmd_match(page, "1")) {
+		mddev->sync_debug = MD_SYNC_DEBUG_ON;
+	} else if (cmd_match(page, "0")) {
+		mddev->sync_debug = MD_SYNC_DEBUG_OFF;
+	} else {
+		printk("md: %s: sync_debug error input\n", mdname(mddev));
+	}
+	return len;
+}
+
+static struct md_sysfs_entry md_sync_debug =
+__ATTR(sync_debug, S_IRUGO|S_IWUSR, sync_debug_show, sync_debug_store);
+#endif  
+#ifdef CONFIG_SYNO_MD_RAID_F1
+static ssize_t
+resync_mode_show(struct mddev *mddev, char *page)
+{
+    return sprintf(page, "%d\n", mddev->resync_mode);
+}
+
+static ssize_t
+resync_mode_store(struct mddev *mddev, const char *page, size_t len)
+{
+    if (cmd_match(page, "2")) {
+		mddev->resync_mode = 2;
+	} else if (cmd_match(page, "1")) {
+		mddev->resync_mode = 1;
+	} else if (cmd_match(page, "0")) {
+		mddev->resync_mode = 0;
+	} else {
+		printk("md: %s: resync_mode error input\n", mdname(mddev));
+	}
+	return len;
+}
+
+static struct md_sysfs_entry md_resync_mode =
+__ATTR(resync_mode, S_IRUGO|S_IWUSR, resync_mode_show, resync_mode_store);
+#endif  
+
 static ssize_t
 array_size_show(struct mddev *mddev, char *page)
 {
@@ -4778,6 +4869,9 @@ static struct attribute *md_default_attrs[] = {
 	&md_active.attr,
 #endif  
 #ifdef MY_ABC_HERE
+	&md_enable_rmw.attr,
+#endif  
+#ifdef MY_ABC_HERE
 	&md_sb_not_clean.attr,
 #endif  
 	NULL,
@@ -4792,6 +4886,12 @@ static struct attribute *md_redundancy_attrs[] = {
 	&md_sync_speed.attr,
 	&md_sync_force_parallel.attr,
 	&md_sync_completed.attr,
+#ifdef MY_ABC_HERE
+	&md_sync_debug.attr,
+#endif  
+#ifdef CONFIG_SYNO_MD_RAID_F1
+	&md_resync_mode.attr,
+#endif  
 	&md_min_sync.attr,
 	&md_max_sync.attr,
 	&md_suspend_lo.attr,
@@ -5026,34 +5126,6 @@ static void md_safemode_timeout(unsigned long data)
 	}
 	md_wakeup_thread(mddev->thread);
 }
-
-#ifdef MY_ABC_HERE
-void SYNOLvInfoSet(struct block_device *bdev, void *private, const char *name)
-{
-	struct mddev *mddev = NULL;
-	char *szDiskName = NULL;
-
-	if (!bdev || !private || !name){
-		printk("%s:%s(%d) error params\n", __FILE__, __FUNCTION__, __LINE__);
-		return;
-	}
-
-	szDiskName = bdev->bd_disk->disk_name;
-	if (NULL == strstr(szDiskName, "md")) {
-		printk("%s:%s(%d) This's not md device:[%s]\n",
-			__FILE__, __FUNCTION__, __LINE__, szDiskName);
-		return;
-	}
-
-	mddev = bdev->bd_disk->private_data;
-	if (mddev) {
-		mddev->syno_private = private;
-	}
-
-	snprintf(mddev->lv_name, 16, "%s", name);
-}
-EXPORT_SYMBOL(SYNOLvInfoSet);
-#endif  
 
 #ifdef MY_ABC_HERE
 static int start_dirty_degraded = 1;
@@ -6904,6 +6976,16 @@ void md_error(struct mddev *mddev, struct md_rdev *rdev)
 
 	if (!mddev->pers || !mddev->pers->error_handler)
 		return;
+
+#if defined(MY_ABC_HERE) \
+	&& defined (MY_ABC_HERE) \
+	&& defined (MY_ABC_HERE)
+
+	if (!test_bit(DiskError, &rdev->flags)) {
+		SynoReportFaultyDevice(mddev->md_minor, rdev->bdev);
+	}
+#endif  
+
 #ifdef MY_ABC_HERE
 	printk("%s: %s is being to be set faulty\n",
 		__FUNCTION__, bdevname(rdev->bdev, b));
@@ -7487,7 +7569,11 @@ void md_do_sync(struct md_thread *thread)
 	}
 
 #ifdef MY_ABC_HERE
+#ifdef CONFIG_SYNO_MD_RAID_F1
+	if (mddev->level == 4 || mddev->level == 5 || mddev->level == 6 || mddev->level == SYNO_RAID_LEVEL_F1) {
+#else  
 	if (mddev->level == 4 || mddev->level == 5 || mddev->level == 6) {
+#endif  
 		printk(KERN_WARNING "md: %s: flushing inflight I/O\n", mdname(mddev));
 		mddev_lock(mddev);
 		mddev_suspend(mddev);
@@ -7810,6 +7896,46 @@ no_add:
 	return spares;
 }
 
+#ifdef CONFIG_SYNO_MD_RAID_F1
+static int can_md_do_resync(struct mddev *mddev)
+{
+	int can_resync = (0 == mddev->resync_mode ? 0 : 1);
+	int min_recovery_offset = MaxSector;
+	struct md_rdev *rdev;
+
+	if (SYNO_RAID_LEVEL_F1 != mddev->level) {
+		return 1;
+	}
+
+	rcu_read_lock();
+	rdev_for_each_rcu(rdev, mddev)
+		if (rdev->raid_disk >= 0 &&
+		    !test_bit(Faulty, &rdev->flags) &&
+		    !test_bit(In_sync, &rdev->flags) &&
+		    rdev->recovery_offset < min_recovery_offset)
+			min_recovery_offset = rdev->recovery_offset;
+	rcu_read_unlock();
+
+	if (min_recovery_offset > 0) {
+		return 1;
+	}
+
+	if (test_bit(MD_RECOVERY_RESHAPE, &mddev->recovery)) {
+		return 1;
+	}
+
+	if (test_bit(MD_RECOVERY_SYNC, &mddev->recovery)) {
+		return 1;
+	}
+
+	if (0 == can_resync) {
+		printk(KERN_ERR "md: %s: refuse to start recovery\n", mdname(mddev));
+	}
+	return can_resync;
+}
+
+#endif  
+ 
 void md_check_recovery(struct mddev *mddev)
 {
 	if (mddev->suspended)
@@ -7941,9 +8067,18 @@ void md_check_recovery(struct mddev *mddev)
 				 
 				bitmap_write_all(mddev->bitmap);
 			}
+#ifdef CONFIG_SYNO_MD_RAID_F1
+			if (can_md_do_resync(mddev)) {
+				mddev->sync_thread = md_register_thread(md_do_sync, mddev, "resync");
+			} else {
+				md_unregister_thread(&mddev->sync_thread);
+			}
+			mddev->resync_mode = 0;
+#else  
 			mddev->sync_thread = md_register_thread(md_do_sync,
 								mddev,
 								"resync");
+#endif  
 			if (!mddev->sync_thread) {
 				printk(KERN_ERR "%s: could not start resync"
 					" thread...\n",

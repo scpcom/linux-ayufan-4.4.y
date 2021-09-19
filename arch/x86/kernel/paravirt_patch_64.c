@@ -1,6 +1,9 @@
 #include <asm/paravirt.h>
 #include <asm/asm-offsets.h>
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #include <asm/processor.h>
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 #include <linux/stringify.h>
 
 DEF_NATIVE(pv_irq_ops, irq_disable, "cli");
@@ -58,6 +61,9 @@ unsigned native_patch(u8 type, u16 clobbers, void *ibuf,
 		PATCH_SITE(pv_mmu_ops, read_cr3);
 		PATCH_SITE(pv_mmu_ops, write_cr3);
 		PATCH_SITE(pv_cpu_ops, clts);
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+		PATCH_SITE(pv_mmu_ops, flush_tlb_single);
+#else
 		case PARAVIRT_PATCH(pv_mmu_ops.flush_tlb_single):
 			if (!boot_cpu_has(X86_FEATURE_PCID)) {
 				start = start_pv_mmu_ops_flush_tlb_single;
@@ -66,6 +72,7 @@ unsigned native_patch(u8 type, u16 clobbers, void *ibuf,
 			} else {
 				goto patch_default;
 			}
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 		PATCH_SITE(pv_cpu_ops, wbinvd);
 
 	patch_site:

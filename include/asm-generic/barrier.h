@@ -29,9 +29,12 @@
 #define mb()	asm volatile ("": : :"memory")
 #define rmb()	mb()
 #define wmb()	asm volatile ("": : :"memory")
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #ifndef gmb
 #define gmb()	do { } while (0)
 #endif
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 #ifdef CONFIG_SMP
 #define smp_mb()	mb()

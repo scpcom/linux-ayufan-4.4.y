@@ -15,11 +15,14 @@
 #include <asm/irqflags.h>
 #include <asm/asm.h>
 #include <asm/smap.h>
-#include <asm/spec_ctrl.h>
-#include <asm/nospec-branch.h>
 #include <linux/linkage.h>
 #include <linux/err.h>
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
+#include <asm/spec_ctrl.h>
+#include <asm/nospec-branch.h>
 #include "../kernel/kaiser.h"
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 /* Avoid __ASSEMBLER__'ifying <linux/audit.h> just for this.  */
 #include <linux/elf-em.h>
@@ -124,12 +127,18 @@ ENTRY(ia32_sysenter_target)
 	CFI_DEF_CFA	rsp,0
 	CFI_REGISTER	rsp,rbp
 	SWAPGS_UNSAFE_STACK
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	SWITCH_TO_KERNEL_CR3
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	movq	PER_CPU_VAR(kernel_stack), %rsp
 	addq	$(KERNEL_STACK_OFFSET),%rsp
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	IBRS_ENTRY
 	CLEAR_R8_TO_R15
 	FILL_RETURN_BUFFER /* no ret allowed before stuffing the RSB */
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	/*
 	 * No need to follow this irqs on/off section: the syscall
 	 * disabled irqs, here we enable it straight after entry:
@@ -173,25 +182,39 @@ sysenter_flags_fixed:
 	CFI_REMEMBER_STATE
 	jnz  sysenter_tracesys
 	cmpq	$(IA32_NR_syscalls),%rax
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	ja	ia32_badsys
+#else
 	jae	ia32_badsys
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 sysenter_do_call:
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	sbb	%r8,%r8				/* array_index_mask_nospec() */
 	and	%r8,%rax
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	IA32_ARG_FIXUP
 sysenter_dispatch:
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	call	*ia32_sys_call_table(,%rax,8)
+#else
 #ifdef CONFIG_RETPOLINE
 	mov	ia32_sys_call_table(,%rax,8), %rax
 	call	__x86_indirect_thunk_rax
 #else
 	call	*ia32_sys_call_table(,%rax,8)
 #endif
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	movq	%rax,RAX-ARGOFFSET(%rsp)
 	DISABLE_INTERRUPTS(CLBR_NONE)
 	TRACE_IRQS_OFF
 	testl	$_TIF_ALLWORK_MASK,TI_flags+THREAD_INFO(%rsp,RIP-ARGOFFSET)
 	jnz	sysexit_audit
 sysexit_from_sys_call:
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	IBRS_EXIT
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	andl    $~TS_COMPAT,TI_status+THREAD_INFO(%rsp,RIP-ARGOFFSET)
 	/* clear IF, that popfq doesn't enable interrupts early */
 	andl  $~0x200,EFLAGS-R11(%rsp) 
@@ -207,7 +230,10 @@ sysexit_from_sys_call:
 	popq_cfi %rcx				/* User %esp */
 	CFI_REGISTER rsp,rcx
 	TRACE_IRQS_ON
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	SWITCH_TO_USER_CR3
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	ENABLE_INTERRUPTS_SYSEXIT32
 
 	CFI_RESTORE_STATE
@@ -222,10 +248,15 @@ sysexit_from_sys_call:
 	movl $AUDIT_ARCH_I386,%edi	/* 1st arg: audit arch */
 	call __audit_syscall_entry
 	movl RAX-ARGOFFSET(%rsp),%eax	/* reload syscall number */
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	cmpq $(IA32_NR_syscalls-1),%rax
+	ja ia32_badsys
+#else
 	cmpq $(IA32_NR_syscalls),%rax
 	jae  ia32_badsys
 	sbb  %r8,%r8			/* array_index_mask_nospec() */
 	and  %r8,%rax
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	movl %ebx,%edi			/* reload 1st syscall arg */
 	movl RCX-ARGOFFSET(%rsp),%esi	/* reload 2nd syscall arg */
 	movl RDX-ARGOFFSET(%rsp),%edx	/* reload 3rd syscall arg */
@@ -281,8 +312,13 @@ sysenter_tracesys:
 	call	syscall_trace_enter
 	LOAD_ARGS32 ARGOFFSET  /* reload args from stack in case ptrace changed it */
 	RESTORE_REST
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	cmpq	$(IA32_NR_syscalls-1),%rax
+	ja	int_ret_from_sys_call /* sysenter_tracesys has set RAX(%rsp) */
+#else
 	cmpq	$(IA32_NR_syscalls),%rax
 	jae	int_ret_from_sys_call /* sysenter_tracesys has set RAX(%rsp) */
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	jmp	sysenter_do_call
 	CFI_ENDPROC
 ENDPROC(ia32_sysenter_target)
@@ -314,16 +350,25 @@ ENTRY(ia32_cstar_target)
 	CFI_REGISTER	rip,rcx
 	/*CFI_REGISTER	rflags,r11*/
 	SWAPGS_UNSAFE_STACK
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	SWITCH_TO_KERNEL_CR3
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	movl	%esp,%r8d
 	CFI_REGISTER	rsp,r8
 	movq	PER_CPU_VAR(kernel_stack),%rsp
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	IBRS_ENTRY
 	FILL_RETURN_BUFFER /* no ret allowed before stuffing the RSB */
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	/*
 	 * No need to follow this irqs on/off section: the syscall
 	 * disabled irqs and here we enable it straight after entry:
 	 */
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	ENABLE_INTERRUPTS(CLBR_NONE)
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	SAVE_ARGS 8,0,0
 	movl 	%eax,%eax	/* zero extension */
 	movq	%rax,ORIG_RAX-ARGOFFSET(%rsp)
@@ -336,14 +381,20 @@ ENTRY(ia32_cstar_target)
 	movq	%r11,EFLAGS-ARGOFFSET(%rsp)
 	/*CFI_REL_OFFSET rflags,EFLAGS-ARGOFFSET*/
 	movq	%r8,RSP-ARGOFFSET(%rsp)	
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	CLEAR_R8_TO_R15
 	ENABLE_INTERRUPTS(CLBR_NONE)
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	CFI_REL_OFFSET rsp,RSP-ARGOFFSET
 	/* no need to do an access_ok check here because r8 has been
 	   32bit zero extended */ 
 	/* hardware stack frame is complete now */	
 	ASM_STAC
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	movq    RSP-ARGOFFSET(%rsp), %r8
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 1:	movl	(%r8),%r9d
 	_ASM_EXTABLE(1b,ia32_badarg)
 	ASM_CLAC
@@ -351,26 +402,41 @@ ENTRY(ia32_cstar_target)
 	testl   $_TIF_WORK_SYSCALL_ENTRY,TI_flags+THREAD_INFO(%rsp,RIP-ARGOFFSET)
 	CFI_REMEMBER_STATE
 	jnz   cstar_tracesys
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	cmpq $IA32_NR_syscalls-1,%rax
+	ja  ia32_badsys
+#else
 	cmpq $IA32_NR_syscalls,%rax
 	jae  ia32_badsys
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 cstar_do_call:
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	sbb  %r8,%r8				/* array_index_mask_nospec() */
 	and  %r8,%rax
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	IA32_ARG_FIXUP 1
 cstar_dispatch:
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	call *ia32_sys_call_table(,%rax,8)
+#else
 #ifdef CONFIG_RETPOLINE
 	mov ia32_sys_call_table(,%rax,8), %rax
 	call __x86_indirect_thunk_rax
 #else
 	call *ia32_sys_call_table(,%rax,8)
 #endif
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	movq %rax,RAX-ARGOFFSET(%rsp)
 	DISABLE_INTERRUPTS(CLBR_NONE)
 	TRACE_IRQS_OFF
 	testl $_TIF_ALLWORK_MASK,TI_flags+THREAD_INFO(%rsp,RIP-ARGOFFSET)
 	jnz sysretl_audit
 sysretl_from_sys_call:
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	IBRS_EXIT
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	andl $~TS_COMPAT,TI_status+THREAD_INFO(%rsp,RIP-ARGOFFSET)
 	RESTORE_ARGS 0,-ARG_SKIP,0,0,0
 	movl RIP-ARGOFFSET(%rsp),%ecx
@@ -383,7 +449,10 @@ sysretl_from_sys_call:
 	TRACE_IRQS_ON
 	movl RSP-ARGOFFSET(%rsp),%esp
 	CFI_RESTORE rsp
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	SWITCH_TO_USER_CR3
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	USERGS_SYSRET32
 	
 #ifdef CONFIG_AUDITSYSCALL
@@ -412,8 +481,13 @@ cstar_tracesys:
 	LOAD_ARGS32 ARGOFFSET, 1  /* reload args from stack in case ptrace changed it */
 	RESTORE_REST
 	xchgl %ebp,%r9d
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	cmpq $(IA32_NR_syscalls-1),%rax
+	ja int_ret_from_sys_call /* cstar_tracesys has set RAX(%rsp) */
+#else
 	cmpq $(IA32_NR_syscalls),%rax
 	jae int_ret_from_sys_call /* cstar_tracesys has set RAX(%rsp) */
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	jmp cstar_do_call
 END(ia32_cstar_target)
 				
@@ -456,8 +530,13 @@ ENTRY(ia32_syscall)
 	PARAVIRT_ADJUST_EXCEPTION_FRAME
 	ASM_CLAC			/* Do this early to minimize exposure */
 	SWAPGS
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	SWITCH_TO_KERNEL_CR3
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	/*
 	 * We could remove the boundary checks, but this is more flexible
 	 * in case we need to change TSS_sp0 during context switch and
@@ -495,6 +574,7 @@ ENTRY(ia32_syscall)
 
 	IBRS_ENTRY
 	FILL_RETURN_BUFFER /* no ret allowed before stuffing the RSB */
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 	/*
 	 * No need to follow this irqs on/off section: the syscall
@@ -503,12 +583,22 @@ ENTRY(ia32_syscall)
 	ENABLE_INTERRUPTS(CLBR_NONE)
 	movl %eax,%eax
 	pushq_cfi %rax
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	cld
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	/* note the registers are not zero extended to the sf.
 	   this could be a problem. */
 	SAVE_ARGS 0,1,0
 	orl $TS_COMPAT,TI_status+THREAD_INFO(%rsp,RIP-ARGOFFSET)
 	testl $_TIF_WORK_SYSCALL_ENTRY,TI_flags+THREAD_INFO(%rsp,RIP-ARGOFFSET)
 	jnz ia32_tracesys
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	cmpq $(IA32_NR_syscalls-1),%rax
+	ja ia32_badsys
+ia32_do_call:
+	IA32_ARG_FIXUP
+	call *ia32_sys_call_table(,%rax,8) # xxx: rip relative
+#else
 	cmpq $(IA32_NR_syscalls),%rax
 	jae  ia32_badsys
 ia32_do_call:
@@ -525,6 +615,7 @@ ia32_do_call:
 #endif
 ia32_ptregsret:
 	RESTORE_REST
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 ia32_sysret:
 	movq %rax,RAX-ARGOFFSET(%rsp)
 ia32_ret_from_sys_call:
@@ -539,8 +630,13 @@ ia32_tracesys:
 	call syscall_trace_enter
 	LOAD_ARGS32 ARGOFFSET  /* reload args from stack in case ptrace changed it */
 	RESTORE_REST
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	cmpq $(IA32_NR_syscalls-1),%rax
+	ja  int_ret_from_sys_call	/* ia32_tracesys has set RAX(%rsp) */
+#else
 	cmpq $(IA32_NR_syscalls),%rax
 	jae int_ret_from_sys_call	/* ia32_tracesys has set RAX(%rsp) */
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	jmp ia32_do_call
 END(ia32_syscall)
 
@@ -574,11 +670,14 @@ GLOBAL(stub32_clone)
 
 	ALIGN
 ia32_ptregs_common:
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	/* ia32_syscall? already has the full frame */
 	cmpq $ia32_ptregsret, (%rsp)
 	jne  1f
 	JMP_NOSPEC %rax
 1:
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	popq %r11
 	CFI_ENDPROC
 	CFI_STARTPROC32	simple
@@ -595,7 +694,11 @@ ia32_ptregs_common:
 	CFI_REL_OFFSET	rsp,RSP-ARGOFFSET
 /*	CFI_REL_OFFSET	ss,SS-ARGOFFSET*/
 	SAVE_REST
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	call *%rax
+#else
 	CALL_NOSPEC %rax
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	RESTORE_REST
 	jmp  ia32_sysret	/* misbalances the return cache */
 	CFI_ENDPROC

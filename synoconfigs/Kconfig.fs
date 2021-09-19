@@ -333,11 +333,6 @@ config SYNO_BTRFS_METADATA_OVERCOMMIT_POLICY
 	default y
 	depends on BTRFS_FS
 
-config SYNO_BTRFS_FLUSHONCOMMIT_THRESHOLD
-	bool "Release btrfs ordered extent to prevent OOM"
-	default y
-	depends on BTRFS_FS
-
 config SYNO_BTRFS_FIX_PAGE_LEAK_WHILE_CLONE_EXTENT_BUFFER
 	bool "Fix btrfs memory leak on clone extent buffer."
 	default y
@@ -353,8 +348,8 @@ config SYNO_BTRFS_FREE_EXTENT_MAPS
 	default y
 	depends on BTRFS_FS
 
-config SYNO_BTRFS_CLUSTER_RESERVE
-	bool "Reserve meta block to suppress problem of extent tree loop"
+config SYNO_BTRFS_CLUSTER_ALLOCATION
+	bool "Cluster allocation"
 	default y
 	depends on BTRFS_FS
 
@@ -563,6 +558,11 @@ config SYNO_BTRFS_FIX_PUNCH_HOLE_ENOSPC
 	default y
 	depends on BTRFS_FS
 
+config SYNO_BTRFS_FIX_FALLOCATE_FAIL
+	bool "fix btrfs fallocate fail when throttling at last extent"
+	default y
+	depends on BTRFS_FS
+
 config SYNO_BTRFS_FIX_SNAPSHOT_HANG
 	bool "fix snapshot hang"
 	default y
@@ -718,6 +718,41 @@ config SYNO_BTRFS_NO_LOG_REPLAY
 	default y
 	depends on BTRFS_FS
 
+config SYNO_BTRFS_COMMIT_STATS
+	bool "Btrfs performance stats about commit transaction."
+	default y
+	depends on BTRFS_FS
+
+config SYNO_BTRFS_SEND_RANGE_CLONE_ENHANCE
+	bool "Enhance send range clone reduce space usage"
+	default y
+	depends on BTRFS_FS
+
+config SYNO_BTRFS_DELAYED_REF_RESERVED_REWORK
+	bool "Rework delayed ref reserved"
+	default y
+	depends on BTRFS_FS
+
+config SYNO_BTRFS_COW_ASYNC_THROTTLE
+	bool "enhance latency for cow with async throttle"
+	default y
+	depends on BTRFS_FS
+
+config SYNO_BTRFS_ORDERED_EXTENT_THROTTLE
+	bool "enhance latency and avoid OOM with ordered extent throttle"
+	default y
+	depends on BTRFS_FS
+
+config SYNO_BTRFS_SPLIT_ENDIO_WORKQUEUE_FOR_ORDERED_EXTENT
+	bool "Btrfs split endio workqueue for ordered extent to enhance latency"
+	default y
+	depends on BTRFS_FS
+
+config SYNO_BTRFS_IMPROVE_DELAYED_REF_THROTTLE
+	bool "improve btrfs delayed ref throttle"
+	default y
+	depends on BTRFS_FS
+
 endmenu #BTRFS
 
 menu "ECRYPT"
@@ -794,6 +829,11 @@ config SYNO_ECRYPTFS_FAST_LOOKUP
 
 config SYNO_ECRYPTFS_SKIP_EQUAL_ISIZE_UPDATE
 	bool "Update ecryptfs i_size only when they are different"
+	default y
+	depends on ECRYPT_FS
+
+config SYNO_ECRYPTFS_AVOID_MOUNT_REPEATLY
+	bool "Avoid ecryptfs mount repeatly at the same mount point"
 	default y
 	depends on ECRYPT_FS
 

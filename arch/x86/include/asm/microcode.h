@@ -1,6 +1,8 @@
 #ifndef _ASM_X86_MICROCODE_H
 #define _ASM_X86_MICROCODE_H
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #define native_rdmsr(msr, val1, val2)                   \
 do {                                                    \
         u64 __val = native_read_msr((msr));             \
@@ -15,6 +17,7 @@ do {                                                    \
         native_write_msr((msr),                         \
                          (u32)((u64)(val)),             \
                          (u32)((u64)(val) >> 32))
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 struct cpu_signature {
 	unsigned int sig;

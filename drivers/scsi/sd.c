@@ -415,12 +415,16 @@ int
 SynoSpinupBegin(struct scsi_device *device)
 {
 	int ret = 0;
-	struct SpinupQueue *q;
+	struct SpinupQueue *q = NULL;
+	unsigned long flags;
 
-	q = device->spinup_queue;
+	if (device && device->spinup_queue) {
+		q = device->spinup_queue;
+	}
 	if (NULL == q) {
 		goto Return;
 	}
+	spin_lock_irqsave(&(q->q_lock), flags);
 	 
 	if (device->spinup_in_process) {
 		 
@@ -434,9 +438,12 @@ SynoSpinupBegin(struct scsi_device *device)
 		goto Return;
 	}
 	 
-	if (atomic_read(&(device->spinup_queue->q_spinup_quota))) {
-		atomic_dec(&(device->spinup_queue->q_spinup_quota));
+	if (atomic_read(&(q->q_spinup_quota))) {
+		atomic_dec(&(q->q_spinup_quota));
 	} else {
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY_DEBUG
+		sdev_printk(KERN_ERR, device, "No quota to spinup disk...\n");
+#endif  
 		 
 		goto Return;
 	}
@@ -449,21 +456,46 @@ SynoSpinupBegin(struct scsi_device *device)
 
 	ret = 1;
 Return:
+	if (NULL != q) {
+		spin_unlock_irqrestore(&(q->q_lock), flags);
+	}
 	return ret;
 }
 
 void SynoSpinupEnd(struct scsi_device *sdev)
 {
-	struct SpinupQueue *q;
+	struct SpinupQueue *q = NULL;
+	unsigned long flags;
 
-	q = sdev->spinup_queue;
-	atomic_inc(&(sdev->spinup_queue->q_spinup_quota));
+	if (sdev && sdev->spinup_queue) {
+		q = sdev->spinup_queue;
+	}
+
+	if(NULL == q) {
+		goto Return;
+	}
+
+	spin_lock_irqsave(&(q->q_lock), flags);
+	if (sdev->spinup_in_process == 0) {
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY_DEBUG
+		sdev_printk(KERN_ERR, sdev, "Spinup should be done already. Q %d remaining %d \n",
+			sdev->spinup_queue_id,
+			atomic_read(&(q->q_spinup_quota)));
+#endif  
+		goto Return;
+	}
+
+	atomic_inc(&(q->q_spinup_quota));
 	sdev->spinup_in_process = 0;
 #ifdef CONFIG_SYNO_SAS_SPINUP_DELAY_DEBUG
 	sdev_printk(KERN_ERR, sdev, "Spinup done. Q %d remaining %d \n",
 			sdev->spinup_queue_id,
-			atomic_read(&(sdev->spinup_queue->q_spinup_quota)));
+			atomic_read(&(q->q_spinup_quota)));
 #endif  
+Return:
+	if (NULL != q) {
+		spin_unlock_irqrestore(&(q->q_lock), flags);
+	}
 }
 
 int SynoSpinupRemove(struct scsi_device *sdev)
@@ -3509,6 +3541,10 @@ done:
 	return ret;
 }
 
+#ifdef MY_DEF_HERE
+struct workqueue_struct *spinup_workqueue = NULL;
+#endif  
+ 
 static int __init init_sd(void)
 {
 	int majors = 0, i, err;
@@ -3546,6 +3582,13 @@ static int __init init_sd(void)
 	err = scsi_register_driver(&sd_template.gendrv);
 	if (err)
 		goto err_out_driver;
+
+#ifdef MY_DEF_HERE
+	spinup_workqueue = create_workqueue("spinup_wq");
+	if (NULL == spinup_workqueue) {
+		printk(KERN_ERR "sd: can't init spinup_wq, fall back to global queue\n");
+	}
+#endif  
 
 	return 0;
 

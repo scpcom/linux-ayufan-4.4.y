@@ -5,6 +5,8 @@
  *  the COPYING file in the top-level directory.
  */
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #include <linux/cpu.h>
 #include <linux/percpu.h>
 #include <linux/debugfs.h>
@@ -591,3 +593,4 @@ void unprotected_firmware_end(bool ibrs_on)
 }
 EXPORT_SYMBOL_GPL(unprotected_firmware_end);
 #endif
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */

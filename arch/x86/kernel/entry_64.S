@@ -59,10 +59,13 @@
 #include <asm/context_tracking.h>
 #include <asm/smap.h>
 #include <asm/pgtable_types.h>
+#include <linux/err.h>
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #include <asm/spec_ctrl.h>
 #include <asm/nospec-branch.h>
-#include <linux/err.h>
 #include "kaiser.h"
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 /* Avoid __ASSEMBLER__'ifying <linux/audit.h> just for this.  */
 #include <linux/elf-em.h>
@@ -470,6 +473,8 @@ ENDPROC(native_usergs_sysret64)
 	testl $3, CS-RBP(%rsi)
 	je 1f
 	SWAPGS
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 		SWITCH_TO_KERNEL_CR3
 	IBRS_ENTRY_CLOBBER /* no indirect jump allowed before IBRS */
 	movq PER_CPU_VAR(kernel_stack), %rsp
@@ -498,6 +503,7 @@ ENDPROC(native_usergs_sysret64)
 	movq %rax, %rsp
 	popq %rdi
 	movq %rsp, %rsi /* we earlier saved %rsp in %rsi, update it to new one */
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	/*
 	 * irq_count is used to check if a CPU is already on an interrupt stack
 	 * or not. While this is essentially redundant with preempt_count it is
@@ -561,12 +567,17 @@ ENTRY(save_paranoid)
 	js 1f	/* negative -> in kernel */
 	SWAPGS
 	xorl %ebx,%ebx
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+1:	ret
+	CFI_ENDPROC
+#else
 1:
 	SAVE_AND_SWITCH_TO_KERNEL_CR3 scratch_reg=%rax save_reg=%r14
 	IBRS_ENTRY_SAVE_AND_CLOBBER save_reg=%r13d /* no indirect jump allowed before IBRS */
 	FILL_RETURN_BUFFER_CLOBBER /* no ret allowed before stuffing the RSB */
 	ret
 	CFI_ENDPROC
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 END(save_paranoid)
 	.popsection
 
@@ -605,7 +616,11 @@ ENTRY(ret_from_fork)
 	subq $REST_SKIP, %rsp	# leave space for volatiles
 	CFI_ADJUST_CFA_OFFSET	REST_SKIP
 	movq %rbp, %rdi
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	call *%rbx
+#else
 	CALL_NOSPEC %rbx
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	movl $0, RAX(%rsp)
 	RESTORE_REST
 	jmp int_ret_from_sys_call
@@ -658,6 +673,32 @@ ENTRY(system_call)
 	 */
 GLOBAL(system_call_after_swapgs)
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	movq	%rsp,PER_CPU_VAR(old_rsp)
+	movq	PER_CPU_VAR(kernel_stack),%rsp
+	/*
+	 * No need to follow this irqs off/on section - it's straight
+	 * and short:
+	 */
+	ENABLE_INTERRUPTS(CLBR_NONE)
+	SAVE_ARGS 8,0
+	movq  %rax,ORIG_RAX-ARGOFFSET(%rsp)
+	movq  %rcx,RIP-ARGOFFSET(%rsp)
+	CFI_REL_OFFSET rip,RIP-ARGOFFSET
+	testl $_TIF_WORK_SYSCALL_ENTRY,TI_flags+THREAD_INFO(%rsp,RIP-ARGOFFSET)
+	jnz tracesys
+system_call_fastpath:
+#if __SYSCALL_MASK == ~0
+	cmpq $__NR_syscall_max,%rax
+#else
+	andl $__SYSCALL_MASK,%eax
+	cmpl $__NR_syscall_max,%eax
+#endif
+	ja badsys
+	movq %r10,%rcx
+	call *sys_call_table(,%rax,8)  # XXX:	 rip relative
+	movq %rax,RAX-ARGOFFSET(%rsp)
+#else
 	SWITCH_TO_KERNEL_CR3
 	movq	%rsp,PER_CPU_VAR(old_rsp)
 	movq	PER_CPU_VAR(kernel_stack),%rsp
@@ -696,6 +737,7 @@ system_call_fastpath:
 #endif
 
 	movq %rax,RAX(%rsp)
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 /*
  * Syscall return path ending with SYSRET (fast path)
  * Has incomplete stack frame and undefined top of stack.
@@ -707,7 +749,11 @@ sysret_check:
 	LOCKDEP_SYS_EXIT
 	DISABLE_INTERRUPTS(CLBR_NONE)
 	TRACE_IRQS_OFF
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	movl TI_flags+THREAD_INFO(%rsp,RIP-ARGOFFSET),%edx
+#else
 	movl TI_flags+THREAD_INFO(%rsp,RIP),%edx
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	andl %edi,%edx
 	jnz  sysret_careful
 	CFI_REMEMBER_STATE
@@ -715,6 +761,13 @@ sysret_check:
 	 * sysretq will re-enable interrupts:
 	 */
 	TRACE_IRQS_ON
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	movq RIP-ARGOFFSET(%rsp),%rcx
+	CFI_REGISTER	rip,rcx
+	RESTORE_ARGS 1,-ARG_SKIP,0
+	/*CFI_REGISTER	rflags,r11*/
+	movq	PER_CPU_VAR(old_rsp), %rsp
+#else
 	IBRS_EXIT_CLOBBER
 	movq RIP(%rsp),%rcx
 	CFI_REGISTER	rip,rcx
@@ -723,6 +776,7 @@ sysret_check:
 	/*CFI_REGISTER	rflags,r11*/
 	movq	PER_CPU_VAR(old_rsp), %rsp
 	SWITCH_TO_USER_CR3
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	USERGS_SYSRET64
 
 	CFI_RESTORE_STATE
@@ -751,11 +805,19 @@ sysret_signal:
 	 * These all wind up with the iret return path anyway,
 	 * so just join that path right now.
 	 */
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	FIXUP_TOP_OF_STACK %r11, -ARGOFFSET
+#else
 	FIXUP_TOP_OF_STACK %r11
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	jmp int_check_syscall_exit_work
 
 badsys:
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	movq $-ENOSYS,RAX-ARGOFFSET(%rsp)
+#else
 	movq $-ENOSYS,RAX(%rsp)
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	jmp ret_from_sys_call
 
 #ifdef CONFIG_AUDITSYSCALL
@@ -772,7 +834,11 @@ auditsys:
 	movq %rax,%rsi			/* 2nd arg: syscall number */
 	movl $AUDIT_ARCH_X86_64,%edi	/* 1st arg: audit arch */
 	call __audit_syscall_entry
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	LOAD_ARGS 0		/* reload call-clobbered registers */
+#else
 	LOAD_ARGS ARGOFFSET             /* reload call-clobbered registers */
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	jmp system_call_fastpath
 
 	/*
@@ -781,7 +847,11 @@ auditsys:
 	 * masked off.
 	 */
 sysret_audit:
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	movq RAX-ARGOFFSET(%rsp),%rsi	/* second arg, syscall return value */
+#else
 	movq RAX(%rsp),%rsi     /* second arg, syscall return value */
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	cmpq $-MAX_ERRNO,%rsi	/* is it < -MAX_ERRNO? */
 	setbe %al		/* 1 if so, 0 if not */
 	movzbl %al,%edi		/* zero-extend that into %edi */
@@ -793,9 +863,16 @@ sysret_audit:
 	/* Do syscall tracing */
 tracesys:
 #ifdef CONFIG_AUDITSYSCALL
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	testl $(_TIF_WORK_SYSCALL_ENTRY & ~_TIF_SYSCALL_AUDIT),TI_flags+THREAD_INFO(%rsp,RIP-ARGOFFSET)
+#else
 	testl $(_TIF_WORK_SYSCALL_ENTRY & ~_TIF_SYSCALL_AUDIT),TI_flags+THREAD_INFO(%rsp,RIP)
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	jz auditsys
 #endif
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	SAVE_REST
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	movq $-ENOSYS,RAX(%rsp) /* ptrace can change this for a bad syscall */
 	FIXUP_TOP_OF_STACK %rdi
 	movq %rsp,%rdi
@@ -806,6 +883,22 @@ tracesys:
 	 * the value it wants us to use in the table lookup.
 	 */
 	LOAD_ARGS ARGOFFSET, 1
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	RESTORE_REST
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#if __SYSCALL_MASK == ~0
+	cmpq $__NR_syscall_max,%rax
+#else
+	andl $__SYSCALL_MASK,%eax
+	cmpl $__NR_syscall_max,%eax
+#endif
+	ja   int_ret_from_sys_call	/* RAX(%rsp) set to -ENOSYS above */
+	movq %r10,%rcx	/* fixup for C */
+	call *sys_call_table(,%rax,8)
+	movq %rax,RAX-ARGOFFSET(%rsp)
+	/* Use IRET because user could have changed frame */
+#else
 #if __SYSCALL_MASK == ~0
 	cmpq	$NR_syscalls, %rax
 #else
@@ -827,6 +920,7 @@ tracesys:
 	movq %rax,RAX(%rsp)
 1:	RESTORE_REST
 /* Use IRET because user could have changed frame */
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 /*
  * Syscall return path ending with IRET.
@@ -862,6 +956,22 @@ int_careful:
 	jmp int_with_check
 
 	/* handle signals and tracing -- both require a full stack frame */
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+int_very_careful:
+	TRACE_IRQS_ON
+	ENABLE_INTERRUPTS(CLBR_NONE)
+int_check_syscall_exit_work:
+	SAVE_REST
+	/* Check for syscall exit trace */
+	testl $_TIF_WORK_SYSCALL_EXIT,%edx
+	jz int_signal
+	pushq_cfi %rdi
+	leaq 8(%rsp),%rdi	# &ptregs -> arg1
+	call syscall_trace_leave
+	popq_cfi %rdi
+	andl $~(_TIF_WORK_SYSCALL_EXIT|_TIF_SYSCALL_EMU),%edi
+	jmp int_restore_rest
+#else
 int_very_careful:
 	TRACE_IRQS_ON
 	ENABLE_INTERRUPTS(CLBR_NONE)
@@ -876,6 +986,7 @@ int_check_syscall_exit_work:
 	popq_cfi %rdi
 	andl $~(_TIF_WORK_SYSCALL_EXIT|_TIF_SYSCALL_EMU),%edi
 	jmp int_restore_rest
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 int_signal:
 	testl $_TIF_DO_NOTIFY_MASK,%edx
@@ -895,11 +1006,23 @@ END(system_call)
 	.macro FORK_LIKE func
 ENTRY(stub_\func)
 	CFI_STARTPROC
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	popq	%r11			/* save return address */
+	PARTIAL_FRAME 0
+	SAVE_REST
+	pushq	%r11			/* put it back on stack */
+	FIXUP_TOP_OF_STACK %r11, 8
+	DEFAULT_FRAME 0 8		/* offset 8: return address */
+	call sys_\func
+	RESTORE_TOP_OF_STACK %r11, 8
+	ret $REST_SKIP		/* pop extended registers */
+#else
 	DEFAULT_FRAME 0 8		/* offset 8: return address */
 	FIXUP_TOP_OF_STACK %r11, 8
 	call sys_\func
 	RESTORE_TOP_OF_STACK %r11, 8
 	ret
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	CFI_ENDPROC
 END(stub_\func)
 	.endm
@@ -907,10 +1030,17 @@ END(stub_\func)
 	.macro FIXED_FRAME label,func
 ENTRY(\label)
 	CFI_STARTPROC
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	PARTIAL_FRAME 0 8		/* offset 8: return address */
+	FIXUP_TOP_OF_STACK %r11, 8-ARGOFFSET
+	call \func
+	RESTORE_TOP_OF_STACK %r11, 8-ARGOFFSET
+#else
 	DEFAULT_FRAME 0 8		/* offset 8: return address */
 	FIXUP_TOP_OF_STACK %r11, 8
 	call \func
 	RESTORE_TOP_OF_STACK %r11, 8
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	ret
 	CFI_ENDPROC
 END(\label)
@@ -921,10 +1051,29 @@ END(\label)
 	FORK_LIKE  vfork
 	FIXED_FRAME stub_iopl, sys_iopl
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+ENTRY(ptregscall_common)
+	DEFAULT_FRAME 1 8	/* offset 8: return address */
+	RESTORE_TOP_OF_STACK %r11, 8
+	movq_cfi_restore R15+8, r15
+	movq_cfi_restore R14+8, r14
+	movq_cfi_restore R13+8, r13
+	movq_cfi_restore R12+8, r12
+	movq_cfi_restore RBP+8, rbp
+	movq_cfi_restore RBX+8, rbx
+	ret $REST_SKIP		/* pop extended registers */
+	CFI_ENDPROC
+END(ptregscall_common)
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 ENTRY(stub_execve)
 	CFI_STARTPROC
 	addq $8, %rsp
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	PARTIAL_FRAME 0
+	SAVE_REST
+#else
 	DEFAULT_FRAME 0
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	FIXUP_TOP_OF_STACK %r11
 	call sys_execve
 	movq %rax,RAX(%rsp)
@@ -940,7 +1089,12 @@ END(stub_execve)
 ENTRY(stub_rt_sigreturn)
 	CFI_STARTPROC
 	addq $8, %rsp
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	PARTIAL_FRAME 0
+	SAVE_REST
+#else
 	DEFAULT_FRAME 0
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	FIXUP_TOP_OF_STACK %r11
 	call sys_rt_sigreturn
 	movq %rax,RAX(%rsp) # fixme, this could be done at the higher layer
@@ -953,7 +1107,12 @@ END(stub_rt_sigreturn)
 ENTRY(stub_x32_rt_sigreturn)
 	CFI_STARTPROC
 	addq $8, %rsp
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	PARTIAL_FRAME 0
+	SAVE_REST
+#else
 	DEFAULT_FRAME 0
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	FIXUP_TOP_OF_STACK %r11
 	call sys32_x32_rt_sigreturn
 	movq %rax,RAX(%rsp) # fixme, this could be done at the higher layer
@@ -965,7 +1124,12 @@ END(stub_x32_rt_sigreturn)
 ENTRY(stub_x32_execve)
 	CFI_STARTPROC
 	addq $8, %rsp
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	PARTIAL_FRAME 0
+	SAVE_REST
+#else
 	DEFAULT_FRAME 0
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	FIXUP_TOP_OF_STACK %r11
 	call compat_sys_execve
 	RESTORE_TOP_OF_STACK %r11
@@ -1079,6 +1243,16 @@ retint_check:
 	CFI_REMEMBER_STATE
 	jnz  retint_careful
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+retint_swapgs:		/* return to user-space */
+	/*
+	 * The iretq could re-enable interrupts:
+	 */
+	DISABLE_INTERRUPTS(CLBR_ANY)
+	TRACE_IRQS_IRETQ
+	SWAPGS
+	jmp restore_args
+#else
 retint_swapgs:		/* return to user-space */
 	/*
 	 * The iretq could re-enable interrupts:
@@ -1110,6 +1284,7 @@ retint_userspace_restore_args:
 paranoid_userspace_restore_all:
 	RESTORE_REST
 	jmp retint_userspace_restore_args
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 retint_restore_args:	/* return to kernel space */
 	DISABLE_INTERRUPTS(CLBR_ANY)
@@ -1117,7 +1292,12 @@ retint_restore_args:	/* return to kernel space */
 	 * The iretq could re-enable interrupts:
 	 */
 	TRACE_IRQS_IRETQ
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+restore_args:
 	RESTORE_ARGS 1,8,1
+#else
+	RESTORE_ARGS 1,8,1
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 irq_return:
 	INTERRUPT_RETURN
@@ -1565,7 +1745,11 @@ errorentry page_fault do_page_fault
 errorentry async_page_fault do_async_page_fault
 #endif
 #ifdef CONFIG_X86_MCE
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+paranoidzeroentry machine_check *machine_check_vector(%rip)
+#else
 paranoidzeroentry machine_check do_mce
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 #endif
 
 	/*
@@ -1587,9 +1771,24 @@ ENTRY(paranoid_exit)
 	DISABLE_INTERRUPTS(CLBR_NONE)
 	TRACE_IRQS_OFF_DEBUG
 	testl %ebx,%ebx				/* swapgs needed? */
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	jnz paranoid_restore
+#else
 	jnz paranoid_noswapgs_restore
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	testl $3,CS(%rsp)
 	jnz   paranoid_userspace
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+paranoid_swapgs:
+	TRACE_IRQS_IRETQ 0
+	SWAPGS_UNSAFE_STACK
+	RESTORE_ALL 8
+	jmp irq_return
+paranoid_restore:
+	TRACE_IRQS_IRETQ_DEBUG 0
+	RESTORE_ALL 8
+	jmp irq_return
+#else
 paranoid_swapgs_restore:
 	/* return to kernel with swapgs */
 	IBRS_EXIT_RESTORE_CLOBBER save_reg=%r13d
@@ -1603,11 +1802,16 @@ paranoid_noswapgs_restore:
 	RESTORE_CR3 scratch_reg=%rax save_reg=%r14
 	RESTORE_ALL 8
 	jmp irq_return
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 paranoid_userspace:
 	GET_THREAD_INFO(%rcx)
 	movl TI_flags(%rcx),%ebx
 	andl $_TIF_WORK_MASK,%ebx
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	jz paranoid_swapgs
+#else
 	jz paranoid_userspace_restore_all
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	movq %rsp,%rdi			/* &pt_regs */
 	call sync_regs
 	movq %rax,%rsp			/* switch stack for scheduling */
@@ -1661,13 +1865,18 @@ ENTRY(error_entry)
 	je error_kernelspace
 error_swapgs:
 	SWAPGS
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	SWITCH_TO_KERNEL_CR3
 	movq %rsp, %rsi
 	movq PER_CPU_VAR(kernel_stack), %rsp
 	IBRS_ENTRY_CLOBBER /* no indirect jump allowed before IBRS */
 	FILL_RETURN_BUFFER_CLOBBER /* no ret allowed before stuffing the RSB */
 	movq %rsi, %rsp
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 error_sti:
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	/* Check to see if we're on the trampoline stack. */
 	movq PER_CPU_VAR(init_tss + TSS_sp0), %rcx
 	cmpq %rcx, %rsp
@@ -1688,6 +1897,7 @@ error_sti:
 	rep movsb
 	movq %rax, %rsp
 1:
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	TRACE_IRQS_OFF
 	ret
 
@@ -1792,9 +2002,22 @@ ENTRY(nmi)
 	 * NMI.
 	 */
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	/* Use %rdx as out temp variable throughout */
+	pushq_cfi %rdx
+	CFI_REL_OFFSET rdx, 0
+
+	/*
+	 * If %cs was not the kernel segment, then the NMI triggered in user
+	 * space, which means it is definitely not nested.
+	 */
+	cmpl $__KERNEL_CS, 16(%rsp)
+	jne first_nmi
+#else
 	/* Use %rsi as out temp variable throughout */
 	pushq_cfi %rsi
 	CFI_REL_OFFSET rsi, 0
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 	/*
 	 * Check the special variable on the stack to see if NMIs are
@@ -1810,8 +2033,13 @@ ENTRY(nmi)
 	 * We check the variable because the first NMI could be in a
 	 * breakpoint routine using a breakpoint stack.
 	 */
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	lea 6*8(%rsp), %rdx
+	test_in_nmi rdx, 4*8(%rsp), nested_nmi, first_nmi
+#else
 	lea 6*8(%rsp), %rsi
 	test_in_nmi rsi, 4*8(%rsp), nested_nmi, first_nmi
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	CFI_REMEMBER_STATE
 
 nested_nmi:
@@ -1832,9 +2060,15 @@ nested_nmi:
 	leaq -1*8(%rsp), %rdx
 	movq %rdx, %rsp
 	CFI_ADJUST_CFA_OFFSET 1*8
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	leaq -10*8(%rsp), %rdx
+	pushq_cfi $__KERNEL_DS
+	pushq_cfi %rdx
+#else
 	leaq -10*8(%rsp), %rsi
 	pushq_cfi $__KERNEL_DS
 	pushq_cfi %rsi
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	pushfq_cfi
 	pushq_cfi $__KERNEL_CS
 	pushq_cfi $repeat_nmi
@@ -1844,8 +2078,13 @@ nested_nmi:
 	CFI_ADJUST_CFA_OFFSET -6*8
 
 nested_nmi_out:
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	popq_cfi %rdx
+	CFI_RESTORE rdx
+#else
 	popq_cfi %rsi
 	CFI_RESTORE rsi
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 	/* No need to check faults here */
 	INTERRUPT_RETURN
@@ -1888,8 +2127,13 @@ first_nmi:
 	 * is also used by nested NMIs and can not be trusted on exit.
 	 */
 	/* Do not pop rdx, nested NMIs will corrupt that part of the stack */
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	movq (%rsp), %rdx
+	CFI_RESTORE rdx
+#else
 	movq (%rsp), %rsi
 	CFI_RESTORE rsi
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 	/* Set the NMI executing variable on the stack. */
 	pushq_cfi $1
@@ -1969,9 +2213,12 @@ end_repeat_nmi:
 	movq $-1,%rsi
 	call do_nmi
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	IBRS_EXIT_RESTORE_CLOBBER save_reg=%r13d
 
 	RESTORE_CR3 scratch_reg=%rax save_reg=%r14
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 	/* Did the NMI take a page fault? Restore cr2 if it did */
 	movq %cr2, %rcx

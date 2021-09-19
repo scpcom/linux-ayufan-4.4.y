@@ -15,7 +15,10 @@
 #include <asm/acpi.h>
 #include <asm/mwait.h>
 #include <asm/special_insns.h>
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #include <asm/spec_ctrl.h>
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 /*
  * Initialize bm_flags based on the CPU cache properties
@@ -167,17 +170,23 @@ void mwait_idle_with_hints(unsigned long ax, unsigned long cx)
 		if (this_cpu_has(X86_FEATURE_CLFLUSH_MONITOR))
 			clflush((void *)&current_thread_info()->flags);
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 			/*
              * IRQs must be disabled here and nmi uses the
              * save_paranoid model which always enables ibrs on
              * exception entry before any indirect jump can run.
              */
         spec_ctrl_ibrs_off();
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 		__monitor((void *)&current_thread_info()->flags, 0, 0);
 		smp_mb();
 		if (!need_resched())
 			__mwait(ax, cx);
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 		spec_ctrl_ibrs_on();
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	}
 }
 

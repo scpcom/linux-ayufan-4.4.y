@@ -153,6 +153,8 @@ KBUILD_CFLAGS += $(call cc-option,-mno-avx,)
 KBUILD_CFLAGS += $(mflags-y)
 KBUILD_AFLAGS += $(mflags-y)
 
+ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+else
 # Avoid indirect branches in kernel to deal with Spectre
 ifdef CONFIG_RETPOLINE
     RETPOLINE_CFLAGS += $(call cc-option,-mindirect-branch=thunk-extern -mindirect-branch-register)
@@ -161,6 +163,7 @@ ifdef CONFIG_RETPOLINE
     else
         $(warning CONFIG_RETPOLINE=y, but not supported by the compiler. Toolchain update recommended.)
     endif
+endif
 endif
 
 archscripts: scripts_basic

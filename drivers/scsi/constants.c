@@ -339,7 +339,7 @@ void scsi_print_command(struct scsi_cmnd *cmd)
 		return;
 
 #ifdef MY_DEF_HERE
-	scmd_printk(KERN_NOTICE, cmd, "CDB: ");
+	scmd_printk(KERN_WARNING, cmd, "CDB: ");
 #else  
 	scmd_printk(KERN_INFO, cmd, "CDB: ");
 #endif  

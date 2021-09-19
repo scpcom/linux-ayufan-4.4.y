@@ -43,7 +43,10 @@
 
 #include <asm/page.h>
 #include <asm/pgtable.h>
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #include <asm/nospec-branch.h>
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 #include <xen/interface/xen.h>
 #include <xen/interface/sched.h>
@@ -214,10 +217,17 @@ privcmd_call(unsigned call,
 	__HYPERCALL_DECLS;
 	__HYPERCALL_5ARG(a1, a2, a3, a4, a5);
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	asm volatile("call *%[call]"
+		     : __HYPERCALL_5PARAM
+		     : [call] "a" (&hypercall_page[call])
+		     : __HYPERCALL_CLOBBER5);
+#else
 	asm volatile(CALL_NOSPEC
 		     : __HYPERCALL_5PARAM
 		     : [thunk_target] "a" (&hypercall_page[call])
 		     : __HYPERCALL_CLOBBER5);
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 	return (long)__res;
 }

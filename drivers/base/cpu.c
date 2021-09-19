@@ -335,6 +335,8 @@ static void __init cpu_dev_register_generic(void)
 #endif
 }
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #ifdef CONFIG_GENERIC_CPU_VULNERABILITIES
 
 ssize_t __weak cpu_show_meltdown(struct device *dev,
@@ -381,6 +383,7 @@ static void __init cpu_register_vulnerabilities(void)
 #else
 static inline void cpu_register_vulnerabilities(void) { }
 #endif
+#endif	 
 
 void __init cpu_dev_init(void)
 {
@@ -388,5 +391,8 @@ void __init cpu_dev_init(void)
 		panic("Failed to register CPU subsystem");
 
 	cpu_dev_register_generic();
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	cpu_register_vulnerabilities();
+#endif	 
 }

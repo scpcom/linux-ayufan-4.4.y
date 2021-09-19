@@ -11,7 +11,10 @@
 #include <asm/uaccess.h>
 #include <asm/desc.h>
 #include <asm/ftrace.h>
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #include <asm/asm.h>
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 #ifdef CONFIG_FUNCTION_TRACER
 /* mcount and __fentry__ are defined in assembly */
@@ -68,6 +71,8 @@ EXPORT_SYMBOL(empty_zero_page);
 EXPORT_SYMBOL(native_load_gs_index);
 #endif
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #ifdef CONFIG_RETPOLINE
 #define EXPORT_THUNK(reg)						\
 	extern void __x86_indirect_thunk_ ## reg(void);			\
@@ -89,3 +94,4 @@ EXPORT_THUNK(r13);
 EXPORT_THUNK(r14);
 EXPORT_THUNK(r15);
 #endif /* CONFIG_RETPOLINE */
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */

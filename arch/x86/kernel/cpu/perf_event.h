@@ -410,15 +410,23 @@ struct x86_pmu {
 			bts_active	:1,
 			pebs		:1,
 			pebs_active	:1,
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+			pebs_broken	:1;
+	int		pebs_record_size;
+#else
 			pebs_broken	:1,
 			pebs_prec_dist	:1;
 	int		pebs_record_size;
 	int		pebs_buffer_size;
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	void		(*drain_pebs)(struct pt_regs *regs);
 	struct event_constraint *pebs_constraints;
 	void		(*pebs_aliases)(struct perf_event *event);
 	int 		max_pebs_events;
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	unsigned long	free_running_flags;
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 	/*
 	 * Intel LBR

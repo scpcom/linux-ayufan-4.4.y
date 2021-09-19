@@ -62,7 +62,10 @@
 #include <linux/perf_event.h>
 #include <linux/file.h>
 #include <linux/ptrace.h>
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #include <linux/kaiser.h>
+#endif	 
 #include <linux/blkdev.h>
 #include <linux/elevator.h>
 #include <linux/random.h>
@@ -381,8 +384,11 @@ static void __init mm_init(void)
 	percpu_init_late();
 	pgtable_cache_init();
 	vmalloc_init();
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	 
 	kaiser_init();
+#endif	 
 }
 
 asmlinkage void __init start_kernel(void)

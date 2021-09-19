@@ -3,6 +3,8 @@
 // Copyright(c) 2018 Alexei Starovoitov. All rights reserved.
 // Copyright(c) 2018 Intel Corporation. All rights reserved.
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #ifndef _LINUX_NOSPEC_H
 #define _LINUX_NOSPEC_H
 #include <asm/barrier.h>
@@ -71,3 +73,4 @@ static inline unsigned long array_index_mask_nospec(unsigned long index,
 	_i;								\
 })
 #endif /* _LINUX_NOSPEC_H */
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */

@@ -45,7 +45,10 @@
 
 #include <asm/inst.h>
 #include <linux/linkage.h>
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #include <asm/nospec-branch.h>
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 ## ISCSI CRC 32 Implementation with crc32 and pclmulqdq Instruction
 
@@ -172,7 +175,11 @@ continue_block:
 	movzxw  (bufp, %rax, 2), len
 	offset=crc_array-jump_table
 	lea     offset(bufp, len, 1), bufp
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	jmp     *bufp
+#else
 	JMP_NOSPEC bufp
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 	################################################################
 	## 2a) PROCESS FULL BLOCKS:

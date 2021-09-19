@@ -609,8 +609,12 @@ int kvm_set_cr4(struct kvm_vcpu *vcpu, unsigned long cr4)
 		if (!guest_cpuid_has_pcid(vcpu))
 			return 1;
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+		if ((kvm_read_cr3(vcpu) & X86_CR3_PCID_MASK) || !is_long_mode(vcpu))
+#else
 		if ((kvm_read_cr3(vcpu) & X86_CR3_PCID_ASID_MASK) ||
 		    !is_long_mode(vcpu))
+#endif	 
 			return 1;
 	}
 
@@ -804,8 +808,12 @@ static u32 msrs_to_save[] = {
 #ifdef CONFIG_X86_64
 	MSR_CSTAR, MSR_KERNEL_GS_BASE, MSR_SYSCALL_MASK, MSR_LSTAR,
 #endif
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	MSR_IA32_TSC, MSR_IA32_CR_PAT, MSR_VM_HSAVE_PA
+#else
 	MSR_IA32_TSC, MSR_IA32_CR_PAT, MSR_VM_HSAVE_PA,
 	MSR_IA32_SPEC_CTRL,
+#endif	 
 };
 
 static unsigned num_msrs_to_save;

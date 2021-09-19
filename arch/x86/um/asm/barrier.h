@@ -64,6 +64,9 @@
  */
 static inline void rdtsc_barrier(void)
 {
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	alternative(ASM_NOP3, "mfence", X86_FEATURE_MFENCE_RDTSC);
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	alternative(ASM_NOP3, "lfence", X86_FEATURE_LFENCE_RDTSC);
 }
 

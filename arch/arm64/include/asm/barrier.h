@@ -30,7 +30,10 @@
 #define mb()		dsb()
 #define rmb()		asm volatile("dsb ld" : : : "memory")
 #define wmb()		asm volatile("dsb st" : : : "memory")
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #define gmb()		do { } while (0)
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 #ifndef CONFIG_SMP
 #define smp_mb()	barrier()

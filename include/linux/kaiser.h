@@ -1,3 +1,5 @@
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #ifndef _INCLUDE_KAISER_H
 #define _INCLUDE_KAISER_H
 
@@ -32,3 +34,4 @@ static inline bool kaiser_active(void)
 #endif /* __ASSEMBLY__ */
 #endif /* !CONFIG_KAISER */
 #endif /* _INCLUDE_KAISER_H */
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */

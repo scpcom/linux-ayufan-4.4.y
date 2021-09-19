@@ -10,7 +10,10 @@
 #include <linux/gfp.h>
 #include <linux/sched.h>
 #include <linux/string.h>
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #include <linux/kaiser.h>
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 #include <linux/mm.h>
 #include <linux/smp.h>
 #include <linux/vmalloc.h>
@@ -29,6 +32,8 @@ static void flush_ldt(void *current_mm)
 }
 #endif
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 static void free_ldt(void *ldt, int size)
 {
 	if (size * LDT_ENTRY_SIZE > PAGE_SIZE)
@@ -36,12 +41,16 @@ static void free_ldt(void *ldt, int size)
 	else
 		put_page(virt_to_page(ldt));
 }
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 static int alloc_ldt(mm_context_t *pc, int mincount, int reload)
 {
 	void *oldldt, *newldt;
 	int oldsize;
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	int ret;
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 	if (mincount <= pc->size)
 		return 0;
@@ -55,6 +64,8 @@ static int alloc_ldt(mm_context_t *pc, int mincount, int reload)
 
 	if (!newldt)
 		return -ENOMEM;
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	ret = kaiser_add_mapping((unsigned long)newldt,
 				 mincount * LDT_ENTRY_SIZE,
 				 __PAGE_KERNEL | _PAGE_GLOBAL);
@@ -62,6 +73,7 @@ static int alloc_ldt(mm_context_t *pc, int mincount, int reload)
 		free_ldt(newldt, mincount);
 		return -ENOMEM;
 	}
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 	if (oldsize)
 		memcpy(newldt, pc->ldt, oldsize * LDT_ENTRY_SIZE);
@@ -93,10 +105,18 @@ static int alloc_ldt(mm_context_t *pc, int mincount, int reload)
 #endif
 	}
 	if (oldsize) {
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+		paravirt_free_ldt(oldldt, oldsize);
+		if (oldsize * LDT_ENTRY_SIZE > PAGE_SIZE)
+			vfree(oldldt);
+		else
+			put_page(virt_to_page(oldldt));
+#else
 		kaiser_remove_mapping((unsigned long)oldldt,
 				      oldsize * LDT_ENTRY_SIZE);
 		paravirt_free_ldt(oldldt, oldsize);
 		free_ldt(oldldt, oldsize);
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	}
 	return 0;
 }
@@ -147,8 +167,11 @@ void destroy_context(struct mm_struct *mm)
 		if (mm == current->active_mm)
 			clear_LDT();
 #endif
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 		kaiser_remove_mapping((unsigned long)mm->context.ldt,
 				      mm->context.size * LDT_ENTRY_SIZE);
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 		paravirt_free_ldt(mm->context.ldt, mm->context.size);
 		if (mm->context.size * LDT_ENTRY_SIZE > PAGE_SIZE)
 			vfree(mm->context.ldt);

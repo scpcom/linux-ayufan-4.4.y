@@ -2014,12 +2014,15 @@ static void add_srcversion(struct buffer *b, struct module *mod)
 	}
 }
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 static void add_retpoline(struct buffer *b, struct module *mod)
 {
 	buf_printf(b, "#ifdef RETPOLINE\n"
 		      "\tMODULE_INFO(retpoline, \"Y\");\n"
 		      "#endif\n");
 }
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 static void write_if_changed(struct buffer *b, const char *fname)
 {
@@ -2246,7 +2249,10 @@ int main(int argc, char **argv)
 		add_depends(&buf, mod, modules);
 		add_moddevtable(&buf, mod);
 		add_srcversion(&buf, mod);
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 		add_retpoline(&buf, mod);
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 		sprintf(fname, "%s.mod.c", mod->name);
 		write_if_changed(&buf, fname);

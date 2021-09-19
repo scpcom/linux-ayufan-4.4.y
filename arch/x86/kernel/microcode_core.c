@@ -88,7 +88,10 @@
 #include <asm/processor.h>
 #include <asm/cpu_device_id.h>
 #include <asm/perf_event.h>
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #include <asm/spec_ctrl.h>
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 MODULE_DESCRIPTION("Microcode Update Driver");
 MODULE_AUTHOR("Tigran Aivazian <tigran@aivazian.fsnet.co.uk>");
@@ -228,7 +231,10 @@ static ssize_t microcode_write(struct file *file, const char __user *buf,
 
 	if (ret > 0) {
 		perf_check_microcode();
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 		spec_ctrl_rescan_cpuid();
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	}
 
 	mutex_unlock(&microcode_mutex);
@@ -325,7 +331,10 @@ static ssize_t reload_store(struct device *dev,
 	}
 	if (!ret) {
 		perf_check_microcode();
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 		spec_ctrl_rescan_cpuid();
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	}
 	mutex_unlock(&microcode_mutex);
 	put_online_cpus();
@@ -633,11 +642,15 @@ static void __exit microcode_exit(void)
 	get_online_cpus();
 	mutex_lock(&microcode_mutex);
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	subsys_interface_unregister(&mc_cpu_interface);
+#else
 	error = subsys_interface_register(&mc_cpu_interface);
 	if (!error) {
 		perf_check_microcode();
 		spec_ctrl_rescan_cpuid();
 	}
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	mutex_unlock(&microcode_mutex);
 	put_online_cpus();
 

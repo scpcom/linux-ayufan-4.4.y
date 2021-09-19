@@ -35,7 +35,10 @@
 #include <asm/tlbflush.h>
 #include <asm/desc.h>
 #include <asm/kvm_para.h>
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #include <asm/nospec-branch.h>
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 #include <asm/virtext.h>
 #include "trace.h"
@@ -145,7 +148,10 @@ struct vcpu_svm {
 		u64 gs_base;
 	} host;
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	u64 spec_ctrl;
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 	u32 *msrpm;
 
@@ -169,7 +175,11 @@ static DEFINE_PER_CPU(u64, current_tsc_ratio);
 
 static const struct svm_direct_access_msrs {
 	u32 index;   /* Index of the MSR */
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	bool always; /* True if intercept is always on */
+#else
 	bool always; /* True if intercept is always off */
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 } direct_access_msrs[] = {
 	{ .index = MSR_STAR,				.always = true  },
 	{ .index = MSR_IA32_SYSENTER_CS,		.always = true  },
@@ -181,8 +191,11 @@ static const struct svm_direct_access_msrs {
 	{ .index = MSR_CSTAR,				.always = true  },
 	{ .index = MSR_SYSCALL_MASK,			.always = true  },
 #endif
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	{ .index = MSR_IA32_SPEC_CTRL,			.always = true  },
 	{ .index = MSR_IA32_PRED_CMD,			.always = true  },
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	{ .index = MSR_IA32_LASTBRANCHFROMIP,		.always = false },
 	{ .index = MSR_IA32_LASTBRANCHTOIP,		.always = false },
 	{ .index = MSR_IA32_LASTINTFROMIP,		.always = false },
@@ -398,7 +411,10 @@ struct svm_cpu_data {
 
 	struct page *save_area;
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	struct vmcb *current_vmcb;
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 };
 
 static DEFINE_PER_CPU(struct svm_cpu_data *, svm_data);
@@ -1291,17 +1307,23 @@ static void svm_free_vcpu(struct kvm_vcpu *vcpu)
 	kvm_vcpu_uninit(vcpu);
 	kmem_cache_free(kvm_vcpu_cache, svm);
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	/*
 	 * The VMCB could be recycled, causing a false negative in svm_vcpu_load;
 	 * block speculative execution.
 	 */
 	spec_ctrl_ibpb();
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 }
 
 static void svm_vcpu_load(struct kvm_vcpu *vcpu, int cpu)
 {
 	struct vcpu_svm *svm = to_svm(vcpu);
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	struct svm_cpu_data *sd = per_cpu(svm_data, cpu);
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	int i;
 
 	if (unlikely(cpu != vcpu->cpu)) {
@@ -1324,14 +1346,16 @@ static void svm_vcpu_load(struct kvm_vcpu *vcpu, int cpu)
 		__get_cpu_var(current_tsc_ratio) = svm->tsc_ratio;
 		wrmsrl(MSR_AMD64_TSC_RATIO, svm->tsc_ratio);
 	}
-}
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	if (sd->current_vmcb != svm->vmcb) {
 		sd->current_vmcb = svm->vmcb;
 		spec_ctrl_ibpb();
 	}
 
 	avic_vcpu_load(vcpu, cpu);
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 }
 
 static void svm_vcpu_put(struct kvm_vcpu *vcpu)
@@ -2297,10 +2321,13 @@ static int nested_svm_vmexit(struct vcpu_svm *svm)
 	if (!nested_vmcb)
 		return 1;
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	/*
 	 * No need for IBPB here, the L1 hypervisor should be running with
 	 * IBRS=1 and inserts one already when switching L2 VMs.
 	 */
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 	/* Exit Guest-Mode */
 	leave_guest_mode(&svm->vcpu);
@@ -2466,10 +2493,13 @@ static bool nested_svm_vmrun(struct vcpu_svm *svm)
 	if (!nested_vmcb)
 		return false;
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	/*
 	 * No need for IBPB here, since the nested VM is less privileged.  The
 	 * L1 hypervisor inserts one already when switching L2 VMs.
 	 */
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 	if (!nested_vmcb_checks(nested_vmcb)) {
 		nested_vmcb->control.exit_code    = SVM_EXIT_ERR;
@@ -3097,9 +3127,12 @@ static int svm_get_msr(struct kvm_vcpu *vcpu, unsigned ecx, u64 *data)
 	case MSR_VM_CR:
 		*data = svm->nested.vm_cr_msr;
 		break;
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	case MSR_IA32_SPEC_CTRL:
 		*data = svm->spec_ctrl;
 		break;
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	case MSR_IA32_UCODE_REV:
 		*data = 0x01000065;
 		break;
@@ -3215,9 +3248,12 @@ static int svm_set_msr(struct kvm_vcpu *vcpu, struct msr_data *msr)
 	case MSR_VM_IGNNE:
 		vcpu_unimpl(vcpu, "unimplemented wrmsr: 0x%x data 0x%llx\n", ecx, data);
 		break;
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	case MSR_IA32_SPEC_CTRL:
 		svm->spec_ctrl = data;
 		break;
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	default:
 		return kvm_set_msr_common(vcpu, msr);
 	}
@@ -3852,7 +3888,10 @@ static void svm_vcpu_run(struct kvm_vcpu *vcpu)
 
 	local_irq_enable();
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	spec_ctrl_vmenter_ibrs(svm->spec_ctrl);
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 	asm volatile (
 		"push %%" _ASM_BP "; \n\t"
@@ -3898,6 +3937,8 @@ static void svm_vcpu_run(struct kvm_vcpu *vcpu)
 		"mov %%r14, %c[r14](%[svm]) \n\t"
 		"mov %%r15, %c[r15](%[svm]) \n\t"
 #endif
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 		/*
 		 * Clear host registers marked as clobbered to prevent
 		 * speculative use.
@@ -3917,6 +3958,7 @@ static void svm_vcpu_run(struct kvm_vcpu *vcpu)
 		"xor %%r14, %%r14 \n\t"
 		"xor %%r15, %%r15 \n\t"
 #endif
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 		"pop %%" _ASM_BP
 		:
 		: [svm]"a"(svm),
@@ -3947,7 +3989,11 @@ static void svm_vcpu_run(struct kvm_vcpu *vcpu)
 		);
 
 #ifdef CONFIG_X86_64
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	wrmsrl(MSR_GS_BASE, svm->host.gs_base);
+#else
 	native_wrmsrl(MSR_GS_BASE, svm->host.gs_base);
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 #else
 	loadsegment(fs, svm->host.fs);
 #ifndef CONFIG_X86_32_LAZY_GS
@@ -3955,12 +4001,15 @@ static void svm_vcpu_run(struct kvm_vcpu *vcpu)
 #endif
 #endif
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	if (cpu_has_spec_ctrl()) {
 		rdmsrl(MSR_IA32_SPEC_CTRL, svm->spec_ctrl);
 		__spec_ctrl_vmexit_ibrs(svm->spec_ctrl);
 	}
 
 	fill_RSB();
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 	reload_tss(vcpu);
 

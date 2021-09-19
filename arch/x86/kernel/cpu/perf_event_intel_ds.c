@@ -1,15 +1,21 @@
 #include <linux/bitops.h>
 #include <linux/types.h>
 #include <linux/slab.h>
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #include <linux/kaiser.h>
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 #include <asm/perf_event.h>
 #include <asm/insn.h>
 
 #include "perf_event.h"
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 static
 DEFINE_PER_CPU_SHARED_ALIGNED_USER_MAPPED(struct debug_store, cpu_debug_store);
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 /* The size of a BTS record in bytes: */
 #define BTS_RECORD_SIZE		24
@@ -198,6 +204,8 @@ void fini_debug_store_on_cpu(int cpu)
 	wrmsr_on_cpu(cpu, MSR_IA32_DS_AREA, 0, 0);
 }
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 static void *dsalloc(size_t size, gfp_t flags, int node)
 {
 	unsigned int order = get_order(size);
@@ -222,6 +230,7 @@ static void dsfree(const void *buffer, size_t size)
 	kaiser_remove_mapping((unsigned long)buffer, size);
 	free_pages((unsigned long)buffer, get_order(size));
 }
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 static int alloc_pebs_buffer(int cpu)
 {
@@ -233,7 +242,11 @@ static int alloc_pebs_buffer(int cpu)
 	if (!x86_pmu.pebs)
 		return 0;
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	buffer = kmalloc_node(PEBS_BUFFER_SIZE, GFP_KERNEL | __GFP_ZERO, node);
+#else
 	buffer = dsalloc(x86_pmu.pebs_buffer_size, GFP_KERNEL, node);
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	if (unlikely(!buffer))
 		return -ENOMEM;
 
@@ -257,8 +270,12 @@ static void release_pebs_buffer(int cpu)
 	if (!ds || !x86_pmu.pebs)
 		return;
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	kfree((void *)(unsigned long)ds->pebs_buffer_base);
+#else
 	dsfree((void *)(unsigned long)ds->pebs_buffer_base,
 			x86_pmu.pebs_buffer_size);
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	ds->pebs_buffer_base = 0;
 }
 
@@ -272,7 +289,11 @@ static int alloc_bts_buffer(int cpu)
 	if (!x86_pmu.bts)
 		return 0;
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	buffer = kmalloc_node(BTS_BUFFER_SIZE, GFP_KERNEL | __GFP_ZERO, node);
+#else
 	buffer = dsalloc(BTS_BUFFER_SIZE, GFP_KERNEL | __GFP_NOWARN, node);
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	if (unlikely(!buffer))
 		return -ENOMEM;
 
@@ -296,15 +317,28 @@ static void release_bts_buffer(int cpu)
 	if (!ds || !x86_pmu.bts)
 		return;
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	kfree((void *)(unsigned long)ds->bts_buffer_base);
+#else
 	dsfree((void *)(unsigned long)ds->bts_buffer_base, BTS_BUFFER_SIZE);
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	ds->bts_buffer_base = 0;
 }
 
 static int alloc_ds_buffer(int cpu)
 {
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	int node = cpu_to_node(cpu);
+	struct debug_store *ds;
+
+	ds = kmalloc_node(sizeof(*ds), GFP_KERNEL | __GFP_ZERO, node);
+	if (unlikely(!ds))
+		return -ENOMEM;
+#else
 	struct debug_store *ds = per_cpu_ptr(&cpu_debug_store, cpu);
 
 	memset(ds, 0, sizeof(*ds));
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	per_cpu(cpu_hw_events, cpu).ds = ds;
 
 	return 0;
@@ -318,6 +352,9 @@ static void release_ds_buffer(int cpu)
 		return;
 
 	per_cpu(cpu_hw_events, cpu).ds = NULL;
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	kfree(ds);
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 }
 
 void release_ds_buffers(void)
@@ -905,7 +942,10 @@ void intel_ds_init(void)
 
 	x86_pmu.bts  = boot_cpu_has(X86_FEATURE_BTS);
 	x86_pmu.pebs = boot_cpu_has(X86_FEATURE_PEBS);
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	x86_pmu.pebs_buffer_size = PEBS_BUFFER_SIZE;
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	if (x86_pmu.pebs) {
 		char pebs_type = x86_pmu.intel_cap.pebs_trap ?  '+' : '-';
 		int format = x86_pmu.intel_cap.pebs_format;
@@ -914,7 +954,10 @@ void intel_ds_init(void)
 		case 0:
 			printk(KERN_CONT "PEBS fmt0%c, ", pebs_type);
 			x86_pmu.pebs_record_size = sizeof(struct pebs_record_core);
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 			x86_pmu.pebs_buffer_size = PAGE_SIZE;
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 			x86_pmu.drain_pebs = intel_pmu_drain_pebs_core;
 			break;
 

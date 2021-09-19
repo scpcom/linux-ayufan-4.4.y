@@ -29,4 +29,7 @@ obj-$(CONFIG_NUMA_EMU)		+= numa_emulation.o
 
 obj-$(CONFIG_MEMTEST)		+= memtest.o
 
+ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+else
 obj-$(CONFIG_KAISER)		+= kaiser.o
+endif

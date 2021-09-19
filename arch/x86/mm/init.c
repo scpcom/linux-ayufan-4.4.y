@@ -17,8 +17,11 @@
 #include <asm/proto.h>
 #include <asm/dma.h>		/* for MAX_DMA_PFN */
 #include <asm/microcode.h>
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #include <asm/cpufeature.h>
 #include <asm/mmu_context.h>
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 #include "mm_internal.h"
 
@@ -148,6 +151,8 @@ static void __init probe_page_size_mask(void)
 	}
 }
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 static void setup_pcid(void)
 {
 #ifdef CONFIG_X86_64
@@ -188,6 +193,7 @@ static void setup_pcid(void)
 	}
 #endif
 }
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 #ifdef CONFIG_X86_32
 #define NR_RANGE_MR 3
@@ -453,7 +459,10 @@ void __init init_mem_mapping(void)
 	unsigned long new_mapped_ram_size;
 
 	probe_page_size_mask();
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	setup_pcid();
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 #ifdef CONFIG_X86_64
 	end = max_pfn << PAGE_SHIFT;

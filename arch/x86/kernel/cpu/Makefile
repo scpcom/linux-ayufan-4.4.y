@@ -17,7 +17,12 @@ obj-y			+= proc.o capflags.o powerflags.o common.o
 obj-y			+= rdrand.o
 obj-y			+= match.o
 
+ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+obj-$(CONFIG_X86_32)	+= bugs.o
+obj-$(CONFIG_X86_64)	+= bugs_64.o
+else
 obj-y			+= bugs.o
+endif
 
 obj-$(CONFIG_CPU_SUP_INTEL)		+= intel.o
 obj-$(CONFIG_CPU_SUP_AMD)		+= amd.o

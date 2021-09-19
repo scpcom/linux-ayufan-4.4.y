@@ -2526,6 +2526,8 @@ static int check_modinfo(struct module *mod, struct load_info *info, int flags)
 		       mod->name);
 	}
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #ifdef CONFIG_RETPOLINE
 {
 	extern void spec_ctrl_report_unsafe_module(struct module *mod);
@@ -2534,6 +2536,7 @@ static int check_modinfo(struct module *mod, struct load_info *info, int flags)
 		spec_ctrl_report_unsafe_module(mod);
 }
 #endif
+#endif	 
 	 
 	set_license(mod, get_modinfo(info, "license"));
 

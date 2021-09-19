@@ -667,6 +667,10 @@ static void __cpuinit init_amd(struct cpuinfo_x86 *c)
 		set_cpu_cap(c, X86_FEATURE_K8);
 
 	if (cpu_has_xmm2) {
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+		/* MFENCE stops RDTSC speculation */
+		set_cpu_cap(c, X86_FEATURE_MFENCE_RDTSC);
+#else
 		/*
 		 * Use LFENCE for execution serialization. On some families
 		 * LFENCE is already serialized and the MSR is not available,
@@ -678,6 +682,7 @@ static void __cpuinit init_amd(struct cpuinfo_x86 *c)
 
 		/* LFENCE with MSR_F10H_DECFG[1]=1 stops RDTSC speculation */
 		set_cpu_cap(c, X86_FEATURE_LFENCE_RDTSC);
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	}
 
 #ifdef CONFIG_X86_64
@@ -757,10 +762,13 @@ static void __cpuinit init_amd(struct cpuinfo_x86 *c)
 
 	rdmsr_safe(MSR_AMD64_PATCH_LEVEL, &c->microcode, &dummy);
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	if (c->x86 == 0x10 || c->x86 == 0x12)
 		set_cpu_cap(c, X86_FEATURE_IBP_DISABLE);
 
 	set_cpu_cap(c, X86_FEATURE_RETPOLINE_AMD);
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 }
 
 #ifdef CONFIG_X86_32

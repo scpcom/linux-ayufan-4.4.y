@@ -27,12 +27,20 @@
 #include "scsi_priv.h"
 #include "scsi_logging.h"
 
+#ifdef MY_ABC_HERE
+#include <linux/ata.h>
+#endif  
+
 #define SG_MEMPOOL_NR		ARRAY_SIZE(scsi_sg_pools)
 #define SG_MEMPOOL_SIZE		2
 
 #ifdef MY_DEF_HERE
 extern int gSynoSASWriteConflictPanic;
 #endif
+
+#ifdef MY_ABC_HERE
+#define SYNO_SMART_CMD_TIMEOUT 30 * HZ
+#endif  
 
 struct scsi_host_sg_pool {
 	size_t		size;
@@ -166,6 +174,12 @@ int scsi_execute(struct scsi_device *sdev, const unsigned char *cmd,
 	req->retries = retries;
 #ifdef MY_ABC_HERE
 	req->timeout = ((sdev->scmd_timeout_sec*HZ) > timeout ? (sdev->scmd_timeout_sec*HZ) : timeout);
+	 
+	if ((ATA_CMD_SMART == req->cmd[0] ||
+				(ATA_16 == req->cmd[0] && ATA_CMD_SMART == req->cmd[14])) &&
+			SYNO_SMART_CMD_TIMEOUT > req->timeout) {
+		req->timeout = SYNO_SMART_CMD_TIMEOUT;
+	}
 #else  
 	req->timeout = timeout;
 #endif  
@@ -467,21 +481,28 @@ static void SynoSpinupDone(struct request *req, int uptodate)
 	SynoSpinupEnd(sdev);
 }
 
-static void SynoSubmitSpinupReq(struct scsi_device *device)
+extern struct workqueue_struct *spinup_workqueue;
+void SynoQueueSpinupReq (struct scsi_device *sdev)
+{
+	if (spinup_workqueue) {
+		queue_work(spinup_workqueue, &sdev->spinup_work);
+	} else {
+		schedule_work(&sdev->spinup_work);
+	}
+}
+
+void SynoSubmitSpinupReq(struct work_struct *work)
 {
 	struct request *req;
-	static int is_print = 0;
+	struct scsi_device *sdev;
 
-	while (1) {
-		req = blk_get_request(device->request_queue, READ, GFP_ATOMIC);
-		if (!req) {
-			if (!is_print) {
-				printk(KERN_ERR "%s: Can't get request, retry it", __func__);
-				is_print = 1;
-			}
-		} else {
-			break;
-		}
+	sdev = container_of(work, struct scsi_device, spinup_work);
+
+	req = blk_get_request(sdev->request_queue, READ, GFP_ATOMIC);
+	if (IS_ERR(req)) {
+		SynoQueueSpinupReq(sdev);
+		printk(KERN_ERR "%s: Can't get request, retry it", __FUNCTION__);
+		return;
 	}
 
 	req->cmd[0] = START_STOP;
@@ -504,7 +525,7 @@ static void SynoSubmitSpinupReq(struct scsi_device *device)
 static void SynoSpinupDisk(struct scsi_device *device)
 {
 	if (SynoSpinupBegin(device)) {
-		SynoSubmitSpinupReq(device);
+		SynoQueueSpinupReq(device);
 	}
 }
 #endif  

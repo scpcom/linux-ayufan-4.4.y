@@ -58,10 +58,13 @@ extern void exit_ptrace(struct task_struct *tracer);
 #define PTRACE_MODE_NOAUDIT	0x04
 #define PTRACE_MODE_FSCREDS 0x08
 #define PTRACE_MODE_REALCREDS 0x10
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #define PTRACE_MODE_NOAUDIT	0x04
 #define PTRACE_MODE_NOACCESS_CHK 0x20
 #define PTRACE_MODE_IBPB (PTRACE_MODE_ATTACH | PTRACE_MODE_NOAUDIT	\
 			  | PTRACE_MODE_NOACCESS_CHK)
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 /* shorthands for READ/ATTACH and FSCREDS/REALCREDS combinations */
 #define PTRACE_MODE_READ_FSCREDS (PTRACE_MODE_READ | PTRACE_MODE_FSCREDS)
@@ -84,11 +87,14 @@ extern void exit_ptrace(struct task_struct *tracer);
  * process_vm_writev or ptrace (and should use the real credentials).
  */
 extern bool ptrace_may_access(struct task_struct *task, unsigned int mode);
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 extern int __ptrace_may_access(struct task_struct *task, unsigned int mode);
 extern int ___ptrace_may_access(struct task_struct *tracer,
 				const struct cred *cred, /* tracer cred */
 				struct task_struct *task,
 				unsigned int mode);
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 static inline int ptrace_reparented(struct task_struct *child)
 {

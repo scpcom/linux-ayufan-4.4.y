@@ -15,6 +15,8 @@
 #define __flush_tlb_single(addr) __native_flush_tlb_single(addr)
 #endif
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 static inline void __invpcid(unsigned long pcid, unsigned long addr,
 			     unsigned long type)
 {
@@ -102,6 +104,7 @@ static __always_inline void __load_cr3(unsigned long cr3)
 	write_cr3(cr3);
 }
 #endif /* CONFIG_KAISER */
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 static inline void __native_flush_tlb(void)
 {
@@ -111,6 +114,9 @@ static inline void __native_flush_tlb(void)
 	 * back:
 	 */
 	preempt_disable();
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	native_write_cr3(native_read_cr3());
+#else
 	if (!static_cpu_has(X86_FEATURE_INVPCID)) {
 		__load_cr3(native_read_cr3());
 		preempt_enable();
@@ -120,6 +126,7 @@ static inline void __native_flush_tlb(void)
 	* Note, this works with CR4.PCIDE=0 or 1.
 	*/
     invpcid_flush_all_nonglobals();
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	preempt_enable();
 }
 
@@ -128,6 +135,11 @@ static inline void __native_flush_tlb_global_irq_disabled(void)
 	unsigned long cr4;
 
 	cr4 = native_read_cr4();
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	/* clear PGE */
+	native_write_cr4(cr4 & ~X86_CR4_PGE);
+	/* write old PGE again and flush TLBs */
+#else
 	/*
 	 * This function is only called on systems that support X86_CR4_PGE
 	 * and where we expect X86_CR4_PGE to be set.  Warn if we are called
@@ -146,6 +158,7 @@ static inline void __native_flush_tlb_global_irq_disabled(void)
     native_write_cr4(cr4 ^ X86_CR4_PGE);
 
     /* Put original CR4 value back: */
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	native_write_cr4(cr4);
 }
 
@@ -153,6 +166,8 @@ static inline void __native_flush_tlb_global(void)
 {
 	unsigned long flags;
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	if (static_cpu_has(X86_FEATURE_INVPCID)) {
 		/*
 		 * Using INVPCID is considerably faster than a pair of writes
@@ -163,6 +178,7 @@ static inline void __native_flush_tlb_global(void)
 		invpcid_flush_all();
 		return;
 	}
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 	/*
 	 * Read-modify-write to CR4 - protect it from preemption and
@@ -178,6 +194,8 @@ static inline void __native_flush_tlb_global(void)
 
 static inline void __native_flush_tlb_single(unsigned long addr)
 {
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #ifdef CONFIG_KAISER
 	unsigned long cr3, shadow_cr3;
 
@@ -227,6 +245,7 @@ static inline void __native_flush_tlb_single(unsigned long addr)
 			     "memory");
 	} else
 #endif
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	asm volatile("invlpg (%0)" ::"r" (addr) : "memory");
 }
 

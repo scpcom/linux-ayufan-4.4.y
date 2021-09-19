@@ -27,6 +27,8 @@
  *
  * Major changes to the original code by: Dave Hansen <dave.hansen@intel.com>
  */
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #include <linux/kernel.h>
 #include <linux/errno.h>
 #include <linux/string.h>
@@ -694,3 +696,4 @@ bool is_kaiser_pgd(pgd_t *pgd)
 	return (pgd >= init_mm.pgd && pgd < init_mm.pgd + PTRS_PER_PGD) ||
 		!list_empty(&virt_to_page(pgd)->lru);
 }
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */

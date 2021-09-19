@@ -765,6 +765,9 @@ int __btrfs_drop_extents(struct btrfs_trans_handle *trans,
 #ifdef MY_DEF_HERE
 	u64 relative_offset;
 #endif  
+#ifdef MY_DEF_HERE
+	bool should_throttle = false;
+#endif  
 
 	if (drop_cache)
 		btrfs_drop_extent_cache(inode, start, end - 1, 0);
@@ -1000,12 +1003,21 @@ delete_extent_item:
 #endif  
 				inode_sub_bytes(inode,
 						extent_end - key.offset);
+#ifdef MY_DEF_HERE
+				if (trans->check_throttle && btrfs_should_throttle_delayed_refs(trans, root) == 1) {
+					should_throttle = true;
+				}
+#endif  
 			}
 
 			if (end == extent_end)
 				break;
 
+#ifdef MY_DEF_HERE
+			if (!should_throttle && path->slots[0] + 1 < btrfs_header_nritems(leaf)) {
+#else
 			if (path->slots[0] + 1 < btrfs_header_nritems(leaf)) {
+#endif  
 				path->slots[0]++;
 				goto next_slot;
 			}
@@ -1021,6 +1033,12 @@ delete_extent_item:
 			del_slot = 0;
 
 			btrfs_release_path(path);
+#ifdef MY_DEF_HERE
+			if (should_throttle) {
+				ret = -EAGAIN;
+				break;
+			}
+#endif  
 			continue;
 		}
 
@@ -1509,6 +1527,22 @@ static noinline int check_can_nocow(struct inode *inode, loff_t pos,
 	return ret;
 }
 
+#ifdef MY_DEF_HERE
+void syno_ordered_extent_throttle(struct btrfs_fs_info *fs_info)
+{
+	DEFINE_WAIT(wait);
+
+	if (!fs_info)
+		return;
+
+	if (fs_info->syno_max_ordered_queue_size && atomic_read(&fs_info->syno_ordered_extent_nr) > fs_info->syno_max_ordered_queue_size) {
+		prepare_to_wait(&fs_info->syno_ordered_queue_wait, &wait, TASK_UNINTERRUPTIBLE);
+		schedule();
+		finish_wait(&fs_info->syno_ordered_queue_wait, &wait);
+	}
+}
+#endif  
+
 static noinline ssize_t __btrfs_buffered_write(struct file *file,
 					       struct iov_iter *i,
 					       loff_t pos)
@@ -1778,10 +1812,7 @@ static ssize_t btrfs_file_aio_write(struct kiocb *iocb,
 	bool sync = (file->f_flags & O_DSYNC) || IS_SYNC(file->f_mapping->host);
 
 #ifdef MY_DEF_HERE
-	 
-	if (root->fs_info->ordered_extent_throttle && root->fs_info->ordered_extent_nr > root->fs_info->ordered_extent_throttle) {
-		btrfs_wait_ordered_roots(root->fs_info, 128);
-	}
+	syno_ordered_extent_throttle(root->fs_info);
 #endif  
 
 	mutex_lock(&inode->i_mutex);
@@ -1866,9 +1897,15 @@ out:
 
 int btrfs_release_file(struct inode *inode, struct file *filp)
 {
-	if (filp->private_data)
+	struct btrfs_file_private *private = filp->private_data;
+
+	if (private && private->trans)
 		btrfs_ioctl_trans_end(filp);
-	 
+	if (private && private->filldir_buf)
+		kfree(private->filldir_buf);
+	kfree(private);
+	filp->private_data = NULL;
+
 	if (test_and_clear_bit(BTRFS_INODE_ORDERED_DATA_CLOSE,
 			       &BTRFS_I(inode)->runtime_flags))
 			filemap_flush(inode->i_mapping);
@@ -1896,6 +1933,16 @@ int btrfs_sync_file(struct file *file, loff_t start, loff_t end, int datasync)
 	int ret = 0;
 	bool full_sync = 0;
 	u64 len;
+
+#ifdef MY_DEF_HERE
+	atomic64_inc(&root->fs_info->fsync_cnt);
+#endif  
+
+	if (test_bit(BTRFS_INODE_NEEDS_FULL_SYNC,
+		     &BTRFS_I(inode)->runtime_flags)) {
+		start = 0;
+		end = LLONG_MAX;
+	}
 
 	len = (u64)end - (u64)start + 1;
 	trace_btrfs_sync_file(file, datasync);
@@ -1980,6 +2027,9 @@ int btrfs_sync_file(struct file *file, loff_t start, loff_t end, int datasync)
 				goto out;
 			}
 		}
+#ifdef MY_DEF_HERE
+		atomic64_inc(&root->fs_info->fsync_full_commit_cnt);
+#endif  
 		ret = btrfs_commit_transaction(trans, root);
 	} else {
 		ret = btrfs_end_transaction(trans, root);
@@ -2387,13 +2437,20 @@ static int btrfs_punch_hole(struct inode *inode, loff_t offset, loff_t len)
 	cur_offset = lockstart;
 	len = lockend - cur_offset;
 	while (cur_offset < lockend) {
+#ifdef MY_DEF_HERE
+		trans->check_throttle = true;
+#endif  
 		ret = __btrfs_drop_extents(trans, root, inode, path,
 					   cur_offset, lockend + 1,
 #ifdef MY_DEF_HERE
 					   &first_punch_pos, &last_punch_pos, &partial_punch,
 #endif  
 					   &drop_end, 1, 0, 0, NULL);
+#ifdef MY_DEF_HERE
+		if (ret != -ENOSPC && ret != -EAGAIN)
+#else
 		if (ret != -ENOSPC)
+#endif  
 			break;
 
 		trans->block_rsv = &root->fs_info->trans_block_rsv;
@@ -2410,6 +2467,9 @@ static int btrfs_punch_hole(struct inode *inode, loff_t offset, loff_t len)
 		}
 
 		cur_offset = drop_end;
+#ifdef MY_DEF_HERE
+		len = lockend - cur_offset;
+#endif   
 
 		ret = btrfs_update_inode(trans, root, inode);
 		if (ret) {

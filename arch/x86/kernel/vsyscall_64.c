@@ -56,7 +56,11 @@
 DEFINE_VVAR(int, vgetcpu_mode);
 DEFINE_VVAR(struct vsyscall_gtod_data, vsyscall_gtod_data);
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+static enum { EMULATE, NATIVE, NONE } vsyscall_mode = EMULATE;
+#else
 enum { EMULATE, NATIVE, NONE } vsyscall_mode = EMULATE;
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 static int __init vsyscall_setup(char *str)
 {

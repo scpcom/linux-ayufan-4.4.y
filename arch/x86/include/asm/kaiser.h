@@ -1,3 +1,5 @@
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #ifndef _ASM_X86_KAISER_H
 #define _ASM_X86_KAISER_H
 /*
@@ -81,3 +83,4 @@ static inline void kaiser_add_mapping_cpu_entry(int cpu) {}
 #endif /* __ASSEMBLY__ */
 
 #endif /* _ASM_X86_KAISER_H */
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */

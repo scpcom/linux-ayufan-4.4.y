@@ -1089,8 +1089,11 @@ static int __iterate_backrefs(u64 ino, u64 offset, u64 root, void *ctx_)
 {
 	struct backref_ctx *bctx = ctx_;
 	struct clone_root *found;
+#ifdef MY_DEF_HERE
+#else
 	int ret;
 	u64 i_size;
+#endif  
 
 	found = bsearch((void *)(uintptr_t)root, bctx->sctx->clone_roots,
 			bctx->sctx->clone_roots_cnt,
@@ -1105,6 +1108,9 @@ static int __iterate_backrefs(u64 ino, u64 offset, u64 root, void *ctx_)
 		bctx->found_itself = 1;
 	}
 
+#ifdef MY_DEF_HERE
+#else
+	 
 	ret = __get_inode_info(found->root, bctx->path, ino, &i_size, NULL, NULL,
 			       NULL, NULL, NULL);
 	btrfs_release_path(bctx->path);
@@ -1113,6 +1119,7 @@ static int __iterate_backrefs(u64 ino, u64 offset, u64 root, void *ctx_)
 
 	if (offset + bctx->data_offset + bctx->extent_len > i_size)
 		return 0;
+#endif  
 
 	if (found->root == bctx->sctx->send_root) {
 		 
@@ -4802,6 +4809,9 @@ static int clone_range(struct send_ctx *sctx,
 	struct btrfs_path *path;
 	struct btrfs_key key;
 	int ret;
+#ifdef MY_DEF_HERE
+	u64 clone_src_i_size;
+#endif  
 
 	if (clone_root->offset == 0 &&
 	    len == sctx->send_root->sectorsize)
@@ -4810,6 +4820,14 @@ static int clone_range(struct send_ctx *sctx,
 	path = alloc_path_for_send();
 	if (!path)
 		return -ENOMEM;
+
+#ifdef MY_DEF_HERE
+	ret = __get_inode_info(clone_root->root, path, clone_root->ino, &clone_src_i_size, NULL, NULL,
+			       NULL, NULL, NULL);
+	btrfs_release_path(path);
+	if (ret < 0)
+		goto out;
+#endif  
 
 	key.objectid = clone_root->ino;
 	key.type = BTRFS_EXTENT_DATA_KEY;
@@ -4831,6 +4849,9 @@ static int clone_range(struct send_ctx *sctx,
 		u8 type;
 		u64 ext_len;
 		u64 clone_len;
+#ifdef MY_DEF_HERE
+		u64 clone_data_offset;
+#endif  
 
 		if (slot >= btrfs_header_nritems(leaf)) {
 			ret = btrfs_next_leaf(clone_root->root, path);
@@ -4880,13 +4901,62 @@ static int clone_range(struct send_ctx *sctx,
 		if (key.offset >= clone_root->offset + len)
 			break;
 
+#ifdef MY_DEF_HERE
+		if (key.offset >= clone_src_i_size)
+			break;
+
+		if (key.offset + ext_len > clone_src_i_size)
+			ext_len = clone_src_i_size - key.offset;
+
+		clone_data_offset = btrfs_file_extent_offset(leaf, ei);
+		if (btrfs_file_extent_disk_bytenr(leaf, ei) == disk_byte) {
+			clone_root->offset = key.offset;
+			if (clone_data_offset < data_offset && clone_data_offset + ext_len > data_offset) {
+				u64 extent_offset = data_offset - clone_data_offset;
+				ext_len -= extent_offset;
+				clone_data_offset += extent_offset;
+				clone_root->offset += extent_offset;
+			}
+		}
+#endif  
+
 		clone_len = min_t(u64, ext_len, len);
 
+#ifdef MY_DEF_HERE
+		if (btrfs_file_extent_disk_bytenr(leaf, ei) == disk_byte &&
+		    clone_data_offset == data_offset) {
+			const u64 src_end = clone_root->offset + clone_len;
+			const u64 sectorsize = SZ_64K;
+
+			if (src_end == clone_src_i_size &&
+			    !IS_ALIGNED(src_end, sectorsize) &&
+			    offset + clone_len < sctx->cur_inode_size) {
+				u64 slen;
+
+				slen = ALIGN_DOWN(src_end - clone_root->offset,
+						  sectorsize);
+				if (slen > 0) {
+					ret = send_clone(sctx, offset, slen,
+							 clone_root);
+					if (ret < 0)
+						goto out;
+				}
+				ret = send_extent_data(sctx, offset + slen,
+						       clone_len - slen);
+			} else {
+				ret = send_clone(sctx, offset, clone_len,
+						 clone_root);
+			}
+		} else {
+			ret = send_extent_data(sctx, offset, clone_len);
+		}
+#else
 		if (btrfs_file_extent_disk_bytenr(leaf, ei) == disk_byte &&
 		    btrfs_file_extent_offset(leaf, ei) == data_offset)
 			ret = send_clone(sctx, offset, clone_len, clone_root);
 		else
 			ret = send_extent_data(sctx, offset, clone_len);
+#endif  
 
 		if (ret < 0)
 			goto out;

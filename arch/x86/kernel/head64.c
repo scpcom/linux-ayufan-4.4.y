@@ -46,7 +46,11 @@ static void __init reset_early_page_tables(void)
 
 	next_early_pgt = 0;
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	write_cr3(__pa(early_level4_pgt));
+#else
 	__load_cr3(__pa(early_level4_pgt));
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 }
 
 /* Create a new PMD entry */

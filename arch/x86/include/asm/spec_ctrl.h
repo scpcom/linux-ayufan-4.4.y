@@ -1,3 +1,5 @@
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #ifndef _ASM_X86_SPEC_CTRL_H
 #define _ASM_X86_SPEC_CTRL_H
 
@@ -358,3 +360,4 @@ static inline void spec_ctrl_ibpb_if_different_creds(struct task_struct *next)
 
 #endif /* __ASSEMBLY__ */
 #endif /* _ASM_X86_SPEC_CTRL_H */
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */

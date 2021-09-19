@@ -321,7 +321,11 @@ static __always_inline int constant_test_bit(unsigned int nr, const volatile uns
 		(addr[nr / BITS_PER_LONG])) != 0;
 }
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+static inline int variable_test_bit(int nr, volatile const unsigned long *addr)
+#else
 static __always_inline int variable_test_bit(int nr, volatile const unsigned long *addr)
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 {
 	int oldbit;
 

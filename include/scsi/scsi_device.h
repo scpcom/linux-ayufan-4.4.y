@@ -183,7 +183,8 @@ struct scsi_device {
 	unsigned int	    spinup_in_process;
 	 
 	unsigned long		spinup_timer;
-#define SYNO_SPINUP_RESEND_TIMER 20 * HZ
+	struct work_struct	spinup_work;
+#define SYNO_SPINUP_RESEND_TIMER 30 * HZ
 #endif  
 
 #ifdef MY_ABC_HERE

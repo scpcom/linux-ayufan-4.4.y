@@ -1,3 +1,5 @@
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #ifdef CONFIG_KAISER
 
 #include <asm/processor-flags.h>
@@ -131,3 +133,4 @@
 .endm
 
 #endif
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */

@@ -222,15 +222,30 @@ static int ptrace_has_cap(struct user_namespace *ns, unsigned int mode)
 }
 
 /* Returns 0 on success, -errno on denial. */
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+static int __ptrace_may_access(struct task_struct *task, unsigned int mode)
+#else
 int ___ptrace_may_access(struct task_struct *tracer,
 			 const struct cred *cred, /* tracer cred */
 			 struct task_struct *task,
 			 unsigned int mode)
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 {
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	const struct cred *cred = current_cred(), *tcred;
+#else
 	const struct cred *tcred;
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	int dumpable = 0;
 	kuid_t caller_uid;
 	kgid_t caller_gid;
+
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	if (!(mode & PTRACE_MODE_FSCREDS) == !(mode & PTRACE_MODE_REALCREDS)) {
+		WARN(1, "denying ptrace access check without PTRACE_MODE_*CREDS\n");
+		return -EPERM;
+	}
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 	/* May we inspect the given task?
 	 * This check is used both for attaching with ptrace
@@ -245,6 +260,8 @@ int ___ptrace_may_access(struct task_struct *tracer,
 	if (same_thread_group(task, current))
 		return 0;
 	rcu_read_lock();
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	if (!cred) {
 		WARN_ON_ONCE(tracer == current);
 		WARN_ON_ONCE(task != current);
@@ -253,6 +270,7 @@ int ___ptrace_may_access(struct task_struct *tracer,
 		WARN_ON_ONCE(tracer != current);
 		WARN_ON_ONCE(task == current);
 	}
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	if (mode & PTRACE_MODE_FSCREDS) {
 		caller_uid = cred->fsuid;
 		caller_gid = cred->fsgid;
@@ -293,16 +311,23 @@ ok:
 	}
 	rcu_read_unlock();
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	return security_ptrace_access_check(task, mode);
+#else
 	if (!(mode & PTRACE_MODE_NOACCESS_CHK))
 		return security_ptrace_access_check(task, mode);
 
 	return 0;
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 }
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 int __ptrace_may_access(struct task_struct *task, unsigned int mode)
 {
 	return ___ptrace_may_access(current, current_cred(), task, mode);
 }
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 bool ptrace_may_access(struct task_struct *task, unsigned int mode)
 {

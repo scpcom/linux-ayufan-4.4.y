@@ -151,6 +151,15 @@ struct disk_part_tbl {
 };
 
 struct disk_events;
+#ifdef MY_ABC_HERE
+enum syno_disk_seq_stat {
+	SYNO_DISK_SEQ_STAT_NEAR_SEQ = 0,
+	SYNO_DISK_SEQ_STAT_SEQ = 1,
+	SYNO_DISK_SEQ_STAT_END = 2,  
+};
+
+#define SYNO_BLOCK_RESPONSE_BUCKETS_END 4
+#endif  
 
 struct gendisk {
 	 
@@ -184,6 +193,15 @@ struct gendisk {
 	int node_id;
 #ifdef MY_ABC_HERE
 	int systemDisk;
+#endif  
+#ifdef MY_ABC_HERE
+	sector_t end_sector;
+	unsigned long seq_ios[SYNO_DISK_SEQ_STAT_END];
+	unsigned char block_latency_uuid[16];
+	u64 u64CplCmdCnt[2];
+	u64 u64RespTimeSum[2];
+	u64 u64WaitTime[2];
+	u64 u64RespTimeBuckets[2][SYNO_BLOCK_RESPONSE_BUCKETS_END][32];
 #endif  
 };
 

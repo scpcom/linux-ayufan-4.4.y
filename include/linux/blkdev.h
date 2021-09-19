@@ -157,6 +157,10 @@ struct request {
 	void *end_io_data;
 
 	struct request *next_rq;
+#ifdef MY_ABC_HERE
+	unsigned int syno_seq;
+	u64 u64IssueTime;
+#endif  
 };
 
 static inline unsigned short req_get_ioprio(struct request *req)

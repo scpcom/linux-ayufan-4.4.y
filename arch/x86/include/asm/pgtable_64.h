@@ -13,8 +13,11 @@
 #include <asm/processor.h>
 #include <linux/bitops.h>
 #include <linux/threads.h>
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #include <linux/kaiser.h>
 #include <linux/mmdebug.h>
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 extern pud_t level3_kernel_pgt[512];
 extern pud_t level3_ident_pgt[512];
@@ -107,6 +110,8 @@ static inline void native_pud_clear(pud_t *pud)
 	native_set_pud(pud, native_make_pud(0));
 }
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #ifdef CONFIG_KAISER
 /*
  * All top-level KAISER page tables are order-1 pages (8k-aligned
@@ -251,7 +256,14 @@ static inline pgd_t kaiser_set_shadow_pgd(pgd_t *pgdp, pgd_t pgd)
 	/* return the copy of the PGD we want the kernel to use: */
 	return pgd;
 }
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+static inline void native_set_pgd(pgd_t *pgdp, pgd_t pgd)
+{
+	*pgdp = pgd;
+}
+#else
 static inline void native_set_pgd(pgd_t *pgdp, pgd_t pgd)
 {
 #ifdef CONFIG_KAISER
@@ -260,6 +272,7 @@ static inline void native_set_pgd(pgd_t *pgdp, pgd_t pgd)
         *pgdp = pgd;
 #endif
 }
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 static inline void native_pgd_clear(pgd_t *pgd)
 {

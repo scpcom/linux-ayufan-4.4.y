@@ -4,6 +4,8 @@
  *
  * Misc librarized functions for cmdline poking.
  */
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #include <linux/kernel.h>
 #include <linux/string.h>
 #include <linux/ctype.h>
@@ -213,3 +215,4 @@ int cmdline_find_option(const char *cmdline, const char *option, char *buffer,
 	return __cmdline_find_option(cmdline, COMMAND_LINE_SIZE, option,
 				     buffer, bufsize);
 }
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */

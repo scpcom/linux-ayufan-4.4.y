@@ -168,6 +168,10 @@ static void __jump_label_update(struct static_key *key,
 		 * kernel_text_address() verifies we are not in core kernel
 		 * init code, see jump_label_invalidate_module_init().
 		 */
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+		if (entry->code && kernel_text_address(entry->code))
+			arch_jump_label_transform(entry, enable);
+#else
 		if (entry->code) {
 			if (kernel_text_address(entry->code))
 				arch_jump_label_transform(entry, enable);
@@ -175,6 +179,7 @@ static void __jump_label_update(struct static_key *key,
 				WARN(1, "can't patch jump_label at 0x%lx\n",
 				     (unsigned long)entry->code);
 		}
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	}
 }
 

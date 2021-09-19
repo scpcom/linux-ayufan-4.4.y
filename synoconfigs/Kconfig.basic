@@ -271,4 +271,8 @@ config SYNO_FIX_SMPBOOT_RACE
 	default y if SYNO_KVMX64
 	default n if !SYNO_KVMX64
 
+config SYNO_WARN_ALLOC_FAILED_RATELIMIT
+	bool "Set harder rate limit for warn_alloc_failed()"
+	default y
+
 endmenu #Kernel Core Enhancements

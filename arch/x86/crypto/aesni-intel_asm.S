@@ -31,7 +31,10 @@
 
 #include <linux/linkage.h>
 #include <asm/inst.h>
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #include <asm/nospec-branch.h>
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 #ifdef __x86_64__
 .data
@@ -2704,7 +2707,11 @@ ENTRY(aesni_xts_crypt8)
 	pxor INC, STATE4
 	movdqu IV, 0x30(OUTP)
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	call *%r11
+#else
 	CALL_NOSPEC %r11
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 	movdqu 0x00(OUTP), INC
 	pxor INC, STATE1
@@ -2749,7 +2756,11 @@ ENTRY(aesni_xts_crypt8)
 	_aesni_gf128mul_x_ble()
 	movups IV, (IVP)
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	call *%r11
+#else
 	CALL_NOSPEC %r11
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 	movdqu 0x40(OUTP), INC
 	pxor INC, STATE1

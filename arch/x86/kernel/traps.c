@@ -64,8 +64,11 @@
 #include <asm/pgalloc.h>
 #include <asm/proto.h>
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 /* No need to be aligned, but done to keep all IDTs defined the same way. */
 gate_desc debug_idt_table[NR_VECTORS] __page_aligned_bss;
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 #else
 #include <asm/processor-flags.h>
 #include <asm/setup.h>
@@ -819,7 +822,11 @@ void __init trap_init(void)
 	x86_init.irqs.trap_init();
 
 #ifdef CONFIG_X86_64
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
 	memcpy(&nmi_idt_table, &idt_table, IDT_ENTRIES * 16);
+#else
+	memcpy(&debug_idt_table, &idt_table, IDT_ENTRIES * 16);
+#endif /* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 	set_nmi_gate(X86_TRAP_DB, &debug);
 	set_nmi_gate(X86_TRAP_BP, &int3);
 #endif

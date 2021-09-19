@@ -125,6 +125,8 @@ extern int __get_user_4(void);
 extern int __get_user_8(void);
 extern int __get_user_bad(void);
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #define __uaccess_begin() stac()
 #define __uaccess_end()   clac()
 #define __uaccess_begin_nospec()	\
@@ -132,6 +134,7 @@ extern int __get_user_bad(void);
 	stac();				\
 	barrier_nospec();		\
 })
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 /*
  * This is a type: either unsigned long, if the argument fits into
@@ -437,6 +440,17 @@ struct __large_struct { unsigned long buf[100]; };
 /*
  * uaccess_try and catch
  */
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#define uaccess_try	do {						\
+	current_thread_info()->uaccess_err = 0;				\
+	stac();								\
+	barrier();
+
+#define uaccess_catch(err)						\
+	clac();								\
+	(err) |= (current_thread_info()->uaccess_err ? -EFAULT : 0);	\
+} while (0)
+#else
 #define uaccess_try	do {						\
 	current_thread_info()->uaccess_err = 0;				\
 	stac();								\
@@ -450,6 +464,7 @@ struct __large_struct { unsigned long buf[100]; };
 	clac();								\
 	(err) |= (current_thread_info()->uaccess_err ? -EFAULT : 0);	\
 } while (0)
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 /**
  * __get_user: - Get a simple variable from user space, with less checking.

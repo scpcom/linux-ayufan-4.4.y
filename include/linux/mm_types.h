@@ -312,6 +312,9 @@ enum {
 	MM_FILEPAGES,
 	MM_ANONPAGES,
 	MM_SWAPENTS,
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	NR_MM_COUNTERS
+#else
 	NR_MM_COUNTERS,
 	/*
 	 * Resident shared memory pages
@@ -320,6 +323,7 @@ enum {
 	 * MM_SHMEMPAGES need to be set apart
 	 */
 	MM_SHMEMPAGES = NR_MM_COUNTERS
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 };
 
 #if USE_SPLIT_PTLOCKS && defined(CONFIG_MMU)
@@ -459,8 +463,11 @@ struct mm_struct {
 #endif
 	struct uprobes_state uprobes_state;
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 	/* porting KAISER(KPTI) from RHEL*/
 	atomic_long_t mm_shmempages;
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 };
 
 /* first nid will either be a valid NID or one of these values */

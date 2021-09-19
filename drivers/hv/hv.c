@@ -29,7 +29,10 @@
 #include <linux/version.h>
 #include <linux/interrupt.h>
 #include <asm/hyperv.h>
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+#else
 #include <asm/nospec-branch.h>
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 #include "hyperv_vmbus.h"
 
 /* The one and only */
@@ -95,9 +98,15 @@ static u64 do_hypercall(u64 control, void *input, void *output)
 	void *hypercall_page = hv_context.hypercall_page;
 
 	__asm__ __volatile__("mov %0, %%r8" : : "r" (output_address) : "r8");
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	__asm__ __volatile__("call *%3" : "=a" (hv_status) :
+			     "c" (control), "d" (input_address),
+			     "m" (hypercall_page));
+#else
 	__asm__ __volatile__(CALL_NOSPEC : "=a" (hv_status) :
 			     "c" (control), "d" (input_address),
 			     THUNK_TARGET(hypercall_page));
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 	return hv_status;
 
@@ -115,11 +124,19 @@ static u64 do_hypercall(u64 control, void *input, void *output)
 	u32 output_address_lo = output_address & 0xFFFFFFFF;
 	void *hypercall_page = hv_context.hypercall_page;
 
+#ifdef CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	__asm__ __volatile__ ("call *%8" : "=d"(hv_status_hi),
+			      "=a"(hv_status_lo) : "d" (control_hi),
+			      "a" (control_lo), "b" (input_address_hi),
+			      "c" (input_address_lo), "D"(output_address_hi),
+			      "S"(output_address_lo), "m" (hypercall_page));
+#else
 	__asm__ __volatile__ (CALL_NOSPEC : "=d"(hv_status_hi),
 			      "=a"(hv_status_lo) : "d" (control_hi),
 			      "a" (control_lo), "b" (input_address_hi),
 			      "c" (input_address_lo), "D"(output_address_hi),
 			      "S"(output_address_lo), THUNK_TARGET(hypercall_page));
+#endif	/* CONFIG_SYNO_SKIP_LK3_10_KPTI_RETPOLINE */
 
 	return hv_status_lo | ((u64)hv_status_hi << 32);
 #endif /* !x86_64 */

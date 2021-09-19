@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
  
 #ifndef __DELAYED_REF__
 #define __DELAYED_REF__
@@ -48,7 +51,9 @@ struct btrfs_delayed_ref_head {
 	struct rb_node href_node;
 
 	struct btrfs_delayed_extent_op *extent_op;
-	 
+
+	int total_ref_mod;
+
 	unsigned int must_insert_reserved:1;
 	unsigned int is_data:1;
 	unsigned int processing:1;
@@ -80,6 +85,12 @@ struct btrfs_delayed_ref_root {
 	unsigned long num_heads;
 
 	unsigned long num_heads_ready;
+
+	u64 pending_csums;
+
+#ifdef MY_DEF_HERE
+	u64 num_pending_csums_leafs;
+#endif  
 
 	int flushing;
 

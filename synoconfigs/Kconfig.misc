@@ -112,7 +112,7 @@ config SYNO_FIX_RTC_WAKE_AFTER_POWER_FAILURE
 	default y
 	depends on SYNO_X64
 
-config SYNO_KPTI_DEFAULT_OFF
+config SYNO_KPTI_RETPOLINE_DEFAULT_OFF
 	bool "Set KPTI to default off"
 	default n
 	depends on KAISER
@@ -121,6 +121,10 @@ config SYNO_REVERT_PERCPU_COUNTER_COMPARE_BATCH
 	bool "revert percpu_counter compare batch"
 	default n
 	depends on SYNO_X64 && !BTRFS_FS 
+
+config SYNO_SKIP_LK3_10_KPTI_RETPOLINE
+	bool "Skip KPTI and Retpoline code"
+	default n
 
 endmenu #MISC Features
 
