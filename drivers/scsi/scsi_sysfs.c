@@ -1181,13 +1181,13 @@ void scsi_remove_target(struct device *dev)
 	struct scsi_target *starget, *last_target = NULL;
 	unsigned long flags;
 
+restart:
 	spin_lock_irqsave(shost->host_lock, flags);
 	list_for_each_entry(starget, &shost->__targets, siblings) {
 		if (starget->state == STARGET_DEL ||
 		    starget == last_target)
 			continue;
 		if (starget->dev.parent == dev || &starget->dev == dev) {
-			 
 			kref_get(&starget->reap_ref);
 			last_target = starget;
 			spin_unlock_irqrestore(shost->host_lock, flags);

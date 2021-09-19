@@ -409,7 +409,6 @@ static int check_syslog_permissions(int type, bool from_file)
 	return security_syslog(type);
 }
 
-
 /* /dev/kmsg - userspace message inject/listen interface */
 struct devkmsg_user {
 	u64 seq;

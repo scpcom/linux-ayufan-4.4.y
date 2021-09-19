@@ -4821,6 +4821,14 @@ static int ext4_quota_on_mount(struct super_block *sb, int type)
 					EXT4_SB(sb)->s_jquota_fmt, type);
 }
 
+static void lockdep_set_quota_inode(struct inode *inode, int subclass)
+{
+	struct ext4_inode_info *ei = EXT4_I(inode);
+
+	(void) ei;	 
+	lockdep_set_subclass(&ei->i_data_sem, subclass);
+}
+
 static int ext4_quota_on(struct super_block *sb, int type, int format_id,
 			 struct path *path)
 {

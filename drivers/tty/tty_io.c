@@ -1747,6 +1747,17 @@ static int tiocsetd(struct tty_struct *tty, int __user *p)
 	return ret;
 }
 
+static int tiocgetd(struct tty_struct *tty, int __user *p)
+{
+	struct tty_ldisc *ld;
+	int ret;
+
+	ld = tty_ldisc_ref_wait(tty);
+	ret = put_user(ld->ops->num, p);
+	tty_ldisc_deref(ld);
+	return ret;
+}
+
 static int send_break(struct tty_struct *tty, unsigned int duration)
 {
 	int retval;

@@ -612,8 +612,7 @@ static void ata_hsm_qc_complete(struct ata_queued_cmd *qc, int in_wq)
 
 	if (ap->ops->error_handler) {
 		if (in_wq) {
-			spin_lock_irqsave(ap->lock, flags);
-
+			 
 			qc = ata_qc_from_tag(ap, qc->tag);
 			if (qc) {
 #ifdef MY_ABC_HERE
@@ -696,8 +695,9 @@ int ata_sff_hsm_move(struct ata_port *ap, struct ata_queued_cmd *qc,
 #if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
 	struct ata_taskfile *tf = &qc->tf;
 #endif  
-	unsigned long flags = 0;
 	int poll_next;
+
+	lockdep_assert_held(ap->lock);
 
 #ifdef MY_ABC_HERE
 	 
@@ -709,6 +709,8 @@ int ata_sff_hsm_move(struct ata_port *ap, struct ata_queued_cmd *qc,
 		WARN_ON_ONCE((qc->flags & ATA_QCFLAG_ACTIVE) == 0);
 	}
 #else  
+
+	WARN_ON_ONCE((qc->flags & ATA_QCFLAG_ACTIVE) == 0);
 
 	WARN_ON_ONCE(in_wq != ata_hsm_ok_in_wq(ap, qc));
 #endif  
@@ -750,9 +752,6 @@ fsm_start:
 			}
 		}
 
-		if (in_wq)
-			spin_lock_irqsave(ap->lock, flags);
-
 		if (qc->tf.protocol == ATA_PROT_PIO) {
 			 
 			ap->hsm_task_state = HSM_ST;
@@ -760,9 +759,6 @@ fsm_start:
 		} else
 			 
 			atapi_send_cdb(ap, qc);
-
-		if (in_wq)
-			spin_unlock_irqrestore(ap->lock, flags);
 
 		break;
 
