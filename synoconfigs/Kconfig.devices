@@ -134,6 +134,10 @@ config SYNO_MD_RAID5_SKIP_COPY
 	bool "Fix data corruption in image backup"
 	default y
 
+config SYNO_MD_SYNC_STATUS_REPORT
+	bool "Report sync status to user space"
+	default y
+
 endmenu #MD
 
 menu "SATA"
@@ -167,15 +171,11 @@ config SYNO_SATA_REMAP
 	depends on SYNO_FIXED_DISK_NAME
 	default y
 
-config SYNO_MAX_PCI_SLOT
-	int "Maximun number of PCIe slot"
-	depends on SYNO_PCI_HOST_SATA_CACHE
-	default "1"
-
 config SYNO_PCI_HOST_SATA_CACHE
 	bool "Force SATA SSD on specific PCI slot used as cache device "
 	select SYNO_FIXED_DISK_NAME
 	select SYNO_SATA_REMAP
+	select SYNO_OPTIONAL_PCI_SLOT
 	default n
 
 config SYNO_SATA_DISK_SEQ_REVERSE
@@ -470,11 +470,6 @@ config SYNO_AHCI_PMP_SII3x26_DEFER_CMD
 	depends on (SYNO_BRASWELL || SYNO_ALPINE || SYNO_AVOTON) && SYNO_SATA_PM_DEVICE_GPIO
 	default n
 
-config SYNO_DISABLE_SIL3x26
-	bool "Disable SiI3x26 with 88SE9170 for DS1517+"
-	depends on SYNO_AVOTON && SYNO_SATA_PM_DEVICE_GPIO
-	default n
-
 config SYNO_SATA_LINK_SPEED_RETRY
 	bool "Enable SATA Link Speed Retry"
 	default y
@@ -526,6 +521,10 @@ config SYNO_DS1815P_SPEED_LIMIT
 
 config SYNO_SIL_PORTING
 	bool "Silicon Image SATA controller workarounds"
+	default y
+
+config SYNO_LINK_RETRY_AFTER_COMRESET
+	bool "SATA link retry after COMRESET"
 	default y
 
 endmenu #SATA
@@ -814,6 +813,11 @@ config SYNO_USB_HC_MORE_TRANSACTION_TRIES
 	default y
 	depends on SYNO_USB_DEVICE_QUIRKS
 
+config SYNO_TURN_OFF_VBUS_GPIO_BEFORE_POWEROFF
+	bool "Turn off USB vbus gpio before poweroff"
+	default y
+	depends on SYNO_USB_VBUS_GPIO_CONTROL && SYNO_AVOTON
+
 endmenu #USB
 
 menu "Hardware Monitor"
@@ -943,5 +947,19 @@ config SYNO_SKIP_IOMMU
 	default y
 
 endmenu #IOMMU
+
+menu "PCI"
+config SYNO_OPTIONAL_PCI_SLOT
+	bool "Support optional PCIe slots"
+	depends on PCI
+	default n
+
+config SYNO_MAX_PCI_SLOT
+	int "Maximun number of PCIe slot"
+	depends on SYNO_OPTIONAL_PCI_SLOT
+
+	default "1"
+
+endmenu #PCI
 
 endmenu #Device Drivers

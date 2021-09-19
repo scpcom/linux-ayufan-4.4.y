@@ -21,6 +21,9 @@
 #ifdef MY_ABC_HERE
 #include <linux/raid/libmd-report.h>
 #endif  
+#ifdef MY_ABC_HERE
+#include <linux/raid/libmd-sync-report.h>
+#endif  
 
 #define MaxSector (~(sector_t)0)
 
@@ -141,31 +144,6 @@ extern int rdev_set_badblocks(struct md_rdev *rdev, sector_t s, int sectors,
 extern int rdev_clear_badblocks(struct md_rdev *rdev, sector_t s, int sectors,
 				int is_new);
 extern void md_ack_all_badblocks(struct badblocks *bb);
-
-#ifdef CONFIG_SYNO_MD_DATA_CORRECTION
-struct md_self_heal_record {
-	struct list_head record_list;
-	void             *private;
-	struct bio       *bio;
-	struct mddev     *mddev;
-	u32              u32_last_hash;
-	int              retry_cnt;
-	int              max_retry_cnt;
-	int              is_hashed;  
-	int              request_cnt;  
-	sector_t         sector_start;
-	sector_t         sector_leng;
-};
-
-u32 syno_self_heal_hash_bio_page(struct bio *bio);
-int syno_self_heal_is_valid_md_stat(struct mddev *mddev);
-int syno_self_heal_record_hash_value(struct md_self_heal_record *heal_record, struct bio *bio);
-void syno_self_heal_del_all_record(struct mddev *mddev);
-void syno_self_heal_find_and_del_record(struct mddev *mddev, struct bio *bio);
-void syno_self_heal_modify_bio_info(struct md_self_heal_record *heal_record, struct bio *bio);
-struct md_self_heal_record* syno_self_heal_init_record(struct mddev *mddev, struct bio *bio, int max_retry_cnt);
-struct md_self_heal_record* syno_self_heal_find_record(struct mddev *mddev, struct bio *bio);
-#endif  
 
 struct mddev {
 	void				*private;

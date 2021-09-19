@@ -751,14 +751,13 @@ syno_pmp_ports_num(struct ata_port *ap)
 #ifdef MY_ABC_HERE
 		 
 		if (syno_pm_is_synology_3xxx(ap) && (ap->link.uiStsFlags & SYNO_STATUS_IS_MV9235)) {
-			ata_port_printk(ap, KERN_ERR, "This expansion unit is unsupported\n");
-			ret = 0;
-		}
-#endif  
-#ifdef MY_DEF_HERE
-		if (syno_is_hw_version(HW_DS1517p) && syno_pm_is_synology_3xxx(ap)) {
-			ata_port_printk(ap, KERN_ERR, "This expansion unit is unsupported\n");
-			ret = 0;
+			if (syno_is_hw_version(HW_DS1517p) ||
+					syno_is_hw_version(HW_DS1817p)) {
+				 
+			} else {
+				ata_port_printk(ap, KERN_ERR, "This expansion unit is unsupported\n");
+				ret = 0;
+			}
 		}
 #endif  
 #if defined (MY_ABC_HERE) && defined (MY_ABC_HERE)

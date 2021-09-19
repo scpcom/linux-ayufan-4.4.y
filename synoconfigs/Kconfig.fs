@@ -101,8 +101,8 @@ config SYNO_CIFS_FORCE_UMOUNT
 	bool ""
 	default y
 
-config SYNO_CIFS_FIX_DOUBLE_FREE_INVALID_FILE
-	bool "Prevent double free in find_writable_file()"
+config SYNO_CIFS_INCREASE_SENDMSG_TIMEOUT
+	bool "increase the kernel_sendmsg EAGAIN timeout for more stability"
 	default y
 
 endmenu #CIFS
@@ -300,11 +300,6 @@ config SYNO_BTRFS_ARCHIVE_BIT
 	bool "Btrfs syno archive bit"
 	default y
 	depends on SYNO_FS_ARCHIVE_BIT && BTRFS_FS && SYNO_BTRFS_XATTR
-
-config SYNO_BTRFS_AVOID_SEARCH_EXTENT_STATE_WHILE_EVICT_INODE
-	bool "Avoid search extent_state again while evict inode to skip unnecessary split extent_state."
-	default y
-	depends on BTRFS_FS
 
 config SYNO_BTRFS_PIN_LOG_ON_DELETE_INODE
 	bool "Pin tree-log while unlink to prevent deadlock."
@@ -571,6 +566,11 @@ config SYNO_BTRFS_AVOID_CACHE_BLOCK_GROUP_SOFT_LOCKUP
 	default y
 	depends on BTRFS_FS
 
+config SYNO_BTRFS_FIX_MOUNT_OPTION_COMMIT_1S_NO_EFFECT
+	bool "fix mount option commit=1 no effect, when race transaction blocked, will sleep 5s"
+	default y
+	depends on BTRFS_FS
+
 endmenu #BTRFS
 
 menu "ECRYPT"
@@ -685,6 +685,10 @@ config SYNO_NFSD_HIDDEN_FILE
 
 config SYNO_NFSD_AVOID_HUNG_TASK_WHEN_UNLINK_BIG_FILE
 	bool "Avoid parent mutex hung task when unlink big file"
+	default y
+
+config SYNO_NFSD_SQUASH_TO_ADMIN
+	bool "Grant permission of administrators group to admin user"
 	default y
 
 endmenu #NFS

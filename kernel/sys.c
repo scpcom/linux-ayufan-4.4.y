@@ -59,6 +59,17 @@
 #include <asm/uaccess.h>
 #include <asm/io.h>
 #include <asm/unistd.h>
+#ifdef MY_DEF_HERE
+#include <linux/gpio.h>
+#ifdef MY_ABC_HERE
+extern u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite);
+#elif defined(MY_DEF_HERE)
+extern void SYNO_GPIO_WRITE(int pin, int pValue);
+#endif  
+extern char gSynoUsbVbusHostAddr[CONFIG_SYNO_USB_VBUS_NUM_GPIO][13];
+extern int gSynoUsbVbusPort[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
+extern unsigned gSynoUsbVbusGpp[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
+#endif  
 
 #ifndef SET_UNALIGN_CTL
 # define SET_UNALIGN_CTL(a,b)	(-EINVAL)
@@ -271,6 +282,27 @@ out_unlock:
 	return retval;
 }
 
+#ifdef MY_DEF_HERE
+static void syno_turnoff_all_usb_vbus_gpio(void)
+{
+	int gpio_off_value = 0;
+	int i = 0;
+	for (i = 0; i < CONFIG_SYNO_USB_VBUS_NUM_GPIO; i++) {
+		if (0 != gSynoUsbVbusGpp[i]) {
+#ifdef MY_ABC_HERE
+			syno_pch_lpc_gpio_pin(gSynoUsbVbusGpp[i],
+					      &gpio_off_value, 1);
+#elif defined(MY_DEF_HERE)
+			SYNO_GPIO_WRITE(gSynoUsbVbusGpp[i],
+				gpio_off_value);
+#endif  
+			printk(KERN_INFO "Turned off USB vbus gpio %u\n",
+			       gSynoUsbVbusGpp[i]);
+		}
+	}
+}
+#endif  
+
 void emergency_restart(void)
 {
 	kmsg_dump(KMSG_DUMP_EMERG);
@@ -338,6 +370,10 @@ static void kernel_shutdown_prepare(enum system_states state)
 	system_state = state;
 	usermodehelper_disable();
 	device_shutdown();
+#ifdef MY_DEF_HERE
+	if (SYSTEM_POWER_OFF == system_state)
+		syno_turnoff_all_usb_vbus_gpio();
+#endif  
 }
  
 void kernel_halt(void)

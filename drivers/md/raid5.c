@@ -270,9 +270,6 @@ static void do_release_stripe(struct r5conf *conf, struct stripe_head *sh)
 #endif  
 		atomic_dec(&conf->active_stripes);
 		if (!test_bit(STRIPE_EXPANDING, &sh->state)) {
-#ifdef MY_DEF_HERE
-			SYNORaid5CheckPage(sh);
-#endif  
 			list_add_tail(&sh->lru, &conf->inactive_list);
 			wake_up(&conf->wait_for_stripe);
 			if (conf->retry_read_aligned)
@@ -1302,30 +1299,11 @@ ops_run_prexor6(struct stripe_head *sh, struct raid5_percpu *percpu,
 }
 #endif  
 
-#ifdef MY_DEF_HERE
-static void restore_r5page(struct page* to, struct page* from)
-{
-	char* pa_from = page_address(from);
-	char* pa_to = page_address(to);
-	memcpy(pa_to, pa_from, STRIPE_SIZE);
-}
-
-static int get_writebio_value(struct r5conf *conf)
-{
-	return (0 == conf->mddev->degraded ? conf->writebio : 0);
-}
-#endif  
-
 static struct dma_async_tx_descriptor *
 ops_run_biodrain(struct stripe_head *sh, struct dma_async_tx_descriptor *tx)
 {
 	int disks = sh->disks;
 	int i;
-#ifdef MY_DEF_HERE
-	int writebio = get_writebio_value(sh->raid_conf);
-	int bi_vec_idx;
-	sector_t cur_bi_sector;
-#endif  
 
 	pr_debug("%s: stripe %llu\n", __func__,
 		(unsigned long long)sh->sector);
@@ -1709,11 +1687,6 @@ static int grow_stripes(struct r5conf *conf, int num)
 {
 	struct kmem_cache *sc;
 	int devs = max(conf->raid_disks, conf->previous_raid_disks);
-#ifdef CONFIG_SYNO_MD_DATA_CORRECTION
-	int syno_self_heal_sh_num = conf->syno_self_heal_sh_size;
-	struct kmem_cache *syno_self_heal_sc;
-	char syno_self_heal_cache_name[32];
-#endif  
 
 	if (conf->mddev->gendisk)
 		sprintf(conf->cache_name[0],
@@ -1734,25 +1707,6 @@ static int grow_stripes(struct r5conf *conf, int num)
 	while (num--)
 		if (!grow_one_stripe(conf))
 			return 1;
-
-#ifdef CONFIG_SYNO_MD_DATA_CORRECTION
-	sprintf(syno_self_heal_cache_name, "%s-raid%d-self-heal-sh-v%d", mdname(conf->mddev), conf->level, conf->active_name);
-	syno_self_heal_sc = kmem_cache_create(syno_self_heal_cache_name,
-			sizeof(struct syno_self_heal_stripe_head) + (devs - 1) * sizeof(struct r5dev),
-			0, 0, NULL);
-	if (!syno_self_heal_sc) {
-		printk(KERN_ERR "md/raid:%s: %s(%d): Failed to allocate cache for syno_self_heal_sc\n", mdname(conf->mddev), __func__, __LINE__);
-		return 1;
-	}
-
-	conf->syno_self_heal_slab_sh_cache = syno_self_heal_sc;
-	while (syno_self_heal_sh_num--) {
-		if (!syno_raid5_self_heal_grow_one_stripe(conf)) {
-			printk(KERN_ERR "md/raid:%s: %s(%d): Failed to grow self heal stripe\n", mdname(conf->mddev), __func__, __LINE__);
-			return 1;
-		}
-	}
-#endif  
 
 	return 0;
 }
@@ -4951,7 +4905,7 @@ static void make_request(struct mddev *mddev, struct bio * bi)
 		syno_flashcache_return_error(bi);
 #else
 		 
-		bio_endio(bi, 0);
+		bio_endio(bi, -EIO);
 #endif  
 		return;
 	}

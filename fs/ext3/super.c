@@ -50,11 +50,6 @@ static int ext3_freeze(struct super_block *sb);
 
 #ifdef MY_ABC_HERE
 extern struct dentry_operations ext3_dentry_operations;
-
-spinlock_t ext3_namei_buf_lock;   
-spinlock_t ext3_hash_buf_lock;    
-static int ext3_namei_lock_init = 0;
-static int ext3_hash_lock_init = 0;
 #endif  
 
 handle_t *ext3_journal_start_sb(struct super_block *sb, int nblocks)
@@ -1938,16 +1933,6 @@ static int ext3_fill_super (struct super_block *sb, void *data, int silent)
 		test_opt(sb,DATA_FLAGS) == EXT3_MOUNT_JOURNAL_DATA ? "journal":
 		test_opt(sb,DATA_FLAGS) == EXT3_MOUNT_ORDERED_DATA ? "ordered":
 		"writeback");
-#ifdef MY_ABC_HERE
-	if (!ext3_namei_lock_init) {
-		spin_lock_init(&ext3_namei_buf_lock);
-		ext3_namei_lock_init=1;
-	}
-	if (!ext3_hash_lock_init) {
-		spin_lock_init(&ext3_hash_buf_lock);
-		ext3_hash_lock_init=1;
-	}
-#endif  
 
 	return 0;
 

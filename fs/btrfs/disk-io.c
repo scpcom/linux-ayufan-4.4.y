@@ -28,6 +28,7 @@
 #include "locking.h"
 #include "tree-log.h"
 #include "free-space-cache.h"
+#include "free-space-tree.h"
 #include "inode-map.h"
 #include "check-integrity.h"
 #include "rcu-string.h"
@@ -105,6 +106,7 @@ static struct btrfs_lockdep_keyset {
 	{ .id = BTRFS_TREE_RELOC_OBJECTID,	.name_stem = "treloc"	},
 	{ .id = BTRFS_DATA_RELOC_TREE_OBJECTID,	.name_stem = "dreloc"	},
 	{ .id = BTRFS_UUID_TREE_OBJECTID,	.name_stem = "uuid"	},
+	{ .id = BTRFS_FREE_SPACE_TREE_OBJECTID,	.name_stem = "free-space" },
 #ifdef MY_ABC_HERE
 	{ .id = BTRFS_BLOCK_GROUP_HINT_TREE_OBJECTID,   .name_stem = "block-group-hint" },
 #endif
@@ -963,12 +965,9 @@ struct extent_buffer *btrfs_find_tree_block(struct btrfs_root *root,
 struct extent_buffer *btrfs_find_create_tree_block(struct btrfs_root *root,
 						 u64 bytenr, u32 blocksize)
 {
-#ifdef CONFIG_BTRFS_FS_RUN_SANITY_TESTS
-	if (unlikely(test_bit(BTRFS_ROOT_DUMMY_ROOT, &root->state)))
-		return alloc_test_extent_buffer(root->fs_info, bytenr,
-						blocksize);
-#endif
-	return alloc_extent_buffer(root->fs_info, bytenr, blocksize);
+	if (btrfs_test_is_dummy_root(root))
+		return alloc_test_extent_buffer(root->fs_info, bytenr);
+	return alloc_extent_buffer(root->fs_info, bytenr);
 }
 
 int btrfs_write_tree_block(struct extent_buffer *buf)
@@ -1493,6 +1492,9 @@ struct btrfs_root *btrfs_get_fs_root(struct btrfs_fs_info *fs_info,
 	if (location->objectid == BTRFS_UUID_TREE_OBJECTID)
 		return fs_info->uuid_root ? fs_info->uuid_root :
 					    ERR_PTR(-ENOENT);
+	if (location->objectid == BTRFS_FREE_SPACE_TREE_OBJECTID)
+		return fs_info->free_space_root ? fs_info->free_space_root :
+						  ERR_PTR(-ENOENT);
 #ifdef MY_ABC_HERE
 	if (location->objectid == BTRFS_BLOCK_GROUP_HINT_TREE_OBJECTID)
 		return fs_info->block_group_hint_root ? fs_info->block_group_hint_root :
@@ -1674,6 +1676,12 @@ static int transaction_kthread(void *arg)
 		    (now < cur->start_time ||
 		     now - cur->start_time < root->fs_info->commit_interval)) {
 			spin_unlock(&root->fs_info->trans_lock);
+#ifdef MY_ABC_HERE
+			 
+			if (root->fs_info->commit_interval <= 5)
+				delay = HZ * 1;
+			else
+#endif  
 			delay = HZ * 5;
 			goto sleep;
 		}
@@ -1908,6 +1916,7 @@ static void free_root_pointers(struct btrfs_fs_info *info, int chunk_root)
 #endif
 	if (chunk_root)
 		free_root_extent_buffers(info->chunk_root);
+	free_root_extent_buffers(info->free_space_root);
 }
 
 void btrfs_free_fs_roots(struct btrfs_fs_info *fs_info)
@@ -1970,6 +1979,7 @@ int open_ctree(struct super_block *sb,
 	struct btrfs_root *quota_root;
 	struct btrfs_root *uuid_root;
 	struct btrfs_root *log_tree_root;
+	struct btrfs_root *free_space_tree_root;
 #ifdef MY_ABC_HERE
 	struct btrfs_root *block_group_hint_root;
 #endif
@@ -1982,6 +1992,7 @@ int open_ctree(struct super_block *sb,
 	int flags = WQ_MEM_RECLAIM | WQ_FREEZABLE | WQ_UNBOUND;
 	bool create_uuid_tree;
 	bool check_uuid_tree;
+	int clear_free_space_tree = 0;
 
 #ifdef MY_ABC_HERE
 	fs_info->check_integrity = 0;
@@ -2023,6 +2034,7 @@ int open_ctree(struct super_block *sb,
 #ifdef MY_ABC_HERE
 #else
 	ret = percpu_counter_init(&fs_info->bio_counter, 0);
+
 	if (ret) {
 		err = ret;
 		goto fail_delalloc_bytes;
@@ -2582,6 +2594,17 @@ retry_root_backup:
 	}
 #endif
 
+	if (btrfs_fs_compat_ro(fs_info, FREE_SPACE_TREE)) {
+		location.objectid = BTRFS_FREE_SPACE_TREE_OBJECTID;
+		free_space_tree_root = btrfs_read_tree_root(tree_root, &location);
+		if (IS_ERR(free_space_tree_root)) {
+			ret = PTR_ERR(free_space_tree_root);
+			goto recovery_tree_root;
+		}
+		set_bit(BTRFS_ROOT_TRACK_DIRTY, &free_space_tree_root->state);
+		fs_info->free_space_root = free_space_tree_root;
+	}
+
 	fs_info->generation = generation;
 	fs_info->last_trans_committed = generation;
 
@@ -2752,6 +2775,38 @@ retry_root_backup:
 
 	if (sb->s_flags & MS_RDONLY)
 		return 0;
+
+	if (btrfs_test_opt(tree_root, CLEAR_CACHE) &&
+	    btrfs_fs_compat_ro(fs_info, FREE_SPACE_TREE)) {
+		clear_free_space_tree = 1;
+	} else if (btrfs_fs_compat_ro(fs_info, FREE_SPACE_TREE) &&
+		   !btrfs_fs_compat_ro(fs_info, FREE_SPACE_TREE_VALID)) {
+		btrfs_warn(fs_info, "free space tree is invalid");
+		clear_free_space_tree = 1;
+	}
+
+	if (clear_free_space_tree) {
+		btrfs_info(fs_info, "clearing free space tree");
+		ret = btrfs_clear_free_space_tree(fs_info);
+		if (ret) {
+			btrfs_warn(fs_info,
+				   "failed to clear free space tree: %d", ret);
+			close_ctree(tree_root);
+			return ret;
+		}
+	}
+
+	if (btrfs_test_opt(tree_root, FREE_SPACE_TREE) &&
+	    !btrfs_fs_compat_ro(fs_info, FREE_SPACE_TREE)) {
+		pr_info("BTRFS: creating free space tree\n");
+		ret = btrfs_create_free_space_tree(fs_info);
+		if (ret) {
+			pr_warn("BTRFS: failed to create free space tree %d\n",
+				ret);
+			close_ctree(tree_root);
+			return ret;
+		}
+	}
 
 	down_read(&fs_info->cleanup_work_sem);
 	if ((ret = btrfs_orphan_cleanup(fs_info->fs_root)) ||

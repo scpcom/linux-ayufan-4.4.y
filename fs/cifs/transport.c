@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *   fs/cifs/transport.c
  *
@@ -181,6 +184,20 @@ smb_send_kvec(struct TCP_Server_Info *server, struct kvec *iov, size_t n_vec,
 				    n_vec - first_vec, remaining);
 		if (rc == -EAGAIN) {
 			i++;
+#ifdef MY_ABC_HERE
+			if (119 < i) {
+				cifs_dbg(VFS, "sends on sock %p stuck for 120 seconds\n",
+					 ssocket);
+				rc = -EAGAIN;
+				break;
+			}
+			if (14 > i) {
+				msleep(1 << i);
+			} else {
+				msleep(1000);
+			}
+			continue;
+#else
 			if (i >= 14 || (!server->noblocksnd && (i > 2))) {
 				cifs_dbg(VFS, "sends on sock %p stuck for 15 seconds\n",
 					 ssocket);
@@ -189,6 +206,7 @@ smb_send_kvec(struct TCP_Server_Info *server, struct kvec *iov, size_t n_vec,
 			}
 			msleep(1 << i);
 			continue;
+#endif /* MY_ABC_HERE */
 		}
 
 		if (rc < 0)

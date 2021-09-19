@@ -14,7 +14,7 @@ dm-thin-pool-y	+= dm-thin.o dm-thin-metadata.o
 dm-cache-y	+= dm-cache-target.o dm-cache-metadata.o dm-cache-policy.o
 dm-cache-mq-y   += dm-cache-policy-mq.o
 dm-cache-cleaner-y += dm-cache-policy-cleaner.o
-md-mod-y	+= md.o bitmap.o libmd-report.o
+md-mod-y	+= md.o bitmap.o libmd-report.o libmd-sync-report.o
 raid456-y	+= raid5.o
 
 # Note: link order is important.  All raid personalities

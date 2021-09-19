@@ -92,6 +92,11 @@ config SYNO_ISCSI_DEVICE_PREFIX
 	default "isd"
 	depends on SYNO_ISCSI_DEVICE
 
+config SYNO_ISCSI_REVERT_SUPPORT_PFMALLOC
+	bool "Revert iscsi initiator support PF_MALLOC"
+	default y
+	depends on ISCSI_TCP
+
 config SYNO_SATA_DEVICE_PREFIX
 	string "The prefix of sata device"
 	default "sd"
@@ -154,6 +159,10 @@ config SYNO_EXPORT_GET_CMDLINE
 config SYNO_GPIO
 	  bool "Employ refactored GPIO-functions"
 	  default n
+
+config SYNO_DISK_EH_FLAG
+	bool "report to userspace if kernel is in SCSI error handling"
+	default y
 
 endmenu #System Features
 

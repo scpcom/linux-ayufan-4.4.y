@@ -196,14 +196,21 @@ int g_syno_sata_remap[SATA_REMAP_MAX] = {SATA_REMAP_NOT_INIT};
 EXPORT_SYMBOL(g_syno_sata_remap);
 int g_use_sata_remap = 0;
 EXPORT_SYMBOL(g_use_sata_remap);
+int g_syno_mv14xx_remap[SATA_REMAP_MAX] = {SATA_REMAP_NOT_INIT};
+EXPORT_SYMBOL(g_syno_mv14xx_remap);
+int g_use_mv14xx_remap = 0;
+EXPORT_SYMBOL(g_use_mv14xx_remap);
 #endif  
 
 #ifdef MY_DEF_HERE
 char gszPciAddrList[PCI_ADDR_NUM_MAX][PCI_ADDR_LEN_MAX] = {{0}};
 int gPciAddrNum = 0;
-int gPciDeferStart = M2SATA_START_IDX;
 EXPORT_SYMBOL(gszPciAddrList);
 EXPORT_SYMBOL(gPciAddrNum);
+#endif  
+
+#ifdef MY_DEF_HERE
+int gPciDeferStart = M2SATA_START_IDX;
 EXPORT_SYMBOL(gPciDeferStart);
 #endif  
 
@@ -324,6 +331,13 @@ EXPORT_SYMBOL(syno_disk_map_table_gen_mv14xx);
 #ifdef MY_DEF_HERE
 int g_syno_ds1815p_speed_limit = 1;
 EXPORT_SYMBOL(g_syno_ds1815p_speed_limit);
+#endif  
+
+#ifdef MY_ABC_HERE
+int giSynoDsikEhFlag = 0;
+EXPORT_SYMBOL(giSynoDsikEhFlag);
+unsigned long guSynoScsiCmdSN = 0;
+EXPORT_SYMBOL(guSynoScsiCmdSN);
 #endif  
 
 extern int sysctl_overcommit_memory;
@@ -1547,6 +1561,15 @@ static struct ctl_table kern_table[] = {
 		.mode           = 0644,
 		.proc_handler   = SynoProcEncPwrCtl,
 	},
+#endif  
+#ifdef MY_ABC_HERE
+       {
+               .procname       = "syno_disk_eh_flag",
+               .data           = &giSynoDsikEhFlag,
+               .maxlen         = sizeof (int),
+               .mode           = 0444,
+               .proc_handler   = &proc_dointvec,
+       },
 #endif  
 	{ }
 };

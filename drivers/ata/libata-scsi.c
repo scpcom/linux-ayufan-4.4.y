@@ -36,6 +36,10 @@
 #include <linux/synolib.h>
 #endif  
 
+#ifdef MY_DEF_HERE
+#include <linux/pci.h>
+#endif  
+
 #ifdef MY_ABC_HERE
 #include <linux/random.h>
 
@@ -1094,12 +1098,20 @@ syno_trans_host_to_disk_show(struct device *dev, struct device_attribute *attr, 
 		goto END;
 	}
 
-	iStartIdx = syno_libata_index_get(pShost, 0, 0, 0);
+#ifdef MY_DEF_HERE
+	if (pShost->isCacheSSD) {
+		iStartIdx = syno_libata_index_get(pShost, 0, 0, 0);
+		snprintf(szTmp, sizeof(szTmp), "%s%d\n",
+			CONFIG_SYNO_CACHE_DEVICE_PREFIX, (iStartIdx - M2SATA_START_IDX) + 1);
+	} else
+#endif  
+	{
+		iStartIdx = syno_libata_index_get(pShost, 0, 0, 0);
+		DeviceNameGet(iStartIdx, szTmp);
 
-	DeviceNameGet(iStartIdx, szTmp);
-
-	szTmp[SYNO_DISK_TRANS_LEN] = '\n';
-	szTmp[SYNO_DISK_TRANS_LEN + 1] = '\0';
+		szTmp[SYNO_DISK_TRANS_LEN] = '\n';
+		szTmp[SYNO_DISK_TRANS_LEN + 1] = '\0';
+	}
 
 	iLen = snprintf(buf, strlen(szTmp)+1, "%s", szTmp);
 END:
