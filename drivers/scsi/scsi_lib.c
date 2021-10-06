@@ -2277,6 +2277,22 @@ void scsi_mq_destroy_tags(struct Scsi_Host *shost)
 	blk_mq_free_tag_set(&shost->tag_set);
 }
 
+struct scsi_device *scsi_device_from_queue(struct request_queue *q)
+{
+	struct scsi_device *sdev = NULL;
+
+	if (q->mq_ops) {
+		if (q->mq_ops == &scsi_mq_ops)
+			sdev = q->queuedata;
+	} else if (q->request_fn == scsi_request_fn)
+		sdev = q->queuedata;
+	if (!sdev || !get_device(&sdev->sdev_gendev))
+		sdev = NULL;
+
+	return sdev;
+}
+EXPORT_SYMBOL_GPL(scsi_device_from_queue);
+
 void scsi_block_requests(struct Scsi_Host *shost)
 {
 	shost->host_self_blocked = 1;

@@ -311,7 +311,25 @@ void build_ntlmssp_negotiate_blob(unsigned char *pbuffer,
 	sec_blob->DomainName.MaximumLength = 0;
 }
 
-int build_ntlmssp_auth_blob(unsigned char *pbuffer,
+static int size_of_ntlmssp_blob(struct cifs_ses *ses)
+{
+	int sz = sizeof(AUTHENTICATE_MESSAGE) + ses->auth_key.len
+		- CIFS_SESS_KEY_SIZE + CIFS_CPHTXT_SIZE + 2;
+
+	if (ses->domainName)
+		sz += 2 * strnlen(ses->domainName, CIFS_MAX_DOMAINNAME_LEN);
+	else
+		sz += 2;
+
+	if (ses->user_name)
+		sz += 2 * strnlen(ses->user_name, CIFS_MAX_USERNAME_LEN);
+	else
+		sz += 2;
+
+	return sz;
+}
+
+int build_ntlmssp_auth_blob(unsigned char **pbuffer,
 					u16 *buflen,
 				   struct cifs_ses *ses,
 				   const struct nls_table *nls_cp)
@@ -379,7 +397,7 @@ int build_ntlmssp_auth_blob(unsigned char *pbuffer,
 		len = cifs_strtoUTF16((__le16 *)tmp, ses->domainName,
 				      CIFS_MAX_USERNAME_LEN, nls_cp);
 		len *= 2;  
-		sec_blob->DomainName.BufferOffset = cpu_to_le32(tmp - pbuffer);
+		sec_blob->DomainName.BufferOffset = cpu_to_le32(tmp - *pbuffer);
 		sec_blob->DomainName.Length = cpu_to_le16(len);
 		sec_blob->DomainName.MaximumLength = cpu_to_le16(len);
 		tmp += len;
@@ -395,7 +413,7 @@ int build_ntlmssp_auth_blob(unsigned char *pbuffer,
 		len = cifs_strtoUTF16((__le16 *)tmp, ses->user_name,
 				      CIFS_MAX_USERNAME_LEN, nls_cp);
 		len *= 2;  
-		sec_blob->UserName.BufferOffset = cpu_to_le32(tmp - pbuffer);
+		sec_blob->UserName.BufferOffset = cpu_to_le32(tmp - *pbuffer);
 		sec_blob->UserName.Length = cpu_to_le16(len);
 		sec_blob->UserName.MaximumLength = cpu_to_le16(len);
 		tmp += len;
@@ -1158,15 +1176,7 @@ sess_auth_rawntlmssp_authenticate(struct sess_data *sess_data)
 
 	pSMB = (SESSION_SETUP_ANDX *)sess_data->iov[0].iov_base;
 	smb_buf = (struct smb_hdr *)pSMB;
-	 
-	ntlmsspblob = kzalloc(5*sizeof(struct _AUTHENTICATE_MESSAGE),
-				GFP_KERNEL);
-	if (!ntlmsspblob) {
-		rc = -ENOMEM;
-		goto out;
-	}
-
-	rc = build_ntlmssp_auth_blob(ntlmsspblob,
+	rc = build_ntlmssp_auth_blob(&ntlmsspblob,
 					&blob_len, ses, sess_data->nls_cp);
 	if (rc)
 		goto out_free_ntlmsspblob;

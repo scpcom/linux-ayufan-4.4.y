@@ -2403,7 +2403,7 @@ static int module_sig_check(struct load_info *info, int flags)
 	return err;
 }
 #else  
-static int module_sig_check(struct load_info *info)
+static int module_sig_check(struct load_info *info, int flags)
 {
 	return 0;
 }

@@ -954,7 +954,9 @@ errout:
 	return ret ? ret : copied;
 }
 
-static void zero_new_buffers(struct page *page, unsigned from, unsigned to)
+static void ext4_journalled_zero_new_buffers(handle_t *handle,
+					    struct page *page,
+					    unsigned from, unsigned to)
 {
 	unsigned int block_start = 0, block_end;
 	struct buffer_head *head, *bh;

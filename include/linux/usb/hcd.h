@@ -103,6 +103,7 @@ struct usb_hcd {
 	struct giveback_urb_bh  high_prio_bh;
 	struct giveback_urb_bh  low_prio_bh;
 
+	struct mutex		*address0_mutex;
 	struct mutex		*bandwidth_mutex;
 	struct usb_hcd		*shared_hcd;
 	struct usb_hcd		*primary_hcd;

@@ -2990,6 +2990,7 @@ void tcp_synack_rtt_meas(struct sock *sk, struct request_sock *req)
 	tcp_ack_update_rtt(sk, FLAG_SYN_ACKED, rtt_us, -1L, rtt_us);
 }
 
+
 static void tcp_cong_avoid(struct sock *sk, u32 ack, u32 acked)
 {
 	const struct inet_connection_sock *icsk = inet_csk(sk);
@@ -6185,6 +6186,7 @@ int tcp_conn_request(struct request_sock_ops *rsk_ops,
 		if (!want_cookie)
 			goto drop;
 	}
+
 
 	/* Accept backlog is full. If we have already queued enough
 	 * of warm entries in syn queue, drop request. It is better than

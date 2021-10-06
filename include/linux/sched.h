@@ -1169,6 +1169,7 @@ struct task_struct {
 	struct task_cputime cputime_expires;
 	struct list_head cpu_timers[3];
 
+	const struct cred __rcu *ptracer_cred;  
 	const struct cred __rcu *real_cred;  
 	const struct cred __rcu *cred;	 
 	char comm[TASK_COMM_LEN];  

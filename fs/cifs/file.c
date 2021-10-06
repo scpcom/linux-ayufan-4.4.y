@@ -1545,7 +1545,7 @@ struct cifsFileInfo *find_readable_file(struct cifsInodeInfo *cifs_inode,
 	if (!(cifs_sb->mnt_cifs_flags & CIFS_MOUNT_MULTIUSER))
 		fsuid_only = false;
 
-	spin_lock(&cifs_file_list_lock);
+	spin_lock(&tcon->open_file_lock);
 	 
 	list_for_each_entry(open_file, &cifs_inode->openFileList, flist) {
 		if (fsuid_only && !uid_eq(open_file->uid, current_fsuid()))
@@ -1553,8 +1553,8 @@ struct cifsFileInfo *find_readable_file(struct cifsInodeInfo *cifs_inode,
 		if (OPEN_FMODE(open_file->f_flags) & FMODE_READ) {
 			if (!open_file->invalidHandle) {
 				 
-				cifsFileInfo_get_locked(open_file);
-				spin_unlock(&cifs_file_list_lock);
+				cifsFileInfo_get(open_file);
+				spin_unlock(&tcon->open_file_lock);
 				return open_file;
 			}  
 		} else  
@@ -1600,8 +1600,8 @@ refind_writable:
 		if (OPEN_FMODE(open_file->f_flags) & FMODE_WRITE) {
 			if (!open_file->invalidHandle) {
 				 
-				cifsFileInfo_get_locked(open_file);
-				spin_unlock(&cifs_file_list_lock);
+				cifsFileInfo_get(open_file);
+				spin_unlock(&tcon->open_file_lock);
 				return open_file;
 			} else {
 				if (!inv_file)

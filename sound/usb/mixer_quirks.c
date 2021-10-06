@@ -1779,8 +1779,8 @@ void snd_usb_mixer_fu_apply_quirk(struct usb_mixer_interface *mixer,
 {
 	switch (mixer->chip->usb_id) {
 	case USB_ID(0x21b4, 0x0081):  
-		if (unitid == 7 && cval->min == 0 && cval->max == 50)
-			snd_dragonfly_quirk_db_scale(mixer, kctl);
+		if (unitid == 7 && cval->control == UAC_FU_VOLUME)
+			snd_dragonfly_quirk_db_scale(mixer, cval, kctl);
 		break;
 	}
 }

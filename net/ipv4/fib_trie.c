@@ -2207,6 +2207,7 @@ static void fib_table_print(struct seq_file *seq, struct fib_table *tb)
 		seq_printf(seq, "Id %d:\n", tb->tb_id);
 }
 
+
 static int fib_triestat_seq_show(struct seq_file *seq, void *v)
 {
 	struct net *net = (struct net *)seq->private;
@@ -2459,7 +2460,7 @@ static struct key_vector *fib_route_get_idx(struct fib_route_iter *iter,
 	if (iter->pos > 0 && pos >= iter->pos) {
 		key = iter->key;
 	} else {
-		iter->pos = 0;
+		iter->pos = 1;
 		key = 0;
 	}
 

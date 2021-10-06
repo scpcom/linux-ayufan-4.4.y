@@ -3551,7 +3551,7 @@ void close_ctree(struct btrfs_root *root)
 	fs_info->closing = 1;
 	smp_mb();
 
-	btrfs_qgroup_wait_for_completion(fs_info);
+	btrfs_qgroup_wait_for_completion(fs_info, false);
 
 	down(&fs_info->uuid_tree_rescan_sem);
 	 

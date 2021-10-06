@@ -317,8 +317,6 @@ static inline void napi_enable(struct napi_struct *n)
 	clear_bit(NAPI_STATE_NPSVC, &n->state);
 }
 
-#ifdef CONFIG_SMP
- 
 static inline void napi_synchronize(const struct napi_struct *n)
 {
 	if (IS_ENABLED(CONFIG_SMP))
@@ -1132,7 +1130,7 @@ struct napi_gro_cb {
 
 	u8	same_flow:1;
 
-	u8	udp_mark:1;
+	u8	encap_mark:1;
 
 	u8	csum_valid:1;
 
@@ -1143,6 +1141,8 @@ struct napi_gro_cb {
 #define NAPI_GRO_FREE_STOLEN_HEAD 2
 
 	u8	is_ipv6:1;
+
+	u8 recursion_counter:4;
 
 	__wsum	csum;
 
@@ -1214,6 +1214,22 @@ struct udp_offload {
 	u8			 ipproto;
 	struct udp_offload_callbacks callbacks;
 };
+
+typedef struct sk_buff **(*gro_receive_udp_t)(struct sk_buff **,
+					      struct sk_buff *,
+					      struct udp_offload *);
+static inline struct sk_buff **call_gro_receive_udp(gro_receive_udp_t cb,
+						    struct sk_buff **head,
+						    struct sk_buff *skb,
+						    struct udp_offload *uoff)
+{
+	if (unlikely(gro_recursion_inc_test(skb))) {
+		NAPI_GRO_CB(skb)->flush |= 1;
+		return NULL;
+	}
+
+	return cb(head, skb, uoff);
+}
 
 struct pcpu_sw_netstats {
 	u64     rx_packets;

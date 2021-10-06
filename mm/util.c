@@ -150,28 +150,9 @@ void __vma_link_list(struct mm_struct *mm, struct vm_area_struct *vma,
 		next->vm_prev = vma;
 }
 
-static int vm_is_stack_for_task(struct task_struct *t,
-				struct vm_area_struct *vma)
+int vma_is_stack_for_task(struct vm_area_struct *vma, struct task_struct *t)
 {
 	return (vma->vm_start <= KSTK_ESP(t) && vma->vm_end >= KSTK_ESP(t));
-}
-
-struct task_struct *task_of_stack(struct task_struct *task,
-				struct vm_area_struct *vma, bool in_group)
-{
-	if (vm_is_stack_for_task(task, vma))
-		return task;
-
-	if (in_group) {
-		struct task_struct *t;
-
-		for_each_thread(task, t) {
-			if (vm_is_stack_for_task(t, vma))
-				return t;
-		}
-	}
-
-	return NULL;
 }
 
 #if defined(CONFIG_MMU) && !defined(HAVE_ARCH_PICK_MMAP_LAYOUT)

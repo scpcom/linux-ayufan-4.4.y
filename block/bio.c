@@ -423,6 +423,8 @@ void __bio_clone_fast(struct bio *bio, struct bio *bio_src)
 	 
 	bio->bi_vcnt = bio_src->bi_vcnt;
 #endif
+
+	bio_clone_blkcg_association(bio, bio_src);
 }
 EXPORT_SYMBOL(__bio_clone_fast);
 
@@ -1460,6 +1462,12 @@ void bio_disassociate_task(struct bio *bio)
 		css_put(bio->bi_css);
 		bio->bi_css = NULL;
 	}
+}
+
+void bio_clone_blkcg_association(struct bio *dst, struct bio *src)
+{
+	if (src->bi_css)
+		WARN_ON(bio_associate_blkcg(dst, src->bi_css));
 }
 
 #endif  

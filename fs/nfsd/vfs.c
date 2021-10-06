@@ -338,15 +338,35 @@ nfsd_setattr(struct svc_rqst *rqstp, struct svc_fh *fhp, struct iattr *iap,
 
 	nfsd_sanitize_attrs(inode, iap);
 
-	if (iap->ia_valid & ATTR_SIZE) {
+	if (check_guard && guardtime != inode->i_ctime.tv_sec)
+		return nfserr_notsync;
+
+	/*
+	 * The size case is special, it changes the file in addition to the
+	 * attributes, and file systems don't expect it to be mixed with
+	 * "random" attribute changes.  We thus split out the size change
+	 * into a separate call to ->setattr, and do the rest as a separate
+	 * setattr call.
+	 */
+	if (size_change) {
 		err = nfsd_get_write_access(rqstp, fhp, iap);
 		if (err)
 			return err;
 	}
 
-		if (iap->ia_size != i_size_read(inode))
-			iap->ia_valid |= ATTR_MTIME;
-	}
+	fh_lock(fhp);
+	if (size_change) {
+		/*
+		 * RFC5661, Section 18.30.4:
+		 *   Changing the size of a file with SETATTR indirectly
+		 *   changes the time_modify and change attributes.
+		 *
+		 * (and similar for the older RFCs)
+		 */
+		struct iattr size_attr = {
+			.ia_valid	= ATTR_SIZE | ATTR_CTIME | ATTR_MTIME,
+			.ia_size	= iap->ia_size,
+		};
 
 		host_err = notify_change(dentry, &size_attr, NULL);
 		if (host_err)

@@ -8746,6 +8746,11 @@ int btrfs_read_block_groups(struct btrfs_root *root)
 #ifdef MY_ABC_HERE
 	struct btrfs_path *hint_path;
 #endif  
+	u64 feature;
+	int mixed;
+
+	feature = btrfs_super_incompat_flags(info->super_copy);
+	mixed = !!(feature & BTRFS_FEATURE_INCOMPAT_MIXED_GROUPS);
 
 	root = info->extent_root;
 	key.objectid = 0;

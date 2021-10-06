@@ -168,13 +168,12 @@ struct usb_bus {
 	unsigned sg_tablesize;		 
 
 	int devnum_next;		 
+	struct mutex devnum_next_mutex;  
 
 	struct usb_devmap devmap;	 
 	struct usb_device *root_hub;	 
 	struct usb_bus *hs_companion;	 
 	struct list_head bus_list;	 
-
-	struct mutex usb_address0_mutex;  
 
 	int bandwidth_allocated;	 
 	int bandwidth_int_reqs;		 

@@ -1333,6 +1333,52 @@ sector_t SynoLvLgSectorCount(void *private, sector_t sector)
 EXPORT_SYMBOL(SynoLvLgSectorCount);
 #endif  
 
+struct dm_offload {
+	struct blk_plug plug;
+	struct blk_plug_cb cb;
+};
+
+static void flush_current_bio_list(struct blk_plug_cb *cb, bool from_schedule)
+{
+	struct dm_offload *o = container_of(cb, struct dm_offload, cb);
+	struct bio_list list;
+	struct bio *bio;
+
+	INIT_LIST_HEAD(&o->cb.list);
+
+	if (unlikely(!current->bio_list))
+		return;
+
+	list = *current->bio_list;
+	bio_list_init(current->bio_list);
+
+	while ((bio = bio_list_pop(&list))) {
+		struct bio_set *bs = bio->bi_pool;
+		if (unlikely(!bs) || bs == fs_bio_set) {
+			bio_list_add(current->bio_list, bio);
+			continue;
+		}
+
+		spin_lock(&bs->rescue_lock);
+		bio_list_add(&bs->rescue_list, bio);
+		queue_work(bs->rescue_workqueue, &bs->rescue_work);
+		spin_unlock(&bs->rescue_lock);
+	}
+}
+
+static void dm_offload_start(struct dm_offload *o)
+{
+	blk_start_plug(&o->plug);
+	o->cb.callback = flush_current_bio_list;
+	list_add(&o->cb.list, &current->plug->cb_list);
+}
+
+static void dm_offload_end(struct dm_offload *o)
+{
+	list_del(&o->cb.list);
+	blk_finish_plug(&o->plug);
+}
+
 static void __map_bio(struct dm_target_io *tio)
 {
 	int r;
@@ -2929,9 +2975,8 @@ static void __dm_internal_suspend(struct mapped_device *md, unsigned suspend_fla
 
 	map = rcu_dereference_protected(md->map, lockdep_is_held(&md->suspend_lock));
 
-	(void) __dm_suspend(md, map, suspend_flags, TASK_UNINTERRUPTIBLE);
-
-	set_bit(DMF_SUSPENDED_INTERNALLY, &md->flags);
+	(void) __dm_suspend(md, map, suspend_flags, TASK_UNINTERRUPTIBLE,
+			    DMF_SUSPENDED_INTERNALLY);
 
 	dm_table_postsuspend_targets(map);
 }

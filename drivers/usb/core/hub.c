@@ -927,11 +927,8 @@ static void hub_activate(struct usb_hub *hub, enum hub_activation_type type)
 	if (type == HUB_INIT2 || type == HUB_INIT3) {
 		device_lock(&hdev->dev);
 
-		if (hub->disconnected) {
-			device_unlock(hub->intfdev);
-			kref_put(&hub->kref, hub_release);
-			return;
-		}
+		if (hub->disconnected)
+			goto disconnected;
 		if (type == HUB_INIT2)
 			goto init2;
 		goto init3;
@@ -1070,7 +1067,7 @@ static void hub_activate(struct usb_hub *hub, enum hub_activation_type type)
 			queue_delayed_work(system_power_efficient_wq,
 					&hub->init_work,
 					msecs_to_jiffies(delay));
-			device_unlock(hub->intfdev);
+			device_unlock(&hdev->dev);
 			return;		 
 		} else {
 			msleep(delay);
@@ -1088,7 +1085,9 @@ static void hub_activate(struct usb_hub *hub, enum hub_activation_type type)
 
 	kick_hub_wq(hub);
 
-	if (type <= HUB_INIT3)
+	if (type == HUB_INIT2 || type == HUB_INIT3) {
+		 
+ disconnected:
 		usb_autopm_put_interface_async(to_usb_interface(hub->intfdev));
 		device_unlock(&hdev->dev);
 	}
@@ -1785,7 +1784,7 @@ static void choose_devnum(struct usb_device *udev)
 	int		devnum;
 	struct usb_bus	*bus = udev->bus;
 
-	mutex_lock(&bus->usb_address0_mutex);
+	mutex_lock(&bus->devnum_next_mutex);
 	if (udev->wusb) {
 		devnum = udev->portnum + 1;
 		BUG_ON(test_bit(devnum, bus->devmap.devicemap));
@@ -3721,7 +3720,7 @@ hub_port_init(struct usb_hub *hub, struct usb_device *udev, int port1,
 	if (oldspeed == USB_SPEED_LOW)
 		delay = HUB_LONG_RESET_TIME;
 
-	mutex_lock(&hdev->bus->usb_address0_mutex);
+	mutex_lock(hcd->address0_mutex);
 #if defined (MY_ABC_HERE)
 port_speed_morph:
 	do {

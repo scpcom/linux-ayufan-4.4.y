@@ -164,6 +164,11 @@ static inline sector_t logical_to_sectors(struct scsi_device *sdev, sector_t blo
 	return blocks << (ilog2(sdev->sector_size) - 9);
 }
 
+static inline unsigned int logical_to_bytes(struct scsi_device *sdev, sector_t blocks)
+{
+	return blocks * sdev->sector_size;
+}
+
 enum sd_dif_target_protection_types {
 	SD_DIF_TYPE0_PROTECTION = 0x0,
 	SD_DIF_TYPE1_PROTECTION = 0x1,

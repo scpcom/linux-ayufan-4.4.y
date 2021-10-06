@@ -1267,7 +1267,13 @@ static void program_hpp_type2(struct pci_dev *dev, struct hpp_type2 *hpp)
 	pcie_capability_clear_and_set_word(dev, PCI_EXP_DEVCTL,
 			~hpp->pci_exp_devctl_and, hpp->pci_exp_devctl_or);
 
-	if (pcie_cap_has_lnkctl(dev))
+	if (pcie_cap_has_lnkctl(dev)) {
+
+		hpp->pci_exp_lnkctl_and |= PCI_EXP_LNKCTL_RCB;
+		hpp->pci_exp_lnkctl_or &= ~PCI_EXP_LNKCTL_RCB;
+		if (pcie_root_rcb_set(dev))
+			hpp->pci_exp_lnkctl_or |= PCI_EXP_LNKCTL_RCB;
+
 		pcie_capability_clear_and_set_word(dev, PCI_EXP_LNKCTL,
 			~hpp->pci_exp_lnkctl_and, hpp->pci_exp_lnkctl_or);
 	}

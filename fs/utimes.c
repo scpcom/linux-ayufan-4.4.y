@@ -78,24 +78,7 @@ static int utimes_common(struct path *path, struct timespec *times)
 		 
 		newattrs.ia_valid |= ATTR_TIMES_SET;
 	} else {
-		 
-		error = -EACCES;
-                if (IS_IMMUTABLE(inode))
-			goto mnt_drop_write_and_out;
-
-#ifdef MY_ABC_HERE
-		if (IS_SYNOACL(path->dentry)) {
-			error = synoacl_op_perm(path->dentry, MAY_WRITE_ATTR | MAY_WRITE_EXT_ATTR);
-			if (error) {
-				goto mnt_drop_write_and_out;
-			}
-		} else
-#endif  
-		if (!inode_owner_or_capable(inode)) {
-			error = inode_permission(inode, MAY_WRITE);
-			if (error)
-				goto mnt_drop_write_and_out;
-		}
+		newattrs.ia_valid |= ATTR_TOUCH;
 	}
 retry_deleg:
 	inode_lock(inode);

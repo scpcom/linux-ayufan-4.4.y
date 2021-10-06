@@ -1222,13 +1222,6 @@ static void tcp_v6_fill_cb(struct sk_buff *skb, const struct ipv6hdr *hdr,
 	TCP_SKB_CB(skb)->sacked = 0;
 }
 
-static void tcp_v6_restore_cb(struct sk_buff *skb)
-{
-	 
-	memmove(IP6CB(skb), &TCP_SKB_CB(skb)->header.h6,
-		sizeof(struct inet6_skb_parm));
-}
-
 static int tcp_v6_rcv(struct sk_buff *skb)
 {
 	const struct tcphdr *th;

@@ -440,7 +440,7 @@ static void mb_regenerate_buddy(struct ext4_buddy *e4b)
 		e4b->bd_bitmap, e4b->bd_group);
 }
 
-static int ext4_mb_init_cache(struct page *page, char *incore)
+static int ext4_mb_init_cache(struct page *page, char *incore, gfp_t gfp)
 {
 	ext4_group_t ngroups;
 	int blocksize;
@@ -639,7 +639,7 @@ int ext4_mb_init_group(struct super_block *sb, ext4_group_t group, gfp_t gfp)
 	mb_debug(1, "init group %u\n", group);
 	this_grp = ext4_get_group_info(sb, group);
 	 
-	ret = ext4_mb_get_buddy_page_lock(sb, group, &e4b);
+	ret = ext4_mb_get_buddy_page_lock(sb, group, &e4b, gfp);
 	if (ret || !EXT4_MB_GRP_NEED_INIT(this_grp)) {
 		 
 		goto err;
@@ -702,7 +702,7 @@ ext4_mb_load_buddy_gfp(struct super_block *sb, ext4_group_t group,
 
 	if (unlikely(EXT4_MB_GRP_NEED_INIT(grp))) {
 		 
-		ret = ext4_mb_init_group(sb, group);
+		ret = ext4_mb_init_group(sb, group, gfp);
 		if (ret)
 			return ret;
 	}

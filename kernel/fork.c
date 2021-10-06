@@ -682,6 +682,22 @@ struct file *get_mm_exe_file(struct mm_struct *mm)
 }
 EXPORT_SYMBOL(get_mm_exe_file);
 
+struct file *get_task_exe_file(struct task_struct *task)
+{
+	struct file *exe_file = NULL;
+	struct mm_struct *mm;
+
+	task_lock(task);
+	mm = task->mm;
+	if (mm) {
+		if (!(task->flags & PF_KTHREAD))
+			exe_file = get_mm_exe_file(mm);
+	}
+	task_unlock(task);
+	return exe_file;
+}
+EXPORT_SYMBOL(get_task_exe_file);
+
 struct mm_struct *get_task_mm(struct task_struct *task)
 {
 	struct mm_struct *mm;
@@ -1342,6 +1358,8 @@ static struct task_struct *copy_process(unsigned long clone_flags,
 	INIT_LIST_HEAD(&p->thread_group);
 	p->task_works = NULL;
 
+	threadgroup_change_begin(current);
+	 
 	retval = cgroup_can_fork(p, cgrp_ss_priv);
 	if (retval)
 		goto bad_fork_free_pid;
@@ -1507,7 +1525,7 @@ long _do_fork(unsigned long clone_flags,
 	}
 
 	p = copy_process(clone_flags, stack_start, stack_size,
-			 child_tidptr, NULL, trace, tls);
+			 child_tidptr, NULL, trace, tls, NUMA_NO_NODE);
 	 
 	if (!IS_ERR(p)) {
 		struct completion vfork;

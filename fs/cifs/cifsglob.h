@@ -575,6 +575,8 @@ struct TCP_Server_Info {
 #ifdef CONFIG_CIFS_SMB2
 	unsigned int	max_read;
 	unsigned int	max_write;
+	struct delayed_work reconnect;  
+	struct mutex reconnect_mutex;  
 #endif  
 };
 
@@ -723,8 +725,9 @@ cap_unix(struct cifs_ses *ses)
 struct cifs_tcon {
 	struct list_head tcon_list;
 	int tc_count;
-	struct list_head rlist; /* reconnect list */
+	struct list_head rlist;  
 	struct list_head openFileList;
+	spinlock_t open_file_lock;  
 	struct cifs_ses *ses;	 
 	char treeName[MAX_TREE_SIZE + 1];  
 	char *nativeFileSystem;
@@ -781,7 +784,7 @@ struct cifs_tcon {
 #endif  
 	__u64    bytes_read;
 	__u64    bytes_written;
-	spinlock_t stat_lock;
+	spinlock_t stat_lock;   
 #endif  
 	FILE_SYSTEM_DEVICE_INFO fsDevInfo;
 	FILE_SYSTEM_ATTRIBUTE_INFO fsAttrInfo;  
@@ -917,8 +920,10 @@ struct cifs_fid_locks {
 };
 
 struct cifsFileInfo {
+	 
 	struct list_head tlist;	 
 	struct list_head flist;	 
+	 
 	struct cifs_fid_locks *llist;	 
 	kuid_t uid;		 
 	__u32 pid;		 
@@ -927,9 +932,11 @@ struct cifsFileInfo {
 	 
 	struct dentry *dentry;
 	struct tcon_link *tlink;
+	unsigned int f_flags;
 	bool invalidHandle:1;	 
 	bool oplock_break_cancelled:1;
-	int count;		 
+	int count;
+	spinlock_t file_info_lock;  
 	struct mutex fh_mutex;  
 	struct cifs_search_info srch_inf;
 	struct work_struct oplock_break;  
@@ -1334,8 +1341,6 @@ static inline void free_dfs_info_array(struct dfs_info3_param *param,
 GLOBAL_EXTERN struct list_head		cifs_tcp_ses_list;
 
 GLOBAL_EXTERN spinlock_t		cifs_tcp_ses_lock;
-
-GLOBAL_EXTERN spinlock_t	cifs_file_list_lock;
 
 #ifdef CONFIG_CIFS_DNOTIFY_EXPERIMENTAL  
  
