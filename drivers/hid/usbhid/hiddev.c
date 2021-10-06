@@ -1,7 +1,33 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
- 
+/*
+ *  Copyright (c) 2001 Paul Stewart
+ *  Copyright (c) 2001 Vojtech Pavlik
+ *
+ *  HID char devices, giving access to raw HID device events.
+ *
+ */
+
+/*
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * Should you need to contact me, the author, you can do so either by
+ * e-mail - mail your message to Paul Stewart <stewart@wetlogic.net>
+ */
+
 #include <linux/poll.h>
 #include <linux/slab.h>
 #include <linux/module.h>
@@ -13,7 +39,7 @@
 #include <linux/compat.h>
 #ifdef MY_ABC_HERE
 #include <linux/string.h>
-#endif  
+#endif /* MY_ABC_HERE */
 #include <linux/vmalloc.h>
 #include "usbhid.h"
 
@@ -47,6 +73,12 @@ struct hiddev_list {
 	struct mutex thread_lock;
 };
 
+/*
+ * Find a report, given the report's type and ID.  The ID can be specified
+ * indirectly by REPORT_ID_FIRST (which returns the first report of the given
+ * type) or by (REPORT_ID_NEXT | old_id), which returns the next report of the
+ * given type which follows old_id.
+ */
 static struct hid_report *
 hiddev_lookup_report(struct hid_device *hid, struct hiddev_report_info *rinfo)
 {
@@ -64,7 +96,7 @@ hiddev_lookup_report(struct hid_device *hid, struct hiddev_report_info *rinfo)
 		(rinfo->report_type - HID_REPORT_TYPE_MIN);
 
 	switch (flags) {
-	case 0:  
+	case 0: /* Nothing to do -- report_id is already set correctly */
 		break;
 
 	case HID_REPORT_ID_FIRST:
@@ -96,6 +128,10 @@ hiddev_lookup_report(struct hid_device *hid, struct hiddev_report_info *rinfo)
 	return report_enum->report_id_hash[rinfo->report_id];
 }
 
+/*
+ * Perform an exhaustive search of the report table for a usage, given its
+ * type and usage id.
+ */
 static struct hid_field *
 hiddev_lookup_usage(struct hid_device *hid, struct hiddev_usage_ref *uref)
 {
@@ -150,6 +186,10 @@ static void hiddev_send_event(struct hid_device *hid,
 	wake_up_interruptible(&hiddev->wait);
 }
 
+/*
+ * This is where hid.c calls into hiddev to pass an event that occurred over
+ * the interrupt pipe
+ */
 void hiddev_hid_event(struct hid_device *hid, struct hid_field *field,
 		      struct hid_usage *usage, __s32 value)
 {
@@ -186,6 +226,9 @@ void hiddev_report_event(struct hid_device *hid, struct hid_report *report)
 	hiddev_send_event(hid, &uref);
 }
 
+/*
+ * fasync file op
+ */
 static int hiddev_fasync(int fd, struct file *file, int on)
 {
 	struct hiddev_list *list = file->private_data;
@@ -193,6 +236,9 @@ static int hiddev_fasync(int fd, struct file *file, int on)
 	return fasync_helper(fd, file, on, &list->fasync);
 }
 
+/*
+ * release file op
+ */
 static int hiddev_release(struct inode * inode, struct file * file)
 {
 	struct hiddev_list *list = file->private_data;
@@ -221,6 +267,9 @@ static int hiddev_release(struct inode * inode, struct file * file)
 	return 0;
 }
 
+/*
+ * open file op
+ */
 static int hiddev_open(struct inode *inode, struct file *file)
 {
 	struct hiddev_list *list;
@@ -241,6 +290,10 @@ static int hiddev_open(struct inode *inode, struct file *file)
 	list->hiddev = hiddev;
 	file->private_data = list;
 
+	/*
+	 * no need for locking because the USB major number
+	 * is shared which usbcore guards against disconnect
+	 */
 	if (list->hiddev->exist) {
 		if (!list->hiddev->open++) {
 			res = usbhid_open(hiddev->hid);
@@ -279,11 +332,17 @@ bail:
 	return res;
 }
 
+/*
+ * "write" file op
+ */
 static ssize_t hiddev_write(struct file * file, const char __user * buffer, size_t count, loff_t *ppos)
 {
 	return -EINVAL;
 }
 
+/*
+ * "read" file op
+ */
 static ssize_t hiddev_read(struct file * file, char __user * buffer, size_t count, loff_t *ppos)
 {
 	DEFINE_WAIT(wait);
@@ -297,6 +356,7 @@ static ssize_t hiddev_read(struct file * file, char __user * buffer, size_t coun
 	if (count < event_size)
 		return 0;
 
+	/* lock against other threads */
 	retval = mutex_lock_interruptible(&list->thread_lock);
 	if (retval)
 		return -ERESTARTSYS;
@@ -319,6 +379,7 @@ static ssize_t hiddev_read(struct file * file, char __user * buffer, size_t coun
 					break;
 				}
 
+				/* let O_NONBLOCK tasks run */
 				mutex_unlock(&list->thread_lock);
 				schedule();
 				if (mutex_lock_interruptible(&list->thread_lock)) {
@@ -370,6 +431,10 @@ static ssize_t hiddev_read(struct file * file, char __user * buffer, size_t coun
 	return retval;
 }
 
+/*
+ * "poll" file op
+ * No kernel lock - fine
+ */
 static unsigned int hiddev_poll(struct file *file, poll_table *wait)
 {
 	struct hiddev_list *list = file->private_data;
@@ -382,6 +447,9 @@ static unsigned int hiddev_poll(struct file *file, poll_table *wait)
 	return 0;
 }
 
+/*
+ * "ioctl" file op
+ */
 static noinline int hiddev_ioctl_usage(struct hiddev *hiddev, unsigned int cmd, void __user *user_arg)
 {
 	struct hid_device *hid = hiddev->hid;
@@ -542,6 +610,8 @@ static long hiddev_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 	struct hid_field *field;
 	void __user *user_arg = (void __user *)arg;
 	int i, r = -EINVAL;
+
+	/* Called without BKL by compat methods so no BKL taken */
 
 	mutex_lock(&hiddev->existancelock);
 	if (!hiddev->exist) {
@@ -718,7 +788,7 @@ static long hiddev_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 		break;
 
 	case HIDIOCGUCODE:
-		 
+		/* fall through */
 	case HIDIOCGUSAGE:
 	case HIDIOCSUSAGE:
 	case HIDIOCGUSAGES:
@@ -806,6 +876,9 @@ static struct usb_class_driver hiddev_class = {
 	.minor_base =	HIDDEV_MINOR_BASE,
 };
 
+/*
+ * This is where hid.c calls us to connect a hid device to the hiddev driver
+ */
 int hiddev_connect(struct hid_device *hid, unsigned int force)
 {
 	struct hiddev *hiddev;
@@ -814,10 +887,14 @@ int hiddev_connect(struct hid_device *hid, unsigned int force)
 
 #ifdef MY_ABC_HERE
 #define UPS_USAGE		0x840004
-#define POWER_USAGE		0x840020	 
+#define POWER_USAGE		0x840020	/* wrong, but needed for MGE */
 	int minor_offset = 8;
 	unsigned int i = 0;
 
+	/* usb device should register by hiddev (ups, lp, synology remote controller
+	 * , etc) because of our userspace application open static device name. But
+	 * usb keyboard and mouse should register by hid-input or cannot work.
+	*/
 	if (!force) {
 		for (i = 0; i < hid->maxcollection; i++){
 			if (hid->collection[i].type == HID_COLLECTION_APPLICATION) {
@@ -842,17 +919,27 @@ int hiddev_connect(struct hid_device *hid, unsigned int force)
 		 ((hid->collection[i].usage & 0xffff) == 6)) &&
 		(hid->name && !memcmp(hid->name,
 				"Raytac Corporation Wireless USB Device (2.4G)", 45))) {
-		 
+		/*
+		 * The ((hid->collection[i].usage & 0xffff) == 2) is Mouse and
+		 * ((hid->collection[i].usage & 0xffff) == 6) is Keyboard
+		 * Our RF remote controller simulate itself as Keyboard and Mouse.
+		 *
+		 * You can see this structure in hid-core.c:
+		 *
+		 *  static char *hid_types[] = {"Device", "Pointer", "Mouse", "Device",
+		 *              "Joystick", "Gamepad", "Keyboard", "Keypad",
+		 *              "Multi-Axis Controller"};
+		 */
 		minor_offset = 5;
 	} else if (((hid->collection[i].usage & 0xffff) == 6) &&
                (hid->name && !memcmp(hid->name, "Synology Incorporated", 21))) {
 		minor_offset = 5;
 	} else if (hid->collection[i].usage == UPS_USAGE ||
 		   hid->collection[i].usage == POWER_USAGE) {
-		 
+		/* Make UPS to be hiddev0 */
 		minor_offset = 0;
 	}
-#else  
+#else /* MY_ABC_HERE */
 	if (!force) {
 		unsigned int i;
 		for (i = 0; i < hid->maxcollection; i++)
@@ -864,7 +951,7 @@ int hiddev_connect(struct hid_device *hid, unsigned int force)
 		if (i == hid->maxcollection)
 			return -1;
 	}
-#endif  
+#endif /* MY_ABC_HERE */
 
 	if (!(hiddev = kzalloc(sizeof(struct hiddev), GFP_KERNEL)))
 		return -1;
@@ -878,9 +965,9 @@ int hiddev_connect(struct hid_device *hid, unsigned int force)
 	hiddev->exist = 1;
 #ifdef MY_ABC_HERE
 	retval = usb_register_dev1(usbhid->intf, &hiddev_class, minor_offset);
-#else  
+#else /* MY_ABC_HERE */
 	retval = usb_register_dev(usbhid->intf, &hiddev_class);
-#endif  
+#endif /* MY_ABC_HERE */
 	if (retval) {
 		hid_err(hid, "Not able to get a minor for this device\n");
 		hid->hiddev = NULL;
@@ -890,6 +977,10 @@ int hiddev_connect(struct hid_device *hid, unsigned int force)
 	return 0;
 }
 
+/*
+ * This is where hid.c calls us to disconnect a hiddev device from the
+ * corresponding hid device (usually because the usb device has disconnected)
+ */
 static struct usb_class_driver hiddev_class;
 void hiddev_disconnect(struct hid_device *hid)
 {

@@ -40,10 +40,12 @@
 #include <drm/ttm/ttm_execbuf_util.h>
 #include <drm/ttm/ttm_module.h>
 #include "vmwgfx_fence.h"
+#include <linux/sync_file.h>
 
-#define VMWGFX_DRIVER_DATE "20150810"
+#define VMWGFX_DRIVER_NAME "vmwgfx"
+#define VMWGFX_DRIVER_DATE "20170612"
 #define VMWGFX_DRIVER_MAJOR 2
-#define VMWGFX_DRIVER_MINOR 9
+#define VMWGFX_DRIVER_MINOR 14
 #define VMWGFX_DRIVER_PATCHLEVEL 0
 #define VMWGFX_FILE_PAGE_OFFSET 0x00100000
 #define VMWGFX_FIFO_STATIC_SIZE (1024*1024)
@@ -67,10 +69,10 @@
 			VMWGFX_NUM_GB_SURFACE +\
 			VMWGFX_NUM_GB_SCREEN_TARGET)
 
-#define VMW_PL_GMR TTM_PL_PRIV0
-#define VMW_PL_FLAG_GMR TTM_PL_FLAG_PRIV0
-#define VMW_PL_MOB TTM_PL_PRIV1
-#define VMW_PL_FLAG_MOB TTM_PL_FLAG_PRIV1
+#define VMW_PL_GMR (TTM_PL_PRIV + 0)
+#define VMW_PL_FLAG_GMR (TTM_PL_FLAG_PRIV << 0)
+#define VMW_PL_MOB (TTM_PL_PRIV + 1)
+#define VMW_PL_FLAG_MOB (TTM_PL_FLAG_PRIV << 1)
 
 #define VMW_RES_CONTEXT ttm_driver_type0
 #define VMW_RES_SURFACE ttm_driver_type1
@@ -81,7 +83,6 @@
 struct vmw_fpriv {
 	struct drm_master *locked_master;
 	struct ttm_object_file *tfile;
-	struct list_head fence_events;
 	bool gb_aware;
 };
 
@@ -153,7 +154,6 @@ enum vmw_cmdbuf_res_type {
 struct vmw_cmdbuf_res_manager;
 
 struct vmw_cursor_snooper {
-	struct drm_crtc *crtc;
 	size_t age;
 	uint32_t *image;
 };
@@ -350,6 +350,12 @@ struct vmw_otable_batch {
 	struct ttm_buffer_object *otable_bo;
 };
 
+enum {
+	VMW_IRQTHREAD_FENCE,
+	VMW_IRQTHREAD_CMDBUF,
+	VMW_IRQTHREAD_MAX
+};
+
 struct vmw_private {
 	struct ttm_bo_device bdev;
 	struct ttm_bo_global_ref bo_global_ref;
@@ -407,8 +413,13 @@ struct vmw_private {
 	void *fb_info;
 	enum vmw_display_unit_type active_display_unit;
 	struct vmw_legacy_display *ldu_priv;
-	struct vmw_screen_object_display *sou_priv;
 	struct vmw_overlay *overlay_priv;
+	struct drm_property *hotplug_mode_update_property;
+	struct drm_property *implicit_placement_property;
+	unsigned num_implicit;
+	struct vmw_framebuffer *implicit_fb;
+	struct mutex global_kms_state_mutex;
+	spinlock_t cursor_lock;
 
 	/*
 	 * Context and surface management.
@@ -523,6 +534,7 @@ struct vmw_private {
 	struct vmw_otable_batch otable_batch;
 
 	struct vmw_cmdbuf_man *cman;
+	DECLARE_BITMAP(irqthread_pending, VMW_IRQTHREAD_MAX);
 };
 
 static inline struct vmw_surface *vmw_res_to_srf(struct vmw_resource *res)
@@ -555,24 +567,21 @@ static inline struct vmw_master *vmw_master(struct drm_master *master)
 static inline void vmw_write(struct vmw_private *dev_priv,
 			     unsigned int offset, uint32_t value)
 {
-	unsigned long irq_flags;
-
-	spin_lock_irqsave(&dev_priv->hw_lock, irq_flags);
+	spin_lock(&dev_priv->hw_lock);
 	outl(offset, dev_priv->io_start + VMWGFX_INDEX_PORT);
 	outl(value, dev_priv->io_start + VMWGFX_VALUE_PORT);
-	spin_unlock_irqrestore(&dev_priv->hw_lock, irq_flags);
+	spin_unlock(&dev_priv->hw_lock);
 }
 
 static inline uint32_t vmw_read(struct vmw_private *dev_priv,
 				unsigned int offset)
 {
-	unsigned long irq_flags;
 	u32 val;
 
-	spin_lock_irqsave(&dev_priv->hw_lock, irq_flags);
+	spin_lock(&dev_priv->hw_lock);
 	outl(offset, dev_priv->io_start + VMWGFX_INDEX_PORT);
 	val = inl(dev_priv->io_start + VMWGFX_VALUE_PORT);
-	spin_unlock_irqrestore(&dev_priv->hw_lock, irq_flags);
+	spin_unlock(&dev_priv->hw_lock);
 
 	return val;
 }
@@ -814,7 +823,8 @@ extern int vmw_execbuf_process(struct drm_file *file_priv,
 			       uint32_t dx_context_handle,
 			       struct drm_vmw_fence_rep __user
 			       *user_fence_rep,
-			       struct vmw_fence_obj **out_fence);
+			       struct vmw_fence_obj **out_fence,
+			       uint32_t flags);
 extern void __vmw_execbuf_release_pinned_bo(struct vmw_private *dev_priv,
 					    struct vmw_fence_obj *fence);
 extern void vmw_execbuf_release_pinned_bo(struct vmw_private *dev_priv);
@@ -829,22 +839,23 @@ extern void vmw_execbuf_copy_fence_user(struct vmw_private *dev_priv,
 					struct drm_vmw_fence_rep __user
 					*user_fence_rep,
 					struct vmw_fence_obj *fence,
-					uint32_t fence_handle);
+					uint32_t fence_handle,
+					int32_t out_fence_fd,
+					struct sync_file *sync_file);
 extern int vmw_validate_single_buffer(struct vmw_private *dev_priv,
 				      struct ttm_buffer_object *bo,
 				      bool interruptible,
 				      bool validate_as_mob);
+bool vmw_cmd_describe(const void *buf, u32 *size, char const **cmd);
 
 /**
  * IRQs and wating - vmwgfx_irq.c
  */
 
-extern irqreturn_t vmw_irq_handler(int irq, void *arg);
 extern int vmw_wait_seqno(struct vmw_private *dev_priv, bool lazy,
 			  uint32_t seqno, bool interruptible,
 			  unsigned long timeout);
-extern void vmw_irq_preinstall(struct drm_device *dev);
-extern int vmw_irq_postinstall(struct drm_device *dev);
+extern int vmw_irq_install(struct drm_device *dev, int irq);
 extern void vmw_irq_uninstall(struct drm_device *dev);
 extern bool vmw_seqno_passed(struct vmw_private *dev_priv,
 				uint32_t seqno);
@@ -923,6 +934,7 @@ int vmw_kms_present(struct vmw_private *dev_priv,
 int vmw_kms_update_layout_ioctl(struct drm_device *dev, void *data,
 				struct drm_file *file_priv);
 void vmw_kms_legacy_hotspot_clear(struct vmw_private *dev_priv);
+void vmw_kms_lost_device(struct drm_device *dev);
 
 int vmw_dumb_create(struct drm_file *file_priv,
 		    struct drm_device *dev,
@@ -1141,13 +1153,13 @@ extern void *vmw_cmdbuf_reserve(struct vmw_cmdbuf_man *man, size_t size,
 extern void vmw_cmdbuf_commit(struct vmw_cmdbuf_man *man, size_t size,
 			      struct vmw_cmdbuf_header *header,
 			      bool flush);
-extern void vmw_cmdbuf_tasklet_schedule(struct vmw_cmdbuf_man *man);
 extern void *vmw_cmdbuf_alloc(struct vmw_cmdbuf_man *man,
 			      size_t size, bool interruptible,
 			      struct vmw_cmdbuf_header **p_header);
 extern void vmw_cmdbuf_header_free(struct vmw_cmdbuf_header *header);
 extern int vmw_cmdbuf_cur_flush(struct vmw_cmdbuf_man *man,
 				bool interruptible);
+extern void vmw_cmdbuf_irqthread(struct vmw_cmdbuf_man *man);
 
 /**
  * Inline helper functions
@@ -1227,4 +1239,10 @@ static inline void vmw_mmio_write(u32 value, u32 *addr)
 {
 	WRITE_ONCE(*addr, value);
 }
+
+/**
+ * Add vmw_msg module function
+ */
+extern int vmw_host_log(const char *log);
+
 #endif

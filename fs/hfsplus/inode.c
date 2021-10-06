@@ -1,7 +1,16 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
- 
+/*
+ *  linux/fs/hfsplus/inode.c
+ *
+ * Copyright (C) 2001
+ * Brad Boyer (flar@allandria.com)
+ * (C) 2003 Ardis Technologies <roman@ardistech.com>
+ *
+ * Inode handling routines
+ */
+
 #include <linux/blkdev.h>
 #include <linux/mm.h>
 #include <linux/fs.h>
@@ -127,6 +136,10 @@ static ssize_t hfsplus_direct_IO(struct kiocb *iocb, struct iov_iter *iter,
 
 	ret = blockdev_direct_IO(iocb, inode, iter, offset, hfsplus_get_block);
 
+	/*
+	 * In case of error extending write may have instantiated a few
+	 * blocks outside i_size. Trim these off again.
+	 */
 	if (unlikely(iov_iter_rw(iter) == WRITE && ret < 0)) {
 		loff_t isize = i_size_read(inode);
 		loff_t end = offset + count;
@@ -175,22 +188,22 @@ static void hfsplus_get_perms(struct inode *inode,
 	u16 mode;
 
 #ifdef MY_ABC_HERE
-	 
+	// ignore the file permission on disk to let umask working
 	mode = 0;
 #else
 	mode = be16_to_cpu(perms->mode);
-#endif  
+#endif /* MY_ABC_HERE */
 
 #ifdef MY_ABC_HERE
 	if (!__kuid_val(sbi->uid))
-#endif  
+#endif /* MY_ABC_HERE */
 	i_uid_write(inode, be32_to_cpu(perms->owner));
 	if (!i_uid_read(inode) && !mode)
 		inode->i_uid = sbi->uid;
 
 #ifdef MY_ABC_HERE
 	if (!__kgid_val(sbi->gid))
-#endif  
+#endif /* MY_ABC_HERE */
 	i_gid_write(inode, be32_to_cpu(perms->group));
 	if (!i_gid_read(inode) && !mode)
 		inode->i_gid = sbi->gid;
@@ -203,7 +216,7 @@ static void hfsplus_get_perms(struct inode *inode,
 		mode = S_IFREG | (S_IRWXUGO & ~(sbi->umask));
 #else
 		mode = S_IFREG | ((S_IRUGO|S_IWUGO) & ~(sbi->umask));
-#endif  
+#endif /* MY_ABC_HERE */
 	inode->i_mode = mode;
 
 	HFSPLUS_I(inode)->userflags = perms->userflags;
@@ -259,7 +272,7 @@ static int hfsplus_setattr(struct dentry *dentry, struct iattr *attr)
 	    attr->ia_size != i_size_read(inode)) {
 #ifdef MY_ABC_HERE
 		loff_t old_size = i_size_read(inode);
-#endif  
+#endif /* MY_ABC_HERE */
 		inode_dio_wait(inode);
 		if (attr->ia_size > inode->i_size) {
 			error = generic_cont_expand_simple(inode,
@@ -270,7 +283,7 @@ static int hfsplus_setattr(struct dentry *dentry, struct iattr *attr)
 		truncate_setsize(inode, attr->ia_size);
 #ifdef MY_ABC_HERE
 		if (0 != old_size)
-#endif  
+#endif /* MY_ABC_HERE */
 		hfsplus_file_truncate(inode);
 	}
 
@@ -299,8 +312,14 @@ int hfsplus_file_fsync(struct file *file, loff_t start, loff_t end,
 		return error;
 	inode_lock(inode);
 
+	/*
+	 * Sync inode metadata into the catalog and extent trees.
+	 */
 	sync_inode_metadata(inode, 1);
 
+	/*
+	 * And explicitly write out the btrees.
+	 */
 	if (test_and_clear_bit(HFSPLUS_I_CAT_DIRTY, &hip->flags))
 		error = filemap_write_and_wait(sbi->cat_tree->inode->i_mapping);
 
@@ -493,7 +512,7 @@ int hfsplus_cat_read_inode(struct inode *inode, struct hfs_find_data *fd)
 		struct hfsplus_cat_folder *folder = &entry.folder;
 
 		if (fd->entrylength < sizeof(struct hfsplus_cat_folder))
-			 ;
+			/* panic? */;
 		hfs_bnode_read(fd->bnode, &entry, fd->entryoffset,
 					sizeof(struct hfsplus_cat_folder));
 		hfsplus_get_perms(inode, &folder->permissions, 1);
@@ -514,7 +533,7 @@ int hfsplus_cat_read_inode(struct inode *inode, struct hfs_find_data *fd)
 		struct hfsplus_cat_file *file = &entry.file;
 
 		if (fd->entrylength < sizeof(struct hfsplus_cat_file))
-			 ;
+			/* panic? */;
 		hfs_bnode_read(fd->bnode, &entry, fd->entryoffset,
 					sizeof(struct hfsplus_cat_file));
 
@@ -560,21 +579,21 @@ int hfsplus_cat_write_inode(struct inode *inode)
 		return 0;
 
 	if (hfs_find_init(HFSPLUS_SB(main_inode->i_sb)->cat_tree, &fd))
-		 
+		/* panic? */
 		return -EIO;
 
 	if (hfsplus_find_cat(main_inode->i_sb, main_inode->i_ino, &fd))
-		 
+		/* panic? */
 		goto out;
 
 	if (S_ISDIR(main_inode->i_mode)) {
 		struct hfsplus_cat_folder *folder = &entry.folder;
 
 		if (fd.entrylength < sizeof(struct hfsplus_cat_folder))
-			 ;
+			/* panic? */;
 		hfs_bnode_read(fd.bnode, &entry, fd.entryoffset,
 					sizeof(struct hfsplus_cat_folder));
-		 
+		/* simple node checks? */
 		hfsplus_cat_set_perms(inode, &folder->permissions);
 		folder->access_date = hfsp_ut2mt(inode->i_atime);
 		folder->content_mod_date = hfsp_ut2mt(inode->i_mtime);
@@ -597,7 +616,7 @@ int hfsplus_cat_write_inode(struct inode *inode)
 		struct hfsplus_cat_file *file = &entry.file;
 
 		if (fd.entrylength < sizeof(struct hfsplus_cat_file))
-			 ;
+			/* panic? */;
 		hfs_bnode_read(fd.bnode, &entry, fd.entryoffset,
 					sizeof(struct hfsplus_cat_file));
 		hfsplus_inode_write_fork(inode, &file->data_fork);

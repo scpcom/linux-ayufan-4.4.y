@@ -29,9 +29,11 @@
 #include <core/gpuobj.h>
 #include <subdev/ltc.h>
 #include <subdev/mmu.h>
+#include <engine/falcon.h>
 
 #define GPC_MAX 32
-#define TPC_MAX (GPC_MAX * 8)
+#define TPC_MAX_PER_GPC 8
+#define TPC_MAX (GPC_MAX * TPC_MAX_PER_GPC)
 
 #define ROP_BCAST(r)      (0x408800 + (r))
 #define ROP_UNIT(u, r)    (0x410000 + (u) * 0x400 + (r))
@@ -43,7 +45,7 @@
 struct gf100_gr_data {
 	u32 size;
 	u32 align;
-	u32 access;
+	bool priv;
 };
 
 struct gf100_gr_mmio {
@@ -74,6 +76,8 @@ struct gf100_gr {
 	const struct gf100_gr_func *func;
 	struct nvkm_gr base;
 
+	struct nvkm_falcon *fecs;
+	struct nvkm_falcon *gpccs;
 	struct gf100_gr_fuc fuc409c;
 	struct gf100_gr_fuc fuc409d;
 	struct gf100_gr_fuc fuc41ac;
@@ -82,7 +86,7 @@ struct gf100_gr {
 
 	/*
 	 * Used if the register packs are loaded from NVIDIA fw instead of
-	 * using hardcoded arrays.
+	 * using hardcoded arrays. To be allocated with vzalloc().
 	 */
 	struct gf100_gr_pack *fuc_sw_nonctx;
 	struct gf100_gr_pack *fuc_sw_ctx;
@@ -100,15 +104,12 @@ struct gf100_gr {
 	u8 ppc_mask[GPC_MAX];
 	u8 ppc_tpc_nr[GPC_MAX][4];
 
-	struct nvkm_memory *unk4188b4;
-	struct nvkm_memory *unk4188b8;
-
 	struct gf100_gr_data mmio_data[4];
 	struct gf100_gr_mmio mmio_list[4096/8];
 	u32  size;
 	u32 *data;
 
-	u8 magic_not_rop_nr;
+	u8 screen_tile_row_offset;
 };
 
 int gf100_gr_ctor(const struct gf100_gr_func *, struct nvkm_device *,
@@ -121,6 +122,10 @@ struct gf100_gr_func {
 	void (*dtor)(struct gf100_gr *);
 	int (*init)(struct gf100_gr *);
 	void (*init_gpc_mmu)(struct gf100_gr *);
+	void (*init_rop_active_fbps)(struct gf100_gr *);
+	void (*init_ppc_exceptions)(struct gf100_gr *);
+	void (*init_swdx_pes_mask)(struct gf100_gr *);
+	void (*init_num_active_ltcs)(struct gf100_gr *);
 	void (*set_hww_esr_report_mask)(struct gf100_gr *);
 	const struct gf100_gr_pack *mmio;
 	struct {
@@ -129,35 +134,43 @@ struct gf100_gr_func {
 	struct {
 		struct gf100_gr_ucode *ucode;
 	} gpccs;
+	int (*rops)(struct gf100_gr *);
 	int ppc_nr;
 	const struct gf100_grctx_func *grctx;
+	const struct nvkm_therm_clkgate_pack *clkgate_pack;
 	struct nvkm_sclass sclass[];
 };
 
 int gf100_gr_init(struct gf100_gr *);
+int gf100_gr_rops(struct gf100_gr *);
 
 int gk104_gr_init(struct gf100_gr *);
+void gk104_gr_init_rop_active_fbps(struct gf100_gr *);
+void gk104_gr_init_ppc_exceptions(struct gf100_gr *);
 
-int gk20a_gr_new_(const struct gf100_gr_func *, struct nvkm_device *,
-		  int, struct nvkm_gr **);
-void gk20a_gr_dtor(struct gf100_gr *);
 int gk20a_gr_init(struct gf100_gr *);
 
-int gm204_gr_init(struct gf100_gr *);
+int gm200_gr_init(struct gf100_gr *);
+int gm200_gr_rops(struct gf100_gr *);
+
+int gp100_gr_init(struct gf100_gr *);
+void gp100_gr_init_rop_active_fbps(struct gf100_gr *);
 
 #define gf100_gr_chan(p) container_of((p), struct gf100_gr_chan, object)
+#include <core/object.h>
 
 struct gf100_gr_chan {
 	struct nvkm_object object;
 	struct gf100_gr *gr;
+	struct nvkm_vmm *vmm;
 
 	struct nvkm_memory *mmio;
-	struct nvkm_vma mmio_vma;
+	struct nvkm_vma *mmio_vma;
 	int mmio_nr;
 
 	struct {
 		struct nvkm_memory *mem;
-		struct nvkm_vma vma;
+		struct nvkm_vma *vma;
 	} data[4];
 };
 
@@ -204,6 +217,17 @@ void gf100_gr_icmd(struct gf100_gr *, const struct gf100_gr_pack *);
 void gf100_gr_mthd(struct gf100_gr *, const struct gf100_gr_pack *);
 int  gf100_gr_init_ctxctl(struct gf100_gr *);
 
+/* external bundles loading functions */
+int gk20a_gr_av_to_init(struct gf100_gr *, const char *,
+			struct gf100_gr_pack **);
+int gk20a_gr_aiv_to_init(struct gf100_gr *, const char *,
+			 struct gf100_gr_pack **);
+int gk20a_gr_av_to_method(struct gf100_gr *, const char *,
+			  struct gf100_gr_pack **);
+
+int gm200_gr_new_(const struct gf100_gr_func *, struct nvkm_device *, int,
+		  struct nvkm_gr **);
+
 /* register init value lists */
 
 extern const struct gf100_gr_init gf100_gr_init_main_0[];
@@ -232,6 +256,7 @@ extern const struct gf100_gr_init gf100_gr_init_mpc_0[];
 extern const struct gf100_gr_init gf100_gr_init_be_0[];
 extern const struct gf100_gr_init gf100_gr_init_fe_1[];
 extern const struct gf100_gr_init gf100_gr_init_pe_1[];
+void gf100_gr_init_gpc_mmu(struct gf100_gr *);
 
 extern const struct gf100_gr_init gf104_gr_init_ds_0[];
 extern const struct gf100_gr_init gf104_gr_init_tex_0[];
@@ -280,5 +305,9 @@ extern const struct gf100_gr_init gm107_gr_init_wwdx_0[];
 extern const struct gf100_gr_init gm107_gr_init_cbm_0[];
 void gm107_gr_init_bios(struct gf100_gr *);
 
-extern const struct gf100_gr_pack gm204_gr_pack_mmio[];
+void gm200_gr_init_gpc_mmu(struct gf100_gr *);
+
+void gp100_gr_init_num_active_ltcs(struct gf100_gr *gr);
+
+void gp102_gr_init_swdx_pes_mask(struct gf100_gr *);
 #endif

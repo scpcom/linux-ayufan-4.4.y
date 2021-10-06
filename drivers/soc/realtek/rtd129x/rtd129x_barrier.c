@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/of_address.h>

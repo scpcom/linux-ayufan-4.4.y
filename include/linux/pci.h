@@ -182,6 +182,15 @@ enum pci_dev_flags {
 	PCI_DEV_FLAGS_NO_PM_RESET = (__force pci_dev_flags_t) (1 << 7),
 	/* Get VPD from function 0 VPD */
 	PCI_DEV_FLAGS_VPD_REF_F0 = (__force pci_dev_flags_t) (1 << 8),
+	/* a non-root bridge where translation occurs, stop alias search here */
+	PCI_DEV_FLAGS_BRIDGE_XLATE_ROOT = (__force pci_dev_flags_t) (1 << 9),
+	/* Do not use FLR even if device advertises PCI_AF_CAP */
+	PCI_DEV_FLAGS_NO_FLR_RESET = (__force pci_dev_flags_t) (1 << 10),
+	/*
+	 * Resume before calling the driver's system suspend hooks, disabling
+	 * the direct_complete optimization.
+	 */
+	PCI_DEV_FLAGS_NEEDS_RESUME = (__force pci_dev_flags_t) (1 << 11),
 };
 
 enum pci_irq_reroute_variant {
@@ -353,6 +362,7 @@ struct pci_dev {
 	unsigned int	is_virtfn:1;
 	unsigned int	reset_fn:1;
 	unsigned int    is_hotplug_bridge:1;
+	unsigned int	is_thunderbolt:1; /* Thunderbolt controller */
 	unsigned int    __aer_firmware_first_valid:1;
 	unsigned int	__aer_firmware_first:1;
 	unsigned int	broken_intx_masking:1;
@@ -1984,4 +1994,27 @@ static inline bool pci_ari_enabled(struct pci_bus *bus)
 {
 	return bus->self && bus->self->ari_enabled;
 }
+
+/**
+ * pci_is_thunderbolt_attached - whether device is on a Thunderbolt daisy chain
+ * @pdev: PCI device to check
+ *
+ * Walk upwards from @pdev and check for each encountered bridge if it's part
+ * of a Thunderbolt controller.  Reaching the host bridge means @pdev is not
+ * Thunderbolt-attached.  (But rather soldered to the mainboard usually.)
+ */
+static inline bool pci_is_thunderbolt_attached(struct pci_dev *pdev)
+{
+	struct pci_dev *parent = pdev;
+
+	if (pdev->is_thunderbolt)
+		return true;
+
+	while ((parent = pci_upstream_bridge(parent)))
+		if (parent->is_thunderbolt)
+			return true;
+
+	return false;
+}
+
 #endif /* LINUX_PCI_H */

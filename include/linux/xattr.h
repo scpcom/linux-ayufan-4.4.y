@@ -1,7 +1,15 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
- 
+/*
+  File: linux/xattr.h
+
+  Extended attributes handling.
+
+  Copyright (C) 2001 by Andreas Gruenbacher <a.gruenbacher@computer.org>
+  Copyright (c) 2001-2002 Silicon Graphics, Inc.  All Rights Reserved.
+  Copyright (c) 2004 Red Hat, Inc., James Morris <jmorris@redhat.com>
+*/
 #ifndef _LINUX_XATTR_H
 #define _LINUX_XATTR_H
 
@@ -15,7 +23,7 @@ struct dentry;
 
 struct xattr_handler {
 	const char *prefix;
-	int flags;       
+	int flags;      /* fs private flags */
 	size_t (*list)(const struct xattr_handler *, struct dentry *dentry,
 		       char *list, size_t list_size, const char *name,
 		       size_t name_len);
@@ -32,7 +40,7 @@ struct syno_xattr_archive_version {
 	__le16	v_struct_version;
 	__le32	v_archive_version;
 } __attribute__ ((__packed__));
-#endif  
+#endif /* MY_ABC_HERE */
 
 const char *xattr_full_name(const struct xattr_handler *, const char *);
 
@@ -70,12 +78,18 @@ struct simple_xattr {
 	char value[0];
 };
 
+/*
+ * initialize the simple_xattrs structure
+ */
 static inline void simple_xattrs_init(struct simple_xattrs *xattrs)
 {
 	INIT_LIST_HEAD(&xattrs->head);
 	spin_lock_init(&xattrs->lock);
 }
 
+/*
+ * free all the xattrs
+ */
 static inline void simple_xattrs_free(struct simple_xattrs *xattrs)
 {
 	struct simple_xattr *xattr, *node;
@@ -97,4 +111,4 @@ ssize_t simple_xattr_list(struct simple_xattrs *xattrs, char *buffer,
 void simple_xattr_list_add(struct simple_xattrs *xattrs,
 			   struct simple_xattr *new_xattr);
 
-#endif	 
+#endif	/* _LINUX_XATTR_H */

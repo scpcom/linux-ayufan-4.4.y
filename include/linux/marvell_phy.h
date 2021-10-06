@@ -4,8 +4,10 @@
 #ifndef _MARVELL_PHY_H
 #define _MARVELL_PHY_H
 
+/* Mask used for ID comparisons */
 #define MARVELL_PHY_ID_MASK		0xfffffff0
 
+/* Known PHY IDs */
 #define MARVELL_PHY_ID_88E1101		0x01410c60
 #define MARVELL_PHY_ID_88E1112		0x01410c90
 #define MARVELL_PHY_ID_88E1111		0x01410cc0
@@ -20,13 +22,14 @@
 #define MARVELL_PHY_ID_88E1540		0x01410eb0
 #if defined(MY_DEF_HERE)
 #define MARVELL_PHY_ID_88E2110		0x002b09b8
-#endif  
+#endif /* MY_DEF_HERE */
 #define MARVELL_PHY_ID_88E3016		0x01410e60
 #if defined(MY_DEF_HERE)
 #define MARVELL_PHY_ID_88E3310		0x01410da0
-#endif  
+#endif /* MY_DEF_HERE */
 
+/* struct phy_device dev_flags definitions */
 #define MARVELL_PHY_M1145_FLAGS_RESISTANCE	0x00000001
 #define MARVELL_PHY_M1118_DNS323_LEDS		0x00000002
 
-#endif  
+#endif /* _MARVELL_PHY_H */

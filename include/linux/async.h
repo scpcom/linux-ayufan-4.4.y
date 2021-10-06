@@ -1,7 +1,17 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
- 
+/*
+ * async.h: Asynchronous function calls for boot performance
+ *
+ * (C) Copyright 2009 Intel Corporation
+ * Author: Arjan van de Ven <arjan@linux.intel.com>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; version 2
+ * of the License.
+ */
 #ifndef __ASYNC_H__
 #define __ASYNC_H__
 
@@ -15,10 +25,17 @@ struct async_domain {
 	unsigned registered:1;
 };
 
+/*
+ * domain participates in global async_synchronize_full
+ */
 #define ASYNC_DOMAIN(_name) \
 	struct async_domain _name = { .pending = LIST_HEAD_INIT(_name.pending),	\
 				      .registered = 1 }
 
+/*
+ * domain is free to go out of scope as soon as all pending work is
+ * complete, this domain does not participate in async_synchronize_full
+ */
 #define ASYNC_DOMAIN_EXCLUSIVE(_name) \
 	struct async_domain _name = { .pending = LIST_HEAD_INIT(_name.pending), \
 				      .registered = 0 }
@@ -26,7 +43,7 @@ struct async_domain {
 #ifdef MY_ABC_HERE
 extern void syno_async_schedule_enabled_set(int iValue);
 extern int syno_async_schedule_enabled_get(void);
-#endif  
+#endif /* MY_ABC_HERE */
 
 extern async_cookie_t async_schedule(async_func_t func, void *data);
 extern async_cookie_t async_schedule_domain(async_func_t func, void *data,

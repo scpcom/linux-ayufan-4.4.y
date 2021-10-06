@@ -159,6 +159,8 @@ static void intel_dvo_get_config(struct intel_encoder *encoder,
 	struct intel_dvo *intel_dvo = enc_to_dvo(encoder);
 	u32 tmp, flags = 0;
 
+	pipe_config->output_types |= BIT(INTEL_OUTPUT_DVO);
+
 	tmp = I915_READ(intel_dvo->dev.dvo_reg);
 	if (tmp & DVO_HSYNC_ACTIVE_HIGH)
 		flags |= DRM_MODE_FLAG_PHSYNC;
@@ -175,8 +177,8 @@ static void intel_dvo_get_config(struct intel_encoder *encoder,
 }
 
 static void intel_disable_dvo(struct intel_encoder *encoder,
-			      struct intel_crtc_state *old_crtc_state,
-			      struct drm_connector_state *old_conn_state)
+			      const struct intel_crtc_state *old_crtc_state,
+			      const struct drm_connector_state *old_conn_state)
 {
 	struct drm_i915_private *dev_priv = to_i915(encoder->base.dev);
 	struct intel_dvo *intel_dvo = enc_to_dvo(encoder);
@@ -189,8 +191,8 @@ static void intel_disable_dvo(struct intel_encoder *encoder,
 }
 
 static void intel_enable_dvo(struct intel_encoder *encoder,
-			     struct intel_crtc_state *pipe_config,
-			     struct drm_connector_state *conn_state)
+			     const struct intel_crtc_state *pipe_config,
+			     const struct drm_connector_state *conn_state)
 {
 	struct drm_i915_private *dev_priv = to_i915(encoder->base.dev);
 	struct intel_dvo *intel_dvo = enc_to_dvo(encoder);
@@ -258,8 +260,8 @@ static bool intel_dvo_compute_config(struct intel_encoder *encoder,
 }
 
 static void intel_dvo_pre_enable(struct intel_encoder *encoder,
-				 struct intel_crtc_state *pipe_config,
-				 struct drm_connector_state *conn_state)
+				 const struct intel_crtc_state *pipe_config,
+				 const struct drm_connector_state *conn_state)
 {
 	struct drm_i915_private *dev_priv = to_i915(encoder->base.dev);
 	struct intel_crtc *crtc = to_intel_crtc(pipe_config->base.crtc);
@@ -344,13 +346,11 @@ static void intel_dvo_destroy(struct drm_connector *connector)
 }
 
 static const struct drm_connector_funcs intel_dvo_connector_funcs = {
-	.dpms = drm_atomic_helper_connector_dpms,
 	.detect = intel_dvo_detect,
 	.late_register = intel_connector_register,
 	.early_unregister = intel_connector_unregister,
 	.destroy = intel_dvo_destroy,
 	.fill_modes = drm_helper_probe_single_connector_modes,
-	.atomic_get_property = intel_connector_atomic_get_property,
 	.atomic_destroy_state = drm_atomic_helper_connector_destroy_state,
 	.atomic_duplicate_state = drm_atomic_helper_connector_duplicate_state,
 };
@@ -381,52 +381,32 @@ static const struct drm_encoder_funcs intel_dvo_enc_funcs = {
  * chip being on DVOB/C and having multiple pipes.
  */
 static struct drm_display_mode *
-intel_dvo_get_current_mode(struct drm_connector *connector)
+intel_dvo_get_current_mode(struct intel_encoder *encoder)
 {
-	struct drm_device *dev = connector->dev;
-	struct drm_i915_private *dev_priv = to_i915(dev);
-	struct intel_dvo *intel_dvo = intel_attached_dvo(connector);
-	uint32_t dvo_val = I915_READ(intel_dvo->dev.dvo_reg);
-	struct drm_display_mode *mode = NULL;
+	struct drm_display_mode *mode;
 
-	/* If the DVO port is active, that'll be the LVDS, so we can pull out
-	 * its timings to get how the BIOS set up the panel.
-	 */
-	if (dvo_val & DVO_ENABLE) {
-		struct drm_crtc *crtc;
-		int pipe = (dvo_val & DVO_PIPE_B_SELECT) ? 1 : 0;
-
-		crtc = intel_get_crtc_for_pipe(dev, pipe);
-		if (crtc) {
-			mode = intel_crtc_mode_get(dev, crtc);
-			if (mode) {
-				mode->type |= DRM_MODE_TYPE_PREFERRED;
-				if (dvo_val & DVO_HSYNC_ACTIVE_HIGH)
-					mode->flags |= DRM_MODE_FLAG_PHSYNC;
-				if (dvo_val & DVO_VSYNC_ACTIVE_HIGH)
-					mode->flags |= DRM_MODE_FLAG_PVSYNC;
-			}
-		}
+	mode = intel_encoder_current_mode(encoder);
+	if (mode) {
+		DRM_DEBUG_KMS("using current (BIOS) mode: ");
+		drm_mode_debug_printmodeline(mode);
+		mode->type |= DRM_MODE_TYPE_PREFERRED;
 	}
 
 	return mode;
 }
 
-static char intel_dvo_port_name(i915_reg_t dvo_reg)
+static enum port intel_dvo_port(i915_reg_t dvo_reg)
 {
 	if (i915_mmio_reg_equal(dvo_reg, DVOA))
-		return 'A';
+		return PORT_A;
 	else if (i915_mmio_reg_equal(dvo_reg, DVOB))
-		return 'B';
-	else if (i915_mmio_reg_equal(dvo_reg, DVOC))
-		return 'C';
+		return PORT_B;
 	else
-		return '?';
+		return PORT_C;
 }
 
-void intel_dvo_init(struct drm_device *dev)
+void intel_dvo_init(struct drm_i915_private *dev_priv)
 {
-	struct drm_i915_private *dev_priv = to_i915(dev);
 	struct intel_encoder *intel_encoder;
 	struct intel_dvo *intel_dvo;
 	struct intel_connector *intel_connector;
@@ -464,6 +444,7 @@ void intel_dvo_init(struct drm_device *dev)
 		bool dvoinit;
 		enum pipe pipe;
 		uint32_t dpll[I915_MAX_PIPES];
+		enum port port;
 
 		/* Allow the I2C driver info to specify the GPIO to be used in
 		 * special cases, but otherwise default to what's defined
@@ -511,24 +492,28 @@ void intel_dvo_init(struct drm_device *dev)
 		if (!dvoinit)
 			continue;
 
-		drm_encoder_init(dev, &intel_encoder->base,
+		port = intel_dvo_port(dvo->dvo_reg);
+		drm_encoder_init(&dev_priv->drm, &intel_encoder->base,
 				 &intel_dvo_enc_funcs, encoder_type,
-				 "DVO %c", intel_dvo_port_name(dvo->dvo_reg));
+				 "DVO %c", port_name(port));
 
 		intel_encoder->type = INTEL_OUTPUT_DVO;
+		intel_encoder->power_domain = POWER_DOMAIN_PORT_OTHER;
+		intel_encoder->port = port;
 		intel_encoder->crtc_mask = (1 << 0) | (1 << 1);
+
 		switch (dvo->type) {
 		case INTEL_DVO_CHIP_TMDS:
 			intel_encoder->cloneable = (1 << INTEL_OUTPUT_ANALOG) |
 				(1 << INTEL_OUTPUT_DVO);
-			drm_connector_init(dev, connector,
+			drm_connector_init(&dev_priv->drm, connector,
 					   &intel_dvo_connector_funcs,
 					   DRM_MODE_CONNECTOR_DVII);
 			encoder_type = DRM_MODE_ENCODER_TMDS;
 			break;
 		case INTEL_DVO_CHIP_LVDS:
 			intel_encoder->cloneable = 0;
-			drm_connector_init(dev, connector,
+			drm_connector_init(&dev_priv->drm, connector,
 					   &intel_dvo_connector_funcs,
 					   DRM_MODE_CONNECTOR_LVDS);
 			encoder_type = DRM_MODE_ENCODER_LVDS;
@@ -551,8 +536,8 @@ void intel_dvo_init(struct drm_device *dev)
 			 * mode being output through DVO.
 			 */
 			intel_panel_init(&intel_connector->panel,
-					 intel_dvo_get_current_mode(connector),
-					 NULL);
+					 intel_dvo_get_current_mode(intel_encoder),
+					 NULL, NULL);
 			intel_dvo->panel_wants_dither = true;
 		}
 

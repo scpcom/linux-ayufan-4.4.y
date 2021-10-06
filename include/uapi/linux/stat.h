@@ -44,29 +44,29 @@
 #endif
 
 #ifdef MY_ABC_HERE
- 
-#define S2_IARCHIVE    (1<<0)	 
-#define S2_SMB_ARCHIVE (1<<1)	 
-#define S2_SMB_HIDDEN  (1<<2)	 
-#define S2_SMB_SYSTEM  (1<<3)	 
-#define S3_IARCHIVE    (1<<4)	 
+/* Ext4 has only 16 bits for archive bit. */
+#define S2_IARCHIVE    (1<<0)	// synology backup archive bit
+#define S2_SMB_ARCHIVE (1<<1)	// samba backup archive bit (some other windows ap)
+#define S2_SMB_HIDDEN  (1<<2)	// hidden attribute in samba
+#define S2_SMB_SYSTEM  (1<<3)	// system attribute in samba
+#define S3_IARCHIVE    (1<<4)	// synology S3 backup archive bit (amazon ap)
 #ifdef MY_ABC_HERE
-#define S2_SMB_READONLY    					(1<<5)	 
-#define S2_SYNO_ACL_INHERIT				    (1<<6)	 
-#define S2_SYNO_ACL_IS_OWNER_GROUP			(1<<7)	 
-#define S2_SYNO_ACL_EXIST					(1<<8)	 
-#define S2_SYNO_ACL_SUPPORT  				(1<<9)	 
+#define S2_SMB_READONLY    					(1<<5)	// Read-Only attribute of samba
+#define S2_SYNO_ACL_INHERIT				    (1<<6)	// inherited from parent
+#define S2_SYNO_ACL_IS_OWNER_GROUP			(1<<7)	// owner tag of SYNO ACL
+#define S2_SYNO_ACL_EXIST					(1<<8)	// is there SYNO ACL
+#define S2_SYNO_ACL_SUPPORT  				(1<<9)	// is support ACL
 #define ALL_SYNO_ACL_ARCHIVE	(S2_SMB_READONLY|S2_SYNO_ACL_INHERIT|S2_SYNO_ACL_IS_OWNER_GROUP|S2_SYNO_ACL_EXIST|S2_SYNO_ACL_SUPPORT)
-#endif  
-#define S2_SMB_SPARSE						(1<<10)	 
-#define ALL_IARCHIVE (S2_IARCHIVE|S3_IARCHIVE)	 
-#define ALL_SYNO_ARCHIVE (S2_IARCHIVE|S2_SMB_ARCHIVE|S3_IARCHIVE)	 
+#endif /* MY_ABC_HERE */
+#define S2_SMB_SPARSE						(1<<10)	// sparse file support bit used by samba 4.4
+#define ALL_IARCHIVE (S2_IARCHIVE|S3_IARCHIVE)	// All synology archive bit.
+#define ALL_SYNO_ARCHIVE (S2_IARCHIVE|S2_SMB_ARCHIVE|S3_IARCHIVE)	// All backup archive bit, if there is new one, it should be added here.
 #ifdef MY_ABC_HERE
 #define ALL_ARCHIVE_BIT (S2_IARCHIVE|S2_SMB_ARCHIVE|S2_SMB_HIDDEN|S2_SMB_SYSTEM|S3_IARCHIVE|ALL_SYNO_ACL_ARCHIVE|S2_SMB_SPARSE)
 #else
 #define ALL_ARCHIVE_BIT (S2_IARCHIVE|S2_SMB_ARCHIVE|S2_SMB_HIDDEN|S2_SMB_SYSTEM|S3_IARCHIVE|S2_SMB_SPARSE)
-#endif  
+#endif /* MY_ABC_HERE */
 
-#endif  
+#endif /* MY_ABC_HERE */
 
-#endif  
+#endif /* _UAPI_LINUX_STAT_H */

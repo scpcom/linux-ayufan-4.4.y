@@ -2,7 +2,7 @@
 
 . ${ScriptsDir}/include/exports
 
-[ "linux-4.4.x" != "${SYNO_KERNEL_VERSION}" ] && return
+[ "linux-4.4.x-glk" != "${SYNO_KERNEL_VERSION}" ] && return
 
 cryptodev_module="`find . -name cryptodev.ko`"
 

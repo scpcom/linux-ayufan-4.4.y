@@ -1,7 +1,16 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
- 
+/*
+ *  linux/fs/hfsplus/dir.c
+ *
+ * Copyright (C) 2001
+ * Brad Boyer (flar@allandria.com)
+ * (C) 2003 Ardis Technologies <roman@ardistech.com>
+ *
+ * Handling of directories
+ */
+
 #include <linux/errno.h>
 #include <linux/fs.h>
 #include <linux/slab.h>
@@ -20,6 +29,7 @@ static inline void hfsplus_instantiate(struct dentry *dentry,
 	d_instantiate(dentry, inode);
 }
 
+/* Find the entry inside dir named dentry->d_name */
 static struct dentry *hfsplus_lookup(struct inode *dir, struct dentry *dentry,
 				     unsigned int flags)
 {
@@ -35,7 +45,7 @@ static struct dentry *hfsplus_lookup(struct inode *dir, struct dentry *dentry,
 	if (dentry->d_name.len > NAME_MAX) {
 		return ERR_PTR(-ENAMETOOLONG);
 	}
-#endif  
+#endif /* MY_ABC_HERE */
 
 	sb = dir->i_sb;
 
@@ -52,7 +62,7 @@ again:
 	if (err) {
 		if (err == -ENOENT) {
 			hfs_find_exit(&fd);
-			 
+			/* No such entry */
 			inode = NULL;
 			goto out;
 		}
@@ -87,7 +97,10 @@ again:
 			char name[32];
 
 			if (dentry->d_fsdata) {
-				 
+				/*
+				 * We found a link pointing to another link,
+				 * so ignore it and treat it as regular file.
+				 */
 				cnid = (unsigned long)dentry->d_fsdata;
 				linkid = 0;
 			} else {
@@ -152,7 +165,7 @@ static int hfsplus_readdir(struct file *file, struct dir_context *ctx)
 		goto out;
 
 	if (ctx->pos == 0) {
-		 
+		/* This is completely artificial... */
 		if (!dir_emit_dot(file, ctx))
 			goto out;
 		ctx->pos = 1;
@@ -325,7 +338,7 @@ static int hfsplus_link(struct dentry *src_dentry, struct inode *dst_dir,
 		res = hfsplus_create_cat(cnid, src_dir,
 			&src_dentry->d_name, inode);
 		if (res)
-			 
+			/* panic? */
 			goto out;
 		sbi->file_count++;
 	}
@@ -447,9 +460,9 @@ static int hfsplus_symlink(struct inode *dir, struct dentry *dentry,
 
 	res = hfsplus_init_inode_security(inode, dir, &dentry->d_name);
 	if (res == -EOPNOTSUPP)
-		res = 0;  
+		res = 0; /* Operation is not supported. */
 	else if (res) {
-		 
+		/* Try to delete anyway without error analysis. */
 		hfsplus_delete_cat(inode->i_ino, dir, &dentry->d_name);
 		goto out_err;
 	}
@@ -488,9 +501,9 @@ static int hfsplus_mknod(struct inode *dir, struct dentry *dentry,
 
 	res = hfsplus_init_inode_security(inode, dir, &dentry->d_name);
 	if (res == -EOPNOTSUPP)
-		res = 0;  
+		res = 0; /* Operation is not supported. */
 	else if (res) {
-		 
+		/* Try to delete anyway without error analysis. */
 		hfsplus_delete_cat(inode->i_ino, dir, &dentry->d_name);
 		goto failed_mknod;
 	}
@@ -524,6 +537,7 @@ static int hfsplus_rename(struct inode *old_dir, struct dentry *old_dentry,
 {
 	int res;
 
+	/* Unlink destination if it already exists */
 	if (d_really_is_positive(new_dentry)) {
 		if (d_is_dir(new_dentry))
 			res = hfsplus_rmdir(new_dir, new_dentry);

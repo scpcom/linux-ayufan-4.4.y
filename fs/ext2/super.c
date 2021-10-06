@@ -1,7 +1,24 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
- 
+/*
+ *  linux/fs/ext2/super.c
+ *
+ * Copyright (C) 1992, 1993, 1994, 1995
+ * Remy Card (card@masi.ibp.fr)
+ * Laboratoire MASI - Institut Blaise Pascal
+ * Universite Pierre et Marie Curie (Paris VI)
+ *
+ *  from
+ *
+ *  linux/fs/minix/inode.c
+ *
+ *  Copyright (C) 1991, 1992  Linus Torvalds
+ *
+ *  Big-endian to little-endian byte-swapping/bitmaps by
+ *        David S. Miller (davem@caip.rutgers.edu), 1995
+ */
+
 #include <linux/module.h>
 #include <linux/string.h>
 #include <linux/fs.h>
@@ -81,6 +98,9 @@ void ext2_msg(struct super_block *sb, const char *prefix,
 	va_end(args);
 }
 
+/*
+ * This must be called with sbi->s_lock held.
+ */
 void ext2_update_dynamic_rev(struct super_block *sb)
 {
 	struct ext2_super_block *es = EXT2_SB(sb)->s_es;
@@ -96,7 +116,14 @@ void ext2_update_dynamic_rev(struct super_block *sb)
 	es->s_first_ino = cpu_to_le32(EXT2_GOOD_OLD_FIRST_INO);
 	es->s_inode_size = cpu_to_le16(EXT2_GOOD_OLD_INODE_SIZE);
 	es->s_rev_level = cpu_to_le32(EXT2_DYNAMIC_REV);
-	 
+	/* leave es->s_feature_*compat flags alone */
+	/* es->s_uuid will be set by e2fsck if empty */
+
+	/*
+	 * The rest of the superblock fields should be zero, and if not it
+	 * means they are likely already in use, so leave them alone.  We
+	 * can leave it up to e2fsck to clean up any inconsistencies there.
+	 */
 }
 
 static void ext2_put_super (struct super_block * sb)
@@ -191,7 +218,10 @@ static int __init init_inodecache(void)
 
 static void destroy_inodecache(void)
 {
-	 
+	/*
+	 * Make sure all delayed rcu free inodes are flushed before we
+	 * destroy cache.
+	 */
 	rcu_barrier();
 	kmem_cache_destroy(ext2_inode_cachep);
 }
@@ -322,11 +352,16 @@ static struct inode *ext2_nfs_get_inode(struct super_block *sb,
 	if (ino > le32_to_cpu(EXT2_SB(sb)->s_es->s_inodes_count))
 		return ERR_PTR(-ESTALE);
 
+	/*
+	 * ext2_iget isn't quite right if the inode is currently unallocated!
+	 * However ext2_iget currently does appropriate checks to handle stale
+	 * inodes so everything is OK.
+	 */
 	inode = ext2_iget(sb, ino);
 	if (IS_ERR(inode))
 		return ERR_CAST(inode);
 	if (generation && inode->i_generation != generation) {
-		 
+		/* we didn't find the right inode.. */
 		iput(inode);
 		return ERR_PTR(-ESTALE);
 	}
@@ -359,7 +394,7 @@ static unsigned long get_sb_block(void **data)
 	char 		*options = (char *) *data;
 
 	if (!options || strncmp(options, "sb=", 3) != 0)
-		return 1;	 
+		return 1;	/* Default location */
 	options += 3;
 	sb_block = simple_strtoul(options, &options, 0);
 	if (*options && *options != ',') {
@@ -470,7 +505,8 @@ static int parse_options(char *options, struct super_block *sb)
 			sbi->s_resgid = gid;
 			break;
 		case Opt_sb:
-			 
+			/* handled by get_sb_block() instead of here */
+			/* *sb_block = match_int(&args[0]); */
 			break;
 		case Opt_err_panic:
 			clear_opt (sbi->s_mount_opt, ERRORS_CONT);
@@ -536,7 +572,7 @@ static int parse_options(char *options, struct super_block *sb)
 		case Opt_xip:
 			ext2_msg(sb, KERN_INFO, "use dax instead of xip");
 			set_opt(sbi->s_mount_opt, XIP);
-			 
+			/* Fall through */
 		case Opt_dax:
 #ifdef CONFIG_FS_DAX
 			ext2_msg(sb, KERN_WARNING,
@@ -619,7 +655,7 @@ static int ext2_setup_super (struct super_block * sb,
 		ext2_msg(sb, KERN_WARNING,
 			"warning: checktime reached, "
 			"running e2fsck is recommended");
-#endif  
+#endif /* MY_ABC_HERE */
 	if (!le16_to_cpu(es->s_max_mnt_count))
 		es->s_max_mnt_count = cpu_to_le16(EXT2_DFL_MAX_MNT_COUNT);
 	le16_add_cpu(&es->s_mnt_count, 1);
@@ -685,20 +721,34 @@ static int ext2_check_descriptors(struct super_block *sb)
 	return 1;
 }
 
+/*
+ * Maximal file size.  There is a direct, and {,double-,triple-}indirect
+ * block limit, and also a limit of (2^32 - 1) 512-byte sectors in i_blocks.
+ * We need to be 1 filesystem block less than the 2^32 sector limit.
+ */
 static loff_t ext2_max_size(int bits)
 {
 	loff_t res = EXT2_NDIR_BLOCKS;
 	int meta_blocks;
 	loff_t upper_limit;
 
+	/* This is calculated to be the largest file size for a
+	 * dense, file such that the total number of
+	 * sectors in the file, including data and all indirect blocks,
+	 * does not exceed 2^32 -1
+	 * __u32 i_blocks representing the total number of
+	 * 512 bytes blocks of the file
+	 */
 	upper_limit = (1LL << 32) - 1;
 
+	/* total blocks in file system block size */
 	upper_limit >>= (bits - 9);
 
+	/* indirect blocks */
 	meta_blocks = 1;
-	 
+	/* double indirect blocks */
 	meta_blocks += 1 + (1LL << (bits-2));
-	 
+	/* tripple indirect blocks */
 	meta_blocks += 1 + (1LL << (bits-2)) + (1LL << (2*(bits-2)));
 
 	upper_limit -= meta_blocks;
@@ -771,12 +821,23 @@ static int ext2_fill_super(struct super_block *sb, void *data, int silent)
 
 	spin_lock_init(&sbi->s_lock);
 
+	/*
+	 * See what the current blocksize for the device is, and
+	 * use that as the blocksize.  Otherwise (or if the blocksize
+	 * is smaller than the default) use the default.
+	 * This is important for devices that have a hardware
+	 * sectorsize that is larger than the default.
+	 */
 	blocksize = sb_min_blocksize(sb, BLOCK_SIZE);
 	if (!blocksize) {
 		ext2_msg(sb, KERN_ERR, "error: unable to set blocksize");
 		goto failed_sbi;
 	}
 
+	/*
+	 * If the superblock doesn't start on a hardware sector boundary,
+	 * calculate the offset.  
+	 */
 	if (blocksize != BLOCK_SIZE) {
 		logic_sb_block = (sb_block*BLOCK_SIZE) / blocksize;
 		offset = (sb_block*BLOCK_SIZE) % blocksize;
@@ -788,7 +849,10 @@ static int ext2_fill_super(struct super_block *sb, void *data, int silent)
 		ext2_msg(sb, KERN_ERR, "error: unable to read superblock");
 		goto failed_sbi;
 	}
-	 
+	/*
+	 * Note: s_es must be initialized as soon as possible because
+	 *       some ext2 macro-instructions depend on its value
+	 */
 	es = (struct ext2_super_block *) (((char *)bh->b_data) + offset);
 	sbi->s_es = es;
 	sb->s_magic = le16_to_cpu(es->s_magic);
@@ -796,6 +860,7 @@ static int ext2_fill_super(struct super_block *sb, void *data, int silent)
 	if (sb->s_magic != EXT2_SUPER_MAGIC)
 		goto cantfind_ext2;
 
+	/* Set defaults before we parse the mount options */
 	def_mount_opts = le32_to_cpu(es->s_default_mount_opts);
 	if (def_mount_opts & EXT2_DEFM_DEBUG)
 		set_opt(sbi->s_mount_opt, DEBUG);
@@ -839,7 +904,11 @@ static int ext2_fill_super(struct super_block *sb, void *data, int silent)
 		ext2_msg(sb, KERN_WARNING,
 			"warning: feature flags set on rev 0 fs, "
 			"running e2fsck is recommended");
-	 
+	/*
+	 * Check feature flags regardless of the revision level, since we
+	 * previously didn't change the revision level when setting the flags,
+	 * so there is a chance incompat flags are set on a rev 0 filesystem.
+	 */
 	features = EXT2_HAS_INCOMPAT_FEATURE(sb, ~EXT2_FEATURE_INCOMPAT_SUPP);
 	if (features) {
 		ext2_msg(sb, KERN_ERR,	"error: couldn't mount because of "
@@ -870,6 +939,7 @@ static int ext2_fill_super(struct super_block *sb, void *data, int silent)
 		}
 	}
 
+	/* If the blocksize doesn't match, re-read the thing.. */
 	if (sb->s_blocksize != blocksize) {
 		brelse(bh);
 
@@ -1013,9 +1083,15 @@ static int ext2_fill_super(struct super_block *sb, void *data, int silent)
 	get_random_bytes(&sbi->s_next_generation, sizeof(u32));
 	spin_lock_init(&sbi->s_next_gen_lock);
 
+	/* per fileystem reservation list head & lock */
 	spin_lock_init(&sbi->s_rsv_window_lock);
 	sbi->s_rsv_window_root = RB_ROOT;
-	 
+	/*
+	 * Add a single, static dummy reservation to the start of the
+	 * reservation window list --- it gives us a placeholder for
+	 * append-at-start-of-list which makes the allocation logic
+	 * _much_ simpler.
+	 */
 	sbi->s_rsv_window_head.rsv_start = EXT2_RESERVE_WINDOW_NOT_ALLOCATED;
 	sbi->s_rsv_window_head.rsv_end = EXT2_RESERVE_WINDOW_NOT_ALLOCATED;
 	sbi->s_rsv_window_head.rsv_alloc_hit = 0;
@@ -1044,7 +1120,9 @@ static int ext2_fill_super(struct super_block *sb, void *data, int silent)
 		goto failed_mount3;
 	}
 #endif
-	 
+	/*
+	 * set up enough so that it can read an inode
+	 */
 	sb->s_op = &ext2_sops;
 	sb->s_export_op = &ext2_export_ops;
 	sb->s_xattr = ext2_xattr_handlers;
@@ -1113,7 +1191,14 @@ static void ext2_clear_super_error(struct super_block *sb)
 	struct buffer_head *sbh = EXT2_SB(sb)->s_sbh;
 
 	if (buffer_write_io_error(sbh)) {
-		 
+		/*
+		 * Oh, dear.  A previous attempt to write the
+		 * superblock failed.  This could happen because the
+		 * USB device was yanked out.  Or it could happen to
+		 * be a transient write error and maybe the block will
+		 * be remapped.  Nothing we can do but to retry the
+		 * write and hope for the best.
+		 */
 		ext2_msg(sb, KERN_ERR,
 		       "previous I/O error to superblock detected\n");
 		clear_buffer_write_io_error(sbh);
@@ -1129,18 +1214,32 @@ static void ext2_sync_super(struct super_block *sb, struct ext2_super_block *es,
 	es->s_free_blocks_count = cpu_to_le32(ext2_count_free_blocks(sb));
 	es->s_free_inodes_count = cpu_to_le32(ext2_count_free_inodes(sb));
 	es->s_wtime = cpu_to_le32(get_seconds());
-	 
+	/* unlock before we do IO */
 	spin_unlock(&EXT2_SB(sb)->s_lock);
 	mark_buffer_dirty(EXT2_SB(sb)->s_sbh);
 	if (wait)
 		sync_dirty_buffer(EXT2_SB(sb)->s_sbh);
 }
 
+/*
+ * In the second extended file system, it is not necessary to
+ * write the super block since we use a mapping of the
+ * disk super block in a buffer.
+ *
+ * However, this function is still used to set the fs valid
+ * flags to 0.  We need to set this flag to 0 since the fs
+ * may have been checked while mounted and e2fsck may have
+ * set s_state to EXT2_VALID_FS after some corrections.
+ */
 static int ext2_sync_fs(struct super_block *sb, int wait)
 {
 	struct ext2_sb_info *sbi = EXT2_SB(sb);
 	struct ext2_super_block *es = EXT2_SB(sb)->s_es;
 
+	/*
+	 * Write quota structures to quota file, sync_blockdev() will write
+	 * them to disk later
+	 */
 	dquot_writeback_dquots(sb, -1);
 
 	spin_lock(&sbi->s_lock);
@@ -1157,11 +1256,16 @@ static int ext2_freeze(struct super_block *sb)
 {
 	struct ext2_sb_info *sbi = EXT2_SB(sb);
 
+	/*
+	 * Open but unlinked files present? Keep EXT2_VALID_FS flag cleared
+	 * because we have unattached inodes and thus filesystem is not fully
+	 * consistent.
+	 */
 	if (atomic_long_read(&sb->s_remove_count)) {
 		ext2_sync_fs(sb, 1);
 		return 0;
 	}
-	 
+	/* Set EXT2_FS_VALID flag */
 	spin_lock(&sbi->s_lock);
 	sbi->s_es->s_state = cpu_to_le16(sbi->s_mount_state);
 	spin_unlock(&sbi->s_lock);
@@ -1172,7 +1276,7 @@ static int ext2_freeze(struct super_block *sb)
 
 static int ext2_unfreeze(struct super_block *sb)
 {
-	 
+	/* Just write sb to clear EXT2_VALID_FS flag */
 	ext2_write_super(sb);
 
 	return 0;
@@ -1195,11 +1299,15 @@ static int ext2_remount (struct super_block * sb, int * flags, char * data)
 	sync_filesystem(sb);
 	spin_lock(&sbi->s_lock);
 
+	/* Store the old options */
 	old_sb_flags = sb->s_flags;
 	old_opts.s_mount_opt = sbi->s_mount_opt;
 	old_opts.s_resuid = sbi->s_resuid;
 	old_opts.s_resgid = sbi->s_resgid;
 
+	/*
+	 * Allow the "check" option to be passed as a remount option.
+	 */
 	if (!parse_options(data, sb)) {
 		err = -EINVAL;
 		goto restore_opts;
@@ -1225,6 +1333,10 @@ static int ext2_remount (struct super_block * sb, int * flags, char * data)
 			return 0;
 		}
 
+		/*
+		 * OK, we are remounting a valid rw partition rdonly, so set
+		 * the rdonly flag and then mark the partition as valid again.
+		 */
 		es->s_state = cpu_to_le16(sbi->s_mount_state);
 		es->s_mtime = cpu_to_le32(get_seconds());
 		spin_unlock(&sbi->s_lock);
@@ -1247,7 +1359,11 @@ static int ext2_remount (struct super_block * sb, int * flags, char * data)
 			err = -EROFS;
 			goto restore_opts;
 		}
-		 
+		/*
+		 * Mounting a RDONLY partition read-write, so reread and
+		 * store the current valid flag.  (It may have been changed
+		 * by e2fsck since we originally mounted the partition.)
+		 */
 		sbi->s_mount_state = le16_to_cpu(es->s_state);
 		if (!ext2_setup_super (sb, es, 0))
 			sb->s_flags &= ~MS_RDONLY;
@@ -1283,12 +1399,31 @@ static int ext2_statfs (struct dentry * dentry, struct kstatfs * buf)
 		unsigned long i, overhead = 0;
 		smp_rmb();
 
+		/*
+		 * Compute the overhead (FS structures). This is constant
+		 * for a given filesystem unless the number of block groups
+		 * changes so we cache the previous value until it does.
+		 */
+
+		/*
+		 * All of the blocks before first_data_block are
+		 * overhead
+		 */
 		overhead = le32_to_cpu(es->s_first_data_block);
 
+		/*
+		 * Add the overhead attributed to the superblock and
+		 * block group descriptors.  If the sparse superblocks
+		 * feature is turned on, then not all groups have this.
+		 */
 		for (i = 0; i < sbi->s_groups_count; i++)
 			overhead += ext2_bg_has_super(sb, i) +
 				ext2_bg_num_gdb(sb, i);
 
+		/*
+		 * Every block group has an inode bitmap, a block
+		 * bitmap, and an inode table.
+		 */
 		overhead += (sbi->s_groups_count *
 			     (2 + sbi->s_itb_per_group));
 		sbi->s_overhead_last = overhead;
@@ -1324,6 +1459,10 @@ static struct dentry *ext2_mount(struct file_system_type *fs_type,
 
 #ifdef CONFIG_QUOTA
 
+/* Read data from quotafile - avoid pagecache and such because we cannot afford
+ * acquiring the locks... As quota files are never truncated and quota code
+ * itself serializes the operations (and no one else should touch the files)
+ * we don't have to be afraid of races */
 static ssize_t ext2_quota_read(struct super_block *sb, int type, char *data,
 			       size_t len, loff_t off)
 {
@@ -1351,7 +1490,7 @@ static ssize_t ext2_quota_read(struct super_block *sb, int type, char *data,
 		err = ext2_get_block(inode, blk, &tmp_bh, 0);
 		if (err < 0)
 			return err;
-		if (!buffer_mapped(&tmp_bh))	 
+		if (!buffer_mapped(&tmp_bh))	/* A hole? */
 			memset(data, 0, tocopy);
 		else {
 			bh = sb_bread(sb, tmp_bh.b_blocknr);
@@ -1368,6 +1507,7 @@ static ssize_t ext2_quota_read(struct super_block *sb, int type, char *data,
 	return len;
 }
 
+/* Write to quotafile */
 static ssize_t ext2_quota_write(struct super_block *sb, int type,
 				const char *data, size_t len, loff_t off)
 {

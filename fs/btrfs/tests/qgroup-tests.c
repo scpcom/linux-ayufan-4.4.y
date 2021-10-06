@@ -1,4 +1,21 @@
- 
+/*
+ * Copyright (C) 2013 Facebook.  All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public
+ * License v2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public
+ * License along with this program; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA 021110-1307, USA.
+ */
+
 #include "btrfs-tests.h"
 #include "../ctree.h"
 #include "../transaction.h"
@@ -216,6 +233,11 @@ static int test_no_shared_qgroup(struct btrfs_root *root)
 		return ret;
 	}
 
+	/*
+	 * Since the test trans doesn't have the complicated delayed refs,
+	 * we can only call btrfs_qgroup_account_extent() directly to test
+	 * quota.
+	 */
 	ret = btrfs_find_all_roots(&trans, fs_info, 4096, 0, &old_roots);
 	if (ret) {
 		ulist_free(old_roots);
@@ -283,6 +305,11 @@ static int test_no_shared_qgroup(struct btrfs_root *root)
 	return 0;
 }
 
+/*
+ * Add a ref for two different roots to make sure the shared value comes out
+ * right, also remove one of the roots and make sure the exclusive count is
+ * adjusted properly.
+ */
 static int test_multiple_refs(struct btrfs_root *root)
 {
 	struct btrfs_trans_handle trans;
@@ -295,6 +322,7 @@ static int test_multiple_refs(struct btrfs_root *root)
 
 	test_msg("Qgroup multiple refs test\n");
 
+	/* We have 5 created already from the previous test */
 	ret = btrfs_create_qgroup(NULL, fs_info, 256);
 	if (ret) {
 		test_msg("Couldn't create a qgroup %d\n", ret);
@@ -425,13 +453,21 @@ int btrfs_test_qgroups(void)
 		ret = -ENOMEM;
 		goto out;
 	}
-	 
+	/* We are using this root as our extent root */
 	root->fs_info->extent_root = root;
 
+	/*
+	 * Some of the paths we test assume we have a filled out fs_info, so we
+	 * just need to add the root in there so we don't panic.
+	 */
 	root->fs_info->tree_root = root;
 	root->fs_info->quota_root = root;
 	root->fs_info->quota_enabled = 1;
 
+	/*
+	 * Can't use bytenr 0, some things freak out
+	 * *cough*backref walking code*cough*
+	 */
 	root->node = alloc_test_extent_buffer(root->fs_info, 4096);
 	if (!root->node) {
 		test_msg("Couldn't allocate dummy buffer\n");

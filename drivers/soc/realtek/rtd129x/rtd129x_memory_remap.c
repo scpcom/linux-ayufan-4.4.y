@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/atomic.h>
 #include <linux/dmi.h>
 #include <linux/efi.h>

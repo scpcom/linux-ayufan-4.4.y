@@ -32,6 +32,7 @@
 
 #include <drm/drm_crtc.h>
 #include <drm/drm_edid.h>
+#include <drm/drm_encoder.h>
 #include <drm/drm_dp_helper.h>
 #include <drm/drm_dp_mst_helper.h>
 #include <drm/drm_fixed.h>
@@ -690,6 +691,9 @@ struct atom_voltage_table
 };
 
 /* Driver internal use only flags of radeon_get_crtc_scanoutpos() */
+#define DRM_SCANOUTPOS_VALID        (1 << 0)
+#define DRM_SCANOUTPOS_IN_VBLANK    (1 << 1)
+#define DRM_SCANOUTPOS_ACCURATE     (1 << 2)
 #define USE_REAL_VBLANKSTART 		(1 << 30)
 #define GET_DISTANCE_TO_VBLANKSTART	(1 << 31)
 
@@ -758,10 +762,6 @@ extern u8 radeon_dp_getsinktype(struct radeon_connector *radeon_connector);
 extern bool radeon_dp_getdpcd(struct radeon_connector *radeon_connector);
 extern int radeon_dp_get_panel_mode(struct drm_encoder *encoder,
 				    struct drm_connector *connector);
-extern int radeon_dp_get_dp_link_config(struct drm_connector *connector,
-					const u8 *dpcd,
-					unsigned pix_clock,
-					unsigned *dp_lanes, unsigned *dp_rate);
 extern void radeon_dp_set_rx_power_state(struct drm_connector *connector,
 					 u8 power_state);
 extern void radeon_dp_aux_init(struct radeon_connector *radeon_connector);
@@ -931,10 +931,6 @@ extern void
 radeon_combios_encoder_crtc_scratch_regs(struct drm_encoder *encoder, int crtc);
 extern void
 radeon_combios_encoder_dpms_scratch_regs(struct drm_encoder *encoder, bool on);
-extern void radeon_crtc_fb_gamma_set(struct drm_crtc *crtc, u16 red, u16 green,
-				     u16 blue, int regno);
-extern void radeon_crtc_fb_gamma_get(struct drm_crtc *crtc, u16 *red, u16 *green,
-				     u16 *blue, int regno);
 int radeon_framebuffer_init(struct drm_device *dev,
 			     struct radeon_framebuffer *rfb,
 			     const struct drm_mode_fb_cmd2 *mode_cmd,
@@ -988,9 +984,6 @@ int radeon_fbdev_init(struct radeon_device *rdev);
 void radeon_fbdev_fini(struct radeon_device *rdev);
 void radeon_fbdev_set_suspend(struct radeon_device *rdev, int state);
 bool radeon_fbdev_robj_is_fb(struct radeon_device *rdev, struct radeon_bo *robj);
-void radeon_fbdev_restore_mode(struct radeon_device *rdev);
-
-void radeon_fb_output_poll_changed(struct radeon_device *rdev);
 
 void radeon_crtc_handle_vblank(struct radeon_device *rdev, int crtc_id);
 

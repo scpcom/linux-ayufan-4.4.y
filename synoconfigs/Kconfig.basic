@@ -109,6 +109,14 @@ config SYNO_ISCSI_REVERT_SUPPORT_PFMALLOC
 	default y
 	depends on ISCSI_TCP
 
+config SYNO_ISCSI_SUPPORT_FALLOCATE_FOR_BLOCK_DEVICE
+	bool "iSCSI support fallocate for block device"
+	default y
+
+config SYNO_ISCSI_WRITE_DIRECT_WITH_REQ_FUA_FOR_BLOCK_DEVICE
+	bool "WRITE_DIRECT with REQ_FUA for block devices"
+	default y
+
 config SYNO_SATA_DEVICE_PREFIX
 	string "The prefix of sata device"
 	default "sd"
@@ -189,6 +197,10 @@ config SYNO_GPIO
 config SYNO_PSTATE_CALC
 	bool "Compare P-state ratio only"
 	default y
+
+config SYNO_DATA_CORRECTION
+	bool "Framework of data correction"
+	default n
 
 config SYNO_DMA_COHERENT_POOL_1M
 	bool "increase DMA coherent pool from 256K to 1M"

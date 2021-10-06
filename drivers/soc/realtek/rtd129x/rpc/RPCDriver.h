@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _RPCDRIVER_H
 #define _RPCDRIVER_H
 

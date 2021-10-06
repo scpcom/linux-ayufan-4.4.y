@@ -67,6 +67,10 @@ config SYNO_FS_NOTIFY
 	default y
 	depends on FSNOTIFY && ANON_INODES
 
+config SYNO_FS_EXPORT_TRUNCATE
+	bool "Export symbol: syno_vfs_truncate"
+	default y
+
 config SYNO_FS_FIX_NOTIFY_CHANGE_WARN_ON
 	bool "Fix notify_change warn_on on boot"
 	default y
@@ -256,6 +260,11 @@ config SYNO_EXT4_INODE_NUM_OVERFLOW_FIX
 	default y
 	depends on EXT4_FS && 64BIT
 
+config SYNO_EXT4_WINACL
+	bool "Enable ext4 syno acl"
+	default y
+	depends on EXT4_FS && SYNO_FS_WINACL
+
 config SYNO_EXT4_CASELESS_STAT
 	bool "Support caseless stat in ext4"
 	default y
@@ -271,6 +280,11 @@ config SYNO_EXT4_SKIP_JOURNAL_SYMLINK
 	default y
 	depends on EXT4_FS
 
+config SYNO_EXT4_RESIZE_INODE_SIZE_EXTEND
+	bool "Increase reserved GDT to break the 16TB boundary of online resize"
+	default y
+	depends on EXT4_FS
+
 config SYNO_EXT4_PARALLEL_GROUP_DESC_PREFETCH_WHEN_MOUNT
 	bool "Add parallel group desc prefetching to enhance mount time."
 	default y
@@ -278,6 +292,11 @@ config SYNO_EXT4_PARALLEL_GROUP_DESC_PREFETCH_WHEN_MOUNT
 
 config SYNO_EXT4_ADD_RETRY_MECH_FOR_SYMLINK
 	bool "Add retry back for symlink to prevant ENOSPC error."
+	default y
+	depends on EXT4_FS
+
+config SYNO_EXT4_AVOID_DANGEROUS_DIR_ENTRY
+	bool "Avoid first dirent entry which malformed form . to /"
 	default y
 	depends on EXT4_FS
 
@@ -310,6 +329,11 @@ config SYNO_BTRFS_ARCHIVE_BIT
 	default y
 	depends on SYNO_FS_ARCHIVE_BIT && BTRFS_FS && SYNO_BTRFS_XATTR
 
+config SYNO_BTRFS_WINACL
+	bool "Enable btrfs syno acl"
+	default y
+	depends on BTRFS_FS && SYNO_FS_WINACL && !BTRFS_FS_POSIX_ACL
+
 config SYNO_BTRFS_PIN_LOG_ON_DELETE_INODE
 	bool "Pin tree-log while unlink to prevent deadlock."
 	default y
@@ -329,6 +353,11 @@ config SYNO_BTRFS_FIX_PAGE_LEAK_WHILE_CLONE_EXTENT_BUFFER
 	bool "Fix btrfs memory leak on clone extent buffer."
 	default y
 	depends on BTRFS_FS
+
+config SYNO_BTRFS_CLONE_CHECK_QUOTA
+	bool "Add quota check for IOC_CLONE ioctl command"
+	default y
+	depends on BTRFS_FS && SYNO_BTRFS_FAST_QGROUP
 
 config SYNO_BTRFS_FREE_EXTENT_MAPS
 	bool "Add a machanisim to drop extent map cache"
@@ -350,6 +379,11 @@ config SYNO_BTRFS_RESIZE_QUERY
 	default y
 	depends on BTRFS_FS
 
+config SYNO_BTRFS_DATA_CORRECTION
+	bool "Report btrfs data checksum failure"
+	default n
+	depends on BTRFS_FS && SYNO_DATA_CORRECTION
+
 config SYNO_BTRFS_SUBVOLUME_HIDE
 	bool "Support subvolume hide flag"
 	default y
@@ -359,6 +393,11 @@ config SYNO_BTRFS_ARCHIVE_VERSION
 	bool "Support syno archive version for btrfs"
 	default y
 	depends on SYNO_FS_ARCHIVE_VERSION && SYNO_BTRFS_XATTR && BTRFS_FS
+
+config SYNO_BTRFS_CASELESS_STAT
+	bool "Add syno caseless stat for btrfs"
+	default y
+	depends on SYNO_FS_CASELESS_STAT && BTRFS_FS
 
 config SYNO_BTRFS_SEND
 	bool "Add syno btrfs send"
@@ -385,10 +424,20 @@ config SYNO_BTRFS_RENAME_READONLY_SUBVOL
 	default y
 	depends on BTRFS_FS
 
+config SYNO_BTRFS_USRQUOTA
+	bool "Btrfs sub-volume usrquota"
+	default y
+	depends on BTRFS_FS && SYNO_BTRFS_FAST_QGROUP
+
 config SYNO_BTRFS_REMOVE_UNUSED_QGROUP
 	bool "Remove qgroup item when snapshot got deleted"
 	default y
 	depends on BTRFS_FS
+
+config SYNO_BTRFS_FAST_QGROUP
+	bool "Syno version fast qgroup accounting"
+	default y
+	depends on BTRFS_FS && SYNO_BTRFS_BACKREF
 
 config SYNO_BTRFS_REVERT_WAIT_OR_COMMIT_SELF_TRANS
 	bool "Revert commit: wait or commit self transaction"
@@ -744,6 +793,11 @@ config SYNO_ECRYPTFS_FILENAME_SYSCALL
 	default y
 	depends on SYNO_SYSTEM_CALL && ECRYPT_FS
 
+config SYNO_ECRYPTFS_WINACL
+	bool "Enable syno acl in ecryptfs"
+	default y
+	depends on ECRYPT_FS && SYNO_FS_WINACL
+
 config SYNO_ECRYPTFS_OCF
 	bool "enable ocf framework"
 	default n
@@ -754,6 +808,11 @@ config SYNO_ECRYPTFS_LOWER_INIT
 	default y
 	depends on ECRYPT_FS
 
+config SYNO_ECRYPTFS_REDUCE_MEMCPY
+	bool "Reduce one memcpy on ecryptfs for performance."
+	default y
+	depends on ECRYPT_FS && BTRFS_FS && SYNO_FS_RECVFILE
+
 config SYNO_ECRYPTFS_SKIP_KERNEL_WRITE_CHECK
 	bool "Skip security check during kernel_write."
 	default y
@@ -763,6 +822,11 @@ config SYNO_ECRYPTFS_FAST_LOOKUP
 	bool "Fast lookup, read i_size from xattr"
 	default y
 	depends on ECRYPT_FS
+
+config SYNO_ECRYPTFS_PASS_BTRFS_IOCTL
+	bool "Pass syno btrfs ioctl to lower btrfs filesystem"
+	default y
+	depends on ECRYPT_FS && BTRFS_FS
 
 config SYNO_ECRYPTFS_SKIP_EQUAL_ISIZE_UPDATE
 	bool "Update ecryptfs i_size only when they are different"
@@ -803,12 +867,25 @@ config SYNO_NFS4_DISABLE_UDP
 	bool "disable NFSv4 over UDP"
 	default y
 
+config SYNO_NFS_VAAI_SUPPORT
+	bool "NFS VAAI support"
+	default y
+
+config SYNO_NFS_VAAI_LAZY_CLONE
+	bool "NFS VAAI lazy clone support"
+	default y
+	depends on BTRFS_FS && SYNO_NFS_VAAI_SUPPORT
+
 config SYNO_NFSD_HIDDEN_FILE
 	bool "Hide system directories"
 	default y
 
 config SYNO_NFSD_AVOID_HUNG_TASK_WHEN_UNLINK_BIG_FILE
 	bool "Avoid parent mutex hung task when unlink big file"
+	default y
+
+config SYNO_NFSD_SQUASH_TO_ADMIN
+	bool "Grant permission of administrators group to admin user"
 	default y
 
 config SYNO_NFSD_NUMA_SVC_POOL_PERNODE

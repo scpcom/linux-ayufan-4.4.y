@@ -1,7 +1,13 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
- 
+/*
+ * Copyright (C) 2003 Sistina Software
+ * Copyright (C) 2006 Red Hat GmbH
+ *
+ * This file is released under the GPL.
+ */
+
 #include "dm.h"
 
 #include <linux/device-mapper.h>
@@ -23,8 +29,26 @@ struct dm_io_client {
 	struct bio_set *bios;
 };
 
+#ifdef MY_ABC_HERE
+
+// Set 0 to disable debug message
+static int debug_enable = 0;
+
+#define sinfo(fmt, args...) do { \
+	if (1 == debug_enable) { \
+		printk(KERN_INFO "%s [%d]: "fmt"\n", __FUNCTION__, __LINE__, ##args); \
+	} \
+} while (0)
+#else
+
 #define sinfo(fmt, args...)
 
+#endif /* MY_ABC_HERE */
+
+/*
+ * Aligning 'struct io' reduces the number of bits required to store
+ * its address.  Refer to store_io_and_region_in_bio() below.
+ */
 struct io {
 	unsigned long error_bits;
 	atomic_t count;
@@ -35,18 +59,25 @@ struct io {
 	unsigned long vma_invalidate_size;
 #ifdef MY_ABC_HERE
 	unsigned long bi_flags;
-#endif  
+#endif /* MY_ABC_HERE */
 } __attribute__((aligned(DM_IO_MAX_REGIONS)));
 
 #ifdef MY_ABC_HERE
 static int has_correction_flag(unsigned long bi_flags)
 {
+#ifdef MY_ABC_HERE
+	return ((bi_flags & (1 << BIO_CORRECTION_RETRY)) || (bi_flags & (1 << BIO_CORRECTION_ABORT)));
+#else
 	return 0;
+#endif /* MY_ABC_HERE */
 }
-#endif  
+#endif /* MY_ABC_HERE */
 
 static struct kmem_cache *_dm_io_cache;
 
+/*
+ * Create a client with mempool and bioset.
+ */
 struct dm_io_client *dm_io_client_create(void)
 {
 	struct dm_io_client *client;
@@ -81,6 +112,13 @@ void dm_io_client_destroy(struct dm_io_client *client)
 }
 EXPORT_SYMBOL(dm_io_client_destroy);
 
+/*-----------------------------------------------------------------
+ * We need to keep track of which region a bio is doing io for.
+ * To avoid a memory allocation to store just 5 or 6 bits, we
+ * ensure the 'struct io' pointer is aligned so enough low bits are
+ * always zero and then combine it with the region number directly in
+ * bi_private.
+ *---------------------------------------------------------------*/
 static void store_io_and_region_in_bio(struct bio *bio, struct io *io,
 				       unsigned region)
 {
@@ -101,7 +139,15 @@ static void retrieve_io_and_region_from_bio(struct bio *bio, struct io **io,
 	*region = val & (DM_IO_MAX_REGIONS - 1);
 }
 
+/*-----------------------------------------------------------------
+ * We need an io object to keep track of the number of bios that
+ * have been dispatched for a particular io.
+ *---------------------------------------------------------------*/
+#ifdef MY_ABC_HERE
+static void complete_io(struct io *io, int error, unsigned long bi_flags)
+#else
 static void complete_io(struct io *io)
+#endif
 {
 	unsigned long error_bits = io->error_bits;
 	io_notify_fn fn = io->callback;
@@ -112,6 +158,27 @@ static void complete_io(struct io *io)
 					     io->vma_invalidate_size);
 
 	mempool_free(io, io->client->pool);
+#ifdef MY_ABC_HERE
+	if (bi_flags & (1 << BIO_CORRECTION_ERR)) {
+		sinfo("detect BIO_CORRECTION_ERR start");
+
+		if (error_bits & (~SYNO_DM_IO_RESERVERD_IO_MASK)) {
+			printk(KERN_ERR "error bits is over the mask range");
+			BUG_ON(1);
+		}
+
+		if (SYNO_DM_IO_RESERVERD_IO_MASK & (1 << BIO_CORRECTION_ERR)) {
+			printk(KERN_ERR "BIO_CORRECTION_ERR (%d) should not in the mask (%x)",
+					BIO_CORRECTION_ERR, SYNO_DM_IO_RESERVERD_IO_MASK);
+			BUG_ON(1);
+		} else {
+			sinfo("add bio flag BIO_CORRECTION_ERR to error code");
+			error_bits |=  1 << BIO_CORRECTION_ERR;
+		}
+
+		sinfo("detect BIO_CORRECTION_ERR end");
+	}
+#endif /* MY_ABC_HERE */
 	fn(error_bits, context);
 }
 
@@ -119,14 +186,25 @@ static void complete_io(struct io *io)
 static void dec_count_common(struct io *io, unsigned int region, int error, unsigned long bi_flags)
 #else
 static void dec_count(struct io *io, unsigned int region, int error)
-#endif  
+#endif /* MY_ABC_HERE */
 {
 	if (error)
 		set_bit(region, &io->error_bits);
 
 	if (atomic_dec_and_test(&io->count))
+#ifdef MY_ABC_HERE
+		complete_io(io, error, bi_flags);
+#else
 		complete_io(io);
+#endif
 }
+
+#ifdef MY_ABC_HERE
+static void dec_count_syno(struct io *io, unsigned int region, int error, unsigned long bi_flags)
+{
+	dec_count_common(io, region, error, bi_flags);
+}
+#endif
 
 #ifdef MY_ABC_HERE
 static void dec_count(struct io *io, unsigned int region, int error)
@@ -141,17 +219,37 @@ static void endio(struct bio *bio)
 	unsigned region;
 	int error;
 
+#ifdef MY_ABC_HERE
+	unsigned long bi_flags = 0;
+	if (!bio) {
+		sinfo("get a null bio");
+	} else {
+		bi_flags = bio->bi_flags;
+	}
+#endif  /* MY_ABC_HERE */
+
 	if (bio->bi_error && bio_data_dir(bio) == READ)
 		zero_fill_bio(bio);
 
+	/*
+	 * The bio destructor in bio_put() may use the io object.
+	 */
 	retrieve_io_and_region_from_bio(bio, &io, &region);
 
 	error = bio->bi_error;
 	bio_put(bio);
 
+#ifdef MY_ABC_HERE
+	dec_count_syno(io, region, error, bi_flags);
+#else
 	dec_count(io, region, error);
+#endif  /* MY_ABC_HERE */
 }
 
+/*-----------------------------------------------------------------
+ * These little objects provide an abstraction for getting a new
+ * destination page for io.
+ *---------------------------------------------------------------*/
 struct dpages {
 	void (*get_page)(struct dpages *dp,
 			 struct page **p, unsigned long *len, unsigned *offset);
@@ -164,6 +262,9 @@ struct dpages {
 	unsigned long vma_invalidate_size;
 };
 
+/*
+ * Functions for getting the pages from a list.
+ */
 static void list_get_page(struct dpages *dp,
 		  struct page **p, unsigned long *len, unsigned *offset)
 {
@@ -190,6 +291,9 @@ static void list_dp_init(struct dpages *dp, struct page_list *pl, unsigned offse
 	dp->context_ptr = pl;
 }
 
+/*
+ * Functions for getting the pages from a bvec.
+ */
 static void bio_get_page(struct dpages *dp, struct page **p,
 			 unsigned long *len, unsigned *offset)
 {
@@ -214,6 +318,9 @@ static void bio_dp_init(struct dpages *dp, struct bio *bio)
 	dp->context_u = bio->bi_iter.bi_bvec_done;
 }
 
+/*
+ * Functions for getting the pages from a VMA.
+ */
 static void vm_get_page(struct dpages *dp,
 		 struct page **p, unsigned long *len, unsigned *offset)
 {
@@ -236,6 +343,9 @@ static void vm_dp_init(struct dpages *dp, void *data)
 	dp->context_ptr = data;
 }
 
+/*
+ * Functions for getting the pages from kernel memory.
+ */
 static void km_get_page(struct dpages *dp, struct page **p, unsigned long *len,
 			unsigned *offset)
 {
@@ -258,6 +368,9 @@ static void km_dp_init(struct dpages *dp, void *data)
 	dp->context_ptr = data;
 }
 
+/*-----------------------------------------------------------------
+ * IO routines that accept a list of pages.
+ *---------------------------------------------------------------*/
 static void do_region(int rw, unsigned region, struct dm_io_region *where,
 		      struct dpages *dp, struct io *io)
 {
@@ -272,6 +385,9 @@ static void do_region(int rw, unsigned region, struct dm_io_region *where,
 	sector_t num_sectors;
 	unsigned int uninitialized_var(special_cmd_max_sectors);
 
+	/*
+	 * Reject unsupported discard and write same requests.
+	 */
 	if (rw & REQ_DISCARD)
 		special_cmd_max_sectors = q->limits.max_discard_sectors;
 	else if (rw & REQ_WRITE_SAME)
@@ -281,8 +397,14 @@ static void do_region(int rw, unsigned region, struct dm_io_region *where,
 		return;
 	}
 
+	/*
+	 * where->count may be zero if rw holds a flush and we need to
+	 * send a zero-sized flush.
+	 */
 	do {
-		 
+		/*
+		 * Allocate a suitably sized-bio.
+		 */
 		if ((rw & REQ_DISCARD) || (rw & REQ_WRITE_SAME))
 			num_bvecs = 1;
 		else
@@ -301,7 +423,9 @@ static void do_region(int rw, unsigned region, struct dm_io_region *where,
 			bio->bi_iter.bi_size = num_sectors << SECTOR_SHIFT;
 			remaining -= num_sectors;
 		} else if (rw & REQ_WRITE_SAME) {
-			 
+			/*
+			 * WRITE SAME only uses a single page.
+			 */
 			dp->get_page(dp, &page, &len, &offset);
 			bio_add_page(bio, page, logical_block_size, offset);
 			num_sectors = min_t(sector_t, special_cmd_max_sectors, remaining);
@@ -311,11 +435,18 @@ static void do_region(int rw, unsigned region, struct dm_io_region *where,
 			remaining -= num_sectors;
 			dp->next_page(dp);
 		} else while (remaining) {
-			 
+			/*
+			 * Try and add as many pages as possible.
+			 */
 			dp->get_page(dp, &page, &len, &offset);
 			len = min(len, to_bytes(remaining));
 			if (!bio_add_page(bio, page, len, offset))
 				break;
+#ifdef MY_ABC_HERE
+			else if (has_correction_flag(io->bi_flags)) {
+				sinfo("add page to bio len=%lu offset=%u", len, offset);
+			}
+#endif /* MY_ABC_HERE */
 
 			offset = 0;
 			remaining -= to_sector(len);
@@ -328,7 +459,7 @@ static void do_region(int rw, unsigned region, struct dm_io_region *where,
 		if (has_correction_flag(io->bi_flags)) {
 			sinfo("bio start=%llu size=%llu", (u64)bio->bi_iter.bi_sector, (u64)to_sector(bio->bi_iter.bi_size));
 		}
-#endif  
+#endif /* MY_ABC_HERE */
 		submit_bio(rw, bio);
 	} while (remaining);
 }
@@ -345,12 +476,20 @@ static void dispatch_io(int rw, unsigned int num_regions,
 	if (sync)
 		rw |= REQ_SYNC;
 
+	/*
+	 * For multiple regions we need to be careful to rewind
+	 * the dp object for each call to do_region.
+	 */
 	for (i = 0; i < num_regions; i++) {
 		*dp = old_pages;
 		if (where[i].count || (rw & REQ_FLUSH))
 			do_region(rw, i, where + i, dp, io);
 	}
 
+	/*
+	 * Drop the extra reference that we were holding to avoid
+	 * the io being completed too early.
+	 */
 	dec_count(io, 0, 0);
 }
 
@@ -375,7 +514,7 @@ static int sync_io(struct dm_io_client *client, unsigned int num_regions,
 static int sync_io(struct dm_io_client *client, unsigned int num_regions,
 		   struct dm_io_region *where, int rw, struct dpages *dp,
 		   unsigned long *error_bits)
-#endif  
+#endif /* MY_ABC_HERE */
 {
 	struct io *io;
 	struct sync_io sio;
@@ -389,7 +528,7 @@ static int sync_io(struct dm_io_client *client, unsigned int num_regions,
 
 	io = mempool_alloc(client->pool, GFP_NOIO);
 	io->error_bits = 0;
-	atomic_set(&io->count, 1);  
+	atomic_set(&io->count, 1); /* see dispatch_io() */
 	io->client = client;
 	io->callback = sync_io_complete;
 	io->context = &sio;
@@ -406,7 +545,7 @@ static int sync_io(struct dm_io_client *client, unsigned int num_regions,
 	if (has_correction_flag(bi_flags)) {
 		sinfo("add io flags finish");
 	}
-#endif  
+#endif /* MY_ABC_HERE */
 
 	dispatch_io(rw, num_regions, where, dp, io, 1);
 
@@ -426,7 +565,7 @@ static int async_io(struct dm_io_client *client, unsigned int num_regions,
 static int async_io(struct dm_io_client *client, unsigned int num_regions,
 		    struct dm_io_region *where, int rw, struct dpages *dp,
 		    io_notify_fn fn, void *context)
-#endif  
+#endif /* MY_ABC_HERE */
 {
 	struct io *io;
 
@@ -438,7 +577,7 @@ static int async_io(struct dm_io_client *client, unsigned int num_regions,
 
 	io = mempool_alloc(client->pool, GFP_NOIO);
 	io->error_bits = 0;
-	atomic_set(&io->count, 1);  
+	atomic_set(&io->count, 1); /* see dispatch_io() */
 	io->client = client;
 	io->callback = fn;
 	io->context = context;
@@ -448,7 +587,7 @@ static int async_io(struct dm_io_client *client, unsigned int num_regions,
 	if (has_correction_flag(bi_flags)) {
 		sinfo("set bi_flags=%lx", bi_flags);
 	}
-#endif  
+#endif /* MY_ABC_HERE */
 
 	io->vma_invalidate_address = dp->vma_invalidate_address;
 	io->vma_invalidate_size = dp->vma_invalidate_size;
@@ -460,7 +599,8 @@ static int async_io(struct dm_io_client *client, unsigned int num_regions,
 static int dp_init(struct dm_io_request *io_req, struct dpages *dp,
 		   unsigned long size)
 {
-	 
+	/* Set up dpages based on memory type */
+
 	dp->vma_invalidate_address = NULL;
 	dp->vma_invalidate_size = 0;
 
@@ -493,7 +633,10 @@ static int dp_init(struct dm_io_request *io_req, struct dpages *dp,
 	return 0;
 }
 #ifdef MY_ABC_HERE
- 
+/*
+ * This function sets BIO_MD_RETURN_ERROR to bi_flags of the bio passed to underlaying layer
+ * You can use bi_flags to add other extra flags
+ */
 int syno_dm_io(struct dm_io_request *io_req, unsigned num_regions,
 	  struct dm_io_region *where, unsigned long *sync_error_bits, unsigned long bi_flags)
 {
@@ -516,8 +659,16 @@ int syno_dm_io(struct dm_io_request *io_req, unsigned num_regions,
 			&dp, io_req->notify.fn, io_req->notify.context, bi_flags);
 }
 EXPORT_SYMBOL(syno_dm_io);
-#endif  
+#endif /* MY_ABC_HERE */
 
+/*
+ * New collapsed (a)synchronous interface.
+ *
+ * If the IO is asynchronous (i.e. it has notify.fn), you must either unplug
+ * the queue with blk_unplug() some time later or set REQ_SYNC in io_req->bi_rw.
+ * If you fail to do one of these, the IO will be submitted to the disk after
+ * q->unplug_delay, which defaults to 3ms in blk-settings.c.
+ */
 int dm_io(struct dm_io_request *io_req, unsigned num_regions,
 	  struct dm_io_region *where, unsigned long *sync_error_bits)
 {
@@ -541,7 +692,7 @@ int dm_io(struct dm_io_request *io_req, unsigned num_regions,
 
 	return async_io(io_req->client, num_regions, where, io_req->bi_rw,
 			&dp, io_req->notify.fn, io_req->notify.context);
-#endif  
+#endif /* MY_ABC_HERE */
 }
 EXPORT_SYMBOL(dm_io);
 

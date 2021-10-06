@@ -222,7 +222,7 @@ static void vmw_takedown_otable_base(struct vmw_private *dev_priv,
 	if (bo) {
 		int ret;
 
-		ret = ttm_bo_reserve(bo, false, true, false, NULL);
+		ret = ttm_bo_reserve(bo, false, true, NULL);
 		BUG_ON(ret != 0);
 
 		vmw_fence_single_bo(bo, NULL);
@@ -240,6 +240,10 @@ static int vmw_otable_batch_setup(struct vmw_private *dev_priv,
 	unsigned long offset;
 	unsigned long bo_size;
 	struct vmw_otable *otables = batch->otables;
+	struct ttm_operation_ctx ctx = {
+		.interruptible = false,
+		.no_wait_gpu = false
+	};
 	SVGAOTableType i;
 	int ret;
 
@@ -262,9 +266,9 @@ static int vmw_otable_batch_setup(struct vmw_private *dev_priv,
 	if (unlikely(ret != 0))
 		goto out_no_bo;
 
-	ret = ttm_bo_reserve(batch->otable_bo, false, true, false, NULL);
+	ret = ttm_bo_reserve(batch->otable_bo, false, true, NULL);
 	BUG_ON(ret != 0);
-	ret = vmw_bo_driver.ttm_tt_populate(batch->otable_bo->ttm);
+	ret = vmw_bo_driver.ttm_tt_populate(batch->otable_bo->ttm, &ctx);
 	if (unlikely(ret != 0))
 		goto out_unreserve;
 	ret = vmw_bo_map_dma(batch->otable_bo);
@@ -319,18 +323,17 @@ int vmw_otables_setup(struct vmw_private *dev_priv)
 	int ret;
 
 	if (dev_priv->has_dx) {
-		*otables = kmalloc(sizeof(dx_tables), GFP_KERNEL);
-		if (*otables == NULL)
+		*otables = kmemdup(dx_tables, sizeof(dx_tables), GFP_KERNEL);
+		if (!(*otables))
 			return -ENOMEM;
 
-		memcpy(*otables, dx_tables, sizeof(dx_tables));
 		dev_priv->otable_batch.num_otables = ARRAY_SIZE(dx_tables);
 	} else {
-		*otables = kmalloc(sizeof(pre_dx_tables), GFP_KERNEL);
-		if (*otables == NULL)
+		*otables = kmemdup(pre_dx_tables, sizeof(pre_dx_tables),
+				   GFP_KERNEL);
+		if (!(*otables))
 			return -ENOMEM;
 
-		memcpy(*otables, pre_dx_tables, sizeof(pre_dx_tables));
 		dev_priv->otable_batch.num_otables = ARRAY_SIZE(pre_dx_tables);
 	}
 
@@ -357,7 +360,7 @@ static void vmw_otable_batch_takedown(struct vmw_private *dev_priv,
 			vmw_takedown_otable_base(dev_priv, i,
 						 &batch->otables[i]);
 
-	ret = ttm_bo_reserve(bo, false, true, false, NULL);
+	ret = ttm_bo_reserve(bo, false, true, NULL);
 	BUG_ON(ret != 0);
 
 	vmw_fence_single_bo(bo, NULL);
@@ -408,7 +411,7 @@ struct vmw_mob *vmw_mob_create(unsigned long data_pages)
 {
 	struct vmw_mob *mob = kzalloc(sizeof(*mob), GFP_KERNEL);
 
-	if (unlikely(mob == NULL))
+	if (unlikely(!mob))
 		return NULL;
 
 	mob->num_pages = vmw_mob_calculate_pt_pages(data_pages);
@@ -431,6 +434,11 @@ static int vmw_mob_pt_populate(struct vmw_private *dev_priv,
 			       struct vmw_mob *mob)
 {
 	int ret;
+	struct ttm_operation_ctx ctx = {
+		.interruptible = false,
+		.no_wait_gpu = false
+	};
+
 	BUG_ON(mob->pt_bo != NULL);
 
 	ret = ttm_bo_create(&dev_priv->bdev, mob->num_pages * PAGE_SIZE,
@@ -440,10 +448,10 @@ static int vmw_mob_pt_populate(struct vmw_private *dev_priv,
 	if (unlikely(ret != 0))
 		return ret;
 
-	ret = ttm_bo_reserve(mob->pt_bo, false, true, false, NULL);
+	ret = ttm_bo_reserve(mob->pt_bo, false, true, NULL);
 
 	BUG_ON(ret != 0);
-	ret = vmw_bo_driver.ttm_tt_populate(mob->pt_bo->ttm);
+	ret = vmw_bo_driver.ttm_tt_populate(mob->pt_bo->ttm, &ctx);
 	if (unlikely(ret != 0))
 		goto out_unreserve;
 	ret = vmw_bo_map_dma(mob->pt_bo);
@@ -545,7 +553,7 @@ static void vmw_mob_pt_setup(struct vmw_mob *mob,
 	const struct vmw_sg_table *vsgt;
 	int ret;
 
-	ret = ttm_bo_reserve(bo, false, true, false, NULL);
+	ret = ttm_bo_reserve(bo, false, true, NULL);
 	BUG_ON(ret != 0);
 
 	vsgt = vmw_bo_sg_table(bo);
@@ -595,7 +603,7 @@ void vmw_mob_unbind(struct vmw_private *dev_priv,
 	struct ttm_buffer_object *bo = mob->pt_bo;
 
 	if (bo) {
-		ret = ttm_bo_reserve(bo, false, true, false, NULL);
+		ret = ttm_bo_reserve(bo, false, true, NULL);
 		/*
 		 * Noone else should be using this buffer.
 		 */

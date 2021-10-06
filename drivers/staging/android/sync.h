@@ -21,7 +21,8 @@
 #include <linux/wait.h>
 #include <linux/fence.h>
 
-#include "uapi/sync.h"
+#include <linux/sync_file.h>
+#include <uapi/linux/sync_file.h>
 
 struct sync_timeline;
 struct sync_pt;

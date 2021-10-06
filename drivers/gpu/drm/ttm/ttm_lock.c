@@ -33,7 +33,6 @@
 #include <linux/atomic.h>
 #include <linux/errno.h>
 #include <linux/wait.h>
-#include <linux/sched.h>
 #include <linux/module.h>
 
 #define TTM_WRITE_LOCK_PENDING    (1 << 0)

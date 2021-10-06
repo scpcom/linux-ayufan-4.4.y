@@ -16,12 +16,14 @@
 
 #include <linux/component.h>
 #include <linux/of_platform.h>
+#include <drm/drm_of.h>
 
+#include "etnaviv_cmdbuf.h"
 #include "etnaviv_drv.h"
 #include "etnaviv_gpu.h"
 #include "etnaviv_gem.h"
 #include "etnaviv_mmu.h"
-#include "etnaviv_gem.h"
+#include "etnaviv_perfmon.h"
 
 #ifdef CONFIG_DRM_ETNAVIV_REGISTER_LOGGING
 static bool reglog;
@@ -109,7 +111,7 @@ static int etnaviv_open(struct drm_device *dev, struct drm_file *file)
 	return 0;
 }
 
-static void etnaviv_preclose(struct drm_device *dev, struct drm_file *file)
+static void etnaviv_postclose(struct drm_device *dev, struct drm_file *file)
 {
 	struct etnaviv_drm_private *priv = dev->dev_private;
 	struct etnaviv_file_private *ctx = file->driver_priv;
@@ -145,21 +147,23 @@ static int etnaviv_gem_show(struct drm_device *dev, struct seq_file *m)
 
 static int etnaviv_mm_show(struct drm_device *dev, struct seq_file *m)
 {
-	int ret;
+	struct drm_printer p = drm_seq_file_printer(m);
 
 	read_lock(&dev->vma_offset_manager->vm_lock);
-	ret = drm_mm_dump_table(m, &dev->vma_offset_manager->vm_addr_space_mm);
+	drm_mm_print(&dev->vma_offset_manager->vm_addr_space_mm, &p);
 	read_unlock(&dev->vma_offset_manager->vm_lock);
 
-	return ret;
+	return 0;
 }
 
 static int etnaviv_mmu_show(struct etnaviv_gpu *gpu, struct seq_file *m)
 {
+	struct drm_printer p = drm_seq_file_printer(m);
+
 	seq_printf(m, "Active Objects (%s):\n", dev_name(gpu->dev));
 
 	mutex_lock(&gpu->mmu->lock);
-	drm_mm_dump_table(m, &gpu->mmu->mm);
+	drm_mm_print(&gpu->mmu->mm, &p);
 	mutex_unlock(&gpu->mmu->lock);
 
 	return 0;
@@ -167,13 +171,14 @@ static int etnaviv_mmu_show(struct etnaviv_gpu *gpu, struct seq_file *m)
 
 static void etnaviv_buffer_dump(struct etnaviv_gpu *gpu, struct seq_file *m)
 {
-	struct etnaviv_cmdbuf *buf = gpu->buffer;
+	struct etnaviv_cmdbuf *buf = &gpu->buffer;
 	u32 size = buf->size;
 	u32 *ptr = buf->vaddr;
 	u32 i;
 
 	seq_printf(m, "virt %p - phys 0x%llx - free 0x%08x\n",
-			buf->vaddr, (u64)buf->paddr, size - buf->user_size);
+			buf->vaddr, (u64)etnaviv_cmdbuf_get_pa(buf),
+			size - buf->user_size);
 
 	for (i = 0; i < size / 4; i++) {
 		if (i && !(i % 4))
@@ -254,12 +259,6 @@ static int etnaviv_debugfs_init(struct drm_minor *minor)
 
 	return ret;
 }
-
-static void etnaviv_debugfs_cleanup(struct drm_minor *minor)
-{
-	drm_debugfs_remove_files(etnaviv_debugfs_list,
-			ARRAY_SIZE(etnaviv_debugfs_list), minor);
-}
 #endif
 
 /*
@@ -317,7 +316,7 @@ static int etnaviv_ioctl_gem_cpu_prep(struct drm_device *dev, void *data,
 
 	ret = etnaviv_gem_cpu_prep(obj, args->op, &TS(args->timeout));
 
-	drm_gem_object_unreference_unlocked(obj);
+	drm_gem_object_put_unlocked(obj);
 
 	return ret;
 }
@@ -338,7 +337,7 @@ static int etnaviv_ioctl_gem_cpu_fini(struct drm_device *dev, void *data,
 
 	ret = etnaviv_gem_cpu_fini(obj);
 
-	drm_gem_object_unreference_unlocked(obj);
+	drm_gem_object_put_unlocked(obj);
 
 	return ret;
 }
@@ -358,7 +357,7 @@ static int etnaviv_ioctl_gem_info(struct drm_device *dev, void *data,
 		return -ENOENT;
 
 	ret = etnaviv_gem_mmap_offset(obj, &args->offset);
-	drm_gem_object_unreference_unlocked(obj);
+	drm_gem_object_put_unlocked(obj);
 
 	return ret;
 }
@@ -447,9 +446,43 @@ static int etnaviv_ioctl_gem_wait(struct drm_device *dev, void *data,
 
 	ret = etnaviv_gem_wait_bo(gpu, obj, timeout);
 
-	drm_gem_object_unreference_unlocked(obj);
+	drm_gem_object_put_unlocked(obj);
 
 	return ret;
+}
+
+static int etnaviv_ioctl_pm_query_dom(struct drm_device *dev, void *data,
+	struct drm_file *file)
+{
+	struct etnaviv_drm_private *priv = dev->dev_private;
+	struct drm_etnaviv_pm_domain *args = data;
+	struct etnaviv_gpu *gpu;
+
+	if (args->pipe >= ETNA_MAX_PIPES)
+		return -EINVAL;
+
+	gpu = priv->gpu[args->pipe];
+	if (!gpu)
+		return -ENXIO;
+
+	return etnaviv_pm_query_dom(gpu, args);
+}
+
+static int etnaviv_ioctl_pm_query_sig(struct drm_device *dev, void *data,
+	struct drm_file *file)
+{
+	struct etnaviv_drm_private *priv = dev->dev_private;
+	struct drm_etnaviv_pm_signal *args = data;
+	struct etnaviv_gpu *gpu;
+
+	if (args->pipe >= ETNA_MAX_PIPES)
+		return -EINVAL;
+
+	gpu = priv->gpu[args->pipe];
+	if (!gpu)
+		return -ENXIO;
+
+	return etnaviv_pm_query_sig(gpu, args);
 }
 
 static const struct drm_ioctl_desc etnaviv_ioctls[] = {
@@ -464,6 +497,8 @@ static const struct drm_ioctl_desc etnaviv_ioctls[] = {
 	ETNA_IOCTL(WAIT_FENCE,   wait_fence,   DRM_AUTH|DRM_RENDER_ALLOW),
 	ETNA_IOCTL(GEM_USERPTR,  gem_userptr,  DRM_AUTH|DRM_RENDER_ALLOW),
 	ETNA_IOCTL(GEM_WAIT,     gem_wait,     DRM_AUTH|DRM_RENDER_ALLOW),
+	ETNA_IOCTL(PM_QUERY_DOM, pm_query_dom, DRM_AUTH|DRM_RENDER_ALLOW),
+	ETNA_IOCTL(PM_QUERY_SIG, pm_query_sig, DRM_AUTH|DRM_RENDER_ALLOW),
 };
 
 static const struct vm_operations_struct vm_ops = {
@@ -477,9 +512,7 @@ static const struct file_operations fops = {
 	.open               = drm_open,
 	.release            = drm_release,
 	.unlocked_ioctl     = drm_ioctl,
-#ifdef CONFIG_COMPAT
 	.compat_ioctl       = drm_compat_ioctl,
-#endif
 	.poll               = drm_poll,
 	.read               = drm_read,
 	.llseek             = no_llseek,
@@ -487,27 +520,27 @@ static const struct file_operations fops = {
 };
 
 static struct drm_driver etnaviv_drm_driver = {
-	.driver_features    = DRIVER_HAVE_IRQ |
-				DRIVER_GEM |
+	.driver_features    = DRIVER_GEM |
 				DRIVER_PRIME |
 				DRIVER_RENDER,
 	.open               = etnaviv_open,
-	.preclose           = etnaviv_preclose,
+	.postclose           = etnaviv_postclose,
 	.gem_free_object_unlocked = etnaviv_gem_free_object,
 	.gem_vm_ops         = &vm_ops,
 	.prime_handle_to_fd = drm_gem_prime_handle_to_fd,
 	.prime_fd_to_handle = drm_gem_prime_fd_to_handle,
 	.gem_prime_export   = drm_gem_prime_export,
 	.gem_prime_import   = drm_gem_prime_import,
+	.gem_prime_res_obj  = etnaviv_gem_prime_res_obj,
 	.gem_prime_pin      = etnaviv_gem_prime_pin,
 	.gem_prime_unpin    = etnaviv_gem_prime_unpin,
 	.gem_prime_get_sg_table = etnaviv_gem_prime_get_sg_table,
 	.gem_prime_import_sg_table = etnaviv_gem_prime_import_sg_table,
 	.gem_prime_vmap     = etnaviv_gem_prime_vmap,
 	.gem_prime_vunmap   = etnaviv_gem_prime_vunmap,
+	.gem_prime_mmap     = etnaviv_gem_prime_mmap,
 #ifdef CONFIG_DEBUG_FS
 	.debugfs_init       = etnaviv_debugfs_init,
-	.debugfs_cleanup    = etnaviv_debugfs_cleanup,
 #endif
 	.ioctls             = etnaviv_ioctls,
 	.num_ioctls         = DRM_ETNAVIV_NUM_IOCTLS,
@@ -516,7 +549,7 @@ static struct drm_driver etnaviv_drm_driver = {
 	.desc               = "etnaviv DRM",
 	.date               = "20151214",
 	.major              = 1,
-	.minor              = 0,
+	.minor              = 2,
 };
 
 /*
@@ -529,10 +562,8 @@ static int etnaviv_bind(struct device *dev)
 	int ret;
 
 	drm = drm_dev_alloc(&etnaviv_drm_driver, dev);
-	if (!drm)
-		return -ENOMEM;
-
-	drm->platformdev = to_platform_device(dev);
+	if (IS_ERR(drm))
+		return PTR_ERR(drm);
 
 	priv = kzalloc(sizeof(*priv), GFP_KERNEL);
 	if (!priv) {
@@ -541,12 +572,6 @@ static int etnaviv_bind(struct device *dev)
 		goto out_unref;
 	}
 	drm->dev_private = priv;
-
-	priv->wq = alloc_ordered_workqueue("etnaviv", 0);
-	if (!priv->wq) {
-		ret = -ENOMEM;
-		goto out_wq;
-	}
 
 	mutex_init(&priv->gem_lock);
 	INIT_LIST_HEAD(&priv->gem_list);
@@ -569,9 +594,6 @@ static int etnaviv_bind(struct device *dev)
 out_register:
 	component_unbind_all(dev, drm);
 out_bind:
-	flush_workqueue(priv->wq);
-	destroy_workqueue(priv->wq);
-out_wq:
 	kfree(priv);
 out_unref:
 	drm_dev_unref(drm);
@@ -586,15 +608,12 @@ static void etnaviv_unbind(struct device *dev)
 
 	drm_dev_unregister(drm);
 
-	flush_workqueue(priv->wq);
-	destroy_workqueue(priv->wq);
-
 	component_unbind_all(dev, drm);
 
 	drm->dev_private = NULL;
 	kfree(priv);
 
-	drm_put_dev(drm);
+	drm_dev_unref(drm);
 }
 
 static const struct component_master_ops etnaviv_master_ops = {
@@ -631,8 +650,8 @@ static int etnaviv_pdev_probe(struct platform_device *pdev)
 			if (!core_node)
 				break;
 
-			component_match_add(&pdev->dev, &match, compare_of,
-					    core_node);
+			drm_of_component_match_add(&pdev->dev, &match,
+						   compare_of, core_node);
 			of_node_put(core_node);
 		}
 	} else if (dev->platform_data) {

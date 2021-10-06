@@ -11,17 +11,19 @@
 #define EXTENT_MAP_INLINE ((u64)-2)
 #define EXTENT_MAP_DELALLOC ((u64)-1)
 
-#define EXTENT_FLAG_PINNED 0  
+/* bits for the flags field */
+#define EXTENT_FLAG_PINNED 0 /* this entry not yet on disk, don't free it */
 #define EXTENT_FLAG_COMPRESSED 1
-#define EXTENT_FLAG_VACANCY 2  
-#define EXTENT_FLAG_PREALLOC 3  
-#define EXTENT_FLAG_LOGGING 4  
-#define EXTENT_FLAG_FILLING 5  
-#define EXTENT_FLAG_FS_MAPPING 6  
+#define EXTENT_FLAG_VACANCY 2 /* no file extent item found */
+#define EXTENT_FLAG_PREALLOC 3 /* pre-allocated extent */
+#define EXTENT_FLAG_LOGGING 4 /* Logging this extent */
+#define EXTENT_FLAG_FILLING 5 /* Filling in a preallocated extent */
+#define EXTENT_FLAG_FS_MAPPING 6 /* filesystem extent mapping type */
 
 struct extent_map {
 	struct rb_node rb_node;
 
+	/* all of these are in bytes */
 	u64 start;
 	u64 len;
 	u64 mod_start;
@@ -36,6 +38,10 @@ struct extent_map {
 	union {
 		struct block_device *bdev;
 
+		/*
+		 * used for chunk mappings
+		 * flags & EXTENT_FLAG_FS_MAPPING must be set
+		 */
 		struct map_lookup *map_lookup;
 	};
 	atomic_t refs;
@@ -44,12 +50,12 @@ struct extent_map {
 #ifdef MY_ABC_HERE
 	struct list_head free_list;
 	bool bl_increase;
-#endif  
+#endif /* MY_ABC_HERE */
 };
 
 #ifdef MY_ABC_HERE
 struct btrfs_inode;
-#endif  
+#endif /* MY_ABC_HERE */
 struct extent_map_tree {
 	struct rb_root map;
 	struct list_head modified_extents;
@@ -60,7 +66,7 @@ struct extent_map_tree {
 	struct list_head pinned_extents;
 	atomic_t nr_extent_maps;
 	struct btrfs_inode *inode;
-#endif  
+#endif /* MY_ABC_HERE */
 };
 
 static inline int extent_map_in_tree(const struct extent_map *em)

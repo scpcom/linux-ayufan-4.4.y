@@ -389,12 +389,7 @@ retpoline_auto:
 
 #ifdef MY_ABC_HERE
 	if (cmdline_find_option_bool(boot_command_line, "SpectreAll_on") ||
-		cmdline_find_option_bool(boot_command_line, "SpectreV2_on") ||
-		/* For models upgrade to DSM6.2.2 need to pass the old config 
-		 * FIXME The best way is to use updater convert the KPTI config to ALL
-		 * For now the KPTI config is equal to ALL
-		 */
-		cmdline_find_option_bool(boot_command_line, "KPTI_on")) {
+		cmdline_find_option_bool(boot_command_line, "SpectreV2_on")) {
 #endif /* MY_ABC_HERE */
 	/* Initialize Indirect Branch Prediction Barrier if supported */
 	if (boot_cpu_has(X86_FEATURE_IBPB)) {
@@ -455,12 +450,7 @@ static enum ssb_mitigation_cmd __init ssb_parse_cmdline(void)
 
 #ifdef MY_ABC_HERE
 	if (cmdline_find_option_bool(boot_command_line, "SpectreAll_on") ||
-		cmdline_find_option_bool(boot_command_line, "SSBD_on") ||
-		/* For models upgrade to DSM6.2.2 need to pass the old config
-		 * FIXME The best way is to use updater convert the KPTI config to ALL
-		 * For now the KPTI config is equal to ALL
-		 */
-		cmdline_find_option_bool(boot_command_line, "KPTI_on")) {
+		cmdline_find_option_bool(boot_command_line, "SSBD_on")) {
 		return SPEC_STORE_BYPASS_CMD_ON;
 	}
 #endif /* MY_ABC_HERE */

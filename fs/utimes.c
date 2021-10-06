@@ -16,9 +16,20 @@
 
 #ifdef MY_ABC_HERE
 #include "synoacl_int.h"
-#endif  
+#endif /* MY_ABC_HERE */
 #ifdef __ARCH_WANT_SYS_UTIME
 
+/*
+ * sys_utime() can be implemented in user-level using sys_utimes().
+ * Is this for backwards compatibility?  If so, why not move it
+ * into the appropriate arch directory (for those architectures that
+ * need it).
+ */
+
+/* If times==NULL, set access and modification to current time,
+ * must be owner or have write permission.
+ * Else, update from *times, must be owner or super user.
+ */
 SYSCALL_DEFINE2(utime, char __user *, filename, struct utimbuf __user *, times)
 {
 	struct timespec tv[2];
@@ -75,7 +86,11 @@ static int utimes_common(struct path *path, struct timespec *times)
 			newattrs.ia_mtime.tv_nsec = times[1].tv_nsec;
 			newattrs.ia_valid |= ATTR_MTIME_SET;
 		}
-		 
+		/*
+		 * Tell inode_change_ok(), that this is an explicit time
+		 * update, even if neither ATTR_ATIME_SET nor ATTR_MTIME_SET
+		 * were used.
+		 */
 		newattrs.ia_valid |= ATTR_TIMES_SET;
 	} else {
 		newattrs.ia_valid |= ATTR_TOUCH;
@@ -95,6 +110,21 @@ out:
 	return error;
 }
 
+/*
+ * do_utimes - change times on filename or file descriptor
+ * @dfd: open file descriptor, -1 or AT_FDCWD
+ * @filename: path name or NULL
+ * @times: new times or NULL
+ * @flags: zero or more flags (only AT_SYMLINK_NOFOLLOW for the moment)
+ *
+ * If filename is NULL and dfd refers to an open file, then operate on
+ * the file.  Otherwise look up filename, possibly using dfd as a
+ * starting point.
+ *
+ * If times==NULL, set access and modification to current time,
+ * must be owner or have write permission.
+ * Else, update from *times, must be owner or super user.
+ */
 long do_utimes(int dfd, const char __user *filename, struct timespec *times,
 	       int flags)
 {
@@ -153,6 +183,7 @@ SYSCALL_DEFINE4(utimensat, int, dfd, const char __user *, filename,
 		if (copy_from_user(&tstimes, utimes, sizeof(tstimes)))
 			return -EFAULT;
 
+		/* Nothing to do, we must not even check the path.  */
 		if (tstimes[0].tv_nsec == UTIME_OMIT &&
 		    tstimes[1].tv_nsec == UTIME_OMIT)
 			return 0;
@@ -171,6 +202,11 @@ SYSCALL_DEFINE3(futimesat, int, dfd, const char __user *, filename,
 		if (copy_from_user(&times, utimes, sizeof(times)))
 			return -EFAULT;
 
+		/* This test is needed to catch all invalid values.  If we
+		   would test only in do_utimes we would miss those invalid
+		   values truncated by the multiplication with 1000.  Note
+		   that we also catch UTIME_{NOW,OMIT} here which are only
+		   valid for utimensat.  */
 		if (times[0].tv_usec >= 1000000 || times[0].tv_usec < 0 ||
 		    times[1].tv_usec >= 1000000 || times[1].tv_usec < 0)
 			return -EINVAL;
@@ -191,7 +227,15 @@ SYSCALL_DEFINE2(utimes, char __user *, filename,
 }
 
 #ifdef MY_ABC_HERE
- 
+/**
+ * sys_SYNOUtime() is used to update create time.
+ *
+ * @param filename The file to be changed create time.
+ *        times    Create time should be stored in a ctime field.
+ *
+ * @return 0 success
+ *        !0 error
+ */
 SYSCALL_DEFINE2(SYNOUtime, const char __user *, filename, struct timespec __user *, ctime)
 {
 #ifdef MY_ABC_HERE
@@ -223,18 +267,21 @@ SYSCALL_DEFINE2(SYNOUtime, const char __user *, filename, struct timespec __user
 			if (error)
 				goto drop_write;
 		} else if (inode->i_op->syno_bypass_is_synoacl) {
-			 
+			/*
+			 * GlusterFS returns false for [IS|HAS]_SYNOACL, but ACL
+			 * attribute could be checked and got from GlusterFS xlator.
+			 */
 			error = inode->i_op->syno_bypass_is_synoacl(path.dentry,
 					                BYPASS_SYNOACL_SYNOUTIME, -EPERM);
 			if (error)
 				goto drop_write;
 		} else {
-#endif  
+#endif /* MY_ABC_HERE */
 		error = -EPERM;
 		goto drop_write;
 #ifdef MY_ABC_HERE
 		}
-#endif  
+#endif /* MY_ABC_HERE */
 	}
 
 	error = syno_op_set_crtime(path.dentry, &time);
@@ -247,6 +294,6 @@ out:
 	return error;
 #else
 	return -EOPNOTSUPP;
-#endif  
+#endif /* MY_ABC_HERE */
 }
-#endif  
+#endif /* MY_ABC_HERE */

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*#include <asm/io.h>
 void __iomem        *base_mcp_addr = 0;
 void __iomem        *base_tp_addr = 0;

@@ -1,7 +1,17 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
- 
+/*
+ * Seiko Instruments S-35390A RTC Driver
+ *
+ * Copyright (c) 2007 Byron Bradley
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version
+ * 2 of the License, or (at your option) any later version.
+ */
+
 #include <linux/module.h>
 #include <linux/rtc.h>
 #include <linux/i2c.h>
@@ -10,7 +20,7 @@
 #include <linux/slab.h>
 #ifdef MY_DEF_HERE
 #include <linux/acpi.h>
-#endif  
+#endif /* MY_ABC_HERE */
 
 #define S35390A_CMD_STATUS1	0
 #define S35390A_CMD_STATUS2	1
@@ -55,7 +65,7 @@ static const struct acpi_device_id s35390a_acpi_ids[] = {
 	{ }
 };
 MODULE_DEVICE_TABLE(acpi, s35390a_acpi_ids);
-#endif  
+#endif /* MY_ABC_HERE */
 
 struct s35390a {
 	struct i2c_client *client[8];
@@ -141,7 +151,7 @@ static int syno_s35390a_use_12h_mode(struct s35390a *s35390a)
 	buf[0] &= ~S35390A_FLAG_24H;
 	return s35390a_set_reg(s35390a, S35390A_CMD_STATUS1, buf, sizeof(buf));
 }
-#endif  
+#endif /* MY_ABC_HERE */
 
 static char s35390a_hr2reg(struct s35390a *s35390a, int hour)
 {
@@ -187,6 +197,7 @@ static int s35390a_set_datetime(struct i2c_client *client, struct rtc_time *tm)
 	buf[S35390A_BYTE_MINS] = bin2bcd(tm->tm_min);
 	buf[S35390A_BYTE_SECS] = bin2bcd(tm->tm_sec);
 
+	/* This chip expects the bits of each byte to be in reverse order */
 	for (i = 0; i < 7; ++i)
 		buf[i] = bitrev8(buf[i]);
 
@@ -205,6 +216,7 @@ static int s35390a_get_datetime(struct i2c_client *client, struct rtc_time *tm)
 	if (err < 0)
 		return err;
 
+	/* This chip returns the bits of each byte in reverse order */
 	for (i = 0; i < 7; ++i)
 		buf[i] = bitrev8(buf[i]);
 
@@ -235,10 +247,12 @@ static int s35390a_set_alarm(struct i2c_client *client, struct rtc_wkalrm *alm)
 		alm->time.tm_min, alm->time.tm_hour, alm->time.tm_mday,
 		alm->time.tm_mon, alm->time.tm_year, alm->time.tm_wday);
 
+	/* disable interrupt */
 	err = s35390a_set_reg(s35390a, S35390A_CMD_STATUS2, &sts, sizeof(sts));
 	if (err < 0)
 		return err;
 
+	/* clear pending interrupt, if any */
 	err = s35390a_get_reg(s35390a, S35390A_CMD_STATUS1, &sts, sizeof(sts));
 	if (err < 0)
 		return err;
@@ -248,8 +262,10 @@ static int s35390a_set_alarm(struct i2c_client *client, struct rtc_wkalrm *alm)
 	else
 		sts = S35390A_INT2_MODE_NOINTR;
 
+	/* This chip expects the bits of each byte to be in reverse order */
 	sts = bitrev8(sts);
 
+	/* set interupt mode*/
 	err = s35390a_set_reg(s35390a, S35390A_CMD_STATUS2, &sts, sizeof(sts));
 	if (err < 0)
 		return err;
@@ -290,6 +306,7 @@ static int s35390a_read_alarm(struct i2c_client *client, struct rtc_wkalrm *alm)
 	if (err < 0)
 		return err;
 
+	/* This chip returns the bits of each byte in reverse order */
 	for (i = 0; i < 3; ++i) {
 		buf[i] = bitrev8(buf[i]);
 		buf[i] &= ~0x80;
@@ -361,6 +378,7 @@ static int s35390a_probe(struct i2c_client *client,
 	s35390a->client[0] = client;
 	i2c_set_clientdata(client, s35390a);
 
+	/* This chip uses multiple addresses, use dummy devices for them */
 	for (i = 1; i < 8; ++i) {
 		s35390a->client[i] = i2c_new_dummy(client->adapter,
 					client->addr + i);
@@ -384,7 +402,7 @@ static int s35390a_probe(struct i2c_client *client,
 		dev_err(&client->dev, "error use 12-hour mode\n");
 		goto exit_dummy;
 	}
-#endif  
+#endif /* MY_ABC_HERE */
 
 	err = s35390a_disable_test_mode(s35390a);
 	if (err < 0) {
@@ -443,7 +461,7 @@ static struct i2c_driver s35390a_driver = {
 		.name	= "rtc-s35390a",
 #ifdef MY_DEF_HERE
 		.acpi_match_table = ACPI_PTR(s35390a_acpi_ids),
-#endif  
+#endif /* MY_ABC_HERE */
 	},
 	.probe		= s35390a_probe,
 	.remove		= s35390a_remove,

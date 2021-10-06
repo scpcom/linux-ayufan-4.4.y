@@ -1,7 +1,14 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
- 
+/*
+  FUSE: Filesystem in Userspace
+  Copyright (C) 2001-2008  Miklos Szeredi <miklos@szeredi.hu>
+
+  This program can be distributed under the terms of the GNU GPL.
+  See the file COPYING.
+*/
+
 #include "fuse_i.h"
 
 #include <linux/pagemap.h>
@@ -18,7 +25,7 @@
 #include <linux/exportfs.h>
 #ifdef MY_ABC_HERE
 #include <linux/xattr.h>
-#endif  
+#endif /* CONFIG_SYNO_FUSE_ARCHIVE_VESION */
 
 MODULE_AUTHOR("Miklos Szeredi <miklos@szeredi.hu>");
 MODULE_DESCRIPTION("Filesystem in Userspace");
@@ -50,8 +57,10 @@ MODULE_PARM_DESC(max_user_congthresh,
 
 #define FUSE_DEFAULT_BLKSIZE 512
 
+/** Maximum number of outstanding background requests */
 #define FUSE_DEFAULT_MAX_BACKGROUND 12
 
+/** Congestion starts at 75% of maximum */
 #define FUSE_DEFAULT_CONGESTION_THRESHOLD (FUSE_DEFAULT_MAX_BACKGROUND * 3 / 4)
 
 struct fuse_mount_data {
@@ -124,7 +133,7 @@ static void fuse_evict_inode(struct inode *inode)
 	if (AGGREGATE_RECVFILE_DOING & inode->aggregate_flag) {
 		flush_aggregate_recvfile(-1);
 	}
-#endif  
+#endif /* MY_ABC_HERE */
 	truncate_inode_pages_final(&inode->i_data);
 	clear_inode(inode);
 	if (inode->i_sb->s_flags & MS_ACTIVE) {
@@ -144,6 +153,10 @@ static int fuse_remount_fs(struct super_block *sb, int *flags, char *data)
 	return 0;
 }
 
+/*
+ * ino_t is 32-bits on 32-bit arch. We have to squash the 64-bit value down
+ * so that it will fit.
+ */
 static ino_t fuse_squash_ino(u64 ino64)
 {
 	ino_t ino = (ino_t) ino64;
@@ -169,7 +182,7 @@ void fuse_change_attributes_common(struct inode *inode, struct fuse_attr *attr,
 	inode->i_blocks  = attr->blocks;
 	inode->i_atime.tv_sec   = attr->atime;
 	inode->i_atime.tv_nsec  = attr->atimensec;
-	 
+	/* mtime from server may be stale due to local buffered write */
 	if (!fc->writeback_cache || !S_ISREG(inode->i_mode)) {
 		inode->i_mtime.tv_sec   = attr->mtime;
 		inode->i_mtime.tv_nsec  = attr->mtimensec;
@@ -182,6 +195,11 @@ void fuse_change_attributes_common(struct inode *inode, struct fuse_attr *attr,
 	else
 		inode->i_blkbits = inode->i_sb->s_blocksize_bits;
 
+	/*
+	 * Don't set the sticky bit in i_mode, unless we want the VFS
+	 * to check permissions.  This prevents failures due to the
+	 * check in may_delete().
+	 */
 	fi->orig_i_mode = inode->i_mode;
 	if (!(fc->flags & FUSE_DEFAULT_PERMISSIONS))
 		inode->i_mode &= ~S_ISVTX;
@@ -209,7 +227,11 @@ void fuse_change_attributes(struct inode *inode, struct fuse_attr *attr,
 	fuse_change_attributes_common(inode, attr, attr_valid);
 
 	oldsize = inode->i_size;
-	 
+	/*
+	 * In case of writeback_cache enabled, the cached writes beyond EOF
+	 * extend local i_size without keeping userspace server in sync. So,
+	 * attr->size coming from server can be stale. We cannot trust it.
+	 */
 	if (!is_wb || !S_ISREG(inode->i_mode))
 		i_size_write(inode, attr->size);
 	spin_unlock(&fc->lock);
@@ -222,7 +244,7 @@ void fuse_change_attributes(struct inode *inode, struct fuse_attr *attr,
 			if (AGGREGATE_RECVFILE_DOING & inode->aggregate_flag) {
 				flush_aggregate_recvfile(-1);
 			}
-#endif  
+#endif /* MY_ABC_HERE */
 			truncate_pagecache(inode, attr->size);
 			inval = true;
 		} else if (fc->auto_inval_data) {
@@ -231,6 +253,10 @@ void fuse_change_attributes(struct inode *inode, struct fuse_attr *attr,
 				.tv_nsec = attr->mtimensec,
 			};
 
+			/*
+			 * Auto inval mode also checks and invalidates if mtime
+			 * has changed.
+			 */
 			if (!timespec_equal(&old_mtime, &new_mtime))
 				inval = true;
 		}
@@ -301,7 +327,7 @@ struct inode *fuse_iget(struct super_block *sb, u64 nodeid,
 		fuse_init_inode(inode, attr);
 		unlock_new_inode(inode);
 	} else if ((inode->i_mode ^ attr->mode) & S_IFMT) {
-		 
+		/* Inode has changed type, any I/O on the old should fail */
 		make_bad_inode(inode);
 		iput(inode);
 		goto retry;
@@ -345,7 +371,7 @@ static void fuse_umount_begin(struct super_block *sb)
 {
 #ifdef MY_ABC_HERE
 	flush_aggregate_recvfile(-1);
-#endif  
+#endif /* MY_ABC_HERE */
 	fuse_abort_conn(get_fuse_conn_super(sb));
 }
 
@@ -395,7 +421,7 @@ static void convert_fuse_statfs(struct kstatfs *stbuf, struct fuse_kstatfs *attr
 	stbuf->f_files   = attr->files;
 	stbuf->f_ffree   = attr->ffree;
 	stbuf->f_namelen = attr->namelen;
-	 
+	/* fsid is left zero */
 }
 
 static int fuse_statfs(struct dentry *dentry, struct kstatfs *buf)
@@ -625,7 +651,7 @@ static int fuse_syno_get_sb_archive_ver(struct super_block *sb, u32 *version)
 
 	return err;
 }
-#endif  
+#endif /* MY_ABC_HERE */
 
 void fuse_conn_init(struct fuse_conn *fc)
 {
@@ -713,7 +739,7 @@ static struct dentry *fuse_get_dentry(struct super_block *sb,
 #else
 		err = fuse_lookup_name(sb, handle->nodeid, &name, &outarg,
 				       &inode);
-#endif  
+#endif /* MY_ABC_HERE */
 		if (err && err != -ENOENT)
 			goto out_err;
 		if (err || !inode) {
@@ -821,7 +847,7 @@ static struct dentry *fuse_get_parent(struct dentry *child)
 #else
 	err = fuse_lookup_name(child_inode->i_sb, get_node_id(child_inode),
 			       &name, &outarg, &inode);
-#endif  
+#endif /* MY_ABC_HERE */
 	if (err) {
 		if (err == -ENOENT)
 			return ERR_PTR(-ESTALE);
@@ -856,7 +882,7 @@ static const struct super_operations fuse_super_operations = {
 #ifdef MY_ABC_HERE
 	.syno_set_sb_archive_ver = fuse_syno_set_sb_archive_ver,
 	.syno_get_sb_archive_ver = fuse_syno_get_sb_archive_ver,
-#endif  
+#endif /* MY_ABC_HERE */
 
 };
 
@@ -935,7 +961,7 @@ static void process_init_reply(struct fuse_conn *fc, struct fuse_req *req)
 			if (arg->flags & FUSE_ATOMIC_O_TRUNC)
 				fc->atomic_o_trunc = 1;
 			if (arg->minor >= 9) {
-				 
+				/* LOOKUP has dependency on proto version */
 				if (arg->flags & FUSE_EXPORT_SUPPORT)
 					fc->export_support = 1;
 			}
@@ -990,7 +1016,9 @@ static void fuse_send_init(struct fuse_conn *fc, struct fuse_req *req)
 	req->in.args[0].size = sizeof(*arg);
 	req->in.args[0].value = arg;
 	req->out.numargs = 1;
-	 
+	/* Variable length argument used for backward compatibility
+	   with interface version < 7.5.  Rest of init_out is zeroed
+	   by do_get_request(), so a short reply is not a problem */
 	req->out.argvar = 1;
 	req->out.args[0].size = sizeof(struct fuse_init_out);
 	req->out.args[0].value = &req->misc.init_out;
@@ -1010,7 +1038,7 @@ static int fuse_bdi_init(struct fuse_conn *fc, struct super_block *sb)
 
 	fc->bdi.name = "fuse";
 	fc->bdi.ra_pages = (VM_MAX_READAHEAD * 1024) / PAGE_CACHE_SIZE;
-	 
+	/* fuse does it's own writeback accounting */
 	fc->bdi.capabilities = BDI_CAP_NO_ACCT_WB | BDI_CAP_STRICTLIMIT;
 
 	err = bdi_init(&fc->bdi);
@@ -1029,6 +1057,18 @@ static int fuse_bdi_init(struct fuse_conn *fc, struct super_block *sb)
 	if (err)
 		return err;
 
+	/*
+	 * For a single fuse filesystem use max 1% of dirty +
+	 * writeback threshold.
+	 *
+	 * This gives about 1M of write buffer for memory maps on a
+	 * machine with 1G and 10% dirty_ratio, which should be more
+	 * than enough.
+	 *
+	 * Privileged users can raise it by writing to
+	 *
+	 *    /sys/class/bdi/<bdi>/max_ratio
+	 */
 	bdi_set_max_ratio(&fc->bdi, 1);
 
 	return 0;
@@ -1133,6 +1173,7 @@ static int fuse_fill_super(struct super_block *sb, void *data, int silent)
 
 	sb->s_bdi = &fc->bdi;
 
+	/* Handle umasking inside the fuse code */
 	if (sb->s_flags & MS_POSIXACL)
 		fc->dont_mask = 1;
 	sb->s_flags |= MS_POSIXACL;
@@ -1142,6 +1183,7 @@ static int fuse_fill_super(struct super_block *sb, void *data, int silent)
 	fc->group_id = d.group_id;
 	fc->max_read = max_t(unsigned, 4096, d.max_read);
 
+	/* Used by get_root_inode() */
 	sb->s_fs_info = fc;
 
 	err = -ENOMEM;
@@ -1149,7 +1191,7 @@ static int fuse_fill_super(struct super_block *sb, void *data, int silent)
 	root_dentry = d_make_root(root);
 	if (!root_dentry)
 		goto err_dev_free;
-	 
+	/* only now - we want root dentry with NULL ->d_op */
 	sb->s_d_op = &fuse_dentry_operations;
 
 	init_req = fuse_request_alloc(0);
@@ -1176,7 +1218,11 @@ static int fuse_fill_super(struct super_block *sb, void *data, int silent)
 	sb->s_root = root_dentry;
 	file->private_data = fud;
 	mutex_unlock(&fuse_mutex);
-	 
+	/*
+	 * atomic_dec_and_test() in fput() provides the necessary
+	 * memory barrier for file->private_data to be visible on all
+	 * CPUs after this
+	 */
 	fput(file);
 
 	fuse_send_init(fc, init_req);
@@ -1321,6 +1367,10 @@ static void fuse_fs_cleanup(void)
 	unregister_filesystem(&fuse_fs_type);
 	unregister_fuseblk();
 
+	/*
+	 * Make sure all delayed rcu free inodes are flushed before we
+	 * destroy cache.
+	 */
 	rcu_barrier();
 	kmem_cache_destroy(fuse_inode_cachep);
 }

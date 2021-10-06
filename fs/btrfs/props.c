@@ -1,7 +1,24 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
- 
+/*
+ * Copyright (C) 2014 Filipe David Borba Manana <fdmanana@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public
+ * License v2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public
+ * License along with this program; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA 021110-1307, USA.
+ */
+
 #include <linux/hashtable.h>
 #include "props.h"
 #include "btrfs_inode.h"
@@ -289,7 +306,7 @@ static int inherit_props(struct btrfs_trans_handle *trans,
 #ifdef MY_ABC_HERE
 #else
 	struct btrfs_root *root = BTRFS_I(inode)->root;
-#endif  
+#endif /* MY_ABC_HERE */
 	int ret;
 	int i;
 
@@ -303,7 +320,7 @@ static int inherit_props(struct btrfs_trans_handle *trans,
 #ifdef MY_ABC_HERE
 #else
 		u64 num_bytes;
-#endif  
+#endif /* MY_ABC_HERE */
 
 		if (!h->inheritable)
 			continue;
@@ -319,13 +336,13 @@ static int inherit_props(struct btrfs_trans_handle *trans,
 					  num_bytes, BTRFS_RESERVE_NO_FLUSH);
 		if (ret)
 			goto out;
-#endif  
+#endif /* MY_ABC_HERE */
 		ret = __btrfs_set_prop(trans, inode, h->xattr_name,
 				       value, strlen(value), 0);
 #ifdef MY_ABC_HERE
 #else
 		btrfs_block_rsv_release(root, trans->block_rsv, num_bytes);
-#endif  
+#endif /* MY_ABC_HERE */
 		if (ret)
 			goto out;
 	}

@@ -106,9 +106,11 @@ gf108_gr_pack_mmio[] = {
 static const struct gf100_gr_func
 gf108_gr = {
 	.init = gf100_gr_init,
+	.init_gpc_mmu = gf100_gr_init_gpc_mmu,
 	.mmio = gf108_gr_pack_mmio,
 	.fecs.ucode = &gf100_gr_fecs_ucode,
 	.gpccs.ucode = &gf100_gr_gpccs_ucode,
+	.rops = gf100_gr_rops,
 	.grctx = &gf108_grctx,
 	.sclass = {
 		{ -1, -1, FERMI_TWOD_A },

@@ -7036,9 +7036,9 @@ static int rtl_rx(struct net_device *dev, struct rtl8169_private *tp, u32 budget
 			if (status & RxCRC)
 				dev->stats.rx_crc_errors++;
 			if (status & RxFOVF) {
-#ifdef MY_DEF_HERE
+#ifdef MY_ABC_HERE
 				printk_once(KERN_ERR "r8169_reset_task: reset with fifo errors, print once.\n");
-#endif /* MY_DEF_HERE */
+#endif /* MY_ABC_HERE */
 				rtl_schedule_task(tp, RTL_FLAG_TASK_RESET_PENDING);
 				dev->stats.rx_fifo_errors++;
 			}
@@ -7111,9 +7111,9 @@ process_pkt:
 	tp->dirty_rx += delta;
 
 	if (tp->dirty_rx + NUM_RX_DESC == tp->cur_rx){
-#ifdef MY_DEF_HERE
+#ifdef MY_ABC_HERE
 		printk_once(KERN_ERR "r8169_reset_task: reset with rx buffers exhausted, print once.\n");
-#endif /* MY_DEF_HERE */
+#endif /* MY_ABC_HERE */
 		rtl_schedule_task(tp, RTL_FLAG_TASK_RESET_PENDING);
 #ifdef MY_DEF_HERE
 		tp->rx_buffer_exhausted_count ++;
@@ -7201,9 +7201,9 @@ static void rtl_slow_event_work(struct rtl8169_private *tp)
 				writel(readl(tp->mmio_clkaddr + 0x104) & ~0x00200000, (tp->mmio_clkaddr + 0x104));
 			}
 */
-#ifdef MY_DEF_HERE
+#ifdef MY_ABC_HERE
 			printk_once(KERN_ERR "r8169_reset_task: reset with slow event.\n");
-#endif /* MY_DEF_HERE */
+#endif /* MY_ABC_HERE */
 			rtl_schedule_task(tp, RTL_FLAG_TASK_RESET_PENDING);
 		}
 		else

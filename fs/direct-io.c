@@ -1195,6 +1195,10 @@ do_blockdev_direct_IO(struct kiocb *iocb, struct inode *inode,
 
 	dio->inode = inode;
 	dio->rw = iov_iter_rw(iter) == WRITE ? WRITE_ODIRECT : READ;
+#ifdef MY_ABC_HERE
+	if ((dio->rw == WRITE_ODIRECT) && (flags & DIO_SKIP_DIO_COUNT))
+		dio->rw |= REQ_FUA;
+#endif
 
 	/*
 	 * For AIO O_(D)SYNC writes we need to defer completions to a workqueue

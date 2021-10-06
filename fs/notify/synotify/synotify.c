@@ -7,7 +7,7 @@
 #include <linux/fsnotify_backend.h>
 #include <linux/init.h>
 #include <linux/jiffies.h>
-#include <linux/kernel.h>  
+#include <linux/kernel.h> /* UINT_MAX */
 #include <linux/mount.h>
 #include <linux/sched.h>
 #include <linux/types.h>
@@ -17,6 +17,13 @@
 
 #include "synotify.h"
 
+/*
+   Fetch full mount point path,
+   It traverse vfsmount from down to up by following mnt_parent
+   @in: struct vfsmount: vfsmount structure, size_t buf_len: path buffer length
+   @out: mnt_full_path: full path of vfsmount struct
+   @return: -1: failed, 0 : success
+ */
 static int syno_fetch_mountpoint_fullpath(struct vfsmount *mnt, size_t buf_len, char *mnt_full_path)
 {
 	int ret = -1;
@@ -168,6 +175,7 @@ static bool should_merge(struct fsnotify_event *old_fsn, struct fsnotify_event *
 	return false;
 }
 
+/* and the list better be locked by something too! */
 static int synotify_merge(struct list_head *list,
 					     struct fsnotify_event *event)
 {
@@ -183,6 +191,7 @@ static bool synotify_should_send_event(struct fsnotify_mark *vfsmnt_mark,
 {
 	__u32 marks_mask;
 
+	/* if we don't have enough info to send an event to userspace say no */
 	if (data_type != FSNOTIFY_EVENT_SYNO && data_type != FSNOTIFY_EVENT_PATH)
 		return false;
 
@@ -283,4 +292,4 @@ const struct fsnotify_ops synotify_fsnotify_ops = {
 	.free_event = synotify_free_event,
 	.fetch_name = synotify_fetch_name,
 };
-#endif  
+#endif /* MY_ABC_HERE */

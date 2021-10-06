@@ -8,8 +8,11 @@
 #include <linux/synobios.h>
 #include <linux/delay.h>
 #ifdef MY_ABC_HERE
+#include <linux/libata.h>
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
 #include <linux/synosata.h>
-#endif  
+#endif /* MY_ABC_HERE */
 
 MODULE_LICENSE("Proprietary");
 
@@ -21,7 +24,7 @@ MODULE_LICENSE("Proprietary");
 
 #ifdef MY_DEF_HERE
 extern long g_hdd_hotplug;
-#endif  
+#endif /* MY_ABC_HERE */
 
 #define GPIO_UNDEF				0xFF
 
@@ -31,7 +34,7 @@ extern int SYNO_CTRL_HDD_POWERON(int index, int value);
 extern int SYNO_CHECK_HDD_DETECT(int index);
 #else
 extern int SYNO_CHECK_HDD_PRESENT(int index);
-#endif  
+#endif /* MY_DEF_HERE */
 
 typedef struct __SynoHddMonData {
 	int iProcessingIdx;
@@ -55,7 +58,7 @@ static int syno_hddmon_data_init(SynoHddMonData_t *pData)
 
 #ifdef MY_DEF_HERE
 	pData->blHddHotPlugSupport = g_hdd_hotplug;
-#endif  
+#endif /* MY_DEF_HERE */
 
 #ifdef MY_DEF_HERE
 	if (gSynoHddPowerupSeq) {
@@ -63,9 +66,9 @@ static int syno_hddmon_data_init(SynoHddMonData_t *pData)
 	} else {
 		pData->iMaxHddNum = 0;
 	}
-#else  
+#else /* MY_ABC_HERE */
 	pData->iMaxHddNum = g_syno_hdd_powerup_seq;
-#endif  
+#endif /* MY_ABC_HERE */
 
 	if (!SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER()) {
 		pData->blHddHotPlugSupport = 0;
@@ -79,6 +82,40 @@ static int syno_hddmon_data_init(SynoHddMonData_t *pData)
 END:
 	return iRet;
 }
+
+#ifdef MY_ABC_HERE
+extern int iIsSynoIRQOff(const struct ata_port *ap);
+
+static int syno_hddmon_is_disk_deepsleep(int iDiskIdx, SynoHddMonData_t *pData)
+{
+	struct Scsi_Host *pScsiHost = NULL;
+	struct ata_port  *pAtaPrt = NULL;
+	int iErr = -1;
+
+	if (NULL == pData) {
+		goto END;
+	}
+
+	if (0 > iDiskIdx || pData->iMaxHddNum < iDiskIdx) {
+		iErr = -EINVAL;
+		goto END;
+	}
+
+	if (NULL == (pScsiHost = scsi_host_lookup(iDiskIdx))) {
+		iErr = -ENODEV;
+		goto END;
+	}
+
+	if (NULL == (pAtaPrt = ata_shost_to_port(pScsiHost))) {
+		iErr = -ENODEV;
+		goto END;
+	}
+
+	iErr = iIsSynoIRQOff(pAtaPrt);
+END:
+	return iErr;
+}
+#endif /* MY_ABC_HERE */
 
 static int syno_hddmon_unplug_monitor(void *args)
 {
@@ -108,7 +145,7 @@ static int syno_hddmon_unplug_monitor(void *args)
 			iPrzPinVal = SYNO_CHECK_HDD_DETECT(iIdx);
 #else
 			iPrzPinVal = SYNO_CHECK_HDD_PRESENT(iIdx);
-#endif  
+#endif /* MY_ABC_HERE */
 
 			if (iPrzPinVal) {
 				continue;
@@ -150,12 +187,18 @@ static void syno_hddmon_task(SynoHddMonData_t *pData)
 		iPrzPinVal = SYNO_CHECK_HDD_DETECT(iIdx);
 #else
 		iPrzPinVal = SYNO_CHECK_HDD_PRESENT(iIdx);
-#endif  
+#endif /* MY_ABC_HERE */
 
 		if (pData->blHddEnStat[iIdx-1] != iPrzPinVal) {
+#ifdef MY_ABC_HERE
+			/*if the disk is plugged in while deep-sleep, do nothing*/
+			if (iPrzPinVal && syno_hddmon_is_disk_deepsleep(iIdx-1, pData)) {
+				continue;
+			}
+#endif /* MY_ABC_HERE */
 
 			if (iPrzPinVal) {
-				 
+				//while starting a port, monitoring other ports for the disks unplugged
 				pUnplugMonitor = kthread_run(syno_hddmon_unplug_monitor, pData, SYNO_HDDMON_UPLG_STR);
 			}
 
@@ -199,12 +242,16 @@ static void syno_hddmon_sync(SynoHddMonData_t *pData)
 		iPrzPinVal = SYNO_CHECK_HDD_PRESENT(iIdx);
 #endif
 
+		/* HDD Enable pins must be high just after boot-up,
+		 * so turns the pins to low if the hdds do not present.
+		 */
 		if (!iPrzPinVal) {
 			mdelay(200);
 			SYNO_CTRL_HDD_POWERON(iIdx, iPrzPinVal);
 			pData->blHddEnStat[iIdx-1] = iPrzPinVal;
 		}
 
+		/*sync the states*/
 		pData->blHddEnStat[iIdx-1] = iPrzPinVal;
 
 	}
@@ -254,6 +301,7 @@ static int __init syno_hddmon_init(void)
 
 	syno_hddmon_sync(&synoHddMonData);
 
+	/* processing */
 	pHddPrzPolling = kthread_create(syno_hddmon_routine, &synoHddMonData, SYNO_HDDMON_STR);
 
 	if (IS_ERR(pHddPrzPolling)) {

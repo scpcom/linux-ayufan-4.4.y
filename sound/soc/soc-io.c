@@ -1,16 +1,36 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
- 
+/*
+ * soc-io.c  --  ASoC register I/O helpers
+ *
+ * Copyright 2009-2011 Wolfson Microelectronics PLC.
+ *
+ * Author: Mark Brown <broonie@opensource.wolfsonmicro.com>
+ *
+ *  This program is free software; you can redistribute  it and/or modify it
+ *  under  the terms of  the GNU General  Public License as published by the
+ *  Free Software Foundation;  either version 2 of the  License, or (at your
+ *  option) any later version.
+ */
+
 #include <linux/i2c.h>
 #include <linux/spi/spi.h>
 #if defined(MY_ABC_HERE)
-#else  
+#else /* MY_ABC_HERE */
 #include <linux/regmap.h>
-#endif  
+#endif /* MY_ABC_HERE */
 #include <linux/export.h>
 #include <sound/soc.h>
 
+/**
+ * snd_soc_component_read() - Read register value
+ * @component: Component to read from
+ * @reg: Register to read
+ * @val: Pointer to where the read value is stored
+ *
+ * Return: 0 on success, a negative error code otherwise.
+ */
 int snd_soc_component_read(struct snd_soc_component *component,
 	unsigned int reg, unsigned int *val)
 {
@@ -27,6 +47,14 @@ int snd_soc_component_read(struct snd_soc_component *component,
 }
 EXPORT_SYMBOL_GPL(snd_soc_component_read);
 
+/**
+ * snd_soc_component_write() - Write register value
+ * @component: Component to write to
+ * @reg: Register to write
+ * @val: Value to write to the register
+ *
+ * Return: 0 on success, a negative error code otherwise.
+ */
 int snd_soc_component_write(struct snd_soc_component *component,
 	unsigned int reg, unsigned int val)
 {
@@ -65,6 +93,17 @@ out_unlock:
 	return ret;
 }
 
+/**
+ * snd_soc_component_update_bits() - Perform read/modify/write cycle
+ * @component: Component to update
+ * @reg: Register to update
+ * @mask: Mask that specifies which bits to update
+ * @val: New value for the bits specified by mask
+ *
+ * Return: 1 if the operation was successful and the value of the register
+ * changed, 0 if the operation was successful, but the value did not change.
+ * Returns a negative error code otherwise.
+ */
 int snd_soc_component_update_bits(struct snd_soc_component *component,
 	unsigned int reg, unsigned int mask, unsigned int val)
 {
@@ -84,6 +123,23 @@ int snd_soc_component_update_bits(struct snd_soc_component *component,
 }
 EXPORT_SYMBOL_GPL(snd_soc_component_update_bits);
 
+/**
+ * snd_soc_component_update_bits_async() - Perform asynchronous
+ *  read/modify/write cycle
+ * @component: Component to update
+ * @reg: Register to update
+ * @mask: Mask that specifies which bits to update
+ * @val: New value for the bits specified by mask
+ *
+ * This function is similar to snd_soc_component_update_bits(), but the update
+ * operation is scheduled asynchronously. This means it may not be completed
+ * when the function returns. To make sure that all scheduled updates have been
+ * completed snd_soc_component_async_complete() must be called.
+ *
+ * Return: 1 if the operation was successful and the value of the register
+ * changed, 0 if the operation was successful, but the value did not change.
+ * Returns a negative error code otherwise.
+ */
 int snd_soc_component_update_bits_async(struct snd_soc_component *component,
 	unsigned int reg, unsigned int mask, unsigned int val)
 {
@@ -103,6 +159,13 @@ int snd_soc_component_update_bits_async(struct snd_soc_component *component,
 }
 EXPORT_SYMBOL_GPL(snd_soc_component_update_bits_async);
 
+/**
+ * snd_soc_component_async_complete() - Ensure asynchronous I/O has completed
+ * @component: Component for which to wait
+ *
+ * This function blocks until all asynchronous I/O which has previously been
+ * scheduled using snd_soc_component_update_bits_async() has completed.
+ */
 void snd_soc_component_async_complete(struct snd_soc_component *component)
 {
 	if (component->regmap)
@@ -110,6 +173,18 @@ void snd_soc_component_async_complete(struct snd_soc_component *component)
 }
 EXPORT_SYMBOL_GPL(snd_soc_component_async_complete);
 
+/**
+ * snd_soc_component_test_bits - Test register for change
+ * @component: component
+ * @reg: Register to test
+ * @mask: Mask that specifies which bits to test
+ * @value: Value to test against
+ *
+ * Tests a register with a new value and checks if the new value is
+ * different from the old value.
+ *
+ * Return: 1 for change, otherwise 0.
+ */
 int snd_soc_component_test_bits(struct snd_soc_component *component,
 	unsigned int reg, unsigned int mask, unsigned int value)
 {
@@ -144,6 +219,17 @@ int snd_soc_write(struct snd_soc_codec *codec, unsigned int reg,
 }
 EXPORT_SYMBOL_GPL(snd_soc_write);
 
+/**
+ * snd_soc_update_bits - update codec register bits
+ * @codec: audio codec
+ * @reg: codec register
+ * @mask: register mask
+ * @value: new value
+ *
+ * Writes new register value.
+ *
+ * Returns 1 for change, 0 for no change, or negative error code.
+ */
 int snd_soc_update_bits(struct snd_soc_codec *codec, unsigned int reg,
 				unsigned int mask, unsigned int value)
 {
@@ -152,6 +238,18 @@ int snd_soc_update_bits(struct snd_soc_codec *codec, unsigned int reg,
 }
 EXPORT_SYMBOL_GPL(snd_soc_update_bits);
 
+/**
+ * snd_soc_test_bits - test register for change
+ * @codec: audio codec
+ * @reg: codec register
+ * @mask: register mask
+ * @value: new value
+ *
+ * Tests a register with a new value and checks if the new value is
+ * different from the old value.
+ *
+ * Returns 1 for change else 0.
+ */
 int snd_soc_test_bits(struct snd_soc_codec *codec, unsigned int reg,
 				unsigned int mask, unsigned int value)
 {

@@ -1,7 +1,16 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
- 
+/*
+  File: linux/xattr.h
+
+  Extended attributes handling.
+
+  Copyright (C) 2001 by Andreas Gruenbacher <a.gruenbacher@computer.org>
+  Copyright (c) 2001-2002 Silicon Graphics, Inc.  All Rights Reserved.
+  Copyright (c) 2004 Red Hat, Inc., James Morris <jmorris@redhat.com>
+*/
+
 #include <linux/libc-compat.h>
 
 #ifndef _UAPI_LINUX_XATTR_H
@@ -10,10 +19,11 @@
 #if __UAPI_DEF_XATTR
 #define __USE_KERNEL_XATTR_DEFS
 
-#define XATTR_CREATE	0x1	 
-#define XATTR_REPLACE	0x2	 
+#define XATTR_CREATE	0x1	/* set value, fail if attr already exists */
+#define XATTR_REPLACE	0x2	/* set value, fail if attr does not exist */
 #endif
 
+/* Namespaces */
 #define XATTR_OS2_PREFIX "os2."
 #define XATTR_OS2_PREFIX_LEN (sizeof(XATTR_OS2_PREFIX) - 1)
 
@@ -21,7 +31,7 @@
 #define XATTR_MAC_OSX_PREFIX ""
 #else
 #define XATTR_MAC_OSX_PREFIX "osx."
-#endif  
+#endif /* MY_ABC_HERE */
 #define XATTR_MAC_OSX_PREFIX_LEN (sizeof(XATTR_MAC_OSX_PREFIX) - 1)
 
 #define XATTR_BTRFS_PREFIX "btrfs."
@@ -42,19 +52,20 @@
 #ifdef MY_ABC_HERE
 #define XATTR_SYNO_PREFIX "syno."
 #define XATTR_SYNO_PREFIX_LEN (sizeof (XATTR_SYNO_PREFIX) - 1)
-#endif  
+#endif /* MY_ABC_HERE */
 
 #ifdef MY_ABC_HERE
 #define XATTR_SYNO_ARCHIVE_BIT "archive_bit"
-#endif  
+#endif /* MY_ABC_HERE */
 #ifdef MY_ABC_HERE
 #define XATTR_SYNO_ARCHIVE_VERSION "archive_version"
 #define XATTR_SYNO_ARCHIVE_VERSION_VOLUME "archive_version_volume"
-#endif  
+#endif /* MY_ABC_HERE */
 #ifdef MY_ABC_HERE
 #define XATTR_SYNO_CREATE_TIME "create_time"
-#endif  
+#endif /* MY_ABC_HERE */
 
+/* Security namespace */
 #define XATTR_EVM_SUFFIX "evm"
 #define XATTR_NAME_EVM XATTR_SECURITY_PREFIX XATTR_EVM_SUFFIX
 
@@ -85,4 +96,4 @@
 #define XATTR_POSIX_ACL_DEFAULT  "posix_acl_default"
 #define XATTR_NAME_POSIX_ACL_DEFAULT XATTR_SYSTEM_PREFIX XATTR_POSIX_ACL_DEFAULT
 
-#endif  
+#endif /* _UAPI_LINUX_XATTR_H */

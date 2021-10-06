@@ -785,20 +785,12 @@ static bool can_stop_idle_tick(int cpu, struct tick_sched *ts)
 	return true;
 }
 
-#ifdef MY_ABC_HERE
-static void __tick_nohz_idle_stop_tick(struct tick_sched *ts)
-#else
 static void __tick_nohz_idle_enter(struct tick_sched *ts)
-#endif
 {
 	ktime_t now, expires;
 	int cpu = smp_processor_id();
 
-#ifdef MY_ABC_HERE
-	now = ts->idle_entrytime;
-#else
 	now = tick_nohz_start_idle(ts);
-#endif
 
 	if (can_stop_idle_tick(cpu, ts)) {
 		int was_stopped = ts->tick_stopped;
@@ -815,13 +807,6 @@ static void __tick_nohz_idle_enter(struct tick_sched *ts)
 			ts->idle_jiffies = ts->last_jiffies;
 	}
 }
-
-#ifdef MY_ABC_HERE
-void tick_nohz_idle_stop_tick(void)
-{
-	__tick_nohz_idle_stop_tick(this_cpu_ptr(&tick_cpu_sched));
-}
-#endif
 
 /**
  * tick_nohz_idle_enter - stop the idle tick from the idle task
@@ -853,11 +838,7 @@ void tick_nohz_idle_enter(void)
 
 	ts = this_cpu_ptr(&tick_cpu_sched);
 	ts->inidle = 1;
-#ifdef MY_ABC_HERE
-	tick_nohz_start_idle(ts);
-#else
 	__tick_nohz_idle_enter(ts);
-#endif
 
 	local_irq_enable();
 }
@@ -874,15 +855,10 @@ void tick_nohz_irq_exit(void)
 {
 	struct tick_sched *ts = this_cpu_ptr(&tick_cpu_sched);
 
-	if (ts->inidle) {
-#ifdef MY_ABC_HERE
-		tick_nohz_start_idle(ts);
-#else
+	if (ts->inidle)
 		__tick_nohz_idle_enter(ts);
-#endif
-	} else {
+	else
 		tick_nohz_full_update_tick(ts);
-	}
 }
 
 /**
@@ -917,18 +893,6 @@ static void tick_nohz_account_idle_ticks(struct tick_sched *ts)
 		account_idle_ticks(ticks);
 #endif
 }
-
-#ifdef MY_ABC_HERE
-void tick_nohz_idle_restart_tick(void)
-{
-	struct tick_sched *ts = this_cpu_ptr(&tick_cpu_sched);
-
-	if (ts->tick_stopped) {
-		tick_nohz_restart_sched_tick(ts, ktime_get());
-		tick_nohz_account_idle_ticks(ts);
-	}
-}
-#endif
 
 /**
  * tick_nohz_idle_exit - restart the idle tick from the idle task

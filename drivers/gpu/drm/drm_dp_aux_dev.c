@@ -32,9 +32,12 @@
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/uaccess.h>
+#include <linux/uio.h>
 #include <drm/drm_dp_helper.h>
 #include <drm/drm_crtc.h>
 #include <drm/drmP.h>
+
+#include "drm_crtc_helper_internal.h"
 
 struct drm_dp_aux_dev {
 	unsigned index;
@@ -138,89 +141,83 @@ static loff_t auxdev_llseek(struct file *file, loff_t offset, int whence)
 	return fixed_size_llseek(file, offset, whence, AUX_MAX_OFFSET);
 }
 
-static ssize_t auxdev_read(struct file *file, char __user *buf, size_t count,
-			   loff_t *offset)
+static ssize_t auxdev_read_iter(struct kiocb *iocb, struct iov_iter *to)
 {
-	size_t bytes_pending, num_bytes_processed = 0;
-	struct drm_dp_aux_dev *aux_dev = file->private_data;
+	struct drm_dp_aux_dev *aux_dev = iocb->ki_filp->private_data;
+	loff_t pos = iocb->ki_pos;
 	ssize_t res = 0;
 
 	if (!atomic_inc_not_zero(&aux_dev->usecount))
 		return -ENODEV;
 
-	bytes_pending = min((loff_t)count, AUX_MAX_OFFSET - (*offset));
+	iov_iter_truncate(to, AUX_MAX_OFFSET - pos);
 
-	if (!access_ok(VERIFY_WRITE, buf, bytes_pending)) {
-		res = -EFAULT;
-		goto out;
+	while (iov_iter_count(to)) {
+		uint8_t buf[DP_AUX_MAX_PAYLOAD_BYTES];
+		ssize_t todo = min(iov_iter_count(to), sizeof(buf));
+
+		if (signal_pending(current)) {
+			res = -ERESTARTSYS;
+			break;
+		}
+
+		res = drm_dp_dpcd_read(aux_dev->aux, pos, buf, todo);
+		if (res <= 0)
+			break;
+
+		if (copy_to_iter(buf, res, to) != res) {
+			res = -EFAULT;
+			break;
+		}
+
+		pos += res;
 	}
 
-	while (bytes_pending > 0) {
-		uint8_t localbuf[DP_AUX_MAX_PAYLOAD_BYTES];
-		ssize_t todo = min_t(size_t, bytes_pending, sizeof(localbuf));
+	if (pos != iocb->ki_pos)
+		res = pos - iocb->ki_pos;
+	iocb->ki_pos = pos;
 
-		res = drm_dp_dpcd_read(aux_dev->aux, *offset, localbuf, todo);
-		if (res <= 0) {
-			res = num_bytes_processed ? num_bytes_processed : res;
-			goto out;
-		}
-		if (__copy_to_user(buf + num_bytes_processed, localbuf, res)) {
-			res = num_bytes_processed ?
-				num_bytes_processed : -EFAULT;
-			goto out;
-		}
-		bytes_pending -= res;
-		*offset += res;
-		num_bytes_processed += res;
-		res = num_bytes_processed;
-	}
-
-out:
 	atomic_dec(&aux_dev->usecount);
 	wake_up_atomic_t(&aux_dev->usecount);
 	return res;
 }
 
-static ssize_t auxdev_write(struct file *file, const char __user *buf,
-			    size_t count, loff_t *offset)
+static ssize_t auxdev_write_iter(struct kiocb *iocb, struct iov_iter *from)
 {
-	size_t bytes_pending, num_bytes_processed = 0;
-	struct drm_dp_aux_dev *aux_dev = file->private_data;
+	struct drm_dp_aux_dev *aux_dev = iocb->ki_filp->private_data;
+	loff_t pos = iocb->ki_pos;
 	ssize_t res = 0;
 
 	if (!atomic_inc_not_zero(&aux_dev->usecount))
 		return -ENODEV;
 
-	bytes_pending = min((loff_t)count, AUX_MAX_OFFSET - *offset);
+	iov_iter_truncate(from, AUX_MAX_OFFSET - pos);
 
-	if (!access_ok(VERIFY_READ, buf, bytes_pending)) {
-		res = -EFAULT;
-		goto out;
-	}
+	while (iov_iter_count(from)) {
+		uint8_t buf[DP_AUX_MAX_PAYLOAD_BYTES];
+		ssize_t todo = min(iov_iter_count(from), sizeof(buf));
 
-	while (bytes_pending > 0) {
-		uint8_t localbuf[DP_AUX_MAX_PAYLOAD_BYTES];
-		ssize_t todo = min_t(size_t, bytes_pending, sizeof(localbuf));
-
-		if (__copy_from_user(localbuf,
-				     buf + num_bytes_processed, todo)) {
-			res = num_bytes_processed ?
-				num_bytes_processed : -EFAULT;
-			goto out;
+		if (signal_pending(current)) {
+			res = -ERESTARTSYS;
+			break;
 		}
 
-		res = drm_dp_dpcd_write(aux_dev->aux, *offset, localbuf, todo);
-		if (res <= 0) {
-			res = num_bytes_processed ? num_bytes_processed : res;
-			goto out;
+		if (!copy_from_iter_full(buf, todo, from)) {
+			res = -EFAULT;
+			break;
 		}
-		bytes_pending -= res;
-		*offset += res;
-		num_bytes_processed += res;
-		res = num_bytes_processed;
+
+		res = drm_dp_dpcd_write(aux_dev->aux, pos, buf, todo);
+		if (res <= 0)
+			break;
+
+		pos += res;
 	}
 
-out:
+	if (pos != iocb->ki_pos)
+		res = pos - iocb->ki_pos;
+	iocb->ki_pos = pos;
+
 	atomic_dec(&aux_dev->usecount);
 	wake_up_atomic_t(&aux_dev->usecount);
 	return res;
@@ -237,8 +234,8 @@ static int auxdev_release(struct inode *inode, struct file *file)
 static const struct file_operations auxdev_fops = {
 	.owner		= THIS_MODULE,
 	.llseek		= auxdev_llseek,
-	.read		= auxdev_read,
-	.write		= auxdev_write,
+	.read_iter	= auxdev_read_iter,
+	.write_iter	= auxdev_write_iter,
 	.open		= auxdev_open,
 	.release	= auxdev_release,
 };
@@ -266,17 +263,6 @@ static struct drm_dp_aux_dev *drm_dp_aux_dev_get_by_aux(struct drm_dp_aux *aux)
 	return aux_dev;
 }
 
-static int auxdev_wait_atomic_t(atomic_t *p)
-{
-	schedule();
-	return 0;
-}
-/**
- * drm_dp_aux_unregister_devnode() - unregister a devnode for this aux channel
- * @aux: DisplayPort AUX channel
- *
- * Returns 0 on success or a negative error code on failure.
- */
 void drm_dp_aux_unregister_devnode(struct drm_dp_aux *aux)
 {
 	struct drm_dp_aux_dev *aux_dev;
@@ -291,7 +277,7 @@ void drm_dp_aux_unregister_devnode(struct drm_dp_aux *aux)
 	mutex_unlock(&aux_idr_mutex);
 
 	atomic_dec(&aux_dev->usecount);
-	wait_on_atomic_t(&aux_dev->usecount, auxdev_wait_atomic_t,
+	wait_on_atomic_t(&aux_dev->usecount, atomic_t_wait,
 			 TASK_UNINTERRUPTIBLE);
 
 	minor = aux_dev->index;
@@ -302,14 +288,7 @@ void drm_dp_aux_unregister_devnode(struct drm_dp_aux *aux)
 	DRM_DEBUG("drm_dp_aux_dev: aux [%s] unregistering\n", aux->name);
 	kref_put(&aux_dev->refcount, release_drm_dp_aux_dev);
 }
-EXPORT_SYMBOL(drm_dp_aux_unregister_devnode);
 
-/**
- * drm_dp_aux_register_devnode() - register a devnode for this aux channel
- * @aux: DisplayPort AUX channel
- *
- * Returns 0 on success or a negative error code on failure.
- */
 int drm_dp_aux_register_devnode(struct drm_dp_aux *aux)
 {
 	struct drm_dp_aux_dev *aux_dev;
@@ -335,7 +314,6 @@ error:
 	drm_dp_aux_unregister_devnode(aux);
 	return res;
 }
-EXPORT_SYMBOL(drm_dp_aux_register_devnode);
 
 int drm_dp_aux_dev_init(void)
 {
@@ -343,8 +321,7 @@ int drm_dp_aux_dev_init(void)
 
 	drm_dp_aux_dev_class = class_create(THIS_MODULE, "drm_dp_aux_dev");
 	if (IS_ERR(drm_dp_aux_dev_class)) {
-		res = PTR_ERR(drm_dp_aux_dev_class);
-		goto out;
+		return PTR_ERR(drm_dp_aux_dev_class);
 	}
 	drm_dp_aux_dev_class->dev_groups = drm_dp_aux_groups;
 
@@ -358,11 +335,9 @@ out:
 	class_destroy(drm_dp_aux_dev_class);
 	return res;
 }
-EXPORT_SYMBOL(drm_dp_aux_dev_init);
 
 void drm_dp_aux_dev_exit(void)
 {
 	unregister_chrdev(drm_dev_major, "aux");
 	class_destroy(drm_dp_aux_dev_class);
 }
-EXPORT_SYMBOL(drm_dp_aux_dev_exit);

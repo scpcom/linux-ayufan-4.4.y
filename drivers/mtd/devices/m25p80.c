@@ -1,7 +1,23 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
- 
+/*
+ * MTD SPI driver for ST M25Pxx (and similar) serial flash chips
+ *
+ * Author: Mike Lavender, mike@steroidmicros.com
+ *
+ * Copyright (c) 2005, Intec Automation Inc.
+ *
+ * Some parts are based on lart.c by Abraham Van Der Merwe
+ *
+ * Cleaned up and generalized based on mtd_dataflash.c
+ *
+ * This code is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ *
+ */
+
 #include <linux/err.h>
 #include <linux/errno.h>
 #include <linux/module.h>
@@ -36,7 +52,7 @@ static int is_locked(struct spi_nor *nor, loff_t ofs, uint64_t len)
 {
 	return 0;
 }
-#endif  
+#endif /* MY_DEF_HERE */
 
 static int m25p80_read_reg(struct spi_nor *nor, u8 code, u8 *val, int len)
 {
@@ -53,7 +69,7 @@ static int m25p80_read_reg(struct spi_nor *nor, u8 code, u8 *val, int len)
 
 static void m25p_addr2cmd(struct spi_nor *nor, unsigned int addr, u8 *cmd)
 {
-	 
+	/* opcode is in cmd[0] */
 	cmd[1] = addr >> (nor->addr_width * 8 -  8);
 	cmd[2] = addr >> (nor->addr_width * 8 - 16);
 	cmd[3] = addr >> (nor->addr_width * 8 - 24);
@@ -119,6 +135,10 @@ static inline unsigned int m25p80_rx_nbits(struct spi_nor *nor)
 	}
 }
 
+/*
+ * Read an address range from the nor chip.  The address range
+ * may be any size provided it is within the physical boundaries.
+ */
 static int m25p80_read(struct spi_nor *nor, loff_t from, size_t len,
 			size_t *retlen, u_char *buf)
 {
@@ -128,6 +148,7 @@ static int m25p80_read(struct spi_nor *nor, loff_t from, size_t len,
 	struct spi_message m;
 	unsigned int dummy = nor->read_dummy;
 
+	/* convert the dummy cycles to the number of bytes */
 	dummy /= 8;
 
 	spi_message_init(&m);
@@ -158,6 +179,7 @@ static int m25p80_erase(struct spi_nor *nor, loff_t offset)
 	dev_dbg(nor->dev, "%dKiB at 0x%08x\n",
 		flash->spi_nor.mtd.erasesize / 1024, (u32)offset);
 
+	/* Set up command buffer. */
 	flash->command[0] = nor->erase_opcode;
 	m25p_addr2cmd(nor, offset, flash->command);
 
@@ -166,6 +188,11 @@ static int m25p80_erase(struct spi_nor *nor, loff_t offset)
 	return 0;
 }
 
+/*
+ * board specific setup should have ensured the SPI clock used here
+ * matches what the READ command supports, at least until this driver
+ * understands FAST_READ (for clocks over 25 MHz).
+ */
 static int m25p_probe(struct spi_device *spi)
 {
 	struct mtd_part_parser_data	ppdata;
@@ -184,6 +211,7 @@ static int m25p_probe(struct spi_device *spi)
 
 	nor = &flash->spi_nor;
 
+	/* install the hooks */
 	nor->read = m25p80_read;
 	nor->write = m25p80_write;
 	nor->erase = m25p80_erase;
@@ -193,7 +221,7 @@ static int m25p_probe(struct spi_device *spi)
 	nor->flash_lock    = lock_chip;
 	nor->flash_unlock  = unlock_chip;
 	nor->flash_is_locked  = is_locked;
-#endif  
+#endif /* MY_DEF_HERE */
 
 	nor->dev = &spi->dev;
 	nor->flash_node = spi->dev.of_node;
@@ -210,6 +238,11 @@ static int m25p_probe(struct spi_device *spi)
 	if (data && data->name)
 		nor->mtd.name = data->name;
 
+	/* For some (historical?) reason many platforms provide two different
+	 * names in flash_platform_data: "name" and "type". Quite often name is
+	 * set to "m25p80" and then "type" provides a real chip name.
+	 * If that's the case, respect "type" and ignore a "name".
+	 */
 	if (data && data->type)
 		flash_name = data->type;
 	else
@@ -230,13 +263,33 @@ static int m25p_remove(struct spi_device *spi)
 {
 	struct m25p	*flash = spi_get_drvdata(spi);
 
+	/* Clean up MTD stuff. */
 	return mtd_device_unregister(&flash->spi_nor.mtd);
 }
 
+/*
+ * Do NOT add to this array without reading the following:
+ *
+ * Historically, many flash devices are bound to this driver by their name. But
+ * since most of these flash are compatible to some extent, and their
+ * differences can often be differentiated by the JEDEC read-ID command, we
+ * encourage new users to add support to the spi-nor library, and simply bind
+ * against a generic string here (e.g., "jedec,spi-nor").
+ *
+ * Many flash names are kept here in this list (as well as in spi-nor.c) to
+ * keep them available as module aliases for existing platforms.
+ */
 static const struct spi_device_id m25p_ids[] = {
-	 
+	/*
+	 * Entries not used in DTs that should be safe to drop after replacing
+	 * them with "nor-jedec" in platform data.
+	 */
 	{"s25sl064a"},	{"w25x16"},	{"m25p10"},	{"m25px64"},
 
+	/*
+	 * Entries that were used in DTs without "nor-jedec" fallback and should
+	 * be kept for backward compatibility.
+	 */
 	{"at25df321a"},	{"at25df641"},	{"at26df081a"},
 	{"mr25h256"},
 	{"mx25l4005a"},	{"mx25l1606e"},	{"mx25l6405d"},	{"mx25l12805d"},
@@ -250,6 +303,7 @@ static const struct spi_device_id m25p_ids[] = {
 	{"w25x80"},	{"w25x32"},	{"w25q32"},	{"w25q32dw"},
 	{"w25q80bl"},	{"w25q128"},	{"w25q256"},
 
+	/* Flashes that can't be detected using JEDEC */
 	{"m25p05-nonjedec"},	{"m25p10-nonjedec"},	{"m25p20-nonjedec"},
 	{"m25p40-nonjedec"},	{"m25p80-nonjedec"},	{"m25p16-nonjedec"},
 	{"m25p32-nonjedec"},	{"m25p64-nonjedec"},	{"m25p128-nonjedec"},
@@ -259,7 +313,10 @@ static const struct spi_device_id m25p_ids[] = {
 MODULE_DEVICE_TABLE(spi, m25p_ids);
 
 static const struct of_device_id m25p_of_table[] = {
-	 
+	/*
+	 * Generic compatibility for SPI NOR that can be identified by the
+	 * JEDEC READ ID opcode (0x9F). Use this, if possible.
+	 */
 	{ .compatible = "jedec,spi-nor" },
 	{}
 };
@@ -274,6 +331,10 @@ static struct spi_driver m25p80_driver = {
 	.probe	= m25p_probe,
 	.remove	= m25p_remove,
 
+	/* REVISIT: many of these chips have deep power-down modes, which
+	 * should clearly be entered on suspend() to minimize power use.
+	 * And also when they're otherwise idle...
+	 */
 };
 
 module_spi_driver(m25p80_driver);

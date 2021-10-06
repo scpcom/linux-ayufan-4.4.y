@@ -1,7 +1,11 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
- 
+/*
+ * IPv6 library code, needed by static components when full IPv6 support is
+ * not configured or static.
+ */
+
 #include <linux/export.h>
 #include <net/ipv6.h>
 #include <net/addrconf.h>
@@ -10,6 +14,10 @@
 #include <linux/module.h>
 #endif
 
+/* if ipv6 module registers this function is used by xfrm to force all
+ * sockets to relookup their nodes - this is fairly expensive, be
+ * careful
+ */
 void (*__fib6_flush_trees)(struct net *);
 EXPORT_SYMBOL(__fib6_flush_trees);
 
@@ -37,26 +45,30 @@ int __ipv6_addr_type(const struct in6_addr *addr)
 
 	st = addr->s6_addr32[0];
 
+	/* Consider all addresses with the first three bits different of
+	   000 and 111 as unicasts.
+	 */
 	if ((st & htonl(0xE0000000)) != htonl(0x00000000) &&
 	    (st & htonl(0xE0000000)) != htonl(0xE0000000))
 		return (IPV6_ADDR_UNICAST |
 			IPV6_ADDR_SCOPE_TYPE(IPV6_ADDR_SCOPE_GLOBAL));
 
 	if ((st & htonl(0xFF000000)) == htonl(0xFF000000)) {
-		 
+		/* multicast */
+		/* addr-select 3.1 */
 		return (IPV6_ADDR_MULTICAST |
 			ipv6_addr_scope2type(IPV6_ADDR_MC_SCOPE(addr)));
 	}
 
 	if ((st & htonl(0xFFC00000)) == htonl(0xFE800000))
 		return (IPV6_ADDR_LINKLOCAL | IPV6_ADDR_UNICAST |
-			IPV6_ADDR_SCOPE_TYPE(IPV6_ADDR_SCOPE_LINKLOCAL));		 
+			IPV6_ADDR_SCOPE_TYPE(IPV6_ADDR_SCOPE_LINKLOCAL));		/* addr-select 3.1 */
 	if ((st & htonl(0xFFC00000)) == htonl(0xFEC00000))
 		return (IPV6_ADDR_SITELOCAL | IPV6_ADDR_UNICAST |
-			IPV6_ADDR_SCOPE_TYPE(IPV6_ADDR_SCOPE_SITELOCAL));		 
+			IPV6_ADDR_SCOPE_TYPE(IPV6_ADDR_SCOPE_SITELOCAL));		/* addr-select 3.1 */
 	if ((st & htonl(0xFE000000)) == htonl(0xFC000000))
 		return (IPV6_ADDR_UNICAST |
-			IPV6_ADDR_SCOPE_TYPE(IPV6_ADDR_SCOPE_GLOBAL));			 
+			IPV6_ADDR_SCOPE_TYPE(IPV6_ADDR_SCOPE_GLOBAL));			/* RFC 4193 */
 
 	if ((addr->s6_addr32[0] | addr->s6_addr32[1]) == 0) {
 		if (addr->s6_addr32[2] == 0) {
@@ -65,19 +77,19 @@ int __ipv6_addr_type(const struct in6_addr *addr)
 
 			if (addr->s6_addr32[3] == htonl(0x00000001))
 				return (IPV6_ADDR_LOOPBACK | IPV6_ADDR_UNICAST |
-					IPV6_ADDR_SCOPE_TYPE(IPV6_ADDR_SCOPE_LINKLOCAL));	 
+					IPV6_ADDR_SCOPE_TYPE(IPV6_ADDR_SCOPE_LINKLOCAL));	/* addr-select 3.4 */
 
 			return (IPV6_ADDR_COMPATv4 | IPV6_ADDR_UNICAST |
-				IPV6_ADDR_SCOPE_TYPE(IPV6_ADDR_SCOPE_GLOBAL));	 
+				IPV6_ADDR_SCOPE_TYPE(IPV6_ADDR_SCOPE_GLOBAL));	/* addr-select 3.3 */
 		}
 
 		if (addr->s6_addr32[2] == htonl(0x0000ffff))
 			return (IPV6_ADDR_MAPPED |
-				IPV6_ADDR_SCOPE_TYPE(IPV6_ADDR_SCOPE_GLOBAL));	 
+				IPV6_ADDR_SCOPE_TYPE(IPV6_ADDR_SCOPE_GLOBAL));	/* addr-select 3.3 */
 	}
 
 	return (IPV6_ADDR_UNICAST |
-		IPV6_ADDR_SCOPE_TYPE(IPV6_ADDR_SCOPE_GLOBAL));	 
+		IPV6_ADDR_SCOPE_TYPE(IPV6_ADDR_SCOPE_GLOBAL));	/* addr-select 3.4 */
 }
 EXPORT_SYMBOL(__ipv6_addr_type);
 
@@ -113,6 +125,7 @@ const struct ipv6_stub *ipv6_stub __read_mostly = &(struct ipv6_stub) {
 };
 EXPORT_SYMBOL_GPL(ipv6_stub);
 
+/* IPv6 Wildcard Address and Loopback Address defined by RFC2553 */
 const struct in6_addr in6addr_loopback = IN6ADDR_LOOPBACK_INIT;
 EXPORT_SYMBOL(in6addr_loopback);
 const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
@@ -142,6 +155,8 @@ static void in6_dev_finish_destroy_rcu(struct rcu_head *head)
 	snmp6_free_dev(idev);
 	kfree(idev);
 }
+
+/* Nobody refers to this device, we may destroy it. */
 
 void in6_dev_finish_destroy(struct inet6_dev *idev)
 {

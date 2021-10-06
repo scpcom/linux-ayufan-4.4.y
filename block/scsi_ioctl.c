@@ -1,7 +1,24 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
- 
+/*
+ * Copyright (C) 2001 Jens Axboe <axboe@suse.de>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public Licens
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-
+ *
+ */
 #include <linux/kernel.h>
 #include <linux/errno.h>
 #include <linux/string.h>
@@ -27,6 +44,7 @@ struct blk_cmd_filter {
 
 static struct blk_cmd_filter blk_default_cmd_filter;
 
+/* Command group 3 is reserved and should never be used.  */
 const unsigned char scsi_command_size_tbl[8] =
 {
 	6, 10, 10, 12,
@@ -97,6 +115,10 @@ static int sg_set_reserved_size(struct request_queue *q, int __user *p)
 	return 0;
 }
 
+/*
+ * will always return that we are ATAPI even for a real SCSI drive, I'm not
+ * so sure this is worth doing anything about (why would you care??)
+ */
 static int sg_emulated_host(struct request_queue *q, int __user *p)
 {
 	return put_user(1, p);
@@ -104,7 +126,7 @@ static int sg_emulated_host(struct request_queue *q, int __user *p)
 
 static void blk_set_cmd_filter_defaults(struct blk_cmd_filter *filter)
 {
-	 
+	/* Basic read-only commands */
 	__set_bit(TEST_UNIT_READY, filter->read_ok);
 	__set_bit(REQUEST_SENSE, filter->read_ok);
 	__set_bit(READ_6, filter->read_ok);
@@ -128,12 +150,14 @@ static void blk_set_cmd_filter_defaults(struct blk_cmd_filter *filter)
 	__set_bit(MAINTENANCE_IN, filter->read_ok);
 	__set_bit(GPCMD_READ_BUFFER_CAPACITY, filter->read_ok);
 
+	/* Audio CD commands */
 	__set_bit(GPCMD_PLAY_CD, filter->read_ok);
 	__set_bit(GPCMD_PLAY_AUDIO_10, filter->read_ok);
 	__set_bit(GPCMD_PLAY_AUDIO_MSF, filter->read_ok);
 	__set_bit(GPCMD_PLAY_AUDIO_TI, filter->read_ok);
 	__set_bit(GPCMD_PAUSE_RESUME, filter->read_ok);
 
+	/* CD/DVD data reading */
 	__set_bit(GPCMD_READ_CD, filter->read_ok);
 	__set_bit(GPCMD_READ_CD_MSF, filter->read_ok);
 	__set_bit(GPCMD_READ_DISC_INFO, filter->read_ok);
@@ -152,6 +176,7 @@ static void blk_set_cmd_filter_defaults(struct blk_cmd_filter *filter)
 	__set_bit(GPCMD_SEEK, filter->read_ok);
 	__set_bit(GPCMD_STOP_PLAY_SCAN, filter->read_ok);
 
+	/* Basic writing commands */
 	__set_bit(WRITE_6, filter->write_ok);
 	__set_bit(WRITE_10, filter->write_ok);
 	__set_bit(WRITE_VERIFY, filter->write_ok);
@@ -189,12 +214,15 @@ int blk_verify_command(unsigned char *cmd, fmode_t has_write_perm)
 {
 	struct blk_cmd_filter *filter = &blk_default_cmd_filter;
 
+	/* root can do any command. */
 	if (capable(CAP_SYS_RAWIO))
 		return 0;
 
+	/* Anybody who can open the device can do a read-safe command */
 	if (test_bit(cmd[0], filter->read_ok))
 		return 0;
 
+	/* Write-safe commands require a writable open */
 	if (test_bit(cmd[0], filter->write_ok) && has_write_perm)
 		return 0;
 
@@ -210,6 +238,9 @@ static int blk_fill_sghdr_rq(struct request_queue *q, struct request *rq,
 	if (blk_verify_command(rq->cmd, mode & FMODE_WRITE))
 		return -EPERM;
 
+	/*
+	 * fill in request structure
+	 */
 	rq->cmd_len = hdr->cmd_len;
 
 	rq->timeout = msecs_to_jiffies(hdr->timeout);
@@ -228,6 +259,9 @@ static int blk_complete_sghdr_rq(struct request *rq, struct sg_io_hdr *hdr,
 {
 	int r, ret = 0;
 
+	/*
+	 * fill in all the output members
+	 */
 	hdr->status = rq->errors & 0xff;
 	hdr->masked_status = status_byte(rq->errors);
 	hdr->msg_status = msg_byte(rq->errors);
@@ -313,6 +347,7 @@ static int sg_io(struct request_queue *q, struct gendisk *bd_disk,
 		if (ret < 0)
 			goto out_free_cdb;
 
+		/* SG_IO howto says that the shorter of the two wins */
 		iov_iter_truncate(&i, hdr->dxfer_len);
 
 		ret = blk_rq_map_user_iov(q, rq, NULL, &i, GFP_KERNEL);
@@ -332,6 +367,10 @@ static int sg_io(struct request_queue *q, struct gendisk *bd_disk,
 
 	start_time = jiffies;
 
+	/* ignore return value. All information is passed back to caller
+	 * (if he doesn't check that is his problem).
+	 * N.B. a non-zero SCSI status is _not_ necessarily an error.
+	 */
 	blk_execute_rq(q, bd_disk, rq, at_head);
 
 	hdr->duration = jiffies_to_msecs(jiffies - start_time);
@@ -346,7 +385,40 @@ out_put_request:
 	return ret;
 }
 
-#define OMAX_SB_LEN 16           
+/**
+ * sg_scsi_ioctl  --  handle deprecated SCSI_IOCTL_SEND_COMMAND ioctl
+ * @file:	file this ioctl operates on (optional)
+ * @q:		request queue to send scsi commands down
+ * @disk:	gendisk to operate on (option)
+ * @sic:	userspace structure describing the command to perform
+ *
+ * Send down the scsi command described by @sic to the device below
+ * the request queue @q.  If @file is non-NULL it's used to perform
+ * fine-grained permission checks that allow users to send down
+ * non-destructive SCSI commands.  If the caller has a struct gendisk
+ * available it should be passed in as @disk to allow the low level
+ * driver to use the information contained in it.  A non-NULL @disk
+ * is only allowed if the caller knows that the low level driver doesn't
+ * need it (e.g. in the scsi subsystem).
+ *
+ * Notes:
+ *   -  This interface is deprecated - users should use the SG_IO
+ *      interface instead, as this is a more flexible approach to
+ *      performing SCSI commands on a device.
+ *   -  The SCSI command length is determined by examining the 1st byte
+ *      of the given command. There is no way to override this.
+ *   -  Data transfers are limited to PAGE_SIZE
+ *   -  The length (x + y) must be at least OMAX_SB_LEN bytes long to
+ *      accommodate the sense buffer when an error occurs.
+ *      The sense buffer is truncated to OMAX_SB_LEN (16) bytes so that
+ *      old code will not be surprised.
+ *   -  If a Unix error occurs (e.g. ENOMEM) then the user will receive
+ *      a negative return and the Unix error code in 'errno'.
+ *      If the SCSI command succeeds then 0 is returned.
+ *      Positive numbers returned are the compacted SCSI error codes (4
+ *      bytes in one int) where the lowest byte is the SCSI status.
+ */
+#define OMAX_SB_LEN 16          /* For backward compatibility */
 int sg_scsi_ioctl(struct request_queue *q, struct gendisk *disk, fmode_t mode,
 		struct scsi_ioctl_command __user *sic)
 {
@@ -358,6 +430,9 @@ int sg_scsi_ioctl(struct request_queue *q, struct gendisk *disk, fmode_t mode,
 	if (!sic)
 		return -EINVAL;
 
+	/*
+	 * get in an out lengths, verify they don't exceed a page worth of data
+	 */
 	if (get_user(in_len, &sic->inlen))
 		return -EFAULT;
 	if (get_user(out_len, &sic->outlen))
@@ -384,6 +459,9 @@ int sg_scsi_ioctl(struct request_queue *q, struct gendisk *disk, fmode_t mode,
 
 	cmdlen = COMMAND_SIZE(opcode);
 
+	/*
+	 * get command and data to send to device, if any
+	 */
 	err = -EFAULT;
 	rq->cmd_len = cmdlen;
 	if (copy_from_user(rq->cmd, sic->data, cmdlen))
@@ -396,6 +474,7 @@ int sg_scsi_ioctl(struct request_queue *q, struct gendisk *disk, fmode_t mode,
 	if (err)
 		goto error;
 
+	/* default.  possible overriden later */
 	rq->retries = 5;
 
 	switch (opcode) {
@@ -433,7 +512,7 @@ int sg_scsi_ioctl(struct request_queue *q, struct gendisk *disk, fmode_t mode,
 
 	blk_execute_rq(q, disk, rq, 0);
 
-	err = rq->errors & 0xff;	 
+	err = rq->errors & 0xff;	/* only 8 bit SCSI status */
 	if (err) {
 		if (rq->sense_len && rq->sense) {
 			bytes = (OMAX_SB_LEN > rq->sense_len) ?
@@ -456,6 +535,7 @@ error_free_buffer:
 }
 EXPORT_SYMBOL_GPL(sg_scsi_ioctl);
 
+/* Send basic block requests */
 static int __blk_send_generic(struct request_queue *q, struct gendisk *bd_disk,
 			      int cmd, int data)
 {
@@ -491,7 +571,9 @@ int scsi_cmd_ioctl(struct request_queue *q, struct gendisk *bd_disk, fmode_t mod
 		return -ENXIO;
 
 	switch (cmd) {
-		 
+		/*
+		 * new sgv3 interface
+		 */
 		case SG_GET_VERSION_NUM:
 			err = sg_get_version(arg);
 			break;
@@ -585,12 +667,15 @@ int scsi_cmd_ioctl(struct request_queue *q, struct gendisk *bd_disk, fmode_t mod
 			break;
 		}
 
+		/*
+		 * old junk scsi send command ioctl
+		 */
 		case SCSI_IOCTL_SEND_COMMAND:
 #ifdef MY_ABC_HERE
-			 
-#else  
+			/* Just hide the warning message */
+#else /* MY_ABC_HERE */
 			printk(KERN_WARNING "program %s is using a deprecated SCSI ioctl, please convert it to SG_IO\n", current->comm);
-#endif  
+#endif /* MY_ABC_HERE */
 			err = -EINVAL;
 			if (!arg)
 				break;
@@ -616,6 +701,9 @@ int scsi_verify_blk_ioctl(struct block_device *bd, unsigned int cmd)
 	if (bd && bd == bd->bd_contains)
 		return 0;
 
+	/* Actually none of these is particularly useful on a partition,
+	 * but they are safe.
+	 */
 	switch (cmd) {
 	case SCSI_IOCTL_GET_IDLUN:
 	case SCSI_IOCTL_GET_BUS_NUMBER:
@@ -629,7 +717,10 @@ int scsi_verify_blk_ioctl(struct block_device *bd, unsigned int cmd)
 	case SG_EMULATED_HOST:
 		return 0;
 	case CDROM_GET_CAPABILITY:
-		 
+		/* Keep this until we remove the printk below.  udev sends it
+		 * and we do not want to spam dmesg about it.   CD-ROMs do
+		 * not have partitions, so we get here only for disks.
+		 */
 		return -ENOIOCTLCMD;
 	default:
 		break;
@@ -638,6 +729,7 @@ int scsi_verify_blk_ioctl(struct block_device *bd, unsigned int cmd)
 	if (capable(CAP_SYS_RAWIO))
 		return 0;
 
+	/* In particular, rule out all resets and host-specific ioctls.  */
 	printk_ratelimited(KERN_WARNING
 			   "%s: sending ioctl %x to a partition!\n", current->comm, cmd);
 

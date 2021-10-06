@@ -122,10 +122,6 @@ config SYNO_SPECULATION_DEFAULT_OFF
 	default n
 	depends on PAGE_TABLE_ISOLATION
 
-config SYNO_FIX_TICK_REPROGRAM
-	bool "Fix tick reprogram bug"
-	default n
-
 endmenu #MISC Features
 
 menu "Cgroup"

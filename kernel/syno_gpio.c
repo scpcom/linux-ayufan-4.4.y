@@ -1,7 +1,28 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
- 
+/*
+ * Synology NAS Board GPIO Setup
+ *
+ * Maintained by:  Comsumer Platform Team <cpt@synology.com>
+ *
+ * Copyright 2009-2015 Synology, Inc.  All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; see the file COPYING.  If not, write to
+ * the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ */
 #include <linux/gpio.h>
 #include <linux/slab.h>
 #include <linux/synobios.h>
@@ -10,7 +31,7 @@
 #ifdef MY_DEF_HERE
 #include <linux/synolib.h>
 #include <linux/of.h>
-#endif  
+#endif /* MY_ABC_HERE */
 
 SYNO_GPIO syno_gpio = {
 	.fan_ctrl =NULL,
@@ -32,7 +53,7 @@ EXPORT_SYMBOL(syno_gpio);
 
 #ifdef MY_DEF_HERE
 extern int giSynoSpinupGroupDebug;
-#endif  
+#endif /* MY_ABC_HERE */
 
 void syno_gpio_direction_output(int pin, int pValue)
 {
@@ -88,9 +109,12 @@ int SYNO_GPIO_READ(int pin)
 	return iVal;
 #else
 #if defined(MY_DEF_HERE)
-	 
+	/*
+	 * pinctl-nb range 476 to 511
+	 * pinctl-sb range 446 to 475
+	 */
 	pin = pin < 36 ? (512 - 36 + pin) : (512 - 36 - 30) + pin - 36;
-#endif  
+#endif /* MY_DEF_HERE */
 	return gpio_get_value(pin);
 #endif
 }
@@ -104,9 +128,12 @@ void SYNO_GPIO_WRITE(int pin, int pValue)
 	syno_gpio_direction_output(pin, pValue);
 #else
 #if defined(MY_DEF_HERE)
-	 
+	/*
+	 * pinctl-nb range 476 to 511
+	 * pinctl-sb range 446 to 475
+	 */
 	pin = pin < 36 ? (512 - 36 + pin) : (512 - 36 - 30) + pin - 36;
-#endif  
+#endif /* MY_DEF_HERE */
 	gpio_set_value(pin, pValue);
 #endif
 }
@@ -147,10 +174,18 @@ void DBG_SpinupGroupListGpio(void)
 	}
 }
 EXPORT_SYMBOL(DBG_SpinupGroupListGpio);
-#endif  
+#endif /* MY_ABC_HERE */
 
 #ifdef MY_DEF_HERE
- 
+/**
+ * syno_disk_gpio_pin_get - get the property content of internal slot
+ * @diskPort [IN]:          internel slot number
+ * @szPropertyName [IN]:
+ * @propertyIndex [IN]: index of number need be read in szPropertyName
+ *
+ * return >=0: property number in device tree of internal slot
+ *        -1: fail
+ */
 u32 syno_disk_gpio_pin_get(const int diskPort, const char *szPropertyName, const int propertyIndex)
 {
 	int index= 0;
@@ -162,7 +197,7 @@ u32 syno_disk_gpio_pin_get(const int diskPort, const char *szPropertyName, const
 	}
 
 	for_each_child_of_node(of_root, pSlotNode) {
-		 
+		// get index number of internal_slot, e.g. /internal_slot@4 --> 4
 		if (!pSlotNode->full_name || 1 != sscanf(pSlotNode->full_name, "/"DT_INTERNAL_SLOT"@%d", &index)) {
 			continue;
 		}
@@ -181,6 +216,14 @@ END:
 }
 EXPORT_SYMBOL(syno_disk_gpio_pin_get);
 
+/**
+ * syno_disk_gpio_pin_have - determine the szPropertyName of the internal slot is defined in device tree
+ * @diskPort [IN]:          internel slot number
+ * @szPropertyName [IN]:
+ *
+ * return 1: property exist
+ *        0: property not exist
+ */
 int syno_disk_gpio_pin_have(const int diskPort, const char *szPropertyName)
 {
 	u32 synoGpioPin = U32_MAX;
@@ -196,7 +239,15 @@ int syno_disk_gpio_pin_have(const int diskPort, const char *szPropertyName)
 	return ret;
 }
 EXPORT_SYMBOL(syno_disk_gpio_pin_have);
- 
+/**
+ * syno_led_pin_get - get the szLedName pin of internal slot
+ * @diskPort [IN]:      internel slot number
+ * @szLedName [IN]:		LED node name in internal_slot node
+ * @propertyIndex [IN]: index of number need be read in DT_SYNO_GPIO
+ *
+ * return >=0: property number in device tree of internal slot
+ *        -1: fail
+ */
 u32 syno_led_pin_get(const int diskPort, const char *szLedName, const int propertyIndex)
 {
 	int index= 0;
@@ -208,7 +259,7 @@ u32 syno_led_pin_get(const int diskPort, const char *szLedName, const int proper
 	}
 
 	for_each_child_of_node(of_root, pSlotNode) {
-		 
+		// get index number of internal_slot, e.g. /internal_slot@4 --> 4
 		if (!pSlotNode->full_name || 1 != sscanf(pSlotNode->full_name, "/"DT_INTERNAL_SLOT"@%d", &index)) {
 			continue;
 		}
@@ -233,6 +284,14 @@ END:
 }
 EXPORT_SYMBOL(syno_led_pin_get);
 
+/**
+ * syno_led_pin_have - determine the szLedName of the internal slot is defined in device tree
+ * @diskPort [IN]:   internel slot number
+ * @szLedName [IN]:	LED node name in internal_slot node
+ *
+ * return 1: szLedName exist
+ *        0: szLedName not exist
+ */
 int syno_led_pin_have(const int diskPort, const char *szLedName)
 {
 	u32 synoGpioPin = U32_MAX;
@@ -249,4 +308,4 @@ int syno_led_pin_have(const int diskPort, const char *szLedName)
 }
 EXPORT_SYMBOL(syno_led_pin_have);
 
-#endif  
+#endif /* MY_DEF_HERE */

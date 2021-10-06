@@ -1,7 +1,27 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
- 
+/*
+ *  Advanced Linux Sound Architecture
+ *  Copyright (c) by Jaroslav Kysela <perex@perex.cz>
+ *
+ *
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program; if not, write to the Free Software
+ *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+ *
+ */
+
 #include <linux/init.h>
 #include <linux/export.h>
 #include <linux/slab.h>
@@ -17,6 +37,9 @@
 static struct snd_minor *snd_oss_minors[SNDRV_OSS_MINORS];
 static DEFINE_MUTEX(sound_oss_mutex);
 
+/* NOTE: This function increments the refcount of the associated card like
+ * snd_lookup_minor_data(); the caller must call snd_card_unref() appropriately
+ */
 void *snd_lookup_oss_minor_data(unsigned int minor, int type)
 {
 	struct snd_minor *mreg;
@@ -54,7 +77,7 @@ static int snd_oss_kernel_minor(int type, struct snd_card *card, int dev)
 				minor = SNDRV_MINOR_OSS(card->number + 4, (dev ? SNDRV_MINOR_OSS_MIXER1 : SNDRV_MINOR_OSS_MIXER));
 			}
 		} else
-#endif  
+#endif /* MY_ABC_HERE */
 		minor = SNDRV_MINOR_OSS(card->number, (dev ? SNDRV_MINOR_OSS_MIXER1 : SNDRV_MINOR_OSS_MIXER));
 		break;
 	case SNDRV_OSS_DEVICE_TYPE_SEQUENCER:
@@ -74,7 +97,7 @@ static int snd_oss_kernel_minor(int type, struct snd_card *card, int dev)
 				minor = SNDRV_MINOR_OSS(card->number + 4, (dev ? SNDRV_MINOR_OSS_PCM1 : SNDRV_MINOR_OSS_PCM));
 			}
 		} else
-#endif  
+#endif /* MY_ABC_HERE */
 		minor = SNDRV_MINOR_OSS(card->number, (dev ? SNDRV_MINOR_OSS_PCM1 : SNDRV_MINOR_OSS_PCM));
 		break;
 	case SNDRV_OSS_DEVICE_TYPE_MIDI:
@@ -91,7 +114,7 @@ static int snd_oss_kernel_minor(int type, struct snd_card *card, int dev)
 				minor = SNDRV_MINOR_OSS(card->number + 4, SNDRV_MINOR_OSS_DMFM);
 			}
 		} else
-#endif  
+#endif /* MY_ABC_HERE */
 		minor = SNDRV_MINOR_OSS(card->number, SNDRV_MINOR_OSS_DMFM);
 		break;
 	case SNDRV_OSS_DEVICE_TYPE_SNDSTAT:
@@ -117,7 +140,7 @@ int snd_register_oss_device(int type, struct snd_card *card, int dev,
 	struct device *carddev = snd_card_get_device_link(card);
 
 	if (card && card->number >= SNDRV_MINOR_OSS_DEVICES)
-		return 0;  
+		return 0; /* ignore silently */
 	if (minor < 0)
 		return minor;
 	preg = kmalloc(sizeof(struct snd_minor), GFP_KERNEL);
@@ -210,6 +233,10 @@ int snd_unregister_oss_device(int type, struct snd_card *card, int dev)
 
 EXPORT_SYMBOL(snd_unregister_oss_device);
 
+/*
+ *  INFO PART
+ */
+
 #ifdef CONFIG_SND_PROC_FS
 static const char *snd_oss_device_type_name(int type)
 {
@@ -259,6 +286,6 @@ int __init snd_minor_info_oss_init(void)
 	if (!entry)
 		return -ENOMEM;
 	entry->c.text.read = snd_minor_info_oss_read;
-	return snd_info_register(entry);  
+	return snd_info_register(entry); /* freed in error path */
 }
-#endif  
+#endif /* CONFIG_SND_PROC_FS */

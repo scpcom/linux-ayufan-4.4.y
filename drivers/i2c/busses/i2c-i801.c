@@ -1,7 +1,88 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
- 
+/*
+    Copyright (c) 1998 - 2002  Frodo Looijaard <frodol@dds.nl>,
+    Philip Edelbrock <phil@netroedge.com>, and Mark D. Studebaker
+    <mdsxyz123@yahoo.com>
+    Copyright (C) 2007 - 2014  Jean Delvare <jdelvare@suse.de>
+    Copyright (C) 2010         Intel Corporation,
+                               David Woodhouse <dwmw2@infradead.org>
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+*/
+
+/*
+ * Supports the following Intel I/O Controller Hubs (ICH):
+ *
+ *					I/O			Block	I2C
+ *					region	SMBus	Block	proc.	block
+ * Chip name			PCI ID	size	PEC	buffer	call	read
+ * ---------------------------------------------------------------------------
+ * 82801AA (ICH)		0x2413	16	no	no	no	no
+ * 82801AB (ICH0)		0x2423	16	no	no	no	no
+ * 82801BA (ICH2)		0x2443	16	no	no	no	no
+ * 82801CA (ICH3)		0x2483	32	soft	no	no	no
+ * 82801DB (ICH4)		0x24c3	32	hard	yes	no	no
+ * 82801E (ICH5)		0x24d3	32	hard	yes	yes	yes
+ * 6300ESB			0x25a4	32	hard	yes	yes	yes
+ * 82801F (ICH6)		0x266a	32	hard	yes	yes	yes
+ * 6310ESB/6320ESB		0x269b	32	hard	yes	yes	yes
+ * 82801G (ICH7)		0x27da	32	hard	yes	yes	yes
+ * 82801H (ICH8)		0x283e	32	hard	yes	yes	yes
+ * 82801I (ICH9)		0x2930	32	hard	yes	yes	yes
+ * EP80579 (Tolapai)		0x5032	32	hard	yes	yes	yes
+ * ICH10			0x3a30	32	hard	yes	yes	yes
+ * ICH10			0x3a60	32	hard	yes	yes	yes
+ * 5/3400 Series (PCH)		0x3b30	32	hard	yes	yes	yes
+ * 6 Series (PCH)		0x1c22	32	hard	yes	yes	yes
+ * Patsburg (PCH)		0x1d22	32	hard	yes	yes	yes
+ * Patsburg (PCH) IDF		0x1d70	32	hard	yes	yes	yes
+ * Patsburg (PCH) IDF		0x1d71	32	hard	yes	yes	yes
+ * Patsburg (PCH) IDF		0x1d72	32	hard	yes	yes	yes
+ * DH89xxCC (PCH)		0x2330	32	hard	yes	yes	yes
+ * Panther Point (PCH)		0x1e22	32	hard	yes	yes	yes
+ * Lynx Point (PCH)		0x8c22	32	hard	yes	yes	yes
+ * Lynx Point-LP (PCH)		0x9c22	32	hard	yes	yes	yes
+ * Avoton (SOC)			0x1f3c	32	hard	yes	yes	yes
+ * Wellsburg (PCH)		0x8d22	32	hard	yes	yes	yes
+ * Wellsburg (PCH) MS		0x8d7d	32	hard	yes	yes	yes
+ * Wellsburg (PCH) MS		0x8d7e	32	hard	yes	yes	yes
+ * Wellsburg (PCH) MS		0x8d7f	32	hard	yes	yes	yes
+ * Coleto Creek (PCH)		0x23b0	32	hard	yes	yes	yes
+ * Wildcat Point (PCH)		0x8ca2	32	hard	yes	yes	yes
+ * Wildcat Point-LP (PCH)	0x9ca2	32	hard	yes	yes	yes
+ * BayTrail (SOC)		0x0f12	32	hard	yes	yes	yes
+ * Sunrise Point-H (PCH) 	0xa123  32	hard	yes	yes	yes
+ * Sunrise Point-LP (PCH)	0x9d23	32	hard	yes	yes	yes
+ * DNV (SOC)			0x19df	32	hard	yes	yes	yes
+ * Broxton (SOC)		0x5ad4	32	hard	yes	yes	yes
+ * Lewisburg (PCH)		0xa1a3	32	hard	yes	yes	yes
+ * Lewisburg Supersku (PCH)	0xa223	32	hard	yes	yes	yes
+ * Cannon Lake-H (PCH)		0xa323	32	hard	yes	yes	yes
+ * Cannon Lake-LP (PCH)		0x9da3	32	hard	yes	yes	yes
+ * Gemini Lake (SOC)       0x31d4  32  hard    yes yes yes
+ *
+ * Features supported by this driver:
+ * Software PEC				no
+ * Hardware PEC				yes
+ * Block buffer				yes
+ * Block process call transaction	no
+ * I2C block read transaction		yes (doesn't use the block buffer)
+ * Slave mode				no
+ * Interrupt processing			yes
+ *
+ * See the file Documentation/i2c/busses/i2c-i801 for details.
+ */
+
 #include <linux/interrupt.h>
 #include <linux/module.h>
 #include <linux/pci.h>
@@ -26,6 +107,7 @@
 #include <linux/i2c-mux-gpio.h>
 #endif
 
+/* I801 SMBus address offsets */
 #define SMBHSTSTS(p)	(0 + (p)->smba)
 #define SMBHSTCNT(p)	(2 + (p)->smba)
 #define SMBHSTCMD(p)	(3 + (p)->smba)
@@ -33,10 +115,11 @@
 #define SMBHSTDAT0(p)	(5 + (p)->smba)
 #define SMBHSTDAT1(p)	(6 + (p)->smba)
 #define SMBBLKDAT(p)	(7 + (p)->smba)
-#define SMBPEC(p)	(8 + (p)->smba)		 
-#define SMBAUXSTS(p)	(12 + (p)->smba)	 
-#define SMBAUXCTL(p)	(13 + (p)->smba)	 
+#define SMBPEC(p)	(8 + (p)->smba)		/* ICH3 and later */
+#define SMBAUXSTS(p)	(12 + (p)->smba)	/* ICH4 and later */
+#define SMBAUXCTL(p)	(13 + (p)->smba)	/* ICH4 and later */
 
+/* PCI Address Constants */
 #define SMBBAR		4
 #define SMBPCICTL	0x004
 #define SMBPCISTS	0x006
@@ -52,35 +135,44 @@
 #define SBREG_BAR		0x10
 #define SBREG_SMBCTRL		0xc6000c
 
+/* Host status bits for SMBPCISTS */
 #define SMBPCISTS_INTS		0x08
 
+/* Control bits for SMBPCICTL */
 #define SMBPCICTL_INTDIS	0x0400
 
+/* Host configuration bits for SMBHSTCFG */
 #define SMBHSTCFG_HST_EN	1
 #define SMBHSTCFG_SMB_SMI_EN	2
 #define SMBHSTCFG_I2C_EN	4
 
+/* TCO configuration bits for TCOCTL */
 #define TCOCTL_EN		0x0100
 
+/* Auxiliary control register bits, ICH4+ only */
 #define SMBAUXCTL_CRC		1
 #define SMBAUXCTL_E32B		2
 
+/* Other settings */
 #define MAX_RETRIES		400
 
+/* I801 command constants */
 #define I801_QUICK		0x00
 #define I801_BYTE		0x04
 #define I801_BYTE_DATA		0x08
 #define I801_WORD_DATA		0x0C
-#define I801_PROC_CALL		0x10	 
+#define I801_PROC_CALL		0x10	/* unimplemented */
 #define I801_BLOCK_DATA		0x14
-#define I801_I2C_BLOCK_DATA	0x18	 
+#define I801_I2C_BLOCK_DATA	0x18	/* ICH5 and later */
 
+/* I801 Host Control register bits */
 #define SMBHSTCNT_INTREN	0x01
 #define SMBHSTCNT_KILL		0x02
 #define SMBHSTCNT_LAST_BYTE	0x20
 #define SMBHSTCNT_START		0x40
-#define SMBHSTCNT_PEC_EN	0x80	 
+#define SMBHSTCNT_PEC_EN	0x80	/* ICH3 and later */
 
+/* I801 Hosts Status register bits */
 #define SMBHSTSTS_BYTE_DONE	0x80
 #define SMBHSTSTS_INUSE_STS	0x40
 #define SMBHSTSTS_SMBALERT_STS	0x20
@@ -96,11 +188,12 @@
 #define STATUS_FLAGS		(SMBHSTSTS_BYTE_DONE | SMBHSTSTS_INTR | \
 				 STATUS_ERROR_FLAGS)
 
+/* Older devices have their ID defined in <linux/pci_ids.h> */
 #define PCI_DEVICE_ID_INTEL_BAYTRAIL_SMBUS		0x0f12
 #define PCI_DEVICE_ID_INTEL_BRASWELL_SMBUS		0x2292
 #define PCI_DEVICE_ID_INTEL_COUGARPOINT_SMBUS		0x1c22
 #define PCI_DEVICE_ID_INTEL_PATSBURG_SMBUS		0x1d22
- 
+/* Patsburg also has three 'Integrated Device Function' SMBus controllers */
 #define PCI_DEVICE_ID_INTEL_PATSBURG_SMBUS_IDF0		0x1d70
 #define PCI_DEVICE_ID_INTEL_PATSBURG_SMBUS_IDF1		0x1d71
 #define PCI_DEVICE_ID_INTEL_PATSBURG_SMBUS_IDF2		0x1d72
@@ -132,7 +225,7 @@ struct i801_mux_config {
 	unsigned values[3];
 	int n_values;
 	unsigned classes[3];
-	unsigned gpios[2];		 
+	unsigned gpios[2];		/* Relative to gpio_chip->base */
 	int n_gpios;
 };
 
@@ -143,9 +236,11 @@ struct i801_priv {
 	struct pci_dev *pci_dev;
 	unsigned int features;
 
+	/* isr processing */
 	wait_queue_head_t waitq;
 	u8 status;
 
+	/* Command state used by isr for byte-by-byte block transactions */
 	u8 cmd;
 	bool is_read;
 	int count;
@@ -159,6 +254,10 @@ struct i801_priv {
 #endif
 	struct platform_device *tco_pdev;
 
+	/*
+	 * If set to true the host controller registers are reserved for
+	 * ACPI AML use. Protected by acpi_lock.
+	 */
 	bool acpi_reserved;
 	struct mutex acpi_lock;
 };
@@ -168,7 +267,7 @@ struct i801_priv {
 #define FEATURE_BLOCK_PROC	(1 << 2)
 #define FEATURE_I2C_BLOCK_READ	(1 << 3)
 #define FEATURE_IRQ		(1 << 4)
- 
+/* Not really a feature, but it's convenient to handle it as such */
 #define FEATURE_IDF		(1 << 15)
 #define FEATURE_TCO		(1 << 16)
 
@@ -188,6 +287,8 @@ MODULE_PARM_DESC(disable_features, "Disable selected driver features:\n"
 	"\t\t  0x08  disable the I2C block read functionality\n"
 	"\t\t  0x10  don't use interrupts ");
 
+/* Make sure the SMBus host is ready to start transmitting.
+   Return 0 if it is, -EBUSY if it is not. */
 static int i801_check_pre(struct i801_priv *priv)
 {
 	int status;
@@ -215,13 +316,24 @@ static int i801_check_pre(struct i801_priv *priv)
 	return 0;
 }
 
+/*
+ * Convert the status register to an error code, and clear it.
+ * Note that status only contains the bits we want to clear, not the
+ * actual register value.
+ */
 static int i801_check_post(struct i801_priv *priv, int status)
 {
 	int result = 0;
 
+	/*
+	 * If the SMBus is still busy, we give up
+	 * Note: This timeout condition only happens when using polling
+	 * transactions.  For interrupt operation, NAK/timeout is indicated by
+	 * DEV_ERR.
+	 */
 	if (unlikely(status < 0)) {
 		dev_err(&priv->pci_dev->dev, "Transaction timeout\n");
-		 
+		/* try to stop the current command */
 		dev_dbg(&priv->pci_dev->dev, "Terminating the current operation\n");
 		outb_p(inb_p(SMBHSTCNT(priv)) | SMBHSTCNT_KILL,
 		       SMBHSTCNT(priv));
@@ -229,6 +341,7 @@ static int i801_check_post(struct i801_priv *priv, int status)
 		outb_p(inb_p(SMBHSTCNT(priv)) & (~SMBHSTCNT_KILL),
 		       SMBHSTCNT(priv));
 
+		/* Check if it worked */
 		status = inb_p(SMBHSTSTS(priv));
 		if ((status & SMBHSTSTS_HOST_BUSY) ||
 		    !(status & SMBHSTSTS_FAILED))
@@ -251,16 +364,19 @@ static int i801_check_post(struct i801_priv *priv, int status)
 		dev_dbg(&priv->pci_dev->dev, "Lost arbitration\n");
 	}
 
+	/* Clear status flags except BYTE_DONE, to be cleared by caller */
 	outb_p(status, SMBHSTSTS(priv));
 
 	return result;
 }
 
+/* Wait for BUSY being cleared and either INTR or an error flag being set */
 static int i801_wait_intr(struct i801_priv *priv)
 {
 	int timeout = 0;
 	int status;
 
+	/* We will always wait for a fraction of a second! */
 	do {
 		usleep_range(250, 500);
 		status = inb_p(SMBHSTSTS(priv));
@@ -275,11 +391,13 @@ static int i801_wait_intr(struct i801_priv *priv)
 	return status & (STATUS_ERROR_FLAGS | SMBHSTSTS_INTR);
 }
 
+/* Wait for either BYTE_DONE or an error flag being set */
 static int i801_wait_byte_done(struct i801_priv *priv)
 {
 	int timeout = 0;
 	int status;
 
+	/* We will always wait for a fraction of a second! */
 	do {
 		usleep_range(250, 500);
 		status = inb_p(SMBHSTSTS(priv));
@@ -318,6 +436,8 @@ static int i801_transaction(struct i801_priv *priv, int xact)
 		return i801_check_post(priv, status);
 	}
 
+	/* the current contents of SMBHSTCNT can be overwritten, since PEC,
+	 * SMBSCMD are passed in xact */
 	outb_p(xact | SMBHSTCNT_START, SMBHSTCNT(priv));
 
 	status = i801_wait_intr(priv);
@@ -331,8 +451,9 @@ static int i801_block_transaction_by_block(struct i801_priv *priv,
 	int i, len;
 	int status;
 
-	inb_p(SMBHSTCNT(priv));  
+	inb_p(SMBHSTCNT(priv)); /* reset the data buffer index */
 
+	/* Use 32-byte buffer to process this transaction */
 	if (read_write == I2C_SMBUS_WRITE) {
 		len = data->block[0];
 		outb_p(len, SMBHSTDAT0(priv));
@@ -360,7 +481,7 @@ static int i801_block_transaction_by_block(struct i801_priv *priv,
 static void i801_isr_byte_done(struct i801_priv *priv)
 {
 	if (priv->is_read) {
-		 
+		/* For SMBus block reads, length is received with first byte */
 		if (((priv->cmd & 0x1c) == I801_BLOCK_DATA) &&
 		    (priv->count == 0)) {
 			priv->len = inb_p(SMBHSTDAT0(priv));
@@ -368,7 +489,7 @@ static void i801_isr_byte_done(struct i801_priv *priv)
 				dev_err(&priv->pci_dev->dev,
 					"Illegal SMBus block read size %d\n",
 					priv->len);
-				 
+				/* FIXME: Recover */
 				priv->len = I2C_SMBUS_BLOCK_MAX;
 			} else {
 				dev_dbg(&priv->pci_dev->dev,
@@ -378,29 +499,47 @@ static void i801_isr_byte_done(struct i801_priv *priv)
 			priv->data[-1] = priv->len;
 		}
 
+		/* Read next byte */
 		if (priv->count < priv->len)
 			priv->data[priv->count++] = inb(SMBBLKDAT(priv));
 		else
 			dev_dbg(&priv->pci_dev->dev,
 				"Discarding extra byte on block read\n");
 
+		/* Set LAST_BYTE for last byte of read transaction */
 		if (priv->count == priv->len - 1)
 			outb_p(priv->cmd | SMBHSTCNT_LAST_BYTE,
 			       SMBHSTCNT(priv));
 	} else if (priv->count < priv->len - 1) {
-		 
+		/* Write next byte, except for IRQ after last byte */
 		outb_p(priv->data[++priv->count], SMBBLKDAT(priv));
 	}
 
+	/* Clear BYTE_DONE to continue with next byte */
 	outb_p(SMBHSTSTS_BYTE_DONE, SMBHSTSTS(priv));
 }
 
+/*
+ * There are two kinds of interrupts:
+ *
+ * 1) i801 signals transaction completion with one of these interrupts:
+ *      INTR - Success
+ *      DEV_ERR - Invalid command, NAK or communication timeout
+ *      BUS_ERR - SMI# transaction collision
+ *      FAILED - transaction was canceled due to a KILL request
+ *    When any of these occur, update ->status and wake up the waitq.
+ *    ->status must be cleared before kicking off the next transaction.
+ *
+ * 2) For byte-by-byte (I2C read/write) transactions, one BYTE_DONE interrupt
+ *    occurs for each byte of a byte-by-byte to prepare the next byte.
+ */
 static irqreturn_t i801_isr(int irq, void *dev_id)
 {
 	struct i801_priv *priv = dev_id;
 	u16 pcists;
 	u8 status;
 
+	/* Confirm this is our interrupt */
 	pci_read_config_word(priv->pci_dev, SMBPCISTS, &pcists);
 	if (!(pcists & SMBPCISTS_INTS))
 		return IRQ_NONE;
@@ -409,6 +548,10 @@ static irqreturn_t i801_isr(int irq, void *dev_id)
 	if (status & SMBHSTSTS_BYTE_DONE)
 		i801_isr_byte_done(priv);
 
+	/*
+	 * Clear irq sources and report transaction result.
+	 * ->status must be cleared before the next transaction is started.
+	 */
 	status &= SMBHSTSTS_INTR | STATUS_ERROR_FLAGS;
 	if (status) {
 		outb_p(status, SMBHSTSTS(priv));
@@ -419,6 +562,11 @@ static irqreturn_t i801_isr(int irq, void *dev_id)
 	return IRQ_HANDLED;
 }
 
+/*
+ * For "byte-by-byte" block transactions:
+ *   I2C write uses cmd=I801_BLOCK_DATA, I2C_EN=1
+ *   I2C read uses cmd=I801_I2C_BLOCK_DATA
+ */
 static int i801_block_transaction_byte_by_byte(struct i801_priv *priv,
 					       union i2c_smbus_data *data,
 					       char read_write, int command,
@@ -489,7 +637,7 @@ static int i801_block_transaction_byte_by_byte(struct i801_priv *priv,
 				dev_err(&priv->pci_dev->dev,
 					"Illegal SMBus block read size %d\n",
 					len);
-				 
+				/* Recover */
 				while (inb_p(SMBHSTSTS(priv)) &
 				       SMBHSTSTS_HOST_BUSY)
 					outb_p(SMBHSTSTS_BYTE_DONE,
@@ -500,11 +648,13 @@ static int i801_block_transaction_byte_by_byte(struct i801_priv *priv,
 			data->block[0] = len;
 		}
 
+		/* Retrieve/store value in SMBBLKDAT */
 		if (read_write == I2C_SMBUS_READ)
 			data->block[i] = inb_p(SMBBLKDAT(priv));
 		if (read_write == I2C_SMBUS_WRITE && i+1 <= len)
 			outb_p(data->block[i+1], SMBBLKDAT(priv));
 
+		/* signals SMBBLKDAT ready */
 		outb_p(SMBHSTSTS_BYTE_DONE, SMBHSTSTS(priv));
 	}
 
@@ -521,6 +671,7 @@ static int i801_set_block_buffer_mode(struct i801_priv *priv)
 	return 0;
 }
 
+/* Block transaction function */
 static int i801_block_transaction(struct i801_priv *priv,
 				  union i2c_smbus_data *data, char read_write,
 				  int command, int hwpec)
@@ -530,7 +681,7 @@ static int i801_block_transaction(struct i801_priv *priv,
 
 	if (command == I2C_SMBUS_I2C_BLOCK_DATA) {
 		if (read_write == I2C_SMBUS_WRITE) {
-			 
+			/* set I2C_EN bit in configuration register */
 			pci_read_config_byte(priv->pci_dev, SMBHSTCFG, &hostc);
 			pci_write_config_byte(priv->pci_dev, SMBHSTCFG,
 					      hostc | SMBHSTCFG_I2C_EN);
@@ -548,9 +699,12 @@ static int i801_block_transaction(struct i801_priv *priv,
 		if (data->block[0] > I2C_SMBUS_BLOCK_MAX)
 			data->block[0] = I2C_SMBUS_BLOCK_MAX;
 	} else {
-		data->block[0] = 32;	 
+		data->block[0] = 32;	/* max for SMBus block reads */
 	}
 
+	/* Experience has shown that the block buffer can only be used for
+	   SMBus (not I2C) block transactions, even though the datasheet
+	   doesn't mention this limitation. */
 	if ((priv->features & FEATURE_BLOCK_BUFFER)
 	 && command != I2C_SMBUS_I2C_BLOCK_DATA
 	 && i801_set_block_buffer_mode(priv) == 0)
@@ -563,12 +717,13 @@ static int i801_block_transaction(struct i801_priv *priv,
 
 	if (command == I2C_SMBUS_I2C_BLOCK_DATA
 	 && read_write == I2C_SMBUS_WRITE) {
-		 
+		/* restore saved configuration register value */
 		pci_write_config_byte(priv->pci_dev, SMBHSTCFG, hostc);
 	}
 	return result;
 }
 
+/* Return negative errno on error. */
 static s32 i801_access(struct i2c_adapter *adap, u16 addr,
 		       unsigned short flags, char read_write, u8 command,
 		       int size, union i2c_smbus_data *data)
@@ -626,10 +781,12 @@ static s32 i801_access(struct i2c_adapter *adap, u16 addr,
 		block = 1;
 		break;
 	case I2C_SMBUS_I2C_BLOCK_DATA:
-		 
+		/* NB: page 240 of ICH5 datasheet shows that the R/#W
+		 * bit should be cleared here, even when reading */
 		outb_p((addr & 0x7f) << 1, SMBHSTADD(priv));
 		if (read_write == I2C_SMBUS_READ) {
-			 
+			/* NB: page 240 of ICH5 datasheet also shows
+			 * that DATA1 is the cmd field when reading */
 			outb_p(command, SMBHSTDAT1(priv));
 		} else
 			outb_p(command, SMBHSTCMD(priv));
@@ -642,7 +799,7 @@ static s32 i801_access(struct i2c_adapter *adap, u16 addr,
 		goto out;
 	}
 
-	if (hwpec)	 
+	if (hwpec)	/* enable/disable hardware PEC */
 		outb_p(inb_p(SMBAUXCTL(priv)) | SMBAUXCTL_CRC, SMBAUXCTL(priv));
 	else
 		outb_p(inb_p(SMBAUXCTL(priv)) & (~SMBAUXCTL_CRC),
@@ -654,6 +811,9 @@ static s32 i801_access(struct i2c_adapter *adap, u16 addr,
 	else
 		ret = i801_transaction(priv, xact);
 
+	/* Some BIOSes don't like it when PEC is enabled at reboot or resume
+	   time, so we forcibly disable it after every transaction. Turn off
+	   E32B for the same reason. */
 	if (hwpec || block)
 		outb_p(inb_p(SMBAUXCTL(priv)) &
 		       ~(SMBAUXCTL_CRC | SMBAUXCTL_E32B), SMBAUXCTL(priv));
@@ -666,7 +826,7 @@ static s32 i801_access(struct i2c_adapter *adap, u16 addr,
 		goto out;
 
 	switch (xact & 0x7f) {
-	case I801_BYTE:	 
+	case I801_BYTE:	/* Result put in SMBHSTDAT0 */
 	case I801_BYTE_DATA:
 		data->byte = inb_p(SMBHSTDAT0(priv));
 		break;
@@ -751,6 +911,7 @@ MODULE_DEVICE_TABLE(pci, i801_ids);
 #if defined CONFIG_X86 && defined CONFIG_DMI
 static unsigned char apanel_addr;
 
+/* Scan the system ROM for the signature "FJKEYINF" */
 static __init const void __iomem *bios_signature(const void __iomem *bios)
 {
 	ssize_t offset;
@@ -769,10 +930,10 @@ static void __init input_apanel_init(void)
 	void __iomem *bios;
 	const void __iomem *p;
 
-	bios = ioremap(0xF0000, 0x10000);  
+	bios = ioremap(0xF0000, 0x10000); /* Can't fail */
 	p = bios_signature(bios);
 	if (p) {
-		 
+		/* just use the first address */
 		apanel_addr = readb(p + 8 + 3) >> 1;
 	}
 	iounmap(bios);
@@ -798,7 +959,7 @@ static void dmi_check_onboard_device(u8 type, const char *name,
 	struct i2c_board_info info;
 
 	for (i = 0; i < ARRAY_SIZE(dmi_devices); i++) {
-		 
+		/* & ~0x80, ignore enabled/disabled bit */
 		if ((type & ~0x80) != dmi_devices[i].type)
 			continue;
 		if (strcasecmp(name, dmi_devices[i].name))
@@ -812,6 +973,9 @@ static void dmi_check_onboard_device(u8 type, const char *name,
 	}
 }
 
+/* We use our own function to check for onboard devices instead of
+   dmi_find_device() as some buggy BIOS's have the devices we are interested
+   in marked as disabled */
 static void dmi_check_onboard_devices(const struct dmi_header *dm, void *adap)
 {
 	int i, count;
@@ -833,16 +997,17 @@ static void dmi_check_onboard_devices(const struct dmi_header *dm, void *adap)
 			name += strlen(name) + 1;
 			s--;
 		}
-		if (name[0] == 0)  
+		if (name[0] == 0) /* Bogus string reference */
 			continue;
 
 		dmi_check_onboard_device(type, name, adap);
 	}
 }
 
+/* Register optional slaves */
 static void i801_probe_optional_slaves(struct i801_priv *priv)
 {
-	 
+	/* Only register slaves on main SMBus channel */
 	if (priv->features & FEATURE_IDF)
 		return;
 
@@ -861,7 +1026,7 @@ static void i801_probe_optional_slaves(struct i801_priv *priv)
 #else
 static void __init input_apanel_init(void) {}
 static void i801_probe_optional_slaves(struct i801_priv *priv) {}
-#endif	 
+#endif	/* CONFIG_X86 && CONFIG_DMI */
 
 #if (defined CONFIG_I2C_MUX_GPIO || defined CONFIG_I2C_MUX_GPIO_MODULE) && \
 		defined CONFIG_DMI
@@ -950,6 +1115,7 @@ static const struct dmi_system_id mux_dmi_table[] = {
 	{ }
 };
 
+/* Setup multiplexing if needed */
 static int i801_add_mux(struct i801_priv *priv)
 {
 	struct device *dev = &priv->adapter.dev;
@@ -961,6 +1127,7 @@ static int i801_add_mux(struct i801_priv *priv)
 		return 0;
 	mux_config = priv->mux_drvdata;
 
+	/* Prepare the platform data */
 	memset(&gpio_data, 0, sizeof(struct i2c_mux_gpio_platform_data));
 	gpio_data.parent = priv->adapter.nr;
 	gpio_data.values = mux_config->values;
@@ -971,6 +1138,7 @@ static int i801_add_mux(struct i801_priv *priv)
 	gpio_data.n_gpios = mux_config->n_gpios;
 	gpio_data.idle = I2C_MUX_GPIO_NO_IDLE;
 
+	/* Register the mux device */
 	priv->mux_pdev = platform_device_register_data(dev, "i2c-mux-gpio",
 				PLATFORM_DEVID_AUTO, &gpio_data,
 				sizeof(struct i2c_mux_gpio_platform_data));
@@ -999,11 +1167,12 @@ static unsigned int i801_get_adapter_class(struct i801_priv *priv)
 
 	id = dmi_first_match(mux_dmi_table);
 	if (id) {
-		 
+		/* Remove branch classes from trunk */
 		mux_config = id->driver_data;
 		for (i = 0; i < mux_config->n_values; i++)
 			class &= ~mux_config->classes[i];
 
+		/* Remember for later */
 		priv->mux_drvdata = mux_config;
 	}
 
@@ -1051,6 +1220,9 @@ static void i801_add_tco(struct i801_priv *priv)
 	res->end = res->start + 32 - 1;
 	res->flags = IORESOURCE_IO;
 
+	/*
+	 * Power Management registers.
+	 */
 	devfn = PCI_DEVFN(PCI_SLOT(pci_dev->devfn), 2);
 	pci_bus_read_config_dword(pci_dev->bus, devfn, ACPIBASE, &base_addr);
 
@@ -1059,14 +1231,24 @@ static void i801_add_tco(struct i801_priv *priv)
 	res->end = res->start + 3;
 	res->flags = IORESOURCE_IO;
 
+	/*
+	 * Enable the ACPI I/O space.
+	 */
 	pci_bus_read_config_dword(pci_dev->bus, devfn, ACPICTRL, &ctrl_val);
 	ctrl_val |= ACPICTRL_EN;
 	pci_bus_write_config_dword(pci_dev->bus, devfn, ACPICTRL, ctrl_val);
 
+	/*
+	 * We must access the NO_REBOOT bit over the Primary to Sideband
+	 * bridge (P2SB). The BIOS prevents the P2SB device from being
+	 * enumerated by the PCI subsystem, so we need to unhide/hide it
+	 * to lookup the P2SB BAR.
+	 */
 	spin_lock(&p2sb_spinlock);
 
 	devfn = PCI_DEVFN(PCI_SLOT(pci_dev->devfn), 1);
 
+	/* Unhide the P2SB device */
 	pci_bus_write_config_byte(pci_dev->bus, devfn, 0xe1, 0x0);
 
 	pci_bus_read_config_dword(pci_dev->bus, devfn, SBREG_BAR, &base_addr);
@@ -1075,6 +1257,7 @@ static void i801_add_tco(struct i801_priv *priv)
 	pci_bus_read_config_dword(pci_dev->bus, devfn, SBREG_BAR + 0x4, &base_addr);
 	base64_addr |= (u64)base_addr << 32;
 
+	/* Hide the P2SB device */
 	pci_bus_write_config_byte(pci_dev->bus, devfn, 0xe1, 0x1);
 	spin_unlock(&p2sb_spinlock);
 
@@ -1103,6 +1286,11 @@ i801_acpi_io_handler(u32 function, acpi_physical_address address, u32 bits,
 	struct pci_dev *pdev = priv->pci_dev;
 	acpi_status status;
 
+	/*
+	 * Once BIOS AML code touches the OpRegion we warn and inhibit any
+	 * further access from the driver itself. This device is now owned
+	 * by the system firmware.
+	 */
 	mutex_lock(&priv->acpi_lock);
 
 	if (!priv->acpi_reserved) {
@@ -1197,15 +1385,15 @@ static int i801_probe(struct pci_dev *dev, const struct pci_device_id *id)
 	case PCI_DEVICE_ID_INTEL_WELLSBURG_SMBUS_MS1:
 	case PCI_DEVICE_ID_INTEL_WELLSBURG_SMBUS_MS2:
 		priv->features |= FEATURE_IDF;
-		 
+		/* fall through */
 	default:
 		priv->features |= FEATURE_I2C_BLOCK_READ;
 		priv->features |= FEATURE_IRQ;
-		 
+		/* fall through */
 	case PCI_DEVICE_ID_INTEL_82801DB_3:
 		priv->features |= FEATURE_SMBUS_PEC;
 		priv->features |= FEATURE_BLOCK_BUFFER;
-		 
+		/* fall through */
 	case PCI_DEVICE_ID_INTEL_82801CA_3:
 	case PCI_DEVICE_ID_INTEL_82801BA_2:
 	case PCI_DEVICE_ID_INTEL_82801AB_3:
@@ -1213,6 +1401,7 @@ static int i801_probe(struct pci_dev *dev, const struct pci_device_id *id)
 		break;
 	}
 
+	/* Disable features on user request */
 	for (i = 0; i < ARRAY_SIZE(i801_feature_names); i++) {
 		if (priv->features & disable_features & (1 << i))
 			dev_notice(&dev->dev, "%s disabled by user\n",
@@ -1222,7 +1411,7 @@ static int i801_probe(struct pci_dev *dev, const struct pci_device_id *id)
 
 #ifdef MY_DEF_HERE
 	priv->features &= ~FEATURE_IRQ;
-#endif  
+#endif /* MY_ABC_HERE */
 
 	err = pcim_enable_device(dev);
 	if (err) {
@@ -1232,6 +1421,7 @@ static int i801_probe(struct pci_dev *dev, const struct pci_device_id *id)
 	}
 	pcim_pin_device(dev);
 
+	/* Determine the address of the SMBus area */
 	priv->smba = pci_resource_start(dev, SMBBAR);
 	if (!priv->smba) {
 		dev_err(&dev->dev,
@@ -1255,7 +1445,7 @@ static int i801_probe(struct pci_dev *dev, const struct pci_device_id *id)
 
 	pci_read_config_byte(priv->pci_dev, SMBHSTCFG, &temp);
 	priv->original_hstcfg = temp;
-	temp &= ~SMBHSTCFG_I2C_EN;	 
+	temp &= ~SMBHSTCFG_I2C_EN;	/* SMBus timing */
 	if (!(temp & SMBHSTCFG_HST_EN)) {
 		dev_info(&dev->dev, "Enabling SMBus device\n");
 		temp |= SMBHSTCFG_HST_EN;
@@ -1264,23 +1454,27 @@ static int i801_probe(struct pci_dev *dev, const struct pci_device_id *id)
 
 	if (temp & SMBHSTCFG_SMB_SMI_EN) {
 		dev_dbg(&dev->dev, "SMBus using interrupt SMI#\n");
-		 
+		/* Disable SMBus interrupt feature if SMBus using SMI# */
 		priv->features &= ~FEATURE_IRQ;
 	}
 
+	/* Clear special mode bits */
 	if (priv->features & (FEATURE_SMBUS_PEC | FEATURE_BLOCK_BUFFER))
 		outb_p(inb_p(SMBAUXCTL(priv)) &
 		       ~(SMBAUXCTL_CRC | SMBAUXCTL_E32B), SMBAUXCTL(priv));
 
+	/* Default timeout in interrupt mode: 200 ms */
 	priv->adapter.timeout = HZ / 5;
 
 	if (priv->features & FEATURE_IRQ) {
 		u16 pcictl, pcists;
 
+		/* Complain if an interrupt is already pending */
 		pci_read_config_word(priv->pci_dev, SMBPCISTS, &pcists);
 		if (pcists & SMBPCISTS_INTS)
 			dev_warn(&dev->dev, "An interrupt is pending!\n");
 
+		/* Check if interrupts have been disabled */
 		pci_read_config_word(priv->pci_dev, SMBPCICTL, &pcictl);
 		if (pcictl & SMBPCICTL_INTDIS) {
 			dev_info(&dev->dev, "Interrupts are disabled\n");
@@ -1315,7 +1509,7 @@ static int i801_probe(struct pci_dev *dev, const struct pci_device_id *id)
 	}
 
 	i801_probe_optional_slaves(priv);
-	 
+	/* We ignore errors - multiplexing is optional */
 	i801_add_mux(priv);
 
 	pci_set_drvdata(dev, priv);
@@ -1334,6 +1528,10 @@ static void i801_remove(struct pci_dev *dev)
 
 	platform_device_unregister(priv->tco_pdev);
 
+	/*
+	 * do not call pci_disable_device(dev) since it can cause hard hangs on
+	 * some systems during power-off (eg. Fujitsu-Siemens Lifebook E8010)
+	 */
 }
 
 #ifdef CONFIG_PM

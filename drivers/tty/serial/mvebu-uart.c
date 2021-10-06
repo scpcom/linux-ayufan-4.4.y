@@ -47,6 +47,10 @@
 #include <linux/tty.h>
 #include <linux/tty_flip.h>
 
+#ifdef MY_DEF_HERE
+extern int (*syno_test_list)(unsigned char, struct tty_struct *);
+#endif /* MY_DEF_HERE */
+
 #if defined(MY_DEF_HERE)
 #ifdef MY_DEF_HERE
 void __iomem *syno_uart1_base;
@@ -558,10 +562,19 @@ static void mvebu_uart_rx_chars(struct uart_port *port, unsigned int status)
 
 #if defined(MY_DEF_HERE)
 		if (status & stat_bit_rx_rdy)
+#ifdef MY_DEF_HERE
+		{
+			if (NULL != syno_test_list && syno_test_list(ch & 0xff, port->state->port.tty)) {
+				goto ignore_char;
+			}
+#endif /* MY_DEF_HERE */
 #else /* MY_DEF_HERE */
 		if (status & STAT_RX_RDY)
 #endif /* MY_DEF_HERE */
 			tty_insert_flip_char(tport, ch, flag);
+#ifdef MY_DEF_HERE
+		}
+#endif /* MY_DEF_HERE */
 
 		if (status & STAT_BRK_DET)
 			tty_insert_flip_char(tport, 0, TTY_BREAK);

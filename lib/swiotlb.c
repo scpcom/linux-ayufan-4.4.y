@@ -120,6 +120,16 @@ unsigned long swiotlb_nr_tbl(void)
 }
 EXPORT_SYMBOL_GPL(swiotlb_nr_tbl);
 
+unsigned int swiotlb_max_size(void)
+{
+#if IS_ENABLED(CONFIG_SWIOTLB)
+       return rounddown(swiotlb_nr_tbl() << IO_TLB_SHIFT, PAGE_SIZE);
+#else
+       return 0;
+#endif
+}
+EXPORT_SYMBOL_GPL(swiotlb_max_size);
+
 /* default to 64MB */
 #define IO_TLB_DEFAULT_SIZE (64UL<<20)
 unsigned long swiotlb_size_or_default(void)

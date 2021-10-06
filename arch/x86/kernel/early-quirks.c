@@ -241,7 +241,7 @@ static void __init intel_remapping_check(int num, int slot, int func)
 #define KB(x)	((x) * 1024UL)
 #define MB(x)	(KB (KB (x)))
 
-static size_t __init i830_tseg_size(void)
+static resource_size_t __init i830_tseg_size(void)
 {
 	u8 esmramc = read_pci_config_byte(0, 0, 0, I830_ESMRAMC);
 
@@ -254,7 +254,7 @@ static size_t __init i830_tseg_size(void)
 		return KB(512);
 }
 
-static size_t __init i845_tseg_size(void)
+static resource_size_t __init i845_tseg_size(void)
 {
 	u8 esmramc = read_pci_config_byte(0, 0, 0, I845_ESMRAMC);
 	u8 tseg_size = esmramc & I845_TSEG_SIZE_MASK;
@@ -271,7 +271,7 @@ static size_t __init i845_tseg_size(void)
 	return 0;
 }
 
-static size_t __init i85x_tseg_size(void)
+static resource_size_t __init i85x_tseg_size(void)
 {
 	u8 esmramc = read_pci_config_byte(0, 0, 0, I85X_ESMRAMC);
 
@@ -281,12 +281,12 @@ static size_t __init i85x_tseg_size(void)
 	return MB(1);
 }
 
-static size_t __init i830_mem_size(void)
+static resource_size_t __init i830_mem_size(void)
 {
 	return read_pci_config_byte(0, 0, 0, I830_DRB3) * MB(32);
 }
 
-static size_t __init i85x_mem_size(void)
+static resource_size_t __init i85x_mem_size(void)
 {
 	return read_pci_config_byte(0, 0, 1, I85X_DRB3) * MB(32);
 }
@@ -295,36 +295,36 @@ static size_t __init i85x_mem_size(void)
  * On 830/845/85x the stolen memory base isn't available in any
  * register. We need to calculate it as TOM-TSEG_SIZE-stolen_size.
  */
-static phys_addr_t __init i830_stolen_base(int num, int slot, int func,
-					   size_t stolen_size)
+static resource_size_t __init i830_stolen_base(int num, int slot, int func,
+					       resource_size_t stolen_size)
 {
-	return (phys_addr_t)i830_mem_size() - i830_tseg_size() - stolen_size;
+	return i830_mem_size() - i830_tseg_size() - stolen_size;
 }
 
-static phys_addr_t __init i845_stolen_base(int num, int slot, int func,
-					   size_t stolen_size)
+static resource_size_t __init i845_stolen_base(int num, int slot, int func,
+					       resource_size_t stolen_size)
 {
-	return (phys_addr_t)i830_mem_size() - i845_tseg_size() - stolen_size;
+	return i830_mem_size() - i845_tseg_size() - stolen_size;
 }
 
-static phys_addr_t __init i85x_stolen_base(int num, int slot, int func,
-					   size_t stolen_size)
+static resource_size_t __init i85x_stolen_base(int num, int slot, int func,
+					       resource_size_t stolen_size)
 {
-	return (phys_addr_t)i85x_mem_size() - i85x_tseg_size() - stolen_size;
+	return i85x_mem_size() - i85x_tseg_size() - stolen_size;
 }
 
-static phys_addr_t __init i865_stolen_base(int num, int slot, int func,
-					   size_t stolen_size)
+static resource_size_t __init i865_stolen_base(int num, int slot, int func,
+					       resource_size_t stolen_size)
 {
 	u16 toud = 0;
 
 	toud = read_pci_config_16(0, 0, 0, I865_TOUD);
 
-	return (phys_addr_t)(toud << 16) + i845_tseg_size();
+	return toud * KB(64) + i845_tseg_size();
 }
 
-static phys_addr_t __init gen3_stolen_base(int num, int slot, int func,
-					   size_t stolen_size)
+static resource_size_t __init gen3_stolen_base(int num, int slot, int func,
+					       resource_size_t stolen_size)
 {
 	u32 bsm;
 
@@ -335,10 +335,10 @@ static phys_addr_t __init gen3_stolen_base(int num, int slot, int func,
 	 */
 	bsm = read_pci_config(num, slot, func, INTEL_BSM);
 
-	return (phys_addr_t)bsm & INTEL_BSM_MASK;
+	return bsm & INTEL_BSM_MASK;
 }
 
-static size_t __init i830_stolen_size(int num, int slot, int func)
+static resource_size_t __init i830_stolen_size(int num, int slot, int func)
 {
 	u16 gmch_ctrl;
 	u16 gms;
@@ -359,7 +359,7 @@ static size_t __init i830_stolen_size(int num, int slot, int func)
 	return 0;
 }
 
-static size_t __init gen3_stolen_size(int num, int slot, int func)
+static resource_size_t __init gen3_stolen_size(int num, int slot, int func)
 {
 	u16 gmch_ctrl;
 	u16 gms;
@@ -388,7 +388,7 @@ static size_t __init gen3_stolen_size(int num, int slot, int func)
 	return 0;
 }
 
-static size_t __init gen6_stolen_size(int num, int slot, int func)
+static resource_size_t __init gen6_stolen_size(int num, int slot, int func)
 {
 	u16 gmch_ctrl;
 	u16 gms;
@@ -396,10 +396,10 @@ static size_t __init gen6_stolen_size(int num, int slot, int func)
 	gmch_ctrl = read_pci_config_16(num, slot, func, SNB_GMCH_CTRL);
 	gms = (gmch_ctrl >> SNB_GMCH_GMS_SHIFT) & SNB_GMCH_GMS_MASK;
 
-	return (size_t)gms * MB(32);
+	return gms * MB(32);
 }
 
-static size_t __init gen8_stolen_size(int num, int slot, int func)
+static resource_size_t __init gen8_stolen_size(int num, int slot, int func)
 {
 	u16 gmch_ctrl;
 	u16 gms;
@@ -407,10 +407,10 @@ static size_t __init gen8_stolen_size(int num, int slot, int func)
 	gmch_ctrl = read_pci_config_16(num, slot, func, SNB_GMCH_CTRL);
 	gms = (gmch_ctrl >> BDW_GMCH_GMS_SHIFT) & BDW_GMCH_GMS_MASK;
 
-	return (size_t)gms * MB(32);
+	return gms * MB(32);
 }
 
-static size_t __init chv_stolen_size(int num, int slot, int func)
+static resource_size_t __init chv_stolen_size(int num, int slot, int func)
 {
 	u16 gmch_ctrl;
 	u16 gms;
@@ -424,19 +424,14 @@ static size_t __init chv_stolen_size(int num, int slot, int func)
 	 * 0x17 to 0x1d: 4MB increments start at 36MB
 	 */
 	if (gms < 0x11)
-		return (size_t)gms * MB(32);
+		return gms * MB(32);
 	else if (gms < 0x17)
-		return (size_t)(gms - 0x11 + 2) * MB(4);
+		return (gms - 0x11) * MB(4) + MB(8);
 	else
-		return (size_t)(gms - 0x17 + 9) * MB(4);
+		return (gms - 0x17) * MB(4) + MB(36);
 }
 
-struct intel_stolen_funcs {
-	size_t (*size)(int num, int slot, int func);
-	phys_addr_t (*base)(int num, int slot, int func, size_t size);
-};
-
-static size_t __init gen9_stolen_size(int num, int slot, int func)
+static resource_size_t __init gen9_stolen_size(int num, int slot, int func)
 {
 	u16 gmch_ctrl;
 	u16 gms;
@@ -447,117 +442,143 @@ static size_t __init gen9_stolen_size(int num, int slot, int func)
 	/* 0x0  to 0xef: 32MB increments starting at 0MB */
 	/* 0xf0 to 0xfe: 4MB increments starting at 4MB */
 	if (gms < 0xf0)
-		return (size_t)gms * MB(32);
+		return gms * MB(32);
 	else
-		return (size_t)(gms - 0xf0 + 1) * MB(4);
+		return (gms - 0xf0) * MB(4) + MB(4);
 }
 
-typedef size_t (*stolen_size_fn)(int num, int slot, int func);
-
-static const struct intel_stolen_funcs i830_stolen_funcs __initconst = {
-	.base = i830_stolen_base,
-	.size = i830_stolen_size,
+struct intel_early_ops {
+	resource_size_t (*stolen_size)(int num, int slot, int func);
+	resource_size_t (*stolen_base)(int num, int slot, int func,
+				       resource_size_t size);
 };
 
-static const struct intel_stolen_funcs i845_stolen_funcs __initconst = {
-	.base = i845_stolen_base,
-	.size = i830_stolen_size,
+static const struct intel_early_ops i830_early_ops __initconst = {
+	.stolen_base = i830_stolen_base,
+	.stolen_size = i830_stolen_size,
 };
 
-static const struct intel_stolen_funcs i85x_stolen_funcs __initconst = {
-	.base = i85x_stolen_base,
-	.size = gen3_stolen_size,
+static const struct intel_early_ops i845_early_ops __initconst = {
+	.stolen_base = i845_stolen_base,
+	.stolen_size = i830_stolen_size,
 };
 
-static const struct intel_stolen_funcs i865_stolen_funcs __initconst = {
-	.base = i865_stolen_base,
-	.size = gen3_stolen_size,
+static const struct intel_early_ops i85x_early_ops __initconst = {
+	.stolen_base = i85x_stolen_base,
+	.stolen_size = gen3_stolen_size,
 };
 
-static const struct intel_stolen_funcs gen3_stolen_funcs __initconst = {
-	.base = gen3_stolen_base,
-	.size = gen3_stolen_size,
+static const struct intel_early_ops i865_early_ops __initconst = {
+	.stolen_base = i865_stolen_base,
+	.stolen_size = gen3_stolen_size,
 };
 
-static const struct intel_stolen_funcs gen6_stolen_funcs __initconst = {
-	.base = gen3_stolen_base,
-	.size = gen6_stolen_size,
+static const struct intel_early_ops gen3_early_ops __initconst = {
+	.stolen_base = gen3_stolen_base,
+	.stolen_size = gen3_stolen_size,
 };
 
-static const struct intel_stolen_funcs gen8_stolen_funcs __initconst = {
-	.base = gen3_stolen_base,
-	.size = gen8_stolen_size,
+static const struct intel_early_ops gen6_early_ops __initconst = {
+	.stolen_base = gen3_stolen_base,
+	.stolen_size = gen6_stolen_size,
 };
 
-static const struct intel_stolen_funcs gen9_stolen_funcs __initconst = {
-	.base = gen3_stolen_base,
-	.size = gen9_stolen_size,
+static const struct intel_early_ops gen8_early_ops __initconst = {
+	.stolen_base = gen3_stolen_base,
+	.stolen_size = gen8_stolen_size,
 };
 
-static const struct intel_stolen_funcs chv_stolen_funcs __initconst = {
-	.base = gen3_stolen_base,
-	.size = chv_stolen_size,
+static const struct intel_early_ops gen9_early_ops __initconst = {
+	.stolen_base = gen3_stolen_base,
+	.stolen_size = gen9_stolen_size,
 };
 
-static const struct pci_device_id intel_stolen_ids[] __initconst = {
-	INTEL_I830_IDS(&i830_stolen_funcs),
-	INTEL_I845G_IDS(&i845_stolen_funcs),
-	INTEL_I85X_IDS(&i85x_stolen_funcs),
-	INTEL_I865G_IDS(&i865_stolen_funcs),
-	INTEL_I915G_IDS(&gen3_stolen_funcs),
-	INTEL_I915GM_IDS(&gen3_stolen_funcs),
-	INTEL_I945G_IDS(&gen3_stolen_funcs),
-	INTEL_I945GM_IDS(&gen3_stolen_funcs),
-	INTEL_VLV_IDS(&gen6_stolen_funcs),
-	INTEL_PINEVIEW_IDS(&gen3_stolen_funcs),
-	INTEL_I965G_IDS(&gen3_stolen_funcs),
-	INTEL_G33_IDS(&gen3_stolen_funcs),
-	INTEL_I965GM_IDS(&gen3_stolen_funcs),
-	INTEL_GM45_IDS(&gen3_stolen_funcs),
-	INTEL_G45_IDS(&gen3_stolen_funcs),
-	INTEL_IRONLAKE_D_IDS(&gen3_stolen_funcs),
-	INTEL_IRONLAKE_M_IDS(&gen3_stolen_funcs),
-	INTEL_SNB_D_IDS(&gen6_stolen_funcs),
-	INTEL_SNB_M_IDS(&gen6_stolen_funcs),
-	INTEL_IVB_M_IDS(&gen6_stolen_funcs),
-	INTEL_IVB_D_IDS(&gen6_stolen_funcs),
-	INTEL_HSW_IDS(&gen6_stolen_funcs),
-	INTEL_BDW_IDS(&gen8_stolen_funcs),
-	INTEL_CHV_IDS(&chv_stolen_funcs),
-	INTEL_SKL_IDS(&gen9_stolen_funcs),
-	INTEL_BXT_IDS(&gen9_stolen_funcs),
-	INTEL_KBL_IDS(&gen9_stolen_funcs),
+static const struct intel_early_ops chv_early_ops __initconst = {
+	.stolen_base = gen3_stolen_base,
+	.stolen_size = chv_stolen_size,
 };
 
-static void __init intel_graphics_stolen(int num, int slot, int func)
+static const struct pci_device_id intel_early_ids[] __initconst = {
+	INTEL_I830_IDS(&i830_early_ops),
+	INTEL_I845G_IDS(&i845_early_ops),
+	INTEL_I85X_IDS(&i85x_early_ops),
+	INTEL_I865G_IDS(&i865_early_ops),
+	INTEL_I915G_IDS(&gen3_early_ops),
+	INTEL_I915GM_IDS(&gen3_early_ops),
+	INTEL_I945G_IDS(&gen3_early_ops),
+	INTEL_I945GM_IDS(&gen3_early_ops),
+	INTEL_VLV_IDS(&gen6_early_ops),
+	INTEL_PINEVIEW_IDS(&gen3_early_ops),
+	INTEL_I965G_IDS(&gen3_early_ops),
+	INTEL_G33_IDS(&gen3_early_ops),
+	INTEL_I965GM_IDS(&gen3_early_ops),
+	INTEL_GM45_IDS(&gen3_early_ops),
+	INTEL_G45_IDS(&gen3_early_ops),
+	INTEL_IRONLAKE_D_IDS(&gen3_early_ops),
+	INTEL_IRONLAKE_M_IDS(&gen3_early_ops),
+	INTEL_SNB_D_IDS(&gen6_early_ops),
+	INTEL_SNB_M_IDS(&gen6_early_ops),
+	INTEL_IVB_M_IDS(&gen6_early_ops),
+	INTEL_IVB_D_IDS(&gen6_early_ops),
+	INTEL_HSW_IDS(&gen6_early_ops),
+	INTEL_BDW_IDS(&gen8_early_ops),
+	INTEL_CHV_IDS(&chv_early_ops),
+	INTEL_SKL_IDS(&gen9_early_ops),
+	INTEL_BXT_IDS(&gen9_early_ops),
+	INTEL_KBL_IDS(&gen9_early_ops),
+	INTEL_CFL_IDS(&gen9_early_ops),
+	INTEL_GLK_IDS(&gen9_early_ops),
+	INTEL_CNL_IDS(&gen9_early_ops),
+};
+
+struct resource intel_graphics_stolen_res = DEFINE_RES_MEM(0, 0);
+EXPORT_SYMBOL(intel_graphics_stolen_res);
+
+static void __init
+intel_graphics_stolen(int num, int slot, int func,
+		      const struct intel_early_ops *early_ops)
 {
-	size_t size;
+	resource_size_t base, size;
+	resource_size_t end;
+
+	size = early_ops->stolen_size(num, slot, func);
+	base = early_ops->stolen_base(num, slot, func, size);
+
+	if (!size || !base)
+		return;
+
+	end = base + size - 1;
+
+	intel_graphics_stolen_res.start = base;
+	intel_graphics_stolen_res.end = end;
+
+	printk(KERN_INFO "Reserving Intel graphics memory at %pR\n",
+	       &intel_graphics_stolen_res);
+
+	/* Mark this space as reserved */
+	e820_add_region(base, size, E820_RESERVED);
+	sanitize_e820_map(e820.map, ARRAY_SIZE(e820.map), &e820.nr_map);
+}
+
+static void __init intel_graphics_quirks(int num, int slot, int func)
+{
+	const struct intel_early_ops *early_ops;
+	u16 device;
 	int i;
-	phys_addr_t start;
-	u16 device, subvendor, subdevice;
 
 	device = read_pci_config_16(num, slot, func, PCI_DEVICE_ID);
-	subvendor = read_pci_config_16(num, slot, func,
-				       PCI_SUBSYSTEM_VENDOR_ID);
-	subdevice = read_pci_config_16(num, slot, func, PCI_SUBSYSTEM_ID);
 
-	for (i = 0; i < ARRAY_SIZE(intel_stolen_ids); i++) {
-		if (intel_stolen_ids[i].device == device) {
-			const struct intel_stolen_funcs *stolen_funcs =
-				(const struct intel_stolen_funcs *)intel_stolen_ids[i].driver_data;
-			size = stolen_funcs->size(num, slot, func);
-			start = stolen_funcs->base(num, slot, func, size);
-			if (size && start) {
-				printk(KERN_INFO "Reserving Intel graphics stolen memory at 0x%llx-0x%llx\n",
-				       start, start + size - 1);
-				/* Mark this space as reserved */
-				e820_add_region(start, size, E820_RESERVED);
-				sanitize_e820_map(e820.map,
-						  ARRAY_SIZE(e820.map),
-						  &e820.nr_map);
-			}
-			return;
-		}
+	for (i = 0; i < ARRAY_SIZE(intel_early_ids); i++) {
+		kernel_ulong_t driver_data = intel_early_ids[i].driver_data;
+
+		if (intel_early_ids[i].device != device)
+			continue;
+
+		early_ops = (typeof(early_ops))driver_data;
+
+		intel_graphics_stolen(num, slot, func, early_ops);
+
+		return;
 	}
 }
 
@@ -655,7 +676,7 @@ static struct chipset early_qrk[] __initdata = {
 	{ PCI_VENDOR_ID_INTEL, 0x3406, PCI_CLASS_BRIDGE_HOST,
 	  PCI_BASE_CLASS_BRIDGE, 0, intel_remapping_check },
 	{ PCI_VENDOR_ID_INTEL, PCI_ANY_ID, PCI_CLASS_DISPLAY_VGA, PCI_ANY_ID,
-	  QFLAG_APPLY_ONCE, intel_graphics_stolen },
+	  QFLAG_APPLY_ONCE, intel_graphics_quirks },
 	/*
 	 * HPET on the current version of the Baytrail platform has accuracy
 	 * problems: it will halt in deep idle state - so we disable it.

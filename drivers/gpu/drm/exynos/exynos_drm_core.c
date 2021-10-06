@@ -13,9 +13,9 @@
  */
 
 #include <drm/drmP.h>
+
 #include "exynos_drm_drv.h"
 #include "exynos_drm_crtc.h"
-#include "exynos_drm_fbdev.h"
 
 static LIST_HEAD(exynos_drm_subdrv_list);
 

@@ -29,8 +29,8 @@
 #include <linux/module.h>
 #include <linux/console.h>
 #include <linux/pci.h>
-#include "drmP.h"
-#include "drm/drm.h"
+#include <drm/drmP.h>
+#include <drm/drm.h>
 
 #include "virtgpu_drv.h"
 static struct drm_driver driver;
@@ -108,9 +108,7 @@ static const struct file_operations virtio_gpu_driver_fops = {
 	.read = drm_read,
 	.unlocked_ioctl	= drm_ioctl,
 	.release = drm_release,
-#ifdef CONFIG_COMPAT
 	.compat_ioctl = drm_compat_ioctl,
-#endif
 	.llseek = noop_llseek,
 };
 
@@ -123,11 +121,9 @@ static struct drm_driver driver = {
 
 	.dumb_create = virtio_gpu_mode_dumb_create,
 	.dumb_map_offset = virtio_gpu_mode_dumb_mmap,
-	.dumb_destroy = virtio_gpu_mode_dumb_destroy,
 
 #if defined(CONFIG_DEBUG_FS)
 	.debugfs_init = virtio_gpu_debugfs_init,
-	.debugfs_cleanup = virtio_gpu_debugfs_takedown,
 #endif
 	.prime_handle_to_fd = drm_gem_prime_handle_to_fd,
 	.prime_fd_to_handle = drm_gem_prime_fd_to_handle,

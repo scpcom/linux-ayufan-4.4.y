@@ -72,7 +72,7 @@ int virtio_gpu_gem_create(struct drm_file *file,
 	*obj_p = &obj->gem_base;
 
 	/* drop reference from allocate - handle holds it now */
-	drm_gem_object_unreference_unlocked(&obj->gem_base);
+	drm_gem_object_put_unlocked(&obj->gem_base);
 
 	*handle_p = handle;
 	return 0;
@@ -88,6 +88,7 @@ int virtio_gpu_mode_dumb_create(struct drm_file *file_priv,
 	int ret;
 	uint32_t pitch;
 	uint32_t resid;
+	uint32_t format;
 
 	pitch = args->width * ((args->bpp + 1) / 8);
 	args->size = pitch * args->height;
@@ -98,9 +99,10 @@ int virtio_gpu_mode_dumb_create(struct drm_file *file_priv,
 	if (ret)
 		goto fail;
 
+	format = virtio_gpu_translate_format(DRM_FORMAT_XRGB8888);
 	virtio_gpu_resource_id_get(vgdev, &resid);
-	virtio_gpu_cmd_create_resource(vgdev, resid,
-				       2, args->width, args->height);
+	virtio_gpu_cmd_create_resource(vgdev, resid, format,
+				       args->width, args->height);
 
 	/* attach the object to the resource */
 	obj = gem_to_virtio_gpu_obj(gobj);
@@ -116,13 +118,6 @@ fail:
 	return ret;
 }
 
-int virtio_gpu_mode_dumb_destroy(struct drm_file *file_priv,
-				 struct drm_device *dev,
-				 uint32_t handle)
-{
-	return drm_gem_handle_delete(file_priv, handle);
-}
-
 int virtio_gpu_mode_dumb_mmap(struct drm_file *file_priv,
 			      struct drm_device *dev,
 			      uint32_t handle, uint64_t *offset_p)
@@ -135,7 +130,7 @@ int virtio_gpu_mode_dumb_mmap(struct drm_file *file_priv,
 		return -ENOENT;
 	obj = gem_to_virtio_gpu_obj(gobj);
 	*offset_p = virtio_gpu_object_mmap_offset(obj);
-	drm_gem_object_unreference_unlocked(gobj);
+	drm_gem_object_put_unlocked(gobj);
 	return 0;
 }
 

@@ -28,8 +28,10 @@
 #include <drm/radeon_drm.h>
 #include "radeon.h"
 #include "radeon_audio.h"
+#include "radeon_asic.h"
 #include "atom.h"
 #include <linux/backlight.h>
+#include <linux/dmi.h>
 
 extern int atom_debug;
 
@@ -2183,9 +2185,17 @@ int radeon_atom_pick_dig_encoder(struct drm_encoder *encoder, int fe_idx)
 		goto assigned;
 	}
 
-	/* on DCE32 and encoder can driver any block so just crtc id */
+	/*
+	 * On DCE32 any encoder can drive any block so usually just use crtc id,
+	 * but Apple thinks different at least on iMac10,1, so there use linkb,
+	 * otherwise the internal eDP panel will stay dark.
+	 */
 	if (ASIC_IS_DCE32(rdev)) {
-		enc_idx = radeon_crtc->crtc_id;
+		if (dmi_match(DMI_PRODUCT_NAME, "iMac10,1"))
+			enc_idx = (dig->linkb) ? 1 : 0;
+		else
+			enc_idx = radeon_crtc->crtc_id;
+
 		goto assigned;
 	}
 
@@ -2630,16 +2640,8 @@ radeon_atom_ext_dpms(struct drm_encoder *encoder, int mode)
 
 }
 
-static bool radeon_atom_ext_mode_fixup(struct drm_encoder *encoder,
-				       const struct drm_display_mode *mode,
-				       struct drm_display_mode *adjusted_mode)
-{
-	return true;
-}
-
 static const struct drm_encoder_helper_funcs radeon_atom_ext_helper_funcs = {
 	.dpms = radeon_atom_ext_dpms,
-	.mode_fixup = radeon_atom_ext_mode_fixup,
 	.prepare = radeon_atom_ext_prepare,
 	.mode_set = radeon_atom_ext_mode_set,
 	.commit = radeon_atom_ext_commit,

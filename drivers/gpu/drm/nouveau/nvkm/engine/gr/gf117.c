@@ -102,7 +102,7 @@ gf117_gr_pack_mmio[] = {
 
 #include "fuc/hubgf117.fuc3.h"
 
-struct gf100_gr_ucode
+static struct gf100_gr_ucode
 gf117_gr_fecs_ucode = {
 	.code.data = gf117_grhub_code,
 	.code.size = sizeof(gf117_grhub_code),
@@ -112,7 +112,7 @@ gf117_gr_fecs_ucode = {
 
 #include "fuc/gpcgf117.fuc3.h"
 
-struct gf100_gr_ucode
+static struct gf100_gr_ucode
 gf117_gr_gpccs_ucode = {
 	.code.data = gf117_grgpc_code,
 	.code.size = sizeof(gf117_grgpc_code),
@@ -123,9 +123,11 @@ gf117_gr_gpccs_ucode = {
 static const struct gf100_gr_func
 gf117_gr = {
 	.init = gf100_gr_init,
+	.init_gpc_mmu = gf100_gr_init_gpc_mmu,
 	.mmio = gf117_gr_pack_mmio,
 	.fecs.ucode = &gf117_gr_fecs_ucode,
 	.gpccs.ucode = &gf117_gr_gpccs_ucode,
+	.rops = gf100_gr_rops,
 	.ppc_nr = 1,
 	.grctx = &gf117_grctx,
 	.sclass = {

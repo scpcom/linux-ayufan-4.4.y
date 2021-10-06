@@ -1,12 +1,38 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
- 
+/*
+ *  libata.h - helper library for ATA
+ *
+ *  Copyright 2003-2004 Red Hat, Inc.  All rights reserved.
+ *  Copyright 2003-2004 Jeff Garzik
+ *
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ *
+ *  libata documentation is available via 'make {ps|pdf}docs',
+ *  as Documentation/DocBook/libata.*
+ *
+ */
+
 #ifndef __LIBATA_H__
 #define __LIBATA_H__
 
 #define DRV_NAME	"libata"
-#define DRV_VERSION	"3.00"	 
+#define DRV_VERSION	"3.00"	/* must be exactly four chars */
 
 #ifdef MY_ABC_HERE
 struct ata_blacklist_entry {
@@ -16,7 +42,7 @@ struct ata_blacklist_entry {
 };
 
 extern struct ata_blacklist_entry ata_device_blacklist [];
-#endif  
+#endif /* MY_ABC_HERE */
 
 struct ata_scsi_args {
 	struct ata_device	*dev;
@@ -25,15 +51,17 @@ struct ata_scsi_args {
 	void			(*done)(struct scsi_cmnd *);
 };
 
+/* libata-core.c */
 enum {
-	 
-	ATA_READID_POSTRESET	= (1 << 0),  
+	/* flags for ata_dev_read_id() */
+	ATA_READID_POSTRESET	= (1 << 0), /* reading ID after reset */
 
-	ATA_DNXFER_PIO		= 0,	 
-	ATA_DNXFER_DMA		= 1,	 
-	ATA_DNXFER_40C		= 2,	 
-	ATA_DNXFER_FORCE_PIO	= 3,	 
-	ATA_DNXFER_FORCE_PIO0	= 4,	 
+	/* selector for ata_down_xfermask_limit() */
+	ATA_DNXFER_PIO		= 0,	/* speed down PIO */
+	ATA_DNXFER_DMA		= 1,	/* speed down DMA */
+	ATA_DNXFER_40C		= 2,	/* apply 40c cable limit */
+	ATA_DNXFER_FORCE_PIO	= 3,	/* force PIO */
+	ATA_DNXFER_FORCE_PIO0	= 4,	/* force PIO0 */
 
 	ATA_DNXFER_QUIET	= (1 << 31),
 };
@@ -90,9 +118,13 @@ extern struct ata_port *ata_port_alloc(struct ata_host *host);
 extern const char *sata_spd_string(unsigned int spd);
 extern int ata_port_probe(struct ata_port *ap);
 extern void __ata_port_probe(struct ata_port *ap);
+#ifdef MY_ABC_HERE
+extern int syno_need_force_retry(struct ata_port *ap);
+#endif /* MY_ABC_HERE */
 
 #define to_ata_port(d) container_of(d, struct ata_port, tdev)
 
+/* libata-acpi.c */
 #ifdef CONFIG_ATA_ACPI
 extern unsigned int ata_acpi_gtf_filter;
 extern void ata_acpi_dissociate(struct ata_host *host);
@@ -116,6 +148,7 @@ static inline void ata_acpi_bind_port(struct ata_port *ap) {}
 static inline void ata_acpi_bind_dev(struct ata_device *dev) {}
 #endif
 
+/* libata-scsi.c */
 extern int ata_scsi_add_hosts(struct ata_host *host,
 			      struct scsi_host_template *sht);
 extern void ata_scsi_scan_host(struct ata_port *ap, int sync);
@@ -124,7 +157,7 @@ extern void ata_scsi_media_change_notify(struct ata_device *dev);
 extern void ata_scsi_hotplug(struct work_struct *work);
 #ifdef MY_ABC_HERE
 extern void ata_syno_pmp_hotplug(struct work_struct *work);
-#endif  
+#endif /* MY_ABC_HERE */
 extern void ata_schedule_scsi_eh(struct Scsi_Host *shost);
 extern void ata_scsi_dev_rescan(struct work_struct *work);
 extern int ata_bus_probe(struct ata_port *ap);
@@ -133,6 +166,7 @@ extern int ata_scsi_user_scan(struct Scsi_Host *shost, unsigned int channel,
 int ata_sas_allocate_tag(struct ata_port *ap);
 void ata_sas_free_tag(unsigned int tag, struct ata_port *ap);
 
+/* libata-eh.c */
 extern unsigned long ata_internal_cmd_timeout(struct ata_device *dev, u8 cmd);
 extern void ata_internal_cmd_timed_out(struct ata_device *dev, u8 cmd);
 extern void ata_eh_acquire(struct ata_port *ap);
@@ -143,6 +177,24 @@ extern void ata_eh_fastdrain_timerfn(unsigned long arg);
 extern void ata_qc_schedule_eh(struct ata_queued_cmd *qc);
 extern void ata_dev_disable(struct ata_device *dev);
 extern void ata_eh_detach_dev(struct ata_device *dev);
+#ifdef MY_ABC_HERE
+extern void sata_pmp_detach(struct ata_device *dev);
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
+extern void SendSataErrEvent(struct work_struct *work);
+extern void SendDiskRetryEvent(struct work_struct *work);
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
+extern void SendPortDisEvent(struct work_struct *work);
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
+extern void SendDiskPowerShortBreakEvent(struct work_struct *work);
+#endif /* MY_ABC_HERE */
+#ifdef MY_ABC_HERE
+extern void SendDsleepWakeEvent(struct work_struct *work);
+extern void SendPwrResetEvent(struct work_struct *work);
+extern struct Scsi_Host* ata_scsi_is_eunit_deepsleep(struct Scsi_Host *host);
+#endif /* MY_ABC_HERE */
 extern void ata_eh_about_to_do(struct ata_link *link, struct ata_device *dev,
 			       unsigned int action);
 extern void ata_eh_done(struct ata_link *link, struct ata_device *dev,
@@ -168,13 +220,14 @@ extern unsigned int atapi_eh_tur(struct ata_device *dev, u8 *r_sense_key);
 extern unsigned int atapi_eh_request_sense(struct ata_device *dev,
 					   u8 *sense_buf, u8 dfl_sense_key);
 
+/* libata-pmp.c */
 #ifdef CONFIG_SATA_PMP
 extern int sata_pmp_scr_read(struct ata_link *link, int reg, u32 *val);
 extern int sata_pmp_scr_write(struct ata_link *link, int reg, u32 val);
 extern int sata_pmp_set_lpm(struct ata_link *link, enum ata_lpm_policy policy,
 			    unsigned hints);
 extern int sata_pmp_attach(struct ata_device *dev);
-#else  
+#else /* CONFIG_SATA_PMP */
 static inline int sata_pmp_scr_read(struct ata_link *link, int reg, u32 *val)
 {
 	return -EINVAL;
@@ -195,14 +248,15 @@ static inline int sata_pmp_attach(struct ata_device *dev)
 {
 	return -EINVAL;
 }
-#endif  
+#endif /* CONFIG_SATA_PMP */
 
+/* libata-sff.c */
 #ifdef CONFIG_ATA_SFF
 extern void ata_sff_flush_pio_task(struct ata_port *ap);
 extern void ata_sff_port_init(struct ata_port *ap);
 extern int ata_sff_init(void);
 extern void ata_sff_exit(void);
-#else  
+#else /* CONFIG_ATA_SFF */
 static inline void ata_sff_flush_pio_task(struct ata_port *ap)
 { }
 static inline void ata_sff_port_init(struct ata_port *ap)
@@ -211,8 +265,9 @@ static inline int ata_sff_init(void)
 { return 0; }
 static inline void ata_sff_exit(void)
 { }
-#endif  
+#endif /* CONFIG_ATA_SFF */
 
+/* libata-zpodd.c */
 #ifdef CONFIG_SATA_ZPODD
 void zpodd_init(struct ata_device *dev);
 void zpodd_exit(struct ata_device *dev);
@@ -225,7 +280,7 @@ bool zpodd_zpready(struct ata_device *dev);
 void zpodd_enable_run_wake(struct ata_device *dev);
 void zpodd_disable_run_wake(struct ata_device *dev);
 void zpodd_post_poweron(struct ata_device *dev);
-#else  
+#else /* CONFIG_SATA_ZPODD */
 static inline void zpodd_init(struct ata_device *dev) {}
 static inline void zpodd_exit(struct ata_device *dev) {}
 static inline bool zpodd_dev_enabled(struct ata_device *dev) { return false; }
@@ -234,9 +289,9 @@ static inline bool zpodd_zpready(struct ata_device *dev) { return false; }
 static inline void zpodd_enable_run_wake(struct ata_device *dev) {}
 static inline void zpodd_disable_run_wake(struct ata_device *dev) {}
 static inline void zpodd_post_poweron(struct ata_device *dev) {}
-#endif  
+#endif /* CONFIG_SATA_ZPODD */
 #ifdef MY_ABC_HERE
 int syno_gpio_with_scmd(struct ata_port *ap, struct scsi_device *sdev, SYNO_PM_PKG *pPkg, u8 rw);
-#endif  
+#endif /* MY_ABC_HERE */
 
-#endif  
+#endif /* __LIBATA_H__ */

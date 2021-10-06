@@ -52,8 +52,16 @@ config SYNO_MD_RAID5_BS_REWRITE
 	default y
 	depends on SYNO_MD_BAD_SECTOR_AUTO_REMAP && SYNO_MD_EIO_NODEV_HANDLER
 
+config SYNO_MD_RAID5_FORCE_RCW
+	bool "Force RAID5 go rcw path"
+	default y
+
 config SYNO_MD_STRIPE_MEMORY_ESTIMATION
 	bool "Raid5/6 stripe cache memory usage"
+	default y
+
+config SYNO_MD_RAID5_WRITE_REFERENCE_BIO_PAGE
+	bool "Enhance RAID5 performance by referencing upper layer page"
 	default y
 
 config SYNO_MD_RAID5_ENABLE_SSD_TRIM
@@ -90,6 +98,10 @@ config SYNO_MD_AUTO_REMAP_REPORT
 	default y
 	depends on SYNO_MD_BAD_SECTOR_AUTO_REMAP && SYNO_MD_SECTOR_STATUS_REPORT
 
+config SYNO_MD_SYNC_DEBUG
+	bool "MD Sync Debug Flag"
+	default y
+
 config SYNO_MD_SYNC_MSG
 	bool "Let md sync action log be stored in /var/log/messages."
 	default y
@@ -113,6 +125,15 @@ config SYNO_MD_FIX_RAID1_IO_BARRIER_CKSUM_ERROR
 config SYNO_MD_RAID5D_PROXY
 	bool "run proxy thread when raid5 finish reshaping"
 	default y
+
+config SYNO_MD_RAID_F1
+	bool "Support RAID F1"
+	default y
+
+config SYNO_MD_DATA_CORRECTION
+	bool "Try to use md redundancy to re-compute data when fs ask to retry"
+	default n
+	depends on SYNO_DATA_CORRECTION
 
 config SYNO_MD_LESS_DELAY_RESYNC_MESSAGE
 	bool "Avoid md write same delay resync message too much"
@@ -147,8 +168,16 @@ config SYNO_MD_RAID1_FLUSH_THRESHOLD
 	default y
 	depends on SYNO_MD_RAID1_SYSFS_INTERFACE
 
+config SYNO_MD_RAID5_PERF_ENHANCE_BY_DEFERIO
+	bool "Enhance raid5 series performance by split I/O part from original kernel thread"
+	default y
+
 config SYNO_MD_FORCE_SB_EVENT_INCREASED
 	bool "Forcely increase sb event during starting and stopping array."
+	default y
+
+config SYNO_MD_RAID5_FIX_MAX_LATENCY_HIGH
+	bool "Fix raid5 max latency high issue"
 	default y
 
 config SYNO_MD_RAID1_ADD_DISK_CHECK
@@ -330,6 +359,11 @@ config SYNO_SPINUP_DELAY_PM_DEVICE_GPIO
 	depends on SYNO_SPINUP_DELAY && SYNO_SATA_PM_DEVICE_GPIO
 	default y
 
+config SYNO_SPINUP_DELAY_SATA_IRQ_OFF
+	bool
+	depends on SYNO_SPINUP_DELAY && SYNO_SATA_IRQ_OFF
+	default y
+
 config SYNO_MV_9235_GPIO_CTRL
 	bool "Interfaces For Marvell 9235 GPIO Control"
 	default y
@@ -346,16 +380,90 @@ config SYNO_SCSI_DEVICE_INDEX
 	bool "Get device index from scsi layer"
 	default y
 
+config SYNO_SATA_IRQ_OFF
+	bool "Interfaces For HDD Deep Sleep"
+	depends on SYNO_ATA_PWR_CTRL && SYNO_SATA_PM_DEVICE_GPIO
+	default y
+
+config SYNO_MAX_SATA_ID
+	int "Maximum SATA ID"
+	depends on SYNO_SATA_IRQ_OFF
+	default "20"
+
+config SYNO_PWRPIN_ENCODE_LEN
+	int "Power Pin Encode Length"
+	depends on SYNO_SATA_IRQ_OFF
+	default "2"
+
+config SYNO_PORT_SIGN
+	string "Power Pin Signature"
+	depends on SYNO_SATA_IRQ_OFF
+	default "N"
+
+config SYNO_SATA_IRQ_OFF_PINCTRL_GPIO
+	bool
+	depends on SYNO_SATA_IRQ_OFF && SYNO_X86_PINCTRL_GPIO
+	default "y"
+
+config SYNO_SATA_IRQ_OFF_ICH_GPIO
+	bool
+	depends on SYNO_SATA_IRQ_OFF && SYNO_ICH_GPIO_CTRL
+	default "y"
+
+config SYNO_SATA_IRQ_OFF_PM_DEVICE_GPIO
+	bool
+	depends on SYNO_SATA_IRQ_OFF && SYNO_SATA_PM_DEVICE_GPIO
+	default "y"
+
+config SYNO_SATA_COMPATIBILITY
+	bool "Sata Compatibility Issue Fix"
+	default y
+
+config SYNO_SATA_DEEP_RETRY
+	bool "SATA retry mechanism"
+	depends on SYNO_SATA_COMPATIBILITY && SYNO_SATA_IRQ_OFF
+	default y
+
+config SYNO_EUNIT_COMPATIBILITY
+	bool "Improve EUnit Compatibility"
+	depends on SYNO_SATA_PM_DEVICE_GPIO && SYNO_SATA_COMPATIBILITY
+	default y
+
 config SYNO_DISK_MONITOR_TOOL
 	bool "Disk performance monitor tool"
 	default y
+
+config SYNO_SATA_RETRY_TIMES
+	int "Retry Times of Sata Compatibility Mechanism"
+	depends on SYNO_SATA_COMPATIBILITY
+	default "1"
 
 config SYNO_PM_DISABLE_LINK_LIMIT
 	bool "Clear the link speed limit when pmp attach"
 	default y
 
+config SYNO_ATA_SHUTDOWN_FIX
+	bool "Add shutdown function for ATA host"
+	depends on SYNO_SATA_IRQ_OFF
+	default y
+
+config SYNO_ATA_SHUTDOWN_FIX_PINCTRL_GPIO
+	bool
+	depends on SYNO_ATA_SHUTDOWN_FIX && SYNO_X86_PINCTRL_GPIO
+	default y
+
+config SYNO_ATA_SHUTDOWN_FIX_ICH_GPIO
+	bool
+	depends on SYNO_ATA_SHUTDOWN_FIX && SYNO_ICH_GPIO_CTRL
+	default y
+
 config SYNO_ATA_DISABLE_QUEUED_TRIM
 	bool "Disable queued TRIM function"
+	default y
+
+config SYNO_SATA_ERROR_REPORT
+	bool "Report sata error to user space"
+	depends on SYNO_FIXED_DISK_NAME || SYNO_PORT_MAPPING_V2
 	default y
 
 config SYNO_SATA_88SX7042_MSI
@@ -479,6 +587,16 @@ config SYNO_SATA_PM_FIRST_PORT_DELAY
 	bool "Delay 2 secs for port multiplier first port reset"
 	default n
 
+config SYNO_DETECT_DISK_POWER_SHORT_BREAK
+	bool "Send disk power short brake event to userspace"
+	default y
+	depends on SYNO_SATA_WCACHE_DISABLE
+
+config SYNO_SATA_IRQ_OFF_DETECT_POWER_SHORT_BREAK
+	bool
+	depends on SYNO_SATA_IRQ_OFF && SYNO_DETECT_DISK_POWER_SHORT_BREAK
+	default "y"
+
 config SYNO_CUSTOM_SCMD_TIMEOUT
 	bool "Customize SCSI commands timeout value per disk"
 	default y
@@ -556,6 +674,11 @@ config SYNO_WAKEUPCMD_IDLEIMMED
 	bool "change disk wakeup command to idle immediate"
 	depends on SYNO_SPINUP_DELAY
 	default y
+
+config SYNO_RTD129X_INTERNAL_HDD_RESET
+	bool "RTD129X sata SoC need to reset phy for compatibility enhancement"
+	depends on SYNO_LSP_RTD129X && SYNO_RTD129X
+	default n
 
 config SYNO_EUNIT_SCSI_HOST_RECOVERY
 	bool "Prevent eunit scsi host stuck in recovery state"
@@ -1052,6 +1175,20 @@ config SYNO_TTY_EXPORT
 	bool "Export uP symbol for synobios"
 	default y
 
+config SYNO_TTY_RECEIVE
+	bool "Handle the result from ttyS1"
+	default y
+
+config SYNO_TTY_COMMAND
+	bool "Remove prefix for uP protection command"
+	default y
+	depends on SYNO_MICROP_CTRL
+
+config SYNO_TTY_LOG_MSG
+	bool "Show all command writed to ttyS1 which is Microp"
+	default y
+	depends on SYNO_TTY_COMMAND
+
 config SYNO_TTY_APL_EARLYPRINTK
 	bool "Enable earlyprintk by bootconsole"
 	default y
@@ -1186,6 +1323,15 @@ config SYNO_XR17V35X_SERIAL
 	  default n
 
 endmenu #ALSA
+
+menu Virtio
+
+config SYNO_CLOUD_DSM_BOOT
+	  bool "Map virtio block devices from vdx to sdx"
+	  depends on (SYNO_KVMX64 || SYNO_NEXTKVMX64)
+	  default y
+
+endmenu #Virtio
 
 menu "IOMMU"
 

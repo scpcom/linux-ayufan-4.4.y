@@ -12,6 +12,8 @@ btrfs-y += super.o ctree.o extent-tree.o print-tree.o root-tree.o dir-item.o \
 	   uuid-tree.o props.o hash.o free-space-tree.o xattr_syno.o
 
 btrfs-$(CONFIG_BTRFS_FS_POSIX_ACL) += acl.o
+btrfs-$(CONFIG_SYNO_BTRFS_WINACL) += syno_acl.o
+btrfs-$(CONFIG_SYNO_BTRFS_USRQUOTA) += usrquota.o
 btrfs-$(CONFIG_BTRFS_FS_CHECK_INTEGRITY) += check-integrity.o
 
 btrfs-$(CONFIG_BTRFS_FS_RUN_SANITY_TESTS) += tests/free-space-tests.o \

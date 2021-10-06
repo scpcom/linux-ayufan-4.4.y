@@ -302,9 +302,6 @@ ModZram=" \
 	${KernelDir}/drivers/block/zram/zram.ko \
 	"
 ModVaapi=" \
-	${KernelDir}/drivers/char/agp/agpgart.ko \
-	${KernelDir}/drivers/char/agp/intel-gtt.ko \
-	${KernelDir}/drivers/char/agp/intel-agp.ko \
 	${KernelDir}/drivers/gpu/drm/drm.ko \
 	${KernelDir}/arch/x86/video/fbdev.ko \
 	${KernelDir}/drivers/video/fbdev/core/fb.ko \
@@ -321,6 +318,8 @@ ModVaapi=" \
 	${KernelDir}/drivers/acpi/video.ko \
 	${KernelDir}/drivers/gpu/drm/i915/i915.ko \
 	${KernelDir}/drivers/video/backlight/generic_bl.ko \
+	${KernelDir}/arch/x86/platform/intel/iosf_mbi.ko \
+	${KernelDir}/drivers/gpu/drm/drm_panel_orientation_quirks.ko \
 	"
 ModVirtualization=" \
 	${KernelDir}/virt/lib/irqbypass.ko \
