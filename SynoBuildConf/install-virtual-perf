@@ -1,0 +1,18 @@
+#!/bin/bash
+# Copyright (c) 2000-2018 Synology Inc. All rights reserved.
+
+if [ "$PLATFORM_FAMILY" != "SYNOPLAT_F_X86_64" ]; then
+    SkipThisProject
+    return
+fi
+
+
+env CC="$CC" CXX="$CXX" LD="$LD" AR="$AR" RANLIB="$RANLIB" NM="$NM" STRIP="$STRIP" \
+    CROSS_COMPILE="$ToolChainPrefix" LDFLAGS="$LDFLAGS" \
+make perf_install -C tools \
+    DESTDIR="$TmpInstDir" \
+    prefix="/usr"
+    ARCH="$ARCH" \
+    NO_LIBPERL=1 \
+    NO_LIBPYTHON=1
+

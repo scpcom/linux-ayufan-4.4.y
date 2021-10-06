@@ -1,0 +1,27 @@
+#!/bin/bash
+# Copyright (c) 2000-2018 Synology Inc. All rights reserved.
+
+if [ "$PLATFORM_FAMILY" != "SYNOPLAT_F_X86_64" ]; then
+    SkipThisProject
+    return
+fi
+
+case "$MakeClean" in
+    [Yy][Ee][Ss])
+        make perf_clean -C tools
+        ;;
+esac
+
+case "$CleanOnly" in
+    [Yy][Ee][Ss])
+        return
+        ;;
+esac
+
+env CC="$CC" CXX="$CXX" LD="$LD" AR="$AR" RANLIB="$RANLIB" NM="$NM" STRIP="$STRIP" \
+    CROSS_COMPILE="$ToolChainPrefix" LDFLAGS="$LDFLAGS" \
+make perf -C tools \
+    ARCH="$ARCH" \
+    NO_LIBPERL=1 \
+    NO_LIBPYTHON=1
+
