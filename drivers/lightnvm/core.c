@@ -27,6 +27,7 @@
 #include <linux/module.h>
 #include <linux/miscdevice.h>
 #include <linux/lightnvm.h>
+#include <linux/sched/sysctl.h>
 #include <uapi/linux/lightnvm.h>
 
 static LIST_HEAD(nvm_targets);
@@ -192,6 +193,206 @@ int nvm_erase_blk(struct nvm_dev *dev, struct nvm_block *blk)
 }
 EXPORT_SYMBOL(nvm_erase_blk);
 
+void nvm_addr_to_generic_mode(struct nvm_dev *dev, struct nvm_rq *rqd)
+{
+	int i;
+
+	if (rqd->nr_pages > 1) {
+		for (i = 0; i < rqd->nr_pages; i++)
+			rqd->ppa_list[i] = dev_to_generic_addr(dev,
+							rqd->ppa_list[i]);
+	} else {
+		rqd->ppa_addr = dev_to_generic_addr(dev, rqd->ppa_addr);
+	}
+}
+EXPORT_SYMBOL(nvm_addr_to_generic_mode);
+
+void nvm_generic_to_addr_mode(struct nvm_dev *dev, struct nvm_rq *rqd)
+{
+	int i;
+
+	if (rqd->nr_pages > 1) {
+		for (i = 0; i < rqd->nr_pages; i++)
+			rqd->ppa_list[i] = generic_to_dev_addr(dev,
+							rqd->ppa_list[i]);
+	} else {
+		rqd->ppa_addr = generic_to_dev_addr(dev, rqd->ppa_addr);
+	}
+}
+EXPORT_SYMBOL(nvm_generic_to_addr_mode);
+
+int nvm_set_rqd_ppalist(struct nvm_dev *dev, struct nvm_rq *rqd,
+					struct ppa_addr *ppas, int nr_ppas)
+{
+	int i, plane_cnt, pl_idx;
+
+	if (dev->plane_mode == NVM_PLANE_SINGLE && nr_ppas == 1) {
+		rqd->nr_pages = 1;
+		rqd->ppa_addr = ppas[0];
+
+		return 0;
+	}
+
+	plane_cnt = (1 << dev->plane_mode);
+	rqd->nr_pages = plane_cnt * nr_ppas;
+
+	if (dev->ops->max_phys_sect < rqd->nr_pages)
+		return -EINVAL;
+
+	rqd->ppa_list = nvm_dev_dma_alloc(dev, GFP_KERNEL, &rqd->dma_ppa_list);
+	if (!rqd->ppa_list) {
+		pr_err("nvm: failed to allocate dma memory\n");
+		return -ENOMEM;
+	}
+
+	for (pl_idx = 0; pl_idx < plane_cnt; pl_idx++) {
+		for (i = 0; i < nr_ppas; i++) {
+			ppas[i].g.pl = pl_idx;
+			rqd->ppa_list[(pl_idx * nr_ppas) + i] = ppas[i];
+		}
+	}
+
+	return 0;
+}
+EXPORT_SYMBOL(nvm_set_rqd_ppalist);
+
+void nvm_free_rqd_ppalist(struct nvm_dev *dev, struct nvm_rq *rqd)
+{
+	if (!rqd->ppa_list)
+		return;
+
+	nvm_dev_dma_free(dev, rqd->ppa_list, rqd->dma_ppa_list);
+}
+EXPORT_SYMBOL(nvm_free_rqd_ppalist);
+
+int nvm_erase_ppa(struct nvm_dev *dev, struct ppa_addr *ppas, int nr_ppas)
+{
+	struct nvm_rq rqd;
+	int ret;
+
+	if (!dev->ops->erase_block)
+		return 0;
+
+	memset(&rqd, 0, sizeof(struct nvm_rq));
+
+	ret = nvm_set_rqd_ppalist(dev, &rqd, ppas, nr_ppas);
+	if (ret)
+		return ret;
+
+	nvm_generic_to_addr_mode(dev, &rqd);
+
+	ret = dev->ops->erase_block(dev, &rqd);
+
+	nvm_free_rqd_ppalist(dev, &rqd);
+
+	return ret;
+}
+EXPORT_SYMBOL(nvm_erase_ppa);
+
+void nvm_end_io(struct nvm_rq *rqd, int error)
+{
+	rqd->error = error;
+	rqd->end_io(rqd);
+}
+EXPORT_SYMBOL(nvm_end_io);
+
+static void nvm_end_io_sync(struct nvm_rq *rqd)
+{
+	struct completion *waiting = rqd->wait;
+
+	rqd->wait = NULL;
+
+	complete(waiting);
+}
+
+int nvm_submit_ppa(struct nvm_dev *dev, struct ppa_addr *ppa, int nr_ppas,
+				int opcode, int flags, void *buf, int len)
+{
+	DECLARE_COMPLETION_ONSTACK(wait);
+	struct nvm_rq rqd;
+	struct bio *bio;
+	int ret;
+	unsigned long hang_check;
+
+	bio = bio_map_kern(dev->q, buf, len, GFP_KERNEL);
+	if (IS_ERR_OR_NULL(bio))
+		return -ENOMEM;
+
+	memset(&rqd, 0, sizeof(struct nvm_rq));
+	ret = nvm_set_rqd_ppalist(dev, &rqd, ppa, nr_ppas);
+	if (ret) {
+		bio_put(bio);
+		return ret;
+	}
+
+	rqd.opcode = opcode;
+	rqd.bio = bio;
+	rqd.wait = &wait;
+	rqd.dev = dev;
+	rqd.end_io = nvm_end_io_sync;
+	rqd.flags = flags;
+	nvm_generic_to_addr_mode(dev, &rqd);
+
+	ret = dev->ops->submit_io(dev, &rqd);
+
+	/* Prevent hang_check timer from firing at us during very long I/O */
+	hang_check = sysctl_hung_task_timeout_secs;
+	if (hang_check)
+		while (!wait_for_completion_io_timeout(&wait, hang_check * (HZ/2)));
+	else
+		wait_for_completion_io(&wait);
+
+	nvm_free_rqd_ppalist(dev, &rqd);
+
+	return rqd.error;
+}
+EXPORT_SYMBOL(nvm_submit_ppa);
+
+static int nvm_init_slc_tbl(struct nvm_dev *dev, struct nvm_id_group *grp)
+{
+	int i;
+
+	dev->lps_per_blk = dev->pgs_per_blk;
+	dev->lptbl = kcalloc(dev->lps_per_blk, sizeof(int), GFP_KERNEL);
+	if (!dev->lptbl)
+		return -ENOMEM;
+
+	/* Just a linear array */
+	for (i = 0; i < dev->lps_per_blk; i++)
+		dev->lptbl[i] = i;
+
+	return 0;
+}
+
+static int nvm_init_mlc_tbl(struct nvm_dev *dev, struct nvm_id_group *grp)
+{
+	int i, p;
+	struct nvm_id_lp_mlc *mlc = &grp->lptbl.mlc;
+
+	if (!mlc->num_pairs)
+		return 0;
+
+	dev->lps_per_blk = mlc->num_pairs;
+	dev->lptbl = kcalloc(dev->lps_per_blk, sizeof(int), GFP_KERNEL);
+	if (!dev->lptbl)
+		return -ENOMEM;
+
+	/* The lower page table encoding consists of a list of bytes, where each
+	 * has a lower and an upper half. The first half byte maintains the
+	 * increment value and every value after is an offset added to the
+	 * previous incrementation value */
+	dev->lptbl[0] = mlc->pairs[0] & 0xF;
+	for (i = 1; i < dev->lps_per_blk; i++) {
+		p = mlc->pairs[i >> 1];
+		if (i & 0x1) /* upper */
+			dev->lptbl[i] = dev->lptbl[i - 1] + ((p & 0xF0) >> 4);
+		else /* lower */
+			dev->lptbl[i] = dev->lptbl[i - 1] + (p & 0xF);
+	}
+
+	return 0;
+}
+
 static int nvm_core_init(struct nvm_dev *dev)
 {
 	struct nvm_id *id = &dev->identity;
@@ -216,10 +417,22 @@ static int nvm_core_init(struct nvm_dev *dev)
 		return -EINVAL;
 	}
 
-	if (grp->fmtype != 0 && grp->fmtype != 1) {
+	switch (grp->fmtype) {
+	case NVM_ID_FMTYPE_SLC:
+		if (nvm_init_slc_tbl(dev, grp))
+			return -ENOMEM;
+		break;
+	case NVM_ID_FMTYPE_MLC:
+		if (nvm_init_mlc_tbl(dev, grp))
+			return -ENOMEM;
+		break;
+	default:
 		pr_err("nvm: flash type not supported\n");
 		return -EINVAL;
 	}
+
+	if (!dev->lps_per_blk)
+		pr_info("nvm: lower page programming table missing\n");
 
 	if (grp->mpos & 0x020202)
 		dev->plane_mode = NVM_PLANE_DOUBLE;
@@ -249,6 +462,8 @@ static void nvm_free(struct nvm_dev *dev)
 
 	if (dev->mt)
 		dev->mt->unregister_mgr(dev);
+
+	kfree(dev->lptbl);
 }
 
 static int nvm_init(struct nvm_dev *dev)

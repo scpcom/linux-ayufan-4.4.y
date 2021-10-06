@@ -273,7 +273,7 @@ int vfs_fallocate(struct file *file, int mode, loff_t offset, loff_t len)
 	if (S_ISFIFO(inode->i_mode))
 		return -ESPIPE;
 
-	if (!S_ISREG(inode->i_mode) && !S_ISDIR(inode->i_mode))
+	if (!S_ISREG(inode->i_mode) && !S_ISDIR(inode->i_mode) && !S_ISBLK(inode->i_mode))
 		return -ENODEV;
 
 	if (((offset + len) > inode->i_sb->s_maxbytes) || ((offset + len) < 0))

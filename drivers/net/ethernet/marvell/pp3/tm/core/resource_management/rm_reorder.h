@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -82,5 +78,3 @@ int rm_nodes_switch(rmctl_t hndl,
 			uint32_t last_b_child);
 
 #endif   /* RM_REORDER_H */
-
-#endif /* MY_DEF_HERE */

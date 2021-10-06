@@ -211,6 +211,10 @@ static int xhci_plat_probe(struct platform_device *pdev)
 			dev_warn(&pdev->dev, "failed to get Vbus gpio\n");
 		}
 	}
+#if defined(MY_DEF_HERE)
+	 
+	hcd->power_control_support = 1;
+#endif  
 	dev_info(&pdev->dev, "USB2 Vbus gpio %d\n", hcd->vbus_gpio_pin);
 	dev_info(&pdev->dev, "power control %s\n", hcd->power_control_support ?
 			"enabled" : "disabled");
@@ -358,6 +362,10 @@ static int xhci_plat_remove(struct platform_device *dev)
 	} else {
 		usb_remove_hcd(xhci->shared_hcd);
 		usb_phy_shutdown(hcd->usb_phy);
+#if defined(MY_DEF_HERE)
+		usb_put_phy(hcd->usb_phy);
+		hcd->usb_phy = NULL;
+#endif  
 
 		usb_remove_hcd(hcd);
 	}

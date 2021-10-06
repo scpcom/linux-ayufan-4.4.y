@@ -2583,7 +2583,7 @@ void __init tcp_init(void)
 	sysctl_tcp_rmem[0] = SK_MEM_QUANTUM;
 	sysctl_tcp_rmem[1] = 87380;
 	sysctl_tcp_rmem[2] = max(87380, max_rshare);
-#if defined(MY_ABC_HERE)
+#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 	sysctl_tcp_rmem[0] *= 2;
 	sysctl_tcp_rmem[1] *= 2;
 #endif  

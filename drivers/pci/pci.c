@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *	PCI Bus Services, see include/linux/pci.h for further explanation.
  *
@@ -82,7 +85,11 @@ unsigned long pci_cardbus_mem_size = DEFAULT_CARDBUS_MEM_SIZE;
 unsigned long pci_hotplug_io_size  = DEFAULT_HOTPLUG_IO_SIZE;
 unsigned long pci_hotplug_mem_size = DEFAULT_HOTPLUG_MEM_SIZE;
 
+#ifdef MY_DEF_HERE
+enum pcie_bus_config_types pcie_bus_config = PCIE_BUS_SAFE;
+#else /* MY_DEF_HERE */
 enum pcie_bus_config_types pcie_bus_config = PCIE_BUS_DEFAULT;
+#endif /* MY_DEF_HERE */
 
 /*
  * The default CLS is used if arch didn't set CLS explicitly and not

@@ -56,7 +56,7 @@ static int ion_cma_allocate(struct ion_heap *heap, struct ion_buffer *buffer,
 	if (buffer->flags & ION_FLAG_CACHED)
 #if defined(MY_DEF_HERE)
 	{
-		dev_err(dev, "Can't allocate buffer cause buffer->flags(0x%.8x) & ION_FLAG_CACHED\n", buffer->flags);
+		dev_err(dev, "Can't allocate buffer cause buffer->flags(0x%.8lx) & ION_FLAG_CACHED\n", buffer->flags);
 #endif /* MY_DEF_HERE */
 		return -EINVAL;
 #if defined(MY_DEF_HERE)

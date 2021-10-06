@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
  
 #include <linux/sched.h>
 #include <linux/slab.h>
@@ -554,6 +557,13 @@ add_delayed_ref_head(struct btrfs_fs_info *fs_info,
 		atomic_inc(&delayed_refs->num_entries);
 		trans->delayed_ref_updates++;
 	}
+#ifdef MY_ABC_HERE
+	if (is_data)
+		__percpu_counter_add(&fs_info->delayed_data_ref, 1, SZ_128M);
+	else
+		__percpu_counter_add(&fs_info->delayed_meta_ref, 1, SZ_128M);
+#endif  
+
 	return head_ref;
 }
 
@@ -807,11 +817,8 @@ int btrfs_add_delayed_extent_op(struct btrfs_fs_info *fs_info,
 }
 
 struct btrfs_delayed_ref_head *
-btrfs_find_delayed_ref_head(struct btrfs_trans_handle *trans, u64 bytenr)
+btrfs_find_delayed_ref_head(struct btrfs_delayed_ref_root *delayed_refs, u64 bytenr)
 {
-	struct btrfs_delayed_ref_root *delayed_refs;
-
-	delayed_refs = &trans->transaction->delayed_refs;
 	return find_ref_head(&delayed_refs->href_root, bytenr, 0);
 }
 

@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -152,4 +148,3 @@ static inline int mv_pp3_hmac_bm_buff_put(int frame, int queue, int bp_id, u32 p
 }
 
 #endif /* __mv_hmac_bm_h__ */
-#endif /* MY_DEF_HERE */

@@ -646,6 +646,10 @@ int __init rtk_suspend_init(void)
     struct device_node *p_gic_nd = NULL;
     struct device_node *p_cpu_wrapper_nd = NULL;
 
+#if defined(MY_DEF_HERE) && defined(MY_DEF_HERE)
+    syno_uart1_init();
+#endif /* MY_DEF_HERE && MY_DEF_HERE */
+
     acpu_set_flag(0x00000000);
     rtk_suspend_wakeup_flags_set(0);
     rtk_suspend_resume_state_set(RESUME_NONE);

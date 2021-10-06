@@ -2,9 +2,7 @@
 # Makefile for the marvell PPv3 network driver.
 #
 
-ifeq ($(CONFIG_SYNO_LSP_ARMADA_16_12), y)
 obj-$(CONFIG_MVPP3) += mv_pp3.o
-endif
 
 PLAT_DIR := drivers/net/ethernet/marvell
 
@@ -15,7 +13,6 @@ INCLUDE_DIRS       += -I$(PLAT_DIR)/pp3
 INCLUDE_DIRS       += -I$(PLAT_DIR)/net_complex
 
 export INCLUDE_DIRS
-ifeq ($(CONFIG_SYNO_LSP_ARMADA_16_12), y)
 ccflags-y	+= $(INCLUDE_DIRS)
 ccflags-y += -I$(PLAT_DIR)/pp3/tm/platform
 ccflags-y += -I$(PLAT_DIR)/pp3/tm/core
@@ -62,4 +59,4 @@ mv_pp3-objs += gop/pcs/mv_xpcs_if.o gop/pcs/mv_gpcs_if.o
 mv_pp3-objs += gop/serdes/mv_serdes_if.o gop/mv_smi.o
 mv_pp3-objs += gop/mv_ptp_if.o gop/mv_ptp_if_serv.o gop/mv_tai_clock.o
 mv_pp3-objs += net_dev/mv_ptp_uio.o
-endif
+

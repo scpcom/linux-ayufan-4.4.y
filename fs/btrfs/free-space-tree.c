@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2015 Facebook.  All rights reserved.
  *
@@ -1149,55 +1152,6 @@ out:
 	return ret;
 }
 
-int btrfs_create_free_space_tree(struct btrfs_fs_info *fs_info)
-{
-	struct btrfs_trans_handle *trans;
-	struct btrfs_root *tree_root = fs_info->tree_root;
-	struct btrfs_root *free_space_root;
-	struct btrfs_block_group_cache *block_group;
-	struct rb_node *node;
-	int ret;
-
-	trans = btrfs_start_transaction(tree_root, 0);
-	if (IS_ERR(trans))
-		return PTR_ERR(trans);
-
-	fs_info->creating_free_space_tree = 1;
-	free_space_root = btrfs_create_tree(trans, fs_info,
-					    BTRFS_FREE_SPACE_TREE_OBJECTID);
-	if (IS_ERR(free_space_root)) {
-		ret = PTR_ERR(free_space_root);
-		goto abort;
-	}
-	fs_info->free_space_root = free_space_root;
-
-	node = rb_first(&fs_info->block_group_cache_tree);
-	while (node) {
-		block_group = rb_entry(node, struct btrfs_block_group_cache,
-				       cache_node);
-		ret = populate_free_space_tree(trans, fs_info, block_group);
-		if (ret)
-			goto abort;
-		node = rb_next(node);
-	}
-
-	btrfs_set_fs_compat_ro(fs_info, FREE_SPACE_TREE);
-	btrfs_set_fs_compat_ro(fs_info, FREE_SPACE_TREE_VALID);
-	fs_info->creating_free_space_tree = 0;
-
-	ret = btrfs_commit_transaction(trans, tree_root);
-	if (ret)
-		return ret;
-
-	return 0;
-
-abort:
-	fs_info->creating_free_space_tree = 0;
-	btrfs_abort_transaction(trans, tree_root, ret);
-	btrfs_end_transaction(trans, tree_root);
-	return ret;
-}
-
 static int clear_free_space_tree(struct btrfs_trans_handle *trans,
 				 struct btrfs_root *root)
 {
@@ -1236,6 +1190,101 @@ static int clear_free_space_tree(struct btrfs_trans_handle *trans,
 	ret = 0;
 out:
 	btrfs_free_path(path);
+	return ret;
+}
+
+int btrfs_create_free_space_tree(struct btrfs_fs_info *fs_info)
+{
+	struct btrfs_trans_handle *trans;
+	struct btrfs_root *tree_root = fs_info->tree_root;
+	struct btrfs_root *free_space_root;
+	struct btrfs_block_group_cache *block_group;
+	struct rb_node *node;
+	int ret;
+
+	trans = btrfs_start_transaction(tree_root, 0);
+	if (IS_ERR(trans))
+		return PTR_ERR(trans);
+
+	fs_info->creating_free_space_tree = 1;
+#ifdef MY_ABC_HERE
+	fs_info->abort_free_space_tree = 0;
+	fs_info->free_space_tree_processed_block_group_cnt = 0;
+#endif /* MY_ABC_HERE */
+	free_space_root = btrfs_create_tree(trans, fs_info,
+					    BTRFS_FREE_SPACE_TREE_OBJECTID);
+	if (IS_ERR(free_space_root)) {
+		ret = PTR_ERR(free_space_root);
+		goto abort;
+	}
+	fs_info->free_space_root = free_space_root;
+
+	node = rb_first(&fs_info->block_group_cache_tree);
+	while (node) {
+		block_group = rb_entry(node, struct btrfs_block_group_cache,
+				       cache_node);
+		ret = populate_free_space_tree(trans, fs_info, block_group);
+		if (ret)
+			goto abort;
+#ifdef MY_ABC_HERE
+		if (fs_info->abort_free_space_tree) {
+			break;
+		}
+#endif /* MY_ABC_HERE */
+
+		node = rb_next(node);
+#ifdef MY_ABC_HERE
+		fs_info->free_space_tree_processed_block_group_cnt++;
+#endif /* MY_ABC_HERE */
+	}
+
+#ifdef MY_ABC_HERE
+	if (!fs_info->abort_free_space_tree) {
+		btrfs_set_fs_compat_ro(fs_info, FREE_SPACE_TREE_VALID);
+		btrfs_set_fs_compat_ro(fs_info, FREE_SPACE_TREE);
+	} else {
+		btrfs_clear_fs_compat_ro(fs_info, FREE_SPACE_TREE);
+		btrfs_clear_fs_compat_ro(fs_info, FREE_SPACE_TREE_VALID);
+		fs_info->free_space_root = NULL;
+
+		ret = clear_free_space_tree(trans, free_space_root);
+		if (ret)
+			goto abort;
+
+		ret = btrfs_del_root(trans, tree_root, &free_space_root->root_key);
+		if (ret)
+			goto abort;
+
+		list_del(&free_space_root->dirty_list);
+
+		btrfs_tree_lock(free_space_root->node);
+
+		clean_tree_block(trans, fs_info, free_space_root->node);
+		btrfs_tree_unlock(free_space_root->node);
+		btrfs_free_tree_block(trans, free_space_root, free_space_root->node,
+					  0, 1);
+
+		free_extent_buffer(free_space_root->node);
+		free_extent_buffer(free_space_root->commit_root);
+		kfree(free_space_root);
+	}
+#else
+	btrfs_set_fs_compat_ro(fs_info, FREE_SPACE_TREE_VALID);
+	btrfs_set_fs_compat_ro(fs_info, FREE_SPACE_TREE);
+#endif /* MY_ABC_HERE */
+
+	fs_info->creating_free_space_tree = 0;
+
+	ret = btrfs_commit_transaction(trans, tree_root);
+	if (ret)
+		return ret;
+
+	return 0;
+
+abort:
+	fs_info->creating_free_space_tree = 0;
+	btrfs_abort_transaction(trans, tree_root, ret);
+	btrfs_end_transaction(trans, tree_root);
 	return ret;
 }
 

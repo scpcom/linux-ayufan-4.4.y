@@ -26,7 +26,11 @@ endif # CONFIG_SYNO_LSP_ARMADA_17_02_02
 endif
 obj-$(CONFIG_PHY_MVEBU_SATA)		+= phy-mvebu-sata.o
 ifeq ($(CONFIG_SYNO_LSP_ARMADA_17_04_02), y)
+ifeq ($(CONFIG_SYNO_LSP_ARMADA_17_10), y)
+obj-$(CONFIG_PHY_MVEBU_UTMI)		+= phy-utmi-mvebu.o
+else # CONFIG_SYNO_LSP_ARMADA_17_10
 obj-$(CONFIG_PHY_ARMADA3700_UTMI)	+= phy-armada3700-utmi.o
+endif # CONFIG_SYNO_LSP_ARMADA_17_10  
 endif # CONFIG_SYNO_LSP_ARMADA_17_04_02
 obj-$(CONFIG_PHY_MIPHY28LP) 		+= phy-miphy28lp.o
 obj-$(CONFIG_PHY_MIPHY365X)		+= phy-miphy365x.o

@@ -460,6 +460,10 @@ err_put_node:
 #endif /* MY_DEF_HERE */
 }
 #if defined(MY_DEF_HERE)
+/* late_initcall, to guarantee the driver is loaded after A3700 clock driver */
+late_initcall(armada3700_cpufreq_driver_init);
+#else /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
 module_init(armada3700_cpufreq_driver_init);
 #else /* MY_DEF_HERE */
 
@@ -481,6 +485,7 @@ static struct platform_driver armada3700_cpufreq_platdrv = {
 	.remove		= armada3700_cpufreq_remove,
 };
 module_platform_driver(armada3700_cpufreq_platdrv);
+#endif /* MY_DEF_HERE */
 #endif /* MY_DEF_HERE */
 
 MODULE_AUTHOR("Victor Gu <xigu@marvell.com>");

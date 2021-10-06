@@ -76,7 +76,11 @@ static unsigned long max_mw_size;
 module_param(max_mw_size, ulong, 0644);
 MODULE_PARM_DESC(max_mw_size, "Limit size of large memory windows");
 
+#ifdef CONFIG_SYNO_NTB /* CONFIG_SYNO_NTB */
+static unsigned int transport_mtu = 0x9026;
+#else
 static unsigned int transport_mtu = 0x10000;
+#endif /* CONFIG_SYNO_NTB */
 module_param(transport_mtu, uint, 0644);
 MODULE_PARM_DESC(transport_mtu, "Maximum size of NTB transport packets");
 
@@ -247,7 +251,11 @@ enum {
 	container_of((__drv), struct ntb_transport_client, driver)
 
 #define QP_TO_MW(nt, qp)	((qp) % nt->mw_count)
+#ifdef CONFIG_SYNO_NTB /* CONFIG_SYNO_NTB */
+#define NTB_QP_DEF_NUM_ENTRIES  10000
+#else
 #define NTB_QP_DEF_NUM_ENTRIES	100
+#endif /* CONFIG_SYNO_NTB */
 #define NTB_LINK_DOWN_TIMEOUT	10
 
 static void ntb_transport_rxc_db(unsigned long data);
@@ -672,8 +680,21 @@ static int ntb_set_mw(struct ntb_transport_ctx *nt, int num_mw,
 	mw->xlat_size = xlat_size;
 	mw->buff_size = buff_size;
 
+#ifdef CONFIG_SYNO_NTB /* CONFIG_SYNO_NTB */
+	mw->virt_addr = dma_alloc_coherent(&pdev->dev, buff_size * 2,
+					   &mw->dma_addr, GFP_KERNEL);
+
+	//Here we shift the dma_addr and virt_addr to meet the align
+	if (!IS_ALIGNED(mw->dma_addr, mw->xlat_align)) {
+                u64 old_dma = mw->dma_addr;
+                mw->dma_addr = (mw->dma_addr & ~(mw->xlat_align - 1)) + mw->xlat_align;
+                mw->virt_addr = mw->virt_addr + (mw->dma_addr - old_dma);
+        }	
+#else
 	mw->virt_addr = dma_alloc_coherent(&pdev->dev, buff_size,
 					   &mw->dma_addr, GFP_KERNEL);
+#endif /* CONFIG_SYNO_NTB */
+
 	if (!mw->virt_addr) {
 		mw->xlat_size = 0;
 		mw->buff_size = 0;

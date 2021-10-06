@@ -175,7 +175,7 @@ static struct mtip_cmd *mtip_get_int_command(struct driver_data *dd)
 	if (mtip_check_surprise_removal(dd->pdev))
 		return NULL;
 
-	rq = blk_mq_alloc_request(dd->queue, 0, __GFP_RECLAIM, true);
+	rq = blk_mq_alloc_request(dd->queue, 0, BLK_MQ_REQ_RESERVED);
 	if (IS_ERR(rq))
 		return NULL;
 
@@ -4029,6 +4029,12 @@ skip_create_disk:
 	blk_queue_max_segment_size(dd->queue, 0x400000);
 	blk_queue_io_min(dd->queue, 4096);
 	blk_queue_bounce_limit(dd->queue, dd->pdev->dma_mask);
+
+	/*
+	 * write back cache is not supported in the device. FUA depends on
+	 * write back cache support, hence setting flush support to zero.
+	 */
+	blk_queue_flush(dd->queue, 0);
 
 	/* Signal trim support */
 	if (dd->trim_supp == true) {

@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -785,4 +781,3 @@ int rm_find_free_port_drop_profile_cos(rmctl_t hndl, uint8_t cos)
 
 	return free_entry;
 }
-#endif /* MY_DEF_HERE */

@@ -835,7 +835,11 @@ static u32 ich10_writable_pin[] = {1, 6, 7, 10, 15, 16, 17, 18, 20, 21, 24, 25, 
 static u32 c206_writable_pin[] = {0, 5, 16, 20, 21, 22, 34, 38, 48, 52, 54, 69, 70, 71};
 static u32 c226_writable_pin[] = {5, 16, 18, 19, 20, 21, 23, 32, 33, 34, 35, 36, 37, 45};
 static u32 avoton_writable_pin[] = {10, 15, 16, 17, 49, 50, 53, 54};
-static u32 broadwell_writable_pin[] = {3, 4, 5, 28, 45, 70, 71};
+#ifdef CONFIG_SYNO_BROADWELLNTB
+static u32 broadwellntb_writable_pin[] = {3, 4, 5, 26, 28, 32, 33, 44, 45, 46};
+#else
+static u32 broadwell_writable_pin[] = {3, 4, 5, 25, 27, 28, 45, 70, 71};
+#endif  
 
 #ifdef MY_DEF_HERE
  
@@ -1005,8 +1009,13 @@ static int syno_gpio_init(struct pci_dev *dev)
 			SynoGpioCount = ARRAY_SIZE(ich10_writable_pin);
 			break;
 		case PCI_DEVICE_ID_INTEL_BROADWELL_LPC:
+#ifdef CONFIG_SYNO_BROADWELLNTB
+			writable_pin = broadwellntb_writable_pin;
+			SynoGpioCount = ARRAY_SIZE(broadwellntb_writable_pin);
+#else
 			writable_pin = broadwell_writable_pin;
 			SynoGpioCount = ARRAY_SIZE(broadwell_writable_pin);
+#endif  
 			break;
 		default:
 			printk("Unknown LPC device %04x\n", dev->device);

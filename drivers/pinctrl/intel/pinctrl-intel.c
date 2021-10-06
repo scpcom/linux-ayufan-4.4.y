@@ -8,6 +8,7 @@
 #include <linux/acpi.h>
 #include <linux/gpio.h>
 #include <linux/gpio/driver.h>
+#include <linux/log2.h>
 #include <linux/platform_device.h>
 #include <linux/pm.h>
 #include <linux/pinctrl/pinctrl.h>
@@ -16,6 +17,10 @@
 #include <linux/pinctrl/pinconf-generic.h>
 
 #include "pinctrl-intel.h"
+
+#define REVID				0x000
+#define REVID_SHIFT			16
+#define REVID_MASK			GENMASK(31, 16)
 
 #define PADBAR				0x00c
 #define GPI_IS				0x100
@@ -34,6 +39,7 @@
 #define PADCFG0_RXEVCFG_EDGE		1
 #define PADCFG0_RXEVCFG_DISABLED	2
 #define PADCFG0_RXEVCFG_EDGE_BOTH	3
+#define PADCFG0_PREGFRXSEL		BIT(24)
 #define PADCFG0_RXINV			BIT(23)
 #define PADCFG0_GPIROUTIOXAPIC		BIT(20)
 #define PADCFG0_GPIROUTSCI		BIT(19)
@@ -55,9 +61,17 @@
 #define PADCFG1_TERM_5K			2
 #define PADCFG1_TERM_1K			1
 
+#define PADCFG2				0x008
+#define PADCFG2_DEBEN			BIT(0)
+#define PADCFG2_DEBOUNCE_SHIFT		1
+#define PADCFG2_DEBOUNCE_MASK		GENMASK(4, 1)
+
+#define DEBOUNCE_PERIOD			31250  
+
 struct intel_pad_context {
 	u32 padcfg0;
 	u32 padcfg1;
+	u32 padcfg2;
 };
 
 struct intel_community_context {
@@ -106,13 +120,19 @@ static void __iomem *intel_get_padcfg(struct intel_pinctrl *pctrl, unsigned pin,
 {
 	const struct intel_community *community;
 	unsigned padno;
+	size_t nregs;
 
 	community = intel_get_community(pctrl, pin);
 	if (!community)
 		return NULL;
 
 	padno = pin_to_padno(community, pin);
-	return community->pad_regs + reg + padno * 8;
+	nregs = (community->features & PINCTRL_FEATURE_DEBOUNCE) ? 4 : 2;
+
+	if (reg == PADCFG2 && !(community->features & PINCTRL_FEATURE_DEBOUNCE))
+		return NULL;
+
+	return community->pad_regs + reg + padno * nregs * 4;
 }
 
 static bool intel_pad_owned_by_host(struct intel_pinctrl *pctrl, unsigned pin)
@@ -219,6 +239,7 @@ static void intel_pin_dbg_show(struct pinctrl_dev *pctldev, struct seq_file *s,
 			       unsigned pin)
 {
 	struct intel_pinctrl *pctrl = pinctrl_dev_get_drvdata(pctldev);
+	void __iomem *padcfg;
 	u32 cfg0, cfg1, mode;
 	bool locked, acpi;
 
@@ -237,6 +258,10 @@ static void intel_pin_dbg_show(struct pinctrl_dev *pctldev, struct seq_file *s,
 		seq_printf(s, "mode %d ", mode);
 
 	seq_printf(s, "0x%08x 0x%08x", cfg0, cfg1);
+
+	padcfg = intel_get_padcfg(pctrl, pin, PADCFG2);
+	if (padcfg)
+		seq_printf(s, " 0x%08x", readl(padcfg));
 
 	locked = intel_pad_locked(pctrl, pin);
 	acpi = intel_pad_acpi_mode(pctrl, pin);
@@ -395,7 +420,7 @@ static int intel_config_get(struct pinctrl_dev *pctldev, unsigned pin,
 	struct intel_pinctrl *pctrl = pinctrl_dev_get_drvdata(pctldev);
 	enum pin_config_param param = pinconf_to_config_param(*config);
 	u32 value, term;
-	u16 arg = 0;
+	u32 arg = 0;
 
 	if (!intel_pad_owned_by_host(pctrl, pin))
 		return -ENOTSUPP;
@@ -444,6 +469,24 @@ static int intel_config_get(struct pinctrl_dev *pctldev, unsigned pin,
 		}
 
 		break;
+
+	case PIN_CONFIG_INPUT_DEBOUNCE: {
+		void __iomem *padcfg2;
+		u32 v;
+
+		padcfg2 = intel_get_padcfg(pctrl, pin, PADCFG2);
+		if (!padcfg2)
+			return -ENOTSUPP;
+
+		v = readl(padcfg2);
+		if (!(v & PADCFG2_DEBEN))
+			return -EINVAL;
+
+		v = (v & PADCFG2_DEBOUNCE_MASK) >> PADCFG2_DEBOUNCE_SHIFT;
+		arg = BIT(v) * DEBOUNCE_PERIOD / 1000;
+
+		break;
+	}
 
 	default:
 		return -ENOTSUPP;
@@ -522,6 +565,52 @@ static int intel_config_set_pull(struct intel_pinctrl *pctrl, unsigned pin,
 	return ret;
 }
 
+static int intel_config_set_debounce(struct intel_pinctrl *pctrl, unsigned pin,
+				     unsigned debounce)
+{
+	void __iomem *padcfg0, *padcfg2;
+	unsigned long flags;
+	u32 value0, value2;
+	int ret = 0;
+
+	padcfg2 = intel_get_padcfg(pctrl, pin, PADCFG2);
+	if (!padcfg2)
+		return -ENOTSUPP;
+
+	padcfg0 = intel_get_padcfg(pctrl, pin, PADCFG0);
+
+	spin_lock_irqsave(&pctrl->lock, flags);
+
+	value0 = readl(padcfg0);
+	value2 = readl(padcfg2);
+
+	value0 &= ~PADCFG0_PREGFRXSEL;
+	value2 &= ~(PADCFG2_DEBEN | PADCFG2_DEBOUNCE_MASK);
+
+	if (debounce) {
+		unsigned long v;
+
+		v = order_base_2(debounce * 1000 / DEBOUNCE_PERIOD);
+		if (v < 3 || v > 15) {
+			ret = -EINVAL;
+			goto exit_unlock;
+		} else {
+			 
+			value0 |= PADCFG0_PREGFRXSEL;
+			value2 |= v << PADCFG2_DEBOUNCE_SHIFT;
+			value2 |= PADCFG2_DEBEN;
+		}
+	}
+
+	writel(value0, padcfg0);
+	writel(value2, padcfg2);
+
+exit_unlock:
+	spin_unlock_irqrestore(&pctrl->lock, flags);
+
+	return ret;
+}
+
 static int intel_config_set(struct pinctrl_dev *pctldev, unsigned pin,
 			  unsigned long *configs, unsigned nconfigs)
 {
@@ -537,6 +626,13 @@ static int intel_config_set(struct pinctrl_dev *pctldev, unsigned pin,
 		case PIN_CONFIG_BIAS_PULL_UP:
 		case PIN_CONFIG_BIAS_PULL_DOWN:
 			ret = intel_config_set_pull(pctrl, pin, configs[i]);
+			if (ret)
+				return ret;
+			break;
+
+		case PIN_CONFIG_INPUT_DEBOUNCE:
+			ret = intel_config_set_debounce(pctrl, pin,
+				pinconf_to_config_argument(configs[i]));
 			if (ret)
 				return ret;
 			break;
@@ -977,6 +1073,14 @@ int intel_pinctrl_probe(struct platform_device *pdev,
 		if (IS_ERR(regs))
 			return PTR_ERR(regs);
 
+		if (!community->features) {
+			u32 rev;
+
+			rev = (readl(regs + REVID) & REVID_MASK) >> REVID_SHIFT;
+			if (rev >= 0x94)
+				community->features |= PINCTRL_FEATURE_DEBOUNCE;
+		}
+
 		padbar = readl(regs + PADBAR);
 
 		community->regs = regs;
@@ -1041,6 +1145,7 @@ int intel_pinctrl_suspend(struct device *dev)
 	pads = pctrl->context.pads;
 	for (i = 0; i < pctrl->soc->npins; i++) {
 		const struct pinctrl_pin_desc *desc = &pctrl->soc->pins[i];
+		void __iomem *padcfg;
 		u32 val;
 
 		if (!intel_pad_usable(pctrl, desc->number))
@@ -1050,6 +1155,10 @@ int intel_pinctrl_suspend(struct device *dev)
 		pads[i].padcfg0 = val & ~PADCFG0_GPIORXSTATE;
 		val = readl(intel_get_padcfg(pctrl, desc->number, PADCFG1));
 		pads[i].padcfg1 = val;
+
+		padcfg = intel_get_padcfg(pctrl, desc->number, PADCFG2);
+		if (padcfg)
+			pads[i].padcfg2 = readl(padcfg);
 	}
 
 	communities = pctrl->context.communities;
@@ -1120,6 +1229,16 @@ int intel_pinctrl_resume(struct device *dev)
 			writel(pads[i].padcfg1, padcfg);
 			dev_dbg(dev, "restored pin %u padcfg1 %#08x\n",
 				desc->number, readl(padcfg));
+		}
+
+		padcfg = intel_get_padcfg(pctrl, desc->number, PADCFG2);
+		if (padcfg) {
+			val = readl(padcfg);
+			if (val != pads[i].padcfg2) {
+				writel(pads[i].padcfg2, padcfg);
+				dev_dbg(dev, "restored pin %u padcfg2 %#08x\n",
+					desc->number, readl(padcfg));
+			}
 		}
 	}
 

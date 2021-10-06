@@ -1389,6 +1389,7 @@ SYSCALL_DEFINE5(recvfile, int, fd, int, s, loff_t *, offset, size_t, nbytes, siz
 	static loff_t   next_offset = 0;
 	unsigned short  blAggregate = 0;
 	unsigned short  blBufferWrite = 0;
+	bool            blNeedFileEndWrite = false;
 
 	if (!offset) {
 		ret = -EINVAL;
@@ -1425,14 +1426,15 @@ SYSCALL_DEFINE5(recvfile, int, fd, int, s, loff_t *, offset, size_t, nbytes, siz
 
 	inode = file->f_path.dentry->d_inode->i_mapping->host;
 
+	file_start_write(file);
+	blNeedFileEndWrite = true;
+
 	mutex_lock(&inode->i_mutex);
 	ret = generic_write_init_and_checks(file, pos, nbytes);
 	if (ret <= 0) {
 		goto out;
 	}
 
-	sb_start_write(inode->i_sb);
-	 
 	current->backing_dev_info = inode_to_bdi(inode);
 	ret = file_remove_privs(file);
 	if (ret)
@@ -1499,8 +1501,6 @@ SYSCALL_DEFINE5(recvfile, int, fd, int, s, loff_t *, offset, size_t, nbytes, siz
 			} while(nbytes > 0);
 		}
 	}
-	sb_end_write(inode->i_sb);
-	current->backing_dev_info = NULL;
 	mutex_unlock(&inode->i_mutex);
 
 	if(ret >= 0) {
@@ -1518,6 +1518,10 @@ SYSCALL_DEFINE5(recvfile, int, fd, int, s, loff_t *, offset, size_t, nbytes, siz
 	}
 
 out:
+	if (blNeedFileEndWrite) {
+		file_end_write(file);
+	}
+	current->backing_dev_info = NULL;
 	if(file)
 		fput(file);
 	if(sock)
@@ -1762,4 +1766,37 @@ int vfs_clone_file_range(struct file *file_in, loff_t pos_in,
 
 	return ret;
 }
+
+#ifdef MY_ABC_HERE
+extern int gSynoPatternCheckCharacter;
+int syno_page_pattern_check(struct inode *inode, struct page *page, size_t offset, size_t bytes, int type)
+{
+	int ret = 0;
+	char *kaddr;
+	void *find = NULL;
+	char type_string[20] = {'\0'};
+
+	switch (type) {
+		case SYNO_PATTERN_CHECK_CACHE_PAGES:
+			snprintf(type_string, sizeof(type_string), "%s", "Cache Pages");
+			break;
+		case SYNO_PATTERN_CHECK_BIO:
+			snprintf(type_string, sizeof(type_string), "%s", "Bio");
+			break;
+		default:
+			snprintf(type_string, sizeof(type_string), "%s", "Unknown");
+                        break;
+	}
+
+	kaddr = kmap(page);
+	find = memchr_inv(kaddr + offset, gSynoPatternCheckCharacter, bytes);
+	kunmap(page);
+	if (find) {
+		printk("Syno Pattern Check: %s:%d data err none 0xFF, type:%s, inode:%lu, file offset:%lld, page->index:%lu, offset:%zu, len:%zu\n", __FUNCTION__, __LINE__, type_string, inode ? inode->i_ino : 0, page_file_offset(page) + offset, page->index, offset, bytes);
+		ret = -1;
+	}
+	return ret;
+}
+#endif  
+
 EXPORT_SYMBOL(vfs_clone_file_range);

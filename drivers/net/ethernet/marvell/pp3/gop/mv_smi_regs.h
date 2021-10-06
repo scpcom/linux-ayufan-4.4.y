@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -154,4 +150,3 @@ disclaimer.
 	(0x1F << MV_SMI_PHY_ADDRESS_PHYAD_OFFS)
 
 #endif /* __mv_smi_regs_h__ */
-#endif /* MY_DEF_HERE */

@@ -59,7 +59,7 @@ static void rtk_thermal_error_check(struct thermal_zone_device *thermal)
     }
 }
 
-static int rtk_thermal_get_temp(struct thermal_zone_device *thermal, unsigned long *temp)
+static int rtk_thermal_get_temp(struct thermal_zone_device *thermal, int *temp)
 {
     struct rtk_thermal_priv *priv = thermal->devdata;
     int temperature = 0;
@@ -94,15 +94,8 @@ static int rtk_thermal_get_temp(struct thermal_zone_device *thermal, unsigned lo
      *                          |-------> thermal_zone_get_temp --|
      *   update_temperature ---/                                  |
      *                                            (*get_temp) <---|
-     *
-     * In both function temp_show and update_temperature use a type 'long'
-     * value as the second paramter of function thermal_zone_get_temp,
-     * which is defined as unsigned long pointer. So it is simple to fix
-     * the unsupported problem of nagative temperature value, just do sign
-     * extension and force the output unsigned long pointer as a long type
-     * pointer.
      */
-    *(long *)temp = temperature;
+    *temp = temperature;
 
     return 0;
 }
@@ -120,7 +113,7 @@ static int rtk_thermal_get_trip_type(struct thermal_zone_device *thermal,
 }
 
 static int rtk_thermal_get_trip_temp(struct thermal_zone_device *thermal,
-                                     int trip, unsigned long *temp)
+                                     int trip, int *temp)
 {
     struct rtk_thermal_priv *priv = thermal->devdata;
 
@@ -133,7 +126,7 @@ static int rtk_thermal_get_trip_temp(struct thermal_zone_device *thermal,
 }
 
 static int rtk_thermal_set_trip_temp(struct thermal_zone_device *thermal,
-                                     int trip, unsigned long temp)
+                                     int trip, int temp)
 {
     struct rtk_thermal_priv *priv = thermal->devdata;
 
@@ -145,7 +138,7 @@ static int rtk_thermal_set_trip_temp(struct thermal_zone_device *thermal,
 }
 
 static int rtk_thermal_get_trip_hyst(struct thermal_zone_device *thermal,
-                                     int trip, unsigned long *hyst)
+                                     int trip, int *hyst)
 {
     struct rtk_thermal_priv *priv = thermal->devdata;
 
@@ -158,7 +151,7 @@ static int rtk_thermal_get_trip_hyst(struct thermal_zone_device *thermal,
 }
 
 static int rtk_thermal_set_trip_hyst(struct thermal_zone_device *thermal,
-                                     int trip, unsigned long hyst)
+                                     int trip, int hyst)
 {
     struct rtk_thermal_priv *priv = thermal->devdata;
 
@@ -169,11 +162,13 @@ static int rtk_thermal_set_trip_hyst(struct thermal_zone_device *thermal,
     return 0;
 }
 
+static int pr_temp_once = 0;
+
 static int rtk_thermal_get_trend(struct thermal_zone_device *thermal,
                                  int trip, enum thermal_trend *trend)
 {
     struct rtk_thermal_priv *priv = thermal->devdata;
-    unsigned long trip_temp;
+    int trip_temp;
     int ret;
 
     ret = rtk_thermal_get_trip_temp(thermal, trip, &trip_temp);
@@ -189,9 +184,14 @@ static int rtk_thermal_get_trend(struct thermal_zone_device *thermal,
         *trend = THERMAL_TREND_DROP_FULL;
     else
         *trend = THERMAL_TREND_DROPPING;
+	
+	if (!pr_temp_once) {
+		dev_info(&thermal->device, "current temp is %d C\n", thermal->temperature/1000);
+		pr_temp_once = 1;
+	}		
 
     if (thermal->temperature >= trip_temp) {
-        dev_info(&thermal->device, "temperature(%d C) tripTemp(%lu C) \n",
+        dev_info(&thermal->device, "temperature(%d C) tripTemp(%d C) \n",
                  thermal->temperature/1000, trip_temp/1000);
         dev_info(&thermal->device, "thermal->temperature = %8d (0x%08x)\n",
                  thermal->temperature, thermal->temperature);
@@ -315,7 +315,7 @@ static int rtk_thermal_set_mode(struct thermal_zone_device *thermal,
 }
 
 static int rtk_thermal_get_crit_temp(struct thermal_zone_device *thermal,
-                                     unsigned long *temp)
+                                     int *temp)
 {
     struct rtk_thermal_priv *priv = thermal->devdata;
 
@@ -361,7 +361,6 @@ static int rtk_thermal_probe_of(struct rtk_thermal_priv *priv, struct platform_d
     const u32 *prop;
     int size;
     int i;
-    int ret;
 
 #define TRIP_POINT_COLUMN 4
     prop = of_get_property(node, "trip-points", &size);
@@ -411,12 +410,6 @@ static int rtk_thermal_probe_of(struct rtk_thermal_priv *priv, struct platform_d
             cpufreq_cpu_put(policy);
         }
     }
-
-    /* cpu core cooling */
-    ret = of_core_control_read_cpumask(pdev->dev.of_node,
-                                       "cpu-core,cpu-list", &priv->core_control_mask);
-    if (!ret)
-        core_control_get_available_cpus(&priv->core_control_mask);
 
     prop = of_get_property(node, "thermal-trip-shutdown", &size);
     if (prop) {
@@ -592,7 +585,7 @@ static int __init rtk_thermal_probe_init(void)
 int syno_rtd_get_temperature(void)
 {
 	int iRet = -1;
-	unsigned long int ulTemp = 0;
+	int ulTemp = 0;
 
 	if (NULL == g_syno_tz) {
 		printk(KERN_ERR "syno: thermal device not found\n");

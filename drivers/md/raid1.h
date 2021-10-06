@@ -49,6 +49,13 @@ struct r1conf {
 	int			barrier;
 	int			array_frozen;
 
+#ifdef MY_ABC_HERE
+	int                     flush_threshold;
+#endif  
+#ifdef MY_ABC_HERE
+	int                     read_target;
+#endif  
+
 	int			fullsync;
 
 	int			recovery_disabled;

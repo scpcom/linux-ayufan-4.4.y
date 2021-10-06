@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -242,4 +238,3 @@ out:
 	TM_WRAPPER_END(qmtm_hndl);
 }
 EXPORT_SYMBOL(mv_tm_dwrr_enable);
-#endif /* MY_DEF_HERE */

@@ -170,6 +170,9 @@ struct mddev {
 #define MD_HAS_JOURNAL	6	 
 
 	int				suspended;
+#ifdef MY_ABC_HERE
+	int				pattern_debug;
+#endif  
 	atomic_t			active_io;
 	int				ro;
 	int				sysfs_active;  
@@ -200,6 +203,9 @@ struct mddev {
 	 
 	int				can_decrease_events;
 
+#ifdef MY_ABC_HERE
+	int				sb_not_clean;
+#endif  
 	char				uuid[16];
 
 	sector_t			reshape_position;
@@ -246,10 +252,6 @@ struct mddev {
 
 	unsigned long			recovery;
 	 
-#ifdef MY_ABC_HERE
-	 
-	int     reshape_interrupt;
-#endif  
 	int				recovery_disabled;
 
 	int				in_sync;	 
@@ -307,6 +309,9 @@ struct mddev {
 	unsigned long			ulLastReq;  
 #endif  
 #ifdef MY_ABC_HERE
+#define MD_NOT_CRASHED 0
+#define MD_CRASHED 1
+#define MD_CRASHED_ASSEMBLE 2
     unsigned char           nodev_and_crashed;      
 #endif  
 #ifdef MY_ABC_HERE
@@ -322,7 +327,6 @@ struct mddev {
 #ifdef MY_ABC_HERE
 	mempool_t	*syno_mdio_mempool;
 #endif  
-
 	struct attribute_group		*to_remove;
 
 	struct bio_set			*bio_set;

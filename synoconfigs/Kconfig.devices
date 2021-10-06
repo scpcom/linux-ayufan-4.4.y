@@ -8,7 +8,7 @@ config SYNO_MD_09_SUPERBLOCK_COMPATIBLE
 config SYNO_MD_BOOT_CONDITIONAL_ASSEMBLE
 	bool "Avoid assemble devices in ebox or not in root device at the boot time"
 	default y
-	depends on SYNO_FIXED_DISK_NAME
+	depends on SYNO_FIXED_DISK_NAME || SYNO_PORT_MAPPING_V2
 
 config SYNO_MD_FORCE_START_DIRTY_DEGRADED
 	bool "Force assemble dirty degraded RAID with level 4, 5 or 6"
@@ -106,10 +106,6 @@ config SYNO_MD_ROOT_SWAP_PARALLEL_RESYNC
 	bool "Let md0 and md1 can do resync without waiting for other mds."
 	default y
 
-config SYNO_MD_RESHAPE_AND_MOUNT_DEADLOCK_WORKAROUND
-	bool "Fix when md call finish_reshape and mount deadlock workaround."
-	default y
-
 config SYNO_MD_FIX_RAID1_IO_BARRIER_CKSUM_ERROR
 	bool "Fix raid1's io barrier mechanism"
 	default y
@@ -134,12 +130,62 @@ config SYNO_MD_FIX_RAID5_RESHAPE_HANG
         bool "Resolve the raid 5 hang problem during expansion with disk error or hotplug out."
         default y
 
+config SYNO_MD_RAID5_DISABLE_STRIPE_GROWTH
+	bool "Prevent out-of-memory and rebuild performance drop"
+	default y
+
+config SYNO_MD_FIX_RESHAPE_AND_MOUNT_DEADLOCK
+	bool "Prevent deadlock between raid5d and mount thread"
+	default y
+
+config SYNO_MD_RAID1_SYSFS_INTERFACE
+	bool "Add sysfs interface to raid1"
+	default y
+
+config SYNO_MD_RAID1_FLUSH_THRESHOLD
+	bool "Add threshold for raid1 plug"
+	default y
+	depends on SYNO_MD_RAID1_SYSFS_INTERFACE
+
+config SYNO_MD_FORCE_SB_EVENT_INCREASED
+	bool "Forcely increase sb event during starting and stopping array."
+	default y
+
+config SYNO_MD_RAID1_ADD_DISK_CHECK
+	bool "check if raid1 is crash when add disk"
+	default y
+
+config SYNO_MD_RAID1_ASSIGN_READ_TARGET
+	bool "Assign read target to raid1"
+	default y
+	depends on SYNO_MD_RAID1_SYSFS_INTERFACE
+
+config SYNO_MD_FIX_RESYNC_STATUS
+	bool "Fix incorrect display of resync status"
+	default y
+
+config SYNO_MD_SKIP_RESYNC_WHEN_SB_NOT_CLEAN
+        bool "Skip resync after assemble md when super block is not clean"
+        default y
+
+config SYNO_MD_ALLOW_MD_RUN_WHEN_RESHAPE_POSITION_IS_ZERO
+	bool "Allow md run when its reshape position is zero"
+	default y
+
+config SYNO_MD_SYNC_THROTTLE_MECHANISM
+	bool "Use previous resync speed throttle mechanism as the same as linux-3.10.x"
+	default y
+
 endmenu #MD
 
 menu "SCSI"
 
 config SYNO_SCSI_WAIT_DISK_READY
 	bool "Wait for SCSI device ready when boot up"
+	default y
+
+config SYNO_BLOCK_BACKPORT_SCSI_REMOVE_LOCK
+	bool "backport linux-block patch to solve scsi remove lock on linux-4.4.x"
 	default y
 
 menu "SATA"
@@ -156,7 +202,7 @@ config SYNO_FIXED_DISK_NAME_PM_DEVICE_GPIO
 config SYNO_FIXED_DISK_NAME_KVMX64
 	bool
 	default y
-	depends on SYNO_FIXED_DISK_NAME && SYNO_KVMX64
+	depends on SYNO_FIXED_DISK_NAME && (SYNO_KVMX64 || SYNO_NEXTKVMX64)
 
 config SYNO_BADSECTOR_TEST
 	bool "Interface to fake bad sectors for testing"
@@ -165,8 +211,8 @@ config SYNO_BADSECTOR_TEST
 config SYNO_MAX_INTERNAL_DISK
 	int "Maximum Internal Disk Number"
 	depends on SYNO_FIXED_DISK_NAME || SYNO_BADSECTOR_TEST
-	default "19" if SYNO_BROMOLOW || SYNO_GRANTLEY || SYNO_KVMX64 || SYNO_BROADWELL || SYNO_PURLEY
-	default "15" if !SYNO_BROMOLOW && !SYNO_GRANTLEY && !SYNO_KVMX64 && !SYNO_BROADWELL && !SYNO_PURLEY
+	default "19" if SYNO_BROMOLOW || SYNO_GRANTLEY || SYNO_KVMX64 || SYNO_BROADWELL || SYNO_PURLEY || SYNO_BROADWELLNTB || SYNO_NEXTKVMX64
+	default "15" if !SYNO_BROMOLOW && !SYNO_GRANTLEY && !SYNO_KVMX64 && !SYNO_BROADWELL && !SYNO_PURLEY &&!SYNO_BROADWELLNTB && !SYNO_NEXTKVMX64
 
 config SYNO_SATA_PORT_MAP
 	bool "Modify SATA Hosts Port Number"
@@ -187,6 +233,11 @@ config SYNO_PCI_HOST_SATA_CACHE
 	bool "Force SATA SSD on specific PCI slot used as cache device "
 	select SYNO_FIXED_DISK_NAME
 	select SYNO_SATA_REMAP
+	default n
+
+config SYNO_ONBOARD_M2_SATA_AS_NVC
+	bool "Remap SATA SSD on specific host and port as NVC device"
+	depends on SYNO_PCI_HOST_SATA_CACHE
 	default n
 
 config SYNO_FIXED_DISK_NAME_MV14XX
@@ -227,7 +278,7 @@ config SYNO_ATA_AHCI_LED_SWITCH
 
 config SYNO_ATA_PWR_CTRL
     bool "Disk Power Control"
-	depends on SYNO_INTERNAL_HD_NUM && SYNO_HW_VERSION && (SYNO_ICH_GPIO_CTRL || SYNO_X86_PINCTRL_GPIO || GPIO_RTD129X || GPIO_MVEBU_A3700)
+	depends on SYNO_INTERNAL_HD_NUM && SYNO_HW_VERSION && (SYNO_ICH_GPIO_CTRL || SYNO_X86_PINCTRL_GPIO || GPIO_RTD129X || GPIO_MVEBU_A3700 || PINCTRL_ARMADA_37XX)
 	default y
 
 config SYNO_ATA_PWR_CTRL_ICH_GPIO
@@ -238,6 +289,11 @@ config SYNO_ATA_PWR_CTRL_ICH_GPIO
 config SYNO_ATA_PWR_CTRL_PIN_GPIO
 	bool
 	depends on SYNO_ATA_PWR_CTRL && SYNO_X86_PINCTRL_GPIO
+	default y
+
+config SYNO_ATA_DISK_PRESENT_CHECK
+	bool "Disk Present Pin Check for Disk Fail"
+	depends on SYNO_ATA_PWR_CTRL
 	default y
 
 config SYNO_INCREASE_DISK_MODEL_NAME_LENGTH
@@ -290,6 +346,10 @@ config SYNO_SCSI_DEVICE_INDEX
 	bool "Get device index from scsi layer"
 	default y
 
+config SYNO_DISK_MONITOR_TOOL
+	bool "Disk performance monitor tool"
+	default y
+
 config SYNO_PM_DISABLE_LINK_LIMIT
 	bool "Clear the link speed limit when pmp attach"
 	default y
@@ -305,7 +365,6 @@ config SYNO_SATA_88SX7042_MSI
 
 config SYNO_DISK_HIBERNATION
 	bool "Disk hibernation"
-	depends on SYNO_FIXED_DISK_NAME
 	default y
 
 config SYNO_HDD_HOTPLUG
@@ -328,6 +387,7 @@ config SYNO_MV_9235_SRST_FIX
 
 config SYNO_TRANS_HOST_TO_DISK
 	bool "Transfer scsi host number to disk name and export to sysfs"
+	depends on SYNO_FIXED_DISK_NAME
 	default y
 
 config SYNO_SATA_FORCE_1_5GBPS
@@ -419,11 +479,6 @@ config SYNO_SATA_PM_FIRST_PORT_DELAY
 	bool "Delay 2 secs for port multiplier first port reset"
 	default n
 
-config SYNO_EUNIT_DEADLOCK_FIX
-	bool "Prevent eunit find master deadlock"
-	default y
-	depends on SYNO_SATA_PM_DEVICE_GPIO
-
 config SYNO_CUSTOM_SCMD_TIMEOUT
 	bool "Customize SCSI commands timeout value per disk"
 	default y
@@ -434,7 +489,7 @@ config SYNO_EUNIT_LIMITATION
 
 config SYNO_AHCI_PMP_SII3x26_DEFER_CMD
 	bool "Enable SiI3x26 defer function in ahci driver"
-	depends on (SYNO_BRASWELL || SYNO_APOLLOLAKE || SYNO_ALPINE || SYNO_AVOTON) && SYNO_SATA_PM_DEVICE_GPIO
+	depends on (SYNO_BRASWELL || SYNO_APOLLOLAKE || SYNO_ALPINE || SYNO_AVOTON || SYNO_DENVERTON || SYNO_GEMINILAKE) && SYNO_SATA_PM_DEVICE_GPIO
 	default n
 
 config SYNO_SATA_LINK_SPEED_RETRY
@@ -452,7 +507,7 @@ config SYNO_DISK_NCQ_COMPATIBILITY
 config SYNO_KVMX64_MAX_MEDIUM_ACCESS_TIMEOUTS
 	bool "Increase max medium access timeouts"
 	default y
-	depends on SYNO_KVMX64
+	depends on (SYNO_KVMX64 || SYNO_NEXTKVMX64)
 
 config SYNO_PMP_HORKAGE
 	bool "Enable horkage on pmp"
@@ -502,17 +557,49 @@ config SYNO_WAKEUPCMD_IDLEIMMED
 	depends on SYNO_SPINUP_DELAY
 	default y
 
-config SYNO_RTD129X_INTERNAL_HDD_RESET
-	bool "RTD129X sata SoC need to reset phy for compatibility enhancement"
-	depends on SYNO_LSP_RTD129X && SYNO_RTD129X
-	default n
-
 config SYNO_EUNIT_SCSI_HOST_RECOVERY
 	bool "Prevent eunit scsi host stuck in recovery state"
 	default y
 
 config SYNO_NONCQ_BASH_ERROR_FIX
 	bool "Fix error return while setting devices which is not supported ncq"
+	default y
+
+config SYNO_AHCI_GPIO_SOFTWARE_ACITIVITY
+	bool "AHCI software control GPIO HDD_ACT_LED"
+	default n
+
+config SYNO_SATA_ERROR_HANDLING_FLAG
+	bool "Raise error handling flag while ata port dealing with error"
+	default y
+
+config SYNO_ASM1061_RESET_DELAY
+	bool "Enable delay 1 us after writing HOST_RESET register"
+	depends on SATA_AHCI
+	default n
+
+config SYNO_SKIP_ATA_HOST_PARALLEL_SCAN
+	bool "Skip ATA_HOST_PARALLEL_SCAN check when power on disks"
+	default n
+
+config SYNO_ATA_READ_QC_DELAY
+	bool "Enable delay N us (default 100) first read qc after interrupt"
+	default n
+
+config SYNO_ATA_DISABLE_READ_LOG_DMA
+	bool "Don't use READ LOG DMA EXT"
+	default y
+
+config SYNO_SATA_INTEL_SSD_COMPATIBILITY
+    bool "Solution of Intel S4500 3.84TB Hotplug 100% failed on Marvell 88SE9235"
+    default y
+
+config SYNO_EXTEND_READ_LOG_TIMEOUT
+    bool "Extend read log timeout prevent spinup timeout for large size drives"
+    default y
+
+config SYNO_ATA_PRINT_SN
+	bool "Add log for disk serial number"
 	default y
 
 endmenu #SATA
@@ -532,7 +619,7 @@ menu "SAS"
 config SYNO_SAS_DISK_NAME
 	bool "Refactor SAS Disk Name"
 	default y
-	depends on SYNO_FIXED_DISK_NAME
+	depends on SYNO_FIXED_DISK_NAME || SYNO_PORT_MAPPING_V2
 
 config SYNO_SAS_DISK_NAME_ISCSI_DEVICE
 	bool
@@ -619,7 +706,7 @@ config SYNO_SCSI_MAX_QUEUE_DEPTH_LOCK
 
 config SYNO_SAS_HBA_IDX
 	bool "Indexing Synology SAS HBA"
-	depends on SYNO_GRANTLEY || SYNO_BROADWELL || SYNO_PURLEY || SYNO_COFFEELAKE
+	depends on SYNO_GRANTLEY || SYNO_BROADWELL || SYNO_PURLEY || SYNO_COFFEELAKE || SYNO_BROADWELLNTB
 	default n
 
 config SYNO_SAS_MAX_HBA_SLOT
@@ -636,9 +723,39 @@ config SYNO_SAS_HOST_DISK_LED_CTRL
 	default y
 	depends on SCSI_MPT3SAS && SYNO_SAS_HBA_IDX
 
+config SYNO_MPT3_WORKAROUND_UNEXPECTED_DEVICE_BLOCKED
+	bool "Workaround for unexpected device blocked while expansion plugs-in on P15 driver"
+	depends on SCSI_MPT3SAS
+	default n
+
+config SYNO_MPT3_FIX_IMPROPER_HANDLING_OF_ATA_PENDING_FLAG
+	bool "Fix improper handling of ata pending flag in P15 driver"
+	depends on SCSI_MPT3SAS
+	default n
+
+config SYNO_MPT3_DISABLE_DIX_SUPPROT
+	bool "Disable driver dix support"
+	depends on SCSI_MPT3SAS
+	default n
+
+config SYNO_MPT3_SKIP_ADD_WHEN_SES_DEVICE_BUSY
+	bool "Requeueu event when SES device busy"
+	depends on SCSI_MPT3SAS
+	default y
+
 endmenu #SAS
 
 endmenu #SCSI
+
+menu "NVMe"
+	depends on BLK_DEV_NVME
+
+config SYNO_NVME_DEVICE_INDEX
+	bool "Assign an unique index to each NVMe device"
+	depends on  BLK_DEV_NVME
+	default y
+
+endmenu #NVMe
 
 menu "Network"
 
@@ -660,10 +777,50 @@ config SYNO_ARMADA37XX_WOL
         default y
         depends on SYNO_ARMADA37XX
 
-config SYNO_ARMADA37XX_TESTSWBM
-        bool "TEST SWBM patches from Marvell"
-        default y
-        depends on SYNO_ARMADA37XX
+config SYNO_ADJUST_R8168_DOWN
+	bool "Fix realtek-r8168-driver reboot timeout bug"
+	default y
+	depends on R8168
+
+config SYNO_R8168_TRX_WORKAROUND
+	bool "Fix realtek-r8168-driver tx/rx hang problem"
+	default y
+	depends on R8168 && SYNO_RTD129X
+
+config SYNO_R8168_INIT_WORK
+	bool "Fix realtek-r8168-driver incorrect init work"
+	default y
+	depends on R8168
+
+config SYNO_R8168_RESET_STOP_CHECK_LINK
+	bool "Fix realtek-r8168-driver check link when reset"
+	default y
+	depends on R8168
+
+config SYNO_R8168_RESET_STOP_NAPI
+	bool "Fix realtek-r8168-driver enable napi when reset"
+	default y
+	depends on R8168
+
+config SYNO_R8168_INIT_RING_FIX
+	bool "Fix realtek-r8168-driver init ring fail"
+	default y
+	depends on R8168
+
+config SYNO_R8168_RESET_DELAY
+	bool "Fix realtek-r8168-driver delay func"
+	default y
+	depends on R8168
+
+config SYNO_RTK_NIC_LINK_LOG_ENHANCE
+	bool "Enhance realtek nic link status log"
+	default y
+        depends on R8168 || R8169SOC
+
+config SYNO_RTK_NETWORK_RESET_LOG
+	bool "Add reset log to r8168 or r8169"
+	default y
+	depends on R8168 || R8169SOC
 
 endmenu #Network
 
@@ -731,6 +888,10 @@ config SYNO_USB_INTEL_XHC_LPM_ENABLE
 	default y
 	depends on X86_64
 
+config SYNO_USB_DISABLE_USB2_HW_LPM_SUPPORT_CHECK
+	bool "Disable USB 2.0 LPM support check"
+	default n
+
 config SYNO_USB_UPS_DISCONNECT_FILTER
 	bool "Filter abnormal disconnect from UPS via USB"
 	default y
@@ -738,7 +899,7 @@ config SYNO_USB_UPS_DISCONNECT_FILTER
 config SYNO_USB_XHCI_RESET_DELAY
 	bool "Add extra delay in xhci_reset"
 	default y
-	depends on SYNO_BRASWELL || SYNO_APOLLOLAKE || SYNO_BROADWELL || SYNO_GRANTLEY || SYNO_PURLEY
+	depends on SYNO_BRASWELL || SYNO_APOLLOLAKE || SYNO_BROADWELL || SYNO_GRANTLEY || SYNO_PURLEY || SYNO_BROADWELLNTB || SYNO_GEMINILAKE
 
 config SYNO_USB_CONNECT_DEBOUNCER
 	bool "Add connect-debouncer during USB reset"
@@ -747,7 +908,7 @@ config SYNO_USB_CONNECT_DEBOUNCER
 config SYNO_USB_DISABLE_FACTORY_DOWNGRADE
 	bool "Disable USB3 downgrade for factory"
 	default n
-	depends on SYNO_BRASWELL || SYNO_APOLLOLAKE
+	depends on SYNO_BRASWELL || SYNO_APOLLOLAKE || SYNO_GEMINILAKE
 
 config SYNO_USB_SYNCHRONIZE_CACHE_FILTER
 	bool "Filter the SYNCHRONIZE_CACHE command for some buggy USB storage"
@@ -865,6 +1026,11 @@ config SYNO_ADT7490_FEATURES
 	depends on SENSORS_ADT7475
 	default n
 
+config SYNO_ADT7490_PECI1_ENABLE
+	bool "Enable PECI1 for platform with two CPU"
+	depends on SYNO_ADT7490_FEATURES
+	default n
+
 endmenu #Hardware Monitor
 
 menu "Serial/TTYs"
@@ -911,6 +1077,11 @@ config SYNO_LSP_ARMADA_UART_FIX
 	depends on SYNO_LSP_ARMADA_17_04_02
 	default y
 
+config SYNO_PURLEY_SERIAL_OVER_LAN
+	bool "Support Purley serial over lan function"
+	depends on SYNO_PURLEY
+	default y
+
 endmenu #Serial/TTYs
 
 menu "MTD"
@@ -927,6 +1098,16 @@ config SYNO_MTD_INFO
 config SYNO_MTD_LOCK_UNLOCK
 	bool "add mtd->lock and mtd->unlock function"
 	default n
+
+config SYNO_MTD_ACCESS_LOG
+	bool "add log for mtd device open/close"
+	default y
+	depends on !X86_64
+
+config SYNO_MTD_ACCESS_LOG_EXCEPT_VENDOR_PART
+	bool "do not show mtd vendor part access log"
+	default n
+	depends on SYNO_MTD_ACCESS_LOG
 
 endmenu #MTD
 
@@ -964,6 +1145,10 @@ config SYNO_LP3943_PROBE_ACPI
 	depends on SYNO_LP3943_FEATURES && ACPI
 
 endchoice
+
+config SYNO_LP3943_REDUCE_CMD
+	bool "Reduce redundant smbus command to LP3943"
+	depends on SYNO_LP3943_FEATURES
 
 endmenu #LEDs
 
@@ -1022,6 +1207,10 @@ config SYNO_S35390A_FIX_12HOUR_MODE
 	depends on RTC_DRV_S35390A
 	default n
 
+config SYNO_DISABLE_NTP_UPDATE_RTC
+	bool "Disable NTP update RTC"
+	default y
+
 endmenu #RTC
 
 menu "PCI"
@@ -1035,6 +1224,16 @@ config SYNO_MAX_PCI_SLOT
 	depends on SYNO_OPTIONAL_PCI_SLOT
 	default "1"
 
+config SYNO_QUIRK_PCIE_MSI
+	bool "Quirk PCIe device MSI"
+	depends on PCI
+	default n
+
+config SYNO_PCIE_BUS_SAFE
+	bool "Set the PCIe bus configuration to PCIE_BUS_SAFE"
+	depends on PCI
+	default n
+
 endmenu #PCI
 
 menu "TRANSCODING"
@@ -1045,5 +1244,13 @@ config SYNO_LINARO_BACKPORT
 	default n
 
 endmenu #TRANSCODING
+
+menu "POWER"
+config SYNO_SKIP_SUSPEND_ERROR
+	bool "enable skip suspend error"
+	depends on SYNO_RTD129X
+	default n
+
+endmenu #POWER
 
 endmenu #Device Drivers

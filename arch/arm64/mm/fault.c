@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Based on arch/arm/mm/fault.c
  *
@@ -42,6 +45,9 @@
 #include <asm/tlbflush.h>
 
 static const char *fault_name(unsigned int esr);
+#ifdef MY_ABC_HERE
+extern int gSynoDebugFlag;
+#endif /* MY_ABC_HERE */
 
 /*
  * Dump out the page tables associated with 'addr' in mm 'mm'.
@@ -169,6 +175,9 @@ static void __do_user_fault(struct task_struct *tsk, unsigned long addr,
 {
 	struct siginfo si;
 
+#ifdef MY_ABC_HERE
+	if (gSynoDebugFlag) {
+#endif /* MY_ABC_HERE */
 	if (unhandled_signal(tsk, sig) && show_unhandled_signals_ratelimited()) {
 		pr_info("%s[%d]: unhandled %s (%d) at 0x%08lx, esr 0x%03x\n",
 			tsk->comm, task_pid_nr(tsk), fault_name(esr), sig,
@@ -176,6 +185,9 @@ static void __do_user_fault(struct task_struct *tsk, unsigned long addr,
 		show_pte(tsk->mm, addr);
 		show_regs(regs);
 	}
+#ifdef MY_ABC_HERE
+	}
+#endif /* MY_ABC_HERE */
 
 	tsk->thread.fault_address = addr;
 	tsk->thread.fault_code = esr;

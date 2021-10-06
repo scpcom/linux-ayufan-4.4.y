@@ -1472,8 +1472,16 @@ cifs_do_rename(const unsigned int xid, struct dentry *from_dentry,
 	tcon = tlink_tcon(tlink);
 	server = tcon->ses->server;
 
+#ifdef MY_ABC_HERE
+	 
+	if (!server->ops->rename) {
+		cifs_put_tlink(tlink);
+		return -ENOSYS;
+	}
+#else
 	if (!server->ops->rename)
 		return -ENOSYS;
+#endif  
 
 	rc = server->ops->rename(xid, tcon, from_path, to_path, cifs_sb);
 

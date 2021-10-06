@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -67,5 +63,3 @@ int tm_tree_set_dwrr_prio(tm_handle hndl, uint8_t *prios);
 #endif
 
 #endif   /* TM_NODES_TREE_H */
-
-#endif /* MY_DEF_HERE */

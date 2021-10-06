@@ -17,6 +17,7 @@
  * Generic Device Tree describing Marvell Armada CP-110 device
  */
 #include <dt-bindings/interrupt-controller/mvebu-icu.h>
+#include <dt-bindings/phy/phy-utmi-mvebu.h>
 
 rtc@284000 {
 	compatible = "marvell,armada8k-rtc";
@@ -91,6 +92,7 @@ usb3h0_1: usb3@500000 {
 	dma-coherent;
 	interrupts = <ICU_GRP_NSR 106 IRQ_TYPE_LEVEL_HIGH>;
 	clocks = <&cps_syscon0 1 22>;
+	needs-reset-on-resume;
 	status = "disabled";
 };
 
@@ -100,6 +102,19 @@ usb3h1_1: usb3@510000 {
 	dma-coherent;
 	interrupts = <ICU_GRP_NSR 105 IRQ_TYPE_LEVEL_HIGH>;
 	clocks = <&cps_syscon0 1 23>;
+	needs-reset-on-resume;
+	status = "disabled";
+};
+
+utmi0_1: utmi@580000 {
+	compatible = "marvell,cp110-utmi-phy";
+	reg = <0x580000 0x1000>,
+	      <0x440420 0x4>,
+	      <0x440440 0x4>;
+	reg-names = "utmi", "usb-cfg-reg", "utmi-cfg-reg";
+	utmi-port = <UTMI_PHY_TO_USB3_HOST0>;
+	utmi-index = <0>;
+	#phy-cells = <0>;
 	status = "disabled";
 };
 
@@ -172,7 +187,7 @@ tdm@7a0000 {
 	status = "disabled";
 };
 
-dma_xor@6a0000 {
+cp1_xor0: dma_xor@6a0000 {
 	compatible = "marvell,mv-xor-v2";
 	reg = <0x6a0000 0x1000>,
 	      <0x6b0000 0x1000>;
@@ -183,7 +198,7 @@ dma_xor@6a0000 {
 	status = "okay";
 };
 
-dma_xor@6c0000 {
+cp1_xor1: dma_xor@6c0000 {
 	compatible = "marvell,mv-xor-v2";
 	reg = <0x6c0000 0x1000>,
 	      <0x6d0000 0x1000>;
@@ -368,13 +383,22 @@ cps_eip197: eip197@800000 {
 			  "ring2", "ring3", "eip_out";
 	clocks = <&cps_syscon0 1 26>;
 	cell-index = <1>;
-	status = "disabled";
+	status = "okay";
 };
 
 comphy1: comphy {
 	compatible = "marvell,cp110-comphy";
 	reg = <0x441000 0x100>, <0x120000 0x6000>;
 	reg-names = "comphy", "serdes";
+	dfx-reg = <0x400280 4>;
 	#phy-cells = <2>;
+	sar-data = <&cps_sar>;
+	skip_pcie_power_off;
 	status = "disabled";
+};
+
+cps_sar: sar@400200 {
+	compatible = "marvell,sample-at-reset-cp110";
+	reg = <0x400200 0x8>;
+	status = "okay";
 };

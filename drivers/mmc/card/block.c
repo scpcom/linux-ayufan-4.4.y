@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Block driver for media (i.e., flash cards)
  *
@@ -45,7 +48,9 @@
 #include <asm/uaccess.h>
 
 #include "queue.h"
-
+#ifdef MY_DEF_HERE
+#include "../../base/base.h"
+#endif /* MY_DEF_HERE */
 MODULE_ALIAS("mmc:block");
 
 #ifdef KERNEL
@@ -2186,6 +2191,21 @@ static inline int mmc_blk_readonly(struct mmc_card *card)
 	       !(card->csd.cmdclass & CCC_BLOCK_WRITE);
 }
 
+#ifdef MY_DEF_HERE
+void mmc_blk_set_ro(struct mmc_card *card)
+{
+        struct mmc_blk_data *md=NULL, *part_md=NULL;
+        md = card->dev.driver_data;
+        if(md!=NULL) {
+                md->read_only = mmc_blk_readonly(card);
+                set_disk_ro(md->disk, md->read_only);
+                list_for_each_entry(part_md, &md->part, part)
+                        set_disk_ro(part_md->disk, md->read_only);
+        }
+}
+EXPORT_SYMBOL(mmc_blk_set_ro);
+#endif /* MY_DEF_HERE */
+
 static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
 					      struct device *parent,
 					      sector_t size,
@@ -2291,7 +2311,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
 	    ((card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN) ||
 	     card->ext_csd.rel_sectors)) {
 		md->flags |= MMC_BLK_REL_WR;
-		blk_queue_write_cache(md->queue.queue, true, true);
+		blk_queue_flush(md->queue.queue, REQ_FLUSH | REQ_FUA);
 	}
 
 	if (mmc_card_mmc(card) &&

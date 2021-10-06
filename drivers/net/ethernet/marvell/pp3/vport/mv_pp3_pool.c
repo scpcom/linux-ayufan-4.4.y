@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*
 * ***************************************************************************
 * Copyright (C) 2015 Marvell International Ltd.
@@ -504,5 +500,3 @@ void pp3_dbg_pool_stats_print(int pool)
 	pr_info("buff_recycled_err...................%10d\n", total_stats.buff_recycled_err);
 #endif /* CONFIG_MV_PP3_SKB_RECYCLE */
 }
-
-#endif /* MY_DEF_HERE */

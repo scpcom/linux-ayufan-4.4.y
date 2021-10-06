@@ -1173,6 +1173,12 @@ static ssize_t fuse_file_write_iter(struct kiocb *iocb, struct iov_iter *from)
 
 	inode_lock(inode);
 
+#ifdef MY_ABC_HERE
+	if (AGGREGATE_RECVFILE_DOING & inode->aggregate_flag) {
+		flush_aggregate_recvfile(-1);
+	}
+#endif  
+
 	current->backing_dev_info = inode_to_bdi(inode);
 
 	err = generic_write_checks(iocb, from);
@@ -2755,6 +2761,14 @@ static long fuse_file_fallocate(struct file *file, int mode, loff_t offset,
 		if (changed && fc->writeback_cache)
 			file_update_time(file);
 	}
+
+#ifdef MY_ABC_HERE
+	if (mode & FALLOC_FL_PUNCH_HOLE) {
+		if (AGGREGATE_RECVFILE_DOING & inode->aggregate_flag) {
+			flush_aggregate_recvfile(-1);
+		}
+	}
+#endif  
 
 	if (mode & FALLOC_FL_PUNCH_HOLE)
 		truncate_pagecache_range(inode, offset, offset + length - 1);

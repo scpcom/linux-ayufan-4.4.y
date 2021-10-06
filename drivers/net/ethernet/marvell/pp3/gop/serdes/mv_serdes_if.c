@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -90,4 +86,3 @@ void mv_serdes_reset(int lane, bool analog_reset, bool core_reset, bool digital_
 
 	mv_gop_reg_write(MV_PP3_SERDES_CFG_1_REG(lane), reg_val);
 }
-#endif /* MY_DEF_HERE */

@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -4248,4 +4244,3 @@ bool mv_cmac_idle_state_check(void)
 {
 	return mv_pp3_cmac_reg_read(MV_CMAC_CMAC_STATUS_REG) & MV_CMAC_CMAC_STATUS_CMAC_IDLE_MASK;
 }
-#endif /* MY_DEF_HERE */

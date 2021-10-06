@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /******************************************************************************
 *Copyright (C) Marvell International Ltd. and its affiliates
 *
@@ -868,5 +864,3 @@ static struct platform_driver mv_net_complex_driver = {
 };
 
 module_platform_driver(mv_net_complex_driver);
-
-#endif /* MY_DEF_HERE */

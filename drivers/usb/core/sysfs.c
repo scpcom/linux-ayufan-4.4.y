@@ -33,6 +33,11 @@ static ssize_t field##_show(struct device *dev,				\
 usb_actconfig_attr(bNumInterfaces, "%2d\n");
 usb_actconfig_attr(bmAttributes, "%2x\n");
 
+#if defined (MY_DEF_HERE)
+extern struct usb_hub *usb_hub_to_struct_hub(struct usb_device *hdev);
+extern int syno_usb_power_cycle(struct usb_hub *hub, int port, int status);
+#endif  
+
 static ssize_t bMaxPower_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
@@ -296,6 +301,34 @@ static ssize_t ltm_capable_show(struct device *dev,
 	return sprintf(buf, "%s\n", "no");
 }
 static DEVICE_ATTR_RO(ltm_capable);
+
+#if defined (MY_DEF_HERE)
+static ssize_t
+syno_vbus_reset_show(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	struct usb_device *udev = to_usb_device(dev);
+	return sprintf(buf, "%d\n", udev->maxchild);
+}
+static ssize_t
+syno_vbus_reset_store(struct device *dev, struct device_attribute *attr,
+		const char * buf, size_t count)
+{
+	struct usb_device *udev = to_usb_device(dev);
+	struct usb_hub *hub = usb_hub_to_struct_hub(udev);
+	unsigned int port1;
+
+	if (0 > kstrtouint(buf, 10, &port1))
+		return -EINVAL;
+
+	if (port1 > udev->maxchild || 0 >= port1)
+		return -EINVAL;
+
+	syno_usb_power_cycle(hub, port1, 0);
+
+	return count;
+}
+static DEVICE_ATTR_RW(syno_vbus_reset);
+#endif  
 
 #ifdef	CONFIG_PM
 
@@ -755,6 +788,9 @@ static struct attribute *dev_attrs[] = {
 	&dev_attr_remove.attr,
 	&dev_attr_removable.attr,
 	&dev_attr_ltm_capable.attr,
+#if defined (MY_DEF_HERE)
+	&dev_attr_syno_vbus_reset.attr,
+#endif  
 	NULL,
 };
 static struct attribute_group dev_attr_grp = {

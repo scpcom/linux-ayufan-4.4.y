@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -611,5 +607,3 @@ int tm_create_c_node_to_port(tm_handle hndl, uint8_t port_index,
 							uint32_t *c_node_index);
 
 #endif 	 /* TM_NODES_CREATE_H */
-
-#endif /* MY_DEF_HERE */

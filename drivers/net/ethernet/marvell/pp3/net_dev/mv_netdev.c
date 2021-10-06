@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -3016,14 +3012,9 @@ static int mv_pp3_change_mtu_internals(struct net_device *dev, int mtu)
 	dev->mtu = mtu;
 
 	if (long_pool) {
-#if defined(MY_DEF_HERE)
 		if (mv_pp3_pool_long_sw_init(long_pool, long_pool->headroom,
 					     MV_RX_PKT_SIZE(mtu)))
 			return -1;
-#else /* MY_DEF_HERE */
-		mv_pp3_pool_long_sw_init(long_pool, long_pool->headroom,
-						MV_RX_PKT_SIZE(mtu));
-#endif /* MY_DEF_HERE */
 
 		if (pp3_fw_bm_pool_set(long_pool) < 0)
 			pr_warn("%s: FW long pool update failed\n", dev->name);
@@ -3490,5 +3481,3 @@ static const struct net_device_ops mv_pp3_netdev_ops = {
 	.ndo_get_stats64     = mvneta_get_stats64,
 */
 };
-
-#endif /* MY_DEF_HERE */

@@ -857,7 +857,7 @@ static int iscsi_sw_tcp_slave_configure(struct scsi_device *sdev)
 	return 0;
 }
 
-#ifdef MY_ABC_HERE
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
 static int syno_iscsi_index_get(struct Scsi_Host *host, uint channel, uint id, uint lun)
 {
 	return SYNO_ISCSI_DEVICE_INDEX;
@@ -883,7 +883,7 @@ static struct scsi_host_template iscsi_sw_tcp_sht = {
 	.proc_name		= "iscsi_tcp",
 	.this_id		= -1,
 	.track_queue_depth	= 1,
-#ifdef MY_ABC_HERE
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
 	.syno_index_get 	= syno_iscsi_index_get,
 #endif  
 };

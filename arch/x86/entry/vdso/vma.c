@@ -19,6 +19,7 @@
 #include <asm/page.h>
 #include <asm/hpet.h>
 #include <asm/desc.h>
+#include <asm/cpufeature.h>
 
 #if defined(CONFIG_X86_64)
 unsigned int __read_mostly vdso64_enabled = 1;
@@ -100,6 +101,7 @@ static int map_vdso(const struct vdso_image *image, bool calculate_addr)
 		.name = "[vvar]",
 		.pages = no_pages,
 	};
+	struct pvclock_vsyscall_time_info *pvti;
 
 	if (calculate_addr) {
 		addr = vdso_addr(current->mm->start_stack,
@@ -168,6 +170,18 @@ static int map_vdso(const struct vdso_image *image, bool calculate_addr)
 			goto up_fail;
 	}
 #endif
+
+	pvti = pvclock_pvti_cpu0_va();
+	if (pvti && image->sym_pvclock_page) {
+		ret = remap_pfn_range(vma,
+				      text_start + image->sym_pvclock_page,
+				      __pa(pvti) >> PAGE_SHIFT,
+				      PAGE_SIZE,
+				      PAGE_READONLY);
+
+		if (ret)
+			goto up_fail;
+	}
 
 up_fail:
 	if (ret)

@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -297,4 +293,3 @@ disclaimer.
 #define GMAC_MIB_COLLISION			0x78
 #define GMAC_MIB_LATE_COLLISION			0x7c
 #endif /* mv_gmac_regs */
-#endif /* MY_DEF_HERE */

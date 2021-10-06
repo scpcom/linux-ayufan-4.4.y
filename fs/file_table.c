@@ -364,28 +364,16 @@ void file_sb_list_del(struct file *file)
 #endif
 
 #define MAX_SHOWN_OPENED_FILE 10
-void fs_show_opened_file(struct mount *mnt)
+void fs_show_opened_file(struct mount *mnt,
+			 const char *mnt_point_name, char *file_name_buf, int buflen)
 {
 	struct file *file;
-	char *file_name_buf;
-	char *mnt_point_buf;
 	char *file_name;
-	char *mnt_point_name;
 	unsigned num_show = 0;
 
-	file_name_buf = kmalloc(PATH_MAX, GFP_KERNEL);
-	mnt_point_buf = kmalloc(PATH_MAX, GFP_KERNEL);
-
-	if (!file_name_buf || !mnt_point_buf) {
-		goto over;
-	}
-	mnt_point_name = dentry_path_raw(mnt->mnt_mountpoint, mnt_point_buf, PATH_MAX - 1);
-	if (IS_ERR(mnt_point_name)) {
-		goto over;
-	}
 	lg_global_lock(&files_lglock);
 	do_file_list_for_each_entry(mnt->mnt.mnt_sb, file) {
-		file_name = dentry_path_raw(file->f_path.dentry, file_name_buf, PATH_MAX - 1);
+		file_name = dentry_path_raw(file->f_path.dentry, file_name_buf, buflen - 1);
 		if (IS_ERR(file_name)) {
 			continue;
 		}
@@ -395,9 +383,5 @@ void fs_show_opened_file(struct mount *mnt)
 		}
 	} while_file_list_for_each_entry;
 	lg_global_unlock(&files_lglock);
-
-over:
-	kfree(file_name_buf);
-	kfree(mnt_point_buf);
 }
 #endif  

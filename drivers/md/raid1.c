@@ -337,6 +337,12 @@ static void raid1_end_read_request(struct bio *bio)
 			}
 		}
 #endif  
+#ifdef MY_ABC_HERE
+		 
+		if (conf->read_target >= 0) {
+			uptodate = 1;
+		}
+#endif  
 	}
 
 	if (uptodate) {
@@ -463,6 +469,50 @@ static void raid1_end_write_request(struct bio *bio)
 	if (to_put)
 		bio_put(to_put);
 }
+
+#ifdef MY_ABC_HERE
+static int read_assign_target(struct r1conf *conf, struct r1bio *r1_bio, int *max_sectors)
+{
+	const sector_t this_sector = r1_bio->sector;
+	int sectors = r1_bio->sectors;
+	int best_disk = -1;
+	struct md_rdev *rdev;
+	int read_target;
+	int block_sector_dummy;
+	sector_t first_block_dummy;
+
+	rcu_read_lock();
+	read_target = conf->read_target;
+
+	if (read_target >= 0) {
+		rdev = rcu_dereference(conf->mirrors[read_target].rdev);
+		if (r1_bio->bios[read_target] == IO_BLOCKED
+				|| rdev == NULL
+				|| test_bit(Faulty, &rdev->flags))
+			goto end;
+		if (!test_bit(In_sync, &rdev->flags) && 
+				rdev->recovery_offset < this_sector + sectors)
+			goto end;
+		if (is_badblock(rdev, this_sector, sectors, 
+					&first_block_dummy, &block_sector_dummy)) {
+			goto end;
+		}
+		best_disk = read_target;
+		goto end;
+	}
+	if (best_disk >= 0) {
+		if (conf->mirrors[best_disk].next_seq_sect != this_sector)
+			conf->mirrors[best_disk].seq_start = this_sector;
+
+		conf->mirrors[best_disk].next_seq_sect = this_sector + sectors;
+	}
+end:
+	rcu_read_unlock();
+	*max_sectors = sectors;
+
+	return best_disk;
+}
+#endif  
 
 static int read_balance(struct r1conf *conf, struct r1bio *r1_bio, int *max_sectors)
 {
@@ -639,7 +689,11 @@ static int raid1_congested(struct mddev *mddev, int bits)
 	int i, ret = 0;
 
 	if ((bits & (1 << WB_async_congested)) &&
-	    conf->pending_count >= max_queued_requests)
+#ifdef MY_ABC_HERE
+		conf->pending_count >= conf->flush_threshold)
+#else  
+		conf->pending_count >= max_queued_requests)
+#endif  
 		return 1;
 
 	rcu_read_lock();
@@ -715,7 +769,10 @@ static void raise_barrier(struct r1conf *conf, sector_t sector_nr)
 #endif  
 			    conf->resync_lock);
 
+#ifdef MY_ABC_HERE
+#else  
 	conf->nr_pending++;
+#endif  
 	spin_unlock_irq(&conf->resync_lock);
 }
 
@@ -725,7 +782,10 @@ static void lower_barrier(struct r1conf *conf)
 	BUG_ON(conf->barrier <= 0);
 	spin_lock_irqsave(&conf->resync_lock, flags);
 	conf->barrier--;
+#ifdef MY_ABC_HERE
+#else  
 	conf->nr_pending--;
+#endif  
 	spin_unlock_irqrestore(&conf->resync_lock, flags);
 	wake_up(&conf->wait_barrier);
 }
@@ -964,6 +1024,9 @@ static void make_request(struct mddev *mddev, struct bio * bio)
 	struct md_rdev *blocked_rdev;
 	struct blk_plug_cb *cb;
 	struct raid1_plug_cb *plug = NULL;
+#ifdef MY_ABC_HERE
+	struct blk_plug *blk_plug = current->plug;
+#endif  
 	int first_clone;
 	int sectors_handled;
 	int max_sectors;
@@ -1038,7 +1101,15 @@ static void make_request(struct mddev *mddev, struct bio * bio)
 		int rdisk;
 
 read_again:
+#ifdef MY_ABC_HERE
+		if (conf->read_target < 0) {
+			rdisk = read_balance(conf, r1_bio, &max_sectors);
+		} else {
+			rdisk = read_assign_target(conf, r1_bio, &max_sectors);
+		}
+#else
 		rdisk = read_balance(conf, r1_bio, &max_sectors);
+#endif  
 
 		if (rdisk < 0) {
 			 
@@ -1100,12 +1171,20 @@ read_again:
 		return;
 	}
 
+#ifdef MY_ABC_HERE
+	if (conf->pending_count >= conf->flush_threshold) {
+		md_wakeup_thread(mddev->thread);
+		wait_event(conf->wait_barrier,
+			   conf->pending_count < conf->flush_threshold);
+	}
+#else  
 	if (conf->pending_count >= max_queued_requests) {
 		md_wakeup_thread(mddev->thread);
 		wait_event(conf->wait_barrier,
 			   conf->pending_count < max_queued_requests);
 	}
-	 
+#endif  
+
 	disks = conf->raid_disks * 2;
  retry_write:
 #ifdef MY_ABC_HERE
@@ -1270,8 +1349,14 @@ read_again:
 			conf->pending_count++;
 		}
 		spin_unlock_irqrestore(&conf->device_lock, flags);
+
 		if (!plug)
 			md_wakeup_thread(mddev->thread);
+#ifdef MY_ABC_HERE
+		else if (blk_plug && plug->pending_cnt > conf->flush_threshold) {
+			blk_flush_plug_list(blk_plug, false);
+		}
+#endif  
 	}
 	 
 	if (sectors_handled < bio_sectors(bio)) {
@@ -1327,8 +1412,8 @@ void syno_error_common(struct mddev *mddev, struct md_rdev *rdev)
 		mddev->degraded++;
 #ifdef MY_ABC_HERE
 		if (mddev->degraded >= conf->raid_disks) {
-			if (0 == mddev->nodev_and_crashed) {
-				mddev->nodev_and_crashed = 1;
+			if (MD_NOT_CRASHED == mddev->nodev_and_crashed) {
+				mddev->nodev_and_crashed = MD_CRASHED;
 			}
 		}
 #endif  
@@ -1360,7 +1445,7 @@ void syno_error_for_hotplug(struct mddev *mddev, struct md_rdev *rdev)
 			if(!test_bit(Faulty, &rdev_tmp->flags) &&
 			   !test_bit(In_sync, &rdev_tmp->flags) &&
 			   0 != strcmp(bdevname(rdev_tmp->bdev, b1), bdevname(rdev->bdev, b2))) {
-				printk("[%s] %d: %s is being to unplug, but %s is sync now, disable both\n", 
+				printk("[%s] %d: %s is being to unplug, but %s is sync now, disable both\n",
 					   __FILE__, __LINE__, bdevname(rdev->bdev, b2), bdevname(rdev_tmp->bdev, b1));
 				SYNORaidRdevUnplug(mddev, rdev_tmp);
 			}
@@ -1556,6 +1641,11 @@ static int raid1_add_disk(struct mddev *mddev, struct md_rdev *rdev)
 
 #ifdef MY_ABC_HERE
 	if (IsDiskErrorSet(mddev)) {
+		return -EINVAL;
+	}
+#endif  
+#ifdef MY_ABC_HERE
+	if (rdev->saved_raid_disk < 0 && mddev->degraded == conf->raid_disks) {
 		return -EINVAL;
 	}
 #endif  
@@ -1965,9 +2055,8 @@ static void process_checks(struct r1bio *r1_bio)
 				s = sbio->bi_io_vec[j].bv_page;
 				if (memcmp(page_address(p),
 					   page_address(s),
-					   sbio->bi_io_vec[j].bv_len)) {
+					   sbio->bi_io_vec[j].bv_len))
 					break;
-				}
 			}
 		} else
 			j = 0;
@@ -2795,6 +2884,12 @@ static struct r1conf *setup_conf(struct mddev *mddev)
 	bio_list_init(&conf->pending_bio_list);
 	conf->pending_count = 0;
 	conf->recovery_disabled = mddev->recovery_disabled - 1;
+#ifdef MY_ABC_HERE
+	conf->flush_threshold = max_queued_requests;
+#endif  
+#ifdef MY_ABC_HERE
+	conf->read_target = -1;
+#endif  
 
 #ifdef MY_ABC_HERE
 #else  
@@ -2850,6 +2945,87 @@ static struct r1conf *setup_conf(struct mddev *mddev)
 	}
 	return ERR_PTR(err);
 }
+
+#ifdef MY_ABC_HERE
+static ssize_t
+read_target_show(struct mddev *mddev, char *page)
+{
+	struct r1conf *conf = mddev->private;
+	if (conf)
+		return sprintf(page, "%d\n", conf->read_target);
+	else
+		return 0;
+}
+static ssize_t
+read_target_store(struct mddev *mddev, const char *page, size_t len)
+{
+	int min;
+	struct r1conf *conf = mddev->private;
+
+	if (!conf)
+		return -ENODEV;
+
+	if (kstrtoint(page, 10, &min)) {
+		return -EINVAL;
+	}
+
+	conf->read_target = min;
+	return len;
+}
+
+static struct md_sysfs_entry raid1_read_target =
+__ATTR(read_target, S_IRUGO|S_IWUSR, read_target_show, read_target_store);
+#endif  
+
+#ifdef MY_ABC_HERE
+static ssize_t
+flush_threshold_show(struct mddev *mddev, char *page)
+{
+	struct r1conf *conf = mddev->private;
+	if (conf)
+		return sprintf(page, "%d\n", conf->flush_threshold);
+	else
+		return 0;
+}
+
+static ssize_t
+flush_threshold_store(struct mddev *mddev, const char *page, size_t len)
+{
+	int min;
+	char *e;
+	struct r1conf *conf = mddev->private;
+
+	if (!conf)
+		return -ENODEV;
+
+	min = simple_strtoul(page, &e, 10);
+	if (page == e || (*e && *e != '\n') || min <= 0)
+		return -EINVAL;
+
+	conf->flush_threshold = min;
+	return len;
+}
+
+static struct md_sysfs_entry raid1_flush_threshold =
+__ATTR(flush_threshold, S_IRUGO|S_IWUSR, flush_threshold_show, flush_threshold_store);
+#endif  
+
+#ifdef MY_ABC_HERE
+static struct attribute *raid1_attrs[] =  {
+#ifdef MY_ABC_HERE
+	&raid1_flush_threshold.attr,
+#endif  
+#ifdef MY_ABC_HERE
+	&raid1_read_target.attr,
+#endif  
+	NULL,
+};
+
+static struct attribute_group raid1_attrs_group = {
+	.name = NULL,
+	.attrs = raid1_attrs,
+};
+#endif  
 
 static void raid1_free(struct mddev *mddev, void *priv);
 static int run(struct mddev *mddev)
@@ -2910,6 +3086,14 @@ static int run(struct mddev *mddev)
 		mdname(mddev), mddev->raid_disks - mddev->degraded,
 		mddev->raid_disks);
 
+#ifdef MY_ABC_HERE
+	if (mddev->to_remove == &raid1_attrs_group)
+		mddev->to_remove = NULL;
+	else if (mddev->kobj.sd && sysfs_create_group(&mddev->kobj, &raid1_attrs_group))
+		pr_warn("raid1: failed to create sysfs attributes for %s\n",
+			mdname(mddev));
+#endif  
+
 	mddev->thread = conf->thread;
 	conf->thread = NULL;
 	mddev->private = conf;
@@ -2942,6 +3126,9 @@ static void raid1_free(struct mddev *mddev, void *priv)
 	safe_put_page(conf->tmppage);
 	kfree(conf->poolinfo);
 	kfree(conf);
+#ifdef MY_ABC_HERE
+	mddev->to_remove = &raid1_attrs_group;
+#endif  
 }
 
 static int raid1_resize(struct mddev *mddev, sector_t sectors)

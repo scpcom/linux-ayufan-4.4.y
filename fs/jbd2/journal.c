@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * linux/fs/jbd2/journal.c
  *
@@ -1559,8 +1562,11 @@ static int journal_get_superblock(journal_t *journal)
 	/* Check superblock checksum */
 	if (!jbd2_superblock_csum_verify(journal, sb)) {
 		printk(KERN_ERR "JBD2: journal checksum error\n");
+#ifdef MY_ABC_HERE
+#else
 		err = -EFSBADCRC;
 		goto out;
+#endif /* CONFIG_SYNO_EXT4_METADATA_CSUM_SMOOTH_ERR_HANGLING */
 	}
 
 	/* Precompute checksum seed for all metadata */

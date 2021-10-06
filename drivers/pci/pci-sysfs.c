@@ -30,6 +30,9 @@
 #include <linux/vgaarb.h>
 #include <linux/pm_runtime.h>
 #include <linux/of.h>
+#ifdef CONFIG_SYNO_SATA_TEST
+#include <linux/delay.h>
+#endif /* CONFIG_SYNO_SATA_TEST */
 #include "pci.h"
 
 static int sysfs_initialized;	/* = 0 */
@@ -394,6 +397,568 @@ static ssize_t dev_bus_rescan_store(struct device *dev,
 }
 static DEVICE_ATTR(rescan, (S_IWUSR|S_IWGRP), NULL, dev_bus_rescan_store);
 
+#ifdef CONFIG_SYNO_SATA_TEST
+
+static const struct pci_device_id syno_device[] = {
+	{ PCI_DEVICE(PCI_VENDOR_ID_MARVELL_EXT, 0x9170) },
+	{ PCI_DEVICE(PCI_VENDOR_ID_MARVELL_EXT, 0x9215) },
+	{ PCI_DEVICE(PCI_VENDOR_ID_MARVELL_EXT, 0x9235) },
+	{ PCI_DEVICE(PCI_VENDOR_ID_ASMEDIA, 0x0612) },
+};
+
+static bool is_synology_device(struct pci_dev *pdev)
+{
+	const struct pci_device_id *match_device;
+
+	for (match_device = syno_device;
+	     match_device < syno_device + ARRAY_SIZE(syno_device);
+	     match_device++) {
+		if (pdev->vendor == match_device->vendor &&
+		    pdev->device == match_device->device)
+			return true;
+	}
+	return false;
+}
+#define SATA_SPEED_LEN 3
+static ssize_t test_port_show(struct device *dev,
+			       struct device_attribute *attr, char *buf)
+{
+	struct pci_dev *pdev;
+
+	pdev = to_pci_dev (dev);
+	return sprintf (buf, "%d\n", pdev->test_port);
+}
+
+static ssize_t test_port_store (struct device *dev,
+				struct device_attribute *attr, const char *buf,
+				size_t count)
+{
+	struct pci_dev *pdev = to_pci_dev(dev);
+	unsigned long val;
+	unsigned long port_num;
+	ssize_t result = kstrtoul(buf, 0, &val);
+
+	if (result < 0) {
+		return result;
+	}
+
+	if (0 > val) {
+		return count;
+	}
+
+	if ((pdev->vendor == 0x1b4b && pdev->device == 0x9235) ||
+			(pdev->vendor == 0x1b4b && pdev->device == 0x9215)) {
+		port_num = 4;
+	} else if ((pdev->vendor == 0x1b4b && pdev->device == 0x9170) ||
+			(pdev->vendor == 0x1b21 && pdev->device == 0x0612)) {
+		port_num = 2;
+	}
+
+	if (port_num <= val) {
+		return count;
+	}
+
+	pdev->test_port = (unsigned int) val;
+
+	return count;
+}
+
+static ssize_t test_setup_store (struct device *dev,
+				struct device_attribute *attr, const char *buf,
+				size_t count)
+{
+	struct pci_dev *pdev = to_pci_dev(dev);
+	unsigned long link_speed;
+	ssize_t result = kstrtoul(buf, 0, &link_speed);
+
+	if (result < 0)
+		return result;
+
+	if (link_speed == 0 && link_speed > 3) {
+		dev_warn(&pdev->dev, "Invalid link speed !!\n");
+		return count;
+	}
+
+	if (false == is_synology_device(pdev)) {
+		dev_warn(&pdev->dev, "Only supported device can use this !!\n");
+		return count;
+	}
+
+	pdev->test_speed = link_speed;
+
+	if (pdev->vendor == 0x1b4b && (pdev->device == 0x9235 || pdev->device == 0x9215 || pdev->device == 0x9170)) {
+		void __iomem *bar5 = NULL;
+		int reg_index, reg_data;
+
+		if (pdev->test_port == 0) {
+			reg_index = 0x178;
+			reg_data = 0x17C;
+		} else if (pdev->test_port == 1) {
+			reg_index = 0x1F8;
+			reg_data = 0x1FC;
+		} else if (pdev->test_port == 2) {
+			reg_index = 0x278;
+			reg_data = 0x27C;
+		} else if (pdev->test_port == 3) {
+			reg_index = 0x2F8;
+			reg_data = 0x2FC;
+		} else {
+			reg_index = 0x0;
+			reg_data = 0x0;
+			return count;
+		}
+
+		bar5 = ioremap(pci_resource_start(pdev, 5), pci_resource_len(pdev, 5));
+		if (!bar5) {
+			dev_warn(&pdev->dev, "Can't map mv sata registers\n");
+			return count;
+		}
+
+		dev_info(&pdev->dev, "mv sata BIST, Port %u setup to SATA Gen %lu\n", pdev->test_port, link_speed);
+
+		if (link_speed == 1) {
+			// Set speed to 1.5 Gbps
+			writel(0x00000002, bar5+reg_index);
+			mdelay(100);
+			writel(0x00000050, bar5+reg_data);
+			mdelay(100);
+			// Assert reset
+			writel(0x00000002, bar5+reg_index);
+			mdelay(100);
+			writel(0x00000051, bar5+reg_data);
+			mdelay(100);
+			// De-assert reset
+			writel(0x00000002, bar5+reg_index);
+			mdelay(100);
+			writel(0x00000050, bar5+reg_data);
+			mdelay(100);
+		} else if (link_speed == 2) {
+			// Set speed to 3.0 Gbps
+			writel(0x00000002, bar5+reg_index);
+			mdelay(100);
+			writel(0x00000060, bar5+reg_data);
+			mdelay(100);
+			// Assert reset
+			writel(0x00000002, bar5+reg_index);
+			mdelay(100);
+			writel(0x00000061, bar5+reg_data);
+			mdelay(100);
+			// De-assert reset
+			writel(0x00000002, bar5+reg_index);
+			mdelay(100);
+			writel(0x00000060, bar5+reg_data);
+			mdelay(100);
+		} else if (link_speed == 3) {
+			// Set speed to 6.0 Gbps
+			writel(0x00000002, bar5+reg_index);
+			mdelay(100);
+			writel(0x00000070, bar5+reg_data);
+			mdelay(100);
+			// Assert reset
+			writel(0x00000002, bar5+reg_index);
+			mdelay(100);
+			writel(0x00000071, bar5+reg_data);
+			mdelay(100);
+			// De-assert reset
+			writel(0x00000002, bar5+reg_index);
+			mdelay(100);
+			writel(0x00000070, bar5+reg_data);
+			mdelay(100);
+		}
+
+		if (bar5) {
+			iounmap(bar5);
+			bar5 = NULL;
+		}
+	}
+
+	return count;
+}
+
+static ssize_t test_pattern_store (struct device *dev,
+				struct device_attribute *attr, const char *buf,
+				size_t count)
+{
+	struct pci_dev *pdev = to_pci_dev(dev);
+
+	if (false == is_synology_device(pdev)) {
+		dev_warn(&pdev->dev, "Only supported device can use this !!\n");
+		return count;
+	}
+
+	if (pdev->test_speed == 0 || SATA_SPEED_LEN < pdev->test_speed) {
+		dev_warn(&pdev->dev, "Invalid link speed !!\n");
+		return count;
+	}
+
+	if (pdev->vendor == 0x1b4b && (pdev->device == 0x9235 || pdev->device == 0x9215 || pdev->device == 0x9170)) {
+		void __iomem *bar5 = NULL;
+		int reg_index, reg_data;
+
+		if (pdev->test_port == 0) {
+			reg_index = 0x178;
+			reg_data = 0x17C;
+		} else if (pdev->test_port == 1) {
+			reg_index = 0x1F8;
+			reg_data = 0x1FC;
+		} else if (pdev->test_port == 2) {
+			reg_index = 0x278;
+			reg_data = 0x27C;
+		} else if (pdev->test_port == 3) {
+			reg_index = 0x2F8;
+			reg_data = 0x2FC;
+		} else {
+			reg_index = 0x0;
+			reg_data = 0x0;
+			return count;
+		}
+
+		bar5 = ioremap(pci_resource_start(pdev, 5), pci_resource_len(pdev, 5));
+		if (!bar5) {
+			dev_warn(&pdev->dev, "Can't map mv sata registers\n");
+			return count;
+		}
+
+		dev_info(&pdev->dev, "mv sata BIST, test pattern %s", buf);
+
+		//
+		// Write test pattern
+		//
+		if (!memcmp(buf, "LFTP", 4)) {
+			writel(0x00000096, bar5+reg_index);
+			mdelay(100);
+			writel(0x00000000, bar5+reg_data);
+			mdelay(100);
+			writel(0x00000097, bar5+reg_index);
+			mdelay(100);
+			writel(0x00000000, bar5+reg_data);
+			mdelay(100);
+			writel(0x00000098, bar5+reg_index);
+			mdelay(100);
+			writel(0x00007E7E, bar5+reg_data);
+			mdelay(100);
+			writel(0x00000099, bar5+reg_index);
+			mdelay(100);
+			writel(0x00007E7E, bar5+reg_data);
+			mdelay(100);
+			writel(0x0000009A, bar5+reg_index);
+			mdelay(100);
+			writel(0x00007E7E, bar5+reg_data);
+			mdelay(100);
+			writel(0x0000009B, bar5+reg_index);
+			mdelay(100);
+			writel(0x00007E7E, bar5+reg_data);
+			mdelay(100);
+			writel(0x00000095, bar5+reg_index);
+			mdelay(100);
+			writel(0x000080F0, bar5+reg_data);
+			mdelay(100);
+		}
+
+		if (!memcmp(buf, "MFTP", 4)) {
+			writel(0x00000096, bar5+reg_index);
+			mdelay(100);
+			writel(0x00000000, bar5+reg_data);
+			mdelay(100);
+			writel(0x00000097, bar5+reg_index);
+			mdelay(100);
+			writel(0x00000000, bar5+reg_data);
+			mdelay(100);
+			writel(0x00000098, bar5+reg_index);
+			mdelay(100);
+			writel(0x00007878, bar5+reg_data);
+			mdelay(100);
+			writel(0x00000099, bar5+reg_index);
+			mdelay(100);
+			writel(0x00007878, bar5+reg_data);
+			mdelay(100);
+			writel(0x0000009A, bar5+reg_index);
+			mdelay(100);
+			writel(0x00007878, bar5+reg_data);
+			mdelay(100);
+			writel(0x0000009B, bar5+reg_index);
+			mdelay(100);
+			writel(0x00007878, bar5+reg_data);
+			mdelay(100);
+			writel(0x00000095, bar5+reg_index);
+			mdelay(100);
+			writel(0x000080F0, bar5+reg_data);
+			mdelay(100);
+		}
+
+		if (!memcmp(buf, "HFTP", 4)) {
+			writel(0x00000096, bar5+reg_index);
+			mdelay(100);
+			writel(0x00000000, bar5+reg_data);
+			mdelay(100);
+			writel(0x00000097, bar5+reg_index);
+			mdelay(100);
+			writel(0x00000000, bar5+reg_data);
+			mdelay(100);
+			writel(0x00000098, bar5+reg_index);
+			mdelay(100);
+			writel(0x00004A4A, bar5+reg_data);
+			mdelay(100);
+			writel(0x00000099, bar5+reg_index);
+			mdelay(100);
+			writel(0x00004A4A, bar5+reg_data);
+			mdelay(100);
+			writel(0x0000009A, bar5+reg_index);
+			mdelay(100);
+			writel(0x00004A4A, bar5+reg_data);
+			mdelay(100);
+			writel(0x0000009B, bar5+reg_index);
+			mdelay(100);
+			writel(0x00004A4A, bar5+reg_data);
+			mdelay(100);
+			writel(0x00000095, bar5+reg_index);
+			mdelay(100);
+			writel(0x000080F0, bar5+reg_data);
+			mdelay(100);
+		}
+
+		if (!memcmp(buf, "LBP", 3)) {
+			writel(0x00000096, bar5+reg_index);
+			mdelay(100);
+			writel(0x00000036, bar5+reg_data);
+			mdelay(100);
+			writel(0x00000097, bar5+reg_index);
+			mdelay(100);
+			writel(0x0000F423, bar5+reg_data);
+			mdelay(100);
+			writel(0x00000098, bar5+reg_index);
+			mdelay(100);
+			writel(0x00006F43, bar5+reg_data);
+			mdelay(100);
+			writel(0x00000099, bar5+reg_index);
+			mdelay(100);
+			writel(0x00003534, bar5+reg_data);
+			mdelay(100);
+			writel(0x0000009A, bar5+reg_index);
+			mdelay(100);
+			writel(0x0000D353, bar5+reg_data);
+			mdelay(100);
+			writel(0x0000009B, bar5+reg_index);
+			mdelay(100);
+			writel(0x00004C05, bar5+reg_data);
+			mdelay(100);
+			writel(0x00000095, bar5+reg_index);
+			mdelay(100);
+			writel(0x000080E0, bar5+reg_data);
+			mdelay(100);
+		}
+
+		if (!memcmp(buf, "SSOP", 4)) {
+			writel(0x00000096, bar5+reg_index);
+			mdelay(100);
+			writel(0x00000000, bar5+reg_data);
+			mdelay(100);
+			writel(0x00000097, bar5+reg_index);
+			mdelay(100);
+			writel(0x00000000, bar5+reg_data);
+			mdelay(100);
+			writel(0x00000098, bar5+reg_index);
+			mdelay(100);
+			writel(0x00000000, bar5+reg_data);
+			mdelay(100);
+			writel(0x00000099, bar5+reg_index);
+			mdelay(100);
+			writel(0x00000000, bar5+reg_data);
+			mdelay(100);
+			writel(0x0000009A, bar5+reg_index);
+			mdelay(100);
+			writel(0x00000000, bar5+reg_data);
+			mdelay(100);
+			writel(0x0000009B, bar5+reg_index);
+			mdelay(100);
+			writel(0x00000000, bar5+reg_data);
+			mdelay(100);
+			writel(0x00000095, bar5+reg_index);
+			mdelay(100);
+			writel(0x00008050, bar5+reg_data);
+			mdelay(100);
+		}
+
+		if (bar5) {
+			iounmap(bar5);
+			bar5 = NULL;
+		}
+	} else if (pdev->vendor == 0x1b21 && pdev->device == 0x0612) {
+		u8 reg_data_LBP[SATA_SPEED_LEN] = {0x9D, 0xAD, 0xCD};
+		u8 reg_data_XFTP[SATA_SPEED_LEN] = {0x96, 0xA6, 0xC6};
+		u8 reg_data_SSOP[SATA_SPEED_LEN] = {0x9C, 0xAC, 0xCC};
+
+		if (0 > pdev->test_port || 2 <= pdev->test_port) {
+			return count;
+		}
+
+		dev_info(&pdev->dev, "test pattern %s", buf);
+
+		//
+		// Write test pattern
+		//
+		if (!memcmp(buf, "LBP", 3)) {
+			pci_bus_write_config_byte(pdev->bus, PCI_DEVFN(0x00, 0x0), (0 == pdev->test_port) ? 0xCB2 : 0xDB2, reg_data_LBP[pdev->test_speed - 1]);
+		}
+
+		if (!memcmp(buf, "LFTP", 4)) {
+			pci_bus_write_config_byte(pdev->bus, PCI_DEVFN(0x00, 0x0), (0 == pdev->test_port) ? 0xCB2 : 0xDB2, reg_data_XFTP[pdev->test_speed - 1]);
+			mdelay(100);
+			pci_bus_write_config_byte(pdev->bus, PCI_DEVFN(0x00, 0x0), (0 == pdev->test_port) ? 0xCC5 : 0xDC5, 0x02);
+		}
+
+		if (!memcmp(buf, "MFTP", 4)) {
+			pci_bus_write_config_byte(pdev->bus, PCI_DEVFN(0x00, 0x0), (0 == pdev->test_port) ? 0xCB2 : 0xDB2, reg_data_XFTP[pdev->test_speed - 1]);
+			mdelay(100);
+			pci_bus_write_config_byte(pdev->bus, PCI_DEVFN(0x00, 0x0), (0 == pdev->test_port) ? 0xCC5 : 0xDC5, 0x01);
+		}
+
+		if (!memcmp(buf, "HFTP", 4)) {
+			pci_bus_write_config_byte(pdev->bus, PCI_DEVFN(0x00, 0x0), (0 == pdev->test_port) ? 0xCB2 : 0xDB2, reg_data_XFTP[pdev->test_speed - 1]);
+			mdelay(100);
+			pci_bus_write_config_byte(pdev->bus, PCI_DEVFN(0x00, 0x0), (0 == pdev->test_port) ? 0xCC5 : 0xDC5, 0x00);
+		}
+
+		if (!memcmp(buf, "SSOP", 4)) {
+			pci_bus_write_config_byte(pdev->bus, PCI_DEVFN(0x00, 0x0), (0 == pdev->test_port) ? 0xCB2 : 0xDB2, reg_data_SSOP[pdev->test_speed - 1]);
+		}
+	}
+
+	return count;
+}
+
+extern const unsigned mv_port_addr[4];
+extern const unsigned mv_port_data[4];
+unsigned mv_speed_addr[3] = {0x8D, 0x8F, 0x91};
+int asm1061_reg_addr_port0[SATA_SPEED_LEN] = {0xCA4, 0xCA5, 0xCA6};
+int asm1061_reg_addr_port1[SATA_SPEED_LEN] = {0xDA4, 0xDA5, 0xDA6};
+
+static ssize_t test_amp_adjust_show(struct device *dev,
+			       struct device_attribute *attr, char *buf)
+{
+	struct pci_dev *pdev;
+	pdev = to_pci_dev (dev);
+
+	if (pdev->test_speed == 0 || SATA_SPEED_LEN < pdev->test_speed) {
+		dev_warn(&pdev->dev, "Invalid link speed !!\n");
+		return 0;
+	}
+
+	if (pdev->vendor == 0x1b4b && (pdev->device == 0x9235 || pdev->device == 0x9215 || pdev->device == 0x9170)) {
+		void __iomem *bar5 = NULL;
+		u32 value;
+
+		bar5 = ioremap(pci_resource_start(pdev, 5), pci_resource_len(pdev, 5));
+		if (!bar5) {
+			dev_warn(&pdev->dev, "Can't map mv sata registers\n");
+			return 0;
+		}
+		if (0 > pdev->test_port || 3 < pdev->test_port) {
+			return 0;
+		}
+		writel(mv_speed_addr[pdev->test_speed - 1], bar5 + mv_port_addr[pdev->test_port]);
+		value = readl(bar5 + mv_port_data[pdev->test_port]);
+		if (bar5) {
+			iounmap(bar5);
+			bar5 = NULL;
+		}
+
+		return sprintf (buf, "%x\n", value);
+	} else if (pdev->vendor == 0x1b21 && pdev->device == 0x0612) {
+		u8 reg_data = 0;
+
+		if (0 > pdev->test_port || 2 <= pdev->test_port) {
+			return 0;
+		}
+
+		if (0 == pdev->test_port) {
+			pci_bus_read_config_byte(pdev->bus, PCI_DEVFN(0x00, 0x0), asm1061_reg_addr_port0[pdev->test_speed - 1], &reg_data);
+		} else if (1 == pdev->test_port) {
+			pci_bus_read_config_byte(pdev->bus, PCI_DEVFN(0x00, 0x0), asm1061_reg_addr_port1[pdev->test_speed - 1], &reg_data);
+		}
+
+		dev_info(&pdev->dev, "TX de-emphasis: 0x%x", (reg_data & 0xf0) >> 4);
+		dev_info(&pdev->dev, "TX amplitude: 0x%x", reg_data & 0x0f);
+
+		return sprintf(buf, "%x\n", reg_data);
+	}
+
+	return 0;
+}
+
+static ssize_t test_amp_adjust_store (struct device *dev,
+				struct device_attribute *attr, const char *buf,
+				size_t count)
+{
+	struct pci_dev *pdev = to_pci_dev(dev);
+
+	if (false == is_synology_device(pdev)) {
+		dev_warn(&pdev->dev, "Only supported device can use this !!\n");
+		return count;
+	}
+
+	if (pdev->test_speed == 0 || SATA_SPEED_LEN < pdev->test_speed) {
+		dev_warn(&pdev->dev, "Invalid link speed !!\n");
+		return count;
+	}
+
+	if (pdev->vendor == 0x1b4b && (pdev->device == 0x9235 || pdev->device == 0x9215 || pdev->device == 0x9170)) {
+		void __iomem *bar5 = NULL;
+		u32 iValue, i2;
+
+		sscanf(buf, "%x", &iValue);
+
+		if (0 > pdev->test_port || 3 < pdev->test_port) {
+			return 0;
+		}
+
+		bar5 = ioremap(pci_resource_start(pdev, 5), pci_resource_len(pdev, 5));
+		if (!bar5) {
+			dev_warn(&pdev->dev, "Can't map mv sata registers\n");
+			return count;
+		}
+		writel(0xE, bar5 + mv_port_addr[pdev->test_port]);
+		i2 = readl(bar5 + mv_port_data[pdev->test_port]);
+		// write apt adjust
+		writel(0xE, bar5 + mv_port_addr[pdev->test_port]);
+		writel(i2 & ~0x100, bar5 + mv_port_data[pdev->test_port]);
+		// write amp emph
+		writel(mv_speed_addr[pdev->test_speed - 1], bar5 + mv_port_addr[pdev->test_port]);
+		writel(iValue, bar5 + mv_port_data[pdev->test_port]);
+
+		if (bar5) {
+			iounmap(bar5);
+			bar5 = NULL;
+		}
+	} else if (pdev->vendor == 0x1b21 && pdev->device == 0x0612) {
+		u8 reg_data = 0;
+
+		if (0 > pdev->test_port || 2 <= pdev->test_port) {
+			return count;
+		}
+
+		sscanf(buf, "%02hhx", &reg_data);
+
+		if (0 == pdev->test_port) {
+			pci_bus_write_config_byte(pdev->bus, PCI_DEVFN(0x00, 0x0), asm1061_reg_addr_port0[pdev->test_speed - 1], reg_data);
+		} else if (1 == pdev->test_port) {
+			pci_bus_write_config_byte(pdev->bus, PCI_DEVFN(0x00, 0x0), asm1061_reg_addr_port1[pdev->test_speed - 1], reg_data);
+		}
+
+		dev_info(&pdev->dev, "TX de-emphasis: 0x%x", (reg_data & 0xf0) >> 4);
+		dev_info(&pdev->dev, "TX amplitude: 0x%x", reg_data & 0x0f);
+	}
+
+	return count;
+}
+
+static DEVICE_ATTR_RW(test_port);
+static DEVICE_ATTR_WO(test_setup);
+static DEVICE_ATTR_WO(test_pattern);
+static DEVICE_ATTR_RW(test_amp_adjust);
+
+#endif /* CONFIG_SYNO_SATA_TEST */
+
 #if defined(CONFIG_PM) && defined(CONFIG_ACPI)
 static ssize_t d3cold_allowed_store(struct device *dev,
 				    struct device_attribute *attr,
@@ -583,6 +1148,12 @@ static struct attribute *pci_dev_attrs[] = {
 	&dev_attr_devspec.attr,
 #endif
 	&dev_attr_driver_override.attr,
+#ifdef CONFIG_SYNO_SATA_TEST
+	&dev_attr_test_port.attr,
+	&dev_attr_test_setup.attr,
+	&dev_attr_test_pattern.attr,
+	&dev_attr_test_amp_adjust.attr,
+#endif /* CONFIG_SYNO_SATA_TEST */
 	NULL,
 };
 

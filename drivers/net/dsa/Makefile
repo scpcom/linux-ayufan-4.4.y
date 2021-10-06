@@ -18,3 +18,6 @@ mv88e6xxx_drv-y += mv88e6171.o
 endif
 endif
 obj-$(CONFIG_NET_DSA_BCM_SF2)	+= bcm_sf2.o
+ifeq ($(CONFIG_SYNO_LSP_ARMADA_17_10), y)
+obj-$(CONFIG_DSA_MVMDIO) += dsa_mvmdio.o
+endif # CONFIG_SYNO_LSP_ARMADA_17_10

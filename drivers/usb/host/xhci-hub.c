@@ -880,12 +880,35 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 				break;
 			}
 
-			if ((temp & PORT_PE) == 0 ||
-				(link_state > USB_SS_PORT_LS_U3)) {
-				xhci_warn(xhci, "Cannot set link state.\n");
+			if (link_state == USB_SS_PORT_LS_COMP_MOD) {
+				if (!HCC2_CTC(xhci->hcc_params2)) {
+					xhci_dbg(xhci, "CTC flag is 0, port already supports entering compliance mode\n");
+					break;
+				}
+
+				if ((temp & PORT_CONNECT)) {
+					xhci_warn(xhci, "Can't set compliance mode when port is connected\n");
+					goto error;
+				}
+
+				xhci_dbg(xhci, "Enable compliance mode transition for port %d\n",
+						wIndex);
+				xhci_set_link_state(xhci, port_array, wIndex,
+						link_state);
+				temp = readl(port_array[wIndex]);
+				break;
+			}
+			 
+			if (!(temp & PORT_PE)) {
+				retval = -ENODEV;
+				break;
+			}
+			 
+			if (link_state > USB_SS_PORT_LS_U3) {
+				xhci_warn(xhci, "Cannot set port %d link state %d\n",
+					 wIndex, link_state);
 				goto error;
 			}
-
 			if (link_state == USB_SS_PORT_LS_U3) {
 				slot_id = xhci_find_slot_id_by_port(hcd, xhci,
 						wIndex + 1);

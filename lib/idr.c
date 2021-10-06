@@ -702,7 +702,7 @@ int ida_get_new_above(struct ida *ida, int starting_id, int *p_id)
 }
 EXPORT_SYMBOL(ida_get_new_above);
 
-#ifdef MY_ABC_HERE
+#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 int syno_ida_get_new(struct ida *idp, int starting_id, int *id)
 {
 	return ida_get_new_above(idp, starting_id, id);

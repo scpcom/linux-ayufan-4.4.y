@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
  
 #include "ctree.h"
 #include "disk-io.h"
@@ -207,7 +210,12 @@ int btrfs_check_dir_item_collision(struct btrfs_root *root, u64 dir,
 		goto out;
 	}
 
+#ifdef MY_ABC_HERE
+	 
+	data_size = sizeof(*di) + name_len + sizeof(struct btrfs_item);
+#else
 	data_size = sizeof(*di) + name_len;
+#endif  
 	leaf = path->nodes[0];
 	slot = path->slots[0];
 	if (data_size + btrfs_item_size_nr(leaf, slot) +

@@ -76,10 +76,17 @@ struct ntb_netdev {
 	struct net_device *ndev;
 	struct ntb_transport_qp *qp;
 	struct timer_list tx_timer;
+#ifdef CONFIG_SYNO_NTB /* CONFIG_SYNO_NTB */
+	unsigned int count_of_rx_allocate_fail;
+#endif /* CONFIG_SYNO_NTB */
 };
 
 #define	NTB_TX_TIMEOUT_MS	1000
+#ifdef CONFIG_SYNO_NTB /* CONFIG_SYNO_NTB */ 
+#define NTB_RXQ_SIZE            10000
+#else
 #define	NTB_RXQ_SIZE		100
+#endif /* CONFIG_SYNO_NTB */ 
 
 static LIST_HEAD(dev_list);
 
@@ -105,6 +112,9 @@ static void ntb_netdev_rx_handler(struct ntb_transport_qp *qp, void *qp_data,
 	struct net_device *ndev = qp_data;
 	struct sk_buff *skb;
 	int rc;
+#ifdef CONFIG_SYNO_NTB /* CONFIG_SYNO_NTB */
+	struct ntb_netdev *dev = netdev_priv(ndev);
+#endif
 
 	skb = data;
 	if (!skb)
@@ -130,10 +140,17 @@ static void ntb_netdev_rx_handler(struct ntb_transport_qp *qp, void *qp_data,
 		ndev->stats.rx_bytes += len;
 	}
 
+#ifdef CONFIG_SYNO_NTB /* CONFIG_SYNO_NTB */
+	skb = __netdev_alloc_skb(ndev, ndev->mtu + ETH_HLEN, GFP_ATOMIC | __GFP_HIGH);
+#else
 	skb = netdev_alloc_skb(ndev, ndev->mtu + ETH_HLEN);
+#endif /* CONFIG_SYNO_NTB */
 	if (!skb) {
 		ndev->stats.rx_errors++;
 		ndev->stats.rx_frame_errors++;
+#ifdef CONFIG_SYNO_NTB /* CONFIG_SYNO_NTB */
+		dev->count_of_rx_allocate_fail++;
+#endif /* CONFIG_SYNO_NTB */
 		return;
 	}
 
@@ -144,6 +161,22 @@ enqueue_again:
 		ndev->stats.rx_errors++;
 		ndev->stats.rx_fifo_errors++;
 	}
+
+#ifdef CONFIG_SYNO_NTB /* CONFIG_SYNO_NTB */
+	while(dev->count_of_rx_allocate_fail) {
+                skb = __netdev_alloc_skb(ndev, ndev->mtu + ETH_HLEN, GFP_ATOMIC | __GFP_HIGH);
+                if(!skb) {
+                        break;
+                } else {
+                        rc = ntb_transport_rx_enqueue(qp, skb, skb->data, ndev->mtu + ETH_HLEN);
+                        if (rc) {
+                                dev_kfree_skb(skb);
+                                break;
+                        }
+                        dev->count_of_rx_allocate_fail--;
+                }
+        }
+#endif /* CONFIG_SYNO_NTB */
 }
 
 static int __ntb_netdev_maybe_stop_tx(struct net_device *netdev,

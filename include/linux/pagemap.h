@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_PAGEMAP_H
 #define _LINUX_PAGEMAP_H
 
@@ -153,7 +156,7 @@ static inline int page_cache_get_speculative(struct page *page)
 
 #ifdef CONFIG_TINY_RCU
 # ifdef CONFIG_PREEMPT_COUNT
-	VM_BUG_ON(!in_atomic());
+	VM_BUG_ON(!in_atomic() && !irqs_disabled());
 # endif
 	/*
 	 * Preempt must be disabled here - we rely on rcu_read_lock doing
@@ -191,7 +194,7 @@ static inline int page_cache_add_speculative(struct page *page, int count)
 
 #if !defined(CONFIG_SMP) && defined(CONFIG_TREE_RCU)
 # ifdef CONFIG_PREEMPT_COUNT
-	VM_BUG_ON(!in_atomic());
+	VM_BUG_ON(!in_atomic() && !irqs_disabled());
 # endif
 	VM_BUG_ON_PAGE(page_count(page) == 0, page);
 	atomic_add(count, &page->_count);
@@ -328,6 +331,27 @@ static inline struct page *find_or_create_page(struct address_space *mapping,
 					FGP_LOCK|FGP_ACCESSED|FGP_CREAT,
 					gfp_mask);
 }
+
+#ifdef MY_ABC_HERE
+static inline bool task_skip_memcg_account(struct task_struct *p)
+{
+	return p->memcg_skip_account;
+}
+
+static inline struct page *find_or_create_page_no_memcg(struct address_space *mapping,
+					pgoff_t offset, gfp_t gfp_mask)
+{
+	struct page *page;
+
+	current->memcg_skip_account++;
+	page = pagecache_get_page(mapping, offset,
+					FGP_LOCK|FGP_ACCESSED|FGP_CREAT,
+					gfp_mask);
+	current->memcg_skip_account--;
+
+	return page;
+}
+#endif
 
 /**
  * grab_cache_page_nowait - returns locked page at given index in given cache

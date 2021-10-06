@@ -4,7 +4,7 @@
 skip=0
 
 case "$BUILD_TARGET" in
-	APOLLOLAKE|DENVERTON|KVMX64|BROADWELLNK|PURLEY|COFFEELAKE)
+	APOLLOLAKE|DENVERTON|KVMX64|BROADWELLNK|PURLEY|COFFEELAKE|BROADWELLNTB|NEXTKVMX64|GEMINILAKE)
 		KERNEL_STRIP=${STRIP64}
 		;;
 	*)
@@ -162,11 +162,13 @@ ModUSB=" \
 	${KernelDir}/drivers/usb/host/xhci-pci.ko \
 	${KernelDir}/drivers/usb/common/usb-common.ko \
 	${KernelDir}/drivers/usb/core/usbcore.ko \
-	${KernelDir}/drivers/usb/host/ehci-hcd.ko \
-	${KernelDir}/drivers/usb/host/ehci-pci.ko \
 	${KernelDir}/drivers/usb/storage/usb-storage.ko \
 	${KernelDir}/drivers/usb/class/cdc-acm.ko \
 	${ModUSBLP} \
+	"
+ModUSBEHCI=" \
+	${KernelDir}/drivers/usb/host/ehci-hcd.ko \
+	${KernelDir}/drivers/usb/host/ehci-pci.ko \
 	"
 ModUSBIP=" \
 	${KernelDir}/drivers/usb/usbip_inf/usbip-host.ko \
@@ -396,6 +398,9 @@ ModXFS=" \
 ModBTRFS=" \
 	${KernelDir}/fs/btrfs/btrfs.ko \
 	"
+ModOVERLAYFS=" \
+	${KernelDir}/fs/overlayfs/overlay.ko \
+	"
 ModCryptoIntel=" \
 	${KernelDir}/arch/x86/crypto/crc32c-intel.ko \
 	${KernelDir}/arch/x86/crypto/aes-x86_64.ko \
@@ -426,6 +431,22 @@ ModDCA=" \
 ModADT=" \
 	${KernelDir}/drivers/hwmon/adt7475.ko \
 	"
+ModNetConsole=" \
+	${KernelDir}/drivers/net/netconsole.ko \
+	"
+
+ModNTB=" \
+	${KernelDir}/drivers/ntb/ntb.ko \
+	${KernelDir}/drivers/ntb/hw/intel/ntb_hw_intel.ko \
+	${KernelDir}/drivers/ntb/ntb_transport.ko \
+	${KernelDir}/drivers/net/ntb_netdev.ko \
+	"
+ModDockerIngress=" \
+	${KernelDir}/net/netfilter/ipvs/ip_vs.ko \
+	${KernelDir}/net/netfilter/ipvs/ip_vs_rr.ko \
+	${KernelDir}/net/netfilter/xt_ipvs.ko \
+	"
+
 ########## Deprecated Module List ##########
 
 ModTalitos=" \
@@ -459,12 +480,16 @@ ModRfkill=" \
 	"
 
 ##################################################
+if [ "$BUILD_TARGET" != BROADWELLNK ]; then
+	ModuleList="${ModuleList} ${ModUSBEHCI}"
+fi
 
 ModuleList="${ModuleList} ${BasicModuleList}"
 
 case "$BUILD_TARGET" in
 	DENVERTON)
 		ModuleList="${ModuleList} ${ModBTRFS}"
+		ModuleList="${ModuleList} ${ModOVERLAYFS}"
 		ModuleList="${ModuleList} ${ModCryptoIntel}"
 		ModuleList="${ModuleList} ${ModI2C}"
 		ModuleList="${ModuleList} ${ModLP3943}"
@@ -485,6 +510,8 @@ case "$BUILD_TARGET" in
 		ModuleList="${ModuleList} ${ModDVB}"
 		ModuleList="${ModuleList} ${ModDiskPwCtl}"
 		ModuleList="${ModuleList} ${KernelDir}/drivers/net/mdio.ko"
+		ModuleList="${ModuleList} ${ModNetConsole}"
+		ModuleList="${ModuleList} ${ModDockerIngress}"
 
 		;;
 	APOLLOLAKE)
@@ -509,7 +536,8 @@ case "$BUILD_TARGET" in
 		ModuleList="${ModuleList} ${ModOpenvswitch}"
 		ModuleList="${ModuleList} ${ModDVB}"
 		ModuleList="${ModuleList} ${ModDiskPwCtl}"
-		ModuleList="${ModuleList} ${KernelDir}/lib/zlib_deflate/zlib_deflate.ko"
+		ModuleList="${ModuleList} ${ModNetConsole}"
+		ModuleList="${ModuleList} ${ModDockerIngress}"
 
 		;;
 	KVMX64)
@@ -538,6 +566,7 @@ case "$BUILD_TARGET" in
 		ModuleList="${ModuleList} ${ModDVB}"
 		ModuleList="${ModuleList} ${ModVirtio}"
 		ModuleList="${ModuleList} ${KernelDir}/lib/zlib_deflate/zlib_deflate.ko"
+		ModuleList="${ModuleList} ${ModDockerIngress}"
 
 		;;
 	REALTEK_RTD1296)
@@ -546,7 +575,6 @@ case "$BUILD_TARGET" in
 		ModuleList="${ModuleList} ${ModBTRFS}"
 		ModuleList="${ModuleList} ${KernelDir}/crypto/arc4.ko"
 		ModuleList="${ModuleList} ${KernelDir}/crypto/cryptd.ko"
-		ModuleList="${ModuleList} ${KernelDir}/crypto/ocf/cryptodev.ko"
 		ModuleList="${ModuleList} ${KernelDir}/arch/arm64/crypto/aes-neon-blk.ko"
 		ModuleList="${ModuleList} ${KernelDir}/arch/arm64/crypto/aes-ce-blk.ko"
 		ModuleList="${ModuleList} ${KernelDir}/drivers/i2c/algos/i2c-algo-bit.ko"
@@ -570,6 +598,9 @@ case "$BUILD_TARGET" in
 		ModuleList="${ModuleList} ${KernelDir}/crypto/ablk_helper.ko"
 		ModuleList="${ModuleList} ${KernelDir}/crypto/gf128mul.ko"
 		ModuleList="${ModuleList} ${KernelDir}/crypto/lrw.ko"
+		ModuleList="${ModuleList} ${KernelDir}/drivers/mmc/core/mmc_core.ko"
+		ModuleList="${ModuleList} ${KernelDir}/drivers/mmc/card/mmc_block.ko"
+		ModuleList="${ModuleList} ${KernelDir}/drivers/mmc/host/rtk-sdmmc.ko"
 		ModuleList="${ModuleList} ${ModBridge} ${ModTC} ${ModFwSecurity}"
 		ModuleList="${ModuleList} ${ModVlan}"
 		ModuleList="${ModuleList} ${ModUSBserial}"
@@ -583,7 +614,6 @@ case "$BUILD_TARGET" in
 		ModuleList="${ModuleList} ${ModNFQ}"
 		ModuleList="${ModuleList} ${ModOpenvswitch}"
 		ModuleList="${ModuleList} ${ModDVB}"
-		ModuleList="${ModuleList} ${KernelDir}/drivers/net/ethernet/realtek/r8168/r8168.ko"
 		ModuleList="${ModuleList} ${ModDiskPwCtl}"
 
 		;;
@@ -612,6 +642,37 @@ case "$BUILD_TARGET" in
 		ModuleList="${ModuleList} ${ModDCA}"
 		ModuleList="${ModuleList} ${ModADT}"
 		ModuleList="${ModuleList} ${KernelDir}/drivers/net/mdio.ko"
+		ModuleList="${ModuleList} ${ModNetConsole}"
+		ModuleList="${ModuleList} ${ModDockerIngress}"
+
+		;;
+	BROADWELLNTB)
+		ModuleList="${ModuleList} ${ModBTRFS}"
+		ModuleList="${ModuleList} ${ModCryptoIntel}"
+		ModuleList="${ModuleList} ${ModI2C}"
+		ModuleList="${ModuleList} ${KernelDir}/drivers/i2c/busses/i2c-i801.ko"
+		ModuleList="${ModuleList} ${ModLP3943}"
+		ModuleList="${ModuleList} ${ModCPUFreq}"
+		ModuleList="${ModuleList} ${ModBridge} ${ModTC} ${ModFwSecurity}"
+		ModuleList="${ModuleList} ${ModVlan}"
+		ModuleList="${ModuleList} ${ModUSBserial}"
+		ModuleList="${ModuleList} ${ModIPsec}"
+		ModuleList="${ModuleList} ${ModUSBModem}"
+		ModuleList="${ModuleList} ${ModEtronUSB}"
+		ModuleList="${ModuleList} ${ModWirless}"
+		ModuleList="${ModuleList} ${ModBluetooth}"
+		ModuleList="${ModuleList} ${ModZram}"
+		ModuleList="${ModuleList} ${ModIPv6Tun}"
+		ModuleList="${ModuleList} ${ModVirtualization}"
+		ModuleList="${ModuleList} ${ModOpenvswitch}"
+		ModuleList="${ModuleList} ${ModNFQ}"
+		ModuleList="${ModuleList} ${ModDVB}"
+		ModuleList="${ModuleList} ${ModDiskPwCtl}"
+		ModuleList="${ModuleList} ${ModDCA}"
+		ModuleList="${ModuleList} ${ModADT}"
+		ModuleList="${ModuleList} ${KernelDir}/drivers/net/mdio.ko"
+		ModuleList="${ModuleList} ${ModNTB}"
+		ModuleList="${ModuleList} ${ModDockerIngress}"
 
 		;;
 	PURLEY)
@@ -640,7 +701,8 @@ case "$BUILD_TARGET" in
 		ModuleList="${ModuleList} ${ModOpenvswitch}"
 		ModuleList="${ModuleList} ${ModNFQ}"
 		ModuleList="${ModuleList} ${ModDVB}"
-		ModuleList="${ModuleList} ${KernelDir}/lib/zlib_deflate/zlib_deflate.ko"
+		ModuleList="${ModuleList} ${ModNetConsole}"
+		ModuleList="${ModuleList} ${ModDockerIngress}"
 
 		;;
 	MARVELL_ARMADA37XX)
@@ -658,6 +720,7 @@ case "$BUILD_TARGET" in
 		ModuleList="${ModuleList} ${KernelDir}/drivers/usb/common/usb-common.ko"
 		ModuleList="${ModuleList} ${KernelDir}/drivers/usb/core/usbcore.ko"
 		ModuleList="${ModuleList} ${KernelDir}/drivers/usb/host/ehci-hcd.ko"
+		ModuleList="${ModuleList} ${KernelDir}/drivers/usb/host/ehci-orion.ko"
 		ModuleList="${ModuleList} ${KernelDir}/drivers/usb/host/ehci-pci.ko"
 		ModuleList="${ModuleList} ${KernelDir}/drivers/usb/storage/usb-storage.ko"
 		ModuleList="${ModuleList} ${KernelDir}/drivers/usb/class/cdc-acm.ko"
@@ -678,6 +741,7 @@ case "$BUILD_TARGET" in
 		ModuleList="${ModuleList} ${ModOpenvswitch}"
 		ModuleList="${ModuleList} ${ModDVB}"
 		ModuleList="${ModuleList} ${ModDiskPwCtl}"
+		ModuleList="${ModuleList} ${ModNetConsole}"
 
 		;;
 	COFFEELAKE)
@@ -705,6 +769,63 @@ case "$BUILD_TARGET" in
 		ModuleList="${ModuleList} ${ModDCA}"
 		ModuleList="${ModuleList} ${ModADT}"
 		ModuleList="${ModuleList} ${KernelDir}/drivers/net/mdio.ko"
+		ModuleList="${ModuleList} ${ModNetConsole}"
+		ModuleList="${ModuleList} ${ModDockerIngress}"
+
+		;;
+	NEXTKVMX64)
+		ModuleList="${ModuleList} ${ModBTRFS}"
+		ModuleList="${ModuleList} ${ModCryptoIntel}"
+		ModuleList="${ModuleList} ${ModI2C}"
+		ModuleList="${ModuleList} ${KernelDir}/drivers/i2c/busses/i2c-i801.ko"
+		ModuleList="${ModuleList} ${KernelDir}/drivers/dma/ioat/ioatdma.ko"
+		ModuleList="${ModuleList} ${KernelDir}/drivers/hwmon/adt7475.ko"
+		ModuleList="${ModuleList} ${KernelDir}/drivers/dca/dca.ko"
+		ModuleList="${ModuleList} ${KernelDir}/drivers/net/mdio.ko"
+		ModuleList="${ModuleList} ${ModCPUFreq}"
+		ModuleList="${ModuleList} ${KernelDir}/drivers/cpufreq/cpufreq_conservative.ko"
+		ModuleList="${ModuleList} ${ModBridge} ${ModTC} ${ModFwSecurity}"
+		ModuleList="${ModuleList} ${ModVlan}"
+		ModuleList="${ModuleList} ${ModUSBserial}"
+		ModuleList="${ModuleList} ${ModIPsec}"
+		ModuleList="${ModuleList} ${ModUSBModem}"
+		ModuleList="${ModuleList} ${ModEtronUSB}"
+		ModuleList="${ModuleList} ${ModWirless}"
+		ModuleList="${ModuleList} ${ModBluetooth}"
+		ModuleList="${ModuleList} ${ModZram}"
+		ModuleList="${ModuleList} ${ModIPv6Tun}"
+		ModuleList="${ModuleList} ${ModVirtualization}"
+		ModuleList="${ModuleList} ${ModOpenvswitch}"
+		ModuleList="${ModuleList} ${ModNFQ}"
+		ModuleList="${ModuleList} ${ModDVB}"
+		ModuleList="${ModuleList} ${ModVirtio}"
+		ModuleList="${ModuleList} ${KernelDir}/lib/zlib_deflate/zlib_deflate.ko"
+		ModuleList="${ModuleList} ${ModDockerIngress}"
+
+		;;
+	GEMINILAKE)
+		ModuleList="${ModuleList} ${ModBTRFS}"
+		ModuleList="${ModuleList} ${ModCryptoIntel}"
+		ModuleList="${ModuleList} ${ModI2C}"
+		ModuleList="${ModuleList} ${ModLP3943}"
+		ModuleList="${ModuleList} ${ModCPUFreq}"
+		ModuleList="${ModuleList} ${ModBridge} ${ModTC} ${ModFwSecurity}"
+		ModuleList="${ModuleList} ${ModVlan}"
+		ModuleList="${ModuleList} ${ModUSBserial}"
+		ModuleList="${ModuleList} ${ModIPsec}"
+		ModuleList="${ModuleList} ${ModUSBModem}"
+		ModuleList="${ModuleList} ${ModEtronUSB}"
+		ModuleList="${ModuleList} ${ModWirless}"
+		ModuleList="${ModuleList} ${ModBluetooth}"
+		ModuleList="${ModuleList} ${ModZram}"
+		ModuleList="${ModuleList} ${ModIPv6Tun}"
+		ModuleList="${ModuleList} ${ModVaapi}"
+		ModuleList="${ModuleList} ${ModNFQ}"
+		ModuleList="${ModuleList} ${ModVirtualization}"
+		ModuleList="${ModuleList} ${ModOpenvswitch}"
+		ModuleList="${ModuleList} ${ModDVB}"
+		ModuleList="${ModuleList} ${ModDiskPwCtl}"
+		ModuleList="${ModuleList} ${ModNetConsole}"
 
 		;;
 	*)
@@ -730,19 +851,31 @@ do
 done
 
 case ${BUILD_TARGET} in
-	APOLLOLAKE|DENVERTON|KVMX64|BROADWELLNK|PURLEY|COFFEELAKE)
+	APOLLOLAKE|DENVERTON|KVMX64|BROADWELLNK|PURLEY|COFFEELAKE|BROADWELLNTB|NEXTKVMX64|GEMINILAKE)
 		ZIMAGE="${KernelDir}/arch/x86_64/boot/bzImage"
 		;;
 	REALTEK_RTD1296)
 		lzma -z ${KernelDir}/arch/arm64/boot/Image
 		ZIMAGE="${KernelDir}/arch/arm64/boot/Image.lzma"
 		mkdir -p ${SysRootInclude}/crypto
+
+		# for flash backup model
+		mkimage -A arm64 -C none -T kernel -O linux -a 0b000000 -e 0b000000 -n "$(GetDSMBuildNumber) kernel" -d ${ZIMAGE} ${ZIMAGE}_cksum
+		if [ $? -ne 0 ]; then
+			echo "Failed to do mkimage on ${ZIMAGE}"
+			return 1
+		fi
+		cp -fv ${ZIMAGE}_cksum ${DebDevBuild}/image/zImage_with_cksum
+
 		cp -vf crypto/ocf/cryptodev.h ${SysRootInclude}/crypto
 		cp -vf ${KernelDir}/arch/arm64/boot/dts/realtek/rtd-1296-synology-DS418.dtb ${DebDevBuild}/image/dtb_ds418.bin
 		cp -vf ${KernelDir}/arch/arm64/boot/dts/realtek/rtd-1293-synology-DS418j.dtb ${DebDevBuild}/image/dtb_ds418j.bin
 		cp -vf ${KernelDir}/arch/arm64/boot/dts/realtek/rtd-1296-synology-DS218play.dtb ${DebDevBuild}/image/dtb_ds218play.bin
 		cp -vf ${KernelDir}/arch/arm64/boot/dts/realtek/rtd-1296-synology-DS118.dtb ${DebDevBuild}/image/dtb_ds118.bin
 		cp -vf ${KernelDir}/arch/arm64/boot/dts/realtek/rtd-1296-synology-DS218.dtb ${DebDevBuild}/image/dtb_ds218.bin
+		cp -vf ${KernelDir}/arch/arm64/boot/dts/realtek/rtd-1296-synology-EDS19.dtb ${DebDevBuild}/image/dtb_eds19.bin
+		cp -vf ${KernelDir}/arch/arm64/boot/dts/realtek/rtd-1296-synology-RS819.dtb ${DebDevBuild}/image/dtb_rs819.bin
+		cp -vf ${KernelDir}/arch/arm64/boot/dts/realtek/rtd-1293-synology-DS220j.dtb ${DebDevBuild}/image/dtb_ds220j.bin
 		;;
 	MARVELL_ARMADA37XX)
 		lzma -z ${KernelDir}/arch/arm64/boot/Image

@@ -642,6 +642,10 @@ raid5_get_active_stripe(struct r5conf *conf, sector_t sector,
 				    *(conf->hash_locks + hash));
 		sh = __find_stripe(conf, sector, conf->generation - previous);
 		if (!sh) {
+#ifdef MY_ABC_HERE
+			if (!test_bit(R5_INACTIVE_BLOCKED, &conf->cache_state))
+				sh = get_free_stripe(conf, hash);
+#else  
 			if (!test_bit(R5_INACTIVE_BLOCKED, &conf->cache_state)) {
 				sh = get_free_stripe(conf, hash);
 				if (!sh && !test_bit(R5_DID_ALLOC,
@@ -649,6 +653,7 @@ raid5_get_active_stripe(struct r5conf *conf, sector_t sector,
 					set_bit(R5_ALLOC_MORE,
 						&conf->cache_state);
 			}
+#endif  
 			if (noblock && sh == NULL)
 				break;
 			if (!sh) {
@@ -788,11 +793,11 @@ static void stripe_add_to_batch_list(struct r5conf *conf, struct stripe_head *sh
 			spin_unlock(&head->batch_head->batch_lock);
 			goto unlock_out;
 		}
+		 
+		sh->batch_head = head->batch_head;
 
 		list_add(&sh->batch_list, &head->batch_list);
 		spin_unlock(&head->batch_head->batch_lock);
-
-		sh->batch_head = head->batch_head;
 	} else {
 		head->batch_head = head;
 		sh->batch_head = head->batch_head;
@@ -2056,7 +2061,7 @@ static int resize_stripes(struct r5conf *conf, int newsize)
 		mutex_unlock(&conf->cache_size_mutex);
 		return -ENOMEM;
 	}
-
+	 
 	hash = 0;
 	cnt = 0;
 	list_for_each_entry(nsh, &newstripes, lru) {
@@ -2093,7 +2098,10 @@ static int resize_stripes(struct r5conf *conf, int newsize)
 		err = -ENOMEM;
 
 	mutex_unlock(&conf->cache_size_mutex);
-	 
+
+	conf->slab_cache = sc;
+	conf->active_name = 1-conf->active_name;
+
 	while(!list_empty(&newstripes)) {
 		nsh = list_entry(newstripes.next, struct stripe_head, lru);
 		list_del_init(&nsh->lru);
@@ -2109,8 +2117,6 @@ static int resize_stripes(struct r5conf *conf, int newsize)
 		raid5_release_stripe(nsh);
 	}
 	 
-	conf->slab_cache = sc;
-	conf->active_name = 1-conf->active_name;
 	if (!err)
 		conf->pool_size = newsize;
 	return err;
@@ -2554,8 +2560,17 @@ static void raid5_end_read_request(struct bio * bi)
 			if (test_bit(R5_ReadNoMerge, &sh->dev[i].flags)) {
 				set_bit(R5_ReadError, &sh->dev[i].flags);
 				clear_bit(R5_ReadNoMerge, &sh->dev[i].flags);
+#ifdef MY_ABC_HERE
+			} else {
+				set_bit(R5_ReadNoMerge, &sh->dev[i].flags);
+				if (1 == blIsRemapping) {
+					set_bit(R5_ReadError, &sh->dev[i].flags);
+				}
+			}
+#else  
 			} else
 				set_bit(R5_ReadNoMerge, &sh->dev[i].flags);
+#endif  
 		else {
 			clear_bit(R5_ReadError, &sh->dev[i].flags);
 			clear_bit(R5_ReWrite, &sh->dev[i].flags);
@@ -2719,8 +2734,8 @@ static void error_orig(struct mddev *mddev, struct md_rdev *rdev)
 	clear_bit(In_sync, &rdev->flags);
 	mddev->degraded = calc_degraded(conf);
 #ifdef MY_ABC_HERE
-	if (mddev->degraded > conf->max_degraded) {
-		mddev->nodev_and_crashed = 1;
+	if (mddev->degraded > conf->max_degraded && MD_CRASHED_ASSEMBLE != mddev->nodev_and_crashed) {
+		mddev->nodev_and_crashed = MD_CRASHED;
 	}
 #endif  
 	spin_unlock_irqrestore(&conf->device_lock, flags);
@@ -2779,7 +2794,7 @@ static void syno_error_for_hotplug(struct mddev *mddev, struct md_rdev *rdev)
 		SynoIsRaidReachMaxDegrade(mddev)) {
 		list_for_each_entry(rdev_tmp, &mddev->disks, same_set) {
 			if(!test_bit(In_sync, &rdev_tmp->flags) && !test_bit(Faulty, &rdev_tmp->flags)) {
-				printk("[%s] %d: %s is being to unplug, but %s is building parity now, disable both\n", 
+				printk("[%s] %d: %s is being to unplug, but %s is building parity now, disable both\n",
 					   __FILE__, __LINE__, bdevname(rdev->bdev, b2), bdevname(rdev_tmp->bdev, b1));
 				SYNORaidRdevUnplug(mddev, rdev_tmp);
 			}
@@ -3549,9 +3564,11 @@ static int fetch_block(struct stripe_head *sh, struct stripe_head_state *s,
 		BUG_ON(test_bit(R5_Wantcompute, &dev->flags));
 		BUG_ON(test_bit(R5_Wantread, &dev->flags));
 		BUG_ON(sh->batch_head);
+
 		if ((s->uptodate == disks - 1) &&
+		    ((sh->qd_idx >= 0 && sh->pd_idx == disk_idx) ||
 		    (s->failed && (disk_idx == s->failed_num[0] ||
-				   disk_idx == s->failed_num[1]))) {
+				   disk_idx == s->failed_num[1])))) {
 			 
 			pr_debug("Computing stripe %llu block %d\n",
 			       (unsigned long long)sh->sector, disk_idx);
@@ -4261,7 +4278,7 @@ static void analyse_stripe(struct stripe_head *sh, struct stripe_head_state *s)
 		} else if (test_bit(In_sync, &rdev->flags))
 #ifdef MY_ABC_HERE
 		{
-			if (isBadSH || (test_bit(DiskError, &rdev->flags) && s->syncing)) {
+			if (isBadSH || (test_bit(DiskError, &rdev->flags) && test_bit(STRIPE_SYNCING, &sh->state))) {
 				if (s->failed < 2)
 					s->failed_num[s->failed] = i;
 				s->failed++;
@@ -4320,7 +4337,7 @@ static void analyse_stripe(struct stripe_head *sh, struct stripe_head_state *s)
 			clear_bit(R5_Insync, &dev->flags);
 		if (!test_bit(R5_Insync, &dev->flags)) {
 #ifdef MY_ABC_HERE
-			if (s->syncing && conf->mddev->auto_remap &&
+			if (test_bit(STRIPE_SYNCING, &sh->state) && conf->mddev->auto_remap &&
 				rdev && test_bit(In_sync, &rdev->flags) &&
 				test_bit(R5_ReadError, &dev->flags)) {
 				 
@@ -4411,7 +4428,8 @@ static void break_stripe_batch_list(struct stripe_head *head_sh,
 
 		set_mask_bits(&sh->state, ~(STRIPE_EXPAND_SYNC_FLAGS |
 					    (1 << STRIPE_PREREAD_ACTIVE) |
-					    (1 << STRIPE_DEGRADED)),
+					    (1 << STRIPE_DEGRADED) |
+					    (1 << STRIPE_ON_UNPLUG_LIST)),
 			      head_sh->state & (1 << STRIPE_INSYNC));
 
 		sh->check_state = head_sh->check_state;
@@ -5894,6 +5912,10 @@ static void raid5_do_work(struct work_struct *work)
 	pr_debug("%d stripes handled\n", handled);
 
 	spin_unlock_irq(&conf->device_lock);
+#if defined(MY_DEF_HERE)
+
+	async_tx_issue_pending_all();
+#endif  
 	blk_finish_plug(&plug);
 
 	pr_debug("--- raid5worker inactive\n");
@@ -5930,8 +5952,11 @@ static void raid5d(struct md_thread *thread)
 		int batch_size, released;
 
 		released = release_stripe_list(conf, conf->temp_inactive_list);
+#ifdef MY_ABC_HERE
+#else  
 		if (released)
 			clear_bit(R5_DID_ALLOC, &conf->cache_state);
+#endif  
 
 		if (
 		    !list_empty(&conf->bitmap_list)) {
@@ -5970,6 +5995,8 @@ static void raid5d(struct md_thread *thread)
 	pr_debug("%d stripes handled\n", handled);
 
 	spin_unlock_irq(&conf->device_lock);
+#ifdef MY_ABC_HERE
+#else  
 	if (test_and_clear_bit(R5_ALLOC_MORE, &conf->cache_state) &&
 	    mutex_trylock(&conf->cache_size_mutex)) {
 		grow_one_stripe(conf, __GFP_NOWARN);
@@ -5977,6 +6004,7 @@ static void raid5d(struct md_thread *thread)
 		set_bit(R5_DID_ALLOC, &conf->cache_state);
 		mutex_unlock(&conf->cache_size_mutex);
 	}
+#endif  
 
 	r5l_flush_stripe_to_raid(conf->log);
 
@@ -6051,6 +6079,7 @@ static void raid5d_proxy(struct md_thread *thread)
 }
 
 #endif  
+
 static ssize_t
 raid5_show_stripe_cache_size(struct mddev *mddev, char *page)
 {
@@ -6059,7 +6088,11 @@ raid5_show_stripe_cache_size(struct mddev *mddev, char *page)
 	spin_lock(&mddev->lock);
 	conf = mddev->private;
 	if (conf)
+#ifdef MY_ABC_HERE
+		ret = sprintf(page, "%d\n", conf->max_nr_stripes);
+#else  
 		ret = sprintf(page, "%d\n", conf->min_nr_stripes);
+#endif  
 	spin_unlock(&mddev->lock);
 	return ret;
 }
@@ -6072,8 +6105,10 @@ raid5_set_cache_size(struct mddev *mddev, int size)
 
 	if (size <= 16 || size > 32768)
 		return -EINVAL;
-
+#ifdef MY_ABC_HERE
+#else  
 	conf->min_nr_stripes = size;
+#endif  
 	mutex_lock(&conf->cache_size_mutex);
 	while (size < conf->max_nr_stripes &&
 	       drop_one_stripe(conf))
@@ -6128,7 +6163,7 @@ static ssize_t
 stripe_cache_memory_usage_show(struct mddev *mddev, char *page)
 {
 	struct r5conf *conf = mddev->private;
-	size_t oneObjSize = 0; 
+	size_t oneObjSize = 0;
 	int devs = 0;
 
 	if (conf) {
@@ -6217,7 +6252,11 @@ raid5_store_preread_threshold(struct mddev *mddev, const char *page, size_t len)
 	conf = mddev->private;
 	if (!conf)
 		err = -ENODEV;
+#ifdef MY_ABC_HERE
+	else if (new > conf->max_nr_stripes)
+#else  
 	else if (new > conf->min_nr_stripes)
+#endif  
 		err = -EINVAL;
 	else
 		conf->bypass_threshold = new;
@@ -6506,8 +6545,11 @@ static void free_conf(struct r5conf *conf)
 {
 	if (conf->log)
 		r5l_exit_log(conf->log);
+#ifdef MY_ABC_HERE
+#else  
 	if (conf->shrinker.seeks)
 		unregister_shrinker(&conf->shrinker);
+#endif  
 
 	free_thread_groups(conf);
 	shrink_stripes(conf);
@@ -6582,6 +6624,8 @@ static int raid5_alloc_percpu(struct r5conf *conf)
 	return err;
 }
 
+#ifdef MY_ABC_HERE
+#else  
 static unsigned long raid5_cache_scan(struct shrinker *shrink,
 				      struct shrink_control *sc)
 {
@@ -6613,6 +6657,7 @@ static unsigned long raid5_cache_count(struct shrinker *shrink,
 		return 0;
 	return conf->max_nr_stripes - conf->min_nr_stripes;
 }
+#endif  
 
 static struct r5conf *setup_conf(struct mddev *mddev)
 {
@@ -6769,11 +6814,20 @@ static struct r5conf *setup_conf(struct mddev *mddev)
 		conf->prev_algo = conf->algorithm;
 	}
 
+#ifdef MY_ABC_HERE
+	memory = NR_STRIPES * (sizeof(struct stripe_head) +
+		max_disks * ((sizeof(struct bio) + PAGE_SIZE))) / 1024;
+#else  
 	conf->min_nr_stripes = NR_STRIPES;
 	memory = conf->min_nr_stripes * (sizeof(struct stripe_head) +
-		 max_disks * ((sizeof(struct bio) + PAGE_SIZE))) / 1024;
+		max_disks * ((sizeof(struct bio) + PAGE_SIZE))) / 1024;
+#endif  
 	atomic_set(&conf->empty_inactive_list_nr, NR_STRIPE_HASH_LOCKS);
+#ifdef MY_ABC_HERE
+	if (grow_stripes(conf, NR_STRIPES)) {
+#else  
 	if (grow_stripes(conf, conf->min_nr_stripes)) {
+#endif  
 		printk(KERN_ERR
 		       "md/raid:%s: couldn't allocate %dkB for buffers\n",
 		       mdname(mddev), memory);
@@ -6781,6 +6835,8 @@ static struct r5conf *setup_conf(struct mddev *mddev)
 	} else
 		printk(KERN_INFO "md/raid:%s: allocated %dkB\n",
 		       mdname(mddev), memory);
+#ifdef MY_ABC_HERE
+#else  
 	 
 	conf->shrinker.seeks = DEFAULT_SEEKS * conf->raid_disks * 4;
 	conf->shrinker.scan_objects = raid5_cache_scan;
@@ -6788,6 +6844,7 @@ static struct r5conf *setup_conf(struct mddev *mddev)
 	conf->shrinker.batch = 128;
 	conf->shrinker.flags = 0;
 	register_shrinker(&conf->shrinker);
+#endif  
 
 	sprintf(pers_name, "raid%d", mddev->new_level);
 	conf->thread = md_register_thread(raid5d, mddev, pers_name);
@@ -6919,11 +6976,20 @@ static int run(struct mddev *mddev)
 				       mdname(mddev));
 				return -EINVAL;
 			}
+#ifdef MY_ABC_HERE
+		} else if ((mddev->reshape_backwards
+		    ? (here_new * chunk_sectors + min_offset_diff <=
+		       here_old * chunk_sectors)
+		    : (here_new * chunk_sectors >=
+		       here_old * chunk_sectors + (-min_offset_diff)))
+			&& mddev->reshape_position != 0) {
+#else  
 		} else if (mddev->reshape_backwards
 		    ? (here_new * chunk_sectors + min_offset_diff <=
 		       here_old * chunk_sectors)
 		    : (here_new * chunk_sectors >=
 		       here_old * chunk_sectors + (-min_offset_diff))) {
+#endif  
 			 
 			printk(KERN_ERR "md/raid:%s: reshape_position too early for "
 			       "auto-recovery - aborting.\n",
@@ -7008,7 +7074,9 @@ static int run(struct mddev *mddev)
 
 	if (has_failed(conf)) {
 #ifdef MY_ABC_HERE
-		mddev->nodev_and_crashed = 1;
+		if (MD_CRASHED_ASSEMBLE != mddev->nodev_and_crashed) {
+			mddev->nodev_and_crashed = MD_CRASHED;
+		}
 #endif  
 		printk(KERN_ERR "md/raid:%s: not enough operational devices"
 			" (%d/%d failed)\n",
@@ -7053,7 +7121,11 @@ static int run(struct mddev *mddev)
 
 	print_raid5_conf(conf);
 
+#ifdef MY_ABC_HERE
+	if (conf->reshape_progress != MaxSector && mddev->degraded <= conf->max_degraded) {
+#else  
 	if (conf->reshape_progress != MaxSector) {
+#endif  
 		conf->reshape_safe = conf->reshape_progress;
 		atomic_set(&conf->reshape_stripes, 0);
 		clear_bit(MD_RECOVERY_SYNC, &mddev->recovery);
@@ -7415,10 +7487,17 @@ static int check_stripe_cache(struct mddev *mddev)
 {
 	 
 	struct r5conf *conf = mddev->private;
+#ifdef MY_ABC_HERE
 	if (((mddev->chunk_sectors << 9) / STRIPE_SIZE) * 4
-	    > conf->min_nr_stripes ||
-	    ((mddev->new_chunk_sectors << 9) / STRIPE_SIZE) * 4
-	    > conf->min_nr_stripes) {
+		> conf->max_nr_stripes ||
+		((mddev->new_chunk_sectors << 9) / STRIPE_SIZE) * 4
+		> conf->max_nr_stripes) {
+#else  
+	if (((mddev->chunk_sectors << 9) / STRIPE_SIZE) * 4
+		> conf->min_nr_stripes ||
+		((mddev->new_chunk_sectors << 9) / STRIPE_SIZE) * 4
+		> conf->min_nr_stripes) {
+#endif  
 		printk(KERN_WARNING "md/raid:%s: reshape: not enough stripes.  Needed %lu\n",
 		       mdname(mddev),
 		       ((max(mddev->chunk_sectors, mddev->new_chunk_sectors) << 9)
@@ -7437,12 +7516,6 @@ static int check_reshape(struct mddev *mddev)
 #ifdef MY_ABC_HERE
 	if (IsDiskErrorSet(mddev)) {
 		return -EINVAL;
-	}
-#endif  
-#ifdef MY_ABC_HERE
-	if (mddev->reshape_interrupt) {
-		mddev->reshape_interrupt = 0;
-		return 0;
 	}
 #endif  
 	if (mddev->delta_disks == 0 &&
@@ -7650,9 +7723,12 @@ static void raid5_finish_reshape(struct mddev *mddev)
 				pr_err("Failed to start proxy, just pray\n");
 			}
 #endif  
+#ifdef MY_ABC_HERE
+#else  
 			md_set_array_sectors(mddev, raid5_size(mddev, 0, 0));
 			set_capacity(mddev->gendisk, mddev->array_sectors);
 			revalidate_disk(mddev->gendisk);
+#endif  
 #ifdef MY_ABC_HERE
 			if (atomic_read(&conf->proxy_enable)) {
 				atomic_set(&conf->proxy_enable, 0);

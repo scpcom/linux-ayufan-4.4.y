@@ -45,10 +45,14 @@ obj-$(CONFIG_ARCH_BERLIN)	+= berlin/
 obj-y				+= freescale/
 obj-$(CONFIG_X86)		+= intel/
 ifeq ($(CONFIG_SYNO_LSP_ARMADA_16_12), y)
+ifeq ($(CONFIG_SYNO_LSP_ARMADA_17_10), y)
+obj-y				+= mvebu/
+else # CONFIG_SYNO_LSP_ARMADA_17_10
 obj-$(CONFIG_PINCTRL_MVEBU)        += mvebu/
-else
+endif # CONFIG_SYNO_LSP_ARMADA_17_10  
+else # CONFIG_SYNO_LSP_ARMADA_16_12
 obj-$(CONFIG_PLAT_ORION)        += mvebu/
-endif
+endif # CONFIG_SYNO_LSP_ARMADA_16_12
 obj-y				+= nomadik/
 obj-$(CONFIG_ARCH_QCOM)		+= qcom/
 obj-$(CONFIG_PINCTRL_SAMSUNG)	+= samsung/

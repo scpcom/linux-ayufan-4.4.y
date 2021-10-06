@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Driver for Marvell NETA network controller Buffer Manager.
  *
@@ -18,7 +21,13 @@
 #include <linux/module.h>
 #include <linux/netdevice.h>
 #include <linux/of.h>
+#if defined(MY_DEF_HERE)
+#include <linux/of_platform.h>
+#endif /* MY_DEF_HERE */
 #include <linux/platform_device.h>
+#if defined(MY_DEF_HERE)
+#include <linux/netdevice.h>
+#endif /* MY_DEF_HERE */
 #include <linux/skbuff.h>
 #include <net/hwbm.h>
 #include "mvneta_bm.h"
@@ -164,6 +173,41 @@ static int mvneta_bm_pool_create(struct mvneta_bm *priv,
 	return 0;
 }
 
+#if defined(MY_DEF_HERE)
+static void mvneta_bm_skb_free(struct sk_buff *skb)
+{
+	dev_kfree_skb_any(skb);
+}
+
+static struct sk_buff *mvneta_bm_skb_alloc(struct mvneta_bm_pool *bm_pool,
+					   dma_addr_t *phys_addr, gfp_t gfp_mask)
+{
+	struct sk_buff *skb;
+	struct mvneta_bm *priv = bm_pool->priv;
+	u8 *data;
+	dma_addr_t paddr;
+
+	skb = __dev_alloc_skb(bm_pool->pkt_size, GFP_DMA | gfp_mask);
+	if (!skb)
+		return NULL;
+
+	data = skb->head + priv->rx_offset_correction;
+
+	/* Save skb as first 4 bytes in the buffer, then skb can be get through rx_desc->bufCookie */
+	*((u32 *)data) = (u32)((uintptr_t)skb & 0xffffffff);
+
+	paddr = dma_map_single(&priv->pdev->dev, skb->head, bm_pool->buf_size, DMA_TO_DEVICE);
+	if (unlikely(dma_mapping_error(&priv->pdev->dev, paddr))) {
+		dev_kfree_skb_any(skb);
+		return NULL;
+	}
+	if (phys_addr)
+		*phys_addr = paddr + priv->rx_offset_correction;
+
+	return skb;
+}
+
+#endif /* MY_DEF_HERE */
 /* Notify the driver that BM pool is being used as specific type and return the
  * pool pointer on success
  */
@@ -187,7 +231,11 @@ struct mvneta_bm_pool *mvneta_bm_pool_use(struct mvneta_bm *priv, u8 pool_id,
 		return NULL;
 	}
 
+#if defined(MY_DEF_HERE)
+	if (type == MVNETA_BM_SHORT)
+#else /* MY_DEF_HERE */
 	if (new_pool->pkt_size == 0 || type != MVNETA_BM_SHORT)
+#endif /* MY_DEF_HERE */
 		new_pool->pkt_size = pkt_size;
 
 	/* Allocate buffers in case BM pool hasn't been used yet */
@@ -211,8 +259,34 @@ struct mvneta_bm_pool *mvneta_bm_pool_use(struct mvneta_bm *priv, u8 pool_id,
 			return NULL;
 		}
 
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_64BIT
+		{
+			struct sk_buff *skb;
+			dma_addr_t paddr;
+
+			/* In Neta HW only 32 bits data is supported, so in order to
+			 * obtain whole 64 bits address from RX descriptor, we store the
+			* upper 32 bits when allocating buffer, and put it back
+			* when using buffer cookie for accessing packet in memory.
+			* Frags should be allocated from single 'memory' region, hence
+			* common upper address half should be sufficient.
+			*/
+			skb = mvneta_bm_skb_alloc(new_pool, &paddr, GFP_KERNEL);
+			if (skb) {
+				new_pool->data_high = (u64)skb & 0xffffffff00000000;
+				dev_kfree_skb_any(skb);
+			}
+		}
+#endif /* CONFIG_64BIT */
+
+#endif /* MY_DEF_HERE */
 		/* Allocate buffers for this pool */
+#if defined(MY_DEF_HERE)
+		num = mvneta_bm_bufs_add(new_pool, hwbm_pool->size);
+#else /* MY_DEF_HERE */
 		num = hwbm_pool_add(hwbm_pool, hwbm_pool->size, GFP_ATOMIC);
+#endif /* MY_DEF_HERE */
 		if (num != hwbm_pool->size) {
 			WARN(1, "pool %d: %d of %d allocated\n",
 			     new_pool->id, num, hwbm_pool->size);
@@ -224,6 +298,73 @@ struct mvneta_bm_pool *mvneta_bm_pool_use(struct mvneta_bm *priv, u8 pool_id,
 }
 EXPORT_SYMBOL_GPL(mvneta_bm_pool_use);
 
+#if defined(MY_DEF_HERE)
+int mvneta_bm_refill(struct mvneta_bm_pool *bm_pool, gfp_t gfp_mask)
+{
+	dma_addr_t paddr;
+	struct mvneta_bm *priv = bm_pool->priv;
+	struct sk_buff *skb;
+
+	skb = mvneta_bm_skb_alloc(bm_pool, &paddr, gfp_mask | __GFP_NOWARN);
+	if (!skb)
+		return -ENOMEM;
+
+	/* Sanity check: data_high must be the same for all allocated SKBs */
+#ifdef CONFIG_64BIT
+	if (unlikely(bm_pool->data_high != ((u64)skb & 0xffffffff00000000))) {
+		pr_err("data_high = 0x%llx is not match allocated skb = %p\n",
+		       bm_pool->data_high, skb);
+		mvneta_bm_skb_free(skb);
+		return -EINVAL;
+	}
+	/* paddr must be in 32bit range */
+	if (paddr & 0xffffffff00000000) {
+		pr_err("pool %d: paddr must be in 32b range. paddr = 0x%llx\n",
+		       bm_pool->id, paddr);
+		mvneta_bm_skb_free(skb);
+		return -EINVAL;
+	}
+#endif
+
+	mvneta_bm_pool_put_bp(priv, bm_pool, paddr);
+
+	return 0;
+}
+
+/* Allocate and add number of buffers to the BM pool */
+int mvneta_bm_bufs_add(struct mvneta_bm_pool *bm_pool, int nof_bufs)
+{
+	int i, err;
+	unsigned long flags;
+
+	spin_lock_irqsave(&bm_pool->hwbm_pool.lock, flags);
+
+	if ((bm_pool->hwbm_pool.buf_num + nof_bufs) > bm_pool->hwbm_pool.size) {
+		nof_bufs = bm_pool->hwbm_pool.size - bm_pool->hwbm_pool.buf_num;
+		pr_warn("BM pool #%d: Can't add %d buffers, buf_num = %d, size = %d\n",
+			bm_pool->id, nof_bufs,
+			bm_pool->hwbm_pool.buf_num, bm_pool->hwbm_pool.size);
+	}
+
+	for (i = 0; i < nof_bufs; i++) {
+		err = mvneta_bm_refill(bm_pool, GFP_KERNEL);
+		if (err < 0)
+			break;
+	}
+
+	/* Update BM driver with number of buffers added to pool */
+	bm_pool->hwbm_pool.buf_num += i;
+
+	spin_unlock_irqrestore(&bm_pool->hwbm_pool.lock, flags);
+
+	pr_debug("BM pool #%d: %d of %d buffers added\n",
+		 bm_pool->id, i, nof_bufs);
+
+	return i;
+}
+EXPORT_SYMBOL_GPL(mvneta_bm_bufs_add);
+
+#endif /* MY_DEF_HERE */
 /* Free all buffers from the pool */
 void mvneta_bm_bufs_free(struct mvneta_bm *priv, struct mvneta_bm_pool *bm_pool,
 			 u8 port_map)
@@ -239,6 +380,9 @@ void mvneta_bm_bufs_free(struct mvneta_bm *priv, struct mvneta_bm_pool *bm_pool,
 	for (i = 0; i < bm_pool->hwbm_pool.buf_num; i++) {
 		dma_addr_t buf_phys_addr;
 		u32 *vaddr;
+#if defined(MY_DEF_HERE)
+		struct sk_buff *skb;
+#endif /* MY_DEF_HERE */
 
 		/* Get buffer physical address (indirect access) */
 		buf_phys_addr = mvneta_bm_pool_get_bp(priv, bm_pool);
@@ -247,19 +391,43 @@ void mvneta_bm_bufs_free(struct mvneta_bm *priv, struct mvneta_bm_pool *bm_pool,
 		 * when it occurs that a read access to BPPI returns 0.
 		 */
 		if (buf_phys_addr == 0)
+#if defined(MY_DEF_HERE)
+			break;
+
+		dma_unmap_single(&priv->pdev->dev, buf_phys_addr - priv->rx_offset_correction,
+				 bm_pool->buf_size, DMA_FROM_DEVICE);
+#else /* MY_DEF_HERE */
 			continue;
+#endif /* MY_DEF_HERE */
 
 		vaddr = phys_to_virt(buf_phys_addr);
 		if (!vaddr)
 			break;
 
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_64BIT
+		skb = (struct sk_buff *)((u64)(*(u32 *)vaddr) | bm_pool->data_high);
+#else
+		skb = (struct sk_buff *)(*(u32 *)vaddr);
+#endif
+		if (!skb)
+			break;
+
+		mvneta_bm_skb_free(skb);
+#else /* MY_DEF_HERE */
 		dma_unmap_single(&priv->pdev->dev, buf_phys_addr,
 				 bm_pool->buf_size, DMA_FROM_DEVICE);
 		hwbm_buf_free(&bm_pool->hwbm_pool, vaddr);
+#endif /* MY_DEF_HERE */
 	}
 
 	mvneta_bm_config_clear(priv, MVNETA_BM_EMPTY_LIMIT_MASK);
 
+#if defined(MY_DEF_HERE)
+	pr_info("BM pool #%d: %d of %d buffers are freed\n",
+		bm_pool->id, i, bm_pool->hwbm_pool.buf_num);
+
+#endif /* MY_DEF_HERE */
 	/* Update BM driver with number of buffers removed from pool */
 	bm_pool->hwbm_pool.buf_num -= i;
 }
@@ -343,7 +511,12 @@ static void mvneta_bm_pools_init(struct mvneta_bm *priv)
 		/* Obtain custom pkt_size from DT */
 		sprintf(prop, "pool%d,pkt-size", i);
 		if (of_property_read_u32(dn, prop, &bm_pool->pkt_size))
+#if defined(MY_DEF_HERE)
+			/* if not specified by DT, set default buffer size to support Jumbo */
+			bm_pool->pkt_size = MVNETA_BM_LONG_PKT_SIZE;
+#else /* MY_DEF_HERE */
 			bm_pool->pkt_size = 0;
+#endif /* MY_DEF_HERE */
 	}
 }
 
@@ -385,6 +558,24 @@ static int mvneta_bm_init(struct mvneta_bm *priv)
 static int mvneta_bm_get_sram(struct device_node *dn,
 			      struct mvneta_bm *priv)
 {
+#if defined(MY_DEF_HERE)
+	struct platform_device *pdev;
+	struct device_node *np_pool;
+	struct resource *res;
+
+	np_pool = of_parse_phandle(dn, "internal-mem", 0);
+	if (!np_pool)
+		return -1;
+	pdev = of_find_device_by_node(np_pool);
+	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+	if (!res) {
+		pr_err("%s:: found no memory resource\n", __func__);
+		return -EINVAL;
+	}
+	/* get size of internal SRAM access region */
+	priv->bppi_size = resource_size(res);
+
+#endif /* MY_DEF_HERE */
 	priv->bppi_pool = of_gen_pool_get(dn, "internal-mem", 0);
 	if (!priv->bppi_pool) {
 		pr_err("%s:: no internal-mem node found\n", __func__);
@@ -392,7 +583,11 @@ static int mvneta_bm_get_sram(struct device_node *dn,
 	}
 
 	priv->bppi_virt_addr = gen_pool_dma_alloc(priv->bppi_pool,
+#if defined(MY_DEF_HERE)
+						  priv->bppi_size,
+#else /* MY_DEF_HERE */
 						  MVNETA_BM_BPPI_SIZE,
+#endif /* MY_DEF_HERE */
 						  &priv->bppi_phys_addr);
 	if (!priv->bppi_virt_addr)
 		return -ENOMEM;
@@ -402,8 +597,12 @@ static int mvneta_bm_get_sram(struct device_node *dn,
 
 static void mvneta_bm_put_sram(struct mvneta_bm *priv)
 {
+#if defined(MY_DEF_HERE)
+	gen_pool_free(priv->bppi_pool, priv->bppi_phys_addr, priv->bppi_size);
+#else /* MY_DEF_HERE */
 	gen_pool_free(priv->bppi_pool, priv->bppi_phys_addr,
 		      MVNETA_BM_BPPI_SIZE);
+#endif /* MY_DEF_HERE */
 }
 
 static int mvneta_bm_probe(struct platform_device *pdev)

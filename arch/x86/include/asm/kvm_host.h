@@ -439,7 +439,6 @@ struct kvm_vcpu_arch {
 	struct kvm_mmu_memory_cache mmu_page_header_cache;
 
 	struct fpu guest_fpu;
-	bool eager_fpu;
 	u64 xcr0;
 	u64 guest_supported_xcr0;
 	u32 guest_xstate_size;
@@ -582,6 +581,9 @@ struct kvm_vcpu_arch {
 
 	int pending_ioapic_eoi;
 	int pending_external_vector;
+
+	/* Flush the L1 Data cache for L1TF mitigation on VMENTER */
+	bool l1tf_flush_l1d;
 };
 
 struct kvm_lpage_info {
@@ -722,6 +724,7 @@ struct kvm_vcpu_stat {
 	u32 signal_exits;
 	u32 irq_window_exits;
 	u32 nmi_window_exits;
+	u32 l1d_flush;
 	u32 halt_exits;
 	u32 halt_successful_poll;
 	u32 halt_attempted_poll;

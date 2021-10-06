@@ -85,12 +85,14 @@ struct scsi_device {
 
 	unsigned int id, channel;
 	u64 lun;
-#ifdef MY_ABC_HERE
+#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 	char syno_disk_name[BDEVNAME_SIZE];		 
 #endif  
 #ifdef MY_ABC_HERE
 	unsigned char auto_remap;
 #endif  
+
+	int reverved;   
 
 	unsigned int manufacturer;	 
 	unsigned sector_size;	 
@@ -213,6 +215,10 @@ struct scsi_device {
 #ifdef MY_ABC_HERE
 #define SERIAL_NUM_SIZE        36       
 	char syno_disk_serial[SERIAL_NUM_SIZE + 1];
+#endif  
+#ifdef MY_DEF_HERE
+#define BLOCK_INFO_SIZE        512      
+	char syno_block_info[BLOCK_INFO_SIZE];
 #endif  
 } __attribute__((aligned(sizeof(unsigned long))));
 

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * linux/include/linux/sunrpc/stats.h
  *
@@ -63,6 +66,10 @@ void			rpc_proc_unregister(struct net *,const char *);
 void			rpc_proc_zero(const struct rpc_program *);
 struct proc_dir_entry *	svc_proc_register(struct net *, struct svc_stat *,
 					  const struct file_operations *);
+#ifdef MY_ABC_HERE
+struct proc_dir_entry *	svc_proc_register_name(struct net *, const char *name,
+					  struct svc_stat *, const struct file_operations *);
+#endif
 void			svc_proc_unregister(struct net *, const char *);
 
 void			svc_seq_show(struct seq_file *,
@@ -75,6 +82,10 @@ static inline void rpc_proc_zero(const struct rpc_program *p) {}
 
 static inline struct proc_dir_entry *svc_proc_register(struct net *net, struct svc_stat *s,
 						       const struct file_operations *f) { return NULL; }
+#ifdef MY_ABC_HERE
+static inline struct proc_dir_entry *svc_proc_register_name(struct net *, const char *name,
+						       struct svc_stat *, const struct file_operations *) { return NULL; }
+#endif
 static inline void svc_proc_unregister(struct net *net, const char *p) {}
 
 static inline void svc_seq_show(struct seq_file *seq,

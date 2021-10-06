@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*
 * ***************************************************************************
 * Copyright (C) 2015 Marvell International Ltd.
@@ -886,4 +882,3 @@ void mv_pp3_vqueue_cnt_dump(const char *cntr_pref, int cpu, struct pp3_vq **vq, 
 	mv_pp3_swq_cnt_dump(cntr_pref, cpu, swq, q, pr_cntr_name);
 }
 /*---------------------------------------------------------------------------*/
-#endif /* MY_DEF_HERE */

@@ -98,6 +98,10 @@ static int rtk_setup_restart(void)
 	const struct of_device_id *of_id;
 	struct device_node *np;
 
+#if defined(MY_DEF_HERE) && defined(MY_DEF_HERE)
+    syno_uart1_init();
+#endif /* MY_DEF_HERE && MY_DEF_HERE */
+
 	/* setup Watchdog */
 	np = of_find_matching_node(NULL, rtk_restart_ids);
 	if (WARN(!np, "Unable to setup watchdog restart"))

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Driver for Marvell NETA network controller Buffer Manager.
  *
@@ -78,6 +81,9 @@
 
 /* Other definitions */
 #define MVNETA_BM_SHORT_PKT_SIZE		256
+#if defined(MY_DEF_HERE)
+#define MVNETA_BM_LONG_PKT_SIZE			(9 * 1024)
+#endif /* MY_DEF_HERE */
 #define MVNETA_BM_POOLS_NUM			4
 #define MVNETA_BM_POOL_CAP_MIN			128
 #define MVNETA_BM_POOL_CAP_DEF			2048
@@ -88,8 +94,12 @@
 
 #define MVNETA_BM_POOL_ACCESS_OFFS		8
 
+#if defined(MY_DEF_HERE)
+//do nothing
+#else /* MY_DEF_HERE */
 #define MVNETA_BM_BPPI_SIZE			0x100000
 
+#endif /* MY_DEF_HERE */
 #define MVNETA_RX_BUF_SIZE(pkt_size)   ((pkt_size) + NET_SKB_PAD)
 
 enum mvneta_bm_type {
@@ -109,6 +119,10 @@ struct mvneta_bm {
 	void __iomem *bppi_virt_addr;
 	/* BPPI physical base address */
 	dma_addr_t bppi_phys_addr;
+#if defined(MY_DEF_HERE)
+	/* BPPI size */
+	size_t bppi_size;
+#endif /* MY_DEF_HERE */
 
 	/* BM pools */
 	struct mvneta_bm_pool *bm_pools;
@@ -134,16 +148,37 @@ struct mvneta_bm_pool {
 	/* Ports using BM pool */
 	u8 port_map;
 
+#if defined(MY_DEF_HERE)
+	/* Number of refill failures */
+	u32 missed_bufs;
+
+#endif /* MY_DEF_HERE */
 	struct mvneta_bm *priv;
+#if defined(MY_DEF_HERE)
+
+#ifdef CONFIG_64BIT
+	u64 data_high;
+#endif
+#endif /* MY_DEF_HERE */
 };
 
 /* Declarations and definitions */
+#if defined(MY_DEF_HERE)
+//do nothing
+#else /* MY_DEF_HERE */
 void *mvneta_frag_alloc(unsigned int frag_size);
 void mvneta_frag_free(unsigned int frag_size, void *data);
 
+#endif /* MY_DEF_HERE */
 #if defined(CONFIG_MVNETA_BM) || defined(CONFIG_MVNETA_BM_MODULE)
+#if defined(MY_DEF_HERE)
+int mvneta_bm_refill(struct mvneta_bm_pool *bm_pool, gfp_t gfp_mask);
+#endif /* MY_DEF_HERE */
 void mvneta_bm_pool_destroy(struct mvneta_bm *priv,
 			    struct mvneta_bm_pool *bm_pool, u8 port_map);
+#if defined(MY_DEF_HERE)
+int mvneta_bm_bufs_add(struct mvneta_bm_pool *bm_pool, int nof_bufs);
+#endif /* MY_DEF_HERE */
 void mvneta_bm_bufs_free(struct mvneta_bm *priv, struct mvneta_bm_pool *bm_pool,
 			 u8 port_map);
 int mvneta_bm_construct(struct hwbm_pool *hwbm_pool, void *buf);
@@ -168,8 +203,14 @@ static inline u32 mvneta_bm_pool_get_bp(struct mvneta_bm *priv,
 			     (bm_pool->id << MVNETA_BM_POOL_ACCESS_OFFS));
 }
 #else
+#if defined(MY_DEF_HERE)
+int mvneta_bm_refill(struct mvneta_bm_pool *bm_pool, gfp_t gfp_mask) { return 0; }
+#endif /* MY_DEF_HERE */
 void mvneta_bm_pool_destroy(struct mvneta_bm *priv,
 			    struct mvneta_bm_pool *bm_pool, u8 port_map) {}
+#if defined(MY_DEF_HERE)
+int mvneta_bm_bufs_add(struct mvneta_bm_pool *bm_pool, int nof_bufs) { return 0; }
+#endif /* MY_DEF_HERE */
 void mvneta_bm_bufs_free(struct mvneta_bm *priv, struct mvneta_bm_pool *bm_pool,
 			 u8 port_map) {}
 int mvneta_bm_construct(struct hwbm_pool *hwbm_pool, void *buf) { return 0; }

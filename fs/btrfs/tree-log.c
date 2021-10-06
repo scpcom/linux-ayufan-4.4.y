@@ -13,6 +13,7 @@
 #include "backref.h"
 #include "hash.h"
 #include "compression.h"
+#include "inode-map.h"
 
 #define LOG_INODE_ALL 0
 #define LOG_INODE_EXISTS 1
@@ -3450,7 +3451,11 @@ static int log_one_extent(struct btrfs_trans_handle *trans,
 	btrfs_init_map_token(&token);
 
 	ret = __btrfs_drop_extents(trans, log, inode, path, em->start,
+#ifdef MY_ABC_HERE
+				   em->start + em->len, NULL, NULL, NULL, NULL, 0, 1,
+#else
 				   em->start + em->len, NULL, 0, 1,
+#endif  
 				   sizeof(*fi), &extent_inserted);
 	if (ret)
 		return ret;
@@ -3956,6 +3961,10 @@ static int btrfs_log_inode(struct btrfs_trans_handle *trans,
 		ins_nr = 0;
 		ret = btrfs_search_forward(root, &min_key,
 					   path, trans->transid);
+		if (ret < 0) {
+			err = ret;
+			goto out_unlock;
+		}
 		if (ret != 0)
 			break;
 again:
@@ -4667,6 +4676,15 @@ again:
 		if (!ret && wc.stage == LOG_WALK_REPLAY_ALL) {
 			ret = fixup_inode_link_counts(trans, wc.replay_dest,
 						      path);
+		}
+
+		if (!ret && wc.stage == LOG_WALK_REPLAY_ALL) {
+			struct btrfs_root *root = wc.replay_dest;
+
+			btrfs_release_path(path);
+
+			ret = btrfs_find_highest_objectid(root,
+						  &root->highest_objectid);
 		}
 
 		key.offset = found_key.offset - 1;

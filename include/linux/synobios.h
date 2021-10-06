@@ -200,10 +200,13 @@
 #define HW_DS218play   "DS218play"     //"DS218play"
 #define HW_DS118       "DS118"         //"DS118"
 #define HW_DS218       "DS218"         //"DS218"
+#define HW_EDS19       "EDS19"         //"EDS19"
+#define HW_RS819       "RS819"         //"RS819"
+#define HW_DS220j       "DS220j"         //"DS220j"
 #define HW_DS3017xs    "DS3017xs"      //"DS3017xs"
 #define HW_DS3018xs    "DS3018xs"      //"DS3018xs"
 #define HW_FS1018      "FS1018"        //"FS1018"
-#define HW_FS3018      "FS3018"        //"FS3018"
+#define HW_FS6400      "FS6400"        //"FS6400"
 #define HW_RS818p      "RS818+"        //"RS818+"
 #define HW_RS818rpp    "RS818rp+"      //"RS818rp+"
 #define HW_DS418play   "DS418play"     //DS418play
@@ -211,6 +214,27 @@
 #define HW_DS219j      "DS219j"        //"DS219j"
 #define HW_DS219se     "DS219se"       //"DS219se"
 #define HW_DS3619xs    "DS3619xs"      //"DS3619xs"
+#define HW_DS119j      "DS119j"        //"DS119j"
+#define HW_TAIPEI      "TAIPEI"        //"TAIPEI"
+#define HW_RS1619xsp   "RS1619xs+"     //"RS1619xs+"
+#define HW_DS2419p     "DS2419+"       //"DS2419+"
+#define HW_DS419p      "DS419+"        //"DS419+"
+#define HW_DS1019p     "DS1019+"       //"DS1019+"
+#define HW_DS719p      "DS719+"        //"DS719+"
+#define HW_DS1819p     "DS1819+"       //"DS1819+"
+#define HW_DS620slim   "DS620slim"     //"DS620slim"
+#define HW_RS419p      "RS419+"        //"RS419+"
+#define HW_DVA3219     "DVA3219"       //"DVA3219"
+#define HW_SA3400      "SA3400"        //"SA3400"
+#define HW_SA3600      "SA3600"        //"SA3600"
+#define HW_DS420p      "DS420+"        //DS420+
+#define HW_DS720p      "DS720+"        //DS720+
+#define HW_RS820p      "RS820+"        //"RS820+"
+#define HW_RS820rpp    "RS820rp+"      //"RS820rp+"
+#define HW_DS220p      "DS220+"        //DS220+
+#define HW_FS3400      "FS3400"        //"FS3400"
+#define HW_FS3600      "FS3600"        //"FS3600"
+#define HW_HD3400      "HD3400"        //"HD3400"
 #define HW_UNKNOWN     "DSUnknown"
 
 #define EBOX_INFO_UNIQUE_RX410  "RX410"
@@ -248,6 +272,9 @@
 #define IS_SYNOLOGY_DX1215(x) (x == 0x13)
 #define IS_SYNOLOGY_DX517(x) (x == 0x15)
 #define IS_SYNOLOGY_RX418(x) (x == 0x16)
+#ifdef MY_DEF_HERE
+#define IS_SYNOLOGY_M2DXX(x) (0)
+#endif /* MY_DEF_HERE */
 
 typedef enum _tag_EUNIT_PWRON_TYPE {
 	EUNIT_NOT_SUPPORT,
@@ -300,6 +327,11 @@ typedef struct _SynoCpuTemp {
 	int cpu_num;
 	int cpu_temp[MAX_CPU];
 } SYNOCPUTEMP;
+
+typedef struct _SynoThermalTemp {
+	unsigned char blSurface;
+	int temperature;
+} SYNO_THERMAL_TEMP;
 
 enum {
     MD_SECTOR_READ_ERROR = 0,

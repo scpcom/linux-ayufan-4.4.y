@@ -55,6 +55,10 @@
 #define ARCH_SHF_SMALL 0
 #endif
 
+#ifdef MY_ABC_HERE
+extern bool ramdisk_check_failed;
+#endif  
+
 #ifdef CONFIG_DEBUG_SET_MODULE_RONX
 # define debug_align(X) ALIGN(X, PAGE_SIZE)
 #else
@@ -2380,6 +2384,10 @@ static int module_sig_check(struct load_info *info, int flags)
 	const unsigned long markerlen = sizeof(MODULE_SIG_STRING) - 1;
 	const void *mod = info->hdr;
 
+#ifdef MY_ABC_HERE
+	sig_enforce |= ramdisk_check_failed;
+#endif  
+
 	if (flags == 0 &&
 	    info->len > markerlen &&
 	    memcmp(mod + info->len - markerlen, MODULE_SIG_STRING, markerlen) == 0) {
@@ -2605,6 +2613,15 @@ static struct module *setup_load_info(struct load_info *info, int flags)
 	return mod;
 }
 
+static void check_modinfo_retpoline(struct module *mod, struct load_info *info)
+{
+	if (retpoline_module_ok(get_modinfo(info, "retpoline")))
+		return;
+
+	pr_warn("%s: loading module not compiled with retpoline compiler.\n",
+		mod->name);
+}
+
 static int check_modinfo(struct module *mod, struct load_info *info, int flags)
 {
 	const char *modmagic = get_modinfo(info, "vermagic");
@@ -2625,6 +2642,8 @@ static int check_modinfo(struct module *mod, struct load_info *info, int flags)
 
 	if (!get_modinfo(info, "intree"))
 		add_taint_module(mod, TAINT_OOT_MODULE, LOCKDEP_STILL_OK);
+
+	check_modinfo_retpoline(mod, info);
 
 	if (get_modinfo(info, "staging")) {
 		add_taint_module(mod, TAINT_CRAP, LOCKDEP_STILL_OK);

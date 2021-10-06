@@ -264,7 +264,7 @@ static inline bool early_page_uninitialised(unsigned long pfn)
 
 static inline bool early_page_nid_uninitialised(unsigned long pfn, int nid)
 {
-#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
 	return true;
 #else  
 	return false;
@@ -1233,7 +1233,7 @@ struct page *__rmqueue_smallest(struct zone *zone, unsigned int order,
 }
 
 static int fallbacks[MIGRATE_TYPES][4] = {
-#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
 	[MIGRATE_UNMOVABLE]   = { MIGRATE_RECLAIMABLE, MIGRATE_MOVABLE,     MIGRATE_RESERVE },
 	[MIGRATE_RECLAIMABLE] = { MIGRATE_UNMOVABLE,   MIGRATE_MOVABLE,     MIGRATE_RESERVE },
 	[MIGRATE_MOVABLE]     = { MIGRATE_RECLAIMABLE, MIGRATE_UNMOVABLE,   MIGRATE_RESERVE },
@@ -1381,7 +1381,7 @@ int find_suitable_fallback(struct free_area *area, unsigned int order,
 	*can_steal = false;
 	for (i = 0;; i++) {
 		fallback_mt = fallbacks[migratetype][i];
-#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
 		if (fallback_mt == MIGRATE_RESERVE)
 #else  
 		if (fallback_mt == MIGRATE_TYPES)
@@ -1404,7 +1404,7 @@ int find_suitable_fallback(struct free_area *area, unsigned int order,
 	return -1;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
  
 #else  
  
@@ -1514,7 +1514,7 @@ __rmqueue_fallback(struct zone *zone, unsigned int order, int start_migratetype)
 	return NULL;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
 static struct page *__rmqueue(struct zone *zone, unsigned int order,
 						int migratetype)
 #else  
@@ -1524,12 +1524,12 @@ static struct page *__rmqueue(struct zone *zone, unsigned int order,
 {
 	struct page *page;
 
-#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
 retry_reserve:
 #endif  
 	page = __rmqueue_smallest(zone, order, migratetype);
 
-#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
 	if (unlikely(!page) && migratetype != MIGRATE_RESERVE) {
 #else  
 	if (unlikely(!page)) {
@@ -1539,7 +1539,7 @@ retry_reserve:
 
 		if (!page)
 			page = __rmqueue_fallback(zone, order, migratetype);
-#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
 
 		if (!page) {
 			migratetype = MIGRATE_RESERVE;
@@ -1560,7 +1560,7 @@ static int rmqueue_bulk(struct zone *zone, unsigned int order,
 
 	spin_lock(&zone->lock);
 	for (i = 0; i < count; ++i) {
-#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
 		struct page *page = __rmqueue(zone, order, migratetype);
 #else  
 		struct page *page = __rmqueue(zone, order, migratetype, 0);
@@ -1834,7 +1834,7 @@ int split_free_page(struct page *page)
 	return nr_pages;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
 static inline
 struct page *buffered_rmqueue(struct zone *preferred_zone,
 			struct zone *zone, unsigned int order,
@@ -1878,7 +1878,7 @@ struct page *buffered_rmqueue(struct zone *preferred_zone,
 			WARN_ON_ONCE(order > 1);
 		}
 		spin_lock_irqsave(&zone->lock, flags);
-#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
 		page = __rmqueue(zone, order, migratetype);
 #else  
 
@@ -1993,7 +1993,7 @@ static inline bool should_fail_alloc_page(gfp_t gfp_mask, unsigned int order)
 
 #endif  
 
-#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
  
 static bool __zone_watermark_ok(struct zone *z, unsigned int order,
 			unsigned long mark, int classzone_idx, int alloc_flags,
@@ -2207,7 +2207,7 @@ zonelist_scan:
 		}
 
 try_this_zone:
-#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
 		page = buffered_rmqueue(ac->preferred_zone, zone, order,
 						gfp_mask, ac->migratetype);
 		if (page) {
@@ -2453,7 +2453,7 @@ retry:
 	page = get_page_from_freelist(gfp_mask, order,
 					alloc_flags & ~ALLOC_NO_WATERMARKS, ac);
 
-#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
 	 
 	if (!page && !drained) {
 		drain_all_pages(NULL);
@@ -2667,11 +2667,7 @@ noretry:
 	if (page)
 		goto got_pg;
 nopage:
-#ifdef MY_ABC_HERE
- 
-#else  
 	warn_alloc_failed(gfp_mask, order, NULL);
-#endif  
 got_pg:
 	return page;
 }
@@ -3077,7 +3073,7 @@ static void show_migration_types(unsigned char type)
 		[MIGRATE_UNMOVABLE]	= 'U',
 		[MIGRATE_MOVABLE]	= 'M',
 		[MIGRATE_RECLAIMABLE]	= 'E',
-#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
 		[MIGRATE_RESERVE]	= 'R',
 #else  
 		[MIGRATE_HIGHATOMIC]	= 'H',
@@ -3692,7 +3688,7 @@ static inline unsigned long wait_table_bits(unsigned long size)
 	return ffz(~size);
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
  
 static int pageblock_is_reserved(unsigned long start_pfn, unsigned long end_pfn)
 {
@@ -4963,7 +4959,7 @@ static void __setup_per_zone_wmarks(void)
 			high_wmark_pages(zone) - low_wmark_pages(zone) -
 			atomic_long_read(&zone->vm_stat[NR_ALLOC_BATCH]));
 
-#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
 		setup_zone_migrate_reserve(zone);
 #endif  
 		spin_unlock_irqrestore(&zone->lock, flags);

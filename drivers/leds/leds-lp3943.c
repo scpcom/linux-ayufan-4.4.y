@@ -470,6 +470,11 @@ static void lp3943_brightness_set(struct led_classdev *led_cdev,
 	struct lp3943_led *led;
 
 	led = container_of(led_cdev, struct lp3943_led, cdev);
+#ifdef MY_DEF_HERE
+	if(brightness == led->brightness) {
+		return;
+	}
+#endif
 	led->brightness = brightness;
 	schedule_work(&led->brtwork);
 }

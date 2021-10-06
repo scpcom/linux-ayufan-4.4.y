@@ -59,6 +59,13 @@ static int mtdchar_open(struct inode *inode, struct file *file)
 	mutex_lock(&mtd_mutex);
 	mtd = get_mtd_device(NULL, devnum);
 
+#ifdef MY_DEF_HERE
+#ifdef MY_DEF_HERE
+	if (0 != strcmp("vendor", mtd->name))
+#endif  
+		printk(KERN_ERR"open mtd (%s), process=%s\n", mtd->name, current->comm);
+#endif  
+
 	if (IS_ERR(mtd)) {
 		ret = PTR_ERR(mtd);
 		goto out;
@@ -97,6 +104,13 @@ static int mtdchar_close(struct inode *inode, struct file *file)
 	struct mtd_info *mtd = mfi->mtd;
 
 	pr_debug("MTD_close\n");
+
+#ifdef MY_DEF_HERE
+#ifdef MY_DEF_HERE
+	if (0 != strcmp("vendor", mtd->name))
+#endif  
+		printk(KERN_ERR"close mtd (%s), process=%s\n", mtd->name, current->comm);
+#endif  
 
 	if ((file->f_mode & FMODE_WRITE))
 		mtd_sync(mtd);

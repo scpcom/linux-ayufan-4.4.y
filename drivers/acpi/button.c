@@ -278,6 +278,18 @@ static int acpi_lid_send_state(struct acpi_device *device)
 	return ret;
 }
 
+#ifdef CONFIG_SYNO_IE_SOFT_POWER_OFF
+int (*funcSYNOSendPowerButtonEvent)(void) = NULL;
+static void syno_acpi_power_button_notifier(void)
+{
+	if (NULL == funcSYNOSendPowerButtonEvent) {
+		printk(KERN_ERR "%s: Can't reference to function 'funcSYNOSendPowerButtonEvent'\n", __func__);
+		return;
+	}
+	funcSYNOSendPowerButtonEvent();
+}
+EXPORT_SYMBOL(funcSYNOSendPowerButtonEvent);
+#endif /* CONFIG_SYNO_IE_SOFT_POWER_OFF */
 static void acpi_button_notify(struct acpi_device *device, u32 event)
 {
 	struct acpi_button *button = acpi_driver_data(device);
@@ -298,6 +310,11 @@ static void acpi_button_notify(struct acpi_device *device, u32 event)
 			if (button->suspended)
 				break;
 
+#ifdef CONFIG_SYNO_IE_SOFT_POWER_OFF
+			if(test_bit(KEY_POWER, input->keybit)) {
+				syno_acpi_power_button_notifier();
+			}
+#endif /* CONFIG_SYNO_IE_SOFT_POWER_OFF */
 			keycode = test_bit(KEY_SLEEP, input->keybit) ?
 						KEY_SLEEP : KEY_POWER;
 			input_report_key(input, keycode, 1);

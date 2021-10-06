@@ -39,7 +39,7 @@ void syno_ledtrig_active_set(int iLedNum)
 {
 	SYNO_LED_TRIGGER_TIMER *pTriggerTimer = NULL;
 
-	if(0 > iLedNum){
+	if(0 > iLedNum || 16 <= iLedNum) {
 		goto END;
 	}
 

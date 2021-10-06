@@ -2829,6 +2829,13 @@ cifs_read(struct file *file, char *read_data, size_t read_size, loff_t *offset)
 	}
 	open_file = file->private_data;
 	tcon = tlink_tcon(open_file->tlink);
+#ifdef MY_ABC_HERE
+	 
+	if (!tcon->ses) {
+		free_xid(xid);
+		return -ENOSYS;
+	}
+#endif  
 	server = tcon->ses->server;
 
 	if (!server->ops->sync_read) {

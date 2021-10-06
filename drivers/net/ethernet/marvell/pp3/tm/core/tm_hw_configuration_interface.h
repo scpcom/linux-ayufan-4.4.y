@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -65,4 +61,3 @@ unsigned int	get_port_min_periodic_interval(void);
 unsigned int	get_drop_threshold_definition(void);
 
 #endif   /* TM_HW_CONFIGURATION_INTERFACE_H */
-#endif /* MY_DEF_HERE */

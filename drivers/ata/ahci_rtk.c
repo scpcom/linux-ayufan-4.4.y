@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * AHCI SATA platform driver
  *
@@ -52,6 +55,10 @@ int RTK_SATA_DEV_FLAG = 0;
 
 static u32 blink_gpio_0 = 0;
 static u32 blink_gpio_1 = 0;
+#ifdef MY_DEF_HERE
+static u32 default_gpio_0 = 0;
+static u32 default_gpio_1 = 0;
+#endif /* MY_DEF_HERE */
 
 enum {
 	status_init = 0,
@@ -150,12 +157,23 @@ static void ahci_rtk_host_stop(struct ata_host *host)
 static void ahci_rtk_postreset(struct ata_link *link, unsigned int *class)
 {
 	struct ata_port *ap = link->ap;
+#ifdef MY_DEF_HERE
+	u32 active = 1;
 
+	active = !default_gpio_0;
+	if (ap->port_no == 0 && gpio_is_valid(blink_gpio_0))
+		ata_link_online(link) ? gpio_set_value(blink_gpio_0, active) : gpio_set_value(blink_gpio_0, !active);
+
+	active = !default_gpio_1;
+	if (ap->port_no == 1 && gpio_is_valid(blink_gpio_1))
+		ata_link_online(link) ? gpio_set_value(blink_gpio_1, active) : gpio_set_value(blink_gpio_1, !active);
+#else /* MY_DEF_HERE */
 	if (ap->port_no == 0 && gpio_is_valid(blink_gpio_0))
 		ata_link_online(link) ? gpio_set_value(blink_gpio_0, 1) : gpio_set_value(blink_gpio_0, 0);
 
 	if (ap->port_no == 1 && gpio_is_valid(blink_gpio_1))
 		ata_link_online(link) ? gpio_set_value(blink_gpio_1, 1) : gpio_set_value(blink_gpio_1, 0);
+#endif /* MY_DEF_HERE */
 
 	return ahci_ops.postreset(link, class);
 }
@@ -163,20 +181,63 @@ static void ahci_rtk_postreset(struct ata_link *link, unsigned int *class)
 static ssize_t ahci_rtk_transmit_led_message(struct ata_port *ap, u32 state,
 					     ssize_t size)
 {
+#ifdef MY_DEF_HERE
+	u32 active = 1;
+
+	active = !default_gpio_0;
+	if (ap->port_no == 0 && gpio_is_valid(blink_gpio_0))
+		(state & EM_MSG_LED_VALUE_ON) ? gpio_set_value(blink_gpio_0, !active) : gpio_set_value(blink_gpio_0, active);
+
+	active = !default_gpio_1;
+	if (ap->port_no == 1 && gpio_is_valid(blink_gpio_1))
+		(state & EM_MSG_LED_VALUE_ON) ? gpio_set_value(blink_gpio_1, !active) : gpio_set_value(blink_gpio_1, active);
+#else /* MY_DEF_HERE */
 	if (ap->port_no == 0 && gpio_is_valid(blink_gpio_0))
 		(state & EM_MSG_LED_VALUE_ON) ? gpio_set_value(blink_gpio_0, 0) : gpio_set_value(blink_gpio_0, 1);
 
 	if (ap->port_no == 1 && gpio_is_valid(blink_gpio_1))
 		(state & EM_MSG_LED_VALUE_ON) ? gpio_set_value(blink_gpio_1, 0) : gpio_set_value(blink_gpio_1, 1);
+#endif /* MY_DEF_HERE */
 
 	return ahci_ops.transmit_led_message(ap, state, size);
 }
+
+#ifdef MY_DEF_HERE
+extern int syno_compare_dts_ata_port(const struct ata_port *pAtaPort, const struct device_node *pDeviceNode);
+/**
+ * syno_ahci_rtk_compare_ata_devicetree_info - check the ata_port matches the device_node
+ * @ap [IN]:   query ata_port
+ * @pNode [IN]: comparing device_node
+ *
+ * return true: success
+          false: fail
+ */
+bool syno_ahci_rtk_compare_ata_devicetree_info(const struct ata_port *ap, const struct device_node *pNode)
+{
+	int ret = false;
+	struct device_node *pAhciRtkNode = NULL;
+	if (NULL == ap || NULL == pNode) {
+		goto END;
+	}
+
+	pAhciRtkNode = of_get_child_by_name(pNode, DT_AHCI_RTK);
+	if (0 == syno_compare_dts_ata_port(ap, pAhciRtkNode)) {
+		ret = true;
+	}
+	of_node_put(pAhciRtkNode);
+END:
+	return ret;
+}
+#endif /* MY_DEF_HERE */
 
 struct ata_port_operations ahci_rtk_ops = {
 	.inherits	= &ahci_ops,
 	.host_stop	= ahci_rtk_host_stop,
 	.postreset	= ahci_rtk_postreset,
 	.transmit_led_message = ahci_rtk_transmit_led_message,
+#ifdef MY_DEF_HERE
+	.syno_compare_node_info = syno_ahci_rtk_compare_ata_devicetree_info,
+#endif /* MY_DEF_HERE */
 };
 
 static const struct ata_port_info ahci_port_info = {
@@ -370,7 +431,7 @@ static void config_sata_phy(unsigned int port)
 			writel_delay(0x68ca6111, base + 0xF60);
 			writel_delay(0x68caa111, base + 0xF60);
 		}
-	} else if(ahci_dev->tx_driving == 4) { // for DS218play
+	} else if(ahci_dev->tx_driving == 4) { // for DS218play, DS220j
 		printk("[SATA] set tx-driving to L (level 4)\n");
 		if(port==0) {
 			writel_delay(0x94a72011, base + 0xF60);
@@ -413,6 +474,26 @@ static void config_sata_phy(unsigned int port)
 			writel_delay(0x383a2111, base + 0xF60);
 			writel_delay(0x383a6111, base + 0xF60);
 			writel_delay(0x383aa111, base + 0xF60);
+		}
+	} else if(ahci_dev->tx_driving == 7) { // for RS819
+		printk("[SATA] set tx-driving to L (level 7)\n");
+		if(port==0) {
+			writel_delay(0x94a42011, base + 0xF60);
+			writel_delay(0x94a46011, base + 0xF60);
+			writel_delay(0x94a4a011, base + 0xF60);
+			writel_delay(0x287a2111, base + 0xF60);
+			writel_delay(0x287a6111, base + 0xF60);
+			writel_delay(0x287aa111, base + 0xF60);
+		}
+	} else if(ahci_dev->tx_driving == 5) { // for EDS19
+		printk("[SATA] set tx-driving to L (level 5)\n");
+		if(port==0) {
+			writel_delay(0x94a42011, base + 0xF60);
+			writel_delay(0x94a46011, base + 0xF60);
+			writel_delay(0x94a4a011, base + 0xF60);
+			writel_delay(0x084a2111, base + 0xF60);
+			writel_delay(0x084a6111, base + 0xF60);
+			writel_delay(0x084aa111, base + 0xF60);
 		}
 	}
 	// RX power saving off
@@ -737,6 +818,7 @@ static int ahci_probe(struct platform_device *pdev)
 	struct device *dev = &pdev->dev;
 	struct ahci_host_priv *hpriv;
 	struct ahci_port_data *port_data;
+	struct of_phandle_args blink_gpio;
 	int ret, i, j;
 	int gpio;
 
@@ -781,10 +863,22 @@ static int ahci_probe(struct platform_device *pdev)
 	blink_gpio_0 = of_get_named_gpio_flags(dev->of_node, "blink-gpios", 0, NULL);
 	if (gpio_is_valid(blink_gpio_0))
 		gpio_request(blink_gpio_0, "blink-gpios(0)");
+#ifdef MY_DEF_HERE
+	if (!of_parse_phandle_with_args(dev->of_node, "blink-gpios", "#gpio-cells", 0, &blink_gpio)) {
+		if (blink_gpio.args_count >= 3)
+			default_gpio_0 = blink_gpio.args[2];
+	}
+#endif /* MY_DEF_HERE */
 
 	blink_gpio_1 = of_get_named_gpio_flags(dev->of_node, "blink-gpios", 1, NULL);
 	if (gpio_is_valid(blink_gpio_1))
 		gpio_request(blink_gpio_1, "blink-gpios(1)");
+#ifdef MY_DEF_HERE
+	if (!of_parse_phandle_with_args(dev->of_node, "blink-gpios", "#gpio-cells", 1, &blink_gpio)) {
+		if (blink_gpio.args_count >= 3)
+			default_gpio_1 = blink_gpio.args[2];
+	}
+#endif /* MY_DEF_HERE */
 
 	//Get reset information
 	for(i=0; i<ahci_dev->port_num; i++) {

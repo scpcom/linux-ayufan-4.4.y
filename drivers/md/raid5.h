@@ -207,7 +207,10 @@ struct r5conf {
 	int			max_degraded;
 	int			raid_disks;
 	int			max_nr_stripes;
+#ifdef MY_ABC_HERE
+#else  
 	int			min_nr_stripes;
+#endif  
 
 	sector_t		reshape_progress;
 	 
@@ -276,9 +279,12 @@ struct r5conf {
 	wait_queue_head_t	wait_for_overlap;
 	unsigned long		cache_state;
 #define R5_INACTIVE_BLOCKED	1	 
+#ifdef MY_ABC_HERE
+#else  
 #define R5_ALLOC_MORE		2	 
 #define R5_DID_ALLOC		4	 
 	struct shrinker		shrinker;
+#endif  
 	int			pool_size;  
 	spinlock_t		device_lock;
 	struct disk_info	*disks;

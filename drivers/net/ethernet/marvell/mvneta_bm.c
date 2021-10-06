@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*
  * Driver for Marvell NETA network controller Buffer Manager.
  *
@@ -22,6 +18,7 @@
 #include <linux/module.h>
 #include <linux/netdevice.h>
 #include <linux/of.h>
+#include <linux/of_platform.h>
 #include <linux/platform_device.h>
 #include <linux/skbuff.h>
 #include <net/hwbm.h>
@@ -191,7 +188,7 @@ struct mvneta_bm_pool *mvneta_bm_pool_use(struct mvneta_bm *priv, u8 pool_id,
 		return NULL;
 	}
 
-	if (new_pool->pkt_size == 0 || type != MVNETA_BM_SHORT)
+	if (type == MVNETA_BM_SHORT)
 		new_pool->pkt_size = pkt_size;
 
 	/* Allocate buffers in case BM pool hasn't been used yet */
@@ -282,11 +279,7 @@ void mvneta_bm_pool_destroy(struct mvneta_bm *priv,
 
 	mvneta_bm_bufs_free(priv, bm_pool, port_map);
 	if (hwbm_pool->buf_num)
-#if defined(MY_DEF_HERE)
 		WARN(1, "cannot free %d buffers in pool %d\n", hwbm_pool->buf_num, bm_pool->id);
-#else /* MY_DEF_HERE */
-		WARN(1, "cannot free all buffers in pool %d\n", bm_pool->id);
-#endif /* MY_DEF_HERE */
 
 	if (bm_pool->virt_addr) {
 		dma_free_coherent(&priv->pdev->dev,
@@ -351,7 +344,8 @@ static void mvneta_bm_pools_init(struct mvneta_bm *priv)
 		/* Obtain custom pkt_size from DT */
 		sprintf(prop, "pool%d,pkt-size", i);
 		if (of_property_read_u32(dn, prop, &bm_pool->pkt_size))
-			bm_pool->pkt_size = 0;
+			/* if not specified by DT, set default buffer size to support Jumbo */
+			bm_pool->pkt_size = MVNETA_BM_LONG_PKT_SIZE;
 	}
 }
 
@@ -393,6 +387,22 @@ static int mvneta_bm_init(struct mvneta_bm *priv)
 static int mvneta_bm_get_sram(struct device_node *dn,
 			      struct mvneta_bm *priv)
 {
+	struct platform_device *pdev;
+	struct device_node *np_pool;
+	struct resource *res;
+
+	np_pool = of_parse_phandle(dn, "internal-mem", 0);
+	if (!np_pool)
+		return -1;
+	pdev = of_find_device_by_node(np_pool);
+	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+	if (!res) {
+		pr_err("%s:: found no memory resource\n", __func__);
+		return -EINVAL;
+	}
+	/* get size of internal SRAM access region */
+	priv->bppi_size = resource_size(res);
+
 	priv->bppi_pool = of_gen_pool_get(dn, "internal-mem", 0);
 	if (!priv->bppi_pool) {
 		pr_err("%s:: no internal-mem node found\n", __func__);
@@ -400,7 +410,7 @@ static int mvneta_bm_get_sram(struct device_node *dn,
 	}
 
 	priv->bppi_virt_addr = gen_pool_dma_alloc(priv->bppi_pool,
-						  MVNETA_BM_BPPI_SIZE,
+						  priv->bppi_size,
 						  &priv->bppi_phys_addr);
 	if (!priv->bppi_virt_addr)
 		return -ENOMEM;
@@ -410,8 +420,7 @@ static int mvneta_bm_get_sram(struct device_node *dn,
 
 static void mvneta_bm_put_sram(struct mvneta_bm *priv)
 {
-	gen_pool_free(priv->bppi_pool, priv->bppi_phys_addr,
-		      MVNETA_BM_BPPI_SIZE);
+	gen_pool_free(priv->bppi_pool, priv->bppi_phys_addr, priv->bppi_size);
 }
 
 static int mvneta_bm_probe(struct platform_device *pdev)
@@ -494,11 +503,51 @@ static int mvneta_bm_remove(struct platform_device *pdev)
 	return 0;
 }
 
+#ifdef CONFIG_PM_SLEEP
+static int mvneta_bm_suspend(struct device *dev)
+{
+	struct mvneta_bm *priv = dev_get_drvdata(dev);
+	u8 all_ports_map = 0xff;
+	int i = 0;
+
+	for (i = 0; i < MVNETA_BM_POOLS_NUM; i++) {
+		struct mvneta_bm_pool *bm_pool = &priv->bm_pools[i];
+
+		mvneta_bm_pool_destroy(priv, bm_pool, all_ports_map);
+	}
+
+	/* Dectivate BM unit */
+	mvneta_bm_write(priv, MVNETA_BM_COMMAND_REG, MVNETA_BM_STOP_MASK);
+	return 0;
+}
+
+int mvneta_bm_resume(struct device *dev)
+{
+	struct mvneta_bm *priv = dev_get_drvdata(dev);
+	int err = 0;
+
+	/* Initialize buffer manager internals */
+	err = mvneta_bm_init(priv);
+	if (err < 0)
+		pr_err("%s: failed to resume BM controller\n", __func__);
+
+	return err;
+}
+
+#endif
+
 static const struct of_device_id mvneta_bm_match[] = {
 	{ .compatible = "marvell,armada-380-neta-bm" },
 	{ }
 };
 MODULE_DEVICE_TABLE(of, mvneta_bm_match);
+
+#ifdef CONFIG_PM_SLEEP
+static const struct dev_pm_ops mvneta_bm_pm_ops = {
+	.suspend_late = mvneta_bm_suspend,
+	.resume_early = mvneta_bm_resume,
+};
+#endif
 
 static struct platform_driver mvneta_bm_driver = {
 	.probe = mvneta_bm_probe,
@@ -506,6 +555,9 @@ static struct platform_driver mvneta_bm_driver = {
 	.driver = {
 		.name = MVNETA_BM_DRIVER_NAME,
 		.of_match_table = mvneta_bm_match,
+#ifdef CONFIG_PM_SLEEP
+		.pm = &mvneta_bm_pm_ops,
+#endif
 	},
 };
 
@@ -514,4 +566,3 @@ module_platform_driver(mvneta_bm_driver);
 MODULE_DESCRIPTION("Marvell NETA Buffer Manager Driver - www.marvell.com");
 MODULE_AUTHOR("Marcin Wojtas <mw@semihalf.com>");
 MODULE_LICENSE("GPL v2");
-#endif /* MY_DEF_HERE */

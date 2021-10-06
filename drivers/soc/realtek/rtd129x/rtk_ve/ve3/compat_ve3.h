@@ -17,6 +17,7 @@
 
 #ifndef _LINUX_COMPAT_VE3_H
 #define _LINUX_COMPAT_VE3_H
+#include <linux/fs.h>
 
 #if IS_ENABLED(CONFIG_COMPAT)
 

@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -540,4 +536,3 @@ static inline void mv_pp3_nss_reg_dump(void)
 }
 
 #endif /* __mv_nss_regs_h__ */
-#endif /* MY_DEF_HERE */

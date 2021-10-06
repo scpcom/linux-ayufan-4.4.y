@@ -103,6 +103,9 @@ void btrfs_put_block_group(struct btrfs_block_group_cache *cache)
 	if (atomic_dec_and_test(&cache->count)) {
 		WARN_ON(cache->pinned > 0);
 		WARN_ON(cache->reserved > 0);
+#ifdef MY_ABC_HERE
+		cache->fs_info->block_group_cnt--;
+#endif  
 		kfree(cache->free_space_ctl);
 		kfree(cache);
 	}
@@ -815,7 +818,7 @@ search_again:
 
 	delayed_refs = &trans->transaction->delayed_refs;
 	spin_lock(&delayed_refs->lock);
-	head = btrfs_find_delayed_ref_head(trans, bytenr);
+	head = btrfs_find_delayed_ref_head(delayed_refs, bytenr);
 	if (head) {
 		if (!mutex_trylock(&head->mutex)) {
 			atomic_inc(&head->node.refs);
@@ -2353,6 +2356,11 @@ static noinline int __btrfs_run_delayed_refs(struct btrfs_trans_handle *trans,
 			locked_ref = NULL;
 		}
 		btrfs_put_delayed_ref(ref);
+#ifdef MY_ABC_HERE
+		 
+		if (actual_count & 0x1)
+			btrfs_async_btree_balance_dirty(fs_info);
+#endif  
 		count++;
 		cond_resched();
 	}
@@ -2681,8 +2689,7 @@ int btrfs_set_disk_extent_flags(struct btrfs_trans_handle *trans,
 	return ret;
 }
 
-static noinline int check_delayed_ref(struct btrfs_trans_handle *trans,
-				      struct btrfs_root *root,
+static noinline int check_delayed_ref(struct btrfs_root *root,
 				      struct btrfs_path *path,
 				      u64 objectid, u64 offset, u64 bytenr)
 {
@@ -2690,13 +2697,23 @@ static noinline int check_delayed_ref(struct btrfs_trans_handle *trans,
 	struct btrfs_delayed_ref_node *ref;
 	struct btrfs_delayed_data_ref *data_ref;
 	struct btrfs_delayed_ref_root *delayed_refs;
+	struct btrfs_transaction *cur_trans;
 	int ret = 0;
 
-	delayed_refs = &trans->transaction->delayed_refs;
+	spin_lock(&root->fs_info->trans_lock);
+	cur_trans = root->fs_info->running_transaction;
+	if (cur_trans)
+		atomic_inc(&cur_trans->use_count);
+	spin_unlock(&root->fs_info->trans_lock);
+	if (!cur_trans)
+		return 0;
+
+	delayed_refs = &cur_trans->delayed_refs;
 	spin_lock(&delayed_refs->lock);
-	head = btrfs_find_delayed_ref_head(trans, bytenr);
+	head = btrfs_find_delayed_ref_head(delayed_refs, bytenr);
 	if (!head) {
 		spin_unlock(&delayed_refs->lock);
+		btrfs_put_transaction(cur_trans);
 		return 0;
 	}
 
@@ -2709,6 +2726,7 @@ static noinline int check_delayed_ref(struct btrfs_trans_handle *trans,
 		mutex_lock(&head->mutex);
 		mutex_unlock(&head->mutex);
 		btrfs_put_delayed_ref(&head->node);
+		btrfs_put_transaction(cur_trans);
 		return -EAGAIN;
 	}
 	spin_unlock(&delayed_refs->lock);
@@ -2732,13 +2750,19 @@ static noinline int check_delayed_ref(struct btrfs_trans_handle *trans,
 	}
 	spin_unlock(&head->lock);
 	mutex_unlock(&head->mutex);
+	btrfs_put_transaction(cur_trans);
 	return ret;
 }
 
-static noinline int check_committed_ref(struct btrfs_trans_handle *trans,
-					struct btrfs_root *root,
+#ifdef MY_ABC_HERE
+static noinline int check_committed_ref(struct btrfs_root *root,
+					struct btrfs_path *path,
+					u64 objectid, u64 offset, u64 bytenr, u64 mode)
+#else
+static noinline int check_committed_ref(struct btrfs_root *root,
 					struct btrfs_path *path,
 					u64 objectid, u64 offset, u64 bytenr)
+#endif  
 {
 	struct btrfs_root *extent_root = root->fs_info->extent_root;
 	struct extent_buffer *leaf;
@@ -2783,9 +2807,16 @@ static noinline int check_committed_ref(struct btrfs_trans_handle *trans,
 	    btrfs_extent_inline_ref_size(BTRFS_EXTENT_DATA_REF_KEY))
 		goto out;
 
+#ifdef MY_ABC_HERE
+	if (mode != CHECK_CROSS_REF_SKIP_FAST_SNAPSHOT &&
+	    btrfs_extent_generation(leaf, ei) <=
+	     btrfs_root_last_snapshot(&root->root_item))
+		goto out;
+#else
 	if (btrfs_extent_generation(leaf, ei) <=
 	    btrfs_root_last_snapshot(&root->root_item))
 		goto out;
+#endif  
 
 	iref = (struct btrfs_extent_inline_ref *)(ei + 1);
 	if (btrfs_extent_inline_ref_type(leaf, iref) !=
@@ -2806,9 +2837,13 @@ out:
 	return ret;
 }
 
-int btrfs_cross_ref_exist(struct btrfs_trans_handle *trans,
-			  struct btrfs_root *root,
-			  u64 objectid, u64 offset, u64 bytenr)
+#ifdef MY_ABC_HERE
+int btrfs_cross_ref_exist(struct btrfs_root *root,
+			  u64 objectid, u64 offset, u64 bytenr, u64 mode)
+#else
+int btrfs_cross_ref_exist(struct btrfs_root *root, u64 objectid, u64 offset,
+			  u64 bytenr)
+#endif  
 {
 	struct btrfs_path *path;
 	int ret;
@@ -2819,12 +2854,17 @@ int btrfs_cross_ref_exist(struct btrfs_trans_handle *trans,
 		return -ENOENT;
 
 	do {
-		ret = check_committed_ref(trans, root, path, objectid,
+#ifdef MY_ABC_HERE
+		ret = check_committed_ref(root, path, objectid,
+					  offset, bytenr, mode);
+#else
+		ret = check_committed_ref(root, path, objectid,
 					  offset, bytenr);
+#endif  
 		if (ret && ret != -ENOENT)
 			goto out;
 
-		ret2 = check_delayed_ref(trans, root, path, objectid,
+		ret2 = check_delayed_ref(root, path, objectid,
 					 offset, bytenr);
 	} while (ret2 == -EAGAIN);
 
@@ -4335,6 +4375,15 @@ static int reserve_metadata_bytes(struct btrfs_root *root,
 	int flush_state = FLUSH_DELAYED_ITEMS_NR;
 	int ret = 0;
 	bool flushing = false;
+#ifdef MY_ABC_HERE
+	int sched_count = 0;
+	int need_async_reclaim = 0;
+	bool bl_resched_timeout = false;
+
+	if (flush == BTRFS_RESERVE_FLUSH_ALL) {
+		bl_resched_timeout = true;
+	}
+#endif  
 
 again:
 	ret = 0;
@@ -4398,10 +4447,35 @@ again:
 			queue_work(system_unbound_wq,
 				   &root->fs_info->async_reclaim_work);
 	}
+#ifdef MY_ABC_HERE
+	if (bl_resched_timeout) {
+		need_async_reclaim = need_do_async_reclaim(space_info, root->fs_info, used);
+	}
+#endif  
 	spin_unlock(&space_info->lock);
 
 	if (!ret || flush == BTRFS_RESERVE_NO_FLUSH)
 		goto out;
+
+#ifdef MY_ABC_HERE
+	if (bl_resched_timeout && !root->fs_info->log_root_recovering && need_async_reclaim &&
+#ifdef MY_ABC_HERE
+		!root->fs_info->avoid_fs_root_null_pointer_dereference &&
+#endif  
+		(root->fs_info->ordered_extent_nr > 0 || percpu_counter_sum_positive(&root->fs_info->delalloc_bytes))) {
+		if (!work_busy(&root->fs_info->async_reclaim_work)) {
+			queue_work(system_unbound_wq, &root->fs_info->async_reclaim_work);
+		}
+		schedule_timeout_uninterruptible(HZ*0.005);
+		sched_count++;
+		if (sched_count > 12000) {
+			bl_resched_timeout = false;
+		}
+		goto again;
+	} else {
+		bl_resched_timeout = false;
+	}
+#endif  
 
 	ret = flush_space(root, space_info, num_bytes, orig_bytes,
 			  flush_state);
@@ -5943,7 +6017,7 @@ static noinline int check_ref_cleanup(struct btrfs_trans_handle *trans,
 
 	delayed_refs = &trans->transaction->delayed_refs;
 	spin_lock(&delayed_refs->lock);
-	head = btrfs_find_delayed_ref_head(trans, bytenr);
+	head = btrfs_find_delayed_ref_head(delayed_refs, bytenr);
 	if (!head)
 		goto out_delayed_unlock;
 
@@ -7485,7 +7559,11 @@ static noinline int do_walk_down(struct btrfs_trans_handle *trans,
 	bytenr = btrfs_node_blockptr(path->nodes[level], path->slots[level]);
 	blocksize = root->nodesize;
 
+#ifdef MY_ABC_HERE
+	next = btrfs_find_tree_block(root, bytenr);
+#else
 	next = btrfs_find_tree_block(root->fs_info, bytenr);
+#endif  
 	if (!next) {
 		next = btrfs_find_create_tree_block(root, bytenr);
 		if (IS_ERR(next))
@@ -7793,8 +7871,11 @@ int btrfs_drop_snapshot(struct btrfs_root *root,
 	int ret;
 	int level;
 	bool root_dropped = false;
-#ifdef MY_ABC_HERE
+#if defined(MY_ABC_HERE) || \
+	defined(MY_ABC_HERE)
 	struct btrfs_fs_info *fs_info = root->fs_info;
+#endif
+#ifdef MY_ABC_HERE
 	u64 qgroupid = root->root_key.objectid;
 #endif  
 
@@ -7911,7 +7992,12 @@ int btrfs_drop_snapshot(struct btrfs_root *root,
 
 		BUG_ON(wc->level == 0);
 		if (btrfs_should_end_transaction(trans, tree_root) ||
+#ifdef MY_ABC_HERE
+		    (!for_reloc && (btrfs_need_cleaner_sleep(root) ||
+			                !root->fs_info->snapshot_cleaner))) {
+#else
 		    (!for_reloc && btrfs_need_cleaner_sleep(root))) {
+#endif  
 			ret = btrfs_update_root(trans, tree_root,
 						&root->root_key,
 						root_item);
@@ -7922,7 +8008,21 @@ int btrfs_drop_snapshot(struct btrfs_root *root,
 			}
 
 			btrfs_end_transaction_throttle(trans, tree_root);
+#ifdef MY_ABC_HERE
+			if (!for_reloc &&
+				(btrfs_need_cleaner_sleep(root) ||
+#ifdef MY_ABC_HERE
+				 !root->fs_info->snapshot_cleaner ||
+#endif  
+				 fs_info->reclaim_space_entry_count >= 16384)) {
+				 
+#elif defined(MY_ABC_HERE)
+			if (!for_reloc &&
+				(btrfs_need_cleaner_sleep(root) ||
+				 !root->fs_info->snapshot_cleaner)) {
+#else  
 			if (!for_reloc && btrfs_need_cleaner_sleep(root)) {
+#endif  
 				pr_debug("BTRFS: drop snapshot early exit\n");
 				err = -EAGAIN;
 				goto out_free;
@@ -7994,7 +8094,11 @@ out_free:
 out:
 	 
 	if (!for_reloc && root_dropped == false)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+		btrfs_add_dead_root_head(root);
+#else
 		btrfs_add_dead_root(root);
+#endif  
 	if (err && err != -EAGAIN)
 		btrfs_handle_fs_error(root->fs_info, err, NULL);
 	return err;
@@ -8613,6 +8717,9 @@ btrfs_create_block_group_cache(struct btrfs_root *root, u64 start, u64 size)
 	btrfs_init_free_space_ctl(cache);
 	atomic_set(&cache->trimming, 0);
 	mutex_init(&cache->free_space_lock);
+#ifdef MY_ABC_HERE
+	cache->fs_info->block_group_cnt++;
+#endif  
 
 	return cache;
 }
@@ -8921,7 +9028,7 @@ void btrfs_create_pending_block_groups(struct btrfs_trans_handle *trans,
 	struct btrfs_root *block_group_hint_root;
 
 	if (!fs_info->block_group_hint_root && !fs_info->no_block_group_hint) {
-		spin_lock(&fs_info->block_group_hint_tree_lock);
+		mutex_lock(&fs_info->block_group_hint_tree_mutex);
 		if (!fs_info->block_group_hint_root) {
 			block_group_hint_root = btrfs_create_tree(trans, fs_info, BTRFS_BLOCK_GROUP_HINT_TREE_OBJECTID);
 			if (!IS_ERR_OR_NULL(block_group_hint_root)) {
@@ -8930,7 +9037,7 @@ void btrfs_create_pending_block_groups(struct btrfs_trans_handle *trans,
 				btrfs_err(fs_info, "Failed to create block group hint tree\n");
 			}
 		}
-		spin_unlock(&fs_info->block_group_hint_tree_lock);
+		mutex_unlock(&fs_info->block_group_hint_tree_mutex);
 	}
 #endif  
 

@@ -321,11 +321,13 @@
 		       0x9803C000 0x00001000
 		       0x9801C600 0x00000100
 		       0x9801A000 0x00000300
-		       0x98012000 0x00001000>;
+		       0x98012000 0x00001000
+			   0x98008000 0x1000>;
 		interrupt-names = "rtk-pcie2-intr";
 		#interrupt-cells = <1>;
 		interrupt-map-mask = <0 0 0 0>;
 		interrupt-map = <0 0 0 0 &gic GIC_SPI 62 IRQ_TYPE_LEVEL_HIGH>;
+		interrupts = <0 35 4>;
 		bus-range = <0x00 0xff>;
 		linux,pci-domain = <1>;
 		device_type = "pci";
@@ -366,23 +368,28 @@
 
 	sdmmc@98010400 {
 		compatible = "Realtek,rtk1295-sdmmc";
+		gpios = <&rtk_misc_gpio 99 1 0>;    /*sd power , output, default high  (poweroff) */
 		reg = <0x98000000 0x400>, /* CRT */
 		      <0x98010400 0x200>, /* SDMMC */
-		      <0x9801A000 0x80>, /* BS2 */
-		      <0x98012000 0x10>, /* EMMC */
+		      <0x9801A000 0x400>, /* BS2 */
+		      <0x98012000 0xa00>, /* EMMC */
 		      <0x98010A00 0x40>; /* SDIO */
 		interrupts = <0 44 4>;
 	};
 
 	emmc@98012000 {
 		compatible = "Realtek,rtk1295-emmc";
-		reg = <0x98012000 0xa00>, /*EMMC CRT CRSD SB2*/
-		      <0x98000000 0x600>,
-		      <0x98010400 0x200>,
-		      <0x9801A000 0x80>;
+		reg = <0x98012000 0xa00>, /*EMMC*/ 
+		      <0x98000000 0x600>, /*CRT */
+              <0x9801A000 0x80>,  /*SB2*/
+              <0x9801B000 0x150>;  /*MISC*/
 		interrupts = <0 42 4>;
-		speed-step = <0>; /* 0: sdr50, 1: ddr50, 2: hs200 */
+		speed-step = <2>; /* 0: sdr50, 1: ddr50, 2: hs200, 3: hs400 */
+		pddrive_nf_s0 = <1 0x77 0x77 0x77 0x33>;    /* pddrive_nf0, pddrive_nf1, pddrive_nf2, pddrive_nf3, pddrive_nf4 ; for sdr50 */
+		pddrive_nf_s2 = <1 0xbb 0xbb 0xbb 0x33>;    /* pddrive_nf0, pddrive_nf1, pddrive_nf2, pddrive_nf3, pddrive_nf4 ; for hs200 */
+		phase_tuning = <0 0>; /* arg0: tx tuning switch, arg1: rx tuning switch*/
 	};
+
 
 	refclk@9801b540 {
 		compatible = "Realtek,rtk1295-refclk";

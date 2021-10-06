@@ -35,7 +35,11 @@ static void svc_unregister(const struct svc_serv *serv, struct net *net);
 #define SVC_POOL_DEFAULT	SVC_POOL_GLOBAL
 
 struct svc_pool_map svc_pool_map = {
+#ifdef MY_DEF_HERE
+	.mode = SVC_POOL_PERNODE
+#else
 	.mode = SVC_POOL_DEFAULT
+#endif  
 };
 EXPORT_SYMBOL_GPL(svc_pool_map);
 
@@ -1112,6 +1116,9 @@ svc_process(struct svc_rqst *rqstp)
 	rqstp->rq_res.buflen = PAGE_SIZE;
 	rqstp->rq_res.tail[0].iov_base = NULL;
 	rqstp->rq_res.tail[0].iov_len = 0;
+#ifdef MY_ABC_HERE
+	rqstp->rq_procinfo = NULL;
+#endif
 
 	dir  = svc_getnl(argv);
 	if (dir != 0) {

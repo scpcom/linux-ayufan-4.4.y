@@ -12,18 +12,28 @@
 
 int (*funcSYNOSendRaidEvent)(unsigned int, unsigned int, unsigned int, unsigned int) = NULL;
 
+static int SynoDiskGetDeviceIndex(struct block_device *bdev)
+{
+#ifdef MY_DEF_HERE
+	if (!strncmp(bdev->bd_disk->disk_name, "nvme", strlen("nvme"))) {
+		return SynoNVMeGetDeviceIndex(bdev);
+	} else
+#endif  
+	{
+		return SynoSCSIGetDeviceIndex(bdev);
+	}
+}
+
 void SynoReportBadSector(sector_t sector, unsigned long rw,
 						 int md_minor, struct block_device *bdev, const char *szFuncName)
 {
 	char b[BDEVNAME_SIZE];
-	int index = SynoSCSIGetDeviceIndex(bdev);
+	int index = SynoDiskGetDeviceIndex(bdev);
 
 	bdevname(bdev,b);
 
-	if (printk_ratelimit()) {
-		printk("%s error, md%d, %s index [%d], sector %llu [%s]\n",
-					   rw ? "write" : "read", md_minor, b, index, (unsigned long long)sector, szFuncName);
-	}
+	printk("%s error, md%d, %s index [%d], sector %llu [%s]\n",
+				   rw ? "write" : "read", md_minor, b, index, (unsigned long long)sector, szFuncName);
 
 	if (funcSYNOSendRaidEvent) {
 		funcSYNOSendRaidEvent(
@@ -38,7 +48,7 @@ void SynoReportCorrectBadSector(sector_t sector, int md_minor,
 								struct block_device *bdev, const char *szFuncName)
 {
 	char b[BDEVNAME_SIZE];
-	int index = SynoSCSIGetDeviceIndex(bdev);
+	int index = SynoDiskGetDeviceIndex(bdev);
 
 	bdevname(bdev,b);
 

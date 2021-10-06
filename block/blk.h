@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef BLK_INTERNAL_H
 #define BLK_INTERNAL_H
 
@@ -68,6 +71,9 @@ int blk_rq_append_bio(struct request_queue *q, struct request *rq,
 		      struct bio *bio);
 void blk_queue_bypass_start(struct request_queue *q);
 void blk_queue_bypass_end(struct request_queue *q);
+#ifdef MY_ABC_HERE
+void blk_drain_queue(struct request_queue *q);
+#endif /* MY_ABC_HERE */
 void blk_dequeue_request(struct request *rq);
 void __blk_queue_free_tags(struct request_queue *q);
 bool __blk_end_bidi_request(struct request *rq, int error,
@@ -93,7 +99,7 @@ static inline void blk_flush_integrity(void)
 }
 #endif
 
-void blk_rq_timed_out_timer(unsigned long data);
+void blk_timeout_work(struct work_struct *work);
 unsigned long blk_rq_timeout(unsigned long timeout);
 void blk_add_timer(struct request *req);
 void blk_delete_timer(struct request *);

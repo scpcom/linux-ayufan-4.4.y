@@ -35,6 +35,7 @@ void extent_map_tree_init(struct extent_map_tree *tree)
 	atomic_set(&tree->nr_extent_maps, 0);
 	INIT_LIST_HEAD(&tree->not_modified_extents);
 	INIT_LIST_HEAD(&tree->syno_modified_extents);
+	INIT_LIST_HEAD(&tree->pinned_extents);
 #endif  
 	tree->map = RB_ROOT;
 	INIT_LIST_HEAD(&tree->modified_extents);
@@ -55,6 +56,7 @@ struct extent_map *alloc_extent_map(void)
 	INIT_LIST_HEAD(&em->list);
 #ifdef MY_ABC_HERE
 	INIT_LIST_HEAD(&em->free_list);
+	em->bl_increase = false;
 #endif  
 	return em;
 }
@@ -212,9 +214,16 @@ static void check_and_insert_extent_map_to_global_extent(struct extent_map_tree 
 		rootid = tree->inode->root->objectid;
 		if (rootid == BTRFS_FS_TREE_OBJECTID ||
 			(rootid >= BTRFS_FIRST_FREE_OBJECTID && rootid <= BTRFS_LAST_FREE_OBJECTID)) {
-			atomic_inc(&tree->inode->root->fs_info->nr_extent_maps);
+			if (!test_bit(EXTENT_FLAG_PINNED, &em->flags)) {
+				if (!em->bl_increase) {
+					atomic_inc(&tree->inode->root->fs_info->nr_extent_maps);
+					em->bl_increase = true;
+				}
+			}
 			if (!modified) {
 				list_move_tail(&em->free_list, &tree->not_modified_extents);
+			} else if (test_bit(EXTENT_FLAG_PINNED, &em->flags)) {
+				list_move_tail(&em->free_list, &tree->pinned_extents);
 			} else {
 				list_move_tail(&em->free_list, &tree->syno_modified_extents);
 			}
@@ -239,8 +248,11 @@ static void check_and_decrease_global_extent(struct extent_map_tree *tree, struc
 		rootid = tree->inode->root->objectid;
 		if (rootid == BTRFS_FS_TREE_OBJECTID ||
 			(rootid >= BTRFS_FIRST_FREE_OBJECTID && rootid <= BTRFS_LAST_FREE_OBJECTID)) {
-			WARN_ON(atomic_read(&(tree->inode->root->fs_info->nr_extent_maps)) == 0);
-			atomic_dec(&tree->inode->root->fs_info->nr_extent_maps);
+			if (em->bl_increase) {
+				WARN_ON(atomic_read(&(tree->inode->root->fs_info->nr_extent_maps)) == 0);
+				atomic_dec(&tree->inode->root->fs_info->nr_extent_maps);
+				em->bl_increase = false;
+			}
 			if (atomic_read(&tree->nr_extent_maps) == 0 && !list_empty(&tree->inode->free_extent_map_inode)) {
 				spin_lock(&tree->inode->root->fs_info->extent_map_inode_list_lock);
 				if (atomic_read(&tree->inode->free_extent_map_counts) == 0) {
@@ -315,6 +327,13 @@ int unpin_extent_cache(struct extent_map_tree *tree, u64 start, u64 len,
 
 	em->generation = gen;
 	clear_bit(EXTENT_FLAG_PINNED, &em->flags);
+#ifdef MY_ABC_HERE
+	list_move_tail(&em->free_list, &tree->syno_modified_extents);
+	if (!em->bl_increase) {
+		atomic_inc(&tree->inode->root->fs_info->nr_extent_maps);
+		em->bl_increase = true;
+	}
+#endif  
 	em->mod_start = em->start;
 	em->mod_len = em->len;
 

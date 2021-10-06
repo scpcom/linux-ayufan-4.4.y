@@ -12,7 +12,7 @@ cp -sv /lnxscripts/config/{signing_key,trusted_certificates,untrusted_certificat
 
 export ARCH=${ARCH}
 case "$BUILD_TARGET" in
-	APOLLOLAKE|DENVERTON|KVMX64|REALTEK_RTD1296|BROADWELLNK|MARVELL_ARMADA37XX|PURLEY|COFFEELAKE)
+	APOLLOLAKE|DENVERTON|KVMX64|REALTEK_RTD1296|BROADWELLNK|MARVELL_ARMADA37XX|PURLEY|COFFEELAKE|BROADWELLNTB|NEXTKVMX64|GEMINILAKE)
 		export CROSS_COMPILE=${ToolChainPrefix64} CC=${CC64}
 		KERNEL_CC=${CC64}
 		;;
@@ -22,6 +22,14 @@ case "$BUILD_TARGET" in
 		KERNEL_CC="${CC}"
 		;;
 esac
+
+if [ "$PLATFORM_FAMILY" = "SYNOPLAT_F_X86_64" ] && [ "$BUILD_TARGET" != "DOCKERX64" ]; then
+	ln -s "${SysRootInclude}/hydrogen/hydrogen.h" "${KernelDir}/include/crypto/hydrogen.h"
+	ln -s "${SysRootInclude}/hydrogen/hydrogen.c" "${KernelDir}/crypto/hydrogen/hydrogen.c"
+	ln -s "${SysRootInclude}/hydrogen/impl" "${KernelDir}/crypto/hydrogen/impl"
+	sed -i "s/__RAMDISK_SIGN_PUBLIC_KEY__/$(cat /lnxscripts/config/rd_sign.pub | xxd -i -c 32 )/" \
+		"${KernelDir}/init/initramfs.c"
+fi
 
 case ${MakeClean} in
 	[Yy][Ee][Ss])
@@ -34,15 +42,6 @@ case ${CleanOnly} in
 		return
 		;;
 esac
-
-# Version Infomation
-LNXVERSION="${KernelDir}/.version"
-if [ -f ${VERSION_FILE} ]; then
-	expr $(GetDSMBuildNumber) - 1 > ${LNXVERSION}
-fi
-
-mkdir -p ${ImageDir}/modules
-
 
 case "$BUILD_TARGET" in
 	APOLLOLAKE)
@@ -87,63 +86,173 @@ case "$BUILD_TARGET" in
 		KernelConfig=synoconfigs/coffeelake
 		KernelTarget=bzImage
 		;;
+	BROADWELLNTB)
+		KernelImage=${KernelDir}/arch/x86_64/boot/bzImage
+		KernelConfig=synoconfigs/broadwellntb
+		KernelTarget=bzImage
+		;;
+	NEXTKVMX64)
+		KernelImage=${KernelDir}/arch/x86_64/boot/bzImage
+		KernelConfig=synoconfigs/nextkvmx64
+		KernelTarget=bzImage
+		;;
+	GEMINILAKE)
+		KernelImage=${KernelDir}/arch/x86_64/boot/bzImage
+		KernelConfig=synoconfigs/geminilake
+		KernelTarget=bzImage
+		;;
 	*)
 		SkipThisProject
 		return
 		;;
 esac
 
-# Build kernel and modules
-rm -f ${KernelImage}
-rm -f ${ImageDir}/modules/*
 
-cp -f ${KernelConfig} .config
-mkdir -p include/linux/modules
-make oldconfig
+make_version()
+{
+    if [ -f "$VERSION_FILE" ]; then
+        expr $(GetDSMBuildNumber) - 1 > "$KernelDir/.version"
+    fi
 
-echo "===== Build Synology Linux kernel 4.4.x ====="
-make ${MAKE_FLAGS} ${KernelTarget} modules CC=${KERNEL_CC}
+    [ -f ".debug" ] || return
 
-# Check if kernel is built correctly
-if [ ! -f "${KernelImage}" ]; then
-	echo "Error! ${KernelImage} does not exist!"
-	exit 1;
-fi
+    local _protect_ver="$(dpkg -l | grep -w synoprotection | awk '{print $3}' | cut -d'-' -f2 | head -n1)"
+    local _dsm_ver="$(GetDSMBuildNumber)"
+    if [ -z "$_protect_ver" ]; then
+        WARNING "Unable to detect dpkg 'synoprotection'"
+        return
+    fi
+    if [ "$_dsm_ver" != "$_protect_ver" ]; then
+        WARNING "buildnumber in synoversion/VERSION doesn't match dpkg 'synoprotection'"
+        exit 1
+    fi
+}
 
-if [ ! -z "${MAKE_DTBS}" ]; then
-	echo "===== Build Synology device tree 4.4.x ====="
-	make dtbs DTC_FLAGS="${MAKE_DTC_FLAGS}";
-fi
+config_debug_mode()
+{
+    local _cfg=
+    local _enabled="
+        CONFIG_DEBUG_FS
+        CONFIG_PERF_EVENTS
 
-./scripts/syno_gen_usbmodem_table.sh create-table
-DVB_MODULES_DIR="scripts/DVB/4.4.x"
-if [ -d "$DVB_MODULES_DIR" ]; then
-	rm -rf ${DVB_MODULES_DIR}
-fi
+        CONFIG_DEBUG_INFO
+        CONFIG_FRAME_POINTER
 
-mkdir -p ${DVB_MODULES_DIR}
-find drivers/media -name '*.ko' -exec cp {} ${DVB_MODULES_DIR}/ \;
-cp drivers/base/regmap/regmap-i2c.ko ${DVB_MODULES_DIR};
-cd ./scripts/DVB/
-./generate_dependency_table.py 2>&1
-./generate_VIDPID_table.py 2>&1
-./generate_cleanuped_dependency_table.py 2>&1
-cd -
+        CONFIG_DEBUG_SPINLOCK
+        CONFIG_DEBUG_MUTEXES
+        CONFIG_DEBUG_ATOMIC_SLEEP
 
-# Compare kernel config with re-generated one to see
-# if any changes or new options not reapplied to ${KernelConfig}.
-ConfigDiff=`diff -bu ${KernelConfig} .config`
-if [ -z "$ConfigDiff" ]; then
-	echo
-	echo "Kernel config matches generated .config"
-	echo
-else
-	echo ========== diff -bu ${KernelConfig} .config
-	diff -bu ${KernelConfig} .config
-	echo ========== END of diff
+        CONFIG_FTRACE
+        CONFIG_BRANCH_PROFILE_NONE
+        CONFIG_FUNCTION_TRACER
+        CONFIG_FTRACE_SYSCALLS
+        CONFIG_IRQSOFF_TRACER
+        CONFIG_PREEMPT_TRACER
+        CONFIG_SCHED_TRACER
+        CONFIG_BLK_DEV_IO_TRACE
+        CONFIG_STACK_TRACER
+        CONFIG_UPROBE_EVENT
+        CONFIG_FUNCTION_PROFILER
 
-	echo
-	echo "!!! Diff EXISTS between ${KernelConfig} & generated .config"
-	echo "!!! Recheck before committing."
-	echo
-fi
+        CONFIG_KPROBES
+        CONFIG_BPF_SYSCALL
+    "
+    local _disabled="
+    "
+
+    for _cfg in $_enabled; do
+        INFO "Enable $_cfg"
+        ./scripts/config --enable $_cfg
+    done
+
+    for _cfg in $_disabled; do
+        INFO "Disable $_cfg"
+        ./scripts/config --disable $_cfg
+    done
+}
+
+build_kernel()
+{
+    mkdir -p "$ImageDir/modules"
+    mkdir -p "include/linux/modules"
+    rm -f "$KernelImage"
+    rm -f "$ImageDir/modules/"*
+
+    cp -f "$KernelConfig" .config
+    if [ -f ".debug" ]; then
+        INFO ".debug detected. Configured as debug mode."
+        config_debug_mode
+        make olddefconfig
+    else
+        make oldconfig
+    fi
+
+    INFO "Build Synology Linux kernel 4.4.x"
+    make $MAKE_FLAGS $KernelTarget modules CC=$KERNEL_CC
+
+    # Check if kernel is built correctly
+    if [ ! -f "$KernelImage" ]; then
+        WARNING "Error! $KernelImage does not exist!"
+        exit 1;
+    fi
+}
+
+build_device_tree()
+{
+    if [ ! -z "$MAKE_DTBS" ]; then
+        INFO "Build Synology device tree"
+        make dtbs DTC_FLAGS="$MAKE_DTC_FLAGS";
+    fi
+}
+
+build_usb_modem_table()
+{
+    INFO "Build USB modem table"
+    ./scripts/syno_gen_usbmodem_table.sh create-table
+}
+
+build_dvb_drivers()
+{
+    INFO "Build DVB drivers"
+
+    DVB_MODULES_DIR="scripts/DVB/4.4.x"
+    if [ -d "$DVB_MODULES_DIR" ]; then
+        rm -rf "$DVB_MODULES_DIR"
+    fi
+
+    mkdir -p "$DVB_MODULES_DIR"
+    find drivers/media -name '*.ko' -exec cp {} "$DVB_MODULES_DIR/" \;
+    cp drivers/base/regmap/regmap-i2c.ko "$DVB_MODULES_DIR";
+    cd ./scripts/DVB/
+    ./generate_dependency_table.py 2>&1
+    ./generate_VIDPID_table.py 2>&1
+    ./generate_cleanuped_dependency_table.py 2>&1
+    cd -
+}
+
+check_config()
+{
+    INFO "Compare kernel config with re-generated one"
+
+    ConfigDiff=`diff -bu $KernelConfig .config`
+    if [ -z "$ConfigDiff" ]; then
+        INFO "Kernel config matches generated .config"
+    else
+        WARNING "========== diff -bu $KernelConfig .config"
+        WARNING "$ConfigDiff"
+        WARNING "========== END of diff"
+        WARNING "There's difference between $KernelConfig & .config"
+        WARNING "Please reconfirm your modifications before committing."
+
+        # Build failed if not debug mode
+        [ -f ".debug" ] || WARNING "!!! Diff EXISTS"
+    fi
+}
+
+make_version
+build_kernel
+build_device_tree
+build_usb_modem_table
+build_dvb_drivers
+check_config
+

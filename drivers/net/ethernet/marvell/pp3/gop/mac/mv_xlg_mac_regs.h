@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -559,4 +555,3 @@ disclaimer.
 #define MV_XLG_EXTERNAL_INTERRUPT_LINK_CHANGE_MASK	(0x1 << MV_XLG_EXTERNAL_INTERRUPT_LINK_CHANGE_OFFS)
 
 #endif /* __mv_xlg_mac_regs_h__ */
-#endif /* MY_DEF_HERE */

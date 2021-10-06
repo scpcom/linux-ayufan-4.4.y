@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -59,5 +55,3 @@ int tm_sched_get_errors(tm_handle hndl, struct tm_error_info *info);
 int tm_drop_get_errors(tm_handle hndl, struct tm_error_info *info);
 
 #endif   /* TM_ERRORS_H */
-
-#endif /* MY_DEF_HERE */

@@ -1,6 +1,6 @@
 config MVPP3
 	tristate "Marvell Armada 390 network interface support"
-	depends on ARCH_MVEBU && SYNO_LSP_ARMADA_16_12
+	depends on ARCH_MVEBU
 	select MVMDIO
 	select MV_GNSS_SUPPORT
 	select MVEBU_ODMI
@@ -13,7 +13,7 @@ config MVPP3
 
 config MV_GNSS_SUPPORT
 	bool "Generic NSS network interfaces support"
-	depends on MVPP3 && SYNO_LSP_ARMADA_16_12
+	depends on MVPP3
 	default n
 	---help---
 	When defined add support for generic
@@ -23,7 +23,7 @@ config MV_GNSS_SUPPORT
 
 config MV_PP3_TM_SUPPORT
 	bool "Traffic Management (TM) configuration support"
-	depends on MVPP3 && SYNO_LSP_ARMADA_16_12
+	depends on MVPP3
 	default y
 	---help---
 	When defined add support for run-time configuration of Traffic Management
@@ -32,7 +32,7 @@ config MV_PP3_TM_SUPPORT
 	If unsure, say N.
 
 menu "BM configuration"
-	depends on MVPP3 && SYNO_LSP_ARMADA_16_12
+	depends on MVPP3
 
 config MV_PP3_BM_LINUX_POOL_CAPACITY
 	int "capacity of Linux (TxDone) BM pool"
@@ -64,7 +64,7 @@ config MV_PP3_BM_SHORT_BUF_SIZE
 endmenu
 
 menu "Rx/Tx Queue configuration"
-	depends on MVPP3 && SYNO_LSP_ARMADA_16_12
+	depends on MVPP3
 
 config  MV_PP3_RXQ_NUM
 	int "Number of RX VQs for NIC devices"
@@ -107,7 +107,7 @@ config MV_PP3_TXQ_SIZE
 endmenu
 
 menu "Control and Statistics"
-	depends on MVPP3 && SYNO_LSP_ARMADA_16_12
+	depends on MVPP3
 
 config  MV_PP3_DEBUG_CODE
 	bool "Add run-time debug code"
@@ -146,7 +146,7 @@ config  MV_PP3_STAT_DBG
 endmenu
 
 menu "Advanced Features"
-	depends on MVPP3 && SYNO_LSP_ARMADA_16_12
+	depends on MVPP3
 
 config MV_PP3_SKB_RECYCLE
 	depends on NET_SKB_RECYCLE

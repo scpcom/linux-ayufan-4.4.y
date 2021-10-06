@@ -24,10 +24,24 @@
 #include <linux/of.h>
 #include <linux/of_device.h>
 #include <linux/pinctrl/pinctrl.h>
+#if defined(MY_DEF_HERE)
+#include <linux/of_address.h>
+#include <linux/syscore_ops.h>
+#endif /* MY_DEF_HERE */
 
 #include "pinctrl-mvebu.h"
 
+#if defined(MY_DEF_HERE)
+#define EMMC_PHY_CTRL_SDPHY_EN	BIT(0)
+
+#endif /* MY_DEF_HERE */
 static void __iomem *mpp_base;
+#if defined(MY_DEF_HERE)
+static void __iomem *emmc_phy_ctrl_reg;
+
+/* Global list of devices (struct mvebu_pinctrl_soc_info) */
+static LIST_HEAD(drvdata_list);
+#endif /* MY_DEF_HERE */
 
 static int armada_ap806_mpp_ctrl_get(unsigned pid, unsigned long *config)
 {
@@ -36,6 +50,28 @@ static int armada_ap806_mpp_ctrl_get(unsigned pid, unsigned long *config)
 
 static int armada_ap806_mpp_ctrl_set(unsigned pid, unsigned long config)
 {
+#if defined(MY_DEF_HERE)
+	/* To enable SDIO/eMMC in Armada-APN806, need to configure PHY mux.
+	 * eMMC/SD PHY register responsible for muxing between MPPs and SD/eMMC
+	 * controller:
+	 * - Bit0 enabled SDIO/eMMC PHY is used as a MPP muxltiplexer,
+	 * - Bit0 disabled SDIO/eMMC PHY is connected to SDIO/eMMC controller
+	 * If pin function is set to eMMC/SD, then configure the eMMC/SD PHY
+	 * muxltiplexer register to be on SDIO/eMMC controller
+	 * If the MPP is configured to sdio, the pin0 as clk is mandatory,
+	 * to avoid config eMMC/SD PHY register repeatly, it is ok to set the
+	 * register only when MPP pin0(pid==0) is configured as "sdio"
+	 * (config == 0x1).
+	 */
+	if (emmc_phy_ctrl_reg && pid == 0 && config == 0x1) {
+		u32 reg;
+
+		reg = readl(emmc_phy_ctrl_reg);
+		reg &= ~EMMC_PHY_CTRL_SDPHY_EN;
+		writel(reg, emmc_phy_ctrl_reg);
+	}
+
+#endif /* MY_DEF_HERE */
 	return default_mpp_ctrl_set(mpp_base, pid, config);
 }
 
@@ -129,7 +165,12 @@ static int armada_ap806_pinctrl_probe(struct platform_device *pdev)
 	struct mvebu_pinctrl_soc_info *soc = &armada_ap806_pinctrl_info;
 	const struct of_device_id *match =
 		of_match_device(armada_ap806_pinctrl_of_match, &pdev->dev);
+#if defined(MY_DEF_HERE)
+	struct resource *res, *res_mmcio;
+	struct mvebu_pinctrl_pm_save *pm_save;
+#else /* MY_DEF_HERE */
 	struct resource *res;
+#endif /* MY_DEF_HERE */
 
 	if (!match)
 		return -ENODEV;
@@ -139,6 +180,21 @@ static int armada_ap806_pinctrl_probe(struct platform_device *pdev)
 	if (IS_ERR(mpp_base))
 		return PTR_ERR(mpp_base);
 
+#if defined(MY_DEF_HERE)
+	/* Get the eMMC PHY IO Control 0 Register base
+	 * Usage of this reg will be required in case MMC is enabled.
+	 */
+	res_mmcio = platform_get_resource_byname(pdev, IORESOURCE_MEM, "mmcio");
+	if (res_mmcio) {
+		emmc_phy_ctrl_reg = devm_ioremap_resource(&pdev->dev,
+							  res_mmcio);
+		if (IS_ERR(emmc_phy_ctrl_reg))
+			return PTR_ERR(emmc_phy_ctrl_reg);
+	} else {
+		dev_warn(&pdev->dev, "mmcio reg not present in DT\n");
+	}
+
+#endif /* MY_DEF_HERE */
 	soc->variant = 0; /* no variants for Armada AP806 */
 	soc->controls = armada_ap806_mpp_controls;
 	soc->ncontrols = ARRAY_SIZE(armada_ap806_mpp_controls);
@@ -147,8 +203,35 @@ static int armada_ap806_pinctrl_probe(struct platform_device *pdev)
 	soc->modes = armada_ap806_mpp_modes;
 	soc->nmodes = armada_ap806_mpp_controls[0].npins;
 
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_PM
+	pm_save = devm_kzalloc(&pdev->dev, sizeof(struct mvebu_pinctrl_pm_save),
+			       GFP_KERNEL);
+	if (!pm_save)
+		return -ENOMEM;
+
+	/* Allocate memory to save the register value before suspend.
+	 * Registers to save includes MPP control registers and eMMC PHY
+	 * IO Control register if eMMC is enabled.
+	 */
+	pm_save->length = resource_size(res);
+	pm_save->regs = (unsigned int *)devm_kzalloc(&pdev->dev,
+						     pm_save->length,
+						     GFP_KERNEL);
+	if (!pm_save->regs)
+		return -ENOMEM;
+
+	soc->pm_save = pm_save;
+#endif /* CONFIG_PM */
+
+#endif /* MY_DEF_HERE */
 	pdev->dev.platform_data = soc;
 
+#if defined(MY_DEF_HERE)
+	/* Add to the global list so we can implement S2R later */
+	list_add_tail(&soc->node, &drvdata_list);
+
+#endif /* MY_DEF_HERE */
 	return mvebu_pinctrl_probe(pdev);
 }
 
@@ -157,6 +240,55 @@ static int armada_ap806_pinctrl_remove(struct platform_device *pdev)
 	return mvebu_pinctrl_remove(pdev);
 }
 
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_PM
+/* armada_ap806_pinctrl_suspend - save registers for suspend */
+static int armada_ap806_pinctrl_suspend(void)
+{
+	struct mvebu_pinctrl_soc_info *soc;
+
+	list_for_each_entry(soc, &drvdata_list, node) {
+		unsigned int offset, i = 0;
+
+		for (offset = 0; offset < soc->pm_save->length;
+		     offset += sizeof(unsigned int))
+			soc->pm_save->regs[i++] = readl(mpp_base + offset);
+
+		if (emmc_phy_ctrl_reg)
+			soc->pm_save->emmc_phy_ctrl = readl(emmc_phy_ctrl_reg);
+	}
+
+	return 0;
+}
+
+/* armada_ap806_pinctrl_resume - restore pinctrl register for suspend */
+static void armada_ap806_pinctrl_resume(void)
+{
+	struct mvebu_pinctrl_soc_info *soc;
+
+	list_for_each_entry_reverse(soc, &drvdata_list, node) {
+		unsigned int offset, i = 0;
+
+		for (offset = 0; offset < soc->pm_save->length;
+		     offset += sizeof(unsigned int))
+			writel(soc->pm_save->regs[i++], mpp_base + offset);
+
+		if (emmc_phy_ctrl_reg)
+			writel(soc->pm_save->emmc_phy_ctrl, emmc_phy_ctrl_reg);
+	}
+}
+
+#else
+#define armada_ap806_pinctrl_suspend		NULL
+#define armada_ap806_pinctrl_resume		NULL
+#endif /* CONFIG_PM */
+
+static struct syscore_ops armada_ap806_pinctrl_syscore_ops = {
+	.suspend	= armada_ap806_pinctrl_suspend,
+	.resume		= armada_ap806_pinctrl_resume,
+};
+
+#endif /* MY_DEF_HERE */
 static struct platform_driver armada_ap806_pinctrl_driver = {
 	.driver = {
 		.name = "armada-ap806-pinctrl",
@@ -166,7 +298,29 @@ static struct platform_driver armada_ap806_pinctrl_driver = {
 	.remove = armada_ap806_pinctrl_remove,
 };
 
+#if defined(MY_DEF_HERE)
+static int __init armada_ap806_pinctrl_drv_register(void)
+{
+	/*
+	 * Register syscore ops for save/restore of registers across suspend.
+	 * It's important to ensure that this driver is running at an earlier
+	 * initcall level than any arch-specific init calls that install syscore
+	 * ops that turn off pad retention.
+	 */
+	register_syscore_ops(&armada_ap806_pinctrl_syscore_ops);
+
+	return platform_driver_register(&armada_ap806_pinctrl_driver);
+}
+postcore_initcall(armada_ap806_pinctrl_drv_register);
+
+static void __exit armada_ap806_pinctrl_drv_unregister(void)
+{
+	platform_driver_unregister(&armada_ap806_pinctrl_driver);
+}
+module_exit(armada_ap806_pinctrl_drv_unregister);
+#else /* MY_DEF_HERE */
 module_platform_driver(armada_ap806_pinctrl_driver);
+#endif /* MY_DEF_HERE */
 
 MODULE_AUTHOR("Thomas Petazzoni <thomas.petazzoni@free-electrons.com>");
 MODULE_DESCRIPTION("Marvell Armada ap806 pinctrl driver");

@@ -74,6 +74,9 @@ enum btrfs_send_cmd {
 #ifdef MY_ABC_HERE
 	BTRFS_SEND_C_SUBVOL_FLAG,
 #endif  
+#ifdef MY_ABC_HERE
+	BTRFS_SEND_C_FALLOCATE,
+#endif  
 	__BTRFS_SEND_C_MAX,
 };
 #define BTRFS_SEND_C_MAX (__BTRFS_SEND_C_MAX - 1)
@@ -114,9 +117,21 @@ enum {
 #ifdef MY_ABC_HERE
 	BTRFS_SEND_A_FLAG,
 #endif  
+#ifdef MY_ABC_HERE
+	BTRFS_SEND_A_FALLOCATE_FLAGS,
+#endif  
 	__BTRFS_SEND_A_MAX,
 };
 #define BTRFS_SEND_A_MAX (__BTRFS_SEND_A_MAX - 1)
+
+#ifdef MY_ABC_HERE
+#define BTRFS_SEND_A_FALLOCATE_FLAG_KEEP_SIZE   (1 << 0)
+#define BTRFS_SEND_A_FALLOCATE_FLAG_PUNCH_HOLE  (1 << 1)
+
+#define BTRFS_SEND_PUNCH_HOLE_FALLOC_FLAGS        \
+		(BTRFS_SEND_A_FALLOCATE_FLAG_KEEP_SIZE |  \
+		 BTRFS_SEND_A_FALLOCATE_FLAG_PUNCH_HOLE)
+#endif  
 
 #ifdef __KERNEL__
 long btrfs_ioctl_send(struct file *mnt_file, void __user *arg);

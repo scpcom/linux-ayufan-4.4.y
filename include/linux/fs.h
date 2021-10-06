@@ -185,7 +185,6 @@ enum bypass_synoacl_type {
 #define WRITE_FLUSH		(WRITE | REQ_SYNC | REQ_NOIDLE | REQ_FLUSH)
 #define WRITE_FUA		(WRITE | REQ_SYNC | REQ_NOIDLE | REQ_FUA)
 #define WRITE_FLUSH_FUA		(WRITE | REQ_SYNC | REQ_NOIDLE | REQ_FLUSH | REQ_FUA)
-#define WRITE_BG		(WRITE | REQ_NOIDLE | REQ_BG)
 
 #define ATTR_MODE	(1 << 0)
 #define ATTR_UID	(1 << 1)
@@ -1453,6 +1452,9 @@ struct inode_operations {
 #ifdef MY_ABC_HERE
 	int (*syno_set_crtime)(struct dentry *, struct timespec *);
 #endif  
+#ifdef MY_ABC_HERE
+	int (*syno_pattern_check)(struct inode *, struct page *, size_t offset, size_t bytes, int type);
+#endif  
 	int (*setattr) (struct dentry *, struct iattr *);
 	int (*getattr) (struct vfsmount *mnt, struct dentry *, struct kstat *);
 	int (*setxattr) (struct dentry *, const char *,const void *,size_t,int);
@@ -1748,6 +1750,9 @@ void deactivate_super(struct super_block *sb);
 void deactivate_locked_super(struct super_block *sb);
 int set_anon_super(struct super_block *s, void *data);
 int get_anon_bdev(dev_t *);
+#ifdef MY_ABC_HERE
+int get_anon_bdev_with_gfp(dev_t *p, gfp_t gfp_mask);
+#endif  
 void free_anon_bdev(dev_t);
 struct super_block *sget(struct file_system_type *type,
 			int (*test)(struct super_block *,void *),
@@ -2699,6 +2704,14 @@ static inline void inode_has_no_xattr(struct inode *inode)
 #define UNICODE_UTF8_BUFSIZE		8192
 int syno_utf8_strcmp(const u_int8_t *utf8str1,const u_int8_t *utf8str2,int len_utf8_str1, int len_utf8_str2, u_int16_t *upcasetable);
 int syno_utf8_toupper(u_int8_t *to,const u_int8_t *from, int maxlen, int clenfrom, u_int16_t *upcasetable);
+#endif  
+
+#ifdef MY_ABC_HERE
+enum syno_pattern_check_type {
+	SYNO_PATTERN_CHECK_CACHE_PAGES = 0,
+	SYNO_PATTERN_CHECK_BIO,
+};
+int syno_page_pattern_check(struct inode *, struct page *, size_t offset, size_t bytes, int type);
 #endif  
 
 static inline bool is_root_inode(struct inode *inode)

@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*
 * ***************************************************************************
 * Copyright (C) 2015 Marvell International Ltd.
@@ -233,4 +229,3 @@ Outputs:
 int mv_pp3_cfg_dp_hw_txq_get(int *hw_txq, int *hwq_num);
 
 #endif /* __mv_pp3_config_h__ */
-#endif /* MY_DEF_HERE */

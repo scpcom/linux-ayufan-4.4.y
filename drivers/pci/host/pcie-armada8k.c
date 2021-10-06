@@ -26,14 +26,27 @@
 #include <linux/resource.h>
 #include <linux/of_pci.h>
 #include <linux/of_irq.h>
+#if defined(MY_DEF_HERE)
+#include <dt-bindings/phy/phy-comphy-mvebu.h>
+#include <linux/of_gpio.h>
+#endif /* MY_DEF_HERE */
 
 #include "pcie-designware.h"
 
 struct armada8k_pcie {
 	void __iomem		*regs_base;
+#if defined(MY_DEF_HERE)
+	struct phy		**phys;
+	int			phy_count;
+#else /* MY_DEF_HERE */
 	struct phy		*phy;
+#endif /* MY_DEF_HERE */
 	struct clk		*clk;
 	struct pcie_port	pp;
+#if defined(MY_DEF_HERE)
+	struct gpio_desc	*reset_gpio;
+	enum of_gpio_flags	flags;
+#endif /* MY_DEF_HERE */
 };
 
 #define PCIE_GLOBAL_CONTROL             0x0
@@ -228,12 +241,40 @@ static int armada8k_add_pcie_port(struct pcie_port *pp,
 	return 0;
 }
 
+#if defined(MY_DEF_HERE)
+/* armada8k_pcie_reset
+ * The function implements the PCIe reset via GPIO.
+ * First, pull down the GPIO used for PCIe reset, and wait 200ms;
+ * Second, set the GPIO output value with setting from DTS, and wait
+ * 200ms for taking effect.
+ * Return: void, always success.
+ */
+static void armada8k_pcie_reset(struct armada8k_pcie *pcie)
+{
+	/* Set the reset gpio to low first */
+	gpiod_direction_output(pcie->reset_gpio, 0);
+	/* After 200ms to reset pcie */
+	mdelay(200);
+	gpiod_direction_output(pcie->reset_gpio,
+			       (pcie->flags & OF_GPIO_ACTIVE_LOW) ? 0 : 1);
+	mdelay(200);
+}
+
+#endif /* MY_DEF_HERE */
 static int armada8k_pcie_probe(struct platform_device *pdev)
 {
 	struct armada8k_pcie *armada8k_pcie;
 	struct pcie_port *pp;
+#if defined(MY_DEF_HERE)
+	struct phy **phys = NULL;
+#endif /* MY_DEF_HERE */
 	struct device *dev = &pdev->dev;
 	struct resource *base;
+#if defined(MY_DEF_HERE)
+	int i, reset_gpio, phy_count = 0;
+	u32 command;
+	char phy_name[16];
+#endif /* MY_DEF_HERE */
 	int ret = 0;
 
 	armada8k_pcie = devm_kzalloc(dev, sizeof(*armada8k_pcie), GFP_KERNEL);
@@ -246,6 +287,50 @@ static int armada8k_pcie_probe(struct platform_device *pdev)
 
 	clk_prepare_enable(armada8k_pcie->clk);
 
+#if defined(MY_DEF_HERE)
+	/* Get PHY count according to phy name */
+	phy_count = of_property_count_strings(pdev->dev.of_node, "phy-names");
+	if (phy_count > 0) {
+		phys = devm_kzalloc(dev, sizeof(*phys) * phy_count, GFP_KERNEL);
+		if (!phys)
+			return -ENOMEM;
+
+		for (i = 0; i < phy_count; i++) {
+			snprintf(phy_name, sizeof(phy_name), "pcie-phy%d", i);
+			phys[i] = devm_phy_get(dev, phy_name);
+			if (IS_ERR(phys[i]))
+				goto err_phy;
+
+			/* Tell COMPHY the PCIE width based on phy command,
+			 * and in PHY command callback, the width will be
+			 * checked for its validation.
+			 */
+			switch (phy_count) {
+			case PCIE_LNK_X1:
+				command = COMPHY_COMMAND_PCIE_WIDTH_1;
+				break;
+			case PCIE_LNK_X2:
+				command = COMPHY_COMMAND_PCIE_WIDTH_2;
+				break;
+			case PCIE_LNK_X4:
+				command = COMPHY_COMMAND_PCIE_WIDTH_4;
+				break;
+			default:
+				command = COMPHY_COMMAND_PCIE_WIDTH_UNSUPPORT;
+			}
+			phy_send_command(phys[i], command);
+
+			ret = phy_init(phys[i]);
+			if (ret < 0)
+				goto err_phy;
+
+			ret = phy_power_on(phys[i]);
+			if (ret < 0) {
+				phy_exit(phys[i]);
+				goto err_phy;
+			}
+		}
+#else /* MY_DEF_HERE */
 #if 0
 	/* Keep this code commented out till we write a PHY driver for
 	** armada-8k PCIe PHY. */
@@ -258,14 +343,33 @@ static int armada8k_pcie_probe(struct platform_device *pdev)
 			dev_err(dev, "couldn't get pcie-phy\n");
 
 		goto fail_free;
-	}
-
 	phy_init(armada8k_pcie->phy);
 #endif
+#endif /* MY_DEF_HERE */
+	}
+
+#if defined(MY_DEF_HERE)
+	/* Config reset gpio for pcie if the reset connected to gpio */
+	reset_gpio = of_get_named_gpio_flags(pdev->dev.of_node,
+					     "reset-gpios", 0,
+					     &armada8k_pcie->flags);
+	if (gpio_is_valid(reset_gpio)) {
+		armada8k_pcie->reset_gpio = gpio_to_desc(reset_gpio);
+		armada8k_pcie_reset(armada8k_pcie);
+	}
+#endif /* MY_DEF_HERE */
 
 	pp = &armada8k_pcie->pp;
+#if defined(MY_DEF_HERE)
+//do nothing
+#else /* MY_DEF_HERE */
 
+#endif /* MY_DEF_HERE */
 	pp->dev = dev;
+#if defined(MY_DEF_HERE)
+	armada8k_pcie->phys = phys;
+	armada8k_pcie->phy_count = phy_count;
+#endif /* MY_DEF_HERE */
 	platform_set_drvdata(pdev, armada8k_pcie);
 
 	/* Get the dw-pcie unit configuration/control registers base. */
@@ -283,9 +387,21 @@ static int armada8k_pcie_probe(struct platform_device *pdev)
 	ret = armada8k_add_pcie_port(pp, pdev);
 	if (ret < 0)
 		goto fail_free;
+#if defined(MY_DEF_HERE)
+//do nothing
+#else /* MY_DEF_HERE */
 
+#endif /* MY_DEF_HERE */
 	return 0;
 
+#if defined(MY_DEF_HERE)
+err_phy:
+	while (--i >= 0) {
+		phy_power_off(phys[i]);
+		phy_exit(phys[i]);
+	}
+
+#endif /* MY_DEF_HERE */
 fail_free:
 	if (!IS_ERR(armada8k_pcie->clk))
 		clk_disable_unprepare(armada8k_pcie->clk);
@@ -293,6 +409,103 @@ fail_free:
 	return ret;
 }
 
+#if defined(MY_DEF_HERE)
+static int armada8k_pcie_suspend_noirq(struct device *dev)
+{
+	int i;
+	struct armada8k_pcie *pcie;
+
+	pcie = dev_get_drvdata(dev);
+
+	/* Gating clock */
+	if (!IS_ERR(pcie->clk))
+		clk_disable_unprepare(pcie->clk);
+
+	/* Power off PHY */
+	for (i = 0; i < pcie->phy_count; i++) {
+		if (pcie->phys[i]) {
+			phy_power_off(pcie->phys[i]);
+			phy_exit(pcie->phys[i]);
+		}
+	}
+
+	return 0;
+}
+
+static int armada8k_pcie_resume_noirq(struct device *dev)
+{
+	struct armada8k_pcie *pcie;
+	int i, ret;
+
+	pcie = dev_get_drvdata(dev);
+
+	if (!IS_ERR(pcie->clk)) {
+		ret = clk_prepare_enable(pcie->clk);
+		if (ret) {
+			dev_err(dev, "Failed to enable clock\n");
+			return ret;
+		}
+	}
+
+	/* Power on PHY */
+	for (i = 0; i < pcie->phy_count; i++) {
+		if (pcie->phys[i]) {
+			u32 command;
+			/* Tell COMPHY the PCIE width based on phy command,
+			 * and in PHY command callback, the width will be
+			 * checked for its validation.
+			 */
+			switch (pcie->phy_count) {
+			case PCIE_LNK_X1:
+				command = COMPHY_COMMAND_PCIE_WIDTH_1;
+				break;
+			case PCIE_LNK_X2:
+				command = COMPHY_COMMAND_PCIE_WIDTH_2;
+				break;
+			case PCIE_LNK_X4:
+				command = COMPHY_COMMAND_PCIE_WIDTH_4;
+				break;
+			default:
+				command = COMPHY_COMMAND_PCIE_WIDTH_UNSUPPORT;
+			}
+			phy_send_command(pcie->phys[i], command);
+
+			ret = phy_init(pcie->phys[i]);
+			if (ret < 0)
+				goto err_phy;
+			ret = phy_power_on(pcie->phys[i]);
+			if (ret < 0) {
+				phy_exit(pcie->phys[i]);
+				goto err_phy;
+			}
+		}
+	}
+
+	/* Reset PCIe if it is connected to GPIO */
+	if (pcie->reset_gpio)
+		armada8k_pcie_reset(pcie);
+
+	/* Reinit PCIE host */
+	armada8k_pcie_host_init(&pcie->pp);
+	return 0;
+
+err_phy:
+	while (--i >= 0) {
+		phy_power_off(pcie->phys[i]);
+		phy_exit(pcie->phys[i]);
+	}
+	if (!IS_ERR(pcie->clk))
+		clk_disable_unprepare(pcie->clk);
+
+	return ret;
+}
+
+static const struct dev_pm_ops armada8k_pcie_pm_ops = {
+	.suspend_noirq = armada8k_pcie_suspend_noirq,
+	.resume_noirq = armada8k_pcie_resume_noirq,
+};
+
+#endif /* MY_DEF_HERE */
 static const struct of_device_id armada8k_pcie_of_match[] = {
 	{ .compatible = "marvell,armada8k-pcie", },
 	{},
@@ -304,6 +517,9 @@ static struct platform_driver armada8k_pcie_driver = {
 	.driver = {
 		.name	= "armada8k-pcie",
 		.of_match_table = of_match_ptr(armada8k_pcie_of_match),
+#if defined(MY_DEF_HERE)
+		.pm	= &armada8k_pcie_pm_ops,
+#endif /* MY_DEF_HERE */
 	},
 };
 

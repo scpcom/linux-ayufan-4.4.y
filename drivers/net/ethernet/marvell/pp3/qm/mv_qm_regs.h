@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -946,5 +942,3 @@ void  qm_reg_size_alias_init(void);
 void qm_reg_offset_alias_init(void);
 
 #endif   /* __mv_qm_regs_h__ */
-
-#endif /* MY_DEF_HERE */

@@ -287,8 +287,15 @@ static int armada_3700_avs_probe(struct platform_device *pdev)
 
 	max_cpu_clk = devm_clk_get(&pdev->dev, NULL);
 	if (IS_ERR(max_cpu_clk)) {
+#if defined(MY_DEF_HERE)
+		dev_err(&pdev->dev,
+			"error getting max cpu frequency, try again later\n");
+		/* Try probe again after A3700 clock driver loaded */
+		ret = -EPROBE_DEFER;
+#else /* MY_DEF_HERE */
 		dev_err(&pdev->dev, "error getting max cpu frequency\n");
 		ret = PTR_ERR(max_cpu_clk);
+#endif /* MY_DEF_HERE */
 		goto err_put_node;
 	}
 	max_cpu_freq = clk_get_rate(max_cpu_clk) / MHZ_TO_HZ;

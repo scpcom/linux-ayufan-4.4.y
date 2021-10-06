@@ -139,9 +139,13 @@
 
 #define XENON_SLOT_EMMC_CTRL			0x0130
 #define XENON_ENABLE_DATA_STROBE		BIT(24)
+#if defined(MY_DEF_HERE)
+//do nothing
+#else /* MY_DEF_HERE */
 #define XENON_EMMC_VCCQ_MASK			0x3
 #define XENON_EMMC_VCCQ_1_8V			0x1
 #define XENON_EMMC_VCCQ_3_3V			0x3
+#endif /* MY_DEF_HERE */
 #else /* MY_DEF_HERE */
 #define SDHCI_TUN_CONSECUTIVE_TIMES_SHIFT	16
 #define SDHCI_TUN_CONSECUTIVE_TIMES_MASK	0x7
@@ -224,9 +228,17 @@
 #define SDHCI_XENON_CTRL_HS400			0x6
 #endif /* MY_DEF_HERE */
 
-/* Indicate Card Type is not clear yet */
 #if defined(MY_DEF_HERE)
+//do nothing
+#else /* MY_DEF_HERE */
+/* Indicate Card Type is not clear yet */
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
+//do nothing
+#else /* MY_DEF_HERE */
 #define XENON_CARD_TYPE_UNKNOWN			0xF
+#endif /* MY_DEF_HERE */
 #else /* MY_DEF_HERE */
 #define SDHCI_CARD_TYPE_UNKNOWN			0xF
 #endif /* MY_DEF_HERE */
@@ -235,20 +247,34 @@
 #define	XENON_SDHCI_CTRL_HS400			0x6
 #endif /* MY_DEF_HERE */
 
+#if defined(MY_DEF_HERE)
+struct xenon_priv {
+#else /* MY_DEF_HERE */
 struct sdhci_xenon_priv {
+#endif /* MY_DEF_HERE */
 #if defined(MY_DEF_HERE)
 	unsigned char	tuning_count;
 	/* idx of SDHC */
 	u8		sdhc_id;
 
 	/*
+#if defined(MY_DEF_HERE)
+	 * eMMC/SD/SDIO require different register settings.
+	 * Xenon driver has to recognize card type
+	 * before mmc_host->card is not available.
+#else /* MY_DEF_HERE */
 	 * eMMC/SD/SDIO require different PHY settings or
 	 * voltage control. It's necessary for Xenon driver to
 	 * recognize card type during, or even before initialization.
 	 * However, mmc_host->card is not available yet at that time.
+#endif /* MY_DEF_HERE */
 	 * This field records the card type during init.
+#if defined(MY_DEF_HERE)
+	 * It is updated in xenon_init_card().
+#else /* MY_DEF_HERE */
 	 * For eMMC, it is updated in dt parse. For SD/SDIO, it is
 	 * updated in xenon_init_card().
+#endif /* MY_DEF_HERE */
 	 *
 	 * It is only valid during initialization after it is updated.
 	 * Do not access this variable in normal transfers after

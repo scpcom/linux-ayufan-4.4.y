@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -331,5 +327,3 @@ void mv_field_set(int offs, int bits, unsigned int *entry,  unsigned int val)
 	/* set new field */
 	entry[word] |= (val << offs_in_word);
 }
-
-#endif /* MY_DEF_HERE */

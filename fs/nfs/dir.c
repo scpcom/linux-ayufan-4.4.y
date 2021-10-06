@@ -711,6 +711,8 @@ void cache_page_release(nfs_readdir_descriptor_t *desc)
 	desc->page = NULL;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
 static
 struct page *get_cache_page(nfs_readdir_descriptor_t *desc)
 {
@@ -719,6 +721,7 @@ struct page *get_cache_page(nfs_readdir_descriptor_t *desc)
 	return read_cache_page(file_inode(desc->file)->i_mapping,
 			desc->page_index, (filler_t *)nfs_readdir_filler, desc);
 }
+#pragma GCC diagnostic pop
 
 /*
  * Returns 0 if desc->dir_cookie was found on page desc->page_index

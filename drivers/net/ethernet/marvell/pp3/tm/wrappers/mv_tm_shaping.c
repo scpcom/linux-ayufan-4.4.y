@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -153,4 +149,3 @@ int mv_tm_get_shaping_full_info(enum mv_tm_level level, uint32_t index,
 	TM_WRAPPER_END(qmtm_hndl);
 }
 EXPORT_SYMBOL(mv_tm_get_shaping_full_info);
-#endif /* MY_DEF_HERE */

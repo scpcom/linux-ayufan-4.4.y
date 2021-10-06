@@ -24,7 +24,6 @@
 #include <linux/ratelimit.h>
 #include <linux/pm_runtime.h>
 #include <linux/blk-cgroup.h>
-#include <linux/wbt.h>
 
 #define CREATE_TRACE_POINTS
 #include <trace/events/block.h>
@@ -307,6 +306,16 @@ static void __blk_drain_queue(struct request_queue *q, bool drain_all)
 	}
 }
 
+#ifdef MY_ABC_HERE
+ 
+void blk_drain_queue(struct request_queue *q)
+{
+	spin_lock_irq(q->queue_lock);
+	__blk_drain_queue(q, true);
+	spin_unlock_irq(q->queue_lock);
+}
+#endif  
+
 void blk_queue_bypass_start(struct request_queue *q)
 {
 	spin_lock_irq(q->queue_lock);
@@ -374,8 +383,11 @@ void blk_cleanup_queue(struct request_queue *q)
 
 	blk_freeze_queue(q);
 	spin_lock_irq(lock);
+#ifdef MY_ABC_HERE
+#else  
 	if (!q->mq_ops)
 		__blk_drain_queue(q, true);
+#endif  
 	queue_flag_set(QUEUE_FLAG_DEAD, q);
 	spin_unlock_irq(lock);
 
@@ -444,7 +456,7 @@ struct request_queue *blk_alloc_queue(gfp_t gfp_mask)
 }
 EXPORT_SYMBOL(blk_alloc_queue);
 
-int blk_queue_enter(struct request_queue *q, gfp_t gfp)
+int blk_queue_enter(struct request_queue *q, bool nowait)
 {
 	while (true) {
 		int ret;
@@ -452,7 +464,7 @@ int blk_queue_enter(struct request_queue *q, gfp_t gfp)
 		if (percpu_ref_tryget_live(&q->q_usage_counter))
 			return 0;
 
-		if (!gfpflags_allow_blocking(gfp))
+		if (nowait)
 			return -EBUSY;
 
 		ret = wait_event_interruptible(q->mq_freeze_wq,
@@ -476,6 +488,13 @@ static void blk_queue_usage_counter_release(struct percpu_ref *ref)
 		container_of(ref, struct request_queue, q_usage_counter);
 
 	wake_up_all(&q->mq_freeze_wq);
+}
+
+static void blk_rq_timed_out_timer(unsigned long data)
+{
+	struct request_queue *q = (struct request_queue *)data;
+
+	kblockd_schedule_work(&q->timeout_work);
 }
 
 struct request_queue *blk_alloc_queue_node(gfp_t gfp_mask, int node_id)
@@ -592,6 +611,7 @@ blk_init_allocated_queue(struct request_queue *q, request_fn_proc *rfn,
 	if (blk_init_rl(&q->root_rl, q, GFP_KERNEL))
 		goto fail;
 
+	INIT_WORK(&q->timeout_work, blk_timeout_work);
 	q->request_fn		= rfn;
 	q->prep_rq_fn		= NULL;
 	q->unprep_rq_fn		= NULL;
@@ -617,8 +637,6 @@ blk_init_allocated_queue(struct request_queue *q, request_fn_proc *rfn,
 
 fail:
 	blk_free_flush_queue(q->fq);
-	wbt_exit(q->rq_wb);
-	q->rq_wb = NULL;
 	return NULL;
 }
 EXPORT_SYMBOL(blk_init_allocated_queue);
@@ -919,7 +937,9 @@ static struct request *blk_old_get_request(struct request_queue *q, int rw,
 struct request *blk_get_request(struct request_queue *q, int rw, gfp_t gfp_mask)
 {
 	if (q->mq_ops)
-		return blk_mq_alloc_request(q, rw, gfp_mask, false);
+		return blk_mq_alloc_request(q, rw,
+			(gfp_mask & __GFP_DIRECT_RECLAIM) ?
+				0 : BLK_MQ_REQ_NOWAIT);
 	else
 		return blk_old_get_request(q, rw, gfp_mask);
 }
@@ -966,7 +986,6 @@ void blk_requeue_request(struct request_queue *q, struct request *rq)
 	blk_delete_timer(rq);
 	blk_clear_rq_complete(rq);
 	trace_block_rq_requeue(q, rq);
-	wbt_requeue(q->rq_wb, &rq->wb_stat);
 
 	if (rq->cmd_flags & REQ_QUEUED)
 		blk_queue_end_tag(q, rq);
@@ -1036,8 +1055,6 @@ void __blk_put_request(struct request_queue *q, struct request *req)
 	elv_completed_request(q, req);
 
 	WARN_ON(req->bio != NULL);
-
-	wbt_done(q->rq_wb, &req->wb_stat);
 
 	if (req->cmd_flags & REQ_ALLOCED) {
 		unsigned int flags = req->cmd_flags;
@@ -1225,7 +1242,6 @@ static blk_qc_t blk_queue_bio(struct request_queue *q, struct bio *bio)
 	int el_ret, rw_flags, where = ELEVATOR_INSERT_SORT;
 	struct request *req;
 	unsigned int request_count = 0;
-	unsigned int wb_acct;
 
 	blk_queue_bounce(q, &bio);
 
@@ -1269,21 +1285,17 @@ static blk_qc_t blk_queue_bio(struct request_queue *q, struct bio *bio)
 	}
 
 get_rq:
-	wb_acct = wbt_wait(q->rq_wb, bio->bi_rw, q->queue_lock);
-
+	 
 	rw_flags = bio_data_dir(bio);
 	if (sync)
 		rw_flags |= REQ_SYNC;
 
 	req = get_request(q, rw_flags, bio, GFP_NOIO);
 	if (IS_ERR(req)) {
-		__wbt_done(q->rq_wb, wb_acct);
 		bio->bi_error = PTR_ERR(req);
 		bio_endio(bio);
 		goto out_unlock;
 	}
-
-	wbt_track(&req->wb_stat, wb_acct);
 
 	init_request_from_bio(req, bio);
 
@@ -1438,8 +1450,7 @@ generic_make_request_checks(struct bio *bio)
 	if (bio_check_eod(bio, nr_sectors))
 		goto end_io;
 
-	if ((bio->bi_rw & (REQ_FLUSH | REQ_FUA)) &&
-	    !test_bit(QUEUE_FLAG_WC, &q->queue_flags)) {
+	if ((bio->bi_rw & (REQ_FLUSH | REQ_FUA)) && !q->flush_flags) {
 		bio->bi_rw &= ~(REQ_FLUSH | REQ_FUA);
 		if (!nr_sectors) {
 			err = 0;
@@ -1492,7 +1503,7 @@ blk_qc_t generic_make_request(struct bio *bio)
 	do {
 		struct request_queue *q = bdev_get_queue(bio->bi_bdev);
 
-		if (likely(blk_queue_enter(q, __GFP_DIRECT_RECLAIM) == 0)) {
+		if (likely(blk_queue_enter(q, false) == 0)) {
 
 			ret = q->make_request_fn(q, bio);
 
@@ -1798,8 +1809,6 @@ void blk_start_request(struct request *req)
 {
 	blk_dequeue_request(req);
 
-	wbt_issue(req->q->rq_wb, &req->wb_stat);
-
 	req->resid_len = blk_rq_bytes(req);
 	if (unlikely(blk_bidi_rq(req)))
 		req->next_rq->resid_len = blk_rq_bytes(req->next_rq);
@@ -1829,8 +1838,6 @@ bool blk_update_request(struct request *req, int error, unsigned int nr_bytes)
 #endif  
 
 	trace_block_rq_complete(req->q, req, nr_bytes);
-
-	blk_stat_add(&req->q->rq_stats[rq_data_dir(req)], req);
 
 	if (!req->bio)
 		return false;
@@ -1978,10 +1985,9 @@ void blk_finish_request(struct request *req, int error)
 
 	blk_account_io_done(req);
 
-	if (req->end_io) {
-		wbt_done(req->q->rq_wb, &req->wb_stat);
+	if (req->end_io)
 		req->end_io(req, error);
-	} else {
+	else {
 		if (blk_bidi_rq(req))
 			__blk_put_request(req->next_rq->q, req->next_rq);
 

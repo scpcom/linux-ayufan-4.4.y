@@ -24,6 +24,11 @@
 #include <linux/mmc/card.h>
 #include <linux/mmc/pm.h>
 
+#ifdef MY_DEF_HERE
+//=====jim add=====
+//#include <linux/wakelock.h>
+//=================
+#endif /* MY_DEF_HERE */
 struct mmc_ios {
 	unsigned int	clock;			/* clock rate */
 	unsigned short	vdd;
@@ -352,6 +357,13 @@ struct mmc_host {
 
 	const struct mmc_bus_ops *bus_ops;	/* current bus driver */
 	unsigned int		bus_refs;	/* reference counter */
+#ifdef MY_DEF_HERE
+        //==========jim added==============
+        unsigned int            bus_resume_flags;
+        #define MMC_BUSRESUME_MANUAL_RESUME     (1 << 0)
+        #define MMC_BUSRESUME_NEEDS_RESUME      (1 << 1)
+        //=================================
+#endif /* MY_DEF_HERE */
 
 	unsigned int		sdio_irqs;
 	struct task_struct	*sdio_irq_thread;
@@ -402,6 +414,13 @@ static inline void *mmc_priv(struct mmc_host *host)
 #define mmc_dev(x)	((x)->parent)
 #define mmc_classdev(x)	(&(x)->class_dev)
 #define mmc_hostname(x)	(dev_name(&(x)->class_dev))
+
+#ifdef MY_DEF_HERE
+#define mmc_bus_needs_resume(host) ((host)->bus_resume_flags & MMC_BUSRESUME_NEEDS_RESUME)
+#define mmc_bus_manual_resume(host) ((host)->bus_resume_flags & MMC_BUSRESUME_MANUAL_RESUME)
+int mmc_suspend_host(struct mmc_host *);
+int mmc_resume_host(struct mmc_host *);
+#endif /* MY_DEF_HERE */
 
 int mmc_power_save_host(struct mmc_host *host);
 int mmc_power_restore_host(struct mmc_host *host);

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (c) 2007 Patrick McHardy <kaber@trash.net>
  *
@@ -940,6 +943,15 @@ static void macvlan_ethtool_get_drvinfo(struct net_device *dev,
 	strlcpy(drvinfo->version, "0.1", sizeof(drvinfo->version));
 }
 
+#if defined(MY_ABC_HERE)
+static int macvlan_ethtool_get_link_ksettings(struct net_device *dev,
+					      struct ethtool_link_ksettings *cmd)
+{
+	const struct macvlan_dev *vlan = netdev_priv(dev);
+
+	return __ethtool_get_link_ksettings(vlan->lowerdev, cmd);
+}
+#else /* MY_ABC_HERE */
 static int macvlan_ethtool_get_settings(struct net_device *dev,
 					struct ethtool_cmd *cmd)
 {
@@ -947,6 +959,7 @@ static int macvlan_ethtool_get_settings(struct net_device *dev,
 
 	return __ethtool_get_settings(vlan->lowerdev, cmd);
 }
+#endif /* MY_ABC_HERE */
 
 static netdev_features_t macvlan_fix_features(struct net_device *dev,
 					      netdev_features_t features)
@@ -1020,7 +1033,11 @@ static int macvlan_dev_get_iflink(const struct net_device *dev)
 
 static const struct ethtool_ops macvlan_ethtool_ops = {
 	.get_link		= ethtool_op_get_link,
+#if defined(MY_ABC_HERE)
+	.get_link_ksettings	= macvlan_ethtool_get_link_ksettings,
+#else /* MY_ABC_HERE */
 	.get_settings		= macvlan_ethtool_get_settings,
+#endif /* MY_ABC_HERE */
 	.get_drvinfo		= macvlan_ethtool_get_drvinfo,
 };
 

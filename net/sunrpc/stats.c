@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * linux/net/sunrpc/stats.c
  *
@@ -273,6 +276,15 @@ svc_proc_register(struct net *net, struct svc_stat *statp, const struct file_ope
 	return do_register(net, statp->program->pg_name, statp, fops);
 }
 EXPORT_SYMBOL_GPL(svc_proc_register);
+
+#ifdef MY_ABC_HERE
+struct proc_dir_entry *
+svc_proc_register_name(struct net *net, const char *name, struct svc_stat *statp, const struct file_operations *fops)
+{
+	return do_register(net, name, statp, fops);
+}
+EXPORT_SYMBOL(svc_proc_register_name);
+#endif /* MY_ABC_HERE */
 
 void
 svc_proc_unregister(struct net *net, const char *name)

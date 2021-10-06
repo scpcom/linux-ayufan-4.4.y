@@ -370,7 +370,7 @@ extern int sata_syno_ahci_defer_cmd(struct ata_queued_cmd *qc);
 extern int ahci_syno_pmp_3x26_qc_defer(struct ata_queued_cmd *qc);
 #endif  
 
-#ifdef MY_ABC_HERE
+#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 extern struct ata_device *ata_scsi_find_dev(struct ata_port *ap,
                                             const struct scsi_device *scsidev);
 #endif  

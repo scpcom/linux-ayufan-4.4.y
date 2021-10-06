@@ -94,6 +94,13 @@ struct mvebu_mpp_mode {
 
 /**
  * struct mvebu_pinctrl_soc_info - SoC specific info passed to pinctrl-mvebu
+ */
+#if defined(MY_DEF_HERE)
+/* 
+ * @node: global list node
+ */
+#endif /* MY_DEF_HERE */
+/*
  * @variant: variant mask of soc_info
  * @controls: list of available mvebu_mpp_ctrls
  * @ncontrols: number of available mvebu_mpp_ctrls
@@ -101,12 +108,21 @@ struct mvebu_mpp_mode {
  * @nmodes: number of available mvebu_mpp_modes
  * @gpioranges: list of pinctrl_gpio_ranges
  * @ngpioranges: number of available pinctrl_gpio_ranges
- *
+ */
+#if defined(MY_DEF_HERE)
+/*
+ * @pm_save: saved register values during suspend
+ */
+#endif /* MY_DEF_HERE */
+/*
  * This struct describes all pinctrl related information for a specific SoC.
  * If variant is unequal 0 it will be matched (AND) with variant of each
  * setting and allows to distinguish between different revisions of one SoC.
  */
 struct mvebu_pinctrl_soc_info {
+#if defined(MY_DEF_HERE)
+	struct list_head node;
+#endif /* MY_DEF_HERE */
 	u8 variant;
 	struct mvebu_mpp_ctrl *controls;
 	int ncontrols;
@@ -114,6 +130,21 @@ struct mvebu_pinctrl_soc_info {
 	int nmodes;
 	struct pinctrl_gpio_range *gpioranges;
 	int ngpioranges;
+#if defined(MY_DEF_HERE)
+	struct mvebu_pinctrl_pm_save *pm_save;
+};
+
+/**
+ * struct mvebu_pinctrl_pm_save - pinctrl register save when PM
+ * @regs: to save register value when suspend
+ * @length: inidcates register space length to save
+ * @emmc_phy_ctrl: used to save eMMC PHY IO Control register if eMMC is valid
+ */
+struct mvebu_pinctrl_pm_save {
+	unsigned int *regs;
+	unsigned int length;
+	unsigned int emmc_phy_ctrl;
+#endif /* MY_DEF_HERE */
 };
 
 #define MPP_FUNC_CTRL(_idl, _idh, _name, _func)			\

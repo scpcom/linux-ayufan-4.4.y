@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /******************************************************************************
 *Copyright (C) Marvell International Ltd. and its affiliates
 *
@@ -81,4 +77,3 @@ struct mv_pp3_port_data {
 #define MV_PP3_PORT_DATA_F_NSS		BIT(MV_PP3_PORT_DATA_F_NSS_BIT)
 
 #endif  /* LINUX_MV_PP3_H */
-#endif /* MY_DEF_HERE */

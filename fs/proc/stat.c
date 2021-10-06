@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/cpumask.h>
 #include <linux/fs.h>
 #include <linux/init.h>
@@ -80,19 +83,31 @@ static u64 get_iowait_time(int cpu)
 static int show_stat(struct seq_file *p, void *v)
 {
 	int i, j;
+#if defined(MY_DEF_HERE)
+//do nothing
+#else /* MY_DEF_HERE */
 	unsigned long jif;
+#endif /* MY_DEF_HERE */
 	u64 user, nice, system, idle, iowait, irq, softirq, steal;
 	u64 guest, guest_nice;
 	u64 sum = 0;
 	u64 sum_softirq = 0;
 	unsigned int per_softirq_sums[NR_SOFTIRQS] = {0};
+#if defined(MY_DEF_HERE)
+	struct timespec64 boottime;
+#else /* MY_DEF_HERE */
 	struct timespec boottime;
+#endif /* MY_DEF_HERE */
 
 	user = nice = system = idle = iowait =
 		irq = softirq = steal = 0;
 	guest = guest_nice = 0;
+#if defined(MY_DEF_HERE)
+	getboottime64(&boottime);
+#else /* MY_DEF_HERE */
 	getboottime(&boottime);
 	jif = boottime.tv_sec;
+#endif /* MY_DEF_HERE */
 
 	for_each_possible_cpu(i) {
 		user += kcpustat_cpu(i).cpustat[CPUTIME_USER];
@@ -163,12 +178,20 @@ static int show_stat(struct seq_file *p, void *v)
 
 	seq_printf(p,
 		"\nctxt %llu\n"
+#if defined(MY_DEF_HERE)
+		"btime %llu\n"
+#else /* MY_DEF_HERE */
 		"btime %lu\n"
+#endif /* MY_DEF_HERE */
 		"processes %lu\n"
 		"procs_running %lu\n"
 		"procs_blocked %lu\n",
 		nr_context_switches(),
+#if defined(MY_DEF_HERE)
+		(unsigned long long)boottime.tv_sec,
+#else /* MY_DEF_HERE */
 		(unsigned long)jif,
+#endif /* MY_DEF_HERE */
 		total_forks,
 		nr_running(),
 		nr_iowait());

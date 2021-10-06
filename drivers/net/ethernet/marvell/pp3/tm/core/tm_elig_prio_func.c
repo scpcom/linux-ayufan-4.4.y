@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -565,4 +561,3 @@ int is_node_elig_fun_uses_shaper(struct tm_elig_prio_func_node *node_func_table,
 
 /**
  */
-#endif /* MY_DEF_HERE */

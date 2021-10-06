@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -708,4 +704,3 @@ int mv_gmac_port_autoneg_restart(int mac_num)
 	mv_gop_reg_write(MV_GMAC_PORT_AUTO_NEG_CFG_REG(mac_num), reg_val);
 	return 0;
 }
-#endif /* MY_DEF_HERE */

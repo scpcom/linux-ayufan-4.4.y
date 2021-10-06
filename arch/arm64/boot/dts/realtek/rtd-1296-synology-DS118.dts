@@ -72,6 +72,11 @@
 		status = "disabled";
 	};
 
+	pcie2@9803B000 {
+		compatible = "Realtek,rtd1295-pcie-slot2";
+		status = "disabled";
+	};
+
 	sata@9803F000 {
 		compatible = "Realtek,ahci-sata";
 		tx-driving = <10>;

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * linux/include/linux/sunrpc/svc_xprt.h
  *
@@ -84,6 +87,9 @@ struct svc_xprt {
 
 	struct net		*xpt_net;
 	struct rpc_xprt		*xpt_bc_xprt;	/* NFSv4.1 backchannel */
+#ifdef MY_ABC_HERE
+	ktime_t			xpt_eqtime;	/* enqueue time */
+#endif
 };
 
 static inline void unregister_xpt_user(struct svc_xprt *xpt, struct svc_xpt_user *u)

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * linux/net/sunrpc/svc_xprt.c
  *
@@ -340,6 +343,9 @@ void svc_xprt_do_enqueue(struct svc_xprt *xprt)
 		goto out;
 	}
 
+#ifdef MY_ABC_HERE
+	xprt->xpt_eqtime = ktime_get();
+#endif
 	cpu = get_cpu();
 	pool = svc_pool_for_cpu(xprt->xpt_server, cpu);
 
@@ -818,6 +824,9 @@ int svc_recv(struct svc_rqst *rqstp, long timeout)
 		goto out;
 	}
 
+#ifdef MY_ABC_HERE
+	rqstp->rq_stime = xprt->xpt_eqtime;
+#endif
 	len = svc_handle_xprt(rqstp, xprt);
 
 	/* No data, incomplete (TCP) read, or accept() */
@@ -886,6 +895,10 @@ int svc_send(struct svc_rqst *rqstp)
 		len = -ENOTCONN;
 	else
 		len = xprt->xpt_ops->xpo_sendto(rqstp);
+#ifdef MY_ABC_HERE
+	if (rqstp->rq_procinfo)
+		svc_update_lat(&rqstp->rq_procinfo->pc_latency, rqstp->rq_stime);
+#endif
 	mutex_unlock(&xprt->xpt_mutex);
 	rpc_wake_up(&xprt->xpt_bc_pending);
 	svc_xprt_release(rqstp);

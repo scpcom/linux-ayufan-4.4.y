@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -66,4 +62,3 @@ struct rm_list {
 };
 
 #endif   /* RM_INTERFACE_H */
-#endif /* MY_DEF_HERE */

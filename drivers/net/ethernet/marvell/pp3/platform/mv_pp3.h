@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*
 * ***************************************************************************
 * Copyright (C) 2015 Marvell International Ltd.
@@ -214,4 +210,3 @@ int mv_pp3_dp_q_find(u16 td, u16 red);
 void mv_pp3_dp_q_free(int dp_id);
 
 #endif /* __mv_pp3_h__ */
-#endif /* MY_DEF_HERE */

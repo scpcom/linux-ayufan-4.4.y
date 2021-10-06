@@ -20,6 +20,10 @@ config SYNO_BONDING_FIX_ACTIVE
 	bool "Fix a bug in active backup bonding mode"
 	default y
 
+config SYNO_FIX_8023AD_LINK_STATUS
+	bool "Fix 802.3ad link status bug"
+	default y
+
 config SYNO_IPV6_LINKLOCAL
 	bool "Assign an interface to IPV6 link local address automatically."
 	default y
@@ -54,9 +58,32 @@ config SYNO_REMOVE_RA_ERROR_LOG
 	bool "To remove error log when receiving RA"
 	default y
 
-config SYNO_ARMADA_REFILL_COUNT
-	bool "Add refill fail count in statistics"
+config SYNO_ARMADA37XX_LOG_REDUCE
+	bool "Remove Armada3700 unnecessary logs"
 	default y
 	depends on SYNO_LSP_ARMADA_17_06_01
+
+config SYNO_ARMADA37XX_MVNETA_FIX
+	bool "Apply marvell mvneta patches after 17_06"
+	default y
+	depends on SYNO_LSP_ARMADA_17_06_01
+
+config SYNO_ARMADA37XX_IRQ_ADJUST
+	bool "Adjust mvneta interrupt affinity"
+	default y
+	depends on SYNO_LSP_ARMADA_17_06_01
+
+config SYNO_ARMADA37XX_MTU_LIMITATION
+	bool "limit armada37xx mtu to 9000"
+	default y
+	depends on SYNO_LSP_ARMADA_17_06_01
+
+config SYNO_BACKPORT_GLINKSETTINGS
+	bool "ethtool get_link_ksettings/set_link_ksettings"
+	default y
+
+config SYNO_RTK_NETWORK_LOG_REDUCE
+	bool "reduce realtek network driver rx buffer exhausted log"
+	default n
 
 endmenu #Network

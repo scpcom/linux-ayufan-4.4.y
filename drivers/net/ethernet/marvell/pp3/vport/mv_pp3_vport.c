@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*
 * ***************************************************************************
 * Copyright (C) 2015 Marvell International Ltd.
@@ -797,5 +793,3 @@ int mv_pp3_vport_fw_stats_clear(int vport)
 
 	return err;
 }
-
-#endif /* MY_DEF_HERE */

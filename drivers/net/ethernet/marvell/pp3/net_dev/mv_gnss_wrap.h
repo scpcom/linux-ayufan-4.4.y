@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*
 * ***************************************************************************
 * Copyright (C) 2015 Marvell International Ltd.
@@ -88,4 +84,3 @@ static inline u32 *mv_pp3_gnss_skb_mdata_get(struct net_device *dev, struct sk_b
 
 	return (u32 *)pmdata;
 }
-#endif /* MY_DEF_HERE */

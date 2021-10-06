@@ -64,6 +64,17 @@
 		method = "smc";
 	};
 
+	reserved-memory {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		psci-area@4000000 {
+			reg = <0 0x4000000 0 0x200000>;
+			no-map;
+		};
+	};
+
 	/* CPUfreq Cluster settings:
 	 * - Initial required static OPP entry of 100Mhz - suited for all CPU boot options
 	 * - Additional OPP entries are registered at runtime by cpufreq driver
@@ -319,7 +330,9 @@
 
 			pinctrl@6f4000 {
 				compatible = "marvell,ap806-pinctrl";
-				reg = <0x6f4000 0x10>;
+				reg = <0x6f4000 0x10>, /* pinctrl regs */
+				      <0x6f4100 0x4>; /* eMMC PHY IO Control 0 Register */
+				reg-names = "pinctrl", "mmcio";
 
 				ap_i2c0_pins: i2c-pins-0 {
 					marvell,pins = "mpp4", "mpp5";
@@ -469,6 +482,12 @@
 				      <0x600000 0x1000>;
 				interrupts = <GIC_SPI 2 IRQ_TYPE_LEVEL_HIGH>;
 				timeout-sec = <30>;
+			};
+
+			ap806_sar: sar@6f8200 {
+				compatible = "marvell,sample-at-reset-ap806";
+				reg = <0x6f8200 0x8>;
+				status = "okay";
 			};
 		};
 	};

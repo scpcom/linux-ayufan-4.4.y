@@ -593,7 +593,13 @@ err_register:
 #endif /* MY_DEF_HERE */
 
 err_ioremap:
+#if defined(MY_DEF_HERE)
+	if (ret != -EPROBE_DEFER)
+		dev_err(dev, "initialization failed.\n");
+
+#else /* MY_DEF_HERE */
 	dev_err(dev, "initialization failed.\n");
+#endif /* MY_DEF_HERE */
 	return ret;
 }
 

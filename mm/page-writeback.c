@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * mm/page-writeback.c
  *
@@ -429,6 +432,9 @@ void global_dirty_limits(unsigned long *pbackground, unsigned long *pdirty)
 	*pbackground = gdtc.bg_thresh;
 	*pdirty = gdtc.thresh;
 }
+#ifdef MY_ABC_HERE
+EXPORT_SYMBOL(global_dirty_limits);
+#endif /* MY_ABC_HERE */
 
 /**
  * zone_dirty_limit - maximum number of dirty pages allowed in a zone
@@ -1738,7 +1744,6 @@ pause:
 					  pause,
 					  start_time);
 		__set_current_state(TASK_KILLABLE);
-		wb->dirty_sleep = now;
 		io_schedule_timeout(pause);
 
 		current->dirty_paused_when = now + pause;

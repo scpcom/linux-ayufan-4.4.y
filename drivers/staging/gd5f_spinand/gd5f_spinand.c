@@ -102,12 +102,26 @@ static int spinand_cmd(struct spi_device *spi, struct spinand_cmd *cmd)
 	}
 	/* Data to be transmitted */
 	if (cmd->n_tx) {
+#if defined(MY_DEF_HERE)
+		if (cmd->cmd == SPI_NAND_PROGRAM_LOAD4_INS)
+			x[3].tx_nbits = SPI_NBITS_QUAD;
+		else
+			x[3].tx_nbits = SPI_NBITS_SINGLE;
+#endif /* MY_DEF_HERE */
 		x[3].len = cmd->n_tx;
 		x[3].tx_buf = cmd->tx_buf;
 		spi_message_add_tail(&x[3], &message);
 	}
 	/* Data to be received */
 	if (cmd->n_rx) {
+#if defined(MY_DEF_HERE)
+		if (cmd->cmd == SPI_NAND_READ_CACHE_X4_INS)
+			x[3].rx_nbits = SPI_NBITS_QUAD;
+		else if (cmd->cmd == SPI_NAND_READ_CACHE_X2_INS)
+			x[3].rx_nbits = SPI_NBITS_DUAL;
+		else
+			x[3].rx_nbits = SPI_NBITS_SINGLE;
+#endif /* MY_DEF_HERE */
 		x[3].len = cmd->n_rx;
 		x[3].rx_buf = cmd->rx_buf;
 		spi_message_add_tail(&x[3], &message);
@@ -395,7 +409,20 @@ static int spinand_read_from_cache(struct spi_device *spi_nand,
 {
 	struct spinand_cmd cmd = {0};
 
+#if defined(MY_DEF_HERE)
+	if (spi_nand->mode & (SPI_RX_DUAL | SPI_RX_QUAD))
+		cmd.n_dummy = 1;
+
+	if (spi_nand->mode & SPI_RX_QUAD)
+		cmd.cmd = SPI_NAND_READ_CACHE_X4_INS;
+	else if (spi_nand->mode & SPI_RX_DUAL)
+		cmd.cmd = SPI_NAND_READ_CACHE_X2_INS;
+	else
+		cmd.cmd = SPI_NAND_READ_CACHE_INS;
+
+#else /* MY_DEF_HERE */
 	cmd.cmd = SPI_NAND_READ_CACHE_INS;
+#endif /* MY_DEF_HERE */
 	cmd.n_addr = 3;
 	cmd.addr[0] = 0;
 	cmd.addr[1] = (u8)((byte_id & 0x0000FF00) >> 8);
@@ -468,7 +495,11 @@ static int spinand_read_page(struct spi_device *spi_nand, u32 page_id,
 	if (status  == SPI_NAND_ECC_UNABLE_TO_CORRECT) {
 		dev_err(&spi_nand->dev, "ECC error reading page %d.\n",
 			page_id);
+#if defined(MY_DEF_HERE)
+//do nothing
+#else /* MY_DEF_HERE */
 		return -1;
+#endif /* MY_DEF_HERE */
 	}
 
 	/* Read page from internal cache to our buffers */
@@ -505,7 +536,15 @@ static int spinand_program_data_to_cache(struct spi_device *spi_nand,
 {
 	struct spinand_cmd cmd = {0};
 
+#if defined(MY_DEF_HERE)
+	if (spi_nand->mode & SPI_TX_QUAD)
+		cmd.cmd = SPI_NAND_PROGRAM_LOAD4_INS;
+	else
+		cmd.cmd = SPI_NAND_PROGRAM_LOAD_INS;
+
+#else /* MY_DEF_HERE */
 	cmd.cmd = SPI_NAND_PROGRAM_LOAD_INS;
+#endif /* MY_DEF_HERE */
 	cmd.n_addr = 2;
 	cmd.addr[0] = (u8)((byte_id & 0x0000FF00) >> 8);
 	cmd.addr[1] = (u8)(byte_id & 0x000000FF);
@@ -925,6 +964,23 @@ static int gd5f_ecc_init(struct nand_ecc_ctrl *ecc, int strength,
 }
 
 /*
+#if defined(MY_DEF_HERE)
+ * spinand_enable_quad - send command to enable spi nand flash in quad mode
+ */
+static int spinand_enable_quad(struct spi_device *spi_nand)
+{
+	u8 feature_reg;
+
+	if ((spinand_get_feature_en(spi_nand, &feature_reg) < 0) ||
+	    (spinand_set_feature_en(spi_nand, feature_reg | SPI_NAND_QUAD_EN)
+	     < 0))
+		return -1;
+
+	return 0;
+}
+
+/*
+#endif /* MY_DEF_HERE */
  * spinand_probe - set up the device driver parameters to make
  * the device available.
  */
@@ -985,6 +1041,17 @@ static int spinand_probe(struct spi_device *spi_nand)
 	chip->options	|= NAND_CACHEPRG;
 	chip->select_chip = spinand_select_chip;
 
+#if defined(MY_DEF_HERE)
+	/* Set chip to quad mode */
+	if (spi_nand->mode & (SPI_TX_QUAD | SPI_RX_QUAD)) {
+		ret = spinand_enable_quad(spi_nand);
+		if (ret < 0) {
+			pr_info("%s: Failed to enable quad mode!\n", __func__);
+			return ret;
+		}
+	}
+
+#endif /* MY_DEF_HERE */
 	/* This should set up mtd->writesize, mtd->oobsize, etc. */
 	if (nand_scan(mtd, 1))
 		return -ENXIO;

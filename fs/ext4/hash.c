@@ -125,6 +125,8 @@ int ext4fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 #ifdef MY_ABC_HERE
 	 
 	char hash_buf[EXT4_NAME_LEN+1];
+	const char *ori_name = name;
+	int ori_len = len;
 
 	if (name && (len > 0)) {
 		if (len > EXT4_NAME_LEN) {
@@ -155,9 +157,15 @@ int ext4fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 	switch (hinfo->hash_version) {
 	case DX_HASH_LEGACY_UNSIGNED:
 		hash = dx_hack_hash_unsigned(name, len);
+#ifdef MY_ABC_HERE
+		minor_hash = dx_hack_hash_unsigned(ori_name, ori_len);
+#endif  
 		break;
 	case DX_HASH_LEGACY:
 		hash = dx_hack_hash_signed(name, len);
+#ifdef MY_ABC_HERE
+		minor_hash = dx_hack_hash_signed(ori_name, ori_len);
+#endif  
 		break;
 	case DX_HASH_HALF_MD4_UNSIGNED:
 		str2hashbuf = str2hashbuf_unsigned;
@@ -169,8 +177,25 @@ int ext4fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 			len -= 32;
 			p += 32;
 		}
+#ifdef MY_ABC_HERE
+		hash = buf[1];
+		p = ori_name;
+		len = ori_len;
+		buf[0] = 0x67452301;
+		buf[1] = 0xefcdab89;
+		buf[2] = 0x98badcfe;
+		buf[3] = 0x10325476;
+		while (len > 0) {
+			(*str2hashbuf)(p, len, in, 8);
+			half_md4_transform(buf, in);
+			len -= 32;
+			p += 32;
+		}
+		minor_hash = buf[2];
+#else
 		minor_hash = buf[2];
 		hash = buf[1];
+#endif  
 		break;
 	case DX_HASH_TEA_UNSIGNED:
 		str2hashbuf = str2hashbuf_unsigned;
@@ -183,6 +208,20 @@ int ext4fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 			p += 16;
 		}
 		hash = buf[0];
+#ifdef MY_ABC_HERE
+		p = ori_name;
+		len = ori_len;
+		buf[0] = 0x67452301;
+		buf[1] = 0xefcdab89;
+		buf[2] = 0x98badcfe;
+		buf[3] = 0x10325476;
+		while (len > 0) {
+			(*str2hashbuf)(p, len, in, 4);
+			TEA_transform(buf, in);
+			len -= 16;
+			p += 16;
+		}
+#endif  
 		minor_hash = buf[1];
 		break;
 	default:

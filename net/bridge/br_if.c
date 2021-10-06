@@ -39,6 +39,22 @@
  */
 static int port_cost(struct net_device *dev)
 {
+#if defined(MY_ABC_HERE)
+	struct ethtool_link_ksettings ecmd;
+
+	if (!__ethtool_get_link_ksettings(dev, &ecmd)) {
+		switch (ecmd.base.speed) {
+		case SPEED_10000:
+			return 2;
+		case SPEED_1000:
+			return 4;
+		case SPEED_100:
+			return 19;
+		case SPEED_10:
+			return 100;
+		}
+	}
+#else /* MY_ABC_HERE */
 	struct ethtool_cmd ecmd;
 
 	if (!__ethtool_get_settings(dev, &ecmd)) {
@@ -53,6 +69,7 @@ static int port_cost(struct net_device *dev)
 			return 100;
 		}
 	}
+#endif /* MY_ABC_HERE */
 
 	/* Old silly heuristics based on name */
 	if (!strncmp(dev->name, "lec", 3))

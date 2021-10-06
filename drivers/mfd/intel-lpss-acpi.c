@@ -33,6 +33,13 @@ static const struct intel_lpss_platform_info bxt_i2c_info = {
 	.clk_rate = 133000000,
 };
 
+#ifdef CONFIG_SYNO_COFFEELAKE
+static const struct intel_lpss_platform_info cfl_uart_info = {
+	.clk_rate = 100000000,
+	.clk_con_id = "baudclk",
+};
+#endif /* CONFIG_SYNO_COFFEELAKE */
+
 static const struct acpi_device_id intel_lpss_acpi_ids[] = {
 	/* SPT */
 	{ "INT3446", (kernel_ulong_t)&spt_info },
@@ -45,6 +52,10 @@ static const struct acpi_device_id intel_lpss_acpi_ids[] = {
 	{ "80865AAC", (kernel_ulong_t)&bxt_i2c_info },
 	{ "80865ABC", (kernel_ulong_t)&bxt_info },
 	{ "80865AC2", (kernel_ulong_t)&bxt_info },
+#ifdef CONFIG_SYNO_COFFEELAKE
+	/* CFL */
+	{ "INT34B8", (kernel_ulong_t)&cfl_uart_info },
+#endif /* CONFIG_SYNO_COFFEELAKE */
 	{ }
 };
 MODULE_DEVICE_TABLE(acpi, intel_lpss_acpi_ids);

@@ -1,7 +1,11 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/synolib.h>
 #include <linux/pci.h>
 #include <linux/libata.h>
 
+#ifdef MY_ABC_HERE
 void syno_insert_sata_index_remap(unsigned int idx, unsigned int num, unsigned int id_start)
 {
 	int i = 0;
@@ -24,3 +28,4 @@ void syno_insert_sata_index_remap(unsigned int idx, unsigned int num, unsigned i
 }
 
 EXPORT_SYMBOL(syno_insert_sata_index_remap);
+#endif /* MY_ABC_HERE */

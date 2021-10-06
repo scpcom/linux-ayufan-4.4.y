@@ -1474,8 +1474,8 @@ syno_error_common(struct mddev *mddev,
 		mddev->degraded++;
 
 #ifdef MY_ABC_HERE
-		if (!blRaid10Enough(conf, rdev)) {
-			mddev->nodev_and_crashed = 1;
+		if (!blRaid10Enough(conf, rdev) && (MD_CRASHED_ASSEMBLE != mddev->nodev_and_crashed)) {
+			mddev->nodev_and_crashed = MD_CRASHED;
 		}
 #endif  
 #ifdef MY_ABC_HERE
@@ -3507,7 +3507,9 @@ static int run(struct mddev *mddev)
 	if (!enough(conf, -1)) {
 #endif  
 #ifdef MY_ABC_HERE
-		mddev->nodev_and_crashed = 1;
+		if (MD_CRASHED_ASSEMBLE != mddev->nodev_and_crashed) {
+			mddev->nodev_and_crashed = MD_CRASHED;
+		}
 #endif  
 		printk(KERN_ERR "md/raid10:%s: not enough operational mirrors.\n",
 		       mdname(mddev));
@@ -4336,15 +4338,22 @@ static void raid10_finish_reshape(struct mddev *mddev)
 		return;
 
 	if (mddev->delta_disks > 0) {
+#ifdef MY_ABC_HERE
+#else  
 		sector_t size = raid10_size(mddev, 0, 0);
 		md_set_array_sectors(mddev, size);
+#endif  
 		if (mddev->recovery_cp > mddev->resync_max_sectors) {
 			mddev->recovery_cp = mddev->resync_max_sectors;
 			set_bit(MD_RECOVERY_NEEDED, &mddev->recovery);
 		}
+#ifdef MY_ABC_HERE
+		mddev->resync_max_sectors = mddev->array_sectors;
+#else  
 		mddev->resync_max_sectors = size;
 		set_capacity(mddev->gendisk, mddev->array_sectors);
 		revalidate_disk(mddev->gendisk);
+#endif  
 	} else {
 		int d;
 		for (d = conf->geo.raid_disks ;

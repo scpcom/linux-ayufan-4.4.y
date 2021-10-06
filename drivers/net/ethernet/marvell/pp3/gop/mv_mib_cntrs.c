@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -213,4 +209,3 @@ void mv_pp3_gop_mib_counters_show(int port)
 	/* This counter must be read last. Read it clear all the counters */
 	pp3_mib_print(port, MV_PP3_MIB_LATE_COLLISION, "LATE_COLLISION");
 }
-#endif /* MY_DEF_HERE */

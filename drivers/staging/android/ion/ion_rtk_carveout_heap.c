@@ -191,6 +191,9 @@ struct ION_RTK_CARVEOUT_PAGE_INFO * ion_rtk_carveout_allocate(struct ion_heap *h
     else
         strncpy(task_comm, "KTHREAD", sizeof(task_comm));
 
+    /* decrease usage count */
+    put_task_struct(current->group_leader);
+
 #if 0
     if (tmp_flag == 0) {
         pr_err(" Warning: flags is zero!! The default value is set RTK_ION_FLAG_POOL_CONDITION [%16.s] pids:%-5d tgid:%-5d\n",

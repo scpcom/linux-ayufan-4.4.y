@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Xen SMP support
  *
@@ -28,6 +31,7 @@
 #include <xen/interface/vcpu.h>
 #include <xen/interface/xenpmu.h>
 
+#include <asm/spec-ctrl.h>
 #include <asm/xen/interface.h>
 #include <asm/xen/hypercall.h>
 
@@ -86,6 +90,8 @@ static void cpu_bringup(void)
 	smp_store_cpu_info(cpu);
 	cpu_data(cpu).x86_max_cores = 1;
 	set_cpu_sibling_map(cpu);
+
+	speculative_store_bypass_ht_init();
 
 	xen_setup_cpu_clockevents();
 
@@ -357,6 +363,8 @@ static void __init xen_smp_prepare_cpus(unsigned int max_cpus)
 	}
 	set_cpu_sibling_map(0);
 
+	speculative_store_bypass_ht_init();
+
 	xen_pmu_init(0);
 
 	if (xen_smp_intr_init(0))
@@ -545,6 +553,9 @@ static void xen_play_dead(void) /* used only with HOTPLUG_CPU */
 	 * data back is to call:
 	 */
 	tick_nohz_idle_enter();
+#ifdef MY_ABC_HERE
+	tick_nohz_idle_stop_tick_protected();
+#endif
 }
 
 #else /* !CONFIG_HOTPLUG_CPU */

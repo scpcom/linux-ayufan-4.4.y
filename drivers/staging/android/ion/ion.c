@@ -1314,15 +1314,13 @@ static long ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 #if 1   //20130208 charleslin: add ioctl to get physical address
 	case ION_IOC_PHYS:
 	{
-		bool valid;
 		int ret;
 		ion_phys_addr_t addr;
 		size_t len;
+		struct ion_handle *handle;
 
 		if (copy_from_user(&data, (void __user *)arg, sizeof(data)))
 			return -EFAULT;
-
-		struct ion_handle *handle;
 
 		handle = ion_handle_get_by_id(client, data.phys.handle);
 		if (IS_ERR(handle))
@@ -1330,7 +1328,7 @@ static long ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		ret = ion_phys(client, handle, &addr, &len);
 
 		ion_handle_put(handle);
-		pr_debug("%s: addr:%lx len:%x\n", __func__, addr, len);
+		pr_debug("%s: addr:%lx len:%zx\n", __func__, addr, len);
 		data.phys.addr = addr;
 		data.phys.len = len;
 		if(ret != 0)

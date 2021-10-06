@@ -103,9 +103,18 @@ int ulist_add(struct ulist *ulist, u64 val, u64 aux, gfp_t gfp_mask)
 {
 	return ulist_add_merge(ulist, val, aux, NULL, gfp_mask);
 }
+#ifdef MY_ABC_HERE
+int ulist_add_for_prealloc(struct ulist *ulist, u64 val, u64 aux, gfp_t gfp_mask, struct ulist_node **prealloc_ulist_node)
+{
+	return ulist_add_merge_for_prealloc(ulist, val, aux, NULL, gfp_mask, prealloc_ulist_node);
+}
 
+int ulist_add_merge_for_prealloc(struct ulist *ulist, u64 val, u64 aux,
+		    u64 *old_aux, gfp_t gfp_mask, struct ulist_node **prealloc_ulist_node)
+#else
 int ulist_add_merge(struct ulist *ulist, u64 val, u64 aux,
 		    u64 *old_aux, gfp_t gfp_mask)
+#endif  
 {
 	int ret;
 	struct ulist_node *node;
@@ -116,6 +125,12 @@ int ulist_add_merge(struct ulist *ulist, u64 val, u64 aux,
 			*old_aux = node->aux;
 		return 0;
 	}
+#ifdef MY_ABC_HERE
+	if (prealloc_ulist_node) {
+		node = *prealloc_ulist_node;
+		*prealloc_ulist_node = NULL;
+	} else
+#endif  
 	node = kmalloc(sizeof(*node), gfp_mask);
 	if (!node)
 		return -ENOMEM;
@@ -130,6 +145,13 @@ int ulist_add_merge(struct ulist *ulist, u64 val, u64 aux,
 
 	return 1;
 }
+#ifdef MY_ABC_HERE
+int ulist_add_merge(struct ulist *ulist, u64 val, u64 aux,
+		    u64 *old_aux, gfp_t gfp_mask)
+{
+	return ulist_add_merge_for_prealloc(ulist, val, aux, old_aux, gfp_mask, NULL);
+}
+#endif  
 
 int ulist_del(struct ulist *ulist, u64 val, u64 aux)
 {

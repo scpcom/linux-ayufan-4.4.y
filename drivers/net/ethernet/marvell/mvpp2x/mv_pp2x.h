@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*
 * ***************************************************************************
 * Copyright (C) 2016 Marvell International Ltd.
@@ -33,17 +29,38 @@
 #define MVPP2_DRIVER_NAME "mvpp2"
 #define MVPP2_DRIVER_VERSION "1.0"
 
+#define MVPP2X_SKB_MAGIC_MASK		0xFFFFFFC0
+#define MVPP2X_SKB_MAGIC_SKB_OFFS	3
+#define MVPP2X_SKB_PP2_CELL_OFFS	4
+#define MVPP2X_CB_REC_OFFS			5
+#define MVPP2X_SKB_BPID_MASK		0xF
+#define MVPP2X_SKB_CELL_MASK		0x3
+
+/* SKB magic, mainly used for skb recycle, here it is the address[34 : 8] of skb */
+#define MVPP2X_SKB_MAGIC(skb)   (((unsigned int)(((u64)skb) >> \
+				MVPP2X_SKB_MAGIC_SKB_OFFS)) & MVPP2X_SKB_MAGIC_MASK)
+/* Cb to store magic and bpid, IPv6 TCP will consume the most cb[] with 44 bytes, so the last 5 bytes is safe to use */
+#define MVPP2X_SKB_CB(skb)                          (*(unsigned int *)(&skb->cb[sizeof(skb->cb) - MVPP2X_CB_REC_OFFS]))
+/* Set magic and bpid, magic[31:5], pp2_id[5:4], source pool[3:0] */
+#define MVPP2X_SKB_MAGIC_BPID_SET(skb, magic_bpid)  (MVPP2X_SKB_CB(skb) = magic_bpid)
+/* Get bpid */
+#define MVPP2X_SKB_BPID_GET(skb)                    (MVPP2X_SKB_CB(skb) & MVPP2X_SKB_BPID_MASK)
+#define MVPP2X_SKB_PP2_CELL_GET(skb)        ((MVPP2X_SKB_CB(skb) >> MVPP2X_SKB_PP2_CELL_OFFS) & \
+						MVPP2X_SKB_CELL_MASK)
+
+#define MVPP2X_SKB_RECYCLE_MAGIC_GET(skb)           (MVPP2X_SKB_CB(skb) & MVPP2X_SKB_MAGIC_MASK)
+/* Recycle magic check */
+#define MVPP2X_SKB_RECYCLE_MAGIC_IS_OK(skb)         (MVPP2X_SKB_MAGIC(skb) == MVPP2X_SKB_RECYCLE_MAGIC_GET(skb))
+
 #define PFX			MVPP2_DRIVER_NAME ": "
 
 #define IRQ_NAME_SIZE (36)
 
 #define STATS_DELAY	250
 
-#if defined(MY_DEF_HERE)
 #define TSO_TXQ_LIMIT 100
 #define TXQ_LIMIT (MAX_SKB_FRAGS + 2)
 
-#endif /* MY_DEF_HERE */
 #define MV_ETH_SKB_SHINFO_SIZE	SKB_DATA_ALIGN(sizeof(struct skb_shared_info))
 
 /* START - Taken from mvPp2Commn.h, need to order TODO */
@@ -115,18 +132,9 @@
 	pr_info("Passed: %s(%d)\n", __func__, __LINE__)
 
 #define MVPP2_PRINT_VAR(var) \
-#if defined(MY_DEF_HERE)
 	pr_info("%s (%d): " #var "=0x%lx\n", __func__, __LINE__, (u64)var)
-#else /* MY_DEF_HERE */
-	pr_info("%s(%d): "#var"=0x%lx\n", __func__, __LINE__,\
-		(u64)var)
-#endif /* MY_DEF_HERE */
 #define MVPP2_PRINT_VAR_NAME(var, name) \
-#if defined(MY_DEF_HERE)
 	pr_info("%s (%d): %s = 0x%lx\n", __func__, __LINE__, name, var)
-#else /* MY_DEF_HERE */
-	pr_info("%s(%d): %s=0x%lx\n", __func__, __LINE__, name, var)
-#endif /* MY_DEF_HERE */
 #else
 #define MVPP2_PRINT_LINE()
 #define MVPP2_PRINT_VAR(var)
@@ -148,11 +156,8 @@
 /* Coalescing */
 #define MVPP2_TXDONE_COAL_PKTS		64
 #define MVPP2_TXDONE_HRTIMER_PERIOD_NS	1000000UL
-#if defined(MY_DEF_HERE)
+#define MVPP2_TX_HRTIMER_PERIOD_NS	50000UL
 #define MVPP2_TXDONE_COAL_USEC		1000
-#else /* MY_DEF_HERE */
-#define MVPP2_TXDONE_COAL_USEC		10000
-#endif /* MY_DEF_HERE */
 
 #define MVPP2_RX_COAL_PKTS		32
 #define MVPP2_RX_COAL_USEC		64
@@ -169,6 +174,7 @@
 #define MVPP2_BM_SHORT_BUF_NUM		2048
 #define MVPP2_BM_LONG_BUF_NUM		1024
 #define MVPP2_BM_JUMBO_BUF_NUM		512
+#define MVPP2_BM_PER_CPU_THRESHOLD	(MVPP2_MAX_CPUS * 2)
 
 #define MVPP2_ALL_BUFS			0
 
@@ -180,30 +186,16 @@ extern  u32 debug_param;
 #define QV_THR_2_CPU(sw_thread_id)	(sw_thread_id - first_addr_space)
 #define QV_CPU_2_THR(cpu_id)		(first_addr_space + cpu_id)
 
-#if defined(MY_DEF_HERE)
-//do nothing
-#else /* MY_DEF_HERE */
-/* TX FIFO constants */
-#define MVPP2_TX_FIFO_DATA_SIZE_10KB		0xa
-#define MVPP2_TX_FIFO_DATA_SIZE_3KB		0x3
-
-#define MVPP2_TX_FIFO_MINIMUM_THRESHOLD		256
-#define MVPP2_TX_FIFO_THRESHOLD_10KB	(MVPP2_TX_FIFO_DATA_SIZE_10KB * 1024 - \
-					MVPP2_TX_FIFO_MINIMUM_THRESHOLD)
-#define MVPP2_TX_FIFO_THRESHOLD_3KB	(MVPP2_TX_FIFO_DATA_SIZE_3KB * 1024 - \
-					MVPP2_TX_FIFO_MINIMUM_THRESHOLD)
-
-#endif /* MY_DEF_HERE */
 /* Used for define type of data saved in shadow: SKB or extended buffer or nothing */
 #define MVPP2_ETH_SHADOW_SKB		0x1
 #define MVPP2_ETH_SHADOW_EXT		0x2
+#define MVPP2_ETH_SHADOW_REC		0x4
+
+#define MVPP2_UNIQUE_HASH		0x4567492
 
 #define MVPP2_EXTRA_BUF_SIZE	120
-#if defined(MY_DEF_HERE)
 #define MVPP2_EXTRA_BUF_NUM	(MVPP2_MAX_TXD * MVPP2_MAX_TXQ)
-#else /* MY_DEF_HERE */
-#define MVPP2_EXTRA_BUF_NUM	MVPP2_MAX_TXD
-#endif /* MY_DEF_HERE */
+#define MVPP2_SKB_NUM		(MVPP2_MAX_RXD * MVPP2_MAX_RXQ * MVPP2_MAX_PORTS)
 
 enum mvppv2_version {
 	PPV21 = 21,
@@ -249,29 +241,21 @@ struct gop_stat {
 	u64 rx_bcast;
 	u64 rx_frames;
 	u64 rx_pause;
-#if defined(MY_DEF_HERE)
 	u64 rx_mac_overrun;
-#else /* MY_DEF_HERE */
-	u64 rx_overrun;
-#endif /* MY_DEF_HERE */
 	u64 rx_crc;
 	u64 rx_runt;
 	u64 rx_giant;
 	u64 rx_fragments_err;
 	u64 rx_mac_err;
 	u64 rx_jabber;
-#if defined(MY_DEF_HERE)
 	u64 rx_ppv2_overrun;
 	u64 rx_cls_drop;
 	u64 rx_fullq_drop;
 	u64 rx_early_drop;
 	u64 rx_bm_drop;
-#endif /* MY_DEF_HERE */
 	u64 rx_total_err;
-#if defined(MY_DEF_HERE)
 	u64 rx_hw_drop;
 	u64 rx_sw_drop;
-#endif /* MY_DEF_HERE */
 	u64 tx_byte;
 	u64 tx_unicast;
 	u64 tx_mcast;
@@ -281,14 +265,12 @@ struct gop_stat {
 	u64 tx_crc_sent;
 	u64 collision;
 	u64 late_collision;
-#if defined(MY_DEF_HERE)
 	u64 frames_64;
 	u64 frames_65_to_127;
 	u64 frames_128_to_255;
 	u64 frames_256_to_511;
 	u64 frames_512_to_1023;
 	u64 frames_1024_to_max;
-#endif /* MY_DEF_HERE */
 };
 
 struct mv_mac_data {
@@ -314,25 +296,13 @@ struct mv_mac_data {
 #define MV_EMAC_F_INIT_BIT	1
 #define MV_EMAC_F_SGMII2_5_BIT	2
 #define MV_EMAC_F_PORT_UP_BIT	3
-#if defined(MY_DEF_HERE)
 #define MV_EMAC_F_5G_BIT	4
-#endif /* MY_DEF_HERE */
 
-#if defined(MY_DEF_HERE)
 #define MV_EMAC_F_LINK_UP	BIT(MV_EMAC_F_LINK_UP_BIT)
 #define MV_EMAC_F_INIT		BIT(MV_EMAC_F_INIT_BIT)
 #define MV_EMAC_F_SGMII2_5	BIT(MV_EMAC_F_SGMII2_5_BIT)
 #define MV_EMAC_F_PORT_UP	BIT(MV_EMAC_F_PORT_UP_BIT)
-#if defined(MY_DEF_HERE)
 #define MV_EMAC_F_5G		BIT(MV_EMAC_F_5G_BIT)
-#endif /* MY_DEF_HERE */
-#else /* MY_DEF_HERE */
-#define MV_EMAC_F_LINK_UP	(1 << MV_EMAC_F_LINK_UP_BIT)
-#define MV_EMAC_F_INIT		(1 << MV_EMAC_F_INIT_BIT)
-#define MV_EMAC_F_SGMII2_5	(1 << MV_EMAC_F_SGMII2_5_BIT)
-#define MV_EMAC_F_PORT_UP	(1 << MV_EMAC_F_PORT_UP_BIT)
-
-#endif /* MY_DEF_HERE */
 
 #define MVPP2_NO_LINK_IRQ	0
 
@@ -343,15 +313,6 @@ struct mv_pp2x_txq_pcpu {
 	/* Number of Tx DMA descriptors in the descriptor ring */
 	int size;
 
-#if defined(MY_DEF_HERE)
-//do nothing
-#else /* MY_DEF_HERE */
-	/* Number of currently used Tx DMA descriptor in the
-	 * descriptor ring
-	 */
-	int count;
-
-#endif /* MY_DEF_HERE */
 	/* Number of Tx DMA descriptors reserved for each CPU */
 	int reserved_num;
 
@@ -410,8 +371,11 @@ struct mv_pp2x_aggr_tx_queue {
 	/* Number of Tx DMA descriptors in the descriptor ring */
 	int size;
 
-	/* Number of currently used Tx DMA descriptor in the descriptor ring */
-	int count;
+	/* Number of currently used Tx DMA descriptor in the descriptor ring used by SW */
+	int sw_count;
+
+	/* Number of currently used Tx DMA descriptor in the descriptor ring used by HW */
+	int hw_count;
 
 	/* Virtual pointer to address of the Aggr_Tx DMA descriptors
 	* memory_allocation
@@ -430,8 +394,8 @@ struct mv_pp2x_aggr_tx_queue {
 	/* Index of the next Tx DMA descriptor to process */
 	int next_desc_to_proc;
 
-	/* Used to statistic the desc number to xmit in bulk */
-	u32 xmit_bulk;
+	/* XPS mask */
+	cpumask_t affinity_mask;
 };
 
 struct mv_pp2x_rx_queue {
@@ -579,13 +543,9 @@ struct mv_pp2x {
 	struct	mv_pp2x_hw hw;
 	struct mv_pp2x_platform_data *pp2xdata;
 
-#if defined(MY_DEF_HERE)
-//do nothing
-#else /* MY_DEF_HERE */
-	u16 cpu_map; /* Bitmap of the participating cpu's */
-
-#endif /* MY_DEF_HERE */
 	struct mv_pp2x_param_config pp2_cfg;
+
+	struct platform_device *pdev;
 
 	/* List of pointers to port structures */
 	u16 num_ports;
@@ -599,20 +559,19 @@ struct mv_pp2x {
 	u16 num_pools;
 	struct mv_pp2x_bm_pool *bm_pools;
 
+	/* Per-CPU CP control */
+	struct mv_pp2x_cp_pcpu __percpu *pcpu;
+
 	/* RX flow hash indir'n table, in pp22, the table contains the
 	* CPU idx according to weight
 	*/
-#if defined(MY_DEF_HERE)
 	u8 num_rss_tables; /* created for sysfs usage */
-#endif /* MY_DEF_HERE */
 	u32 rx_indir_table[MVPP22_RSS_TBL_LINE_NUM];
 	u32 l4_chksum_jumbo_port;
 
 	struct delayed_work stats_task;
 	struct workqueue_struct *workqueue;
-#if defined(MY_DEF_HERE)
 	struct notifier_block	cp_hotplug_nb;
-#endif /* MY_DEF_HERE */
 };
 
 struct mv_pp2x_pcpu_stats {
@@ -632,6 +591,17 @@ struct mv_pp2x_port_pcpu {
 	int ext_buf_size;
 	struct list_head ext_buf_port_list;
 	struct mv_pp2x_ext_buf_pool *ext_buf_pool;
+};
+
+/* Per-CPU CP control */
+struct mv_pp2x_cp_pcpu {
+	struct list_head skb_port_list;
+	struct mv_pp2x_skb_pool *skb_pool;
+	int in_use[MVPP2_BM_POOLS_NUM];
+
+	struct hrtimer tx_timer;
+	struct tasklet_struct tx_tasklet;
+	bool tx_timer_scheduled;
 };
 
 struct queue_vector {
@@ -700,9 +670,7 @@ struct mv_pp2x_port {
 	struct mv_pp2x_bm_pool *pool_short; /* Pointer to the short pool_id */
 
 	struct phy *comphy; /* comphy handler */
-#if defined(MY_DEF_HERE)
 	int txq_stop_limit;
-#endif /* MY_DEF_HERE */
 
 	u32 num_qvector;
 	/* q_vector is the parameter that will be passed to
@@ -713,9 +681,8 @@ struct mv_pp2x_port {
 	struct mv_pp2x_ptp_desc *ptp_desc;
 	struct mv_pp2x_cos cos_cfg;
 	struct mv_pp2x_rss rss_cfg;
-#if defined(MY_DEF_HERE)
 	struct notifier_block	port_hotplug_nb;
-#endif /* MY_DEF_HERE */
+	int use_interrupts;
 };
 
 struct pp2x_hw_params {
@@ -741,11 +708,23 @@ struct mv_pp2x_ext_buf_struct {
 	u8 *ext_buf_data;
 };
 
+struct mv_pp2x_skb_struct {
+	struct list_head skb_list;
+	struct sk_buff *skb;
+};
+
 struct mv_pp2x_ext_buf_pool {
 	int buf_pool_size;
 	int buf_pool_next_free;
 	int buf_pool_in_use;
 	struct mv_pp2x_ext_buf_struct *ext_buf_struct;
+};
+
+struct mv_pp2x_skb_pool {
+	int skb_pool_size;
+	int skb_pool_in_use;
+	int skb_pool_next_free;
+	struct mv_pp2x_skb_struct *skb_struct;
 };
 
 static inline struct mv_pp2x_port *mv_pp2x_port_struct_get(struct mv_pp2x *priv,
@@ -855,11 +834,11 @@ struct mv_pp2x_pool_attributes {
 char *mv_pp2x_pool_description_get(enum mv_pp2x_bm_pool_log_num  log_id);
 
 void mv_pp2x_bm_bufs_free(struct device *dev, struct mv_pp2x *priv,
-			struct mv_pp2x_bm_pool *bm_pool, int buf_num);
+			  struct mv_pp2x_bm_pool *bm_pool, int buf_num);
 int mv_pp2x_bm_bufs_add(struct mv_pp2x_port *port,
 			struct mv_pp2x_bm_pool *bm_pool, int buf_num);
 int mv_pp2x_bm_pool_ext_add(struct device *dev, struct mv_pp2x *priv,
-			u32 *pool_num, u32 pkt_size);
+			    u32 *pool_num, u32 pkt_size);
 int mv_pp2x_bm_pool_destroy(struct device *dev, struct mv_pp2x *priv,
 			    struct mv_pp2x_bm_pool *bm_pool);
 int mv_pp2x_swf_bm_pool_assign(struct mv_pp2x_port *port, u32 rxq,
@@ -879,6 +858,7 @@ int mv_pp2x_setup_rxqs(struct mv_pp2x_port *port);
 int mv_pp2x_setup_txqs(struct mv_pp2x_port *port);
 void mv_pp2x_cleanup_txqs(struct mv_pp2x_port *port);
 void mv_pp2x_set_ethtool_ops(struct net_device *netdev);
+void mv_pp2x_set_non_kernel_ethtool_ops(struct net_device *netdev);
 int mv_pp22_rss_rxfh_indir_set(struct mv_pp2x_port *port);
 int mv_pp2x_cos_classifier_set(struct mv_pp2x_port *port,
 			       enum mv_pp2x_cos_classifier cos_mode);
@@ -895,5 +875,3 @@ int mv_pp2x_txq_reserved_desc_num_proc(struct mv_pp2x *priv,
 				       int num, int cpu);
 
 #endif /*_MVPP2_H_*/
-
-#endif /* MY_DEF_HERE */

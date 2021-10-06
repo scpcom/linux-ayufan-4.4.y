@@ -224,8 +224,8 @@ static int orion_mdio_probe(struct platform_device *pdev)
 
 	for (i = 0; i < PHY_MAX_ADDR; i++)
 		bus->irq[i] = PHY_POLL;
-#endif /* MY_DEF_HERE */
 
+#endif /* MY_DEF_HERE */
 	dev = bus->priv;
 	dev->regs = devm_ioremap(&pdev->dev, r->start, resource_size(r));
 	if (!dev->regs) {

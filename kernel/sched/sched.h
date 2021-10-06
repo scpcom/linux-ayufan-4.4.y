@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 
 #include <linux/sched.h>
 #include <linux/sched/sysctl.h>
@@ -25,9 +28,17 @@ extern __read_mostly int scheduler_running;
 
 extern unsigned long calc_load_update;
 extern atomic_long_t calc_load_tasks;
+#ifdef MY_ABC_HERE
+extern atomic_long_t calc_io_load_tasks;
+extern atomic_long_t calc_cpu_load_tasks;
+#endif /* MY_ABC_HERE */
 
 extern void calc_global_load_tick(struct rq *this_rq);
+#ifdef MY_ABC_HERE
+extern void calc_load_fold_active(struct rq *this_rq, long delta[]);
+#else
 extern long calc_load_fold_active(struct rq *this_rq);
+#endif /* MY_ABC_HERE */
 
 #ifdef CONFIG_SMP
 extern void update_cpu_load_active(struct rq *this_rq);
@@ -653,6 +664,10 @@ struct rq {
 	/* calc_load related fields */
 	unsigned long calc_load_update;
 	long calc_load_active;
+#ifdef MY_ABC_HERE
+	long calc_io_load_active;
+	long calc_cpu_load_active;
+#endif /* MY_ABC_HERE */
 
 #ifdef CONFIG_SCHED_HRTICK
 #ifdef CONFIG_SMP

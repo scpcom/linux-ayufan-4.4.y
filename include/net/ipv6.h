@@ -279,8 +279,8 @@ static inline int ip6_frag_mem(struct net *net)
 }
 #endif
 
-#define IPV6_FRAG_HIGH_THRESH	(4 * 1024*1024)	 
-#define IPV6_FRAG_LOW_THRESH	(3 * 1024*1024)	 
+#define IPV6_FRAG_HIGH_THRESH	(256 * 1024)	 
+#define IPV6_FRAG_LOW_THRESH	(192 * 1024)	 
 #define IPV6_FRAG_TIMEOUT	(60 * HZ)	 
 
 int __ipv6_addr_type(const struct in6_addr *addr);

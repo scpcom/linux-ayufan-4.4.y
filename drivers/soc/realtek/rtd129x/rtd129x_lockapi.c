@@ -34,8 +34,6 @@ spinlock_t lockapi_slock;
 //static int lockapi_flags;
 static DEFINE_MUTEX(lockapi_mutex);
 
-static atomic_t lockapi_atom= ATOMIC_INIT(0);
-
 static struct device *myproc_lockapi_dev;
 static char caller_name1[MAX_LOG_MSG_LEN];
 static char caller_name2[MAX_LOG_MSG_LEN];

@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -155,5 +151,3 @@ void convert_value_to_elig_func(uint16_t elig_val, struct tm_elig_prio_func_out 
 
  */
 #endif   /* TM_ELIG_PRIO_H */
-
-#endif /* MY_DEF_HERE */

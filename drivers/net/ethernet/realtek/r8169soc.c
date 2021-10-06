@@ -50,7 +50,7 @@
 #include <linux/reset-helper.h> // rstc_get
 #include <linux/reset.h>
 
-#define RTL8169_VERSION "2.25-LK-NAPI"
+#define RTL8169_VERSION "2.32.2-LK-NAPI"
 #define MODULENAME "r8169"
 #define PFX MODULENAME ": "
 
@@ -95,7 +95,7 @@
 	(NETIF_MSG_DRV | NETIF_MSG_PROBE | NETIF_MSG_IFUP | NETIF_MSG_IFDOWN)
 
 #define TX_SLOTS_AVAIL(tp) \
-	(tp->dirty_tx + NUM_TX_DESC - tp->cur_tx)
+	(tp->dirty_tx + NUM_TX_DESC - tp->cur_tx-3072)
 
 /* A skbuff with nr_frags needs nr_frags+1 entries in the tx queue */
 #define TX_FRAGS_READY_FOR(tp,nr_frags) \
@@ -111,8 +111,8 @@ static const int multicast_filter_limit = 32;
 
 #define R8169_REGS_SIZE		256
 #define R8169_NAPI_WEIGHT	64
-#define NUM_TX_DESC	64	/* Number of Tx descriptor registers */
-#define NUM_RX_DESC	256U	/* Number of Rx descriptor registers */
+#define NUM_TX_DESC	4096	/* Number of Tx descriptor registers */
+#define NUM_RX_DESC	1024U	/* Number of Rx descriptor registers */
 #define RX_BUF_SIZE 0x05F3  /* 0x05F3 = 1522bye + 1 */
 #define R8169_TX_RING_BYTES	(NUM_TX_DESC * sizeof(struct TxDesc))
 #define R8169_RX_RING_BYTES	(NUM_RX_DESC * sizeof(struct RxDesc))
@@ -413,7 +413,6 @@ enum rtl_registers {
 					/* Unlimited maximum PCI burst. */
 #define	RX_DMA_BURST			(3 << RXCFG_DMA_SHIFT)	/* 128 bytes */
 
-	TCTR            = 0x48,
 	RxMissed	= 0x4c,
 	Cfg9346		= 0x50,
 	Config0		= 0x51,
@@ -424,7 +423,6 @@ enum rtl_registers {
 	Config3		= 0x54,
 	Config4		= 0x55,
 	Config5		= 0x56,
-	TimeInt0        = 0x58,
 	MultiIntr	= 0x5c,
 	PHYAR		= 0x60,
 	PHYstatus	= 0x6c,
@@ -823,6 +821,9 @@ struct rtl8169_private {
 	u32 last_cur_rx;
 	u32 rx_reset_count;
 	u8 checkRDU;
+#ifdef MY_DEF_HERE
+	u64 rx_buffer_exhausted_count;
+#endif /* MY_DEF_HERE */
 	struct rtl8169_stats rx_stats;
 	struct rtl8169_stats tx_stats;
 	struct TxDesc *TxDescArray;	/* 256-aligned Tx descriptor ring */
@@ -903,6 +904,10 @@ struct rtl8169_private {
 	struct task_struct *kthr;
 	wait_queue_head_t thr_wait;
 	int link_chg;
+
+#ifdef MY_DEF_HERE
+	u8 syno_lan_led_status;
+#endif /* MY_DEF_HERE */
 };
 
 MODULE_AUTHOR("Realtek and the Linux r8169 crew <netdev@vger.kernel.org>");
@@ -1463,12 +1468,11 @@ static void rtl_irq_disable(struct rtl8169_private *tp)
 static void rtl_irq_enable(struct rtl8169_private *tp, u16 bits)
 {
 	void __iomem *ioaddr = tp->mmio_addr;
-	RTL_W32(TCTR, 0x2600);
-	RTL_W32(TimeInt0, 0x2600);
+
 	RTL_W16(IntrMask, bits);
 }
 
-#define RTL_EVENT_NAPI_RX	(RxOK | RxErr | RxOverflow | PCSTimeout)
+#define RTL_EVENT_NAPI_RX	(RxOK | RxErr | RxOverflow)
 #define RTL_EVENT_NAPI_TX	(TxOK | TxErr)
 #define RTL_EVENT_NAPI		(RTL_EVENT_NAPI_RX | RTL_EVENT_NAPI_TX)
 
@@ -1584,14 +1588,35 @@ static void __rtl8169_check_link_status(struct net_device *dev,
 					struct rtl8169_private *tp,
 					void __iomem *ioaddr, bool pm)
 {
+
+#ifdef MY_DEF_HERE
+	const char *speed_str;
+#endif /* MY_DEF_HERE */
+
+#ifdef MY_DEF_HERE
+	if (RTL_R8(PHYstatus) & _1000bpsF)
+		speed_str = "1 Gbps";
+	else if (RTL_R8(PHYstatus) & _100bps)
+		speed_str = "100 Mbps";
+	else if (RTL_R8(PHYstatus) & _10bps)
+		speed_str = "10 Mbps";
+	else
+		speed_str = "unknown";
+#endif /* MY_DEF_HERE */
+
 	if (tp->link_ok(ioaddr)) {
 		rtl_link_chg_patch(tp);
 		/* This is to cancel a scheduled suspend if there's one. */
 		if (pm)
 			pm_request_resume(&tp->pdev->dev);
 		netif_carrier_on(dev);
-		if (net_ratelimit())
+		if (net_ratelimit()){
+#ifdef MY_DEF_HERE
+			netif_info(tp, ifup, dev, "link up %s\n", speed_str);
+#else /* MY_DEF_HERE */
 			netif_info(tp, ifup, dev, "link up\n");
+#endif /* MY_DEF_HERE */
+		}
 	} else {
 		netif_carrier_off(dev);
 		netif_info(tp, ifdown, dev, "link down\n");
@@ -2201,6 +2226,9 @@ static const char rtl8169_gstrings[][ETH_GSTRING_LEN] = {
 	"multicast",
 	"tx_aborted",
 	"tx_underrun",
+#ifdef MY_DEF_HERE
+	"rx_buffer_exhausted",
+#endif /* MY_DEF_HERE */
 };
 
 static int rtl8169_get_sset_count(struct net_device *dev, int sset)
@@ -2276,6 +2304,9 @@ static void rtl8169_get_ethtool_stats(struct net_device *dev,
 	data[10] = le32_to_cpu(tp->counters.rx_multicast);
 	data[11] = le16_to_cpu(tp->counters.tx_aborted);
 	data[12] = le16_to_cpu(tp->counters.tx_underun);
+#ifdef MY_DEF_HERE
+	data[13] = tp->rx_buffer_exhausted_count;
+#endif /* MY_DEF_HERE */
 }
 
 static void rtl8169_get_strings(struct net_device *dev, u32 stringset, u8 *data)
@@ -4211,11 +4242,14 @@ static void rtl_phy_work(struct rtl8169_private *tp)
 {
 	// 1295 remove the patch first
 	struct timer_list *timer = &tp->timer;
-	void __iomem *ioaddr = tp->mmio_addr;
+	//void __iomem *ioaddr = tp->mmio_addr;
 	unsigned long timeout = RTL8169_PHY_TIMEOUT;
         if(tp->cur_tx > tp->dirty_tx)
                 if(tp->last_dirty_tx==tp->dirty_tx){
                         if (tp->tx_reset_count>3){
+#ifdef MY_DEF_HERE
+                            printk(KERN_ERR "r8169_reset_task: reset with tx hang\n");
+#endif /* MY_DEF_HERE */
 				rtl_schedule_task(tp, RTL_FLAG_TASK_RESET_PENDING);
 				tp->tx_reset_count=0;
                         }
@@ -4236,6 +4270,9 @@ static void rtl_phy_work(struct rtl8169_private *tp)
 
 		if(tp->last_cur_rx == tp->cur_rx){
 			if(tp->rx_reset_count>3){
+#ifdef MY_DEF_HERE
+                            printk(KERN_ERR "r8169_reset_task: reset with rx hang\n");
+#endif /* MY_DEF_HERE */
 				rtl_schedule_task(tp, RTL_FLAG_TASK_RESET_PENDING);
 				tp->rx_reset_count=0;
 			}
@@ -5885,9 +5922,6 @@ static void rtl_hw_start_8168g_1(struct rtl8169_private *tp)
 	rtl_w1w0_eri(tp, 0x1b0, ERIAR_MASK_0011, 0x0000, 0x1000, ERIAR_EXGMAC);
 }
 
-#if defined(MY_DEF_HERE)
-static int SYNO_LAN_LED_STATUS = 0xF;
-#endif /* MY_DEF_HERE */
 static void rtl_hw_start_8168g_2(struct rtl8169_private *tp)
 {
 	void __iomem *ioaddr = tp->mmio_addr;
@@ -5903,9 +5937,8 @@ static void rtl_hw_start_8168g_2(struct rtl8169_private *tp)
 	// LED setting  add by yukuen
 #if defined(MY_DEF_HERE)
 	if (tp->led_cfg) {
-		u32 val = (0x00060000 | tp->led_cfg) & 0xFFFFFFF0;
-		val += SYNO_LAN_LED_STATUS;
-		RTL_W32(LEDSEL, val);
+		u32 val = (0x00060000 | tp->led_cfg) & ~0xF;
+		RTL_W32(LEDSEL, val | tp->syno_lan_led_status);
 	}
 #else /* MY_DEF_HERE */
 	if (tp->led_cfg)
@@ -5936,7 +5969,7 @@ static void rtl_hw_start_8168(struct net_device *dev)
 
 	RTL_W16(CPlusCmd, tp->cp_cmd);
 
-	RTL_W16(IntrMitigate, 0x5151);
+	RTL_W16(IntrMitigate, 0x1111);
 
 	/* Work around for RxFIFO overflow. */
 	if (tp->mac_version == RTL_GIGA_MAC_VER_11) {
@@ -6298,6 +6331,9 @@ static int rtl8169_change_mtu(struct net_device *dev, int new_mtu)
 
 	rx_buf_sz_new = (new_mtu > ETH_DATA_LEN) ? new_mtu + ETH_HLEN + 8 + 1 : RX_BUF_SIZE;
 
+#ifdef MY_DEF_HERE
+	printk(KERN_ERR "r8169_reset_task: reset with change mtu\n");
+#endif /* MY_DEF_HERE */
 	rtl_schedule_task(tp, RTL_FLAG_TASK_RESET_PENDING);
 
 /*	rtl8169_down(dev);
@@ -6550,9 +6586,6 @@ static void rtl8169_unmap_tx_skb(struct device *d, struct ring_info *tx_skb,
 
 	dma_unmap_single(d, le64_to_cpu(desc->addr), len, DMA_TO_DEVICE);
 
-	desc->opts1 = 0x00;
-	desc->opts2 = 0x00;
-	desc->addr = 0x00;
 	tx_skb->len = 0;
 }
 
@@ -6626,6 +6659,9 @@ static void rtl8169_tx_timeout(struct net_device *dev)
 {
 	struct rtl8169_private *tp = netdev_priv(dev);
 
+#ifdef MY_DEF_HERE
+	printk(KERN_ERR "r8169_reset_task: reset with tx watchdog timeout\n");
+#endif /* MY_DEF_HERE */
 	rtl_schedule_task(tp, RTL_FLAG_TASK_RESET_PENDING);
 }
 
@@ -6867,6 +6903,9 @@ static void rtl8169_pcierr_interrupt(struct net_device *dev)
 
 	rtl8169_hw_reset(tp);
 
+#ifdef MY_DEF_HERE
+	printk(KERN_ERR "r8169_reset_task: reset with pcie err intr\n");
+#endif /* MY_DEF_HERE */
 	rtl_schedule_task(tp, RTL_FLAG_TASK_RESET_PENDING);
 #endif
 }
@@ -6889,13 +6928,14 @@ static void rtl_tx(struct net_device *dev, struct rtl8169_private *tp)
 		if (status & DescOwn)
 			break;
 
+		u64_stats_update_begin(&tp->tx_stats.syncp);
+		tp->tx_stats.packets++;
+		tp->tx_stats.bytes += tx_skb->len;
+		u64_stats_update_end(&tp->tx_stats.syncp);
+
 		rtl8169_unmap_tx_skb(&tp->pdev->dev, tx_skb,
 					 tp->TxDescArray + entry);
-		if (status & LastFrag) {
-			u64_stats_update_begin(&tp->tx_stats.syncp);
-			tp->tx_stats.packets++;
-			tp->tx_stats.bytes += tx_skb->skb->len;
-			u64_stats_update_end(&tp->tx_stats.syncp);
+		if (tx_skb->skb != NULL) {
 			dev_kfree_skb(tx_skb->skb);
 			tx_skb->skb = NULL;
 		}
@@ -6996,6 +7036,9 @@ static int rtl_rx(struct net_device *dev, struct rtl8169_private *tp, u32 budget
 			if (status & RxCRC)
 				dev->stats.rx_crc_errors++;
 			if (status & RxFOVF) {
+#ifdef MY_DEF_HERE
+				printk_once(KERN_ERR "r8169_reset_task: reset with fifo errors, print once.\n");
+#endif /* MY_DEF_HERE */
 				rtl_schedule_task(tp, RTL_FLAG_TASK_RESET_PENDING);
 				dev->stats.rx_fifo_errors++;
 			}
@@ -7068,8 +7111,15 @@ process_pkt:
 	tp->dirty_rx += delta;
 
 	if (tp->dirty_rx + NUM_RX_DESC == tp->cur_rx){
+#ifdef MY_DEF_HERE
+		printk_once(KERN_ERR "r8169_reset_task: reset with rx buffers exhausted, print once.\n");
+#endif /* MY_DEF_HERE */
 		rtl_schedule_task(tp, RTL_FLAG_TASK_RESET_PENDING);
+#ifdef MY_DEF_HERE
+		tp->rx_buffer_exhausted_count ++;
+#else /* MY_DEF_HERE */
 		netif_err(tp, drv, tp->dev, "%s: Rx buffers exhausted\n", dev->name);
+#endif /* MY_DEF_HERE */
 	}
 
 	return count;
@@ -7151,6 +7201,9 @@ static void rtl_slow_event_work(struct rtl8169_private *tp)
 				writel(readl(tp->mmio_clkaddr + 0x104) & ~0x00200000, (tp->mmio_clkaddr + 0x104));
 			}
 */
+#ifdef MY_DEF_HERE
+			printk_once(KERN_ERR "r8169_reset_task: reset with slow event.\n");
+#endif /* MY_DEF_HERE */
 			rtl_schedule_task(tp, RTL_FLAG_TASK_RESET_PENDING);
 		}
 		else
@@ -7538,6 +7591,9 @@ static void __rtl8169_resume(struct net_device *dev)
 	set_bit(RTL_FLAG_TASK_ENABLED, tp->wk.flags);
 	rtl_unlock_work(tp);
 
+#ifdef MY_DEF_HERE
+	printk(KERN_ERR "r8169_reset_task: reset with resume\n");
+#endif /* MY_DEF_HERE */
 	rtl_schedule_task(tp, RTL_FLAG_TASK_RESET_PENDING);
 }
 
@@ -7751,23 +7807,23 @@ static int rtl_remove_one(struct platform_device *pdev)
 }
 
 #if defined(MY_DEF_HERE)
-static void rtl8169_lan_led_control(struct net_device *dev, int state)
+void syno_rtd129x_rtl8169_lan_led_control(struct net_device *dev, int state)
 {
 	struct rtl8169_private *tp = netdev_priv(dev);
 	void __iomem *ioaddr = tp->mmio_addr;
 	u32 val = 0x00060000;
 
 	if(tp->led_cfg)
-		val = (0x00060000 | tp->led_cfg) & 0xFFFFFFF0;
+		val = (0x00060000 | tp->led_cfg) & ~0xF;
 
 	if(state == 0)
-		SYNO_LAN_LED_STATUS = 0x0;
+		tp->syno_lan_led_status = 0x0;
 	else
-		SYNO_LAN_LED_STATUS = 0xF;
+		tp->syno_lan_led_status = 0xF;
 
-	val += SYNO_LAN_LED_STATUS;
-	RTL_W32(LEDSEL, val);
+	RTL_W32(LEDSEL, val | tp->syno_lan_led_status);
 }
+EXPORT_SYMBOL(syno_rtd129x_rtl8169_lan_led_control);
 #endif /* MY_DEF_HERE */
 
 static const struct net_device_ops rtl_netdev_ops = {
@@ -7786,9 +7842,6 @@ static const struct net_device_ops rtl_netdev_ops = {
 #ifdef CONFIG_NET_POLL_CONTROLLER
 	.ndo_poll_controller	= rtl8169_netpoll,
 #endif
-#if defined(MY_DEF_HERE)
-	.ndo_lan_led_control	= rtl8169_lan_led_control,
-#endif /* MY_DEF_HERE */
 
 };
 
@@ -8062,14 +8115,14 @@ rtl_init_one(struct platform_device *pdev)
 		msleep(100);
 	}
 
+	/* only the model with link speed LED have iso_gpios attr, e.g. ds418 */
 	nic_gpio_iso = of_get_named_gpio_flags(pdev->dev.of_node, "iso-gpios", 0, NULL);
 	if (nic_gpio_iso) {
 		if (gpio_is_valid(nic_gpio_iso)) {
 			ret = gpio_request(nic_gpio_iso, "nic_gpio_iso");
 			if (ret < 0)
 				printk(KERN_ERR "%s: can't request gpio %d\n", __func__, nic_gpio_iso);
-		} else
-			printk(KERN_ERR "%s: gpio %d is not valid\n", __func__, nic_gpio_iso);
+		}
 	}
 
 	if (gpio_is_valid(nic_gpio_iso)) {
@@ -8207,8 +8260,12 @@ rtl_init_one(struct platform_device *pdev)
 	tp->mmio_clkaddr = clkaddr;
 	tp->led_cfg = led_config;
 #if defined(MY_DEF_HERE)
+	tp->syno_lan_led_status = 0xF;
 	if(tp->led_cfg)
-		SYNO_LAN_LED_STATUS = tp->led_cfg & 0xF;
+		tp->syno_lan_led_status = tp->led_cfg & 0xF;
+#endif /* MY_DEF_HERE */
+#ifdef MY_DEF_HERE
+	tp->rx_buffer_exhausted_count = 0;
 #endif /* MY_DEF_HERE */
 
 //	if (!pci_is_pcie(pdev))

@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -37,4 +33,3 @@ extern const struct ethtool_ops mv_pp3_ethtool_ops;
 extern const struct ethtool_ops mv_pp3_gnss_ethtool_ops;
 
 #endif /* __mv_ethtool_h__ */
-#endif /* MY_DEF_HERE */

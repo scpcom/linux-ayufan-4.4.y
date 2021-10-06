@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -4798,4 +4794,3 @@ int set_hw_a_node_map_directly(tm_handle hndl,
 	COMPLETE_HW_WRITE
 	return rc;
 }
-#endif /* MY_DEF_HERE */

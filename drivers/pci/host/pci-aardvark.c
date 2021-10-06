@@ -8,6 +8,13 @@
  *
  * Copyright (C) 2016 Marvell
  *
+ */
+#if defined(MY_DEF_HERE)
+/*
+ * Author: Hezi Shahmoon <hezi.shahmoon@marvell.com>
+ */
+#endif /* MY_DEF_HERE */
+/*
  * This file is licensed under the terms of the GNU General Public
  * License version 2.  This program is licensed "as is" without any
  * warranty of any kind, whether express or implied.
@@ -187,14 +194,34 @@
 #define CENTRAL_INT_BASE_ADDR			0x1b000
 #define HOST_CTRL_INT_STATUS_REG		(CENTRAL_INT_BASE_ADDR + 0x0)
 #define HOST_CTRL_INT_MASK_REG			(CENTRAL_INT_BASE_ADDR + 0x4)
+#if defined(MY_DEF_HERE)
+#define     PCIE_IRQ_CMDQ_INT			BIT(0)
+#endif /* MY_DEF_HERE */
 #define     PCIE_IRQ_MSI_STATUS_INT		BIT(1)
+#if defined(MY_DEF_HERE)
+#define     PCIE_IRQ_CMD_SENT_DONE		BIT(3)
+#endif /* MY_DEF_HERE */
 #define     PCIE_IRQ_DMA_INT			BIT(4)
+#if defined(MY_DEF_HERE)
+#define     PCIE_IRQ_IB_DXFERDONE		BIT(5)
+#endif /* MY_DEF_HERE */
 #define     PCIE_IRQ_OB_DXFERDONE		BIT(6)
 #define     PCIE_IRQ_OB_RXFERDONE		BIT(7)
+#if defined(MY_DEF_HERE)
+#define     PCIE_IRQ_COMPQ_INT			BIT(12)
+#define     PCIE_IRQ_DIR_RD_DDR_DET		BIT(13)
+#define     PCIE_IRQ_DIR_WR_DDR_DET		BIT(14)
+#endif /* MY_DEF_HERE */
 #define     PCIE_IRQ_CORE_INT			BIT(16)
 #define     PCIE_IRQ_CORE_INT_PIO		BIT(17)
 #define     PCIE_IRQ_DPMU_INT			BIT(18)
 #define     PCIE_IRQ_PCIE_MIS_INT		BIT(19)
+#if defined(MY_DEF_HERE)
+#define     PCIE_IRQ_MSI_INT1_DET		BIT(20)
+#define     PCIE_IRQ_MSI_INT2_DET		BIT(21)
+#define     PCIE_IRQ_RC_DBELL_DET		BIT(22)
+#define     PCIE_IRQ_EP_STATUS			BIT(23)
+#endif /* MY_DEF_HERE */
 #define     PCIE_IRQ_ALL_MASK			0xfff0fb
 #define     PCIE_IRQ_ENABLE_INTS_MASK		PCIE_IRQ_CORE_INT
 
@@ -225,6 +252,9 @@
 
 struct advk_pcie {
 	struct platform_device *pdev;
+#if defined(MY_DEF_HERE)
+	struct pci_bus *bus;
+#endif /* MY_DEF_HERE */
 	void __iomem *base;
 #if defined(MY_DEF_HERE)
 	struct phy *phy;
@@ -232,10 +262,23 @@ struct advk_pcie {
 	struct list_head resources;
 	struct irq_domain *irq_domain;
 	struct irq_chip irq_chip;
+#if defined(MY_DEF_HERE)
+//do nothing
+#else /* MY_DEF_HERE */
 	struct msi_controller msi;
+#endif /* MY_DEF_HERE */
 	struct irq_domain *msi_domain;
+#if defined(MY_DEF_HERE)
+	struct irq_domain *msi_inner_domain;
+	struct irq_chip msi_bottom_irq_chip;
+#endif /* MY_DEF_HERE */
 	struct irq_chip msi_irq_chip;
+#if defined(MY_DEF_HERE)
+	struct msi_domain_info msi_domain_info;
+	DECLARE_BITMAP(msi_used, MSI_IRQ_NUM);
+#else /* MY_DEF_HERE */
 	DECLARE_BITMAP(msi_irq_in_use, MSI_IRQ_NUM);
+#endif /* MY_DEF_HERE */
 	struct mutex msi_used_lock;
 	u16 msi_msg;
 	int root_bus_nr;
@@ -270,20 +313,31 @@ static int advk_pcie_link_up(struct advk_pcie *pcie)
 
 static int advk_pcie_wait_for_link(struct advk_pcie *pcie)
 {
+#if defined(MY_DEF_HERE)
+	struct device *dev = &pcie->pdev->dev;
+#endif /* MY_DEF_HERE */
 	int retries;
 
 	/* check if the link is up or not */
 	for (retries = 0; retries < LINK_WAIT_MAX_RETRIES; retries++) {
 		if (advk_pcie_link_up(pcie)) {
+#if defined(MY_DEF_HERE)
+			dev_info(dev, "link up\n");
+#else /* MY_DEF_HERE */
 			dev_info(&pcie->pdev->dev, "link up\n");
+#endif /* MY_DEF_HERE */
 			return 0;
 		}
 
 		usleep_range(LINK_WAIT_USLEEP_MIN, LINK_WAIT_USLEEP_MAX);
 	}
 
+#if defined(MY_DEF_HERE)
+	dev_err(dev, "link never came up\n");
+#else /* MY_DEF_HERE */
 	dev_err(&pcie->pdev->dev, "link never came up\n");
 
+#endif /* MY_DEF_HERE */
 	return -ETIMEDOUT;
 }
 
@@ -350,13 +404,23 @@ static void advk_pcie_setup_hw(struct advk_pcie *pcie)
 	/* Set PCIe Device Control and Status 1 PF0 register */
 	reg = PCIE_CORE_DEV_CTRL_STATS_RELAX_ORDER_DISABLE |
 #if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
+		(PCIE_CORE_DEV_CTRL_STATS_MAX_PAYLOAD_SZ <<
+		 PCIE_CORE_DEV_CTRL_STATS_MAX_PAYLOAD_SZ_SHIFT) |
+#else /* MY_DEF_HERE */
 		(PCIE_CORE_DEV_CTRL_STATS_MAX_PAYLOAD_SZ << PCIE_CORE_DEV_CTRL_STATS_MAX_PAYLOAD_SZ_SHIFT) |
+#endif /* MY_DEF_HERE */
 #else /* MY_DEF_HERE */
 		(7 << PCIE_CORE_DEV_CTRL_STATS_MAX_PAYLOAD_SZ_SHIFT) |
 #endif /* MY_DEF_HERE */
 		PCIE_CORE_DEV_CTRL_STATS_SNOOP_DISABLE |
 #if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
+		(PCIE_CORE_DEV_CTRL_STATS_MAX_RD_REQ_SZ <<
+		 PCIE_CORE_DEV_CTRL_STATS_MAX_RD_REQ_SIZE_SHIFT);
+#else /* MY_DEF_HERE */
 		(PCIE_CORE_DEV_CTRL_STATS_MAX_RD_REQ_SZ << PCIE_CORE_DEV_CTRL_STATS_MAX_RD_REQ_SIZE_SHIFT);
+#endif /* MY_DEF_HERE */
 #else /* MY_DEF_HERE */
 		PCIE_CORE_DEV_CTRL_STATS_MAX_RD_REQ_SIZE_SHIFT;
 #endif /* MY_DEF_HERE */
@@ -450,6 +514,9 @@ static void advk_pcie_setup_hw(struct advk_pcie *pcie)
 
 static void advk_pcie_check_pio_status(struct advk_pcie *pcie)
 {
+#if defined(MY_DEF_HERE)
+	struct device *dev = &pcie->pdev->dev;
+#endif /* MY_DEF_HERE */
 	u32 reg;
 	unsigned int status;
 	char *strcomp_status, *str_posted;
@@ -481,12 +548,19 @@ static void advk_pcie_check_pio_status(struct advk_pcie *pcie)
 	else
 		str_posted = "Posted";
 
+#if defined(MY_DEF_HERE)
+	dev_err(dev, "%s PIO Response Status: %s, %#x @ %#x\n",
+#else /* MY_DEF_HERE */
 	dev_err(&pcie->pdev->dev, "%s PIO Response Status: %s, %#x @ %#x\n",
+#endif /* MY_DEF_HERE */
 		str_posted, strcomp_status, reg, advk_readl(pcie, PIO_ADDR_LS));
 }
 
 static int advk_pcie_wait_pio(struct advk_pcie *pcie)
 {
+#if defined(MY_DEF_HERE)
+	struct device *dev = &pcie->pdev->dev;
+#endif /* MY_DEF_HERE */
 	unsigned long timeout;
 
 	timeout = jiffies + msecs_to_jiffies(PIO_TIMEOUT_MS);
@@ -500,7 +574,11 @@ static int advk_pcie_wait_pio(struct advk_pcie *pcie)
 			return 0;
 	}
 
+#if defined(MY_DEF_HERE)
+	dev_err(dev, "config read/write timed out\n");
+#else /* MY_DEF_HERE */
 	dev_err(&pcie->pdev->dev, "config read/write timed out\n");
+#endif /* MY_DEF_HERE */
 	return -ETIMEDOUT;
 }
 
@@ -617,10 +695,25 @@ static struct pci_ops advk_pcie_ops = {
 	.write = advk_pcie_wr_conf,
 };
 
+#if defined(MY_DEF_HERE)
+static void advk_msi_irq_compose_msi_msg(struct irq_data *data,
+					 struct msi_msg *msg)
+#else /* MY_DEF_HERE */
 static int advk_pcie_alloc_msi(struct advk_pcie *pcie)
+#endif /* MY_DEF_HERE */
 {
+#if defined(MY_DEF_HERE)
+	struct advk_pcie *pcie = irq_data_get_irq_chip_data(data);
+	phys_addr_t msi_msg = virt_to_phys(&pcie->msi_msg);
+#else /* MY_DEF_HERE */
 	int hwirq;
+#endif /* MY_DEF_HERE */
 
+#if defined(MY_DEF_HERE)
+	msg->address_lo = lower_32_bits(msi_msg);
+	msg->address_hi = upper_32_bits(msi_msg);
+	msg->data = data->irq;
+#else /* MY_DEF_HERE */
 	mutex_lock(&pcie->msi_used_lock);
 	hwirq = find_first_zero_bit(pcie->msi_irq_in_use, MSI_IRQ_NUM);
 	if (hwirq >= MSI_IRQ_NUM)
@@ -630,10 +723,19 @@ static int advk_pcie_alloc_msi(struct advk_pcie *pcie)
 	mutex_unlock(&pcie->msi_used_lock);
 
 	return hwirq;
+#endif /* MY_DEF_HERE */
 }
 
+#if defined(MY_DEF_HERE)
+static int advk_msi_set_affinity(struct irq_data *irq_data,
+				 const struct cpumask *mask, bool force)
+#else /* MY_DEF_HERE */
 static void advk_pcie_free_msi(struct advk_pcie *pcie, int hwirq)
+#endif /* MY_DEF_HERE */
 {
+#if defined(MY_DEF_HERE)
+	return -EINVAL;
+#else /* MY_DEF_HERE */
 	mutex_lock(&pcie->msi_used_lock);
 	if (!test_bit(hwirq, pcie->msi_irq_in_use))
 		dev_err(&pcie->pdev->dev, "trying to free unused MSI#%d\n",
@@ -641,12 +743,23 @@ static void advk_pcie_free_msi(struct advk_pcie *pcie, int hwirq)
 	else
 		clear_bit(hwirq, pcie->msi_irq_in_use);
 	mutex_unlock(&pcie->msi_used_lock);
+#endif /* MY_DEF_HERE */
 }
 
+#if defined(MY_DEF_HERE)
+static int advk_msi_irq_domain_alloc(struct irq_domain *domain,
+				     unsigned int virq,
+				     unsigned int nr_irqs, void *args)
+#else /* MY_DEF_HERE */
 static int advk_pcie_setup_msi_irq(struct msi_controller *chip,
 				   struct pci_dev *pdev,
 				   struct msi_desc *desc)
+#endif /* MY_DEF_HERE */
 {
+#if defined(MY_DEF_HERE)
+	struct advk_pcie *pcie = domain->host_data;
+	int hwirq, i;
+#else /* MY_DEF_HERE */
 	struct advk_pcie *pcie = pdev->bus->sysdata;
 	struct msi_msg msg;
 	int virq, hwirq;
@@ -659,13 +772,27 @@ static int advk_pcie_setup_msi_irq(struct msi_controller *chip,
 	hwirq = advk_pcie_alloc_msi(pcie);
 	if (hwirq < 0)
 		return hwirq;
+#endif /* MY_DEF_HERE */
 
+#if defined(MY_DEF_HERE)
+	mutex_lock(&pcie->msi_used_lock);
+	hwirq = bitmap_find_next_zero_area(pcie->msi_used, MSI_IRQ_NUM,
+					   0, nr_irqs, 0);
+	if (hwirq >= MSI_IRQ_NUM) {
+		mutex_unlock(&pcie->msi_used_lock);
+		return -ENOSPC;
+#else /* MY_DEF_HERE */
 	virq = irq_create_mapping(pcie->msi_domain, hwirq);
 	if (!virq) {
 		advk_pcie_free_msi(pcie, hwirq);
 		return -EINVAL;
+#endif /* MY_DEF_HERE */
 	}
 
+#if defined(MY_DEF_HERE)
+	bitmap_set(pcie->msi_used, hwirq, nr_irqs);
+	mutex_unlock(&pcie->msi_used_lock);
+#else /* MY_DEF_HERE */
 	irq_set_msi_desc(virq, desc);
 
 	msi_msg_phys = virt_to_phys(&pcie->msi_msg);
@@ -678,7 +805,15 @@ static int advk_pcie_setup_msi_irq(struct msi_controller *chip,
 
 	return 0;
 }
+#endif /* MY_DEF_HERE */
 
+#if defined(MY_DEF_HERE)
+	for (i = 0; i < nr_irqs; i++)
+		irq_domain_set_info(domain, virq + i, hwirq + i,
+				    &pcie->msi_bottom_irq_chip,
+				    domain->host_data, handle_simple_irq,
+				    NULL, NULL);
+#else /* MY_DEF_HERE */
 static void advk_pcie_teardown_msi_irq(struct msi_controller *chip,
 				       unsigned int irq)
 {
@@ -686,24 +821,49 @@ static void advk_pcie_teardown_msi_irq(struct msi_controller *chip,
 	struct msi_desc *msi = irq_data_get_msi_desc(d);
 	struct advk_pcie *pcie = msi_desc_to_pci_sysdata(msi);
 	unsigned long hwirq = d->hwirq;
+#endif /* MY_DEF_HERE */
 
+#if defined(MY_DEF_HERE)
+	return hwirq;
+#else /* MY_DEF_HERE */
 	irq_dispose_mapping(irq);
 	advk_pcie_free_msi(pcie, hwirq);
+#endif /* MY_DEF_HERE */
 }
 
+#if defined(MY_DEF_HERE)
+static void advk_msi_irq_domain_free(struct irq_domain *domain,
+				     unsigned int virq, unsigned int nr_irqs)
+#else /* MY_DEF_HERE */
 static int advk_pcie_msi_map(struct irq_domain *domain,
 			     unsigned int virq, irq_hw_number_t hw)
+#endif /* MY_DEF_HERE */
 {
+#if defined(MY_DEF_HERE)
+	struct irq_data *d = irq_domain_get_irq_data(domain, virq);
+#endif /* MY_DEF_HERE */
 	struct advk_pcie *pcie = domain->host_data;
 
+#if defined(MY_DEF_HERE)
+	mutex_lock(&pcie->msi_used_lock);
+	bitmap_clear(pcie->msi_used, d->hwirq, nr_irqs);
+	mutex_unlock(&pcie->msi_used_lock);
+#else /* MY_DEF_HERE */
 	irq_set_chip_and_handler(virq, &pcie->msi_irq_chip,
 				 handle_simple_irq);
 
 	return 0;
+#endif /* MY_DEF_HERE */
 }
 
+#if defined(MY_DEF_HERE)
+static const struct irq_domain_ops advk_msi_domain_ops = {
+	.alloc = advk_msi_irq_domain_alloc,
+	.free = advk_msi_irq_domain_free,
+#else /* MY_DEF_HERE */
 static const struct irq_domain_ops advk_pcie_msi_irq_ops = {
 	.map = advk_pcie_msi_map,
+#endif /* MY_DEF_HERE */
 };
 
 static void advk_pcie_irq_mask(struct irq_data *d)
@@ -763,34 +923,78 @@ static int advk_pcie_init_msi_irq_domain(struct advk_pcie *pcie)
 {
 	struct device *dev = &pcie->pdev->dev;
 	struct device_node *node = dev->of_node;
+#if defined(MY_DEF_HERE)
+	struct irq_chip *bottom_ic, *msi_ic;
+	struct msi_domain_info *msi_di;
+#else /* MY_DEF_HERE */
 	struct irq_chip *msi_irq_chip;
 	struct msi_controller *msi;
+#endif /* MY_DEF_HERE */
 #if defined(MY_DEF_HERE)
 //do nothing
 #else /* MY_DEF_HERE */
 	phys_addr_t msi_msg_phys;
 #endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
+	phys_addr_t msi_msg_phys;
+#else /* MY_DEF_HERE */
 	int ret;
+#endif /* MY_DEF_HERE */
 
+#if defined(MY_DEF_HERE)
+	mutex_init(&pcie->msi_used_lock);
+#else /* MY_DEF_HERE */
 	msi_irq_chip = &pcie->msi_irq_chip;
+#endif /* MY_DEF_HERE */
 
+#if defined(MY_DEF_HERE)
+	bottom_ic = &pcie->msi_bottom_irq_chip;
+#else /* MY_DEF_HERE */
 	msi_irq_chip->name = devm_kasprintf(dev, GFP_KERNEL, "%s-msi",
 					    dev_name(dev));
 	if (!msi_irq_chip->name)
 		return -ENOMEM;
+#endif /* MY_DEF_HERE */
 
+#if defined(MY_DEF_HERE)
+	bottom_ic->name = "MSI";
+	bottom_ic->irq_compose_msi_msg = advk_msi_irq_compose_msi_msg;
+	bottom_ic->irq_set_affinity = advk_msi_set_affinity;
+#else /* MY_DEF_HERE */
 	msi_irq_chip->irq_enable = pci_msi_unmask_irq;
 	msi_irq_chip->irq_disable = pci_msi_mask_irq;
 	msi_irq_chip->irq_mask = pci_msi_mask_irq;
 	msi_irq_chip->irq_unmask = pci_msi_unmask_irq;
+#endif /* MY_DEF_HERE */
 
+#if defined(MY_DEF_HERE)
+	msi_ic = &pcie->msi_irq_chip;
+	msi_ic->name = "advk-MSI";
+#else /* MY_DEF_HERE */
 	msi = &pcie->msi;
+#endif /* MY_DEF_HERE */
 
+#if defined(MY_DEF_HERE)
+	msi_di = &pcie->msi_domain_info;
+	msi_di->flags = MSI_FLAG_USE_DEF_DOM_OPS | MSI_FLAG_USE_DEF_CHIP_OPS |
+		MSI_FLAG_MULTI_PCI_MSI;
+	msi_di->chip = msi_ic;
+#else /* MY_DEF_HERE */
 	msi->setup_irq = advk_pcie_setup_msi_irq;
 	msi->teardown_irq = advk_pcie_teardown_msi_irq;
 	msi->of_node = node;
+#endif /* MY_DEF_HERE */
 
+#if defined(MY_DEF_HERE)
+	msi_msg_phys = virt_to_phys(&pcie->msi_msg);
+
+	advk_writel(pcie, lower_32_bits(msi_msg_phys),
+		    PCIE_MSI_ADDR_LOW_REG);
+	advk_writel(pcie, upper_32_bits(msi_msg_phys),
+		    PCIE_MSI_ADDR_HIGH_REG);
+#else /* MY_DEF_HERE */
 	mutex_init(&pcie->msi_used_lock);
+#endif /* MY_DEF_HERE */
 
 #if defined(MY_DEF_HERE)
 //do nothing
@@ -803,16 +1007,34 @@ static int advk_pcie_init_msi_irq_domain(struct advk_pcie *pcie)
 		    PCIE_MSI_ADDR_HIGH_REG);
 
 #endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
+	pcie->msi_inner_domain =
+#else /* MY_DEF_HERE */
 	pcie->msi_domain =
+#endif /* MY_DEF_HERE */
 		irq_domain_add_linear(NULL, MSI_IRQ_NUM,
+#if defined(MY_DEF_HERE)
+				      &advk_msi_domain_ops, pcie);
+	if (!pcie->msi_inner_domain)
+#else /* MY_DEF_HERE */
 				      &advk_pcie_msi_irq_ops, pcie);
 	if (!pcie->msi_domain)
+#endif /* MY_DEF_HERE */
 		return -ENOMEM;
 
+#if defined(MY_DEF_HERE)
+	pcie->msi_domain =
+		pci_msi_create_irq_domain(of_node_to_fwnode(node),
+					  msi_di, pcie->msi_inner_domain);
+	if (!pcie->msi_domain) {
+		irq_domain_remove(pcie->msi_inner_domain);
+		return -ENOMEM;
+#else /* MY_DEF_HERE */
 	ret = of_pci_msi_chip_add(msi);
 	if (ret < 0) {
 		irq_domain_remove(pcie->msi_domain);
 		return ret;
+#endif /* MY_DEF_HERE */
 	}
 
 	return 0;
@@ -820,8 +1042,15 @@ static int advk_pcie_init_msi_irq_domain(struct advk_pcie *pcie)
 
 static void advk_pcie_remove_msi_irq_domain(struct advk_pcie *pcie)
 {
+#if defined(MY_DEF_HERE)
+//do nothing
+#else /* MY_DEF_HERE */
 	of_pci_msi_chip_remove(&pcie->msi);
+#endif /* MY_DEF_HERE */
 	irq_domain_remove(pcie->msi_domain);
+#if defined(MY_DEF_HERE)
+	irq_domain_remove(pcie->msi_inner_domain);
+#endif /* MY_DEF_HERE */
 }
 
 static int advk_pcie_init_irq_domain(struct advk_pcie *pcie)
@@ -965,7 +1194,11 @@ static int advk_pcie_parse_request_of_pci_ranges(struct advk_pcie *pcie)
 	int err, res_valid = 0;
 	struct device *dev = &pcie->pdev->dev;
 	struct device_node *np = dev->of_node;
+#if defined(MY_DEF_HERE)
+	struct resource_entry *win, *tmp;
+#else /* MY_DEF_HERE */
 	struct resource_entry *win;
+#endif /* MY_DEF_HERE */
 	resource_size_t iobase;
 
 	INIT_LIST_HEAD(&pcie->resources);
@@ -975,7 +1208,11 @@ static int advk_pcie_parse_request_of_pci_ranges(struct advk_pcie *pcie)
 	if (err)
 		return err;
 
+#if defined(MY_DEF_HERE)
+	resource_list_for_each_entry_safe(win, tmp, &pcie->resources) {
+#else /* MY_DEF_HERE */
 	resource_list_for_each_entry(win, &pcie->resources) {
+#endif /* MY_DEF_HERE */
 		struct resource *parent = NULL;
 		struct resource *res = win->res;
 
@@ -996,6 +1233,9 @@ static int advk_pcie_parse_request_of_pci_ranges(struct advk_pcie *pcie)
 			if (err) {
 				dev_warn(dev, "error %d: failed to map resource %pR\n",
 					 err, res);
+#if defined(MY_DEF_HERE)
+				resource_list_destroy_entry(win);
+#endif /* MY_DEF_HERE */
 				continue;
 			}
 			break;
@@ -1019,7 +1259,11 @@ static int advk_pcie_parse_request_of_pci_ranges(struct advk_pcie *pcie)
 		default:
 			continue;
 		}
+#if defined(MY_DEF_HERE)
+//do nothing
+#else /* MY_DEF_HERE */
 
+#endif /* MY_DEF_HERE */
 		if (parent) {
 			err = devm_request_resource(dev, parent, res);
 			if (err)
@@ -1118,11 +1362,18 @@ static int advk_pcie_clk_enable_then_reset(struct advk_pcie *pcie)
 #endif /* MY_DEF_HERE */
 static int advk_pcie_probe(struct platform_device *pdev)
 {
+#if defined(MY_DEF_HERE)
+	struct device *dev = &pdev->dev;
+#endif /* MY_DEF_HERE */
 	struct advk_pcie *pcie;
 	struct resource *res;
 	struct pci_bus *bus, *child;
+#if defined(MY_DEF_HERE)
+//do nothing
+#else /* MY_DEF_HERE */
 	struct msi_controller *msi;
 	struct device_node *msi_node;
+#endif /* MY_DEF_HERE */
 #if defined(MY_DEF_HERE)
 //do nothing
 #else /* MY_DEF_HERE */
@@ -1142,8 +1393,12 @@ static int advk_pcie_probe(struct platform_device *pdev)
 	int reset_gpio;
 #endif /* MY_DEF_HERE */
 
+#if defined(MY_DEF_HERE)
+	pcie = devm_kzalloc(dev, sizeof(struct advk_pcie), GFP_KERNEL);
+#else /* MY_DEF_HERE */
 	pcie = devm_kzalloc(&pdev->dev, sizeof(struct advk_pcie),
 			    GFP_KERNEL);
+#endif /* MY_DEF_HERE */
 	if (!pcie)
 		return -ENOMEM;
 
@@ -1151,11 +1406,20 @@ static int advk_pcie_probe(struct platform_device *pdev)
 	platform_set_drvdata(pdev, pcie);
 
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+#if defined(MY_DEF_HERE)
+	pcie->base = devm_ioremap_resource(dev, res);
+	if (IS_ERR(pcie->base))
+#else /* MY_DEF_HERE */
 	pcie->base = devm_ioremap_resource(&pdev->dev, res);
 	if (IS_ERR(pcie->base)) {
 		dev_err(&pdev->dev, "Failed to map registers\n");
+#endif /* MY_DEF_HERE */
 		return PTR_ERR(pcie->base);
+#if defined(MY_DEF_HERE)
+//do nothing
+#else /* MY_DEF_HERE */
 	}
+#endif /* MY_DEF_HERE */
 
 #if defined(MY_DEF_HERE)
 	/* Get comphy and init if there is */
@@ -1181,11 +1445,19 @@ static int advk_pcie_probe(struct platform_device *pdev)
 
 #endif /* MY_DEF_HERE */
 	irq = platform_get_irq(pdev, 0);
+#if defined(MY_DEF_HERE)
+	ret = devm_request_irq(dev, irq, advk_pcie_irq_handler,
+#else /* MY_DEF_HERE */
 	ret = devm_request_irq(&pdev->dev, irq, advk_pcie_irq_handler,
+#endif /* MY_DEF_HERE */
 			       IRQF_SHARED | IRQF_NO_THREAD, "advk-pcie",
 			       pcie);
 	if (ret) {
+#if defined(MY_DEF_HERE)
+		dev_err(dev, "Failed to register interrupt\n");
+#else /* MY_DEF_HERE */
 		dev_err(&pdev->dev, "Failed to register interrupt\n");
+#endif /* MY_DEF_HERE */
 		return ret;
 	}
 
@@ -1196,7 +1468,11 @@ static int advk_pcie_probe(struct platform_device *pdev)
 	clk = devm_clk_get(&pdev->dev, NULL);
 	if (IS_ERR(clk)) {
 #endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
+		dev_err(dev, "Failed to obtain clock from DT\n");
+#else /* MY_DEF_HERE */
 		dev_err(&pdev->dev, "Failed to obtain clock from DT\n");
+#endif /* MY_DEF_HERE */
 #if defined(MY_DEF_HERE)
 		return PTR_ERR(pcie->clk);
 #else /* MY_DEF_HERE */
@@ -1205,18 +1481,34 @@ static int advk_pcie_probe(struct platform_device *pdev)
 	}
 
 #if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
+	/* Config reset gpio for pcie if there is valid gpio setting in DTS */
+#else /* MY_DEF_HERE */
 	/* Config reset gpio for pcie */
+#endif /* MY_DEF_HERE */
 #if defined(MY_DEF_HERE)
 	reset_gpio = of_get_named_gpio_flags(dn, "reset-gpios", 0, &pcie->flags);
 #else /* MY_DEF_HERE */
 	reset_gpio = of_get_named_gpio_flags(dn, "reset-gpios", 0, &flags);
 #endif /* MY_DEF_HERE */
-	if (reset_gpio != -EPROBE_DEFER) {
 #if defined(MY_DEF_HERE)
 //do nothing
 #else /* MY_DEF_HERE */
 		pcie->reset_gpio = gpio_to_desc(reset_gpio);
 #endif /* MY_DEF_HERE */
+
+#if defined(MY_DEF_HERE)
+	if (gpio_is_valid(reset_gpio)) {
+		pcie->reset_gpio = gpio_to_desc(reset_gpio);
+		ret = advk_pcie_clk_enable_then_reset(pcie);
+		if (ret)
+			return ret;
+
+		/* continue init flow after pcie reset */
+		goto after_pcie_reset;
+	} else if (reset_gpio == -EPROBE_DEFER) {
+		return -EPROBE_DEFER;
+#else /* MY_DEF_HERE */
 		if (gpio_is_valid(reset_gpio)) {
 #if defined(MY_DEF_HERE)
 			pcie->reset_gpio = gpio_to_desc(reset_gpio);
@@ -1274,6 +1566,7 @@ static int advk_pcie_probe(struct platform_device *pdev)
 			/* continue init flow after pcie reset */
 			goto after_pcie_reset;
 		}
+#endif /* MY_DEF_HERE */
 	}
 
 #endif /* MY_DEF_HERE */
@@ -1283,7 +1576,11 @@ static int advk_pcie_probe(struct platform_device *pdev)
 	ret = clk_prepare_enable(clk);
 #endif /* MY_DEF_HERE */
 	if (ret) {
+#if defined(MY_DEF_HERE)
+		dev_err(dev, "Failed to enable clock\n");
+#else /* MY_DEF_HERE */
 		dev_err(&pdev->dev, "Failed to enable clock\n");
+#endif /* MY_DEF_HERE */
 		return ret;
 	}
 #if defined(MY_DEF_HERE)
@@ -1291,7 +1588,11 @@ after_pcie_reset:
 #endif /* MY_DEF_HERE */
 	ret = advk_pcie_parse_request_of_pci_ranges(pcie);
 	if (ret) {
+#if defined(MY_DEF_HERE)
+		dev_err(dev, "Failed to parse resources\n");
+#else /* MY_DEF_HERE */
 		dev_err(&pdev->dev, "Failed to parse resources\n");
+#endif /* MY_DEF_HERE */
 		goto err_clk;
 	}
 
@@ -1299,17 +1600,29 @@ after_pcie_reset:
 
 	ret = advk_pcie_init_irq_domain(pcie);
 	if (ret) {
+#if defined(MY_DEF_HERE)
+		dev_err(dev, "Failed to initialize irq\n");
+#else /* MY_DEF_HERE */
 		dev_err(&pdev->dev, "Failed to initialize irq\n");
+#endif /* MY_DEF_HERE */
 		goto err_clk;
 	}
 
 	ret = advk_pcie_init_msi_irq_domain(pcie);
 	if (ret) {
+#if defined(MY_DEF_HERE)
+		dev_err(dev, "Failed to initialize irq\n");
+#else /* MY_DEF_HERE */
 		dev_err(&pdev->dev, "Failed to initialize irq\n");
+#endif /* MY_DEF_HERE */
 		advk_pcie_remove_irq_domain(pcie);
 		goto err_clk;
 	}
 
+#if defined(MY_DEF_HERE)
+	bus = pci_scan_root_bus(dev, 0, &advk_pcie_ops,
+				pcie, &pcie->resources);
+#else /* MY_DEF_HERE */
 	msi_node = of_parse_phandle(pdev->dev.of_node, "msi-parent", 0);
 	if (msi_node)
 		msi = of_pci_find_msi_chip_by_node(msi_node);
@@ -1318,6 +1631,7 @@ after_pcie_reset:
 
 	bus = pci_scan_root_bus_msi(&pdev->dev, 0, &advk_pcie_ops,
 				    pcie, &pcie->resources, &pcie->msi);
+#endif /* MY_DEF_HERE */
 	if (!bus) {
 		advk_pcie_remove_msi_irq_domain(pcie);
 		advk_pcie_remove_irq_domain(pcie);
@@ -1326,6 +1640,9 @@ after_pcie_reset:
 	}
 
 	pci_bus_assign_resources(bus);
+#if defined(MY_DEF_HERE)
+	pcie->bus = bus;
+#endif /* MY_DEF_HERE */
 
 	list_for_each_entry(child, &bus->children, node)
 		pcie_bus_configure_settings(child);
@@ -1336,7 +1653,11 @@ after_pcie_reset:
 
 #endif /* MY_DEF_HERE */
 	pci_bus_add_devices(bus);
+#if defined(MY_DEF_HERE)
+//do nothing
+#else /* MY_DEF_HERE */
 
+#endif /* MY_DEF_HERE */
 	return 0;
 
 err_clk:
@@ -1397,6 +1718,11 @@ static int advk_pcie_resume_noirq(struct device *dev)
 
 	advk_pcie_setup_hw(pcie);
 
+#if defined(MY_DEF_HERE)
+	/* Reconfigure the MAX pay load size */
+	advk_pcie_configure_mps(pcie->bus, pcie);
+
+#endif /* MY_DEF_HERE */
 	return 0;
 }
 
@@ -1426,8 +1752,12 @@ static struct platform_driver advk_pcie_driver = {
 	.probe = advk_pcie_probe,
 };
 module_platform_driver(advk_pcie_driver);
+#if defined(MY_DEF_HERE)
+//do nothing
+#else /* MY_DEF_HERE */
 
 MODULE_AUTHOR("Hezi Shahmoon <hezi.shahmoon@marvell.com>");
 MODULE_DESCRIPTION("Aardvark PCIe driver");
 MODULE_LICENSE("GPL v2");
+#endif /* MY_DEF_HERE */
 #endif /* MY_DEF_HERE */

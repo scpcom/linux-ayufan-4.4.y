@@ -61,6 +61,10 @@ config SYNO_ELEVATE_LOG_LEVEL
 	bool "Elevate log level of kernel log"
 	default y
 
+config SYNO_DEGRADE_LOG_LEVEL
+	bool "degrade log level"
+	default y
+
 config SYNO_DYNAMIC_IDENTIFY_CPU_NAME
 	bool "dynamic identify CPU name"
 	default y
@@ -93,6 +97,48 @@ config SYNO_FIX_RTC_WAKE_AFTER_POWER_FAILURE
 	default y
 	depends on SYNO_X64
 
+config SYNO_IE_SOFT_POWER_OFF
+	bool "IE soft power off"
+	depends on SYNO_PURLEY
+	select ACPI_BUTTON
+	default n
+
+config SYNO_IE_SOFT_POWER_OFF
+	bool "IE soft power off"
+	depends on SYNO_PURLEY
+	select ACPI_BUTTON
+	default n
+
+config SYNO_SATA_CHECK
+	tristate "show sata chip amplitude/de-emphasis adjustment."
+	default n
+
+config SYNO_SATA_TEST
+	bool "sata controller pci register sysfs setting interface for amplitude/de-emphasis adjustment."
+	default n
+
+config SYNO_SPECULATION_DEFAULT_OFF
+	bool "Set speculation mitigation to default off"
+	default n
+	depends on PAGE_TABLE_ISOLATION
+
+config SYNO_FIX_TICK_REPROGRAM
+	bool "Fix tick reprogram bug"
+	default n
+
+endmenu #MISC Features
+
+menu "Cgroup"
+
+endmenu #Cgroup
+
+config SYNO_CGROUP_SKIP_MEMCG
+	bool "skip memcg check in critical path"
+	default y
+	depends on MEMCG
+
+menu "Encryption"
+
 config SYNO_KEY
 	bool "use keys supply by our system"
 	depends on KEYS
@@ -108,10 +154,6 @@ config SYNO_SYSTEM_UNTRUSTED_KEYS
 config SYNO_REMOVE_X509_DATE_VALIDATION_CONSTRAIN
 	bool "Remote x509 date validation constrain"
 	depends on KEYS
-
-endmenu #MISC Features
-
-menu "Encryption"
 
 endmenu #Encryption
 

@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -336,4 +332,3 @@ static void pp3_pack_dump(char *desc, char *data, int offs_begin, int pack_len)
 	} while (i < pack_len);
 }
 #endif/*PTP_PACKET_DUMP*/
-#endif /* MY_DEF_HERE */

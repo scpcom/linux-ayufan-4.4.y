@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -218,5 +214,3 @@ int tm_read_port_configuration_hw(tm_handle hndl, uint32_t port_index,
 							uint32_t *p_last_child);
 
 #endif   /* TM_NODES_READ_H */
-
-#endif /* MY_DEF_HERE */

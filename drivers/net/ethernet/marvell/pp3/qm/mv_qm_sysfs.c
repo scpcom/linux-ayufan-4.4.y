@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -207,4 +203,3 @@ int mv_pp3_qm_sysfs_exit(struct kobject *pp3_kobj)
 	sysfs_remove_group(pp3_kobj, &mv_qm_group);
 	return 0;
 }
-#endif /* MY_DEF_HERE */

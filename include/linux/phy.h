@@ -86,6 +86,9 @@ typedef enum {
 	PHY_INTERFACE_MODE_RTBI,
 	PHY_INTERFACE_MODE_SMII,
 	PHY_INTERFACE_MODE_XGMII,
+#if defined(MY_DEF_HERE)
+	PHY_INTERFACE_MODE_1000BASEX,
+#endif /* MY_DEF_HERE */
 	PHY_INTERFACE_MODE_MOCA,
 	PHY_INTERFACE_MODE_QSGMII,
 #if defined(MY_DEF_HERE)
@@ -134,6 +137,10 @@ static inline const char *phy_modes(phy_interface_t interface)
 		return "smii";
 	case PHY_INTERFACE_MODE_XGMII:
 		return "xgmii";
+#if defined(MY_DEF_HERE)
+	case PHY_INTERFACE_MODE_1000BASEX:
+		return "1000base-x";
+#endif /* MY_DEF_HERE */
 	case PHY_INTERFACE_MODE_MOCA:
 		return "moca";
 	case PHY_INTERFACE_MODE_QSGMII:

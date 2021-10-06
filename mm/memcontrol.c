@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* memcontrol.c - Memory Controller
  *
  * Copyright IBM Corporation, 2007
@@ -2064,6 +2067,10 @@ retry:
 	if (unlikely(current->flags & PF_MEMALLOC))
 		goto force;
 
+#ifdef MY_ABC_HERE
+	if (task_skip_memcg_account(current))
+		goto force;
+#endif
 	if (unlikely(task_in_memcg_oom(current)))
 		goto nomem;
 

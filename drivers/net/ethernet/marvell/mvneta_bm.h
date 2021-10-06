@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*
  * Driver for Marvell NETA network controller Buffer Manager.
  *
@@ -82,6 +78,7 @@
 
 /* Other definitions */
 #define MVNETA_BM_SHORT_PKT_SIZE		256
+#define MVNETA_BM_LONG_PKT_SIZE			(9 * 1024)
 #define MVNETA_BM_POOLS_NUM			4
 #define MVNETA_BM_POOL_CAP_MIN			128
 #define MVNETA_BM_POOL_CAP_DEF			2048
@@ -91,8 +88,6 @@
 #define MVNETA_BM_POOL_PTR_ALIGN		32
 
 #define MVNETA_BM_POOL_ACCESS_OFFS		8
-
-#define MVNETA_BM_BPPI_SIZE			0x100000
 
 #define MVNETA_RX_BUF_SIZE(pkt_size)   ((pkt_size) + NET_SKB_PAD)
 
@@ -113,6 +108,8 @@ struct mvneta_bm {
 	void __iomem *bppi_virt_addr;
 	/* BPPI physical base address */
 	dma_addr_t bppi_phys_addr;
+	/* BPPI size */
+	size_t bppi_size;
 
 	/* BM pools */
 	struct mvneta_bm_pool *bm_pools;
@@ -192,4 +189,3 @@ static inline u32 mvneta_bm_pool_get_bp(struct mvneta_bm *priv,
 { return 0; }
 #endif /* CONFIG_MVNETA_BM */
 #endif
-#endif /* MY_DEF_HERE */

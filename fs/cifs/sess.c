@@ -483,8 +483,12 @@ select_sectype(struct TCP_Server_Info *server, enum securityEnum requested)
 		case LANMAN:
 			return requested;
 		case Unspecified:
+#if defined(MY_ABC_HERE) && !defined(CONFIG_CIFS_WEAK_PW_HASH)
+			 
+#else
 			if (global_secflags & CIFSSEC_MAY_LANMAN)
 				return LANMAN;
+#endif
 			 
 		default:
 			return Unspecified;

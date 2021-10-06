@@ -1467,6 +1467,10 @@ nfsd4_proc_compound(struct svc_rqst *rqstp,
 	}
 
 	while (!status && resp->opcnt < args->opcnt) {
+#ifdef MY_ABC_HERE
+		ktime_t stime = ktime_get();
+#endif
+
 		op = &args->ops[resp->opcnt++];
 
 		dprintk("nfsv4 compound op #%d/%d: %d (%s)\n",
@@ -1543,6 +1547,10 @@ encode_op:
 
 		nfsd4_cstate_clear_replay(cstate);
 		nfsd4_increment_op_stats(op->opnum);
+#ifdef MY_ABC_HERE
+		if (op->opnum >= FIRST_NFS4_OP && op->opnum <= LAST_NFS4_OP)
+			svc_update_lat(&nfsdstats.nfs4_oplatency[op->opnum], stime);
+#endif
 	}
 
 	cstate->status = status;

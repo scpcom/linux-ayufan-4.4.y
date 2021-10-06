@@ -6,9 +6,7 @@
 
 #define SD_MAJORS	16
 
-#ifdef MY_ABC_HERE
-#define SD_TIMEOUT		(1024 * HZ)
-#elif defined(MY_ABC_HERE)
+#if defined(MY_ABC_HERE)
 #define SD_TIMEOUT		(60 * HZ)
 #else  
 #define SD_TIMEOUT		(30 * HZ)
@@ -51,7 +49,7 @@ enum {
 	SD_LBP_DISABLE,		 
 };
 
-#ifdef MY_ABC_HERE
+#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 typedef enum __syno_disk_type {
 	SYNO_DISK_UNKNOWN = 0,
 	SYNO_DISK_SATA,
@@ -80,10 +78,10 @@ struct scsi_disk {
 	u32		unmap_granularity;
 	u32		unmap_alignment;
 	u32		index;
-#ifdef MY_ABC_HERE
+#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 	SYNO_DISK_TYPE	synodisktype;
 #endif  
-#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	u32		synoindex;
 #endif  
 	unsigned int	physical_block_size;

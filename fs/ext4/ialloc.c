@@ -86,7 +86,10 @@ static int ext4_validate_inode_bitmap(struct super_block *sb,
 {
 	ext4_fsblk_t	blk;
 	struct ext4_group_info *grp = ext4_get_group_info(sb, block_group);
+#ifdef MY_ABC_HERE
+#else
 	struct ext4_sb_info *sbi = EXT4_SB(sb);
+#endif  
 
 	if (buffer_verified(bh))
 		return 0;
@@ -97,6 +100,10 @@ static int ext4_validate_inode_bitmap(struct super_block *sb,
 	blk = ext4_inode_bitmap(sb, desc);
 	if (!ext4_inode_bitmap_csum_verify(sb, block_group, desc, bh,
 					   EXT4_INODES_PER_GROUP(sb) / 8)) {
+#ifdef MY_ABC_HERE
+		ext4_msg(sb, KERN_CRIT, "Corrupt inode bitmap - block_group = %u, "
+			   "inode_bitmap = %llu", block_group, blk);
+#else
 		ext4_unlock_group(sb, block_group);
 		ext4_error(sb, "Corrupt inode bitmap - block_group = %u, "
 			   "inode_bitmap = %llu", block_group, blk);
@@ -109,6 +116,7 @@ static int ext4_validate_inode_bitmap(struct super_block *sb,
 		}
 		set_bit(EXT4_GROUP_INFO_IBITMAP_CORRUPT_BIT, &grp->bb_state);
 		return -EFSBADCRC;
+#endif  
 	}
 	set_buffer_verified(bh);
 	ext4_unlock_group(sb, block_group);
@@ -882,9 +890,7 @@ got:
 #endif  
 
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
-	if (!EXT4_HAS_RO_COMPAT_FEATURE(sb, EXT4_FEATURE_RO_COMPAT_METADATA_CSUM)) {
-		inode->i_archive_bit = ALL_SYNO_ARCHIVE;	 
-	}
+	inode->i_archive_bit = ALL_SYNO_ARCHIVE;	 
 #endif  
 
 	memset(ei->i_data, 0, sizeof(ei->i_data));

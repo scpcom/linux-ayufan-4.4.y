@@ -42,7 +42,7 @@ config MVMDIO
 
 config MVXMDIO
 	tristate "Marvell xMDIO interface support"
-	depends on HAS_IOMEM && SYNO_LSP_ARMADA_16_12
+	depends on HAS_IOMEM
 	select PHYLIB
 	---help---
 	  This driver supports the xMDIO interface found in the network
@@ -54,7 +54,7 @@ config MVXMDIO
 config MVNETA_BM
 	tristate "Marvell Armada 38x/XP/37xx network interface BM support"
 	depends on MVNETA
-	depends on SYNO_LSP_ARMADA_17_04_02
+	select SRAM
 	select HWBM
 	---help---
 	  This driver supports auxiliary block of the network
@@ -68,7 +68,7 @@ config MVNETA_BM
 
 config MVNETA
 	tristate "Marvell Armada 370/38x/XP/37xx network interface support"
-	depends on (ARCH_MVEBU && SYNO_LSP_ARMADA_16_12) || (PLAT_ORION && (!SYNO_LSP_ARMADA_16_12))
+	depends on ARCH_MVEBU
 	select MVMDIO
 	select FIXED_PHY
 	---help---
@@ -81,16 +81,17 @@ config MVNETA
 	  (Dove, Orion, Discovery, Kirkwood).
 
 config MVPP2
-	tristate "Marvell Armada 375 network interface support"
-	depends on MACH_ARMADA_375
+	tristate "Marvell Armada 375/70xx/80xx network interface support(mainline)"
+	depends on ARCH_MVEBU
 	select MVMDIO
+	select MVXMDIO
 	---help---
 	  This driver supports the network interface units in the
-	  Marvell ARMADA 375 SoC.
+	  Marvell ARMADA 375/70xx/80xx SoC series
 
 config MVPP2X
         tristate "Marvell Armada 375/70xx/80xx network interface support"
-       depends on ARCH_MVEBU && SYNO_LSP_ARMADA_16_12
+       depends on ARCH_MVEBU
         select MVMDIO
         select MVXMDIO
         ---help---
@@ -177,13 +178,11 @@ config SKY2_DEBUG
 
 config MVNET_COMPLEX
 	bool "Choose to compile Marvell Net Complex support"
-	depends on ARCH_MVEBU && SYNO_LSP_ARMADA_16_12
+	depends on ARCH_MVEBU
 	---help---
 	Use Marvell propriotary netcomplex driver for A390.
 	The driver located uner directory mvebu_net/a390_nc.
 
-if SYNO_LSP_ARMADA_16_12
 source "drivers/net/ethernet/marvell/pp3/Kconfig"
-endif
 
 endif # NET_VENDOR_MARVELL

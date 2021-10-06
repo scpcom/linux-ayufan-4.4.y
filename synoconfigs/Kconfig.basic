@@ -6,12 +6,12 @@ config SYNO_SYSTEM_CALL
 
 config SYNO_USB_FLASH_BOOT
 	bool "Boot From USB Flash"
-	depends on SYNO_FIXED_DISK_NAME
+	depends on SYNO_FIXED_DISK_NAME || SYNO_PORT_MAPPING_V2
 	default y
 
 config SYNO_USB_FLASH_BOOT_KVMX64
 	bool "Boot From USB Flash"
-	depends on SYNO_USB_FLASH_BOOT && SYNO_KVMX64
+	depends on SYNO_USB_FLASH_BOOT && (SYNO_KVMX64 || SYNO_NEXTKVMX64)
 	default y
 
 config SYNO_USB_FLASH_DEVICE_INDEX
@@ -92,17 +92,17 @@ config SYNO_SATA_DOM_MODEL_SECOND_SRC
 config SYNO_ISCSI_DEVICE
 	bool "Refactor iSCSI Device Name"
 	default y
-	depends on SYNO_FIXED_DISK_NAME
+	depends on SYNO_FIXED_DISK_NAME || SYNO_PORT_MAPPING_V2
 
 config SYNO_ISCSI_LOOPBACK_DEVICE
 	bool "Loopback Iscsi device name"
 	default y
-	depends on SYNO_FIXED_DISK_NAME
+	depends on SYNO_FIXED_DISK_NAME || SYNO_PORT_MAPPING_V2
 
 config SYNO_ISCSI_DEVICE_PREFIX
 	string "The prefix of iSCSI device"
 	default "isd"
-	depends on SYNO_ISCSI_DEVICE
+	depends on SYNO_ISCSI_DEVICE && !SYNO_PORT_MAPPING_V2
 
 config SYNO_ISCSI_REVERT_SUPPORT_PFMALLOC
 	bool "Revert iscsi initiator support PF_MALLOC"
@@ -113,6 +113,26 @@ config SYNO_SATA_DEVICE_PREFIX
 	string "The prefix of sata device"
 	default "sd"
 	depends on SYNO_FIXED_DISK_NAME
+
+config SYNO_PORT_MAPPING_V2
+	bool "Refactor SATA Disk Name"
+	select OF_EARLY_FLATTREE
+	default y
+
+config SYNO_SATA_DEVICE_NEW_PREFIX
+	string "The prefix of sata device for new port mapping"
+	default "sata"
+	depends on SYNO_PORT_MAPPING_V2
+
+config SYNO_USB_DEVICE_NEW_PREFIX
+	string "USB device prefix for new port mapping"
+	default "usb"
+	depends on SYNO_PORT_MAPPING_V2
+
+config SYNO_ISCSI_DEVICE_NEW_PREFIX
+	string "The iSCSI device name for new port mapping"
+	default "iscsi"
+	depends on SYNO_PORT_MAPPING_V2 && SYNO_ISCSI_DEVICE
 
 config SYNO_CACHE_DEVICE_PREFIX
 	string "The prefix of sata cache device"
@@ -146,17 +166,12 @@ config SYNO_IT87_SUPERIO_RW
 config SYNO_KVMX64_PCI_SLOT_SYSTEM
 	int "Fixed disk name support for virtio scsi disk"
 	default 11
-	depends on SYNO_KVMX64 && SYNO_FIXED_DISK_NAME
+	depends on (SYNO_KVMX64 || SYNO_NEXTKVMX64) && SYNO_FIXED_DISK_NAME
 
 config SYNO_KVMX64_PCI_SLOT_BOOT
 	int "Reserve virtio pci slot for synoboot"
 	default 10
-	depends on SYNO_KVMX64 && SYNO_USB_FLASH_BOOT
-
-config SYNO_VHOST_SCSI_TMF_UNSUPPORTED
-	bool "scsi command abort when using vhost-scsi"
-	default y
-	depends on SYNO_KVMX64
+	depends on (SYNO_KVMX64 || SYNO_NEXTKVMX64) && SYNO_USB_FLASH_BOOT
 
 config SYNO_KVM_IGNORE_MSRS
 	bool "skip logging of ignored MSRS"
@@ -181,6 +196,14 @@ config SYNO_DMA_COHERENT_POOL_1M
 
 config SYNO_DISK_EH_FLAG
 	bool "report to userspace if kernel is in SCSI error handling"
+	default y
+
+config SYNO_LOAD_AVERAGE
+	bool "Split load average into cpu and io part"
+	default y
+
+config SYNO_CHECKSUM_DEBUG
+	bool "Checksum debugger"
 	default y
 
 endmenu #System Features
@@ -237,6 +260,11 @@ config SYNO_EFI
 	depends on (SYNO_BROMOLOW || SYNO_GRANTLEY) && EFI
 	default y
 
+config SYNO_SPINUP_GROUP
+    bool "Enable spinup group"
+	depends on SYNO_SPINUP_DELAY
+    default n
+
 endmenu #Boot Arguments
 
 menu "Kernel Core Enhancements"
@@ -247,10 +275,6 @@ config SYNO_RCU_CPU_STALL_SUPPRESS
 
 config SYNO_KERNEL_UTC_TIME
 	bool "Keep UTC Time In Kernel And RTC"
-	default y
-
-config SYNO_HIDE_LOWMEM_WARNING
-	bool "Do Not Show Nowait Page Allocating Fail Warning"
 	default y
 
 config SYNO_SOFTLOCKUP_COUNTER
@@ -271,5 +295,15 @@ config SYNO_SOFTLOCKUP_THRESH_EXTENSION
 config SYNO_DEVICES_LIST_REORDER
 	bool "Rollback devices_kset list order to the same as kernel 3.10"
 	default y
+
+config SYNO_LSP_ARMADA_16_12_MM_REVERT
+	bool "Revert marvell mm commits due to oom issue"
+	default y
+	depends on SYNO_LSP_ARMADA_16_12
+
+config SYNO_MQ_TIMEOUT_KVMX64
+	int "The default seconds before a multi-queue block request timeout"
+	default 1024
+	depends on (SYNO_KVMX64 || SYNO_NEXTKVMX64)
 
 endmenu #Kernel Core Enhancements

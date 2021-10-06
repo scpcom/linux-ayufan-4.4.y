@@ -50,7 +50,7 @@ static struct pci_bus *bus;
 
 static spinlock_t rtk_pcie1_lock;
 
-static inline u32 rtk_pcie1_read(u32 addr, u8 size)
+static inline u32 rtk_pcie1_read(u64 addr, u8 size)
 {
 	u32 rval = 0;
 	u32 mask;
@@ -112,7 +112,7 @@ pci_read_129x_retry:
 	pci_error_status = rtk_pci_ctrl_read(0xc7c);
 	if (pci_error_status & 0x1F) {
 		rtk_pci_ctrl_write(0xc7c, pci_error_status);
-		printk(KERN_INFO "RTD129X: %s: DLLP(#%d) 0x%x reg=0x%x val=0x%x\n", __func__, retry_cnt, pci_error_status, addr, rval);
+		printk(KERN_INFO "RTD129X: %s: DLLP(#%d) 0x%x reg=0x%llx val=0x%x\n", __func__, retry_cnt, pci_error_status, addr, rval);
 
 		if (retry_cnt < retry) {
 			retry_cnt++;
@@ -135,7 +135,7 @@ pci_read_129x_retry:
 	return rval;
 }
 
-static inline void rtk_pcie1_write(u32 addr, u8 size, u32 wval)
+static inline void rtk_pcie1_write(u64 addr, u8 size, u32 wval)
 {
 	u32 mask;
 	u32 translate_val = 0;
@@ -201,19 +201,19 @@ static inline void rtk_pcie1_write(u32 addr, u8 size, u32 wval)
 
 u8 rtk_pcie1_readb(const volatile void __iomem *addr)
 {
-	return rtk_pcie1_read((u32)addr, 1);
+	return rtk_pcie1_read((u64)addr, 1);
 }
 EXPORT_SYMBOL(rtk_pcie1_readb);
 
 u16 rtk_pcie1_readw(const volatile void __iomem *addr)
 {
-	return rtk_pcie1_read((u32)addr, 2);
+	return rtk_pcie1_read((u64)addr, 2);
 }
 EXPORT_SYMBOL(rtk_pcie1_readw);
 
 u32 rtk_pcie1_readl(const volatile void __iomem *addr)
 {
-	return rtk_pcie1_read((u32)addr, 4);
+	return rtk_pcie1_read((u64)addr, 4);
 }
 EXPORT_SYMBOL(rtk_pcie1_readl);
 
@@ -222,8 +222,8 @@ u64 rtk_pcie1_readq(const volatile void __iomem *addr)
 	const volatile u32 __iomem *p = addr;
 	u32 low, high;
 
-	low = rtk_pcie1_read((u32)p, 4);
-	high = rtk_pcie1_read((u32)(p + 1), 4);
+	low = rtk_pcie1_read((u64)p, 4);
+	high = rtk_pcie1_read((u64)(p + 1), 4);
 
 	return low + ((u64)high << 32);
 }
@@ -231,29 +231,29 @@ EXPORT_SYMBOL(rtk_pcie1_readq);
 
 void rtk_pcie1_writeb(u8 val, volatile void __iomem *addr)
 {
-	rtk_pcie1_write((u32)addr, 1, val);
+	rtk_pcie1_write((u64)addr, 1, val);
 	return;
 }
 EXPORT_SYMBOL(rtk_pcie1_writeb);
 
 void rtk_pcie1_writew(u16 val, volatile void __iomem *addr)
 {
-	rtk_pcie1_write((u32)addr, 2, val);
+	rtk_pcie1_write((u64)addr, 2, val);
 	return;
 }
 EXPORT_SYMBOL(rtk_pcie1_writew);
 
 void rtk_pcie1_writel(u32 val, volatile void __iomem *addr)
 {
-	rtk_pcie1_write((u32)addr, 4, val);
+	rtk_pcie1_write((u64)addr, 4, val);
 	return;
 }
 EXPORT_SYMBOL(rtk_pcie1_writel);
 
 void rtk_pcie1_writeq(u64 val, volatile void __iomem *addr)
 {
-	rtk_pcie1_write((u32)addr, 4, val);
-	rtk_pcie1_write((u32)addr + 4, 4, val >> 32);
+	rtk_pcie1_write((u64)addr, 4, val);
+	rtk_pcie1_write((u64)addr + 4, 4, val >> 32);
 	return;
 }
 EXPORT_SYMBOL(rtk_pcie1_writeq);

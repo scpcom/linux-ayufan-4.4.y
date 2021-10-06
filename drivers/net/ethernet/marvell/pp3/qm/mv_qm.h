@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -358,4 +354,3 @@ void qm_ql_profile_show(enum mv_qm_thr_profiles profile);
 const char *mv_qm_node_str(enum mv_qm_node_type level);
 
 #endif /* __mv_qm_h__ */
-#endif /* MY_DEF_HERE */

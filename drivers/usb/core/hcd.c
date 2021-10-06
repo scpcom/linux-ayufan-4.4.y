@@ -982,6 +982,9 @@ static int usb_register_bus(struct usb_bus *bus)
 {
 	int result = -E2BIG;
 	int busnum;
+#ifdef MY_DEF_HERE
+	struct usb_hcd *usb_hcd = bus_to_hcd(bus);
+#endif /* MY_DEF_HERE */
 
 	mutex_lock(&usb_bus_list_lock);
 #ifdef MY_DEF_HERE
@@ -989,7 +992,6 @@ static int usb_register_bus(struct usb_bus *bus)
 	 * assignment happened only on platform RTD1296.
 	 * The primary hcd should be USB2.0 hcd.
 	 */
-	struct usb_hcd *usb_hcd = bus_to_hcd(bus);
 
 	switch (usb_hcd->speed) {
 	case HCD_USB2:

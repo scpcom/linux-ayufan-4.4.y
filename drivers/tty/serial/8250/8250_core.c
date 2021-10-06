@@ -589,6 +589,24 @@ static struct console univ8250_console = {
 	.data		= &serial8250_reg,
 };
 
+#ifdef CONFIG_SYNO_PURLEY_SERIAL_OVER_LAN
+struct console kt_console = {
+	.name		= "ttyS",
+	.write		= univ8250_console_write,
+	.device		= uart_console_device,
+	.setup		= univ8250_console_setup,
+	.match		= univ8250_console_match,
+	.flags		= CON_PRINTBUFFER | CON_ANYTIME | CON_ENABLED,
+	.index		= 2,
+	.data		= &serial8250_reg,
+};
+
+void kt_console_init(void)
+{
+	register_console(&kt_console);
+}
+#endif  
+
 static int __init univ8250_console_init(void)
 {
 	if (nr_uarts == 0)

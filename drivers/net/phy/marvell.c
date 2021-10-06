@@ -25,6 +25,9 @@
 #include <asm/irq.h>
 #include <linux/uaccess.h>
 
+#if defined(MY_DEF_HERE)
+#define MII_MARVELL_REG_INIT_FIELDS	4
+#endif  
 #define MII_MARVELL_PHY_PAGE		22
 
 #define MII_M1011_IEVENT		0x13
@@ -69,11 +72,26 @@
 #define MII_M1111_HWCFG_FIBER_COPPER_RES	0x2000
 
 #if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
+#define MII_M1112_SPEC_STAT_REG		0x11
+#define MII_M1112_FIBER_COPPER_RES	0x80
+#else  
 #define COPPER_BASE_T		1
 #define FIBER_BASE_R		2
 #define FIBER_BASE_X		3
+#endif  
 
 #define MII_M1112_PHY_ENERGY_STATE	0x10
+#if defined(MY_DEF_HERE)
+#define MII_M1112_PHY_COPPER_STATE	0x10
+
+#define COPPER_PAGE		0
+#define FIBER_PAGE		1
+
+#define COPPER_BASE_T		BIT(1)
+#define FIBER_BASE_R		BIT(2)
+#define FIBER_BASE_X		BIT(3)
+#endif  
 #else  
 #define MII_M1111_COPPER		0
 #define MII_M1111_FIBER			1
@@ -177,6 +195,44 @@
 #define MII_88E3310_COPPER_SP_2500	0x2058
 #define MII_88E3310_COPPER_SP_1000	0x0040
 #define MII_88E3310_COPPER_SP_100	0x2000
+
+#endif  
+#if defined(MY_DEF_HERE)
+#define MII_88E3310_AUT_NEG_CON		0x8000
+#define MII_88E3310_AUT_NEG_ST		0x8001
+
+#define MII_88E2110_IMASK		0x8010
+#define MII_88E2110_IMASK_INIT		0x6400
+#define MII_88E2110_IMASK_CLEAR		0x0000
+
+#define MII_88E2110_ISTATUS		0x8011
+
+#define MII_88E2110_PHY_STATUS		0x8008
+#define MII_88E2110_PHY_STATUS_SPD_MASK	0xc00c
+#define MII_88E2110_PHY_STATUS_5000	0xc008
+#define MII_88E2110_PHY_STATUS_2500	0xc004
+#define MII_88E2110_PHY_STATUS_1000	0x8000
+#define MII_88E2110_PHY_STATUS_100	0x4000
+#define MII_88E2110_PHY_STATUS_DUPLEX	0x2000
+#define MII_88E2110_PHY_STATUS_SPDDONE	0x0800
+#define MII_88E2110_PHY_STATUS_LINK	0x0400
+
+#define MII_88E2110_NG_EXT_CTRL			0xc000
+#define MII_88E2110_NG_EXT_CTRL_SWAP_ABCD	0x1
+
+#define MII_88E2110_AN_CTRL		0x0
+#define MII_88E2110_AN_CTRL_EXT_NP_CTRL 0x2000
+#define MII_88E2110_AN_CTRL_AN_EN	0x1000
+#define MII_88E2110_AN_CTRL_RESTART_AN	0x0200
+
+#define MII_88E2110_ADVERTISE		0x10
+#define MII_88E2110_LPA			0x13
+#define MII_88E2110_STAT1000		0x8001
+
+#define MII_88E2110_MGBASET_AN_CTRL1			0x20
+#define MII_88E2110_MGBASET_AN_CTRL1_ADVERTISE_5000	0x01e1
+#define MII_88E2110_MGBASET_AN_CTRL1_ADVERTISE_2500	0x00a1
+#define MII_88E2110_MGBASET_AN_CTRL1_ADVERTISE_1000	0x0001
 
 #endif  
 MODULE_DESCRIPTION("Marvell PHY driver");
@@ -431,11 +487,62 @@ err:
 	}
 	return ret;
 }
+#if defined(MY_DEF_HERE)
+
+static int marvell_of_reg_c45_init(struct phy_device *phydev)
+{
+	const __be32 *paddr;
+	int len, i, ret;
+
+	if (!phydev->mdio.dev.of_node)
+		return 0;
+
+	paddr = of_get_property(phydev->mdio.dev.of_node,
+				"marvell,c45-reg-init", &len);
+	if (!paddr)
+		return 0;
+
+	ret = 0;
+	len /= sizeof(*paddr);
+	for (i = 0; i < len - (MII_MARVELL_REG_INIT_FIELDS - 1);
+	     i += MII_MARVELL_REG_INIT_FIELDS) {
+		u16 devid = be32_to_cpup(paddr + i);
+		u16 reg = be32_to_cpup(paddr + i + 1);
+		u16 mask = be32_to_cpup(paddr + i + 2);
+		u16 val_bits = be32_to_cpup(paddr + i + 3);
+		int val;
+
+		val = 0;
+		if (mask) {
+			val = phy_read_mmd(phydev, devid, reg);
+			if (val < 0) {
+				ret = val;
+				goto err;
+			}
+			val &= mask;
+		}
+		val |= val_bits;
+
+		ret = phy_write_mmd(phydev, devid, reg, val);
+		if (ret < 0)
+			goto err;
+	}
+err:
+	return ret;
+}
+#endif  
 #else
 static int marvell_of_reg_init(struct phy_device *phydev)
 {
 	return 0;
 }
+#if defined(MY_DEF_HERE)
+
+static int marvell_of_reg_c45_init(struct phy_device *phydev)
+{
+	return 0;
+}
+#endif  
 #endif  
 
 static int m88e1121_config_aneg(struct phy_device *phydev)
@@ -545,6 +652,14 @@ static int marvell_config_init(struct phy_device *phydev)
 }
 #endif  
 
+#if defined(MY_DEF_HERE)
+static int marvell_c45_config_init(struct phy_device *phydev)
+{
+	 
+	return marvell_of_reg_c45_init(phydev);
+}
+
+#endif  
 static int m88e1116r_config_init(struct phy_device *phydev)
 {
 	int temp;
@@ -657,6 +772,10 @@ int m88e3310_phy_update_link(struct phy_device *phydev)
 
 static int m88e3310_config_init(struct phy_device *phydev)
 {
+#if defined(MY_DEF_HERE)
+	 
+	phydev->supported |= SUPPORTED_1000baseT_Full;
+#endif  
 	m88e3310_phy_update_link(phydev);
 
 	return 0;
@@ -1146,7 +1265,11 @@ int m88e3310_restart_aneg(struct phy_device *phydev)
 
 	ctl &= ~BMCR_ISOLATE;
 
+#if defined(MY_DEF_HERE)
+	return phy_write(phydev, MV_XMDIO(MDIO_MMD_AN, MII_BMCR), ctl);
+#else  
 	return phy_write(phydev, MV_XMDIO(MDIO_MMD_PCS, MII_BMCR), ctl);
+#endif  
 }
 
 int m88e3310_setup_forced(struct phy_device *phydev)
@@ -1195,7 +1318,11 @@ static int m88e3310_config_advert(struct phy_device *phydev)
 		changed = 1;
 	}
 
+#if defined(MY_DEF_HERE)
+	bmsr = phy_read(phydev, MV_XMDIO(MDIO_MMD_AN, MII_88E3310_AUT_NEG_ST));
+#else  
 	bmsr = phy_read(phydev, MV_XMDIO(MDIO_MMD_PMAPMD, MII_BMSR));
+#endif  
 
 	if (!(bmsr & BMSR_ESTATEN))
 		return changed;
@@ -1213,6 +1340,10 @@ static int m88e3310_config_advert(struct phy_device *phydev)
 	if (adv != oldadv)
 		changed = 1;
 
+#if defined(MY_DEF_HERE)
+	phy_write(phydev, MV_XMDIO(MDIO_MMD_AN, MII_88E3310_AUT_NEG_CON), adv);
+
+#endif  
 	return changed;
 }
 
@@ -1220,9 +1351,20 @@ int m88e3310_config_aneg(struct phy_device *phydev)
 {
 	int result;
 
+#if defined(MY_DEF_HERE)
+	 
+#else  
+	 
+#endif  
 	if ((phydev->dev_flags & FIBER_BASE_X) || (phydev->dev_flags & FIBER_BASE_R))
 		return 0;
 
+#if defined(MY_DEF_HERE)
+	 
+	if (phydev->speed == SPEED_10000 || phydev->speed == SPEED_5000)
+		return 0;
+
+#endif  
 	if (phydev->autoneg != AUTONEG_ENABLE)
 		return m88e3310_setup_forced(phydev);
 
@@ -1285,6 +1427,12 @@ static int marvell_read_status(struct phy_device *phydev)
 
 		lpa &= adv;
 
+#if defined(MY_DEF_HERE)
+		adv = phy_read(phydev, MV_XMDIO(MDIO_MMD_AN, MII_88E3310_AUT_NEG_ST));
+
+		phydev->lp_advertising |= mii_stat1000_to_ethtool_lpa_t(adv);
+
+#endif  
 		if (status & MII_M1011_PHY_STATUS_FULLDUPLEX)
 			phydev->duplex = DUPLEX_FULL;
 		else
@@ -1767,6 +1915,184 @@ int m88e3310_soft_reset(struct phy_device *phydev)
 }
 
 #endif  
+#if defined(MY_DEF_HERE)
+static int m88e2110_ack_interrupt(struct phy_device *phydev)
+{
+	int err;
+
+	err = phy_read_mmd(phydev, MDIO_MMD_PCS, MII_88E2110_ISTATUS);
+
+	if (err < 0)
+		return err;
+
+	return 0;
+}
+
+static int m88e2110_config_aneg(struct phy_device *phydev)
+{
+	struct device_node *node = phydev->mdio.dev.of_node;
+	u32 max_speed;
+	int reg, change = 0;
+
+	if (!of_property_read_u32(node, "max-speed", &max_speed)) {
+		reg = phy_read_mmd(phydev, MDIO_MMD_AN,
+				   MII_88E2110_MGBASET_AN_CTRL1);
+		switch (max_speed) {
+		case SPEED_5000:
+			 
+			if (reg != MII_88E2110_MGBASET_AN_CTRL1_ADVERTISE_5000) {
+				phy_write_mmd(phydev, MDIO_MMD_AN,
+					      MII_88E2110_MGBASET_AN_CTRL1,
+					      MII_88E2110_MGBASET_AN_CTRL1_ADVERTISE_5000);
+				change = 1;
+			}
+			break;
+		case SPEED_2500:
+			 
+			if (reg != MII_88E2110_MGBASET_AN_CTRL1_ADVERTISE_2500) {
+				phy_write_mmd(phydev, MDIO_MMD_AN,
+					      MII_88E2110_MGBASET_AN_CTRL1,
+					      MII_88E2110_MGBASET_AN_CTRL1_ADVERTISE_2500);
+				change = 1;
+			}
+			break;
+		default:
+			 
+			if (reg != MII_88E2110_MGBASET_AN_CTRL1_ADVERTISE_1000) {
+				phy_write_mmd(phydev, MDIO_MMD_AN,
+					      MII_88E2110_MGBASET_AN_CTRL1,
+					      MII_88E2110_MGBASET_AN_CTRL1_ADVERTISE_1000);
+				change = 1;
+			}
+			break;
+		}
+	}
+
+	if (change)
+		phy_write_mmd(phydev, MDIO_MMD_AN, MII_88E2110_AN_CTRL,
+			      MII_88E2110_AN_CTRL_EXT_NP_CTRL |
+			      MII_88E2110_AN_CTRL_AN_EN |
+			      MII_88E2110_AN_CTRL_RESTART_AN);
+
+	return 0;
+}
+
+static int m88e2110_config_init(struct phy_device *phydev)
+{
+	return marvell_c45_config_init(phydev);
+}
+
+static int m88e2110_config_intr(struct phy_device *phydev)
+{
+	int err;
+
+	if (phydev->interrupts == PHY_INTERRUPT_ENABLED)
+		err = phy_write_mmd(phydev, MDIO_MMD_PCS, MII_88E2110_IMASK,
+				    MII_88E2110_IMASK_INIT);
+	else
+		err = phy_write_mmd(phydev, MDIO_MMD_PCS, MII_88E2110_IMASK,
+				    MII_88E2110_IMASK_CLEAR);
+
+	return err;
+}
+
+static int m88e2110_read_status(struct phy_device *phydev)
+{
+	int adv, lpa, lpagb, status;
+
+	status = phy_read_mmd(phydev, MDIO_MMD_PCS, MII_88E2110_PHY_STATUS);
+	if (status < 0)
+		return status;
+
+	if (!(status & MII_88E2110_PHY_STATUS_LINK)) {
+		phydev->link = 0;
+		return 0;
+	}
+
+	phydev->link = 1;
+	if (status & MII_88E2110_PHY_STATUS_DUPLEX)
+		phydev->duplex = DUPLEX_FULL;
+	else
+		phydev->duplex = DUPLEX_HALF;
+
+	phydev->pause = 0;
+	phydev->asym_pause = 0;
+
+	switch (status & MII_88E2110_PHY_STATUS_SPD_MASK) {
+	case MII_88E2110_PHY_STATUS_5000:
+		phydev->speed = SPEED_5000;
+		break;
+	case MII_88E2110_PHY_STATUS_2500:
+		phydev->speed = SPEED_2500;
+		break;
+	case MII_88E2110_PHY_STATUS_1000:
+		phydev->speed = SPEED_1000;
+		break;
+	case MII_88E2110_PHY_STATUS_100:
+		phydev->speed = SPEED_100;
+		break;
+	default:
+		phydev->speed = SPEED_10;
+		break;
+	}
+
+	if (phydev->autoneg == AUTONEG_ENABLE) {
+		lpa = phy_read_mmd(phydev, MDIO_MMD_AN, MII_88E2110_LPA);
+		if (lpa < 0)
+			return lpa;
+
+		lpagb = phy_read_mmd(phydev, MDIO_MMD_AN, MII_88E2110_STAT1000);
+		if (lpagb < 0)
+			return lpagb;
+
+		adv = phy_read_mmd(phydev, MDIO_MMD_AN, MII_88E2110_ADVERTISE);
+		if (adv < 0)
+			return adv;
+
+		phydev->lp_advertising = mii_stat1000_to_ethtool_lpa_t(lpagb) |
+					 mii_lpa_to_ethtool_lpa_t(lpa);
+
+		lpa &= adv;
+
+		if (phydev->duplex == DUPLEX_FULL) {
+			phydev->pause = lpa & LPA_PAUSE_CAP ? 1 : 0;
+			phydev->asym_pause = lpa & LPA_PAUSE_ASYM ? 1 : 0;
+		}
+	} else {
+		phydev->lp_advertising = 0;
+	}
+
+	return 0;
+}
+
+static int m88e2110_aneg_done(struct phy_device *phydev)
+{
+	int retval;
+
+	retval = phy_read_mmd(phydev, MDIO_MMD_PCS, MII_88E2110_PHY_STATUS);
+
+	return ((retval < 0) ? retval : (retval & MII_88E2110_PHY_STATUS_SPDDONE));
+}
+
+static int m88e2110_did_interrupt(struct phy_device *phydev)
+{
+	int imask;
+
+	imask = phy_read_mmd(phydev, MDIO_MMD_PCS, MII_88E2110_ISTATUS);
+
+	if (imask & MII_88E2110_IMASK_INIT)
+		return 1;
+
+	return 0;
+}
+
+static int m88e2110_soft_reset(struct phy_device *phydev)
+{
+	 
+	return 0;
+}
+
+#endif  
 #ifndef UINT64_MAX
 #define UINT64_MAX              (u64)(~((u64)0))
 #endif
@@ -1821,8 +2147,137 @@ static int marvell_probe(struct phy_device *phydev)
 #endif  
 
 #if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
+static int m88e1112_config_advert(struct phy_device *phydev)
+{
+	u32 advertise;
+	int oldadv, adv, bmsr;
+	int err, changed = 0;
+
+	phydev->advertising &= phydev->supported;
+	advertise = phydev->advertising;
+
+	adv = phy_read(phydev, MII_ADVERTISE);
+	oldadv = adv;
+
+	if (phydev->dev_flags & FIBER_BASE_R) {
+		adv &= ~(ADVERTISE_1000XFULL | ADVERTISE_1000XHALF | ADVERTISE_1000XPAUSE | ADVERTISE_1000XPSE_ASYM);
+		adv |= ethtool_adv_to_mii_adv_x(advertise);
+	} else {
+		adv &= ~(ADVERTISE_ALL | ADVERTISE_100BASE4 | ADVERTISE_PAUSE_CAP |
+				 ADVERTISE_PAUSE_ASYM);
+		adv |= ethtool_adv_to_mii_adv_t(advertise);
+	}
+
+	if (adv != oldadv) {
+		phy_write(phydev, MII_ADVERTISE, adv);
+		changed = 1;
+	}
+
+	if (!(phydev->dev_flags & FIBER_BASE_R)) {
+		bmsr = phy_read(phydev, MII_BMSR);
+
+		if (!(bmsr & BMSR_ESTATEN))
+			return changed;
+
+	    adv = phy_read(phydev, MII_CTRL1000);
+
+	    oldadv = adv;
+	    adv &= ~(ADVERTISE_1000FULL | ADVERTISE_1000HALF);
+
+		if (phydev->supported & (SUPPORTED_1000baseT_Half | SUPPORTED_1000baseT_Full))
+			adv |= ethtool_adv_to_mii_ctrl1000_t(advertise);
+
+		if (adv != oldadv)
+			changed = 1;
+
+	    err = phy_write(phydev, MII_CTRL1000, adv);
+	}
+
+	return changed;
+}
+
+int m88e1112_control_aneg(struct phy_device *phydev)
+{
+	int result;
+
+	if (phydev->autoneg != AUTONEG_ENABLE)
+		return genphy_setup_forced(phydev);
+
+	result = m88e1112_config_advert(phydev);
+
+	if (result == 0) {
+		 
+		int ctl = phy_read(phydev, MII_BMCR);
+
+		if (!(ctl & BMCR_ANENABLE) || (ctl & BMCR_ISOLATE))
+			result = 1;  
+	}
+
+	if (result > 0)
+		result = genphy_restart_aneg(phydev);
+
+	return result;
+}
+
+static int m88e1112_config_aneg(struct phy_device *phydev)
+{
+	int err;
+
+	if (phydev->dev_flags & FIBER_BASE_R)
+		err = phy_write(phydev, MII_MARVELL_PHY_PAGE, FIBER_PAGE);
+	else
+		err = phy_write(phydev, MII_MARVELL_PHY_PAGE, COPPER_PAGE);
+
+	err = phy_write(phydev, MII_BMCR, BMCR_RESET);
+
+	if (!(phydev->dev_flags & FIBER_BASE_R)) {
+		err = marvell_set_polarity(phydev, phydev->mdix);
+		if (err < 0)
+			return err;
+	}
+
+	m88e1112_control_aneg(phydev);
+
+	if (phydev->autoneg != AUTONEG_ENABLE) {
+		int bmcr;
+
+		bmcr = phy_read(phydev, MII_BMCR);
+
+		phy_write(phydev, MII_BMCR, bmcr | BMCR_RESET);
+	}
+
+	return 0;
+}
+
+#endif  
 static int m88e1112_read_status(struct phy_device *phydev)
 {
+#if defined(MY_DEF_HERE)
+	int adv;
+	int err;
+	int lpa;
+	int lpagb = 0;
+	int common_adv;
+	int common_adv_gb = 0;
+	int combo_mode, val;
+
+	err = genphy_update_link(phydev);
+	if (err)
+		return err;
+
+	combo_mode = phy_read(phydev, MII_M1112_SPEC_STAT_REG);
+
+	if (phydev->dev_flags & FIBER_BASE_R) {
+		if (!(combo_mode & MII_M1112_FIBER_COPPER_RES)) {
+			phydev->dev_flags &= ~FIBER_BASE_R;
+			m88e1112_config_aneg(phydev);
+		}
+	} else {
+		if (combo_mode & MII_M1112_FIBER_COPPER_RES) {
+			phydev->dev_flags |= FIBER_BASE_R;
+			m88e1112_config_aneg(phydev);
+#else  
 	int val, bmcr;
 
 	if ((phydev->autoneg != AUTONEG_ENABLE) & (phydev->speed == SPEED_10)) {
@@ -1831,10 +2286,109 @@ static int m88e1112_read_status(struct phy_device *phydev)
 		if (val & MII_M1112_PHY_ENERGY_STATE) {
 			bmcr = phy_read(phydev, MII_BMCR);
 			phy_write(phydev, MII_BMCR, bmcr | BMCR_RESET);
+#endif  
 		}
 	}
+#if defined(MY_DEF_HERE)
+	phydev->lp_advertising = 0;
 
+	if (phydev->autoneg == AUTONEG_ENABLE) {
+		if (phydev->dev_flags & FIBER_BASE_R) {
+			lpa = phy_read(phydev, MII_LPA);
+
+			phydev->lp_advertising |= mii_lpa_to_ethtool_lpa_x(lpa);
+
+			adv = phy_read(phydev, MII_ADVERTISE);
+
+			common_adv = lpa & adv;
+
+			phydev->speed = SPEED_10;
+			phydev->duplex = DUPLEX_HALF;
+			phydev->pause = 1;
+			phydev->asym_pause = 1;
+
+			if (common_adv & (LPA_1000FULL | LPA_1000HALF)) {
+				phydev->speed = SPEED_1000;
+
+				if (common_adv & LPA_1000FULL)
+					phydev->duplex = DUPLEX_FULL;
+		   }
+
+			if (phydev->duplex == DUPLEX_FULL) {
+				phydev->pause = lpa & LPA_1000XPAUSE ? 1 : 0;
+				phydev->asym_pause = lpa & LPA_1000XPAUSE_ASYM ? 1 : 0;
+			}
+		} else {
+			if (phydev->supported & (SUPPORTED_1000baseT_Half
+					   | SUPPORTED_1000baseT_Full)) {
+				lpagb = phy_read(phydev, MII_STAT1000);
+#endif  
+
+#if defined(MY_DEF_HERE)
+				adv = phy_read(phydev, MII_CTRL1000);
+
+				phydev->lp_advertising = mii_stat1000_to_ethtool_lpa_t(lpagb);
+				common_adv_gb = lpagb & adv << 2;
+			}
+
+			lpa = phy_read(phydev, MII_LPA);
+			phydev->lp_advertising |= mii_lpa_to_ethtool_lpa_t(lpa);
+			adv = phy_read(phydev, MII_ADVERTISE);
+			common_adv = lpa & adv;
+
+			phydev->speed = SPEED_10;
+			phydev->duplex = DUPLEX_HALF;
+			phydev->pause = 0;
+			phydev->asym_pause = 0;
+
+			if (common_adv_gb & (LPA_1000FULL | LPA_1000HALF)) {
+				phydev->speed = SPEED_1000;
+
+				if (common_adv_gb & LPA_1000FULL)
+					phydev->duplex = DUPLEX_FULL;
+			} else if (common_adv & (LPA_100FULL | LPA_100HALF)) {
+				phydev->speed = SPEED_100;
+
+				if (common_adv & LPA_100FULL)
+					phydev->duplex = DUPLEX_FULL;
+			} else {
+				if (common_adv & LPA_10FULL)
+					phydev->duplex = DUPLEX_FULL;
+			}
+
+			if (phydev->duplex == DUPLEX_FULL) {
+				phydev->pause = lpa & LPA_PAUSE_CAP ? 1 : 0;
+				phydev->asym_pause = lpa & LPA_PAUSE_ASYM ? 1 : 0;
+			}
+		}
+	} else {
+		int bmcr = phy_read(phydev, MII_BMCR);
+
+		if (bmcr & BMCR_FULLDPLX)
+			phydev->duplex = DUPLEX_FULL;
+		else
+			phydev->duplex = DUPLEX_HALF;
+
+		if (bmcr & BMCR_SPEED1000) {
+			phydev->speed = SPEED_1000;
+		} else if (bmcr & BMCR_SPEED100) {
+			phydev->speed = SPEED_100;
+		} else {
+			phydev->speed = SPEED_10;
+			val = phy_read(phydev, MII_M1011_IEVENT);
+			if ((val & MII_M1112_PHY_ENERGY_STATE) || (val & MII_M1112_PHY_COPPER_STATE)) {
+				bmcr = phy_read(phydev, MII_BMCR);
+				phy_write(phydev, MII_BMCR, bmcr | BMCR_RESET);
+			}
+		}
+		phydev->pause = 0;
+		phydev->asym_pause = 0;
+	}
+
+	return 0;
+#else  
 	return genphy_read_status(phydev);
+#endif  
 }
 
 #endif  
@@ -1875,7 +2429,12 @@ static struct phy_driver marvell_drivers[] = {
 		.probe = marvell_probe,
 #endif  
 		.config_init = &m88e1111_config_init,
+#if defined(MY_DEF_HERE)
+		.config_aneg = &m88e1112_config_aneg,
+		.aneg_done = &marvell_aneg_done,
+#else  
 		.config_aneg = &marvell_config_aneg,
+#endif  
 #if defined(MY_DEF_HERE)
 		.read_status = &m88e1112_read_status,
 #else  
@@ -2189,6 +2748,24 @@ static struct phy_driver marvell_drivers[] = {
 		.get_stats = marvell_get_stats,
 	},
 #endif  
+#if defined(MY_DEF_HERE)
+	{
+		.phy_id = MARVELL_PHY_ID_88E2110,
+		.phy_id_mask = MARVELL_PHY_ID_MASK,
+		.name = "Marvell 88E2110",
+		.features = PHY_BASIC_FEATURES,
+		.flags = PHY_HAS_INTERRUPT,
+		.probe = marvell_probe,
+		.config_aneg = &m88e2110_config_aneg,
+		.config_init = &m88e2110_config_init,
+		.aneg_done = &m88e2110_aneg_done,
+		.read_status = &m88e2110_read_status,
+		.ack_interrupt = &m88e2110_ack_interrupt,
+		.config_intr = &m88e2110_config_intr,
+		.did_interrupt = &m88e2110_did_interrupt,
+		.soft_reset = &m88e2110_soft_reset,
+	},
+#endif  
 };
 
 module_phy_driver(marvell_drivers);
@@ -2206,6 +2783,9 @@ static struct mdio_device_id __maybe_unused marvell_tbl[] = {
 	{ MARVELL_PHY_ID_88E1116R, MARVELL_PHY_ID_MASK },
 	{ MARVELL_PHY_ID_88E1510, MARVELL_PHY_ID_MASK },
 	{ MARVELL_PHY_ID_88E1540, MARVELL_PHY_ID_MASK },
+#if defined(MY_DEF_HERE)
+	{ MARVELL_PHY_ID_88E2110, MARVELL_PHY_ID_MASK },
+#endif  
 	{ MARVELL_PHY_ID_88E3016, MARVELL_PHY_ID_MASK },
 #if defined(MY_DEF_HERE)
 	{ MARVELL_PHY_ID_88E3310, MARVELL_PHY_ID_MASK },

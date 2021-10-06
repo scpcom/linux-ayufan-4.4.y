@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*
 * ***************************************************************************
 * Copyright (C) 2016 Marvell International Ltd.
@@ -58,7 +54,7 @@ void mv_pp2x_skb_dump(struct sk_buff *skb, int size, int access)
 
 	if ((access != 4) && (access != 2) && (access != 1)) {
 		pr_err("%d wrong access size. Access must be 1 or 2 or 4\n",
-				access);
+		       access);
 		return;
 	}
 	mem_addr = round_down((uintptr_t)addr, 4);
@@ -100,5 +96,3 @@ void mv_pp2x_skb_dump(struct sk_buff *skb, int size, int access)
 		DBG_MSG("\n");
 	}
 }
-
-#endif /* MY_DEF_HERE */

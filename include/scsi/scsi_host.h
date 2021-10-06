@@ -36,7 +36,7 @@ struct blk_queue_tags;
 #define DISABLE_CLUSTERING 0
 #define ENABLE_CLUSTERING 1
 
-#ifdef MY_ABC_HERE
+#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 enum {
 	SYNO_PORT_TYPE_SATA = 1,
 	SYNO_PORT_TYPE_USB = 2,
@@ -148,7 +148,7 @@ struct scsi_host_template {
 
 	struct list_head legacy_hosts;
 
-#ifdef MY_ABC_HERE
+#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 	 
 	int  (* syno_index_get)(struct Scsi_Host *host, uint channel, uint id, uint lun);
 #endif  
@@ -156,7 +156,12 @@ struct scsi_host_template {
 	 
 	int  (* syno_host_power_ctl)(struct Scsi_Host *host, u8 blPowerOn);
 #endif  
-#ifdef MY_ABC_HERE
+
+	int  (* syno_set_dbg)(struct Scsi_Host *host, unsigned int uiDbglvl);
+	int  (* syno_get_dbg)(struct Scsi_Host *host, unsigned int *uiDbglvl);
+	int  (* syno_dbg_info)(struct Scsi_Host *host);
+
+#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 	int  syno_port_type;
 #endif  
 
@@ -305,6 +310,13 @@ struct Scsi_Host {
 	void *shost_data;
 
 	struct device *dma_dev;
+
+	spinlock_t	dbg_lock;
+	spinlock_t	*pdbg_lock;
+	int		dbg_enable;
+	unsigned int	uidbg_flags;
+	unsigned int	*puidbg_flags;
+	int		reverved;
 
 #ifdef MY_DEF_HERE
 	 

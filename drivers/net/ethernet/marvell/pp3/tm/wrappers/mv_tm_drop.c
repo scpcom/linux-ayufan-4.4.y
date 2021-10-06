@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -620,4 +616,3 @@ int mv_tm_queue_length_get(enum mv_tm_level level, uint32_t index, uint32_t *av_
 	TM_WRAPPER_END(qmtm_hndl);
 }
 EXPORT_SYMBOL(mv_tm_queue_length_get);
-#endif /* MY_DEF_HERE */

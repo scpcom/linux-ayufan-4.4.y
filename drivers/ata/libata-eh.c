@@ -61,6 +61,10 @@ enum {
 	ATA_EH_PROBE_TRIALS		= 2,
 };
 
+#ifdef MY_ABC_HERE
+extern unsigned int guiWakeupDisksNum;
+#endif  
+
 static const unsigned long ata_eh_reset_timeouts[] = {
 	10000,	 
 	10000,	 
@@ -404,6 +408,9 @@ void ata_scsi_error(struct Scsi_Host *host)
 
 	DPRINTK("ENTER\n");
 
+#ifdef MY_ABC_HERE
+	ap->error_handling = 1;
+#endif  
 	spin_lock_irqsave(host->host_lock, flags);
 	list_splice_init(&host->eh_cmd_q, &eh_work_q);
 	spin_unlock_irqrestore(host->host_lock, flags);
@@ -413,6 +420,10 @@ void ata_scsi_error(struct Scsi_Host *host)
 	ata_scsi_port_error_handler(host, ap);
 
 	WARN_ON(!list_empty(&eh_work_q));
+
+#ifdef MY_ABC_HERE
+	ap->error_handling = 0;
+#endif  
 
 	DPRINTK("EXIT\n");
 }
@@ -717,6 +728,10 @@ void ata_eh_fastdrain_timerfn(unsigned long arg)
 	if (cnt == ap->fastdrain_cnt) {
 		unsigned int tag;
 
+#ifdef MY_ABC_HERE
+		ata_port_printk(ap, KERN_ERR, "All qcs time out, freeze the port\n");
+#endif  
+		 
 		for (tag = 0; tag < ATA_MAX_QUEUE - 1; tag++) {
 			struct ata_queued_cmd *qc = ata_qc_from_tag(ap, tag);
 			if (qc)
@@ -1084,6 +1099,11 @@ unsigned int ata_read_log_page(struct ata_device *dev, u8 log,
 		return AC_ERR_DEV;
 
 retry:
+
+#ifdef MY_ABC_HERE
+	dev->horkage |= ATA_HORKAGE_NO_NCQ_LOG;
+#endif  
+
 	ata_tf_init(dev, &tf);
 	if (dev->dma_mode && ata_id_has_read_log_dma_ext(dev->id) &&
 	    !(dev->horkage & ATA_HORKAGE_NO_NCQ_LOG)) {
@@ -1102,7 +1122,11 @@ retry:
 	tf.flags |= ATA_TFLAG_ISADDR | ATA_TFLAG_LBA48 | ATA_TFLAG_DEVICE;
 
 	err_mask = ata_exec_internal(dev, &tf, NULL, DMA_FROM_DEVICE,
+#ifdef MY_ABC_HERE
+				     buf, sectors * ATA_SECT_SIZE, 15 * 1000);
+#else  
 				     buf, sectors * ATA_SECT_SIZE, 0);
+#endif  
 
 	if (err_mask && dma) {
 		dev->horkage |= ATA_HORKAGE_NO_NCQ_LOG;
@@ -3128,6 +3152,16 @@ void ata_eh_finish(struct ata_port *ap)
 
 	for (tag = 0; tag < ATA_MAX_QUEUE; tag++) {
 		struct ata_queued_cmd *qc = __ata_qc_from_tag(ap, tag);
+
+#ifdef MY_ABC_HERE
+		if (0 < guiWakeupDisksNum && 1 == ap->nr_active_links &&
+			(qc->flags & ATA_QCFLAG_ACTIVE) && IS_SYNO_SPINUP_CMD(qc)) {
+			DBGMESG("ata%u eh finish, set failed to spinup cmd 0x%x\n", ap->print_id, qc->tf.command);
+			qc->flags |= ATA_QCFLAG_FAILED;
+			__ata_qc_complete(qc);
+			continue;
+		}
+#endif  
 
 		if (!(qc->flags & ATA_QCFLAG_FAILED))
 			continue;

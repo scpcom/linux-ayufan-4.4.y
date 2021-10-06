@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*
 * ***************************************************************************
 * Copyright (C) 2015 Marvell International Ltd.
@@ -870,4 +866,3 @@ void pp3_fw_msg_stat_print(struct mv_pp3_fw_msg_chan_stat *stat)
 	pr_info("Number of replies sent by FW                   %10u\n", stat->msg_reply_cntr);
 	pr_info("Number of events sent by FW                    %10u\n", stat->msg_event_cntr);
 }
-#endif /* MY_DEF_HERE */

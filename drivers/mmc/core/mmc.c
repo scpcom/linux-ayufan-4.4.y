@@ -2006,8 +2006,8 @@ static const struct mmc_bus_ops mmc_ops = {
 	.reset = mmc_reset,
 };
 
-/*
 #if defined(MY_DEF_HERE)
+/*
  * Parse mmc-card dt sub-node and set eMMC common caps
  * if mmc-card exists.
  * If mmc-card is detected, return true.
@@ -2030,9 +2030,9 @@ bool mmc_of_parse_mmc_card(struct mmc_host *host)
 	return ret;
 }
 EXPORT_SYMBOL_GPL(mmc_of_parse_mmc_card);
+#endif /* MY_DEF_HERE */
 
 /*
-#endif /* MY_DEF_HERE */
  * Starting point for MMC card init.
  */
 int mmc_attach_mmc(struct mmc_host *host)

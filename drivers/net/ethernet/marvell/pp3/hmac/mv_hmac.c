@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -917,5 +913,3 @@ void mv_pp3_hmac_rxq_delete(int frame, int queue)
 
 	mv_hmac_rxq_handle[frame][queue] = NULL;
 }
-
-#endif /* MY_DEF_HERE */

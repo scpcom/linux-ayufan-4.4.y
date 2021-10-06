@@ -96,6 +96,9 @@ struct nameidata;
 
 extern unsigned long avenrun[];		 
 extern void get_avenrun(unsigned long *loads, unsigned long offset, int shift);
+#ifdef MY_ABC_HERE
+extern void get_avenrun_split(unsigned long *io_loads, unsigned long *cpu_loads, unsigned long offset, int shift);
+#endif  
 
 #define FSHIFT		11		 
 #define FIXED_1		(1<<FSHIFT)	 
@@ -1088,7 +1091,7 @@ struct task_struct {
 
 	struct mm_struct *mm, *active_mm;
 	 
-	u32 vmacache_seqnum;
+	u64 vmacache_seqnum;
 	struct vm_area_struct *vmacache[VMACACHE_SIZE];
 #if defined(SPLIT_RSS_COUNTING)
 	struct task_rss_stat	rss_stat;
@@ -1110,6 +1113,9 @@ struct task_struct {
 	unsigned in_iowait:1;
 #ifdef CONFIG_MEMCG
 	unsigned memcg_may_oom:1;
+#endif
+#ifdef MY_ABC_HERE
+	unsigned memcg_skip_account:1;
 #endif
 #ifdef CONFIG_MEMCG_KMEM
 	unsigned memcg_kmem_skip_account:1;
@@ -1668,6 +1674,8 @@ static inline void memalloc_noio_restore(unsigned int flags)
 #define PFA_NO_NEW_PRIVS 0	 
 #define PFA_SPREAD_PAGE  1       
 #define PFA_SPREAD_SLAB  2       
+#define PFA_SPEC_SSB_DISABLE		4	 
+#define PFA_SPEC_SSB_FORCE_DISABLE	5	 
 
 #define TASK_PFA_TEST(name, func)					\
 	static inline bool task_##func(struct task_struct *p)		\
@@ -1689,6 +1697,13 @@ TASK_PFA_CLEAR(SPREAD_PAGE, spread_page)
 TASK_PFA_TEST(SPREAD_SLAB, spread_slab)
 TASK_PFA_SET(SPREAD_SLAB, spread_slab)
 TASK_PFA_CLEAR(SPREAD_SLAB, spread_slab)
+
+TASK_PFA_TEST(SPEC_SSB_DISABLE, spec_ssb_disable)
+TASK_PFA_SET(SPEC_SSB_DISABLE, spec_ssb_disable)
+TASK_PFA_CLEAR(SPEC_SSB_DISABLE, spec_ssb_disable)
+
+TASK_PFA_TEST(SPEC_SSB_FORCE_DISABLE, spec_ssb_force_disable)
+TASK_PFA_SET(SPEC_SSB_FORCE_DISABLE, spec_ssb_force_disable)
 
 #define JOBCTL_STOP_SIGMASK	0xffff	 
 

@@ -154,8 +154,8 @@ static int vpu_clk_enable(struct clk *clk);
 static struct clk *vpu_clk_get(struct device *dev, u32 coreIdx);
 static void vpu_clk_put(struct clk *clk);
 #ifdef CONFIG_PM
-static int vpu_suspend(struct platform_device *pdev, pm_message_t state);
-static int vpu_resume(struct platform_device *pdev);
+static int vpu_suspend(struct device *dev);
+static int vpu_resume(struct device *dev);
 #endif
 
 /* end customer definition */
@@ -931,7 +931,6 @@ static long vpu_ioctl(struct file *filp, u_int cmd, u_long arg)
     case VDI_IOCTL_SET_RTK_CLK_GATING:
     {
         vpu_clock_info_t clockInfo;
-        unsigned int value;
         struct clk *s_vpu_clk;
 #ifdef CONFIG_POWER_CONTROL
         struct power_control *pctrl;
@@ -979,7 +978,6 @@ static long vpu_ioctl(struct file *filp, u_int cmd, u_long arg)
     case VDI_IOCTL_SET_RTK_CLK_PLL:
     {
         vpu_clock_info_t clockInfo;
-        unsigned int value;
         DPRINTK("[VPUDRV][+]VDI_IOCTL_SET_RTK_CLK_PLL\n");
         ret = copy_from_user(&clockInfo, (vpu_clock_info_t *)arg, sizeof(vpu_clock_info_t));
         if (ret != 0)
@@ -1110,7 +1108,7 @@ static ssize_t vpu_write(struct file *filp, const char __user *buf, size_t len, 
             compat_vpu_bit_firmware_info_t __user *data32;
             vpu_bit_firmware_info_t __user *data;
 
-            data32 = buf;
+            data32 = (compat_vpu_bit_firmware_info_t __user *)buf;
             data = compat_alloc_user_space(sizeof(*data));
             if (data == NULL)
             {
@@ -1538,9 +1536,8 @@ static void Wave4BitIssueCommand(u32 cmd)
 }
 #endif
 
-static int vpu_suspend(struct platform_device *pdev, pm_message_t state)
+static int vpu_suspend(struct device *dev)
 {
-    unsigned int value;
 
     printk(KERN_INFO "[RTK_VE1] Enter %s\n", __func__);
 
@@ -1655,7 +1652,10 @@ static int vpu_suspend(struct platform_device *pdev, pm_message_t state)
 
     return 0;
 
+#ifdef DISABLE_ORIGIN_SUSPEND
+#else /* DISABLE_ORIGIN_SUSPEND */
 DONE_SUSPEND:
+#endif /* DISABLE_ORIGIN_SUSPEND */
 
     vpu_clk_disable(s_vpu_clk_ve1);
     vpu_clk_disable(s_vpu_clk_ve2);
@@ -1668,10 +1668,8 @@ DONE_SUSPEND:
 
     return -EAGAIN;
 }
-static int vpu_resume(struct platform_device *pdev)
+static int vpu_resume(struct device *dev)
 {
-    u32                   value;
-
     printk(KERN_INFO "[RTK_VE1] Enter %s\n", __func__);
 
 #ifdef CONFIG_POWER_CONTROL
@@ -1819,7 +1817,10 @@ static int vpu_resume(struct platform_device *pdev)
 #endif
     }
 
+#ifdef DISABLE_ORIGIN_SUSPEND
+#else /* DISABLE_ORIGIN_SUSPEND */
 DONE_WAKEUP:
+#endif /* DISABLE_ORIGIN_SUSPEND */
 
     if (s_vpu_open_ref_count > 0)
     {
@@ -1916,8 +1917,6 @@ module_exit(vpu_exit);
 int vpu_hw_reset(u32 coreIdx)
 {
 #if 1 /* RTK, workaround for demo */
-    unsigned int val = 0;
-
     DPRINTK("[VPUDRV] request vpu reset from application. \n");
 
     if (coreIdx == 0)

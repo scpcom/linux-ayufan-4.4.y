@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -530,4 +526,3 @@ int mv_pp3_hmac_sysfs_init(struct kobject *kobj);
 int mv_pp3_hmac_sysfs_exit(struct kobject *kobj);
 
 #endif /* __mv_hmac_h__ */
-#endif /* MY_DEF_HERE */

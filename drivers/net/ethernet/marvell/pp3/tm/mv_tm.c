@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -1396,5 +1392,3 @@ err_out:
 	return rc;
 }
 EXPORT_SYMBOL(tm_cfg3_tree);
-
-#endif /* MY_DEF_HERE */

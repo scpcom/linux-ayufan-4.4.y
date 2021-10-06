@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -88,5 +84,3 @@ int tm_check_args(struct qmtm *hndl, struct tm_ctl **ctl, struct qmtm **env);
 /* the Linux platform  generates warning for this action */
 
 #endif  /* TM_PLATFORM_IMPLEMENTATION_DEFINITIONS_H */
-
-#endif /* MY_DEF_HERE */

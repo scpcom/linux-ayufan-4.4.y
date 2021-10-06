@@ -20,6 +20,10 @@
 #ifdef MY_DEF_HERE
 #include <linux/gpio.h>
 #include <linux/delay.h>
+#ifdef MY_DEF_HERE
+#include <linux/of.h>
+#include <linux/synolib.h>
+#endif  
 #ifdef MY_ABC_HERE
 extern u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite);
 #endif  
@@ -61,25 +65,89 @@ void emergency_restart(void)
 EXPORT_SYMBOL_GPL(emergency_restart);
 
 #ifdef MY_DEF_HERE
+static void syno_turnoff_usb_vbus_gpio(const unsigned vbus_gpio_pin, const unsigned vbus_gpio_polarity)
+{
+	int gpio_off_value = 0;
+	if (UINT_MAX == vbus_gpio_pin || UINT_MAX == vbus_gpio_polarity) {
+		return;
+	}
+#ifdef MY_ABC_HERE
+	gpio_off_value = !(gpio_off_value ^ vbus_gpio_polarity);
+	syno_pch_lpc_gpio_pin(vbus_gpio_pin, &gpio_off_value, 1);
+#elif defined(MY_DEF_HERE)
+	SYNO_GPIO_WRITE(vbus_gpio_pin, !(gpio_off_value ^ vbus_gpio_polarity));
+#endif  
+	msleep(500);
+	printk(KERN_INFO "Turned off USB vbus gpio %u (%s)\n", vbus_gpio_pin,
+		vbus_gpio_polarity ? "ACTIVE_HIGH" : "ACTIVE_LOW");
+	return;
+}
+
 static void syno_turnoff_all_usb_vbus_gpio(void)
 {
-        int gpio_off_value = 0;
-        int i = 0;
-        for (i = 0; i < CONFIG_SYNO_USB_VBUS_NUM_GPIO; i++) {
-                if (0 != gSynoUsbVbusGpp[i]) {
-#ifdef MY_ABC_HERE
-                        gpio_off_value = !(gpio_off_value ^ gSynoUsbVbusGppPol[i]);
-                        syno_pch_lpc_gpio_pin(gSynoUsbVbusGpp[i],
-                                              &gpio_off_value, 1);
-#elif defined(MY_DEF_HERE)
-                        SYNO_GPIO_WRITE(gSynoUsbVbusGpp[i],
-                                !(gpio_off_value ^ gSynoUsbVbusGppPol[i]));
+#ifdef MY_DEF_HERE
+		int index;
+		struct device_node *pUSBNode = NULL, *pVbusNode = NULL;
+		u32 vbusGpioPin = U32_MAX, vbusGpioPolarity = U32_MAX;
+		for_each_child_of_node(of_root, pUSBNode) {
+			 
+			if (pUSBNode->full_name && 1 != sscanf(pUSBNode->full_name, "/"DT_USB_SLOT"@%d", &index)) {
+
+				pVbusNode = of_get_child_by_name(pUSBNode, DT_VBUS);
+				if (NULL == pVbusNode) {
+					goto USB_PUT_NODE;
+				}
+
+				if (0 != of_property_read_u32_index(pVbusNode, DT_SYNO_GPIO, SYNO_GPIO_PIN, &vbusGpioPin)) {
+					printk(KERN_ERR "%s reading vbus vbusGpioPin failed.\n", __func__);
+					goto USB_PUT_NODE;
+				}
+				if (0 != of_property_read_u32_index(pVbusNode, DT_SYNO_GPIO, SYNO_POLARITY_PIN, &vbusGpioPolarity)) {
+					printk(KERN_ERR "%s reading vbus vbusGpioPolarity failed.\n", __func__);
+					goto USB_PUT_NODE;
+				}
+
+				syno_turnoff_usb_vbus_gpio(vbusGpioPin, vbusGpioPolarity);
+USB_PUT_NODE:
+				if (pVbusNode) {
+					of_node_put(pVbusNode);
+				}
+			}
+		}
+
+		for_each_child_of_node(of_root, pUSBNode) {
+			 
+			if (pUSBNode->full_name && 1 != sscanf(pUSBNode->full_name, "/"DT_HUB_SLOT"@%d", &index)) {
+
+				pVbusNode = of_get_child_by_name(pUSBNode, DT_VBUS);
+				if (NULL == pVbusNode) {
+					goto HUB_PUT_NODE;
+				}
+
+				if (0 != of_property_read_u32_index(pVbusNode, DT_SYNO_GPIO, SYNO_GPIO_PIN, &vbusGpioPin)) {
+					printk(KERN_ERR "%s reading vbus vbusGpioPin failed.\n", __func__);
+					goto HUB_PUT_NODE;
+				}
+				if (0 != of_property_read_u32_index(pVbusNode, DT_SYNO_GPIO, SYNO_POLARITY_PIN, &vbusGpioPolarity)) {
+					printk(KERN_ERR "%s reading vbus vbusGpioPolarity failed.\n", __func__);
+					goto HUB_PUT_NODE;
+				}
+
+				syno_turnoff_usb_vbus_gpio(vbusGpioPin, vbusGpioPolarity);
+HUB_PUT_NODE:
+				if (pVbusNode) {
+					of_node_put(pVbusNode);
+				}
+			}
+		}
+#else
+		int i = 0;
+		for (i = 0; i < CONFIG_SYNO_USB_VBUS_NUM_GPIO; i++) {
+			if (UINT_MAX != gSynoUsbVbusGpp[i]) {
+				syno_turnoff_usb_vbus_gpio(gSynoUsbVbusGpp[i], gSynoUsbVbusGppPol[i]);
+			}
+		}
 #endif  
-                        printk(KERN_INFO "Turned off USB vbus gpio %u (%s)\n",
-                               gSynoUsbVbusGpp[i],
-			       gSynoUsbVbusGppPol[i] ? "ACTIVE_HIGH" : "ACTIVE_LOW");
-                }
-        }
 #ifdef CONFIG_SYNO_USB_POWER_OFF_TIME
 	mdelay(CONFIG_SYNO_USB_POWER_OFF_TIME);
 #endif  
@@ -182,7 +250,7 @@ static void kernel_shutdown_prepare(enum system_states state)
 #endif  
 #if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
 	 
-	if (syno_is_hw_version(HW_DS718p) || syno_is_hw_version(HW_DS218p)) {
+	if (syno_is_hw_version(HW_DS718p) || syno_is_hw_version(HW_DS218p) || syno_is_hw_version(HW_DS220p)) {
 		SYNO_GPIO_WRITE (PHY_LED_CTRL_PIN(), 0);
 	}
 #endif  

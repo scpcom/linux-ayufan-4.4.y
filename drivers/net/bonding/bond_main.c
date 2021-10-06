@@ -300,6 +300,37 @@ down:
 	return 0;
 }
 
+#if defined(MY_ABC_HERE)
+static void bond_update_speed_duplex(struct slave *slave)
+{
+	struct net_device *slave_dev = slave->dev;
+	struct ethtool_link_ksettings ecmd;
+	int res;
+
+	slave->speed = SPEED_UNKNOWN;
+	slave->duplex = DUPLEX_UNKNOWN;
+
+	res = __ethtool_get_link_ksettings(slave_dev, &ecmd);
+	if (res < 0)
+		return;
+
+	if (ecmd.base.speed == 0 || ecmd.base.speed == ((__u32)-1))
+		return;
+
+	switch (ecmd.base.duplex) {
+	case DUPLEX_FULL:
+	case DUPLEX_HALF:
+		break;
+	default:
+		return;
+	}
+
+	slave->speed = ecmd.base.speed;
+	slave->duplex = ecmd.base.duplex;
+
+	return;
+}
+#else  
 static void bond_update_speed_duplex(struct slave *slave)
 {
 	struct net_device *slave_dev = slave->dev;
@@ -331,6 +362,7 @@ static void bond_update_speed_duplex(struct slave *slave)
 
 	return;
 }
+#endif  
 
 const char *bond_slave_link_status(s8 link)
 {
@@ -491,8 +523,8 @@ static void bond_set_dev_addr(struct net_device *bond_dev,
 			      struct net_device *slave_dev)
 {
 #ifdef MY_ABC_HERE
-	    unsigned char szMac[MAX_ADDR_LEN];
-		    memset(szMac, 0, sizeof(szMac));
+	unsigned char szMac[MAX_ADDR_LEN];
+	memset(szMac, 0, sizeof(szMac));
 #endif  
 	netdev_dbg(bond_dev, "bond_dev=%p slave_dev=%p slave_dev->addr_len=%d\n",
 		   bond_dev, slave_dev, slave_dev->addr_len);
@@ -1144,6 +1176,9 @@ int bond_enslave(struct net_device *bond_dev, struct net_device *slave_dev)
 	struct sockaddr addr;
 	int link_reporting;
 	int res = 0, i;
+#ifdef MY_ABC_HERE
+	unsigned char szMac[MAX_ADDR_LEN] = {0};
+#endif  
 
 	if (!bond->params.use_carrier &&
 	    slave_dev->ethtool_ops->get_link == NULL &&
@@ -1260,7 +1295,21 @@ int bond_enslave(struct net_device *bond_dev, struct net_device *slave_dev)
 		goto err_free;
 	}
 
+#ifdef MY_ABC_HERE
+	memset(szMac, 0, sizeof(szMac));
+
+	if (syno_get_dev_vendor_mac(slave_dev->name, szMac)) {
+		netdev_info(bond_dev, "%s:%s(%d) dev:[%s] get vendor mac fail\n",
+				__FILE__, __FUNCTION__, __LINE__, slave_dev->name);
+		 
+		ether_addr_copy(new_slave->perm_hwaddr, slave_dev->dev_addr);
+	} else {
+		 
+		ether_addr_copy(new_slave->perm_hwaddr, szMac);
+	}
+#else  
 	ether_addr_copy(new_slave->perm_hwaddr, slave_dev->dev_addr);
+#endif  
 
 	if (!bond->params.fail_over_mac ||
 	    BOND_MODE(bond) != BOND_MODE_ACTIVEBACKUP) {

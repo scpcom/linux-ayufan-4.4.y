@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Tick related global functions
  */
@@ -105,6 +108,18 @@ extern void tick_nohz_irq_exit(void);
 extern ktime_t tick_nohz_get_sleep_length(void);
 extern u64 get_cpu_idle_time_us(int cpu, u64 *last_update_time);
 extern u64 get_cpu_iowait_time_us(int cpu, u64 *last_update_time);
+
+#ifdef MY_ABC_HERE
+extern void tick_nohz_idle_stop_tick(void);
+extern void tick_nohz_idle_restart_tick(void);
+static inline void tick_nohz_idle_stop_tick_protected(void)
+{
+	local_irq_disable();
+	tick_nohz_idle_stop_tick();
+	local_irq_enable();
+}
+#endif
+
 #else /* !CONFIG_NO_HZ_COMMON */
 static inline int tick_nohz_tick_stopped(void) { return 0; }
 static inline void tick_nohz_idle_enter(void) { }
@@ -118,6 +133,13 @@ static inline ktime_t tick_nohz_get_sleep_length(void)
 }
 static inline u64 get_cpu_idle_time_us(int cpu, u64 *unused) { return -1; }
 static inline u64 get_cpu_iowait_time_us(int cpu, u64 *unused) { return -1; }
+
+#ifdef MY_ABC_HERE
+static inline void tick_nohz_idle_stop_tick(void) { }
+static inline void tick_nohz_idle_restart_tick(void) { }
+static inline void tick_nohz_idle_stop_tick_protected(void) { }
+#endif
+
 #endif /* !CONFIG_NO_HZ_COMMON */
 
 #ifdef CONFIG_NO_HZ_FULL

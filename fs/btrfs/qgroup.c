@@ -2327,21 +2327,6 @@ btrfs_qgroup_rescan_resume(struct btrfs_fs_info *fs_info)
 				 &fs_info->qgroup_rescan_work);
 }
 
-#ifdef MY_ABC_HERE
-int btrfs_quota_reserve(struct btrfs_root *root, struct inode *inode, u64 num_bytes)
-{
-	int ret = 0;
-	ret = qgroup_reserve(root, num_bytes);
-	if (ret < 0)
-		return ret;
-	return 0;
-}
-void btrfs_quota_reserve_free(struct btrfs_root *root, struct inode *inode, u64 num_bytes)
-{
-	qgroup_free(root, num_bytes);
-}
-#endif  
- 
 int btrfs_qgroup_reserve_data(struct inode *inode, u64 start, u64 len)
 {
 	struct btrfs_root *root = BTRFS_I(inode)->root;
@@ -2356,6 +2341,9 @@ int btrfs_qgroup_reserve_data(struct inode *inode, u64 start, u64 len)
 
 	changeset.bytes_changed = 0;
 	changeset.range_changed = ulist_alloc(GFP_NOFS);
+#ifdef MY_ABC_HERE
+	changeset.prealloc_ulist_node = NULL;
+#endif  
 	ret = set_record_extent_bits(&BTRFS_I(inode)->io_tree, start,
 			start + len -1, EXTENT_QGROUP_RESERVED, &changeset);
 	trace_btrfs_qgroup_reserve_data(inode, start, len,
@@ -2390,6 +2378,9 @@ static int __btrfs_qgroup_release_data(struct inode *inode, u64 start, u64 len,
 
 	changeset.bytes_changed = 0;
 	changeset.range_changed = ulist_alloc(GFP_NOFS);
+#ifdef MY_ABC_HERE
+	changeset.prealloc_ulist_node = NULL;
+#endif  
 	if (!changeset.range_changed)
 		return -ENOMEM;
 
@@ -2468,6 +2459,9 @@ void btrfs_qgroup_check_reserved_leak(struct inode *inode)
 
 	changeset.bytes_changed = 0;
 	changeset.range_changed = ulist_alloc(GFP_NOFS);
+#ifdef MY_ABC_HERE
+	changeset.prealloc_ulist_node = NULL;
+#endif  
 	if (WARN_ON(!changeset.range_changed))
 		return;
 

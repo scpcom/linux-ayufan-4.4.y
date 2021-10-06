@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*
 * ***************************************************************************
 * Copyright (C) 2015 Marvell International Ltd.
@@ -268,4 +264,3 @@ static void pp3_chan_callback(int chan, void *msg, int size, int seq_num, int fl
 
 	mv_pp3_drv_request_delete(seq_num);
 }
-#endif /* MY_DEF_HERE */

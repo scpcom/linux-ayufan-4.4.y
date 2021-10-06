@@ -57,6 +57,12 @@
 
 	chosen { };
 
+	aliases {
+		ethernet0 = &emac3;
+		ethernet1 = &emac0_1;
+		ethernet2 = &emac2_1;
+	};
+
 	ap806 {
 		config-space {
 			serial@512000 {
@@ -79,8 +85,14 @@
 			/* usb3h0 is USB2 only (UTMI) */
 			usb3h0: usb3@500000 {
 				status = "okay";
+				phys = <&utmi0>;
+				phy-names = "usb";
 			};
 			usb3h1: usb3@510000 {
+				separated-phys-for-usb2-usb3;
+				phys = <&utmi1>,
+				       <&comphy0 4 COMPHY_USB3H1>;
+				phy-names = "usb2", "usb3";
 				status = "okay";
 			};
 			sdhci@780000 {
@@ -126,10 +138,13 @@
 					status = "okay";
 				};
 			};
-			eip197@800000 {
+			comphy {
 				status = "okay";
 			};
-			comphy {
+			utmi0: utmi@580000 {
+				status = "okay";
+			};
+			utmi1: utmi@581000 {
 				status = "okay";
 			};
 		};
@@ -143,8 +158,11 @@
 	};
 	cpn-110-slave {
 		config-space {
-			/* usb3h0_1 is USB2 only (UTMI) */
 			usb3h0_1: usb3@500000 {
+				separated-phys-for-usb2-usb3;
+				phys = <&utmi0_1>,
+				       <&comphy1 1 COMPHY_USB3H0>;
+				phy-names = "usb2", "usb3";
 				status = "okay";
 			};
 			serial@702000 {
@@ -202,7 +220,8 @@
 				pinctrl-names = "default";
 				pinctrl-0 = <&cps_spi1_pins>;
 			};
-			eip197@800000 {
+
+			utmi0_1: utmi@580000 {
 				status = "okay";
 			};
 		};

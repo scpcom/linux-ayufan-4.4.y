@@ -95,8 +95,8 @@ struct usb_port {
 	unsigned int flag;
 #endif  
 #ifdef MY_DEF_HERE
-	unsigned syno_vbus_gpp;
-	unsigned syno_vbus_gpp_pol;
+	int syno_vbus_gpp;
+	int syno_vbus_gpp_pol;
 #endif  
 };
 #if defined (MY_DEF_HERE)

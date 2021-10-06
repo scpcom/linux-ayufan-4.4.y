@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -55,4 +51,3 @@ int tm_sysfs_wred_curve_set(int color, uint32_t curve_ind, uint32_t curve_scale)
 int tm_sysfs_drop_profile_set(int level, uint16_t index, int cos);
 
 #endif /* TM_SYSFS_DROP__H */
-#endif /* MY_DEF_HERE */

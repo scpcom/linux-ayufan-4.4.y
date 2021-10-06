@@ -375,7 +375,14 @@ uncork:
 		 * be taken as the remainder of this one. We need to kill the
 		 * socket so the server throws away the partial SMB
 		 */
+#ifdef MY_ABC_HERE
+		// CID 45292: Data race condition. tcpstatus only set without lock here.
+		spin_lock(&GlobalMid_Lock);
 		server->tcpStatus = CifsNeedReconnect;
+		spin_unlock(&GlobalMid_Lock);
+#else
+		server->tcpStatus = CifsNeedReconnect;
+#endif /* MY_ABC_HERE */
 	}
 
 	if (rc < 0 && rc != -EINTR)
@@ -774,6 +781,25 @@ SendReceive2(const unsigned int xid, struct cifs_ses *ses,
 	 */
 
 	mutex_lock(&ses->server->srv_mutex);
+#ifdef MY_ABC_HERE
+	if (SMB20_PROT_ID > ses->server->dialect) {
+		struct smb_hdr *hdr = iov->iov_base;
+		if (0xFE == hdr->Protocol[0]) {
+			cifs_dbg(FYI, "Dialect change from SMB2 to SMB\n");
+			mutex_unlock(&ses->server->srv_mutex);
+			cifs_small_buf_release(buf);
+			return -EAGAIN;
+		}
+	} else {
+		struct smb2_hdr *hdr = iov->iov_base;
+		if (0xFF == hdr->ProtocolId[0]) {
+			cifs_dbg(FYI, "Dialect change from SMB to SMB2\n");
+			mutex_unlock(&ses->server->srv_mutex);
+			cifs_small_buf_release(buf);
+			return -EAGAIN;
+		}
+	}
+#endif /* MY_ABC_HERE */
 
 	midQ = ses->server->ops->setup_request(ses, &rqst);
 	if (IS_ERR(midQ)) {
@@ -895,6 +921,20 @@ SendReceive(const unsigned int xid, struct cifs_ses *ses,
 	   of smb data */
 
 	mutex_lock(&ses->server->srv_mutex);
+#ifdef MY_ABC_HERE
+	if (SMB20_PROT_ID <= ses->server->dialect) {
+		if (0xFF == in_buf->Protocol[0]) {
+			cifs_dbg(FYI, "Dialect change from SMB to SMB2\n");
+			mutex_unlock(&ses->server->srv_mutex);
+			return -EAGAIN;
+		}
+	} else if (0xFE == in_buf->Protocol[0]) {
+		// SMB2 header should not send here.
+		cifs_dbg(FYI, "Dialect change from SMB2 to SMB\n");
+		mutex_unlock(&ses->server->srv_mutex);
+		return -EAGAIN;
+	}
+#endif /* MY_ABC_HERE */
 
 	rc = allocate_mid(ses, in_buf, &midQ);
 	if (rc) {

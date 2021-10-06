@@ -47,7 +47,10 @@ static int ehci_rtk_drv_probe(struct platform_device *pdev)
     struct resource res;
     struct usb_hcd *hcd;
     struct ehci_hcd *ehci;
-    void __iomem *regs, *reset_reg;
+    void __iomem *regs;
+#ifdef CONFIG_ARCH_RTD119X
+    void __iomem *reset_reg;
+#endif
     int irq, err = 0;
     struct usb_phy *phy;
     unsigned long probe_time = jiffies;

@@ -333,7 +333,7 @@ static void __save_error_info(struct super_block *sb, const char *func,
 			&& (0 == sbi->s_new_error_fs_event_flag)
 			&& (0 == sbi->s_last_notify_time ||
 			    time_after(jiffies, sbi->s_last_notify_time + 24*60*60*HZ))
-			&& (es->s_syno_hash_magic == cpu_to_le32(SYNO_HASH_MAGIC))) {
+			&& is_syno_ext(sb)) {
 		sbi->s_new_error_fs_event_flag = 1;
 		sbi->s_last_notify_time = jiffies;
 		syno_ext4_get_dsm_version(es->s_volume_name, dsm_version);
@@ -2202,10 +2202,13 @@ static int ext4_check_descriptors(struct super_block *sb,
 				 "Checksum for group %u failed (%u!=%u)",
 				 i, le16_to_cpu(ext4_group_desc_csum(sb, i,
 				     gdp)), le16_to_cpu(gdp->bg_checksum));
+#ifdef MY_ABC_HERE
+#else
 			if (!(sb->s_flags & MS_RDONLY)) {
 				ext4_unlock_group(sb, i);
 				return 0;
 			}
+#endif  
 		}
 		ext4_unlock_group(sb, i);
 		if (!flexbg_flag)
@@ -3138,9 +3141,12 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 	if (!ext4_superblock_csum_verify(sb, es)) {
 		ext4_msg(sb, KERN_ERR, "VFS: Found ext4 filesystem with "
 			 "invalid superblock checksum.  Run e2fsck?");
+#ifdef MY_ABC_HERE
+#else
 		silent = 1;
 		ret = -EFSBADCRC;
 		goto cantfind_ext4;
+#endif  
 	}
 
 	if (ext4_has_feature_csum_seed(sb))
@@ -3430,7 +3436,7 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 		sbi->s_hash_seed[i] = le32_to_cpu(es->s_hash_seed[i]);
 	sbi->s_def_hash_version = es->s_def_hash_version;
 #ifdef MY_ABC_HERE
-	if (es->s_syno_hash_magic == cpu_to_le32(SYNO_HASH_MAGIC) ||
+	if (is_syno_ext(sb) ||
 	     ext4_has_feature_dir_index(sb)) {
 #else
 	if (ext4_has_feature_dir_index(sb)) {
@@ -4577,8 +4583,11 @@ static int ext4_remount(struct super_block *sb, int *flags, char *data)
 	       "ext4_remount: Checksum for group %u failed (%u!=%u)",
 		g, le16_to_cpu(ext4_group_desc_csum(sb, g, gdp)),
 					       le16_to_cpu(gdp->bg_checksum));
+#ifdef MY_ABC_HERE
+#else
 					err = -EFSBADCRC;
 					goto restore_opts;
+#endif  
 				}
 			}
 

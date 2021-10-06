@@ -152,6 +152,10 @@ static inline void btrfs_clear_skip_qgroup(struct btrfs_trans_handle *trans)
 	delayed_refs->qgroup_to_skip = 0;
 }
 
+#ifdef MY_ABC_HERE
+int btrfs_end_transaction_nosync_delayed(struct btrfs_trans_handle *trans,
+			  struct btrfs_root *root);
+#endif  
 int btrfs_end_transaction(struct btrfs_trans_handle *trans,
 			  struct btrfs_root *root);
 struct btrfs_trans_handle *btrfs_start_transaction(struct btrfs_root *root,
@@ -172,6 +176,9 @@ struct btrfs_trans_handle *btrfs_start_ioctl_transaction(struct btrfs_root *root
 int btrfs_wait_for_commit(struct btrfs_root *root, u64 transid);
 
 void btrfs_add_dead_root(struct btrfs_root *root);
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+void btrfs_add_dead_root_head(struct btrfs_root *root);
+#endif  
 int btrfs_defrag_root(struct btrfs_root *root);
 int btrfs_clean_one_deleted_snapshot(struct btrfs_root *root);
 int btrfs_commit_transaction(struct btrfs_trans_handle *trans,

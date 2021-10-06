@@ -1018,6 +1018,9 @@ static ssize_t do_generic_file_read(struct file *filp, loff_t *ppos,
 	unsigned long offset;       
 	unsigned int prev_offset;
 	int error = 0;
+#ifdef MY_ABC_HERE
+	bool pattern_failed = false;
+#endif  
 
 	index = *ppos >> PAGE_CACHE_SHIFT;
 	prev_index = ra->prev_pos >> PAGE_CACHE_SHIFT;
@@ -1092,6 +1095,13 @@ page_ok:
 			mark_page_accessed(page);
 		prev_index = index;
 
+#ifdef MY_ABC_HERE
+		if (!pattern_failed && inode->i_op->syno_pattern_check) {
+			if (0 > inode->i_op->syno_pattern_check(inode, page, offset, nr, SYNO_PATTERN_CHECK_CACHE_PAGES)) {
+				pattern_failed = true;
+			}
+		}
+#endif  
 		ret = copy_page_to_iter(page, offset, nr, iter);
 		offset += ret;
 		index += offset >> PAGE_CACHE_SHIFT;

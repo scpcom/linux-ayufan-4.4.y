@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -81,4 +77,3 @@ void mv_stack_delete(void *stack_hndl)
 	kfree(p_stack->stack_elements);
 	kfree(p_stack);
 }
-#endif /* MY_DEF_HERE */

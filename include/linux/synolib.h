@@ -27,6 +27,9 @@ void syno_do_hibernation_scsi_log(const char *DeviceName);
 #ifdef MY_ABC_HERE
 int SynoSCSIGetDeviceIndex(struct block_device *bdev);
 #endif
+#ifdef MY_DEF_HERE
+int SynoNVMeGetDeviceIndex(struct block_device *bdev);
+#endif  
 
 #ifdef MY_ABC_HERE
  
@@ -58,6 +61,54 @@ int syno_get_mv_14xx_remap_idx(int origin_idx);
 #endif  
 
 #ifdef MY_DEF_HERE
+#define DT_INTERNAL_SLOT "internal_slot"
+#define DT_ESATA_SLOT "esata_port"
+#define DT_PCIE_SLOT "pcie_slot"
+#define DT_USB_SLOT "usb_slot"
+#define DT_HUB_SLOT "usb_hub"
+#define DT_POWER_PIN_GPIO "power_pin_gpio"
+#define DT_DETECT_PIN_GPIO "detect_pin_gpio"
+#define DT_HDD_ORANGE_LED "led_orange"
+#define DT_HDD_GREEN_LED "led_green"
+#define DT_HDD_ACT_LED "led_activity"
+#define DT_SYNO_GPIO "syno_gpio"
+#define DT_PCIE_ROOT "pcie_root"
+#define DT_ATA_PORT "ata_port"
+#define DT_AHCI "ahci"
+#define DT_AHCI_RTK "ahci_rtk"
+#define DT_AHCI_MVEBU "ahci_mvebu"
+#define DT_MV14XX "mv14xx"
+#define DT_PHY "phy"
+#define DT_USB2 "usb2"
+#define DT_USB3 "usb3"
+#define DT_USB_PORT "usb_port"
+#define DT_USB_HUB "usb_hub"
+#define DT_VBUS "vbus"
+#define DT_SHARED "shared"
+#define DT_SYNO_SPINUP_GROUP "syno_spinup_group"
+#define DT_SYNO_SPINUP_GROUP_DELAY "syno_spinup_group_delay"
+#define DT_HDD_POWERUP_SEQ "syno_hdd_powerup_seq"
+
+#define SYNO_DTS_PROPERTY_CONTENT_LENGTH 50
+
+typedef enum _tag_DISK_PORT_TYPE{
+	UNKNOWN_DEVICE = 0,
+	INTERNAL_DEVICE,
+	EXTERNAL_SATA_DEVICE,
+	EUNIT_DEVICE,
+	EXTERNAL_USB_DEVICE,
+	SYNOBOOT_DEVICE,
+	ISCSI_DEVICE,
+	CACHE_DEVICE,
+	USB_HUB_DEVICE,
+	SDCARD_DEVICE,
+	INVALID_DEVICE,
+	DISK_PORT_TYPE_END,
+} DISK_PORT_TYPE;
+
+#endif  
+
+#ifdef MY_DEF_HERE
 #define PCI_ADDR_LEN_MAX 9
 #define PCI_ADDR_NUM_MAX CONFIG_SYNO_MAX_PCI_SLOT
 extern char gszPciAddrList[PCI_ADDR_NUM_MAX][PCI_ADDR_LEN_MAX];
@@ -68,9 +119,29 @@ extern int syno_check_on_option_pci_slot(struct pci_dev *pdev);
 #ifdef MY_DEF_HERE
  
 #define M2SATA_START_IDX 300
+extern int gPciDeferStart;
 extern int g_nvc_map_index;
 extern int g_syno_nvc_index_map[SATA_REMAP_MAX];
 void syno_insert_sata_index_remap(unsigned int idx, unsigned int num, unsigned int id_start);
 #endif  
-
+#ifdef MY_DEF_HERE
+#define M2_HOST_LEN_MAX 128
+#define M2_PORT_NO_MAX 16
+extern char gSynoM2HostName[M2_HOST_LEN_MAX];
+extern unsigned long gSynoM2PortNo;
+extern unsigned long gSynoM2PortIndex[M2_PORT_NO_MAX];
+#endif  
+#ifdef MY_DEF_HERE
+#define SYNO_SPINUP_GROUP_MAX 16
+#define SYNO_SPINUP_GROUP_PIN_MAX_NUM 8
+extern int g_syno_rp_detect_no;
+extern int g_syno_rp_detect_list[SYNO_SPINUP_GROUP_PIN_MAX_NUM];
+extern int g_syno_hdd_detect_no;
+extern int g_syno_hdd_detect_list[SYNO_SPINUP_GROUP_PIN_MAX_NUM];
+extern int g_syno_hdd_enable_no;
+extern int g_syno_hdd_enable_list[SYNO_SPINUP_GROUP_PIN_MAX_NUM];
+#endif  
+#ifdef MY_DEF_HERE
+#define SYNO_DISK_LATENCY_RANK_NUM 10
+#endif  
 #endif  

@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 ropyright (C) Marvell International Ltd. and its affiliates
 
@@ -987,4 +983,3 @@ err:
 	pr_err("%s: function failed\n", __func__);
 	return -1;
 }
-#endif /* MY_DEF_HERE */

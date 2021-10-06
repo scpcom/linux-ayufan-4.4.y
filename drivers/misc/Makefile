@@ -62,3 +62,6 @@ endif
 ifeq ($(CONFIG_SYNO_LSP_ARMADA_17_02_02), y)
 obj-$(CONFIG_MVEBU_SOC_INFO)	+= mv_soc_info.o
 endif # CONFIG_SYNO_LSP_ARMADA_17_02_02
+ifeq ($(CONFIG_SYNO_LSP_ARMADA_17_10), y)
+obj-$(CONFIG_MVEBU_A8K_SAR)	+= mvebu-sample-at-reset.o
+endif # CONFIG_SYNO_LSP_ARMADA_17_10

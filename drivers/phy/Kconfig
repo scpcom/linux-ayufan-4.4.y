@@ -99,7 +99,7 @@ config PHY_MVEBU_COMPHY
 
 config PHY_MVEBU_COMPHY_CP110
 	def_bool y
-	depends on ARCH_MVEBU && SYNO_LSP_ARMADA_17_02_02
+	depends on ARCH_MVEBU && SYNO_LSP_ARMADA_17_02_02 && !SYNO_ARMADA37XX
 	depends on OF
 	select PHY_MVEBU_COMPHY
 	help
@@ -124,12 +124,16 @@ config PHY_MVEBU_SATA
 	depends on OF
 	select GENERIC_PHY
 
-config PHY_ARMADA3700_UTMI
+config PHY_MVEBU_UTMI
 	def_bool y
 	depends on ARCH_MVEBU
 	depends on OF
 	depends on SYNO_LSP_ARMADA_17_04_02
 	select GENERIC_PHY
+	help
+	  Enable this to support Marvell utmi phy driver. The utmi driver
+	  supports Armada-3700 and CP110. This driver is responsible for
+	  configuring PHY accordingly.
 
 config PHY_MIPHY28LP
 	tristate "STMicroelectronics MIPHY28LP PHY driver for STiH407"

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Generic entry point for the idle threads
  */
@@ -150,9 +153,15 @@ static void cpuidle_idle_call(void)
 	 * so no more rcu read side critical sections and one more
 	 * step to the grace period
 	 */
+#ifndef MY_ABC_HERE
 	rcu_idle_enter();
+#endif
 
 	if (cpuidle_not_available(drv, dev)) {
+#ifdef MY_ABC_HERE
+		tick_nohz_idle_stop_tick();
+		rcu_idle_enter();
+#endif
 		default_idle_call();
 		goto exit_idle;
 	}
@@ -172,10 +181,18 @@ static void cpuidle_idle_call(void)
 			local_irq_enable();
 			goto exit_idle;
 		}
-
+#ifdef MY_ABC_HERE
+		tick_nohz_idle_stop_tick();
+		rcu_idle_enter();
+#endif
 		next_state = cpuidle_find_deepest_state(drv, dev);
 		call_cpuidle(drv, dev, next_state);
 	} else {
+#ifdef MY_ABC_HERE
+		tick_nohz_idle_stop_tick();
+		rcu_idle_enter();
+#endif
+
 		/*
 		 * Ask the cpuidle framework to choose a convenient idle state.
 		 */
@@ -226,6 +243,9 @@ static void cpu_idle_loop(void)
 			rmb();
 
 			if (cpu_is_offline(smp_processor_id())) {
+#ifdef MY_ABC_HERE
+				tick_nohz_idle_stop_tick_protected();
+#endif
 				rcu_cpu_notify(NULL, CPU_DYING_IDLE,
 					       (void *)(long)smp_processor_id());
 				smp_mb(); /* all activity before dead. */
@@ -245,10 +265,14 @@ static void cpu_idle_loop(void)
 			 * know that the IPI is going to arrive right
 			 * away
 			 */
-			if (cpu_idle_force_poll || tick_check_broadcast_expired())
+			if (cpu_idle_force_poll || tick_check_broadcast_expired()) {
+#ifdef MY_ABC_HERE
+				tick_nohz_idle_restart_tick();
+#endif
 				cpu_idle_poll();
-			else
+			} else {
 				cpuidle_idle_call();
+			}
 
 			arch_cpu_idle_exit();
 		}

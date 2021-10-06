@@ -485,40 +485,22 @@ void blk_queue_update_dma_alignment(struct request_queue *q, int mask)
 }
 EXPORT_SYMBOL(blk_queue_update_dma_alignment);
 
+void blk_queue_flush(struct request_queue *q, unsigned int flush)
+{
+	WARN_ON_ONCE(flush & ~(REQ_FLUSH | REQ_FUA));
+
+	if (WARN_ON_ONCE(!(flush & REQ_FLUSH) && (flush & REQ_FUA)))
+		flush &= ~REQ_FUA;
+
+	q->flush_flags = flush & (REQ_FLUSH | REQ_FUA);
+}
+EXPORT_SYMBOL_GPL(blk_queue_flush);
+
 void blk_queue_flush_queueable(struct request_queue *q, bool queueable)
 {
-	spin_lock_irq(q->queue_lock);
-	if (queueable)
-		clear_bit(QUEUE_FLAG_FLUSH_NQ, &q->queue_flags);
-	else
-		set_bit(QUEUE_FLAG_FLUSH_NQ, &q->queue_flags);
-	spin_unlock_irq(q->queue_lock);
+	q->flush_not_queueable = !queueable;
 }
 EXPORT_SYMBOL_GPL(blk_queue_flush_queueable);
-
-void blk_set_queue_depth(struct request_queue *q, unsigned int depth)
-{
-	q->queue_depth = depth;
-	wbt_set_queue_depth(q->rq_wb, depth);
-}
-EXPORT_SYMBOL(blk_set_queue_depth);
-
-void blk_queue_write_cache(struct request_queue *q, bool wc, bool fua)
-{
-	spin_lock_irq(q->queue_lock);
-	if (wc)
-		queue_flag_set(QUEUE_FLAG_WC, q);
-	else
-		queue_flag_clear(QUEUE_FLAG_WC, q);
-	if (fua)
-		queue_flag_set(QUEUE_FLAG_FUA, q);
-	else
-		queue_flag_clear(QUEUE_FLAG_FUA, q);
-	spin_unlock_irq(q->queue_lock);
-
-	wbt_set_write_cache(q->rq_wb, test_bit(QUEUE_FLAG_WC, &q->queue_flags));
-}
-EXPORT_SYMBOL_GPL(blk_queue_write_cache);
 
 static int __init blk_settings_init(void)
 {

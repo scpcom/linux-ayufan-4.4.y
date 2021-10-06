@@ -264,7 +264,7 @@ static int __rtk_usb_host_reset(struct manager_data* data) {
     clk_prepare_enable(clk_usb); // = clk_prepare + clk_enable
     mdelay(2);
 
-    dev_info(dev, "Realtek USB init 5/5 OK (CRT_SOFT_RESET1=%x, CRT_SOFT_RESET2=%x, CRT_CLOCK_ENABLE1=%x)\n",
+    dev_dbg(dev, "Realtek USB init 5/5 OK (CRT_SOFT_RESET1=%x, CRT_SOFT_RESET2=%x, CRT_CLOCK_ENABLE1=%x)\n",
              (uint32_t)(readl(crt_reg + CRT_SOFT_RESET1)),
              (uint32_t)(readl(crt_reg + CRT_SOFT_RESET2)),
              (uint32_t)(readl(crt_reg + CRT_CLOCK_ENABLE1)));

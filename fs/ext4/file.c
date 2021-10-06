@@ -871,6 +871,9 @@ const struct inode_operations ext4_file_inode_operations = {
 	.syno_get_archive_ver	= ext4_syno_get_archive_ver,
 	.syno_set_archive_ver	= ext4_syno_set_archive_ver,
 #endif  
+#ifdef MY_ABC_HERE
+	.syno_pattern_check = ext4_syno_pattern_check,
+#endif  
 	.setattr	= ext4_setattr,
 	.getattr	= ext4_getattr,
 	.setxattr	= generic_setxattr,

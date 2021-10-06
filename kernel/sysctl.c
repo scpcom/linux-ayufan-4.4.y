@@ -79,6 +79,10 @@
 #include <linux/nmi.h>
 #endif
 
+#ifdef MY_ABC_HERE
+#include <linux/syno.h>
+#endif  
+
 #if defined(CONFIG_SYSCTL)
 
 #ifdef MY_DEF_HERE
@@ -112,7 +116,7 @@ char gszSataPortMap[8] = {0};
 EXPORT_SYMBOL(gszSataPortMap);
 #endif  
 
-#ifdef MY_ABC_HERE
+#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 unsigned int gSynoSataHostCnt = 0;
 EXPORT_SYMBOL(gSynoSataHostCnt);
 #endif  
@@ -152,9 +156,16 @@ EXPORT_SYMBOL(gszSynoHWVersion);
 #endif  
 
 #ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
+int gSynoHddPowerupSeq = 0, gSynoInternalHddNumber = 0;
+EXPORT_SYMBOL(gSynoHddPowerupSeq);
+EXPORT_SYMBOL(gSynoInternalHddNumber);
+#else  
 long g_syno_hdd_powerup_seq = -1;
-long syno_boot_hd_count = 0;
 EXPORT_SYMBOL(g_syno_hdd_powerup_seq);
+#endif  
+long syno_boot_hd_count = 0;
+EXPORT_SYMBOL(syno_boot_hd_count);
 #endif  
 
 #ifdef MY_ABC_HERE
@@ -183,6 +194,8 @@ EXPORT_SYMBOL(gszCustomSerialNum);
 #include <linux/synosata.h>
 int (*funcSYNOGetHwCapability)(CAPABILITY *) = NULL;
 EXPORT_SYMBOL(funcSYNOGetHwCapability);
+EUNIT_PWRON_TYPE (*funcSynoEunitPowerctlType)(void) = NULL;
+EXPORT_SYMBOL(funcSynoEunitPowerctlType);
 #endif  
 
 #ifdef MY_DEF_HERE
@@ -193,11 +206,6 @@ EXPORT_SYMBOL(funcSYNOCtrlDiskLedBy1475);
 #ifdef  MY_ABC_HERE
 int gSynoRaidSyncFlag = 0;
 EXPORT_SYMBOL(gSynoRaidSyncFlag);
-#endif  
-
-#ifdef MY_ABC_HERE
-DECLARE_RWSEM(s_reshape_mount_key);
-EXPORT_SYMBOL(s_reshape_mount_key);
 #endif  
 
 #ifdef MY_ABC_HERE
@@ -219,6 +227,8 @@ EXPORT_SYMBOL(gPciAddrNum);
 #endif  
 
 #ifdef MY_DEF_HERE
+int gPciDeferStart = M2SATA_START_IDX;
+EXPORT_SYMBOL(gPciDeferStart);
 int g_nvc_map_index = 0;
 EXPORT_SYMBOL(g_nvc_map_index);
 #endif  
@@ -284,7 +294,7 @@ EXPORT_SYMBOL(gSynoFactoryUSB3Disable);
 #endif  
 
 #ifdef MY_DEF_HERE
-char gSynoCastratedXhcAddr[CONFIG_SYNO_USB_NUM_CASTRATED_XHC][13] = {{0}};
+char gSynoCastratedXhcAddr[CONFIG_SYNO_USB_NUM_CASTRATED_XHC][32] = {{0}};
 unsigned int gSynoCastratedXhcPortBitmap[CONFIG_SYNO_USB_NUM_CASTRATED_XHC] = {0};
 EXPORT_SYMBOL(gSynoCastratedXhcAddr);
 EXPORT_SYMBOL(gSynoCastratedXhcPortBitmap);
@@ -293,7 +303,7 @@ EXPORT_SYMBOL(gSynoCastratedXhcPortBitmap);
 #ifdef MY_DEF_HERE
 char gSynoUsbVbusHostAddr[CONFIG_SYNO_USB_VBUS_NUM_GPIO][20] = {{0}};
 int gSynoUsbVbusPort[CONFIG_SYNO_USB_VBUS_NUM_GPIO] = {0};
-unsigned gSynoUsbVbusGpp[CONFIG_SYNO_USB_VBUS_NUM_GPIO] = {0};
+unsigned gSynoUsbVbusGpp[CONFIG_SYNO_USB_VBUS_NUM_GPIO] = {UINT_MAX};
 unsigned gSynoUsbVbusGppPol[CONFIG_SYNO_USB_VBUS_NUM_GPIO] = {0};
 EXPORT_SYMBOL(gSynoUsbVbusHostAddr);
 EXPORT_SYMBOL(gSynoUsbVbusPort);
@@ -328,14 +338,85 @@ EXPORT_SYMBOL(syno_disk_map_table_gen_mv14xx);
 #endif  
 
 #ifdef MY_DEF_HERE
+#ifdef MY_ABC_HERE
 int g_syno_nvc_index_map[SATA_REMAP_MAX] = {-1};
 EXPORT_SYMBOL(g_syno_nvc_index_map);
 #endif  
+#endif  
 #ifdef MY_ABC_HERE
-int giSynoDsikEhFlag = 0;
-EXPORT_SYMBOL(giSynoDsikEhFlag);
+int giSynoDiskEhFlag = 0;
+EXPORT_SYMBOL(giSynoDiskEhFlag);
 unsigned long guSynoScsiCmdSN = 0;
 EXPORT_SYMBOL(guSynoScsiCmdSN);
+#endif  
+#ifdef MY_DEF_HERE
+char gSynoM2HostName[M2_HOST_LEN_MAX] = {0};
+EXPORT_SYMBOL(gSynoM2HostName);
+unsigned long gSynoM2PortNo = 0;
+EXPORT_SYMBOL(gSynoM2PortNo);
+unsigned long gSynoM2PortIndex[M2_PORT_NO_MAX];
+EXPORT_SYMBOL(gSynoM2PortIndex);
+#endif  
+
+#ifdef MY_DEF_HERE
+unsigned int SynoDiskLatencyType = 0x6;
+EXPORT_SYMBOL(SynoDiskLatencyType);
+unsigned int gSynoDiskLatencyRank[SYNO_DISK_LATENCY_RANK_NUM] = {99, 90, 70, 50, 0};
+EXPORT_SYMBOL(gSynoDiskLatencyRank);
+#endif  
+#ifdef MY_ABC_HERE
+
+#define SZ_IF_PREFIX "eth"
+#define SYNO_SFP_UNSUPPORT_NOTIFY_SIZE 64
+int gSynoSfpUnsupportNotify[SYNO_SFP_UNSUPPORT_NOTIFY_SIZE] = {0};
+
+void SynoSfpUnsupportNotifySet(const char* ethName, SYNO_SFP_UNSUPPORTED_NOTIFY_TYPE val)
+{
+	long int ethNum = -1;
+
+	if (0 != strncmp(ethName, SZ_IF_PREFIX, strlen(SZ_IF_PREFIX))) {
+		goto err;
+	}
+	if (0 != kstrtol(ethName + strlen(SZ_IF_PREFIX), 10, &ethNum)) {
+		goto err;
+	}
+	if (ethNum >= SYNO_SFP_UNSUPPORT_NOTIFY_SIZE) {
+		goto err;
+	}
+
+	gSynoSfpUnsupportNotify[ethNum] = val;
+	return;
+
+err:
+	printk(KERN_ERR "Syno SFP+ notification failed: %s\n", ethName);
+}
+EXPORT_SYMBOL(SynoSfpUnsupportNotifySet);
+
+#endif  
+
+#ifdef MY_ABC_HERE
+int gSynoPatternCheckCharacter = 0xFF;
+int gSynoFsPatternCheckFlag = 0;
+EXPORT_SYMBOL(gSynoPatternCheckCharacter);
+EXPORT_SYMBOL(gSynoFsPatternCheckFlag);
+static int syno_char_max = 0xFF;
+#endif  
+
+#ifdef MY_DEF_HERE
+int giSynoSpinupGroup[SYNO_SPINUP_GROUP_MAX] = {0};
+EXPORT_SYMBOL(giSynoSpinupGroup);
+int giSynoSpinupGroupNum = 0;
+EXPORT_SYMBOL(giSynoSpinupGroupNum);
+int giSynoSpinupGroupDelay = 0;
+EXPORT_SYMBOL(giSynoSpinupGroupDelay);
+int giSynoSpinupGroupDebug = 0;
+EXPORT_SYMBOL(giSynoSpinupGroupDebug);
+int giSynoDSleepCurrentSpinupGroupNum = 0;
+EXPORT_SYMBOL(giSynoDSleepCurrentSpinupGroupNum);
+int giSynoDSleepCurrentSpinupGroupDiskNum = 0;
+EXPORT_SYMBOL(giSynoDSleepCurrentSpinupGroupDiskNum);
+int giSynoDSleepCurrentPoweronDisks = 0;
+EXPORT_SYMBOL(giSynoDSleepCurrentPoweronDisks);
 #endif  
 
 extern int suid_dumpable;
@@ -1459,7 +1540,7 @@ static struct ctl_table kern_table[] = {
 		.proc_handler   = proc_dostring,
 	},
 #endif  
-#ifdef MY_ABC_HERE
+#if defined(MY_ABC_HERE) && !defined(MY_DEF_HERE)
 	{
 		.procname	= "syno_internal_hd_num",
 		.data		= &g_syno_hdd_powerup_seq,
@@ -1481,6 +1562,22 @@ static struct ctl_table kern_table[] = {
 		.data			= &giDenoOfTimeInterval,
 		.maxlen			= sizeof (int),
 		.mode			= 0644,
+		.proc_handler	= proc_dointvec,
+	},
+#endif  
+#ifdef MY_DEF_HERE
+	{
+		.procname	= "syno_spinup_group_delay",
+		.data		= &giSynoSpinupGroupDelay,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= proc_dointvec,
+	},
+	{
+		.procname	= "syno_spinup_group_debug",
+		.data		= &giSynoSpinupGroupDebug,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
 		.proc_handler	= proc_dointvec,
 	},
 #endif  
@@ -1582,7 +1679,7 @@ static struct ctl_table kern_table[] = {
 		.extra2         = &iSynoDualheadIPValueLen,
 	},
 #endif  
-#ifdef MY_DEF_HERE
+#if defined(MY_DEF_HERE) || (defined(MY_DEF_HERE) && defined(MY_DEF_HERE))
 	{
 		.procname		= "syno_is_sas_model",
 		.data			= &g_is_sas_model,
@@ -1654,11 +1751,54 @@ static struct ctl_table kern_table[] = {
 #ifdef MY_ABC_HERE
        {
                .procname       = "syno_disk_eh_flag",
-               .data           = &giSynoDsikEhFlag,
+               .data           = &giSynoDiskEhFlag,
                .maxlen         = sizeof (int),
                .mode           = 0444,
                .proc_handler   = &proc_dointvec,
        },
+#endif  
+#ifdef MY_ABC_HERE
+	{
+		.procname       = "syno_unsupported_sfp_notify",
+		.data           = &gSynoSfpUnsupportNotify,
+		.maxlen         = sizeof(gSynoSfpUnsupportNotify),
+		.mode           = 0644,
+		.proc_handler   = SynoProcDoIntVec,
+	},
+#endif  
+#ifdef MY_DEF_HERE
+	{
+		.procname       = "syno_disk_latency_type",
+		.data           = &SynoDiskLatencyType,
+		.maxlen         = sizeof (int),
+		.mode           = 0644,
+		.proc_handler   = proc_dointvec,
+	},
+	{
+		.procname       = "syno_disk_latency_rank",
+		.data           = &gSynoDiskLatencyRank,
+		.maxlen         = sizeof (gSynoDiskLatencyRank),
+		.mode           = 0644,
+		.proc_handler   = proc_dointvec,
+	},
+#endif  
+#ifdef MY_ABC_HERE
+	{
+		.procname       = "syno_fs_pattern_check_flag",
+		.data           = &gSynoFsPatternCheckFlag,
+		.maxlen         = sizeof (int),
+		.mode           = 0644,
+		.proc_handler   = &proc_dointvec,
+	},
+	{
+		.procname       = "syno_pattern_check_character",
+		.data           = &gSynoPatternCheckCharacter,
+		.maxlen         = sizeof (int),
+		.mode           = 0644,
+		.proc_handler   = proc_dointvec_minmax,
+		.extra1		= &zero,
+		.extra2		= &syno_char_max,
+	},
 #endif  
 	{ }
 };
@@ -3200,6 +3340,107 @@ int SynoProcDoStringVec(struct ctl_table *table, int write,
 }
 #endif  
 
+#ifdef MY_ABC_HERE
+ 
+int SynoProcDoIntVec(struct ctl_table *table, int write,
+	void __user *buffer, size_t *lenp, loff_t *ppos)
+{
+	int *i, vleft, first = 1, err = 0, writeVal = 0, getWriteVal = 0;
+	unsigned long page = 0;
+	size_t left;
+	char *kbuf;
+
+	if (!table->data || !table->maxlen || !*lenp || (*ppos && !write)) {
+		*lenp = 0;
+		return 0;
+	}
+
+	i = (int *) table->data;
+	vleft = table->maxlen / sizeof(*i);
+	left = *lenp;
+
+	if (write) {
+		if (*ppos) {
+			switch (sysctl_writes_strict) {
+			case SYSCTL_WRITES_STRICT:
+				goto out;
+			case SYSCTL_WRITES_WARN:
+				warn_sysctl_write(table);
+				break;
+			default:
+				break;
+			}
+		}
+
+		if (left > PAGE_SIZE - 1)
+			left = PAGE_SIZE - 1;
+		page = __get_free_page(GFP_TEMPORARY);
+		kbuf = (char *) page;
+		if (!kbuf)
+			return -ENOMEM;
+		if (copy_from_user(kbuf, buffer, left)) {
+			err = -EFAULT;
+			goto free;
+		}
+		kbuf[left] = 0;
+	}
+
+	for (; left && vleft--; i++, first=0) {
+		unsigned long lval;
+		bool neg;
+
+		if (write) {
+			left -= proc_skip_spaces(&kbuf);
+
+			if (!left)
+				break;
+			err = proc_get_long(&kbuf, &left, &lval, &neg,
+					     proc_wspace_sep,
+					     sizeof(proc_wspace_sep), NULL);
+			if (err)
+				break;
+			if (0 == getWriteVal) {
+				getWriteVal = 1;
+				writeVal = lval;
+				continue;
+			}
+			if (lval >= (table->maxlen / sizeof(*i)) || neg) {
+				err = -EINVAL;
+				break;
+			}
+			((int*)table->data)[lval] = writeVal;
+		} else {
+			if (do_proc_dointvec_conv(&neg, &lval, i, 0, NULL)) {
+				err = -EINVAL;
+				break;
+			}
+			if (!first)
+				err = proc_put_char(&buffer, &left, '\t');
+			if (err)
+				break;
+			err = proc_put_long(&buffer, &left, lval, neg);
+			if (err)
+				break;
+		}
+	}
+
+	if (!write && !first && left && !err)
+		err = proc_put_char(&buffer, &left, '\n');
+	if (write && !err && left)
+		left -= proc_skip_spaces(&kbuf);
+free:
+	if (write) {
+		free_page(page);
+		if (first)
+			return err ? : -EINVAL;
+	}
+	*lenp -= left;
+out:
+	*ppos += *lenp;
+	return err;
+}
+#endif  
+
 #else  
 
 int proc_dostring(struct ctl_table *table, int write,
@@ -3259,6 +3500,14 @@ int proc_doulongvec_ms_jiffies_minmax(struct ctl_table *table, int write,
 
 #if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 int SynoProcDoStringVec(struct ctl_table *table, int write,
+			void __user *buffer, size_t *lenp, loff_t *ppos)
+{
+    return -ENOSYS;
+}
+#endif  
+
+#ifdef MY_ABC_HERE
+int SynoProcDoIntVec(struct ctl_table *table, int write,
 			void __user *buffer, size_t *lenp, loff_t *ppos)
 {
     return -ENOSYS;

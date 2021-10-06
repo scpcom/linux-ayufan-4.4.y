@@ -32,11 +32,32 @@
 #include <linux/pm_runtime.h>
 #include <linux/platform_device.h>
 
+#ifdef MY_DEF_HERE
+#include <linux/math64.h>
+#endif  
+
+#ifdef MY_DEF_HERE
+#include <linux/of.h>
+#include <linux/synolib.h>
+#endif  
+
 #define CREATE_TRACE_POINTS
 #include <trace/events/libata.h>
 
 #include "libata.h"
 #include "libata-transport.h"
+
+#ifdef MY_DEF_HERE
+#include <linux/mutex.h>
+static struct mutex mutex_spin;
+static DEFINE_MUTEX(mutex_spin);
+#endif  
+
+#ifdef MY_ABC_HERE
+static int syno_ata_pattern_check = 0;
+extern int gSynoPatternCheckCharacter;
+module_param(syno_ata_pattern_check, int, 0644);
+#endif  
 
 const unsigned long sata_deb_timing_normal[]		= {   5,  100, 2000 };
 const unsigned long sata_deb_timing_hotplug[]		= {  25,  500, 2000 };
@@ -63,10 +84,6 @@ static unsigned int ata_dev_set_xfermode(struct ata_device *dev);
 static void ata_dev_xfermask(struct ata_device *dev);
 static unsigned long ata_dev_blacklisted(const struct ata_device *dev);
 
-#if defined(MY_DEF_HERE)
-extern void ahci_rtk_issue_intr(int port_num);
-extern void ahci_rtk_reset_mac(int port_num);
-#endif  
 atomic_t ata_print_id = ATOMIC_INIT(0);
 
 struct ata_force_param {
@@ -88,10 +105,80 @@ struct ata_force_ent {
 static struct ata_force_ent *ata_force_tbl;
 static int ata_force_tbl_size;
 
+#ifdef MY_DEF_HERE
+struct klist syno_ata_port_head;
+#endif  
+
+#ifdef MY_DEF_HERE
+ 
+struct ata_port *syno_ata_port_get_by_port(const unsigned short diskPort)
+{
+	int index = -1;
+	struct ata_port *ap = NULL;
+	struct device_node *pSlotNode = NULL;
+	struct klist_iter klist_iter;
+	struct klist_node *ata_node = NULL;
+
+	if (NULL == of_root) {
+		goto END;
+	}
+	for_each_child_of_node(of_root, pSlotNode) {
+		 
+		if (!pSlotNode->full_name || 1 != sscanf(pSlotNode->full_name, "/"DT_INTERNAL_SLOT"@%d", &index)) {
+			continue;
+		}
+		if (diskPort == index) {
+			break;
+		}
+	}
+
+	if (NULL == pSlotNode) {
+		goto END;
+	}
+
+	klist_iter_init(&syno_ata_port_head, &klist_iter);
+	for (ata_node = klist_next(&klist_iter); NULL != ata_node; ata_node = klist_next(&klist_iter)) {
+		ap = container_of(ata_node, struct ata_port, ata_port_list);
+		if (true == ap->ops->syno_compare_node_info(ap, pSlotNode)) {
+			break;
+		}
+		ap = NULL;
+	}
+	klist_iter_exit(&klist_iter);
+
+	of_node_put(pSlotNode);
+END:
+	return ap;
+}
+EXPORT_SYMBOL(syno_ata_port_get_by_port);
+
+int syno_compare_dts_ata_port(const struct ata_port *pAtaPort, const struct device_node *pDeviceNode)
+{
+	int ret = -1;
+	u32 ata_port_no = U32_MAX;
+	if (NULL == pDeviceNode || NULL == pAtaPort) {
+		goto END;
+	}
+	if (0 != of_property_read_u32_index(pDeviceNode, DT_ATA_PORT, 0, &ata_port_no)) {
+		printk(KERN_ERR "ahci_rtk read ata_port error\n");
+		goto END;
+	}
+
+	if (pAtaPort->port_no == ata_port_no) {
+		ret = 0;
+	}
+END:
+	return ret;
+}
+EXPORT_SYMBOL(syno_compare_dts_ata_port);
+#endif  
+
 #ifdef MY_ABC_HERE
 #if defined(MY_DEF_HERE)
 #include <linux/syno_gpio.h>
 extern SYNO_GPIO syno_gpio;
+#ifdef MY_DEF_HERE
+#else
 static SYNO_GPIO_INFO hdd_detect = {
 	.name 			= "hdd detect",
 	.nr_gpio		= 0,
@@ -202,45 +289,6 @@ static int __init early_hdd_enable(char *p)
 	return 1;
 }
 __setup("syno_hdd_enable=", early_hdd_enable);
-
-#if defined(MY_DEF_HERE)
-static void rtk_hdd_pwren_reset(int index, int value) {
-	int iLastGPIOstat = SYNO_GPIO_READ(HDD_ENABLE_PIN(index));
-
-	SYNO_GPIO_WRITE(HDD_ENABLE_PIN(index), value);
-
-	if(1 == iLastGPIOstat && 0 == value) {
-		if (syno_is_hw_version(HW_DS418j) || \
-				syno_is_hw_version(HW_DS418)) {
-			if (3 == index) {
-				msleep(200);
-				ahci_rtk_reset_mac(0);
-				ahci_rtk_issue_intr(0);
-			} else if (4 == index) {
-				msleep(200);
-				ahci_rtk_reset_mac(1);
-				ahci_rtk_issue_intr(1);
-			}
-		} else if (syno_is_hw_version(HW_DS218play) || \
-                syno_is_hw_version(HW_DS218)) {
-			if (1 == index) {
-				msleep(200);
-				ahci_rtk_reset_mac(0);
-				ahci_rtk_issue_intr(0);
-			} else if (2 == index) {
-				msleep(200);
-				ahci_rtk_reset_mac(1);
-				ahci_rtk_issue_intr(1);
-			}
-		} else if (syno_is_hw_version(HW_DS118)) {
-			if (1 == index) {
-				msleep(200);
-				ahci_rtk_reset_mac(0);
-				ahci_rtk_issue_intr(0);
-			}
-		}
-	}
-}
 #endif  
 
 int SYNO_CTRL_HDD_POWERON(int index, int value)
@@ -250,11 +298,7 @@ int SYNO_CTRL_HDD_POWERON(int index, int value)
 		WARN_ON(1);
 		return -EINVAL;
 	}
-#if defined(MY_DEF_HERE)
-	rtk_hdd_pwren_reset(index, value);
-#else  
 	SYNO_GPIO_WRITE(HDD_ENABLE_PIN(index), value);
-#endif  
 
 	return 0;
 }
@@ -269,7 +313,11 @@ int SYNO_CHECK_HDD_DETECT(int index)
 	}
 	ret = SYNO_GPIO_READ(HDD_DETECT_PIN(index));
 	 
+#ifdef MY_DEF_HERE
+	if (ACTIVE_LOW == HDD_DETECT_POLARITY(index)) {
+#else
 	if (ACTIVE_LOW == HDD_DETECT_POLARITY()) {
+#endif  
 		return !ret;
 	}
 	return ret;
@@ -285,25 +333,157 @@ int SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER(void)
 	return 0;
 }
 EXPORT_SYMBOL(SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER);
-int SYNO_CTRL_HDD_ACT_NOTIFY(int index)
+int SYNO_CTRL_GPIO_HDD_ACT_LED(int index, int value)
 {
-	int value = 0;
-	static u32 disk_act_value[SYNO_GPIO_PIN_MAX_NUM] = {0};
-	if (!HAVE_HDD_ACT_LED(index + 1)) {  
+	index++;   
+	if (!HAVE_HDD_ACT_LED(index)) {
 		printk("No such hdd act led pin. Index: %d\n", index);
 		WARN_ON(1);
 		return -EINVAL;
 	}
-	disk_act_value[index] = !disk_act_value[index];
-	value = disk_act_value[index];
-	SYNO_GPIO_WRITE(HDD_ACT_LED_PIN(index + 1), value);
+	SYNO_GPIO_WRITE(HDD_ACT_LED_PIN(index), value);
 	return 0;
 }
-EXPORT_SYMBOL(SYNO_CTRL_HDD_ACT_NOTIFY);
+EXPORT_SYMBOL(SYNO_CTRL_GPIO_HDD_ACT_LED);
+#ifdef MY_DEF_HERE
+#ifdef MY_DEF_HERE
+#else
+static SYNO_GPIO_INFO redundant_power_detect = {
+	.name 			= "redundant power detect",
+	.nr_gpio		= 0,
+	.gpio_port		= {0},
+	.gpio_polarity	= ACTIVE_LOW,
+};
+static int __init early_redundant_power_detect(char *p)
+{
+	int i, ret;
+	 
+	if ((NULL == p) || (0 == strlen(p))) {
+		return 1;
+	}
+	printk("SYNO GPIO redundant power detect pin: ");
+	ret = hdd_bootargs_parser(&hdd_detect, p);
+	if (-EINVAL == ret) {
+		printk("Error parameters, %s\n", p);
+	} else if (-EMSGSIZE == ret) {
+		printk("Too many arguments, %s\n", p);
+	} else {
+		syno_gpio.redundant_power_detect = &redundant_power_detect;
+		for (i = 0; i < syno_gpio.redundant_power_detect->nr_gpio; i++) {
+			printk("%d ", RP_DETECT_PIN(i + 1));
+		}
+		printk("\n");
+	}
+	return 1;
+}
+__setup("syno_rp_detect=", early_redundant_power_detect);
+#endif  
+#endif  
 #else
 extern int SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER(void);
 extern int SYNO_CTRL_HDD_POWERON(int index, int value);
 extern int SYNO_CHECK_HDD_PRESENT(int index);
+#ifdef MY_DEF_HERE
+int g_syno_rp_detect_no;
+int g_syno_rp_detect_list[SYNO_SPINUP_GROUP_PIN_MAX_NUM];
+int g_syno_hdd_detect_no;
+int g_syno_hdd_detect_list[SYNO_SPINUP_GROUP_PIN_MAX_NUM];
+int g_syno_hdd_enable_no;
+int g_syno_hdd_enable_list[SYNO_SPINUP_GROUP_PIN_MAX_NUM];
+ 
+static int hdd_bootargs_parser (char *args, int *no, int *list)
+{
+        int pin_num = 0;
+        char *endp;
+        if (NULL == args || NULL == no || NULL == list) {
+                return -EINVAL;
+        }
+        while (1) {
+                if(SYNO_SPINUP_GROUP_PIN_MAX_NUM < pin_num) {
+                        return -EMSGSIZE;
+                }
+                list[pin_num] = simple_strtol(args, &endp, 10) & 0xFF;
+                pin_num++;
+                 
+                if (*endp == '\0') {
+                        break;
+                }
+                args = ++endp;
+        }
+        *no = pin_num;
+        return 0;
+}
+
+static int __init early_syno_rp_detect(char *p)
+{
+        int i, ret;
+
+        ret = hdd_bootargs_parser(p, &g_syno_rp_detect_no, g_syno_rp_detect_list);
+
+        printk("SYNO GPIO redundant power detect pin:");
+        if (-EINVAL == ret) {
+                printk("Error parameters, %s\n", p);
+        } else if (-EMSGSIZE == ret) {
+                printk("Too many arguments, %s\n", p);
+        } else {
+                for (i = 0; i < g_syno_rp_detect_no; ++i) {
+                        printk(" %d", g_syno_rp_detect_list[i]);
+                }
+                printk("\n");
+        }
+
+        return 1;
+}
+__setup("syno_rp_detect=", early_syno_rp_detect);
+
+static int __init early_syno_hdd_detect(char *p)
+{
+        int i, ret;
+
+        ret = hdd_bootargs_parser(p, &g_syno_hdd_detect_no, g_syno_hdd_detect_list);
+
+        printk("SYNO GPIO HDD detect pin:");
+        if (-EINVAL == ret) {
+                printk("Error parameters, %s\n", p);
+        } else if (-EMSGSIZE == ret) {
+                printk("Too many arguments, %s\n", p);
+        } else {
+                for (i = 0; i < g_syno_hdd_detect_no; ++i) {
+                        printk(" %d", g_syno_hdd_detect_list[i]);
+                }
+                printk("\n");
+        }
+
+        return 1;
+}
+__setup("syno_hdd_detect=", early_syno_hdd_detect);
+
+static int __init early_syno_hdd_enable(char *p)
+{
+        int i, ret;
+
+        ret = hdd_bootargs_parser(p, &g_syno_hdd_enable_no, g_syno_hdd_enable_list);
+
+        printk("SYNO GPIO HDD enable pin:");
+        if (-EINVAL == ret) {
+                printk("Error parameters, %s\n", p);
+        } else if (-EMSGSIZE == ret) {
+                printk("Too many arguments, %s\n", p);
+        } else {
+                for (i = 0; i < g_syno_hdd_enable_no; ++i) {
+                        printk(" %d", g_syno_hdd_enable_list[i]);
+                }
+                printk("\n");
+        }
+
+        return 1;
+}
+__setup("syno_hdd_enable=", early_syno_hdd_enable);
+#endif  
+#if defined(MY_DEF_HERE)
+extern u8 SYNO_GET_HDD_PRESENT_PIN(int index);
+#define GPIO_UNDEF 0xFF
+#endif  
 #endif  
 #endif  
 
@@ -1734,7 +1914,8 @@ static int syno_ata_dev_ncq_compat(struct ata_device *dev) {
 	}
 
 	if (pdev && ((pdev->vendor == 0x1b4b && pdev->device == 0x9170)
-		|| (pdev->vendor == 0x1b4b && pdev->device == 0x9235))
+		|| (pdev->vendor == 0x1b4b && pdev->device == 0x9235)
+		|| (pdev->vendor == 0x1b4b && pdev->device == 0x9215))
 		&& syno_pm_is_3xxx(vendor, device)) {
 		ret = 0;
 	}
@@ -1851,6 +2032,9 @@ int ata_dev_configure(struct ata_device *dev)
 	char revbuf[7];		 
 	char fwrevbuf[ATA_ID_FW_REV_LEN+1];
 	char modelbuf[ATA_ID_PROD_LEN+1];
+#ifdef MY_ABC_HERE
+	char snbuf[ATA_ID_SERNO_LEN+1];
+#endif  
 	int rc;
 #ifdef MY_ABC_HERE
 	struct pci_dev *pdev = NULL;
@@ -1947,6 +2131,10 @@ int ata_dev_configure(struct ata_device *dev)
 
 	ata_id_c_string(dev->id, modelbuf, ATA_ID_PROD,
 			sizeof(modelbuf));
+#ifdef MY_ABC_HERE
+	ata_id_c_string(dev->id, snbuf, ATA_ID_SERNO,
+			sizeof(snbuf));
+#endif  
 
 #ifdef MY_ABC_HERE
 	 
@@ -2012,6 +2200,11 @@ int ata_dev_configure(struct ata_device *dev)
 					     "%llu sectors, multi %u: %s %s\n",
 					(unsigned long long)dev->n_sectors,
 					dev->multi_count, lba_desc, ncq_desc);
+#ifdef MY_ABC_HERE
+				ata_dev_info(dev,
+					     "SN:%s\n",
+					snbuf);
+#endif  
 			}
 		} else {
 			 
@@ -2035,8 +2228,19 @@ int ata_dev_configure(struct ata_device *dev)
 					     (unsigned long long)dev->n_sectors,
 					     dev->multi_count, dev->cylinders,
 					     dev->heads, dev->sectors);
+#ifdef MY_ABC_HERE
+				ata_dev_info(dev,
+					     "SN:%s\n",
+					     snbuf);
+#endif  
 			}
 		}
+
+#ifdef MY_ABC_HERE
+		if (!glob_match(modelbuf, "SATADOM-SH TYPE D 3SE")) {
+			dev->id[ATA_ID_FEATURE_SUPP] &= cpu_to_le16(~(1 << 8));
+		}
+#endif  
 
 		if (ata_id_has_devslp(dev->id)) {
 			u8 *sata_setting = ap->sector_buf;
@@ -2306,6 +2510,39 @@ int ata_bus_probe(struct ata_port *ap)
 	goto retry;
 }
 
+#if defined(MY_DEF_HERE)
+void syno_ata_present_print(struct ata_port *ap, const char *eventlog)
+{
+	int iHavePres = 0;
+	if (ap->nr_pmp_links == 0) {
+#ifdef MY_DEF_HERE
+		if (HAVE_HDD_DETECT(ap->syno_disk_index + 1)) {
+			if (SYNO_CHECK_HDD_DETECT(ap->syno_disk_index + 1)) {
+				ata_port_printk(ap, KERN_ERR, "Disk is present for %s event\n", eventlog);
+			} else {
+				ata_port_printk(ap, KERN_ERR, "Disk is not present for %s event\n", eventlog);
+			}
+			iHavePres = 1;
+		}
+#else  
+		if (GPIO_UNDEF != SYNO_GET_HDD_PRESENT_PIN(ap->syno_disk_index + 1)) {
+			if (SYNO_CHECK_HDD_PRESENT(ap->syno_disk_index + 1)) {
+				ata_port_printk(ap, KERN_ERR, "Disk is present for %s event\n", eventlog);
+			} else {
+				ata_port_printk(ap, KERN_ERR, "Disk is not present for %s event\n", eventlog);
+			}
+			iHavePres = 1;
+		}
+#endif  
+	}
+
+	if (!iHavePres) {
+		ata_port_printk(ap, KERN_ERR, "No present pin info for %s event\n", eventlog);
+	}
+}
+EXPORT_SYMBOL(syno_ata_present_print);
+#endif  
+ 
 #ifdef MY_ABC_HERE
 void sata_print_link_status(struct ata_link *link)
 #else  
@@ -2325,6 +2562,11 @@ static void sata_print_link_status(struct ata_link *link)
 	} else {
 		ata_link_info(link, "SATA link down (SStatus %X SControl %X)\n",
 			      sstatus, scontrol);
+#if defined(MY_DEF_HERE)
+		if (link->ap) {
+			syno_ata_present_print(link->ap, "SATA link down");
+		}
+#endif  
 	}
 }
 
@@ -3087,7 +3329,12 @@ int sata_link_hardreset(struct ata_link *link, const unsigned long *timing,
 
 			pmp_deadline = ata_deadline(jiffies,
 						    ATA_TMOUT_PMP_SRST_WAIT);
+#ifdef MY_ABC_HERE
+			 
+			if (time_before(pmp_deadline, deadline))
+#else
 			if (time_after(pmp_deadline, deadline))
+#endif  
 				pmp_deadline = deadline;
 			ata_wait_ready(link, pmp_deadline, check_ready);
 		}
@@ -3728,19 +3975,104 @@ void ata_qc_free(struct ata_queued_cmd *qc)
 	}
 }
 
+#ifdef MY_DEF_HERE
+static inline unsigned int syno_ata_latency_bucket_offset_get(const u64 u64Latency)
+{
+	unsigned int uOffset = 0;
+
+	if ( 0x1F < u64Latency) {
+		uOffset += 1;
+	}
+
+	if (unlikely( 0x3FF < u64Latency)) {
+		uOffset += 1;
+	}
+
+	return uOffset;
+}
+
+static void syno_ata_cmd_latency_preprocess(struct ata_queued_cmd *qc,
+											struct ata_link *link,
+											u64 u64AtaIntrTime)
+{
+	u8 u8QcType = 0;
+	unsigned int uBucketOffset = 0;
+	u64 u64StepOffset = 0;
+	u64 u64CmdRespTime = 0;
+
+	u8QcType = qc->qc_stat.u8QcType;
+	if (unlikely(2 < u8QcType)) {
+		u8QcType = 0;
+	}
+
+	u64CmdRespTime = (u64AtaIntrTime - qc->qc_stat.u64IssueTime);;
+
+	link->ata_latency.u16TotalCplCmdCnt += 1;
+	link->ata_latency.u16CplCmdCnt[u8QcType] += 1;
+	link->latency_stat.u64TotalCount[u8QcType] += 1;
+	link->latency_stat.u64TotalBytes[u8QcType] += qc->nbytes;
+	link->latency_stat.u64TotalRespTime[u8QcType] += u64CmdRespTime;
+	if ((0 == link->ata_latency.u64FirstCmdStartTime)
+			|| (qc->qc_stat.u64IssueTime < link->ata_latency.u64FirstCmdStartTime)) {
+		link->ata_latency.u64FirstCmdStartTime = qc->qc_stat.u64IssueTime;
+	}
+
+	u64StepOffset = (u64CmdRespTime >> 15);
+	 
+	uBucketOffset = syno_ata_latency_bucket_offset_get(u64StepOffset);
+	u64StepOffset >>= (5 * uBucketOffset);
+	if (unlikely(31 < u64StepOffset)) {
+		uBucketOffset = 2;
+		u64StepOffset = 31;
+	}
+	link->ata_latency.u32RespTimeBuckets[u8QcType][uBucketOffset][u64StepOffset] += 1;
+	return;
+}
+#endif  
+
 void __ata_qc_complete(struct ata_queued_cmd *qc)
 {
 	struct ata_port *ap;
 	struct ata_link *link;
+#ifdef MY_ABC_HERE
+	struct Scsi_Host *host;
+	unsigned long flags;
+	struct req_iterator iter;
+	struct bio_vec bv;
+	unsigned char *start;
+#endif  
 
 	WARN_ON_ONCE(qc == NULL);  
 	WARN_ON_ONCE(!(qc->flags & ATA_QCFLAG_ACTIVE));
 	ap = qc->ap;
 	link = qc->dev->link;
 
-	if (likely(qc->flags & ATA_QCFLAG_DMAMAP))
+	if (likely(qc->flags & ATA_QCFLAG_DMAMAP)) {
 		ata_sg_clean(qc);
-
+#ifdef MY_ABC_HERE
+		if ( 1 == syno_ata_pattern_check && !(qc->flags & ATA_QCFLAG_FAILED) && qc->scsicmd && qc->scsicmd->request) {
+			host = ap->scsi_host;
+			__rq_for_each_bio(iter.bio, qc->scsicmd->request) {
+				if (!(iter.bio->bi_rw & REQ_SYNO_PATTERN_CHECK)) {
+					continue;
+				}
+				bio_for_each_segment(bv, iter.bio, iter.iter) {
+					char *data = bvec_kmap_irq(&bv, &flags);
+					start = memchr_inv(data, gSynoPatternCheckCharacter , bv.bv_len);
+					if (!start) {
+						continue;
+					} else {
+						printk("Syno Pattern Check: %s:%d, host: %d, bio_sec: %lu\n",
+						__func__, __LINE__,host->host_no, iter.bio->bi_iter.bi_sector);
+						break;
+					}
+					bvec_kunmap_irq(data, &flags);
+				}
+			}
+		}
+#endif  
+	}
+	 
 	if (qc->tf.protocol == ATA_PROT_NCQ) {
 		link->sactive &= ~(1 << qc->tag);
 		if (!link->sactive)
@@ -3753,6 +4085,10 @@ void __ata_qc_complete(struct ata_queued_cmd *qc)
 	if (unlikely(qc->flags & ATA_QCFLAG_CLEAR_EXCL &&
 		     ap->excl_link == link))
 		ap->excl_link = NULL;
+
+#ifdef MY_DEF_HERE
+	syno_ata_cmd_latency_preprocess(qc, link, ap->u64AtaIntrTime);
+#endif  
 
 	qc->flags &= ~ATA_QCFLAG_ACTIVE;
 	ap->qc_active &= ~(1 << qc->tag);
@@ -3808,16 +4144,22 @@ void ata_qc_complete(struct ata_queued_cmd *qc)
 #ifdef MY_ABC_HERE
 			if ((IS_SYNO_PMP_CMD(tf) && NULL == qc->scsicmd)) {
 				__ata_qc_complete(qc);
-			} else
+			} else {
 #endif  
 #ifdef MY_ABC_HERE
-			if (IS_SYNO_SPINUP_CMD(qc))
-			{
-				__ata_qc_complete(qc);
-			} else
+				if (IS_SYNO_SPINUP_CMD(qc))
+				{
+					__ata_qc_complete(qc);
+				} else {
 #endif  
-			trace_ata_qc_complete_failed(qc);
-			ata_qc_schedule_eh(qc);
+					trace_ata_qc_complete_failed(qc);
+					ata_qc_schedule_eh(qc);
+#ifdef MY_ABC_HERE
+				}
+#endif  
+#ifdef MY_ABC_HERE
+			}
+#endif  
 			return;
 		}
 
@@ -3860,12 +4202,74 @@ void ata_qc_complete(struct ata_queued_cmd *qc)
 		__ata_qc_complete(qc);
 	}
 }
+#ifdef MY_DEF_HERE
+ 
+static void syno_ata_latency_calculate(struct ata_link *link, u64 u64AtaIntrTime)
+{
+	int iType					= 0;
+	unsigned int uBucketOffset	= 0;
+	u64 u64CmdStartTime			= 0;
+	u64 u64CmdLatencyTime		= 0;
+	u64 u64StepOffset			= 0;
+
+	if (0 == link->ata_latency.u16TotalCplCmdCnt) {
+		goto END;
+	}
+
+	u64CmdStartTime = (link->ata_latency.u64FirstCmdStartTime
+						> link->ata_latency.u64LastIntrTime)
+									? link->ata_latency.u64FirstCmdStartTime
+									: link->ata_latency.u64LastIntrTime;
+	u64CmdLatencyTime = div_u64((u64AtaIntrTime - u64CmdStartTime),
+										link->ata_latency.u16TotalCplCmdCnt);
+	 
+	u64StepOffset = (u64CmdLatencyTime >> 15);
+	 
+	uBucketOffset = syno_ata_latency_bucket_offset_get(u64StepOffset);
+	u64StepOffset >>= (5 * uBucketOffset);
+	if (unlikely(31 < u64StepOffset)) {
+		uBucketOffset = 2;
+		u64StepOffset = 31;
+	}
+
+	for (iType = 0 ; iType < SYNO_LATENCY_TYPE_COUNT; iType++) {
+		link->latency_stat.u64TotalTime[iType]
+				+= (u64CmdLatencyTime * link->ata_latency.u16CplCmdCnt[iType]);
+
+		link->ata_latency.u32TimeBuckets[iType][uBucketOffset][u64StepOffset]
+									+= link->ata_latency.u16CplCmdCnt[iType];
+	}
+
+	if (!link->sactive) {
+		 
+		link->ata_latency.u64BatchComplete = u64AtaIntrTime;
+		link->latency_stat.u64TotalBatchCount += 1;
+		link->latency_stat.u64TotalBatchTime +=
+					(u64AtaIntrTime - link->ata_latency.u64BatchIssue);
+	}
+
+	link->ata_latency.u64LastIntrTime = u64AtaIntrTime;
+END:
+	 
+	link->ata_latency.u64FirstCmdStartTime = 0;
+	link->ata_latency.u16TotalCplCmdCnt = 0;
+	for (iType = 0 ; iType < SYNO_LATENCY_TYPE_COUNT; iType++) {
+		link->ata_latency.u16CplCmdCnt[iType] = 0;
+	}
+	return;
+}
+#endif  
 
 int ata_qc_complete_multiple(struct ata_port *ap, u32 qc_active)
 {
 	int nr_done = 0;
 	u32 done_mask;
 
+#ifdef MY_DEF_HERE
+	struct ata_link *link = NULL;
+
+	ap->u64AtaIntrTime = cpu_clock(0);
+#endif  
 	done_mask = ap->qc_active ^ qc_active;
 
 	if (unlikely(done_mask & qc_active)) {
@@ -3885,15 +4289,87 @@ int ata_qc_complete_multiple(struct ata_port *ap, u32 qc_active)
 		}
 		done_mask &= ~(1 << tag);
 	}
+#ifdef MY_DEF_HERE
+	ata_for_each_link(link, ap, HOST_FIRST) {
+		syno_ata_latency_calculate(link, ap->u64AtaIntrTime);
+	}
+#endif  
 
 	return nr_done;
 }
+
+#ifdef MY_DEF_HERE
+static int syno_ata_read_qc_delay = 50;
+int ata_qc_complete_multiple_delay(struct ata_port *ap, u32 qc_active)
+{
+	int nr_done = 0;
+	u32 done_mask;
+	int is_first_read_qc = 1;
+
+#ifdef MY_DEF_HERE
+	struct ata_link *link = NULL;
+
+	ap->u64AtaIntrTime = cpu_clock(0);
+#endif  
+	done_mask = ap->qc_active ^ qc_active;
+
+	if (unlikely(done_mask & qc_active)) {
+		ata_port_err(ap, "illegal qc_active transition (%08x->%08x)\n",
+			     ap->qc_active, qc_active);
+		return -EINVAL;
+	}
+
+	while (done_mask) {
+		struct ata_queued_cmd *qc;
+		unsigned int tag = __ffs(done_mask);
+
+		qc = ata_qc_from_tag(ap, tag);
+		if (qc) {
+			if (is_first_read_qc && qc->dma_dir == DMA_FROM_DEVICE) {
+				udelay(syno_ata_read_qc_delay);
+				is_first_read_qc = 0;
+			}
+			ata_qc_complete(qc);
+			nr_done++;
+		}
+		done_mask &= ~(1 << tag);
+	}
+#ifdef MY_DEF_HERE
+	ata_for_each_link(link, ap, HOST_FIRST) {
+		syno_ata_latency_calculate(link, ap->u64AtaIntrTime);
+	}
+#endif  
+
+	return nr_done;
+}
+EXPORT_SYMBOL(ata_qc_complete_multiple_delay);
+module_param(syno_ata_read_qc_delay, int, 0644);
+#endif  
+
+#ifdef MY_DEF_HERE
+static inline void syno_ata_latency_start(struct ata_queued_cmd *qc, u8 blIsBatchHead)
+{
+	struct ata_link *link = qc->dev->link;
+
+	qc->qc_stat.u64IssueTime = cpu_clock(0);
+
+	if (1 == blIsBatchHead) {
+		 
+		link->ata_latency.u64BatchIssue = qc->qc_stat.u64IssueTime;
+	}
+
+	return;
+}
+#endif  
 
 void ata_qc_issue(struct ata_queued_cmd *qc)
 {
 	struct ata_port *ap = qc->ap;
 	struct ata_link *link = qc->dev->link;
 	u8 prot = qc->tf.protocol;
+#ifdef MY_DEF_HERE
+	u8 blIsBatchHead = 0;
+#endif  
 
 	WARN_ON_ONCE(ap->ops->error_handler && ata_tag_valid(link->active_tag));
 
@@ -3901,9 +4377,20 @@ void ata_qc_issue(struct ata_queued_cmd *qc)
 		WARN_ON_ONCE(link->sactive & (1 << qc->tag));
 
 		if (!link->sactive)
+#ifdef MY_DEF_HERE
+		{
+			 
+#endif  
 			ap->nr_active_links++;
+#ifdef MY_DEF_HERE
+			blIsBatchHead = 1;
+		}
+#endif  
 		link->sactive |= 1 << qc->tag;
 	} else {
+#ifdef MY_DEF_HERE
+		blIsBatchHead = 1;
+#endif  
 		WARN_ON_ONCE(link->sactive);
 
 		ap->nr_active_links++;
@@ -3931,6 +4418,10 @@ void ata_qc_issue(struct ata_queued_cmd *qc)
 
 	ap->ops->qc_prep(qc);
 	trace_ata_qc_issue(qc);
+#ifdef MY_DEF_HERE
+	syno_ata_latency_start(qc, blIsBatchHead);
+#endif  
+
 	qc->err_mask |= ap->ops->qc_issue(qc);
 	if (unlikely(qc->err_mask))
 		goto err;
@@ -4228,6 +4719,11 @@ void ata_link_init(struct ata_port *ap, struct ata_link *link, int pmp)
 	link->pmp = pmp;
 	link->active_tag = ATA_TAG_POISON;
 	link->hw_sata_spd_limit = UINT_MAX;
+#ifdef MY_DEF_HERE
+	memset(&(link->ata_latency), 0, sizeof(struct syno_ata_latency));
+	memset(&(link->latency_stat), 0, sizeof(struct syno_latency_stat));
+	memset(&(link->prev_latency_stat), 0, sizeof(struct syno_latency_stat));
+#endif  
 
 	for (i = 0; i < ATA_MAX_DEVICES; i++) {
 		struct ata_device *dev = &link->device[i];
@@ -4314,8 +4810,17 @@ struct ata_port *ata_port_alloc(struct ata_host *host)
 	ap->stats.idle_irq = 1;
 #endif
 
-	ata_sff_port_init(ap);
+#ifdef MY_ABC_HERE
+	ap->error_handling = 0;
+#endif  
 
+	ata_sff_port_init(ap);
+#ifdef MY_DEF_HERE
+	ap->syno_disk_index = -1;
+	 
+	syno_libata_index_get(ap->scsi_host, 0, 0, 0);
+	klist_add_tail(&ap->ata_port_list, &syno_ata_port_head);
+#endif  
 	return ap;
 }
 
@@ -4571,8 +5076,19 @@ static void HddPowerOn(struct ata_port *pAp) {
 	}
 
 	iSynoDiskIdx = syno_libata_index_get(pAp->scsi_host, 0, 0, 0) + 1;
-
+#ifdef MY_DEF_HERE
+	 
+	if (0 == iSynoDiskIdx) {
+		 
+		goto END;
+	}
+#endif  
+	 
+#ifdef MY_DEF_HERE
+	if (gSynoHddPowerupSeq && gSynoInternalHddNumber < iSynoDiskIdx) {
+#else  
 	if (0 < g_syno_hdd_powerup_seq && g_syno_hdd_powerup_seq < iSynoDiskIdx) {
+#endif  
 		goto END;
 	}
 
@@ -4580,6 +5096,10 @@ static void HddPowerOn(struct ata_port *pAp) {
 	if (1 == SYNO_CHECK_HDD_DETECT(iSynoDiskIdx)) {
 #else
 	if (1 == SYNO_CHECK_HDD_PRESENT(iSynoDiskIdx)) {
+#endif  
+
+#ifdef MY_DEF_HERE
+		DBG_SpinupGroup("Power on disk: %d\n", iSynoDiskIdx);
 #endif  
 		SYNO_CTRL_HDD_POWERON(iSynoDiskIdx, 1);
 		SleepForLatency();
@@ -4604,8 +5124,19 @@ static void DelayForHWCtl(struct ata_port *pAp)
 	}
 
 	iSynoDiskIdx = syno_libata_index_get(pAp->scsi_host, 0, 0, 0) + 1;
-
+#ifdef MY_DEF_HERE
+	 
+	if (0 == iSynoDiskIdx) {
+		 
+		goto END;
+	}
+#endif  
+	 
+#ifdef MY_DEF_HERE
+	if (gSynoHddPowerupSeq && gSynoInternalHddNumber < iSynoDiskIdx) {
+#else  
 	if (0 < g_syno_hdd_powerup_seq && g_syno_hdd_powerup_seq < iSynoDiskIdx) {
+#endif  
 		goto END;
 	}
 
@@ -4662,8 +5193,19 @@ int ata_port_probe(struct ata_port *ap)
 #endif  
 
 #ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
+	 
+	if (0 < giSynoSpinupGroupNum) {
+		mutex_lock(&mutex_spin);
+	}
+#endif  
 	 
 	DelayForHWCtl(ap);
+#ifdef MY_DEF_HERE
+	if (0 < giSynoSpinupGroupNum) {
+		mutex_unlock(&mutex_spin);
+	}
+#endif  
 #endif  
 
 #ifdef MY_ABC_HERE
@@ -4699,8 +5241,13 @@ static void async_port_probe(void *data, async_cookie_t cookie)
 {
 	struct ata_port *ap = data;
 
+#ifdef MY_DEF_HERE
+	 
+#else
+	 
 	if (!(ap->host->flags & ATA_HOST_PARALLEL_SCAN) && ap->port_no != 0)
 		async_synchronize_cookie(cookie);
+#endif  
 
 	(void)ata_port_probe(ap);
 
@@ -4775,8 +5322,23 @@ int ata_host_register(struct ata_host *host, struct scsi_host_template *sht)
 
 	for (i = 0; i < host->n_ports; i++) {
 		struct ata_port *ap = host->ports[i];
+#ifdef MY_DEF_HERE
+		 
+#ifdef MY_DEF_HERE
+		if (gSynoHddPowerupSeq) {
+#else  
+		if (0 < giSynoSpinupGroupNum) {
+#endif  
+			async_schedule(async_port_probe, ap);
+			continue;
+		}
+#endif  
 #ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
+		if (0 == gSynoHddPowerupSeq) {
+#else  
 		if (0 == g_syno_hdd_powerup_seq) {
+#endif  
 			async_schedule(async_port_probe, ap);
 		} else {
 			ata_port_probe(ap);
@@ -4787,7 +5349,11 @@ int ata_host_register(struct ata_host *host, struct scsi_host_template *sht)
 #endif  
 	}
 #ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
+	if (gSynoHddPowerupSeq) {
+#else  
 	if (0 != g_syno_hdd_powerup_seq) {
+#endif  
 		for (i = 0; i < host->n_ports; i++) {
 			struct ata_port *ap = host->ports[i];
 			ata_port_wait_eh(ap);
@@ -4873,6 +5439,9 @@ static void ata_port_detach(struct ata_port *ap)
 		for (i = 0; i < SATA_PMP_MAX_PORTS; i++)
 			ata_tlink_delete(&ap->pmp_link[i]);
 	}
+#ifdef MY_DEF_HERE
+	klist_del(&ap->ata_port_list);
+#endif  
 	 
 	scsi_remove_host(ap->scsi_host);
 	ata_tport_delete(ap);
@@ -5188,6 +5757,9 @@ static int __init ata_init(void)
 		rc = -ENOMEM;
 		goto err_out;
 	}
+#ifdef MY_DEF_HERE
+	klist_init(&syno_ata_port_head, NULL, NULL);
+#endif  
 
 	printk(KERN_DEBUG "libata version " DRV_VERSION " loaded.\n");
 	return 0;
@@ -5316,8 +5888,15 @@ void ata_port_printk(const struct ata_port *ap, const char *level,
 
 	vaf.fmt = fmt;
 	vaf.va = &args;
-
+#ifdef MY_DEF_HERE
+	if (0 <= ap->syno_disk_index) {
+		printk("%sata%u (slot %d): %pV", level, ap->print_id, ap->syno_disk_index + 1 , &vaf);
+	} else {
+		printk("%sata%u : %pV", level, ap->print_id, &vaf);
+	}
+#else  
 	printk("%sata%u: %pV", level, ap->print_id, &vaf);
+#endif  
 
 	va_end(args);
 }
@@ -5334,12 +5913,32 @@ void ata_link_printk(const struct ata_link *link, const char *level,
 	vaf.fmt = fmt;
 	vaf.va = &args;
 
+#ifdef MY_DEF_HERE
+	if (sata_pmp_attached(link->ap) || link->ap->slave_link) {
+		if (0 <= link->ap->syno_disk_index) {
+			printk("%sata%u.%02u (slot %d): %pV",
+			       level, link->ap->print_id, link->pmp, link->ap->syno_disk_index + 1, &vaf);
+		} else {
+			printk("%sata%u.%02u : %pV",
+			       level, link->ap->print_id, link->pmp, &vaf);
+		}
+	} else {
+		if (0 <= link->ap->syno_disk_index) {
+			printk("%sata%u (slot %d): %pV",
+			       level, link->ap->print_id, link->ap->syno_disk_index + 1, &vaf);
+		} else {
+			printk("%sata%u : %pV",
+			       level, link->ap->print_id, &vaf);
+		}
+	}
+#else  
 	if (sata_pmp_attached(link->ap) || link->ap->slave_link)
 		printk("%sata%u.%02u: %pV",
 		       level, link->ap->print_id, link->pmp, &vaf);
 	else
 		printk("%sata%u: %pV",
 		       level, link->ap->print_id, &vaf);
+#endif  
 
 	va_end(args);
 }
@@ -5355,10 +5954,21 @@ void ata_dev_printk(const struct ata_device *dev, const char *level,
 
 	vaf.fmt = fmt;
 	vaf.va = &args;
-
+#ifdef MY_DEF_HERE
+	if (0 <= dev->link->ap->syno_disk_index) {
+		printk("%sata%u.%02u (slot %d): %pV",
+		       level, dev->link->ap->print_id, dev->link->pmp + dev->devno, dev->link->ap->syno_disk_index + 1,
+		       &vaf);
+	} else {
+		printk("%sata%u.%02u : %pV",
+		       level, dev->link->ap->print_id, dev->link->pmp + dev->devno,
+		       &vaf);
+	}
+#else  
 	printk("%sata%u.%02u: %pV",
 	       level, dev->link->ap->print_id, dev->link->pmp + dev->devno,
 	       &vaf);
+#endif  
 
 	va_end(args);
 }
@@ -5484,3 +6094,16 @@ EXPORT_SYMBOL_GPL(ata_cable_80wire);
 EXPORT_SYMBOL_GPL(ata_cable_unknown);
 EXPORT_SYMBOL_GPL(ata_cable_ignore);
 EXPORT_SYMBOL_GPL(ata_cable_sata);
+
+int (*funcSYNOSendDiskResetPwrEvent)(unsigned int, unsigned int) = NULL;
+EXPORT_SYMBOL(funcSYNOSendDiskResetPwrEvent);
+int (*funcSYNOSendDiskPortDisEvent)(unsigned int, unsigned int) = NULL;
+EXPORT_SYMBOL(funcSYNOSendDiskPortDisEvent);
+int (*funcSYNOSataErrorReport)(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int) = NULL;
+EXPORT_SYMBOL(funcSYNOSataErrorReport);
+int (*funcSYNODiskRetryReport)(unsigned int, unsigned int) = NULL;
+EXPORT_SYMBOL(funcSYNODiskRetryReport);
+int (*funcSYNODeepSleepEvent)(unsigned int, unsigned int) = NULL;
+EXPORT_SYMBOL(funcSYNODeepSleepEvent);
+int (*funcSYNODiskPowerShortBreakReport)(unsigned int, unsigned int) = NULL;
+EXPORT_SYMBOL(funcSYNODiskPowerShortBreakReport);

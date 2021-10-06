@@ -8,10 +8,29 @@
 #include <linux/kernel.h>
 #include <linux/synobios.h>
 #include <uapi/linux/synosata.h>
+#ifdef MY_ABC_HERE
+#include <linux/gpio.h>
+#endif  
 
 #ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
+extern int gSynoHddPowerupSeq, gSynoInternalHddNumber;
+#else  
 extern long g_syno_hdd_powerup_seq;
+#endif  
 extern long syno_boot_hd_count;
+#endif  
+#ifdef MY_DEF_HERE
+extern int giSynoSpinupGroup[16];
+extern int giSynoSpinupGroupNum;
+extern int giSynoSpinupGroupDelay;
+extern int giSynoSpinupGroupDebug;
+extern int giSynoDSleepCurrentSpinupGroupNum;
+extern int giSynoDSleepCurrentSpinupGroupDiskNum;
+extern int giSynoDSleepCurrentPoweronDisks;
+extern void DBG_SpinupGroupListGpio(void);
+extern int SynoHaveRPDetectPin(void);
+extern int SynoAllRedundantPowerDetected(void);
 #endif  
 
 #ifdef MY_ABC_HERE
@@ -24,9 +43,14 @@ static inline void SleepForLatency(void)
 #ifdef MY_ABC_HERE
 static inline void SleepForHD(int i)
 {
+#ifdef MY_DEF_HERE
+	if ((syno_boot_hd_count != gSynoInternalHddNumber - 1) &&  
+		(gSynoHddPowerupSeq && (syno_boot_hd_count < gSynoInternalHddNumber))) {
+#else  
 	if ((syno_boot_hd_count != g_syno_hdd_powerup_seq - 1) &&  
 		(( g_syno_hdd_powerup_seq < 0 ) ||  
 		  syno_boot_hd_count < g_syno_hdd_powerup_seq) ) {
+#endif  
 		printk("Delay 10 seconds to wait for disk %d ready.\n", i);
 		mdelay(10000);
 	}
@@ -35,10 +59,35 @@ static inline void SleepForHD(int i)
 
 static inline void SleepForHW(int iDisk, int iIsDoLatency)
 {
+#ifdef MY_DEF_HERE
+	static int iDisksInSpinupGroup = 0;
+	static int iCurrentSpinupGroup = 0;
+	if(0 < giSynoSpinupGroupNum) {
+		DBG_SpinupGroupListGpio();
+		if (iDisksInSpinupGroup < giSynoSpinupGroup[iCurrentSpinupGroup]) {
+			goto skip_wait_or_wait_done;
+		}
+		if (SynoHaveRPDetectPin() && SynoAllRedundantPowerDetected()) {
+			goto skip_wait_or_wait_done;
+		}
+	}
+#endif  
 	 
+#ifdef MY_DEF_HERE
+	if (syno_boot_hd_count &&
+		(gSynoHddPowerupSeq && (syno_boot_hd_count < gSynoInternalHddNumber))) {
+#else  
 	if (syno_boot_hd_count &&
 		(( g_syno_hdd_powerup_seq < 0 ) ||  
 		  syno_boot_hd_count < g_syno_hdd_powerup_seq) ) {
+#endif  
+#ifdef MY_DEF_HERE
+		if (0 < giSynoSpinupGroupDelay) {
+			printk("Delay %d seconds to wait for disk %d ready.\n", giSynoSpinupGroupDelay, iDisk);
+			mdelay(giSynoSpinupGroupDelay * 1000);
+			goto skip_wait_or_wait_done;
+		}
+#endif  
 		if (iIsDoLatency) {
 			printk("Delay 5 seconds to wait for disk %d ready.\n", iDisk);
 			mdelay(5000);
@@ -47,6 +96,16 @@ static inline void SleepForHW(int iDisk, int iIsDoLatency)
 			mdelay(7000);
 		}
 	}
+#ifdef MY_DEF_HERE
+skip_wait_or_wait_done:
+	if (0 < giSynoSpinupGroupNum) {
+		if (iDisksInSpinupGroup >= giSynoSpinupGroup[iCurrentSpinupGroup]) {
+			iCurrentSpinupGroup++;
+			iDisksInSpinupGroup = 0;
+		}
+		iDisksInSpinupGroup++;
+	}
+#endif  
 	syno_boot_hd_count++;
 }
 #endif  
@@ -434,4 +493,61 @@ END:
 #define SZV_PMP_DISCONNECT "CABLE_DISCONNECT"
 #endif  
 
+#ifdef MY_DEF_HERE
+#define DBG_SpinupGroup(x...)	\
+	if (0 < giSynoSpinupGroupDebug) printk(x)
+
+static inline void SynoResetDSleepGroup(void)
+{
+	if (0 < giSynoSpinupGroupNum) {
+		 
+		giSynoDSleepCurrentSpinupGroupNum = 0;
+		 
+		giSynoDSleepCurrentSpinupGroupDiskNum = giSynoSpinupGroup[0];
+		giSynoDSleepCurrentPoweronDisks = 0;
+	}
+}
+static inline int SynoDSleepNeedUpdateLastPmOn(void)
+{
+	int ret = 0;
+	if (0 == giSynoSpinupGroupNum) {
+		ret = 1;
+	} else {
+		 
+		if (!SynoHaveRPDetectPin() ||
+			(SynoHaveRPDetectPin() && !SynoAllRedundantPowerDetected())) {
+			giSynoDSleepCurrentPoweronDisks++;
+		}
+
+		if (SynoHaveRPDetectPin() && SynoAllRedundantPowerDetected()) {
+			 
+			ret = 1;
+		}
+
+		if (giSynoDSleepCurrentPoweronDisks >= giSynoDSleepCurrentSpinupGroupDiskNum) {
+			DBG_SpinupGroup("Disk Group %d is full, going to delay for power on.\n",giSynoDSleepCurrentSpinupGroupNum);
+			DBG_SpinupGroupListGpio();
+			giSynoDSleepCurrentPoweronDisks = 0;
+			giSynoDSleepCurrentSpinupGroupNum++;
+			if (giSynoDSleepCurrentSpinupGroupNum < giSynoSpinupGroupNum) {
+				giSynoDSleepCurrentSpinupGroupDiskNum = giSynoSpinupGroup[giSynoDSleepCurrentSpinupGroupNum];
+			} else {
+				 
+				giSynoDSleepCurrentSpinupGroupDiskNum = 1;
+			}
+			ret = 1;
+		}
+	}
+	return ret;
+}
+static inline unsigned long SynoWakeInterval(void)
+{
+	 
+	static unsigned long uiSynoWakeInterval = 7UL*HZ;
+	if (0 < giSynoSpinupGroupDelay) {
+		uiSynoWakeInterval = (unsigned long)giSynoSpinupGroupDelay * HZ;
+	}
+	return uiSynoWakeInterval;
+}
+#endif  
 #endif  

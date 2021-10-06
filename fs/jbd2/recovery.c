@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * linux/fs/jbd2/recovery.c
  *
@@ -527,9 +530,12 @@ static int do_one_pass(journal_t *journal,
 				printk(KERN_ERR "JBD2: Invalid checksum "
 				       "recovering block %lu in log\n",
 				       next_log_block);
+#ifdef MY_ABC_HERE
+#else
 				err = -EFSBADCRC;
 				brelse(bh);
 				goto failed;
+#endif /* MY_ABC_HERE */
 			}
 
 			/* If it is a valid descriptor block, replay it
@@ -847,7 +853,11 @@ static int scan_revoke_records(journal_t *journal, struct buffer_head *bh,
 	rcount = be32_to_cpu(header->r_count);
 
 	if (!jbd2_revoke_block_csum_verify(journal, header))
+#ifdef MY_ABC_HERE
+		printk(KERN_ERR "JBD: Invalid checksum of revoke block\n");
+#else
 		return -EFSBADCRC;
+#endif /* MY_ABC_HERE */
 
 	if (jbd2_journal_has_csum_v2or3(journal))
 		csum_size = sizeof(struct jbd2_journal_revoke_tail);

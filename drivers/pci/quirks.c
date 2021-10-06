@@ -1295,6 +1295,18 @@ DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_INTEL,	PCI_DEVICE_ID_INTEL_PXH_0,	quirk_pc
 DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_INTEL,	PCI_DEVICE_ID_INTEL_PXH_1,	quirk_pcie_pxh);
 DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_INTEL,	PCI_DEVICE_ID_INTEL_PXHV,	quirk_pcie_pxh);
 
+#ifdef MY_DEF_HERE
+static void syno_quirk_pcie_msi(struct pci_dev *dev)
+{
+	dev->no_msi = 1;
+	dev_warn(&dev->dev, "syno quirk detected Vendor ID:0x%04hx, Device ID:0x%04hx; MSI disabled\n", dev->vendor, dev->device);
+}
+#ifdef MY_DEF_HERE
+DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_REALTEK,	PCI_DEVICE_ID_REALTEK_8168,	syno_quirk_pcie_msi);
+DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_ASMEDIA,	PCI_DEVICE_ID_ASMEDIA_1061,	syno_quirk_pcie_msi);
+#endif  
+#endif  
+
 static void quirk_intel_pcie_pm(struct pci_dev *dev)
 {
 	pci_pm_d3_delay = 120;

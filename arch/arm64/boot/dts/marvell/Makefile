@@ -15,7 +15,13 @@ endif # CONFIG_SYNO_LSP_ARMADA_17_06_01
 dtb-$(CONFIG_ARCH_MVEBU) += armada-3720-community.dtb
 dtb-$(CONFIG_ARCH_MVEBU) += armada-37x0-customer.dtb
 ifeq ($(CONFIG_SYNO_LSP_ARMADA_17_02_02), y)
+ifeq ($(CONFIG_SYNO_LSP_ARMADA_17_10), y)
+dtb-$(CONFIG_ARCH_MVEBU) += armada-3900-db-axis.dtb
+dtb-$(CONFIG_ARCH_MVEBU) += armada-3900-db-vd.dtb
+dtb-$(CONFIG_ARCH_MVEBU) += armada-7040-db.dtb
+else # CONFIG_SYNO_LSP_ARMADA_17_10
 dtb-$(CONFIG_ARCH_MVEBU) += armada-7040-db-A.dtb
+endif # CONFIG_SYNO_LSP_ARMADA_17_10
 dtb-$(CONFIG_ARCH_MVEBU) += armada-7040-db-B.dtb
 ifeq ($(CONFIG_SYNO_LSP_ARMADA_17_04_02), y)
 dtb-$(CONFIG_ARCH_MVEBU) += armada-7040-db-C.dtb
@@ -29,12 +35,22 @@ dtb-$(CONFIG_ARCH_MVEBU) += armada-7040-db-router.dtb
 endif # CONFIG_SYNO_LSP_ARMADA_17_02_02
 dtb-$(CONFIG_ARCH_MVEBU) += armada-7040-db-nand.dtb
 dtb-$(CONFIG_ARCH_MVEBU) += armada-7040-db-all-pcie.dtb
+ifeq ($(CONFIG_SYNO_LSP_ARMADA_17_10), y)
+dtb-$(CONFIG_ARCH_MVEBU) += armada-7020-amc.dtb
+endif # CONFIG_SYNO_LSP_ARMADA_17_10
 dtb-$(CONFIG_ARCH_MVEBU) += armada-70x0-customer.dtb
 ifeq ($(CONFIG_SYNO_LSP_ARMADA_17_04_02), y)
 dtb-$(CONFIG_ARCH_MVEBU) += armada-7040-pcac.dtb
 endif # CONFIG_SYNO_LSP_ARMADA_17_04_02
 dtb-$(CONFIG_ARCH_MVEBU_PD) += armada-7040-pd.dtb
+ifeq ($(CONFIG_SYNO_LSP_ARMADA_17_10), y)
+dtb-$(CONFIG_ARCH_MVEBU) += armada-8040-db.dtb
+dtb-$(CONFIG_ARCH_MVEBU) += armada-7040-db-pp2-vanilla.dtb
+dtb-$(CONFIG_ARCH_MVEBU) += armada-8040-db-pp2-vanilla.dtb
+dtb-$(CONFIG_ARCH_MVEBU) += armada-8040-mcbin-pp2-vanilla.dtb
+else # CONFIG_SYNO_LSP_ARMADA_17_10
 dtb-$(CONFIG_ARCH_MVEBU) += armada-8040-db-A.dtb
+endif # CONFIG_SYNO_LSP_ARMADA_17_10
 ifeq ($(CONFIG_SYNO_LSP_ARMADA_17_02_02), y)
 dtb-$(CONFIG_ARCH_MVEBU) += armada-8040-db-B.dtb
 dtb-$(CONFIG_ARCH_MVEBU) += armada-8040-db-C.dtb
@@ -49,6 +65,9 @@ else  # CONFIG_SYNO_LSP_ARMADA_17_02_02
 dtb-$(CONFIG_ARCH_MVEBU) += armada-8040-db-router.dtb
 endif # CONFIG_SYNO_LSP_ARMADA_17_02_02
 dtb-$(CONFIG_ARCH_MVEBU) += armada-8040-mcbin.dtb
+ifeq ($(CONFIG_SYNO_LSP_ARMADA_17_10), y)
+dtb-$(CONFIG_ARCH_MVEBU) += armada-8040-ocp.dtb
+endif # CONFIG_SYNO_LSP_ARMADA_17_10
 dtb-$(CONFIG_ARCH_MVEBU) += armada-80x0-customer.dtb
 endif
 

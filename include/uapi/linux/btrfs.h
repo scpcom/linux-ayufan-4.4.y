@@ -344,11 +344,24 @@ struct btrfs_ioctl_clone_range_args {
   __u64 dest_offset;
 };
 
+#ifdef MY_ABC_HERE
+struct btrfs_ioctl_syno_clone_range_args_v2 {
+	__s64 src_fd;
+	 
+	__u64 src_offset;	 
+	__u64 src_length;	 
+	__u64 dest_offset;
+	__u64 ref_limit;	 
+	__u64 reserved[3];
+};
+#endif  
+ 
 #define BTRFS_DEFRAG_RANGE_COMPRESS 1
 #define BTRFS_DEFRAG_RANGE_START_IO 2
 #ifdef MY_ABC_HERE
 #define BTRFS_DEFRAG_RANGE_SYNO_DEFRAG  (1ULL << 2)
 #define BTRFS_DEFRAG_RANGE_PRINT_STDOUT (1ULL << 3)
+#define BTRFS_DEFRAG_RANGE_SKIP_FAST_SNAPSHOT_CHECK  (1ULL << 4)
 #endif  
 struct btrfs_ioctl_defrag_range_args {
 	 
@@ -564,15 +577,23 @@ struct btrfs_ioctl_snapshot_size_query_args {
 
 #define BTRFS_SEND_FLAG_OMIT_END_CMD		0x4
 
-#ifdef MY_ABC_HERE
+#if defined(MY_ABC_HERE) || \
+    defined(MY_ABC_HERE) || \
+	defined(MY_ABC_HERE)
  
 #define BTRFS_SEND_FLAG_CALCULATE_DATA_SIZE    0x8
+
+#define BTRFS_SEND_FLAG_SKIP_FIND_CLONE    0x10
+
+#define BTRFS_SEND_FLAG_SUPPORT_FALLOCATE       0x20
 
 #define BTRFS_SEND_FLAG_MASK \
 	(BTRFS_SEND_FLAG_NO_FILE_DATA | \
 	 BTRFS_SEND_FLAG_OMIT_STREAM_HEADER | \
-	 BTRFS_SEND_FLAG_OMIT_END_CMD | \
-	 BTRFS_SEND_FLAG_CALCULATE_DATA_SIZE)
+	 BTRFS_SEND_FLAG_CALCULATE_DATA_SIZE | \
+	 BTRFS_SEND_FLAG_SKIP_FIND_CLONE | \
+	 BTRFS_SEND_FLAG_SUPPORT_FALLOCATE | \
+	 BTRFS_SEND_FLAG_OMIT_END_CMD)
 #else
 #define BTRFS_SEND_FLAG_MASK \
 	(BTRFS_SEND_FLAG_NO_FILE_DATA | \
@@ -755,6 +776,14 @@ static inline char *btrfs_err_str(enum btrfs_err_code err_code)
 				   struct btrfs_ioctl_feature_flags[2])
 #define BTRFS_IOC_GET_SUPPORTED_FEATURES _IOR(BTRFS_IOCTL_MAGIC, 57, \
 				   struct btrfs_ioctl_feature_flags[3])
+
+#ifdef MY_ABC_HERE
+#define BTRFS_IOC_SYNO_CLONE_RANGE_V2 _IOWR(BTRFS_IOCTL_MAGIC, 245, \
+				    struct btrfs_ioctl_syno_clone_range_args_v2)
+#endif  
+#ifdef MY_ABC_HERE
+#define BTRFS_IOC_SYNC_SYNO	_IO(BTRFS_IOCTL_MAGIC, 246)
+#endif  
 
 #ifdef MY_ABC_HERE
 #define BTRFS_IOC_SNAPSHOT_SIZE_QUERY _IOWR(BTRFS_IOCTL_MAGIC, 247, \

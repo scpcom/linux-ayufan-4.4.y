@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * NTP state machine interfaces and logic.
  *
@@ -511,6 +514,10 @@ static void sync_cmos_clock(struct work_struct *work)
 	struct timespec64 now;
 	struct timespec64 next;
 	int fail = 1;
+
+#ifdef MY_ABC_HERE
+		return;
+#endif
 
 	/*
 	 * If we have an externally synchronized Linux clock, then update

@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*
 * ***************************************************************************
 * Copyright (C) 2015 Marvell International Ltd.
@@ -89,4 +85,3 @@ Return:
 int mv_pp3_drv_request_delete(unsigned int req_num);
 
 #endif /* __mv_pp3_msg_drv_h__ */
-#endif /* MY_DEF_HERE */

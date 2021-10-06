@@ -555,7 +555,7 @@ static void SynoSubmitSpinupReq(struct scsi_device *device)
 		req = blk_get_request(device->request_queue, READ, GFP_ATOMIC);
 		if (!req) {
 			if (!is_print) {
-				printk(KERN_ERR, "%s: Can't get request, retry it", __func__);
+				printk(KERN_ERR "%s: Can't get request, retry it", __FUNCTION__);
 				is_print = 1;
 			}
 		} else {
@@ -932,6 +932,15 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 #endif  
 
 #ifdef MY_DEF_HERE
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY_DEBUG
+	if (0x1b == cmd->cmnd[0]) {
+		sdev_printk(KERN_ERR, cmd->device,
+				"START_STOP done - tag %02x %s - %02x %02x %02x %02x %02x %02x\n",
+				cmd->tag, (cmd->cmnd[4]&0x01)?"START":"STOP ",
+				cmd->cmnd[0], cmd->cmnd[1], cmd->cmnd[2],
+				cmd->cmnd[3], cmd->cmnd[4], cmd->cmnd[5]);
+	}
+#endif  
 	 
 	if ((cmd->device->spinup_queue) &&
 		(status_byte(result) == CHECK_CONDITION) &&
@@ -946,6 +955,11 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 			default:
 				switch (sshdr.ascq) {
 					case 0x02:  
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY_DEBUG
+						sdev_printk(KERN_ERR, cmd->device,
+								"%s(%d): cmd 0x%02x need start. force retry\n",
+								__func__, __LINE__, cmd->cmnd[0]);
+#endif  
 						SynoSpinupDisk(cmd->device);
 						 
 					case 0x01:  
@@ -974,7 +988,17 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 				req->sense_len = len;
 			}
 			if (!sense_deferred)
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY_DEBUG
+			{
 				error = __scsi_error_from_host_byte(cmd, result);
+				sdev_printk(KERN_ERR, cmd->device, "%s(%d): cmd %p 0x%02x, good bytes %d\n", __func__, __LINE__, cmd, cmd->cmnd[0], good_bytes);
+				if (sense_valid) {
+					scsi_print_sense(cmd);
+				}
+			}
+#else  
+				error = __scsi_error_from_host_byte(cmd, result);
+#endif  
 		}
 		 
 		req->errors = cmd->result;
@@ -1025,6 +1049,12 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 		goto requeue;
 
 	error = __scsi_error_from_host_byte(cmd, result);
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY_DEBUG
+	sdev_printk(KERN_ERR, cmd->device, "%s(%d): cmd 0x%02x, good bytes %d\n", __func__, __LINE__, cmd->cmnd[0], good_bytes);
+	if (sense_valid) {
+		scsi_print_sense(cmd);
+	}
+#endif  
 
 	if (host_byte(result) == DID_RESET) {
 		 

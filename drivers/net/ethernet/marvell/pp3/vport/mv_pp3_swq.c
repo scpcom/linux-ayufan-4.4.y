@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*
 * ***************************************************************************
 * Copyright (C) 2015 Marvell International Ltd.
@@ -333,5 +329,3 @@ void mv_pp3_swq_stats_clear(struct pp3_swq *swq)
 	memset(&swq->stats, 0, sizeof(struct pp3_swq_stats));
 }
 /*---------------------------------------------------------------------------*/
-
-#endif /* MY_DEF_HERE */

@@ -586,12 +586,19 @@ struct ata_host {
 	struct mutex		eh_mutex;
 	struct task_struct	*eh_owner;
 
-#ifdef MY_ABC_HERE
+#if defined(MY_ABC_HERE)
 	unsigned int            host_no;
 #endif  
 	struct ata_port		*simplex_claimed;	 
 	struct ata_port		*ports[0];
 };
+
+#ifdef MY_DEF_HERE
+struct syno_qc_stat {
+	u8		u8QcType;
+	u64		u64IssueTime;
+};
+#endif  
 
 struct ata_queued_cmd {
 	struct ata_port		*ap;
@@ -629,6 +636,9 @@ struct ata_queued_cmd {
 
 	void			*private_data;
 	void			*lldd_task;
+#ifdef MY_DEF_HERE
+	struct syno_qc_stat	qc_stat;
+#endif  
 };
 
 struct ata_port_stats {
@@ -754,6 +764,40 @@ struct ata_acpi_gtm {
 	u32 flags;
 } __packed;
 
+#ifdef MY_DEF_HERE
+#define SYNO_LATENCY_TYPE_COUNT 3
+
+typedef enum {
+	SYNO_LATENCY_OTHERS = 0x1,
+	SYNO_LATENCY_READ   = 0x2,
+	SYNO_LATENCY_WRITE  = 0x4,
+} SYNO_LATENCY_TYPE;
+
+struct syno_ata_latency {
+	u16 u16TotalCplCmdCnt;
+	u16 u16CplCmdCnt[SYNO_LATENCY_TYPE_COUNT];
+	u64 u64FirstCmdStartTime;
+	u64 u64LastIntrTime;
+	u64 u64BatchIssue;
+	u64 u64BatchComplete;
+
+	u64 u64LastReportTime;
+	u64 u64LastBatchTimeOffset;
+	u32 u32TimeBuckets[SYNO_LATENCY_TYPE_COUNT][3][32];
+	u32 u32RespTimeBuckets[SYNO_LATENCY_TYPE_COUNT][3][32];
+};
+
+struct syno_latency_stat {
+	u64 u64TotalCount[SYNO_LATENCY_TYPE_COUNT];
+	u64 u64TotalTime[SYNO_LATENCY_TYPE_COUNT];
+	u64 u64TotalRespTime[SYNO_LATENCY_TYPE_COUNT];
+	u64 u64TotalBytes[SYNO_LATENCY_TYPE_COUNT];
+
+	u64 u64TotalBatchCount;
+	u64 u64TotalBatchTime;
+};
+#endif  
+
 struct ata_link {
 	struct ata_port		*ap;
 	int			pmp;		 
@@ -768,6 +812,11 @@ struct ata_link {
 	unsigned int		hw_sata_spd_limit;
 	unsigned int		sata_spd_limit;
 	unsigned int		sata_spd;	 
+#ifdef MY_DEF_HERE
+	struct syno_ata_latency ata_latency;
+	struct syno_latency_stat latency_stat;
+	struct syno_latency_stat prev_latency_stat;
+#endif  
 	enum ata_lpm_policy	lpm_policy;
 
 	struct ata_eh_info	eh_info;
@@ -883,13 +932,26 @@ struct ata_port {
 	u8				PMSynoCpldVer;
 	SYNO_PMP_SWITCH_MODE	PMSynoSwitchMode;
 #endif  
-#ifdef MY_ABC_HERE
+#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 	int			syno_disk_index;
 #endif  
 #ifdef MY_DEF_HERE
 	SYNO_PM_RETRY_TYPE	syno_pm_need_retry;
 #endif  
+#ifdef MY_ABC_HERE
+	unsigned int error_handling;
+#endif  
+#ifdef MY_DEF_HERE
+	struct klist_node ata_port_list;
+#endif  
+#ifdef MY_DEF_HERE
+	u64 u64AtaIntrTime;
+#endif  
 };
+
+#ifdef MY_DEF_HERE
+struct ata_port *syno_ata_port_get_by_port(const unsigned short diskPort);
+#endif  
 
 #define ATA_OP_NULL		(void *)(unsigned long)(-ENOENT)
 
@@ -977,6 +1039,10 @@ struct ata_port_operations {
 	void (*eng_timeout)(struct ata_port *ap);
 
 	const struct ata_port_operations	*inherits;
+
+#ifdef MY_DEF_HERE
+	bool (*syno_compare_node_info)(const struct ata_port *ap, const struct device_node *np);
+#endif  
 };
 
 struct ata_port_info {
@@ -1017,6 +1083,10 @@ extern struct device_attribute dev_attr_syno_diskname_trans;
 
 #ifdef MY_ABC_HERE
 extern struct device_attribute dev_attr_syno_sata_disk_led_ctrl;
+#endif  
+#ifdef MY_DEF_HERE
+extern struct device_attribute dev_attr_syno_disk_latency_hist;
+extern struct device_attribute dev_attr_syno_disk_latency_stat;
 #endif  
 
 extern const unsigned long sata_deb_timing_normal[];
@@ -1195,6 +1265,10 @@ extern unsigned int ata_do_dev_read_id(struct ata_device *dev,
 					struct ata_taskfile *tf, u16 *id);
 extern void ata_qc_complete(struct ata_queued_cmd *qc);
 extern int ata_qc_complete_multiple(struct ata_port *ap, u32 qc_active);
+#ifdef MY_DEF_HERE
+extern int (*syno_ata_qc_complete_multiple)(struct ata_port *ap, u32 qc_active);
+extern int ata_qc_complete_multiple_delay(struct ata_port *ap, u32 qc_active);
+#endif  
 extern void ata_scsi_simulate(struct ata_device *dev, struct scsi_cmnd *cmd);
 extern int ata_std_bios_param(struct scsi_device *sdev,
 			      struct block_device *bdev,
@@ -1229,6 +1303,10 @@ extern u8 ata_timing_cycle2mode(unsigned int xfer_shift, int cycle);
 
 #ifdef MY_ABC_HERE
 extern void syno_ata_info_print(struct ata_port *ap);
+#endif  
+
+#if defined(MY_DEF_HERE)
+extern void syno_ata_present_print(struct ata_port *ap, const char *eventlog);
 #endif  
 
 #ifdef CONFIG_PCI
@@ -1334,14 +1412,15 @@ extern unsigned int syno_pm_gpio_output_enable(struct ata_link *link);
 extern int syno_libata_pm_power_ctl(struct ata_port *ap, u8 blPowerOn, u8 blCustomInfo);
 extern unsigned int syno_sata_pmp_is_rp(struct ata_port *ap);
 extern struct ata_port *SynoEunitFindMaster(struct ata_port *ap);
-extern void SynoEunitFlagSet(struct ata_port *pAp_master, bool blset, unsigned int flag);
+extern void SynoEunitFlagSet(struct ata_port *pAp_master, bool blset, unsigned int flag, bool blWithLink);
 int syno_libata_port_power_ctl(struct Scsi_Host *host, u8 blPowerOn);
 extern u8 syno_pm_is_synology_3xxx(const struct ata_port *ap);
 extern u8 syno_pm_is_synology_9705(const struct ata_port *ap);
 #endif  
 
-#ifdef MY_ABC_HERE
+#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 extern int syno_libata_index_get(struct Scsi_Host *host, uint channel, uint id, uint lun);
+extern int syno_external_libata_index_get(const struct ata_port *ap);
 #endif  
 
 #ifdef MY_ABC_HERE
@@ -1362,15 +1441,24 @@ extern int syno_libata_index_get(struct Scsi_Host *host, uint channel, uint id, 
 #endif  
 
 #ifdef MY_ABC_HERE
+#if defined(MY_ABC_HERE)
 #define IS_SYNO_SPINUP_CMD(qc) (NULL == qc->scsicmd && !ata_tag_internal(qc->tag) && \
 			ATA_CMD_IDLEIMMEDIATE == qc->tf.command)
+#else  
+#define IS_SYNO_SPINUP_CMD(qc) (NULL == qc->scsicmd && !ata_tag_internal(qc->tag) && \
+			(ATA_CMD_FPDMA_READ == qc->tf.command || ATA_CMD_READ == qc->tf.command || \
+			 ATA_CMD_READ_EXT == qc->tf.command || ATA_CMD_PIO_READ == qc->tf.command || ATA_CMD_PIO_READ_EXT == qc->tf.command || \
+			 ATA_CMD_READ_MULTI == qc->tf.command || ATA_CMD_READ_MULTI_EXT == qc->tf.command))
+#endif  
 #endif  
 
 extern const struct ata_port_operations ata_base_port_ops;
 extern const struct ata_port_operations sata_port_ops;
 extern struct device_attribute *ata_common_sdev_attrs[];
-#ifdef MY_ABC_HERE
+#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 extern unsigned int gSynoSataHostCnt;
+#endif  
+#ifdef MY_ABC_HERE
 extern int syno_libata_disk_map_table_gen(int *iDiskMapTable);
 #endif  
 
@@ -1386,7 +1474,7 @@ extern char gszSataPortMap[8];
 extern char giDiskSeqReverse[];
 #endif  
 
-#ifdef MY_ABC_HERE
+#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 #define	SYNO_FIXED_DISK_NAME_MACRO		\
 	.syno_index_get = syno_libata_index_get,		\
 	.syno_port_type = SYNO_PORT_TYPE_SATA,
@@ -1677,6 +1765,11 @@ static inline void ata_qc_reinit(struct ata_queued_cmd *qc)
 	qc->n_elem = 0;
 	qc->err_mask = 0;
 	qc->sect_size = ATA_SECT_SIZE;
+
+#ifdef MY_DEF_HERE
+	qc->qc_stat.u8QcType = 0;
+	qc->qc_stat.u64IssueTime = 0;
+#endif  
 
 	ata_tf_init(qc->dev, &qc->tf);
 

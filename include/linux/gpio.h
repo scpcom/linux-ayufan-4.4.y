@@ -5,6 +5,9 @@
 #define __LINUX_GPIO_H
 
 #include <linux/errno.h>
+#ifdef MY_ABC_HERE
+#include <linux/types.h>
+#endif  
 
 #define GPIOF_DIR_OUT	(0 << 0)
 #define GPIOF_DIR_IN	(1 << 0)
@@ -38,10 +41,9 @@ extern u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite);
 #endif  
 
 #if defined(MY_DEF_HERE)
-extern void syno_rtd_set_gpio_input(int pin);
-#endif  
-
-#if defined(MY_DEF_HERE)
+extern void syno_gpio_direction_output(int pin, int pValue);
+extern void syno_gpio_direction_input(int pin);
+extern int syno_gpio_to_irq(int pin);
 extern int SYNO_GPIO_READ(int pin);
 extern void SYNO_GPIO_WRITE(int pin, int pValue);
 #endif  
@@ -51,6 +53,12 @@ extern void SYNO_GPIO_WRITE(int pin, int pValue);
 #ifdef MY_DEF_HERE
 extern int syno_gpio_value_set(int iPin, int iValue);
 extern int syno_gpio_value_get(int iPin, int *pValue);
+#endif  
+
+#ifdef MY_DEF_HERE
+extern void DBG_SpinupGroupListGpio(void);
+extern int SynoHaveRPDetectPin(void);
+extern int SynoAllRedundantPowerDetected(void);
 #endif  
 
 #ifdef CONFIG_ARCH_HAVE_CUSTOM_GPIO_H

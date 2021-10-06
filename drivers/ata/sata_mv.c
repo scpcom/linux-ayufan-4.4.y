@@ -595,7 +595,7 @@ static struct scsi_host_template mv5_sht = {
 	ATA_BASE_SHT(DRV_NAME),
 	.sg_tablesize		= MV_MAX_SG_CT / 2,
 	.dma_boundary		= MV_DMA_BOUNDARY,
-#ifdef MY_ABC_HERE
+#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 	.syno_index_get         = syno_libata_index_get,
 #endif  
 };
@@ -3005,20 +3005,14 @@ syno_mv_phy_ctl_store(struct device *dev, struct device_attribute *attr, const c
 #endif  
 
 #ifdef MY_ABC_HERE
-int syno_sata_mv_gpio_read(const unsigned short hostnum)
+int __syno_sata_mv_gpio_read(const struct ata_port *ap)
 {
-	struct Scsi_Host *shost = scsi_host_lookup(hostnum);
-	struct ata_port *ap = NULL;
 	void __iomem *host_mmio = NULL;
-	u32 gpio_value = 0;
 	int led_idx;
+	u32 gpio_value = 0;
 	int ret = -1;
 
-	if (NULL == shost) {
-		goto END;
-	}
-
-	if (NULL == (ap = ata_shost_to_port(shost))) {
+	if (NULL == ap)	{
 		goto END;
 	}
 
@@ -3035,6 +3029,34 @@ int syno_sata_mv_gpio_read(const unsigned short hostnum)
 	} else {
 		ret = 0;
 	}
+END:
+	return ret;
+}
+
+#ifdef MY_DEF_HERE
+ 
+int syno_sata_mv_gpio_read_by_port(const unsigned short iDiskPort)
+{
+	return __syno_sata_mv_gpio_read(syno_ata_port_get_by_port(iDiskPort));
+}
+EXPORT_SYMBOL(syno_sata_mv_gpio_read_by_port);
+#endif  
+
+int syno_sata_mv_gpio_read(const unsigned short hostnum)
+{
+	struct Scsi_Host *shost = scsi_host_lookup(hostnum);
+	struct ata_port *ap = NULL;
+	int ret = -1;
+
+	if (NULL == shost) {
+		goto END;
+	}
+
+	if (NULL == (ap = ata_shost_to_port(shost))) {
+		goto END;
+	}
+
+	ret = __syno_sata_mv_gpio_read(ap);
 
 END:
 	if (NULL != shost) {
@@ -3044,19 +3066,13 @@ END:
 }
 EXPORT_SYMBOL(syno_sata_mv_gpio_read);
 
-void syno_sata_mv_gpio_write(u8 blFaulty, const unsigned short hostnum)
+void __syno_sata_mv_gpio_write(const struct ata_port *ap, u8 blFaulty)
 {
-	struct Scsi_Host *shost = scsi_host_lookup(hostnum);
-	struct ata_port *ap = NULL;
+
 	void __iomem *host_mmio = NULL;
 	u32 gpio_value = 0;
 	int led_idx;
-
-	if (NULL == shost) {
-		goto END;
-	}
-
-	if (NULL == (ap = ata_shost_to_port(shost))) {
+	if (NULL == ap) {
 		goto END;
 	}
 
@@ -3075,6 +3091,34 @@ void syno_sata_mv_gpio_write(u8 blFaulty, const unsigned short hostnum)
 	}
 
 	writel(gpio_value, host_mmio + GPIO_CTL_DATA);
+END:
+	return;
+}
+
+#ifdef MY_DEF_HERE
+ 
+void syno_sata_mv_gpio_write_by_port(u8 blFaulty, const unsigned short iDiskPort)
+{
+	__syno_sata_mv_gpio_write(syno_ata_port_get_by_port(iDiskPort), blFaulty);
+	return;
+}
+EXPORT_SYMBOL(syno_sata_mv_gpio_write_by_port);
+#endif  
+
+void syno_sata_mv_gpio_write(u8 blFaulty, const unsigned short hostnum)
+{
+	struct Scsi_Host *shost = scsi_host_lookup(hostnum);
+	struct ata_port *ap = NULL;
+
+	if (NULL == shost) {
+		goto END;
+	}
+
+	if (NULL == (ap = ata_shost_to_port(shost))) {
+		goto END;
+	}
+
+	__syno_sata_mv_gpio_write(ap, blFaulty);
 
 END:
 	if (NULL != shost) {

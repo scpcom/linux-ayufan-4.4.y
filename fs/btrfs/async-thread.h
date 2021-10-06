@@ -30,6 +30,9 @@ void btrfs_##name(struct work_struct *arg)
 BTRFS_WORK_HELPER_PROTO(worker_helper);
 BTRFS_WORK_HELPER_PROTO(delalloc_helper);
 BTRFS_WORK_HELPER_PROTO(flush_delalloc_helper);
+#ifdef MY_ABC_HERE
+BTRFS_WORK_HELPER_PROTO(flush_meta_helper);
+#endif  
 BTRFS_WORK_HELPER_PROTO(cache_helper);
 BTRFS_WORK_HELPER_PROTO(submit_helper);
 BTRFS_WORK_HELPER_PROTO(fixup_helper);

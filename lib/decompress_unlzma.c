@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* Lzma decompressor for Linux kernel. Shamelessly snarfed
  *from busybox 1.1.1
  *
@@ -650,8 +653,17 @@ STATIC inline int INIT unlzma(unsigned char *buf, long in_len,
 			goto exit_3;
 	}
 
+#ifdef MY_ABC_HERE
+	if (posp) {
+		if (get_pos(&wr) == header.dst_size)
+			*posp = 0;
+		else
+			*posp = rc.ptr-rc.buffer;
+	}
+#else
 	if (posp)
 		*posp = rc.ptr-rc.buffer;
+#endif /* MY_ABC_HERE */
 	if (!wr.flush || wr.flush(wr.buffer, wr.buffer_pos) == wr.buffer_pos)
 		ret = 0;
 exit_3:

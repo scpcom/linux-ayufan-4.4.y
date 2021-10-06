@@ -3726,11 +3726,9 @@ static void check_blkcg_changed(struct cfq_io_cq *cic, struct bio *bio)
 	struct cfq_data *cfqd = cic_to_cfqd(cic);
 	struct cfq_queue *cfqq;
 	uint64_t serial_nr;
-	bool nonroot_cg;
 
 	rcu_read_lock();
 	serial_nr = bio_blkcg(bio)->css.serial_nr;
-	nonroot_cg = bio_blkcg(bio) != &blkcg_root;
 	rcu_read_unlock();
 
 	/*
@@ -3739,17 +3737,6 @@ static void check_blkcg_changed(struct cfq_io_cq *cic, struct bio *bio)
 	 */
 	if (unlikely(!cfqd) || likely(cic->blkcg_serial_nr == serial_nr))
 		return;
-
-	/*
-	 * If we have a non-root cgroup, we can depend on that to
-	 * do proper throttling of writes. Turn off wbt for that
-	 * case.
-	 */
-	if (nonroot_cg) {
-		struct request_queue *q = cfqd->queue;
-
-		wbt_disable(q->rq_wb);
-	}
 
 	/*
 	 * Drop reference to queues.  New queues will be assigned in new
@@ -3822,7 +3809,8 @@ cfq_get_queue(struct cfq_data *cfqd, bool is_sync, struct cfq_io_cq *cic,
 			goto out;
 	}
 
-	cfqq = kmem_cache_alloc_node(cfq_pool, GFP_NOWAIT | __GFP_ZERO,
+	cfqq = kmem_cache_alloc_node(cfq_pool,
+				     GFP_NOWAIT | __GFP_ZERO | __GFP_NOWARN,
 				     cfqd->queue->node);
 	if (!cfqq) {
 		cfqq = &cfqd->oom_cfqq;

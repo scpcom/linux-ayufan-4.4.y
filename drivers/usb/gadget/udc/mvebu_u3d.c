@@ -1528,7 +1528,13 @@ static int mvc2_vbus_session(struct usb_gadget *gadget, int is_active)
 
 	val = MV_CP_READ(MVCP_DMA_GLOBAL_CONFIG);
 	if (is_active) {
+#if defined(MY_DEF_HERE)
+		/* For Armada 3700, need to skip PHY HW reset */
+		if (cp->phy_hw_reset)
+			mvc2_hw_reset(cp);
+#else /* MY_DEF_HERE */
 		mvc2_hw_reset(cp);
+#endif /* MY_DEF_HERE */
 		pm_stay_awake(cp->dev);
 		/* turn on dma int */
 		val |= MVCP_DMA_GLOBAL_CONFIG_RUN
@@ -2515,6 +2521,15 @@ static int mvc2_probe(struct platform_device *pdev)
 	}
 
 #if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
+	/* For Armada 3700, need to skip PHY HW reset */
+	if (of_device_is_compatible(pdev->dev.of_node,
+				    "marvell,armada3700-u3d"))
+		cp->phy_hw_reset = false;
+	else
+		cp->phy_hw_reset = true;
+
+#endif /* MY_DEF_HERE */
 	/* Get comphy and init if there is */
 	cp->comphy = devm_of_phy_get(&pdev->dev, pdev->dev.of_node, "usb");
 	if (!IS_ERR(cp->comphy)) {
@@ -2547,7 +2562,12 @@ static int mvc2_probe(struct platform_device *pdev)
 
 	eps_init(cp);
 
+#if defined(MY_DEF_HERE)
+	if (cp->phy_hw_reset)
+		mvc2_hw_reset(cp);
+#else /* MY_DEF_HERE */
 	mvc2_hw_reset(cp);
+#endif /* MY_DEF_HERE */
 
 	dev_set_drvdata(cp->dev, cp);
 	dev_info(cp->dev, "Detected ver %x from Marvell Central IP.\n", ver);
@@ -2698,6 +2718,9 @@ static void mvc2_shutdown(struct platform_device *dev)
 
 static const struct of_device_id mv_usb3_dt_match[] = {
 	{.compatible = "marvell,mvebu-u3d"},
+#if defined(MY_DEF_HERE)
+	{.compatible = "marvell,armada3700-u3d"},
+#endif /* MY_DEF_HERE */
 	{},
 };
 

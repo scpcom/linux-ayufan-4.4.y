@@ -42,6 +42,11 @@ void ulist_free(struct ulist *ulist);
 int ulist_add(struct ulist *ulist, u64 val, u64 aux, gfp_t gfp_mask);
 int ulist_add_merge(struct ulist *ulist, u64 val, u64 aux,
 		    u64 *old_aux, gfp_t gfp_mask);
+#ifdef MY_ABC_HERE
+int ulist_add_for_prealloc(struct ulist *ulist, u64 val, u64 aux, gfp_t gfp_mask, struct ulist_node **prealloc_ulist_node);
+int ulist_add_merge_for_prealloc(struct ulist *ulist, u64 val, u64 aux,
+		    u64 *old_aux, gfp_t gfp_mask, struct ulist_node **prealloc_ulist_node);
+#endif  
 int ulist_del(struct ulist *ulist, u64 val, u64 aux);
 
 static inline int ulist_add_merge_ptr(struct ulist *ulist, u64 val, void *aux,

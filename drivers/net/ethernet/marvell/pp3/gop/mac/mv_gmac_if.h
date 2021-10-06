@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -73,4 +69,3 @@ void mv_gmac_port_link_event_mask(int mac_num);
 void mv_gmac_port_link_event_clear(int mac_num);
 
 #endif /* __mv_gmac_if_h__ */
-#endif /* MY_DEF_HERE */

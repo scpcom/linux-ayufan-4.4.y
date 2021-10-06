@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -99,4 +95,3 @@ int  mv_gpcs_reset(int pcs_num, enum mv_reset act)
 	mv_gop_reg_write(MV_GMAC_PORT_CTRL2_REG(pcs_num), reg_data);
 	return 0;
 }
-#endif /* MY_DEF_HERE */

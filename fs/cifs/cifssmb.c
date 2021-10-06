@@ -117,6 +117,13 @@ cifs_reconnect_tcon(struct cifs_tcon *tcon, int smb_command)
 		}
 	}
 
+#ifdef MY_ABC_HERE
+	if (SMB20_PROT_ID <= server->dialect) {
+		cifs_dbg(FYI, "(%s) origin_dialect=0x%x, server->dialect=0x%x\n", __func__, origin_dialect, server->dialect);
+		return -EAGAIN;
+	}
+	origin_dialect = server->dialect;
+#endif  
 	if (!ses->need_reconnect && !tcon->need_reconnect)
 		return 0;
 
@@ -126,9 +133,13 @@ cifs_reconnect_tcon(struct cifs_tcon *tcon, int smb_command)
 	nls_codepage = load_nls_default();
 #endif  
 
-	mutex_lock(&ses->session_mutex);
 #ifdef MY_ABC_HERE
-	origin_dialect = server->dialect;
+	if (!mutex_trylock(&ses->session_mutex)) {
+		rc = -EINPROGRESS;
+		goto out;
+	}
+#else
+	mutex_lock(&ses->session_mutex);
 #endif  
 	rc = cifs_negotiate_protocol(0, ses);
 	if (rc == 0 && ses->need_reconnect)
@@ -157,7 +168,9 @@ cifs_reconnect_tcon(struct cifs_tcon *tcon, int smb_command)
 		reset_cifs_unix_caps(0, tcon, NULL, NULL);
 
 #ifdef MY_ABC_HERE
-	if (server->dialect != origin_dialect) {
+	if (server->dialect != origin_dialect ||
+	    SMB20_PROT_ID <= server->dialect) {
+		cifs_dbg(FYI, "(%s) SMB1 reconnect dialect not match! origin=0x%x, current=0x%x\n", __func__, origin_dialect, server->dialect);
 		rc = -EAGAIN;
 	}
 #endif  
@@ -4576,8 +4589,14 @@ CIFSGetDFSRefer(const unsigned int xid, struct cifs_ses *ses,
 	*target_nodes = NULL;
 
 	cifs_dbg(FYI, "In GetDFSRefer the path %s\n", search_name);
+#ifdef MY_ABC_HERE
+	 
+	if (NULL == ses || NULL == ses->server)
+		return -ENODEV;
+#else
 	if (ses == NULL)
 		return -ENODEV;
+#endif  
 getDFSRetry:
 	rc = smb_init(SMB_COM_TRANSACTION2, 15, NULL, (void **) &pSMB,
 		      (void **) &pSMBr);

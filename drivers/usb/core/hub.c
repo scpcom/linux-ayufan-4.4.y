@@ -27,6 +27,11 @@
 #include <linux/gpio.h>
 #endif  
 
+#ifdef MY_DEF_HERE
+#include <linux/synolib.h>
+#include <linux/syno_gpio.h>
+#endif  
+
 #include <asm/uaccess.h>
 #include <asm/byteorder.h>
 
@@ -708,7 +713,7 @@ static inline int get_vbus_gpio(struct usb_hub *hub, int port) {
 #ifdef MY_DEF_HERE
 	struct usb_port *port_dev = hub->ports[port - 1];
 
-	if (0 <= port_dev->syno_vbus_gpp) {  
+	if (0 <= port_dev->syno_vbus_gpp) {
 		return port_dev->syno_vbus_gpp;
 	}
 #else  
@@ -759,28 +764,76 @@ syno_get_power_on_time_ms(void) {
 
 #if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
  
-static int syno_usb_power_set_children(struct usb_hub *hub, int port, int enable)
+static int syno_usb_power_set_children(const struct usb_hub *hub, const int port, const int enable)
 {
-	int i;
-	struct usb_device *hdev = hub->hdev;
+#ifdef MY_DEF_HERE
+	char szHubName[SYNO_DTS_PROPERTY_CONTENT_LENGTH] = {'\0'};
+	u32 vbusGpioPin = U32_MAX, vbusGpioPolarity = 0, usbHub = 0;
+	struct device_node *pUSBNode = NULL, *pVbusNode = NULL;
+	int index = 0;
+#else
+	int i = 0;
 	extern char gSynoUsbVbusHostAddr[CONFIG_SYNO_USB_VBUS_NUM_GPIO][20];
 	extern unsigned gSynoUsbVbusGpp[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
 	extern unsigned gSynoUsbVbusGppPol[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
+#endif  
+	struct usb_device *hdev = hub->hdev;
 	int ret = -EINVAL;
 	if (strncmp(hdev->serial, CONFIG_SYNO_USB_EXT_HUB_PARENT_SERIAL, strlen(hdev->serial))) {
-		printk(KERN_INFO "This host %s has no children hub(%s).\n",hdev->serial,
+		printk(KERN_NOTICE "This host %s has no children hub(%s).\n",hdev->serial,
 			CONFIG_SYNO_USB_EXT_HUB_PARENT_SERIAL);
 		goto END;
 	}
+#ifdef MY_DEF_HERE
+	for_each_child_of_node(of_root, pUSBNode) {
+		pVbusNode = NULL;
+		 
+		if (pUSBNode->full_name && 1 != sscanf(pUSBNode->full_name, "/"DT_USB_SLOT"@%d", &index)) {
+			if (0 != of_property_read_u32_index(pUSBNode, DT_USB_HUB, 0, &usbHub)) {
+				goto PUT_NODE;
+			}
+
+			if (0 == usbHub) {
+				goto PUT_NODE;
+			}
+
+			pVbusNode = of_get_child_by_name(pUSBNode, DT_VBUS);
+			if (NULL == pVbusNode) {
+				goto PUT_NODE;
+			}
+
+			if (0 != of_property_read_u32_index(pVbusNode, DT_SYNO_GPIO, SYNO_GPIO_PIN, &vbusGpioPin)) {
+				printk(KERN_ERR "%s reading vbus vbusGpioPin failed.\n", __func__);
+				goto PUT_NODE;
+			}
+			if (0 != of_property_read_u32_index(pVbusNode, DT_SYNO_GPIO, SYNO_POLARITY_PIN, &vbusGpioPolarity)) {
+				printk(KERN_ERR "%s reading vbus vbusGpioPolarity failed.\n", __func__);
+				goto PUT_NODE;
+			}
+
+			snprintf(szHubName, SYNO_DTS_PROPERTY_CONTENT_LENGTH, "%s.%d", SYNO_SERIAL_EXT_HUB, usbHub);
+			printk(KERN_INFO "Turn %s children hub %s vbus gpio %d(%s)\n",
+				enable ? "ON" : "OFF", szHubName, vbusGpioPin,
+				vbusGpioPolarity ? "ACTIVE_HIGH" : "ACTIVE_LOW");
+			SYNO_GPIO_WRITE(vbusGpioPin, !(enable ^ vbusGpioPolarity));
+
+		}
+PUT_NODE:
+		if (pVbusNode) {
+			of_node_put(pVbusNode);
+		}
+	}
+#else
 	for (i = 0; i < CONFIG_SYNO_USB_VBUS_NUM_GPIO; i++) {
 		if (!strncmp(SYNO_SERIAL_EXT_HUB, gSynoUsbVbusHostAddr[i],
 				strlen(SYNO_SERIAL_EXT_HUB))) {
-			printk(KERN_INFO "Turn %s children hub %s vbus gpio %d(%s)\n",
+			printk(KERN_NOTICE "Turn %s children hub %s vbus gpio %d(%s)\n",
 				enable ? "ON" : "OFF", gSynoUsbVbusHostAddr[i], gSynoUsbVbusGpp[i],
 				gSynoUsbVbusGppPol[i] ? "ACTIVE_HIGH" : "ACTIVE_LOW");
 			SYNO_GPIO_WRITE(gSynoUsbVbusGpp[i], !(enable ^ gSynoUsbVbusGppPol[i]));
 		}
 	}
+#endif  
 	ret = 0;
 END:
 	return ret;
@@ -833,12 +886,16 @@ __syno_usb_power_cycle(struct usb_hub *hub, int port) {
 	return 0;
 }
 
-static int
+int
 syno_usb_power_cycle(struct usb_hub *hub, int port, int status) {
 	struct usb_device *hdev = hub->hdev;
 	struct usb_hcd *hcd = bus_to_hcd(hdev->bus);
+#if defined (MY_DEF_HERE) || defined (MY_DEF_HERE)
+	if (hdev->parent && 0 != is_syno_ext_hub(hdev))
+#else  
 	 
-	if (hub->hdev->parent)
+	if (hdev->parent)
+#endif  
 		return -EINVAL;
 
 	if ((status == -ENODEV) || (status == -ENOTCONN))
@@ -2010,13 +2067,12 @@ static int device_serial_match(struct usb_device *dev, struct usb_device *udev_s
 	usb_hub_for_each_child(dev, child, childdev) {
 		if (childdev && childdev != udev_search && childdev->serial) {
 
+			if (
 #if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
-			if (0 == is_syno_ext_hub(childdev)) {
-				continue;
-			}
+					0 != is_syno_ext_hub(childdev) &&
 #endif  
-			 
-			if (childdev->serial[0] && strcmp(childdev->serial, udev_search->serial) == 0) {
+					childdev->serial[0] &&
+					strcmp(childdev->serial, udev_search->serial) == 0) {
 				match++;
 			} else {
 				match = device_serial_match(childdev, udev_search);
@@ -2134,6 +2190,7 @@ int usb_new_device(struct usb_device *udev)
 #endif  
 			printk("Got empty serial number. "
 					"Generate serial number from product.\n");
+			 
 			udev->serial[0] = '\0';
 			for(i = 0; (i < cProductLen) && (i < (SERIAL_LEN-1)/2); i++) {
 				snprintf(udev->serial + strlen(udev->serial),
@@ -2149,6 +2206,9 @@ int usb_new_device(struct usb_device *udev)
 
 	if (udev->parent && udev->serial) {
 		int match, counter = 0;
+#ifdef MY_ABC_HERE
+		int entered = 0;
+#endif
 		struct list_head *buslist;
 		struct usb_bus *bus;
 
@@ -2179,9 +2239,12 @@ RETRY:
 				printk("There are to many same devices (%d)\n", counter);
 			} else {
 #if defined(MY_ABC_HERE)
-				 
-				udev->syno_old_serial = kmalloc(Len, GFP_KERNEL);
-				memcpy(udev->syno_old_serial, udev->serial, Len);
+				if (NULL != udev->syno_old_serial && !entered) {
+					 
+					udev->syno_old_serial = kmalloc(Len, GFP_KERNEL);
+					memcpy(udev->syno_old_serial, udev->serial, Len);
+					entered = 1;
+				}
 #endif  
 				udev->serial[Len - 1] = counter + '0';
 				udev->serial[Len] = '\0';

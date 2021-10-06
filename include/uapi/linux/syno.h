@@ -82,4 +82,13 @@
 #define SDCOPY_PORT_LOCATION 98
 #endif  
 
+#if defined (MY_ABC_HERE) && !defined (__ASSEMBLER__)
+typedef enum
+{
+	SFP_NOTIFY_UNSET 			= 0,
+	SFP_NOTIFY_NOT_SUPPORT_DROP	= 1,	 
+	SFP_NOTIFY_NOT_SUPPORT_WARN = 2		 
+} SYNO_SFP_UNSUPPORTED_NOTIFY_TYPE;
+#endif  
+
 #endif  

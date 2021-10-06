@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * cacheinfo support - processor cache information via sysfs
  *
@@ -39,7 +42,7 @@ struct cpu_cacheinfo *get_cpu_cacheinfo(unsigned int cpu)
 	return ci_cacheinfo(cpu);
 }
 
-#ifdef CONFIG_OF
+#if defined(CONFIG_OF) && !(defined(CONFIG_X86) && defined(MY_DEF_HERE))
 static int cache_setup_of_node(unsigned int cpu)
 {
 	struct device_node *np;
@@ -85,7 +88,7 @@ static inline bool cache_leaves_are_shared(struct cacheinfo *this_leaf,
 {
 	return sib_leaf->of_node == this_leaf->of_node;
 }
-#else
+#else /* defined(CONFIG_OF) && !(defined(CONFIG_X86) && defined(MY_DEF_HERE)) */
 static inline int cache_setup_of_node(unsigned int cpu) { return 0; }
 static inline bool cache_leaves_are_shared(struct cacheinfo *this_leaf,
 					   struct cacheinfo *sib_leaf)
@@ -97,7 +100,7 @@ static inline bool cache_leaves_are_shared(struct cacheinfo *this_leaf,
 	 */
 	return !(this_leaf->level == 1);
 }
-#endif
+#endif /* defined(CONFIG_OF) && !(defined(CONFIG_X86) && defined(MY_DEF_HERE */
 
 static int cache_shared_cpu_map_setup(unsigned int cpu)
 {

@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*
 * ***************************************************************************
 * Copyright (C) 2015 Marvell International Ltd.
@@ -66,4 +62,3 @@ enum mv_pp3_fw_msg_opcode {
 };
 
 #endif /* __mv_pp3_fw_opcodes_h__ */
-#endif /* MY_DEF_HERE */

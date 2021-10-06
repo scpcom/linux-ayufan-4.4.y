@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2007 Oracle.  All rights reserved.
  *
@@ -63,8 +66,13 @@ struct buffer_head *btrfs_read_dev_super(struct block_device *bdev);
 int btrfs_read_dev_one_super(struct block_device *bdev, int copy_num,
 			struct buffer_head **bh_ret);
 int btrfs_commit_super(struct btrfs_root *root);
+#ifdef MY_ABC_HERE
+struct extent_buffer *btrfs_find_tree_block(struct btrfs_root *root,
+					    u64 bytenr);
+#else
 struct extent_buffer *btrfs_find_tree_block(struct btrfs_fs_info *fs_info,
 					    u64 bytenr);
+#endif /* MY_ABC_HERE */
 struct btrfs_root *btrfs_read_fs_root(struct btrfs_root *tree_root,
 				      struct btrfs_key *location);
 int btrfs_init_fs_root(struct btrfs_root *root);
@@ -85,6 +93,9 @@ btrfs_read_fs_root_no_name(struct btrfs_fs_info *fs_info,
 int btrfs_cleanup_fs_roots(struct btrfs_fs_info *fs_info);
 void btrfs_btree_balance_dirty(struct btrfs_root *root);
 void btrfs_btree_balance_dirty_nodelay(struct btrfs_root *root);
+#ifdef MY_ABC_HERE
+void btrfs_async_btree_balance_dirty(struct btrfs_fs_info *fs_info);
+#endif /* MY_ABC_HERE */
 void btrfs_drop_and_free_fs_root(struct btrfs_fs_info *fs_info,
 				 struct btrfs_root *root);
 void btrfs_free_fs_root(struct btrfs_root *root);
@@ -107,10 +118,30 @@ static inline struct btrfs_root *btrfs_grab_fs_root(struct btrfs_root *root)
 	return NULL;
 }
 
+#ifdef MY_ABC_HERE
+static inline void btrfs_free_root_eb_monitor(struct btrfs_root *root)
+{
+	if (root) {
+		percpu_counter_destroy(&root->eb_hit);
+		percpu_counter_destroy(&root->eb_miss);
+	}
+}
+
+void debugfs_remove_root_hook(struct btrfs_root *root);
+#endif /* MY_ABC_HERE */
+
 static inline void btrfs_put_fs_root(struct btrfs_root *root)
 {
+#ifdef MY_ABC_HERE
+	if (atomic_dec_and_test(&root->refs)) {
+		debugfs_remove_root_hook(root);
+		btrfs_free_root_eb_monitor(root);
+		kfree(root);
+	}
+#else
 	if (atomic_dec_and_test(&root->refs))
 		kfree(root);
+#endif /* MY_ABC_HERE */
 }
 
 void btrfs_mark_buffer_dirty(struct extent_buffer *buf);

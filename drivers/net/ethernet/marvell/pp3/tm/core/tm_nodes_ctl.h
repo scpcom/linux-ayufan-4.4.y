@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -104,5 +100,3 @@ int tm_nodes_read_next_change(tm_handle hndl, struct tm_tree_change *change);
 int tm_clean_list(tm_handle hndl);
 
 #endif   /* TM_NODES_CTL_H */
-
-#endif /* MY_DEF_HERE */

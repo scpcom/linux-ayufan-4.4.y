@@ -59,6 +59,10 @@
 #define AP806_RESET	BIT(1)
 #define AP806_ENABLE	BIT(2)
 
+#if defined(MY_DEF_HERE)
+#define AP806_INIT_TIMEOUT	10
+
+#endif /* MY_DEF_HERE */
 /* For AP806 TSEN output format is signed as a 2s complement number
 	ranging from-512 to +511*/
 #define AP806_TSEN_OUTPUT_MSB		512
@@ -398,13 +402,29 @@ static void armada380_init_sensor(struct platform_device *pdev,
 static void armada_ap806_init_sensor(struct platform_device *pdev,
 				  struct armada_thermal_priv *priv)
 {
+#if defined(MY_DEF_HERE)
+	unsigned int timeout;
+#endif /* MY_DEF_HERE */
 	unsigned long reg = readl_relaxed(priv->control);
 
 	reg &= ~AP806_RESET;
 	reg |= AP806_START;
 	reg |= AP806_ENABLE;
 	writel(reg, priv->control);
+#if defined(MY_DEF_HERE)
+
+	timeout = AP806_INIT_TIMEOUT;
+	if (priv->data->is_valid) {
+		do {
+			mdelay(10);
+			if (priv->data->is_valid(priv))
+				break;
+			timeout--;
+		} while (timeout != 0);
+	}
+#else /* MY_DEF_HERE */
 	mdelay(10);
+#endif /* MY_DEF_HERE */
 
 	/* Set thresholds */
 	ap806_temp_set_threshold(pdev, priv);
@@ -836,6 +856,11 @@ static int armada_thermal_probe(struct platform_device *pdev)
 	if (!priv)
 		return -ENOMEM;
 
+#if defined(MY_DEF_HERE)
+	/* Register device in thermal data structure */
+	priv->pdev = pdev;
+
+#endif /* MY_DEF_HERE */
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 	priv->sensor = devm_ioremap_resource(&pdev->dev, res);
 	if (IS_ERR(priv->sensor))
@@ -889,9 +914,13 @@ static int armada_thermal_probe(struct platform_device *pdev)
 	}
 
 #if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
+//do nothing
+#else /* MY_DEF_HERE */
 	/* Register device in thermal data structure */
 	priv->pdev = pdev;
 
+#endif /* MY_DEF_HERE */
 	/* Register overheat interrupt */
 	irq = platform_get_irq(pdev, 0);
 	if (irq >= 0) {

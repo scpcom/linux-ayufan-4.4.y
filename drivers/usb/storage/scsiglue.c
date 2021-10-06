@@ -378,7 +378,7 @@ static const struct scsi_host_template usb_stor_host_template = {
 
 	.sdev_attrs =			sysfs_device_attr_list,
 
-#ifdef MY_ABC_HERE
+#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 	.syno_port_type         = SYNO_PORT_TYPE_USB,
 #endif  
 

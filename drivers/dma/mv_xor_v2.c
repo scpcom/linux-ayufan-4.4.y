@@ -898,7 +898,11 @@ static void mv_xor_v2_tasklet(unsigned long data)
 	spin_unlock_bh(&xor_dev->sw_ll_lock);
 #endif /* MY_DEF_HERE */
 
+#if defined(MY_DEF_HERE)
+	/* get the pending descriptors parameters */
+#else /* MY_DEF_HERE */
 	/* get thepending descriptors parameters */
+#endif /* MY_DEF_HERE */
 	num_of_pending = mv_xor_v2_get_pending_params(xor_dev, &pending_ptr);
 
 	/* loop over free descriptors */
@@ -953,7 +957,11 @@ static void mv_xor_v2_tasklet(unsigned long data)
 	}
 
 	if (num_of_pending != 0) {
+#if defined(MY_DEF_HERE)
+		/* free the descriptors */
+#else /* MY_DEF_HERE */
 		/* free the descriptores */
+#endif /* MY_DEF_HERE */
 		mv_xor_v2_free_desc_from_desq(xor_dev, num_of_pending);
 	}
 #if defined(MY_DEF_HERE)

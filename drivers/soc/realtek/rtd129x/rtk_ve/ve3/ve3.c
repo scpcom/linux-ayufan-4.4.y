@@ -68,7 +68,7 @@ unsigned long s_pll_phy_register = 0;
 unsigned long s_pll_virt_register = 0;
 unsigned long s_pll_size_register = 0;
 
-u64 multicorebase[HXDEC_MAX_CORES] =
+long multicorebase[HXDEC_MAX_CORES] =
 {
     -1
 };
@@ -83,7 +83,7 @@ int elements = 0;
 /* module_param(name, type, perm) */
 module_param(base_port, ulong, 0);
 module_param(ve3_irq, int, 0);
-module_param_array(multicorebase, ulong, &elements, 0);
+module_param_array(multicorebase, long, &elements, 0);
 
 static int hantrodec_major = 0; /* dynamic allocation */
 static struct miscdevice s_ve3_dev;
@@ -1000,7 +1000,7 @@ static int ve3_probe(struct platform_device *pdev)
 
     multicorebase[0] = base_port;
     elements = 1;
-    printk(KERN_INFO "VE3: Init single core at 0x%16llx IRQ=%i\n",
+    printk(KERN_INFO "VE3: Init single core at 0x%16lx IRQ=%i\n",
            multicorebase[0], ve3_irq);
 
     hantrodec_data.iosize = DEC_IO_SIZE;
@@ -1115,7 +1115,7 @@ static int ve3_remove(struct platform_device *pdev)
 }
 
 #ifdef CONFIG_PM
-static int ve3_suspend(struct platform_device *pdev, pm_message_t state)
+static int ve3_suspend(struct device *dev)
 {
 
     printk(KERN_INFO "[RTK_VE3] Enter %s\n", __func__);
@@ -1144,7 +1144,7 @@ static int ve3_suspend(struct platform_device *pdev, pm_message_t state)
     return 0;
 }
 
-static int ve3_resume(struct platform_device *pdev)
+static int ve3_resume(struct device *dev)
 {
     printk(KERN_INFO "[RTK_VE3] Enter %s\n", __func__);
 

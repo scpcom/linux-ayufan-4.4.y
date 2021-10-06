@@ -64,35 +64,40 @@
 	soc {
 		internal-regs {
 			spi0: spi@10600 {
+				pinctrl-names = "default";
+				pinctrl-0 = <&spi_quad_pins>;
 				status = "okay";
 
-				spi-flash@0 {
-					#address-cells = <1>;
-					#size-cells = <1>;
+				m25p80@0 {
 					compatible = "jedec,spi-nor";
-					reg = <0>; /* Chip select 0 */
-					spi-max-frequency = <104000000>;
-					m25p,fast-read;
+					reg = <0>;
+					spi-max-frequency = <108000000>;
+					spi-rx-bus-width = <4>;
+					spi-tx-bus-width = <4>;
 
-					pinctrl-names = "default";
-					pinctrl-0 = <&spi0_pins &spi_quad_pins>;
-
-					partition@0 {
-						label = "Bootloader";
-						reg = <0 0x200000>;
-					};
-					partition@200000 {
-						label = "U-boot Env";
-						reg = <0x200000 0x10000>;
-					};
-					partition@210000 {
-						label = "Linux";
-						reg = <0x210000 0xDF0000>;
+					partitions {
+						compatible = "fixed-partitions";
+						#address-cells = <1>;
+						#size-cells = <1>;
+						partition@0 {
+							label = "bootloader";
+							reg = <0x0 0x200000>;
+						};
+						partition@200000 {
+							label = "U-boot Env";
+							reg = <0x200000 0x10000>;
+						};
+						partition@210000 {
+							label = "Linux";
+							reg = <0x210000 0xDF0000>;
+						};
 					};
 				};
 			};
 
 			i2c0: i2c@11000 {
+				pinctrl-names = "default";
+				pinctrl-0 = <&i2c1_pins>;
 				status = "okay";
 				expander0: pca9555@22 {
 					compatible = "nxp,pca9555";
@@ -115,16 +120,20 @@
 			* through an FTDI
 			*/
 			uart0: serial@12000 {
-				status = "okay";
-			};
-
-			uart1: serial@12200 {
 				pinctrl-names = "default";
 				pinctrl-0 = <&uart1_pins>;
 				status = "okay";
 			};
 
+			uart1: serial@12200 {
+				pinctrl-names = "default";
+				pinctrl-0 = <&uart2_pins>;
+				status = "okay";
+			};
+
 			eth0: ethernet@30000 {
+				pinctrl-names = "default";
+				pinctrl-0 = <&rgmii_pins>, <&smi_pins>;
 				phy-mode = "rgmii-id";
 				phy = <&phy0>;
 				status = "okay";
@@ -189,13 +198,14 @@
 			sdhci1: sdhci@d0000 {
 				wp-inverted;
 				bus-width = <4>;
-				cd-gpios = <&gpio_sb 2 GPIO_ACTIVE_LOW>;
+				cd-gpios = <&gpiosb 2 GPIO_ACTIVE_LOW>;
 				vqmmc-supply = <&vcc_sd_reg1>;
+				mmc-pwrseq = <&sd_pwrseq>;
 				marvell,pad-type = "sd";
 				status = "okay";
 
 				pinctrl-names = "default";
-				pinctrl-0 = <&sdio_pins &cd_pins>;
+				pinctrl-0 = <&sdio_pins>;
 			};
 
 			sdhci0: sdhci@d8000 {
@@ -219,6 +229,11 @@
 				status = "okay";
 			};
 
+			sd_pwrseq: sd-pwrseq {
+				compatible = "mmc-pwrseq-a3700-sd";
+				pwren-gpios = <&expander0 4 GPIO_ACTIVE_HIGH>;
+			};
+
 			vcc_sd_reg1: regulator@0 {
 				compatible = "regulator-gpio";
 				regulator-name = "vcc_sd1";
@@ -226,7 +241,7 @@
 				regulator-max-microvolt = <3300000>;
 				regulator-boot-on;
 
-				gpios = <&gpio_sb 23 GPIO_ACTIVE_HIGH>;
+				gpios = <&gpiosb 23 GPIO_ACTIVE_HIGH>;
 				gpios-states = <0>;
 				states = <1800000 0x1
 					  3300000 0x0>;
@@ -284,8 +299,10 @@
 
 /* CON17 (PCIe) / CON12 (mini-PCIe) */
 &pcie0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pcie_pins>;
 	status = "okay";
 	phys = <&a3700_comphy 1 COMPHY_PCIE0>;
 	phy-names = "comphy";
-	reset-gpios = <&gpio_sb 3 GPIO_ACTIVE_HIGH>;
+	reset-gpios = <&gpiosb 3 GPIO_ACTIVE_HIGH>;
 };

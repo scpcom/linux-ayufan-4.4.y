@@ -178,7 +178,15 @@ ext4_xattr_check_block(struct inode *inode, struct buffer_head *bh)
 	    BHDR(bh)->h_blocks != cpu_to_le32(1))
 		return -EFSCORRUPTED;
 	if (!ext4_xattr_block_csum_verify(inode, bh->b_blocknr, BHDR(bh)))
+#ifdef MY_ABC_HERE
+		ext4_msg(inode->i_sb, KERN_CRIT,
+			" %s:%d: inode #%lu: comm %s: "
+			"bad block %llu failed xattr blk csum\n",
+		    __func__, __LINE__, inode->i_ino, current->comm,
+			EXT4_I(inode)->i_file_acl);
+#else
 		return -EFSBADCRC;
+#endif  
 	error = ext4_xattr_check_names(BFIRST(bh), bh->b_data + bh->b_size,
 				       bh->b_data);
 	if (!error)

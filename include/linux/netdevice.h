@@ -692,10 +692,6 @@ struct net_device_ops {
 							 bool proto_down);
 	int			(*ndo_fill_metadata_dst)(struct net_device *dev,
 						       struct sk_buff *skb);
-#if defined(MY_DEF_HERE)
-	void		(*ndo_lan_led_control)(struct net_device *dev,
-							int status);
-#endif  
 };
 
 enum netdev_priv_flags {
@@ -2765,6 +2761,10 @@ extern struct pernet_operations __net_initdata loopback_net_ops;
 
 #ifdef MY_ABC_HERE
 extern int syno_get_dev_vendor_mac(const char *szDev, char *szMac);
+#endif  
+
+#ifdef MY_DEF_HERE
+extern void syno_rtd129x_rtl8169_lan_led_control(struct net_device *dev, int state);
 #endif  
 
 static inline const char *netdev_name(const struct net_device *dev)

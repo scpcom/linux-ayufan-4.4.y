@@ -230,7 +230,7 @@ int rpc_intr_init(void)
     is_init = 1;
     rpc_intr_is_paused = 0;
     rpc_intr_is_suspend = 0;
-    pr_info("\033[31mrpc is not paused & suspended\033[m\n");
+    pr_info("rpc is not paused & suspended\n");
 
 //fail:
     return result;
@@ -239,7 +239,7 @@ int rpc_intr_init(void)
 int rpc_intr_pause(void)
 {
     rpc_intr_is_paused = 1;
-    pr_info("\033[31mrpc is paused\033[m\n");
+    pr_info("rpc is paused\n");
 
     return 0;
 }
@@ -247,14 +247,14 @@ int rpc_intr_pause(void)
 int rpc_intr_suspend(void)
 {
     rpc_intr_is_suspend = 1;
-    pr_info("\033[31mrpc is suspended\033[m\n");
+    pr_info("rpc is suspended\n");
     return 0;
 }
 
 int rpc_intr_resume(void)
 {
     rpc_intr_is_suspend = 0;
-    pr_info("\033[31mrpc is not suspended\033[m\n");
+    pr_info("rpc is not suspended\n");
     return 0;
 }
 

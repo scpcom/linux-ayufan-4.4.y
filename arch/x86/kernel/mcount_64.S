@@ -7,11 +7,10 @@
 #include <linux/linkage.h>
 #include <asm/ptrace.h>
 #include <asm/ftrace.h>
-
+#include <asm/nospec-branch.h>
 
 	.code64
 	.section .entry.text, "ax"
-
 
 #ifdef CONFIG_FUNCTION_TRACER
 
@@ -256,7 +255,6 @@ GLOBAL(ftrace_regs_caller_end)
 
 END(ftrace_regs_caller)
 
-
 #else /* ! CONFIG_DYNAMIC_FTRACE */
 
 ENTRY(function_hook)
@@ -285,8 +283,9 @@ trace:
 	 * ip and parent ip are used and the list function is called when
 	 * function tracing is enabled.
 	 */
-	call   *ftrace_trace_function
 
+	movq ftrace_trace_function, %r8
+	CALL_NOSPEC %r8
 	restore_mcount_regs
 
 	jmp fgraph_trace
@@ -329,5 +328,5 @@ GLOBAL(return_to_handler)
 	movq 8(%rsp), %rdx
 	movq (%rsp), %rax
 	addq $24, %rsp
-	jmp *%rdi
+	JMP_NOSPEC %rdi
 #endif

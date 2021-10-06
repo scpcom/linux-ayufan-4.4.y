@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -69,4 +65,3 @@ void mv_xlg_port_link_event_clear(int mac_num);
 void mv_xlg_2_gig_mac_cfg(int mac_num);
 
 #endif /* __mv_xlg_mac_if_h__ */
-#endif /* MY_DEF_HERE */

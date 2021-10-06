@@ -13,7 +13,7 @@
 
 MODULE_LICENSE("Proprietary");
 
-#define SYNO_MAX_HDD_PRZ 4
+#define SYNO_MAX_HDD_PRZ 6
 #define SYNO_HDDMON_POLL_SEC 1
 #define SYNO_HDDMON_EN_WAIT_SEC 7
 #define SYNO_HDDMON_STR "Syno_HDDMon"
@@ -57,11 +57,15 @@ static int syno_hddmon_data_init(SynoHddMonData_t *pData)
 	pData->blHddHotPlugSupport = g_hdd_hotplug;
 #endif  
 
-	pData->iMaxHddNum = g_syno_hdd_powerup_seq;
-
-	if (SYNO_MAX_HDD_PRZ < pData->iMaxHddNum) {
-		goto END;
+#ifdef MY_DEF_HERE
+	if (gSynoHddPowerupSeq) {
+		pData->iMaxHddNum = gSynoInternalHddNumber;
+	} else {
+		pData->iMaxHddNum = 0;
 	}
+#else  
+	pData->iMaxHddNum = g_syno_hdd_powerup_seq;
+#endif  
 
 	if (!SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER()) {
 		pData->blHddHotPlugSupport = 0;

@@ -1,8 +1,15 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _TSO_H
 #define _TSO_H
 
 #include <net/ip.h>
 
+#if defined(MY_DEF_HERE)
+#define TSO_HEADER_SIZE		128
+
+#endif /* MY_DEF_HERE */
 struct tso_t {
 	int next_frag_idx;
 	void *data;

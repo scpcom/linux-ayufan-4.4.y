@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/drivers/mmc/card/queue.c
  *
@@ -21,7 +24,11 @@
 #include <linux/mmc/host.h>
 #include "queue.h"
 
+#if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE)
+#define MMC_QUEUE_BOUNCESZ	0x200000
+#else /* CONFIG_ARCH_RTD129X / MY_DEF_HERE */
 #define MMC_QUEUE_BOUNCESZ	65536
+#endif /* CONFIG_ARCH_RTD129X / MY_DEF_HERE */
 
 /*
  * Prepare a MMC request. This just filters out odd stuff.

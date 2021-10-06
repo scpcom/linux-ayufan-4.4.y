@@ -1708,6 +1708,9 @@ pci_wch_ch38x_setup(struct serial_private *priv,
 #define PCIE_DEVICE_ID_NEO_2_OX_IBM	0x00F6
 #define PCI_DEVICE_ID_PLX_CRONYX_OMEGA	0xc001
 #define PCI_DEVICE_ID_INTEL_PATSBURG_KT 0x1d3d
+#ifdef CONFIG_SYNO_PURLEY_SERIAL_OVER_LAN
+#define PCI_DEVICE_ID_INTEL_LEWISBURG_KT 0xa1fb
+#endif  
 #define PCI_VENDOR_ID_WCH		0x4348
 #define PCI_DEVICE_ID_WCH_CH352_2S	0x3253
 #define PCI_DEVICE_ID_WCH_CH353_4S	0x3453
@@ -3603,7 +3606,9 @@ serial_pci_matches(const struct pciserial_board *board,
 	    board->reg_shift == guessed->reg_shift &&
 	    board->first_offset == guessed->first_offset;
 }
-
+#ifdef CONFIG_SYNO_PURLEY_SERIAL_OVER_LAN
+extern void kt_console_init(void);
+#endif  
 struct serial_private *
 pciserial_init_ports(struct pci_dev *dev, const struct pciserial_board *board)
 {
@@ -3659,6 +3664,13 @@ pciserial_init_ports(struct pci_dev *dev, const struct pciserial_board *board)
 			break;
 		}
 	}
+
+#ifdef CONFIG_SYNO_PURLEY_SERIAL_OVER_LAN
+	if (PCI_VENDOR_ID_INTEL == dev->vendor &&
+		PCI_DEVICE_ID_INTEL_LEWISBURG_KT == dev->device) {
+		kt_console_init();
+	}
+#endif  
 	priv->nr = i;
 	priv->board = board;
 	return priv;

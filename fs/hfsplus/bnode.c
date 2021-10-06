@@ -79,6 +79,14 @@ void hfs_bnode_write(struct hfs_bnode *node, void *buf, int off, int len)
 	struct page **pagep;
 	int l;
 
+#ifdef MY_ABC_HERE
+	if (off > node->tree->node_size)
+		if(printk_ratelimit())
+			printk(KERN_ERR "the offset of hfsplus's node is "
+				"beyond the node size: %d/%u, page_offset:%u\n",
+				off, node->tree->node_size, node->page_offset);
+#endif
+
 	off += node->page_offset;
 	pagep = node->page + (off >> PAGE_CACHE_SHIFT);
 	off &= ~PAGE_CACHE_MASK;

@@ -1959,9 +1959,14 @@ static int adt7475_probe(struct i2c_client *client,
 				i2c_smbus_write_byte_data(client, REG_CONFIG1, config1);
 			}
 		}
-
 		configPECI = adt7475_read(REG_PECI_CONFIG);
+#ifdef MY_DEF_HERE
+		// 40h = 01000000b
+		// Bits [7:6], 01: 2 CPUs (PECI0, PECI1)
+		configPECI = 0x40;
+#else /* MY_DEF_HERE */
 		configPECI = 0x00;
+#endif /* MY_DEF_HERE */
 		i2c_smbus_write_byte_data(client, REG_PECI_CONFIG, configPECI);
 	}
 #endif /* MY_ABC_HERE */

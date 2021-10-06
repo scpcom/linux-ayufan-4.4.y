@@ -509,6 +509,9 @@ cifs_readv_from_socket(struct TCP_Server_Info *server, struct kvec *iov_orig,
 
 	smb_msg.msg_control = NULL;
 	smb_msg.msg_controllen = 0;
+	smb_msg.msg_name = NULL;
+	smb_msg.msg_namelen = 0;
+	smb_msg.msg_flags = 0;
 
 	for (total_read = 0; to_read; total_read += length, to_read -= length) {
 		try_to_freeze();
@@ -1339,7 +1342,11 @@ cifs_parse_mount_options(const char *mountdata, const char *devname,
 			cifs_dbg(VFS, "FS-Cache support needs CONFIG_CIFS_FSCACHE kernel config option set\n");
 			goto cifs_parse_mount_err;
 #endif
+#if defined(MY_ABC_HERE) && !defined(CONFIG_CIFS_FSCACHE)
+			 
+#else
 			vol->fsc = true;
+#endif
 			break;
 		case Opt_mfsymlinks:
 			vol->mfsymlinks = true;
@@ -1498,6 +1505,12 @@ cifs_parse_mount_options(const char *mountdata, const char *devname,
 		case Opt_blank_pass:
 			 
 			tmp_end = strchr(data, '=');
+#ifdef MY_ABC_HERE
+			 
+			if (NULL == tmp_end) {
+				goto cifs_parse_mount_err;
+			}
+#endif  
 			tmp_end++;
 			if (!(tmp_end < end && tmp_end[1] == delim)) {
 				 
@@ -1509,6 +1522,12 @@ cifs_parse_mount_options(const char *mountdata, const char *devname,
 		case Opt_pass:
 			 
 			value = strchr(data, '=');
+#ifdef MY_ABC_HERE
+			 
+			if (NULL == value) {
+				goto cifs_parse_mount_err;
+			}
+#endif  
 			value++;
 
 			tmp_end = (char *) value + strlen(value);
@@ -2744,8 +2763,13 @@ ip_rfc1001_connect(struct TCP_Server_Info *server)
 	if (ses_init_buf) {
 		ses_init_buf->trailer.session_req.called_len = 32;
 
+#ifdef MY_ABC_HERE
+		 
+		if (server->server_RFC1001_name[0] != 0)
+#else
 		if (server->server_RFC1001_name &&
 		    server->server_RFC1001_name[0] != 0)
+#endif  
 			rfc1002mangle(ses_init_buf->trailer.
 				      session_req.called_name,
 				      server->server_RFC1001_name,

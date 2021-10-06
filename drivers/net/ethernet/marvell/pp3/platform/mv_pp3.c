@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*
 * ***************************************************************************
 * Copyright (C) 2015 Marvell International Ltd.
@@ -1090,5 +1086,3 @@ module_exit(mv_pp3_cleanup_module);
 MODULE_DESCRIPTION("Marvell PPv3 Network Driver - www.marvell.com");
 MODULE_AUTHOR("Dmitri Epshtein <dima@marvell.com>");
 MODULE_LICENSE("GPL");
-
-#endif /* MY_DEF_HERE */

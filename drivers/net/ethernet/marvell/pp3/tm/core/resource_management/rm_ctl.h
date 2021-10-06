@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -67,4 +63,3 @@ int rm_open(uint8_t total_ports,
 int rm_close(rmctl_t hndl);
 
 #endif   /* RM_CTL_H */
-#endif /* MY_DEF_HERE */

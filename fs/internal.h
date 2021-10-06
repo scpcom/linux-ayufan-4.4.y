@@ -53,7 +53,8 @@ extern void chroot_fs_refs(const struct path *, const struct path *);
 #ifdef MY_ABC_HERE
 extern void file_sb_list_add(struct file *f, struct super_block *sb);
 extern void file_sb_list_del(struct file *f);
-extern void fs_show_opened_file(struct mount *m);
+extern void fs_show_opened_file(struct mount *m, const char *mnt_point_name,
+				char *file_name_buf, int buflen);
 #endif  
 extern struct file *get_empty_filp(void);
 

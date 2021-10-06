@@ -74,12 +74,6 @@ int btrfs_verify_qgroup_counts(struct btrfs_fs_info *fs_info, u64 qgroupid,
 			       u64 rfer, u64 excl);
 #endif
 
-#ifdef MY_ABC_HERE
-int btrfs_quota_reserve(struct btrfs_root *root, struct inode *inode,
-						 u64 num_bytes);
-void btrfs_quota_reserve_free(struct btrfs_root *root,
-						 struct inode *inode, u64 num_bytes);
-#endif  
 int btrfs_qgroup_reserve_data(struct inode *inode, u64 start, u64 len);
 int btrfs_qgroup_release_data(struct inode *inode, u64 start, u64 len);
 int btrfs_qgroup_free_data(struct inode *inode, u64 start, u64 len);

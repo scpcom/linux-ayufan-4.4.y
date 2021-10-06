@@ -363,7 +363,7 @@ static long jpu_ioctl(struct file *filp, u_int cmd, u_long arg)
         spin_lock(&s_jpu_lock);
         list_for_each_entry_safe(jbp, n, &s_jbp_head, list)
         {
-            if (jbp->jb.base == jb.base)
+            if (jbp->jb.phys_addr == jb.phys_addr)
             {
                 list_del(&jbp->list);
                 kfree(jbp);
@@ -916,7 +916,7 @@ static int jpu_remove(struct platform_device *pdev)
 }
 
 #ifdef CONFIG_PM
-static int jpu_suspend(struct platform_device *pdev, pm_message_t state)
+static int jpu_suspend(struct device *dev)
 {
     printk(KERN_INFO "[RTK_JPEG] Enter %s\n", __func__);
 
@@ -980,7 +980,7 @@ static int jpu_suspend(struct platform_device *pdev, pm_message_t state)
 
 }
 
-static int jpu_resume(struct platform_device *pdev)
+static int jpu_resume(struct device *dev)
 {
     printk(KERN_INFO "[RTK_JPEG] Enter %s\n", __func__);
 

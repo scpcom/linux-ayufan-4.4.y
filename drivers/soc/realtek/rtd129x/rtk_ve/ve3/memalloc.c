@@ -309,13 +309,12 @@ static int AllocMemory(unsigned *busaddr, unsigned long size,
 
     int i = 0;
 
-    *busaddr = 0;
-
     /* run through the chunk table */
 #ifdef SUPPORT_RESERVED_VIDEO_MEMORY
     /* calculate how many chunks we need; round up to chunk boundary */
     unsigned int alloc_chunks = (size + CHUNK_SIZE - 1) / CHUNK_SIZE;
 
+    *busaddr = 0;
     spin_lock(&s_mem_lock);
     for (i = 0; i < chunks;) {
         int j = 0;
@@ -357,7 +356,7 @@ static int AllocMemory(unsigned *busaddr, unsigned long size,
     unsigned int ret = pu_alloc_dma_buffer(nSize, &phys_addr, &base);
     if(ret == -1)
     {
-        printk(KERN_ERR "memalloc: Physical memory allocation error size=%d\n", nSize);
+        printk(KERN_ERR "memalloc: Physical memory allocation error size=%lu\n", nSize);
         return -EFAULT;
     }
 #else /* else of CONFIG_RTK_RESERVE_MEMORY */
@@ -367,6 +366,7 @@ static int AllocMemory(unsigned *busaddr, unsigned long size,
         return -EFAULT;
     }
 #endif /* end of CONFIG_RTK_RESERVE_MEMORY */
+    *busaddr = 0;
     spin_lock(&s_mem_lock);
     for (i = 0; i < chunks; i++)
     {

@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -42,5 +38,3 @@ void *tm_memcpy(void *dest, const void *src, unsigned int n);
 int    tm_abs(int x);
 
 #endif   /* TM_OS_INTERFACE_H */
-
-#endif /* MY_DEF_HERE */

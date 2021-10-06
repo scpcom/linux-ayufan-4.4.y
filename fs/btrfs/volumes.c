@@ -4605,10 +4605,16 @@ int btrfs_num_copies(struct btrfs_fs_info *fs_info, u64 logical, u64 len)
 		ret = 1;
 	free_extent_map(em);
 
+#ifdef MY_ABC_HERE
+	if (fs_info->dev_replace_may_start) {
+#endif  
 	btrfs_dev_replace_lock(&fs_info->dev_replace, 0);
 	if (btrfs_dev_replace_is_ongoing(&fs_info->dev_replace))
 		ret++;
 	btrfs_dev_replace_unlock(&fs_info->dev_replace, 0);
+#ifdef MY_ABC_HERE
+	}
+#endif  
 
 	return ret;
 }
@@ -4852,12 +4858,18 @@ static int __btrfs_map_block(struct btrfs_fs_info *fs_info, int rw,
 	if (!bbio_ret)
 		goto out;
 
+#ifdef MY_ABC_HERE
+	if (fs_info->dev_replace_may_start) {
+#endif  
 	btrfs_dev_replace_lock(dev_replace, 0);
 	dev_replace_is_ongoing = btrfs_dev_replace_is_ongoing(dev_replace);
 	if (!dev_replace_is_ongoing)
 		btrfs_dev_replace_unlock(dev_replace, 0);
 	else
 		btrfs_dev_replace_set_lock_blocking(dev_replace);
+#ifdef MY_ABC_HERE
+	}
+#endif  
 
 	if (dev_replace_is_ongoing && mirror_num == map->num_stripes + 1 &&
 	    !(rw & (REQ_WRITE | REQ_DISCARD | REQ_GET_READ_MIRRORS)) &&

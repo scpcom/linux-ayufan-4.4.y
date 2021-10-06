@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*
 * ***************************************************************************
 * Copyright (C) 2016 Marvell International Ltd.
@@ -26,19 +22,15 @@
 #include <linux/platform_device.h>
 #include <linux/inetdevice.h>
 #include <uapi/linux/ppp_defs.h>
-#if defined(MY_DEF_HERE)
 #include <dt-bindings/phy/phy-comphy-mvebu.h>
 #include <linux/phy/phy.h>
-#endif /* MY_DEF_HERE */
 
 #include <net/ip.h>
 #include <net/ipv6.h>
 
 #include "mv_pp2x.h"
 #include "mv_gop110_hw.h"
-#if defined(MY_DEF_HERE)
 #include "mv_pp2x_hw.h"
-#endif /* MY_DEF_HERE */
 
 void mv_gop110_register_bases_dump(struct gop_hw *gop)
 {
@@ -51,7 +43,6 @@ void mv_gop110_register_bases_dump(struct gop_hw *gop)
 	pr_info("  %-32s: 0x%p\n", "XPCS", gop->gop_110.xpcs_base);
 	pr_info("  %-32s: 0x%p\n", "PTP", gop->gop_110.ptp.base);
 	pr_info("  %-32s: 0x%p\n", "RFU1", gop->gop_110.rfu1_base);
-
 }
 EXPORT_SYMBOL(mv_gop110_register_bases_dump);
 
@@ -183,7 +174,6 @@ static void mv_gop110_gmac_rgmii_cfg(struct gop_hw *gop, int mac_num)
 
 	val = mv_gop110_gmac_read(gop, mac_num, MV_GMAC_PORT_CTRL2_REG);
 	val |= MV_GMAC_PORT_CTRL2_CLK_125_BYPS_EN_MASK;
-	val &= ~MV_GMAC_PORT_CTRL2_DIS_PADING_OFFS;
 	mv_gop110_gmac_write(gop, mac_num, MV_GMAC_PORT_CTRL2_REG, val);
 
 	val = mv_gop110_gmac_read(gop, mac_num, MV_GMAC_PORT_CTRL0_REG);
@@ -223,10 +213,6 @@ static void mv_gop110_gmac_qsgmii_cfg(struct gop_hw *gop, int mac_num)
 	val &= ~MV_GMAC_PORT_CTRL4_QSGMII_BYPASS_ACTIVE_MASK;
 	mv_gop110_gmac_write(gop, mac_num, MV_GMAC_PORT_CTRL4_REG, val);
 
-	val = mv_gop110_gmac_read(gop, mac_num, MV_GMAC_PORT_CTRL2_REG);
-	val &= ~MV_GMAC_PORT_CTRL2_DIS_PADING_OFFS;
-	mv_gop110_gmac_write(gop, mac_num, MV_GMAC_PORT_CTRL2_REG, val);
-
 	val = mv_gop110_gmac_read(gop, mac_num, MV_GMAC_PORT_CTRL0_REG);
 	/* configure GIG MAC to SGMII mode */
 	val &= ~MV_GMAC_PORT_CTRL0_PORTTYPE_MASK;
@@ -265,7 +251,6 @@ static void mv_gop110_gmac_sgmii_cfg(struct gop_hw *gop, int mac_num)
 	mv_gop110_gmac_write(gop, mac_num, MV_GMAC_PORT_CTRL4_REG, val);
 
 	val = mv_gop110_gmac_read(gop, mac_num, MV_GMAC_PORT_CTRL2_REG);
-	val |= MV_GMAC_PORT_CTRL2_DIS_PADING_OFFS;
 	val &= ~MV_GMAC_PORT_CTRL2_FC_MODE_MASK;
 	mv_gop110_gmac_write(gop, mac_num, MV_GMAC_PORT_CTRL2_REG, val);
 
@@ -306,9 +291,87 @@ static void mv_gop110_gmac_sgmii2_5_cfg(struct gop_hw *gop, int mac_num)
 	val |= MV_GMAC_PORT_CTRL4_QSGMII_BYPASS_ACTIVE_MASK;
 	mv_gop110_gmac_write(gop, mac_num, MV_GMAC_PORT_CTRL4_REG, val);
 
+	val = mv_gop110_gmac_read(gop, mac_num, MV_GMAC_PORT_CTRL0_REG);
+	/* configure GIG MAC to 1000Base-X mode connected to a
+	 * fiber transceiver
+	 */
+	val &= ~MV_GMAC_PORT_CTRL0_PORTTYPE_MASK;
+	mv_gop110_gmac_write(gop, mac_num, MV_GMAC_PORT_CTRL0_REG, val);
+
+	/* configure AN 0x9260 */
+	an = MV_GMAC_PORT_AUTO_NEG_CFG_SET_MII_SPEED_MASK  |
+		MV_GMAC_PORT_AUTO_NEG_CFG_SET_GMII_SPEED_MASK |
+		MV_GMAC_PORT_AUTO_NEG_CFG_ADV_PAUSE_MASK    |
+		MV_GMAC_PORT_AUTO_NEG_CFG_SET_FULL_DX_MASK  |
+		MV_GMAC_PORT_AUTO_NEG_CFG_CHOOSE_SAMPLE_TX_CONFIG_MASK;
+	mv_gop110_gmac_write(gop, mac_num, MV_GMAC_PORT_AUTO_NEG_CFG_REG, an);
+}
+
+static void mv_gop110_gmac_1000basex_cfg(struct gop_hw *gop, int mac_num)
+{
+	u32 val, thresh, an;
+
+	/* configure minimal level of the Tx FIFO before the lower
+	 * part starts to read a packet
+	 */
+	thresh = MV_SGMII_TX_FIFO_MIN_TH;
+	val = mv_gop110_gmac_read(gop, mac_num, MV_GMAC_PORT_FIFO_CFG_1_REG);
+	U32_SET_FIELD(val, MV_GMAC_PORT_FIFO_CFG_1_TX_FIFO_MIN_TH_MASK,
+		      (thresh << MV_GMAC_PORT_FIFO_CFG_1_TX_FIFO_MIN_TH_OFFS));
+	mv_gop110_gmac_write(gop, mac_num, MV_GMAC_PORT_FIFO_CFG_1_REG, val);
+
+	/* Disable bypass of sync module */
+	val = mv_gop110_gmac_read(gop, mac_num, MV_GMAC_PORT_CTRL4_REG);
+	val |= MV_GMAC_PORT_CTRL4_SYNC_BYPASS_MASK;
+	/* configure DP clock select according to mode */
+	val &= ~MV_GMAC_PORT_CTRL4_DP_CLK_SEL_MASK;
+	/* configure QSGMII bypass according to mode */
+	val |= MV_GMAC_PORT_CTRL4_QSGMII_BYPASS_ACTIVE_MASK;
+	mv_gop110_gmac_write(gop, mac_num, MV_GMAC_PORT_CTRL4_REG, val);
+
 	val = mv_gop110_gmac_read(gop, mac_num, MV_GMAC_PORT_CTRL2_REG);
-	val |= MV_GMAC_PORT_CTRL2_DIS_PADING_OFFS;
+	val &= ~MV_GMAC_PORT_CTRL2_FC_MODE_MASK;
 	mv_gop110_gmac_write(gop, mac_num, MV_GMAC_PORT_CTRL2_REG, val);
+
+	val = mv_gop110_gmac_read(gop, mac_num, MV_GMAC_PORT_CTRL0_REG);
+	/* configure GIG MAC to 1000BASEX mode */
+	val |= MV_GMAC_PORT_CTRL0_PORTTYPE_MASK;
+	mv_gop110_gmac_write(gop, mac_num, MV_GMAC_PORT_CTRL0_REG, val);
+
+	/* In 1000BaseX mode, we can't negotiate speed (it's
+	 * only 1000), and we do not want InBand autoneg
+	 * bypass enabled (link interrupt storm risk
+	 * otherwise).
+	 */
+	an = MV_GMAC_PORT_AUTO_NEG_CFG_EN_PCS_AN_MASK |
+		MV_GMAC_PORT_AUTO_NEG_CFG_SET_GMII_SPEED_MASK  |
+		MV_GMAC_PORT_AUTO_NEG_CFG_EN_FC_AN_MASK     |
+		MV_GMAC_PORT_AUTO_NEG_CFG_EN_FDX_AN_MASK    |
+		MV_GMAC_PORT_AUTO_NEG_CFG_CHOOSE_SAMPLE_TX_CONFIG_MASK;
+	mv_gop110_gmac_write(gop, mac_num, MV_GMAC_PORT_AUTO_NEG_CFG_REG, an);
+}
+
+static void mv_gop110_gmac_2500basex_cfg(struct gop_hw *gop, int mac_num)
+{
+	u32 val, thresh, an;
+
+	/* configure minimal level of the Tx FIFO before the lower
+	 * part starts to read a packet
+	 */
+	thresh = MV_SGMII2_5_TX_FIFO_MIN_TH;
+	val = mv_gop110_gmac_read(gop, mac_num, MV_GMAC_PORT_FIFO_CFG_1_REG);
+	U32_SET_FIELD(val, MV_GMAC_PORT_FIFO_CFG_1_TX_FIFO_MIN_TH_MASK,
+		      (thresh << MV_GMAC_PORT_FIFO_CFG_1_TX_FIFO_MIN_TH_OFFS));
+	mv_gop110_gmac_write(gop, mac_num, MV_GMAC_PORT_FIFO_CFG_1_REG, val);
+
+	/* Disable bypass of sync module */
+	val = mv_gop110_gmac_read(gop, mac_num, MV_GMAC_PORT_CTRL4_REG);
+	val |= MV_GMAC_PORT_CTRL4_SYNC_BYPASS_MASK;
+	/* configure DP clock select according to mode */
+	val |= MV_GMAC_PORT_CTRL4_DP_CLK_SEL_MASK;
+	/* configure QSGMII bypass according to mode */
+	val |= MV_GMAC_PORT_CTRL4_QSGMII_BYPASS_ACTIVE_MASK;
+	mv_gop110_gmac_write(gop, mac_num, MV_GMAC_PORT_CTRL4_REG, val);
 
 	val = mv_gop110_gmac_read(gop, mac_num, MV_GMAC_PORT_CTRL0_REG);
 	/* configure GIG MAC to 1000Base-X mode connected to a
@@ -341,6 +404,12 @@ int mv_gop110_gmac_mode_cfg(struct gop_hw *gop, struct mv_mac_data *mac)
 			mv_gop110_gmac_sgmii2_5_cfg(gop, mac_num);
 		else
 			mv_gop110_gmac_sgmii_cfg(gop, mac_num);
+	break;
+	case PHY_INTERFACE_MODE_1000BASEX:
+		if (mac->speed == 2500)
+			mv_gop110_gmac_2500basex_cfg(gop, mac_num);
+		else
+			mv_gop110_gmac_1000basex_cfg(gop, mac_num);
 	break;
 	case PHY_INTERFACE_MODE_RGMII:
 		mv_gop110_gmac_rgmii_cfg(gop, mac_num);
@@ -505,16 +574,9 @@ int mv_gop110_gmac_link_status(struct gop_hw *gop, int mac_num,
 			pstatus->autoneg_fc = MV_PORT_FC_AN_ASYM;
 		else
 			pstatus->autoneg_fc = MV_PORT_FC_AN_SYM;
-#if defined(MY_DEF_HERE)
 	} else {
-#else /* MY_DEF_HERE */
-		}
-	else
-#endif /* MY_DEF_HERE */
 		pstatus->autoneg_fc = MV_PORT_FC_AN_NO;
-#if defined(MY_DEF_HERE)
 	}
-#endif /* MY_DEF_HERE */
 
 	return 0;
 }
@@ -933,8 +995,8 @@ int mv_gop110_port_init(struct gop_hw *gop, struct mv_mac_data *mac)
 		/* select proper Mac mode */
 		mv_gop110_xlg_2_gig_mac_cfg(gop, mac_num);
 
-		/* pcs unreset */
-		mv_gop110_gpcs_reset(gop, mac_num, UNRESET);
+		/* set InBand AutoNeg */
+		mv_gop110_in_band_auto_neg(gop, mac_num, true);
 		/* mac unreset */
 		mv_gop110_gmac_reset(gop, mac_num, UNRESET);
 		mv_gop110_force_link_mode_set(gop, mac, false, false);
@@ -951,8 +1013,26 @@ int mv_gop110_port_init(struct gop_hw *gop, struct mv_mac_data *mac)
 		/* select proper Mac mode */
 		mv_gop110_xlg_2_gig_mac_cfg(gop, mac_num);
 
-		/* pcs unreset */
-		mv_gop110_gpcs_reset(gop, mac_num, UNRESET);
+		/* set InBand AutoNeg */
+		mv_gop110_in_band_auto_neg(gop, mac_num, true);
+		/* mac unreset */
+		mv_gop110_gmac_reset(gop, mac_num, UNRESET);
+		mv_gop110_force_link_mode_set(gop, mac, false, false);
+	break;
+	case PHY_INTERFACE_MODE_1000BASEX:
+		mv_gop110_force_link_mode_set(gop, mac, false, true);
+		mv_gop110_gmac_reset(gop, mac_num, RESET);
+		/* configure PCS */
+		mv_gop110_gpcs_mode_cfg(gop, mac_num, true);
+
+		/* configure MAC */
+		mv_gop110_gmac_mode_cfg(gop, mac);
+		/* select proper Mac mode */
+		mv_gop110_xlg_2_gig_mac_cfg(gop, mac_num);
+
+		/* set InBand AutoNeg */
+		mv_gop110_in_band_auto_neg(gop, mac_num, false);
+
 		/* mac unreset */
 		mv_gop110_gmac_reset(gop, mac_num, UNRESET);
 		mv_gop110_force_link_mode_set(gop, mac, false, false);
@@ -1041,8 +1121,9 @@ int mv_gop110_port_reset(struct gop_hw *gop, struct mv_mac_data *mac)
 	case PHY_INTERFACE_MODE_RGMII:
 	case PHY_INTERFACE_MODE_SGMII:
 	case PHY_INTERFACE_MODE_QSGMII:
-		/* pcs unreset */
-		mv_gop110_gpcs_reset(gop, mac_num, RESET);
+	case PHY_INTERFACE_MODE_1000BASEX:
+		/* set InBand AutoNeg */
+		mv_gop110_in_band_auto_neg(gop, mac_num, false);
 		/* mac unreset */
 		mv_gop110_gmac_reset(gop, mac_num, RESET);
 	break;
@@ -1078,11 +1159,7 @@ int mv_gop110_port_reset(struct gop_hw *gop, struct mv_mac_data *mac)
 }
 
 /*-------------------------------------------------------------------*/
-#if defined(MY_DEF_HERE)
 void mv_gop110_port_enable(struct gop_hw *gop, struct mv_mac_data *mac, struct phy *comphy)
-#else /* MY_DEF_HERE */
-void mv_gop110_port_enable(struct gop_hw *gop, struct mv_mac_data *mac)
-#endif /* MY_DEF_HERE */
 {
 	int port_num = mac->gop_index;
 
@@ -1090,6 +1167,7 @@ void mv_gop110_port_enable(struct gop_hw *gop, struct mv_mac_data *mac)
 	case PHY_INTERFACE_MODE_RGMII:
 	case PHY_INTERFACE_MODE_SGMII:
 	case PHY_INTERFACE_MODE_QSGMII:
+	case PHY_INTERFACE_MODE_1000BASEX:
 		mv_gop110_gmac_port_enable(gop, port_num);
 		mv_gop110_force_link_mode_set(gop, mac, false, false);
 		mv_gop110_gmac_reset(gop, port_num, UNRESET);
@@ -1099,9 +1177,7 @@ void mv_gop110_port_enable(struct gop_hw *gop, struct mv_mac_data *mac)
 	case PHY_INTERFACE_MODE_KR:
 	case PHY_INTERFACE_MODE_SFI:
 	case PHY_INTERFACE_MODE_XFI:
-#if defined(MY_DEF_HERE)
 		phy_send_command(comphy, COMPHY_COMMAND_DIGITAL_PWR_ON);
-#endif /* MY_DEF_HERE */
 		mv_gop110_mpcs_clock_reset(gop,  UNRESET);
 		mv_gop110_xlg_mac_reset(gop, port_num, UNRESET);
 		mv_gop110_xlg_mac_port_enable(gop, port_num);
@@ -1112,11 +1188,7 @@ void mv_gop110_port_enable(struct gop_hw *gop, struct mv_mac_data *mac)
 	}
 }
 
-#if defined(MY_DEF_HERE)
 void mv_gop110_port_disable(struct gop_hw *gop, struct mv_mac_data *mac, struct phy *comphy)
-#else /* MY_DEF_HERE */
-void mv_gop110_port_disable(struct gop_hw *gop, struct mv_mac_data *mac)
-#endif /* MY_DEF_HERE */
 {
 	int port_num = mac->gop_index;
 
@@ -1124,6 +1196,7 @@ void mv_gop110_port_disable(struct gop_hw *gop, struct mv_mac_data *mac)
 	case PHY_INTERFACE_MODE_RGMII:
 	case PHY_INTERFACE_MODE_SGMII:
 	case PHY_INTERFACE_MODE_QSGMII:
+	case PHY_INTERFACE_MODE_1000BASEX:
 		mv_gop110_gmac_port_disable(gop, port_num);
 		mv_gop110_force_link_mode_set(gop, mac, false, true);
 		mv_gop110_gmac_reset(gop, port_num, RESET);
@@ -1136,9 +1209,7 @@ void mv_gop110_port_disable(struct gop_hw *gop, struct mv_mac_data *mac)
 		mv_gop110_xlg_mac_port_disable(gop, port_num);
 		mv_gop110_xlg_mac_reset(gop, port_num, RESET);
 		mv_gop110_mpcs_clock_reset(gop,  RESET);
-#if defined(MY_DEF_HERE)
 		phy_send_command(comphy, COMPHY_COMMAND_DIGITAL_PWR_OFF);
-#endif /* MY_DEF_HERE */
 	break;
 	default:
 		pr_err("%s: Wrong port mode (%d)", __func__, mac->phy_mode);
@@ -1153,8 +1224,10 @@ void mv_gop110_port_periodic_xon_set(struct gop_hw *gop,
 	int port_num = mac->gop_index;
 
 	switch (mac->phy_mode) {
+	case PHY_INTERFACE_MODE_RGMII:
 	case PHY_INTERFACE_MODE_SGMII:
 	case PHY_INTERFACE_MODE_QSGMII:
+	case PHY_INTERFACE_MODE_1000BASEX:
 		mv_gop110_gmac_port_periodic_xon_set(gop, port_num, enable);
 	break;
 	case PHY_INTERFACE_MODE_XAUI:
@@ -1178,6 +1251,7 @@ bool mv_gop110_port_is_link_up(struct gop_hw *gop, struct mv_mac_data *mac)
 	case PHY_INTERFACE_MODE_RGMII:
 	case PHY_INTERFACE_MODE_SGMII:
 	case PHY_INTERFACE_MODE_QSGMII:
+	case PHY_INTERFACE_MODE_1000BASEX:
 		return mv_gop110_gmac_link_status_get(gop, port_num);
 	break;
 	case PHY_INTERFACE_MODE_XAUI:
@@ -1185,11 +1259,6 @@ bool mv_gop110_port_is_link_up(struct gop_hw *gop, struct mv_mac_data *mac)
 	case PHY_INTERFACE_MODE_KR:
 	case PHY_INTERFACE_MODE_SFI:
 	case PHY_INTERFACE_MODE_XFI:
-#if defined(MY_DEF_HERE)
-//do nothing
-#else /* MY_DEF_HERE */
-		udelay(1000);
-#endif /* MY_DEF_HERE */
 		return mv_gop110_xlg_mac_link_status_get(gop, port_num);
 	break;
 	default:
@@ -1208,6 +1277,7 @@ int mv_gop110_port_link_status(struct gop_hw *gop, struct mv_mac_data *mac,
 	case PHY_INTERFACE_MODE_RGMII:
 	case PHY_INTERFACE_MODE_SGMII:
 	case PHY_INTERFACE_MODE_QSGMII:
+	case PHY_INTERFACE_MODE_1000BASEX:
 		mv_gop110_gmac_link_status(gop, port_num, pstatus);
 	break;
 	case PHY_INTERFACE_MODE_XAUI:
@@ -1231,7 +1301,7 @@ bool mv_gop110_port_autoneg_status(struct gop_hw *gop, struct mv_mac_data *mac)
 		reg_val = mv_gop110_gmac_read(gop, mac->gop_index, MV_GMAC_PORT_AUTO_NEG_CFG_REG);
 
 		if (reg_val & MV_GMAC_PORT_AUTO_NEG_CFG_EN_FDX_AN_OFFS &&
-			reg_val & MV_GMAC_PORT_AUTO_NEG_CFG_EN_AN_SPEED_MASK)
+		    reg_val & MV_GMAC_PORT_AUTO_NEG_CFG_EN_AN_SPEED_MASK)
 			return true;
 		else
 			return false;
@@ -1252,7 +1322,7 @@ void mv_gop110_gmac_set_autoneg(struct gop_hw *gop, struct mv_mac_data *mac, boo
 	int mac_num = mac->gop_index;
 
 	reg_val = mv_gop110_gmac_read(gop, mac_num,
-				MV_GMAC_PORT_AUTO_NEG_CFG_REG);
+				      MV_GMAC_PORT_AUTO_NEG_CFG_REG);
 
 	if (auto_neg) {
 		reg_val |= MV_GMAC_PORT_AUTO_NEG_CFG_EN_AN_SPEED_MASK;
@@ -1265,7 +1335,7 @@ void mv_gop110_gmac_set_autoneg(struct gop_hw *gop, struct mv_mac_data *mac, boo
 		}
 
 	mv_gop110_gmac_write(gop, mac_num,
-				MV_GMAC_PORT_AUTO_NEG_CFG_REG, reg_val);
+			     MV_GMAC_PORT_AUTO_NEG_CFG_REG, reg_val);
 }
 
 int mv_gop110_port_regs(struct gop_hw *gop, struct mv_mac_data *mac)
@@ -1276,6 +1346,7 @@ int mv_gop110_port_regs(struct gop_hw *gop, struct mv_mac_data *mac)
 	case PHY_INTERFACE_MODE_RGMII:
 	case PHY_INTERFACE_MODE_SGMII:
 	case PHY_INTERFACE_MODE_QSGMII:
+	case PHY_INTERFACE_MODE_1000BASEX:
 		pr_info("\n[gop GMAC #%d registers]\n", port_num);
 		mv_gop110_gmac_regs_dump(gop, port_num);
 	break;
@@ -1302,6 +1373,7 @@ int mv_gop110_port_events_mask(struct gop_hw *gop, struct mv_mac_data *mac)
 	case PHY_INTERFACE_MODE_RGMII:
 	case PHY_INTERFACE_MODE_SGMII:
 	case PHY_INTERFACE_MODE_QSGMII:
+	case PHY_INTERFACE_MODE_1000BASEX:
 		mv_gop110_gmac_port_link_event_mask(gop, port_num);
 	break;
 	case PHY_INTERFACE_MODE_XAUI:
@@ -1326,6 +1398,7 @@ int mv_gop110_port_events_unmask(struct gop_hw *gop, struct mv_mac_data *mac)
 	case PHY_INTERFACE_MODE_RGMII:
 	case PHY_INTERFACE_MODE_SGMII:
 	case PHY_INTERFACE_MODE_QSGMII:
+	case PHY_INTERFACE_MODE_1000BASEX:
 		mv_gop110_gmac_port_link_event_unmask(gop, port_num);
 		/* gige interrupt cause connected to CPU via XLG
 		 * external interrupt cause
@@ -1354,6 +1427,7 @@ int mv_gop110_port_events_clear(struct gop_hw *gop, struct mv_mac_data *mac)
 	case PHY_INTERFACE_MODE_RGMII:
 	case PHY_INTERFACE_MODE_SGMII:
 	case PHY_INTERFACE_MODE_QSGMII:
+	case PHY_INTERFACE_MODE_1000BASEX:
 		mv_gop110_gmac_port_link_event_clear(gop, port_num);
 	break;
 	case PHY_INTERFACE_MODE_XAUI:
@@ -1394,6 +1468,8 @@ int mv_gop110_status_show(struct gop_hw *gop, struct mv_pp2x *pp2, int port_num)
 	case PHY_INTERFACE_MODE_QSGMII:
 		pr_info("Port mode               : QSGMII");
 	break;
+	case PHY_INTERFACE_MODE_1000BASEX:
+		pr_info("Port mode               : 1000BASEX");
 	case PHY_INTERFACE_MODE_XAUI:
 		pr_info("Port mode               : XAUI");
 	break;
@@ -1480,6 +1556,7 @@ int mv_gop110_speed_duplex_get(struct gop_hw *gop, struct mv_mac_data *mac,
 	case PHY_INTERFACE_MODE_RGMII:
 	case PHY_INTERFACE_MODE_SGMII:
 	case PHY_INTERFACE_MODE_QSGMII:
+	case PHY_INTERFACE_MODE_1000BASEX:
 		mv_gop110_gmac_speed_duplex_get(gop, port_num, speed,
 						duplex);
 	break;
@@ -1509,6 +1586,7 @@ int mv_gop110_speed_duplex_set(struct gop_hw *gop, struct mv_mac_data *mac,
 	case PHY_INTERFACE_MODE_RGMII:
 	case PHY_INTERFACE_MODE_SGMII:
 	case PHY_INTERFACE_MODE_QSGMII:
+	case PHY_INTERFACE_MODE_1000BASEX:
 		mv_gop110_gmac_speed_duplex_set(gop, port_num, speed, duplex);
 	break;
 	case PHY_INTERFACE_MODE_XAUI:
@@ -1532,6 +1610,7 @@ int mv_gop110_autoneg_restart(struct gop_hw *gop, struct mv_mac_data *mac)
 
 	switch (mac->phy_mode) {
 	case PHY_INTERFACE_MODE_RGMII:
+	case PHY_INTERFACE_MODE_1000BASEX:
 	break;
 	case PHY_INTERFACE_MODE_SGMII:
 	case PHY_INTERFACE_MODE_QSGMII:
@@ -1560,6 +1639,7 @@ int mv_gop110_fl_cfg(struct gop_hw *gop, struct mv_mac_data *mac)
 	case PHY_INTERFACE_MODE_RGMII:
 	case PHY_INTERFACE_MODE_SGMII:
 	case PHY_INTERFACE_MODE_QSGMII:
+	case PHY_INTERFACE_MODE_1000BASEX:
 		/* disable AN */
 		if (mac->speed == 2500)
 			mv_gop110_speed_duplex_set(gop, mac,
@@ -1596,6 +1676,7 @@ int mv_gop110_force_link_mode_set(struct gop_hw *gop, struct mv_mac_data *mac,
 	case PHY_INTERFACE_MODE_RGMII:
 	case PHY_INTERFACE_MODE_SGMII:
 	case PHY_INTERFACE_MODE_QSGMII:
+	case PHY_INTERFACE_MODE_1000BASEX:
 		/* force link */
 		mv_gop110_gmac_force_link_mode_set(gop, port_num,
 						   force_link_up,
@@ -1625,6 +1706,7 @@ int mv_gop110_force_link_mode_get(struct gop_hw *gop, struct mv_mac_data *mac,
 	case PHY_INTERFACE_MODE_RGMII:
 	case PHY_INTERFACE_MODE_SGMII:
 	case PHY_INTERFACE_MODE_QSGMII:
+	case PHY_INTERFACE_MODE_1000BASEX:
 		return mv_gop110_gmac_force_link_mode_get(gop, port_num,
 							  force_link_up,
 							  force_link_down);
@@ -1653,6 +1735,7 @@ int mv_gop110_loopback_set(struct gop_hw *gop, struct mv_mac_data *mac,
 	case PHY_INTERFACE_MODE_RGMII:
 	case PHY_INTERFACE_MODE_SGMII:
 	case PHY_INTERFACE_MODE_QSGMII:
+	case PHY_INTERFACE_MODE_1000BASEX:
 		/* set loopback */
 		if (lb)
 			type = MV_TX_2_RX_LB;
@@ -1674,24 +1757,7 @@ int mv_gop110_loopback_set(struct gop_hw *gop, struct mv_mac_data *mac,
 	return 0;
 }
 
-/**************************************************************************
-* mv_gop110_gpcs_mode_cfg
-*
-* DESCRIPTION:
-	Configure port to working with Gig PCS or don't.
-*
-* INPUTS:
-*       pcs_num   - physical PCS number
-*       en        - true to enable PCS
-*
-* OUTPUTS:
-*       None.
-*
-* RETURNS:
-*       0  - on success
-*       1  - on error
-*
-**************************************************************************/
+/* Set GPCS mode configuration */
 int mv_gop110_gpcs_mode_cfg(struct gop_hw *gop, int pcs_num, bool en)
 {
 	u32 val;
@@ -1709,42 +1775,23 @@ int mv_gop110_gpcs_mode_cfg(struct gop_hw *gop, int pcs_num, bool en)
 	return 0;
 }
 
-/**************************************************************************
-* mv_gop110_gpcs_reset
-*
-* DESCRIPTION:
-*       Set the selected PCS number to reset or exit from reset.
-*
-* INPUTS:
-*       pcs_num    - physical PCS number
-*       action    - reset / unreset
-*
-* OUTPUTS:
-*       None.
-*
-* RETURNS:
-*       0  - on success
-*       1  - on error
-*
-*************************************************************************/
-int  mv_gop110_gpcs_reset(struct gop_hw *gop, int pcs_num, enum mv_reset act)
+/* Set InBand AutoNeg configuration */
+int  mv_gop110_in_band_auto_neg(struct gop_hw *gop, int pcs_num, bool en)
 {
 	u32 reg_data;
 
 	reg_data = mv_gop110_gmac_read(gop, pcs_num, MV_GMAC_PORT_CTRL2_REG);
-	if (act == RESET)
-		U32_SET_FIELD(reg_data, MV_GMAC_PORT_CTRL2_SGMII_MODE_MASK, 0);
-	else
+	if (en)
 		U32_SET_FIELD(reg_data, MV_GMAC_PORT_CTRL2_SGMII_MODE_MASK,
 			      1 << MV_GMAC_PORT_CTRL2_SGMII_MODE_OFFS);
+	else
+		U32_SET_FIELD(reg_data, MV_GMAC_PORT_CTRL2_SGMII_MODE_MASK, 0);
 
 	mv_gop110_gmac_write(gop, pcs_num, MV_GMAC_PORT_CTRL2_REG, reg_data);
 	return 0;
 }
 
-/**************************************************************************
-* mv_gop110_smi_init
-**************************************************************************/
+/* Init SMI interface */
 int mv_gop110_smi_init(struct gop_hw *gop)
 {
 	u32 val;
@@ -1757,9 +1804,7 @@ int mv_gop110_smi_init(struct gop_hw *gop)
 	return 0;
 }
 
-/**************************************************************************
-* mv_gop_phy_addr_cfg
-**************************************************************************/
+/* Set SMI PHY address */
 int mv_gop110_smi_phy_addr_cfg(struct gop_hw *gop, int port, int addr)
 {
 	mv_gop110_smi_write(gop, MV_SMI_PHY_ADDRESS_REG(port), addr);
@@ -2390,12 +2435,12 @@ int mv_gop110_mpcs_mode(struct gop_hw *gop)
 	reg_addr = PCS_CLOCK_RESET;
 	val = mv_gop110_mpcs_global_read(gop, reg_addr);
 	U32_SET_FIELD(val, CLK_DIVISION_RATIO_MASK,
-			1 << CLK_DIVISION_RATIO_OFFSET);
+		      1 << CLK_DIVISION_RATIO_OFFSET);
 
 	mv_gop110_mpcs_global_write(gop, reg_addr, val);
 
 	U32_SET_FIELD(val, CLK_DIV_PHASE_SET_MASK,
-			0 << CLK_DIV_PHASE_SET_OFFSET);
+		      0 << CLK_DIV_PHASE_SET_OFFSET);
 	U32_SET_FIELD(val, MAC_CLK_RESET_MASK, 1 << MAC_CLK_RESET_OFFSET);
 	U32_SET_FIELD(val, RX_SD_CLK_RESET_MASK, 1 << RX_SD_CLK_RESET_OFFSET);
 	U32_SET_FIELD(val, TX_SD_CLK_RESET_MASK, 1 << TX_SD_CLK_RESET_OFFSET);
@@ -2520,7 +2565,6 @@ EXPORT_SYMBOL(mv_gop110_mib_counters_show);
 
 void mv_gop110_mib_counters_stat_update(struct gop_hw *gop, int port, struct gop_stat *gop_statistics)
 {
-
 	u64 val;
 
 	gop_statistics->rx_byte += mv_gop110_mib_read64(gop, port,
@@ -2538,7 +2582,6 @@ void mv_gop110_mib_counters_stat_update(struct gop_hw *gop, int port, struct gop
 	gop_statistics->rx_mcast += val;
 	gop_statistics->rx_frames += val;
 
-#if defined(MY_DEF_HERE)
 	gop_statistics->frames_64 += mv_gop110_mib_read64(gop, port, MV_MIB_FRAMES_64_OCTETS);
 
 	gop_statistics->frames_65_to_127 += mv_gop110_mib_read64(gop, port,
@@ -2556,7 +2599,6 @@ void mv_gop110_mib_counters_stat_update(struct gop_hw *gop, int port, struct gop
 	gop_statistics->frames_1024_to_max += mv_gop110_mib_read64(gop, port,
 								   MV_MIB_FRAMES_1024_TO_MAX_OCTETS);
 
-#endif /* MY_DEF_HERE */
 	gop_statistics->tx_byte += mv_gop110_mib_read64(gop, port,
 							MV_MIB_GOOD_OCTETS_SENT_LOW);
 
@@ -2582,54 +2624,38 @@ void mv_gop110_mib_counters_stat_update(struct gop_hw *gop, int port, struct gop
 							MV_MIB_FC_SENT);
 
 	val = mv_gop110_mib_read64(gop, port, MV_MIB_RX_FIFO_OVERRUN);
-#if defined(MY_DEF_HERE)
 	gop_statistics->rx_mac_overrun += val;
 	gop_statistics->rx_sw_drop += val;
-#else /* MY_DEF_HERE */
-	gop_statistics->rx_overrun += val;
-#endif /* MY_DEF_HERE */
 	gop_statistics->rx_total_err += val;
 
 	val = mv_gop110_mib_read64(gop, port, MV_MIB_UNDERSIZE_RECEIVED);
 	gop_statistics->rx_runt += val;
-#if defined(MY_DEF_HERE)
 	gop_statistics->rx_sw_drop += val;
-#endif /* MY_DEF_HERE */
 	gop_statistics->rx_total_err += val;
 
 	val = mv_gop110_mib_read64(gop, port, MV_MIB_FRAGMENTS_RECEIVED);
 	gop_statistics->rx_fragments_err += val;
-#if defined(MY_DEF_HERE)
 	gop_statistics->rx_sw_drop += val;
-#endif /* MY_DEF_HERE */
 	gop_statistics->rx_total_err += val;
 
 	val = mv_gop110_mib_read64(gop, port, MV_MIB_OVERSIZE_RECEIVED);
 	gop_statistics->rx_giant += val;
-#if defined(MY_DEF_HERE)
 	gop_statistics->rx_sw_drop += val;
-#endif /* MY_DEF_HERE */
 	gop_statistics->rx_total_err += val;
 
 	val = mv_gop110_mib_read64(gop, port, MV_MIB_JABBER_RECEIVED);
 	gop_statistics->rx_jabber += val;
-#if defined(MY_DEF_HERE)
 	gop_statistics->rx_sw_drop += val;
-#endif /* MY_DEF_HERE */
 	gop_statistics->rx_total_err += val;
 
 	val = mv_gop110_mib_read64(gop, port, MV_MIB_MAC_RECEIVE_ERROR);
 	gop_statistics->rx_jabber += val;
-#if defined(MY_DEF_HERE)
 	gop_statistics->rx_sw_drop += val;
-#endif /* MY_DEF_HERE */
 	gop_statistics->rx_total_err += val;
 
 	val = mv_gop110_mib_read64(gop, port, MV_MIB_BAD_CRC_EVENT);
 	gop_statistics->rx_crc += val;
-#if defined(MY_DEF_HERE)
 	gop_statistics->rx_sw_drop += val;
-#endif /* MY_DEF_HERE */
 	gop_statistics->rx_total_err += val;
 
 	gop_statistics->collision += mv_gop110_mib_read64(gop, port,
@@ -2640,21 +2666,18 @@ void mv_gop110_mib_counters_stat_update(struct gop_hw *gop, int port, struct gop
 							MV_MIB_LATE_COLLISION);
 }
 
-#if defined(MY_DEF_HERE)
 void mv_gop110_mib_counters_clear(struct gop_hw *gop, int port)
 {
 	mv_gop110_mib_read64(gop, port, MV_MIB_GOOD_OCTETS_RECEIVED_LOW);
 	mv_gop110_mib_read64(gop, port, MV_MIB_UNICAST_FRAMES_RECEIVED);
 	mv_gop110_mib_read64(gop, port, MV_MIB_BROADCAST_FRAMES_RECEIVED);
 	mv_gop110_mib_read64(gop, port, MV_MIB_MULTICAST_FRAMES_RECEIVED);
-#if defined(MY_DEF_HERE)
 	mv_gop110_mib_read64(gop, port, MV_MIB_FRAMES_64_OCTETS);
 	mv_gop110_mib_read64(gop, port, MV_MIB_FRAMES_65_TO_127_OCTETS);
 	mv_gop110_mib_read64(gop, port, MV_MIB_FRAMES_128_TO_255_OCTETS);
 	mv_gop110_mib_read64(gop, port, MV_MIB_FRAMES_256_TO_511_OCTETS);
 	mv_gop110_mib_read64(gop, port, MV_MIB_FRAMES_512_TO_1023_OCTETS);
 	mv_gop110_mib_read64(gop, port, MV_MIB_FRAMES_1024_TO_MAX_OCTETS);
-#endif /* MY_DEF_HERE */
 	mv_gop110_mib_read64(gop, port, MV_MIB_GOOD_OCTETS_SENT_LOW);
 	mv_gop110_mib_read64(gop, port, MV_MIB_UNICAST_FRAMES_SENT);
 	mv_gop110_mib_read64(gop, port, MV_MIB_MULTICAST_FRAMES_SENT);
@@ -2671,10 +2694,9 @@ void mv_gop110_mib_counters_clear(struct gop_hw *gop, int port)
 	mv_gop110_mib_read64(gop, port, MV_MIB_BAD_CRC_EVENT);
 	mv_gop110_mib_read64(gop, port, MV_MIB_COLLISION);
 
-	/* This counter must be read last. Read it clear all read counters */
+	/* This counter must be read last. Read it clear all read counters. */
 	mv_gop110_mib_read64(gop, port, MV_MIB_LATE_COLLISION);
 }
-#endif /* MY_DEF_HERE */
 
 void mv_gop110_netc_active_port(struct gop_hw *gop, u32 port, u32 val)
 {
@@ -2797,7 +2819,7 @@ static void mv_gop110_netc_port_rf_reset(struct gop_hw *gop, u32 port, u32 val)
 }
 
 static void mv_gop110_netc_gbe_sgmii_mode_select(struct gop_hw *gop, u32 port,
-						u32 val)
+						 u32 val)
 {
 	u32 reg, mask, offset;
 
@@ -2858,7 +2880,7 @@ static void mv_gop110_netc_mac_to_xgmii(struct gop_hw *gop, u32 port,
 		mv_gop110_netc_bus_width_select(gop, 1);
 		/* Select RGMII mode */
 		mv_gop110_netc_gbe_sgmii_mode_select(gop, port,
-							MV_NETC_GBE_XMII);
+						     MV_NETC_GBE_XMII);
 		break;
 	case MV_NETC_SECOND_PHASE:
 		/* De-assert the relevant port HB reset */
@@ -2877,7 +2899,7 @@ static void mv_gop110_netc_mac_to_sgmii(struct gop_hw *gop, u32 port,
 		/* Select SGMII mode */
 		if (port >= 1)
 			mv_gop110_netc_gbe_sgmii_mode_select(gop, port,
-			MV_NETC_GBE_SGMII);
+							     MV_NETC_GBE_SGMII);
 
 		/* Configure the sample stages */
 		mv_gop110_netc_sample_stages_timing(gop, 0);
@@ -2915,7 +2937,7 @@ static void mv_gop110_netc_mac_to_rxaui(struct gop_hw *gop, u32 port,
 }
 
 static void mv_gop110_netc_mac_to_xaui(struct gop_hw *gop, u32 port,
-					enum mv_netc_phase phase)
+				       enum mv_netc_phase phase)
 {
 	switch (phase) {
 	case MV_NETC_FIRST_PHASE:
@@ -2947,17 +2969,9 @@ int mv_gop110_netc_init(struct gop_hw *gop,
 		mv_gop110_netc_mac_to_sgmii(gop, 2, phase);
 	else
 		mv_gop110_netc_mac_to_xgmii(gop, 2, phase);
-#if defined(MY_DEF_HERE)
 	if (c & MV_NETC_GE_MAC3_SGMII) {
-#else /* MY_DEF_HERE */
-	if (c & MV_NETC_GE_MAC3_SGMII)
-#endif /* MY_DEF_HERE */
 		mv_gop110_netc_mac_to_sgmii(gop, 3, phase);
-#if defined(MY_DEF_HERE)
 	} else {
-#else /* MY_DEF_HERE */
-	else {
-#endif /* MY_DEF_HERE */
 		mv_gop110_netc_mac_to_xgmii(gop, 3, phase);
 		if (c & MV_NETC_GE_MAC3_RGMII)
 			mv_gop110_netc_mii_mode(gop, 3, MV_NETC_GBE_RGMII);
@@ -2981,7 +2995,6 @@ int mv_gop110_netc_init(struct gop_hw *gop,
 
 void mv_gop110_netc_xon_set(struct gop_hw *gop, enum mv_gop_port port, bool en)
 {
-
 	u32 reg;
 
 	reg = mv_gop110_rfu1_read(gop, MV_NETCOMP_PORTS_CONTROL_0);
@@ -3005,7 +3018,6 @@ void mv_gop110_netc_xon_set(struct gop_hw *gop, enum mv_gop_port port, bool en)
 	}
 
 	mv_gop110_rfu1_write(gop, MV_NETCOMP_PORTS_CONTROL_0, reg);
-
 }
 EXPORT_SYMBOL(mv_gop110_netc_xon_set);
 
@@ -3016,9 +3028,9 @@ void mv_gop110_fca_send_periodic(struct gop_hw *gop, int mac_num, bool en)
 	val = mv_gop110_fca_read(gop, mac_num, FCA_CONTROL_REG);
 
 	U32_SET_FIELD(val, FCA_PORT_TYPE_MASK,
-			      FCA_PORT_TYPE_B << FCA_PORT_TYPE_OFFSET);
+		      FCA_PORT_TYPE_B << FCA_PORT_TYPE_OFFSET);
 	U32_SET_FIELD(val, FCA_SEND_PERIODIC_MASK,
-			      en << FCA_SEND_PERIODIC_OFFSET);
+		      en << FCA_SEND_PERIODIC_OFFSET);
 	mv_gop110_fca_write(gop, mac_num, FCA_CONTROL_REG, val);
 }
 
@@ -3029,7 +3041,7 @@ void mv_gop110_fca_enable_periodic(struct gop_hw *gop, int mac_num, bool en)
 	val = mv_gop110_fca_read(gop, mac_num, FCA_CONTROL_REG);
 
 	U32_SET_FIELD(val, FCA_ENABLE_PERIODIC_MASK,
-			      en << FCA_ENABLE_PERIODIC_OFFSET);
+		      en << FCA_ENABLE_PERIODIC_OFFSET);
 	mv_gop110_fca_write(gop, mac_num, FCA_CONTROL_REG, val);
 }
 
@@ -3063,9 +3075,9 @@ void mv_gop110_fca_tx_enable(struct gop_hw *gop, int mac_num, bool en)
 	val = mv_gop110_fca_read(gop, mac_num, FCA_CONTROL_REG);
 
 	U32_SET_FIELD(val, FCA_PORT_TYPE_MASK,
-			      FCA_PORT_TYPE_B << FCA_PORT_TYPE_OFFSET);
+		      FCA_PORT_TYPE_B << FCA_PORT_TYPE_OFFSET);
 	U32_SET_FIELD(val, FCA_BYPASS_MASK,
-			      en << FCA_BYPASS_OFFSET);
+		      en << FCA_BYPASS_OFFSET);
 	mv_gop110_fca_write(gop, mac_num, FCA_CONTROL_REG, val);
 }
 
@@ -3289,7 +3301,6 @@ void mv_gop110_xlg_registers_dump(struct mv_pp2x_port *port, u32 *regs_buff)
 						    MV_XLG_MAC_DIC_PPM_IPG_REDUCE_REG);
 }
 
-#if defined(MY_DEF_HERE)
 static void mv_gop110_set_new_phy_mode(u32 speed, struct mv_mac_data *mac)
 {
 	mac->flags &= ~(MV_EMAC_F_SGMII2_5 | MV_EMAC_F_5G);
@@ -3394,5 +3405,3 @@ out:
 
 	return err;
 }
-#endif /* MY_DEF_HERE */
-#endif /* MY_DEF_HERE */

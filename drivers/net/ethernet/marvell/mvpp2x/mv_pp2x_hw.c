@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*
 * ***************************************************************************
 * Copyright (C) 2016 Marvell International Ltd.
@@ -40,11 +36,7 @@
 
 int mv_pp2x_ptr_validate(const void *ptr)
 {
-#if defined(MY_DEF_HERE)
 	if (!ptr) {
-#else /* MY_DEF_HERE */
-	if (ptr == NULL) {
-#endif /* MY_DEF_HERE */
 		pr_err("%s: null pointer.\n", __func__);
 		return MV_ERROR;
 	}
@@ -56,7 +48,7 @@ int mv_pp2x_range_validate(int value, int min, int max)
 {
 	if (((value) > (max)) || ((value) < (min))) {
 		pr_err("%s: value 0x%X (%d) is out of range [0x%X , 0x%X].\n",
-			__func__, (value), (value), (min), (max));
+		       __func__, (value), (value), (min), (max));
 		return MV_ERROR;
 	}
 	return MV_OK;
@@ -419,15 +411,15 @@ int mv_pp2x_prs_hw_write(struct mv_pp2x_hw *hw, struct mv_pp2x_prs_entry *pe)
 	/* Clear entry invalidation bit */
 	pe->tcam.word[MVPP2_PRS_TCAM_INV_WORD] &= ~MVPP2_PRS_TCAM_INV_MASK;
 
-	/* Write tcam index - indirect access */
-	mv_pp2x_write(hw, MVPP2_PRS_TCAM_IDX_REG, pe->index);
-	for (i = 0; i < MVPP2_PRS_TCAM_WORDS; i++)
-		mv_pp2x_write(hw, MVPP2_PRS_TCAM_DATA_REG(i), pe->tcam.word[i]);
-
 	/* Write sram index - indirect access */
 	mv_pp2x_write(hw, MVPP2_PRS_SRAM_IDX_REG, pe->index);
 	for (i = 0; i < MVPP2_PRS_SRAM_WORDS; i++)
 		mv_pp2x_write(hw, MVPP2_PRS_SRAM_DATA_REG(i), pe->sram.word[i]);
+
+	/* Write tcam index - indirect access */
+	mv_pp2x_write(hw, MVPP2_PRS_TCAM_IDX_REG, pe->index);
+	for (i = 0; i < MVPP2_PRS_TCAM_WORDS; i++)
+		mv_pp2x_write(hw, MVPP2_PRS_TCAM_DATA_REG(i), pe->tcam.word[i]);
 
 	return 0;
 }
@@ -617,7 +609,6 @@ void mv_pp2x_prs_tcam_ai_update(struct mv_pp2x_prs_entry *pe,
 	int i, ai_idx = MVPP2_PRS_TCAM_AI_BYTE;
 
 	for (i = 0; i < MVPP2_PRS_AI_BITS; i++) {
-
 		if (!(enable & BIT(i)))
 			continue;
 
@@ -645,7 +636,6 @@ static void mv_pp2x_prs_match_etype(struct mv_pp2x_prs_entry *pe, int offset,
 	mv_pp2x_prs_tcam_data_byte_set(pe, offset + 1, ethertype & 0xff, 0xff);
 }
 
-#if defined(MY_DEF_HERE)
 /* Set vid in tcam sw entry */
 static void mv_pp2x_prs_match_vid(struct mv_pp2x_prs_entry *pe, int offset, unsigned short vid)
 {
@@ -654,7 +644,6 @@ static void mv_pp2x_prs_match_vid(struct mv_pp2x_prs_entry *pe, int offset, unsi
 	mv_pp2x_prs_tcam_data_byte_set(pe, offset + 1, vid & MVPP2_PRS_VID_L_WORD_MASK, MVPP2_PRS_VID_L_WORD_MASK);
 }
 
-#endif /* MY_DEF_HERE */
 /* Set bits in sram sw entry */
 static void mv_pp2x_prs_sram_bits_set(struct mv_pp2x_prs_entry *pe, int bit_num,
 				      int val)
@@ -687,7 +676,7 @@ void mv_pp2x_prs_sram_ri_update(struct mv_pp2x_prs_entry *pe,
 			mv_pp2x_prs_sram_bits_clear(pe, ri_off + i, 1);
 
 		mv_pp2x_prs_sram_bits_set(pe,
-			MVPP2_PRS_SRAM_RI_CTRL_OFFS + i, 1);
+					  MVPP2_PRS_SRAM_RI_CTRL_OFFS + i, 1);
 	}
 }
 EXPORT_SYMBOL(mv_pp2x_prs_sram_ri_update);
@@ -706,7 +695,6 @@ void mv_pp2x_prs_sram_ai_update(struct mv_pp2x_prs_entry *pe,
 	int ai_off = MVPP2_PRS_SRAM_AI_OFFS;
 
 	for (i = 0; i < MVPP2_PRS_SRAM_AI_CTRL_BITS; i++) {
-
 		if (!(mask & BIT(i)))
 			continue;
 
@@ -716,7 +704,7 @@ void mv_pp2x_prs_sram_ai_update(struct mv_pp2x_prs_entry *pe,
 			mv_pp2x_prs_sram_bits_clear(pe, ai_off + i, 1);
 
 		mv_pp2x_prs_sram_bits_set(pe,
-			MVPP2_PRS_SRAM_AI_CTRL_OFFS + i, 1);
+					  MVPP2_PRS_SRAM_AI_CTRL_OFFS + i, 1);
 	}
 }
 EXPORT_SYMBOL(mv_pp2x_prs_sram_ai_update);
@@ -758,11 +746,11 @@ static void mv_pp2x_prs_sram_shift_set(struct mv_pp2x_prs_entry *pe, int shift,
 	/* Set sign */
 	if (shift < 0) {
 		mv_pp2x_prs_sram_bits_set(pe,
-			MVPP2_PRS_SRAM_SHIFT_SIGN_BIT, 1);
+					  MVPP2_PRS_SRAM_SHIFT_SIGN_BIT, 1);
 		shift = 0 - shift;
 	} else {
 		mv_pp2x_prs_sram_bits_clear(pe,
-			MVPP2_PRS_SRAM_SHIFT_SIGN_BIT, 1);
+					    MVPP2_PRS_SRAM_SHIFT_SIGN_BIT, 1);
 	}
 
 	/* Set value */
@@ -914,7 +902,7 @@ static void mv_pp2x_prs_mac_drop_all_set(struct mv_pp2x_hw *hw,
 
 		/* Non-promiscuous mode for all ports - DROP unknown packets */
 		mv_pp2x_prs_sram_ri_update(&pe, MVPP2_PRS_RI_DROP_MASK,
-					 MVPP2_PRS_RI_DROP_MASK);
+					   MVPP2_PRS_RI_DROP_MASK);
 
 		mv_pp2x_prs_sram_bits_set(&pe, MVPP2_PRS_SRAM_LU_GEN_BIT, 1);
 		mv_pp2x_prs_sram_next_lu_set(&pe, MVPP2_PRS_LU_FLOWS);
@@ -932,37 +920,37 @@ static void mv_pp2x_prs_mac_drop_all_set(struct mv_pp2x_hw *hw,
 	mv_pp2x_prs_hw_write(hw, &pe);
 }
 
-/* Set port to promiscuous mode */
-void mv_pp2x_prs_mac_promisc_set(struct mv_pp2x_hw *hw, int port, bool add)
+/* Set port to unicast promiscuous mode */
+void mv_pp2x_prs_mac_uc_promisc_set(struct mv_pp2x_hw *hw, int port, bool add)
 {
 	struct mv_pp2x_prs_entry pe;
 
-#if defined(MY_DEF_HERE)
 	/* Promiscuous mode - Accept unknown packets */
-#else /* MY_DEF_HERE */
-	/* Promiscous mode - Accept unknown packets */
-#endif /* MY_DEF_HERE */
 
-	if (hw->prs_shadow[MVPP2_PE_MAC_PROMISCUOUS].valid) {
+	if (hw->prs_shadow[MVPP2_PE_MAC_UC_PROMISCUOUS].valid) {
 		/* Entry exist - update port only */
-		pe.index = MVPP2_PE_MAC_PROMISCUOUS;
+		pe.index = MVPP2_PE_MAC_UC_PROMISCUOUS;
 		mv_pp2x_prs_hw_read(hw, &pe);
 	} else {
 		/* Entry doesn't exist - create new */
 		memset(&pe, 0, sizeof(struct mv_pp2x_prs_entry));
 		mv_pp2x_prs_tcam_lu_set(&pe, MVPP2_PRS_LU_MAC);
-		pe.index = MVPP2_PE_MAC_PROMISCUOUS;
+		pe.index = MVPP2_PE_MAC_UC_PROMISCUOUS;
 
 		/* Continue - set next lookup */
 		mv_pp2x_prs_sram_next_lu_set(&pe, MVPP2_PRS_LU_DSA);
 
 		/* Set result info bits */
 		mv_pp2x_prs_sram_ri_update(&pe, MVPP2_PRS_RI_L2_UCAST,
-					 MVPP2_PRS_RI_L2_CAST_MASK);
+					   MVPP2_PRS_RI_L2_CAST_MASK);
+
+		/* Update tcam entry data first byte */
+		mv_pp2x_prs_tcam_data_byte_set(&pe, 0, MVPP2_PRS_UCAST_VAL,
+					       MVPP2_PRS_CAST_MASK);
 
 		/* Shift to ethertype */
 		mv_pp2x_prs_sram_shift_set(&pe, 2 * ETH_ALEN,
-					 MVPP2_PRS_SRAM_OP_SEL_SHIFT_ADD);
+					   MVPP2_PRS_SRAM_OP_SEL_SHIFT_ADD);
 
 		/* Mask all ports */
 		mv_pp2x_prs_tcam_port_map_set(&pe, 0);
@@ -977,27 +965,20 @@ void mv_pp2x_prs_mac_promisc_set(struct mv_pp2x_hw *hw, int port, bool add)
 	mv_pp2x_prs_hw_write(hw, &pe);
 }
 
-/* Accept multicast */
-void mv_pp2x_prs_mac_multi_set(struct mv_pp2x_hw *hw, int port, int index,
-			       bool add)
+/* Set port to multicast promiscuous mode */
+void mv_pp2x_prs_mac_mc_promisc_set(struct mv_pp2x_hw *hw, int port, bool add)
 {
 	struct mv_pp2x_prs_entry pe;
-	unsigned char da_mc;
 
-	/* Ethernet multicast address first byte is
-	 * 0x01 for IPv4 and 0x33 for IPv6
-	 */
-	da_mc = (index == MVPP2_PE_MAC_MC_ALL) ? 0x01 : 0x33;
-
-	if (hw->prs_shadow[index].valid) {
+	if (hw->prs_shadow[MVPP2_PE_MAC_MC_PROMISCUOUS].valid) {
 		/* Entry exist - update port only */
-		pe.index = index;
+		pe.index = MVPP2_PE_MAC_MC_PROMISCUOUS;
 		mv_pp2x_prs_hw_read(hw, &pe);
 	} else {
 		/* Entry doesn't exist - create new */
 		memset(&pe, 0, sizeof(struct mv_pp2x_prs_entry));
 		mv_pp2x_prs_tcam_lu_set(&pe, MVPP2_PRS_LU_MAC);
-		pe.index = index;
+		pe.index = MVPP2_PE_MAC_MC_PROMISCUOUS;
 
 		/* Continue - set next lookup */
 		mv_pp2x_prs_sram_next_lu_set(&pe, MVPP2_PRS_LU_DSA);
@@ -1007,11 +988,12 @@ void mv_pp2x_prs_mac_multi_set(struct mv_pp2x_hw *hw, int port, int index,
 					   MVPP2_PRS_RI_L2_CAST_MASK);
 
 		/* Update tcam entry data first byte */
-		mv_pp2x_prs_tcam_data_byte_set(&pe, 0, da_mc, 0xff);
+		mv_pp2x_prs_tcam_data_byte_set(&pe, 0, MVPP2_PRS_MCAST_VAL,
+					       MVPP2_PRS_CAST_MASK);
 
 		/* Shift to ethertype */
 		mv_pp2x_prs_sram_shift_set(&pe, 2 * ETH_ALEN,
-					 MVPP2_PRS_SRAM_OP_SEL_SHIFT_ADD);
+					   MVPP2_PRS_SRAM_OP_SEL_SHIFT_ADD);
 
 		/* Mask all ports */
 		mv_pp2x_prs_tcam_port_map_set(&pe, 0);
@@ -1061,7 +1043,7 @@ static void mv_pp2x_prs_dsa_tag_set(struct mv_pp2x_hw *hw, int port, bool add,
 		if (tagged) {
 			/* Set tagged bit in DSA tag */
 			mv_pp2x_prs_tcam_data_byte_set(&pe, 0,
-					MVPP2_PRS_TCAM_DSA_TAGGED_BIT,
+						       MVPP2_PRS_TCAM_DSA_TAGGED_BIT,
 					MVPP2_PRS_TCAM_DSA_TAGGED_BIT);
 			/* Clear all ai bits for next iteration */
 			mv_pp2x_prs_sram_ai_update(&pe, 0,
@@ -1131,7 +1113,7 @@ static void mv_pp2x_prs_dsa_tag_ethertype_set(struct mv_pp2x_hw *hw, int port,
 		if (tagged) {
 			/* Set tagged bit in DSA tag */
 			mv_pp2x_prs_tcam_data_byte_set(&pe,
-						     MVPP2_ETH_TYPE_LEN + 2 + 3,
+						       MVPP2_ETH_TYPE_LEN + 2 + 3,
 						 MVPP2_PRS_TCAM_DSA_TAGGED_BIT,
 						 MVPP2_PRS_TCAM_DSA_TAGGED_BIT);
 			/* Clear all ai bits for next iteration */
@@ -1255,17 +1237,10 @@ static int mv_pp2x_prs_vlan_add(struct mv_pp2x_hw *hw, unsigned short tpid,
 
 		mv_pp2x_prs_match_etype(pe, 0, tpid);
 
-#if defined(MY_DEF_HERE)
 		mv_pp2x_prs_sram_next_lu_set(pe, MVPP2_PRS_LU_VID);
 
 		/* Do not shift now, will be shifted after VID is checked*/
 
-#else /* MY_DEF_HERE */
-		mv_pp2x_prs_sram_next_lu_set(pe, MVPP2_PRS_LU_L2);
-		/* Shift 4 bytes - skip 1 vlan tag */
-		mv_pp2x_prs_sram_shift_set(pe, MVPP2_VLAN_TAG_LEN,
-					   MVPP2_PRS_SRAM_OP_SEL_SHIFT_ADD);
-#endif /* MY_DEF_HERE */
 		/* Clear all ai bits for next iteration */
 		mv_pp2x_prs_sram_ai_update(pe, 0, MVPP2_PRS_SRAM_AI_MASK);
 
@@ -1330,13 +1305,8 @@ static struct mv_pp2x_prs_entry *mv_pp2x_prs_double_vlan_find(
 		pe->index = tid;
 		mv_pp2x_prs_hw_read(hw, pe);
 
-#if defined(MY_DEF_HERE)
 		match = mv_pp2x_prs_tcam_data_cmp(pe, 0, swab16(tpid1))	&&
 			mv_pp2x_prs_tcam_data_cmp(pe, 4, swab16(tpid2));
-#else /* MY_DEF_HERE */
-		match = mv_pp2x_prs_tcam_data_cmp(pe, 0, swab16(tpid1))
-			&& mv_pp2x_prs_tcam_data_cmp(pe, 4, swab16(tpid2));
-#endif /* MY_DEF_HERE */
 
 		if (!match)
 			continue;
@@ -1412,13 +1382,8 @@ static int mv_pp2x_prs_double_vlan_add(struct mv_pp2x_hw *hw,
 		mv_pp2x_prs_match_etype(pe, 4, tpid2);
 
 		mv_pp2x_prs_sram_next_lu_set(pe, MVPP2_PRS_LU_VLAN);
-#if defined(MY_DEF_HERE)
 		/* Shift 4 bytes - skip outer vlan tags */
 		mv_pp2x_prs_sram_shift_set(pe, MVPP2_VLAN_TAG_LEN,
-#else /* MY_DEF_HERE */
-		/* Shift 8 bytes - skip 2 vlan tags */
-		mv_pp2x_prs_sram_shift_set(pe, 2 * MVPP2_VLAN_TAG_LEN,
-#endif /* MY_DEF_HERE */
 					   MVPP2_PRS_SRAM_OP_SEL_SHIFT_ADD);
 		mv_pp2x_prs_sram_ri_update(pe, MVPP2_PRS_RI_VLAN_DOUBLE,
 					   MVPP2_PRS_RI_VLAN_MASK);
@@ -1588,9 +1553,9 @@ static int mv_pp2x_prs_ip6_proto(struct mv_pp2x_hw *hw, unsigned short proto,
 				    MVPP2_PRS_SRAM_OP_SEL_UDF_ADD);
 
 	mv_pp2x_prs_tcam_data_byte_set(&pe, 0, proto,
-			MVPP2_PRS_TCAM_PROTO_MASK);
+				       MVPP2_PRS_TCAM_PROTO_MASK);
 	mv_pp2x_prs_tcam_ai_update(&pe, MVPP2_PRS_IPV6_NO_EXT_AI_BIT,
-				 MVPP2_PRS_IPV6_NO_EXT_AI_BIT);
+				   MVPP2_PRS_IPV6_NO_EXT_AI_BIT);
 	/* Unmask all ports */
 	mv_pp2x_prs_tcam_port_map_set(&pe, MVPP2_PRS_PORT_MASK);
 
@@ -1611,7 +1576,7 @@ static int mv_pp2x_prs_ip6_cast(struct mv_pp2x_hw *hw, unsigned short l3_cast)
 		return -EINVAL;
 
 	tid = mv_pp2x_prs_tcam_first_free(hw, MVPP2_PE_FIRST_FREE_TID,
-					MVPP2_PE_LAST_FREE_TID);
+					  MVPP2_PE_LAST_FREE_TID);
 	if (tid < 0)
 		return tid;
 
@@ -1703,7 +1668,7 @@ static void mv_pp2x_prs_mh_init(struct mv_pp2x_hw *hw)
 	pe.index = MVPP2_PE_MH_DEFAULT;
 	mv_pp2x_prs_tcam_lu_set(&pe, MVPP2_PRS_LU_MH);
 	mv_pp2x_prs_sram_shift_set(&pe, MVPP2_MH_SIZE,
-				 MVPP2_PRS_SRAM_OP_SEL_SHIFT_ADD);
+				   MVPP2_PRS_SRAM_OP_SEL_SHIFT_ADD);
 	mv_pp2x_prs_sram_next_lu_set(&pe, MVPP2_PRS_LU_MAC);
 
 	/* Unmask all ports */
@@ -1741,10 +1706,8 @@ static void mv_pp2x_prs_mac_init(struct mv_pp2x_hw *hw)
 
 	/* place holders only - no ports */
 	mv_pp2x_prs_mac_drop_all_set(hw, 0, false);
-	mv_pp2x_prs_mac_promisc_set(hw, 0, false);
-
-	mv_pp2x_prs_mac_multi_set(hw, 0, MVPP2_PE_MAC_MC_ALL, false);
-	mv_pp2x_prs_mac_multi_set(hw, 0, MVPP2_PE_MAC_MC_IP6, false);
+	mv_pp2x_prs_mac_uc_promisc_set(hw, 0, false);
+	mv_pp2x_prs_mac_mc_promisc_set(hw, 0, false);
 }
 
 /* Set default entries for various types of dsa packets */
@@ -2069,14 +2032,10 @@ static int mv_pp2x_prs_vlan_init(struct platform_device *pdev,
 	mv_pp2x_prs_tcam_lu_set(&pe, MVPP2_PRS_LU_VLAN);
 	pe.index = MVPP2_PE_VLAN_DBL;
 
-#if defined(MY_DEF_HERE)
 	mv_pp2x_prs_sram_next_lu_set(&pe, MVPP2_PRS_LU_VID);
 
 	/* Do not update offset, it is already positioned to inner vlan by double vlan parser entry*/
 
-#else /* MY_DEF_HERE */
-	mv_pp2x_prs_sram_next_lu_set(&pe, MVPP2_PRS_LU_L2);
-#endif /* MY_DEF_HERE */
 	/* Clear ai for next iterations */
 	mv_pp2x_prs_sram_ai_update(&pe, 0, MVPP2_PRS_SRAM_AI_MASK);
 	mv_pp2x_prs_sram_ri_update(&pe, MVPP2_PRS_RI_VLAN_DOUBLE,
@@ -2110,7 +2069,6 @@ static int mv_pp2x_prs_vlan_init(struct platform_device *pdev,
 	return 0;
 }
 
-#if defined(MY_DEF_HERE)
 /* Initialize parser entries for VID filtering */
 static void mv_pp2x_prs_vid_init(struct mv_pp2x_hw *hw)
 {
@@ -2135,7 +2093,6 @@ static void mv_pp2x_prs_vid_init(struct mv_pp2x_hw *hw)
 	mv_pp2x_prs_hw_write(hw, &pe);
 }
 
-#endif /* MY_DEF_HERE */
 /* Set entries for PPPoE ethertype */
 static int mv_pp2x_prs_pppoe_init(struct mv_pp2x_hw *hw)
 {
@@ -2338,11 +2295,7 @@ static int mv_pp2x_prs_ip4_init(struct mv_pp2x_hw *hw)
 static int mv_pp2x_prs_ip6_init(struct mv_pp2x_hw *hw)
 {
 	struct mv_pp2x_prs_entry pe;
-#if defined(MY_DEF_HERE)
 	int err;
-#else /* MY_DEF_HERE */
-	int tid, err;
-#endif /* MY_DEF_HERE */
 
 	/* Set entries for TCP, UDP and ICMP over IPv6 */
 	err = mv_pp2x_prs_ip6_proto(hw, IPPROTO_TCP,
@@ -2378,36 +2331,6 @@ static int mv_pp2x_prs_ip6_init(struct mv_pp2x_hw *hw)
 	if (err)
 		return err;
 
-#if defined(MY_DEF_HERE)
-//do nothing
-#else /* MY_DEF_HERE */
-	/* Entry for checking hop limit */
-	tid = mv_pp2x_prs_tcam_first_free(hw, MVPP2_PE_FIRST_FREE_TID,
-					  MVPP2_PE_LAST_FREE_TID);
-	if (tid < 0)
-		return tid;
-
-	memset(&pe, 0, sizeof(struct mv_pp2x_prs_entry));
-	mv_pp2x_prs_tcam_lu_set(&pe, MVPP2_PRS_LU_IP6);
-	pe.index = tid;
-
-	/* Finished: go to flowid generation */
-	mv_pp2x_prs_sram_next_lu_set(&pe, MVPP2_PRS_LU_FLOWS);
-	mv_pp2x_prs_sram_bits_set(&pe, MVPP2_PRS_SRAM_LU_GEN_BIT, 1);
-	mv_pp2x_prs_sram_ri_update(&pe, MVPP2_PRS_RI_L3_UN |
-				   MVPP2_PRS_RI_DROP_MASK,
-				   MVPP2_PRS_RI_L3_PROTO_MASK |
-				   MVPP2_PRS_RI_DROP_MASK);
-
-	mv_pp2x_prs_tcam_data_byte_set(&pe, 1, 0x00, MVPP2_PRS_IPV6_HOP_MASK);
-	mv_pp2x_prs_tcam_ai_update(&pe, MVPP2_PRS_IPV6_NO_EXT_AI_BIT,
-				   MVPP2_PRS_IPV6_NO_EXT_AI_BIT);
-
-	/* Update shadow table and hw entry */
-	mv_pp2x_prs_shadow_set(hw, pe.index, MVPP2_PRS_LU_IP4);
-	mv_pp2x_prs_hw_write(hw, &pe);
-
-#endif /* MY_DEF_HERE */
 	/* Default IPv6 entry for unknown protocols */
 	memset(&pe, 0, sizeof(struct mv_pp2x_prs_entry));
 	mv_pp2x_prs_tcam_lu_set(&pe, MVPP2_PRS_LU_IP6);
@@ -2486,7 +2409,7 @@ static bool mv_pp2x_prs_mac_range_equals(struct mv_pp2x_prs_entry *pe,
 
 	for (index = 0; index < ETH_ALEN; index++) {
 		mv_pp2x_prs_tcam_data_byte_get(pe, index, &tcam_byte,
-			&tcam_mask);
+					       &tcam_mask);
 		if (tcam_mask != mask[index])
 			return false;
 
@@ -2738,7 +2661,6 @@ void mv_pp2x_prs_mac_entry_del(struct mv_pp2x_port *port,
 	}
 }
 
-#if defined(MY_DEF_HERE)
 /* Write parser entry for default VID filtering */
 static int mv_pp2x_prs_vid_drop_entry_accept(struct net_device *dev, unsigned int tid, bool add)
 {
@@ -2942,7 +2864,6 @@ int mv_pp2x_prs_vid_entry_accept(struct net_device *dev, u16 proto, u16 vid, boo
 	return 0;
 }
 
-#endif /* MY_DEF_HERE */
 int mv_pp2x_prs_tag_mode_set(struct mv_pp2x_hw *hw, int port, int type)
 {
 	switch (type) {
@@ -3035,24 +2956,15 @@ int mv_pp2x_prs_def_flow(struct mv_pp2x_port *port)
 }
 
 /* Set prs dedicated flow for the port */
-#if defined(MY_DEF_HERE)
 int mv_pp2x_prs_flow_id_gen(struct mv_pp2x_port *port, u32 flow_id,
 			    u32 res, u32 res_mask)
-#else /* MY_DEF_HERE */
-int mv_pp2x_prs_flow_id_gen(struct mv_pp2x_port *port, u32 flowId,
-			    u32 res, u32 resMask)
-#endif /* MY_DEF_HERE */
 {
 	struct mv_pp2x_prs_entry *pe;
 	struct mv_pp2x_hw *hw = &port->priv->hw;
 	int tid;
 	unsigned int pmap = 0;
 
-#if defined(MY_DEF_HERE)
 	pe = mv_pp2x_prs_flow_find(hw, flow_id, res, res_mask);
-#else /* MY_DEF_HERE */
-	pe = mv_pp2x_prs_flow_find(hw, flowId, res, resMask);
-#endif /* MY_DEF_HERE */
 
 	/* Such entry not exist */
 	if (!pe) {
@@ -3062,7 +2974,7 @@ int mv_pp2x_prs_flow_id_gen(struct mv_pp2x_port *port, u32 flowId,
 
 		/* Go through the all entires from last to first */
 		tid = mv_pp2x_prs_tcam_first_free(hw,
-			MVPP2_PE_LAST_FREE_TID,
+						  MVPP2_PE_LAST_FREE_TID,
 			MVPP2_PE_FIRST_FREE_TID);
 		if (tid < 0) {
 			kfree(pe);
@@ -3072,22 +2984,14 @@ int mv_pp2x_prs_flow_id_gen(struct mv_pp2x_port *port, u32 flowId,
 		mv_pp2x_prs_tcam_lu_set(pe, MVPP2_PRS_LU_FLOWS);
 		pe->index = tid;
 
-#if defined(MY_DEF_HERE)
 		mv_pp2x_prs_sram_ai_update(pe, flow_id, MVPP2_PRS_FLOW_ID_MASK);
-#else /* MY_DEF_HERE */
-		mv_pp2x_prs_sram_ai_update(pe, flowId, MVPP2_PRS_FLOW_ID_MASK);
-#endif /* MY_DEF_HERE */
 		mv_pp2x_prs_sram_bits_set(pe, MVPP2_PRS_SRAM_LU_DONE_BIT, 1);
 
 		/* Update shadow table */
 		mv_pp2x_prs_shadow_set(hw, pe->index, MVPP2_PRS_LU_FLOWS);
 
 		/*update result data and mask*/
-#if defined(MY_DEF_HERE)
 		mv_pp2x_prs_tcam_data_dword_set(pe, 0, res, res_mask);
-#else /* MY_DEF_HERE */
-		mv_pp2x_prs_tcam_data_dword_set(pe, 0, res, resMask);
-#endif /* MY_DEF_HERE */
 	} else {
 		pmap = mv_pp2x_prs_tcam_port_map_get(pe);
 	}
@@ -3105,7 +3009,7 @@ int mv_pp2x_prs_flow_set(struct mv_pp2x_port *port)
 
 	for (index = 0; index < MVPP2_PRS_FL_TCAM_NUM; index++) {
 		ret = mv_pp2x_prs_flow_id_gen(port,
-			mv_pp2x_prs_flow_id_array[index].flow_id,
+					      mv_pp2x_prs_flow_id_array[index].flow_id,
 			mv_pp2x_prs_flow_id_array[index].prs_result.ri,
 			mv_pp2x_prs_flow_id_array[index].prs_result.ri_mask);
 		if (ret)
@@ -3224,7 +3128,7 @@ int mv_pp2x_cls_sw_flow_hek_num_set(struct mv_pp2x_cls_flow_entry *fe,
 		return MV_ERROR;
 
 	if (mv_pp2x_range_validate(num_of_fields, 0,
-	    MVPP2_CLS_FLOWS_TBL_FIELDS_MAX) == MV_ERROR)
+				   MVPP2_CLS_FLOWS_TBL_FIELDS_MAX) == MV_ERROR)
 		return MV_ERROR;
 
 	fe->data[1] &= ~MVPP2_FLOW_FIELDS_NUM_MASK;
@@ -3243,11 +3147,7 @@ int mv_pp2x_cls_sw_flow_hek_set(struct mv_pp2x_cls_flow_entry *fe,
 	num_of_fields = ((fe->data[1] &
 		MVPP2_FLOW_FIELDS_NUM_MASK) >> MVPP2_FLOW_FIELDS_NUM);
 
-#if defined(MY_DEF_HERE)
 	if (num_of_fields < (field_index + 1)) {
-#else /* MY_DEF_HERE */
-	if (num_of_fields < (field_index+1)) {
-#endif /* MY_DEF_HERE */
 		pr_debug("%s:num of heks=%d ,idx(%d) out of range\n",
 			 __func__, num_of_fields, field_index);
 		return -1;
@@ -3292,7 +3192,7 @@ static void mv_pp2x_cls_flow_cos(struct mv_pp2x_hw *hw,
 	}
 	hek_num = 0;
 	if ((lkpid == MVPP2_PRS_FL_NON_IP_UNTAG &&
-		cos_type == MVPP2_COS_TYPE_DEF) ||
+	     cos_type == MVPP2_COS_TYPE_DEF) ||
 	    (lkpid == MVPP2_PRS_FL_NON_IP_TAG &&
 		cos_type == MVPP2_COS_TYPE_VLAN))
 		is_last = 1;
@@ -3363,20 +3263,20 @@ static void mv_pp2x_cls_flow_rss_hash(struct mv_pp2x_hw *hw,
 		mv_pp2x_cls_sw_flow_eng_set(fe, MVPP2_CLS_ENGINE_C3HB, 1);
 	}
 	mv_pp2x_cls_sw_flow_extra_set(fe,
-		MVPP2_CLS_LKP_HASH, MVPP2_CLS_FL_RSS_PRI);
+				      MVPP2_CLS_LKP_HASH, MVPP2_CLS_FL_RSS_PRI);
 	fe->index = entry_idx;
 
-	/* Update last for UDP NF flow */
-	if ((lkpid_attr & MVPP2_PRS_FL_ATTR_UDP_BIT) &&
-	    !(lkpid_attr & MVPP2_PRS_FL_ATTR_FRAG_BIT)) {
+	/* Update last for TCP & UDP NF flow */
+	if (((lkpid_attr & (MVPP2_PRS_FL_ATTR_TCP_BIT | MVPP2_PRS_FL_ATTR_UDP_BIT)) &&
+	     !(lkpid_attr & MVPP2_PRS_FL_ATTR_FRAG_BIT))) {
 		if (!hw->cls_shadow->flow_info[lkpid -
 			MVPP2_PRS_FL_START].flow_entry_rss1) {
 			if (rss_mode == MVPP2_RSS_HASH_2T)
 				mv_pp2x_cls_sw_flow_eng_set(fe,
-						MVPP2_CLS_ENGINE_C3HA, 0);
+							    MVPP2_CLS_ENGINE_C3HA, 0);
 			else
 				mv_pp2x_cls_sw_flow_eng_set(fe,
-						MVPP2_CLS_ENGINE_C3HB, 0);
+							    MVPP2_CLS_ENGINE_C3HB, 0);
 		}
 	}
 
@@ -3427,8 +3327,9 @@ void mv_pp2x_cls_flow_tbl_config(struct mv_pp2x_hw *hw)
 					     MVPP2_COS_TYPE_DSCP);
 			/* RSS hash rule */
 			if ((!(lkpid_attr & MVPP2_PRS_FL_ATTR_FRAG_BIT)) &&
-			    (lkpid_attr & MVPP2_PRS_FL_ATTR_UDP_BIT)) {
-				/* RSS hash rules for UDP rss mode update */
+			    (lkpid_attr & (MVPP2_PRS_FL_ATTR_TCP_BIT |
+				MVPP2_PRS_FL_ATTR_UDP_BIT))) {
+				/* RSS hash rules for TCP & UDP rss mode update */
 				mv_pp2x_cls_flow_rss_hash(hw, &fe, lkpid,
 							  MVPP2_RSS_HASH_2T);
 				mv_pp2x_cls_flow_rss_hash(hw, &fe, lkpid,
@@ -3451,8 +3352,9 @@ void mv_pp2x_cls_flow_tbl_config(struct mv_pp2x_hw *hw)
 					     MVPP2_COS_TYPE_DSCP);
 			/* RSS hash rule */
 			if ((!(lkpid_attr & MVPP2_PRS_FL_ATTR_FRAG_BIT)) &&
-			    (lkpid_attr & MVPP2_PRS_FL_ATTR_UDP_BIT)) {
-				/* RSS hash rules for UDP rss mode update */
+			    (lkpid_attr & (MVPP2_PRS_FL_ATTR_TCP_BIT |
+				MVPP2_PRS_FL_ATTR_UDP_BIT))) {
+				/* RSS hash rules for TCP & UDP rss mode update */
 				mv_pp2x_cls_flow_rss_hash(hw, &fe, lkpid,
 							  MVPP2_RSS_HASH_2T);
 				mv_pp2x_cls_flow_rss_hash(hw, &fe, lkpid,
@@ -3514,55 +3416,34 @@ EXPORT_SYMBOL(mv_pp2x_cls_lkp_port_way_set);
 int mv_pp2x_cls_hw_udf_set(struct mv_pp2x_hw *hw, int udf_no, int offs_id,
 			   int offs_bits, int size_bits)
 {
-#if defined(MY_DEF_HERE)
 	unsigned int reg_val;
-#else /* MY_DEF_HERE */
-	unsigned int regVal;
-#endif /* MY_DEF_HERE */
 
 	if (mv_pp2x_range_validate(offs_id, 0,
-	    MVPP2_CLS_UDF_OFFSET_ID_MAX) == MV_ERROR)
+				   MVPP2_CLS_UDF_OFFSET_ID_MAX) == MV_ERROR)
 		return MV_ERROR;
 
 	if (mv_pp2x_range_validate(offs_bits, 0,
-	    MVPP2_CLS_UDF_REL_OFFSET_MAX) == MV_ERROR)
+				   MVPP2_CLS_UDF_REL_OFFSET_MAX) == MV_ERROR)
 		return MV_ERROR;
 
 	if (mv_pp2x_range_validate(size_bits, 0,
-	    MVPP2_CLS_UDF_SIZE_MASK) == MV_ERROR)
+				   MVPP2_CLS_UDF_SIZE_MASK) == MV_ERROR)
 		return MV_ERROR;
 
 	if (mv_pp2x_range_validate(udf_no, 0,
-	    MVPP2_CLS_UDF_REGS_NUM - 1) == MV_ERROR)
+				   MVPP2_CLS_UDF_REGS_NUM - 1) == MV_ERROR)
 		return MV_ERROR;
 
-#if defined(MY_DEF_HERE)
 	reg_val = mv_pp2x_read(hw, MVPP2_CLS_UDF_REG(udf_no));
 	reg_val &= ~MVPP2_CLS_UDF_OFFSET_ID_MASK;
 	reg_val &= ~MVPP2_CLS_UDF_REL_OFFSET_MASK;
 	reg_val &= ~MVPP2_CLS_UDF_SIZE_MASK;
-#else /* MY_DEF_HERE */
-	regVal = mv_pp2x_read(hw, MVPP2_CLS_UDF_REG(udf_no));
-	regVal &= ~MVPP2_CLS_UDF_OFFSET_ID_MASK;
-	regVal &= ~MVPP2_CLS_UDF_REL_OFFSET_MASK;
-	regVal &= ~MVPP2_CLS_UDF_SIZE_MASK;
-#endif /* MY_DEF_HERE */
 
-#if defined(MY_DEF_HERE)
 	reg_val |= (offs_id << MVPP2_CLS_UDF_OFFSET_ID_OFFS);
 	reg_val |= (offs_bits << MVPP2_CLS_UDF_REL_OFFSET_OFFS);
 	reg_val |= (size_bits << MVPP2_CLS_UDF_SIZE_OFFS);
-#else /* MY_DEF_HERE */
-	regVal |= (offs_id << MVPP2_CLS_UDF_OFFSET_ID_OFFS);
-	regVal |= (offs_bits << MVPP2_CLS_UDF_REL_OFFSET_OFFS);
-	regVal |= (size_bits << MVPP2_CLS_UDF_SIZE_OFFS);
-#endif /* MY_DEF_HERE */
 
-#if defined(MY_DEF_HERE)
 	mv_pp2x_write(hw, MVPP2_CLS_UDF_REG(udf_no), reg_val);
-#else /* MY_DEF_HERE */
-	mv_pp2x_write(hw, MVPP2_CLS_UDF_REG(udf_no), regVal);
-#endif /* MY_DEF_HERE */
 
 	return MV_OK;
 }
@@ -3584,11 +3465,7 @@ void mv_pp2x_cls_lookup_tbl_config(struct mv_pp2x_hw *hw)
 		index++) {
 		int i, j;
 
-#if defined(MY_DEF_HERE)
 		flow_info = &hw->cls_shadow->flow_info[index];
-#else /* MY_DEF_HERE */
-		flow_info = &(hw->cls_shadow->flow_info[index]);
-#endif /* MY_DEF_HERE */
 		/* Init data[] as invalid value */
 		for (i = 0; i < MVPP2_LKP_PTR_NUM; i++)
 			data[i] = MVPP2_FLOW_TBL_SIZE;
@@ -3721,7 +3598,6 @@ void mv_pp2x_cls_oversize_rxq_set(struct mv_pp2x_port *port)
 
 	mv_pp2x_write(hw, MVPP2_CLS_OVERSIZE_RXQ_LOW_REG(port->id),
 		      port->first_rxq & MVPP2_CLS_OVERSIZE_RXQ_LOW_MASK);
-
 }
 
 void mv_pp21_get_mac_address(struct mv_pp2x_port *port, unsigned char *addr)
@@ -4014,14 +3890,14 @@ int mv_pp2x_aggr_desc_num_check(struct mv_pp2x *priv,
 				struct mv_pp2x_aggr_tx_queue *aggr_txq,
 				int num, int cpu)
 {
-	if ((aggr_txq->count + num) > aggr_txq->size) {
+	if ((aggr_txq->sw_count + aggr_txq->hw_count + num) > aggr_txq->size) {
 		/* Update number of occupied aggregated Tx descriptors */
 		u32 val = mv_pp2x_relaxed_read(&priv->hw,
 				MVPP2_AGGR_TXQ_STATUS_REG(cpu), cpu);
 
-		aggr_txq->count = val & MVPP2_AGGR_TXQ_PENDING_MASK;
+		aggr_txq->hw_count = val & MVPP2_AGGR_TXQ_PENDING_MASK;
 
-		if ((aggr_txq->count + num) > aggr_txq->size)
+		if ((aggr_txq->sw_count + aggr_txq->hw_count + num) > aggr_txq->size)
 			return -ENOMEM;
 	}
 
@@ -4162,7 +4038,7 @@ void mv_pp2x_pool_refill(struct mv_pp2x *priv, u32 pool,
 }
 
 void mv_pp2x_pool_refill_virtual(struct mv_pp2x *priv, u32 pool,
-			 dma_addr_t phys_addr, u8 *cookie)
+				 dma_addr_t phys_addr, u8 *cookie)
 {
 	int cpu = smp_processor_id();
 
@@ -4183,7 +4059,7 @@ void mv_pp2x_bm_pool_bufsize_set(struct mv_pp2x_hw *hw,
 
 /* Attach long pool to rxq */
 void mv_pp21_rxq_long_pool_set(struct mv_pp2x_hw *hw,
-		int prxq, int long_pool)
+			       int prxq, int long_pool)
 {
 	u32 val;
 
@@ -4273,16 +4149,18 @@ void mv_pp2x_egress_enable(struct mv_pp2x_port *port)
 	int tx_port_num = mv_pp2x_egress_port(port);
 	struct mv_pp2x_hw *hw = &port->priv->hw;
 
+	/* Don't do nothing for MUSDK ports since MUSDK manages
+	 * its own queues
+	 */
+	if (port->flags & MVPP2_F_IF_MUSDK)
+		return;
+
 	/* Enable all initialized TXs. */
 	qmap = 0;
 	for (queue = 0; queue < port->num_tx_queues; queue++) {
 		struct mv_pp2x_tx_queue *txq = port->txqs[queue];
 
-#if defined(MY_DEF_HERE)
 		if (txq->first_desc)
-#else /* MY_DEF_HERE */
-		if (txq->first_desc != NULL)
-#endif /* MY_DEF_HERE */
 			qmap |= (1 << queue);
 	}
 
@@ -4301,6 +4179,12 @@ void mv_pp2x_egress_disable(struct mv_pp2x_port *port)
 	int delay;
 	int tx_port_num = mv_pp2x_egress_port(port);
 	struct mv_pp2x_hw *hw = &port->priv->hw;
+
+	/* Don't do nothing for MUSDK ports since MUSDK manages
+	 * its own queues
+	 */
+	if (port->flags & MVPP2_F_IF_MUSDK)
+		return;
 
 	/* Issue stop command for active channels only */
 	mv_pp2x_write(hw, MVPP2_TXP_SCHED_PORT_INDEX_REG, tx_port_num);
@@ -4331,7 +4215,7 @@ void mv_pp2x_egress_disable(struct mv_pp2x_port *port)
 
 /* Parser default initialization */
 int mv_pp2x_prs_default_init(struct platform_device *pdev,
-		struct mv_pp2x_hw *hw)
+			     struct mv_pp2x_hw *hw)
 {
 	int err, index, i;
 
@@ -4380,11 +4264,9 @@ int mv_pp2x_prs_default_init(struct platform_device *pdev,
 	err = mv_pp2x_prs_vlan_init(pdev, hw);
 	if (err)
 		return err;
-#if defined(MY_DEF_HERE)
 
 	mv_pp2x_prs_vid_init(hw);
 
-#endif /* MY_DEF_HERE */
 	err = mv_pp2x_prs_pppoe_init(hw);
 	if (err)
 		return err;
@@ -4407,11 +4289,11 @@ int mv_pp2x_prs_sw_sram_shift_set(struct mv_pp2x_prs_entry *pe,
 		return MV_ERROR;
 
 	if (mv_pp2x_range_validate(shift, 0 - MVPP2_PRS_SRAM_SHIFT_MASK,
-	    MVPP2_PRS_SRAM_SHIFT_MASK) == MV_ERROR)
+				   MVPP2_PRS_SRAM_SHIFT_MASK) == MV_ERROR)
 		return MV_ERROR;
 
 	if (mv_pp2x_range_validate(op, 0,
-	    MVPP2_PRS_SRAM_OP_SEL_SHIFT_MASK) == MV_ERROR)
+				   MVPP2_PRS_SRAM_OP_SEL_SHIFT_MASK) == MV_ERROR)
 		return MV_ERROR;
 
 	/* Set sign */
@@ -4478,15 +4360,15 @@ int mv_pp2x_prs_sw_sram_offset_set(struct mv_pp2x_prs_entry *pe,
 		return MV_ERROR;
 
 	if (mv_pp2x_range_validate(offset, 0 - MVPP2_PRS_SRAM_UDF_MASK,
-	    MVPP2_PRS_SRAM_UDF_MASK) == MV_ERROR)
+				   MVPP2_PRS_SRAM_UDF_MASK) == MV_ERROR)
 		return MV_ERROR;
 
 	if (mv_pp2x_range_validate(type, 0,
-	    MVPP2_PRS_SRAM_UDF_TYPE_MASK) == MV_ERROR)
+				   MVPP2_PRS_SRAM_UDF_TYPE_MASK) == MV_ERROR)
 		return MV_ERROR;
 
 	if (mv_pp2x_range_validate(op, 0,
-		MVPP2_PRS_SRAM_OP_SEL_UDF_MASK) == MV_ERROR)
+				   MVPP2_PRS_SRAM_OP_SEL_UDF_MASK) == MV_ERROR)
 		return MV_ERROR;
 
 	/* Set offset sign */
@@ -4622,25 +4504,15 @@ int mv_pp2x_prs_sw_sram_next_lu_get(struct mv_pp2x_prs_entry *pe,
 }
 EXPORT_SYMBOL(mv_pp2x_prs_sw_sram_next_lu_get);
 
-#if defined(MY_DEF_HERE)
 int mv_pp2x_prs_sram_bit_get(struct mv_pp2x_prs_entry *pe, int bit_num,
-#else /* MY_DEF_HERE */
-int mv_pp2x_prs_sram_bit_get(struct mv_pp2x_prs_entry *pe, int bitNum,
-#endif /* MY_DEF_HERE */
 			     unsigned int *bit)
 {
 	if (mv_pp2x_ptr_validate(pe) == MV_ERROR)
 		return MV_ERROR;
 
-#if defined(MY_DEF_HERE)
 	*bit = pe->sram.byte[SRAM_BIT_TO_BYTE(bit_num)]  &
 		(1 << (bit_num % 8));
 	*bit = (*bit) >> (bit_num % 8);
-#else /* MY_DEF_HERE */
-	*bit = pe->sram.byte[SRAM_BIT_TO_BYTE(bitNum)]  &
-		(1 << (bitNum % 8));
-	*bit = (*bit) >> (bitNum % 8);
-#endif /* MY_DEF_HERE */
 	return MV_OK;
 }
 
@@ -4695,13 +4567,8 @@ int mv_pp2x_prs_sw_sram_ri_get(struct mv_pp2x_prs_entry *pe,
 	if (mv_pp2x_ptr_validate(enable) == MV_ERROR)
 		return MV_ERROR;
 
-#if defined(MY_DEF_HERE)
 	*bits = pe->sram.word[MVPP2_PRS_SRAM_RI_OFFS / 32];
 	*enable = pe->sram.word[MVPP2_PRS_SRAM_RI_CTRL_OFFS / 32];
-#else /* MY_DEF_HERE */
-	*bits = pe->sram.word[MVPP2_PRS_SRAM_RI_OFFS/32];
-	*enable = pe->sram.word[MVPP2_PRS_SRAM_RI_CTRL_OFFS/32];
-#endif /* MY_DEF_HERE */
 	return MV_OK;
 }
 EXPORT_SYMBOL(mv_pp2x_prs_sw_sram_ri_get);
@@ -4751,11 +4618,7 @@ EXPORT_SYMBOL(mv_pp2x_prs_sw_sram_ai_get);
 int mv_pp2x_cls_hw_lkp_read(struct mv_pp2x_hw *hw, int lkpid, int way,
 			    struct mv_pp2x_cls_lookup_entry *fe)
 {
-#if defined(MY_DEF_HERE)
 	unsigned int reg_val = 0;
-#else /* MY_DEF_HERE */
-	unsigned int regVal = 0;
-#endif /* MY_DEF_HERE */
 
 	if (mv_pp2x_ptr_validate(fe) == MV_ERROR)
 		return MV_ERROR;
@@ -4764,21 +4627,13 @@ int mv_pp2x_cls_hw_lkp_read(struct mv_pp2x_hw *hw, int lkpid, int way,
 		return MV_ERROR;
 
 	if (mv_pp2x_range_validate(lkpid, 0,
-	    MVPP2_CLS_FLOWS_TBL_SIZE) == MV_ERROR)
+				   MVPP2_CLS_FLOWS_TBL_SIZE) == MV_ERROR)
 		return MV_ERROR;
 
 	/* write index reg */
-#if defined(MY_DEF_HERE)
 	reg_val = (way << MVPP2_CLS_LKP_INDEX_WAY_OFFS) |
-#else /* MY_DEF_HERE */
-	regVal = (way << MVPP2_CLS_LKP_INDEX_WAY_OFFS) |
-#endif /* MY_DEF_HERE */
 		(lkpid << MVPP2_CLS_LKP_INDEX_LKP_OFFS);
-#if defined(MY_DEF_HERE)
 	mv_pp2x_write(hw, MVPP2_CLS_LKP_INDEX_REG, reg_val);
-#else /* MY_DEF_HERE */
-	mv_pp2x_write(hw, MVPP2_CLS_LKP_INDEX_REG, regVal);
-#endif /* MY_DEF_HERE */
 
 	fe->way = way;
 	fe->lkpid = lkpid;
@@ -4792,11 +4647,7 @@ EXPORT_SYMBOL(mv_pp2x_cls_hw_lkp_read);
 int mv_pp2x_cls_hw_lkp_write(struct mv_pp2x_hw *hw, int lkpid,
 			     int way, struct mv_pp2x_cls_lookup_entry *fe)
 {
-#if defined(MY_DEF_HERE)
 	unsigned int reg_val = 0;
-#else /* MY_DEF_HERE */
-	unsigned int regVal = 0;
-#endif /* MY_DEF_HERE */
 
 	if (mv_pp2x_ptr_validate(fe) == MV_ERROR)
 		return MV_ERROR;
@@ -4805,21 +4656,13 @@ int mv_pp2x_cls_hw_lkp_write(struct mv_pp2x_hw *hw, int lkpid,
 		return MV_ERROR;
 
 	if (mv_pp2x_range_validate(lkpid, 0,
-	    MVPP2_CLS_FLOWS_TBL_SIZE) == MV_ERROR)
+				   MVPP2_CLS_FLOWS_TBL_SIZE) == MV_ERROR)
 		return MV_ERROR;
 
 	/* write index reg */
-#if defined(MY_DEF_HERE)
 	reg_val = (way << MVPP2_CLS_LKP_INDEX_WAY_OFFS) |
-#else /* MY_DEF_HERE */
-	regVal = (way << MVPP2_CLS_LKP_INDEX_WAY_OFFS) |
-#endif /* MY_DEF_HERE */
 		(lkpid << MVPP2_CLS_LKP_INDEX_LKP_OFFS);
-#if defined(MY_DEF_HERE)
 	mv_pp2x_write(hw, MVPP2_CLS_LKP_INDEX_REG, reg_val);
-#else /* MY_DEF_HERE */
-	mv_pp2x_write(hw, MVPP2_CLS_LKP_INDEX_REG, regVal);
-#endif /* MY_DEF_HERE */
 
 	/* write flowId reg */
 	mv_pp2x_write(hw, MVPP2_CLS_LKP_TBL_REG, fe->data);
@@ -4849,7 +4692,7 @@ int mv_pp2x_cls_sw_lkp_rxq_set(struct mv_pp2x_cls_lookup_entry *lkp, int rxq)
 		return MV_ERROR;
 
 	if (mv_pp2x_range_validate(rxq, 0,
-	    (1 << MVPP2_FLOWID_RXQ_BITS) - 1) == MV_ERROR)
+				   (1 << MVPP2_FLOWID_RXQ_BITS) - 1) == MV_ERROR)
 		return MV_ERROR;
 
 	lkp->data &= ~MVPP2_FLOWID_RXQ_MASK;
@@ -4906,13 +4749,13 @@ int mv_pp2x_cls_sw_lkp_flow_get(struct mv_pp2x_cls_lookup_entry *lkp,
 EXPORT_SYMBOL(mv_pp2x_cls_sw_lkp_flow_get);
 
 int mv_pp2x_cls_sw_lkp_flow_set(struct mv_pp2x_cls_lookup_entry *lkp,
-		int flow_idx)
+				int flow_idx)
 {
 	if (mv_pp2x_ptr_validate(lkp) == MV_ERROR)
 		return MV_ERROR;
 
 	if (mv_pp2x_range_validate(flow_idx, 0,
-	    MVPP2_CLS_FLOWS_TBL_SIZE) == MV_ERROR)
+				   MVPP2_CLS_FLOWS_TBL_SIZE) == MV_ERROR)
 		return MV_ERROR;
 
 	lkp->data &= ~MVPP2_FLOWID_FLOW_MASK;
@@ -4946,7 +4789,7 @@ int mv_pp2x_cls_sw_lkp_mod_set(struct mv_pp2x_cls_lookup_entry *lkp,
 
 	/* TODO: what is the max value of mode base */
 	if (mv_pp2x_range_validate(mod_base, 0,
-	    (1 << MVPP2_FLOWID_MODE_BITS) - 1) == MV_ERROR)
+				   (1 << MVPP2_FLOWID_MODE_BITS) - 1) == MV_ERROR)
 		return MV_ERROR;
 
 	lkp->data &= ~MVPP2_FLOWID_MODE_MASK;
@@ -4967,7 +4810,7 @@ int mv_pp2x_cls_hw_flow_read(struct mv_pp2x_hw *hw, int index,
 		return MV_ERROR;
 
 	if (mv_pp2x_range_validate(index, 0,
-	    MVPP2_CLS_FLOWS_TBL_SIZE) == MV_ERROR)
+				   MVPP2_CLS_FLOWS_TBL_SIZE) == MV_ERROR)
 		return MV_ERROR;
 
 	fe->index = index;
@@ -5043,11 +4886,11 @@ int mv_pp2x_cls_sw_flow_port_set(struct mv_pp2x_cls_flow_entry *fe,
 		return MV_ERROR;
 
 	if (mv_pp2x_range_validate(type, 0,
-	    ((1 << MVPP2_FLOW_PORT_TYPE_BITS) - 1)) == MV_ERROR)
+				   ((1 << MVPP2_FLOW_PORT_TYPE_BITS) - 1)) == MV_ERROR)
 		return MV_ERROR;
 
 	if (mv_pp2x_range_validate(portid, 0,
-	    ((1 << MVPP2_FLOW_PORT_ID_BITS) - 1)) == MV_ERROR)
+				   ((1 << MVPP2_FLOW_PORT_ID_BITS) - 1)) == MV_ERROR)
 		return MV_ERROR;
 
 	fe->data[0] &= ~MVPP2_FLOW_PORT_ID_MASK;
@@ -5192,7 +5035,6 @@ int mv_pp2x_cls_sw_flow_engine_set(struct mv_pp2x_cls_flow_entry *fe,
 	fe->data[0] |= (engine << MVPP2_FLOW_ENGINE);
 
 	return MV_OK;
-
 }
 EXPORT_SYMBOL(mv_pp2x_cls_sw_flow_engine_set);
 
@@ -5226,11 +5068,11 @@ int mv_pp2x_cls_sw_flow_extra_set(struct mv_pp2x_cls_flow_entry *fe,
 		return MV_ERROR;
 
 	if (mv_pp2x_range_validate(type, 0,
-	    MVPP2_FLOW_PORT_ID_MAX) == MV_ERROR)
+				   MVPP2_FLOW_PORT_ID_MAX) == MV_ERROR)
 		return MV_ERROR;
 
 	if (mv_pp2x_range_validate(prio, 0,
-	    ((1 << MVPP2_FLOW_FIELD_ID_BITS) - 1)) == MV_ERROR)
+				   ((1 << MVPP2_FLOW_FIELD_ID_BITS) - 1)) == MV_ERROR)
 		return MV_ERROR;
 
 	fe->data[1] &= ~MVPP2_FLOW_LKP_TYPE_MASK;
@@ -5252,7 +5094,7 @@ int mv_pp2x_cls_hw_flow_hit_get(struct mv_pp2x_hw *hw,
 				int index,  unsigned int *cnt)
 {
 	if (mv_pp2x_range_validate(index, 0,
-	    MVPP2_CLS_FLOWS_TBL_SIZE) == MV_ERROR)
+				   MVPP2_CLS_FLOWS_TBL_SIZE) == MV_ERROR)
 		return MV_ERROR;
 
 	/*set index */
@@ -5274,7 +5116,7 @@ int mv_pp2x_cls_hw_lkp_hit_get(struct mv_pp2x_hw *hw, int lkpid, int way,
 		return MV_ERROR;
 
 	if (mv_pp2x_range_validate(lkpid, 0,
-	    MVPP2_CLS_LKP_TBL_SIZE) == MV_ERROR)
+				   MVPP2_CLS_LKP_TBL_SIZE) == MV_ERROR)
 		return MV_ERROR;
 
 	/*set index */
@@ -5295,11 +5137,7 @@ int mv_pp2x_cls_c2_qos_hw_read(struct mv_pp2x_hw *hw, int tbl_id,
 			       int tbl_sel, int tbl_line,
 			       struct mv_pp2x_cls_c2_qos_entry *qos)
 {
-#if defined(MY_DEF_HERE)
 	unsigned int reg_val = 0;
-#else /* MY_DEF_HERE */
-	unsigned int regVal = 0;
-#endif /* MY_DEF_HERE */
 
 	if (mv_pp2x_ptr_validate(qos) == MV_ERROR)
 		return MV_ERROR;
@@ -5311,19 +5149,19 @@ int mv_pp2x_cls_c2_qos_hw_read(struct mv_pp2x_hw *hw, int tbl_id,
 		/*dscp*/
 		/* TODO define 8=DSCP_TBL_NUM  64=DSCP_TBL_LINES */
 		if (mv_pp2x_range_validate(tbl_id, 0,
-		    MVPP2_QOS_TBL_NUM_DSCP) == MV_ERROR)
+					   MVPP2_QOS_TBL_NUM_DSCP) == MV_ERROR)
 			return MV_ERROR;
 		if (mv_pp2x_range_validate(tbl_line, 0,
-		    MVPP2_QOS_TBL_LINE_NUM_DSCP) == MV_ERROR)
+					   MVPP2_QOS_TBL_LINE_NUM_DSCP) == MV_ERROR)
 			return MV_ERROR;
 	} else {
 		/*pri*/
 		/* TODO define 64=PRI_TBL_NUM  8=PRI_TBL_LINES */
 		if (mv_pp2x_range_validate(tbl_id, 0,
-		    MVPP2_QOS_TBL_NUM_PRI) == MV_ERROR)
+					   MVPP2_QOS_TBL_NUM_PRI) == MV_ERROR)
 			return MV_ERROR;
 		if (mv_pp2x_range_validate(tbl_line, 0,
-		    MVPP2_QOS_TBL_LINE_NUM_PRI) == MV_ERROR)
+					   MVPP2_QOS_TBL_LINE_NUM_PRI) == MV_ERROR)
 			return MV_ERROR;
 	}
 
@@ -5332,21 +5170,11 @@ int mv_pp2x_cls_c2_qos_hw_read(struct mv_pp2x_hw *hw, int tbl_id,
 	qos->tbl_line = tbl_line;
 
 	/* write index reg */
-#if defined(MY_DEF_HERE)
 	reg_val |= (tbl_line << MVPP2_CLS2_DSCP_PRI_INDEX_LINE_OFF);
 	reg_val |= (tbl_sel << MVPP2_CLS2_DSCP_PRI_INDEX_SEL_OFF);
 	reg_val |= (tbl_id << MVPP2_CLS2_DSCP_PRI_INDEX_TBL_ID_OFF);
-#else /* MY_DEF_HERE */
-	regVal |= (tbl_line << MVPP2_CLS2_DSCP_PRI_INDEX_LINE_OFF);
-	regVal |= (tbl_sel << MVPP2_CLS2_DSCP_PRI_INDEX_SEL_OFF);
-	regVal |= (tbl_id << MVPP2_CLS2_DSCP_PRI_INDEX_TBL_ID_OFF);
-#endif /* MY_DEF_HERE */
 
-#if defined(MY_DEF_HERE)
 	mv_pp2x_write(hw, MVPP2_CLS2_DSCP_PRI_INDEX_REG, reg_val);
-#else /* MY_DEF_HERE */
-	mv_pp2x_write(hw, MVPP2_CLS2_DSCP_PRI_INDEX_REG, regVal);
-#endif /* MY_DEF_HERE */
 
 	/* read data reg*/
 	qos->data = mv_pp2x_read(hw, MVPP2_CLS2_QOS_TBL_REG);
@@ -5357,11 +5185,7 @@ EXPORT_SYMBOL(mv_pp2x_cls_c2_qos_hw_read);
 
 /*----------------------------------------------------------------------*/
 
-#if defined(MY_DEF_HERE)
 int mv_pp2_cls_c2_qos_prio_get(struct mv_pp2x_cls_c2_qos_entry *qos, int *prio)
-#else /* MY_DEF_HERE */
-int mvPp2ClsC2QosPrioGet(struct mv_pp2x_cls_c2_qos_entry *qos, int *prio)
-#endif /* MY_DEF_HERE */
 {
 	if (mv_pp2x_ptr_validate(qos) == MV_ERROR)
 		return MV_ERROR;
@@ -5373,19 +5197,11 @@ int mvPp2ClsC2QosPrioGet(struct mv_pp2x_cls_c2_qos_entry *qos, int *prio)
 		MVPP2_CLS2_QOS_TBL_PRI_OFF;
 	return MV_OK;
 }
-#if defined(MY_DEF_HERE)
 EXPORT_SYMBOL(mv_pp2_cls_c2_qos_prio_get);
-#else /* MY_DEF_HERE */
-EXPORT_SYMBOL(mvPp2ClsC2QosPrioGet);
-#endif /* MY_DEF_HERE */
 
 /*----------------------------------------------------------------------*/
 
-#if defined(MY_DEF_HERE)
 int mv_pp2_cls_c2_qos_dscp_get(struct mv_pp2x_cls_c2_qos_entry *qos, int *dscp)
-#else /* MY_DEF_HERE */
-int mvPp2ClsC2QosDscpGet(struct mv_pp2x_cls_c2_qos_entry *qos, int *dscp)
-#endif /* MY_DEF_HERE */
 {
 	if (mv_pp2x_ptr_validate(qos) == MV_ERROR)
 		return MV_ERROR;
@@ -5397,19 +5213,11 @@ int mvPp2ClsC2QosDscpGet(struct mv_pp2x_cls_c2_qos_entry *qos, int *dscp)
 		MVPP2_CLS2_QOS_TBL_DSCP_OFF;
 	return MV_OK;
 }
-#if defined(MY_DEF_HERE)
 EXPORT_SYMBOL(mv_pp2_cls_c2_qos_dscp_get);
-#else /* MY_DEF_HERE */
-EXPORT_SYMBOL(mvPp2ClsC2QosDscpGet);
-#endif /* MY_DEF_HERE */
 
 /*----------------------------------------------------------------------*/
 
-#if defined(MY_DEF_HERE)
 int mv_pp2_cls_c2_qos_color_get(struct mv_pp2x_cls_c2_qos_entry *qos, int *color)
-#else /* MY_DEF_HERE */
-int mvPp2ClsC2QosColorGet(struct mv_pp2x_cls_c2_qos_entry *qos, int *color)
-#endif /* MY_DEF_HERE */
 {
 	if (mv_pp2x_ptr_validate(qos) == MV_ERROR)
 		return MV_ERROR;
@@ -5421,19 +5229,11 @@ int mvPp2ClsC2QosColorGet(struct mv_pp2x_cls_c2_qos_entry *qos, int *color)
 		MVPP2_CLS2_QOS_TBL_COLOR_OFF;
 	return MV_OK;
 }
-#if defined(MY_DEF_HERE)
 EXPORT_SYMBOL(mv_pp2_cls_c2_qos_color_get);
-#else /* MY_DEF_HERE */
-EXPORT_SYMBOL(mvPp2ClsC2QosColorGet);
-#endif /* MY_DEF_HERE */
 
 /*----------------------------------------------------------------------*/
 
-#if defined(MY_DEF_HERE)
 int mv_pp2_cls_c2_qos_gpid_get(struct mv_pp2x_cls_c2_qos_entry *qos, int *gpid)
-#else /* MY_DEF_HERE */
-int mvPp2ClsC2QosGpidGet(struct mv_pp2x_cls_c2_qos_entry *qos, int *gpid)
-#endif /* MY_DEF_HERE */
 {
 	if (mv_pp2x_ptr_validate(qos) == MV_ERROR)
 		return MV_ERROR;
@@ -5445,19 +5245,11 @@ int mvPp2ClsC2QosGpidGet(struct mv_pp2x_cls_c2_qos_entry *qos, int *gpid)
 		MVPP2_CLS2_QOS_TBL_GEMPORT_OFF;
 	return MV_OK;
 }
-#if defined(MY_DEF_HERE)
 EXPORT_SYMBOL(mv_pp2_cls_c2_qos_gpid_get);
-#else /* MY_DEF_HERE */
-EXPORT_SYMBOL(mvPp2ClsC2QosGpidGet);
-#endif /* MY_DEF_HERE */
 
 /*----------------------------------------------------------------------*/
 
-#if defined(MY_DEF_HERE)
 int mv_pp2_cls_c2_qos_queue_get(struct mv_pp2x_cls_c2_qos_entry *qos, int *queue)
-#else /* MY_DEF_HERE */
-int mvPp2ClsC2QosQueueGet(struct mv_pp2x_cls_c2_qos_entry *qos, int *queue)
-#endif /* MY_DEF_HERE */
 {
 	if (mv_pp2x_ptr_validate(qos) == MV_ERROR)
 		return MV_ERROR;
@@ -5469,11 +5261,7 @@ int mvPp2ClsC2QosQueueGet(struct mv_pp2x_cls_c2_qos_entry *qos, int *queue)
 		MVPP2_CLS2_QOS_TBL_QUEUENUM_OFF;
 	return MV_OK;
 }
-#if defined(MY_DEF_HERE)
 EXPORT_SYMBOL(mv_pp2_cls_c2_qos_queue_get);
-#else /* MY_DEF_HERE */
-EXPORT_SYMBOL(mvPp2ClsC2QosQueueGet);
-#endif /* MY_DEF_HERE */
 
 /*----------------------------------------------------------------------*/
 /*	Classifier C2 engine TCAM table Public APIs			*/
@@ -5485,13 +5273,8 @@ EXPORT_SYMBOL(mvPp2ClsC2QosQueueGet);
 int mv_pp2x_cls_c2_hw_read(struct mv_pp2x_hw *hw, int index,
 			   struct mv_pp2x_cls_c2_entry *c2)
 {
-#if defined(MY_DEF_HERE)
 	unsigned int reg_val;
 	int	tcm_idx;
-#else /* MY_DEF_HERE */
-	unsigned int regVal;
-	int	TcmIdx;
-#endif /* MY_DEF_HERE */
 
 	if (mv_pp2x_ptr_validate(c2) == MV_ERROR)
 		return MV_ERROR;
@@ -5502,27 +5285,16 @@ int mv_pp2x_cls_c2_hw_read(struct mv_pp2x_hw *hw, int index,
 	mv_pp2x_write(hw, MVPP2_CLS2_TCAM_IDX_REG, index);
 
 	/* read inValid bit*/
-#if defined(MY_DEF_HERE)
 	reg_val = mv_pp2x_read(hw, MVPP2_CLS2_TCAM_INV_REG);
 	c2->inv = (reg_val & MVPP2_CLS2_TCAM_INV_INVALID_MASK) >>
-#else /* MY_DEF_HERE */
-	regVal = mv_pp2x_read(hw, MVPP2_CLS2_TCAM_INV_REG);
-	c2->inv = (regVal & MVPP2_CLS2_TCAM_INV_INVALID_MASK) >>
-#endif /* MY_DEF_HERE */
 		MVPP2_CLS2_TCAM_INV_INVALID_OFF;
 
 	if (c2->inv)
 		return MV_OK;
 
-#if defined(MY_DEF_HERE)
 	for (tcm_idx = 0; tcm_idx < MVPP2_CLS_C2_TCAM_WORDS; tcm_idx++)
 		c2->tcam.words[tcm_idx] = mv_pp2x_read(hw,
 					MVPP2_CLS2_TCAM_DATA_REG(tcm_idx));
-#else /* MY_DEF_HERE */
-	for (TcmIdx = 0; TcmIdx < MVPP2_CLS_C2_TCAM_WORDS; TcmIdx++)
-		c2->tcam.words[TcmIdx] = mv_pp2x_read(hw,
-					MVPP2_CLS2_TCAM_DATA_REG(TcmIdx));
-#endif /* MY_DEF_HERE */
 
 	/* read action_tbl 0x1B30 */
 	c2->sram.regs.action_tbl = mv_pp2x_read(hw, MVPP2_CLS2_ACT_DATA_REG);
@@ -5548,12 +5320,8 @@ EXPORT_SYMBOL(mv_pp2x_cls_c2_hw_read);
 
 /*----------------------------------------------------------------------*/
 
-#if defined(MY_DEF_HERE)
 int mv_pp2_cls_c2_tcam_byte_get(struct mv_pp2x_cls_c2_entry *c2,
-#else /* MY_DEF_HERE */
-int mvPp2ClsC2TcamByteGet(struct mv_pp2x_cls_c2_entry *c2,
-#endif /* MY_DEF_HERE */
-			  unsigned int offs, unsigned char *byte,
+				unsigned int offs, unsigned char *byte,
 			  unsigned char *enable)
 {
 	if (mv_pp2x_ptr_validate(c2) == MV_ERROR)
@@ -5581,27 +5349,13 @@ int mvPp2ClsC2TcamByteGet(struct mv_pp2x_cls_c2_entry *c2,
 
 int mv_pp2x_cls_c2_hit_cntr_is_busy(struct mv_pp2x_hw *hw)
 {
-#if defined(MY_DEF_HERE)
 	unsigned int reg_val;
-#else /* MY_DEF_HERE */
-	unsigned int regVal;
-#endif /* MY_DEF_HERE */
 
-#if defined(MY_DEF_HERE)
 	reg_val = mv_pp2x_read(hw, MVPP2_CLS2_HIT_CTR_REG);
 	reg_val &= MVPP2_CLS2_HIT_CTR_CLR_DONE_MASK;
 	reg_val >>= MVPP2_CLS2_HIT_CTR_CLR_DONE_OFF;
-#else /* MY_DEF_HERE */
-	regVal = mv_pp2x_read(hw, MVPP2_CLS2_HIT_CTR_REG);
-	regVal &= MVPP2_CLS2_HIT_CTR_CLR_DONE_MASK;
-	regVal >>= MVPP2_CLS2_HIT_CTR_CLR_DONE_OFF;
-#endif /* MY_DEF_HERE */
 
-#if defined(MY_DEF_HERE)
 	return (1 - (int)reg_val);
-#else /* MY_DEF_HERE */
-	return (1 - (int)regVal);
-#endif /* MY_DEF_HERE */
 }
 
 /*----------------------------------------------------------------------*/
@@ -5612,7 +5366,7 @@ int mv_pp2x_cls_c2_hit_cntr_clear_all(struct mv_pp2x_hw *hw)
 
 	/* wrirte clear bit*/
 	mv_pp2x_write(hw, MVPP2_CLS2_HIT_CTR_CLR_REG,
-		(1 << MVPP2_CLS2_HIT_CTR_CLR_CLR_OFF));
+		      (1 << MVPP2_CLS2_HIT_CTR_CLR_CLR_OFF));
 
 	while (mv_pp2x_cls_c2_hit_cntr_is_busy(hw))
 		if (iter++ >= RETRIES_EXCEEDED) {
@@ -5681,11 +5435,7 @@ void mv_pp2x_cls_flow_tbl_temp_copy(struct mv_pp2x_hw *hw, int lkpid,
 	int flow_start = hw->cls_shadow->flow_free_start;
 	struct mv_pp2x_cls_flow_info *flow_info;
 
-#if defined(MY_DEF_HERE)
 	flow_info = &hw->cls_shadow->flow_info[index];
-#else /* MY_DEF_HERE */
-	flow_info = &(hw->cls_shadow->flow_info[index]);
-#endif /* MY_DEF_HERE */
 
 	if (flow_info->flow_entry_dflt) {
 		mv_pp2x_cls_flow_read(hw, flow_info->flow_entry_dflt, &fe);
@@ -5720,11 +5470,7 @@ void mv_pp2x_cls_flow_tbl_temp_copy(struct mv_pp2x_hw *hw, int lkpid,
 int mv_pp2x_cls_c2_hw_write(struct mv_pp2x_hw *hw, int index,
 			    struct mv_pp2x_cls_c2_entry *c2)
 {
-#if defined(MY_DEF_HERE)
 	int tcm_idx;
-#else /* MY_DEF_HERE */
-	int TcmIdx;
-#endif /* MY_DEF_HERE */
 
 	if (!c2 || index >= MVPP2_CLS_C2_TCAM_SIZE)
 		return -EINVAL;
@@ -5734,28 +5480,7 @@ int mv_pp2x_cls_c2_hw_write(struct mv_pp2x_hw *hw, int index,
 	/* write index reg */
 	mv_pp2x_write(hw, MVPP2_CLS2_TCAM_IDX_REG, index);
 
-#if defined(MY_DEF_HERE)
-//do nothing
-#else /* MY_DEF_HERE */
-	/* write valid bit*/
-	c2->inv = 0;
-	mv_pp2x_write(hw, MVPP2_CLS2_TCAM_INV_REG,
-		((c2->inv) << MVPP2_CLS2_TCAM_INV_INVALID_OFF));
-
-#endif /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
 	mv_pp2x_cls_c2_hw_inv(hw, index);
-#else /* MY_DEF_HERE */
-	for (tcm_idx = 0; tcm_idx < MVPP2_CLS_C2_TCAM_WORDS; tcm_idx++)
-		mv_pp2x_write(hw, MVPP2_CLS2_TCAM_DATA_REG(tcm_idx),
-			      c2->tcam.words[tcm_idx]);
-#endif /* MY_DEF_HERE */
-#else /* MY_DEF_HERE */
-	for (TcmIdx = 0; TcmIdx < MVPP2_CLS_C2_TCAM_WORDS; TcmIdx++)
-		mv_pp2x_write(hw, MVPP2_CLS2_TCAM_DATA_REG(TcmIdx),
-			c2->tcam.words[TcmIdx]);
-#endif /* MY_DEF_HERE */
 
 	/* write action_tbl CLSC2_ACT_DATA */
 	mv_pp2x_write(hw, MVPP2_CLS2_ACT_DATA_REG, c2->sram.regs.action_tbl);
@@ -5772,7 +5497,6 @@ int mv_pp2x_cls_c2_hw_write(struct mv_pp2x_hw *hw, int index,
 	/* write rss_attr CLSC2_ATTR2 */
 	mv_pp2x_write(hw, MVPP2_CLS2_ACT_DUP_ATTR_REG, c2->sram.regs.rss_attr);
 
-#if defined(MY_DEF_HERE)
 	/* write valid bit*/
 	c2->inv = 0;
 	mv_pp2x_write(hw, MVPP2_CLS2_TCAM_INV_REG,
@@ -5782,7 +5506,6 @@ int mv_pp2x_cls_c2_hw_write(struct mv_pp2x_hw *hw, int index,
 		mv_pp2x_write(hw, MVPP2_CLS2_TCAM_DATA_REG(tcm_idx),
 			      c2->tcam.words[tcm_idx]);
 
-#endif /* MY_DEF_HERE */
 	return 0;
 }
 EXPORT_SYMBOL(mv_pp2x_cls_c2_hw_write);
@@ -5790,11 +5513,7 @@ EXPORT_SYMBOL(mv_pp2x_cls_c2_hw_write);
 int mv_pp2x_cls_c2_qos_hw_write(struct mv_pp2x_hw *hw,
 				struct mv_pp2x_cls_c2_qos_entry *qos)
 {
-#if defined(MY_DEF_HERE)
 	unsigned int reg_val = 0;
-#else /* MY_DEF_HERE */
-	unsigned int regVal = 0;
-#endif /* MY_DEF_HERE */
 
 	if (!qos || qos->tbl_sel > MVPP2_QOS_TBL_SEL_DSCP)
 		return -EINVAL;
@@ -5802,26 +5521,19 @@ int mv_pp2x_cls_c2_qos_hw_write(struct mv_pp2x_hw *hw,
 	if (qos->tbl_sel == MVPP2_QOS_TBL_SEL_DSCP) {
 		/*dscp*/
 		if (qos->tbl_id >=  MVPP2_QOS_TBL_NUM_DSCP ||
-			qos->tbl_line >= MVPP2_QOS_TBL_LINE_NUM_DSCP)
+		    qos->tbl_line >= MVPP2_QOS_TBL_LINE_NUM_DSCP)
 			return -EINVAL;
 	} else {
 		/*pri*/
 		if (qos->tbl_id >=  MVPP2_QOS_TBL_NUM_PRI ||
-			qos->tbl_line >= MVPP2_QOS_TBL_LINE_NUM_PRI)
+		    qos->tbl_line >= MVPP2_QOS_TBL_LINE_NUM_PRI)
 			return -EINVAL;
 	}
 	/* write index reg */
-#if defined(MY_DEF_HERE)
 	reg_val |= (qos->tbl_line << MVPP2_CLS2_DSCP_PRI_INDEX_LINE_OFF);
 	reg_val |= (qos->tbl_sel << MVPP2_CLS2_DSCP_PRI_INDEX_SEL_OFF);
 	reg_val |= (qos->tbl_id << MVPP2_CLS2_DSCP_PRI_INDEX_TBL_ID_OFF);
 	mv_pp2x_write(hw, MVPP2_CLS2_DSCP_PRI_INDEX_REG, reg_val);
-#else /* MY_DEF_HERE */
-	regVal |= (qos->tbl_line << MVPP2_CLS2_DSCP_PRI_INDEX_LINE_OFF);
-	regVal |= (qos->tbl_sel << MVPP2_CLS2_DSCP_PRI_INDEX_SEL_OFF);
-	regVal |= (qos->tbl_id << MVPP2_CLS2_DSCP_PRI_INDEX_TBL_ID_OFF);
-	mv_pp2x_write(hw, MVPP2_CLS2_DSCP_PRI_INDEX_REG, regVal);
-#endif /* MY_DEF_HERE */
 
 	/* write data reg*/
 	mv_pp2x_write(hw, MVPP2_CLS2_QOS_TBL_REG, qos->data);
@@ -5931,7 +5643,7 @@ int mv_pp2x_cls_c2_prio_set(struct mv_pp2x_cls_c2_entry *c2, int cmd,
 			    int prio, int from)
 {
 	if (!c2 || cmd > MVPP2_ACTION_TYPE_UPDT_LOCK ||
-			prio >= MVPP2_QOS_TBL_LINE_NUM_PRI)
+	    prio >= MVPP2_QOS_TBL_LINE_NUM_PRI)
 		return -EINVAL;
 
 	/*set command*/
@@ -5958,7 +5670,7 @@ int mv_pp2x_cls_c2_dscp_set(struct mv_pp2x_cls_c2_entry *c2,
 			    int cmd, int dscp, int from)
 {
 	if (!c2 || cmd > MVPP2_ACTION_TYPE_UPDT_LOCK ||
-			dscp >= MVPP2_QOS_TBL_LINE_NUM_DSCP)
+	    dscp >= MVPP2_QOS_TBL_LINE_NUM_DSCP)
 		return -EINVAL;
 
 	/*set command*/
@@ -5986,7 +5698,7 @@ int mv_pp2x_cls_c2_queue_low_set(struct mv_pp2x_cls_c2_entry *c2,
 				 int cmd, int queue, int from)
 {
 	if (!c2 || cmd > MVPP2_ACTION_TYPE_UPDT_LOCK ||
-			queue >= (1 << MVPP2_CLS2_ACT_QOS_ATTR_QL_BITS))
+	    queue >= (1 << MVPP2_CLS2_ACT_QOS_ATTR_QL_BITS))
 		return -EINVAL;
 
 	/*set command*/
@@ -6014,7 +5726,7 @@ int mv_pp2x_cls_c2_queue_high_set(struct mv_pp2x_cls_c2_entry *c2,
 				  int cmd, int queue, int from)
 {
 	if (!c2 || cmd > MVPP2_ACTION_TYPE_UPDT_LOCK ||
-			queue >= (1 << MVPP2_CLS2_ACT_QOS_ATTR_QH_BITS))
+	    queue >= (1 << MVPP2_CLS2_ACT_QOS_ATTR_QH_BITS))
 		return -EINVAL;
 
 	/*set command*/
@@ -6126,7 +5838,7 @@ static int mv_pp2x_c2_tcam_set(struct mv_pp2x_hw *hw,
 
 	/* Set QOS table, selection and ID */
 	ret_code = mv_pp2x_cls_c2_qos_tbl_set(&c2_entry,
-					c2_add_entry->qos_info.qos_tbl_index,
+					      c2_add_entry->qos_info.qos_tbl_index,
 					c2_add_entry->qos_info.qos_tbl_type);
 	if (ret_code)
 		return ret_code;
@@ -6164,7 +5876,7 @@ static int mv_pp2x_c2_tcam_set(struct mv_pp2x_hw *hw,
 
 	/* Set queue high, cmd, value and source */
 	ret_code = mv_pp2x_cls_c2_queue_high_set(&c2_entry,
-					c2_add_entry->action.q_high_act,
+						 c2_add_entry->action.q_high_act,
 					c2_add_entry->qos_value.q_high,
 					c2_add_entry->qos_info.q_high_src);
 	if (ret_code)
@@ -6270,11 +5982,7 @@ static int mv_pp2x_c2_rule_add(struct mv_pp2x_port *port,
 	bool first_free_update = false;
 	struct mv_pp2x_c2_rule_idx *rule_idx;
 
-#if defined(MY_DEF_HERE)
 	rule_idx = &port->priv->hw.c2_shadow->rule_idx_info[port->id];
-#else /* MY_DEF_HERE */
-	rule_idx = &(port->priv->hw.c2_shadow->rule_idx_info[port->id]);
-#endif /* MY_DEF_HERE */
 
 	if (!port || !c2_add_entry)
 		return -EINVAL;
@@ -6470,24 +6178,15 @@ EXPORT_SYMBOL(mv_pp2x_cls_c2_rule_set);
 /* The function get the queue in the C2 rule with input index */
 u8 mv_pp2x_cls_c2_rule_queue_get(struct mv_pp2x_hw *hw, u32 rule_idx)
 {
-#if defined(MY_DEF_HERE)
 	u32 reg_val;
-#else /* MY_DEF_HERE */
-	u32 regVal;
-#endif /* MY_DEF_HERE */
 	u8 queue;
 
 	/* Write index reg */
 	mv_pp2x_write(hw, MVPP2_CLS2_TCAM_IDX_REG, rule_idx);
 
 	/* Read Reg CLSC2_ATTR0 */
-#if defined(MY_DEF_HERE)
 	reg_val = mv_pp2x_read(hw, MVPP2_CLS2_ACT_QOS_ATTR_REG);
 	queue = (reg_val & (MVPP2_CLS2_ACT_QOS_ATTR_QL_MASK |
-#else /* MY_DEF_HERE */
-	regVal = mv_pp2x_read(hw, MVPP2_CLS2_ACT_QOS_ATTR_REG);
-	queue = (regVal & (MVPP2_CLS2_ACT_QOS_ATTR_QL_MASK |
-#endif /* MY_DEF_HERE */
 			MVPP2_CLS2_ACT_QOS_ATTR_QH_MASK)) >>
 			MVPP2_CLS2_ACT_QOS_ATTR_QL_OFF;
 	return queue;
@@ -6497,40 +6196,20 @@ u8 mv_pp2x_cls_c2_rule_queue_get(struct mv_pp2x_hw *hw, u32 rule_idx)
 void mv_pp2x_cls_c2_rule_queue_set(struct mv_pp2x_hw *hw, u32 rule_idx,
 				   u8 queue)
 {
-#if defined(MY_DEF_HERE)
 	u32 reg_val;
-#else /* MY_DEF_HERE */
-	u32 regVal;
-#endif /* MY_DEF_HERE */
 
 	/* Write index reg */
 	mv_pp2x_write(hw, MVPP2_CLS2_TCAM_IDX_REG, rule_idx);
 
 	/* Read Reg CLSC2_ATTR0 */
-#if defined(MY_DEF_HERE)
 	reg_val = mv_pp2x_read(hw, MVPP2_CLS2_ACT_QOS_ATTR_REG);
-#else /* MY_DEF_HERE */
-	regVal = mv_pp2x_read(hw, MVPP2_CLS2_ACT_QOS_ATTR_REG);
-#endif /* MY_DEF_HERE */
 	/* Update Value */
-#if defined(MY_DEF_HERE)
 	reg_val &= (~(MVPP2_CLS2_ACT_QOS_ATTR_QL_MASK |
-#else /* MY_DEF_HERE */
-	regVal &= (~(MVPP2_CLS2_ACT_QOS_ATTR_QL_MASK |
-#endif /* MY_DEF_HERE */
 			MVPP2_CLS2_ACT_QOS_ATTR_QH_MASK));
-#if defined(MY_DEF_HERE)
 	reg_val |= (((u32)queue) << MVPP2_CLS2_ACT_QOS_ATTR_QL_OFF);
-#else /* MY_DEF_HERE */
-	regVal |= (((u32)queue) << MVPP2_CLS2_ACT_QOS_ATTR_QL_OFF);
-#endif /* MY_DEF_HERE */
 
 	/* Write Reg CLSC2_ATTR0 */
-#if defined(MY_DEF_HERE)
 	mv_pp2x_write(hw, MVPP2_CLS2_ACT_QOS_ATTR_REG, reg_val);
-#else /* MY_DEF_HERE */
-	mv_pp2x_write(hw, MVPP2_CLS2_ACT_QOS_ATTR_REG, regVal);
-#endif /* MY_DEF_HERE */
 }
 
 /* The function get the queue in the pbit table entry */
@@ -6538,36 +6217,17 @@ u8 mv_pp2x_cls_c2_pbit_tbl_queue_get(struct mv_pp2x_hw *hw, u8 tbl_id,
 				     u8 tbl_line)
 {
 	u8 queue;
-#if defined(MY_DEF_HERE)
 	u32 reg_val = 0;
-#else /* MY_DEF_HERE */
-	u32 regVal = 0;
-#endif /* MY_DEF_HERE */
 
 	/* write index reg */
-#if defined(MY_DEF_HERE)
 	reg_val |= (tbl_line << MVPP2_CLS2_DSCP_PRI_INDEX_LINE_OFF);
 	reg_val |= (MVPP2_QOS_TBL_SEL_PRI <<
-#else /* MY_DEF_HERE */
-	regVal |= (tbl_line << MVPP2_CLS2_DSCP_PRI_INDEX_LINE_OFF);
-	regVal |= (MVPP2_QOS_TBL_SEL_PRI <<
-#endif /* MY_DEF_HERE */
 			MVPP2_CLS2_DSCP_PRI_INDEX_SEL_OFF);
-#if defined(MY_DEF_HERE)
 	reg_val |= (tbl_id << MVPP2_CLS2_DSCP_PRI_INDEX_TBL_ID_OFF);
 	mv_pp2x_write(hw, MVPP2_CLS2_DSCP_PRI_INDEX_REG, reg_val);
-#else /* MY_DEF_HERE */
-	regVal |= (tbl_id << MVPP2_CLS2_DSCP_PRI_INDEX_TBL_ID_OFF);
-	mv_pp2x_write(hw, MVPP2_CLS2_DSCP_PRI_INDEX_REG, regVal);
-#endif /* MY_DEF_HERE */
 	/* Read Reg CLSC2_DSCP_PRI */
-#if defined(MY_DEF_HERE)
 	reg_val = mv_pp2x_read(hw, MVPP2_CLS2_QOS_TBL_REG);
 	queue = (reg_val &  MVPP2_CLS2_QOS_TBL_QUEUENUM_MASK) >>
-#else /* MY_DEF_HERE */
-	regVal = mv_pp2x_read(hw, MVPP2_CLS2_QOS_TBL_REG);
-	queue = (regVal &  MVPP2_CLS2_QOS_TBL_QUEUENUM_MASK) >>
-#endif /* MY_DEF_HERE */
 			MVPP2_CLS2_QOS_TBL_QUEUENUM_OFF;
 
 	return queue;
@@ -6577,46 +6237,22 @@ u8 mv_pp2x_cls_c2_pbit_tbl_queue_get(struct mv_pp2x_hw *hw, u8 tbl_id,
 void mv_pp2x_cls_c2_pbit_tbl_queue_set(struct mv_pp2x_hw *hw,
 				       u8 tbl_id, u8 tbl_line, u8 queue)
 {
-#if defined(MY_DEF_HERE)
 	u32 reg_val = 0;
-#else /* MY_DEF_HERE */
-	u32 regVal = 0;
-#endif /* MY_DEF_HERE */
 
 	/* write index reg */
-#if defined(MY_DEF_HERE)
 	reg_val |= (tbl_line << MVPP2_CLS2_DSCP_PRI_INDEX_LINE_OFF);
 	reg_val |=
-#else /* MY_DEF_HERE */
-	regVal |= (tbl_line << MVPP2_CLS2_DSCP_PRI_INDEX_LINE_OFF);
-	regVal |=
-#endif /* MY_DEF_HERE */
 		(MVPP2_QOS_TBL_SEL_PRI << MVPP2_CLS2_DSCP_PRI_INDEX_SEL_OFF);
-#if defined(MY_DEF_HERE)
 	reg_val |= (tbl_id << MVPP2_CLS2_DSCP_PRI_INDEX_TBL_ID_OFF);
 	mv_pp2x_write(hw, MVPP2_CLS2_DSCP_PRI_INDEX_REG, reg_val);
-#else /* MY_DEF_HERE */
-	regVal |= (tbl_id << MVPP2_CLS2_DSCP_PRI_INDEX_TBL_ID_OFF);
-	mv_pp2x_write(hw, MVPP2_CLS2_DSCP_PRI_INDEX_REG, regVal);
-#endif /* MY_DEF_HERE */
 
 	/* Read Reg CLSC2_DSCP_PRI */
-#if defined(MY_DEF_HERE)
 	reg_val = mv_pp2x_read(hw, MVPP2_CLS2_QOS_TBL_REG);
 	reg_val &= (~MVPP2_CLS2_QOS_TBL_QUEUENUM_MASK);
 	reg_val |= (((u32)queue) << MVPP2_CLS2_QOS_TBL_QUEUENUM_OFF);
-#else /* MY_DEF_HERE */
-	regVal = mv_pp2x_read(hw, MVPP2_CLS2_QOS_TBL_REG);
-	regVal &= (~MVPP2_CLS2_QOS_TBL_QUEUENUM_MASK);
-	regVal |= (((u32)queue) << MVPP2_CLS2_QOS_TBL_QUEUENUM_OFF);
-#endif /* MY_DEF_HERE */
 
 	/* Write Reg CLSC2_DSCP_PRI */
-#if defined(MY_DEF_HERE)
 	mv_pp2x_write(hw, MVPP2_CLS2_QOS_TBL_REG, reg_val);
-#else /* MY_DEF_HERE */
-	mv_pp2x_write(hw, MVPP2_CLS2_QOS_TBL_REG, regVal);
-#endif /* MY_DEF_HERE */
 }
 
 /* RSS */
@@ -6624,11 +6260,7 @@ void mv_pp2x_cls_c2_pbit_tbl_queue_set(struct mv_pp2x_hw *hw,
 int mv_pp22_rss_tbl_entry_set(struct mv_pp2x_hw *hw,
 			      struct mv_pp22_rss_entry *rss)
 {
-#if defined(MY_DEF_HERE)
 	unsigned int reg_val = 0;
-#else /* MY_DEF_HERE */
-	unsigned int regVal = 0;
-#endif /* MY_DEF_HERE */
 
 	if (!rss || rss->sel > MVPP22_RSS_ACCESS_TBL)
 		return -EINVAL;
@@ -6637,65 +6269,31 @@ int mv_pp22_rss_tbl_entry_set(struct mv_pp2x_hw *hw,
 		if (rss->u.pointer.rss_tbl_ptr >= MVPP22_RSS_TBL_NUM)
 			return -EINVAL;
 		/* Write index */
-#if defined(MY_DEF_HERE)
 		reg_val |= rss->u.pointer.rxq_idx <<
-#else /* MY_DEF_HERE */
-		regVal |= rss->u.pointer.rxq_idx <<
-#endif /* MY_DEF_HERE */
 				MVPP22_RSS_IDX_RXQ_NUM_OFF;
-#if defined(MY_DEF_HERE)
 		mv_pp2x_write(hw, MVPP22_RSS_IDX_REG, reg_val);
-#else /* MY_DEF_HERE */
-		mv_pp2x_write(hw, MVPP22_RSS_IDX_REG, regVal);
-#endif /* MY_DEF_HERE */
 		/* Write entry */
-#if defined(MY_DEF_HERE)
 		reg_val &= (~MVPP22_RSS_RXQ2RSS_TBL_POINT_MASK);
 		reg_val |= rss->u.pointer.rss_tbl_ptr <<
-#else /* MY_DEF_HERE */
-		regVal &= (~MVPP22_RSS_RXQ2RSS_TBL_POINT_MASK);
-		regVal |= rss->u.pointer.rss_tbl_ptr <<
-#endif /* MY_DEF_HERE */
 				MVPP22_RSS_RXQ2RSS_TBL_POINT_OFF;
-#if defined(MY_DEF_HERE)
 		mv_pp2x_write(hw, MVPP22_RSS_RXQ2RSS_TBL_REG, reg_val);
-#else /* MY_DEF_HERE */
-		mv_pp2x_write(hw, MVPP22_RSS_RXQ2RSS_TBL_REG, regVal);
-#endif /* MY_DEF_HERE */
 	} else if (rss->sel == MVPP22_RSS_ACCESS_TBL) {
 		if (rss->u.entry.tbl_id >= MVPP22_RSS_TBL_NUM ||
 		    rss->u.entry.tbl_line >= MVPP22_RSS_TBL_LINE_NUM ||
 		    rss->u.entry.width >= MVPP22_RSS_WIDTH_MAX)
 			return -EINVAL;
 		/* Write index */
-#if defined(MY_DEF_HERE)
 		reg_val |= (rss->u.entry.tbl_line <<
-#else /* MY_DEF_HERE */
-		regVal |= (rss->u.entry.tbl_line <<
-#endif /* MY_DEF_HERE */
 				MVPP22_RSS_IDX_ENTRY_NUM_OFF |
 			   rss->u.entry.tbl_id << MVPP22_RSS_IDX_TBL_NUM_OFF);
-#if defined(MY_DEF_HERE)
 		mv_pp2x_write(hw, MVPP22_RSS_IDX_REG, reg_val);
-#else /* MY_DEF_HERE */
-		mv_pp2x_write(hw, MVPP22_RSS_IDX_REG, regVal);
-#endif /* MY_DEF_HERE */
 		/* Write entry */
-#if defined(MY_DEF_HERE)
 		reg_val &= (~MVPP22_RSS_TBL_ENTRY_MASK);
 		reg_val |= (rss->u.entry.rxq << MVPP22_RSS_TBL_ENTRY_OFF);
 		mv_pp2x_write(hw, MVPP22_RSS_TBL_ENTRY_REG, reg_val);
 		reg_val &= (~MVPP22_RSS_WIDTH_MASK);
 		reg_val |= (rss->u.entry.width << MVPP22_RSS_WIDTH_OFF);
 		mv_pp2x_write(hw, MVPP22_RSS_WIDTH_REG, reg_val);
-#else /* MY_DEF_HERE */
-		regVal &= (~MVPP22_RSS_TBL_ENTRY_MASK);
-		regVal |= (rss->u.entry.rxq << MVPP22_RSS_TBL_ENTRY_OFF);
-		mv_pp2x_write(hw, MVPP22_RSS_TBL_ENTRY_REG, regVal);
-		regVal &= (~MVPP22_RSS_WIDTH_MASK);
-		regVal |= (rss->u.entry.width << MVPP22_RSS_WIDTH_OFF);
-		mv_pp2x_write(hw, MVPP22_RSS_WIDTH_REG, regVal);
-#endif /* MY_DEF_HERE */
 	}
 	return 0;
 }
@@ -6704,16 +6302,16 @@ int mv_pp22_rss_tbl_entry_set(struct mv_pp2x_hw *hw,
 int mv_pp22_rss_tbl_entry_get(struct mv_pp2x_hw *hw,
 			      struct mv_pp22_rss_entry *rss)
 {
-#if defined(MY_DEF_HERE)
 	unsigned int reg_val = 0;
-#else /* MY_DEF_HERE */
-	unsigned int regVal = 0;
-#endif /* MY_DEF_HERE */
 
 	if (!rss || rss->sel > MVPP22_RSS_ACCESS_TBL)
 		return -EINVAL;
 
 	if (rss->sel == MVPP22_RSS_ACCESS_POINTER) {
+		/* Set index */
+		reg_val |= (rss->u.pointer.rxq_idx <<
+				MVPP22_RSS_IDX_RXQ_NUM_OFF);
+		mv_pp2x_write(hw, MVPP22_RSS_IDX_REG, reg_val);
 		/* Read entry */
 		rss->u.pointer.rss_tbl_ptr =
 			mv_pp2x_read(hw, MVPP22_RSS_RXQ2RSS_TBL_REG) &
@@ -6723,19 +6321,11 @@ int mv_pp22_rss_tbl_entry_get(struct mv_pp2x_hw *hw,
 		    rss->u.entry.tbl_line >= MVPP22_RSS_TBL_LINE_NUM)
 			return -EINVAL;
 		/* Read index */
-#if defined(MY_DEF_HERE)
 		reg_val |= (rss->u.entry.tbl_line <<
-#else /* MY_DEF_HERE */
-		regVal |= (rss->u.entry.tbl_line <<
-#endif /* MY_DEF_HERE */
 				MVPP22_RSS_IDX_ENTRY_NUM_OFF |
 			   rss->u.entry.tbl_id <<
 				MVPP22_RSS_IDX_TBL_NUM_OFF);
-#if defined(MY_DEF_HERE)
 		mv_pp2x_write(hw, MVPP22_RSS_IDX_REG, reg_val);
-#else /* MY_DEF_HERE */
-		mv_pp2x_write(hw, MVPP22_RSS_IDX_REG, regVal);
-#endif /* MY_DEF_HERE */
 		/* Read entry */
 		rss->u.entry.rxq = mv_pp2x_read(hw,
 						MVPP22_RSS_TBL_ENTRY_REG) &
@@ -6797,11 +6387,7 @@ void mv_pp22_rss_c2_enable(struct mv_pp2x_port *port, bool en)
 	int c2_index[MVPP2_CLS_LKP_MAX];
 	struct mv_pp2x_c2_rule_idx *rule_idx;
 
-#if defined(MY_DEF_HERE)
 	rule_idx = &port->priv->hw.c2_shadow->rule_idx_info[port->id];
-#else /* MY_DEF_HERE */
-	rule_idx = &(port->priv->hw.c2_shadow->rule_idx_info[port->id]);
-#endif /* MY_DEF_HERE */
 
 	/* Get the C2 index from shadow */
 	c2_index[MVPP2_CLS_LKP_VLAN_PRI] = rule_idx->vlan_pri_idx;
@@ -6836,7 +6422,6 @@ void mv_pp2x_tx_fifo_threshold_set(struct mv_pp2x_hw *hw, u32 port_id, u32 val)
 /* Check number of buffers in BM pool */
 int mv_pp2x_check_hw_buf_num(struct mv_pp2x *priv, struct mv_pp2x_bm_pool *bm_pool)
 {
-
 	int buf_num = 0;
 
 	buf_num += mv_pp2x_read(&priv->hw, MVPP2_BM_POOL_PTRS_NUM_REG(bm_pool->id))
@@ -6850,8 +6435,6 @@ int mv_pp2x_check_hw_buf_num(struct mv_pp2x *priv, struct mv_pp2x_bm_pool *bm_po
 	else
 		return 0;
 }
-#endif /* MY_DEF_HERE */
-#if defined(MY_DEF_HERE)
 
 /*  Update Mvpp2x counter statistic */
 void mv_pp2x_counters_stat_update(struct mv_pp2x_port *port,
@@ -6907,4 +6490,3 @@ void mv_pp2x_counters_stat_clear(struct mv_pp2x_port *port)
 	}
 	preempt_enable();
 }
-#endif /* MY_DEF_HERE */

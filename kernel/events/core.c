@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Performance events core code:
  *
@@ -257,11 +260,20 @@ static void perf_duration_warn(struct irq_work *w)
 	local_samples_len = __this_cpu_read(running_sample_length);
 	avg_local_sample_len = local_samples_len/NR_ACCUMULATED_SAMPLES;
 
+#ifdef MY_ABC_HERE
+	printk_ratelimited(KERN_INFO
+			"perf interrupt took too long (%lld > %lld), lowering "
+			"kernel.perf_event_max_sample_rate to %d\n",
+			avg_local_sample_len, allowed_ns >> 1,
+			sysctl_perf_event_sample_rate);
+
+#else /* MY_ABC_HERE */
 	printk_ratelimited(KERN_WARNING
 			"perf interrupt took too long (%lld > %lld), lowering "
 			"kernel.perf_event_max_sample_rate to %d\n",
 			avg_local_sample_len, allowed_ns >> 1,
 			sysctl_perf_event_sample_rate);
+#endif /* MY_ABC_HERE */
 }
 
 static DEFINE_IRQ_WORK(perf_duration_work, perf_duration_warn);
@@ -7106,6 +7118,7 @@ static int perf_event_set_bpf_prog(struct perf_event *event, u32 prog_fd)
 	}
 
 	event->tp_event->prog = prog;
+	event->tp_event->bpf_prog_owner = event;
 
 	return 0;
 }
@@ -7118,7 +7131,7 @@ static void perf_event_free_bpf_prog(struct perf_event *event)
 		return;
 
 	prog = event->tp_event->prog;
-	if (prog) {
+	if (prog && event->tp_event->bpf_prog_owner == event) {
 		event->tp_event->prog = NULL;
 		bpf_prog_put_rcu(prog);
 	}

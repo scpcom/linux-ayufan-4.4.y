@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) STRATO AG 2012.  All rights reserved.
  *
@@ -355,6 +358,9 @@ int btrfs_dev_replace_start(struct btrfs_root *root,
 		return PTR_ERR(trans);
 	}
 
+#ifdef MY_ABC_HERE
+	fs_info->dev_replace_may_start = 1;
+#endif /* MY_ABC_HERE */
 	btrfs_dev_replace_lock(dev_replace, 1);
 	switch (dev_replace->replace_state) {
 	case BTRFS_IOCTL_DEV_REPLACE_STATE_NEVER_STARTED:

@@ -143,7 +143,7 @@ static int rtk_reset_assert(struct reset_controller_dev *rcdev,
         writel(val, reg);
         mutex_unlock(&rtk_rstc_mutex);
 
-        pr_info("ASSERT      0x%08x [0x%08x -> 0x%08x] D 0x%08x, M 0x%08x\n",
+        pr_debug("ASSERT      0x%08x [0x%08x -> 0x%08x] D 0x%08x, M 0x%08x\n",
                 (u32)(long)reg, val_old, val, val_old ^ val, mask);
         break;
     } /* switch (data->type) */
@@ -169,7 +169,7 @@ static int rtk_reset_deassert(struct reset_controller_dev *rcdev,
         writel(val, reg);
         mutex_unlock(&rtk_rstc_mutex);
 
-        pr_info("DEASSERT    0x%08x [0x%08x -> 0x%08x] D 0x%08x, M 0x%08x\n",
+        pr_debug("DEASSERT    0x%08x [0x%08x -> 0x%08x] D 0x%08x, M 0x%08x\n",
                 (u32)(long)reg, val_old, val, val_old ^ val, mask);
         break;
 

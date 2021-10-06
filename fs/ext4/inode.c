@@ -482,6 +482,18 @@ has_zeroout:
 		ret = check_block_validity(inode, map);
 		if (ret != 0)
 			return ret;
+
+		if (map->m_flags & EXT4_MAP_NEW &&
+		    !(map->m_flags & EXT4_MAP_UNWRITTEN) &&
+		    !IS_NOQUOTA(inode) &&
+#ifdef MY_ABC_HERE
+			ext4_test_inode_state(inode, EXT4_STATE_ORDERED_MODE) &&
+#endif  
+		    ext4_should_order_data(inode)) {
+			ret = ext4_jbd2_file_inode(handle, inode);
+			if (ret)
+				return ret;
+		}
 	}
 	return retval;
 }
@@ -904,14 +916,6 @@ static int ext4_write_end(struct file *file,
 	int i_size_changed = 0;
 
 	trace_ext4_write_end(inode, pos, len, copied);
-	if (ext4_test_inode_state(inode, EXT4_STATE_ORDERED_MODE)) {
-		ret = ext4_jbd2_file_inode(handle, inode);
-		if (ret) {
-			unlock_page(page);
-			page_cache_release(page);
-			goto errout;
-		}
-	}
 
 	if (ext4_has_inline_data(inode)) {
 		ret = ext4_write_inline_data_end(inode, pos, len,
@@ -3285,9 +3289,15 @@ struct inode *ext4_iget(struct super_block *sb, unsigned long ino)
 	}
 
 	if (!ext4_inode_csum_verify(inode, raw_inode, ei)) {
+#ifdef MY_ABC_HERE
+		ext4_msg(inode->i_sb, KERN_CRIT,
+			" %s:%d: inode #%lu: comm %s: checksum invalid\n",
+		    __func__, __LINE__, inode->i_ino, current->comm);
+#else
 		EXT4_ERROR_INODE(inode, "checksum invalid");
 		ret = -EFSBADCRC;
 		goto bad_inode;
+#endif  
 	}
 
 	inode->i_mode = le16_to_cpu(raw_inode->i_mode);
@@ -3396,9 +3406,7 @@ ext3_create_time:
 	}
 #endif  
 #ifdef MY_ABC_HERE
-	if (!EXT4_HAS_RO_COMPAT_FEATURE(sb, EXT4_FEATURE_RO_COMPAT_METADATA_CSUM)) {
-		inode->i_archive_bit = le16_to_cpu(raw_inode->ext4_archive_bit);
-	}
+	EXT4_INODE_GET_SYNO_ARCHIVE_BIT(inode, raw_inode);
 #endif  
 #ifdef MY_ABC_HERE
 not_ext4:
@@ -3653,9 +3661,7 @@ ext3_create_time:
 	}
 #endif  
 #ifdef MY_ABC_HERE
-	if (!EXT4_HAS_RO_COMPAT_FEATURE(inode->i_sb, EXT4_FEATURE_RO_COMPAT_METADATA_CSUM)) {
-		raw_inode->ext4_archive_bit = cpu_to_le16(inode->i_archive_bit);  
-	}
+	EXT4_INODE_SET_SYNO_ARCHIVE_BIT(inode, raw_inode);
 #endif  
 #ifdef MY_ABC_HERE
 not_ext4:
@@ -4072,6 +4078,16 @@ int ext4_syno_get_archive_ver(struct dentry *dentry, u32 *version)
 	*version = inode->i_archive_version;
 	inode->i_flags |= S_ARCHIVE_VERSION_CACHED;
 	return 0;
+}
+#endif  
+
+#ifdef MY_ABC_HERE
+extern int gSynoFsPatternCheckFlag;
+int ext4_syno_pattern_check(struct inode *inode, struct page *page, size_t offset, size_t bytes, int type)
+{
+	if (!gSynoFsPatternCheckFlag || !(ext4_test_inode_flag(inode, EXT4_INODE_NODUMP)))
+		return 0;
+	return syno_page_pattern_check(inode, page, offset, bytes, type);
 }
 #endif  
 

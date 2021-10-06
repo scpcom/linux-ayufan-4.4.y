@@ -12,6 +12,18 @@
 	container_of((lane), struct mvebu_comphy_priv, lanes[(lane)->index])
 
 #if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
+enum {
+	COMPHY_LANE0 = 0,
+	COMPHY_LANE1,
+	COMPHY_LANE2,
+	COMPHY_LANE3,
+	COMPHY_LANE4,
+	COMPHY_LANE5,
+	COMPHY_LANE_MAX,
+};
+
+#endif /* MY_DEF_HERE */
 enum reg_width_type {
 	REG_16BIT = 0,
 	REG_32BIT,
@@ -28,6 +40,14 @@ struct mvebu_comphy_priv {
 		struct phy *phy;
 		int mode;
 		int index;
+#if defined(MY_DEF_HERE)
+		/* in case PCIe is in End point mode */
+		bool skip_pcie_power_off;
+		struct misc_info {
+			int pcie_width: 8;
+			int pcie_is_ep: 1;
+		} misc;
+#endif /* MY_DEF_HERE */
 	} lanes[MVEBU_COMPHY_MAX_CNT];
 };
 

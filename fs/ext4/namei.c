@@ -160,20 +160,36 @@ static struct buffer_head *__ext4_read_dirblock(struct inode *inode,
 		if (ext4_dx_csum_verify(inode, dirent))
 			set_buffer_verified(bh);
 		else {
+#ifdef MY_ABC_HERE
+			ext4_msg(inode->i_sb, KERN_CRIT,
+				" %s:%d: inode #%lu: block %lu: comm %s: "
+				"Directory index failed checksum\n",
+			    __func__, __LINE__, inode->i_ino, (unsigned long)block,
+				current->comm);
+#else
 			ext4_error_inode(inode, func, line, block,
 					 "Directory index failed checksum");
 			brelse(bh);
 			return ERR_PTR(-EFSBADCRC);
+#endif  
 		}
 	}
 	if (!is_dx_block) {
 		if (ext4_dirent_csum_verify(inode, dirent))
 			set_buffer_verified(bh);
 		else {
+#ifdef MY_ABC_HERE
+			ext4_msg(inode->i_sb, KERN_CRIT,
+				" %s:%d: inode #%lu: block %lu: comm %s: "
+				"Directory block failed checksum\n",
+			    __func__, __LINE__, inode->i_ino, (unsigned long)block,
+				current->comm);
+#else
 			ext4_error_inode(inode, func, line, block,
 					 "Directory block failed checksum");
 			brelse(bh);
 			return ERR_PTR(-EFSBADCRC);
+#endif  
 		}
 	}
 	return bh;
@@ -1441,10 +1457,18 @@ restart:
 					 (struct ext4_dir_entry *)bh->b_data) &&
 		    !ext4_dirent_csum_verify(dir,
 				(struct ext4_dir_entry *)bh->b_data)) {
+#ifdef MY_ABC_HERE
+			ext4_msg(dir->i_sb, KERN_CRIT,
+				" %s:%d: inode #%lu: comm %s: "
+				"checksumming directory block %lu\n",
+			    __func__, __LINE__, dir->i_ino, current->comm,
+				(unsigned long)block);
+#else
 			EXT4_ERROR_INODE(dir, "checksumming directory "
 					 "block %lu", (unsigned long)block);
 			brelse(bh);
 			goto next;
+#endif  
 		}
 		set_buffer_verified(bh);
 #ifdef MY_ABC_HERE
@@ -2078,7 +2102,7 @@ static int ext4_add_entry(handle_t *handle, struct dentry *dentry,
 
 		if (blocks == 1 && !dx_fallback &&
 #ifdef MY_ABC_HERE
-			(is_syno_ext(sb) && !ext4_has_feature_dir_index(sb))) {
+			is_syno_ext(sb)) {
 #else
 		    ext4_has_feature_dir_index(sb)) {
 #endif  

@@ -6,8 +6,16 @@ obj-$(CONFIG_ARMADA_375_CLK)	+= armada-375.o
 obj-$(CONFIG_ARMADA_38X_CLK)	+= armada-38x.o
 obj-$(CONFIG_ARMADA_39X_CLK)	+= armada-39x.o
 ifeq ($(CONFIG_SYNO_LSP_ARMADA_16_12), y)
-obj-$(CONFIG_ARMADA_3700_CLK)	+= armada-3700.o
+ifeq ($(CONFIG_SYNO_LSP_ARMADA_17_10), y)
+else #CONFIG_SYNO_LSP_ARMADA_17_10
+obj-$(CONFIG_ARMADA_3700_CLK)  += armada-3700.o
+endif # CONFIG_SYNO_LSP_ARMADA_17_10
 obj-$(CONFIG_MSYS_CLK)	+= msys.o
+ifeq ($(CONFIG_SYNO_LSP_ARMADA_17_10), y)
+obj-$(CONFIG_ARMADA_37XX_CLK)	+= armada-37xx-xtal.o
+obj-$(CONFIG_ARMADA_37XX_CLK)	+= armada-37xx-tbg.o
+obj-$(CONFIG_ARMADA_37XX_CLK)	+= armada-37xx-periph.o
+endif # CONFIG_SYNO_LSP_ARMADA_17_10
 obj-$(CONFIG_ARMADA_AP806_SYSCON) += ap806-system-controller.o
 obj-$(CONFIG_ARMADA_CP110_SYSCON) += cp110-system-controller.o
 obj-$(CONFIG_ARMADA_AP806_CORE_CLK) += ap806-core.o

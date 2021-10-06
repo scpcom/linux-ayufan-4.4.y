@@ -23,7 +23,7 @@ extern char gszSynoHWRevision[];
 extern char gszSynoHWVersion[];
 #endif  
 
-#ifdef MY_ABC_HERE
+#if defined(MY_ABC_HERE) && !defined(MY_DEF_HERE)
 extern long g_syno_hdd_powerup_seq;
 #endif  
 
@@ -103,7 +103,7 @@ extern char gszSataPortMap[8];
 #endif  
 
 #ifdef MY_DEF_HERE
-extern char gSynoCastratedXhcAddr[CONFIG_SYNO_USB_NUM_CASTRATED_XHC][13];
+extern char gSynoCastratedXhcAddr[CONFIG_SYNO_USB_NUM_CASTRATED_XHC][32];
 extern unsigned int gSynoCastratedXhcPortBitmap[CONFIG_SYNO_USB_NUM_CASTRATED_XHC];
 #endif  
 
@@ -112,6 +112,14 @@ extern char gSynoUsbVbusHostAddr[CONFIG_SYNO_USB_VBUS_NUM_GPIO][20];
 extern int gSynoUsbVbusPort[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
 extern unsigned gSynoUsbVbusGpp[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
 extern unsigned gSynoUsbVbusGppPol[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
+#include <linux/synobios.h>
+#endif  
+
+#ifdef MY_DEF_HERE
+extern int giSynoSpinupGroup[SYNO_SPINUP_GROUP_MAX];
+extern int giSynoSpinupGroupNum;
+extern int giSynoSpinupGroupDelay;
+extern int giSynoSpinupGroupDebug;
 #endif  
 
 #ifdef MY_ABC_HERE
@@ -152,7 +160,7 @@ static int __init early_hw_version(char *p)
 __setup("syno_hw_version=", early_hw_version);
 #endif  
 
-#ifdef MY_ABC_HERE
+#if defined(MY_ABC_HERE) && !defined(MY_DEF_HERE)
  
 static int __init early_internal_hd_num(char *p)
 {
@@ -188,6 +196,18 @@ static int __init early_hdd_hotplug(char *p)
 	return 1;
 }
 __setup("HddHotplug=", early_hdd_hotplug);
+
+static int __init early_hdd_enable_dynamic_power(char *p)
+{
+	g_hdd_hotplug = simple_strtol(p, NULL, 10);
+
+	if ( g_hdd_hotplug > 0 ) {
+		printk("Support HDD Dynamic Power.\n");
+	}
+
+	return 1;
+}
+__setup("HddEnableDynamicPower=", early_hdd_enable_dynamic_power);
 
 static int __init enable_hdd_hotplug(char *p)
 {
@@ -508,7 +528,7 @@ static int __init early_sataport_map(char *p)
 __setup("SataPortMap=", early_sataport_map);
 #endif  
 
-#ifdef MY_DEF_HERE
+#if defined(MY_DEF_HERE) || (defined(MY_DEF_HERE) && defined(MY_DEF_HERE))
 static int __init early_SASmodel(char *p)
 {
 	g_is_sas_model = simple_strtol(p, NULL, 10);
@@ -636,16 +656,29 @@ __setup("syno_castrated_xhc=", early_castrated_xhc);
 #endif  
 
 #ifdef MY_DEF_HERE
+#ifdef MY_DEF_HERE
+#else
 static int __init early_usb_vbus_gpio(char *p)
 {
 	int iCount = 0;
 	char *pBegin = p;
-	char *pEnd = strstr(pBegin, ",");
+	char *pEnd = NULL;
 	char *pSeparator = NULL;
 	int error = 0;
 
 	printk("USB Vbus GPIO Control:\n");
 
+#if defined(MY_DEF_HERE)
+		if (syno_is_hw_version(HW_DS918p) || syno_is_hw_version(HW_DS418play)) {
+			pBegin = "13@dev_name:usb2@1,13@dev_name:usb1@3,11@dev_name:usb2@2,11@dev_name:usb1@1";
+		}
+#endif
+	pEnd = strstr(pBegin, ",");
+	 
+	for (iCount = 0; iCount < CONFIG_SYNO_USB_VBUS_NUM_GPIO; iCount++) {
+		gSynoUsbVbusGpp[iCount] = UINT_MAX;
+	}
+	iCount = 0;
 	while (iCount < CONFIG_SYNO_USB_VBUS_NUM_GPIO) {
 		if(NULL != pEnd)
 			*pEnd = '\0';
@@ -672,7 +705,19 @@ static int __init early_usb_vbus_gpio(char *p)
 				sizeof(gSynoUsbVbusHostAddr[iCount]), "%s", pBegin);
 		printk(" - Host: %-20s", gSynoUsbVbusHostAddr[iCount]);
 
-		gSynoUsbVbusPort[iCount] = simple_strtoul(pSeparator + 1, NULL, 10);
+		gSynoUsbVbusPort[iCount] = simple_strtol(pSeparator + 1, NULL, 10);
+#if defined(MY_DEF_HERE)
+		if (syno_is_hw_version(HW_DS1618p) && -1 == gSynoUsbVbusPort[iCount]) {
+			if ( 0 == (strcmp("0000:00:15.00", gSynoUsbVbusHostAddr[iCount]))) {
+				snprintf(gSynoUsbVbusHostAddr[iCount],sizeof(gSynoUsbVbusHostAddr[iCount]), "%s","0000:00:15.0");
+			}
+			gSynoUsbVbusPort[iCount] = 2;
+		}
+#endif
+#if defined(MY_DEF_HERE)
+		 
+		gSynoUsbVbusPort[iCount]++;
+#endif  
 		printk(" - Port:%d", gSynoUsbVbusPort[iCount]);
 
 		pSeparator = strstr(pSeparator + 1, "@");
@@ -703,7 +748,7 @@ static int __init early_usb_vbus_gpio(char *p)
 		iCount = 0;
 		while (iCount < CONFIG_SYNO_USB_VBUS_NUM_GPIO) {
 			gSynoUsbVbusHostAddr[iCount][0] = '\0';
-			gSynoUsbVbusGpp[iCount] = 0;
+			gSynoUsbVbusGpp[iCount] = UINT_MAX;
 			gSynoUsbVbusPort[iCount] = 0;
 			iCount++;
 		}
@@ -712,6 +757,7 @@ static int __init early_usb_vbus_gpio(char *p)
 	return 1;
 }
 __setup("syno_usb_vbus_gpio=", early_usb_vbus_gpio);
+#endif  
 #endif  
 #ifdef MY_DEF_HERE
 static int __init early_syno_set_ttyS0(char *p)
@@ -729,4 +775,114 @@ static int __init early_syno_set_ttyS1(char *p)
 }
 __setup("syno_ttyS1=", early_syno_set_ttyS1);
 
+#endif  
+#ifdef MY_DEF_HERE
+static int __init early_syno_m2_port(char *p)
+{
+	char *begin, *end;
+	int i = 0, err;
+
+	begin = p;
+	end = strstr(begin, "#");
+	if (NULL == end) {
+		printk("%s: Parse sign '#' failed from %s\n", __func__, begin);
+		goto ERR;
+	}
+	end[0] = 0;
+
+	snprintf(gSynoM2HostName, M2_HOST_LEN_MAX, begin);
+
+	begin = end+1;
+	end = strstr(begin, "@");
+	if (NULL == end) {
+		printk("%s: Parse sign '@' failed from %s\n", __func__, begin);
+		goto ERR;
+	}
+	end[0] = 0;
+
+	err = kstrtoul(begin, 10, &gSynoM2PortNo);
+	if (0 != err) {
+		printk("%s: Parse the M.2 port number failed, err = %d\n", __func__, err);
+		goto ERR;
+	}
+
+	for (i = 0; i < gSynoM2PortNo-1; ++i) {
+		begin = end+1;
+		end = strstr(begin, "@");
+		if (NULL == end) {
+			printk("%s: Parse sign '@' failed from %s\n", __func__, begin);
+			goto ERR;
+		}
+		end[0] = 0;
+
+		err = kstrtoul(begin, 10, &gSynoM2PortIndex[i]);
+		if (0 != err) {
+			printk("%s: Parse the M.2 port index %d failed, err = %d\n", __func__, i, err);
+			goto ERR;
+		}
+	}
+	err = kstrtoul(end+1, 10, &gSynoM2PortIndex[i]);
+	if (0 != err) {
+		printk("%s: Parse the M.2 port index %d failed, err = %d\n", __func__, i, err);
+		goto ERR;
+	}
+	printk("%s: Onboard M2 host name is %s, port no is %lu, port index is", __func__, gSynoM2HostName, gSynoM2PortNo);
+	for (i = 0; i < gSynoM2PortNo; ++i) {
+		printk(" %lu", gSynoM2PortIndex[i]);
+	}
+	printk("\n");
+	return 1;
+ERR:
+	gSynoM2PortNo = 0;
+	gSynoM2HostName[0] = 0;
+	return 1;
+}
+__setup("m2_port=", early_syno_m2_port);
+#endif  
+#ifdef MY_DEF_HERE
+static int __init early_syno_spinup_group(char *p)
+{
+	int group_num = 0;
+	char *endp;
+	while (1) {
+		if(SYNO_SPINUP_GROUP_MAX < group_num) {
+			return -EMSGSIZE;
+		}
+		giSynoSpinupGroup[group_num] = simple_strtol(p, &endp, 10) & 0xFF;
+		printk("SYNO Spinup Group %d: %d\n", group_num, giSynoSpinupGroup[group_num]);
+		group_num++;
+		 
+		if (*endp == '\0') {
+			break;
+		}
+		p = ++endp;
+	}
+	giSynoSpinupGroupNum = group_num;
+#ifdef MY_DEF_HERE
+	printk(KERN_ERR "ERROR !!! Kernel parameter for spinup group is only for HW tuning.\n");
+	printk(KERN_ERR "ERROR !!! The spinup group should be read from dts.\n");
+#endif  
+	return 1;
+}
+__setup("syno_spinup_group=", early_syno_spinup_group);
+
+static int __init early_syno_spinup_group_delay(char *p)
+{
+	giSynoSpinupGroupDelay = simple_strtol(p, NULL, 10);
+	printk("SYNO Spinup Group Delay: %d\n", (int)giSynoSpinupGroupDelay);
+#ifdef MY_DEF_HERE
+	printk(KERN_ERR "ERROR !!! Kernel parameter for spinup group delay is only for HW tuning.\n");
+	printk(KERN_ERR "ERROR !!! The spinup group delay should be read from dts.\n");
+#endif  
+	return 1;
+}
+__setup("syno_spinup_group_delay=", early_syno_spinup_group_delay);
+
+static int __init early_syno_spinup_group_debug(char *p)
+{
+	giSynoSpinupGroupDebug = simple_strtol(p, NULL, 10);
+	printk("SYNO Spinup Group Debug: %d\n", (int)giSynoSpinupGroupDebug);
+	return 1;
+}
+__setup("syno_spinup_group_debug=", early_syno_spinup_group_debug);
 #endif  

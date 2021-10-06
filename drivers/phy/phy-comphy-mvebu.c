@@ -168,6 +168,9 @@ static int mvebu_comphy_probe(struct platform_device *pdev)
 	struct resource *res;
 	struct phy_provider *phy_provider;
 	const struct mvebu_comphy_soc_info *soc_info;
+#if defined(MY_DEF_HERE)
+	bool skip_pcie_power_off;
+#endif /* MY_DEF_HERE */
 	int i;
 
 	dev_dbg(priv->dev, "%s: Enter\n", __func__);
@@ -188,12 +191,21 @@ static int mvebu_comphy_probe(struct platform_device *pdev)
 	if (IS_ERR(priv->comphy_pipe_regs))
 		return PTR_ERR(priv->comphy_pipe_regs);
 
+#if defined(MY_DEF_HERE)
+	/* check if skip_pcie_power_off flag exist */
+	skip_pcie_power_off = of_property_read_bool(pdev->dev.of_node,
+						    "skip_pcie_power_off");
+
+#endif /* MY_DEF_HERE */
 	priv->soc_info = soc_info;
 	priv->dev = &pdev->dev;
 	spin_lock_init(&priv->lock);
 
 	for (i = 0; i < soc_info->num_of_lanes; i++) {
 		struct phy *phy;
+#if defined(MY_DEF_HERE)
+		u32 reg_data;
+#endif /* MY_DEF_HERE */
 
 		phy = devm_phy_create(&pdev->dev, NULL, soc_info->comphy_ops);
 		if (IS_ERR(phy)) {
@@ -210,6 +222,29 @@ static int mvebu_comphy_probe(struct platform_device *pdev)
 		priv->lanes[i].phy = phy;
 		priv->lanes[i].index = i;
 		priv->lanes[i].mode = COMPHY_UNUSED;
+#if defined(MY_DEF_HERE)
+
+		/* In case PCIe is in End point mode,
+		 * link must be always kept alive vs the remote host,
+		 * so we can't power off the SerDes as part of the
+		 * initialization flow, thus end point PCIe ports must set this
+		 * boolean to true in device tree, to avoid being powered off.
+		 */
+		if (skip_pcie_power_off) {
+			/* If a port is set to PCIe and indicated in device
+			 * tree to skip PCIe power off, than we assume it's
+			 * an End point PCIe port that can't be powered off
+			 */
+			reg_data = readl(priv->comphy_regs +
+					 COMMON_SELECTOR_PIPE_REG_OFFSET);
+			reg_data = reg_data >>
+				   (COMMON_SELECTOR_COMPHYN_FIELD_WIDTH * i);
+			reg_data &= COMMON_SELECTOR_COMPHY_MASK;
+			if (reg_data == COMMON_SELECTOR_PIPE_COMPHY_PCIE)
+				priv->lanes[i].skip_pcie_power_off = true;
+		}
+
+#endif /* MY_DEF_HERE */
 		phy_set_drvdata(phy, &priv->lanes[i]);
 
 		soc_info->comphy_ops->power_off(phy);

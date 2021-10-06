@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -4788,4 +4784,3 @@ disclaimer.
 #define MV_EIP197_IES_AXI_MRVL_CLASSIF_RAM_ACCESS_SPACE			(0x002E0000)
 
 #endif /* __mv_eip197_h__ */
-#endif /* MY_DEF_HERE */

@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -476,4 +472,3 @@ void mv_pp3_emac_sleep_state(int port, bool en)
 
 	return;
 }
-#endif /* MY_DEF_HERE */

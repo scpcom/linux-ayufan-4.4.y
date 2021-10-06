@@ -7,6 +7,14 @@
 #ifdef MY_DEF_HERE
 #include <linux/gpio.h>
 #endif  
+#ifdef MY_DEF_HERE
+#define SYNO_SERIAL_EXT_HUB "syno.ext.hub"
+#endif  
+
+#ifdef MY_DEF_HERE
+#include <linux/synolib.h>
+#include <linux/syno_gpio.h>
+#endif  
 
 #include "hub.h"
 
@@ -329,6 +337,111 @@ static void find_and_link_peer(struct usb_hub *hub, int port1)
 		link_peers_report(port_dev, peer);
 }
 
+#ifdef MY_DEF_HERE
+ 
+static struct device_node *__syno_usb_hub_node_get(const struct usb_device *hdev, const int portnum, const char *szNodeName)
+{
+	int size = 0;
+	struct device_node *pUsbSlotNode = NULL, *pUsbNode = NULL;
+	char *szUsbNodeBusPort = NULL;
+	char szUsbBusPort[SYNO_DTS_PROPERTY_CONTENT_LENGTH] = {'\0'};
+
+	if (NULL == hdev || NULL == szNodeName || 0 > portnum) {
+		goto END;
+	}
+
+	if (0 == strncmp(dev_name(&hdev->dev), "usb", strlen("usb"))) {
+		snprintf(szUsbBusPort, SYNO_DTS_PROPERTY_CONTENT_LENGTH, "%s-%d", dev_name(&hdev->dev), portnum);
+		sscanf(szUsbBusPort, "usb%s", szUsbBusPort);
+	} else {
+		snprintf(szUsbBusPort, SYNO_DTS_PROPERTY_CONTENT_LENGTH, "%s.%d", dev_name(&hdev->dev), portnum);
+	}
+
+	for_each_child_of_node(of_root, pUsbSlotNode) {
+		if (pUsbSlotNode->name && (strlen(pUsbSlotNode->name) == strlen(szNodeName))
+			&& 0 == (of_node_cmp(pUsbSlotNode->name, szNodeName))) {
+
+			pUsbNode = of_get_child_by_name(pUsbSlotNode, DT_USB2);
+			szUsbNodeBusPort = (char *)of_get_property(pUsbNode, DT_USB_PORT, &size);
+			if (szUsbNodeBusPort && (strlen(szUsbNodeBusPort) == strlen(szUsbBusPort))
+				&& 0 == strncmp(szUsbNodeBusPort, szUsbBusPort, strlen(szUsbBusPort))) {
+				goto END;
+			}
+			of_node_put(pUsbNode);
+
+			pUsbNode = of_get_child_by_name(pUsbSlotNode, DT_USB3);
+			szUsbNodeBusPort = (char *)of_get_property(pUsbNode, DT_USB_PORT, &size);
+			if (szUsbNodeBusPort && (strlen(szUsbNodeBusPort) == strlen(szUsbBusPort))
+				&& 0 == strncmp(szUsbNodeBusPort, szUsbBusPort, strlen(szUsbBusPort))) {
+				goto END;
+			}
+			of_node_put(pUsbNode);
+		}
+	}
+END:
+	return pUsbSlotNode;
+}
+ 
+static struct device_node *syno_usb_hub_node_get(const struct usb_device *hdev, const int portnum)
+{
+	struct device_node *pDeviceNode = NULL;
+	if (NULL == hdev || 0 > portnum) {
+		goto END;
+	}
+	pDeviceNode = __syno_usb_hub_node_get(hdev, portnum, DT_USB_SLOT);
+	if (NULL != pDeviceNode) {
+		goto END;
+	}
+	pDeviceNode = __syno_usb_hub_node_get(hdev, portnum, DT_HUB_SLOT);
+END:
+	return pDeviceNode;
+}
+#endif  
+
+#ifdef MY_DEF_HERE
+ 
+void syno_vbus_gpio_set(const char *vbus_host_addr, const unsigned vbus_gpio_pin, const unsigned vbus_gpio_polarity, const int port1)
+{
+#ifdef MY_ABC_HERE
+	unsigned vbusGPIOValue = 0;
+#endif  
+#ifdef MY_DEF_HERE
+	if (UINT_MAX == vbus_gpio_pin || UINT_MAX == vbus_gpio_polarity || 0 > port1) {
+		return;
+	}
+#endif  
+#ifdef MY_ABC_HERE
+	if (0 == syno_pch_lpc_gpio_pin(vbus_gpio_pin, &vbusGPIOValue, 0) &&
+	    vbus_gpio_polarity != vbusGPIOValue) {
+		vbusGPIOValue = vbus_gpio_polarity;
+		if (0 == syno_pch_lpc_gpio_pin(vbus_gpio_pin, &vbusGPIOValue, 1)) {
+			printk(KERN_INFO " port%d is going to power up Vbus by "
+				"GPIO#%d(%s)\n", port1, vbus_gpio_pin,
+				vbus_gpio_polarity ? "ACTIVE_HIGH" : "ACTIVE_LOW");
+			mdelay(100);
+		}
+	}
+#else  
+	if (vbus_gpio_polarity != SYNO_GPIO_READ(vbus_gpio_pin)) {
+		SYNO_GPIO_WRITE(vbus_gpio_pin, vbus_gpio_polarity);
+		printk(KERN_INFO " port%d is going to power up Vbus by "
+				"GPIO#%d(%s)\n", port1, vbus_gpio_pin,
+				vbus_gpio_polarity ? "ACTIVE_HIGH" : "ACTIVE_LOW");
+#ifdef MY_DEF_HERE
+		if (0 == strncmp(SYNO_SERIAL_EXT_HUB, vbus_host_addr,strlen(SYNO_SERIAL_EXT_HUB))) {
+			mdelay(1000);
+		} else {
+			mdelay(100);
+		}
+#else  
+		mdelay(100);
+#endif  
+	}
+#endif  
+	return;
+}
+#endif  
+
 int usb_hub_create_port_device(struct usb_hub *hub, int port1)
 {
 	struct usb_port *port_dev;
@@ -336,19 +449,28 @@ int usb_hub_create_port_device(struct usb_hub *hub, int port1)
 #if defined(MY_DEF_HERE) ||\
 	defined(MY_DEF_HERE)
 	struct usb_device *hdev = hub->hdev;
+#endif  
+#ifdef MY_DEF_HERE
+	extern char gSynoCastratedXhcAddr[CONFIG_SYNO_USB_NUM_CASTRATED_XHC][32];
+	extern unsigned gSynoCastratedXhcPortBitmap[CONFIG_SYNO_USB_NUM_CASTRATED_XHC];
+
 	int i = 0;
 #endif  
 #ifdef MY_DEF_HERE
-	extern char gSynoCastratedXhcAddr[CONFIG_SYNO_USB_NUM_CASTRATED_XHC][13];
-	extern unsigned gSynoCastratedXhcPortBitmap[CONFIG_SYNO_USB_NUM_CASTRATED_XHC];
-#endif  
 #ifdef MY_DEF_HERE
+	u32 vbusGpioPin = U32_MAX, vbusGpioPolarity = 0;
+	char *szGpioShared = NULL;
+	struct device_node *pVbusNode = NULL, *pUSBNode = NULL;
+#else
+#ifdef MY_DEF_HERE
+#else
+	int i = 0;
+#endif  
 	extern char gSynoUsbVbusHostAddr[CONFIG_SYNO_USB_VBUS_NUM_GPIO][20];
 	extern int gSynoUsbVbusPort[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
 	extern unsigned gSynoUsbVbusGpp[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
 	extern unsigned gSynoUsbVbusGppPol[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
-#ifdef MY_ABC_HERE
-	int vbusGPIOValue = 0;
+	const char *syno_vbus_host_name_prefix = "dev_name:";
 #endif  
 #endif  
 
@@ -392,40 +514,68 @@ int usb_hub_create_port_device(struct usb_hub *hub, int port1)
 #endif  
 
 #ifdef MY_DEF_HERE
+	port_dev->syno_vbus_gpp = -1;
+	port_dev->syno_vbus_gpp_pol = -1;
 	if (hdev && hdev->serial) {
+#ifdef MY_DEF_HERE
+		pUSBNode = syno_usb_hub_node_get(hdev, port1);
+		if (NULL == pUSBNode) {
+			goto PUT_NODE;
+		}
+
+		pVbusNode = of_get_child_by_name(pUSBNode, DT_VBUS);
+		if (NULL == pVbusNode) {
+			goto PUT_NODE;
+		}
+
+		if (0 != of_property_read_u32_index(pVbusNode, DT_SYNO_GPIO, SYNO_GPIO_PIN, &vbusGpioPin)) {
+			printk(KERN_ERR "%s reading vbus vbusGpioPin failed.\n", __func__);
+			goto PUT_NODE;
+		}
+
+		if (0 != of_property_read_u32_index(pVbusNode, DT_SYNO_GPIO, SYNO_POLARITY_PIN, &vbusGpioPolarity)) {
+			printk(KERN_ERR "%s reading vbus vbusGpioPolarity failed.\n", __func__);
+			goto PUT_NODE;
+		}
+
+		syno_vbus_gpio_set(NULL, vbusGpioPin, vbusGpioPolarity, port1);
+
+		szGpioShared = (char *)of_get_property(pUSBNode, DT_SHARED, NULL);
+
+		if (szGpioShared && 0 == strncmp(szGpioShared, "true", strlen("true"))) {
+			goto PUT_NODE;
+		}
+
+		port_dev->syno_vbus_gpp = vbusGpioPin;
+		port_dev->syno_vbus_gpp_pol = vbusGpioPolarity;
+		printk(KERN_INFO "host %s port %d has Vbus GPIO#%d with polarity "
+				"%s\n",hdev->serial, port1, port_dev->syno_vbus_gpp,
+				port_dev->syno_vbus_gpp_pol ? "ACTIVE_HIGH" : "ACTIVE_LOW");
+PUT_NODE:
+		if (pUSBNode) {
+			of_node_put(pUSBNode);
+		}
+		if (pVbusNode) {
+			of_node_put(pVbusNode);
+		}
+#else
 		for (i = 0; i < CONFIG_SYNO_USB_VBUS_NUM_GPIO; i++) {
-			if (0 == strcmp(gSynoUsbVbusHostAddr[i], hdev->serial)) {
+			if (0 == strcmp(gSynoUsbVbusHostAddr[i], hdev->serial) ||
+					( 0 == strncmp(syno_vbus_host_name_prefix, gSynoUsbVbusHostAddr[i], strlen(syno_vbus_host_name_prefix))
+					&& 0 == strcmp(gSynoUsbVbusHostAddr[i] + strlen(syno_vbus_host_name_prefix), dev_name(&hdev->dev)))) {
 				 
-#ifdef MY_ABC_HERE
-				vbusGPIOValue = 0;
-				if (0 == syno_pch_lpc_gpio_pin(gSynoUsbVbusGpp[i], &vbusGPIOValue, 0) &&
-				    gSynoUsbVbusGppPol[i] != vbusGPIOValue) {
-					vbusGPIOValue = gSynoUsbVbusGppPol[i];
-					if (0 == syno_pch_lpc_gpio_pin(gSynoUsbVbusGpp[i], &vbusGPIOValue, 1)) {
-						printk(KERN_INFO " port%d is going to power up Vbus by "
-							"GPIO#%d(%s)\n", port1, gSynoUsbVbusGpp[i],
-							gSynoUsbVbusGppPol[i] ? "ACTIVE_HIGH" : "ACTIVE_LOW");
-						mdelay(100);
-					}
-				}
-#else  
-				if (gSynoUsbVbusGppPol[i] != SYNO_GPIO_READ(gSynoUsbVbusGpp[i])) {
-					SYNO_GPIO_WRITE(gSynoUsbVbusGpp[i], gSynoUsbVbusGppPol[i]);
-					printk(KERN_INFO " port%d is going to power up Vbus by "
-							"GPIO#%d(%s)\n", port1, gSynoUsbVbusGpp[i],
-							gSynoUsbVbusGppPol[i] ? "ACTIVE_HIGH" : "ACTIVE_LOW");
-					mdelay(100);
-				}
-#endif  
+				syno_vbus_gpio_set(gSynoUsbVbusHostAddr[i], gSynoUsbVbusGpp[i], gSynoUsbVbusGppPol[i], port1);
+
 				if (port1 == gSynoUsbVbusPort[i]) {
 					port_dev->syno_vbus_gpp = gSynoUsbVbusGpp[i];
 					port_dev->syno_vbus_gpp_pol = gSynoUsbVbusGppPol[i];
-					printk(KERN_INFO "host %s port %d has Vbus GPIO#%d with polarity "
+					printk(KERN_NOTICE "host %s port %d has Vbus GPIO#%d with polarity "
 							"%s\n",hdev->serial, port1, port_dev->syno_vbus_gpp,
 							port_dev->syno_vbus_gpp_pol ? "ACTIVE_HIGH" : "ACTIVE_LOW");
 				}
 			}
 		}
+#endif  
 	}
 #endif  
 	mutex_init(&port_dev->status_lock);

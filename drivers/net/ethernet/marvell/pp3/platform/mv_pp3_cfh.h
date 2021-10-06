@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*
 * ***************************************************************************
 * Copyright (C) 2015 Marvell International Ltd.
@@ -321,5 +317,3 @@ enum mv_pp3_l4_csum {
 #define MV_CFH_L3_INFO_TX_SET(v)	(((v) & MV_CFH_L3_INFO_TX_MASK) << MV_CFH_L3_INFO_TX_OFFS)
 
 #endif /* __mv_pp3_cfh_h__ */
-
-#endif /* MY_DEF_HERE */

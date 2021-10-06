@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*
 * ***************************************************************************
 * Copyright (C) 2015 Marvell International Ltd.
@@ -64,4 +60,3 @@
 /*-------------------------------------------------------------------------*/
 
 #endif /* __mv_a2m_h__ */
-#endif /* MY_DEF_HERE */

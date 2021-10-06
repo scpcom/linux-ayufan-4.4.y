@@ -43,6 +43,7 @@ struct extent_map {
 	struct list_head list;
 #ifdef MY_ABC_HERE
 	struct list_head free_list;
+	bool bl_increase;
 #endif  
 };
 
@@ -56,6 +57,7 @@ struct extent_map_tree {
 #ifdef MY_ABC_HERE
 	struct list_head not_modified_extents;
 	struct list_head syno_modified_extents;
+	struct list_head pinned_extents;
 	atomic_t nr_extent_maps;
 	struct btrfs_inode *inode;
 #endif  

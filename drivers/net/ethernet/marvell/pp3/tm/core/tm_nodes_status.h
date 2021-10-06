@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -141,5 +137,3 @@ int tm_drop_get_queue_length(tm_handle hndl,
 							 uint32_t *av_queue_length);
 
 #endif   /* TM_NODES_STATUS_H */
-
-#endif /* MY_DEF_HERE */

@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -63,4 +59,3 @@ int mv_tm_dwrr_weight(enum mv_tm_level level, uint32_t index, uint32_t quantum);
 int mv_tm_dwrr_enable(enum mv_tm_level level, uint32_t index, uint8_t prio, int en);
 
 #endif /* MV_TM_SCHED__H */
-#endif /* MY_DEF_HERE */

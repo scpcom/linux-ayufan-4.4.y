@@ -298,7 +298,7 @@ config GPIO_MVEBU
 config GPIO_MVEBU_A3700
 	bool "Marvell Armada 3700 GPIO support"
 	default n
-	depends on ARCH_MVEBU && SYNO_LSP_ARMADA_16_12
+	depends on ARCH_MVEBU && SYNO_LSP_ARMADA_16_12 && !SYNO_LSP_ARMADA_17_10
 	depends on OF
 	select GENERIC_IRQ_CHIP
 	help

@@ -54,6 +54,11 @@
 	#address-cells = <2>;
 	#size-cells = <2>;
 
+	aliases {
+		ethernet0 = &emac2;
+		ethernet1 = &emac3;
+	};
+
 	chosen { };
 
 	ap806 {
@@ -99,6 +104,10 @@
 				status = "disabled";
 			};
 			usb3h1: usb3@510000 {
+				separated-phys-for-usb2-usb3;
+				phys = <&utmi1>,
+				       <&comphy0 4 COMPHY_USB3H1>;
+				phy-names = "usb2", "usb3";
 				status = "okay";
 			};
 			u3d@520000 {
@@ -155,10 +164,10 @@
 					status = "okay";
 				};
 			};
-			eip197: eip197@800000 {
+			comphy {
 				status = "okay";
 			};
-			comphy {
+			utmi1: utmi@581000 {
 				status = "okay";
 			};
 		};

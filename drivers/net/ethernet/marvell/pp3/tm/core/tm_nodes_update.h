@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -246,5 +242,3 @@ int tm_update_port_drop_cos(tm_handle hndl,
 							struct tm_port_drop_per_cos *params);
 
 #endif   /* TM_NODES_UPDATE_H */
-
-#endif /* MY_DEF_HERE */

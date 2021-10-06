@@ -142,6 +142,35 @@ static struct scsi_host_template ahci_platform_sht = {
 };
 
 #endif /* MY_DEF_HERE */
+
+#ifdef MY_DEF_HERE
+extern int syno_compare_dts_ata_port(const struct ata_port *pAtaPort, const struct device_node *pDeviceNode);
+/**
+ * syno_mvebu_compart_ata_devicetree_info - check the ata_port matches the device_node
+ * @ap [IN]:   query ata_port
+ * @pNode [IN]: comparing device_node
+ *
+ * return true: success
+          false: fail
+ */
+bool syno_mvebu_compart_ata_devicetree_info(const struct ata_port *ap, const struct device_node *pNode)
+{
+	int ret = false;
+	struct device_node *pAhciMvebuNode = NULL;
+	if (NULL == ap || NULL == pNode) {
+		goto END;
+	}
+
+	pAhciMvebuNode = of_get_child_by_name(pNode, DT_AHCI_MVEBU);
+	if (0 == syno_compare_dts_ata_port(ap, pAhciMvebuNode)) {
+		ret = true;
+	}
+	of_node_put(pAhciMvebuNode);
+END:
+	return ret;
+}
+#endif /* MY_DEF_HERE */
+
 #if defined(MY_DEF_HERE)
 #if defined(MY_DEF_HERE)
 //do nothing
@@ -575,6 +604,10 @@ static int ahci_mvebu_probe(struct platform_device *pdev)
 		return -ENODEV;
 	ahci_mvebu_mbus_config(hpriv, dram);
 	ahci_mvebu_regret_option(hpriv);
+#endif /* MY_DEF_HERE */
+
+#ifdef MY_DEF_HERE
+	ahci_platform_ops.syno_compare_node_info = syno_mvebu_compart_ata_devicetree_info;
 #endif /* MY_DEF_HERE */
 
 	rc = ahci_platform_init_host(pdev, hpriv, &ahci_mvebu_port_info,

@@ -93,7 +93,10 @@
 #include <asm/alternative.h>
 #include <asm/prom.h>
 #include <asm/microcode.h>
-
+#include <asm/kaiser.h>
+#ifdef MY_DEF_HERE
+#include <linux/synolib.h>
+#endif  
 #if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
 #include  <linux/synobios.h>
 
@@ -107,7 +110,11 @@ extern u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite);
 #endif  
 
 #ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
+extern int gSynoHddPowerupSeq, gSynoInternalHddNumber;
+#else  
 extern long g_syno_hdd_powerup_seq;
+#endif  
 #endif  
 
 unsigned long max_low_pfn_mapped;
@@ -255,7 +262,7 @@ void * __init extend_brk(size_t size, size_t align)
 	return ret;
 }
 
-#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE) && !defined(MY_DEF_HERE) && !defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE) && !defined(MY_DEF_HERE) && !defined(MY_DEF_HERE) && !defined(MY_DEF_HERE) && !defined(CONFIG_SYNO_COFFEELAKE) && !defined(MY_DEF_HERE)
  
 #define SYNO_MAX_HDD_PRZ	4
 #define GPIO_UNDEF			0xFF
@@ -264,6 +271,15 @@ static u8 SYNO_GET_HDD_ENABLE_PIN(const int index)
 {
 	u8 ret = GPIO_UNDEF;
 
+#ifdef MY_DEF_HERE
+	if (0 == g_syno_hdd_enable_no) {
+		goto END;
+	}
+	if (index < 1 || index > g_syno_hdd_enable_no) {
+		goto END;
+	}
+	ret = g_syno_hdd_enable_list[index-1];
+#else  
 #if defined(MY_DEF_HERE)
 	u8 HddEnPinMap[] = {10, 15, 16, 17};
 #else
@@ -281,7 +297,7 @@ static u8 SYNO_GET_HDD_ENABLE_PIN(const int index)
 	}
 
 	ret = HddEnPinMap[index-1];
-
+#endif  
 END:
 	return ret;
 }
@@ -297,11 +313,31 @@ static u32 SYNO_X86_GPIO_PIN_SET(int pin, int *pValue)
 #endif  
 	return ret;
 }
+#ifdef MY_DEF_HERE
+static int SYNO_X86_GPIO_PIN_GET(int pin)
+{
+	int ret = 0;
 
+#if defined(MY_ABC_HERE)
+	syno_pch_lpc_gpio_pin(pin, &ret, 0);
+#elif defined(MY_DEF_HERE)
+	syno_gpio_value_get(pin, &ret);
+#endif  
+	return ret;
+}
+#endif  
+ 
 int SYNO_CTRL_HDD_POWERON(int index, int value)
 {
 	int iRet = -EINVAL;
+#ifdef MY_DEF_HERE
+	u8 pin = SYNO_GET_HDD_ENABLE_PIN(index);
 
+	if(pin == GPIO_UNDEF) {
+		goto END;
+	}
+	SYNO_X86_GPIO_PIN_SET(pin, &value);
+#else  
 	if (syno_is_hw_version(HW_DS415p)) {
 		switch (index) {
 			case 0:
@@ -342,15 +378,29 @@ int SYNO_CTRL_HDD_POWERON(int index, int value)
 	} else {
 		goto END;
 	}
-
+#endif  
 	iRet = 0;
 END:
 	return iRet;
 }
 
+#if defined(MY_DEF_HERE)
+u8 SYNO_GET_HDD_PRESENT_PIN(const int index)
+#else  
 static u8 SYNO_GET_HDD_PRESENT_PIN(const int index)
+#endif  
 {
 	u8 ret = GPIO_UNDEF;
+
+#ifdef MY_DEF_HERE
+	if (0 == g_syno_hdd_detect_no) {
+		goto END;
+	}
+	if (index < 1 || index > g_syno_hdd_detect_no) {
+		goto END;
+	}
+	ret = g_syno_hdd_detect_list[index-1];
+#else  
 
 #if defined(MY_DEF_HERE)
 	u8 przPinMap[] = {18, 28, 34, 44};
@@ -362,14 +412,12 @@ static u8 SYNO_GET_HDD_PRESENT_PIN(const int index)
 		goto END;
 	}
 
-	if (1 > index || (0 < g_syno_hdd_powerup_seq && g_syno_hdd_powerup_seq < index)) {
-		printk("SYNO_GET_HDD_PRESENT_PIN(%d) is illegal", index);
-		WARN_ON(1);
+	if (1 > index || (0 == g_syno_hdd_powerup_seq) || (0 < g_syno_hdd_powerup_seq && g_syno_hdd_powerup_seq < index)) {
 		goto END;
 	}
 
 	ret = przPinMap[index-1];
-
+#endif  
 END:
 	return ret;
 }
@@ -382,14 +430,24 @@ int SYNO_CHECK_HDD_PRESENT(int index)
 #if defined(MY_DEF_HERE)
 	const int iInverseValue = 1;
 #else
-	const int iInverseValue = 0;
+	int iInverseValue = 0;
 #endif
+
+#ifdef MY_DEF_HERE
+	if(syno_is_hw_version(HW_RS1619xsp)) {
+		iInverseValue = 1;
+	}
+#endif  
 
 	if (GPIO_UNDEF == iPin) {
 		goto END;
 	}
 
+#ifdef MY_DEF_HERE
+	if (gSynoHddPowerupSeq && gSynoInternalHddNumber < index) {
+#else  
 	if (0 < g_syno_hdd_powerup_seq && g_syno_hdd_powerup_seq < index) {
+#endif  
 		goto END;
 	}
 
@@ -410,15 +468,94 @@ int SYNO_CHECK_HDD_PRESENT(int index)
 END:
 	return iPrzVal;
 }
+#ifdef MY_DEF_HERE
+ 
+static u8 SYNO_GET_RP_POWERGOOD_PIN(const int index)
+{
+	u8 ret = GPIO_UNDEF;
 
+	if (0 == g_syno_rp_detect_no) {
+		goto END;
+	}
+
+	if (1 > index || g_syno_rp_detect_no < index) {
+		printk("%s(%d) is illegal", __func__, index);
+		WARN_ON(1);
+		goto END;
+	}
+
+	ret = g_syno_rp_detect_list[index-1];
+
+END:
+	return ret;
+}
+
+int SYNO_CHECK_RP_POWERGOOD(int index)
+{
+	int iPrzVal = 1;  
+	u8 iPin = SYNO_GET_RP_POWERGOOD_PIN(index);
+
+	if (GPIO_UNDEF == iPin) {
+		goto END;
+	}
+
+	iPrzVal = SYNO_X86_GPIO_PIN_GET(iPin);
+END:
+	return iPrzVal;
+}
+EXPORT_SYMBOL(SYNO_CHECK_RP_POWERGOOD);
+int SynoHaveRPDetectPin(void)
+{
+	if (2 == g_syno_rp_detect_no) {
+		return 1;
+	}
+	return 0;
+}
+EXPORT_SYMBOL(SynoHaveRPDetectPin);
+int SynoAllRedundantPowerDetected(void)
+{
+	if (2 == g_syno_rp_detect_no &&
+			!(SYNO_CHECK_RP_POWERGOOD(1) ^ SYNO_CHECK_RP_POWERGOOD(2))) {
+		return 1;
+	}
+	return 0;
+}
+EXPORT_SYMBOL(SynoAllRedundantPowerDetected);
+extern int giSynoSpinupGroupDebug;
+void DBG_SpinupGroupListGpio(void)
+{
+	int i = 0;
+
+	if (0 == giSynoSpinupGroupDebug) {
+		return;
+	}
+
+	for (i = 1; i <= g_syno_rp_detect_no; ++i) {
+		printk("gpio debug: redundant power #%d, value= %d\n", i, SYNO_CHECK_RP_POWERGOOD(i));
+	}
+	for (i = 1; i <= g_syno_hdd_detect_no; ++i) {
+		printk("gpio debug: HDD #%d detect, value= %d\n", i, SYNO_CHECK_HDD_PRESENT(i));
+	}
+	for (i = 1; i <= g_syno_hdd_enable_no; ++i) {
+		printk("gpio debug: HDD #%d enable, value= %d\n", i, SYNO_X86_GPIO_PIN_GET(SYNO_GET_HDD_ENABLE_PIN(i)));
+	}
+}
+EXPORT_SYMBOL(DBG_SpinupGroupListGpio);
+#endif  
+ 
 int SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER(void)
 {
 	int iRet = 0;
 
+#ifndef MY_DEF_HERE
 	if (0 > g_syno_hdd_powerup_seq || SYNO_MAX_HDD_PRZ < g_syno_hdd_powerup_seq) {
 		goto END;
 	}
+#endif  
 
+#ifdef MY_DEF_HERE
+	iRet = 1;
+#else  
 	if (syno_is_hw_version(HW_DS415p) ||
 	    syno_is_hw_version(HW_DS916p) ||
 	    syno_is_hw_version(HW_DS713p) ||
@@ -431,6 +568,7 @@ int SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER(void)
 	} else {
 		goto END;
 	}
+#endif  
 
 END:
 	return iRet;
@@ -438,6 +576,9 @@ END:
 
 EXPORT_SYMBOL(SYNO_CTRL_HDD_POWERON);
 EXPORT_SYMBOL(SYNO_CHECK_HDD_PRESENT);
+#if defined(MY_DEF_HERE)
+EXPORT_SYMBOL(SYNO_GET_HDD_PRESENT_PIN);
+#endif  
 EXPORT_SYMBOL(SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER);
 #endif  
 
@@ -947,6 +1088,8 @@ void __init setup_arch(char **cmdline_p)
 	memblock_reserve(__pa_symbol(_text),
 			 (unsigned long)__bss_stop - (unsigned long)_text);
 
+	memblock_reserve(0, PAGE_SIZE);
+
 	early_reserve_initrd();
 
 #ifdef CONFIG_X86_32
@@ -1077,6 +1220,8 @@ void __init setup_arch(char **cmdline_p)
 	dmi_set_dump_stack_arch_desc();
 
 	init_hypervisor_platform();
+
+	kaiser_check_boottime_disable();
 
 	x86_init.resources.probe_roms();
 

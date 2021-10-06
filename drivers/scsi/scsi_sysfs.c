@@ -604,6 +604,24 @@ END:
 static DEVICE_ATTR(syno_disk_serial, S_IRUGO, syno_disk_serial_show, NULL);
 #endif  
 
+#ifdef MY_DEF_HERE
+static ssize_t
+syno_block_info_show(struct device *device, struct device_attribute *attr, char *buf)
+{
+	struct scsi_device *sdev = NULL;
+	ssize_t len = -EFAULT;
+
+	if (NULL == (sdev = to_scsi_device(device))) {
+		goto END;
+	}
+
+	len = snprintf(buf, BLOCK_INFO_SIZE , "%s", sdev->syno_block_info);
+END:
+	return len;
+}
+static DEVICE_ATTR(syno_block_info, S_IRUGO, syno_block_info_show, NULL);
+#endif  
+
 #ifdef MY_ABC_HERE
  
 static ssize_t
@@ -703,7 +721,7 @@ static DEVICE_ATTR(syno_standby_syncing, S_IRUGO | S_IWUSR, sdev_show_syno_stand
 #ifdef MY_DEF_HERE
 const char *disk_spd_string(unsigned char spd)
 {
-        char *szRet;
+        const char *szRet;
         static const char * const spd_str[] = {
                 "unknown",
                 "1.5 Gbps",
@@ -726,7 +744,7 @@ sdev_show_syno_disk_spd(struct device *dev, struct device_attribute *attr, char 
 {
                 struct scsi_device *sdev = to_scsi_device(dev);
                 int iRet = -EFAULT;
-                int iDiskSpd = NULL;
+                int iDiskSpd = 0;
 
                 if (NULL == (sdev = to_scsi_device(dev))){
                         goto END;
@@ -1191,6 +1209,9 @@ static struct attribute *scsi_sdev_attrs[] = {
 #endif  
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_disk_serial.attr,
+#endif  
+#ifdef MY_DEF_HERE
+	&dev_attr_syno_block_info.attr,
 #endif  
 	REF_EVT(media_change),
 	REF_EVT(inquiry_change_reported),

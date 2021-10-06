@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -44,4 +40,3 @@ void mv_serdes_init(int lane, enum sd_media_mode mode);
 void mv_serdes_reset(int lane, bool analog_reset, bool core_reset, bool digital_reset);
 
 #endif /* __mv_serdes_if_h__ */
-#endif /* MY_DEF_HERE */

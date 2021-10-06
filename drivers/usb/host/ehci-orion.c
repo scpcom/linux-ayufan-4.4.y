@@ -131,13 +131,26 @@ static int ehci_orion_drv_reset(struct usb_hcd *hcd)
 {
 	struct device *dev = hcd->self.controller;
 	int retval;
+#if defined(MY_DEF_HERE)
+	uint32_t regVal;
+#endif  
 
 	retval = ehci_setup(hcd);
 	if (retval)
 		dev_err(dev, "ehci_setup failed %d\n", retval);
 
+#if defined(MY_DEF_HERE)
+	if (of_device_is_compatible(dev->of_node, "marvell,armada-3700-ehci")) {
+#else  
 	if (of_device_is_compatible(dev->of_node, "marvell,armada-3700-ehci"))
+#endif  
 		wrl(USB_SBUSCFG, USB_SBUSCFG_DEF_VAL);
+#if defined(MY_DEF_HERE)
+		 
+		regVal = rdl(USB_MODE);
+		wrl(USB_MODE, regVal | USB_MODE_SDIS);
+	}
+#endif  
 
 	return retval;
 }

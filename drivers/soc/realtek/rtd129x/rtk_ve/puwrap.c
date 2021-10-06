@@ -66,8 +66,6 @@ unsigned long pll_size_register = 0;
 #ifdef CONFIG_RTK_RESERVE_MEMORY
 int pu_alloc_dma_buffer(unsigned int size, unsigned long *phys_addr, unsigned long *base)
 {
-    if (!size)
-        return -1;
 
 #ifdef USE_ION_ALLOCATOR
     unsigned int i;
@@ -75,7 +73,12 @@ int pu_alloc_dma_buffer(unsigned int size, unsigned long *phys_addr, unsigned lo
     struct dma_buf *dmabuf;
     ion_phys_addr_t dat;
     size_t len;
+#endif /* USE_ION_ALLOCATOR */
 
+    if (!size)
+        return -1;
+
+#ifdef USE_ION_ALLOCATOR
     mutex_lock(&s_pu_mutex);
     for (i = 0; i < NUM_ION_STRUCT; i++)
     {
@@ -134,13 +137,17 @@ int pu_alloc_dma_buffer(unsigned int size, unsigned long *phys_addr, unsigned lo
 
 void pu_free_dma_buffer(unsigned long base, unsigned long phys_addr)
 {
-    if (!base)
-        return;
 
 #ifdef USE_ION_ALLOCATOR
     unsigned int i;
     struct ion_handle *handle;
     struct dma_buf *dmabuf;
+#endif /* USE_ION_ALLOCATOR */
+
+    if (!base)
+        return;
+
+#ifdef USE_ION_ALLOCATOR
     mutex_lock(&s_pu_mutex);
 
     for (i = 0; i < NUM_ION_STRUCT; i++)
@@ -158,11 +165,8 @@ void pu_free_dma_buffer(unsigned long base, unsigned long phys_addr)
     dmabuf = (struct dma_buf *)pu_ion_buffer[i].dmabuf;
     if (dmabuf != NULL)
     {
-        dmabuf->ops->release(dmabuf);
-        list_del(&dmabuf->list_node);
-        if (dmabuf->resv == (struct reservation_object *)&dmabuf[1])
-            reservation_object_fini(dmabuf->resv);
-        kfree(dmabuf);
+        dma_buf_put(dmabuf);
+        pu_ion_buffer[i].dmabuf = (unsigned long)NULL;
     }
 
     handle = (struct ion_handle *)pu_ion_buffer[i].pIonHandle;

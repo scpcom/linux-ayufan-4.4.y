@@ -15,6 +15,21 @@
 #define SOFTWARE_REBOOT					0x43 // set TX 0x43, reboot
 
 /**
+* Init rstn_ur1, clk_en_ur1, base_addr
+* @param  None
+*
+* @return None
+*
+* @example
+* <pre>
+* syno_uart1_init();
+* </pre>
+*
+* @see syno_uart1_init
+*/
+void syno_uart1_init(void);
+
+/**
 * Write UART1 on rtd129x
 *
 * @param[in] cmd Input command: SOFTWARE_SHUTDOWN, SOFTWARE_REBOOT

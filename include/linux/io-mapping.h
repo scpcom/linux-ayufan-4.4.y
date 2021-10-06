@@ -123,7 +123,7 @@ io_mapping_unmap(void __iomem *vaddr)
 
 #include <linux/uaccess.h>
 
-#ifdef MY_DEF_HERE
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #include <asm/iomap.h>
 
 struct io_mapping {
@@ -131,10 +131,10 @@ struct io_mapping {
 	unsigned long size;
 	pgprot_t prot;
 };
-#else /* MY_DEF_HERE */
+#else /* MY_DEF_HERE || MY_DEF_HERE */
 /* this struct isn't actually defined anywhere */
 struct io_mapping;
-#endif /* MY_DEF_HERE */
+#endif /* MY_DEF_HERE || MY_DEF_HERE */
 
 /* Create the io_mapping object*/
 static inline struct io_mapping *

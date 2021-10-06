@@ -1294,6 +1294,12 @@ int spi_nor_scan(struct spi_nor *nor, const char *name, enum read_mode mode)
 			/* No small sector erase for 4-byte command set */
 			nor->erase_opcode = SPINOR_OP_SE_4B;
 			mtd->erasesize = info->sector_size;
+#if defined(MY_DEF_HERE)
+		} else if (of_property_read_bool(np, "spi-3byte-addressing")) {
+			nor->addr_width = 3;
+			mtd->size = 0x1000000;
+			dev_info(dev, "Force 3B addressing mode\n");
+#endif /* MY_DEF_HERE */
 		} else
 			set_4byte(nor, info, 1);
 	} else {

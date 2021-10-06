@@ -7,8 +7,6 @@ config PINCTRL_MVEBU
 config PINCTRL_ARMADA_3700
 	bool
 	depends on SYNO_LSP_ARMADA_16_12
-	select PINCTRL_MVEBU
-
 config PINCTRL_ARMADA_AP806
 	bool
 	depends on SYNO_LSP_ARMADA_16_12
@@ -60,3 +58,10 @@ config PINCTRL_ORION
 	select PINCTRL_MVEBU
 
 endif
+
+config PINCTRL_ARMADA_37XX
+       bool
+       select GENERIC_PINCONF
+       select MFD_SYSCON
+       select PINCONF
+       select PINMUX

@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*
 * ***************************************************************************
 * Copyright (C) 2015 Marvell International Ltd.
@@ -92,4 +88,3 @@ int mv_pp3_swq_rx_time_prof_set(struct pp3_swq *swq, int prof);
 int mv_pp3_swq_rx_time_coal_set(struct pp3_swq *swq, int usec);
 
 #endif /* __mv_pp3_swq_h__ */
-#endif /* MY_DEF_HERE */

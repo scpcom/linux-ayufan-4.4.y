@@ -64,6 +64,18 @@ config SYNO_COFFEELAKE
 	bool "Intel Coffee Lake"
 	depends on X86_64
 
+config SYNO_BROADWELLNTB
+	bool "Intel Broadwell with ntb"
+	depends on X86_64
+
+config SYNO_NEXTKVMX64
+	bool "Next OS KVM X64 Virtual Machine"
+	depends on X86_64
+
+config SYNO_GEMINILAKE
+	bool "Intel-Geminilake"
+	depends on X86_64
+
 endchoice
 
 config SYNO_LSP_ARMADA
@@ -90,6 +102,11 @@ config SYNO_LSP_ARMADA_17_06_01
 	depends on SYNO_LSP_ARMADA && SYNO_LSP_ARMADA_16_12 && SYNO_LSP_ARMADA_17_02_02 && SYNO_LSP_ARMADA_17_04_02
 	default y
 
+config SYNO_LSP_ARMADA_17_10
+	bool "Apply Marvell armada LSP devel-17.10"
+	depends on SYNO_LSP_ARMADA && SYNO_LSP_ARMADA_16_12 && SYNO_LSP_ARMADA_17_02_02 && SYNO_LSP_ARMADA_17_04_02 && SYNO_LSP_ARMADA_17_06_01
+	default y
+
 config SYNO_LSP_RTD129X
 	bool "Apply Realtek rtd129x LSP"
 	depends on ARM64 && ARCH_RTD129X
@@ -97,11 +114,16 @@ config SYNO_LSP_RTD129X
 config SYNO_DUAL_HEAD
 	bool "Synology Dual Head Host"
 	default n
-	depends on SYNO_BROMOLOW || SYNO_BROADWELL
+	depends on SYNO_BROMOLOW || SYNO_BROADWELL || SYNO_BROADWELLNTB
 
 config SYNO_SAS
 	bool "Synology SAS Support"
 	default y
-	depends on SYNO_BROMOLOW || SYNO_BROADWELL || SYNO_GRANTLEY || SYNO_PURLEY || SYNO_COFFEELAKE
+	depends on SYNO_BROMOLOW || SYNO_BROADWELL || SYNO_GRANTLEY || SYNO_PURLEY || SYNO_COFFEELAKE || SYNO_BROADWELLNTB
+
+config SYNO_NTB
+	bool "Synology NTB support"
+	default n
+	depends on SYNO_BROADWELLNTB
 
 endmenu #Platform Selection

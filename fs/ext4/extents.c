@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (c) 2003-2006, Cluster File Systems, Inc, info@clusterfs.com
  * Written by Alex Tomas <alex@clusterfs.com>
@@ -481,8 +484,18 @@ static int __ext4_ext_check(const char *function, unsigned int line,
 	if (ext_depth(inode) != depth &&
 	    !ext4_extent_block_csum_verify(inode, eh)) {
 		error_msg = "extent tree corrupted";
+#ifdef MY_ABC_HERE
+		ext4_msg(inode->i_sb, KERN_CRIT,
+			" %s:%d: inode#%lu: bad header/extent: %s - magic %x, "
+			"entries %u, max %u(%u), depth %u(%u)",
+			function, line, inode->i_ino,
+			error_msg, le16_to_cpu(eh->eh_magic),
+			le16_to_cpu(eh->eh_entries), le16_to_cpu(eh->eh_max),
+			max, le16_to_cpu(eh->eh_depth), depth);
+#else
 		err = -EFSBADCRC;
 		goto corrupted;
+#endif /* MY_ABC_HERE */
 	}
 	return 0;
 

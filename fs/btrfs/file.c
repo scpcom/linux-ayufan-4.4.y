@@ -36,6 +36,9 @@
 
 static struct kmem_cache *btrfs_inode_defrag_cachep;
  
+#ifdef MY_ABC_HERE
+#define BTRFS_INODE_SYNO_DEFRAG_DELAY_GEN 5
+#endif  
 struct inode_defrag {
 	struct rb_node rb_node;
 	 
@@ -46,6 +49,14 @@ struct inode_defrag {
 	u64 root;
 
 	u64 last_offset;
+
+#ifdef MY_ABC_HERE
+	u64 end_offset;
+
+	int defrag_type;
+
+	struct list_head list;
+#endif  
 
 	int cycled;
 };
@@ -61,6 +72,16 @@ static int __compare_inode_defrag(struct inode_defrag *defrag1,
 		return 1;
 	else if (defrag1->ino < defrag2->ino)
 		return -1;
+#ifdef MY_ABC_HERE
+	else if (defrag1->defrag_type == defrag2->defrag_type &&
+		     defrag1->defrag_type == BTRFS_INODE_DEFRAG_SYNO) {
+		if (defrag1->last_offset > defrag2->end_offset)
+			return 1;
+		if (defrag1->end_offset < defrag2->last_offset)
+			return -1;
+		return 0;
+	}
+#endif  
 	else
 		return 0;
 }
@@ -86,6 +107,20 @@ static int __btrfs_add_inode_defrag(struct inode *inode,
 			p = &parent->rb_right;
 		else {
 			 
+#ifdef MY_ABC_HERE
+			if (defrag->defrag_type != entry->defrag_type)
+			 
+				return -EEXIST;
+			if (defrag->defrag_type == BTRFS_INODE_DEFRAG_SYNO) {
+				if (defrag->last_offset < entry->last_offset)
+					entry->last_offset = defrag->last_offset;
+				if (defrag->end_offset > entry->end_offset)
+					entry->end_offset = defrag->end_offset;
+				entry->transid = defrag->transid;
+				list_move_tail(&entry->list, &root->fs_info->defrag_inodes_list[0]);
+				return -EEXIST;
+			}
+#endif  
 			if (defrag->transid < entry->transid)
 				entry->transid = defrag->transid;
 			if (defrag->last_offset > entry->last_offset)
@@ -93,12 +128,38 @@ static int __btrfs_add_inode_defrag(struct inode *inode,
 			return -EEXIST;
 		}
 	}
+#ifdef MY_ABC_HERE
+	if (defrag->defrag_type == BTRFS_INODE_DEFRAG_SYNO) {
+		list_add_tail(&defrag->list, &root->fs_info->defrag_inodes_list[0]);
+		root->fs_info->reclaim_space_entry_count++;
+	} else {
+		list_add(&defrag->list, &root->fs_info->defrag_inodes_list[1]);
+		set_bit(BTRFS_INODE_IN_DEFRAG, &BTRFS_I(inode)->runtime_flags);
+	}
+#else
 	set_bit(BTRFS_INODE_IN_DEFRAG, &BTRFS_I(inode)->runtime_flags);
+#endif  
 	rb_link_node(&defrag->rb_node, parent, p);
 	rb_insert_color(&defrag->rb_node, &root->fs_info->defrag_inodes);
 	return 0;
 }
 
+#ifdef MY_ABC_HERE
+static inline int __need_auto_defrag(struct btrfs_root *root,
+			   int defrag_type)
+{
+	if (btrfs_fs_closing(root->fs_info))
+		return 0;
+
+	if ((btrfs_test_opt(root, AUTO_DEFRAG) &&
+		  (defrag_type & BTRFS_INODE_DEFRAG_NORMAL)) ||
+		(btrfs_test_opt(root, AUTO_RECLAIM_SPACE) &&
+		  (defrag_type & BTRFS_INODE_DEFRAG_SYNO)))
+		return 1;
+
+	return 0;
+}
+#else
 static inline int __need_auto_defrag(struct btrfs_root *root)
 {
 	if (!btrfs_test_opt(root, AUTO_DEFRAG))
@@ -109,21 +170,41 @@ static inline int __need_auto_defrag(struct btrfs_root *root)
 
 	return 1;
 }
+#endif  
 
+#ifdef MY_ABC_HERE
+int btrfs_add_inode_defrag(struct btrfs_trans_handle *trans,
+			   struct inode *inode, u64 start, u64 end,
+			   int defrag_type)
+#else
 int btrfs_add_inode_defrag(struct btrfs_trans_handle *trans,
 			   struct inode *inode)
+#endif  
 {
 	struct btrfs_root *root = BTRFS_I(inode)->root;
 	struct inode_defrag *defrag;
 	u64 transid;
 	int ret;
 
-	if (!__need_auto_defrag(root))
+#ifdef MY_ABC_HERE
+	if (!__need_auto_defrag(root, defrag_type))
 		return 0;
 
+	if (defrag_type != BTRFS_INODE_DEFRAG_SYNO)
+#else
+	if (!__need_auto_defrag(root))
+		return 0;
+#endif  
 	if (test_bit(BTRFS_INODE_IN_DEFRAG, &BTRFS_I(inode)->runtime_flags))
 		return 0;
 
+#ifdef MY_ABC_HERE
+	 
+	if (defrag_type == BTRFS_INODE_DEFRAG_SYNO &&
+	    root->fs_info->reclaim_space_entry_count >= 163840) {
+		return 0;
+	}
+#endif  
 	if (trans)
 		transid = trans->transid;
 	else
@@ -136,6 +217,11 @@ int btrfs_add_inode_defrag(struct btrfs_trans_handle *trans,
 	defrag->ino = btrfs_ino(inode);
 	defrag->transid = transid;
 	defrag->root = root->root_key.objectid;
+#ifdef MY_ABC_HERE
+	defrag->last_offset = start;
+	defrag->end_offset = end;
+	defrag->defrag_type = defrag_type;
+#endif  
 
 	spin_lock(&root->fs_info->defrag_inodes_lock);
 	if (!test_bit(BTRFS_INODE_IN_DEFRAG, &BTRFS_I(inode)->runtime_flags)) {
@@ -156,7 +242,11 @@ static void btrfs_requeue_inode_defrag(struct inode *inode,
 	struct btrfs_root *root = BTRFS_I(inode)->root;
 	int ret;
 
+#ifdef MY_ABC_HERE
+	if (!__need_auto_defrag(root, defrag->defrag_type))
+#else
 	if (!__need_auto_defrag(root))
+#endif  
 		goto out;
 
 	spin_lock(&root->fs_info->defrag_inodes_lock);
@@ -170,9 +260,35 @@ out:
 }
 
 static struct inode_defrag *
+#ifdef MY_ABC_HERE
+btrfs_pick_defrag_inode(struct btrfs_fs_info *fs_info, struct list_head *cur_list)
+#else
 btrfs_pick_defrag_inode(struct btrfs_fs_info *fs_info, u64 root, u64 ino)
+#endif  
 {
 	struct inode_defrag *entry = NULL;
+#ifdef MY_ABC_HERE
+	spin_lock(&fs_info->defrag_inodes_lock);
+	entry = list_first_entry_or_null(cur_list, struct inode_defrag, list);
+	if (!entry)
+		goto out;
+	if (entry->defrag_type == BTRFS_INODE_DEFRAG_NORMAL) {
+		goto out;
+	}
+	if (entry->transid + BTRFS_INODE_SYNO_DEFRAG_DELAY_GEN >= fs_info->generation)
+		entry = NULL;
+
+out:
+	if (entry) {
+		rb_erase(&entry->rb_node, &fs_info->defrag_inodes);
+		list_del(&entry->list);
+		if (entry->defrag_type == BTRFS_INODE_DEFRAG_SYNO) {
+			fs_info->reclaim_space_entry_count--;
+		}
+	}
+	spin_unlock(&fs_info->defrag_inodes_lock);
+	return entry;
+#else
 	struct inode_defrag tmp;
 	struct rb_node *p;
 	struct rb_node *parent = NULL;
@@ -208,6 +324,7 @@ out:
 		rb_erase(parent, &fs_info->defrag_inodes);
 	spin_unlock(&fs_info->defrag_inodes_lock);
 	return entry;
+#endif  
 }
 
 void btrfs_cleanup_defrag_inodes(struct btrfs_fs_info *fs_info)
@@ -241,6 +358,9 @@ static int __btrfs_run_defrag_inode(struct btrfs_fs_info *fs_info,
 	int num_defrag;
 	int index;
 	int ret;
+#ifdef MY_ABC_HERE
+	unsigned long max_to_defrag = BTRFS_DEFRAG_BATCH;
+#endif  
 
 	key.objectid = defrag->root;
 	key.type = BTRFS_ROOT_ITEM_KEY;
@@ -268,12 +388,31 @@ static int __btrfs_run_defrag_inode(struct btrfs_fs_info *fs_info,
 	memset(&range, 0, sizeof(range));
 	range.len = (u64)-1;
 	range.start = defrag->last_offset;
+#ifdef MY_ABC_HERE
+	if (defrag->defrag_type == BTRFS_INODE_DEFRAG_SYNO) {
+		range.flags |= BTRFS_DEFRAG_RANGE_SYNO_DEFRAG;
+		range.len = defrag->end_offset - defrag->last_offset;
+		defrag->transid = 0;
+		max_to_defrag = 0;
+	}
+
+	sb_start_write(fs_info->sb);
+	num_defrag = btrfs_defrag_file(inode, NULL, &range, defrag->transid,
+				       max_to_defrag);
+	sb_end_write(fs_info->sb);
+#else
 
 	sb_start_write(fs_info->sb);
 	num_defrag = btrfs_defrag_file(inode, NULL, &range, defrag->transid,
 				       BTRFS_DEFRAG_BATCH);
 	sb_end_write(fs_info->sb);
+#endif  
 	 
+#ifdef MY_ABC_HERE
+	if (defrag->defrag_type == BTRFS_INODE_DEFRAG_SYNO) {
+		kmem_cache_free(btrfs_inode_defrag_cachep, defrag);
+	} else
+#endif  
 	if (num_defrag == BTRFS_DEFRAG_BATCH) {
 		defrag->last_offset = range.start;
 		btrfs_requeue_inode_defrag(inode, defrag);
@@ -297,8 +436,14 @@ cleanup:
 int btrfs_run_defrag_inodes(struct btrfs_fs_info *fs_info)
 {
 	struct inode_defrag *defrag;
+#ifdef MY_ABC_HERE
+	int list_idx = 0;
+	struct list_head *cur_list = &fs_info->defrag_inodes_list[list_idx];
+	int last_null = 0;
+#else
 	u64 first_ino = 0;
 	u64 root_objectid = 0;
+#endif  
 
 	atomic_inc(&fs_info->defrag_running);
 	while (1) {
@@ -307,6 +452,22 @@ int btrfs_run_defrag_inodes(struct btrfs_fs_info *fs_info)
 			     &fs_info->fs_state))
 			break;
 
+#ifdef MY_ABC_HERE
+		if (!__need_auto_defrag(fs_info->tree_root,
+			    BTRFS_INODE_DEFRAG_NORMAL | BTRFS_INODE_DEFRAG_SYNO))
+			break;
+
+		defrag = btrfs_pick_defrag_inode(fs_info, cur_list);
+		list_idx = (list_idx + 1) % 2;
+		cur_list = &fs_info->defrag_inodes_list[list_idx];
+		if (!defrag) {
+			if (last_null)
+				break;
+			last_null = 1;
+			continue;
+		}
+		last_null = 0;
+#else
 		if (!__need_auto_defrag(fs_info->tree_root))
 			break;
 
@@ -324,6 +485,7 @@ int btrfs_run_defrag_inodes(struct btrfs_fs_info *fs_info)
 
 		first_ino = defrag->ino + 1;
 		root_objectid = defrag->root;
+#endif  
 
 		__btrfs_run_defrag_inode(fs_info, defrag);
 	}
@@ -569,6 +731,10 @@ next:
 int __btrfs_drop_extents(struct btrfs_trans_handle *trans,
 			 struct btrfs_root *root, struct inode *inode,
 			 struct btrfs_path *path, u64 start, u64 end,
+#ifdef MY_ABC_HERE
+			 u64 *first_punch_pos, u64 *last_punch_pos,
+			 int *partial_punch,
+#endif  
 			 u64 *drop_end, int drop_cache,
 			 int replace_extent,
 			 u32 extent_item_size,
@@ -594,6 +760,9 @@ int __btrfs_drop_extents(struct btrfs_trans_handle *trans,
 	int update_refs;
 	int found = 0;
 	int leafs_visited = 0;
+#ifdef MY_ABC_HERE
+	u64 relative_offset;
+#endif  
 
 	if (drop_cache)
 		btrfs_drop_extent_cache(inode, start, end - 1, 0);
@@ -737,6 +906,19 @@ next_slot:
 				break;
 			}
 
+#ifdef MY_ABC_HERE
+			relative_offset = key.offset - extent_offset;
+			if (relative_offset >= LLONG_MAX)
+				relative_offset = 0;
+			if (first_punch_pos && relative_offset < *first_punch_pos)
+				*first_punch_pos = relative_offset;
+			if (last_punch_pos &&
+			    relative_offset + num_bytes > *last_punch_pos)
+				*last_punch_pos = relative_offset + num_bytes;
+			if (partial_punch)
+				*partial_punch = 1;
+#endif  
+
 			memcpy(&new_key, &key, sizeof(new_key));
 			new_key.offset = end;
 			btrfs_set_item_key_safe(root->fs_info, path, &new_key);
@@ -763,6 +945,18 @@ next_slot:
 			btrfs_set_file_extent_num_bytes(leaf, fi,
 							start - key.offset);
 			btrfs_mark_buffer_dirty(leaf);
+#ifdef MY_ABC_HERE
+			relative_offset = key.offset - extent_offset;
+			if (relative_offset >= LLONG_MAX)
+				relative_offset = 0;
+			if (first_punch_pos && relative_offset < *first_punch_pos)
+				*first_punch_pos = relative_offset;
+			if (last_punch_pos &&
+			    relative_offset + num_bytes > *last_punch_pos)
+				*last_punch_pos = relative_offset + num_bytes;
+			if (partial_punch)
+				*partial_punch = 1;
+#endif  
 			if (update_refs && disk_bytenr > 0)
 				inode_sub_bytes(inode, extent_end - start);
 			if (end == extent_end)
@@ -795,6 +989,21 @@ delete_extent_item:
 						key.objectid, key.offset -
 						extent_offset);
 				BUG_ON(ret);  
+#ifdef MY_ABC_HERE
+				relative_offset = key.offset - extent_offset;
+				if (partial_punch &&
+				    extent_end - key.offset != num_bytes) {
+					*partial_punch = 1;
+					if (relative_offset >= LLONG_MAX)
+						relative_offset = 0;
+					if (first_punch_pos &&
+					    relative_offset < *first_punch_pos)
+						*first_punch_pos = relative_offset;
+					if (last_punch_pos &&
+					    relative_offset + num_bytes > *last_punch_pos)
+						*last_punch_pos = relative_offset + num_bytes;
+				}
+#endif  
 				inode_sub_bytes(inode,
 						extent_end - key.offset);
 			}
@@ -876,6 +1085,9 @@ int btrfs_drop_extents(struct btrfs_trans_handle *trans,
 	if (!path)
 		return -ENOMEM;
 	ret = __btrfs_drop_extents(trans, root, inode, path, start, end, NULL,
+#ifdef MY_ABC_HERE
+				   NULL, NULL, NULL,
+#endif  
 				   drop_cache, 0, 0, NULL);
 	btrfs_free_path(path);
 	return ret;
@@ -1467,6 +1679,9 @@ again:
 		cond_resched();
 
 		balance_dirty_pages_ratelimited(inode->i_mapping);
+#ifdef MY_ABC_HERE
+		syno_writeback_balance_dirty_pages(root, inode);
+#endif  
 		if (dirty_pages < (root->nodesize >> PAGE_CACHE_SHIFT) + 1)
 			btrfs_btree_balance_dirty(root);
 
@@ -1559,6 +1774,13 @@ static ssize_t btrfs_file_write_iter(struct kiocb *iocb,
 	ssize_t err;
 	loff_t pos;
 	size_t count;
+
+#ifdef MY_ABC_HERE
+	 
+	if (root->fs_info->ordered_extent_throttle && root->fs_info->ordered_extent_nr > root->fs_info->ordered_extent_throttle) {
+		btrfs_wait_ordered_roots(root->fs_info, 128, 0, (u64)-1);
+	}
+#endif  
 
 	inode_lock(inode);
 	err = generic_write_checks(iocb, from);
@@ -2005,6 +2227,12 @@ static int btrfs_punch_hole(struct inode *inode, loff_t offset, loff_t len)
 	u64 ino_size;
 	bool truncated_page = false;
 	bool updated_inode = false;
+#ifdef MY_ABC_HERE
+	 
+	u64 first_punch_pos;
+	u64 last_punch_pos;
+	int partial_punch = 0;
+#endif  
 
 	ret = btrfs_wait_ordered_range(inode, offset, len);
 	if (ret)
@@ -2026,6 +2254,10 @@ static int btrfs_punch_hole(struct inode *inode, loff_t offset, loff_t len)
 			     BTRFS_I(inode)->root->sectorsize) - 1;
 	same_page = ((offset >> PAGE_CACHE_SHIFT) ==
 		    ((offset + len - 1) >> PAGE_CACHE_SHIFT));
+#ifdef MY_ABC_HERE
+	first_punch_pos = lockstart;
+	last_punch_pos = lockend + 1;
+#endif  
 
 	if (same_page && len < PAGE_CACHE_SIZE) {
 		if (offset < ino_size) {
@@ -2147,6 +2379,9 @@ static int btrfs_punch_hole(struct inode *inode, loff_t offset, loff_t len)
 	while (cur_offset < lockend) {
 		ret = __btrfs_drop_extents(trans, root, inode, path,
 					   cur_offset, lockend + 1,
+#ifdef MY_ABC_HERE
+					   &first_punch_pos, &last_punch_pos, &partial_punch,
+#endif  
 					   &drop_end, 1, 0, 0, NULL);
 		if (ret != -ENOSPC)
 			break;
@@ -2216,6 +2451,12 @@ static int btrfs_punch_hole(struct inode *inode, loff_t offset, loff_t len)
 		}
 	}
 
+#ifdef MY_ABC_HERE
+	if (partial_punch) {
+		btrfs_add_inode_defrag(NULL, inode, first_punch_pos,
+				    last_punch_pos, BTRFS_INODE_DEFRAG_SYNO);
+	}
+#endif  
 out_trans:
 	if (!trans)
 		goto out_free;

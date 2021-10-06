@@ -85,35 +85,6 @@
 
 	soc {
 		internal-regs {
-			spi0: spi@10600 {
-				status = "disabled";
-				/* UPDATE */
-				spi-flash@0 {
-					#address-cells = <1>;
-					#size-cells = <1>;
-					compatible = "jedec,spi-nor";
-					reg = <0>; /* Chip select 0 */
-					spi-max-frequency = <104000000>;
-					m25p,fast-read;
-
-					pinctrl-names = "default";
-					pinctrl-0 = <&spi0_pins &spi_quad_pins>;
-
-					partition@0 {
-						label = "Bootloader";
-						reg = <0 0x200000>;
-					};
-					partition@200000 {
-						label = "U-boot Env";
-						reg = <0x200000 0x10000>;
-					};
-					partition@210000 {
-						label = "Linux";
-						reg = <0x210000 0xDF0000>;
-					};
-				};
-			};
-
 			i2c0: i2c@11000 {
 				status = "disabled";
 				/* UPDATE */
@@ -195,13 +166,13 @@
 			sdhci1: sdhci@d0000 {
 				wp-inverted;
 				bus-width = <4>;
-				cd-gpios = <&gpio_sb 2 GPIO_ACTIVE_LOW>;
+				cd-gpios = <&gpiosb 2 GPIO_ACTIVE_LOW>;
 				vqmmc-supply = <&vcc_sd_reg1>;
 				marvell,pad-type = "sd";
 				status = "disabled";
 				/* UPDATE */
 				pinctrl-names = "default";
-				pinctrl-0 = <&sdio_pins &cd_pins>;
+				pinctrl-0 = <&sdio_pins>;
 			};
 
 			sdhci0: sdhci@d8000 {
@@ -227,7 +198,7 @@
 				regulator-max-microvolt = <3300000>;
 				regulator-boot-on;
 
-				gpios = <&gpio_sb 23 GPIO_ACTIVE_HIGH>;
+				gpios = <&gpiosb 23 GPIO_ACTIVE_HIGH>;
 				gpios-states = <0>;
 				states = <1800000 0x1 3300000 0x0>;
 				enable-active-high;

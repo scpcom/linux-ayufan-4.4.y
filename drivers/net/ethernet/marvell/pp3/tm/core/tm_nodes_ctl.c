@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -453,5 +449,3 @@ int tm_clean_list(tm_handle hndl)
 
 	return rc;
 }
-
-#endif /* MY_DEF_HERE */

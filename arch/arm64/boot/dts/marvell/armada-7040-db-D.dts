@@ -56,6 +56,11 @@
 
 	chosen { };
 
+	aliases {
+		ethernet0 = &emac0;
+		ethernet1 = &emac3;
+	};
+
 	ap806 {
 		config-space {
 			sdhci@6e0000 {
@@ -108,13 +113,21 @@
 				status = "disabled";
 			};
 			usb3h1: usb3@510000 {
+				separated-phys-for-usb2-usb3;
+				phys = <&utmi1>,
+				       <&comphy0 4 COMPHY_USB3H1>;
+				phy-names = "usb2", "usb3";
 				status = "okay";
 			};
 			u3d@520000 {
 				vbus-gpio = <&expander0 3 GPIO_ACTIVE_HIGH>;
+				phys = <&comphy0 1 COMPHY_USB3D0>;
+				phy-names = "usb";
 				status = "okay";
 			};
 			udc@524100 {
+				phys = <&utmi0>;
+				phy-names = "usb";
 				status = "okay";
 			};
 			nand@720000 {
@@ -181,10 +194,10 @@
 					status = "okay";
 				};
 			};
-			eip197: eip197@800000 {
+			comphy {
 				status = "okay";
 			};
-			comphy {
+			utmi1: utmi@581000 {
 				status = "okay";
 			};
 		};

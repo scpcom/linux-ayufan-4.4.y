@@ -64,14 +64,6 @@ void rtk_phoenix_set_tiler_heap(struct ion_heap **hPtr);
 void rtk_phoenix_ion_update_last_alloc_addr(unsigned int addr, unsigned int size);
 #endif /* __KERNEL__ */
 
-/* additional heaps used only on rtk_phoenix */
-enum {
-	RTK_PHOENIX_ION_HEAP_TYPE_TILER = ION_HEAP_TYPE_CUSTOM + 1,
-	RTK_PHOENIX_ION_HEAP_TYPE_MEDIA,
-	RTK_PHOENIX_ION_HEAP_TYPE_AUDIO,
-	RTK_PHOENIX_ION_HEAP_TYPE_SECURE,
-};
-
 #define RTK_PHOENIX_ION_HEAP_TILER_MASK (1 << RTK_PHOENIX_ION_HEAP_TYPE_TILER)
 #define RTK_PHOENIX_ION_HEAP_MEDIA_MASK (1 << RTK_PHOENIX_ION_HEAP_TYPE_MEDIA)
 #define RTK_PHOENIX_ION_HEAP_AUDIO_MASK (1 << RTK_PHOENIX_ION_HEAP_TYPE_AUDIO)

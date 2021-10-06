@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * linux/fs/ext4/readpage.c
  *
@@ -86,6 +89,10 @@ static inline bool ext4_bio_encrypted(struct bio *bio)
 #endif
 }
 
+#ifdef MY_ABC_HERE
+extern int gSynoFsPatternCheckFlag;
+#endif /* MY_ABC_HERE */
+
 /*
  * I/O completion handler for multipage BIOs.
  *
@@ -102,6 +109,9 @@ static void mpage_end_io(struct bio *bio)
 {
 	struct bio_vec *bv;
 	int i;
+#ifdef MY_ABC_HERE
+	bool pattern_failed = false;
+#endif /* MY_ABC_HERE */
 
 	if (ext4_bio_encrypted(bio)) {
 		struct ext4_crypto_ctx *ctx = bio->bi_private;
@@ -117,6 +127,15 @@ static void mpage_end_io(struct bio *bio)
 	}
 	bio_for_each_segment_all(bv, bio, i) {
 		struct page *page = bv->bv_page;
+#ifdef MY_ABC_HERE
+		struct inode *inode = page->mapping->host;
+
+		if (!bio->bi_error && !pattern_failed && (bio->bi_rw & REQ_SYNO_PATTERN_CHECK)) {
+			if (0 > ext4_syno_pattern_check(inode, page, bv->bv_offset, bv->bv_len, SYNO_PATTERN_CHECK_BIO)) {
+				pattern_failed = true;
+			}
+		}
+#endif /* MY_ABC_HERE */
 
 		if (!bio->bi_error) {
 			SetPageUptodate(page);
@@ -294,6 +313,11 @@ int ext4_mpage_readpages(struct address_space *mapping,
 			bio->bi_iter.bi_sector = blocks[0] << (blkbits - 9);
 			bio->bi_end_io = mpage_end_io;
 			bio->bi_private = ctx;
+#ifdef MY_ABC_HERE
+			if (gSynoFsPatternCheckFlag && ext4_test_inode_flag(inode, EXT4_INODE_NODUMP)) {
+				bio->bi_rw |= REQ_SYNO_PATTERN_CHECK;
+			}
+#endif /* MY_ABC_HERE */
 		}
 
 		length = first_hole << blkbits;

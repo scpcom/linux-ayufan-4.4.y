@@ -319,11 +319,11 @@ static struct lock_class_key af_callback_keys[AF_MAX];
 /* Run time adjustable parameters. */
 __u32 sysctl_wmem_max __read_mostly = SK_WMEM_MAX;
 EXPORT_SYMBOL(sysctl_wmem_max);
-#if defined(MY_ABC_HERE)
+#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 __u32 sysctl_rmem_max __read_mostly = 2 * SK_RMEM_MAX;
 #else
 __u32 sysctl_rmem_max __read_mostly = SK_RMEM_MAX;
-#endif /* MY_ABC_HERE */
+#endif /* MY_ABC_HERE || defined(MY_DEF_HERE) */
 EXPORT_SYMBOL(sysctl_rmem_max);
 __u32 sysctl_wmem_default __read_mostly = SK_WMEM_MAX;
 __u32 sysctl_rmem_default __read_mostly = SK_RMEM_MAX;

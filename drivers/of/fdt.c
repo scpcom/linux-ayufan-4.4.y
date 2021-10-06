@@ -35,6 +35,18 @@
 #include <asm/setup.h>  /* for COMMAND_LINE_SIZE */
 #include <asm/page.h>
 
+#ifdef MY_DEF_HERE
+#include <linux/synolib.h>
+#ifdef MY_ABC_HERE
+extern int gSynoHddPowerupSeq, gSynoInternalHddNumber;
+#endif /* MY_ABC_HERE */
+#ifdef MY_DEF_HERE
+extern int giSynoSpinupGroup[SYNO_SPINUP_GROUP_MAX];
+extern int giSynoSpinupGroupNum;
+extern int giSynoSpinupGroupDelay;
+#endif /* MY_DEF_HERE */
+#endif /* MY_DEF_HERE */
+
 /*
  * of_fdt_limit_memory - limit the number of regions in the /memory node
  * @limit: maximum entries
@@ -813,8 +825,6 @@ static inline void early_init_dt_check_for_cma(unsigned long node)
 {
 	int i, len;
 	const __be32 *prop;
-	u64 base_u64, size_u64;
-	phys_addr_t base, size;
 
 	pr_debug("Looking for cma properties... ");
 
@@ -840,7 +850,7 @@ static inline void early_init_dt_check_for_cma(unsigned long node)
 			of_cma_info.region[i].size = of_cma_info.region[i].size & 0xFFFFFFFF; // work around
             of_cma_info.region[i].base = of_read_number(prop, 3 + (i*CMA_REGION_COLUMN));
             of_cma_info.region[i].base = of_cma_info.region[i].base & 0xFFFFFFFF; // work around
-			pr_debug("region_cnt.region[%d] { 0x%08x, 0x%016x, 0x%016x }\n", i,
+			pr_debug("region_cnt.region[%d] { 0x%08x, 0x%016llx, 0x%016llx }\n", i,
 				of_cma_info.region[i].flag,
 				of_cma_info.region[i].size,
 				of_cma_info.region[i].base);
@@ -1241,6 +1251,54 @@ void __init unflatten_device_tree(void)
 	of_alias_scan(early_init_dt_alloc_memory_arch);
 }
 
+#ifdef MY_DEF_HERE
+#ifdef MY_DEF_HERE
+void __init syno_init_spinup_group(void)
+{
+	int group_num = 0, retReadDT = 0, spinupGroupMemberNum = 0, spinupGroupDelay = 0;
+	for (group_num = 0; group_num < sizeof(giSynoSpinupGroup)/sizeof(int); group_num++) {
+		retReadDT = of_property_read_u32_index(of_root, DT_SYNO_SPINUP_GROUP, group_num, &spinupGroupMemberNum);
+		// if reading DT error, this means that reading to the end of spinup_group or no spinup_group
+		if (retReadDT) {
+			break;
+		}
+		giSynoSpinupGroup[group_num] = spinupGroupMemberNum;
+		printk("SYNO Spinup Group %d: %d\n", group_num, giSynoSpinupGroup[group_num]);
+	}
+	giSynoSpinupGroupNum = group_num;
+
+	retReadDT = of_property_read_u32_index(of_root, DT_SYNO_SPINUP_GROUP_DELAY, 0, &spinupGroupDelay);
+	if (0 == retReadDT) {
+		giSynoSpinupGroupDelay = spinupGroupDelay;
+		printk("SYNO Spinup Group Delay: %d\n", giSynoSpinupGroupDelay);
+	}
+}
+#endif /* MY_DEF_HERE */
+
+#ifdef MY_ABC_HERE
+void __init syno_init_internal_hdd_number(void)
+{
+	int internalHDDNumber = 0;
+	struct device_node *pSlotNode = NULL;
+	char *szSynoHddPowerupSeq = NULL;
+	szSynoHddPowerupSeq = (char *)of_get_property(of_root, DT_HDD_POWERUP_SEQ, NULL);
+
+	if (szSynoHddPowerupSeq && 0 == strncmp(szSynoHddPowerupSeq, "true", strlen("true"))) {
+		gSynoHddPowerupSeq = 1;
+
+		for_each_child_of_node(of_root, pSlotNode) {
+			// get index number of internal_slot, e.g. /internal_slot@4 --> 4
+			if (!pSlotNode->full_name || 0 != strncmp(pSlotNode->full_name, "/"DT_INTERNAL_SLOT, strlen("/"DT_INTERNAL_SLOT))) {
+				continue;
+			}
+			internalHDDNumber++;
+		}
+		gSynoInternalHddNumber = internalHDDNumber;
+	}
+}
+#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE */
+
 /**
  * unflatten_and_copy_device_tree - copy and create tree of device_nodes from flat blob
  *
@@ -1271,9 +1329,26 @@ void __init unflatten_and_copy_device_tree(void)
 		initial_boot_params = dt;
 	}
 	unflatten_device_tree();
+
+#ifdef MY_DEF_HERE
+#ifdef MY_DEF_HERE
+	syno_init_spinup_group();
+#endif /* MY_DEF_HERE */
+
+#ifdef MY_ABC_HERE
+	syno_init_internal_hdd_number();
+#endif /* MY_ABC_HERE */
+#endif /* MY_DEF_HERE && MY_DEF_HERE */
+
 }
 
 #ifdef CONFIG_SYSFS
+#if defined(CONFIG_X86) && defined(MY_DEF_HERE)
+static int __init of_fdt_raw_init(void)
+{
+	return 0;
+}
+#else /* CONFIG_X86 && MY_DEF_HERE*/
 static ssize_t of_fdt_raw_read(struct file *filp, struct kobject *kobj,
 			       struct bin_attribute *bin_attr,
 			       char *buf, loff_t off, size_t count)
@@ -1298,6 +1373,7 @@ static int __init of_fdt_raw_init(void)
 	of_fdt_raw_attr.size = fdt_totalsize(initial_boot_params);
 	return sysfs_create_bin_file(firmware_kobj, &of_fdt_raw_attr);
 }
+#endif /* CONFIG_X86 && MY_DEF_HERE*/
 late_initcall(of_fdt_raw_init);
 #endif
 

@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
  *  scsi_error.c Copyright (C) 1997 Eric Youngdale
  *
@@ -58,10 +55,6 @@ static void scsi_eh_done(struct scsi_cmnd *scmd);
 #define BUS_RESET_SETTLE_TIME   (10)
 #define HOST_RESET_SETTLE_TIME  (10)
 
-#ifdef MY_ABC_HERE
-extern int giSynoDsikEhFlag;
-extern unsigned long guSynoScsiCmdSN;
-#endif /* MY_ABC_HERE */
 static int scsi_eh_try_stu(struct scsi_cmnd *scmd);
 static int scsi_try_to_abort_cmd(struct scsi_host_template *,
 				 struct scsi_cmnd *);
@@ -892,13 +885,6 @@ static int scsi_try_to_abort_cmd(struct scsi_host_template *hostt,
 {
 	if (!hostt->eh_abort_handler)
 		return FAILED;
-
-#ifdef MY_ABC_HERE
-	if (giSynoDsikEhFlag == 1 && guSynoScsiCmdSN == scmd->serial_number) {
-		giSynoDsikEhFlag = 0;
-		guSynoScsiCmdSN = 0;
-	}
-#endif /* MY_ABC_HERE */
 
 	return hostt->eh_abort_handler(scmd);
 }
@@ -2103,12 +2089,6 @@ void scsi_eh_flush_done_q(struct list_head *done_q)
 		if (scsi_device_online(scmd->device) &&
 		    !scsi_noretry_cmd(scmd) &&
 		    (++scmd->retries <= scmd->allowed)) {
-#ifdef MY_ABC_HERE
-			if (0 == giSynoDsikEhFlag) {
-				giSynoDsikEhFlag = 1;
-				guSynoScsiCmdSN = scmd->serial_number;
-			}
-#endif /* MY_ABC_HERE */
 			SCSI_LOG_ERROR_RECOVERY(3,
 				scmd_printk(KERN_INFO, scmd,
 					     "%s: flush retry cmd\n",
@@ -2127,12 +2107,6 @@ void scsi_eh_flush_done_q(struct list_head *done_q)
 					     "%s: flush finish cmd\n",
 					     current->comm));
 			scsi_finish_command(scmd);
-#ifdef MY_ABC_HERE
-			if (giSynoDsikEhFlag == 1 && guSynoScsiCmdSN == scmd->serial_number) {
-				giSynoDsikEhFlag = 0;
-				guSynoScsiCmdSN = 0;
-			}
-#endif /* MY_ABC_HERE */
 		}
 	}
 }

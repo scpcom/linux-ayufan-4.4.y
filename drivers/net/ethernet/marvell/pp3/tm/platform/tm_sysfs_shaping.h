@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -37,5 +33,3 @@ disclaimer.
 int tm_sysfs_read_shaping(void);
 
 #endif /* TM_SYSFS_SHAPING__H */
-
-#endif /* MY_DEF_HERE */

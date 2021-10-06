@@ -19,7 +19,10 @@
 #include <linux/reset.h>
 #include <linux/suspend.h>
 #include <linux/kthread.h>
-
+#ifdef CONFIG_PCI_MSI
+#include <linux/msi.h>
+#include <asm/cacheflush.h>
+#endif /* CONFIG_PCI_MSI */
 #include <soc/realtek/rtd129x_cpu.h>
 #include "pcie-rtd1295.h"
 
@@ -28,6 +31,9 @@ static void __iomem	*PCIE_CFG_BASE;
 static void __iomem	*SYSTEM_BASE1;
 static void __iomem	*SYSTEM_BASE2;
 static void __iomem	*EMMC_MUXPAD;
+#ifdef CONFIG_PCI_MSI
+static void __iomem	*DCSYS_BASE;
+#endif /* CONFIG_PCI_MSI */
 
 static u32 pcie_gpio_20 = 0;
 static u32 speed_mode = 0;
@@ -50,12 +56,26 @@ static struct pci_bus *bus;
 
 static spinlock_t rtk_pcie2_lock;
 
-static inline u32 rtk_pcie2_read(u32 addr, u8 size)
+#ifdef CONFIG_PCI_MSI
+#define MAX_RTK_MSI_IRQS 16
+#define MAX_RTK_MSI_CTRLS	(MAX_RTK_MSI_IRQS / 16)
+
+struct irq_domain *pcie2_irq_domain;
+struct irq_domain *rtk_msi_domain;
+struct mutex		msi_lock;
+
+DECLARE_BITMAP(rtk_pcie_irq_bitmap, MAX_RTK_MSI_IRQS);
+unsigned long *pcie2_msi_data;
+dma_addr_t dma_handle;
+bool no_msi = 0;
+#endif /* CONFIG_PCI_MSI */
+
+static inline u32 rtk_pcie2_read(u64 addr, u8 size)
 {
 	u32 rval = 0;
 	u32 mask;
 	u32 translate_val = 0;
-	u32 tmp_addr = addr & 0xFFF;
+	u64 tmp_addr = addr & 0xFFF;
 	u32 pci_error_status = 0;
 	int retry_cnt = 0;
 	u8 retry = 5;
@@ -111,7 +131,7 @@ pci_read_129x_retry:
 	pci_error_status = rtk_pci_ctrl_read(0xc7c);
 	if (pci_error_status & 0x1F) {
 		rtk_pci_ctrl_write(0xc7c, pci_error_status);
-		printk(KERN_INFO "RTD129X: %s: DLLP(#%d) 0x%x reg=0x%x val=0x%x\n", __func__, retry_cnt, pci_error_status, addr, rval);
+		printk(KERN_INFO "RTD129X: %s: DLLP(#%d) 0x%x reg=0x%llx val=0x%x\n", __func__, retry_cnt, pci_error_status, addr, rval);
 
 		if (retry_cnt < retry) {
 			retry_cnt++;
@@ -134,11 +154,11 @@ pci_read_129x_retry:
 	return rval;
 }
 
-static inline void rtk_pcie2_write(u32 addr, u8 size, u32 wval)
+static inline void rtk_pcie2_write(u64 addr, u8 size, u32 wval)
 {
 	u32 mask;
 	u32 translate_val = 0;
-	u32 tmp_addr = addr & 0xFFF;
+	u64 tmp_addr = addr & 0xFFF;
 	unsigned long irqL;
 
 	spin_lock_irqsave(&rtk_pcie2_lock, irqL);
@@ -200,19 +220,19 @@ static inline void rtk_pcie2_write(u32 addr, u8 size, u32 wval)
 
 u8 rtk_pcie2_readb(const volatile void __iomem *addr)
 {
-	return rtk_pcie2_read((u32)addr, 1);
+	return rtk_pcie2_read((u64)addr, 1);
 }
 EXPORT_SYMBOL(rtk_pcie2_readb);
 
 u16 rtk_pcie2_readw(const volatile void __iomem *addr)
 {
-	return rtk_pcie2_read((u32)addr, 2);
+	return rtk_pcie2_read((u64)addr, 2);
 }
 EXPORT_SYMBOL(rtk_pcie2_readw);
 
 u32 rtk_pcie2_readl(const volatile void __iomem *addr)
 {
-	return rtk_pcie2_read((u32)addr, 4);
+	return rtk_pcie2_read((u64)addr, 4);
 }
 EXPORT_SYMBOL(rtk_pcie2_readl);
 
@@ -221,8 +241,8 @@ u64 rtk_pcie2_readq(const volatile void __iomem *addr)
 	const volatile u32 __iomem *p = addr;
 	u32 low, high;
 
-	low = rtk_pcie2_read((u32)p, 4);
-	high = rtk_pcie2_read((p + 1), 4);
+	low = rtk_pcie2_read((u64)p, 4);
+	high = rtk_pcie2_read((u64)(p + 1), 4);
 
 	return low + ((u64)high << 32);
 }
@@ -230,29 +250,29 @@ EXPORT_SYMBOL(rtk_pcie2_readq);
 
 void rtk_pcie2_writeb(u8 val, volatile void __iomem *addr)
 {
-	rtk_pcie2_write((u32)addr, 1, val);
+	rtk_pcie2_write((u64)addr, 1, val);
 	return;
 }
 EXPORT_SYMBOL(rtk_pcie2_writeb);
 
 void rtk_pcie2_writew(u16 val, volatile void __iomem *addr)
 {
-	rtk_pcie2_write((u32)addr, 2, val);
+	rtk_pcie2_write((u64)addr, 2, val);
 	return;
 }
 EXPORT_SYMBOL(rtk_pcie2_writew);
 
 void rtk_pcie2_writel(u32 val, volatile void __iomem *addr)
 {
-	rtk_pcie2_write((u32)addr, 4, val);
+	rtk_pcie2_write((u64)addr, 4, val);
 	return;
 }
 EXPORT_SYMBOL(rtk_pcie2_writel);
 
 void rtk_pcie2_writeq(u64 val, volatile void __iomem *addr)
 {
-	rtk_pcie2_write((u32)addr, 4, val);
-	rtk_pcie2_write((u32)addr + 4, 4, val >> 32);
+	rtk_pcie2_write((u64)addr, 4, val);
+	rtk_pcie2_write((u64)addr + 4, 4, val >> 32);
 	return;
 }
 EXPORT_SYMBOL(rtk_pcie2_writeq);
@@ -689,15 +709,144 @@ static int rtk_pcie2_hw_initial(struct device *dev)
 	rtk_pci_ctrl_write(0x20, 0x0000FFF0);
 	rtk_pci_ctrl_write(0x24, 0x0000FFF0);
 
+#ifdef CONFIG_PCI_MSI
+	if (!no_msi) {
+		rtk_pci_ctrl_write(0xC04, 0x1C00);
+	}
+#endif /* CONFIG_PCI_MSI */
+
 	return ret;
 }
+
+#ifdef CONFIG_PCI_MSI
+/* MSI int handler */
+irqreturn_t rtk_handle_msi_irq(int _irq, void *_data)
+{
+	unsigned long val = 0;
+	int pos, irq;
+	irqreturn_t ret = IRQ_NONE;
+	u32 int_stat = 0;
+
+	int_stat = readl(DCSYS_BASE + 0x240);
+	if (int_stat & 0x2000){
+		writel(0x5400, DCSYS_BASE + 0x240);/*interrupt clear*/
+	} else {
+		return IRQ_HANDLED;
+	}
+	while(1){
+		val = *pcie2_msi_data;
+		if(val != 0x0){
+			*pcie2_msi_data = 0x0;
+			break;
+		}
+	}
+
+	ret = IRQ_HANDLED;
+	pos = 0;
+	while ((pos = find_next_bit(&val, MAX_RTK_MSI_IRQS, pos)) != MAX_RTK_MSI_IRQS) {
+		irq = irq_find_mapping(pcie2_irq_domain, pos);
+		generic_handle_irq(irq);
+		pos++;
+	}
+
+	return ret;
+}
+
+static struct irq_chip rtk_msi_irq_chip = {
+	.name = "RTK-PCIE2-MSI",
+	.irq_enable = pci_msi_unmask_irq,
+	.irq_disable = pci_msi_mask_irq,
+	.irq_mask = pci_msi_mask_irq,
+	.irq_unmask = pci_msi_unmask_irq,
+};
+
+void rtk_pcie_msi_init(void)
+{
+	pcie2_msi_data = (unsigned long *)__get_free_pages(GFP_KERNEL, 0);
+	rtk_pci_ctrl_write(0xCD0, virt_to_phys((void *)pcie2_msi_data));
+	*(volatile unsigned int *)pcie2_msi_data = 0;
+}
+
+static void rtk_compose_msi_msg(struct irq_data *data, struct msi_msg *msg)
+{
+	msg->address_lo = dma_handle;
+	msg->address_hi = 0x0;
+	msg->data = 1 << data->hwirq;
+}
+
+static int rtk_msi_set_affinity(struct irq_data *irq_data,
+				   const struct cpumask *mask, bool force)
+{
+	 return -EINVAL;
+}
+
+static struct irq_chip rtk_msi_bottom_irq_chip = {
+	.name			= "Realtek MSI",
+	.irq_compose_msi_msg	= rtk_compose_msi_msg,
+	.irq_set_affinity	= rtk_msi_set_affinity,
+};
+
+static int rtk_irq_domain_alloc(struct irq_domain *domain, unsigned int virq,
+				   unsigned int nr_irqs, void *args)
+{
+	int pos0;
+
+	WARN_ON(nr_irqs != 1);
+	mutex_lock(&msi_lock);
+	pos0 = find_first_zero_bit(rtk_pcie_irq_bitmap, MAX_RTK_MSI_IRQS);
+
+	if (pos0 >= MAX_RTK_MSI_IRQS) {
+		printk("[%s]ERROR: irq domain number(%d) > MAX_RTK_MSI_IRQS(%d)\n", __func__, pos0, MAX_RTK_MSI_IRQS);
+		return -ENOSPC;
+	}
+
+	set_bit(pos0, rtk_pcie_irq_bitmap);
+	mutex_unlock(&msi_lock);
+	irq_domain_set_info(domain, virq, pos0, &rtk_msi_bottom_irq_chip,
+			    domain->host_data, handle_simple_irq,
+			    NULL, NULL);
+	//set_irq_flags(virq, IRQF_VALID);
+
+	return 0;
+}
+
+static void rtk_irq_domain_free(struct irq_domain *domain,
+				   unsigned int virq, unsigned int nr_irqs)
+{
+	struct irq_data *d = irq_domain_get_irq_data(domain, virq);
+
+	mutex_lock(&msi_lock);
+	if (!test_bit(d->hwirq, rtk_pcie_irq_bitmap)) {
+		printk("[%s] PCIE: irq domain number(%lu) not in rtk_pcie_irq_bitmap\n", __func__, d->hwirq);
+	} else {
+		__clear_bit(d->hwirq, rtk_pcie_irq_bitmap);
+	}
+	mutex_unlock(&msi_lock);
+}
+
+static const struct irq_domain_ops rtk_msi_domain_ops = {
+	.alloc = rtk_irq_domain_alloc,
+	.free = rtk_irq_domain_free,
+};
+
+static struct msi_domain_info rtk_msi_domain_info = {
+	.flags	= (MSI_FLAG_USE_DEF_DOM_OPS | MSI_FLAG_USE_DEF_CHIP_OPS | MSI_FLAG_MULTI_PCI_MSI),
+	.chip	= &rtk_msi_irq_chip,
+};
+
+#endif /* CONFIG_PCI_MSI */
 
 static int rtk_pcie2_probe(struct platform_device *pdev)
 {
 	int ret = 0;
 	int size = 0;
 	const u32 *prop;
-
+#ifdef CONFIG_PCI_MSI
+	int irq;
+	struct fwnode_handle *fwnode = of_node_to_fwnode(pdev->dev.of_node);
+	u32 tmp = 0;
+#endif /* CONFIG_PCI_MSI */
+	
 	resource_size_t iobase = 0;
 	LIST_HEAD(res);
 
@@ -742,6 +891,14 @@ static int rtk_pcie2_probe(struct platform_device *pdev)
 		dev_err(&pdev->dev, "can't request 'EMMC_MUXPAD' address\n");
 		return -EINVAL;
 	}
+
+#ifdef CONFIG_PCI_MSI
+	DCSYS_BASE = of_iomap(pdev->dev.of_node, 5);
+	if (!DCSYS_BASE) {
+		dev_err(&pdev->dev, "can't request 'DCSYS_BASE' address, no init msi\n");
+		no_msi = 1;
+	}
+#endif /* CONFIG_PCI_MSI */
 
 	pcie_gpio_20 = of_get_gpio_flags(pdev->dev.of_node, 0, NULL);
 	if (gpio_is_valid(pcie_gpio_20)) {
@@ -807,6 +964,53 @@ static int rtk_pcie2_probe(struct platform_device *pdev)
 		return -EINVAL;
 	}
 
+#ifdef CONFIG_PCI_MSI
+	if (no_msi) {
+		goto no_msi;
+	}
+
+	mutex_init(&msi_lock);
+
+	/*MSI Init*/
+	irq = irq_of_parse_and_map(pdev->dev.of_node, 0);
+	if (irq < 0) {
+		printk(KERN_ERR "PCIE2 request irq(%d) failed\n", irq);
+		return -EINVAL;
+	}
+
+	ret = request_irq(irq, rtk_handle_msi_irq, IRQF_SHARED,
+						"rtk-pcie2-msi", pdev);
+
+	if (ret !=0)
+		printk("[%s]request irq failed\n", __func__);
+
+	pcie2_irq_domain = irq_domain_add_linear(pdev->dev.of_node,
+					MAX_RTK_MSI_IRQS, &rtk_msi_domain_ops,
+					NULL);
+	if (!pcie2_irq_domain) {
+		dev_err(&pdev->dev, "irq domain init failed\n");
+		return -ENXIO;
+	}
+
+	rtk_msi_domain = pci_msi_create_irq_domain(fwnode, &rtk_msi_domain_info, pcie2_irq_domain);
+
+	if (!rtk_msi_domain) {
+		printk("[%s]failed to create MSI domain\n", __func__);
+		irq_domain_remove(pcie2_irq_domain);
+		return -ENOMEM;
+	}
+	pcie2_msi_data  = dma_alloc_coherent(&pdev->dev, PAGE_SIZE, &dma_handle, GFP_KERNEL);
+	writel(1 << 30 | ((dma_handle >> 5) << 2), DCSYS_BASE + 0x200);/*write start address*/
+	writel((((dma_handle + 0x4) >> 5) << 2), DCSYS_BASE + 0x220);/*write end address*/
+	writel(0x56, DCSYS_BASE + 0x260); /*monitor pcie*/
+	tmp = (0x1 << 2)| (0x1 << 0) | (0x1 << 23) | (0x2 << 21) | (0x2 << 19) | (0x2 << 17) | (0x2 << 15)
+		| (0x1 << 8) | (0x1 << 3) | (0x1 << 4) | (0x1 << 5) | (0x0 << 6);
+	writel(tmp, DCSYS_BASE + 0x240); /*set write access type & interrupt to cpu*/
+	*pcie2_msi_data = 0x0;
+
+no_msi:
+#endif /* CONFIG_PCI_MSI */
+
 	/*-------------------------------------------
 	 * Register PCI-E host
 	 *-------------------------------------------*/
@@ -848,6 +1052,9 @@ static int rtk_pcie2_suspend(struct device *dev)
 		reset_control_assert(rstn_pcie1_phy);
 		reset_control_assert(rstn_pcie1_phy_mdio);
 		clk_disable_unprepare(pcie1_clk);
+
+		gpio_direction_output(pcie_gpio_20, 0);
+		gpio_free(pcie_gpio_20);
 	}
 
 	dev_info(dev, "suspend exit ...\n");

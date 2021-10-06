@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -55,4 +51,3 @@ unsigned int __get_field(void * address, int shift, int width)
 	uvalue >>=shift;
 	return (unsigned int) uvalue;
 }
-#endif /* MY_DEF_HERE */

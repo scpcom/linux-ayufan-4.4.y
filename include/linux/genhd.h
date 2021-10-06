@@ -195,7 +195,7 @@ struct gendisk {
 	struct kobject integrity_kobj;
 #endif	 
 	int node_id;
-#ifdef MY_ABC_HERE
+#if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 	int systemDisk;
 #endif  
 };

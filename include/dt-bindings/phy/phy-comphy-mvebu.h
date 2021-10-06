@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _DT_BINDINGS_PHY_COMPHY_MVEBU
 #define _DT_BINDINGS_PHY_COMPHY_MVEBU
 
@@ -6,8 +9,17 @@
  *      - bit 7~2 represent comphy speed
  *      - bit 11~8 represent unit index
  *      - bit 16~12 represent mode
+ */
+#if defined(MY_DEF_HERE)
+/*
+ *      - bit 17 represent comphy indication of clock source
+ *      - bit 31~18 reserved
+ */
+#else /* MY_DEF_HERE */
+/* 
  *      - bit 31~13 reserved
  */
+#endif /* MY_DEF_HERE */
 
 #define COMPHY_INVERT_OFFSET	0
 #define COMPHY_INVERT_LEN	2
@@ -21,6 +33,11 @@
 #define COMPHY_MODE_OFFSET	(COMPHY_UNIT_ID_OFFSET + COMPHY_UNIT_ID_LEN)
 #define COMPHY_MODE_LEN		5
 #define COMPHY_MODE_MASK	COMPHY_MASK(COMPHY_MODE_OFFSET, COMPHY_MODE_LEN)
+#if defined(MY_DEF_HERE)
+#define COMPHY_CLK_SRC_OFFSET	(COMPHY_MODE_OFFSET + COMPHY_MODE_LEN)
+#define COMPHY_CLK_SRC_LEN	1
+#define COMPHY_CLK_SRC_MASK	COMPHY_MASK(COMPHY_CLK_SRC_OFFSET, COMPHY_CLK_SRC_LEN)
+#endif /* MY_DEF_HERE */
 #define COMPHY_DEF(mode, id, speed, invert)	\
 	(((mode) << COMPHY_MODE_OFFSET) | ((id) << COMPHY_UNIT_ID_OFFSET) | \
 	((speed) << COMPHY_SPEED_OFFSET) | ((invert) << COMPHY_INVERT_OFFSET))
@@ -35,6 +52,10 @@
 #define COMPHY_GET_SPEED(x)		(((x) & COMPHY_SPEED_MASK) >> COMPHY_SPEED_OFFSET)
 /* Macro the extract the polarity invert from lane description */
 #define COMPHY_GET_POLARITY_INVERT(x)	(((x) & COMPHY_INVERT_MASK) >> COMPHY_INVERT_OFFSET)
+#if defined(MY_DEF_HERE)
+/* Macro the extract the clock source indication from lane description */
+#define COMPHY_GET_CLK_SRC(x)		(((x) & COMPHY_CLK_SRC_MASK) >> COMPHY_CLK_SRC_OFFSET)
+#endif /* MY_DEF_HERE */
 
 /* Comphy unit index macro */
 #define COMPHY_UNIT_ID0		0
@@ -112,7 +133,18 @@
 #define COMPHY_SPEED_DEFAULT		COMPHY_SPEED_MAX
 
 /* Commands for comphy driver */
+#if defined(MY_DEF_HERE)
+#define COMPHY_COMMAND_DIGITAL_PWR_OFF		0x00000001
+#define COMPHY_COMMAND_DIGITAL_PWR_ON		0x00000002
+#define COMPHY_COMMAND_PCIE_WIDTH_1		0x00000003
+#define COMPHY_COMMAND_PCIE_WIDTH_2		0x00000004
+#define COMPHY_COMMAND_PCIE_WIDTH_4		0x00000005
+#define COMPHY_COMMAND_PCIE_WIDTH_UNSUPPORT	0x00000006
+#define COMPHY_COMMAND_PCIE_IS_EP		0x00000007
+#define COMPHY_COMMAND_SFI_RX_TRAINING		0x00000008
+#else /* MY_DEF_HERE */
 #define COMPHY_COMMAND_DIGITAL_PWR_OFF	0x00000001
 #define COMPHY_COMMAND_DIGITAL_PWR_ON	0x00000002
+#endif /* MY_DEF_HERE */
 
 #endif /* _DT_BINDINGS_PHY_COMPHY_MVEBU */

@@ -793,9 +793,12 @@ ssize_t hfsplus_listxattr(struct dentry *dentry, char *buffer, size_t size)
 	if (res < 0)
 		return res;
 #ifdef MY_ABC_HERE
-	res += hfsplus_listxattr_rfork(dentry, buffer + res, size - res);
-	if (res < 0) {
-		return res;
+	err = hfsplus_listxattr_rfork(dentry, buffer ?
+		buffer + res : buffer, size < res ? 0 : size - res);
+
+	res += err;
+	if (err < 0) {
+		return err;
 	}
 #endif  
 	else if (!HFSPLUS_SB(inode->i_sb)->attr_tree)

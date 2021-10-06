@@ -47,6 +47,13 @@ enum ion_heap_type {
 			       * must be last so device specific heaps always
 			       * are at the end of this enum
 			       */
+#if defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE)
+	/* additional heaps used only on rtk_phoenix */
+	RTK_PHOENIX_ION_HEAP_TYPE_TILER = ION_HEAP_TYPE_CUSTOM + 1, // default 6
+	RTK_PHOENIX_ION_HEAP_TYPE_MEDIA,
+	RTK_PHOENIX_ION_HEAP_TYPE_AUDIO,
+	RTK_PHOENIX_ION_HEAP_TYPE_SECURE,
+#endif /* CONFIG_ION_RTK_PHOENIX && MY_DEF_HERE */
 	ION_NUM_HEAPS = 16,
 };
 

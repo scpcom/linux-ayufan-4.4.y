@@ -56,6 +56,13 @@
 		reg = <0x0 0x0 0x0 0x80000000>;
 	};
 
+	aliases {
+		ethernet0 = &emac0;
+		ethernet1 = &emac0_1;
+		ethernet2 = &emac2_1;
+		ethernet3 = &emac3_1;
+	};
+
 	ap806 {
 		config-space {
 			serial@512000 {
@@ -85,6 +92,10 @@
 			pinctrl@440000 {
 				xhci0_vbus_pins: xhci0-vbus-pins {
 					marvell,pins = "mpp47";
+					marvell,function = "gpio";
+				};
+				pcie_reset_pins: pcie-reset-pins {
+					marvell,pins = "mpp52";
 					marvell,function = "gpio";
 				};
 			};
@@ -145,13 +156,13 @@
 					status = "okay";
 				};
 			};
-			eip197@800000 {
-				status = "okay";
-			};
 		};
 		pcie@0x600000 {
 			num-lanes = <4>;
 			status = "okay";
+			reset-gpios = <&cpm_gpio1 20 GPIO_ACTIVE_HIGH>;
+			pinctrl-names = "default";
+			pinctrl-0 = <&pcie_reset_pins>;
 		};
 		reg_usb3h0_vbus: usb3-vbus0 {
 			compatible = "regulator-fixed";
@@ -181,6 +192,10 @@
 			};
 			usb3h0_1: usb3@500000 {
 				usb-phy = <&usb3h0_phy>;
+				separated-phys-for-usb2-usb3;
+				phys = <&utmi0_1>,
+				       <&comphy1 2 COMPHY_USB3H0>;
+				phy-names = "usb2", "usb3";
 				status = "okay";
 			};
 			usb3h0_phy: usb3_phy0 {
@@ -233,7 +248,7 @@
 					status = "okay";
 				};
 			};
-			eip197@800000 {
+			utmi0_1: utmi@580000 {
 				status = "okay";
 			};
 		};

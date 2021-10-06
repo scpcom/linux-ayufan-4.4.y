@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -235,4 +231,3 @@ disclaimer.
 		(0x000000ff << MV_EMAC_DBG_FIFO_FILL_LVL2_DBG_FIFO_FILL_LVL_DEQ_PKT_FIFO_OFFS)
 
 #endif /* __mv_emac_reg_h__ */
-#endif /* MY_DEF_HERE */

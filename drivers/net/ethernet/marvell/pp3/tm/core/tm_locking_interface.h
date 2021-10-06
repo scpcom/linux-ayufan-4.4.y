@@ -1,7 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
-#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -74,5 +70,3 @@ int tm_glob_unlock(void * environment_handle);
 int tm_sched_unlock(void * environment_handle);
 
 #endif   /* TM_LOCKING_INTERFACE_H */
-
-#endif /* MY_DEF_HERE */
