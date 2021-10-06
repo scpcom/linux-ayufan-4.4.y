@@ -1,0 +1,7 @@
+config RTK_RPC
+	bool "Realtek RPC driver"
+	depends on RTK_MEM_REMAP
+	default n if SYNO_LSP_RTD129X
+	default y if SYNO_LSP_RTD1619
+	help
+	  Realtek RPC driver with audio CPU

@@ -1,0 +1,119 @@
+if SYNO_LSP_RTD1619
+config RTK_SB2_SECURITY_DEBG
+	bool "Realtek system bridge security mode debug"
+	depends on HAVE_ARM_SMCCC
+	default n
+	help
+	  Enable helper functions for Realtek system bridge security mode debug. If unsure, say N.
+endif # SYNO_LSP_RTD1619
+
+config RTK_RBUS_BARRIER
+	bool "Realtek rbus barrier"
+	depends on RTK_MEM_REMAP
+	default y
+	help
+	  Enable helper functions for R-bus barrier. If unsure, say N.
+
+config RTK_MEM_REMAP
+	bool "Realtek memory remap"
+	default y
+	help
+	  Enable helper functions for static ioremap. If unsure, say N.
+
+if SYNO_LSP_RTD1619
+config RTK_ACPU_RELOAD
+	bool "Realtek dynamic ACPU reload"
+	default n
+	help
+	  Dynamic ACPU stop/start mechanism. If unsure, say N.
+
+config RTK_IPCSHM_RESET
+	bool "Dynamic IPC share memory reset"
+	depends on RTK_ACPU_RELOAD
+	default n
+	help
+	  Reset IPC_SHM when performing dynamic ACPU stop/start. If unsure, say N.
+
+config RTK_REGMAP_I2C
+	bool
+	select REGMAP
+
+config RTK_REGMAP_MMIO
+	bool
+	select REGMAP
+
+config RTK_REGMAP_SECURE_MMIO
+	bool
+	select RTK_REGMAP_MMIO
+	depends on HAVE_ARM_SMCCC
+
+config RTK_MMIO
+	bool
+	select REGMAP_MMIO
+
+config RTK_SECURE_DVFS
+	bool
+	default y if ARCH_RTD16xx
+	select RTK_REGMAP_SECURE_MMIO
+	select I2C_RTK_SECURE_ACCESS
+
+config RTK_MCP
+	bool "Realtek MCP driver"
+	default n
+	help
+	  Realtek MCP driver
+
+
+config RTK_VMX_ULTRA
+	bool "VMX ultra boot enable"
+	default n
+	help
+	  Set VMX ultra boot enable.
+
+config RTK_AVCPU_LOG
+	bool "Realtek AVCPU share memory logging system"
+	depends on RTK_RPC
+	help
+	  Enable AVCPU share memory logging read from userspace
+	  via device node.
+endif # SYNO_LSP_RTD1619
+
+source "drivers/soc/realtek/common/rpc/Kconfig"
+source "drivers/soc/realtek/common/pwrctrl/Kconfig"
+if SYNO_LSP_RTD1619
+source "drivers/soc/realtek/common/Kconfig.workaround"
+source "drivers/soc/realtek/common/hse/Kconfig"
+source "drivers/soc/realtek/common/debug/Kconfig"
+endif # SYNO_LSP_RTD1619
+
+#
+# Realtek codec configuration
+#
+
+menuconfig RTK_CODEC
+	bool "Realtek Codec"
+	default n
+
+if RTK_CODEC
+
+if ION
+config RTK_RESERVE_MEMORY
+	bool "RTK Reserve Memory for Video/Image Codec"
+	default n
+endif # ION
+
+config VE1_CODEC
+	bool "RTK Video Engine 1 Codec"
+	default n
+
+if SYNO_LSP_RTD129X
+config VE3_CODEC
+	bool "RTK Video Engine 3 Codec"
+	default n
+endif # SYNO_LSP_RTD129X
+
+config IMAGE_CODEC
+	bool "RTK Image Codec"
+	default n
+
+endif # RTK_CODEC

@@ -1,0 +1,20 @@
+diff --git a/synoconfigs/Kconfig.devices b/synoconfigs/Kconfig.devices
+index e60f1bcc0d94..b5b83a96f30e 100644
+--- a/synoconfigs/Kconfig.devices
++++ b/synoconfigs/Kconfig.devices
+@@ -1873,6 +1873,15 @@ config SYNO_MPT3_WORKAROUND_FOR_4G_ALIGNED_SENSE_DMA_ADDR
+ 			DMA buffer once we found sense buffer been allocated at 4G aligned
+ 			address.
+ 
++config SYNO_MPT3_HBA_TEMPERATURE_READ
++	bool "Add an sysfs entry for reading HBA temperature"
++	depends on SCSI_MPT3SAS
++	default y
++	help
++		<DSM> #128338
++			Add and sysfs entry for reading HBA temperature through LSI MPI
++			interface.
++
+ endmenu #SAS
+ 
+ endmenu #SCSI
