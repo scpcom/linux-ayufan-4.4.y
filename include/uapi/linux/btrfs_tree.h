@@ -39,11 +39,7 @@
 #define BTRFS_CSUM_TREE_OBJECTID 7ULL
 
 /* holds quota configuration and tracking */
-#ifdef MY_ABC_HERE
-#define BTRFS_QUOTA_TREE_OBJECTID 201ULL
-#else
 #define BTRFS_QUOTA_TREE_OBJECTID 8ULL
-#endif /* MY_ABC_HERE */
 
 /* for storing items that use the BTRFS_UUID_KEY* types */
 #define BTRFS_UUID_TREE_OBJECTID 9ULL
@@ -52,12 +48,8 @@
 #define BTRFS_FREE_SPACE_TREE_OBJECTID 10ULL
 
 #ifdef MY_ABC_HERE
-/* holds subvolume usr quota configuration and tracking */
-#define BTRFS_USRQUOTA_TREE_OBJECTID 200ULL
-#endif /* MY_ABC_HERE */
-
-#ifdef MY_ABC_HERE
 #define BTRFS_BLOCK_GROUP_HINT_TREE_OBJECTID 202ULL
+#define BTRFS_BLOCK_GROUP_CACHE_TREE_OBJECTID 203ULL
 #endif /* MY_ABC_HERE */
 
 /* device stats in the device tree */
@@ -134,9 +126,6 @@
 #define BTRFS_DIR_LOG_ITEM_KEY  60
 #define BTRFS_DIR_LOG_INDEX_KEY 72
 #define BTRFS_DIR_ITEM_KEY	84
-#ifdef MY_ABC_HERE
-#define BTRFS_DIR_ITEM_CASELESS_KEY 91
-#endif /* MY_ABC_HERE */
 #define BTRFS_DIR_INDEX_KEY	96
 /*
  * extent data is for file data
@@ -244,30 +233,6 @@
  * (parentid, BTRFS_QGROUP_RELATION_KEY, childid)
  */
 #define BTRFS_QGROUP_RELATION_KEY       246
-
-#ifdef MY_ABC_HERE
-/*
- * Records the overall state of the usrquota.
- * There's only one instance of this key present,
- * (0, BTRFS_USRQUOTA_STATUS_KEY, 0)
- */
-#define BTRFS_USRQUOTA_STATUS_KEY       240
-/*
- * Records the per root (subvolume) usrquota infomation.
- * One key per root, (root_id, BTRFS_USRQUOTA_ROOT_KEY, 0).
- */
-#define BTRFS_USRQUOTA_ROOT_KEY         241
-/*
- * Records the currently used space of the usrquota.
- * One key per usrquota, (root_id, BTRFS_USRQUOTA_INFO_KEY, uid).
- */
-#define BTRFS_USRQUOTA_INFO_KEY         242
-/*
- * Contains the user configured limits for the usrquota.
- * One key per usrquota, (root_id, BTRFS_USRGROUP_LIMIT_KEY, uid).
- */
-#define BTRFS_USRQUOTA_LIMIT_KEY        244
-#endif /* MY_ABC_HERE */
 
 #define BTRFS_BALANCE_ITEM_KEY	248
 
@@ -488,21 +453,6 @@ struct btrfs_extent_item_v0 {
  */
 #define BTRFS_EXTENT_FLAG_SUPER		(1ULL << 48)
 
-#ifdef MY_ABC_HERE
-/*
- * This flag is used to indicate that the extent item has more than
- * one backrefs for a particular file. This could be done by calling
- * BTRFS_IOC_CLONE_RANGE or dedup. Since our quota reference needs to
- * drop only if we find out that this is the file's last reference
- * to this extent item. After enabling dedup and iocl, things become
- * much more complicated because the variable "last_ref" in
- * __btrfs_free_extent doesn't serve our purpose for indicating we
- * need to drop quota due to dropping of file's last reference to
- * this file.
- */
-#define BTRFS_EXTENT_FLAG_HAS_CLONE_RANGE	(1ULL << 59)
-#endif /* MY_ABC_HERE */
-
 struct btrfs_tree_block_info {
 	struct btrfs_disk_key key;
 	u8 level;
@@ -607,9 +557,6 @@ struct btrfs_dir_item {
 #define BTRFS_ROOT_SUBVOL_RDONLY	(1ULL << 0)
 #ifdef MY_ABC_HERE
 #define BTRFS_ROOT_SUBVOL_HIDE		(1ULL << 32)
-#endif /* MY_ABC_HERE */
-#ifdef MY_ABC_HERE
-#define BTRFS_ROOT_SUBVOL_NOLOAD_USRQUOTA (1ULL << 33)
 #endif /* MY_ABC_HERE */
 
 /*
@@ -915,51 +862,6 @@ struct btrfs_block_group_item {
 	__le64 chunk_objectid;
 	__le64 flags;
 } __attribute__ ((__packed__));
-
-#ifdef MY_ABC_HERE
-
-#define BTRFS_USRQUOTA_STATUS_FLAG_ON            (1ULL << 0)
-#define BTRFS_USRQUOTA_STATUS_FLAG_RESCAN        (1ULL << 1)
-#define BTRFS_USRQUOTA_STATUS_FLAG_INCONSISTENT  (1ULL << 2)
-#define BTRFS_USRQUOTA_STATUS_V1                 1
-#define BTRFS_USRQUOTA_STATUS_VERSION            BTRFS_USRQUOTA_STATUS_V1
-
-struct btrfs_usrquota_status_item {
-	__le64 version;
-	__le64 generation;
-	__le64 flags;
-	__le64 rescan_rootid;
-	__le64 rescan_objectid;
-	__le64 reserved[3];
-} __attribute__ ((__packed__));
-
-struct btrfs_usrquota_root_item {
-	__le64 info_item_cnt;
-	__le64 limit_item_cnt;
-} __attribute__ ((__packed__));
-
-struct btrfs_usrquota_info_item {
-	__le64 generation;
-	__le64 rfer_used;
-} __attribute__ ((__packed__));
-
-struct btrfs_usrquota_limit_item {
-	__le64 rfer_soft;
-	__le64 rfer_hard;
-} __attribute__ ((__packed__));
-
-union btrfs_usrquota_item_union {
-	struct btrfs_usrquota_info_item info_item;
-	struct btrfs_usrquota_limit_item limit_item;
-};
-
-#define BTRFS_USRQUOTA_MAX_ITEMS_LEAF(r) (BTRFS_LEAF_DATA_SIZE(r) / \
-							(sizeof(union btrfs_usrquota_item_union) + \
-							 sizeof(struct btrfs_item)))
-
-#define BTRFS_ANY_QUOTA_ENABLED(fs_info) (fs_info->quota_enabled || fs_info->usrquota_enabled)
-#define BTRFS_USRQUOTA_DELAYED_REF_SCAN ((unsigned long)-2)
-#endif /* MY_ABC_HERE */
 
 struct btrfs_free_space_info {
 	__le32 extent_count;

@@ -1,2 +1,6 @@
-
-obj-$(CONFIG_ARCH_RTD129X)	+= rtd129x/
+ifeq ($(CONFIG_SYNO_LSP_RTD129X), y)
+obj-$(CONFIG_ARCH_RTD129X)	+= rtd129x/ common/
+endif # CONFIG_SYNO_LSP_RTD129X
+ifeq ($(CONFIG_SYNO_LSP_RTD1619), y)
+obj-$(CONFIG_ARCH_RTD16xx)	= rtd16xx/ common/
+endif # CONFIG_SYNO_LSP_RTD1619

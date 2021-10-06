@@ -66,3 +66,6 @@ obj-$(CONFIG_PHY_TUSB1210)		+= phy-tusb1210.o
 obj-$(CONFIG_PHY_BRCMSTB_SATA)		+= phy-brcmstb-sata.o
 obj-$(CONFIG_PHY_PISTACHIO_USB)		+= phy-pistachio-usb.o
 obj-$(CONFIG_PHY_CYGNUS_PCIE)		+= phy-bcm-cygnus-pcie.o
+ifeq ($(CONFIG_SYNO_LSP_RTD1619), y)
+obj-$(CONFIG_PHY_RTK_SATA)      += phy-rtk-sata.o
+endif # CONFIG_SYNO_LSP_RTD1619

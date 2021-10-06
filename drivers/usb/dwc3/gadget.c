@@ -30,6 +30,12 @@
 #include <linux/list.h>
 #include <linux/dma-mapping.h>
 
+#if defined(MY_DEF_HERE)
+#if IS_ENABLED(CONFIG_USB_DWC3_RTK)
+#include <linux/of_device.h>
+#endif /* CONFIG_USB_DWC3_RTK */
+
+#endif /* MY_DEF_HERE */
 #include <linux/usb/ch9.h>
 #include <linux/usb/gadget.h>
 
@@ -2311,6 +2317,20 @@ static void dwc3_stop_active_transfer(struct dwc3 *dwc, u32 epnum, bool force)
 	 *
 	 * - Issue EndTransfer WITH CMDIOC bit set
 	 * - Wait 100us
+#if defined(MY_DEF_HERE)
+	 *
+	 * As of IP version 3.10a of the DWC_usb3 IP, the controller
+	 * supports a mode to work around the above limitation. The
+	 * software can poll the CMDACT bit in the DEPCMD register
+	 * after issuing a EndTransfer command. This mode is enabled
+	 * by writing GUCTL2[14]. This polling is already done in the
+	 * dwc3_send_gadget_ep_cmd() function so if the mode is
+	 * enabled, the EndTransfer command will have completed upon
+	 * returning from this function and we don't need to delay for
+	 * 100us.
+	 *
+	 * This mode is NOT available on the DWC_usb31 IP.
+#endif // MY_DEF_HERE
 	 */
 
 	cmd = DWC3_DEPCMD_ENDTRANSFER;
@@ -2963,6 +2983,11 @@ int dwc3_gadget_init(struct dwc3 *dwc)
 		goto err3;
 	}
 
+#if defined(MY_DEF_HERE)
+#if IS_ENABLED(CONFIG_USB_DWC3_RTK)
+	of_dma_configure(&dwc->gadget.dev, NULL);
+#endif /* CONFIG_USB_DWC3_RTK */
+#endif /* MY_DEF_HERE */
 	dwc->gadget.ops			= &dwc3_gadget_ops;
 	dwc->gadget.speed		= USB_SPEED_UNKNOWN;
 	dwc->gadget.sg_supported	= true;

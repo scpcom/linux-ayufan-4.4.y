@@ -120,9 +120,9 @@ static void set_recommended_min_free_kbytes(void)
 
 #if defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
 	/* Make sure at least 2 hugepages are free for MIGRATE_RESERVE */
-#else /* MY_DEF_HERE && !MY_DEF_HERE */
+#else /* MY_DEF_HERE && !CONFIG_SYNO_LSP_ARMADA_16_12_MM_REVERT */
 	/* Ensure 2 pageblocks are free to assist fragmentation avoidance */
-#endif /* MY_DEF_HERE && !MY_DEF_HERE */
+#endif /* MY_DEF_HERE && !CONFIG_SYNO_LSP_ARMADA_16_12_MM_REVERT */
 	recommended_min = pageblock_nr_pages * nr_zones * 2;
 
 	/*

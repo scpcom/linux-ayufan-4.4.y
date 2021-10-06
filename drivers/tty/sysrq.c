@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *	Linux Magic System Request Key Hacks
  *
@@ -157,6 +160,22 @@ static struct sysrq_key_op sysrq_reboot_op = {
 	.enable_mask	= SYSRQ_ENABLE_BOOT,
 };
 
+#ifdef MY_ABC_HERE
+static void sysrq_handle_cf9_reboot(int key)
+{
+	lockdep_off();
+	local_irq_enable();
+	reboot_type = BOOT_CF9_FORCE;
+	reboot_mode = REBOOT_COLD;
+	emergency_restart();
+}
+static struct sysrq_key_op sysrq_cf9_reboot_op = {
+	.handler	= sysrq_handle_cf9_reboot,
+	.help_msg	= "cf9 reboot(g)",
+	.action_msg	= "CF9 Resetting",
+	.enable_mask	= SYSRQ_ENABLE_BOOT,
+};
+#endif /* MY_ABC_HERE */
 static void sysrq_handle_sync(int key)
 {
 	emergency_sync();
@@ -442,7 +461,11 @@ static struct sysrq_key_op *sysrq_key_table[36] = {
 	&sysrq_term_op,			/* e */
 	&sysrq_moom_op,			/* f */
 	/* g: May be registered for the kernel debugger */
-	NULL,				/* g */
+#ifdef MY_ABC_HERE
+	&sysrq_cf9_reboot_op, 		/* g */
+#else
+	NULL,                           /* g */
+#endif /* MY_ABC_HERE */
 	NULL,				/* h - reserved for help */
 	&sysrq_kill_op,			/* i */
 #ifdef CONFIG_BLOCK

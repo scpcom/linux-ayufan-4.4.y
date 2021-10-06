@@ -785,14 +785,16 @@ config REGULATOR_WM8994
 	  This driver provides support for the voltage regulators on the
 	  WM8994 CODEC.
 
-if SYNO_LSP_RTD129X
+if SYNO_LSP_RTD129X || SYNO_LSP_RTD1619
 config REGULATOR_G2227
 	tristate "GMT G2227 Power regulators"
 	depends on I2C
+	select RTK_REGMAP_I2C if SYNO_LSP_RTD1619
+	select REGULATOR_G22XX_CORE if SYNO_LSP_RTD1619
 	help
 	  This driver provides support for the voltage regulators on the
 	  GMT G2227 PMIC.
-endif # SYNO_LSP_RTD129X
+endif # SYNO_LSP_RTD129X || SYNO_LSP_RTD1619
 
 config REGULATOR_ARMADA3700
 	tristate "Marvell Armada 3700 AVS"
@@ -801,6 +803,56 @@ config REGULATOR_ARMADA3700
 	help
 	  This driver provides support for the CPU voltage regulators (DVS) for
 	  Armada 3700.
+
+if SYNO_LSP_RTD1619
+config REGULATOR_G22XX_CORE
+	bool
+	depends on I2C
+	help
+	  GMT G2227/G2237 common codes
+
+config REGULATOR_G2237
+	tristate "GMT G2237 Power regulators"
+	depends on I2C
+	select RTK_REGMAP_I2C
+	select REGULATOR_G22XX_CORE
+	help
+	  This driver provides support for the voltage regulators on the
+	  GMT G2237 PMIC.
+
+config REGULATOR_REALTEK_PWM
+	tristate "Realtek Generic PWM Regulator Driver"
+	depends on PWM
+	help
+	  This driver provides support for a simple PMW voltage regulator
+
+config REGULATOR_RTKGPIO
+	tristate "RTK GPIO Power regulators"
+	help
+	  This driver provides support for the voltage regulators on the
+	  RTK GPIO REGULATOR.
+
+config REGULATOR_SY8827E
+	tristate "SILERGY SY8827E Power regulator"
+	depends on I2C
+	select RTK_REGMAP_I2C
+	help
+	  This driver provides support for the voltage regulators on the
+	  Silergy SY8827E.
+
+config REGULATOR_APW8889
+	tristate "ANPEC APW8889 Power regulator"
+	depends on I2C
+	select RTK_REGMAP_I2C
+	help
+	  This driver provides support for the voltage regulators on the
+	  Anpec APW8889.
+
+config REGULATOR_I2C_SELECTOR
+	bool "I2C selector regualtor"
+	select REGULATOR_APW8889
+	select REGULATOR_G2237
+endif # SYNO_LSP_RTD1619
 
 endif
 

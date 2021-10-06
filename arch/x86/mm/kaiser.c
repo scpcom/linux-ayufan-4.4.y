@@ -13,6 +13,7 @@
 #include <linux/mm.h>
 #include <linux/uaccess.h>
 #include <linux/ftrace.h>
+#include <linux/cpu.h>
 
 #undef pr_fmt
 #define pr_fmt(fmt)     "Kernel/User page tables isolation: " fmt
@@ -291,7 +292,11 @@ void __init kaiser_check_boottime_disable(void)
 #ifdef MY_ABC_HERE
 	if (cmdline_find_option_bool(boot_command_line, "SpectreAll_on") ||
 		cmdline_find_option_bool(boot_command_line, "KPTI_on")) {
-		goto enable;
+		if (boot_cpu_data.x86_vendor == X86_VENDOR_AMD) {
+			goto disable;
+		} else {
+			goto enable;
+		}
 	}
 #endif /* MY_ABC_HERE */
 
@@ -309,7 +314,9 @@ void __init kaiser_check_boottime_disable(void)
 #ifdef MY_ABC_HERE
 	goto disable;
 #else /* MY_ABC_HERE */
-	if (cmdline_find_option_bool(boot_command_line, "nopti"))
+
+	if (cmdline_find_option_bool(boot_command_line, "nopti") ||
+	    cpu_mitigations_off())
 		goto disable;
 #endif /* MY_ABC_HERE */
 

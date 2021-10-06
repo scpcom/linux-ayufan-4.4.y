@@ -1671,12 +1671,13 @@ static inline void memalloc_noio_restore(unsigned int flags)
 	current->flags = (current->flags & ~PF_MEMALLOC_NOIO) | flags;
 }
 
-
-#define PFA_NO_NEW_PRIVS 0	
-#define PFA_SPREAD_PAGE  1      
-#define PFA_SPREAD_SLAB  2      
-#define PFA_SPEC_SSB_DISABLE		4	
-#define PFA_SPEC_SSB_FORCE_DISABLE	5	
+#define PFA_NO_NEW_PRIVS 0	 
+#define PFA_SPREAD_PAGE  1       
+#define PFA_SPREAD_SLAB  2       
+#define PFA_SPEC_SSB_DISABLE		4	 
+#define PFA_SPEC_SSB_FORCE_DISABLE	5	 
+#define PFA_SPEC_IB_DISABLE		6	 
+#define PFA_SPEC_IB_FORCE_DISABLE	7	 
 
 #define TASK_PFA_TEST(name, func)					\
 	static inline bool task_##func(struct task_struct *p)		\
@@ -1706,16 +1707,22 @@ TASK_PFA_CLEAR(SPEC_SSB_DISABLE, spec_ssb_disable)
 TASK_PFA_TEST(SPEC_SSB_FORCE_DISABLE, spec_ssb_force_disable)
 TASK_PFA_SET(SPEC_SSB_FORCE_DISABLE, spec_ssb_force_disable)
 
+TASK_PFA_TEST(SPEC_IB_DISABLE, spec_ib_disable)
+TASK_PFA_SET(SPEC_IB_DISABLE, spec_ib_disable)
+TASK_PFA_CLEAR(SPEC_IB_DISABLE, spec_ib_disable)
 
-#define JOBCTL_STOP_SIGMASK	0xffff	
+TASK_PFA_TEST(SPEC_IB_FORCE_DISABLE, spec_ib_force_disable)
+TASK_PFA_SET(SPEC_IB_FORCE_DISABLE, spec_ib_force_disable)
 
-#define JOBCTL_STOP_DEQUEUED_BIT 16	
-#define JOBCTL_STOP_PENDING_BIT	17	
-#define JOBCTL_STOP_CONSUME_BIT	18	
-#define JOBCTL_TRAP_STOP_BIT	19	
-#define JOBCTL_TRAP_NOTIFY_BIT	20	
-#define JOBCTL_TRAPPING_BIT	21	
-#define JOBCTL_LISTENING_BIT	22	
+#define JOBCTL_STOP_SIGMASK	0xffff	 
+
+#define JOBCTL_STOP_DEQUEUED_BIT 16	 
+#define JOBCTL_STOP_PENDING_BIT	17	 
+#define JOBCTL_STOP_CONSUME_BIT	18	 
+#define JOBCTL_TRAP_STOP_BIT	19	 
+#define JOBCTL_TRAP_NOTIFY_BIT	20	 
+#define JOBCTL_TRAPPING_BIT	21	 
+#define JOBCTL_LISTENING_BIT	22	 
 
 #define JOBCTL_STOP_DEQUEUED	(1UL << JOBCTL_STOP_DEQUEUED_BIT)
 #define JOBCTL_STOP_PENDING	(1UL << JOBCTL_STOP_PENDING_BIT)

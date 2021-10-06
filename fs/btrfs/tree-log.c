@@ -453,37 +453,21 @@ static noinline int replay_one_extent(struct btrfs_trans_handle *trans,
 			u64 csum_start;
 			u64 csum_end;
 			LIST_HEAD(ordered_sums);
-			
+			 
 			ret = btrfs_lookup_data_extent(root, ins.objectid,
 						ins.offset);
 			if (ret == 0) {
-#ifdef MY_ABC_HERE
-				ret = btrfs_inc_extent_ref_uid(trans, root,
-						ins.objectid, ins.offset,
-						0, root->root_key.objectid,
-						key->objectid, offset, 0,
-						i_uid_read(inode));
-#else
 				ret = btrfs_inc_extent_ref(trans, root,
 						ins.objectid, ins.offset,
 						0, root->root_key.objectid,
-#ifdef MY_ABC_HERE
-						key->objectid, offset, 0);
-#else
 						key->objectid, offset);
-#endif 
-#endif 
 				if (ret)
 					goto out;
 			} else {
-				
+				 
 				ret = btrfs_alloc_logged_file_extent(trans,
 						root, root->root_key.objectid,
-#ifdef MY_ABC_HERE
-						key->objectid, offset, &ins, i_uid_read(inode));
-#else
 						key->objectid, offset, &ins);
-#endif 
 				if (ret)
 					goto out;
 			}

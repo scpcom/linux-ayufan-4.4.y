@@ -901,6 +901,9 @@ void phy_detach(struct phy_device *phydev);
 void phy_start(struct phy_device *phydev);
 void phy_stop(struct phy_device *phydev);
 int phy_start_aneg(struct phy_device *phydev);
+#ifdef CONFIG_SYNO_AMD_XGBE_PORTING
+int phy_aneg_done(struct phy_device *phydev);
+#endif /* CONFIG_SYNO_AMD_XGBE_PORTING */
 
 int phy_stop_interrupts(struct phy_device *phydev);
 

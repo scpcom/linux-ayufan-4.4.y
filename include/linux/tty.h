@@ -248,11 +248,10 @@ struct tty_struct {
 	int closing;
 	unsigned char *write_buf;
 	int write_cnt;
-	
+	 
 	struct work_struct SAK_work;
 	struct tty_port *port;
 };
-
 
 struct tty_file_private {
 	struct tty_struct *tty;
@@ -260,24 +259,22 @@ struct tty_file_private {
 	struct list_head list;
 };
 
-
 #define TTY_MAGIC		0x5401
 
-
-#define TTY_THROTTLED 		0	
-#define TTY_IO_ERROR 		1	
-#define TTY_OTHER_CLOSED 	2	
-#define TTY_EXCLUSIVE 		3	
-#define TTY_DEBUG 		4	
-#define TTY_DO_WRITE_WAKEUP 	5	
-#define TTY_LDISC_OPEN	 	11	
-#define TTY_PTY_LOCK 		16	
-#define TTY_NO_WRITE_SPLIT 	17	
-#define TTY_HUPPED 		18	
-#define TTY_LDISC_HALTED	22	
+#define TTY_THROTTLED 		0	 
+#define TTY_IO_ERROR 		1	 
+#define TTY_OTHER_CLOSED 	2	 
+#define TTY_EXCLUSIVE 		3	 
+#define TTY_DEBUG 		4	 
+#define TTY_DO_WRITE_WAKEUP 	5	 
+#define TTY_LDISC_OPEN	 	11	 
+#define TTY_PTY_LOCK 		16	 
+#define TTY_NO_WRITE_SPLIT 	17	 
+#define TTY_HUPPED 		18	 
+#define TTY_HUPPING		19	 
+#define TTY_LDISC_HALTED	22	 
 
 #define TTY_WRITE_FLUSH(tty) tty_write_flush((tty))
-
 
 #define TTY_THROTTLE_SAFE 1
 #define TTY_UNTHROTTLE_SAFE 2

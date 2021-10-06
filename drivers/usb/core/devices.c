@@ -11,63 +11,59 @@
 #include <linux/usb/hcd.h>
 #include <linux/mutex.h>
 #include <linux/uaccess.h>
-#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_RTD1619)
 #include <linux/synobios.h>
-#endif
+#endif  
 
 #include "usb.h"
-
 
 #define ALLOW_SERIAL_NUMBER
 
 static const char format_topo[] =
-
+ 
 "\nT:  Bus=%2.2d Lev=%2.2d Prnt=%2.2d Port=%2.2d Cnt=%2.2d Dev#=%3d Spd=%-4s MxCh=%2d\n";
 
 static const char format_string_manufacturer[] =
-
+ 
   "S:  Manufacturer=%.100s\n";
 
 static const char format_string_product[] =
-
+ 
   "S:  Product=%.100s\n";
 
 #ifdef ALLOW_SERIAL_NUMBER
 static const char format_string_serialnumber[] =
-
+ 
   "S:  SerialNumber=%.100s\n";
 #endif
 
 static const char format_bandwidth[] =
-
+ 
   "B:  Alloc=%3d/%3d us (%2d%%), #Int=%3d, #Iso=%3d\n";
 
 static const char format_device1[] =
-
+ 
   "D:  Ver=%2x.%02x Cls=%02x(%-5s) Sub=%02x Prot=%02x MxPS=%2d #Cfgs=%3d\n";
 
 static const char format_device2[] =
-
+ 
   "P:  Vendor=%04x ProdID=%04x Rev=%2x.%02x\n";
 
 static const char format_config[] =
-
+ 
   "C:%c #Ifs=%2d Cfg#=%2d Atr=%02x MxPwr=%3dmA\n";
 
 static const char format_iad[] =
-
+ 
   "A:  FirstIf#=%2d IfCount=%2d Cls=%02x(%-5s) Sub=%02x Prot=%02x\n";
 
 static const char format_iface[] =
-
+ 
   "I:%c If#=%2d Alt=%2d #EPs=%2d Cls=%02x(%-5s) Sub=%02x Prot=%02x Driver=%s\n";
 
 static const char format_endpt[] =
-
+ 
   "E:  Ad=%02x(%c) Atr=%02x(%-4s) MxPS=%4d Ivl=%d%cs\n";
-
-
-
 
 static struct device_connect_event {
 	atomic_t count;
@@ -432,19 +428,24 @@ int blIsUSBDeviceAtFrontPort(struct usb_device *usbdev)
 		if(!strcmp(buf,"0000:00:14.0-2")) {
 			return 1;
 		}
-#endif 
+#endif  
 #if defined(MY_DEF_HERE)
 		if(!strcmp(buf,"0000:00:15.0-3")) {
 			return 1;
 		}
-#endif 
+#endif  
+#if defined(CONFIG_SYNO_GEMINILAKE)
+		if(!strcmp(buf,"0000:00:15.0-1")) {
+			return 1;
+		}
+#endif  
 #if defined(MY_DEF_HERE)
 #if defined(CONFIG_ARCH_GEN3)
 		if(!strcmp(buf,"0000:01:0d.0-1")) {
 			return 1;
 		}
-#endif 
-#endif 
+#endif  
+#endif  
 #if defined(MY_ABC_HERE)
 #if defined(MY_DEF_HERE)
 		if(!strcmp(buf,"0000:00:1d.7-2")) {
@@ -454,25 +455,32 @@ int blIsUSBDeviceAtFrontPort(struct usb_device *usbdev)
 		if(!strcmp(buf,"0000:00:1d.7-3") || !strcmp(buf,"0000:00:1d.1-1")) {
 			return 1;
 		}
-#endif 
-#endif 
+#endif  
+#endif  
 #if defined(MY_DEF_HERE) && defined(CONFIG_ARMADA_XP)
 		if(!strcmp(buf, "ehci_marvell.1-1") ||
 		   !strcmp(buf, "ehci_marvell.0-1")) {
 			return 1;
 		}
-#endif 
+#endif  
 #if defined(MY_DEF_HERE)
 		if(syno_is_hw_version(HW_DS218)) {
 			if(!strcmp(buf, "xhci-hcd.5.auto-1")) {
 				return 1;
 			}
 		}
-#endif 
+#endif  
+#if defined(CONFIG_SYNO_RTD1619)
+		if(syno_is_hw_version(HW_DS220)) {
+			if(!strcmp(buf, "xhci-hcd.7.auto-1")) {
+				return 1;
+			}
+		}
+#endif  
 	}
 	return 0;
 }
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 int blIsCardReader(struct usb_device *usbdev)

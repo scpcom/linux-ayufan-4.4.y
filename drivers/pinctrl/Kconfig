@@ -263,6 +263,9 @@ source "drivers/pinctrl/sunxi/Kconfig"
 source "drivers/pinctrl/uniphier/Kconfig"
 source "drivers/pinctrl/vt8500/Kconfig"
 source "drivers/pinctrl/mediatek/Kconfig"
+if SYNO_LSP_RTD1619
+source "drivers/pinctrl/realtek/Kconfig"
+endif # SYNO_LSP_RTD1619
 
 config PINCTRL_XWAY
 	bool

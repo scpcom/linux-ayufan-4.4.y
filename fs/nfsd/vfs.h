@@ -1,53 +1,43 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-
-
+ 
 #ifndef LINUX_NFSD_VFS_H
 #define LINUX_NFSD_VFS_H
 
 #ifdef MY_ABC_HERE
 #include <linux/sched.h>
-#endif 
+#endif  
 #include "nfsfh.h"
 #include "nfsd.h"
 
-
 #define NFSD_MAY_NOP			0
-#define NFSD_MAY_EXEC			0x001 
-#define NFSD_MAY_WRITE			0x002 
-#define NFSD_MAY_READ			0x004 
+#define NFSD_MAY_EXEC			0x001  
+#define NFSD_MAY_WRITE			0x002  
+#define NFSD_MAY_READ			0x004  
 #define NFSD_MAY_SATTR			0x008
 #define NFSD_MAY_TRUNC			0x010
 #define NFSD_MAY_LOCK			0x020
 #define NFSD_MAY_MASK			0x03f
 
-
 #define NFSD_MAY_OWNER_OVERRIDE		0x040
-#define NFSD_MAY_LOCAL_ACCESS		0x080 
+#define NFSD_MAY_LOCAL_ACCESS		0x080  
 #define NFSD_MAY_BYPASS_GSS_ON_ROOT	0x100
 #define NFSD_MAY_NOT_BREAK_LEASE	0x200
 #define NFSD_MAY_BYPASS_GSS		0x400
 #define NFSD_MAY_READ_IF_EXEC		0x800
 
-#define NFSD_MAY_64BIT_COOKIE		0x1000 
+#define NFSD_MAY_64BIT_COOKIE		0x1000  
 
 #ifdef MY_ABC_HERE
 #define NFSD_MAY_SYNO_NOP		0x2000
 #define NFSD_MAY_APPEND			0x4000
-#endif 
+#endif  
 
 #define NFSD_MAY_CREATE		(NFSD_MAY_EXEC|NFSD_MAY_WRITE)
 #define NFSD_MAY_REMOVE		(NFSD_MAY_EXEC|NFSD_MAY_WRITE|NFSD_MAY_TRUNC)
 
-#ifdef MY_ABC_HERE
-#define NFSD_COPYBUFFERSIZE                     (1<<17)
-#define NFSD_PAGESIZE                           (1<<12)
-#endif
-
-
 typedef int (*nfsd_filldir_t)(void *, const char *, int, loff_t, u64, unsigned);
-
 
 int		nfsd_racache_init(int);
 void		nfsd_racache_shutdown(void);
@@ -92,15 +82,6 @@ __be32 		nfsd_read(struct svc_rqst *, struct svc_fh *,
 				loff_t, struct kvec *, int, unsigned long *);
 __be32 		nfsd_write(struct svc_rqst *, struct svc_fh *,struct file *,
 				loff_t, struct kvec *,int, unsigned long *, int *);
-#ifdef MY_ABC_HERE
-__be32		nfsd_writezero(struct svc_rqst *, struct svc_fh *,
-                                loff_t, unsigned long *);
-__be32		nfsd_synocopy(const char *, struct svc_rqst *, struct svc_fh *,
-                                loff_t, unsigned long *, bool);
-#ifdef MY_ABC_HERE
-__be32		nfsd_synoclone(const char *, struct svc_rqst *, struct svc_fh *);
-#endif 
-#endif
 __be32		nfsd_vfs_write(struct svc_rqst *rqstp, struct svc_fh *fhp,
 				struct file *file, loff_t offset,
 				struct kvec *vec, int vlen, unsigned long *cnt,

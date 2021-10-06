@@ -88,8 +88,15 @@ obj-$(CONFIG_EARLY_PRINTK)	+= early_printk.o
 
 obj-$(CONFIG_ARM_VIRT_EXT)	+= hyp-stub.o
 ifeq ($(CONFIG_ARM_PSCI),y)
+ifeq ($(CONFIG_SYNO_RTD1619), y)
+else # CONFIG_SYNO_RTD1619
 obj-y				+= psci-call.o
+endif # CONFIG_SYNO_RTD1619
 obj-$(CONFIG_SMP)		+= psci_smp.o
 endif
+
+ifeq ($(CONFIG_SYNO_RTD1619), y)
+obj-$(CONFIG_HAVE_ARM_SMCCC)	+= smccc-call.o
+endif # CONFIG_SYNO_RTD1619
 
 extra-y := $(head-y) vmlinux.lds

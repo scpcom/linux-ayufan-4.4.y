@@ -20,27 +20,20 @@
 #include <linux/task_work.h>
 #ifdef MY_ABC_HERE
 #include <linux/string.h>
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
 extern bool ramdisk_check_failed;
-#endif 
+#endif  
 #include "pnode.h"
 #include "internal.h"
 
 #ifdef MY_ABC_HERE
 extern int gSynoHasDynModule;
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 extern void ext4_fill_mount_path(struct super_block *sb, const char *szPath);
-#endif 
-
-#ifdef MY_ABC_HERE
-int (*funcSYNOSendErrorFsBtrfsEvent)(const u8*) = NULL;
-void (*btrfs_fill_mount_path)(struct super_block *, const char *) = NULL;
-EXPORT_SYMBOL(funcSYNOSendErrorFsBtrfsEvent);
-EXPORT_SYMBOL(btrfs_fill_mount_path);
-#endif 
+#endif  
 
 static unsigned int m_hash_mask __read_mostly;
 static unsigned int m_hash_shift __read_mostly;
@@ -2146,23 +2139,12 @@ static int do_new_mount(struct path *path, const char *fstype, int flags,
 		char buf[SYNO_MOUNT_PATH_LEN] = {'\0'};
 		ext4_fill_mount_path(mnt->mnt_sb, d_path(path, buf, sizeof(buf)));
 	}
-#endif 
-
-#ifdef MY_ABC_HERE
-	if (!strcmp(fstype, "btrfs")) {
-		char buf[SYNO_MOUNT_PATH_LEN] = {'\0'};
-		if (NULL == btrfs_fill_mount_path) {
-			printk(KERN_WARNING "%s: function \"btrfs_fill_mount_path\" is not ready \n", __func__);
-		} else {
-			btrfs_fill_mount_path(mnt->mnt_sb, d_path(path, buf, sizeof(buf)));
-		}
-	}
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 	if (options.relatime_period > 0)
 		mnt->mnt_sb->relatime_period = options.relatime_period;
-#endif 
+#endif  
 
 	if (err)
 		mntput(mnt);

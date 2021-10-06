@@ -14,13 +14,9 @@
 #include <scsi/scsi_host.h>
 #include <scsi/scsi_cmnd.h>
 #include <linux/libata.h>
-#ifdef MY_ABC_HERE
-#include <linux/gpio.h>
-#endif 
 
 #define DRV_NAME	"sata_sil24"
 #define DRV_VERSION	"1.1"
-
 
 struct sil24_prb {
 	__le16	ctrl;
@@ -299,10 +295,6 @@ static int sil24_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 static int sil24_pci_device_resume(struct pci_dev *pdev);
 #endif
 
-#ifdef MY_ABC_HERE
-static inline void sil24_host_intr(struct ata_port *ap);
-#endif 
-
 #ifdef CONFIG_PM
 static int sil24_port_resume(struct ata_port *ap);
 #endif
@@ -316,87 +308,14 @@ static const struct pci_device_id sil24_pci_tbl[] = {
 	{ PCI_VDEVICE(CMD, 0x3131), BID_SIL3131 },
 	{ PCI_VDEVICE(CMD, 0x3531), BID_SIL3131 },
 
-	{ } 
+	{ }  
 };
-
-#ifdef MY_ABC_HERE
-#ifdef MY_ABC_HERE
-#ifdef CONFIG_SYNO_ATA_SHUTDOWN_FIX_ICH_GPIO
-extern u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite);
-#endif 
-extern int grgPwrCtlPin[];
-static int syno_pulldown_eunit_gpio(struct ata_port *ap)
-{
-	int iRet = -1;
-	int iValue = 0;
-	int iPin = -1;
-
-	
-	if (!(iPin = grgPwrCtlPin[ap->print_id])) { 
-		goto END;
-	}
-
-#ifdef CONFIG_SYNO_ATA_SHUTDOWN_FIX_ICH_GPIO
-	if (syno_pch_lpc_gpio_pin(iPin, &iValue, 1)) {
-		goto END;
-	}
-#endif 
-#ifdef MY_DEF_HERE
-	if (syno_gpio_value_set(iPin, iValue)) {
-		goto END;
-	}
-#endif 
-
-	mdelay(1000); 
-
-	iRet = 0;
-END:
-	return iRet;
-}
-#endif 
-
-extern int gSynoSystemShutdown;
-
-void sil24_pci_shutdown(struct pci_dev *pdev)
-{
-	int i;
-	struct ata_host *host = dev_get_drvdata(&pdev->dev);
-	struct Scsi_Host *shost;
-
-	if (NULL == host) {
-		goto END;
-	}
-
-	
-	if (1 == gSynoSystemShutdown) {
-		for (i = 0; i < host->n_ports; i++) {
-			shost = host->ports[i]->scsi_host;
-			if (shost->hostt->syno_host_poweroff_task) {
-				shost->hostt->syno_host_poweroff_task(shost);
-			}
-#ifdef MY_ABC_HERE
-			syno_pulldown_eunit_gpio(host->ports[i]);
-#endif 
-		}
-	}
-
-	if (pdev->irq >= 0) {
-		free_irq(pdev->irq, host);
-		pdev->irq = -1;
-	}
-END:
-	return;
-}
-#endif 
 
 static struct pci_driver sil24_pci_driver = {
 	.name			= DRV_NAME,
 	.id_table		= sil24_pci_tbl,
 	.probe			= sil24_init_one,
 	.remove			= ata_pci_remove_one,
-#ifdef MY_ABC_HERE
-	.shutdown		= sil24_pci_shutdown,
-#endif 
 #ifdef CONFIG_PM_SLEEP
 	.suspend		= ata_pci_device_suspend,
 	.resume			= sil24_pci_device_resume,
@@ -409,23 +328,16 @@ static struct device_attribute *sil24_shost_attrs[] = {
 	&dev_attr_syno_manutil_power_disable,
 	&dev_attr_syno_pm_gpio,
 	&dev_attr_syno_pm_info,
-#ifdef MY_ABC_HERE
-	&dev_attr_syno_power_ctrl,
-	&dev_attr_syno_pm_control_support,
-#endif 
-#endif 
-#ifdef MY_ABC_HERE
-	&dev_attr_syno_port_thaw,
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_diskname_trans,
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_sata_disk_led_ctrl,
-#endif 
+#endif  
 	NULL
 };
-#endif 
+#endif  
 
 static struct scsi_host_template sil24_sht = {
 	ATA_NCQ_SHT(DRV_NAME),
@@ -465,21 +377,17 @@ static struct ata_port_operations sil24_ops = {
 #ifdef CONFIG_PM
 	.port_resume		= sil24_port_resume,
 #endif
-#ifdef MY_ABC_HERE
-	.syno_force_intr	= sil24_host_intr,
-#endif 
 };
 
-static bool sata_sil24_msi;    
+static bool sata_sil24_msi;     
 module_param_named(msi, sata_sil24_msi, bool, S_IRUGO);
 MODULE_PARM_DESC(msi, "Enable MSI (Default: false)");
-
 
 #define SIL24_NPORTS2FLAG(nports)	((((unsigned)(nports) - 1) & 0x3) << 30)
 #define SIL24_FLAG2NPORTS(flag)		((((flag) >> 30) & 0x3) + 1)
 
 static const struct ata_port_info sil24_port_info[] = {
-	
+	 
 	{
 		.flags		= SIL24_COMMON_FLAGS | SIL24_NPORTS2FLAG(4) |
 				  SIL24_FLAG_PCIX_IRQ_WOC,
@@ -701,28 +609,17 @@ static int sil24_softreset(struct ata_link *link, unsigned int *class,
 
 	DPRINTK("ENTER\n");
 
-	
 	if (sil24_init_port(ap)) {
 		reason = "port not ready";
 		goto err;
 	}
 
-	
 	if (time_after(deadline, jiffies))
 		timeout_msec = jiffies_to_msecs(deadline - jiffies);
 
-	ata_tf_init(link->device, &tf);	
+	ata_tf_init(link->device, &tf);	 
 	rc = sil24_exec_polled_cmd(ap, pmp, &tf, 0, PRB_CTRL_SRST,
 				   timeout_msec);
-#ifdef MY_ABC_HERE
-	if (0 < ap->iFakeError) {
-		ata_link_printk(link, KERN_ERR, "generate fake softreset error, Fake count %d\n", ap->iFakeError);
-		if (SYNO_ERROR_MAX > ap->iFakeError) {
-			--(ap->iFakeError);
-		}
-		rc = -EBUSY;
-	}
-#endif 
 	if (rc == -EBUSY) {
 		reason = "timeout";
 		goto err;
@@ -739,10 +636,6 @@ static int sil24_softreset(struct ata_link *link, unsigned int *class,
 
  err:
 	ata_link_err(link, "softreset failed (%s)\n", reason);
-#ifdef MY_ABC_HERE
-	ata_link_printk(link, KERN_ERR, "softreset failed, set srst fail flag\n");
-	link->uiSflags |= ATA_SYNO_FLAG_SRST_FAIL;
-#endif 
 	return -EIO;
 }
 
@@ -1010,45 +903,12 @@ static void sil24_error_intr(struct ata_port *ap)
 	int abort = 0, freeze = 0;
 	u32 irq_stat;
 
-	
 	irq_stat = readl(port + PORT_IRQ_STAT);
 	writel(irq_stat, port + PORT_IRQ_STAT);
 
-	
 	link = &ap->link;
 	ehi = &link->eh_info;
 	ata_ehi_clear_desc(ehi);
-
-#ifdef MY_ABC_HERE
-	
-	if (ap->pflags & ATA_PFLAG_SYNO_IRQ_OFF) {
-		
-		if (0 == iIsSynoDeepSleepSupport(ap) && !(ap->pflags & ATA_PFLAG_SYNO_DS_PWROFF)) {
-			printk("BUG!!! This port %d didn't support deep sleep\n", ap->print_id);
-			WARN_ON(1);
-			ap->pflags &= ~ATA_PFLAG_SYNO_IRQ_OFF;
-			ehi->action |= ATA_EH_RESET;
-		} else if (irq_stat & (PORT_IRQ_ERROR | PORT_IRQ_PHYRDY_CHG | PORT_IRQ_DEV_XCHG
-					| PORT_IRQ_8B10B | PORT_IRQ_SDB_NOTIFY)) {
-			
-
-			
-			if (ap->nr_active_links && !(ap->pflags & ATA_PFLAG_SYNO_DS_PWROFF)) {
-				printk("WARNING: disk %d irq off but still have cmd. Reset now. irq_stat 0x%x\n",
-						ap->print_id, irq_stat);
-				ehi->action |= ATA_EH_RESET;
-			} else {
-				DBGMESG("disk %d irq off, ignore this interrupt, irq_stat 0x%x\n", ap->print_id, irq_stat);
-				return;
-			}
-		} else {
-			printk("WARNING: disk %d irq off but received un-wanted interrupts, reset now. irq_stat 0x%x\n",
-				ap->print_id, irq_stat);
-			WARN_ON(1);
-			ehi->action |= ATA_EH_RESET;
-		}
-	}
-#endif 
 
 	ata_ehi_push_desc(ehi, "irq_stat 0x%08x", irq_stat);
 
@@ -1057,25 +917,13 @@ static void sil24_error_intr(struct ata_port *ap)
 		sata_async_notification(ap);
 	}
 
-#ifdef MY_ABC_HERE
-	if ((irq_stat & (PORT_IRQ_PHYRDY_CHG | PORT_IRQ_DEV_XCHG)) ||
-		(ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR)) {
-		if (ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR) {
-			ap->uiSflags &= ~ATA_SYNO_FLAG_FORCE_INTR;
-			DBGMESG("ata%u: clear ATA_SYNO_FLAG_FORCE_INTR\n", ap->print_id);
-		} else {
-			ap->iDetectStat = 1;
-			DBGMESG("ata%u: set detect stat check\n", ap->print_id);
-		}
-#else 
 	if (irq_stat & (PORT_IRQ_PHYRDY_CHG | PORT_IRQ_DEV_XCHG)) {
-#endif 
 #ifdef MY_ABC_HERE
 		syno_ata_info_print(ap);
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
 		ap->pflags |= ATA_PFLAG_SYNO_BOOT_PROBE;
-#endif 
+#endif  
 		ata_ehi_hotplugged(ehi);
 		ata_ehi_push_desc(ehi, "%s",
 				  irq_stat & PORT_IRQ_PHYRDY_CHG ?
@@ -1171,17 +1019,12 @@ static inline void sil24_host_intr(struct ata_port *ap)
 	u32 slot_stat, qc_active;
 	int rc;
 
-	
 	if (ap->flags & SIL24_FLAG_PCIX_IRQ_WOC)
 		writel(PORT_IRQ_COMPLETE, port + PORT_IRQ_STAT);
 
 	slot_stat = readl(port + PORT_SLOT_STAT);
 
-#ifdef MY_ABC_HERE
-	if (unlikely(slot_stat & HOST_SSTAT_ATTN) || (ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR)) {
-#else 
 	if (unlikely(slot_stat & HOST_SSTAT_ATTN)) {
-#endif 
 		sil24_error_intr(ap);
 		return;
 	}

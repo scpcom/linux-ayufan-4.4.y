@@ -21,11 +21,8 @@
 #include <scsi/scsi_device.h>
 #include <scsi/scsi_tcq.h>
 #include <scsi/scsi_transport.h>
-#endif 
+#endif  
 #include <linux/libata.h>
-#ifdef MY_ABC_HERE
-#include <linux/gpio.h>
-#endif 
 #include "ahci.h"
 
 #define DRV_NAME	"ahci"
@@ -52,24 +49,30 @@ enum board_ids {
 	board_ahci_yes_fbs,
 #ifdef MY_DEF_HERE
 	board_ahci_yes_fbs_no_ncq,
-#endif 
+#endif  
 
-	
 	board_ahci_avn,
+#ifdef CONFIG_SYNO_JMICRON_585_FIX
+	board_ahci_jmb585,
+#endif  
 	board_ahci_mcp65,
 	board_ahci_mcp77,
 	board_ahci_mcp89,
 	board_ahci_mv,
 	board_ahci_sb600,
-	board_ahci_sb700,	
+	board_ahci_sb700,	 
 	board_ahci_vt8251,
 
-	
 	board_ahci_mcp_linux	= board_ahci_mcp65,
 	board_ahci_mcp67	= board_ahci_mcp65,
 	board_ahci_mcp73	= board_ahci_mcp65,
 	board_ahci_mcp79	= board_ahci_mcp77,
 };
+
+#ifdef CONFIG_SYNO_JMICRON_585_FIX
+static int syno_ahci_hardreset_jmb(struct ata_link *link, unsigned int *class, unsigned long deadline);
+static int syno_ahci_softreset_jmb(struct ata_link *link, unsigned int *class, unsigned long deadline);
+#endif  
 
 static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent);
 static int ahci_vt8251_hardreset(struct ata_link *link, unsigned int *class,
@@ -111,8 +114,17 @@ static struct ata_port_operations ahci_avn_ops = {
 	.hardreset		= ahci_avn_hardreset,
 };
 
+#ifdef CONFIG_SYNO_JMICRON_585_FIX
+static struct ata_port_operations ahci_jmb585_ops = {
+	.inherits		= &ahci_ops,
+	.hardreset		= syno_ahci_hardreset_jmb,
+	.softreset		= syno_ahci_softreset_jmb,
+	.pmp_softreset		= syno_ahci_softreset_jmb,
+};
+#endif  
+
 static const struct ata_port_info ahci_port_info[] = {
-	
+	 
 	[board_ahci] = {
 		.flags		= AHCI_FLAG_COMMON,
 		.pio_mask	= ATA_PIO4,
@@ -227,334 +239,338 @@ static const struct ata_port_info ahci_port_info[] = {
 		.udma_mask	= ATA_UDMA6,
 		.port_ops	= &ahci_vt8251_ops,
 	},
+#ifdef CONFIG_SYNO_JMICRON_585_FIX
+	[board_ahci_jmb585] = {
+		.flags		= AHCI_FLAG_COMMON,
+		.pio_mask	= ATA_PIO4,
+		.udma_mask	= ATA_UDMA6,
+		.port_ops	= &ahci_jmb585_ops,
+	},
+#endif  
 };
 
 static const struct pci_device_id ahci_pci_tbl[] = {
-	
-	{ PCI_VDEVICE(INTEL, 0x2652), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x2653), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x27c1), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x27c5), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x27c3), board_ahci }, 
-	{ PCI_VDEVICE(AL, 0x5288), board_ahci_ign_iferr }, 
-	{ PCI_VDEVICE(INTEL, 0x2681), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x2682), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x2683), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x27c6), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x2821), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x2822), board_ahci_nosntf }, 
-	{ PCI_VDEVICE(INTEL, 0x2824), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x2829), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x282a), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x2922), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x2923), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x2924), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x2925), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x2927), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x2929), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x292a), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x292b), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x292c), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x292f), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x294d), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x294e), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x502a), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x502b), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x3a05), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x3a22), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x3a25), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x3b22), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x3b23), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x3b24), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x3b25), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x3b29), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x3b2b), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x3b2c), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x3b2f), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19b0), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19b1), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19b2), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19b3), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19b4), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19b5), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19b6), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19b7), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19bE), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19bF), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19c0), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19c1), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19c2), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19c3), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19c4), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19c5), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19c6), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19c7), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19cE), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19cF), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x1c02), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x1c03), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x1c04), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x1c05), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x1c06), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x1c07), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x1d02), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x1d04), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x1d06), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x2826), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x2323), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x1e02), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x1e03), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x1e04), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x1e05), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x1e06), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x1e07), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x1e0e), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x8c02), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x8c03), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x8c04), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x8c05), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x8c06), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x8c07), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x8c0e), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x8c0f), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x9c02), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x9c03), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x9c04), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x9c05), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x9c06), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x9c07), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x9c0e), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x9c0f), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x1f22), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x1f23), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x1f24), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x1f25), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x1f26), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x1f27), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x1f2e), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x1f2f), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x1f32), board_ahci_avn }, 
-	{ PCI_VDEVICE(INTEL, 0x1f33), board_ahci_avn }, 
-	{ PCI_VDEVICE(INTEL, 0x1f34), board_ahci_avn }, 
-	{ PCI_VDEVICE(INTEL, 0x1f35), board_ahci_avn }, 
-	{ PCI_VDEVICE(INTEL, 0x1f36), board_ahci_avn }, 
-	{ PCI_VDEVICE(INTEL, 0x1f37), board_ahci_avn }, 
-	{ PCI_VDEVICE(INTEL, 0x1f3e), board_ahci_avn }, 
-	{ PCI_VDEVICE(INTEL, 0x1f3f), board_ahci_avn }, 
-	{ PCI_VDEVICE(INTEL, 0x2823), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x2827), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x8d02), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x8d04), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x8d06), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x8d0e), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x8d62), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x8d64), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x8d66), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x8d6e), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x23a3), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x9c83), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x9c85), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x9c87), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x9c8f), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19b0), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19b1), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19b2), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19b3), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19b4), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19b5), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19b6), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19b7), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19be), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19bf), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19c0), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19c1), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19c2), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19c3), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19c4), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19c5), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19c6), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19c7), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19ce), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x19cf), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x8c82), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x8c83), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x8c84), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x8c85), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x8c86), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x8c87), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x8c8e), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x8c8f), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x9d03), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x9d05), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x9d07), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0xa102), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0xa103), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0xa105), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0xa106), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0xa107), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0xa10f), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x2822), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x2823), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x2826), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0x2827), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0xa182), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0xa184), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0xa186), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0xa18e), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0xa1d2), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0xa1d6), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0xa202), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0xa204), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0xa206), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0xa20e), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0xa252), board_ahci }, 
-	{ PCI_VDEVICE(INTEL, 0xa256), board_ahci }, 
+	 
+	{ PCI_VDEVICE(INTEL, 0x2652), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x2653), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x27c1), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x27c5), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x27c3), board_ahci },  
+	{ PCI_VDEVICE(AL, 0x5288), board_ahci_ign_iferr },  
+	{ PCI_VDEVICE(INTEL, 0x2681), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x2682), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x2683), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x27c6), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x2821), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x2822), board_ahci_nosntf },  
+	{ PCI_VDEVICE(INTEL, 0x2824), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x2829), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x282a), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x2922), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x2923), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x2924), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x2925), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x2927), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x2929), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x292a), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x292b), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x292c), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x292f), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x294d), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x294e), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x502a), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x502b), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x3a05), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x3a22), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x3a25), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x3b22), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x3b23), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x3b24), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x3b25), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x3b29), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x3b2b), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x3b2c), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x3b2f), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19b0), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19b1), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19b2), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19b3), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19b4), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19b5), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19b6), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19b7), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19bE), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19bF), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19c0), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19c1), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19c2), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19c3), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19c4), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19c5), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19c6), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19c7), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19cE), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19cF), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x1c02), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x1c03), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x1c04), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x1c05), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x1c06), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x1c07), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x1d02), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x1d04), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x1d06), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x2826), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x2323), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x1e02), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x1e03), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x1e04), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x1e05), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x1e06), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x1e07), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x1e0e), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x8c02), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x8c03), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x8c04), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x8c05), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x8c06), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x8c07), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x8c0e), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x8c0f), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x9c02), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x9c03), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x9c04), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x9c05), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x9c06), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x9c07), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x9c0e), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x9c0f), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x1f22), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x1f23), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x1f24), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x1f25), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x1f26), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x1f27), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x1f2e), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x1f2f), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x1f32), board_ahci_avn },  
+	{ PCI_VDEVICE(INTEL, 0x1f33), board_ahci_avn },  
+	{ PCI_VDEVICE(INTEL, 0x1f34), board_ahci_avn },  
+	{ PCI_VDEVICE(INTEL, 0x1f35), board_ahci_avn },  
+	{ PCI_VDEVICE(INTEL, 0x1f36), board_ahci_avn },  
+	{ PCI_VDEVICE(INTEL, 0x1f37), board_ahci_avn },  
+	{ PCI_VDEVICE(INTEL, 0x1f3e), board_ahci_avn },  
+	{ PCI_VDEVICE(INTEL, 0x1f3f), board_ahci_avn },  
+	{ PCI_VDEVICE(INTEL, 0x2823), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x2827), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x8d02), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x8d04), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x8d06), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x8d0e), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x8d62), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x8d64), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x8d66), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x8d6e), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x23a3), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x9c83), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x9c85), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x9c87), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x9c8f), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19b0), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19b1), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19b2), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19b3), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19b4), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19b5), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19b6), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19b7), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19be), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19bf), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19c0), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19c1), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19c2), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19c3), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19c4), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19c5), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19c6), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19c7), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19ce), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x19cf), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x8c82), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x8c83), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x8c84), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x8c85), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x8c86), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x8c87), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x8c8e), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x8c8f), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x9d03), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x9d05), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x9d07), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0xa102), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0xa103), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0xa105), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0xa106), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0xa107), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0xa10f), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x2822), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x2823), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x2826), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0x2827), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0xa182), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0xa184), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0xa186), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0xa18e), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0xa1d2), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0xa1d6), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0xa202), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0xa204), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0xa206), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0xa20e), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0xa252), board_ahci },  
+	{ PCI_VDEVICE(INTEL, 0xa256), board_ahci },  
 
-	
+#ifdef CONFIG_SYNO_JMICRON_585_DUBIOUS_IFS_FIX
+	 
+	{ PCI_VDEVICE(JMICRON, 0x0585), board_ahci_jmb585 },
+#endif  
+	 
 	{ PCI_VENDOR_ID_JMICRON, PCI_ANY_ID, PCI_ANY_ID, PCI_ANY_ID,
 	  PCI_CLASS_STORAGE_SATA_AHCI, 0xffffff, board_ahci_ign_iferr },
-	
+	 
 	{ PCI_VDEVICE(JMICRON, 0x2362), board_ahci_ign_iferr },
 	{ PCI_VDEVICE(JMICRON, 0x236f), board_ahci_ign_iferr },
-	
+	 
+	{ PCI_VDEVICE(ATI, 0x4380), board_ahci_sb600 },  
+	{ PCI_VDEVICE(ATI, 0x4390), board_ahci_sb700 },  
+	{ PCI_VDEVICE(ATI, 0x4391), board_ahci_sb700 },  
+	{ PCI_VDEVICE(ATI, 0x4392), board_ahci_sb700 },  
+	{ PCI_VDEVICE(ATI, 0x4393), board_ahci_sb700 },  
+	{ PCI_VDEVICE(ATI, 0x4394), board_ahci_sb700 },  
+	{ PCI_VDEVICE(ATI, 0x4395), board_ahci_sb700 },  
 
-	
-	{ PCI_VDEVICE(ATI, 0x4380), board_ahci_sb600 }, 
-	{ PCI_VDEVICE(ATI, 0x4390), board_ahci_sb700 }, 
-	{ PCI_VDEVICE(ATI, 0x4391), board_ahci_sb700 }, 
-	{ PCI_VDEVICE(ATI, 0x4392), board_ahci_sb700 }, 
-	{ PCI_VDEVICE(ATI, 0x4393), board_ahci_sb700 }, 
-	{ PCI_VDEVICE(ATI, 0x4394), board_ahci_sb700 }, 
-	{ PCI_VDEVICE(ATI, 0x4395), board_ahci_sb700 }, 
-
-	
-	{ PCI_VDEVICE(AMD, 0x7800), board_ahci }, 
-	{ PCI_VDEVICE(AMD, 0x7900), board_ahci }, 
-	
+	{ PCI_VDEVICE(AMD, 0x7800), board_ahci },  
+	{ PCI_VDEVICE(AMD, 0x7900), board_ahci },  
+	 
 	{ PCI_VENDOR_ID_AMD, PCI_ANY_ID, PCI_ANY_ID, PCI_ANY_ID,
 	  PCI_CLASS_STORAGE_RAID << 8, 0xffffff, board_ahci },
 
-	
-	{ PCI_VDEVICE(VIA, 0x3349), board_ahci_vt8251 }, 
-	{ PCI_VDEVICE(VIA, 0x6287), board_ahci_vt8251 }, 
+	{ PCI_VDEVICE(VIA, 0x3349), board_ahci_vt8251 },  
+	{ PCI_VDEVICE(VIA, 0x6287), board_ahci_vt8251 },  
 
-	
-	{ PCI_VDEVICE(NVIDIA, 0x044c), board_ahci_mcp65 },	
-	{ PCI_VDEVICE(NVIDIA, 0x044d), board_ahci_mcp65 },	
-	{ PCI_VDEVICE(NVIDIA, 0x044e), board_ahci_mcp65 },	
-	{ PCI_VDEVICE(NVIDIA, 0x044f), board_ahci_mcp65 },	
-	{ PCI_VDEVICE(NVIDIA, 0x045c), board_ahci_mcp65 },	
-	{ PCI_VDEVICE(NVIDIA, 0x045d), board_ahci_mcp65 },	
-	{ PCI_VDEVICE(NVIDIA, 0x045e), board_ahci_mcp65 },	
-	{ PCI_VDEVICE(NVIDIA, 0x045f), board_ahci_mcp65 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0550), board_ahci_mcp67 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0551), board_ahci_mcp67 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0552), board_ahci_mcp67 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0553), board_ahci_mcp67 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0554), board_ahci_mcp67 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0555), board_ahci_mcp67 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0556), board_ahci_mcp67 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0557), board_ahci_mcp67 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0558), board_ahci_mcp67 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0559), board_ahci_mcp67 },	
-	{ PCI_VDEVICE(NVIDIA, 0x055a), board_ahci_mcp67 },	
-	{ PCI_VDEVICE(NVIDIA, 0x055b), board_ahci_mcp67 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0580), board_ahci_mcp_linux },	
-	{ PCI_VDEVICE(NVIDIA, 0x0581), board_ahci_mcp_linux },	
-	{ PCI_VDEVICE(NVIDIA, 0x0582), board_ahci_mcp_linux },	
-	{ PCI_VDEVICE(NVIDIA, 0x0583), board_ahci_mcp_linux },	
-	{ PCI_VDEVICE(NVIDIA, 0x0584), board_ahci_mcp_linux },	
-	{ PCI_VDEVICE(NVIDIA, 0x0585), board_ahci_mcp_linux },	
-	{ PCI_VDEVICE(NVIDIA, 0x0586), board_ahci_mcp_linux },	
-	{ PCI_VDEVICE(NVIDIA, 0x0587), board_ahci_mcp_linux },	
-	{ PCI_VDEVICE(NVIDIA, 0x0588), board_ahci_mcp_linux },	
-	{ PCI_VDEVICE(NVIDIA, 0x0589), board_ahci_mcp_linux },	
-	{ PCI_VDEVICE(NVIDIA, 0x058a), board_ahci_mcp_linux },	
-	{ PCI_VDEVICE(NVIDIA, 0x058b), board_ahci_mcp_linux },	
-	{ PCI_VDEVICE(NVIDIA, 0x058c), board_ahci_mcp_linux },	
-	{ PCI_VDEVICE(NVIDIA, 0x058d), board_ahci_mcp_linux },	
-	{ PCI_VDEVICE(NVIDIA, 0x058e), board_ahci_mcp_linux },	
-	{ PCI_VDEVICE(NVIDIA, 0x058f), board_ahci_mcp_linux },	
-	{ PCI_VDEVICE(NVIDIA, 0x07f0), board_ahci_mcp73 },	
-	{ PCI_VDEVICE(NVIDIA, 0x07f1), board_ahci_mcp73 },	
-	{ PCI_VDEVICE(NVIDIA, 0x07f2), board_ahci_mcp73 },	
-	{ PCI_VDEVICE(NVIDIA, 0x07f3), board_ahci_mcp73 },	
-	{ PCI_VDEVICE(NVIDIA, 0x07f4), board_ahci_mcp73 },	
-	{ PCI_VDEVICE(NVIDIA, 0x07f5), board_ahci_mcp73 },	
-	{ PCI_VDEVICE(NVIDIA, 0x07f6), board_ahci_mcp73 },	
-	{ PCI_VDEVICE(NVIDIA, 0x07f7), board_ahci_mcp73 },	
-	{ PCI_VDEVICE(NVIDIA, 0x07f8), board_ahci_mcp73 },	
-	{ PCI_VDEVICE(NVIDIA, 0x07f9), board_ahci_mcp73 },	
-	{ PCI_VDEVICE(NVIDIA, 0x07fa), board_ahci_mcp73 },	
-	{ PCI_VDEVICE(NVIDIA, 0x07fb), board_ahci_mcp73 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0ad0), board_ahci_mcp77 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0ad1), board_ahci_mcp77 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0ad2), board_ahci_mcp77 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0ad3), board_ahci_mcp77 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0ad4), board_ahci_mcp77 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0ad5), board_ahci_mcp77 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0ad6), board_ahci_mcp77 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0ad7), board_ahci_mcp77 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0ad8), board_ahci_mcp77 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0ad9), board_ahci_mcp77 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0ada), board_ahci_mcp77 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0adb), board_ahci_mcp77 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0ab4), board_ahci_mcp79 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0ab5), board_ahci_mcp79 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0ab6), board_ahci_mcp79 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0ab7), board_ahci_mcp79 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0ab8), board_ahci_mcp79 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0ab9), board_ahci_mcp79 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0aba), board_ahci_mcp79 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0abb), board_ahci_mcp79 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0abc), board_ahci_mcp79 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0abd), board_ahci_mcp79 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0abe), board_ahci_mcp79 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0abf), board_ahci_mcp79 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0d84), board_ahci_mcp89 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0d85), board_ahci_mcp89 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0d86), board_ahci_mcp89 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0d87), board_ahci_mcp89 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0d88), board_ahci_mcp89 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0d89), board_ahci_mcp89 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0d8a), board_ahci_mcp89 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0d8b), board_ahci_mcp89 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0d8c), board_ahci_mcp89 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0d8d), board_ahci_mcp89 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0d8e), board_ahci_mcp89 },	
-	{ PCI_VDEVICE(NVIDIA, 0x0d8f), board_ahci_mcp89 },	
+	{ PCI_VDEVICE(NVIDIA, 0x044c), board_ahci_mcp65 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x044d), board_ahci_mcp65 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x044e), board_ahci_mcp65 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x044f), board_ahci_mcp65 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x045c), board_ahci_mcp65 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x045d), board_ahci_mcp65 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x045e), board_ahci_mcp65 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x045f), board_ahci_mcp65 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0550), board_ahci_mcp67 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0551), board_ahci_mcp67 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0552), board_ahci_mcp67 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0553), board_ahci_mcp67 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0554), board_ahci_mcp67 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0555), board_ahci_mcp67 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0556), board_ahci_mcp67 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0557), board_ahci_mcp67 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0558), board_ahci_mcp67 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0559), board_ahci_mcp67 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x055a), board_ahci_mcp67 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x055b), board_ahci_mcp67 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0580), board_ahci_mcp_linux },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0581), board_ahci_mcp_linux },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0582), board_ahci_mcp_linux },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0583), board_ahci_mcp_linux },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0584), board_ahci_mcp_linux },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0585), board_ahci_mcp_linux },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0586), board_ahci_mcp_linux },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0587), board_ahci_mcp_linux },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0588), board_ahci_mcp_linux },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0589), board_ahci_mcp_linux },	 
+	{ PCI_VDEVICE(NVIDIA, 0x058a), board_ahci_mcp_linux },	 
+	{ PCI_VDEVICE(NVIDIA, 0x058b), board_ahci_mcp_linux },	 
+	{ PCI_VDEVICE(NVIDIA, 0x058c), board_ahci_mcp_linux },	 
+	{ PCI_VDEVICE(NVIDIA, 0x058d), board_ahci_mcp_linux },	 
+	{ PCI_VDEVICE(NVIDIA, 0x058e), board_ahci_mcp_linux },	 
+	{ PCI_VDEVICE(NVIDIA, 0x058f), board_ahci_mcp_linux },	 
+	{ PCI_VDEVICE(NVIDIA, 0x07f0), board_ahci_mcp73 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x07f1), board_ahci_mcp73 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x07f2), board_ahci_mcp73 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x07f3), board_ahci_mcp73 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x07f4), board_ahci_mcp73 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x07f5), board_ahci_mcp73 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x07f6), board_ahci_mcp73 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x07f7), board_ahci_mcp73 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x07f8), board_ahci_mcp73 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x07f9), board_ahci_mcp73 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x07fa), board_ahci_mcp73 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x07fb), board_ahci_mcp73 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0ad0), board_ahci_mcp77 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0ad1), board_ahci_mcp77 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0ad2), board_ahci_mcp77 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0ad3), board_ahci_mcp77 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0ad4), board_ahci_mcp77 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0ad5), board_ahci_mcp77 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0ad6), board_ahci_mcp77 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0ad7), board_ahci_mcp77 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0ad8), board_ahci_mcp77 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0ad9), board_ahci_mcp77 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0ada), board_ahci_mcp77 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0adb), board_ahci_mcp77 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0ab4), board_ahci_mcp79 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0ab5), board_ahci_mcp79 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0ab6), board_ahci_mcp79 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0ab7), board_ahci_mcp79 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0ab8), board_ahci_mcp79 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0ab9), board_ahci_mcp79 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0aba), board_ahci_mcp79 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0abb), board_ahci_mcp79 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0abc), board_ahci_mcp79 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0abd), board_ahci_mcp79 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0abe), board_ahci_mcp79 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0abf), board_ahci_mcp79 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0d84), board_ahci_mcp89 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0d85), board_ahci_mcp89 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0d86), board_ahci_mcp89 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0d87), board_ahci_mcp89 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0d88), board_ahci_mcp89 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0d89), board_ahci_mcp89 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0d8a), board_ahci_mcp89 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0d8b), board_ahci_mcp89 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0d8c), board_ahci_mcp89 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0d8d), board_ahci_mcp89 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0d8e), board_ahci_mcp89 },	 
+	{ PCI_VDEVICE(NVIDIA, 0x0d8f), board_ahci_mcp89 },	 
 
-	
-	{ PCI_VDEVICE(SI, 0x1184), board_ahci },		
-	{ PCI_VDEVICE(SI, 0x1185), board_ahci },		
-	{ PCI_VDEVICE(SI, 0x0186), board_ahci },		
+	{ PCI_VDEVICE(SI, 0x1184), board_ahci },		 
+	{ PCI_VDEVICE(SI, 0x1185), board_ahci },		 
+	{ PCI_VDEVICE(SI, 0x0186), board_ahci },		 
 
-	
-	{ PCI_VDEVICE(STMICRO, 0xCC06), board_ahci },		
+	{ PCI_VDEVICE(STMICRO, 0xCC06), board_ahci },		 
 
-	
-	{ PCI_VDEVICE(MARVELL, 0x6145), board_ahci_mv },	
-	{ PCI_VDEVICE(MARVELL, 0x6121), board_ahci_mv },	
+	{ PCI_VDEVICE(MARVELL, 0x6145), board_ahci_mv },	 
+	{ PCI_VDEVICE(MARVELL, 0x6121), board_ahci_mv },	 
 	{ PCI_DEVICE(PCI_VENDOR_ID_MARVELL_EXT, 0x9123),
 	  .class = PCI_CLASS_STORAGE_SATA_AHCI,
 	  .class_mask = 0xffffff,
-	  .driver_data = board_ahci_yes_fbs },			
+	  .driver_data = board_ahci_yes_fbs },			 
 	{ PCI_DEVICE(PCI_VENDOR_ID_MARVELL_EXT, 0x9125),
-	  .driver_data = board_ahci_yes_fbs },			
+	  .driver_data = board_ahci_yes_fbs },			 
 	{ PCI_DEVICE_SUB(PCI_VENDOR_ID_MARVELL_EXT, 0x9178,
 			 PCI_VENDOR_ID_MARVELL_EXT, 0x9170),
-	  .driver_data = board_ahci_yes_fbs },			
+	  .driver_data = board_ahci_yes_fbs },			 
 	{ PCI_DEVICE(PCI_VENDOR_ID_MARVELL_EXT, 0x917a),
-	  .driver_data = board_ahci_yes_fbs },			
+	  .driver_data = board_ahci_yes_fbs },			 
 	{ PCI_DEVICE(PCI_VENDOR_ID_MARVELL_EXT, 0x9172),
-	  .driver_data = board_ahci_yes_fbs },			
+	  .driver_data = board_ahci_yes_fbs },			 
 	{ PCI_DEVICE(PCI_VENDOR_ID_MARVELL_EXT, 0x9182),
-	  .driver_data = board_ahci_yes_fbs },			
+	  .driver_data = board_ahci_yes_fbs },			 
 	{ PCI_DEVICE(PCI_VENDOR_ID_MARVELL_EXT, 0x9192),
-	  .driver_data = board_ahci_yes_fbs },			
+	  .driver_data = board_ahci_yes_fbs },			 
 	{ PCI_DEVICE(PCI_VENDOR_ID_MARVELL_EXT, 0x91a0),
 	  .driver_data = board_ahci_yes_fbs },
-	{ PCI_DEVICE(PCI_VENDOR_ID_MARVELL_EXT, 0x91a2), 	
+	{ PCI_DEVICE(PCI_VENDOR_ID_MARVELL_EXT, 0x91a2), 	 
 	  .driver_data = board_ahci_yes_fbs },
 	{ PCI_DEVICE(PCI_VENDOR_ID_MARVELL_EXT, 0x91a3),
 	  .driver_data = board_ahci_yes_fbs },
@@ -1269,9 +1285,9 @@ void syno_mv_9xxx_amp_adjust(struct ata_host *host, struct pci_dev *pdev)
 			syno_mv_9xxx_amp_adjust_by_port(host, 0xAA62, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
 			syno_mv_9xxx_amp_adjust_by_port(host, 0xE75, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
 		}	
-	} else if (syno_is_hw_version(HW_DVA3219)) {
+	} else if (syno_is_hw_version(HW_DVA3219) || syno_is_hw_version(HW_DVA3221)) {
 		if (0x10 == PCI_SLOT(pdev->bus->self->devfn)) {
-                        
+                         
                         port = 0;
                         syno_mv_9xxx_amp_adjust_by_port(host, 0xAA62, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
                         syno_mv_9xxx_amp_adjust_by_port(host, 0xE75, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
@@ -1280,8 +1296,8 @@ void syno_mv_9xxx_amp_adjust(struct ata_host *host, struct pci_dev *pdev)
                         syno_mv_9xxx_amp_adjust_by_port(host, 0xFF9, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
                 }
 	} else if (syno_is_hw_version(HW_DS720p)) {
-		
-		port = 3;
+		 
+		port = 0;
 		syno_mv_9xxx_amp_adjust_by_port(host, 0xA75, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
 	} else if (syno_is_hw_version(HW_RS820p) || syno_is_hw_version(HW_RS820rpp)) {
 		if (0x11 == PCI_SLOT(pdev->bus->self->devfn)) {
@@ -1289,9 +1305,16 @@ void syno_mv_9xxx_amp_adjust(struct ata_host *host, struct pci_dev *pdev)
 			syno_mv_9xxx_amp_adjust_by_port(host, 0xAA62, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
 			syno_mv_9xxx_amp_adjust_by_port(host, 0xCF5, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
 		}
+	} else if (syno_is_hw_version(HW_DS1520p)) {
+		if (0x9170 == pdev->device) {
+			port = 0;
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xD75, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+			port = 1;
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xD75, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+		}
 	} 
 }
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 int __syno_mv_9235_disk_led_get(const struct ata_port *ap)
@@ -1407,85 +1430,13 @@ END:
 }
 
 EXPORT_SYMBOL(syno_mv_9235_disk_led_set);
-#endif 
-
-#ifdef MY_ABC_HERE
-#ifdef MY_ABC_HERE
-#ifdef CONFIG_SYNO_ATA_SHUTDOWN_FIX_ICH_GPIO
-extern u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite);
-#endif 
-extern int grgPwrCtlPin[];
-static int syno_pulldown_eunit_gpio(struct ata_port *ap)
-{
-	int iRet = -1;
-	int iValue = 0;
-	int iPin = -1;
-
-	
-	if (!(iPin = grgPwrCtlPin[ap->print_id])) { 
-		goto END;
-	}
-
-#ifdef CONFIG_SYNO_ATA_SHUTDOWN_FIX_ICH_GPIO
-	if (syno_pch_lpc_gpio_pin(iPin, &iValue, 1)) {
-		goto END;
-	}
-#endif 
-#ifdef MY_DEF_HERE
-	if (syno_gpio_value_set(iPin, iValue)) {
-		goto END;
-	}
-#endif 
-
-	mdelay(1000); 
-
-	iRet = 0;
-END:
-	return iRet;
-}
-#endif 
-
-extern int gSynoSystemShutdown;
-void ahci_pci_shutdown(struct pci_dev *pdev){
-	int i;
-	struct ata_host *host = dev_get_drvdata(&pdev->dev);
-	struct Scsi_Host *shost;
-
-	if (NULL == host) {
-		goto END;
-	}
-
-	
-	if (1 == gSynoSystemShutdown) {
-		for (i = 0; i < host->n_ports; i++) {
-			shost = host->ports[i]->scsi_host;
-			if (shost->hostt->syno_host_poweroff_task) {
-				shost->hostt->syno_host_poweroff_task(shost);
-			}
-#ifdef MY_ABC_HERE
-			syno_pulldown_eunit_gpio(host->ports[i]);
-#endif 
-		}
-	}
-
-	if (pdev->irq >= 0) {
-		free_irq(pdev->irq, host);
-		pci_disable_msi(pdev);
-		pci_intx(pdev, 0);
-	}
-END:
-	return;
-}
-#endif 
+#endif  
 
 static struct pci_driver ahci_pci_driver = {
 	.name			= DRV_NAME,
 	.id_table		= ahci_pci_tbl,
 	.probe			= ahci_init_one,
 	.remove			= ata_pci_remove_one,
-#ifdef MY_ABC_HERE
-	.shutdown		= ahci_pci_shutdown,
-#endif 
 #ifdef CONFIG_PM
 	.suspend		= ahci_pci_device_suspend,
 	.resume			= ahci_pci_device_resume,
@@ -1619,6 +1570,59 @@ static int ahci_p5wdh_hardreset(struct ata_link *link, unsigned int *class,
 	return rc;
 }
 
+#ifdef CONFIG_SYNO_JMICRON_585_FIX
+static int syno_ahci_hardreset_jmb(struct ata_link *link, unsigned int *class,
+			  unsigned long deadline)
+{
+	const unsigned long *timing = sata_ehc_deb_timing(&link->eh_context);
+	struct ata_port *ap = link->ap;
+	struct ahci_port_priv *pp = ap->private_data;
+	struct ahci_host_priv *hpriv = ap->host->private_data;
+	u8 *d2h_fis = pp->rx_fis + RX_FIS_D2H_REG;
+	struct ata_taskfile tf;
+	bool online;
+	int rc;
+	void __iomem *port_mmio = ahci_port_base(link->ap);
+	u32 uIRQStatus = 0;
+
+	DPRINTK("ENTER\n");
+	ahci_stop_engine(ap);
+
+	ata_tf_init(link->device, &tf);
+	tf.command = ATA_BUSY;
+	ata_tf_to_fis(&tf, 0, 0, d2h_fis);
+
+	uIRQStatus = readl(port_mmio + PORT_IRQ_MASK);
+	writel(uIRQStatus & ~PORT_IRQ_BAD_PMP, port_mmio + PORT_IRQ_MASK);
+	rc = sata_link_hardreset(link, timing, deadline, &online,
+				 ahci_check_ready);
+	writel(uIRQStatus, port_mmio + PORT_IRQ_MASK);
+
+	hpriv->start_engine(ap);
+
+	if (online)
+		*class = ahci_dev_classify(ap);
+
+	DPRINTK("EXIT, rc=%d, class=%u\n", rc, *class);
+	return rc;
+}
+
+static int syno_ahci_softreset_jmb(struct ata_link *link, unsigned int *class,
+			  unsigned long deadline)
+{
+	int pmp = sata_srst_pmp(link);
+	int iRet = 0;
+	void __iomem *port_mmio = ahci_port_base(link->ap);
+	u32 uIRQStatus = 0;
+	DPRINTK("ENTER\n");
+
+	uIRQStatus = readl(port_mmio + PORT_IRQ_MASK);
+	writel(uIRQStatus & ~PORT_IRQ_BAD_PMP, port_mmio + PORT_IRQ_MASK);
+	iRet = ahci_do_softreset(link, class, pmp, deadline, ahci_check_ready);
+	writel(uIRQStatus, port_mmio + PORT_IRQ_MASK);
+	return iRet;
+}
+#endif  
 
 static int ahci_avn_hardreset(struct ata_link *link, unsigned int *class,
 			      unsigned long deadline)
@@ -2283,6 +2287,7 @@ void syno_asmedia_1061_init(struct ata_host *host)
 	unsigned int asmedia_DS420p_data_gen1[SYNO_ASM_PORT_NUM] = {0xab, 0xab};
 	unsigned int asmedia_DS420p_data_gen2[SYNO_ASM_PORT_NUM] = {0x26, 0x26};
 	unsigned int asmedia_DS420p_data_gen3[SYNO_ASM_PORT_NUM] = {0x38, 0x28};
+	unsigned int asmedia_DS420j_data[SYNO_ASM_PORT_NUM] = {0xaf, 0xaf};
 
 	if (syno_is_hw_version(HW_DS418)) {
 		devfn = PCI_DEVFN(0x00, 0x0);
@@ -2291,6 +2296,10 @@ void syno_asmedia_1061_init(struct ata_host *host)
 	} else if (syno_is_hw_version(HW_DS418j)) {
 		devfn = PCI_DEVFN(0x00, 0x0);
 		syno_asmedia_1061_amp_adjust(pdev, devfn, asmedia_addr, asmedia_DS418j_data, SYNO_ASM_PORT_NUM, asmedia_gen[2]);
+		syno_asmedia_1061_gpio2_led_mode(pdev, devfn);
+	} else if (syno_is_hw_version(HW_DS420j)) {
+		devfn = PCI_DEVFN(0x00, 0x0);
+		syno_asmedia_1061_amp_adjust(pdev, devfn, asmedia_addr, asmedia_DS420j_data, SYNO_ASM_PORT_NUM, asmedia_gen[2]);
 		syno_asmedia_1061_gpio2_led_mode(pdev, devfn);
 	} else if (syno_is_hw_version(HW_DS418play)) {
 		devfn = PCI_DEVFN(0x00, 0x0);

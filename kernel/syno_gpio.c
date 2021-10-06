@@ -196,23 +196,22 @@ int syno_disk_gpio_pin_have(const int diskPort, const char *szPropertyName)
 	return ret;
 }
 EXPORT_SYMBOL(syno_disk_gpio_pin_have);
-
-u32 syno_led_pin_get(const int diskPort, const char *szLedName, const int propertyIndex)
+ 
+u32 syno_led_pin_get(const char* szSlotName, const int diskPort, const char *szLedName, const int propertyIndex)
 {
-	int index= 0;
 	u32 synoGpioPin = U32_MAX;
 	struct device_node *pSlotNode = NULL, *pLedNode = NULL;
+	char szFullName[MAX_NODENAME_LEN] = {0};
 
-	if (NULL == szLedName || 0 > diskPort || 0 >propertyIndex) {
+	if (NULL == szSlotName || NULL == szLedName || 0 > diskPort || 0 > propertyIndex) {
 		goto END;
 	}
+	if (0 > snprintf(szFullName, MAX_NODENAME_LEN - 1, "/%s@%d", szSlotName, diskPort)) {
+		goto END;
+}
 
 	for_each_child_of_node(of_root, pSlotNode) {
-		
-		if (!pSlotNode->full_name || 1 != sscanf(pSlotNode->full_name, "/"DT_INTERNAL_SLOT"@%d", &index)) {
-			continue;
-		}
-		if (diskPort == index) {
+		if (pSlotNode->full_name && 0 == strcmp(pSlotNode->full_name, szFullName)) {
 			break;
 		}
 	}
@@ -233,13 +232,14 @@ END:
 }
 EXPORT_SYMBOL(syno_led_pin_get);
 
-
-int syno_led_pin_have(const int diskPort, const char *szLedName)
+int syno_led_pin_have(const char* szSlotName, const int diskPort, const char *szLedName)
 {
 	u32 synoGpioPin = U32_MAX;
 	int ret = -1;
 
-	synoGpioPin = syno_led_pin_get(diskPort, szLedName, SYNO_GPIO_PIN);
+	if (szSlotName && szLedName) {
+		synoGpioPin = syno_led_pin_get(szSlotName, diskPort, szLedName, SYNO_GPIO_PIN);
+	}
 
 	if (U32_MAX != synoGpioPin) {
 		ret = 1;

@@ -418,10 +418,14 @@ void syno_vbus_gpio_set(const char *vbus_host_addr, const unsigned vbus_gpio_pin
 			printk(KERN_INFO " port%d is going to power up Vbus by "
 				"GPIO#%d(%s)\n", port1, vbus_gpio_pin,
 				vbus_gpio_polarity ? "ACTIVE_HIGH" : "ACTIVE_LOW");
+#ifdef CONFIG_SYNO_BROADWELL
+			mdelay(1000);
+#else  
 			mdelay(100);
+#endif  
 		}
 	}
-#else 
+#else  
 	if (vbus_gpio_polarity != SYNO_GPIO_READ(vbus_gpio_pin)) {
 		SYNO_GPIO_WRITE(vbus_gpio_pin, vbus_gpio_polarity);
 		printk(KERN_INFO " port%d is going to power up Vbus by "
@@ -497,21 +501,24 @@ int usb_hub_create_port_device(struct usb_hub *hub, int port1)
 			port1);
 #if defined (MY_DEF_HERE)
 	port_dev->power_cycle_counter = SYNO_POWER_CYCLE_TRIES;
-#endif 
+#endif  
+#ifdef CONFIG_SYNO_USB_POWER_DELAY_ON
+	port_dev->get_desc_fail_counter = 0;
+#endif	 
 
 #ifdef MY_DEF_HERE
 	if (hdev && hdev->serial) {
 		for (i = 0; i < CONFIG_SYNO_USB_NUM_CASTRATED_XHC; i++) {
 			if (0 == strcmp(gSynoCastratedXhcAddr[i], hdev->serial) &&
 				gSynoCastratedXhcPortBitmap[i] & (0x01 << (port1 - 1))) {
-				
+				 
 				port_dev->flag |= SYNO_USB_PORT_CASTRATED_XHC;
 				if (hub_is_superspeed(hdev))
 					dev_info (&port_dev->dev, "is a castrated xHC-port\n");
 			}
 		}
 	}
-#endif 
+#endif  
 
 #ifdef MY_DEF_HERE
 	port_dev->syno_vbus_gpp = -1;

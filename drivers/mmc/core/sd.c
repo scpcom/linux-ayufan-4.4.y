@@ -30,6 +30,22 @@
 #include "sd.h"
 #include "sd_ops.h"
 
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_MMC_RTK_SDMMC
+int mmc_runtime_resume_flag=0;
+int get_mmc_runtime_resume_flag(void)
+{
+        return mmc_runtime_resume_flag;
+}
+EXPORT_SYMBOL(get_mmc_runtime_resume_flag);
+void set_mmc_runtime_resume_flag(int flag)
+{
+        mmc_runtime_resume_flag = flag;
+}
+EXPORT_SYMBOL(set_mmc_runtime_resume_flag);
+#endif
+
+#endif /* MY_DEF_HERE */
 static const unsigned int tran_exp[] = {
 	10000,		100000,		1000000,	10000000,
 	0,		0,		0,		0
@@ -1180,9 +1196,17 @@ static int mmc_sd_runtime_resume(struct mmc_host *host)
 		return 0;
 
 	err = _mmc_sd_resume(host);
+#if defined(CONFIG_MMC_RTK_SDMMC) && defined(MY_DEF_HERE)
+	if (err) {
+		mmc_runtime_resume_flag=1;
+		pr_err("%s: error %d doing aggressive resume\n",
+			mmc_hostname(host), err);
+	}
+#else /* CONFIG_MMC_RTK_SDMMC && MY_DEF_HERE */
 	if (err)
 		pr_err("%s: error %d doing aggressive resume\n",
 			mmc_hostname(host), err);
+#endif /* CONFIG_MMC_RTK_SDMMC && MY_DEF_HERE */
 
 	return 0;
 }

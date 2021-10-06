@@ -590,9 +590,6 @@ struct scsi_transport_template *ata_attach_transport(void)
 	i->t.eh_strategy_handler	= ata_scsi_error;
 	i->t.eh_timed_out		= ata_scsi_timed_out;
 	i->t.user_scan			= ata_scsi_user_scan;
-#ifdef MY_ABC_HERE
-	i->t.is_eunit_deepsleep		= ata_scsi_is_eunit_deepsleep;
-#endif 
 
 	i->t.host_attrs.ac.attrs = &i->port_attrs[0];
 	i->t.host_attrs.ac.class = &ata_port_class.class;

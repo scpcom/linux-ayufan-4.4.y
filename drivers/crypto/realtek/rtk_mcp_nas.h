@@ -8,7 +8,12 @@ base_mcp_addr = ioremap(0x98015000, 0x1000);
 base_tp_addr = ioremap(0x98014000, 0x1000);
 const void __iomem        *const_mcp_addr = base_mcp_addr;
 const void __iomem        *const_tp_addr = base_tp_addr;*/
+#if defined(MY_DEF_HERE)
 #include <soc/realtek/memory.h>
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
+#include <soc/realtek/memory_1619.h>
+#endif /* MY_DEF_HERE */
 
 #define CP_REG_BASE	0
 #define TP_REG_BASE	0

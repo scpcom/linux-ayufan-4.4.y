@@ -67,15 +67,14 @@ struct ulist_node *ulist_next(struct ulist *ulist,
 
 #define ULIST_ITER_INIT(uiter) ((uiter)->cur_list = NULL)
 
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE) || \
-    defined(MY_ABC_HERE)
-#define ULIST_NODES_MAX 65536 
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#define ULIST_NODES_MAX 65536  
 int ulist_add_lru_adjust(struct ulist *ulist, u64 val, u64 aux, gfp_t gfp_mask);
 void ulist_remove_first(struct ulist *ulist);
-#endif 
+#endif  
 #if defined(MY_ABC_HERE) || \
     defined(MY_ABC_HERE)
 struct ulist_node * ulist_search(struct ulist *ulist, u64 val);
-#endif 
+#endif  
 
 #endif

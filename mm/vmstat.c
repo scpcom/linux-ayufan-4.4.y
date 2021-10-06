@@ -926,9 +926,9 @@ static char * const migratetype_names[MIGRATE_TYPES] = {
 	"Reclaimable",
 #if defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
 	"Reserve",
-#else /* MY_DEF_HERE && !MY_DEF_HERE */
+#else /* MY_DEF_HERE && !CONFIG_SYNO_LSP_ARMADA_16_12_MM_REVERT */
 	"HighAtomic",
-#endif /* MY_DEF_HERE && !MY_DEF_HERE */
+#endif /* MY_DEF_HERE && !CONFIG_SYNO_LSP_ARMADA_16_12_MM_REVERT */
 #ifdef CONFIG_CMA
 	"CMA",
 #endif

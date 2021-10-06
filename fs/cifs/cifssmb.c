@@ -616,11 +616,16 @@ CIFSSMBEcho(struct TCP_Server_Info *server)
 
 	cifs_dbg(FYI, "In echo request\n");
 
+#ifdef MY_ABC_HERE
+	if (CifsGood != server->tcpStatus) {
+		cifs_dbg(FYI, "tcpStatus not Good (%d); Don't send echo\n", server->tcpStatus);
+		return rc;
+	}
+#endif  
 	rc = small_smb_init(SMB_COM_ECHO, 0, NULL, (void **)&smb);
 	if (rc)
 		return rc;
 
-	
 	smb->hdr.Tid = 0xffff;
 	smb->hdr.WordCount = 1;
 	put_unaligned_le16(1, &smb->EchoCount);

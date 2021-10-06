@@ -1,47 +1,36 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-
+ 
 #ifndef __DELAYED_REF__
 #define __DELAYED_REF__
 
-
-#define BTRFS_ADD_DELAYED_REF    1 
-#define BTRFS_DROP_DELAYED_REF   2 
-#define BTRFS_ADD_DELAYED_EXTENT 3 
-#define BTRFS_UPDATE_DELAYED_HEAD 4 
-
+#define BTRFS_ADD_DELAYED_REF    1  
+#define BTRFS_DROP_DELAYED_REF   2  
+#define BTRFS_ADD_DELAYED_EXTENT 3  
+#define BTRFS_UPDATE_DELAYED_HEAD 4  
 
 struct btrfs_delayed_ref_node {
-	
+	 
 	struct rb_node rb_node;
 
-	
 	struct list_head list;
-	
+	 
 	struct list_head add_list;
 
-	
 	u64 bytenr;
 
-	
 	u64 num_bytes;
 
-	
 	u64 seq;
 
-	
 	atomic_t refs;
 
-	
 	int ref_mod;
 
 	unsigned int action:8;
 	unsigned int type:8;
-#ifdef MY_ABC_HERE
-	unsigned int no_quota:1;
-#endif 
-	
+	 
 	unsigned int is_head:1;
 	unsigned int in_tree:1;
 };
@@ -92,41 +81,32 @@ struct btrfs_delayed_data_ref {
 	u64 parent;
 	u64 objectid;
 	u64 offset;
-#ifdef MY_ABC_HERE
-	uid_t uid;
-#endif 
 };
 
 struct btrfs_delayed_ref_root {
-	
+	 
 	struct rb_root href_root;
 
-	
-#ifdef MY_ABC_HERE
-#else
 	struct rb_root dirty_extent_root;
-#endif 
 
-	
 	spinlock_t lock;
 
-	
 	atomic_t num_entries;
 
-	
 	unsigned long num_heads;
 
-	
 	unsigned long num_heads_ready;
 
 	u64 pending_csums;
 
-	
+#ifdef MY_ABC_HERE
+	u64 num_pending_csums_leafs;
+#endif  
+
 	int flushing;
 
 	u64 run_delayed_start;
 
-	
 	u64 qgroup_to_skip;
 };
 
@@ -184,16 +164,7 @@ int btrfs_add_delayed_data_ref(struct btrfs_fs_info *fs_info,
 			       u64 bytenr, u64 num_bytes,
 			       u64 parent, u64 ref_root,
 			       u64 owner, u64 offset, u64 reserved, int action,
-#ifdef MY_ABC_HERE
-			       struct btrfs_delayed_extent_op *extent_op,
-#ifdef MY_ABC_HERE
-			       int no_quota, uid_t uid);
-#else
-			       int no_quota);
-#endif 
-#else
 			       struct btrfs_delayed_extent_op *extent_op);
-#endif 
 int btrfs_add_delayed_qgroup_reserve(struct btrfs_fs_info *fs_info,
 				     struct btrfs_trans_handle *trans,
 				     u64 ref_root, u64 bytenr, u64 num_bytes);
@@ -218,21 +189,15 @@ static inline void btrfs_delayed_ref_unlock(struct btrfs_delayed_ref_head *head)
 
 struct btrfs_delayed_ref_head *
 btrfs_select_ref_head(struct btrfs_trans_handle *trans);
-#ifdef MY_ABC_HERE
-struct btrfs_delayed_ref_head *
-btrfs_select_data_ref_head(struct btrfs_trans_handle *trans);
-#endif 
 
 int btrfs_check_delayed_seq(struct btrfs_fs_info *fs_info,
 			    struct btrfs_delayed_ref_root *delayed_refs,
 			    u64 seq);
 
-
 static int btrfs_delayed_ref_is_head(struct btrfs_delayed_ref_node *node)
 {
 	return node->is_head;
 }
-
 
 static inline struct btrfs_delayed_tree_ref *
 btrfs_delayed_node_to_tree_ref(struct btrfs_delayed_ref_node *node)

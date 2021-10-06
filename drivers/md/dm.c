@@ -50,12 +50,6 @@ static unsigned int major = 0;
 static unsigned int _major = 0;
 
 static DEFINE_IDR(_minor_idr);
-
-#ifdef MY_ABC_HERE
-extern sector_t (*funcSYNOLvLgSectorCount)(void *private, sector_t sector);
-sector_t SynoLvLgSectorCount(void *, sector_t);
-#endif 
-
 static DEFINE_SPINLOCK(_minor_lock);
 
 static void do_deferred_remove(struct work_struct *w);
@@ -359,10 +353,6 @@ static int __init dm_init(void)
 		if (r)
 			goto bad;
 	}
-
-#ifdef MY_ABC_HERE
-	funcSYNOLvLgSectorCount = SynoLvLgSectorCount;
-#endif 
 
 	return 0;
 
@@ -974,18 +964,13 @@ static void clone_endio(struct bio *bio)
 	struct mapped_device *md = tio->io->md;
 	dm_endio_fn endio = tio->ti->type->end_io;
 
-#ifdef MY_ABC_HERE
-	if (unlikely(bio_flagged(bio, BIO_CORRECTION_ERR)))
-		bio_set_flag(io->bio, BIO_CORRECTION_ERR);
-#endif 
-
 	if (endio) {
 		r = endio(tio->ti, bio, error);
 		if (r < 0 || r == DM_ENDIO_REQUEUE)
-			
+			 
 			error = r;
 		else if (r == DM_ENDIO_INCOMPLETE)
-			
+			 
 			return;
 		else if (r) {
 			DMWARN("unimplemented target endio return value: %d", r);
@@ -1324,21 +1309,6 @@ void dm_accept_partial_bio(struct bio *bio, unsigned n_sectors)
 }
 EXPORT_SYMBOL_GPL(dm_accept_partial_bio);
 
-#ifdef MY_ABC_HERE
-sector_t SynoLvLgSectorCount(void *private, sector_t sector)
-{
-	struct dm_target *ti = (struct dm_target *)private;
-
-	if (ti && ti->type->lg_sector_get) {
-		return ti->type->lg_sector_get(sector, ti);
-	}
-
-	return 0;
-}
-EXPORT_SYMBOL(SynoLvLgSectorCount);
-#endif 
-
-
 struct dm_offload {
 	struct blk_plug plug;
 	struct blk_plug_cb cb;
@@ -1349,26 +1319,29 @@ static void flush_current_bio_list(struct blk_plug_cb *cb, bool from_schedule)
 	struct dm_offload *o = container_of(cb, struct dm_offload, cb);
 	struct bio_list list;
 	struct bio *bio;
+	int i;
 
 	INIT_LIST_HEAD(&o->cb.list);
 
 	if (unlikely(!current->bio_list))
 		return;
 
-	list = *current->bio_list;
-	bio_list_init(current->bio_list);
+	for (i = 0; i < 2; i++) {
+		list = current->bio_list[i];
+		bio_list_init(&current->bio_list[i]);
 
-	while ((bio = bio_list_pop(&list))) {
-		struct bio_set *bs = bio->bi_pool;
-		if (unlikely(!bs) || bs == fs_bio_set) {
-			bio_list_add(current->bio_list, bio);
-			continue;
+		while ((bio = bio_list_pop(&list))) {
+			struct bio_set *bs = bio->bi_pool;
+			if (unlikely(!bs) || bs == fs_bio_set) {
+				bio_list_add(&current->bio_list[i], bio);
+				continue;
+			}
+
+			spin_lock(&bs->rescue_lock);
+			bio_list_add(&bs->rescue_list, bio);
+			queue_work(bs->rescue_workqueue, &bs->rescue_work);
+			spin_unlock(&bs->rescue_lock);
 		}
-
-		spin_lock(&bs->rescue_lock);
-		bio_list_add(&bs->rescue_list, bio);
-		queue_work(bs->rescue_workqueue, &bs->rescue_work);
-		spin_unlock(&bs->rescue_lock);
 	}
 }
 

@@ -38,9 +38,14 @@
 #define SFC_SCK_TAP         (0x9801a824)
 #define SFP_OPCODE2         (0x9801a828)
 
+#if defined(CONFIG_ARCH_RTD16xx) && defined(MY_DEF_HERE)
+#define ISO_MUXPAD1         (0x9804e004)
+#define ISO_MUXPAD6         (0x9804e048)
+#else /* CONFIG_ARCH_RTD16xx && MY_DEF_HERE */
 // System Bridge II
 #define SB2_WRAPPER_CTRL    (0x9801a018)
 #define SYS_MUXPAD5         (0x9801a914)
+#endif /* CONFIG_ARCH_RTD16xx && MY_DEF_HERE */
 
 // Move Data Engine
 #define MD_FDMA_DDR_SADDR   (0x9800b088)
@@ -156,7 +161,12 @@ typedef struct rtk_sfc_info {
         asm volatile("DMB SY" : : : "memory"); \
     }while(0)
 
-#define SYS_REG_TRY_LOCK(delay) 
-#define SYS_REG_TRY_UNLOCK  
+#define SYS_REG_TRY_LOCK(delay)
+#define SYS_REG_TRY_UNLOCK
 #define SFC_FLUSH_CACHE(buff, len)
+
+#if defined(MY_DEF_HERE)
+int rtk_sfc_panic_erase(struct mtd_info *mtd, struct erase_info *instr);
+#endif /* MY_DEF_HERE */
+
 #endif

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (c) 2006-2009 Red Hat Inc.
  * Copyright (c) 2006-2008 Intel Corporation
@@ -1882,9 +1885,14 @@ static int drm_fb_helper_single_fb_probe(struct drm_fb_helper *fb_helper,
 		DRM_INFO("Cannot find any crtc or sizes\n");
 
 		/* First time: disable all crtc's.. */
+#ifdef MY_DEF_HERE
+		sizes.fb_width = sizes.surface_width = 1024;
+		sizes.fb_height = sizes.surface_height = 768;
+#else /* MY_DEF_HERE */
 		if (!fb_helper->deferred_setup && !READ_ONCE(fb_helper->dev->master))
 			restore_fbdev_mode(fb_helper);
 		return -EAGAIN;
+#endif /* MY_DEF_HERE */
 	}
 
 	/* Handle our overallocation */

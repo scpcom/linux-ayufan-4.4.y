@@ -106,6 +106,7 @@ struct cpuinfo_x86 {
 	__u8			x86_coreid_bits;
 
 	__u8			x86_cache_bits;
+	__u8			cu_id;
 	/* Max extended CPUID function supported: */
 	__u32			extended_cpuid_level;
 	/* Maximum supported CPUID level, -1=no CPUID: */
@@ -132,8 +133,6 @@ struct cpuinfo_x86 {
 	u16			phys_proc_id;
 	/* Core id: */
 	u16			cpu_core_id;
-	/* Compute unit id */
-	u8			compute_unit_id;
 	/* Index into per_cpu list: */
 	u16			cpu_index;
 	u32			microcode;
@@ -845,4 +844,11 @@ bool xen_set_default_idle(void);
 
 void stop_this_cpu(void *dummy);
 void df_debug(struct pt_regs *regs, long error_code);
+
+enum mds_mitigations {
+	MDS_MITIGATION_OFF,
+	MDS_MITIGATION_FULL,
+	MDS_MITIGATION_VMWERV,
+};
+
 #endif /* _ASM_X86_PROCESSOR_H */

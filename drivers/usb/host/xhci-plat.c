@@ -12,12 +12,18 @@
 #include <linux/usb/xhci_pdriver.h>
 #include <linux/acpi.h>
 
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_USB_PATCH_ON_RTK
+#include <linux/suspend.h>
+#endif
+
+#endif  
 #include "xhci.h"
 #include "xhci-mvebu.h"
 #include "xhci-rcar.h"
 #if defined(MY_DEF_HERE)
 #include <linux/usb/otg.h>
-#endif 
+#endif  
 
 static struct hc_driver __read_mostly xhci_plat_hc_driver;
 
@@ -96,12 +102,15 @@ int xhci_phy_init(struct usb_hcd *hcd, const char *phy_name)
 	return ret;
 }
 
-#endif 
+#endif  
 static int xhci_plat_probe(struct platform_device *pdev)
 {
 #if defined (MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
+#else  
 	u32 vbus_gpio_pin = 0;
-#endif 
+#endif  
+#endif  
 	struct device_node	*node = pdev->dev.of_node;
 	struct usb_xhci_pdata	*pdata = dev_get_platdata(&pdev->dev);
 	const struct hc_driver	*driver;
@@ -196,6 +205,11 @@ static int xhci_plat_probe(struct platform_device *pdev)
 	}
 
 #if defined (MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
+	hcd->power_control_support = 1;
+	dev_info(&pdev->dev, "power control %s\n", hcd->power_control_support ?
+			"enabled" : "disabled");
+#else  
 	if (node) {
 		if (of_property_read_bool(node, "power-control-capable")) {
 			hcd->power_control_support = 1;
@@ -204,31 +218,27 @@ static int xhci_plat_probe(struct platform_device *pdev)
 		}
 		if (of_property_read_bool(node, "vbus-gpio")) {
 			of_property_read_u32(node, "vbus-gpio", &vbus_gpio_pin);
-			
+			 
 			hcd->vbus_gpio_pin = vbus_gpio_pin;
 		} else {
 			hcd->vbus_gpio_pin = -1;
 			dev_warn(&pdev->dev, "failed to get Vbus gpio\n");
 		}
 	}
-#if defined(MY_DEF_HERE)
-	
-	hcd->power_control_support = 1;
-#endif 
 	dev_info(&pdev->dev, "USB2 Vbus gpio %d\n", hcd->vbus_gpio_pin);
 	dev_info(&pdev->dev, "power control %s\n", hcd->power_control_support ?
 			"enabled" : "disabled");
-#endif 
+#endif  
+#endif  
 
 #if defined(MY_DEF_HERE)
 	if (of_device_is_compatible(pdev->dev.of_node,
 #if defined(MY_DEF_HERE)
 				    "marvell,armada-3700-xhci")) {
-#else 
+#else  
 				    "marvell,armada-3700-xhci-otg")) {
-#endif 
-		
-
+#endif  
+		 
 		if (hcd->usb_phy == NULL) {
 			dev_err(&pdev->dev, "unable to find OTG PHY\n");
 			goto disable_usb_phy;
@@ -275,45 +285,57 @@ static int xhci_plat_probe(struct platform_device *pdev)
 			if (ret)
 				goto dealloc_usb2_hcd;
 		}
-#else 
+#else  
 		ret = usb_add_hcd(hcd, irq, IRQF_SHARED);
 		if (ret)
 			goto disable_usb_phy;
-#endif 
+#endif  
 
 #if defined (MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
+		xhci->shared_hcd->power_control_support = hcd->power_control_support;
+		dev_info(&pdev->dev, "power control %s\n", hcd->power_control_support ?
+				"enabled" : "disabled");
+#else  
 		xhci->shared_hcd->vbus_gpio_pin = hcd->vbus_gpio_pin;
 		xhci->shared_hcd->power_control_support = hcd->power_control_support;
 		dev_info(&pdev->dev, "USB3 Vbus gpio %d\n",
 				xhci->shared_hcd->vbus_gpio_pin);
 		dev_info(&pdev->dev, "power control %s\n", hcd->power_control_support ?
 				"enabled" : "disabled");
-#endif 
+#endif  
+#endif  
 
 		if (HCC_MAX_PSA(xhci->hcc_params) >= 4)
 			xhci->shared_hcd->can_do_streams = 1;
 
 #if defined(MY_DEF_HERE)
-
-#else 
+ 
+#else  
 		ret = usb_add_hcd(xhci->shared_hcd, irq, IRQF_SHARED);
 		if (ret)
 			goto dealloc_usb2_hcd;
-#endif 
+#endif  
 	}
-#else 
+#else  
 	ret = usb_add_hcd(hcd, irq, IRQF_SHARED);
 	if (ret)
 		goto disable_usb_phy;
 
 #if defined (MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
+	xhci->shared_hcd->power_control_support = hcd->power_control_support;
+	dev_info(&pdev->dev, "power control %s\n", hcd->power_control_support ?
+			"enabled" : "disabled");
+#else  
 	xhci->shared_hcd->vbus_gpio_pin = hcd->vbus_gpio_pin;
 	xhci->shared_hcd->power_control_support = hcd->power_control_support;
 	dev_info(&pdev->dev, "USB3 Vbus gpio %d\n",
 			xhci->shared_hcd->vbus_gpio_pin);
 	dev_info(&pdev->dev, "power control %s\n", hcd->power_control_support ?
 			"enabled" : "disabled");
-#endif 
+#endif  
+#endif  
 
 	if (HCC_MAX_PSA(xhci->hcc_params) >= 4)
 		xhci->shared_hcd->can_do_streams = 1;
@@ -391,18 +413,39 @@ void xhci_plat_shutdown(struct platform_device *dev)
 {
 	xhci_plat_remove(dev);
 }
-#endif 
+#endif  
 
 #ifdef CONFIG_PM_SLEEP
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_USB_PATCH_ON_RTK
+ 
+static int xhci_plat_suspend(struct device *dev);
+int RTK_xhci_plat_suspend(struct device *dev) {
+	return xhci_plat_suspend(dev);
+}
+#endif
+
+#endif  
 static int xhci_plat_suspend(struct device *dev)
 {
 	struct usb_hcd	*hcd = dev_get_drvdata(dev);
 	struct xhci_hcd	*xhci = hcd_to_xhci(hcd);
 #if defined(MY_DEF_HERE)
 	int ret;
-#endif 
+#endif  
 
-	
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_USB_PATCH_ON_RTK
+	if (RTK_PM_STATE == PM_SUSPEND_STANDBY) {
+		dev_info(dev, "[USB] %s Idle mode\n", __func__);
+		return 0;
+	 } else
+		xhci_info(xhci, "[USB] %s Suspend mode --> xhci_suspend (do_wakeup=%s)",
+			__func__, device_may_wakeup(dev)? "true":"false");
+#endif
+
+#endif  
+	 
 #if defined(MY_DEF_HERE)
 	ret = xhci_suspend(xhci, device_may_wakeup(dev));
 	if (ret) {
@@ -419,11 +462,22 @@ static int xhci_plat_suspend(struct device *dev)
 	}
 
 	return 0;
-#else 
+#else  
 	return xhci_suspend(xhci, device_may_wakeup(dev));
-#endif 
+#endif  
 }
 
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_USB_PATCH_ON_RTK
+ 
+static int xhci_plat_resume(struct device *dev);
+int RTK_xhci_plat_resume(struct device *dev)
+{
+	return xhci_plat_resume(dev);
+}
+#endif
+
+#endif  
 static int xhci_plat_resume(struct device *dev)
 {
 	struct usb_hcd	*hcd = dev_get_drvdata(dev);
@@ -449,14 +503,24 @@ static int xhci_plat_resume(struct device *dev)
 		ret = phy_power_on(xhci->shared_hcd->phy);
 		if (ret) {
 			phy_exit(xhci->shared_hcd->phy);
-			
+			 
 			phy_power_off(hcd->phy);
 			phy_exit(hcd->phy);
 			return ret;
 		}
 	}
-#endif 
+#endif  
 
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_USB_PATCH_ON_RTK
+	if (RTK_PM_STATE == PM_SUSPEND_STANDBY) {
+		dev_info(dev, "[USB] %s Idle mode\n", __func__);
+		return 0;
+	} else
+		dev_info(dev,  "[USB] %s Suspend mode --> xhci_resume\n", __func__);
+#endif
+
+#endif  
 	return xhci_resume(xhci, 0);
 }
 

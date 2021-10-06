@@ -162,3 +162,6 @@ obj-$(CONFIG_RTC_DRV_WM8350)	+= rtc-wm8350.o
 obj-$(CONFIG_RTC_DRV_X1205)	+= rtc-x1205.o
 obj-$(CONFIG_RTC_DRV_XGENE)	+= rtc-xgene.o
 obj-$(CONFIG_RTC_DRV_ZYNQMP)	+= rtc-zynqmp.o
+ifeq ($(CONFIG_SYNO_LSP_RTD1619), y)
+obj-$(CONFIG_RTC_DRV_RTK)	+= rtc-rtk.o
+endif # CONFIG_SYNO_LSP_RTD1619

@@ -57,121 +57,118 @@ struct scsi_event {
 	enum scsi_device_event	evt_type;
 	struct list_head	node;
 
-	
 };
 
 struct scsi_device {
 	struct Scsi_Host *host;
 	struct request_queue *request_queue;
 
-	
-	struct list_head    siblings;   
-	struct list_head    same_target_siblings; 
+	struct list_head    siblings;    
+	struct list_head    same_target_siblings;  
 
-	atomic_t device_busy;		
-	atomic_t device_blocked;	
+	atomic_t device_busy;		 
+	atomic_t device_blocked;	 
 
 	spinlock_t list_lock;
-	struct list_head cmd_list;	
+	struct list_head cmd_list;	 
 	struct list_head starved_entry;
-	struct scsi_cmnd *current_cmnd;	
-	unsigned short queue_depth;	
-	unsigned short max_queue_depth;	
-	unsigned short last_queue_full_depth; 
-	unsigned short last_queue_full_count; 
-	unsigned long last_queue_full_time;	
-	unsigned long queue_ramp_up_period;	
+	struct scsi_cmnd *current_cmnd;	 
+	unsigned short queue_depth;	 
+	unsigned short max_queue_depth;	 
+	unsigned short last_queue_full_depth;  
+	unsigned short last_queue_full_count;  
+	unsigned long last_queue_full_time;	 
+	unsigned long queue_ramp_up_period;	 
 #define SCSI_DEFAULT_RAMP_UP_PERIOD	(120 * HZ)
 
-	unsigned long last_queue_ramp_up;	
+	unsigned long last_queue_ramp_up;	 
 
 	unsigned int id, channel;
 	u64 lun;
 #if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
-	char syno_disk_name[BDEVNAME_SIZE];		
-#endif 
+	char syno_disk_name[BDEVNAME_SIZE];		 
+#endif  
 #ifdef MY_ABC_HERE
 	unsigned char auto_remap;
-#endif 
-#ifdef MY_ABC_HERE
-	int iResetPwrCount;  
-#endif 
+#endif  
 
-	unsigned int manufacturer;	
-	unsigned sector_size;	
+	int reverved;   
 
-	void *hostdata;		
+	unsigned int manufacturer;	 
+	unsigned sector_size;	 
+
+	void *hostdata;		 
 	char type;
 	char scsi_level;
-	char inq_periph_qual;		
-	unsigned char inquiry_len;	
-	unsigned char * inquiry;	
-	const char * vendor;		
-	const char * model;		
-	const char * rev;		
+	char inq_periph_qual;	 	
+	unsigned char inquiry_len;	 
+	unsigned char * inquiry;	 
+	const char * vendor;		 
+	const char * model;		 
+	const char * rev;		 
 
 #define SCSI_VPD_PG_LEN                255
 	int vpd_pg83_len;
 	unsigned char *vpd_pg83;
 	int vpd_pg80_len;
 	unsigned char *vpd_pg80;
-	unsigned char current_tag;	
-	struct scsi_target      *sdev_target;   
+	unsigned char current_tag;	 
+	struct scsi_target      *sdev_target;    
 
-	unsigned int	sdev_bflags; 
-	unsigned int eh_timeout; 
+	unsigned int	sdev_bflags;  
+	unsigned int eh_timeout;  
 	unsigned removable:1;
-	unsigned changed:1;	
-	unsigned busy:1;	
-	unsigned lockable:1;	
-	unsigned locked:1;      
-	unsigned borken:1;	
-	unsigned disconnect:1;	
-	unsigned soft_reset:1;	
-	unsigned sdtr:1;	
-	unsigned wdtr:1;	
-	unsigned ppr:1;		
-	unsigned tagged_supported:1;	
-	unsigned simple_tags:1;	
-	unsigned was_reset:1;	
-	unsigned expecting_cc_ua:1; 
-	unsigned use_10_for_rw:1; 
-	unsigned use_10_for_ms:1; 
-	unsigned no_report_opcodes:1;	
-	unsigned no_write_same:1;	
-	unsigned use_16_for_rw:1; 
-	unsigned skip_ms_page_8:1;	
-	unsigned skip_ms_page_3f:1;	
-	unsigned skip_vpd_pages:1;	
-	unsigned try_vpd_pages:1;	
-	unsigned use_192_bytes_for_3f:1; 
-	unsigned no_start_on_add:1;	
-	unsigned allow_restart:1; 
-	unsigned manage_start_stop:1;	
-	unsigned start_stop_pwr_cond:1;	
-	unsigned no_uld_attach:1; 
+	unsigned changed:1;	 
+	unsigned busy:1;	 
+	unsigned lockable:1;	 
+	unsigned locked:1;       
+	unsigned borken:1;	 
+	unsigned disconnect:1;	 
+	unsigned soft_reset:1;	 
+	unsigned sdtr:1;	 
+	unsigned wdtr:1;	 
+	unsigned ppr:1;		 
+	unsigned tagged_supported:1;	 
+	unsigned simple_tags:1;	 
+	unsigned was_reset:1;	 
+	unsigned expecting_cc_ua:1;  
+	unsigned use_10_for_rw:1;  
+	unsigned use_10_for_ms:1;  
+	unsigned no_report_opcodes:1;	 
+	unsigned no_write_same:1;	 
+	unsigned use_16_for_rw:1;  
+	unsigned skip_ms_page_8:1;	 
+	unsigned skip_ms_page_3f:1;	 
+	unsigned skip_vpd_pages:1;	 
+	unsigned try_vpd_pages:1;	 
+	unsigned use_192_bytes_for_3f:1;  
+	unsigned no_start_on_add:1;	 
+	unsigned allow_restart:1;  
+	unsigned manage_start_stop:1;	 
+	unsigned start_stop_pwr_cond:1;	 
+	unsigned no_uld_attach:1;  
 	unsigned select_no_atn:1;
-	unsigned fix_capacity:1;	
-	unsigned guess_capacity:1;	
-	unsigned retry_hwerror:1;	
-	unsigned last_sector_bug:1;	
-	unsigned no_read_disc_info:1;	
-	unsigned no_read_capacity_16:1; 
-	unsigned try_rc_10_first:1;	
-	unsigned is_visible:1;	
-	unsigned wce_default_on:1;	
-	unsigned no_dif:1;	
-	unsigned broken_fua:1;		
-	unsigned lun_in_cdb:1;		
+	unsigned fix_capacity:1;	 
+	unsigned guess_capacity:1;	 
+	unsigned retry_hwerror:1;	 
+	unsigned last_sector_bug:1;	 
+	unsigned no_read_disc_info:1;	 
+	unsigned no_read_capacity_16:1;  
+	unsigned try_rc_10_first:1;	 
+	unsigned is_visible:1;	 
+	unsigned wce_default_on:1;	 
+	unsigned no_dif:1;	 
+	unsigned broken_fua:1;		 
+	unsigned lun_in_cdb:1;		 
 
-	atomic_t disk_events_disable_depth; 
+	atomic_t disk_events_disable_depth;  
 
-	DECLARE_BITMAP(supported_events, SDEV_EVT_MAXBITS); 
-	DECLARE_BITMAP(pending_events, SDEV_EVT_MAXBITS); 
-	struct list_head event_list;	
+	DECLARE_BITMAP(supported_events, SDEV_EVT_MAXBITS);  
+	DECLARE_BITMAP(pending_events, SDEV_EVT_MAXBITS);  
+	struct list_head event_list;	 
 	struct work_struct event_work;
 
-	unsigned int max_device_blocked; 
+	unsigned int max_device_blocked;  
 #define SCSI_DEFAULT_DEVICE_BLOCKED	3
 
 	atomic_t iorequest_cnt;
@@ -197,32 +194,33 @@ struct scsi_device {
 	enum scsi_device_state sdev_state;
 
 #ifdef MY_DEF_HERE
-	
+	 
 	unsigned int	    spinup_queue_id;
-	
+	 
 	struct SpinupQueue *spinup_queue;
-	
+	 
 	struct list_head    spinup_list;
-	
+	 
 	unsigned int	    spinup_in_process;
-	
+	 
 	unsigned long		spinup_timer;
-#define SYNO_SPINUP_RESEND_TIMER 20 * HZ
-#endif 
+	struct work_struct	spinup_work;
+#define SYNO_SPINUP_RESEND_TIMER 30 * HZ
+#endif  
 
 #ifdef MY_ABC_HERE
 	unsigned int        scmd_timeout_sec;
-#endif 
+#endif  
 
 	unsigned long		sdev_data[0];
 #ifdef MY_ABC_HERE
-#define SERIAL_NUM_SIZE        36      
+#define SERIAL_NUM_SIZE        36       
 	char syno_disk_serial[SERIAL_NUM_SIZE + 1];
-#endif 
+#endif  
 #ifdef MY_DEF_HERE
-#define BLOCK_INFO_SIZE        512     
+#define BLOCK_INFO_SIZE        512      
 	char syno_block_info[BLOCK_INFO_SIZE];
-#endif 
+#endif  
 } __attribute__((aligned(sizeof(unsigned long))));
 
 #define	to_scsi_device(d)	\

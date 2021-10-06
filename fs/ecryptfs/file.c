@@ -31,9 +31,6 @@
 #include <linux/security.h>
 #include <linux/compat.h>
 #include <linux/fs_stack.h>
-#ifdef MY_ABC_HERE
-#include <linux/btrfs.h>
-#endif /* MY_ABC_HERE */
 #include "ecryptfs_kernel.h"
 
 /**
@@ -364,32 +361,6 @@ ecryptfs_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 	case FS_IOC_SETFLAGS:
 	case FS_IOC_GETVERSION:
 	case FS_IOC_SETVERSION:
-#ifdef MY_ABC_HERE
-	/*
-	 * In our sdk, we'll iterate every share by concatenate share name after
-	 * volume name. In ecryption share case, /volume1/ecrypt rather than
-	 * /volume1/@ecrypt will be passed. Therefore, we need to allow
-	 * BTRFS_IOC_DEFRAG to pass to lower btrfs.
-	 */
-	case BTRFS_IOC_DEFRAG:
-#ifdef MY_ABC_HERE
-	case BTRFS_IOC_SUBVOL_GETINFO:
-#endif /* MY_ABC_HERE */
-#ifdef MY_ABC_HERE
-	case BTRFS_IOC_USRQUOTA_QUERY:
-	case BTRFS_IOC_USRQUOTA_CTL:
-	case BTRFS_IOC_USRQUOTA_LIMIT:
-	case BTRFS_IOC_USRQUOTA_RESCAN:
-	case BTRFS_IOC_USRQUOTA_RESCAN_STATUS:
-	case BTRFS_IOC_USRQUOTA_RESCAN_WAIT:
-#endif /* MY_ABC_HERE */
-#ifdef MY_ABC_HERE
-	case BTRFS_IOC_QGROUP_QUERY:
-#endif /* MY_ABC_HERE */
-#ifdef MY_ABC_HERE
-	case BTRFS_IOC_COMPR_CTL:
-#endif /* MY_ABC_HERE */
-#endif /* MY_ABC_HERE */
 		rc = lower_file->f_op->unlocked_ioctl(lower_file, cmd, arg);
 		fsstack_copy_attr_all(file_inode(file), file_inode(lower_file));
 

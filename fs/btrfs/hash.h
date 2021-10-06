@@ -17,14 +17,10 @@ static inline u64 btrfs_name_hash(const char *name, int len)
 	return btrfs_crc32c((u32)~1, name, len);
 }
 
-
 static inline u64 btrfs_extref_hash(u64 parent_objectid, const char *name,
 				    int len)
 {
 	return (u64) btrfs_crc32c(parent_objectid, name, len);
 }
 
-#ifdef MY_ABC_HERE
-int btrfs_upper_name_hash(const char *name, int len, u32 *hash);
-#endif 
 #endif

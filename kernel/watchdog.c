@@ -37,8 +37,13 @@ int __read_mostly watchdog_user_enabled;
 int __read_mostly watchdog_thresh = 10;
 
 #ifdef CONFIG_SMP
+#ifdef MY_ABC_HERE
+int __read_mostly sysctl_softlockup_all_cpu_backtrace = 1;
+int __read_mostly sysctl_hardlockup_all_cpu_backtrace = 1;
+#else
 int __read_mostly sysctl_softlockup_all_cpu_backtrace;
 int __read_mostly sysctl_hardlockup_all_cpu_backtrace;
+#endif
 #else
 #define sysctl_softlockup_all_cpu_backtrace 0
 #define sysctl_hardlockup_all_cpu_backtrace 0
@@ -250,11 +255,13 @@ static void watchdog_overflow_callback(struct perf_event *event,
 		return;
 	}
 
-	
 	if (is_hardlockup()) {
+#ifdef CONFIG_SYNO_HARDLOCKUP_PANIC_ENHANCE
+		 
+		unsigned int panic_backup = hardlockup_panic;
+#endif  
 		int this_cpu = smp_processor_id();
 
-		
 		if (__this_cpu_read(hard_watchdog_warn) == true)
 			return;
 
@@ -266,12 +273,14 @@ static void watchdog_overflow_callback(struct perf_event *event,
 		else
 			dump_stack();
 
-		
 		if (sysctl_hardlockup_all_cpu_backtrace &&
 				!test_and_set_bit(0, &hardlockup_allcpu_dumped))
 			trigger_allbutself_cpu_backtrace();
-
+#ifdef CONFIG_SYNO_HARDLOCKUP_PANIC_ENHANCE
+		if (panic_backup)
+#else  
 		if (hardlockup_panic)
+#endif  
 			panic("Hard LOCKUP");
 
 		__this_cpu_write(hard_watchdog_warn, true);
@@ -542,7 +551,17 @@ static int watchdog_park_threads(void)
 
 	return ret;
 }
-
+#ifdef CONFIG_SYNO_HARDLOCKUP_PANIC_ENHANCE
+ 
+void watchdog_hrtimer_inc(void)
+{
+	int cpu;
+	for_each_watchdog_cpu(cpu) {
+		++per_cpu(hrtimer_interrupts, cpu);
+	}
+}
+EXPORT_SYMBOL(watchdog_hrtimer_inc);
+#endif  
 
 static void watchdog_unpark_threads(void)
 {
@@ -724,7 +743,7 @@ int proc_watchdog_thresh(struct ctl_table *table, int write,
 	mutex_lock(&watchdog_proc_mutex);
 
 	if (watchdog_suspended) {
-		
+		 
 		err = -EAGAIN;
 		goto out;
 	}
@@ -767,12 +786,12 @@ int proc_watchdog_cpumask(struct ctl_table *table, int write,
 
 	err = proc_do_large_bitmap(table, write, buffer, lenp, ppos);
 	if (!err && write) {
-		
+		 
 		cpumask_and(&watchdog_cpumask, &watchdog_cpumask,
 			    cpu_possible_mask);
 
 		if (watchdog_running) {
-			
+			 
 			if (smpboot_update_cpumask_percpu_thread(
 				    &watchdog_threads, &watchdog_cpumask) != 0)
 				pr_err("cpumask update failed\n");

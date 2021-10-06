@@ -173,4 +173,24 @@ config ARCH_RTD129X
 	help
 	  This enables support for Realtek RTD129X SoC.
 
+config ARCH_RTD16xx
+	bool "Realtek RTD16xx SoC Family"
+	select ARM_GIC
+	select CLKSRC_OF
+	select PINCTRL
+	select RTK_PLATFORM
+	select RTK_PLATFORM_PSCI
+	select PM_OPP
+#	select IRDA
+	help
+	  This enables support for Realtek RTD16xx SoC Family
+
+config RTK_PLATFORM
+	def_bool n
+	help
+	  Realtek Platform except RTD129X
+
+config RTK_PLATFORM_PSCI
+	def_bool n
+
 endmenu

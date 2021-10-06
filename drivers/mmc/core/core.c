@@ -49,6 +49,12 @@
 #include "sd_ops.h"
 #include "sdio_ops.h"
 
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_MMC_SDHCI_RTK
+#include "../host/sdhci.h"
+#endif /* CONFIG_MMC_SDHCI_RTK */
+
+#endif /* MY_DEF_HERE */
 /* If the device is not responding */
 #define MMC_CORE_TIMEOUT_MS	(10 * 60 * 1000) /* 10 minute timeout */
 
@@ -68,6 +74,17 @@ static const unsigned freqs[] = { 400000, 300000, 200000, 100000 };
  */
 bool use_spi_crc = 1;
 module_param(use_spi_crc, bool, 0);
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_MMC_SDHCI_RTK
+bool SDIO_flag = false;
+bool SDIO_fini = false;
+extern bool SDIO_card;
+#endif /* CONFIG_MMC_SDHCI_RTK */
+#ifdef CONFIG_MMC_RTK_SDMMC
+void rtk_sdmmc_close_clk(struct mmc_host *host);
+int rtk_sdmmc_clk_cls_chk(struct mmc_host *host);
+#endif
+#endif /* MY_DEF_HERE */
 
 /*
  * Internal function. Schedule delayed work in the MMC work queue.
@@ -1085,6 +1102,12 @@ int mmc_execute_tuning(struct mmc_card *card)
 	else
 		opcode = MMC_SEND_TUNING_BLOCK;
 
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_MMC_RTK_EMMC
+	host->card = card;
+#endif
+
+#endif /* MY_DEF_HERE */
 	err = host->ops->execute_tuning(host, opcode);
 
 	if (err)
@@ -2461,6 +2484,11 @@ EXPORT_SYMBOL(mmc_hw_reset);
 
 static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
 {
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_MMC_SDHCI_RTK
+	int ret=0;
+#endif /* CONFIG_MMC_SDHCI_RTK */
+#endif /* MY_DEF_HERE */
 	host->f_init = freq;
 
 #ifdef CONFIG_MMC_DEBUG
@@ -2479,19 +2507,58 @@ static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
 	 * sdio_reset sends CMD52 to reset card.  Since we do not know
 	 * if the card is being re-initialized, just send it.  CMD52
 	 * should be ignored by SD/eMMC cards.
+#if defined(MY_DEF_HERE)
+	 * Skip it if we already know that we do not support SDIO commands
+#endif // MY_DEF_HERE
 	 */
+#if defined(MY_DEF_HERE)
+	if (!(host->caps2 & MMC_CAP2_NO_SDIO))
+		sdio_reset(host);
+
+#else /* MY_DEF_HERE */
 	sdio_reset(host);
+#endif /* MY_DEF_HERE */
 	mmc_go_idle(host);
 
+#if defined(MY_DEF_HERE)
+	if (!(host->caps2 & MMC_CAP2_NO_SD))
+		mmc_send_if_cond(host, host->ocr_avail);
+#else /* MY_DEF_HERE */
 	mmc_send_if_cond(host, host->ocr_avail);
+#endif /* MY_DEF_HERE */
 
 	/* Order's important: probe SDIO, then SD, then MMC */
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_MMC_SDHCI_RTK
+	if (!(host->caps2 & MMC_CAP2_NO_SDIO)) {
+		if (!(ret = mmc_attach_sdio(host))) {
+			SDIO_flag = true;
+			return 0;
+		}
+		if(ret == -110)
+			SDIO_fini = true;
+	}
+#else /* CONFIG_MMC_SDHCI_RTK */
+	if (!(host->caps2 & MMC_CAP2_NO_SDIO))
+		if (!mmc_attach_sdio(host))
+			return 0;
+#endif /* CONFIG_MMC_SDHCI_RTK */
+
+	if (!(host->caps2 & MMC_CAP2_NO_SD))
+		if (!mmc_attach_sd(host))
+			return 0;
+
+	if (!(host->caps2 & MMC_CAP2_NO_MMC))
+		if (!mmc_attach_mmc(host))
+			return 0;
+#else /* MY_DEF_HERE */
 	if (!mmc_attach_sdio(host))
 		return 0;
 	if (!mmc_attach_sd(host))
 		return 0;
 	if (!mmc_attach_mmc(host))
 		return 0;
+#endif /* MY_DEF_HERE */
 
 	mmc_power_off(host);
 	return -EIO;
@@ -2592,6 +2659,14 @@ void mmc_rescan(struct work_struct *work)
 	if (host->bus_ops && !host->bus_dead
 	    && !(host->caps & MMC_CAP_NONREMOVABLE))
 		host->bus_ops->detect(host);
+#if defined(MY_DEF_HERE)
+#if (!defined(CONFIG_ARCH_RTD119X)) && (!defined(CONFIG_ARCH_RTD129x))
+#ifdef CONFIG_MMC_RTK_SDMMC
+		//We close the SD clock for power saving if no SD card
+		if(!(host->caps2 & MMC_CAP2_NO_SD)) rtk_sdmmc_close_clk(host);
+#endif
+#endif
+#endif /* MY_DEF_HERE */
 
 	host->detect_change = 0;
 
@@ -2634,6 +2709,24 @@ void mmc_rescan(struct work_struct *work)
  out:
 	if (host->caps & MMC_CAP_NEEDS_POLL)
 		mmc_schedule_delayed_work(&host->detect, HZ);
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_MMC_SDHCI_RTK
+	if(SDIO_fini==true && SDIO_flag == false && SDIO_card==false) {
+		SDIO_fini= false;
+		host->caps2 |=  MMC_CAP2_NO_SDIO;
+		rtk_sdhci_close_clk();
+	}
+#endif
+
+#if (!defined(CONFIG_ARCH_RTD119X)) && (!defined(CONFIG_ARCH_RTD129x))
+#ifdef CONFIG_MMC_RTK_SDMMC
+	//We close the SD clock for power saving if no SD card
+	if(!(host->caps2 & MMC_CAP2_NO_SD) && rtk_sdmmc_clk_cls_chk(host)) {
+		rtk_sdmmc_close_clk(host);
+	}
+#endif
+#endif
+#endif /* MY_DEF_HERE */
 }
 
 void mmc_start_host(struct mmc_host *host)

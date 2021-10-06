@@ -4,6 +4,13 @@ config SYNO_HDDMON
 	tristate "Syno HDD monitor"
 	depends on SYNO_ATA_PWR_CTRL && SYNO_HDD_HOTPLUG
 
+config SYNO_SMBUS_HDDMON
+	tristate "Syno SMBus HDD Monitor"
+
+config SYNO_SMBUS_HDD_POWERCTL
+	bool "Syno Control HDD power by SMBus"
+	default n
+
 config SYNO_PLUGIN_INTERFACE
 	bool "Synology plugin interface for kernel modules"
 	default y
@@ -122,6 +129,15 @@ config SYNO_SPECULATION_DEFAULT_OFF
 	default n
 	depends on PAGE_TABLE_ISOLATION
 
+config SYNO_FIX_TICK_REPROGRAM
+	bool "Fix tick reprogram bug"
+	default n
+
+config SYNO_FORCE_CF9_REBOOT
+	bool "Support CF9 Force reboot"
+	default n
+	depends on X86_64
+
 endmenu #MISC Features
 
 menu "Cgroup"
@@ -160,3 +176,17 @@ config SYNO_DEPRECATED_UEVENT_ENV
 	default y
 
 endmenu #Udev
+
+menu "Bios Log"
+
+config SYNO_MEMORY_TRAINING_FAILED_LOG
+	bool "Print the MRC postcode if memory training fail happened at last boot up"
+	depends on X86
+	default y
+
+config SYNO_MRC_POSTCODE_CMOS_ADDR
+	hex "The address of cmos storing failed MRC postcode"
+	depends on SYNO_MEMORY_TRAINING_FAILED_LOG
+	default 0x48
+
+endmenu #BIOS LOG

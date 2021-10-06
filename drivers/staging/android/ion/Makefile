@@ -16,3 +16,6 @@ obj-$(CONFIG_ION_TEGRA) += tegra/
 ifeq ($(CONFIG_SYNO_LSP_RTD129X),y)
 obj-$(CONFIG_ION_RTK_PHOENIX) += rtk_phoenix/
 endif # CONFIG_SYNO_LSP_RTD129X
+ifeq ($(CONFIG_SYNO_LSP_RTD1619),y)
+obj-$(CONFIG_ION_RTK) += realtek/
+endif # CONFIG_SYNO_LSP_RTD1619

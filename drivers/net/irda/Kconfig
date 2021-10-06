@@ -401,5 +401,9 @@ config SH_IRDA
 	help
 	  Say Y here if your want to enable SuperH IrDA devices.
 
+if SYNO_LSP_RTD129X || SYNO_LSP_RTD1619
+source "drivers/net/irda/realtek/Kconfig"
+endif # SYNO_LSP_RTD129X || SYNO_LSP_RTD1619
+
 endmenu
 

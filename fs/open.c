@@ -123,21 +123,13 @@ out:
 }
 EXPORT_SYMBOL_GPL(vfs_truncate);
 
-#ifdef MY_ABC_HERE
-long syno_vfs_truncate(struct path *path, loff_t length)
-{
-	return vfs_truncate(path, length);
-}
-EXPORT_SYMBOL(syno_vfs_truncate);
-#endif 
-
 static long do_sys_truncate(const char __user *pathname, loff_t length)
 {
 	unsigned int lookup_flags = LOOKUP_FOLLOW;
 	struct path path;
 	int error;
 
-	if (length < 0)	
+	if (length < 0)	 
 		return -EINVAL;
 
 retry:
@@ -962,9 +954,6 @@ long do_sys_open(int dfd, const char __user *filename, int flags, umode_t mode)
 	putname(tmp);
 	return fd;
 }
-#ifdef MY_ABC_HERE
-EXPORT_SYMBOL(do_sys_open);
-#endif 
 
 SYSCALL_DEFINE3(open, const char __user *, filename, int, flags, umode_t, mode)
 {

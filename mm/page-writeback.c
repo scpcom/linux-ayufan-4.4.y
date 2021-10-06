@@ -2822,7 +2822,11 @@ EXPORT_SYMBOL(mapping_tagged);
  */
 void wait_for_stable_page(struct page *page)
 {
+#ifdef MY_DEF_HERE
+	if (bdi_cap_stable_pages_required(&syno_backing_dev_info) || bdi_cap_stable_pages_required(inode_to_bdi(page->mapping->host)))
+#else /* MY_DEF_HERE */
 	if (bdi_cap_stable_pages_required(inode_to_bdi(page->mapping->host)))
+#endif /* MY_DEF_HERE */
 		wait_on_page_writeback(page);
 }
 EXPORT_SYMBOL_GPL(wait_for_stable_page);

@@ -26,6 +26,9 @@
 #include <linux/syscalls.h>
 #include <linux/uaccess.h>
 #include <linux/io.h>
+#if defined(CONFIG_SYNO_RTD1619)
+#include <linux/arm-smccc.h>
+#endif /* CONFIG_SYNO_RTD1619 */
 
 #include <asm/checksum.h>
 
@@ -68,3 +71,9 @@ EXPORT_SYMBOL(test_and_change_bit);
 #ifdef CONFIG_FUNCTION_TRACER
 EXPORT_SYMBOL(_mcount);
 #endif
+#if defined(CONFIG_SYNO_RTD1619)
+
+	/* arm-smccc */
+EXPORT_SYMBOL(arm_smccc_smc);
+EXPORT_SYMBOL(arm_smccc_hvc);
+#endif /* CONFIG_SYNO_RTD1619 */

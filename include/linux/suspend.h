@@ -43,9 +43,9 @@ typedef int __bitwise suspend_state_t;
 #define PM_SUSPEND_MIN		PM_SUSPEND_FREEZE
 #define PM_SUSPEND_MAX		((__force suspend_state_t) 4)
 
-#ifdef MY_DEF_HERE
-extern int RTK_PM_STATE;        //For RTD129x idle mode support.
-#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE) || defined(CONFIG_RTK_PLATFORM) && defined(MY_DEF_HERE)
+extern int RTK_PM_STATE;
+#endif /* MY_DEF_HERE || CONFIG_RTK_PLATFORM && MY_DEF_HERE */
 
 enum suspend_stat_step {
 	SUSPEND_FREEZE = 1,

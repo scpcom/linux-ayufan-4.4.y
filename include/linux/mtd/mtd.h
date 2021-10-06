@@ -65,52 +65,83 @@ struct nand_ecclayout {
 	struct nand_oobfree oobfree[MTD_MAX_OOBFREE_ENTRIES_LARGE];
 };
 
-struct module;	
+#if defined(MY_DEF_HERE)
+ 
+struct mtd_oob_region {
+	u32 offset;
+	u32 length;
+};
+
+struct mtd_ooblayout_ops {
+	int (*ecc)(struct mtd_info *mtd, int section,
+		   struct mtd_oob_region *oobecc);
+	int (*free)(struct mtd_info *mtd, int section,
+		    struct mtd_oob_region *oobfree);
+};
+
+struct mtd_pairing_info {
+	int pair;
+	int group;
+};
+
+struct mtd_pairing_scheme {
+	int ngroups;
+	int (*get_info)(struct mtd_info *mtd, int wunit,
+			struct mtd_pairing_info *info);
+	int (*get_wunit)(struct mtd_info *mtd,
+			 const struct mtd_pairing_info *info);
+};
+
+#endif  
+struct module;	 
 
 struct mtd_info {
 	u_char type;
 	uint32_t flags;
-	uint64_t size;	 
+	uint64_t size;	  
 
-	
 	uint32_t erasesize;
-	
+	 
 	uint32_t writesize;
 
-	
 	uint32_t writebufsize;
 
-	uint32_t oobsize;   
-	uint32_t oobavail;  
+	uint32_t oobsize;    
+	uint32_t oobavail;   
 
-	
 	unsigned int erasesize_shift;
 	unsigned int writesize_shift;
-	
+	 
 	unsigned int erasesize_mask;
 	unsigned int writesize_mask;
 
-	
 	unsigned int bitflip_threshold;
 
-	
 	const char *name;
 	int index;
 
-	
+#if defined(MY_DEF_HERE)
+	 
+#else  
+	 
+#endif  
 	struct nand_ecclayout *ecclayout;
 
-	
+#if defined(MY_DEF_HERE)
+	 
+	const struct mtd_ooblayout_ops *ooblayout;
+
+	const struct mtd_pairing_scheme *pairing;
+
+#endif  
+	 
 	unsigned int ecc_step_size;
 
-	
 	unsigned int ecc_strength;
 
-	
 	int numeraseregions;
 	struct mtd_erase_region_info *eraseregions;
 
-	
 	int (*_erase) (struct mtd_info *mtd, struct erase_info *instr);
 	int (*_point) (struct mtd_info *mtd, loff_t from, size_t len,
 		       size_t *retlen, void **virt, resource_size_t *phys);
@@ -173,6 +204,40 @@ struct mtd_info {
 };
 
 #if defined(MY_DEF_HERE)
+int mtd_ooblayout_ecc(struct mtd_info *mtd, int section,
+		      struct mtd_oob_region *oobecc);
+int mtd_ooblayout_find_eccregion(struct mtd_info *mtd, int eccbyte,
+				 int *section,
+				 struct mtd_oob_region *oobregion);
+int mtd_ooblayout_get_eccbytes(struct mtd_info *mtd, u8 *eccbuf,
+			       const u8 *oobbuf, int start, int nbytes);
+int mtd_ooblayout_set_eccbytes(struct mtd_info *mtd, const u8 *eccbuf,
+			       u8 *oobbuf, int start, int nbytes);
+int mtd_ooblayout_free(struct mtd_info *mtd, int section,
+		       struct mtd_oob_region *oobfree);
+int mtd_ooblayout_get_databytes(struct mtd_info *mtd, u8 *databuf,
+				const u8 *oobbuf, int start, int nbytes);
+int mtd_ooblayout_set_databytes(struct mtd_info *mtd, const u8 *databuf,
+				u8 *oobbuf, int start, int nbytes);
+int mtd_ooblayout_count_freebytes(struct mtd_info *mtd);
+int mtd_ooblayout_count_eccbytes(struct mtd_info *mtd);
+
+void mtd_set_ecclayout(struct mtd_info *mtd, struct nand_ecclayout *ecclayout);
+
+static inline void mtd_set_ooblayout(struct mtd_info *mtd,
+				     const struct mtd_ooblayout_ops *ooblayout)
+{
+	mtd->ooblayout = ooblayout;
+}
+
+static inline void mtd_set_pairing_scheme(struct mtd_info *mtd,
+				const struct mtd_pairing_scheme *pairing)
+{
+	mtd->pairing = pairing;
+}
+#endif  
+
+#if defined(MY_DEF_HERE)
 static inline void mtd_set_of_node(struct mtd_info *mtd,
 				   struct device_node *np)
 {
@@ -183,8 +248,20 @@ static inline struct device_node *mtd_get_of_node(struct mtd_info *mtd)
 {
 	return mtd->dev.of_node;
 }
-#endif 
+#endif  
 
+#if defined(MY_DEF_HERE)
+static inline int mtd_oobavail(struct mtd_info *mtd, struct mtd_oob_ops *ops)
+{
+	return ops->mode == MTD_OPS_AUTO_OOB ? mtd->oobavail : mtd->oobsize;
+}
+
+int mtd_wunit_to_pairing_info(struct mtd_info *mtd, int wunit,
+			      struct mtd_pairing_info *info);
+int mtd_pairing_info_to_wunit(struct mtd_info *mtd,
+			      const struct mtd_pairing_info *info);
+int mtd_pairing_groups(struct mtd_info *mtd);
+#endif  
 int mtd_erase(struct mtd_info *mtd, struct erase_info *instr);
 int mtd_point(struct mtd_info *mtd, loff_t from, size_t len, size_t *retlen,
 	      void **virt, resource_size_t *phys);
@@ -199,6 +276,9 @@ int mtd_panic_write(struct mtd_info *mtd, loff_t to, size_t len, size_t *retlen,
 		    const u_char *buf);
 
 int mtd_read_oob(struct mtd_info *mtd, loff_t from, struct mtd_oob_ops *ops);
+#if defined(MY_DEF_HERE)
+int mtd_write_oob(struct mtd_info *mtd, loff_t to, struct mtd_oob_ops *ops);
+#else  
 
 static inline int mtd_write_oob(struct mtd_info *mtd, loff_t to,
 				struct mtd_oob_ops *ops)
@@ -210,6 +290,7 @@ static inline int mtd_write_oob(struct mtd_info *mtd, loff_t to,
 		return -EROFS;
 	return mtd->_write_oob(mtd, to, ops);
 }
+#endif  
 
 int mtd_get_fact_prot_info(struct mtd_info *mtd, size_t len, size_t *retlen,
 			   struct otp_info *buf);
@@ -280,6 +361,24 @@ static inline uint32_t mtd_mod_by_ws(uint64_t sz, struct mtd_info *mtd)
 	return do_div(sz, mtd->writesize);
 }
 
+#if defined(MY_DEF_HERE)
+static inline int mtd_wunit_per_eb(struct mtd_info *mtd)
+{
+	return mtd->erasesize / mtd->writesize;
+}
+
+static inline int mtd_offset_to_wunit(struct mtd_info *mtd, loff_t offs)
+{
+	return mtd_div_by_ws(mtd_mod_by_eb(offs, mtd), mtd);
+}
+
+static inline loff_t mtd_wunit_to_offset(struct mtd_info *mtd, loff_t base,
+					 int wunit)
+{
+	return base + (wunit * mtd->writesize);
+}
+
+#endif  
 static inline int mtd_has_oob(const struct mtd_info *mtd)
 {
 	return mtd->_read_oob && mtd->_write_oob;

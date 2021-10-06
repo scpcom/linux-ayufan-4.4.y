@@ -305,20 +305,17 @@ static void raid1_end_read_request(struct bio *bio)
 		printk("%s:%s(%d) BIO_AUTO_REMAP detected\n", __FILE__,__FUNCTION__,__LINE__);
 		SynoAutoRemapReport(conf->mddev, r1_bio->sector, conf->mirrors[mirror].rdev->bdev);
 	}
-#endif 
+#endif  
 
 	if (uptodate)
 		set_bit(R1BIO_Uptodate, &r1_bio->state);
 	else {
-		
+		 
 		unsigned long flags;
 		spin_lock_irqsave(&conf->device_lock, flags);
 		if (r1_bio->mddev->degraded == conf->raid_disks ||
 		    (r1_bio->mddev->degraded == conf->raid_disks-1 &&
 		     test_bit(In_sync, &conf->mirrors[mirror].rdev->flags)))
-#ifdef MY_ABC_HERE
-			
-#endif 
 			uptodate = 1;
 		spin_unlock_irqrestore(&conf->device_lock, flags);
 
@@ -813,42 +810,43 @@ static bool need_to_wait_for_sync(struct r1conf *conf, struct bio *bio)
 
 	return wait;
 }
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 static void wait_barrier(struct r1conf *conf)
 {
-#else 
+#else  
 static sector_t wait_barrier(struct r1conf *conf, struct bio *bio)
 {
 	sector_t sector = 0;
-#endif 
+#endif  
 
 	spin_lock_irq(&conf->resync_lock);
 #ifdef MY_ABC_HERE
 	if (conf->barrier) {
-#else 
+#else  
 	if (need_to_wait_for_sync(conf, bio)) {
-#endif 
+#endif  
 		conf->nr_waiting++;
-		
+		 
 		wait_event_lock_irq(conf->wait_barrier,
 				    !conf->array_frozen &&
 				    (!conf->barrier ||
 #ifdef MY_ABC_HERE
 				     (conf->nr_pending &&
-#else 
+#else  
 				     ((conf->start_next_window <
 				       conf->next_resync + RESYNC_SECTORS) &&
-#endif 
+#endif  
 				      current->bio_list &&
-				      !bio_list_empty(current->bio_list))),
+				     (!bio_list_empty(&current->bio_list[0]) ||
+				      !bio_list_empty(&current->bio_list[1])))),
 				    conf->resync_lock);
 		conf->nr_waiting--;
 	}
 
 #ifdef MY_ABC_HERE
-#else 
+#else  
 	if (bio && bio_data_dir(bio) == WRITE) {
 		if (bio->bi_iter.bi_sector >= conf->next_resync) {
 			if (conf->start_next_window == MaxSector)
@@ -1009,170 +1007,6 @@ static void raid1_unplug(struct blk_plug_cb *cb, bool from_schedule)
 	kfree(plug);
 }
 
-#ifdef MY_ABC_HERE
-static void syno_raid1_self_heal_end_request(struct bio *bio)
-{
-	int uptodate = !bio->bi_error;
-	struct r1bio *r1_bio = bio->bi_private;
-	struct bio *master_bio = r1_bio->master_bio;
-	struct mddev *mddev = r1_bio->mddev;
-	struct md_self_heal_record *heal_record = NULL;
-	struct r1conf *conf = mddev->private;
-	int mirror = r1_bio->read_disk;
-
-	bio_put(bio);
-	r1_bio->bios[mirror] = NULL;
-	update_head_pos(mirror, r1_bio);
-	rdev_dec_pending(conf->mirrors[mirror].rdev, mddev);
-
-	if (!(heal_record = syno_self_heal_find_record(mddev, master_bio))) {
-		printk(KERN_ERR "md/raid1:%s: %s(%d): Failed to find record at sector %llu\n",
-				mdname(mddev), __func__, __LINE__, (unsigned long long)master_bio->bi_iter.bi_sector);
-		goto ERR;
-	}
-
-	if (!uptodate) {
-		printk(KERN_ERR "md/raid1:%s: %s(%d): Retry read not success at sector %llu at round %d, try next round\n",
-				mdname(mddev), __func__, __LINE__, (unsigned long long)master_bio->bi_iter.bi_sector, heal_record->retry_cnt);
-
-		++(heal_record->retry_cnt);
-
-		spin_lock_irq(&conf->syno_self_heal_retry_list_lock);
-		list_add(&r1_bio->retry_list, &conf->syno_self_heal_retry_list);
-		spin_unlock_irq(&conf->syno_self_heal_retry_list_lock);
-		md_wakeup_thread(mddev->thread);
-
-		return;
-	}
-
-	if (0 != syno_self_heal_record_hash_value(heal_record, master_bio)) {
-		spin_lock_irq(&conf->syno_self_heal_retry_list_lock);
-		list_add(&r1_bio->retry_list, &conf->syno_self_heal_retry_list);
-		spin_unlock_irq(&conf->syno_self_heal_retry_list_lock);
-		md_wakeup_thread(mddev->thread);
-	} else {
-		bio_endio(master_bio);
-#ifdef MY_ABC_HERE
-		allow_barrier(conf);
-#else 
-		allow_barrier(conf, 0, 0);
-#endif 
-		free_r1bio(r1_bio);
-	}
-
-	return;
-ERR:
-	bio_set_flag(master_bio, BIO_CORRECTION_ERR);
-	syno_self_heal_find_and_del_record(mddev, master_bio);
-	bio_endio(master_bio);
-#ifdef MY_ABC_HERE
-	allow_barrier(conf);
-#else 
-	allow_barrier(conf, 0, 0);
-#endif 
-	free_r1bio(r1_bio);
-}
-
-static void syno_raid1_self_heal_set_and_submit_read_bio(struct r1conf *conf, struct r1bio *r1_bio)
-{
-	int disk = 0;
-	struct mddev *mddev = conf->mddev;
-	struct bio *master_bio = r1_bio->master_bio;
-	struct bio *read_bio = NULL;
-	struct raid1_info *mirror = NULL;
-	struct md_rdev *rdev = NULL;
-	struct md_self_heal_record *heal_record = NULL;
-	const unsigned long do_sync = (master_bio->bi_rw & REQ_SYNC);
-
-	if (!(heal_record = syno_self_heal_find_record(mddev, master_bio))) {
-		printk(KERN_ERR "md/raid1:%s: %s(%d): Failed to find record at sector %llu\n",
-				mdname(mddev), __func__, __LINE__, (unsigned long long)master_bio->bi_iter.bi_sector);
-		goto ERR;
-	}
-
-	rcu_read_lock();
-	for (disk = heal_record->retry_cnt; disk < conf->raid_disks * 2; ++disk) {
-		rdev = rcu_dereference(conf->mirrors[disk].rdev);
-		if (r1_bio->bios[disk] == IO_BLOCKED ||
-			rdev == NULL ||
-			test_bit(Faulty, &rdev->flags) ||
-			!test_bit(In_sync, &rdev->flags)) {
-			++(heal_record->retry_cnt);
-			continue;
-		}
-		break;
-	}
-	rcu_read_unlock();
-
-	if (disk >= heal_record->max_retry_cnt) {
-		printk(KERN_ERR "md/raid1:%s: %s(%d): No suitable device for self healing retry read at round %d at sector %llu\n",
-				mdname(mddev), __func__, __LINE__, heal_record->retry_cnt, (unsigned long long)master_bio->bi_iter.bi_sector);
-		goto ERR;
-	}
-
-	r1_bio->read_disk = disk;
-	mirror = conf->mirrors + disk;
-
-	read_bio = bio_clone_mddev(master_bio, GFP_NOIO, mddev);
-	if (!read_bio) {
-		printk(KERN_ERR "md/raid1:%s: %s(%d): Failed to clone bio to read_bio at sector %llu\n",
-				mdname(mddev), __func__, __LINE__, (unsigned long long)master_bio->bi_iter.bi_sector);
-		goto ERR;
-	}
-
-	r1_bio->bios[disk] = read_bio;
-	bio_set_flag(read_bio, BIO_CORRECTION_RETRY);
-	read_bio->bi_iter.bi_sector = master_bio->bi_iter.bi_sector + mirror->rdev->data_offset;
-	read_bio->bi_bdev = mirror->rdev->bdev;
-	read_bio->bi_end_io = syno_raid1_self_heal_end_request;
-	read_bio->bi_rw = READ | do_sync;
-	read_bio->bi_private = r1_bio;
-
-	atomic_inc(&rdev->nr_pending);
-	generic_make_request(read_bio);
-
-	return;
-ERR:
-	bio_set_flag(master_bio, BIO_CORRECTION_ERR);
-	syno_self_heal_find_and_del_record(mddev, master_bio);
-	bio_endio(master_bio);
-#ifdef MY_ABC_HERE
-	allow_barrier(conf);
-#else 
-	allow_barrier(conf, 0, 0);
-#endif 
-	free_r1bio(r1_bio);
-}
-
-static void syno_raid1_self_heal_retry_read(struct mddev *mddev, struct bio *bio, struct r1bio *r1_bio)
-{
-	struct r1conf *conf = mddev->private;
-	struct md_self_heal_record *heal_record = NULL;
-
-	if (!(heal_record = syno_self_heal_find_record(mddev, bio))) {
-		if (!(heal_record = syno_self_heal_init_record(mddev, bio, conf->raid_disks * 2))) {
-			goto ERR;
-		}
-	}
-	syno_self_heal_modify_bio_info(heal_record, bio);
-
-	++(heal_record->request_cnt);
-	syno_raid1_self_heal_set_and_submit_read_bio(conf, r1_bio);
-
-	return;
-ERR:
-	bio_set_flag(bio, BIO_CORRECTION_ERR);
-	syno_self_heal_find_and_del_record(mddev, bio);
-	bio_endio(bio);
-#ifdef MY_ABC_HERE
-	allow_barrier(conf);
-#else 
-	allow_barrier(conf, 0, 0);
-#endif 
-	free_r1bio(r1_bio);
-}
-#endif 
-
 static void make_request(struct mddev *mddev, struct bio * bio)
 {
 	struct r1conf *conf = mddev->private;
@@ -1260,20 +1094,12 @@ static void make_request(struct mddev *mddev, struct bio * bio)
 	r1_bio->mddev = mddev;
 	r1_bio->sector = bio->bi_iter.bi_sector;
 
-	
 	bio->bi_phys_segments = 0;
 	bio_clear_flag(bio, BIO_SEG_VALID);
 
 	if (rw == READ) {
-		
+		 
 		int rdisk;
-
-#ifdef MY_ABC_HERE
-		if (unlikely(bio_flagged(bio, BIO_CORRECTION_RETRY) && syno_self_heal_is_valid_md_stat(mddev))) {
-			syno_raid1_self_heal_retry_read(mddev, bio, r1_bio);
-			return;
-		}
-#endif 
 
 read_again:
 #ifdef MY_ABC_HERE
@@ -2642,10 +2468,6 @@ static void raid1d(struct md_thread *thread)
 	struct r1conf *conf = mddev->private;
 	struct list_head *head = &conf->retry_list;
 	struct blk_plug plug;
-#ifdef MY_ABC_HERE
-	struct r1bio *r1_bio_temp;
-	struct list_head syno_self_heal_retry_list_head;
-#endif 
 
 	md_check_recovery(mddev);
 
@@ -2676,21 +2498,6 @@ static void raid1d(struct md_thread *thread)
 	for (;;) {
 
 		flush_pending_writes(conf);
-
-#ifdef MY_ABC_HERE
-		spin_lock_irq(&conf->syno_self_heal_retry_list_lock);
-		if (list_empty(&conf->syno_self_heal_retry_list)) {
-			INIT_LIST_HEAD(&syno_self_heal_retry_list_head);
-		} else {
-			list_replace_init(&conf->syno_self_heal_retry_list, &syno_self_heal_retry_list_head);
-		}
-		spin_unlock_irq(&conf->syno_self_heal_retry_list_lock);
-
-		list_for_each_entry_safe(r1_bio, r1_bio_temp, &syno_self_heal_retry_list_head, retry_list) {
-			list_del(&r1_bio->retry_list);
-			syno_raid1_self_heal_set_and_submit_read_bio(conf, r1_bio);
-		}
-#endif 
 
 		spin_lock_irqsave(&conf->device_lock, flags);
 		if (list_empty(head)) {
@@ -3080,10 +2887,6 @@ static struct r1conf *setup_conf(struct mddev *mddev)
 	conf->mddev = mddev;
 	INIT_LIST_HEAD(&conf->retry_list);
 	INIT_LIST_HEAD(&conf->bio_end_io_list);
-#ifdef MY_ABC_HERE
-	spin_lock_init(&conf->syno_self_heal_retry_list_lock);
-	INIT_LIST_HEAD(&conf->syno_self_heal_retry_list);
-#endif 
 
 	spin_lock_init(&conf->resync_lock);
 	init_waitqueue_head(&conf->wait_barrier);

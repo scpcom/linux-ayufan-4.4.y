@@ -84,3 +84,16 @@ void ntb_transport_link_up(struct ntb_transport_qp *qp);
 void ntb_transport_link_down(struct ntb_transport_qp *qp);
 bool ntb_transport_link_query(struct ntb_transport_qp *qp);
 unsigned int ntb_transport_tx_free_entry(struct ntb_transport_qp *qp);
+
+#ifdef CONFIG_SYNO_NTB_SUPPORT_BRD
+int ntb_transport_map_block(struct device *client_dev, u64 size,
+		void **tx_buff, void **rx_buff,
+		void (*event_handler)(int status));
+void ntb_transport_unmap_all(struct device *client_dev);
+
+enum {
+	NTB_BRD_LINK_DOWN = 0,
+	NTB_BRD_LINK_UP,
+	NTB_BRD_LINK_UP_FORCE_LOCAL,
+};
+#endif /* CONFIG_SYNO_NTB_SUPPORT_BRD */

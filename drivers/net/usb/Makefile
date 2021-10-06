@@ -6,7 +6,11 @@ obj-$(CONFIG_USB_CATC)		+= catc.o
 obj-$(CONFIG_USB_KAWETH)	+= kaweth.o
 obj-$(CONFIG_USB_PEGASUS)	+= pegasus.o
 obj-$(CONFIG_USB_RTL8150)	+= rtl8150.o
+ifeq ($(CONFIG_SYNO_LSP_RTD1619), y)
+obj-$(CONFIG_USB_RTL8152)	+= r8152/
+else # CONFIG_SYNO_LSP_RTD1619
 obj-$(CONFIG_USB_RTL8152)	+= r8152.o
+endif # CONFIG_SYNO_LSP_RTD1619
 obj-$(CONFIG_USB_HSO)		+= hso.o
 obj-$(CONFIG_USB_LAN78XX)	+= lan78xx.o
 obj-$(CONFIG_USB_NET_AX8817X)	+= asix.o

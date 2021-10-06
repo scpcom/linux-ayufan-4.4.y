@@ -13,7 +13,7 @@
 #include <asm/io.h>
 #include <asm/system_misc.h>
 #if defined(MY_DEF_HERE) && defined(MY_DEF_HERE)
-#include "rtd129x_syno_uart1.h"
+#include "../common/rtd_syno_uart1.h"
 #endif /* MY_DEF_HERE && MY_DEF_HERE */
 
 static void __iomem * wdt_base;

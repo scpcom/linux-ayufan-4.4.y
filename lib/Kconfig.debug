@@ -789,6 +789,22 @@ config DEFAULT_HUNG_TASK_TIMEOUT
 	  A timeout of 0 disables the check.  The default is two minutes.
 	  Keeping the default should be fine in most cases.
 
+config SYNO_HUNG_TASK_ADJUSTMENT
+	bool "Record hung task count"
+	depends on DETECT_HUNG_TASK
+	default Y
+	help
+	  DSM #117194 for record more hung task call stack.
+
+config SYNO_DEFAULT_HUNG_TASK_WARNINGS
+	int "Default warnning call stack count for hung task detection"
+	depends on DETECT_HUNG_TASK
+	default 300
+	help
+	  This option controls the default warning call stack used
+	  to determine when a task has become non-responsive and should
+	  be considered hung.
+
 config BOOTPARAM_HUNG_TASK_PANIC
 	bool "Panic (Reboot) On Hung Tasks"
 	depends on DETECT_HUNG_TASK

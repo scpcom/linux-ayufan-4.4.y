@@ -320,24 +320,25 @@ SpinupQueueFindById(unsigned int id)
 	return NULL;
 }
 
-
 static struct SpinupQueue *
 SpinupQueueAlloc(unsigned int id)
 {
 	struct SpinupQueue *qNew;
-
-	
 
 	qNew = kmalloc(sizeof(struct SpinupQueue), GFP_KERNEL);
 	INIT_LIST_HEAD(&(qNew->q_disk_list));
 	INIT_LIST_HEAD(&(qNew->q_head));
 	qNew->q_id = id;
 	spin_lock_init(&(qNew->q_lock));
-	atomic_set(&(qNew->q_spinup_quota), 4); 
+	if (syno_is_hw_version(HW_HD3400) || syno_is_hw_version(HW_HD6400)) {
+		atomic_set(&(qNew->q_spinup_quota), 15);  
+	} else {
+		atomic_set(&(qNew->q_spinup_quota), 4);  
+	}
 
 #ifdef CONFIG_SYNO_SAS_SPINUP_DELAY_DEBUG
 	printk(" == add queue %p for id %d\n", qNew, id);
-#endif 
+#endif  
 	return qNew;
 }
 
@@ -468,63 +469,91 @@ spinup_queue_id_store(struct device *dev, struct device_attribute *attr,
 }
 static DEVICE_ATTR_RW(spinup_queue_id);
 
-
 int
 SynoSpinupBegin(struct scsi_device *device)
 {
 	int ret = 0;
-	struct SpinupQueue *q;
+	struct SpinupQueue *q = NULL;
+	unsigned long flags;
 
-	
-	q = device->spinup_queue;
+	if (device && device->spinup_queue) {
+		q = device->spinup_queue;
+	}
 	if (NULL == q) {
 		goto Return;
 	}
-	
+	spin_lock_irqsave(&(q->q_lock), flags);
+	 
 	if (device->spinup_in_process) {
-		
+		 
 		if (jiffies - device->spinup_timer > SYNO_SPINUP_RESEND_TIMER) {
 #ifdef CONFIG_SYNO_SAS_SPINUP_DELAY_DEBUG
 			sdev_printk(KERN_ERR, device, "Retry spinup disk...\n");
-#endif 
+#endif  
 			device->spinup_timer = jiffies;
 			ret = 1;
 		}
 		goto Return;
 	}
-	
-	if (atomic_read(&(device->spinup_queue->q_spinup_quota))) {
-		atomic_dec(&(device->spinup_queue->q_spinup_quota));
+	 
+	if (atomic_read(&(q->q_spinup_quota))) {
+		atomic_dec(&(q->q_spinup_quota));
 	} else {
-		
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY_DEBUG
+		sdev_printk(KERN_ERR, device, "No quota to spinup disk...\n");
+#endif  
+		 
 		goto Return;
 	}
 
 #ifdef CONFIG_SYNO_SAS_SPINUP_DELAY_DEBUG
 	sdev_printk(KERN_ERR, device, "Spinup disk...\n");
-#endif 
+#endif  
 	device->spinup_in_process = 1;
 	device->spinup_timer = jiffies;
 
-	
 	ret = 1;
 Return:
+	if (NULL != q) {
+		spin_unlock_irqrestore(&(q->q_lock), flags);
+	}
 	return ret;
 }
 
-
 void SynoSpinupEnd(struct scsi_device *sdev)
 {
-	struct SpinupQueue *q;
+	struct SpinupQueue *q = NULL;
+	unsigned long flags;
 
-	q = sdev->spinup_queue;
-	atomic_inc(&(sdev->spinup_queue->q_spinup_quota));
+	if (sdev && sdev->spinup_queue) {
+		q = sdev->spinup_queue;
+	}
+
+	if(NULL == q) {
+		goto Return;
+	}
+
+	spin_lock_irqsave(&(q->q_lock), flags);
+	if (sdev->spinup_in_process == 0) {
+#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY_DEBUG
+		sdev_printk(KERN_ERR, sdev, "Spinup should be done already. Q %d remaining %d \n",
+			sdev->spinup_queue_id,
+			atomic_read(&(q->q_spinup_quota)));
+#endif  
+		goto Return;
+	}
+	atomic_inc(&(q->q_spinup_quota));
 	sdev->spinup_in_process = 0;
 #ifdef CONFIG_SYNO_SAS_SPINUP_DELAY_DEBUG
 	sdev_printk(KERN_ERR, sdev, "Spinup done. Q %d remaining %d \n",
 			sdev->spinup_queue_id,
-			atomic_read(&(sdev->spinup_queue->q_spinup_quota)));
-#endif 
+			atomic_read(&(q->q_spinup_quota)));
+#endif  
+
+Return:
+	if (NULL != q) {
+		spin_unlock_irqrestore(&(q->q_lock), flags);
+	}
 }
 
 int SynoSpinupRemove(struct scsi_device *sdev)
@@ -3036,29 +3065,31 @@ static SYNO_DISK_TYPE syno_disk_type_get(struct device *dev)
 #ifdef MY_ABC_HERE
 	struct device *virtdev = sdp->host->shost_gendev.parent;
 	struct pci_dev *pcidev = NULL;
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
 	bool blIsSynoboot = false;
-#endif 
+#endif  
+#ifdef MY_DEF_HERE
+	int synoDiskIdx = 0;
+#endif  
 
 #if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 	if (_isCDSM_() && _isSynobootScsiDev_(sdp)) {
 		return SYNO_DISK_SYNOBOOT;
 	}
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
-	
+	 
 	if (0 == strcmp(sdp->host->hostt->name, "iSCSI Initiator over TCP/IP")) {
 		return SYNO_DISK_ISCSI;
 	}
-#endif 
+#endif  
 
-	
 #ifdef MY_ABC_HERE
 	if(strcmp(sdp->host->hostt->name, "TCM_Loopback") == 0){
 		return SYNO_DISK_ISCSI;
 	}
-#endif 
+#endif  
 
 #if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 	if (strcmp(sdp->host->hostt->name, "Virtio SCSI HBA") == 0){
@@ -3095,18 +3126,30 @@ static SYNO_DISK_TYPE syno_disk_type_get(struct device *dev)
 			if (0 == gSynoHasDynModule) {
 				return SYNO_DISK_USB;
 			}
-#endif 
+#endif  
 			if (!syno_find_synoboot()) {
 				return SYNO_DISK_SYNOBOOT;
 			}
 		}
-#endif 
+#endif  
 		return SYNO_DISK_USB;
 	}
 
 	if (SYNO_PORT_TYPE_SATA == sdp->host->hostt->syno_port_type) {
+#ifdef MY_DEF_HERE
+		if (sdp->host->hostt->syno_index_get) {
+			synoDiskIdx = sdp->host->hostt->syno_index_get(sdp->host,
+														   sdp->channel,
+														   sdp->id, sdp->lun);
+			if ((SYSTEM_DEVICE_START_IDX <= synoDiskIdx) &&
+				(synoDiskIdx <= SYSTEM_DEVICE_START_IDX + SYSTEM_DEVICE_NUM_MAX)) {
+				return SYNO_DISK_SYSTEM;
+			}
+		}
+#endif  
+
 #ifdef MY_ABC_HERE
-		
+		 
 		if (1 == gSynoBootSATADOM) {
 			if (!strncmp(CONFIG_SYNO_SATA_DOM_VENDOR, sdp->vendor, strlen(CONFIG_SYNO_SATA_DOM_VENDOR))
 				&& !strncmp(CONFIG_SYNO_SATA_DOM_MODEL, sdp->model, strlen(CONFIG_SYNO_SATA_DOM_MODEL))) {
@@ -3157,8 +3200,41 @@ static void syno_pciepath_enum(struct device *dev, char *buf) {
 		snprintf(buf, BLOCK_INFO_SIZE, "%spciepath=%s\n", buf, sztemp);
 	}
 }
+
+static int get_ata_port_property_string(struct ata_port *ap, const char *prop_name, const char **prop_value)
+{
+	struct device_node *slot_node = NULL;
+	int ret = -EINVAL;
+
+	if (!prop_name || !prop_value || !ap ) {
+		printk(KERN_INFO "Bad parameter.\n");
+		goto END;
+	}
+
+	if (!ap->ops || !ap->ops->syno_compare_node_info) {
+		printk(KERN_INFO "Operation not available: syno_compare_node_info.\n");
+		goto END;
+	}
+
+	for_each_child_of_node(of_root, slot_node) {
+		if (ap->ops->syno_compare_node_info(ap, slot_node)) {
+			break;
+		}
+	}
+	if (!slot_node) {
+		printk(KERN_ERR "Cannot find slot node of this ata_port.\n");
+		goto END;
+	}
+
+	ret = of_property_read_string(slot_node, prop_name, prop_value);
+	of_node_put(slot_node);
+END:
+	return ret;
+}
+
 static void syno_ata_info_enum(struct ata_port *ap, struct scsi_device *sdev) {
 	struct ata_device *dev = NULL;
+	const char* form_factor = NULL;
 
 	if (NULL == ap || NULL == sdev || NULL == ap->host) {
 		return;
@@ -3199,7 +3275,11 @@ static void syno_ata_info_enum(struct ata_port *ap, struct scsi_device *sdev) {
 			snprintf(sdev->syno_block_info, BLOCK_INFO_SIZE, "%sunique=%s\n", sdev->syno_block_info, EBOX_INFO_UNIQUE_DX1215);
 		}
 	}
-#endif 
+#endif  
+
+	if (0 == get_ata_port_property_string(ap, DT_FORM_FACTOR, &form_factor)) {
+		snprintf(sdev->syno_block_info, BLOCK_INFO_SIZE, "%sform_factor=%s\n", sdev->syno_block_info, form_factor);
+	}
 }
 static void syno_usb_info_enum(struct scsi_device *sdev) {
 	struct us_data *us = NULL;
@@ -3342,35 +3422,37 @@ static int sd_probe(struct device *dev)
 				error = syno_ida_get_new(&iscsi_index_ida, 0, &synoidx);
 				want_idx = 0;
 				break;
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
 			case SYNO_DISK_SYNOBOOT:
 				want_idx = CONFIG_SYNO_USB_FLASH_DEVICE_INDEX;
 				break;
-#endif 
+#endif  
 			case SYNO_DISK_USB:
 				error = syno_ida_get_new(&usb_index_ida, 0, &synoidx);
 				want_idx = 0;
 				break;
-			case SYNO_DISK_SAS:
 			case SYNO_DISK_SATA:
-			default:
-#ifdef MY_DEF_HERE
-				if (1 == g_is_sas_model) {
-					error = syno_ida_get_new(&sas_index_ida, 0, &synoidx);
-					want_idx = 0;
-					break;
-				}
-#endif 
 				error = syno_ida_get_new(&sata_index_ida, 0, &synoidx);
 				want_idx = 0;
 				break;
+#ifdef MY_DEF_HERE
+			case SYNO_DISK_SAS:
+				if (1 == g_is_sas_model) {
+					error = syno_ida_get_new(&sas_index_ida, 0, &synoidx);
+					want_idx = 0;
+				}
+				break;
+#endif  
+			default:
+				break;	
+
 		}
 
 		error = syno_ida_get_new(&sd_index_ida, want_idx, &index);
         sdkp->synoindex = synoidx;
 
-#elif defined(MY_ABC_HERE) 
+#elif defined(MY_ABC_HERE)  
 		switch (sdkp->synodisktype) {
 #ifdef MY_ABC_HERE
 			case SYNO_DISK_ISCSI:
@@ -3411,7 +3493,17 @@ static int sd_probe(struct device *dev)
 					want_idx = sdp->host->host_no;
 				}
 				break;
-#endif 
+#endif  
+#ifdef MY_DEF_HERE
+			case SYNO_DISK_SYSTEM:
+				if (sdp->host->hostt->syno_index_get) {
+					want_idx = sdp->host->hostt->syno_index_get(sdp->host,
+																sdp->channel,
+																sdp->id,
+																sdp->lun);
+				}
+				break;
+#endif  
 			case SYNO_DISK_SAS:
 			case SYNO_DISK_SATA:
 			default:
@@ -3516,21 +3608,24 @@ SYNO_SKIP_WANT_RETRY:
 				searchDev = searchDev->parent;
 			}
 			break;
-#endif 
+#endif  
 		case SYNO_DISK_SATA:
 			ap = ata_shost_to_port(sdp->host);
-			
+			 
 			if (NULL != ap
 #ifdef MY_ABC_HERE
 					&& !syno_is_synology_pm(ap)
-#endif 
+#endif  
 					) {
 				gd->systemDisk = 1;
+				gd->syno_slot_index = ap->syno_disk_index + 1;
 			}
 			error = syno_sd_format_numeric_disk_name(CONFIG_SYNO_SATA_DEVICE_NEW_PREFIX, synoidx, gd->disk_name, DISK_NAME_LEN);
 			if (NULL != ap) {
-				
-				syno_pciepath_enum(ap->dev, sdp->syno_block_info);
+				 
+				if (ap->dev->bus && !strcmp("pci", ap->dev->bus->name)) {
+					syno_pciepath_enum(ap->dev, sdp->syno_block_info);
+				}
 				syno_ata_info_enum(ap, sdp);
 			}
 			printk("got SATA disk[%d]\n", synoidx);
@@ -3541,7 +3636,7 @@ SYNO_SKIP_WANT_RETRY:
 			error = syno_sd_format_numeric_disk_name(CONFIG_SYNO_USB_DEVICE_NEW_PREFIX, synoidx, gd->disk_name, DISK_NAME_LEN);
 			break;
 	}
-#elif defined(MY_ABC_HERE) 
+#elif defined(MY_ABC_HERE)  
 	gd->systemDisk = 0;
 	switch (sdkp->synodisktype) {
 #ifdef MY_ABC_HERE
@@ -3576,25 +3671,34 @@ SYNO_SKIP_WANT_RETRY:
 				}
 				searchDev = searchDev->parent;
 			}
-#endif 
+#endif  
 			break;
+#ifdef MY_DEF_HERE
+		case SYNO_DISK_SYSTEM:
+			gd->systemDisk = 1;
+			synoidx = index - SYSTEM_DEVICE_START_IDX;
+			error = syno_sd_format_numeric_disk_name(
+						CONFIG_SYNO_SATA_SYSTEM_DEVICE_PREFIX, synoidx,
+						gd->disk_name, DISK_NAME_LEN);
+			break;
+#endif  
 		case SYNO_DISK_SATA:
 #ifdef MY_ABC_HERE
 			ap = ata_shost_to_port(sdp->host);
-			
+			 
 			if (NULL != ap && !syno_is_synology_pm(ap)) {
-#endif 
+#endif  
 			gd->systemDisk = 1;
 #ifdef MY_ABC_HERE
 			}
-#endif 
+#endif  
 			error = sd_format_disk_name(CONFIG_SYNO_SATA_DEVICE_PREFIX, index, gd->disk_name, DISK_NAME_LEN);
 			break;
 #ifdef MY_DEF_HERE
 		case SYNO_DISK_CACHE:
 			error = syno_sd_format_numeric_disk_name(CONFIG_SYNO_CACHE_DEVICE_PREFIX, cache_idx, gd->disk_name, DISK_NAME_LEN);
 			break;
-#endif 
+#endif  
 		case SYNO_DISK_USB:
 		default:
 #ifdef MY_DEF_HERE
@@ -3822,28 +3926,23 @@ static int sd_start_stop_device(struct scsi_disk *sdkp, int start)
 		if (driver_byte(res) & DRIVER_SENSE)
 			sd_print_sense_hdr(sdkp, &sshdr);
 		if (scsi_sense_valid(&sshdr) &&
-			
+			 
 			sshdr.asc == 0x3a)
 			res = 0;
 	}
 
-	
 	if (res)
 		return -EIO;
 
 	return 0;
 }
 
-
 static void sd_shutdown(struct device *dev)
 {
 	struct scsi_disk *sdkp = dev_get_drvdata(dev);
-#ifdef MY_ABC_HERE
-	struct scsi_device *sdp = NULL;
-#endif 
 
 	if (!sdkp)
-		return;         
+		return;          
 
 	if (pm_runtime_suspended(dev))
 		return;
@@ -3857,19 +3956,6 @@ static void sd_shutdown(struct device *dev)
 		sd_printk(KERN_NOTICE, sdkp, "Stopping disk\n");
 		sd_start_stop_device(sdkp, 0);
 	}
-#ifdef MY_ABC_HERE
-	
-	sdp = sdkp->device;
-	if (sdp->host->hostt->syno_host_support_pwr_ctl) {
-		if (system_state == SYSTEM_RESTART &&
-		    sdp->host->hostt->syno_host_support_pwr_ctl(sdp->host) &&
-		    sdkp->device->manage_start_stop) {
-
-			sd_printk(KERN_NOTICE, sdkp, "Stopping disk\n");
-			sd_start_stop_device(sdkp, 0);
-		}
-	}
-#endif 
 }
 
 static int sd_suspend_common(struct device *dev, bool ignore_stop_errors)
@@ -3927,7 +4013,10 @@ static int sd_resume(struct device *dev)
 	return sd_start_stop_device(sdkp, 1);
 }
 
-
+#ifdef MY_DEF_HERE
+struct workqueue_struct *spinup_workqueue = NULL;
+#endif  
+ 
 static int __init init_sd(void)
 {
 	int majors = 0, i, err;
@@ -3971,6 +4060,13 @@ static int __init init_sd(void)
 	err = scsi_register_driver(&sd_template.gendrv);
 	if (err)
 		goto err_out_driver;
+
+#ifdef MY_DEF_HERE
+	spinup_workqueue = create_workqueue("spinup_wq");
+	if (NULL == spinup_workqueue) {
+		printk(KERN_ERR "sd: can't init spinup_wq, fall back to global queue\n");
+	}
+#endif  
 
 	return 0;
 
@@ -4045,14 +4141,18 @@ int SynoSCSIGetDeviceIndex(struct block_device *bdev)
 	if (g_is_sas_model) {
 		return container_of(disk->private_data, struct scsi_disk, driver)->synoindex;
 	}
-#endif 
+#endif  
+#ifdef MY_DEF_HERE
+	return container_of(disk->private_data, struct scsi_disk, driver)->synoindex;
+#else  
 	return container_of(disk->private_data, struct scsi_disk, driver)->index;
+#endif  
 }
 EXPORT_SYMBOL(SynoSCSIGetDeviceIndex);
-#endif 
+#endif  
 
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
-
+ 
 static unsigned char
 blIsScsiDevice(int major)
 {

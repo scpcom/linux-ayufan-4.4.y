@@ -25,14 +25,14 @@
 
 struct phy;
 
-#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 enum phy_mode {
 	PHY_MODE_INVALID,
 	PHY_MODE_USB_HOST,
 	PHY_MODE_USB_DEVICE,
 	PHY_MODE_USB_OTG,
 };
-#endif /* MY_DEF_HERE */
+#endif /* MY_DEF_HERE / MY_DEF_HERE */
 
 /**
  * struct phy_ops - set of function pointers for performing phy operations
@@ -46,6 +46,9 @@ enum phy_mode {
  * @send_command: request specific operations from the phy
 #endif // MY_DEF_HERE
 #endif // MY_DEF_HERE
+#if defined(MY_DEF_HERE)
+ * @set_mode: set the mode of the phy
+#endif // MY_DEF_HERE
  * @owner: the module owner containing the ops
  */
 struct phy_ops {
@@ -58,7 +61,11 @@ struct phy_ops {
  * @set_mode: set the mode of the phy
  * @get_mode: get the mode of the phy
  */
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	int	(*set_mode)(struct phy *phy, enum phy_mode mode);
+#endif /* MY_DEF_HERE || MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
 	enum phy_mode	(*get_mode)(struct phy *phy);
 #if defined(MY_DEF_HERE)
 #if defined(MY_DEF_HERE)
@@ -151,8 +158,10 @@ int phy_init(struct phy *phy);
 int phy_exit(struct phy *phy);
 int phy_power_on(struct phy *phy);
 int phy_power_off(struct phy *phy);
-#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 int phy_set_mode(struct phy *phy, enum phy_mode mode);
+#endif /* MY_DEF_HERE || MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
 enum phy_mode phy_get_mode(struct phy *phy);
 #if defined(MY_DEF_HERE)
 #if defined(MY_DEF_HERE)
@@ -266,14 +275,16 @@ static inline int phy_power_off(struct phy *phy)
 	return -ENOSYS;
 }
 
-#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 static inline int phy_set_mode(struct phy *phy, enum phy_mode mode)
 {
 	if (!phy)
 		return 0;
 	return -ENOSYS;
 }
+#endif /* MY_DEF_HERE / MY_DEF_HERE */
 
+#if defined(MY_DEF_HERE)
 static inline enum phy_mode phy_get_mode(struct phy *phy)
 {
 	if (!phy)

@@ -451,6 +451,11 @@ void blk_mq_start_request(struct request *rq)
 	struct request_queue *q = rq->q;
 
 	trace_block_rq_issue(q, rq);
+#ifdef MY_ABC_HERE
+	if  (rq->rq_disk) {
+		rq->u64IssueTime = cpu_clock(0);
+	}
+#endif /* MY_ABC_HERE */
 
 	rq->resid_len = blk_rq_bytes(rq);
 	if (unlikely(blk_bidi_rq(rq)))

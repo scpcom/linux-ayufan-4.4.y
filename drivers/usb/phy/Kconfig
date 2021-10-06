@@ -233,25 +233,40 @@ config USB_ULPI_VIEWPORT
 	  Provides read/write operations to the ULPI phy register set for
 	  controllers with a viewport register (e.g. Chipidea/ARC controllers).
 
+if SYNO_LSP_RTD129X || SYNO_LSP_RTD1619
 config RTK_USB_RLE0599_PHY
 	tristate "Realtek USB RLE0599 PHY Controller Driver"
-	depends on (USB_EHCI_RTK || USB_OHCI_RTK) && (ARCH_RTK119X || ARCH_RTD129X)
+	depends on ((USB_EHCI_RTK || USB_OHCI_RTK) && (ARCH_RTK119X || ARCH_RTD129X) && SYNO_LSP_RTD129X) || SYNO_LSP_RTD1619
 	select USB_PHY
 	help
 	  Enable this to support Realtek RLE0599 phy controller SoC.
 
 config RTK_USB2PHY
 	tristate "Realtek USB2 PHY Controller Driver"
-	depends on ARCH_RTK119X || ARCH_RTD129X
-	select RTK_USB_RLE0599_PHY
+	depends on ((ARCH_RTK119X || ARCH_RTD129X) && SYNO_LSP_RTD129X) || SYNO_LSP_RTD1619
+	select RTK_USB_RLE0599_PHY if SYNO_LSP_RTD129X
+	select USB_PHY if SYNO_LSP_RTD1619
 	help
 	  Enable this to support Realtek USB2 phy controller SoC.
 
 config RTK_USB3PHY
 	tristate "Realtek USB3 PHY Controller Driver"
-	depends on ARCH_RTK119X || ARCH_RTD129X
-	select RTK_USB_RLE0599_PHY
+	depends on ((ARCH_RTK119X || ARCH_RTD129X) && SYNO_LSP_RTD129X) || SYNO_LSP_RTD1619
+	select RTK_USB_RLE0599_PHY if SYNO_LSP_RTD129X
+	select USB_PHY if SYNO_LSP_RTD1619
 	help
 	  Enable this to support Realtek USB3 phy controller SoC.
+endif # SYNO_LSP_RTD129X || SYNO_LSP_RTD1619
+
+if SYNO_LSP_RTD1619
+config DUAL_ROLE_USB_INTF
+	bool "Generic DUAL ROLE sysfs interface"
+	depends on SYSFS && USB_PHY
+	help
+	  A generic sysfs interface to track and change the state of
+	  dual role usb phys. The usb phy drivers can register to
+	  this interface to expose it capabilities to the userspace
+	  and thereby allowing userspace to change the port mode.
+endif # SYNO_LSP_RTD1619
 
 endmenu

@@ -777,7 +777,11 @@ struct mtd_info *mtd_concat_create(struct mtd_info *subdev[],	/* subdevices to c
 
 	}
 
+#if defined(MY_DEF_HERE)
+	mtd_set_ooblayout(&concat->mtd, subdev[0]->ooblayout);
+#else /* MY_DEF_HERE */
 	concat->mtd.ecclayout = subdev[0]->ecclayout;
+#endif /* MY_DEF_HERE */
 
 	concat->num_subdev = num_devs;
 	concat->mtd.name = name;

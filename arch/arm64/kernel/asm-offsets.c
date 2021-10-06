@@ -28,6 +28,9 @@
 #include <asm/suspend.h>
 #include <asm/vdso_datapage.h>
 #include <linux/kbuild.h>
+#if defined(CONFIG_SYNO_RTD1619)
+#include <linux/arm-smccc.h>
+#endif /* CONFIG_SYNO_RTD1619 */
 
 int main(void)
 {
@@ -162,5 +165,9 @@ int main(void)
   DEFINE(SLEEP_SAVE_SP_PHYS,	offsetof(struct sleep_save_sp, save_ptr_stash_phys));
   DEFINE(SLEEP_SAVE_SP_VIRT,	offsetof(struct sleep_save_sp, save_ptr_stash));
 #endif
+#if defined(CONFIG_SYNO_RTD1619)
+  DEFINE(ARM_SMCCC_RES_X0_OFFS,	offsetof(struct arm_smccc_res, a0));
+  DEFINE(ARM_SMCCC_RES_X2_OFFS,	offsetof(struct arm_smccc_res, a2));
+#endif /* CONFIG_SYNO_RTD1619 */
   return 0;
 }

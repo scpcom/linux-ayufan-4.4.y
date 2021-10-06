@@ -61,6 +61,9 @@ obj-$(CONFIG_ARM_MT8173_CPUFREQ)	+= mt8173-cpufreq.o
 obj-$(CONFIG_ARM_OMAP2PLUS_CPUFREQ)	+= omap-cpufreq.o
 obj-$(CONFIG_ARM_PXA2xx_CPUFREQ)	+= pxa2xx-cpufreq.o
 obj-$(CONFIG_PXA3xx)			+= pxa3xx-cpufreq.o
+ifeq ($(CONFIG_SYNO_LSP_RTD1619),y)
+obj-$(CONFIG_ARM_REALTEK_CPUFREQ)	+= rtk-cpufreq_1619.o
+endif # CONFIG_SYNO_LSP_RTD1619
 ifeq ($(CONFIG_SYNO_LSP_RTD129X),y)
 obj-$(CONFIG_ARM_REALTEK_CPUFREQ)	+= rtk-cpufreq.o
 obj-$(CONFIG_ARM_REALTEK_CPUFREQ)	+= rtk-cpufreq-helpers.o

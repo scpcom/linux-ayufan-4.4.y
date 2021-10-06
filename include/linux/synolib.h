@@ -11,6 +11,7 @@
 #include <linux/jiffies.h>
 #include <linux/module.h>
 #include <linux/fs.h>
+#include <linux/list.h>
 
 #ifdef  MY_ABC_HERE
 extern int gSynoDebugFlag;
@@ -88,9 +89,18 @@ int syno_get_mv_14xx_remap_idx(int origin_idx);
 #define DT_SYNO_SPINUP_GROUP "syno_spinup_group"
 #define DT_SYNO_SPINUP_GROUP_DELAY "syno_spinup_group_delay"
 #define DT_HDD_POWERUP_SEQ "syno_hdd_powerup_seq"
+#define DT_PROPERTY_SW_ACTIVITY "sw_activity"
+#define DT_DISK_LED_TYPE_GPIO "gpio"
+#define DT_FORM_FACTOR "form_factor"
+
+#ifdef CONFIG_SYNO_SMBUS_HDD_POWERCTL
+#define DT_SYNO_HDD_SMBUS_TYPE "syno_smbus_hdd_type"
+#define DT_SYNO_HDD_SMBUS_ADAPTER "syno_smbus_hdd_adapter"
+#define DT_SYNO_HDD_SMBUS_ADDRESS "syno_smbus_hdd_address"
+#endif  
 
 #define SYNO_DTS_PROPERTY_CONTENT_LENGTH 50
-
+#define MAX_NODENAME_LEN 31
 
 typedef enum _tag_DISK_PORT_TYPE{
 	UNKNOWN_DEVICE = 0,
@@ -104,10 +114,20 @@ typedef enum _tag_DISK_PORT_TYPE{
 	USB_HUB_DEVICE,
 	SDCARD_DEVICE,
 	INVALID_DEVICE,
+	SYSTEM_DEVICE,
 	DISK_PORT_TYPE_END,
 } DISK_PORT_TYPE;
 
-#endif 
+#endif  
+
+#ifdef CONFIG_SYNO_SMBUS_HDD_POWERCTL
+typedef struct _syno_smbus_hdd_powerctl {
+        bool bl_init;
+        int (*syno_smbus_hdd_enable_write)(int adapter, int address, int index, int val);
+        int (*syno_smbus_hdd_enable_read)(int adapter, int address, int index);
+        int (*syno_smbus_hdd_present_read)(int adapter, int address, int index);
+} SYNO_SMBUS_HDD_POWERCTL;
+#endif  
 
 #ifdef MY_DEF_HERE
 #define PCI_ADDR_LEN_MAX 9
@@ -115,23 +135,23 @@ typedef enum _tag_DISK_PORT_TYPE{
 extern char gszPciAddrList[PCI_ADDR_NUM_MAX][PCI_ADDR_LEN_MAX];
 extern int gPciAddrNum;
 extern int syno_check_on_option_pci_slot(struct pci_dev *pdev);
-#endif 
+#endif  
 
 #ifdef MY_DEF_HERE
-
-#define M2SATA_START_IDX 300
+ 
+#define M2SATA_START_IDX 800
 extern int gPciDeferStart;
 extern int g_nvc_map_index;
 extern int g_syno_nvc_index_map[SATA_REMAP_MAX];
 void syno_insert_sata_index_remap(unsigned int idx, unsigned int num, unsigned int id_start);
-#endif 
+#endif  
 #ifdef MY_DEF_HERE
 #define M2_HOST_LEN_MAX 128
 #define M2_PORT_NO_MAX 16
 extern char gSynoM2HostName[M2_HOST_LEN_MAX];
 extern unsigned long gSynoM2PortNo;
 extern unsigned long gSynoM2PortIndex[M2_PORT_NO_MAX];
-#endif 
+#endif  
 #ifdef MY_DEF_HERE
 #define SYNO_SPINUP_GROUP_MAX 16
 #define SYNO_SPINUP_GROUP_PIN_MAX_NUM 8
@@ -141,8 +161,11 @@ extern int g_syno_hdd_detect_no;
 extern int g_syno_hdd_detect_list[SYNO_SPINUP_GROUP_PIN_MAX_NUM];
 extern int g_syno_hdd_enable_no;
 extern int g_syno_hdd_enable_list[SYNO_SPINUP_GROUP_PIN_MAX_NUM];
-#endif 
+#endif  
+
 #ifdef MY_DEF_HERE
-#define SYNO_DISK_LATENCY_RANK_NUM 10
-#endif 
-#endif 
+#define SYSTEM_DEVICE_START_IDX 900
+#define SYSTEM_DEVICE_NUM_MAX 10
+#endif  
+
+#endif  

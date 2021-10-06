@@ -33,6 +33,7 @@
 
 #define PERCPU_COUNT_BIAS	(1LU << (BITS_PER_LONG - 1))
 
+static DEFINE_SPINLOCK(percpu_ref_switch_lock);
 static DECLARE_WAIT_QUEUE_HEAD(percpu_ref_switch_waitq);
 
 static unsigned long __percpu *percpu_count_ptr(struct percpu_ref *ref)
@@ -161,6 +162,8 @@ static void percpu_ref_noop_confirm_switch(struct percpu_ref *ref)
 static void __percpu_ref_switch_to_atomic(struct percpu_ref *ref,
 					  percpu_ref_func_t *confirm_switch)
 {
+	lockdep_assert_held(&percpu_ref_switch_lock);
+
 	if (!(ref->percpu_count_ptr & __PERCPU_REF_ATOMIC)) {
 		/* switching from percpu to atomic */
 		ref->percpu_count_ptr |= __PERCPU_REF_ATOMIC;
@@ -183,7 +186,8 @@ static void __percpu_ref_switch_to_atomic(struct percpu_ref *ref,
 		 * has passed.  Wait synchronously for the previous
 		 * switching and schedule @confirm_switch invocation.
 		 */
-		wait_event(percpu_ref_switch_waitq, !ref->confirm_switch);
+		wait_event_lock_irq(percpu_ref_switch_waitq, !ref->confirm_switch,
+				percpu_ref_switch_lock);
 		ref->confirm_switch = confirm_switch;
 
 		percpu_ref_get(ref);	/* put after confirmation */
@@ -219,8 +223,14 @@ static void __percpu_ref_switch_to_atomic(struct percpu_ref *ref,
 void percpu_ref_switch_to_atomic(struct percpu_ref *ref,
 				 percpu_ref_func_t *confirm_switch)
 {
+	unsigned long flags;
+
+	spin_lock_irqsave(&percpu_ref_switch_lock, flags);
+
 	ref->force_atomic = true;
 	__percpu_ref_switch_to_atomic(ref, confirm_switch);
+
+	spin_unlock_irqrestore(&percpu_ref_switch_lock, flags);
 }
 
 static void __percpu_ref_switch_to_percpu(struct percpu_ref *ref)
@@ -229,11 +239,13 @@ static void __percpu_ref_switch_to_percpu(struct percpu_ref *ref)
 	int cpu;
 
 	BUG_ON(!percpu_count);
+	lockdep_assert_held(&percpu_ref_switch_lock);
 
 	if (!(ref->percpu_count_ptr & __PERCPU_REF_ATOMIC))
 		return;
 
-	wait_event(percpu_ref_switch_waitq, !ref->confirm_switch);
+	wait_event_lock_irq(percpu_ref_switch_waitq, !ref->confirm_switch,
+			percpu_ref_switch_lock);
 
 	atomic_long_add(PERCPU_COUNT_BIAS, &ref->count);
 
@@ -270,11 +282,17 @@ static void __percpu_ref_switch_to_percpu(struct percpu_ref *ref)
  */
 void percpu_ref_switch_to_percpu(struct percpu_ref *ref)
 {
+	unsigned long flags;
+
+	spin_lock_irqsave(&percpu_ref_switch_lock, flags);
+
 	ref->force_atomic = false;
 
 	/* a dying or dead ref can't be switched to percpu mode w/o reinit */
 	if (!(ref->percpu_count_ptr & __PERCPU_REF_DEAD))
 		__percpu_ref_switch_to_percpu(ref);
+
+	spin_unlock_irqrestore(&percpu_ref_switch_lock, flags);
 }
 
 /**
@@ -299,12 +317,18 @@ void percpu_ref_switch_to_percpu(struct percpu_ref *ref)
 void percpu_ref_kill_and_confirm(struct percpu_ref *ref,
 				 percpu_ref_func_t *confirm_kill)
 {
+	unsigned long flags;
+
+	spin_lock_irqsave(&percpu_ref_switch_lock, flags);
+
 	WARN_ONCE(ref->percpu_count_ptr & __PERCPU_REF_DEAD,
 		  "%s called more than once on %pf!", __func__, ref->release);
 
 	ref->percpu_count_ptr |= __PERCPU_REF_DEAD;
 	__percpu_ref_switch_to_atomic(ref, confirm_kill);
 	percpu_ref_put(ref);
+
+	spin_unlock_irqrestore(&percpu_ref_switch_lock, flags);
 }
 EXPORT_SYMBOL_GPL(percpu_ref_kill_and_confirm);
 
@@ -321,11 +345,17 @@ EXPORT_SYMBOL_GPL(percpu_ref_kill_and_confirm);
  */
 void percpu_ref_reinit(struct percpu_ref *ref)
 {
+	unsigned long flags;
+
+	spin_lock_irqsave(&percpu_ref_switch_lock, flags);
+
 	WARN_ON_ONCE(!percpu_ref_is_zero(ref));
 
 	ref->percpu_count_ptr &= ~__PERCPU_REF_DEAD;
 	percpu_ref_get(ref);
 	if (!ref->force_atomic)
 		__percpu_ref_switch_to_percpu(ref);
+
+	spin_unlock_irqrestore(&percpu_ref_switch_lock, flags);
 }
 EXPORT_SYMBOL_GPL(percpu_ref_reinit);

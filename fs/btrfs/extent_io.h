@@ -25,33 +25,21 @@
 #define EXTENT_IOBITS		(EXTENT_LOCKED | EXTENT_WRITEBACK)
 #define EXTENT_CTLBITS		(EXTENT_DO_ACCOUNTING | EXTENT_FIRST_DELALLOC)
 
-
 #define EXTENT_BIO_COMPRESSED 1
 #define EXTENT_BIO_TREE_LOG 2
-#ifdef MY_ABC_HERE
-#define EXTENT_BIO_RETRY 8
-
-#define EXTENT_BIO_ABORT 16
-#endif 
 #define EXTENT_BIO_FLAG_SHIFT 16
-
 
 #define EXTENT_BUFFER_UPTODATE 0
 #define EXTENT_BUFFER_DIRTY 2
 #define EXTENT_BUFFER_CORRUPT 3
-#define EXTENT_BUFFER_READAHEAD 4	
+#define EXTENT_BUFFER_READAHEAD 4	 
 #define EXTENT_BUFFER_TREE_REF 5
 #define EXTENT_BUFFER_STALE 6
 #define EXTENT_BUFFER_WRITEBACK 7
-#define EXTENT_BUFFER_READ_ERR 8        
+#define EXTENT_BUFFER_READ_ERR 8         
 #define EXTENT_BUFFER_DUMMY 9
 #define EXTENT_BUFFER_IN_TREE 10
-#define EXTENT_BUFFER_WRITE_ERR 11    
-#ifdef MY_ABC_HERE
-#define EXTENT_BUFFER_SHOULD_REPAIR 31    
-#define EXTENT_BUFFER_RETRY_ERR 32    
-#endif
-
+#define EXTENT_BUFFER_WRITE_ERR 11     
 
 #define PAGE_UNLOCK		(1 << 0)
 #define PAGE_CLEAR_DIRTY	(1 << 1)
@@ -94,11 +82,7 @@ struct extent_io_ops {
 	int (*merge_bio_hook)(int rw, struct page *page, unsigned long offset,
 			      size_t size, struct bio *bio,
 			      unsigned long bio_flags);
-#ifdef MY_ABC_HERE
-	int (*readpage_io_failed_hook)(struct page *page, int failed_mirror, int correction_err);
-#else
 	int (*readpage_io_failed_hook)(struct page *page, int failed_mirror);
-#endif 
 	int (*readpage_end_io_hook)(struct btrfs_io_bio *io_bio, u64 phy_offset,
 				    struct page *page, u64 start, u64 end,
 				    int mirror);
@@ -140,16 +124,7 @@ struct extent_state {
 #endif
 };
 
-#ifdef MY_ABC_HERE
-#define EXTENT_BUFFER_SHOULD_ABORT_RETRY ((u8)-2)
-#define EXTENT_BUFFER_RETRY_ABORTED ((u8)-1)
-#endif 
-
-#ifdef MY_ABC_HERE
-#define INLINE_EXTENT_BUFFER_PAGES 8
-#else
 #define INLINE_EXTENT_BUFFER_PAGES 16
-#endif 
 #define MAX_INLINE_EXTENT_BUFFER_SIZE (INLINE_EXTENT_BUFFER_PAGES * PAGE_CACHE_SIZE)
 struct extent_buffer {
 	u64 start;
@@ -170,38 +145,28 @@ struct extent_buffer {
 	atomic_t spinning_readers;
 	atomic_t spinning_writers;
 	short lock_nested;
-	
+	 
 	short log_index;
 
-	
 	rwlock_t lock;
 
-	
 	wait_queue_head_t write_lock_wq;
 
-	
 	wait_queue_head_t read_lock_wq;
-#ifdef MY_ABC_HERE
-	u8 nr_retry;
-	u8 can_retry;
-	u32 prev_bad_csum;
-#endif 
 	struct page *pages[INLINE_EXTENT_BUFFER_PAGES];
 #ifdef CONFIG_BTRFS_DEBUG
 	struct list_head leak_list;
 #endif
 };
 
-
 struct extent_changeset {
-	
+	 
 	u64 bytes_changed;
 
-	
 	struct ulist *range_changed;
 #ifdef MY_ABC_HERE
 	struct ulist_node *prealloc_ulist_node;
-#endif 
+#endif  
 };
 
 static inline void extent_set_compress_type(unsigned long *bio_flags,
@@ -393,21 +358,15 @@ struct extent_buffer *find_extent_buffer(struct btrfs_root *root,
 #else
 struct extent_buffer *find_extent_buffer(struct btrfs_fs_info *fs_info,
 					 u64 start);
-#endif 
+#endif  
 void free_extent_buffer(struct extent_buffer *eb);
 void free_extent_buffer_stale(struct extent_buffer *eb);
 #define WAIT_NONE	0
 #define WAIT_COMPLETE	1
 #define WAIT_PAGE_LOCK	2
-#ifdef MY_ABC_HERE
-int read_extent_buffer_pages(struct extent_io_tree *tree,
-			     struct extent_buffer *eb, u64 start, int wait,
-			     get_extent_t *get_extent, int mirror_num, int can_retry);
-#else
 int read_extent_buffer_pages(struct extent_io_tree *tree,
 			     struct extent_buffer *eb, u64 start, int wait,
 			     get_extent_t *get_extent, int mirror_num);
-#endif 
 void wait_on_extent_buffer_writeback(struct extent_buffer *eb);
 
 static inline unsigned long num_extent_pages(u64 start, u64 len)
@@ -424,12 +383,6 @@ static inline void extent_buffer_get(struct extent_buffer *eb)
 int memcmp_extent_buffer(struct extent_buffer *eb, const void *ptrv,
 			  unsigned long start,
 			  unsigned long len);
-#ifdef MY_ABC_HERE
-int memcmp_caseless_extent_buffer(struct extent_buffer *eb, const void *ptrv,
-			  unsigned long len_ptrv,
-			  unsigned long start,
-			  unsigned long len);
-#endif 
 void read_extent_buffer(struct extent_buffer *eb, void *dst,
 			unsigned long start,
 			unsigned long len);
@@ -471,27 +424,24 @@ void extent_clear_unlock_delalloc(struct inode *inode, u64 start, u64 end,
 				 unsigned long page_ops);
 struct bio *
 btrfs_bio_alloc(struct block_device *bdev, u64 first_sector, int nr_vecs,
+#ifdef CONFIG_SYNO_BTRFS_LIMIT_BIO_SIZE_FOR_LATENCY
+		gfp_t gfp_flags, int rw);
+#else
 		gfp_t gfp_flags);
+#endif  
 struct bio *btrfs_io_bio_alloc(gfp_t gfp_mask, unsigned int nr_iovecs);
 struct bio *btrfs_bio_clone(struct bio *bio, gfp_t gfp_mask);
 
 struct btrfs_fs_info;
 
-#ifdef MY_ABC_HERE
-int repair_io_failure(struct inode *inode, u64 start, u64 length, u64 logical,
-		      struct page *page, unsigned int pg_offset,
-		      int mirror_num, int abort_correction);
-#else
 int repair_io_failure(struct inode *inode, u64 start, u64 length, u64 logical,
 		      struct page *page, unsigned int pg_offset,
 		      int mirror_num);
-#endif 
 int clean_io_failure(struct inode *inode, u64 start, struct page *page,
 		     unsigned int pg_offset);
 void end_extent_writepage(struct page *page, int err, u64 start, u64 end);
 int repair_eb_io_failure(struct btrfs_root *root, struct extent_buffer *eb,
 			 int mirror_num);
-
 
 struct io_failure_record {
 	struct page *page;
@@ -505,13 +455,8 @@ struct io_failure_record {
 };
 
 void btrfs_free_io_failure_record(struct inode *inode, u64 start, u64 end);
-#ifdef MY_ABC_HERE
-int btrfs_get_io_failure_record(struct inode *inode, u64 start, u64 end,
-				struct io_failure_record **failrec_ret, struct page *page);
-#else
 int btrfs_get_io_failure_record(struct inode *inode, u64 start, u64 end,
 				struct io_failure_record **failrec_ret);
-#endif 
 int btrfs_check_repairable(struct inode *inode, struct bio *failed_bio,
 			   struct io_failure_record *failrec, int fail_mirror);
 struct bio *btrfs_create_repair_bio(struct inode *inode, struct bio *failed_bio,
@@ -527,17 +472,5 @@ noinline u64 find_lock_delalloc_range(struct inode *inode,
 #endif
 struct extent_buffer *alloc_test_extent_buffer(struct btrfs_fs_info *fs_info,
 					       u64 start);
-#ifdef MY_ABC_HERE
-void add_cksumfailed_file(u64 rootid, u64 i_ino, struct btrfs_fs_info *fs_info);
-
-struct correction_record {
-	struct rb_node node;
-	u64 logical;
-};
-
-void correction_get_locked_record(struct btrfs_fs_info *fs_info, u64 logical);
-void correction_put_locked_record(struct btrfs_fs_info *fs_info, u64 logical);
-void correction_destroy_locked_record(struct btrfs_fs_info *fs_info);
-#endif 
 
 #endif

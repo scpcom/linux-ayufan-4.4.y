@@ -482,15 +482,18 @@ static int rtk_gpio_get(struct gpio_chip *chip, unsigned offset)
 static void rtk_gpio_set(struct gpio_chip *chip, unsigned offset, int value)
 {
     u32 dato_offset;
+    unsigned long flags;
     struct rtk_gpio_controller *p_rtk_gpio_ctl = chip2controller(chip);
     RTK_GPIO_DBG("[%s] offset(%u) value(%d)", __FUNCTION__,offset,value);
 
     dato_offset = gpio_get_reg_offset(p_rtk_gpio_ctl->group_index, GP_REG_DATO, offset);
 
+    spin_lock_irqsave(&p_rtk_gpio_ctl->lock, flags);
     if (value)
         iowrite_reg_bit(((volatile void *)p_rtk_gpio_ctl->gpio_regs_base + dato_offset), GPIO_REG_BIT(offset), 1);
     else
         iowrite_reg_bit(((volatile void *)p_rtk_gpio_ctl->gpio_regs_base + dato_offset), GPIO_REG_BIT(offset), 0);
+    spin_unlock_irqrestore(&p_rtk_gpio_ctl->lock, flags);
 }
 
 static int rtk_gpio_direction_in(struct gpio_chip *chip, unsigned offset)

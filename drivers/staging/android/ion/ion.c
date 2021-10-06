@@ -47,6 +47,12 @@
 #include "../uapi/rtk_phoenix_ion.h"
 #endif /* defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) */
 
+#if defined(MY_DEF_HERE)
+#if defined(CONFIG_ION_RTK)
+#include "../uapi/ion_rtk.h"
+#endif
+
+#endif /* MY_DEF_HERE */
 /**
  * struct ion_device - the metadata of the ion device node
  * @dev:		the actual misc device
@@ -393,13 +399,30 @@ static void ion_handle_get(struct ion_handle *handle)
 	kref_get(&handle->ref);
 }
 
+#if defined(CONFIG_SYNO_RTD1619)
+static int ion_handle_put_nolock(struct ion_handle *handle)
+{
+	int ret;
+
+	ret = kref_put(&handle->ref, ion_handle_destroy);
+
+	return ret;
+}
+
+int ion_handle_put(struct ion_handle *handle)
+#else /* CONFIG_SYNO_RTD1619 */
 static int ion_handle_put(struct ion_handle *handle)
+#endif /* CONFIG_SYNO_RTD1619 */
 {
 	struct ion_client *client = handle->client;
 	int ret;
 
 	mutex_lock(&client->lock);
+#if defined(CONFIG_SYNO_RTD1619)
+	ret = ion_handle_put_nolock(handle);
+#else /* CONFIG_SYNO_RTD1619 */
 	ret = kref_put(&handle->ref, ion_handle_destroy);
+#endif /* CONFIG_SYNO_RTD1619 */
 	mutex_unlock(&client->lock);
 
 	return ret;
@@ -423,20 +446,46 @@ static struct ion_handle *ion_handle_lookup(struct ion_client *client,
 	return ERR_PTR(-EINVAL);
 }
 
+#if defined(CONFIG_SYNO_RTD1619)
+static struct ion_handle *ion_handle_get_by_id_nolock(struct ion_client *client,
+#else /* CONFIG_SYNO_RTD1619 */
 static struct ion_handle *ion_handle_get_by_id(struct ion_client *client,
+#endif /* CONFIG_SYNO_RTD1619 */
+						int id)
+{
+	struct ion_handle *handle;
+
+#if defined(CONFIG_SYNO_RTD1619)
+//do nothing
+#else /* CONFIG_SYNO_RTD1619 */
+	mutex_lock(&client->lock);
+#endif /* CONFIG_SYNO_RTD1619 */
+	handle = idr_find(&client->idr, id);
+	if (handle)
+		ion_handle_get(handle);
+#if defined(CONFIG_SYNO_RTD1619)
+//do nothing
+#else /* CONFIG_SYNO_RTD1619 */
+	mutex_unlock(&client->lock);
+#endif /* CONFIG_SYNO_RTD1619 */
+
+	return handle ? handle : ERR_PTR(-EINVAL);
+}
+
+#if defined(MY_DEF_HERE)
+struct ion_handle *ion_handle_get_by_id(struct ion_client *client,
 						int id)
 {
 	struct ion_handle *handle;
 
 	mutex_lock(&client->lock);
-	handle = idr_find(&client->idr, id);
-	if (handle)
-		ion_handle_get(handle);
+	handle = ion_handle_get_by_id_nolock(client, id);
 	mutex_unlock(&client->lock);
 
-	return handle ? handle : ERR_PTR(-EINVAL);
+	return handle;
 }
 
+#endif /* MY_DEF_HERE */
 static bool ion_handle_validate(struct ion_client *client,
 				struct ion_handle *handle)
 {
@@ -474,6 +523,26 @@ static int ion_handle_add(struct ion_client *client, struct ion_handle *handle)
 
 	return 0;
 }
+#if defined(MY_DEF_HERE)
+#if defined(CONFIG_ION_RTK)
+struct ion_heap * ion_get_client_heap_by_mask(struct ion_client *client,  unsigned int heap_id_mask)
+{
+	struct ion_device *dev = client->dev;
+	struct ion_heap *heap = NULL;
+
+	down_read(&dev->lock);
+	plist_for_each_entry(heap, &dev->heaps, node) {
+		/* if the caller didn't specify this heap id */
+		if (!((1 << heap->id) & heap_id_mask))
+			continue;
+		break;
+	}
+	up_read(&dev->lock);
+	return heap;
+}
+EXPORT_SYMBOL(ion_get_client_heap_by_mask);
+#endif /* CONFIG_ION_RTK */
+#endif /* MY_DEF_HERE */
 
 struct ion_handle *ion_alloc(struct ion_client *client, size_t len,
 			     size_t align, unsigned int heap_id_mask,
@@ -538,6 +607,31 @@ struct ion_handle *ion_alloc(struct ion_client *client, size_t len,
 }
 EXPORT_SYMBOL(ion_alloc);
 
+#if defined(CONFIG_SYNO_RTD1619)
+static void ion_free_nolock(struct ion_client *client, struct ion_handle *handle)
+{
+	bool valid_handle;
+
+	BUG_ON(client != handle->client);
+
+	valid_handle = ion_handle_validate(client, handle);
+
+	if (!valid_handle) {
+		WARN(1, "%s: invalid handle passed to free.\n", __func__);
+		return;
+	}
+	ion_handle_put_nolock(handle);
+}
+
+void ion_free(struct ion_client *client, struct ion_handle *handle)
+{
+	BUG_ON(client != handle->client);
+
+	mutex_lock(&client->lock);
+	ion_free_nolock(client, handle);
+	mutex_unlock(&client->lock);
+}
+#else /* CONFIG_SYNO_RTD1619 */
 void ion_free(struct ion_client *client, struct ion_handle *handle)
 {
 	bool valid_handle;
@@ -555,6 +649,7 @@ void ion_free(struct ion_client *client, struct ion_handle *handle)
 	mutex_unlock(&client->lock);
 	ion_handle_put(handle);
 }
+#endif /* CONFIG_SYNO_RTD1619 */
 EXPORT_SYMBOL(ion_free);
 
 int ion_phys(struct ion_client *client, struct ion_handle *handle,
@@ -1005,11 +1100,20 @@ static void ion_vm_close(struct vm_area_struct *vma)
 	mutex_unlock(&buffer->lock);
 }
 
+#if defined(CONFIG_ION_RTK) && defined(MY_DEF_HERE)
+const struct vm_operations_struct ion_vma_ops = {
+	.open = ion_vm_open,
+	.close = ion_vm_close,
+	.fault = ion_vm_fault,
+};
+EXPORT_SYMBOL(ion_vma_ops);
+#else /* CONFIG_ION_RTK && MY_DEF_HERE */
 static const struct vm_operations_struct ion_vma_ops = {
 	.open = ion_vm_open,
 	.close = ion_vm_close,
 	.fault = ion_vm_fault,
 };
+#endif /* CONFIG_ION_RTK && MY_DEF_HERE */
 
 static int ion_mmap(struct dma_buf *dmabuf, struct vm_area_struct *vma)
 {
@@ -1031,17 +1135,19 @@ static int ion_mmap(struct dma_buf *dmabuf, struct vm_area_struct *vma)
 		return 0;
 	}
 
-#if defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE)
+#if defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) || \
+	defined(CONFIG_ION_RTK) && defined(MY_DEF_HERE)
 #if 0
-    if (    buffer->heap->type == RTK_PHOENIX_ION_HEAP_TYPE_MEDIA ||
-            buffer->heap->type == RTK_PHOENIX_ION_HEAP_TYPE_AUDIO ||
-            buffer->heap->type == RTK_PHOENIX_ION_HEAP_TYPE_TILER)
-#else
-    if (buffer->flags & ION_FLAG_NONCACHED)
-#endif
+	if (buffer->heap->type == RTK_PHOENIX_ION_HEAP_TYPE_MEDIA ||
+		buffer->heap->type == RTK_PHOENIX_ION_HEAP_TYPE_AUDIO ||
+		buffer->heap->type == RTK_PHOENIX_ION_HEAP_TYPE_TILER)
+#else /* rtk if 0 */
+	if (buffer->flags & ION_FLAG_NONCACHED)
+#endif /* rtk if 0 */
 		vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot);
-    else
-#endif /* defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) */
+	else
+#endif /* CONFIG_ION_RTK_PHOENIX && MY_DEF_HERE ||
+		  CONFIG_ION_RTK && MY_DEF_HERE */
 	if (!(buffer->flags & ION_FLAG_CACHED))
 		vma->vm_page_prot = pgprot_writecombine(vma->vm_page_prot);
 
@@ -1056,6 +1162,20 @@ static int ion_mmap(struct dma_buf *dmabuf, struct vm_area_struct *vma)
 
 	return ret;
 }
+#if defined(MY_DEF_HERE)
+#if defined(CONFIG_ION_RTK)
+int ion_mmap_by_handle(struct ion_handle *handle, struct vm_area_struct *vma)
+{
+	struct dma_buf dmabuf;
+
+	if (handle == NULL)
+		return -1;
+	dmabuf.priv = handle->buffer;
+	return ion_mmap(&dmabuf, vma);
+}
+EXPORT_SYMBOL(ion_mmap_by_handle);
+#endif /* CONFIG_ION_RTK */
+#endif /* MY_DEF_HERE */
 
 static void ion_dma_buf_release(struct dma_buf *dmabuf)
 {
@@ -1218,6 +1338,56 @@ end:
 }
 EXPORT_SYMBOL(ion_import_dma_buf);
 
+#if defined(MY_DEF_HERE)
+#if defined(CONFIG_ION_RTK)
+struct ion_handle *ion_import_dma_buf_point(struct ion_client *client, struct dma_buf *dmabuf)
+{
+	struct ion_buffer *buffer;
+	struct ion_handle *handle;
+	int ret;
+
+	if (IS_ERR(dmabuf))
+		return ERR_CAST(dmabuf);
+	/* if this memory came from ion */
+
+	if (dmabuf->ops != &dma_buf_ops) {
+		pr_err("%s: can not import dmabuf from another exporter\n",
+		       __func__);
+		dma_buf_put(dmabuf);
+		return ERR_PTR(-EINVAL);
+	}
+	buffer = dmabuf->priv;
+
+	mutex_lock(&client->lock);
+	/* if a handle exists for this buffer just take a reference to it */
+	handle = ion_handle_lookup(client, buffer);
+	if (!IS_ERR(handle)) {
+		ion_handle_get(handle);
+		mutex_unlock(&client->lock);
+		goto end;
+	}
+
+	handle = ion_handle_create(client, buffer);
+	if (IS_ERR(handle)) {
+		mutex_unlock(&client->lock);
+		goto end;
+	}
+
+	ret = ion_handle_add(client, handle);
+	mutex_unlock(&client->lock);
+	if (ret) {
+		ion_handle_put(handle);
+		handle = ERR_PTR(ret);
+	}
+
+end:
+	dma_buf_put(dmabuf);
+	return handle;
+}
+EXPORT_SYMBOL(ion_import_dma_buf_point);
+#endif /* CONFIG_ION_RTK */
+
+#endif /* MY_DEF_HERE */
 static int ion_sync_for_device(struct ion_client *client, int fd)
 {
 	struct dma_buf *dmabuf;
@@ -1268,9 +1438,11 @@ static long ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		struct ion_allocation_data allocation;
 		struct ion_handle_data handle;
 		struct ion_custom_data custom;
-#if defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE)
+#if defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) || \
+	defined(CONFIG_ION_RTK) && defined(MY_DEF_HERE)
 		struct ion_phys_data phys;
-#endif /* defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) */
+#endif /* CONFIG_ION_RTK_PHOENIX && MY_DEF_HERE ||
+		  CONFIG_ION_RTK && MY_DEF_HERE */
 	} data;
 
 	dir = ion_ioctl_dir(cmd);
@@ -1303,15 +1475,29 @@ static long ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 	{
 		struct ion_handle *handle;
 
+#if defined(CONFIG_SYNO_RTD1619)
+		mutex_lock(&client->lock);
+		handle = ion_handle_get_by_id_nolock(client, data.handle.handle);
+		if (IS_ERR(handle)) {
+			mutex_unlock(&client->lock);
+#else /* CONFIG_SYNO_RTD1619 */
 		handle = ion_handle_get_by_id(client, data.handle.handle);
 		if (IS_ERR(handle))
+#endif /* CONFIG_SYNO_RTD1619 */
 			return PTR_ERR(handle);
+#if defined(CONFIG_SYNO_RTD1619)
+		}
+		ion_free_nolock(client, handle);
+		ion_handle_put_nolock(handle);
+		mutex_unlock(&client->lock);
+#else /* CONFIG_SYNO_RTD1619 */
 		ion_free(client, handle);
 		ion_handle_put(handle);
+#endif /* CONFIG_SYNO_RTD1619 */
 		break;
 	}
-#if defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE)
-#if 1   //20130208 charleslin: add ioctl to get physical address
+#if defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) || \
+	defined(CONFIG_ION_RTK) && defined(MY_DEF_HERE)
 	case ION_IOC_PHYS:
 	{
 		int ret;
@@ -1337,8 +1523,8 @@ static long ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 			return -EFAULT;
 		break;
 	}
-#endif
-#endif /* defined(CONFIG_ION_RTK_PHOENIX) && defined(MY_DEF_HERE) */
+#endif /* CONFIG_ION_RTK_PHOENIX && MY_DEF_HERE ||
+		  CONFIG_ION_RTK && MY_DEF_HERE */
 	case ION_IOC_SHARE:
 	case ION_IOC_MAP:
 	{

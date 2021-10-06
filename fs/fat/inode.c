@@ -353,6 +353,79 @@ void fat_detach(struct inode *inode)
 }
 EXPORT_SYMBOL_GPL(fat_detach);
 
+#ifdef MY_ABC_HERE
+static void syno_inode_keep_list_init(struct syno_inode_keep_list *list)
+{
+	int i = 0;
+	spin_lock_init(&list->lock);
+	INIT_LIST_HEAD(&list->head);
+	for (i = 0; i < SYNO_FAT_INODE_KEEP_LIST_MAXSIZE; i++) {
+		list->pre_alloc_entry[i].inode = NULL;
+		INIT_LIST_HEAD(&list->pre_alloc_entry[i].list_entry);
+		list_add(&list->pre_alloc_entry[i].list_entry, &list->head);
+	}
+}
+
+static struct syno_inode_keep_entry *
+__syno_inode_keep_list_find(const struct syno_inode_keep_list * const list,
+							const struct inode * const inode)
+{
+	struct syno_inode_keep_entry *entry = NULL;
+
+	list_for_each_entry(entry, &list->head, list_entry) {
+		if (entry->inode == inode) {
+			return entry;
+		}
+	}
+	return NULL;
+}
+
+int syno_inode_keep_list_update(struct syno_inode_keep_list *list, struct inode *inode)
+{
+	int ret = 0;
+	struct syno_inode_keep_entry *entry = NULL;
+	struct inode *inode_need_put = NULL;
+
+	spin_lock(&list->lock);
+	entry = __syno_inode_keep_list_find(list, inode);
+	if (!entry) {
+		 
+		entry = list_last_entry(&list->head, struct syno_inode_keep_entry, list_entry);
+		inode_need_put = entry->inode;
+		entry->inode = NULL;
+		if (!igrab(inode)) {
+			ret = -EBUSY;
+			goto End;
+		}
+		entry->inode = inode;
+	}
+	 
+	list_move(&entry->list_entry, &list->head);
+End:
+	spin_unlock(&list->lock);
+	if (inode_need_put)
+		iput(inode_need_put);
+	return ret;
+}
+
+static void syno_inode_keep_list_put_all(struct syno_inode_keep_list *list)
+{
+	int num_inode = 0;
+	int i = 0;
+	struct syno_inode_keep_entry *entry = NULL;
+	struct inode *inode_put_list[SYNO_FAT_INODE_KEEP_LIST_MAXSIZE] = {NULL};
+
+	spin_lock(&list->lock);
+	list_for_each_entry(entry, &list->head, list_entry) {
+		if(entry->inode)
+			inode_put_list[num_inode++] = entry->inode;
+		entry->inode = NULL;
+	}
+	spin_unlock(&list->lock);
+	for (i = 0; i < num_inode; i++)
+		iput(inode_put_list[i]);
+}
+#endif  
 struct inode *fat_iget(struct super_block *sb, loff_t i_pos)
 {
 	struct msdos_sb_info *sbi = MSDOS_SB(sb);
@@ -587,6 +660,9 @@ static void fat_put_super(struct super_block *sb)
 
 	fat_set_state(sb, 0, 0);
 
+#ifdef MY_ABC_HERE
+	syno_inode_keep_list_put_all(&sbi->syno_inode_keep_list);
+#endif  
 	iput(sbi->fsinfo_inode);
 	iput(sbi->fat_inode);
 
@@ -1621,20 +1697,20 @@ int fat_fill_super(struct super_block *sb, void *data, int silent, int isvfat,
 	}
 
 	sbi->max_cluster = total_clusters + FAT_START_ENT;
-	
+	 
 	if (sbi->free_clusters != -1 && sbi->free_clusters > total_clusters)
 		sbi->free_clusters = -1;
-	
+	 
 	sbi->prev_free %= sbi->max_cluster;
 	if (sbi->prev_free < FAT_START_ENT)
 		sbi->prev_free = FAT_START_ENT;
 
-	
 	fat_hash_init(sb);
 	dir_hash_init(sb);
 	fat_ent_access_init(sb);
-
-	
+#ifdef MY_ABC_HERE
+	syno_inode_keep_list_init(&(MSDOS_SB(sb)->syno_inode_keep_list));
+#endif  
 
 	error = -EINVAL;
 	sprintf(buf, "cp%d", sbi->options.codepage);

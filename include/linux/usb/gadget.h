@@ -1013,6 +1013,11 @@ static inline int usb_gadget_activate(struct usb_gadget *gadget)
  * @reset: Invoked on USB bus reset. It is mandatory for all gadget drivers
  *	and should be called in_interrupt.
  * @driver: Driver model state for this driver.
+#if defined(MY_DEF_HERE)
+ * @udc_name: A name of UDC this driver should be bound to. If udc_name is NULL,
+ *	this driver will be bound to any available UDC.
+ * @pending: UDC core private data used for deferred probe of this driver.
+#endif // MY_DEF_HERE
  *
  * Devices are disabled till a gadget driver successfully bind()s, which
  * means the driver will handle setup() requests needed to enumerate (and
@@ -1073,6 +1078,11 @@ struct usb_gadget_driver {
 
 	/* FIXME support safe rmmod */
 	struct device_driver	driver;
+#if defined(MY_DEF_HERE)
+
+	char			*udc_name;
+	struct list_head	pending;
+#endif /* MY_DEF_HERE */
 };
 
 /*-------------------------------------------------------------------------*/

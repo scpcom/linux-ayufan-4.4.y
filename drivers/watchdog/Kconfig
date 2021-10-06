@@ -617,6 +617,15 @@ config LPC18XX_WATCHDOG
 	  To compile this driver as a module, choose M here: the
 	  module will be called lpc18xx_wdt.
 
+if SYNO_LSP_RTD1619
+config RTK_WATCHDOG
+    tristate "Realtek watchdog support"
+    depends on RTK_PLATFORM
+    select WATCHDOG_CORE
+    help
+      Realtek  watchdog support.
+endif # SYNO_LSP_RTD1619
+
 # AVR32 Architecture
 
 config AT32AP700X_WDT

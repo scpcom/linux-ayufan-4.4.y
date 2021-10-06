@@ -45,9 +45,9 @@ enum {
 	MIGRATE_PCPTYPES,	/* the number of types on the pcp lists */
 #if defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
 	MIGRATE_RESERVE = MIGRATE_PCPTYPES,
-#else /* MY_DEF_HERE && !MY_DEF_HERE */
+#else /* MY_DEF_HERE && !CONFIG_SYNO_LSP_ARMADA_16_12_MM_REVERT */
 	MIGRATE_HIGHATOMIC = MIGRATE_PCPTYPES,
-#endif /* MY_DEF_HERE && !MY_DEF_HERE */
+#endif /* MY_DEF_HERE && !CONFIG_SYNO_LSP_ARMADA_16_12_MM_REVERT */
 #ifdef CONFIG_CMA
 	/*
 	 * MIGRATE_CMA migration type is designed to mimic the way
@@ -344,9 +344,9 @@ struct zone {
 
 #if defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
 //do nothing
-#else /* MY_DEF_HERE && !MY_DEF_HERE */
+#else /* MY_DEF_HERE && !CONFIG_SYNO_LSP_ARMADA_16_12_MM_REVERT */
 	unsigned long nr_reserved_highatomic;
-#endif /* MY_DEF_HERE && !MY_DEF_HERE */
+#endif /* MY_DEF_HERE && !CONFIG_SYNO_LSP_ARMADA_16_12_MM_REVERT */
 
 	/*
 	 * We don't know if the memory that we're going to allocate will be
@@ -450,7 +450,7 @@ struct zone {
 	 * optimization. Protected by zone->lock.
 	 */
 	int			nr_migrate_reserve_block;
-#endif /* MY_DEF_HERE && !MY_DEF_HERE */
+#endif /* MY_DEF_HERE && !CONFIG_SYNO_LSP_ARMADA_16_12_MM_REVERT */
 
 #ifdef CONFIG_MEMORY_ISOLATION
 	/*

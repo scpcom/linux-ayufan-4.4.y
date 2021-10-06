@@ -514,6 +514,23 @@ config GPIO_ZX
 	help
 	  Say yes here to support the GPIO device on ZTE ZX SoCs.
 
+if SYNO_LSP_RTD1619
+config GPIO_RTD16xx
+    bool "Realtek RTD16xx GPIO support"
+    depends on ARCH_RTD16xx
+    default y
+    select GPIOLIB_IRQCHIP
+    help
+      Realtek RTD16xx GPIO support.
+
+config GPIO_RTD13xx
+    bool "Realtek RTD13xx GPIO support"
+    depends on ARCH_RTD13xx
+    default y
+    select GPIOLIB_IRQCHIP
+    help
+      Realtek RTD13xx GPIO support.
+endif # SYNO_LSP_RTD1619
 endmenu
 
 menu "Port-mapped I/O GPIO drivers"

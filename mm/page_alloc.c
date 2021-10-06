@@ -65,12 +65,15 @@ EXPORT_PER_CPU_SYMBOL(numa_node);
 #endif
 
 #ifdef CONFIG_HAVE_MEMORYLESS_NODES
-
-DEFINE_PER_CPU(int, _numa_mem_);		
+ 
+DEFINE_PER_CPU(int, _numa_mem_);		 
 EXPORT_PER_CPU_SYMBOL(_numa_mem_);
 int _node_numa_mem_[MAX_NUMNODES];
 #endif
 
+#ifdef  MY_ABC_HERE
+extern int gSynoPageAllocFailedLog;
+#endif  
 
 nodemask_t node_states[NR_NODE_STATES] __read_mostly = {
 	[N_POSSIBLE] = NODE_MASK_ALL,
@@ -668,27 +671,23 @@ static void free_pcppages_bulk(struct zone *zone, int count,
 			list = &pcp->lists[migratetype];
 		} while (list_empty(list));
 
-		
 		if (batch_free == MIGRATE_PCPTYPES)
 			batch_free = to_free;
 
 		do {
-			int mt;	
+			int mt;	 
 
 			page = list_entry(list->prev, struct page, lru);
-			
+			 
 			list_del(&page->lru);
 
 			mt = get_pcppage_migratetype(page);
-			
+			 
 			VM_BUG_ON_PAGE(is_migrate_isolate(mt), page);
-			
+			 
 			if (unlikely(has_isolate_pageblock(zone)))
 				mt = get_pageblock_migratetype(page);
 
-#if defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
-			
-#endif 
 			__free_one_page(page, page_to_pfn(page), zone, 0, mt);
 			trace_mm_page_pcpu_drain(page, 0, mt);
 		} while (--to_free && --batch_free && !list_empty(list));
@@ -2259,9 +2258,16 @@ static inline bool should_suppress_show_mem(void)
 	return ret;
 }
 
+#ifdef MY_ABC_HERE
+#define SYNO_WARN_ALLOC_FAILED_RATELIMIT_BURST 1
+static DEFINE_RATELIMIT_STATE(nopage_rs,
+		DEFAULT_RATELIMIT_INTERVAL,
+		SYNO_WARN_ALLOC_FAILED_RATELIMIT_BURST);
+#else
 static DEFINE_RATELIMIT_STATE(nopage_rs,
 		DEFAULT_RATELIMIT_INTERVAL,
 		DEFAULT_RATELIMIT_BURST);
+#endif
 
 void warn_alloc_failed(gfp_t gfp_mask, unsigned int order, const char *fmt, ...)
 {
@@ -2672,11 +2678,16 @@ noretry:
 	if (page)
 		goto got_pg;
 nopage:
+#ifdef  MY_ABC_HERE
+	if (0 < gSynoPageAllocFailedLog) {
+		warn_alloc_failed(gfp_mask, order, NULL);
+	}
+#else
 	warn_alloc_failed(gfp_mask, order, NULL);
+#endif  
 got_pg:
 	return page;
 }
-
 
 struct page *
 __alloc_pages_nodemask(gfp_t gfp_mask, unsigned int order,

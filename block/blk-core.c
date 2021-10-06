@@ -42,13 +42,14 @@ EXPORT_TRACEPOINT_SYMBOL_GPL(block_split);
 EXPORT_TRACEPOINT_SYMBOL_GPL(block_unplug);
 
 DEFINE_IDA(blk_queue_ida);
-
+#ifdef MY_ABC_HERE
+static inline unsigned int syno_block_latency_bucket_offset_get(const u64 u64Latency);
+static void syno_block_latency_cal(struct request *req);
+#endif  
 
 struct kmem_cache *request_cachep = NULL;
 
-
 struct kmem_cache *blk_requestq_cachep;
-
 
 static struct workqueue_struct *kblockd_workqueue;
 
@@ -112,6 +113,9 @@ void blk_rq_init(struct request_queue *q, struct request *rq)
 	rq->cmd_len = BLK_MAX_CDB;
 	rq->tag = -1;
 	rq->start_time = jiffies;
+#ifdef MY_ABC_HERE
+	rq->syno_seq = 0;
+#endif  
 	set_start_time_ns(rq);
 	rq->part = NULL;
 }
@@ -1487,55 +1491,63 @@ end_io:
 	return false;
 }
 
-
 blk_qc_t generic_make_request(struct bio *bio)
 {
-	struct bio_list bio_list_on_stack;
+	 
+	struct bio_list bio_list_on_stack[2];
 	blk_qc_t ret = BLK_QC_T_NONE;
 
 	if (!generic_make_request_checks(bio))
 		goto out;
 
-	
 	if (current->bio_list) {
-		bio_list_add(current->bio_list, bio);
+		bio_list_add(&current->bio_list[0], bio);
 		goto out;
 	}
 
-	
 	BUG_ON(bio->bi_next);
-	bio_list_init(&bio_list_on_stack);
-	current->bio_list = &bio_list_on_stack;
+	bio_list_init(&bio_list_on_stack[0]);
+	current->bio_list = bio_list_on_stack;
 	do {
 		struct request_queue *q = bdev_get_queue(bio->bi_bdev);
 
 		if (likely(blk_queue_enter(q, false) == 0)) {
+			struct bio_list lower, same;
+
+			bio_list_on_stack[1] = bio_list_on_stack[0];
+			bio_list_init(&bio_list_on_stack[0]);
 
 			ret = q->make_request_fn(q, bio);
 
 			blk_queue_exit(q);
-
-			bio = bio_list_pop(current->bio_list);
+			 
+			bio_list_init(&lower);
+			bio_list_init(&same);
+			while ((bio = bio_list_pop(&bio_list_on_stack[0])) != NULL)
+				if (q == bdev_get_queue(bio->bi_bdev))
+					bio_list_add(&same, bio);
+				else
+					bio_list_add(&lower, bio);
+			 
+			bio_list_merge(&bio_list_on_stack[0], &lower);
+			bio_list_merge(&bio_list_on_stack[0], &same);
+			bio_list_merge(&bio_list_on_stack[0], &bio_list_on_stack[1]);
 		} else {
-			struct bio *bio_next = bio_list_pop(current->bio_list);
-
 			bio_io_error(bio);
-			bio = bio_next;
 		}
+		bio = bio_list_pop(&bio_list_on_stack[0]);
 	} while (bio);
-	current->bio_list = NULL; 
+	current->bio_list = NULL;  
 
 out:
 	return ret;
 }
 EXPORT_SYMBOL(generic_make_request);
 
-
 blk_qc_t submit_bio(int rw, struct bio *bio)
 {
 	bio->bi_rw |= rw;
 
-	
 	if (bio_has_data(bio)) {
 		unsigned int count;
 
@@ -1553,8 +1565,14 @@ blk_qc_t submit_bio(int rw, struct bio *bio)
 
 		if (unlikely(block_dump)) {
 			char b[BDEVNAME_SIZE];
+#ifdef MY_ABC_HERE
+			printk(KERN_DEBUG "ppid:%d(%s), pid:%d(%s), %s block %Lu on %s (%u sectors)\n",
+			task_pid_nr(current->parent), current->parent->comm,
+			task_pid_nr(current), current->comm,
+#else  
 			printk(KERN_DEBUG "%s(%d): %s block %Lu on %s (%u sectors)\n",
 			current->comm, task_pid_nr(current),
+#endif  
 				(rw & WRITE) ? "WRITE" : "READ",
 				(unsigned long long)bio->bi_iter.bi_sector,
 				bdevname(bio->bi_bdev, b),
@@ -1683,11 +1701,25 @@ void blk_account_io_done(struct request *req)
 
 		hd_struct_put(part);
 		part_stat_unlock();
+#ifdef MY_ABC_HERE
+		if (0 != req->syno_seq) {
+			req->rq_disk->seq_ios[SYNO_DISK_SEQ_STAT_NEAR_SEQ]++;
+			req->rq_disk->seq_ios[SYNO_DISK_SEQ_STAT_SEQ] +=
+				!!(req->syno_seq & (1 << SYNO_DISK_SEQ_STAT_SEQ));
+		}
+		if (likely(time_after64(
+						rq_io_start_time_ns(req),
+						rq_start_time_ns(req)))) {
+			req->rq_disk->u64WaitTime[rw] +=
+				rq_io_start_time_ns(req) - rq_start_time_ns(req);
+		}
+		syno_block_latency_cal(req);
+#endif  
 	}
 }
 
 #ifdef CONFIG_PM
-
+ 
 static struct request *blk_pm_peek_request(struct request_queue *q,
 					   struct request *rq)
 {
@@ -1734,11 +1766,14 @@ void blk_account_io_start(struct request *rq, bool new_io)
 	part_stat_unlock();
 }
 
-
 struct request *blk_peek_request(struct request_queue *q)
 {
 	struct request *rq;
 	int ret;
+#ifdef MY_ABC_HERE
+	sector_t rq_pos = 0;
+	sector_t end_sector = 0;
+#endif  
 
 	while ((rq = __elv_next_request(q)) != NULL) {
 
@@ -1747,13 +1782,17 @@ struct request *blk_peek_request(struct request_queue *q)
 			break;
 
 		if (!(rq->cmd_flags & REQ_STARTED)) {
-			
+			 
 			if (rq->cmd_flags & REQ_SORTED)
 				elv_activate_rq(q, rq);
 
-			
 			rq->cmd_flags |= REQ_STARTED;
 			trace_block_rq_issue(q, rq);
+#ifdef MY_ABC_HERE
+			if  (rq->rq_disk) {
+				rq->u64IssueTime = cpu_clock(0);
+			}
+#endif  
 		}
 
 		if (!q->boundary_rq || q->boundary_rq == rq) {
@@ -1795,6 +1834,21 @@ struct request *blk_peek_request(struct request_queue *q)
 			break;
 		}
 	}
+#ifdef MY_ABC_HERE
+	if (rq && blk_do_io_stat(rq)) {
+		rq_pos = blk_rq_pos(rq);
+		end_sector = rq->rq_disk->end_sector;
+		if (end_sector == rq_pos) {
+			rq->syno_seq |= (1 << SYNO_DISK_SEQ_STAT_NEAR_SEQ);
+			rq->syno_seq |= (1 << SYNO_DISK_SEQ_STAT_SEQ);
+
+		} else if (end_sector < rq_pos
+				&& end_sector + 256 >= rq_pos) {
+			rq->syno_seq |= (1 << SYNO_DISK_SEQ_STAT_NEAR_SEQ);
+		}
+		rq->rq_disk->end_sector = rq_end_sector(rq);
+	}
+#endif  
 
 	return rq;
 }
@@ -1839,6 +1893,52 @@ struct request *blk_fetch_request(struct request_queue *q)
 }
 EXPORT_SYMBOL(blk_fetch_request);
 
+#ifdef MY_ABC_HERE
+static inline unsigned int syno_block_latency_bucket_offset_get(const u64 u64Latency)
+{
+	unsigned int uOffset = 0;
+
+	if ( 0x1F < u64Latency) {
+		uOffset += 1;
+	}
+
+	if (unlikely( 0x3FF < u64Latency)) {
+		uOffset += 1;
+	}
+
+	if (unlikely( 0x7FFF < u64Latency)) {
+		uOffset += 1;
+	}
+
+	return uOffset;
+}
+
+static void syno_block_latency_cal(struct request *req)
+{
+	int iDirection = rq_data_dir(req);
+	unsigned int uBucketOffset = 0;
+	u64 u64StepOffset = 0;
+	u64 u64CmdRespTime = 0;
+
+	if  (!req->rq_disk) {
+		return;
+	}
+	u64CmdRespTime = cpu_clock(0) - req->u64IssueTime;
+
+	req->rq_disk->u64CplCmdCnt[iDirection] += 1;
+
+	u64StepOffset = (u64CmdRespTime >> 15);
+	 
+	uBucketOffset = syno_block_latency_bucket_offset_get(u64StepOffset);
+	u64StepOffset >>= (5 * uBucketOffset);
+	if (unlikely(31 < u64StepOffset)) {
+		uBucketOffset = (SYNO_BLOCK_RESPONSE_BUCKETS_END - 1);
+		u64StepOffset = 31;
+	}
+	req->rq_disk->u64RespTimeSum[iDirection] += u64CmdRespTime;
+	req->rq_disk->u64RespTimeBuckets[iDirection][uBucketOffset][u64StepOffset] += 1;
+}
+#endif  
 
 bool blk_update_request(struct request *req, int error, unsigned int nr_bytes)
 {

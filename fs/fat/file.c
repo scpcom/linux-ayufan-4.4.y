@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/fs/fat/file.c
  *
@@ -305,6 +308,9 @@ void fat_truncate_blocks(struct inode *inode, loff_t offset)
 
 int fat_getattr(struct vfsmount *mnt, struct dentry *dentry, struct kstat *stat)
 {
+#ifdef MY_ABC_HERE
+	int err = 0;
+#endif /* MY_ABC_HERE */
 	struct inode *inode = d_inode(dentry);
 	generic_fillattr(inode, stat);
 	stat->blksize = MSDOS_SB(inode->i_sb)->cluster_size;
@@ -313,6 +319,12 @@ int fat_getattr(struct vfsmount *mnt, struct dentry *dentry, struct kstat *stat)
 		/* Use i_pos for ino. This is used as fileid of nfs. */
 		stat->ino = fat_i_pos_read(MSDOS_SB(inode->i_sb), inode);
 	}
+#ifdef MY_ABC_HERE
+	err = syno_inode_keep_list_update(&(MSDOS_SB(inode->i_sb)->syno_inode_keep_list), inode);
+	if (err) {
+		fat_msg(inode->i_sb, KERN_INFO, "FAT failed to update inode keep err:%d", err);
+	}
+#endif /* MY_ABC_HERE */
 	return 0;
 }
 EXPORT_SYMBOL_GPL(fat_getattr);

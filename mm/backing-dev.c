@@ -17,6 +17,14 @@
 
 static atomic_long_t bdi_seq = ATOMIC_LONG_INIT(0);
 
+#ifdef MY_DEF_HERE
+struct backing_dev_info syno_backing_dev_info = {
+	.name		= "syno",
+	.ra_pages	= VM_MAX_READAHEAD * 1024 / PAGE_CACHE_SIZE,
+};
+EXPORT_SYMBOL_GPL(syno_backing_dev_info);
+#endif /* MY_DEF_HERE */
+
 struct backing_dev_info noop_backing_dev_info = {
 	.name		= "noop",
 	.capabilities	= BDI_CAP_NO_ACCT_AND_WRITEBACK,
@@ -221,7 +229,31 @@ static ssize_t stable_pages_required_show(struct device *dev,
 	return snprintf(page, PAGE_SIZE-1, "%d\n",
 			bdi_cap_stable_pages_required(bdi) ? 1 : 0);
 }
+#ifdef MY_DEF_HERE
+static ssize_t stable_pages_required_store(struct device *dev,
+		  struct device_attribute *attr, const char *buf, size_t count)
+{
+	ssize_t ret;
+	unsigned int value;
+	struct backing_dev_info *bdi = dev_get_drvdata(dev);
+
+	ret = kstrtouint(buf, 10, &value);
+	if (ret < 0)
+		return ret;
+
+	value = !!value;
+	if (value) {
+		bdi->capabilities |= BDI_CAP_STABLE_WRITES;
+	} else {
+		bdi->capabilities &= ~BDI_CAP_STABLE_WRITES;
+	}
+
+	return count;
+}
+static DEVICE_ATTR_RW(stable_pages_required);
+#else
 static DEVICE_ATTR_RO(stable_pages_required);
+#endif /* MY_DEF_HERE */
 
 static struct attribute *bdi_dev_attrs[] = {
 	&dev_attr_read_ahead_kb.attr,
@@ -252,6 +284,12 @@ static int __init default_bdi_init(void)
 					      WQ_UNBOUND | WQ_SYSFS, 0);
 	if (!bdi_wq)
 		return -ENOMEM;
+
+#ifdef MY_DEF_HERE
+	err = bdi_init(&syno_backing_dev_info);
+	if (!err)
+		bdi_register(&syno_backing_dev_info, NULL, "syno");
+#endif /* MY_DEF_HERE */
 
 	err = bdi_init(&noop_backing_dev_info);
 

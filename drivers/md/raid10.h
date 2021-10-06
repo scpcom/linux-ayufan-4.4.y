@@ -16,34 +16,28 @@ struct r10conf {
 	struct raid10_info	*mirrors_new, *mirrors_old;
 	spinlock_t		device_lock;
 
-	
 	struct geom {
 		int		raid_disks;
-		int		near_copies;  
-		int		far_copies;   
-		int		far_offset;   
-		sector_t	stride;	      
-		int             far_set_size; 
-		int		chunk_shift; 
+		int		near_copies;   
+		int		far_copies;    
+		int		far_offset;    
+		sector_t	stride;	       
+		int             far_set_size;  
+		int		chunk_shift;  
 		sector_t	chunk_mask;
 	} prev, geo;
-	int			copies;	      
+	int			copies;	       
 
-	sector_t		dev_sectors;  
+	sector_t		dev_sectors;   
 	sector_t		reshape_progress;
 	sector_t		reshape_safe;
 	unsigned long		reshape_checkpoint;
 	sector_t		offset_diff;
 
 	struct list_head	retry_list;
-	
+	 
 	struct list_head	bio_end_io_list;
 
-#ifdef MY_ABC_HERE
-	spinlock_t          syno_self_heal_retry_list_lock;
-	struct list_head    syno_self_heal_retry_list;
-#endif 
-	
 	struct bio_list		pending_bio_list;
 	int			pending_count;
 

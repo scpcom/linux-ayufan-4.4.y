@@ -28,12 +28,9 @@
 
 #include <linux/kthread.h>
 #include <linux/freezer.h>
-#ifdef MY_ABC_HERE
-#include <linux/syno_acl.h>
-#endif 
 
 #include "ext4.h"
-#include "ext4_extents.h"	
+#include "ext4_extents.h"	 
 #include "ext4_jbd2.h"
 #include "xattr.h"
 #include "acl.h"
@@ -1209,9 +1206,6 @@ enum {
 	Opt_dioread_nolock, Opt_dioread_lock,
 	Opt_discard, Opt_nodiscard, Opt_init_itable, Opt_noinit_itable,
 	Opt_max_dir_size_kb, Opt_nojournal_checksum,
-#ifdef MY_ABC_HERE
-	Opt_synoacl, Opt_nosynoacl,
-#endif 
 };
 
 static const match_table_t tokens = {
@@ -1235,10 +1229,6 @@ static const match_table_t tokens = {
 	{Opt_nouser_xattr, "nouser_xattr"},
 	{Opt_acl, "acl"},
 	{Opt_noacl, "noacl"},
-#ifdef MY_ABC_HERE
-	{Opt_synoacl, SYNO_ACL_MNT_OPT},
-	{Opt_nosynoacl, SYNO_ACL_NOT_MNT_OPT},
-#endif 
 	{Opt_noload, "norecovery"},
 	{Opt_noload, "noload"},
 	{Opt_removed, "nobh"},
@@ -1473,10 +1463,6 @@ static const struct mount_opts {
 	 MOPT_NO_EXT2 | MOPT_DATAJ},
 	{Opt_user_xattr, EXT4_MOUNT_XATTR_USER, MOPT_SET},
 	{Opt_nouser_xattr, EXT4_MOUNT_XATTR_USER, MOPT_CLEAR},
-#ifdef MY_ABC_HERE
-	{Opt_synoacl, EXT4_MOUNT_SYNO_ACL, MOPT_SET},
-	{Opt_nosynoacl, EXT4_MOUNT_SYNO_ACL, MOPT_CLEAR},
-#else
 #ifdef CONFIG_EXT4_FS_POSIX_ACL
 	{Opt_acl, EXT4_MOUNT_POSIX_ACL, MOPT_SET},
 	{Opt_noacl, EXT4_MOUNT_POSIX_ACL, MOPT_CLEAR},
@@ -1484,7 +1470,6 @@ static const struct mount_opts {
 	{Opt_acl, 0, MOPT_NOSUPPORT},
 	{Opt_noacl, 0, MOPT_NOSUPPORT},
 #endif
-#endif 
 	{Opt_nouid32, EXT4_MOUNT_NO_UID32, MOPT_SET},
 	{Opt_debug, EXT4_MOUNT_DEBUG, MOPT_SET},
 	{Opt_quota, EXT4_MOUNT_QUOTA | EXT4_MOUNT_USRQUOTA, MOPT_SET | MOPT_Q},
@@ -3178,22 +3163,19 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 		set_opt(sb, GRPID);
 	if (def_mount_opts & EXT4_DEFM_UID16)
 		set_opt(sb, NO_UID32);
-	
+	 
 	set_opt(sb, XATTR_USER);
-#ifdef MY_ABC_HERE
-#else
 #ifdef CONFIG_EXT4_FS_POSIX_ACL
 	set_opt(sb, POSIX_ACL);
 #endif
-#endif 
 
 #ifdef MY_ABC_HERE
 	set_opt(sb, JOURNAL_CHECKSUM);
 #else
-	
+	 
 	if (ext4_has_metadata_csum(sb))
 		set_opt(sb, JOURNAL_CHECKSUM);
-#endif 
+#endif  
 
 	if ((def_mount_opts & EXT4_DEFM_JMODE) == EXT4_DEFM_JMODE_DATA)
 		set_opt(sb, JOURNAL_DATA);
@@ -3281,23 +3263,8 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 		sb->s_iflags |= SB_I_CGROUPWB;
 	}
 
-#ifdef MY_ABC_HERE
-	if (test_opt(sb, SYNO_ACL)) {
-		int st = SYNOACLModuleStatusGet("synoacl_vfs");
-		if (MODULE_STATE_LIVE != st) {
-			ext4_msg(sb, KERN_ERR,
-		           "synoacl module has not been loaded."
-		           "Unable to mount with synoacl, vfs_mod status=%d", st);
-			clear_opt(sb, SYNO_ACL);
-		} else {
-			sb->s_flags |= MS_SYNOACL;
-			SYNOACLModuleGet("synoacl_vfs");
-		}
-	}
-#else
 	sb->s_flags = (sb->s_flags & ~MS_POSIXACL) |
 		(test_opt(sb, POSIX_ACL) ? MS_POSIXACL : 0);
-#endif 
 
 	if (le32_to_cpu(es->s_rev_level) == EXT4_GOOD_OLD_REV &&
 	    (ext4_has_compat_features(sb) ||
@@ -3357,12 +3324,7 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 		goto failed_mount;
 	}
 
-#ifdef MY_ABC_HERE
-	
-	if (le16_to_cpu(sbi->s_es->s_reserved_gdt_blocks) > 8189) {
-#else
 	if (le16_to_cpu(sbi->s_es->s_reserved_gdt_blocks) > (blocksize / 4)) {
-#endif 
 		ext4_msg(sb, KERN_ERR,
 			 "Number of reserved GDT blocks insanely large: %d",
 			 le16_to_cpu(sbi->s_es->s_reserved_gdt_blocks));
@@ -4309,9 +4271,6 @@ static int ext4_commit_super(struct super_block *sb, int sync)
 			EXT4_C2B(EXT4_SB(sb), percpu_counter_sum_positive(
 				&EXT4_SB(sb)->s_freeclusters_counter)));
 	if (percpu_counter_initialized(&EXT4_SB(sb)->s_freeinodes_counter))
-#ifdef MY_ABC_HERE
-		if ((u32)(~0U) >= percpu_counter_sum_positive(&EXT4_SB(sb)->s_freeinodes_counter))
-#endif 
 		es->s_free_inodes_count =
 			cpu_to_le32(percpu_counter_sum_positive(
 				&EXT4_SB(sb)->s_freeinodes_counter));
@@ -4572,26 +4531,8 @@ static int ext4_remount(struct super_block *sb, int *flags, char *data)
 	if (sbi->s_mount_flags & EXT4_MF_FS_ABORTED)
 		ext4_abort(sb, "Abort forced by user");
 
-#ifdef MY_ABC_HERE
-	if ((sb->s_flags & MS_SYNOACL) && !test_opt(sb, SYNO_ACL)) {
-		sb->s_flags = sb->s_flags & ~MS_SYNOACL;
-		SYNOACLModulePut("synoacl_vfs");
-	} else if((!(sb->s_flags & MS_SYNOACL)) && test_opt(sb, SYNO_ACL)) {
-		int st = SYNOACLModuleStatusGet("synoacl_vfs");
-		if (MODULE_STATE_LIVE != st) {
-			ext4_msg(sb, KERN_ERR,
-			       "synoacl module has not been loaded."
-			       "Unable to remount with synoacl, vfs_mod status=%d", st);
-			clear_opt(sb, SYNO_ACL);
-		} else {
-			sb->s_flags |= MS_SYNOACL;
-			SYNOACLModuleGet("synoacl_vfs");
-		}
-	}
-#else
 	sb->s_flags = (sb->s_flags & ~MS_POSIXACL) |
 		(test_opt(sb, POSIX_ACL) ? MS_POSIXACL : 0);
-#endif 
 
 	es = sbi->s_es;
 
@@ -5077,17 +5018,6 @@ static struct dentry *ext4_mount(struct file_system_type *fs_type, int flags,
 }
 
 #ifdef MY_ABC_HERE
-static void ext4_kill_sb(struct super_block *sb)
-{
-	kill_block_super(sb);
-
-	if (MS_SYNOACL & sb->s_flags) {
-		SYNOACLModulePut("synoacl_vfs");
-	}
-}
-#endif 
-
-#ifdef MY_ABC_HERE
 void ext4_fill_mount_path(struct super_block *sb, char *path)
 {
 	struct ext4_sb_info *sbi = EXT4_SB(sb);
@@ -5162,15 +5092,10 @@ static struct file_system_type ext4_fs_type = {
 	.owner		= THIS_MODULE,
 	.name		= "ext4",
 	.mount		= ext4_mount,
-#ifdef MY_ABC_HERE
-	.kill_sb	= ext4_kill_sb,
-#else
 	.kill_sb	= kill_block_super,
-#endif 
 	.fs_flags	= FS_REQUIRES_DEV,
 };
 MODULE_ALIAS_FS("ext4");
-
 
 wait_queue_head_t ext4__ioend_wq[EXT4_WQ_HASH_SZ];
 struct mutex ext4__aio_mutex[EXT4_WQ_HASH_SZ];

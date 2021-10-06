@@ -27,12 +27,57 @@
 #include <linux/i2c.h>
 #include "pmbus.h"
 
+#ifdef CONFIG_SYNO_PMBUS_FEATURES
+#include <linux/i2c/pmbus.h>
+#define SYNO_PMBUS "syno_pmbus"
+
+static struct i2c_driver pmbus_driver;
+
+static int pmbus_detect(struct i2c_client *client, struct i2c_board_info *info) {
+
+	struct i2c_adapter *adapter = client->adapter;
+
+	if (!i2c_check_functionality(adapter, I2C_FUNC_SMBUS_BYTE_DATA))
+		return -ENODEV;
+	strlcpy(info->type, SYNO_PMBUS, I2C_NAME_SIZE);
+
+	return 0;
+}
+
+struct i2c_client *syno_find_pmbus_client(int psu_no){
+	struct list_head *pos;
+	struct i2c_client *client;
+	struct i2c_client *ret = NULL;
+	int count = 0;
+
+	list_for_each(pos, &pmbus_driver.clients) {
+		client = list_entry(pos, struct i2c_client, detected);
+		if (!strcmp(client->name, SYNO_PMBUS)) {
+			count++;
+		}
+		if (count == psu_no) {
+			ret = client;
+			break;
+		}
+	}
+	return ret;
+}
+#endif /* CONFIG_SYNO_PMBUS_FEATURES */
+
 /*
  * Find sensor groups and status registers on each page.
  */
 static void pmbus_find_sensor_groups(struct i2c_client *client,
-				     struct pmbus_driver_info *info)
+                                    struct pmbus_driver_info *info)
 {
+#ifdef CONFIG_SYNO_PMBUS_FEATURES
+	// Support list for SYNO_PMBUS
+	info->func[0] |= PMBUS_HAVE_PIN;
+	info->func[0] |= PMBUS_HAVE_FAN12;
+	info->func[0] |= PMBUS_HAVE_STATUS_FAN12;
+	info->func[0] |= PMBUS_HAVE_TEMP;
+	info->func[0] |= PMBUS_HAVE_POUT;
+#else /* CONFIG_SYNO_PMBUS_FEATURES */
 	int page;
 
 	/* Sensors detected on page 0 only */
@@ -66,28 +111,29 @@ static void pmbus_find_sensor_groups(struct i2c_client *client,
 	if (pmbus_check_word_register(client, 0, PMBUS_READ_TEMPERATURE_3))
 		info->func[0] |= PMBUS_HAVE_TEMP3;
 	if (info->func[0] & (PMBUS_HAVE_TEMP | PMBUS_HAVE_TEMP2
-			     | PMBUS_HAVE_TEMP3)
-	    && pmbus_check_byte_register(client, 0,
-					 PMBUS_STATUS_TEMPERATURE))
-			info->func[0] |= PMBUS_HAVE_STATUS_TEMP;
+				| PMBUS_HAVE_TEMP3)
+			&& pmbus_check_byte_register(client, 0,
+				PMBUS_STATUS_TEMPERATURE))
+		info->func[0] |= PMBUS_HAVE_STATUS_TEMP;
 
 	/* Sensors detected on all pages */
 	for (page = 0; page < info->pages; page++) {
 		if (pmbus_check_word_register(client, page, PMBUS_READ_VOUT)) {
 			info->func[page] |= PMBUS_HAVE_VOUT;
 			if (pmbus_check_byte_register(client, page,
-						      PMBUS_STATUS_VOUT))
+						PMBUS_STATUS_VOUT))
 				info->func[page] |= PMBUS_HAVE_STATUS_VOUT;
 		}
 		if (pmbus_check_word_register(client, page, PMBUS_READ_IOUT)) {
 			info->func[page] |= PMBUS_HAVE_IOUT;
 			if (pmbus_check_byte_register(client, 0,
-						      PMBUS_STATUS_IOUT))
+						PMBUS_STATUS_IOUT))
 				info->func[page] |= PMBUS_HAVE_STATUS_IOUT;
 		}
 		if (pmbus_check_word_register(client, page, PMBUS_READ_POUT))
 			info->func[page] |= PMBUS_HAVE_POUT;
 	}
+#endif /* CONFIG_SYNO_PMBUS_FEATURES */
 }
 
 /*
@@ -167,14 +213,33 @@ static int pmbus_probe(struct i2c_client *client,
 		       const struct i2c_device_id *id)
 {
 	struct pmbus_driver_info *info;
+#ifdef CONFIG_SYNO_PMBUS_FEATURES 
+	struct pmbus_platform_data *pdata = NULL;
+	struct device *dev = &client->dev;
+#endif /* CONFIG_SYNO_PMBUS_FEATURES */
 
 	info = devm_kzalloc(&client->dev, sizeof(struct pmbus_driver_info),
-			    GFP_KERNEL);
+			GFP_KERNEL);
 	if (!info)
 		return -ENOMEM;
 
+#ifdef CONFIG_SYNO_PMBUS_FEATURES
+	if (!strcmp(id->name, SYNO_PMBUS)) {
+		pdata = devm_kzalloc(&client->dev,
+				sizeof(struct pmbus_platform_data),
+				GFP_KERNEL);
+		if (!pdata)
+			return -ENOMEM;
+
+		pdata->flags = PMBUS_SKIP_STATUS_CHECK;
+	}
+#endif /* CONFIG_SYNO_PMBUS_FEATURES */
+
 	info->pages = id->driver_data;
 	info->identify = pmbus_identify;
+#ifdef CONFIG_SYNO_PMBUS_FEATURES
+	dev->platform_data = pdata;
+#endif /* CONFIG_SYNO_PMBUS_FEATURES */
 
 	return pmbus_do_probe(client, id, info);
 }
@@ -193,6 +258,9 @@ static const struct i2c_device_id pmbus_id[] = {
 	{"pdt006", 1},
 	{"pdt012", 1},
 	{"pmbus", 0},
+#ifdef CONFIG_SYNO_PMBUS_FEATURES
+	{SYNO_PMBUS, 1},
+#endif /* CONFIG_SYNO_PMBUS_FEATURES */
 	{"tps40400", 1},
 	{"tps544b20", 1},
 	{"tps544b25", 1},
@@ -204,6 +272,10 @@ static const struct i2c_device_id pmbus_id[] = {
 
 MODULE_DEVICE_TABLE(i2c, pmbus_id);
 
+#ifdef CONFIG_SYNO_PMBUS_FEATURES
+static const unsigned short pmbus_i2c[] = { 0x58, 0x59, I2C_CLIENT_END };
+#endif /* CONFIG_SYNO_PMBUS_FEATURES */
+
 /* This is the driver that will be inserted */
 static struct i2c_driver pmbus_driver = {
 	.driver = {
@@ -212,6 +284,11 @@ static struct i2c_driver pmbus_driver = {
 	.probe = pmbus_probe,
 	.remove = pmbus_do_remove,
 	.id_table = pmbus_id,
+#ifdef CONFIG_SYNO_PMBUS_FEATURES
+	.class = I2C_CLASS_HWMON,
+	.detect = pmbus_detect,
+	.address_list = pmbus_i2c,
+#endif /* CONFIG_SYNO_PMBUS_FEATURES */
 };
 
 module_i2c_driver(pmbus_driver);

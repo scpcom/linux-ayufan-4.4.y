@@ -42,13 +42,6 @@
  * This is used to lock changes in serial line configuration.
  */
 static DEFINE_MUTEX(port_mutex);
-#ifdef MY_ABC_HERE
-static DEFINE_SPINLOCK(ttyS1_lock);
-#endif /* MY_ABC_HERE */
-
-#ifdef MY_DEF_HERE
-extern int gSynoTtyLogMsg;
-#endif /* MY_DEF_HERE */
 
 /*
  * lockdep: port->lock is initialized in two places, but we
@@ -531,21 +524,6 @@ static int uart_write(struct tty_struct *tty,
 	struct circ_buf *circ;
 	unsigned long flags;
 	int c, ret = 0;
-
-#ifdef MY_ABC_HERE
-	/* We need to delay 150 ms avoid micro p buffer queue overflow */
-	if (!strcmp(tty->name, "ttyS1")) {
-		spin_lock(&ttyS1_lock);
-		mdelay(150);
-		spin_unlock(&ttyS1_lock);
-#ifdef MY_DEF_HERE
-		// only the first size of bytes are write to ttyS1 which is microP
-		if (gSynoTtyLogMsg) {
-			printk(KERN_ERR "TTYS1 write command: [%.*s] call by %s (pid = %d)\n", count, buf, current->comm, current->pid);
-		}
-#endif /* MY_DEF_HERE */
-	}
-#endif /* MY_ABC_HERE */
 
 	/*
 	 * This means you called this function _after_ the port was

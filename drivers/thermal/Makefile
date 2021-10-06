@@ -48,6 +48,6 @@ obj-$(CONFIG_INTEL_PCH_THERMAL)	+= intel_pch_thermal.o
 obj-$(CONFIG_ST_THERMAL)	+= st/
 obj-$(CONFIG_TEGRA_SOCTHERM)	+= tegra_soctherm.o
 obj-$(CONFIG_HISI_THERMAL)     += hisi_thermal.o
-ifeq ($(CONFIG_SYNO_LSP_RTD129X),y)
+ifneq (,$(filter y, $(CONFIG_SYNO_LSP_RTD129X) $(CONFIG_SYNO_LSP_RTD1619)))
 obj-$(CONFIG_RTK_THERMAL)	+= realtek/
-endif # CONFIG_SYNO_LSP_RTD129X
+endif # CONFIG_SYNO_LSP_RTD129X || CONFIG_SYNO_LSP_RTD1619

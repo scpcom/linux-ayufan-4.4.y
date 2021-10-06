@@ -1,3 +1,15 @@
+#if defined(MY_DEF_HERE)
+/*
+ * Realtek pin controller driver
+ *
+ * Copyright (c) 2017 Realtek Semiconductor Corp.
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
+ */
+#endif /* MY_DEF_HERE */
 
 #ifndef __PINCTRL_RTK129X_H
 #define __PINCTRL_RTK129X_H
@@ -7,19 +19,23 @@
 
 //#define RTK_PINCTRL_DEBUG
 #ifdef RTK_PINCTRL_DEBUG
+#if defined(MY_DEF_HERE)
+#define RTK_PINCTRL_DBG(fmt, ....) pr_info("[PINCTRL] " fmt "\n", ## __VA_ARGS__)
+#else /* MY_DEF_HERE */
 #define RTK_PINCTRL_DBG(fmt, ...) printk("[PINCTRL] " fmt "\n", ## __VA_ARGS__)
+#endif /* MY_DEF_HERE */
 #else
-#define RTK_PINCTRL_DBG(fmt, ...) do {} while(0)
+#define RTK_PINCTRL_DBG(fmt, ...) do {} while (0)
 #endif
 
 #define RTK_PINCTRL_INF(fmt, ...) pr_info("[PINCTRL] " fmt "\n", ## __VA_ARGS__)
 #define RTK_PINCTRL_ERR(fmt, ...) pr_err("[PINCTRL Error] " fmt "\n", ## __VA_ARGS__)
 
-#define P_MISC_BASE			0
-#define P_MISC_BANK 		101
-#define P_ISO_BASE			(P_MISC_BASE+P_MISC_BANK)
-#define P_ISO_BANK			35
-#define P_OTHER_BASE 		(P_ISO_BASE+P_ISO_BANK)
+#define P_MISC_BASE		0
+#define P_MISC_BANK		101
+#define P_ISO_BASE		(P_MISC_BASE+P_MISC_BANK)
+#define P_ISO_BANK		35
+#define P_OTHER_BASE		(P_ISO_BASE+P_ISO_BANK)
 
 #define RTK_PCONF_SCHM		3
 #define RTK_PCONF_CURR		2
@@ -475,13 +491,21 @@ struct RTK_pinctrl_desc {
 struct RTK_pinctrl_function {
 	const char	*name;
 	const char	**groups;
+#if defined(MY_DEF_HERE)
+	unsigned int	ngroups;
+#else /* MY_DEF_HERE */
 	unsigned	ngroups;
+#endif /* MY_DEF_HERE */
 };
 
 struct RTK_pinctrl_group {
 	const char	*name;
 	unsigned long	config;
+#if defined(MY_DEF_HERE)
+	unsigned int	pin;
+#else /* MY_DEF_HERE */
 	unsigned	pin;
+#endif /* MY_DEF_HERE */
 };
 
 struct RTK_pinctrl {
@@ -493,9 +517,17 @@ struct RTK_pinctrl {
 	struct RTK_pinctrl_desc	*desc;
 	struct device			*dev;
 	struct RTK_pinctrl_function	*functions;
+#if defined(MY_DEF_HERE)
+	unsigned int			nfunctions;
+#else /* MY_DEF_HERE */
 	unsigned			nfunctions;
+#endif /* MY_DEF_HERE */
 	struct RTK_pinctrl_group	*groups;
+#if defined(MY_DEF_HERE)
+	unsigned int			ngroups;
+#else /* MY_DEF_HERE */
 	unsigned			ngroups;
+#endif /* MY_DEF_HERE */
 	struct pinctrl_dev		*pctl_dev;
 };
 

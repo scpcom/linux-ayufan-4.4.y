@@ -55,6 +55,16 @@
 #endif /* defined(CONFIG_USB_PATCH_ON_RTK) && defined(MY_DEF_HERE) */
 
 #include "platform_data.h"
+#if defined(MY_DEF_HERE)
+#if IS_ENABLED(CONFIG_USB_DWC3_RTK)
+#include <linux/of_address.h>
+#endif /* CONFIG_USB_DWC3_RTK */
+
+#ifdef CONFIG_USB_PATCH_ON_RTK
+#include <linux/suspend.h>
+#endif
+
+#endif /* MY_DEF_HERE */
 #include "core.h"
 #include "gadget.h"
 #include "io.h"
@@ -100,14 +110,13 @@ static int dwc3_core_soft_reset(struct dwc3 *dwc)
 	reg |= DWC3_GUSB2PHYCFG_PHYSOFTRST;
 	dwc3_writel(dwc->regs, DWC3_GUSB2PHYCFG(0), reg);
 
-#if defined(MY_DEF_HERE)
-#if !IS_ENABLED(CONFIG_USB_DWC3_RTK)
+#if IS_ENABLED(CONFIG_USB_DWC3_RTK) && (defined(MY_DEF_HERE) || defined(MY_DEF_HERE))
 	/* fixed kernel panic when init usb2_phy
 	 * move to the end of function
 	 */
+#else /* CONFIG_USB_DWC3_RTK && (MY_DEF_HERE || MY_DEF_HERE) */
 	usb_phy_init(dwc->usb2_phy);
-#endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_USB_DWC3_RTK && (MY_DEF_HERE || MY_DEF_HERE) */
 	usb_phy_init(dwc->usb3_phy);
 	ret = phy_init(dwc->usb2_generic_phy);
 	if (ret < 0)
@@ -137,13 +146,13 @@ static int dwc3_core_soft_reset(struct dwc3 *dwc)
 	reg &= ~DWC3_GCTL_CORESOFTRESET;
 	dwc3_writel(dwc->regs, DWC3_GCTL, reg);
 
-#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #if IS_ENABLED(CONFIG_USB_DWC3_RTK)
 	dev_dbg(dwc->dev, "[bug fixed] late to init usb2_phy");
 	usb_phy_init(dwc->usb2_phy);
 	mdelay(100);
-#endif
-#endif /* MY_DEF_HERE */
+#endif /* CONFIG_USB_DWC3_RTK */
+#endif /* MY_DEF_HERE || MY_DEF_HERE */
 
 	return 0;
 }
@@ -324,7 +333,7 @@ static int dwc3_event_buffers_setup(struct dwc3 *dwc)
 	return 0;
 }
 
-#if defined(CONFIG_USB_RTK_DWC3_DRD_MODE) && defined(MY_DEF_HERE)
+#if defined(CONFIG_USB_RTK_DWC3_DRD_MODE) && (defined(MY_DEF_HERE) || defined(MY_DEF_HERE))
 int rtk_dwc3_drd_core_soft_reset(struct dwc3 *dwc)
 {
 	return dwc3_core_soft_reset(dwc);
@@ -340,7 +349,7 @@ int rtk_dwc3_drd_event_buffers_setup(struct dwc3 *dwc)
 #ifdef MY_DEF_HERE
 EXPORT_SYMBOL_GPL(rtk_dwc3_drd_event_buffers_setup);
 #endif
-#endif /* defined(CONFIG_USB_RTK_DWC3_DRD_MODE) && defined(MY_DEF_HERE) */
+#endif /* CONFIG_USB_RTK_DWC3_DRD_MODE || (MY_DEF_HERE || MY_DEF_HERE) */
 
 static void dwc3_event_buffers_cleanup(struct dwc3 *dwc)
 {
@@ -747,7 +756,7 @@ static int dwc3_core_init(struct dwc3 *dwc)
 	if (ret)
 		goto err2;
 
-#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #if IS_ENABLED(CONFIG_USB_DWC3_RTK)
 	/* workaround: to avoid transaction error and cause port reset
 	 * we enable threshold control for TX/RX
@@ -764,17 +773,29 @@ static int dwc3_core_init(struct dwc3 *dwc)
 
 	dwc3_writel(dwc->regs, DWC3_GTXTHRCFG, 0x01010000);
 	dwc3_writel(dwc->regs, DWC3_GRXTHRCFG,  RX_THRESHOLD_EN  |
-			RX_PKT_CNT(3)    |
-			RX_MAX_BURST_SZ(3));
+											RX_PKT_CNT(3)    |
+											RX_MAX_BURST_SZ(3));
 	dwc3_writel(dwc->regs, DWC3_GUCTL,
-			dwc3_readl(dwc->regs, DWC3_GUCTL) | (1<<14));   // enable auto retry
+					dwc3_readl(dwc->regs, DWC3_GUCTL) | (1<<14));   // enable auto retry
 
-#if defined(CONFIG_USB_PATCH_ON_RTK) && defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
+	/* disable SS park modde */
+	if (dwc->dis_ss_park_mode)
+		dwc3_writel(dwc->regs, DWC3_GUCTL1,
+				dwc3_readl(dwc->regs, DWC3_GUCTL1) | (1<<17));
+
+	if (dwc->dis_hs_park_mode)
+		dwc3_writel(dwc->regs, DWC3_GUCTL1,
+				dwc3_readl(dwc->regs, DWC3_GUCTL1) | (1<<16));
+#endif /* MY_DEF_HERE */
+
+#ifdef CONFIG_USB_PATCH_ON_RTK
 	if (dwc->revision >= DWC3_REVISION_300A)
 		dwc3_writel(dwc->regs, DWC3_DEV_IMOD,
-				dwc3_readl(dwc->regs, DWC3_DEV_IMOD) | DWC3_DEVICE_IMODI(0x1));
-#endif /* defined(CONFIG_USB_PATCH_ON_RTK) && defined(MY_DEF_HERE) */
+					dwc3_readl(dwc->regs, DWC3_DEV_IMOD) | DWC3_DEVICE_IMODI(0x1));
+#endif /* CONFIG_USB_PATCH_ON_RTK */
 
+#if defined(MY_DEF_HERE)
 	if (get_rtd129x_cpu_revision() == RTD129x_CHIP_REVISION_A00) {
 		/* USB2.0 cannot connect to device if port 0(USB3, type C port) is disconnected from a device
 		 * If no device is connected to USB port 0, the USB macro will enter suspend mode.
@@ -787,9 +808,9 @@ static int dwc3_core_init(struct dwc3 *dwc)
 		dwc3_writel(dwc->regs, DWC3_GUSB2PHYCFG(0), reg);
 		dev_info(dwc->dev, "[bug fixed] 1295 A00: add workaround to disable phy suspend");
 	}
-
-#endif /* CONFIG_USB_DWC3_RTK */
 #endif /* MY_DEF_HERE */
+#endif /* CONFIG_USB_DWC3_RTK */
+#endif /* MY_DEF_HERE || MY_DEF_HERE */
 
 	return 0;
 
@@ -1001,34 +1022,38 @@ static int dwc3_probe(struct platform_device *pdev)
 
 	res->start += DWC3_GLOBALS_REGS_START;
 
-#if IS_ENABLED(CONFIG_USB_DWC3_RTK) && defined(MY_DEF_HERE)
+#if IS_ENABLED(CONFIG_USB_DWC3_RTK) && (defined(MY_DEF_HERE) || defined(MY_DEF_HERE))
 	/* due to rtk dwc3 ip DWC3_GLOBALS_REGS_START is not standard (0xc100)
 	 * we need to fixed it
 	 */
+#if defined(MY_DEF_HERE)
+	regs = of_iomap(dev->of_node, 0);
+#else /* MY_DEF_HERE */
 	regs = of_iomap(node, 0);
+#endif /* MY_DEF_HERE */
 	regs += 0x8100;
 	dev_info(dev, "rtk dwc3 fixed dwc3 globals register start address 0x%p\n", regs);
-#else /* CONFIG_USB_DWC3_RTK && defined(MY_DEF_HERE) */
+#else /* CONFIG_USB_DWC3_RTK && (MY_DEF_HERE || MY_DEF_HERE) */
 	/*
 	 * Request memory region but exclude xHCI regs,
 	 * since it will be requested by the xhci-plat driver.
 	 */
 	regs = devm_ioremap_resource(dev, res);
-#endif /* CONFIG_USB_DWC3_RTK && defined(MY_DEF_HERE) */
+#endif /* CONFIG_USB_DWC3_RTK && (MY_DEF_HERE || MY_DEF_HERE) */
 	if (IS_ERR(regs)) {
 		ret = PTR_ERR(regs);
 		goto err0;
 	}
 
 	dwc->regs	= regs;
-#if IS_ENABLED(CONFIG_USB_DWC3_RTK) && defined(MY_DEF_HERE)
+#if IS_ENABLED(CONFIG_USB_DWC3_RTK) && (defined(MY_DEF_HERE) || defined(MY_DEF_HERE))
 	/* due to rtk dwc3 ip DWC3_GLOBALS_REGS_START is not standard (0xc100)
 	 * we need to fixed it
 	 */
 	dwc->regs_size	= resource_size(res) - 0x8100;
-#else /* CONFIG_USB_DWC3_RTK && defined(MY_DEF_HERE) */
+#else /* CONFIG_USB_DWC3_RTK && (MY_DEF_HERE || MY_DEF_HERE) */
 	dwc->regs_size	= resource_size(res);
-#endif /* CONFIG_USB_DWC3_RTK && defined(MY_DEF_HERE) */
+#endif /* CONFIG_USB_DWC3_RTK && (MY_DEF_HERE || MY_DEF_HERE) */
 
 	/* default to highest possible threshold */
 	lpm_nyet_threshold = 0xff;
@@ -1126,6 +1151,14 @@ static int dwc3_probe(struct platform_device *pdev)
 				"snps,dis_u2_susphy_quirk");
 	dwc->dis_enblslpm_quirk = device_property_read_bool(dev,
 				"snps,dis_enblslpm_quirk");
+#if defined(MY_DEF_HERE)
+#if IS_ENABLED(CONFIG_USB_DWC3_RTK)
+		dwc->dis_ss_park_mode = device_property_read_bool(dev,
+				"snps,dis_ss_park_mode");
+		dwc->dis_hs_park_mode = device_property_read_bool(dev,
+				"snps,dis_hs_park_mode");
+#endif
+#endif /* MY_DEF_HERE */
 
 	dwc->tx_de_emphasis_quirk = device_property_read_bool(dev,
 				"snps,tx_de_emphasis_quirk");

@@ -45,6 +45,86 @@ extern int giSynoSpinupGroup[SYNO_SPINUP_GROUP_MAX];
 extern int giSynoSpinupGroupNum;
 extern int giSynoSpinupGroupDelay;
 #endif /* MY_DEF_HERE */
+#ifdef CONFIG_SYNO_SMBUS_HDD_POWERCTL
+extern int gSynoSmbusHddAdapter;
+extern int gSynoSmbusHddAddress;
+extern char gSynoSmbusHddType[16];
+#endif /* CONFIG_SYNO_SMBUS_HDD_POWERCTL */
+
+#ifdef MY_ABC_HERE
+void __init syno_init_internal_hdd_number(void)
+{
+	int internalHDDNumber = 0;
+	struct device_node *pSlotNode = NULL;
+	char *szSynoHddPowerupSeq = NULL;
+	szSynoHddPowerupSeq = (char *)of_get_property(of_root, DT_HDD_POWERUP_SEQ, NULL);
+
+	if (szSynoHddPowerupSeq && 0 == strncmp(szSynoHddPowerupSeq, "true", strlen("true"))) {
+		gSynoHddPowerupSeq = 1;
+
+		for_each_child_of_node(of_root, pSlotNode) {
+			// get index number of internal_slot, e.g. /internal_slot@4 --> 4
+			if (!pSlotNode->full_name || 0 != strncmp(pSlotNode->full_name, "/"DT_INTERNAL_SLOT, strlen("/"DT_INTERNAL_SLOT))) {
+				continue;
+			}
+			internalHDDNumber++;
+		}
+		gSynoInternalHddNumber = internalHDDNumber;
+	}
+}
+#endif /* MY_ABC_HERE */
+
+#ifdef MY_DEF_HERE
+void __init syno_init_spinup_group(void)
+{
+	int group_num = 0, retReadDT = 0, spinupGroupMemberNum = 0, spinupGroupDelay = 0;
+	for (group_num = 0; group_num < sizeof(giSynoSpinupGroup)/sizeof(int); group_num++) {
+		retReadDT = of_property_read_u32_index(of_root, DT_SYNO_SPINUP_GROUP, group_num, &spinupGroupMemberNum);
+		// if reading DT error, this means that reading to the end of spinup_group or no spinup_group
+		if (retReadDT) {
+			break;
+		}
+		giSynoSpinupGroup[group_num] = spinupGroupMemberNum;
+		printk("SYNO Spinup Group %d: %d\n", group_num, giSynoSpinupGroup[group_num]);
+	}
+	giSynoSpinupGroupNum = group_num;
+
+	retReadDT = of_property_read_u32_index(of_root, DT_SYNO_SPINUP_GROUP_DELAY, 0, &spinupGroupDelay);
+	if (0 == retReadDT) {
+		giSynoSpinupGroupDelay = spinupGroupDelay;
+		printk("SYNO Spinup Group Delay: %d\n", giSynoSpinupGroupDelay);
+	}
+}
+#endif /* MY_DEF_HERE */
+
+#ifdef CONFIG_SYNO_SMBUS_HDD_POWERCTL
+void __init syno_init_smbus_hdd_pwrctl(void)
+{
+	int retReadDT = 0;
+	int smbushddadapter = 0;
+	int smbushddaddress = 0;
+	char *smbushddtype = NULL;
+
+	smbushddtype = (char *)of_get_property(of_root, DT_SYNO_HDD_SMBUS_TYPE, NULL);
+
+	if (smbushddtype != NULL) {
+		snprintf(gSynoSmbusHddType, sizeof(gSynoSmbusHddType), "%s", smbushddtype);
+		printk("SYNO Smbus Hdd Type: %s\n", gSynoSmbusHddType);
+	}
+
+	retReadDT = of_property_read_u32_index(of_root, DT_SYNO_HDD_SMBUS_ADAPTER, 0, &smbushddadapter);
+	if (0 == retReadDT) {
+		gSynoSmbusHddAdapter = smbushddadapter;
+		printk("SYNO Smbus Hdd Adapter: %d\n", gSynoSmbusHddAdapter);
+	}
+
+	retReadDT = of_property_read_u32_index(of_root, DT_SYNO_HDD_SMBUS_ADDRESS, 0, &smbushddaddress);
+	if (0 == retReadDT) {
+		gSynoSmbusHddAddress = smbushddaddress;
+		printk("SYNO Smbus Hdd Address: 0x%02x\n", gSynoSmbusHddAddress);
+	}
+}
+#endif /*CONFIG_SYNO_SMBUS_HDD_POWERCTL */
 #endif /* MY_DEF_HERE */
 
 /*
@@ -1249,55 +1329,19 @@ void __init unflatten_device_tree(void)
 
 	/* Get pointer to "/chosen" and "/aliases" nodes for use everywhere */
 	of_alias_scan(early_init_dt_alloc_memory_arch);
-}
 
 #ifdef MY_DEF_HERE
 #ifdef MY_DEF_HERE
-void __init syno_init_spinup_group(void)
-{
-	int group_num = 0, retReadDT = 0, spinupGroupMemberNum = 0, spinupGroupDelay = 0;
-	for (group_num = 0; group_num < sizeof(giSynoSpinupGroup)/sizeof(int); group_num++) {
-		retReadDT = of_property_read_u32_index(of_root, DT_SYNO_SPINUP_GROUP, group_num, &spinupGroupMemberNum);
-		// if reading DT error, this means that reading to the end of spinup_group or no spinup_group
-		if (retReadDT) {
-			break;
-		}
-		giSynoSpinupGroup[group_num] = spinupGroupMemberNum;
-		printk("SYNO Spinup Group %d: %d\n", group_num, giSynoSpinupGroup[group_num]);
-	}
-	giSynoSpinupGroupNum = group_num;
-
-	retReadDT = of_property_read_u32_index(of_root, DT_SYNO_SPINUP_GROUP_DELAY, 0, &spinupGroupDelay);
-	if (0 == retReadDT) {
-		giSynoSpinupGroupDelay = spinupGroupDelay;
-		printk("SYNO Spinup Group Delay: %d\n", giSynoSpinupGroupDelay);
-	}
-}
+	syno_init_spinup_group();
 #endif /* MY_DEF_HERE */
-
 #ifdef MY_ABC_HERE
-void __init syno_init_internal_hdd_number(void)
-{
-	int internalHDDNumber = 0;
-	struct device_node *pSlotNode = NULL;
-	char *szSynoHddPowerupSeq = NULL;
-	szSynoHddPowerupSeq = (char *)of_get_property(of_root, DT_HDD_POWERUP_SEQ, NULL);
-
-	if (szSynoHddPowerupSeq && 0 == strncmp(szSynoHddPowerupSeq, "true", strlen("true"))) {
-		gSynoHddPowerupSeq = 1;
-
-		for_each_child_of_node(of_root, pSlotNode) {
-			// get index number of internal_slot, e.g. /internal_slot@4 --> 4
-			if (!pSlotNode->full_name || 0 != strncmp(pSlotNode->full_name, "/"DT_INTERNAL_SLOT, strlen("/"DT_INTERNAL_SLOT))) {
-				continue;
-			}
-			internalHDDNumber++;
-		}
-		gSynoInternalHddNumber = internalHDDNumber;
-	}
-}
+	syno_init_internal_hdd_number();
 #endif /* MY_ABC_HERE */
-#endif /* MY_DEF_HERE */
+#ifdef CONFIG_SYNO_SMBUS_HDD_POWERCTL
+	syno_init_smbus_hdd_pwrctl();
+#endif /* CONFIG_SYNO_SMBUS_HDD_POWERCTL */
+#endif /* MY_DEF_HERE && MY_DEF_HERE */
+}
 
 /**
  * unflatten_and_copy_device_tree - copy and create tree of device_nodes from flat blob
@@ -1329,17 +1373,6 @@ void __init unflatten_and_copy_device_tree(void)
 		initial_boot_params = dt;
 	}
 	unflatten_device_tree();
-
-#ifdef MY_DEF_HERE
-#ifdef MY_DEF_HERE
-	syno_init_spinup_group();
-#endif /* MY_DEF_HERE */
-
-#ifdef MY_ABC_HERE
-	syno_init_internal_hdd_number();
-#endif /* MY_ABC_HERE */
-#endif /* MY_DEF_HERE && MY_DEF_HERE */
-
 }
 
 #ifdef CONFIG_SYSFS

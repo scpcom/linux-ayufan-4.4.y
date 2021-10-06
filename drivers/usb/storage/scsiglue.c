@@ -55,18 +55,20 @@ static int slave_configure(struct scsi_device *sdev)
 			blk_queue_max_hw_sectors(sdev->request_queue,
 					      max_sectors);
 	} else if (sdev->type == TYPE_TAPE) {
-		
+		 
 		blk_queue_max_hw_sectors(sdev->request_queue, 0x7FFFFF);
+#if defined(MY_DEF_HERE)
+	} else if (us->pusb_dev->speed >= USB_SPEED_SUPER) {
+		 
+		blk_queue_max_hw_sectors(sdev->request_queue, 2048);
+#endif  
 	}
 
-	
 	if (!us->pusb_dev->bus->controller->dma_mask)
 		blk_queue_bounce_limit(sdev->request_queue, BLK_BOUNCE_HIGH);
 
-	
 	if (sdev->type == TYPE_DISK) {
 
-		
 		switch (le16_to_cpu(us->pusb_dev->descriptor.idVendor)) {
 		case VENDOR_ID_NOKIA:
 		case VENDOR_ID_NIKON:

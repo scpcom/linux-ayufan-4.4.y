@@ -344,6 +344,14 @@ struct _mmc_csd {
 
 #define EXT_CSD_WR_REL_PARAM_EN		(1<<2)
 
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_MMC_RTK_EMMC
+#define EXT_CSD_BOOT_WP_SEL            (0x80)
+#define EXT_CSD_BOOT_WP_PERM_SEL       (0x08)
+#define EXT_CSD_BOOT_WP_PWR_SEL        (0x02)
+#endif
+
+#endif /* MY_DEF_HERE */
 #define EXT_CSD_BOOT_WP_B_PWR_WP_DIS	(0x40)
 #define EXT_CSD_BOOT_WP_B_PERM_WP_DIS	(0x10)
 #define EXT_CSD_BOOT_WP_B_PERM_WP_EN	(0x04)

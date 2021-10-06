@@ -58,11 +58,11 @@ static void __iomem *__ioremap_caller(phys_addr_t phys_addr, size_t size,
 	/*
 	 * Don't allow RAM to be mapped.
 	 */
-#ifdef CONFIG_RTK_MEM_REMAP     //Allow Realtek RTD1295 to mapping RAM area, jamestai20151213
-#else
-        if (WARN_ON(pfn_valid(__phys_to_pfn(phys_addr))))
-                return NULL;
-#endif
+#ifdef CONFIG_RTK_MEM_REMAP     //Allow Realtek Platform to mapping RAM area
+#else /* CONFIG_RTK_MEM_REMAP */
+	if (WARN_ON(pfn_valid(__phys_to_pfn(phys_addr))))
+		return NULL;
+#endif /* CONFIG_RTK_MEM_REMAP */
 
 	area = get_vm_area_caller(size, VM_IOREMAP, caller);
 	if (!area)

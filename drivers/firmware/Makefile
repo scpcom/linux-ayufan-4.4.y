@@ -1,7 +1,10 @@
 #
 # Makefile for the linux kernel.
 #
+ifneq (,$(filter my yy, $(CONFIG_RTK_PLATFORM_PSCI)$(CONFIG_SYNO_LSP_RTD1619)))
+else # CONFIG_RTK_PLATFORM_PSCI && CONFIG_SYNO_LSP_RTD1619
 obj-$(CONFIG_ARM_PSCI_FW)	+= psci.o
+endif # CONFIG_RTK_PLATFORM_PSCI && CONFIG_SYNO_LSP_RTD1619
 obj-$(CONFIG_ARM_SCPI_PROTOCOL)	+= arm_scpi.o
 obj-$(CONFIG_DMI)		+= dmi_scan.o
 obj-$(CONFIG_DMI_SYSFS)		+= dmi-sysfs.o

@@ -762,7 +762,10 @@ int __btrfs_drop_extents(struct btrfs_trans_handle *trans,
 	int leafs_visited = 0;
 #ifdef MY_ABC_HERE
 	u64 relative_offset;
-#endif 
+#endif  
+#ifdef MY_ABC_HERE
+	bool should_throttle = false;
+#endif  
 
 	if (drop_cache)
 		btrfs_drop_extent_cache(inode, start, end - 1, 0);
@@ -892,19 +895,14 @@ next_slot:
 						disk_bytenr, num_bytes, 0,
 						root->root_key.objectid,
 						new_key.objectid,
-#ifdef MY_ABC_HERE
-						start - extent_offset, 1);
-#else
 						start - extent_offset);
-#endif 
-				BUG_ON(ret); 
+				BUG_ON(ret);  
 			}
 			key.offset = start;
 		}
-		
+		 
 		last_end = extent_end;
 
-		
 		if (start <= key.offset && end < extent_end) {
 			if (extent_type == BTRFS_FILE_EXTENT_INLINE) {
 				ret = -EOPNOTSUPP;
@@ -988,24 +986,12 @@ delete_extent_item:
 				extent_end = ALIGN(extent_end,
 						   root->sectorsize);
 			} else if (update_refs && disk_bytenr > 0) {
-#ifdef MY_ABC_HERE
-				ret = btrfs_free_extent_uid(trans, root,
-						disk_bytenr, num_bytes, 0,
-						root->root_key.objectid,
-						key.objectid, key.offset -
-						extent_offset, 0, i_uid_read(inode));
-#else
 				ret = btrfs_free_extent(trans, root,
 						disk_bytenr, num_bytes, 0,
 						root->root_key.objectid,
 						key.objectid, key.offset -
-#ifdef MY_ABC_HERE
-						extent_offset, 0);
-#else
 						extent_offset);
-#endif 
-#endif 
-				BUG_ON(ret); 
+				BUG_ON(ret);  
 #ifdef MY_ABC_HERE
 				relative_offset = key.offset - extent_offset;
 				if (partial_punch &&
@@ -1020,15 +1006,24 @@ delete_extent_item:
 					    relative_offset + num_bytes > *last_punch_pos)
 						*last_punch_pos = relative_offset + num_bytes;
 				}
-#endif 
+#endif  
 				inode_sub_bytes(inode,
 						extent_end - key.offset);
+#ifdef MY_ABC_HERE
+				if (trans->check_throttle && btrfs_should_throttle_delayed_refs(trans, root) == 1) {
+					should_throttle = true;
+				}
+#endif  
 			}
 
 			if (end == extent_end)
 				break;
 
+#ifdef MY_ABC_HERE
+			if (!should_throttle && path->slots[0] + 1 < btrfs_header_nritems(leaf)) {
+#else
 			if (path->slots[0] + 1 < btrfs_header_nritems(leaf)) {
+#endif  
 				path->slots[0]++;
 				goto next_slot;
 			}
@@ -1044,6 +1039,12 @@ delete_extent_item:
 			del_slot = 0;
 
 			btrfs_release_path(path);
+#ifdef MY_ABC_HERE
+			if (should_throttle) {
+				ret = -EAGAIN;
+				break;
+			}
+#endif  
 			continue;
 		}
 
@@ -1285,12 +1286,8 @@ again:
 
 		ret = btrfs_inc_extent_ref(trans, root, bytenr, num_bytes, 0,
 					   root->root_key.objectid,
-#ifdef MY_ABC_HERE
-					   ino, orig_offset, 1);
-#else
 					   ino, orig_offset);
-#endif 
-		BUG_ON(ret); 
+		BUG_ON(ret);  
 
 		if (split == start) {
 			key.offset = start;
@@ -1314,20 +1311,10 @@ again:
 		extent_end = other_end;
 		del_slot = path->slots[0] + 1;
 		del_nr++;
-#ifdef MY_ABC_HERE
-		ret = btrfs_free_extent_uid(trans, root, bytenr, num_bytes,
-					0, root->root_key.objectid, ino, orig_offset, 0,
-					i_uid_read(inode));
-#else
 		ret = btrfs_free_extent(trans, root, bytenr, num_bytes,
 					0, root->root_key.objectid,
-#ifdef MY_ABC_HERE
-					ino, orig_offset, 0);
-#else
 					ino, orig_offset);
-#endif 
-#endif 
-		BUG_ON(ret); 
+		BUG_ON(ret);  
 	}
 	other_start = 0;
 	other_end = start;
@@ -1341,20 +1328,10 @@ again:
 		key.offset = other_start;
 		del_slot = path->slots[0];
 		del_nr++;
-#ifdef MY_ABC_HERE
-		ret = btrfs_free_extent_uid(trans, root, bytenr, num_bytes,
-					0, root->root_key.objectid,
-					ino, orig_offset, 0, i_uid_read(inode));
-#else
 		ret = btrfs_free_extent(trans, root, bytenr, num_bytes,
 					0, root->root_key.objectid,
-#ifdef MY_ABC_HERE
-					ino, orig_offset, 0);
-#else
 					ino, orig_offset);
-#endif 
-#endif 
-		BUG_ON(ret); 
+		BUG_ON(ret);  
 	}
 	if (del_nr == 0) {
 		fi = btrfs_item_ptr(leaf, path->slots[0],
@@ -1557,362 +1534,20 @@ static noinline int check_can_nocow(struct inode *inode, loff_t pos,
 }
 
 #ifdef MY_ABC_HERE
-#include <linux/tcp.h>
-#include <net/tcp.h>
-
-#ifdef MY_ABC_HERE
-extern int ecryptfs_encrypt_page_export(struct page *enc_page,
-				   void *crypt_stat_ptr,
-				   struct page *page);
-
-static int generic_write_init_and_checks(struct file* filp, loff_t pos, size_t nbytes)
+void syno_ordered_extent_throttle(struct btrfs_fs_info *fs_info)
 {
-	struct iovec iov = { .iov_base = NULL, .iov_len = nbytes };
-	struct kiocb kiocb;
-	struct iov_iter iter;
+	DEFINE_WAIT(wait);
 
-	init_sync_kiocb(&kiocb, filp);
-	kiocb.ki_pos = pos;
-	iov_iter_init(&iter, WRITE, &iov, 1, nbytes);
+	if (!fs_info)
+		return;
 
-	return generic_write_checks(&kiocb, &iter);
+	if (fs_info->syno_max_ordered_queue_size && atomic_read(&fs_info->syno_ordered_extent_nr) > fs_info->syno_max_ordered_queue_size) {
+		prepare_to_wait(&fs_info->syno_ordered_queue_wait, &wait, TASK_UNINTERRUPTIBLE);
+		schedule();
+		finish_wait(&fs_info->syno_ordered_queue_wait, &wait);
+	}
 }
-
-static noinline int btrfs_ecryptfs_zero_copy(struct file *file, loff_t pos, int num_page,
-      struct page **pages, void *crypt_stat)
-{
-	struct inode *inode = file_inode(file);
-	struct btrfs_root *root = BTRFS_I(inode)->root;
-	struct page *dst_pages[MAX_PAGES_PER_RECVFILE + 1];
-	struct extent_state *cached_state = NULL;
-	u64 release_bytes = 0;
-	u64 lockstart;
-	u64 lockend;
-	u64 start_pos = 0;
-	u64 end_pos;
-	int ret = 0, i;
-	size_t count = num_page*PAGE_CACHE_SIZE;
-	bool need_unlock;
-
-#ifdef MY_ABC_HERE
-	
-	if (root->fs_info->ordered_extent_throttle && root->fs_info->ordered_extent_nr > root->fs_info->ordered_extent_throttle) {
-		btrfs_wait_ordered_roots(root->fs_info, 128, 0, (u64)-1);
-	}
-#endif 
-
-	file_start_write(file);
-
-	BUG_ON(num_page > MAX_PAGES_PER_RECVFILE + 1);
-	mutex_lock(&inode->i_mutex);
-	ret = generic_write_init_and_checks(file, pos, count);
-	if (ret <= 0) {
-		goto out;
-	}
-
-	
-	current->backing_dev_info = inode_to_bdi(inode);
-	ret = file_remove_privs(file);
-	if (ret)
-		goto out;
-
-	ret = file_update_time(file);
-	if (ret)
-		goto out;
-	
-	start_pos = round_down(pos, root->sectorsize);
-	if (start_pos > i_size_read(inode)) {
-		end_pos = round_up(pos + count, root->sectorsize);
-		ret = btrfs_cont_expand(inode, i_size_read(inode), end_pos);
-		if (ret)
-			goto out;
-	}
-
-	ret = btrfs_check_data_free_space(inode, pos, count);
-	if (ret)
-		goto out;
-
-	ret = btrfs_delalloc_reserve_metadata(inode, count);
-	if (ret) {
-		btrfs_free_reserved_data_space(inode, pos, count);
-		goto out;
-	}
-
-	release_bytes = count;
-	need_unlock = false;
-again:
-	
-	ret = prepare_pages(inode, dst_pages, num_page, pos, count, false);
-	if (ret)
-		goto out;
-
-	ret = lock_and_cleanup_extent_if_need(inode, dst_pages, num_page,
-					      pos, &lockstart, &lockend,
-					      &cached_state);
-	if (ret < 0) {
-		if (ret == -EAGAIN)
-			goto again;
-		goto out;
-	} else if (ret > 0) {
-		need_unlock = true;
-		ret = 0;
-	}
-	for (i = 0;i < num_page;i++) {
-		ret = ecryptfs_encrypt_page_export(dst_pages[i], crypt_stat, pages[i]);
-		if (ret) {
-			if (need_unlock)
-				unlock_extent_cached(&BTRFS_I(inode)->io_tree,
-						     lockstart, lockend, &cached_state,
-						     GFP_NOFS);
-			btrfs_drop_pages(dst_pages, num_page);
-			goto out;
-		}
-		cond_resched();
-	}
-	ret = btrfs_dirty_pages(root, inode, dst_pages,
-				num_page, pos, count,
-				NULL);
-	if (need_unlock)
-		unlock_extent_cached(&BTRFS_I(inode)->io_tree,
-				     lockstart, lockend, &cached_state,
-				     GFP_NOFS);
-	if (ret) {
-		btrfs_drop_pages(dst_pages, num_page);
-		goto out;
-	}
-
-	release_bytes = 0;
-	btrfs_drop_pages(dst_pages, num_page);
-
-	balance_dirty_pages_ratelimited(inode->i_mapping);
-	if (num_page < (root->nodesize >> PAGE_CACHE_SHIFT) + 1)
-		btrfs_btree_balance_dirty(root);
-
-out:
-	if (release_bytes) {
-		btrfs_delalloc_release_space(inode, pos, release_bytes);
-	}
-	file_end_write(file);
-	current->backing_dev_info = NULL;
-	mutex_unlock(&inode->i_mutex);
-
-	return ret;
-}
-#endif 
-
-static noinline ssize_t btrfs_syno_recvfile(struct file *file, struct socket *sock,
-					loff_t pos, size_t count, size_t * rbytes, size_t * wbytes)
-{
-	struct inode *inode = file_inode(file);
-	struct btrfs_root *root = BTRFS_I(inode)->root;
-	struct msghdr   msg;
-	struct page *pages[MAX_PAGES_PER_RECVFILE];
-	struct extent_state *cached_state = NULL;
-	struct kvec iov[MAX_PAGES_PER_RECVFILE];
-	u64 release_bytes = 0;
-	u64 lockstart;
-	u64 lockend;
-	u64 start_pos = 0;
-	u64 end_pos;
-	size_t num_written = 0;
-	int ret = 0, recv_meg_ret = 0;
-	int i;
-	long rcvtimeo;
-	bool only_release_metadata = false;
-	bool need_unlock;
-	size_t offset = pos & (PAGE_CACHE_SIZE - 1);
-	size_t write_bytes = min(count,
-				 MAX_PAGES_PER_RECVFILE * (size_t)PAGE_CACHE_SIZE -
-				 offset);
-	size_t num_pages = (write_bytes + offset +
-				PAGE_CACHE_SIZE - 1) >> PAGE_CACHE_SHIFT;
-	size_t reserve_bytes;
-	size_t dirty_pages;
-	size_t copied = 0;
-
-#ifdef MY_ABC_HERE
-	
-	if (root->fs_info->ordered_extent_throttle && root->fs_info->ordered_extent_nr > root->fs_info->ordered_extent_throttle) {
-		btrfs_wait_ordered_roots(root->fs_info, 128, 0, (u64)-1);
-	}
-#endif 
-
-	
-	start_pos = round_down(pos, root->sectorsize);
-	if (round_down(pos, root->sectorsize) > i_size_read(inode)) {
-		end_pos = round_up(pos + count, root->sectorsize);
-		ret = btrfs_cont_expand(inode, i_size_read(inode), end_pos);
-		if (ret)
-			return ret;
-	}
-	memset(&msg, 0, sizeof(msg));
-	msg.msg_flags = MSG_KERNSPACE;
-	rcvtimeo = sock->sk->sk_rcvtimeo;
-	sock->sk->sk_rcvtimeo = 64 * HZ;
-
-	reserve_bytes = num_pages << PAGE_CACHE_SHIFT;
-
-	ret = btrfs_check_data_free_space(inode, pos, write_bytes);
-	if (ret < 0) {
-		if ((BTRFS_I(inode)->flags & (BTRFS_INODE_NODATACOW |
-					      BTRFS_INODE_PREALLOC)) &&
-		    check_can_nocow(inode, pos, &write_bytes) > 0) {
-			
-			only_release_metadata = true;
-			
-			num_pages = DIV_ROUND_UP(write_bytes + offset,
-						 PAGE_CACHE_SIZE);
-			reserve_bytes = num_pages << PAGE_CACHE_SHIFT;
-		} else {
-			goto err;
-		}
-	}
-
-	ret = btrfs_delalloc_reserve_metadata(inode, reserve_bytes);
-	if (ret) {
-		if (!only_release_metadata)
-			btrfs_free_reserved_data_space(inode, pos, write_bytes);
-		else
-			btrfs_end_write_no_snapshoting(root);
-		goto err;
-	}
-
-	release_bytes = reserve_bytes;
-	need_unlock = false;
-again:
-	
-	ret = prepare_pages(inode, pages, num_pages,
-				pos, write_bytes,
-				false);
-	if (ret)
-		goto err;
-
-	ret = lock_and_cleanup_extent_if_need(inode, pages, num_pages,
-						  pos, &lockstart, &lockend,
-						  &cached_state);
-	if (ret < 0) {
-		if (ret == -EAGAIN)
-			goto again;
-		goto err;
-	} else if (ret > 0) {
-		need_unlock = true;
-		ret = 0;
-	}
-
-	iov[0].iov_base = kmap(pages[0]) + offset;
-	iov[0].iov_len = PAGE_CACHE_SIZE - offset;
-	for (i = 1; i < num_pages; i++) {
-		iov[i].iov_base = kmap(pages[i]);
-		iov[i].iov_len = PAGE_CACHE_SIZE;
-	}
-	if (0 != ((write_bytes + offset) & (PAGE_CACHE_SIZE - 1)) && 1 < num_pages) {
-		iov[num_pages-1].iov_len = (write_bytes + offset) & (PAGE_CACHE_SIZE - 1);
-	}
-	recv_meg_ret = kernel_recvmsg(
-			sock, &msg, &iov[0], num_pages, write_bytes,
-			MSG_WAITALL | MSG_NOCATCHSIGNAL);
-	for (i = 0; i < num_pages; i++) {
-		kunmap(pages[i]);
-	}
-	if (0 > recv_meg_ret) {
-		if (need_unlock)
-			unlock_extent_cached(&BTRFS_I(inode)->io_tree,
-						 lockstart, lockend, &cached_state,
-						 GFP_NOFS);
-		btrfs_drop_pages(pages, num_pages);
-		ret = recv_meg_ret;
-		goto err;
-	}
-	copied = (size_t) recv_meg_ret;
-	*rbytes = copied;
-	if (write_bytes > recv_meg_ret) {
-		recv_meg_ret = -EPIPE;
-	}
-	dirty_pages = (copied + offset + PAGE_CACHE_SIZE - 1) >> PAGE_CACHE_SHIFT;
-	
-	if (num_pages > dirty_pages) {
-		release_bytes = (num_pages - dirty_pages) <<
-			PAGE_CACHE_SHIFT;
-		if (copied > 0) {
-			spin_lock(&BTRFS_I(inode)->lock);
-			BTRFS_I(inode)->outstanding_extents++;
-			spin_unlock(&BTRFS_I(inode)->lock);
-		}
-		if (only_release_metadata) {
-			btrfs_delalloc_release_metadata(inode,
-							release_bytes);
-		} else {
-			u64 __pos;
-
-			__pos = round_down(pos, root->sectorsize) +
-				(dirty_pages << PAGE_CACHE_SHIFT);
-			btrfs_delalloc_release_space(inode, __pos,
-							 release_bytes);
-		}
-	}
-
-	release_bytes = dirty_pages << PAGE_CACHE_SHIFT;
-	if (copied > 0)
-		ret = btrfs_dirty_pages(root, inode, pages,
-					dirty_pages, pos, copied,
-					NULL);
-	if (need_unlock)
-		unlock_extent_cached(&BTRFS_I(inode)->io_tree,
-					 lockstart, lockend, &cached_state,
-					 GFP_NOFS);
-	if (ret) {
-		btrfs_drop_pages(pages, num_pages);
-		goto err;
-	}
-
-	release_bytes = 0;
-	if (only_release_metadata)
-		btrfs_end_write_no_snapshoting(root);
-
-	if (only_release_metadata && copied > 0) {
-		u64 lockstart = round_down(pos, root->sectorsize);
-		u64 lockend = lockstart +
-			(dirty_pages << PAGE_CACHE_SHIFT) - 1;
-
-		set_extent_bit(&BTRFS_I(inode)->io_tree, lockstart,
-				   lockend, EXTENT_NORESERVE, NULL,
-				   NULL, GFP_NOFS);
-		only_release_metadata = false;
-	}
-
-	btrfs_drop_pages(pages, num_pages);
-
-	cond_resched();
-
-	balance_dirty_pages_ratelimited(inode->i_mapping);
-#ifdef MY_ABC_HERE
-	syno_writeback_balance_dirty_pages(root, inode);
-#endif 
-	if (dirty_pages < (root->nodesize >> PAGE_CACHE_SHIFT) + 1)
-		btrfs_btree_balance_dirty(root);
-
-	num_written = copied;
-	if (recv_meg_ret == -EPIPE) {
-		ret = -EPIPE;
-		goto err;
-	}
-
-err:
-	sock->sk->sk_rcvtimeo = rcvtimeo;
-
-	if (release_bytes) {
-		if (only_release_metadata) {
-			btrfs_end_write_no_snapshoting(root);
-			btrfs_delalloc_release_metadata(inode, release_bytes);
-		} else {
-			btrfs_delalloc_release_space(inode, pos, release_bytes);
-		}
-	}
-	*wbytes = num_written;
-
-	return ret ? ret : num_written;
-}
-#endif 
+#endif  
 
 static noinline ssize_t __btrfs_buffered_write(struct file *file,
 					       struct iov_iter *i,
@@ -2175,11 +1810,8 @@ static ssize_t btrfs_file_write_iter(struct kiocb *iocb,
 	size_t count;
 
 #ifdef MY_ABC_HERE
-	
-	if (root->fs_info->ordered_extent_throttle && root->fs_info->ordered_extent_nr > root->fs_info->ordered_extent_throttle) {
-		btrfs_wait_ordered_roots(root->fs_info, 128, 0, (u64)-1);
-	}
-#endif 
+	syno_ordered_extent_throttle(root->fs_info);
+#endif  
 
 	inode_lock(inode);
 	err = generic_write_checks(iocb, from);
@@ -2247,9 +1879,15 @@ out:
 
 int btrfs_release_file(struct inode *inode, struct file *filp)
 {
-	if (filp->private_data)
+	struct btrfs_file_private *private = filp->private_data;
+
+	if (private && private->trans)
 		btrfs_ioctl_trans_end(filp);
-	
+	if (private && private->filldir_buf)
+		kfree(private->filldir_buf);
+	kfree(private);
+	filp->private_data = NULL;
+
 	if (test_and_clear_bit(BTRFS_INODE_ORDERED_DATA_CLOSE,
 			       &BTRFS_I(inode)->runtime_flags))
 			filemap_flush(inode->i_mapping);
@@ -2278,11 +1916,19 @@ int btrfs_sync_file(struct file *file, loff_t start, loff_t end, int datasync)
 	bool full_sync = 0;
 	u64 len;
 
-	
+#ifdef MY_ABC_HERE
+	atomic64_inc(&root->fs_info->fsync_cnt);
+#endif  
+
+	if (test_bit(BTRFS_INODE_NEEDS_FULL_SYNC,
+		     &BTRFS_I(inode)->runtime_flags)) {
+		start = 0;
+		end = LLONG_MAX;
+	}
+
 	len = (u64)end - (u64)start + 1;
 	trace_btrfs_sync_file(file, datasync);
 
-	
 	ret = start_ordered_ops(inode, start, end);
 	if (ret)
 		return ret;
@@ -2363,6 +2009,9 @@ int btrfs_sync_file(struct file *file, loff_t start, loff_t end, int datasync)
 				goto out;
 			}
 		}
+#ifdef MY_ABC_HERE
+		atomic64_inc(&root->fs_info->fsync_full_commit_cnt);
+#endif  
 		ret = btrfs_commit_transaction(trans, root);
 	} else {
 		ret = btrfs_end_transaction(trans, root);
@@ -2778,13 +2427,20 @@ static int btrfs_punch_hole(struct inode *inode, loff_t offset, loff_t len)
 	cur_offset = lockstart;
 	len = lockend - cur_offset;
 	while (cur_offset < lockend) {
+#ifdef MY_ABC_HERE
+		trans->check_throttle = true;
+#endif  
 		ret = __btrfs_drop_extents(trans, root, inode, path,
 					   cur_offset, lockend + 1,
 #ifdef MY_ABC_HERE
 					   &first_punch_pos, &last_punch_pos, &partial_punch,
-#endif 
+#endif  
 					   &drop_end, 1, 0, 0, NULL);
+#ifdef MY_ABC_HERE
+		if (ret != -ENOSPC && ret != -EAGAIN)
+#else
 		if (ret != -ENOSPC)
+#endif  
 			break;
 
 		trans->block_rsv = &root->fs_info->trans_block_rsv;
@@ -2801,6 +2457,9 @@ static int btrfs_punch_hole(struct inode *inode, loff_t offset, loff_t len)
 		}
 
 		cur_offset = drop_end;
+#ifdef MY_ABC_HERE
+		len = lockend - cur_offset;
+#endif   
 
 		ret = btrfs_update_inode(trans, root, inode);
 		if (ret) {
@@ -3032,8 +2691,10 @@ static long btrfs_fallocate(struct file *file, int mode,
 			}
 			ret = btrfs_qgroup_reserve_data(inode, cur_offset,
 					last_byte - cur_offset);
-			if (ret < 0)
+			if (ret < 0) {
+				free_extent_map(em);
 				break;
+			}
 		}
 		free_extent_map(em);
 		cur_offset = last_byte;
@@ -3478,19 +3139,13 @@ const struct file_operations btrfs_file_operations = {
 	.fsync		= btrfs_sync_file,
 	.fallocate	= btrfs_fallocate,
 	.unlocked_ioctl	= btrfs_ioctl,
-#ifdef MY_ABC_HERE
-	.syno_recvfile  = btrfs_syno_recvfile,
-#ifdef MY_ABC_HERE
-	.ecryptfs_zero_copy = btrfs_ecryptfs_zero_copy,
-#endif 
-#endif 
 #ifdef CONFIG_COMPAT
 	.compat_ioctl	= btrfs_compat_ioctl,
 #endif
 	.clone_file_range = btrfs_clone_file_range,
 #ifdef MY_ABC_HERE
 	.clone_check_compr = btrfs_clone_check_compr,
-#endif 
+#endif  
 };
 
 void btrfs_auto_defrag_exit(void)

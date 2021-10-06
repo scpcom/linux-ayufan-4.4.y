@@ -23,17 +23,12 @@
 #include "compression.h"
 
 #ifdef MY_ABC_HERE
-#include <linux/syno_acl_xattr_ds.h>
-#include "syno_acl.h"
-#endif 
-#ifdef MY_ABC_HERE
 #include <linux/time.h>
-#endif 
+#endif  
 
 static int g_verbose = 0;
 
 #define verbose_printk(...) if (g_verbose) printk(__VA_ARGS__)
-
 
 struct fs_path {
 	union {
@@ -121,27 +116,24 @@ struct send_ctx {
 	u64 cur_inode_last_extent;
 #ifdef MY_ABC_HERE
 	u64 cur_inode_max_write_end;
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
 	u32 cur_inode_archive;
-#ifdef MY_ABC_HERE
-	u32 cur_inode_synoacl;
-#endif 
-#endif 
+#endif  
 
 	u64 send_progress;
 #ifdef MY_ABC_HERE
 	enum btrfs_send_phase phase;
 	u64 total_data_size;
 	struct timeval write_timeval;
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
 	u32 subvol_flags;
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
 	u64 skip_cmd_count;
 	u64 current_cmd_pos;
-#endif 
+#endif  
 
 	struct list_head new_refs;
 	struct list_head deleted_refs;
@@ -1113,15 +1105,16 @@ static int __clone_root_cmp_sort(const void *e1, const void *e2)
 	return 0;
 }
 
-
 static int __iterate_backrefs(u64 ino, u64 offset, u64 root, void *ctx_)
 {
 	struct backref_ctx *bctx = ctx_;
 	struct clone_root *found;
+#ifdef MY_ABC_HERE
+#else
 	int ret;
 	u64 i_size;
+#endif  
 
-	
 	found = bsearch((void *)(uintptr_t)root, bctx->sctx->clone_roots,
 			bctx->sctx->clone_roots_cnt,
 			sizeof(struct clone_root),
@@ -1135,7 +1128,9 @@ static int __iterate_backrefs(u64 ino, u64 offset, u64 root, void *ctx_)
 		bctx->found_itself = 1;
 	}
 
-	
+#ifdef MY_ABC_HERE
+#else
+	 
 	ret = __get_inode_info(found->root, bctx->path, ino, &i_size, NULL, NULL,
 			       NULL, NULL, NULL);
 	btrfs_release_path(bctx->path);
@@ -1144,10 +1139,10 @@ static int __iterate_backrefs(u64 ino, u64 offset, u64 root, void *ctx_)
 
 	if (offset + bctx->data_offset + bctx->extent_len > i_size)
 		return 0;
+#endif  
 
-	
 	if (found->root == bctx->sctx->send_root) {
-		
+		 
 		if (ino >= bctx->cur_objectid)
 			return 0;
 #if 0
@@ -4155,24 +4150,17 @@ static int __process_new_xattr(int num, struct btrfs_key *di_key,
 	posix_acl_xattr_header dummy_acl;
 
 #ifdef MY_ABC_HERE
-	
+	 
 	if (!strncmp(name, XATTR_SYNO_PREFIX XATTR_SYNO_ARCHIVE_BIT, name_len)) {
 		sctx->cur_inode_archive = syno_archive_set;
 		return 0;
 	}
-#ifdef MY_ABC_HERE
-	if (!strncmp(name, SYNO_ACL_XATTR_ACCESS, name_len)) {
-		sctx->cur_inode_synoacl = 1;
-		return 0;
-	}
-#endif 
-#endif 
+#endif  
 
 	p = fs_path_alloc();
 	if (!p)
 		return -ENOMEM;
 
-	
 	if (!strncmp(name, XATTR_NAME_POSIX_ACL_ACCESS, name_len) ||
 	    !strncmp(name, XATTR_NAME_POSIX_ACL_DEFAULT, name_len)) {
 		if (data_len == 0) {
@@ -4802,8 +4790,10 @@ static int clone_range(struct send_ctx *sctx,
 	struct btrfs_path *path;
 	struct btrfs_key key;
 	int ret;
+#ifdef MY_ABC_HERE
+	u64 clone_src_i_size;
+#endif  
 
-	
 	if (clone_root->offset == 0 &&
 	    len == sctx->send_root->sectorsize)
 		return send_extent_data(sctx, offset, len);
@@ -4812,7 +4802,14 @@ static int clone_range(struct send_ctx *sctx,
 	if (!path)
 		return -ENOMEM;
 
-	
+#ifdef MY_ABC_HERE
+	ret = __get_inode_info(clone_root->root, path, clone_root->ino, &clone_src_i_size, NULL, NULL,
+			       NULL, NULL, NULL);
+	btrfs_release_path(path);
+	if (ret < 0)
+		goto out;
+#endif  
+
 	key.objectid = clone_root->ino;
 	key.type = BTRFS_EXTENT_DATA_KEY;
 	key.offset = clone_root->offset;
@@ -4833,6 +4830,9 @@ static int clone_range(struct send_ctx *sctx,
 		u8 type;
 		u64 ext_len;
 		u64 clone_len;
+#ifdef MY_ABC_HERE
+		u64 clone_data_offset;
+#endif  
 
 		if (slot >= btrfs_header_nritems(leaf)) {
 			ret = btrfs_next_leaf(clone_root->root, path);
@@ -4882,13 +4882,62 @@ static int clone_range(struct send_ctx *sctx,
 		if (key.offset >= clone_root->offset + len)
 			break;
 
+#ifdef MY_ABC_HERE
+		if (key.offset >= clone_src_i_size)
+			break;
+
+		if (key.offset + ext_len > clone_src_i_size)
+			ext_len = clone_src_i_size - key.offset;
+
+		clone_data_offset = btrfs_file_extent_offset(leaf, ei);
+		if (btrfs_file_extent_disk_bytenr(leaf, ei) == disk_byte) {
+			clone_root->offset = key.offset;
+			if (clone_data_offset < data_offset && clone_data_offset + ext_len > data_offset) {
+				u64 extent_offset = data_offset - clone_data_offset;
+				ext_len -= extent_offset;
+				clone_data_offset += extent_offset;
+				clone_root->offset += extent_offset;
+			}
+		}
+#endif  
+
 		clone_len = min_t(u64, ext_len, len);
 
+#ifdef MY_ABC_HERE
+		if (btrfs_file_extent_disk_bytenr(leaf, ei) == disk_byte &&
+		    clone_data_offset == data_offset) {
+			const u64 src_end = clone_root->offset + clone_len;
+			const u64 sectorsize = SZ_64K;
+
+			if (src_end == clone_src_i_size &&
+			    !IS_ALIGNED(src_end, sectorsize) &&
+			    offset + clone_len < sctx->cur_inode_size) {
+				u64 slen;
+
+				slen = ALIGN_DOWN(src_end - clone_root->offset,
+						  sectorsize);
+				if (slen > 0) {
+					ret = send_clone(sctx, offset, slen,
+							 clone_root);
+					if (ret < 0)
+						goto out;
+				}
+				ret = send_extent_data(sctx, offset + slen,
+						       clone_len - slen);
+			} else {
+				ret = send_clone(sctx, offset, clone_len,
+						 clone_root);
+			}
+		} else {
+			ret = send_extent_data(sctx, offset, clone_len);
+		}
+#else
 		if (btrfs_file_extent_disk_bytenr(leaf, ei) == disk_byte &&
 		    btrfs_file_extent_offset(leaf, ei) == data_offset)
 			ret = send_clone(sctx, offset, clone_len, clone_root);
 		else
 			ret = send_extent_data(sctx, offset, clone_len);
+#endif  
 
 		if (ret < 0)
 			goto out;
@@ -5431,17 +5480,8 @@ static int syno_attribute_handler(struct send_ctx *sctx)
 	struct btrfs_fs_info *fs_info = root->fs_info;
 	struct inode *inode = NULL;
 	struct btrfs_key key;
-#ifdef MY_ABC_HERE
-	size_t data_len = 0;
-	void *data = NULL;
-	struct syno_acl *acl = NULL;
-#endif 
 
-#ifdef MY_ABC_HERE
-	if (sctx->cur_inode_archive || sctx->cur_inode_synoacl) {
-#else
 	if (sctx->cur_inode_archive) {
-#endif 
 		key.objectid = sctx->cur_ino;
 		key.type = BTRFS_INODE_ITEM_KEY;
 		key.offset = 0;
@@ -5453,47 +5493,14 @@ static int syno_attribute_handler(struct send_ctx *sctx)
 		}
 		if (sctx->cur_inode_archive) {
 			archive_bit_le32 = cpu_to_le32(inode->i_archive_bit);
-#ifdef MY_ABC_HERE
-			if (sctx->cur_inode_archive & syno_archive_set_owner_group &&
-				!(inode->i_archive_bit & S2_SYNO_ACL_IS_OWNER_GROUP)) {
-				sctx->cur_inode_archive &= ~syno_archive_set_owner_group;
-			}
-			if (sctx->cur_inode_archive & syno_archive_set_acl &&
-				!(inode->i_archive_bit & ALL_SYNO_ACL_ARCHIVE)) {
-				sctx->cur_inode_archive &= ~syno_archive_set_acl;
-			}
-#endif 
 		}
-#ifdef MY_ABC_HERE
-		if (sctx->cur_inode_synoacl) {
-			acl = btrfs_get_syno_acl(inode);
-			if (IS_ERR(acl)) {
-				ret = PTR_ERR(acl);
-				goto out;
-			}
-			data_len = syno_acl_to_xattr(acl, NULL, 0);
-			if (data_len > 0) {
-				data = kmalloc(data_len, GFP_NOFS);
-				if (!data) {
-					ret = -ENOMEM;
-					goto out;
-				}
-				data_len = syno_acl_to_xattr(acl, data, data_len);
-			}
-			ret = data_len;
-		}
-#endif 
 		iput(inode);
 		if (ret < 0) {
 			goto out;
 		}
 	}
 
-#ifdef MY_ABC_HERE
-	if (sctx->cur_inode_archive || data_len > 0) {
-#else
 	if (sctx->cur_inode_archive) {
-#endif 
 		p = fs_path_alloc();
 		if (!p) {
 			ret = -ENOMEM;
@@ -5519,40 +5526,15 @@ static int syno_attribute_handler(struct send_ctx *sctx)
 				goto out;
 #ifdef MY_ABC_HERE
 			}
-#endif 
+#endif  
 		}
-#ifdef MY_ABC_HERE
-		if (data_len > 0) {
-#ifdef MY_ABC_HERE
-			if (sctx->phase == SEND_PHASE_COMPUTE_DATA_SIZE) {
-				sctx->total_data_size += data_len;
-				ret = write_calculate_size(sctx);
-				if (ret < 0) {
-					goto out;
-				}
-			} else {
-#endif 
-			ret = send_set_xattr(sctx, p, SYNO_ACL_XATTR_ACCESS,
-							    strlen(SYNO_ACL_XATTR_ACCESS), data, data_len);
-			if (ret < 0)
-				goto out;
-#ifdef MY_ABC_HERE
-			}
-#endif 
-		}
-#endif 
 	}
 
 out:
-#ifdef MY_ABC_HERE
-	if (!IS_ERR(acl))
-		syno_acl_release(acl);
-	kfree(data);
-#endif 
 	fs_path_free(p);
 	return ret;
 }
-#endif 
+#endif  
 
 static int finish_inode_if_needed(struct send_ctx *sctx, int at_end)
 {
@@ -5666,30 +5648,22 @@ truncate_inode:
 				sctx->cur_inode_size);
 		if (ret < 0)
 			goto out;
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
 		}
-#endif  
+#endif   
 	}
 
 	if (need_chown) {
-#ifdef MY_ABC_HERE
-		sctx->cur_inode_archive |= syno_archive_set_owner_group;
-#endif 
 #ifdef MY_ABC_HERE
 #else
 		ret = send_chown(sctx, sctx->cur_ino, sctx->cur_inode_gen,
 				left_uid, left_gid);
 		if (ret < 0)
 			goto out;
-#endif 
+#endif  
 	}
 	if (need_chmod) {
-#ifdef MY_ABC_HERE
-		if (sctx->cur_inode_synoacl) {
-			sctx->cur_inode_archive |= syno_archive_set_acl;
-		}
-#endif 
 		ret = send_chmod(sctx, sctx->cur_ino, sctx->cur_inode_gen,
 				left_mode);
 		if (ret < 0)
@@ -5737,31 +5711,27 @@ static int changed_inode(struct send_ctx *sctx,
 	u64 left_gid = 0;
 	u64 right_uid = 0;
 	u64 right_gid = 0;
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
 	u64 mode;
-#endif 
+#endif  
 
 	sctx->cur_ino = key->objectid;
 	sctx->cur_inode_new_gen = 0;
 	sctx->cur_inode_last_extent = (u64)-1;
 #ifdef MY_ABC_HERE
 	sctx->cur_inode_max_write_end = 0;
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
 	sctx->cur_inode_skip_truncate = 0;
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
 	sctx->cur_inode_archive = 0;
-#ifdef MY_ABC_HERE
-	sctx->cur_inode_synoacl = 0;
-#endif 
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
 	sctx->cur_inode_skip_clone = 0;
-#endif 
+#endif  
 
-	
 	sctx->send_progress = sctx->cur_ino;
 
 	if (result == BTRFS_COMPARE_TREE_NEW ||

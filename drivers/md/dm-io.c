@@ -23,22 +23,7 @@ struct dm_io_client {
 	struct bio_set *bios;
 };
 
-#ifdef MY_ABC_HERE
-
-
-static int debug_enable = 0;
-
-#define sinfo(fmt, args...) do { \
-	if (1 == debug_enable) { \
-		printk(KERN_INFO "%s [%d]: "fmt"\n", __FUNCTION__, __LINE__, ##args); \
-	} \
-} while (0)
-#else
-
 #define sinfo(fmt, args...)
-
-#endif 
-
 
 struct io {
 	unsigned long error_bits;
@@ -50,22 +35,17 @@ struct io {
 	unsigned long vma_invalidate_size;
 #ifdef MY_ABC_HERE
 	unsigned long bi_flags;
-#endif 
+#endif  
 } __attribute__((aligned(DM_IO_MAX_REGIONS)));
 
 #ifdef MY_ABC_HERE
 static int has_correction_flag(unsigned long bi_flags)
 {
-#ifdef MY_ABC_HERE
-	return ((bi_flags & (1 << BIO_CORRECTION_RETRY)) || (bi_flags & (1 << BIO_CORRECTION_ABORT)));
-#else
 	return 0;
-#endif 
 }
-#endif 
+#endif  
 
 static struct kmem_cache *_dm_io_cache;
-
 
 struct dm_io_client *dm_io_client_create(void)
 {
@@ -121,12 +101,7 @@ static void retrieve_io_and_region_from_bio(struct bio *bio, struct io **io,
 	*region = val & (DM_IO_MAX_REGIONS - 1);
 }
 
-
-#ifdef MY_ABC_HERE
-static void complete_io(struct io *io, int error, unsigned long bi_flags)
-#else
 static void complete_io(struct io *io)
-#endif
 {
 	unsigned long error_bits = io->error_bits;
 	io_notify_fn fn = io->callback;
@@ -137,27 +112,6 @@ static void complete_io(struct io *io)
 					     io->vma_invalidate_size);
 
 	mempool_free(io, io->client->pool);
-#ifdef MY_ABC_HERE
-	if (bi_flags & (1 << BIO_CORRECTION_ERR)) {
-		sinfo("detect BIO_CORRECTION_ERR start");
-
-		if (error_bits & (~SYNO_DM_IO_RESERVERD_IO_MASK)) {
-			printk(KERN_ERR "error bits is over the mask range");
-			BUG_ON(1);
-		}
-
-		if (SYNO_DM_IO_RESERVERD_IO_MASK & (1 << BIO_CORRECTION_ERR)) {
-			printk(KERN_ERR "BIO_CORRECTION_ERR (%d) should not in the mask (%x)",
-					BIO_CORRECTION_ERR, SYNO_DM_IO_RESERVERD_IO_MASK);
-			BUG_ON(1);
-		} else {
-			sinfo("add bio flag BIO_CORRECTION_ERR to error code");
-			error_bits |=  1 << BIO_CORRECTION_ERR;
-		}
-
-		sinfo("detect BIO_CORRECTION_ERR end");
-	}
-#endif 
 	fn(error_bits, context);
 }
 
@@ -165,25 +119,14 @@ static void complete_io(struct io *io)
 static void dec_count_common(struct io *io, unsigned int region, int error, unsigned long bi_flags)
 #else
 static void dec_count(struct io *io, unsigned int region, int error)
-#endif 
+#endif  
 {
 	if (error)
 		set_bit(region, &io->error_bits);
 
 	if (atomic_dec_and_test(&io->count))
-#ifdef MY_ABC_HERE
-		complete_io(io, error, bi_flags);
-#else
 		complete_io(io);
-#endif
 }
-
-#ifdef MY_ABC_HERE
-static void dec_count_syno(struct io *io, unsigned int region, int error, unsigned long bi_flags)
-{
-	dec_count_common(io, region, error, bi_flags);
-}
-#endif
 
 #ifdef MY_ABC_HERE
 static void dec_count(struct io *io, unsigned int region, int error)
@@ -198,31 +141,16 @@ static void endio(struct bio *bio)
 	unsigned region;
 	int error;
 
-#ifdef MY_ABC_HERE
-	unsigned long bi_flags = 0;
-	if (!bio) {
-		sinfo("get a null bio");
-	} else {
-		bi_flags = bio->bi_flags;
-	}
-#endif  
-
 	if (bio->bi_error && bio_data_dir(bio) == READ)
 		zero_fill_bio(bio);
 
-	
 	retrieve_io_and_region_from_bio(bio, &io, &region);
 
 	error = bio->bi_error;
 	bio_put(bio);
 
-#ifdef MY_ABC_HERE
-	dec_count_syno(io, region, error, bi_flags);
-#else
 	dec_count(io, region, error);
-#endif  
 }
-
 
 struct dpages {
 	void (*get_page)(struct dpages *dp,
@@ -383,16 +311,11 @@ static void do_region(int rw, unsigned region, struct dm_io_region *where,
 			remaining -= num_sectors;
 			dp->next_page(dp);
 		} else while (remaining) {
-			
+			 
 			dp->get_page(dp, &page, &len, &offset);
 			len = min(len, to_bytes(remaining));
 			if (!bio_add_page(bio, page, len, offset))
 				break;
-#ifdef MY_ABC_HERE
-			else if (has_correction_flag(io->bi_flags)) {
-				sinfo("add page to bio len=%lu offset=%u", len, offset);
-			}
-#endif 
 
 			offset = 0;
 			remaining -= to_sector(len);

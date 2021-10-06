@@ -23,15 +23,13 @@
 #include <linux/bitops.h>
 #ifdef MY_ABC_HERE
 #include <linux/xattr.h>
-#endif 
+#include <linux/fsnotify.h>
+#endif  
 
 #include "ext4_jbd2.h"
 #include "xattr.h"
 #include "acl.h"
 #include "truncate.h"
-#ifdef MY_ABC_HERE
-#include "syno_acl.h"
-#endif 
 
 #include <trace/events/ext4.h>
 
@@ -3646,15 +3644,16 @@ static int ext4_do_update_inode(handle_t *handle,
 		raw_inode->i_ext3_create_time = cpu_to_le32(inode->i_create_time.tv_sec);
 		goto ext3_create_time;
 	}
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
 	raw_inode->i_crtime = cpu_to_le32(inode->i_create_time.tv_sec);
 	raw_inode->i_crtime_extra = cpu_to_le32(inode->i_create_time.tv_nsec);
-#endif 
+#else  
 	EXT4_EINODE_SET_XTIME(i_crtime, ei, raw_inode);
+#endif  
 #ifdef MY_ABC_HERE
 ext3_create_time:
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 	if (ext4_is_ext3_sb(inode->i_sb)) {
@@ -3826,18 +3825,9 @@ int ext4_setattr(struct dentry *dentry, struct iattr *attr)
 	int orphan = 0;
 	const unsigned int ia_valid = attr->ia_valid;
 
-#ifdef MY_ABC_HERE
-	
-	if (!IS_EXT4_SYNOACL(inode)) {
-		error = inode_change_ok(inode, attr);
-		if (error)
-			return error;
-	}
-#else
 	error = inode_change_ok(inode, attr);
 	if (error)
 		return error;
-#endif 
 
 	if (is_quota_modification(inode, attr)) {
 		error = dquot_initialize(inode);
@@ -4364,9 +4354,12 @@ int ext4_page_mkwrite(struct vm_area_struct *vma, struct vm_fault *vmf)
 
 	sb_start_pagefault(inode->i_sb);
 	file_update_time(vma->vm_file);
+#ifdef MY_ABC_HERE
+	fsnotify_modify(vma->vm_file);
+#endif  
 
 	down_read(&EXT4_I(inode)->i_mmap_sem);
-	
+	 
 	if (test_opt(inode->i_sb, DELALLOC) &&
 	    !ext4_should_journal_data(inode) &&
 	    !ext4_nonda_switch(inode->i_sb)) {

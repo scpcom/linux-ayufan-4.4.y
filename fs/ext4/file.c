@@ -17,15 +17,11 @@
 #include <linux/swap.h>
 #include <net/sock.h>
 #endif
-#endif 
+#endif  
 #include "ext4.h"
 #include "ext4_jbd2.h"
 #include "xattr.h"
 #include "acl.h"
-#ifdef MY_ABC_HERE
-#include "syno_acl.h"
-#endif 
-
 
 static int ext4_release_file(struct inode *inode, struct file *filp)
 {
@@ -863,33 +859,28 @@ const struct file_operations ext4_file_operations = {
 #ifdef CONFIG_SPLICE_FROM_SOCKET
 	.splice_from_socket = ext4_splice_from_socket,
 #endif
-#endif 
+#endif  
 	.fallocate	= ext4_fallocate,
 };
 
 const struct inode_operations ext4_file_inode_operations = {
 #ifdef MY_ABC_HERE
 	.syno_getattr	= ext4_syno_getattr,
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
 	.syno_get_archive_ver	= ext4_syno_get_archive_ver,
 	.syno_set_archive_ver	= ext4_syno_set_archive_ver,
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
 	.syno_pattern_check = ext4_syno_pattern_check,
-#endif 
+#endif  
 	.setattr	= ext4_setattr,
 	.getattr	= ext4_getattr,
 	.setxattr	= generic_setxattr,
 	.getxattr	= generic_getxattr,
 	.listxattr	= ext4_listxattr,
 	.removexattr	= generic_removexattr,
-#ifdef MY_ABC_HERE
-	.syno_acl_get   = ext4_get_syno_acl,
-	.syno_acl_set	= ext4_set_syno_acl,
-#else
 	.get_acl	= ext4_get_acl,
 	.set_acl	= ext4_set_acl,
-#endif 
 	.fiemap		= ext4_fiemap,
 };

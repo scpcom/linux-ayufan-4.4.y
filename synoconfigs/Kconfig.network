@@ -86,4 +86,17 @@ config SYNO_RTK_NETWORK_LOG_REDUCE
 	bool "reduce realtek network driver rx buffer exhausted log"
 	default n
 
+config SYNO_AMD_XGBE_PORTING
+	bool "AMD Xgbe driver porting"
+	default n
+	depends on AMD_XGBE
+
+config SYNO_ADD_ROUTE_CHECK
+    bool "check if interface is link up before adding route"
+	default n
+
+config SYNO_AQUANTIA_WOL_SUPPORT
+	bool "support wol function for aquantia nic"
+	default n
+
 endmenu #Network

@@ -355,7 +355,7 @@ int phy_power_off(struct phy *phy)
 }
 EXPORT_SYMBOL_GPL(phy_power_off);
 
-#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 int phy_set_mode(struct phy *phy, enum phy_mode mode)
 {
 	int ret;
@@ -370,7 +370,9 @@ int phy_set_mode(struct phy *phy, enum phy_mode mode)
 	return ret;
 }
 EXPORT_SYMBOL_GPL(phy_set_mode);
+#endif /* MY_DEF_HERE / MY_DEF_HERE */
 
+#if defined(MY_DEF_HERE)
 enum phy_mode phy_get_mode(struct phy *phy)
 {
 	int ret;

@@ -90,12 +90,8 @@ extern struct ata_port *ata_port_alloc(struct ata_host *host);
 extern const char *sata_spd_string(unsigned int spd);
 extern int ata_port_probe(struct ata_port *ap);
 extern void __ata_port_probe(struct ata_port *ap);
-#ifdef MY_ABC_HERE
-extern int syno_need_force_retry(struct ata_port *ap);
-#endif 
 
 #define to_ata_port(d) container_of(d, struct ata_port, tdev)
-
 
 #ifdef CONFIG_ATA_ACPI
 extern unsigned int ata_acpi_gtf_filter;
@@ -147,24 +143,6 @@ extern void ata_eh_fastdrain_timerfn(unsigned long arg);
 extern void ata_qc_schedule_eh(struct ata_queued_cmd *qc);
 extern void ata_dev_disable(struct ata_device *dev);
 extern void ata_eh_detach_dev(struct ata_device *dev);
-#ifdef MY_ABC_HERE
-extern void sata_pmp_detach(struct ata_device *dev);
-#endif 
-#ifdef MY_ABC_HERE
-extern void SendSataErrEvent(struct work_struct *work);
-extern void SendDiskRetryEvent(struct work_struct *work);
-#endif 
-#ifdef MY_ABC_HERE
-extern void SendPortDisEvent(struct work_struct *work);
-#endif 
-#ifdef MY_ABC_HERE
-extern void SendDiskPowerShortBreakEvent(struct work_struct *work);
-#endif 
-#ifdef MY_ABC_HERE
-extern void SendDsleepWakeEvent(struct work_struct *work);
-extern void SendPwrResetEvent(struct work_struct *work);
-extern struct Scsi_Host* ata_scsi_is_eunit_deepsleep(struct Scsi_Host *host);
-#endif 
 extern void ata_eh_about_to_do(struct ata_link *link, struct ata_device *dev,
 			       unsigned int action);
 extern void ata_eh_done(struct ata_link *link, struct ata_device *dev,
@@ -256,9 +234,13 @@ static inline bool zpodd_zpready(struct ata_device *dev) { return false; }
 static inline void zpodd_enable_run_wake(struct ata_device *dev) {}
 static inline void zpodd_disable_run_wake(struct ata_device *dev) {}
 static inline void zpodd_post_poweron(struct ata_device *dev) {}
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
 int syno_gpio_with_scmd(struct ata_port *ap, struct scsi_device *sdev, SYNO_PM_PKG *pPkg, u8 rw);
-#endif 
+#endif  
 
-#endif 
+#ifdef CONFIG_SYNO_SMBUS_HDD_POWERCTL
+void syno_smbus_hdd_powerctl_init(void);
+#endif  
+
+#endif  

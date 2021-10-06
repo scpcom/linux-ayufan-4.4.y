@@ -9,109 +9,110 @@
 extern int setup_early_printk(char *);
 extern char gszSynoTtyS0[50];
 extern char gszSynoTtyS1[50];
-#endif 
-
-#ifdef MY_ABC_HERE
-#include <linux/syno.h>
-
-extern int grgPwrCtlPin[];
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 extern char gszDiskIdxMap[16];
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 extern char gszSynoHWRevision[];
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 extern char gszSynoHWVersion[];
-#endif 
+#endif  
 
 #if defined(MY_ABC_HERE) && !defined(MY_DEF_HERE)
 extern long g_syno_hdd_powerup_seq;
-#endif 
+#endif  
 
 #ifdef MY_DEF_HERE
 extern long g_hdd_hotplug;
-#endif 
+#endif  
+
+#ifdef CONFIG_SYNO_SMBUS_HDD_POWERCTL
+extern long g_smbus_hdd_powerctl;
+extern char gSynoSmbusHddType[16];
+extern int gSynoSmbusHddAdapter;
+extern int gSynoSmbusHddAddress;
+#endif  
 
 #ifdef MY_ABC_HERE
 extern unsigned char grgbLanMac[SYNO_MAC_MAX_NUMBER][16];
 extern int giVenderFormatVersion;
 extern char gszSkipVenderMacInterfaces[256];
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 extern char gszSerialNum[32];
 extern char gszCustomSerialNum[32];
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 extern int g_syno_sata_remap[SATA_REMAP_MAX];
 extern int g_use_sata_remap;
 extern int g_syno_mv14xx_remap[SATA_REMAP_MAX];
 extern int g_use_mv14xx_remap;
-#endif 
+#endif  
 
 #ifdef MY_DEF_HERE
 extern char gszPciAddrList[PCI_ADDR_NUM_MAX][PCI_ADDR_LEN_MAX];
 extern int gPciAddrNum;
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 extern long g_internal_netif_num;
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 extern long g_sata_mv_led;
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 extern int gSynoFactoryUSBFastReset;
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 extern int gSynoFactoryUSB3Disable;
-#endif 
+#endif  
 
 #ifdef MY_DEF_HERE
 extern int gSynoMemMode;
-#endif 
+#endif  
 
 #ifdef MY_DEF_HERE
 extern long g_is_sas_model;
-#endif 
+#endif  
 
 #ifdef MY_DEF_HERE
 extern int gSynoDualHead;
-#endif 
+#endif  
 
 #ifdef MY_DEF_HERE
 extern int gSynoSASWriteConflictPanic;
-#endif 
+#endif  
 
 #ifdef MY_DEF_HERE
 extern char gSynoSASHBAAddr[CONFIG_SYNO_SAS_MAX_HBA_SLOT][13];
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 extern int gSynoBootSATADOM;
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 extern char g_ahci_switch;
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 extern char gszSataPortMap[8];
-#endif 
+#endif  
 
 #ifdef MY_DEF_HERE
 extern char gSynoCastratedXhcAddr[CONFIG_SYNO_USB_NUM_CASTRATED_XHC][32];
 extern unsigned int gSynoCastratedXhcPortBitmap[CONFIG_SYNO_USB_NUM_CASTRATED_XHC];
-#endif 
+#endif  
 
 #ifdef MY_DEF_HERE
 extern char gSynoUsbVbusHostAddr[CONFIG_SYNO_USB_VBUS_NUM_GPIO][20];
@@ -119,70 +120,14 @@ extern int gSynoUsbVbusPort[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
 extern unsigned gSynoUsbVbusGpp[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
 extern unsigned gSynoUsbVbusGppPol[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
 #include <linux/synobios.h>
-#endif 
+#endif  
 
 #ifdef MY_DEF_HERE
 extern int giSynoSpinupGroup[SYNO_SPINUP_GROUP_MAX];
 extern int giSynoSpinupGroupNum;
 extern int giSynoSpinupGroupDelay;
 extern int giSynoSpinupGroupDebug;
-#endif 
-
-#ifdef MY_ABC_HERE
-
-static int __init early_pwrctl_pin(char *p)
-{
-       int i = 0;
-       int iLen = 0;
-       int iCount = 0;
-       int iSataID = 0;
-       int iPin = 0;
-       char szSataID[CONFIG_SYNO_PWRPIN_ENCODE_LEN + 1] = {'\0'};
-       char szPin[CONFIG_SYNO_PWRPIN_ENCODE_LEN + 1] = {'\0'};
-
-       
-       if ((NULL == p) || (0 == (iLen = strlen(p)))) {
-               goto END;
-       }
-
-       iCount = iLen / SYNO_PWRPIN_ITEM_LEN;
-       for(i = 0; i < iCount; ++i) {
-               if (CONFIG_SYNO_PORT_SIGN[0] != p[0]) {
-                       goto END;
-               }
-               
-               ++p;
-
-               
-               snprintf(szSataID, CONFIG_SYNO_PWRPIN_ENCODE_LEN + 1, "%s", p);
-               iSataID = simple_strtol(szSataID, NULL, 10);
-               if (0 > iSataID  || CONFIG_SYNO_MAX_SATA_ID < iSataID) {
-                       printk("!!!!!!!!! wrong sata id %d, set pwrctl_pin fail\n",
-                                       iSataID);
-                       goto END;
-               }
-               
-               p+= CONFIG_SYNO_PWRPIN_ENCODE_LEN;
-
-               
-               snprintf(szPin, CONFIG_SYNO_PWRPIN_ENCODE_LEN + 1, "%s", p);
-               if (0 > (iPin = simple_strtol(szPin, NULL, 10))) {
-                       printk("!!!!!!!!! wrong iPin %d, set pwrctl_pin fail\n", iPin);
-               }
-               
-               p+= CONFIG_SYNO_PWRPIN_ENCODE_LEN;
-
-               
-               printk("Get sata id %d pwrctl pin %d\n", iSataID, iPin);
-               grgPwrCtlPin[iSataID] = iPin;
-       }
-
-END:
-       return 1;
-}
-
-__setup("pwrctl_pin=", early_pwrctl_pin);
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 static int __init early_disk_idx_map(char *p)
@@ -282,7 +227,51 @@ static int __init enable_hdd_hotplug(char *p)
 	return 1;
 }
 __setup("enable_hdd_hotplug=", enable_hdd_hotplug);
-#endif 
+#endif  
+
+#ifdef CONFIG_SYNO_SMBUS_HDD_POWERCTL
+static int __init early_smbus_hdd_powerctl(char *p)
+{
+	g_smbus_hdd_powerctl = simple_strtol(p, NULL, 10);
+
+	if ( g_smbus_hdd_powerctl > 0 ) {
+		printk("Support SMBus HDD Dynamic Power Control.\n");
+	}
+
+	return 1;
+}
+__setup("SMBusHddDynamicPower=", early_smbus_hdd_powerctl);
+
+static int __init early_smbus_hdd_type(char *p)
+{
+	snprintf(gSynoSmbusHddType, sizeof(gSynoSmbusHddType), "%s", p);
+
+	printk("SYNO Smbus Hdd Type: %s\n", gSynoSmbusHddType);
+
+	return 1;
+}
+__setup("syno_smbus_hdd_type=", early_smbus_hdd_type);
+
+static int __init early_smbus_hdd_adapter(char *p)
+{
+	gSynoSmbusHddAdapter = simple_strtol(p, NULL, 10);
+
+	printk("SYNO Smbus Hdd Adapter: %d\n", gSynoSmbusHddAdapter);
+
+	return 1;
+}
+__setup("syno_smbus_hdd_adapter=", early_smbus_hdd_adapter);
+
+static int __init early_smbus_hdd_address(char *p)
+{
+	gSynoSmbusHddAddress = simple_strtol(p, NULL, 16);
+
+	printk("SYNO Smbus Hdd Address: 0x%02x\n", gSynoSmbusHddAddress);
+
+	return 1;
+}
+__setup("syno_smbus_hdd_address=", early_smbus_hdd_address);
+#endif  
 
 #ifdef MY_ABC_HERE
 static int __init early_mac1(char *p)
@@ -441,8 +430,7 @@ static int remap_parser(char *p, int *rgRemapTable)
 		origin_idx = simple_strtol(sz_origin, NULL, 10);
 		mapped_idx = simple_strtol(sz_mapped, NULL, 10);
 
-		if ((SATA_REMAP_MAX > origin_idx) &&
-		    (SATA_REMAP_MAX > mapped_idx)) {
+		if (SATA_REMAP_MAX > origin_idx) {
 			rgRemapTable[origin_idx] = mapped_idx;
 		} else {
 			goto FMT_ERR;

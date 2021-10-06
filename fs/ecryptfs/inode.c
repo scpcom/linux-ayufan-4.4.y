@@ -14,9 +14,6 @@
 #include <linux/xattr.h>
 #include <asm/unaligned.h>
 #include "ecryptfs_kernel.h"
-#ifdef MY_ABC_HERE
-#include "../synoacl_int.h"
-#endif 
 
 static struct dentry *lock_parent(struct dentry *dentry)
 {
@@ -1029,83 +1026,7 @@ static int ecryptfs_syno_get_archive_ver(struct dentry *dentry, u32 *version)
 		return -EINVAL;
 	return lower_dentry->d_inode->i_op->syno_get_archive_ver(lower_dentry, version);
 }
-#endif 
-
-#ifdef MY_ABC_HERE
-
-static int
-ecryptfs_syno_permission(struct dentry *dentry, int mask)
-{
-	struct dentry *lower_dentry = ecryptfs_dentry_to_lower(dentry);
-
-	return synoacl_mod_permission(lower_dentry, mask);
-}
-
-
-static int
-ecryptfs_syno_exec_permission(struct dentry *dentry)
-{
-	struct dentry *lower_dentry = ecryptfs_dentry_to_lower(dentry);
-
-	return synoacl_mod_exec_permission(lower_dentry);
-}
-
-static int
-ecryptfs_syno_acl_access(struct dentry *dentry, int mask, int syno_acl_access)
-{
-	struct dentry *lower_dentry = ecryptfs_dentry_to_lower(dentry);
-
-	return synoacl_mod_access(lower_dentry, mask, syno_acl_access);
-}
-
-static int
-ecryptfs_get_syno_acl_xattr(struct dentry *dentry, int cmd, void *value, size_t size)
-{
-	struct dentry *lower_dentry = ecryptfs_dentry_to_lower(dentry);
-
-	return synoacl_mod_get_acl_xattr(lower_dentry, cmd, value, size);
-}
-
-static int
-ecryptfs_syno_inode_change_ok(struct dentry *dentry, struct iattr *attr)
-{
-	struct dentry *lower_dentry = ecryptfs_dentry_to_lower(dentry);
-
-	return synoacl_mod_inode_change_ok(lower_dentry, attr);
-}
-
-static int
-ecryptfs_syno_arbit_chg_ok(struct dentry *dentry, unsigned int cmd, int tag, int mask)
-{
-	struct dentry *lower_dentry = ecryptfs_dentry_to_lower(dentry);
-
-	return synoacl_mod_archive_change_ok(lower_dentry, cmd, tag, mask);
-}
-
-static int
-ecryptfs_syno_setattr_post(struct dentry *dentry, struct iattr *attr)
-{
-	struct dentry *lower_dentry = ecryptfs_dentry_to_lower(dentry);
-
-	return synoacl_mod_setattr_post(lower_dentry, attr);
-}
-
-static void
-ecryptfs_syno_acl_to_mode(struct dentry *dentry, struct kstat *stat)
-{
-	struct dentry *lower_dentry = ecryptfs_dentry_to_lower(dentry);
-
-	synoacl_mod_to_mode(lower_dentry, stat);
-}
-
-static int
-ecryptfs_syno_acl_init(struct dentry *dentry, struct inode *inode)
-{
-	struct dentry *lower_dentry = ecryptfs_dentry_to_lower(dentry);
-
-	return synoacl_mod_init_acl(lower_dentry, lower_dentry->d_inode);
-}
-#endif 
+#endif  
 
 int
 ecryptfs_setxattr(struct dentry *dentry, const char *name, const void *value,
@@ -1218,28 +1139,17 @@ const struct inode_operations ecryptfs_symlink_iops = {
 const struct inode_operations ecryptfs_dir_iops = {
 #ifdef MY_ABC_HERE
 	.syno_getattr = ecryptfs_syno_getattr,
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
 	.syno_set_crtime = ecryptfs_syno_set_crtime,
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
 	.syno_set_archive_bit = ecryptfs_syno_set_archive_bit,
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
 	.syno_get_archive_ver = ecryptfs_syno_get_archive_ver,
 	.syno_set_archive_ver = ecryptfs_syno_set_archive_ver,
-#endif 
-#ifdef MY_ABC_HERE
-	.syno_permission = ecryptfs_syno_permission,
-	.syno_acl_access = ecryptfs_syno_acl_access,
-	.syno_acl_xattr_get = ecryptfs_get_syno_acl_xattr,
-	.syno_exec_permission = ecryptfs_syno_exec_permission,
-	.syno_inode_change_ok = ecryptfs_syno_inode_change_ok,
-	.syno_arbit_chg_ok = ecryptfs_syno_arbit_chg_ok,
-	.syno_setattr_post = ecryptfs_syno_setattr_post,
-	.syno_acl_to_mode = ecryptfs_syno_acl_to_mode,
-	.syno_acl_init = ecryptfs_syno_acl_init,
-#endif 
+#endif  
 	.create = ecryptfs_create,
 	.lookup = ecryptfs_lookup,
 	.link = ecryptfs_link,
@@ -1260,28 +1170,17 @@ const struct inode_operations ecryptfs_dir_iops = {
 const struct inode_operations ecryptfs_main_iops = {
 #ifdef MY_ABC_HERE
 	.syno_getattr = ecryptfs_syno_getattr,
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
 	.syno_set_crtime = ecryptfs_syno_set_crtime,
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
 	.syno_set_archive_bit = ecryptfs_syno_set_archive_bit,
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
 	.syno_get_archive_ver = ecryptfs_syno_get_archive_ver,
 	.syno_set_archive_ver = ecryptfs_syno_set_archive_ver,
-#endif 
-#ifdef MY_ABC_HERE
-	.syno_acl_xattr_get = ecryptfs_get_syno_acl_xattr,
-	.syno_acl_access = ecryptfs_syno_acl_access,
-	.syno_permission = ecryptfs_syno_permission,
-	.syno_exec_permission = ecryptfs_syno_exec_permission,
-	.syno_inode_change_ok = ecryptfs_syno_inode_change_ok,
-	.syno_arbit_chg_ok = ecryptfs_syno_arbit_chg_ok,
-	.syno_setattr_post = ecryptfs_syno_setattr_post,
-	.syno_acl_to_mode = ecryptfs_syno_acl_to_mode,
-	.syno_acl_init = ecryptfs_syno_acl_init,
-#endif 
+#endif  
 	.permission = ecryptfs_permission,
 	.setattr = ecryptfs_setattr,
 	.getattr = ecryptfs_getattr,

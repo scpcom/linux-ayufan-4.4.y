@@ -529,15 +529,15 @@ int __close_fd(struct files_struct *files, unsigned fd)
 	file = fdt->fd[fd];
 	if (!file)
 		goto out_unlock;
-#ifdef MY_ABC_HERE
-	if (file->f_mapping->a_ops->aggregate_write_end &&
-	      file->f_inode && (file->f_inode->aggregate_flag & AGGREGATE_RECVFILE_DOING))
-		flush_aggregate_recvfile(fd);
-#endif 
 	rcu_assign_pointer(fdt->fd[fd], NULL);
 	__clear_close_on_exec(fd, fdt);
 	__put_unused_fd(files, fd);
 	spin_unlock(&files->file_lock);
+#ifdef MY_ABC_HERE
+	if (file->f_mapping->a_ops->aggregate_write_end &&
+	      file->f_inode && (file->f_inode->aggregate_flag & AGGREGATE_RECVFILE_DOING))
+		flush_aggregate_recvfile_filp(file);
+#endif  
 	return filp_close(file, files);
 
 out_unlock:

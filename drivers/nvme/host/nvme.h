@@ -93,7 +93,16 @@ enum nvme_quirks {
  */
 #define NVME_QUIRK_DELAY_AMOUNT		2000
 
+enum nvme_ctrl_state {
+	NVME_CTRL_NEW,
+	NVME_CTRL_LIVE,
+	NVME_CTRL_RESETTING,
+	NVME_CTRL_DELETING,
+};
+
 struct nvme_ctrl {
+	enum nvme_ctrl_state state;
+	spinlock_t lock;
 	bool identified;
 	const struct nvme_ctrl_ops *ops;
 	struct request_queue *admin_q;
@@ -124,6 +133,12 @@ struct nvme_ctrl {
 	u8 npss;
 	u8 apsta;
 	bool subsystem;
+#ifdef MY_DEF_HERE
+	unsigned syno_force_timeout;
+#endif /* MY_DEF_HERE */
+#ifdef MY_ABC_HERE
+	unsigned long idle; /* nvme device idle time in jiffies */
+#endif /* MY_ABC_HERE */
 #ifdef MY_DEF_HERE
 #define BLOCK_INFO_SIZE        512     /* Largest string for a nvme device block information */
 	char syno_block_info[BLOCK_INFO_SIZE];
@@ -227,6 +242,10 @@ static inline void nvme_setup_rw(struct nvme_ns *ns, struct request *req,
 	if (req->cmd_flags & REQ_RAHEAD)
 		dsmgmt |= NVME_RW_DSM_FREQ_PREFETCH;
 
+#ifdef MY_ABC_HERE
+	ns->ctrl->idle = jiffies;
+#endif /* MY_ABC_HERE */
+
 	memset(cmnd, 0, sizeof(*cmnd));
 	cmnd->rw.opcode = (rq_data_dir(req) ? nvme_cmd_write : nvme_cmd_read);
 	cmnd->rw.command_id = req->tag;
@@ -273,6 +292,8 @@ static inline bool nvme_req_needs_retry(struct request *req, u16 status)
 		(jiffies - req->start_time) < req->timeout;
 }
 
+bool nvme_change_ctrl_state(struct nvme_ctrl *ctrl,
+		enum nvme_ctrl_state new_state);
 int nvme_disable_ctrl(struct nvme_ctrl *ctrl, u64 cap);
 int nvme_enable_ctrl(struct nvme_ctrl *ctrl, u64 cap);
 int nvme_shutdown_ctrl(struct nvme_ctrl *ctrl);

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * mm/mmap.c
  *
@@ -42,6 +45,9 @@
 #include <linux/memory.h>
 #include <linux/printk.h>
 #include <linux/userfaultfd_k.h>
+#ifdef MY_ABC_HERE
+#include <linux/fsnotify.h>
+#endif /* MY_ABC_HERE */
 
 #include <asm/uaccess.h>
 #include <asm/cacheflush.h>
@@ -2654,6 +2660,10 @@ int do_munmap(struct mm_struct *mm, unsigned long start, size_t len)
 		}
 	}
 
+#ifdef MY_ABC_HERE
+	if (vma->vm_file)
+		fsnotify_modify(vma->vm_file);
+#endif /* MY_ABC_HERE */
 	/*
 	 * Remove the vma's, and unmap the actual pages
 	 */

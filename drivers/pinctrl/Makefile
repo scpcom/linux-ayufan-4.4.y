@@ -65,3 +65,7 @@ obj-$(CONFIG_ARCH_MEDIATEK)	+= mediatek/
 ifeq ($(CONFIG_SYNO_LSP_RTD129X),y)
 obj-$(CONFIG_ARCH_RTD129X)      += realtek/
 endif # CONFIG_SYNO_LSP_RTD129X
+ifeq ($(CONFIG_SYNO_LSP_RTD1619),y)
+obj-$(CONFIG_ARCH_RTD16xx)	+= realtek/
+obj-$(CONFIG_ARCH_RTD13xx)      += realtek/
+endif # CONFIG_SYNO_LSP_RTD1619

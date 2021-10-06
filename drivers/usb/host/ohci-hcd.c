@@ -1254,10 +1254,12 @@ MODULE_LICENSE ("GPL");
 #define PLATFORM_DRIVER		ohci_hcd_tilegx_driver
 #endif
 
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #ifdef CONFIG_USB_OHCI_RTK
 #include "ohci-rtk.c"
-#define PLATFORM_DRIVER ohci_rtk_driver
-#endif
+#define	PLATFORM_DRIVER		ohci_rtk_driver
+#endif /* CONFIG_USB_OHCI_RTK */
+#endif /* MY_DEF_HERE || MY_DEF_HERE */
 
 static int __init ohci_hcd_mod_init(void)
 {

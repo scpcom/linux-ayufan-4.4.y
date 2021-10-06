@@ -207,12 +207,14 @@ static ssize_t power_ro_lock_show(struct device *dev,
 	struct mmc_blk_data *md = mmc_blk_get(dev_to_disk(dev));
 	struct mmc_card *card = md->queue.card;
 	int locked = 0;
-
+#if defined(CONFIG_MMC_RTK_EMMC) && defined(MY_DEF_HERE)
+	locked = card->ext_csd.boot_ro_lock;
+#else /* CONFIG_MMC_RTK_EMMC && MY_DEF_HERE */
 	if (card->ext_csd.boot_ro_lock & EXT_CSD_BOOT_WP_B_PERM_WP_EN)
 		locked = 2;
 	else if (card->ext_csd.boot_ro_lock & EXT_CSD_BOOT_WP_B_PWR_WP_EN)
 		locked = 1;
-
+#endif /* CONFIG_MMC_RTK_EMMC && MY_DEF_HERE */
 	ret = snprintf(buf, PAGE_SIZE, "%d\n", locked);
 
 	mmc_blk_put(md);
@@ -227,18 +229,64 @@ static ssize_t power_ro_lock_store(struct device *dev,
 	struct mmc_blk_data *md, *part_md;
 	struct mmc_card *card;
 	unsigned long set;
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_MMC_RTK_EMMC
+	unsigned int mode=0, mode_tmp=0;
+#endif /* CONFIG_MMC_RTK_EMMC */
+#endif /* MY_DEF_HERE */
 
 	if (kstrtoul(buf, 0, &set))
 		return -EINVAL;
 
+#if defined(CONFIG_MMC_RTK_EMMC) && defined(MY_DEF_HERE)
+	sscanf(buf,"%d",&mode);
+
+        if(mode>255 || ((mode & EXT_CSD_BOOT_WP_B_PWR_WP_EN)==0 && (mode & EXT_CSD_BOOT_WP_B_PERM_WP_EN)==0)) {
+                printk(KERN_ERR "Bad setting...\n");
+                return count;
+        }
+#else /* CONFIG_MMC_RTK_EMMC && MY_DEF_HERE */
 	if (set != 1)
 		return count;
+#endif /* CONFIG_MMC_RTK_EMMC && MY_DEF_HERE */
 
 	md = mmc_blk_get(dev_to_disk(dev));
 	card = md->queue.card;
 
 	mmc_get_card(card);
 
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_MMC_RTK_EMMC
+	if((mode & EXT_CSD_BOOT_WP_SEL)==0x0) {
+		if(mode & EXT_CSD_BOOT_WP_B_PERM_WP_EN) mode_tmp |= EXT_CSD_BOOT_WP_B_PERM_WP_EN;
+		else mode_tmp |= EXT_CSD_BOOT_WP_B_PWR_WP_EN;
+        }
+	else if((mode & EXT_CSD_BOOT_WP_SEL)==0x80){
+		if(mode & EXT_CSD_BOOT_WP_B_PERM_WP_EN) {
+			mode_tmp |= EXT_CSD_BOOT_WP_B_PERM_WP_EN;
+			mode_tmp |= EXT_CSD_BOOT_WP_SEL;
+			if(mode & EXT_CSD_BOOT_WP_PERM_SEL) mode_tmp |= EXT_CSD_BOOT_WP_PERM_SEL ;
+		}
+		else {
+			mode_tmp |= EXT_CSD_BOOT_WP_B_PWR_WP_EN;
+			mode_tmp |= EXT_CSD_BOOT_WP_SEL;
+			if(mode & EXT_CSD_BOOT_WP_PWR_SEL)  mode_tmp |= EXT_CSD_BOOT_WP_PWR_SEL ;
+		}
+	}
+#endif /* CONFIG_MMC_RTK_EMMC */
+#endif /* MY_DEF_HERE */
+
+#if defined(CONFIG_MMC_RTK_EMMC) && defined(MY_DEF_HERE)
+	ret = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_BOOT_WP,
+				card->ext_csd.boot_ro_lock | mode_tmp,
+				card->ext_csd.part_time);
+	if (ret) {
+		if(mode & EXT_CSD_BOOT_WP_B_PERM_WP_EN) pr_err("%s: Locking boot partition ro permanently failed: %d\n", md->disk->disk_name, ret);
+		else pr_err("%s: Locking boot partition ro until next power on failed: %d\n", md->disk->disk_name, ret);
+	}
+	else
+		card->ext_csd.boot_ro_lock |= mode_tmp;
+#else /* CONFIG_MMC_RTK_EMMC && MY_DEF_HERE */
 	ret = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_BOOT_WP,
 				card->ext_csd.boot_ro_lock |
 				EXT_CSD_BOOT_WP_B_PWR_WP_EN,
@@ -247,10 +295,82 @@ static ssize_t power_ro_lock_store(struct device *dev,
 		pr_err("%s: Locking boot partition ro until next power on failed: %d\n", md->disk->disk_name, ret);
 	else
 		card->ext_csd.boot_ro_lock |= EXT_CSD_BOOT_WP_B_PWR_WP_EN;
-
+#endif /* CONFIG_MMC_RTK_EMMC && MY_DEF_HERE */
 	mmc_put_card(card);
 
 	if (!ret) {
+#if defined(CONFIG_MMC_RTK_EMMC) && defined(MY_DEF_HERE)
+		if((mode & EXT_CSD_BOOT_WP_SEL)==0x0) {
+			if(mode & EXT_CSD_BOOT_WP_B_PERM_WP_EN) printk(KERN_ERR "%s: [1] Locking boot partition ro permanently\n", md->disk->disk_name);
+			else printk(KERN_ERR "%s: Locking boot partition ro until next power on\n", md->disk->disk_name);
+			set_disk_ro(md->disk, 1);
+
+			list_for_each_entry(part_md, &md->part, part)
+				if (part_md->area_type == MMC_BLK_DATA_AREA_BOOT) {
+					if(mode & EXT_CSD_BOOT_WP_B_PERM_WP_EN) printk(KERN_ERR "%s: [1] Locking boot partition ro permanently\n", part_md->disk->disk_name);
+					else printk(KERN_ERR "%s: Locking boot partition ro until next power on\n", part_md->disk->disk_name);
+					set_disk_ro(part_md->disk, 1);
+				}
+		}
+		else {
+			if(mode & EXT_CSD_BOOT_WP_B_PERM_WP_EN) {
+				if((mode & EXT_CSD_BOOT_WP_PERM_SEL)==0x0) {
+					if (strcmp(md->disk->disk_name,"mmcblk0boot0")==0) {
+						printk(KERN_ERR "%s: Locking boot partition ro permanently\n", md->disk->disk_name);
+						set_disk_ro(md->disk, 1);
+					}
+					else {
+						list_for_each_entry(part_md, &md->part, part)
+							if (strcmp(part_md->disk->disk_name,"mmcblk0boot0")==0) {
+								printk(KERN_ERR "%s: Locking boot partition ro permanently\n", part_md->disk->disk_name);
+								set_disk_ro(part_md->disk, 1);
+							}
+					}
+				}
+				else {
+					if (strcmp(md->disk->disk_name,"mmcblk0boot1")==0) {
+						printk(KERN_ERR "%s: Locking boot partition ro permanently\n", md->disk->disk_name);
+						set_disk_ro(md->disk, 1);
+					}
+					else {
+						list_for_each_entry(part_md, &md->part, part)
+							if (strcmp(part_md->disk->disk_name,"mmcblk0boot1")==0) {
+								printk(KERN_ERR "%s: Locking boot partition ro permanently\n", part_md->disk->disk_name);
+								set_disk_ro(part_md->disk, 1);
+							}
+					}
+				}
+			}
+			else {
+				if((mode & EXT_CSD_BOOT_WP_PWR_SEL)==0x0) {
+					if (strcmp(md->disk->disk_name,"mmcblk0boot0")==0) {
+						printk(KERN_ERR "%s: Locking boot partition ro until next power on\n", md->disk->disk_name);
+						set_disk_ro(md->disk, 1);
+					}
+					else {
+						list_for_each_entry(part_md, &md->part, part)
+							if (strcmp(part_md->disk->disk_name,"mmcblk0boot0")==0) {
+								printk(KERN_ERR "%s: Locking boot partition ro until next power on\n", part_md->disk->disk_name);
+								set_disk_ro(part_md->disk, 1);
+							}
+					}
+				}
+				else {
+					if (strcmp(md->disk->disk_name,"mmcblk0boot1")==0) {
+						printk(KERN_ERR "%s: Locking boot partition ro until next power on\n", md->disk->disk_name);
+						set_disk_ro(md->disk, 1);
+					}
+					else {
+						list_for_each_entry(part_md, &md->part, part)
+							if (strcmp(part_md->disk->disk_name,"mmcblk0boot1")==0) {
+								printk(KERN_ERR "%s: Locking boot partition ro until next power on\n", part_md->disk->disk_name);
+								set_disk_ro(part_md->disk, 1);
+							}
+					}
+				}
+			}
+		}
+#else /* CONFIG_MMC_RTK_EMMC && MY_DEF_HERE */
 		pr_info("%s: Locking boot partition ro until next power on\n",
 			md->disk->disk_name);
 		set_disk_ro(md->disk, 1);
@@ -260,6 +380,7 @@ static ssize_t power_ro_lock_store(struct device *dev,
 				pr_info("%s: Locking boot partition ro until next power on\n", part_md->disk->disk_name);
 				set_disk_ro(part_md->disk, 1);
 			}
+#endif /* CONFIG_MMC_RTK_EMMC && MY_DEF_HERE */
 	}
 
 	mmc_blk_put(md);

@@ -74,13 +74,45 @@ struct mtd_part_parser {
 	struct list_head list;
 	struct module *owner;
 	const char *name;
+#if defined(CONFIG_SYNO_RTD1619)
+	int (*parse_fn)(struct mtd_info *, const struct mtd_partition **,
+#else /* CONFIG_SYNO_RTD1619 */
 	int (*parse_fn)(struct mtd_info *, struct mtd_partition **,
+#endif /* CONFIG_SYNO_RTD1619 */
 			struct mtd_part_parser_data *);
+#if defined(MY_DEF_HERE)
+	void (*cleanup)(const struct mtd_partition *pparts, int nr_parts);
+#endif /* MY_DEF_HERE */
 };
 
+#if defined(MY_DEF_HERE)
+/* Container for passing around a set of parsed partitions */
+struct mtd_partitions {
+	const struct mtd_partition *parts;
+	int nr_parts;
+	const struct mtd_part_parser *parser;
+};
+
+extern int __register_mtd_parser(struct mtd_part_parser *parser,
+				 struct module *owner);
+#define register_mtd_parser(parser) __register_mtd_parser(parser, THIS_MODULE)
+
+#else /* MY_DEF_HERE */
 extern void register_mtd_parser(struct mtd_part_parser *parser);
+#endif /* MY_DEF_HERE */
 extern void deregister_mtd_parser(struct mtd_part_parser *parser);
 
+#if defined(MY_DEF_HERE)
+/*
+ * module_mtd_part_parser() - Helper macro for MTD partition parsers that don't
+ * do anything special in module init/exit. Each driver may only use this macro
+ * once, and calling it replaces module_init() and module_exit().
+ */
+#define module_mtd_part_parser(__mtd_part_parser) \
+	module_driver(__mtd_part_parser, register_mtd_parser, \
+		      deregister_mtd_parser)
+
+#endif /* MY_DEF_HERE */
 int mtd_is_partition(const struct mtd_info *mtd);
 int mtd_add_partition(struct mtd_info *master, const char *name,
 		      long long offset, long long length);

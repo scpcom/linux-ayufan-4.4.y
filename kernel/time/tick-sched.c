@@ -785,12 +785,20 @@ static bool can_stop_idle_tick(int cpu, struct tick_sched *ts)
 	return true;
 }
 
+#ifdef MY_ABC_HERE
+static void __tick_nohz_idle_stop_tick(struct tick_sched *ts)
+#else
 static void __tick_nohz_idle_enter(struct tick_sched *ts)
+#endif
 {
 	ktime_t now, expires;
 	int cpu = smp_processor_id();
 
+#ifdef MY_ABC_HERE
+	now = ts->idle_entrytime;
+#else
 	now = tick_nohz_start_idle(ts);
+#endif
 
 	if (can_stop_idle_tick(cpu, ts)) {
 		int was_stopped = ts->tick_stopped;
@@ -807,6 +815,13 @@ static void __tick_nohz_idle_enter(struct tick_sched *ts)
 			ts->idle_jiffies = ts->last_jiffies;
 	}
 }
+
+#ifdef MY_ABC_HERE
+void tick_nohz_idle_stop_tick(void)
+{
+	__tick_nohz_idle_stop_tick(this_cpu_ptr(&tick_cpu_sched));
+}
+#endif
 
 /**
  * tick_nohz_idle_enter - stop the idle tick from the idle task
@@ -838,7 +853,11 @@ void tick_nohz_idle_enter(void)
 
 	ts = this_cpu_ptr(&tick_cpu_sched);
 	ts->inidle = 1;
+#ifdef MY_ABC_HERE
+	tick_nohz_start_idle(ts);
+#else
 	__tick_nohz_idle_enter(ts);
+#endif
 
 	local_irq_enable();
 }
@@ -855,10 +874,15 @@ void tick_nohz_irq_exit(void)
 {
 	struct tick_sched *ts = this_cpu_ptr(&tick_cpu_sched);
 
-	if (ts->inidle)
+	if (ts->inidle) {
+#ifdef MY_ABC_HERE
+		tick_nohz_start_idle(ts);
+#else
 		__tick_nohz_idle_enter(ts);
-	else
+#endif
+	} else {
 		tick_nohz_full_update_tick(ts);
+	}
 }
 
 /**
@@ -893,6 +917,18 @@ static void tick_nohz_account_idle_ticks(struct tick_sched *ts)
 		account_idle_ticks(ticks);
 #endif
 }
+
+#ifdef MY_ABC_HERE
+void tick_nohz_idle_restart_tick(void)
+{
+	struct tick_sched *ts = this_cpu_ptr(&tick_cpu_sched);
+
+	if (ts->tick_stopped) {
+		tick_nohz_restart_sched_tick(ts, ktime_get());
+		tick_nohz_account_idle_ticks(ts);
+	}
+}
+#endif
 
 /**
  * tick_nohz_idle_exit - restart the idle tick from the idle task
@@ -1098,6 +1134,10 @@ void tick_setup_sched_timer(void)
 {
 	struct tick_sched *ts = this_cpu_ptr(&tick_cpu_sched);
 	ktime_t now = ktime_get();
+#if defined(CONFIG_ARCH_RTD16xx) && defined(MY_DEF_HERE)
+	/* Offset the tick to avert jiffies_lock contentio,(CH bonding) */
+	u64 offset = ktime_to_ns(tick_period) >> 1;
+#endif /* CONFIG_ARCH_RTD16xx && MY_DEF_HERE */
 
 	/*
 	 * Emulate tick processing via per-CPU hrtimers:
@@ -1108,6 +1148,11 @@ void tick_setup_sched_timer(void)
 	/* Get the next period (per cpu) */
 	hrtimer_set_expires(&ts->sched_timer, tick_init_jiffy_update());
 
+#if defined(CONFIG_ARCH_RTD16xx) && defined(MY_DEF_HERE)
+	do_div(offset, num_possible_cpus());
+	offset *= smp_processor_id();
+	hrtimer_add_expires_ns(&ts->sched_timer, offset);
+#else /* CONFIG_ARCH_RTD16xx && MY_DEF_HERE */
 	/* Offset the tick to avert jiffies_lock contention. */
 	if (sched_skew_tick) {
 		u64 offset = ktime_to_ns(tick_period) >> 1;
@@ -1115,6 +1160,7 @@ void tick_setup_sched_timer(void)
 		offset *= smp_processor_id();
 		hrtimer_add_expires_ns(&ts->sched_timer, offset);
 	}
+#endif /* CONFIG_ARCH_RTD16xx && MY_DEF_HERE */
 
 	hrtimer_forward(&ts->sched_timer, now, tick_period);
 	hrtimer_start_expires(&ts->sched_timer, HRTIMER_MODE_ABS_PINNED);

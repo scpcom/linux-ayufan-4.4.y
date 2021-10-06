@@ -61,6 +61,9 @@ struct page;
 #ifdef CONFIG_DMA_CMA
 
 extern struct cma *dma_contiguous_default_area;
+#ifdef CONFIG_SYNO_NTB_SUPPORT_BRD
+extern struct cma *dma_contiguous_syno_ntb_area;
+#endif /* CONFIG_SYNO_NTB_SUPPORT_BRD */
 
 static inline struct cma *dev_get_cma_area(struct device *dev)
 {
@@ -85,6 +88,11 @@ void dma_contiguous_reserve(phys_addr_t addr_limit);
 int __init dma_contiguous_reserve_area(phys_addr_t size, phys_addr_t base,
 				       phys_addr_t limit, struct cma **res_cma,
 				       bool fixed);
+#ifdef CONFIG_SYNO_NTB_SUPPORT_BRD
+int __init dma_contiguous_reserve_ntb_area(phys_addr_t size, phys_addr_t base,
+				       phys_addr_t limit, struct cma **res_cma,
+				       bool fixed);
+#endif /* CONFIG_SYNO_NTB_SUPPORT_BRD */
 
 /**
  * dma_declare_contiguous() - reserve area for contiguous memory handling

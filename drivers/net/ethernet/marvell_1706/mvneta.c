@@ -4093,7 +4093,7 @@ static void mvneta_adjust_link(struct net_device *ndev)
 			pp->speed  = phydev->speed;
 		}
 #ifdef MY_DEF_HERE
-		if (syno_is_hw_version(HW_DS219j) || syno_is_hw_version(HW_DS219se) || syno_is_hw_version(HW_DS119j)) {
+		if (syno_is_hw_version(HW_DS219j) || syno_is_hw_version(HW_DS219se) || syno_is_hw_version(HW_DS119j) || syno_is_hw_version(HW_DS120j)) {
 			if (0 > syno_m88e151X_led_init(phydev)) {
 				printk("set phy led failed\n");
 			}

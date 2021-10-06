@@ -56,4 +56,8 @@ obj-$(CONFIG_MTD_NAND_SUNXI)		+= sunxi_nand.o
 obj-$(CONFIG_MTD_NAND_HISI504)	        += hisi504_nand.o
 obj-$(CONFIG_MTD_NAND_BRCMNAND)		+= brcmnand/
 
+ifeq ($(CONFIG_SYNO_LSP_RTD1619),y)
+nand-objs := rtk_nand.o nand_base_rtk.o
+else # CONFIG_SYNO_LSP_RTD1619
 nand-objs := nand_base.o nand_bbt.o nand_timings.o
+endif # CONFIG_SYNO_LSP_RTD1619

@@ -51,7 +51,7 @@
 	.macro	enable_irq
 	msr	daifclr, #2
 	.endm
-#ifdef MY_DEF_HERE
+#if defined(MY_DEF_HERE) || defined(CONFIG_RTK_PLATFORM) && defined(MY_DEF_HERE)
 /*
  * Save/disable and restore interrupts.
  */
@@ -63,7 +63,7 @@
 	.macro  restore_irqs, olddaif
 	msr     daif, \olddaif
 	.endm
-#endif /* MY_DEF_HERE */
+#endif /* MY_DEF_HERE || CONFIG_RTK_PLATFORM && MY_DEF_HERE */
 /*
  * Enable and disable debug exceptions.
  */

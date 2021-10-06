@@ -202,7 +202,8 @@
 #define HW_DS218       "DS218"         //"DS218"
 #define HW_EDS19       "EDS19"         //"EDS19"
 #define HW_RS819       "RS819"         //"RS819"
-#define HW_DS220j       "DS220j"         //"DS220j"
+#define HW_DS220j      "DS220j"        //"DS220j"
+#define HW_DS420j      "DS420j"        //"DS420j"
 #define HW_DS3017xs    "DS3017xs"      //"DS3017xs"
 #define HW_DS3018xs    "DS3018xs"      //"DS3018xs"
 #define HW_FS1018      "FS1018"        //"FS1018"
@@ -215,7 +216,9 @@
 #define HW_DS219se     "DS219se"       //"DS219se"
 #define HW_DS3619xs    "DS3619xs"      //"DS3619xs"
 #define HW_DS119j      "DS119j"        //"DS119j"
+#define HW_DS120j      "DS120j"        //"DS120j"
 #define HW_TAIPEI      "TAIPEI"        //"TAIPEI"
+#define HW_SA3200d     "SA3200d"       //"SA3200d"
 #define HW_RS1619xsp   "RS1619xs+"     //"RS1619xs+"
 #define HW_DS2419p     "DS2419+"       //"DS2419+"
 #define HW_DS419p      "DS419+"        //"DS419+"
@@ -235,6 +238,18 @@
 #define HW_FS3400      "FS3400"        //"FS3400"
 #define HW_FS3600      "FS3600"        //"FS3600"
 #define HW_HD3400      "HD3400"        //"HD3400"
+#define HW_DS1520p     "DS1520+"       //"DS1520+"
+#define HW_DS220play   "DS220play"     //"DS220play"
+#define HW_DS220       "DS220"         //"DS220"
+#define HW_RS1220p     "RS1220+"       //"RS1220+"
+#define HW_RS1220rpp   "RS1220rp+"     //"RS1220rp+"
+#define HW_DS1620xsp   "DS1620xs+"     //"DS1620xs+"
+#define HW_DS920p      "DS920+"        //"DS920+"
+#define HW_SA6400      "SA6400"        //"SA6400"
+#define HW_DS1621p     "DS1621+"       //"DS1621+"
+#define HW_HD6400      "HD6400"        //"HD6400"
+#define HW_AliDSM      "AliDSM"        //"AliDSM"
+#define HW_DVA3221     "DVA3221"       //"DVA3221"
 #define HW_UNKNOWN     "DSUnknown"
 
 #define EBOX_INFO_UNIQUE_RX410  "RX410"
@@ -275,6 +290,30 @@
 #ifdef MY_DEF_HERE
 #define IS_SYNOLOGY_M2DXX(x) (0)
 #endif /* MY_DEF_HERE */
+
+#define HWMON_CPU_TEMP_NAME "CPU_Temperature"
+#define HWMON_SYS_THERMAL_NAME "System_Thermal_Sensor"
+#define HWMON_SYS_VOLTAGE_NAME "System_Voltage_Sensor"
+#define HWMON_SYS_FAN_RPM_NAME "System_Fan_Speed_RPM"
+#define HWMON_SYS_CURRENT_NAME "System_Current_Sensor"
+#define HWMON_SYS_FAN1_RPM "fan1_rpm"
+#define HWMON_SYS_FAN2_RPM "fan2_rpm"
+#define HWMON_SYS_FAN3_RPM "fan3_rpm"
+#define HWMON_SYS_FAN4_RPM "fan4_rpm"
+#define HWMON_PSU_STATUS_NAME "PSU_%d_Status"
+#define HWMON_PSU1_STATUS_NAME "PSU_1_Status"
+#define HWMON_PSU2_STATUS_NAME "PSU_2_Status"
+#define HWMON_PSU_SENSOR_PIN "power_in"
+#define HWMON_PSU_SENSOR_POUT "power_out"
+#define HWMON_PSU_SENSOR_TEMP "temperature"
+#define HWMON_PSU_SENSOR_FAN "fan_speed"
+#define HWMON_PSU_SENSOR_STATUS "status"
+#define HWMON_HDD_BP_STATUS_NAME "HDD_Backplane_Status"
+#define HWMON_HDD_BP_DETECT "hdd_detect"
+#define HWMON_HDD_BP_ENABLE "hdd_enable"
+#define MAX_SENSOR_NUM 10
+#define MAX_SENSOR_NAME 30
+#define MAX_SENSOR_VALUE 30
 
 typedef enum _tag_EUNIT_PWRON_TYPE {
 	EUNIT_NOT_SUPPORT,
@@ -333,10 +372,37 @@ typedef struct _SynoThermalTemp {
 	int temperature;
 } SYNO_THERMAL_TEMP;
 
+typedef enum {
+	HWMON_CPU_TEMP,
+	HWMON_SYS_THERMAL,
+	HWMON_SYS_VOLTAGE,
+	HWMON_FAN_SPEED_RPM,
+	HWMON_HDD_BACKPLANE,
+	HWMON_PSU_STATUS,
+	HWMON_SYS_CURRENT,
+} SYNO_HWMON_SUPPORT_ID;
+
+typedef struct _SYNO_HWMON_SUPPORT {
+	SYNO_HWMON_SUPPORT_ID id;
+	int support;
+} SYNO_HWMON_SUPPORT;
+
+typedef struct _SYNO_HWMON_SENSOR {
+	char sensor_name[MAX_SENSOR_NAME];
+	char value[MAX_SENSOR_VALUE];
+} SYNO_HWMON_SENSOR;
+
+typedef struct _SYNO_HWMON_SENSOR_TYPE {
+	char type_name[MAX_SENSOR_NAME];
+	int sensor_num;
+	SYNO_HWMON_SENSOR sensor[MAX_SENSOR_NUM];
+} SYNO_HWMON_SENSOR_TYPE;
+
 enum {
     MD_SECTOR_READ_ERROR = 0,
     MD_SECTOR_WRITE_ERROR = 1,
     MD_SECTOR_REWRITE_OK = 2,
+    MD_FAULTY_DEVICE = 3,
 };
 
 typedef enum {
@@ -357,6 +423,7 @@ typedef enum {
 #define EBOX_INFO_EMID_KEY      "EMID"
 #define EBOX_INFO_SATAHOST_KEY  "sata_host"
 #define EBOX_INFO_PORTNO_KEY    "port_no"
+#define EBOX_INFO_PCIEPATH_KEY  "pciepath"
 #define EBOX_INFO_CPLDVER_KEY   "cpld_version"
 #define EBOX_INFO_DEEP_SLEEP    "deepsleep_support"
 #define EBOX_INFO_IRQ_OFF       "irq_off"

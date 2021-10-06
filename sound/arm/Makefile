@@ -8,6 +8,10 @@ ccflags-y += -I$(srctree)/drivers/soc/realtek/rtd129x/rpc
 #ccflags-y += -DRTK_TRACE_ALSA_EN
 ccflags-y += -Werror
 endif # CONFIG_SYNO_LSP_RTD129X
+ifeq ($(CONFIG_SYNO_LSP_RTD1619),y)
+ccflags-y += -I$(srctree)/drivers/soc/realtek/common/rpc
+ccflags-y += -Werror
+endif # CONFIG_SYNO_LSP_RTD1619
 
 obj-$(CONFIG_SND_ARMAACI)	+= snd-aaci.o
 snd-aaci-objs			:= aaci.o
@@ -26,3 +30,7 @@ ifeq ($(CONFIG_SYNO_LSP_RTD129X),y)
 obj-$(CONFIG_SND_REALTEK)      += snd-realtek-driver.o
 snd-realtek-driver-objs     := snd-realtek.o snd-realtek-compress.o snd-realtek_RPC.o
 endif # CONFIG_SYNO_LSP_RTD129X
+ifeq ($(CONFIG_SYNO_LSP_RTD1619),y)
+obj-$(CONFIG_SND_REALTEK)	+= snd-realtek-driver.o
+obj-$(CONFIG_SND_REALTEK)	:= snd-realtek_1619.o snd-realtek_RPC_1619.o snd-realtek-notify.o
+endif # CONFIG_SYNO_LSP_RTD1619

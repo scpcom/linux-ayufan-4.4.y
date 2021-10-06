@@ -29,55 +29,51 @@ enum reconstruct_states {
 
 struct stripe_head {
 	struct hlist_node	hash;
-	struct list_head	lru;	      
+	struct list_head	lru;	       
 	struct llist_node	release_list;
 	struct r5conf		*raid_conf;
-	short			generation;	
-	sector_t		sector;		
-	short			pd_idx;		
-	short			qd_idx;		
-	short			ddf_layout;
+	short			generation;	 
+	sector_t		sector;		 
+	short			pd_idx;		 
+	short			qd_idx;		 
+	short			ddf_layout; 
 	short			hash_lock_index;
-	unsigned long		state;		
-	atomic_t		count;	      
-#ifdef MY_ABC_HERE
-	atomic_t delayed_cnt;
-#endif 
-	int			bm_seq;	
-	int			disks;		
-	int			overwrite_disks; 
+	unsigned long		state;		 
+	atomic_t		count;	       
+	int			bm_seq;	 
+	int			disks;		 
+	int			overwrite_disks;  
 	enum check_states	check_state;
 	enum reconstruct_states reconstruct_state;
 	spinlock_t		stripe_lock;
 	int			cpu;
 	struct r5worker_group	*group;
 
-	struct stripe_head	*batch_head; 
-	spinlock_t		batch_lock; 
-	struct list_head	batch_list; 
+	struct stripe_head	*batch_head;  
+	spinlock_t		batch_lock;  
+	struct list_head	batch_list;  
 
 	struct r5l_io_unit	*log_io;
 	struct list_head	log_list;
-	
+	 
 	struct stripe_operations {
 		int 		     target, target2;
 		enum sum_check_flags zero_sum_result;
 	} ops;
 	struct r5dev {
-		
+		 
 		struct bio	req, rreq;
 		struct bio_vec	vec, rvec;
 		struct page	*page, *orig_page;
 		struct bio	*toread, *read, *towrite, *written;
-		sector_t	sector;			
+		sector_t	sector;			 
 		unsigned long	flags;
 		u32		log_checksum;
-	} dev[1]; 
+	} dev[1];  
 };
 
-
 struct stripe_head_state {
-	
+	 
 	int syncing, expanding, expanded, replacing;
 	int locked, uptodate, to_read, to_write, failed, written;
 	int to_fill, compute, req_compute, non_overwrite;
@@ -92,40 +88,35 @@ struct stripe_head_state {
 	int log_failed;
 };
 
-
 enum r5dev_flags {
-	R5_UPTODATE,	
-	R5_LOCKED,	
-	R5_DOUBLE_LOCKED,
-	R5_OVERWRITE,	
-
-	R5_Insync,	
-	R5_Wantread,	
+	R5_UPTODATE,	 
+	R5_LOCKED,	 
+	R5_DOUBLE_LOCKED, 
+	R5_OVERWRITE,	 
+ 
+	R5_Insync,	 
+	R5_Wantread,	 
 	R5_Wantwrite,
-	R5_Overlap,	
-	R5_ReadNoMerge, 
-	R5_ReadError,	
-	R5_ReWrite,	
+	R5_Overlap,	 
+	R5_ReadNoMerge,  
+	R5_ReadError,	 
+	R5_ReWrite,	 
 
-	R5_Expanded,	
-	R5_Wantcompute,	
-	R5_Wantfill,	
-	R5_Wantdrain,	
-	R5_WantFUA,	
-	R5_SyncIO,	
-	R5_WriteError,	
-	R5_MadeGood,	
-	R5_ReadRepl,	
-	R5_MadeGoodRepl,
-	R5_NeedReplace,	
-	R5_WantReplace, 
-	R5_Discard,	
-	R5_SkipCopy,	
-#ifdef CONFIG_SYNO_MD_RAID5_WRITE_REFERENCE_BIO_PAGE
-	R5_UseFSPage,
-#endif 
+	R5_Expanded,	 
+	R5_Wantcompute,	 
+	R5_Wantfill,	 
+	R5_Wantdrain,	 
+	R5_WantFUA,	 
+	R5_SyncIO,	 
+	R5_WriteError,	 
+	R5_MadeGood,	 
+	R5_ReadRepl,	 
+	R5_MadeGoodRepl, 
+	R5_NeedReplace,	 
+	R5_WantReplace,  
+	R5_Discard,	 
+	R5_SkipCopy,	 
 };
-
 
 enum {
 	STRIPE_ACTIVE,
@@ -151,15 +142,11 @@ enum {
 	STRIPE_ON_RELEASE_LIST,
 	STRIPE_BATCH_READY,
 	STRIPE_BATCH_ERR,
-	STRIPE_BITMAP_PENDING,	
-	STRIPE_LOG_TRAPPED, 
+	STRIPE_BITMAP_PENDING,	 
+	STRIPE_LOG_TRAPPED,  
 #ifdef MY_ABC_HERE
 	STRIPE_NORETRY,
-#endif 
-#ifdef MY_ABC_HERE
-	STRIPE_ACTIVATE_STABLE,
-	STRIPE_CHECK_STABLE_LIST,
-#endif 
+#endif  
 };
 
 #define STRIPE_EXPAND_SYNC_FLAGS \
@@ -210,78 +197,9 @@ struct r5worker_group {
 	int stripes_cnt;
 };
 
-#ifdef MY_ABC_HERE
-struct syno_defer_worker_t {
-	struct work_struct work;
-	struct syno_defer_worker_group_t *group;
-};
-
-struct syno_defer_worker_group_t {
-	struct r5conf *conf;
-	struct syno_defer_worker_t *workers;
-};
-#endif 
-
-#ifdef MY_ABC_HERE
-enum syno_raid5_heal_stripe_head_stat {
-	HEAL_STRIPE_READ_BLOCK = 0,
-	HEAL_STRIPE_WANT_COMPUTE,
-	HEAL_STRIPE_COMPUTING,
-	HEAL_STRIPE_COMPUTE_DONE,
-};
-
-struct syno_self_heal_stripe_head {
-	struct list_head           sh_list;
-	unsigned long              state;
-	spinlock_t                 sh_lock;
-	sector_t                   sh_sector;
-	int                        pd_idx;
-	int                        qd_idx;
-	int                        ddf_layout;
-	atomic_t                   nr_pending;
-	atomic_t                   nr_bio_chain;
-	struct bio                 *bio_chain;
-	struct r5conf              *raid_conf;
-	struct syno_r5dev {
-		int uptodate;
-		struct page	*page;
-	} dev[1]; 
-};
-
-struct syno_r5bio {
-	struct r5conf *conf;
-	struct bio *bio;
-	struct syno_self_heal_stripe_head *sh;
-	int disk_idx;
-	sector_t sh_sector;
-};
-#endif 
-
-#ifdef MY_ABC_HERE
-#define PENDING_IO_FLUSH_THRESHOLD 64
-#define DEFER_GROUP_CNT_MAX 6
-#define DEFER_GROUP_DISK_CNT_MAX 4
-
-struct syno_r5pending_data {
-	struct list_head sibling;
-	struct bio_list bios;
-	sector_t sector;
-};
-
-struct syno_r5defer {
-	struct list_head free_list;
-	struct list_head pending_list;
-	spinlock_t pending_bios_lock;
-	int pending_data_cnt;
-	struct bio_list pending_bios;
-	struct syno_r5pending_data *pending_data;
-	struct md_thread *defer_thread;
-};
-#endif 
-
 struct r5conf {
 	struct hlist_head	*stripe_hashtbl;
-	
+	 
 	spinlock_t		hash_locks[NR_STRIPE_HASH_LOCKS];
 	struct mddev		*mddev;
 	int			chunk_sectors;
@@ -290,77 +208,56 @@ struct r5conf {
 	int			raid_disks;
 	int			max_nr_stripes;
 #ifdef MY_ABC_HERE
-#else 
+#else  
 	int			min_nr_stripes;
-#endif 
+#endif  
 
-	
 	sector_t		reshape_progress;
-	
+	 
 	sector_t		reshape_safe;
 	int			previous_raid_disks;
 	int			prev_chunk_sectors;
 	int			prev_algo;
-	short			generation; 
-	seqcount_t		gen_lock;	
-	unsigned long		reshape_checkpoint; 
-	long long		min_offset_diff; 
+	short			generation;  
+	seqcount_t		gen_lock;	 
+	unsigned long		reshape_checkpoint;  
+	long long		min_offset_diff;  
 
-	struct list_head	handle_list; 
-	struct list_head	hold_list; 
-	struct list_head	delayed_list; 
-	struct list_head	bitmap_list; 
-#ifdef MY_ABC_HERE
-	
-	struct list_head    stable_list;
-#endif 
-	struct bio		*retry_read_aligned; 
-	struct bio		*retry_read_aligned_list; 
-	atomic_t		preread_active_stripes; 
+	struct list_head	handle_list;  
+	struct list_head	hold_list;  
+	struct list_head	delayed_list;  
+	struct list_head	bitmap_list;  
+	struct bio		*retry_read_aligned;  
+	struct bio		*retry_read_aligned_list;  
+	atomic_t		preread_active_stripes;  
 	atomic_t		active_aligned_reads;
-	atomic_t		pending_full_writes; 
-	int			bypass_count; 
-	int			bypass_threshold; 
-	int			skip_copy; 
+	atomic_t		pending_full_writes;  
+	int			bypass_count;  
+	int			bypass_threshold;  
+	int			skip_copy;  
 #ifdef MY_ABC_HERE
 	int         stripe_cache_memory_usage;
-#endif 
-#ifdef CONFIG_SYNO_MD_RAID5_WRITE_REFERENCE_BIO_PAGE
-	int			writebio;
-#endif 
-	struct list_head	*last_hold; 
+#endif  
+	struct list_head	*last_hold;  
 
-	
 	struct bio_list		return_bi;
 
-	atomic_t		reshape_stripes; 
-	
+	atomic_t		reshape_stripes;  
+	 
 	int			active_name;
 	char			cache_name[2][32];
-	struct kmem_cache	*slab_cache; 
-	struct mutex		cache_size_mutex; 
-#ifdef MY_ABC_HERE
-	int               syno_self_heal_sh_size;
-	wait_queue_head_t syno_self_heal_wait_for_sh;
-	spinlock_t        syno_self_heal_sh_handle_list_lock;
-	spinlock_t        syno_self_heal_sh_free_list_lock;
-	spinlock_t        syno_self_heal_master_bio_lock;
-	spinlock_t        syno_self_heal_master_bio_list_lock;
-	struct list_head  syno_self_heal_sh_handle_list; 
-	struct list_head  syno_self_heal_sh_free_list; 
-	struct bio        *syno_self_heal_master_bio_list;
-	struct kmem_cache *syno_self_heal_slab_sh_cache;
-#endif 
+	struct kmem_cache	*slab_cache;  
+	struct mutex		cache_size_mutex;  
 
 	int			seq_flush, seq_write;
 	int			quiesce;
 
-	int			fullsync;  
+	int			fullsync;   
 	int			recovery_disabled;
-	
+	 
 	struct raid5_percpu {
-		struct page	*spare_page; 
-		struct flex_array *scribble;   
+		struct page	*spare_page;  
+		struct flex_array *scribble;    
 	} __percpu *percpu;
 	int scribble_disks;
 	int scribble_sectors;
@@ -381,53 +278,37 @@ struct r5conf {
 	wait_queue_head_t	wait_for_stripe;
 	wait_queue_head_t	wait_for_overlap;
 	unsigned long		cache_state;
-#define R5_INACTIVE_BLOCKED	1	
+#define R5_INACTIVE_BLOCKED	1	 
 #ifdef MY_ABC_HERE
-#else 
-#define R5_ALLOC_MORE		2	
-#define R5_DID_ALLOC		4	
+#else  
+#define R5_ALLOC_MORE		2	 
+#define R5_DID_ALLOC		4	 
 	struct shrinker		shrinker;
-#endif 
-	int			pool_size; 
+#endif  
+	int			pool_size;  
 	spinlock_t		device_lock;
 	struct disk_info	*disks;
+	struct bio_set		*bio_split;
 
-	
 	struct md_thread	*thread;
 	struct list_head	temp_inactive_list[NR_STRIPE_HASH_LOCKS];
 	struct r5worker_group	*worker_groups;
 	int			group_cnt;
 	int			worker_cnt_per_group;
-
-#ifdef MY_ABC_HERE
-	int syno_defer_flush_threshold;
-	int syno_defer_mode;
-	int syno_defer_group_cnt;
-	struct syno_r5defer *syno_defer_groups;
-
-	struct syno_defer_worker_group_t *syno_defer_worker_groups;
-	int syno_defer_worker_cnt_per_group;
-#endif 
-
 	struct r5l_log		*log;
 };
 
+#define ALGORITHM_LEFT_ASYMMETRIC	0  
+#define ALGORITHM_RIGHT_ASYMMETRIC	1  
+#define ALGORITHM_LEFT_SYMMETRIC	2  
+#define ALGORITHM_RIGHT_SYMMETRIC	3  
 
-#define ALGORITHM_LEFT_ASYMMETRIC	0 
-#define ALGORITHM_RIGHT_ASYMMETRIC	1 
-#define ALGORITHM_LEFT_SYMMETRIC	2 
-#define ALGORITHM_RIGHT_SYMMETRIC	3 
+#define ALGORITHM_PARITY_0		4  
+#define ALGORITHM_PARITY_N		5  
 
-
-#define ALGORITHM_PARITY_0		4 
-#define ALGORITHM_PARITY_N		5 
-
-
-
-#define ALGORITHM_ROTATING_ZERO_RESTART	8 
-#define ALGORITHM_ROTATING_N_RESTART	9 
-#define ALGORITHM_ROTATING_N_CONTINUE	10 
-
+#define ALGORITHM_ROTATING_ZERO_RESTART	8  
+#define ALGORITHM_ROTATING_N_RESTART	9  
+#define ALGORITHM_ROTATING_N_CONTINUE	10  
 
 #define ALGORITHM_LEFT_ASYMMETRIC_6	16
 #define ALGORITHM_RIGHT_ASYMMETRIC_6	17

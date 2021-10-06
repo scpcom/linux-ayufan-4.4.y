@@ -23,6 +23,11 @@
 #include "mmc_ops.h"
 
 #define MMC_OPS_TIMEOUT_MS	(10 * 60 * 1000) /* 10 minute timeout */
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_MMC_RTK_EMMC
+#define MMC_MIN_OPS_TIMEOUT_MS (100)            /* minimum 100 ms timeout */
+#endif
+#endif /* MY_DEF_HERE */
 
 static const u8 tuning_blk_pattern_4bit[] = {
 	0xff, 0x0f, 0xff, 0x00, 0xff, 0xcc, 0xc3, 0xcc,
@@ -540,6 +545,12 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
 	/* We have an unspecified cmd timeout, use the fallback value. */
 	if (!timeout_ms)
 		timeout_ms = MMC_OPS_TIMEOUT_MS;
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_MMC_RTK_EMMC
+        if (timeout_ms < MMC_MIN_OPS_TIMEOUT_MS)
+                timeout_ms = MMC_MIN_OPS_TIMEOUT_MS;
+#endif
+#endif /* MY_DEF_HERE */
 
 	/* Must check status to be sure of no errors. */
 	timeout = jiffies + msecs_to_jiffies(timeout_ms);
@@ -588,6 +599,27 @@ int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
 }
 EXPORT_SYMBOL_GPL(mmc_switch);
 
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_MMC_SDHCI_RTK
+int mmc_send_tuning_tx(struct mmc_host *host, u32 opcode, int *cmd_error)
+{
+	struct mmc_command cmd = {0};
+        int err;
+
+        cmd.opcode = opcode;
+        cmd.arg = 0x2000;
+        cmd.flags = MMC_RSP_SPI_R5 | MMC_RSP_R5 | MMC_CMD_AC;
+
+        err = mmc_wait_for_cmd(host, &cmd, 0);
+        if (err)
+                return err;
+
+        return 0;
+}
+EXPORT_SYMBOL_GPL(mmc_send_tuning_tx);
+#endif
+
+#endif /* MY_DEF_HERE */
 int mmc_send_tuning(struct mmc_host *host, u32 opcode, int *cmd_error)
 {
 	struct mmc_request mrq = {NULL};

@@ -112,23 +112,144 @@ static __initconst const u64 amd_hw_cache_event_ids
  },
 };
 
+static __initconst const u64 amd_hw_cache_event_ids_f17h
+                               [PERF_COUNT_HW_CACHE_MAX]
+                               [PERF_COUNT_HW_CACHE_OP_MAX]
+                               [PERF_COUNT_HW_CACHE_RESULT_MAX] = {
+[C(L1D)] = {
+	[C(OP_READ)] = {
+		[C(RESULT_ACCESS)] = 0x0040, /* Data Cache Accesses */
+		[C(RESULT_MISS)]   = 0xc860, /* L2$ access from DC Miss */
+	},
+	[C(OP_WRITE)] = {
+		[C(RESULT_ACCESS)] = 0,
+		[C(RESULT_MISS)]   = 0,
+	},
+	[C(OP_PREFETCH)] = {
+		[C(RESULT_ACCESS)] = 0xff5a, /* h/w prefetch DC Fills */
+		[C(RESULT_MISS)]   = 0,
+	},
+},
+[C(L1I)] = {
+	[C(OP_READ)] = {
+		[C(RESULT_ACCESS)] = 0x0080, /* Instruction cache fetches  */
+		[C(RESULT_MISS)]   = 0x0081, /* Instruction cache misses   */
+	},
+	[C(OP_WRITE)] = {
+		[C(RESULT_ACCESS)] = -1,
+		[C(RESULT_MISS)]   = -1,
+	},
+	[C(OP_PREFETCH)] = {
+		[C(RESULT_ACCESS)] = 0,
+		[C(RESULT_MISS)]   = 0,
+	},
+},
+[C(LL)] = {
+	[C(OP_READ)] = {
+		[C(RESULT_ACCESS)] = 0,
+		[C(RESULT_MISS)]   = 0,
+	},
+	[C(OP_WRITE)] = {
+		[C(RESULT_ACCESS)] = 0,
+		[C(RESULT_MISS)]   = 0,
+	},
+	[C(OP_PREFETCH)] = {
+		[C(RESULT_ACCESS)] = 0,
+		[C(RESULT_MISS)]   = 0,
+	},
+},
+[C(DTLB)] = {
+	[C(OP_READ)] = {
+		[C(RESULT_ACCESS)] = 0xff45, /* All L2 DTLB accesses */
+		[C(RESULT_MISS)]   = 0xf045, /* L2 DTLB misses (PT walks) */
+	},
+	[C(OP_WRITE)] = {
+		[C(RESULT_ACCESS)] = 0,
+		[C(RESULT_MISS)]   = 0,
+	},
+	[C(OP_PREFETCH)] = {
+		[C(RESULT_ACCESS)] = 0,
+		[C(RESULT_MISS)]   = 0,
+	},
+},
+[C(ITLB)] = {
+	[C(OP_READ)] = {
+		[C(RESULT_ACCESS)] = 0x0084, /* L1 ITLB misses, L2 ITLB hits */
+		[C(RESULT_MISS)]   = 0xff85, /* L1 ITLB misses, L2 misses */
+	},
+	[C(OP_WRITE)] = {
+		[C(RESULT_ACCESS)] = -1,
+		[C(RESULT_MISS)]   = -1,
+	},
+	[C(OP_PREFETCH)] = {
+		[C(RESULT_ACCESS)] = -1,
+		[C(RESULT_MISS)]   = -1,
+	},
+},
+[C(BPU)] = {
+	[C(OP_READ)] = {
+		[C(RESULT_ACCESS)] = 0x00c2, /* Retired Branch Instr.      */
+		[C(RESULT_MISS)]   = 0x00c3, /* Retired Mispredicted BI    */
+	},
+	[C(OP_WRITE)] = {
+		[C(RESULT_ACCESS)] = -1,
+		[C(RESULT_MISS)]   = -1,
+	},
+	[C(OP_PREFETCH)] = {
+		[C(RESULT_ACCESS)] = -1,
+		[C(RESULT_MISS)]   = -1,
+	},
+},
+[C(NODE)] = {
+	[C(OP_READ)] = {
+		[C(RESULT_ACCESS)] = 0,
+		[C(RESULT_MISS)]   = 0,
+	},
+	[C(OP_WRITE)] = {
+		[C(RESULT_ACCESS)] = -1,
+		[C(RESULT_MISS)]   = -1,
+	},
+	[C(OP_PREFETCH)] = {
+		[C(RESULT_ACCESS)] = -1,
+		[C(RESULT_MISS)]   = -1,
+	},
+},
+};
+
 /*
- * AMD Performance Monitor K7 and later.
+ * AMD Performance Monitor K7 and later, up to and including Family 16h:
  */
-static const u64 amd_perfmon_event_map[] =
+static const u64 amd_perfmon_event_map[PERF_COUNT_HW_MAX] =
 {
-  [PERF_COUNT_HW_CPU_CYCLES]			= 0x0076,
-  [PERF_COUNT_HW_INSTRUCTIONS]			= 0x00c0,
-  [PERF_COUNT_HW_CACHE_REFERENCES]		= 0x0080,
-  [PERF_COUNT_HW_CACHE_MISSES]			= 0x0081,
-  [PERF_COUNT_HW_BRANCH_INSTRUCTIONS]		= 0x00c2,
-  [PERF_COUNT_HW_BRANCH_MISSES]			= 0x00c3,
-  [PERF_COUNT_HW_STALLED_CYCLES_FRONTEND]	= 0x00d0, /* "Decoder empty" event */
-  [PERF_COUNT_HW_STALLED_CYCLES_BACKEND]	= 0x00d1, /* "Dispatch stalls" event */
+	[PERF_COUNT_HW_CPU_CYCLES]              = 0x0076,
+	[PERF_COUNT_HW_INSTRUCTIONS]            = 0x00c0,
+	[PERF_COUNT_HW_CACHE_REFERENCES]        = 0x077d,
+	[PERF_COUNT_HW_CACHE_MISSES]            = 0x077e,
+	[PERF_COUNT_HW_BRANCH_INSTRUCTIONS]     = 0x00c2,
+	[PERF_COUNT_HW_BRANCH_MISSES]           = 0x00c3,
+	[PERF_COUNT_HW_STALLED_CYCLES_FRONTEND] = 0x00d0, /* "Decoder empty" event */
+	[PERF_COUNT_HW_STALLED_CYCLES_BACKEND]  = 0x00d1, /* "Dispatch stalls" event */
+};
+
+/*
+ * AMD Performance Monitor Family 17h and later:
+ */
+static const u64 amd_f17h_perfmon_event_map[PERF_COUNT_HW_MAX] =
+{
+	[PERF_COUNT_HW_CPU_CYCLES]              = 0x0076,
+	[PERF_COUNT_HW_INSTRUCTIONS]            = 0x00c0,
+	[PERF_COUNT_HW_CACHE_REFERENCES]        = 0xff60,
+	[PERF_COUNT_HW_BRANCH_INSTRUCTIONS]     = 0x00c2,
+	[PERF_COUNT_HW_BRANCH_MISSES]           = 0x00c3,
+	[PERF_COUNT_HW_STALLED_CYCLES_FRONTEND] = 0x0287,
+	[PERF_COUNT_HW_STALLED_CYCLES_BACKEND]  = 0x0187,
 };
 
 static u64 amd_pmu_event_map(int hw_event)
 {
+	if (boot_cpu_data.x86 >= 0x17)
+		return amd_f17h_perfmon_event_map[hw_event];
+
 	return amd_perfmon_event_map[hw_event];
 }
 
@@ -369,7 +490,7 @@ static int amd_pmu_cpu_prepare(int cpu)
 
 	WARN_ON_ONCE(cpuc->amd_nb);
 
-	if (boot_cpu_data.x86_max_cores < 2)
+	if (!x86_pmu.amd_nb_constraints)
 		return NOTIFY_OK;
 
 	cpuc->amd_nb = amd_alloc_nb(cpu);
@@ -388,7 +509,7 @@ static void amd_pmu_cpu_starting(int cpu)
 
 	cpuc->perf_ctr_virt_mask = AMD64_EVENTSEL_HOSTONLY;
 
-	if (boot_cpu_data.x86_max_cores < 2)
+	if (!x86_pmu.amd_nb_constraints)
 		return;
 
 	nb_id = amd_get_nb_id(cpu);
@@ -414,7 +535,7 @@ static void amd_pmu_cpu_dead(int cpu)
 {
 	struct cpu_hw_events *cpuhw;
 
-	if (boot_cpu_data.x86_max_cores < 2)
+	if (!x86_pmu.amd_nb_constraints)
 		return;
 
 	cpuhw = &per_cpu(cpu_hw_events, cpu);
@@ -648,6 +769,7 @@ static __initconst const struct x86_pmu amd_pmu = {
 	.cpu_prepare		= amd_pmu_cpu_prepare,
 	.cpu_starting		= amd_pmu_cpu_starting,
 	.cpu_dead		= amd_pmu_cpu_dead,
+	.amd_nb_constraints     = 1,
 };
 
 static int __init amd_core_pmu_init(void)
@@ -659,6 +781,14 @@ static int __init amd_core_pmu_init(void)
 	case 0x15:
 		pr_cont("Fam15h ");
 		x86_pmu.get_event_constraints = amd_get_event_constraints_f15h;
+		break;
+
+	case 0x17:
+		pr_cont("Fam17h ");
+		/*
+		 * In family 17h, there are no event constraints in the PMC hardware.
+		 * We fallback to using default amd_get_event_constraints.
+		 */
 		break;
 
 	default:
@@ -674,6 +804,11 @@ static int __init amd_core_pmu_init(void)
 	x86_pmu.eventsel	= MSR_F15H_PERF_CTL;
 	x86_pmu.perfctr		= MSR_F15H_PERF_CTR;
 	x86_pmu.num_counters	= AMD64_NUM_COUNTERS_CORE;
+	/*
+	 * AMD Core perfctr has separate MSRs for the NB events, see
+	 * the amd/uncore.c driver.
+	 */
+	x86_pmu.amd_nb_constraints = 0;
 
 	pr_cont("core perfctr, ");
 	return 0;
@@ -693,9 +828,18 @@ __init int amd_pmu_init(void)
 	if (ret)
 		return ret;
 
-	/* Events are common for all AMDs */
-	memcpy(hw_cache_event_ids, amd_hw_cache_event_ids,
-	       sizeof(hw_cache_event_ids));
+	if (num_possible_cpus() == 1) {
+		/*
+		 * No point in allocating data structures to serialize
+		 * against other CPUs, when there is only the one CPU.
+		 */
+		x86_pmu.amd_nb_constraints = 0;
+	}
+
+	if (boot_cpu_data.x86 >= 0x17)
+		memcpy(hw_cache_event_ids, amd_hw_cache_event_ids_f17h, sizeof(hw_cache_event_ids));
+	else
+		memcpy(hw_cache_event_ids, amd_hw_cache_event_ids, sizeof(hw_cache_event_ids));
 
 	return 0;
 }

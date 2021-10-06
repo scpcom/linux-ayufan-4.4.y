@@ -69,3 +69,6 @@ obj-$(CONFIG_MVEBU_PIC)			+= irq-mvebu-pic.o
 obj-$(CONFIG_MVEBU_SEI_IRQ)		+= irq-mvebu-sei.o
 obj-$(CONFIG_MVEBU_ICU_IRQ)		+= irq-mvebu-icu.o
 endif
+ifeq ($(CONFIG_SYNO_LSP_RTD1619), y)
+obj-$(CONFIG_ARCH_RTD16xx)		+= irq-rtd16xx.o
+endif # CONFIG_SYNO_LSP_RTD1619

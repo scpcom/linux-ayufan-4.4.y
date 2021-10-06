@@ -286,15 +286,17 @@ static void punt_bios_to_rescuer(struct bio_set *bs)
 	struct bio_list punt, nopunt;
 	struct bio *bio;
 
-	
-
 	bio_list_init(&punt);
 	bio_list_init(&nopunt);
 
-	while ((bio = bio_list_pop(current->bio_list)))
+	while ((bio = bio_list_pop(&current->bio_list[0])))
 		bio_list_add(bio->bi_pool == bs ? &punt : &nopunt, bio);
+	current->bio_list[0] = nopunt;
 
-	*current->bio_list = nopunt;
+	bio_list_init(&nopunt);
+	while ((bio = bio_list_pop(&current->bio_list[1])))
+		bio_list_add(bio->bi_pool == bs ? &punt : &nopunt, bio);
+	current->bio_list[1] = nopunt;
 
 	spin_lock(&bs->rescue_lock);
 	bio_list_merge(&bs->rescue_list, &punt);
@@ -323,12 +325,13 @@ struct bio *bio_alloc_bioset(gfp_t gfp_mask, int nr_iovecs, struct bio_set *bs)
 		front_pad = 0;
 		inline_vecs = nr_iovecs;
 	} else {
-		
+		 
 		if (WARN_ON_ONCE(!bs->bvec_pool && nr_iovecs > 0))
 			return NULL;
-		
-
-		if (current->bio_list && !bio_list_empty(current->bio_list))
+		 
+		if (current->bio_list &&
+		    (!bio_list_empty(&current->bio_list[0]) ||
+		     !bio_list_empty(&current->bio_list[1])))
 			gfp_mask &= ~__GFP_DIRECT_RECLAIM;
 
 		p = mempool_alloc(bs->bio_pool, gfp_mask);
@@ -413,32 +416,23 @@ inline int bio_phys_segments(struct request_queue *q, struct bio *bio)
 }
 EXPORT_SYMBOL(bio_phys_segments);
 
-
 void __bio_clone_fast(struct bio *bio, struct bio *bio_src)
 {
 	BUG_ON(bio->bi_pool && BIO_POOL_IDX(bio) != BIO_POOL_NONE);
 
-	
 	bio->bi_bdev = bio_src->bi_bdev;
 	bio_set_flag(bio, BIO_CLONED);
 	bio->bi_rw = bio_src->bi_rw;
 	bio->bi_iter = bio_src->bi_iter;
 	bio->bi_io_vec = bio_src->bi_io_vec;
 #ifdef MY_ABC_HERE
-	
+	 
 	bio->bi_vcnt = bio_src->bi_vcnt;
 #endif
-#ifdef MY_ABC_HERE
-	if (unlikely(bio_flagged(bio_src, BIO_CORRECTION_RETRY)))
-		bio_set_flag(bio, BIO_CORRECTION_RETRY);
-	if (unlikely(bio_flagged(bio_src, BIO_CORRECTION_ABORT)))
-		bio_set_flag(bio, BIO_CORRECTION_ABORT);
-#endif 
 
 	bio_clone_blkcg_association(bio, bio_src);
 }
 EXPORT_SYMBOL(__bio_clone_fast);
-
 
 struct bio *bio_clone_fast(struct bio *bio, gfp_t gfp_mask, struct bio_set *bs)
 {
@@ -488,13 +482,6 @@ struct bio *bio_clone_bioset(struct bio *bio_src, gfp_t gfp_mask,
 		bio->bi_io_vec[bio->bi_vcnt++] = bio_src->bi_io_vec[0];
 		goto integrity_clone;
 	}
-
-#ifdef MY_ABC_HERE
-	if (unlikely(bio_flagged(bio_src, BIO_CORRECTION_RETRY)))
-		bio_set_flag(bio, BIO_CORRECTION_RETRY);
-	if (unlikely(bio_flagged(bio_src, BIO_CORRECTION_ABORT)))
-		bio_set_flag(bio, BIO_CORRECTION_ABORT);
-#endif 
 
 	bio_for_each_segment(bv, bio_src, iter)
 		bio->bi_io_vec[bio->bi_vcnt++] = bv;

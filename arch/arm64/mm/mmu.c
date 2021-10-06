@@ -471,7 +471,7 @@ void __init paging_init(void)
 	cpu_set_default_tcr_t0sz();
 }
 
-#ifdef MY_DEF_HERE
+#if defined(MY_DEF_HERE) || defined(CONFIG_RTK_PLATFORM) && defined(MY_DEF_HERE)
 /*
  * Enable the identity mapping to allow the MMU disabling.
  */
@@ -482,8 +482,8 @@ void setup_mm_for_reboot(void)
 	cpu_set_idmap_tcr_t0sz();
 	cpu_switch_mm(idmap_pg_dir, &init_mm);
 }
+#endif /* MY_DEF_HERE || CONFIG_RTK_PLATFORM && MY_DEF_HERE */
 
-#endif /* MY_DEF_HERE */
 /*
  * Check whether a kernel address is valid (derived from arch/x86/).
  */

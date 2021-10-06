@@ -144,13 +144,20 @@ static int phy_config_interrupt(struct phy_device *phydev, u32 interrupts)
  * Returns > 0 on success or < 0 on error. 0 means that auto-negotiation
  * is still pending.
  */
+#ifdef CONFIG_SYNO_AMD_XGBE_PORTING
+int phy_aneg_done(struct phy_device *phydev)
+#else /* CONFIG_SYNO_AMD_XGBE_PORTING */
 static inline int phy_aneg_done(struct phy_device *phydev)
+#endif /* CONFIG_SYNO_AMD_XGBE_PORTING */
 {
 	if (phydev->drv->aneg_done)
 		return phydev->drv->aneg_done(phydev);
 
 	return genphy_aneg_done(phydev);
 }
+#ifdef CONFIG_SYNO_AMD_XGBE_PORTING
+EXPORT_SYMBOL(phy_aneg_done);
+#endif /* CONFIG_SYNO_AMD_XGBE_PORTING */
 
 /* A structure for mapping a particular speed and duplex
  * combination to a particular SUPPORTED and ADVERTISED value

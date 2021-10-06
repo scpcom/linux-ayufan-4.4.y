@@ -1,3 +1,7 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 #ifndef _LINUX_POWER_CONTROL_H_
 #define _LINUX_POWER_CONTROL_H_
 
@@ -86,3 +90,9 @@ inline static int power_control_disable_hw_pm(struct power_control *pctrl)
 }
 
 #endif
+#endif /* MY_DEF_HERE */
+
+#if defined(MY_DEF_HERE)
+#warning "Please include soc/realtek/power-control.h"
+#include <soc/realtek/power-control.h>
+#endif /* MY_DEF_HERE */

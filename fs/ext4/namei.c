@@ -16,16 +16,13 @@
 
 #ifdef MY_ABC_HERE
 #include <linux/namei.h>
-#endif 
+#endif  
 
 #include "xattr.h"
 #include "acl.h"
-#ifdef MY_ABC_HERE
-#include "syno_acl.h"
-#endif 
 
 #include <trace/events/ext4.h>
-
+ 
 #define NAMEI_RA_CHUNKS  2
 #define NAMEI_RA_BLOCKS  4
 #define NAMEI_RA_SIZE	     (NAMEI_RA_CHUNKS * NAMEI_RA_BLOCKS)
@@ -3731,33 +3728,24 @@ const struct inode_operations ext4_dir_inode_operations = {
 	.getxattr	= generic_getxattr,
 	.listxattr	= ext4_listxattr,
 	.removexattr	= generic_removexattr,
-#ifdef MY_ABC_HERE
-	.syno_acl_get   = ext4_get_syno_acl,
-	.syno_acl_set	= ext4_set_syno_acl,
-#else
 	.get_acl	= ext4_get_acl,
 	.set_acl	= ext4_set_acl,
-#endif 
 	.fiemap         = ext4_fiemap,
 };
 
 const struct inode_operations ext4_special_inode_operations = {
 #ifdef MY_ABC_HERE
 	.syno_getattr	= ext4_syno_getattr,
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
 	.syno_get_archive_ver = ext4_syno_get_archive_ver,
 	.syno_set_archive_ver = ext4_syno_set_archive_ver,
-#endif 
+#endif  
 	.setattr	= ext4_setattr,
 	.setxattr	= generic_setxattr,
 	.getxattr	= generic_getxattr,
 	.listxattr	= ext4_listxattr,
 	.removexattr	= generic_removexattr,
-#ifdef MY_ABC_HERE
-	
-#else
 	.get_acl	= ext4_get_acl,
 	.set_acl	= ext4_set_acl,
-#endif 
 };

@@ -226,9 +226,6 @@ void kernel_restart(char *cmd)
 }
 EXPORT_SYMBOL_GPL(kernel_restart);
 
-#ifdef MY_ABC_HERE
-extern int gSynoSystemShutdown;
-#endif 
 static void kernel_shutdown_prepare(enum system_states state)
 {
 	blocking_notifier_call_chain(&reboot_notifier_list,
@@ -237,12 +234,9 @@ static void kernel_shutdown_prepare(enum system_states state)
 #ifdef MY_DEF_HERE
 	if (state != SYSTEM_POWER_OFF)
 		usermodehelper_disable();
-#else 
+#else  
 	usermodehelper_disable();
-#endif 
-#ifdef MY_ABC_HERE
-	gSynoSystemShutdown = 1;
-#endif 
+#endif  
 
 #if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE)
 	if (state != SYSTEM_POWER_OFF)

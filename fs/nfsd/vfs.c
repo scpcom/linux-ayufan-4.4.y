@@ -20,30 +20,23 @@
 #include <linux/writeback.h>
 #include <linux/security.h>
 
-#ifdef MY_ABC_HERE
-#include <linux/vmalloc.h>
-#include <linux/btrfs.h>
-#include <linux/syscalls.h>
-#endif
-
 #ifdef CONFIG_NFSD_V3
 #include "xdr3.h"
-#endif 
+#endif  
 
 #ifdef CONFIG_NFSD_V4
 #include "../internal.h"
 #include "acl.h"
 #include "idmap.h"
-#endif 
+#endif  
 
 #include "nfsd.h"
 #include "vfs.h"
 
 #ifdef MY_ABC_HERE
 #include "../synoacl_int.h"
-#endif 
+#endif  
 #define NFSDDBG_FACILITY		NFSDDBG_FILEOP
-
 
 struct raparms {
 	struct raparms		*p_next;
@@ -957,197 +950,8 @@ out:
 	return err;
 }
 
-#ifdef MY_ABC_HERE
-__be32
-nfsd_writezero(struct svc_rqst *rqstp, struct svc_fh *fhp,
-				loff_t offset, unsigned long *cnt)
-{
-		__be32                  err = 0;
-		struct file             *file;
-		loff_t                  len = *cnt;
-
-		err = nfsd_open(rqstp, fhp, S_IFREG, NFSD_MAY_WRITE, &file);
-		if (err) {
-				goto out;
-		}
-
-		if (cnt) {
-				err = do_fallocate(file, 0, offset, len);
-		}
-
-		fput(file);
-
-out:
-		return err;
-}
-
-static __be32
-nfsd_synoopen(const char* path, int flags,
-								int rights, struct file **filp)
-{
-		__be32                  err = 0;
-		mm_segment_t    oldfs;
-
-		oldfs = get_fs();
-		set_fs(get_ds());
-		*filp = filp_open(path, flags, rights);
-		set_fs(oldfs);
-
-		if(IS_ERR(*filp)) {
-				err = PTR_ERR(*filp);
-		}
-
-		return err;
-}
-
-static void
-nfsd_mallocBuf(char **pBuf, size_t size)
-{
-		*pBuf = kzalloc(size, GFP_KERNEL);
-
-		if (!(*pBuf)) {
-				dprintk("nfsd_mallocBuf: kzalloc failed\n");
-				*pBuf = (char *)vmalloc(size);
-		}
-
-		if (!(*pBuf)) {
-				dprintk("nfsd_mallocBuf: Cannot allocate memories for buffer\n");
-		}
-}
-
-__be32
-nfsd_synocopy(const char *srcPath, struct svc_rqst *rqstp, struct svc_fh *fhp,
-				loff_t offset, unsigned long *cnt, bool skipZero)
-{
-	__be32                  err = -1;
-	struct file             *dstFile, *srcFile;
-	loff_t                  len = *cnt, deadLine, writeOffset, readoffset;
-	char                    *buffer = NULL, *zeroBuf = NULL;
-	unsigned long   dataSize;
-	int                     readByte, writeByte, processedByte;
-	mm_segment_t    oldfs;
-
-	err = nfsd_open(rqstp, fhp, S_IFREG, NFSD_MAY_WRITE, &dstFile);
-	if (err) {
-		dprintk("nfsd_synocopy: cannot open destination file\n");
-		goto out;
-	}
-
-	err = nfsd_synoopen(srcPath, O_RDONLY | O_LARGEFILE, 0, &srcFile);
-	if (err) {
-		
-		printk(KERN_WARNING "nfsd_synocopy: cannot open source file\n");
-		goto closeDst;
-	}
-
-	nfsd_mallocBuf(&buffer, NFSD_COPYBUFFERSIZE);
-	nfsd_mallocBuf(&zeroBuf, NFSD_COPYBUFFERSIZE);
-
-	if (!zeroBuf || !buffer) {
-		err = -1;
-		goto closeSrc;
-	}
-
-	deadLine = offset + len;
-
-	oldfs = get_fs();
-	set_fs(get_ds());
-
-	for (; offset < deadLine; offset += NFSD_COPYBUFFERSIZE) {
-		dataSize = (NFSD_COPYBUFFERSIZE < (deadLine - offset))?NFSD_COPYBUFFERSIZE:(deadLine - offset);
-		writeOffset = readoffset = offset;
-		readByte = writeByte = 0;
-
-		do {
-			if (0 > (processedByte = vfs_read(srcFile, buffer + readByte, dataSize - readByte, &readoffset))) {
-					dprintk("nfsd_synocopy: Error while reading data from source file, read %d bytes\n", readByte);
-					goto resetFs;
-			}
-
-			readByte += processedByte;
-		} while (readByte < dataSize);
-
-		if (skipZero && 0 == memcmp(buffer, zeroBuf, NFSD_COPYBUFFERSIZE)) {
-			continue;
-		}
-
-		do {
-			if (0 > (processedByte = vfs_write(dstFile, buffer + writeByte, dataSize - writeByte, &writeOffset))) {
-					dprintk("nfsd_synocopy: Error while writing data to destination file, write %d bytes\n", writeByte);
-					goto resetFs;
-			}
-
-			writeByte += processedByte;
-		} while (writeByte < dataSize);
-	}
-
-resetFs:
-	set_fs(oldfs);
-
-	if (is_vmalloc_addr(buffer)) {
-		vfree(buffer);
-	} else {
-		kfree(buffer);
-	}
-
-	if (is_vmalloc_addr(zeroBuf)) {
-		vfree(zeroBuf);
-	} else {
-		kfree(zeroBuf);
-	}
-closeSrc:
-	filp_close(srcFile, NULL);
-closeDst:
-	fput(dstFile);
-out:
-	return err;
-}
-
-#ifdef MY_ABC_HERE
-__be32
-nfsd_synoclone(const char *srcPath, struct svc_rqst *rqstp, struct svc_fh *fhp)
-{
-	__be32 err = -1;
-	struct file *dstFile;
-	unsigned long srcFd = -1;
-	mm_segment_t oldfs;
-
-	err = nfsd_open(rqstp, fhp, S_IFREG, NFSD_MAY_WRITE, &dstFile);
-	if (err) {
-		dprintk("nfsd_synoclone: cannot open destination file\n");
-		goto out;
-	}
-
-	srcFd = do_sys_open(AT_FDCWD, srcPath, O_RDONLY | O_LARGEFILE, S_IRWXU);
-	if (0 > srcFd) {
-		dprintk("nfsd_synoclone: cannot open source file\n");
-		goto close_dst;
-	}
-
-	oldfs = get_fs();
-	set_fs(get_ds());
-
-	if (0 > (err = btrfs_lazy_clone(dstFile, srcFd, 0, 0, 0))) {
-		dprintk("nfsd_synoclone: cannot open source file\n");
-		goto old_fs;
-	}
-
-	err = 0;
-
-old_fs:
-	set_fs(oldfs);
-	sys_close(srcFd);
-
-close_dst:
-	fput(dstFile);
-out:
-	return err;
-}
-#endif 
-#endif
-
 #ifdef CONFIG_NFSD_V3
-
+ 
 __be32
 nfsd_commit(struct svc_rqst *rqstp, struct svc_fh *fhp,
                loff_t offset, unsigned long count)

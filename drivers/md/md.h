@@ -157,31 +157,6 @@ extern void md_ack_all_badblocks(struct badblocks *bb);
 
 struct md_cluster_info;
 
-#ifdef MY_ABC_HERE
-struct md_self_heal_record {
-	struct list_head record_list;
-	void             *private;
-	struct bio       *bio;
-	struct mddev     *mddev;
-	u32              u32_last_hash;
-	int              retry_cnt;
-	int              max_retry_cnt;
-	int              is_hashed; 
-	int              request_cnt; 
-	sector_t         sector_start;
-	sector_t         sector_leng;
-};
-
-u32 syno_self_heal_hash_bio_page(struct bio *bio);
-int syno_self_heal_is_valid_md_stat(struct mddev *mddev);
-int syno_self_heal_record_hash_value(struct md_self_heal_record *heal_record, struct bio *bio);
-void syno_self_heal_del_all_record(struct mddev *mddev);
-void syno_self_heal_find_and_del_record(struct mddev *mddev, struct bio *bio);
-void syno_self_heal_modify_bio_info(struct md_self_heal_record *heal_record, struct bio *bio);
-struct md_self_heal_record* syno_self_heal_init_record(struct mddev *mddev, struct bio *bio, int max_retry_cnt);
-struct md_self_heal_record* syno_self_heal_find_record(struct mddev *mddev, struct bio *bio);
-#endif 
-
 struct mddev {
 	void				*private;
 	struct md_personality		*pers;
@@ -280,111 +255,101 @@ struct mddev {
 #define	MD_RECOVERY_ERROR	10
 #ifdef CONFIG_SYNO_MD_RAID_F1
 #define	MD_RESHAPE_START	11
-#endif 
+#endif  
 
 	unsigned long			recovery;
-	
+	 
 	int				recovery_disabled;
 
-	int				in_sync;	
-	
+	int				in_sync;	 
+	 
 	struct mutex			open_mutex;
 	struct mutex			reconfig_mutex;
-	atomic_t			active;		
-	atomic_t			openers;	
+	atomic_t			active;		 
+	atomic_t			openers;	 
 
-	int				changed;	
-	int				degraded;	
+	int				changed;	 
+	int				degraded;	 
 
-	atomic_t			recovery_active; 
+	atomic_t			recovery_active;  
 	wait_queue_head_t		recovery_wait;
 	sector_t			recovery_cp;
-	sector_t			resync_min;	
-	sector_t			resync_max;	
+	sector_t			resync_min;	 
+	sector_t			resync_max;	 
 
-	struct kernfs_node		*sysfs_state;	
-	struct kernfs_node		*sysfs_action;  
+	struct kernfs_node		*sysfs_state;	 
+	struct kernfs_node		*sysfs_action;   
 
-	struct work_struct del_work;	
+	struct work_struct del_work;	 
 
-	
 	spinlock_t			lock;
-	wait_queue_head_t		sb_wait;	
-	atomic_t			pending_writes;	
+	wait_queue_head_t		sb_wait;	 
+	atomic_t			pending_writes;	 
 
-	unsigned int			safemode;	
+	unsigned int			safemode;	 
 	unsigned int			safemode_delay;
 	struct timer_list		safemode_timer;
 	atomic_t			writes_pending;
-	struct request_queue		*queue;	
+	struct request_queue		*queue;	 
 
-	struct bitmap			*bitmap; 
+	struct bitmap			*bitmap;  
 	struct {
-		struct file		*file; 
-		loff_t			offset; 
-		unsigned long		space; 
-		loff_t			default_offset; 
-		unsigned long		default_space; 
+		struct file		*file;  
+		loff_t			offset;  
+		unsigned long		space;  
+		loff_t			default_offset;  
+		unsigned long		default_space;  
 		struct mutex		mutex;
 		unsigned long		chunksize;
-		unsigned long		daemon_sleep; 
-		unsigned long		max_write_behind; 
+		unsigned long		daemon_sleep;  
+		unsigned long		max_write_behind;  
 		int			external;
-		int			nodes; 
-		char                    cluster_name[64]; 
+		int			nodes;  
+		char                    cluster_name[64];  
 	} bitmap_info;
 
-	atomic_t			max_corr_read_errors; 
+	atomic_t			max_corr_read_errors;  
 	struct list_head		all_mddevs;
 #ifdef MY_ABC_HERE
-	unsigned char			blActive;  
-	spinlock_t				ActLock;   
-	unsigned long			ulLastReq; 
-#endif 
+	unsigned char			blActive;   
+	spinlock_t				ActLock;    
+	unsigned long			ulLastReq;  
+#endif  
 #ifdef MY_ABC_HERE
 #define MD_NOT_CRASHED 0
 #define MD_CRASHED 1
 #define MD_CRASHED_ASSEMBLE 2
-    unsigned char           nodev_and_crashed;     
-#endif 
+    unsigned char           nodev_and_crashed;      
+#endif  
 #ifdef MY_ABC_HERE
 #define MD_AUTO_REMAP_MODE_FORCE_OFF 0
 #define MD_AUTO_REMAP_MODE_FORCE_ON 1
 #define MD_AUTO_REMAP_MODE_ISMAXDEGRADE 2
     unsigned char           auto_remap;
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
-	void                            *syno_private;    
-	char                            lv_name[16];
-#endif 
-#ifdef MY_ABC_HERE
-	unsigned char			enable_rmw;     
-#endif 
+	unsigned char			enable_rmw;      
+#endif  
 #ifdef MY_ABC_HERE
 	#define MD_SYNC_DEBUG_OFF 0
 	#define MD_SYNC_DEBUG_ON 1
 	unsigned char           sync_debug;
-#endif 
+#endif  
 #ifdef CONFIG_SYNO_MD_RAID_F1
 	unsigned char           resync_mode;
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
 	mempool_t	*syno_mdio_mempool;
-#endif 
-#ifdef MY_ABC_HERE
-	struct list_head md_self_heal_record_list;
-	rwlock_t record_lock;
-#endif 
+#endif  
 
 	struct attribute_group		*to_remove;
 
 	struct bio_set			*bio_set;
 
-	
 	struct bio *flush_bio;
 	atomic_t flush_pending;
 	struct work_struct flush_work;
-	struct work_struct event_work;	
+	struct work_struct event_work;	 
 	void (*sync_super)(struct mddev *mddev, struct md_rdev *rdev);
 	struct md_cluster_info		*cluster_info;
 };

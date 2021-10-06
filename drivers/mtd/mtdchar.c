@@ -50,10 +50,12 @@ static int mtdchar_open(struct inode *inode, struct file *file)
 	int ret = 0;
 	struct mtd_info *mtd;
 	struct mtd_file_info *mfi;
+#ifdef MY_DEF_HERE
+	int syno_print_mtd_access_log = 1;
+#endif  
 
 	pr_debug("MTD_open\n");
 
-	
 	if ((file->f_mode & FMODE_WRITE) && (minor & 1))
 		return -EACCES;
 
@@ -62,10 +64,19 @@ static int mtdchar_open(struct inode *inode, struct file *file)
 
 #ifdef MY_DEF_HERE
 #ifdef MY_DEF_HERE
-	if (0 != strcmp("vendor", mtd->name))
-#endif 
+	if (!strcmp("vendor", mtd->name)) {
+		syno_print_mtd_access_log = 0;
+	}
+#endif  
+#ifdef CONFIG_SYNO_MTD_ACCESS_LOG_EXCEPT_REDBOOTCONF_PART
+	if (!strcmp("RedBoot Config", mtd->name)) {
+		syno_print_mtd_access_log = 0;
+	}
+#endif  
+	if (syno_print_mtd_access_log) {
 		printk(KERN_ERR"open mtd (%s), process=%s\n", mtd->name, current->comm);
-#endif 
+	}
+#endif  
 
 	if (IS_ERR(mtd)) {
 		ret = PTR_ERR(mtd);
@@ -97,25 +108,34 @@ out1:
 out:
 	mutex_unlock(&mtd_mutex);
 	return ret;
-} 
-
-
+}  
 
 static int mtdchar_close(struct inode *inode, struct file *file)
 {
 	struct mtd_file_info *mfi = file->private_data;
 	struct mtd_info *mtd = mfi->mtd;
+#ifdef MY_DEF_HERE
+	int syno_print_mtd_access_log = 1;
+#endif  
 
 	pr_debug("MTD_close\n");
 
 #ifdef MY_DEF_HERE
 #ifdef MY_DEF_HERE
-	if (0 != strcmp("vendor", mtd->name))
-#endif 
+	if (!strcmp("vendor", mtd->name)) {
+		syno_print_mtd_access_log = 0;
+	}
+#endif  
+#ifdef CONFIG_SYNO_MTD_ACCESS_LOG_EXCEPT_REDBOOTCONF_PART
+	if (!strcmp("RedBoot Config", mtd->name)) {
+		syno_print_mtd_access_log = 0;
+	}
+#endif  
+	if (syno_print_mtd_access_log) {
 		printk(KERN_ERR"close mtd (%s), process=%s\n", mtd->name, current->comm);
-#endif 
+	}
+#endif  
 
-	
 	if ((file->f_mode & FMODE_WRITE))
 		mtd_sync(mtd);
 
@@ -817,12 +837,15 @@ static int mtdchar_ioctl(struct file *file, u_int cmd, u_long arg)
 		break;
 	}
 
-	
 	case MEMGETOOBSEL:
 	{
 		struct nand_oobinfo oi;
 
+#if defined(MY_DEF_HERE)
+		if (!mtd->ooblayout)
+#else  
 		if (!mtd->ecclayout)
+#endif  
 			return -EOPNOTSUPP;
 		if (mtd->ecclayout->eccbytes > ARRAY_SIZE(oi.eccpos))
 			return -EINVAL;
@@ -952,14 +975,17 @@ static int mtdchar_ioctl(struct file *file, u_int cmd, u_long arg)
 
 		break;
 	}
-#endif 
+#endif  
 
-	
 	case ECCGETLAYOUT:
 	{
 		struct nand_ecclayout_user *usrlay;
 
+#if defined(MY_DEF_HERE)
+		if (!mtd->ooblayout)
+#else  
 		if (!mtd->ecclayout)
+#endif  
 			return -EOPNOTSUPP;
 
 		usrlay = kmalloc(sizeof(*usrlay), GFP_KERNEL);

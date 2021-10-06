@@ -557,6 +557,9 @@ __irq_get_desc_lock(unsigned int irq, unsigned long *flags, bool bus,
 	}
 	return desc;
 }
+#ifdef CONFIG_SYNO_NTB_IRQ_CHECK
+EXPORT_SYMBOL_GPL(__irq_get_desc_lock);
+#endif /* CONFIG_SYNO_NTB_IRQ_CHECK */
 
 void __irq_put_desc_unlock(struct irq_desc *desc, unsigned long flags, bool bus)
 {
@@ -564,6 +567,9 @@ void __irq_put_desc_unlock(struct irq_desc *desc, unsigned long flags, bool bus)
 	if (bus)
 		chip_bus_sync_unlock(desc);
 }
+#ifdef CONFIG_SYNO_NTB_IRQ_CHECK
+EXPORT_SYMBOL_GPL(__irq_put_desc_unlock);
+#endif /* CONFIG_SYNO_NTB_IRQ_CHECK */
 
 int irq_set_percpu_devid(unsigned int irq)
 {

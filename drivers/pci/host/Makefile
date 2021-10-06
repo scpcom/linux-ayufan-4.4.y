@@ -28,3 +28,7 @@ obj-$(CONFIG_PCIE_RTD1295) += pcie-rtd1295.o
 ifeq ($(CONFIG_SYNO_LSP_ARMADA_16_12), y)
 obj-$(CONFIG_PCIE_ARMADA_8K) += pcie-armada8k.o
 endif
+ifeq ($(CONFIG_SYNO_LSP_RTD1619), y)
+obj-$(CONFIG_PCIE_RTD16xx_SLOT1) += pcie-rtd16xx-slot1.o
+obj-$(CONFIG_PCIE_RTD16xx_SLOT2) += pcie-rtd16xx-slot2.o
+endif # CONFIG_SYNO_LSP_RTD1619

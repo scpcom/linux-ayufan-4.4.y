@@ -309,3 +309,12 @@ config ACPI_CPPC_CPUFREQ
 	  support for its operation.
 
 	  If in doubt, say N.
+
+if SYNO_LSP_RTD1619
+config ARM_REALTEK_CPUFREQ
+	bool "Realtek CPUFreq support"
+	depends on RTK_PLATFORM
+	default y
+	help
+		This adds the CPUFreq driver support for Realtek SOCs.
+endif # SYNO_LSP_RTD1619

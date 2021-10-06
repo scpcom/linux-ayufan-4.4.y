@@ -20,9 +20,12 @@ obj-$(CONFIG_AHCI_ST)		+= ahci_st.o libahci.o libahci_platform.o
 obj-$(CONFIG_AHCI_TEGRA)	+= ahci_tegra.o libahci.o libahci_platform.o
 obj-$(CONFIG_AHCI_XGENE)	+= ahci_xgene.o libahci.o libahci_platform.o
 obj-$(CONFIG_AHCI_QORIQ)	+= ahci_qoriq.o libahci.o libahci_platform.o
-ifeq ($(CONFIG_SYNO_LSP_RTD129X),y)
-obj-$(CONFIG_AHCI_RTK)          += ahci_rtk.o libahci.o libahci_platform.o
+ifeq ($(CONFIG_SYNO_LSP_RTD129X), y)
+obj-$(CONFIG_AHCI_RTK)		+= ahci_rtk.o libahci.o libahci_platform.o
 endif # CONFIG_SYNO_LSP_RTD129X
+ifeq ($(CONFIG_SYNO_LSP_RTD1619), y)
+obj-$(CONFIG_AHCI_RTK)		+= ahci_rtk_1619.o libahci.o libahci_platform.o
+endif # CONFIG_SYNO_LSP_RTD1619
 
 # SFF w/ custom DMA
 obj-$(CONFIG_PDC_ADMA)		+= pdc_adma.o
@@ -30,6 +33,9 @@ obj-$(CONFIG_PATA_ARASAN_CF)	+= pata_arasan_cf.o
 obj-$(CONFIG_PATA_OCTEON_CF)	+= pata_octeon_cf.o
 obj-$(CONFIG_SATA_QSTOR)	+= sata_qstor.o
 obj-$(CONFIG_SATA_SX4)		+= sata_sx4.o
+ifeq ($(CONFIG_SYNO_SMBUS_HDD_POWERCTL), y)
+obj-$(CONFIG_SYNO_SMBUS_HDD_POWERCTL)+= ata_syno_i2c.o
+endif
 
 # SFF SATA w/ BMDMA
 obj-$(CONFIG_ATA_PIIX)		+= ata_piix.o

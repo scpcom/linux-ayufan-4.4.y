@@ -215,4 +215,17 @@ config PCI_AARDVARK
 	 controller is part of the South Bridge of the Marvel Armada
 	 3700 SoC.
 
+if SYNO_LSP_RTD1619
+config PCIE_RTD16xx_SLOT1
+	bool "Realtek PCIe host controller(slot1)"
+	depends on ARCH_RTD16xx
+	help
+	  Realtek PCIe host controller support(slot1).
+
+config PCIE_RTD16xx_SLOT2
+	bool "Realtek PCIe host controller(slot2)"
+	depends on ARCH_RTD16xx
+	help
+	  Realtek PCIe host controller support(slot2).
+endif # SYNO_LSP_RTD1619
 endmenu

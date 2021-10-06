@@ -329,11 +329,7 @@ setversion_out:
 		if (err)
 			return err;
 
-#ifdef MY_ABC_HERE
-		if (get_user(n_blocks_count, (__u64 __user *)arg)) {
-#else
 		if (get_user(n_blocks_count, (__u32 __user *)arg)) {
-#endif 
 			err = -EFAULT;
 			goto group_extend_out;
 		}

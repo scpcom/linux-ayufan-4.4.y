@@ -90,12 +90,7 @@ char gszSynoTtyS0[50] = {0};
 EXPORT_SYMBOL(gszSynoTtyS0);
 char gszSynoTtyS1[50] = {0};
 EXPORT_SYMBOL(gszSynoTtyS1);
-#endif 
-
-#ifdef MY_DEF_HERE
-int gSynoTtyLogMsg = 0;
-EXPORT_SYMBOL(gSynoTtyLogMsg);
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 int gSynoDebugFlag = 0;
@@ -106,110 +101,132 @@ EXPORT_SYMBOL(gSynoHibernationLogLevel);
 
 int gSynoAtaDebug = 0;
 EXPORT_SYMBOL(gSynoAtaDebug);
-#endif 
+
+int gSynoPageAllocFailedLog = 1;
+EXPORT_SYMBOL(gSynoPageAllocFailedLog);
+#endif  
 
 #ifdef MY_ABC_HERE
 long unsigned int guiWakeupDisksNum = 1;
 EXPORT_SYMBOL(guiWakeupDisksNum);
-
+ 
 int giDenoOfTimeInterval = 1;
 EXPORT_SYMBOL(giDenoOfTimeInterval);
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 char gszSataPortMap[8] = {0};
 EXPORT_SYMBOL(gszSataPortMap);
-#endif 
+#endif  
 
 #if defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
 unsigned int gSynoSataHostCnt = 0;
 EXPORT_SYMBOL(gSynoSataHostCnt);
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 char gszDiskIdxMap[16] = {0};
 EXPORT_SYMBOL(gszDiskIdxMap);
-#endif 
+#endif  
 
 #ifdef MY_DEF_HERE
 long g_hdd_hotplug = 0;
 EXPORT_SYMBOL(g_hdd_hotplug);
-#endif 
+#endif  
+
+#ifdef CONFIG_SYNO_SMBUS_HDD_POWERCTL
+long g_smbus_hdd_powerctl = 0;
+EXPORT_SYMBOL(g_smbus_hdd_powerctl);
+char gSynoSmbusHddType[16];
+EXPORT_SYMBOL(gSynoSmbusHddType);
+int gSynoSmbusHddAdapter;
+EXPORT_SYMBOL(gSynoSmbusHddAdapter);
+int gSynoSmbusHddAddress;
+EXPORT_SYMBOL(gSynoSmbusHddAddress);
+SYNO_SMBUS_HDD_POWERCTL SynoSmbusHddPowerCtl = {
+	.bl_init = 0,
+	.syno_smbus_hdd_enable_write = NULL,
+	.syno_smbus_hdd_present_read = NULL,
+};
+EXPORT_SYMBOL(SynoSmbusHddPowerCtl);
+#endif  
 
 #ifdef MY_ABC_HERE
 #ifdef MY_ABC_HERE
 int gSynoHasDynModule = 1;
-#else 
+#else  
 int gSynoHasDynModule = 0;
-#endif 
+#endif  
 EXPORT_SYMBOL(gSynoHasDynModule);
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 int gSynoInstallFlag = 0;
 EXPORT_SYMBOL(gSynoInstallFlag);
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 char gszSynoHWRevision[4] = {'\0'};
 EXPORT_SYMBOL(gszSynoHWRevision);
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 char gszSynoHWVersion[16];
 EXPORT_SYMBOL(gszSynoHWVersion);
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 #ifdef MY_DEF_HERE
 int gSynoHddPowerupSeq = 0, gSynoInternalHddNumber = 0;
 EXPORT_SYMBOL(gSynoHddPowerupSeq);
 EXPORT_SYMBOL(gSynoInternalHddNumber);
-#else 
+#else  
 long g_syno_hdd_powerup_seq = -1;
 EXPORT_SYMBOL(g_syno_hdd_powerup_seq);
-#endif 
+#endif  
 long syno_boot_hd_count = 0;
 EXPORT_SYMBOL(syno_boot_hd_count);
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 char g_ahci_switch = '1';
 EXPORT_SYMBOL(g_ahci_switch);
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 long g_sata_mv_led = 0;
 EXPORT_SYMBOL(g_sata_mv_led);
-#endif 
+#endif  
 
 #ifdef MY_DEF_HERE
 int giSynoHddLedEnabled = 1;
 EXPORT_SYMBOL(giSynoHddLedEnabled);
-#endif  
+#endif   
 
 #ifdef MY_ABC_HERE
 char gszSerialNum[32];
 EXPORT_SYMBOL(gszSerialNum);
 char gszCustomSerialNum[32];
 EXPORT_SYMBOL(gszCustomSerialNum);
-#endif 
+#endif  
 
 #if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 #include <linux/synosata.h>
 int (*funcSYNOGetHwCapability)(CAPABILITY *) = NULL;
 EXPORT_SYMBOL(funcSYNOGetHwCapability);
-#endif 
+EUNIT_PWRON_TYPE (*funcSynoEunitPowerctlType)(void) = NULL;
+EXPORT_SYMBOL(funcSynoEunitPowerctlType);
+#endif  
 
 #ifdef MY_DEF_HERE
 int (*funcSYNOCtrlDiskLedBy1475)(unsigned short, unsigned short) = NULL;
 EXPORT_SYMBOL(funcSYNOCtrlDiskLedBy1475);
-#endif 
+#endif  
 
 #ifdef  MY_ABC_HERE
 int gSynoRaidSyncFlag = 0;
 EXPORT_SYMBOL(gSynoRaidSyncFlag);
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 int g_syno_sata_remap[SATA_REMAP_MAX] = {SATA_REMAP_NOT_INIT};
@@ -250,18 +267,12 @@ static int iSynoMacMax = SYNO_MAC_MAX_NUMBER;
 static int iMacEntrySize = 16;
 char gszSkipVenderMacInterfaces[256] = {'\0'};
 EXPORT_SYMBOL(gszSkipVenderMacInterfaces);
-#endif 
+#endif  
 
 #ifdef MY_DEF_HERE
 long g_is_sas_model = 0;
 EXPORT_SYMBOL(g_is_sas_model);
-#endif 
-
-#ifdef MY_ABC_HERE
-int grgPwrCtlPin[CONFIG_SYNO_MAX_SATA_ID] = {0};
-EUNIT_PWRON_TYPE (*funcSynoEunitPowerctlType)(void) = NULL;
-EXPORT_SYMBOL(funcSynoEunitPowerctlType);
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 unsigned int gSynoCPUInfoCore = 0;
@@ -318,51 +329,48 @@ EXPORT_SYMBOL(gSynoUsbVbusHostAddr);
 EXPORT_SYMBOL(gSynoUsbVbusPort);
 EXPORT_SYMBOL(gSynoUsbVbusGpp);
 EXPORT_SYMBOL(gSynoUsbVbusGppPol);
-#endif 
+#endif  
 
 #ifdef MY_DEF_HERE
 int giSynoEncPwrCtl = 0;
 extern int SynoProcEncPwrCtl(struct ctl_table *table, int write,
 		        void __user *buffer, size_t *lenp, loff_t *ppos);
-#endif 
+#endif  
 
 #ifdef MY_DEF_HERE
 char gSynoSASHBAAddr[CONFIG_SYNO_SAS_MAX_HBA_SLOT][13] = {{0}};
 EXPORT_SYMBOL(gSynoSASHBAAddr);
-#endif 
+#endif  
 
 #ifdef MY_DEF_HERE
 int (*syno_test_list)(unsigned char, struct tty_struct *);
 EXPORT_SYMBOL(syno_test_list);
-#endif 
-
-#ifdef MY_ABC_HERE
-int gSynoSystemShutdown = 0;
-EXPORT_SYMBOL(gSynoSystemShutdown);
-#endif 
+int (*syno_get_current)(unsigned char, struct tty_struct *);
+EXPORT_SYMBOL(syno_get_current);
+#endif  
 
 #ifdef MY_DEF_HERE
 int (*syno_valid_lsi3008_led)(u8 cmd);
 EXPORT_SYMBOL(syno_valid_lsi3008_led);
-#endif 
+#endif  
 
 #ifdef MY_DEF_HERE
 int (*syno_disk_map_table_gen_mv14xx)(int *iDiskMapTable, int iPortMax);
 EXPORT_SYMBOL(syno_disk_map_table_gen_mv14xx);
-#endif 
+#endif  
 
 #ifdef MY_DEF_HERE
 #ifdef MY_ABC_HERE
 int g_syno_nvc_index_map[SATA_REMAP_MAX] = {-1};
 EXPORT_SYMBOL(g_syno_nvc_index_map);
-#endif 
-#endif 
+#endif  
+#endif  
 #ifdef MY_ABC_HERE
 int giSynoDiskEhFlag = 0;
 EXPORT_SYMBOL(giSynoDiskEhFlag);
 unsigned long guSynoScsiCmdSN = 0;
 EXPORT_SYMBOL(guSynoScsiCmdSN);
-#endif 
+#endif  
 #ifdef MY_DEF_HERE
 char gSynoM2HostName[M2_HOST_LEN_MAX] = {0};
 EXPORT_SYMBOL(gSynoM2HostName);
@@ -370,14 +378,8 @@ unsigned long gSynoM2PortNo = 0;
 EXPORT_SYMBOL(gSynoM2PortNo);
 unsigned long gSynoM2PortIndex[M2_PORT_NO_MAX];
 EXPORT_SYMBOL(gSynoM2PortIndex);
-#endif 
+#endif  
 
-#ifdef MY_DEF_HERE
-unsigned int SynoDiskLatencyType = 0x6;
-EXPORT_SYMBOL(SynoDiskLatencyType);
-unsigned int gSynoDiskLatencyRank[SYNO_DISK_LATENCY_RANK_NUM] = {99, 90, 70, 50, 0};
-EXPORT_SYMBOL(gSynoDiskLatencyRank);
-#endif 
 #ifdef MY_ABC_HERE
 
 #define SZ_IF_PREFIX "eth"
@@ -522,9 +524,13 @@ static int proc_dointvec_minmax_coredump(struct ctl_table *table, int write,
 static int proc_dostring_coredump(struct ctl_table *table, int write,
 		void __user *buffer, size_t *lenp, loff_t *ppos);
 #endif
+#ifdef CONFIG_SYNO_HARDLOCKUP_PANIC_ENHANCE
+static int proc_dointvec_minmax_hardlockup_panic(struct ctl_table *, int,
+		void __user *, size_t *, loff_t *);
+#endif  
 
 #ifdef CONFIG_MAGIC_SYSRQ
-
+ 
 static int __sysrq_enabled = CONFIG_MAGIC_SYSRQ_DEFAULT_ENABLE;
 
 static int sysrq_sysctl_handler(struct ctl_table *table, int write,
@@ -1222,7 +1228,11 @@ static struct ctl_table kern_table[] = {
 		.data		= &hardlockup_panic,
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
-		.proc_handler	= proc_dointvec_minmax,
+#ifdef CONFIG_SYNO_HARDLOCKUP_PANIC_ENHANCE
+		.proc_handler	= proc_dointvec_minmax_hardlockup_panic,
+#else  
+		.proc_handler   = proc_dointvec_minmax,
+#endif  
 		.extra1		= &zero,
 		.extra2		= &one,
 	},
@@ -1389,6 +1399,16 @@ static struct ctl_table kern_table[] = {
 		.proc_handler	= proc_dointvec_minmax,
 		.extra1		= &neg_one,
 	},
+#ifdef MY_ABC_HERE
+	{
+		.procname	= "hung_task_warnings_default",
+		.data		= &sysctl_hung_task_warnings_default,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= proc_dointvec_minmax,
+		.extra1		= &neg_one,
+	},
+#endif  
 #endif
 #ifdef CONFIG_COMPAT
 	{
@@ -1513,6 +1533,13 @@ static struct ctl_table kern_table[] = {
 	{
 		.procname       = "syno_ata_debug",
 		.data           = &gSynoAtaDebug,
+		.maxlen         = sizeof (int),
+		.mode           = 0644,
+		.proc_handler   = proc_dointvec,
+	},
+	{
+		.procname       = "syno_page_alloc_failed_log",
+		.data           = &gSynoPageAllocFailedLog,
 		.maxlen         = sizeof (int),
 		.mode           = 0644,
 		.proc_handler   = proc_dointvec,
@@ -1779,32 +1806,7 @@ static struct ctl_table kern_table[] = {
 		.mode           = 0644,
 		.proc_handler   = SynoProcDoIntVec,
 	},
-#endif 
-#ifdef MY_DEF_HERE
-	{
-		.procname		= "syno_tty_log",
-		.data			= &gSynoTtyLogMsg,
-		.maxlen			= sizeof (int),
-		.mode			= 0644,
-		.proc_handler	= proc_dointvec,
-	},
-#endif 
-#ifdef MY_DEF_HERE
-	{
-		.procname       = "syno_disk_latency_type",
-		.data           = &SynoDiskLatencyType,
-		.maxlen         = sizeof (int),
-		.mode           = 0644,
-		.proc_handler   = proc_dointvec,
-	},
-	{
-		.procname       = "syno_disk_latency_rank",
-		.data           = &gSynoDiskLatencyRank,
-		.maxlen         = sizeof (gSynoDiskLatencyRank),
-		.mode           = 0644,
-		.proc_handler   = proc_dointvec,
-	},
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
 	{
 		.procname       = "syno_fs_pattern_check_flag",
@@ -2870,6 +2872,19 @@ int proc_dointvec_minmax(struct ctl_table *table, int write,
 				do_proc_dointvec_minmax_conv, &param);
 }
 
+#ifdef CONFIG_SYNO_HARDLOCKUP_PANIC_ENHANCE
+extern void watchdog_hrtimer_inc(void);
+static int proc_dointvec_minmax_hardlockup_panic(struct ctl_table *table, int write,
+		  void __user *buffer, size_t *lenp, loff_t *ppos)
+{
+	 
+	if (write) {
+		watchdog_hrtimer_inc();
+	}
+	return proc_dointvec_minmax(table , write, buffer, lenp, ppos);
+}
+#endif  
+
 static void validate_coredump_safety(void)
 {
 #ifdef CONFIG_COREDUMP
@@ -3569,4 +3584,52 @@ char* syno_get_hw_version(void)
 	return gszSynoHWVersion;
 }
 EXPORT_SYMBOL(syno_get_hw_version);
-#endif 
+#endif  
+#ifdef MY_ABC_HERE
+int (*funcSYNOReadAdtPeci)(struct _SynoCpuTemp *) = NULL;
+EXPORT_SYMBOL(funcSYNOReadAdtPeci);
+int (*funcSYNOReadAdtFanSpeedRpm)(struct _SYNO_HWMON_SENSOR_TYPE *) = NULL;
+EXPORT_SYMBOL(funcSYNOReadAdtFanSpeedRpm);
+int (*funcSYNOReadAdtVoltageSensor)(struct _SYNO_HWMON_SENSOR_TYPE *) = NULL;
+EXPORT_SYMBOL(funcSYNOReadAdtVoltageSensor);
+int (*funcSYNOReadAdtThermalSensor)(struct _SYNO_HWMON_SENSOR_TYPE *) = NULL;
+EXPORT_SYMBOL(funcSYNOReadAdtThermalSensor);
+
+int syno_get_adt_peci(struct _SynoCpuTemp *cpu_temp)
+{
+	int ret = -1;
+	if (funcSYNOReadAdtPeci) {
+		ret = funcSYNOReadAdtPeci(cpu_temp);
+	}
+	return ret;
+}
+EXPORT_SYMBOL(syno_get_adt_peci);
+int syno_get_adt_fan_speed_rpm(struct _SYNO_HWMON_SENSOR_TYPE *FanSpeedRpm)
+{
+	int ret = -1;
+	if (funcSYNOReadAdtFanSpeedRpm) {
+		ret = funcSYNOReadAdtFanSpeedRpm(FanSpeedRpm);
+	}
+	return ret;
+}
+EXPORT_SYMBOL(syno_get_adt_fan_speed_rpm);
+int syno_get_adt_thermal_sensor(struct _SYNO_HWMON_SENSOR_TYPE *SysThermal)
+{
+	int ret = -1;
+	if (funcSYNOReadAdtThermalSensor) {
+		ret = funcSYNOReadAdtThermalSensor(SysThermal);
+	}
+	return ret;
+
+}
+EXPORT_SYMBOL(syno_get_adt_thermal_sensor);
+int syno_get_adt_voltage_sensor(struct _SYNO_HWMON_SENSOR_TYPE *SysVoltage)
+{
+	int ret = -1;
+	if (funcSYNOReadAdtVoltageSensor) {
+		ret = funcSYNOReadAdtVoltageSensor(SysVoltage);
+	}
+	return ret;
+}
+EXPORT_SYMBOL(syno_get_adt_voltage_sensor);
+#endif  

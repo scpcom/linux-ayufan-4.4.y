@@ -30,17 +30,21 @@
 extern const struct cpu_operations smp_spin_table_ops;
 extern const struct cpu_operations cpu_psci_ops;
 
-#if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE)
+#if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE) || \
+	defined(CONFIG_RTK_PLATFORM) && defined(MY_DEF_HERE)
 extern const struct cpu_operations rtk_smp_spin_table_ops;
-#endif
+#endif /* CONFIG_ARCH_RTD129X && MY_DEF_HERE ||
+		  CONFIG_RTK_PLATFORM && MY_DEF_HERE */
 
 const struct cpu_operations *cpu_ops[NR_CPUS];
 
 static const struct cpu_operations *supported_cpu_ops[] __initconst = {
 	&smp_spin_table_ops,
-#if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE)
+#if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE) || \
+	defined(CONFIG_RTK_PLATFORM) && defined(MY_DEF_HERE)
 	&rtk_smp_spin_table_ops,
-#endif
+#endif /* CONFIG_ARCH_RTD129X && MY_DEF_HERE ||
+		  CONFIG_RTK_PLATFORM && MY_DEF_HERE */
 	&cpu_psci_ops,
 	NULL,
 };

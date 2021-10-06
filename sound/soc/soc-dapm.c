@@ -962,7 +962,10 @@ static __always_inline int is_connected_ep(struct snd_soc_dapm_widget *widget,
 		if (path->walking)
 			return 1;
 
+#if defined(MY_ABC_HERE)
+#else  
 		trace_snd_soc_dapm_path(widget, dir, path);
+#endif  
 
 		if (path->connect) {
 			path->walking = 1;
@@ -1011,19 +1014,20 @@ int snd_soc_dapm_dai_get_connected_widgets(struct snd_soc_dai *dai, int stream,
 	else
 		paths = is_connected_input_ep(dai->capture_widget, &widgets);
 
-	
 	list_del(widgets.next);
 
 	ret = dapm_widget_list_create(list, &widgets);
 	if (ret)
 		paths = ret;
 
+#if defined(MY_ABC_HERE)
+#else  
 	trace_snd_soc_dapm_connected(paths, stream);
+#endif  
 	mutex_unlock(&card->dapm_mutex);
 
 	return paths;
 }
-
 
 int dapm_regulator_event(struct snd_soc_dapm_widget *w,
 		   struct snd_kcontrol *kcontrol, int event)

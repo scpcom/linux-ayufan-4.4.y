@@ -187,11 +187,7 @@ static bool merge_ref(struct btrfs_trans_handle *trans,
 		if (seq && next->seq >= seq)
 			goto next;
 
-#ifdef MY_ABC_HERE
-		if (next->type != ref->type || next->no_quota != ref->no_quota)
-#else
 		if (next->type != ref->type)
-#endif 
 			goto next;
 
 		if ((ref->type == BTRFS_TREE_BLOCK_REF_KEY ||
@@ -350,77 +346,24 @@ again:
 	return head;
 }
 
-#ifdef MY_ABC_HERE
-
-struct btrfs_delayed_ref_head *
-btrfs_select_data_ref_head(struct btrfs_trans_handle *trans)
-{
-	struct btrfs_delayed_ref_root *delayed_refs;
-	struct btrfs_delayed_ref_head *head;
-	struct rb_node *node;
-
-	delayed_refs = &trans->transaction->delayed_refs;
-
-	head = find_ref_head(&delayed_refs->href_root, delayed_refs->run_delayed_start, 1);
-	if (!head)
-		return NULL;
-	
-	if (head->node.bytenr < delayed_refs->run_delayed_start)
-		return NULL;
-
-	while (!head->is_data) {
-		node = rb_next(&head->href_node);
-		if (!node)
-			return NULL;
-		head = rb_entry(node, struct btrfs_delayed_ref_head,
-				href_node);
-	}
-
-	
-	if (head->processing)
-		return ERR_PTR(-EAGAIN);
-
-	head->processing = 1;
-	WARN_ON(delayed_refs->num_heads_ready == 0);
-	delayed_refs->num_heads_ready--;
-	delayed_refs->run_delayed_start = head->node.bytenr +
-		head->node.num_bytes;
-	return head;
-}
-#endif
-
-
 static int
 add_delayed_ref_tail_merge(struct btrfs_trans_handle *trans,
-#ifdef MY_ABC_HERE
-			   struct btrfs_fs_info *fs_info,
-#endif 
 			   struct btrfs_delayed_ref_root *root,
 			   struct btrfs_delayed_ref_head *href,
 			   struct btrfs_delayed_ref_node *ref)
 {
 	struct btrfs_delayed_ref_node *exist;
-#ifdef MY_ABC_HERE
-	struct btrfs_delayed_ref_node *tmp = ref;
-	struct btrfs_delayed_data_ref *data_ref;
-	int quota_ref_mod = ref->ref_mod;
-#endif 
 	int mod;
 	int ret = 0;
 
 	spin_lock(&href->lock);
-	
+	 
 	if (list_empty(&href->ref_list))
 		goto add_tail;
 	exist = list_entry(href->ref_list.prev, struct btrfs_delayed_ref_node,
 			   list);
-	
-#ifdef MY_ABC_HERE
-	if (exist->type != ref->type || exist->no_quota != ref->no_quota ||
-	    exist->seq != ref->seq)
-#else
+	 
 	if (exist->type != ref->type || exist->seq != ref->seq)
-#endif 
 		goto add_tail;
 
 	if ((exist->type == BTRFS_TREE_BLOCK_REF_KEY ||
@@ -435,17 +378,12 @@ add_delayed_ref_tail_merge(struct btrfs_trans_handle *trans,
 			   btrfs_delayed_node_to_data_ref(ref)))
 		goto add_tail;
 
-	
 	ret = 1;
 	if (exist->action == ref->action) {
 		mod = ref->ref_mod;
 	} else {
-		
+		 
 		if (exist->ref_mod < ref->ref_mod) {
-#ifdef MY_ABC_HERE
-			tmp = exist;
-			quota_ref_mod = exist->ref_mod;
-#endif 
 			exist->action = ref->action;
 			mod = -exist->ref_mod;
 			exist->ref_mod = ref->ref_mod;
@@ -460,21 +398,9 @@ add_delayed_ref_tail_merge(struct btrfs_trans_handle *trans,
 			}
 		} else
 			mod = -ref->ref_mod;
-#ifdef MY_ABC_HERE
-		if (!tmp->no_quota) {
-			data_ref = btrfs_delayed_node_to_data_ref(tmp);
-			btrfs_qgroup_free_refroot(fs_info, data_ref->root,
-			       quota_ref_mod * tmp->num_bytes);
-#ifdef MY_ABC_HERE
-			btrfs_usrquota_free_rootid(fs_info, data_ref->root,
-			       data_ref->uid, tmp->num_bytes);
-#endif 
-		}
-#endif 
 	}
 	exist->ref_mod += mod;
 
-	
 	if (exist->ref_mod == 0)
 		drop_delayed_ref(trans, root, href, exist);
 	spin_unlock(&href->lock);
@@ -490,11 +416,17 @@ add_tail:
 	return ret;
 }
 
-
 static noinline void
+#ifdef MY_ABC_HERE
+update_existing_head_ref(struct btrfs_fs_info *fs_info,
+			 struct btrfs_delayed_ref_root *delayed_refs,
+			 struct btrfs_delayed_ref_node *existing,
+			 struct btrfs_delayed_ref_node *update)
+#else
 update_existing_head_ref(struct btrfs_delayed_ref_root *delayed_refs,
 			 struct btrfs_delayed_ref_node *existing,
 			 struct btrfs_delayed_ref_node *update)
+#endif  
 {
 	struct btrfs_delayed_ref_head *existing_ref;
 	struct btrfs_delayed_ref_head *ref;
@@ -531,21 +463,31 @@ update_existing_head_ref(struct btrfs_delayed_ref_root *delayed_refs,
 			btrfs_free_delayed_extent_op(ref->extent_op);
 		}
 	}
-	
+	 
 	old_ref_mod = existing_ref->total_ref_mod;
 	existing->ref_mod += update->ref_mod;
 	existing_ref->total_ref_mod += update->ref_mod;
 
-	
 	if (existing_ref->is_data) {
+#ifdef MY_ABC_HERE
+		u64 csum_leaves = btrfs_csum_bytes_to_leaves(fs_info->tree_root, existing->num_bytes);
+		if (existing_ref->total_ref_mod >= 0 && old_ref_mod < 0) {
+			delayed_refs->pending_csums -= existing->num_bytes;
+			delayed_refs->num_pending_csums_leafs -= csum_leaves;
+		}
+		if (existing_ref->total_ref_mod < 0 && old_ref_mod >= 0) {
+			delayed_refs->pending_csums += existing->num_bytes;
+			delayed_refs->num_pending_csums_leafs += csum_leaves;
+		}
+#else
 		if (existing_ref->total_ref_mod >= 0 && old_ref_mod < 0)
 			delayed_refs->pending_csums -= existing->num_bytes;
 		if (existing_ref->total_ref_mod < 0 && old_ref_mod >= 0)
 			delayed_refs->pending_csums += existing->num_bytes;
+#endif  
 	}
 	spin_unlock(&existing_ref->lock);
 }
-
 
 static noinline struct btrfs_delayed_ref_head *
 add_delayed_ref_head(struct btrfs_fs_info *fs_info,
@@ -558,23 +500,17 @@ add_delayed_ref_head(struct btrfs_fs_info *fs_info,
 	struct btrfs_delayed_ref_head *existing;
 	struct btrfs_delayed_ref_head *head_ref = NULL;
 	struct btrfs_delayed_ref_root *delayed_refs;
-#ifdef MY_ABC_HERE
-#else
 	struct btrfs_qgroup_extent_record *qexisting;
-#endif 
 	int count_mod = 1;
 	int must_insert_reserved = 0;
 
-	
 	BUG_ON(!is_data && reserved);
 
-	
 	if (action == BTRFS_UPDATE_DELAYED_HEAD)
 		count_mod = 0;
 	else if (action == BTRFS_DROP_DELAYED_REF)
 		count_mod = -1;
 
-	
 	if (action == BTRFS_ADD_DELAYED_EXTENT)
 		must_insert_reserved = 1;
 	else
@@ -602,9 +538,6 @@ add_delayed_ref_head(struct btrfs_fs_info *fs_info,
 	head_ref->qgroup_reserved = 0;
 	head_ref->qgroup_ref_root = 0;
 
-#ifdef MY_ABC_HERE
-#else
-	
 	if (qrecord) {
 		if (ref_root && reserved) {
 			head_ref->qgroup_ref_root = ref_root;
@@ -620,7 +553,6 @@ add_delayed_ref_head(struct btrfs_fs_info *fs_info,
 		if (qexisting)
 			kfree(qrecord);
 	}
-#endif 
 
 	spin_lock_init(&head_ref->lock);
 	mutex_init(&head_ref->mutex);
@@ -632,13 +564,24 @@ add_delayed_ref_head(struct btrfs_fs_info *fs_info,
 	if (existing) {
 		WARN_ON(ref_root && reserved && existing->qgroup_ref_root
 			&& existing->qgroup_reserved);
+#ifdef MY_ABC_HERE
+		update_existing_head_ref(fs_info, delayed_refs, &existing->node, ref);
+#else
 		update_existing_head_ref(delayed_refs, &existing->node, ref);
-		
+#endif  
+		 
 		kmem_cache_free(btrfs_delayed_ref_head_cachep, head_ref);
 		head_ref = existing;
 	} else {
+#ifdef MY_ABC_HERE
+		if (is_data && count_mod < 0) {
+			delayed_refs->pending_csums += num_bytes;
+			delayed_refs->num_pending_csums_leafs += btrfs_csum_bytes_to_leaves(fs_info->tree_root, num_bytes);
+		}
+#else
 		if (is_data && count_mod < 0)
 			delayed_refs->pending_csums += num_bytes;
+#endif  
 		delayed_refs->num_heads++;
 		delayed_refs->num_heads_ready++;
 		atomic_inc(&delayed_refs->num_entries);
@@ -681,10 +624,6 @@ add_delayed_tree_ref(struct btrfs_fs_info *fs_info,
 	ref->action = action;
 	ref->is_head = 0;
 	ref->in_tree = 1;
-#ifdef MY_ABC_HERE
-	
-	ref->no_quota = 1;
-#endif 
 	ref->seq = seq;
 	INIT_LIST_HEAD(&ref->list);
 	INIT_LIST_HEAD(&ref->add_list);
@@ -700,17 +639,11 @@ add_delayed_tree_ref(struct btrfs_fs_info *fs_info,
 
 	trace_add_delayed_tree_ref(ref, full_ref, action);
 
-#ifdef MY_ABC_HERE
-	ret = add_delayed_ref_tail_merge(trans, fs_info, delayed_refs, head_ref, ref);
-#else
 	ret = add_delayed_ref_tail_merge(trans, delayed_refs, head_ref, ref);
-#endif 
 
-	
 	if (ret > 0)
 		kmem_cache_free(btrfs_delayed_tree_ref_cachep, full_ref);
 }
-
 
 static noinline void
 add_delayed_data_ref(struct btrfs_fs_info *fs_info,
@@ -718,15 +651,7 @@ add_delayed_data_ref(struct btrfs_fs_info *fs_info,
 		     struct btrfs_delayed_ref_head *head_ref,
 		     struct btrfs_delayed_ref_node *ref, u64 bytenr,
 		     u64 num_bytes, u64 parent, u64 ref_root, u64 owner,
-#ifdef MY_ABC_HERE
-#ifdef MY_ABC_HERE
-		     u64 offset, int action, int no_quota, uid_t uid)
-#else
-		     u64 offset, int action, int no_quota)
-#endif 
-#else
 		     u64 offset, int action)
-#endif 
 {
 	struct btrfs_delayed_data_ref *full_ref;
 	struct btrfs_delayed_ref_root *delayed_refs;
@@ -748,9 +673,6 @@ add_delayed_data_ref(struct btrfs_fs_info *fs_info,
 	ref->action = action;
 	ref->is_head = 0;
 	ref->in_tree = 1;
-#ifdef MY_ABC_HERE
-	ref->no_quota = no_quota;
-#endif 
 	ref->seq = seq;
 	INIT_LIST_HEAD(&ref->list);
 	INIT_LIST_HEAD(&ref->add_list);
@@ -765,22 +687,14 @@ add_delayed_data_ref(struct btrfs_fs_info *fs_info,
 
 	full_ref->objectid = owner;
 	full_ref->offset = offset;
-#ifdef MY_ABC_HERE
-	full_ref->uid = uid;
-#endif 
 
 	trace_add_delayed_data_ref(ref, full_ref, action);
 
-#ifdef MY_ABC_HERE
-	ret = add_delayed_ref_tail_merge(trans, fs_info, delayed_refs, head_ref, ref);
-#else
 	ret = add_delayed_ref_tail_merge(trans, delayed_refs, head_ref, ref);
-#endif 
 
 	if (ret > 0)
 		kmem_cache_free(btrfs_delayed_data_ref_cachep, full_ref);
 }
-
 
 int btrfs_add_delayed_tree_ref(struct btrfs_fs_info *fs_info,
 			       struct btrfs_trans_handle *trans,
@@ -802,21 +716,17 @@ int btrfs_add_delayed_tree_ref(struct btrfs_fs_info *fs_info,
 	if (!head_ref)
 		goto free_ref;
 
-#ifdef MY_ABC_HERE
-#else
 	if (fs_info->quota_enabled && is_fstree(ref_root)) {
 		record = kmalloc(sizeof(*record), GFP_NOFS);
 		if (!record)
 			goto free_head_ref;
 	}
-#endif 
 
 	head_ref->extent_op = extent_op;
 
 	delayed_refs = &trans->transaction->delayed_refs;
 	spin_lock(&delayed_refs->lock);
 
-	
 	head_ref = add_delayed_ref_head(fs_info, trans, &head_ref->node, record,
 					bytenr, num_bytes, 0, 0, action, 0);
 
@@ -826,47 +736,25 @@ int btrfs_add_delayed_tree_ref(struct btrfs_fs_info *fs_info,
 
 	return 0;
 
-#ifdef MY_ABC_HERE
-#else
 free_head_ref:
 	kmem_cache_free(btrfs_delayed_ref_head_cachep, head_ref);
-#endif 
 free_ref:
 	kmem_cache_free(btrfs_delayed_tree_ref_cachep, ref);
 
 	return -ENOMEM;
 }
 
-
 int btrfs_add_delayed_data_ref(struct btrfs_fs_info *fs_info,
 			       struct btrfs_trans_handle *trans,
 			       u64 bytenr, u64 num_bytes,
 			       u64 parent, u64 ref_root,
 			       u64 owner, u64 offset, u64 reserved, int action,
-#ifdef MY_ABC_HERE
-			       struct btrfs_delayed_extent_op *extent_op,
-#ifdef MY_ABC_HERE
-			       int no_quota, uid_t uid)
-#else
-			       int no_quota)
-#endif 
-#else
 			       struct btrfs_delayed_extent_op *extent_op)
-#endif 
 {
 	struct btrfs_delayed_data_ref *ref;
 	struct btrfs_delayed_ref_head *head_ref;
 	struct btrfs_delayed_ref_root *delayed_refs;
 	struct btrfs_qgroup_extent_record *record = NULL;
-
-#ifdef MY_ABC_HERE
-#ifdef MY_ABC_HERE
-	if (!is_fstree(ref_root) || !BTRFS_ANY_QUOTA_ENABLED(fs_info))
-#else
-	if (!is_fstree(ref_root) || !fs_info->quota_enabled)
-#endif 
-		no_quota = 1;
-#endif 
 
 	BUG_ON(extent_op && !extent_op->is_data);
 	ref = kmem_cache_alloc(btrfs_delayed_data_ref_cachep, GFP_NOFS);
@@ -879,8 +767,6 @@ int btrfs_add_delayed_data_ref(struct btrfs_fs_info *fs_info,
 		return -ENOMEM;
 	}
 
-#ifdef MY_ABC_HERE
-#else
 	if (fs_info->quota_enabled && is_fstree(ref_root)) {
 		record = kmalloc(sizeof(*record), GFP_NOFS);
 		if (!record) {
@@ -890,29 +776,19 @@ int btrfs_add_delayed_data_ref(struct btrfs_fs_info *fs_info,
 			return -ENOMEM;
 		}
 	}
-#endif 
 
 	head_ref->extent_op = extent_op;
 
 	delayed_refs = &trans->transaction->delayed_refs;
 	spin_lock(&delayed_refs->lock);
 
-	
 	head_ref = add_delayed_ref_head(fs_info, trans, &head_ref->node, record,
 					bytenr, num_bytes, ref_root, reserved,
 					action, 1);
 
 	add_delayed_data_ref(fs_info, trans, head_ref, &ref->node, bytenr,
 				   num_bytes, parent, ref_root, owner, offset,
-#ifdef MY_ABC_HERE
-#ifdef MY_ABC_HERE
-				   action, no_quota, uid);
-#else
-				   action, no_quota);
-#endif 
-#else
 				   action);
-#endif 
 	spin_unlock(&delayed_refs->lock);
 
 	return 0;

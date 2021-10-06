@@ -103,9 +103,11 @@ struct uio_info {
 	long			irq;
 	unsigned long		irq_flags;
 	void			*priv;
-#if defined(CONFIG_UIO_ASSIGN_MINOR) && defined(MY_DEF_HERE)
-	int             	minor;
-#endif /* defined(CONFIG_UIO_ASSIGN_MINOR) && defined(MY_DEF_HERE) */
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(CONFIG_UIO_ASSIGN_MINOR)
+	int	minor;
+#endif /* CONFIG_UIO_ASSIGN_MINOR */
+#endif /* MY_DEF_HERE || MY_DEF_HERE */
 	irqreturn_t (*handler)(int irq, struct uio_info *dev_info);
 	int (*mmap)(struct uio_info *info, struct vm_area_struct *vma);
 	int (*open)(struct uio_info *info, struct inode *inode);

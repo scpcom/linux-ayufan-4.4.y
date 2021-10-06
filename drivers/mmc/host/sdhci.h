@@ -690,6 +690,12 @@ void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable);
 #endif /* MY_DEF_HERE */
 #endif /* MY_DEF_HERE */
 
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_RTK_PLATFORM
+void rtk_sdhci_close_clk(void);
+#endif /* CONFIG_RTK_PLATFORM */
+
+#endif /* MY_DEF_HERE */
 #ifdef CONFIG_PM
 extern int sdhci_suspend_host(struct sdhci_host *host);
 extern int sdhci_resume_host(struct sdhci_host *host);

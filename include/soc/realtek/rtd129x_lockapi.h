@@ -1,3 +1,16 @@
+#if defined(MY_DEF_HERE)
+/*
+ * rtd129x_lockapi.h
+ *
+ * Copyright (c) 2017 Realtek Semiconductor Corp.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ */
+#endif /* MY_DEF_HERE */
+
 #ifndef _RTD129x_LOCKAPI_H_
 #define _RTD129x_LOCKAPI_H_
 
@@ -11,6 +24,35 @@
 #define _AT_(X) __FILE__ " " LINE2STR(X)
 #define _at_(X) X " " LINE2STR(__LINE__)
 
+#if defined(MY_DEF_HERE)
+#if (defined(EN_SPINLOCK) || defined(EN_SPINLOCK_IRQ) || defined(EN_SEMAPHORE) || defined(EN_MUTEX)) && \
+	defined(CONFIG_ARCH_RTD129x)
+    #define LOCKAPI_EN
+    #define rtk_lockapi_trylock(X,Y)         _rtk_lockapi_trylock(&X,Y)
+    #define rtk_lockapi_lock(X,Y)            _rtk_lockapi_lock(&X,Y)
+    #define rtk_lockapi_unlock(X,Y)          _rtk_lockapi_unlock(X,Y)
+
+    #define rtk_lockapi_trylock2(X,Y)        _rtk_lockapi_trylock2(&X,Y)
+    #define rtk_lockapi_lock2(X,Y)           _rtk_lockapi_lock2(&X,Y)
+    #define rtk_lockapi_unlock2(X,Y)         _rtk_lockapi_unlock2(X,Y)
+
+    #define rtk_lockapi_trylock3(X,Y,Z)        _rtk_lockapi_trylock3(&X,Y,Z)
+    #define rtk_lockapi_lock3(X,Y,Z)         _rtk_lockapi_lock3(&X,Y,Z)
+    #define rtk_lockapi_unlock3(X,Y,Z)       _rtk_lockapi_unlock3(X,Y,Z)
+#else /* (EN_SPINLOCK || EN_SPINLOCK_IRQ || EN_SEMAPHORE || EN_MUTEX) && CONFIG_ARCH_RTD129x */
+    #define rtk_lockapi_trylock(X,Y)
+    #define rtk_lockapi_lock(X,Y)
+    #define rtk_lockapi_unlock(X,Y)
+
+    #define rtk_lockapi_trylock2(X,Y)
+    #define rtk_lockapi_lock2(X,Y)
+    #define rtk_lockapi_unlock2(X,Y)
+
+    #define rtk_lockapi_trylock3(X,Y,Z)
+    #define rtk_lockapi_lock3(X,Y,Z)
+    #define rtk_lockapi_unlock3(X,Y,Z)
+#endif /* (EN_SPINLOCK || EN_SPINLOCK_IRQ || EN_SEMAPHORE || EN_MUTEX) && CONFIG_ARCH_RTD129x */
+#else /* MY_DEF_HERE */
 #if defined(EN_SPINLOCK) || defined(EN_SPINLOCK_IRQ) || defined(EN_SEMAPHORE) || defined(EN_MUTEX)
 
     #define LOCKAPI_EN
@@ -38,8 +80,12 @@
     #define rtk_lockapi_lock3(X,Y,Z)
     #define rtk_lockapi_unlock3(X,Y,Z)
 #endif
+#endif /* MY_DEF_HERE */
 
 #define LOCKAPI_MAGICNUM (0xdeadbeef)
+#if defined(MY_DEF_HERE)
+#define LOCKAPI_BY_PASS (0xbeefdead)
+#endif /* MY_DEF_HERE */
 #define MAX_LOG_MSG_LEN  (64)
 
 #define LOCK_NOP_DELAY_CNT (30)

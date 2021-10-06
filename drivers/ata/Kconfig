@@ -184,7 +184,7 @@ config AHCI_QORIQ
 
 	  If unsure, say N.
 
-if SYNO_LSP_RTD129X
+if SYNO_LSP_RTD129X || SYNO_LSP_RTD1619
 config AHCI_RTK
 	tristate "Realtek AHCI SATA support"
 	help
@@ -192,7 +192,7 @@ config AHCI_RTK
 	  controllers.
 
 	  If unsure, say N.
-endif # SYNO_LSP_RTD129X
+endif # SYNO_LSP_RTD129X || SYNO_LSP_RTD1619
 
 config SATA_FSL
 	tristate "Freescale 3.0Gbps SATA support"

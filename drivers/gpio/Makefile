@@ -126,3 +126,7 @@ obj-$(CONFIG_GPIO_XTENSA)	+= gpio-xtensa.o
 obj-$(CONFIG_GPIO_ZEVIO)	+= gpio-zevio.o
 obj-$(CONFIG_GPIO_ZYNQ)		+= gpio-zynq.o
 obj-$(CONFIG_GPIO_ZX)		+= gpio-zx.o
+ifeq ($(CONFIG_SYNO_LSP_RTD1619),y)
+obj-$(CONFIG_GPIO_RTD16xx)	+= gpio-rtd16xx.o gpio-rtd16xx-suspend.o
+obj-$(CONFIG_GPIO_RTD13xx)	+= gpio-rtd16xx.o gpio-rtd16xx-suspend.o
+endif # CONFIG_SYNO_LSP_RTD1619

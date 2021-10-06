@@ -12,46 +12,32 @@
 #include <scsi/scsi_device.h>
 
 struct scsi_transport_template {
-	
+	 
 	struct transport_container host_attrs;
 	struct transport_container target_attrs;
 	struct transport_container device_attrs;
 
-	
 	int (*user_scan)(struct Scsi_Host *, uint, uint, u64);
 
-	
 	int	device_size;
 	int	device_private_offset;
 	int	target_size;
 	int	target_private_offset;
 	int	host_size;
-	
-
-	
+	 
 	unsigned int create_work_queue : 1;
 
-	
 	void (* eh_strategy_handler)(struct Scsi_Host *);
 
-#ifdef MY_ABC_HERE
-	
-	struct Scsi_Host* (* is_eunit_deepsleep)(struct Scsi_Host *);
-#endif 
-
-	
 	enum blk_eh_timer_return (*eh_timed_out)(struct scsi_cmnd *);
 
-	
 	int (* it_nexus_response)(struct Scsi_Host *, u64, int);
 
-	
 	int (* tsk_mgmt_response)(struct Scsi_Host *, u64, u64, int);
 };
 
 #define transport_class_to_shost(tc) \
 	dev_to_shost((tc)->parent)
-
 
 static inline void
 scsi_transport_reserve_target(struct scsi_transport_template * t, int space)

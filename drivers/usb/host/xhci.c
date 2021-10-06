@@ -11,6 +11,12 @@
 #include <linux/dmi.h>
 #include <linux/dma-mapping.h>
 
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_USB_PATCH_ON_RTK
+#include <linux/usb/quirks.h>
+#endif
+
+#endif  
 #include "xhci.h"
 #include "xhci-trace.h"
 

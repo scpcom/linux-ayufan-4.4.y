@@ -28,5 +28,8 @@ obj-$(CONFIG_SERIAL_8250_MT6577)	+= 8250_mtk.o
 obj-$(CONFIG_SERIAL_8250_UNIPHIER)	+= 8250_uniphier.o
 obj-$(CONFIG_SERIAL_8250_INGENIC)	+= 8250_ingenic.o
 obj-$(CONFIG_SERIAL_8250_MID)		+= 8250_mid.o
+ifeq ($(CONFIG_SYNO_LSP_RTD1619), y)
+obj-$(CONFIG_SERIAL_8250_RTK)			+= 8250_rtk.o
+endif # CONFIG_SYNO_LSP_RTD1619
 
 CFLAGS_8250_ingenic.o += -I$(srctree)/scripts/dtc/libfdt

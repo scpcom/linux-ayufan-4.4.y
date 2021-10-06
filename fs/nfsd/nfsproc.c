@@ -478,169 +478,13 @@ nfsd_proc_statfs(struct svc_rqst * rqstp, struct nfsd_fhandle   *argp,
 	return nfserr;
 }
 
-#ifdef MY_ABC_HERE
-static __be32
-nfsd_proc_writezero(struct svc_rqst *rqstp, struct nfsd_writeargs *argp,
-										struct nfsd_attrstat  *resp)
-{
-	__be32  nfserr, beCnt;
-	unsigned long cnt;
-	loff_t offset = argp->offset;
-
-	offset *= NFS2_MAXZEROEDSIZE;
-
-	memcpy(&beCnt, rqstp->rq_vec[0].iov_base, sizeof(beCnt));
-
-	cnt = ntohl(beCnt);
-
-	if (cnt > NFS2_MAXZEROEDSIZE) {
-		dprintk("nfsd: ERROR WRITEZERO    zeroed byte %lu too large\n", cnt);
-
-		cnt = NFS2_MAXZEROEDSIZE;
-	}
-
-	dprintk("nfsd: WRITEZERO    %s %lu zero bytes at %llu\n",
-			SVCFH_fmt(&argp->fh),
-			cnt, offset);
-
-	nfserr = nfsd_writezero(rqstp, fh_copy(&resp->fh, &argp->fh),
-							   offset, &cnt);
-
-	nfserr = nfsd_return_attrs(nfserr, resp);
-
-	dprintk("nfsd: WRITEZERO block count:%llu\n", resp->stat.blocks);
-
-	return nfserr;
-}
-
-static __be32
-nfsd_proc_xlookup(struct svc_rqst *rqstp, struct nfsd_diropargs *argp,
-										 struct nfsd_diropres  *resp)
-{
-	__be32  nfserr;
-
-	dprintk("nfsd: XLOOKUP   %s %.*s\n",
-			SVCFH_fmt(&argp->fh), argp->len, argp->name);
-
-	fh_init(&resp->fh, NFS_FHSIZE);
-	nfserr = nfsd_lookup(rqstp, &argp->fh, argp->name, argp->len,
-							 &resp->fh);
-
-	fh_put(&argp->fh);
-
-	nfserr = nfsd_return_dirop(nfserr, resp);
-	if (nfserr) {
-		goto end;
-	}
-
-	dprintk("nfsd: XLOOKUP  file block count %lld\n", resp->stat.blocks);
-
-	
-
-	resp->stat.ino = resp->stat.size >> 32;
-	resp->stat.size &= (NFS2_4G - 1);
-	resp->stat.ino |= (resp->stat.blocks >> 32) << 16;
-	resp->stat.blocks &= (NFS2_4G - 1);
-
-	
-	if (resp->fh.fh_dentry && resp->fh.fh_dentry->d_inode) {
-		resp->stat.nlink = resp->fh.fh_dentry->d_inode->i_sb->s_magic;
-	} else {
-		resp->stat.nlink = 0;
-	}
-
-end:
-	if (!(resp->fh.fh_dentry)) {
-		printk(KERN_WARNING "nfsd: XLOOKUP   resp->fh.fh_dentery is null\n");
-	} else if (!(resp->fh.fh_dentry->d_inode)) {
-		printk(KERN_WARNING "nfsd: XLOOKUP   resp->fh.fh_dentry->d_inode is null\n");
-	}
-	return nfserr;
-}
-
-static __be32
-nfsd_proc_synocopy(struct svc_rqst *rqstp, struct nfsd_writeargs *argp,
-										struct nfsd_attrstat  *resp)
-{
-	__be32  nfserr = 0, beCnt;
-	unsigned long cnt;
-	loff_t offset = argp->offset;
-	int fnOffset;
-	bool skipZero;
-	char zeroBuf[sizeof(__be32)] = {0};
-
-	offset *= NFS2_SYNOCOPYSIZE;
-
-	memcpy(&beCnt, rqstp->rq_vec[0].iov_base, sizeof(__be32));
-
-	cnt = ntohl(beCnt);
-
-	if (cnt > NFS2_SYNOCOPYSIZE) {
-		dprintk("nfsd: ERROR SYNOCOPY    copyed byte %lu too large\n", cnt);
-
-		cnt = NFS2_SYNOCOPYSIZE;
-	}
-
-	skipZero = (0 != memcmp(rqstp->rq_vec[0].iov_base + sizeof(__be32), zeroBuf, sizeof(__be32)));
-
-	fnOffset = sizeof(__be32) + sizeof(__be32);
-
-	dprintk("nfsd: SYNOCOPY    from %s %lu bytes at %llu\n",
-			(char *)(rqstp->rq_vec[0].iov_base + fnOffset),
-			cnt, offset);
-
-	nfserr = nfsd_synocopy((const char *)(rqstp->rq_vec[0].iov_base + fnOffset), rqstp, fh_copy(&resp->fh, &argp->fh),
-							   offset, &cnt, skipZero);
-
-	nfserr = nfsd_return_attrs(nfserr, resp);
-
-	return nfserr;
-}
-
-static __be32
-nfsd_proc_synosupport(struct svc_rqst *rqstp, void *argp, void *resp)
-{
-	return nfs_ok;
-}
-
-#ifdef MY_ABC_HERE
-static __be32
-nfsd_proc_synoclone(struct svc_rqst *rqstp, struct nfsd_writeargs *argp,
-										struct nfsd_attrstat  *resp)
-{
-	__be32  nfserr = 0;
-	int fnOffset;
-
-	fnOffset = sizeof(__be32) + sizeof(__be32);
-
-	dprintk("nfsd: SYNOCLONE    from %s \n",
-			(char *)(rqstp->rq_vec[0].iov_base + fnOffset));
-
-	nfserr = nfsd_synoclone((const char *)(rqstp->rq_vec[0].iov_base + fnOffset), rqstp, fh_copy(&resp->fh, &argp->fh));
-
-	nfserr = nfsd_return_attrs(nfserr, resp);
-
-	return nfserr;
-}
-#endif 
-#endif
-
-
 struct nfsd_void { int dummy; };
 
-#define ST 1		
-#define FH 8		
-#define	AT 18		
+#define ST 1		 
+#define FH 8		 
+#define	AT 18		 
 
-#ifndef MY_ABC_HERE
 static struct svc_procedure		nfsd_procedures2[18] = {
-#else
-#ifdef MY_ABC_HERE
-static struct svc_procedure             nfsd_procedures2[33] = {
-#else
-static struct svc_procedure             nfsd_procedures2[32] = {
-#endif 
-#endif
 	[NFSPROC_NULL] = {
 		.pc_func = (svc_procfunc) nfsd_proc_null,
 		.pc_decode = (kxdrproc_t) nfssvc_decode_void,
@@ -807,87 +651,15 @@ static struct svc_procedure             nfsd_procedures2[32] = {
 		.pc_cachetype = RC_NOCACHE,
 		.pc_xdrressize = ST+5,
 	},
-#ifdef MY_ABC_HERE
-		{}, 
-		{},
-		{},
-		{},
-		{},
-		{},
-		{},
-		{},
-		{},
-		{},
-		[NFSPROC_SYNO_WRITEZERO] = {
-		.pc_func = (svc_procfunc) nfsd_proc_writezero,
-		.pc_decode = (kxdrproc_t) nfssvc_decode_writeargs,
-		.pc_encode = (kxdrproc_t) nfssvc_encode_attrstat,
-		.pc_release = (kxdrproc_t) nfssvc_release_fhandle,
-		.pc_argsize = sizeof(struct nfsd_writeargs),
-		.pc_ressize = sizeof(struct nfsd_attrstat),
-		.pc_cachetype = RC_REPLBUFF,
-		.pc_xdrressize = ST+AT,
-		},
-		[NFSPROC_SYNO_XLOOKUP] = {
-		.pc_func = (svc_procfunc) nfsd_proc_xlookup,
-		.pc_decode = (kxdrproc_t) nfssvc_decode_diropargs,
-		.pc_encode = (kxdrproc_t) nfssvc_encode_diropres,
-		.pc_release = (kxdrproc_t) nfssvc_release_fhandle,
-		.pc_argsize = sizeof(struct nfsd_diropargs),
-		.pc_ressize = sizeof(struct nfsd_diropres),
-		.pc_cachetype = RC_NOCACHE,
-		.pc_xdrressize = ST+FH+AT,
-		},
-		[NFSPROC_SYNO_COPY] = {
-		.pc_func = (svc_procfunc) nfsd_proc_synocopy,
-		.pc_decode = (kxdrproc_t) nfssvc_decode_writeargs,
-		.pc_encode = (kxdrproc_t) nfssvc_encode_attrstat,
-		.pc_release = (kxdrproc_t) nfssvc_release_fhandle,
-		.pc_argsize = sizeof(struct nfsd_writeargs),
-		.pc_ressize = sizeof(struct nfsd_attrstat),
-		.pc_cachetype = RC_REPLBUFF,
-		.pc_xdrressize = ST+AT,
-		},
-		[NFSPROC_SYNO_SUPPORT] = {
-		.pc_func = (svc_procfunc) nfsd_proc_synosupport,
-		.pc_decode = (kxdrproc_t) nfssvc_decode_void,
-		.pc_encode = (kxdrproc_t) nfssvc_encode_void,
-		.pc_argsize = sizeof(struct nfsd_void),
-		.pc_ressize = sizeof(struct nfsd_void),
-		.pc_cachetype = RC_NOCACHE,
-		.pc_xdrressize = ST,
-		},
-#ifdef MY_ABC_HERE
-		[NFSPROC_SYNO_CLONE] = {
-		.pc_func = (svc_procfunc) nfsd_proc_synoclone,
-		.pc_decode = (kxdrproc_t) nfssvc_decode_writeargs,
-		.pc_encode = (kxdrproc_t) nfssvc_encode_attrstat,
-		.pc_release = (kxdrproc_t) nfssvc_release_fhandle,
-		.pc_argsize = sizeof(struct nfsd_writeargs),
-		.pc_ressize = sizeof(struct nfsd_attrstat),
-		.pc_cachetype = RC_REPLBUFF,
-		.pc_xdrressize = ST+AT,
-		},
-#endif 
-#endif
 };
 
 struct svc_version	nfsd_version2 = {
 		.vs_vers	= 2,
-#ifndef MY_ABC_HERE
 		.vs_nproc	= 18,
-#else
-#ifdef MY_ABC_HERE
-		.vs_nproc       = 33,
-#else
-		.vs_nproc       = 32,
-#endif 
-#endif
 		.vs_proc	= nfsd_procedures2,
 		.vs_dispatch	= nfsd_dispatch,
 		.vs_xdrsize	= NFS2_SVC_XDRSIZE,
 };
-
 
 __be32
 nfserrno (int errno)

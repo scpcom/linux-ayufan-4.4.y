@@ -380,11 +380,11 @@ depends on ARCH_STI && OF
 source "drivers/thermal/st/Kconfig"
 endmenu
 
-if SYNO_LSP_RTD129X
+if SYNO_LSP_RTD129X || SYNO_LSP_RTD1619
 menu "Realtek thermal drivers"
 source "drivers/thermal/realtek/Kconfig"
 endmenu
-endif # SYNO_LSP_RTD129X
+endif # SYNO_LSP_RTD129X || SYNO_LSP_RTD1619
 
 config QCOM_SPMI_TEMP_ALARM
 	tristate "Qualcomm SPMI PMIC Temperature Alarm"

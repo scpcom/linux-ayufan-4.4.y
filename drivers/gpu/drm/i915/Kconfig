@@ -126,6 +126,13 @@ config DRM_I915_GVT_KVMGT
 	  Choose this option if you want to enable KVMGT support for
 	  Intel GVT-g.
 
+config SYNO_DRM_I915_FIX
+        bool "Synology i915 driver fix-ups"
+        depends on DRM_I915
+        default y
+        help
+	  Synology i915 driver fix-ups
+
 menu "drm/i915 Debugging"
 depends on DRM_I915
 depends on EXPERT

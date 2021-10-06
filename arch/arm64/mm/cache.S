@@ -29,7 +29,7 @@
 
 #include "proc-macros.S"
 
-#ifdef MY_DEF_HERE
+#if defined(MY_DEF_HERE) || defined(CONFIG_RTK_PLATFORM) && defined(MY_DEF_HERE)
 /*
  *     __flush_dcache_all()
  *
@@ -102,7 +102,7 @@ ENTRY(flush_cache_all)
 	ic      ialluis				// I+BTB cache invalidate
 	ret     x12
 ENDPROC(flush_cache_all)
-#endif /* MY_DEF_HERE */
+#endif /* MY_DEF_HERE || CONFIG_RTK_PLATFORM && MY_DEF_HERE */
 /*
  *	flush_icache_range(start,end)
  *

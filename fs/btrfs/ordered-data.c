@@ -192,10 +192,11 @@ static int __btrfs_add_ordered_extent(struct inode *inode, u64 file_offset,
 	spin_lock(&root->ordered_extent_lock);
 	list_add_tail(&entry->root_extent_list,
 		      &root->ordered_extents);
-#ifdef MY_ABC_HERE
-	root->fs_info->ordered_extent_nr++;
-#endif 
+
 	root->nr_ordered_extents++;
+#ifdef MY_ABC_HERE
+	atomic_inc(&root->fs_info->syno_ordered_extent_nr);
+#endif  
 	if (root->nr_ordered_extents == 1) {
 		spin_lock(&root->fs_info->ordered_root_lock);
 		BUG_ON(!list_empty(&root->ordered_root));
@@ -540,10 +541,11 @@ void btrfs_remove_ordered_extent(struct inode *inode,
 
 	spin_lock(&root->ordered_extent_lock);
 	list_del_init(&entry->root_extent_list);
-#ifdef MY_ABC_HERE
-	root->fs_info->ordered_extent_nr--;
-#endif 
+
 	root->nr_ordered_extents--;
+#ifdef MY_ABC_HERE
+	atomic_dec(&root->fs_info->syno_ordered_extent_nr);
+#endif  
 
 	trace_btrfs_ordered_extent_remove(inode, entry);
 
@@ -555,6 +557,10 @@ void btrfs_remove_ordered_extent(struct inode *inode,
 	}
 	spin_unlock(&root->ordered_extent_lock);
 	wake_up(&entry->wait);
+#ifdef MY_ABC_HERE
+	if (waitqueue_active(&root->fs_info->syno_ordered_queue_wait))
+		wake_up(&root->fs_info->syno_ordered_queue_wait);
+#endif  
 }
 
 static void btrfs_run_ordered_extent_work(struct btrfs_work *work)
@@ -663,20 +669,30 @@ void btrfs_wait_ordered_roots(struct btrfs_fs_info *fs_info, int nr,
 	mutex_unlock(&fs_info->ordered_operations_mutex);
 }
 
-
 void btrfs_start_ordered_extent(struct inode *inode,
 				       struct btrfs_ordered_extent *entry,
 				       int wait)
 {
 #ifdef MY_ABC_HERE
 	struct btrfs_root *root = BTRFS_I(entry->inode)->root;
-#endif 
+#endif  
 	u64 start = entry->file_offset;
 	u64 end = start + entry->len - 1;
 
 	trace_btrfs_ordered_extent_start(inode, entry);
 
-	
+#ifdef MY_ABC_HERE
+	if (wait) {
+		entry->high_priority = 1;
+		if (test_bit(BTRFS_ORDERED_WORK_INITIALIZED, &entry->flags) && work_pending(&entry->work.normal_work) &&
+			!test_and_set_bit(BTRFS_ORDERED_HIGH_PRIORITY, &entry->flags)) {
+			if (cancel_work_sync(&entry->work.normal_work)) {
+				btrfs_queue_work(BTRFS_I(inode)->root->fs_info->syno_high_priority_endio_workers, &entry->work);
+			}
+		}
+	}
+#endif  
+
 	if (!test_bit(BTRFS_ORDERED_DIRECT, &entry->flags))
 #ifdef MY_ABC_HERE
 	{

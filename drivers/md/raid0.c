@@ -652,11 +652,14 @@ END:
 	return;
 }
 
-
 static void SynoRaid0ErrorInternal(struct mddev *mddev, struct md_rdev *rdev)
 {
 	char b[BDEVNAME_SIZE];
+#ifdef MY_ABC_HERE
+	printk_ratelimited(KERN_ALERT
+#else  
 	printk(KERN_ALERT
+#endif  
 		"md/raid:%s: Disk failure on %s, disabling device.\n",
 		mdname(mddev), bdevname(rdev->bdev, b));
 #ifdef MY_ABC_HERE

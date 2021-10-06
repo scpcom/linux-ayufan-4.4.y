@@ -4123,7 +4123,7 @@ static int __btrfs_alloc_chunk(struct btrfs_trans_handle *trans,
 
 	if (type & BTRFS_BLOCK_GROUP_DATA) {
 #ifdef MY_ABC_HERE
-		if (info->super_copy->total_bytes > 1024ULL * 1024 * 1024 * 1024) {
+		if (info->super_copy->total_bytes >= 1024ULL * 1024 * 1024 * 1024) {
 			max_stripe_size = 10ULL * 1024 * 1024 * 1024;
 			max_chunk_size = 2 * max_stripe_size;
 		} else {

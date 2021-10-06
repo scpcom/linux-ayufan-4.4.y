@@ -30,10 +30,15 @@
 #include <linux/of_address.h>
 #include <linux/of_device.h>
 
+#if defined(MY_DEF_HERE)
 #include <soc/realtek/memory.h>
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
+#include <soc/realtek/memory_1619.h>
+#endif /* MY_DEF_HERE */
 #include "rtd129x_suspend.h"
 #if defined(MY_DEF_HERE) && defined(MY_DEF_HERE)
-#include "rtd129x_syno_uart1.h"
+#include "../common/rtd_syno_uart1.h"
 #endif /* MY_DEF_HERE && MY_DEF_HERE */
 
 static int suspend_version = 2;

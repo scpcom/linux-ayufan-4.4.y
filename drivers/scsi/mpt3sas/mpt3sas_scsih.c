@@ -5530,7 +5530,7 @@ _scsih_remove_device(struct MPT3SAS_ADAPTER *ioc,
 		_scsih_turn_off_pfa_led(ioc, sas_device);
 		sas_device->any_led_on = 0;
 	}
-#endif /* ifdef MY_DEF_HERE */
+#endif /* ifdef CONFIG_SYNO_SAS_HOST_DISK_LED_CTRL */
 	dewtprintk(ioc, pr_info(MPT3SAS_FMT
 		"%s: enter: handle(0x%04x), sas_addr(0x%016llx)\n",
 		ioc->name, __func__,

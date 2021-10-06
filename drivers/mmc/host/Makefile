@@ -2,6 +2,9 @@
 # Makefile for MMC/SD host controller drivers
 #
 
+ifeq ($(CONFIG_SYNO_LSP_RTD1619), y)
+obj-$(CONFIG_MMC_RTK_EMMC)              += rtkemmc.o
+endif # CONFIG_SYNO_LSP_RTD1619
 obj-$(CONFIG_MMC_ARMMMCI)	+= mmci.o
 obj-$(CONFIG_MMC_QCOM_DML)	+= mmci_qcom_dml.o
 obj-$(CONFIG_MMC_PXA)		+= pxamci.o
@@ -75,6 +78,9 @@ obj-$(CONFIG_MMC_SDHCI_BCM2835)		+= sdhci-bcm2835.o
 obj-$(CONFIG_MMC_SDHCI_IPROC)		+= sdhci-iproc.o
 obj-$(CONFIG_MMC_SDHCI_MSM)		+= sdhci-msm.o
 obj-$(CONFIG_MMC_SDHCI_ST)		+= sdhci-st.o
+ifeq ($(CONFIG_SYNO_LSP_RTD1619), y)
+obj-$(CONFIG_MMC_SDHCI_RTK)		+= sdhci-rtk.o
+endif # CONFIG_SYNO_LSP_RTD1619
 
 ifeq ($(CONFIG_CB710_DEBUG),y)
 	CFLAGS-cb710-mmc	+= -DDEBUG
@@ -82,8 +88,13 @@ endif
 
 ifeq ($(CONFIG_SYNO_LSP_RTD129X), y)
 obj-$(CONFIG_MMC_RTK_SDMMC)		+= rtk-sdmmc.o
-obj-y					+= sdmmc_export.o
 endif # CONFIG_SYNO_LSP_RTD129X
+ifeq ($(CONFIG_SYNO_LSP_RTD1619), y)
+obj-$(CONFIG_MMC_RTK_SDMMC)		+= rtk-sdmmc_1619.o
+endif # CONFIG_SYNO_LSP_RTD1619
+ifneq (,$(filter y, $(CONFIG_SYNO_LSP_RTD129X) $(CONFIG_SYNO_LSP_RTD1619)))
+obj-y					+= sdmmc_export.o
+endif # CONFIG_SYNO_LSP_RTD129X || CONFIG_SYNO_LSP_RTD1619
 
 ifeq ($(CONFIG_SYNO_LSP_ARMADA_16_12), y)
 ifeq ($(CONFIG_SYNO_LSP_ARMADA_17_02_02), y)

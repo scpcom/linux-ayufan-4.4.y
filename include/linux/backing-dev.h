@@ -162,6 +162,9 @@ int bdi_set_max_ratio(struct backing_dev_info *bdi, unsigned int max_ratio);
 #define BDI_CAP_NO_ACCT_AND_WRITEBACK \
 	(BDI_CAP_NO_WRITEBACK | BDI_CAP_NO_ACCT_DIRTY | BDI_CAP_NO_ACCT_WB)
 
+#ifdef MY_DEF_HERE
+extern struct backing_dev_info syno_backing_dev_info;
+#endif /* MY_DEF_HERE */
 extern struct backing_dev_info noop_backing_dev_info;
 
 /**

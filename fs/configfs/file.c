@@ -43,7 +43,11 @@
  * because an attribute of 16k on ia64 won't work on x86.  So we limit to
  * 4k, our minimum common page size.
  */
+#ifdef MY_ABC_HERE
+#define SIMPLE_ATTR_SIZE PAGE_SIZE
+#else /* MY_ABC_HERE */
 #define SIMPLE_ATTR_SIZE 4096
+#endif /* MY_ABC_HERE */
 
 struct configfs_buffer {
 	size_t			count;

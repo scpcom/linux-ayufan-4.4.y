@@ -34,7 +34,17 @@
 #define CMA_SIZE_MBYTES 0
 #endif
 
+#ifdef CONFIG_SYNO_NTB_CMA_SIZE
+#define NTB_CMA_SIZE_MBYTES CONFIG_SYNO_NTB_CMA_SIZE
+#else
+#define NTB_CMA_SIZE_MBYTES 0
+#endif /* CONFIG_SYNO_NTB_CMA_SIZE */
+
 struct cma *dma_contiguous_default_area;
+#ifdef CONFIG_SYNO_NTB_SUPPORT_BRD
+struct cma *dma_contiguous_syno_ntb_area;
+EXPORT_SYMBOL(dma_contiguous_syno_ntb_area);
+#endif /* CONFIG_SYNO_NTB_SUPPORT_BRD */
 
 #if defined(CONFIG_RTD129X) && defined(CONFIG_CMA_AREAS)
 of_cma_info_t of_cma_info;
@@ -141,6 +151,11 @@ void __init dma_contiguous_reserve(phys_addr_t limit)
 	}
 #endif
 
+#ifdef CONFIG_SYNO_NTB_SUPPORT_BRD
+	dma_contiguous_reserve_ntb_area(NTB_CMA_SIZE_MBYTES * 1024 * 1024ULL, 0, 0,
+			&dma_contiguous_syno_ntb_area, 0);
+#endif /* CONFIG_SYNO_NTB_SUPPORT_BRD */
+
 	if (size_cmdline != -1) {
 		selected_size = size_cmdline;
 		selected_base = base_cmdline;
@@ -203,6 +218,25 @@ int __init dma_contiguous_reserve_area(phys_addr_t size, phys_addr_t base,
 
 	return 0;
 }
+
+#ifdef CONFIG_SYNO_NTB_SUPPORT_BRD
+int __init dma_contiguous_reserve_ntb_area(phys_addr_t size, phys_addr_t base,
+				       phys_addr_t limit, struct cma **res_cma,
+				       bool fixed)
+{
+	int ret;
+
+	ret = cma_declare_contiguous(base, size, limit, size, 0, fixed, res_cma);
+	if (ret)
+		return ret;
+
+	/* Architecture specific contiguous memory fixup. */
+	dma_contiguous_early_fixup(cma_get_base(*res_cma),
+				cma_get_size(*res_cma));
+
+	return 0;
+}
+#endif /* CONFIG_SYNO_NTB_SUPPORT_BRD */
 
 /**
  * dma_alloc_from_contiguous() - allocate pages from contiguous area

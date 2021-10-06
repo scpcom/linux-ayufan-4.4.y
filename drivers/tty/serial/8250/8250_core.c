@@ -905,6 +905,19 @@ static struct uart_8250_port *serial8250_find_match_or_unused(struct uart_port *
 					return &serial8250_ports[1];
 				}
 			}
+			if (!strncmp(gszSynoTtyS0, "mmio", 4)) {
+				str = &gszSynoTtyS0[4];
+				if ((virt_to_phys((volatile void *)port->mapbase) & 0xffffffff) == syno_parse_ttys_port(str)) {
+					return &serial8250_ports[0];
+				}
+			}
+
+			if (!strncmp(gszSynoTtyS1, "mmio", 4)) {
+				str = &gszSynoTtyS1[4];
+				if ((virt_to_phys((volatile void *)port->mapbase) & 0xffffffff) == syno_parse_ttys_port(str)) {
+					return &serial8250_ports[1];
+				}
+			}
 			break;
 		default:
 			break;	

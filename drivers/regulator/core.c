@@ -42,6 +42,11 @@
 #include "dummy.h"
 #include "internal.h"
 
+#if defined(MY_DEF_HERE)
+#define SYSFS_RW_uV_EN      //Add by Simon 2014/1/6
+#define SYSFS_RW_OPMODE
+
+#endif /* MY_DEF_HERE */
 #define rdev_crit(rdev, fmt, ...)					\
 	pr_crit("%s: " fmt, rdev_get_name(rdev), ##__VA_ARGS__)
 #define rdev_err(rdev, fmt, ...)					\
@@ -435,6 +440,58 @@ static ssize_t regulator_print_opmode(char *buf, int mode)
 	return sprintf(buf, "unknown\n");
 }
 
+#if defined(MY_DEF_HERE)
+static __maybe_unused ssize_t regulator_opmode_store(struct device *dev, struct device_attribute *attr,
+            const char *buf, size_t count)
+{
+    struct regulator_dev *rdev = dev_get_drvdata(dev);
+    int mode = REGULATOR_MODE_NORMAL;
+    int ret;
+    int regulator_curr_mode;
+
+    if (!strncmp(buf, "fast", sizeof("fast") - 1))
+        mode = REGULATOR_MODE_FAST;
+    else if (!strncmp(buf, "normal", sizeof("normal") - 1))
+        mode = REGULATOR_MODE_NORMAL;
+    else if (!strncmp(buf, "idle", sizeof("idle") - 1))
+        mode = REGULATOR_MODE_IDLE;
+    else if (!strncmp(buf, "standby", sizeof("standby") - 1))
+        mode = REGULATOR_MODE_STANDBY;
+    else
+        return -EINVAL;
+
+    mutex_lock(&rdev->mutex);
+
+    /* sanity check */
+    if (!rdev->desc->ops->set_mode) {
+        ret = -EINVAL;
+        goto out;
+    }
+
+    /* return if the same mode is requested */
+    if (rdev->desc->ops->get_mode) {
+        regulator_curr_mode = rdev->desc->ops->get_mode(rdev);
+        if (regulator_curr_mode == mode) {
+            ret = 0;
+            goto out;
+        }
+    }
+
+    /* constraints check */
+    ret = regulator_mode_constrain(rdev, &mode);
+    if (ret < 0)
+        goto out;
+
+    ret = rdev->desc->ops->set_mode(rdev, mode);
+out:
+    mutex_unlock(&rdev->mutex);
+
+    if (ret)
+        return ret;
+    return count;
+}
+
+#endif /* MY_DEF_HERE */
 static ssize_t regulator_opmode_show(struct device *dev,
 				    struct device_attribute *attr, char *buf)
 {
@@ -442,7 +499,11 @@ static ssize_t regulator_opmode_show(struct device *dev,
 
 	return regulator_print_opmode(buf, _regulator_get_mode(rdev));
 }
+#if defined(SYSFS_RW_OPMODE) && defined(MY_DEF_HERE)
+static DEVICE_ATTR(opmode, S_IRUSR | S_IWUSR, regulator_opmode_show, regulator_opmode_store);
+#else /* SYSFS_RW_OPMODE && MY_DEF_HERE */
 static DEVICE_ATTR(opmode, 0444, regulator_opmode_show, NULL);
+#endif /* SYSFS_RW_OPMODE && MY_DEF_HERE */
 
 static ssize_t regulator_print_state(char *buf, int state)
 {

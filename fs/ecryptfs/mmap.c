@@ -488,9 +488,6 @@ static int ecryptfs_aggregate_write_end(struct file *file, struct address_space 
 	struct ecryptfs_crypt_stat *crypt_stat =
 		&ecryptfs_inode_to_private(ecryptfs_inode)->crypt_stat;
 	int rc = 0, i;
-#ifdef MY_ABC_HERE
-	struct file *lower_file = ecryptfs_inode_to_private(ecryptfs_inode)->lower_file;
-#endif 
 
 	ecryptfs_printk(KERN_DEBUG, "Calling fill_zeros_to_end_of_page"
 			"(page w/ index = [0x%.16lx], to = [%d])\n", index, to);
@@ -525,30 +522,17 @@ static int ecryptfs_aggregate_write_end(struct file *file, struct address_space 
 		fill_zeros_to_end_of_page(pages[page_num-1], to);
 	}
 
-#ifdef MY_ABC_HERE
-	if (lower_file->f_op->ecryptfs_zero_copy) {
-			rc = ecryptfs_encrypt_page_zero_copy(lower_file, pages, page_num);
-			if (!rc) {
-				goto encrypt_page_done;
-			}
-	}
-#endif 
-
 	for (i = 0;i < page_num;i++) {
 		rc = ecryptfs_encrypt_page(pages[i]);
 		if (rc) {
 #ifdef MY_ABC_HERE
 			if (-EDQUOT != rc && -ENOSPC != rc)
-#endif 
+#endif  
 			ecryptfs_printk(KERN_WARNING, "Error encrypting page (upper "
 					"index [0x%.16lx])\n", index);
 			goto out;
 		}
 	}
-
-#ifdef MY_ABC_HERE
-encrypt_page_done:
-#endif 
 
 	if (pos + copied > i_size_read(ecryptfs_inode)) {
 		i_size_write(ecryptfs_inode, pos + copied);

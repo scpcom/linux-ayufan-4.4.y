@@ -212,9 +212,52 @@ static struct console early_serial_console = {
 #if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	.pcimapaddress = 0,
 	.pcimapsize = 0,
-#endif 
+#endif  
 };
 
+#ifdef MY_DEF_HERE
+static __init void early_mmio_serial_init(char *s)
+{
+        unsigned divisor;
+        unsigned long addr;
+        unsigned long baud = 115200;          
+        unsigned long base_clock = 1843200;   
+        char *e;
+
+        if (*s == ',')
+                ++s;
+
+        if (!strncmp(s, "0x", 2)) {
+                addr = simple_strtoul(s, &e, 16);
+        }
+
+        s = e;
+
+        if (*s == ',')
+                ++s;
+
+        baud = simple_strtoul(s, &e, 10);
+
+        s = e;
+
+        if (*s == ',')
+                ++s;
+
+        base_clock = simple_strtoul(s, &e, 10);
+
+        early_serial_base = (unsigned long)early_ioremap(addr, 0x10);
+
+        serial_in = mem32_serial_in;
+        serial_out = mem32_serial_out;
+
+        early_serial_console.pcimapaddress = (void __iomem *)early_serial_base;
+        early_serial_console.pcimapsize = 0x10;
+
+        divisor = (base_clock / 16) / baud;
+
+        early_serial_hw_init(divisor);
+}
+#endif  
 
 static __init void early_pci_serial_init(char *s)
 {
@@ -392,9 +435,16 @@ static int __init setup_early_printk(char *buf)
 		if (!strncmp(buf, "pciserial", 9)) {
 			early_pci_serial_init(buf + 9);
 			early_console_register(&early_serial_console, keep);
-			buf += 9; 
+			buf += 9;  
 		}
 #endif
+#ifdef MY_DEF_HERE
+		if (!strncmp(buf, "mmio", 4)) {
+			early_mmio_serial_init(buf + 4);
+			early_console_register(&early_serial_console, keep);
+			buf += 4;  
+		}
+#endif  
 		if (!strncmp(buf, "vga", 3) &&
 		    boot_params.screen_info.orig_video_isVGA == 1) {
 			max_xpos = boot_params.screen_info.orig_video_cols;

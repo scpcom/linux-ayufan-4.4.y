@@ -101,11 +101,25 @@ obj-$(CONFIG_REGULATOR_WM831X) += wm831x-ldo.o
 obj-$(CONFIG_REGULATOR_WM8350) += wm8350-regulator.o
 obj-$(CONFIG_REGULATOR_WM8400) += wm8400-regulator.o
 obj-$(CONFIG_REGULATOR_WM8994) += wm8994-regulator.o
+ifeq ($(CONFIG_SYNO_LSP_RTD129X), y)
 obj-$(CONFIG_REGULATOR_G2227)	+= gmt-g2227.o
+endif # CONFIG_SYNO_LSP_RTD129X
 ifeq ($(CONFIG_SYNO_LSP_ARMADA_17_04_02), y)
 obj-$(CONFIG_REGULATOR_ARMADA3700) += armada-37xx-regulator.o
 endif # CONFIG_SYNO_LSP_ARMADA_17_04_02
-
+ifeq ($(CONFIG_SYNO_LSP_RTD1619), y)
+obj-$(CONFIG_REGULATOR_G22XX_CORE) += g22xx-regulator-core.o
+obj-$(CONFIG_REGULATOR_G2227) += g2227-regulator.o
+obj-$(CONFIG_REGULATOR_G2237) += g2237-regulator.o
+obj-$(CONFIG_REGULATOR_RTKGPIO) += rtkgpio-regulator.o
+obj-$(CONFIG_REGULATOR_REALTEK_PWM) += rtk-pwm-regulator.o
+obj-$(CONFIG_REGULATOR_SY8827E) += sy8827e-regulator.o
+obj-$(CONFIG_REGULATOR_APW8889) += apw8889-regulator.o
+endif # CONFIG_SYNO_LSP_RTD1619
 
 
 ccflags-$(CONFIG_REGULATOR_DEBUG) += -DDEBUG
+
+ifeq ($(CONFIG_SYNO_LSP_RTD1619), y)
+obj-$(CONFIG_REGULATOR_I2C_SELECTOR) += i2c-selector.o
+endif # CONFIG_SYNO_LSP_RTD1619

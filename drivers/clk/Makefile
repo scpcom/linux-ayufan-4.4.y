@@ -87,3 +87,6 @@ obj-$(CONFIG_ARCH_ZX)			+= zte/
 obj-$(CONFIG_ARCH_ZYNQ)			+= zynq/
 obj-$(CONFIG_COMMON_CLK_RTK)		+= realtek/
 obj-$(CONFIG_H8300)		+= h8300/
+ifeq ($(CONFIG_SYNO_LSP_RTD1619), y)
+obj-$(CONFIG_COMMON_CLK_REALTEK)	+= realtek/
+endif # CONFIG_SYNO_LSP_RTD1619

@@ -37,7 +37,12 @@
 #include "ion_priv.h"
 
 #include "../uapi/rtk_phoenix_ion.h"
+#if defined(MY_DEF_HERE)
 #include "soc/realtek/memory.h"
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
+#include "soc/realtek/memory_1619.h"
+#endif /* MY_DEF_HERE */
 
 enum ion_rtk_carveout_heap_gen_pool_algo_mode {
     ALGO_FIRST_FIT  = 0,

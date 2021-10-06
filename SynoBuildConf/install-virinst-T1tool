@@ -1,9 +1,8 @@
 #!/bin/bash
 
-. ${ScriptsDir}/include/exports
+cpufreq_modules="freq_table cpufreq_stats cpufreq thermal_sys processor mperf acpi-cpufreq cpufreq_ondemand cpufreq_performance cpufreq_powersave cpufreq_conservative"
 
-[ "linux-4.4.x-glk" != "${SYNO_KERNEL_VERSION}" ] && return
-
-cryptodev_module="`find . -name cryptodev.ko`"
-
-[ -e "${cryptodev_module}" ] && install -Dm 755 "${cryptodev_module}" ${TmpInstDir}/lib/modules/cryptodev.ko
+for module_name in $cpufreq_modules; do
+	module="`find . -name ${module_name}.ko`"
+	[ -e "${module}" ] && install -Dm644 "${module}" "${TmpInstDir}/lib/modules/${module_name}.ko"
+done

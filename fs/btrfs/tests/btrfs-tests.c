@@ -217,9 +217,6 @@ void btrfs_init_dummy_trans(struct btrfs_trans_handle *trans)
 {
 	memset(trans, 0, sizeof(*trans));
 	trans->transid = 1;
-#ifdef MY_ABC_HERE
-#else
 	INIT_LIST_HEAD(&trans->qgroup_ref_list);
-#endif /* MY_ABC_HERE */
 	trans->type = __TRANS_DUMMY;
 }

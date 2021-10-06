@@ -170,6 +170,9 @@ static struct scsi_device *scsi_alloc_sdev(struct scsi_target *starget,
 	struct Scsi_Host *shost = dev_to_shost(starget->dev.parent);
 	extern void scsi_evt_thread(struct work_struct *work);
 	extern void scsi_requeue_run_queue(struct work_struct *work);
+#ifdef MY_DEF_HERE
+	extern void SynoSubmitSpinupReq(struct work_struct *work);
+#endif  
 
 	sdev = kzalloc(sizeof(*sdev) + shost->transportt->device_size,
 		       GFP_ATOMIC);
@@ -195,20 +198,23 @@ static struct scsi_device *scsi_alloc_sdev(struct scsi_target *starget,
 	spin_lock_init(&sdev->list_lock);
 	INIT_WORK(&sdev->event_work, scsi_evt_thread);
 	INIT_WORK(&sdev->requeue_work, scsi_requeue_run_queue);
+#ifdef MY_DEF_HERE
+	INIT_WORK(&sdev->spinup_work, SynoSubmitSpinupReq);
+	INIT_LIST_HEAD(&sdev->spinup_list);
+	sdev->spinup_in_process = 0;
+	sdev->spinup_timer = 0;
+	sdev->spinup_queue = NULL;
+#endif  
 
 	sdev->sdev_gendev.parent = get_device(&starget->dev);
 	sdev->sdev_target = starget;
 
-	
 	sdev->hostdata = hostdata;
 
-	
 	sdev->max_device_blocked = SCSI_DEFAULT_DEVICE_BLOCKED;
 
-	
 	sdev->type = -1;
 
-	
 	sdev->borken = 1;
 
 	if (shost_use_blk_mq(shost))

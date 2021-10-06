@@ -51,7 +51,7 @@ config SYNO_X86_PINCTRL_GPIO
 config SYNO_RTD_PINCTRL_GPIO
        bool "RTD GPIO Control With Pinctrl Subsystem"
        default y
-       depends on SYNO_RTD129X
+       depends on SYNO_RTD129X || SYNO_RTD1619
        select PINCTRL
 
 config SYNO_X86_PINCTRL_CALC_GPIOBASE
@@ -63,6 +63,11 @@ config SYNO_X86_CORETEMP
 	bool "X86 Core Temperature Detection"
 	default y
 	depends on X86
+
+config SYNO_K10TEMP
+	bool "AMD CPU Temperature Detection"
+	default n
+	depends on SENSORS_K10TEMP
 
 config SYNO_BOOT_SATA_DOM
 	bool "Synology boot device SATADOM"
@@ -108,14 +113,6 @@ config SYNO_ISCSI_REVERT_SUPPORT_PFMALLOC
 	bool "Revert iscsi initiator support PF_MALLOC"
 	default y
 	depends on ISCSI_TCP
-
-config SYNO_ISCSI_SUPPORT_FALLOCATE_FOR_BLOCK_DEVICE
-	bool "iSCSI support fallocate for block device"
-	default y
-
-config SYNO_ISCSI_WRITE_DIRECT_WITH_REQ_FUA_FOR_BLOCK_DEVICE
-	bool "WRITE_DIRECT with REQ_FUA for block devices"
-	default y
 
 config SYNO_SATA_DEVICE_PREFIX
 	string "The prefix of sata device"
@@ -198,10 +195,6 @@ config SYNO_PSTATE_CALC
 	bool "Compare P-state ratio only"
 	default y
 
-config SYNO_DATA_CORRECTION
-	bool "Framework of data correction"
-	default n
-
 config SYNO_DMA_COHERENT_POOL_1M
 	bool "increase DMA coherent pool from 256K to 1M"
 	default n
@@ -217,6 +210,11 @@ config SYNO_LOAD_AVERAGE
 config SYNO_CHECKSUM_DEBUG
 	bool "Checksum debugger"
 	default y
+
+config SYNO_AMD_MCE_PORTING
+	bool "AMD MCE Porting"
+	default n
+	depends on X86_MCE_AMD
 
 endmenu #System Features
 
@@ -317,5 +315,18 @@ config SYNO_MQ_TIMEOUT_KVMX64
 	int "The default seconds before a multi-queue block request timeout"
 	default 1024
 	depends on (SYNO_KVMX64 || SYNO_NEXTKVMX64)
+
+config SYNO_WARN_ALLOC_FAILED_RATELIMIT
+	bool "Set harder rate limit for warn_alloc_failed()"
+	default y
+
+config SYNO_PRINT_BACKTRACE_ON_LOCKUP
+	bool "Print backtrace on soft and hard lockup"
+	default y
+
+config SYNO_HARDLOCKUP_PANIC_ENHANCE
+	bool "enhance hardlockup_panic mechanism"
+	default y
+	depends on (SYNO_PURLEY || SYNO_GEMINILAKE) && HARDLOCKUP_DETECTOR
 
 endmenu #Kernel Core Enhancements

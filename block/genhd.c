@@ -1041,6 +1041,97 @@ static ssize_t disk_discard_alignment_show(struct device *dev,
 	return sprintf(buf, "%d\n", queue_discard_alignment(disk->queue));
 }
 
+#ifdef MY_ABC_HERE
+static ssize_t block_resp_stat_show(struct device *dev,
+					   struct device_attribute *attr,
+					   char *buf)
+{
+	struct gendisk *disk = dev_to_disk(dev);
+	ssize_t len = 0;
+	char szTmp[512] = {'\0'};
+
+	if (!disk) {
+		goto END;
+	}
+	// Disk uuid
+	snprintf(szTmp, sizeof(szTmp), "%pU\n",
+			disk->block_latency_uuid);
+	len += strlen(szTmp);
+	strncat(buf, szTmp, PAGE_SIZE - len - 1);
+
+	// Latency info
+	snprintf(szTmp, sizeof(szTmp), "%llu %llu %llu %llu\n",
+			disk->u64CplCmdCnt[0],
+			disk->u64RespTimeSum[0],
+			disk->u64CplCmdCnt[1],
+			disk->u64RespTimeSum[1]);
+	len += strlen(szTmp);
+	strncat(buf, szTmp, PAGE_SIZE - len - 1);
+	// Extend info
+	snprintf(szTmp, sizeof(szTmp), "%lu %lu %llu %llu\n",
+			disk->seq_ios[SYNO_DISK_SEQ_STAT_NEAR_SEQ],
+			disk->seq_ios[SYNO_DISK_SEQ_STAT_SEQ],
+			disk->u64WaitTime[0],
+			disk->u64WaitTime[1]
+			);
+	len += strlen(szTmp);
+	strncat(buf, szTmp, PAGE_SIZE - len - 1);
+
+END:
+	return len;
+}
+
+static void block_latency_hist_get(u64 u64TimeBuckets[SYNO_BLOCK_RESPONSE_BUCKETS_END][32],
+		char *szBuf, int cbBuf)
+{
+	ssize_t len = 0;
+	unsigned int j = 0;
+	unsigned int i = 0;
+	char szTmp[32] = {'\0'};
+	for (j = 0; j < SYNO_BLOCK_RESPONSE_BUCKETS_END; j++) {
+		for (i = 0; i < 32; i++) {
+			snprintf(szTmp, sizeof(szTmp), "%llu ", u64TimeBuckets[j][i]);
+			len += strlen(szTmp);
+			strncat(szBuf, szTmp, cbBuf - len - 1);
+		}
+		szBuf[len - 1] = '\n';
+	}
+}
+
+static ssize_t block_resp_read_hist_show(struct device *dev,
+					   struct device_attribute *attr,
+					   char *buf)
+{
+	struct gendisk *disk = dev_to_disk(dev);
+	char szHist[2048] = {'\0'};
+
+	if (!disk) {
+		goto END;
+	}
+        block_latency_hist_get(disk->u64RespTimeBuckets[0], szHist, sizeof(szHist));
+
+END:
+	return sprintf(buf, "%s", szHist);
+}
+
+static ssize_t block_resp_write_hist_show(struct device *dev,
+					   struct device_attribute *attr,
+					   char *buf)
+{
+	struct gendisk *disk = dev_to_disk(dev);
+	char szHist[2048] = {'\0'};
+
+	if (!disk) {
+		goto END;
+	}
+
+        block_latency_hist_get(disk->u64RespTimeBuckets[1], szHist, sizeof(szHist));
+
+END:
+	return sprintf(buf, "%s", szHist);
+}
+#endif /* MY_ABC_HERE */
+
 static DEVICE_ATTR(range, S_IRUGO, disk_range_show, NULL);
 static DEVICE_ATTR(ext_range, S_IRUGO, disk_ext_range_show, NULL);
 static DEVICE_ATTR(removable, S_IRUGO, disk_removable_show, NULL);
@@ -1061,6 +1152,11 @@ static struct device_attribute dev_attr_fail_timeout =
 	__ATTR(io-timeout-fail,  S_IRUGO|S_IWUSR, part_timeout_show,
 		part_timeout_store);
 #endif
+#ifdef MY_ABC_HERE
+static DEVICE_ATTR(block_resp_stat, S_IRUGO, block_resp_stat_show, NULL);
+static DEVICE_ATTR(block_resp_read_hist, S_IRUGO, block_resp_read_hist_show, NULL);
+static DEVICE_ATTR(block_resp_write_hist, S_IRUGO, block_resp_write_hist_show, NULL);
+#endif /* MY_ABC_HERE */
 
 static struct attribute *disk_attrs[] = {
 	&dev_attr_range.attr,
@@ -1079,6 +1175,11 @@ static struct attribute *disk_attrs[] = {
 #ifdef CONFIG_FAIL_IO_TIMEOUT
 	&dev_attr_fail_timeout.attr,
 #endif
+#ifdef MY_ABC_HERE
+	&dev_attr_block_resp_stat.attr,
+	&dev_attr_block_resp_read_hist.attr,
+	&dev_attr_block_resp_write_hist.attr,
+#endif /* MY_ABC_HERE */
 	NULL
 };
 
@@ -1359,6 +1460,15 @@ struct gendisk *alloc_disk_node(int minors, int node_id)
 		disk_to_dev(disk)->class = &block_class;
 		disk_to_dev(disk)->type = &disk_type;
 		device_initialize(disk_to_dev(disk));
+#ifdef MY_ABC_HERE
+		disk->end_sector = 0;
+		generate_random_uuid(disk->block_latency_uuid);
+		memset(&(disk->u64CplCmdCnt), 0, sizeof(disk->u64CplCmdCnt[0]) * 2);
+		memset(&(disk->u64RespTimeSum), 0, sizeof(disk->u64RespTimeSum[0]) * 2);
+		memset(&(disk->seq_ios), 0, sizeof(disk->seq_ios[0]) * SYNO_DISK_SEQ_STAT_END);
+		memset(&(disk->u64WaitTime), 0, sizeof(disk->u64WaitTime[0]) * 2);
+		memset(&(disk->u64RespTimeBuckets), 0, sizeof(disk->u64RespTimeBuckets[0][0][0]) * 2 * SYNO_BLOCK_RESPONSE_BUCKETS_END * 32);
+#endif /* MY_ABC_HERE */
 	}
 	return disk;
 }

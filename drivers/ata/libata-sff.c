@@ -1402,40 +1402,21 @@ int ata_sff_softreset(struct ata_link *link, unsigned int *classes,
 
 	DPRINTK("ENTER\n");
 
-	
 	if (ata_devchk(ap, 0))
 		devmask |= (1 << 0);
 	if (slave_possible && ata_devchk(ap, 1))
 		devmask |= (1 << 1);
 
-	
 	ap->ops->sff_dev_select(ap, 0);
 
-	
 	DPRINTK("about to softreset, devmask=%x\n", devmask);
 	rc = ata_bus_softreset(ap, devmask, deadline);
-	
-#ifdef MY_ABC_HERE
-	if (0 < ap->iFakeError) {
-		ata_link_printk(link, KERN_ERR, "generate fake SRST, Fake count %d\n", ap->iFakeError);
-		if (SYNO_ERROR_MAX > ap->iFakeError) {
-			--(ap->iFakeError);
-		}
-		rc = -EBUSY;
-	}
-#endif 
+	 
 	if (rc && (rc != -ENODEV || sata_scr_valid(link))) {
 		ata_link_err(link, "SRST failed (errno=%d)\n", rc);
-#ifdef MY_ABC_HERE
-		if (-EBUSY == rc) {
-			ata_link_printk(link, KERN_ERR, "SRST fail, set srst fail flag\n");
-			link->uiSflags |= ATA_SYNO_FLAG_SRST_FAIL;
-		}
-#endif 
 		return rc;
 	}
 
-	
 	classes[0] = ata_sff_dev_classify(&link->device[0],
 					  devmask & (1 << 0), &err);
 	if (slave_possible && err != 0x81)

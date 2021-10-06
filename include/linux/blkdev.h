@@ -152,12 +152,14 @@ struct request {
 	unsigned int timeout;
 	int retries;
 
-	
 	rq_end_io_fn *end_io;
 	void *end_io_data;
 
-	
 	struct request *next_rq;
+#ifdef MY_ABC_HERE
+	unsigned int syno_seq;
+	u64 u64IssueTime;
+#endif  
 };
 
 static inline unsigned short req_get_ioprio(struct request *req)

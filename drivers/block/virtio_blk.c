@@ -534,22 +534,11 @@ static struct blk_mq_ops virtio_mq_ops = {
 static unsigned int virtblk_queue_depth;
 module_param_named(queue_depth, virtblk_queue_depth, uint, 0444);
 
-#ifdef CONFIG_SYNO_CLOUD_DSM_BOOT
-static bool isSynobootBlk(int vblk_index)
-{
-	return (0 == vblk_index);
-}
-#endif 
-
 static int virtblk_probe(struct virtio_device *vdev)
 {
 	struct virtio_blk *vblk;
 	struct request_queue *q;
 	int err, index;
-#ifdef CONFIG_SYNO_CLOUD_DSM_BOOT
-	static int syno_blk_index = 0;
-#endif 
-
 	u64 cap;
 	u32 v, blk_size, sg_elems, opt_io_size;
 	u16 min_io_size;
@@ -561,30 +550,19 @@ static int virtblk_probe(struct virtio_device *vdev)
 		return -EINVAL;
 	}
 
-#ifdef CONFIG_SYNO_CLOUD_DSM_BOOT
-	err = minor_to_index(1 << MINORBITS) - 1;
-	if (!isSynobootBlk(syno_blk_index)) {
-		err = ida_simple_get(&vd_index_ida, 0, minor_to_index(1 << MINORBITS) - 1,
-				 GFP_KERNEL);
-	}
-#else
 	err = ida_simple_get(&vd_index_ida, 0, minor_to_index(1 << MINORBITS),
 			     GFP_KERNEL);
-#endif 
 	if (err < 0)
 		goto out;
 	index = err;
 
-	
 	err = virtio_cread_feature(vdev, VIRTIO_BLK_F_SEG_MAX,
 				   struct virtio_blk_config, seg_max,
 				   &sg_elems);
 
-	
 	if (err || !sg_elems)
 		sg_elems = 1;
 
-	
 	sg_elems += 2;
 	vdev->priv = vblk = kmalloc(sizeof(*vblk), GFP_KERNEL);
 	if (!vblk) {
@@ -637,16 +615,7 @@ static int virtblk_probe(struct virtio_device *vdev)
 
 	q->queuedata = vblk;
 
-#ifdef CONFIG_SYNO_CLOUD_DSM_BOOT
-	if (isSynobootBlk(syno_blk_index)) {
-		sprintf(vblk->disk->disk_name, CONFIG_SYNO_USB_FLASH_DEVICE_NAME);
-	} else {
-		virtblk_name_format("sd", index, vblk->disk->disk_name, DISK_NAME_LEN);
-	}
-	syno_blk_index++;
-#else
 	virtblk_name_format("vd", index, vblk->disk->disk_name, DISK_NAME_LEN);
-#endif 
 
 	vblk->disk->major = major;
 	vblk->disk->first_minor = index_to_minor(index);

@@ -36,12 +36,16 @@ module_param(directory, int, 0);
 
 static inline int redboot_checksum(struct fis_image_desc *img)
 {
-	
+	 
 	return 1;
 }
 
 static int parse_redboot_partitions(struct mtd_info *master,
+#if defined(CONFIG_SYNO_RTD1619)
+				    const struct mtd_partition **pparts,
+#else  
 				    struct mtd_partition **pparts,
+#endif  
 				    struct mtd_part_parser_data *data)
 {
 	int nrparts = 0;

@@ -7,16 +7,18 @@
 #include <linux/fsnotify_backend.h>
 #include <linux/init.h>
 #include <linux/jiffies.h>
-#include <linux/kernel.h> 
+#include <linux/kernel.h>  
 #include <linux/mount.h>
 #include <linux/sched.h>
 #include <linux/types.h>
 #include <linux/wait.h>
 #include <linux/nsproxy.h>
 #include <linux/mnt_namespace.h>
+#include <linux/ratelimit.h>
 
 #include "synotify.h"
 
+static DEFINE_RATELIMIT_STATE(_synotify_rs, (3600 * HZ), 1);
 
 static int syno_fetch_mountpoint_fullpath(struct vfsmount *mnt, size_t buf_len, char *mnt_full_path)
 {
@@ -31,6 +33,8 @@ static int syno_fetch_mountpoint_fullpath(struct vfsmount *mnt, size_t buf_len, 
 
 	mnt_dentry_path_buf = kmalloc(PATH_MAX, GFP_ATOMIC);
 	if(!mnt_dentry_path_buf) {
+		if (__ratelimit(&_synotify_rs))
+			printk(KERN_WARNING "synotify get ENOMEM in file: %s, line: %d\n", __FILE__, __LINE__);
 		ret = -ENOMEM;
 		goto ERR;
 	}
@@ -108,6 +112,8 @@ static int SYNOFetchFullName(struct synotify_event_info *event, gfp_t gfp)
 		root_path.dentry = mnt->mnt_root;
 		dentry_path_buf = kmalloc(PATH_MAX, gfp);
 		if (unlikely(!dentry_path_buf)) {
+			if (__ratelimit(&_synotify_rs))
+				printk(KERN_WARNING "synotify get ENOMEM in file: %s, line: %d\n", __FILE__, __LINE__);
 			ret = -ENOMEM;
 			goto ERR;
 		}
@@ -120,6 +126,8 @@ static int SYNOFetchFullName(struct synotify_event_info *event, gfp_t gfp)
 	full_path = kmalloc(PATH_MAX, gfp);
 	mnt_full_path = kzalloc(PATH_MAX, gfp);
 	if(!full_path || !mnt_full_path){
+		if (__ratelimit(&_synotify_rs))
+			printk(KERN_WARNING "synotify get ENOMEM in file: %s, line: %d\n", __FILE__, __LINE__);
 		ret = -ENOMEM;
 		goto ERR;
 	}
@@ -134,6 +142,8 @@ static int SYNOFetchFullName(struct synotify_event_info *event, gfp_t gfp)
 	}
 	event->full_name = kstrdup(full_path, gfp);
 	if (unlikely(!event->full_name)) {
+		if (__ratelimit(&_synotify_rs))
+			printk(KERN_WARNING "synotify get ENOMEM in file: %s, line: %d\n", __FILE__, __LINE__);
 		ret = -ENOMEM;
 		goto ERR;
 	}
@@ -205,8 +215,11 @@ struct synotify_event_info *synotify_alloc_event(struct inode *inode, u32 mask,
 	struct synotify_event_info *event;
 
 	event = kmalloc(sizeof(struct synotify_event_info), GFP_KERNEL);
-	if (!event)
+	if (!event) {
+		if (__ratelimit(&_synotify_rs))
+			printk(KERN_WARNING "synotify get ENOMEM in file: %s, line: %d\n", __FILE__, __LINE__);
 		return NULL;
+	}
 
 	fsnotify_init_event(&event->fse, inode, mask);
 	if (path) {

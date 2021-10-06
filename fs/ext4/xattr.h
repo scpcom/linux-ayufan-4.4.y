@@ -17,39 +17,35 @@
 #define EXT4_XATTR_INDEX_SYSTEM			7
 #define EXT4_XATTR_INDEX_RICHACL		8
 #ifdef MY_ABC_HERE
-#define EXT4_XATTR_INDEX_SYNO			EXT4_XATTR_INDEX_RICHACL 
-#endif 
+#define EXT4_XATTR_INDEX_SYNO			EXT4_XATTR_INDEX_RICHACL  
+#endif  
 #define EXT4_XATTR_INDEX_ENCRYPTION		9
 #ifdef MY_ABC_HERE
-#define EXT4_XATTR_INDEX_SYNO_ACL_ACCESS	EXT4_XATTR_INDEX_SYSTEM 
-#define EXT4_XATTR_INDEX_SYNO_ACL_ACCESS_NOPERM		EXT4_XATTR_INDEX_SYNO_ACL_ACCESS
-#endif 
-#ifdef MY_ABC_HERE
 #define EXT3_XATTR_INDEX_SYNO_BAD	7
-#endif 
+#endif  
 
 struct ext4_xattr_header {
-	__le32	h_magic;	
-	__le32	h_refcount;	
-	__le32	h_blocks;	
-	__le32	h_hash;		
-	__le32	h_checksum;	
-				
-	__u32	h_reserved[3];	
+	__le32	h_magic;	 
+	__le32	h_refcount;	 
+	__le32	h_blocks;	 
+	__le32	h_hash;		 
+	__le32	h_checksum;	 
+				 
+	__u32	h_reserved[3];	 
 };
 
 struct ext4_xattr_ibody_header {
-	__le32	h_magic;	
+	__le32	h_magic;	 
 };
 
 struct ext4_xattr_entry {
-	__u8	e_name_len;	
-	__u8	e_name_index;	
-	__le16	e_value_offs;	
-	__le32	e_value_block;	
-	__le32	e_value_size;	
-	__le32	e_hash;		
-	char	e_name[0];	
+	__u8	e_name_len;	 
+	__u8	e_name_index;	 
+	__le16	e_value_offs;	 
+	__le32	e_value_block;	 
+	__le32	e_value_size;	 
+	__le32	e_hash;		 
+	char	e_name[0];	 
 };
 
 #define EXT4_XATTR_PAD_BITS		2
@@ -99,12 +95,8 @@ struct ext4_xattr_ibody_find {
 };
 
 #ifdef MY_ABC_HERE
-extern const struct xattr_handler ext4_xattr_synoacl_access_handler;
-extern const struct xattr_handler ext4_xattr_synoacl_noperm_access_handler;
-#endif 
-#ifdef MY_ABC_HERE
 extern const struct xattr_handler ext4_xattr_syno_handler;
-#endif 
+#endif  
 extern const struct xattr_handler ext4_xattr_user_handler;
 extern const struct xattr_handler ext4_xattr_trusted_handler;
 extern const struct xattr_handler ext4_xattr_security_handler;

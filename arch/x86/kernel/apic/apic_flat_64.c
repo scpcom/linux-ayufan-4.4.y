@@ -253,10 +253,14 @@ static void physflat_send_IPI_all(int vector)
 
 static int physflat_probe(void)
 {
+#ifdef CONFIG_SYNO_NTB_FORCE_API_PHYSICAL_FLAT
+	return 1;
+#else
 	if (apic == &apic_physflat || num_possible_cpus() > 8)
 		return 1;
 
 	return 0;
+#endif /* CONFIG_SYNO_NTB_FORCE_API_PHYSICAL_FLAT */
 }
 
 static struct apic apic_physflat =  {

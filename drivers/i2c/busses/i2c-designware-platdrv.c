@@ -123,6 +123,9 @@ static const struct acpi_device_id dw_i2c_acpi_match[] = {
 	{ "80860F41", 0 },
 	{ "808622C1", 0 },
 	{ "AMD0010", ACCESS_INTR_MASK },
+	{ "AMDI0010", ACCESS_INTR_MASK },
+	{ "AMDI0510", 0 },
+	{ "APMC0D0F", 0 },
 	{ }
 };
 MODULE_DEVICE_TABLE(acpi, dw_i2c_acpi_match);
@@ -227,7 +230,11 @@ static int dw_i2c_plat_probe(struct platform_device *pdev)
 
 	adap = &dev->adapter;
 	adap->owner = THIS_MODULE;
+#if defined(CONFIG_SYNO_V1000)
+	adap->class = I2C_CLASS_HWMON | I2C_CLASS_SPD;
+#else /* CONFIG_SYNO_V1000 */
 	adap->class = I2C_CLASS_DEPRECATED;
+#endif /* CONFIG_SYNO_V1000 */
 	ACPI_COMPANION_SET(&adap->dev, ACPI_COMPANION(&pdev->dev));
 	adap->dev.of_node = pdev->dev.of_node;
 

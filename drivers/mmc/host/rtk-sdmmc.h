@@ -1,3 +1,16 @@
+#if defined(MY_DEF_HERE)
+/*
+ * Realtek SD/MMC/mini SD card driver
+ *
+ * Authors:
+ * Copyright (C) 2017 Realtek Ltd.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+#endif /* MY_DEF_HERE */
+
 #ifndef DRIVERS_MMC_HOST_RTK_SDMMC_H_
 #define DRIVERS_MMC_HOST_RTK_SDMMC_H_
 
@@ -23,14 +36,35 @@ struct rtk_sdmmc_host {
     void __iomem *sdmmc;
     void __iomem *pll;
     void __iomem *sysbrdg;
+#if (defined(CONFIG_ARCH_RTD139x) || defined(CONFIG_ARCH_RTD16xx)) && defined(MY_DEF_HERE)
+    void __iomem *isopad;
+    void __iomem *gpiodir;
+    int cd_irq;
+    int wp_irq;
+    u32 sdmmc_wp_gpio;
+    u32 sdmmc_cd_gpio;
+#else /* (CONFIG_ARCH_RTD139x || CONFIG_ARCH_RTD16xx) && MY_DEF_HERE */
     void __iomem *emmc;
-    void __iomem *sdio;
+#endif /* (CONFIG_ARCH_RTD139x || CONFIG_ARCH_RTD16xx) && MY_DEF_HERE */
 
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_ARCH_RTD119X
+    void __iomem *sdio;
+#endif /* CONFIG_ARCH_RTD119X */
+#else /* MY_DEF_HERE */
+    void __iomem *sdio;
+#endif /* MY_DEF_HERE */
     spinlock_t lock;
 
     struct tasklet_struct req_end_tasklet;
     struct timer_list timer;
+#if defined(MY_DEF_HERE)
+#if defined(CONFIG_ARCH_RTD129x) || defined(CONFIG_ARCH_RTD119X)
     struct timer_list plug_timer;
+#endif /* CONFIG_ARCH_RTD129x || CONFIG_ARCH_RTD119X */
+#else /* MY_DEF_HERE */
+    struct timer_list plug_timer;
+#endif /* MY_DEF_HERE */
     struct timer_list rtk_sdmmc_stop_cmd; //CMD25_WO_STOP_COMMAND
 
     struct completion *int_waiting;

@@ -15,9 +15,10 @@
 
 #ifdef MY_ABC_HERE
 #include <linux/nsproxy.h>
+#include <linux/ratelimit.h>
 extern struct rw_semaphore namespace_sem;
-#endif 
-
+static DEFINE_RATELIMIT_STATE(_fsnotify_rs, (3600 * HZ), 1);
+#endif  
 
 void __fsnotify_inode_delete(struct inode *inode)
 {
@@ -288,6 +289,8 @@ static int notify_event(struct vfsmount *vfsmnt, struct dentry *dentry, __u32 ma
 
 	dentry_buf = kmalloc(PATH_MAX, GFP_NOFS);
 	if (!dentry_buf) {
+		if (__ratelimit(&_fsnotify_rs))
+			printk(KERN_WARNING "synotify get ENOMEM in file: %s, line: %d\n", __FILE__, __LINE__);
 		ret = -ENOMEM;
 		goto end;
 	}

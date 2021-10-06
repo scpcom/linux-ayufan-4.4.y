@@ -36,6 +36,7 @@
 #include <linux/of_net.h>
 #include <linux/of_address.h>
 #include <linux/of_gpio.h>
+#include <linux/version.h>
 //#include <mach/cpu.h>
 
 #include <asm/io.h>
@@ -50,7 +51,7 @@
 #include <linux/reset-helper.h> // rstc_get
 #include <linux/reset.h>
 
-#define RTL8169_VERSION "2.32.2-LK-NAPI"
+#define RTL8169_VERSION "2.32.5-LK-NAPI"
 #define MODULENAME "r8169"
 #define PFX MODULENAME ": "
 
@@ -350,8 +351,7 @@ static const struct {
 		_R("RTL8168g/8111g",	RTL_TD_1, NULL, JUMBO_9K, false),
 	[RTL_GIGA_MAC_VER_42] =
 	//	_R("RTL8168g/8111g",	RTL_TD_1, FIRMWARE_8168G_3,
-		_R("RTL8168g/8111g",	RTL_TD_1, NULL,
-							JUMBO_9K, false),
+		_R("RTL8169SOC",	RTL_TD_1, NULL, JUMBO_9K, false),
 	[RTL_GIGA_MAC_VER_43] =
 		_R("RTL8106e",		RTL_TD_1, FIRMWARE_8106E_2,
 							JUMBO_1K, true),
@@ -932,6 +932,15 @@ MODULE_FIRMWARE(FIRMWARE_8106E_1);
 MODULE_FIRMWARE(FIRMWARE_8106E_2);
 MODULE_FIRMWARE(FIRMWARE_8168G_2);
 MODULE_FIRMWARE(FIRMWARE_8168G_3);
+
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+static DEFINE_RATELIMIT_STATE(syno_log_ratelimit_state, 10 * HZ, 1);
+#define printk_syno_ratelimited(fmt, ...)	\
+({												\
+	if (__ratelimit(&syno_log_ratelimit_state))	\
+		printk(fmt, ##__VA_ARGS__);				\
+})
+#endif /* MY_DEF_HERE || MY_DEF_HERE */
 
 static void rtl8169_down(struct net_device *dev);
 static int rtl8169_init_ring(struct net_device *dev);
@@ -6426,7 +6435,11 @@ rtl8168_alloc_rx_skb(struct rtl8169_private *tp,
         dma_addr_t mapping;
         int ret = 0;
 
+#if defined(MY_DEF_HERE)
+        skb = __dev_alloc_skb(rx_buf_sz + RTK_RX_ALIGN, GFP_ATOMIC | __GFP_NOWARN);
+#else /* MY_DEF_HERE */
         skb = dev_alloc_skb(rx_buf_sz + RTK_RX_ALIGN);
+#endif /* MY_DEF_HERE */
         if (!skb)
                 goto err_out;
 
@@ -6646,7 +6659,21 @@ static void rtl_reset_work(struct rtl8169_private *tp)
 	}
 	memset(tp->RxDescArray, 0x0, NUM_RX_DESC * sizeof(struct RxDesc));
 
+#if defined(MY_DEF_HERE)
+	if (rtl8169_init_ring(dev) <= 0) {
+		napi_enable(&tp->napi);
+		netif_wake_queue(dev);
+		netif_warn(tp, drv, dev, "No memory. Try to restart......\n");
+		msleep(1000);
+#ifdef MY_DEF_HERE
+		printk(KERN_ERR "r8169_reset_task: reset when no memory to reset.\n");
+#endif /* MY_DEF_HERE */
+		rtl_schedule_task(tp, RTL_FLAG_TASK_RESET_PENDING);
+		return;
+	}
+#else /* MY_DEF_HERE */
 	rtl8169_init_ring(dev);
+#endif /* MY_DEF_HERE */
 
 	//rtl8169_init_ring_indexes(tp);
 	napi_enable(&tp->napi);
@@ -7036,9 +7063,9 @@ static int rtl_rx(struct net_device *dev, struct rtl8169_private *tp, u32 budget
 			if (status & RxCRC)
 				dev->stats.rx_crc_errors++;
 			if (status & RxFOVF) {
-#ifdef MY_ABC_HERE
-				printk_once(KERN_ERR "r8169_reset_task: reset with fifo errors, print once.\n");
-#endif /* MY_ABC_HERE */
+#ifdef MY_DEF_HERE
+				printk_syno_ratelimited(KERN_ERR"r8169_reset_task: reset with fifo errors.\n");
+#endif /* MY_DEF_HERE */
 				rtl_schedule_task(tp, RTL_FLAG_TASK_RESET_PENDING);
 				dev->stats.rx_fifo_errors++;
 			}
@@ -7111,11 +7138,17 @@ process_pkt:
 	tp->dirty_rx += delta;
 
 	if (tp->dirty_rx + NUM_RX_DESC == tp->cur_rx){
-#ifdef MY_ABC_HERE
-		printk_once(KERN_ERR "r8169_reset_task: reset with rx buffers exhausted, print once.\n");
-#endif /* MY_ABC_HERE */
-		rtl_schedule_task(tp, RTL_FLAG_TASK_RESET_PENDING);
 #ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
+#ifdef MY_DEF_HERE
+		printk_syno_ratelimited(KERN_ERR"r8169_reset_task: reset with rx buffers exhausted.\n");
+#endif /* MY_DEF_HERE */
+		rtl_schedule_task(tp, RTL_FLAG_TASK_RESET_PENDING);
+#endif /* MY_DEF_HERE */
+#ifdef MY_DEF_HERE
+#ifdef MY_DEF_HERE
+		printk_syno_ratelimited(KERN_ERR"%s: Rx buffers exhausted\n", dev->name);
+#endif /* MY_DEF_HERE */
 		tp->rx_buffer_exhausted_count ++;
 #else /* MY_DEF_HERE */
 		netif_err(tp, drv, tp->dev, "%s: Rx buffers exhausted\n", dev->name);
@@ -7201,9 +7234,9 @@ static void rtl_slow_event_work(struct rtl8169_private *tp)
 				writel(readl(tp->mmio_clkaddr + 0x104) & ~0x00200000, (tp->mmio_clkaddr + 0x104));
 			}
 */
-#ifdef MY_ABC_HERE
-			printk_once(KERN_ERR "r8169_reset_task: reset with slow event.\n");
-#endif /* MY_ABC_HERE */
+#ifdef MY_DEF_HERE
+			printk(KERN_ERR "r8169_reset_task: reset with slow event.\n");
+#endif /* MY_DEF_HERE */
 			rtl_schedule_task(tp, RTL_FLAG_TASK_RESET_PENDING);
 		}
 		else
@@ -7768,6 +7801,10 @@ static int rtl_remove_one(struct platform_device *pdev)
 			break;
 
 		remove_proc_entry("wol_enable", tp->dir_dev);
+		remove_proc_entry("driver_var", tp->dir_dev);
+		remove_proc_entry("ext_regs", tp->dir_dev);
+		remove_proc_entry("registers", tp->dir_dev);
+		remove_proc_entry("tally", tp->dir_dev);
 
 		if(rtw_proc==NULL)
 			break;
@@ -8007,6 +8044,186 @@ static const struct file_operations proc_fops = {
 .write= write_proc,
 };
 
+static int driver_var_read_proc(struct seq_file *m, void *v)
+{
+	struct net_device *dev = m->private;
+	struct rtl8169_private *tp = netdev_priv(dev);
+
+	seq_puts(m, "\nDump Driver Variable\n");
+
+	seq_puts(m, "Variable\tValue\n----------\t-----\n");
+	seq_printf(m, "MODULENAME\t%s\n", MODULENAME);
+	seq_printf(m, "mac version\t%d\n", tp->mac_version);
+	seq_printf(m, "chipset_name\t%s\n", rtl_chip_infos[tp->mac_version].name);
+	seq_printf(m, "driver version\t%s\n", RTL8169_VERSION);
+	seq_printf(m, "txd version\t%d\n", tp->txd_version);
+	seq_printf(m, "msg_enable\t0x%x\n", tp->msg_enable);
+	seq_printf(m, "mtu\t\t%d\n", dev->mtu);
+	seq_printf(m, "NUM_RX_DESC\t0x%x\n", NUM_RX_DESC);
+	seq_printf(m, "cur_rx\t\t0x%x\n", tp->cur_rx);
+	seq_printf(m, "dirty_rx\t0x%x\n", tp->dirty_rx);
+	seq_printf(m, "last_cur_rx\t0x%x\n", tp->last_cur_rx);
+	seq_printf(m, "rx_reset_count\t%d\n", tp->rx_reset_count);
+	seq_printf(m, "checkRDU\t%d\n", tp->checkRDU);
+	seq_printf(m, "NUM_TX_DESC\t0x%x\n", NUM_TX_DESC);
+	seq_printf(m, "cur_tx\t\t0x%x\n", tp->cur_tx);
+	seq_printf(m, "dirty_tx\t0x%x\n", tp->dirty_tx);
+	seq_printf(m, "last_dirty_tx\t0x%x\n", tp->last_dirty_tx);
+	seq_printf(m, "tx_reset_count\t%d\n", tp->tx_reset_count);
+	seq_printf(m, "rx_buf_sz\t%d\n", rx_buf_sz);
+	seq_printf(m, "cp_cmd\t\t0x%x\n", tp->cp_cmd);
+	seq_printf(m, "event_slow\t0x%x\n", tp->event_slow);
+	seq_printf(m, "wol_enable\t0x%x\n", wol_enable);
+	seq_printf(m, "saved_wolopts\t0x%x\n", tp->saved_wolopts);
+	seq_printf(m, "opts1_mask\t0x%x\n", tp->opts1_mask);
+	seq_printf(m, "ocp_base\t0x%x\n", tp->ocp_base);
+	seq_printf(m, "rtk_enable_diag\t%d\n", tp->rtk_enable_diag);
+	seq_printf(m, "led_cfg\t\t0x%x\n", tp->led_cfg);
+	seq_printf(m, "features\t0x%x\n", tp->features);
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2, 6, 13)
+	seq_printf(m, "perm_addr\t%pM\n", dev->perm_addr);
+#endif
+	seq_printf(m, "dev_addr\t%pM\n", dev->dev_addr);
+
+	seq_putc(m, '\n');
+	return 0;
+}
+
+static int driver_var_proc_open(struct inode *inode, struct file *file)
+{
+	struct net_device *dev = proc_get_parent_data(inode);
+
+	return single_open(file, driver_var_read_proc, dev);
+}
+
+static const struct file_operations driver_var_proc_fops = {
+	.open           = driver_var_proc_open,
+	.read           = seq_read,
+	.write          = NULL,
+	.llseek         = seq_lseek,
+	.release        = single_release,
+};
+
+static int tally_read_proc(struct seq_file *m, void *v)
+{
+	struct net_device *dev = m->private;
+	struct rtl8169_private *tp = netdev_priv(dev);
+	struct rtl8169_counters *counters = &tp->counters;
+
+	rtl8169_update_counters(dev);
+
+	seq_puts(m, "\nDump Tally Counter\n");
+	seq_puts(m, "Statistics\tValue\n----------\t-----\n");
+	seq_printf(m, "tx_packets\t%lld\n", le64_to_cpu(counters->tx_packets));
+	seq_printf(m, "rx_packets\t%lld\n", le64_to_cpu(counters->rx_packets));
+	seq_printf(m, "tx_errors\t%lld\n", le64_to_cpu(counters->tx_errors));
+	seq_printf(m, "rx_errors\t%d\n", le32_to_cpu(counters->rx_errors));
+	seq_printf(m, "rx_missed\t%d\n", le16_to_cpu(counters->rx_missed));
+	seq_printf(m, "align_errors\t%d\n", le16_to_cpu(counters->align_errors));
+	seq_printf(m, "tx_one_collision\t%d\n", le32_to_cpu(counters->tx_one_collision));
+	seq_printf(m, "tx_multi_collision\t%d\n", le32_to_cpu(counters->tx_multi_collision));
+	seq_printf(m, "rx_unicast\t%lld\n", le64_to_cpu(counters->rx_unicast));
+	seq_printf(m, "rx_broadcast\t%lld\n", le64_to_cpu(counters->rx_broadcast));
+	seq_printf(m, "rx_multicast\t%d\n", le32_to_cpu(counters->rx_multicast));
+	seq_printf(m, "tx_aborted\t%d\n", le16_to_cpu(counters->tx_aborted));
+	seq_printf(m, "tx_underun\t%d\n", le16_to_cpu(counters->tx_underun));
+
+	seq_putc(m, '\n');
+	return 0;
+}
+
+static int tally_proc_open(struct inode *inode, struct file *file)
+{
+	struct net_device *dev = proc_get_parent_data(inode);
+
+	return single_open(file, tally_read_proc, dev);
+}
+
+static const struct file_operations tally_proc_fops = {
+	.open           = tally_proc_open,
+	.read           = seq_read,
+	.write          = NULL,
+	.llseek         = seq_lseek,
+	.release        = single_release,
+};
+
+static int registers_read_proc(struct seq_file *m, void *v)
+{
+	struct net_device *dev = m->private;
+	int i, n, max = 256;
+	u8 byte_rd;
+	struct rtl8169_private *tp = netdev_priv(dev);
+	void __iomem *ioaddr = tp->mmio_addr;
+
+	seq_puts(m, "\nDump MAC Registers\n");
+	seq_puts(m, "Offset\tValue\n------\t-----\n");
+
+	for (n = 0; n < max;) {
+		seq_printf(m, "\n0x%02x:\t", n);
+
+		for (i = 0; i < 16 && n < max; i++, n++) {
+			byte_rd = readb(ioaddr + n);
+			seq_printf(m, "%02x ", byte_rd);
+		}
+	}
+
+	seq_putc(m, '\n');
+	return 0;
+}
+
+static int registers_proc_open(struct inode *inode, struct file *file)
+{
+	struct net_device *dev = proc_get_parent_data(inode);
+
+	return single_open(file, registers_read_proc, dev);
+}
+
+static const struct file_operations registers_proc_fops = {
+	.open           = registers_proc_open,
+	.read           = seq_read,
+	.write          = NULL,
+	.llseek         = seq_lseek,
+	.release        = single_release,
+};
+
+static int ext_regs_read_proc(struct seq_file *m, void *v)
+{
+	struct net_device *dev = m->private;
+	int i, n, max = 256;
+	u32 dword_rd;
+	struct rtl8169_private *tp = netdev_priv(dev);
+
+	seq_puts(m, "\nDump Extended Registers\n");
+	seq_puts(m, "\nOffset\tValue\n------\t-----\n ");
+
+	for (n = 0; n < max;) {
+		seq_printf(m, "\n0x%02x:\t", n);
+
+		for (i = 0; i < 4 && n < max; i++, n+=4) {
+			dword_rd = rtl_eri_read(tp, n, ERIAR_EXGMAC);
+			seq_printf(m, "%08x ", dword_rd);
+		}
+	}
+
+	seq_putc(m, '\n');
+	return 0;
+}
+
+static int ext_regs_proc_open(struct inode *inode, struct file *file)
+{
+	struct net_device *dev = proc_get_parent_data(inode);
+
+	return single_open(file, ext_regs_read_proc, dev);
+}
+
+static const struct file_operations ext_regs_proc_fops = {
+	.open           = ext_regs_proc_open,
+	.read           = seq_read,
+	.write          = NULL,
+	.llseek         = seq_lseek,
+	.release        = single_release,
+};
+
 #endif
 
 static int
@@ -8229,7 +8446,7 @@ rtl_init_one(struct platform_device *pdev)
 		// create /proc/net/$rtw_proc_name/$dev->name
 		if(tp->dir_dev == NULL)
 		{
-			tp->dir_dev = proc_mkdir_data(MODULENAME, S_IFDIR | S_IRUGO | S_IXUGO,rtw_proc, NULL);
+			tp->dir_dev = proc_mkdir_data(MODULENAME, S_IFDIR | S_IRUGO | S_IXUGO,rtw_proc, ndev);
 			dir_dev = tp->dir_dev;
 
 			if(dir_dev==NULL)
@@ -8252,6 +8469,34 @@ rtl_init_one(struct platform_device *pdev)
 				   dir_dev, &proc_fops, NULL);
 		if (!entry) {
 			printk(KERN_INFO "procfs:create /proc/net/eth0/r8169/wol_enable failed\n");
+			break;
+		}
+
+		entry = proc_create_data("driver_var", S_IFREG | S_IRUGO,
+				   dir_dev, &driver_var_proc_fops, NULL);
+		if (!entry) {
+			printk(KERN_INFO "procfs:create /proc/net/eth0/r8169/driver_var failed\n");
+			break;
+		}
+
+		entry = proc_create_data("ext_regs", S_IFREG | S_IRUGO,
+				   dir_dev, &ext_regs_proc_fops, NULL);
+		if (!entry) {
+			printk(KERN_INFO "procfs:create /proc/net/eth0/r8169/ext_regs failed\n");
+			break;
+		}
+
+		entry = proc_create_data("registers", S_IFREG | S_IRUGO,
+				   dir_dev, &registers_proc_fops, NULL);
+		if (!entry) {
+			printk(KERN_INFO "procfs:create /proc/net/eth0/r8169/registers failed\n");
+			break;
+		}
+
+		entry = proc_create_data("tally", S_IFREG | S_IRUGO,
+				   dir_dev, &tally_proc_fops, NULL);
+		if (!entry) {
+			printk(KERN_INFO "procfs:create /proc/net/eth0/r8169/tally failed\n");
 			break;
 		}
 	}while(0);

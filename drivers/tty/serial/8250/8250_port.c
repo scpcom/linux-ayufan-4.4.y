@@ -38,11 +38,6 @@
 
 #define BOTH_EMPTY 	(UART_LSR_TEMT | UART_LSR_THRE)
 
-#ifdef MY_DEF_HERE
-extern int (*syno_test_list)(unsigned char, struct tty_struct *);
-#endif 
-
-
 static const struct serial8250_config uart_config[] = {
 	[PORT_UNKNOWN] = {
 		.name		= "unknown",
@@ -1196,12 +1191,6 @@ serial8250_rx_chars(struct uart_8250_port *up, unsigned char lsr)
 		if (uart_handle_sysrq_char(port, ch))
 			goto ignore_char;
 
-#ifdef MY_DEF_HERE
-		if (NULL != syno_test_list && syno_test_list(ch, port->state->port.tty)) {
-			goto ignore_char;
-		}
-#endif 
-
 		uart_insert_char(port, lsr, UART_LSR_OE, ch, flag);
 
 ignore_char:
@@ -1682,7 +1671,12 @@ dont_test_tx_en:
 	up->lsr_saved_flags = 0;
 	up->msr_saved_flags = 0;
 
-	
+#ifdef MY_DEF_HERE
+	 
+	if (uart_console(port))
+		up->dma = NULL;
+#endif  
+
 	if (up->dma) {
 		retval = serial8250_request_dma(up);
 		if (retval) {

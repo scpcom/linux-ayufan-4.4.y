@@ -352,45 +352,20 @@ syno_pm_poweron_pkg_init(unsigned short vendor, unsigned short devid, SYNO_PM_PK
 		}
 	}
 
-	
 }
-
-#ifdef MY_ABC_HERE
-
-static inline int
-syno_pm_deepsleep_indicator_pkg_init(unsigned short vendor, unsigned short devid, SYNO_PM_PKG *pPKG, unsigned char blCLR)
-{
-	
-	int iRet = 0;
-
-	memset(pPKG, 0, sizeof(*pPKG));
-	if (syno_pm_is_9705(vendor, devid)) {
-		if (blCLR) {
-			pPKG->var = GPIO_9705_PKG_INIT(1,0);
-		} else {
-			pPKG->var = GPIO_9705_PKG_INIT(1,0x80);
-		}
-		iRet = 1;
-	}
-	
-	return iRet;
-}
-#endif 
 
 static inline void
 syno_pm_enable_powerbtn_pkg_init(unsigned short vendor, unsigned short devid, SYNO_PM_PKG *pPKG)
 {
-	
-
+	 
 	memset(pPKG, 0, sizeof(*pPKG));
-	
+	 
 	if (syno_pm_is_3xxx(vendor, devid)) {
 		pPKG->var = GPIO_3826_CMD_ENABLE_POWERBTN;
 	} else if (syno_pm_is_9705(vendor, devid)) {
 		pPKG->var = GPIO_9705_PKG_INIT(4,0x20);
 	}
 
-	
 }
 
 static inline unsigned int
@@ -443,37 +418,20 @@ syno_pm_hddled_status_pkg_init(unsigned short vendor, unsigned short devid, SYNO
 		pPKG->var = GPIO_9705_PKG_INIT(1,0);
 	}
 
-	
 }
 
-#ifdef MY_ABC_HERE
-extern EUNIT_PWRON_TYPE (*funcSynoEunitPowerctlType)(void);
-#endif 
 extern char gszSynoHWVersion[16];
 static inline unsigned char
 is_ebox_support(void)
 {
 	unsigned char ret = 0;
 
-#ifdef MY_ABC_HERE
-	if (funcSynoEunitPowerctlType) {
-		if (EUNIT_NOT_SUPPORT == funcSynoEunitPowerctlType()) {
-			goto END;
-		}
-	}
-#endif 
-	
-
 	ret = 1;
-#ifdef MY_ABC_HERE
-END:
-#endif 
 	return ret;
 }
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
-
 
 #define SYNO_ATA_ID_MAJOR_VER	 80
 #define SYNO_ATA_ID_MINOR_VER	 81

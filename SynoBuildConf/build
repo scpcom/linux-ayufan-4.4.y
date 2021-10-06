@@ -12,7 +12,7 @@ cp -sv /lnxscripts/config/{signing_key,trusted_certificates,untrusted_certificat
 
 export ARCH=${ARCH}
 case "$BUILD_TARGET" in
-	APOLLOLAKE|DENVERTON|KVMX64|REALTEK_RTD1296|BROADWELLNK|MARVELL_ARMADA37XX|PURLEY|COFFEELAKE|BROADWELLNTB|NEXTKVMX64|GEMINILAKE)
+	APOLLOLAKE|DENVERTON|KVMX64|REALTEK_RTD1296|BROADWELLNK|MARVELL_ARMADA37XX|PURLEY|COFFEELAKE|BROADWELLNTB|NEXTKVMX64|GEMINILAKE|REALTEK_RTD1619|V1000|BROADWELLNTBAP|KVMCLOUD)
 		export CROSS_COMPILE=${ToolChainPrefix64} CC=${CC64}
 		KERNEL_CC=${CC64}
 		;;
@@ -91,6 +91,11 @@ case "$BUILD_TARGET" in
 		KernelConfig=synoconfigs/broadwellntb
 		KernelTarget=bzImage
 		;;
+	BROADWELLNTBAP)
+		KernelImage=${KernelDir}/arch/x86_64/boot/bzImage
+		KernelConfig=synoconfigs/broadwellntbap
+		KernelTarget=bzImage
+		;;
 	NEXTKVMX64)
 		KernelImage=${KernelDir}/arch/x86_64/boot/bzImage
 		KernelConfig=synoconfigs/nextkvmx64
@@ -99,6 +104,23 @@ case "$BUILD_TARGET" in
 	GEMINILAKE)
 		KernelImage=${KernelDir}/arch/x86_64/boot/bzImage
 		KernelConfig=synoconfigs/geminilake
+		KernelTarget=bzImage
+		;;
+	REALTEK_RTD1619)
+		KernelImage=${KernelDir}/arch/arm64/boot/Image
+		KernelConfig=synoconfigs/rtd1619
+		KernelTarget=Image.gz
+		MAKE_DTBS="yes"
+		MAKE_DTC_FLAGS="-p 8192"
+		;;
+	V1000)
+		KernelImage=${KernelDir}/arch/x86_64/boot/bzImage
+		KernelConfig=synoconfigs/v1000
+		KernelTarget=bzImage
+		;;
+	KVMCLOUD)
+		KernelImage=${KernelDir}/arch/x86_64/boot/bzImage
+		KernelConfig=synoconfigs/kvmcloud
 		KernelTarget=bzImage
 		;;
 	*)

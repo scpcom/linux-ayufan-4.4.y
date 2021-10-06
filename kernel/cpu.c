@@ -11,6 +11,7 @@
 #include <linux/init.h>
 #include <linux/notifier.h>
 #include <linux/sched.h>
+#include <linux/sched/smt.h>
 #include <linux/unistd.h>
 #include <linux/cpu.h>
 #include <linux/oom.h>
@@ -29,10 +30,12 @@
 
 #include "smpboot.h"
 
-#if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE)//CPU core 1-3 power gating, jamestai20160118
+#if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE) || \
+	defined(CONFIG_RTK_PLATFORM) && defined(MY_DEF_HERE)
 extern void rtk_cpu_power_down(int cpu);
 extern void rtk_cpu_power_up(int cpu);
-#endif /* CONFIG_ARCH_RTD129X */
+#endif /* CONFIG_ARCH_RTD129X && MY_DEF_HERE ||
+		  CONFIG_RTK_PLATFORM && MY_DEF_HERE */
 
 #ifdef CONFIG_SMP
 /* Serializes the updates to cpu_online_mask, cpu_present_mask */
@@ -198,6 +201,12 @@ void cpu_hotplug_enable(void)
 }
 EXPORT_SYMBOL_GPL(cpu_hotplug_enable);
 #endif	/* CONFIG_HOTPLUG_CPU */
+
+/*
+ * Architectures that need SMT-specific errata handling during SMT hotplug
+ * should override this.
+ */
+void __weak arch_smt_update(void) { }
 
 /* Need to know about CPUs going up/down? */
 int register_cpu_notifier(struct notifier_block *nb)
@@ -434,6 +443,7 @@ out_release:
 	cpu_hotplug_done();
 	if (!err)
 		cpu_notify_nofail(CPU_POST_DEAD | mod, hcpu);
+	arch_smt_update();
 	return err;
 }
 
@@ -537,7 +547,7 @@ out_notify:
 		__cpu_notify(CPU_UP_CANCELED | mod, hcpu, nr_calls, NULL);
 out:
 	cpu_hotplug_done();
-
+	arch_smt_update();
 	return ret;
 }
 
@@ -595,9 +605,11 @@ int disable_nonboot_cpus(void)
 		trace_suspend_resume(TPS("CPU_OFF"), cpu, true);
 		error = _cpu_down(cpu, 1);
 
-#if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE)//CPU core 1-3 power gating, jamestai20160118
+#if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE) || \
+	defined(CONFIG_RTK_PLATFORM) && defined(MY_DEF_HERE)
 		rtk_cpu_power_down(cpu);
-#endif /* CONIFG_ARCH_RTD129X */
+#endif /* CONIFG_ARCH_RTD129X && MY_DEF_HERE ||
+		  CONFIG_RTK_PLATFORM && MY_DEF_HERE */
 
 		trace_suspend_resume(TPS("CPU_OFF"), cpu, false);
 		if (!error)
@@ -649,9 +661,11 @@ void enable_nonboot_cpus(void)
 	for_each_cpu(cpu, frozen_cpus) {
 		trace_suspend_resume(TPS("CPU_ON"), cpu, true);
 
-#if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE)//CPU core 1-3 power gating, jamestai20160118
+#if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE) || \
+	defined(CONFIG_RTK_PLATFORM) && defined(MY_DEF_HERE)
 		rtk_cpu_power_up(cpu);
-#endif /* CONIFG_ARCH_RTD129X */
+#endif /* CONIFG_ARCH_RTD129X && MY_DEF_HERE ||
+		  CONFIG_RTK_PLATFORM && MY_DEF_HERE */
 
 		error = _cpu_up(cpu, 1);
 		trace_suspend_resume(TPS("CPU_ON"), cpu, false);
@@ -843,3 +857,23 @@ void init_cpu_online(const struct cpumask *src)
 {
 	cpumask_copy(to_cpumask(cpu_online_bits), src);
 }
+
+#ifdef MY_ABC_HERE
+enum cpu_mitigations cpu_mitigations = CPU_MITIGATIONS_OFF;
+#else /* MY_ABC_HERE */
+enum cpu_mitigations cpu_mitigations = CPU_MITIGATIONS_AUTO;
+#endif /* MY_ABC_HERE */
+
+static int __init mitigations_parse_cmdline(char *arg)
+{
+	if (!strcmp(arg, "off"))
+		cpu_mitigations = CPU_MITIGATIONS_OFF;
+	else if (!strcmp(arg, "auto"))
+		cpu_mitigations = CPU_MITIGATIONS_AUTO;
+	else
+		pr_crit("Unsupported mitigations=%s, system may still be vulnerable\n",
+			arg);
+
+	return 0;
+}
+early_param("mitigations", mitigations_parse_cmdline);

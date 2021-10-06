@@ -24,6 +24,9 @@
 #include <linux/hwmon-vid.h>
 #include <linux/err.h>
 #include <linux/jiffies.h>
+#ifdef MY_ABC_HERE
+#include <linux/synobios.h>
+#endif /* MY_ABC_HERE */
 
 /* Indexes for the sysfs hooks */
 
@@ -1907,6 +1910,124 @@ static void adt7475_remove_files(struct i2c_client *client,
 		sysfs_remove_group(&client->dev.kobj, &vid_attr_group);
 }
 
+#ifdef MY_ABC_HERE
+extern int (*funcSYNOReadAdtFanSpeedRpm)(struct _SYNO_HWMON_SENSOR_TYPE *);
+extern int (*funcSYNOReadAdtVoltageSensor)(struct _SYNO_HWMON_SENSOR_TYPE *);
+extern int (*funcSYNOReadAdtThermalSensor)(struct _SYNO_HWMON_SENSOR_TYPE *);
+extern int (*funcSYNOReadAdtPeci)(struct _SynoCpuTemp *);
+static struct i2c_client *syno_find_adt7490_client(void)
+{
+        struct i2c_client *client, *_n, *ret = NULL;
+
+        list_for_each_entry_safe(client, _n, &adt7475_driver.clients, detected) {
+		if (SYNO_IS_ADT7490(client)) {
+			ret = client;
+			break;
+		}
+	}
+
+	return ret;
+}
+
+static int syno_parse_adt_peci_input(struct _SynoCpuTemp *pCpuTemp)
+{
+	int i, ret = -1;
+	int cpu_count = 1;
+	struct i2c_client *client;
+	struct adt7475_data *data;
+
+	if (NULL == pCpuTemp) {
+		printk("adt7475: parameter error.\n");
+		goto RET;
+	}
+
+	client = syno_find_adt7490_client();
+	if (NULL == client) {
+		printk("adt7475: client not found.\n");
+		goto RET;
+	}
+
+	data = i2c_get_clientdata(client);
+
+#ifdef MY_DEF_HERE
+	cpu_count = 2;
+#endif /* MY_DEF_HERE */
+
+	for (i = 0; i < cpu_count; ++i) {
+		pCpuTemp->cpu_temp[i] = reg2temp(data, data->peci[INPUT][i]);
+	}
+	pCpuTemp->cpu_num = cpu_count;
+
+	ret = 0;
+RET:
+	return ret;
+}
+
+static int syno_parse_adt_voltage_sensor(struct _SYNO_HWMON_SENSOR_TYPE *SysVoltage)
+{
+	struct i2c_client *client;
+	struct adt7475_data *data;
+	int i = 0;
+
+	client = syno_find_adt7490_client();
+	if (NULL == client || NULL == SysVoltage) {
+		return -ENODEV;
+	}
+
+	data = i2c_get_clientdata(client);
+
+	for (i = 0 ; i < SysVoltage->sensor_num ; i++) {
+		snprintf(SysVoltage->sensor[i].value, sizeof(SysVoltage->sensor[i].value), "%d", reg2volt(i, data->voltage[INPUT][i], data->bypass_attn));
+	}
+
+	return 0;
+}
+
+static int syno_parse_adt_thermal_sensor(struct _SYNO_HWMON_SENSOR_TYPE *SysThermal)
+{
+	struct i2c_client *client;
+	struct adt7475_data *data;
+	int i = 0;
+
+	client = syno_find_adt7490_client();
+	if (NULL == client || NULL == SysThermal) {
+		return -ENODEV;
+	}
+
+	data = i2c_get_clientdata(client);
+
+	for (i = 0 ; i < SysThermal->sensor_num ; i++) {
+		snprintf(SysThermal->sensor[i].value, sizeof(SysThermal->sensor[i].value), "%d", reg2temp(data, data->temp[INPUT][i]) / 1000);
+	}
+
+	return 0;
+}
+
+static int syno_parse_adt_fan_speed_rpm(struct _SYNO_HWMON_SENSOR_TYPE *FanSpeedRpm)
+{
+	struct i2c_client *client;
+	struct adt7475_data *data;
+	int i = 0;
+
+	client = syno_find_adt7490_client();
+	if (NULL == client || NULL == FanSpeedRpm) {
+		return -ENODEV;
+	}
+
+	data = i2c_get_clientdata(client);
+
+	for (i = 0 ; i < FanSpeedRpm->sensor_num ; i++) {
+		snprintf(FanSpeedRpm->sensor[i].value, sizeof(FanSpeedRpm->sensor[i].value), "%d",  tach2rpm(data->tach[INPUT][i]));
+	}
+
+	return 0;
+}
+
+#endif /* MY_ABC_HERE */
+
+#ifdef MY_ABC_HERE
+extern u8 syno_cpu_tjmax(int, int*);
+#endif /* MY_ABC_HERE */
 static int adt7475_probe(struct i2c_client *client,
 			 const struct i2c_device_id *id)
 {
@@ -1923,6 +2044,9 @@ static int adt7475_probe(struct i2c_client *client,
 	struct adt7475_data *data;
 	int i, ret = 0, revision;
 	u8 config2, config3;
+#ifdef MY_ABC_HERE
+	int tjmax;
+#endif /* MY_ABC_HERE */
 
 	data = devm_kzalloc(&client->dev, sizeof(*data), GFP_KERNEL);
 	if (data == NULL)
@@ -1968,6 +2092,19 @@ static int adt7475_probe(struct i2c_client *client,
 		configPECI = 0x00;
 #endif /* MY_DEF_HERE */
 		i2c_smbus_write_byte_data(client, REG_PECI_CONFIG, configPECI);
+
+		funcSYNOReadAdtPeci = syno_parse_adt_peci_input;
+		funcSYNOReadAdtFanSpeedRpm = syno_parse_adt_fan_speed_rpm;
+		funcSYNOReadAdtVoltageSensor = syno_parse_adt_voltage_sensor;
+		funcSYNOReadAdtThermalSensor = syno_parse_adt_thermal_sensor;
+#ifdef MY_ABC_HERE
+		for (i = 0; i < ADT7490_PECI_COUNT; ++i) {
+			if (syno_cpu_tjmax(i, &tjmax) < 0) {
+				continue;
+			}
+			i2c_smbus_write_byte_data(client, PECI_OFFSET_REG(i), (u8)tjmax);
+		}
+#endif /* MY_ABC_HERE */
 	}
 #endif /* MY_ABC_HERE */
 
@@ -2103,6 +2240,12 @@ eremove:
 static int adt7475_remove(struct i2c_client *client)
 {
 	struct adt7475_data *data = i2c_get_clientdata(client);
+#ifdef MY_ABC_HERE
+	funcSYNOReadAdtPeci = NULL;
+	funcSYNOReadAdtFanSpeedRpm = NULL;
+	funcSYNOReadAdtVoltageSensor = NULL;
+	funcSYNOReadAdtThermalSensor = NULL;
+#endif /* MY_ABC_HERE */
 
 	hwmon_device_unregister(data->hwmon_dev);
 	adt7475_remove_files(client, data);

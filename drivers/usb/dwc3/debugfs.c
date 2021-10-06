@@ -50,6 +50,9 @@ static const struct debugfs_reg32 dwc3_regs[] = {
 	dump_register(GCTL),
 	dump_register(GEVTEN),
 	dump_register(GSTS),
+#if defined(MY_DEF_HERE)
+	dump_register(GUCTL1),
+#endif /* MY_DEF_HERE */
 	dump_register(GSNPSID),
 	dump_register(GGPIO),
 	dump_register(GUID),
@@ -220,9 +223,9 @@ static const struct debugfs_reg32 dwc3_regs[] = {
 	dump_register(DGCMDPAR),
 	dump_register(DGCMD),
 	dump_register(DALEPENA),
-#ifdef MY_DEF_HERE
+#if defined(MY_DEF_HERE) || IS_ENABLED(CONFIG_USB_DWC3_RTK) && defined(MY_DEF_HERE)
 	dump_register(DEV_IMOD),
-#endif /* MY_DEF_HERE */
+#endif /* MY_DEF_HERE || CONFIG_USB_DWC3_RTK && MY_DEF_HERE */
 
 	dump_register(DEPCMDPAR2(0)),
 	dump_register(DEPCMDPAR2(1)),
@@ -630,7 +633,12 @@ int dwc3_debugfs_init(struct dwc3 *dwc)
 	struct dentry		*file;
 	int			ret;
 
+#if defined(CONFIG_USB_PATCH_ON_RTK) && defined(MY_DEF_HERE)
+	/* move debugfs to /sys/kernel/debug/usb/ */
+	root = debugfs_create_dir(dev_name(dwc->dev), usb_debug_root);
+#else /* CONFIG_USB_PATCH_ON_RTK && MY_DEF_HERE */
 	root = debugfs_create_dir(dev_name(dwc->dev), NULL);
+#endif /* CONFIG_USB_PATCH_ON_RTK && MY_DEF_HERE */
 	if (!root) {
 		ret = -ENOMEM;
 		goto err0;

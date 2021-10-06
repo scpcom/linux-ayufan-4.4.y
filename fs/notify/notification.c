@@ -17,10 +17,16 @@
 #include <linux/atomic.h>
 
 #include <linux/fsnotify_backend.h>
+#ifdef MY_ABC_HERE
+#include <linux/ratelimit.h>
+#endif  
 #include "fsnotify.h"
 
 static atomic_t fsnotify_sync_cookie = ATOMIC_INIT(0);
 
+#ifdef MY_ABC_HERE
+static DEFINE_RATELIMIT_STATE(_notification_rs, (3600 * HZ), 1);
+#endif  
 
 u32 fsnotify_get_cookie(void)
 {
@@ -64,12 +70,14 @@ int fsnotify_add_event(struct fsnotify_group *group,
 
 	if (group->q_len >= group->max_events) {
 		ret = 2;
-		
+		 
 		if (!list_empty(&group->overflow_event->list)) {
 			mutex_unlock(&group->notification_mutex);
 			return ret;
 		}
 		event = group->overflow_event;
+		if (__ratelimit(&_notification_rs))
+			printk(KERN_WARNING "synotify get overflow in file: %s, line: %d\n", __FILE__, __LINE__);
 		goto queue;
 	}
 

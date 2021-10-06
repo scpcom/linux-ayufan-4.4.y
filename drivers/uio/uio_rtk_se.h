@@ -8,7 +8,24 @@
 //#include "se_export.h"
 //#include "debug.h"
 
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_ARCH_RTD129x
+#  define SE_NUM_ENGINES       2
+#elif defined(CONFIG_ARCH_RTD139x)
+#  define SE_NUM_ENGINES       1
+#elif defined(CONFIG_ARCH_RTD16xx)
+#  define SE_NUM_ENGINES       1
+#elif defined(CONFIG_ARCH_RTD119X)
+#  define SE_NUM_ENGINES       2
+#elif defined(CONFIG_ARCH_RTD13xx)
+#  define SE_NUM_ENGINES       1
+#else
+#  error "unknown platform"
+#endif
+#else /* MY_DEF_HERE */
 #define SE_NUM_ENGINES			2 //3
+#endif /* MY_DEF_HERE */
+
 #define SE_COMMAND_ENTRIES		4096
 #define SE_CMDBUF_SIZE			(SE_COMMAND_ENTRIES * sizeof(uint32_t))
 

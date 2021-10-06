@@ -6,6 +6,69 @@
 
 MODULE_LICENSE("Proprietary");
 
+const unsigned jmb_port_addr[3][5] = {{0x74, 0x76, 0x78, 0x7A, 0x7C},
+                                      {0x73, 0x75, 0x77, 0x79, 0x7B},
+                                      {0x04, 0x11, 0x1e, 0x2b, 0x38}};
+
+static void syno_jmb_read_phy_reg(void __iomem *bar5, u32 addr, u32 *data, unsigned long sata)
+{
+	// Index port has 24 bits, PHY registers access uses bit[12:0] and bit[18], bit[18] is used to select:
+	//   0: PCIe PHY registers.
+	//   1: SATA PHY registers.
+
+	// Offset C0 [IDXP] is index port register
+	writel((addr & 0x01FFFUL) + (sata << 18UL), bar5 + 0xC0);
+
+	// Offset C8 [DPHY] is data port for PCIe/SATA PHY registers access.
+	*data = readl(bar5 + 0xC8);
+}
+
+static int syno_jmb_sata_check(unsigned pID, int portNum)
+{
+	struct pci_dev *pdev = NULL;
+	void __iomem *bar5 = NULL;
+	u32 value = 0;
+	int i = 0;
+	int j = 0;
+	int iRet = -1;
+
+	printk("======= JMicron %x =======\n", pID);
+	while ((pdev = pci_get_device(0x197b, pID, pdev)) != NULL) {
+		bar5 = ioremap(pci_resource_start(pdev, 5), pci_resource_len(pdev, 5));
+		if (!bar5) {
+			printk("Can't map jmb%x registers pci%d:%d\n", pID, pdev->bus->number, pdev->bus->primary);
+			goto END;
+		}
+
+		//check pcie register
+		syno_jmb_read_phy_reg(bar5, 0x1035, &value, 0);// 0x00000001 1: enable, 0: disable
+		printk("pci %d:%d Preset %s\n", pdev->bus->number, pdev->bus->primary, (value & 0x00000001)?"Enable":"Disable");
+		syno_jmb_read_phy_reg(bar5, 0x1034, &value, 0);// 0x00000044 preset value, lane0/1 preset = 0x4
+		printk("pci %d:%d Preset Value: 0x%x\n", pdev->bus->number, pdev->bus->primary, value);
+		syno_jmb_read_phy_reg(bar5, 0x28, &value, 0);  // 0x222A90F3 // PCIe impedance
+		printk("pci %d:%d PCIe impedance reg: 0x%x\n", pdev->bus->number, pdev->bus->primary, value);
+		syno_jmb_read_phy_reg(bar5, 0x428, &value, 0); // 0x222A90F3 // PCIe impedance
+		printk("pci %d:%d PCIe impedance reg: 0x%x\n", pdev->bus->number, pdev->bus->primary, value);
+
+		//check sata signal
+		for (i = 0 ; i < portNum; i++) {
+			for (j = 0 ; j < 3; j++) {
+				syno_jmb_read_phy_reg(bar5, jmb_port_addr[j][i], &value, 1);
+				printk("pci %d:%d port %d gen %d: %x\n",pdev->bus->number, pdev->bus->primary, i, j + 1, value);
+			}
+		}
+		if (bar5) {
+			iounmap(bar5);
+			bar5 = NULL;
+		}
+	}
+	printk("============================\n");
+	iRet = 0;
+
+END:
+	return iRet;
+}
+
 const unsigned mv_port_gen[3] = {0x8D, 0x8F, 0x91};
 const unsigned mv_port_addr[4] = {0x178, 0x1f8, 0x278, 0x2f8};
 const unsigned mv_port_data[4] = {0x17c, 0x1fc, 0x27c, 0x2fc};
@@ -171,6 +234,7 @@ static int __init syno_sata_check_init(void)
 	syno_mv_sata_check(0x9215, 4);
 	syno_mv_sata_check(0x9170, 2);
 	syno_asm_sata_check(0x0612, 2);
+	syno_jmb_sata_check(0x0585, 5);
 
 	intel_soc_sata(0x1f0c);
 

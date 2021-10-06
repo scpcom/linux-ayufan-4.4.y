@@ -25,21 +25,16 @@
 #include <scsi/scsi_cmnd.h>
 #include <scsi/scsi_device.h>
 #include <linux/libata.h>
-#ifdef MY_ABC_HERE
-#include <linux/gpio.h>
-#endif 
 
 #define DRV_NAME	"sata_mv"
 #define DRV_VERSION	"1.28"
 
-
-
 #ifdef CONFIG_PCI
 #ifdef MY_ABC_HERE
 static int msi = 1;
-#else 
+#else  
 static int msi;
-#endif 
+#endif  
 module_param(msi, int, S_IRUGO);
 MODULE_PARM_DESC(msi, "Enable use of PCI MSI (0=off, 1=on)");
 #endif
@@ -570,14 +565,10 @@ static u8   mv_bmdma_status(struct ata_port *ap);
 static u8 mv_sff_check_status(struct ata_port *ap);
 
 #ifdef MY_ABC_HERE
-static void mv_err_intr(struct ata_port *ap);
-#endif 
-
-#ifdef MY_ABC_HERE
 static ssize_t
 syno_mv_phy_ctl_store(struct device *dev, struct device_attribute *attr, const char * buf, size_t count);
 DEVICE_ATTR(syno_phy_ctl, S_IRUGO | S_IWUSR , NULL, syno_mv_phy_ctl_store);
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 static struct device_attribute *sata_mv_shost_attrs[] = {
@@ -587,25 +578,17 @@ static struct device_attribute *sata_mv_shost_attrs[] = {
 	&dev_attr_syno_pm_info,
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_phy_ctl,
-#endif 
-#ifdef MY_ABC_HERE
-	&dev_attr_syno_power_ctrl,
-	&dev_attr_syno_pm_control_support,
-#endif 
-#endif 
-#ifdef MY_ABC_HERE
-	&dev_attr_syno_port_thaw,
-#endif 
+#endif  
+#endif  
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_diskname_trans,
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
 	&dev_attr_syno_sata_disk_led_ctrl,
-#endif 
+#endif  
 	NULL
 };
-#endif 
-
+#endif  
 
 #ifdef CONFIG_PCI
 static struct scsi_host_template mv5_sht = {
@@ -676,10 +659,6 @@ static struct ata_port_operations mv6_ops = {
 	.bmdma_start		= mv_bmdma_start,
 	.bmdma_stop		= mv_bmdma_stop,
 	.bmdma_status		= mv_bmdma_status,
-
-#ifdef MY_ABC_HERE
-	.syno_force_intr	= mv_err_intr,
-#endif 
 
 	.port_start		= mv_port_start,
 	.port_stop		= mv_port_stop,
@@ -2199,45 +2178,10 @@ static void mv_err_intr(struct ata_port *ap)
 	writelfl(~edma_err_cause, port_mmio + EDMA_ERR_IRQ_CAUSE);
 
 	if (edma_err_cause & EDMA_ERR_DEV) {
-		
+		 
 		if (mv_handle_dev_err(ap, edma_err_cause))
 			return;
 	}
-
-#ifdef MY_ABC_HERE
-	if (ap->pflags & ATA_PFLAG_SYNO_IRQ_OFF) {
-		
-		if (0 == iIsSynoDeepSleepSupport(ap) && !(ap->pflags & ATA_PFLAG_SYNO_DS_PWROFF)) {
-			printk("BUG!!! This port %d didn't support deep sleep\n", ap->print_id);
-			WARN_ON(1);
-			ap->pflags &= ~ATA_PFLAG_SYNO_IRQ_OFF;
-			action |= ATA_EH_RESET;
-		} else if ((edma_err_cause & EDMA_ERR_DEV_DCON) ||
-				   (edma_err_cause & EDMA_ERR_TRANS_IRQ_7) ||
-				   (edma_err_cause & EDMA_ERR_TRANS_PROTO) ||
-				   ((edma_err_cause & EDMA_ERR_SERR) && ((serr & 0x10000) ||(serr & 0x180000)))) {
-			
-
-			
-			if(ap->nr_active_links && !(ap->pflags & ATA_PFLAG_SYNO_DS_PWROFF)) {
-				printk("WARNING: disk %d irq off but still have command, can't ignore interrupt, reset now. edma_err_cause 0x%x fis_cause 0x%x serr 0x%x\n",
-						ap->print_id, edma_err_cause, fis_cause, serr);
-				action |= ATA_EH_RESET;
-			} else {
-				DBGMESG("disk %d irq off, ignore this interrupt\n", ap->print_id);
-				return;
-			}
-		} else if (edma_err_cause & EDMA_ERR_DEV_CON) {
-			printk("disk %d edma_err_cause is EDMA_ERR_DEV_CON, it may wake up from irq off\n",
-					ap->print_id);
-		} else {
-			printk("WARNING: disk %d irq off but received un-wanted interrupts, reset now. edma_err_cause 0x%x fis_cause 0x%x serr 0x%x\n",
-					ap->print_id, edma_err_cause, fis_cause, serr);
-			WARN_ON(1);
-			action |= ATA_EH_RESET;
-		}
-	}
-#endif 
 
 	qc = mv_get_active_qc(ap);
 	ata_ehi_clear_desc(ehi);
@@ -2268,34 +2212,21 @@ static void mv_err_intr(struct ata_port *ap)
 		action |= ATA_EH_RESET;
 		ata_ehi_push_desc(ehi, "parity error");
 	}
-#ifdef MY_ABC_HERE
-	if ((edma_err_cause & (EDMA_ERR_DEV_DCON | EDMA_ERR_DEV_CON)) ||
-		(ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR)) {
-		if (ap->uiSflags & ATA_SYNO_FLAG_FORCE_INTR) {
-			ap->uiSflags &= ~ATA_SYNO_FLAG_FORCE_INTR;
-			DBGMESG("ata%u: clear ATA_SYNO_FLAG_FORCE_INTR\n", ap->print_id);
-		} else {
-			ap->iDetectStat = 1;
-			DBGMESG("ata%u: set detect stat check\n", ap->print_id);
-		}
-#else 
 	if (edma_err_cause & (EDMA_ERR_DEV_DCON | EDMA_ERR_DEV_CON)) {
-#endif 
 #ifdef MY_ABC_HERE
 		syno_ata_info_print(ap);
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
 		if (edma_err_cause & EDMA_ERR_DEV_CON) {
 			ap->pflags |= ATA_PFLAG_SYNO_BOOT_PROBE;
 		}
-#endif 
+#endif  
 		ata_ehi_hotplugged(ehi);
 		ata_ehi_push_desc(ehi, edma_err_cause & EDMA_ERR_DEV_DCON ?
 			"dev disconnect" : "dev connect");
 		action |= ATA_EH_RESET;
 	}
 
-	
 	if (IS_GEN_I(hpriv)) {
 		eh_freeze_mask = EDMA_EH_FREEZE_5;
 		if (edma_err_cause & EDMA_ERR_SELF_DIS_5) {
@@ -3853,85 +3784,11 @@ static int mv_pci_init_one(struct pci_dev *pdev,
 static int mv_pci_device_resume(struct pci_dev *pdev);
 #endif
 
-#ifdef MY_ABC_HERE
-#ifdef MY_ABC_HERE
-#ifdef CONFIG_SYNO_ATA_SHUTDOWN_FIX_ICH_GPIO
-extern u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite);
-#endif 
-extern int grgPwrCtlPin[];
-static int syno_pulldown_eunit_gpio(struct ata_port *ap)
-{
-	int iRet = -1;
-	int iValue = 0;
-	int iPin = -1;
-
-	
-	if (!(iPin = grgPwrCtlPin[ap->print_id])) { 
-		goto END;
-	}
-
-#ifdef CONFIG_SYNO_ATA_SHUTDOWN_FIX_ICH_GPIO
-	if (syno_pch_lpc_gpio_pin(iPin, &iValue, 1)) {
-		goto END;
-	}
-#endif 
-#ifdef MY_DEF_HERE
-	if (syno_gpio_value_set(iPin, iValue)) {
-		goto END;
-	}
-#endif 
-
-	mdelay(1000); 
-
-	iRet = 0;
-END:
-	return iRet;
-}
-#endif 
-
-extern int gSynoSystemShutdown;
-
-void mv_pci_shutdown(struct pci_dev *pdev)
-{
-	int i;
-	struct ata_host *host = dev_get_drvdata(&pdev->dev);
-	struct Scsi_Host *shost;
-
-	if (NULL == host) {
-		goto END;
-	}
-
-	
-	if (1 == gSynoSystemShutdown) {
-		for (i = 0; i < host->n_ports; i++) {
-			shost = host->ports[i]->scsi_host;
-			if (shost->hostt->syno_host_poweroff_task) {
-				shost->hostt->syno_host_poweroff_task(shost);
-			}
-#ifdef MY_ABC_HERE
-			syno_pulldown_eunit_gpio(host->ports[i]);
-#endif 
-		}
-	}
-
-	if (pdev->irq >= 0) {
-		free_irq(pdev->irq, host);
-		pci_disable_msi(pdev);
-		pci_intx(pdev, 0);
-	}
-END:
-	return;
-}
-#endif 
-
 static struct pci_driver mv_pci_driver = {
 	.name			= DRV_NAME,
 	.id_table		= mv_pci_tbl,
 	.probe			= mv_pci_init_one,
 	.remove			= ata_pci_remove_one,
-#ifdef MY_ABC_HERE
-	.shutdown		= mv_pci_shutdown,
-#endif 
 #ifdef CONFIG_PM_SLEEP
 	.suspend		= ata_pci_device_suspend,
 	.resume			= mv_pci_device_resume,

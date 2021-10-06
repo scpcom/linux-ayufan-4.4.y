@@ -1390,18 +1390,14 @@ struct file_operations {
 #ifdef MY_ABC_HERE
 	ssize_t (*syno_recvfile)(struct file *file, struct socket *sock,
 	                                              loff_t pos, size_t count, size_t * rbytes, size_t * wbytes);
-#ifdef MY_ABC_HERE
-	int (*ecryptfs_zero_copy)(struct file *file, loff_t pos, int num_page,
-	      struct page **pages, void *crypt_stat);
-#endif 
-#endif 
+#endif  
 	ssize_t (*copy_file_range)(struct file *, loff_t, struct file *,
 			loff_t, size_t, unsigned int);
 	int (*clone_file_range)(struct file *, loff_t, struct file *, loff_t,
 			u64);
 #ifdef MY_ABC_HERE
 	int (*clone_check_compr)(struct file *, struct file *);
-#endif 
+#endif  
 };
 
 struct inode_operations {
@@ -1956,29 +1952,25 @@ static inline int break_layout(struct inode *inode, bool wait)
 	return 0;
 }
 
-#endif 
-
+#endif  
 
 struct audit_names;
 struct filename {
-	const char		*name;	
-	const __user char	*uptr;	
+	const char		*name;	 
+	const __user char	*uptr;	 
 	struct audit_names	*aname;
 	int			refcnt;
 	const char		iname[];
 };
 
 extern long vfs_truncate(struct path *, loff_t);
-#ifdef MY_ABC_HERE
-extern long syno_vfs_truncate(struct path *, loff_t);
-#endif 
 extern int do_truncate(struct dentry *, loff_t start, unsigned int time_attrs,
 		       struct file *filp);
 extern int vfs_fallocate(struct file *file, int mode, loff_t offset,
 			loff_t len);
 #ifdef MY_ABC_HERE
 extern int do_fallocate(struct file *file, int mode, loff_t offset, loff_t len);
-#endif 
+#endif  
 
 extern long do_sys_open(int dfd, const char __user *filename, int flags,
 			umode_t mode);
@@ -2381,7 +2373,8 @@ extern int do_recvfile(struct file *, struct socket *, loff_t , size_t , size_t 
 extern void aggregate_recvfile_flush_only(struct file *file);
 extern int do_aggregate_recvfile(struct file *file, struct socket *sock, loff_t pos, size_t count, size_t *rbytes , size_t *wbytes, unsigned flush_only);
 extern int flush_aggregate_recvfile(int fd);
-#endif 
+extern int flush_aggregate_recvfile_filp(struct file *file);
+#endif  
 extern ssize_t generic_file_read_iter(struct kiocb *, struct iov_iter *);
 extern ssize_t __generic_file_write_iter(struct kiocb *, struct iov_iter *);
 extern ssize_t generic_file_write_iter(struct kiocb *, struct iov_iter *);
@@ -2869,10 +2862,10 @@ static inline int syno_op_set_crtime(struct dentry *dentry, struct timespec *tim
 	mutex_unlock(&inode->i_mutex);
 	return error;
 }
-#endif 
+#endif  
 
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(MY_ABC_HERE)
 #define SYNO_MOUNT_PATH_LEN 128
-#endif 
+#endif  
 
-#endif 
+#endif  

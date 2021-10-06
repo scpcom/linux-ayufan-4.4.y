@@ -709,6 +709,49 @@ static u32 xhci_get_port_status(struct usb_hcd *hcd,
 	return status;
 }
 
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_USB_PATCH_ON_RTK
+#if IS_ENABLED(CONFIG_USB_DWC3_RTK)
+extern void RTK_dwc3_usb3_phy_toggle(struct device *dwc3_dev, bool isConnect, int port);
+extern int RTK_dwc3_usb2_phy_toggle(struct device *dwc3_dev, bool isConnect, int port);
+#endif  
+
+static void RTK_phy_toggle(struct usb_hcd *hcd, u16 wValue, u16 wIndex,
+	    u32 temp)
+{
+	struct xhci_hcd *xhci = hcd_to_xhci(hcd);
+
+	if (wValue == USB_PORT_FEAT_C_CONNECTION) {
+		int max_ports, port;
+		u32 status;
+		__le32 __iomem **port_array;
+		bool isConnect;
+
+		port = wIndex;
+		max_ports = xhci_get_ports(hcd, &port_array);
+		status = readl(port_array[wIndex]);
+		isConnect = (status & PORT_CONNECT)?true:false;
+
+#if IS_ENABLED(CONFIG_USB_DWC3_RTK)
+		if (hcd->speed >= HCD_USB3 && status & PORT_CSC) {
+			xhci_info(xhci, "%s to call RTK_dwc3_usb3_phy_toggle (wValue=%x "
+				    "port=%d status=%x)\n",
+				    __func__, wValue, port, status);
+			RTK_dwc3_usb3_phy_toggle(hcd->self.controller, isConnect, port);
+		} else if (status & PORT_CSC) {
+			xhci_info(xhci, "%s to call RTK_dwc3_usb2_phy_toggle (wValue=%x "
+				    "port=%d status=%x)\n",
+				    __func__, wValue, port, status);
+			RTK_dwc3_usb2_phy_toggle(hcd->self.controller, isConnect, port);
+		}
+#else  
+		xhci_info(xhci, "%s NO build CONFIG_USB_DWC3_RTK\n", __func__);
+#endif  
+	}
+}
+#endif
+
+#endif  
 int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		u16 wIndex, char *buf, u16 wLength)
 {
@@ -728,24 +771,29 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 	u16 link_state = 0;
 	u16 wake_mask = 0;
 	u16 timeout = 0;
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_USB_RTK_HCD_TEST_MODE
+	int test_mode = (wIndex & 0xff00) >> 8;
+#endif
+#endif  
 
 	max_ports = xhci_get_ports(hcd, &port_array);
 #ifdef MY_ABC_HERE
 	if (pdev->vendor == PCI_VENDOR_ID_NEC) {
-		
+		 
 		xhci_get_ports_map(hcd, &port_array_map);
 	}
-#endif 
+#endif  
 	bus_state = &xhci->bus_state[hcd_index(hcd)];
 
 	spin_lock_irqsave(&xhci->lock, flags);
 	switch (typeReq) {
 	case GetHubStatus:
-		
+		 
 		memset(buf, 0, 4);
 		break;
 	case GetHubDescriptor:
-		
+		 
 		if (hcd->speed >= HCD_USB3 &&
 				(wLength < USB_DT_SS_HUB_SIZE ||
 				 wValue != (USB_DT_SS_HUB << 8))) {
@@ -1029,10 +1077,31 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 			temp |= PORT_U2_TIMEOUT(timeout);
 			writel(temp, port_array[wIndex] + PORTPMSC);
 			break;
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_USB_RTK_HCD_TEST_MODE
+		case USB_PORT_FEAT_TEST:
+			if (!test_mode || test_mode > 5)
+				goto error;
+
+			slot_id = xhci_find_slot_id_by_port(hcd, xhci,
+					wIndex + 1);
+			if (test_mode && test_mode <= 5) {
+				 
+				spin_unlock_irqrestore(&xhci->lock, flags);
+				xhci_stop_device(xhci, slot_id, 1);
+				spin_lock_irqsave(&xhci->lock, flags);
+				xhci_halt(xhci);
+				temp = readl(port_array[wIndex] + PORTPMSC);
+				temp |= test_mode << 28;
+				writel(temp, port_array[wIndex] + PORTPMSC);
+			}
+			break;
+#endif
+#endif  
 		default:
 			goto error;
 		}
-		
+		 
 		temp = readl(port_array[wIndex]);
 		break;
 	case ClearPortFeature:
@@ -1082,6 +1151,11 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 		case USB_PORT_FEAT_C_RESET:
 		case USB_PORT_FEAT_C_BH_PORT_RESET:
 		case USB_PORT_FEAT_C_CONNECTION:
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_USB_PATCH_ON_RTK
+			RTK_phy_toggle(hcd, wValue, wIndex, temp);
+#endif
+#endif  
 		case USB_PORT_FEAT_C_OVER_CURRENT:
 		case USB_PORT_FEAT_C_ENABLE:
 		case USB_PORT_FEAT_C_PORT_LINK_STATE:

@@ -16,6 +16,9 @@
 
 #define pr_fmt(fmt) "psci: " fmt
 
+#if defined(CONFIG_SYNO_RTD1619)
+#include <linux/arm-smccc.h>
+#endif /* CONFIG_SYNO_RTD1619 */
 #include <linux/errno.h>
 #include <linux/linkage.h>
 #include <linux/of.h>
@@ -74,8 +77,12 @@ struct psci_operations psci_ops;
 
 typedef unsigned long (psci_fn)(unsigned long, unsigned long,
 				unsigned long, unsigned long);
+#if defined(CONFIG_SYNO_RTD1619)
+//do nothing
+#else /* CONFIG_SYNO_RTD1619 */
 asmlinkage psci_fn __invoke_psci_fn_hvc;
 asmlinkage psci_fn __invoke_psci_fn_smc;
+#endif /* CONFIG_SYNO_RTD1619 */
 static psci_fn *invoke_psci_fn;
 
 enum psci_function {
@@ -123,6 +130,28 @@ bool psci_power_state_is_valid(u32 state)
 	return !(state & ~valid_mask);
 }
 
+#if defined(CONFIG_SYNO_RTD1619)
+static unsigned long __invoke_psci_fn_hvc(unsigned long function_id,
+			unsigned long arg0, unsigned long arg1,
+			unsigned long arg2)
+{
+	struct arm_smccc_res res;
+
+	arm_smccc_hvc(function_id, arg0, arg1, arg2, 0, 0, 0, 0, &res);
+	return res.a0;
+}
+
+static unsigned long __invoke_psci_fn_smc(unsigned long function_id,
+			unsigned long arg0, unsigned long arg1,
+			unsigned long arg2)
+{
+	struct arm_smccc_res res;
+
+	arm_smccc_smc(function_id, arg0, arg1, arg2, 0, 0, 0, 0, &res);
+	return res.a0;
+}
+
+#endif /* CONFIG_SYNO_RTD1619 */
 static int psci_to_linux_errno(int errno)
 {
 	switch (errno) {

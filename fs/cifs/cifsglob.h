@@ -512,94 +512,91 @@ inc_rfc1001_len(void *buf, int count)
 struct TCP_Server_Info {
 	struct list_head tcp_ses_list;
 	struct list_head smb_ses_list;
-	int srv_count; 
-	
+	int srv_count;  
+	 
 	char server_RFC1001_name[RFC1001_NAME_LEN_WITH_NULL];
 	struct smb_version_operations	*ops;
 	struct smb_version_values	*vals;
 #ifdef MY_ABC_HERE
-	struct smb_version_values	values;
-#endif 
-	enum statusEnum tcpStatus; 
-	char *hostname; 
+	 
+	struct smb_version_values	*values;
+#endif  
+	enum statusEnum tcpStatus;  
+	char *hostname;  
 	struct socket *ssocket;
 	struct sockaddr_storage dstaddr;
-	struct sockaddr_storage srcaddr; 
+	struct sockaddr_storage srcaddr;  
 #ifdef CONFIG_NET_NS
 	struct net *net;
 #endif
 	wait_queue_head_t response_q;
-	wait_queue_head_t request_q; 
+	wait_queue_head_t request_q;  
 	struct list_head pending_mid_q;
-	bool noblocksnd;		
-	bool noautotune;		
+	bool noblocksnd;		 
+	bool noautotune;		 
 	bool tcp_nodelay;
-	int credits;  
-	unsigned int in_flight;  
-	spinlock_t req_lock;  
+	int credits;   
+	unsigned int in_flight;   
+	spinlock_t req_lock;   
 	struct mutex srv_mutex;
 	struct task_struct *tsk;
 	char server_GUID[16];
 	__u16 sec_mode;
-	bool sign; 
-	bool session_estab; 
+	bool sign;  
+	bool session_estab;  
 #ifdef CONFIG_CIFS_SMB2
-	int echo_credits;  
-	int oplock_credits;  
-	bool echoes:1; 
-	__u8 client_guid[SMB2_CLIENT_GUID_SIZE]; 
+	int echo_credits;   
+	int oplock_credits;   
+	bool echoes:1;  
+	__u8 client_guid[SMB2_CLIENT_GUID_SIZE];  
 #endif
-	u16 dialect; 
-	bool oplocks:1; 
-	unsigned int maxReq;	
-	
-	
-	unsigned int maxBuf;	
-	
-	
-	
-	unsigned int max_rw;	
-	
-	
-	unsigned int capabilities; 
-	int timeAdj;  
-	__u64 CurrentMid;         
-	char cryptkey[CIFS_CRYPTO_KEY_SIZE]; 
-	
+	u16 dialect;  
+	bool oplocks:1;  
+	unsigned int maxReq;	 
+	 
+	unsigned int maxBuf;	 
+	 
+	unsigned int max_rw;	 
+	 
+	unsigned int capabilities;  
+	int timeAdj;   
+	__u64 CurrentMid;          
+	char cryptkey[CIFS_CRYPTO_KEY_SIZE];  
+	 
 	char workstation_RFC1001_name[RFC1001_NAME_LEN_WITH_NULL];
-	__u32 sequence_number; 
+	__u32 sequence_number;  
 	struct session_key session_key;
-	unsigned long lstrp; 
-	struct cifs_secmech secmech; 
-#define	CIFS_NEGFLAVOR_LANMAN	0	
-#define	CIFS_NEGFLAVOR_UNENCAP	1	
-#define	CIFS_NEGFLAVOR_EXTENDED	2	
-	char	negflavor;	
-	
-	bool	sec_ntlmssp;		
-	bool	sec_kerberosu2u;	
-	bool	sec_kerberos;		
-	bool	sec_mskerberos;		
-	bool	large_buf;		
-	struct delayed_work	echo; 
-	struct kvec *iov;	
-	unsigned int nr_iov;	
-	char	*smallbuf;	
-	char	*bigbuf;	
-	unsigned int total_read; 
+	unsigned long lstrp;  
+	struct cifs_secmech secmech;  
+#define	CIFS_NEGFLAVOR_LANMAN	0	 
+#define	CIFS_NEGFLAVOR_UNENCAP	1	 
+#define	CIFS_NEGFLAVOR_EXTENDED	2	 
+	char	negflavor;	 
+	 
+	bool	sec_ntlmssp;		 
+	bool	sec_kerberosu2u;	 
+	bool	sec_kerberos;		 
+	bool	sec_mskerberos;		 
+	bool	large_buf;		 
+	struct delayed_work	echo;  
+	struct kvec *iov;	 
+	unsigned int nr_iov;	 
+	char	*smallbuf;	 
+	char	*bigbuf;	 
+	unsigned int total_read;  
 #ifdef CONFIG_CIFS_FSCACHE
-	struct fscache_cookie   *fscache; 
+	struct fscache_cookie   *fscache;  
 #endif
 #ifdef CONFIG_CIFS_STATS2
-	atomic_t in_send; 
-	atomic_t num_waiters;   
+	atomic_t in_send;  
+	atomic_t num_waiters;    
 #endif
 #ifdef CONFIG_CIFS_SMB2
 	unsigned int	max_read;
 	unsigned int	max_write;
-	struct delayed_work reconnect; 
-	struct mutex reconnect_mutex; 
-#endif 
+	struct delayed_work reconnect;  
+	struct mutex reconnect_mutex;  
+#endif  
 };
 
 static inline unsigned int
@@ -1332,32 +1329,27 @@ static inline void free_dfs_info_array(struct dfs_info3_param *param,
 #define   CIFSSEC_MUST_LANMAN	0x10010
 #define   CIFSSEC_MUST_PLNTXT	0x20020
 #ifdef CONFIG_CIFS_UPCALL
-#define   CIFSSEC_MASK          0xBF0BF 
+#define   CIFSSEC_MASK          0xBF0BF  
 #else
-#define   CIFSSEC_MASK          0xB70B7 
-#endif 
-#else 
+#define   CIFSSEC_MASK          0xB70B7  
+#endif  
+#else  
 #define   CIFSSEC_MUST_LANMAN	0
 #define   CIFSSEC_MUST_PLNTXT	0
 #ifdef CONFIG_CIFS_UPCALL
-#define   CIFSSEC_MASK          0x8F08F 
+#define   CIFSSEC_MASK          0x8F08F  
 #else
-#define	  CIFSSEC_MASK          0x87087 
-#endif 
-#endif 
-#define   CIFSSEC_MUST_SEAL	0x40040 
-#define   CIFSSEC_MUST_NTLMSSP	0x80080 
+#define	  CIFSSEC_MASK          0x87087  
+#endif  
+#endif  
+#define   CIFSSEC_MUST_SEAL	0x40040  
+#define   CIFSSEC_MUST_NTLMSSP	0x80080  
 
 #define   CIFSSEC_DEF (CIFSSEC_MAY_SIGN | CIFSSEC_MAY_NTLMV2 | CIFSSEC_MAY_NTLMSSP)
 #define   CIFSSEC_MAX (CIFSSEC_MUST_SIGN | CIFSSEC_MUST_NTLMV2)
 #define   CIFSSEC_AUTH_MASK (CIFSSEC_MAY_NTLM | CIFSSEC_MAY_NTLMV2 | CIFSSEC_MAY_LANMAN | CIFSSEC_MAY_PLNTXT | CIFSSEC_MAY_KRB5 | CIFSSEC_MAY_NTLMSSP)
-
-
+ 
 #define UID_HASH (16)
-
-
-
-
 
 #ifdef DECLARE_GLOBALS_HERE
 #define GLOBAL_EXTERN
@@ -1365,57 +1357,53 @@ static inline void free_dfs_info_array(struct dfs_info3_param *param,
 #define GLOBAL_EXTERN extern
 #endif
 
-
 GLOBAL_EXTERN struct list_head		cifs_tcp_ses_list;
-
 
 GLOBAL_EXTERN spinlock_t		cifs_tcp_ses_lock;
 
-#ifdef CONFIG_CIFS_DNOTIFY_EXPERIMENTAL 
-
+#ifdef CONFIG_CIFS_DNOTIFY_EXPERIMENTAL  
+ 
 GLOBAL_EXTERN struct list_head GlobalDnotifyReqList;
-
+ 
 GLOBAL_EXTERN struct list_head GlobalDnotifyRsp_Q;
-#endif 
+#endif  
 
-
-GLOBAL_EXTERN unsigned int GlobalCurrentXid;	
-GLOBAL_EXTERN unsigned int GlobalTotalActiveXid; 
-GLOBAL_EXTERN unsigned int GlobalMaxActiveXid;	
-GLOBAL_EXTERN spinlock_t GlobalMid_Lock;  
-					  
-
+GLOBAL_EXTERN unsigned int GlobalCurrentXid;	 
+GLOBAL_EXTERN unsigned int GlobalTotalActiveXid;  
+GLOBAL_EXTERN unsigned int GlobalMaxActiveXid;	 
+GLOBAL_EXTERN spinlock_t GlobalMid_Lock;   
+					   
 GLOBAL_EXTERN atomic_t sesInfoAllocCount;
 GLOBAL_EXTERN atomic_t tconInfoAllocCount;
 GLOBAL_EXTERN atomic_t tcpSesAllocCount;
 GLOBAL_EXTERN atomic_t tcpSesReconnectCount;
 GLOBAL_EXTERN atomic_t tconInfoReconnectCount;
 
-
-GLOBAL_EXTERN atomic_t bufAllocCount;    
+GLOBAL_EXTERN atomic_t bufAllocCount;     
 #ifdef CONFIG_CIFS_STATS2
-GLOBAL_EXTERN atomic_t totBufAllocCount; 
+GLOBAL_EXTERN atomic_t totBufAllocCount;  
 GLOBAL_EXTERN atomic_t totSmBufAllocCount;
 #endif
 GLOBAL_EXTERN atomic_t smBufAllocCount;
 GLOBAL_EXTERN atomic_t midCount;
 
-
-GLOBAL_EXTERN bool enable_oplocks; 
+GLOBAL_EXTERN bool enable_oplocks;  
 GLOBAL_EXTERN bool lookupCacheEnabled;
-GLOBAL_EXTERN unsigned int global_secflags;	
-GLOBAL_EXTERN unsigned int sign_CIFS_PDUs;  
+GLOBAL_EXTERN unsigned int global_secflags;	 
+GLOBAL_EXTERN unsigned int sign_CIFS_PDUs;   
 #ifdef MY_ABC_HERE
-GLOBAL_EXTERN unsigned int SynoPosixSemanticsEnabled;
-#endif 
-GLOBAL_EXTERN bool linuxExtEnabled;
-GLOBAL_EXTERN unsigned int CIFSMaxBufSize;  
-GLOBAL_EXTERN unsigned int cifs_min_rcv;    
-GLOBAL_EXTERN unsigned int cifs_min_small;  
-GLOBAL_EXTERN unsigned int cifs_max_pending; 
-
+GLOBAL_EXTERN unsigned int SynoPosixSemanticsEnabled; 
+#endif  
+GLOBAL_EXTERN bool linuxExtEnabled; 
+GLOBAL_EXTERN unsigned int CIFSMaxBufSize;   
+GLOBAL_EXTERN unsigned int cifs_min_rcv;     
+GLOBAL_EXTERN unsigned int cifs_min_small;   
+GLOBAL_EXTERN unsigned int cifs_max_pending;  
 
 GLOBAL_EXTERN unsigned short echo_retries;
+#ifdef MY_ABC_HERE
+GLOBAL_EXTERN unsigned short need_nego_timeout;
+#endif  
 
 #ifdef CONFIG_CIFS_ACL
 GLOBAL_EXTERN struct rb_root uidtree;

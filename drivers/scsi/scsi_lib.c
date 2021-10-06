@@ -17,17 +17,15 @@
 #include <linux/scatterlist.h>
 #include <linux/blk-mq.h>
 #include <linux/ratelimit.h>
-#ifdef MY_ABC_HERE
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
 #include <linux/ata.h>
+#endif  
+#ifdef MY_ABC_HERE
 #ifdef MY_ABC_HERE
 #include <linux/synolib.h>
-#endif 
-#endif 
+#endif  
+#endif  
 
-#ifdef MY_ABC_HERE
-#include <scsi/scsi_transport.h>
-#include "scsi_transport_api.h"
-#endif 
 #include <scsi/scsi.h>
 #include <scsi/scsi_cmnd.h>
 #include <scsi/scsi_dbg.h>
@@ -47,7 +45,11 @@
 
 #ifdef MY_DEF_HERE
 extern int gSynoSASWriteConflictPanic;
-#endif 
+#endif  
+
+#ifdef MY_ABC_HERE
+#define SYNO_SMART_CMD_TIMEOUT 30 * HZ
+#endif  
 
 struct scsi_host_sg_pool {
 	size_t		size;
@@ -176,15 +178,19 @@ int scsi_execute(struct scsi_device *sdev, const unsigned char *cmd,
 	req->retries = retries;
 #ifdef MY_ABC_HERE
 	req->timeout = ((sdev->scmd_timeout_sec*HZ) > timeout ? (sdev->scmd_timeout_sec*HZ) : timeout);
-#else 
+	 
+	if ((ATA_CMD_SMART == req->cmd[0] ||
+				(ATA_16 == req->cmd[0] && ATA_CMD_SMART == req->cmd[14])) &&
+			SYNO_SMART_CMD_TIMEOUT > req->timeout) {
+		req->timeout = SYNO_SMART_CMD_TIMEOUT;
+	}
+#else  
 	req->timeout = timeout;
-#endif 
+#endif  
 	req->cmd_flags |= flags | REQ_QUIET | REQ_PREEMPT;
-
-	
+	 
 	blk_execute_rq(req->q, NULL, req, 1);
 
-	
 	if (unlikely(req->resid_len > 0 && req->resid_len <= bufflen))
 		memset(buffer + (bufflen - req->resid_len), 0, req->resid_len);
 
@@ -552,28 +558,35 @@ static void SynoSpinupDone(struct request *req, int uptodate)
 	SynoSpinupEnd(sdev);
 }
 
-static void SynoSubmitSpinupReq(struct scsi_device *device)
+extern struct workqueue_struct *spinup_workqueue;
+void SynoQueueSpinupReq (struct scsi_device *sdev)
+{
+	if (spinup_workqueue) {
+		queue_work(spinup_workqueue, &sdev->spinup_work);
+	} else {
+		schedule_work(&sdev->spinup_work);
+	}
+}
+
+void SynoSubmitSpinupReq(struct work_struct *work)
 {
 	struct request *req;
-	static int is_print = 0;
+	struct scsi_device *sdev;
 
-	while (1) {
-		req = blk_get_request(device->request_queue, READ, GFP_ATOMIC);
-		if (!req) {
-			if (!is_print) {
-				printk(KERN_ERR "%s: Can't get request, retry it", __FUNCTION__);
-				is_print = 1;
-			}
-		} else {
-			break;
-		}
+	sdev = container_of(work, struct scsi_device, spinup_work);
+
+	req = blk_get_request(sdev->request_queue, READ, GFP_ATOMIC);
+	if (IS_ERR(req)) {
+		SynoQueueSpinupReq(sdev);
+		printk(KERN_ERR "%s: Can't get request, retry it", __FUNCTION__);
+		return;
 	}
 
 	req->cmd[0] = START_STOP;
 	req->cmd[1] = 0;
 	req->cmd[2] = 0;
 	req->cmd[3] = 0;
-	req->cmd[4] = 1; 
+	req->cmd[4] = 1;  
 	req->cmd[5] = 0;
 
 	req->cmd_len = COMMAND_SIZE(req->cmd[0]);
@@ -589,10 +602,10 @@ static void SynoSubmitSpinupReq(struct scsi_device *device)
 static void SynoSpinupDisk(struct scsi_device *device)
 {
 	if (SynoSpinupBegin(device)) {
-		SynoSubmitSpinupReq(device);
+		SynoQueueSpinupReq(device);
 	}
 }
-#endif 
+#endif  
 
 static void scsi_release_bidi_buffers(struct scsi_cmnd *cmd)
 {
@@ -1767,43 +1780,34 @@ static void syno_disk_hiternation_cmd_printk(struct scsi_device *sdp, struct scs
 		}
 	}
 }
-#endif 
-
+#endif  
 
 static int scsi_dispatch_cmd(struct scsi_cmnd *cmd)
 {
 	struct Scsi_Host *host = cmd->device->host;
 	int rtn = 0;
-#ifdef MY_ABC_HERE
-	unsigned long ulflags;
-	struct Scsi_Host *pMaster_host = NULL;
-#endif 
 
 	atomic_inc(&cmd->device->iorequest_cnt);
 
-	
 	if (unlikely(cmd->device->sdev_state == SDEV_DEL)) {
-		
+		 
 		cmd->result = DID_NO_CONNECT << 16;
 		goto done;
 	}
 
-	
 	if (unlikely(scsi_device_blocked(cmd->device))) {
-		
+		 
 		SCSI_LOG_MLQUEUE(3, scmd_printk(KERN_INFO, cmd,
 			"queuecommand : device blocked\n"));
 		return SCSI_MLQUEUE_DEVICE_BUSY;
 	}
 
-	
 	if (cmd->device->lun_in_cdb)
 		cmd->cmnd[1] = (cmd->cmnd[1] & 0x1f) |
 			       (cmd->device->lun << 5 & 0xe0);
 
 	scsi_log_send(cmd);
 
-	
 	if (cmd->cmd_len > cmd->device->host->max_cmd_len) {
 		SCSI_LOG_MLQUEUE(3, scmd_printk(KERN_INFO, cmd,
 			       "queuecommand : command too long. "
@@ -1814,52 +1818,22 @@ static int scsi_dispatch_cmd(struct scsi_cmnd *cmd)
 	}
 
 #ifdef MY_ABC_HERE
-	
-	if (host->transportt->is_eunit_deepsleep && host->is_eunit_deepsleep && host->eunit_lock_configured){
-		spin_lock_irqsave(host->peunit_poweron_lock, ulflags);
-		if (*(host->puiata_eh_flag)) {
-			spin_unlock_irqrestore(host->peunit_poweron_lock, ulflags);
-			return SCSI_MLQUEUE_HOST_BUSY;
-		}
-		(*(host->puiata_eh_flag)) ++;
-		spin_unlock_irqrestore(host->peunit_poweron_lock, ulflags);
-		if ((pMaster_host = host->transportt->is_eunit_deepsleep(host))) {
-			
-			scsi_schedule_eh(host);
-		}
-		(*(host->puiata_eh_flag)) --;
-	}
-#endif 
-
-#ifdef CONFIG_SYNO_SAS_SPINUP_DELAY_DEBUG
-	
-	if (0x1b == cmd->cmnd[0]) {
-		sdev_printk(KERN_ERR, cmd->device,
-				"START_STOP run  - tag %02x %s - %02x %02x %02x %02x %02x %02x\n",
-				cmd->tag, (cmd->cmnd[4]&0x01)?"START":"STOP ",
-				cmd->cmnd[0], cmd->cmnd[1], cmd->cmnd[2],
-				cmd->cmnd[3], cmd->cmnd[4], cmd->cmnd[5]);
-	}
-#endif 
-#ifdef MY_ABC_HERE
-	
+	 
 	if (cmd->device->spindown &&
-	
+	 
 		!(ATA_16 == cmd->cmnd[0] && (ATA_CMD_PMP_WRITE == cmd->cmnd[14] || ATA_CMD_PMP_READ == cmd->cmnd[14])) &&
 		TEST_UNIT_READY != cmd->cmnd[0]) {
 #ifdef MY_ABC_HERE
 		if (0 < gSynoHibernationLogLevel) {
 			syno_disk_hiternation_cmd_printk(cmd->device, cmd);
 		}
-#endif 
+#endif  
 		if (0 == cmd->device->do_standby_syncing) {
 			cmd->device->idle = jiffies;
 		}
 		cmd->device->spindown = 0;
 	}
 
-	
-	
 	if (0x0C == cmd->cmnd[0]) {
 		struct scatterlist *sg;
 		unsigned char* pBuffer;

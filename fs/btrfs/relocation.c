@@ -504,8 +504,8 @@ static int is_cowonly_root(u64 root_objectid)
 	    root_objectid == BTRFS_CSUM_TREE_OBJECTID ||
 	    root_objectid == BTRFS_UUID_TREE_OBJECTID ||
 #ifdef MY_ABC_HERE
-	    root_objectid == BTRFS_USRQUOTA_TREE_OBJECTID ||
-#endif 
+	    root_objectid == BTRFS_BLOCK_GROUP_CACHE_TREE_OBJECTID ||
+#endif  
 	    root_objectid == BTRFS_QUOTA_TREE_OBJECTID ||
 	    root_objectid == BTRFS_FREE_SPACE_TREE_OBJECTID)
 		return 1;
@@ -1545,11 +1545,7 @@ int replace_file_extents(struct btrfs_trans_handle *trans,
 		ret = btrfs_inc_extent_ref(trans, root, new_bytenr,
 					   num_bytes, parent,
 					   btrfs_header_owner(leaf),
-#ifdef MY_ABC_HERE
-					   key.objectid, key.offset, 1);
-#else
 					   key.objectid, key.offset);
-#endif 
 		if (ret) {
 			btrfs_abort_transaction(trans, root, ret);
 			break;
@@ -1557,11 +1553,7 @@ int replace_file_extents(struct btrfs_trans_handle *trans,
 
 		ret = btrfs_free_extent(trans, root, bytenr, num_bytes,
 					parent, btrfs_header_owner(leaf),
-#ifdef MY_ABC_HERE
-					key.objectid, key.offset, 1);
-#else
 					key.objectid, key.offset);
-#endif 
 		if (ret) {
 			btrfs_abort_transaction(trans, root, ret);
 			break;
@@ -1726,37 +1718,21 @@ again:
 
 		ret = btrfs_inc_extent_ref(trans, src, old_bytenr, blocksize,
 					path->nodes[level]->start,
-#ifdef MY_ABC_HERE
-					src->root_key.objectid, level - 1, 0, 1);
-#else
 					src->root_key.objectid, level - 1, 0);
-#endif 
 		BUG_ON(ret);
 		ret = btrfs_inc_extent_ref(trans, dest, new_bytenr, blocksize,
 					0, dest->root_key.objectid, level - 1,
-#ifdef MY_ABC_HERE
-					0, 1);
-#else
 					0);
-#endif 
 		BUG_ON(ret);
 
 		ret = btrfs_free_extent(trans, src, new_bytenr, blocksize,
 					path->nodes[level]->start,
-#ifdef MY_ABC_HERE
-					src->root_key.objectid, level - 1, 0, 1);
-#else
 					src->root_key.objectid, level - 1, 0);
-#endif 
 		BUG_ON(ret);
 
 		ret = btrfs_free_extent(trans, dest, old_bytenr, blocksize,
 					0, dest->root_key.objectid, level - 1,
-#ifdef MY_ABC_HERE
-					0, 1);
-#else
 					0);
-#endif 
 		BUG_ON(ret);
 
 		btrfs_unlock_up_safe(path, 0);
@@ -2536,11 +2512,7 @@ static int do_relocation(struct btrfs_trans_handle *trans,
 						node->eb->start, blocksize,
 						upper->eb->start,
 						btrfs_header_owner(upper->eb),
-#ifdef MY_ABC_HERE
-						node->level, 0, 1);
-#else
 						node->level, 0);
-#endif 
 			BUG_ON(ret);
 
 			ret = btrfs_drop_subtree(trans, root, eb, upper->eb);

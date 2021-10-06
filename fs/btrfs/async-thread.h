@@ -51,16 +51,17 @@ BTRFS_WORK_HELPER_PROTO(delayed_meta_helper);
 BTRFS_WORK_HELPER_PROTO(readahead_helper);
 #ifdef MY_ABC_HERE
 BTRFS_WORK_HELPER_PROTO(reada_path_start_helper);
-#endif 
+#endif  
 BTRFS_WORK_HELPER_PROTO(qgroup_rescan_helper);
-#ifdef MY_ABC_HERE
-BTRFS_WORK_HELPER_PROTO(usrquota_rescan_helper);
-#endif 
 BTRFS_WORK_HELPER_PROTO(extent_refs_helper);
 BTRFS_WORK_HELPER_PROTO(scrub_helper);
 BTRFS_WORK_HELPER_PROTO(scrubwrc_helper);
 BTRFS_WORK_HELPER_PROTO(scrubnc_helper);
 BTRFS_WORK_HELPER_PROTO(scrubparity_helper);
+#ifdef MY_ABC_HERE
+BTRFS_WORK_HELPER_PROTO(syno_nocow_endio_helper);
+BTRFS_WORK_HELPER_PROTO(syno_high_priority_endio_helper);
+#endif  
 
 struct btrfs_workqueue *btrfs_alloc_workqueue(const char *name,
 					      unsigned int flags,

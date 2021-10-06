@@ -1,3 +1,16 @@
+#if defined(MY_DEF_HERE)
+/*
+ * barrier.h
+ *
+ * Copyright (c) 2017 Realtek Semiconductor Corp.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ */
+#endif /* MY_DEF_HERE */
+
 #ifndef INCLUDE_SOC_REALTEK_BARRIER_H_
 #define INCLUDE_SOC_REALTEK_BARRIER_H_
 

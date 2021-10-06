@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2007 Oracle.  All rights reserved.
  *
@@ -75,6 +78,11 @@ struct btrfs_ordered_sum {
 				 * in the logging code. */
 #define BTRFS_ORDERED_PENDING 11 /* We are waiting for this ordered extent to
 				  * complete in the current transaction. */
+#ifdef MY_ABC_HERE
+#define BTRFS_ORDERED_WORK_INITIALIZED 13
+#define BTRFS_ORDERED_HIGH_PRIORITY 14
+#endif /* MY_ABC_HERE */
+
 struct btrfs_ordered_extent {
 	/* logical offset in the file */
 	u64 file_offset;
@@ -139,6 +147,9 @@ struct btrfs_ordered_extent {
 	struct completion completion;
 	struct btrfs_work flush_work;
 	struct list_head work_list;
+#ifdef MY_ABC_HERE
+	int high_priority;
+#endif /* MY_ABC_HERE */
 };
 
 /*

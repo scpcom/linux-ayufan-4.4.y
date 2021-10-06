@@ -10,10 +10,23 @@ int add_mtd_device(struct mtd_info *mtd);
 int del_mtd_device(struct mtd_info *mtd);
 int add_mtd_partitions(struct mtd_info *, const struct mtd_partition *, int);
 int del_mtd_partitions(struct mtd_info *);
+#if defined(MY_DEF_HERE)
+
+struct mtd_partitions;
+
+#endif /* MY_DEF_HERE */
 int parse_mtd_partitions(struct mtd_info *master, const char * const *types,
+#if defined(MY_DEF_HERE)
+			 struct mtd_partitions *pparts,
+#else /* MY_DEF_HERE */
 			 struct mtd_partition **pparts,
+#endif /* MY_DEF_HERE */
 			 struct mtd_part_parser_data *data);
 
+#if defined(MY_DEF_HERE)
+void mtd_part_parser_cleanup(struct mtd_partitions *parts);
+
+#endif /* MY_DEF_HERE */
 int __init init_mtdchar(void);
 void __exit cleanup_mtdchar(void);
 

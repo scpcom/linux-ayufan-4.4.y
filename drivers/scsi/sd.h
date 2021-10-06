@@ -58,19 +58,22 @@ typedef enum __syno_disk_type {
 	SYNO_DISK_ISCSI,
 	SYNO_DISK_SAS,
 #ifdef MY_DEF_HERE
-	SYNO_DISK_CACHE, 
-#endif 
-	SYNO_DISK_END, 
+	SYNO_DISK_CACHE,  
+#endif  
+#ifdef MY_DEF_HERE
+	SYNO_DISK_SYSTEM,  
+#endif  
+	SYNO_DISK_END,  
 } SYNO_DISK_TYPE;
-#endif 
+#endif  
 
 struct scsi_disk {
-	struct scsi_driver *driver;	
+	struct scsi_driver *driver;	 
 	struct scsi_device *device;
 	struct device	dev;
 	struct gendisk	*disk;
 	atomic_t	openers;
-	sector_t	capacity;	
+	sector_t	capacity;	 
 	u32		max_xfer_blocks;
 	u32		opt_xfer_blocks;
 	u32		max_ws_blocks;

@@ -761,7 +761,46 @@ int syno_cpu_temperature(struct _SynoCpuTemp *pCpuTemp)
 	return 0;
 }
 EXPORT_SYMBOL(syno_cpu_temperature);
-#endif 
+
+int syno_cpu_tjmax(int cpu_no, int *tjmax)
+{
+	struct platform_data *pdata = NULL;
+	struct pdev_entry *p = NULL;
+	struct pdev_entry *n = NULL;
+	struct temp_data *tdata = NULL;
+	int    iIndex = 0;
+	int    ret = -1;
+
+	if (tjmax == NULL) {
+		goto RET;
+	}
+
+	mutex_lock(&pdev_list_mutex);
+	list_for_each_entry_safe(p, n, &pdev_list, list) {
+		pdata = dev_get_drvdata(&(p->pdev->dev));
+		if (!pdata) {
+			printk("Can't get Core %d data\n", p->phys_proc_id);
+			continue;
+		}
+		if (cpu_no != p->phys_proc_id) {
+			continue;
+		}
+		iIndex = TO_ATTR_NO(p->phys_proc_id);
+		tdata = pdata->core_data[iIndex];
+		if (!tdata) {
+			printk("Can't get Core %d temperature data\n", p->phys_proc_id);
+			continue;
+		}
+		*tjmax = tdata->tjmax / 1000;
+		ret = 0;
+		break;
+	}
+	mutex_unlock(&pdev_list_mutex);
+RET:
+	return ret;
+}
+EXPORT_SYMBOL(syno_cpu_tjmax);
+#endif  
 
 MODULE_AUTHOR("Rudolf Marek <r.marek@assembler.cz>");
 MODULE_DESCRIPTION("Intel Core temperature monitor");

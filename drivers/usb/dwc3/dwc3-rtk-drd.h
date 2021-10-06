@@ -1,6 +1,10 @@
 /**
  * dwc3-rtk-drd.h - Realtek DWC3 Specific Glue layer
  *
+#if defined(MY_DEF_HERE)
+ * Copyright (C) 2017 Realtek Semiconductor Corporation
+ *
+#endif // MY_DEF_HERE
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or

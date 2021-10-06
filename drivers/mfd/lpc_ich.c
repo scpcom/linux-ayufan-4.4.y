@@ -837,23 +837,24 @@ static u32 c226_writable_pin[] = {5, 16, 18, 19, 20, 21, 23, 32, 33, 34, 35, 36,
 static u32 avoton_writable_pin[] = {10, 15, 16, 17, 49, 50, 53, 54};
 #ifdef CONFIG_SYNO_BROADWELLNTB
 static u32 broadwellntb_writable_pin[] = {3, 4, 5, 26, 28, 32, 33, 44, 45, 46};
+#elif defined CONFIG_SYNO_BROADWELLNTBAP
+static u32 broadwellntbap_writable_pin[] = {3, 4, 5, 26, 28, 31, 32, 33, 44, 45, 46};
 #else
-static u32 broadwell_writable_pin[] = {3, 4, 5, 25, 27, 28, 45, 70, 71};
-#endif 
+static u32 broadwell_writable_pin[] = {3, 4, 5, 15, 24, 25, 26, 27, 28, 45, 61, 70, 71};
+#endif  
 
 #ifdef MY_DEF_HERE
-
+ 
 static u32 coreWellGpio = 0;
 static u32 susWellGpio = 0;
-static u32 avoton_corewell_gpioin_pin = 0x18041831; 
+static u32 avoton_corewell_gpioin_pin = 0x18041831;  
 static u32 avoton_suswell_gpioin_pin = 0xC181114;
 
-
 #define GPIO_MAX_PIN 63
-#else 
-
+#else  
+ 
 #define GPIO_MAX_PIN 95
-#endif 
+#endif  
 
 u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite)
 {
@@ -1013,10 +1014,13 @@ static int syno_gpio_init(struct pci_dev *dev)
 #ifdef CONFIG_SYNO_BROADWELLNTB
 			writable_pin = broadwellntb_writable_pin;
 			SynoGpioCount = ARRAY_SIZE(broadwellntb_writable_pin);
+#elif defined CONFIG_SYNO_BROADWELLNTBAP
+			writable_pin = broadwellntbap_writable_pin;
+			SynoGpioCount = ARRAY_SIZE(broadwellntbap_writable_pin);
 #else
 			writable_pin = broadwell_writable_pin;
 			SynoGpioCount = ARRAY_SIZE(broadwell_writable_pin);
-#endif 
+#endif  
 			break;
 		default:
 			printk("Unknown LPC device %04x\n", dev->device);

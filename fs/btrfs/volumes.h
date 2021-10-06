@@ -263,11 +263,6 @@ struct btrfs_fs_devices {
 
 #define BTRFS_BIO_INLINE_CSUM_SIZE	64
 
-#ifdef MY_ABC_HERE
-#define BTRFS_BIO_SHOULD_ABORT_RETRY ((u8)-2)
-#define BTRFS_BIO_RETRY_ABORTED ((u8)-1)
-#endif /* MY_ABC_HERE */
-
 /*
  * we need the mirror number and stripe index to be passed around
  * the call chain while we are processing end_io (especially errors).
@@ -283,19 +278,10 @@ struct btrfs_io_bio {
 	unsigned int stripe_index;
 	u64 logical;
 	u8 *csum;
-#ifdef MY_ABC_HERE
-	/*
-	 * In retry mode, the first 32 bits is the correct csum, and
-	 * the second 32 bits is bad csum from previous retry.
-	 */
-#endif /* MY_ABC_HERE */
+
 	u8 csum_inline[BTRFS_BIO_INLINE_CSUM_SIZE];
 	u8 *csum_allocated;
 	btrfs_io_bio_end_io_t *end_io;
-#ifdef MY_ABC_HERE
-	// Must be placed before bio since bio has inline data.
-	u8 nr_retry;
-#endif /* MY_ABC_HERE */
 	struct bio bio;
 };
 

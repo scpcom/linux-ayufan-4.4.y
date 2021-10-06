@@ -87,6 +87,16 @@
 #define SND_AUDIOCODEC_MAX                   SND_AUDIOCODEC_G729
 #endif /* MY_DEF_HERE */
 
+#if defined(MY_DEF_HERE)
+/* Rtk begin */
+#define SND_AUDIOCODEC_EAC3                  ((__u32) 0x0000000F)
+#define SND_AUDIOCODEC_DTS                   ((__u32) 0x00000010)
+#define SND_AUDIOCODEC_DTS_HD                ((__u32) 0x00000011)
+#define SND_AUDIOCODEC_TRUEHD                ((__u32) 0x00000012)
+#define SND_AUDIOCODEC_AC3                   ((__u32) 0x00000013)
+/* Rtk end */
+#endif /* MY_DEF_HERE */
+
 /*
  * Profile and modes are listed with bit masks. This allows for a
  * more compact representation of fields that will not evolve

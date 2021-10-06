@@ -68,7 +68,11 @@ static int bcm63xx_detect_cfe(struct mtd_info *master)
 }
 
 static int bcm63xx_parse_cfe_partitions(struct mtd_info *master,
+#if defined(CONFIG_SYNO_RTD1619)
+					const struct mtd_partition **pparts,
+#else /* CONFIG_SYNO_RTD1619 */
 					struct mtd_partition **pparts,
+#endif /* CONFIG_SYNO_RTD1619 */
 					struct mtd_part_parser_data *data)
 {
 	/* CFE, NVRAM and global Linux are always present */

@@ -27,26 +27,16 @@
 
 #ifdef MY_ABC_HERE
 #include <linux/magic.h>
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
 #include "synoacl_int.h"
-#endif 
+#endif  
 #include "internal.h"
 #include "mount.h"
 #ifdef MY_ABC_HERE
 extern struct rw_semaphore namespace_sem;
-#endif 
-
-
-
-
-
-
-
-
-
-
-
+static DEFINE_RATELIMIT_STATE(_namei_rs, (3600 * HZ), 1);
+#endif  
 
 #ifdef MY_ABC_HERE
 int syno_utf8chr_to_utf16chr(u_int16_t *p, const u_int8_t *s, int n);
@@ -4055,6 +4045,8 @@ static inline struct synotify_rename_path * get_rename_path(struct vfsmount *vfs
 
 	rename_path = kmalloc(sizeof(struct synotify_rename_path), GFP_NOFS);
 	if (!rename_path) {
+		if (__ratelimit(&_namei_rs))
+			printk(KERN_WARNING "synotify get ENOMEM in file: %s, line: %d\n", __FILE__, __LINE__);
 		goto end;
 	}
 
@@ -4072,15 +4064,18 @@ static inline struct synotify_rename_path * get_rename_path(struct vfsmount *vfs
 
 	old_path_buf = kmalloc(PATH_MAX, GFP_NOFS);
 	if (!old_path_buf) {
+		if (__ratelimit(&_namei_rs))
+			printk(KERN_WARNING "synotify get ENOMEM in file: %s, line: %d\n", __FILE__, __LINE__);
 		goto end;
 	}
 
 	new_path_buf = kmalloc(PATH_MAX, GFP_NOFS);
 	if (!new_path_buf) {
+		if (__ratelimit(&_namei_rs))
+			printk(KERN_WARNING "synotify get ENOMEM in file: %s, line: %d\n", __FILE__, __LINE__);
 		goto end;
 	}
 
-	
 	tmp_old_full_path = __d_path(&old_path, &root_path, old_path_buf, PATH_MAX-1);
 	tmp_new_full_path = __d_path(&new_path, &root_path, new_path_buf, PATH_MAX-1);
 

@@ -59,12 +59,10 @@ struct snd_dma_device {
 #else
 #define SNDRV_DMA_TYPE_DEV_IRAM	SNDRV_DMA_TYPE_DEV
 #endif
-#ifdef MY_DEF_HERE
-//rtk begin
+#if defined(MY_DEF_HERE) || defined(CONFIG_RTK_PLATFORM) && defined(MY_DEF_HERE)
 #define SNDRV_DMA_TYPE_ION_PLAYBACK 5
 #define SNDRV_DMA_TYPE_ION_CAPTURE  6
-//rtk end
-#endif /* MY_DEF_HERE */
+#endif /* MY_DEF_HERE || CONFIG_RTK_PLATFORM && MY_DEF_HERE */
 
 /*
  * info for buffer allocation

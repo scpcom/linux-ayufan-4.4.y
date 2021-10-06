@@ -19,36 +19,28 @@ struct pool_info {
 
 struct r1conf {
 	struct mddev		*mddev;
-	struct raid1_info	*mirrors;	
+	struct raid1_info	*mirrors;	 
 	int			raid_disks;
 
-	
 	sector_t		next_resync;
 
 #ifdef MY_ABC_HERE
-#else 
-	
+#else  
+	 
 	sector_t		start_next_window;
 	int			current_window_requests;
 	int			next_window_requests;
-#endif 
+#endif  
 
 	spinlock_t		device_lock;
 
-	
 	struct list_head	retry_list;
-	
+	 
 	struct list_head	bio_end_io_list;
-#ifdef MY_ABC_HERE
-	spinlock_t          syno_self_heal_retry_list_lock;
-	struct list_head    syno_self_heal_retry_list;
-#endif 
 
-	
 	struct bio_list		pending_bio_list;
 	int			pending_count;
 
-	
 	wait_queue_head_t	wait_barrier;
 	spinlock_t		resync_lock;
 	int			nr_pending;

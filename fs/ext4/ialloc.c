@@ -366,12 +366,7 @@ static int find_group_orlov(struct super_block *sb, struct inode *parent,
 	struct ext4_sb_info *sbi = EXT4_SB(sb);
 	ext4_group_t real_ngroups = ext4_get_groups_count(sb);
 	int inodes_per_group = EXT4_INODES_PER_GROUP(sb);
-#ifdef MY_ABC_HERE
-	ext4_fsblk_t freei, avefreei;
-	unsigned int grp_free;
-#else
 	unsigned int freei, avefreei, grp_free;
-#endif 
 	ext4_fsblk_t freeb, avefreec;
 	unsigned int ndirs;
 	int max_dirs, min_inodes;

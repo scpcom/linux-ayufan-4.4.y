@@ -22,14 +22,6 @@
 #define NFS2MODE_SOCK	0140000
 #define NFS2MODE_FIFO	0010000
 
-#ifdef MY_ABC_HERE
-#define NFS2_MAXZEROEDSIZE      (1<<27)
-#define NFS2_SYNOCOPYSIZE       (1<<27)
-#define NFS2_4G                 (1ULL<<32)
-#define NFS2_LENTHINBYTE        8
-#endif
-
-
 enum nfs2_ftype {
 	NF2NON = 0,
 	NF2REG = 1,
@@ -66,14 +58,4 @@ struct nfs2_fh {
 #define NFSPROC_READDIR		16
 #define NFSPROC_STATFS		17
 
-#ifdef MY_ABC_HERE
-#define NFSPROC_SYNO_WRITEZERO  28
-#define NFSPROC_SYNO_XLOOKUP    29
-#define NFSPROC_SYNO_COPY       30
-#define NFSPROC_SYNO_SUPPORT    31
-#ifdef MY_ABC_HERE
-#define NFSPROC_SYNO_CLONE      32
-#endif 
-#endif
-
-#endif 
+#endif  

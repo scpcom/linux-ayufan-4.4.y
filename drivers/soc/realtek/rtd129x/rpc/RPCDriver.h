@@ -12,7 +12,12 @@
 #include <linux/devfs_fs_kernel.h>
 #endif
 
+#if defined(MY_DEF_HERE)
 #include "soc/realtek/memory.h"
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
+#include "soc/realtek/memory_1619.h"
+#endif /* MY_DEF_HERE */
 
 //#define REG_SB2_CPU_INT           0xb801a104
 //#define REG_SB2_CPU_INT_EN        0xb801a108

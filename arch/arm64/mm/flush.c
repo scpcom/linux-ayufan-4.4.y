@@ -101,9 +101,9 @@ EXPORT_SYMBOL(flush_dcache_page);
 /*
  * Additional functions defined in assembly.
  */
-#ifdef MY_DEF_HERE
+#if defined(MY_DEF_HERE) || defined(CONFIG_RTK_PLATFORM) && defined(MY_DEF_HERE)
 EXPORT_SYMBOL(flush_cache_all);
-#endif
+#endif /* MY_DEF_HERE || CONFIG_RTK_PLATFORM && MY_DEF_HERE */
 EXPORT_SYMBOL(flush_icache_range);
 
 #ifdef CONFIG_TRANSPARENT_HUGEPAGE

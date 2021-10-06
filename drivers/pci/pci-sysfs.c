@@ -404,6 +404,7 @@ static const struct pci_device_id syno_device[] = {
 	{ PCI_DEVICE(PCI_VENDOR_ID_MARVELL_EXT, 0x9215) },
 	{ PCI_DEVICE(PCI_VENDOR_ID_MARVELL_EXT, 0x9235) },
 	{ PCI_DEVICE(PCI_VENDOR_ID_ASMEDIA, 0x0612) },
+	{ PCI_DEVICE(PCI_VENDOR_ID_JMICRON, 0x0585) },
 };
 
 static bool is_synology_device(struct pci_dev *pdev)
@@ -419,6 +420,57 @@ static bool is_synology_device(struct pci_dev *pdev)
 	}
 	return false;
 }
+
+u8 jmb585_spi_wait_status_wip0(void __iomem *host_mmio, u32 timeout_ms, u8 delay_ms)
+{
+	unsigned long timeout;
+	u8 wip0_flag = 0;
+
+	timeout = jiffies + msecs_to_jiffies(timeout_ms*1000);
+
+	while (time_before(jiffies, timeout)) {
+		// check WIP bit
+		writel(0xFF | (0x80 << 8) | (0x08 << 16) | (0x05 << 24), host_mmio + 0xB4);
+		if (((u8) readl(host_mmio + 0xCC)) & 0x01) {
+			ndelay(5);
+		} else {
+			// wip became zero
+			wip0_flag = 1;
+			break;
+		}
+	}
+
+	if (!wip0_flag) {
+		printk("\nJMB585 header update error: WIP bit of Flash Status didn't become zero\n\n");
+	}
+
+	return 1;
+}
+
+u8 jmb585_spi_wait_read_done(void __iomem *host_mmio, u8 *buffer, u32 buffer_size, u32 offset)
+{
+	u32 i;
+	u32 dwData = 0;
+
+	// wait WIP bit to become zero
+	if(!jmb585_spi_wait_status_wip0(host_mmio, 2*1000, 1)) {
+		return 0;
+	}
+	// setting for reading
+	writel(0xFF | (0x80 << 8) | (0xE9 << 16) | (0x03 << 24), host_mmio + 0xB4);
+
+	for (i = offset; i < (buffer_size+offset); i += 4) {
+		writel(i, host_mmio + 0xC0);
+		dwData = readl(host_mmio + 0xCC);
+		buffer[i - offset] = (u8)dwData;
+		buffer[i - offset + 1] = (u8)(dwData >> 8);
+		buffer[i - offset + 2] = (u8)(dwData >> 16);
+		buffer[i - offset + 3] = (u8)(dwData >> 24);
+	}
+
+	return 1;
+}
+
 #define SATA_SPEED_LEN 3
 static ssize_t test_port_show(struct device *dev,
 			       struct device_attribute *attr, char *buf)
@@ -452,6 +504,8 @@ static ssize_t test_port_store (struct device *dev,
 	} else if ((pdev->vendor == 0x1b4b && pdev->device == 0x9170) ||
 			(pdev->vendor == 0x1b21 && pdev->device == 0x0612)) {
 		port_num = 2;
+	} else if (pdev->vendor == 0x197b && pdev->device == 0x0585) {
+		port_num = 5;
 	}
 
 	if (port_num <= val) {
@@ -570,6 +624,8 @@ static ssize_t test_setup_store (struct device *dev,
 			iounmap(bar5);
 			bar5 = NULL;
 		}
+	} else if (pdev->vendor == 0x197b && pdev->device == 0x0585) {
+		//already set pdev->test_speed above, do nothing here
 	}
 
 	return count;
@@ -822,6 +878,8 @@ static ssize_t test_pattern_store (struct device *dev,
 		if (!memcmp(buf, "SSOP", 4)) {
 			pci_bus_write_config_byte(pdev->bus, PCI_DEVFN(0x00, 0x0), (0 == pdev->test_port) ? 0xCB2 : 0xDB2, reg_data_SSOP[pdev->test_speed - 1]);
 		}
+	} else if (pdev->vendor == 0x197b && pdev->device == 0x0585) {
+		dev_warn(&pdev->dev, "Not support this function by now!!\n");
 	}
 
 	return count;
@@ -832,6 +890,9 @@ extern const unsigned mv_port_data[4];
 unsigned mv_speed_addr[3] = {0x8D, 0x8F, 0x91};
 int asm1061_reg_addr_port0[SATA_SPEED_LEN] = {0xCA4, 0xCA5, 0xCA6};
 int asm1061_reg_addr_port1[SATA_SPEED_LEN] = {0xDA4, 0xDA5, 0xDA6};
+unsigned jmb_port_addr[3][5] = {{0x74, 0x76, 0x78, 0x7A, 0x7C},
+                                {0x73, 0x75, 0x77, 0x79, 0x7B},
+                                {0x04, 0x11, 0x1e, 0x2b, 0x38}};
 
 static ssize_t test_amp_adjust_show(struct device *dev,
 			       struct device_attribute *attr, char *buf)
@@ -881,6 +942,35 @@ static ssize_t test_amp_adjust_show(struct device *dev,
 		dev_info(&pdev->dev, "TX amplitude: 0x%x", reg_data & 0x0f);
 
 		return sprintf(buf, "%x\n", reg_data);
+	} else if (pdev->vendor == 0x197b && pdev->device == 0x0585) {
+		void __iomem *bar5 = NULL;
+		u32 value;
+
+		bar5 = ioremap(pci_resource_start(pdev, 5), pci_resource_len(pdev, 5));
+		if (!bar5) {
+			dev_warn(&pdev->dev, "Can't map jmb sata registers\n");
+			return 0;
+		}
+		if (0 > pdev->test_port || 4 < pdev->test_port) {
+			return 0;
+		}
+		// Index port has 24 bits, PHY registers access uses bit[12:0] and bit[18], bit[18] is used to select:
+		//   0: PCIe PHY registers
+		//   1: SATA PHY registers.
+		// Offset C0 [IDXP] is index port register
+		writel((jmb_port_addr[pdev->test_speed - 1][pdev->test_port] & 0x01FFFUL) + (1UL << 18UL), bar5 + 0xC0);
+		// Offset C8 [DPHY] is data port for PCIe/SATA PHY registers access.
+		value = readl(bar5 + 0xC8);
+
+		if (bar5) {
+			iounmap(bar5);
+			bar5 = NULL;
+		}
+
+		dev_info(&pdev->dev, "TX de-emphasis: 0x%lx", (value & 0x3FFFFE0UL) >> 5);
+		dev_info(&pdev->dev, "TX amplitude: 0x%lx", value & 0x1FUL);
+
+		return sprintf (buf, "%x\n", value);
 	}
 
 	return 0;
@@ -947,8 +1037,168 @@ static ssize_t test_amp_adjust_store (struct device *dev,
 
 		dev_info(&pdev->dev, "TX de-emphasis: 0x%x", (reg_data & 0xf0) >> 4);
 		dev_info(&pdev->dev, "TX amplitude: 0x%x", reg_data & 0x0f);
+	} else if (pdev->vendor == 0x197b && pdev->device == 0x0585) {
+		void __iomem *bar5 = NULL;
+		u32 iValue;
+
+		sscanf(buf, "%x", &iValue);
+
+		if (0 > pdev->test_port || 4 < pdev->test_port) {
+			return 0;
+		}
+
+		bar5 = ioremap(pci_resource_start(pdev, 5), pci_resource_len(pdev, 5));
+		if (!bar5) {
+			dev_warn(&pdev->dev, "Can't map jmb sata registers\n");
+			return count;
+		}
+		// Index port has 24 bits, PHY registers access uses bit[12:0] and bit[18], bit[18] is used to select:
+		//   0: PCIe PHY registers
+		//   1: SATA PHY registers.
+		// Offset C0 [IDXP] is index port register
+		writel((jmb_port_addr[pdev->test_speed - 1][pdev->test_port] & 0x01FFFUL) + (1UL << 18UL), bar5 + 0xC0);
+		// Offset C8 [DPHY] is data port for PCIe/SATA PHY registers access.
+		writel(iValue, bar5 + 0xC8);
+
+		dev_info(&pdev->dev, "TX de-emphasis: 0x%lx", (iValue & 0x3FFFFE0UL) >> 5);
+		dev_info(&pdev->dev, "TX amplitude: 0x%lx", iValue & 0x1FUL);
+
+		if (bar5) {
+			iounmap(bar5);
+			bar5 = NULL;
+		}
 	}
 
+	return count;
+}
+
+#define JMB_HEADER_SIZE 3 * 1024
+unsigned char read_buffer[JMB_HEADER_SIZE] = {0};
+unsigned char header_buffer[JMB_HEADER_SIZE] = {0};
+
+static ssize_t test_spi_update_show(struct device *dev,
+				struct device_attribute *attr, char *buf)
+{
+	struct pci_dev *pdev = to_pci_dev(dev);
+
+	if (0x197B == pdev->vendor && 0x585 == pdev->device) {
+		void __iomem *bar5 = NULL;
+
+		bar5 = ioremap(pci_resource_start(pdev, 5), pci_resource_len(pdev, 5));
+		if (!bar5) {
+			dev_warn(&pdev->dev, "Can't map mv sata registers\n");
+			return 0;
+		}
+
+		memset(read_buffer, 0, sizeof(read_buffer));
+		if(!jmb585_spi_wait_read_done(bar5, read_buffer, JMB_HEADER_SIZE, 0)) {
+			return 0;
+		}
+
+		if (bar5) {
+			iounmap(bar5);
+			bar5 = NULL;
+		}
+	}
+	return sprintf(buf, "%s", read_buffer);
+}
+
+static ssize_t test_spi_update_store (struct device *dev,
+				struct device_attribute *attr, const char *buf,
+				size_t count)
+{
+	struct pci_dev *pdev = to_pci_dev(dev);
+	u32 i = 0;
+	u8 cmp_fail_flag = 0;
+
+	if (false == is_synology_device(pdev)) {
+		dev_warn(&pdev->dev, "Only supported device can use this !!\n");
+		return count;
+	}
+	if (0x197B == pdev->vendor && 0x585 == pdev->device) {
+		void __iomem *bar5 = NULL;
+
+		bar5 = ioremap(pci_resource_start(pdev, 5), pci_resource_len(pdev, 5));
+		if (!bar5) {
+			dev_warn(&pdev->dev, "Can't map jmb sata registers\n");
+			return count;
+		}
+		memcpy(header_buffer, buf, sizeof(header_buffer));
+
+		if(header_buffer[0] != 0x85 || header_buffer[1] != 0x05 || header_buffer[2] != 0x7B || header_buffer[3] != 0x19) {
+			//Values except 0x197B0585 are invalid.
+			dev_warn(&pdev->dev, "JMB585 header update error: Incorrect header format!");
+			return count;
+		}
+		// wait WIP bit to become zero
+		if(!jmb585_spi_wait_status_wip0(bar5, 2000, 1)){
+			return count;
+		}
+		// write enable
+		writel(0xFF | (0x80 << 8) | (0x00 << 16) | (0x06 << 24), bar5 + 0xB4);
+		writel(0, bar5 + 0xCC);
+		// disable BP(Block Protect) bits, because MXIC flash's BP(Block Protect) bits are enabled
+		// write 0 to status register
+		writel(0xFF | (0x80 << 8) | (0x04 << 16) | (0x01 << 24), bar5 + 0xB4);
+		writel(0, bar5 + 0xCC);
+
+		if(!jmb585_spi_wait_status_wip0(bar5, 1000, 1)){
+			return count;
+		}
+
+		// write enable
+		writel(0xFF | (0x80 << 8) | (0x00 << 16) | (0x06 << 24), bar5 + 0xB4);
+		writel(0, bar5 + 0xCC);
+
+		dev_info(&pdev->dev, "JMB585 flash update: Begin Chip Erase\n");
+		// chip erase
+		writel(0xFF | (0x80 << 8) | (0x00 << 16) | (0xC7 << 24), bar5 + 0xB4);
+		writel(0, bar5 + 0xCC);
+		if(!jmb585_spi_wait_status_wip0(bar5, 33000, 1)) {
+			//Chip erase may need a longer time to complete, wait for up to 33 seconds
+			return count;
+		}
+
+		dev_info(&pdev->dev, "JMB585 flash update: Chip Erase Done. Begin flash update\n");
+		for (i = 0; i < JMB_HEADER_SIZE; i += 4) {
+			if ( ! jmb585_spi_wait_status_wip0(bar5, 1000, 1)) {
+				return count;
+			}
+			// write enable
+			writel(0xFF | (0x80 << 8) | (0x00 << 16) | (0x06 << 24), bar5 + 0xB4);
+			writel(0, bar5 + 0xCC);
+			// setting for page program
+			writel(0xFF | (0x80 << 8) | (0xE5 << 16) | (0x02 << 24), bar5 + 0xB4);
+
+			writel(i, bar5 + 0xC0);
+			writel(header_buffer[i] | (header_buffer[i+1] << 8) | (header_buffer[i+2] << 16) | (header_buffer[i+3] << 24) , bar5 + 0xCC);
+		}
+		dev_info(&pdev->dev, "JMB585 flash update: Complete flash update.\n");
+
+		dev_info(&pdev->dev, "JMB585 flash update: Begin flash read\n");
+		memset(read_buffer, 0, sizeof(read_buffer));
+		if (!jmb585_spi_wait_read_done(bar5, read_buffer, JMB_HEADER_SIZE, 0)) {
+			return count;
+		}
+
+		dev_info(&pdev->dev, "JMB585 flash update: Flash read Done. Comparing data...\n");
+		// compare
+		for (i = 0; i < JMB_HEADER_SIZE; i++) {
+			if (header_buffer[i] != read_buffer[i]) {
+				dev_warn(&pdev->dev, "\nJMB585 header update error: Comparison failed at %d, write is 0x%X but read is 0x%X!!\n", i, header_buffer[i], read_buffer[i]);
+				cmp_fail_flag = 1;
+				return count;
+			}
+		}
+		if (!cmp_fail_flag) {
+			dev_warn(&pdev->dev, "JMB585 flash update: JMB585 header update successful!\n");
+		}
+
+		if (bar5) {
+			iounmap(bar5);
+			bar5 = NULL;
+		}
+	}
 	return count;
 }
 
@@ -956,6 +1206,7 @@ static DEVICE_ATTR_RW(test_port);
 static DEVICE_ATTR_WO(test_setup);
 static DEVICE_ATTR_WO(test_pattern);
 static DEVICE_ATTR_RW(test_amp_adjust);
+static DEVICE_ATTR_RW(test_spi_update);
 
 #endif /* CONFIG_SYNO_SATA_TEST */
 
@@ -1153,6 +1404,7 @@ static struct attribute *pci_dev_attrs[] = {
 	&dev_attr_test_setup.attr,
 	&dev_attr_test_pattern.attr,
 	&dev_attr_test_amp_adjust.attr,
+	&dev_attr_test_spi_update.attr,
 #endif /* CONFIG_SYNO_SATA_TEST */
 	NULL,
 };

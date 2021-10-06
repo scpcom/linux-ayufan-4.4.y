@@ -1,6 +1,10 @@
 /**
  * dwc3-rtk-drd.c - Realtek DWC3 Specific Glue layer
  *
+#if defined(MY_DEF_HERE)
+ * Copyright (C) 2017 Realtek Semiconductor Corporation
+ *
+#endif // MY_DEF_HERE
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -34,7 +38,9 @@ extern int rtk_dwc3_drd_event_buffers_setup(struct dwc3 *dwc);
 extern int dwc3_gadget_restart(struct dwc3 *dwc);
 extern int dwc3_gadget_stop_on_switch(struct dwc3 *dwc);
 
-struct usb_gadget_driver *rtk_dwc3_set_and_get_usb_gadget_driver(struct usb_gadget_driver* driver) {
+struct usb_gadget_driver *rtk_dwc3_set_and_get_usb_gadget_driver(
+	    struct usb_gadget_driver *driver)
+{
 	static struct usb_gadget_driver *gadget_driver = NULL;
 	struct usb_gadget_driver *local_driver = gadget_driver;
 
@@ -109,7 +115,10 @@ err0:
 	dev_info(dwc->dev, "%s END....", __func__);
 	return ret;
 }
+#if defined(MY_DEF_HERE)
+#else /* MY_DEF_HERE */
 EXPORT_SYMBOL_GPL(dwc3_drd_to_host);
+#endif /* MY_DEF_HERE */
 
 int dwc3_drd_to_device(struct dwc3 *dwc)
 {
@@ -169,9 +178,13 @@ int dwc3_drd_to_device(struct dwc3 *dwc)
 	if (ret) {
 		dev_err(dwc->dev, "failed to init gadget\n");
 		goto err0;
-	}
+#if defined(MY_DEF_HERE)
+	} else {
+#else /* MY_DEF_HERE */
 	{
-		struct usb_gadget_driver *driver = rtk_dwc3_set_and_get_usb_gadget_driver(NULL);
+#endif /* MY_DEF_HERE */
+		struct usb_gadget_driver *driver =
+			    rtk_dwc3_set_and_get_usb_gadget_driver(NULL);
 		if (driver)
 			ret = usb_gadget_probe_driver(driver);
 	}
@@ -183,12 +196,18 @@ err0:
 	dev_info(dwc->dev, "%s END....", __func__);
 	return ret;
 }
+#if defined(MY_DEF_HERE)
+#else /* MY_DEF_HERE */
 EXPORT_SYMBOL_GPL(dwc3_drd_to_device);
+#endif /* MY_DEF_HERE */
 
 int dwc3_drd_to_stop_all(struct dwc3 *dwc)
 {
 	int ret = 0;
 
+#if defined(MY_DEF_HERE)
+	dev_info(dwc->dev, "%s START....", __func__);
+#endif /* MY_DEF_HERE */
 	if (dwc->has_xhci)
 		dwc3_host_exit(dwc);
 	if (dwc->has_gadget) {
@@ -199,6 +218,12 @@ int dwc3_drd_to_stop_all(struct dwc3 *dwc)
 		dwc3_gadget_exit(dwc);
 	}
 	wmb();
+#if defined(MY_DEF_HERE)
+	dev_info(dwc->dev, "%s END....", __func__);
+#endif /* MY_DEF_HERE */
 	return ret;
 }
+#if defined(MY_DEF_HERE)
+#else /* MY_DEF_HERE */
 EXPORT_SYMBOL_GPL(dwc3_drd_to_stop_all);
+#endif /* MY_DEF_HERE */

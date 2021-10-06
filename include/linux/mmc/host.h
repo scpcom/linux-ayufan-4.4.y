@@ -152,6 +152,11 @@ struct mmc_host_ops {
 	 */
 	int	(*multi_io_quirk)(struct mmc_card *card,
 				  unsigned int direction, int blk_size);
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_MMC_RTK_EMMC
+	void    (*dqs_tuning)(struct mmc_host *host);
+#endif
+#endif /* MY_DEF_HERE */
 };
 
 struct mmc_card;
@@ -224,6 +229,11 @@ struct mmc_host {
 	u32			max_current_330;
 	u32			max_current_300;
 	u32			max_current_180;
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_RTK_PLATFORM
+	u32			mode; //for rtkemmc_execute_tuning usage
+#endif /* CONFIG_RTK_PLATFORM */
+#endif /* MY_DEF_HERE */
 
 #define MMC_VDD_165_195		0x00000080	/* VDD voltage 1.65 - 1.95 */
 #define MMC_VDD_20_21		0x00000100	/* VDD voltage 2.0 ~ 2.1 */
@@ -297,16 +307,16 @@ struct mmc_host {
 #define MMC_CAP2_HSX00_1_2V	(MMC_CAP2_HS200_1_2V_SDR | MMC_CAP2_HS400_1_2V)
 #define MMC_CAP2_SDIO_IRQ_NOTHREAD (1 << 17)
 #define MMC_CAP2_NO_WRITE_PROTECT (1 << 18)	/* No physical write protect pin, assume that card is always read-write */
-#if defined(MY_DEF_HERE)
-#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 #define MMC_CAP2_NO_SDIO	(1 << 19)	/* Do not send SDIO commands during initialization */
 #define MMC_CAP2_HS400_ES	(1 << 20)	/* Host supports enhanced strobe */
 #define MMC_CAP2_NO_SD		(1 << 21)	/* Do not send SD commands during initialization */
 #define MMC_CAP2_NO_MMC		(1 << 22)	/* Do not send (e)MMC commands during initialization */
-#else /* MY_DEF_HERE */
+#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 / MY_DEF_HERE */
 #define MMC_CAP2_NO_DDR50_TUNING (1 << 20)	/* Do not execute tuning in DDR50 mode */
-#endif /* MY_DEF_HERE */
-#endif /* MY_DEF_HERE */
+#endif /* MY_DEF_HERE / MY_DEF_HERE */
+#endif /* MY_DEF_HERE / MY_DEF_HERE */
 
 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
 
@@ -365,6 +375,14 @@ struct mmc_host {
         //=================================
 #endif /* MY_DEF_HERE */
 
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_RTK_PLATFORM
+	unsigned int		bus_resume_flags;
+	#define MMC_BUSRESUME_MANUAL_RESUME		(1 << 0)
+	#define MMC_BUSRESUME_NEEDS_RESUME		(1 << 1)
+#endif /* CONFIG_RTK_PLATFORM */
+
+#endif /* MY_DEF_HERE */
 	unsigned int		sdio_irqs;
 	struct task_struct	*sdio_irq_thread;
 	bool			sdio_irq_pending;
@@ -415,12 +433,12 @@ static inline void *mmc_priv(struct mmc_host *host)
 #define mmc_classdev(x)	(&(x)->class_dev)
 #define mmc_hostname(x)	(dev_name(&(x)->class_dev))
 
-#ifdef MY_DEF_HERE
+#if defined(MY_DEF_HERE) || defined(CONFIG_RTK_PLATFORM) && defined(MY_DEF_HERE)
 #define mmc_bus_needs_resume(host) ((host)->bus_resume_flags & MMC_BUSRESUME_NEEDS_RESUME)
 #define mmc_bus_manual_resume(host) ((host)->bus_resume_flags & MMC_BUSRESUME_MANUAL_RESUME)
 int mmc_suspend_host(struct mmc_host *);
 int mmc_resume_host(struct mmc_host *);
-#endif /* MY_DEF_HERE */
+#endif /* MY_DEF_HERE || CONFIG_RTK_PLATFORM && MY_DEF_HERE */
 
 int mmc_power_save_host(struct mmc_host *host);
 int mmc_power_restore_host(struct mmc_host *host);

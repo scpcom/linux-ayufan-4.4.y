@@ -48,20 +48,12 @@ struct btrfs_transaction {
 	struct list_head dropped_roots;
 	u64 num_dirty_bgs;
 
-	
 	struct mutex cache_write_mutex;
 	spinlock_t dirty_bgs_lock;
-	
+	 
 	struct list_head deleted_bgs;
 	spinlock_t dropped_roots_lock;
 	struct btrfs_delayed_ref_root delayed_refs;
-#ifdef MY_ABC_HERE
-	struct list_head quota_account_list;
-	spinlock_t quota_account_lock;
-#endif 
-#ifdef MY_ABC_HERE
-	struct rw_semaphore delayed_refs_rw_sem;
-#endif 
 	int aborted;
 };
 
@@ -103,18 +95,19 @@ struct btrfs_trans_handle {
 	bool sync;
 	bool dirty;
 	unsigned int type;
-	
+	 
 	struct btrfs_root *root;
 	struct seq_list delayed_ref_elem;
-#ifdef MY_ABC_HERE
-#else
 	struct list_head qgroup_ref_list;
-#endif 
 	struct list_head new_bgs;
 #ifdef MY_ABC_HERE
 	struct btrfs_pending_snapshot *pending_snap;
 	bool pending_snap_rm;
-#endif 
+#endif  
+#ifdef MY_ABC_HERE
+	struct btrfs_delayed_ref_throttle_ticket *syno_delayed_ref_throttle_ticket;
+	bool check_throttle;
+#endif  
 };
 
 struct btrfs_pending_snapshot {
@@ -125,13 +118,10 @@ struct btrfs_pending_snapshot {
 	struct btrfs_root *snap;
 	struct btrfs_qgroup_inherit *inherit;
 	struct btrfs_path *path;
-	
+	 
 	struct btrfs_block_rsv block_rsv;
 	u64 qgroup_reserved;
-#ifdef MY_ABC_HERE
-	u64 copy_limit_from;
-#endif 
-	
+	 
 	int error;
 	bool readonly;
 	struct list_head list;

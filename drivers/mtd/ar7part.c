@@ -43,7 +43,11 @@ struct ar7_bin_rec {
 };
 
 static int create_mtd_partitions(struct mtd_info *master,
+#if defined(CONFIG_SYNO_RTD1619)
+				 const struct mtd_partition **pparts,
+#else /* CONFIG_SYNO_RTD1619 */
 				 struct mtd_partition **pparts,
+#endif /* CONFIG_SYNO_RTD1619 */
 				 struct mtd_part_parser_data *data)
 {
 	struct ar7_bin_rec header;

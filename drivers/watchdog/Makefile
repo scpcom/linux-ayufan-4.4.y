@@ -76,6 +76,9 @@ obj-$(CONFIG_BCM7038_WDT) += bcm7038_wdt.o
 ifeq ($(CONFIG_SYNO_LSP_ARMADA_17_04_02), y)
 obj-$(CONFIG_ARMADA3700_WATCHDOG) += armada3700_wdt.o
 endif # CONFIG_SYNO_LSP_ARMADA_17_04_02
+ifeq ($(CONFIG_SYNO_LSP_RTD1619), y)
+obj-$(CONFIG_RTK_WATCHDOG) += rtk_wdt.o
+endif # CONFIG_SYNO_LSP_RTD1619
 
 # AVR32 Architecture
 obj-$(CONFIG_AT32AP700X_WDT) += at32ap700x_wdt.o

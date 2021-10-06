@@ -48,3 +48,11 @@ config ION_RTK_PHOENIX
 	help
 	  Choose this option if you wish to use ion on Realtek Phoenix.
 endif # SYNO_LSP_RTD129X
+
+if SYNO_LSP_RTD1619
+config ION_RTK
+	tristate "Ion for Realtek"
+	depends on ION
+	help
+	  Choose this option if you wish to use ion on Realtek platform.
+endif # SYNO_LSP_RTD1619

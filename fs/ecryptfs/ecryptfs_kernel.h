@@ -271,19 +271,19 @@ struct ecryptfs_mount_crypt_stat {
 	char global_default_fnek_sig[ECRYPTFS_SIG_SIZE_HEX + 1];
 };
 
-
 struct ecryptfs_sb_info {
 	struct super_block *wsi_sb;
 	struct ecryptfs_mount_crypt_stat mount_crypt_stat;
 	struct backing_dev_info bdi;
+#ifdef MY_ABC_HERE
+	struct dentry *dentry;
+#endif  
 };
-
 
 struct ecryptfs_file_info {
 	struct file *wfi_file;
 	struct ecryptfs_crypt_stat *crypt_stat;
 };
-
 
 struct ecryptfs_auth_tok_list_item {
 	unsigned char encrypted_session_key[ECRYPTFS_MAX_KEY_BYTES];
@@ -504,9 +504,6 @@ void ecryptfs_destroy_mount_crypt_stat(
 int ecryptfs_init_crypt_ctx(struct ecryptfs_crypt_stat *crypt_stat);
 int ecryptfs_write_inode_size_to_metadata(struct inode *ecryptfs_inode);
 int ecryptfs_encrypt_page(struct page *page);
-#ifdef MY_ABC_HERE
-int ecryptfs_encrypt_page_zero_copy(struct file *file, struct page **pages, int num_page);
-#endif 
 int ecryptfs_decrypt_page(struct page *page);
 int ecryptfs_write_metadata(struct dentry *ecryptfs_dentry,
 			    struct inode *ecryptfs_inode);

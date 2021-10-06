@@ -612,6 +612,12 @@ struct x86_pmu {
 	 */
 	atomic_t	lbr_exclusive[x86_lbr_exclusive_max];
 
+//SYNO_AMD
+	/*
+	 * AMD bits
+	 */
+	unsigned int    amd_nb_constraints : 1;
+//SYNO_AMD
 	/*
 	 * Extra registers for events
 	 */

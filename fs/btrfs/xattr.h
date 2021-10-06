@@ -1,20 +1,15 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-
-
+ 
 #ifndef __XATTR__
 #define __XATTR__
 
 #include <linux/xattr.h>
 
 #ifdef MY_ABC_HERE
-extern const struct xattr_handler btrfs_xattr_synoacl_access_handler;
-extern const struct xattr_handler btrfs_xattr_synoacl_noperm_access_handler;
-#endif 
-#ifdef MY_ABC_HERE
 extern const struct xattr_handler btrfs_xattr_syno_handler;
-#endif 
+#endif  
 
 extern const struct xattr_handler *btrfs_xattr_handlers[];
 

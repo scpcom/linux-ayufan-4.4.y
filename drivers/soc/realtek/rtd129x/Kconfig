@@ -8,18 +8,8 @@ config RTK_SB2_MEM_TRASH_MONITOR
 	help
 	  Enable helper functions for memory trash detection. If unsure, say N.
 
-config RTK_RBUS_BARRIER
-	bool "R-bus barrier"
-	depends on RTK_MEM_REMAP
-	default y
-	help
-	  Enable helper functions for R-bus barrier. If unsure, say N.
-
-config RTK_MEM_REMAP
-	bool "Memory remap"
-	default y
-	help
-	  Enable helper functions for static ioremap. If unsure, say N.
+# config RTK_RBUS_BARRIER see ./drivers/soc/realtek/common/Kconfig
+# config RTK_MEM_REMAP see ./drivers/soc/realtek/common/Kconfig
 
 source "drivers/soc/realtek/rtd129x/rtk_ve/Kconfig"
 source "drivers/soc/realtek/rtd129x/irda/Kconfig"

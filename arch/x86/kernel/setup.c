@@ -96,27 +96,34 @@
 #include <asm/kaiser.h>
 #ifdef MY_DEF_HERE
 #include <linux/synolib.h>
-#endif 
+#endif  
 #if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
 #include  <linux/synobios.h>
 
 #ifdef MY_DEF_HERE
 #include <linux/gpio.h>
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 extern u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite);
-#endif 
-#endif 
+#endif  
+#endif  
 
 #ifdef MY_ABC_HERE
 #ifdef MY_DEF_HERE
 extern int gSynoHddPowerupSeq, gSynoInternalHddNumber;
-#else 
+#else  
 extern long g_syno_hdd_powerup_seq;
-#endif 
-#endif 
+#endif  
+#endif  
 
+#ifdef CONFIG_SYNO_SMBUS_HDD_POWERCTL
+extern long g_smbus_hdd_powerctl;
+extern int gSynoSmbusHddAdapter;
+extern int gSynoSmbusHddAddress;
+extern void syno_smbus_hdd_powerctl_init(void);
+extern SYNO_SMBUS_HDD_POWERCTL SynoSmbusHddPowerCtl;
+#endif  
 
 unsigned long max_low_pfn_mapped;
 unsigned long max_pfn_mapped;
@@ -263,11 +270,10 @@ void * __init extend_brk(size_t size, size_t align)
 	return ret;
 }
 
-#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE) && !defined(MY_DEF_HERE) && !defined(MY_DEF_HERE) && !defined(MY_DEF_HERE) && !defined(CONFIG_SYNO_COFFEELAKE) && !defined(MY_DEF_HERE)
-
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE) && !defined(MY_DEF_HERE) && !defined(MY_DEF_HERE) && !defined(MY_DEF_HERE) && !defined(CONFIG_SYNO_COFFEELAKE) && !defined(CONFIG_SYNO_GEMINILAKE) && !defined(CONFIG_SYNO_V1000)
+ 
 #define SYNO_MAX_HDD_PRZ	4
 #define GPIO_UNDEF			0xFF
-
 
 static u8 SYNO_GET_HDD_ENABLE_PIN(const int index)
 {
@@ -324,26 +330,42 @@ static int SYNO_X86_GPIO_PIN_GET(int pin)
 	syno_pch_lpc_gpio_pin(pin, &ret, 0);
 #elif defined(MY_DEF_HERE)
 	syno_gpio_value_get(pin, &ret);
-#endif 
+#endif  
 	return ret;
 }
-#endif 
-
+#endif  
+ 
 int SYNO_CTRL_HDD_POWERON(int index, int value)
 {
 	int iRet = -EINVAL;
 #ifdef MY_DEF_HERE
 	u8 pin = SYNO_GET_HDD_ENABLE_PIN(index);
+#endif  
 
+#ifdef CONFIG_SYNO_SMBUS_HDD_POWERCTL
+	if (0 < g_smbus_hdd_powerctl) {
+		if (!SynoSmbusHddPowerCtl.bl_init){
+			syno_smbus_hdd_powerctl_init();
+		}
+		if (NULL != SynoSmbusHddPowerCtl.syno_smbus_hdd_enable_write) {
+			SynoSmbusHddPowerCtl.syno_smbus_hdd_enable_write(gSynoSmbusHddAdapter, gSynoSmbusHddAddress, index, value);
+		}
+
+		iRet = 0;
+		goto END;
+	}
+#endif  
+
+#ifdef MY_DEF_HERE
 	if(pin == GPIO_UNDEF) {
 		goto END;
 	}
 	SYNO_X86_GPIO_PIN_SET(pin, &value);
-#else 
+#else  
 	if (syno_is_hw_version(HW_DS415p)) {
 		switch (index) {
 			case 0:
-				
+				 
 				SYNO_X86_GPIO_PIN_SET(SYNO_GET_HDD_ENABLE_PIN(1), &value);
 				mdelay(200);
 				SYNO_X86_GPIO_PIN_SET(SYNO_GET_HDD_ENABLE_PIN(2) , &value);
@@ -419,40 +441,50 @@ static u8 SYNO_GET_HDD_PRESENT_PIN(const int index)
 	}
 
 	ret = przPinMap[index-1];
-#endif 
+#endif  
 END:
 	return ret;
 }
 
-
 int SYNO_CHECK_HDD_PRESENT(int index)
 {
-	int iPrzVal = 1; 
+	int iPrzVal = 1;  
 	u8 iPin = SYNO_GET_HDD_PRESENT_PIN(index);
 
-	
 #if defined(MY_DEF_HERE)
 	const int iInverseValue = 1;
 #else
 	int iInverseValue = 0;
 #endif
 
+#ifdef CONFIG_SYNO_SMBUS_HDD_POWERCTL
+	if (0 < g_smbus_hdd_powerctl) {
+		if (!SynoSmbusHddPowerCtl.bl_init){
+			syno_smbus_hdd_powerctl_init();
+		}
+		if ( NULL != SynoSmbusHddPowerCtl.syno_smbus_hdd_present_read) {
+			iPrzVal = SynoSmbusHddPowerCtl.syno_smbus_hdd_present_read(gSynoSmbusHddAdapter, gSynoSmbusHddAddress, index);
+		}
+
+		goto END;
+	}
+#endif  
+
 #ifdef MY_DEF_HERE
 	if(syno_is_hw_version(HW_RS1619xsp)) {
 		iInverseValue = 1;
 	}
-#endif 
+#endif  
 
 	if (GPIO_UNDEF == iPin) {
 		goto END;
 	}
 
-	
 #ifdef MY_DEF_HERE
 	if (gSynoHddPowerupSeq && gSynoInternalHddNumber < index) {
-#else 
+#else  
 	if (0 < g_syno_hdd_powerup_seq && g_syno_hdd_powerup_seq < index) {
-#endif 
+#endif  
 		goto END;
 	}
 

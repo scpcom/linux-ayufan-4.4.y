@@ -322,15 +322,12 @@ struct Scsi_Host *scsi_host_alloc(struct scsi_host_template *sht, int privsize)
 
 	shost->host_lock = &shost->default_lock;
 	spin_lock_init(shost->host_lock);
-#ifdef MY_ABC_HERE
-	
-	shost->peunit_poweron_lock = &shost->eunit_poweron_lock;
-	spin_lock_init(shost->peunit_poweron_lock);
-	shost->puiata_eh_flag = &shost->uiata_eh_flag;
-	shost->uiata_eh_flag = 0;
-	shost->eunit_lock_configured = 0;
-	shost->is_eunit_deepsleep = 0;
-#endif 
+
+	shost->pdbg_lock = &shost->dbg_lock;
+	spin_lock_init(shost->pdbg_lock);
+	shost->puidbg_flags = &shost->uidbg_flags;
+	shost->dbg_enable = 0;
+
 	shost->shost_state = SHOST_CREATED;
 	INIT_LIST_HEAD(&shost->__devices);
 	INIT_LIST_HEAD(&shost->__targets);

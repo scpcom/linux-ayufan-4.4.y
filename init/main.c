@@ -121,6 +121,9 @@ EXPORT_SYMBOL(system_state);
 
 #ifdef CONFIG_RTK_MEM_REMAP
 extern void rtk_mem_remap_of_init(void);
+#if defined(MY_DEF_HERE)
+extern void of_reserved_mem_remap(void);
+#endif /* MY_DEF_HERE */
 #endif
 
 extern void time_init(void);
@@ -599,9 +602,16 @@ asmlinkage __visible void __init start_kernel(void)
 	softirq_init();
 	timekeeping_init();
 	time_init();
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_RTK_MEM_REMAP     //Realtek RTD1295 static ioremap, jamestai20151209
         rtk_mem_remap_of_init();
-#endif
+#endif /* CONFIG_RTK_MEM_REMAP */
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_RTK_MEM_REMAP
+	of_reserved_mem_remap();
+#endif /* CONFIG_RTK_MEM_REMAP */
+#endif /* MY_DEF_HERE */
 	sched_clock_postinit();
 	perf_event_init();
 	profile_init();

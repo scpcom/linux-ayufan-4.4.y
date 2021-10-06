@@ -11,7 +11,12 @@
 #include <linux/printk.h>
 #include <asm/io.h>
 
+#if defined(MY_DEF_HERE)
 #include <soc/realtek/memory.h>
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
+#include <soc/realtek/memory_1619.h>
+#endif /* MY_DEF_HERE */
 #include <soc/realtek/barrier.h>
 
 #define RBUS_SYNC	0x0001A020

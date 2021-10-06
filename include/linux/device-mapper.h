@@ -72,18 +72,12 @@ typedef int (*dm_iterate_devices_fn) (struct dm_target *ti,
 typedef int (*dm_handle_4kn_target_support_fn) (struct dm_target *ti,
 				      iterate_devices_callout_fn fn,
 				      void *data);
-#endif 
+#endif  
 
 typedef void (*dm_io_hints_fn) (struct dm_target *ti,
 				struct queue_limits *limits);
 
-
 typedef int (*dm_busy_fn) (struct dm_target *ti);
-
-#ifdef MY_ABC_HERE
-typedef void (*dm_lvinfoset_fn) (struct dm_target *ti);
-typedef sector_t (*dm_lg_sector_get_fn) (sector_t sector, struct dm_target *ti);
-#endif 
 
 void dm_error(const char *message);
 
@@ -121,38 +115,27 @@ struct target_type {
 	dm_message_fn message;
 #ifdef MY_ABC_HERE
 	dm_extra_ioctl_fn extra_ioctl;
-#endif 
+#endif  
 	dm_prepare_ioctl_fn prepare_ioctl;
 	dm_busy_fn busy;
 	dm_iterate_devices_fn iterate_devices;
 #ifdef MY_ABC_HERE
 	dm_handle_4kn_target_support_fn handle_4kn_target_support;
-#endif 
+#endif  
 	dm_io_hints_fn io_hints;
-#ifdef MY_ABC_HERE
-	dm_lvinfoset_fn lvinfoset;
-	dm_lg_sector_get_fn lg_sector_get;
-#endif 
-
-	
+	 
 	struct list_head list;
 };
 
-
-
-
 #define DM_TARGET_SINGLETON		0x00000001
 #define dm_target_needs_singleton(type)	((type)->features & DM_TARGET_SINGLETON)
-
 
 #define DM_TARGET_ALWAYS_WRITEABLE	0x00000002
 #define dm_target_always_writeable(type) \
 		((type)->features & DM_TARGET_ALWAYS_WRITEABLE)
 
-
 #define DM_TARGET_IMMUTABLE		0x00000004
 #define dm_target_is_immutable(type)	((type)->features & DM_TARGET_IMMUTABLE)
-
 
 typedef unsigned (*dm_num_write_bios_fn) (struct dm_target *ti, struct bio *bio);
 
@@ -160,53 +143,38 @@ struct dm_target {
 	struct dm_table *table;
 	struct target_type *type;
 
-	
 	sector_t begin;
 	sector_t len;
 
-	
 	uint32_t max_io_len;
 
-	
 	unsigned num_flush_bios;
 
-	
 	unsigned num_discard_bios;
 
-	
 	unsigned num_write_same_bios;
 
-	
 	unsigned per_bio_data_size;
 
-	
 	dm_num_write_bios_fn num_write_bios;
 
-	
 	void *private;
 
-	
 	char *error;
 
-	
 	bool flush_supported:1;
 
-	
 	bool discards_supported:1;
 
-	
 	bool split_discard_bios:1;
 
-	
 	bool discard_zeroes_data_unsupported:1;
 };
-
 
 struct dm_target_callbacks {
 	struct list_head list;
 	int (*congested_fn) (struct dm_target_callbacks *, int);
 };
-
 
 struct dm_target_io {
 	struct dm_io *io;
@@ -422,8 +390,4 @@ static inline unsigned long to_bytes(sector_t n)
 	return (n << SECTOR_SHIFT);
 }
 
-#ifdef MY_ABC_HERE
-#define SYNO_DM_IO_RESERVERD_IO_MASK 0xf
-#endif 
-
-#endif	
+#endif	 

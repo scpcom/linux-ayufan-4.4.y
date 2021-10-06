@@ -16,6 +16,9 @@
 #include <linux/syscalls.h>
 #include <linux/uaccess.h>
 #include <linux/io.h>
+#if defined(CONFIG_SYNO_RTD1619)
+#include <linux/arm-smccc.h>
+#endif /* CONFIG_SYNO_RTD1619 */
 
 #include <asm/checksum.h>
 #include <asm/ftrace.h>
@@ -175,3 +178,10 @@ EXPORT_SYMBOL(__gnu_mcount_nc);
 EXPORT_SYMBOL(__pv_phys_pfn_offset);
 EXPORT_SYMBOL(__pv_offset);
 #endif
+#if defined(CONFIG_SYNO_RTD1619)
+
+#ifdef CONFIG_HAVE_ARM_SMCCC
+EXPORT_SYMBOL(arm_smccc_smc);
+EXPORT_SYMBOL(arm_smccc_hvc);
+#endif
+#endif /* CONFIG_SYNO_RTD1619 */

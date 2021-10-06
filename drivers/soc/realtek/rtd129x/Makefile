@@ -8,4 +8,3 @@ obj-$(CONFIG_RTK_RPC) += rpc/
 obj-$(CONFIG_ION) += rtk_ion_of.o
 obj-$(CONFIG_RTK_CODEC) += rtk_ve/
 obj-y += rtd129x_lockapi.o
-obj-$(CONFIG_SYNO_RTD129X_UART1) += rtd129x_syno_uart1.o

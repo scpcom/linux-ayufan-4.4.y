@@ -553,6 +553,9 @@ static void xen_play_dead(void) /* used only with HOTPLUG_CPU */
 	 * data back is to call:
 	 */
 	tick_nohz_idle_enter();
+#ifdef MY_ABC_HERE
+	tick_nohz_idle_stop_tick_protected();
+#endif
 }
 
 #else /* !CONFIG_HOTPLUG_CPU */

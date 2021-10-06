@@ -5,7 +5,7 @@
 config NET_VENDOR_REALTEK
 	bool "Realtek devices"
 	default y
-	depends on PCI || (PARPORT && X86) || ARCH_RTD129X
+	depends on PCI || (PARPORT && X86) || ARCH_RTD129X || SYNO_LSP_RTD1619
 	---help---
 	  If you have a network (Ethernet) card belonging to this class, say Y.
 
@@ -94,6 +94,20 @@ config 8139_OLD_RX_RESET
 	  experience problems, you can enable this option to restore the
 	  old RX-reset behavior.  If unsure, say N.
 
+if SYNO_LSP_RTD1619
+config R8125
+	tristate "Realtek 8125 gigabit ethernet support"
+	depends on PCI
+	select FW_LOADER
+	select CRC32
+	select MII
+	---help---
+	  Say Y here if you have a Realtek 8125 PCI Gigabit Ethernet adapter.
+
+	  To compile this driver as a module, choose M here: the module
+	  will be called r8125.  This is recommended.
+endif # SYNO_LSP_RTD1619
+
 config R8169
 	tristate "Realtek 8169 gigabit ethernet support"
 	depends on PCI
@@ -106,19 +120,31 @@ config R8169
 	  To compile this driver as a module, choose M here: the module
 	  will be called r8169.  This is recommended.
 
-if SYNO_LSP_RTD129X
+if SYNO_LSP_RTD129X || SYNO_LSP_RTD1619
 config R8169SOC
 	tristate "Realtek 8169SoC gigabit ethernet support"
-	depends on ARCH_RTD129X
+	depends on ARCH_RTD129X || RTK_PLATFORM
 	select FW_LOADER
 	select CRC32
-#	select NET_CORE
 	select MII
 	---help---
-	  Say Y here if you have a Realtek 8169 SoC for RTK119X Gigabit Ethernet adapter.
+	  Say Y here if you have a Realtek 8169 SoC for RTK Gigabit Ethernet adapter.
+
 	  To compile this driver as a module, choose M here: the module
 	  will be called r8169.  This is recommended.
-endif # SYNO_LSP_RTD129X
+endif # SYNO_LSP_RTD129X || SYNO_LSP_RTD1619
+
+if SYNO_LSP_RTD1619
+config RTL_RX_NO_COPY
+
+	bool "Support to receive packets without memory copy"
+	default n
+	depends on R8169SOC
+	---help---
+	  This is a feature of Realtek 8169SoC gigabit ethernet driver.
+	  Say Y here to impove performance and reduce CPU loading.
+	  Say N here to save memory for packet buffers.
+endif # SYNO_LSP_RTD1619
 
 config R8168
 	tristate "Realtek 8168 gigabit ethernet support"

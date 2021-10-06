@@ -58,9 +58,17 @@
 #elif (PAGE_OFFSET & 0x1fffff) != 0
 #error PAGE_OFFSET must be at least 2MB aligned
 #elif TEXT_OFFSET > 0x1fffff
+#if defined(CONFIG_RTK_PLATFORM) && defined(MY_DEF_HERE)
+#else /* CONFIG_RTK_PLATFORM && MY_DEF_HERE */
 #error TEXT_OFFSET must be less than 2MB
+#endif /* CONFIG_RTK_PLATFORM && MY_DEF_HERE */
 #endif
 
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_RTK_PLATFORM_FPGA
+#define DTB_ADDR 0x02100000
+#endif /* CONFIG_RTK_PLATFORM_FPGA */
+#endif /* MY_DEF_HERE */
 #endif /* MY_DEF_HERE */
 
 #define KERNEL_START	_text
@@ -643,11 +651,14 @@ ENTRY(secondary_holding_pen)
 	mrs	x0, mpidr_el1
 	ldr     x1, =MPIDR_HWID_BITMASK
 	and	x0, x0, x1
-#if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE)
+#if defined(CONFIG_ARCH_RTD129X) && defined(MY_DEF_HERE) || \
+	defined(CONFIG_RTK_PLATFORM) && defined(MY_DEF_HERE)
 	adr_l	x3, rtk_secondary_holding_pen_release
-#else
+#else /* CONFIG_ARCH_RTD129X && MY_DEF_HERE ||
+		 CONFIG_RTK_PLATFORM && MY_DEF_HERE */
 	adr_l	x3, secondary_holding_pen_release
-#endif
+#endif /* CONFIG_ARCH_RTD129X && MY_DEF_HERE ||
+		  CONFIG_RTK_PLATFORM && MY_DEF_HERE */
 pen:	ldr	x4, [x3]
 	cmp	x4, x0
 	b.eq	secondary_startup

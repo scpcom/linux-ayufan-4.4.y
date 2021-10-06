@@ -304,7 +304,11 @@ static int mtdpart_setup_real(char *s)
  * the first one in the chain if a NULL mtd_id is passed in.
  */
 static int parse_cmdline_partitions(struct mtd_info *master,
+#if defined(CONFIG_SYNO_RTD1619)
+				    const struct mtd_partition **pparts,
+#else /* CONFIG_SYNO_RTD1619 */
 				    struct mtd_partition **pparts,
+#endif /* CONFIG_SYNO_RTD1619 */
 				    struct mtd_part_parser_data *data)
 {
 	unsigned long long offset;

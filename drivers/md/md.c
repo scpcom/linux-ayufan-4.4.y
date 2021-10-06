@@ -23,10 +23,7 @@
 #include <linux/slab.h>
 #ifdef MY_ABC_HERE
 #include <linux/list_sort.h>
-#endif 
-#ifdef MY_ABC_HERE
-#include <crypto/hash.h>
-#endif 
+#endif  
 #include "md.h"
 #include "bitmap.h"
 #include "md-cluster.h"
@@ -54,17 +51,11 @@ static void autostart_arrays(int part);
 extern int (*funcSYNORaidDiskUnplug)(char *szDiskName);
 #ifdef CONFIG_BLK_DEV_NVME
 extern int (*funcSYNORaidNVMeUnplug)(char *szDiskName);
-#endif 
+#endif  
 EXPORT_SYMBOL(SYNORaidRdevUnplug);
 int SYNORaidDiskUnplug(char *szArgDiskName);
 void SYNORaidUnplugTask(struct work_struct *);
-#endif  
-
-#ifdef MY_ABC_HERE
-
-static struct crypto_shash *tfm;
-#endif 
-
+#endif   
 
 static LIST_HEAD(pers_list);
 static DEFINE_SPINLOCK(pers_lock);
@@ -262,167 +253,11 @@ static void syno_md_endio(struct bio *bio)
 		bio->bi_private = cloned_bio->bi_private;
 		bio_put(cloned_bio);
 	}
-#endif 
+#endif  
 	mempool_free(mdio, mddev->syno_mdio_mempool);
 	bio_endio(bio);
 }
-#endif 
-
-#ifdef MY_ABC_HERE
-void syno_self_heal_modify_bio_info(struct md_self_heal_record *heal_record, struct bio *bio)
-{
-	heal_record->bio = bio;
-	heal_record->sector_start = bio->bi_iter.bi_sector;
-	heal_record->sector_leng = bio_sectors(bio);
-}
-
-struct md_self_heal_record* syno_self_heal_init_record(struct mddev *mddev, struct bio *bio, int max_retry_cnt)
-{
-	struct md_self_heal_record *heal_record = NULL;
-
-	heal_record = kzalloc(sizeof(struct md_self_heal_record), GFP_KERNEL);
-	if (NULL == heal_record) {
-		printk(KERN_ERR "%s: %s(%d): Failed to allocate memory for md self healing record at sector %llu\n",
-				mdname(mddev), __func__, __LINE__, (unsigned long long)bio->bi_iter.bi_sector);
-		return NULL;
-	}
-
-	heal_record->mddev = mddev;
-	heal_record->retry_cnt = 0;
-	heal_record->max_retry_cnt = max_retry_cnt;
-	heal_record->u32_last_hash = 0;
-	heal_record->is_hashed = 0;
-	heal_record->request_cnt = 0;
-
-	write_lock_irq(&mddev->record_lock);
-	list_add_tail(&heal_record->record_list, &mddev->md_self_heal_record_list);
-	write_unlock_irq(&mddev->record_lock);
-
-	return heal_record;
-}
-
-void syno_self_heal_del_all_record(struct mddev *mddev)
-{
-	struct md_self_heal_record *heal_record = NULL;
-	struct md_self_heal_record *temp_record = NULL;
-
-	write_lock_irq(&mddev->record_lock);
-	list_for_each_entry_safe(heal_record, temp_record, &mddev->md_self_heal_record_list, record_list) {
-		list_del(&heal_record->record_list);
-		kfree(heal_record);
-	}
-	write_unlock_irq(&mddev->record_lock);
-}
-
-static int syno_self_heal_is_bio_recorded(struct bio *bio, struct md_self_heal_record *heal_record)
-{
-	if (heal_record->sector_start == bio->bi_iter.bi_sector) {
-		return 1;
-	} else {
-		return 0;
-	}
-}
-
-void syno_self_heal_find_and_del_record(struct mddev *mddev, struct bio *bio)
-{
-	struct md_self_heal_record *heal_record = NULL;
-	struct md_self_heal_record *temp_record = NULL;
-
-	write_lock_irq(&mddev->record_lock);
-	list_for_each_entry_safe(heal_record, temp_record, &mddev->md_self_heal_record_list, record_list) {
-		if (syno_self_heal_is_bio_recorded(bio, heal_record)) {
-			list_del(&heal_record->record_list);
-			kfree(heal_record);
-			break;
-		}
-	}
-	write_unlock_irq(&mddev->record_lock);
-}
-
-struct md_self_heal_record* syno_self_heal_find_record(struct mddev *mddev, struct bio *bio)
-{
-	struct md_self_heal_record *heal_record = NULL;
-
-	read_lock_irq(&mddev->record_lock);
-	list_for_each_entry(heal_record, &mddev->md_self_heal_record_list, record_list) {
-		if (syno_self_heal_is_bio_recorded(bio, heal_record)) {
-			read_unlock_irq(&mddev->record_lock);
-			return heal_record;
-		}
-	}
-	read_unlock_irq(&mddev->record_lock);
-
-	return NULL;
-}
-
-static u32 md_crc32c(u32 crc, const void *address, unsigned int length)
-{
-	SHASH_DESC_ON_STACK(shash, tfm);
-	u32 *ctx = (u32 *)shash_desc_ctx(shash);
-	int err;
-
-	shash->tfm = tfm;
-	shash->flags = 0;
-	*ctx = crc;
-
-	err = crypto_shash_update(shash, address, length);
-	BUG_ON(err);
-
-	return *ctx;
-}
-
-u32 syno_self_heal_hash_bio_page(struct bio *bio)
-{
-	struct bio_vec bvec;
-	struct bvec_iter iter;
-	char *kaddr;
-	u32 hash = ~(u32)0;
-
-	if (!tfm)
-		tfm = crypto_alloc_shash("crc32c", 0, 0);
-
-	if (IS_ERR(tfm)) {
-		printk_ratelimited(KERN_ERR "%s(%d): md cannot initiate crc32c module, ret = %ld\n",
-				__func__, __LINE__, PTR_ERR(tfm));
-		return 0;
-	}
-
-	bio_for_each_segment(bvec, bio, iter) {
-		kaddr = kmap_atomic(bvec.bv_page);
-		hash = md_crc32c(hash, kaddr, PAGE_SIZE);
-		kunmap_atomic(kaddr);
-	}
-
-	return hash;
-}
-
-int syno_self_heal_record_hash_value(struct md_self_heal_record *heal_record, struct bio *bio)
-{
-	int ret = 0;
-	u32 u32_hash = syno_self_heal_hash_bio_page(bio);
-
-	if (heal_record->is_hashed && u32_hash == heal_record->u32_last_hash) {
-		++(heal_record->retry_cnt);
-		ret = 1;
-	}
-
-	heal_record->u32_last_hash = u32_hash;
-	heal_record->is_hashed = 1;
-
-	return ret;
-}
-
-int syno_self_heal_is_valid_md_stat(struct mddev *mddev)
-{
-	if (!(0 == mddev->degraded && MaxSector == mddev->recovery_cp && !test_bit(MD_RECOVERY_RUNNING, &mddev->recovery))) {
-		printk_ratelimited(KERN_ERR "%s: %s(%d): md's current state is not suitable for data correction\n", mdname(mddev), __func__, __LINE__);
-		return 0;
-	}
-
-	return 1;
-}
-#endif 
-
+#endif  
 
 static blk_qc_t md_make_request(struct request_queue *q, struct bio *bio)
 {
@@ -516,20 +351,10 @@ static blk_qc_t md_make_request(struct request_queue *q, struct bio *bio)
 	mdio->mddev = mddev;
 	bio->bi_end_io = syno_md_endio;
 	bio->bi_private = mdio;
-#endif 
-	
-#ifdef MY_ABC_HERE
-	if (unlikely(bio_flagged(bio, BIO_CORRECTION_ABORT))) {
-		syno_self_heal_find_and_del_record(mddev, bio);
-	}
-	if (unlikely(bio_flagged(bio, BIO_CORRECTION_RETRY))) {
-		if (8 != bio_sectors(bio)) {
-			printk(KERN_WARNING "%s: [Warning] receive a retry bio at sector %llu with sector leng %d\n", mdname(mddev), (u64)bio->bi_iter.bi_sector, bio_sectors(bio));
-		}
-	}
-#endif 
+#endif  
+	 
 	sectors = bio_sectors(bio);
-	
+	 
 	bio->bi_rw &= ~REQ_NOMERGE;
 	mddev->pers->make_request(mddev, bio);
 
@@ -767,10 +592,7 @@ void mddev_init(struct mddev *mddev)
 	spin_lock_init(&mddev->ActLock);
 	mddev->blActive = 1;
 	mddev->ulLastReq = jiffies;
-#endif 
-#ifdef MY_ABC_HERE
-	rwlock_init(&mddev->record_lock);
-#endif 
+#endif  
 	init_waitqueue_head(&mddev->sb_wait);
 	init_waitqueue_head(&mddev->recovery_wait);
 	mddev->reshape_position = MaxSector;
@@ -5119,46 +4941,7 @@ END:
 
 static struct md_sysfs_entry md_pattern_debug =
 __ATTR(pattern_debug, S_IRUGO|S_IWUSR, pattern_debug_show, pattern_debug_store);
-#endif 
-
-#ifdef MY_ABC_HERE
-static ssize_t
-heal_record_info_show(struct mddev *mddev, char *page)
-{
-	int cnt = 0;
-	struct md_self_heal_record *heal_record = NULL;
-
-	read_lock_irq(&mddev->record_lock);
-	list_for_each_entry(heal_record, &mddev->md_self_heal_record_list, record_list) {
-		printk(KERN_WARNING "heal_record(%d): (sector:%llu, sec_leng:%d, retry:%d/%d, request_cnt:%d)\n",
-				cnt++, (unsigned long long)heal_record->sector_start, bio_sectors(heal_record->bio),
-				heal_record->retry_cnt, heal_record->max_retry_cnt, heal_record->request_cnt);
-	}
-	read_unlock_irq(&mddev->record_lock);
-
-	return sprintf(page, "remain %d records\n", cnt);
-}
-
-static ssize_t
-heal_record_info_store(struct mddev *mddev, const char *page, size_t len)
-{
-	if (!mddev->pers){
-		len = -EINVAL;
-		goto END;
-	}
-
-	if (cmd_match(page, "clear")) {
-		syno_self_heal_del_all_record(mddev);
-		printk(KERN_WARNING "md: %s: delete all heal records\n", mdname(mddev));
-	}
-
-END:
-	return len;
-}
-
-static struct md_sysfs_entry md_heal_record_info =
-__ATTR(heal_record_info, S_IRUGO|S_IWUSR, heal_record_info_show, heal_record_info_store);
-#endif 
+#endif  
 
 #ifdef MY_ABC_HERE
 static ssize_t
@@ -5336,13 +5119,10 @@ static struct attribute *md_redundancy_attrs[] = {
 	&md_sync_completed.attr,
 #ifdef MY_ABC_HERE
 	&md_sync_debug.attr,
-#endif 
+#endif  
 #ifdef CONFIG_SYNO_MD_RAID_F1
 	&md_resync_mode.attr,
-#endif 
-#ifdef MY_ABC_HERE
-	&md_heal_record_info.attr,
-#endif 
+#endif  
 	&md_min_sync.attr,
 	&md_max_sync.attr,
 	&md_suspend_lo.attr,
@@ -5569,38 +5349,10 @@ static void md_safemode_timeout(unsigned long data)
 }
 
 #ifdef MY_ABC_HERE
-void SYNOLvInfoSet(struct block_device *bdev, void *private, const char *name)
-{
-	struct mddev *mddev = NULL;
-	char *szDiskName = NULL;
-
-	if (!bdev || !private || !name){
-		printk("%s:%s(%d) error params\n", __FILE__, __FUNCTION__, __LINE__);
-		return;
-	}
-
-	szDiskName = bdev->bd_disk->disk_name;
-	if (NULL == strstr(szDiskName, "md")) {
-		printk("%s:%s(%d) This's not md device:[%s]\n",
-			__FILE__, __FUNCTION__, __LINE__, szDiskName);
-		return;
-	}
-
-	mddev = bdev->bd_disk->private_data;
-	if (mddev) {
-		mddev->syno_private = private;
-	}
-
-	snprintf(mddev->lv_name, 16, "%s", name);
-}
-EXPORT_SYMBOL(SYNOLvInfoSet);
-#endif 
-
-#ifdef MY_ABC_HERE
 static int start_dirty_degraded = 1;
-#else 
+#else  
 static int start_dirty_degraded;
-#endif 
+#endif  
 
 int md_run(struct mddev *mddev)
 {
@@ -5723,24 +5475,21 @@ int md_run(struct mddev *mddev)
 	}
 
 	mddev->recovery = 0;
-	
+	 
 	mddev->resync_max_sectors = mddev->dev_sectors;
 
 	mddev->ok_start_degraded = start_dirty_degraded;
 #ifdef MY_ABC_HERE
 	mddev->nodev_and_crashed = MD_NOT_CRASHED;
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
 	if (0 == strcmp("md0", mdname(mddev)) || 0 == strcmp("md1", mdname(mddev))) {
 		mddev->parallel_resync = 1;
 	}
-#endif 
-#ifdef MY_ABC_HERE
-	INIT_LIST_HEAD(&mddev->md_self_heal_record_list);
-#endif 
+#endif  
 
 	if (start_readonly && mddev->ro == 0)
-		mddev->ro = 2; 
+		mddev->ro = 2;  
 
 	err = pers->run(mddev);
 	if (err)
@@ -6136,14 +5885,10 @@ static int do_md_stop(struct mddev *mddev, int mode,
 		if (mddev->ro)
 			set_disk_ro(disk, 0);
 
-#ifdef MY_ABC_HERE
-		syno_self_heal_del_all_record(mddev);
-#endif 
 		__md_stop_writes(mddev);
 		__md_stop(mddev);
 		mddev->queue->backing_dev_info.congested_fn = NULL;
 
-		
 		sysfs_notify_dirent_safe(mddev->sysfs_state);
 
 		rdev_for_each(rdev, mddev)
@@ -7636,16 +7381,30 @@ void md_error(struct mddev *mddev, struct md_rdev *rdev)
 {
 #ifdef MY_ABC_HERE
 	char b[BDEVNAME_SIZE];
-#endif 
+#endif  
 	if (!rdev || test_bit(Faulty, &rdev->flags))
 		return;
 
 	if (!mddev->pers || !mddev->pers->error_handler)
 		return;
+
+#if defined(MY_ABC_HERE) \
+	&& defined (MY_ABC_HERE) \
+	&& defined (MY_ABC_HERE)
+
+	if (!test_bit(DiskError, &rdev->flags)) {
+		SynoReportFaultyDevice(mddev->md_minor, rdev->bdev);
+	}
+#endif  
+
 #ifdef MY_ABC_HERE
+#ifdef MY_ABC_HERE
+	printk_ratelimited("%s: %s is being to be set faulty\n",
+#else  
 	printk("%s: %s is being to be set faulty\n",
+#endif  
 		__FUNCTION__, bdevname(rdev->bdev, b));
-#endif 
+#endif  
 	mddev->pers->error_handler(mddev,rdev);
 	if (mddev->degraded)
 		set_bit(MD_RECOVERY_RECOVER, &mddev->recovery);
@@ -8219,24 +7978,18 @@ void md_do_sync(struct md_thread *thread)
 	bool cluster_resync_finished = false;
 #ifdef MY_ABC_HERE
 	int old_auto_remap_setting = -1;
-#endif 
+#endif  
 
-#ifdef MY_ABC_HERE
-	
-	
-#endif 
-
-	
 	if (test_bit(MD_RECOVERY_DONE, &mddev->recovery))
 		return;
-	if (mddev->ro) {
+	if (mddev->ro) { 
 		set_bit(MD_RECOVERY_INTR, &mddev->recovery);
 		return;
 	}
 
 #ifdef MY_ABC_HERE
 	old_auto_remap_setting = SynoRaidAutoRemapAdjust(mddev, MD_AUTO_REMAP_MODE_ISMAXDEGRADE);
-#endif 
+#endif  
 
 	if (test_bit(MD_RECOVERY_SYNC, &mddev->recovery)) {
 		if (test_bit(MD_RECOVERY_CHECK, &mddev->recovery)) {
@@ -9483,19 +9236,15 @@ static int __init md_init(void)
 	funcSYNORaidDiskUnplug = SYNORaidDiskUnplug;
 #ifdef CONFIG_BLK_DEV_NVME
 	funcSYNORaidNVMeUnplug = SYNORaidDiskUnplug;
-#endif 
-#endif 
-
-#ifdef MY_ABC_HERE
-	tfm = NULL;
-#endif 
+#endif  
+#endif  
 
 	return 0;
 
 #ifdef MY_ABC_HERE
 err_cache:
 	unregister_blkdev(mdp_major, "mdp");
-#endif 
+#endif  
 err_mdp:
 	unregister_blkdev(MD_MAJOR, "md");
 err_md:
@@ -9615,31 +9364,45 @@ EXPORT_SYMBOL(md_reload_sb);
 
 #ifndef MODULE
 
-
-
 #ifdef MY_ABC_HERE
 DEFINE_SPINLOCK(all_detected_devices_lock);
-#endif 
+#endif  
 static LIST_HEAD(all_detected_devices);
 struct detected_devices_node {
 	struct list_head list;
 	dev_t dev;
+#ifdef MY_DEF_HERE
+	int slot;
+#endif  
 };
 
 void md_autodetect_dev(dev_t dev)
 {
 	struct detected_devices_node *node_detected_dev;
+#ifdef MY_DEF_HERE
+	struct gendisk *disk;
+	int partno;
+#endif  
 
 	node_detected_dev = kzalloc(sizeof(*node_detected_dev), GFP_KERNEL);
 	if (node_detected_dev) {
 		node_detected_dev->dev = dev;
+#ifdef MY_DEF_HERE
+		disk = get_gendisk(dev, &partno);
+		if (disk) {
+			node_detected_dev->slot = disk->syno_slot_index;
+			put_disk(disk);
+		} else {
+			node_detected_dev->slot = INT_MAX;
+		}
+#endif  
 #ifdef MY_ABC_HERE
 		spin_lock(&all_detected_devices_lock);
-#endif 
+#endif  
 		list_add_tail(&node_detected_dev->list, &all_detected_devices);
 #ifdef MY_ABC_HERE
 		spin_unlock(&all_detected_devices_lock);
-#endif 
+#endif  
 	} else {
 		printk(KERN_CRIT "md: md_autodetect_dev: kzalloc failed"
 			", skipping dev(%d,%d)\n", MAJOR(dev), MINOR(dev));
@@ -9690,16 +9453,24 @@ static int device_sort_cmp(void *priv, struct list_head *plistHead1, struct list
 		pnode1 = list_entry(plistHead1, struct detected_devices_node, list);
 		pnode2 = list_entry(plistHead2, struct detected_devices_node, list);
 
+#ifdef MY_DEF_HERE
+		if (pnode1->slot > pnode2->slot) {
+			iRet = 1;
+		} else if (pnode1->slot < pnode2->slot) {
+			iRet = -1;
+		}
+#else  
 		if (MAJOR(pnode1->dev) == MAJOR(pnode2->dev)) {
 			iRet = MINOR(pnode1->dev) - MINOR(pnode2->dev);
 		} else {
 			iRet = MAJOR(pnode1->dev) - MAJOR(pnode2->dev);
 		}
+#endif  
 	}
 
 	return iRet;
 }
-#endif 
+#endif  
 
 static void autostart_arrays(int part)
 {
@@ -9787,11 +9558,7 @@ static __exit void md_exit(void)
 
 #ifdef MY_ABC_HERE
 	kmem_cache_destroy(syno_mdio_cache);
-#endif 
-#ifdef MY_ABC_HERE
-	if (!IS_ERR_OR_NULL(tfm))
-		crypto_free_shash(tfm);
-#endif 
+#endif  
 	blk_unregister_region(MKDEV(MD_MAJOR,0), 512);
 	blk_unregister_region(MKDEV(mdp_major,0), 1U << MINORBITS);
 

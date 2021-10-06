@@ -1,18 +1,35 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
+ 
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_USB_PATCH_ON_RTK
+extern int RTK_ohci_force_suspend(const char *func);
 
+int check_and_restore_async_list(struct ehci_hcd *ehci, const char *func, int line) {
 
+	int retry = 0;
+	if (ehci->fixed_async_list_addr_bug) {
+		for (retry = 0; retry < 5; retry++) {
+			u32 async_next = ehci_readl(ehci, &ehci->regs->async_next);
+			if (async_next == 0) {
+				ehci_err(ehci, "%s:%d #%d async_next is NULL ==> fixed async_next to HEAD=%x\n",
+					func, line, retry, (unsigned int) ehci->async->qh_dma);
+				ehci_writel(ehci, (u32) ehci->async->qh_dma,
+					&ehci->regs->async_next);
+				wmb();
+				mdelay(2);
+			} else {
+				break;
+			}
+		}
+	}
+	return 0;
+}
+#endif
 
-
-
-
-
-
-
-
-
-
+#endif  
+ 
 static int
 qtd_fill(struct ehci_hcd *ehci, struct ehci_qtd *qtd, dma_addr_t buf,
 		  size_t len, int token, int maxpacket)
@@ -681,51 +698,62 @@ done:
 	return qh;
 }
 
-
-
 static void enable_async(struct ehci_hcd *ehci)
 {
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_USB_PATCH_ON_RTK
+	 
+	check_and_restore_async_list(ehci, __func__, __LINE__);
+#endif  
+
+#endif  
 	if (ehci->async_count++)
 		return;
 
-	
 	ehci->enabled_hrtimer_events &= ~BIT(EHCI_HRTIMER_DISABLE_ASYNC);
 
-	
 	ehci_poll_ASS(ehci);
 	turn_on_io_watchdog(ehci);
 }
 
 static void disable_async(struct ehci_hcd *ehci)
 {
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_USB_PATCH_ON_RTK
+	 
+	check_and_restore_async_list(ehci, __func__, __LINE__);
+#endif
+
+#endif  
 	if (--ehci->async_count)
 		return;
 
-	
 	WARN_ON(ehci->async->qh_next.qh || !list_empty(&ehci->async_unlink) ||
 			!list_empty(&ehci->async_idle));
 
-	
 	ehci_poll_ASS(ehci);
 }
-
-
 
 static void qh_link_async (struct ehci_hcd *ehci, struct ehci_qh *qh)
 {
 	__hc32		dma = QH_NEXT(ehci, qh->qh_dma);
 	struct ehci_qh	*head;
 
-	
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_USB_PATCH_ON_RTK
+	 
+	check_and_restore_async_list(ehci, __func__, __LINE__);
+#endif  
+
+#endif  
+	 
 	if (unlikely(qh->clearing_tt))
 		return;
 
 	WARN_ON(qh->qh_state != QH_STATE_IDLE);
 
-	
 	qh_refresh(ehci, qh);
 
-	
 	head = ehci->async;
 	qh->qh_next = head->qh_next;
 	qh->hw->hw_next = head->hw->hw_next;
@@ -822,6 +850,15 @@ submit_async (
 
 	epnum = urb->ep->desc.bEndpointAddress;
 
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_USB_PATCH_ON_RTK
+#ifdef CONFIG_USB_OHCI_RTK
+	 
+	RTK_ohci_force_suspend(__func__);
+#endif
+#endif
+
+#endif  
 #ifdef EHCI_URB_TRACE
 	{
 		struct ehci_qtd *qtd;
@@ -952,23 +989,27 @@ static void single_unlink_async(struct ehci_hcd *ehci, struct ehci_qh *qh)
 	prev->qh_next = qh->qh_next;
 	if (ehci->qh_scan_next == qh)
 		ehci->qh_scan_next = qh->qh_next.qh;
+#if defined(MY_DEF_HERE)
+
+#ifdef CONFIG_USB_PATCH_ON_RTK
+	 
+	check_and_restore_async_list(ehci, __func__, __LINE__);
+#endif  
+#endif  
 }
 
 static void start_iaa_cycle(struct ehci_hcd *ehci)
 {
-	
+	 
 	if (ehci->iaa_in_progress)
 		return;
 	ehci->iaa_in_progress = true;
 
-	
 	if (unlikely(ehci->rh_state < EHCI_RH_RUNNING)) {
 		end_unlink_async(ehci);
 
-	
 	} else if (likely(ehci->rh_state == EHCI_RH_RUNNING)) {
 
-		
 		wmb();
 
 		ehci_writel(ehci, ehci->command | CMD_IAAD,
@@ -987,40 +1028,40 @@ static void end_unlink_async(struct ehci_hcd *ehci)
 		ehci_writel(ehci, (u32) ehci->async->qh_dma,
 			    &ehci->regs->async_next);
 
-	
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_USB_PATCH_ON_RTK
+	 
+	check_and_restore_async_list(ehci, __func__, __LINE__);
+#endif  
+
+#endif  
+	 
 	ehci->iaa_in_progress = false;
 
 	if (list_empty(&ehci->async_unlink))
 		return;
 	qh = list_first_entry(&ehci->async_unlink, struct ehci_qh,
-			unlink_node);	
+			unlink_node);	 
 
-	
 	early_exit = ehci->async_unlinking;
 
-	
 	if (ehci->rh_state < EHCI_RH_RUNNING)
 		list_splice_tail_init(&ehci->async_unlink, &ehci->async_idle);
 
-	
 	else if (qh->qh_state == QH_STATE_UNLINK_WAIT) {
 		qh->qh_state = QH_STATE_UNLINK;
 		early_exit = true;
 	}
 
-	
 	else
 		list_move_tail(&qh->unlink_node, &ehci->async_idle);
 
-	
 	if (!list_empty(&ehci->async_unlink))
 		start_iaa_cycle(ehci);
 
-	
 	if (early_exit)
 		return;
 
-	
 	ehci->async_unlinking = true;
 	while (!list_empty(&ehci->async_idle)) {
 		qh = list_first_entry(&ehci->async_idle, struct ehci_qh,

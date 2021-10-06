@@ -45,8 +45,10 @@ obj-$(CONFIG_USB_EHCI_HCD_AT91) += ehci-atmel.o
 obj-$(CONFIG_USB_EHCI_MSM)	+= ehci-msm.o
 obj-$(CONFIG_USB_EHCI_TEGRA)	+= ehci-tegra.o
 obj-$(CONFIG_USB_W90X900_EHCI)	+= ehci-w90x900.o
-ifeq ($(CONFIG_SYNO_LSP_RTD129X),y)
+ifneq (,$(filter y, $(CONFIG_SYNO_LSP_RTD129X) $(CONFIG_SYNO_LSP_RTD1619)))
 obj-$(CONFIG_USB_EHCI_RTK)      += ehci-rtk.o
+endif # CONFIG_SYNO_LSP_RTD129X || CONFIG_SYNO_LSP_RTD1619
+ifeq ($(CONFIG_SYNO_LSP_RTD129X),y)
 ifneq ($(or $(CONFIG_USB_EHCI_RTK), $(CONFIG_USB_DWC3_RTK)), )
 	obj-y   += rtk-usb-power-manager.o
 endif
@@ -87,3 +89,6 @@ obj-$(CONFIG_USB_HCD_BCMA)	+= bcma-hcd.o
 obj-$(CONFIG_USB_HCD_SSB)	+= ssb-hcd.o
 obj-$(CONFIG_USB_FOTG210_HCD)	+= fotg210-hcd.o
 obj-$(CONFIG_USB_MAX3421_HCD)	+= max3421-hcd.o
+ifeq ($(CONFIG_SYNO_LSP_RTD1619), y)
+obj-$(CONFIG_USB_RTK_CTRL_MANAGER)	+= rtk-usb-manager.o
+endif # CONFIG_SYNO_LSP_RTD1619

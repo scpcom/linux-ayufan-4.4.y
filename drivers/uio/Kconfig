@@ -12,11 +12,13 @@ menuconfig UIO
 
 if UIO
 
-if SYNO_LSP_RTD129X
+if SYNO_LSP_RTD129X || SYNO_LSP_RTD1619
 config UIO_ASSIGN_MINOR
 	bool "UIO supports assigning minor number"
 	default n
+endif # SYNO_LSP_RTD129X || SYNO_LSP_RTD1619
 
+if SYNO_LSP_RTD129X
 config UIO_RTK_RBUS
 	bool "Memory mapping RBUS area to userspace"
 	default n
@@ -30,7 +32,19 @@ config UIO_RTK_REFCLK
 	select UIO_ASSIGN_MINOR
 	help
 	  Memory mapping Reference Clock area to userspace
+endif # SYNO_LSP_RTD129X
 
+if SYNO_LSP_RTD1619
+config UIO_RTK
+	bool "Realtek Generic UIO Driver"
+	default y
+	help
+	  Realtek Generic UIO Driver
+
+	  If you don't know what to do here, say Y.
+endif # SYNO_LSP_RTD1619
+
+if SYNO_LSP_RTD129X || SYNO_LSP_RTD1619
 config UIO_RTK_SE
 	bool "Streaming Engine driver use UIO mode"
 	default n
@@ -48,7 +62,7 @@ config UIO_RTK_MD
 	select CONFIG_UIO_DMEM_GENIRQ
 	help
 	  Realtek Moving Data Engine driver using UIO mode
-endif # SYNO_LSP_RTD129X
+endif # SYNO_LSP_RTD129X || SYNO_LSP_RTD1619
 
 config UIO_CIF
 	tristate "generic Hilscher CIF Card driver"

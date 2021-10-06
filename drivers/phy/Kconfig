@@ -432,4 +432,12 @@ config PHY_CYGNUS_PCIE
 	  Enable this to support the Broadcom Cygnus PCIe PHY.
 	  If unsure, say N.
 
+if SYNO_LSP_RTD1619
+config PHY_RTK_SATA
+	tristate "Realtek SATA PHY driver"
+	depends on OF
+	select GENERIC_PHY
+	help
+	  Support for SATA GEN3 PHY on realtek chipsets.
+endif # SYNO_LSP_RTD1619
 endmenu

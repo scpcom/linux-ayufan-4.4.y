@@ -89,19 +89,31 @@ struct usb_port {
 	unsigned int is_superspeed:1;
 #if defined (MY_DEF_HERE)
 	unsigned int power_cycle_counter;
-#endif 
+#endif  
 #ifdef MY_DEF_HERE
 #define SYNO_USB_PORT_CASTRATED_XHC 0x01
 	unsigned int flag;
-#endif 
+#endif  
 #ifdef MY_DEF_HERE
 	int syno_vbus_gpp;
 	int syno_vbus_gpp_pol;
-#endif 
+#endif  
+#ifdef CONFIG_SYNO_USB_POWER_DELAY_ON
+	unsigned int get_desc_fail_counter;
+	struct timer_list timer;
+#endif	 
 };
 #if defined (MY_DEF_HERE)
 #define SYNO_POWER_CYCLE_TRIES	(3)
-#endif 
+#endif  
+
+#ifdef CONFIG_SYNO_USB_POWER_DELAY_ON
+#define SYNO_GET_DESC_FAIL_COUNT 3
+struct usb_port_delay_work {
+	struct usb_hub *hub;
+	int port;
+};
+#endif	 
 
 #define to_usb_port(_dev) \
 	container_of(_dev, struct usb_port, dev)

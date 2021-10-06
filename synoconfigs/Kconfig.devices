@@ -60,10 +60,6 @@ config SYNO_MD_STRIPE_MEMORY_ESTIMATION
 	bool "Raid5/6 stripe cache memory usage"
 	default y
 
-config SYNO_MD_RAID5_WRITE_REFERENCE_BIO_PAGE
-	bool "Enhance RAID5 performance by referencing upper layer page"
-	default y
-
 config SYNO_MD_RAID5_ENABLE_SSD_TRIM
 	bool "Default enable trim for raid5"
 	default y
@@ -130,17 +126,16 @@ config SYNO_MD_RAID_F1
 	bool "Support RAID F1"
 	default y
 
-config SYNO_MD_DATA_CORRECTION
-	bool "Try to use md redundancy to re-compute data when fs ask to retry"
-	default n
-	depends on SYNO_DATA_CORRECTION
-
 config SYNO_MD_LESS_DELAY_RESYNC_MESSAGE
 	bool "Avoid md write same delay resync message too much"
 	default y
 
 config SYNO_MD_DISKSTATS
 	bool "Show md's util in iostat"
+	default y
+
+config SYNO_MD_RAID5_SKIP_COPY_ENHANCE
+	bool "Enhance raid5 skip_copy due to our stress results"
 	default y
 
 config SYNO_MD_SYNC_STATUS_REPORT
@@ -168,16 +163,8 @@ config SYNO_MD_RAID1_FLUSH_THRESHOLD
 	default y
 	depends on SYNO_MD_RAID1_SYSFS_INTERFACE
 
-config SYNO_MD_RAID5_PERF_ENHANCE_BY_DEFERIO
-	bool "Enhance raid5 series performance by split I/O part from original kernel thread"
-	default y
-
 config SYNO_MD_FORCE_SB_EVENT_INCREASED
 	bool "Forcely increase sb event during starting and stopping array."
-	default y
-
-config SYNO_MD_RAID5_FIX_MAX_LATENCY_HIGH
-	bool "Fix raid5 max latency high issue"
 	default y
 
 config SYNO_MD_RAID1_ADD_DISK_CHECK
@@ -240,8 +227,8 @@ config SYNO_BADSECTOR_TEST
 config SYNO_MAX_INTERNAL_DISK
 	int "Maximum Internal Disk Number"
 	depends on SYNO_FIXED_DISK_NAME || SYNO_BADSECTOR_TEST
-	default "19" if SYNO_BROMOLOW || SYNO_GRANTLEY || SYNO_KVMX64 || SYNO_BROADWELL || SYNO_PURLEY || SYNO_BROADWELLNTB || SYNO_NEXTKVMX64
-	default "15" if !SYNO_BROMOLOW && !SYNO_GRANTLEY && !SYNO_KVMX64 && !SYNO_BROADWELL && !SYNO_PURLEY &&!SYNO_BROADWELLNTB && !SYNO_NEXTKVMX64
+	default "19" if SYNO_BROMOLOW || SYNO_GRANTLEY || SYNO_KVMX64 || SYNO_BROADWELL || SYNO_PURLEY || SYNO_BROADWELLNTB || SYNO_NEXTKVMX64 || SYNO_BROADWELLNTBAP || SYNO_KVMCLOUD
+	default "15" if !SYNO_BROMOLOW && !SYNO_GRANTLEY && !SYNO_KVMX64 && !SYNO_BROADWELL && !SYNO_PURLEY &&!SYNO_BROADWELLNTB && !SYNO_NEXTKVMX64 &&!SYNO_BROADWELLNTBAP && !SYNO_KVMCLOUD
 
 config SYNO_SATA_PORT_MAP
 	bool "Modify SATA Hosts Port Number"
@@ -287,6 +274,11 @@ config SYNO_SATA_PM_DEVICE_GPIO
 	depends on SATA_PMP
 	default y
 
+config SYNO_SATA_PM_AMPLITUDE_ADJUSTMENT
+	bool "Synology DX/RX amplitude adjustment"
+	depends on SYNO_SATA_PM_DEVICE_GPIO && SYNO_HW_VERSION
+	default y
+
 config SYNO_SATA_MV_GPIO_RW
 	bool "Marvell SATA Controller GPIO Operation Interfaces"
 	default y
@@ -307,7 +299,7 @@ config SYNO_ATA_AHCI_LED_SWITCH
 
 config SYNO_ATA_PWR_CTRL
     bool "Disk Power Control"
-	depends on SYNO_INTERNAL_HD_NUM && SYNO_HW_VERSION && (SYNO_ICH_GPIO_CTRL || SYNO_X86_PINCTRL_GPIO || GPIO_RTD129X || GPIO_MVEBU_A3700 || PINCTRL_ARMADA_37XX)
+	depends on SYNO_INTERNAL_HD_NUM && SYNO_HW_VERSION && (SYNO_ICH_GPIO_CTRL || SYNO_X86_PINCTRL_GPIO || GPIO_RTD129X || GPIO_MVEBU_A3700 || PINCTRL_ARMADA_37XX || GPIO_RTD16xx)
 	default y
 
 config SYNO_ATA_PWR_CTRL_ICH_GPIO
@@ -359,11 +351,6 @@ config SYNO_SPINUP_DELAY_PM_DEVICE_GPIO
 	depends on SYNO_SPINUP_DELAY && SYNO_SATA_PM_DEVICE_GPIO
 	default y
 
-config SYNO_SPINUP_DELAY_SATA_IRQ_OFF
-	bool
-	depends on SYNO_SPINUP_DELAY && SYNO_SATA_IRQ_OFF
-	default y
-
 config SYNO_MV_9235_GPIO_CTRL
 	bool "Interfaces For Marvell 9235 GPIO Control"
 	default y
@@ -380,90 +367,16 @@ config SYNO_SCSI_DEVICE_INDEX
 	bool "Get device index from scsi layer"
 	default y
 
-config SYNO_SATA_IRQ_OFF
-	bool "Interfaces For HDD Deep Sleep"
-	depends on SYNO_ATA_PWR_CTRL && SYNO_SATA_PM_DEVICE_GPIO
-	default y
-
-config SYNO_MAX_SATA_ID
-	int "Maximum SATA ID"
-	depends on SYNO_SATA_IRQ_OFF
-	default "20"
-
-config SYNO_PWRPIN_ENCODE_LEN
-	int "Power Pin Encode Length"
-	depends on SYNO_SATA_IRQ_OFF
-	default "2"
-
-config SYNO_PORT_SIGN
-	string "Power Pin Signature"
-	depends on SYNO_SATA_IRQ_OFF
-	default "N"
-
-config SYNO_SATA_IRQ_OFF_PINCTRL_GPIO
-	bool
-	depends on SYNO_SATA_IRQ_OFF && SYNO_X86_PINCTRL_GPIO
-	default "y"
-
-config SYNO_SATA_IRQ_OFF_ICH_GPIO
-	bool
-	depends on SYNO_SATA_IRQ_OFF && SYNO_ICH_GPIO_CTRL
-	default "y"
-
-config SYNO_SATA_IRQ_OFF_PM_DEVICE_GPIO
-	bool
-	depends on SYNO_SATA_IRQ_OFF && SYNO_SATA_PM_DEVICE_GPIO
-	default "y"
-
-config SYNO_SATA_COMPATIBILITY
-	bool "Sata Compatibility Issue Fix"
-	default y
-
-config SYNO_SATA_DEEP_RETRY
-	bool "SATA retry mechanism"
-	depends on SYNO_SATA_COMPATIBILITY && SYNO_SATA_IRQ_OFF
-	default y
-
-config SYNO_EUNIT_COMPATIBILITY
-	bool "Improve EUnit Compatibility"
-	depends on SYNO_SATA_PM_DEVICE_GPIO && SYNO_SATA_COMPATIBILITY
-	default y
-
 config SYNO_DISK_MONITOR_TOOL
 	bool "Disk performance monitor tool"
 	default y
-
-config SYNO_SATA_RETRY_TIMES
-	int "Retry Times of Sata Compatibility Mechanism"
-	depends on SYNO_SATA_COMPATIBILITY
-	default "1"
 
 config SYNO_PM_DISABLE_LINK_LIMIT
 	bool "Clear the link speed limit when pmp attach"
 	default y
 
-config SYNO_ATA_SHUTDOWN_FIX
-	bool "Add shutdown function for ATA host"
-	depends on SYNO_SATA_IRQ_OFF
-	default y
-
-config SYNO_ATA_SHUTDOWN_FIX_PINCTRL_GPIO
-	bool
-	depends on SYNO_ATA_SHUTDOWN_FIX && SYNO_X86_PINCTRL_GPIO
-	default y
-
-config SYNO_ATA_SHUTDOWN_FIX_ICH_GPIO
-	bool
-	depends on SYNO_ATA_SHUTDOWN_FIX && SYNO_ICH_GPIO_CTRL
-	default y
-
 config SYNO_ATA_DISABLE_QUEUED_TRIM
 	bool "Disable queued TRIM function"
-	default y
-
-config SYNO_SATA_ERROR_REPORT
-	bool "Report sata error to user space"
-	depends on SYNO_FIXED_DISK_NAME || SYNO_PORT_MAPPING_V2
 	default y
 
 config SYNO_SATA_88SX7042_MSI
@@ -587,16 +500,6 @@ config SYNO_SATA_PM_FIRST_PORT_DELAY
 	bool "Delay 2 secs for port multiplier first port reset"
 	default n
 
-config SYNO_DETECT_DISK_POWER_SHORT_BREAK
-	bool "Send disk power short brake event to userspace"
-	default y
-	depends on SYNO_SATA_WCACHE_DISABLE
-
-config SYNO_SATA_IRQ_OFF_DETECT_POWER_SHORT_BREAK
-	bool
-	depends on SYNO_SATA_IRQ_OFF && SYNO_DETECT_DISK_POWER_SHORT_BREAK
-	default "y"
-
 config SYNO_CUSTOM_SCMD_TIMEOUT
 	bool "Customize SCSI commands timeout value per disk"
 	default y
@@ -675,11 +578,6 @@ config SYNO_WAKEUPCMD_IDLEIMMED
 	depends on SYNO_SPINUP_DELAY
 	default y
 
-config SYNO_RTD129X_INTERNAL_HDD_RESET
-	bool "RTD129X sata SoC need to reset phy for compatibility enhancement"
-	depends on SYNO_LSP_RTD129X && SYNO_RTD129X
-	default n
-
 config SYNO_EUNIT_SCSI_HOST_RECOVERY
 	bool "Prevent eunit scsi host stuck in recovery state"
 	default y
@@ -690,6 +588,10 @@ config SYNO_NONCQ_BASH_ERROR_FIX
 
 config SYNO_AHCI_GPIO_SOFTWARE_ACITIVITY
 	bool "AHCI software control GPIO HDD_ACT_LED"
+	default n
+
+config SYNO_AHCI_GPIO_SOFTWARE_PRESENT_BLINK
+	bool "AHCI software control GPIO HDD_PRESENT_LED blink"
 	default n
 
 config SYNO_SATA_ERROR_HANDLING_FLAG
@@ -723,6 +625,28 @@ config SYNO_EXTEND_READ_LOG_TIMEOUT
 
 config SYNO_ATA_PRINT_SN
 	bool "Add log for disk serial number"
+	default y
+
+config SYNO_REMAP_SATA_TO_SYS_ONLY_DEV
+	bool "Assign a SATA device as a system partition only device"
+	select SYNO_FIXED_DISK_NAME
+	select SYNO_SATA_REMAP
+
+config SYNO_SATA_SYSTEM_DEVICE_PREFIX
+	string "SATA system device Name Prefix"
+	default "sysd"
+	depends on SYNO_REMAP_SATA_TO_SYS_ONLY_DEV
+
+config SYNO_JMICRON_585_FIX
+	bool "Fix JMicron issues"
+	default y
+
+config SYNO_JMICRON_585_DUBIOUS_IFS_FIX
+	bool "Fix JMicron 585 raise IFS on device error"
+	default y
+
+config SYNO_BLOCK_MONITOR_TOOL
+	bool "Disk block layer performance monitor tool"
 	default y
 
 endmenu #SATA
@@ -829,7 +753,7 @@ config SYNO_SCSI_MAX_QUEUE_DEPTH_LOCK
 
 config SYNO_SAS_HBA_IDX
 	bool "Indexing Synology SAS HBA"
-	depends on SYNO_GRANTLEY || SYNO_BROADWELL || SYNO_PURLEY || SYNO_COFFEELAKE || SYNO_BROADWELLNTB
+	depends on SYNO_GRANTLEY || SYNO_BROADWELL || SYNO_PURLEY || SYNO_COFFEELAKE || SYNO_BROADWELLNTB || SYNO_BROADWELLNTBAP
 	default n
 
 config SYNO_SAS_MAX_HBA_SLOT
@@ -866,6 +790,26 @@ config SYNO_MPT3_SKIP_ADD_WHEN_SES_DEVICE_BUSY
 	depends on SCSI_MPT3SAS
 	default y
 
+config SYNO_MPT3_ENHANCE_TASK_ABORT_FAIL_CHECK
+	bool "Enhance task abort fail checking logic"
+	depends on SCSI_MPT3SAS
+	default y
+
+config SYNO_MPT3_WORKAROUND_FOR_4G_ALIGNED_SENSE_DMA_ADDR
+	bool "Workaround for 4G aligned Sense DMA buffer address"
+	depends on SCSI_MPT3SAS
+	default y
+
+config SYNO_MPT3_ENHANCED_LOG_INFO_MESSAGE
+	bool "Enhanced log_info messages"
+	depends on SCSI_MPT3SAS
+	default y
+
+config SYNO_MPT3_HBA_TEMPERATURE_READ
+	bool "Add an sysfs entry for reading HBA temperature"
+	depends on SCSI_MPT3SAS
+	default y
+
 endmenu #SAS
 
 endmenu #SCSI
@@ -875,6 +819,21 @@ menu "NVMe"
 
 config SYNO_NVME_DEVICE_INDEX
 	bool "Assign an unique index to each NVMe device"
+	depends on  BLK_DEV_NVME
+	default y
+
+config SYNO_NVME_DEBUG_FORCE_TIMEOUT
+	bool "Enable sysfs entry to triger NVMe device timeout"
+	depends on  BLK_DEV_NVME
+	default y
+
+config SYNO_NVME_QUIRK_NO_APST
+	bool "default APST off"
+	depends on  BLK_DEV_NVME
+	default y
+
+config SYNO_NVME_EXTEND_IO_TIMEOUT
+	bool "Extend timeout of NVMe IO command"
 	depends on  BLK_DEV_NVME
 	default y
 
@@ -908,7 +867,7 @@ config SYNO_ADJUST_R8168_DOWN
 config SYNO_R8168_TRX_WORKAROUND
 	bool "Fix realtek-r8168-driver tx/rx hang problem"
 	default y
-	depends on R8168 && SYNO_RTD129X
+	depends on R8168
 
 config SYNO_R8168_INIT_WORK
 	bool "Fix realtek-r8168-driver incorrect init work"
@@ -935,6 +894,21 @@ config SYNO_R8168_RESET_DELAY
 	default y
 	depends on R8168
 
+config SYNO_R8168_TX_ERROR_LOG
+	bool "Enhance R8168 tx error log"
+	default y
+	depends on R8168
+
+config SYNO_R8168_MALLOC_FIX
+	bool "Fix realtek-r8168-driver malloc fail issue"
+	default y
+	depends on R8168
+
+config SYNO_R8168_MAC_RESET_ALDPS
+	bool "Enter ALDPS mode while tx_timeout"
+	default y
+	depends on R8168
+
 config SYNO_RTK_NIC_LINK_LOG_ENHANCE
 	bool "Enhance realtek nic link status log"
 	default y
@@ -944,6 +918,26 @@ config SYNO_RTK_NETWORK_RESET_LOG
 	bool "Add reset log to r8168 or r8169"
 	default y
 	depends on R8168 || R8169SOC
+
+config SYNO_R8169_NOWARN
+	bool "Add nowarn to r8169(rtd1296) alloc skb"
+	default y
+	depends on R8169SOC && SYNO_RTD129X
+
+config SYNO_R8169_DELAY_RETRY
+	bool "Add delay retry when r8169(rtd1296) reset"
+	default y
+	depends on R8169SOC && SYNO_RTD129X
+
+config SYNO_R8169_NOMEM_NO_RESET
+	bool "Don't reset when rx buffer exhausted"
+	default y
+	depends on R8169SOC && SYNO_RTD129X
+
+config SYNO_RTD1619_R8169_HIGH_LATENCY_FIX
+	bool "fix rtd1619 r8169 high latency"
+	default y
+	depends on R8169SOC && SYNO_RTD1619
 
 endmenu #Network
 
@@ -1022,7 +1016,7 @@ config SYNO_USB_UPS_DISCONNECT_FILTER
 config SYNO_USB_XHCI_RESET_DELAY
 	bool "Add extra delay in xhci_reset"
 	default y
-	depends on SYNO_BRASWELL || SYNO_APOLLOLAKE || SYNO_BROADWELL || SYNO_GRANTLEY || SYNO_PURLEY || SYNO_BROADWELLNTB || SYNO_GEMINILAKE
+	depends on SYNO_BRASWELL || SYNO_APOLLOLAKE || SYNO_BROADWELL || SYNO_GRANTLEY || SYNO_PURLEY || SYNO_BROADWELLNTB || SYNO_GEMINILAKE || SYNO_BROADWELLNTBAP
 
 config SYNO_USB_CONNECT_DEBOUNCER
 	bool "Add connect-debouncer during USB reset"
@@ -1136,6 +1130,11 @@ config SYNO_USB_FIX_SET_INTERFACE
 	bool "Fix usb_set_interface hang"
 	default y
 
+config SYNO_USB_POWER_DELAY_ON
+	bool "Support power delay on when get description failed"
+	depends on SYNO_USB_POWER_RESET
+	default n
+
 endmenu #USB
 
 menu "Hardware Monitor"
@@ -1153,6 +1152,16 @@ config SYNO_ADT7490_PECI1_ENABLE
 	bool "Enable PECI1 for platform with two CPU"
 	depends on SYNO_ADT7490_FEATURES
 	default n
+
+config SYNO_PMBUS_FEATURES
+	bool "Features of PMBUS for Synology Inc."
+	depends on PMBUS && SENSORS_PMBUS
+	default n
+
+config SYNO_PMBUS_SKIP_CHECK
+        bool "Skip PMBUS command to avoid smbus hang"
+        depends on SYNO_PMBUS_FEATURES
+        default n
 
 endmenu #Hardware Monitor
 
@@ -1175,20 +1184,6 @@ config SYNO_TTY_EXPORT
 	bool "Export uP symbol for synobios"
 	default y
 
-config SYNO_TTY_RECEIVE
-	bool "Handle the result from ttyS1"
-	default y
-
-config SYNO_TTY_COMMAND
-	bool "Remove prefix for uP protection command"
-	default y
-	depends on SYNO_MICROP_CTRL
-
-config SYNO_TTY_LOG_MSG
-	bool "Show all command writed to ttyS1 which is Microp"
-	default y
-	depends on SYNO_TTY_COMMAND
-
 config SYNO_TTY_APL_EARLYPRINTK
 	bool "Enable earlyprintk by bootconsole"
 	default y
@@ -1204,9 +1199,9 @@ config SYNO_TTYS_FUN_NUM
 	depends on SYNO_FIX_TTYS_FUNCTIONS
 	default 2
 
-config SYNO_RTD129X_UART1
+config SYNO_RTD_UART1
 	bool "Send uP command via UART1"
-	depends on SYNO_RTD129X
+	depends on SYNO_RTD129X || SYNO_RTD1619
 	default y
 
 config SYNO_LSP_ARMADA_UART_FIX
@@ -1217,6 +1212,11 @@ config SYNO_LSP_ARMADA_UART_FIX
 config SYNO_PURLEY_SERIAL_OVER_LAN
 	bool "Support Purley serial over lan function"
 	depends on SYNO_PURLEY
+	default y
+
+config SYNO_SERIAL_8250_DISABLE_CONSOLE_DMA
+	bool "Avoid 8250 console port allocation DMA failure"
+	depends on SERIAL_8250
 	default y
 
 endmenu #Serial/TTYs
@@ -1243,6 +1243,11 @@ config SYNO_MTD_ACCESS_LOG
 
 config SYNO_MTD_ACCESS_LOG_EXCEPT_VENDOR_PART
 	bool "do not show mtd vendor part access log"
+	default n
+	depends on SYNO_MTD_ACCESS_LOG
+
+config SYNO_MTD_ACCESS_LOG_EXCEPT_REDBOOTCONF_PART
+	bool "do not show mtd RedBoot Config part access log"
 	default n
 	depends on SYNO_MTD_ACCESS_LOG
 
@@ -1324,15 +1329,6 @@ config SYNO_XR17V35X_SERIAL
 
 endmenu #ALSA
 
-menu Virtio
-
-config SYNO_CLOUD_DSM_BOOT
-	  bool "Map virtio block devices from vdx to sdx"
-	  depends on (SYNO_KVMX64 || SYNO_NEXTKVMX64)
-	  default y
-
-endmenu #Virtio
-
 menu "IOMMU"
 
 config SYNO_IOMMU_PASSTHROUGH
@@ -1390,6 +1386,38 @@ config SYNO_LINARO_BACKPORT
 	default n
 
 endmenu #TRANSCODING
+
+menu "NTB"
+
+config SYNO_NTB_CLEAR_INIT_ERROR
+	bool "clear pcie errors occurs in ntb init procedure"
+	depends on SYNO_NTB
+	default n
+
+config SYNO_NTB_FORCE_API_PHYSICAL_FLAT
+	bool "Force APIC table to physical flat mode"
+	depends on SYNO_NTB
+	default n
+
+config SYNO_NTB_HEARTBEAT
+	bool "NTB provide heartbeat function"
+	depends on SYNO_NTB
+	default n
+
+config SYNO_NTB_IRQ_CHECK
+	bool "Check IRQ of NTB disable and enable it"
+	depends on SYNO_NTB
+	default n
+
+config SYNO_NTB_SUPPORT_BRD
+	bool "NTB support ram disk block device"
+	depends on SYNO_NTB
+
+config SYNO_NTB_CMA_SIZE
+	int "Customed CMA area size in Mbytes for ntb brd devices"
+	depends on SYNO_NTB_SUPPORT_BRD
+
+endmenu #NTB
 
 menu "POWER"
 config SYNO_SKIP_SUSPEND_ERROR

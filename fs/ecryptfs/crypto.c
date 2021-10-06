@@ -409,59 +409,6 @@ out:
 	return rc;
 }
 
-#ifdef MY_ABC_HERE
-int ecryptfs_encrypt_page_export(struct page *enc_page,
-				   void *crypt_stat_ptr,
-				   struct page *page)
-{
-	int rc = 0;
-	loff_t extent_offset;
-	struct ecryptfs_crypt_stat *crypt_stat = (struct ecryptfs_crypt_stat *) crypt_stat_ptr;
-
-	for (extent_offset = 0;
-	     extent_offset < (PAGE_CACHE_SIZE / crypt_stat->extent_size);
-	     extent_offset++) {
-		rc = crypt_extent(crypt_stat, enc_page, page,
-				  extent_offset, ENCRYPT);
-		if (rc) {
-			printk(KERN_ERR "%s: Error encrypting extent; "
-			       "rc = [%d]\n", __func__, rc);
-			goto out;
-		}
-	}
-
-	rc = 0;
-out:
-	return rc;
-}
-EXPORT_SYMBOL(ecryptfs_encrypt_page_export);
-
-int ecryptfs_encrypt_page_zero_copy(struct file *file, struct page **pages, int num_page)
-{
-	struct inode *ecryptfs_inode;
-	struct ecryptfs_crypt_stat *crypt_stat;
-	loff_t offset;
-	int rc = 0;
-
-	ecryptfs_inode = pages[0]->mapping->host;
-	crypt_stat =
-		&(ecryptfs_inode_to_private(ecryptfs_inode)->crypt_stat);
-	BUG_ON(!(crypt_stat->flags & ECRYPTFS_ENCRYPTED));
-	offset = lower_offset_for_page(crypt_stat, pages[0]);
-	rc = file->f_op->ecryptfs_zero_copy(file, offset, num_page, pages,
-	      (void *)crypt_stat);
-	if (rc) {
-		printk("ecryptfs_zero_copy failed:%d\n", rc);
-		rc = -EINVAL;
-		goto out;
-	}
-	rc = 0;
-out:
-	return rc;
-}
-#endif 
-
-
 int ecryptfs_decrypt_page(struct page *page)
 {
 	struct inode *ecryptfs_inode;

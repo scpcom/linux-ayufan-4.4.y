@@ -43,42 +43,32 @@ static int ext4_xattr_list(struct dentry *dentry, char *buffer,
 
 static const struct xattr_handler *ext4_xattr_handler_map[] = {
 	[EXT4_XATTR_INDEX_USER]		     = &ext4_xattr_user_handler,
-#ifdef MY_ABC_HERE
-	[EXT4_XATTR_INDEX_SYNO_ACL_ACCESS]  = &ext4_xattr_synoacl_access_handler,
-	[EXT4_XATTR_INDEX_SYNO_ACL_ACCESS_NOPERM]  = &ext4_xattr_synoacl_noperm_access_handler,
-#else
 #ifdef CONFIG_EXT4_FS_POSIX_ACL
 	[EXT4_XATTR_INDEX_POSIX_ACL_ACCESS]  = &posix_acl_access_xattr_handler,
 	[EXT4_XATTR_INDEX_POSIX_ACL_DEFAULT] = &posix_acl_default_xattr_handler,
 #endif
-#endif 
 	[EXT4_XATTR_INDEX_TRUSTED]	     = &ext4_xattr_trusted_handler,
 #ifdef CONFIG_EXT4_FS_SECURITY
 	[EXT4_XATTR_INDEX_SECURITY]	     = &ext4_xattr_security_handler,
 #endif
 #ifdef MY_ABC_HERE
 	[EXT4_XATTR_INDEX_SYNO]          = &ext4_xattr_syno_handler,
-#endif 
+#endif  
 };
 
 const struct xattr_handler *ext4_xattr_handlers[] = {
 	&ext4_xattr_user_handler,
 	&ext4_xattr_trusted_handler,
-#ifdef MY_ABC_HERE
-	&ext4_xattr_synoacl_access_handler,
-	&ext4_xattr_synoacl_noperm_access_handler,
-#else
 #ifdef CONFIG_EXT4_FS_POSIX_ACL
 	&posix_acl_access_xattr_handler,
 	&posix_acl_default_xattr_handler,
 #endif
-#endif 
 #ifdef CONFIG_EXT4_FS_SECURITY
 	&ext4_xattr_security_handler,
 #endif
 #ifdef MY_ABC_HERE
 	&ext4_xattr_syno_handler,
-#endif 
+#endif  
 	NULL
 };
 

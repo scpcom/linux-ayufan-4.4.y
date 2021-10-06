@@ -68,12 +68,29 @@ config SYNO_BROADWELLNTB
 	bool "Intel Broadwell with ntb"
 	depends on X86_64
 
+config SYNO_BROADWELLNTBAP
+	bool "Intel Broadwell with ntb in AP mode"
+	depends on X86_64
+
 config SYNO_NEXTKVMX64
 	bool "Next OS KVM X64 Virtual Machine"
 	depends on X86_64
 
 config SYNO_GEMINILAKE
 	bool "Intel-Geminilake"
+	depends on X86_64
+
+config SYNO_RTD1619
+	bool "realtek rtd1619"
+	depends on ARM64
+	select SYNO_LSP_RTD1619
+
+config SYNO_V1000
+	bool "AMD Ryzen Embedded V1000"
+	depends on X86_64
+
+config SYNO_KVMCLOUD
+	bool "KVM X64 Virtual machine on cloud"
 	depends on X86_64
 
 endchoice
@@ -111,19 +128,23 @@ config SYNO_LSP_RTD129X
 	bool "Apply Realtek rtd129x LSP"
 	depends on ARM64 && ARCH_RTD129X
 
+config SYNO_LSP_RTD1619
+	bool "Apply Realtek rtd1619 LSP"
+	depends on ARM64 && ARCH_RTD16xx
+
 config SYNO_DUAL_HEAD
 	bool "Synology Dual Head Host"
 	default n
-	depends on SYNO_BROMOLOW || SYNO_BROADWELL || SYNO_BROADWELLNTB
+	depends on SYNO_BROMOLOW || SYNO_BROADWELL || SYNO_BROADWELLNTB || SYNO_BROADWELLNTBAP
 
 config SYNO_SAS
 	bool "Synology SAS Support"
 	default y
-	depends on SYNO_BROMOLOW || SYNO_BROADWELL || SYNO_GRANTLEY || SYNO_PURLEY || SYNO_COFFEELAKE || SYNO_BROADWELLNTB
+	depends on SYNO_BROMOLOW || SYNO_BROADWELL || SYNO_GRANTLEY || SYNO_PURLEY || SYNO_COFFEELAKE || SYNO_BROADWELLNTB || SYNO_BROADWELLNTBAP
 
 config SYNO_NTB
 	bool "Synology NTB support"
 	default n
-	depends on SYNO_BROADWELLNTB
+	depends on SYNO_BROADWELLNTB || SYNO_BROADWELLNTBAP
 
 endmenu #Platform Selection

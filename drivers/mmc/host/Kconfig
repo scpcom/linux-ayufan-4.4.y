@@ -4,6 +4,7 @@
 
 comment "MMC/SD/SDIO Host Controller Drivers"
 
+if SYNO_LSP_RTD129X
 menuconfig MMC_RTK_SDMMC
     tristate "Realtek SD/MMC host driver"
     depends on ARCH_RTD129X
@@ -11,13 +12,28 @@ menuconfig MMC_RTK_SDMMC
     select GPIO_RTD129X
     help
       Realtek SD/MMC host support.
+endif # SYNO_LSP_RTD129X
 
+if SYNO_LSP_RTD1619
+menuconfig MMC_RTK_EMMC
+    tristate "Realtek EMMC host driver"
+        help
+          Support RealTek EMMC for Kylin.
+
+menuconfig MMC_RTK_SDMMC
+    tristate "Realtek SD/MMC host driver"
+    help
+      Realtek SD/MMC host support.
+endif # SYNO_LSP_RTD1619
+
+if SYNO_LSP_RTD129X || SYNO_LSP_RTD1619
 config MMC_RTK_SDMMC_DEBUG
     bool  "Enable Realtek SD/MMC host driver debug message."
     depends on MMC_RTK_SDMMC
     default n
         help
           Enable Realtek SD/MMC host driver debug message.
+endif # SYNO_LSP_RTD129X || SYNO_LSP_RTD1619
 
 config MMC_ARMMMCI
 	tristate "ARM AMBA Multimedia Card Interface support"
@@ -367,6 +383,26 @@ config MMC_SDHCI_ST
 
 	  If you have a controller with this interface, say Y or M here.
 	  If unsure, say N.
+
+if SYNO_LSP_RTD1619
+menuconfig MMC_SDHCI_RTK
+    tristate "SDHCI support for Realtek SoC"
+    depends on RTK_PLATFORM
+    depends on MMC_SDHCI_PLTFM
+    select MMC_SDHCI_IO_ACCESSORS
+    help
+      This selects the Secure Digital Host Controller Interface in
+      Realtek SoCs.
+
+      If you have a controller with this interface, say Y or M here.
+      If unsure, say N.
+
+config RTK_SDIO_CLK_ADJUST
+    bool "Dynamic SDIO clock adjust support"
+    depends on MMC_SDHCI_RTK
+        help
+          SDIO clock adjusting API for WIFI driver
+endif # SYNO_LSP_RTD1619
 
 config MMC_OMAP
 	tristate "TI OMAP Multimedia Card Interface support"

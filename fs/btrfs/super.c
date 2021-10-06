@@ -51,12 +51,8 @@
 #include <trace/events/btrfs.h>
 
 #ifdef MY_ABC_HERE
-#include <linux/syno_acl.h>
-#endif 
-
-#ifdef MY_ABC_HERE
 #include <linux/list_lru.h>
-#endif 
+#endif  
 
 static const struct super_operations btrfs_super_ops;
 static struct file_system_type btrfs_fs_type;
@@ -255,27 +251,21 @@ enum {
 	Opt_noenospc_debug, Opt_noflushoncommit, Opt_acl, Opt_datacow,
 	Opt_datasum, Opt_treelog, Opt_noinode_cache,
 	Opt_nologreplay,
-#ifdef MY_ABC_HERE
-	Opt_synoacl, Opt_nosynoacl,
-#endif 
-#ifdef MY_ABC_HERE
-	Opt_ordered_extent_throttle,
-#endif 
 #ifdef CONFIG_BTRFS_DEBUG
 	Opt_fragment_data, Opt_fragment_metadata, Opt_fragment_all,
 #endif
 #ifdef MY_ABC_HERE
-	Opt_no_block_group_hint,
-#endif 
+	Opt_no_block_group_hint, Opt_block_group_cache_tree, Opt_clear_block_group_cache_tree,
+#endif  
 #ifdef MY_ABC_HERE
 	Opt_reclaim_space, Opt_noreclaim_space,
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
        Opt_no_block_group,
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
 	Opt_no_quota_tree,
-#endif 
+#endif  
 	Opt_err,
 };
 
@@ -307,9 +297,6 @@ static const match_table_t tokens = {
 	{Opt_nologreplay, "nologreplay"},
 	{Opt_flushoncommit, "flushoncommit"},
 	{Opt_noflushoncommit, "noflushoncommit"},
-#ifdef MY_ABC_HERE
-	{Opt_ordered_extent_throttle, "ordered_extent_throttle=%d"},
-#endif 
 	{Opt_ratio, "metadata_ratio=%d"},
 	{Opt_discard, "discard"},
 	{Opt_nodiscard, "nodiscard"},
@@ -333,10 +320,6 @@ static const match_table_t tokens = {
 	{Opt_rescan_uuid_tree, "rescan_uuid_tree"},
 	{Opt_fatal_errors, "fatal_errors=%s"},
 	{Opt_commit_interval, "commit=%d"},
-#ifdef MY_ABC_HERE
-	{Opt_synoacl, SYNO_ACL_MNT_OPT},
-	{Opt_nosynoacl, SYNO_ACL_NOT_MNT_OPT},
-#endif 
 #ifdef CONFIG_BTRFS_DEBUG
 	{Opt_fragment_data, "fragment=data"},
 	{Opt_fragment_metadata, "fragment=metadata"},
@@ -344,20 +327,21 @@ static const match_table_t tokens = {
 #endif
 #ifdef MY_ABC_HERE
 	{Opt_no_block_group_hint, "no_block_group_hint"},
-#endif 
+	{Opt_block_group_cache_tree, "block_group_cache_tree"},
+	{Opt_clear_block_group_cache_tree, "clear_block_group_cache_tree"},
+#endif  
 #ifdef MY_ABC_HERE
 	{Opt_reclaim_space, "auto_reclaim_space"},
 	{Opt_noreclaim_space, "noauto_reclaim_space"},
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
        {Opt_no_block_group, "no_block_group"},
-#endif 
+#endif  
 #ifdef MY_ABC_HERE
 	{Opt_no_quota_tree, "no_quota_tree"},
-#endif 
+#endif  
 	{Opt_err, NULL},
 };
-
 
 int btrfs_parse_options(struct btrfs_root *root, char *options,
 			unsigned long new_flags)
@@ -389,13 +373,16 @@ int btrfs_parse_options(struct btrfs_root *root, char *options,
 #else
 	else if (cache_gen)
 		btrfs_set_opt(info->mount_opt, SPACE_CACHE);
-#endif 
+#endif  
 
-	
+#ifdef MY_ABC_HERE
+	if (btrfs_fs_compat(root->fs_info, BLOCK_GROUP_CACHE_TREE) || btrfs_fs_compat(root->fs_info, BLOCK_GROUP_CACHE_TREE_AUTO))
+		btrfs_set_opt(info->mount_opt, BLOCK_GROUP_CACHE_TREE);
+#endif  
+
 	if (!options)
 		goto check;
 
-	
 	options = kstrdup(options, GFP_NOFS);
 	if (!options)
 		return -ENOMEM;
@@ -586,14 +573,6 @@ int btrfs_parse_options(struct btrfs_root *root, char *options,
 		case Opt_noacl:
 			root->fs_info->sb->s_flags &= ~MS_POSIXACL;
 			break;
-#ifdef MY_ABC_HERE
-		case Opt_synoacl:
-			btrfs_set_opt(info->mount_opt, SYNO_ACL);
-			break;
-		case Opt_nosynoacl:
-			btrfs_clear_opt(info->mount_opt, SYNO_ACL);
-			break;
-#endif 
 		case Opt_notreelog:
 			btrfs_set_and_info(root, NOTREELOG,
 					   "disabling tree log");
@@ -606,19 +585,6 @@ int btrfs_parse_options(struct btrfs_root *root, char *options,
 			btrfs_set_and_info(root, NOLOGREPLAY,
 					   "disabling log replay at mount time");
 			break;
-#ifdef MY_ABC_HERE
-		case Opt_ordered_extent_throttle:
-			ret = match_int(&args[0], &intarg);
-			if (ret) {
-				goto out;
-			} else if (intarg >= 0) {
-				info->ordered_extent_throttle = intarg;
-			} else {
-				ret = -EINVAL;
-				goto out;
-			}
-			break;
-#endif 
 		case Opt_flushoncommit:
 			btrfs_set_and_info(root, FLUSHONCOMMIT,
 					   "turning on flush-on-commit");
@@ -811,7 +777,13 @@ int btrfs_parse_options(struct btrfs_root *root, char *options,
 		case Opt_no_block_group_hint:
 			info->no_block_group_hint = 1;
 			break;
-#endif 
+		case Opt_block_group_cache_tree:
+			btrfs_set_opt(info->mount_opt, BLOCK_GROUP_CACHE_TREE);
+			break;
+		case Opt_clear_block_group_cache_tree:
+			btrfs_clear_opt(info->mount_opt, BLOCK_GROUP_CACHE_TREE);
+			break;
+#endif  
 #ifdef MY_ABC_HERE
                case Opt_no_block_group:
                        if (!(info->sb->s_flags & MS_RDONLY)) {
@@ -869,10 +841,14 @@ out:
 		btrfs_info(root->fs_info, "disk space caching is enabled");
 	if (!ret && btrfs_test_opt(root, FREE_SPACE_TREE))
 		btrfs_info(root->fs_info, "using free space tree");
+#ifdef MY_ABC_HERE
+	if (!ret && btrfs_test_opt(root, BLOCK_GROUP_CACHE_TREE))
+		btrfs_info(root->fs_info, "using free block group cache tree");
+#endif  
+
 	kfree(orig);
 	return ret;
 }
-
 
 static int btrfs_parse_early_options(const char *options, fmode_t flags,
 		void *holder, char **subvol_name, u64 *subvol_objectid,
@@ -1138,12 +1114,9 @@ static int btrfs_fill_super(struct super_block *sb,
 	sb->s_export_op = &btrfs_export_ops;
 	sb->s_xattr = btrfs_xattr_handlers;
 	sb->s_time_gran = 1;
-#ifdef MY_ABC_HERE
-#else
 #ifdef CONFIG_BTRFS_FS_POSIX_ACL
 	sb->s_flags |= MS_POSIXACL;
 #endif
-#endif 
 	sb->s_flags |= MS_I_VERSION;
 	sb->s_iflags |= SB_I_CGROUPWB;
 	err = open_ctree(sb, fs_devices, (char *)data);
@@ -1152,19 +1125,6 @@ static int btrfs_fill_super(struct super_block *sb,
 		return err;
 	}
 
-#ifdef MY_ABC_HERE
-	if (btrfs_raw_test_opt(fs_info->mount_opt, SYNO_ACL)) {
-		int st = SYNOACLModuleStatusGet("synoacl_vfs");
-		if (MODULE_STATE_LIVE != st) {
-			btrfs_err(fs_info, "synoacl module has not been loaded."
-							   "Unable to mount with synoacl, vfs_mod status=%d", st);
-			btrfs_clear_opt(fs_info->mount_opt, SYNO_ACL);
-		} else {
-			sb->s_flags |= MS_SYNOACL;
-			SYNOACLModuleGet("synoacl_vfs");
-		}
-	}
-#endif 
 	key.objectid = BTRFS_FIRST_FREE_OBJECTID;
 	key.type = BTRFS_INODE_ITEM_KEY;
 	key.offset = 0;
@@ -1274,13 +1234,8 @@ static int btrfs_show_options(struct seq_file *seq, struct dentry *dentry)
 		seq_puts(seq, ",flushoncommit");
 	if (btrfs_test_opt(root, DISCARD))
 		seq_puts(seq, ",discard");
-#ifdef MY_ABC_HERE
-	if (btrfs_test_opt(root, SYNO_ACL))
-		seq_puts(seq, ","SYNO_ACL_MNT_OPT);
-#else
 	if (!(root->fs_info->sb->s_flags & MS_POSIXACL))
 		seq_puts(seq, ",noacl");
-#endif 
 	if (btrfs_test_opt(root, SPACE_CACHE))
 		seq_puts(seq, ",space_cache");
 	else if (btrfs_test_opt(root, FREE_SPACE_TREE))
@@ -1316,11 +1271,6 @@ static int btrfs_show_options(struct seq_file *seq, struct dentry *dentry)
 		seq_printf(seq, ",check_int_print_mask=%d",
 				info->check_integrity_print_mask);
 #endif
-#ifdef MY_ABC_HERE
-	if (info->ordered_extent_throttle)
-		seq_printf(seq, ",ordered_extent_throttle=%d",
-				info->ordered_extent_throttle);
-#endif 
 	if (info->metadata_ratio)
 		seq_printf(seq, ",metadata_ratio=%d",
 				info->metadata_ratio);
@@ -1337,7 +1287,9 @@ static int btrfs_show_options(struct seq_file *seq, struct dentry *dentry)
 #ifdef MY_ABC_HERE
 	if (info->no_block_group_hint)
 		seq_puts(seq, ",no_block_group_hint");
-#endif 
+	if (btrfs_test_opt(root, BLOCK_GROUP_CACHE_TREE))
+		seq_puts(seq, ",block_group_cache_tree");
+#endif  
 #ifdef MY_ABC_HERE
        if (btrfs_test_opt(root, NO_BLOCK_GROUP))
                seq_puts(seq, ",no_block_group");
@@ -1768,23 +1720,6 @@ static int btrfs_remount(struct super_block *sb, int *flags, char *data)
 		goto restore;
 	}
 
-#ifdef MY_ABC_HERE
-	if ((sb->s_flags & MS_SYNOACL) && !btrfs_test_opt(root, SYNO_ACL)) {
-		sb->s_flags = sb->s_flags & ~MS_SYNOACL;
-		SYNOACLModulePut("synoacl_vfs");
-	} else if((!(sb->s_flags & MS_SYNOACL)) && btrfs_test_opt(root, SYNO_ACL)) {
-		int st = SYNOACLModuleStatusGet("synoacl_vfs");
-		if (MODULE_STATE_LIVE != st) {
-			btrfs_err(fs_info, "synoacl module has not been loaded."
-							   "Unable to remount with synoacl, vfs_mod status=%d", st);
-			btrfs_clear_opt(fs_info->mount_opt, SYNO_ACL);
-		} else {
-			sb->s_flags |= MS_SYNOACL;
-			SYNOACLModuleGet("synoacl_vfs");
-		}
-	}
-#endif 
-
 	btrfs_remount_begin(fs_info, old_opts, *flags);
 	btrfs_resize_thread_pool(fs_info,
 		fs_info->thread_pool_size, old_thread_pool_size);
@@ -1793,17 +1728,18 @@ static int btrfs_remount(struct super_block *sb, int *flags, char *data)
 		goto out;
 
 	if (*flags & MS_RDONLY) {
-		
+		 
 		cancel_work_sync(&fs_info->async_reclaim_work);
+#ifdef MY_ABC_HERE
+		cancel_work_sync(&fs_info->async_delayed_ref_work);
+#endif  
 
-		
 		down(&fs_info->uuid_tree_rescan_sem);
-		
+		 
 		up(&fs_info->uuid_tree_rescan_sem);
 
 		sb->s_flags |= MS_RDONLY;
 
-		
 		btrfs_delete_unused_bgs(fs_info);
 
 		btrfs_dev_replace_suspend_for_unmount(fs_info);
@@ -2170,11 +2106,6 @@ static int btrfs_statfs(struct dentry *dentry, struct kstatfs *buf)
 static void btrfs_kill_super(struct super_block *sb)
 {
 	struct btrfs_fs_info *fs_info = btrfs_sb(sb);
-#ifdef MY_ABC_HERE
-	if (MS_SYNOACL & sb->s_flags) {
-		SYNOACLModulePut("synoacl_vfs");
-	}
-#endif 
 	kill_anon_super(sb);
 	free_fs_info(fs_info);
 }
@@ -2574,27 +2505,6 @@ out:
 	return ret;
 }
 
-#ifdef MY_ABC_HERE
-extern void (*btrfs_fill_mount_path)(struct super_block *, const char *);
-void __btrfs_fill_mount_path(struct super_block *sb, const char *path)
-{
-	struct btrfs_fs_info *fs_info = btrfs_sb(sb);
-
-	snprintf(fs_info->mount_path, sizeof(fs_info->mount_path), "%s", path);
-}
-
-extern int (*funcSYNOSendErrorFsBtrfsEvent)(const u8*);
-void SynoAutoErrorFsBtrfsReport(const u8* fsid)
-{
-	if (NULL == funcSYNOSendErrorFsBtrfsEvent) {
-		printk(KERN_ERR "BTRFS-fs error: Can't reference to function 'funcSYNOSendErrorFsBtrfsEvent'\n");
-		return;
-	}
-
-	funcSYNOSendErrorFsBtrfsEvent(fsid);
-}
-#endif 
-
 static int __init init_btrfs_fs(void)
 {
 	int err;
@@ -2662,10 +2572,6 @@ static int __init init_btrfs_fs(void)
 	err = register_filesystem(&btrfs_fs_type);
 	if (err)
 		goto unregister_ioctl;
-
-#ifdef MY_ABC_HERE
-	btrfs_fill_mount_path = __btrfs_fill_mount_path;
-#endif 
 
 	return 0;
 

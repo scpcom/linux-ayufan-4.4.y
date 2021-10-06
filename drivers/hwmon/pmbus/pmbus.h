@@ -313,6 +313,9 @@ enum pmbus_sensor_classes {
 	PSC_POWER,
 	PSC_TEMPERATURE,
 	PSC_FAN,
+#ifdef CONFIG_SYNO_PMBUS_FEATURES
+	PSC_STATUS,
+#endif /* CONFIG_SYNO_PMBUS_FEATURES */
 	PSC_NUM_CLASSES		/* Number of power sensor classes */
 };
 
@@ -403,6 +406,9 @@ extern const struct regulator_ops pmbus_regulator_ops;
 
 /* Function declarations */
 
+#ifdef CONFIG_SYNO_PMBUS_FEATURES
+struct i2c_client* syno_find_pmbus_client(int psu_no);
+#endif /* CONFIG_SYNO_PMBUS_FEATURES */
 void pmbus_clear_cache(struct i2c_client *client);
 int pmbus_set_page(struct i2c_client *client, u8 page);
 int pmbus_read_word_data(struct i2c_client *client, u8 page, u8 reg);

@@ -1,3 +1,4 @@
+if SYNO_LSP_RTD129X
 menuconfig COMMON_CLK_RTK
     bool "Clock driver for realtek"
     depends on ARCH_RTD129X
@@ -11,4 +12,34 @@ config COMMON_CLK_RTD129X
 config COMMON_CLK_RTD129X_DEBUGFS
     bool "DebugFs for RTD129X clock driver"
     depends on DEBUG_FS && COMMON_CLK_RTD129X
+endif # SYNO_LSP_RTD129X
 
+if SYNO_LSP_RTD1619
+config COMMON_CLK_REALTEK
+	bool "Clock driver for realtek"
+	select RTK_MMIO
+	select RESET_CONTROLLER
+
+config COMMON_CLK_REALTEK_DEBUG
+	bool "Clock debug"
+	select RTK_REGISTER_TRACKER
+	default y
+	help
+	  Add a simple register tracker to clock
+
+config COMMON_CLK_RTD16XX
+	bool "Clock driver for RTD16xx"
+	select COMMON_CLK_REALTEK
+	default y if ARCH_RTD16xx
+
+config COMMON_CLK_DUMMY
+	bool "Dummy Clock"
+	help
+	  Dummy Clock, if not sure say N.
+
+config RESET_MUX
+	bool "Reset Controller Mux"
+	default y if ARCH_RTD16xx
+	help
+	  A mux to select reset controll.
+endif # SYNO_LSP_RTD1619

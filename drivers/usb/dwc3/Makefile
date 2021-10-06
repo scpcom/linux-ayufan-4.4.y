@@ -49,3 +49,9 @@ obj-$(CONFIG_USB_DWC3_ST)		+= dwc3-st.o
 ifeq ($(CONFIG_SYNO_LSP_RTD129X),y)
 obj-$(CONFIG_USB_DWC3_RTK)		+= dwc3-rtk.o
 endif # CONFIG_SYNO_LSP_RTD129X
+ifeq ($(CONFIG_SYNO_LSP_RTD1619),y)
+obj-$(CONFIG_USB_DWC3_RTK)		+= dwc3-rtk_1619.o
+obj-$(CONFIG_USB_DWC3_RTK)		+= dwc3-rtk-type_c_1619.o
+obj-$(CONFIG_USB_RTK_DWC3_DRD_MODE)			+= dwc3-rtk-drd.o
+obj-$(CONFIG_USB_TYPE_C_RTK_RTS5400) += rtk-rts5400.o
+endif # CONFIG_SYNO_LSP_RTD1619

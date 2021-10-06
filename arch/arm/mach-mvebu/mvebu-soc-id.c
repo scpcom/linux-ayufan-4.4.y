@@ -184,7 +184,7 @@ static int __init mvebu_soc_id_init(void)
 
 	/*
 	 * First try to get the ID and the revision by the system
-	 * (for MY_DEF_HERE)
+	 * (for CONFIG_SYNO_LSP_ARMADA_16_12)
 	 * register, then try to read it from PCI registers,
 	 * use DFX registers only if the previous methods are not possible
 	 * (for others)

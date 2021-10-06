@@ -21,11 +21,13 @@
 
 #ifdef CONFIG_SPARSEMEM
 #define MAX_PHYSMEM_BITS	48
-#ifdef MY_DEF_HERE
+#if defined(MY_DEF_HERE)
 #define SECTION_SIZE_BITS	28
-#else /* MY_DEF_HERE */
+#elif defined(MY_DEF_HERE)
+#define SECTION_SIZE_BITS	29
+#else /* CONFIG_SYNO_ARMADA37XX / MY_DEF_HERE */
 #define SECTION_SIZE_BITS	30
-#endif /* MY_DEF_HERE */
+#endif /* MY_DEF_HERE / MY_DEF_HERE */
 #endif
 
 #endif

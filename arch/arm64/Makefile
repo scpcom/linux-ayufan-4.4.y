@@ -53,20 +53,20 @@ head-y		:= arch/arm64/kernel/head.o
 ifeq ($(CONFIG_ARM64_RANDOMIZE_TEXT_OFFSET), y)
 TEXT_OFFSET := $(shell awk 'BEGIN {srand(); printf "0x%03x000\n", int(512 * rand())}')
 else
-ifeq ($(CONFIG_SYNO_LSP_RTD129X), y)
+ifneq (,$(filter y, $(CONFIG_SYNO_LSP_RTD129X) $(CONFIG_SYNO_LSP_RTD1619)))
 TEXT_OFFSET := 0x00280000
-else
+else # CONFIG_SYNO_LSP_RTD129X || CONFIG_SYNO_LSP_RTD1619
 ifeq ($(CONFIG_SYNO_LSP_ARMADA_16_12), y)
 ifeq ($(CONFIG_ARCH_MVEBU_PD), y)
 TEXT_OFFSET := 0x00180000
-else
+else # CONFIG_ARCH_MVEBU_PD
 TEXT_OFFSET := 0x00080000
-endif
-else
+endif # CONFIG_ARCH_MVEBU_PD
+else # CONFIG_SYNO_LSP_ARMADA_16_12
 TEXT_OFFSET := 0x00080000
-endif
-endif
-endif
+endif # CONFIG_SYNO_LSP_ARMADA_16_12
+endif # CONFIG_SYNO_LSP_RTD129X || CONFIG_SYNO_LSP_RTD1619
+endif # CONFIG_ARM64_RANDOMIZE_TEXT_OFFSET
 
 # KASAN_SHADOW_OFFSET = VA_START + (1 << (VA_BITS - 3)) - (1 << 61)
 # in 32-bit arithmetic

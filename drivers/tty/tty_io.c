@@ -513,11 +513,12 @@ static void __tty_hangup(struct tty_struct *tty, int exit_session)
 		return;
 	}
 
-	
+	set_bit(TTY_HUPPING, &tty->flags);
+
 	check_tty_count(tty, "tty_hangup");
 
 	spin_lock(&tty_files_lock);
-	
+	 
 	list_for_each_entry(priv, &tty->tty_files, list) {
 		filp = priv->file;
 		if (filp->f_op->write == redirected_tty_write)
@@ -547,15 +548,15 @@ static void __tty_hangup(struct tty_struct *tty, int exit_session)
 	tty->ctrl_status = 0;
 	spin_unlock_irq(&tty->ctrl_lock);
 
-	
 	if (cons_filp) {
 		if (tty->ops->close)
 			for (n = 0; n < closecount; n++)
 				tty->ops->close(tty, cons_filp);
 	} else if (tty->ops->hangup)
 		tty->ops->hangup(tty);
-	
+	 
 	set_bit(TTY_HUPPED, &tty->flags);
+	clear_bit(TTY_HUPPING, &tty->flags);
 	tty_unlock(tty);
 
 	if (f)
@@ -860,26 +861,19 @@ void tty_write_message(struct tty_struct *tty, char *msg)
 	return;
 }
 
-
-
 static ssize_t tty_write(struct file *file, const char __user *buf,
 						size_t count, loff_t *ppos)
 {
 	struct tty_struct *tty = file_tty(file);
  	struct tty_ldisc *ld;
 	ssize_t ret;
-#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
-#ifdef MY_ABC_HERE
-	char chFirstChar = '\0';
-#endif
-#endif 
 
 	if (tty_paranoia_check(tty, file_inode(file), "tty_write"))
 		return -EIO;
 	if (!tty || !tty->ops->write ||
 		(test_bit(TTY_IO_ERROR, &tty->flags)))
 			return -EIO;
-	
+	 
 	if (tty->ops->write_room == NULL)
 		printk(KERN_ERR "tty driver %s lacks a write_room method.\n",
 			tty->driver->name);
@@ -890,28 +884,12 @@ static ssize_t tty_write(struct file *file, const char __user *buf,
 #if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
 	{
 		if (0 == strcmp(tty->name, "ttyS1"))
-#ifdef MY_ABC_HERE
-		{
-			if (access_ok(VERIFY_READ, buf, 1)) {
-				if (copy_from_user(&chFirstChar, buf, 1)) {
-					printk(KERN_DEBUG "error attempted to copy_from_user\n");
-				}
-			} else {
-				memcpy(&chFirstChar, buf, 1);
-			}
-
-			if ('+' != chFirstChar) {
-#endif 
 			do_tty_write(ld->ops->write, tty, file, "-", 1);
-#ifdef MY_ABC_HERE
-			}
-		}
-#endif 
-#endif 
+#endif  
 		ret = do_tty_write(ld->ops->write, tty, file, buf, count);
 #if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
 	}
-#endif 
+#endif  
 	tty_ldisc_deref(ld);
 	return ret;
 }

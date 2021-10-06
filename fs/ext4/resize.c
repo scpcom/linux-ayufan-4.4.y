@@ -626,11 +626,7 @@ static int verify_reserved_gdb(struct super_block *sb,
 
 	while ((grp = ext4_list_backups(sb, &three, &five, &seven)) < end) {
 		if (le32_to_cpu(*p++) !=
-#ifdef MY_ABC_HERE
-			(unsigned)(grp * EXT4_BLOCKS_PER_GROUP(sb) + blk)) {
-#else
 		    grp * EXT4_BLOCKS_PER_GROUP(sb) + blk){
-#endif 
 			ext4_warning(sb, "reserved GDT %llu"
 				     " missing grp %d (%llu)",
 				     blk, grp,
@@ -660,9 +656,6 @@ static int add_new_gdb(handle_t *handle, struct inode *inode,
 	struct ext4_iloc iloc;
 	__le32 *data;
 	int err;
-#ifdef MY_ABC_HERE
-	unsigned int blk_shift = 0;
-#endif 
 
 	if (test_opt(sb, DEBUG))
 		printk(KERN_DEBUG
@@ -679,37 +672,14 @@ static int add_new_gdb(handle_t *handle, struct inode *inode,
 		goto exit_bh;
 	}
 
-#ifdef MY_ABC_HERE
-	blk_shift = gdb_num / EXT4_ADDR_PER_BLOCK(sb);
-	data = EXT4_I(inode)->i_data + EXT4_IND_BLOCK;
-	if (le32_to_cpu(*data)) {
-		blk_shift = blk_shift % le32_to_cpu(*data);
-	}
-#endif 
 	data = EXT4_I(inode)->i_data + EXT4_DIND_BLOCK;
-#ifdef MY_ABC_HERE
-	dind = sb_bread(sb, le32_to_cpu(*data) + blk_shift);
-#else
 	dind = sb_bread(sb, le32_to_cpu(*data));
-#endif 
 	if (!dind) {
 		err = -EIO;
 		goto exit_bh;
 	}
 
 	data = (__le32 *)dind->b_data;
-#ifdef MY_ABC_HERE
-	if (le32_to_cpu(data[gdb_num % EXT4_ADDR_PER_BLOCK(sb)]) != gdblock) {
-		brelse(dind);
-		data = EXT4_I(inode)->i_data + EXT4_DIND_BLOCK;
-		dind = sb_bread(sb, le32_to_cpu(*data));
-		if (!dind) {
-			err = -EIO;
-			goto exit_bh;
-		}
-		data = (__le32 *)dind->b_data;
-	}
-#endif 
 	if (le32_to_cpu(data[gdb_num % EXT4_ADDR_PER_BLOCK(sb)]) != gdblock) {
 		ext4_warning(sb, "new group %u GDT block %llu not reserved",
 			     group, gdblock);
@@ -835,9 +805,6 @@ static int reserve_backup_gdb(handle_t *handle, struct inode *inode,
 	struct buffer_head *dind;
 	struct ext4_iloc iloc;
 	ext4_fsblk_t blk;
-#ifdef MY_ABC_HERE
-	unsigned int blk_shift = 0;
-#endif 
 	__le32 *data, *end;
 	int gdbackups = 0;
 	int res, i;
@@ -847,25 +814,6 @@ static int reserve_backup_gdb(handle_t *handle, struct inode *inode,
 	if (!primary)
 		return -ENOMEM;
 
-#ifdef MY_ABC_HERE
-	blk = EXT4_SB(sb)->s_sbh->b_blocknr + 1 + EXT4_SB(sb)->s_gdb_count;
-	blk_shift = EXT4_SB(sb)->s_gdb_count / EXT4_ADDR_PER_BLOCK(sb);
-	data = EXT4_I(inode)->i_data + EXT4_IND_BLOCK;
-	if (le32_to_cpu(*data)) {
-		blk_shift = blk_shift % le32_to_cpu(*data);
-	} else {
-		blk_shift = 0;
-	}
-	data = EXT4_I(inode)->i_data + EXT4_DIND_BLOCK;
-	dind = sb_bread(sb, le32_to_cpu(*data) + blk_shift);
-	if (!dind) {
-		err = -EIO;
-		goto exit_free;
-	}
-	data = (__le32 *)dind->b_data + (EXT4_SB(sb)->s_gdb_count %
-					 EXT4_ADDR_PER_BLOCK(sb));
-	end = (__le32 *)dind->b_data + EXT4_ADDR_PER_BLOCK(sb);
-#else
 	data = EXT4_I(inode)->i_data + EXT4_DIND_BLOCK;
 	dind = sb_bread(sb, le32_to_cpu(*data));
 	if (!dind) {
@@ -877,9 +825,7 @@ static int reserve_backup_gdb(handle_t *handle, struct inode *inode,
 	data = (__le32 *)dind->b_data + (EXT4_SB(sb)->s_gdb_count %
 					 EXT4_ADDR_PER_BLOCK(sb));
 	end = (__le32 *)dind->b_data + EXT4_ADDR_PER_BLOCK(sb);
-#endif 
 
-	
 	for (res = 0; res < reserved_gdb; res++, blk++) {
 		if (le32_to_cpu(*data) != blk) {
 			ext4_warning(sb, "reserved block %llu"
@@ -900,38 +846,8 @@ static int reserve_backup_gdb(handle_t *handle, struct inode *inode,
 			err = gdbackups;
 			goto exit_bh;
 		}
-#ifdef MY_ABC_HERE
-		if (++data < end)
-			continue;
-		
-		brelse(dind);
-		blk_shift++;
-		data = EXT4_I(inode)->i_data + EXT4_DIND_BLOCK;
-		dind = sb_bread(sb, le32_to_cpu(*data) + blk_shift);
-		if (!dind) {
-			err = -EIO;
-			goto exit_free;
-		}
-		data = (__le32 *)dind->b_data;
-		end = (__le32 *)dind->b_data + EXT4_ADDR_PER_BLOCK(sb);
-		if (le32_to_cpu(*data) == (blk+1)) {
-			continue;
-		}
-		
-		blk_shift = 0;
-		brelse(dind);
-		data = EXT4_I(inode)->i_data + EXT4_DIND_BLOCK;
-		dind = sb_bread(sb, le32_to_cpu(*data));
-		if (!dind) {
-			err = -EIO;
-			goto exit_free;
-		}
-		data = (__le32 *)dind->b_data;
-		end = (__le32 *)dind->b_data + EXT4_ADDR_PER_BLOCK(sb);
-#else
 		if (++data >= end)
 			data = (__le32 *)dind->b_data;
-#endif 
 	}
 
 	for (i = 0; i < reserved_gdb; i++) {
@@ -1210,41 +1126,26 @@ static void ext4_update_super(struct super_block *sb,
 
 	ext4_blocks_count_set(es, ext4_blocks_count(es) + blocks_count);
 	ext4_free_blocks_count_set(es, ext4_free_blocks_count(es) + free_blocks);
-#ifdef MY_ABC_HERE
-	if ((u64)((u64)le32_to_cpu(es->s_inodes_count) + ((u64)EXT4_INODES_PER_GROUP(sb) * flex_gd->count)) < (u32)(~0U)) {
-		le32_add_cpu(&es->s_inodes_count, EXT4_INODES_PER_GROUP(sb) *
-					 flex_gd->count);
-		le32_add_cpu(&es->s_free_inodes_count, EXT4_INODES_PER_GROUP(sb) *
-				 flex_gd->count);
-	} else {
-		es->s_free_inodes_count += cpu_to_le32((u32)(~0U) - le32_to_cpu(es->s_inodes_count));
-		es->s_inodes_count = cpu_to_le32(~0U);
-	}
-#else
 	le32_add_cpu(&es->s_inodes_count, EXT4_INODES_PER_GROUP(sb) *
 		     flex_gd->count);
 	le32_add_cpu(&es->s_free_inodes_count, EXT4_INODES_PER_GROUP(sb) *
 		     flex_gd->count);
-#endif 
 
 	ext4_debug("free blocks count %llu", ext4_free_blocks_count(es));
-	
+	 
 	smp_wmb();
 
-	
 	sbi->s_groups_count += flex_gd->count;
 	sbi->s_blockfile_groups = min_t(ext4_group_t, sbi->s_groups_count,
 			(EXT4_MAX_BLOCK_FILE_PHYS / EXT4_BLOCKS_PER_GROUP(sb)));
 
-	
 #ifdef MY_ABC_HERE
-	
+	 
 #else
 	ext4_r_blocks_count_set(es, ext4_r_blocks_count(es) +
 				reserved_blocks);
-#endif 
+#endif  
 
-	
 	percpu_counter_add(&sbi->s_freeclusters_counter,
 			   EXT4_NUM_B2C(sbi, free_blocks));
 	percpu_counter_add(&sbi->s_freeinodes_counter,
@@ -1292,22 +1193,11 @@ static int ext4_flex_group_add(struct super_block *sb,
 	err = setup_new_flex_group_blocks(sb, flex_gd);
 	if (err)
 		goto exit;
-	
-#ifdef MY_ABC_HERE
-	if (!ext4_has_feature_flex_bg(sb)) {
-		credit = 3 + reserved_gdb;
-	} else {
-		credit = 3;	
-		
-		credit += 1 + DIV_ROUND_UP(flex_gd->count, EXT4_DESC_PER_BLOCK(sb));
-		credit += reserved_gdb;	
-	}
-#else
-	credit = 3;	
-	
+	 
+	credit = 3;	 
+	 
 	credit += 1 + DIV_ROUND_UP(flex_gd->count, EXT4_DESC_PER_BLOCK(sb));
-	credit += reserved_gdb;	
-#endif 
+	credit += reserved_gdb;	 
 	handle = ext4_journal_start_sb(sb, EXT4_HT_RESIZE, credit);
 	if (IS_ERR(handle)) {
 		err = PTR_ERR(handle);
@@ -1626,19 +1516,9 @@ static int ext4_convert_meta_bg(struct super_block *sb, struct inode *inode)
 			return -EPERM;
 		}
 
-#ifdef MY_ABC_HERE
-		
-#else
-		
 		if (inode->i_blocks != 1 << (inode->i_blkbits - 9))
 			goto invalid_resize_inode;
-#endif 
 		for (i = 0; i < EXT4_N_BLOCKS; i++) {
-#ifdef MY_ABC_HERE
-			if (i == EXT4_IND_BLOCK) {
-				continue;
-			}
-#endif 
 			if (i == EXT4_DIND_BLOCK) {
 				if (ei->i_data[i])
 					continue;
@@ -1672,20 +1552,10 @@ static int ext4_convert_meta_bg(struct super_block *sb, struct inode *inode)
 	}
 
 	if (inode) {
-#ifdef MY_ABC_HERE
-		int reserved_gdt_block = le32_to_cpu(ei->i_data[EXT4_IND_BLOCK]);
-#endif
 		nr = le32_to_cpu(ei->i_data[EXT4_DIND_BLOCK]);
-#ifdef MY_ABC_HERE
-		ext4_free_blocks(handle, inode, NULL, nr, reserved_gdt_block ? reserved_gdt_block : 1,
-#else
 		ext4_free_blocks(handle, inode, NULL, nr, 1,
-#endif 
 				 EXT4_FREE_BLOCKS_METADATA |
 				 EXT4_FREE_BLOCKS_FORGET);
-#ifdef MY_ABC_HERE
-		ei->i_data[EXT4_IND_BLOCK] = 0;
-#endif 
 		ei->i_data[EXT4_DIND_BLOCK] = 0;
 		inode->i_blocks = 0;
 
@@ -1737,24 +1607,20 @@ retry:
 		 "to %llu blocks", o_blocks_count, n_blocks_count);
 
 	if (n_blocks_count < o_blocks_count) {
-		
+		 
 		ext4_warning(sb, "can't shrink FS - resize aborted");
 		return -EINVAL;
 	}
 
 	if (n_blocks_count == o_blocks_count)
-		
+		 
 		return 0;
 
 	n_group = ext4_get_group_number(sb, n_blocks_count - 1);
-#ifdef MY_ABC_HERE
-	
-#else
 	if (n_group > (0xFFFFFFFFUL / EXT4_INODES_PER_GROUP(sb))) {
 		ext4_warning(sb, "resize would cause inodes_count overflow");
 		return -EINVAL;
 	}
-#endif 
 	ext4_get_group_no_and_offset(sb, o_blocks_count - 1, &o_group, &offset);
 
 	n_desc_blocks = num_desc_blocks(sb, n_group + 1);

@@ -68,9 +68,17 @@ static inline int compressed_bio_size(struct btrfs_root *root,
 }
 
 static struct bio *compressed_bio_alloc(struct block_device *bdev,
+#ifdef CONFIG_SYNO_BTRFS_LIMIT_BIO_SIZE_FOR_LATENCY
+					u64 first_byte, gfp_t gfp_flags, int rw)
+#else
 					u64 first_byte, gfp_t gfp_flags)
+#endif  
 {
+#ifdef CONFIG_SYNO_BTRFS_LIMIT_BIO_SIZE_FOR_LATENCY
+	return btrfs_bio_alloc(bdev, first_byte >> 9, BIO_MAX_PAGES, gfp_flags, rw);
+#else
 	return btrfs_bio_alloc(bdev, first_byte >> 9, BIO_MAX_PAGES, gfp_flags);
+#endif  
 }
 
 static int check_compressed_csum(struct inode *inode,
@@ -275,7 +283,11 @@ int btrfs_submit_compressed_write(struct inode *inode, u64 start,
 
 	bdev = BTRFS_I(inode)->root->fs_info->fs_devices->latest_bdev;
 
+#ifdef CONFIG_SYNO_BTRFS_LIMIT_BIO_SIZE_FOR_LATENCY
+	bio = compressed_bio_alloc(bdev, first_byte, GFP_NOFS, WRITE);
+#else
 	bio = compressed_bio_alloc(bdev, first_byte, GFP_NOFS);
+#endif  
 	if (!bio) {
 		kfree(cb);
 		return -ENOMEM;
@@ -300,24 +312,27 @@ int btrfs_submit_compressed_write(struct inode *inode, u64 start,
 		    PAGE_CACHE_SIZE) {
 			bio_get(bio);
 
-			
 			atomic_inc(&cb->pending_bios);
 			ret = btrfs_bio_wq_end_io(root->fs_info, bio,
 					BTRFS_WQ_ENDIO_DATA);
-			BUG_ON(ret); 
+			BUG_ON(ret);  
 
 			if (!skip_sum) {
 				ret = btrfs_csum_one_bio(root, inode, bio,
 							 start, 1);
-				BUG_ON(ret); 
+				BUG_ON(ret);  
 			}
 
 			ret = btrfs_map_bio(root, WRITE, bio, 0, 1);
-			BUG_ON(ret); 
+			BUG_ON(ret);  
 
 			bio_put(bio);
 
+#ifdef CONFIG_SYNO_BTRFS_LIMIT_BIO_SIZE_FOR_LATENCY
+			bio = compressed_bio_alloc(bdev, first_byte, GFP_NOFS, WRITE);
+#else
 			bio = compressed_bio_alloc(bdev, first_byte, GFP_NOFS);
+#endif  
 			BUG_ON(!bio);
 			bio->bi_private = cb;
 			bio->bi_end_io = end_compressed_bio_write;
@@ -537,11 +552,14 @@ int btrfs_submit_compressed_read(struct inode *inode, struct bio *bio,
 
 	add_ra_bio_pages(inode, em_start + em_len, cb);
 
-	
 	uncompressed_len = bio->bi_vcnt * PAGE_CACHE_SIZE;
 	cb->len = uncompressed_len;
 
+#ifdef CONFIG_SYNO_BTRFS_LIMIT_BIO_SIZE_FOR_LATENCY
+	comp_bio = compressed_bio_alloc(bdev, cur_disk_byte, GFP_NOFS, READ);
+#else
 	comp_bio = compressed_bio_alloc(bdev, cur_disk_byte, GFP_NOFS);
+#endif  
 	if (!comp_bio)
 		goto fail2;
 	comp_bio->bi_private = cb;
@@ -589,7 +607,11 @@ int btrfs_submit_compressed_read(struct inode *inode, struct bio *bio,
 			bio_put(comp_bio);
 
 			comp_bio = compressed_bio_alloc(bdev, cur_disk_byte,
+#ifdef CONFIG_SYNO_BTRFS_LIMIT_BIO_SIZE_FOR_LATENCY
+							GFP_NOFS, READ);
+#else
 							GFP_NOFS);
+#endif  
 			BUG_ON(!comp_bio);
 			comp_bio->bi_private = cb;
 			comp_bio->bi_end_io = end_compressed_bio_read;

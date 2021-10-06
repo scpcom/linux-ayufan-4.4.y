@@ -412,9 +412,27 @@ out:
 	return rc;
 }
 
+#ifdef MY_ABC_HERE
+static int ecryptfs_test_super(struct super_block *s, void *data)
+{
+	struct ecryptfs_sb_info *p = data;
+	struct ecryptfs_sb_info *sb_info = ecryptfs_superblock_to_private(s);
+
+	return sb_info->dentry == p->dentry;
+}
+
+static int ecryptfs_set_super(struct super_block *s, void *data)
+{
+	int err = set_anon_super(s, data);
+	if (!err) {
+		ecryptfs_set_superblock_private(s, (struct ecryptfs_sb_info *)data);
+	}
+	return err;
+}
+#endif  
+
 struct kmem_cache *ecryptfs_sb_info_cache;
 static struct file_system_type ecryptfs_fs_type;
-
 
 static struct dentry *ecryptfs_mount(struct file_system_type *fs_type, int flags,
 			const char *dev_name, void *raw_data)
@@ -435,37 +453,72 @@ static struct dentry *ecryptfs_mount(struct file_system_type *fs_type, int flags
 		goto out;
 	}
 
+#ifdef MY_ABC_HERE
+	rc = kern_path(dev_name, LOOKUP_FOLLOW | LOOKUP_DIRECTORY, &path);
+	if (rc) {
+		ecryptfs_printk(KERN_WARNING, "kern_path() failed\n");
+		goto out;
+	}
+
+	sbi->dentry = path.dentry;
+	s = sget(fs_type, ecryptfs_test_super, ecryptfs_set_super, flags, sbi);
+	if (IS_ERR(s)) {
+		rc = PTR_ERR(s);
+		goto out1;
+	}
+
+	if (s->s_root) {
+		kmem_cache_free(ecryptfs_sb_info_cache, sbi);
+		path_put(&path);
+		return dget(s->s_root);
+	}
+
+#endif  
+
 	rc = ecryptfs_parse_options(sbi, raw_data, &check_ruid);
 	if (rc) {
 		err = "Error parsing options";
+#ifdef MY_ABC_HERE
+		goto out_free;
+#else  
 		goto out;
+#endif  
 	}
 	mount_crypt_stat = &sbi->mount_crypt_stat;
 
+#ifdef MY_ABC_HERE
+#else  
 	s = sget(fs_type, NULL, set_anon_super, flags, NULL);
 	if (IS_ERR(s)) {
 		rc = PTR_ERR(s);
 		goto out;
 	}
+#endif  
 
 	rc = bdi_setup_and_register(&sbi->bdi, "ecryptfs");
 	if (rc)
+#ifdef MY_ABC_HERE
+		goto out_free;
+#else  
 		goto out1;
+#endif  
 
 	ecryptfs_set_superblock_private(s, sbi);
 	s->s_bdi = &sbi->bdi;
 
-	
 	sbi = NULL;
 	s->s_op = &ecryptfs_sops;
 	s->s_d_op = &ecryptfs_dops;
 
 	err = "Reading sb failed";
+#ifdef MY_ABC_HERE
+#else  
 	rc = kern_path(dev_name, LOOKUP_FOLLOW | LOOKUP_DIRECTORY, &path);
 	if (rc) {
 		ecryptfs_printk(KERN_WARNING, "kern_path() failed\n");
 		goto out1;
 	}
+#endif  
 	if (path.dentry->d_sb->s_type == &ecryptfs_fs_type) {
 		rc = -EINVAL;
 		printk(KERN_ERR "Mount on filesystem of type "
@@ -485,17 +538,9 @@ static struct dentry *ecryptfs_mount(struct file_system_type *fs_type, int flags
 
 	ecryptfs_set_superblock_lower(s, path.dentry->d_sb);
 
-#ifdef MY_ABC_HERE
-	if (IS_FS_SYNOACL(path.dentry->d_inode)) {
-		s->s_flags |= MS_SYNOACL;
-	}
-#else
-	
 	s->s_flags = flags & ~MS_POSIXACL;
 	s->s_flags |= path.dentry->d_sb->s_flags & MS_POSIXACL;
-#endif 
 
-	
 	if (path.dentry->d_sb->s_flags & MS_RDONLY ||
 	    mount_crypt_stat->flags & ECRYPTFS_ENCRYPTED_VIEW_ENABLED)
 		s->s_flags |= MS_RDONLY;
@@ -527,17 +572,23 @@ static struct dentry *ecryptfs_mount(struct file_system_type *fs_type, int flags
 	if (!root_info)
 		goto out_free;
 
-	
 	ecryptfs_set_dentry_private(s->s_root, root_info);
 	root_info->lower_path = path;
 
 	s->s_flags |= MS_ACTIVE;
 	return dget(s->s_root);
 
+#ifdef MY_ABC_HERE
+out_free:
+	deactivate_locked_super(s);
+out1:
+	path_put(&path);
+#else  
 out_free:
 	path_put(&path);
 out1:
 	deactivate_locked_super(s);
+#endif  
 out:
 	if (sbi) {
 		ecryptfs_destroy_mount_crypt_stat(&sbi->mount_crypt_stat);

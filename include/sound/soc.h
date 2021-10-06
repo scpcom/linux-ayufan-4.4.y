@@ -13,9 +13,12 @@
 #include <linux/interrupt.h>
 #include <linux/kernel.h>
 #if defined(MY_ABC_HERE)
-#else 
+#if defined(CONFIG_SYNO_RTD1619)
 #include <linux/regmap.h>
-#endif 
+#endif  
+#else  
+#include <linux/regmap.h>
+#endif  
 #include <linux/log2.h>
 #include <sound/core.h>
 #include <sound/pcm.h>

@@ -64,6 +64,17 @@ static int sdhci_pre_dma_transfer(struct sdhci_host *host,
 					struct mmc_data *data);
 static int sdhci_do_get_cd(struct sdhci_host *host);
 
+#if defined(MY_DEF_HERE)
+#ifdef CONFIG_MMC_SDHCI_RTK
+void Disable_sdio_irq(struct sdhci_host *host)
+{
+	sdhci_writel(host, 0, SDHCI_INT_ENABLE);
+	sdhci_writel(host, 0, SDHCI_SIGNAL_ENABLE);
+}
+EXPORT_SYMBOL(Disable_sdio_irq);
+#endif /* CONFIG_MMC_SDHCI_RTK */
+
+#endif /* MY_DEF_HERE */
 #ifdef CONFIG_PM
 static int sdhci_runtime_pm_get(struct sdhci_host *host);
 static int sdhci_runtime_pm_put(struct sdhci_host *host);
@@ -3001,9 +3012,16 @@ int sdhci_add_host(struct sdhci_host *host)
 
 	sdhci_do_reset(host, SDHCI_RESET_ALL);
 
+#if defined(CONFIG_MMC_SDHCI_RTK) && defined(MY_DEF_HERE)
+	host->caps |= (SDHCI_CAN_VDD_180 | SDHCI_CAN_VDD_330);
+	/* workaround, kylin register cannot be showed correctly, so just set host capability 3.0
+#endif */
+	host->version = SDHCI_SPEC_300;
+#else /* CONFIG_MMC_SDHCI_RTK && MY_DEF_HERE */
 	host->version = sdhci_readw(host, SDHCI_HOST_VERSION);
 	host->version = (host->version & SDHCI_SPEC_VER_MASK)
 				>> SDHCI_SPEC_VER_SHIFT;
+#endif /* CONFIG_MMC_SDHCI_RTK && MY_DEF_HERE */
 	if (host->version > SDHCI_SPEC_300) {
 		pr_err("%s: Unknown controller version (%d). "
 			"You may experience problems.\n", mmc_hostname(mmc),
@@ -3122,12 +3140,19 @@ int sdhci_add_host(struct sdhci_host *host)
 		mmc_dev(mmc)->dma_mask = &host->dma_mask;
 	}
 
+#if defined(CONFIG_MMC_SDHCI_RTK) && defined(MY_DEF_HERE)
+        if (host->version >= SDHCI_SPEC_300)
+                host->max_clk = 200;
+        else
+                host->max_clk = 100;
+#else /* CONFIG_MMC_SDHCI_RTK && MY_DEF_HERE */
 	if (host->version >= SDHCI_SPEC_300)
 		host->max_clk = (caps[0] & SDHCI_CLOCK_V3_BASE_MASK)
 			>> SDHCI_CLOCK_BASE_SHIFT;
 	else
 		host->max_clk = (caps[0] & SDHCI_CLOCK_BASE_MASK)
 			>> SDHCI_CLOCK_BASE_SHIFT;
+#endif /* CONFIG_MMC_SDHCI_RTK && MY_DEF_HERE */
 
 	host->max_clk *= 1000000;
 	if (host->max_clk == 0 || host->quirks &

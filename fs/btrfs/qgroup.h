@@ -1,28 +1,13 @@
 #ifndef MY_ABC_HERE
 #define MY_ABC_HERE
 #endif
-
-
+ 
 #ifndef __BTRFS_QGROUP__
 #define __BTRFS_QGROUP__
 
 #include "ulist.h"
 #include "delayed-ref.h"
 
-
-#ifdef MY_ABC_HERE
-struct btrfs_quota_account_rec {
-	struct list_head list;
-	u64 ref_root;
-	u64 bytenr;
-	u64 num_bytes;
-	unsigned int op_type:1;
-#ifdef MY_ABC_HERE
-	u64 objectid;
-	uid_t uid;
-#endif 
-};
-#endif 
 struct btrfs_qgroup_extent_record {
 	struct rb_node node;
 	u64 bytenr;
@@ -56,12 +41,6 @@ int btrfs_limit_qgroup(struct btrfs_trans_handle *trans,
 int btrfs_read_qgroup_config(struct btrfs_fs_info *fs_info);
 void btrfs_free_qgroup_config(struct btrfs_fs_info *fs_info);
 struct btrfs_delayed_extent_op;
-#ifdef MY_ABC_HERE
-int btrfs_insert_quota_record(struct btrfs_trans_handle *trans,
-				  struct btrfs_delayed_ref_node *node);
-int btrfs_quota_accounting(struct btrfs_trans_handle *trans,
-				  struct btrfs_fs_info *fs_info);
-#else
 int btrfs_qgroup_prepare_account_extents(struct btrfs_trans_handle *trans,
 					 struct btrfs_fs_info *fs_info);
 struct btrfs_qgroup_extent_record
@@ -74,7 +53,6 @@ btrfs_qgroup_account_extent(struct btrfs_trans_handle *trans,
 			    struct ulist *old_roots, struct ulist *new_roots);
 int btrfs_qgroup_account_extents(struct btrfs_trans_handle *trans,
 				 struct btrfs_fs_info *fs_info);
-#endif 
 int btrfs_run_qgroups(struct btrfs_trans_handle *trans,
 		      struct btrfs_fs_info *fs_info);
 int btrfs_qgroup_inherit(struct btrfs_trans_handle *trans,
@@ -96,13 +74,6 @@ int btrfs_verify_qgroup_counts(struct btrfs_fs_info *fs_info, u64 qgroupid,
 			       u64 rfer, u64 excl);
 #endif
 
-
-#ifdef MY_ABC_HERE
-int btrfs_quota_reserve(struct btrfs_root *root, struct inode *inode,
-						 u64 num_bytes);
-void btrfs_quota_reserve_free(struct btrfs_root *root,
-						 struct inode *inode, u64 num_bytes);
-#endif 
 int btrfs_qgroup_reserve_data(struct inode *inode, u64 start, u64 len);
 int btrfs_qgroup_release_data(struct inode *inode, u64 start, u64 len);
 int btrfs_qgroup_free_data(struct inode *inode, u64 start, u64 len);

@@ -220,8 +220,12 @@ EXPORT_SYMBOL_GPL(mce_inject_log);
 
 static struct notifier_block mce_srao_nb;
 
+static atomic_t num_notifiers;
+
 void mce_register_decode_chain(struct notifier_block *nb)
 {
+	atomic_inc(&num_notifiers);
+
 	/* Ensure SRAO notifier has the highest priority in the decode chain. */
 	if (nb != &mce_srao_nb && nb->priority == INT_MAX)
 		nb->priority -= 1;
@@ -232,21 +236,23 @@ EXPORT_SYMBOL_GPL(mce_register_decode_chain);
 
 void mce_unregister_decode_chain(struct notifier_block *nb)
 {
+	atomic_dec(&num_notifiers);
+
 	atomic_notifier_chain_unregister(&x86_mce_decoder_chain, nb);
 }
 EXPORT_SYMBOL_GPL(mce_unregister_decode_chain);
 
-static void print_mce(struct mce *m)
+static void __print_mce(struct mce *m)
 {
-	int ret = 0;
-
-	pr_emerg(HW_ERR "CPU %d: Machine Check Exception: %Lx Bank %d: %016Lx\n",
-	       m->extcpu, m->mcgstatus, m->bank, m->status);
+	pr_emerg(HW_ERR "CPU %d: Machine Check%s: %Lx Bank %d: %016Lx\n",
+		 m->extcpu,
+		 (m->mcgstatus & MCG_STATUS_MCIP ? " Exception" : ""),
+		 m->mcgstatus, m->bank, m->status);
 
 	if (m->ip) {
 		pr_emerg(HW_ERR "RIP%s %02x:<%016Lx> ",
 			!(m->mcgstatus & MCG_STATUS_EIPV) ? " !INEXACT!" : "",
-				m->cs, m->ip);
+			m->cs, m->ip);
 
 		if (m->cs == __KERNEL_CS)
 			print_symbol("{%s}", m->ip);
@@ -267,6 +273,13 @@ static void print_mce(struct mce *m)
 	pr_emerg(HW_ERR "PROCESSOR %u:%x TIME %llu SOCKET %u APIC %x microcode %x\n",
 		m->cpuvendor, m->cpuid, m->time, m->socketid, m->apicid,
 		cpu_data(m->extcpu).microcode);
+}
+
+static void print_mce(struct mce *m)
+{
+	int ret = 0;
+
+	__print_mce(m);
 
 	/*
 	 * Print out human-readable details about the MCE error,
@@ -505,6 +518,32 @@ static int srao_decode_notifier(struct notifier_block *nb, unsigned long val,
 static struct notifier_block mce_srao_nb = {
 	.notifier_call	= srao_decode_notifier,
 	.priority = INT_MAX,
+};
+
+static int mce_default_notifier(struct notifier_block *nb, unsigned long val,
+				void *data)
+{
+	struct mce *m = (struct mce *)data;
+
+	if (!m)
+		return NOTIFY_DONE;
+
+	/*
+	 * Run the default notifier if we have only the SRAO
+	 * notifier and us registered.
+	 */
+	if (atomic_read(&num_notifiers) > 2)
+		return NOTIFY_DONE;
+
+	__print_mce(m);
+
+	return NOTIFY_DONE;
+}
+
+static struct notifier_block mce_default_nb = {
+	.notifier_call	= mce_default_notifier,
+	/* lowest prio, we want it to run last. */
+	.priority	= 0,
 };
 
 /*
@@ -1653,12 +1692,18 @@ static void __mcheck_cpu_init_vendor(struct cpuinfo_x86 *c)
 		break;
 
 	case X86_VENDOR_AMD: {
+#ifdef CONFIG_SYNO_AMD_MCE_PORTING 
+		mce_flags.overflow_recov = !!cpu_has(c, X86_FEATURE_OVERFLOW_RECOV);
+		mce_flags.succor	 = !!cpu_has(c, X86_FEATURE_SUCCOR);
+		mce_flags.smca		 = !!cpu_has(c, X86_FEATURE_SMCA);
+#else /* CONFIG_SYNO_AMD_MCE_PORTING */
 		u32 ebx = cpuid_ebx(0x80000007);
 
 		mce_amd_feature_init(c);
 		mce_flags.overflow_recov = !!(ebx & BIT(0));
 		mce_flags.succor	 = !!(ebx & BIT(1));
 		mce_flags.smca		 = !!(ebx & BIT(3));
+#endif /* CONFIG_SYNO_AMD_MCE_PORTING */
 
 		break;
 		}
@@ -2086,6 +2131,7 @@ int __init mcheck_init(void)
 {
 	mcheck_intel_therm_init();
 	mce_register_decode_chain(&mce_srao_nb);
+	mce_register_decode_chain(&mce_default_nb);
 	mcheck_vendor_init_severity();
 
 	INIT_WORK(&mce_work, mce_process_work);
