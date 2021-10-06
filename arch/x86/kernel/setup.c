@@ -1,7 +1,7 @@
-
-
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/sched.h>
 #include <linux/mm.h>
 #include <linux/mmzone.h>
@@ -94,6 +94,21 @@
 #include <asm/prom.h>
 #include <asm/microcode.h>
 
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+#include  <linux/synobios.h>
+
+#ifdef MY_DEF_HERE
+#include <linux/gpio.h>
+#endif  
+
+#ifdef MY_ABC_HERE
+extern u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite);
+#endif  
+#endif  
+
+#ifdef MY_ABC_HERE
+extern long g_syno_hdd_powerup_seq;
+#endif  
 
 unsigned long max_low_pfn_mapped;
 unsigned long max_pfn_mapped;
@@ -239,6 +254,210 @@ void * __init extend_brk(size_t size, size_t align)
 
 	return ret;
 }
+
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE) && !defined(MY_DEF_HERE) && !defined(MY_DEF_HERE) && !defined(MY_DEF_HERE)
+ 
+#define SYNO_MAX_HDD_PRZ	4
+#define GPIO_UNDEF			0xFF
+
+static u8 SYNO_GET_HDD_ENABLE_PIN(const int index)
+{
+	u8 ret = GPIO_UNDEF;
+
+#if defined(MY_DEF_HERE)
+	u8 HddEnPinMap[] = {10, 15, 16, 17};
+#else
+	u8 *HddEnPinMap = NULL;
+#endif
+
+	if (NULL == HddEnPinMap) {
+		goto END;
+	}
+
+	if (1 > index || (0 < g_syno_hdd_powerup_seq && g_syno_hdd_powerup_seq < index)) {
+		printk("SYNO_GET_HDD_ENABLE_PIN(%d) is illegal", index);
+		WARN_ON(1);
+		goto END;
+	}
+
+	ret = HddEnPinMap[index-1];
+
+END:
+	return ret;
+}
+
+static u32 SYNO_X86_GPIO_PIN_SET(int pin, int *pValue)
+{
+	u32 ret = 0;
+
+#if defined(MY_ABC_HERE)
+	ret = syno_pch_lpc_gpio_pin(pin, pValue, 1);
+#elif defined(MY_DEF_HERE)
+	ret = syno_gpio_value_set(pin, *pValue);
+#endif  
+	return ret;
+}
+
+int SYNO_CTRL_HDD_POWERON(int index, int value)
+{
+	int iRet = -EINVAL;
+
+	if (syno_is_hw_version(HW_DS415p)) {
+		switch (index) {
+			case 0:
+				 
+				SYNO_X86_GPIO_PIN_SET(SYNO_GET_HDD_ENABLE_PIN(1), &value);
+				mdelay(200);
+				SYNO_X86_GPIO_PIN_SET(SYNO_GET_HDD_ENABLE_PIN(2) , &value);
+				mdelay(200);
+				SYNO_X86_GPIO_PIN_SET(SYNO_GET_HDD_ENABLE_PIN(3) , &value);
+				mdelay(200);
+				SYNO_X86_GPIO_PIN_SET(SYNO_GET_HDD_ENABLE_PIN(4) , &value);
+				break;
+			case 1 ... 4:
+				SYNO_X86_GPIO_PIN_SET(SYNO_GET_HDD_ENABLE_PIN(index) , &value);
+				break;
+			default:
+				goto END;
+		}
+	 
+	}else if(syno_is_hw_version(HW_DS716p) ||
+		syno_is_hw_version(HW_DS216p) ||
+		syno_is_hw_version(HW_DS216pII) ||
+		syno_is_hw_version(HW_DS716pII)) {
+		switch(index){
+			case 0:
+				 
+				SYNO_X86_GPIO_PIN_SET(SYNO_GET_HDD_ENABLE_PIN(1) , &value);
+				mdelay(200);
+				SYNO_X86_GPIO_PIN_SET(SYNO_GET_HDD_ENABLE_PIN(2) , &value);
+				break;
+			case 1 ... 2:
+				SYNO_X86_GPIO_PIN_SET(SYNO_GET_HDD_ENABLE_PIN(index) , &value);
+				break;
+			default:
+				goto END;
+		}
+	 
+	} else {
+		goto END;
+	}
+
+	iRet = 0;
+END:
+	return iRet;
+}
+
+static u8 SYNO_GET_HDD_PRESENT_PIN(const int index)
+{
+	u8 ret = GPIO_UNDEF;
+
+#if defined(MY_DEF_HERE)
+	u8 przPinMap[] = {18, 28, 34, 44};
+#else
+	u8 *przPinMap = NULL;
+#endif
+
+	if (NULL == przPinMap) {
+		goto END;
+	}
+
+	if (1 > index || (0 < g_syno_hdd_powerup_seq && g_syno_hdd_powerup_seq < index)) {
+		printk("SYNO_GET_HDD_PRESENT_PIN(%d) is illegal", index);
+		WARN_ON(1);
+		goto END;
+	}
+
+	ret = przPinMap[index-1];
+
+END:
+	return ret;
+}
+
+int SYNO_CHECK_HDD_PRESENT(int index)
+{
+	int iPrzVal = 1;  
+	u8 iPin = SYNO_GET_HDD_PRESENT_PIN(index);
+
+#if defined(MY_DEF_HERE)
+	const int iInverseValue = 1;
+#else
+	const int iInverseValue = 0;
+#endif
+
+	if (GPIO_UNDEF == iPin) {
+		goto END;
+	}
+
+	if (0 < g_syno_hdd_powerup_seq && g_syno_hdd_powerup_seq < index) {
+		goto END;
+	}
+
+#if defined(MY_ABC_HERE)
+	syno_pch_lpc_gpio_pin(iPin, &iPrzVal, 0);
+#elif defined(MY_DEF_HERE)
+	syno_gpio_value_get(iPin, &iPrzVal);
+#endif  
+
+	if (iInverseValue) {
+		if (iPrzVal) {
+			iPrzVal = 0;
+		} else {
+			iPrzVal = 1;
+		}
+	}
+
+END:
+	return iPrzVal;
+}
+
+int SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER(void)
+{
+	int iRet = 0;
+
+	if (0 > g_syno_hdd_powerup_seq || SYNO_MAX_HDD_PRZ < g_syno_hdd_powerup_seq) {
+		goto END;
+	}
+
+	if (syno_is_hw_version(HW_DS415p) ||
+	    syno_is_hw_version(HW_DS916p) ||
+	    syno_is_hw_version(HW_DS713p) ||
+	    syno_is_hw_version(HW_DS716p) ||
+	    syno_is_hw_version(HW_DS416play) ||
+	    syno_is_hw_version(HW_DS216p) ||
+	    syno_is_hw_version(HW_DS216pII) ||
+	    syno_is_hw_version(HW_DS716pII)) {
+		iRet = 1;
+	} else {
+		goto END;
+	}
+
+END:
+	return iRet;
+}
+
+EXPORT_SYMBOL(SYNO_CTRL_HDD_POWERON);
+EXPORT_SYMBOL(SYNO_CHECK_HDD_PRESENT);
+EXPORT_SYMBOL(SYNO_SUPPORT_HDD_DYNAMIC_ENABLE_POWER);
+#endif  
+
+#ifdef MY_DEF_HERE
+ 
+int SynoProcEncPwrCtl(struct ctl_table *table, int write,
+		void __user *buffer, size_t *lenp, loff_t *ppos)
+{
+	int iValue = 0;
+
+	if (write) {
+		if (-1 == SYNO_X86_GPIO_PIN_SET(20, &iValue)) {
+			printk("fail to drive PCH GPIO20 to low\n");
+		}
+	}
+
+	return proc_dointvec(table, write, buffer, lenp, ppos);
+}
+EXPORT_SYMBOL(SynoProcEncPwrCtl);
+#endif  
 
 #ifdef CONFIG_X86_32
 static void __init cleanup_highmap(void)

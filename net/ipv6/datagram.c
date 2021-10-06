@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/capability.h>
 #include <linux/errno.h>
 #include <linux/types.h>
@@ -124,7 +126,20 @@ ipv4_connected:
 		if (!sk->sk_bound_dev_if && (addr_type & IPV6_ADDR_MULTICAST))
 			sk->sk_bound_dev_if = np->mcast_oif;
 
-		
+#if defined(MY_ABC_HERE)
+		if (__ipv6_addr_is_link_local(addr_type) && !sk->sk_bound_dev_if) {
+			struct net_device *dev = NULL;
+			for_each_netdev(sock_net(sk), dev) {
+				unsigned flags = dev_get_flags(dev);
+				if ((flags & IFF_RUNNING) &&
+					!(flags & (IFF_LOOPBACK | IFF_SLAVE))) {
+					sk->sk_bound_dev_if = dev->ifindex;
+					break;
+				}
+			}
+		}
+#endif  
+
 		if (!sk->sk_bound_dev_if) {
 			err = -EINVAL;
 			goto out;

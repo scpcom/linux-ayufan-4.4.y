@@ -35,8 +35,8 @@
  * when a regular drm_encoder entity isn't enough to represent the entire
  * encoder chain.
  *
- * A bridge is always associated to a single drm_encoder at a time, but can be
- * either connected to it directly, or through an intermediate bridge:
+ * A bridge is always attached to a single &drm_encoder at a time, but can be
+ * either connected to it directly, or through an intermediate bridge::
  *
  * encoder ---> bridge B ---> bridge A
  *

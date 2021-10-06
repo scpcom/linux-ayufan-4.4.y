@@ -1,6 +1,7 @@
-
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/slab.h>
 #include <asm/unaligned.h>
 
@@ -217,30 +218,33 @@ static unsigned int xhci_port_speed(unsigned int port_status)
 		return USB_PORT_STAT_LOW_SPEED;
 	if (DEV_HIGHSPEED(port_status))
 		return USB_PORT_STAT_HIGH_SPEED;
-	
+	 
 	return 0;
 }
 
-
 #define	XHCI_PORT_RO	((1<<0) | (1<<3) | (0xf<<10) | (1<<30))
-
+ 
 #define XHCI_PORT_RWS	((0xf<<5) | (1<<9) | (0x3<<14) | (0x7<<25))
-
+ 
 #define	XHCI_PORT_RW1S	((1<<4))
-
+ 
 #define XHCI_PORT_RW1CS	((1<<1) | (0x7f<<17))
-
+ 
 #define	XHCI_PORT_RW	((1<<16))
-
+ 
 #define	XHCI_PORT_RZ	((1<<2) | (1<<24) | (0xf<<28))
-
 
 u32 xhci_port_state_to_neutral(u32 state)
 {
-	
+	 
 	return (state & XHCI_PORT_RO) | (state & XHCI_PORT_RWS);
 }
 
+#ifdef MY_ABC_HERE
+#include <linux/pci.h>
+
+extern int gSynoFactoryUSB3Disable;
+#endif  
 
 int xhci_find_slot_id_by_port(struct usb_hcd *hcd, struct xhci_hcd *xhci,
 		u16 port)
@@ -410,6 +414,26 @@ static int xhci_get_ports(struct usb_hcd *hcd, __le32 __iomem ***port_array)
 
 	return max_ports;
 }
+
+#ifdef MY_ABC_HERE
+ 
+static int xhci_get_ports_map(struct usb_hcd *hcd, __le32 __iomem ***port_array)
+{
+	int max_ports;
+	struct xhci_hcd	*xhci = hcd_to_xhci(hcd);
+
+	if (hcd->speed == HCD_USB3) {
+		 
+		max_ports = xhci->num_usb2_ports;
+		*port_array = xhci->usb2_ports;
+	} else {
+		max_ports = xhci->num_usb3_ports;
+		*port_array = xhci->usb3_ports;
+	}
+
+	return max_ports;
+}
+#endif  
 
 void xhci_set_link_state(struct xhci_hcd *xhci, __le32 __iomem **port_array,
 				int port_id, u32 link_state)
@@ -689,6 +713,11 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 	int max_ports;
 	unsigned long flags;
 	u32 temp, status;
+#ifdef MY_ABC_HERE
+	u32 temp_map;
+	__le32 __iomem **port_array_map = 0;
+	struct pci_dev *pdev = to_pci_dev(hcd->self.controller);
+#endif  
 	int retval = 0;
 	__le32 __iomem **port_array;
 	int slot_id;
@@ -698,16 +727,22 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 	u16 timeout = 0;
 
 	max_ports = xhci_get_ports(hcd, &port_array);
+#ifdef MY_ABC_HERE
+	if (pdev->vendor == PCI_VENDOR_ID_NEC) {
+		 
+		xhci_get_ports_map(hcd, &port_array_map);
+	}
+#endif  
 	bus_state = &xhci->bus_state[hcd_index(hcd)];
 
 	spin_lock_irqsave(&xhci->lock, flags);
 	switch (typeReq) {
 	case GetHubStatus:
-		
+		 
 		memset(buf, 0, 4);
 		break;
 	case GetHubDescriptor:
-		
+		 
 		if (hcd->speed >= HCD_USB3 &&
 				(wLength < USB_DT_SS_HUB_SIZE ||
 				 wValue != (USB_DT_SS_HUB << 8))) {
@@ -872,8 +907,22 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 				bus_state->suspended_ports |= 1 << wIndex;
 			break;
 		case USB_PORT_FEAT_POWER:
-			
+			 
+#if defined(MY_ABC_HERE) \
+			&& !defined(MY_DEF_HERE)
+			xhci_dbg(xhci, "set port power. hcd->speed:%d.\n",hcd->speed);
+			if (1 == gSynoFactoryUSB3Disable && hcd->speed == HCD_USB3) {
+				writel(temp & ~PORT_POWER, port_array[wIndex]);
+				spin_unlock_irqrestore(&xhci->lock, flags);
+				msleep(500);
+				spin_lock_irqsave(&xhci->lock, flags);
+			} else {
+#endif  
 			writel(temp | PORT_POWER, port_array[wIndex]);
+#if defined(MY_ABC_HERE) \
+			&& !defined(MY_DEF_HERE)
+			}
+#endif  
 
 			temp = readl(port_array[wIndex]);
 			xhci_dbg(xhci, "set port power, actual port %d status  = 0x%x\n", wIndex, temp);
@@ -882,8 +931,21 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 			temp = usb_acpi_power_manageable(hcd->self.root_hub,
 					wIndex);
 			if (temp)
+#if defined(MY_ABC_HERE) \
+			&& !defined(MY_DEF_HERE)
+			{
+				if (1 == gSynoFactoryUSB3Disable && hcd->speed == HCD_USB3) {
+					usb_acpi_set_power_state(hcd->self.root_hub,
+						wIndex, false);
+				} else {
+#endif  
 				usb_acpi_set_power_state(hcd->self.root_hub,
 						wIndex, true);
+#if defined(MY_ABC_HERE) \
+			&& !defined(MY_DEF_HERE)
+				}
+			}
+#endif  
 			spin_lock_irqsave(&xhci->lock, flags);
 			break;
 		case USB_PORT_FEAT_RESET:
@@ -892,6 +954,24 @@ int xhci_hub_control(struct usb_hcd *hcd, u16 typeReq, u16 wValue,
 
 			temp = readl(port_array[wIndex]);
 			xhci_dbg(xhci, "set port reset, actual port %d status  = 0x%x\n", wIndex, temp);
+#ifdef MY_ABC_HERE
+			if (pdev->vendor == PCI_VENDOR_ID_NEC) {
+				temp_map = readl(port_array_map[wIndex]);
+				xhci_dbg(xhci, "set port reset map, actual port"
+						" %d status  = 0x%x\n", wIndex, temp_map);
+				 
+				if ((hcd->speed == HCD_USB2) &&
+					((temp_map & USB_PORT_STAT_LINK_STATE) ==
+						USB_SS_PORT_LS_COMP_MOD ||
+					 (temp_map & USB_PORT_STAT_LINK_STATE) ==
+						USB_SS_PORT_LS_LOOPBACK)) {
+					xhci_err(xhci, "set port reset for test mode.\n");
+					writel(temp_map | PORT_RESET,
+							port_array_map[wIndex]);
+					temp_map = readl(port_array_map[wIndex]);
+				}
+			}
+#endif  
 			break;
 		case USB_PORT_FEAT_REMOTE_WAKE_MASK:
 			xhci_set_remote_wake_mask(xhci, port_array,

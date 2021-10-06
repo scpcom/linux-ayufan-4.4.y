@@ -18,6 +18,7 @@
 #include <linux/acpi.h>
 #include <linux/pnp.h>
 #include <linux/apple_bl.h>
+#include <linux/apple-gmux.h>
 #include <linux/slab.h>
 #include <linux/delay.h>
 #include <linux/pci.h>
@@ -588,7 +589,7 @@ static int gmux_probe(struct pnp_dev *pnp, const struct pnp_device_id *id)
 		gmux_data->gpe = -1;
 	}
 
-	if (vga_switcheroo_register_handler(&gmux_handler)) {
+	if (vga_switcheroo_register_handler(&gmux_handler, 0)) {
 		ret = -ENODEV;
 		goto err_register_handler;
 	}
@@ -649,7 +650,7 @@ static void gmux_remove(struct pnp_dev *pnp)
 }
 
 static const struct pnp_device_id gmux_device_ids[] = {
-	{"APP000B", 0},
+	{GMUX_ACPI_HID, 0},
 	{"", 0}
 };
 

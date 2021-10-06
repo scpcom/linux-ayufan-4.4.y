@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /**
  * debug.c - DesignWare USB3 DRD Controller Debug/Trace Support
  *
@@ -30,3 +33,6 @@ void dwc3_trace(void (*trace)(struct va_format *), const char *fmt, ...)
 
 	va_end(args);
 }
+#ifdef MY_DEF_HERE
+EXPORT_SYMBOL_GPL(dwc3_trace);
+#endif

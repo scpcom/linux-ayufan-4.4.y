@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #ifndef __BTRFS_I__
 #define __BTRFS_I__
 
@@ -21,103 +23,89 @@
 #define BTRFS_INODE_IN_DELALLOC_LIST		9
 #define BTRFS_INODE_READDIO_NEED_LOCK		10
 #define BTRFS_INODE_HAS_PROPS		        11
-
+#ifdef MY_ABC_HERE
+#define BTRFS_INODE_IN_SYNO_DEFRAG			31
+#endif  
+ 
 #define BTRFS_INODE_BTREE_ERR		        12
 #define BTRFS_INODE_BTREE_LOG1_ERR		13
 #define BTRFS_INODE_BTREE_LOG2_ERR		14
 
-
 struct btrfs_inode {
-	
+	 
 	struct btrfs_root *root;
 
-	
 	struct btrfs_key location;
 
-	
 	spinlock_t lock;
 
-	
 	struct extent_map_tree extent_tree;
 
-	
 	struct extent_io_tree io_tree;
 
-	
 	struct extent_io_tree io_failure_tree;
 
-	
 	struct mutex log_mutex;
 
-	
 	struct mutex delalloc_mutex;
 
-	
 	struct btrfs_ordered_inode_tree ordered_tree;
 
-	
 	struct list_head delalloc_inodes;
 
-	
 	struct rb_node rb_node;
 
 	unsigned long runtime_flags;
 
-	
 	atomic_t sync_writers;
 
-	
 	u64 generation;
 
-	
 	u64 last_trans;
 
-	
 	u64 logged_trans;
 
-	
 	int last_sub_trans;
 
-	
 	int last_log_commit;
 
-	
 	u64 delalloc_bytes;
 
-	
 	u64 defrag_bytes;
 
-	
 	u64 disk_i_size;
 
-	
 	u64 index_cnt;
 
-	
 	u64 dir_index;
 
-	
 	u64 last_unlink_trans;
 
-	
 	u64 csum_bytes;
 
-	
 	u32 flags;
 
-	
 	unsigned outstanding_extents;
 	unsigned reserved_extents;
 
-	
 	unsigned force_compress;
 
 	struct btrfs_delayed_node *delayed_node;
 
-	
 	struct timespec i_otime;
 
+	struct list_head delayed_iput;
+	long delayed_iput_count;
+
+	struct rw_semaphore dio_sem;
+
 	struct inode vfs_inode;
+
+#ifdef MY_ABC_HERE
+	struct list_head free_extent_map_inode;
+	atomic_t free_extent_map_counts;
+#endif  
+
 };
 
 extern unsigned char btrfs_filetype_table[];

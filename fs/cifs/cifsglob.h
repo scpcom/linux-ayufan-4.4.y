@@ -1,4 +1,7 @@
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #ifndef _CIFS_GLOB_H
 #define _CIFS_GLOB_H
 
@@ -1300,32 +1303,27 @@ static inline void free_dfs_info_array(struct dfs_info3_param *param,
 #define   CIFSSEC_MUST_LANMAN	0x10010
 #define   CIFSSEC_MUST_PLNTXT	0x20020
 #ifdef CONFIG_CIFS_UPCALL
-#define   CIFSSEC_MASK          0xBF0BF 
+#define   CIFSSEC_MASK          0xBF0BF  
 #else
-#define   CIFSSEC_MASK          0xB70B7 
-#endif 
-#else 
+#define   CIFSSEC_MASK          0xB70B7  
+#endif  
+#else  
 #define   CIFSSEC_MUST_LANMAN	0
 #define   CIFSSEC_MUST_PLNTXT	0
 #ifdef CONFIG_CIFS_UPCALL
-#define   CIFSSEC_MASK          0x8F08F 
+#define   CIFSSEC_MASK          0x8F08F  
 #else
-#define	  CIFSSEC_MASK          0x87087 
-#endif 
-#endif 
-#define   CIFSSEC_MUST_SEAL	0x40040 
-#define   CIFSSEC_MUST_NTLMSSP	0x80080 
+#define	  CIFSSEC_MASK          0x87087  
+#endif  
+#endif  
+#define   CIFSSEC_MUST_SEAL	0x40040  
+#define   CIFSSEC_MUST_NTLMSSP	0x80080  
 
 #define   CIFSSEC_DEF (CIFSSEC_MAY_SIGN | CIFSSEC_MAY_NTLMV2 | CIFSSEC_MAY_NTLMSSP)
 #define   CIFSSEC_MAX (CIFSSEC_MUST_SIGN | CIFSSEC_MUST_NTLMV2)
 #define   CIFSSEC_AUTH_MASK (CIFSSEC_MAY_NTLM | CIFSSEC_MAY_NTLMV2 | CIFSSEC_MAY_LANMAN | CIFSSEC_MAY_PLNTXT | CIFSSEC_MAY_KRB5 | CIFSSEC_MAY_NTLMSSP)
-
-
+ 
 #define UID_HASH (16)
-
-
-
-
 
 #ifdef DECLARE_GLOBALS_HERE
 #define GLOBAL_EXTERN
@@ -1333,54 +1331,50 @@ static inline void free_dfs_info_array(struct dfs_info3_param *param,
 #define GLOBAL_EXTERN extern
 #endif
 
-
 GLOBAL_EXTERN struct list_head		cifs_tcp_ses_list;
-
 
 GLOBAL_EXTERN spinlock_t		cifs_tcp_ses_lock;
 
-
 GLOBAL_EXTERN spinlock_t	cifs_file_list_lock;
 
-#ifdef CONFIG_CIFS_DNOTIFY_EXPERIMENTAL 
-
+#ifdef CONFIG_CIFS_DNOTIFY_EXPERIMENTAL  
+ 
 GLOBAL_EXTERN struct list_head GlobalDnotifyReqList;
-
+ 
 GLOBAL_EXTERN struct list_head GlobalDnotifyRsp_Q;
-#endif 
+#endif  
 
-
-GLOBAL_EXTERN unsigned int GlobalCurrentXid;	
-GLOBAL_EXTERN unsigned int GlobalTotalActiveXid; 
-GLOBAL_EXTERN unsigned int GlobalMaxActiveXid;	
-GLOBAL_EXTERN spinlock_t GlobalMid_Lock;  
-					  
-
+GLOBAL_EXTERN unsigned int GlobalCurrentXid;	 
+GLOBAL_EXTERN unsigned int GlobalTotalActiveXid;  
+GLOBAL_EXTERN unsigned int GlobalMaxActiveXid;	 
+GLOBAL_EXTERN spinlock_t GlobalMid_Lock;   
+					   
 GLOBAL_EXTERN atomic_t sesInfoAllocCount;
 GLOBAL_EXTERN atomic_t tconInfoAllocCount;
 GLOBAL_EXTERN atomic_t tcpSesAllocCount;
 GLOBAL_EXTERN atomic_t tcpSesReconnectCount;
 GLOBAL_EXTERN atomic_t tconInfoReconnectCount;
 
-
-GLOBAL_EXTERN atomic_t bufAllocCount;    
+GLOBAL_EXTERN atomic_t bufAllocCount;     
 #ifdef CONFIG_CIFS_STATS2
-GLOBAL_EXTERN atomic_t totBufAllocCount; 
+GLOBAL_EXTERN atomic_t totBufAllocCount;  
 GLOBAL_EXTERN atomic_t totSmBufAllocCount;
 #endif
 GLOBAL_EXTERN atomic_t smBufAllocCount;
 GLOBAL_EXTERN atomic_t midCount;
 
-
-GLOBAL_EXTERN bool enable_oplocks; 
+GLOBAL_EXTERN bool enable_oplocks;  
 GLOBAL_EXTERN unsigned int lookupCacheEnabled;
-GLOBAL_EXTERN unsigned int global_secflags;	
-GLOBAL_EXTERN unsigned int sign_CIFS_PDUs;  
-GLOBAL_EXTERN unsigned int linuxExtEnabled;
-GLOBAL_EXTERN unsigned int CIFSMaxBufSize;  
-GLOBAL_EXTERN unsigned int cifs_min_rcv;    
-GLOBAL_EXTERN unsigned int cifs_min_small;  
-GLOBAL_EXTERN unsigned int cifs_max_pending; 
+GLOBAL_EXTERN unsigned int global_secflags;	 
+GLOBAL_EXTERN unsigned int sign_CIFS_PDUs;   
+GLOBAL_EXTERN unsigned int linuxExtEnabled; 
+#ifdef MY_ABC_HERE
+GLOBAL_EXTERN unsigned int SynoPosixSemanticsEnabled; 
+#endif  
+GLOBAL_EXTERN unsigned int CIFSMaxBufSize;   
+GLOBAL_EXTERN unsigned int cifs_min_rcv;     
+GLOBAL_EXTERN unsigned int cifs_min_small;   
+GLOBAL_EXTERN unsigned int cifs_max_pending;  
 
 #ifdef CONFIG_CIFS_ACL
 GLOBAL_EXTERN struct rb_root uidtree;

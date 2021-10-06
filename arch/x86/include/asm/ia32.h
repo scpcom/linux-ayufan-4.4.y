@@ -1,25 +1,22 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _ASM_X86_IA32_H
 #define _ASM_X86_IA32_H
-
 
 #ifdef CONFIG_IA32_EMULATION
 
 #include <linux/compat.h>
 
-
-
 #include <uapi/asm/sigcontext.h>
-
-
 
 struct ucontext_ia32 {
 	unsigned int	  uc_flags;
 	unsigned int 	  uc_link;
 	compat_stack_t	  uc_stack;
 	struct sigcontext_32 uc_mcontext;
-	compat_sigset_t	  uc_sigmask;	
+	compat_sigset_t	  uc_sigmask;	 
 };
-
 
 struct stat64 {
 	unsigned long long	st_dev;
@@ -51,6 +48,21 @@ struct stat64 {
 
 	unsigned long long	st_ino;
 } __attribute__((packed));
+
+#ifdef MY_ABC_HERE
+ 
+struct SYNOSTAT64_EXTRA {
+	struct compat_timespec create_time;
+	unsigned int archive_version;
+	unsigned int archive_bit;
+	unsigned int last_component;
+};
+
+struct SYNOSTAT64 {
+	struct stat64 st;
+	struct SYNOSTAT64_EXTRA ext;
+};
+#endif  
 
 #define IA32_STACK_TOP IA32_PAGE_OFFSET
 

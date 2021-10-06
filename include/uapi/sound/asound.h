@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Advanced Linux Sound Architecture - ALSA - Driver
  *  Copyright (c) 1994-2003 by Jaroslav Kysela <perex@perex.cz>,
@@ -580,6 +583,12 @@ enum {
 #define SNDRV_PCM_IOCTL_READN_FRAMES	_IOR('A', 0x53, struct snd_xfern)
 #define SNDRV_PCM_IOCTL_LINK		_IOW('A', 0x60, int)
 #define SNDRV_PCM_IOCTL_UNLINK		_IO('A', 0x61)
+#ifdef MY_DEF_HERE
+#define SNDRV_PCM_IOCTL_VOLUME_SET  _IOW('A', 0xE0, int)
+#define SNDRV_PCM_IOCTL_VOLUME_GET  _IOR('A', 0xE1, int)
+#define SNDRV_PCM_IOCTL_GET_LATENCY _IOR('A', 0xF0, int)
+#define SNDRV_PCM_IOCTL_GET_FW_DELAY _IOR('A', 0xF1, snd_pcm_sframes_t)
+#endif /* MY_DEF_HERE */
 
 /*****************************************************************************
  *                                                                           *

@@ -1,6 +1,7 @@
-
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/backing-dev.h>
@@ -29,6 +30,10 @@
 
 #include "blk.h"
 #include "blk-mq.h"
+
+#ifdef MY_ABC_HERE
+#include <linux/synolib.h>
+#endif  
 
 EXPORT_TRACEPOINT_SYMBOL_GPL(block_bio_remap);
 EXPORT_TRACEPOINT_SYMBOL_GPL(block_rq_remap);
@@ -1315,13 +1320,18 @@ static inline void blk_partition_remap(struct bio *bio)
 static void handle_bad_sector(struct bio *bio)
 {
 	char b[BDEVNAME_SIZE];
-
+#ifdef MY_ABC_HERE
+    if (printk_ratelimit()) {
+#endif  
 	printk(KERN_INFO "attempt to access beyond end of device\n");
 	printk(KERN_INFO "%s: rw=%ld, want=%Lu, limit=%Lu\n",
 			bdevname(bio->bi_bdev, b),
 			bio->bi_rw,
 			(unsigned long long)bio_end_sector(bio),
 			(long long)(i_size_read(bio->bi_bdev->bd_inode) >> 9));
+#ifdef MY_ABC_HERE
+    }
+#endif  
 }
 
 #ifdef CONFIG_FAIL_MAKE_REQUEST
@@ -1517,12 +1527,19 @@ blk_qc_t submit_bio(int rw, struct bio *bio)
 				bdevname(bio->bi_bdev, b),
 				count);
 		}
+
+#ifdef MY_ABC_HERE
+		if (0 < gSynoHibernationLogLevel) {
+			char b[BDEVNAME_SIZE];
+			syno_do_hibernation_bio_log(bdevname(bio->bi_bdev, b));
+		}
+#endif  
+
 	}
 
 	return generic_make_request(bio);
 }
 EXPORT_SYMBOL(submit_bio);
-
 
 static int blk_cloned_rq_check_limits(struct request_queue *q,
 				      struct request *rq)
@@ -1787,17 +1804,19 @@ struct request *blk_fetch_request(struct request_queue *q)
 }
 EXPORT_SYMBOL(blk_fetch_request);
 
-
 bool blk_update_request(struct request *req, int error, unsigned int nr_bytes)
 {
 	int total_bytes;
+
+#ifdef MY_ABC_HERE
+	static unsigned long long blk_rq_pos_last = 0;
+#endif  
 
 	trace_block_rq_complete(req->q, req, nr_bytes);
 
 	if (!req->bio)
 		return false;
 
-	
 	if (req->cmd_type == REQ_TYPE_FS)
 		req->errors = 0;
 
@@ -1829,11 +1848,26 @@ bool blk_update_request(struct request *req, int error, unsigned int nr_bytes)
 			error_type = "I/O";
 			break;
 		}
+#ifdef MY_ABC_HERE
+		if (blk_rq_pos_last == (unsigned long long)blk_rq_pos(req)) {
+			printk_ratelimited(KERN_ERR "%s: %s error, dev %s, sector %llu\n",
+					__func__, error_type, req->rq_disk ?
+					req->rq_disk->disk_name : "?",
+					blk_rq_pos_last);
+		} else {
+			blk_rq_pos_last = (unsigned long long)blk_rq_pos(req);
+			printk_ratelimited(KERN_ERR "%s: %s error, dev %s, sector in range %llu + 0-2(%d)\n",
+					__func__, error_type, req->rq_disk ?
+					req->rq_disk->disk_name : "?",
+					(blk_rq_pos_last >> CONFIG_SYNO_IO_ERROR_LIMIT_MSG_SHIFT) << CONFIG_SYNO_IO_ERROR_LIMIT_MSG_SHIFT,
+					CONFIG_SYNO_IO_ERROR_LIMIT_MSG_SHIFT);
+		}
+#else
 		printk_ratelimited(KERN_ERR "%s: %s error, dev %s, sector %llu\n",
 				   __func__, error_type, req->rq_disk ?
 				   req->rq_disk->disk_name : "?",
 				   (unsigned long long)blk_rq_pos(req));
-
+#endif  
 	}
 
 	blk_account_io_completion(req, nr_bytes);
@@ -2408,13 +2442,26 @@ void blk_post_runtime_resume(struct request_queue *q, int err)
 }
 EXPORT_SYMBOL(blk_post_runtime_resume);
 #endif
+#ifdef MY_ABC_HERE
+void syno_flashcache_return_error(struct bio *bio)
+{
+	 
+	if (bio_flagged(bio, BIO_MD_RETURN_ERROR)) {
+		printk(KERN_DEBUG "Get flashcache access md error, return error code\n");
+		bio->bi_error = -EIO;
+		bio_endio(bio);
+	} else {
+		bio_endio(bio);
+	}
+}
+EXPORT_SYMBOL(syno_flashcache_return_error);
+#endif  
 
 int __init blk_dev_init(void)
 {
 	BUILD_BUG_ON(__REQ_NR_BITS > 8 *
 			FIELD_SIZEOF(struct request, cmd_flags));
 
-	
 	kblockd_workqueue = alloc_workqueue("kblockd",
 					    WQ_MEM_RECLAIM | WQ_HIGHPRI, 0);
 	if (!kblockd_workqueue)

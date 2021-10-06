@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/ctype.h>
 #include <linux/types.h>
 #include <linux/export.h>
@@ -111,13 +113,28 @@ static int match_number(substring_t *s, int *result, int base)
 	return ret;
 }
 
-
 int match_int(substring_t *s, int *result)
 {
 	return match_number(s, result, 0);
 }
 EXPORT_SYMBOL(match_int);
 
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+int SYNO_get_option_ul(substring_t *args, unsigned long *option)
+{
+	int rc;
+	char *string;
+
+	string = match_strdup(args);
+	if (string == NULL)
+		return -ENOMEM;
+	rc = kstrtoul(string, 0, option);
+	kfree(string);
+
+	return rc;
+}
+EXPORT_SYMBOL(SYNO_get_option_ul);
+#endif  
 
 int match_octal(substring_t *s, int *result)
 {

@@ -1,7 +1,7 @@
-
-
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/module.h>
 #include <linux/fs.h>
 #include <linux/mount.h>
@@ -36,9 +36,12 @@ int cifsFYI = 0;
 int traceSMB = 0;
 bool enable_oplocks = true;
 unsigned int linuxExtEnabled = 1;
+#ifdef MY_ABC_HERE
+unsigned int SynoPosixSemanticsEnabled = 1;
+#endif  
 unsigned int lookupCacheEnabled = 1;
 unsigned int global_secflags = CIFSSEC_DEF;
-
+ 
 unsigned int sign_CIFS_PDUs = 1;
 static const struct super_operations cifs_super_ops;
 unsigned int CIFSMaxBufSize = CIFS_MAX_MSGSIZE;
@@ -474,21 +477,24 @@ static void cifs_umount_begin(struct super_block *sb)
 
 	spin_lock(&cifs_tcp_ses_lock);
 	if ((tcon->tc_count > 1) || (tcon->tidStatus == CifsExiting)) {
-		
+		 
 		spin_unlock(&cifs_tcp_ses_lock);
 		return;
+#ifdef MY_ABC_HERE
+	 
+	} else if (atomic_read(&sb->s_active) == 1)
+#else
 	} else if (tcon->tc_count == 1)
+#endif  
 		tcon->tidStatus = CifsExiting;
 	spin_unlock(&cifs_tcp_ses_lock);
 
-	 
-	
 	if (tcon->ses && tcon->ses->server) {
 		cifs_dbg(FYI, "wake up tasks now - umount begin not complete\n");
 		wake_up_all(&tcon->ses->server->request_q);
 		wake_up_all(&tcon->ses->server->response_q);
-		msleep(1); 
-		
+		msleep(1);  
+		 
 		wake_up_all(&tcon->ses->server->response_q);
 		msleep(1);
 	}
@@ -569,19 +575,18 @@ cifs_get_root(struct smb_vol *vol, struct super_block *sb)
 			break;
 		}
 
-		
 		while (*s == sep)
 			s++;
 		if (!*s)
 			break;
 		p = s++;
-		
+		 
 		while (*s && *s != sep)
 			s++;
 
-		mutex_lock(&dir->i_mutex);
+		inode_lock(dir);
 		child = lookup_one_len(p, dentry, s - p);
-		mutex_unlock(&dir->i_mutex);
+		inode_unlock(dir);
 		dput(dentry);
 		dentry = child;
 	} while (!IS_ERR(dentry));

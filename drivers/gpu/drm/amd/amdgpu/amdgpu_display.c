@@ -530,7 +530,7 @@ static const struct drm_framebuffer_funcs amdgpu_fb_funcs = {
 int
 amdgpu_framebuffer_init(struct drm_device *dev,
 			struct amdgpu_framebuffer *rfb,
-			struct drm_mode_fb_cmd2 *mode_cmd,
+			const struct drm_mode_fb_cmd2 *mode_cmd,
 			struct drm_gem_object *obj)
 {
 	int ret;
@@ -547,13 +547,13 @@ amdgpu_framebuffer_init(struct drm_device *dev,
 static struct drm_framebuffer *
 amdgpu_user_framebuffer_create(struct drm_device *dev,
 			       struct drm_file *file_priv,
-			       struct drm_mode_fb_cmd2 *mode_cmd)
+			       const struct drm_mode_fb_cmd2 *mode_cmd)
 {
 	struct drm_gem_object *obj;
 	struct amdgpu_framebuffer *amdgpu_fb;
 	int ret;
 
-	obj = drm_gem_object_lookup(dev, file_priv, mode_cmd->handles[0]);
+	obj = drm_gem_object_lookup(file_priv, mode_cmd->handles[0]);
 	if (obj ==  NULL) {
 		dev_err(&dev->pdev->dev, "No GEM object associated to handle 0x%08X, "
 			"can't create framebuffer\n", mode_cmd->handles[0]);

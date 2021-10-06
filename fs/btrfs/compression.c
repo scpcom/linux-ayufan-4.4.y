@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/kernel.h>
 #include <linux/bio.h>
 #include <linux/buffer_head.h>
@@ -477,12 +479,15 @@ int btrfs_submit_compressed_read(struct inode *inode, struct bio *bio,
 	tree = &BTRFS_I(inode)->io_tree;
 	em_tree = &BTRFS_I(inode)->extent_tree;
 
-	
+#ifdef MY_ABC_HERE
+	em = btrfs_get_extent(inode, NULL, 0, page_offset(bio->bi_io_vec->bv_page), PAGE_CACHE_SIZE, 0);
+#else
 	read_lock(&em_tree->lock);
 	em = lookup_extent_mapping(em_tree,
 				   page_offset(bio->bi_io_vec->bv_page),
 				   PAGE_CACHE_SIZE);
 	read_unlock(&em_tree->lock);
+#endif  
 	if (!em)
 		return -EIO;
 
@@ -529,11 +534,8 @@ int btrfs_submit_compressed_read(struct inode *inode, struct bio *bio,
 	faili = nr_pages - 1;
 	cb->nr_pages = nr_pages;
 
-	
-	if (!(bio_flags & EXTENT_BIO_PARENT_LOCKED))
-		add_ra_bio_pages(inode, em_start + em_len, cb);
+	add_ra_bio_pages(inode, em_start + em_len, cb);
 
-	
 	uncompressed_len = bio->bi_vcnt * PAGE_CACHE_SIZE;
 	cb->len = uncompressed_len;
 
@@ -631,8 +633,11 @@ out:
 static struct {
 	struct list_head idle_ws;
 	spinlock_t ws_lock;
-	int num_ws;
-	atomic_t alloc_ws;
+	 
+	int free_ws;
+	 
+	atomic_t total_ws;
+	 
 	wait_queue_head_t ws_wait;
 } btrfs_comp_ws[BTRFS_COMPRESS_TYPES];
 
@@ -646,13 +651,24 @@ void __init btrfs_init_compress(void)
 	int i;
 
 	for (i = 0; i < BTRFS_COMPRESS_TYPES; i++) {
+		struct list_head *workspace;
+
 		INIT_LIST_HEAD(&btrfs_comp_ws[i].idle_ws);
 		spin_lock_init(&btrfs_comp_ws[i].ws_lock);
-		atomic_set(&btrfs_comp_ws[i].alloc_ws, 0);
+		atomic_set(&btrfs_comp_ws[i].total_ws, 0);
 		init_waitqueue_head(&btrfs_comp_ws[i].ws_wait);
+
+		workspace = btrfs_compress_op[i]->alloc_workspace();
+		if (IS_ERR(workspace)) {
+			printk(KERN_WARNING
+	"BTRFS: cannot preallocate compression workspace, will try later");
+		} else {
+			atomic_set(&btrfs_comp_ws[i].total_ws, 1);
+			btrfs_comp_ws[i].free_ws = 1;
+			list_add(workspace, &btrfs_comp_ws[i].idle_ws);
+		}
 	}
 }
-
 
 static struct list_head *find_workspace(int type)
 {
@@ -662,68 +678,78 @@ static struct list_head *find_workspace(int type)
 
 	struct list_head *idle_ws	= &btrfs_comp_ws[idx].idle_ws;
 	spinlock_t *ws_lock		= &btrfs_comp_ws[idx].ws_lock;
-	atomic_t *alloc_ws		= &btrfs_comp_ws[idx].alloc_ws;
+	atomic_t *total_ws		= &btrfs_comp_ws[idx].total_ws;
 	wait_queue_head_t *ws_wait	= &btrfs_comp_ws[idx].ws_wait;
-	int *num_ws			= &btrfs_comp_ws[idx].num_ws;
+	int *free_ws			= &btrfs_comp_ws[idx].free_ws;
 again:
 	spin_lock(ws_lock);
 	if (!list_empty(idle_ws)) {
 		workspace = idle_ws->next;
 		list_del(workspace);
-		(*num_ws)--;
+		(*free_ws)--;
 		spin_unlock(ws_lock);
 		return workspace;
 
 	}
-	if (atomic_read(alloc_ws) > cpus) {
+	if (atomic_read(total_ws) > cpus) {
 		DEFINE_WAIT(wait);
 
 		spin_unlock(ws_lock);
 		prepare_to_wait(ws_wait, &wait, TASK_UNINTERRUPTIBLE);
-		if (atomic_read(alloc_ws) > cpus && !*num_ws)
+		if (atomic_read(total_ws) > cpus && !*free_ws)
 			schedule();
 		finish_wait(ws_wait, &wait);
 		goto again;
 	}
-	atomic_inc(alloc_ws);
+	atomic_inc(total_ws);
 	spin_unlock(ws_lock);
 
 	workspace = btrfs_compress_op[idx]->alloc_workspace();
 	if (IS_ERR(workspace)) {
-		atomic_dec(alloc_ws);
+		atomic_dec(total_ws);
 		wake_up(ws_wait);
+
+		if (atomic_read(total_ws) == 0) {
+			static DEFINE_RATELIMIT_STATE(_rs,
+					  60 * HZ,
+					  1);
+
+			if (__ratelimit(&_rs)) {
+				printk(KERN_WARNING
+			    "no compression workspaces, low memory, retrying");
+			}
+		}
+		goto again;
 	}
 	return workspace;
 }
-
 
 static void free_workspace(int type, struct list_head *workspace)
 {
 	int idx = type - 1;
 	struct list_head *idle_ws	= &btrfs_comp_ws[idx].idle_ws;
 	spinlock_t *ws_lock		= &btrfs_comp_ws[idx].ws_lock;
-	atomic_t *alloc_ws		= &btrfs_comp_ws[idx].alloc_ws;
+	atomic_t *total_ws		= &btrfs_comp_ws[idx].total_ws;
 	wait_queue_head_t *ws_wait	= &btrfs_comp_ws[idx].ws_wait;
-	int *num_ws			= &btrfs_comp_ws[idx].num_ws;
+	int *free_ws			= &btrfs_comp_ws[idx].free_ws;
 
 	spin_lock(ws_lock);
-	if (*num_ws < num_online_cpus()) {
+	if (*free_ws < num_online_cpus()) {
 		list_add(workspace, idle_ws);
-		(*num_ws)++;
+		(*free_ws)++;
 		spin_unlock(ws_lock);
 		goto wake;
 	}
 	spin_unlock(ws_lock);
 
 	btrfs_compress_op[idx]->free_workspace(workspace);
-	atomic_dec(alloc_ws);
+	atomic_dec(total_ws);
 wake:
-	
+	 
 	smp_mb();
 	if (waitqueue_active(ws_wait))
 		wake_up(ws_wait);
 }
-
 
 static void free_workspaces(void)
 {
@@ -735,11 +761,10 @@ static void free_workspaces(void)
 			workspace = btrfs_comp_ws[i].idle_ws.next;
 			list_del(workspace);
 			btrfs_compress_op[i]->free_workspace(workspace);
-			atomic_dec(&btrfs_comp_ws[i].alloc_ws);
+			atomic_dec(&btrfs_comp_ws[i].total_ws);
 		}
 	}
 }
-
 
 int btrfs_compress_pages(int type, struct address_space *mapping,
 			 u64 start, unsigned long len,
@@ -754,8 +779,6 @@ int btrfs_compress_pages(int type, struct address_space *mapping,
 	int ret;
 
 	workspace = find_workspace(type);
-	if (IS_ERR(workspace))
-		return PTR_ERR(workspace);
 
 	ret = btrfs_compress_op[type-1]->compress_pages(workspace, mapping,
 						      start, len, pages,
@@ -774,8 +797,6 @@ static int btrfs_decompress_biovec(int type, struct page **pages_in,
 	int ret;
 
 	workspace = find_workspace(type);
-	if (IS_ERR(workspace))
-		return PTR_ERR(workspace);
 
 	ret = btrfs_compress_op[type-1]->decompress_biovec(workspace, pages_in,
 							 disk_start,
@@ -791,8 +812,6 @@ int btrfs_decompress(int type, unsigned char *data_in, struct page *dest_page,
 	int ret;
 
 	workspace = find_workspace(type);
-	if (IS_ERR(workspace))
-		return PTR_ERR(workspace);
 
 	ret = btrfs_compress_op[type-1]->decompress(workspace, data_in,
 						  dest_page, start_byte,

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/mm.h>
 #include <linux/slab.h>
 #include <linux/string.h>
@@ -322,34 +325,40 @@ unsigned long vm_commit_limit(void)
 	return allowed;
 }
 
-
 int get_cmdline(struct task_struct *task, char *buffer, int buflen)
 {
 	int res = 0;
 	unsigned int len;
 	struct mm_struct *mm = get_task_mm(task);
+	unsigned long arg_start, arg_end, env_start, env_end;
 	if (!mm)
 		goto out;
 	if (!mm->arg_end)
-		goto out_mm;	
+		goto out_mm;	 
 
-	len = mm->arg_end - mm->arg_start;
+	down_read(&mm->mmap_sem);
+	arg_start = mm->arg_start;
+	arg_end = mm->arg_end;
+	env_start = mm->env_start;
+	env_end = mm->env_end;
+	up_read(&mm->mmap_sem);
+
+	len = arg_end - arg_start;
 
 	if (len > buflen)
 		len = buflen;
 
-	res = access_process_vm(task, mm->arg_start, buffer, len, 0);
+	res = access_process_vm(task, arg_start, buffer, len, 0);
 
-	
 	if (res > 0 && buffer[res-1] != '\0' && len < buflen) {
 		len = strnlen(buffer, res);
 		if (len < res) {
 			res = len;
 		} else {
-			len = mm->env_end - mm->env_start;
+			len = env_end - env_start;
 			if (len > buflen - res)
 				len = buflen - res;
-			res += access_process_vm(task, mm->env_start,
+			res += access_process_vm(task, env_start,
 						 buffer+res, len, 0);
 			res = strnlen(buffer, res);
 		}
@@ -359,3 +368,6 @@ out_mm:
 out:
 	return res;
 }
+#ifdef MY_ABC_HERE
+EXPORT_SYMBOL(get_cmdline);
+#endif

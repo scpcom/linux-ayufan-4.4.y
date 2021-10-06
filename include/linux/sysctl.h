@@ -1,4 +1,7 @@
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #ifndef _LINUX_SYSCTL_H
 #define _LINUX_SYSCTL_H
 
@@ -35,9 +38,10 @@ extern int proc_doulongvec_ms_jiffies_minmax(struct ctl_table *table, int,
 				      void __user *, size_t *, loff_t *);
 extern int proc_do_large_bitmap(struct ctl_table *, int,
 				void __user *, size_t *, loff_t *);
-
-
-
+#if defined (MY_ABC_HERE) || defined(MY_DEF_HERE)
+extern int SynoProcDoStringVec(struct ctl_table *, int,
+		                void __user *, size_t *, loff_t *);
+#endif  
 
 struct ctl_table_poll {
 	atomic_t event;

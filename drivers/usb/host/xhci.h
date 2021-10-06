@@ -1,5 +1,6 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 
 #ifndef __LINUX_XHCI_HCD_H
 #define __LINUX_XHCI_HCD_H
@@ -629,10 +630,12 @@ struct xhci_virt_device {
 	u8				real_port;
 	struct xhci_interval_bw_table	*bw_table;
 	struct xhci_tt_bw_info		*tt_info;
-	
+	 
 	u16				current_mel;
+#ifdef MY_DEF_HERE
+	bool				disconnected;
+#endif  
 };
-
 
 struct xhci_root_port_bw_info {
 	struct list_head		tts;

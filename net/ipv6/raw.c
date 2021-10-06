@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/errno.h>
 #include <linux/types.h>
 #include <linux/socket.h>
@@ -227,18 +229,30 @@ static int rawv6_bind(struct sock *sk, struct sockaddr *uaddr, int addr_len)
 		goto out;
 
 	rcu_read_lock();
-	
+	 
 	if (addr_type != IPV6_ADDR_ANY) {
 		struct net_device *dev = NULL;
 
 		if (__ipv6_addr_needs_scope_id(addr_type)) {
 			if (addr_len >= sizeof(struct sockaddr_in6) &&
 			    addr->sin6_scope_id) {
-				
+				 
 				sk->sk_bound_dev_if = addr->sin6_scope_id;
 			}
 
-			
+#if defined(MY_ABC_HERE)
+			if (__ipv6_addr_is_link_local(addr_type) && !sk->sk_bound_dev_if) {
+				for_each_netdev(sock_net(sk), dev) {
+					unsigned flags = dev_get_flags(dev);
+					if ((flags & IFF_RUNNING) &&
+						!(flags & (IFF_LOOPBACK | IFF_SLAVE))) {
+						sk->sk_bound_dev_if = dev->ifindex;
+						break;
+					}
+				}
+			}
+#endif  
+
 			if (!sk->sk_bound_dev_if)
 				goto out_unlock;
 

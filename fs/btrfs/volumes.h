@@ -26,7 +26,7 @@
 
 extern struct mutex uuid_mutex;
 
-#define BTRFS_STRIPE_LEN	(64 * 1024)
+#define BTRFS_STRIPE_LEN	SZ_64K
 
 struct buffer_head;
 struct btrfs_pending_bios {
@@ -348,7 +348,7 @@ struct map_lookup {
 	u64 type;
 	int io_align;
 	int io_width;
-	int stripe_len;
+	u64 stripe_len;
 	int sector_size;
 	int num_stripes;
 	int sub_stripes;
@@ -357,52 +357,6 @@ struct map_lookup {
 
 #define map_lookup_size(n) (sizeof(struct map_lookup) + \
 			    (sizeof(struct btrfs_bio_stripe) * (n)))
-
-/*
- * Restriper's general type filter
- */
-#define BTRFS_BALANCE_DATA		(1ULL << 0)
-#define BTRFS_BALANCE_SYSTEM		(1ULL << 1)
-#define BTRFS_BALANCE_METADATA		(1ULL << 2)
-
-#define BTRFS_BALANCE_TYPE_MASK		(BTRFS_BALANCE_DATA |	    \
-					 BTRFS_BALANCE_SYSTEM |	    \
-					 BTRFS_BALANCE_METADATA)
-
-#define BTRFS_BALANCE_FORCE		(1ULL << 3)
-#define BTRFS_BALANCE_RESUME		(1ULL << 4)
-
-/*
- * Balance filters
- */
-#define BTRFS_BALANCE_ARGS_PROFILES	(1ULL << 0)
-#define BTRFS_BALANCE_ARGS_USAGE	(1ULL << 1)
-#define BTRFS_BALANCE_ARGS_DEVID	(1ULL << 2)
-#define BTRFS_BALANCE_ARGS_DRANGE	(1ULL << 3)
-#define BTRFS_BALANCE_ARGS_VRANGE	(1ULL << 4)
-#define BTRFS_BALANCE_ARGS_LIMIT	(1ULL << 5)
-#define BTRFS_BALANCE_ARGS_LIMIT_RANGE	(1ULL << 6)
-#define BTRFS_BALANCE_ARGS_STRIPES_RANGE (1ULL << 7)
-#define BTRFS_BALANCE_ARGS_USAGE_RANGE	(1ULL << 10)
-
-#define BTRFS_BALANCE_ARGS_MASK			\
-	(BTRFS_BALANCE_ARGS_PROFILES |		\
-	 BTRFS_BALANCE_ARGS_USAGE |		\
-	 BTRFS_BALANCE_ARGS_DEVID | 		\
-	 BTRFS_BALANCE_ARGS_DRANGE |		\
-	 BTRFS_BALANCE_ARGS_VRANGE |		\
-	 BTRFS_BALANCE_ARGS_LIMIT |		\
-	 BTRFS_BALANCE_ARGS_LIMIT_RANGE |	\
-	 BTRFS_BALANCE_ARGS_STRIPES_RANGE |	\
-	 BTRFS_BALANCE_ARGS_USAGE_RANGE)
-
-/*
- * Profile changing flags.  When SOFT is set we won't relocate chunk if
- * it already has the target profile (even though it may be
- * half-filled).
- */
-#define BTRFS_BALANCE_ARGS_CONVERT	(1ULL << 8)
-#define BTRFS_BALANCE_ARGS_SOFT		(1ULL << 9)
 
 struct btrfs_balance_args;
 struct btrfs_balance_progress;
@@ -567,6 +521,5 @@ static inline void unlock_chunks(struct btrfs_root *root)
 struct list_head *btrfs_get_fs_uuids(void);
 void btrfs_set_fs_info_ptr(struct btrfs_fs_info *fs_info);
 void btrfs_reset_fs_info_ptr(struct btrfs_fs_info *fs_info);
-void btrfs_close_one_device(struct btrfs_device *device);
 
 #endif

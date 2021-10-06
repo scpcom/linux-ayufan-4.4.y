@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <sound/jack.h>
 #include <sound/soc.h>
 #include <linux/gpio.h>
@@ -40,7 +42,10 @@ void snd_soc_jack_report(struct snd_soc_jack *jack, int status, int mask)
 	unsigned int sync = 0;
 	int enable;
 
+#if defined(MY_ABC_HERE)
+#else  
 	trace_snd_soc_jack_report(jack, mask, status);
+#endif  
 
 	if (!jack)
 		return;
@@ -52,7 +57,10 @@ void snd_soc_jack_report(struct snd_soc_jack *jack, int status, int mask)
 	jack->status &= ~mask;
 	jack->status |= status & mask;
 
+#if defined(MY_ABC_HERE)
+#else  
 	trace_snd_soc_jack_notify(jack, status);
+#endif  
 
 	list_for_each_entry(pin, &jack->pins, list) {
 		enable = pin->mask & jack->status;
@@ -170,13 +178,15 @@ static void snd_soc_jack_gpio_detect(struct snd_soc_jack_gpio *gpio)
 	snd_soc_jack_report(jack, report, gpio->report);
 }
 
-
 static irqreturn_t gpio_handler(int irq, void *data)
 {
 	struct snd_soc_jack_gpio *gpio = data;
 	struct device *dev = gpio->jack->card->dev;
 
+#if defined(MY_ABC_HERE)
+#else  
 	trace_snd_soc_jack_irq(gpio->name);
+#endif  
 
 	if (device_may_wakeup(dev))
 		pm_wakeup_event(dev, gpio->debounce_time + 50);

@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/blkdev.h>
 #include <linux/module.h>
 #include <linux/buffer_head.h>
@@ -48,6 +50,10 @@
 #define CREATE_TRACE_POINTS
 #include <trace/events/btrfs.h>
 
+#ifdef MY_ABC_HERE
+#include <linux/list_lru.h>
+#endif  
+
 static const struct super_operations btrfs_super_ops;
 static struct file_system_type btrfs_fs_type;
 
@@ -81,13 +87,6 @@ const char *btrfs_decode_error(int errno)
 	return errstr;
 }
 
-static void save_error_info(struct btrfs_fs_info *fs_info)
-{
-	
-	set_bit(BTRFS_FS_STATE_ERROR, &fs_info->fs_state);
-}
-
-
 static void btrfs_handle_error(struct btrfs_fs_info *fs_info)
 {
 	struct super_block *sb = fs_info->sb;
@@ -98,13 +97,12 @@ static void btrfs_handle_error(struct btrfs_fs_info *fs_info)
 	if (test_bit(BTRFS_FS_STATE_ERROR, &fs_info->fs_state)) {
 		sb->s_flags |= MS_RDONLY;
 		btrfs_info(fs_info, "forced readonly");
-		
+		 
 	}
 }
 
-
 __cold
-void __btrfs_std_error(struct btrfs_fs_info *fs_info, const char *function,
+void __btrfs_handle_fs_error(struct btrfs_fs_info *fs_info, const char *function,
 		       unsigned int line, int errno, const char *fmt, ...)
 {
 	struct super_block *sb = fs_info->sb;
@@ -135,8 +133,8 @@ void __btrfs_std_error(struct btrfs_fs_info *fs_info, const char *function,
 	}
 #endif
 
-	
-	save_error_info(fs_info);
+	set_bit(BTRFS_FS_STATE_ERROR, &fs_info->fs_state);
+
 	if (sb->s_flags & MS_BORN)
 		btrfs_handle_error(fs_info);
 }
@@ -183,15 +181,14 @@ void btrfs_printk(const struct btrfs_fs_info *fs_info, const char *fmt, ...)
 }
 #endif
 
-
 __cold
 void __btrfs_abort_transaction(struct btrfs_trans_handle *trans,
 			       struct btrfs_root *root, const char *function,
 			       unsigned int line, int errno)
 {
 	trans->aborted = errno;
-	
-	if (!trans->blocks_used && list_empty(&trans->new_bgs)) {
+	 
+	if (!trans->dirty && list_empty(&trans->new_bgs)) {
 		const char *errstr;
 
 		errstr = btrfs_decode_error(errno);
@@ -201,12 +198,12 @@ void __btrfs_abort_transaction(struct btrfs_trans_handle *trans,
 		return;
 	}
 	ACCESS_ONCE(trans->transaction->aborted) = errno;
-	
+	 
 	wake_up(&root->fs_info->transaction_wait);
 	wake_up(&root->fs_info->transaction_blocked_wait);
-	__btrfs_std_error(root->fs_info, function, line, errno, NULL);
+	__btrfs_handle_fs_error(root->fs_info, function, line, errno, NULL);
 }
-
+ 
 __cold
 void __btrfs_panic(struct btrfs_fs_info *fs_info, const char *function,
 		   unsigned int line, int errno, const char *fmt, ...)
@@ -252,13 +249,19 @@ enum {
 	Opt_commit_interval, Opt_barrier, Opt_nodefrag, Opt_nodiscard,
 	Opt_noenospc_debug, Opt_noflushoncommit, Opt_acl, Opt_datacow,
 	Opt_datasum, Opt_treelog, Opt_noinode_cache,
+#ifdef MY_ABC_HERE
+	Opt_flushoncommit_threshold,
+#endif  
 #ifdef CONFIG_BTRFS_DEBUG
 	Opt_fragment_data, Opt_fragment_metadata, Opt_fragment_all,
 #endif
+#ifdef MY_ABC_HERE
+	Opt_no_block_group_hint,
+#endif  
 	Opt_err,
 };
 
-static match_table_t tokens = {
+static const match_table_t tokens = {
 	{Opt_degraded, "degraded"},
 	{Opt_subvol, "subvol=%s"},
 	{Opt_subvolid, "subvolid=%s"},
@@ -285,6 +288,9 @@ static match_table_t tokens = {
 	{Opt_treelog, "treelog"},
 	{Opt_flushoncommit, "flushoncommit"},
 	{Opt_noflushoncommit, "noflushoncommit"},
+#ifdef MY_ABC_HERE
+	{Opt_flushoncommit_threshold, "flushoncommit_threshold=%d"},
+#endif  
 	{Opt_ratio, "metadata_ratio=%d"},
 	{Opt_discard, "discard"},
 	{Opt_nodiscard, "nodiscard"},
@@ -312,9 +318,11 @@ static match_table_t tokens = {
 	{Opt_fragment_metadata, "fragment=metadata"},
 	{Opt_fragment_all, "fragment=all"},
 #endif
+#ifdef MY_ABC_HERE
+	{Opt_no_block_group_hint, "no_block_group_hint"},
+#endif  
 	{Opt_err, NULL},
 };
-
 
 int btrfs_parse_options(struct btrfs_root *root, char *options)
 {
@@ -326,6 +334,9 @@ int btrfs_parse_options(struct btrfs_root *root, char *options)
 	int ret = 0;
 	char *compress_type;
 	bool compress_force = false;
+	enum btrfs_compression_type saved_compress_type;
+	bool saved_compress_force;
+	int no_compress = 0;
 
 	cache_gen = btrfs_super_cache_generation(root->fs_info->super_copy);
 	if (cache_gen)
@@ -393,9 +404,13 @@ int btrfs_parse_options(struct btrfs_root *root, char *options)
 		case Opt_compress_force:
 		case Opt_compress_force_type:
 			compress_force = true;
-			
+			 
 		case Opt_compress:
 		case Opt_compress_type:
+			saved_compress_type = btrfs_test_opt(root, COMPRESS) ?
+				info->compress_type : BTRFS_COMPRESS_NONE;
+			saved_compress_force =
+				btrfs_test_opt(root, FORCE_COMPRESS);
 			if (token == Opt_compress ||
 			    token == Opt_compress_force ||
 			    strcmp(args[0].from, "zlib") == 0) {
@@ -404,6 +419,7 @@ int btrfs_parse_options(struct btrfs_root *root, char *options)
 				btrfs_set_opt(info->mount_opt, COMPRESS);
 				btrfs_clear_opt(info->mount_opt, NODATACOW);
 				btrfs_clear_opt(info->mount_opt, NODATASUM);
+				no_compress = 0;
 			} else if (strcmp(args[0].from, "lzo") == 0) {
 				compress_type = "lzo";
 				info->compress_type = BTRFS_COMPRESS_LZO;
@@ -411,28 +427,35 @@ int btrfs_parse_options(struct btrfs_root *root, char *options)
 				btrfs_clear_opt(info->mount_opt, NODATACOW);
 				btrfs_clear_opt(info->mount_opt, NODATASUM);
 				btrfs_set_fs_incompat(info, COMPRESS_LZO);
+				no_compress = 0;
 			} else if (strncmp(args[0].from, "no", 2) == 0) {
 				compress_type = "no";
 				btrfs_clear_opt(info->mount_opt, COMPRESS);
 				btrfs_clear_opt(info->mount_opt, FORCE_COMPRESS);
 				compress_force = false;
+				no_compress++;
 			} else {
 				ret = -EINVAL;
 				goto out;
 			}
 
 			if (compress_force) {
-				btrfs_set_and_info(root, FORCE_COMPRESS,
-						   "force %s compression",
-						   compress_type);
+				btrfs_set_opt(info->mount_opt, FORCE_COMPRESS);
 			} else {
-				if (!btrfs_test_opt(root, COMPRESS))
-					btrfs_info(root->fs_info,
-						   "btrfs: use %s compression",
-						   compress_type);
-				
+				 
 				btrfs_clear_opt(info->mount_opt, FORCE_COMPRESS);
 			}
+			if ((btrfs_test_opt(root, COMPRESS) &&
+			     (info->compress_type != saved_compress_type ||
+			      compress_force != saved_compress_force)) ||
+			    (!btrfs_test_opt(root, COMPRESS) &&
+			     no_compress == 1)) {
+				btrfs_info(root->fs_info,
+					   "%s %s compression",
+					   (compress_force) ? "force" : "use",
+					   compress_type);
+			}
+			compress_force = false;
 			break;
 		case Opt_ssd:
 			btrfs_set_and_info(root, SSD,
@@ -520,6 +543,19 @@ int btrfs_parse_options(struct btrfs_root *root, char *options)
 			btrfs_clear_and_info(root, NOTREELOG,
 					     "enabling tree log");
 			break;
+#ifdef MY_ABC_HERE
+		case Opt_flushoncommit_threshold:
+			ret = match_int(&args[0], &intarg);
+			if (ret) {
+				goto out;
+			} else if (intarg >= 0) {
+				info->flushoncommit_threshold = intarg;
+			} else {
+				ret = -EINVAL;
+				goto out;
+			}
+			break;
+#endif  
 		case Opt_flushoncommit:
 			btrfs_set_and_info(root, FLUSHONCOMMIT,
 					   "turning on flush-on-commit");
@@ -678,6 +714,11 @@ int btrfs_parse_options(struct btrfs_root *root, char *options)
 			btrfs_set_opt(info->mount_opt, FRAGMENT_DATA);
 			break;
 #endif
+#ifdef MY_ABC_HERE
+		case Opt_no_block_group_hint:
+			info->no_block_group_hint = 1;
+			break;
+#endif  
 		case Opt_err:
 			btrfs_info(root->fs_info, "unrecognized mount option '%s'", p);
 			ret = -EINVAL;
@@ -926,6 +967,21 @@ static int get_default_subvol_objectid(struct btrfs_fs_info *fs_info, u64 *objec
 	return 0;
 }
 
+#ifdef MY_ABC_HERE
+static void syno_load_sb_archive_ver(struct super_block *sb, struct inode *inode)
+{
+	struct syno_xattr_archive_version value;
+	int err;
+
+	err = __btrfs_getxattr(inode, XATTR_SYNO_PREFIX XATTR_SYNO_ARCHIVE_VERSION_VOLUME,
+						   &value, sizeof(value));
+	if (0 < err)
+		sb->s_archive_version = le32_to_cpu(value.v_archive_version);
+	else
+		sb->s_archive_version = 0;
+}
+#endif  
+
 static int btrfs_fill_super(struct super_block *sb,
 			    struct btrfs_fs_devices *fs_devices,
 			    void *data, int silent)
@@ -968,6 +1024,10 @@ static int btrfs_fill_super(struct super_block *sb,
 		goto fail_close;
 	}
 
+#ifdef MY_ABC_HERE
+	syno_load_sb_archive_ver(sb, inode);
+#endif  
+
 	save_mount_options(sb, data);
 	cleancache_init_fs(sb);
 	sb->s_flags |= MS_ACTIVE;
@@ -991,16 +1051,16 @@ int btrfs_sync_fs(struct super_block *sb, int wait)
 		return 0;
 	}
 
-	btrfs_wait_ordered_roots(fs_info, -1);
+	btrfs_wait_ordered_roots(fs_info, -1, 0, (u64)-1);
 
 	trans = btrfs_attach_transaction_barrier(root);
 	if (IS_ERR(trans)) {
-		
+		 
 		if (PTR_ERR(trans) == -ENOENT) {
-			
+			 
 			if (fs_info->pending_changes == 0)
 				return 0;
-			
+			 
 			if (__sb_start_write(sb, SB_FREEZE_WRITE, false))
 				__sb_end_write(sb, SB_FREEZE_WRITE);
 			else
@@ -1087,6 +1147,11 @@ static int btrfs_show_options(struct seq_file *seq, struct dentry *dentry)
 		seq_printf(seq, ",check_int_print_mask=%d",
 				info->check_integrity_print_mask);
 #endif
+#ifdef MY_ABC_HERE
+	if (info->flushoncommit_threshold)
+		seq_printf(seq, ",flushoncommit_threshold=%d",
+				info->flushoncommit_threshold);
+#endif  
 	if (info->metadata_ratio)
 		seq_printf(seq, ",metadata_ratio=%d",
 				info->metadata_ratio);
@@ -1100,6 +1165,10 @@ static int btrfs_show_options(struct seq_file *seq, struct dentry *dentry)
 	if (btrfs_test_opt(root, FRAGMENT_METADATA))
 		seq_puts(seq, ",fragment=metadata");
 #endif
+#ifdef MY_ABC_HERE
+	if (info->no_block_group_hint)
+		seq_puts(seq, ",no_block_group_hint");
+#endif  
 	seq_printf(seq, ",subvolid=%llu",
 		  BTRFS_I(d_inode(dentry))->root->root_key.objectid);
 	seq_puts(seq, ",subvol=");
@@ -1585,6 +1654,8 @@ static int btrfs_remount(struct super_block *sb, int *flags, char *data)
 			}
 		}
 		sb->s_flags &= ~MS_RDONLY;
+
+		fs_info->open = 1;
 	}
 out:
 	wake_up_process(fs_info->transaction_kthread);
@@ -1691,21 +1762,17 @@ static int btrfs_calc_avail_data_space(struct btrfs_root *root, u64 *free_bytes)
 
 		avail_space = device->total_bytes - device->bytes_used;
 
-		
 		avail_space = div_u64(avail_space, BTRFS_STRIPE_LEN);
 		avail_space *= BTRFS_STRIPE_LEN;
 
-		
-		skip_space = 1024 * 1024;
+		skip_space = SZ_1M;
 
-		
 		if (fs_info->alloc_start &&
 		    fs_info->alloc_start + BTRFS_STRIPE_LEN <=
 		    device->total_bytes) {
 			rcu_read_unlock();
 			skip_space = max(fs_info->alloc_start, skip_space);
 
-			
 			ret = btrfs_account_dev_extents_size(device, 0,
 							     skip_space - 1,
 							     &used_space);
@@ -1780,8 +1847,11 @@ static int btrfs_statfs(struct dentry *dentry, struct kstatfs *buf)
 	struct btrfs_block_rsv *block_rsv = &fs_info->global_block_rsv;
 	int ret;
 	u64 thresh = 0;
+#ifdef MY_ABC_HERE
+	u64 total_metadata = 0;
+#endif  
+	int mixed = 0;
 
-	
 	rcu_read_lock();
 	list_for_each_entry_rcu(found, head, list) {
 		if (found->flags & BTRFS_BLOCK_GROUP_DATA) {
@@ -1802,8 +1872,19 @@ static int btrfs_statfs(struct dentry *dentry, struct kstatfs *buf)
 				}
 			}
 		}
-		if (found->flags & BTRFS_BLOCK_GROUP_METADATA)
-			total_free_meta += found->disk_total - found->disk_used;
+
+		if (!mixed && found->flags & BTRFS_BLOCK_GROUP_METADATA) {
+			if (found->flags & BTRFS_BLOCK_GROUP_DATA)
+				mixed = 1;
+			else
+				total_free_meta += found->disk_total -
+					found->disk_used;
+		}
+#ifdef MY_ABC_HERE
+		if (found->flags & BTRFS_BLOCK_GROUP_METADATA) {
+			total_metadata += found->disk_total;
+		}
+#endif  
 
 		total_used += found->disk_used;
 	}
@@ -1814,9 +1895,12 @@ static int btrfs_statfs(struct dentry *dentry, struct kstatfs *buf)
 	buf->f_blocks >>= bits;
 	buf->f_bfree = buf->f_blocks - (div_u64(total_used, factor) >> bits);
 
-	
 	spin_lock(&block_rsv->lock);
-	buf->f_bfree -= block_rsv->size >> bits;
+	 
+	if (buf->f_bfree >= block_rsv->size >> bits)
+		buf->f_bfree -= block_rsv->size >> bits;
+	else
+		buf->f_bfree = 0;
 	spin_unlock(&block_rsv->lock);
 
 	buf->f_bavail = div_u64(total_free_data, factor);
@@ -1824,22 +1908,45 @@ static int btrfs_statfs(struct dentry *dentry, struct kstatfs *buf)
 	if (ret)
 		return ret;
 	buf->f_bavail += div_u64(total_free_data, factor);
+#ifdef MY_ABC_HERE
+	if (fs_info->metadata_ratio) {
+		u64 reserved_for_metadata = btrfs_super_total_bytes(disk_super);
+
+		do_div(reserved_for_metadata, fs_info->metadata_ratio);
+		if (fs_info->avail_metadata_alloc_bits & BTRFS_BLOCK_GROUP_DUP)
+			reserved_for_metadata *= 2;
+		if (total_metadata < reserved_for_metadata) {
+			if ((reserved_for_metadata-total_metadata) < buf->f_bavail)
+				buf->f_bavail -= reserved_for_metadata-total_metadata;
+			else
+				buf->f_bavail = 0;
+		}
+		buf->f_blocks -= reserved_for_metadata >> bits;
+		if (buf->f_bfree >= reserved_for_metadata >> bits) {
+			buf->f_bfree -= reserved_for_metadata >> bits;
+		} else {
+			buf->f_bfree = 0;
+		}
+		if (buf->f_bfree > buf->f_blocks)
+			buf->f_bfree = buf->f_blocks;
+		else if (buf->f_bfree < (buf->f_bavail >> bits))
+			buf->f_bfree = buf->f_bavail >> bits;
+	}
+#endif  
 	buf->f_bavail = buf->f_bavail >> bits;
 
-	
 	thresh = 4 * 1024 * 1024;
 
-	if (total_free_meta - thresh < block_rsv->size)
+	if (!mixed && total_free_meta - thresh < block_rsv->size)
 		buf->f_bavail = 0;
 
 	buf->f_type = BTRFS_SUPER_MAGIC;
 	buf->f_bsize = dentry->d_sb->s_blocksize;
 	buf->f_namelen = BTRFS_NAME_LEN;
 
-	
 	buf->f_fsid.val[0] = be32_to_cpu(fsid[0]) ^ be32_to_cpu(fsid[2]);
 	buf->f_fsid.val[1] = be32_to_cpu(fsid[1]) ^ be32_to_cpu(fsid[3]);
-	
+	 
 	buf->f_fsid.val[0] ^= BTRFS_I(d_inode(dentry))->root->objectid >> 32;
 	buf->f_fsid.val[1] ^= BTRFS_I(d_inode(dentry))->root->objectid;
 
@@ -1894,6 +2001,9 @@ static long btrfs_control_ioctl(struct file *file, unsigned int cmd,
 		if (ret)
 			break;
 		ret = !(fs_devices->num_devices == fs_devices->total_devices);
+		break;
+	case BTRFS_IOC_GET_SUPPORTED_FEATURES:
+		ret = btrfs_ioctl_get_supported_features((void __user*)arg);
 		break;
 	}
 
@@ -1951,7 +2061,142 @@ static int btrfs_show_devname(struct seq_file *m, struct dentry *root)
 	return 0;
 }
 
+#ifdef MY_ABC_HERE
+static int btrfs_syno_set_sb_archive_ver(struct super_block *sb, u32 archive_ver)
+{
+	struct dentry *dentry = sb->s_root;
+	struct syno_xattr_archive_version value;
+	int err;
+
+	if (!dentry->d_inode->i_op->setxattr) {
+		printk(KERN_ERR "BTRFS:Can't set archive ver on dir_ro_inode %s\n", dentry->d_name.name);
+		return -EINVAL;
+	}
+	value.v_magic = cpu_to_le16(0x2552);
+	value.v_struct_version = cpu_to_le16(1);
+	value.v_archive_version = cpu_to_le32(archive_ver);
+	err = __btrfs_setxattr(NULL, d_inode(dentry), XATTR_SYNO_PREFIX XATTR_SYNO_ARCHIVE_VERSION_VOLUME,
+						   &value, sizeof(value), 0);
+	if (!err) {
+		sb->s_archive_version = archive_ver;
+	}
+	return err;
+}
+
+static int btrfs_syno_get_sb_archive_ver(struct super_block *sb, u32 *version)
+{
+	*version = sb->s_archive_version;
+	return 0;
+}
+#endif  
+
+#ifdef MY_ABC_HERE
+static long btrfs_nr_cached_objects(struct super_block *sb, struct shrink_control *sc)
+{
+	return (long)atomic_read(&btrfs_sb(sb)->nr_extent_maps);
+}
+
+static int btrfs_drop_extent_maps(struct inode *inode, int nr_to_drop)
+{
+	struct extent_map *em;
+	struct extent_map_tree *em_tree = &BTRFS_I(inode)->extent_tree;
+	int dropped = 0;
+	u64 start = 0;
+
+	while (nr_to_drop--) {
+		write_lock(&em_tree->lock);
+		em = lookup_extent_mapping(em_tree, start, (u64)-1);
+		if (!em) {
+			write_unlock(&em_tree->lock);
+			break;
+		}
+		start = em->start + em->len;
+		if (test_bit(EXTENT_FLAG_PINNED, &em->flags)) {
+			free_extent_map(em);
+			write_unlock(&em_tree->lock);
+			continue;
+		}
+		remove_extent_mapping(em_tree, em);
+		write_unlock(&em_tree->lock);
+		 
+		free_extent_map(em);
+		 
+		free_extent_map(em);
+		dropped++;
+	}
+	return dropped;
+}
+
+static bool list_lru_item_empty(struct list_lru *lru, struct list_head *item)
+{
+	int nid = page_to_nid(virt_to_page(item));
+	struct list_lru_node *nlru = &lru->node[nid];
+
+	spin_lock(&nlru->lock);
+	if (list_empty(item)) {
+		spin_unlock(&nlru->lock);
+		return true;
+	}
+	spin_unlock(&nlru->lock);
+	return false;
+}
+
+static long btrfs_free_cached_objects(struct super_block *sb, struct shrink_control *sc)
+{
+	struct inode *inode;
+	struct inode *toput_inode = NULL;
+	struct btrfs_inode *binode;
+	struct btrfs_fs_info *fs_info = btrfs_sb(sb);
+	int nr_to_drop = sc->nr_to_scan;
+
+	spin_lock(&fs_info->extent_map_inode_list_lock);
+	list_for_each_entry(binode, &fs_info->extent_map_inode_list, free_extent_map_inode) {
+		inode = &binode->vfs_inode;
+		if (!list_lru_item_empty(&fs_info->sb->s_inode_lru, &inode->i_lru)) {
+			continue;
+		}
+		spin_lock(&inode->i_lock);
+		if (inode->i_state & (I_FREEING|I_WILL_FREE|I_NEW)) {
+			spin_unlock(&inode->i_lock);
+			continue;
+		}
+		__iget(inode);
+		spin_unlock(&inode->i_lock);
+		atomic_inc(&binode->free_extent_map_counts);
+		if (toput_inode && (atomic_read(&BTRFS_I(toput_inode)->free_extent_map_counts) == 0) && (atomic_read(&(BTRFS_I(toput_inode)->extent_tree.nr_extent_maps)) == 0)) {
+			list_del_init(&BTRFS_I(toput_inode)->free_extent_map_inode);
+		}
+		spin_unlock(&fs_info->extent_map_inode_list_lock);
+
+		nr_to_drop -= btrfs_drop_extent_maps(inode, nr_to_drop);
+
+		iput(toput_inode);
+		toput_inode = inode;
+		spin_lock(&fs_info->extent_map_inode_list_lock);
+		WARN_ON(atomic_read(&binode->free_extent_map_counts) == 0);
+		atomic_dec(&binode->free_extent_map_counts);
+		if (nr_to_drop <= 0) {
+			break;
+		}
+	}
+	if (toput_inode && (atomic_read(&BTRFS_I(toput_inode)->free_extent_map_counts) == 0) && (atomic_read(&(BTRFS_I(toput_inode)->extent_tree.nr_extent_maps)) == 0)) {
+		list_del_init(&BTRFS_I(toput_inode)->free_extent_map_inode);
+	}
+	spin_unlock(&fs_info->extent_map_inode_list_lock);
+	iput(toput_inode);
+	return (long)(sc->nr_to_scan - nr_to_drop);
+}
+#endif  
+
 static const struct super_operations btrfs_super_ops = {
+#ifdef MY_ABC_HERE
+	.syno_set_sb_archive_ver = btrfs_syno_set_sb_archive_ver,
+	.syno_get_sb_archive_ver = btrfs_syno_get_sb_archive_ver,
+#endif  
+#ifdef MY_ABC_HERE
+	.nr_cached_objects = btrfs_nr_cached_objects,
+	.free_cached_objects = btrfs_free_cached_objects,
+#endif  
 	.drop_inode	= btrfs_drop_inode,
 	.evict_inode	= btrfs_evict_inode,
 	.put_super	= btrfs_put_super,
@@ -1993,9 +2238,9 @@ static void btrfs_interface_exit(void)
 	misc_deregister(&btrfs_misc);
 }
 
-static void btrfs_print_info(void)
+static void btrfs_print_mod_info(void)
 {
-	printk(KERN_INFO "Btrfs loaded"
+	printk(KERN_INFO "Btrfs loaded, crc32c=%s"
 #ifdef CONFIG_BTRFS_DEBUG
 			", debug=on"
 #endif
@@ -2005,7 +2250,8 @@ static void btrfs_print_info(void)
 #ifdef CONFIG_BTRFS_FS_CHECK_INTEGRITY
 			", integrity-checker=on"
 #endif
-			"\n");
+			"\n",
+			btrfs_crc32c_impl());
 }
 
 static int btrfs_run_sanity_tests(void)
@@ -2092,7 +2338,7 @@ static int __init init_btrfs_fs(void)
 
 	btrfs_init_lockdep();
 
-	btrfs_print_info();
+	btrfs_print_mod_info();
 
 	err = btrfs_run_sanity_tests();
 	if (err)

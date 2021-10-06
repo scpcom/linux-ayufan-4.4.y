@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <asm/uaccess.h>
 #include <linux/bitops.h>
 #include <linux/capability.h>
@@ -65,19 +67,20 @@
 #include <linux/errqueue.h>
 #include <linux/hrtimer.h>
 #include <linux/netfilter_ingress.h>
+#if defined(MY_ABC_HERE)
+#include <linux/synolib.h>
+#endif  
 
 #include "net-sysfs.h"
 
-
 #define MAX_GRO_SKBS 8
-
 
 #define GRO_MAX_HEAD (MAX_HEADER + 128)
 
 static DEFINE_SPINLOCK(ptype_lock);
 static DEFINE_SPINLOCK(offload_lock);
 struct list_head ptype_base[PTYPE_HASH_SIZE] __read_mostly;
-struct list_head ptype_all __read_mostly;	
+struct list_head ptype_all __read_mostly;	 
 static struct list_head offload_base __read_mostly;
 
 static int netif_rx_internal(struct sk_buff *skb);
@@ -85,10 +88,125 @@ static int call_netdevice_notifiers_info(unsigned long val,
 					 struct net_device *dev,
 					 struct netdev_notifier_info *info);
 
+#if defined(MY_DEF_HERE)
+void (*funcSynoNicLedCtrl)(int iEnable) = NULL;
+EXPORT_SYMBOL(funcSynoNicLedCtrl);
+#endif  
+
+#ifdef MY_ABC_HERE
+static unsigned int str_to_hex(char ch)
+{
+	if ((ch >= '0') && (ch <= '9'))
+		return (ch - '0');
+
+	if ((ch >= 'a') && (ch <= 'f'))
+		return (ch - 'a' + 10);
+
+	if ((ch >= 'A') && (ch <= 'F'))
+		return (ch - 'A' + 10);
+
+	return 0;
+}
+
+void convert_str_to_mac(char *source , char *dest)
+{
+	dest[0] = (str_to_hex(source[0]) << 4) + str_to_hex(source[1]);
+	dest[1] = (str_to_hex(source[2]) << 4) + str_to_hex(source[3]);
+	dest[2] = (str_to_hex(source[4]) << 4) + str_to_hex(source[5]);
+	dest[3] = (str_to_hex(source[6]) << 4) + str_to_hex(source[7]);
+	dest[4] = (str_to_hex(source[8]) << 4) + str_to_hex(source[9]);
+	dest[5] = (str_to_hex(source[10]) << 4) + str_to_hex(source[11]);
+}
+
+static int syno_skip_bond_vender_mac(int iMacIndex)
+{
+	extern const char gszSkipVenderMacInterfaces[256];
+	char szDupIfns[256] = {'\0'};
+	char *token = NULL;
+	char *ptr = NULL;
+	long iSkipIndex = 0;
+	int iMatch = 0;
+
+	if (0 == strlen(gszSkipVenderMacInterfaces)) {
+		goto END;
+	}
+
+	snprintf(szDupIfns, sizeof(szDupIfns), "%s", gszSkipVenderMacInterfaces);
+	ptr = szDupIfns;
+	 
+	while (NULL != (token = strsep(&ptr, ","))) {
+		if (0 != kstrtol(token, 10, &iSkipIndex)) {
+			 
+			iMatch = -1;
+			goto END;
+		}
+		if ((long)iMacIndex == iSkipIndex) {
+			iMatch = 1;
+			goto END;
+		}
+		if (!ptr) {
+			break;
+		}
+	}
+
+END:
+	return iMatch;
+}
+
+#define SYNO_VENDOR_MAC_SUCCESS     0
+#define SYNO_VENDOR_MAC_EMPTY       1
+#define SYNO_VENDOR_MAC_FAIL        2
+int syno_get_dev_vendor_mac(const char *szDev, char *szMac)
+{
+	extern unsigned char grgbLanMac[SYNO_MAC_MAX_NUMBER][16];
+#ifdef MY_ABC_HERE
+	extern unsigned long g_internal_netif_num;
+#endif  
+	int err = SYNO_VENDOR_MAC_FAIL;
+	char szIFPrefix[IFNAMSIZ] = "eth";
+	int iMacIndex = 0;
+	const char *pMacIndex = NULL;
+	int iMatch = 0;
+
+	if (!szMac || !szDev)
+		goto ERR;
+
+	if (!strncmp(szDev, szIFPrefix, strlen(szIFPrefix))) {
+		pMacIndex = szDev + strlen(szIFPrefix);
+		iMacIndex = simple_strtol(pMacIndex, NULL, 10);
+#ifdef MY_ABC_HERE
+		if (0 > iMacIndex || g_internal_netif_num <= iMacIndex) {
+			err = SYNO_VENDOR_MAC_FAIL;
+			goto ERR;
+		}
+#endif  
+		if (1 == (iMatch = syno_skip_bond_vender_mac(iMacIndex))) {
+			err = SYNO_VENDOR_MAC_EMPTY;
+			goto ERR;
+		} else if (-1 == iMatch) {
+			printk(KERN_ERR "Error when match bond vender mac\n");
+			err = SYNO_VENDOR_MAC_FAIL;
+			goto ERR;
+		}
+
+		if (!strcmp(grgbLanMac[iMacIndex], "")) {
+			err = SYNO_VENDOR_MAC_EMPTY;
+			goto ERR;
+		}
+		convert_str_to_mac(grgbLanMac[iMacIndex], szMac);
+	} else {
+		goto ERR;
+	}
+
+	err = SYNO_VENDOR_MAC_SUCCESS;
+ERR:
+	return err;
+}
+EXPORT_SYMBOL(syno_get_dev_vendor_mac);
+#endif  
 
 DEFINE_RWLOCK(dev_base_lock);
 EXPORT_SYMBOL(dev_base_lock);
-
 
 static DEFINE_SPINLOCK(napi_hash_lock);
 
@@ -5542,7 +5660,11 @@ struct rtnl_link_stats64 *dev_get_stats(struct net_device *dev,
 	} else {
 		netdev_stats_to_stats64(storage, &dev->stats);
 	}
+#if defined(MY_ABC_HERE)
+	 
+#else
 	storage->rx_dropped += atomic_long_read(&dev->rx_dropped);
+#endif  
 	storage->tx_dropped += atomic_long_read(&dev->tx_dropped);
 	return storage;
 }

@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #ifndef _LINUX_DM_IO_H
 #define _LINUX_DM_IO_H
 
@@ -41,26 +43,27 @@ struct dm_io_memory {
 };
 
 struct dm_io_notify {
-	io_notify_fn fn;	
-	void *context;		
+	io_notify_fn fn;	 
+	void *context;		 
 };
-
 
 struct dm_io_client;
 struct dm_io_request {
-	int bi_rw;			
-	struct dm_io_memory mem;	
-	struct dm_io_notify notify;	
-	struct dm_io_client *client;	
+	int bi_rw;			 
+	struct dm_io_memory mem;	 
+	struct dm_io_notify notify;	 
+	struct dm_io_client *client;	 
 };
-
 
 struct dm_io_client *dm_io_client_create(void);
 void dm_io_client_destroy(struct dm_io_client *client);
 
-
+#ifdef MY_ABC_HERE
+int syno_dm_io(struct dm_io_request *io_req, unsigned num_regions,
+		struct dm_io_region *region, unsigned long *sync_error_bits, unsigned long bi_flags);
+#endif  
 int dm_io(struct dm_io_request *io_req, unsigned num_regions,
 	  struct dm_io_region *region, unsigned long *sync_error_bits);
 
-#endif	
-#endif	
+#endif	 
+#endif	 

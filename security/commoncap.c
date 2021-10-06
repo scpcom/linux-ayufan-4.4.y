@@ -1057,12 +1057,18 @@ int cap_mmap_addr(unsigned long addr)
 	}
 	return ret;
 }
+#ifdef CONFIG_AUFS_FHSM
+EXPORT_SYMBOL_GPL(cap_mmap_addr);
+#endif /* CONFIG_AUFS_FHSM */
 
 int cap_mmap_file(struct file *file, unsigned long reqprot,
 		  unsigned long prot, unsigned long flags)
 {
 	return 0;
 }
+#ifdef CONFIG_AUFS_FHSM
+EXPORT_SYMBOL_GPL(cap_mmap_file);
+#endif /* CONFIG_AUFS_FHSM */
 
 #ifdef CONFIG_SECURITY
 

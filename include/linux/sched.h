@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_SCHED_H
 #define _LINUX_SCHED_H
 
@@ -572,35 +575,36 @@ static inline int signal_group_exit(const struct signal_struct *sig)
 		(sig->group_exit_task != NULL);
 }
 
-
 struct user_struct {
-	atomic_t __count;	
-	atomic_t processes;	
-	atomic_t sigpending;	
+	atomic_t __count;	 
+	atomic_t processes;	 
+	atomic_t sigpending;	 
 #ifdef CONFIG_INOTIFY_USER
-	atomic_t inotify_watches; 
-	atomic_t inotify_devs;	
+	atomic_t inotify_watches;  
+	atomic_t inotify_devs;	 
 #endif
+#ifdef MY_ABC_HERE
+	atomic_t synotify_instances;
+#endif  
 #ifdef CONFIG_FANOTIFY
 	atomic_t fanotify_listeners;
 #endif
 #ifdef CONFIG_EPOLL
-	atomic_long_t epoll_watches; 
+	atomic_long_t epoll_watches;  
 #endif
 #ifdef CONFIG_POSIX_MQUEUE
-	
-	unsigned long mq_bytes;	
+	 
+	unsigned long mq_bytes;	 
 #endif
-	unsigned long locked_shm; 
-	unsigned long unix_inflight;	
-	atomic_long_t pipe_bufs;  
+	unsigned long locked_shm;  
+	unsigned long unix_inflight;	 
+	atomic_long_t pipe_bufs;   
 
 #ifdef CONFIG_KEYS
-	struct key *uid_keyring;	
-	struct key *session_keyring;	
+	struct key *uid_keyring;	 
+	struct key *session_keyring;	 
 #endif
 
-	
 	struct hlist_node uidhash_node;
 	kuid_t uid;
 

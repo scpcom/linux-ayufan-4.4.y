@@ -643,15 +643,13 @@ void cdv_intel_lvds_init(struct drm_device *dev,
 	connector = &gma_connector->base;
 	encoder = &gma_encoder->base;
 
-
 	drm_connector_init(dev, connector,
 			   &cdv_intel_lvds_connector_funcs,
 			   DRM_MODE_CONNECTOR_LVDS);
 
 	drm_encoder_init(dev, encoder,
 			 &cdv_intel_lvds_enc_funcs,
-			 DRM_MODE_ENCODER_LVDS);
-
+			 DRM_MODE_ENCODER_LVDS, NULL);
 
 	gma_connector_attach_encoder(gma_connector, gma_encoder);
 	gma_encoder->type = INTEL_OUTPUT_LVDS;

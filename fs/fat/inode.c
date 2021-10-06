@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/module.h>
 #include <linux/pagemap.h>
 #include <linux/mpage.h>
@@ -201,6 +203,14 @@ static int fat_write_begin(struct file *file, struct address_space *mapping,
 	err = cont_write_begin(file, mapping, pos, len, flags,
 				pagep, fsdata, fat_get_block,
 				&MSDOS_I(mapping->host)->mmu_private);
+#ifdef MY_ABC_HERE
+	if (err >= 0 && (flags & AOP_FLAG_RECVFILE)) {
+		if (pos+len > mapping->host->i_size) {
+			i_size_write(mapping->host, pos+len);
+			mark_inode_dirty(mapping->host);
+		}
+	} else
+#endif  
 	if (err < 0)
 		fat_write_failed(mapping, pos + len);
 	return err;
@@ -436,8 +446,13 @@ int fat_fill_inode(struct inode *inode, struct msdos_dir_entry *de)
 
 	fat_time_fat2unix(sbi, &inode->i_mtime, de->time, de->date, 0);
 	if (sbi->options.isvfat) {
+#ifdef MY_ABC_HERE
+		fat_time_fat2unix(sbi, &inode->i_create_time, de->ctime,
+				  de->cdate, de->ctime_cs);
+#else
 		fat_time_fat2unix(sbi, &inode->i_ctime, de->ctime,
 				  de->cdate, de->ctime_cs);
+#endif  
 		fat_time_fat2unix(sbi, &inode->i_atime, 0, de->adate, 0);
 	} else
 		inode->i_ctime = inode->i_atime = inode->i_mtime;
@@ -711,8 +726,13 @@ retry:
 			  &raw_entry->date, NULL);
 	if (sbi->options.isvfat) {
 		__le16 atime;
+#ifdef MY_ABC_HERE
+		fat_time_unix2fat(sbi, &inode->i_create_time, &raw_entry->ctime,
+				  &raw_entry->cdate, &raw_entry->ctime_cs);
+#else
 		fat_time_unix2fat(sbi, &inode->i_ctime, &raw_entry->ctime,
 				  &raw_entry->cdate, &raw_entry->ctime_cs);
+#endif  
 		fat_time_unix2fat(sbi, &inode->i_atime, &atime,
 				  &raw_entry->adate, NULL);
 	}
@@ -861,7 +881,11 @@ enum {
 	Opt_charset, Opt_shortname_lower, Opt_shortname_win95,
 	Opt_shortname_winnt, Opt_shortname_mixed, Opt_utf8_no, Opt_utf8_yes,
 	Opt_uni_xl_no, Opt_uni_xl_yes, Opt_nonumtail_no, Opt_nonumtail_yes,
+#ifdef MY_ABC_HERE
+	Opt_obsolete, Opt_flush, Opt_noflush, Opt_tz_utc, Opt_rodir, Opt_err_cont,
+#else
 	Opt_obsolete, Opt_flush, Opt_tz_utc, Opt_rodir, Opt_err_cont,
+#endif  
 	Opt_err_panic, Opt_err_ro, Opt_discard, Opt_nfs, Opt_time_offset,
 	Opt_nfs_stale_rw, Opt_nfs_nostale_ro, Opt_err, Opt_dos1xfloppy,
 };
@@ -887,6 +911,9 @@ static const match_table_t fat_tokens = {
 	{Opt_debug, "debug"},
 	{Opt_immutable, "sys_immutable"},
 	{Opt_flush, "flush"},
+#ifdef MY_ABC_HERE
+	{Opt_noflush, "noflush"},
+#endif  
 	{Opt_tz_utc, "tz=UTC"},
 	{Opt_time_offset, "time_offset=%d"},
 	{Opt_err_cont, "errors=continue"},
@@ -979,6 +1006,9 @@ static int parse_options(struct super_block *sb, char *options, int is_vfat,
 	opts->tz_set = 0;
 	opts->nfs = 0;
 	opts->errors = FAT_ERRORS_RO;
+#ifdef MY_ABC_HERE
+	opts->flush = 1;
+#endif  
 	*debug = 0;
 
 	if (!options)
@@ -1072,6 +1102,11 @@ static int parse_options(struct super_block *sb, char *options, int is_vfat,
 		case Opt_flush:
 			opts->flush = 1;
 			break;
+#ifdef MY_ABC_HERE
+		case Opt_noflush:
+			opts->flush = 0;
+			break;
+#endif  
 		case Opt_time_offset:
 			if (match_int(&args[0], &option))
 				return -EINVAL;
@@ -1567,36 +1602,54 @@ int fat_fill_super(struct super_block *sb, void *data, int silent, int isvfat,
 	}
 
 	sbi->max_cluster = total_clusters + FAT_START_ENT;
-	
+	 
 	if (sbi->free_clusters != -1 && sbi->free_clusters > total_clusters)
 		sbi->free_clusters = -1;
-	
+	 
 	sbi->prev_free %= sbi->max_cluster;
 	if (sbi->prev_free < FAT_START_ENT)
 		sbi->prev_free = FAT_START_ENT;
 
-	
 	fat_hash_init(sb);
 	dir_hash_init(sb);
 	fat_ent_access_init(sb);
-
-	
 
 	error = -EINVAL;
 	sprintf(buf, "cp%d", sbi->options.codepage);
 	sbi->nls_disk = load_nls(buf);
 	if (!sbi->nls_disk) {
+#ifdef MY_ABC_HERE
+		if (!silent) {
+			fat_msg(sb, KERN_ERR, "FAT: nls_disk load default table\n");
+		}
+		sbi->nls_disk = load_nls_default();
+		if (!sbi->nls_disk){
+			fat_msg(sb, KERN_ERR, "FAT: nls_disk load default failed\n");
+			goto out_fail;
+		}
+#else
 		fat_msg(sb, KERN_ERR, "codepage %s not found", buf);
 		goto out_fail;
+#endif  
 	}
 
-	
 	if (sbi->options.isvfat) {
 		sbi->nls_io = load_nls(sbi->options.iocharset);
 		if (!sbi->nls_io) {
+#ifdef MY_ABC_HERE
+			if (!silent) {
+				fat_msg(sb, KERN_ERR, "FAT: nls_io load default table\n");
+			}
+			sbi->nls_io = load_nls_default();
+			if (!sbi->nls_io){
+				fat_msg(sb, KERN_ERR, "FAT: nls_io load default failed\n");
+				goto out_fail;
+			}
+#else
 			fat_msg(sb, KERN_ERR, "IO charset %s not found",
 			       sbi->options.iocharset);
 			goto out_fail;
+#endif  
 		}
 	}
 

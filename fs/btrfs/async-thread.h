@@ -1,11 +1,13 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #ifndef __BTRFS_ASYNC_THREAD_
 #define __BTRFS_ASYNC_THREAD_
 #include <linux/workqueue.h>
 
 struct btrfs_workqueue;
-
+ 
 struct __btrfs_workqueue;
 struct btrfs_work;
 typedef void (*btrfs_func_t)(struct btrfs_work *arg);
@@ -41,6 +43,9 @@ BTRFS_WORK_HELPER_PROTO(endio_write_helper);
 BTRFS_WORK_HELPER_PROTO(freespace_write_helper);
 BTRFS_WORK_HELPER_PROTO(delayed_meta_helper);
 BTRFS_WORK_HELPER_PROTO(readahead_helper);
+#ifdef MY_ABC_HERE
+BTRFS_WORK_HELPER_PROTO(reada_path_start_helper);
+#endif  
 BTRFS_WORK_HELPER_PROTO(qgroup_rescan_helper);
 BTRFS_WORK_HELPER_PROTO(extent_refs_helper);
 BTRFS_WORK_HELPER_PROTO(scrub_helper);

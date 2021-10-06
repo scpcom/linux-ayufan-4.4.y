@@ -1,7 +1,7 @@
-
-
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/kernel.h>
 #include <linux/syscalls.h>
 #include <linux/fs.h>
@@ -111,24 +111,42 @@ static void buffer_io_error(struct buffer_head *bh, char *msg)
 	char b[BDEVNAME_SIZE];
 
 	if (!test_bit(BH_Quiet, &bh->b_state))
-		printk_ratelimited(KERN_ERR
+#ifdef MY_ABC_HERE
+	{
+		static unsigned long long b_blocknr_last = 0;
+
+		if (b_blocknr_last == (unsigned long long)bh->b_blocknr) {
+			printk_ratelimited(KERN_ERR
+					"Buffer I/O error on dev %s, logical block %llu%s\n",
+					bdevname(bh->b_bdev, b),
+					b_blocknr_last, msg);
+		} else {
+			b_blocknr_last = (unsigned long long)bh->b_blocknr;
+			printk_ratelimited(KERN_ERR
+					"Buffer I/O error on dev %s, logical block in range %llu + 0-2(%d) %s\n",
+					bdevname(bh->b_bdev, b),
+					(b_blocknr_last >> CONFIG_SYNO_IO_ERROR_LIMIT_MSG_SHIFT) << CONFIG_SYNO_IO_ERROR_LIMIT_MSG_SHIFT,
+					CONFIG_SYNO_IO_ERROR_LIMIT_MSG_SHIFT, msg);
+		}
+	}
+#else
+	printk_ratelimited(KERN_ERR
 			"Buffer I/O error on dev %s, logical block %llu%s\n",
 			bdevname(bh->b_bdev, b),
 			(unsigned long long)bh->b_blocknr, msg);
+#endif  
 }
-
 
 static void __end_buffer_read_notouch(struct buffer_head *bh, int uptodate)
 {
 	if (uptodate) {
 		set_buffer_uptodate(bh);
 	} else {
-		
+		 
 		clear_buffer_uptodate(bh);
 	}
 	unlock_buffer(bh);
 }
-
 
 void end_buffer_read_sync(struct buffer_head *bh, int uptodate)
 {

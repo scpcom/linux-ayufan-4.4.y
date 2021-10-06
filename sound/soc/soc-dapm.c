@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/module.h>
 #include <linux/moduleparam.h>
 #include <linux/init.h>
@@ -20,7 +22,10 @@
 #include <sound/soc.h>
 #include <sound/initval.h>
 
+#if defined(MY_ABC_HERE)
+#else  
 #include <trace/events/asoc.h>
+#endif  
 
 #define DAPM_UPDATE_STAT(widget, val) widget->dapm->card->dapm_stats.val++;
 
@@ -542,14 +547,16 @@ int snd_soc_dapm_force_bias_level(struct snd_soc_dapm_context *dapm,
 }
 EXPORT_SYMBOL_GPL(snd_soc_dapm_force_bias_level);
 
-
 static int snd_soc_dapm_set_bias_level(struct snd_soc_dapm_context *dapm,
 				       enum snd_soc_bias_level level)
 {
 	struct snd_soc_card *card = dapm->card;
 	int ret = 0;
 
+#if defined(MY_ABC_HERE)
+#else  
 	trace_snd_soc_bias_level_start(card, level);
+#endif  
 
 	if (card && card->set_bias_level)
 		ret = card->set_bias_level(card, dapm, level);
@@ -565,11 +572,13 @@ static int snd_soc_dapm_set_bias_level(struct snd_soc_dapm_context *dapm,
 	if (card && card->set_bias_level_post)
 		ret = card->set_bias_level_post(card, dapm, level);
 out:
+#if defined(MY_ABC_HERE)
+#else  
 	trace_snd_soc_bias_level_done(card, level);
+#endif  
 
 	return ret;
 }
-
 
 static int dapm_connect_mux(struct snd_soc_dapm_context *dapm,
 	struct snd_soc_dapm_path *path, const char *control_name,
@@ -1203,15 +1212,20 @@ static void dapm_seq_check_event(struct snd_soc_card *card,
 		pop_dbg(w->dapm->dev, card->pop_time, "pop test : %s %s\n",
 			w->name, ev_name);
 		soc_dapm_async_complete(w->dapm);
+#if defined(MY_ABC_HERE)
+#else  
 		trace_snd_soc_dapm_widget_event_start(w, event);
+#endif  
 		ret = w->event(w, NULL, event);
+#if defined(MY_ABC_HERE)
+#else  
 		trace_snd_soc_dapm_widget_event_done(w, event);
+#endif  
 		if (ret < 0)
 			dev_err(w->dapm->dev, "ASoC: %s: %s event failed: %d\n",
 			       ev_name, w->name, ret);
 	}
 }
-
 
 static void dapm_seq_run_coalesced(struct snd_soc_card *card,
 				   struct list_head *pending)
@@ -1486,13 +1500,14 @@ static void dapm_widget_set_power(struct snd_soc_dapm_widget *w, bool power,
 	if (w->power == power)
 		return;
 
+#if defined(MY_ABC_HERE)
+#else  
 	trace_snd_soc_dapm_widget_power(w, power);
+#endif  
 
-	
 	snd_soc_dapm_widget_for_each_source_path(w, path)
 		dapm_widget_set_peer_power(path->source, power, path->connect);
 
-	
 	if (!w->is_supply) {
 		snd_soc_dapm_widget_for_each_sink_path(w, path)
 			dapm_widget_set_peer_power(path->sink, power,
@@ -1554,7 +1569,10 @@ static int dapm_power_widgets(struct snd_soc_card *card, int event)
 
 	lockdep_assert_held(&card->dapm_mutex);
 
+#if defined(MY_ABC_HERE)
+#else  
 	trace_snd_soc_dapm_start(card);
+#endif  
 
 	list_for_each_entry(d, &card->dapm_list, list) {
 		if (dapm_idle_bias_off(d))
@@ -1610,11 +1628,13 @@ static int dapm_power_widgets(struct snd_soc_card *card, int event)
 		if (!dapm_idle_bias_off(d))
 			d->target_bias_level = bias;
 
+#if defined(MY_ABC_HERE)
+#else  
 	trace_snd_soc_dapm_walk_done(card);
+#endif  
 
-	
 	dapm_pre_sequence_async(&card->dapm, 0);
-	
+	 
 	list_for_each_entry(d, &card->dapm_list, list) {
 		if (d != &card->dapm)
 			async_schedule_domain(dapm_pre_sequence_async, d,
@@ -1654,7 +1674,10 @@ static int dapm_power_widgets(struct snd_soc_card *card, int event)
 		"DAPM sequencing finished, waiting %dms\n", card->pop_time);
 	pop_wait(card->pop_time);
 
+#if defined(MY_ABC_HERE)
+#else  
 	trace_snd_soc_dapm_done(card);
+#endif  
 
 	return 0;
 }

@@ -200,13 +200,6 @@ static int exynos_drm_load(struct drm_device *dev, unsigned long flags)
 	 */
 	dev->irq_enabled = true;
 
-	/*
-	 * with vblank_disable_allowed = true, vblank interrupt will be disabled
-	 * by drm timer once a current process gives up ownership of
-	 * vblank event.(after drm_vblank_put function is called)
-	 */
-	dev->vblank_disable_allowed = true;
-
 	/* init kms poll for handling hpd */
 	drm_kms_helper_poll_init(dev);
 
@@ -294,7 +287,7 @@ int exynos_atomic_commit(struct drm_device *dev, struct drm_atomic_state *state,
 	priv->pending |= commit->crtcs;
 	spin_unlock(&priv->lock);
 
-	drm_atomic_helper_swap_state(dev, state);
+	drm_atomic_helper_swap_state(state, true);
 
 	if (async)
 		schedule_work(&commit->work);
@@ -448,7 +441,6 @@ static struct drm_driver exynos_drm_driver = {
 	.preclose		= exynos_drm_preclose,
 	.lastclose		= exynos_drm_lastclose,
 	.postclose		= exynos_drm_postclose,
-	.set_busid		= drm_platform_set_busid,
 	.get_vblank_counter	= drm_vblank_no_hw_counter,
 	.enable_vblank		= exynos_drm_crtc_enable_vblank,
 	.disable_vblank		= exynos_drm_crtc_disable_vblank,

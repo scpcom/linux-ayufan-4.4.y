@@ -1,10 +1,28 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include "hfsplus_fs.h"
 #include <linux/posix_acl_xattr.h>
 #include <linux/nls.h>
 #include "xattr.h"
 #include "acl.h"
+
+#ifdef MY_ABC_HERE
+ 
+static void hfsplus_zero_dateadded(u16 entry_type, u8 *finderinfo) {
+
+    finderinfo = finderinfo + 16;
+
+	if (entry_type == HFSPLUS_FOLDER) {
+		struct DXInfo *fldinfo = (struct DXInfo *)finderinfo;
+		fldinfo->date_added = 0;
+	} else if (entry_type == HFSPLUS_FILE) {
+		struct FXInfo *fileinfo = (struct FXInfo *)finderinfo;
+		fileinfo->date_added = 0;
+    }
+}
+#endif  
 
 static int hfsplus_removexattr(struct inode *inode, const char *name);
 
@@ -278,8 +296,17 @@ int __hfsplus_setxattr(struct inode *inode, const char *name,
 			err = -EOPNOTSUPP;
 			goto end_setxattr;
 		}
+#ifdef MY_ABC_HERE  
+		cat_entry_type = hfs_bnode_read_u16(cat_fd.bnode, cat_fd.entryoffset);
+		if (cat_entry_type == HFSPLUS_FOLDER) {
+			hfs_bnode_read(cat_fd.bnode, &entry, cat_fd.entryoffset, sizeof(struct hfsplus_cat_folder));
+		} else if (cat_entry_type == HFSPLUS_FILE) {
+			hfs_bnode_read(cat_fd.bnode, &entry, cat_fd.entryoffset, sizeof(struct hfsplus_cat_file));
+		}
+#else
 		hfs_bnode_read(cat_fd.bnode, &entry, cat_fd.entryoffset,
 					sizeof(hfsplus_cat_entry));
+#endif  
 		if (be16_to_cpu(entry.type) == HFSPLUS_FOLDER) {
 			if (size == folder_finderinfo_len) {
 				memcpy(&entry.folder.user_info, value,
@@ -454,6 +481,9 @@ static ssize_t hfsplus_getxattr_finder_info(struct inode *inode,
 				fd.entryoffset +
 				offsetof(struct hfsplus_cat_folder, user_info),
 				folder_rec_len);
+#ifdef MY_ABC_HERE
+			hfsplus_zero_dateadded(entry_type, folder_finder_info);
+#endif  
 			memcpy(value, folder_finder_info, folder_rec_len);
 			res = folder_rec_len;
 		} else if (entry_type == HFSPLUS_FILE) {
@@ -461,6 +491,9 @@ static ssize_t hfsplus_getxattr_finder_info(struct inode *inode,
 				fd.entryoffset +
 				offsetof(struct hfsplus_cat_file, user_info),
 				file_rec_len);
+#ifdef MY_ABC_HERE
+			hfsplus_zero_dateadded(entry_type, file_finder_info);
+#endif  
 			memcpy(value, file_finder_info, file_rec_len);
 			res = file_rec_len;
 		} else {
@@ -483,7 +516,11 @@ ssize_t __hfsplus_getxattr(struct inode *inode, const char *name,
 	hfsplus_attr_entry *entry;
 	__be32 xattr_record_type;
 	u32 record_type;
+#ifdef MY_ABC_HERE
+	u32 record_length = 0;
+#else
 	u16 record_length = 0;
+#endif  
 	ssize_t res = 0;
 
 	if ((!S_ISREG(inode->i_mode) &&
@@ -522,6 +559,18 @@ ssize_t __hfsplus_getxattr(struct inode *inode, const char *name,
 			fd.entryoffset, sizeof(xattr_record_type));
 	record_type = be32_to_cpu(xattr_record_type);
 	if (record_type == HFSPLUS_ATTR_INLINE_DATA) {
+#ifdef MY_ABC_HERE
+		record_length = hfs_bnode_read_u32(fd.bnode,
+				fd.entryoffset +
+				offsetof(struct hfsplus_attr_inline_data,
+				length));
+		if ((offsetof(struct hfsplus_attr_inline_data,
+					raw_bytes) + record_length) > hfsplus_get_attr_tree_cache_size()) {
+			pr_err("invalid xattr record size\n");
+			res = -EIO;
+			goto out;
+		}
+#else
 		record_length = hfs_bnode_read_u16(fd.bnode,
 				fd.entryoffset +
 				offsetof(struct hfsplus_attr_inline_data,
@@ -531,6 +580,7 @@ ssize_t __hfsplus_getxattr(struct inode *inode, const char *name,
 			res = -EIO;
 			goto out;
 		}
+#endif  
 	} else if (record_type == HFSPLUS_ATTR_FORK_DATA ||
 			record_type == HFSPLUS_ATTR_EXTENTS) {
 		pr_err("only inline data xattr are supported\n");
@@ -596,6 +646,59 @@ static inline int can_list(const char *xattr_name)
 				capable(CAP_SYS_ADMIN);
 }
 
+#ifdef MY_ABC_HERE
+static ssize_t hfsplus_listxattr_rfork(struct dentry *dentry,
+						char *buffer, size_t size)
+{
+	ssize_t res = 0;
+	struct inode *inode = dentry->d_inode;
+	struct hfs_find_data fd;
+	u16 entry_type;
+	int xattr_name_len, symbols_count;
+	struct hfsplus_fork_raw rsrc_fork = {0};
+
+	res = hfs_find_init(HFSPLUS_SB(inode->i_sb)->cat_tree, &fd);
+	if (res) {
+		pr_err("can't init xattr find struct\n");
+		return res;
+	}
+
+	res = hfsplus_find_cat(inode->i_sb, inode->i_ino, &fd);
+	if (res)
+		goto end_listxattr_rfork;
+
+	entry_type = hfs_bnode_read_u16(fd.bnode, fd.entryoffset);
+	if (entry_type == HFSPLUS_FILE) {
+		hfs_bnode_read(fd.bnode, &rsrc_fork,
+				fd.entryoffset +
+				offsetof(struct hfsplus_cat_file, rsrc_fork),
+				sizeof(struct hfsplus_fork_raw));
+	}
+	if (be64_to_cpu(rsrc_fork.total_size) > 0) {
+		symbols_count = sizeof(HFSPLUS_XATTR_RESOURCE_FORK_NAME) - 1;
+		xattr_name_len =
+			name_len(HFSPLUS_XATTR_RESOURCE_FORK_NAME, symbols_count);
+		if (!buffer || !size) {
+			if (can_list(HFSPLUS_XATTR_RESOURCE_FORK_NAME))
+				res = xattr_name_len;
+		} else if (can_list(HFSPLUS_XATTR_RESOURCE_FORK_NAME)) {
+			if (size < xattr_name_len)
+				res = -ERANGE;
+			else {
+				res = copy_name(buffer,
+						HFSPLUS_XATTR_RESOURCE_FORK_NAME,
+						symbols_count);
+			}
+		}
+	}
+
+end_listxattr_rfork:
+	hfs_find_exit(&fd);
+
+	return res;
+}
+#endif  
+
 static ssize_t hfsplus_listxattr_finder_info(struct dentry *dentry,
 						char *buffer, size_t size)
 {
@@ -625,6 +728,9 @@ static ssize_t hfsplus_listxattr_finder_info(struct dentry *dentry,
 				fd.entryoffset +
 				offsetof(struct hfsplus_cat_folder, user_info),
 				len);
+#ifdef MY_ABC_HERE
+		hfsplus_zero_dateadded(entry_type, folder_finder_info);
+#endif  
 		found_bit = find_first_bit((void *)folder_finder_info, len*8);
 	} else if (entry_type == HFSPLUS_FILE) {
 		len = sizeof(struct FInfo) + sizeof(struct FXInfo);
@@ -632,6 +738,9 @@ static ssize_t hfsplus_listxattr_finder_info(struct dentry *dentry,
 				fd.entryoffset +
 				offsetof(struct hfsplus_cat_file, user_info),
 				len);
+#ifdef MY_ABC_HERE
+		hfsplus_zero_dateadded(entry_type, file_finder_info);
+#endif  
 		found_bit = find_first_bit((void *)file_finder_info, len*8);
 	} else {
 		res = -EOPNOTSUPP;
@@ -683,6 +792,12 @@ ssize_t hfsplus_listxattr(struct dentry *dentry, char *buffer, size_t size)
 	res = hfsplus_listxattr_finder_info(dentry, buffer, size);
 	if (res < 0)
 		return res;
+#ifdef MY_ABC_HERE
+	res += hfsplus_listxattr_rfork(dentry, buffer + res, size - res);
+	if (res < 0) {
+		return res;
+	}
+#endif  
 	else if (!HFSPLUS_SB(inode->i_sb)->attr_tree)
 		return (res == 0) ? -EOPNOTSUPP : res;
 
@@ -726,6 +841,15 @@ ssize_t hfsplus_listxattr(struct dentry *dentry, char *buffer, size_t size)
 			goto end_listxattr;
 
 		xattr_name_len = NLS_MAX_CHARSET_SIZE * HFSPLUS_ATTR_MAX_STRLEN;
+#ifdef MY_ABC_HERE
+		if (hfsplus_attr_uni2asc(inode->i_sb,
+			(const struct hfsplus_unistr *)&fd.key->attr.key_name,
+					strbuf, &xattr_name_len)) {
+			pr_err("unicode conversion failed\n");
+			res = -EIO;
+			goto end_listxattr;
+		}
+#else
 		if (hfsplus_uni2asc(inode->i_sb,
 			(const struct hfsplus_unistr *)&fd.key->attr.key_name,
 					strbuf, &xattr_name_len)) {
@@ -733,6 +857,7 @@ ssize_t hfsplus_listxattr(struct dentry *dentry, char *buffer, size_t size)
 			res = -EIO;
 			goto end_listxattr;
 		}
+#endif
 
 		if (!buffer || !size) {
 			if (can_list(strbuf))

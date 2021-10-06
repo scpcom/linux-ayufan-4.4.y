@@ -1,6 +1,7 @@
-
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #define EXT4FS_DEBUG
 
 #include <linux/errno.h>
@@ -1131,19 +1132,20 @@ static void ext4_update_super(struct super_block *sb,
 		     flex_gd->count);
 
 	ext4_debug("free blocks count %llu", ext4_free_blocks_count(es));
-	
+	 
 	smp_wmb();
 
-	
 	sbi->s_groups_count += flex_gd->count;
 	sbi->s_blockfile_groups = min_t(ext4_group_t, sbi->s_groups_count,
 			(EXT4_MAX_BLOCK_FILE_PHYS / EXT4_BLOCKS_PER_GROUP(sb)));
 
-	
+#ifdef MY_ABC_HERE
+	 
+#else
 	ext4_r_blocks_count_set(es, ext4_r_blocks_count(es) +
 				reserved_blocks);
+#endif  
 
-	
 	percpu_counter_add(&sbi->s_freeclusters_counter,
 			   EXT4_NUM_B2C(sbi, free_blocks));
 	percpu_counter_add(&sbi->s_freeinodes_counter,

@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/device.h>
 #include <linux/fs.h>
 #include <linux/mm.h>
@@ -21,11 +23,14 @@
 #include <linux/mtd/map.h>
 
 #include <asm/uaccess.h>
+#ifdef MY_DEF_HERE
+#include <linux/syscalls.h>
+#include <linux/semaphore.h>
+#endif  
 
 #include "mtdcore.h"
 
 static DEFINE_MUTEX(mtd_mutex);
-
 
 struct mtd_file_info {
 	struct mtd_info *mtd;
@@ -179,21 +184,71 @@ static ssize_t mtdchar_read(struct file *file, char __user *buf, size_t count,
 
 	kfree(kbuf);
 	return total_retlen;
-} 
+}  
+
+#ifdef MY_DEF_HERE
+static int syno_write_buf_size = 0x1000;
+
+char *kbuf;
+int write_kbuf_len;
+struct semaphore write_kbuf_sem;
+
+SYSCALL_DEFINE1(SYNOMTDAlloc, bool, blMalloc)
+{
+	int retval = 0;
+
+	down(&write_kbuf_sem);
+	if (blMalloc) {
+		if (write_kbuf_len)
+			goto End;
+
+		write_kbuf_len = syno_write_buf_size;
+		kbuf = kmalloc(write_kbuf_len, GFP_KERNEL);
+		if (!kbuf) {
+			printk(KERN_NOTICE "%s:%d(%s) malloc fail write_kbuf_len=[%d], kbuf=[%p]\n", __FILE__, __LINE__, __func__, write_kbuf_len, kbuf);
+			write_kbuf_len = 0x0;
+			retval = -ENOMEM;
+		}
+	} else {
+		if (!write_kbuf_len)
+			goto End;
+		write_kbuf_len = 0x0;
+		kfree(kbuf);
+		kbuf = NULL;
+	}
+End:
+	up(&write_kbuf_sem);
+	return retval;
+}  
+#endif  
 
 static ssize_t mtdchar_write(struct file *file, const char __user *buf, size_t count,
 			loff_t *ppos)
 {
 	struct mtd_file_info *mfi = file->private_data;
 	struct mtd_info *mtd = mfi->mtd;
+#ifdef MY_DEF_HERE
+	 
+#else  
 	size_t size = count;
 	char *kbuf;
+#endif  
 	size_t retlen;
 	size_t total_retlen=0;
 	int ret=0;
 	int len;
 
 	pr_debug("MTD_write\n");
+#ifdef MY_DEF_HERE
+	if (syno_write_buf_size < mtd->writesize) {
+		printk(KERN_ERR "mtd kmalloc size small than mtd driver minimal write size !!\n");
+		WARN_ON(1);
+		syno_write_buf_size = mtd->writesize;
+		if (write_kbuf_len)
+			sys_SYNOMTDAlloc(false);
+		printk(KERN_ERR "mtd kmalloc size replace with mtd driver minimal write size !!\n");
+	}
+#endif  
 
 	if (*ppos == mtd->size)
 		return -ENOSPC;
@@ -204,15 +259,35 @@ static ssize_t mtdchar_write(struct file *file, const char __user *buf, size_t c
 	if (!count)
 		return 0;
 
+#ifdef MY_DEF_HERE
+	if (!write_kbuf_len) {
+		ret = sys_SYNOMTDAlloc(true);
+		if (ret != 0)
+			return ret;
+	}
+	down(&write_kbuf_sem);
+#else  
 	kbuf = mtd_kmalloc_up_to(mtd, &size);
 	if (!kbuf)
 		return -ENOMEM;
+#endif  
 
 	while (count) {
+#ifdef MY_DEF_HERE
+		if (count > syno_write_buf_size)
+			len = syno_write_buf_size;
+		else
+			len = count;
+#else  
 		len = min_t(size_t, count, size);
+#endif  
 
 		if (copy_from_user(kbuf, buf, len)) {
+#ifdef MY_DEF_HERE
+			up(&write_kbuf_sem);
+#else  
 			kfree(kbuf);
+#endif  
 			return -EFAULT;
 		}
 
@@ -254,15 +329,22 @@ static ssize_t mtdchar_write(struct file *file, const char __user *buf, size_t c
 			buf += retlen;
 		}
 		else {
+#ifdef MY_DEF_HERE
+			up(&write_kbuf_sem);
+#else  
 			kfree(kbuf);
+#endif  
 			return ret;
 		}
 	}
 
+#ifdef MY_DEF_HERE
+	up(&write_kbuf_sem);
+#else  
 	kfree(kbuf);
+#endif  
 	return total_retlen;
-} 
-
+}  
 
 static void mtdchar_erase_callback (struct erase_info *instr)
 {
@@ -814,7 +896,45 @@ static int mtdchar_ioctl(struct file *file, u_int cmd, u_long arg)
 		break;
 	}
 
-	
+#ifdef  MY_ABC_HERE
+	case MEMMODIFYPARTINFO:
+	{
+		struct erase_info_user einfo32;
+
+		if (copy_from_user(&einfo32, argp, sizeof(struct erase_info_user)))
+			return -EFAULT;
+
+		ret = SYNOMTDModifyPartInfo(mtd, einfo32.start, einfo32.length);
+
+		break;
+	}
+
+	case MEMMODIFYFISINFO:
+	{
+		struct SYNO_MTD_FIS_INFO SynoMtdFisInfo;
+
+		if (strcmp(mtd->name, "FIS directory")) {  
+#ifdef MY_DEF_HERE
+			printk("FIXME: skip FIS directory name checking for update\n");
+#else
+			return -EOPNOTSUPP;
+#endif
+		}
+
+		if (copy_from_user(&SynoMtdFisInfo, (struct SYNO_MTD_FIS_INFO *)arg, sizeof(struct SYNO_MTD_FIS_INFO))) {
+			return -EFAULT;
+		}
+
+		if (!SynoMtdFisInfo.name[0]) {  
+			return -EFAULT;
+		}
+
+		ret = SYNOMTDModifyFisInfo(mtd, SynoMtdFisInfo);
+
+		break;
+	}
+#endif  
+
 	case ECCGETLAYOUT:
 	{
 		struct nand_ecclayout_user *usrlay;
@@ -1069,6 +1189,11 @@ int __init init_mtdchar(void)
 		       MTD_CHAR_MAJOR);
 		return ret;
 	}
+
+#ifdef MY_DEF_HERE
+	 
+	sema_init(&write_kbuf_sem, 1);
+#endif  
 
 	return ret;
 }

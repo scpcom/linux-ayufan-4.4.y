@@ -1,29 +1,27 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _RAID5_H
 #define _RAID5_H
 
 #include <linux/raid/xor.h>
 #include <linux/dmaengine.h>
 
-
-
-
-
 enum check_states {
 	check_state_idle = 0,
-	check_state_run, 
-	check_state_run_q, 
-	check_state_run_pq, 
+	check_state_run,  
+	check_state_run_q,  
+	check_state_run_pq,  
 	check_state_check_result,
-	check_state_compute_run, 
+	check_state_compute_run,  
 	check_state_compute_result,
 };
 
-
 enum reconstruct_states {
 	reconstruct_state_idle = 0,
-	reconstruct_state_prexor_drain_run,	
-	reconstruct_state_drain_run,		
-	reconstruct_state_run,			
+	reconstruct_state_prexor_drain_run,	 
+	reconstruct_state_drain_run,		 
+	reconstruct_state_run,			 
 	reconstruct_state_prexor_drain_result,
 	reconstruct_state_drain_result,
 	reconstruct_state_result,
@@ -144,8 +142,11 @@ enum {
 	STRIPE_ON_RELEASE_LIST,
 	STRIPE_BATCH_READY,
 	STRIPE_BATCH_ERR,
-	STRIPE_BITMAP_PENDING,	
-	STRIPE_LOG_TRAPPED, 
+	STRIPE_BITMAP_PENDING,	 
+	STRIPE_LOG_TRAPPED,  
+#ifdef MY_ABC_HERE
+	STRIPE_NORETRY,
+#endif  
 };
 
 #define STRIPE_EXPAND_SYNC_FLAGS \
@@ -208,51 +209,52 @@ struct r5conf {
 	int			max_nr_stripes;
 	int			min_nr_stripes;
 
-	
 	sector_t		reshape_progress;
-	
+	 
 	sector_t		reshape_safe;
 	int			previous_raid_disks;
 	int			prev_chunk_sectors;
 	int			prev_algo;
-	short			generation; 
-	seqcount_t		gen_lock;	
-	unsigned long		reshape_checkpoint; 
-	long long		min_offset_diff; 
+	short			generation;  
+	seqcount_t		gen_lock;	 
+	unsigned long		reshape_checkpoint;  
+	long long		min_offset_diff;  
 
-	struct list_head	handle_list; 
-	struct list_head	hold_list; 
-	struct list_head	delayed_list; 
-	struct list_head	bitmap_list; 
-	struct bio		*retry_read_aligned; 
-	struct bio		*retry_read_aligned_list; 
-	atomic_t		preread_active_stripes; 
+	struct list_head	handle_list;  
+	struct list_head	hold_list;  
+	struct list_head	delayed_list;  
+	struct list_head	bitmap_list;  
+	struct bio		*retry_read_aligned;  
+	struct bio		*retry_read_aligned_list;  
+	atomic_t		preread_active_stripes;  
 	atomic_t		active_aligned_reads;
-	atomic_t		pending_full_writes; 
-	int			bypass_count; 
-	int			bypass_threshold; 
-	int			skip_copy; 
-	struct list_head	*last_hold; 
+	atomic_t		pending_full_writes;  
+	int			bypass_count;  
+	int			bypass_threshold;  
+	int			skip_copy;  
+#ifdef MY_ABC_HERE
+	int         stripe_cache_memory_usage;
+#endif  
+	struct list_head	*last_hold;  
 
-	
 	struct bio_list		return_bi;
 
-	atomic_t		reshape_stripes; 
-	
+	atomic_t		reshape_stripes;  
+	 
 	int			active_name;
 	char			cache_name[2][32];
-	struct kmem_cache	*slab_cache; 
-	struct mutex		cache_size_mutex; 
+	struct kmem_cache	*slab_cache;  
+	struct mutex		cache_size_mutex;  
 
 	int			seq_flush, seq_write;
 	int			quiesce;
 
-	int			fullsync;  
+	int			fullsync;   
 	int			recovery_disabled;
-	
+	 
 	struct raid5_percpu {
-		struct page	*spare_page; 
-		struct flex_array *scribble;   
+		struct page	*spare_page;  
+		struct flex_array *scribble;    
 	} __percpu *percpu;
 	int scribble_disks;
 	int scribble_sectors;
@@ -260,7 +262,11 @@ struct r5conf {
 	struct notifier_block	cpu_notify;
 #endif
 
-	
+#ifdef MY_ABC_HERE
+	atomic_t            proxy_enable;
+	struct md_thread   *proxy_thread;
+#endif  
+	 
 	atomic_t		active_stripes;
 	struct list_head	inactive_list[NR_STRIPE_HASH_LOCKS];
 	atomic_t		empty_inactive_list_nr;
@@ -342,4 +348,9 @@ extern void r5l_stripe_write_finished(struct stripe_head *sh);
 extern int r5l_handle_flush_request(struct r5l_log *log, struct bio *bio);
 extern void r5l_quiesce(struct r5l_log *log, int state);
 extern bool r5l_log_disk_error(struct r5conf *conf);
+
+#ifdef MY_ABC_HERE
+#define sector_mod(a,b) sector_div(a,b)
+#endif  
+
 #endif

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Virtio SCSI HBA driver
  *
@@ -24,6 +27,9 @@
 #include <linux/virtio_scsi.h>
 #include <linux/cpu.h>
 #include <linux/blkdev.h>
+#ifdef MY_ABC_HERE
+#include <linux/pci.h>
+#endif /* MY_ABC_HERE */
 #include <scsi/scsi_host.h>
 #include <scsi/scsi_device.h>
 #include <scsi/scsi_cmnd.h>
@@ -644,6 +650,10 @@ static int virtscsi_tmf(struct virtio_scsi *vscsi, struct virtio_scsi_cmd *cmd)
 	DECLARE_COMPLETION_ONSTACK(comp);
 	int ret = FAILED;
 
+#ifdef MY_ABC_HERE
+	ret = SUCCESS;
+	goto out;
+#endif /* MY_ABC_HERE */
 	cmd->comp = &comp;
 	if (virtscsi_kick_cmd(&vscsi->ctrl_vq, cmd,
 			      sizeof cmd->req.tmf, sizeof cmd->resp.tmf) < 0)
@@ -756,6 +766,27 @@ static void virtscsi_target_destroy(struct scsi_target *starget)
 	kfree(tgt);
 }
 
+#ifdef MY_ABC_HERE
+int virtscsi_index_get(struct Scsi_Host *host, uint cahnnel, uint id, uint lun)
+{
+	int index = 0;
+	struct device *dev = host->shost_gendev.parent;
+	struct pci_dev *pcidev = NULL;
+
+	while (dev) {
+		if (dev->driver && dev->driver->name && !strcmp(dev->driver->name, "virtio-pci")) {
+			pcidev = to_pci_dev(dev);
+			break;
+		}
+		dev = dev->parent;
+	}
+	if (pcidev && PCI_SLOT(pcidev->devfn) >= CONFIG_SYNO_KVMX64_PCI_SLOT_SYSTEM) {
+		index = PCI_SLOT(pcidev->devfn) - CONFIG_SYNO_KVMX64_PCI_SLOT_SYSTEM;
+	}
+	return index;
+}
+#endif /* MY_ABC_HERE */
+
 static struct scsi_host_template virtscsi_host_template_single = {
 	.module = THIS_MODULE,
 	.name = "Virtio SCSI HBA",
@@ -773,6 +804,9 @@ static struct scsi_host_template virtscsi_host_template_single = {
 	.target_alloc = virtscsi_target_alloc,
 	.target_destroy = virtscsi_target_destroy,
 	.track_queue_depth = 1,
+#ifdef MY_ABC_HERE
+	.syno_index_get = virtscsi_index_get,
+#endif /* MY_ABC_HERE */
 };
 
 static struct scsi_host_template virtscsi_host_template_multi = {

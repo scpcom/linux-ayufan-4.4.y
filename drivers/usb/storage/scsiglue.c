@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/module.h>
 #include <linux/mutex.h>
 
@@ -314,60 +316,72 @@ static ssize_t max_sectors_store(struct device *dev, struct device_attribute *at
 	}
 	return -EINVAL;
 }
+
+#ifdef MY_ABC_HERE
+extern int blIsCardReader(struct usb_device *usbdev);
+static ssize_t show_syno_cardreader(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	struct scsi_device *sdp = to_scsi_device(dev);
+	struct us_data *us = host_to_us(sdp->host);
+	struct usb_device *usbdev = us->pusb_dev;
+
+	if (blIsCardReader(usbdev)) {
+		return sprintf(buf, "1");
+	} else {
+		return sprintf(buf, "0");
+	}
+}
+static DEVICE_ATTR(syno_cardreader, S_IRUGO, show_syno_cardreader, NULL);
+#endif  
 static DEVICE_ATTR_RW(max_sectors);
 
 static struct device_attribute *sysfs_device_attr_list[] = {
 	&dev_attr_max_sectors,
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_cardreader,
+#endif  
 	NULL,
 };
 
-
-
 static const struct scsi_host_template usb_stor_host_template = {
-	
+	 
 	.name =				"usb-storage",
 	.proc_name =			"usb-storage",
 	.show_info =			show_info,
 	.write_info =			write_info,
 	.info =				host_info,
 
-	
 	.queuecommand =			queuecommand,
 
-	
 	.eh_abort_handler =		command_abort,
 	.eh_device_reset_handler =	device_reset,
 	.eh_bus_reset_handler =		bus_reset,
 
-	
 	.can_queue =			1,
 
-	
 	.this_id =			-1,
 
 	.slave_alloc =			slave_alloc,
 	.slave_configure =		slave_configure,
 	.target_alloc =			target_alloc,
 
-	
 	.sg_tablesize =			SCSI_MAX_SG_CHAIN_SEGMENTS,
 
-	
 	.max_sectors =                  240,
 
-	
 	.use_clustering =		1,
 
-	
 	.emulated =			1,
 
-	
 	.skip_settle_delay =		1,
 
-	
 	.sdev_attrs =			sysfs_device_attr_list,
 
-	
+#ifdef MY_ABC_HERE
+	.syno_port_type         = SYNO_PORT_TYPE_USB,
+#endif  
+
 	.module =			THIS_MODULE
 };
 

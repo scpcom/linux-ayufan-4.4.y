@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * core.c  --  Voltage/Current Regulator framework.
  *
@@ -49,6 +52,10 @@
 	pr_info("%s: " fmt, rdev_get_name(rdev), ##__VA_ARGS__)
 #define rdev_dbg(rdev, fmt, ...)					\
 	pr_debug("%s: " fmt, rdev_get_name(rdev), ##__VA_ARGS__)
+
+#ifdef MY_DEF_HERE
+#define SYSFS_RW_uV_EN          //Add by Simon 2014/1/6
+#endif /* MY_DEF_HERE */
 
 static DEFINE_MUTEX(regulator_list_mutex);
 static LIST_HEAD(regulator_map_list);
@@ -359,7 +366,41 @@ static ssize_t regulator_uV_show(struct device *dev,
 
 	return ret;
 }
+#ifdef SYSFS_RW_uV_EN
+static ssize_t regulator_uV_write(struct device *dev, struct device_attribute *attr,
+			const char *buf, size_t count)
+{
+	struct regulator_dev *rdev = dev_get_drvdata(dev);
+	unsigned long voltage;
+	unsigned int min_uV, max_uV;
+	char *endp;
+	int ret, i;
+
+	mutex_lock(&rdev->mutex);
+	endp = (char *)(buf + count);
+	voltage = simple_strtoul(buf, &endp, 10);
+	min_uV = max_uV = (int)voltage;
+
+	ret = regulator_check_voltage(rdev, &min_uV, &max_uV);
+	if (ret < 0)
+		goto out;
+
+	ret = _regulator_do_set_voltage(rdev, min_uV, max_uV);
+	if (ret < 0) {
+		rdev_err(rdev, "unsupportable voltage: support list--\n");
+		for(i=0; i<rdev->desc->n_voltages; i++)
+			rdev_err(rdev, "%d\n", rdev->desc->ops->list_voltage(rdev, i));
+	}
+
+out:
+	mutex_unlock(&rdev->mutex);
+
+	return count;
+}
+static DEVICE_ATTR(microvolts, S_IRUSR | S_IWUSR, regulator_uV_show, regulator_uV_write);
+#else
 static DEVICE_ATTR(microvolts, 0444, regulator_uV_show, NULL);
+#endif
 
 static ssize_t regulator_uA_show(struct device *dev,
 				struct device_attribute *attr, char *buf)

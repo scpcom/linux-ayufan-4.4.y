@@ -1,4 +1,7 @@
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/types.h>
 #include <linux/kernel.h>
 #include <linux/init.h>
@@ -275,7 +278,11 @@ EXPORT_SYMBOL_GPL(do_trace_rcu_torture_read);
 #define RCU_STALL_DELAY_DELTA	       0
 #endif
 
-int rcu_cpu_stall_suppress __read_mostly; 
+#ifdef MY_ABC_HERE
+int rcu_cpu_stall_suppress __read_mostly = 1;  
+#else
+int rcu_cpu_stall_suppress __read_mostly;  
+#endif  
 static int rcu_cpu_stall_timeout __read_mostly = CONFIG_RCU_CPU_STALL_TIMEOUT;
 
 module_param(rcu_cpu_stall_suppress, int, 0644);

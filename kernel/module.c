@@ -1,4 +1,7 @@
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/export.h>
 #include <linux/moduleloader.h>
 #include <linux/trace_events.h>
@@ -3703,3 +3706,20 @@ void module_layout(struct module *mod,
 }
 EXPORT_SYMBOL(module_layout);
 #endif
+
+#ifdef MY_ABC_HERE
+void syno_dump_modules(void)
+{
+	struct module *mod;
+
+	pr_warning( "\n[size]\t\t[module]\n\n");
+
+	list_for_each_entry_rcu(mod, &modules, list) {
+		if (mod->state == MODULE_STATE_UNFORMED)
+			continue;
+
+		pr_warning( "%u\t\t%s\n", mod->init_size + mod->core_size, mod->name);
+	}
+}
+EXPORT_SYMBOL_GPL(syno_dump_modules);
+#endif  

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * drivers/staging/android/ion/ion_carveout_heap.c
  *
@@ -24,6 +27,9 @@
 #include <linux/vmalloc.h>
 #include "ion.h"
 #include "ion_priv.h"
+#if defined(CONFIG_ION_RTK_PHOENIX)
+#include "../uapi/rtk_phoenix_ion.h"
+#endif
 
 struct ion_carveout_heap {
 	struct ion_heap heap;
@@ -93,6 +99,13 @@ static int ion_carveout_heap_allocate(struct ion_heap *heap,
 		ret = -ENOMEM;
 		goto err_free_table;
 	}
+
+#if defined(CONFIG_ION_RTK_PHOENIX)
+        if (flags == RTK_PHOENIX_ION_HEAP_TILER_MASK)
+        {
+            rtk_phoenix_ion_update_last_alloc_addr(paddr, size);
+        }
+#endif
 
 	sg_set_page(table->sgl, pfn_to_page(PFN_DOWN(paddr)), size, 0);
 	buffer->priv_virt = table;
@@ -167,7 +180,11 @@ struct ion_heap *ion_carveout_heap_create(struct ion_platform_heap *heap_data)
 	if (!carveout_heap)
 		return ERR_PTR(-ENOMEM);
 
+#ifdef MY_DEF_HERE
+	carveout_heap->pool = gen_pool_create(PAGE_SHIFT, -1);
+#else /* MY_DEF_HERE */
 	carveout_heap->pool = gen_pool_create(12, -1);
+#endif /* MY_DEF_HERE */
 	if (!carveout_heap->pool) {
 		kfree(carveout_heap);
 		return ERR_PTR(-ENOMEM);

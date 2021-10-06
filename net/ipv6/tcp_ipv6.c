@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/bottom_half.h>
 #include <linux/module.h>
 #include <linux/errno.h>
@@ -141,7 +143,20 @@ static int tcp_v6_connect(struct sock *sk, struct sockaddr *uaddr,
 			sk->sk_bound_dev_if = usin->sin6_scope_id;
 		}
 
-		
+#if defined(MY_ABC_HERE)
+		if (__ipv6_addr_is_link_local(addr_type) && !sk->sk_bound_dev_if) {
+			struct net_device *dev = NULL;
+			for_each_netdev(sock_net(sk), dev) {
+				unsigned flags = dev_get_flags(dev);
+				if ((flags & IFF_RUNNING) &&
+					!(flags & (IFF_LOOPBACK | IFF_SLAVE))) {
+					sk->sk_bound_dev_if = dev->ifindex;
+					break;
+				}
+			}
+		}
+#endif  
+
 		if (!sk->sk_bound_dev_if)
 			return -EINVAL;
 	}

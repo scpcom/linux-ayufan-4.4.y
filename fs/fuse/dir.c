@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include "fuse_i.h"
 
 #include <linux/pagemap.h>
@@ -7,6 +9,18 @@
 #include <linux/sched.h>
 #include <linux/namei.h>
 #include <linux/slab.h>
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#include <linux/xattr.h>
+#endif  
+
+#ifdef MY_ABC_HERE
+#include "../synoacl_int.h"
+#endif  
+
+#ifdef MY_ABC_HERE
+#include "../ntfs/time.h"
+#include "../ntfs/endian.h"
+#endif  
 
 static bool fuse_use_readdirplus(struct inode *dir, struct dir_context *ctx)
 {
@@ -227,20 +241,32 @@ int fuse_valid_type(int m)
 		S_ISBLK(m) || S_ISFIFO(m) || S_ISSOCK(m);
 }
 
+#ifdef MY_ABC_HERE
+int fuse_lookup_name(struct super_block *sb, u64 nodeid, struct qstr *name,
+		     struct fuse_entry_out *outarg, struct inode **inode,
+			 struct fuse_synostat *synostat, int syno_stat_flags)
+#else
 int fuse_lookup_name(struct super_block *sb, u64 nodeid, struct qstr *name,
 		     struct fuse_entry_out *outarg, struct inode **inode)
+#endif  
 {
 	struct fuse_conn *fc = get_fuse_conn_super(sb);
 	FUSE_ARGS(args);
 	struct fuse_forget_link *forget;
 	u64 attr_version;
 	int err;
+#ifdef MY_ABC_HERE
+	char *result_name = NULL;
+	int result_name_len = 0;
+	int glsfs_caseless_lookup = IS_GLUSTER_FS_SB(sb) && (syno_stat_flags & SYNOST_IS_CASELESS);
+	char *new_dname = NULL;
+	const char *extra_dname = NULL;
+#endif  
 
 	*inode = NULL;
 	err = -ENAMETOOLONG;
 	if (name->len > FUSE_NAME_MAX)
 		goto out;
-
 
 	forget = fuse_alloc_forget();
 	err = -ENOMEM;
@@ -250,8 +276,27 @@ int fuse_lookup_name(struct super_block *sb, u64 nodeid, struct qstr *name,
 	attr_version = fuse_get_attr_version(fc);
 
 	fuse_lookup_init(fc, &args, nodeid, name, outarg);
+#ifdef MY_ABC_HERE
+	if (IS_GLUSTER_FS_SB(sb)) {
+		args.in.numargs = 2;
+		args.in.args[1].size = sizeof(syno_stat_flags);
+		args.in.args[1].value = &syno_stat_flags;
+		if (synostat) {
+			args.out.numargs = 2;
+			args.out.argvar = 1;
+			args.out.args[1].size = FUSE_SYNOSTAT_SIZE;
+			args.out.args[1].value = synostat;
+		}
+	}
+	if (glsfs_caseless_lookup && synostat) {
+		result_name = synostat->name;
+		synostat->name_len = SYNO_FUSE_ENTRY_NAME_LEN + 1;
+	}
+	err = fuse_send_syno_request(fc, &args);
+#else
 	err = fuse_simple_request(fc, &args);
-	
+#endif  
+	 
 	if (err || !outarg->nodeid)
 		goto out_put_forget;
 
@@ -264,6 +309,39 @@ int fuse_lookup_name(struct super_block *sb, u64 nodeid, struct qstr *name,
 	*inode = fuse_iget(sb, outarg->nodeid, outarg->generation,
 			   &outarg->attr, entry_attr_timeout(outarg),
 			   attr_version);
+#ifdef MY_ABC_HERE
+	 
+	if (glsfs_caseless_lookup && synostat) {
+		result_name_len = args.out.args[1].size - sizeof(*synostat);
+		result_name[result_name_len] = '\0';
+
+		if (dentry_string_cmp(name->name, result_name, result_name_len)) {
+			if (result_name_len > (DNAME_INLINE_LEN - 1) && result_name_len > name->len) {
+				new_dname = kmalloc(result_name_len + 1, GFP_KERNEL);
+				if (!new_dname) {
+					return -ENOMEM;
+				}
+				 
+				if (name->len > (DNAME_INLINE_LEN - 1)) {
+					extra_dname = name->name;
+				}
+				memcpy((unsigned char*)new_dname, result_name, result_name_len);
+				new_dname[result_name_len] = '\0';
+
+				name->len = result_name_len;
+				name->name = new_dname;
+
+				if (extra_dname) {
+					kfree(extra_dname);
+				}
+			} else {
+				memcpy((unsigned char *)name->name, result_name, result_name_len);
+				((char*)name->name)[result_name_len] = '\0';
+				name->len = result_name_len;
+			}
+		}
+	}
+#endif  
 	err = -ENOMEM;
 	if (!*inode) {
 		fuse_queue_forget(fc, forget, outarg->nodeid, 1);
@@ -282,12 +360,26 @@ static struct dentry *fuse_lookup(struct inode *dir, struct dentry *entry,
 {
 	int err;
 	struct fuse_entry_out outarg;
+#ifdef MY_ABC_HERE
+	struct fuse_synostat *synostat = NULL;
+#endif  
 	struct inode *inode;
 	struct dentry *newent;
 	bool outarg_valid = true;
 
+#ifdef MY_ABC_HERE
+	if ((flags & LOOKUP_CASELESS_COMPARE) && IS_GLUSTER_FS(dir)) {
+		synostat = kmalloc(FUSE_SYNOSTAT_SIZE, GFP_KERNEL);
+		memset(synostat, 0, FUSE_SYNOSTAT_SIZE);
+	}
+	err = fuse_lookup_name(dir->i_sb, get_node_id(dir), &entry->d_name,
+			       &outarg, &inode, synostat,
+				   (flags & LOOKUP_CASELESS_COMPARE) ? SYNOST_IS_CASELESS : 0);
+	kfree(synostat);
+#else
 	err = fuse_lookup_name(dir->i_sb, get_node_id(dir), &entry->d_name,
 			       &outarg, &inode);
+#endif  
 	if (err == -ENOENT) {
 		outarg_valid = false;
 		err = 0;
@@ -862,7 +954,7 @@ int fuse_reverse_inval_entry(struct super_block *sb, u64 parent_nodeid,
 	if (!parent)
 		return -ENOENT;
 
-	mutex_lock(&parent->i_mutex);
+	inode_lock(parent);
 	if (!S_ISDIR(parent->i_mode))
 		goto unlock;
 
@@ -880,7 +972,7 @@ int fuse_reverse_inval_entry(struct super_block *sb, u64 parent_nodeid,
 	fuse_invalidate_entry(entry);
 
 	if (child_nodeid != 0 && d_really_is_positive(entry)) {
-		mutex_lock(&d_inode(entry)->i_mutex);
+		inode_lock(d_inode(entry));
 		if (get_node_id(d_inode(entry)) != child_nodeid) {
 			err = -ENOENT;
 			goto badentry;
@@ -901,7 +993,7 @@ int fuse_reverse_inval_entry(struct super_block *sb, u64 parent_nodeid,
 		clear_nlink(d_inode(entry));
 		err = 0;
  badentry:
-		mutex_unlock(&d_inode(entry)->i_mutex);
+		inode_unlock(d_inode(entry));
 		if (!err)
 			d_delete(entry);
 	} else {
@@ -910,11 +1002,10 @@ int fuse_reverse_inval_entry(struct super_block *sb, u64 parent_nodeid,
 	dput(entry);
 
  unlock:
-	mutex_unlock(&parent->i_mutex);
+	inode_unlock(parent);
 	iput(parent);
 	return err;
 }
-
 
 int fuse_allow_current_process(struct fuse_conn *fc)
 {
@@ -935,19 +1026,32 @@ int fuse_allow_current_process(struct fuse_conn *fc)
 	return 0;
 }
 
+#ifdef MY_ABC_HERE
+static int fuse_access(struct inode *inode, int mask, int syno_acl_access)
+#else
 static int fuse_access(struct inode *inode, int mask)
+#endif  
 {
 	struct fuse_conn *fc = get_fuse_conn(inode);
 	FUSE_ARGS(args);
 	struct fuse_access_in inarg;
 	int err;
 
+#ifdef MY_ABC_HERE
+	if (!syno_acl_access)
+#endif  
 	BUG_ON(mask & MAY_NOT_BLOCK);
 
 	if (fc->no_access)
 		return 0;
 
 	memset(&inarg, 0, sizeof(inarg));
+#ifdef MY_ABC_HERE
+	inarg.syno_acl_access = syno_acl_access;
+	if (IS_GLUSTER_FS(inode) && syno_acl_access) {
+		inarg.mask = mask & SYNO_PERM_FULL_CONTROL;
+	} else
+#endif  
 	inarg.mask = mask & (MAY_READ | MAY_WRITE | MAY_EXEC);
 	args.in.h.opcode = FUSE_ACCESS;
 	args.in.h.nodeid = get_node_id(inode);
@@ -995,17 +1099,24 @@ static int fuse_permission(struct inode *inode, int mask)
 	if (fc->flags & FUSE_DEFAULT_PERMISSIONS) {
 		err = generic_permission(inode, mask);
 
-		
 		if (err == -EACCES && !refreshed) {
 			err = fuse_perm_getattr(inode, mask);
 			if (!err)
 				err = generic_permission(inode, mask);
 		}
 
-		
 	} else if (mask & (MAY_ACCESS | MAY_CHDIR)) {
+#ifdef MY_ABC_HERE
+		err = fuse_access(inode, mask, 0);
+#else
 		err = fuse_access(inode, mask);
+#endif  
 	} else if ((mask & MAY_EXEC) && S_ISREG(inode->i_mode)) {
+#ifdef MY_ABC_HERE
+		if (IS_GLUSTER_FS(inode)) {
+			return fuse_access(inode, mask, 0);
+		}
+#endif  
 		if (!(inode->i_mode & S_IXUGO)) {
 			if (refreshed)
 				return -EACCES;
@@ -1352,13 +1463,12 @@ static void iattr_to_fattr(struct iattr *iattr, struct fuse_setattr_in *arg,
 	}
 }
 
-
 void fuse_set_nowrite(struct inode *inode)
 {
 	struct fuse_conn *fc = get_fuse_conn(inode);
 	struct fuse_inode *fi = get_fuse_inode(inode);
 
-	BUG_ON(!mutex_is_locked(&inode->i_mutex));
+	BUG_ON(!inode_is_locked(inode));
 
 	spin_lock(&fc->lock);
 	BUG_ON(fi->writectr < 0);
@@ -1556,8 +1666,13 @@ static int fuse_getattr(struct vfsmount *mnt, struct dentry *entry,
 	return fuse_update_attributes(inode, stat, NULL, NULL);
 }
 
+#ifdef MY_ABC_HERE
+int fuse_setxattr(struct dentry *entry, const char *name,
+			 const void *value, size_t size, int flags)
+#else
 static int fuse_setxattr(struct dentry *entry, const char *name,
 			 const void *value, size_t size, int flags)
+#endif  
 {
 	struct inode *inode = d_inode(entry);
 	struct fuse_conn *fc = get_fuse_conn(inode);
@@ -1592,8 +1707,13 @@ static int fuse_setxattr(struct dentry *entry, const char *name,
 	return err;
 }
 
+#ifdef MY_ABC_HERE
+ssize_t fuse_getxattr(struct dentry *entry, const char *name,
+			     void *value, size_t size)
+#else
 static ssize_t fuse_getxattr(struct dentry *entry, const char *name,
 			     void *value, size_t size)
+#endif  
 {
 	struct inode *inode = d_inode(entry);
 	struct fuse_conn *fc = get_fuse_conn(inode);
@@ -1703,6 +1823,297 @@ static int fuse_removexattr(struct dentry *entry, const char *name)
 	return err;
 }
 
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#define SZ_FS_NTFS	"ntfs"
+#define IS_NTFS_FS(inode) (inode->i_sb->s_subtype && !strcmp(SZ_FS_NTFS, inode->i_sb->s_subtype))
+#endif  
+#ifdef MY_ABC_HERE
+#define XATTR_NTFS_CREATE_TIME "ntfs_crtime"
+#endif  
+#ifdef MY_ABC_HERE
+static int fuse_syno_glusterfs_getattr(struct dentry *dentry, struct kstat *stat, int stat_flag)
+{
+	int err = 0;
+	struct inode *dir;
+	struct fuse_entry_out outarg;
+	struct fuse_synostat *synostat = NULL;
+	struct inode *inode;
+	struct qstr name;
+
+	dir = dentry->d_parent->d_inode;
+
+	if (stat_flag & (SYNOST_ALL | SYNOST_IS_CASELESS)) {
+		synostat = kmalloc(FUSE_SYNOSTAT_SIZE, GFP_KERNEL);
+		memset(synostat, 0, FUSE_SYNOSTAT_SIZE);
+	}
+	if (get_node_id(dentry->d_inode) == FUSE_ROOT_ID) {
+		 
+		name.name = ".";
+		name.len = 1;
+		err = fuse_lookup_name(dir->i_sb, get_node_id(dir), &name,
+				       &outarg, &inode, synostat, stat_flag);
+	} else {
+		err = fuse_lookup_name(dir->i_sb, get_node_id(dir), &dentry->d_name,
+				       &outarg, &inode, synostat, stat_flag);
+	}
+	if (err)
+		goto out;
+
+#ifdef MY_ABC_HERE
+	if (stat_flag & SYNOST_ARCHIVE_BIT) {
+		stat->syno_archive_bit = synostat->archive_bit;
+	}
+#endif  
+#ifdef MY_ABC_HERE
+	if (stat_flag & SYNOST_CREATE_TIME) {
+		stat->syno_create_time.tv_sec = synostat->create_time_sec;
+		stat->syno_create_time.tv_nsec = synostat->create_time_nsec;
+	}
+#endif  
+#ifdef MY_ABC_HERE
+	if (stat_flag & SYNOST_ARCHIVE_VER) {
+		stat->syno_archive_version = synostat->archive_version;
+	}
+#endif  
+out:
+	kfree (synostat);
+	iput(inode);
+	return err;
+}
+
+static int fuse_syno_ntfs_getattr(struct dentry *dentry, struct kstat *stat, int stat_flag)
+{
+#ifdef MY_ABC_HERE
+	int size = 0;
+	sle64 time_le = 0;
+	s64 time_s = 0;
+
+	size = fuse_getxattr(dentry, XATTR_SYSTEM_PREFIX XATTR_NTFS_CREATE_TIME, &time_s, sizeof(time_s));
+	if (size == sizeof(time_s)) {
+		time_le = cpu_to_sle64(time_s);
+		stat->syno_create_time = ntfs2utc(time_le);
+	} else {
+		memset(&stat->syno_create_time, 0, sizeof(stat->syno_create_time));
+	}
+#endif  
+#ifdef MY_ABC_HERE
+	stat->syno_archive_bit = dentry->d_inode->i_archive_bit;
+#endif  
+#ifdef MY_ABC_HERE
+	stat->syno_archive_version = dentry->d_inode->i_archive_version;
+#endif  
+	return 0;
+}
+
+static int fuse_syno_getattr(struct dentry *dentry, struct kstat *stat, int stat_flag)
+{
+	if (!dentry->d_parent || !dentry->d_parent->d_inode) {
+		printk(KERN_WARNING"fuse syno getattr null entry\n");
+		return -EINVAL;
+	}
+
+	if (IS_GLUSTER_FS(dentry->d_inode)) {
+		return fuse_syno_glusterfs_getattr(dentry, stat, stat_flag);
+	} else if (IS_NTFS_FS(dentry->d_inode)) {
+		return fuse_syno_ntfs_getattr(dentry, stat, stat_flag);
+	}
+
+#ifdef MY_ABC_HERE
+	stat->syno_create_time = dentry->d_inode->i_create_time;
+#endif  
+#ifdef MY_ABC_HERE
+	stat->syno_archive_bit = dentry->d_inode->i_archive_bit;
+#endif  
+#ifdef MY_ABC_HERE
+	stat->syno_archive_version = dentry->d_inode->i_archive_version;
+#endif  
+	return 0;
+}
+#endif  
+
+#ifdef MY_ABC_HERE
+static int fuse_syno_set_archive_version(struct dentry *dentry, u32 archive_version)
+{
+	struct syno_xattr_archive_version value;
+
+	value.v_magic = cpu_to_le16(0x2552);
+	value.v_struct_version = cpu_to_le16(1);
+	value.v_archive_version = cpu_to_le32(archive_version);
+
+	return fuse_setxattr(dentry, XATTR_SYNO_PREFIX XATTR_SYNO_ARCHIVE_VERSION_GLUSTER, &value, sizeof(value), 0);
+}
+#endif  
+
+#ifdef MY_ABC_HERE
+static int fuse_syno_set_glusterfs_create_time(struct dentry *dentry, struct timespec* time)
+{
+	struct syno_gf_xattr_crtime time_le;
+
+	time_le.sec = cpu_to_le64(time->tv_sec);
+	time_le.nsec = cpu_to_le32(time->tv_nsec);
+
+	return fuse_setxattr(dentry, XATTR_SYNO_PREFIX XATTR_SYNO_CREATE_TIME, &time_le, sizeof(time_le), 0);
+}
+
+static int fuse_syno_set_ntfs_create_time(struct dentry *dentry, struct timespec* time)
+{
+	sle64 time_le;
+	s64 time_s;
+
+	time_le = utc2ntfs(*time);
+	time_s = sle64_to_cpu(time_le);
+
+	return fuse_setxattr(dentry, XATTR_SYSTEM_PREFIX XATTR_NTFS_CREATE_TIME, &time_s, sizeof(time_s), 0);
+}
+
+static int fuse_syno_set_create_time(struct dentry *dentry, struct timespec* time)
+{
+	struct inode *inode = dentry->d_inode;
+
+	if (IS_GLUSTER_FS(inode)) {
+		return fuse_syno_set_glusterfs_create_time(dentry, time);
+	} else if (IS_NTFS_FS(inode)) {
+		return fuse_syno_set_ntfs_create_time(dentry, time);
+	}
+	return -EOPNOTSUPP;
+}
+#endif  
+
+#ifdef MY_ABC_HERE
+static int fuse_syno_get_archive_bit(struct dentry *entry, unsigned int *archive_bit)
+{
+	int err;
+	struct inode *inode = entry->d_inode;
+	struct kstat stat;
+
+	if (!IS_GLUSTER_FS(inode)) {
+		*archive_bit = inode->i_archive_bit;
+		return 0;
+	}
+
+	memset (&stat, 0, sizeof(stat));
+	err = fuse_syno_getattr(entry, &stat, SYNOST_ARCHIVE_BIT);
+	if (err) {
+		return err;
+	}
+
+	*archive_bit = stat.syno_archive_bit;
+	return 0;
+}
+
+static int fuse_syno_set_archive_bit(struct dentry *dentry, unsigned int arbit)
+{
+	int err;
+	struct inode *inode = dentry->d_inode;
+	__le32 arbit_le32 = cpu_to_le32(arbit);
+
+	if (!IS_GLUSTER_FS(inode)) {
+		inode->i_archive_bit = arbit;
+		inode->i_ctime = CURRENT_TIME;
+		mark_inode_dirty_sync(inode);
+		return 0;
+	}
+
+	err = fuse_setxattr(dentry, XATTR_SYNO_PREFIX XATTR_SYNO_ARCHIVE_BIT, &arbit_le32, sizeof(arbit_le32), 0);
+	if (err) {
+		return err;
+	}
+
+	inode->i_archive_bit = arbit;
+	return 0;
+}
+#endif  
+
+#ifdef MY_ABC_HERE
+static int fuse_syno_acl_sys_get_perm(struct dentry *dentry, int *allow_out)
+{
+	__le32 allow_le32 = 0;
+	int error;
+
+	if (!IS_GLUSTER_FS(dentry->d_inode)) {
+		return -EOPNOTSUPP;
+	}
+
+	error = fuse_getxattr(dentry, SYNO_ACL_XATTR_PERM, &allow_le32, sizeof(allow_le32));
+	if (error >= 0) {
+		error = 0;
+		*allow_out = le32_to_cpu(allow_le32);
+	}
+
+	return error;
+}
+
+static int fuse_syno_acl_sys_is_support(struct dentry *dentry, int tag)
+{
+	struct inode *inode = dentry->d_inode;
+	uint32_t archive_bit = 0;
+	int error;
+
+	if (!IS_GLUSTER_FS(inode)) {
+		return -EOPNOTSUPP;
+	}
+
+	if (SYNO_KERNEL_IS_FS_SUPPORT == tag) {
+		return 1;
+	} else if (SYNO_KERNEL_IS_FILE_SUPPORT == tag) {
+		error = inode->i_op->syno_get_archive_bit(dentry, &archive_bit);
+		if (0 == error) {
+			return !!(archive_bit & S2_SYNO_ACL_SUPPORT);
+		}
+	} else {
+		return 0;
+	}
+	return error;
+}
+
+static int fuse_syno_acl_sys_check_perm(struct dentry *dentry, int mask)
+{
+	if (!IS_GLUSTER_FS(dentry->d_inode)) {
+		return -EOPNOTSUPP;
+	}
+	return fuse_access(dentry->d_inode, mask, 1);
+}
+
+static int fuse_syno_acl_xattr_get(struct dentry *dentry, int cmd, void *value, size_t size)
+{
+	if (IS_GLUSTER_FS(dentry->d_inode)) {
+		if (SYNO_ACL_INHERITED == cmd)
+			return fuse_getxattr(dentry, SYNO_ACL_XATTR_INHERIT, value, size);
+		else if (SYNO_ACL_PSEUDO_INHERIT_ONLY == cmd)
+			return fuse_getxattr(dentry, SYNO_ACL_XATTR_PSEUDO_INHERIT_ONLY, value, size);
+		else
+			return -EOPNOTSUPP;
+	}
+	return synoacl_mod_get_acl_xattr(dentry, cmd, value, size);
+}
+
+static int fuse_syno_bypass_is_synoacl(struct dentry *dentry, int cmd, int reterror)
+{
+	if (IS_GLUSTER_FS(dentry->d_inode)) {
+		return 0;
+	}
+	if (cmd == BYPASS_SYNOACL_SYNOARCHIVE_OVERWRITE) {
+		if (inode_owner_or_capable(dentry->d_inode)) {
+			return 0;
+		}
+	}
+	return reterror;
+}
+
+static int fuse_syno_archive_bit_change_ok(struct dentry *dentry, unsigned int cmd, int tag, int mask)
+{
+	if (IS_GLUSTER_FS(dentry->d_inode)) {
+		return 0;
+	}
+
+	if ((NEED_INODE_ACL_SUPPORT | NEED_FS_ACL_SUPPORT) & tag) {
+		return -EOPNOTSUPP;
+	}
+
+	return 0;
+}
+#endif  
+
 static const struct inode_operations fuse_dir_inode_operations = {
 	.lookup		= fuse_lookup,
 	.mkdir		= fuse_mkdir,
@@ -1721,6 +2132,28 @@ static const struct inode_operations fuse_dir_inode_operations = {
 	.getxattr	= fuse_getxattr,
 	.listxattr	= fuse_listxattr,
 	.removexattr	= fuse_removexattr,
+#ifdef MY_ABC_HERE
+	.syno_getattr	= fuse_syno_getattr,
+#endif  
+#ifdef MY_ABC_HERE
+	 
+	.syno_set_archive_ver	= fuse_syno_set_archive_version,
+#endif  
+#ifdef MY_ABC_HERE
+	.syno_set_crtime	= fuse_syno_set_create_time,
+#endif  
+#ifdef MY_ABC_HERE
+	.syno_get_archive_bit	= fuse_syno_get_archive_bit,
+	.syno_set_archive_bit	= fuse_syno_set_archive_bit,
+#endif  
+#ifdef MY_ABC_HERE
+	.syno_acl_sys_get_perm	= fuse_syno_acl_sys_get_perm,
+	.syno_acl_sys_is_support	= fuse_syno_acl_sys_is_support,
+	.syno_acl_sys_check_perm	= fuse_syno_acl_sys_check_perm,
+	.syno_acl_xattr_get	= fuse_syno_acl_xattr_get,
+	.syno_bypass_is_synoacl = fuse_syno_bypass_is_synoacl,
+	.syno_arbit_chg_ok = fuse_syno_archive_bit_change_ok,
+#endif  
 };
 
 static const struct file_operations fuse_dir_operations = {
@@ -1742,6 +2175,27 @@ static const struct inode_operations fuse_common_inode_operations = {
 	.getxattr	= fuse_getxattr,
 	.listxattr	= fuse_listxattr,
 	.removexattr	= fuse_removexattr,
+#ifdef MY_ABC_HERE
+	.syno_getattr	= fuse_syno_getattr,
+#endif  
+#ifdef MY_ABC_HERE
+	.syno_set_archive_ver	= fuse_syno_set_archive_version,
+#endif  
+#ifdef MY_ABC_HERE
+	.syno_set_crtime	= fuse_syno_set_create_time,
+#endif  
+#ifdef MY_ABC_HERE
+	.syno_get_archive_bit	= fuse_syno_get_archive_bit,
+	.syno_set_archive_bit	= fuse_syno_set_archive_bit,
+#endif  
+#ifdef MY_ABC_HERE
+	.syno_acl_sys_get_perm	= fuse_syno_acl_sys_get_perm,
+	.syno_acl_sys_is_support	= fuse_syno_acl_sys_is_support,
+	.syno_acl_sys_check_perm	= fuse_syno_acl_sys_check_perm,
+	.syno_acl_xattr_get	= fuse_syno_acl_xattr_get,
+	.syno_bypass_is_synoacl = fuse_syno_bypass_is_synoacl,
+	.syno_arbit_chg_ok = fuse_syno_archive_bit_change_ok,
+#endif  
 };
 
 static const struct inode_operations fuse_symlink_inode_operations = {
@@ -1754,6 +2208,27 @@ static const struct inode_operations fuse_symlink_inode_operations = {
 	.getxattr	= fuse_getxattr,
 	.listxattr	= fuse_listxattr,
 	.removexattr	= fuse_removexattr,
+#ifdef MY_ABC_HERE
+	.syno_getattr	= fuse_syno_getattr,
+#endif  
+#ifdef MY_ABC_HERE
+	.syno_set_archive_ver	= fuse_syno_set_archive_version,
+#endif  
+#ifdef MY_ABC_HERE
+	.syno_set_crtime	= fuse_syno_set_create_time,
+#endif  
+#ifdef MY_ABC_HERE
+	.syno_get_archive_bit	= fuse_syno_get_archive_bit,
+	.syno_set_archive_bit	= fuse_syno_set_archive_bit,
+#endif  
+#ifdef MY_ABC_HERE
+	.syno_acl_sys_get_perm	= fuse_syno_acl_sys_get_perm,
+	.syno_acl_sys_is_support	= fuse_syno_acl_sys_is_support,
+	.syno_acl_sys_check_perm	= fuse_syno_acl_sys_check_perm,
+	.syno_acl_xattr_get	= fuse_syno_acl_xattr_get,
+	.syno_bypass_is_synoacl = fuse_syno_bypass_is_synoacl,
+	.syno_arbit_chg_ok = fuse_syno_archive_bit_change_ok,
+#endif  
 };
 
 void fuse_init_common(struct inode *inode)

@@ -381,12 +381,15 @@ int drm_gem_handle_create(struct drm_file *file_priv,
 }
 EXPORT_SYMBOL(drm_gem_handle_create);
 
-
 /**
  * drm_gem_free_mmap_offset - release a fake mmap offset for an object
  * @obj: obj in question
  *
  * This routine frees fake offsets allocated by drm_gem_create_mmap_offset().
+ *
+ * Note that drm_gem_object_release() already calls this function, so drivers
+ * don't have to take care of releasing the mmap offset themselves when freeing
+ * the GEM object.
  */
 void
 drm_gem_free_mmap_offset(struct drm_gem_object *obj)
@@ -410,6 +413,9 @@ EXPORT_SYMBOL(drm_gem_free_mmap_offset);
  * This routine allocates and attaches a fake offset for @obj, in cases where
  * the virtual size differs from the physical size (ie. obj->size).  Otherwise
  * just use drm_gem_create_mmap_offset().
+ *
+ * This function is idempotent and handles an already allocated mmap offset
+ * transparently. Drivers do not need to check for this case.
  */
 int
 drm_gem_create_mmap_offset_size(struct drm_gem_object *obj, size_t size)
@@ -431,6 +437,9 @@ EXPORT_SYMBOL(drm_gem_create_mmap_offset_size);
  * structures.
  *
  * This routine allocates and attaches a fake offset for @obj.
+ *
+ * Drivers can call drm_gem_free_mmap_offset() before freeing @obj to release
+ * the fake offset again.
  */
 int drm_gem_create_mmap_offset(struct drm_gem_object *obj)
 {
@@ -466,7 +475,7 @@ struct page **drm_gem_get_pages(struct drm_gem_object *obj)
 	int i, npages;
 
 	/* This is the shared memory object that backs the GEM resource */
-	mapping = file_inode(obj->filp)->i_mapping;
+	mapping = obj->filp->f_mapping;
 
 	/* We already BUG_ON() for non-page-aligned sizes in
 	 * drm_gem_object_init(), so we should never hit this unless
@@ -541,10 +550,18 @@ void drm_gem_put_pages(struct drm_gem_object *obj, struct page **pages,
 }
 EXPORT_SYMBOL(drm_gem_put_pages);
 
-/** Returns a reference to the object named by the handle. */
+/**
+ * drm_gem_object_lookup - look up a GEM object from it's handle
+ * @filp: DRM file private date
+ * @handle: userspace handle
+ *
+ * Returns:
+ *
+ * A reference to the object named by the handle if such exists on @filp, NULL
+ * otherwise.
+ */
 struct drm_gem_object *
-drm_gem_object_lookup(struct drm_device *dev, struct drm_file *filp,
-		      u32 handle)
+drm_gem_object_lookup(struct drm_file *filp, u32 handle)
 {
 	struct drm_gem_object *obj;
 
@@ -552,12 +569,8 @@ drm_gem_object_lookup(struct drm_device *dev, struct drm_file *filp,
 
 	/* Check if we currently have a reference on the object */
 	obj = idr_find(&filp->object_idr, handle);
-	if (obj == NULL) {
-		spin_unlock(&filp->table_lock);
-		return NULL;
-	}
-
-	drm_gem_object_reference(obj);
+	if (obj)
+		drm_gem_object_reference(obj);
 
 	spin_unlock(&filp->table_lock);
 
@@ -610,7 +623,7 @@ drm_gem_flink_ioctl(struct drm_device *dev, void *data,
 	if (!drm_core_check_feature(dev, DRIVER_GEM))
 		return -ENODEV;
 
-	obj = drm_gem_object_lookup(dev, file_priv, args->handle);
+	obj = drm_gem_object_lookup(file_priv, args->handle);
 	if (obj == NULL)
 		return -ENOENT;
 
@@ -739,6 +752,13 @@ drm_gem_release(struct drm_device *dev, struct drm_file *file_private)
 	idr_destroy(&file_private->object_idr);
 }
 
+/**
+ * drm_gem_object_release - release GEM buffer object resources
+ * @obj: GEM buffer object
+ *
+ * This releases any structures and resources used by @obj and is the invers of
+ * drm_gem_object_init().
+ */
 void
 drm_gem_object_release(struct drm_gem_object *obj)
 {
@@ -756,7 +776,7 @@ EXPORT_SYMBOL(drm_gem_object_release);
  * @kref: kref of the object to free
  *
  * Called after the last reference to the object has been lost.
- * Must be called holding struct_ mutex
+ * Must be called holding &drm_device->struct_mutex.
  *
  * Frees the object
  */

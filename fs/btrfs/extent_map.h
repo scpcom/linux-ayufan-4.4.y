@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef __EXTENTMAP__
 #define __EXTENTMAP__
 
@@ -30,16 +33,27 @@ struct extent_map {
 	u64 block_len;
 	u64 generation;
 	unsigned long flags;
-	struct block_device *bdev;
+	union {
+		struct block_device *bdev;
+
+		struct map_lookup *map_lookup;
+	};
 	atomic_t refs;
 	unsigned int compress_type;
 	struct list_head list;
 };
 
+#ifdef MY_ABC_HERE
+struct btrfs_inode;
+#endif  
 struct extent_map_tree {
 	struct rb_root map;
 	struct list_head modified_extents;
 	rwlock_t lock;
+#ifdef MY_ABC_HERE
+	atomic_t nr_extent_maps;
+	struct btrfs_inode *inode;
+#endif  
 };
 
 static inline int extent_map_in_tree(const struct extent_map *em)

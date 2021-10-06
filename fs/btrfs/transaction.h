@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #ifndef __BTRFS_TRANSACTION__
 #define __BTRFS_TRANSACTION__
 #include "btrfs_inode.h"
@@ -81,7 +83,6 @@ struct btrfs_trans_handle {
 	u64 chunk_bytes_reserved;
 	unsigned long use_count;
 	unsigned long blocks_reserved;
-	unsigned long blocks_used;
 	unsigned long delayed_ref_updates;
 	struct btrfs_transaction *transaction;
 	struct btrfs_block_rsv *block_rsv;
@@ -92,24 +93,31 @@ struct btrfs_trans_handle {
 	bool can_flush_pending_bgs;
 	bool reloc_reserved;
 	bool sync;
+	bool dirty;
 	unsigned int type;
-	
+	 
 	struct btrfs_root *root;
 	struct seq_list delayed_ref_elem;
 	struct list_head qgroup_ref_list;
 	struct list_head new_bgs;
+#ifdef MY_ABC_HERE
+	struct btrfs_pending_snapshot *pending_snap;
+	bool pending_snap_rm;
+#endif  
 };
 
 struct btrfs_pending_snapshot {
 	struct dentry *dentry;
 	struct inode *dir;
 	struct btrfs_root *root;
+	struct btrfs_root_item *root_item;
 	struct btrfs_root *snap;
 	struct btrfs_qgroup_inherit *inherit;
-	
+	struct btrfs_path *path;
+	 
 	struct btrfs_block_rsv block_rsv;
 	u64 qgroup_reserved;
-	
+	 
 	int error;
 	bool readonly;
 	struct list_head list;

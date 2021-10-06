@@ -1,7 +1,7 @@
-
-
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/syscalls.h>
 #include <linux/string.h>
 #include <linux/mm.h>
@@ -88,12 +88,19 @@ int proc_nr_dentry(struct ctl_table *table, int write, void __user *buffer,
 }
 #endif
 
-
 #ifdef CONFIG_DCACHE_WORD_ACCESS
 
 #include <asm/word-at-a-time.h>
-
+ 
+#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
+int dentry_string_cmp(const unsigned char *cs, const unsigned char *ct, unsigned tcount)
+#else
+inline int dentry_string_cmp(const unsigned char *cs, const unsigned char *ct, unsigned tcount)
+#endif  
+#else
 static inline int dentry_string_cmp(const unsigned char *cs, const unsigned char *ct, unsigned tcount)
+#endif  
 {
 	unsigned long a,b,mask;
 
@@ -116,7 +123,15 @@ static inline int dentry_string_cmp(const unsigned char *cs, const unsigned char
 
 #else
 
+#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
+int dentry_string_cmp(const unsigned char *cs, const unsigned char *ct, unsigned tcount)
+#else
+inline int dentry_string_cmp(const unsigned char *cs, const unsigned char *ct, unsigned tcount)
+#endif  
+#else
 static inline int dentry_string_cmp(const unsigned char *cs, const unsigned char *ct, unsigned tcount)
+#endif  
 {
 	do {
 		if (*cs != *ct)
@@ -129,15 +144,29 @@ static inline int dentry_string_cmp(const unsigned char *cs, const unsigned char
 }
 
 #endif
+#ifdef MY_ABC_HERE
+EXPORT_SYMBOL(dentry_string_cmp);
+#endif  
 
+#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
+int dentry_cmp(const struct dentry *dentry, const unsigned char *ct, unsigned tcount)
+#else
+inline int dentry_cmp(const struct dentry *dentry, const unsigned char *ct, unsigned tcount)
+#endif  
+#else
 static inline int dentry_cmp(const struct dentry *dentry, const unsigned char *ct, unsigned tcount)
+#endif  
 {
 	const unsigned char *cs;
-	
+	 
 	cs = ACCESS_ONCE(dentry->d_name.name);
 	smp_read_barrier_depends();
 	return dentry_string_cmp(cs, ct, tcount);
 }
+#ifdef MY_ABC_HERE
+EXPORT_SYMBOL(dentry_cmp);
+#endif  
 
 struct external_name {
 	union {
@@ -769,8 +798,11 @@ enum d_walk_ret {
 	D_WALK_SKIP,
 };
 
-
+#ifdef CONFIG_AUFS_FHSM
+void d_walk(struct dentry *parent, void *data,
+#else
 static void d_walk(struct dentry *parent, void *data,
+#endif  
 		   enum d_walk_ret (*enter)(void *, struct dentry *),
 		   void (*finish)(void *))
 {
@@ -872,8 +904,9 @@ rename_retry:
 	seq = 1;
 	goto again;
 }
-
-
+#ifdef CONFIG_AUFS_FHSM
+EXPORT_SYMBOL_GPL(d_walk);
+#endif  
 
 static enum d_walk_ret check_mount(void *data, struct dentry *dentry)
 {
@@ -1188,6 +1221,10 @@ void d_set_d_op(struct dentry *dentry, const struct dentry_operations *op)
 		dentry->d_flags |= DCACHE_OP_HASH;
 	if (op->d_compare)
 		dentry->d_flags |= DCACHE_OP_COMPARE;
+#ifdef MY_ABC_HERE
+	if (op->d_compare_case)
+		dentry->d_flags |= DCACHE_OP_COMPARE_CASE;
+#endif  
 	if (op->d_revalidate)
 		dentry->d_flags |= DCACHE_OP_REVALIDATE;
 	if (op->d_weak_revalidate)
@@ -1476,18 +1513,26 @@ struct dentry *d_add_ci(struct dentry *dentry, struct inode *inode,
 }
 EXPORT_SYMBOL(d_add_ci);
 
-
 enum slow_d_compare {
 	D_COMP_OK,
 	D_COMP_NOMATCH,
 	D_COMP_SEQRETRY,
 };
 
+#ifdef MY_ABC_HERE
+static noinline enum slow_d_compare slow_dentry_cmp(
+		const struct dentry *parent,
+		struct dentry *dentry,
+		unsigned int seq,
+		const struct qstr *name,
+		int caseless)
+#else
 static noinline enum slow_d_compare slow_dentry_cmp(
 		const struct dentry *parent,
 		struct dentry *dentry,
 		unsigned int seq,
 		const struct qstr *name)
+#endif  
 {
 	int tlen = dentry->d_name.len;
 	const char *tname = dentry->d_name.name;
@@ -1496,42 +1541,73 @@ static noinline enum slow_d_compare slow_dentry_cmp(
 		cpu_relax();
 		return D_COMP_SEQRETRY;
 	}
+#ifdef MY_ABC_HERE
+	if (likely(parent->d_flags & DCACHE_OP_COMPARE_CASE)) {
+		if (parent->d_op->d_compare_case(dentry, tlen, tname, name, caseless)) {
+			return D_COMP_NOMATCH;
+		}
+	} else
+#endif  
 	if (parent->d_op->d_compare(parent, dentry, tlen, tname, name))
 		return D_COMP_NOMATCH;
 	return D_COMP_OK;
 }
 
-
+#ifdef MY_ABC_HERE
+struct dentry *__d_lookup_rcu(const struct dentry *parent,
+				const struct qstr *name,
+				unsigned *seqp,
+				int caseless)
+#else
 struct dentry *__d_lookup_rcu(const struct dentry *parent,
 				const struct qstr *name,
 				unsigned *seqp)
+#endif  
 {
 	u64 hashlen = name->hash_len;
 	const unsigned char *str = name->name;
 	struct hlist_bl_head *b = d_hash(parent, hashlen_hash(hashlen));
 	struct hlist_bl_node *node;
 	struct dentry *dentry;
+#ifdef MY_ABC_HERE
+	struct dentry *found = NULL;
+#endif  
 
-	
-
-	
 	hlist_bl_for_each_entry_rcu(dentry, node, b, d_hash) {
 		unsigned seq;
 
 seqretry:
-		
+		 
 		seq = raw_seqcount_begin(&dentry->d_seq);
 		if (dentry->d_parent != parent)
 			continue;
 		if (d_unhashed(dentry))
 			continue;
 
+#ifdef MY_ABC_HERE
+		if (likely(parent->d_flags & (DCACHE_OP_COMPARE | DCACHE_OP_COMPARE_CASE))) {
+			if (dentry->d_name.hash != hashlen_hash(hashlen))
+				continue;
+			*seqp = seq;
+			switch (slow_dentry_cmp(parent, dentry, seq, name, caseless)) {
+			case D_COMP_OK:
+				if (caseless) {
+					if (!dentry->d_inode) {
+						 
+						if (!found) {
+							found = dentry;
+						}
+						continue;
+					}
+				}
+#else
 		if (unlikely(parent->d_flags & DCACHE_OP_COMPARE)) {
 			if (dentry->d_name.hash != hashlen_hash(hashlen))
 				continue;
 			*seqp = seq;
 			switch (slow_dentry_cmp(parent, dentry, seq, name)) {
 			case D_COMP_OK:
+#endif  
 				return dentry;
 			case D_COMP_NOMATCH:
 				continue;
@@ -1546,9 +1622,12 @@ seqretry:
 		if (!dentry_cmp(dentry, str, hashlen_len(hashlen)))
 			return dentry;
 	}
+#ifdef MY_ABC_HERE
+	return found;
+#else
 	return NULL;
+#endif  
 }
-
 
 struct dentry *d_lookup(const struct dentry *parent, const struct qstr *name)
 {
@@ -1557,7 +1636,11 @@ struct dentry *d_lookup(const struct dentry *parent, const struct qstr *name)
 
 	do {
 		seq = read_seqbegin(&rename_lock);
+#ifdef MY_ABC_HERE
+		dentry = __d_lookup(parent, name, 0);
+#else
 		dentry = __d_lookup(parent, name);
+#endif  
 		if (dentry)
 			break;
 	} while (read_seqretry(&rename_lock, seq));
@@ -1565,8 +1648,29 @@ struct dentry *d_lookup(const struct dentry *parent, const struct qstr *name)
 }
 EXPORT_SYMBOL(d_lookup);
 
+#ifdef MY_ABC_HERE
+ 
+struct dentry *d_lookup_case(struct dentry *parent, struct qstr *name, int caseless)
+{
+	struct dentry *dentry;
+	unsigned seq;
 
+	do {
+		seq = read_seqbegin(&rename_lock);
+		dentry = __d_lookup(parent, name, caseless);
+		if (dentry)
+			break;
+	} while (read_seqretry(&rename_lock, seq));
+	return dentry;
+}
+EXPORT_SYMBOL(d_lookup_case);
+#endif  
+
+#ifdef MY_ABC_HERE
+struct dentry *__d_lookup(const struct dentry *parent, const struct qstr *name, int caseless)
+#else
 struct dentry *__d_lookup(const struct dentry *parent, const struct qstr *name)
+#endif  
 {
 	unsigned int len = name->len;
 	unsigned int hash = name->hash;
@@ -1575,10 +1679,10 @@ struct dentry *__d_lookup(const struct dentry *parent, const struct qstr *name)
 	struct hlist_bl_node *node;
 	struct dentry *found = NULL;
 	struct dentry *dentry;
+#ifdef MY_ABC_HERE
+	int lock_found = 0;
+#endif  
 
-	
-
-	
 	rcu_read_lock();
 	
 	hlist_bl_for_each_entry_rcu(dentry, node, b, d_hash) {
@@ -1592,7 +1696,28 @@ struct dentry *__d_lookup(const struct dentry *parent, const struct qstr *name)
 		if (d_unhashed(dentry))
 			goto next;
 
-		
+#ifdef MY_ABC_HERE
+		if (parent->d_flags & DCACHE_OP_COMPARE_CASE) {
+			int tlen = dentry->d_name.len;
+			const char *tname = dentry->d_name.name;
+			if (parent->d_op->d_compare_case(dentry, tlen, tname, name, caseless))
+				goto next;
+			 
+			if (caseless) {
+				if (!dentry->d_inode) {
+					 
+					if (!found) {
+						dentry->d_lockref.count++;
+						found = dentry;
+						lock_found = 1;
+						 
+						continue;
+					}
+					goto next;
+				}
+			}
+		} else
+#endif  
 		if (parent->d_flags & DCACHE_OP_COMPARE) {
 			int tlen = dentry->d_name.len;
 			const char *tname = dentry->d_name.name;
@@ -1604,6 +1729,14 @@ struct dentry *__d_lookup(const struct dentry *parent, const struct qstr *name)
 			if (dentry_cmp(dentry, str, len))
 				goto next;
 		}
+#ifdef MY_ABC_HERE
+		 
+		if (lock_found) {
+			found->d_lockref.count--;
+			spin_unlock(&found->d_lock);
+			lock_found = 0;
+		}
+#endif  
 
 		dentry->d_lockref.count++;
 		found = dentry;
@@ -1612,15 +1745,20 @@ struct dentry *__d_lookup(const struct dentry *parent, const struct qstr *name)
 next:
 		spin_unlock(&dentry->d_lock);
  	}
+#ifdef MY_ABC_HERE
+	 
+	if (lock_found) {
+		spin_unlock(&found->d_lock);
+	}
+#endif  
  	rcu_read_unlock();
 
  	return found;
 }
 
-
 struct dentry *d_hash_and_lookup(struct dentry *dir, struct qstr *name)
 {
-	
+	 
 	name->hash = full_name_hash(name->name, name->len);
 	if (dir->d_flags & DCACHE_OP_HASH) {
 		int err = dir->d_op->d_hash(dir, name);
@@ -1682,11 +1820,10 @@ void d_rehash(struct dentry * entry)
 }
 EXPORT_SYMBOL(d_rehash);
 
-
 void dentry_update_name_case(struct dentry *dentry, struct qstr *name)
 {
-	BUG_ON(!mutex_is_locked(&dentry->d_parent->d_inode->i_mutex));
-	BUG_ON(dentry->d_name.len != name->len); 
+	BUG_ON(!inode_is_locked(dentry->d_parent->d_inode));
+	BUG_ON(dentry->d_name.len != name->len);  
 
 	spin_lock(&dentry->d_lock);
 	write_seqcount_begin(&dentry->d_seq);
@@ -1868,22 +2005,19 @@ struct dentry *d_ancestor(struct dentry *p1, struct dentry *p2)
 	return NULL;
 }
 
-
 static int __d_unalias(struct inode *inode,
 		struct dentry *dentry, struct dentry *alias)
 {
 	struct mutex *m1 = NULL, *m2 = NULL;
 	int ret = -ESTALE;
 
-	
 	if (alias->d_parent == dentry->d_parent)
 		goto out_unalias;
 
-	
 	if (!mutex_trylock(&dentry->d_sb->s_vfs_rename_mutex))
 		goto out_err;
 	m1 = &dentry->d_sb->s_vfs_rename_mutex;
-	if (!mutex_trylock(&alias->d_parent->d_inode->i_mutex))
+	if (!inode_trylock(alias->d_parent->d_inode))
 		goto out_err;
 	m2 = &alias->d_parent->d_inode->i_mutex;
 out_unalias:

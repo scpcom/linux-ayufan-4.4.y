@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * drivers/staging/android/ion/ion_cma_heap.c
  *
@@ -51,7 +54,14 @@ static int ion_cma_allocate(struct ion_heap *heap, struct ion_buffer *buffer,
 	dev_dbg(dev, "Request buffer allocation len %ld\n", len);
 
 	if (buffer->flags & ION_FLAG_CACHED)
+#if defined(MY_DEF_HERE)
+	{
+		dev_err(dev, "Can't allocate buffer cause buffer->flags(0x%.8x) & ION_FLAG_CACHED\n", buffer->flags);
+#endif /* MY_DEF_HERE */
 		return -EINVAL;
+#if defined(MY_DEF_HERE)
+	}
+#endif /* MY_DEF_HERE */
 
 	if (align > PAGE_SIZE)
 		return -EINVAL;

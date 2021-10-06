@@ -1,10 +1,14 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/export.h>
 #include <net/ipv6.h>
 #include <net/addrconf.h>
 #include <net/ip.h>
-
+#ifdef MY_ABC_HERE
+#include <linux/module.h>
+#endif
 
 void (*__fib6_flush_trees)(struct net *);
 EXPORT_SYMBOL(__fib6_flush_trees);

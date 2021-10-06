@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef __LINUX_USB_H
 #define __LINUX_USB_H
 
@@ -277,6 +280,12 @@ struct usb_device {
 	int maxchild;
 
 	u32 quirks;
+#ifdef MY_ABC_HERE
+	char *syno_old_serial;
+#endif  
+#ifdef MY_ABC_HERE
+	u32 syno_quirks;
+#endif  
 	atomic_t urbnum;
 
 	unsigned long active_duration;
@@ -616,41 +625,39 @@ extern void usb_deregister_device_driver(struct usb_device_driver *);
 
 extern int usb_register_dev(struct usb_interface *intf,
 			    struct usb_class_driver *class_driver);
+#ifdef MY_ABC_HERE
+extern int usb_register_dev1(struct usb_interface *intf,
+				struct usb_class_driver *class_driver, int minor_offset);
+#endif  
 extern void usb_deregister_dev(struct usb_interface *intf,
 			       struct usb_class_driver *class_driver);
 
 extern int usb_disabled(void);
 
+#define URB_SHORT_NOT_OK	0x0001	 
+#define URB_ISO_ASAP		0x0002	 
+#define URB_NO_TRANSFER_DMA_MAP	0x0004	 
+#define URB_NO_FSBR		0x0020	 
+#define URB_ZERO_PACKET		0x0040	 
+#define URB_NO_INTERRUPT	0x0080	 
+#define URB_FREE_BUFFER		0x0100	 
 
-
-
-
-
-#define URB_SHORT_NOT_OK	0x0001	
-#define URB_ISO_ASAP		0x0002	
-#define URB_NO_TRANSFER_DMA_MAP	0x0004	
-#define URB_NO_FSBR		0x0020	
-#define URB_ZERO_PACKET		0x0040	
-#define URB_NO_INTERRUPT	0x0080	
-#define URB_FREE_BUFFER		0x0100	
-
-
-#define URB_DIR_IN		0x0200	
+#define URB_DIR_IN		0x0200	 
 #define URB_DIR_OUT		0
 #define URB_DIR_MASK		URB_DIR_IN
 
-#define URB_DMA_MAP_SINGLE	0x00010000	
-#define URB_DMA_MAP_PAGE	0x00020000	
-#define URB_DMA_MAP_SG		0x00040000	
-#define URB_MAP_LOCAL		0x00080000	
-#define URB_SETUP_MAP_SINGLE	0x00100000	
-#define URB_SETUP_MAP_LOCAL	0x00200000	
-#define URB_DMA_SG_COMBINED	0x00400000	
-#define URB_ALIGNED_TEMP_BUFFER	0x00800000	
+#define URB_DMA_MAP_SINGLE	0x00010000	 
+#define URB_DMA_MAP_PAGE	0x00020000	 
+#define URB_DMA_MAP_SG		0x00040000	 
+#define URB_MAP_LOCAL		0x00080000	 
+#define URB_SETUP_MAP_SINGLE	0x00100000	 
+#define URB_SETUP_MAP_LOCAL	0x00200000	 
+#define URB_DMA_SG_COMBINED	0x00400000	 
+#define URB_ALIGNED_TEMP_BUFFER	0x00800000	 
 
 struct usb_iso_packet_descriptor {
 	unsigned int offset;
-	unsigned int length;		
+	unsigned int length;		 
 	unsigned int actual_length;
 	int status;
 };

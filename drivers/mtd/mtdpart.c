@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/module.h>
 #include <linux/types.h>
 #include <linux/kernel.h>
@@ -10,13 +12,26 @@
 #include <linux/mtd/partitions.h>
 #include <linux/err.h>
 #include <linux/kconfig.h>
+#ifdef MY_ABC_HERE
+#include <linux/synolib.h>
+#endif  
 
 #include "mtdcore.h"
 
+#ifdef MY_ABC_HERE
+extern unsigned char grgbLanMac[SYNO_MAC_MAX_NUMBER][16];
+extern int giVenderFormatVersion;
+#endif  
+#ifdef MY_ABC_HERE
+extern char gszSerialNum[];
+extern char gszCustomSerialNum[];
+#define SYNO_SN_TAG "SN="
+#define SYNO_CHKSUM_TAG "CHK="
+#define SYNO_SN_12_SIG SYNO_SN_TAG   
+#endif  
 
 static LIST_HEAD(mtd_partitions);
 static DEFINE_MUTEX(mtd_partitions_mutex);
-
 
 struct mtd_part {
 	struct mtd_info mtd;
@@ -495,6 +510,159 @@ static struct mtd_part *allocate_partition(struct mtd_info *master,
 	}
 
 out_register:
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+	if ((memcmp(part->name, "vender", 7)==0) ||
+		(memcmp(part->name, "vendor", 7)==0)) {
+		u_char rgbszBuf[128];
+		int i = 0, x = 0;
+		size_t retlen;
+		unsigned int Sum;
+		u_char ucSum;
+#ifdef MY_ABC_HERE
+		int n = 0;
+		int MacNumber = 0;
+		char rgbLanMac[SYNO_MAC_MAX_NUMBER][6];
+#endif  
+#ifdef MY_ABC_HERE
+		char szSerialBuffer[32];
+		char *ptr;
+		char szSerial[32];
+		char szCheckSum[32];
+		unsigned long ulchksum = 0;
+		unsigned long ulTemp = 0;
+#endif  
+
+		part_read(&slave->mtd, 0, 128, &retlen, rgbszBuf);
+
+#ifdef MY_ABC_HERE
+		 
+		x = 0;
+		switch (giVenderFormatVersion) {
+		case 1:
+			MacNumber = 4;
+			break;
+		case 2:
+			MacNumber = 8;
+			break;
+		default:
+			printk(KERN_ERR "Undefined verder version %d\n", giVenderFormatVersion);
+		}
+
+		for (n = 0; n < MacNumber; n++) {
+			for (Sum=0,ucSum=0,i=0; i<6; i++) {
+				Sum+=rgbszBuf[i+x];
+				ucSum+=rgbszBuf[i+x];
+				rgbLanMac[n][i] = rgbszBuf[i+x];
+			}
+			x+=6;
+
+			if (0==Sum) {
+				printk("vender Mac%d doesn't set ucSum:0x%02x Buf:0x%02x Sum:%d.\n",
+						n, ucSum, rgbszBuf[x], Sum);
+			} else if (ucSum!=rgbszBuf[x]) {
+				printk("vender Mac%d checksum error ucSum:0x%02x Buf:0x%02x Sum:%d.\n",
+						n, ucSum, rgbszBuf[x], Sum);
+				grgbLanMac[n][0] = '\0';
+			} else {
+				printk("vender Mac%d address : %02x:%02x:%02x:%02x:%02x:%02x\n",n,rgbLanMac[n][0],
+												  rgbLanMac[n][1],
+												  rgbLanMac[n][2],
+												  rgbLanMac[n][3],
+												  rgbLanMac[n][4],
+												  rgbLanMac[n][5]);
+				snprintf(grgbLanMac[n], sizeof(grgbLanMac),
+						"%02x%02x%02x%02x%02x%02x",
+				rgbLanMac[n][0],
+				rgbLanMac[n][1],
+				rgbLanMac[n][2],
+				rgbLanMac[n][3],
+				rgbLanMac[n][4],
+				rgbLanMac[n][5]);
+			}
+
+			x++;
+		}
+#endif  
+#ifdef MY_ABC_HERE
+		memset(szSerial, 0, sizeof(szSerial));
+		memset(szCheckSum, 0, sizeof(szCheckSum));
+		memset(gszSerialNum, 0, 32);
+		memcpy(szSerialBuffer, &(rgbszBuf[32]), 32);
+
+		if (0 == strncmp(szSerialBuffer, SYNO_SN_12_SIG,strlen(SYNO_SN_12_SIG))) {
+			 
+			ptr = strstr(szSerialBuffer, SYNO_SN_TAG);
+			if (NULL == ptr) {
+				printk("no serial tag found, serial buffer='%s'\n", szSerialBuffer);
+				goto SKIP_SERIAL;
+			}
+			ptr += strlen(SYNO_SN_TAG);
+			i = 0;
+			while (0 != *ptr && ',' != *ptr) {
+				szSerial[i++] = *ptr;
+				ptr++;
+			}
+			szSerial[i] = '\0';
+
+			ptr = strstr(szSerialBuffer, SYNO_CHKSUM_TAG);
+			if (NULL == ptr) {
+				printk("no checksum tag found, serial buffer='%s'\n", szSerialBuffer);
+				goto SKIP_SERIAL;
+			}
+			ptr += strlen(SYNO_CHKSUM_TAG);
+			i = 0;
+			while (0 != *ptr && ',' != *ptr) {
+				szCheckSum[i++] = *ptr;
+				ptr++;
+			}
+			szCheckSum[i] = '\0';
+
+			for (i = 0 ; i < strlen(szSerial); i++) {
+				ulchksum += szSerial[i];
+			}
+
+			if (0 != kstrtoul(szCheckSum, 10, &ulTemp)) {
+				printk("string conversion error: '%s'\n", szCheckSum);
+				goto SKIP_SERIAL;
+			} else if (ulchksum != ulTemp) {
+				printk("serial number checksum error, serial='%s', checksum='%lu' not '%lu'\n", szSerial, ulchksum, ulTemp);
+				goto SKIP_SERIAL;
+			}
+		} else {
+			unsigned char ucChkSum = 0;
+			 
+			for (i = 0 ; i < 10; i++) {
+				ucChkSum += szSerialBuffer[i];
+			}
+			 
+			if (ucChkSum != szSerialBuffer[10]) {
+				printk("serial number checksum error, serial='%s', checksum='%d' not '%d'", szSerialBuffer, ucChkSum, szSerialBuffer[10]);
+				goto SKIP_SERIAL;
+			} else {
+				memcpy(szSerial, szSerialBuffer, 10);
+			}
+		}
+		snprintf(gszSerialNum, 32, "%s", szSerial);
+SKIP_SERIAL:
+		printk("serial number='%s'", gszSerialNum);
+
+		x = 64;
+		for (Sum=0,ucSum=0,i=0; i<31; i++) {
+			Sum+=rgbszBuf[i+x];
+			ucSum+=rgbszBuf[i+x];
+			gszCustomSerialNum[i] = rgbszBuf[i+x];
+		}
+		x+=31;
+		if (Sum==0 || ucSum!=rgbszBuf[x]) {
+			for (i=0; i<32; i++) {
+				gszCustomSerialNum[i] = 0;
+			}
+		} else {
+			printk("Custom Serial Number: %s\n", gszCustomSerialNum);
+		}
+#endif  
+	}
+#endif  
 	return slave;
 }
 
@@ -720,3 +888,21 @@ uint64_t mtd_get_device_size(const struct mtd_info *mtd)
 	return PART(mtd)->master->size;
 }
 EXPORT_SYMBOL_GPL(mtd_get_device_size);
+
+#ifdef MY_ABC_HERE
+int SYNOMTDModifyPartInfo(struct mtd_info *mtd, unsigned long offset, unsigned long length)
+{
+	struct mtd_part *part = PART(mtd);
+
+	part->offset = offset;
+	part->offset &= part->master->size-1;
+
+	mtd->size = length;
+
+	if (part->offset + mtd->size > part->master->size) {
+		return -EFAULT;
+	}
+
+	return 0;
+}
+#endif  

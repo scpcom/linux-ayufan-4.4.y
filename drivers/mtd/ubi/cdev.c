@@ -174,12 +174,11 @@ static int vol_cdev_fsync(struct file *file, loff_t start, loff_t end,
 	struct ubi_device *ubi = desc->vol->ubi;
 	struct inode *inode = file_inode(file);
 	int err;
-	mutex_lock(&inode->i_mutex);
+	inode_lock(inode);
 	err = ubi_sync(ubi->ubi_num);
-	mutex_unlock(&inode->i_mutex);
+	inode_unlock(inode);
 	return err;
 }
-
 
 static ssize_t vol_cdev_read(struct file *file, __user char *buf, size_t count,
 			     loff_t *offp)

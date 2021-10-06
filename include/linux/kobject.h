@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * kobject.h - generic kernel object infrastructure.
  *
@@ -57,6 +60,10 @@ enum kobject_action {
 	KOBJ_MOVE,
 	KOBJ_ONLINE,
 	KOBJ_OFFLINE,
+#ifdef MY_DEF_HERE
+	KOBJ_LINKUP,
+	KOBJ_LINKDOWN,
+#endif /* MY_DEF_HERE */
 	KOBJ_MAX
 };
 

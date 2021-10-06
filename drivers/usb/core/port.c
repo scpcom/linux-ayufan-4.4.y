@@ -1,7 +1,16 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/slab.h>
 #include <linux/pm_qos.h>
+#ifdef MY_DEF_HERE
+#include <linux/gpio.h>
+#endif  
+
+#ifdef MY_ABC_HERE
+extern u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite);
+#endif  
 
 #include "hub.h"
 
@@ -328,6 +337,21 @@ int usb_hub_create_port_device(struct usb_hub *hub, int port1)
 {
 	struct usb_port *port_dev;
 	int retval;
+#if defined(MY_DEF_HERE) ||\
+	defined(MY_DEF_HERE)
+	struct usb_device *hdev = hub->hdev;
+	int i = 0;
+#endif  
+#ifdef MY_DEF_HERE
+	extern char gSynoCastratedXhcAddr[CONFIG_SYNO_USB_NUM_CASTRATED_XHC][13];
+	extern unsigned gSynoCastratedXhcPortBitmap[CONFIG_SYNO_USB_NUM_CASTRATED_XHC];
+#endif  
+#ifdef MY_DEF_HERE
+	extern char gSynoUsbVbusHostAddr[CONFIG_SYNO_USB_VBUS_NUM_GPIO][20];
+	extern int gSynoUsbVbusPort[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
+	extern unsigned gSynoUsbVbusGpp[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
+	int vbusGPIOValue = 0;
+#endif  
 
 	port_dev = kzalloc(sizeof(*port_dev), GFP_KERNEL);
 	if (!port_dev)
@@ -350,6 +374,57 @@ int usb_hub_create_port_device(struct usb_hub *hub, int port1)
 		port_dev->is_superspeed = 1;
 	dev_set_name(&port_dev->dev, "%s-port%d", dev_name(&hub->hdev->dev),
 			port1);
+#if defined (MY_DEF_HERE)
+	port_dev->power_cycle_counter = SYNO_POWER_CYCLE_TRIES;
+#endif  
+
+#ifdef MY_DEF_HERE
+	if (hdev && hdev->serial) {
+		for (i = 0; i < CONFIG_SYNO_USB_NUM_CASTRATED_XHC; i++) {
+			if (0 == strcmp(gSynoCastratedXhcAddr[i], hdev->serial) &&
+				gSynoCastratedXhcPortBitmap[i] & (0x01 << (port1 - 1))) {
+				 
+				port_dev->flag |= SYNO_USB_PORT_CASTRATED_XHC;
+				if (hub_is_superspeed(hdev))
+					dev_info (&port_dev->dev, "is a castrated xHC-port\n");
+			}
+		}
+	}
+#endif  
+
+#ifdef MY_DEF_HERE
+	if (hdev && hdev->serial) {
+		for (i = 0; i < CONFIG_SYNO_USB_VBUS_NUM_GPIO; i++) {
+			if (0 == strcmp(gSynoUsbVbusHostAddr[i], hdev->serial)) {
+#ifdef MY_ABC_HERE
+				vbusGPIOValue = 0;
+				if (0 == syno_pch_lpc_gpio_pin(gSynoUsbVbusGpp[i], &vbusGPIOValue, 0) && 0 == vbusGPIOValue) {
+					vbusGPIOValue = 1;
+					if (0 == syno_pch_lpc_gpio_pin(gSynoUsbVbusGpp[i], &vbusGPIOValue, 1)) {
+						printk(KERN_INFO " port%d is going to power up Vbus by "
+								"GPIO#%d\n", port1, gSynoUsbVbusGpp[i]);
+						mdelay(100);
+					}
+				}
+#else  
+				if (0 == gpio_get_value(gSynoUsbVbusGpp[i])) {
+#if defined(MY_DEF_HERE)
+					gpio_request(gSynoUsbVbusGpp[i], NULL);
+					gpio_direction_output(gSynoUsbVbusGpp[i], 1);
+#else
+					gpio_set_value(gSynoUsbVbusGpp[i], 1);
+#endif
+					printk(KERN_INFO " port%d is going to power up Vbus by "
+							"GPIO#%d\n", port1, gSynoUsbVbusGpp[i]);
+					mdelay(100);
+				}
+#endif  
+				if (port1 == gSynoUsbVbusPort[i])
+					port_dev->syno_vbus_gpp = gSynoUsbVbusGpp[i];
+			}
+		}
+	}
+#endif  
 	mutex_init(&port_dev->status_lock);
 	retval = device_register(&port_dev->dev);
 	if (retval) {

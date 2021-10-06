@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * phy.c -- USB phy handling
  *
@@ -15,6 +18,9 @@
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/of.h>
+#ifdef MY_DEF_HERE
+#include <linux/of_device.h>
+#endif /* MY_DEF_HERE */
 
 #include <linux/usb/phy.h>
 
@@ -22,10 +28,12 @@ static LIST_HEAD(phy_list);
 static LIST_HEAD(phy_bind_list);
 static DEFINE_SPINLOCK(phy_lock);
 
+#ifndef MY_DEF_HERE
 struct phy_devm {
 	struct usb_phy *phy;
 	struct notifier_block *nb;
 };
+#endif /* MY_DEF_HERE */
 
 static struct usb_phy *__usb_find_phy(struct list_head *list,
 	enum usb_phy_type type)
@@ -84,6 +92,7 @@ static void devm_usb_phy_release(struct device *dev, void *res)
 	usb_put_phy(phy);
 }
 
+#ifndef MY_DEF_HERE
 static void devm_usb_phy_release2(struct device *dev, void *_res)
 {
 	struct phy_devm *res = _res;
@@ -92,6 +101,7 @@ static void devm_usb_phy_release2(struct device *dev, void *_res)
 		usb_unregister_notifier(res->phy, res->nb);
 	usb_put_phy(res->phy);
 }
+#endif /* MY_DEF_HERE */
 
 static int devm_usb_phy_match(struct device *dev, void *res, void *match_data)
 {
@@ -166,6 +176,7 @@ err0:
 }
 EXPORT_SYMBOL_GPL(usb_get_phy);
 
+#ifndef MY_DEF_HERE
 /**
  * devm_usb_get_phy_by_node - find the USB PHY by device_node
  * @dev - device that requests this phy
@@ -225,6 +236,7 @@ err0:
 	return phy;
 }
 EXPORT_SYMBOL_GPL(devm_usb_get_phy_by_node);
+#endif /* MY_DEF_HERE */
 
 /**
  * devm_usb_get_phy_by_phandle - find the USB PHY by phandle
@@ -241,6 +253,7 @@ EXPORT_SYMBOL_GPL(devm_usb_get_phy_by_node);
  *
  * For use by USB host and peripheral drivers.
  */
+#ifndef MY_DEF_HERE
 struct usb_phy *devm_usb_get_phy_by_phandle(struct device *dev,
 	const char *phandle, u8 index)
 {
@@ -262,6 +275,77 @@ struct usb_phy *devm_usb_get_phy_by_phandle(struct device *dev,
 	of_node_put(node);
 	return phy;
 }
+#else /* MY_DEF_HERE */
+struct usb_phy *devm_usb_get_phy_by_phandle(struct device *dev,
+	const char *phandle, u8 index)
+{
+	struct usb_phy	*phy = ERR_PTR(-ENOMEM), **ptr;
+	unsigned long	flags;
+	struct device_node *node;
+
+	if (!dev->of_node) {
+		dev_dbg(dev, "device does not have a device node entry\n");
+		return ERR_PTR(-EINVAL);
+	}
+
+	node = of_parse_phandle(dev->of_node, phandle, index);
+	if (!node) {
+		dev_dbg(dev, "failed to get %s phandle in %s node\n", phandle,
+			dev->of_node->full_name);
+		return ERR_PTR(-ENODEV);
+	}
+
+	ptr = devres_alloc(devm_usb_phy_release, sizeof(*ptr), GFP_KERNEL);
+	if (!ptr) {
+		dev_dbg(dev, "failed to allocate memory for devres\n");
+		goto err0;
+	}
+
+	spin_lock_irqsave(&phy_lock, flags);
+
+	phy = __of_usb_find_phy(node);
+
+#if 1 // Add to support different phy driver on multi-host controller
+	if (IS_ERR(phy)) {
+		if (node != NULL) {
+			struct platform_device *pdev = NULL;
+			pdev = of_find_device_by_node(node);
+			if (pdev == NULL) {
+				dev_err(dev, "No usb phy platform device\n");
+			} else {
+				phy = platform_get_drvdata(pdev);
+				if (phy == NULL) phy = ERR_PTR(-ENODEV);
+			}
+		} else {
+			dev_err(dev, "No usb phy node\n");
+		}
+	}
+#endif
+
+	if (IS_ERR(phy)) {
+		devres_free(ptr);
+		goto err1;
+	}
+
+	if (!try_module_get(phy->dev->driver->owner)) {
+		phy = ERR_PTR(-ENODEV);
+		devres_free(ptr);
+		goto err1;
+	}
+
+	*ptr = phy;
+	devres_add(dev, ptr);
+
+	get_device(phy->dev);
+
+err1:
+	spin_unlock_irqrestore(&phy_lock, flags);
+
+err0:
+	of_node_put(node);
+	return phy;
+}
+#endif /* MY_DEF_HERE */
 EXPORT_SYMBOL_GPL(devm_usb_get_phy_by_phandle);
 
 /**

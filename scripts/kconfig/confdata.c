@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2002 Roman Zippel <zippel@linux-m68k.org>
  * Released under the terms of the GNU GPL v2.0.
@@ -955,6 +958,9 @@ int conf_write_autoconf(void)
 	const char *name;
 	FILE *out, *tristate, *out_h;
 	int i;
+#ifdef MY_ABC_HERE
+	FILE *syno_h;
+#endif /* MY_ABC_HERE */
 
 	sym_clear_all_valid();
 
@@ -980,6 +986,19 @@ int conf_write_autoconf(void)
 		return 1;
 	}
 
+#ifdef MY_ABC_HERE
+	syno_h = fopen(".tmpsynoconfig.h", "w");
+	if (!syno_h) {
+		fclose(out);
+		fclose(tristate);
+		fclose(out_h);
+		return 1;
+	}
+	conf_write_heading(syno_h, &header_printer_cb, NULL);
+	fprintf(syno_h, "#ifndef __SYNO_AUTOCONF_H__\n"
+			"#define __SYNO_AUTOCONF_H__\n");
+#endif /* MY_ABC_HERE */
+
 	conf_write_heading(out, &kconfig_printer_cb, NULL);
 
 	conf_write_heading(tristate, &tristate_printer_cb, NULL);
@@ -997,11 +1016,22 @@ int conf_write_autoconf(void)
 		conf_write_symbol(tristate, sym, &tristate_printer_cb, (void *)1);
 
 		conf_write_symbol(out_h, sym, &header_printer_cb, NULL);
+#ifdef MY_ABC_HERE
+		if (strncmp(sym->name, "SYNO", 4) == 0) {
+			conf_write_symbol(syno_h, sym, &header_printer_cb, NULL);
+		}
+#endif /* MY_ABC_HERE */
 	}
 	fclose(out);
 	fclose(tristate);
 	fclose(out_h);
 
+#ifdef MY_ABC_HERE
+	fprintf(syno_h, "#endif /* __SYNO_AUTOCONF_H__ */");
+	fclose(syno_h);
+	if (rename(".tmpsynoconfig.h", "include/linux/syno_autoconf.h"))
+		return 1;
+#endif /* MY_ABC_HERE */
 	name = getenv("KCONFIG_AUTOHEADER");
 	if (!name)
 		name = "include/generated/autoconf.h";

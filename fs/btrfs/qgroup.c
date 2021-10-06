@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/sched.h>
 #include <linux/pagemap.h>
 #include <linux/writeback.h>
@@ -1177,6 +1179,40 @@ out:
 	return ret;
 }
 
+#ifdef MY_ABC_HERE
+ 
+void btrfs_qgroup_query(struct btrfs_fs_info *fs_info, u64 qgroupid,
+                        struct btrfs_ioctl_qgroup_query_args *qqa)
+{
+	struct btrfs_qgroup *qgroup;
+
+	mutex_lock(&fs_info->qgroup_ioctl_lock);
+	if (!fs_info->quota_enabled)
+		goto unlock;
+
+	qgroup = find_qgroup_rb(fs_info, qgroupid);
+	if (!qgroup)
+		goto unlock;
+
+	qqa->rfer = qgroup->rfer;
+	qqa->rfer_cmpr = qgroup->rfer_cmpr;
+	qqa->excl = qgroup->excl;
+	qqa->excl_cmpr = qgroup->excl_cmpr;
+
+	if (qgroup->lim_flags & BTRFS_QGROUP_LIMIT_MAX_RFER)
+		qqa->max_rfer = qgroup->max_rfer;
+	if (qgroup->lim_flags & BTRFS_QGROUP_LIMIT_MAX_EXCL)
+		qqa->max_excl = qgroup->max_excl;
+	if (qgroup->lim_flags & BTRFS_QGROUP_LIMIT_RSV_RFER)
+		qqa->rsv_rfer = qgroup->rsv_rfer;
+	if (qgroup->lim_flags & BTRFS_QGROUP_LIMIT_RSV_EXCL)
+		qqa->rsv_excl = qgroup->rsv_excl;
+	qqa->reserved = qgroup->reserved;
+unlock:
+	mutex_unlock(&fs_info->qgroup_ioctl_lock);
+}
+#endif  
+
 int btrfs_remove_qgroup(struct btrfs_trans_handle *trans,
 			struct btrfs_fs_info *fs_info, u64 qgroupid)
 {
@@ -1230,8 +1266,11 @@ int btrfs_limit_qgroup(struct btrfs_trans_handle *trans,
 	struct btrfs_root *quota_root;
 	struct btrfs_qgroup *qgroup;
 	int ret = 0;
-	
+	 
+#ifdef MY_ABC_HERE
+#else
 	const u64 CLEAR_VALUE = -1;
+#endif  
 
 	mutex_lock(&fs_info->qgroup_ioctl_lock);
 	quota_root = fs_info->quota_root;
@@ -1247,6 +1286,14 @@ int btrfs_limit_qgroup(struct btrfs_trans_handle *trans,
 	}
 
 	spin_lock(&fs_info->qgroup_lock);
+
+#ifdef MY_ABC_HERE
+	qgroup->lim_flags = limit->flags;
+	qgroup->max_rfer = limit->max_rfer;
+	qgroup->max_excl = limit->max_excl;
+	qgroup->rsv_rfer = limit->rsv_rfer;
+	qgroup->rsv_excl = limit->rsv_excl;
+#else
 	if (limit->flags & BTRFS_QGROUP_LIMIT_MAX_RFER) {
 		if (limit->max_rfer == CLEAR_VALUE) {
 			qgroup->lim_flags &= ~BTRFS_QGROUP_LIMIT_MAX_RFER;
@@ -1284,6 +1331,7 @@ int btrfs_limit_qgroup(struct btrfs_trans_handle *trans,
 		}
 	}
 	qgroup->lim_flags |= limit->flags;
+#endif  
 
 	spin_unlock(&fs_info->qgroup_lock);
 
@@ -1336,6 +1384,7 @@ struct btrfs_qgroup_extent_record
 	u64 bytenr = record->bytenr;
 
 	assert_spin_locked(&delayed_refs->lock);
+	trace_btrfs_qgroup_insert_dirty_extent(record);
 
 	while (*p) {
 		parent_node = *p;
@@ -1429,7 +1478,9 @@ static int qgroup_update_counters(struct btrfs_fs_info *fs_info,
 		cur_old_count = btrfs_qgroup_get_old_refcnt(qg, seq);
 		cur_new_count = btrfs_qgroup_get_new_refcnt(qg, seq);
 
-		
+		trace_qgroup_update_counters(qg->qgroupid, cur_old_count,
+					     cur_new_count);
+
 		if (cur_old_count == 0 && cur_new_count > 0) {
 			qg->rfer += num_bytes;
 			qg->rfer_cmpr += num_bytes;
@@ -1512,6 +1563,9 @@ btrfs_qgroup_account_extent(struct btrfs_trans_handle *trans,
 		goto out_free;
 	BUG_ON(!fs_info->quota_root);
 
+	trace_btrfs_qgroup_account_extent(bytenr, num_bytes, nr_old_roots,
+					  nr_new_roots);
+
 	qgroups = ulist_alloc(GFP_NOFS);
 	if (!qgroups) {
 		ret = -ENOMEM;
@@ -1576,8 +1630,10 @@ int btrfs_qgroup_account_extents(struct btrfs_trans_handle *trans,
 		record = rb_entry(node, struct btrfs_qgroup_extent_record,
 				  node);
 
+		trace_btrfs_qgroup_account_extents(record);
+
 		if (!ret) {
-			
+			 
 			ret = btrfs_find_all_roots(trans, fs_info,
 					record->bytenr, (u64)-1, &new_roots);
 			if (ret < 0)
@@ -1686,20 +1742,15 @@ int btrfs_qgroup_inherit(struct btrfs_trans_handle *trans,
 		       2 * inherit->num_excl_copies;
 		for (i = 0; i < nums; ++i) {
 			srcgroup = find_qgroup_rb(fs_info, *i_qgroups);
-			if (!srcgroup) {
-				ret = -EINVAL;
-				goto out;
-			}
 
-			if ((srcgroup->qgroupid >> 48) <= (objectid >> 48)) {
-				ret = -EINVAL;
-				goto out;
-			}
+			if (!srcgroup ||
+			    ((srcgroup->qgroupid >> 48) <= (objectid >> 48)))
+				*i_qgroups = 0ULL;
+
 			++i_qgroups;
 		}
 	}
 
-	
 	ret = add_qgroup_item(trans, quota_root, objectid);
 	if (ret)
 		goto out;
@@ -1722,22 +1773,22 @@ int btrfs_qgroup_inherit(struct btrfs_trans_handle *trans,
 		rcu_read_unlock();
 	}
 
-	
 	if (inherit) {
 		i_qgroups = (u64 *)(inherit + 1);
-		for (i = 0; i < inherit->num_qgroups; ++i) {
+		for (i = 0; i < inherit->num_qgroups; ++i, ++i_qgroups) {
+			if (*i_qgroups == 0)
+				continue;
 			ret = add_qgroup_relation_item(trans, quota_root,
 						       objectid, *i_qgroups);
-			if (ret)
+			if (ret && ret != -EEXIST)
 				goto out;
 			ret = add_qgroup_relation_item(trans, quota_root,
 						       *i_qgroups, objectid);
-			if (ret)
+			if (ret && ret != -EEXIST)
 				goto out;
-			++i_qgroups;
 		}
+		ret = 0;
 	}
-
 
 	spin_lock(&fs_info->qgroup_lock);
 
@@ -1790,16 +1841,21 @@ int btrfs_qgroup_inherit(struct btrfs_trans_handle *trans,
 
 	i_qgroups = (u64 *)(inherit + 1);
 	for (i = 0; i < inherit->num_qgroups; ++i) {
-		ret = add_relation_rb(quota_root->fs_info, objectid,
-				      *i_qgroups);
-		if (ret)
-			goto unlock;
+		if (*i_qgroups) {
+			ret = add_relation_rb(quota_root->fs_info, objectid,
+					      *i_qgroups);
+			if (ret)
+				goto unlock;
+		}
 		++i_qgroups;
 	}
 
-	for (i = 0; i <  inherit->num_ref_copies; ++i) {
+	for (i = 0; i <  inherit->num_ref_copies; ++i, i_qgroups += 2) {
 		struct btrfs_qgroup *src;
 		struct btrfs_qgroup *dst;
+
+		if (!i_qgroups[0] || !i_qgroups[1])
+			continue;
 
 		src = find_qgroup_rb(fs_info, i_qgroups[0]);
 		dst = find_qgroup_rb(fs_info, i_qgroups[1]);
@@ -1811,11 +1867,13 @@ int btrfs_qgroup_inherit(struct btrfs_trans_handle *trans,
 
 		dst->rfer = src->rfer - level_size;
 		dst->rfer_cmpr = src->rfer_cmpr - level_size;
-		i_qgroups += 2;
 	}
-	for (i = 0; i <  inherit->num_excl_copies; ++i) {
+	for (i = 0; i <  inherit->num_excl_copies; ++i, i_qgroups += 2) {
 		struct btrfs_qgroup *src;
 		struct btrfs_qgroup *dst;
+
+		if (!i_qgroups[0] || !i_qgroups[1])
+			continue;
 
 		src = find_qgroup_rb(fs_info, i_qgroups[0]);
 		dst = find_qgroup_rb(fs_info, i_qgroups[1]);
@@ -1827,7 +1885,6 @@ int btrfs_qgroup_inherit(struct btrfs_trans_handle *trans,
 
 		dst->excl = src->excl + level_size;
 		dst->excl_cmpr = src->excl_cmpr + level_size;
-		i_qgroups += 2;
 	}
 
 unlock:
@@ -2260,7 +2317,21 @@ btrfs_qgroup_rescan_resume(struct btrfs_fs_info *fs_info)
 				 &fs_info->qgroup_rescan_work);
 }
 
-
+#ifdef MY_ABC_HERE
+int btrfs_quota_reserve(struct btrfs_root *root, struct inode *inode, u64 num_bytes)
+{
+	int ret = 0;
+	ret = qgroup_reserve(root, num_bytes);
+	if (ret < 0)
+		return ret;
+	return 0;
+}
+void btrfs_quota_reserve_free(struct btrfs_root *root, struct inode *inode, u64 num_bytes)
+{
+	qgroup_free(root, num_bytes);
+}
+#endif  
+ 
 int btrfs_qgroup_reserve_data(struct inode *inode, u64 start, u64 len)
 {
 	struct btrfs_root *root = BTRFS_I(inode)->root;
@@ -2276,8 +2347,7 @@ int btrfs_qgroup_reserve_data(struct inode *inode, u64 start, u64 len)
 	changeset.bytes_changed = 0;
 	changeset.range_changed = ulist_alloc(GFP_NOFS);
 	ret = set_record_extent_bits(&BTRFS_I(inode)->io_tree, start,
-			start + len -1, EXTENT_QGROUP_RESERVED, GFP_NOFS,
-			&changeset);
+			start + len -1, EXTENT_QGROUP_RESERVED, &changeset);
 	trace_btrfs_qgroup_reserve_data(inode, start, len,
 					changeset.bytes_changed,
 					QGROUP_RESERVE);
@@ -2314,8 +2384,7 @@ static int __btrfs_qgroup_release_data(struct inode *inode, u64 start, u64 len,
 		return -ENOMEM;
 
 	ret = clear_record_extent_bits(&BTRFS_I(inode)->io_tree, start, 
-			start + len -1, EXTENT_QGROUP_RESERVED, GFP_NOFS,
-			&changeset);
+			start + len -1, EXTENT_QGROUP_RESERVED, &changeset);
 	if (ret < 0)
 		goto out;
 
@@ -2393,7 +2462,7 @@ void btrfs_qgroup_check_reserved_leak(struct inode *inode)
 		return;
 
 	ret = clear_record_extent_bits(&BTRFS_I(inode)->io_tree, 0, (u64)-1,
-			EXTENT_QGROUP_RESERVED, GFP_NOFS, &changeset);
+			EXTENT_QGROUP_RESERVED, &changeset);
 
 	WARN_ON(ret < 0);
 	if (WARN_ON(changeset.bytes_changed)) {

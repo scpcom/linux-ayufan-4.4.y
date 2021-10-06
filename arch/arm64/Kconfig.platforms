@@ -128,4 +128,12 @@ config ARCH_ZYNQMP
 	help
 	  This enables support for Xilinx ZynqMP Family
 
+config ARCH_RTD129X
+	bool "Realtek RTD1296 SoC"
+	select ARM_GIC
+	select CLKSRC_OF
+	select PINCTR
+	help
+	  This enables support for Realtek RTD129X SoC.
+
 endmenu

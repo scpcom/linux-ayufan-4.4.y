@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/init.h>
 #include <linux/export.h>
 #include <linux/slab.h>
@@ -44,6 +46,15 @@ static int snd_oss_kernel_minor(int type, struct snd_card *card, int dev)
 	case SNDRV_OSS_DEVICE_TYPE_MIXER:
 		if (snd_BUG_ON(!card || dev < 0 || dev > 1))
 			return -EINVAL;
+#if defined(MY_ABC_HERE)
+		if (NULL != card) {
+			if (0x0d8c0103 == card->low_level_dev_id) {
+				minor = SNDRV_MINOR_OSS(card->number, (dev ? SNDRV_MINOR_OSS_MIXER1 : SNDRV_MINOR_OSS_MIXER));
+			} else {
+				minor = SNDRV_MINOR_OSS(card->number + 4, (dev ? SNDRV_MINOR_OSS_MIXER1 : SNDRV_MINOR_OSS_MIXER));
+			}
+		} else
+#endif  
 		minor = SNDRV_MINOR_OSS(card->number, (dev ? SNDRV_MINOR_OSS_MIXER1 : SNDRV_MINOR_OSS_MIXER));
 		break;
 	case SNDRV_OSS_DEVICE_TYPE_SEQUENCER:
@@ -55,6 +66,15 @@ static int snd_oss_kernel_minor(int type, struct snd_card *card, int dev)
 	case SNDRV_OSS_DEVICE_TYPE_PCM:
 		if (snd_BUG_ON(!card || dev < 0 || dev > 1))
 			return -EINVAL;
+#if defined(MY_ABC_HERE)
+		if (NULL != card) {
+			if (0x0d8c0103 == card->low_level_dev_id) {
+				minor = SNDRV_MINOR_OSS(card->number, (dev ? SNDRV_MINOR_OSS_PCM1 : SNDRV_MINOR_OSS_PCM));
+			} else {
+				minor = SNDRV_MINOR_OSS(card->number + 4, (dev ? SNDRV_MINOR_OSS_PCM1 : SNDRV_MINOR_OSS_PCM));
+			}
+		} else
+#endif  
 		minor = SNDRV_MINOR_OSS(card->number, (dev ? SNDRV_MINOR_OSS_PCM1 : SNDRV_MINOR_OSS_PCM));
 		break;
 	case SNDRV_OSS_DEVICE_TYPE_MIDI:
@@ -63,6 +83,15 @@ static int snd_oss_kernel_minor(int type, struct snd_card *card, int dev)
 		minor = SNDRV_MINOR_OSS(card->number, (dev ? SNDRV_MINOR_OSS_MIDI1 : SNDRV_MINOR_OSS_MIDI));
 		break;
 	case SNDRV_OSS_DEVICE_TYPE_DMFM:
+#if defined(MY_ABC_HERE)
+		if (NULL != card) {
+			if (0x0d8c0103 == card->low_level_dev_id) {
+				minor = SNDRV_MINOR_OSS(card->number, SNDRV_MINOR_OSS_DMFM);
+			} else {
+				minor = SNDRV_MINOR_OSS(card->number + 4, SNDRV_MINOR_OSS_DMFM);
+			}
+		} else
+#endif  
 		minor = SNDRV_MINOR_OSS(card->number, SNDRV_MINOR_OSS_DMFM);
 		break;
 	case SNDRV_OSS_DEVICE_TYPE_SNDSTAT:

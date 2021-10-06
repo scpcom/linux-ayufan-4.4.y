@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #ifndef __MTD_MTD_H__
 #define __MTD_MTD_H__
 
@@ -313,4 +315,11 @@ static inline int mtd_is_bitflip_or_eccerr(int err) {
 
 unsigned mtd_mmap_capabilities(struct mtd_info *mtd);
 
-#endif 
+#ifdef MY_ABC_HERE
+ 
+int SYNOMTDModifyPartInfo(struct mtd_info *mtd, unsigned long offset, unsigned long length);
+
+int SYNOMTDModifyFisInfo(struct mtd_info *mtd, struct SYNO_MTD_FIS_INFO SynoMtdFisInfo);
+#endif  
+
+#endif  

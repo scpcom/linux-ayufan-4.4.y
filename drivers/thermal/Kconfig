@@ -380,6 +380,11 @@ depends on ARCH_STI && OF
 source "drivers/thermal/st/Kconfig"
 endmenu
 
+menu "Realtek thermal drivers"
+depends on SYNO_RTD1296
+source "drivers/thermal/realtek/Kconfig"
+endmenu
+
 config QCOM_SPMI_TEMP_ALARM
 	tristate "Qualcomm SPMI PMIC Temperature Alarm"
 	depends on OF && SPMI && IIO

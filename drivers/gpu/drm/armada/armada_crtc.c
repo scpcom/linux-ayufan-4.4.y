@@ -911,7 +911,7 @@ static int armada_drm_crtc_cursor_set(struct drm_crtc *crtc,
 		if (w > 64 || h > 64 || (w > 32 && h > 32))
 			return -ENOMEM;
 
-		obj = armada_gem_object_lookup(dev, file, handle);
+		obj = armada_gem_object_lookup(file, handle);
 		if (!obj)
 			return -ENOENT;
 
@@ -1216,14 +1216,14 @@ static int armada_drm_crtc_create(struct drm_device *drm, struct device *dev,
 				       &armada_primary_plane_funcs,
 				       armada_primary_formats,
 				       ARRAY_SIZE(armada_primary_formats),
-				       DRM_PLANE_TYPE_PRIMARY);
+				       DRM_PLANE_TYPE_PRIMARY, NULL);
 	if (ret) {
 		kfree(primary);
 		return ret;
 	}
 
 	ret = drm_crtc_init_with_planes(drm, &dcrtc->crtc, &primary->base, NULL,
-					&armada_crtc_funcs);
+					&armada_crtc_funcs, NULL);
 	if (ret)
 		goto err_crtc_init;
 

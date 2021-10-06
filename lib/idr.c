@@ -1,6 +1,8 @@
-
-
-#ifndef TEST                        
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
+#ifndef TEST                         
 #include <linux/slab.h>
 #include <linux/init.h>
 #include <linux/export.h>
@@ -700,6 +702,13 @@ int ida_get_new_above(struct ida *ida, int starting_id, int *p_id)
 }
 EXPORT_SYMBOL(ida_get_new_above);
 
+#ifdef MY_ABC_HERE
+int syno_ida_get_new(struct ida *idp, int starting_id, int *id)
+{
+	return ida_get_new_above(idp, starting_id, id);
+}
+EXPORT_SYMBOL(syno_ida_get_new);
+#endif  
 
 void ida_remove(struct ida *ida, int id)
 {

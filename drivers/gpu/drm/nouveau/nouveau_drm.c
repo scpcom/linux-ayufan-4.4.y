@@ -307,6 +307,9 @@ static int nouveau_drm_probe(struct pci_dev *pdev,
 	bool boot = false;
 	int ret;
 
+	if (vga_switcheroo_client_probe_defer(pdev))
+		return -EPROBE_DEFER;
+
 	/* remove conflicting drivers (vesafb, efifb etc) */
 	aper = alloc_apertures(3);
 	if (!aper)
@@ -1066,15 +1069,12 @@ nouveau_drm_init(void)
 	driver_pci = driver_stub;
 	driver_pci.set_busid = drm_pci_set_busid;
 	driver_platform = driver_stub;
-	driver_platform.set_busid = drm_platform_set_busid;
 
 	nouveau_display_options();
 
 	if (nouveau_modeset == -1) {
-#ifdef CONFIG_VGA_CONSOLE
 		if (vgacon_text_force())
 			nouveau_modeset = 0;
-#endif
 	}
 
 	if (!nouveau_modeset)

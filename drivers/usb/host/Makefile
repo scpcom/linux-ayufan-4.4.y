@@ -22,6 +22,10 @@ ifneq ($(CONFIG_USB_XHCI_RCAR), )
 	xhci-plat-hcd-y		+= xhci-rcar.o
 endif
 
+etxhci-hcd-y := etxhci.o etxhci-mem.o etxhci-pci.o
+etxhci-hcd-y += etxhci-ring.o etxhci-hub.o etxhci-dbg.o
+etxhci-hcd-y += etxhci-ejxxx.o
+
 obj-$(CONFIG_USB_WHCI_HCD)	+= whci/
 
 ifneq ($(CONFIG_USB), )
@@ -41,6 +45,10 @@ obj-$(CONFIG_USB_EHCI_HCD_AT91) += ehci-atmel.o
 obj-$(CONFIG_USB_EHCI_MSM)	+= ehci-msm.o
 obj-$(CONFIG_USB_EHCI_TEGRA)	+= ehci-tegra.o
 obj-$(CONFIG_USB_W90X900_EHCI)	+= ehci-w90x900.o
+obj-$(CONFIG_USB_EHCI_RTK)      += ehci-rtk.o
+ifneq ($(or $(CONFIG_USB_EHCI_RTK), $(CONFIG_USB_DWC3_RTK)), )
+	obj-y   += rtk-usb-power-manager.o
+endif
 
 obj-$(CONFIG_USB_OXU210HP_HCD)	+= oxu210hp-hcd.o
 obj-$(CONFIG_USB_ISP116X_HCD)	+= isp116x-hcd.o
@@ -64,6 +72,7 @@ obj-$(CONFIG_USB_FHCI_HCD)	+= fhci.o
 obj-$(CONFIG_USB_XHCI_HCD)	+= xhci-hcd.o
 obj-$(CONFIG_USB_XHCI_PCI)	+= xhci-pci.o
 obj-$(CONFIG_USB_XHCI_PLATFORM) += xhci-plat-hcd.o
+obj-$(CONFIG_USB_ETRON_HCD)	+= etxhci-hcd.o
 obj-$(CONFIG_USB_SL811_HCD)	+= sl811-hcd.o
 obj-$(CONFIG_USB_SL811_CS)	+= sl811_cs.o
 obj-$(CONFIG_USB_U132_HCD)	+= u132-hcd.o

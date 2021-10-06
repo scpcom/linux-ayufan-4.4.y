@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #ifndef _MD_MD_H
 #define _MD_MD_H
 
@@ -14,82 +16,106 @@
 #include <linux/workqueue.h>
 #include "md-cluster.h"
 
-#define MaxSector (~(sector_t)0)
+#ifdef MY_ABC_HERE
+#define CHECKINTERVAL (7UL*HZ)
+#endif  
 
+#ifdef MY_ABC_HERE
+#include <linux/raid/libmd-report.h>
+#endif  
+
+#define MaxSector (~(sector_t)0)
 
 #define MD_MAX_BADBLOCKS	(PAGE_SIZE/8)
 
+#ifdef MY_ABC_HERE
+typedef struct _tag_SYNO_WAKEUP_DEVICE_WORK {
+    struct work_struct work;
+    struct mddev *mddev;
+} SYNO_WAKEUP_DEVICE_WORK;
+#endif  
 
 struct md_rdev {
-	struct list_head same_set;	
+	struct list_head same_set;	 
 
-	sector_t sectors;		
-	struct mddev *mddev;		
-	int last_events;		
+	sector_t sectors;		 
+	struct mddev *mddev;		 
+	int last_events;		 
 
-	
 	struct block_device *meta_bdev;
-	struct block_device *bdev;	
+	struct block_device *bdev;	 
 
 	struct page	*sb_page, *bb_page;
+#ifdef MY_ABC_HERE
+	struct page	*wakeup_page;
+#endif  
 	int		sb_loaded;
 	__u64		sb_events;
-	sector_t	data_offset;	
-	sector_t	new_data_offset;
-	sector_t	sb_start;	
-	int		sb_size;	
-	int		preferred_minor;	
+	sector_t	data_offset;	 
+	sector_t	new_data_offset; 
+	sector_t	sb_start;	 
+	int		sb_size;	 
+	int		preferred_minor;	 
 
 	struct kobject	kobj;
 
-	
-
-	unsigned long	flags;	
+	unsigned long	flags;	 
 	wait_queue_head_t blocked_wait;
 
-	int desc_nr;			
-	int raid_disk;			
-	int new_raid_disk;		
-	int saved_raid_disk;		
+	int desc_nr;			 
+	int raid_disk;			 
+	int new_raid_disk;		 
+	int saved_raid_disk;		 
 	union {
-		sector_t recovery_offset;
-		sector_t journal_tail;	
+		sector_t recovery_offset; 
+		sector_t journal_tail;	 
 	};
 
-	atomic_t	nr_pending;	
-	atomic_t	read_errors;	
-	struct timespec last_read_error;	
-	atomic_t	corrected_errors; 
-	struct work_struct del_work;	
+	atomic_t	nr_pending;	 
+	atomic_t	read_errors;	 
+	struct timespec last_read_error;	 
+	atomic_t	corrected_errors;  
+	struct work_struct del_work;	 
 
-	struct kernfs_node *sysfs_state; 
+	struct kernfs_node *sysfs_state;  
 
 	struct badblocks {
-		int	count;		
-		int	unacked_exist;	
-		int	shift;		
-		u64	*page;		
+		int	count;		 
+		int	unacked_exist;	 
+		int	shift;		 
+		u64	*page;		 
 		int	changed;
 		seqlock_t lock;
 
 		sector_t sector;
-		sector_t size;		
+		sector_t size;		 
 	} badblocks;
 };
+
+#ifdef MY_ABC_HERE
+typedef struct _tag_SYNO_UPDATE_SB_WORK{
+    struct work_struct work;
+    struct mddev *mddev;
+} SYNO_UPDATE_SB_WORK;
+#endif  
+
 enum flag_bits {
-	Faulty,			
-	In_sync,		
-	Bitmap_sync,		
-	WriteMostly,		
-	AutoDetected,		
-	Blocked,		
-	WriteErrorSeen,		
-	FaultRecorded,		
-	BlockedBadBlocks,	
-	WantReplacement,	
-	Replacement,		
-	Candidate,		
-	Journal,		
+	Faulty,			 
+	In_sync,		 
+	Bitmap_sync,		 
+	WriteMostly,		 
+	AutoDetected,		 
+	Blocked,		 
+	WriteErrorSeen,		 
+	FaultRecorded,		 
+	BlockedBadBlocks,	 
+	WantReplacement,	 
+	Replacement,		 
+	Candidate,		 
+	Journal,		 
+#ifdef MY_ABC_HERE
+	DiskError,	 
+#endif  
 };
 
 #define BB_LEN_MASK	(0x00000000000001FFULL)
@@ -216,69 +242,85 @@ struct mddev {
 #define	MD_RECOVERY_ERROR	10
 
 	unsigned long			recovery;
-	
+	 
 	int				recovery_disabled;
 
-	int				in_sync;	
-	
+	int				in_sync;	 
+	 
 	struct mutex			open_mutex;
 	struct mutex			reconfig_mutex;
-	atomic_t			active;		
-	atomic_t			openers;	
+	atomic_t			active;		 
+	atomic_t			openers;	 
 
-	int				changed;	
-	int				degraded;	
+	int				changed;	 
+	int				degraded;	 
 
-	atomic_t			recovery_active; 
+	atomic_t			recovery_active;  
 	wait_queue_head_t		recovery_wait;
 	sector_t			recovery_cp;
-	sector_t			resync_min;	
-	sector_t			resync_max;	
+	sector_t			resync_min;	 
+	sector_t			resync_max;	 
 
-	struct kernfs_node		*sysfs_state;	
-	struct kernfs_node		*sysfs_action;  
+	struct kernfs_node		*sysfs_state;	 
+	struct kernfs_node		*sysfs_action;   
 
-	struct work_struct del_work;	
+	struct work_struct del_work;	 
 
-	
 	spinlock_t			lock;
-	wait_queue_head_t		sb_wait;	
-	atomic_t			pending_writes;	
+	wait_queue_head_t		sb_wait;	 
+	atomic_t			pending_writes;	 
 
-	unsigned int			safemode;	
+	unsigned int			safemode;	 
 	unsigned int			safemode_delay;
 	struct timer_list		safemode_timer;
 	atomic_t			writes_pending;
-	struct request_queue		*queue;	
+	struct request_queue		*queue;	 
 
-	struct bitmap			*bitmap; 
+	struct bitmap			*bitmap;  
 	struct {
-		struct file		*file; 
-		loff_t			offset; 
-		unsigned long		space; 
-		loff_t			default_offset; 
-		unsigned long		default_space; 
+		struct file		*file;  
+		loff_t			offset;  
+		unsigned long		space;  
+		loff_t			default_offset;  
+		unsigned long		default_space;  
 		struct mutex		mutex;
 		unsigned long		chunksize;
-		unsigned long		daemon_sleep; 
-		unsigned long		max_write_behind; 
+		unsigned long		daemon_sleep;  
+		unsigned long		max_write_behind;  
 		int			external;
-		int			nodes; 
-		char                    cluster_name[64]; 
+		int			nodes;  
+		char                    cluster_name[64];  
 	} bitmap_info;
 
-	atomic_t			max_corr_read_errors; 
+	atomic_t			max_corr_read_errors;  
 	struct list_head		all_mddevs;
+#ifdef MY_ABC_HERE
+	unsigned char			blActive;   
+	spinlock_t				ActLock;    
+	unsigned long			ulLastReq;  
+#endif  
+#ifdef MY_ABC_HERE
+    unsigned char           nodev_and_crashed;      
+#endif  
+#ifdef MY_ABC_HERE
+#define MD_AUTO_REMAP_MODE_FORCE_OFF 0
+#define MD_AUTO_REMAP_MODE_FORCE_ON 1
+#define MD_AUTO_REMAP_MODE_ISMAXDEGRADE 2
+    unsigned char           auto_remap;
+#endif  
+#ifdef MY_ABC_HERE
+	void                            *syno_private;     
+	char                            lv_name[16];
+#endif  
 
 	struct attribute_group		*to_remove;
 
 	struct bio_set			*bio_set;
 
-	
 	struct bio *flush_bio;
 	atomic_t flush_pending;
 	struct work_struct flush_work;
-	struct work_struct event_work;	
+	struct work_struct event_work;	 
 	void (*sync_super)(struct mddev *mddev, struct md_rdev *rdev);
 	struct md_cluster_info		*cluster_info;
 };
@@ -319,7 +361,11 @@ struct md_personality
 	int (*run)(struct mddev *mddev);
 	void (*free)(struct mddev *mddev, void *priv);
 	void (*status)(struct seq_file *seq, struct mddev *mddev);
-	
+#ifdef MY_ABC_HERE
+	 
+	void (*syno_error_handler)(struct mddev *mddev, struct md_rdev *rdev);
+#endif  
+	 
 	void (*error_handler)(struct mddev *mddev, struct md_rdev *rdev);
 	int (*hot_add_disk) (struct mddev *mddev, struct md_rdev *rdev);
 	int (*hot_remove_disk) (struct mddev *mddev, struct md_rdev *rdev);
@@ -330,11 +376,15 @@ struct md_personality
 	int (*check_reshape) (struct mddev *mddev);
 	int (*start_reshape) (struct mddev *mddev);
 	void (*finish_reshape) (struct mddev *mddev);
-	
+	 
 	void (*quiesce) (struct mddev *mddev, int state);
-	
+	 
+#ifdef MY_ABC_HERE
+	unsigned char (*ismaxdegrade) (struct mddev *mddev);
+	void (*syno_set_rdev_auto_remap) (struct mddev *mddev);
+#endif  
 	void *(*takeover) (struct mddev *mddev);
-	
+	 
 	int (*congested)(struct mddev *mddev, int bits);
 };
 
@@ -414,6 +464,13 @@ static inline void safe_put_page(struct page *p)
 	if (p) put_page(p);
 }
 
+#ifdef MY_ABC_HERE
+extern void SynoUpdateSBTask(struct work_struct *work);
+#endif  
+#ifdef MY_ABC_HERE
+extern void syno_md_error (struct mddev *mddev, struct md_rdev *rdev);
+extern int IsDeviceDisappear(struct block_device *bdev);
+#endif  
 extern int register_md_personality(struct md_personality *p);
 extern int unregister_md_personality(struct md_personality *p);
 extern int register_md_cluster_operations(struct md_cluster_operations *ops,
@@ -452,6 +509,16 @@ extern int md_integrity_register(struct mddev *mddev);
 extern int md_integrity_add_rdev(struct md_rdev *rdev, struct mddev *mddev);
 extern int strict_strtoul_scaled(const char *cp, unsigned long *res, int scale);
 
+#ifdef MY_ABC_HERE
+void SynoAutoRemapReport(struct mddev *mddev, sector_t sector, struct block_device *bdev);
+#endif  
+#ifdef MY_ABC_HERE
+void RaidRemapModeSet(struct block_device *, unsigned char);
+#endif  
+
+#ifdef MY_ABC_HERE
+void SYNORaidRdevUnplug(struct mddev *mddev, struct md_rdev *rdev);
+#endif  
 extern void mddev_init(struct mddev *mddev);
 extern int md_run(struct mddev *mddev);
 extern void md_stop(struct mddev *mddev);

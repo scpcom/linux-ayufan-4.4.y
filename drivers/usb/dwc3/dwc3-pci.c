@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /**
  * dwc3-pci.c - PCI Specific glue layer
  *
@@ -21,11 +24,14 @@
 #include <linux/slab.h>
 #include <linux/pci.h>
 #include <linux/platform_device.h>
+#ifndef MY_DEF_HERE
 #include <linux/gpio/consumer.h>
 #include <linux/acpi.h>
+#endif /* MY_DEF_HERE */
 
 #include "platform_data.h"
 
+#ifndef MY_DEF_HERE
 #define PCI_DEVICE_ID_SYNOPSYS_HAPSUSB3		0xabcd
 #define PCI_DEVICE_ID_SYNOPSYS_HAPSUSB3_AXI	0xabce
 #define PCI_DEVICE_ID_SYNOPSYS_HAPSUSB31	0xabcf
@@ -45,6 +51,16 @@ static const struct acpi_gpio_mapping acpi_dwc3_byt_gpios[] = {
 	{ "cs-gpios", &cs_gpios, 1 },
 	{ },
 };
+#else /* MY_DEF_HERE */
+#define PCI_DEVICE_ID_SYNOPSYS_HAPSUSB3	0xabcd
+#define PCI_DEVICE_ID_SYNOPSYS_HAPSUSB3_AXI 0xabce
+#define PCI_DEVICE_ID_SYNOPSYS_HAPSUSB31 0xabcf
+#define PCI_DEVICE_ID_INTEL_BYT		0x0f37
+#define PCI_DEVICE_ID_INTEL_MRFLD	0x119e
+#define PCI_DEVICE_ID_INTEL_BSW		0x22B7
+#define PCI_DEVICE_ID_INTEL_SPTLP	0x9d30
+#define PCI_DEVICE_ID_INTEL_SPTH	0xa130
+#endif /* MY_DEF_HERE */
 
 static int dwc3_pci_quirks(struct pci_dev *pdev)
 {
@@ -80,6 +96,7 @@ static int dwc3_pci_quirks(struct pci_dev *pdev)
 						sizeof(pdata));
 	}
 
+#ifndef MY_DEF_HERE
 	if (pdev->vendor == PCI_VENDOR_ID_INTEL &&
 	    pdev->device == PCI_DEVICE_ID_INTEL_BYT) {
 		struct gpio_desc *gpio;
@@ -109,6 +126,7 @@ static int dwc3_pci_quirks(struct pci_dev *pdev)
 			usleep_range(10000, 11000);
 		}
 	}
+#endif /* MY_DEF_HERE */
 
 	if (pdev->vendor == PCI_VENDOR_ID_SYNOPSYS &&
 	    (pdev->device == PCI_DEVICE_ID_SYNOPSYS_HAPSUSB3 ||
@@ -120,7 +138,9 @@ static int dwc3_pci_quirks(struct pci_dev *pdev)
 		memset(&pdata, 0, sizeof(pdata));
 		pdata.usb3_lpm_capable = true;
 		pdata.has_lpm_erratum = true;
+#ifndef MY_DEF_HERE
 		pdata.dis_enblslpm_quirk = true;
+#endif /* MY_DEF_HERE */
 
 		return platform_device_add_data(pci_get_drvdata(pdev), &pdata,
 						sizeof(pdata));
@@ -174,7 +194,9 @@ static int dwc3_pci_probe(struct pci_dev *pci,
 		goto err;
 
 	dwc3->dev.parent = dev;
+#ifndef MY_DEF_HERE
 	ACPI_COMPANION_SET(&dwc3->dev, ACPI_COMPANION(dev));
+#endif /* MY_DEF_HERE */
 
 	ret = platform_device_add(dwc3);
 	if (ret) {
@@ -190,7 +212,9 @@ err:
 
 static void dwc3_pci_remove(struct pci_dev *pci)
 {
+#ifndef MY_DEF_HERE
 	acpi_dev_remove_driver_gpios(ACPI_COMPANION(&pci->dev));
+#endif /* MY_DEF_HERE */
 	platform_device_unregister(pci_get_drvdata(pci));
 }
 
@@ -212,8 +236,10 @@ static const struct pci_device_id dwc3_pci_id_table[] = {
 	{ PCI_DEVICE(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_MRFLD), },
 	{ PCI_DEVICE(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_SPTLP), },
 	{ PCI_DEVICE(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_SPTH), },
+#ifndef MY_DEF_HERE
 	{ PCI_DEVICE(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_BXT), },
 	{ PCI_DEVICE(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_APL), },
+#endif /* MY_DEF_HERE */
 	{ PCI_DEVICE(PCI_VENDOR_ID_AMD, PCI_DEVICE_ID_AMD_NL_USB), },
 	{  }	/* Terminating Entry */
 };

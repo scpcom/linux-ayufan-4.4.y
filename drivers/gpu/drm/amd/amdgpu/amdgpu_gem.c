@@ -101,6 +101,26 @@ int amdgpu_gem_init(struct amdgpu_device *adev)
 void amdgpu_gem_fini(struct amdgpu_device *adev)
 {
 	amdgpu_bo_force_delete(adev);
+	struct drm_device *ddev = adev->ddev;
+	struct drm_file *file;
+
+	mutex_lock(&ddev->filelist_mutex);
+
+	list_for_each_entry(file, &ddev->filelist, lhead) {
+		struct drm_gem_object *gobj;
+		int handle;
+
+		WARN_ONCE(1, "Still active user space clients!\n");
+		spin_lock(&file->table_lock);
+		idr_for_each_entry(&file->object_idr, gobj, handle) {
+			WARN_ONCE(1, "And also active allocations!\n");
+			drm_gem_object_unreference_unlocked(gobj);
+		}
+		idr_destroy(&file->object_idr);
+		spin_unlock(&file->table_lock);
+	}
+
+	mutex_unlock(&ddev->filelist_mutex);
 }
 
 /*
@@ -303,7 +323,7 @@ int amdgpu_mode_dumb_mmap(struct drm_file *filp,
 	struct drm_gem_object *gobj;
 	struct amdgpu_bo *robj;
 
-	gobj = drm_gem_object_lookup(dev, filp, handle);
+	gobj = drm_gem_object_lookup(filp, handle);
 	if (gobj == NULL) {
 		return -ENOENT;
 	}
@@ -367,7 +387,7 @@ int amdgpu_gem_wait_idle_ioctl(struct drm_device *dev, void *data,
 	int r = 0;
 	long ret;
 
-	gobj = drm_gem_object_lookup(dev, filp, handle);
+	gobj = drm_gem_object_lookup(filp, handle);
 	if (gobj == NULL) {
 		return -ENOENT;
 	}
@@ -401,7 +421,7 @@ int amdgpu_gem_metadata_ioctl(struct drm_device *dev, void *data,
 	int r = -1;
 
 	DRM_DEBUG("%d \n", args->handle);
-	gobj = drm_gem_object_lookup(dev, filp, args->handle);
+	gobj = drm_gem_object_lookup(filp, args->handle);
 	if (gobj == NULL)
 		return -ENOENT;
 	robj = gem_to_amdgpu_bo(gobj);
@@ -550,7 +570,7 @@ int amdgpu_gem_va_ioctl(struct drm_device *dev, void *data,
 		return -EINVAL;
 	}
 
-	gobj = drm_gem_object_lookup(dev, filp, args->handle);
+	gobj = drm_gem_object_lookup(filp, args->handle);
 	if (gobj == NULL)
 		return -ENOENT;
 	rbo = gem_to_amdgpu_bo(gobj);
@@ -612,7 +632,7 @@ int amdgpu_gem_op_ioctl(struct drm_device *dev, void *data,
 	struct amdgpu_bo *robj;
 	int r;
 
-	gobj = drm_gem_object_lookup(dev, filp, args->handle);
+	gobj = drm_gem_object_lookup(filp, args->handle);
 	if (gobj == NULL) {
 		return -ENOENT;
 	}
@@ -696,6 +716,12 @@ static int amdgpu_debugfs_gem_info(struct seq_file *m, void *data)
 	struct amdgpu_device *adev = dev->dev_private;
 	struct amdgpu_bo *rbo;
 	unsigned i = 0;
+	struct drm_file *file;
+	int r;
+
+	r = mutex_lock_interruptible(&dev->filelist_mutex);
+	if (r)
+		return r;
 
 	mutex_lock(&adev->gem.mutex);
 	list_for_each_entry(rbo, &adev->gem.objects, list) {
@@ -720,7 +746,8 @@ static int amdgpu_debugfs_gem_info(struct seq_file *m, void *data)
 			   placement, (unsigned long)rbo->pid);
 		i++;
 	}
-	mutex_unlock(&adev->gem.mutex);
+
+	mutex_unlock(&dev->filelist_mutex);
 	return 0;
 }
 

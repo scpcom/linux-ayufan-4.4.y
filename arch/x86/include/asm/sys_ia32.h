@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #ifndef _ASM_X86_SYS_IA32_H
 #define _ASM_X86_SYS_IA32_H
 
@@ -38,10 +40,21 @@ asmlinkage long sys32_fadvise64(int, unsigned, unsigned, size_t, int);
 asmlinkage long sys32_fallocate(int, int, unsigned,
 				unsigned, unsigned, unsigned);
 
-
 asmlinkage long sys32_sigreturn(void);
 asmlinkage long sys32_rt_sigreturn(void);
 
-#endif 
+#ifdef MY_ABC_HERE
+#ifdef MY_ABC_HERE
+asmlinkage long sys32_SYNOStat64(char __user *, unsigned int, struct SYNOSTAT64 __user *);
+asmlinkage long sys32_SYNOFStat64(unsigned int fd, unsigned int flags, struct SYNOSTAT64 __user *);
+asmlinkage long sys32_SYNOLStat64(char __user *, unsigned int flags, struct SYNOSTAT64 __user *);
+#endif  
+#ifdef MY_ABC_HERE
+asmlinkage long sys32_SYNOCaselessStat64(char __user *, struct stat64 __user *);
+asmlinkage long sys32_SYNOCaselessLStat64(char __user *, struct stat64 __user *);
+#endif  
+#endif  
 
-#endif 
+#endif  
+
+#endif  

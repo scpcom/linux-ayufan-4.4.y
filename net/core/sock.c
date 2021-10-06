@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * INET		An implementation of the TCP/IP protocol suite for the LINUX
  *		operating system.  INET is implemented using the  BSD Socket
@@ -316,7 +319,11 @@ static struct lock_class_key af_callback_keys[AF_MAX];
 /* Run time adjustable parameters. */
 __u32 sysctl_wmem_max __read_mostly = SK_WMEM_MAX;
 EXPORT_SYMBOL(sysctl_wmem_max);
+#ifdef MY_ABC_HERE
+__u32 sysctl_rmem_max __read_mostly = 2 * SK_RMEM_MAX;
+#else
 __u32 sysctl_rmem_max __read_mostly = SK_RMEM_MAX;
+#endif /* MY_ABC_HERE */
 EXPORT_SYMBOL(sysctl_rmem_max);
 __u32 sysctl_wmem_default __read_mostly = SK_WMEM_MAX;
 __u32 sysctl_rmem_default __read_mostly = SK_RMEM_MAX;

@@ -1,11 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
  
- 
- 
- 
- 
-
 #include <linux/fs.h>
 #include <linux/kernel.h>
 #include <linux/vfs.h>
@@ -121,15 +117,17 @@ cifs_reconnect_tcon(struct cifs_tcon *tcon, int smb_command)
 	if (!ses->need_reconnect && !tcon->need_reconnect)
 		return 0;
 
+#ifdef MY_ABC_HERE
+	nls_codepage = load_nls("utf8");
+#else
 	nls_codepage = load_nls_default();
+#endif  
 
-	
 	mutex_lock(&ses->session_mutex);
 	rc = cifs_negotiate_protocol(0, ses);
 	if (rc == 0 && ses->need_reconnect)
 		rc = cifs_setup_session(0, ses, nls_codepage);
 
-	
 	if (rc || !tcon->need_reconnect) {
 		mutex_unlock(&ses->session_mutex);
 		goto out;
@@ -1168,14 +1166,16 @@ openRetry:
 	req->DesiredAccess = cpu_to_le32(desired_access);
 	req->AllocationSize = 0;
 
-	
 	if (create_options & CREATE_OPTION_SPECIAL)
 		req->FileAttributes = cpu_to_le32(ATTR_SYSTEM);
 	else
 		req->FileAttributes = cpu_to_le32(ATTR_NORMAL);
 
-	
+#ifdef MY_ABC_HERE
+	if (tcon->ses->capabilities & CAP_UNIX && SynoPosixSemanticsEnabled)
+#else
 	if (tcon->ses->capabilities & CAP_UNIX)
+#endif  
 		req->FileAttributes |= cpu_to_le32(ATTR_POSIX_SEMANTICS);
 
 	if (create_options & CREATE_OPTION_READONLY)

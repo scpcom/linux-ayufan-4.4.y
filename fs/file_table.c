@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/string.h>
 #include <linux/slab.h>
 #include <linux/file.h>
@@ -23,14 +25,20 @@
 #include <linux/swap.h>
 
 #include <linux/atomic.h>
+#ifdef MY_ABC_HERE
+#include <linux/lglock.h>
+#include <linux/dcache.h>
+#include "mount.h"
+#endif  
 
 #include "internal.h"
-
 
 struct files_stat_struct files_stat = {
 	.max_files = NR_FILE
 };
-
+#ifdef MY_ABC_HERE
+DEFINE_STATIC_LGLOCK(files_lglock);
+#endif  
 
 static struct kmem_cache *filp_cachep __read_mostly;
 
@@ -100,24 +108,28 @@ struct file *get_empty_filp(void)
 		file_free(f);
 		return ERR_PTR(error);
 	}
-
+#ifdef MY_ABC_HERE
+	INIT_LIST_HEAD(&f->f_u.fu_list);
+#endif  
 	atomic_long_set(&f->f_count, 1);
 	rwlock_init(&f->f_owner.lock);
 	spin_lock_init(&f->f_lock);
 	mutex_init(&f->f_pos_lock);
 	eventpoll_init_file(f);
-	
+	 
 	return f;
 
 over:
-	
+	 
 	if (get_nr_files() > old_max) {
 		pr_info("VFS: file-max limit %lu reached\n", get_max_files());
 		old_max = get_nr_files();
 	}
 	return ERR_PTR(-ENFILE);
 }
-
+#ifdef CONFIG_AUFS_FHSM
+EXPORT_SYMBOL_GPL(get_empty_filp);
+#endif  
 
 struct file *alloc_file(struct path *path, fmode_t mode,
 		const struct file_operations *fop)
@@ -203,11 +215,13 @@ static void ____fput(struct callback_head *work)
 	__fput(container_of(work, struct file, f_u.fu_rcuhead));
 }
 
-
 void flush_delayed_fput(void)
 {
 	delayed_fput(NULL);
 }
+#ifdef CONFIG_AUFS_FHSM
+EXPORT_SYMBOL_GPL(flush_delayed_fput);
+#endif  
 
 static DECLARE_DELAYED_WORK(delayed_fput_work, delayed_fput);
 
@@ -215,12 +229,14 @@ void fput(struct file *file)
 {
 	if (atomic_long_dec_and_test(&file->f_count)) {
 		struct task_struct *task = current;
-
+#ifdef MY_ABC_HERE
+		file_sb_list_del(file);
+#endif  
 		if (likely(!in_interrupt() && !(task->flags & PF_KTHREAD))) {
 			init_task_work(&file->f_u.fu_rcuhead, ____fput);
 			if (!task_work_add(task, &file->f_u.fu_rcuhead, true))
 				return;
-			
+			 
 		}
 
 		if (llist_add(&file->f_u.fu_llist, &delayed_fput_list))
@@ -228,33 +244,46 @@ void fput(struct file *file)
 	}
 }
 
-
 void __fput_sync(struct file *file)
 {
 	if (atomic_long_dec_and_test(&file->f_count)) {
 		struct task_struct *task = current;
+#ifdef MY_ABC_HERE
+		file_sb_list_del(file);
+#endif  
 		BUG_ON(!(task->flags & PF_KTHREAD));
 		__fput(file);
 	}
 }
 
 EXPORT_SYMBOL(fput);
+#ifdef CONFIG_AUFS_FHSM
+EXPORT_SYMBOL_GPL(__fput_sync);
+#endif  
 
 void put_filp(struct file *file)
 {
 	if (atomic_long_dec_and_test(&file->f_count)) {
 		security_file_free(file);
+#ifdef MY_ABC_HERE
+		file_sb_list_del(file);
+#endif  
 		file_free(file);
 	}
 }
+#ifdef CONFIG_AUFS_FHSM
+EXPORT_SYMBOL_GPL(put_filp);
+#endif  
 
 void __init files_init(void)
 { 
 	filp_cachep = kmem_cache_create("filp", sizeof(struct file), 0,
 			SLAB_HWCACHE_ALIGN | SLAB_PANIC, NULL);
+#ifdef MY_ABC_HERE
+	lg_lock_init(&files_lglock, "files_lglock");
+#endif  
 	percpu_counter_init(&nr_files, 0, GFP_KERNEL);
 }
-
 
 void __init files_maxfiles_init(void)
 {
@@ -266,3 +295,109 @@ void __init files_maxfiles_init(void)
 
 	files_stat.max_files = max_t(unsigned long, n, NR_FILE);
 } 
+
+#ifdef MY_ABC_HERE
+static inline int file_list_cpu(struct file *file)
+{
+#ifdef CONFIG_SMP
+	return file->f_sb_list_cpu;
+#else
+	return smp_processor_id();
+#endif
+}
+
+static inline void __file_sb_list_add(struct file *file, struct super_block *sb)
+{
+	struct list_head *list;
+#ifdef CONFIG_SMP
+	int cpu;
+	cpu = smp_processor_id();
+	file->f_sb_list_cpu = cpu;
+	list = per_cpu_ptr(sb->s_files, cpu);
+#else
+	list = &sb->s_files;
+#endif
+	list_add(&file->f_u.fu_list, list);
+}
+
+void file_sb_list_add(struct file *file, struct super_block *sb)
+{
+	lg_local_lock(&files_lglock);
+	__file_sb_list_add(file, sb);
+	lg_local_unlock(&files_lglock);
+}
+
+void file_sb_list_del(struct file *file)
+{
+	if (!list_empty(&file->f_u.fu_list)) {
+		lg_local_lock_cpu(&files_lglock, file_list_cpu(file));
+		list_del_init(&file->f_u.fu_list);
+		lg_local_unlock_cpu(&files_lglock, file_list_cpu(file));
+	}
+}
+
+#ifdef CONFIG_SMP
+
+#define do_file_list_for_each_entry(__sb, __file)		\
+{								\
+	int i;							\
+	for_each_possible_cpu(i) {				\
+		struct list_head *list;				\
+		list = per_cpu_ptr((__sb)->s_files, i);		\
+		list_for_each_entry((__file), list, f_u.fu_list)
+
+#define while_file_list_for_each_entry				\
+	}							\
+}
+
+#else
+
+#define do_file_list_for_each_entry(__sb, __file)		\
+{								\
+	struct list_head *list;					\
+	list = &(sb)->s_files;					\
+	list_for_each_entry((__file), list, f_u.fu_list)
+
+#define while_file_list_for_each_entry				\
+}
+
+#endif
+
+#define MAX_SHOWN_OPENED_FILE 10
+void fs_show_opened_file(struct mount *mnt)
+{
+	struct file *file;
+	char *file_name_buf;
+	char *mnt_point_buf;
+	char *file_name;
+	char *mnt_point_name;
+	unsigned num_show = 0;
+
+	file_name_buf = kmalloc(PATH_MAX, GFP_KERNEL);
+	mnt_point_buf = kmalloc(PATH_MAX, GFP_KERNEL);
+
+	if (!file_name_buf || !mnt_point_buf) {
+		goto over;
+	}
+	mnt_point_name = dentry_path_raw(mnt->mnt_mountpoint, mnt_point_buf, PATH_MAX - 1);
+	if (IS_ERR(mnt_point_name)) {
+		goto over;
+	}
+	lg_global_lock(&files_lglock);
+	do_file_list_for_each_entry(mnt->mnt.mnt_sb, file) {
+		file_name = dentry_path_raw(file->f_path.dentry, file_name_buf, PATH_MAX - 1);
+		if (IS_ERR(file_name)) {
+			continue;
+		}
+		printk(KERN_WARNING "VFS: opened file in mnt_point: (%s), file: (%s)\n", mnt_point_name, file_name);
+		if (MAX_SHOWN_OPENED_FILE <= ++num_show) {
+			break;
+		}
+	} while_file_list_for_each_entry;
+	lg_global_unlock(&files_lglock);
+
+over:
+	kfree(file_name_buf);
+	kfree(mnt_point_buf);
+}
+#endif  

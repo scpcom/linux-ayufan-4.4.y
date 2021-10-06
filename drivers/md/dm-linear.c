@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2001-2003 Sistina Software (UK) Limited.
  *
@@ -141,6 +144,27 @@ static int linear_iterate_devices(struct dm_target *ti,
 	return fn(ti, lc->dev, lc->start, ti->len, data);
 }
 
+#ifdef MY_ABC_HERE
+extern void SYNOLvInfoSet(struct block_device *bdev, void *private, const char *lv_name);
+static void linear_lv_info_set(struct dm_target *ti)
+{
+	struct linear_c *lc = ti->private;
+	struct block_device *bdev = lc->dev->bdev;
+	struct mapped_device *md = dm_table_get_md(ti->table);
+
+	SYNOLvInfoSet(bdev, (void *)ti, dm_device_name(md));
+}
+
+static sector_t linear_lg_sector_get(sector_t sector, struct dm_target *ti)
+{
+	struct linear_c *lc = ti->private;
+	sector_t lg_sector;
+
+	lg_sector = sector - lc->start + ti->begin;
+	return lg_sector;
+}
+#endif /* MY_ABC_HERE */
+
 static struct target_type linear_target = {
 	.name   = "linear",
 	.version = {1, 2, 1},
@@ -150,6 +174,10 @@ static struct target_type linear_target = {
 	.map    = linear_map,
 	.status = linear_status,
 	.prepare_ioctl = linear_prepare_ioctl,
+#ifdef MY_ABC_HERE
+	.lvinfoset = linear_lv_info_set,
+	.lg_sector_get = linear_lg_sector_get,
+#endif /* MY_ABC_HERE */
 	.iterate_devices = linear_iterate_devices,
 };
 

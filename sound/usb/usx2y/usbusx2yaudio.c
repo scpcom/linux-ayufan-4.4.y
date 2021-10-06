@@ -1,6 +1,7 @@
-
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/interrupt.h>
 #include <linux/slab.h>
 #include <linux/usb.h>
@@ -425,6 +426,9 @@ static int usX2Y_urbs_start(struct snd_usX2Y_substream *subs)
 			}
 			urb->transfer_buffer_length = subs->maxpacksize * nr_of_packs(); 
 			if ((err = usb_submit_urb(urb, GFP_ATOMIC)) < 0) {
+#if defined(MY_ABC_HERE)
+				if (printk_ratelimit())
+#endif  
 				snd_printk (KERN_ERR "cannot submit datapipe for urb %d, err = %d\n", i, err);
 				err = -EPIPE;
 				goto cleanup;

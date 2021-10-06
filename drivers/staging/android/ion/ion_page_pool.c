@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * drivers/staging/android/ion/ion_mem_pool.c
  *
@@ -30,6 +33,10 @@ static void *ion_page_pool_alloc_pages(struct ion_page_pool *pool)
 
 	if (!page)
 		return NULL;
+#ifdef MY_DEF_HERE
+	ion_page_pool_alloc_set_cache_policy(pool, page);
+#endif /* MY_DEF_HERE */
+
 	ion_pages_sync_for_device(NULL, page, PAGE_SIZE << pool->order,
 						DMA_BIDIRECTIONAL);
 	return page;
@@ -38,6 +45,9 @@ static void *ion_page_pool_alloc_pages(struct ion_page_pool *pool)
 static void ion_page_pool_free_pages(struct ion_page_pool *pool,
 				     struct page *page)
 {
+#ifdef MY_DEF_HERE
+	ion_page_pool_free_set_cache_policy(pool, page);
+#endif /* MY_DEF_HERE */
 	__free_pages(page, pool->order);
 }
 
@@ -102,6 +112,13 @@ void ion_page_pool_free(struct ion_page_pool *pool, struct page *page)
 	if (ret)
 		ion_page_pool_free_pages(pool, page);
 }
+
+#ifdef MY_DEF_HERE
+void ion_page_pool_free_immediate(struct ion_page_pool *pool, struct page *page)
+{
+	ion_page_pool_free_pages(pool, page);
+}
+#endif /* MY_DEF_HERE */
 
 static int ion_page_pool_total(struct ion_page_pool *pool, bool high)
 {

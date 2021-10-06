@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #ifndef DATAPATH_H
 #define DATAPATH_H 1
 
@@ -59,13 +61,30 @@ struct dp_upcall_info {
 	u16 mru;
 };
 
+#ifdef MY_ABC_HERE
+struct syno_ovs_bond_slave_list {
+	char *name;
+	struct list_head next;
+};
+
+struct syno_ovs_bond_list {
+	char *name;
+	struct list_head slaves;
+	struct list_head next;
+};
+#endif  
 
 struct ovs_net {
 	struct list_head dps;
 	struct work_struct dp_notify_work;
 
-	
 	bool xt_label;
+
+#ifdef MY_ABC_HERE
+	struct net *net;
+	struct class_attribute class_attr_syno_ovs_bonds;
+	struct list_head bond_list;
+#endif  
 };
 
 extern int ovs_net_id;

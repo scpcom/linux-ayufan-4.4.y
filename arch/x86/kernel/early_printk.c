@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/console.h>
 #include <linux/kernel.h>
 #include <linux/init.h>
@@ -278,7 +281,58 @@ static struct console early_serial_console = {
 	.write =	early_serial_write,
 	.flags =	CON_PRINTBUFFER,
 	.index =	-1,
+#ifdef MY_DEF_HERE
+	.pcimapaddress = 0,
+	.pcimapsize = 0,
+#endif  
 };
+
+#ifdef MY_DEF_HERE
+static __init void apl_serial_hw_init(unsigned divisor)
+{
+	 
+	serial_out(early_serial_base, LCR, DLAB);
+	serial_out(early_serial_base, DLL, divisor & 0xff);
+	serial_out(early_serial_base, DLH, (divisor >> 8) & 0xff);
+
+	serial_out(early_serial_base, LCR, 0x3 & 0x1f);
+
+	serial_out(early_serial_base, FCR, 1);
+
+	serial_out(early_serial_base, MCR, 1);
+}
+
+#define EARLY_PRINTK_APL_BUS 0
+#define EARLY_PRINTK_APL_SLOT 24
+#define EARLY_PRINTK_APL_FUNC 2
+ 
+static __init void early_apl_serial_init(void)
+{
+	unsigned divisor;
+	unsigned long baud = 115200;
+	u32 classcode, bar0;
+	u16 cmdreg;
+
+	cmdreg = read_pci_config(EARLY_PRINTK_APL_BUS, EARLY_PRINTK_APL_SLOT, EARLY_PRINTK_APL_FUNC, PCI_COMMAND);
+	classcode = read_pci_config(EARLY_PRINTK_APL_BUS, EARLY_PRINTK_APL_SLOT, EARLY_PRINTK_APL_FUNC, PCI_CLASS_REVISION);
+	bar0 = read_pci_config(EARLY_PRINTK_APL_BUS, EARLY_PRINTK_APL_SLOT, EARLY_PRINTK_APL_FUNC, PCI_BASE_ADDRESS_0);
+
+	serial_in = mem32_serial_in;
+	serial_out = mem32_serial_out;
+
+	early_serial_base =
+		(unsigned long)early_ioremap(bar0 & 0xfffffff0, 0x10);
+	write_pci_config(EARLY_PRINTK_APL_BUS, EARLY_PRINTK_APL_SLOT, EARLY_PRINTK_APL_FUNC, PCI_COMMAND,
+			cmdreg|PCI_COMMAND_MEMORY);
+
+	early_serial_console.pcimapaddress = (void __iomem *)early_serial_base;
+	early_serial_console.pcimapsize = 0x10;
+
+	divisor = 115200 / baud;
+
+	apl_serial_hw_init(divisor);
+}
+#endif  
 
 static void early_console_register(struct console *con, int keep_early)
 {
@@ -345,6 +399,12 @@ static int __init setup_early_printk(char *buf)
 		if (!strncmp(buf, "efi", 3))
 			early_console_register(&early_efi_console, keep);
 #endif
+#ifdef MY_DEF_HERE
+		if (!strncmp(buf, "apl", 3)) {
+			early_apl_serial_init();
+			early_console_register(&early_serial_console, keep);
+		}
+#endif  
 
 		buf++;
 	}

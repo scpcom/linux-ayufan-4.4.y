@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/syscalls.h>
 #include <linux/export.h>
 #include <linux/capability.h>
@@ -8,16 +10,27 @@
 #include <linux/namei.h>
 #include <linux/security.h>
 #include <linux/idr.h>
-#include <linux/init.h>		
-#include <linux/fs_struct.h>	
-#include <linux/fsnotify.h>	
+#include <linux/init.h>		 
+#include <linux/fs_struct.h>	 
+#include <linux/fsnotify.h>	 
 #include <linux/uaccess.h>
 #include <linux/proc_ns.h>
 #include <linux/magic.h>
 #include <linux/bootmem.h>
 #include <linux/task_work.h>
+#ifdef MY_ABC_HERE
+#include <linux/string.h>
+#endif  
 #include "pnode.h"
 #include "internal.h"
+
+#ifdef MY_ABC_HERE
+extern int gSynoHasDynModule;
+#endif  
+
+#ifdef MY_ABC_HERE
+extern void ext4_fill_mount_path(struct super_block *sb, const char *szPath);
+#endif  
 
 static unsigned int m_hash_mask __read_mostly;
 static unsigned int m_hash_shift __read_mostly;
@@ -44,6 +57,10 @@ static int __init set_mphash_entries(char *str)
 }
 __setup("mphash_entries=", set_mphash_entries);
 
+#ifdef MY_ABC_HERE
+extern struct rw_semaphore s_reshape_mount_key;
+#endif  
+
 static u64 event;
 static DEFINE_IDA(mnt_id_ida);
 static DEFINE_IDA(mnt_group_ida);
@@ -54,12 +71,15 @@ static int mnt_group_start = 1;
 static struct hlist_head *mount_hashtable __read_mostly;
 static struct hlist_head *mountpoint_hashtable __read_mostly;
 static struct kmem_cache *mnt_cache __read_mostly;
+#ifdef MY_ABC_HERE
+ 
+DECLARE_RWSEM(namespace_sem);
+#else
 static DECLARE_RWSEM(namespace_sem);
-
+#endif  
 
 struct kobject *fs_kobj;
 EXPORT_SYMBOL_GPL(fs_kobj);
-
 
 __cacheline_aligned_in_smp DEFINE_SEQLOCK(mount_lock);
 
@@ -338,14 +358,15 @@ int mnt_want_write_file(struct file *file)
 }
 EXPORT_SYMBOL_GPL(mnt_want_write_file);
 
-
 void __mnt_drop_write(struct vfsmount *mnt)
 {
 	preempt_disable();
 	mnt_dec_writers(real_mount(mnt));
 	preempt_enable();
 }
-
+#ifdef CONFIG_AUFS_FHSM
+EXPORT_SYMBOL_GPL(__mnt_drop_write);
+#endif  
 
 void mnt_drop_write(struct vfsmount *mnt)
 {
@@ -1223,11 +1244,15 @@ static int do_umount(struct mount *mnt, int flags)
 			retval = 0;
 		}
 	}
+#ifdef MY_ABC_HERE
+	if (-EBUSY == retval) {
+		fs_show_opened_file(mnt);
+	}
+#endif  
 	unlock_mount_hash();
 	namespace_unlock();
 	return retval;
 }
-
 
 void __detach_mounts(struct dentry *dentry)
 {
@@ -1292,15 +1317,20 @@ SYSCALL_DEFINE2(umount, char __user *, name, int, flags)
 
 	retval = do_umount(mnt, flags);
 dput_and_out:
-	
+	 
 	dput(path.dentry);
+#ifdef MY_ABC_HERE
+	down_read(&s_reshape_mount_key);
+#endif  
 	mntput_no_expire(mnt);
+#ifdef MY_ABC_HERE
+	up_read(&s_reshape_mount_key);
+#endif  
 out:
 	return retval;
 }
 
 #ifdef __ARCH_WANT_SYS_OLDUMOUNT
-
 
 SYSCALL_DEFINE1(oldumount, char __user *, name)
 {
@@ -1455,6 +1485,9 @@ int iterate_mounts(int (*f)(struct vfsmount *, void *), void *arg,
 	}
 	return 0;
 }
+#ifdef CONFIG_AUFS_FHSM
+EXPORT_SYMBOL_GPL(iterate_mounts);
+#endif  
 
 static void cleanup_group_ids(struct mount *mnt, struct mount *end)
 {
@@ -1542,9 +1575,9 @@ static struct mountpoint *lock_mount(struct path *path)
 	struct vfsmount *mnt;
 	struct dentry *dentry = path->dentry;
 retry:
-	mutex_lock(&dentry->d_inode->i_mutex);
+	inode_lock(dentry->d_inode);
 	if (unlikely(cant_mount(dentry))) {
-		mutex_unlock(&dentry->d_inode->i_mutex);
+		inode_unlock(dentry->d_inode);
 		return ERR_PTR(-ENOENT);
 	}
 	namespace_lock();
@@ -1555,13 +1588,13 @@ retry:
 			mp = new_mountpoint(dentry);
 		if (IS_ERR(mp)) {
 			namespace_unlock();
-			mutex_unlock(&dentry->d_inode->i_mutex);
+			inode_unlock(dentry->d_inode);
 			return mp;
 		}
 		return mp;
 	}
 	namespace_unlock();
-	mutex_unlock(&path->dentry->d_inode->i_mutex);
+	inode_unlock(path->dentry->d_inode);
 	path_put(path);
 	path->mnt = mnt;
 	dentry = path->dentry = dget(mnt->mnt_root);
@@ -1573,7 +1606,7 @@ static void unlock_mount(struct mountpoint *where)
 	struct dentry *dentry = where->m_dentry;
 	put_mountpoint(where);
 	namespace_unlock();
-	mutex_unlock(&dentry->d_inode->i_mutex);
+	inode_unlock(dentry->d_inode);
 }
 
 static int graft_tree(struct mount *mnt, struct mount *p, struct mountpoint *mp)
@@ -1725,6 +1758,66 @@ static int change_mount_flags(struct vfsmount *mnt, int ms_flags)
 	return error;
 }
 
+#ifdef MY_ABC_HERE
+static struct syno_mnt_options {
+	long relatime_period;
+};
+
+static void option_erase(char *str) {
+	char *next = strchr(str, ',');
+
+	if (next) {
+		next++;
+		while (*next) {
+			*str = *next;
+			str++;
+			next++;
+		}
+	}
+	while (*str) {
+		*str = '\0';
+		str++;
+	}
+}
+
+enum {
+	Opt_relatime_period,
+	Opt_err,
+};
+
+static struct option_table {
+	int token;
+	const char *name;
+	const char *pattern;
+} tokens[] = {
+	{Opt_relatime_period, "relatime_period", "relatime_period=%ld"},
+	{Opt_err, NULL, NULL},
+};
+
+static int syno_parse_options(struct syno_mnt_options *options, char *data) {
+	struct option_table *p;
+	char *str;
+
+	if (!data)
+		return 0;
+
+	for (p = tokens; p->token != Opt_err; p++) {
+		while (NULL != (str = strstr(data, p->name))) {
+			switch (p->token) {
+				case Opt_relatime_period:
+					if (1 != sscanf(str, p->pattern, &(options->relatime_period))
+						|| options->relatime_period <= 0 || options->relatime_period > 365*10)
+						return -EINVAL;
+					break;
+				default:
+					break;
+			}
+			option_erase(str);
+		}
+	}
+	return 0;
+}
+#endif  
 
 static int do_remount(struct path *path, int flags, int mnt_flags,
 		      void *data)
@@ -1732,6 +1825,9 @@ static int do_remount(struct path *path, int flags, int mnt_flags,
 	int err;
 	struct super_block *sb = path->mnt->mnt_sb;
 	struct mount *mnt = real_mount(path->mnt);
+#ifdef MY_ABC_HERE
+	struct syno_mnt_options options;
+#endif  
 
 	if (!check_mnt(mnt))
 		return -EINVAL;
@@ -1739,14 +1835,20 @@ static int do_remount(struct path *path, int flags, int mnt_flags,
 	if (path->dentry != path->mnt->mnt_root)
 		return -EINVAL;
 
-	
+#ifdef MY_ABC_HERE
+	memset(&options, 0, sizeof(struct syno_mnt_options));
+	err = syno_parse_options(&options, data);
+	if (err)
+		return -EINVAL;
+#endif  
+
 	if ((mnt->mnt.mnt_flags & MNT_LOCK_READONLY) &&
 	    !(mnt_flags & MNT_READONLY)) {
 		return -EPERM;
 	}
 	if ((mnt->mnt.mnt_flags & MNT_LOCK_NODEV) &&
 	    !(mnt_flags & MNT_NODEV)) {
-		
+		 
 		if ((mnt->mnt_ns->user_ns != &init_user_ns) &&
 		    !(sb->s_type->fs_flags & FS_USERNS_DEV_MOUNT)) {
 			mnt_flags |= MNT_NODEV;
@@ -1785,6 +1887,10 @@ static int do_remount(struct path *path, int flags, int mnt_flags,
 		touch_mnt_namespace(mnt->mnt_ns);
 		unlock_mount_hash();
 	}
+#ifdef MY_ABC_HERE
+	if (options.relatime_period > 0)
+		sb->relatime_period = options.relatime_period;
+#endif  
 	up_write(&sb->s_umount);
 	return err;
 }
@@ -1934,6 +2040,9 @@ static int do_new_mount(struct path *path, const char *fstype, int flags,
 	struct user_namespace *user_ns = current->nsproxy->mnt_ns->user_ns;
 	struct vfsmount *mnt;
 	int err;
+#ifdef MY_ABC_HERE
+	struct syno_mnt_options options;
+#endif  
 
 	if (!fstype)
 		return -EINVAL;
@@ -1958,6 +2067,13 @@ static int do_new_mount(struct path *path, const char *fstype, int flags,
 		}
 	}
 
+#ifdef MY_ABC_HERE
+	memset(&options, 0, sizeof(struct syno_mnt_options));
+	err = syno_parse_options(&options, data);
+	if (err)
+		return -EINVAL;
+#endif  
+
 	mnt = vfs_kern_mount(type, flags, name, data);
 	if (!IS_ERR(mnt) && (type->fs_flags & FS_HAS_SUBTYPE) &&
 	    !mnt->mnt_sb->s_subtype)
@@ -1968,6 +2084,18 @@ static int do_new_mount(struct path *path, const char *fstype, int flags,
 		return PTR_ERR(mnt);
 
 	err = do_add_mount(real_mount(mnt), path, mnt_flags);
+#ifdef MY_ABC_HERE
+	if (!err && !strcmp(fstype, "ext4")) {
+		char buf[SYNO_MOUNT_PATH_LEN] = {'\0'};
+		ext4_fill_mount_path(mnt->mnt_sb, d_path(path, buf, sizeof(buf)));
+	}
+#endif  
+
+#ifdef MY_ABC_HERE
+	if (options.relatime_period > 0)
+		mnt->mnt_sb->relatime_period = options.relatime_period;
+#endif  
+
 	if (err)
 		mntput(mnt);
 	return err;
@@ -2152,15 +2280,24 @@ long do_mount(const char *dev_name, const char __user *dir_name,
 	int retval = 0;
 	int mnt_flags = 0;
 
-	
+#ifdef MY_ABC_HERE
+	extern int gSynoInstallFlag;
+	if ( 0 == gSynoInstallFlag &&
+#ifdef MY_ABC_HERE
+			gSynoHasDynModule &&
+#endif  
+			NULL != dev_name &&
+			strstr(dev_name, CONFIG_SYNO_USB_FLASH_DEVICE_PATH)) {
+		return -EINVAL;
+	}
+#endif  
+
 	if ((flags & MS_MGC_MSK) == MS_MGC_VAL)
 		flags &= ~MS_MGC_MSK;
 
-	
 	if (data_page)
 		((char *)data_page)[PAGE_SIZE - 1] = 0;
 
-	
 	retval = user_path(dir_name, &path);
 	if (retval)
 		return retval;
@@ -2201,6 +2338,9 @@ long do_mount(const char *dev_name, const char __user *dir_name,
 		   MS_NOATIME | MS_NODIRATIME | MS_RELATIME| MS_KERNMOUNT |
 		   MS_STRICTATIME);
 
+#ifdef MY_ABC_HERE
+	down_read(&s_reshape_mount_key);
+#endif  
 	if (flags & MS_REMOUNT)
 		retval = do_remount(&path, flags & ~MS_REMOUNT, mnt_flags,
 				    data_page);
@@ -2213,6 +2353,11 @@ long do_mount(const char *dev_name, const char __user *dir_name,
 	else
 		retval = do_new_mount(&path, type_page, flags, mnt_flags,
 				      dev_name, data_page);
+
+#ifdef MY_ABC_HERE
+	up_read(&s_reshape_mount_key);
+#endif  
+
 dput_out:
 	path_put(&path);
 	return retval;

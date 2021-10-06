@@ -117,13 +117,11 @@ static const struct file_operations ulong_fops = {
 	.llseek		= default_llseek,
 };
 
-
 static const struct file_operations ulong_ro_fops = {
 	.read		= ulong_read_file,
 	.open		= simple_open,
 	.llseek		= default_llseek,
 };
-
 
 static int __oprofilefs_create_file(struct dentry *root, char const *name,
 	const struct file_operations *fops, int perm, void *priv)
@@ -131,25 +129,24 @@ static int __oprofilefs_create_file(struct dentry *root, char const *name,
 	struct dentry *dentry;
 	struct inode *inode;
 
-	mutex_lock(&d_inode(root)->i_mutex);
+	inode_lock(d_inode(root));
 	dentry = d_alloc_name(root, name);
 	if (!dentry) {
-		mutex_unlock(&d_inode(root)->i_mutex);
+		inode_unlock(d_inode(root));
 		return -ENOMEM;
 	}
 	inode = oprofilefs_get_inode(root->d_sb, S_IFREG | perm);
 	if (!inode) {
 		dput(dentry);
-		mutex_unlock(&d_inode(root)->i_mutex);
+		inode_unlock(d_inode(root));
 		return -ENOMEM;
 	}
 	inode->i_fop = fops;
 	inode->i_private = priv;
 	d_add(dentry, inode);
-	mutex_unlock(&d_inode(root)->i_mutex);
+	inode_unlock(d_inode(root));
 	return 0;
 }
-
 
 int oprofilefs_create_ulong(struct dentry *root,
 	char const *name, unsigned long *val)
@@ -184,13 +181,11 @@ int oprofilefs_create_ro_atomic(struct dentry *root,
 					&atomic_ro_fops, 0444, val);
 }
 
-
 int oprofilefs_create_file(struct dentry *root,
 	char const *name, const struct file_operations *fops)
 {
 	return __oprofilefs_create_file(root, name, fops, 0644, NULL);
 }
-
 
 int oprofilefs_create_file_perm(struct dentry *root,
 	char const *name, const struct file_operations *fops, int perm)
@@ -198,31 +193,29 @@ int oprofilefs_create_file_perm(struct dentry *root,
 	return __oprofilefs_create_file(root, name, fops, perm, NULL);
 }
 
-
 struct dentry *oprofilefs_mkdir(struct dentry *parent, char const *name)
 {
 	struct dentry *dentry;
 	struct inode *inode;
 
-	mutex_lock(&d_inode(parent)->i_mutex);
+	inode_lock(d_inode(parent));
 	dentry = d_alloc_name(parent, name);
 	if (!dentry) {
-		mutex_unlock(&d_inode(parent)->i_mutex);
+		inode_unlock(d_inode(parent));
 		return NULL;
 	}
 	inode = oprofilefs_get_inode(parent->d_sb, S_IFDIR | 0755);
 	if (!inode) {
 		dput(dentry);
-		mutex_unlock(&d_inode(parent)->i_mutex);
+		inode_unlock(d_inode(parent));
 		return NULL;
 	}
 	inode->i_op = &simple_dir_inode_operations;
 	inode->i_fop = &simple_dir_operations;
 	d_add(dentry, inode);
-	mutex_unlock(&d_inode(parent)->i_mutex);
+	inode_unlock(d_inode(parent));
 	return dentry;
 }
-
 
 static int oprofilefs_fill_super(struct super_block *sb, void *data, int silent)
 {

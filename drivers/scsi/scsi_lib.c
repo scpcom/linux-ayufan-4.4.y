@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/bio.h>
 #include <linux/bitops.h>
 #include <linux/blkdev.h>
@@ -15,6 +17,12 @@
 #include <linux/scatterlist.h>
 #include <linux/blk-mq.h>
 #include <linux/ratelimit.h>
+#ifdef MY_ABC_HERE
+#include <linux/ata.h>
+#ifdef MY_ABC_HERE
+#include <linux/synolib.h>
+#endif  
+#endif  
 
 #include <scsi/scsi.h>
 #include <scsi/scsi_cmnd.h>
@@ -30,9 +38,12 @@
 #include "scsi_priv.h"
 #include "scsi_logging.h"
 
-
 #define SG_MEMPOOL_NR		ARRAY_SIZE(scsi_sg_pools)
 #define SG_MEMPOOL_SIZE		2
+
+#ifdef MY_DEF_HERE
+extern int gSynoSASWriteConflictPanic;
+#endif  
 
 struct scsi_host_sg_pool {
 	size_t		size;
@@ -64,8 +75,12 @@ static struct scsi_host_sg_pool scsi_sg_pools[] = {
 };
 #undef SP
 
-struct kmem_cache *scsi_sdb_cache;
+#ifdef MY_ABC_HERE
+SDBADSECTORS grgSdBadSectors[CONFIG_SYNO_MAX_INTERNAL_DISK];
+int gBadSectorTest = 0;
+#endif  
 
+struct kmem_cache *scsi_sdb_cache;
 
 #define SCSI_QUEUE_DELAY	3
 
@@ -155,13 +170,15 @@ int scsi_execute(struct scsi_device *sdev, const unsigned char *cmd,
 	req->sense = sense;
 	req->sense_len = 0;
 	req->retries = retries;
+#ifdef MY_ABC_HERE
+	req->timeout = ((sdev->scmd_timeout_sec*HZ) > timeout ? (sdev->scmd_timeout_sec*HZ) : timeout);
+#else  
 	req->timeout = timeout;
+#endif  
 	req->cmd_flags |= flags | REQ_QUIET | REQ_PREEMPT;
 
-	
 	blk_execute_rq(req->q, NULL, req, 1);
 
-	
 	if (unlikely(req->resid_len > 0 && req->resid_len <= bufflen))
 		memset(buffer + (bufflen - req->resid_len), 0, req->resid_len);
 
@@ -498,6 +515,58 @@ static void scsi_release_buffers(struct scsi_cmnd *cmd)
 		scsi_free_sgtable(cmd->prot_sdb, false);
 }
 
+#ifdef MY_DEF_HERE
+static void SynoSpinupDone(struct request *req, int uptodate)
+{
+	struct scsi_device *sdev = req->q->queuedata;
+
+	__blk_put_request(req->q, req);
+
+	SynoSpinupEnd(sdev);
+}
+
+static void SynoSubmitSpinupReq(struct scsi_device *device)
+{
+	struct request *req;
+	static int is_print = 0;
+
+	while (1) {
+		req = blk_get_request(device->request_queue, READ, GFP_ATOMIC);
+		if (!req) {
+			if (!is_print) {
+				printk(KERN_ERR, "%s: Can't get request, retry it", __func__);
+				is_print = 1;
+			}
+		} else {
+			break;
+		}
+	}
+
+	req->cmd[0] = START_STOP;
+	req->cmd[1] = 0;
+	req->cmd[2] = 0;
+	req->cmd[3] = 0;
+	req->cmd[4] = 1;  
+	req->cmd[5] = 0;
+
+	req->cmd_len = COMMAND_SIZE(req->cmd[0]);
+
+	req->cmd_type = REQ_TYPE_BLOCK_PC;
+	req->cmd_flags |= REQ_QUIET;
+	req->timeout = 60 * HZ;
+	req->retries = 5;
+
+	blk_execute_rq_nowait(req->q, NULL, req, 1, SynoSpinupDone);
+}
+
+static void SynoSpinupDisk(struct scsi_device *device)
+{
+	if (SynoSpinupBegin(device)) {
+		SynoSubmitSpinupReq(device);
+	}
+}
+#endif  
+
 static void scsi_release_bidi_buffers(struct scsi_cmnd *cmd)
 {
 	struct scsi_data_buffer *bidi_sdb = cmd->request->next_rq->special;
@@ -587,6 +656,215 @@ static int __scsi_error_from_host_byte(struct scsi_cmnd *cmd, int result)
 	return error;
 }
 
+#ifdef MY_ABC_HERE
+extern unsigned char
+blSectorNeedAutoRemap(struct scsi_cmnd *scsi_cmd, sector_t lba);
+
+static void
+syno_scsi_do_remap_done(struct request *req, int uptodate)
+{
+	__blk_put_request(req->q, req);
+}
+
+static unsigned int
+syno_scsi_do_remap(struct scsi_cmnd *scsi_cmd, sector_t badLba)
+{
+	unsigned int iRet = -1, iCheck = 0, i = 0;
+	unsigned int uSectors = 0;
+	struct request_queue *q = NULL;
+	u8 lbal = 0;
+	size_t size = 0;
+	struct scsi_device *device = NULL;
+	struct request *req = NULL;
+
+	if (NULL == scsi_cmd) {
+		printk("%s:%s(%d) Failed to get scsi_cmd", __FILE__, __FUNCTION__,  __LINE__);
+		goto ERR;
+	}
+
+	device = scsi_cmd->device;
+	if (NULL == device) {
+		printk("%s:%s(%d) Failed to get device", __FILE__, __FUNCTION__,  __LINE__);
+		goto ERR;
+	}
+
+	q = device->request_queue;
+	if (NULL == q) {
+		printk("%s:%s(%d) Failed to get request_queue\n", __FILE__, __FUNCTION__,  __LINE__);
+		goto ERR;
+	}
+
+	uSectors = queue_physical_block_size(q) / queue_logical_block_size(q);
+	lbal = (u8)(badLba & 0xff);
+	lbal = (lbal & (~(uSectors - 1)));  
+	size = SYNO_SCSI_SECT_SIZE * uSectors;
+
+	req = blk_get_request(q, WRITE, GFP_ATOMIC);
+	if (NULL == req) {
+		printk("%s:%s(%d) Failed to get request\n", __FILE__, __FUNCTION__,  __LINE__);
+		goto ERR;
+	}
+
+	req->cmd[0] = WRITE_16;
+	req->cmd[1] = 0;
+	 
+	req->cmd[2] = (u8)((badLba & 0xff00000000000000) >> 56);
+	req->cmd[3] = (u8)((badLba & 0xff000000000000) >> 48);
+	req->cmd[4] = (u8)((badLba & 0xff0000000000) >> 40);
+	req->cmd[5] = (u8)((badLba & 0xff00000000) >> 32);
+	req->cmd[6] = (u8)((badLba & 0xff000000) >> 24);
+	req->cmd[7] = (u8)((badLba & 0xff0000) >> 16);
+	req->cmd[8] = (u8)((badLba & 0xff00) >> 8);
+	req->cmd[9] = lbal;
+	 
+	req->cmd[10] = (u8)((uSectors & 0xff000000) >> 24);
+	req->cmd[11] = (u8)((uSectors & 0xff0000) >> 16);
+	req->cmd[12] = (u8)((uSectors & 0xff00) >> 8);
+	req->cmd[13] = (u8)(uSectors & 0xff);
+
+	req->cmd_len = COMMAND_SIZE(req->cmd[0]);
+
+	req->cmd_type = REQ_TYPE_BLOCK_PC;
+	req->cmd_flags |= REQ_QUIET;
+	req->timeout = 60 * HZ;
+	req->retries = 0;
+
+	iCheck = blk_rq_map_kern(q, req, page_address(ZERO_PAGE(0)), size, GFP_DMA | GFP_KERNEL);
+	if (0 != iCheck) {
+		printk("%s:%s(%d) blk_rq_map_kern return != 0\n", __FILE__, __FUNCTION__,  __LINE__);
+		goto ERR;
+	}
+
+	sdev_printk(KERN_INFO, device, "Insert write command :");
+	for (i = 0; i < req->cmd_len; ++i) {
+		printk("%02x ", req->cmd[i]);
+	}
+	printk("\n");
+
+	blk_execute_rq_nowait(q, NULL, req, 1, syno_scsi_do_remap_done);
+
+	iRet = 0;
+	goto OUT;
+ERR:
+	if (NULL != req) {
+		blk_put_request(req);
+	}
+OUT:
+	return iRet;
+}
+
+static int
+syno_scsi_check_ncq_fake_unc(const u8 * sense_buffer, int iSbLen)
+{
+	int iRet = 0;
+	const u8 * desc = NULL;
+	u8 format = 0;
+
+	if (7 > iSbLen) {
+		goto OUT;
+	}
+
+	format = 0x7f & sense_buffer[0];
+	if (0x72 == format || 0x73 == format) {
+		desc = scsi_sense_desc_find(sense_buffer, iSbLen, 0  );
+		if (desc && (0xa == desc[1])) {
+			iRet = SYNO_NCQ_FAKE_UNC & desc[SYNO_DESCRIPTOR_RESERVED_INDEX];
+		}
+	}
+OUT:
+	return iRet;
+}
+
+static unsigned int
+syno_scsi_writes_sector(struct scsi_cmnd *scsi_cmd)
+{
+	unsigned int iRet = -1, iCheck = 0;
+	sector_t badLba = 0;
+	u8 blIsWrite = 0;
+#ifdef MY_ABC_HERE
+	struct bio* b = NULL;
+	unsigned int len = 0;
+	int i = 0;
+#endif  
+
+	if (NULL == scsi_cmd) {
+		printk("%s:%s(%d) Failed to get scsi_cmd", __FILE__, __FUNCTION__,  __LINE__);
+		goto ERR;
+	}
+
+	if (NULL == scsi_cmd->request) {
+		printk("%s:%s(%d) Failed to get scsi_cmd request\n", __FILE__, __FUNCTION__,  __LINE__);
+		goto ERR;
+	}
+
+	if (NULL == scsi_cmd->sense_buffer) {
+		printk("%s:%s(%d) Failed to get scsi_cmd sense_buffer\n", __FILE__, __FUNCTION__,  __LINE__);
+		goto ERR;
+	}
+
+	if (NULL == scsi_cmd->cmnd) {
+		printk("%s:%s(%d) Failed to get scsi_cmd cmnd\n", __FILE__, __FUNCTION__,  __LINE__);
+		goto ERR;
+	}
+
+	iCheck = scsi_get_sense_info_fld(scsi_cmd->sense_buffer,
+			SCSI_SENSE_BUFFERSIZE,
+			(u64*) &badLba);
+	if (0 == iCheck) {
+		printk("%s:%s(%d) sense info in sense data invalid\n", __FILE__, __FUNCTION__,  __LINE__);
+		goto ERR;
+	}
+
+	if (syno_scsi_check_ncq_fake_unc(scsi_cmd->sense_buffer, SCSI_SENSE_BUFFERSIZE)) {
+		scmd_printk(KERN_INFO, scsi_cmd, "UNC ERROR code but NCQ abort, do NOT remap");
+		goto ERR;
+	}
+
+	switch (scsi_cmd->cmnd[0]) {
+		case WRITE_6:
+		case WRITE_10:
+		case WRITE_12:
+		case WRITE_16:
+		case WRITE_32:
+			blIsWrite = 1;
+			break;
+		default:
+			if (DMA_TO_DEVICE == scsi_cmd->sc_data_direction) {
+				blIsWrite = 1;
+			}
+	}
+
+	scmd_printk(KERN_INFO, scsi_cmd, "%s unc at %llu\n",
+		(blIsWrite) ? "write" : "read",
+		(unsigned long long)badLba);
+
+	if (!blIsWrite && !blSectorNeedAutoRemap(scsi_cmd, badLba)) {
+		goto ERR;
+	}
+
+#ifdef MY_ABC_HERE
+	 
+	if (!blIsWrite) {
+		for (b = scsi_cmd->request->bio; b; b = b->bi_next) {
+			len = 0;
+			for (i = 0; i < b->bi_vcnt; i++) {
+				len += b->bi_io_vec[i].bv_len;
+			}
+			if (b->bi_iter.bi_sector <= badLba && badLba < b->bi_iter.bi_sector + (len >> 9)) {
+				bio_set_flag(b, BIO_AUTO_REMAP);
+				printk("%s:%s(%d) set bio BIO_AUTO_REMAP bit on\n",
+					__FILE__, __FUNCTION__, __LINE__);
+			}
+		}
+	}
+#endif  
+
+	syno_scsi_do_remap(scsi_cmd, badLba);
+	iRet = 0;
+ERR:
+	return iRet;
+}
+#endif  
 
 void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 {
@@ -607,10 +885,66 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 			sense_deferred = scsi_sense_is_deferred(&sshdr);
 	}
 
-	if (req->cmd_type == REQ_TYPE_BLOCK_PC) { 
+#ifdef MY_DEF_HERE
+	 
+	if (1 == gSynoSASWriteConflictPanic) {
+		if (unlikely(RESERVATION_CONFLICT == status_byte(cmd->result) && COMMAND_COMPLETE == msg_byte(cmd->result) &&
+			(WRITE_6 == cmd->cmnd[0] ||
+			 WRITE_10 == cmd->cmnd[0] ||
+			 WRITE_12 == cmd->cmnd[0] ||
+			 WRITE_16 == cmd->cmnd[0] ||
+			 WRITE_32 == cmd->cmnd[0] ||
+			 WRITE_SAME == cmd->cmnd[0] ||
+			 WRITE_SAME_16 == cmd->cmnd[0] ||
+			 WRITE_SAME_32 == cmd->cmnd[0] ||
+			 WRITE_VERIFY == cmd->cmnd[0] ||
+			 WRITE_VERIFY_12 == cmd->cmnd[0] ||
+			 WRITE_LONG == cmd->cmnd[0] ||
+			 WRITE_LONG_2 == cmd->cmnd[0]))) {
+			scmd_printk(KERN_INFO, cmd, "Unhandled error code\n");
+			scsi_print_result(cmd, NULL, FAILED);
+			scsi_print_sense(cmd);
+			scsi_print_command(cmd);
+			panic("Reservation conflict!, try to reboot\n");
+		}
+	}
+#endif  
+
+#ifdef MY_DEF_HERE
+	 
+	if ((cmd->device->spinup_queue) &&
+		(status_byte(result) == CHECK_CONDITION) &&
+		(sshdr.sense_key == NOT_READY) &&
+		(sshdr.asc == 0x04)) {
+		switch (cmd->cmnd[0]) {
+			 
+			case TEST_UNIT_READY:
+			case REQUEST_SENSE:
+				 
+				break;
+			default:
+				switch (sshdr.ascq) {
+					case 0x02:  
+						SynoSpinupDisk(cmd->device);
+						 
+					case 0x01:  
+					case 0x11:  
+						action = ACTION_DELAYED_RETRY;
+						goto handle_cmd;
+						break;
+					default:
+						 
+						break;
+				}
+				break;
+		}
+	}
+#endif  
+
+	if (req->cmd_type == REQ_TYPE_BLOCK_PC) {  
 		if (result) {
 			if (sense_valid && req->sense) {
-				
+				 
 				int len = 8 + cmd->sense_buffer[7];
 
 				if (len > SCSI_SENSE_BUFFERSIZE)
@@ -732,9 +1066,31 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 				action = ACTION_FAIL;
 			break;
 		case VOLUME_OVERFLOW:
-			
+			 
 			action = ACTION_FAIL;
 			break;
+#ifdef MY_ABC_HERE
+		case MEDIUM_ERROR:
+			switch (sshdr.asc) {
+				case 0x11:
+					switch (sshdr.ascq) {
+						case 0x00:
+						case 0x04:
+						case 0x14:
+							syno_scsi_writes_sector(cmd);
+							action = ACTION_FAIL;
+							break;
+						default:
+							action = ACTION_FAIL;
+							break;
+					}
+					break;
+				default:
+					action = ACTION_FAIL;
+					break;
+			}
+			break;
+#endif  
 		default:
 			action = ACTION_FAIL;
 			break;
@@ -746,9 +1102,12 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 	    time_before(cmd->jiffies_at_alloc + wait_for, jiffies))
 		action = ACTION_FAIL;
 
+#ifdef MY_DEF_HERE
+handle_cmd:
+#endif  
 	switch (action) {
 	case ACTION_FAIL:
-		
+		 
 		if (!(req->cmd_flags & REQ_QUIET)) {
 			static DEFINE_RATELIMIT_STATE(_rs,
 					DEFAULT_RATELIMIT_INTERVAL,
@@ -818,6 +1177,56 @@ int scsi_init_io(struct scsi_cmnd *cmd)
 	error = scsi_init_sgtable(rq, &cmd->sdb);
 	if (error)
 		goto err_exit;
+
+#ifdef MY_ABC_HERE
+	if (0 < gBadSectorTest) {
+		sector_t badSector, curSector;
+		int i;
+		struct gendisk *disk = cmd->request->rq_disk;
+		char *diskname = NULL;
+		int max_support_disk = sizeof(grgSdBadSectors) / sizeof(SDBADSECTORS);
+
+		if (disk) {
+			diskname = disk->disk_name;
+			i = SynoGetInternalDiskSeq(diskname);
+			curSector = blk_rq_pos(cmd->request);
+			if (i < max_support_disk && grgSdBadSectors[i].uiEnable) {
+				int j;
+				for (j = 0; j < 100; j++) {
+					badSector = grgSdBadSectors[i].rgSectors[j];
+					if (curSector <= badSector && (curSector + blk_rq_sectors(cmd->request)) >= badSector) {
+						if (grgSdBadSectors[i].rgEnableSector[j] & EN_BAD_SECTOR_READ) {
+							if (READ == rq_data_dir(cmd->request)) {
+								printk("%s[%d]:%s [%s], found badsector at %llu of %s curSector %llu\n",
+									   __FILE__, __LINE__, __FUNCTION__,
+									   "read",
+									   (unsigned long long)badSector,
+									   diskname,
+									   (unsigned long long)curSector);
+								return BLKPREP_KILL;
+							} else {
+								grgSdBadSectors[i].rgEnableSector[j] &= ~EN_BAD_SECTOR_READ;
+							}
+						}
+						if (grgSdBadSectors[i].rgEnableSector[j] & EN_BAD_SECTOR_WRITE) {
+							if (WRITE == rq_data_dir(cmd->request)) {
+								printk("%s[%d]:%s [%s], found badsector at %llu of %s curSector %llu\n",
+									   __FILE__, __LINE__, __FUNCTION__,
+									   "write",
+									   (unsigned long long)badSector,
+									   diskname,
+									   (unsigned long long)curSector);
+								return BLKPREP_KILL;
+							}
+						}
+					} else if ( 0xFFFFFFFF == badSector) {
+						break;
+					}
+				}
+			}
+		}
+	}
+#endif  
 
 	if (blk_bidi_rq(rq)) {
 		if (!rq->q->mq_ops) {
@@ -966,18 +1375,23 @@ scsi_prep_state_check(struct scsi_device *sdev, struct request *req)
 {
 	int ret = BLKPREP_OK;
 
-	
 	if (unlikely(sdev->sdev_state != SDEV_RUNNING)) {
 		switch (sdev->sdev_state) {
 		case SDEV_OFFLINE:
 		case SDEV_TRANSPORT_OFFLINE:
-			
+			 
+#ifdef MY_ABC_HERE
+			if (printk_ratelimit()) {
+#endif  
 			sdev_printk(KERN_ERR, sdev,
 				    "rejecting I/O to offline device\n");
+#ifdef MY_ABC_HERE
+			}
+#endif  
 			ret = BLKPREP_KILL;
 			break;
 		case SDEV_DEL:
-			
+			 
 			sdev_printk(KERN_ERR, sdev,
 				    "rejecting I/O to dead device\n");
 			ret = BLKPREP_KILL;
@@ -1259,6 +1673,40 @@ static void scsi_softirq_done(struct request *rq)
 	}
 }
 
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+ 
+static void syno_disk_hiternation_cmd_printk(struct scsi_device *sdp, struct scsi_cmnd *cmd)
+{
+	 
+	if (SYNO_PORT_TYPE_SATA == sdp->host->hostt->syno_port_type ||
+		SYNO_PORT_TYPE_SAS  == sdp->host->hostt->syno_port_type) {
+		 
+		syno_do_hibernation_scsi_log(sdp->syno_disk_name);
+	} else if (SYNO_PORT_TYPE_USB == sdp->host->hostt->syno_port_type) {
+		char szBuf[128];
+		struct mm_struct *mm;
+		int len;
+		if (current) {
+			mm = current->mm;
+			if (mm) {
+				len = mm->arg_end - mm->arg_start;
+				memset(szBuf, 0, sizeof(szBuf));
+				memcpy(szBuf, (unsigned char *)mm->arg_start, len);
+				printk(KERN_WARNING"%s[%d]:%s(), %s: spin up by pid=%d, name=%s\n",
+					   __FILE__, __LINE__, __FUNCTION__,
+					   sdp->syno_disk_name, current->pid, szBuf);
+			} else {
+				printk(KERN_WARNING"%s[%d]:%s(), %s: spin up by pid = %d, current->mm = NULL\n",
+					   __FILE__, __LINE__, __FUNCTION__,
+					   sdp->syno_disk_name, current->pid);
+			}
+		} else {
+			printk(KERN_WARNING"%s[%d]:%s(), current = NULL\n",
+				   __FILE__, __LINE__, __FUNCTION__);
+		}
+	}
+}
+#endif  
 
 static int scsi_dispatch_cmd(struct scsi_cmnd *cmd)
 {
@@ -1294,6 +1742,74 @@ static int scsi_dispatch_cmd(struct scsi_cmnd *cmd)
 		cmd->result = (DID_ABORT << 16);
 		goto done;
 	}
+
+#ifdef MY_ABC_HERE
+	 
+	if (cmd->device->spindown &&
+	 
+		!(ATA_16 == cmd->cmnd[0] && (ATA_CMD_PMP_WRITE == cmd->cmnd[14] || ATA_CMD_PMP_READ == cmd->cmnd[14])) &&
+		TEST_UNIT_READY != cmd->cmnd[0]) {
+#ifdef MY_ABC_HERE
+		if (0 < gSynoHibernationLogLevel) {
+			syno_disk_hiternation_cmd_printk(cmd->device, cmd);
+		}
+#endif  
+		if (0 == cmd->device->do_standby_syncing) {
+			cmd->device->idle = jiffies;
+		}
+		cmd->device->spindown = 0;
+	}
+
+	if (0x0C == cmd->cmnd[0]) {
+		struct scatterlist *sg;
+		unsigned char* pBuffer;
+
+		if (cmd->sdb.table.nents) {
+			sg = (struct scatterlist *)cmd->sdb.table.sgl;
+			pBuffer = kmap_atomic(sg_page(sg)) + sg->offset;
+		} else {
+			pBuffer = (char *)cmd->sdb.table.sgl;
+		}
+
+		if (0xE0 == pBuffer[0]) {
+			cmd->device->spindown = 1;
+		}
+
+		if (cmd->sdb.table.nents) {
+			kunmap_atomic(pBuffer - sg->offset);
+		}
+	} else if (ATA_16 == cmd->cmnd[0]) {
+		 
+		if (0xE0 == cmd->cmnd[14]) {
+			cmd->device->spindown = 1;
+		}
+	} else if (START_STOP == cmd->cmnd[0]) {
+		if (0x01 == cmd->cmnd[4]) {
+			 
+#ifdef MY_ABC_HERE
+			if (0 < gSynoHibernationLogLevel) {
+				syno_disk_hiternation_cmd_printk(cmd->device, cmd);
+			}
+#endif  
+			if (0 == cmd->device->do_standby_syncing) {
+				cmd->device->idle = jiffies;
+			}
+		}
+	} else if (LOG_SENSE != cmd->cmnd[0] &&
+			TEST_UNIT_READY != cmd->cmnd[0] &&
+			SYNCHRONIZE_CACHE != cmd->cmnd[0]) {
+
+#ifdef MY_ABC_HERE
+			if (1 < gSynoHibernationLogLevel) {  
+				syno_disk_hiternation_cmd_printk(cmd->device, cmd);
+			}
+#endif  
+
+		if (0 == cmd->device->do_standby_syncing) {
+			cmd->device->idle = jiffies;
+		}
+	}
+#endif  
 
 	if (unlikely(host->shost_state == SHOST_DEL)) {
 		cmd->result = (DID_NO_CONNECT << 16);
@@ -1334,18 +1850,23 @@ static void scsi_request_fn(struct request_queue *q)
 	struct scsi_cmnd *cmd;
 	struct request *req;
 
-	
 	shost = sdev->host;
 	for (;;) {
 		int rtn;
-		
+		 
 		req = blk_peek_request(q);
 		if (!req)
 			break;
 
 		if (unlikely(!scsi_device_online(sdev))) {
+#ifdef MY_ABC_HERE
+			if (printk_ratelimit()) {
+#endif  
 			sdev_printk(KERN_ERR, sdev,
 				    "rejecting I/O to offline device\n");
+#ifdef MY_ABC_HERE
+			}
+#endif  
 			scsi_kill_request(req, q);
 			continue;
 		}

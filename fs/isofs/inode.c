@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/init.h>
 #include <linux/module.h>
 
@@ -316,6 +318,9 @@ static int parse_options(char *options, struct iso9660_options *popt)
 {
 	char *p;
 	int option;
+#ifdef MY_ABC_HERE
+	unsigned long ulOption;
+#endif
 
 	popt->map = 'n';
 	popt->rock = 1;
@@ -404,17 +409,29 @@ static int parse_options(char *options, struct iso9660_options *popt)
 		case Opt_ignore:
 			break;
 		case Opt_uid:
+#ifdef MY_ABC_HERE
+			if (SYNO_get_option_ul(&args[0], &ulOption))
+				return 0;
+			popt->uid = make_kuid(current_user_ns(), ulOption);
+#else
 			if (match_int(&args[0], &option))
 				return 0;
 			popt->uid = make_kuid(current_user_ns(), option);
+#endif  
 			if (!uid_valid(popt->uid))
 				return 0;
 			popt->uid_set = 1;
 			break;
 		case Opt_gid:
+#ifdef MY_ABC_HERE
+			if (SYNO_get_option_ul(&args[0], &ulOption))
+				return 0;
+			popt->gid = make_kgid(current_user_ns(), ulOption);
+#else
 			if (match_int(&args[0], &option))
 				return 0;
 			popt->gid = make_kgid(current_user_ns(), option);
+#endif  
 			if (!gid_valid(popt->gid))
 				return 0;
 			popt->gid_set = 1;

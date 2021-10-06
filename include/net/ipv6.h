@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #ifndef _NET_IPV6_H
 #define _NET_IPV6_H
 
@@ -308,6 +310,13 @@ static inline bool __ipv6_addr_needs_scope_id(int type)
 	       (type & IPV6_ADDR_MULTICAST &&
 		(type & (IPV6_ADDR_LOOPBACK|IPV6_ADDR_LINKLOCAL)));
 }
+
+#if defined(MY_ABC_HERE)
+static inline bool __ipv6_addr_is_link_local(int type)
+{
+	return type & IPV6_ADDR_LINKLOCAL;
+}
+#endif  
 
 static inline __u32 ipv6_iface_scope_id(const struct in6_addr *addr, int iface)
 {

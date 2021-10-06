@@ -190,6 +190,9 @@ extern int usb_stor_reset_resume(struct usb_interface *iface);
 #define usb_stor_reset_resume	NULL
 #endif
 
+#if defined(CONFIG_USB_ETRON_HUB)
+extern int usb_is_etron_hcd(struct usb_device *udev);
+#endif /* CONFIG_USB_ETRON_HUB */
 extern int usb_stor_pre_reset(struct usb_interface *iface);
 extern int usb_stor_post_reset(struct usb_interface *iface);
 

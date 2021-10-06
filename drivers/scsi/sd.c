@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/module.h>
 #include <linux/fs.h>
 #include <linux/kernel.h>
@@ -18,6 +20,9 @@
 #include <linux/string_helpers.h>
 #include <linux/async.h>
 #include <linux/slab.h>
+#ifdef MY_ABC_HERE
+#include <linux/pci.h>
+#endif  
 #include <linux/pm_runtime.h>
 #include <linux/pr.h>
 #include <asm/uaccess.h>
@@ -36,6 +41,16 @@
 #include "sd.h"
 #include "scsi_priv.h"
 #include "scsi_logging.h"
+
+#ifdef MY_ABC_HERE
+#include <linux/libata.h>
+#include <linux/usb.h>
+#include "../usb/storage/usb.h"
+#endif  
+#ifdef MY_DEF_HERE
+#include <linux/synolib.h>
+static DEFINE_IDA(cache_index_ida);
+#endif  
 
 MODULE_AUTHOR("Eric Youngdale");
 MODULE_DESCRIPTION("SCSI disk (sd) driver");
@@ -67,6 +82,32 @@ MODULE_ALIAS_SCSI_DEVICE(TYPE_RBC);
 #define SD_MINORS	0
 #endif
 
+#ifdef MY_ABC_HERE
+extern int gSynoHasDynModule;
+#endif  
+
+#ifdef MY_ABC_HERE
+extern int gSynoBootSATADOM;
+#endif  
+
+#ifdef MY_DEF_HERE
+
+struct SpinupQueue {
+	spinlock_t q_lock;
+	unsigned int q_id;
+	atomic_t q_spinup_quota;
+	struct list_head q_disk_list;
+	struct list_head q_head;
+};
+
+LIST_HEAD(SpinupListHead);
+DEFINE_SPINLOCK(SpinupListLock);
+
+#define MAX_ALLOWED_SPINUP_NUM  12
+atomic_t gSpinupCmdNum = ATOMIC_INIT(0);
+
+#endif  
+
 static void sd_config_discard(struct scsi_disk *, unsigned int);
 static void sd_config_write_same(struct scsi_disk *);
 static int  sd_revalidate_disk(struct gendisk *);
@@ -87,10 +128,28 @@ static void scsi_disk_release(struct device *cdev);
 static void sd_print_sense_hdr(struct scsi_disk *, struct scsi_sense_hdr *);
 static void sd_print_result(const struct scsi_disk *, const char *, int);
 
+#ifdef MY_ABC_HERE
+extern u8 syno_is_synology_pm(const struct ata_port *ap);
+#endif  
+#ifdef MY_DEF_HERE
+static DEFINE_IDA(usb_index_ida);
+static DEFINE_IDA(sas_index_ida);
+#ifdef CONFIG_SYNO_SAS_DISK_NAME_ISCSI_DEVICE
+static DEFINE_IDA(iscsi_index_ida);
+#endif  
+extern int g_is_sas_model;
+ 
+#define SCSI_HOST_SEARCH_DEPTH 7
+#endif  
+
+#if defined(MY_ABC_HERE)
+#define _isCDSM_() (syno_is_hw_version(HW_C2DSM))
+#define _isSynobootScsiDev_(sdp) (0 == (sdp->host->host_no | sdp->channel | sdp->id | sdp->lun))
+#endif  
+
 static DEFINE_SPINLOCK(sd_index_lock);
 static DEFINE_IDA(sd_index_ida);
-
-
+ 
 static DEFINE_MUTEX(sd_ref_mutex);
 
 static struct kmem_cache *sd_cdb_cache;
@@ -206,6 +265,207 @@ manage_start_stop_store(struct device *dev, struct device_attribute *attr,
 	return count;
 }
 static DEVICE_ATTR_RW(manage_start_stop);
+
+#ifdef MY_DEF_HERE
+
+static struct SpinupQueue *
+SpinupQueueFindById(unsigned int id)
+{
+	struct SpinupQueue *q;
+
+	list_for_each_entry(q, &SpinupListHead, q_head) {
+		if (q->q_id == id) {
+			return q;
+		}
+	}
+	return NULL;
+}
+
+static struct SpinupQueue *
+SpinupQueueAlloc(unsigned int id)
+{
+	struct SpinupQueue *qNew;
+
+	qNew = kmalloc(sizeof(struct SpinupQueue), GFP_KERNEL);
+	INIT_LIST_HEAD(&(qNew->q_disk_list));
+	INIT_LIST_HEAD(&(qNew->q_head));
+	qNew->q_id = id;
+	spin_lock_init(&(qNew->q_lock));
+	atomic_set(&(qNew->q_spinup_quota), 4);  
+
+	return qNew;
+}
+
+static int
+SpinupQueueDiskAdd(struct SpinupQueue *sq, struct scsi_device *sd)
+{
+	unsigned long flags;
+
+	spin_lock_irqsave(&(sq->q_lock), flags);
+
+	list_add_tail(&(sd->spinup_list), &(sq->q_disk_list));
+	sd->spinup_queue = sq;
+
+	spin_unlock_irqrestore(&(sq->q_lock), flags);
+	return 0;
+}
+
+static int
+SpinupQueueDiskRemove(struct SpinupQueue *pSQ, struct scsi_device *pSD)
+{
+	unsigned long flags;
+
+	if (NULL == pSD->spinup_queue) {
+		return 0;
+	}
+	spin_lock_irqsave(&(pSQ->q_lock), flags);
+
+	BUG_ON(pSQ != pSD->spinup_queue);
+
+	list_del(&(pSD->spinup_list));
+	pSD->spinup_queue = NULL;
+
+	spin_unlock_irqrestore(&(pSQ->q_lock), flags);
+	return 0;
+}
+
+static void
+SpinupQueueSet(struct scsi_device *sdp, unsigned int new_id)
+{
+	unsigned int old_id;
+	struct SpinupQueue *qOld;
+	struct SpinupQueue *qNew;
+
+	unsigned long flags;
+
+	spin_lock_irqsave(&SpinupListLock, flags);
+
+	old_id = sdp->spinup_queue_id;
+
+	if (old_id == new_id) {
+		 
+		spin_unlock_irqrestore(&SpinupListLock, flags);
+		return;
+	}
+	 
+	if (NULL != sdp->spinup_queue) {
+		unsigned long flags_sd;
+
+		qOld = sdp->spinup_queue;
+		BUG_ON(NULL == qOld);
+		SpinupQueueDiskRemove(qOld, sdp);
+
+		spin_lock_irqsave(&(qOld->q_lock), flags_sd);
+		if (list_empty(&(qOld->q_disk_list))) {
+			list_del(&(qOld->q_head));
+		}
+		spin_unlock_irqrestore(&(qOld->q_lock), flags_sd);
+	}
+	if (new_id) {  
+
+		qNew = SpinupQueueFindById(new_id);
+		 
+		if (NULL == qNew) {
+			 
+			qNew = SpinupQueueAlloc(new_id);
+			 
+			list_add_tail( &(qNew->q_head), &SpinupListHead);
+		}
+		 
+		SpinupQueueDiskAdd(qNew, sdp);
+
+	}
+	sdp->spinup_queue_id = new_id;
+
+	spin_unlock_irqrestore(&SpinupListLock, flags);
+
+}
+
+static ssize_t
+spinup_queue_id_show(struct device *dev, struct device_attribute *attr,
+			  char *buf)
+{
+	struct scsi_disk *sdkp = to_scsi_disk(dev);
+	struct scsi_device *sdp = sdkp->device;
+
+	return snprintf(buf, 20, "%u\n", sdp->spinup_queue_id);
+}
+
+static ssize_t
+spinup_queue_id_store(struct device *dev, struct device_attribute *attr,
+			   const char *buf, size_t count)
+{
+	struct scsi_disk *sdkp = to_scsi_disk(dev);
+	struct scsi_device *sdp = sdkp->device;
+	unsigned int new_id;
+
+	if (!capable(CAP_SYS_ADMIN))
+		return -EACCES;
+
+	new_id = simple_strtoul(buf, NULL, 10);
+
+	SpinupQueueSet(sdp, new_id);
+
+	return count;
+}
+static DEVICE_ATTR_RW(spinup_queue_id);
+
+int
+SynoSpinupBegin(struct scsi_device *device)
+{
+	int ret = 0;
+	struct SpinupQueue *q;
+
+	q = device->spinup_queue;
+	if (NULL == q) {
+		goto Return;
+	}
+	 
+	if (device->spinup_in_process) {
+		 
+		if (jiffies - device->spinup_timer > SYNO_SPINUP_RESEND_TIMER) {
+			device->spinup_timer = jiffies;
+			ret = 1;
+		}
+		goto Return;
+	}
+	 
+	if (atomic_read(&(device->spinup_queue->q_spinup_quota))) {
+		atomic_dec(&(device->spinup_queue->q_spinup_quota));
+	} else {
+		 
+		goto Return;
+	}
+
+	device->spinup_in_process = 1;
+	device->spinup_timer = jiffies;
+
+	ret = 1;
+Return:
+	return ret;
+}
+
+void SynoSpinupEnd(struct scsi_device *sdev)
+{
+	struct SpinupQueue *q;
+
+	q = sdev->spinup_queue;
+	atomic_inc(&(sdev->spinup_queue->q_spinup_quota));
+	sdev->spinup_in_process = 0;
+}
+
+int SynoSpinupRemove(struct scsi_device *sdev)
+{
+	unsigned long flags;
+	int ret;
+
+	spin_lock_irqsave(&SpinupListLock, flags);
+	ret = SpinupQueueDiskRemove(sdev->spinup_queue, sdev);
+	spin_unlock_irqrestore(&SpinupListLock, flags);
+
+	return ret;
+}
+#endif  
 
 static ssize_t
 allow_restart_show(struct device *dev, struct device_attribute *attr, char *buf)
@@ -448,6 +708,9 @@ static struct attribute *sd_disk_attrs[] = {
 	&dev_attr_FUA.attr,
 	&dev_attr_allow_restart.attr,
 	&dev_attr_manage_start_stop.attr,
+#ifdef MY_DEF_HERE
+	&dev_attr_spinup_queue_id.attr,
+#endif  
 	&dev_attr_protection_type.attr,
 	&dev_attr_protection_mode.attr,
 	&dev_attr_app_tag_own.attr,
@@ -1104,6 +1367,40 @@ static int sd_getgeo(struct block_device *bdev, struct hd_geometry *geo)
 	return 0;
 }
 
+#ifdef MY_ABC_HERE
+static int ScsiSetBadSector(struct gendisk *pDisk, SDBADSECTORS *pSectors)
+{
+	int iDrive = SynoGetInternalDiskSeq(pDisk->disk_name);
+	int max_support_disk = sizeof(grgSdBadSectors)/sizeof(SDBADSECTORS);
+
+	if (NULL == pSectors) {
+		return -EINVAL;
+	}
+
+	gBadSectorTest = 1;
+	if (iDrive >= 0 &&
+		iDrive < max_support_disk) {
+		if (copy_from_user(&grgSdBadSectors[iDrive], pSectors, sizeof(SDBADSECTORS))) {
+			return -EINVAL;
+		}
+
+		if (grgSdBadSectors[iDrive].uiEnable) {
+			int i;
+			for (i = 0; i < 100; i++) {
+				printk("%s[%d]:%s set bad sector: %u, max support disk: %d\n",
+					   __FILE__, __LINE__, pDisk->disk_name,
+					   grgSdBadSectors[iDrive].rgSectors[i], max_support_disk);
+				if (0xFFFFFFFF == grgSdBadSectors[iDrive].rgSectors[i]) {
+					break;
+				}
+			}
+		}
+		return 0;
+	} else {
+		return -EINVAL;
+	}
+}
+#endif  
 
 static int sd_ioctl(struct block_device *bdev, fmode_t mode,
 		    unsigned int cmd, unsigned long arg)
@@ -1121,18 +1418,39 @@ static int sd_ioctl(struct block_device *bdev, fmode_t mode,
 	if (error < 0)
 		return error;
 
-	
 	error = scsi_ioctl_block_when_processing_errors(sdp, cmd,
 			(mode & FMODE_NDELAY) != 0);
 	if (error)
 		goto out;
 
-	
 	switch (cmd) {
 		case SCSI_IOCTL_GET_IDLUN:
 		case SCSI_IOCTL_GET_BUS_NUMBER:
 			error = scsi_ioctl(sdp, cmd, p);
 			break;
+#ifdef MY_ABC_HERE
+		case SCSI_IOCTL_SET_BADSECTORS:
+			return ScsiSetBadSector(disk, p);
+#endif  
+#ifdef MY_ABC_HERE
+		case SD_IOCTL_IDLE:
+			return (jiffies - sdp->idle) / HZ + 1;
+		case SD_IOCTL_SUPPORT_SLEEP:
+		{
+			const int iCanSleep = sdp->nospindown ? 0 : 1;
+			if (copy_to_user(p, &iCanSleep, sizeof(iCanSleep))) {
+				return -EINVAL;
+			}
+			return 0;
+		}
+#endif  
+#ifdef MY_DEF_HERE
+		case SD_IOCTL_SASHOST_DISK_LED:
+			if (NULL == sdp->host->hostt->syno_set_sashost_disk_led){
+				break;
+			}
+			return sdp->host->hostt->syno_set_sashost_disk_led(sdp, arg);
+#endif  
 		default:
 			error = scsi_cmd_blk_ioctl(bdev, mode, cmd, p);
 			if (error != -ENOTTY)
@@ -2233,6 +2551,27 @@ static void sd_read_app_tag_own(struct scsi_disk *sdkp, unsigned char *buffer)
 	return;
 }
 
+#ifdef MY_ABC_HERE
+ 
+int
+syno_get_ata_identity(struct scsi_device *sdev, u16 *id)
+{
+	unsigned char scsi_cmd[MAX_COMMAND_SIZE] = {0};
+
+	scsi_cmd[0] = ATA_16;
+	scsi_cmd[1] = 0x08;  
+	scsi_cmd[2] = 0x0e;  
+	scsi_cmd[14] = ATA_CMD_ID_ATA;
+
+	if (scsi_execute_req(sdev, scsi_cmd, DMA_FROM_DEVICE,
+		id, 512, NULL, 10 * HZ, 5, NULL)) {
+		return 0;
+	}
+
+	return 1;
+}
+EXPORT_SYMBOL(syno_get_ata_identity);
+#endif  
 
 static void sd_read_block_limits(struct scsi_disk *sdkp)
 {
@@ -2267,18 +2606,29 @@ static void sd_read_block_limits(struct scsi_disk *sdkp)
 
 		sdkp->unmap_granularity = get_unaligned_be32(&buffer[28]);
 
+#ifdef MY_DEF_HERE
+#define SYNO_MD_CHUNK_SIZE 65536
+	 
+	if (1 == g_is_sas_model && (SYNO_MD_CHUNK_SIZE >> 9) < sdkp->unmap_granularity) {
+		u16 id[ATA_ID_WORDS] = {0};
+		if (syno_get_ata_identity(sdkp->device, id) && ata_id_has_trim(id)) {
+			sdkp->unmap_granularity = 1;
+		}
+	}
+#endif  
+
 		if (buffer[32] & 0x80)
 			sdkp->unmap_alignment =
 				get_unaligned_be32(&buffer[32]) & ~(1 << 31);
 
-		if (!sdkp->lbpvpd) { 
+		if (!sdkp->lbpvpd) {  
 
 			if (sdkp->max_unmap_blocks)
 				sd_config_discard(sdkp, SD_LBP_UNMAP);
 			else
 				sd_config_discard(sdkp, SD_LBP_WS16);
 
-		} else {	
+		} else {	 
 			if (sdkp->lbpu && sdkp->max_unmap_blocks && !sdkp->lbprz)
 				sd_config_discard(sdkp, SD_LBP_UNMAP);
 			else if (sdkp->lbpws)
@@ -2401,9 +2751,23 @@ static int sd_revalidate_disk(struct gendisk *disk)
 		goto out;
 	}
 
-	sd_spinup_disk(sdkp);
+#ifdef MY_DEF_HERE
+	if (1 == g_is_sas_model) {
+		 
+		while (MAX_ALLOWED_SPINUP_NUM < atomic_read(&(gSpinupCmdNum))) {
+			msleep(1000);
+		}
 
-	
+		atomic_inc(&(gSpinupCmdNum));
+		sd_spinup_disk(sdkp);
+		atomic_dec(&(gSpinupCmdNum));
+	} else {
+#endif  
+	sd_spinup_disk(sdkp);
+#ifdef MY_DEF_HERE
+	}
+#endif  
+
 	if (sdkp->media_present) {
 		sd_read_capacity(sdkp, buffer);
 
@@ -2447,6 +2811,26 @@ static int sd_revalidate_disk(struct gendisk *disk)
 	return 0;
 }
 
+#ifdef MY_ABC_HERE
+extern int syno_ida_get_new(struct ida *idp, int starting_id, int *id);
+#endif  
+
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+ 
+static int syno_sd_format_numeric_disk_name(char *prefix, int synoindex, char *buf, int buflen)
+{
+	 
+	if (buflen <= (strlen(prefix) + (synoindex + 1)/10 + 1)) {
+		return -EINVAL;
+	}
+
+	if (snprintf(buf, buflen, "%s%d", prefix, synoindex + 1) <= 0) {
+		return -EINVAL;
+	}
+
+	return 0;
+}
+#endif  
 
 static void sd_unlock_native_capacity(struct gendisk *disk)
 {
@@ -2534,6 +2918,143 @@ static void sd_probe_async(void *data, async_cookie_t cookie)
 	put_device(&sdkp->dev);
 }
 
+#ifdef MY_ABC_HERE
+static bool syno_find_synoboot(void)
+{
+	bool find = false;
+	struct scsi_disk *sdisk = NULL;
+	struct class_dev_iter iter;
+	struct device *dev;
+
+	class_dev_iter_init(&iter, &sd_disk_class, NULL, NULL);
+	dev = class_dev_iter_next(&iter);
+	while (dev) {
+		if (!dev->parent) {
+			dev = class_dev_iter_next(&iter);
+			continue;
+		}
+		sdisk = dev_get_drvdata(dev->parent);
+		if (sdisk && sdisk->disk) {
+			if (0 == strcmp(CONFIG_SYNO_USB_FLASH_DEVICE_NAME, sdisk->disk->disk_name)) {
+				find = true;
+				goto OUT;
+			}
+		}
+		dev = class_dev_iter_next(&iter);
+	}
+OUT:
+	class_dev_iter_exit(&iter);
+	return find;
+}
+#endif  
+
+#ifdef MY_ABC_HERE
+static SYNO_DISK_TYPE syno_disk_type_get(struct device *dev)
+{
+	struct scsi_device *sdp = to_scsi_device(dev);
+#ifdef MY_ABC_HERE
+	struct device *virtdev = sdp->host->shost_gendev.parent;
+	struct pci_dev *pcidev = NULL;
+#endif  
+#ifdef MY_ABC_HERE
+	bool blIsSynoboot = false;
+#endif  
+
+#if defined(MY_ABC_HERE)
+	if (_isCDSM_() && _isSynobootScsiDev_(sdp)) {
+		return SYNO_DISK_SYNOBOOT;
+	}
+#endif  
+#ifdef MY_ABC_HERE
+	 
+	if (0 == strcmp(sdp->host->hostt->name, "iSCSI Initiator over TCP/IP")) {
+		return SYNO_DISK_ISCSI;
+	}
+#endif  
+
+#ifdef MY_ABC_HERE
+	if(strcmp(sdp->host->hostt->name, "TCM_Loopback") == 0){
+		return SYNO_DISK_ISCSI;
+	}
+#endif  
+
+#ifdef MY_ABC_HERE
+	if (strcmp(sdp->host->hostt->name, "Virtio SCSI HBA") == 0){
+#ifdef MY_ABC_HERE
+		while (virtdev) {
+			if (virtdev->driver && virtdev->driver->name && !strcmp(virtdev->driver->name, "virtio-pci")) {
+				pcidev = to_pci_dev(virtdev);
+				break;
+			}
+			virtdev = virtdev->parent;
+		}
+		if (pcidev && PCI_SLOT(pcidev->devfn) == CONFIG_SYNO_KVMX64_PCI_SLOT_BOOT) {
+			return SYNO_DISK_SYNOBOOT;
+		}
+#endif  
+		return SYNO_DISK_SATA;
+	}
+#endif  
+
+	if (SYNO_PORT_TYPE_USB == sdp->host->hostt->syno_port_type) {
+#ifdef MY_ABC_HERE
+		struct us_data *us = host_to_us(sdp->host);
+		struct usb_device *usbdev = us->pusb_dev;
+		 
+		if (NULL == us) {
+			return SYNO_DISK_USB;
+		}
+		if (NULL == usbdev) {
+			return SYNO_DISK_USB;
+		}
+		if (IS_SYNO_USBBOOT_ID_VENDOR(le16_to_cpu(usbdev->descriptor.idVendor)) &&
+			IS_SYNO_USBBOOT_ID_PRODUCT(le16_to_cpu(usbdev->descriptor.idProduct))) {
+#ifdef MY_ABC_HERE
+			if (0 == gSynoHasDynModule) {
+				return SYNO_DISK_USB;
+			}
+#endif  
+			if (!syno_find_synoboot()) {
+				return SYNO_DISK_SYNOBOOT;
+			}
+		}
+#endif  
+		return SYNO_DISK_USB;
+	}
+
+	if (SYNO_PORT_TYPE_SATA == sdp->host->hostt->syno_port_type) {
+#ifdef MY_ABC_HERE
+		 
+		if (1 == gSynoBootSATADOM) {
+			if (!strncmp(CONFIG_SYNO_SATA_DOM_VENDOR, sdp->vendor, strlen(CONFIG_SYNO_SATA_DOM_VENDOR))
+				&& !strncmp(CONFIG_SYNO_SATA_DOM_MODEL, sdp->model, strlen(CONFIG_SYNO_SATA_DOM_MODEL))) {
+				blIsSynoboot = true;
+			} else if (!strncmp(CONFIG_SYNO_SATA_DOM_VENDOR_SECOND_SRC, sdp->vendor, strlen(CONFIG_SYNO_SATA_DOM_VENDOR_SECOND_SRC))
+				&& !strncmp(CONFIG_SYNO_SATA_DOM_MODEL_SECOND_SRC, sdp->model, strlen(CONFIG_SYNO_SATA_DOM_MODEL_SECOND_SRC))) {
+				blIsSynoboot = true;
+			}
+#ifdef MY_ABC_HERE
+			if (blIsSynoboot && !syno_find_synoboot()) {
+				return SYNO_DISK_SYNOBOOT;
+			}
+#endif  
+		}
+#endif  
+		 
+#ifdef MY_DEF_HERE
+		if (sdp->host->isCacheSSD) {
+			return SYNO_DISK_CACHE;
+		}
+#endif  
+		return SYNO_DISK_SATA;
+	}
+	 
+	if (SYNO_PORT_TYPE_SAS == sdp->host->hostt->syno_port_type) {
+		return SYNO_DISK_SAS;
+	}
+	return SYNO_DISK_UNKNOWN;
+}
+#endif  
 
 static int sd_probe(struct device *dev)
 {
@@ -2542,6 +3063,24 @@ static int sd_probe(struct device *dev)
 	struct gendisk *gd;
 	int index;
 	int error;
+#ifdef	MY_ABC_HERE
+#ifdef MY_ABC_HERE
+	struct ata_port *ap;
+#endif  
+#ifdef MY_ABC_HERE
+	int start_index;
+#endif  
+	int iRetry = 0;
+	u32 want_idx = 0;
+#ifdef MY_DEF_HERE
+	u32 cache_idx = 0;
+#endif  
+#endif  
+#ifdef MY_DEF_HERE
+	u32 synoidx;
+	struct device *searchDev = dev;
+	int i = 0;
+#endif  
 
 	scsi_autopm_get_device(sdp);
 	error = -ENODEV;
@@ -2560,12 +3099,147 @@ static int sd_probe(struct device *dev)
 	if (!gd)
 		goto out_free;
 
+#ifdef MY_ABC_HERE
+	sdkp->synodisktype = syno_disk_type_get(dev);
+#endif  
 	do {
 		if (!ida_pre_get(&sd_index_ida, GFP_KERNEL))
 			goto out_put;
+#ifdef MY_DEF_HERE
+		if (SYNO_DISK_CACHE == sdkp->synodisktype) {
+			if (!ida_pre_get(&cache_index_ida, GFP_KERNEL))
+			goto out_put;
+		}
+#endif  
+
+#ifdef MY_DEF_HERE
+		if (1 == g_is_sas_model) {
+			 
+			switch (sdkp->synodisktype) {
+#ifdef CONFIG_SYNO_SAS_DISK_NAME_ISCSI_DEVICE
+				case SYNO_DISK_ISCSI:
+					if (!ida_pre_get(&iscsi_index_ida, GFP_KERNEL))
+						goto out_put;
+					break;
+#endif  
+				case SYNO_DISK_USB:
+					if (!ida_pre_get(&usb_index_ida, GFP_KERNEL))
+						goto out_put;
+					break;
+				case SYNO_DISK_SAS:
+					if (!ida_pre_get(&sas_index_ida, GFP_KERNEL))
+						goto out_put;
+					break;
+				default:
+					break;
+			}
+		}
+#endif  
+
+#ifdef MY_ABC_HERE
+		sdp->idle = jiffies;
+		sdp->nospindown = 0;
+		sdp->spindown = 0;
+#endif  
 
 		spin_lock(&sd_index_lock);
+
+#ifdef MY_ABC_HERE
+		switch (sdkp->synodisktype) {
+#ifdef MY_ABC_HERE
+			case SYNO_DISK_ISCSI:
+#ifdef MY_DEF_HERE
+				if (1 == g_is_sas_model) {
+					error = syno_ida_get_new(&iscsi_index_ida, 0, &synoidx);
+					want_idx = 0;
+					break;
+				}
+#endif  
+				want_idx = SYNO_ISCSI_DEVICE_INDEX;
+				break;
+#endif  
+#ifdef MY_ABC_HERE
+			case SYNO_DISK_SYNOBOOT:
+				want_idx = CONFIG_SYNO_USB_FLASH_DEVICE_INDEX;
+				break;
+#endif  
+			case SYNO_DISK_USB:
+#ifdef MY_DEF_HERE
+				if (1 == g_is_sas_model) {
+					error = syno_ida_get_new(&usb_index_ida, 0, &synoidx);
+					want_idx = 0;
+					break;
+				}
+#endif  
+				want_idx = CONFIG_SYNO_MAX_INTERNAL_DISK + 1;
+				break;
+#ifdef MY_DEF_HERE
+			case SYNO_DISK_CACHE:
+#endif  
+			case SYNO_DISK_SAS:
+			case SYNO_DISK_SATA:
+			default:
+#ifdef MY_DEF_HERE
+				if (1 == g_is_sas_model) {
+					error = syno_ida_get_new(&sas_index_ida, 0, &synoidx);
+					want_idx = 0;
+					break;
+				}
+#endif  
+				if (sdp->host->hostt->syno_index_get) {
+#if defined(MY_ABC_HERE)
+					if (_isCDSM_()) {
+						want_idx = (0 < sdp->lun ? sdp->lun - 1 : 0);
+					} else {
+#endif  
+						want_idx = sdp->host->hostt->syno_index_get(sdp->host, sdp->channel, sdp->id, sdp->lun);
+#if defined(MY_ABC_HERE)
+					}
+#endif  
+				} else {
+					want_idx = sdp->host->host_no;
+				}
+				break;
+		}
+
+		error = syno_ida_get_new(&sd_index_ida, want_idx, &index);
+#ifdef MY_DEF_HERE
+		if (1 == g_is_sas_model) {
+			sdkp->synoindex = synoidx;
+			goto SYNO_SKIP_WANT_RETRY;
+		}
+#endif  
+
+#ifdef MY_DEF_HERE
+		if (SYNO_DISK_CACHE == sdkp->synodisktype) {
+			error = syno_ida_get_new(&cache_index_ida, (want_idx - M2SATA_START_IDX), &cache_idx);
+			sdkp->synoindex = cache_idx;
+		}
+#endif  
+
+		while (want_idx != index &&
+			(SYNO_DISK_SATA == sdkp->synodisktype) && iRetry < 15) {
+			 
+			printk("want_idx %d index %d. delay and reget\n", want_idx, index);
+
+			ida_remove(&sd_index_ida, index);
+			spin_unlock(&sd_index_lock);
+
+			schedule_timeout_uninterruptible(HZ);
+
+			spin_lock(&sd_index_lock);
+			error = syno_ida_get_new(&sd_index_ida, want_idx, &index);
+
+			printk("want_idx %d index %d\n", want_idx, index);
+			iRetry++;
+		}
+#ifdef MY_DEF_HERE
+SYNO_SKIP_WANT_RETRY:
+#endif  
+
+#else
 		error = ida_get_new(&sd_index_ida, &index);
+#endif  
 		spin_unlock(&sd_index_lock);
 	} while (error == -EAGAIN);
 
@@ -2574,7 +3248,75 @@ static int sd_probe(struct device *dev)
 		goto out_put;
 	}
 
+#ifdef MY_ABC_HERE
+	gd->systemDisk = 0;
+	switch (sdkp->synodisktype) {
+#ifdef MY_ABC_HERE
+		case SYNO_DISK_ISCSI:
+#ifdef MY_DEF_HERE
+			if (1 == g_is_sas_model) {
+				error = syno_sd_format_numeric_disk_name(CONFIG_SYNO_SAS_ISCSI_DEVICE_PREFIX, synoidx, gd->disk_name, DISK_NAME_LEN);
+				printk("got iSCSI disk[%d]\n", synoidx);
+				break;
+			}
+#endif  
+			start_index = index - SYNO_ISCSI_DEVICE_INDEX;
+			error = sd_format_disk_name(CONFIG_SYNO_ISCSI_DEVICE_PREFIX, start_index, gd->disk_name, DISK_NAME_LEN);
+			printk("got iSCSI disk[%d]\n", start_index);
+			break;
+#endif  
+#ifdef MY_ABC_HERE
+		case SYNO_DISK_SYNOBOOT:
+			 
+			sprintf(gd->disk_name, CONFIG_SYNO_USB_FLASH_DEVICE_NAME);
+			error = 0;
+			break;
+#endif  
+
+		case SYNO_DISK_SAS:
+#ifdef MY_DEF_HERE
+			error = syno_sd_format_numeric_disk_name(CONFIG_SYNO_SAS_DEVICE_PREFIX, synoidx, gd->disk_name, DISK_NAME_LEN);
+			for (i = 0; i < SCSI_HOST_SEARCH_DEPTH && NULL != searchDev; i++) {
+				if (scsi_is_host_device(searchDev)) {
+					gd->systemDisk = 1;
+					break;
+				}
+				searchDev = searchDev->parent;
+			}
+#endif  
+			break;
+		case SYNO_DISK_SATA:
+#ifdef MY_ABC_HERE
+			ap = ata_shost_to_port(sdp->host);
+			 
+			if (NULL != ap && !syno_is_synology_pm(ap)) {
+#endif  
+			gd->systemDisk = 1;
+#ifdef MY_ABC_HERE
+			}
+#endif  
+			error = sd_format_disk_name(CONFIG_SYNO_SATA_DEVICE_PREFIX, index, gd->disk_name, DISK_NAME_LEN);
+			break;
+#ifdef MY_DEF_HERE
+		case SYNO_DISK_CACHE:
+			error = syno_sd_format_numeric_disk_name(CONFIG_SYNO_CACHE_DEVICE_PREFIX, cache_idx, gd->disk_name, DISK_NAME_LEN);
+			break;
+#endif  
+		case SYNO_DISK_USB:
+		default:
+#ifdef MY_DEF_HERE
+			if (1 == g_is_sas_model) {
+				error = syno_sd_format_numeric_disk_name(CONFIG_SYNO_SAS_USB_DEVICE_PREFIX, synoidx, gd->disk_name, DISK_NAME_LEN);
+				break;
+			}
+#endif  
+			error = sd_format_disk_name(CONFIG_SYNO_SATA_DEVICE_PREFIX, index, gd->disk_name, DISK_NAME_LEN);
+			break;
+	}
+#else
 	error = sd_format_disk_name("sd", index, gd->disk_name, DISK_NAME_LEN);
+#endif  
+
 	if (error) {
 		sdev_printk(KERN_WARNING, sdp, "SCSI disk (sd) name length exceeded.\n");
 		goto out_free_index;
@@ -2607,14 +3349,41 @@ static int sd_probe(struct device *dev)
 	get_device(dev);
 	dev_set_drvdata(dev, sdkp);
 
-	get_device(&sdkp->dev);	
+	get_device(&sdkp->dev);	 
 	async_schedule_domain(sd_probe_async, sdkp, &scsi_sd_probe_domain);
+#ifdef MY_ABC_HERE
+	strlcpy(sdp->syno_disk_name, gd->disk_name, BDEVNAME_SIZE);
+#endif  
 
 	return 0;
 
  out_free_index:
 	spin_lock(&sd_index_lock);
 	ida_remove(&sd_index_ida, index);
+#ifdef MY_DEF_HERE
+	if (1 == g_is_sas_model) {
+		switch (sdkp->synodisktype) {
+#ifdef CONFIG_SYNO_SAS_DISK_NAME_ISCSI_DEVICE
+			case SYNO_DISK_ISCSI:
+				ida_remove(&iscsi_index_ida, synoidx);
+				break;
+#endif  
+			case SYNO_DISK_USB:
+				ida_remove(&usb_index_ida, synoidx);
+				break;
+			case SYNO_DISK_SAS:
+				ida_remove(&sas_index_ida, synoidx);
+				break;
+			default:
+				break;
+		}
+	}
+#endif  
+#ifdef MY_DEF_HERE
+	if (SYNO_DISK_CACHE == sdkp->synodisktype) {
+		ida_remove(&cache_index_ida, cache_idx);
+	}
+#endif  
 	spin_unlock(&sd_index_lock);
  out_put:
 	put_disk(gd);
@@ -2658,6 +3427,30 @@ static void scsi_disk_release(struct device *dev)
 	
 	spin_lock(&sd_index_lock);
 	ida_remove(&sd_index_ida, sdkp->index);
+#ifdef MY_DEF_HERE
+	if (1 == g_is_sas_model) {
+		switch (sdkp->synodisktype) {
+#ifdef CONFIG_SYNO_SAS_DISK_NAME_ISCSI_DEVICE
+			case SYNO_DISK_ISCSI:
+				ida_remove(&iscsi_index_ida, sdkp->synoindex);
+				break;
+#endif  
+			case SYNO_DISK_USB:
+				ida_remove(&usb_index_ida, sdkp->synoindex);
+				break;
+			case SYNO_DISK_SAS:
+				ida_remove(&sas_index_ida, sdkp->synoindex);
+				break;
+			default:
+				break;
+		}
+	}
+#endif  
+#ifdef MY_DEF_HERE
+	if (SYNO_DISK_CACHE == sdkp->synodisktype) {
+		ida_remove(&cache_index_ida, sdkp->synoindex);
+	}
+#endif  
 	spin_unlock(&sd_index_lock);
 
 	disk->private_data = NULL;
@@ -2791,6 +3584,10 @@ static int __init init_sd(void)
 				    sd_default_probe, NULL, NULL);
 	}
 
+#ifdef MY_ABC_HERE
+	gBadSectorTest = 0;
+#endif  
+
 	if (!majors)
 		return -ENODEV;
 
@@ -2878,3 +3675,274 @@ static void sd_print_result(const struct scsi_disk *sdkp, const char *msg,
 			  msg, host_byte(result), driver_byte(result));
 }
 
+#ifdef MY_ABC_HERE
+int SynoSCSIGetDeviceIndex(struct block_device *bdev)
+{
+	struct gendisk *disk = NULL;
+
+	BUG_ON(bdev == NULL);
+	disk = bdev->bd_disk;
+
+#ifdef CONFIG_SYNO_SAS_DISK_NAME_ISCSI_DEVICE
+	if (g_is_sas_model) {
+		return container_of(disk->private_data, struct scsi_disk, driver)->synoindex;
+	}
+#endif  
+	return container_of(disk->private_data, struct scsi_disk, driver)->index;
+}
+EXPORT_SYMBOL(SynoSCSIGetDeviceIndex);
+#endif  
+
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+ 
+static unsigned char
+blIsScsiDevice(int major)
+{
+	unsigned char ret = 0;
+
+	switch (major) {
+	case SCSI_DISK0_MAJOR:
+	case SCSI_DISK1_MAJOR ... SCSI_DISK7_MAJOR:
+	case SCSI_DISK8_MAJOR ... SCSI_DISK15_MAJOR:
+		ret = 1;
+		break;
+	default:
+		break;
+	}
+
+	return ret;
+}
+#endif  
+
+#ifdef MY_ABC_HERE
+int
+IsDeviceDisappear(struct block_device *bdev)
+{
+	struct gendisk *disk = NULL;
+	struct scsi_disk *sdkp;
+	int ret = 0;
+
+	if (!bdev) {
+		WARN_ON(bdev == NULL);
+		goto END;
+	}
+
+	disk = bdev->bd_disk;
+	if (!disk) {
+		WARN_ON(disk == NULL);
+		goto END;
+	}
+
+	if (!blIsScsiDevice(disk->major)) {
+		 
+		printk("This is not a kind of scsi disk %d\n", disk->major);
+		goto END;
+	}
+
+	sdkp = container_of(disk->private_data, struct scsi_disk, driver);
+	if (!sdkp) {
+		WARN_ON(!sdkp);
+		goto END;
+	}
+
+	switch (sdkp->device->sdev_state) {
+	case SDEV_OFFLINE:
+	case SDEV_DEL:
+	case SDEV_CANCEL:
+		ret = 1;
+		break;
+	default:
+		break;
+	}
+
+END:
+	return ret;
+}
+
+EXPORT_SYMBOL(IsDeviceDisappear);
+#endif  
+
+#ifdef MY_ABC_HERE
+ 
+void
+PartitionRemapModeSet(struct gendisk *gd,
+					  struct hd_struct *phd,
+					  unsigned char blAutoRemap)
+{
+	struct scsi_disk *sdkp;
+	struct scsi_device *sdev;
+
+	if (!gd || !phd) {
+		goto END;
+	}
+
+	phd->auto_remap = blAutoRemap;
+	if (!blAutoRemap) {
+		if (!blIsScsiDevice(gd->major)) {
+			 
+			printk("This is not a kind of scsi disk %d\n", gd->major);
+			goto END;
+		}
+
+		sdkp = container_of(gd->private_data, struct scsi_disk, driver);
+		if (!sdkp) {
+			printk(" sdkp is NULL\n");
+			goto END;
+		}
+
+		sdev = sdkp->device;
+		if(!sdev) {
+			printk(" sdev is NULL\n");
+			goto END;
+		}
+		sdev->auto_remap = 0;
+	}
+END:
+	return;
+}
+
+void
+ScsiRemapModeSet(struct scsi_device *sdev,
+				 unsigned char blAutoRemap)
+{
+	struct scsi_disk *sdkp;
+	struct gendisk *gd;
+	struct hd_struct *phd;
+	int i = 0;
+
+	if (!sdev) {
+		goto END;
+	}
+
+	if (TYPE_DISK != sdev->type) {
+		printk("Only support scsi disk\n");
+		goto END;
+	}
+
+	sdev->auto_remap = blAutoRemap;
+	sdkp = dev_get_drvdata(&sdev->sdev_gendev);
+	if (!sdkp) {
+		goto END;
+	}
+
+	gd = sdkp->disk;
+	if (!gd) {
+		goto END;
+	}
+
+	for (i = 0; i < gd->minors; i++) {
+		phd = disk_get_part(gd, i+1);
+		if (!phd || !phd->nr_sects)
+			continue;
+
+		phd->auto_remap = blAutoRemap;
+	}
+END:
+	return;
+}
+
+void
+RaidRemapModeSet(struct block_device *bdev, unsigned char blAutoRemap)
+{
+	struct gendisk *disk = NULL;
+	struct scsi_disk *sdkp;
+
+	if (!bdev) {
+		WARN_ON(bdev == NULL);
+		return;
+	}
+
+	disk = bdev->bd_disk;
+	if (!disk) {
+		WARN_ON(disk == NULL);
+		return;
+	}
+
+	if (!blIsScsiDevice(disk->major)) {
+		 
+		printk("This is not a kind of scsi disk %d\n", disk->major);
+		return;
+	}
+
+	if (bdev->bd_part) {
+		 
+		bdev->bd_part->auto_remap = blAutoRemap;
+	} else {
+		 
+		sdkp = container_of(disk->private_data, struct scsi_disk, driver);
+		if (!sdkp) {
+			WARN_ON(!sdkp);
+			return;
+		}
+		ScsiRemapModeSet(sdkp->device, blAutoRemap);
+	}
+}
+
+unsigned char
+blSectorNeedAutoRemap(struct scsi_cmnd *scsi_cmd,
+					  sector_t lba)
+{
+	struct scsi_device *sdev;
+	struct scsi_disk *sdkp;
+	struct gendisk *gd;
+	struct hd_struct *phd;
+	char szName[BDEVNAME_SIZE];
+	sector_t start, end;
+	u8 ret = 0;
+	int i = 0;
+
+	if (!scsi_cmd) {
+		WARN_ON(1);
+		goto END;
+	}
+
+	sdev = scsi_cmd->device;
+	if (!sdev) {
+		WARN_ON(1);
+		goto END;
+	}
+
+	if (TYPE_DISK != sdev->type) {
+		printk("Only support scsi disk\n");
+		goto END;
+	}
+
+	if (sdev->auto_remap) {
+		ret = 1;
+		printk("%s auto remap is on\n", dev_name(&sdev->sdev_gendev));
+		goto END;
+	}
+
+	sdkp = dev_get_drvdata(&sdev->sdev_gendev);
+	if (!sdkp) {
+		goto END;
+	}
+
+	gd = sdkp->disk;
+	if (!gd) {
+		goto END;
+	}
+
+	for (i = 0; i < gd->minors; i++) {
+		phd = disk_get_part(gd, i+1);
+		if (!phd || !phd->nr_sects)
+			continue;
+
+		start = phd->start_sect;
+		end = phd->nr_sects + start - 1;
+
+		if (lba >= start && lba <= end) {
+			printk("lba %llu start %llu end %llu\n", (unsigned long long)lba, (unsigned long long)start, (unsigned long long)end);
+			ret = phd->auto_remap;
+			printk("%s auto_remap %u\n", disk_name(gd, i+1, szName), phd->auto_remap);
+		}
+	}
+END:
+	return ret;
+}
+
+EXPORT_SYMBOL(blSectorNeedAutoRemap);
+EXPORT_SYMBOL(RaidRemapModeSet);
+EXPORT_SYMBOL(ScsiRemapModeSet);
+EXPORT_SYMBOL(PartitionRemapModeSet);
+#endif  

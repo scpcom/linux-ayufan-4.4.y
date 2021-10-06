@@ -232,4 +232,54 @@ config MTD_XIP
 	  used for XIP purposes.  If you're not sure what this is all about
 	  then say N.
 
+config MTD_RTK_SFC
+        tristate "Realtek Serial Flash Controller for SPI Flash"
+        default y
+        depends on SYNO_RTD1296
+        help
+          This is used by SST/SPANSION/MXIC SPI Serial Flash with
+          Realtek Serial Flash Controller.
+
+config MTD_RTK_SFC_READ_MD
+        bool "Support MD Read"
+        depends on MTD_RTK_SFC
+        default y
+        help
+          Enable Move Data Engine(MD) to accelerate FLASH-to-DDR performance
+
+config MTD_RTK_SFC_WRITE_MD
+        bool "Support MD Write"
+        depends on MTD_RTK_SFC
+        default y
+        help
+          Enable Move Data Engine(MD) to accelerate DDR-to-FLASH performance
+
+config MTD_RTK_SFC_DEBUG
+        bool "Logging Serial Flash Controller Activities"
+        depends on MTD_RTK_SFC
+        default n
+        help
+          Enable Logging of serial flash controller activities for debug purpose
+
+config NOR_SUPPORT_MAX_ERASE_SIZE
+        bool "Enable max erase size support of nor flash driver"
+        depends on MTD_RTK_SFC
+        default n
+        help
+         Setting this to 'n' will not use max erase size for nor flash.
+
+config NOR_AUTO_HW_POLLING
+        bool "Enable auto hardware polling for nor flash driver"
+        depends on MTD_RTK_SFC
+        default y
+        help
+         Setting this to 'n' will disable auto hardware polling for nor flash driver.
+
+config NOR_ENTER_4BYTES_MODE
+        bool "Enable 4Bytes mode support for nor flash driver"
+        depends on MTD_RTK_SFC
+        default n
+        help
+         Setting this to 'y' will enable 4Bytes mode support for nor flash driver.
+
 endmenu

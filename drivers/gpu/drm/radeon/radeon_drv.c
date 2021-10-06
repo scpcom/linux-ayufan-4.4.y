@@ -400,6 +400,17 @@ static int radeon_pci_probe(struct pci_dev *pdev,
 {
 	int ret;
 
+	/*
+	 * Initialize amdkfd before starting radeon. If it was not loaded yet,
+	 * defer radeon probing
+	 */
+	ret = radeon_kfd_init();
+	if (ret == -EPROBE_DEFER)
+		return ret;
+
+	if (vga_switcheroo_client_probe_defer(pdev))
+		return -EPROBE_DEFER;
+
 	/* Get rid of things like offb */
 	ret = radeon_kick_out_firmware_fb(pdev);
 	if (ret)
@@ -635,12 +646,10 @@ static struct pci_driver radeon_kms_pci_driver = {
 
 static int __init radeon_init(void)
 {
-#ifdef CONFIG_VGA_CONSOLE
 	if (vgacon_text_force() && radeon_modeset == -1) {
 		DRM_INFO("VGACON disable radeon kernel modesetting.\n");
 		radeon_modeset = 0;
 	}
-#endif
 	/* set to modesetting by default if not nomodeset */
 	if (radeon_modeset == -1)
 		radeon_modeset = 1;

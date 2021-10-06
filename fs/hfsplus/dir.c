@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/errno.h>
 #include <linux/fs.h>
 #include <linux/slab.h>
@@ -28,6 +30,12 @@ static struct dentry *hfsplus_lookup(struct inode *dir, struct dentry *dentry,
 	int err;
 	u32 cnid, linkid = 0;
 	u16 type;
+
+#ifdef MY_ABC_HERE
+	if (dentry->d_name.len > NAME_MAX) {
+		return ERR_PTR(-ENAMETOOLONG);
+	}
+#endif  
 
 	sb = dir->i_sb;
 
@@ -272,9 +280,9 @@ static int hfsplus_dir_release(struct inode *inode, struct file *file)
 {
 	struct hfsplus_readdir_data *rd = file->private_data;
 	if (rd) {
-		mutex_lock(&inode->i_mutex);
+		inode_lock(inode);
 		list_del(&rd->list);
-		mutex_unlock(&inode->i_mutex);
+		inode_unlock(inode);
 		kfree(rd);
 	}
 	return 0;

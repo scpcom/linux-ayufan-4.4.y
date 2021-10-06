@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/dcache.h>
 #include <linux/fs.h>
 #include <linux/gfp.h>
@@ -11,6 +13,10 @@
 #include <linux/fsnotify_backend.h>
 #include "fsnotify.h"
 
+#ifdef MY_ABC_HERE
+#include <linux/nsproxy.h>
+extern struct rw_semaphore namespace_sem;
+#endif  
 
 void __fsnotify_inode_delete(struct inode *inode)
 {
@@ -235,6 +241,147 @@ out:
 	return ret;
 }
 EXPORT_SYMBOL_GPL(fsnotify);
+
+#ifdef MY_ABC_HERE
+ 
+static int notify_event(struct vfsmount *vfsmnt, struct dentry *dentry, __u32 mask)
+{
+	int ret = 0;
+	struct path path;
+	struct path root_path;
+	char *dentry_path = NULL;
+	char *dentry_buf = NULL;
+	struct mount * mnt = NULL;
+	__u32 test_mask = (mask & ~FS_EVENT_ON_CHILD);
+
+	if (!dentry) {
+		ret = -EINVAL;
+		goto end;
+	}
+	if (!vfsmnt) {
+		ret = -EINVAL;
+		goto end;
+	}
+
+	mnt = real_mount(vfsmnt);
+	if (!mnt) {
+		ret = -EINVAL;
+		goto end;
+	}
+
+	if (!(test_mask & mnt->mnt_fsnotify_mask)) {
+		ret = 0;
+		goto end;
+	}
+
+	memset(&path, 0, sizeof(struct path));
+	memset(&root_path, 0, sizeof(struct path));
+
+	path.mnt = vfsmnt;
+	path.dentry = dentry;
+	root_path.mnt = vfsmnt;
+	root_path.dentry = vfsmnt->mnt_root;
+
+	dentry_buf = kmalloc(PATH_MAX, GFP_NOFS);
+	if (!dentry_buf) {
+		ret = -ENOMEM;
+		goto end;
+	}
+
+	dentry_path = __d_path(&path, &root_path, dentry_buf, PATH_MAX-1);
+	if (IS_ERR_OR_NULL(dentry_path)) {
+		ret = -1;
+		goto end;
+	}
+
+	SYNOFsnotify(mask, &path, FSNOTIFY_EVENT_SYNO, dentry_path, 0);
+end:
+	if (dentry_buf)
+		kfree(dentry_buf);
+	return ret;
+}
+
+inline int SYNOFsnotify(__u32 mask, void *data, int data_is,
+	     const unsigned char *file_name, u32 cookie)
+{
+	struct hlist_node *mount_node = NULL;
+	struct fsnotify_mark *mount_mark = NULL;
+	struct mount *mnt = NULL;
+	int idx = 0;
+	 
+	__u32 test_mask = (mask & ~FS_EVENT_ON_CHILD);
+
+	if (data_is != FSNOTIFY_EVENT_SYNO)
+		return 0;
+
+	if (!((struct path *)data)->mnt)
+		return 0;
+
+	mnt = real_mount(((struct path *)data)->mnt);
+	if (!(test_mask & mnt->mnt_fsnotify_mask))
+		return 0;
+
+	idx = srcu_read_lock(&fsnotify_mark_srcu);
+
+	mount_node = srcu_dereference(mnt->mnt_fsnotify_marks.first,
+						 &fsnotify_mark_srcu);
+
+	while (mount_node) {
+
+		mount_mark = hlist_entry(srcu_dereference(mount_node, &fsnotify_mark_srcu),
+							struct fsnotify_mark, obj_list);
+
+		send_to_group(NULL, NULL, mount_mark, mask, data,
+					    data_is, cookie, file_name);
+
+		mount_node = srcu_dereference(mount_node->next,
+							 &fsnotify_mark_srcu);
+	}
+
+	srcu_read_unlock(&fsnotify_mark_srcu, idx);
+
+	return 0;
+}
+
+int SYNONotify(struct dentry *dentry, __u32 mask)
+{
+	struct list_head *head = NULL;
+	struct nsproxy *nsproxy = NULL;
+	int ret = 0;
+
+	if (!dentry) {
+		ret = -EINVAL;
+		goto ERR;
+	}
+
+	if (!dentry->d_sb) {
+		ret = -EINVAL;
+		goto ERR;
+	}
+
+	nsproxy = current->nsproxy;
+	if (nsproxy) {
+		struct mnt_namespace *mnt_space = nsproxy->mnt_ns;
+		if (mnt_space) {
+			down_read(&namespace_sem);
+			list_for_each(head, &mnt_space->list) {
+				struct mount *mnt = list_entry(head, struct mount, mnt_list);
+				if (mnt && mnt->mnt.mnt_sb == dentry->d_sb) {
+					struct vfsmount *vfsmnt = &mnt->mnt;
+					mntget(vfsmnt);
+					notify_event(vfsmnt, dentry, mask);  
+					mntput(vfsmnt);
+				}
+			}
+			up_read(&namespace_sem);
+		}
+	}
+
+ERR:
+	return ret;
+}
+EXPORT_SYMBOL(SYNONotify);
+#endif  
 
 static __init int fsnotify_init(void)
 {

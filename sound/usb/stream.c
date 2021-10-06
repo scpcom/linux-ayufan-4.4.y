@@ -1,6 +1,7 @@
-
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/init.h>
 #include <linux/slab.h>
 #include <linux/usb.h>
@@ -331,6 +332,11 @@ int snd_usb_add_audio_stream(struct snd_usb_audio *chip,
 		return err;
 	}
 	as->pcm = pcm;
+#if defined(MY_ABC_HERE)
+	if (pcm && pcm->card) {
+		pcm->card->low_level_dev_id = chip->usb_id;
+	}
+#endif  
 	pcm->private_data = as;
 	pcm->private_free = snd_usb_audio_pcm_free;
 	pcm->info_flags = 0;

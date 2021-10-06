@@ -1,11 +1,10 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/slab.h>
 #include "ulist.h"
 #include "ctree.h"
-
-
-
 
 void ulist_init(struct ulist *ulist)
 {
@@ -164,3 +163,68 @@ struct ulist_node *ulist_next(struct ulist *ulist, struct ulist_iterator *uiter)
 	node = list_entry(uiter->cur_list, struct ulist_node, list);
 	return node;
 }
+
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+int ulist_add_lru_adjust(struct ulist *ulist, u64 val, u64 aux, gfp_t gfp_mask)
+{
+	int ret;
+	struct ulist_node *node;
+
+	node = ulist_rbtree_search(ulist, val);
+	if (node) {
+		list_del(&node->list);
+		list_add_tail(&node->list, &ulist->nodes);
+		return 0;
+	}
+	node = kmalloc(sizeof(*node), gfp_mask);
+	if (!node)
+		return -ENOMEM;
+
+	node->val = val;
+	node->aux = aux;
+#ifdef CONFIG_BTRFS_DEBUG
+	node->seqnum = ulist->nnodes;
+#endif
+
+	ret = ulist_rbtree_insert(ulist, node);
+	ASSERT(!ret);
+	list_add_tail(&node->list, &ulist->nodes);
+	ulist->nnodes++;
+
+	return 1;
+}
+
+void ulist_remove_first(struct ulist *ulist)
+{
+	struct ulist_node *node;
+
+	if (!ulist->nnodes)
+		return;
+
+	node = list_entry(ulist->nodes.next, struct ulist_node, list);
+	rb_erase(&node->rb_node, &ulist->root);
+	list_del(&node->list);
+	ulist->nnodes--;
+	kfree(node);
+}
+#endif  
+
+#if defined(MY_ABC_HERE) || \
+    defined(MY_ABC_HERE)
+struct ulist_node * ulist_search(struct ulist *ulist, u64 val)
+{
+	struct rb_node *n = ulist->root.rb_node;
+	struct ulist_node *u = NULL;
+
+	while (n) {
+		u = rb_entry(n, struct ulist_node, rb_node);
+		if (u->val < val)
+			n = n->rb_right;
+		else if (u->val > val)
+			n = n->rb_left;
+		else
+			return u;
+	}
+	return NULL;
+}
+#endif  

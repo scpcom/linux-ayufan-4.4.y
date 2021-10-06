@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/kernel.h>
 #include <linux/mm.h>
 #include <linux/tty.h>
@@ -93,52 +95,49 @@ static int preferred_console = -1;
 int console_set_on_cmdline;
 EXPORT_SYMBOL(console_set_on_cmdline);
 
-
 static int console_may_schedule;
 
-
-
 enum log_flags {
-	LOG_NOCONS	= 1,	
-	LOG_NEWLINE	= 2,	
-	LOG_PREFIX	= 4,	
-	LOG_CONT	= 8,	
+	LOG_NOCONS	= 1,	 
+	LOG_NEWLINE	= 2,	 
+	LOG_PREFIX	= 4,	 
+	LOG_CONT	= 8,	 
 };
 
 struct printk_log {
-	u64 ts_nsec;		
-	u16 len;		
-	u16 text_len;		
-	u16 dict_len;		
-	u8 facility;		
-	u8 flags:5;		
-	u8 level:3;		
+	u64 ts_nsec;		 
+	u16 len;		 
+	u16 text_len;		 
+	u16 dict_len;		 
+	u8 facility;		 
+	u8 flags:5;		 
+	u8 level:3;		 
 };
-
 
 static DEFINE_RAW_SPINLOCK(logbuf_lock);
 
 #ifdef CONFIG_PRINTK
 DECLARE_WAIT_QUEUE_HEAD(log_wait);
-
+ 
 static u64 syslog_seq;
 static u32 syslog_idx;
 static enum log_flags syslog_prev;
 static size_t syslog_partial;
 
+#if defined(MY_DEF_HERE)
+static u64 dnv_console_seq = 0;
+static u32 dnv_console_idx = 0;
+#endif
 
 static u64 log_first_seq;
 static u32 log_first_idx;
 
-
 static u64 log_next_seq;
 static u32 log_next_idx;
-
 
 static u64 console_seq;
 static u32 console_idx;
 static enum log_flags console_prev;
-
 
 static u64 clear_seq;
 static u32 clear_idx;
@@ -2066,32 +2065,47 @@ void register_console(struct console *newcon)
 			pr_info("printk: continuation disabled due to ext consoles, expect more fragments in /dev/kmsg\n");
 
 	if (newcon->flags & CON_PRINTBUFFER) {
-		
+		 
 		raw_spin_lock_irqsave(&logbuf_lock, flags);
+#if defined(MY_DEF_HERE)
+		console_seq = dnv_console_seq;
+		console_idx = dnv_console_idx;
+#else
 		console_seq = syslog_seq;
 		console_idx = syslog_idx;
+#endif
 		console_prev = syslog_prev;
 		raw_spin_unlock_irqrestore(&logbuf_lock, flags);
-		
+		 
 		exclusive_console = newcon;
 	}
 	console_unlock();
 	console_sysfs_notify();
 
-	
 	pr_info("%sconsole [%s%d] enabled\n",
 		(newcon->flags & CON_BOOT) ? "boot" : "" ,
 		newcon->name, newcon->index);
 	if (bcon &&
 	    ((newcon->flags & (CON_CONSDEV | CON_BOOT)) == CON_CONSDEV) &&
 	    !keep_bootcon) {
-		
+		 
 		for_each_console(bcon)
 			if (bcon->flags & CON_BOOT)
 				unregister_console(bcon);
 	}
 }
 EXPORT_SYMBOL(register_console);
+
+#ifdef MY_DEF_HERE
+static void __ref pci_console_unmap_memory(void __iomem *addr, u32 size)
+{
+	if (!addr || !size)
+		return;
+
+	else
+		early_iounmap(addr, size);
+}
+#endif  
 
 int unregister_console(struct console *console)
 {
@@ -2101,6 +2115,11 @@ int unregister_console(struct console *console)
 	pr_info("%sconsole [%s%d] disabled\n",
 		(console->flags & CON_BOOT) ? "boot" : "" ,
 		console->name, console->index);
+
+#if defined(MY_DEF_HERE)
+	dnv_console_seq = console_seq;
+	dnv_console_idx = console_idx;
+#endif
 
 	res = _braille_unregister_console(console);
 	if (res)
@@ -2125,13 +2144,17 @@ int unregister_console(struct console *console)
 	if (!res && (console->flags & CON_EXTENDED))
 		nr_ext_console_drivers--;
 
-	
 	if (console_drivers != NULL && console->flags & CON_CONSDEV)
 		console_drivers->flags |= CON_CONSDEV;
 
 	console->flags &= ~CON_ENABLED;
 	console_unlock();
 	console_sysfs_notify();
+#ifdef MY_DEF_HERE
+	if (console->pcimapaddress) {
+		pci_console_unmap_memory(console->pcimapaddress, console->pcimapsize);
+	}
+#endif  
 	return res;
 }
 EXPORT_SYMBOL(unregister_console);

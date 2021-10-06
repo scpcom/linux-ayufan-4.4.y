@@ -1,30 +1,38 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _SCSI_DISK_H
 #define _SCSI_DISK_H
 
-
 #define SD_MAJORS	16
 
-
+#ifdef MY_ABC_HERE
+#define SD_TIMEOUT		(1024 * HZ)
+#elif defined(MY_ABC_HERE)
+#define SD_TIMEOUT		(60 * HZ)
+#else  
 #define SD_TIMEOUT		(30 * HZ)
+#endif  
 #define SD_MOD_TIMEOUT		(75 * HZ)
-
+ 
 #define SD_FLUSH_TIMEOUT_MULTIPLIER	2
 #define SD_WRITE_SAME_TIMEOUT	(120 * HZ)
 
-
 #define SD_MAX_RETRIES		5
 #define SD_PASSTHROUGH_RETRIES	1
+#ifdef MY_ABC_HERE
+#define SD_MAX_MEDIUM_TIMEOUTS 1024
+#else
 #define SD_MAX_MEDIUM_TIMEOUTS	2
-
+#endif  
 
 #define SD_BUF_SIZE		512
-
 
 #define SD_LAST_BUGGY_SECTORS	8
 
 enum {
-	SD_EXT_CDB_SIZE = 32,	
-	SD_MEMPOOL_SIZE = 2,	
+	SD_EXT_CDB_SIZE = 32,	 
+	SD_MEMPOOL_SIZE = 2,	 
 };
 
 enum {
@@ -35,21 +43,36 @@ enum {
 };
 
 enum {
-	SD_LBP_FULL = 0,	
-	SD_LBP_UNMAP,		
-	SD_LBP_WS16,		
-	SD_LBP_WS10,		
-	SD_LBP_ZERO,		
-	SD_LBP_DISABLE,		
+	SD_LBP_FULL = 0,	 
+	SD_LBP_UNMAP,		 
+	SD_LBP_WS16,		 
+	SD_LBP_WS10,		 
+	SD_LBP_ZERO,		 
+	SD_LBP_DISABLE,		 
 };
 
+#ifdef MY_ABC_HERE
+typedef enum __syno_disk_type {
+	SYNO_DISK_UNKNOWN = 0,
+	SYNO_DISK_SATA,
+	SYNO_DISK_USB,
+	SYNO_DISK_SYNOBOOT,
+	SYNO_DISK_ISCSI,
+	SYNO_DISK_SAS,
+#ifdef MY_DEF_HERE
+	SYNO_DISK_CACHE,
+#endif  
+	SYNO_DISK_END,  
+} SYNO_DISK_TYPE;
+#endif  
+
 struct scsi_disk {
-	struct scsi_driver *driver;	
+	struct scsi_driver *driver;	 
 	struct scsi_device *device;
 	struct device	dev;
 	struct gendisk	*disk;
 	atomic_t	openers;
-	sector_t	capacity;	
+	sector_t	capacity;	 
 	u32		max_xfer_blocks;
 	u32		opt_xfer_blocks;
 	u32		max_ws_blocks;
@@ -57,18 +80,24 @@ struct scsi_disk {
 	u32		unmap_granularity;
 	u32		unmap_alignment;
 	u32		index;
+#ifdef MY_ABC_HERE
+	SYNO_DISK_TYPE	synodisktype;
+#endif  
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+	u32		synoindex;
+#endif  
 	unsigned int	physical_block_size;
 	unsigned int	max_medium_access_timeouts;
 	unsigned int	medium_access_timed_out;
 	u8		media_present;
 	u8		write_prot;
-	u8		protection_type;
+	u8		protection_type; 
 	u8		provisioning_mode;
-	unsigned	ATO : 1;	
-	unsigned	cache_override : 1; 
-	unsigned	WCE : 1;	
-	unsigned	RCD : 1;	
-	unsigned	DPOFUA : 1;	
+	unsigned	ATO : 1;	 
+	unsigned	cache_override : 1;  
+	unsigned	WCE : 1;	 
+	unsigned	RCD : 1;	 
+	unsigned	DPOFUA : 1;	 
 	unsigned	first_scan : 1;
 	unsigned	lbpme : 1;
 	unsigned	lbprz : 1;

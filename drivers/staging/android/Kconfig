@@ -68,6 +68,10 @@ config SW_SYNC_USER
 
 source "drivers/staging/android/ion/Kconfig"
 
+if SYNO_LINARO_BACKPORT
+source "drivers/staging/android/fiq_debugger/Kconfig"
+endif # if SYNO_LINARO_BACKPORT
+
 endif # if ANDROID
 
 endmenu

@@ -434,7 +434,7 @@ static void tegra_plane_reset(struct drm_plane *plane)
 	struct tegra_plane_state *state;
 
 	if (plane->state)
-		__drm_atomic_helper_plane_destroy_state(plane, plane->state);
+		__drm_atomic_helper_plane_destroy_state(plane->state);
 
 	kfree(plane->state);
 	plane->state = NULL;
@@ -466,7 +466,7 @@ static struct drm_plane_state *tegra_plane_atomic_duplicate_state(struct drm_pla
 static void tegra_plane_atomic_destroy_state(struct drm_plane *plane,
 					     struct drm_plane_state *state)
 {
-	__drm_atomic_helper_plane_destroy_state(plane, state);
+	__drm_atomic_helper_plane_destroy_state(state);
 	kfree(state);
 }
 
@@ -660,7 +660,8 @@ static struct drm_plane *tegra_dc_primary_plane_create(struct drm_device *drm,
 
 	err = drm_universal_plane_init(drm, &plane->base, possible_crtcs,
 				       &tegra_primary_plane_funcs, formats,
-				       num_formats, DRM_PLANE_TYPE_PRIMARY);
+				       num_formats, DRM_PLANE_TYPE_PRIMARY,
+				       NULL);
 	if (err < 0) {
 		kfree(plane);
 		return ERR_PTR(err);
@@ -827,7 +828,8 @@ static struct drm_plane *tegra_dc_cursor_plane_create(struct drm_device *drm,
 
 	err = drm_universal_plane_init(drm, &plane->base, 1 << dc->pipe,
 				       &tegra_cursor_plane_funcs, formats,
-				       num_formats, DRM_PLANE_TYPE_CURSOR);
+				       num_formats, DRM_PLANE_TYPE_CURSOR,
+				       NULL);
 	if (err < 0) {
 		kfree(plane);
 		return ERR_PTR(err);
@@ -890,7 +892,8 @@ static struct drm_plane *tegra_dc_overlay_plane_create(struct drm_device *drm,
 
 	err = drm_universal_plane_init(drm, &plane->base, 1 << dc->pipe,
 				       &tegra_overlay_plane_funcs, formats,
-				       num_formats, DRM_PLANE_TYPE_OVERLAY);
+				       num_formats, DRM_PLANE_TYPE_OVERLAY,
+				       NULL);
 	if (err < 0) {
 		kfree(plane);
 		return ERR_PTR(err);
@@ -1012,7 +1015,7 @@ static void tegra_crtc_reset(struct drm_crtc *crtc)
 	struct tegra_dc_state *state;
 
 	if (crtc->state)
-		__drm_atomic_helper_crtc_destroy_state(crtc, crtc->state);
+		__drm_atomic_helper_crtc_destroy_state(crtc->state);
 
 	kfree(crtc->state);
 	crtc->state = NULL;
@@ -1048,7 +1051,7 @@ tegra_crtc_atomic_duplicate_state(struct drm_crtc *crtc)
 static void tegra_crtc_atomic_destroy_state(struct drm_crtc *crtc,
 					    struct drm_crtc_state *state)
 {
-	__drm_atomic_helper_crtc_destroy_state(crtc, state);
+	__drm_atomic_helper_crtc_destroy_state(state);
 	kfree(state);
 }
 
@@ -1732,7 +1735,7 @@ static int tegra_dc_init(struct host1x_client *client)
 	}
 
 	err = drm_crtc_init_with_planes(drm, &dc->base, primary, cursor,
-					&tegra_crtc_funcs);
+					&tegra_crtc_funcs, NULL);
 	if (err < 0)
 		goto cleanup;
 

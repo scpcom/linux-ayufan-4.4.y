@@ -1,22 +1,30 @@
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #ifndef _SCSI_SCSI_H
 #define _SCSI_SCSI_H
 
 #include <linux/types.h>
+#ifdef __KERNEL__
 #include <linux/scatterlist.h>
 #include <linux/kernel.h>
 #include <scsi/scsi_common.h>
+#endif  
 #include <scsi/scsi_proto.h>
 
+#ifdef __KERNEL__
 struct scsi_cmnd;
 
 enum scsi_timeouts {
 	SCSI_DEFAULT_EH_TIMEOUT		= 10 * HZ,
 };
 
+#else
+ 
+#endif  
 
 #define SCSI_MAX_SG_SEGMENTS	128
-
 
 #ifdef CONFIG_ARCH_HAS_SG_CHAIN
 #define SCSI_MAX_SG_CHAIN_SEGMENTS	2048
@@ -24,11 +32,11 @@ enum scsi_timeouts {
 #define SCSI_MAX_SG_CHAIN_SEGMENTS	SCSI_MAX_SG_SEGMENTS
 #endif
 
-
 #define SCSI_MAX_PROT_SG_SEGMENTS	0xFFFF
 
-
 #define SCAN_WILD_CARD	~0
+
+#ifdef __KERNEL__
 
 #ifdef CONFIG_ACPI
 struct acpi_bus_type;
@@ -40,37 +48,36 @@ extern void
 scsi_unregister_acpi_bus_type(struct acpi_bus_type *bus);
 #endif
 
+#endif  
 
 static inline int scsi_status_is_good(int status)
 {
-	
+	 
 	status &= 0xfe;
 	return ((status == SAM_STAT_GOOD) ||
 		(status == SAM_STAT_INTERMEDIATE) ||
 		(status == SAM_STAT_INTERMEDIATE_CONDITION_MET) ||
-		
+		 
 		(status == SAM_STAT_COMMAND_TERMINATED));
 }
 
-
-
-
 struct ccs_modesel_head {
-	__u8 _r1;			
-	__u8 medium;		
-	__u8 _r2;			
-	__u8 block_desc_length;	
-	__u8 density;		
-	__u8 number_blocks_hi;	
+	__u8 _r1;			 
+	__u8 medium;		 
+	__u8 _r2;			 
+	__u8 block_desc_length;	 
+	__u8 density;		 
+	__u8 number_blocks_hi;	 
 	__u8 number_blocks_med;
 	__u8 number_blocks_lo;
 	__u8 _r3;
-	__u8 block_length_hi;	
+	__u8 block_length_hi;	 
 	__u8 block_length_med;
 	__u8 block_length_lo;
 };
 
-
+#ifdef __KERNEL__
+ 
 #define SCSI_W_LUN_BASE 0xc100
 #define SCSI_W_LUN_REPORT_LUNS (SCSI_W_LUN_BASE + 1)
 #define SCSI_W_LUN_ACCESS_CONTROL (SCSI_W_LUN_BASE + 2)
@@ -80,15 +87,13 @@ static inline int scsi_is_wlun(u64 lun)
 {
 	return (lun & 0xff00) == SCSI_W_LUN_BASE;
 }
-
-
-
+#endif  
 
 #define COMMAND_COMPLETE    0x00
 #define EXTENDED_MESSAGE    0x01
 #define     EXTENDED_MODIFY_DATA_POINTER    0x00
 #define     EXTENDED_SDTR                   0x01
-#define     EXTENDED_EXTENDED_IDENTIFY      0x02    
+#define     EXTENDED_EXTENDED_IDENTIFY      0x02     
 #define     EXTENDED_WDTR                   0x03
 #define     EXTENDED_PPR                    0x04
 #define     EXTENDED_MODIFY_BIDI_DATA_PTR   0x05
@@ -175,55 +180,65 @@ static inline int scsi_is_wlun(u64 lun)
 #define sense_error(sense)  ((sense) & 0xf)
 #define sense_valid(sense)  ((sense) & 0x80)
 
-
 #define FORMAT_UNIT_TIMEOUT		(2 * 60 * 60 * HZ)
 #define START_STOP_TIMEOUT		(60 * HZ)
 #define MOVE_MEDIUM_TIMEOUT		(5 * 60 * HZ)
 #define READ_ELEMENT_STATUS_TIMEOUT	(5 * 60 * HZ)
 #define READ_DEFECT_DATA_TIMEOUT	(60 * HZ )
 
-
 #define IDENTIFY_BASE       0x80
 #define IDENTIFY(can_disconnect, lun)   (IDENTIFY_BASE |\
 		     ((can_disconnect) ?  0x40 : 0) |\
 		     ((lun) & 0x07))
 
-
-
 #define SCSI_UNKNOWN    0
 #define SCSI_1          1
 #define SCSI_1_CCS      2
 #define SCSI_2          3
-#define SCSI_3          4        
+#define SCSI_3          4         
 #define SCSI_SPC_2      5
 #define SCSI_SPC_3      6
-
 
 #define SCSI_INQ_PQ_CON         0x00
 #define SCSI_INQ_PQ_NOT_CON     0x01
 #define SCSI_INQ_PQ_NOT_CAP     0x03
 
-
-
-
-
 #define SCSI_IOCTL_GET_IDLUN		0x5382
-
-
-
 
 #define SCSI_IOCTL_PROBE_HOST		0x5385
 
-
 #define SCSI_IOCTL_GET_BUS_NUMBER	0x5386
 
-
 #define SCSI_IOCTL_GET_PCI		0x5387
-
 
 static inline __u32 scsi_to_u32(__u8 *ptr)
 {
 	return (ptr[0]<<24) + (ptr[1]<<16) + (ptr[2]<<8) + ptr[3];
 }
 
-#endif 
+#ifdef __KERNEL__
+ 
+#ifdef MY_ABC_HERE
+#define SCSI_IOCTL_SET_BADSECTORS    0x5400
+
+typedef struct _tag_SdBadSectors {
+	unsigned int     rgSectors[101];
+	unsigned short     rgEnableSector[101];
+	unsigned short     uiEnable;    
+} SDBADSECTORS, *PSDBADSECTORS;
+#define EN_BAD_SECTOR_READ      0x01
+#define EN_BAD_SECTOR_WRITE     0x02
+
+extern SDBADSECTORS grgSdBadSectors[CONFIG_SYNO_MAX_INTERNAL_DISK];
+extern int gBadSectorTest;
+#define SynoGetInternalDiskSeq(szBdevName) (szBdevName[2] - 'a')
+#endif  
+#endif  
+
+#ifdef MY_ABC_HERE
+#define SYNO_DESCRIPTOR_RESERVED_INDEX 3  
+#define SYNO_NCQ_FAKE_UNC 0x01  
+#define SYNO_SCSI_SECT_SIZE 512
+#endif  
+
+#endif  

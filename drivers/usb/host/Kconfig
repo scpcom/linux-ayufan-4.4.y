@@ -3,6 +3,33 @@
 #
 comment "USB Host Controller Drivers"
 
+config USB_ETRON_HCD
+	tristate "Etron HCD support"
+	depends on PCI
+	help
+	  The Etron EJ168A chip is USB 3.0 host controller.
+
+	  Enable this option to support this chip in host controller mode.
+	  If unsure, say N.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called etxhci-hcd.
+
+config USB_ETRON_HCD_DEBUGGING
+	bool "Debugging for the Etron host controller"
+	depends on USB_ETRON_HCD
+	---help---
+	  Say 'Y' to turn on debugging for the Etron host controller driver.
+	  This will spew debugging output, even in interrupt context.
+	  This should only be used for debugging Etron host driver bugs.
+
+	  If unsure, say N.
+
+config USB_ETRON_HUB
+	bool
+	depends on USB_ETRON_HCD
+	default y
+
 config USB_C67X00_HCD
 	tristate "Cypress C67x00 HCD support"
 	help
@@ -150,6 +177,15 @@ config USB_EHCI_FSL
 	select USB_FSL_MPH_DR_OF if OF
 	---help---
 	  Variation of ARC USB block used in some Freescale chips.
+
+config USB_EHCI_RTK
+	tristate "Support for RTK on-chip EHCI USB controller"
+	depends on ARCH_RTD129X
+	---help---
+	  The Realtek chips are dual-role host/peripheral USB controllers.
+
+	  Enable this option to support this chip in host controller mode.
+	  If unsure, say N.
 
 config USB_EHCI_MXC
 	tristate "Support for Freescale i.MX on-chip EHCI USB controller"
@@ -386,6 +422,16 @@ config USB_OHCI_HCD
 	  module will be called ohci-hcd.
 
 if USB_OHCI_HCD
+
+config USB_OHCI_RTK
+	bool "Support for RTK on-chip OHCI USB controller"
+	depends on USB_OHCI_HCD && (ARCH_RTK119X || ARCH_RTD129X)
+	---help---
+	  The Realtek chips are dual-role host/peripheral USB controllers.
+
+	  Enable this option to support this chip in host controller mode.
+	  If unsure, say N.
+
 
 config USB_OHCI_HCD_OMAP1
 	tristate "OHCI support for OMAP1/2 chips"

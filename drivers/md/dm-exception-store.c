@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include "dm-exception-store.h"
 
 #include <linux/ctype.h>
@@ -133,13 +135,19 @@ int dm_exception_store_set_chunk_size(struct dm_exception_store *store,
 				      unsigned chunk_size,
 				      char **error)
 {
-	
+	 
 	if (!is_power_of_2(chunk_size)) {
 		*error = "Chunk size is not a power of 2";
 		return -EINVAL;
 	}
 
-	
+#ifdef MY_ABC_HERE
+	 
+	if (4 == chunk_size) {
+		chunk_size = 8;
+	}
+#endif	 
+	 
 	if (chunk_size %
 	    (bdev_logical_block_size(dm_snap_cow(store->snap)->bdev) >> 9) ||
 	    chunk_size %

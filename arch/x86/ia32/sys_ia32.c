@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/kernel.h>
 #include <linux/sched.h>
 #include <linux/fs.h>
@@ -69,6 +71,158 @@ static int cp_stat64(struct stat64 __user *ubuf, struct kstat *stat)
 		return -EFAULT;
 	return 0;
 }
+
+#ifdef MY_ABC_HERE
+extern int __SYNOCaselessStat(char __user * filename, int no_follow_link, struct kstat *stat, int flags);
+#endif  
+
+#ifdef MY_ABC_HERE
+asmlinkage long sys32_SYNOCaselessStat64(char __user *filename, struct stat64 __user *statbuf)
+{
+#ifdef MY_ABC_HERE
+	long error = -1;
+	struct kstat stat;
+
+	error =  __SYNOCaselessStat(filename, 0, &stat, 0);
+	if (!error) {
+		error = cp_stat64(statbuf, &stat);
+	}
+
+	return error;
+#else
+	return -EOPNOTSUPP;
+#endif  
+}
+
+asmlinkage long sys32_SYNOCaselessLStat64(char __user *filename, struct stat64 __user *statbuf)
+{
+#ifdef MY_ABC_HERE
+	long error = -1;
+	struct kstat stat;
+
+	error =  __SYNOCaselessStat(filename, 1, &stat, 0);
+	if (!error) {
+		error = cp_stat64(statbuf, &stat);
+	}
+
+	return error;
+#else
+	return -EOPNOTSUPP;
+#endif  
+}
+#endif  
+
+#ifdef MY_ABC_HERE
+#include <linux/namei.h>
+
+extern int syno_vfs_fstat(unsigned int fd, struct kstat *stat, int stat_flags);
+extern int syno_vfs_fstatat(const char __user *name, struct kstat *stat, int lookup_flags, int stat_flags);
+
+static int SYNOStat64CopyToUser(struct kstat *kst, unsigned int flags, struct SYNOSTAT64 __user *synostat)
+{
+	int error = -EFAULT;
+
+	if (flags & SYNOST_STAT) {
+		error = cp_stat64(&synostat->st, kst);
+		if (error) {
+			goto out;
+		}
+	}
+#ifdef MY_ABC_HERE
+	if (flags & SYNOST_ARCHIVE_BIT) {
+		if (__put_user(kst->syno_archive_bit, &synostat->ext.archive_bit)){
+			goto out;
+		}
+	}
+#endif  
+
+#ifdef MY_ABC_HERE
+	if (flags & SYNOST_ARCHIVE_VER) {
+		if (__put_user(kst->syno_archive_version, &synostat->ext.archive_version)){
+			goto out;
+		}
+	}
+#endif  
+
+#ifdef MY_ABC_HERE
+	if (flags & SYNOST_CREATE_TIME) {
+		if (__put_user(kst->syno_create_time.tv_sec, &synostat->ext.create_time.tv_sec)){
+			goto out;
+		}
+		if (__put_user(kst->syno_create_time.tv_nsec, &synostat->ext.create_time.tv_nsec)){
+			goto out;
+		}
+	}
+#endif  
+	error = 0;
+out:
+	return error;
+}
+
+static long do_SYNOStat64(char __user * filename, int no_follow_link, unsigned int flags, struct SYNOSTAT64 __user *synostat)
+{
+	long error = -EINVAL;
+	struct kstat kst;
+
+	if (flags & SYNOST_IS_CASELESS) {
+#ifdef MY_ABC_HERE
+		error = __SYNOCaselessStat(filename, no_follow_link, &kst, flags);
+#else
+		error = -EOPNOTSUPP;
+#endif  
+	} else {
+		if (no_follow_link) {
+			error = syno_vfs_fstatat(filename, &kst, 0, flags);
+		} else {
+			error = syno_vfs_fstatat(filename, &kst, LOOKUP_FOLLOW, flags);
+		}
+	}
+
+	if (error) {
+		goto out;
+	}
+
+	error = SYNOStat64CopyToUser(&kst, flags, synostat);
+out:
+	return error;
+}
+#endif  
+
+#ifdef MY_ABC_HERE
+asmlinkage long sys32_SYNOStat64(char __user * filename, unsigned int flags, struct SYNOSTAT64 __user *synostat)
+{
+#ifdef MY_ABC_HERE
+	return do_SYNOStat64(filename, 0, flags, synostat);
+#else
+	return -EOPNOTSUPP;
+#endif  
+}
+
+asmlinkage long sys32_SYNOFStat64(unsigned int fd, unsigned int flags, struct SYNOSTAT64 __user *synostat)
+{
+#ifdef MY_ABC_HERE
+	int error;
+	struct kstat kst;
+
+	error = syno_vfs_fstat(fd, &kst, flags);
+	if (!error) {
+		error = SYNOStat64CopyToUser(&kst, flags, synostat);
+	}
+	return error;
+#else
+	return -EOPNOTSUPP;
+#endif  
+}
+
+asmlinkage long sys32_SYNOLStat64(char __user * filename, unsigned int flags, struct SYNOSTAT64 __user *synostat)
+{
+#ifdef MY_ABC_HERE
+	return do_SYNOStat64(filename, 1, flags, synostat);
+#else
+	return -EOPNOTSUPP;
+#endif  
+}
+#endif  
 
 asmlinkage long sys32_stat64(const char __user *filename,
 			     struct stat64 __user *statbuf)

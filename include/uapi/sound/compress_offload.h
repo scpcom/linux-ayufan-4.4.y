@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  compress_offload.h - compress offload header definations
  *
@@ -179,6 +182,9 @@ struct snd_compr_metadata {
 #define SNDRV_COMPRESS_DRAIN		_IO('C', 0x34)
 #define SNDRV_COMPRESS_NEXT_TRACK	_IO('C', 0x35)
 #define SNDRV_COMPRESS_PARTIAL_DRAIN	_IO('C', 0x36)
+#ifdef MY_DEF_HERE
+#define SNDRV_COMPRESS_GET_LATENCY	_IOR('C', 0xf0, int)
+#endif /* MY_DEF_HERE */
 /*
  * TODO
  * 1. add mmap support
@@ -187,4 +193,7 @@ struct snd_compr_metadata {
 #define SND_COMPR_TRIGGER_DRAIN 7 /*FIXME move this to pcm.h */
 #define SND_COMPR_TRIGGER_NEXT_TRACK 8
 #define SND_COMPR_TRIGGER_PARTIAL_DRAIN 9
+#ifdef MY_DEF_HERE
+#define SND_COMPR_TRIGGER_GET_LATENCY 0xf
+#endif /* MY_DEF_HERE */
 #endif

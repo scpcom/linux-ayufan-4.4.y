@@ -1,26 +1,28 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
+#include <linux/sched.h>		 
+#include <linux/kdebug.h>		 
+#include <linux/module.h>		 
+#include <linux/bootmem.h>		 
+#include <linux/kprobes.h>		 
+#include <linux/mmiotrace.h>		 
+#include <linux/perf_event.h>		 
+#include <linux/hugetlb.h>		 
+#include <linux/prefetch.h>		 
+#include <linux/context_tracking.h>	 
+#include <linux/uaccess.h>		 
 
-#include <linux/sched.h>		
-#include <linux/kdebug.h>		
-#include <linux/module.h>		
-#include <linux/bootmem.h>		
-#include <linux/kprobes.h>		
-#include <linux/mmiotrace.h>		
-#include <linux/perf_event.h>		
-#include <linux/hugetlb.h>		
-#include <linux/prefetch.h>		
-#include <linux/context_tracking.h>	
-#include <linux/uaccess.h>		
-
-#include <asm/traps.h>			
-#include <asm/pgalloc.h>		
-#include <asm/kmemcheck.h>		
-#include <asm/fixmap.h>			
-#include <asm/vsyscall.h>		
-#include <asm/vm86.h>			
+#include <asm/traps.h>			 
+#include <asm/pgalloc.h>		 
+#include <asm/kmemcheck.h>		 
+#include <asm/fixmap.h>			 
+#include <asm/vsyscall.h>		 
+#include <asm/vm86.h>			 
 
 #define CREATE_TRACE_POINTS
 #include <asm/trace/exceptions.h>
-
 
 enum x86_pf_error_code {
 
@@ -590,10 +592,17 @@ show_signal_msg(struct pt_regs *regs, unsigned long error_code,
 	if (!printk_ratelimit())
 		return;
 
+#ifdef MY_ABC_HERE
+	printk("%s%s[%d]: segfault at %lx ip %p sp %p error %lx",
+		task_pid_nr(tsk) > 1 ? KERN_WARNING : KERN_EMERG,
+		tsk->comm, task_pid_nr(tsk), address,
+		(void *)regs->ip, (void *)regs->sp, error_code);
+#else
 	printk("%s%s[%d]: segfault at %lx ip %p sp %p error %lx",
 		task_pid_nr(tsk) > 1 ? KERN_INFO : KERN_EMERG,
 		tsk->comm, task_pid_nr(tsk), address,
 		(void *)regs->ip, (void *)regs->sp, error_code);
+#endif  
 
 	print_vma_addr(KERN_CONT " in ", regs->ip);
 

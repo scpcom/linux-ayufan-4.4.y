@@ -98,6 +98,9 @@ EXPORT_SYMBOL(flush_dcache_page);
 /*
  * Additional functions defined in assembly.
  */
+#ifdef CONFIG_SYNO_RTD296
+EXPORT_SYMBOL(flush_cache_all);
+#endif
 EXPORT_SYMBOL(flush_icache_range);
 
 #ifdef CONFIG_TRANSPARENT_HUGEPAGE

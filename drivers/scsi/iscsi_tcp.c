@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/types.h>
 #include <linux/inet.h>
 #include <linux/slab.h>
@@ -835,6 +837,13 @@ static int iscsi_sw_tcp_slave_configure(struct scsi_device *sdev)
 	return 0;
 }
 
+#ifdef MY_ABC_HERE
+static int syno_iscsi_index_get(struct Scsi_Host *host, uint channel, uint id, uint lun)
+{
+	return SYNO_ISCSI_DEVICE_INDEX;
+}
+#endif  
+
 static struct scsi_host_template iscsi_sw_tcp_sht = {
 	.module			= THIS_MODULE,
 	.name			= "iSCSI Initiator over TCP/IP",
@@ -854,6 +863,9 @@ static struct scsi_host_template iscsi_sw_tcp_sht = {
 	.proc_name		= "iscsi_tcp",
 	.this_id		= -1,
 	.track_queue_depth	= 1,
+#ifdef MY_ABC_HERE
+	.syno_index_get 	= syno_iscsi_index_get,
+#endif  
 };
 
 static struct iscsi_transport iscsi_sw_tcp_transport = {

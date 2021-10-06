@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #ifndef _LINUX_CONSOLE_H_
 #define _LINUX_CONSOLE_H_ 1
 
@@ -99,9 +101,12 @@ struct console {
 	short	index;
 	int	cflag;
 	void	*data;
+#ifdef MY_DEF_HERE
+	void __iomem * pcimapaddress;
+	unsigned long pcimapsize;
+#endif  
 	struct	 console *next;
 };
-
 
 #define for_each_console(con) \
 	for (con = console_drivers; con != NULL; con = con->next)
@@ -156,6 +161,8 @@ void vcs_remove_sysfs(int index);
 
 #ifdef CONFIG_VGA_CONSOLE
 extern bool vgacon_text_force(void);
+#else
+static inline bool vgacon_text_force(void) { return false; }
 #endif
 
-#endif 
+#endif  

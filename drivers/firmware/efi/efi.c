@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * efi.c - EFI subsystem
  *
@@ -45,12 +48,21 @@ struct efi __read_mostly efi = {
 EXPORT_SYMBOL(efi);
 
 static bool disable_runtime;
+#ifdef MY_DEF_HERE
+static int __init setup_withefi(char *arg)
+{
+	disable_runtime = false;
+	return 0;
+}
+early_param("withefi", setup_withefi);
+#else /* MY_DEF_HERE */
 static int __init setup_noefi(char *arg)
 {
 	disable_runtime = true;
 	return 0;
 }
 early_param("noefi", setup_noefi);
+#endif /* MY_DEF_HERE */
 
 bool efi_runtime_disabled(void)
 {

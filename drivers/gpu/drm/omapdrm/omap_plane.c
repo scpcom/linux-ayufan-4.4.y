@@ -266,7 +266,7 @@ omap_plane_atomic_duplicate_state(struct drm_plane *plane)
 static void omap_plane_atomic_destroy_state(struct drm_plane *plane,
 					    struct drm_plane_state *state)
 {
-	__drm_atomic_helper_plane_destroy_state(plane, state);
+	__drm_atomic_helper_plane_destroy_state(state);
 	kfree(to_omap_plane_state(state));
 }
 
@@ -366,7 +366,7 @@ struct drm_plane *omap_plane_init(struct drm_device *dev,
 
 	ret = drm_universal_plane_init(dev, plane, (1 << priv->num_crtcs) - 1,
 				       &omap_plane_funcs, omap_plane->formats,
-				       omap_plane->nformats, type);
+				       omap_plane->nformats, type, NULL);
 	if (ret < 0)
 		goto error;
 

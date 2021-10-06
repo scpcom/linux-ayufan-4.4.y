@@ -1,12 +1,11 @@
-
-
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/scatterlist.h>
 #include <linux/slab.h>
 #include "xhci.h"
 #include "xhci-trace.h"
-
 
 dma_addr_t xhci_trb_virt_to_dma(struct xhci_segment *seg,
 		union xhci_trb *trb)
@@ -1102,6 +1101,32 @@ static void handle_vendor_event(struct xhci_hcd *xhci,
 		handle_cmd_completion(xhci, &event->event_cmd);
 }
 
+#ifdef MY_DEF_HERE
+static void xhci_giveback_error_urb(struct xhci_hcd *xhci,
+				int slot_id)
+{
+	struct xhci_virt_device *virt_dev;
+	int i;
+
+	virt_dev = xhci->devs[slot_id];
+	for (i = LAST_EP_INDEX; i > 0; i--) {
+			struct xhci_virt_ep *ep = &virt_dev->eps[i];
+			struct xhci_ring *ring = ep->ring;
+			if (!ring)
+					continue;
+
+			if (!list_empty(&ring->td_list)) {
+					struct xhci_td *cur_td = list_first_entry(&ring->td_list,
+							struct xhci_td,
+							td_list);
+					list_del_init(&cur_td->td_list);
+					if (!list_empty(&cur_td->cancelled_td_list))
+							list_del_init(&cur_td->cancelled_td_list);
+					xhci_giveback_urb_in_irq(xhci, cur_td, -EPROTO);
+			}
+	}
+}
+#endif  
 
 static unsigned int find_faked_portnum_from_hw_portnum(struct usb_hcd *hcd,
 		struct xhci_hcd *xhci, u32 port_id)
@@ -1236,14 +1261,27 @@ static void handle_port_status(struct xhci_hcd *xhci,
 			set_bit(faked_port_index, &bus_state->resuming_ports);
 			mod_timer(&hcd->rh_timer,
 				  bus_state->resume_done[faked_port_index]);
-			
+			 
 		}
 	}
+
+#ifdef MY_DEF_HERE
+	if (!(temp & PORT_CONNECT) &&
+			(temp & PORT_WRC)) {
+			slot_id = xhci_find_slot_id_by_port(hcd, xhci,
+					faked_port_index + 1);
+			if (slot_id && xhci->devs[slot_id]) {
+					xhci_warn(xhci, "device is plugged out, empty URBs\n");
+					xhci->devs[slot_id]->disconnected = true;
+					xhci_giveback_error_urb(xhci, slot_id);
+			}
+	}
+#endif  
 
 	if ((temp & PORT_PLC) && (temp & PORT_PLS_MASK) == XDEV_U0 &&
 			DEV_SUPERSPEED_ANY(temp)) {
 		xhci_dbg(xhci, "resume SS port %d finished\n", port_id);
-		
+		 
 		slot_id = xhci_find_slot_id_by_port(hcd, xhci,
 				faked_port_index + 1);
 		if (slot_id && xhci->devs[slot_id])

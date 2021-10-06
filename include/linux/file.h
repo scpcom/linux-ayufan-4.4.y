@@ -19,6 +19,9 @@ struct dentry;
 struct path;
 extern struct file *alloc_file(struct path *, fmode_t mode,
 	const struct file_operations *fop);
+#ifdef CONFIG_AUFS_FHSM
+extern struct file *get_empty_filp(void);
+#endif /* CONFIG_AUFS_FHSM */
 
 static inline void fput_light(struct file *file, int fput_needed)
 {

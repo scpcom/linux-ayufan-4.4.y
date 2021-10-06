@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * AppArmor security module
  *
@@ -32,9 +35,11 @@
 #include "include/context.h"
 #include "include/file.h"
 #include "include/ipc.h"
+#include "include/net.h"
 #include "include/path.h"
 #include "include/policy.h"
 #include "include/procattr.h"
+#include "include/mount.h"
 
 /* Flag indicating whether initialization completed */
 int apparmor_initialized __initdata;
@@ -113,7 +118,11 @@ static int apparmor_capget(struct task_struct *target, kernel_cap_t *effective,
 
 	rcu_read_lock();
 	cred = __task_cred(target);
+#ifdef MY_ABC_HERE
+	profile = aa_get_newest_cred_profile(cred);
+#else
 	profile = aa_cred_profile(cred);
+#endif
 
 	/*
 	 * cap_capget is stacked ahead of this and will
@@ -124,6 +133,9 @@ static int apparmor_capget(struct task_struct *target, kernel_cap_t *effective,
 		*permitted = cap_intersect(*permitted, profile->caps.allow);
 	}
 	rcu_read_unlock();
+#ifdef MY_ABC_HERE
+	aa_put_profile(profile);
+#endif
 
 	return 0;
 }
@@ -134,9 +146,16 @@ static int apparmor_capable(const struct cred *cred, struct user_namespace *ns,
 	struct aa_profile *profile;
 	int error = 0;
 
+#ifdef MY_ABC_HERE
+	profile = aa_get_newest_cred_profile(cred);
+#else
 	profile = aa_cred_profile(cred);
+#endif
 	if (!unconfined(profile))
 		error = aa_capable(profile, cap, audit);
+#ifdef MY_ABC_HERE
+	aa_put_profile(profile);
+#endif
 	return error;
 }
 
@@ -155,9 +174,16 @@ static int common_perm(int op, struct path *path, u32 mask,
 	struct aa_profile *profile;
 	int error = 0;
 
+#ifdef MY_ABC_HERE
+	profile = __aa_get_current_profile();
+#else
 	profile = __aa_current_profile();
+#endif
 	if (!unconfined(profile))
 		error = aa_path_perm(op, profile, path, 0, mask, cond);
+#ifdef MY_ABC_HERE
+	__aa_put_current_profile(profile);
+#endif
 
 	return error;
 }
@@ -382,7 +408,11 @@ static int apparmor_file_open(struct file *file, const struct cred *cred)
 		return 0;
 	}
 
+#ifdef MY_ABC_HERE
+	profile = aa_get_newest_cred_profile(cred);
+#else
 	profile = aa_cred_profile(cred);
+#endif
 	if (!unconfined(profile)) {
 		struct inode *inode = file_inode(file);
 		struct path_cond cond = { inode->i_uid, inode->i_mode };
@@ -392,6 +422,9 @@ static int apparmor_file_open(struct file *file, const struct cred *cred)
 		/* todo cache full allowed permissions set and state */
 		fcxt->allow = aa_map_file_to_perms(file);
 	}
+#ifdef MY_ABC_HERE
+	aa_put_profile(profile);
+#endif
 
 	return error;
 }
@@ -416,16 +449,28 @@ static void apparmor_file_free_security(struct file *file)
 static int common_file_perm(int op, struct file *file, u32 mask)
 {
 	struct aa_file_cxt *fcxt = file->f_security;
+#ifdef MY_ABC_HERE
+	struct aa_profile *profile, *fprofile = aa_get_newest_cred_profile(file->f_cred);
+#else
 	struct aa_profile *profile, *fprofile = aa_cred_profile(file->f_cred);
+#endif
 	int error = 0;
 
 	BUG_ON(!fprofile);
 
 	if (!file->f_path.mnt ||
 	    !mediated_filesystem(file->f_path.dentry))
+#ifdef MY_ABC_HERE
+		goto out;
+#else
 		return 0;
+#endif
 
+#ifdef MY_ABC_HERE
+	profile = __aa_get_current_profile();
+#else
 	profile = __aa_current_profile();
+#endif
 
 	/* revalidate access, if task is unconfined, or the cached cred
 	 * doesn't match or if the request is for more permissions than
@@ -437,6 +482,11 @@ static int common_file_perm(int op, struct file *file, u32 mask)
 	if (!unconfined(profile) && !unconfined(fprofile) &&
 	    ((fprofile != profile) || (mask & ~fcxt->allow)))
 		error = aa_file_perm(op, profile, file, mask);
+#ifdef MY_ABC_HERE
+	__aa_put_current_profile(profile);
+out:
+	aa_put_profile(fprofile);
+#endif
 
 	return error;
 }
@@ -489,6 +539,60 @@ static int apparmor_file_mprotect(struct vm_area_struct *vma,
 {
 	return common_mmap(OP_FMPROT, vma->vm_file, prot,
 			   !(vma->vm_flags & VM_SHARED) ? MAP_PRIVATE : 0);
+}
+
+static int apparmor_sb_mount(const char *dev_name, struct path *path, const char *type,
+			     unsigned long flags, void *data)
+{
+	struct aa_profile *profile;
+	int error = 0;
+
+	/* Discard magic */
+	if ((flags & MS_MGC_MSK) == MS_MGC_VAL)
+		flags &= ~MS_MGC_MSK;
+
+	flags &= ~AA_MS_IGNORE_MASK;
+
+	profile = __aa_current_profile();
+	if (!unconfined(profile)) {
+		if (flags & MS_REMOUNT)
+			error = aa_remount(profile, path, flags, data);
+		else if (flags & MS_BIND)
+			error = aa_bind_mount(profile, path, dev_name, flags);
+		else if (flags & (MS_SHARED | MS_PRIVATE | MS_SLAVE |
+				  MS_UNBINDABLE))
+			error = aa_mount_change_type(profile, path, flags);
+		else if (flags & MS_MOVE)
+			error = aa_move_mount(profile, path, dev_name);
+		else
+			error = aa_new_mount(profile, dev_name, path, type,
+					     flags, data);
+	}
+	return error;
+}
+
+static int apparmor_sb_umount(struct vfsmount *mnt, int flags)
+{
+	struct aa_profile *profile;
+	int error = 0;
+
+	profile = __aa_current_profile();
+	if (!unconfined(profile))
+		error = aa_umount(profile, mnt, flags);
+
+	return error;
+}
+
+static int apparmor_sb_pivotroot(struct path *old_path, struct path *new_path)
+{
+	struct aa_profile *profile;
+	int error = 0;
+
+	profile = __aa_current_profile();
+	if (!unconfined(profile))
+		error = aa_pivotroot(profile, old_path, new_path);
+
+	return error;
 }
 
 static int apparmor_getprocattr(struct task_struct *task, char *name,
@@ -596,13 +700,118 @@ fail:
 static int apparmor_task_setrlimit(struct task_struct *task,
 		unsigned int resource, struct rlimit *new_rlim)
 {
+#ifdef MY_ABC_HERE
+	struct aa_profile *profile = __aa_get_current_profile();
+#else
 	struct aa_profile *profile = __aa_current_profile();
+#endif
 	int error = 0;
 
 	if (!unconfined(profile))
 		error = aa_task_setrlimit(profile, task, resource, new_rlim);
+#ifdef MY_ABC_HERE
+	__aa_put_current_profile(profile);
+#endif
 
 	return error;
+}
+
+static int apparmor_socket_create(int family, int type, int protocol, int kern)
+{
+	struct aa_profile *profile;
+	int error = 0;
+
+	if (kern)
+		return 0;
+
+	profile = __aa_current_profile();
+	if (!unconfined(profile))
+		error = aa_net_perm(OP_CREATE, profile, family, type, protocol,
+				    NULL);
+	return error;
+}
+
+static int apparmor_socket_bind(struct socket *sock,
+				struct sockaddr *address, int addrlen)
+{
+	struct sock *sk = sock->sk;
+
+	return aa_revalidate_sk(OP_BIND, sk);
+}
+
+static int apparmor_socket_connect(struct socket *sock,
+				   struct sockaddr *address, int addrlen)
+{
+	struct sock *sk = sock->sk;
+
+	return aa_revalidate_sk(OP_CONNECT, sk);
+}
+
+static int apparmor_socket_listen(struct socket *sock, int backlog)
+{
+	struct sock *sk = sock->sk;
+
+	return aa_revalidate_sk(OP_LISTEN, sk);
+}
+
+static int apparmor_socket_accept(struct socket *sock, struct socket *newsock)
+{
+	struct sock *sk = sock->sk;
+
+	return aa_revalidate_sk(OP_ACCEPT, sk);
+}
+
+static int apparmor_socket_sendmsg(struct socket *sock,
+				   struct msghdr *msg, int size)
+{
+	struct sock *sk = sock->sk;
+
+	return aa_revalidate_sk(OP_SENDMSG, sk);
+}
+
+static int apparmor_socket_recvmsg(struct socket *sock,
+				   struct msghdr *msg, int size, int flags)
+{
+	struct sock *sk = sock->sk;
+
+	return aa_revalidate_sk(OP_RECVMSG, sk);
+}
+
+static int apparmor_socket_getsockname(struct socket *sock)
+{
+	struct sock *sk = sock->sk;
+
+	return aa_revalidate_sk(OP_GETSOCKNAME, sk);
+}
+
+static int apparmor_socket_getpeername(struct socket *sock)
+{
+	struct sock *sk = sock->sk;
+
+	return aa_revalidate_sk(OP_GETPEERNAME, sk);
+}
+
+static int apparmor_socket_getsockopt(struct socket *sock, int level,
+				      int optname)
+{
+	struct sock *sk = sock->sk;
+
+	return aa_revalidate_sk(OP_GETSOCKOPT, sk);
+}
+
+static int apparmor_socket_setsockopt(struct socket *sock, int level,
+				      int optname)
+{
+	struct sock *sk = sock->sk;
+
+	return aa_revalidate_sk(OP_SETSOCKOPT, sk);
+}
+
+static int apparmor_socket_shutdown(struct socket *sock, int how)
+{
+	struct sock *sk = sock->sk;
+
+	return aa_revalidate_sk(OP_SOCK_SHUTDOWN, sk);
 }
 
 static struct security_hook_list apparmor_hooks[] = {
@@ -610,6 +819,10 @@ static struct security_hook_list apparmor_hooks[] = {
 	LSM_HOOK_INIT(ptrace_traceme, apparmor_ptrace_traceme),
 	LSM_HOOK_INIT(capget, apparmor_capget),
 	LSM_HOOK_INIT(capable, apparmor_capable),
+
+	LSM_HOOK_INIT(sb_mount, apparmor_sb_mount),
+	LSM_HOOK_INIT(sb_umount, apparmor_sb_umount),
+	LSM_HOOK_INIT(sb_pivotroot, apparmor_sb_pivotroot),
 
 	LSM_HOOK_INIT(path_link, apparmor_path_link),
 	LSM_HOOK_INIT(path_unlink, apparmor_path_unlink),
@@ -633,6 +846,19 @@ static struct security_hook_list apparmor_hooks[] = {
 
 	LSM_HOOK_INIT(getprocattr, apparmor_getprocattr),
 	LSM_HOOK_INIT(setprocattr, apparmor_setprocattr),
+
+	LSM_HOOK_INIT(socket_create, apparmor_socket_create),
+	LSM_HOOK_INIT(socket_bind, apparmor_socket_bind),
+	LSM_HOOK_INIT(socket_connect, apparmor_socket_connect),
+	LSM_HOOK_INIT(socket_listen, apparmor_socket_listen),
+	LSM_HOOK_INIT(socket_accept, apparmor_socket_accept),
+	LSM_HOOK_INIT(socket_sendmsg, apparmor_socket_sendmsg),
+	LSM_HOOK_INIT(socket_recvmsg, apparmor_socket_recvmsg),
+	LSM_HOOK_INIT(socket_getsockname, apparmor_socket_getsockname),
+	LSM_HOOK_INIT(socket_getpeername, apparmor_socket_getpeername),
+	LSM_HOOK_INIT(socket_getsockopt, apparmor_socket_getsockopt),
+	LSM_HOOK_INIT(socket_setsockopt, apparmor_socket_setsockopt),
+	LSM_HOOK_INIT(socket_shutdown, apparmor_socket_shutdown),
 
 	LSM_HOOK_INIT(cred_alloc_blank, apparmor_cred_alloc_blank),
 	LSM_HOOK_INIT(cred_free, apparmor_cred_free),

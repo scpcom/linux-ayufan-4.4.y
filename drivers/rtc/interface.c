@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * RTC subsystem, interface functions
  *
@@ -55,7 +58,11 @@ int rtc_read_time(struct rtc_device *rtc, struct rtc_time *tm)
 	mutex_unlock(&rtc->ops_lock);
 	return err;
 }
+#if defined(MY_DEF_HERE)
+EXPORT_SYMBOL(rtc_read_time);
+#else /* MY_DEF_HERE */
 EXPORT_SYMBOL_GPL(rtc_read_time);
+#endif /* MY_DEF_HERE */
 
 int rtc_set_time(struct rtc_device *rtc, struct rtc_time *tm)
 {
@@ -89,7 +96,11 @@ int rtc_set_time(struct rtc_device *rtc, struct rtc_time *tm)
 	schedule_work(&rtc->irqwork);
 	return err;
 }
+#if defined(MY_DEF_HERE)
+EXPORT_SYMBOL(rtc_set_time);
+#else /* MY_DEF_HERE */
 EXPORT_SYMBOL_GPL(rtc_set_time);
+#endif /* MY_DEF_HERE */
 
 static int rtc_read_alarm_internal(struct rtc_device *rtc, struct rtc_wkalrm *alarm)
 {
@@ -301,7 +312,11 @@ int rtc_read_alarm(struct rtc_device *rtc, struct rtc_wkalrm *alarm)
 
 	return err;
 }
+#if defined(MY_DEF_HERE)
+EXPORT_SYMBOL(rtc_read_alarm);
+#else /* MY_DEF_HERE */
 EXPORT_SYMBOL_GPL(rtc_read_alarm);
+#endif /* MY_DEF_HERE */
 
 static int __rtc_set_alarm(struct rtc_device *rtc, struct rtc_wkalrm *alarm)
 {
@@ -360,7 +375,11 @@ int rtc_set_alarm(struct rtc_device *rtc, struct rtc_wkalrm *alarm)
 	mutex_unlock(&rtc->ops_lock);
 	return err;
 }
+#if defined(MY_DEF_HERE)
+EXPORT_SYMBOL(rtc_set_alarm);
+#else /* MY_DEF_HERE */
 EXPORT_SYMBOL_GPL(rtc_set_alarm);
+#endif /* MY_DEF_HERE */
 
 /* Called once per device from rtc_device_register */
 int rtc_initialize_alarm(struct rtc_device *rtc, struct rtc_wkalrm *alarm)
@@ -420,7 +439,11 @@ int rtc_alarm_irq_enable(struct rtc_device *rtc, unsigned int enabled)
 	mutex_unlock(&rtc->ops_lock);
 	return err;
 }
+#if defined(MY_DEF_HERE)
+EXPORT_SYMBOL(rtc_alarm_irq_enable);
+#else /* MY_DEF_HERE */
 EXPORT_SYMBOL_GPL(rtc_alarm_irq_enable);
+#endif /* MY_DEF_HERE */
 
 int rtc_update_irq_enable(struct rtc_device *rtc, unsigned int enabled)
 {
@@ -593,14 +616,22 @@ struct rtc_device *rtc_class_open(const char *name)
 
 	return rtc;
 }
+#if defined(MY_DEF_HERE)
+EXPORT_SYMBOL(rtc_class_open);
+#else /* MY_DEF_HERE */
 EXPORT_SYMBOL_GPL(rtc_class_open);
+#endif /* MY_DEF_HERE */
 
 void rtc_class_close(struct rtc_device *rtc)
 {
 	module_put(rtc->owner);
 	put_device(&rtc->dev);
 }
+#if defined(MY_DEF_HERE)
+EXPORT_SYMBOL(rtc_class_close);
+#else /* MY_DEF_HERE */
 EXPORT_SYMBOL_GPL(rtc_class_close);
+#endif /* MY_DEF_HERE */
 
 int rtc_irq_register(struct rtc_device *rtc, struct rtc_task *task)
 {

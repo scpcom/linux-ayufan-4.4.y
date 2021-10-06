@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/module.h>
 #include <linux/fs.h>
 #include <linux/mount.h>
@@ -241,11 +243,10 @@ static struct dentry *start_creating(const char *name, struct dentry *parent)
 	if (error)
 		return ERR_PTR(error);
 
-	
 	if (!parent)
 		parent = debugfs_mount->mnt_root;
 
-	mutex_lock(&d_inode(parent)->i_mutex);
+	inode_lock(d_inode(parent));
 	dentry = lookup_one_len(name, parent, strlen(name));
 	if (!IS_ERR(dentry) && d_really_is_positive(dentry)) {
 		dput(dentry);
@@ -253,7 +254,7 @@ static struct dentry *start_creating(const char *name, struct dentry *parent)
 	}
 
 	if (IS_ERR(dentry)) {
-		mutex_unlock(&d_inode(parent)->i_mutex);
+		inode_unlock(d_inode(parent));
 		simple_release_fs(&debugfs_mount, &debugfs_mount_count);
 	}
 
@@ -262,7 +263,7 @@ static struct dentry *start_creating(const char *name, struct dentry *parent)
 
 static struct dentry *failed_creating(struct dentry *dentry)
 {
-	mutex_unlock(&d_inode(dentry->d_parent)->i_mutex);
+	inode_unlock(d_inode(dentry->d_parent));
 	dput(dentry);
 	simple_release_fs(&debugfs_mount, &debugfs_mount_count);
 	return NULL;
@@ -270,10 +271,9 @@ static struct dentry *failed_creating(struct dentry *dentry)
 
 static struct dentry *end_creating(struct dentry *dentry)
 {
-	mutex_unlock(&d_inode(dentry->d_parent)->i_mutex);
+	inode_unlock(d_inode(dentry->d_parent));
 	return dentry;
 }
-
 
 struct dentry *debugfs_create_file(const char *name, umode_t mode,
 				   struct dentry *parent, void *data,
@@ -421,14 +421,13 @@ void debugfs_remove(struct dentry *dentry)
 	if (!parent || d_really_is_negative(parent))
 		return;
 
-	mutex_lock(&d_inode(parent)->i_mutex);
+	inode_lock(d_inode(parent));
 	ret = __debugfs_remove(dentry, parent);
-	mutex_unlock(&d_inode(parent)->i_mutex);
+	inode_unlock(d_inode(parent));
 	if (!ret)
 		simple_release_fs(&debugfs_mount, &debugfs_mount_count);
 }
 EXPORT_SYMBOL_GPL(debugfs_remove);
-
 
 void debugfs_remove_recursive(struct dentry *dentry)
 {
@@ -443,18 +442,17 @@ void debugfs_remove_recursive(struct dentry *dentry)
 
 	parent = dentry;
  down:
-	mutex_lock(&d_inode(parent)->i_mutex);
+	inode_lock(d_inode(parent));
  loop:
-	
+	 
 	spin_lock(&parent->d_lock);
 	list_for_each_entry(child, &parent->d_subdirs, d_child) {
 		if (!simple_positive(child))
 			continue;
 
-		
 		if (!list_empty(&child->d_subdirs)) {
 			spin_unlock(&parent->d_lock);
-			mutex_unlock(&d_inode(parent)->i_mutex);
+			inode_unlock(d_inode(parent));
 			parent = child;
 			goto down;
 		}
@@ -464,26 +462,29 @@ void debugfs_remove_recursive(struct dentry *dentry)
 		if (!__debugfs_remove(child, parent))
 			simple_release_fs(&debugfs_mount, &debugfs_mount_count);
 
-		
 		goto loop;
 	}
 	spin_unlock(&parent->d_lock);
 
-	mutex_unlock(&d_inode(parent)->i_mutex);
+	inode_unlock(d_inode(parent));
 	child = parent;
 	parent = parent->d_parent;
-	mutex_lock(&d_inode(parent)->i_mutex);
+	inode_lock(d_inode(parent));
 
 	if (child != dentry)
-		
+		 
 		goto loop;
 
 	if (!__debugfs_remove(child, parent))
 		simple_release_fs(&debugfs_mount, &debugfs_mount_count);
-	mutex_unlock(&d_inode(parent)->i_mutex);
+	inode_unlock(d_inode(parent));
 }
 EXPORT_SYMBOL_GPL(debugfs_remove_recursive);
 
+#ifdef MY_ABC_HERE
+extern struct synotify_rename_path * get_rename_path_list(struct dentry *old_dentry, struct dentry *new_dentry);
+extern void free_rename_path_list(struct synotify_rename_path * rename_path_list);
+#endif  
 
 struct dentry *debugfs_rename(struct dentry *old_dir, struct dentry *old_dentry,
 		struct dentry *new_dir, const char *new_name)
@@ -491,20 +492,26 @@ struct dentry *debugfs_rename(struct dentry *old_dir, struct dentry *old_dentry,
 	int error;
 	struct dentry *dentry = NULL, *trap;
 	const char *old_name;
+#ifdef MY_ABC_HERE
+	struct synotify_rename_path *rename_path_list = NULL;
+#endif  
 
 	trap = lock_rename(new_dir, old_dir);
-	
+	 
 	if (d_really_is_negative(old_dir) || d_really_is_negative(new_dir))
 		goto exit;
-	
+	 
 	if (d_really_is_negative(old_dentry) || old_dentry == trap ||
 	    d_mountpoint(old_dentry))
 		goto exit;
 	dentry = lookup_one_len(new_name, new_dir, strlen(new_name));
-	
+	 
 	if (IS_ERR(dentry) || dentry == trap || d_really_is_positive(dentry))
 		goto exit;
 
+#ifdef MY_ABC_HERE
+	rename_path_list = get_rename_path_list(old_dentry, dentry);
+#endif  
 	old_name = fsnotify_oldname_init(old_dentry->d_name.name);
 
 	error = simple_rename(d_inode(old_dir), old_dentry, d_inode(new_dir),
@@ -514,14 +521,23 @@ struct dentry *debugfs_rename(struct dentry *old_dir, struct dentry *old_dentry,
 		goto exit;
 	}
 	d_move(old_dentry, dentry);
+#ifdef MY_ABC_HERE
+	fsnotify_move(d_inode(old_dir), d_inode(new_dir), old_name,
+		d_is_dir(old_dentry),
+		NULL, old_dentry, rename_path_list, false);
+#else
 	fsnotify_move(d_inode(old_dir), d_inode(new_dir), old_name,
 		d_is_dir(old_dentry),
 		NULL, old_dentry);
+#endif  
 	fsnotify_oldname_free(old_name);
 	unlock_rename(new_dir, old_dir);
 	dput(dentry);
 	return old_dentry;
 exit:
+#ifdef MY_ABC_HERE
+	free_rename_path_list(rename_path_list);
+#endif  
 	if (dentry && !IS_ERR(dentry))
 		dput(dentry);
 	unlock_rename(new_dir, old_dir);

@@ -53,7 +53,11 @@ head-y		:= arch/arm64/kernel/head.o
 ifeq ($(CONFIG_ARM64_RANDOMIZE_TEXT_OFFSET), y)
 TEXT_OFFSET := $(shell awk 'BEGIN {srand(); printf "0x%03x000\n", int(512 * rand())}')
 else
+ifeq ($(CONFIG_SYNO_RTD1296), y)
+TEXT_OFFSET := 0x00280000
+else
 TEXT_OFFSET := 0x00080000
+endif
 endif
 
 # KASAN_SHADOW_OFFSET = VA_START + (1 << (VA_BITS - 3)) - (1 << 61)
@@ -80,6 +84,9 @@ KBUILD_DTBS	:= dtbs
 all:	$(KBUILD_IMAGE) $(KBUILD_DTBS)
 
 boot := arch/arm64/boot
+ifeq ($(CONFIG_SYNO_RTD1296), y)
+DTC_FLAGS ?= -p 8192
+endif
 
 Image: vmlinux
 	$(Q)$(MAKE) $(build)=$(boot) $(boot)/$@
@@ -91,12 +98,20 @@ zinstall install: vmlinux
 	$(Q)$(MAKE) $(build)=$(boot) $@
 
 %.dtb: scripts
+ifeq ($(CONFIG_SYNO_RTD1296), y)
+	$(Q)$(MAKE) $(build)=$(boot)/dts DTC_FLAGS="$(DTC_FLAGS)" $(boot)/dts/$@
+else
 	$(Q)$(MAKE) $(build)=$(boot)/dts $(boot)/dts/$@
+endif
 
 PHONY += dtbs dtbs_install
 
 dtbs: prepare scripts
+ifeq ($(CONFIG_SYNO_RTD1296), y)
+	$(Q)$(MAKE) $(build)=$(boot)/dts DTC_FLAGS="$(DTC_FLAGS)"
+else
 	$(Q)$(MAKE) $(build)=$(boot)/dts
+endif
 
 dtbs_install:
 	$(Q)$(MAKE) $(dtbinst)=$(boot)/dts

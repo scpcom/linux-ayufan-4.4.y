@@ -145,6 +145,11 @@ source "drivers/usb/misc/Kconfig"
 
 source "drivers/usb/atm/Kconfig"
 
+config USB_PATCH_ON_RTK
+	depends on SYNO_RTD1296
+	bool
+	default y
+
 endif # USB
 
 source "drivers/usb/phy/Kconfig"

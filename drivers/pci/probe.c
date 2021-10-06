@@ -155,8 +155,13 @@ int __pci_read_base(struct pci_dev *dev, enum pci_bar_type type,
 	struct pci_bus_region region, inverted_region;
 
 	mask = type ? PCI_ROM_ADDRESS_MASK : ~0;
+#ifdef CONFIG_SYNO_USB_ICH_UHCI_NO_MMIO_OFF
+	if (PCI_VENDOR_ID_INTEL == dev->vendor && 0x2934 == dev->device) {
+		dev_printk(KERN_INFO, &dev->dev, "[%04x:%04x] Reading BAR - reg %x\n",
+		   dev->vendor, dev->device, pos);
+	}
+#endif  
 
-	
 	if (!dev->mmio_always_on) {
 		pci_read_config_word(dev, PCI_COMMAND, &orig_cmd);
 		if (orig_cmd & PCI_COMMAND_DECODE_ENABLE) {
@@ -259,10 +264,15 @@ int __pci_read_base(struct pci_dev *dev, enum pci_bar_type type,
 
 	goto out;
 
-
 fail:
 	res->flags = 0;
 out:
+#ifdef CONFIG_SYNO_USB_ICH_UHCI_NO_MMIO_OFF
+	if (PCI_VENDOR_ID_INTEL == dev->vendor && 0x2934 == dev->device) {
+		dev_printk(KERN_INFO, &dev->dev, "[%04x:%04x] Sizing Complete - reg %x\n",
+		   dev->vendor, dev->device, pos);
+	}
+#endif  
 	if (res->flags)
 		dev_printk(KERN_DEBUG, &dev->dev, "reg 0x%x: %pR\n", pos, res);
 

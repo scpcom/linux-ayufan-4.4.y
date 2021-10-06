@@ -2838,6 +2838,10 @@ unsigned int datagram_poll(struct file *file, struct socket *sock,
 			   struct poll_table_struct *wait);
 int skb_copy_datagram_iter(const struct sk_buff *from, int offset,
 			   struct iov_iter *to, int size);
+#ifdef CONFIG_SENDFILE_PATCH
+int skb_copy_datagram_iter1(const struct sk_buff *from, int offset,
+			   struct iov_iter *to, int size);
+#endif
 static inline int skb_copy_datagram_msg(const struct sk_buff *from, int offset,
 					struct msghdr *msg, int size)
 {

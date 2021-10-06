@@ -196,23 +196,20 @@ long ext4_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		flags = ext4_mask_flags(inode->i_mode, flags);
 
 		err = -EPERM;
-		mutex_lock(&inode->i_mutex);
-		
+		inode_lock(inode);
+		 
 		if (IS_NOQUOTA(inode))
 			goto flags_out;
 
 		oldflags = ei->i_flags;
 
-		
 		jflag = flags & EXT4_JOURNAL_DATA_FL;
 
-		
 		if ((flags ^ oldflags) & (EXT4_APPEND_FL | EXT4_IMMUTABLE_FL)) {
 			if (!capable(CAP_LINUX_IMMUTABLE))
 				goto flags_out;
 		}
 
-		
 		if ((jflag ^ oldflags) & (EXT4_JOURNAL_DATA_FL)) {
 			if (!capable(CAP_SYS_RESOURCE))
 				goto flags_out;
@@ -270,7 +267,7 @@ flags_err:
 		}
 
 flags_out:
-		mutex_unlock(&inode->i_mutex);
+		inode_unlock(inode);
 		mnt_drop_write_file(filp);
 		return err;
 	}
@@ -301,7 +298,7 @@ flags_out:
 			goto setversion_out;
 		}
 
-		mutex_lock(&inode->i_mutex);
+		inode_lock(inode);
 		handle = ext4_journal_start(inode, EXT4_HT_INODE, 1);
 		if (IS_ERR(handle)) {
 			err = PTR_ERR(handle);
@@ -316,7 +313,7 @@ flags_out:
 		ext4_journal_stop(handle);
 
 unlock_out:
-		mutex_unlock(&inode->i_mutex);
+		inode_unlock(inode);
 setversion_out:
 		mnt_drop_write_file(filp);
 		return err;
@@ -456,10 +453,10 @@ group_add_out:
 		err = mnt_want_write_file(filp);
 		if (err)
 			return err;
-		
-		mutex_lock(&(inode->i_mutex));
+		 
+		inode_lock((inode));
 		err = ext4_ext_migrate(inode);
-		mutex_unlock(&(inode->i_mutex));
+		inode_unlock((inode));
 		mnt_drop_write_file(filp);
 		return err;
 	}

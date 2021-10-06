@@ -1,4 +1,7 @@
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #ifndef _LINUX_NETDEVICE_H
 #define _LINUX_NETDEVICE_H
 
@@ -2712,9 +2715,9 @@ static inline void netif_keep_dst(struct net_device *dev)
 
 extern struct pernet_operations __net_initdata loopback_net_ops;
 
-
-
-
+#ifdef MY_ABC_HERE
+extern int syno_get_dev_vendor_mac(const char *szDev, char *szMac);
+#endif  
 
 static inline const char *netdev_name(const struct net_device *dev)
 {

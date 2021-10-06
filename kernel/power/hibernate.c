@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/export.h>
 #include <linux/suspend.h>
 #include <linux/syscalls.h>
@@ -376,6 +378,17 @@ int hibernation_restore(int platform_mode)
 	return error;
 }
 
+#ifdef MY_ABC_HERE
+void syno_schedule_power_on_prepare(void)
+{
+	if (!hibernation_ops) {
+		return;
+	}
+
+	hibernation_ops->begin();
+	hibernation_ops->end();
+}
+#endif  
 
 int hibernation_platform_enter(void)
 {

@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/time.h>
 #include <linux/fs.h>
 #include <linux/stat.h>
@@ -664,7 +666,14 @@ got_group:
 	if (ret2 == -1)
 		goto out;
 
-	
+#ifdef MY_ABC_HERE
+#define MAX_U32_IN_U64 ((u64)(~0U))
+	if (MAX_U32_IN_U64 < (u64)group*EXT4_INODES_PER_GROUP(sb)) {
+		u32 max_group =	(u32)((MAX_U32_IN_U64 + 1) / EXT4_INODES_PER_GROUP(sb));
+		group %= max_group;
+	}
+#endif  
+
 	for (i = 0; i < ngroups; i++, ino = 0) {
 		err = -EIO;
 
@@ -733,15 +742,21 @@ repeat_in_this_group:
 		ext4_lock_group(sb, group);
 		ret2 = ext4_test_and_set_bit(ino, inode_bitmap_bh->b_data);
 		ext4_unlock_group(sb, group);
-		ino++;		
+		ino++;		 
 		if (!ret2)
-			goto got; 
+			goto got;  
 next_inode:
 		if (ino < EXT4_INODES_PER_GROUP(sb))
 			goto repeat_in_this_group;
 next_group:
+#ifdef MY_ABC_HERE
+		if (++group == ngroups || (MAX_U32_IN_U64 < (u64)group*EXT4_INODES_PER_GROUP(sb))) {
+			group = 0;
+		}
+#else  
 		if (++group == ngroups)
 			group = 0;
+#endif  
 	}
 	err = -ENOSPC;
 	goto out;
@@ -853,16 +868,29 @@ got:
 	}
 
 	inode->i_ino = ino + group * EXT4_INODES_PER_GROUP(sb);
-	
+	 
 	inode->i_blocks = 0;
 	inode->i_mtime = inode->i_atime = inode->i_ctime = ei->i_crtime =
 						       ext4_current_time(inode);
+#ifdef MY_ABC_HERE
+	if (ext4_is_ext3_sb(inode->i_sb))
+		inode->i_create_time = CURRENT_TIME_SEC;
+	else
+#endif  
+#ifdef MY_ABC_HERE
+	inode->i_create_time = ei->i_crtime;
+#endif  
+
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+	if (!EXT4_HAS_RO_COMPAT_FEATURE(sb, EXT4_FEATURE_RO_COMPAT_METADATA_CSUM)) {
+		inode->i_archive_bit = ALL_SYNO_ARCHIVE;	 
+	}
+#endif  
 
 	memset(ei->i_data, 0, sizeof(ei->i_data));
 	ei->i_dir_start_lookup = 0;
 	ei->i_disksize = 0;
 
-	
 	ei->i_flags =
 		ext4_mask_flags(mode, EXT4_I(dir)->i_flags & EXT4_FL_INHERITED);
 	ei->i_file_acl = 0;

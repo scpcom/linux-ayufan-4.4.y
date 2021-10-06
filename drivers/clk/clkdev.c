@@ -242,7 +242,11 @@ void clkdev_add_table(struct clk_lookup *cl, size_t num)
 }
 
 #define MAX_DEV_ID	20
+#ifdef CONFIG_ARCH_RTD129X
+#define MAX_CON_ID	24
+#else
 #define MAX_CON_ID	16
+#endif
 
 struct clk_lookup_alloc {
 	struct clk_lookup cl;
@@ -262,6 +266,10 @@ vclkdev_alloc(struct clk_hw *hw, const char *con_id, const char *dev_fmt,
 
 	cla->cl.clk_hw = hw;
 	if (con_id) {
+#ifdef CONFIG_ARCH_RTD129X
+		if (strlen(con_id) >= MAX_CON_ID)
+			printk(KERN_WARNING "RTK-WARNING: con_id's length MUST be less than MAX_CON_ID!\n");
+#endif
 		strlcpy(cla->con_id, con_id, sizeof(cla->con_id));
 		cla->cl.con_id = cla->con_id;
 	}

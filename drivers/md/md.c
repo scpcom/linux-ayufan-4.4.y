@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/kthread.h>
 #include <linux/blkdev.h>
 #include <linux/sysctl.h>
@@ -19,14 +21,31 @@
 #include <linux/raid/md_p.h>
 #include <linux/raid/md_u.h>
 #include <linux/slab.h>
+#ifdef MY_ABC_HERE
+#include <linux/list_sort.h>
+#endif  
 #include "md.h"
 #include "bitmap.h"
 #include "md-cluster.h"
+
+#ifdef MY_ABC_HERE
+void SynoMDWakeUpDevices(void *md);
+#endif  
+
+#ifdef MY_ABC_HERE
+extern struct rw_semaphore s_reshape_mount_key;
+#endif  
 
 #ifndef MODULE
 static void autostart_arrays(int part);
 #endif
 
+#ifdef MY_ABC_HERE
+extern int (*funcSYNORaidDiskUnplug)(char *szDiskName);
+EXPORT_SYMBOL(SYNORaidRdevUnplug);
+int SYNORaidDiskUnplug(char *szArgDiskName);
+void SYNORaidUnplugTask(struct work_struct *);
+#endif   
 
 static LIST_HEAD(pers_list);
 static DEFINE_SPINLOCK(pers_lock);
@@ -162,13 +181,15 @@ static DEFINE_SPINLOCK(all_mddevs_lock);
 		_tmp = _tmp->next;})					\
 		)
 
-
 static blk_qc_t md_make_request(struct request_queue *q, struct bio *bio)
 {
 	const int rw = bio_data_dir(bio);
 	struct mddev *mddev = q->queuedata;
 	unsigned int sectors;
 	int cpu;
+#ifdef MY_ABC_HERE
+	unsigned char blActive = 1;
+#endif  
 
 	blk_queue_split(q, &bio, q->bio_split);
 
@@ -201,9 +222,24 @@ static blk_qc_t md_make_request(struct request_queue *q, struct bio *bio)
 	atomic_inc(&mddev->active_io);
 	rcu_read_unlock();
 
-	
+#ifdef MY_ABC_HERE
+	 
+	if (time_after(jiffies, mddev->ulLastReq + CHECKINTERVAL)) {
+		spin_lock(&mddev->ActLock);
+		blActive = mddev->blActive;
+		mddev->blActive = 1;
+		spin_unlock(&mddev->ActLock);
+
+		if (!blActive) {
+			SynoMDWakeUpDevices(mddev);
+		}
+	}
+
+	mddev->ulLastReq = jiffies;
+#endif  
+	 
 	sectors = bio_sectors(bio);
-	
+	 
 	bio->bi_rw &= ~REQ_NOMERGE;
 	mddev->pers->make_request(mddev, bio);
 
@@ -218,13 +254,37 @@ static blk_qc_t md_make_request(struct request_queue *q, struct bio *bio)
 	return BLK_QC_T_NONE;
 }
 
-
 void mddev_suspend(struct mddev *mddev)
 {
+#ifdef MY_ABC_HERE
+	sector_t ori_suspend_lo, ori_suspend_hi;
+	DEFINE_WAIT(wait_noio);
+#endif  
+
 	if (mddev->suspended++)
 		return;
 	synchronize_rcu();
+#ifdef MY_ABC_HERE
+	ori_suspend_lo = mddev->suspend_lo;
+	ori_suspend_hi = mddev->suspend_hi;
+	mddev->suspend_lo = 0;
+	mddev->suspend_hi = 0;
+	mddev->pers->quiesce(mddev, 2);
+
+	while (atomic_read(&mddev->active_io) > 0) {
+		prepare_to_wait(&mddev->sb_wait, &wait_noio, TASK_UNINTERRUPTIBLE);
+		if (mddev->flags & MD_UPDATE_SB_FLAGS) {
+			md_update_sb(mddev, 0);
+		}
+		schedule();
+	}
+	finish_wait(&mddev->sb_wait, &wait_noio);
+
+	mddev->suspend_lo = ori_suspend_lo;
+	mddev->suspend_hi = ori_suspend_hi;
+#else  
 	wait_event(mddev->sb_wait, atomic_read(&mddev->active_io) == 0);
+#endif  
 	mddev->pers->quiesce(mddev, 1);
 
 	del_timer_sync(&mddev->safemode_timer);
@@ -397,6 +457,11 @@ void mddev_init(struct mddev *mddev)
 	atomic_set(&mddev->active_io, 0);
 	spin_lock_init(&mddev->lock);
 	atomic_set(&mddev->flush_pending, 0);
+#ifdef MY_ABC_HERE
+	spin_lock_init(&mddev->ActLock);
+	mddev->blActive = 1;
+	mddev->ulLastReq = jiffies;
+#endif  
 	init_waitqueue_head(&mddev->sb_wait);
 	init_waitqueue_head(&mddev->recovery_wait);
 	mddev->reshape_position = MaxSector;
@@ -576,6 +641,28 @@ static int alloc_disk_sb(struct md_rdev *rdev)
 
 	return 0;
 }
+#ifdef MY_ABC_HERE
+static int alloc_disk_wakeup_page(struct md_rdev * rdev)
+{
+	if (rdev->wakeup_page)
+		printk(KERN_ERR "md: bug in file %s, line %d\n", __FILE__, __LINE__);
+
+	rdev->wakeup_page = alloc_page(GFP_KERNEL);
+	if (!rdev->wakeup_page) {
+		printk(KERN_ALERT "md: out of memory.\n");
+		return -ENOMEM;
+	}
+
+	return 0;
+}
+
+static void free_disk_wakeup_page(struct md_rdev * rdev)
+{
+	if (rdev->wakeup_page) {
+		put_page(rdev->wakeup_page);
+	}
+}
+#endif  
 
 void md_rdev_clear(struct md_rdev *rdev)
 {
@@ -602,7 +689,15 @@ static void super_written(struct bio *bio)
 
 	if (bio->bi_error) {
 		printk("md: super_written gets error=%d\n", bio->bi_error);
+#ifdef MY_ABC_HERE
+		if (IsDeviceDisappear(rdev->bdev)) {
+			syno_md_error(mddev, rdev);
+		} else {
+			md_error(mddev, rdev);
+		}
+#else  
 		md_error(mddev, rdev);
+#endif  
 	}
 
 	if (atomic_dec_and_test(&mddev->pending_writes))
@@ -657,15 +752,147 @@ int sync_page_io(struct md_rdev *rdev, sector_t sector, int size,
 }
 EXPORT_SYMBOL_GPL(sync_page_io);
 
+#ifdef MY_ABC_HERE
+void SYNOSwapSuperblock0(mdp_super_t *sb)
+{
+	int i;
+	__u32 t32;
+	char bTmp, *ptr = (char *)sb;
+
+	for (i = 0; i < 4096; i += 4) {
+		bTmp = ptr[0];
+		ptr[0] = ptr[3];
+		ptr[3] = bTmp;
+		bTmp = ptr[1];
+		ptr[1] = ptr[2];
+		ptr[2] = bTmp;
+		ptr += 4;
+	}
+
+	t32 = sb->events_hi;
+	sb->events_hi = sb->events_lo;
+	sb->events_lo = t32;
+
+	t32 = sb->cp_events_hi;
+	sb->cp_events_hi = sb->cp_events_lo;
+	sb->cp_events_lo = t32;
+}
+#endif  
+
+#ifdef MY_ABC_HERE
+static inline void
+RaidMemberAutoRemapSet(struct mddev *mddev)
+{
+	struct md_rdev *rdev;
+	char b[BDEVNAME_SIZE];
+
+#ifdef MY_ABC_HERE
+	if (MD_AUTO_REMAP_MODE_ISMAXDEGRADE == mddev->auto_remap && mddev->pers->syno_set_rdev_auto_remap) {
+		mddev->pers->syno_set_rdev_auto_remap(mddev);
+	} else {
+		rdev_for_each(rdev, mddev) {
+			bdevname(rdev->bdev, b);
+			RaidRemapModeSet(rdev->bdev, mddev->auto_remap);
+			printk("md: %s: set %s to auto_remap [%d]\n", mdname(mddev), b, mddev->auto_remap);
+		}
+	}
+#else  
+	rdev_for_each(rdev, mddev) {
+		bdevname(rdev->bdev, b);
+		RaidRemapModeSet(rdev->bdev, mddev->auto_remap);
+		printk("md: %s: set %s to auto_remap [%d]\n", mdname(mddev), b, mddev->auto_remap);
+	}
+#endif  
+}
+#endif  
+
+#ifdef MY_ABC_HERE
+static int sync_sb_page_io(struct block_device *bdev, sector_t sector, int size,
+		struct page *page, int rw)
+{
+	struct bio *bio = bio_alloc(GFP_NOIO, 1);
+	int ret;
+
+	rw |= REQ_SYNC;
+
+	bio->bi_bdev = bdev;
+	bio->bi_iter.bi_sector = sector;
+	bio_add_page(bio, page, size, 0);
+	submit_bio_wait(rw, bio);
+
+	ret = !bio->bi_error;
+	if (ret && bio_flagged(bio, BIO_AUTO_REMAP)) {
+		bio_clear_flag(bio, BIO_AUTO_REMAP);
+		ret = 0;
+	}
+
+	bio_put(bio);
+	return ret;
+}
+
+static int SynoRaidAutoRemapAdjust(struct mddev *mddev, int specify_setting)
+{
+	int old_setting = -1;
+
+	if (NULL == mddev || NULL == mddev->pers) {
+		goto END;
+	}
+
+	old_setting = mddev->auto_remap;
+
+	if (MD_AUTO_REMAP_MODE_ISMAXDEGRADE == specify_setting) {
+		if (mddev->pers->ismaxdegrade && mddev->pers->ismaxdegrade(mddev)) {
+			if (!mddev->pers->syno_set_rdev_auto_remap) {
+				specify_setting = MD_AUTO_REMAP_MODE_FORCE_ON;
+			}
+		} else {
+			specify_setting = MD_AUTO_REMAP_MODE_FORCE_OFF;
+		}
+	}
+
+	mddev->auto_remap = specify_setting;
+
+	if (old_setting != mddev->auto_remap || MD_AUTO_REMAP_MODE_ISMAXDEGRADE == mddev->auto_remap) {
+		RaidMemberAutoRemapSet(mddev);
+	} else {  
+		printk("md: %s: current auto_remap = %d\n", mdname(mddev), mddev->auto_remap);
+	}
+
+END:
+	 
+	return old_setting;
+}
+#endif  
+
 static int read_disk_sb(struct md_rdev *rdev, int size)
 {
 	char b[BDEVNAME_SIZE];
-
+#ifdef MY_ABC_HERE
+	mdp_super_t *sb;
+#endif  
+	if (!rdev->sb_page) {
+		printk(KERN_ERR "md: bug in file %s, line %d\n", __FILE__, __LINE__);
+		return -EINVAL;
+	}
 	if (rdev->sb_loaded)
 		return 0;
 
+#ifdef MY_ABC_HERE
+	if (!sync_sb_page_io(rdev->bdev, rdev->sb_start, size, rdev->sb_page, READ))
+		goto fail;
+#else  
 	if (!sync_page_io(rdev, 0, size, rdev->sb_page, READ, true))
 		goto fail;
+#endif  
+
+#ifdef MY_ABC_HERE
+	sb = (mdp_super_t*)page_address(rdev->sb_page);
+	if (sb->major_version == 0) {
+		if (sb->md_magic != MD_SB_MAGIC) {
+			SYNOSwapSuperblock0(sb);
+		}
+	}
+#endif  
 	rdev->sb_loaded = 1;
 	return 0;
 
@@ -765,6 +992,19 @@ int md_check_no_bitmap(struct mddev *mddev)
 }
 EXPORT_SYMBOL(md_check_no_bitmap);
 
+#ifdef MY_ABC_HERE
+static int
+super_90_validate_rdev_event(struct md_rdev *newest_rdev, struct md_rdev *rdev)
+{
+	mdp_super_t *newest_sb = (mdp_super_t *)page_address(newest_rdev->sb_page);
+	mdp_super_t *valid_sb = (mdp_super_t *)page_address(rdev->sb_page);
+
+	if (md_event(valid_sb) < md_event(newest_sb)) {
+		return 1;
+	}
+	return 0;
+}
+#endif  
 
 static int super_90_load(struct md_rdev *rdev, struct md_rdev *refdev, int minor_version)
 {
@@ -951,12 +1191,17 @@ static int super_90_validate(struct mddev *mddev, struct md_rdev *rdev)
 
 		if (desc->state & (1<<MD_DISK_FAULTY))
 			set_bit(Faulty, &rdev->flags);
-		else if (desc->state & (1<<MD_DISK_SYNC) ) {
+		else if (desc->state & (1<<MD_DISK_SYNC)  ) {
 			set_bit(In_sync, &rdev->flags);
 			rdev->raid_disk = desc->raid_disk;
 			rdev->saved_raid_disk = desc->raid_disk;
+#ifdef MY_ABC_HERE
+			if (desc->state & (1 << MD_DISK_ERROR)) {
+				set_bit(DiskError, &rdev->flags);
+			}
+#endif  
 		} else if (desc->state & (1<<MD_DISK_ACTIVE)) {
-			
+			 
 			if (mddev->minor_version >= 91) {
 				rdev->recovery_offset = 0;
 				rdev->raid_disk = desc->raid_disk;
@@ -1057,13 +1302,18 @@ static void super_90_sync(struct mddev *mddev, struct md_rdev *rdev)
 		if (is_active)
 			d->raid_disk = rdev2->raid_disk;
 		else
-			d->raid_disk = rdev2->desc_nr; 
+			d->raid_disk = rdev2->desc_nr;  
 		if (test_bit(Faulty, &rdev2->flags))
 			d->state = (1<<MD_DISK_FAULTY);
 		else if (is_active) {
 			d->state = (1<<MD_DISK_ACTIVE);
 			if (test_bit(In_sync, &rdev2->flags))
 				d->state |= (1<<MD_DISK_SYNC);
+#ifdef MY_ABC_HERE
+			if (test_bit(DiskError, &rdev2->flags)) {
+				d->state |= (1 << MD_DISK_ERROR);
+			}
+#endif  
 			active++;
 			working++;
 		} else {
@@ -1093,20 +1343,24 @@ static void super_90_sync(struct mddev *mddev, struct md_rdev *rdev)
 
 	sb->this_disk = sb->disks[rdev->desc_nr];
 	sb->sb_csum = calc_sb_csum(sb);
+#ifdef MY_ABC_HERE
+#ifdef __LITTLE_ENDIAN
+	SYNOSwapSuperblock0(sb);
+#endif  
+#endif  
 }
-
 
 static unsigned long long
 super_90_rdev_size_change(struct md_rdev *rdev, sector_t num_sectors)
 {
 	if (num_sectors && num_sectors < rdev->mddev->dev_sectors)
-		return 0; 
+		return 0;  
 	if (rdev->mddev->bitmap_info.offset)
-		return 0; 
+		return 0;  
 	rdev->sb_start = calc_dev_sboffset(rdev);
 	if (!num_sectors || num_sectors > rdev->sb_start)
 		num_sectors = rdev->sb_start;
-	
+	 
 	if (num_sectors >= (2ULL << 32) && rdev->mddev->level >= 1)
 		num_sectors = (2ULL << 32) - 2;
 	md_super_write(rdev->mddev, rdev, rdev->sb_start, rdev->sb_size,
@@ -1426,6 +1680,13 @@ static int super_1_validate(struct mddev *mddev, struct md_rdev *rdev)
 					rdev->saved_raid_disk = -1;
 			} else
 				set_bit(In_sync, &rdev->flags);
+#ifdef MY_ABC_HERE
+			if (role & 0x8000) {
+				set_bit(DiskError, &rdev->flags);
+				role &= ~(0x8000);
+				sb->dev_roles[rdev->desc_nr] = cpu_to_le16(role);
+			}
+#endif  
 			rdev->raid_disk = role;
 			break;
 		}
@@ -1582,7 +1843,18 @@ retry:
 		if (test_bit(Faulty, &rdev2->flags))
 			sb->dev_roles[i] = cpu_to_le16(MD_DISK_ROLE_FAULTY);
 		else if (test_bit(In_sync, &rdev2->flags))
+#ifdef MY_ABC_HERE
+		{
+			if (test_bit(DiskError, &rdev2->flags)) {
+				 
+				sb->dev_roles[i] = cpu_to_le16(0x8000 | rdev2->raid_disk);
+			} else {
+				sb->dev_roles[i] = cpu_to_le16(rdev2->raid_disk);
+			}
+		}
+#else  
 			sb->dev_roles[i] = cpu_to_le16(rdev2->raid_disk);
+#endif  
 		else if (test_bit(Journal, &rdev2->flags))
 			sb->dev_roles[i] = cpu_to_le16(MD_DISK_ROLE_JOURNAL);
 		else if (rdev2->raid_disk >= 0)
@@ -1909,6 +2181,9 @@ static void export_rdev(struct md_rdev *rdev)
 	printk(KERN_INFO "md: export_rdev(%s)\n",
 		bdevname(rdev->bdev,b));
 	md_rdev_clear(rdev);
+#ifdef MY_ABC_HERE
+	free_disk_wakeup_page(rdev);
+#endif  
 #ifndef MODULE
 	if (test_bit(AutoDetected, &rdev->flags))
 		md_autodetect_dev(rdev->bdev->bd_dev);
@@ -1919,6 +2194,9 @@ static void export_rdev(struct md_rdev *rdev)
 
 void md_kick_rdev_from_array(struct md_rdev *rdev)
 {
+#ifdef MY_ABC_HERE
+	RaidRemapModeSet(rdev->bdev, 0);
+#endif  
 	unbind_rdev_from_array(rdev);
 	export_rdev(rdev);
 }
@@ -2158,8 +2436,13 @@ static int add_bound_rdev(struct md_rdev *rdev)
 	struct mddev *mddev = rdev->mddev;
 	int err = 0;
 
+#ifdef MY_ABC_HERE
+	if (LEVEL_LINEAR == mddev->level) {
+		 
+#else  
 	if (!mddev->pers->hot_remove_disk) {
-		
+#endif  
+		 
 		super_types[mddev->major_version].
 			validate_super(mddev, rdev);
 		err = mddev->pers->hot_add_disk(mddev, rdev);
@@ -2212,6 +2495,12 @@ state_show(struct md_rdev *rdev, char *page)
 		len+= sprintf(page+len, "%sfaulty",sep);
 		sep = ",";
 	}
+#ifdef MY_ABC_HERE
+	if (test_bit(DiskError, &flags)) {
+		len += sprintf(page+len, "%serror",sep);
+		sep = ",";
+	}
+#endif  
 	if (test_bit(In_sync, &flags)) {
 		len += sprintf(page+len, "%sin_sync",sep);
 		sep = ",";
@@ -2835,10 +3124,18 @@ static struct md_rdev *md_import_device(dev_t newdev, int super_format, int supe
 	if (err)
 		goto abort_free;
 
+#ifdef MY_ABC_HERE
+	if ((err = alloc_disk_wakeup_page(rdev)))
+		goto abort_free;
+#endif  
+
 	err = lock_rdev(rdev, newdev, super_format == -2);
 	if (err)
 		goto abort_free;
 
+#ifdef MY_ABC_HERE
+	RaidRemapModeSet(rdev->bdev, 0);
+#endif  
 	kobject_init(&rdev->kobj, &rdev_ktype);
 
 	size = i_size_read(rdev->bdev->bd_inode) >> BLOCK_SIZE_BITS;
@@ -2875,11 +3172,14 @@ abort_free:
 	if (rdev->bdev)
 		unlock_rdev(rdev);
 	md_rdev_clear(rdev);
+#ifdef MY_ABC_HERE
+	if (rdev->wakeup_page){
+		free_disk_wakeup_page(rdev);
+	}
+#endif  
 	kfree(rdev);
 	return ERR_PTR(err);
 }
-
-
 
 static void analyze_sbs(struct mddev *mddev)
 {
@@ -4318,6 +4618,94 @@ static struct md_sysfs_entry md_reshape_direction =
 __ATTR(reshape_direction, S_IRUGO|S_IWUSR, reshape_direction_show,
        reshape_direction_store);
 
+#ifdef MY_ABC_HERE
+static ssize_t
+auto_remap_show(struct mddev *mddev, char *page)
+{
+	return sprintf(page, "%d\n", mddev->auto_remap);
+}
+
+static ssize_t
+auto_remap_store(struct mddev *mddev, const char *page, size_t len)
+{
+	int auto_remap_mode = -1;
+
+	if (!mddev->pers){
+		len = -EINVAL;
+		goto END;
+	}
+#ifdef MY_ABC_HERE
+	if (mddev->nodev_and_crashed) {
+		 
+		goto END;
+	}
+#endif  
+
+#ifdef MY_ABC_HERE
+	if (cmd_match(page, "2")) {  
+		auto_remap_mode = MD_AUTO_REMAP_MODE_ISMAXDEGRADE;
+	} else
+#endif  
+	if (cmd_match(page, "1")) {
+		auto_remap_mode = MD_AUTO_REMAP_MODE_FORCE_ON;
+	} else if (cmd_match(page, "0")) {
+		auto_remap_mode = MD_AUTO_REMAP_MODE_FORCE_OFF;
+	} else {
+		printk("md: %s: auto_remap, error input\n", mdname(mddev));
+		goto END;
+	}
+
+#ifdef MY_ABC_HERE
+	SynoRaidAutoRemapAdjust(mddev, auto_remap_mode);
+#else  
+	mddev->auto_remap = auto_remap_mode;
+	RaidMemberAutoRemapSet(mddev);
+#endif  
+
+END:
+	return len;
+}
+
+static struct md_sysfs_entry md_auto_remap =
+__ATTR(auto_remap, S_IRUGO|S_IWUSR, auto_remap_show, auto_remap_store);
+#endif  
+
+#ifdef MY_ABC_HERE
+static ssize_t
+md_active_show(struct mddev *mddev, char *page)
+{
+	return sprintf(page, "%d\n", mddev->blActive);
+}
+
+static ssize_t
+md_active_store(struct mddev *mddev, const char *page, size_t len)
+{
+	int iNeedWake = 0;
+
+	spin_lock(&mddev->ActLock);
+	if (cmd_match(page, "1")) {
+		if (!(mddev->blActive)) {
+			iNeedWake = 1;
+		}
+		mddev->blActive = 1;
+	} else if (cmd_match(page, "0")) {
+		mddev->blActive = 0;
+	} else {
+		printk("md: %s: active, error input\n", mdname(mddev));
+	}
+	spin_unlock(&mddev->ActLock);
+
+	if (iNeedWake) {
+		SynoMDWakeUpDevices(mddev);
+	}
+
+	return len;
+}
+
+static struct md_sysfs_entry md_active =
+__ATTR(active, S_IRUGO|S_IWUSR, md_active_show, md_active_store);
+#endif  
+
 static ssize_t
 array_size_show(struct mddev *mddev, char *page)
 {
@@ -4384,6 +4772,12 @@ static struct attribute *md_default_attrs[] = {
 	&md_reshape_direction.attr,
 	&md_array_size.attr,
 	&max_corr_read_errors.attr,
+#ifdef MY_ABC_HERE
+	&md_auto_remap.attr,
+#endif  
+#ifdef MY_ABC_HERE
+	&md_active.attr,
+#endif  
 	NULL,
 };
 
@@ -4621,7 +5015,39 @@ static void md_safemode_timeout(unsigned long data)
 	md_wakeup_thread(mddev->thread);
 }
 
+#ifdef MY_ABC_HERE
+void SYNOLvInfoSet(struct block_device *bdev, void *private, const char *name)
+{
+	struct mddev *mddev = NULL;
+	char *szDiskName = NULL;
+
+	if (!bdev || !private || !name){
+		printk("%s:%s(%d) error params\n", __FILE__, __FUNCTION__, __LINE__);
+		return;
+	}
+
+	szDiskName = bdev->bd_disk->disk_name;
+	if (NULL == strstr(szDiskName, "md")) {
+		printk("%s:%s(%d) This's not md device:[%s]\n",
+			__FILE__, __FUNCTION__, __LINE__, szDiskName);
+		return;
+	}
+
+	mddev = bdev->bd_disk->private_data;
+	if (mddev) {
+		mddev->syno_private = private;
+	}
+
+	snprintf(mddev->lv_name, 16, "%s", name);
+}
+EXPORT_SYMBOL(SYNOLvInfoSet);
+#endif  
+
+#ifdef MY_ABC_HERE
+static int start_dirty_degraded = 1;
+#else  
 static int start_dirty_degraded;
+#endif  
 
 int md_run(struct mddev *mddev)
 {
@@ -4735,13 +5161,21 @@ int md_run(struct mddev *mddev)
 	}
 
 	mddev->recovery = 0;
-	
+	 
 	mddev->resync_max_sectors = mddev->dev_sectors;
 
 	mddev->ok_start_degraded = start_dirty_degraded;
+#ifdef MY_ABC_HERE
+	mddev->nodev_and_crashed = 0;
+#endif  
+#ifdef MY_ABC_HERE
+	if (0 == strcmp("md0", mdname(mddev)) || 0 == strcmp("md1", mdname(mddev))) {
+		mddev->parallel_resync = 1;
+	}
+#endif  
 
 	if (start_readonly && mddev->ro == 0)
-		mddev->ro = 2; 
+		mddev->ro = 2;  
 
 	err = pers->run(mddev);
 	if (err)
@@ -5139,9 +5573,13 @@ static int do_md_stop(struct mddev *mddev, int mode,
 
 		if (mddev->ro)
 			mddev->ro = 0;
+#ifdef MY_ABC_HERE
+		mddev->auto_remap = MD_AUTO_REMAP_MODE_FORCE_OFF;
+		RaidMemberAutoRemapSet(mddev);
+#endif  
 	} else
 		mutex_unlock(&mddev->open_mutex);
-	
+	 
 	if (mode == 0) {
 		printk(KERN_INFO "md: %s stopped.\n", mdname(mddev));
 
@@ -5248,6 +5686,37 @@ static void autorun_devices(int part)
 				mdname(mddev), bdevname(rdev0->bdev,b));
 			mddev_unlock(mddev);
 		} else {
+#ifdef MY_ABC_HERE
+			mdp_super_t *newest_sb = NULL;
+			unsigned int cRaidDisks = 0;
+			unsigned int cCandidates = 0;
+
+			struct md_rdev *rdev_newest = NULL;
+			rdev_for_each_list(rdev, tmp, &candidates) {
+				if (1 == super_90_load(rdev, rdev_newest, mddev->minor_version)) {
+					rdev_newest = rdev;
+				}
+				cCandidates++;
+			}
+
+			newest_sb = (mdp_super_t *)page_address(rdev_newest->sb_page);
+			cRaidDisks = newest_sb->raid_disks;
+
+			if (cRaidDisks < cCandidates) {
+				 
+				rdev_for_each_list(rdev, tmp, &candidates) {
+					if (rdev != rdev_newest) {
+						if (super_90_validate_rdev_event(rdev_newest, rdev)) {
+							printk(KERN_WARNING "md: kicking non-fresh %s from candidates rdevs!\n",
+								   bdevname(rdev->bdev,b));
+							list_del_init(&rdev->same_set);
+							export_rdev(rdev);
+							continue;
+						}
+					}
+				}
+			}
+#endif  
 			printk(KERN_INFO "md: created %s\n", mdname(mddev));
 			mddev->persistent = 1;
 			rdev_for_each_list(rdev, tmp, &candidates) {
@@ -5392,6 +5861,11 @@ static int get_disk_info(struct mddev *mddev, void __user * arg)
 		else if (test_bit(In_sync, &rdev->flags)) {
 			info.state |= (1<<MD_DISK_ACTIVE);
 			info.state |= (1<<MD_DISK_SYNC);
+#ifdef MY_ABC_HERE
+			if (test_bit(DiskError, &rdev->flags)) {
+				info.state |= (1 << MD_DISK_ERROR);
+			}
+#endif  
 		}
 		if (test_bit(Journal, &rdev->flags))
 			info.state |= (1<<MD_DISK_JOURNAL);
@@ -6076,6 +6550,10 @@ static inline bool md_ioctl_valid(unsigned int cmd)
 	case STOP_ARRAY:
 	case STOP_ARRAY_RO:
 	case CLUSTERED_DISK_NACK:
+#ifdef MY_ABC_HERE
+	case GET_ARRAY_STATUS:
+	case GET_SYNC_STATUS:
+#endif  
 		return true;
 	default:
 		return false;
@@ -6331,6 +6809,67 @@ static int md_ioctl(struct block_device *bdev, fmode_t mode,
 		err = set_bitmap_file(mddev, (int)arg);
 		goto unlock;
 
+#ifdef MY_ABC_HERE
+	 
+	case GET_ARRAY_STATUS:
+	{
+		int ret = 0;
+#ifdef MY_ABC_HERE
+		struct md_rdev *rdev;
+#endif  
+
+		if (mddev->degraded)
+			ret = 1;
+
+#ifdef MY_ABC_HERE
+		if (mddev->nodev_and_crashed)
+			ret = 2;
+#endif  
+
+#ifdef MY_ABC_HERE
+		list_for_each_entry(rdev, &mddev->disks, same_set) {
+			if (test_bit(DiskError, &rdev->flags))
+				ret = 2;
+		}
+#endif  
+
+		if (copy_to_user(argp, &ret, sizeof(ret))) {
+			err = -EFAULT;
+			goto unlock;
+		}
+		break;
+	}
+	case GET_SYNC_STATUS:
+	{
+		MD_SYNC_STATUS status;
+		if (test_bit(MD_RECOVERY_RUNNING, &mddev->recovery) ||
+			test_bit(MD_RECOVERY_NEEDED, &mddev->recovery)) {
+			status.inSync = 1;
+		} else {
+			status.inSync = 0;
+		}
+		if (0 == mddev->level || LEVEL_LINEAR == mddev->level) {
+			 
+			status.inSync = 0;
+		}
+		if (mddev->curr_resync > 2) {
+			status.finishSectors = (mddev->curr_resync - atomic_read(&mddev->recovery_active));
+		} else {
+			status.finishSectors = 0;
+		}
+
+		if (test_bit(MD_RECOVERY_SYNC, &mddev->recovery))
+			status.totalSectors = mddev->resync_max_sectors;
+		else
+			status.totalSectors = mddev->dev_sectors;
+
+		if (copy_to_user(argp, &status, sizeof(status))) {
+			err = -EFAULT;
+			goto unlock;
+		}
+		break;
+	}
+#endif  
 	default:
 		err = -EINVAL;
 		goto unlock;
@@ -6742,8 +7281,14 @@ static int md_seq_show(struct seq_file *seq, void *v)
 				seq_printf(seq, "(F)");
 				continue;
 			}
+#ifdef MY_ABC_HERE
+			if (test_bit(DiskError, &rdev->flags)) {
+				seq_printf(seq, "(E)");
+				continue;
+			}
+#endif  
 			if (rdev->raid_disk < 0)
-				seq_printf(seq, "(S)"); 
+				seq_printf(seq, "(S)");  
 			if (test_bit(Replacement, &rdev->flags))
 				seq_printf(seq, "(R)");
 			sectors += rdev->sectors;
@@ -7047,14 +7592,20 @@ void md_do_sync(struct md_thread *thread)
 	char *desc, *action = NULL;
 	struct blk_plug plug;
 	bool cluster_resync_finished = false;
+#ifdef MY_ABC_HERE
+	int old_auto_remap_setting = -1;
+#endif  
 
-	
 	if (test_bit(MD_RECOVERY_DONE, &mddev->recovery))
 		return;
-	if (mddev->ro) {
+	if (mddev->ro) { 
 		set_bit(MD_RECOVERY_INTR, &mddev->recovery);
 		return;
 	}
+
+#ifdef MY_ABC_HERE
+	old_auto_remap_setting = SynoRaidAutoRemapAdjust(mddev, MD_AUTO_REMAP_MODE_ISMAXDEGRADE);
+#endif  
 
 	if (test_bit(MD_RECOVERY_SYNC, &mddev->recovery)) {
 		if (test_bit(MD_RECOVERY_CHECK, &mddev->recovery)) {
@@ -7140,21 +7691,24 @@ void md_do_sync(struct md_thread *thread)
 				j = rdev->recovery_offset;
 		rcu_read_unlock();
 
-		
 		if (mddev->bitmap) {
 			mddev->pers->quiesce(mddev, 1);
 			mddev->pers->quiesce(mddev, 0);
 		}
 	}
 
+#ifdef MY_ABC_HERE
+	printk(KERN_WARNING "md: %s of RAID array %s\n", desc, mdname(mddev));
+#else  
 	printk(KERN_INFO "md: %s of RAID array %s\n", desc, mdname(mddev));
+#endif  
 	printk(KERN_INFO "md: minimum _guaranteed_  speed:"
 		" %d KB/sec/disk.\n", speed_min(mddev));
 	printk(KERN_INFO "md: using maximum available idle IO bandwidth "
 	       "(but not more than %d KB/sec) for %s.\n",
 	       speed_max(mddev), desc);
 
-	is_mddev_idle(mddev, 1); 
+	is_mddev_idle(mddev, 1);  
 
 	io_sectors = 0;
 	for (m = 0; m < SYNC_MARKS; m++) {
@@ -7280,16 +7834,22 @@ void md_do_sync(struct md_thread *thread)
 				goto repeat;
 			}
 			if (!is_mddev_idle(mddev, 0)) {
-				
+				 
 				wait_event(mddev->recovery_wait,
 					   !atomic_read(&mddev->recovery_active));
 			}
 		}
 	}
+#ifdef MY_ABC_HERE
+	printk(KERN_WARNING "md: %s: %s %s.\n",mdname(mddev), desc,
+	       test_bit(MD_RECOVERY_INTR, &mddev->recovery)
+	       ? "interrupted" : "done");
+#else  
 	printk(KERN_INFO "md: %s: %s %s.\n",mdname(mddev), desc,
 	       test_bit(MD_RECOVERY_INTR, &mddev->recovery)
 	       ? "interrupted" : "done");
-	
+#endif  
+	 
 	blk_finish_plug(&plug);
 	wait_event(mddev->recovery_wait, !atomic_read(&mddev->recovery_active));
 
@@ -7361,9 +7921,33 @@ void md_do_sync(struct md_thread *thread)
 
 	wake_up(&resync_wait);
 	md_wakeup_thread(mddev->thread);
+#ifdef MY_ABC_HERE
+	 
+	SynoRaidAutoRemapAdjust(mddev, old_auto_remap_setting);
+#endif  
 	return;
 }
 EXPORT_SYMBOL_GPL(md_do_sync);
+
+#if defined(MY_ABC_HERE)
+static void
+remove_faulty(struct mddev *mddev)
+{
+	struct md_rdev *rdev;
+
+	list_for_each_entry(rdev, &mddev->disks, same_set)
+		if (rdev->raid_disk >= 0 &&
+		    test_bit(Faulty, &rdev->flags) &&
+		    0 == atomic_read(&rdev->nr_pending)) {
+			if (0 == mddev->pers->hot_remove_disk(mddev, rdev)) {
+				char nm[20];
+				sprintf(nm,"rd%d", rdev->raid_disk);
+				sysfs_remove_link(&mddev->kobj, nm);
+				rdev->raid_disk = -1;
+			}
+		}
+}
+#endif  
 
 static int remove_and_add_spares(struct mddev *mddev,
 				 struct md_rdev *this)
@@ -7469,11 +8053,23 @@ out:
 	md_new_event(mddev);
 }
 
-
 void md_check_recovery(struct mddev *mddev)
 {
+#ifdef MY_ABC_HERE
+	int is_get_reshape_and_mount_lock = 0;
+#endif  
+
 	if (mddev->suspended)
+#ifdef MY_ABC_HERE
+	{
+		if (mddev->flags & MD_UPDATE_SB_FLAGS) {
+			wake_up(&mddev->sb_wait);
+		}
 		return;
+	}
+#else  
+		return;
+#endif  
 
 	if (mddev->bitmap)
 		bitmap_daemon_work(mddev);
@@ -7499,18 +8095,28 @@ void md_check_recovery(struct mddev *mddev)
 		))
 		return;
 
+#ifdef MY_ABC_HERE
+	if (test_bit(MD_RECOVERY_DONE, &mddev->recovery) && mddev->sync_thread) {
+		if (1 == down_write_trylock(&s_reshape_mount_key)) {
+			is_get_reshape_and_mount_lock = 1;
+		} else {
+			return;
+		}
+	}
+#endif  
+
 	if (mddev_trylock(mddev)) {
 		int spares = 0;
 
 		if (mddev->ro) {
 			struct md_rdev *rdev;
 			if (!mddev->external && mddev->in_sync)
-				
+				 
 				rdev_for_each(rdev, mddev)
 					clear_bit(Blocked, &rdev->flags);
-			
+			 
 			remove_and_add_spares(mddev, NULL);
-			
+			 
 			set_bit(MD_RECOVERY_INTR, &mddev->recovery);
 			md_reap_sync_thread(mddev);
 			clear_bit(MD_RECOVERY_RECOVER, &mddev->recovery);
@@ -7550,24 +8156,29 @@ void md_check_recovery(struct mddev *mddev)
 			md_reap_sync_thread(mddev);
 			goto unlock;
 		}
-		
+		 
 		mddev->curr_resync_completed = 0;
 		spin_lock(&mddev->lock);
 		set_bit(MD_RECOVERY_RUNNING, &mddev->recovery);
 		spin_unlock(&mddev->lock);
-		
+		 
 		clear_bit(MD_RECOVERY_INTR, &mddev->recovery);
 		clear_bit(MD_RECOVERY_DONE, &mddev->recovery);
 
 		if (!test_and_clear_bit(MD_RECOVERY_NEEDED, &mddev->recovery) ||
 		    test_bit(MD_RECOVERY_FROZEN, &mddev->recovery))
 			goto not_running;
-		
-
+		 
 		if (mddev->reshape_position != MaxSector) {
+#ifdef MY_ABC_HERE
+			 
+			if (mddev->degraded) {
+				remove_faulty(mddev);
+			}
+#endif  
 			if (mddev->pers->check_reshape == NULL ||
 			    mddev->pers->check_reshape(mddev) != 0)
-				
+				 
 				goto not_running;
 			set_bit(MD_RECOVERY_RESHAPE, &mddev->recovery);
 			clear_bit(MD_RECOVERY_RECOVER, &mddev->recovery);
@@ -7580,12 +8191,20 @@ void md_check_recovery(struct mddev *mddev)
 			set_bit(MD_RECOVERY_SYNC, &mddev->recovery);
 			clear_bit(MD_RECOVERY_RECOVER, &mddev->recovery);
 		} else if (!test_bit(MD_RECOVERY_SYNC, &mddev->recovery))
-			
+			 
 			goto not_running;
 
+#ifdef MY_ABC_HERE
+		if (mddev->nodev_and_crashed) {
+			printk(KERN_ERR "%s: crashed, stop sync\n", mdname(mddev));
+			clear_bit(MD_RECOVERY_SYNC, &mddev->recovery);
+			clear_bit(MD_RECOVERY_RECOVER, &mddev->recovery);
+			goto unlock;
+		}
+#endif  
 		if (mddev->pers->sync_request) {
 			if (spares) {
-				
+				 
 				bitmap_write_all(mddev->bitmap);
 			}
 			INIT_WORK(&mddev->del_work, md_start_sync);
@@ -7605,6 +8224,11 @@ void md_check_recovery(struct mddev *mddev)
 		wake_up(&mddev->sb_wait);
 		mddev_unlock(mddev);
 	}
+#ifdef MY_ABC_HERE
+	if (is_get_reshape_and_mount_lock) {
+		up_write(&s_reshape_mount_key);
+	}
+#endif  
 }
 EXPORT_SYMBOL(md_check_recovery);
 
@@ -8147,6 +8771,11 @@ static int __init md_init(void)
 	raid_table_header = register_sysctl_table(raid_root_table);
 
 	md_geninit();
+
+#ifdef MY_ABC_HERE
+	funcSYNORaidDiskUnplug = SYNORaidDiskUnplug;
+#endif  
+
 	return 0;
 
 err_mdp:
@@ -8268,8 +8897,9 @@ EXPORT_SYMBOL(md_reload_sb);
 
 #ifndef MODULE
 
-
-
+#ifdef MY_ABC_HERE
+DEFINE_SPINLOCK(all_detected_devices_lock);
+#endif  
 static LIST_HEAD(all_detected_devices);
 struct detected_devices_node {
 	struct list_head list;
@@ -8283,12 +8913,73 @@ void md_autodetect_dev(dev_t dev)
 	node_detected_dev = kzalloc(sizeof(*node_detected_dev), GFP_KERNEL);
 	if (node_detected_dev) {
 		node_detected_dev->dev = dev;
+#ifdef MY_ABC_HERE
+		spin_lock(&all_detected_devices_lock);
+#endif  
 		list_add_tail(&node_detected_dev->list, &all_detected_devices);
+#ifdef MY_ABC_HERE
+		spin_unlock(&all_detected_devices_lock);
+#endif  
 	} else {
 		printk(KERN_CRIT "md: md_autodetect_dev: kzalloc failed"
 			", skipping dev(%d,%d)\n", MAJOR(dev), MINOR(dev));
 	}
 }
+
+#ifdef MY_ABC_HERE
+ 
+static u8
+blDenyDisks(const struct block_device *pBDev)
+{
+	u8 ret = 1;
+	int part = -1;
+
+	if (!pBDev) {
+		goto END;
+	}
+	 
+#ifdef MY_ABC_HERE
+	 
+#else
+	if (!(pBDev->bd_disk->systemDisk)) {
+		goto END;
+	}
+#endif
+
+	part = MINOR(pBDev->bd_dev) - pBDev->bd_disk->first_minor;
+	 
+	if (part > 2) {
+		goto END;
+	}
+
+	ret = 0;
+END:
+	return ret;
+}
+#endif  
+
+#ifdef MY_ABC_HERE
+ 
+static int device_sort_cmp(void *priv, struct list_head *plistHead1, struct list_head *plistHead2)
+{
+	struct detected_devices_node *pnode1 = NULL;
+	struct detected_devices_node *pnode2 = NULL;
+	int iRet = 0;
+
+	if (plistHead1 != plistHead2) {
+		pnode1 = list_entry(plistHead1, struct detected_devices_node, list);
+		pnode2 = list_entry(plistHead2, struct detected_devices_node, list);
+
+		if (MAJOR(pnode1->dev) == MAJOR(pnode2->dev)) {
+			iRet = MINOR(pnode1->dev) - MINOR(pnode2->dev);
+		} else {
+			iRet = MAJOR(pnode1->dev) - MAJOR(pnode2->dev);
+		}
+	}
+
+	return iRet;
+}
+#endif  
 
 static void autostart_arrays(int part)
 {
@@ -8296,17 +8987,40 @@ static void autostart_arrays(int part)
 	struct detected_devices_node *node_detected_dev;
 	dev_t dev;
 	int i_scanned, i_passed;
+#ifdef MY_ABC_HERE
+	int iIsEmpty = 0;
+#endif  
 
 	i_scanned = 0;
 	i_passed = 0;
 
 	printk(KERN_INFO "md: Autodetecting RAID arrays.\n");
 
+#ifdef MY_ABC_HERE
+	spin_lock(&all_detected_devices_lock);
+	iIsEmpty = list_empty(&all_detected_devices);
+#ifdef MY_ABC_HERE
+	list_sort(NULL, &all_detected_devices, device_sort_cmp);
+#endif  
+	spin_unlock(&all_detected_devices_lock);
+	while (!iIsEmpty && i_scanned < INT_MAX) {
+		i_scanned++;
+		spin_lock(&all_detected_devices_lock);
+		node_detected_dev = list_entry(all_detected_devices.next,
+					struct detected_devices_node, list);
+		list_del(&node_detected_dev->list);
+		iIsEmpty = list_empty(&all_detected_devices);
+		spin_unlock(&all_detected_devices_lock);
+#else  
+#ifdef MY_ABC_HERE
+	list_sort(NULL, &all_detected_devices, device_sort_cmp);
+#endif  
 	while (!list_empty(&all_detected_devices) && i_scanned < INT_MAX) {
 		i_scanned++;
 		node_detected_dev = list_entry(all_detected_devices.next,
 					struct detected_devices_node, list);
 		list_del(&node_detected_dev->list);
+#endif  
 		dev = node_detected_dev->dev;
 		kfree(node_detected_dev);
 		rdev = md_import_device(dev,0, 90);
@@ -8316,8 +9030,24 @@ static void autostart_arrays(int part)
 		if (test_bit(Faulty, &rdev->flags))
 			continue;
 
+#ifdef MY_ABC_HERE
+		if (blDenyDisks(rdev->bdev)) {
+			char b[BDEVNAME_SIZE];
+
+			printk(KERN_INFO "md: deny %s.\n",
+				   bdevname(rdev->bdev,b));
+
+			export_rdev(rdev);
+			continue;
+		}
+#endif  
 		set_bit(AutoDetected, &rdev->flags);
+#ifdef MY_ABC_HERE
+		 
+		list_add_tail(&rdev->same_set, &pending_raid_disks);
+#else  
 		list_add(&rdev->same_set, &pending_raid_disks);
+#endif  
 		i_passed++;
 	}
 
@@ -8375,6 +9105,465 @@ static int set_ro(const char *val, struct kernel_param *kp)
 module_param_call(start_ro, set_ro, get_ro, NULL, S_IRUSR|S_IWUSR);
 module_param(start_dirty_degraded, int, S_IRUGO|S_IWUSR);
 module_param_call(new_array, add_named_array, NULL, NULL, S_IWUSR);
+
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+
+#ifdef MY_ABC_HERE
+void syno_md_error(struct mddev *mddev, struct md_rdev *rdev)
+#else  
+static void syno_md_error(struct mddev *mddev, struct md_rdev *rdev)
+#endif  
+{
+	if (!mddev) {
+		printk(KERN_ERR "md: bug in file %s, line %d\n", __FILE__, __LINE__);
+		return;
+	}
+
+	if (!rdev || test_bit(Faulty, &rdev->flags))
+		return;
+ 
+	if (!mddev->pers)
+		return;
+	if (!mddev->pers->error_handler)
+		return;
+#ifdef MY_ABC_HERE
+	if(NULL != mddev->pers->syno_error_handler) {
+		mddev->pers->syno_error_handler(mddev,rdev);
+	} else {
+		mddev->pers->error_handler(mddev,rdev);
+	}
+#else  
+	mddev->pers->error_handler(mddev,rdev);
+#endif  
+	if (mddev->degraded)
+		set_bit(MD_RECOVERY_RECOVER, &mddev->recovery);
+	sysfs_notify_dirent_safe(rdev->sysfs_state);
+	set_bit(MD_RECOVERY_INTR, &mddev->recovery);
+	set_bit(MD_RECOVERY_NEEDED, &mddev->recovery);
+	md_wakeup_thread(mddev->thread);
+	if (mddev->event_work.func)
+		queue_work(md_misc_wq, &mddev->event_work);
+	md_new_event_inintr(mddev);
+}
+
+EXPORT_SYMBOL(syno_md_error);
+#endif  
+
+#ifdef MY_ABC_HERE
+ 
+#define SYNO_RAID0 0
+static int syno_hot_remove_disk(struct mddev * mddev, struct md_rdev *rdev)
+{
+	char b[BDEVNAME_SIZE];
+	int res = -1;
+	struct md_rdev *rdev_tmp;
+	unsigned char blNoRdev = 1;
+
+	if(0 != mddev_lock(mddev)) {
+		res = -EAGAIN;
+		printk(KERN_WARNING "%s (%d): mddev_lock fail try again!\n",__FUNCTION__, __LINE__);
+		goto ABORT;
+	}
+
+	list_for_each_entry(rdev_tmp, &mddev->disks, same_set) {
+		 
+		if (rdev_tmp == rdev) {
+			blNoRdev = 0;
+		}
+	}
+
+	if (blNoRdev) {
+		res = -ENODEV;
+		goto END;
+	}
+
+	if (!mddev->pers || !rdev || !rdev->mddev) {
+		printk(KERN_WARNING "%s (%d): !mddev->pers || !rdev->mddev || !rdev\n",__FUNCTION__, __LINE__);
+		res = -ENODEV;
+		goto END;
+	}
+
+	if(SYNO_RAID0 == mddev->level ||
+	   LEVEL_LINEAR == mddev->level) {
+		 
+		if(mddev->pers->hot_remove_disk) {
+			if(0 != mddev->pers->hot_remove_disk(mddev, rdev)) {
+				res = -EAGAIN;
+				goto END;
+			}
+		}
+	} else {
+		 
+		if (mddev->ro) {
+			 
+			printk(KERN_WARNING "%s (%d): %s is in readonly mode, remove faulty disk %s by ourself\n",__FUNCTION__, __LINE__, mdname(mddev), bdevname(rdev->bdev,b));
+			remove_faulty(mddev);
+		}
+	}
+
+	if (rdev->raid_disk >= 0) {
+		if (mddev->curr_resync == 1 || mddev->curr_resync == 2) {
+			res = -EBUSY;
+			remove_faulty(mddev);
+		} else {
+			res = -EAGAIN;
+		}
+		printk(KERN_WARNING "%s (%d): cannot remove active disk %s from %s ... rdev->raid_disk %d pending %u\n",
+			   __FUNCTION__, __LINE__, bdevname(rdev->bdev,b), mdname(mddev), rdev->raid_disk, atomic_read(&rdev->nr_pending));
+		goto END;
+	}
+
+	md_kick_rdev_from_array(rdev);
+	md_update_sb(mddev, 1);
+	md_new_event(mddev);
+
+	res = 0;
+END:
+	mddev_unlock(mddev);
+ABORT:
+	return res;
+}
+
+static int syno_set_disk_faulty(struct mddev * mddev, struct md_rdev *rdev)
+{
+	int res = -1;
+	struct md_rdev *rdev_tmp;
+	unsigned char blNoRdev = 1;
+
+	if(0 != mddev_lock(mddev)) {
+		printk(KERN_WARNING "%s (%d): mddev_lock fail try again!\n",__FUNCTION__, __LINE__);
+		res = -EAGAIN;
+		goto ABORT;
+	}
+
+	list_for_each_entry(rdev_tmp, &mddev->disks, same_set) {
+		 
+		if (rdev_tmp == rdev) {
+			blNoRdev = 0;
+		}
+	}
+
+	if (blNoRdev) {
+		res = -ENODEV;
+		goto END;
+	}
+
+	if (mddev->pers == NULL || !rdev || !rdev->mddev) {
+		printk(KERN_WARNING "%s (%d): set faulty error! \n",__FUNCTION__, __LINE__);
+		res = -ENODEV;
+		goto END;
+	}
+
+	syno_md_error(mddev, rdev);
+
+	res = 0;
+END:
+	mddev_unlock(mddev);
+ABORT:
+	return res;
+}
+
+static int SynoCheckRdevIsWorking(struct mddev *mddev, struct md_rdev *rdev)
+{
+	int res = -1;
+	char b[BDEVNAME_SIZE];
+	struct md_rdev *rdev_tmp;
+	unsigned char blNoRdev = 1;
+
+	if (0 != mddev_lock(mddev)) {
+		printk(KERN_WARNING "%s (%d): mddev_lock fail try again!\n",__FUNCTION__, __LINE__);
+		res = -EAGAIN;
+		goto ABORT;
+	}
+
+	list_for_each_entry(rdev_tmp, &mddev->disks, same_set) {
+		 
+		if (rdev_tmp == rdev) {
+			blNoRdev = 0;
+		}
+	}
+
+	if (blNoRdev) {
+		res = -ENODEV;
+		goto END;
+	}
+
+	if (mddev->pers == NULL || !rdev || !rdev->mddev) {
+		res = -ENODEV;
+		goto END;
+	}
+
+	printk("%s (%d): remove active disk %s from %s "
+				   "raid_disks %d mddev->degraded %d mddev->level %d \n", __FUNCTION__, __LINE__,
+				   bdevname(rdev->bdev, b), mdname(mddev),
+				   mddev->raid_disks, mddev->degraded, mddev->level);
+	res = 0;
+END:
+	mddev_unlock(mddev);
+ABORT:
+	return res;
+}
+
+typedef struct _tag_SYNO_RAID_UNPLUG_WORK{
+	struct work_struct work;
+	char szDiskName[BDEVNAME_SIZE];
+}SYNO_RAID_UNPLUG_WORK;
+
+typedef struct _tag_SYNO_RDEV_UNPLUG_WORK{
+	struct work_struct work;
+	struct mddev *mddev;
+	struct md_rdev *rdev;
+}SYNO_RDEV_UNPLUG_WORK;
+
+static int SynoRaidUnplugSingleRdev(struct mddev *mddev, struct md_rdev *rdev)
+{
+	int status;
+	int res = 0;
+
+AGAIN:
+	status = SynoCheckRdevIsWorking(mddev, rdev);
+	if (-ENODEV == status) {
+		goto END;
+	}
+
+	if (-EAGAIN == status) {
+		goto AGAIN;
+	}
+
+	status = syno_set_disk_faulty(mddev, rdev);
+	if (-ENODEV == status) {
+		goto END;
+	}
+
+	if (-EAGAIN == status) {
+		goto AGAIN;
+	}
+
+	status = syno_hot_remove_disk(mddev, rdev);
+	if (-EBUSY == status) {
+		res = -1;
+		goto END;
+	}
+
+	if (-EAGAIN == status) {
+		 
+		msleep(1000);
+		goto AGAIN;
+	}
+
+END:
+	return res;
+}
+
+void SYNORaidUnplugTask(struct work_struct *work)
+{
+	struct mddev *mddev;
+	struct md_rdev *rdev;
+	struct list_head *mdev_tmp;
+	char b[BDEVNAME_SIZE];
+	char *szDiskName;
+
+	SYNO_RAID_UNPLUG_WORK *raid_unplug_work = container_of(work, SYNO_RAID_UNPLUG_WORK, work);
+
+	if(NULL == raid_unplug_work) {
+		printk("%s %d: NULL == raid_unplug_work, not doing this function done.\n", __FILE__, __LINE__);
+		return;
+	}
+
+	szDiskName = raid_unplug_work->szDiskName;
+
+	if (NULL == szDiskName || 0 == szDiskName[0]) {
+		kfree(raid_unplug_work);
+		return;
+	}
+
+	for_each_mddev(mddev, mdev_tmp) {
+		if(0 != mddev_lock(mddev)) {
+			WARN_ON(1);
+			printk(KERN_WARNING "%s (%d): mddev_lock fail try again!\n",__FUNCTION__, __LINE__);
+			continue;
+		}
+
+		list_for_each_entry(rdev, &mddev->disks, same_set) {
+			 
+			if (rdev && rdev->mddev) {
+				bdevname(rdev->bdev, b);
+			} else {
+				continue;
+			}
+
+			if (!strcmp(rdev->bdev->bd_disk->disk_name, szDiskName)) {
+				SYNORaidRdevUnplug(mddev, rdev);
+			}
+		}
+		mddev_unlock(mddev);
+	}
+
+	kfree(raid_unplug_work);
+	return;
+}
+
+static void SYNORdevUnplugTask(struct work_struct *work)
+{
+	struct mddev *mddev;
+	struct md_rdev *rdev;
+	SYNO_RDEV_UNPLUG_WORK *rdev_unplug_work = container_of(work, SYNO_RDEV_UNPLUG_WORK, work);
+
+	if(NULL == rdev_unplug_work) {
+		printk("%s %d: NULL == raid_unplug_work, not doing this function done.\n", __FILE__, __LINE__);
+		return;
+	}
+
+	mddev = rdev_unplug_work->mddev;
+	rdev = rdev_unplug_work->rdev;
+
+	if (SynoRaidUnplugSingleRdev(mddev, rdev)) {
+		schedule_work(&rdev_unplug_work->work);
+		return;
+	}
+
+	kfree(rdev_unplug_work);
+	return;
+}
+
+int SYNORaidDiskUnplug(char *szArgDiskName)
+{
+	SYNO_RAID_UNPLUG_WORK *raid_unplug_work = kmalloc(sizeof(SYNO_RAID_UNPLUG_WORK), GFP_ATOMIC);
+
+	if(raid_unplug_work != NULL) {
+		strlcpy(raid_unplug_work->szDiskName, szArgDiskName, BDEVNAME_SIZE);
+
+		INIT_WORK(&raid_unplug_work->work, SYNORaidUnplugTask);
+
+		if (schedule_work(&raid_unplug_work->work) == 0) {
+			printk("(%s) [%s] - %d,"
+				   " schedule_work(&worker->work) already on the queue, not queuing again\n", __FILE__, __func__, __LINE__);
+			kfree(raid_unplug_work);
+		}
+
+	} else {
+		printk("%s %d: kmalloc error\n", __FILE__, __LINE__);
+	}
+	return 0;
+}
+
+void SYNORaidRdevUnplug(struct mddev *mddev, struct md_rdev *rdev)
+{
+	SYNO_RDEV_UNPLUG_WORK *rdev_unplug_work = kmalloc(sizeof(SYNO_RDEV_UNPLUG_WORK), GFP_ATOMIC);
+
+	if(rdev_unplug_work != NULL) {
+		rdev_unplug_work->mddev = mddev;
+		rdev_unplug_work->rdev = rdev;
+		INIT_WORK(&rdev_unplug_work->work, SYNORdevUnplugTask);
+
+		if (schedule_work(&rdev_unplug_work->work) == 0) {
+			printk("(%s) [%s] - %d,"
+				   " schedule_work(&rdev_unplug_work->work) already on the queue, not queuing again\n", __FILE__, __func__, __LINE__);
+			kfree(rdev_unplug_work);
+		}
+	} else {
+		printk("%s %d: kmalloc error\n", __FILE__, __LINE__);
+	}
+}
+
+void
+SynoUpdateSBTask(struct work_struct *work)
+{
+	SYNO_UPDATE_SB_WORK *update_sb = container_of(work, SYNO_UPDATE_SB_WORK, work);
+
+	if (!update_sb) {
+		WARN_ON(!update_sb);
+		return;
+	}
+
+	if (!update_sb->mddev) {
+		WARN_ON(!update_sb->mddev);
+		goto END;
+	}
+
+	if(0 != mddev_lock(update_sb->mddev)) {
+		printk(KERN_WARNING "%s (%d): mddev_lock fail try again!\n",__FUNCTION__, __LINE__);
+		goto END;
+	}
+
+	md_update_sb(update_sb->mddev, 1);
+
+	mddev_unlock(update_sb->mddev);
+END:
+	kfree(update_sb);
+}
+EXPORT_SYMBOL(SynoUpdateSBTask);
+#endif  
+#ifdef MY_ABC_HERE
+static void wakeup_bi_complete(struct bio *bio)
+{
+	bio_put(bio);
+}
+
+static void wakeup_io(struct block_device *bdev, sector_t sector, int size,
+		   struct page *page, int rw)
+{
+	struct bio *bio = bio_alloc(GFP_NOIO, 1);
+
+	rw |= REQ_SYNC;
+
+	bio->bi_bdev = bdev;
+	bio->bi_iter.bi_sector = sector;
+	bio_add_page(bio, page, size, 0);
+	bio->bi_private = NULL;
+	bio->bi_end_io = wakeup_bi_complete;
+	submit_bio(rw, bio);
+}
+
+static void SYNOWakeUpTask(struct work_struct *work) {
+	struct md_rdev *rdev = NULL;
+	SYNO_WAKEUP_DEVICE_WORK *pWakeup_work = container_of(work, SYNO_WAKEUP_DEVICE_WORK, work);
+	struct mddev *mddev = pWakeup_work->mddev;
+
+	if (!mddev) {
+		goto END;
+	}
+
+	if(0 != mddev_lock(mddev)){
+		goto END;
+	}
+
+	list_for_each_entry(rdev, &mddev->disks, same_set) {
+		wakeup_io(rdev->bdev, rdev->sb_start, MD_SB_BYTES, rdev->wakeup_page, 0);
+	}
+	mddev_unlock(mddev);
+	kfree(pWakeup_work);
+END:
+	return;
+}
+
+void SynoMDWakeUpDevices(void *md)
+{
+	SYNO_WAKEUP_DEVICE_WORK *pWakeup_work = NULL;
+	struct mddev *mddev = md;
+
+	if (!md) {
+		printk("%s no mddev\n", __FUNCTION__);
+		goto END;
+	}
+
+	if (NULL == (pWakeup_work = kzalloc(sizeof(SYNO_WAKEUP_DEVICE_WORK), GFP_ATOMIC))){
+		WARN_ON(!pWakeup_work);
+		goto END;
+	}
+
+	INIT_WORK(&pWakeup_work->work, SYNOWakeUpTask);
+	pWakeup_work->mddev = mddev;
+	schedule_work(&pWakeup_work->work);
+
+	spin_lock(&mddev->ActLock);
+	mddev->blActive = 1;
+	spin_unlock(&mddev->ActLock);
+END:
+	return;
+}
+EXPORT_SYMBOL(SynoMDWakeUpDevices);
+#endif  
 
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("MD RAID framework");

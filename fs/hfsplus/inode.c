@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/blkdev.h>
 #include <linux/mm.h>
 #include <linux/fs.h>
@@ -119,13 +121,12 @@ static ssize_t hfsplus_direct_IO(struct kiocb *iocb, struct iov_iter *iter,
 {
 	struct file *file = iocb->ki_filp;
 	struct address_space *mapping = file->f_mapping;
-	struct inode *inode = file_inode(file)->i_mapping->host;
+	struct inode *inode = mapping->host;
 	size_t count = iov_iter_count(iter);
 	ssize_t ret;
 
 	ret = blockdev_direct_IO(iocb, inode, iter, offset, hfsplus_get_block);
 
-	
 	if (unlikely(iov_iter_rw(iter) == WRITE && ret < 0)) {
 		loff_t isize = i_size_read(inode);
 		loff_t end = offset + count;
@@ -173,12 +174,23 @@ static void hfsplus_get_perms(struct inode *inode,
 	struct hfsplus_sb_info *sbi = HFSPLUS_SB(inode->i_sb);
 	u16 mode;
 
+#ifdef MY_ABC_HERE
+	 
+	mode = 0;
+#else
 	mode = be16_to_cpu(perms->mode);
+#endif  
 
+#ifdef MY_ABC_HERE
+	if (!__kuid_val(sbi->uid))
+#endif  
 	i_uid_write(inode, be32_to_cpu(perms->owner));
 	if (!i_uid_read(inode) && !mode)
 		inode->i_uid = sbi->uid;
 
+#ifdef MY_ABC_HERE
+	if (!__kgid_val(sbi->gid))
+#endif  
 	i_gid_write(inode, be32_to_cpu(perms->group));
 	if (!i_gid_read(inode) && !mode)
 		inode->i_gid = sbi->gid;
@@ -187,7 +199,11 @@ static void hfsplus_get_perms(struct inode *inode,
 		mode = mode ? (mode & S_IALLUGO) : (S_IRWXUGO & ~(sbi->umask));
 		mode |= S_IFDIR;
 	} else if (!mode)
+#ifdef MY_ABC_HERE
+		mode = S_IFREG | (S_IRWXUGO & ~(sbi->umask));
+#else
 		mode = S_IFREG | ((S_IRUGO|S_IWUGO) & ~(sbi->umask));
+#endif  
 	inode->i_mode = mode;
 
 	HFSPLUS_I(inode)->userflags = perms->userflags;
@@ -218,14 +234,14 @@ static int hfsplus_file_release(struct inode *inode, struct file *file)
 	if (HFSPLUS_IS_RSRC(inode))
 		inode = HFSPLUS_I(inode)->rsrc_inode;
 	if (atomic_dec_and_test(&HFSPLUS_I(inode)->opencnt)) {
-		mutex_lock(&inode->i_mutex);
+		inode_lock(inode);
 		hfsplus_file_truncate(inode);
 		if (inode->i_flags & S_DEAD) {
 			hfsplus_delete_cat(inode->i_ino,
 					   HFSPLUS_SB(sb)->hidden_dir, NULL);
 			hfsplus_delete_inode(inode);
 		}
-		mutex_unlock(&inode->i_mutex);
+		inode_unlock(inode);
 	}
 	return 0;
 }
@@ -241,6 +257,9 @@ static int hfsplus_setattr(struct dentry *dentry, struct iattr *attr)
 
 	if ((attr->ia_valid & ATTR_SIZE) &&
 	    attr->ia_size != i_size_read(inode)) {
+#ifdef MY_ABC_HERE
+		loff_t old_size = i_size_read(inode);
+#endif  
 		inode_dio_wait(inode);
 		if (attr->ia_size > inode->i_size) {
 			error = generic_cont_expand_simple(inode,
@@ -249,6 +268,9 @@ static int hfsplus_setattr(struct dentry *dentry, struct iattr *attr)
 				return error;
 		}
 		truncate_setsize(inode, attr->ia_size);
+#ifdef MY_ABC_HERE
+		if (0 != old_size)
+#endif  
 		hfsplus_file_truncate(inode);
 	}
 
@@ -275,12 +297,10 @@ int hfsplus_file_fsync(struct file *file, loff_t start, loff_t end,
 	error = filemap_write_and_wait_range(inode->i_mapping, start, end);
 	if (error)
 		return error;
-	mutex_lock(&inode->i_mutex);
+	inode_lock(inode);
 
-	
 	sync_inode_metadata(inode, 1);
 
-	
 	if (test_and_clear_bit(HFSPLUS_I_CAT_DIRTY, &hip->flags))
 		error = filemap_write_and_wait(sbi->cat_tree->inode->i_mapping);
 
@@ -312,7 +332,7 @@ int hfsplus_file_fsync(struct file *file, loff_t start, loff_t end,
 	if (!test_bit(HFSPLUS_SB_NOBARRIER, &sbi->flags))
 		blkdev_issue_flush(inode->i_sb->s_bdev, GFP_KERNEL, NULL);
 
-	mutex_unlock(&inode->i_mutex);
+	inode_unlock(inode);
 
 	return error;
 }

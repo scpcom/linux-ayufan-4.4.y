@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * kernel/power/main.c - PM subsystem core functionality.
  *
@@ -19,6 +22,10 @@
 #include "power.h"
 
 DEFINE_MUTEX(pm_mutex);
+
+#ifdef MY_DEF_HERE
+extern int rtk_set_suspend_mode(const char *buf, int n);
+#endif /* MY_DEF_HERE */
 
 #ifdef CONFIG_PM_SLEEP
 
@@ -318,6 +325,12 @@ static ssize_t state_show(struct kobject *kobj, struct kobj_attribute *attr,
 #endif
 	if (hibernation_available())
 		s += sprintf(s, "disk ");
+
+#ifdef MY_DEF_HERE
+    /* RTD129x extra power state */
+    s += sprintf(s, "off ");
+#endif /* MY_DEF_HERE */
+
 	if (s != buf)
 		/* convert the last space to a newline */
 		*(s-1) = '\n';
@@ -365,6 +378,19 @@ static ssize_t state_store(struct kobject *kobj, struct kobj_attribute *attr,
 		error = -EBUSY;
 		goto out;
 	}
+
+#ifdef MY_DEF_HERE
+	/* hijack the following power states:
+	*   standby -> mem [suspend_mode=wfi]
+	*   mem     -> mem [suspend_mode=ram]
+	*   off     -> mem [suspend_mode=coolboot]
+	*
+	* These states will be set as mem, but suspend_mode will
+	*   be set to relative value.
+	*/
+
+	n = rtk_set_suspend_mode(buf, n);
+#endif /* MY_DEF_HERE */
 
 	state = decode_state(buf, n);
 	if (state < PM_SUSPEND_MAX)

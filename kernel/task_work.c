@@ -118,3 +118,6 @@ void task_work_run(void)
 		} while (work);
 	}
 }
+#ifdef CONFIG_AUFS_FHSM
+EXPORT_SYMBOL_GPL(task_work_run);
+#endif /* CONFIG_AUFS_FHSM */

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * SCSI Enclosure Services
  *
@@ -152,7 +155,12 @@ static int ses_set_page2_descriptor(struct enclosure_device *edev,
 		for (j = 0; j < type_ptr[1]; j++) {
 			desc_ptr += 4;
 			if (type_ptr[0] != ENCLOSURE_COMPONENT_DEVICE &&
+#ifdef MY_DEF_HERE
+			    type_ptr[0] != ENCLOSURE_COMPONENT_ARRAY_DEVICE &&
+			    type_ptr[0] != ENCLOSURE_COMPONENT_ENCLOSURE)
+#else /* MY_DEF_HERE */
 			    type_ptr[0] != ENCLOSURE_COMPONENT_ARRAY_DEVICE)
+#endif /* MY_DEF_HERE */
 				continue;
 			if (count++ == descriptor) {
 				memcpy(desc_ptr, desc, 4);
@@ -162,6 +170,9 @@ static int ses_set_page2_descriptor(struct enclosure_device *edev,
 				desc_ptr[0] &= 0xf0;
 			}
 		}
+#ifdef MY_DEF_HERE
+		desc_ptr += 4;
+#endif /* MY_DEF_HERE */
 	}
 
 	return ses_send_diag(sdev, 2, ses_dev->page2, ses_dev->page2_len);
@@ -182,11 +193,19 @@ static unsigned char *ses_get_page2_descriptor(struct enclosure_device *edev,
 		for (j = 0; j < type_ptr[1]; j++) {
 			desc_ptr += 4;
 			if (type_ptr[0] != ENCLOSURE_COMPONENT_DEVICE &&
+#ifdef MY_DEF_HERE
+			    type_ptr[0] != ENCLOSURE_COMPONENT_ARRAY_DEVICE &&
+			    type_ptr[0] != ENCLOSURE_COMPONENT_ENCLOSURE)
+#else /* MY_DEF_HERE */
 			    type_ptr[0] != ENCLOSURE_COMPONENT_ARRAY_DEVICE)
+#endif /* MY_DEF_HERE */
 				continue;
 			if (count++ == descriptor)
 				return desc_ptr;
 		}
+#ifdef MY_DEF_HERE
+		desc_ptr += 4;
+#endif /* MY_DEF_HERE */
 	}
 	return NULL;
 }
@@ -281,6 +300,24 @@ static int ses_set_locate(struct enclosure_device *edev,
 	}
 	return ses_set_page2_descriptor(edev, ecomp, desc);
 }
+
+#ifdef MY_DEF_HERE
+static int syno_ses_set_poweroff(struct enclosure_device *edev,
+					struct enclosure_component *ecomp)
+{
+	unsigned char desc[4] = {0};
+	unsigned char *desc_get = NULL;
+
+	desc_get = ses_get_page2_descriptor(edev, ecomp);
+
+	/* power cycle request: bit 7,6 = 10, bit 5~0 = 000000 */
+	desc[2] = 0x40;
+	/* power off duration: bit 7~2 = 111111 */
+	desc[3] = ((desc_get[3] & 0x3) | (63 << 2));
+
+	return ses_set_page2_descriptor(edev, ecomp, desc);
+}
+#endif /* MY_DEF_HERE */
 
 static int ses_set_active(struct enclosure_device *edev,
 			  struct enclosure_component *ecomp,
@@ -533,7 +570,12 @@ static void ses_enclosure_data_process(struct enclosure_device *edev,
 				}
 			}
 			if (type_ptr[0] == ENCLOSURE_COMPONENT_DEVICE ||
+#ifdef MY_DEF_HERE
+			    type_ptr[0] == ENCLOSURE_COMPONENT_ARRAY_DEVICE ||
+			    type_ptr[0] == ENCLOSURE_COMPONENT_ENCLOSURE) {
+#else /* MY_DEF_HERE */
 			    type_ptr[0] == ENCLOSURE_COMPONENT_ARRAY_DEVICE) {
+#endif /* MY_DEF_HERE */
 
 				if (create)
 					ecomp =	enclosure_component_alloc(
@@ -676,7 +718,12 @@ static int ses_intf_add(struct device *cdev,
 
 	for (i = 0; i < types && type_ptr < buf + len; i++, type_ptr += 4) {
 		if (type_ptr[0] == ENCLOSURE_COMPONENT_DEVICE ||
+#ifdef MY_DEF_HERE
+		    type_ptr[0] == ENCLOSURE_COMPONENT_ARRAY_DEVICE ||
+		    type_ptr[0] == ENCLOSURE_COMPONENT_ENCLOSURE)
+#else /* MY_DEF_HERE */
 		    type_ptr[0] == ENCLOSURE_COMPONENT_ARRAY_DEVICE)
+#endif /* MY_DEF_HERE */
 			components += type_ptr[1];
 	}
 	ses_dev->page1 = buf;
@@ -763,6 +810,34 @@ static int ses_intf_add(struct device *cdev,
 	return err;
 }
 
+#ifdef MY_DEF_HERE
+static void syno_ses_shutdown(struct device *dev)
+{
+	struct scsi_device *sdev = to_scsi_device(dev);
+	struct enclosure_device *edev, *prev = NULL;
+	struct enclosure_component *cdev = NULL;
+	int i = 0;
+
+	if ((0 != memcmp(sdev->model, "RX1216sas", sizeof(sdev->model)) &&
+	     0 != memcmp(sdev->model, "RXD1215sas", sizeof(sdev->model))) ||
+	     SYSTEM_POWER_OFF != system_state) {
+		return;
+	}
+
+	sdev_printk(KERN_ERR, sdev, "ses shutdown \n");
+
+	while (NULL != (edev = enclosure_find(dev, prev))) {
+		prev = edev;
+		for (i = 0; i < edev->components; i++) {
+			cdev = &edev->component[i];
+			if(ENCLOSURE_COMPONENT_ENCLOSURE == cdev->type) {
+				syno_ses_set_poweroff(edev, cdev);
+			}
+		}
+	}
+}
+#endif /* MY_DEF_HERE */
+
 static int ses_remove(struct device *dev)
 {
 	return 0;
@@ -827,6 +902,9 @@ static struct scsi_driver ses_template = {
 		.owner		= THIS_MODULE,
 		.probe		= ses_probe,
 		.remove		= ses_remove,
+#ifdef MY_DEF_HERE
+		.shutdown	= syno_ses_shutdown,
+#endif /* MY_DEF_HERE */
 	},
 };
 

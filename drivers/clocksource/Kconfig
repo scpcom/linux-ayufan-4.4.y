@@ -77,6 +77,12 @@ config ASM9260_TIMER
 	select CLKSRC_MMIO
 	select CLKSRC_OF
 
+config RTK_TIMER
+	bool "Realtek System Timer"
+	depends on ARCH_RTD129X
+	help
+	Realtek System Timer.
+
 config CLKSRC_NOMADIK_MTU
 	bool
 	depends on (ARCH_NOMADIK || ARCH_U8500)

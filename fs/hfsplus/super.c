@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/pagemap.h>
@@ -46,6 +48,22 @@ static int hfsplus_system_read_inode(struct inode *inode)
 
 	return 0;
 }
+
+#ifdef MY_ABC_HERE
+ 
+static inline size_t hfsplus_get_maxinline_attrsize(struct hfs_btree *btree)
+{
+       unsigned int maxsize = btree->node_size;
+        
+       maxsize -= sizeof(struct hfs_bnode_desc);        
+       maxsize -= 3 * sizeof(u16);                      
+       maxsize /= 2;                             
+       maxsize -= sizeof(struct hfsplus_attr_key);        
+       maxsize -= sizeof(struct hfsplus_attr_data) - 2;   
+       maxsize &= 0xFFFFFFFE;                    
+       return maxsize;
+}
+#endif  
 
 struct inode *hfsplus_iget(struct super_block *sb, unsigned long ino)
 {
@@ -364,6 +382,10 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 	struct nls_table *nls = NULL;
 	u64 last_fs_block, last_fs_page;
 	int err;
+#ifdef MY_ABC_HERE
+	size_t max_attr_size = 0;
+	size_t cached_size = 0;
+#endif  
 
 	err = -ENOMEM;
 	sbi = kzalloc(sizeof(*sbi), GFP_KERNEL);
@@ -467,6 +489,19 @@ static int hfsplus_fill_super(struct super_block *sb, void *data, int silent)
 		atomic_set(&sbi->attr_tree_state, HFSPLUS_VALID_ATTR_TREE);
 	}
 	sb->s_xattr = hfsplus_xattr_handlers;
+#ifdef MY_ABC_HERE
+	if (sbi->attr_tree) {
+		max_attr_size = hfsplus_get_maxinline_attrsize(sbi->attr_tree);
+		cached_size = offsetof(struct hfsplus_attr_inline_data, raw_bytes) + max_attr_size;
+		if (cached_size > hfsplus_get_attr_tree_cache_size()) {
+			err = hfsplus_recreate_attr_tree_cache(cached_size);
+			if (err) {
+				goto out_close_attr_tree;
+			}
+		}
+		err = -EINVAL;
+	}
+#endif  
 
 	inode = hfsplus_iget(sb, HFSPLUS_ALLOC_CNID);
 	if (IS_ERR(inode)) {

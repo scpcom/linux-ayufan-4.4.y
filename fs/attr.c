@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/export.h>
 #include <linux/time.h>
 #include <linux/mm.h>
@@ -11,48 +13,45 @@
 #include <linux/evm.h>
 #include <linux/ima.h>
 
-
+#ifdef MY_ABC_HERE
+#include "synoacl_int.h"
+#endif  
+ 
 int inode_change_ok(const struct inode *inode, struct iattr *attr)
 {
 	unsigned int ia_valid = attr->ia_valid;
 
-	
 	if (ia_valid & ATTR_SIZE) {
 		int error = inode_newsize_ok(inode, attr->ia_size);
 		if (error)
 			return error;
 	}
 
-	
 	if (ia_valid & ATTR_FORCE)
 		return 0;
 
-	
 	if ((ia_valid & ATTR_UID) &&
 	    (!uid_eq(current_fsuid(), inode->i_uid) ||
 	     !uid_eq(attr->ia_uid, inode->i_uid)) &&
 	    !capable_wrt_inode_uidgid(inode, CAP_CHOWN))
 		return -EPERM;
 
-	
 	if ((ia_valid & ATTR_GID) &&
 	    (!uid_eq(current_fsuid(), inode->i_uid) ||
 	    (!in_group_p(attr->ia_gid) && !gid_eq(attr->ia_gid, inode->i_gid))) &&
 	    !capable_wrt_inode_uidgid(inode, CAP_CHOWN))
 		return -EPERM;
 
-	
 	if (ia_valid & ATTR_MODE) {
 		if (!inode_owner_or_capable(inode))
 			return -EPERM;
-		
+		 
 		if (!in_group_p((ia_valid & ATTR_GID) ? attr->ia_gid :
 				inode->i_gid) &&
 		    !capable_wrt_inode_uidgid(inode, CAP_FSETID))
 			attr->ia_mode &= ~S_ISGID;
 	}
 
-	
 	if (ia_valid & (ATTR_MTIME_SET | ATTR_ATIME_SET | ATTR_TIMES_SET)) {
 		if (!inode_owner_or_capable(inode))
 			return -EPERM;
@@ -121,8 +120,11 @@ int notify_change(struct dentry * dentry, struct iattr * attr, struct inode **de
 	int error;
 	struct timespec now;
 	unsigned int ia_valid = attr->ia_valid;
+#ifdef MY_ABC_HERE
+	int isSYNOACL = 0;
+#endif  
 
-	WARN_ON_ONCE(!mutex_is_locked(&inode->i_mutex));
+	WARN_ON_ONCE(!inode_is_locked(inode));
 
 	if (ia_valid & (ATTR_MODE | ATTR_UID | ATTR_GID | ATTR_TIMES_SET)) {
 		if (IS_IMMUTABLE(inode) || IS_APPEND(inode))
@@ -182,12 +184,26 @@ int notify_change(struct dentry * dentry, struct iattr * attr, struct inode **de
 	if (error)
 		return error;
 
+#ifdef MY_ABC_HERE
+	isSYNOACL = IS_SYNOACL(dentry);
+	if (isSYNOACL) {
+		error = synoacl_op_inode_chg_ok(dentry, attr);
+		if (error) {
+			return error;
+		}
+	}
+#endif  
 	if (inode->i_op->setattr)
 		error = inode->i_op->setattr(dentry, attr);
 	else
 		error = simple_setattr(dentry, attr);
 
 	if (!error) {
+#ifdef MY_ABC_HERE
+		if (isSYNOACL) {
+			synoacl_op_setattr_post(dentry, attr);
+		}
+#endif  
 		fsnotify_change(dentry, ia_valid);
 		ima_inode_post_setattr(dentry);
 		evm_inode_post_setattr(dentry, ia_valid);

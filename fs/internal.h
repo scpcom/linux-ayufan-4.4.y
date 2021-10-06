@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 struct super_block;
 struct file_system_type;
 struct linux_binprm;
@@ -46,19 +48,20 @@ extern int __mnt_want_write_file(struct file *);
 extern void __mnt_drop_write(struct vfsmount *);
 extern void __mnt_drop_write_file(struct file *);
 
-
 extern void chroot_fs_refs(const struct path *, const struct path *);
 
-
+#ifdef MY_ABC_HERE
+extern void file_sb_list_add(struct file *f, struct super_block *sb);
+extern void file_sb_list_del(struct file *f);
+extern void fs_show_opened_file(struct mount *m);
+#endif  
 extern struct file *get_empty_filp(void);
-
 
 extern int do_remount_sb(struct super_block *, int, void *, int);
 extern bool trylock_super(struct super_block *sb);
 extern struct dentry *mount_fs(struct file_system_type *,
 			       int, const char *, void *);
 extern struct super_block *user_get_super(dev_t);
-
 
 struct open_flags {
 	int open_flag;

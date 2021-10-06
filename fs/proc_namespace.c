@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * fs/proc_namespace.c - handling of /proc/<pid>/{mounts,mountinfo,mountstats}
  *
@@ -75,6 +78,11 @@ static void show_mnt_opts(struct seq_file *m, struct vfsmount *mnt)
 		if (mnt->mnt_flags & fs_infop->flag)
 			seq_puts(m, fs_infop->str);
 	}
+#ifdef MY_ABC_HERE
+	if ((mnt->mnt_flags & MNT_RELATIME) && mnt->mnt_root->d_sb->relatime_period > 1) {
+		seq_printf(m, ",relatime_period=%ld", mnt->mnt_root->d_sb->relatime_period);
+	}
+#endif /* MY_ABC_HERE */
 }
 
 static inline void mangle(struct seq_file *m, const char *s)

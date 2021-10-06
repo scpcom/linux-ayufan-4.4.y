@@ -1,32 +1,28 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef __SOUND_CORE_H
 #define __SOUND_CORE_H
 
-
-
 #include <linux/device.h>
-#include <linux/sched.h>		
-#include <linux/mutex.h>		
-#include <linux/rwsem.h>		
-#include <linux/pm.h>			
+#include <linux/sched.h>		 
+#include <linux/mutex.h>		 
+#include <linux/rwsem.h>		 
+#include <linux/pm.h>			 
 #include <linux/stringify.h>
 #include <linux/printk.h>
-
 
 #ifdef CONFIG_SND_DYNAMIC_MINORS
 #define SNDRV_CARDS CONFIG_SND_MAX_CARDS
 #else
-#define SNDRV_CARDS 8		
+#define SNDRV_CARDS 8		 
 #endif
 
-#define CONFIG_SND_MAJOR	116	
-
+#define CONFIG_SND_MAJOR	116	 
 
 struct pci_dev;
 struct module;
 struct completion;
-
-
-
 
 enum snd_device_type {
 	SNDRV_DEV_LOWLEVEL,
@@ -117,6 +113,9 @@ struct snd_card {
 	struct snd_mixer_oss *mixer_oss;
 	int mixer_oss_change_count;
 #endif
+#if defined(MY_ABC_HERE)
+	unsigned int low_level_dev_id;
+#endif  
 };
 
 #define dev_to_snd_card(p)	container_of(p, struct snd_card, card_dev)

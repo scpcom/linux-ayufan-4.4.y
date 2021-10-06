@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * SWIOTLB-based DMA API implementation
  *
@@ -340,7 +343,11 @@ static int __swiotlb_get_sgtable(struct device *dev, struct sg_table *sgt,
 	return ret;
 }
 
+#ifdef MY_DEF_HERE
+struct dma_map_ops swiotlb_dma_ops = {
+#else
 static struct dma_map_ops swiotlb_dma_ops = {
+#endif
 	.alloc = __dma_alloc,
 	.free = __dma_free,
 	.mmap = __swiotlb_mmap,
@@ -356,6 +363,9 @@ static struct dma_map_ops swiotlb_dma_ops = {
 	.dma_supported = swiotlb_dma_supported,
 	.mapping_error = swiotlb_dma_mapping_error,
 };
+#ifdef MY_DEF_HERE
+EXPORT_SYMBOL(swiotlb_dma_ops);
+#endif /* MY_DEF_HERE */
 
 static int __init atomic_pool_init(void)
 {

@@ -317,7 +317,7 @@ static int qxl_crtc_cursor_set2(struct drm_crtc *crtc,
 	if (!handle)
 		return qxl_hide_cursor(qdev);
 
-	obj = drm_gem_object_lookup(crtc->dev, file_priv, handle);
+	obj = drm_gem_object_lookup(file_priv, handle);
 	if (!obj) {
 		DRM_ERROR("cannot find cursor object\n");
 		return -ENOENT;
@@ -524,7 +524,7 @@ static const struct drm_framebuffer_funcs qxl_fb_funcs = {
 int
 qxl_framebuffer_init(struct drm_device *dev,
 		     struct qxl_framebuffer *qfb,
-		     struct drm_mode_fb_cmd2 *mode_cmd,
+		     const struct drm_mode_fb_cmd2 *mode_cmd,
 		     struct drm_gem_object *obj)
 {
 	int ret;
@@ -937,7 +937,7 @@ static const struct drm_connector_funcs qxl_connector_funcs = {
 	.save = qxl_conn_save,
 	.restore = qxl_conn_restore,
 	.detect = qxl_conn_detect,
-	.fill_modes = drm_helper_probe_single_connector_modes_nomerge,
+	.fill_modes = drm_helper_probe_single_connector_modes,
 	.set_property = qxl_conn_set_property,
 	.destroy = qxl_conn_destroy,
 };
@@ -982,7 +982,7 @@ static int qdev_output_init(struct drm_device *dev, int num_output)
 			   &qxl_connector_funcs, DRM_MODE_CONNECTOR_VIRTUAL);
 
 	drm_encoder_init(dev, &qxl_output->enc, &qxl_enc_funcs,
-			 DRM_MODE_ENCODER_VIRTUAL);
+			 DRM_MODE_ENCODER_VIRTUAL, NULL);
 
 	/* we get HPD via client monitors config */
 	connector->polled = DRM_CONNECTOR_POLL_HPD;
@@ -1005,13 +1005,15 @@ static int qdev_output_init(struct drm_device *dev, int num_output)
 static struct drm_framebuffer *
 qxl_user_framebuffer_create(struct drm_device *dev,
 			    struct drm_file *file_priv,
-			    struct drm_mode_fb_cmd2 *mode_cmd)
+			    const struct drm_mode_fb_cmd2 *mode_cmd)
 {
 	struct drm_gem_object *obj;
 	struct qxl_framebuffer *qxl_fb;
 	int ret;
 
-	obj = drm_gem_object_lookup(dev, file_priv, mode_cmd->handles[0]);
+	obj = drm_gem_object_lookup(file_priv, mode_cmd->handles[0]);
+	if (!obj)
+		return NULL;
 
 	qxl_fb = kzalloc(sizeof(*qxl_fb), GFP_KERNEL);
 	if (qxl_fb == NULL)

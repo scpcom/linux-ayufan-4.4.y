@@ -1,7 +1,7 @@
-
-
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/bitops.h>
 #include <linux/init.h>
 #include <linux/list.h>
@@ -794,31 +794,39 @@ static void volume_control_quirks(struct usb_mixer_elem_info *cval,
 		}
 		break;
 
-	case USB_ID(0x046d, 0x0807): 
+	case USB_ID(0x046d, 0x0807):  
 	case USB_ID(0x046d, 0x0808):
 	case USB_ID(0x046d, 0x0809):
-	case USB_ID(0x046d, 0x0819): 
-	case USB_ID(0x046d, 0x081b): 
-	case USB_ID(0x046d, 0x081d): 
-	case USB_ID(0x046d, 0x0825): 
-	case USB_ID(0x046d, 0x0826): 
-	case USB_ID(0x046d, 0x08ca): 
+	case USB_ID(0x046d, 0x0819):  
+	case USB_ID(0x046d, 0x081b):  
+	case USB_ID(0x046d, 0x081d):  
+	case USB_ID(0x046d, 0x0825):  
+	case USB_ID(0x046d, 0x0826):  
+	case USB_ID(0x046d, 0x08ca):  
 	case USB_ID(0x046d, 0x0991):
-	
+	 
 		if (!strcmp(kctl->id.name, "Mic Capture Volume")) {
 			usb_audio_info(chip,
 				"set resolution quirk: cval->res = 384\n");
 			cval->res = 384;
 		}
 		break;
+
+#ifdef MY_ABC_HERE
+	 
+	case USB_ID(0x0d8c, 0x0103):  
+		if (!strcmp(kctl->id.name, "PCM Playback Volume")) {
+			cval->res = 37;
+		}
+		break;
+#endif  
 	}
 }
-
 
 static int get_min_max_with_quirks(struct usb_mixer_elem_info *cval,
 				   int default_min, struct snd_kcontrol *kctl)
 {
-	
+	 
 	cval->min = default_min;
 	cval->max = cval->min + 1;
 	cval->res = 1;

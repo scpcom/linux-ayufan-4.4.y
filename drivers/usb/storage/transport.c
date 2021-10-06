@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/sched.h>
 #include <linux/gfp.h>
 #include <linux/errno.h>
@@ -20,11 +22,13 @@
 #include <linux/blkdev.h>
 #include "../../scsi/sd.h"
 
+#ifdef MY_ABC_HERE
+#include <linux/module.h>
+#endif  
 
-
-
-
-
+#ifdef MY_ABC_HERE
+#include <linux/usb/syno_quirks.h>
+#endif  
 
 static void usb_stor_blocking_completion(struct urb *urb)
 {
@@ -363,36 +367,41 @@ static void last_sector_hacks(struct us_data *us, struct scsi_cmnd *srb)
 	}
 
  done:
-	
+	 
 	if (srb->cmnd[0] != TEST_UNIT_READY)
 		us->last_sector_retries = 0;
 }
-
 
 void usb_stor_invoke_transport(struct scsi_cmnd *srb, struct us_data *us)
 {
 	int need_auto_sense;
 	int result;
 
-	
+#ifdef MY_ABC_HERE
+	if (unlikely((us->pusb_dev->syno_quirks &
+					SYNO_USB_QUIRK_SYNCHRONIZE_CACHE_FILTER) &&
+				 SYNCHRONIZE_CACHE == srb->cmnd[0])) {
+		srb->result = SAM_STAT_GOOD;
+		msleep(3000);
+		return;
+	}
+#endif  
+
 	scsi_set_resid(srb, 0);
 	result = us->transport(srb, us);
 
-	
 	if (test_bit(US_FLIDX_TIMED_OUT, &us->dflags)) {
 		usb_stor_dbg(us, "-- command was aborted\n");
 		srb->result = DID_ABORT << 16;
 		goto Handle_Errors;
 	}
 
-	
 	if (result == USB_STOR_TRANSPORT_ERROR) {
 		usb_stor_dbg(us, "-- transport indicates error, resetting\n");
 		srb->result = DID_ERROR << 16;
 		goto Handle_Errors;
 	}
 
-	
 	if (result == USB_STOR_TRANSPORT_NO_SENSE) {
 		srb->result = SAM_STAT_CHECK_CONDITION;
 		last_sector_hacks(us, srb);
@@ -691,9 +700,27 @@ int usb_stor_Bulk_max_lun(struct us_data *us)
 		}
 	}
 
-	
 	return 0;
 }
+
+#ifdef MY_ABC_HERE
+int extra_delay = 0;
+module_param(extra_delay, int, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+int extra_delay_time = 0;
+module_param(extra_delay_time, int, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+
+static inline void usb_stor_delay(struct us_data *us)
+{
+	 
+	if (likely(extra_delay == 0))
+		return;
+
+	if (1 == extra_delay && 0 < extra_delay_time) {
+		udelay(extra_delay_time);
+		return;
+	}
+}
+#endif  
 
 int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 {
@@ -731,14 +758,13 @@ int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 		     bcb->Length);
 	result = usb_stor_bulk_transfer_buf(us, us->send_bulk_pipe,
 				bcb, cbwlen, NULL);
+#ifdef MY_ABC_HERE
+	usb_stor_delay(us);
+#endif  
 	usb_stor_dbg(us, "Bulk command transfer result=%d\n", result);
 	if (result != USB_STOR_XFER_GOOD)
 		return USB_STOR_TRANSPORT_ERROR;
 
-	
-	
-
-	
 	if (unlikely(us->fflags & US_FL_GO_SLOW))
 		usleep_range(125, 150);
 
@@ -746,15 +772,16 @@ int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 		unsigned int pipe = srb->sc_data_direction == DMA_FROM_DEVICE ? 
 				us->recv_bulk_pipe : us->send_bulk_pipe;
 		result = usb_stor_bulk_srb(us, pipe, srb);
+#ifdef MY_ABC_HERE
+		usb_stor_delay(us);
+#endif  
 		usb_stor_dbg(us, "Bulk data transfer result 0x%x\n", result);
 		if (result == USB_STOR_XFER_ERROR)
 			return USB_STOR_TRANSPORT_ERROR;
 
-		
 		if (result == USB_STOR_XFER_LONG)
 			fake_sense = 1;
 
-		
 		if (result == USB_STOR_XFER_SHORT &&
 				srb->sc_data_direction == DMA_FROM_DEVICE &&
 				transfer_length - scsi_get_resid(srb) ==
@@ -775,36 +802,38 @@ int usb_stor_Bulk_transport(struct scsi_cmnd *srb, struct us_data *us)
 		}
 	}
 
-	
-
-	
 	usb_stor_dbg(us, "Attempting to get CSW...\n");
 	result = usb_stor_bulk_transfer_buf(us, us->recv_bulk_pipe,
 				bcs, US_BULK_CS_WRAP_LEN, &cswlen);
+#ifdef MY_ABC_HERE
+	usb_stor_delay(us);
+#endif  
 
-	
 	if (result == USB_STOR_XFER_SHORT && cswlen == 0) {
 		usb_stor_dbg(us, "Received 0-length CSW; retrying...\n");
 		result = usb_stor_bulk_transfer_buf(us, us->recv_bulk_pipe,
 				bcs, US_BULK_CS_WRAP_LEN, &cswlen);
+#ifdef MY_ABC_HERE
+		usb_stor_delay(us);
+#endif  
 	}
 
-	
 	if (result == USB_STOR_XFER_STALLED) {
 
-		
 		usb_stor_dbg(us, "Attempting to get CSW (2nd try)...\n");
 		result = usb_stor_bulk_transfer_buf(us, us->recv_bulk_pipe,
 				bcs, US_BULK_CS_WRAP_LEN, NULL);
+#ifdef MY_ABC_HERE
+		usb_stor_delay(us);
+#endif  
 	}
 
-	
 	usb_stor_dbg(us, "Bulk status result = %d\n", result);
 	if (result != USB_STOR_XFER_GOOD)
 		return USB_STOR_TRANSPORT_ERROR;
 
  skipped_data_phase:
-	
+	 
 	residue = le32_to_cpu(bcs->Residue);
 	usb_stor_dbg(us, "Bulk Status S 0x%x T 0x%x R %u Stat 0x%x\n",
 		     le32_to_cpu(bcs->Signature), bcs->Tag,

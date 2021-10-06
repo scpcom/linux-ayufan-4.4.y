@@ -1,12 +1,14 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include "ctree.h"
 
 #define BTRFS_SEND_STREAM_MAGIC "btrfs-stream"
 #define BTRFS_SEND_STREAM_VERSION 1
 
-#define BTRFS_SEND_BUF_SIZE (1024 * 64)
-#define BTRFS_SEND_READ_SIZE (1024 * 48)
+#define BTRFS_SEND_BUF_SIZE SZ_64K
+#define BTRFS_SEND_READ_SIZE (48 * SZ_1K)
 
 enum btrfs_tlv_type {
 	BTRFS_TLV_U8,
@@ -69,10 +71,12 @@ enum btrfs_send_cmd {
 
 	BTRFS_SEND_C_END,
 	BTRFS_SEND_C_UPDATE_EXTENT,
+#ifdef MY_ABC_HERE
+	BTRFS_SEND_C_SUBVOL_FLAG,
+#endif  
 	__BTRFS_SEND_C_MAX,
 };
 #define BTRFS_SEND_C_MAX (__BTRFS_SEND_C_MAX - 1)
-
 
 enum {
 	BTRFS_SEND_A_UNSPEC,
@@ -107,6 +111,9 @@ enum {
 	BTRFS_SEND_A_CLONE_OFFSET,
 	BTRFS_SEND_A_CLONE_LEN,
 
+#ifdef MY_ABC_HERE
+	BTRFS_SEND_A_FLAG,
+#endif  
 	__BTRFS_SEND_A_MAX,
 };
 #define BTRFS_SEND_A_MAX (__BTRFS_SEND_A_MAX - 1)

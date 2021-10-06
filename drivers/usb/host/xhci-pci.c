@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/pci.h>
 #include <linux/slab.h>
 #include <linux/module.h>
@@ -101,7 +103,9 @@ static void xhci_pci_quirks(struct device *dev, struct xhci_hcd *xhci)
 		xhci->quirks |= XHCI_TRUST_TX_LENGTH;
 
 	if (pdev->vendor == PCI_VENDOR_ID_INTEL) {
+#ifdef MY_ABC_HERE
 		xhci->quirks |= XHCI_LPM_SUPPORT;
+#endif  
 		xhci->quirks |= XHCI_INTEL_HOST;
 		xhci->quirks |= XHCI_AVOID_BEI;
 	}
@@ -182,12 +186,15 @@ static int xhci_pci_setup(struct usb_hcd *hcd)
 	if (retval)
 		return retval;
 
+#ifdef MY_DEF_HERE
+	hcd->power_control_support = 1;
+#endif  
+
 	if (!usb_hcd_is_primary_hcd(hcd))
 		return 0;
 
 	xhci_dbg(xhci, "Got SBRN %u\n", (unsigned int) xhci->sbrn);
 
-	
 	retval = xhci_pci_reinit(xhci, pdev);
 	if (!retval)
 		return retval;
@@ -202,18 +209,20 @@ static int xhci_pci_probe(struct pci_dev *dev, const struct pci_device_id *id)
 	struct hc_driver *driver;
 	struct usb_hcd *hcd;
 
+#if defined(CONFIG_USB_ETRON_HUB)
+	if (dev->vendor == PCI_VENDOR_ID_ETRON)
+		return -ENODEV;
+#endif  
+
 	driver = (struct hc_driver *)id->driver_data;
 
-	
 	pm_runtime_get_noresume(&dev->dev);
 
-	
 	retval = usb_hcd_pci_probe(dev, id);
 
 	if (retval)
 		goto put_runtime_pm;
 
-	
 	hcd = dev_get_drvdata(&dev->dev);
 	xhci = hcd_to_xhci(hcd);
 	xhci->shared_hcd = usb_create_shared_hcd(driver, &dev->dev,

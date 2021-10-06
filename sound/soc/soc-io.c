@@ -1,11 +1,15 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/i2c.h>
 #include <linux/spi/spi.h>
+#if defined(MY_ABC_HERE)
+#else  
 #include <linux/regmap.h>
+#endif  
 #include <linux/export.h>
 #include <sound/soc.h>
-
 
 int snd_soc_component_read(struct snd_soc_component *component,
 	unsigned int reg, unsigned int *val)

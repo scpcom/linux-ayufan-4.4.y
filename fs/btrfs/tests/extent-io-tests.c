@@ -18,6 +18,7 @@
 
 #include <linux/pagemap.h>
 #include <linux/sched.h>
+#include <linux/sizes.h>
 #include "btrfs-tests.h"
 #include "../extent_io.h"
 
@@ -70,8 +71,8 @@ static int test_find_delalloc(void)
 	struct page *page;
 	struct page *locked_page = NULL;
 	unsigned long index = 0;
-	u64 total_dirty = 256 * 1024 * 1024;
-	u64 max_bytes = 128 * 1024 * 1024;
+	u64 total_dirty = SZ_256M;
+	u64 max_bytes = SZ_128M;
 	u64 start, end, test_start;
 	u64 found;
 	int ret = -EINVAL;
@@ -90,7 +91,7 @@ static int test_find_delalloc(void)
 	 * test.
 	 */
 	for (index = 0; index < (total_dirty >> PAGE_CACHE_SHIFT); index++) {
-		page = find_or_create_page(inode->i_mapping, index, GFP_NOFS);
+		page = find_or_create_page(inode->i_mapping, index, GFP_KERNEL);
 		if (!page) {
 			test_msg("Failed to allocate test page\n");
 			ret = -ENOMEM;
@@ -109,7 +110,7 @@ static int test_find_delalloc(void)
 	 * |--- delalloc ---|
 	 * |---  search  ---|
 	 */
-	set_extent_delalloc(&tmp, 0, 4095, NULL, GFP_NOFS);
+	set_extent_delalloc(&tmp, 0, 4095, NULL);
 	start = 0;
 	end = 0;
 	found = find_lock_delalloc_range(inode, &tmp, locked_page, &start,
@@ -133,14 +134,14 @@ static int test_find_delalloc(void)
 	 * |--- delalloc ---|
 	 *           |--- search ---|
 	 */
-	test_start = 64 * 1024 * 1024;
+	test_start = SZ_64M;
 	locked_page = find_lock_page(inode->i_mapping,
 				     test_start >> PAGE_CACHE_SHIFT);
 	if (!locked_page) {
 		test_msg("Couldn't find the locked page\n");
 		goto out_bits;
 	}
-	set_extent_delalloc(&tmp, 4096, max_bytes - 1, NULL, GFP_NOFS);
+	set_extent_delalloc(&tmp, 4096, max_bytes - 1, NULL);
 	start = test_start;
 	end = 0;
 	found = find_lock_delalloc_range(inode, &tmp, locked_page, &start,
@@ -172,7 +173,7 @@ static int test_find_delalloc(void)
 	locked_page = find_lock_page(inode->i_mapping, test_start >>
 				     PAGE_CACHE_SHIFT);
 	if (!locked_page) {
-		test_msg("Could'nt find the locked page\n");
+		test_msg("Couldn't find the locked page\n");
 		goto out_bits;
 	}
 	start = test_start;
@@ -195,7 +196,7 @@ static int test_find_delalloc(void)
 	 *
 	 * We are re-using our test_start from above since it works out well.
 	 */
-	set_extent_delalloc(&tmp, max_bytes, total_dirty - 1, NULL, GFP_NOFS);
+	set_extent_delalloc(&tmp, max_bytes, total_dirty - 1, NULL);
 	start = test_start;
 	end = 0;
 	found = find_lock_delalloc_range(inode, &tmp, locked_page, &start,
@@ -220,8 +221,8 @@ static int test_find_delalloc(void)
 	 * Now to test where we run into a page that is no longer dirty in the
 	 * range we want to find.
 	 */
-	page = find_get_page(inode->i_mapping, (max_bytes + (1 * 1024 * 1024))
-			     >> PAGE_CACHE_SHIFT);
+	page = find_get_page(inode->i_mapping,
+			     (max_bytes + SZ_1M) >> PAGE_CACHE_SHIFT);
 	if (!page) {
 		test_msg("Couldn't find our page\n");
 		goto out_bits;
@@ -258,7 +259,7 @@ static int test_find_delalloc(void)
 	}
 	ret = 0;
 out_bits:
-	clear_extent_bits(&tmp, 0, total_dirty - 1, (unsigned)-1, GFP_NOFS);
+	clear_extent_bits(&tmp, 0, total_dirty - 1, (unsigned)-1);
 out:
 	if (locked_page)
 		page_cache_release(locked_page);

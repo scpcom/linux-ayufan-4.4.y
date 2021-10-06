@@ -1,8 +1,7 @@
-
-
-
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include "ext4_jbd2.h"
 #include "mballoc.h"
 #include <linux/log2.h>
@@ -3952,6 +3951,9 @@ int ext4_group_add_blocks(handle_t *handle, struct super_block *sb,
 	    in_range(block, ext4_inode_table(sb, desc), sbi->s_itb_per_group) ||
 	    in_range(block + count - 1, ext4_inode_table(sb, desc),
 		     sbi->s_itb_per_group)) {
+#ifdef MY_ABC_HERE
+		if (printk_ratelimit())
+#endif  
 		ext4_error(sb, "Adding blocks in system zones - "
 			   "Block = %llu, count = %lu",
 			   block, count);

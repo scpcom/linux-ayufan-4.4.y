@@ -1125,6 +1125,12 @@ config RTC_DRV_OPAL
 	  This driver can also be built as a module. If so, the module
 	  will be called rtc-opal.
 
+config RTC_DRV_RTD129X
+	tristate "Realtek RTD129X RTC"
+	depends on ARCH_RTD129X
+	help
+	  Realtek RTD129X RTC support.
+
 config RTC_DRV_ZYNQMP
 	tristate "Xilinx Zynq Ultrascale+ MPSoC RTC"
 	depends on OF

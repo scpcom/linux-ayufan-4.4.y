@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/kernel.h>
 #include <linux/slab.h>
 #include <linux/init.h>
@@ -7,18 +9,21 @@
 
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/partitions.h>
+#ifdef MY_ABC_HERE
+#include <linux/sched.h>
+#endif
 #include <linux/module.h>
 
 struct fis_image_desc {
-    unsigned char name[16];      
-    uint32_t	  flash_base;    
-    uint32_t	  mem_base;      
-    uint32_t	  size;          
-    uint32_t	  entry_point;   
-    uint32_t	  data_length;   
+    unsigned char name[16];       
+    uint32_t	  flash_base;     
+    uint32_t	  mem_base;       
+    uint32_t	  size;           
+    uint32_t	  entry_point;    
+    uint32_t	  data_length;    
     unsigned char _pad[256-(16+7*sizeof(uint32_t))];
-    uint32_t	  desc_cksum;    
-    uint32_t	  file_cksum;    
+    uint32_t	  desc_cksum;     
+    uint32_t	  file_cksum;     
 };
 
 struct fis_list {
@@ -263,6 +268,111 @@ static void __exit redboot_parser_exit(void)
 {
 	deregister_mtd_parser(&redboot_parser);
 }
+
+#ifdef MY_ABC_HERE
+static void mtd_erase_callback_in_redboot (struct erase_info *instr)
+{
+	wake_up((wait_queue_head_t *)instr->priv);
+}
+
+int SYNOMTDModifyFisInfo(struct mtd_info *mtd, struct SYNO_MTD_FIS_INFO SynoMtdFisInfo)
+{
+	struct fis_image_desc *buf;
+	int ret, i;
+	size_t retlen;
+
+	buf = kmalloc(PAGE_SIZE, GFP_KERNEL);
+
+	if (!buf) {
+		return -ENOMEM;
+	}
+
+	ret = mtd_read(mtd, 0, PAGE_SIZE, &retlen, (void *)buf);
+
+	if (ret)
+		goto out;
+
+	if (retlen != PAGE_SIZE) {
+		ret = -EIO;
+		goto out;
+	}
+
+	for (i = 0; i < PAGE_SIZE / sizeof(struct fis_image_desc); i++) {
+		if (buf[i].name[0] == 0xff) {  
+			ret = -ENOENT;  
+			break;
+		}
+
+		if (0 == strcmp(buf[i].name, SynoMtdFisInfo.name)) {  
+			int lockret, eraseret;
+			struct erase_info einfo;
+
+			buf[i].flash_base = SynoMtdFisInfo.offset;
+			buf[i].size = SynoMtdFisInfo.size;
+			buf[i].data_length = SynoMtdFisInfo.data_length;
+			lockret = mtd_unlock(mtd, 0, mtd->erasesize);
+			if (lockret) {
+				printk(KERN_NOTICE "Failed to unlock [%s], error [%d]\n", mtd->name, lockret*(-1));
+			}
+			 
+			{
+				wait_queue_head_t waitq;
+				DECLARE_WAITQUEUE(wait, current);
+
+				init_waitqueue_head(&waitq);
+
+				memset (&einfo, 0, sizeof(struct erase_info));
+				einfo.addr = 0;
+				einfo.len = mtd->erasesize;
+				einfo.mtd = mtd;
+				einfo.callback = mtd_erase_callback_in_redboot;
+				einfo.priv = (unsigned long)&waitq;
+
+				eraseret = mtd_erase(mtd, &einfo);
+				if (!eraseret) {
+					set_current_state(TASK_UNINTERRUPTIBLE);
+					add_wait_queue(&waitq, &wait);
+					if (einfo.state != MTD_ERASE_DONE &&
+						einfo.state != MTD_ERASE_FAILED)
+						schedule();
+					remove_wait_queue(&waitq, &wait);
+					set_current_state(TASK_RUNNING);
+
+					eraseret = (einfo.state == MTD_ERASE_FAILED)?-EIO:0;
+				}
+			}
+			if (eraseret) {
+				ret = eraseret;
+				printk(KERN_NOTICE "Failed to erase [%s], error [%d]\n", mtd->name, eraseret*(-1));
+			}
+			else {
+				 
+				ret = mtd_write(mtd, 0, PAGE_SIZE, &retlen, (const u_char*)buf);
+				if (ret) {
+					printk(KERN_NOTICE "Failed to write [%s], error [%d]\n", mtd->name, ret*(-1));
+				}
+			}
+			lockret = mtd_lock(mtd, 0, mtd->erasesize);
+			if (lockret) {
+				printk(KERN_NOTICE "Failed to lock [%s], error [%d]\n", mtd->name, lockret*(-1));
+			}
+			if (ret) {
+				goto out;
+			}
+
+			if (retlen != PAGE_SIZE) {
+				ret = -EIO;
+				goto out;
+			}
+			break;
+		}
+	}  
+
+out:
+	kfree(buf);
+	return ret;
+}
+#endif  
 
 module_init(redboot_parser_init);
 module_exit(redboot_parser_exit);

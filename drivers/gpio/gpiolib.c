@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/interrupt.h>
@@ -22,16 +25,11 @@
 #define CREATE_TRACE_POINTS
 #include <trace/events/gpio.h>
 
-
-
-
-
 #ifdef	DEBUG
 #define	extra_checks	1
 #else
 #define	extra_checks	0
 #endif
-
 
 DEFINE_SPINLOCK(gpio_lock);
 
@@ -39,29 +37,37 @@ static DEFINE_MUTEX(gpio_lookup_lock);
 static LIST_HEAD(gpio_lookup_list);
 LIST_HEAD(gpio_chips);
 
-
 static void gpiochip_free_hogs(struct gpio_chip *chip);
 static void gpiochip_irqchip_remove(struct gpio_chip *gpiochip);
-
 
 static inline void desc_set_label(struct gpio_desc *d, const char *label)
 {
 	d->label = label;
 }
 
-
 struct gpio_desc *gpio_to_desc(unsigned gpio)
 {
 	struct gpio_chip *chip;
 	unsigned long flags;
+#ifdef MY_DEF_HERE
+	unsigned int iBase;
+#endif  
 
 	spin_lock_irqsave(&gpio_lock, flags);
 
 	list_for_each_entry(chip, &gpio_chips, list) {
+#ifdef MY_DEF_HERE
+		iBase = ARCH_NR_GPIOS - (chip->base+chip->ngpio);
+		if (iBase <= gpio && iBase + chip->ngpio > gpio) {
+			spin_unlock_irqrestore(&gpio_lock, flags);
+			return &chip->desc[gpio - iBase];
+		}
+#else  
 		if (chip->base <= gpio && chip->base + chip->ngpio > gpio) {
 			spin_unlock_irqrestore(&gpio_lock, flags);
 			return &chip->desc[gpio - chip->base];
 		}
+#endif  
 	}
 
 	spin_unlock_irqrestore(&gpio_lock, flags);
@@ -1878,11 +1884,54 @@ static const struct file_operations gpiolib_operations = {
 
 static int __init gpiolib_debugfs_init(void)
 {
-	
+	 
 	(void) debugfs_create_file("gpio", S_IFREG | S_IRUGO,
 				NULL, NULL, &gpiolib_operations);
 	return 0;
 }
 subsys_initcall(gpiolib_debugfs_init);
 
-#endif	
+#endif	 
+
+#ifdef MY_DEF_HERE
+int syno_gpio_value_set(int iPin, int iValue)
+{
+	int iRet = -1;
+	struct gpio_desc *desc;
+	desc = gpio_to_desc(iPin);  
+
+	if (!desc) {
+		goto END;
+	}
+
+	if (GPIOF_DIR_OUT != gpiod_get_direction(desc)) {
+		printk("pin %d is not writable.\n", iPin);
+		goto END;
+	}
+
+	gpiod_set_value(desc, iValue);
+
+	iRet = 0;
+END:
+	return iRet;
+}
+EXPORT_SYMBOL(syno_gpio_value_set);
+
+int syno_gpio_value_get(int iPin, int *pValue)
+{
+	int iRet = -1;
+	struct gpio_desc *desc;
+	desc = gpio_to_desc(iPin);  
+
+	if (!desc) {
+		goto END;
+	}
+
+	*pValue = gpiod_get_value(desc);
+
+	iRet = 0;
+END:
+	return iRet;
+}
+EXPORT_SYMBOL(syno_gpio_value_get);
+#endif  

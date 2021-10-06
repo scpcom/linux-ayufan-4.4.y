@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Copyright (c) by Jaroslav Kysela <perex@perex.cz>
  *                   Takashi Iwai <tiwai@suse.de>
@@ -56,6 +59,12 @@ struct snd_dma_device {
 #else
 #define SNDRV_DMA_TYPE_DEV_IRAM	SNDRV_DMA_TYPE_DEV
 #endif
+#ifdef MY_DEF_HERE
+//rtk begin
+#define SNDRV_DMA_TYPE_ION_PLAYBACK 5
+#define SNDRV_DMA_TYPE_ION_CAPTURE  6
+//rtk end
+#endif /* MY_DEF_HERE */
 
 /*
  * info for buffer allocation

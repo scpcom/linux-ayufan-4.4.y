@@ -1,10 +1,13 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _RAID10_H
 #define _RAID10_H
 
 struct raid10_info {
 	struct md_rdev	*rdev, *replacement;
 	sector_t	head_position;
-	int		recovery_disabled;	
+	int		recovery_disabled;	 
 };
 
 struct r10conf {
@@ -44,44 +47,40 @@ struct r10conf {
 	int			nr_queued;
 	int			barrier;
 	sector_t		next_resync;
-	int			fullsync;  
-	int			have_replacement; 
+	int			fullsync;   
+	int			have_replacement;  
 	wait_queue_head_t	wait_barrier;
 
 	mempool_t		*r10bio_pool;
 	mempool_t		*r10buf_pool;
 	struct page		*tmppage;
 
-	
 	struct md_thread	*thread;
 };
 
-
-
 struct r10bio {
-	atomic_t		remaining; 
-	sector_t		sector;	
+	atomic_t		remaining;  
+	sector_t		sector;	 
 	int			sectors;
 	unsigned long		state;
 	struct mddev		*mddev;
-	
+	 
 	struct bio		*master_bio;
-	
+	 
 	int			read_slot;
 
 	struct list_head	retry_list;
-	
+	 
 	struct r10dev {
 		struct bio	*bio;
 		union {
-			struct bio	*repl_bio; 
-			struct md_rdev	*rdev;	   
+			struct bio	*repl_bio;  
+			struct md_rdev	*rdev;	    
 		};
 		sector_t	addr;
 		int		devnum;
 	} devs[0];
 };
-
 
 enum r10bio_state {
 	R10BIO_Uptodate,
@@ -89,12 +88,15 @@ enum r10bio_state {
 	R10BIO_IsRecover,
 	R10BIO_IsReshape,
 	R10BIO_Degraded,
-
+ 
 	R10BIO_ReadError,
-
+ 
 	R10BIO_MadeGood,
 	R10BIO_WriteError,
-
+ 
 	R10BIO_Previous,
+#ifdef MY_ABC_HERE
+	R10BIO_FIX_READ_ERROR,
+#endif  
 };
 #endif

@@ -1,10 +1,22 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #ifndef __LIBATA_H__
 #define __LIBATA_H__
 
 #define DRV_NAME	"libata"
-#define DRV_VERSION	"3.00"	
+#define DRV_VERSION	"3.00"	 
+
+#ifdef MY_ABC_HERE
+struct ata_blacklist_entry {
+	const char *model_num;
+	const char *model_rev;
+	unsigned long horkage;
+};
+
+extern struct ata_blacklist_entry ata_device_blacklist [];
+#endif  
 
 struct ata_scsi_args {
 	struct ata_device	*dev;
@@ -104,13 +116,15 @@ static inline void ata_acpi_bind_port(struct ata_port *ap) {}
 static inline void ata_acpi_bind_dev(struct ata_device *dev) {}
 #endif
 
-
 extern int ata_scsi_add_hosts(struct ata_host *host,
 			      struct scsi_host_template *sht);
 extern void ata_scsi_scan_host(struct ata_port *ap, int sync);
 extern int ata_scsi_offline_dev(struct ata_device *dev);
 extern void ata_scsi_media_change_notify(struct ata_device *dev);
 extern void ata_scsi_hotplug(struct work_struct *work);
+#ifdef MY_ABC_HERE
+extern void ata_syno_pmp_hotplug(struct work_struct *work);
+#endif  
 extern void ata_schedule_scsi_eh(struct Scsi_Host *shost);
 extern void ata_scsi_dev_rescan(struct work_struct *work);
 extern int ata_bus_probe(struct ata_port *ap);
@@ -220,6 +234,9 @@ static inline bool zpodd_zpready(struct ata_device *dev) { return false; }
 static inline void zpodd_enable_run_wake(struct ata_device *dev) {}
 static inline void zpodd_disable_run_wake(struct ata_device *dev) {}
 static inline void zpodd_post_poweron(struct ata_device *dev) {}
-#endif 
+#endif  
+#ifdef MY_ABC_HERE
+int syno_gpio_with_scmd(struct ata_port *ap, struct scsi_device *sdev, SYNO_PM_PKG *pPkg, u8 rw);
+#endif  
 
-#endif 
+#endif  

@@ -1,11 +1,16 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/module.h>
 #include <linux/rtc.h>
 #include <linux/i2c.h>
 #include <linux/bitrev.h>
 #include <linux/bcd.h>
 #include <linux/slab.h>
+#ifdef MY_DEF_HERE
+#include <linux/acpi.h>
+#endif  
 
 #define S35390A_CMD_STATUS1	0
 #define S35390A_CMD_STATUS2	1
@@ -43,6 +48,14 @@ static const struct i2c_device_id s35390a_id[] = {
 	{ }
 };
 MODULE_DEVICE_TABLE(i2c, s35390a_id);
+
+#ifdef MY_DEF_HERE
+static const struct acpi_device_id s35390a_acpi_ids[] = {
+	{ "RTC35390", 0 },
+	{ }
+};
+MODULE_DEVICE_TABLE(acpi, s35390a_acpi_ids);
+#endif  
 
 struct s35390a {
 	struct i2c_client *client[8];
@@ -113,6 +126,22 @@ static int s35390a_disable_test_mode(struct s35390a *s35390a)
 	buf[0] &= ~S35390A_FLAG_TEST;
 	return s35390a_set_reg(s35390a, S35390A_CMD_STATUS2, buf, sizeof(buf));
 }
+
+#ifdef MY_DEF_HERE
+static int syno_s35390a_use_12h_mode(struct s35390a *s35390a)
+{
+	char buf[1];
+
+	if (s35390a_get_reg(s35390a, S35390A_CMD_STATUS1, buf, sizeof(buf)) < 0)
+		return -EIO;
+
+	if (!(buf[0] & S35390A_FLAG_24H))
+		return 0;
+
+	buf[0] &= ~S35390A_FLAG_24H;
+	return s35390a_set_reg(s35390a, S35390A_CMD_STATUS1, buf, sizeof(buf));
+}
+#endif  
 
 static char s35390a_hr2reg(struct s35390a *s35390a, int hour)
 {
@@ -349,6 +378,14 @@ static int s35390a_probe(struct i2c_client *client,
 		goto exit_dummy;
 	}
 
+#ifdef MY_DEF_HERE
+	err = syno_s35390a_use_12h_mode(s35390a);
+	if (err < 0) {
+		dev_err(&client->dev, "error use 12-hour mode\n");
+		goto exit_dummy;
+	}
+#endif  
+
 	err = s35390a_disable_test_mode(s35390a);
 	if (err < 0) {
 		dev_err(&client->dev, "error disabling test mode\n");
@@ -404,6 +441,9 @@ static int s35390a_remove(struct i2c_client *client)
 static struct i2c_driver s35390a_driver = {
 	.driver		= {
 		.name	= "rtc-s35390a",
+#ifdef MY_DEF_HERE
+		.acpi_match_table = ACPI_PTR(s35390a_acpi_ids),
+#endif  
 	},
 	.probe		= s35390a_probe,
 	.remove		= s35390a_remove,

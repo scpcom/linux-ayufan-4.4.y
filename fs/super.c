@@ -1,11 +1,13 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/export.h>
 #include <linux/slab.h>
 #include <linux/blkdev.h>
 #include <linux/mount.h>
 #include <linux/security.h>
-#include <linux/writeback.h>		
+#include <linux/writeback.h>		 
 #include <linux/idr.h>
 #include <linux/mutex.h>
 #include <linux/backing-dev.h>
@@ -105,11 +107,15 @@ static void destroy_super_rcu(struct rcu_head *head)
 	schedule_work(&s->destroy_work);
 }
 
-
 static void destroy_super(struct super_block *s)
 {
 	list_lru_destroy(&s->s_dentry_lru);
 	list_lru_destroy(&s->s_inode_lru);
+#ifdef MY_ABC_HERE
+#ifdef CONFIG_SMP
+	free_percpu(s->s_files);
+#endif
+#endif  
 	security_sb_free(s);
 	WARN_ON(!list_empty(&s->s_mounts));
 	kfree(s->s_subtype);
@@ -131,6 +137,17 @@ static struct super_block *alloc_super(struct file_system_type *type, int flags)
 	if (security_sb_alloc(s))
 		goto fail;
 
+#ifdef MY_ABC_HERE
+#ifdef CONFIG_SMP
+	s->s_files = alloc_percpu(struct list_head);
+	if (!s->s_files)
+		goto fail;
+	for_each_possible_cpu(i)
+		INIT_LIST_HEAD(per_cpu_ptr(s->s_files, i));
+#else
+	INIT_LIST_HEAD(&s->s_files);
+#endif
+#endif  
 	for (i = 0; i < SB_FREEZE_LEVELS; i++) {
 		if (__percpu_init_rwsem(&s->s_writers.rw_sem[i],
 					sb_writers_name[i],
@@ -165,6 +182,10 @@ static struct super_block *alloc_super(struct file_system_type *type, int flags)
 	s->s_op = &default_op;
 	s->s_time_gran = 1000000000;
 	s->cleancache_poolid = CLEANCACHE_NO_POOL;
+#ifdef MY_ABC_HERE
+	mutex_init(&s->s_archive_mutex);
+	s->s_archive_version = 0;
+#endif  
 
 	s->s_shrink.seeks = DEFAULT_SEEKS;
 	s->s_shrink.scan_objects = super_cache_scan;

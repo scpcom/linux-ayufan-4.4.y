@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/init.h>
@@ -399,12 +401,15 @@ static void scsi_device_dev_release_usercontext(struct work_struct *work)
 	}
 
 	blk_put_queue(sdev->request_queue);
-	
+	 
 	sdev->request_queue = NULL;
 
 	kfree(sdev->vpd_pg83);
 	kfree(sdev->vpd_pg80);
 	kfree(sdev->inquiry);
+#ifdef MY_ABC_HERE
+	kfree(sdev->model);
+#endif  
 	kfree(sdev);
 
 	if (parent)
@@ -479,7 +484,18 @@ void scsi_sysfs_unregister(void)
 	bus_unregister(&scsi_bus_type);
 }
 
+#ifdef MY_ABC_HERE
+#define sdev_show_function(field, format_string)				\
+static ssize_t								\
+sdev_show_##field (struct device *dev, struct device_attribute *attr,	\
+		   char *buf)						\
+{									\
+	struct scsi_device *sdev;					\
+	sdev = to_scsi_device(dev);					\
+	return snprintf (buf, CONFIG_SYNO_DISK_MODEL_NUM + 4, format_string, sdev->field);		\
+}									\
 
+#else  
 #define sdev_show_function(field, format_string)				\
 static ssize_t								\
 sdev_show_##field (struct device *dev, struct device_attribute *attr,	\
@@ -490,12 +506,11 @@ sdev_show_##field (struct device *dev, struct device_attribute *attr,	\
 	return snprintf (buf, 20, format_string, sdev->field);		\
 }									\
 
+#endif  
 
 #define sdev_rd_attr(field, format_string)				\
 	sdev_show_function(field, format_string)			\
 static DEVICE_ATTR(field, S_IRUGO, sdev_show_##field, NULL);
-
-
 
 #define sdev_rw_attr(field, format_string)				\
 	sdev_show_function(field, format_string)				\
@@ -546,10 +561,201 @@ static int scsi_sdev_check_buf_bit(const char *buf)
 }
 #endif
 
+#ifdef MY_ABC_HERE
+extern void
+ScsiRemapModeSet(struct scsi_device *sdev, unsigned char blAutoRemap);
+static ssize_t
+sdev_show_auto_remap(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	struct scsi_device *sdev;
+	sdev = to_scsi_device(dev);
+	return snprintf (buf, 20, "%d type 0x%x\n", sdev->auto_remap, sdev->type);
+}
+
+static ssize_t
+sdev_store_auto_remap(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+	struct scsi_device *sdev;
+	int val = 0;
+	sdev = to_scsi_device(dev);
+	sscanf (buf, "%d", &val);
+
+	ScsiRemapModeSet(sdev, val ? 1 : 0);
+	return count;
+}
+static DEVICE_ATTR(auto_remap, S_IRUGO | S_IWUSR, sdev_show_auto_remap, sdev_store_auto_remap);
+#endif  
+
+#ifdef MY_ABC_HERE
+static ssize_t
+syno_disk_serial_show(struct device *device, struct device_attribute *attr, char *buf)
+{
+	struct scsi_device *sdev = NULL;
+	ssize_t len = -EFAULT;
+
+	if (NULL == (sdev = to_scsi_device(device))) {
+		goto END;
+	}
+
+	len = snprintf(buf, SERIAL_NUM_SIZE + 2, "%s\n", sdev->syno_disk_serial);
+END:
+	return len;
+}
+static DEVICE_ATTR(syno_disk_serial, S_IRUGO, syno_disk_serial_show, NULL);
+#endif  
+
+#ifdef MY_ABC_HERE
+ 
+static ssize_t
+sdev_show_syno_idle_time(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	struct scsi_device *sdev;
+	int iRet = -EFAULT;
+
+	if (NULL == (sdev = to_scsi_device(dev))) {
+		goto END;
+	}
+
+	iRet = snprintf(buf, 20, "%lu\n", (jiffies - sdev->idle) / HZ + 1);
+
+END:
+	return iRet;
+}
+
+static ssize_t
+sdev_store_syno_idle_time(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+	struct scsi_device *sdev;
+	unsigned long idletime;
+
+	if (NULL == (sdev = to_scsi_device(dev))) {
+		goto END;
+	}
+
+	sscanf(buf, "%lu", &idletime);
+	 
+	sdev->idle = jiffies - (idletime - 1) * HZ;
+
+END:
+	return count;
+}
+
+static DEVICE_ATTR(syno_idle_time, S_IRUGO | S_IWUSR, sdev_show_syno_idle_time, sdev_store_syno_idle_time);
+
+static ssize_t
+sdev_show_syno_spindown(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	struct scsi_device *sdev;
+	int iRet = -EFAULT;
+
+	if (NULL == (sdev = to_scsi_device(dev))) {
+		goto END;
+	}
+
+	iRet = snprintf(buf, 20, "%d\n", sdev->spindown);
+
+END:
+	return iRet;
+}
+
+static DEVICE_ATTR(syno_spindown, S_IRUGO, sdev_show_syno_spindown, NULL);
+
+static ssize_t
+sdev_show_syno_standby_syncing(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	struct scsi_device *sdev;
+	int iRet = -EFAULT;
+
+	if (NULL == (sdev = to_scsi_device(dev))) {
+		goto END;
+	}
+
+	iRet = snprintf (buf, 20, "%u\n", sdev->do_standby_syncing);
+
+END:
+	return iRet;
+}
+
+static ssize_t
+sdev_store_syno_standby_syncing(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+	struct scsi_device *sdev;
+	unsigned long ulstandby_syncing;
+
+	if (NULL == (sdev = to_scsi_device(dev))) {
+		goto END;
+	}
+
+	sscanf(buf, "%lu", &ulstandby_syncing);
+	if (0 < ulstandby_syncing) {
+		sdev->do_standby_syncing = 1;
+	} else {
+		sdev->do_standby_syncing = 0;
+	}
+
+END:
+	return count;
+}
+
+static DEVICE_ATTR(syno_standby_syncing, S_IRUGO | S_IWUSR, sdev_show_syno_standby_syncing, sdev_store_syno_standby_syncing);
+#endif  
+
+#ifdef MY_ABC_HERE
+ 
+static ssize_t
+syno_scmd_min_timeout_show (struct device *dev, struct device_attribute *attr, char *buf)
+{
+	struct scsi_device *sdev = to_scsi_device(dev);
+	ssize_t len = -EIO;
+
+	if (!sdev) {
+		goto END;
+	}
+
+	if (0 == sdev->scmd_timeout_sec) {
+		len = sprintf(buf, "%s", "<not set>\n");
+	} else {
+		len = sprintf(buf, "%d%s", sdev->scmd_timeout_sec, "\n");
+	}
+
+END:
+	return len;
+}
+
+static ssize_t
+syno_scmd_min_timeout_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+	struct scsi_device *sdev = to_scsi_device(dev);
+	int iTimeoutSec = 0;
+	ssize_t ret = -EIO;
+
+	if (!sdev) {
+		goto END;
+	}
+
+	sscanf(buf, "%d", &iTimeoutSec);
+	if (0 >= iTimeoutSec || 60 < iTimeoutSec) {
+		printk(KERN_ERR "Invalid argument !!\n");
+		goto END;
+	}
+	sdev->scmd_timeout_sec = iTimeoutSec;
+
+	ret = count;
+
+END:
+	return ret;
+}
+DEVICE_ATTR(syno_scmd_min_timeout, S_IRUGO | S_IWUSR, syno_scmd_min_timeout_show, syno_scmd_min_timeout_store);
+#endif  
+
 sdev_rd_attr (type, "%d\n");
 sdev_rd_attr (scsi_level, "%d\n");
 sdev_rd_attr (vendor, "%.8s\n");
+#ifdef MY_ABC_HERE
+sdev_rd_attr (model, "%."CONFIG_SYNO_DISK_MODEL_LEN"s\n");
+#else  
 sdev_rd_attr (model, "%.16s\n");
+#endif  
 sdev_rd_attr (rev, "%.4s\n");
 
 static ssize_t
@@ -920,9 +1126,23 @@ static struct attribute *scsi_sdev_attrs[] = {
 	&dev_attr_iodone_cnt.attr,
 	&dev_attr_ioerr_cnt.attr,
 	&dev_attr_modalias.attr,
+#ifdef MY_ABC_HERE
+	&dev_attr_auto_remap.attr,
+#endif  
 	&dev_attr_queue_depth.attr,
 	&dev_attr_queue_type.attr,
 	&dev_attr_queue_ramp_up_period.attr,
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_idle_time.attr,
+	&dev_attr_syno_spindown.attr,
+	&dev_attr_syno_standby_syncing.attr,
+#endif  
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_scmd_min_timeout.attr,
+#endif  
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_disk_serial.attr,
+#endif  
 	REF_EVT(media_change),
 	REF_EVT(inquiry_change_reported),
 	REF_EVT(capacity_change_reported),
@@ -1069,12 +1289,15 @@ void __scsi_remove_device(struct scsi_device *sdev)
 		sdev->host->hostt->slave_destroy(sdev);
 	transport_destroy_device(dev);
 
-	
 	scsi_target_reap(scsi_target(sdev));
 
 	put_device(dev);
 }
 
+#ifdef MY_ABC_HERE
+int (*funcSYNORaidDiskUnplug)(char *szDiskName) = NULL;
+EXPORT_SYMBOL(funcSYNORaidDiskUnplug);
+#endif  
 
 void scsi_remove_device(struct scsi_device *sdev)
 {
@@ -1083,6 +1306,14 @@ void scsi_remove_device(struct scsi_device *sdev)
 	mutex_lock(&shost->scan_mutex);
 	__scsi_remove_device(sdev);
 	mutex_unlock(&shost->scan_mutex);
+#ifdef MY_DEF_HERE
+	SynoSpinupRemove(sdev);
+#endif  
+#ifdef MY_ABC_HERE
+	if (funcSYNORaidDiskUnplug) {
+		funcSYNORaidDiskUnplug(sdev->syno_disk_name);
+	}
+#endif   
 }
 EXPORT_SYMBOL(scsi_remove_device);
 

@@ -57,6 +57,10 @@
  * by the atomic helpers.
  *
  * Again drivers are strongly urged to switch to the new interfaces.
+ *
+ * The plane helpers share the function table structures with other helpers,
+ * specifically also the atomic helpers. See struct &drm_plane_helper_funcs for
+ * the details.
  */
 
 /*
@@ -111,6 +115,7 @@ static int get_connectors_for_crtc(struct drm_crtc *crtc,
  * @src: source coordinates in 16.16 fixed point
  * @dest: integer destination coordinates
  * @clip: integer clipping coordinates
+ * @rotation: plane rotation
  * @min_scale: minimum @src:@dest scaling factor in 16.16 fixed point
  * @max_scale: maximum @src:@dest scaling factor in 16.16 fixed point
  * @can_position: is it legal to position the plane such that it
@@ -130,16 +135,17 @@ static int get_connectors_for_crtc(struct drm_crtc *crtc,
  * Zero if update appears valid, error code on failure
  */
 int drm_plane_helper_check_update(struct drm_plane *plane,
-				    struct drm_crtc *crtc,
-				    struct drm_framebuffer *fb,
-				    struct drm_rect *src,
-				    struct drm_rect *dest,
-				    const struct drm_rect *clip,
-				    int min_scale,
-				    int max_scale,
-				    bool can_position,
-				    bool can_update_disabled,
-				    bool *visible)
+				  struct drm_crtc *crtc,
+				  struct drm_framebuffer *fb,
+				  struct drm_rect *src,
+				  struct drm_rect *dest,
+				  const struct drm_rect *clip,
+				  unsigned int rotation,
+				  int min_scale,
+				  int max_scale,
+				  bool can_position,
+				  bool can_update_disabled,
+				  bool *visible)
 {
 	int hscale, vscale;
 
@@ -159,6 +165,8 @@ int drm_plane_helper_check_update(struct drm_plane *plane,
 		return -EINVAL;
 	}
 
+	drm_rect_rotate(src, fb->width << 16, fb->height << 16, rotation);
+
 	/* Check scaling */
 	hscale = drm_rect_calc_hscale(src, dest, min_scale, max_scale);
 	vscale = drm_rect_calc_vscale(src, dest, min_scale, max_scale);
@@ -168,6 +176,9 @@ int drm_plane_helper_check_update(struct drm_plane *plane,
 	}
 
 	*visible = drm_rect_clip_scaled(src, dest, clip, hscale, vscale);
+
+	drm_rect_rotate_inv(src, fb->width << 16, fb->height << 16, rotation);
+
 	if (!*visible)
 		/*
 		 * Plane isn't visible; some drivers can handle this
@@ -211,10 +222,12 @@ EXPORT_SYMBOL(drm_plane_helper_check_update);
  *
  * Note that we make some assumptions about hardware limitations that may not be
  * true for all hardware --
- *   1) Primary plane cannot be repositioned.
- *   2) Primary plane cannot be scaled.
- *   3) Primary plane must cover the entire CRTC.
- *   4) Subpixel positioning is not supported.
+ *
+ * 1. Primary plane cannot be repositioned.
+ * 2. Primary plane cannot be scaled.
+ * 3. Primary plane must cover the entire CRTC.
+ * 4. Subpixel positioning is not supported.
+ *
  * Drivers for hardware that don't have these restrictions can provide their
  * own implementation rather than using this helper.
  *
@@ -257,6 +270,7 @@ int drm_primary_helper_update(struct drm_plane *plane, struct drm_crtc *crtc,
 
 	ret = drm_plane_helper_check_update(plane, crtc, fb,
 					    &src, &dest, &clip,
+					    BIT(DRM_ROTATE_0),
 					    DRM_PLANE_HELPER_NO_SCALING,
 					    DRM_PLANE_HELPER_NO_SCALING,
 					    false, false, &visible);
@@ -367,7 +381,7 @@ static struct drm_plane *create_primary_plane(struct drm_device *dev)
 				       &drm_primary_helper_funcs,
 				       safe_modeset_formats,
 				       ARRAY_SIZE(safe_modeset_formats),
-				       DRM_PLANE_TYPE_PRIMARY);
+				       DRM_PLANE_TYPE_PRIMARY, NULL);
 	if (ret) {
 		kfree(primary);
 		primary = NULL;
@@ -394,7 +408,8 @@ int drm_crtc_init(struct drm_device *dev, struct drm_crtc *crtc,
 	struct drm_plane *primary;
 
 	primary = create_primary_plane(dev);
-	return drm_crtc_init_with_planes(dev, crtc, primary, NULL, funcs);
+	return drm_crtc_init_with_planes(dev, crtc, primary, NULL, funcs,
+					 NULL);
 }
 EXPORT_SYMBOL(drm_crtc_init);
 

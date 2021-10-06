@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Based on arch/arm/include/asm/assembler.h
  *
@@ -48,7 +51,19 @@
 	.macro	enable_irq
 	msr	daifclr, #2
 	.endm
+#ifdef MY_DEF_HERE
+/*
+ * Save/disable and restore interrupts.
+ */
+	.macro  save_and_disable_irqs, olddaif
+	mrs     \olddaif, daif
+	disable_irq
+	.endm
 
+	.macro  restore_irqs, olddaif
+	msr     daif, \olddaif
+	.endm
+#endif
 /*
  * Enable and disable debug exceptions.
  */

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Digital Audio (PCM) abstract layer
  *  Copyright (c) by Jaroslav Kysela <perex@perex.cz>
@@ -2808,6 +2811,21 @@ static int snd_pcm_common_ioctl1(struct file *file,
 		snd_pcm_stream_unlock_irq(substream);
 		return res;
 	}
+#ifdef MY_DEF_HERE
+	case SNDRV_PCM_IOCTL_VOLUME_SET:
+	case SNDRV_PCM_IOCTL_VOLUME_GET:
+	case SNDRV_PCM_IOCTL_GET_LATENCY:
+	case SNDRV_PCM_IOCTL_GET_FW_DELAY:
+	{
+		snd_printd("############## %s %d\n", __FUNCTION__, __LINE__);
+		snd_printd("substream->name = %s\n", substream->pcm->card->driver);
+		//realtek sound card driver name
+		if((strcmp(substream->pcm->card->driver, "snd_alsa_rtk") == 0)) {
+			substream->ops->ioctl(substream, cmd, arg);
+		}
+		return 0;
+	}
+#endif /* MY_DEF_HERE */
 	}
 	pcm_dbg(substream->pcm, "unknown ioctl = 0x%x\n", cmd);
 	return -ENOTTY;

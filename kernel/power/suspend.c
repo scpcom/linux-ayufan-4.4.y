@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * kernel/power/suspend.c - Suspend to RAM and standby functionality.
  *
@@ -31,6 +34,11 @@
 #include <linux/moduleparam.h>
 
 #include "power.h"
+
+#ifdef MY_DEF_HERE
+int RTK_PM_STATE;       //For RTD129x idle mode support.
+EXPORT_SYMBOL(RTK_PM_STATE);
+#endif /* MY_DEF_HERE */
 
 const char *pm_labels[] = { "mem", "standby", "freeze", NULL };
 const char *pm_states[PM_SUSPEND_MAX];
@@ -412,8 +420,16 @@ int suspend_devices_and_enter(suspend_state_t state)
 	if (error)
 		goto Close;
 
+#ifdef MY_DEF_HERE
+#else /* MY_DEF_HERE */
 	suspend_console();
+#endif /* MY_DEF_HERE */
 	suspend_test_start();
+
+#ifdef MY_DEF_HERE
+	RTK_PM_STATE = state;   //For RTD129x idle mode support.
+#endif /* MY_DEF_HERE */
+
 	error = dpm_suspend_start(PMSG_SUSPEND);
 	if (error) {
 		pr_err("PM: Some devices failed to suspend, or early wake event detected\n");

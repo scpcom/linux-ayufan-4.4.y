@@ -1,4 +1,7 @@
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/module.h>
 #include <linux/types.h>
 #include <linux/kernel.h>
@@ -142,19 +145,21 @@ void eth_header_cache_update(struct hh_cache *hh,
 }
 EXPORT_SYMBOL(eth_header_cache_update);
 
-
 int eth_prepare_mac_addr_change(struct net_device *dev, void *p)
 {
 	struct sockaddr *addr = p;
 
+#ifdef MY_ABC_HERE
+	 
+#else  
 	if (!(dev->priv_flags & IFF_LIVE_ADDR_CHANGE) && netif_running(dev))
 		return -EBUSY;
+#endif  
 	if (!is_valid_ether_addr(addr->sa_data))
 		return -EADDRNOTAVAIL;
 	return 0;
 }
 EXPORT_SYMBOL(eth_prepare_mac_addr_change);
-
 
 void eth_commit_mac_addr_change(struct net_device *dev, void *p)
 {

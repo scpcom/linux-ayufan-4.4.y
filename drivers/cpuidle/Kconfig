@@ -48,3 +48,8 @@ endif
 config ARCH_NEEDS_CPU_IDLE_COUPLED
 	def_bool n
 endmenu
+
+config ARM_CPUIDLE_RTK
+	bool
+	default y
+	depends on HOTPLUG_CPU && SYNO_RTD1296

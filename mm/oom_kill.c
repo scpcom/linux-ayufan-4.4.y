@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/oom.h>
 #include <linux/mm.h>
 #include <linux/err.h>
@@ -26,10 +28,14 @@ int sysctl_panic_on_oom;
 int sysctl_oom_kill_allocating_task;
 int sysctl_oom_dump_tasks = 1;
 
+#ifdef MY_ABC_HERE
+extern void syno_dump_modules(void);
+#endif  
+
 DEFINE_MUTEX(oom_lock);
 
 #ifdef CONFIG_NUMA
-
+ 
 static bool has_intersects_mems_allowed(struct task_struct *start,
 					const nodemask_t *mask)
 {
@@ -245,13 +251,16 @@ static struct task_struct *select_bad_process(struct oom_control *oc,
 	return chosen;
 }
 
-
 static void dump_tasks(struct mem_cgroup *memcg, const nodemask_t *nodemask)
 {
 	struct task_struct *p;
 	struct task_struct *task;
 
+#ifdef MY_ABC_HERE
+	pr_warning("[ pid ]   uid  tgid total_vm      rss nr_ptes nr_pmds swapents oom_score_adj name\n");
+#else
 	pr_info("[ pid ]   uid  tgid total_vm      rss nr_ptes nr_pmds swapents oom_score_adj name\n");
+#endif  
 	rcu_read_lock();
 	for_each_process(p) {
 		if (oom_unkillable_task(p, memcg, nodemask))
@@ -259,11 +268,15 @@ static void dump_tasks(struct mem_cgroup *memcg, const nodemask_t *nodemask)
 
 		task = find_lock_task_mm(p);
 		if (!task) {
-			
+			 
 			continue;
 		}
 
+#ifdef MY_ABC_HERE
+		pr_warning("[%5d] %5d %5d %8lu %8lu %7ld %7ld %8lu         %5hd %s\n",
+#else
 		pr_info("[%5d] %5d %5d %8lu %8lu %7ld %7ld %8lu         %5hd %s\n",
+#endif  
 			task->pid, from_kuid(&init_user_ns, task_uid(task)),
 			task->tgid, task->mm->total_vm, get_mm_rss(task->mm),
 			atomic_long_read(&task->mm->nr_ptes),
@@ -290,26 +303,26 @@ static void dump_header(struct oom_control *oc, struct task_struct *p,
 		show_mem(SHOW_MEM_FILTER_NODES);
 	if (sysctl_oom_dump_tasks)
 		dump_tasks(memcg, oc->nodemask);
+#ifdef MY_ABC_HERE
+	syno_dump_modules();
+#endif  
 }
-
 
 static atomic_t oom_victims = ATOMIC_INIT(0);
 static DECLARE_WAIT_QUEUE_HEAD(oom_victims_wait);
 
 bool oom_killer_disabled __read_mostly;
 
-
 void mark_oom_victim(struct task_struct *tsk)
 {
 	WARN_ON(oom_killer_disabled);
-	
+	 
 	if (test_and_set_tsk_thread_flag(tsk, TIF_MEMDIE))
 		return;
-	
+	 
 	__thaw_task(tsk);
 	atomic_inc(&oom_victims);
 }
-
 
 void exit_oom_victim(void)
 {

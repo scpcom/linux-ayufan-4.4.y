@@ -1,4 +1,7 @@
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #ifndef __LINUX_BLK_TYPES_H
 #define __LINUX_BLK_TYPES_H
 
@@ -51,48 +54,49 @@ struct bio {
 
 	void			*bi_private;
 #ifdef CONFIG_BLK_CGROUP
-	
+	 
 	struct io_context	*bi_ioc;
 	struct cgroup_subsys_state *bi_css;
 #endif
 	union {
 #if defined(CONFIG_BLK_DEV_INTEGRITY)
-		struct bio_integrity_payload *bi_integrity; 
+		struct bio_integrity_payload *bi_integrity;  
 #endif
 	};
 
-	unsigned short		bi_vcnt;	
+	unsigned short		bi_vcnt;	 
 
-	
+	unsigned short		bi_max_vecs;	 
 
-	unsigned short		bi_max_vecs;	
+	atomic_t		__bi_cnt;	 
 
-	atomic_t		__bi_cnt;	
-
-	struct bio_vec		*bi_io_vec;	
+	struct bio_vec		*bi_io_vec;	 
 
 	struct bio_set		*bi_pool;
 
-	
 	struct bio_vec		bi_inline_vecs[0];
 };
 
 #define BIO_RESET_BYTES		offsetof(struct bio, bi_max_vecs)
 
-
-#define BIO_SEG_VALID	1	
-#define BIO_CLONED	2	
-#define BIO_BOUNCED	3	
-#define BIO_USER_MAPPED 4	
-#define BIO_NULL_MAPPED 5	
-#define BIO_QUIET	6	
-#define BIO_CHAIN	7	
-#define BIO_REFFED	8	
-
+#define BIO_SEG_VALID	1	 
+#define BIO_CLONED	2	 
+#define BIO_BOUNCED	3	 
+#define BIO_USER_MAPPED 4	 
+#define BIO_NULL_MAPPED 5	 
+#define BIO_QUIET	6	 
+#define BIO_CHAIN	7	 
+#define BIO_REFFED	8	 
 
 #define BIO_RESET_BITS	13
-#define BIO_OWNS_VEC	13	
-
+#define BIO_OWNS_VEC	13	 
+#ifdef MY_ABC_HERE
+#define BIO_AUTO_REMAP 14	 
+#endif  
+#ifdef MY_ABC_HERE
+ 
+#define BIO_MD_RETURN_ERROR 15
+#endif  
 
 #define BIO_POOL_BITS		(4)
 #define BIO_POOL_NONE		((1UL << BIO_POOL_BITS) - 1)

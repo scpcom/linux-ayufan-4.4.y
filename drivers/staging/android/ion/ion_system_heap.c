@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * drivers/staging/android/ion/ion_system_heap.c
  *
@@ -83,15 +86,25 @@ static void free_buffer_page(struct ion_system_heap *heap,
 	unsigned int order = compound_order(page);
 	bool cached = ion_buffer_cached(buffer);
 
+#ifdef MY_DEF_HERE
+	if (!cached) {
+#else /* MY_DEF_HERE */
 	if (!cached && !(buffer->private_flags & ION_PRIV_FLAG_SHRINKER_FREE)) {
+#endif /* MY_DEF_HERE */
 		struct ion_page_pool *pool = heap->pools[order_to_index(order)];
 
+#ifdef MY_DEF_HERE
+		if (buffer->private_flags & ION_PRIV_FLAG_SHRINKER_FREE)
+			ion_page_pool_free_immediate(pool, page);
+		else
+			ion_page_pool_free(pool, page);
+#else /* MY_DEF_HERE */
 		ion_page_pool_free(pool, page);
+#endif /* MY_DEF_HERE */
 	} else {
 		__free_pages(page, order);
 	}
 }
-
 
 static struct page *alloc_largest_available(struct ion_system_heap *heap,
 					    struct ion_buffer *buffer,

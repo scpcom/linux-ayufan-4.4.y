@@ -1,4 +1,7 @@
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/file.h>
 #include <linux/falloc.h>
 #include <linux/slab.h>
@@ -22,13 +25,13 @@ nfsd4_security_inode_setsecctx(struct svc_fh *resfh, struct xdr_netobj *label, u
 	struct inode *inode = d_inode(resfh->fh_dentry);
 	int status;
 
-	mutex_lock(&inode->i_mutex);
+	inode_lock(inode);
 	status = security_inode_setsecctx(resfh->fh_dentry,
 		label->data, label->len);
-	mutex_unlock(&inode->i_mutex);
+	inode_unlock(inode);
 
 	if (status)
-		
+		 
 		bmval[2] &= ~FATTR4_WORD2_SECURITY_LABEL;
 
 	return;
@@ -435,11 +438,15 @@ nfsd4_savefh(struct svc_rqst *rqstp, struct nfsd4_compound_state *cstate,
 	return nfs_ok;
 }
 
-
 static __be32
 nfsd4_access(struct svc_rqst *rqstp, struct nfsd4_compound_state *cstate,
 	     struct nfsd4_access *access)
 {
+#ifdef MY_ABC_HERE
+	if (IPPROTO_UDP == rqstp->rq_prot) {
+		return nfserr_acces;
+	}
+#endif  
 	if (access->ac_req_access & ~NFS3_ACCESS_FULL)
 		return nfserr_inval;
 

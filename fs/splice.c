@@ -33,6 +33,17 @@
 #include <linux/socket.h>
 #include <linux/compat.h>
 #include "internal.h"
+#if defined(CONFIG_SENDFILE_PATCH)
+#include <net/sock.h>
+#include <linux/net.h>
+#include <linux/socket.h>
+#include <linux/genalloc.h>
+#include <linux/backing-dev.h>
+
+struct common_mempool;
+static struct common_mempool/*struct gen_pool*/ * rcv_pool = NULL;
+static struct common_mempool/*struct gen_pool*/ * kvec_pool = NULL;
+#endif
 
 /*
  * Attempt to steal a page from a pipe buffer. This should perhaps go into
@@ -1113,8 +1124,13 @@ EXPORT_SYMBOL(generic_splice_sendpage);
 /*
  * Attempt to initiate a splice from pipe to file.
  */
+#ifdef CONFIG_AUFS_FHSM
+long do_splice_from(struct pipe_inode_info *pipe, struct file *out,
+		    loff_t *ppos, size_t len, unsigned int flags)
+#else
 static long do_splice_from(struct pipe_inode_info *pipe, struct file *out,
-			   loff_t *ppos, size_t len, unsigned int flags)
+			loff_t *ppos, size_t len, unsigned int flags)
+#endif /* CONFIG_AUFS_FHSM */
 {
 	ssize_t (*splice_write)(struct pipe_inode_info *, struct file *,
 				loff_t *, size_t, unsigned int);
@@ -1126,13 +1142,22 @@ static long do_splice_from(struct pipe_inode_info *pipe, struct file *out,
 
 	return splice_write(pipe, out, ppos, len, flags);
 }
+#ifdef CONFIG_AUFS_FHSM
+EXPORT_SYMBOL_GPL(do_splice_from);
+#endif /* CONFIG_AUFS_FHSM */
 
 /*
  * Attempt to initiate a splice from a file to a pipe.
  */
+#ifdef CONFIG_AUFS_FHSM
+long do_splice_to(struct file *in, loff_t *ppos,
+		  struct pipe_inode_info *pipe, size_t len,
+		  unsigned int flags)
+#else
 static long do_splice_to(struct file *in, loff_t *ppos,
-			 struct pipe_inode_info *pipe, size_t len,
-			 unsigned int flags)
+			struct pipe_inode_info *pipe, size_t len,
+			unsigned int flags)
+#endif /* CONFIG_AUFS_FHSM */
 {
 	ssize_t (*splice_read)(struct file *, loff_t *,
 			       struct pipe_inode_info *, size_t, unsigned int);
@@ -1152,6 +1177,9 @@ static long do_splice_to(struct file *in, loff_t *ppos,
 
 	return splice_read(in, ppos, pipe, len, flags);
 }
+#ifdef CONFIG_AUFS_FHSM
+EXPORT_SYMBOL_GPL(do_splice_to);
+#endif /* CONFIG_AUFS_FHSM */
 
 /**
  * splice_direct_to_actor - splices data directly between two non-pipes
@@ -1435,6 +1463,447 @@ static long do_splice(struct file *in, loff_t __user *off_in,
 
 	return -EINVAL;
 }
+
+#if defined(CONFIG_SENDFILE_PATCH)
+/****************************** POOL MANAGER *************************************/
+/* Forward declarations */
+typedef struct common_mempool common_mempool_t;
+void* common_mempool_alloc(common_mempool_t* pool);
+void common_mempool_free(common_mempool_t* pool, void* mem);
+common_mempool_t* common_mempool_get(void* mem);
+common_mempool_t*  common_mempool_create(uint32_t number_of_entries, uint32_t entry_size);
+void  common_mempool_destroy(common_mempool_t* pool);
+int32_t common_mempool_get_number_of_free_entries(common_mempool_t* pool);
+int32_t common_mempool_get_number_of_entries(common_mempool_t* pool);
+int32_t common_mempool_get_entry_size(common_mempool_t* pool);
+
+/* Implementation */
+#define COMMON_MPOOL_HDR_FLAGS_ALLOCATED 0x00000001
+#define COMMON_MPOOL_HDR_MAGIC           0xa5a5a508
+#define COMMON_MPOOL_FTR_MAGIC           0xa5a5a509
+#define COMMON_MPOOL_ALIGN4(size) ((size)+4) & 0xFFFFFFFC;
+#define COMMON_MPOOL_CHECK_ALIGNED4(ptr) ((((uint64_t)(ptr)) & 0x00000003) == 0)
+
+typedef struct common_mpool_hdr
+{
+  struct common_mpool_hdr* next;
+  common_mempool_t*        pool;
+  uint32_t flags;
+  uint32_t magic;
+} common_mpool_hdr_t;
+
+typedef struct
+{
+	uint32_t magic;
+	common_mempool_t* pool;
+} common_mpool_ftr_t;
+
+struct common_mempool
+{
+	common_mpool_hdr_t*  head;
+	common_mpool_hdr_t*  tail;
+	uint32_t		number_of_free_entries;
+	spinlock_t		lock;
+	uint32_t                 data_size; /* size of data section in pool entry */
+	uint32_t                 pool_entry_size; /* size of pool entry */
+	/* parameters passed on init */
+	uint32_t                 number_of_entries;
+	uint32_t                 entry_size;
+	uint8_t*                 mem;
+};
+
+bool common_mempool_check_internal(common_mempool_t * pool,
+                                          void * ptr,
+                                          common_mpool_hdr_t * hdr,
+                                          common_mpool_ftr_t * ftr)
+{
+	if (!ptr) {
+		printk(KERN_ERR "illegal ptr NULL");
+		return false;
+	}
+
+	if (!COMMON_MPOOL_CHECK_ALIGNED4(ptr)) {
+		printk(KERN_ERR "ptr not aligned %p",ptr);
+		return false;
+	}
+
+	if (hdr->magic != COMMON_MPOOL_HDR_MAGIC) {
+		printk(KERN_ERR "illegal hdr magic %x for ptr %p",hdr->magic,ptr);
+		return false;
+	}
+
+	if (ftr->magic != COMMON_MPOOL_FTR_MAGIC) {
+		printk(KERN_ERR "illegal ftr magic %x for ptr %p",ftr->magic,ptr);
+		return false;
+	}
+
+	if (hdr->pool != pool || ftr->pool != pool) {
+		printk(KERN_ERR "inconsistent size hdr->pool: %p ftr->pool: %p for ptr %p",hdr->pool,ftr->pool,ptr);
+		return false;
+	}
+
+	if (!(hdr->flags & COMMON_MPOOL_HDR_FLAGS_ALLOCATED)) {
+		printk(KERN_ERR "ptr %p was not allocated",ptr);
+		return false;
+	}
+	return true;
+}
+
+void* common_mempool_alloc(common_mempool_t* pool)
+{
+	common_mpool_hdr_t* hdr;
+
+	if (!pool || !pool->head || pool->number_of_free_entries == 0) {
+		return NULL;
+	}
+	spin_lock_bh(&pool->lock);
+	hdr = pool->head;
+	pool->head = pool->head->next;
+
+	if (!pool->head) {
+		pool->tail = NULL;
+	}
+
+	hdr->flags = COMMON_MPOOL_HDR_FLAGS_ALLOCATED;
+	pool->number_of_free_entries--;
+	spin_unlock_bh(&pool->lock);
+	return ((uint8_t*)hdr+sizeof(common_mpool_hdr_t));
+}
+
+void common_mempool_free(common_mempool_t* pool, void* ptr)
+{
+	common_mpool_hdr_t* hdr;
+	common_mpool_ftr_t* ftr;
+
+	if (!pool || !ptr) {
+		return;
+	}
+	if (!COMMON_MPOOL_CHECK_ALIGNED4(ptr)) {
+		printk(KERN_ERR "ptr not aligned %p",ptr);
+		return;
+	}
+	spin_lock_bh(&pool->lock);
+	hdr = (common_mpool_hdr_t*)((uint8_t*)ptr-sizeof(common_mpool_hdr_t));
+	ftr = (common_mpool_ftr_t*)((uint8_t*)ptr+pool->data_size);
+
+	if (!common_mempool_check_internal(pool,ptr,hdr,ftr)) {
+		printk(KERN_ERR "invalid ptr %p",ptr);
+		spin_unlock_bh(&pool->lock);
+		return;
+	}
+
+	hdr->flags ^= COMMON_MPOOL_HDR_FLAGS_ALLOCATED;
+	hdr->next = NULL;
+
+	if (!pool->head) {
+		pool->head = pool->tail = hdr;
+	} else {
+		pool->tail->next = hdr;
+		pool->tail = hdr;
+	}
+
+	pool->number_of_free_entries++;
+	spin_unlock_bh(&pool->lock);
+}
+
+common_mempool_t*  common_mempool_create(uint32_t number_of_entries,
+						uint32_t entry_size)
+{
+	uint32_t i;
+	uint32_t aligned_entry_size;
+	uint32_t pool_entry_size;
+	common_mpool_hdr_t* hdr;
+	common_mpool_hdr_t* next_hdr;
+	common_mpool_ftr_t* ftr;
+	common_mempool_t* pool;
+
+	aligned_entry_size = COMMON_MPOOL_ALIGN4(entry_size);
+	pool_entry_size = COMMON_MPOOL_ALIGN4(sizeof(common_mpool_hdr_t)+aligned_entry_size+sizeof(common_mpool_ftr_t));
+	pool = kmalloc((sizeof(common_mempool_t) + pool_entry_size*number_of_entries), GFP_ATOMIC);
+
+	if (!pool) {
+		return NULL;
+	}
+
+	pool->entry_size = entry_size;
+	pool->number_of_entries = number_of_entries;
+	pool->data_size  = aligned_entry_size;
+	pool->pool_entry_size = pool_entry_size;
+	pool->number_of_free_entries = number_of_entries;
+	pool->mem = (uint8_t*)(pool+1);
+	pool->head = (common_mpool_hdr_t*)pool->mem;
+	spin_lock_init(&pool->lock);
+
+	for (i=0;i<number_of_entries;i++) {
+		hdr = (common_mpool_hdr_t*)&pool->mem[pool_entry_size*i];
+		ftr = (common_mpool_ftr_t*)((uint8_t*)hdr+sizeof(common_mpool_hdr_t)+aligned_entry_size);
+		hdr->magic = COMMON_MPOOL_HDR_MAGIC;
+		hdr->pool = pool;
+		hdr->flags = 0;
+		ftr->magic = COMMON_MPOOL_FTR_MAGIC;
+		ftr->pool = pool;
+
+		if (i < (number_of_entries-1)) {
+			next_hdr = (common_mpool_hdr_t*)&pool->mem[pool_entry_size*(i+1)];
+		} else {
+			pool->tail = hdr;
+			next_hdr = NULL;
+		}
+
+		hdr->next = next_hdr;
+	}
+	return pool;
+}
+
+void  common_mempool_destroy(common_mempool_t* pool)
+{
+	if (!pool) {
+		return;
+	}
+
+	kfree(pool);
+}
+
+int32_t common_mempool_get_number_of_free_entries(common_mempool_t* pool)
+{
+	if (!pool) {
+		return -1;
+	}
+
+	return (int32_t)pool->number_of_free_entries;
+}
+
+int32_t common_mempool_get_number_of_entries(common_mempool_t* pool)
+{
+	if (!pool) {
+		return -1;
+	}
+	return (int32_t)pool->number_of_entries;
+}
+
+int32_t common_mempool_get_entry_size(common_mempool_t* pool)
+{
+	if (!pool) {
+		return -1;
+	}
+	return (int32_t)pool->entry_size;
+}
+
+common_mempool_t* common_mempool_get(void* ptr)
+{
+	common_mpool_hdr_t* hdr;
+	common_mpool_ftr_t* ftr;
+
+	if (!ptr) {
+		return NULL;
+	}
+	if (!COMMON_MPOOL_CHECK_ALIGNED4(ptr)) {
+		return NULL;
+	}
+	hdr = (common_mpool_hdr_t*)((uint8_t*)ptr-sizeof(common_mpool_hdr_t));
+	ftr = (common_mpool_ftr_t*)((uint8_t*)ptr + hdr->pool->data_size);
+
+	if (hdr->magic != COMMON_MPOOL_HDR_MAGIC) {
+		printk(KERN_ERR "illegal hdr magic %x for ptr %p",hdr->magic,ptr);
+		return NULL;
+	}
+	if (ftr->magic != COMMON_MPOOL_FTR_MAGIC) {
+		printk(KERN_ERR "illegal ftr magic %x for ptr %p",ftr->magic,ptr);
+		return NULL;
+	}
+	if (hdr->pool != ftr->pool || !hdr->pool) {
+		printk(KERN_ERR "inconsistent size hdr->pool: %p ftr->pool: %p for ptr %p",hdr->pool,ftr->pool,ptr);
+		return false;
+	}
+	return hdr->pool;
+}
+/****************************** POOL MANAGER *************************************/
+
+ssize_t generic_splice_from_socket(struct file *file, struct socket *sock,
+				     loff_t *ppos, size_t count, bool ppage)
+				     //loff_t __user *ppos, size_t count)
+{
+	struct address_space *mapping = file->f_mapping;
+	struct inode *inode = mapping->host;
+	loff_t pos;
+	size_t count_total = 0;
+	size_t pcount;
+	size_t count_tmp;
+	int err = 0;
+	int i = 0;
+	int nr_pages = 0;
+	int page_cnt_est= count/PAGE_SIZE + 1;
+	struct recvfile_ctl_blk *rv_cb = NULL;
+	struct kvec *iov = NULL;
+	struct msghdr msg;
+	long rcvtimeo;
+	int ret;
+	struct kiocb iocb;
+	struct iov_iter from;
+
+	//if (copy_from_user(&pos, ppos, sizeof(loff_t)))
+	//	return -EFAULT;
+	pos = *ppos;
+
+	if (!mapping->a_ops->write_begin || !mapping->a_ops->write_end) {
+		return -EBADF;
+	}
+
+	if (count > MAX_SIZE_PER_RECVFILE) {
+		printk("%s: count(%zu) exceeds maxinum\n", __func__, count);
+		return -EINVAL;
+	}
+
+	init_sync_kiocb(&iocb, file);
+	iocb.ki_pos = *ppos;
+	memset((void*)&from, 0, sizeof(struct iov_iter));
+	from.count = count;
+	from.type |= WRITE;
+
+	mutex_lock(&inode->i_mutex);
+
+	sb_start_write(inode->i_sb);
+
+	/* We can write back this queue in page reclaim */
+	current->backing_dev_info = inode_to_bdi(inode);
+
+	err = generic_write_checks(&iocb, &from);
+	//if (err != 0 || count == 0)
+	if (err <= 0)
+		goto done;
+
+	file_remove_privs(file);
+	file_update_time(file);
+
+	if (unlikely(!rcv_pool || !kvec_pool))
+	{
+		printk(KERN_ERR "rcv_pool %p kvec_pool %p uninitialized\n", rcv_pool, kvec_pool);
+		sb_end_write(inode->i_sb);
+		return -ENOMEM;
+	}
+
+	rv_cb = (struct recvfile_ctl_blk *)common_mempool_alloc(rcv_pool);
+	iov = (struct kvec *)common_mempool_alloc(kvec_pool);
+
+	if (!rv_cb || !iov)
+	{
+		printk(KERN_ERR "Failed to get pool mem for %d pages (rv_cb %p iov %p)\n", page_cnt_est, rv_cb, iov);
+		sb_end_write(inode->i_sb);
+		return -ENOMEM;
+	}
+
+	/* Calculate first write size within page */
+	if (ppage)
+	{
+		pcount  = PAGE_CACHE_SIZE - (pos & (PAGE_CACHE_SIZE - 1));
+		if (pcount > count)
+			pcount = count;
+	}
+	else
+	{
+		pcount = count;
+	}
+
+	count_total = 0;
+	count_tmp = pcount;
+	for(;count_total < count; nr_pages=0,count_total+=count_tmp,count_tmp=pcount=(count-count_total<PAGE_SIZE)?(count-count_total):PAGE_SIZE){
+		do {
+			unsigned long bytes;	/* Bytes to write to page */
+			unsigned long offset;	/* Offset into pagecache page */
+			struct page *pageP;
+			void *fsdata;
+
+			offset = (pos & (PAGE_CACHE_SIZE - 1));
+			bytes = PAGE_CACHE_SIZE - offset;
+			if (bytes > count_tmp)
+				bytes = count_tmp;
+			ret = mapping->a_ops->write_begin(file, mapping, pos, bytes,
+							  AOP_FLAG_UNINTERRUPTIBLE,
+							  &pageP, &fsdata);
+
+			if (unlikely(ret)) {
+				err = ret;
+				goto cleanup;
+			}
+
+			rv_cb[nr_pages].rv_page = pageP;
+			rv_cb[nr_pages].rv_pos = pos;
+			rv_cb[nr_pages].rv_count = bytes;
+			rv_cb[nr_pages].rv_fsdata = fsdata;
+			iov[nr_pages].iov_base = kmap(pageP) + offset;
+			iov[nr_pages].iov_len = bytes;
+			nr_pages++;
+			count_tmp -= bytes;
+			pos += bytes;
+		} while (count_tmp);
+
+		/* IOV is ready, receive the date from socket now */
+		msg.msg_name = NULL;
+		msg.msg_namelen = 0;
+		msg.msg_control = NULL;
+		msg.msg_controllen = 0;
+		msg.msg_flags = MSG_KERNSPACE;
+		rcvtimeo = sock->sk->sk_rcvtimeo;
+		sock->sk->sk_rcvtimeo = 8 * HZ;
+
+		ret = kernel_recvmsg(sock, &msg, &iov[0], nr_pages, pcount,
+				     MSG_WAITALL | MSG_NOCATCHSIGNAL);
+
+		sock->sk->sk_rcvtimeo = rcvtimeo;
+		if(ret != pcount)
+			err = -EPIPE;
+		else
+			err = 0;
+
+		if (unlikely(err < 0)) {
+			goto cleanup;
+		}
+
+		for(i=0,count_tmp=0;i < nr_pages; i++) {
+			kunmap(rv_cb[i].rv_page);
+			ret = mapping->a_ops->write_end(file, mapping,
+							rv_cb[i].rv_pos,
+							rv_cb[i].rv_count,
+							rv_cb[i].rv_count,
+							rv_cb[i].rv_page,
+							rv_cb[i].rv_fsdata);
+			if (unlikely(ret < 0))
+				printk("%s: write_end fail,ret = %d\n", __func__, ret);
+			count_tmp += rv_cb[i].rv_count;
+		}
+
+		if (count_tmp != pcount)
+		{
+			printk(KERN_ERR "%s: Mismatch in write begin/end! begin count:%zu, end count:%zu\n", __func__, pcount, count_tmp);
+			//break; // break??
+		}
+        } // Per-page write call
+	balance_dirty_pages_ratelimited(mapping);
+	//if (copy_to_user(ppos, &pos, sizeof(loff_t)))
+	//	err = -EFAULT;
+	*ppos = pos;
+done:
+	current->backing_dev_info = NULL;
+	common_mempool_free(rcv_pool, (void*)rv_cb);
+	common_mempool_free(kvec_pool, (void*)iov);
+
+	mutex_unlock(&inode->i_mutex);
+	sb_end_write(inode->i_sb);
+	return err ? err : count_total;
+cleanup:
+	for(i = 0; i < nr_pages; i++) {
+		kunmap(rv_cb[i].rv_page);
+		ret = mapping->a_ops->write_end(file, mapping,
+						rv_cb[i].rv_pos,
+						rv_cb[i].rv_count,
+						rv_cb[i].rv_count,
+						rv_cb[i].rv_page,
+						rv_cb[i].rv_fsdata);
+	}
+
+	goto done;
+}
+#endif
 
 /*
  * Map an iov into an array of pages and offset/length tupples. With the
@@ -2043,3 +2512,25 @@ SYSCALL_DEFINE4(tee, int, fdin, int, fdout, size_t, len, unsigned int, flags)
 
 	return error;
 }
+
+#if defined(CONFIG_SENDFILE_PATCH)
+static int __init init_splice_pools(void)
+{
+	unsigned int rcv_pool_size= sizeof(struct recvfile_ctl_blk) * (MAX_PAGES_PER_RECVFILE+1);
+	unsigned int kve_pool_size= sizeof(struct kvec) * (MAX_PAGES_PER_RECVFILE+1);
+
+	rcv_pool =  common_mempool_create((8 * num_possible_cpus()), rcv_pool_size);
+	kvec_pool = common_mempool_create((8 * num_possible_cpus()), kve_pool_size);
+	if (!rcv_pool || !kvec_pool)
+	{
+		return -ENOMEM;
+	}
+/*
+	printk(KERN_ERR "%s rcv %p (sz:%d) kvec %p (sz:%d) per %d core\n",
+		__FUNCTION__, rcv_pool, rcv_pool_size, kvec_pool, kve_pool_size, num_possible_cpus());
+*/
+	return 0;
+}
+
+fs_initcall(init_splice_pools);
+#endif

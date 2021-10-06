@@ -1,6 +1,7 @@
-
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/export.h>
 #include <linux/timex.h>
 #include <linux/capability.h>
@@ -107,8 +108,12 @@ int do_sys_settimeofday(const struct timespec *tv, const struct timezone *tz)
 		update_vsyscall_tz();
 		if (firsttime) {
 			firsttime = 0;
+#ifdef MY_ABC_HERE
+ 
+#else
 			if (!tv)
 				warp_clock();
+#endif  
 		}
 	}
 	if (tv)

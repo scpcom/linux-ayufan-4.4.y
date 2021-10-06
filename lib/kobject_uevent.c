@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * kernel userspace event delivery
  *
@@ -49,6 +52,10 @@ static const char *kobject_actions[] = {
 	[KOBJ_MOVE] =		"move",
 	[KOBJ_ONLINE] =		"online",
 	[KOBJ_OFFLINE] =	"offline",
+#ifdef MY_DEF_HERE
+	[KOBJ_LINKUP] =		"linkup",
+	[KOBJ_LINKDOWN] =	"linkdown",
+#endif /* MY_DEF_HERE */
 };
 
 /**

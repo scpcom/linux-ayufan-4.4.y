@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * linux/fs/ext4/page-io.c
  *
@@ -53,9 +56,24 @@ void ext4_exit_pageio(void)
 static void buffer_io_error(struct buffer_head *bh)
 {
 	char b[BDEVNAME_SIZE];
+#ifdef MY_ABC_HERE
+	static unsigned long long b_blocknr_last = 0;
+	if (b_blocknr_last == (unsigned long long)bh->b_blocknr) {
+		printk_ratelimited(KERN_ERR "Buffer I/O error on device %s, logical block %llu\n",
+				bdevname(bh->b_bdev, b),
+				b_blocknr_last);
+	} else {
+		b_blocknr_last = (unsigned long long)bh->b_blocknr;
+		printk_ratelimited(KERN_ERR "Buffer I/O error on device %s, logical block in range %llu + 0-2(%d)\n",
+				bdevname(bh->b_bdev, b),
+				(b_blocknr_last >> CONFIG_SYNO_IO_ERROR_LIMIT_MSG_SHIFT) << CONFIG_SYNO_IO_ERROR_LIMIT_MSG_SHIFT,
+				CONFIG_SYNO_IO_ERROR_LIMIT_MSG_SHIFT);
+	}
+#else
 	printk_ratelimited(KERN_ERR "Buffer I/O error on device %s, logical block %llu\n",
 			bdevname(bh->b_bdev, b),
 			(unsigned long long)bh->b_blocknr);
+#endif /* MY_ABC_HERE */
 }
 
 static void ext4_finish_bio(struct bio *bio)

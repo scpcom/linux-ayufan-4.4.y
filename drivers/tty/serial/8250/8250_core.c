@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/module.h>
 #include <linux/moduleparam.h>
 #include <linux/ioport.h>
@@ -562,6 +564,10 @@ static int __init univ8250_console_init(void)
 {
 	if (nr_uarts == 0)
 		return -ENODEV;
+
+#ifdef MY_DEF_HERE
+	return -ENODEV;
+#endif  
 
 	serial8250_isa_init_ports();
 	register_console(&univ8250_console);

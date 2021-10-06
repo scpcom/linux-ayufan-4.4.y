@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/gfp.h>
@@ -320,12 +322,32 @@ static struct pci_driver sil24_pci_driver = {
 #endif
 };
 
+#ifdef MY_ABC_HERE
+static struct device_attribute *sil24_shost_attrs[] = {
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_manutil_power_disable,
+	&dev_attr_syno_pm_gpio,
+	&dev_attr_syno_pm_info,
+#endif  
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_diskname_trans,
+#endif  
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_sata_disk_led_ctrl,
+#endif  
+	NULL
+};
+#endif  
+
 static struct scsi_host_template sil24_sht = {
 	ATA_NCQ_SHT(DRV_NAME),
 	.can_queue		= SIL24_MAX_CMDS,
 	.sg_tablesize		= SIL24_MAX_SGE,
 	.dma_boundary		= ATA_DMA_BOUNDARY,
 	.tag_alloc_policy	= BLK_TAG_ALLOC_FIFO,
+#ifdef MY_ABC_HERE
+	.shost_attrs 		= sil24_shost_attrs,
+#endif  
 };
 
 static struct ata_port_operations sil24_ops = {
@@ -717,7 +739,24 @@ static int sil24_qc_defer(struct ata_queued_cmd *qc)
 				return ATA_DEFER_PORT;
 			qc->flags |= ATA_QCFLAG_CLEAR_EXCL;
 		} else
+#ifdef MY_ABC_HERE
+		{
+			if (!ap->nr_active_links) {
+				 
+				if (is_excl) {
+					ap->excl_link = link;
+					qc->flags |= ATA_QCFLAG_CLEAR_EXCL;
+				} else {
+					 
+					ap->excl_link = NULL;
+				}
+			} else {
+				return ATA_DEFER_PORT;
+			}
+		}
+#else
 			return ATA_DEFER_PORT;
+#endif  
 	} else if (unlikely(is_excl)) {
 		ap->excl_link = link;
 		if (ap->nr_active_links)
@@ -879,6 +918,12 @@ static void sil24_error_intr(struct ata_port *ap)
 	}
 
 	if (irq_stat & (PORT_IRQ_PHYRDY_CHG | PORT_IRQ_DEV_XCHG)) {
+#ifdef MY_ABC_HERE
+		syno_ata_info_print(ap);
+#endif  
+#ifdef MY_ABC_HERE
+		ap->pflags |= ATA_PFLAG_SYNO_BOOT_PROBE;
+#endif  
 		ata_ehi_hotplugged(ehi);
 		ata_ehi_push_desc(ehi, "%s",
 				  irq_stat & PORT_IRQ_PHYRDY_CHG ?

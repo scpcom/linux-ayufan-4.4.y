@@ -1,4 +1,7 @@
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/fs.h>
 #include <linux/net.h>
 #include <linux/string.h>
@@ -1235,6 +1238,9 @@ cifs_parse_mount_options(const char *mountdata, const char *devname,
 			vol->no_linux_ext = 1;
 			break;
 		case Opt_nocase:
+#ifdef MY_ABC_HERE
+			SynoPosixSemanticsEnabled = 0;
+#endif  
 			vol->nocase = 1;
 			break;
 		case Opt_brl:

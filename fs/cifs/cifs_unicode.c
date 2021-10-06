@@ -1,4 +1,7 @@
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/fs.h>
 #include <linux/slab.h>
 #include "cifs_fs_sb.h"
@@ -45,12 +48,22 @@ convert_sfu_char(const __u16 src_char, char *target)
 	case UNI_LESSTHAN:
 		*target = '<';
 		break;
+#ifdef MY_ABC_HERE
+	case UNI_DQUOT:
+		*target = '"';
+		break;
+	case UNI_DIVSLASH:
+		*target = '/';
+		break;
+	case UNI_CRGRET:
+		*target = '\r';
+		break;
+#endif  
 	default:
 		return false;
 	}
 	return true;
 }
-
 
 static bool
 convert_sfm_char(const __u16 src_char, char *target)
@@ -145,70 +158,134 @@ cifs_from_utf16(char *to, const __le16 *from, int tolen, int fromlen,
 		else
 			ftmp[2] = 0;
 
-		
 		if (outlen >= safelen) {
 			charlen = cifs_mapchar(tmp, ftmp, codepage, map_type);
 			if ((outlen + charlen) > (tolen - nullsize))
 				break;
 		}
 
-		
 		charlen = cifs_mapchar(&to[outlen], ftmp, codepage, map_type);
 		outlen += charlen;
 
-		
 		if (charlen == 4)
 			i++;
 		else if (charlen >= 5)
-			
+			 
 			i += 2;
 	}
 
-	
 	for (i = 0; i < nullsize; i++)
 		to[outlen++] = 0;
 
 	return outlen;
 }
 
-
+#ifdef MY_ABC_HERE
 int
-cifs_strtoUTF16(__le16 *to, const char *from, int len,
+cifs_strtoUTF16_NoSpecialChar(__le16 *to, const char *from, int len,
 	      const struct nls_table *codepage)
 {
 	int charlen;
 	int i;
-	wchar_t wchar_to; 
-
-	
-	if (!strcmp(codepage->charset, "utf8")) {
-		
-		i  = utf8s_to_utf16s(from, len, UTF16_LITTLE_ENDIAN,
-				       (wchar_t *) to, len);
-
-		
-		if (i >= 0)
-			goto success;
-		
-	}
+	wchar_t wchar_to;  
 
 	for (i = 0; len && *from; i++, from += charlen, len -= charlen) {
 		charlen = codepage->char2uni(from, len, &wchar_to);
 		if (charlen < 1) {
-			cifs_dbg(VFS, "strtoUTF16: char2uni of 0x%x returned %d\n",
-				 *from, charlen);
-			
+			cifs_dbg(VFS, "strtoUTF16: char2uni of 0x%x returned %d",
+				*from, charlen);
+			 
 			wchar_to = 0x003f;
 			charlen = 1;
 		}
 		put_unaligned_le16(wchar_to, &to[i]);
 	}
 
-success:
 	put_unaligned_le16(0, &to[i]);
 	return i;
 }
+#endif  
+ 
+int
+cifs_strtoUTF16(__le16 *to, const char *from, int len,
+	      const struct nls_table *codepage)
+{
+	int charlen;
+	int i;
+	wchar_t wchar_to;  
 
+#ifdef MY_ABC_HERE
+	 
+#else
+	 
+	if (!strcmp(codepage->charset, "utf8")) {
+		 
+		i  = utf8s_to_utf16s(from, len, UTF16_LITTLE_ENDIAN,
+				       (wchar_t *) to, len);
+
+		if (i >= 0)
+			goto success;
+		 
+	}
+#endif  
+
+	for (i = 0; len && *from; i++, from += charlen, len -= charlen) {
+#ifdef MY_ABC_HERE
+		if (0x0d == *from) {     
+			to[i] = cpu_to_le16(0xf00d);
+			charlen = 1;
+		} else if (0x2a == *from) {      
+			to[i] = cpu_to_le16(0xf02a);
+			charlen = 1;
+		} else if (0x2f == *from) {      
+			to[i] = cpu_to_le16(0xf02f);
+			charlen = 1;
+		} else if (0x3c == *from) {      
+			to[i] = cpu_to_le16(0xf03c);
+			charlen = 1;
+		} else if (0x3e == *from) {      
+			to[i] = cpu_to_le16(0xf03e);
+			charlen = 1;
+		} else if (0x3f == *from) {      
+			to[i] = cpu_to_le16(0xf03f);
+			charlen = 1;
+		} else if (0x7c== *from) {       
+			to[i] = cpu_to_le16(0xf07c);
+			charlen = 1;
+		} else if (0x3a== *from) {       
+			to[i] = cpu_to_le16(0xf022);
+			charlen = 1;
+		} else if (0x22== *from) {       
+			to[i] = cpu_to_le16(0xf020);
+			charlen = 1;
+		} else {
+#endif  
+		charlen = codepage->char2uni(from, len, &wchar_to);
+		if (charlen < 1) {
+#ifdef MY_ABC_HERE
+			 
+#else
+			cifs_dbg(VFS, "strtoUTF16: char2uni of 0x%x returned %d\n",
+				 *from, charlen);
+#endif  
+			 
+			wchar_to = 0x003f;
+			charlen = 1;
+		}
+		put_unaligned_le16(wchar_to, &to[i]);
+#ifdef MY_ABC_HERE
+		}
+#endif  
+	}
+
+#ifdef MY_ABC_HERE
+	 
+#else
+success:
+#endif  
+	put_unaligned_le16(0, &to[i]);
+	return i;
+}
 
 int
 cifs_utf16_bytes(const __le16 *from, int maxbytes,
@@ -290,6 +367,17 @@ static __le16 convert_to_sfu_char(char src_char)
 	case '|':
 		dest_char = cpu_to_le16(UNI_PIPE);
 		break;
+#ifdef MY_ABC_HERE
+	case '"':
+		dest_char = cpu_to_le16(UNI_DQUOT);
+		break;
+	case '/':
+		dest_char = cpu_to_le16(UNI_DIVSLASH);
+		break;
+	case '\r':
+		dest_char = cpu_to_le16(UNI_CRGRET);
+		break;
+#endif  
 	default:
 		dest_char = 0;
 	}

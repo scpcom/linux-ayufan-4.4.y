@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
 #include <linux/module.h>
@@ -366,6 +368,10 @@ static struct temp_data *init_temp_data(unsigned int cpu, int pkg_flag)
 	tdata->is_pkg_data = pkg_flag;
 	tdata->cpu = cpu;
 	tdata->cpu_core_id = TO_CORE_ID(cpu);
+#ifdef MY_ABC_HERE
+	 
+	tdata->temp = 20 * 1000;
+#endif  
 	tdata->attr_size = MAX_CORE_ATTRS;
 	mutex_init(&tdata->update_lock);
 	return tdata;
@@ -689,6 +695,73 @@ static void __exit coretemp_exit(void)
 	cpu_notifier_register_done();
 	platform_driver_unregister(&coretemp_driver);
 }
+
+#ifdef MY_ABC_HERE
+#include <linux/synobios.h>
+ 
+static void syno_update_temp(struct temp_data *tdata)
+{
+	u32 eax, edx;
+
+	mutex_lock(&tdata->update_lock);
+	 
+	if (!tdata->valid || time_after(jiffies, tdata->last_updated + HZ)) {
+		rdmsr_on_cpu(tdata->cpu, tdata->status_reg, &eax, &edx);
+		tdata->valid = 0;
+		 
+		if (eax & 0x80000000) {
+			tdata->temp = tdata->tjmax -
+					((eax >> 16) & 0x7f) * 1000;
+			tdata->valid = 1;
+		}
+		tdata->last_updated = jiffies;
+	}
+	mutex_unlock(&tdata->update_lock);
+}
+
+int syno_cpu_temperature(struct _SynoCpuTemp *pCpuTemp)
+{
+	struct platform_data *pdata = NULL;
+	struct pdev_entry *p = NULL;
+	struct pdev_entry *n = NULL;
+	struct temp_data *tdata = NULL;
+	int    iCpuCount = 0;
+	int    iIndex = 0;
+
+	if (NULL == pCpuTemp) {
+		printk("coretemp: parameter error.\n");
+		return -1;
+	}
+
+	mutex_lock(&pdev_list_mutex);
+	list_for_each_entry_safe(p, n, &pdev_list, list) {
+		pdata = dev_get_drvdata(&(p->pdev->dev));
+		if (!pdata) {
+			printk("Can't get Core %d data\n", p->phys_proc_id);
+			continue;
+		}
+		iIndex = TO_ATTR_NO(p->phys_proc_id);
+		tdata = pdata->core_data[iIndex];
+		if (!tdata) {
+			printk("Can't get Core %d temperature data\n", p->phys_proc_id);
+			continue;
+		}
+		if (MAX_CPU <= iCpuCount) {
+			printk("CPU count larger than MAX_CPU %d: %d\n", MAX_CPU, iCpuCount);
+		} else {
+			 
+			syno_update_temp(tdata);
+			pCpuTemp->cpu_temp[iCpuCount] = tdata->temp / 1000;
+			++iCpuCount;
+		}
+	}
+	mutex_unlock(&pdev_list_mutex);
+	pCpuTemp->cpu_num = iCpuCount;
+
+	return 0;
+}
+EXPORT_SYMBOL(syno_cpu_temperature);
+#endif  
 
 MODULE_AUTHOR("Rudolf Marek <r.marek@assembler.cz>");
 MODULE_DESCRIPTION("Intel Core temperature monitor");

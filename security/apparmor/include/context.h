@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * AppArmor security module
  *
@@ -100,6 +103,19 @@ static inline struct aa_profile *aa_cred_profile(const struct cred *cred)
 	return cxt->profile;
 }
 
+#ifdef MY_ABC_HERE
+/**
+ * aa_get_newest_cred_profile - obtain the newest version of the profile on a cred
+ * @cred: cred to obtain profile from (NOT NULL)
+ *
+ * Returns: newest version of confining profile
+ */
+static inline struct aa_profile *aa_get_newest_cred_profile(const struct cred *cred)
+{
+	return aa_get_newest_profile(aa_cred_profile(cred));
+}
+#endif
+
 /**
  * __aa_task_profile - retrieve another task's profile
  * @task: task to query  (NOT NULL)
@@ -136,6 +152,39 @@ static inline struct aa_profile *__aa_current_profile(void)
 {
 	return aa_cred_profile(current_cred());
 }
+
+#ifdef MY_ABC_HERE
+/**
+ * __aa_get_current_profile - find newest version of the current tasks profile
+ *
+ * Returns: newest version of confining profile (NOT NULL)
+ *
+ * This fn will not update the tasks cred, so it is safe inside of locks
+ *
+ * The returned reference must be put with __aa_put_current_profile()
+ */
+static inline struct aa_profile *__aa_get_current_profile(void)
+{
+	struct aa_profile *p = __aa_current_profile();
+
+	if (PROFILE_INVALID(p))
+		p = aa_get_newest_profile(p);
+	return p;
+}
+
+/**
+ * __aa_put_current_profile - put a reference found with aa_get_current_profile
+ * @profile: profile reference to put
+ *
+ * Should only be used with a reference obtained with __aa_get_current_profile
+ * and never used in situations where the task cred may be updated
+ */
+static inline void __aa_put_current_profile(struct aa_profile *profile)
+{
+	if (profile != __aa_current_profile())
+		aa_put_profile(profile);
+}
+#endif /* MY_ABC_HERE */
 
 /**
  * aa_current_profile - find the current tasks confining profile and do updates

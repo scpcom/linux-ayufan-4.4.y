@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/init.h>
 #include <linux/slab.h>
 #include <linux/usb.h>
@@ -541,12 +543,31 @@ static struct snd_kcontrol_new snd_xonar_u1_output_switch = {
 
 static int snd_xonar_u1_controls_create(struct usb_mixer_interface *mixer)
 {
+#if defined(MY_ABC_HERE)
+	int ret = add_single_ctl_with_resume(mixer, 0,
+					  snd_xonar_u1_switch_resume,
+					  &snd_xonar_u1_output_switch, NULL);
+	if (0 <= ret) {
+		u8 status = 0;
+		struct usb_mixer_elem_list *list =
+				container_of(&mixer, struct usb_mixer_elem_list, mixer);
+
+		status = list->kctl->private_value | 0x02;
+
+		if (!snd_usb_ctl_msg(mixer->chip->dev,
+					usb_sndctrlpipe(mixer->chip->dev, 0), 0x08,
+					USB_DIR_OUT | USB_TYPE_VENDOR | USB_RECIP_OTHER,
+					50, 0, &status, 1)) {
+			list->kctl->private_value = status;
+		}
+	}
+	return ret;
+#else  
 	return add_single_ctl_with_resume(mixer, 0,
 					  snd_xonar_u1_switch_resume,
 					  &snd_xonar_u1_output_switch, NULL);
+#endif  
 }
-
-
 
 static int snd_mbox1_switch_get(struct snd_kcontrol *kctl,
 				struct snd_ctl_elem_value *ucontrol)

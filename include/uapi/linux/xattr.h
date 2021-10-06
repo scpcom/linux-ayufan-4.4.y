@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/libc-compat.h>
 
 #ifndef _UAPI_LINUX_XATTR_H
@@ -8,15 +10,18 @@
 #if __UAPI_DEF_XATTR
 #define __USE_KERNEL_XATTR_DEFS
 
-#define XATTR_CREATE	0x1	
-#define XATTR_REPLACE	0x2	
+#define XATTR_CREATE	0x1	 
+#define XATTR_REPLACE	0x2	 
 #endif
-
 
 #define XATTR_OS2_PREFIX "os2."
 #define XATTR_OS2_PREFIX_LEN (sizeof(XATTR_OS2_PREFIX) - 1)
 
+#ifdef MY_ABC_HERE
+#define XATTR_MAC_OSX_PREFIX ""
+#else
 #define XATTR_MAC_OSX_PREFIX "osx."
+#endif  
 #define XATTR_MAC_OSX_PREFIX_LEN (sizeof(XATTR_MAC_OSX_PREFIX) - 1)
 
 #define XATTR_BTRFS_PREFIX "btrfs."
@@ -34,6 +39,21 @@
 #define XATTR_USER_PREFIX "user."
 #define XATTR_USER_PREFIX_LEN (sizeof(XATTR_USER_PREFIX) - 1)
 
+#ifdef MY_ABC_HERE
+#define XATTR_SYNO_PREFIX "syno."
+#define XATTR_SYNO_PREFIX_LEN (sizeof (XATTR_SYNO_PREFIX) - 1)
+#endif  
+
+#ifdef MY_ABC_HERE
+#define XATTR_SYNO_ARCHIVE_BIT "archive_bit"
+#endif  
+#ifdef MY_ABC_HERE
+#define XATTR_SYNO_ARCHIVE_VERSION "archive_version"
+#define XATTR_SYNO_ARCHIVE_VERSION_VOLUME "archive_version_volume"
+#endif  
+#ifdef MY_ABC_HERE
+#define XATTR_SYNO_CREATE_TIME "create_time"
+#endif  
 
 #define XATTR_EVM_SUFFIX "evm"
 #define XATTR_NAME_EVM XATTR_SECURITY_PREFIX XATTR_EVM_SUFFIX

@@ -1,6 +1,7 @@
-
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/export.h>
 #include <linux/compiler.h>
 #include <linux/fs.h>
@@ -31,14 +32,14 @@
 #define CREATE_TRACE_POINTS
 #include <trace/events/filemap.h>
 
-
-#include <linux/buffer_head.h> 
+#include <linux/buffer_head.h>  
 
 #include <asm/mman.h>
 
-
-
-
+#ifdef MY_ABC_HERE
+#include <linux/tcp.h>
+#include <net/tcp.h>
+#endif  
 
 static void page_cache_tree_delete(struct address_space *mapping,
 				   struct page *page, void *shadow)
@@ -1468,14 +1469,18 @@ int filemap_page_mkwrite(struct vm_area_struct *vma, struct vm_fault *vmf)
 	int ret = VM_FAULT_LOCKED;
 
 	sb_start_pagefault(inode->i_sb);
+#ifdef CONFIG_AUFS_FHSM
+	vma_file_update_time(vma);
+#else
 	file_update_time(vma->vm_file);
+#endif  
 	lock_page(page);
 	if (page->mapping != inode->i_mapping) {
 		unlock_page(page);
 		ret = VM_FAULT_NOPAGE;
 		goto out;
 	}
-	
+	 
 	set_page_dirty(page);
 	wait_for_stable_page(page);
 out:
@@ -1685,6 +1690,322 @@ int pagecache_write_end(struct file *file, struct address_space *mapping,
 }
 EXPORT_SYMBOL(pagecache_write_end);
 
+#ifdef MY_ABC_HERE
+static int sock2iov(struct socket *sock, struct kvec *iov,
+			int page_count, int start_page, size_t bytes_to_received, size_t *bytes_received)
+{
+	int             kmsg_ret = 0;
+	long            rcvtimeo = 0;
+	struct msghdr   msg = {0};
+
+	msg.msg_flags = MSG_KERNSPACE;
+	rcvtimeo = sock->sk->sk_rcvtimeo;
+	sock->sk->sk_rcvtimeo = 64 * HZ;
+
+	kmsg_ret = kernel_recvmsg(
+			sock, &msg, &iov[start_page], page_count, bytes_to_received,
+			MSG_WAITALL | MSG_NOCATCHSIGNAL);
+
+	sock->sk->sk_rcvtimeo = rcvtimeo;
+	if (kmsg_ret >= 0) {
+		*bytes_received = (size_t) kmsg_ret;
+		if (kmsg_ret == bytes_to_received) {
+			 
+			kmsg_ret = 0;
+		} else {
+			kmsg_ret = -EPIPE;
+		}
+	}
+
+	return kmsg_ret;
+}
+
+int do_recvfile(struct file *file, struct socket *sock, loff_t pos,
+			size_t count, size_t * rbytes, size_t * wbytes)
+{
+	int                    err = 0;
+	int                    pages_allocated = 0;
+	int                    page_index = 0;
+	int                    flags = AOP_FLAG_UNINTERRUPTIBLE | AOP_FLAG_RECVFILE | AOP_FLAG_NOFS;
+	int                    write_end_ret = 0, failed_write_flag = 0;
+	loff_t                 firstPagePos = 0, lastPagePos = 0;
+	unsigned               firstPageBytes = 0, lastPageBytes = 0;
+	unsigned               bytes = 0;
+	pgoff_t                offset = (pos & (PAGE_CACHE_SIZE - 1));
+	void                  *fsdata = NULL;  
+	size_t                 bytes_received = 0, bytes_wrote = 0;
+	ssize_t                bytes_to_received = 0;
+	struct kvec            iov[MAX_PAGES_PER_RECVFILE + 1];
+	struct page           *page = NULL;
+	struct page           *rgPageList[MAX_PAGES_PER_RECVFILE + 1];
+	struct address_space  *mapping = file->f_mapping;
+
+	if ((!mapping->a_ops->write_begin || !mapping->a_ops->write_end)) {
+		printk("write_begin() or write_end() or syno_recvfile() are not implemented\n");
+		goto done;
+	}
+	if (mapping->a_ops->recvfile_da_check && mapping->a_ops->recvfile_da_check(mapping->host->i_sb)) {
+		flags |= AOP_FLAG_RECVFILE_NONDA;
+	}
+
+	do {
+		bytes = min_t(unsigned int, PAGE_CACHE_SIZE - offset, count);
+
+		err = mapping->a_ops->write_begin(
+					file, mapping, pos, bytes, flags,
+					&page, &fsdata);
+		if (err) {
+			goto release_pages;
+		}
+
+		rgPageList[pages_allocated] = page;
+		if (!pages_allocated) {
+			firstPageBytes = bytes;
+			firstPagePos = pos;
+		}
+		if (bytes == count) {
+			lastPageBytes = bytes;
+			lastPagePos = pos;
+		}
+		iov[pages_allocated].iov_base = kmap(page) + offset;
+		iov[pages_allocated].iov_len = bytes;
+		pages_allocated++;
+
+		BUG_ON(pages_allocated > MAX_PAGES_PER_RECVFILE + 1);
+
+		count -= bytes;
+		pos += bytes;
+		bytes_to_received += bytes;
+		offset = 0;
+	} while (count);
+
+	err = sock2iov(sock, iov, pages_allocated, 0, bytes_to_received, &bytes_received);
+
+release_pages:
+	*rbytes = bytes_received;
+	bytes_wrote = bytes_received;
+	if (unlikely(mapping->a_ops->aggregate_write_end)) {
+		for (page_index = 0; page_index < pages_allocated; page_index++) {
+			kunmap(rgPageList[page_index]);
+		}
+		write_end_ret = mapping->a_ops->aggregate_write_end(
+				file, mapping, firstPagePos,
+				bytes_to_received, bytes_to_received,
+				rgPageList, NULL, pages_allocated);
+		 
+		if (0 > write_end_ret) {
+			bytes_wrote = 0;
+			if (!err) {
+				err = write_end_ret;
+			}
+		}
+	} else {
+		 
+		if (flags & AOP_FLAG_RECVFILE_NONDA)
+			fsdata = (void *)1;  
+		for (page_index = 0; page_index < pages_allocated; page_index++) {
+			page = rgPageList[page_index];
+			kunmap(page);
+			if (!page_index) {
+				bytes = firstPageBytes;
+				pos = firstPagePos;
+			} else if (page_index == pages_allocated - 1) {
+				bytes = lastPageBytes;
+				pos = lastPagePos;
+			} else {
+				pos += bytes;
+				bytes = PAGE_CACHE_SIZE;
+			}
+			write_end_ret = mapping->a_ops->write_end(file, mapping, pos,
+								bytes, bytes, page, fsdata);
+			 
+			if (0 > write_end_ret) {
+				if (!failed_write_flag) {
+					failed_write_flag = 1;
+					if (page_index) {
+						bytes_wrote = firstPageBytes + ((page_index-1) * PAGE_CACHE_SIZE);
+						if (bytes_wrote > bytes_received)
+							bytes_wrote = bytes_received;
+					} else {
+						bytes_wrote = 0;
+					}
+				}
+				if (!err) {
+					err = write_end_ret;
+				}
+			}
+		}
+	}
+	*wbytes = bytes_wrote;
+	balance_dirty_pages_ratelimited(mapping);
+
+done:
+	return err?err:bytes_received;
+}
+extern int aggregate_fd;
+extern spinlock_t aggregate_lock;
+extern atomic_t syno_aggregate_recvfile_count;
+
+int do_aggregate_recvfile(struct file *file, struct socket *sock, loff_t pos,
+			size_t count, size_t * rbytes, size_t * wbytes, unsigned flush_only)
+{
+	int                    err = 0;
+	int                    page_index = 0;
+	int                    write_end_ret = 0;
+	int                    page_alloc_last_time;
+	int                    isPageAlign = 1;
+	unsigned               bytes = 0;
+	pgoff_t                offset = (pos & (PAGE_CACHE_SIZE - 1));
+	void                  *fsdata = NULL;  
+	size_t                 bytes_received = 0, bytes_wrote = 0;
+	ssize_t                bytes_to_received = 0;
+	struct page           *page = NULL;
+	struct address_space  *mapping = file->f_mapping;
+	struct inode          *inode = mapping->host;
+	static int             pages_allocated = 0;
+	static loff_t          rgPos[MAX_PAGES_PER_AGGREGATE_RECVFILE + 1];
+	static unsigned        rgBytes[MAX_PAGES_PER_AGGREGATE_RECVFILE + 1];
+	static struct kvec     iov[MAX_PAGES_PER_AGGREGATE_RECVFILE + 1];
+	static struct page    *rgPageList[MAX_PAGES_PER_AGGREGATE_RECVFILE + 1];
+
+	if (!mapping->a_ops->write_begin || !mapping->a_ops->aggregate_write_end) {
+		printk("write_begin() or aggregate_write_end() is not implemented\n");
+		dump_stack();
+		goto done;
+	}
+	if (flush_only) {
+		if (!pages_allocated) {
+			goto done;
+		}
+		goto release_pages;
+	}
+	if (count == 0) {
+		goto done;
+	}
+	if (offset || (count & (PAGE_CACHE_SIZE - 1))) {
+		isPageAlign = 0;
+	}
+
+	page_alloc_last_time = pages_allocated;
+	do {
+		bytes = min_t(unsigned int, PAGE_CACHE_SIZE - offset, count);
+
+		err = mapping->a_ops->write_begin(
+					file, mapping, pos, bytes, AOP_FLAG_UNINTERRUPTIBLE | AOP_FLAG_RECVFILE | AOP_FLAG_NOFS,
+					&page, &fsdata);
+		if (err) {
+			goto release_pages;
+		}
+
+		rgPageList[pages_allocated] = page;
+		rgPos[pages_allocated] = pos;
+		rgBytes[pages_allocated] = bytes;
+		iov[pages_allocated].iov_base = kmap(page) + offset;
+		iov[pages_allocated].iov_len = bytes;
+		pages_allocated++;
+
+		BUG_ON(pages_allocated > MAX_PAGES_PER_AGGREGATE_RECVFILE + 1);
+
+		count -= bytes;
+		pos += bytes;
+		bytes_to_received += bytes;
+		offset = 0;
+	} while (count);
+
+	err = sock2iov(sock, iov, pages_allocated-page_alloc_last_time,
+			page_alloc_last_time, bytes_to_received, &bytes_received);
+
+	if (!err && isPageAlign && (pages_allocated <= MAX_PAGES_PER_AGGREGATE_RECVFILE - MAX_PAGES_PER_RECVFILE)) {
+		*rbytes = bytes_received;
+		*wbytes = bytes_received;
+
+		return bytes_received;
+	}
+release_pages:
+
+	*rbytes = bytes_received;
+	*wbytes = bytes_received;
+	for (page_index = 0; page_index < pages_allocated; page_index++) {
+		bytes_wrote += rgBytes[page_index];
+		kunmap(rgPageList[page_index]);
+	}
+	write_end_ret = mapping->a_ops->aggregate_write_end(
+			file, mapping, rgPos[0],
+			bytes_wrote, bytes_wrote,
+			rgPageList, NULL, pages_allocated);
+	 
+	if (0 > write_end_ret) {
+		*wbytes = 0;
+		if (!err) {
+			err = write_end_ret;
+		}
+	}
+
+	pages_allocated = 0;
+	aggregate_fd = -1;
+	inode->aggregate_flag &= ~AGGREGATE_RECVFILE_DOING;
+
+	balance_dirty_pages_ratelimited(mapping);
+
+done:
+	return err?err:bytes_received;
+}
+
+void aggregate_recvfile_flush_only(struct file *file)
+{
+	struct socket *sock = NULL;
+	size_t bytes_received;
+	size_t bytes_written;
+
+	do_aggregate_recvfile(file, sock, 0, 0, &bytes_received, &bytes_written, 1);
+}
+EXPORT_SYMBOL(aggregate_recvfile_flush_only);
+
+int flush_aggregate_recvfile(int fd)
+{
+	int ret = 0;
+	struct inode *inode = NULL;
+	struct file *file = NULL;                 
+
+	if (-1 != fd) {
+		file = fget(fd);
+	} else {
+		file = fget(aggregate_fd);
+	}
+	if (!file || !file->f_mapping->a_ops->aggregate_write_end) {
+		goto out;
+	}
+	if (!(file->f_mode & FMODE_WRITE)) {
+		ret = -EBADF;
+		goto out;
+	}
+	inode = file->f_path.dentry->d_inode->i_mapping->host;
+	spin_lock(&aggregate_lock);
+	inode->aggregate_flag |= AGGREGATE_RECVFILE_FLUSH;
+	if (AGGREGATE_RECVFILE_DOING & inode->aggregate_flag) {
+		while (atomic_read(&syno_aggregate_recvfile_count)) {
+			spin_unlock(&aggregate_lock);
+			schedule_timeout_uninterruptible(HZ/2);
+			spin_lock(&aggregate_lock);
+		}
+		atomic_inc(&syno_aggregate_recvfile_count);
+		spin_unlock(&aggregate_lock);
+		aggregate_recvfile_flush_only(file);
+		atomic_dec(&syno_aggregate_recvfile_count);
+	} else {
+		spin_unlock(&aggregate_lock);
+	}
+	inode->aggregate_flag &= ~AGGREGATE_RECVFILE_FLUSH;
+
+out:
+	if (file)
+		fput(file);
+
+	return ret;
+}
+EXPORT_SYMBOL(flush_aggregate_recvfile);
+#endif  
+
 ssize_t
 generic_file_direct_write(struct kiocb *iocb, struct iov_iter *from, loff_t pos)
 {
@@ -1880,18 +2201,17 @@ out:
 }
 EXPORT_SYMBOL(__generic_file_write_iter);
 
-
 ssize_t generic_file_write_iter(struct kiocb *iocb, struct iov_iter *from)
 {
 	struct file *file = iocb->ki_filp;
 	struct inode *inode = file->f_mapping->host;
 	ssize_t ret;
 
-	mutex_lock(&inode->i_mutex);
+	inode_lock(inode);
 	ret = generic_write_checks(iocb, from);
 	if (ret > 0)
 		ret = __generic_file_write_iter(iocb, from);
-	mutex_unlock(&inode->i_mutex);
+	inode_unlock(inode);
 
 	if (ret > 0) {
 		ssize_t err;

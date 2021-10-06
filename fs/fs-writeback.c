@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/kernel.h>
 #include <linux/export.h>
 #include <linux/spinlock.h>
@@ -17,13 +19,15 @@
 #include <linux/memcontrol.h>
 #include "internal.h"
 
-
 #define MIN_WRITEBACK_PAGES	(4096UL >> (PAGE_CACHE_SHIFT - 10))
+
+#ifdef MY_ABC_HERE
+#include <linux/synolib.h>
+#endif  
 
 struct wb_completion {
 	atomic_t		cnt;
 };
-
 
 struct wb_writeback_work {
 	long nr_pages;
@@ -1418,6 +1422,12 @@ void __mark_inode_dirty(struct inode *inode, int flags)
 
 	if (unlikely(block_dump))
 		block_dump___mark_inode_dirty(inode);
+
+#ifdef MY_ABC_HERE
+	if (0 < gSynoHibernationLogLevel) {
+		syno_do_hibernation_inode_log(inode);
+	}
+#endif  
 
 	spin_lock(&inode->i_lock);
 	if (dirtytime && (inode->i_state & I_DIRTY_INODE))

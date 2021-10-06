@@ -109,6 +109,9 @@ void fsnotify_put_mark(struct fsnotify_mark *mark)
 		mark->free_mark(mark);
 	}
 }
+#ifdef CONFIG_AUFS_FHSM
+EXPORT_SYMBOL_GPL(fsnotify_put_mark);
+#endif /* CONFIG_AUFS_FHSM */
 
 /* Calculate mask of events for a list of marks */
 u32 fsnotify_recalc_mask(struct hlist_head *head)
@@ -208,6 +211,9 @@ void fsnotify_destroy_mark(struct fsnotify_mark *mark,
 	mutex_unlock(&group->mark_mutex);
 	fsnotify_free_mark(mark);
 }
+#ifdef CONFIG_AUFS_FHSM
+EXPORT_SYMBOL_GPL(fsnotify_destroy_mark);
+#endif /* CONFIG_AUFS_FHSM */
 
 void fsnotify_destroy_marks(struct hlist_head *head, spinlock_t *lock)
 {
@@ -392,6 +398,9 @@ err:
 
 	return ret;
 }
+#ifdef CONFIG_AUFS_FHSM
+EXPORT_SYMBOL_GPL(fsnotify_add_mark);
+#endif /* CONFIG_AUFS_FHSM */
 
 int fsnotify_add_mark(struct fsnotify_mark *mark, struct fsnotify_group *group,
 		      struct inode *inode, struct vfsmount *mnt, int allow_dups)
@@ -492,6 +501,9 @@ void fsnotify_init_mark(struct fsnotify_mark *mark,
 	atomic_set(&mark->refcnt, 1);
 	mark->free_mark = free_mark;
 }
+#ifdef CONFIG_AUFS_FHSM
+EXPORT_SYMBOL_GPL(fsnotify_init_mark);
+#endif /* CONFIG_AUFS_FHSM */
 
 static int fsnotify_mark_destroy(void *ignored)
 {

@@ -1,24 +1,23 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/export.h>
 #include <linux/fs.h>
 #include <linux/fs_stack.h>
-
 
 void fsstack_copy_inode_size(struct inode *dst, struct inode *src)
 {
 	loff_t i_size;
 	blkcnt_t i_blocks;
 
-	
 	i_size = i_size_read(src);
 
-	
 	if (sizeof(i_blocks) > sizeof(long))
 		spin_lock(&src->i_lock);
 	i_blocks = src->i_blocks;
 	if (sizeof(i_blocks) > sizeof(long))
 		spin_unlock(&src->i_lock);
 
-	
 	if (sizeof(i_size) > sizeof(long) || sizeof(i_blocks) > sizeof(long))
 		spin_lock(&dst->i_lock);
 	i_size_write(dst, i_size);
@@ -39,6 +38,13 @@ void fsstack_copy_attr_all(struct inode *dest, const struct inode *src)
 	dest->i_ctime = src->i_ctime;
 	dest->i_blkbits = src->i_blkbits;
 	dest->i_flags = src->i_flags;
+#ifdef MY_ABC_HERE
+	 
+	dest->i_archive_bit = src->i_archive_bit;
+#endif  
+#ifdef MY_ABC_HERE
+	dest->i_create_time = src->i_create_time;
+#endif  
 	set_nlink(dest, src->i_nlink);
 }
 EXPORT_SYMBOL_GPL(fsstack_copy_attr_all);

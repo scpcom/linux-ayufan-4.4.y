@@ -1,11 +1,14 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/hashtable.h>
 #include "props.h"
 #include "btrfs_inode.h"
 #include "hash.h"
 #include "transaction.h"
 #include "xattr.h"
+#include "compression.h"
 
 #define BTRFS_PROP_HANDLERS_HT_BITS 8
 static DEFINE_HASHTABLE(prop_handlers_ht, BTRFS_PROP_HANDLERS_HT_BITS);
@@ -283,7 +286,10 @@ static int inherit_props(struct btrfs_trans_handle *trans,
 			 struct inode *inode,
 			 struct inode *parent)
 {
+#ifdef MY_ABC_HERE
+#else
 	struct btrfs_root *root = BTRFS_I(inode)->root;
+#endif  
 	int ret;
 	int i;
 
@@ -294,7 +300,10 @@ static int inherit_props(struct btrfs_trans_handle *trans,
 	for (i = 0; i < ARRAY_SIZE(prop_handlers); i++) {
 		const struct prop_handler *h = &prop_handlers[i];
 		const char *value;
+#ifdef MY_ABC_HERE
+#else
 		u64 num_bytes;
+#endif  
 
 		if (!h->inheritable)
 			continue;
@@ -303,14 +312,20 @@ static int inherit_props(struct btrfs_trans_handle *trans,
 		if (!value)
 			continue;
 
+#ifdef MY_ABC_HERE
+#else
 		num_bytes = btrfs_calc_trans_metadata_size(root, 1);
 		ret = btrfs_block_rsv_add(root, trans->block_rsv,
 					  num_bytes, BTRFS_RESERVE_NO_FLUSH);
 		if (ret)
 			goto out;
+#endif  
 		ret = __btrfs_set_prop(trans, inode, h->xattr_name,
 				       value, strlen(value), 0);
+#ifdef MY_ABC_HERE
+#else
 		btrfs_block_rsv_release(root, trans->block_rsv, num_bytes);
+#endif  
 		if (ret)
 			goto out;
 	}

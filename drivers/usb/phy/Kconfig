@@ -213,4 +213,25 @@ config USB_ULPI_VIEWPORT
 	  Provides read/write operations to the ULPI phy register set for
 	  controllers with a viewport register (e.g. Chipidea/ARC controllers).
 
+config RTK_USB_RLE0599_PHY
+	tristate "Realtek USB RLE0599 PHY Controller Driver"
+	depends on (USB_EHCI_RTK || USB_OHCI_RTK) && (ARCH_RTK119X || ARCH_RTD129X)
+	select USB_PHY
+	help
+	  Enable this to support Realtek RLE0599 phy controller SoC.
+
+config RTK_USB2PHY
+	tristate "Realtek USB2 PHY Controller Driver"
+	depends on ARCH_RTK119X || ARCH_RTD129X
+	select RTK_USB_RLE0599_PHY
+	help
+	  Enable this to support Realtek USB2 phy controller SoC.
+
+config RTK_USB3PHY
+	tristate "Realtek USB3 PHY Controller Driver"
+	depends on ARCH_RTK119X || ARCH_RTD129X
+	select RTK_USB_RLE0599_PHY
+	help
+	  Enable this to support Realtek USB3 phy controller SoC.
+
 endmenu

@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/fs.h>
 #include <linux/buffer_head.h>
 #include <linux/slab.h>
@@ -8,10 +10,14 @@
 
 static int ext4_dx_readdir(struct file *, struct dir_context *);
 
-
 static int is_dx_dir(struct inode *inode)
 {
 	struct super_block *sb = inode->i_sb;
+
+#ifdef MY_ABC_HERE
+	 
+	return 0;
+#endif  
 
 	if (ext4_has_feature_dir_index(inode->i_sb) &&
 	    ((ext4_test_inode_flag(inode, EXT4_INODE_INDEX)) ||
@@ -46,6 +52,17 @@ int __ext4_check_dir_entry(const char *function, unsigned int line,
 	else
 		return 0;
 
+#ifdef MY_ABC_HERE
+	if (filp) {
+		if (printk_ratelimit())
+			ext4_error_file(filp, function, line, bh->b_blocknr,
+				"bad entry in directory: %s - offset=%u(%u), "
+				"inode=%u, rec_len=%d, name_len=%d",
+				error_msg, (unsigned) (offset % size),
+				offset, le32_to_cpu(de->inode),
+				rlen, de->name_len);
+	}
+#else  
 	if (filp)
 		ext4_error_file(filp, function, line, bh->b_blocknr,
 				"bad entry in directory: %s - offset=%u(%u), "
@@ -53,7 +70,11 @@ int __ext4_check_dir_entry(const char *function, unsigned int line,
 				error_msg, (unsigned) (offset % size),
 				offset, le32_to_cpu(de->inode),
 				rlen, de->name_len);
+#endif  
 	else
+#ifdef MY_ABC_HERE
+		if (printk_ratelimit())
+#endif  
 		ext4_error_inode(dir, function, line, bh->b_blocknr,
 				"bad entry in directory: %s - offset=%u(%u), "
 				"inode=%u, rec_len=%d, name_len=%d",

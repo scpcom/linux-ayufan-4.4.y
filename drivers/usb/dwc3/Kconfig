@@ -11,12 +11,14 @@ config USB_DWC3
 
 if USB_DWC3
 
+if !SYNO_RTD1296
 config USB_DWC3_ULPI
 	bool "Register ULPI PHY Interface"
 	depends on USB_ULPI_BUS=y || USB_ULPI_BUS=USB_DWC3
 	help
 	  Select this if you have ULPI type PHY attached to your DWC3
 	  controller.
+endif # !SYNO_RTD1296
 
 choice
 	bool "DWC3 Mode Selection"
@@ -48,6 +50,20 @@ config USB_DWC3_DUAL_ROLE
 endchoice
 
 comment "Platform Glue Driver Support"
+
+config USB_DWC3_RTK
+	tristate "Realtek DWC3 Platform Driver"
+	default USB_DWC3
+	depends on SYNO_RTD1296
+	help
+	  RTK SoCs with DesignWare Core USB3 IP inside,
+	  say 'Y' or 'M' if you have such device.
+
+config USB_RTK_DWC3_DRD_MODE
+	bool "RTK DWC3 DRD (dynamical host/device mode switch)"
+	depends on USB_DWC3_DUAL_ROLE
+	help
+		Support Realtek dwc3 drd type c dynamical host/device mode switch
 
 config USB_DWC3_OMAP
 	tristate "Texas Instruments OMAP5 and similar Platforms"
@@ -103,5 +119,12 @@ config USB_DWC3_QCOM
 	help
 	  Recent Qualcomm SoCs ship with one DesignWare Core USB3 IP inside,
 	  say 'Y' or 'M' if you have one such device.
+
+comment "Debugging features"
+
+config USB_DWC3_DEBUG
+	bool "Enable Debugging Messages"
+	help
+	  Say Y here to enable debugging messages on DWC3 Driver.
 
 endif

@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/syscalls.h>
 #include <linux/mm.h>
 #include <linux/capability.h>
@@ -11,12 +13,13 @@
 #include <linux/writeback.h>
 #include <linux/buffer_head.h>
 #include <linux/falloc.h>
+#ifdef MY_ABC_HERE
+#include <linux/mount.h>
+#endif  
 
 #include <asm/ioctls.h>
 
-
 #define FIEMAP_MAX_EXTENTS	(UINT_MAX / sizeof(struct fiemap_extent))
-
 
 static long vfs_ioctl(struct file *filp, unsigned int cmd,
 		      unsigned long arg)
@@ -277,22 +280,19 @@ int __generic_block_fiemap(struct inode *inode,
 }
 EXPORT_SYMBOL(__generic_block_fiemap);
 
-
-
 int generic_block_fiemap(struct inode *inode,
 			 struct fiemap_extent_info *fieinfo, u64 start,
 			 u64 len, get_block_t *get_block)
 {
 	int ret;
-	mutex_lock(&inode->i_mutex);
+	inode_lock(inode);
 	ret = __generic_block_fiemap(inode, fieinfo, start, len, get_block);
-	mutex_unlock(&inode->i_mutex);
+	inode_unlock(inode);
 	return ret;
 }
 EXPORT_SYMBOL(generic_block_fiemap);
 
-#endif  
-
+#endif   
 
 int ioctl_preallocate(struct file *filp, void __user *argp)
 {
@@ -360,6 +360,195 @@ static int ioctl_fionbio(struct file *filp, int __user *argp)
 	return error;
 }
 
+#ifdef MY_ABC_HERE
+static int archive_check_capable(struct inode *inode)
+{
+	if((!S_ISDIR(inode->i_mode)) && (!S_ISREG(inode->i_mode)))
+		return -EPERM;
+
+	if (!capable(CAP_SYS_ADMIN))
+		return -EPERM;
+
+	if (!inode->i_sb->s_op->syno_set_sb_archive_ver)
+		return -EINVAL;
+
+	if (!inode->i_sb->s_op->syno_get_sb_archive_ver)
+		return -EINVAL;
+
+	return 0;
+}
+
+static int ioctl_get_version(struct inode *inode, unsigned int *version)
+{
+	int error;
+	struct super_block *sb = inode->i_sb;
+
+	error = archive_check_capable(inode);
+	if (error)
+		return error;
+
+	error = sb->s_op->syno_get_sb_archive_ver(sb, version);
+	return error;
+}
+
+static int ioctl_set_version(struct file *filp, unsigned int version)
+{
+	int error;
+	struct inode *inode = filp->f_path.dentry->d_inode;
+	struct super_block *sb = inode->i_sb;
+
+	error = archive_check_capable(inode);
+	if (error)
+		return error;
+
+	if ((UINT_MAX - 1) <= version) {
+		return -EPERM;
+	}
+
+	error = mnt_want_write_file(filp);
+	if (error)
+		return error;
+
+	mutex_lock(&sb->s_archive_mutex);
+	error = sb->s_op->syno_set_sb_archive_ver(sb, version);
+	mutex_unlock(&sb->s_archive_mutex);
+	mnt_drop_write_file(filp);
+	return error;
+}
+
+static int ioctl_inc_version(struct file *filp)
+{
+	unsigned int ver;
+	int error;
+	struct inode *inode = filp->f_path.dentry->d_inode;
+	struct super_block *sb = inode->i_sb;
+
+	error = archive_check_capable(inode);
+	if (error)
+		return error;
+	error = mnt_want_write_file(filp);
+	if (error)
+		return error;
+
+	mutex_lock(&sb->s_archive_mutex);
+	error = sb->s_op->syno_get_sb_archive_ver(sb, &ver);
+	if (error)
+		goto unlock;
+
+	if ((UINT_MAX - 1) <= (ver + 1)) {
+		error = -EPERM;
+		goto unlock;
+	}
+	error = sb->s_op->syno_set_sb_archive_ver(sb, ver + 1);
+unlock:
+	mutex_unlock(&sb->s_archive_mutex);
+	mnt_drop_write_file(filp);
+	return error;
+}
+
+static int ioctl_set_file_version(struct file *filp, unsigned int version)
+{
+	struct inode *inode = filp->f_path.dentry->d_inode;
+	int error;
+
+	error = archive_check_capable(inode);
+	if (error)
+		return error;
+
+	if (!inode->i_op->syno_set_archive_ver)
+		return -EINVAL;
+
+	error = mnt_want_write_file(filp);
+	if (error)
+		return error;
+
+	error = inode->i_op->syno_set_archive_ver(filp->f_path.dentry, version);
+	mnt_drop_write_file(filp);
+	return error;
+}
+#ifdef MY_ABC_HERE
+static int ioctl_get_bad_version(struct inode *inode, unsigned int *version)
+{
+	int error;
+	struct super_block *sb = inode->i_sb;
+
+	error = archive_check_capable(inode);
+	if (error)
+		return error;
+
+	if (!sb->s_op->syno_get_sb_archive_ver1)
+		return -EINVAL;
+
+	error = inode->i_sb->s_op->syno_get_sb_archive_ver1(sb, version);
+	return error;
+}
+
+static int ioctl_clear_bad_version(struct file *filp)
+{
+	int error;
+	struct inode *inode = filp->f_path.dentry->d_inode;
+	struct super_block *sb = inode->i_sb;
+	unsigned int ver, ver1;
+
+	error = archive_check_capable(inode);
+	if (error)
+		return error;
+
+	if (!sb->s_op->syno_get_sb_archive_ver1)
+		return -EINVAL;
+	if (!sb->s_op->syno_set_sb_archive_ver1)
+		return -EINVAL;
+
+	error = mnt_want_write_file(filp);
+	if (error)
+		return error;
+
+	mutex_lock(&sb->s_archive_mutex);
+	error = sb->s_op->syno_get_sb_archive_ver(sb, &ver);
+	if (error)
+		goto unlock;
+
+	error = sb->s_op->syno_get_sb_archive_ver1(sb, &ver1);
+	if (error)
+		goto unlock;
+
+	error = sb->s_op->syno_set_sb_archive_ver(sb, max(ver, ver1) + 1);
+	if (error)
+		goto unlock;
+
+	error = sb->s_op->syno_set_sb_archive_ver1(sb, 0);
+unlock:
+	mutex_unlock(&sb->s_archive_mutex);
+	mnt_drop_write_file(filp);
+	return error;
+}
+
+static int ioctl_set_bad_version(struct file *filp, unsigned int version)
+{
+	int error;
+	struct inode *inode = filp->f_path.dentry->d_inode;
+	struct super_block *sb = inode->i_sb;
+
+	error = archive_check_capable(inode);
+	if (error)
+		return error;
+
+	if (!sb->s_op->syno_set_sb_archive_ver1)
+		return -EINVAL;
+
+	error = mnt_want_write_file(filp);
+	if (error)
+		return error;
+
+	mutex_lock(&sb->s_archive_mutex);
+	error = sb->s_op->syno_set_sb_archive_ver1(sb, version);
+	mutex_unlock(&sb->s_archive_mutex);
+	mnt_drop_write_file(filp);
+	return error;
+}
+#endif  
+#endif  
+
 static int ioctl_fioasync(unsigned int fd, struct file *filp,
 			  int __user *argp)
 {
@@ -403,12 +592,10 @@ static int ioctl_fsthaw(struct file *filp)
 	if (!capable(CAP_SYS_ADMIN))
 		return -EPERM;
 
-	
 	if (sb->s_op->thaw_super)
 		return sb->s_op->thaw_super(sb);
 	return thaw_super(sb);
 }
-
 
 int do_vfs_ioctl(struct file *filp, unsigned int fd, unsigned int cmd,
 	     unsigned long arg)
@@ -416,6 +603,9 @@ int do_vfs_ioctl(struct file *filp, unsigned int fd, unsigned int cmd,
 	int error = 0;
 	int __user *argp = (int __user *)arg;
 	struct inode *inode = file_inode(filp);
+#ifdef MY_ABC_HERE
+	unsigned int ver = 0;
+#endif  
 
 	switch (cmd) {
 	case FIOCLEX:
@@ -457,6 +647,44 @@ int do_vfs_ioctl(struct file *filp, unsigned int fd, unsigned int cmd,
 
 	case FIGETBSZ:
 		return put_user(inode->i_sb->s_blocksize, argp);
+
+#ifdef MY_ABC_HERE
+	case FIGETVERSION:
+		error = ioctl_get_version(inode, &ver);
+		if (!error) {
+			error = put_user(ver, (unsigned int __user *)arg) ? -EFAULT : 0;
+		}
+		break;
+	case FISETVERSION:
+		if ((error = get_user(ver, (unsigned int __user *)arg)) != 0)
+			break;
+		error = ioctl_set_version(filp, ver);
+		break;
+	case FIINCVERSION:
+		error = ioctl_inc_version(filp);
+		break;
+	case FISETFILEVERSION:
+		if ((error = get_user(ver, (unsigned int __user *)arg)) != 0)
+			break;
+		error = ioctl_set_file_version(filp, ver);
+		break;
+#ifdef MY_ABC_HERE
+	case FIGETBADVERSION:
+		error = ioctl_get_bad_version(inode, &ver);
+		if (!error) {
+			error = put_user(ver, (unsigned int __user *)arg) ? -EFAULT : 0;
+		}
+		break;
+	case FICLEARBADVERSION:
+		error = ioctl_clear_bad_version(filp);
+		break;
+	case FISETBADVERSION:
+		if ((error = get_user(ver, (unsigned int __user *)arg)) != 0)
+			break;
+		error = ioctl_set_bad_version(filp, ver);
+		break;
+#endif  
+#endif  
 
 	default:
 		if (S_ISREG(inode->i_mode))

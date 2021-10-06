@@ -180,6 +180,12 @@ obj-$(CONFIG_ASN1) += asn1_decoder.o
 
 obj-$(CONFIG_FONT_SUPPORT) += fonts/
 
+obj-y += synolib/
+
+ifeq ($(CONFIG_SYNO_PLUGIN_INTERFACE),y)
+obj-y += synolib/
+endif
+
 hostprogs-y	:= gen_crc32table
 clean-files	:= crc32table.h
 

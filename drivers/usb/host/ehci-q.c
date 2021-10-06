@@ -1,15 +1,7 @@
-
-
-
-
-
-
-
-
-
-
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 static int
 qtd_fill(struct ehci_hcd *ehci, struct ehci_qtd *qtd, dma_addr_t buf,
 		  size_t len, int token, int maxpacket)
@@ -260,19 +252,31 @@ qh_completions (struct ehci_hcd *ehci, struct ehci_qh *qh)
 					qtd,
 					qh);
 
-			
 			if ((token & QTD_STS_HALT) != 0) {
 
-				
+#ifdef MY_ABC_HERE
+				struct usb_device *udev = urb->dev;
+				int more_xact_tries = 0;
+
+				if (unlikely(udev &&
+					(udev->syno_quirks &
+					SYNO_USB_QUIRK_HC_MORE_TRANSACTION_TRIES)))
+					more_xact_tries = 500;
+
+#endif  
+
 				if ((token & QTD_STS_XACT) &&
 						QTD_CERR(token) == 0 &&
+#ifdef MY_ABC_HERE
+						++qh->xacterrs < (QH_XACTERR_MAX + more_xact_tries) &&
+#else  
 						++qh->xacterrs < QH_XACTERR_MAX &&
+#endif  
 						!urb->unlinked) {
 					ehci_dbg(ehci,
 	"detected XactErr len %zu/%zu retry %d\n",
 	qtd->length - QTD_LENGTH(token), qtd->length, qh->xacterrs);
 
-					
 					token &= ~QTD_STS_HALT;
 					token |= QTD_STS_ACTIVE |
 							(EHCI_TUNE_CERR << 10);
@@ -281,47 +285,43 @@ qh_completions (struct ehci_hcd *ehci, struct ehci_qh *qh)
 					wmb();
 					hw->hw_token = cpu_to_hc32(ehci,
 							token);
+#ifdef MY_ABC_HERE
+					if (qh->xacterrs >= QH_XACTERR_MAX)
+						mdelay(1);
+#endif  
 					goto retry_xacterr;
 				}
 				stopped = 1;
 
-			
 			} else if (IS_SHORT_READ (token)
 					&& !(qtd->hw_alt_next
 						& EHCI_LIST_END(ehci))) {
 				stopped = 1;
 			}
 
-		
 		} else if (likely (!stopped
 				&& ehci->rh_state >= EHCI_RH_RUNNING)) {
 			break;
 
-		
 		} else {
 			stopped = 1;
 
-			
 			if (ehci->rh_state < EHCI_RH_RUNNING)
 				last_status = -ESHUTDOWN;
 
-			
 			else if (last_status == -EINPROGRESS && !urb->unlinked)
 				continue;
 
-			
 			if (state == QH_STATE_IDLE &&
 					qh->qtd_list.next == &qtd->qtd_list &&
 					(hw->hw_token & ACTIVE_BIT(ehci))) {
 				token = hc32_to_cpu(ehci, hw->hw_token);
 				hw->hw_token &= ~ACTIVE_BIT(ehci);
 
-				
 				ehci_clear_tt_buffer(ehci, qh, urb, token);
 			}
 		}
 
-		
 		if (last_status == -EINPROGRESS) {
 			last_status = qtd_copy_status(ehci, urb,
 					qtd->length, token);

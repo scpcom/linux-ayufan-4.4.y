@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #ifndef __USB_CORE_HCD_H
 #define __USB_CORE_HCD_H
 
@@ -122,13 +124,23 @@ struct usb_hcd {
 #define	HC_IS_RUNNING(state) ((state) & __ACTIVE)
 #define	HC_IS_SUSPENDED(state) ((state) & __SUSPEND)
 
-	
+#if defined(CONFIG_USB_ETRON_HUB)
+	u8		chip_id;
+#define HCD_CHIP_ID_UNKNOWN 0x00
+#define HCD_CHIP_ID_ETRON_EJ168 0x10
+#define HCD_CHIP_ID_ETRON_EJ188 0x20
+#endif  
 
-	
+#if defined (MY_DEF_HERE)
+	 
+	int vbus_gpio_pin;
+	 
+	int power_control_support;
+#endif  
+
 	unsigned long hcd_priv[0]
 			__attribute__ ((aligned(sizeof(s64))));
 };
-
 
 static inline struct usb_bus *hcd_to_bus(struct usb_hcd *hcd)
 {
@@ -200,63 +212,60 @@ struct hc_driver {
 	int	(*bus_resume)(struct usb_hcd *);
 	int	(*start_port_reset)(struct usb_hcd *, unsigned port_num);
 
-		
 	void	(*relinquish_port)(struct usb_hcd *, int);
-		
+		 
 	int	(*port_handed_over)(struct usb_hcd *, int);
 
-		
 	void	(*clear_tt_buffer_complete)(struct usb_hcd *,
 				struct usb_host_endpoint *);
 
-	
-		
 	int	(*alloc_dev)(struct usb_hcd *, struct usb_device *);
-		
+		 
 	void	(*free_dev)(struct usb_hcd *, struct usb_device *);
-	
+	 
 	int	(*alloc_streams)(struct usb_hcd *hcd, struct usb_device *udev,
 		struct usb_host_endpoint **eps, unsigned int num_eps,
 		unsigned int num_streams, gfp_t mem_flags);
-	
+	 
 	int	(*free_streams)(struct usb_hcd *hcd, struct usb_device *udev,
 		struct usb_host_endpoint **eps, unsigned int num_eps,
 		gfp_t mem_flags);
 
-	
-	
-		
 	int	(*add_endpoint)(struct usb_hcd *, struct usb_device *,
 				struct usb_host_endpoint *);
-		
+		 
 	int	(*drop_endpoint)(struct usb_hcd *, struct usb_device *,
 				 struct usb_host_endpoint *);
-		
+		 
 	int	(*check_bandwidth)(struct usb_hcd *, struct usb_device *);
-		
+		 
 	void	(*reset_bandwidth)(struct usb_hcd *, struct usb_device *);
-		
+		 
 	int	(*address_device)(struct usb_hcd *, struct usb_device *udev);
-		
+		 
 	int	(*enable_device)(struct usb_hcd *, struct usb_device *udev);
-		
+		 
 	int	(*update_hub_device)(struct usb_hcd *, struct usb_device *hdev,
 			struct usb_tt *tt, gfp_t mem_flags);
 	int	(*reset_device)(struct usb_hcd *, struct usb_device *);
-		
+		 
 	int	(*update_device)(struct usb_hcd *, struct usb_device *);
 	int	(*set_usb2_hw_lpm)(struct usb_hcd *, struct usb_device *, int);
-	
-		
+	 
 	int	(*enable_usb3_lpm_timeout)(struct usb_hcd *,
 			struct usb_device *, enum usb3_link_state state);
-		
+		 
 	int	(*disable_usb3_lpm_timeout)(struct usb_hcd *,
 			struct usb_device *, enum usb3_link_state state);
 	int	(*find_raw_port_number)(struct usb_hcd *, int);
-	
+	 
 	int	(*port_power)(struct usb_hcd *hcd, int portnum, bool enable);
 
+#if defined(CONFIG_USB_ETRON_HUB)
+	int	(*update_uas_device)(struct usb_hcd *, struct usb_device *, int);
+	void	(*stop_endpoint)(struct usb_hcd *, struct usb_device *,
+				struct usb_host_endpoint *);
+#endif  
 };
 
 static inline int hcd_giveback_urb_in_bh(struct usb_hcd *hcd)

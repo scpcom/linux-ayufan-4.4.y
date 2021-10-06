@@ -35,6 +35,59 @@ struct drm_fbdev_cma {
 	struct drm_fb_cma	*fb;
 };
 
+/**
+ * DOC: framebuffer cma helper functions
+ *
+ * Provides helper functions for creating a cma (contiguous memory allocator)
+ * backed framebuffer.
+ *
+ * drm_fb_cma_create() is used in the &drm_mode_config_funcs ->fb_create
+ * callback function to create a cma backed framebuffer.
+ *
+ * An fbdev framebuffer backed by cma is also available by calling
+ * drm_fbdev_cma_init(). drm_fbdev_cma_fini() tears it down.
+ * If the &drm_framebuffer_funcs ->dirty callback is set, fb_deferred_io
+ * will be set up automatically. dirty() is called by
+ * drm_fb_helper_deferred_io() in process context (struct delayed_work).
+ *
+ * Example fbdev deferred io code::
+ *
+ *     static int driver_fbdev_fb_dirty(struct drm_framebuffer *fb,
+ *                                      struct drm_file *file_priv,
+ *                                      unsigned flags, unsigned color,
+ *                                      struct drm_clip_rect *clips,
+ *                                      unsigned num_clips)
+ *     {
+ *         struct drm_gem_cma_object *cma = drm_fb_cma_get_gem_obj(fb, 0);
+ *         ... push changes ...
+ *         return 0;
+ *     }
+ *
+ *     static struct drm_framebuffer_funcs driver_fbdev_fb_funcs = {
+ *         .destroy       = drm_fb_cma_destroy,
+ *         .create_handle = drm_fb_cma_create_handle,
+ *         .dirty         = driver_fbdev_fb_dirty,
+ *     };
+ *
+ *     static int driver_fbdev_create(struct drm_fb_helper *helper,
+ *             struct drm_fb_helper_surface_size *sizes)
+ *     {
+ *         return drm_fbdev_cma_create_with_funcs(helper, sizes,
+ *                                                &driver_fbdev_fb_funcs);
+ *     }
+ *
+ *     static const struct drm_fb_helper_funcs driver_fb_helper_funcs = {
+ *         .fb_probe = driver_fbdev_create,
+ *     };
+ *
+ *     Initialize:
+ *     fbdev = drm_fbdev_cma_init_with_funcs(dev, 16,
+ *                                           dev->mode_config.num_crtc,
+ *                                           dev->mode_config.num_connector,
+ *                                           &driver_fb_helper_funcs);
+ *
+ */
+
 static inline struct drm_fbdev_cma *to_fbdev_cma(struct drm_fb_helper *helper)
 {
 	return container_of(helper, struct drm_fbdev_cma, fb_helper);
@@ -74,7 +127,7 @@ static struct drm_framebuffer_funcs drm_fb_cma_funcs = {
 };
 
 static struct drm_fb_cma *drm_fb_cma_alloc(struct drm_device *dev,
-	struct drm_mode_fb_cmd2 *mode_cmd, struct drm_gem_cma_object **obj,
+	const const struct drm_mode_fb_cmd2 *mode_cmd, struct drm_gem_cma_object **obj,
 	unsigned int num_planes)
 {
 	struct drm_fb_cma *fb_cma;
@@ -107,7 +160,7 @@ static struct drm_fb_cma *drm_fb_cma_alloc(struct drm_device *dev,
  * checked before calling this function.
  */
 struct drm_framebuffer *drm_fb_cma_create(struct drm_device *dev,
-	struct drm_file *file_priv, struct drm_mode_fb_cmd2 *mode_cmd)
+	struct drm_file *file_priv, const struct drm_mode_fb_cmd2 *mode_cmd)
 {
 	struct drm_fb_cma *fb_cma;
 	struct drm_gem_cma_object *objs[4];
@@ -125,7 +178,7 @@ struct drm_framebuffer *drm_fb_cma_create(struct drm_device *dev,
 		unsigned int height = mode_cmd->height / (i ? vsub : 1);
 		unsigned int min_size;
 
-		obj = drm_gem_object_lookup(dev, file_priv, mode_cmd->handles[i]);
+		obj = drm_gem_object_lookup(file_priv, mode_cmd->handles[i]);
 		if (!obj) {
 			dev_err(dev->dev, "Failed to lookup GEM object\n");
 			ret = -ENXIO;

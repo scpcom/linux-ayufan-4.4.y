@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/string.h>
 #include <linux/kernel.h>
 #include <linux/sched.h>
@@ -36,14 +38,18 @@ static const match_table_t tokens = {
 	{ opt_err, NULL }
 };
 
-
 void hfsplus_fill_defaults(struct hfsplus_sb_info *opts)
 {
 	if (!opts)
 		return;
 
+#ifdef MY_ABC_HERE
+	opts->creator = 0;
+	opts->type = 0;
+#else
 	opts->creator = HFSPLUS_DEF_CR_TYPE;
 	opts->type = HFSPLUS_DEF_CR_TYPE;
+#endif  
 	opts->umask = current_umask();
 	opts->uid = current_uid();
 	opts->gid = current_gid();
@@ -223,5 +229,9 @@ int hfsplus_show_options(struct seq_file *seq, struct dentry *root)
 		seq_puts(seq, ",nodecompose");
 	if (test_bit(HFSPLUS_SB_NOBARRIER, &sbi->flags))
 		seq_puts(seq, ",nobarrier");
+#ifdef MY_ABC_HERE
+	if (test_bit(HFSPLUS_SB_CASEFOLD, &sbi->flags))
+		seq_printf(seq, ",caseless");
+#endif  
 	return 0;
 }

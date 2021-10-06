@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/stddef.h>
 #include <linux/mm.h>
 #include <linux/swap.h>
@@ -2546,11 +2548,14 @@ noretry:
 	if (page)
 		goto got_pg;
 nopage:
+#ifdef MY_ABC_HERE
+ 
+#else  
 	warn_alloc_failed(gfp_mask, order, NULL);
+#endif  
 got_pg:
 	return page;
 }
-
 
 struct page *
 __alloc_pages_nodemask(gfp_t gfp_mask, unsigned int order,
@@ -2861,6 +2866,36 @@ static inline void show_node(struct zone *zone)
 	if (IS_ENABLED(CONFIG_NUMA))
 		printk("Node %d ", zone_to_nid(zone));
 }
+
+long si_mem_available(void)
+{
+	long available;
+	unsigned long pagecache;
+	unsigned long wmark_low = 0;
+	unsigned long pages[NR_LRU_LISTS];
+	struct zone *zone;
+	int lru;
+
+	for (lru = LRU_BASE; lru < NR_LRU_LISTS; lru++)
+		pages[lru] = global_page_state(NR_LRU_BASE + lru);
+
+	for_each_zone(zone)
+		wmark_low += zone->watermark[WMARK_LOW];
+
+	available = global_page_state(NR_FREE_PAGES) - totalreserve_pages;
+
+	pagecache = pages[LRU_ACTIVE_FILE] + pages[LRU_INACTIVE_FILE];
+	pagecache -= min(pagecache / 2, wmark_low);
+	available += pagecache;
+
+	available += global_page_state(NR_SLAB_RECLAIMABLE) -
+		     min(global_page_state(NR_SLAB_RECLAIMABLE) / 2, wmark_low);
+
+	if (available < 0)
+		available = 0;
+	return available;
+}
+EXPORT_SYMBOL_GPL(si_mem_available);
 
 void si_meminfo(struct sysinfo *val)
 {
@@ -4757,21 +4792,37 @@ static void __meminit setup_per_zone_inactive_ratio(void)
 		calculate_zone_inactive_ratio(zone);
 }
 
-
 int __meminit init_per_zone_wmark_min(void)
 {
 	unsigned long lowmem_kbytes;
 	int new_min_free_kbytes;
+#ifdef CONFIG_ARCH_RTD129X
+	const int max_free_kbytes = 102400;
+#else
+	const int max_free_kbytes = 65536;
+#endif
 
 	lowmem_kbytes = nr_free_buffer_pages() * (PAGE_SIZE >> 10);
+#ifdef CONFIG_ARCH_RTD129X
+	if(lowmem_kbytes > 256000)
+		new_min_free_kbytes = 102400;
+	else
+		new_min_free_kbytes = int_sqrt(lowmem_kbytes * 16);
+#else
 	new_min_free_kbytes = int_sqrt(lowmem_kbytes * 16);
+#endif
 
 	if (new_min_free_kbytes > user_min_free_kbytes) {
 		min_free_kbytes = new_min_free_kbytes;
 		if (min_free_kbytes < 128)
 			min_free_kbytes = 128;
+#ifdef MY_DEF_HERE
+		if (min_free_kbytes > max_free_kbytes)
+			min_free_kbytes = max_free_kbytes;
+#else
 		if (min_free_kbytes > 65536)
 			min_free_kbytes = 65536;
+#endif  
 	} else {
 		pr_warn("min_free_kbytes is not updated to %d because user defined value %d is preferred\n",
 				new_min_free_kbytes, user_min_free_kbytes);

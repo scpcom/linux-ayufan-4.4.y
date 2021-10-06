@@ -1,7 +1,7 @@
-
-
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/init.h>
 #include <linux/slab.h>
 #include <linux/module.h>
@@ -326,7 +326,14 @@ static void ubifs_dirty_inode(struct inode *inode, int flags)
 {
 	struct ubifs_inode *ui = ubifs_inode(inode);
 
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+	if (!mutex_is_locked(&ui->ui_mutex)) {
+		 
+		return;
+	}
+#else
 	ubifs_assert(mutex_is_locked(&ui->ui_mutex));
+#endif  
 	if (!ui->dirty) {
 		ui->dirty = 1;
 		dbg_gen("inode %lu",  inode->i_ino);

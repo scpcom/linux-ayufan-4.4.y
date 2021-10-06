@@ -1037,7 +1037,7 @@ static struct vmw_master *vmw_master_check(struct drm_device *dev,
 	if (unlikely(ret != 0))
 		return ERR_PTR(-ERESTARTSYS);
 
-	if (file_priv->is_master) {
+	if (drm_is_current_master(file_priv)) {
 		mutex_unlock(&dev->master_mutex);
 		return NULL;
 	}
@@ -1536,10 +1536,8 @@ static int __init vmwgfx_init(void)
 {
 	int ret;
 
-#ifdef CONFIG_VGA_CONSOLE
 	if (vgacon_text_force())
 		return -EINVAL;
-#endif
 
 	ret = drm_pci_init(&driver, &vmw_pci_driver);
 	if (ret)

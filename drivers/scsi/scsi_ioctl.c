@@ -1,4 +1,7 @@
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/module.h>
 #include <linux/blkdev.h>
 #include <linux/interrupt.h>
@@ -66,6 +69,15 @@ static int ioctl_internal_command(struct scsi_device *sdev, char *cmd,
 
 	if ((driver_byte(result) & DRIVER_SENSE) &&
 	    (scsi_sense_valid(&sshdr))) {
+#ifdef MY_ABC_HERE
+		if (START_STOP == cmd[0]) {
+			if (0 == sdev->nospindown) {
+				sdev->nospindown = 1;
+				printk(KERN_WARNING"host %d, id %d, lun %lld, does not support spindown\n",
+					   sdev->host->host_no, sdev->id, sdev->lun);
+			}
+		}
+#endif  
 		switch (sshdr.sense_key) {
 		case ILLEGAL_REQUEST:
 			if (cmd[0] == ALLOW_MEDIUM_REMOVAL)

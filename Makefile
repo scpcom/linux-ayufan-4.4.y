@@ -383,7 +383,8 @@ LINUXINCLUDE    := \
 		-Iarch/$(hdr-arch)/include/generated \
 		$(if $(KBUILD_SRC), -I$(srctree)/include) \
 		-Iinclude \
-		$(USERINCLUDE)
+		$(USERINCLUDE) \
+		-include $(if $(KBUILD_SRC),$(srctree)/)include/linux/syno.h
 
 KBUILD_CPPFLAGS := -D__KERNEL__
 

@@ -364,13 +364,13 @@ void omap_framebuffer_describe(struct drm_framebuffer *fb, struct seq_file *m)
 #endif
 
 struct drm_framebuffer *omap_framebuffer_create(struct drm_device *dev,
-		struct drm_file *file, struct drm_mode_fb_cmd2 *mode_cmd)
+		struct drm_file *file, const struct drm_mode_fb_cmd2 *mode_cmd)
 {
 	struct drm_gem_object *bos[4];
 	struct drm_framebuffer *fb;
 	int ret;
 
-	ret = objects_lookup(dev, file, mode_cmd->pixel_format,
+	ret = objects_lookup(file, mode_cmd->pixel_format,
 			bos, mode_cmd->handles);
 	if (ret)
 		return ERR_PTR(ret);
@@ -386,7 +386,7 @@ struct drm_framebuffer *omap_framebuffer_create(struct drm_device *dev,
 }
 
 struct drm_framebuffer *omap_framebuffer_init(struct drm_device *dev,
-		struct drm_mode_fb_cmd2 *mode_cmd, struct drm_gem_object **bos)
+		const struct drm_mode_fb_cmd2 *mode_cmd, struct drm_gem_object **bos)
 {
 	struct omap_framebuffer *omap_fb = NULL;
 	struct drm_framebuffer *fb = NULL;

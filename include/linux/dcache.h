@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef __LINUX_DCACHE_H
 #define __LINUX_DCACHE_H
 
@@ -113,6 +116,10 @@ struct dentry_operations {
 	int (*d_hash)(const struct dentry *, struct qstr *);
 	int (*d_compare)(const struct dentry *, const struct dentry *,
 			unsigned int, const char *, const struct qstr *);
+#ifdef MY_ABC_HERE
+	int (*d_compare_case)(const struct dentry *, unsigned int, const char *,
+			const struct qstr *, int caseless);
+#endif  
 	int (*d_delete)(const struct dentry *);
 	void (*d_release)(struct dentry *);
 	void (*d_prune)(struct dentry *);
@@ -142,37 +149,49 @@ struct dentry_operations {
 #define DCACHE_OP_WEAK_REVALIDATE	0x00000800
 
 #define DCACHE_NFSFS_RENAMED		0x00001000
-     
-#define DCACHE_COOKIE			0x00002000 
+      
+#define DCACHE_COOKIE			0x00002000  
 #define DCACHE_FSNOTIFY_PARENT_WATCHED	0x00004000
-     
-
+      
 #define DCACHE_DENTRY_KILLED		0x00008000
 
-#define DCACHE_MOUNTED			0x00010000 
-#define DCACHE_NEED_AUTOMOUNT		0x00020000 
-#define DCACHE_MANAGE_TRANSIT		0x00040000 
+#define DCACHE_MOUNTED			0x00010000  
+#define DCACHE_NEED_AUTOMOUNT		0x00020000  
+#define DCACHE_MANAGE_TRANSIT		0x00040000  
 #define DCACHE_MANAGED_DENTRY \
 	(DCACHE_MOUNTED|DCACHE_NEED_AUTOMOUNT|DCACHE_MANAGE_TRANSIT)
 
 #define DCACHE_LRU_LIST			0x00080000
 
 #define DCACHE_ENTRY_TYPE		0x00700000
-#define DCACHE_MISS_TYPE		0x00000000 
-#define DCACHE_WHITEOUT_TYPE		0x00100000 
-#define DCACHE_DIRECTORY_TYPE		0x00200000 
-#define DCACHE_AUTODIR_TYPE		0x00300000 
-#define DCACHE_REGULAR_TYPE		0x00400000 
-#define DCACHE_SPECIAL_TYPE		0x00500000 
-#define DCACHE_SYMLINK_TYPE		0x00600000 
+#define DCACHE_MISS_TYPE		0x00000000  
+#define DCACHE_WHITEOUT_TYPE		0x00100000  
+#define DCACHE_DIRECTORY_TYPE		0x00200000  
+#define DCACHE_AUTODIR_TYPE		0x00300000  
+#define DCACHE_REGULAR_TYPE		0x00400000  
+#define DCACHE_SPECIAL_TYPE		0x00500000  
+#define DCACHE_SYMLINK_TYPE		0x00600000  
 
 #define DCACHE_MAY_FREE			0x00800000
-#define DCACHE_FALLTHRU			0x01000000 
-#define DCACHE_OP_SELECT_INODE		0x02000000 
+#define DCACHE_FALLTHRU			0x01000000  
+#define DCACHE_OP_SELECT_INODE		0x02000000  
 #define DCACHE_OP_REAL			0x08000000
+
+#ifdef MY_ABC_HERE
+#define DCACHE_OP_COMPARE_CASE	0x10000000
+#endif  
 
 extern seqlock_t rename_lock;
 
+#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
+extern int dentry_cmp(const struct dentry *dentry, const unsigned char *ct, unsigned tcount);
+extern int dentry_string_cmp(const unsigned char *cs, const unsigned char *ct, unsigned tcount);
+#else
+extern inline int dentry_cmp(const struct dentry *dentry, const unsigned char *ct, unsigned tcount);
+extern inline int dentry_string_cmp(const unsigned char *cs, const unsigned char *ct, unsigned tcount);
+#endif  
+#endif  
 
 extern void d_instantiate(struct dentry *, struct inode *);
 extern struct dentry * d_instantiate_unique(struct dentry *, struct inode *);
@@ -224,23 +243,28 @@ static inline struct dentry *d_add_unique(struct dentry *entry, struct inode *in
 
 extern void dentry_update_name_case(struct dentry *, struct qstr *);
 
-
 extern void d_move(struct dentry *, struct dentry *);
 extern void d_exchange(struct dentry *, struct dentry *);
 extern struct dentry *d_ancestor(struct dentry *, struct dentry *);
 
-
 extern struct dentry *d_lookup(const struct dentry *, const struct qstr *);
 extern struct dentry *d_hash_and_lookup(struct dentry *, struct qstr *);
+#ifdef MY_ABC_HERE
+extern struct dentry *d_lookup_case(struct dentry *, struct qstr *, int caseless);
+extern struct dentry *__d_lookup(const struct dentry *, const struct qstr *, int caseless);
+extern struct dentry *__d_lookup_rcu(const struct dentry *parent,
+				const struct qstr *name, unsigned *seq,
+				int caseless);
+#else
 extern struct dentry *__d_lookup(const struct dentry *, const struct qstr *);
 extern struct dentry *__d_lookup_rcu(const struct dentry *parent,
 				const struct qstr *name, unsigned *seq);
+#endif  
 
 static inline unsigned d_count(const struct dentry *dentry)
 {
 	return dentry->d_lockref.count;
 }
-
 
 extern __printf(4, 5)
 char *dynamic_dname(struct dentry *, char *, int, const char *, ...);

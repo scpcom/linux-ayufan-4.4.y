@@ -26,6 +26,11 @@
 
 #include "smpboot.h"
 
+#ifdef CONFIG_ARCH_RTD129X //CPU core 1-3 power gating, jamestai20160118
+extern void rtk_cpu_power_down(int cpu);
+extern void rtk_cpu_power_up(int cpu);
+#endif /* CONFIG_ARCH_RTD129X */
+
 #ifdef CONFIG_SMP
 /* Serializes the updates to cpu_online_mask, cpu_present_mask */
 static DEFINE_MUTEX(cpu_add_remove_lock);
@@ -586,6 +591,11 @@ int disable_nonboot_cpus(void)
 			continue;
 		trace_suspend_resume(TPS("CPU_OFF"), cpu, true);
 		error = _cpu_down(cpu, 1);
+
+#ifdef CONFIG_ARCH_RTD129X //CPU core 1-3 power gating, jamestai20160118
+		rtk_cpu_power_down(cpu);
+#endif /* CONIFG_ARCH_RTD129X */
+
 		trace_suspend_resume(TPS("CPU_OFF"), cpu, false);
 		if (!error)
 			cpumask_set_cpu(cpu, frozen_cpus);
@@ -635,6 +645,11 @@ void enable_nonboot_cpus(void)
 
 	for_each_cpu(cpu, frozen_cpus) {
 		trace_suspend_resume(TPS("CPU_ON"), cpu, true);
+
+#ifdef CONFIG_ARCH_RTD129X //CPU core 1-3 power gating, jamestai20160118
+		rtk_cpu_power_up(cpu);
+#endif /* CONIFG_ARCH_RTD129X */
+
 		error = _cpu_up(cpu, 1);
 		trace_suspend_resume(TPS("CPU_ON"), cpu, false);
 		if (!error) {

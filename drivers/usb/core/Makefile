@@ -9,5 +9,6 @@ usbcore-y += port.o
 
 usbcore-$(CONFIG_PCI)		+= hcd-pci.o
 usbcore-$(CONFIG_ACPI)		+= usb-acpi.o
+usbcore-$(CONFIG_USB_ETRON_HUB) += ethub.o
 
 obj-$(CONFIG_USB)		+= usbcore.o

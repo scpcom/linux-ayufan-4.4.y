@@ -1647,3 +1647,9 @@ source crypto/asymmetric_keys/Kconfig
 source certs/Kconfig
 
 endif	# if CRYPTO
+
+if SYNO_RTD1296
+
+source "crypto/ocf/Kconfig"
+
+endif # if SYNO_RTD1296

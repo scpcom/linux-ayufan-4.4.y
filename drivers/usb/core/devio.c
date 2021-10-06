@@ -1,9 +1,7 @@
-
-
-
-
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/fs.h>
 #include <linux/mm.h>
 #include <linux/slab.h>
@@ -612,10 +610,14 @@ static int checkintf(struct usb_dev_state *ps, unsigned int ifnum)
 		return -EINVAL;
 	if (test_bit(ifnum, &ps->ifclaimed))
 		return 0;
-	
+#ifdef MY_ABC_HERE
+	 
+#else  
+	 
 	dev_warn(&ps->dev->dev, "usbfs: process %d (%s) did not claim "
 		 "interface %u before use\n", task_pid_nr(current),
 		 current->comm, ifnum);
+#endif  
 	return claimintf(ps, ifnum);
 }
 

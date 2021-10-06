@@ -1,6 +1,7 @@
-
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/module.h>
 #include <linux/device.h>
 #include <linux/err.h>
@@ -385,13 +386,16 @@ static int soundcore_open(struct inode *inode, struct file *file)
 	if (preclaim_oss && !new_fops) {
 		spin_unlock(&sound_loader_lock);
 
-		
+#ifdef MY_ABC_HERE
+		 
+#else  
+		 
 		request_module("sound-slot-%i", unit>>4);
 		request_module("sound-service-%i-%i", unit>>4, chain);
 
-		
 		if (request_module("char-major-%d-%d", SOUND_MAJOR, unit) > 0)
 			request_module("char-major-%d", SOUND_MAJOR);
+#endif  
 
 		spin_lock(&sound_loader_lock);
 		s = __look_for_unit(chain, unit);

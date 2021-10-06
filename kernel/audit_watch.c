@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/kernel.h>
 #include <linux/audit.h>
 #include <linux/kthread.h>
@@ -304,15 +306,14 @@ static void audit_remove_parent_watches(struct audit_parent *parent)
 	fsnotify_destroy_mark(&parent->mark, audit_watch_group);
 }
 
-
 static int audit_get_nd(struct audit_watch *watch, struct path *parent)
 {
 	struct dentry *d = kern_path_locked(watch->path, parent);
 	if (IS_ERR(d))
 		return PTR_ERR(d);
-	mutex_unlock(&d_backing_inode(parent->dentry)->i_mutex);
+	inode_unlock(d_backing_inode(parent->dentry));
 	if (d_is_positive(d)) {
-		
+		 
 		watch->dev = d_backing_inode(d)->i_sb->s_dev;
 		watch->ino = d_backing_inode(d)->i_ino;
 	}
@@ -413,6 +414,11 @@ static int audit_watch_handle_event(struct fsnotify_group *group,
 {
 	struct inode *inode;
 	struct audit_parent *parent;
+
+#ifdef MY_ABC_HERE
+	if (data_type == FSNOTIFY_EVENT_SYNO)
+		return 0;
+#endif  
 
 	parent = container_of(inode_mark, struct audit_parent, mark);
 

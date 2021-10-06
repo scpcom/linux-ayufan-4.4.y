@@ -1,10 +1,11 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #ifndef _LINUX_HFSPLUS_RAW_H
 #define _LINUX_HFSPLUS_RAW_H
 
 #include <linux/types.h>
-
 
 #define HFSPLUS_SECTOR_SIZE        512
 #define HFSPLUS_SECTOR_SHIFT         9
@@ -207,13 +208,20 @@ struct DInfo {
 } __packed;
 
 struct DXInfo {
+#ifdef MY_ABC_HERE
+	__be32 point;
+	__be32 date_added;
+	__be16 extended_flags;
+	__be16 reserved2;
+	__be32 reserved3;
+#else
 	struct hfsp_point frScroll;
 	__be32 frOpenChain;
 	__be16 frUnused;
 	__be16 frComment;
 	__be32 frPutAway;
+#endif  
 } __packed;
-
 
 struct hfsplus_cat_folder {
 	__be16 type;
@@ -241,12 +249,19 @@ struct FInfo {
 } __packed;
 
 struct FXInfo {
+#ifdef MY_ABC_HERE
+	__be32 reserved1;
+	__be32 date_added;
+	__be16 extended_flags;
+	__be16 reserved2;
+	__be32 reserved3;
+#else
 	__be16 fdIconID;
 	u8 fdUnused[8];
 	__be16 fdComment;
 	__be32 fdPutAway;
+#endif  
 } __packed;
-
 
 struct hfsplus_cat_file {
 	__be16 type;
@@ -307,11 +322,13 @@ struct hfsplus_ext_key {
 
 #define HFSPLUS_XATTR_FINDER_INFO_NAME "com.apple.FinderInfo"
 #define HFSPLUS_XATTR_ACL_NAME "com.apple.system.Security"
+#ifdef MY_ABC_HERE
+#define HFSPLUS_XATTR_RESOURCE_FORK_NAME "com.apple.ResourceFork"
+#endif  
 
 #define HFSPLUS_ATTR_INLINE_DATA 0x10
 #define HFSPLUS_ATTR_FORK_DATA   0x20
 #define HFSPLUS_ATTR_EXTENTS     0x30
-
 
 struct hfsplus_attr_key {
 	__be16 key_len;
@@ -337,7 +354,17 @@ struct hfsplus_attr_extents {
 
 #define HFSPLUS_MAX_INLINE_DATA_SIZE 3802
 
-
+#ifdef MY_ABC_HERE
+ 
+struct hfsplus_attr_data {
+	__be32 record_type;
+	__be32 reserved[2];
+	__be32 length;
+	__u8 raw_bytes[2];
+} __packed;
+#define hfsplus_attr_inline_data hfsplus_attr_data
+#else
+ 
 struct hfsplus_attr_inline_data {
 	__be32 record_type;
 	__be32 reserved1;
@@ -345,7 +372,7 @@ struct hfsplus_attr_inline_data {
 	__be16 length;
 	u8 raw_bytes[HFSPLUS_MAX_INLINE_DATA_SIZE];
 } __packed;
-
+#endif  
 
 typedef union {
 	__be32 record_type;

@@ -1,57 +1,47 @@
-
+ 
 #ifndef __DELAYED_REF__
 #define __DELAYED_REF__
 
-
-#define BTRFS_ADD_DELAYED_REF    1 
-#define BTRFS_DROP_DELAYED_REF   2 
-#define BTRFS_ADD_DELAYED_EXTENT 3 
-#define BTRFS_UPDATE_DELAYED_HEAD 4 
-
+#define BTRFS_ADD_DELAYED_REF    1  
+#define BTRFS_DROP_DELAYED_REF   2  
+#define BTRFS_ADD_DELAYED_EXTENT 3  
+#define BTRFS_UPDATE_DELAYED_HEAD 4  
 
 struct btrfs_delayed_ref_node {
-	
+	 
 	struct rb_node rb_node;
 
-	
 	struct list_head list;
 
-	
 	u64 bytenr;
 
-	
 	u64 num_bytes;
 
-	
 	u64 seq;
 
-	
 	atomic_t refs;
 
-	
 	int ref_mod;
 
 	unsigned int action:8;
 	unsigned int type:8;
-	
+	 
 	unsigned int is_head:1;
 	unsigned int in_tree:1;
 };
 
 struct btrfs_delayed_extent_op {
 	struct btrfs_disk_key key;
+	u8 level;
+	bool update_key;
+	bool update_flags;
+	bool is_data;
 	u64 flags_to_set;
-	int level;
-	unsigned int update_key:1;
-	unsigned int update_flags:1;
-	unsigned int is_data:1;
 };
-
 
 struct btrfs_delayed_ref_head {
 	struct btrfs_delayed_ref_node node;
 
-	
 	struct mutex mutex;
 
 	spinlock_t lock;

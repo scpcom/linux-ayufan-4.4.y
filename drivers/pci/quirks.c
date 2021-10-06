@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/types.h>
 #include <linux/kernel.h>
 #include <linux/export.h>
@@ -14,9 +16,8 @@
 #include <linux/sched.h>
 #include <linux/ktime.h>
 #include <linux/mm.h>
-#include <asm/dma.h>	
+#include <asm/dma.h>	 
 #include "pci.h"
-
 
 static void quirk_mmio_always_on(struct pci_dev *dev)
 {
@@ -24,22 +25,22 @@ static void quirk_mmio_always_on(struct pci_dev *dev)
 }
 DECLARE_PCI_FIXUP_CLASS_EARLY(PCI_ANY_ID, PCI_ANY_ID,
 				PCI_CLASS_BRIDGE_HOST, 8, quirk_mmio_always_on);
-
+#ifdef CONFIG_SYNO_USB_ICH_UHCI_NO_MMIO_OFF
+DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_INTEL, 0x2934, quirk_mmio_always_on);
+#endif  
 
 static void quirk_mellanox_tavor(struct pci_dev *dev)
 {
-	dev->broken_parity_status = 1;	
+	dev->broken_parity_status = 1;	 
 }
 DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_MELLANOX, PCI_DEVICE_ID_MELLANOX_TAVOR, quirk_mellanox_tavor);
 DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_MELLANOX, PCI_DEVICE_ID_MELLANOX_TAVOR_BRIDGE, quirk_mellanox_tavor);
-
 
 static void quirk_passive_release(struct pci_dev *dev)
 {
 	struct pci_dev *d = NULL;
 	unsigned char dlc;
 
-	
 	while ((d = pci_get_device(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_82371SB_0, d))) {
 		pci_read_config_byte(d, 0x82, &dlc);
 		if (!(dlc & 1<<1)) {
@@ -2420,15 +2421,179 @@ DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_INTEL, 0x22b5, quirk_remove_d3_delay);
 DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_INTEL, 0x22b7, quirk_remove_d3_delay);
 DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_INTEL, 0x2298, quirk_remove_d3_delay);
 DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_INTEL, 0x229c, quirk_remove_d3_delay);
-
+ 
 static void quirk_broken_intx_masking(struct pci_dev *dev)
 {
 	dev->broken_intx_masking = 1;
 }
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_CHELSIO, 0x0030,
 			 quirk_broken_intx_masking);
-DECLARE_PCI_FIXUP_HEADER(0x1814, 0x0601, 
+DECLARE_PCI_FIXUP_HEADER(0x1814, 0x0601,  
 			 quirk_broken_intx_masking);
+
+#ifdef MY_ABC_HERE
+ 
+static void mv9235_non_spi_programming(struct pci_dev *dev)
+{
+	void __iomem *bar5;
+
+	bar5 = ioremap(pci_resource_start(dev, 5), pci_resource_len(dev, 5));
+	if (!bar5) {
+		dev_warn(&dev->dev, "Can't map mv9235 registers\n");
+		return;
+	}
+
+	dev_info(&dev->dev, "Apply mv9235 specific programming steps\n");
+
+	writel(0x00000104, bar5+0x178);
+	ndelay(80);
+	 
+	writel(0x00500B03, bar5+0x17C);
+	ndelay(80);
+	 
+	writel(0x00000104, bar5+0x1F8);
+	ndelay(80);
+	 
+	writel(0x00500B03, bar5+0x1FC);
+	ndelay(80);
+	 
+	writel(0x00000104, bar5+0x278);
+	ndelay(80);
+	 
+	writel(0x00500B03, bar5+0x27C);
+	ndelay(80);
+	 
+	writel(0x00000104, bar5+0x2F8);
+	ndelay(80);
+	 
+	writel(0x00500B03, bar5+0x2FC);
+	ndelay(80);
+	 
+	writel(0x0000001C, bar5+0xA0);
+	ndelay(80);
+	writel(0x00935038, bar5+0xA4);
+	ndelay(80);
+	 
+	writel(0x0000000C, bar5+0xA0);
+	ndelay(80);
+	writel(0xA5A58757, bar5+0xA4);
+	ndelay(80);
+	 
+	writel(0x00000008, bar5+0xA0);
+	ndelay(80);
+	writel(0x0001388F, bar5+0xA4);
+	ndelay(80);
+}
+DECLARE_PCI_FIXUP_FINAL(0x1b4b, 0x9235, mv9235_non_spi_programming);
+DECLARE_PCI_FIXUP_FINAL(0x1b4b, 0x9215, mv9235_non_spi_programming);
+#endif  
+
+#ifdef MY_ABC_HERE
+ 
+static void mv9170_non_spi_programming(struct pci_dev *dev)
+{
+	void __iomem *bar5;
+
+	bar5 = ioremap(pci_resource_start(dev, 5), pci_resource_len(dev, 5));
+	if (!bar5) {
+		dev_warn(&dev->dev, "Can't map mv9170 registers\n");
+		return;
+	}
+
+	dev_info(&dev->dev, "Apply mv9170 specific programming steps\n");
+
+	writel(0x0000008D, bar5+0x178);
+	ndelay(80);
+	writel(0x0000C962, bar5+0x17C);
+	ndelay(80);
+	 
+	writel(0x0000008D, bar5+0x1F8);
+	ndelay(80);
+	writel(0x0000C962, bar5+0x1FC);
+	ndelay(80);
+	 
+	writel(0x00000091, bar5+0x178);
+	ndelay(80);
+	writel(0x00000E75, bar5+0x17C);
+	ndelay(80);
+	 
+	writel(0x00000091, bar5+0x1F8);
+	ndelay(80);
+	writel(0x00000E75, bar5+0x1FC);
+	ndelay(80);
+	 
+	writel(0x000000A2, bar5+0x178);
+	ndelay(80);
+	writel(0x00000046, bar5+0x17C);
+	ndelay(80);
+	 
+	writel(0x000000A2, bar5+0x1F8);
+	ndelay(80);
+	writel(0x00000046, bar5+0x1FC);
+	ndelay(80);
+	 
+	writel(0x000000ED, bar5+0x178);
+	ndelay(80);
+	writel(0x00002400, bar5+0x17C);
+	ndelay(80);
+	 
+	writel(0x000000ED, bar5+0x1F8);
+	ndelay(80);
+	writel(0x00002400, bar5+0x1FC);
+	ndelay(80);
+	 
+	writel(0x000000DB, bar5+0x178);
+	ndelay(80);
+	writel(0x00000000, bar5+0x17C);
+	ndelay(80);
+	 
+	writel(0x000000DB, bar5+0x1F8);
+	ndelay(80);
+	writel(0x00000000, bar5+0x1FC);
+	ndelay(80);
+	 
+	writel(0x000000A9, bar5+0x178);
+	ndelay(80);
+	writel(0x00005556, bar5+0x17C);
+	ndelay(80);
+	 
+	writel(0x000000A9, bar5+0x1F8);
+	ndelay(80);
+	writel(0x00005556, bar5+0x1FC);
+	ndelay(80);
+	 
+	writel(0x000000D6, bar5+0x178);
+	ndelay(80);
+	writel(0x00000000, bar5+0x17C);
+	ndelay(80);
+	 
+	writel(0x000000D6, bar5+0x1F8);
+	ndelay(80);
+	writel(0x00000000, bar5+0x1FC);
+	ndelay(80);
+	 
+	writel(0x000000D6, bar5+0x178);
+	ndelay(80);
+	writel(0x00000200, bar5+0x17C);
+	ndelay(80);
+	 
+	writel(0x000000D6, bar5+0x1F8);
+	ndelay(80);
+	writel(0x00000200, bar5+0x1FC);
+	ndelay(80);
+	 
+	writel(0x00000008, bar5+0xA0);
+	ndelay(80);
+	writel(0x11888EAE, bar5+0xA4);
+	ndelay(80);
+	 
+	writel(0x00000004, bar5+0xA0);
+	ndelay(80);
+	writel(0x00009C4F, bar5+0xA4);
+	ndelay(80);
+}
+DECLARE_PCI_FIXUP_FINAL(0x1b4b, 0x9170, mv9170_non_spi_programming);
+#endif  
 
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_REALTEK, 0x8169,
 			 quirk_broken_intx_masking);
@@ -2516,6 +2681,39 @@ DECLARE_PCI_FIXUP_RESUME_EARLY(PCI_VENDOR_ID_INTEL, 0x1547,
 DECLARE_PCI_FIXUP_RESUME_EARLY(PCI_VENDOR_ID_INTEL, 0x156d,
 			       quirk_apple_wait_for_thunderbolt);
 #endif
+
+#ifdef MY_ABC_HERE
+ 
+static void intel_lynxpoint_xhci_quirk(struct pci_dev *dev)
+{
+	void __iomem *mmio_base;
+	u16 pm_ctrl;
+	u32 val;
+
+	if (!dev->pm_cap) {
+		dev_warn(&dev->dev, "Lynx Point XHCI quirks: Doesn't have PM capability\n");
+		return ;
+	}
+
+	dev_info(&dev->dev, "Lynx Point XHCI quirks: Set power state to D0\n");
+	pci_read_config_word(dev, dev->pm_cap + PCI_PM_CTRL, &pm_ctrl);
+	pm_ctrl &= ~PCI_PM_CTRL_STATE_MASK;
+	pm_ctrl |= PCI_D0;
+	pci_write_config_word(dev, dev->pm_cap + PCI_PM_CTRL, pm_ctrl);
+
+	mmio_base = pci_ioremap_bar(dev, 0);
+	if (!mmio_base) {
+		dev_warn(&dev->dev, "Lynx Point XHCI quirks: Can't map mmio registers\n");
+		return ;
+	}
+
+	val = readl(mmio_base + 0x8154);
+	writel((val | 0x80000000), mmio_base + 0x8154);
+
+	pci_iounmap(dev, mmio_base);
+}
+DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_INTEL, 0x8c31, intel_lynxpoint_xhci_quirk);
+#endif  
 
 static void pci_do_fixups(struct pci_dev *dev, struct pci_fixup *f,
 			  struct pci_fixup *end)
@@ -2664,10 +2862,12 @@ static int reset_intel_82599_sfp_virtfn(struct pci_dev *dev, int probe)
 	return 0;
 }
 
-#include "../gpu/drm/i915/i915_reg.h"
+#define SOUTH_CHICKEN2		0xc2004
+#define PCH_PP_STATUS		0xc7200
+#define PCH_PP_CONTROL		0xc7204
 #define MSG_CTL			0x45010
 #define NSDE_PWR_STATE		0xd0100
-#define IGD_OPERATION_TIMEOUT	10000     
+#define IGD_OPERATION_TIMEOUT	10000      
 
 static int reset_ivb_igd(struct pci_dev *dev, int probe)
 {
@@ -2790,37 +2990,40 @@ static void quirk_dma_func1_alias(struct pci_dev *dev)
 	}
 }
 
-
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_MARVELL_EXT, 0x9120,
 			 quirk_dma_func1_alias);
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_MARVELL_EXT, 0x9123,
 			 quirk_dma_func1_alias);
-
+ 
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_MARVELL_EXT, 0x9130,
 			 quirk_dma_func1_alias);
-
+ 
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_MARVELL_EXT, 0x9172,
 			 quirk_dma_func1_alias);
-
+ 
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_MARVELL_EXT, 0x917a,
 			 quirk_dma_func1_alias);
-
+ 
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_MARVELL_EXT, 0x91a0,
 			 quirk_dma_func1_alias);
-
+ 
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_MARVELL_EXT, 0x9230,
 			 quirk_dma_func1_alias);
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_TTI, 0x0642,
 			 quirk_dma_func1_alias);
-
+ 
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_JMICRON,
 			 PCI_DEVICE_ID_JMICRON_JMB388_ESD,
 			 quirk_dma_func1_alias);
-
+#ifdef MY_ABC_HERE
+ 
+DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_MARVELL_EXT, 0x9235,
+			 quirk_dma_func1_alias);
+#endif  
 
 static const struct pci_device_id fixed_dma_alias_tbl[] = {
 	{ PCI_DEVICE_SUB(PCI_VENDOR_ID_ADAPTEC2, 0x0285,
-			 PCI_VENDOR_ID_ADAPTEC2, 0x02bb), 
+			 PCI_VENDOR_ID_ADAPTEC2, 0x02bb),  
 	  .driver_data = PCI_DEVFN(1, 0) },
 	{ 0 }
 };

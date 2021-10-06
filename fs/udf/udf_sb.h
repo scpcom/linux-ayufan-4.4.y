@@ -1,9 +1,11 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef __LINUX_UDF_SB_H
 #define __LINUX_UDF_SB_H
 
 #include <linux/mutex.h>
 #include <linux/bitops.h>
-
 
 #define UDF_SUPER_MAGIC			0x15013346
 
@@ -32,6 +34,9 @@
 #define UDF_FLAG_SESSION_SET	17
 #define UDF_FLAG_LASTBLOCK_SET	18
 #define UDF_FLAG_BLOCKSIZE_SET	19
+#ifdef MY_ABC_HERE
+#define SYNO_UDF_FLAG_CASELESS 20
+#endif  
 
 #define UDF_PART_FLAG_UNALLOC_BITMAP	0x0001
 #define UDF_PART_FLAG_UNALLOC_TABLE	0x0002

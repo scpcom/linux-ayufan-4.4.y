@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (c) 2014, The Linux Foundation. All rights reserved.
  * Debug helper to dump the current kernel pagetables of the system
@@ -216,6 +219,10 @@ static void note_page(struct pg_state *st, unsigned long addr, unsigned level,
 		if (st->current_prot) {
 			seq_printf(st->seq, "0x%016lx-0x%016lx   ",
 				   st->start_address, addr);
+#ifdef MY_DEF_HERE
+			seq_printf(st->seq, "0x%.8lx-0x%.8lx   ",
+				   virt_to_phys(st->start_address), virt_to_phys(addr));
+#endif
 
 			delta = (addr - st->start_address) >> 10;
 			while (!(delta & 1023) && unit[1]) {

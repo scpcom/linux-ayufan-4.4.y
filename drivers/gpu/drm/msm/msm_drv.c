@@ -863,7 +863,7 @@ static int msm_ioctl_gem_cpu_prep(struct drm_device *dev, void *data,
 		return -EINVAL;
 	}
 
-	obj = drm_gem_object_lookup(dev, file, args->handle);
+	obj = drm_gem_object_lookup(file, args->handle);
 	if (!obj)
 		return -ENOENT;
 
@@ -881,7 +881,7 @@ static int msm_ioctl_gem_cpu_fini(struct drm_device *dev, void *data,
 	struct drm_gem_object *obj;
 	int ret;
 
-	obj = drm_gem_object_lookup(dev, file, args->handle);
+	obj = drm_gem_object_lookup(file, args->handle);
 	if (!obj)
 		return -ENOENT;
 
@@ -902,7 +902,7 @@ static int msm_ioctl_gem_info(struct drm_device *dev, void *data,
 	if (args->pad)
 		return -EINVAL;
 
-	obj = drm_gem_object_lookup(dev, file, args->handle);
+	obj = drm_gem_object_lookup(file, args->handle);
 	if (!obj)
 		return -ENOENT;
 
@@ -969,7 +969,6 @@ static struct drm_driver msm_driver = {
 	.open               = msm_open,
 	.preclose           = msm_preclose,
 	.lastclose          = msm_lastclose,
-	.set_busid          = drm_platform_set_busid,
 	.irq_handler        = msm_irq,
 	.irq_preinstall     = msm_irq_preinstall,
 	.irq_postinstall    = msm_irq_postinstall,

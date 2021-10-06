@@ -1,4 +1,7 @@
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/kernel.h>
 #include <linux/errno.h>
 #include <linux/string.h>
@@ -579,9 +582,12 @@ int scsi_cmd_ioctl(struct request_queue *q, struct gendisk *bd_disk, fmode_t mod
 			break;
 		}
 
-		
 		case SCSI_IOCTL_SEND_COMMAND:
+#ifdef MY_ABC_HERE
+			 
+#else  
 			printk(KERN_WARNING "program %s is using a deprecated SCSI ioctl, please convert it to SG_IO\n", current->comm);
+#endif  
 			err = -EINVAL;
 			if (!arg)
 				break;

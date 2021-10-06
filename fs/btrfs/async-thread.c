@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/kthread.h>
 #include <linux/slab.h>
 #include <linux/list.h>
@@ -64,6 +66,9 @@ BTRFS_WORK_HELPER(endio_write_helper);
 BTRFS_WORK_HELPER(freespace_write_helper);
 BTRFS_WORK_HELPER(delayed_meta_helper);
 BTRFS_WORK_HELPER(readahead_helper);
+#ifdef MY_ABC_HERE
+BTRFS_WORK_HELPER(reada_path_start_helper);
+#endif  
 BTRFS_WORK_HELPER(qgroup_rescan_helper);
 BTRFS_WORK_HELPER(extent_refs_helper);
 BTRFS_WORK_HELPER(scrub_helper);
@@ -75,7 +80,7 @@ static struct __btrfs_workqueue *
 __btrfs_alloc_workqueue(const char *name, unsigned int flags, int limit_active,
 			 int thresh)
 {
-	struct __btrfs_workqueue *ret = kzalloc(sizeof(*ret), GFP_NOFS);
+	struct __btrfs_workqueue *ret = kzalloc(sizeof(*ret), GFP_KERNEL);
 
 	if (!ret)
 		return NULL;
@@ -122,7 +127,7 @@ struct btrfs_workqueue *btrfs_alloc_workqueue(const char *name,
 					      int limit_active,
 					      int thresh)
 {
-	struct btrfs_workqueue *ret = kzalloc(sizeof(*ret), GFP_NOFS);
+	struct btrfs_workqueue *ret = kzalloc(sizeof(*ret), GFP_KERNEL);
 
 	if (!ret)
 		return NULL;

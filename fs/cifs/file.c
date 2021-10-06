@@ -1,4 +1,7 @@
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/fs.h>
 #include <linux/backing-dev.h>
 #include <linux/stat.h>
@@ -1623,6 +1626,9 @@ refind_writable:
 					&cifs_inode->openFileList);
 			spin_unlock(&cifs_file_list_lock);
 			cifsFileInfo_put(inv_file);
+#ifdef MY_ABC_HERE
+			inv_file = NULL;
+#endif  
 			spin_lock(&cifs_file_list_lock);
 			++refind;
 			inv_file = NULL;
@@ -2026,7 +2032,7 @@ int cifs_strict_fsync(struct file *file, loff_t start, loff_t end,
 	rc = filemap_write_and_wait_range(inode->i_mapping, start, end);
 	if (rc)
 		return rc;
-	mutex_lock(&inode->i_mutex);
+	inode_lock(inode);
 
 	xid = get_xid();
 
@@ -2051,7 +2057,7 @@ int cifs_strict_fsync(struct file *file, loff_t start, loff_t end,
 	}
 
 	free_xid(xid);
-	mutex_unlock(&inode->i_mutex);
+	inode_unlock(inode);
 	return rc;
 }
 
@@ -2068,7 +2074,7 @@ int cifs_fsync(struct file *file, loff_t start, loff_t end, int datasync)
 	rc = filemap_write_and_wait_range(inode->i_mapping, start, end);
 	if (rc)
 		return rc;
-	mutex_lock(&inode->i_mutex);
+	inode_lock(inode);
 
 	xid = get_xid();
 
@@ -2085,10 +2091,9 @@ int cifs_fsync(struct file *file, loff_t start, loff_t end, int datasync)
 	}
 
 	free_xid(xid);
-	mutex_unlock(&inode->i_mutex);
+	inode_unlock(inode);
 	return rc;
 }
-
 
 int cifs_flush(struct file *file, fl_owner_t id)
 {
@@ -2382,9 +2387,8 @@ cifs_writev(struct kiocb *iocb, struct iov_iter *from)
 	struct TCP_Server_Info *server = tlink_tcon(cfile->tlink)->ses->server;
 	ssize_t rc;
 
-	
 	down_read(&cinode->lock_sem);
-	mutex_lock(&inode->i_mutex);
+	inode_lock(inode);
 
 	rc = generic_write_checks(iocb, from);
 	if (rc <= 0)
@@ -2397,7 +2401,7 @@ cifs_writev(struct kiocb *iocb, struct iov_iter *from)
 	else
 		rc = -EACCES;
 out:
-	mutex_unlock(&inode->i_mutex);
+	inode_unlock(inode);
 
 	if (rc > 0) {
 		ssize_t err = generic_write_sync(file, iocb->ki_pos - rc, rc);

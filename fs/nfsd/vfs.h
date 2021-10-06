@@ -1,37 +1,38 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #ifndef LINUX_NFSD_VFS_H
 #define LINUX_NFSD_VFS_H
 
+#ifdef MY_ABC_HERE
+#include <linux/sched.h>
+#endif
 #include "nfsfh.h"
 #include "nfsd.h"
 
-
 #define NFSD_MAY_NOP			0
-#define NFSD_MAY_EXEC			0x001 
-#define NFSD_MAY_WRITE			0x002 
-#define NFSD_MAY_READ			0x004 
+#define NFSD_MAY_EXEC			0x001  
+#define NFSD_MAY_WRITE			0x002  
+#define NFSD_MAY_READ			0x004  
 #define NFSD_MAY_SATTR			0x008
 #define NFSD_MAY_TRUNC			0x010
 #define NFSD_MAY_LOCK			0x020
 #define NFSD_MAY_MASK			0x03f
 
-
 #define NFSD_MAY_OWNER_OVERRIDE		0x040
-#define NFSD_MAY_LOCAL_ACCESS		0x080 
+#define NFSD_MAY_LOCAL_ACCESS		0x080  
 #define NFSD_MAY_BYPASS_GSS_ON_ROOT	0x100
 #define NFSD_MAY_NOT_BREAK_LEASE	0x200
 #define NFSD_MAY_BYPASS_GSS		0x400
 #define NFSD_MAY_READ_IF_EXEC		0x800
 
-#define NFSD_MAY_64BIT_COOKIE		0x1000 
+#define NFSD_MAY_64BIT_COOKIE		0x1000  
 
 #define NFSD_MAY_CREATE		(NFSD_MAY_EXEC|NFSD_MAY_WRITE)
 #define NFSD_MAY_REMOVE		(NFSD_MAY_EXEC|NFSD_MAY_WRITE|NFSD_MAY_TRUNC)
 
-
 typedef int (*nfsd_filldir_t)(void *, const char *, int, loff_t, u64, unsigned);
-
 
 int		nfsd_racache_init(int);
 void		nfsd_racache_shutdown(void);
@@ -122,7 +123,16 @@ static inline __be32 fh_getattr(struct svc_fh *fh, struct kstat *stat)
 {
 	struct path p = {.mnt = fh->fh_export->ex_path.mnt,
 			 .dentry = fh->fh_dentry};
+#ifdef MY_ABC_HERE
+	int err = 0;
+
+	err = vfs_getattr(&p, stat);
+	if (!err && IS_SYNOACL(fh->fh_dentry) && uid_eq(current_fsuid(), GLOBAL_ROOT_UID))
+		stat->mode |= (S_IRWXU|S_IRWXG|S_IRWXO);
+	return nfserrno(err);
+#else
 	return nfserrno(vfs_getattr(&p, stat));
+#endif
 }
 
 static inline int nfsd_create_is_exclusive(int createmode)

@@ -27,10 +27,17 @@
 extern const struct cpu_operations smp_spin_table_ops;
 extern const struct cpu_operations cpu_psci_ops;
 
+#ifdef CONFIG_ARCH_RTD129X
+extern const struct cpu_operations rtk_smp_spin_table_ops;
+#endif
+
 const struct cpu_operations *cpu_ops[NR_CPUS];
 
 static const struct cpu_operations *supported_cpu_ops[] __initconst = {
 	&smp_spin_table_ops,
+#ifdef CONFIG_ARCH_RTD129X
+	&rtk_smp_spin_table_ops,
+#endif
 	&cpu_psci_ops,
 	NULL,
 };

@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #define pr_fmt(fmt) "TCP: " fmt
 
 #include <linux/kernel.h>
@@ -1177,7 +1179,27 @@ int tcp_recvmsg(struct sock *sk, struct msghdr *msg, size_t len, int nonblock,
 	do {
 		u32 offset;
 
-		
+#ifdef MY_ABC_HERE
+        if(flags &  MSG_NOCATCHSIGNAL) {
+			 
+			if (signal_pending(current)) {
+				if (sigismember(&current->pending.signal, SIGQUIT) ||
+					sigismember(&current->pending.signal, SIGABRT) ||
+					sigismember(&current->pending.signal, SIGKILL) ||
+					sigismember(&current->pending.signal, SIGTERM) ||
+					sigismember(&current->pending.signal, SIGSTOP) ) {
+
+					printk("%s (%d) Avoiding recvfile() hangs.\n", __FILE__, __LINE__);
+					if (copied)
+						break;
+					copied = timeo ? sock_intr_errno(timeo) : -EAGAIN;
+					break;
+				}
+			}
+        }
+        else
+#endif  
+		 
 		if (tp->urg_data && tp->urg_seq == *seq) {
 			if (copied)
 				break;
@@ -1224,6 +1246,11 @@ int tcp_recvmsg(struct sock *sk, struct msghdr *msg, size_t len, int nonblock,
 				break;
 
 			if (sk->sk_err) {
+#ifdef MY_ABC_HERE
+				if ( (msg->msg_flags & MSG_KERNSPACE) &&
+					ECONNRESET == sk->sk_err )
+					printk("connection reset by peer.\n");
+#endif  
 				copied = sock_error(sk);
 				break;
 			}
@@ -2553,6 +2580,10 @@ void __init tcp_init(void)
 	sysctl_tcp_rmem[0] = SK_MEM_QUANTUM;
 	sysctl_tcp_rmem[1] = 87380;
 	sysctl_tcp_rmem[2] = max(87380, max_rshare);
+#ifdef MY_ABC_HERE
+	sysctl_tcp_rmem[0] *= 2;
+	sysctl_tcp_rmem[1] *= 2;
+#endif  
 
 	pr_info("Hash tables configured (established %u bind %u)\n",
 		tcp_hashinfo.ehash_mask + 1, tcp_hashinfo.bhash_size);

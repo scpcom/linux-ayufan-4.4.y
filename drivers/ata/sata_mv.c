@@ -1,9 +1,7 @@
-
-
-
-
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/pci.h>
@@ -31,10 +29,12 @@
 #define DRV_NAME	"sata_mv"
 #define DRV_VERSION	"1.28"
 
-
-
 #ifdef CONFIG_PCI
+#ifdef MY_ABC_HERE
+static int msi = 1;
+#else  
 static int msi;
+#endif  
 module_param(msi, int, S_IRUGO);
 MODULE_PARM_DESC(msi, "Enable use of PCI MSI (0=off, 1=on)");
 #endif
@@ -49,31 +49,32 @@ module_param(irq_coalescing_usecs, int, S_IRUGO);
 MODULE_PARM_DESC(irq_coalescing_usecs,
 		 "IRQ coalescing time threshold in usecs");
 
+#ifdef MY_ABC_HERE
+extern void sata_print_link_status(struct ata_link *link);
+#endif  
+
 enum {
-	
-	MV_PRIMARY_BAR		= 0,	
-	MV_IO_BAR		= 2,	
-	MV_MISC_BAR		= 3,	
+	 
+	MV_PRIMARY_BAR		= 0,	 
+	MV_IO_BAR		= 2,	 
+	MV_MISC_BAR		= 3,	 
 
-	MV_MAJOR_REG_AREA_SZ	= 0x10000,	
-	MV_MINOR_REG_AREA_SZ	= 0x2000,	
+	MV_MAJOR_REG_AREA_SZ	= 0x10000,	 
+	MV_MINOR_REG_AREA_SZ	= 0x2000,	 
 
-	
-	COAL_CLOCKS_PER_USEC	= 150,		
-	MAX_COAL_TIME_THRESHOLD	= ((1 << 24) - 1), 
-	MAX_COAL_IO_COUNT	= 255,		
+	COAL_CLOCKS_PER_USEC	= 150,		 
+	MAX_COAL_TIME_THRESHOLD	= ((1 << 24) - 1),  
+	MAX_COAL_IO_COUNT	= 255,		 
 
 	MV_PCI_REG_BASE		= 0,
 
-	
 	COAL_REG_BASE		= 0x18000,
 	IRQ_COAL_CAUSE		= (COAL_REG_BASE + 0x08),
-	ALL_PORTS_COAL_IRQ	= (1 << 4),	
+	ALL_PORTS_COAL_IRQ	= (1 << 4),	 
 
 	IRQ_COAL_IO_THRESHOLD   = (COAL_REG_BASE + 0xcc),
 	IRQ_COAL_TIME_THRESHOLD = (COAL_REG_BASE + 0xd0),
 
-	
 	TRAN_COAL_CAUSE_LO	= (COAL_REG_BASE + 0x88),
 	TRAN_COAL_CAUSE_HI	= (COAL_REG_BASE + 0x8c),
 
@@ -81,29 +82,29 @@ enum {
 	FLASH_CTL		= 0x1046c,
 	GPIO_PORT_CTL		= 0x104f0,
 	RESET_CFG		= 0x180d8,
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+	GPIO_CTL_DATA		= 0x1809c,
+#endif  
 
 	MV_PCI_REG_SZ		= MV_MAJOR_REG_AREA_SZ,
 	MV_SATAHC_REG_SZ	= MV_MAJOR_REG_AREA_SZ,
-	MV_SATAHC_ARBTR_REG_SZ	= MV_MINOR_REG_AREA_SZ,		
+	MV_SATAHC_ARBTR_REG_SZ	= MV_MINOR_REG_AREA_SZ,		 
 	MV_PORT_REG_SZ		= MV_MINOR_REG_AREA_SZ,
 
 	MV_MAX_Q_DEPTH		= 32,
 	MV_MAX_Q_DEPTH_MASK	= MV_MAX_Q_DEPTH - 1,
 
-	
 	MV_CRQB_Q_SZ		= (32 * MV_MAX_Q_DEPTH),
 	MV_CRPB_Q_SZ		= (8 * MV_MAX_Q_DEPTH),
 	MV_MAX_SG_CT		= 256,
 	MV_SG_TBL_SZ		= (16 * MV_MAX_SG_CT),
 
-	
 	MV_PORT_HC_SHIFT	= 2,
-	MV_PORTS_PER_HC		= (1 << MV_PORT_HC_SHIFT), 
-	
-	MV_PORT_MASK		= (MV_PORTS_PER_HC - 1),   
+	MV_PORTS_PER_HC		= (1 << MV_PORT_HC_SHIFT),  
+	 
+	MV_PORT_MASK		= (MV_PORTS_PER_HC - 1),    
 
-	
-	MV_FLAG_DUAL_HC		= (1 << 30),  
+	MV_FLAG_DUAL_HC		= (1 << 30),   
 
 	MV_COMMON_FLAGS		= ATA_FLAG_SATA | ATA_FLAG_PIO_POLLING,
 
@@ -563,12 +564,40 @@ static void mv_bmdma_stop(struct ata_queued_cmd *qc);
 static u8   mv_bmdma_status(struct ata_port *ap);
 static u8 mv_sff_check_status(struct ata_port *ap);
 
+#ifdef MY_ABC_HERE
+static ssize_t
+syno_mv_phy_ctl_store(struct device *dev, struct device_attribute *attr, const char * buf, size_t count);
+DEVICE_ATTR(syno_phy_ctl, S_IRUGO | S_IWUSR , NULL, syno_mv_phy_ctl_store);
+#endif  
+
+#ifdef MY_ABC_HERE
+static struct device_attribute *sata_mv_shost_attrs[] = {
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_manutil_power_disable,
+	&dev_attr_syno_pm_gpio,
+	&dev_attr_syno_pm_info,
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_phy_ctl,
+#endif  
+#endif  
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_diskname_trans,
+#endif  
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_sata_disk_led_ctrl,
+#endif  
+	NULL
+};
+#endif  
 
 #ifdef CONFIG_PCI
 static struct scsi_host_template mv5_sht = {
 	ATA_BASE_SHT(DRV_NAME),
 	.sg_tablesize		= MV_MAX_SG_CT / 2,
 	.dma_boundary		= MV_DMA_BOUNDARY,
+#ifdef MY_ABC_HERE
+	.syno_index_get         = syno_libata_index_get,
+#endif  
 };
 #endif
 static struct scsi_host_template mv6_sht = {
@@ -576,6 +605,9 @@ static struct scsi_host_template mv6_sht = {
 	.can_queue		= MV_MAX_Q_DEPTH - 1,
 	.sg_tablesize		= MV_MAX_SG_CT / 2,
 	.dma_boundary		= MV_DMA_BOUNDARY,
+#ifdef MY_ABC_HERE
+	.shost_attrs		= sata_mv_shost_attrs,
+#endif  
 };
 
 static struct ata_port_operations mv5_ops = {
@@ -1227,14 +1259,32 @@ static int mv_qc_defer(struct ata_queued_cmd *qc)
 			qc->flags |= ATA_QCFLAG_CLEAR_EXCL;
 			return 0;
 		} else
+#ifdef MY_ABC_HERE
+		{
+			if (!ap->nr_active_links) {
+				 
+				if ((pp->pp_flags & MV_PP_FLAG_EDMA_EN) &&
+					(pp->pp_flags & MV_PP_FLAG_NCQ_EN) &&
+					!ata_is_ncq(qc->tf.protocol)) {
+					ap->excl_link = link;
+					qc->flags |= ATA_QCFLAG_CLEAR_EXCL;
+				} else {
+					 
+					ap->excl_link = NULL;
+				}
+				return 0;
+			} else {
+				return ATA_DEFER_PORT;
+			}
+		}
+#else
 			return ATA_DEFER_PORT;
+#endif  
 	}
 
-	
 	if (ap->nr_active_links == 0)
 		return 0;
 
-	
 	if ((pp->pp_flags & MV_PP_FLAG_EDMA_EN) &&
 	    (pp->pp_flags & MV_PP_FLAG_NCQ_EN)) {
 		if (ata_is_ncq(qc->tf.protocol))
@@ -2147,13 +2197,20 @@ static void mv_err_intr(struct ata_port *ap)
 		ata_ehi_push_desc(ehi, "parity error");
 	}
 	if (edma_err_cause & (EDMA_ERR_DEV_DCON | EDMA_ERR_DEV_CON)) {
+#ifdef MY_ABC_HERE
+		syno_ata_info_print(ap);
+#endif  
+#ifdef MY_ABC_HERE
+		if (edma_err_cause & EDMA_ERR_DEV_CON) {
+			ap->pflags |= ATA_PFLAG_SYNO_BOOT_PROBE;
+		}
+#endif  
 		ata_ehi_hotplugged(ehi);
 		ata_ehi_push_desc(ehi, edma_err_cause & EDMA_ERR_DEV_DCON ?
 			"dev disconnect" : "dev connect");
 		action |= ATA_EH_RESET;
 	}
 
-	
 	if (IS_GEN_I(hpriv)) {
 		eh_freeze_mask = EDMA_EH_FREEZE_5;
 		if (edma_err_cause & EDMA_ERR_SELF_DIS_5) {
@@ -2683,13 +2740,24 @@ static void mv6_read_preamp(struct mv_host_priv *hpriv, int idx,
 	port_mmio = mv_port_base(mmio, idx);
 	tmp = readl(port_mmio + PHY_MODE2);
 
-	hpriv->signal[idx].amps = tmp & 0x700;	
-	hpriv->signal[idx].pre = tmp & 0xe0;	
+	hpriv->signal[idx].amps = tmp & 0x700;	 
+	hpriv->signal[idx].pre = tmp & 0xe0;	 
 }
 
 static void mv6_enable_leds(struct mv_host_priv *hpriv, void __iomem *mmio)
 {
+#ifdef MY_ABC_HERE
+	extern long g_sata_mv_led;
+
+	if (0 != g_sata_mv_led) {
+		writel(0x00000050, mmio + GPIO_PORT_CTL);
+		writel(0x00000000, mmio + GPIO_CTL_DATA);
+	} else {
+#endif  
 	writel(0x00000060, mmio + GPIO_PORT_CTL);
+#ifdef MY_ABC_HERE
+	}
+#endif  
 }
 
 static void mv6_phy_errata(struct mv_host_priv *hpriv, void __iomem *mmio,
@@ -2719,27 +2787,29 @@ static void mv6_phy_errata(struct mv_host_priv *hpriv, void __iomem *mmio,
 		udelay(200);
 	}
 
-	
 	m3 = readl(port_mmio + PHY_MODE3);
+#ifdef MY_ABC_HERE
+	m3 = (m3 & 0x03) | (0x5555601 << 5);
+	m3 |= 0x0c;
+#else  
 	m3 = (m3 & 0x1f) | (0x5555601 << 5);
+#endif  
 
-	
 	if (IS_SOC(hpriv))
 		m3 &= ~0x1c;
 
 	if (fix_phy_mode4) {
 		u32 m4 = readl(port_mmio + PHY_MODE4);
-		
+		 
 		if (IS_GEN_IIE(hpriv))
 			m4 = (m4 & ~PHY_MODE4_RSVD_ZEROS) | PHY_MODE4_RSVD_ONES;
 		else
 			m4 = (m4 & ~PHY_MODE4_CFG_MASK) | PHY_MODE4_CFG_VALUE;
 		writel(m4, port_mmio + PHY_MODE4);
 	}
-	
+	 
 	writel(m3, port_mmio + PHY_MODE3);
 
-	
 	m2 = readl(port_mmio + PHY_MODE2);
 
 	m2 &= ~MV_M2_PREAMP_MASK;
@@ -2878,13 +2948,134 @@ static bool soc_is_65n(struct mv_host_priv *hpriv)
 	return false;
 }
 
+#ifdef MY_ABC_HERE
+extern struct scsi_device *look_up_scsi_dev_from_ap(struct ata_port *ap);
+ 
+static void syno_mv_phy_ctl(void __iomem *port_mmio, u8 blShutdown)
+{
+	u32 ifcfg = readl(port_mmio + SATA_IFCFG);
+
+	ifcfg = (ifcfg & 0xfff) | 0x9b1000;
+	 
+	if (blShutdown)
+		ifcfg |= (1 << 9);
+	else
+		ifcfg &= ~(1 << 9);
+
+	writelfl(ifcfg, port_mmio + SATA_IFCFG);
+}
+
+static ssize_t
+syno_mv_phy_ctl_store(struct device *dev, struct device_attribute *attr, const char * buf, size_t count)
+{
+	struct Scsi_Host *shost = class_to_shost(dev);
+	struct ata_port *ap = ata_shost_to_port(shost);
+	struct scsi_device *sdev = NULL;
+
+	if (strstr(buf, "off")) {
+		if (NULL != (sdev = look_up_scsi_dev_from_ap(ap)))
+			scsi_remove_device(sdev);
+		syno_mv_phy_ctl(mv_ap_base(ap), 1);
+	} else if (strstr(buf, "on")) {
+		 
+		syno_mv_phy_ctl(mv_ap_base(ap), 0);
+		mv_unexpected_intr(ap, 1);
+	} else {
+		printk("No effect %s\n", buf);
+	}
+
+	return count;
+}
+#endif  
+
+#ifdef MY_ABC_HERE
+int syno_sata_mv_gpio_read(const unsigned short hostnum)
+{
+	struct Scsi_Host *shost = scsi_host_lookup(hostnum);
+	struct ata_port *ap = NULL;
+	void __iomem *host_mmio = NULL;
+	u32 gpio_value = 0;
+	int led_idx;
+	int ret = -1;
+
+	if (NULL == shost) {
+		goto END;
+	}
+
+	if (NULL == (ap = ata_shost_to_port(shost))) {
+		goto END;
+	}
+
+	if (NULL == (host_mmio = mv_host_base(ap->host))) {
+		goto END;
+	}
+
+	led_idx = ap->print_id - ap->host->ports[0]->print_id;
+
+	gpio_value = readl(host_mmio + GPIO_CTL_DATA);
+
+	if (gpio_value & (1 << led_idx)) {
+		ret = 1;
+	} else {
+		ret = 0;
+	}
+
+END:
+	if (NULL != shost) {
+		scsi_host_put(shost);
+	}
+	return ret;
+}
+EXPORT_SYMBOL(syno_sata_mv_gpio_read);
+
+void syno_sata_mv_gpio_write(u8 blFaulty, const unsigned short hostnum)
+{
+	struct Scsi_Host *shost = scsi_host_lookup(hostnum);
+	struct ata_port *ap = NULL;
+	void __iomem *host_mmio = NULL;
+	u32 gpio_value = 0;
+	int led_idx;
+
+	if (NULL == shost) {
+		goto END;
+	}
+
+	if (NULL == (ap = ata_shost_to_port(shost))) {
+		goto END;
+	}
+
+	if (NULL == (host_mmio = mv_host_base(ap->host))) {
+		goto END;
+	}
+
+	led_idx = ap->print_id - ap->host->ports[0]->print_id;
+
+	gpio_value = readl(host_mmio + GPIO_CTL_DATA);
+
+	if (blFaulty) {
+		gpio_value |= (1 << led_idx);
+	} else {
+		gpio_value &= ~(1 << led_idx);
+	}
+
+	writel(gpio_value, host_mmio + GPIO_CTL_DATA);
+
+END:
+	if (NULL != shost) {
+		scsi_host_put(shost);
+	}
+	return;
+}
+EXPORT_SYMBOL(syno_sata_mv_gpio_write);
+#endif  
+
 static void mv_setup_ifcfg(void __iomem *port_mmio, int want_gen2i)
 {
 	u32 ifcfg = readl(port_mmio + SATA_IFCFG);
 
-	ifcfg = (ifcfg & 0xf7f) | 0x9b1000;	
+	ifcfg = (ifcfg & 0xf7f) | 0x9b1000;	 
 	if (want_gen2i)
-		ifcfg |= (1 << 7);		
+		ifcfg |= (1 << 7);		 
 	writelfl(ifcfg, port_mmio + SATA_IFCFG);
 }
 
@@ -2928,8 +3119,20 @@ static void mv_pmp_select(struct ata_port *ap, int pmp)
 static int mv_pmp_hardreset(struct ata_link *link, unsigned int *class,
 				unsigned long deadline)
 {
+#ifdef MY_ABC_HERE
+	int iRet = 0;
+#endif  
 	mv_pmp_select(link->ap, sata_srst_pmp(link));
+#ifdef MY_ABC_HERE
+	iRet = sata_std_hardreset(link, class, deadline);
+	if (0 < gSynoAtaDebug) {
+		DBGMESG("-- Syno Debug Show pmp link status --\n");
+		sata_print_link_status(link);
+	}
+	return iRet;
+#else  
 	return sata_std_hardreset(link, class, deadline);
+#endif  
 }
 
 static int mv_softreset(struct ata_link *link, unsigned int *class,
@@ -3601,8 +3804,15 @@ static int mv_pci_init_one(struct pci_dev *pdev,
 
 	ata_print_version_once(&pdev->dev, DRV_VERSION);
 
-	
+#ifdef MY_ABC_HERE
+	if (gSynoSataHostCnt < sizeof(gszSataPortMap) && 0 != gszSataPortMap[gSynoSataHostCnt]) {
+		n_ports = gszSataPortMap[gSynoSataHostCnt] - '0';
+	} else {
+#endif  
 	n_ports = mv_get_hc_count(ppi[0]->flags) * MV_PORTS_PER_HC;
+#ifdef MY_ABC_HERE
+	}
+#endif  
 
 	host = ata_host_alloc_pinfo(&pdev->dev, ppi, n_ports);
 	hpriv = devm_kzalloc(&pdev->dev, sizeof(*hpriv), GFP_KERNEL);

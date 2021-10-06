@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/blkdev.h>
 #include <linux/seq_file.h>
 #include <linux/module.h>
@@ -14,6 +16,14 @@ static int raid0_congested(struct mddev *mddev, int bits)
 	struct md_rdev **devlist = conf->devlist;
 	int raid_disks = conf->strip_zone[0].nb_dev;
 	int i, ret = 0;
+
+#ifdef MY_ABC_HERE
+	 
+	if(mddev->degraded) {
+		 
+		return ret;
+	}
+#endif  
 
 	for (i = 0; i < raid_disks && !ret ; i++) {
 		struct request_queue *q = bdev_get_queue(devlist[i]->bdev);
@@ -178,14 +188,21 @@ static int create_strip_zones(struct mddev *mddev, struct r0conf **private_conf)
 	if (cnt != mddev->raid_disks) {
 		printk(KERN_ERR "md/raid0:%s: too few disks (%d of %d) - "
 		       "aborting!\n", mdname(mddev), cnt, mddev->raid_disks);
+#ifdef MY_ABC_HERE
+		 
+		mddev->degraded = mddev->raid_disks - cnt;
+		zone->nb_dev = mddev->raid_disks;
+		mddev->private = conf;
+		return -ENOMEM;
+#else  
 		goto abort;
+#endif  
 	}
 	zone->nb_dev = cnt;
 	zone->zone_end = smallest->sectors * cnt;
 
 	curr_zone_end = zone->zone_end;
 
-	
 	for (i = 1; i < conf->nr_strip_zones; i++)
 	{
 		int j;
@@ -313,6 +330,10 @@ static int raid0_run(struct mddev *mddev)
 	struct r0conf *conf;
 	int ret;
 
+#ifdef MY_ABC_HERE
+	mddev->degraded = 0;
+#endif  
+
 	if (mddev->chunk_sectors == 0) {
 		printk(KERN_ERR "md/raid0:%s: chunk size must be set.\n",
 		       mdname(mddev));
@@ -321,11 +342,22 @@ static int raid0_run(struct mddev *mddev)
 	if (md_check_no_bitmap(mddev))
 		return -EINVAL;
 
-	
 	if (mddev->private == NULL) {
 		ret = create_strip_zones(mddev, &conf);
+#ifdef MY_ABC_HERE
+		if (ret < 0) {
+#ifdef MY_ABC_HERE
+			mddev->nodev_and_crashed = 1;
+#endif  
+			 
+			mddev->array_sectors = raid0_size(mddev, 0, 0);
+			 
+			return 0;
+		}
+#else  
 		if (ret < 0)
 			return ret;
+#endif  
 		mddev->private = conf;
 	}
 	conf = mddev->private;
@@ -383,7 +415,48 @@ static void raid0_free(struct mddev *mddev, void *priv)
 	kfree(conf);
 }
 
+#ifdef MY_ABC_HERE
+ 
+static void Raid0EndRequest(struct bio *bio)
+{
+	int bio_error = bio->bi_error;
+	struct mddev *mddev = NULL;
+	struct md_rdev *rdev = NULL;
+	struct bio *data_bio;
 
+	data_bio = bio->bi_private;
+
+	rdev = (struct md_rdev *)data_bio->bi_next;
+	mddev = rdev->mddev;
+
+	bio->bi_end_io = data_bio->bi_end_io;
+	bio->bi_private = data_bio->bi_private;
+
+	if (bio_error) {
+		if (-ENODEV == bio_error) {
+			syno_md_error(mddev, rdev);
+		} else {
+			 
+#ifdef MY_ABC_HERE
+#ifdef MY_ABC_HERE
+			if (bio_flagged(bio, BIO_AUTO_REMAP)) {
+				SynoReportBadSector(bio->bi_iter.bi_sector, bio->bi_rw, mddev->md_minor, bio->bi_bdev, __FUNCTION__);
+			}
+#else  
+			SynoReportBadSector(bio->bi_iter.bi_sector, bio->bi_rw, mddev->md_minor, bio->bi_bdev, __FUNCTION__);
+#endif  
+#endif  
+			md_error(mddev, rdev);
+		}
+	}
+
+	atomic_dec(&rdev->nr_pending);
+	bio_put(data_bio);
+	 
+	bio_endio(bio);
+}
+#endif  
+ 
 static inline int is_io_in_chunk_boundary(struct mddev *mddev,
 			unsigned int chunk_sects, struct bio *bio)
 {
@@ -417,8 +490,26 @@ static void raid0_make_request(struct mddev *mddev, struct bio *bio)
 			(likely(is_power_of_2(chunk_sects))
 			 ? (sector & (chunk_sects-1))
 			 : sector_div(sector, chunk_sects));
+#ifdef MY_ABC_HERE
+		struct bio *data_bio;
+#endif  
 
-		
+#ifdef MY_ABC_HERE
+		 
+#ifdef MY_ABC_HERE
+		if (mddev->nodev_and_crashed) {
+#else  
+		if (mddev->degraded) {
+#endif  
+#ifdef  MY_ABC_HERE
+		syno_flashcache_return_error(bio);
+#else
+			bio_endio(bio);
+#endif  
+			return;
+		}
+#endif  
+
 		sector = bio->bi_iter.bi_sector;
 
 		if (sectors < bio_sectors(bio)) {
@@ -436,18 +527,145 @@ static void raid0_make_request(struct mddev *mddev, struct bio *bio)
 
 		if (unlikely((split->bi_rw & REQ_DISCARD) &&
 			 !blk_queue_discard(bdev_get_queue(split->bi_bdev)))) {
-			
+			 
 			bio_endio(split);
 		} else
+#ifdef MY_ABC_HERE
+		{
+			data_bio = bio_clone(split, GFP_NOIO);
+
+			if (data_bio) {
+				atomic_inc(&tmp_dev->nr_pending);
+				data_bio->bi_end_io = split->bi_end_io;
+				data_bio->bi_private = split->bi_private;
+				data_bio->bi_next = (void *)tmp_dev;
+
+				split->bi_end_io = Raid0EndRequest;
+				split->bi_private = data_bio;
+			}
+
 			generic_make_request(split);
+		}
+#else  
+			generic_make_request(split);
+#endif  
+
 	} while (split != bio);
 }
 
+#ifdef MY_ABC_HERE
+	static void
+syno_raid0_status(struct seq_file *seq, struct mddev *mddev)
+{
+	int k;
+	struct r0conf *conf = mddev->private;
+	struct md_rdev *rdev = NULL;
+
+	seq_printf(seq, " %dk chunks", mddev->chunk_sectors/2);
+	seq_printf(seq, " [%d/%d] [", mddev->raid_disks, mddev->raid_disks - mddev->degraded);
+	for (k = 0; k < conf->strip_zone[0].nb_dev; k++) {
+		rdev = conf->devlist[k];
+		if(rdev) {
+#ifdef MY_ABC_HERE
+			seq_printf (seq, "%s", 
+						test_bit(In_sync, &rdev->flags) ? 
+						(test_bit(DiskError, &rdev->flags) ? "E" : "U") : "_");
+#else  
+			seq_printf (seq, "%s", "U");
+#endif  
+		} else {
+			seq_printf (seq, "%s", "_");
+		}
+	}
+	seq_printf (seq, "]");
+}
+#else  
 static void raid0_status(struct seq_file *seq, struct mddev *mddev)
 {
 	seq_printf(seq, " %dk chunks", mddev->chunk_sectors / 2);
 	return;
 }
+#endif  
+
+#ifdef MY_ABC_HERE
+int SynoRaid0RemoveDisk(struct mddev *mddev, struct md_rdev *rdev)
+{
+	int err = 0;
+	char nm[20];
+	struct r0conf *conf = mddev->private;
+
+	if (!rdev) {
+		goto END;
+	}
+
+	if (atomic_read(&rdev->nr_pending)) {
+		 
+		err = -EBUSY;
+		goto END;
+	}
+
+	sprintf(nm,"rd%d", rdev->raid_disk);
+	sysfs_remove_link(&mddev->kobj, nm);
+	conf->devlist[rdev->raid_disk] = NULL;
+	rdev->raid_disk = -1;
+END:
+	return err;
+}
+
+static void SynoRaid0Error(struct mddev *mddev, struct md_rdev *rdev)
+{
+	if (test_and_clear_bit(In_sync, &rdev->flags)) {
+		if (mddev->degraded < mddev->raid_disks) {
+			SYNO_UPDATE_SB_WORK *update_sb = NULL;
+			mddev->degraded++;
+#ifdef MY_ABC_HERE
+			mddev->nodev_and_crashed = 1;
+#endif  
+			set_bit(Faulty, &rdev->flags);
+#ifdef MY_ABC_HERE
+			clear_bit(DiskError, &rdev->flags);
+#endif  
+			set_bit(MD_CHANGE_DEVS, &mddev->flags);
+
+			if (NULL == (update_sb = kzalloc(sizeof(SYNO_UPDATE_SB_WORK), GFP_ATOMIC))) {
+				WARN_ON(!update_sb);
+				goto END;
+			}
+
+			INIT_WORK(&update_sb->work, SynoUpdateSBTask);
+			update_sb->mddev = mddev;
+			schedule_work(&update_sb->work);
+		}
+	} else {
+		set_bit(Faulty, &rdev->flags);
+	}
+END:
+	return;
+}
+
+static void SynoRaid0ErrorInternal(struct mddev *mddev, struct md_rdev *rdev)
+{
+#ifdef MY_ABC_HERE
+	if (!test_bit(DiskError, &rdev->flags)) {
+		SYNO_UPDATE_SB_WORK *update_sb = NULL;
+
+		set_bit(DiskError, &rdev->flags);
+		if (NULL == (update_sb = kzalloc(sizeof(SYNO_UPDATE_SB_WORK), GFP_ATOMIC))) {
+			WARN_ON(!update_sb);
+			goto END;
+		}
+
+		INIT_WORK(&update_sb->work, SynoUpdateSBTask);
+		update_sb->mddev = mddev;
+		schedule_work(&update_sb->work);
+		set_bit(MD_CHANGE_DEVS, &mddev->flags);
+	}
+
+END:
+#endif  
+	return;
+}
+#endif  
 
 static void *raid0_takeover_raid45(struct mddev *mddev)
 {
@@ -593,8 +811,17 @@ static struct md_personality raid0_personality=
 	.make_request	= raid0_make_request,
 	.run		= raid0_run,
 	.free		= raid0_free,
+#ifdef MY_ABC_HERE
+	.status		= syno_raid0_status,
+#else  
 	.status		= raid0_status,
+#endif  
 	.size		= raid0_size,
+#ifdef MY_ABC_HERE
+	.hot_remove_disk    = SynoRaid0RemoveDisk,
+	.error_handler      = SynoRaid0ErrorInternal,
+	.syno_error_handler = SynoRaid0Error,
+#endif  
 	.takeover	= raid0_takeover,
 	.quiesce	= raid0_quiesce,
 	.congested	= raid0_congested,

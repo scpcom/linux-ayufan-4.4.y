@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #define pr_fmt(fmt) "NMI watchdog: " fmt
 
 #include <linux/mm.h>
@@ -67,15 +69,16 @@ static DEFINE_PER_CPU(bool, watchdog_nmi_touch);
 static DEFINE_PER_CPU(unsigned long, hrtimer_interrupts_saved);
 static DEFINE_PER_CPU(struct perf_event *, watchdog_ev);
 #endif
+#ifdef MY_ABC_HERE
+static DEFINE_PER_CPU(unsigned long, softlockup_counter);
+#endif  
 static unsigned long soft_lockup_nmi_warn;
-
-
 
 #ifdef CONFIG_HARDLOCKUP_DETECTOR
 unsigned int __read_mostly hardlockup_panic =
 			CONFIG_BOOTPARAM_HARDLOCKUP_PANIC_VALUE;
 static unsigned long hardlockup_allcpu_dumped;
-
+ 
 void hardlockup_detector_disable(void)
 {
 	watchdog_enabled &= ~NMI_WATCHDOG_ENABLED;
@@ -138,24 +141,29 @@ static int __init hardlockup_all_cpu_backtrace_setup(char *str)
 __setup("hardlockup_all_cpu_backtrace=", hardlockup_all_cpu_backtrace_setup);
 #endif
 
-
 static int get_softlockup_thresh(void)
 {
+#ifdef MY_ABC_HERE
+	return watchdog_thresh * 4;
+#else  
 	return watchdog_thresh * 2;
+#endif  
 }
-
 
 static unsigned long get_timestamp(void)
 {
-	return running_clock() >> 30LL;  
+	return running_clock() >> 30LL;   
 }
 
 static void set_sample_period(void)
 {
-	
+	 
+#ifdef MY_ABC_HERE
+	sample_period = (get_softlockup_thresh() / 2) * ((u64)NSEC_PER_SEC / 5);
+#else  
 	sample_period = get_softlockup_thresh() * ((u64)NSEC_PER_SEC / 5);
+#endif  
 }
-
 
 static void __touch_watchdog(void)
 {
@@ -326,13 +334,22 @@ static enum hrtimer_restart watchdog_timer_fn(struct hrtimer *hrtimer)
 		}
 
 		if (softlockup_all_cpu_backtrace) {
-			
+			 
 			if (test_and_set_bit(0, &soft_lockup_nmi_warn)) {
-				
+				 
 				__this_cpu_write(soft_watchdog_warn, true);
 				return HRTIMER_RESTART;
 			}
 		}
+
+#ifdef MY_ABC_HERE
+		if (__this_cpu_read(softlockup_counter) >= CONFIG_SYNO_SOFTLOCKUP_COUNTER_MAX) {
+			__this_cpu_write(soft_watchdog_warn, false);
+			return HRTIMER_RESTART;
+		} else {
+			__this_cpu_inc(softlockup_counter);
+		}
+#endif  
 
 		pr_emerg("BUG: soft lockup - CPU#%d stuck for %us! [%s:%d]\n",
 			smp_processor_id(), duration,

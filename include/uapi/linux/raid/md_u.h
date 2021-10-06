@@ -1,23 +1,20 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #ifndef _UAPI_MD_U_H
 #define _UAPI_MD_U_H
 
-
 #define MD_MAJOR_VERSION                0
 #define MD_MINOR_VERSION                90
-
+ 
 #define MD_PATCHLEVEL_VERSION           3
-
-
-
 
 #define RAID_VERSION		_IOR (MD_MAJOR, 0x10, mdu_version_t)
 #define GET_ARRAY_INFO		_IOR (MD_MAJOR, 0x11, mdu_array_info_t)
 #define GET_DISK_INFO		_IOR (MD_MAJOR, 0x12, mdu_disk_info_t)
 #define RAID_AUTORUN		_IO (MD_MAJOR, 0x14)
 #define GET_BITMAP_FILE		_IOR (MD_MAJOR, 0x15, mdu_bitmap_file_t)
-
 
 #define CLEAR_ARRAY		_IO (MD_MAJOR, 0x20)
 #define ADD_NEW_DISK		_IOW (MD_MAJOR, 0x21, mdu_disk_info_t)
@@ -32,14 +29,23 @@
 #define HOT_GENERATE_ERROR	_IO (MD_MAJOR, 0x2a)
 #define SET_BITMAP_FILE		_IOW (MD_MAJOR, 0x2b, int)
 
-
 #define RUN_ARRAY		_IOW (MD_MAJOR, 0x30, mdu_param_t)
-
+ 
 #define STOP_ARRAY		_IO (MD_MAJOR, 0x32)
 #define STOP_ARRAY_RO		_IO (MD_MAJOR, 0x33)
 #define RESTART_ARRAY_RW	_IO (MD_MAJOR, 0x34)
 #define CLUSTERED_DISK_NACK	_IO (MD_MAJOR, 0x35)
 
+#ifdef MY_ABC_HERE
+#define GET_SYNC_STATUS    _IOR(MD_MAJOR, 0x60, MD_SYNC_STATUS)
+#define GET_ARRAY_STATUS    _IOR(MD_MAJOR, 0x61, int)
+
+typedef struct __tag_MD_SYNC_STATUS {
+	unsigned long long inSync;      
+	unsigned long long finishSectors;
+	unsigned long long totalSectors;
+} MD_SYNC_STATUS;
+#endif  
 
 #define MdpMinorShift 6
 

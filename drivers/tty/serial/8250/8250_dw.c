@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Synopsys DesignWare 8250 driver.
  *
@@ -62,6 +65,10 @@ struct dw8250_data {
 	struct clk		*pclk;
 	struct reset_control	*rst;
 	struct uart_8250_dma	dma;
+#ifdef MY_DEF_HERE
+	u32             	isr_st_mask;
+	void __iomem *  	isr_reg;
+#endif /* MY_DEF_HERE */
 
 	unsigned int		skip_autocfg:1;
 	unsigned int		uart_16550_compatible:1;
@@ -192,10 +199,23 @@ static int dw8250_handle_irq(struct uart_port *p)
 	unsigned int iir = p->serial_in(p, UART_IIR);
 
 	if (serial8250_handle_irq(p, iir)) {
+#ifdef MY_DEF_HERE
+		if (d->isr_reg)
+			writel(d->isr_st_mask, d->isr_reg);
+#endif /* MY_DEF_HERE */
 		return 1;
 	} else if ((iir & UART_IIR_BUSY) == UART_IIR_BUSY) {
+#ifdef MY_DEF_HERE
+		/* Clear the USR and write the LCR again. */
+		(void)p->serial_in(p, DW_UART_USR);
+		//p->serial_out(p, UART_LCR, d->last_lcr);
+
+		if (d->isr_reg)
+			writel(d->isr_st_mask, d->isr_reg);
+#else
 		/* Clear the USR */
 		(void)p->serial_in(p, d->usr_reg);
+#endif /* MY_DEF_HERE */
 
 		return 1;
 	}
@@ -335,9 +355,15 @@ static int dw8250_probe(struct platform_device *pdev)
 {
 	struct uart_8250_port uart = {};
 	struct resource *regs = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+#ifdef MY_DEF_HERE
+	struct resource *isr_regs = platform_get_resource(pdev, IORESOURCE_MEM, 1);
+#endif /* MY_DEF_HERE */
 	int irq = platform_get_irq(pdev, 0);
 	struct uart_port *p = &uart.port;
 	struct dw8250_data *data;
+#ifdef MY_DEF_HERE
+	struct device_node *node = pdev->dev.of_node;
+#endif /* MY_DEF_HERE */
 	int err;
 	u32 val;
 
@@ -416,7 +442,9 @@ static int dw8250_probe(struct platform_device *pdev)
 
 	/* Always ask for fixed clock rate from a property. */
 	device_property_read_u32(p->dev, "clock-frequency", &p->uartclk);
-
+#ifdef MY_DEF_HERE
+	printk("####1 p->uartclk:%u\n", p->uartclk);
+#endif
 	/* If there is separate baudclk, get the rate from it. */
 	data->clk = devm_clk_get(&pdev->dev, "baudclk");
 	if (IS_ERR(data->clk) && PTR_ERR(data->clk) != -EPROBE_DEFER)
@@ -428,10 +456,20 @@ static int dw8250_probe(struct platform_device *pdev)
 		if (err)
 			dev_warn(&pdev->dev, "could not enable optional baudclk: %d\n",
 				 err);
+#ifdef MY_DEF_HERE
+		else if (!p->uartclk) // only get uartclk if DTS doesn't set "clock-frequency"
+		{	
+			p->uartclk = clk_get_rate(data->clk);
+			printk("####2 p->uartclk:%u\n", p->uartclk);
+		}
+#else
 		else
 			p->uartclk = clk_get_rate(data->clk);
+#endif
 	}
-
+#ifdef MY_DEF_HERE
+	printk("####3 p->uartclk:%u\n", p->uartclk);
+#endif
 	/* If no clock rate is defined, fail. */
 	if (!p->uartclk) {
 		dev_err(&pdev->dev, "clock rate not defined\n");
@@ -457,8 +495,23 @@ static int dw8250_probe(struct platform_device *pdev)
 		goto err_pclk;
 	}
 	if (!IS_ERR(data->rst))
-		reset_control_deassert(data->rst);
+#ifdef MY_DEF_HERE
+	{	
+	reset_control_reset(data->rst); // RTK change, from deassert to reset
 
+        data->dma.rx_param = data;
+        data->dma.tx_param = data;
+	}	
+#else
+		reset_control_deassert(data->rst);
+#endif
+
+#ifdef MY_DEF_HERE
+	if (!of_property_read_u32_index(node, "interrupts-st-mask", 0, &data->isr_st_mask))
+		data->isr_reg = devm_ioremap(&pdev->dev, isr_regs->start, resource_size(isr_regs));
+	else
+		data->isr_reg = 0;
+#endif /* MY_DEF_HERE */
 	dw8250_quirks(p, data);
 
 	/* If the Busy Functionality is not implemented, don't handle it */
@@ -541,6 +594,10 @@ static int dw8250_suspend(struct device *dev)
 static int dw8250_resume(struct device *dev)
 {
 	struct dw8250_data *data = dev_get_drvdata(dev);
+#ifdef MY_DEF_HERE
+	if (!IS_ERR(data->rst))
+		reset_control_reset(data->rst); // RTK change, RST must be triggered after suspend
+#endif
 
 	serial8250_resume_port(data->line);
 

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * r8169.c: RealTek 8169/8168/8101 ethernet driver.
  *
@@ -8237,7 +8240,18 @@ static int rtl_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	}
 
 	/* ioremap MMIO region */
+#ifdef MY_DEF_HERE
+	if(pdev->bus->number == 0)
+	{
+		ioaddr = ioremap(0x9804f000, R8169_REGS_SIZE);
+	}
+	else
+	{
+		ioaddr = ioremap(0x9803C000, R8169_REGS_SIZE);
+	}
+#else
 	ioaddr = ioremap(pci_resource_start(pdev, region), R8169_REGS_SIZE);
+#endif /* MY_DEF_HERE */
 	if (!ioaddr) {
 		netif_err(tp, probe, dev, "cannot remap MMIO, aborting\n");
 		rc = -EIO;

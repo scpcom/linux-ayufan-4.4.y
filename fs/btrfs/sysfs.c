@@ -103,6 +103,9 @@ static ssize_t btrfs_feature_attr_store(struct kobject *kobj,
 	if (!fs_info)
 		return -EPERM;
 
+	if (fs_info->sb->s_flags & MS_RDONLY)
+		return -EROFS;
+
 	ret = kstrtoul(skip_spaces(buf), 0, &val);
 	if (ret)
 		return ret;
@@ -341,7 +344,13 @@ static ssize_t btrfs_label_show(struct kobject *kobj,
 {
 	struct btrfs_fs_info *fs_info = to_fs_info(kobj);
 	char *label = fs_info->super_copy->label;
-	return snprintf(buf, PAGE_SIZE, label[0] ? "%s\n" : "%s", label);
+	ssize_t ret;
+
+	spin_lock(&fs_info->super_lock);
+	ret = snprintf(buf, PAGE_SIZE, label[0] ? "%s\n" : "%s", label);
+	spin_unlock(&fs_info->super_lock);
+
+	return ret;
 }
 
 static ssize_t btrfs_label_store(struct kobject *kobj,
@@ -351,10 +360,12 @@ static ssize_t btrfs_label_store(struct kobject *kobj,
 	struct btrfs_fs_info *fs_info = to_fs_info(kobj);
 	size_t p_len;
 
+	if (!fs_info)
+		return -EPERM;
+
 	if (fs_info->sb->s_flags & MS_RDONLY)
 		return -EROFS;
 
-	
 	p_len = strcspn(buf, "\n");
 
 	if (p_len >= BTRFS_LABEL_SIZE)
@@ -741,6 +752,30 @@ int btrfs_sysfs_add_mounted(struct btrfs_fs_info *fs_info)
 failure:
 	btrfs_sysfs_remove_mounted(fs_info);
 	return error;
+}
+
+void btrfs_sysfs_feature_update(struct btrfs_fs_info *fs_info,
+		u64 bit, enum btrfs_feature_set set)
+{
+	struct btrfs_fs_devices *fs_devs;
+	struct kobject *fsid_kobj;
+	u64 features;
+	int ret;
+
+	if (!fs_info)
+		return;
+
+	features = get_features(fs_info, set);
+	ASSERT(bit & supported_feature_masks[set]);
+
+	fs_devs = fs_info->fs_devices;
+	fsid_kobj = &fs_devs->fsid_kobj;
+
+	if (!fsid_kobj->state_initialized)
+		return;
+
+	sysfs_remove_group(fsid_kobj, &btrfs_feature_attr_group);
+	ret = sysfs_create_group(fsid_kobj, &btrfs_feature_attr_group);
 }
 
 static int btrfs_init_debugfs(void)

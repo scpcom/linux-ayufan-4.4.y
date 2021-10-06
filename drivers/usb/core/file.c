@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/module.h>
 #include <linux/errno.h>
 #include <linux/rwsem.h>
@@ -114,6 +116,75 @@ void usb_major_cleanup(void)
 	unregister_chrdev(USB_MAJOR, "usb");
 }
 
+#ifdef MY_ABC_HERE
+ 
+int usb_register_dev1(struct usb_interface *intf,
+                     struct usb_class_driver *class_driver, int minor_offset)
+{
+	int retval = -EINVAL;
+	int minor_base = class_driver->minor_base;
+	int minor = 0;
+	char name[20];
+	char *temp;
+
+	if (minor_offset < 0) {
+		printk("%s (%d) Illegal minor_offset %d. Reset to 0\n",
+				__FILE__, __LINE__, minor_offset);
+		minor_offset = 0;
+	}
+#ifdef CONFIG_USB_DYNAMIC_MINORS
+	 
+	minor_base = 0;
+#endif
+	intf->minor = -1;
+
+	dev_dbg(&intf->dev, "looking for a minor, starting at %d\n", minor_base);
+
+	if (class_driver->fops == NULL)
+		goto exit;
+
+	down_write(&minor_rwsem);
+	for (minor = minor_base+minor_offset; minor < MAX_USB_MINORS; ++minor) {
+		if (usb_minors[minor])
+				continue;
+
+		printk("Get empty minor:%d\n", minor);
+		usb_minors[minor] = class_driver->fops;
+
+		retval = 0;
+		break;
+	}
+	up_write(&minor_rwsem);
+
+	if (retval)
+		goto exit;
+
+	retval = init_usb_class();
+	if (retval)
+		goto exit;
+
+	intf->minor = minor;
+
+	snprintf(name, sizeof(name), class_driver->name, minor - minor_base);
+	temp = strrchr(name, '/');
+	if (temp && (temp[1] != '\0'))
+		++temp;
+	else
+		temp = name;
+	intf->usb_dev = device_create(usb_class->class, &intf->dev,
+				      MKDEV(USB_MAJOR, minor), class_driver,
+				      "%s", temp);
+	if (IS_ERR(intf->usb_dev)) {
+		down_write(&minor_rwsem);
+		usb_minors[intf->minor] = NULL;
+		up_write(&minor_rwsem);
+		retval = PTR_ERR(intf->usb_dev);
+	}
+exit:
+	return retval;
+}
+EXPORT_SYMBOL(usb_register_dev1);
+#endif  
 
 int usb_register_dev(struct usb_interface *intf,
 		     struct usb_class_driver *class_driver)

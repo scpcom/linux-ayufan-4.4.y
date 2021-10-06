@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #ifndef _AHCI_H
 #define _AHCI_H
 
@@ -17,10 +19,20 @@
 #define EM_MSG_LED_VALUE_OFF          0xfff80000
 #define EM_MSG_LED_VALUE_ON           0x00010000
 
+#ifdef MY_ABC_HERE
+#define EM_MSG_LOCATE_LED_MASK        0x00380000
+#define EM_MSG_FAULT_LED_MASK         0x01c00000
+
+enum {
+	ATA_FLAG_SW_LOCATE      = (1 << 24),  
+	ATA_FLAG_SW_FAULT       = (1 << 25),  
+};
+#endif  
+
 enum {
 	AHCI_MAX_PORTS		= 32,
 	AHCI_MAX_CLKS		= 5,
-	AHCI_MAX_SG		= 168, 
+	AHCI_MAX_SG		= 168,  
 	AHCI_DMA_BOUNDARY	= 0xffffffff,
 	AHCI_MAX_CMDS		= 32,
 	AHCI_CMD_SZ		= 32,
@@ -136,97 +148,90 @@ enum {
 				  PORT_IRQ_SDB_FIS | PORT_IRQ_DMAS_FIS |
 				  PORT_IRQ_PIOS_FIS | PORT_IRQ_D2H_REG_FIS,
 
-	
-	PORT_CMD_ASP		= (1 << 27), 
-	PORT_CMD_ALPE		= (1 << 26), 
-	PORT_CMD_ATAPI		= (1 << 24), 
-	PORT_CMD_FBSCP		= (1 << 22), 
-	PORT_CMD_ESP		= (1 << 21), 
-	PORT_CMD_HPCP		= (1 << 18), 
-	PORT_CMD_PMP		= (1 << 17), 
-	PORT_CMD_LIST_ON	= (1 << 15), 
-	PORT_CMD_FIS_ON		= (1 << 14), 
-	PORT_CMD_FIS_RX		= (1 << 4), 
-	PORT_CMD_CLO		= (1 << 3), 
-	PORT_CMD_POWER_ON	= (1 << 2), 
-	PORT_CMD_SPIN_UP	= (1 << 1), 
-	PORT_CMD_START		= (1 << 0), 
+	PORT_CMD_ASP		= (1 << 27),  
+	PORT_CMD_ALPE		= (1 << 26),  
+	PORT_CMD_ATAPI		= (1 << 24),  
+	PORT_CMD_FBSCP		= (1 << 22),  
+	PORT_CMD_ESP		= (1 << 21),  
+	PORT_CMD_HPCP		= (1 << 18),  
+	PORT_CMD_PMP		= (1 << 17),  
+	PORT_CMD_LIST_ON	= (1 << 15),  
+	PORT_CMD_FIS_ON		= (1 << 14),  
+	PORT_CMD_FIS_RX		= (1 << 4),  
+	PORT_CMD_CLO		= (1 << 3),  
+	PORT_CMD_POWER_ON	= (1 << 2),  
+	PORT_CMD_SPIN_UP	= (1 << 1),  
+	PORT_CMD_START		= (1 << 0),  
 
-	PORT_CMD_ICC_MASK	= (0xf << 28), 
-	PORT_CMD_ICC_ACTIVE	= (0x1 << 28), 
-	PORT_CMD_ICC_PARTIAL	= (0x2 << 28), 
-	PORT_CMD_ICC_SLUMBER	= (0x6 << 28), 
+	PORT_CMD_ICC_MASK	= (0xf << 28),  
+	PORT_CMD_ICC_ACTIVE	= (0x1 << 28),  
+	PORT_CMD_ICC_PARTIAL	= (0x2 << 28),  
+	PORT_CMD_ICC_SLUMBER	= (0x6 << 28),  
 
-	
-	PORT_FBS_DWE_OFFSET	= 16, 
-	PORT_FBS_ADO_OFFSET	= 12, 
-	PORT_FBS_DEV_OFFSET	= 8,  
-	PORT_FBS_DEV_MASK	= (0xf << PORT_FBS_DEV_OFFSET),  
-	PORT_FBS_SDE		= (1 << 2), 
-	PORT_FBS_DEC		= (1 << 1), 
-	PORT_FBS_EN		= (1 << 0), 
+	PORT_FBS_DWE_OFFSET	= 16,  
+	PORT_FBS_ADO_OFFSET	= 12,  
+	PORT_FBS_DEV_OFFSET	= 8,   
+	PORT_FBS_DEV_MASK	= (0xf << PORT_FBS_DEV_OFFSET),   
+	PORT_FBS_SDE		= (1 << 2),  
+	PORT_FBS_DEC		= (1 << 1),  
+	PORT_FBS_EN		= (1 << 0),  
 
-	
-	PORT_DEVSLP_DM_OFFSET	= 25,             
-	PORT_DEVSLP_DM_MASK	= (0xf << 25),    
-	PORT_DEVSLP_DITO_OFFSET	= 15,             
-	PORT_DEVSLP_MDAT_OFFSET	= 10,             
-	PORT_DEVSLP_DETO_OFFSET	= 2,              
-	PORT_DEVSLP_DSP		= (1 << 1),       
-	PORT_DEVSLP_ADSE	= (1 << 0),       
-
-	
+	PORT_DEVSLP_DM_OFFSET	= 25,              
+	PORT_DEVSLP_DM_MASK	= (0xf << 25),     
+	PORT_DEVSLP_DITO_OFFSET	= 15,              
+	PORT_DEVSLP_MDAT_OFFSET	= 10,              
+	PORT_DEVSLP_DETO_OFFSET	= 2,               
+	PORT_DEVSLP_DSP		= (1 << 1),        
+	PORT_DEVSLP_ADSE	= (1 << 0),        
 
 #define AHCI_HFLAGS(flags)		.private_data	= (void *)(flags)
 
 	AHCI_HFLAG_NO_NCQ		= (1 << 0),
-	AHCI_HFLAG_IGN_IRQ_IF_ERR	= (1 << 1), 
-	AHCI_HFLAG_IGN_SERR_INTERNAL	= (1 << 2), 
-	AHCI_HFLAG_32BIT_ONLY		= (1 << 3), 
-	AHCI_HFLAG_MV_PATA		= (1 << 4), 
-	AHCI_HFLAG_NO_MSI		= (1 << 5), 
-	AHCI_HFLAG_NO_PMP		= (1 << 6), 
-	AHCI_HFLAG_SECT255		= (1 << 8), 
-	AHCI_HFLAG_YES_NCQ		= (1 << 9), 
-	AHCI_HFLAG_NO_SUSPEND		= (1 << 10), 
-	AHCI_HFLAG_SRST_TOUT_IS_OFFLINE	= (1 << 11), 
-	AHCI_HFLAG_NO_SNTF		= (1 << 12), 
-	AHCI_HFLAG_NO_FPDMA_AA		= (1 << 13), 
-	AHCI_HFLAG_YES_FBS		= (1 << 14), 
-	AHCI_HFLAG_DELAY_ENGINE		= (1 << 15), 
-	AHCI_HFLAG_MULTI_MSI		= (1 << 16), 
-	AHCI_HFLAG_NO_DEVSLP		= (1 << 17), 
-	AHCI_HFLAG_NO_FBS		= (1 << 18), 
-	AHCI_HFLAG_EDGE_IRQ		= (1 << 19), 
-
-	
+	AHCI_HFLAG_IGN_IRQ_IF_ERR	= (1 << 1),  
+	AHCI_HFLAG_IGN_SERR_INTERNAL	= (1 << 2),  
+	AHCI_HFLAG_32BIT_ONLY		= (1 << 3),  
+	AHCI_HFLAG_MV_PATA		= (1 << 4),  
+	AHCI_HFLAG_NO_MSI		= (1 << 5),  
+	AHCI_HFLAG_NO_PMP		= (1 << 6),  
+	AHCI_HFLAG_SECT255		= (1 << 8),  
+	AHCI_HFLAG_YES_NCQ		= (1 << 9),  
+	AHCI_HFLAG_NO_SUSPEND		= (1 << 10),  
+	AHCI_HFLAG_SRST_TOUT_IS_OFFLINE	= (1 << 11),  
+	AHCI_HFLAG_NO_SNTF		= (1 << 12),  
+	AHCI_HFLAG_NO_FPDMA_AA		= (1 << 13),  
+	AHCI_HFLAG_YES_FBS		= (1 << 14),  
+	AHCI_HFLAG_DELAY_ENGINE		= (1 << 15),  
+	AHCI_HFLAG_MULTI_MSI		= (1 << 16),  
+	AHCI_HFLAG_NO_DEVSLP		= (1 << 17),  
+	AHCI_HFLAG_NO_FBS		= (1 << 18),  
+	AHCI_HFLAG_EDGE_IRQ		= (1 << 19),  
+#ifdef MY_ABC_HERE
+	AHCI_HFLAG_YES_MV9235_FIX   = (1 << 31),
+#endif  
 
 	AHCI_FLAG_COMMON		= ATA_FLAG_SATA | ATA_FLAG_PIO_DMA |
 					  ATA_FLAG_ACPI_SATA | ATA_FLAG_AN,
 
-	ICH_MAP				= 0x90, 
+	ICH_MAP				= 0x90,  
 
-	
 	EM_MAX_SLOTS			= 8,
 	EM_MAX_RETRY			= 5,
 
-	
-	EM_CTL_RST		= (1 << 9), 
-	EM_CTL_TM		= (1 << 8), 
-	EM_CTL_MR		= (1 << 0), 
-	EM_CTL_ALHD		= (1 << 26), 
-	EM_CTL_XMT		= (1 << 25), 
-	EM_CTL_SMB		= (1 << 24), 
-	EM_CTL_SGPIO		= (1 << 19), 
-	EM_CTL_SES		= (1 << 18), 
-	EM_CTL_SAFTE		= (1 << 17), 
-	EM_CTL_LED		= (1 << 16), 
+	EM_CTL_RST		= (1 << 9),  
+	EM_CTL_TM		= (1 << 8),  
+	EM_CTL_MR		= (1 << 0),  
+	EM_CTL_ALHD		= (1 << 26),  
+	EM_CTL_XMT		= (1 << 25),  
+	EM_CTL_SMB		= (1 << 24),  
+	EM_CTL_SGPIO		= (1 << 19),  
+	EM_CTL_SES		= (1 << 18),  
+	EM_CTL_SAFTE		= (1 << 17),  
+	EM_CTL_LED		= (1 << 16),  
 
-	
-	EM_MSG_TYPE_LED		= (1 << 0), 
-	EM_MSG_TYPE_SAFTE	= (1 << 1), 
-	EM_MSG_TYPE_SES2	= (1 << 2), 
-	EM_MSG_TYPE_SGPIO	= (1 << 3), 
+	EM_MSG_TYPE_LED		= (1 << 0),  
+	EM_MSG_TYPE_SAFTE	= (1 << 1),  
+	EM_MSG_TYPE_SES2	= (1 << 2),  
+	EM_MSG_TYPE_SGPIO	= (1 << 3),  
 };
 
 struct ahci_cmd_hdr {
@@ -250,6 +255,12 @@ struct ahci_em_priv {
 	unsigned long saved_activity;
 	unsigned long activity;
 	unsigned long led_state;
+#ifdef MY_ABC_HERE
+	unsigned long saved_locate;
+	unsigned long locate;
+	unsigned long saved_fault;
+	unsigned long fault;
+#endif  
 };
 
 struct ahci_port_priv {
@@ -320,6 +331,19 @@ extern struct ata_port_operations ahci_ops;
 extern struct ata_port_operations ahci_platform_ops;
 extern struct ata_port_operations ahci_pmp_retry_srst_ops;
 
+#ifdef MY_ABC_HERE
+extern int sata_syno_ahci_defer_cmd(struct ata_queued_cmd *qc);
+#endif  
+
+#ifdef MY_DEF_HERE
+extern int ahci_syno_pmp_3x26_qc_defer(struct ata_queued_cmd *qc);
+#endif  
+
+#ifdef MY_ABC_HERE
+extern struct ata_device *ata_scsi_find_dev(struct ata_port *ap,
+                                            const struct scsi_device *scsidev);
+#endif  
+
 unsigned int ahci_dev_classify(struct ata_port *ap);
 void ahci_fill_cmd_slot(struct ahci_port_priv *pp, unsigned int tag,
 			u32 opts);
@@ -345,6 +369,14 @@ int ahci_reset_em(struct ata_host *host);
 void ahci_print_info(struct ata_host *host, const char *scc_s);
 int ahci_host_activate(struct ata_host *host, struct scsi_host_template *sht);
 void ahci_error_handler(struct ata_port *ap);
+
+#ifdef MY_ABC_HERE
+static inline void __iomem *ahci_host_base(struct ata_host *host)
+{
+	struct ahci_host_priv *hpriv = host->private_data;
+	return hpriv->mmio;
+}
+#endif  
 
 static inline void __iomem *__ahci_port_base(struct ata_host *host,
 					     unsigned int port_no)

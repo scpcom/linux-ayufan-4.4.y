@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #if defined(CONFIG_SERIAL_8250_CONSOLE) && defined(CONFIG_MAGIC_SYSRQ)
 #define SUPPORT_SYSRQ
 #endif
@@ -1319,6 +1321,10 @@ static int serial8250_default_handle_irq(struct uart_port *port)
 	return ret;
 }
 
+#ifdef MY_DEF_HERE
+int gSynoBuzzerMutePressed = 0;
+EXPORT_SYMBOL(gSynoBuzzerMutePressed);
+#endif  
 
 static int exar_handle_irq(struct uart_port *port)
 {
@@ -1330,10 +1336,26 @@ static int exar_handle_irq(struct uart_port *port)
 
 	if ((port->type == PORT_XR17V35X) ||
 	   (port->type == PORT_XR17D15X)) {
+#ifdef MY_DEF_HERE
+		unsigned long flags;
+		unsigned char mpiolow, mpiohigh;
+		spin_lock_irqsave(&port->lock, flags);
+#endif
 		int0 = serial_port_in(port, 0x80);
 		int1 = serial_port_in(port, 0x81);
 		int2 = serial_port_in(port, 0x82);
 		int3 = serial_port_in(port, 0x83);
+#ifdef MY_DEF_HERE
+		if (int1 & 0x6) {
+			mpiolow = serial_port_in(port, 0x90);
+			mpiohigh = serial_port_in(port, 0x96);
+			if (mpiolow & 0x1) {
+				gSynoBuzzerMutePressed = 1;
+			}
+			ret = 1;
+		}
+		spin_unlock_irqrestore(&port->lock, flags);
+#endif
 	}
 
 	return ret;
@@ -2430,7 +2452,11 @@ static unsigned int probe_baud(struct uart_port *port)
 
 int serial8250_console_setup(struct uart_port *port, char *options, bool probe)
 {
+#ifdef MY_ABC_HERE
+	int baud = 115200;
+#else
 	int baud = 9600;
+#endif  
 	int bits = 8;
 	int parity = 'n';
 	int flow = 'n';

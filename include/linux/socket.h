@@ -1,12 +1,14 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_SOCKET_H
 #define _LINUX_SOCKET_H
 
-
-#include <asm/socket.h>			
-#include <linux/sockios.h>		
-#include <linux/uio.h>			
-#include <linux/types.h>		
-#include <linux/compiler.h>		
+#include <asm/socket.h>			 
+#include <linux/sockios.h>		 
+#include <linux/uio.h>			 
+#include <linux/types.h>		 
+#include <linux/compiler.h>		 
 #include <uapi/linux/socket.h>
 
 struct pid;
@@ -209,50 +211,55 @@ struct ucred {
 #define PF_VSOCK	AF_VSOCK
 #define PF_MAX		AF_MAX
 
-
 #define SOMAXCONN	128
 
-
- 
 #define MSG_OOB		1
 #define MSG_PEEK	2
 #define MSG_DONTROUTE	4
-#define MSG_TRYHARD     4       
+#define MSG_TRYHARD     4        
 #define MSG_CTRUNC	8
-#define MSG_PROBE	0x10	
+#define MSG_PROBE	0x10	 
 #define MSG_TRUNC	0x20
-#define MSG_DONTWAIT	0x40	
-#define MSG_EOR         0x80	
-#define MSG_WAITALL	0x100	
+#define MSG_DONTWAIT	0x40	 
+#define MSG_EOR         0x80	 
+#define MSG_WAITALL	0x100	 
 #define MSG_FIN         0x200
 #define MSG_SYN		0x400
-#define MSG_CONFIRM	0x800	
+#define MSG_CONFIRM	0x800	 
 #define MSG_RST		0x1000
-#define MSG_ERRQUEUE	0x2000	
-#define MSG_NOSIGNAL	0x4000	
-#define MSG_MORE	0x8000	
-#define MSG_WAITFORONE	0x10000	
-#define MSG_SENDPAGE_NOTLAST 0x20000 
+#define MSG_ERRQUEUE	0x2000	 
+#define MSG_NOSIGNAL	0x4000	 
+#define MSG_MORE	0x8000	 
+#define MSG_WAITFORONE	0x10000	 
+#define MSG_SENDPAGE_NOTLAST 0x20000  
 #define MSG_EOF         MSG_FIN
 
-#define MSG_FASTOPEN	0x20000000	
-#define MSG_CMSG_CLOEXEC 0x40000000	
-#if defined(CONFIG_COMPAT)
-#define MSG_CMSG_COMPAT	0x80000000	
-#else
-#define MSG_CMSG_COMPAT	0		
+#ifdef MY_ABC_HERE
+#define MSG_KERNSPACE       0x40000
+#define MSG_NOCATCHSIGNAL   0x80000
+#endif  
+
+#define MSG_FASTOPEN	0x20000000	 
+#define MSG_CMSG_CLOEXEC 0x40000000	 
+#ifdef CONFIG_SENDFILE_PATCH
+#define MSG_KERNSPACE       0x40000
+#define MSG_NOCATCHSIGNAL   0x80000
 #endif
 
-
+#if defined(CONFIG_COMPAT)
+#define MSG_CMSG_COMPAT	0x80000000	 
+#else
+#define MSG_CMSG_COMPAT	0		 
+#endif
 
 #define SOL_IP		0
-
+ 
 #define SOL_TCP		6
 #define SOL_UDP		17
 #define SOL_IPV6	41
 #define SOL_ICMPV6	58
 #define SOL_SCTP	132
-#define SOL_UDPLITE	136     
+#define SOL_UDPLITE	136      
 #define SOL_RAW		255
 #define SOL_IPX		256
 #define SOL_AX25	257

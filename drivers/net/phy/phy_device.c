@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
 #include <linux/kernel.h>
@@ -293,6 +295,17 @@ int phy_device_register(struct phy_device *phydev)
 		pr_err("PHY %d failed to add\n", phydev->addr);
 		goto out;
 	}
+
+#if defined(MY_DEF_HERE)
+	 
+	if (phydev->drv && phydev->drv->config_init) {
+		err = phydev->drv->config_init(phydev);
+		if (err) {
+			pr_err("PHY %d failed to initialize config\n", phydev->addr);
+			goto out;
+		}
+	}
+#endif  
 
 	return 0;
 

@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/fs.h>
@@ -178,12 +180,15 @@ E_md4hash(const unsigned char *passwd, unsigned char *p16,
 	int len;
 	__le16 wpwd[129];
 
-	
-	if (passwd) 
+	if (passwd)  
+#ifdef MY_ABC_HERE
+		len = cifs_strtoUTF16_NoSpecialChar(wpwd, passwd, 128, codepage);
+#else
 		len = cifs_strtoUTF16(wpwd, passwd, 128, codepage);
+#endif  
 	else {
 		len = 0;
-		*wpwd = 0; 
+		*wpwd = 0;  
 	}
 
 	rc = mdfour(p16, (unsigned char *) wpwd, len * sizeof(__le16));

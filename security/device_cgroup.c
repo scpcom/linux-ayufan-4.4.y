@@ -7,6 +7,9 @@
 #include <linux/device_cgroup.h>
 #include <linux/cgroup.h>
 #include <linux/ctype.h>
+#ifdef CONFIG_AUFS_FHSM
+#include <linux/export.h>
+#endif /* CONFIG_AUFS_FHSM */
 #include <linux/list.h>
 #include <linux/uaccess.h>
 #include <linux/seq_file.h>
@@ -849,6 +852,9 @@ int __devcgroup_inode_permission(struct inode *inode, int mask)
 	return __devcgroup_check_permission(type, imajor(inode), iminor(inode),
 			access);
 }
+#ifdef CONFIG_AUFS_FHSM
+EXPORT_SYMBOL_GPL(__devcgroup_inode_permission);
+#endif /* CONFIG_AUFS_FHSM */
 
 int devcgroup_inode_mknod(int mode, dev_t dev)
 {

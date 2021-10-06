@@ -344,6 +344,14 @@ config GPIO_RCAR
 	help
 	  Say yes here to support GPIO on Renesas R-Car SoCs.
 
+config GPIO_RTD129X
+	bool "Realtek RTD129X GPIO support"
+	depends on ARCH_RTD129X
+	select GPIOLIB_IRQCHIP
+	help
+	Realtek RTD129X GPIO support.
+
+
 config GPIO_SAMSUNG
 	bool
 	depends on PLAT_SAMSUNG

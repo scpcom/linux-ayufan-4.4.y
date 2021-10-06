@@ -214,6 +214,15 @@ config LEDS_GPIO
 	  defined as platform devices and/or OpenFirmware platform devices.
 	  The code to use these bindings can be selected below.
 
+config LEDS_LP3943
+	tristate "LED Support for N.S. LP3943 (Fun Light) I2C chip"
+	depends on LEDS_CLASS
+	depends on I2C
+	help
+	  This option enables support for LEDs connected to the National
+	  Semiconductor LP3943 Lighting Management Unit (LMU) also known as
+	  Fun Light Chip.
+
 config LEDS_LP3944
 	tristate "LED Support for N.S. LP3944 (Fun Light) I2C chip"
 	depends on LEDS_CLASS

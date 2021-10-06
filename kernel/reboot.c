@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #define pr_fmt(fmt)	"reboot: " fmt
 
 #include <linux/ctype.h>
@@ -12,8 +14,9 @@
 #include <linux/syscalls.h>
 #include <linux/syscore_ops.h>
 #include <linux/uaccess.h>
-
-
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+#include <linux/tty.h>
+#endif  
 
 int C_A_D = 1;
 struct pid *cad_pid;
@@ -114,9 +117,15 @@ static void kernel_shutdown_prepare(enum system_states state)
 		(state == SYSTEM_HALT) ? SYS_HALT : SYS_POWER_OFF, NULL);
 	system_state = state;
 	usermodehelper_disable();
-	device_shutdown();
-}
 
+#ifdef CONFIG_ARCH_RTD129X
+	if (state != SYSTEM_POWER_OFF)
+		device_shutdown();
+#else
+	device_shutdown();
+#endif
+}
+ 
 void kernel_halt(void)
 {
 	kernel_shutdown_prepare(SYSTEM_HALT);
@@ -128,10 +137,15 @@ void kernel_halt(void)
 }
 EXPORT_SYMBOL_GPL(kernel_halt);
 
-
+#ifdef MY_ABC_HERE
+extern int syno_schedule_power_on_prepare(void);
+#endif  
 void kernel_power_off(void)
 {
 	kernel_shutdown_prepare(SYSTEM_POWER_OFF);
+#ifdef MY_ABC_HERE 
+	syno_schedule_power_on_prepare();
+#endif  
 	if (pm_power_off_prepare)
 		pm_power_off_prepare();
 	migrate_to_reboot_cpu();
@@ -142,8 +156,14 @@ void kernel_power_off(void)
 }
 EXPORT_SYMBOL_GPL(kernel_power_off);
 
-static DEFINE_MUTEX(reboot_mutex);
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+#define UART_TTYS_INDEX 1
 
+#define UART_CMD_REBOOT 67  
+#define UART_CMD_POWEROFF 49  
+#endif  
+
+static DEFINE_MUTEX(reboot_mutex);
 
 SYSCALL_DEFINE4(reboot, int, magic1, int, magic2, unsigned int, cmd,
 		void __user *, arg)
@@ -151,12 +171,13 @@ SYSCALL_DEFINE4(reboot, int, magic1, int, magic2, unsigned int, cmd,
 	struct pid_namespace *pid_ns = task_active_pid_ns(current);
 	char buffer[256];
 	int ret = 0;
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+	char szBuf[2];
+#endif  
 
-	
 	if (!ns_capable(pid_ns->user_ns, CAP_SYS_BOOT))
 		return -EPERM;
 
-	
 	if (magic1 != LINUX_REBOOT_MAGIC1 ||
 			(magic2 != LINUX_REBOOT_MAGIC2 &&
 			magic2 != LINUX_REBOOT_MAGIC2A &&
@@ -164,18 +185,21 @@ SYSCALL_DEFINE4(reboot, int, magic1, int, magic2, unsigned int, cmd,
 			magic2 != LINUX_REBOOT_MAGIC2C))
 		return -EINVAL;
 
-	
 	ret = reboot_pid_ns(pid_ns, cmd);
 	if (ret)
 		return ret;
 
-	
 	if ((cmd == LINUX_REBOOT_CMD_POWER_OFF) && !pm_power_off)
 		cmd = LINUX_REBOOT_CMD_HALT;
 
 	mutex_lock(&reboot_mutex);
 	switch (cmd) {
 	case LINUX_REBOOT_CMD_RESTART:
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+		szBuf[0] = UART_CMD_REBOOT;
+		szBuf[1] = '\0';
+		syno_ttys_write(UART_TTYS_INDEX, szBuf);
+#endif  
 		kernel_restart(NULL);
 		break;
 
@@ -193,6 +217,11 @@ SYSCALL_DEFINE4(reboot, int, magic1, int, magic2, unsigned int, cmd,
 		panic("cannot halt");
 
 	case LINUX_REBOOT_CMD_POWER_OFF:
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+		szBuf[0] = UART_CMD_POWEROFF;
+		szBuf[1] = '\0';
+		syno_ttys_write(UART_TTYS_INDEX, szBuf);
+#endif  
 		kernel_power_off();
 		do_exit(0);
 		break;

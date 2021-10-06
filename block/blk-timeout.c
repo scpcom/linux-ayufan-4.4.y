@@ -1,4 +1,7 @@
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/blkdev.h>
@@ -155,6 +158,10 @@ unsigned long blk_rq_timeout(unsigned long timeout)
 	return timeout;
 }
 
+#ifdef MY_ABC_HERE
+unsigned int blk_timeout_factory = 0;
+EXPORT_SYMBOL(blk_timeout_factory);
+#endif  
 
 void blk_add_timer(struct request *req)
 {
@@ -164,28 +171,30 @@ void blk_add_timer(struct request *req)
 	if (req->cmd_flags & REQ_NO_TIMEOUT)
 		return;
 
-	
 	if (!q->mq_ops && !q->rq_timed_out_fn)
 		return;
 
 	BUG_ON(!list_empty(&req->timeout_list));
 
-	
 	if (!req->timeout)
 		req->timeout = q->rq_timeout;
+
+#ifdef MY_ABC_HERE
+	if (blk_timeout_factory) {
+		req->timeout = 3 * HZ;
+	}
+#endif  
 
 	req->deadline = jiffies + req->timeout;
 	if (!q->mq_ops)
 		list_add_tail(&req->timeout_list, &req->q->timeout_list);
 
-	
 	expiry = blk_rq_timeout(round_jiffies_up(req->deadline));
 
 	if (!timer_pending(&q->timeout) ||
 	    time_before(expiry, q->timeout.expires)) {
 		unsigned long diff = q->timeout.expires - expiry;
 
-		
 		if (!timer_pending(&q->timeout) || (diff >= HZ / 2))
 			mod_timer(&q->timeout, expiry);
 	}

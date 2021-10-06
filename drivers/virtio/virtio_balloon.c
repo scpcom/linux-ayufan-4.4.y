@@ -30,6 +30,7 @@
 #include <linux/balloon_compaction.h>
 #include <linux/oom.h>
 #include <linux/wait.h>
+#include <linux/mm.h>
 
 /*
  * Balloon device works in 4K page units.  So each page is pointed to by
@@ -229,9 +230,12 @@ static void update_balloon_stats(struct virtio_balloon *vb)
 	unsigned long events[NR_VM_EVENT_ITEMS];
 	struct sysinfo i;
 	int idx = 0;
+	long available;
 
 	all_vm_events(events);
 	si_meminfo(&i);
+
+	available = si_mem_available();
 
 	update_stat(vb, idx++, VIRTIO_BALLOON_S_SWAP_IN,
 				pages_to_bytes(events[PSWPIN]));
@@ -243,6 +247,8 @@ static void update_balloon_stats(struct virtio_balloon *vb)
 				pages_to_bytes(i.freeram));
 	update_stat(vb, idx++, VIRTIO_BALLOON_S_MEMTOT,
 				pages_to_bytes(i.totalram));
+	update_stat(vb, idx++, VIRTIO_BALLOON_S_AVAIL,
+				pages_to_bytes(available));
 }
 
 /*
@@ -388,7 +394,7 @@ static int init_vqs(struct virtio_balloon *vb)
 {
 	struct virtqueue *vqs[3];
 	vq_callback_t *callbacks[] = { balloon_ack, balloon_ack, stats_request };
-	const char *names[] = { "inflate", "deflate", "stats" };
+	static const char * const names[] = { "inflate", "deflate", "stats" };
 	int err, nvqs;
 
 	/*

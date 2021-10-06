@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #ifndef _LINUX_DEVICE_MAPPER_H
 #define _LINUX_DEVICE_MAPPER_H
 
@@ -51,25 +53,36 @@ typedef void (*dm_status_fn) (struct dm_target *ti, status_type_t status_type,
 
 typedef int (*dm_message_fn) (struct dm_target *ti, unsigned argc, char **argv);
 
+#ifdef MY_ABC_HERE
+typedef int (*dm_extra_ioctl_fn) (struct dm_target *ti,
+		unsigned int cmd, unsigned long arg);
+#endif  
 typedef int (*dm_prepare_ioctl_fn) (struct dm_target *ti,
 			    struct block_device **bdev, fmode_t *mode);
-
 
 typedef int (*iterate_devices_callout_fn) (struct dm_target *ti,
 					   struct dm_dev *dev,
 					   sector_t start, sector_t len,
 					   void *data);
 
-
 typedef int (*dm_iterate_devices_fn) (struct dm_target *ti,
 				      iterate_devices_callout_fn fn,
 				      void *data);
+#ifdef MY_ABC_HERE
+typedef int (*dm_handle_4kn_target_support_fn) (struct dm_target *ti,
+				      iterate_devices_callout_fn fn,
+				      void *data);
+#endif  
 
 typedef void (*dm_io_hints_fn) (struct dm_target *ti,
 				struct queue_limits *limits);
 
-
 typedef int (*dm_busy_fn) (struct dm_target *ti);
+
+#ifdef MY_ABC_HERE
+typedef void (*dm_lvinfoset_fn) (struct dm_target *ti);
+typedef sector_t (*dm_lg_sector_get_fn) (sector_t sector, struct dm_target *ti);
+#endif  
 
 void dm_error(const char *message);
 
@@ -105,30 +118,33 @@ struct target_type {
 	dm_resume_fn resume;
 	dm_status_fn status;
 	dm_message_fn message;
+#ifdef MY_ABC_HERE
+	dm_extra_ioctl_fn extra_ioctl;
+#endif  
 	dm_prepare_ioctl_fn prepare_ioctl;
 	dm_busy_fn busy;
 	dm_iterate_devices_fn iterate_devices;
+#ifdef MY_ABC_HERE
+	dm_handle_4kn_target_support_fn handle_4kn_target_support;
+#endif  
 	dm_io_hints_fn io_hints;
+#ifdef MY_ABC_HERE
+	dm_lvinfoset_fn lvinfoset;
+	dm_lg_sector_get_fn lg_sector_get;
+#endif  
 
-	
 	struct list_head list;
 };
 
-
-
-
 #define DM_TARGET_SINGLETON		0x00000001
 #define dm_target_needs_singleton(type)	((type)->features & DM_TARGET_SINGLETON)
-
 
 #define DM_TARGET_ALWAYS_WRITEABLE	0x00000002
 #define dm_target_always_writeable(type) \
 		((type)->features & DM_TARGET_ALWAYS_WRITEABLE)
 
-
 #define DM_TARGET_IMMUTABLE		0x00000004
 #define dm_target_is_immutable(type)	((type)->features & DM_TARGET_IMMUTABLE)
-
 
 typedef unsigned (*dm_num_write_bios_fn) (struct dm_target *ti, struct bio *bio);
 
@@ -136,53 +152,38 @@ struct dm_target {
 	struct dm_table *table;
 	struct target_type *type;
 
-	
 	sector_t begin;
 	sector_t len;
 
-	
 	uint32_t max_io_len;
 
-	
 	unsigned num_flush_bios;
 
-	
 	unsigned num_discard_bios;
 
-	
 	unsigned num_write_same_bios;
 
-	
 	unsigned per_bio_data_size;
 
-	
 	dm_num_write_bios_fn num_write_bios;
 
-	
 	void *private;
 
-	
 	char *error;
 
-	
 	bool flush_supported:1;
 
-	
 	bool discards_supported:1;
 
-	
 	bool split_discard_bios:1;
 
-	
 	bool discard_zeroes_data_unsupported:1;
 };
-
 
 struct dm_target_callbacks {
 	struct list_head list;
 	int (*congested_fn) (struct dm_target_callbacks *, int);
 };
-
 
 struct dm_target_io {
 	struct dm_io *io;
@@ -210,12 +211,10 @@ static inline unsigned dm_bio_get_target_bio_nr(const struct bio *bio)
 int dm_register_target(struct target_type *t);
 void dm_unregister_target(struct target_type *t);
 
-
 struct dm_arg_set {
 	unsigned argc;
 	char **argv;
 };
-
 
 struct dm_arg {
 	unsigned min;
@@ -223,46 +222,38 @@ struct dm_arg {
 	char *error;
 };
 
-
 int dm_read_arg(struct dm_arg *arg, struct dm_arg_set *arg_set,
 		unsigned *value, char **error);
-
 
 int dm_read_arg_group(struct dm_arg *arg, struct dm_arg_set *arg_set,
 		      unsigned *num_args, char **error);
 
-
 const char *dm_shift_arg(struct dm_arg_set *as);
-
 
 void dm_consume_args(struct dm_arg_set *as, unsigned num_args);
 
-
-
-
 #define DM_ANY_MINOR (-1)
 int dm_create(int minor, struct mapped_device **md);
-
 
 struct mapped_device *dm_get_md(dev_t dev);
 void dm_get(struct mapped_device *md);
 int dm_hold(struct mapped_device *md);
 void dm_put(struct mapped_device *md);
 
-
 void dm_set_mdptr(struct mapped_device *md, void *ptr);
 void *dm_get_mdptr(struct mapped_device *md);
 
-
 int dm_suspend(struct mapped_device *md, unsigned suspend_flags);
 int dm_resume(struct mapped_device *md);
-
+#ifdef MY_ABC_HERE
+int dm_active_get(struct mapped_device *md);
+int dm_active_set(struct mapped_device *md, int value);
+#endif  
 
 uint32_t dm_get_event_nr(struct mapped_device *md);
 int dm_wait_event(struct mapped_device *md, int event_nr);
 uint32_t dm_next_uevent_seq(struct mapped_device *md);
 void dm_uevent_add(struct mapped_device *md, struct list_head *elist);
-
 
 const char *dm_device_name(struct mapped_device *md);
 int dm_copy_name_and_uuid(struct mapped_device *md, char *name, char *uuid);

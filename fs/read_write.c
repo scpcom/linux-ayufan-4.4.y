@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/slab.h> 
 #include <linux/stat.h>
 #include <linux/fcntl.h>
@@ -16,6 +18,18 @@
 
 #include <asm/uaccess.h>
 #include <asm/unistd.h>
+#ifdef CONFIG_SENDFILE_PATCH
+    #include <net/sock.h>
+#endif  
+
+#ifdef MY_ABC_HERE
+#include <linux/synolib.h>
+#endif  
+
+#ifdef MY_ABC_HERE
+#include <linux/backing-dev.h>
+DEFINE_SPINLOCK(aggregate_lock);
+#endif  
 
 typedef ssize_t (*io_fn_t)(struct file *, char __user *, size_t, loff_t *);
 typedef ssize_t (*iter_fn_t)(struct kiocb *, struct iov_iter *);
@@ -122,7 +136,7 @@ loff_t default_llseek(struct file *file, loff_t offset, int whence)
 	struct inode *inode = file_inode(file);
 	loff_t retval;
 
-	mutex_lock(&inode->i_mutex);
+	inode_lock(inode);
 	switch (whence) {
 		case SEEK_END:
 			offset += i_size_read(inode);
@@ -159,7 +173,7 @@ loff_t default_llseek(struct file *file, loff_t offset, int whence)
 		retval = offset;
 	}
 out:
-	mutex_unlock(&inode->i_mutex);
+	inode_unlock(inode);
 	return retval;
 }
 EXPORT_SYMBOL(default_llseek);
@@ -405,6 +419,34 @@ ssize_t __vfs_write(struct file *file, const char __user *p, size_t count,
 }
 EXPORT_SYMBOL(__vfs_write);
 
+#ifdef CONFIG_AUFS_FHSM
+vfs_readf_t vfs_readf(struct file *file)
+{
+	const struct file_operations *fop = file->f_op;
+
+	if (fop->read)
+		return fop->read;
+	if (fop->read_iter)
+		return new_sync_read;
+	return ERR_PTR(-ENOSYS);
+}
+EXPORT_SYMBOL_GPL(vfs_readf);
+#endif  
+
+#ifdef CONFIG_AUFS_FHSM
+vfs_writef_t vfs_writef(struct file *file)
+{
+	const struct file_operations *fop = file->f_op;
+
+	if (fop->write)
+		return fop->write;
+	if (fop->write_iter)
+		return new_sync_write;
+	return ERR_PTR(-ENOSYS);
+}
+EXPORT_SYMBOL_GPL(vfs_writef);
+#endif  
+
 ssize_t __kernel_write(struct file *file, const char *buf, size_t count, loff_t *pos)
 {
 	mm_segment_t old_fs;
@@ -475,6 +517,12 @@ SYSCALL_DEFINE3(read, unsigned int, fd, char __user *, buf, size_t, count)
 	struct fd f = fdget_pos(fd);
 	ssize_t ret = -EBADF;
 
+#ifdef MY_ABC_HERE
+	if (0 < gSynoHibernationLogLevel) {
+		syno_do_hibernation_fd_log(fd);
+	}
+#endif  
+
 	if (f.file) {
 		loff_t pos = file_pos_read(f.file);
 		ret = vfs_read(f.file, buf, count, &pos);
@@ -490,6 +538,12 @@ SYSCALL_DEFINE3(write, unsigned int, fd, const char __user *, buf,
 {
 	struct fd f = fdget_pos(fd);
 	ssize_t ret = -EBADF;
+
+#ifdef MY_ABC_HERE
+	if (0 < gSynoHibernationLogLevel) {
+		syno_do_hibernation_fd_log(fd);
+	}
+#endif  
 
 	if (f.file) {
 		loff_t pos = file_pos_read(f.file);
@@ -1038,6 +1092,10 @@ COMPAT_SYSCALL_DEFINE5(pwritev, compat_ulong_t, fd,
 }
 #endif
 
+#ifdef CONFIG_SENDFILE_PATCH
+extern ssize_t generic_splice_from_socket(struct file *file, struct socket *sock,
+                                    loff_t *ppos, size_t count, bool ppage);
+#endif
 static ssize_t do_sendfile(int out_fd, int in_fd, loff_t *ppos,
 		  	   size_t count, loff_t max)
 {
@@ -1048,7 +1106,36 @@ static ssize_t do_sendfile(int out_fd, int in_fd, loff_t *ppos,
 	ssize_t retval;
 	int fl;
 
-	
+#ifdef CONFIG_SENDFILE_PATCH
+	 
+	int error;
+	struct socket *sock = NULL;
+
+	error = -EBADF;
+	sock = sockfd_lookup(in_fd, &error);
+	if (sock) {
+		if (!sock->sk)
+			goto done;
+		out = fdget(out_fd);
+
+		if (out.file) {
+			if (!(out.file->f_mode & FMODE_WRITE))
+				goto done;
+			 
+			if (out.file->f_op->splice_from_socket)
+				error = (int)out.file->f_op->splice_from_socket(out.file, sock, ppos, count, false);
+			else
+				 
+				error = (int)generic_splice_from_socket(out.file, sock, ppos, count, true);
+		}
+done:
+		if(out.file)
+			fdput(out);
+		fput(sock->file);
+		return (ssize_t)error;
+	}
+#endif
+
 	retval = -EBADF;
 	in = fdget(in_fd);
 	if (!in.file)
@@ -1203,3 +1290,254 @@ COMPAT_SYSCALL_DEFINE4(sendfile64, int, out_fd, int, in_fd,
 	return do_sendfile(out_fd, in_fd, NULL, count, 0);
 }
 #endif
+
+#ifdef MY_ABC_HERE
+#ifdef MY_ABC_HERE
+int aggregate_fd = -1;
+atomic_t syno_aggregate_recvfile_count = ATOMIC_INIT(0);
+
+#define SZV_GLUSTERFS "glusterfs"
+static int should_do_aggregate(struct file *file, int fd, loff_t pos, loff_t next_offset)
+{
+	int          blFlush = 0;
+	struct file *aggregate_file;
+	struct inode *inode;
+	static struct file *last_file = NULL;
+
+	if (!file->f_mapping->a_ops->aggregate_write_end)
+		return 0;
+
+	inode = file->f_path.dentry->d_inode->i_mapping->host;
+
+	if (!strcmp(inode->i_sb->s_type->name, "ecryptfs"))
+		return 0;
+
+	if (0 == strcmp(SZV_GLUSTERFS, inode->i_sb->s_subtype)) {
+		return 0;
+	}
+
+	spin_lock(&aggregate_lock);
+	if (0 == atomic_read(&syno_aggregate_recvfile_count)) {
+	 
+		if (aggregate_fd == -1 || (fd == aggregate_fd && pos == next_offset && file == last_file)) {
+			 
+			aggregate_fd = fd;
+			last_file = file;
+			atomic_inc(&syno_aggregate_recvfile_count);
+			inode->aggregate_flag |= AGGREGATE_RECVFILE_DOING;
+			spin_unlock(&aggregate_lock);
+			return 1;
+		}
+		 
+		aggregate_file = fget(aggregate_fd);
+		 
+		if (aggregate_file) {
+			if (last_file == aggregate_file) {
+				atomic_inc(&syno_aggregate_recvfile_count);
+				spin_unlock(&aggregate_lock);
+				aggregate_recvfile_flush_only(aggregate_file);
+				atomic_dec(&syno_aggregate_recvfile_count);
+				spin_lock(&aggregate_lock);
+			}
+			fput(aggregate_file);
+		}
+		 
+		if (0 == atomic_read(&syno_aggregate_recvfile_count) && aggregate_fd == -1) {
+			aggregate_fd = fd;
+			last_file = file;
+			atomic_inc(&syno_aggregate_recvfile_count);
+			inode->aggregate_flag |= AGGREGATE_RECVFILE_DOING;
+			spin_unlock(&aggregate_lock);
+			return 1;
+		}
+	}
+	if (inode->aggregate_flag & AGGREGATE_RECVFILE_DOING) {
+		blFlush = 1;
+	}
+	spin_unlock(&aggregate_lock);
+
+	if (blFlush) {
+		flush_aggregate_recvfile(fd);
+	}
+	return 0;
+}
+
+static int generic_write_init_and_checks(struct file* filp, loff_t pos, size_t nbytes)
+{
+	struct iovec iov = { .iov_base = NULL, .iov_len = nbytes };
+	struct kiocb kiocb;
+	struct iov_iter iter;
+
+	init_sync_kiocb(&kiocb, filp);
+	kiocb.ki_pos = pos;
+	iov_iter_init(&iter, WRITE, &iov, 1, nbytes);
+
+	return generic_write_checks(&kiocb, &iter);
+}
+
+SYSCALL_DEFINE5(recvfile, int, fd, int, s, loff_t *, offset, size_t, nbytes, size_t *, rwbytes)
+{
+	int             ret = 0;
+	loff_t          pos = 0;                  
+	size_t          bytes_received = 0;
+	size_t          bytes_written = 0;
+	size_t          total_received = 0;
+	size_t          total_written = 0;
+	struct file    *file = NULL;
+	struct socket  *sock = NULL;
+	struct inode   *inode = NULL;
+	static loff_t   next_offset = 0;
+	unsigned short  blAggregate = 0;
+	unsigned short  blBufferWrite = 0;
+
+	if (!offset) {
+		ret = -EINVAL;
+		goto out;
+	}
+
+	if (nbytes <= 0) {
+		if (nbytes < 0) {
+			ret = -EINVAL;
+		}
+		goto out;
+	}
+
+	if(copy_from_user(&pos, offset, sizeof(loff_t))) {
+		ret = -EFAULT;
+		goto out;
+	}
+
+	file = fget(fd);
+	if (!file || !(file->f_mode & FMODE_WRITE)) {
+		ret = -EBADF;
+		goto out;
+	}
+
+	sock = sockfd_lookup(s, &ret);
+	if((!sock) || ret)
+		goto out;
+
+	if(!sock->sk) {
+		 
+		ret = -EINVAL;
+		goto out;
+	}
+
+	inode = file->f_path.dentry->d_inode->i_mapping->host;
+
+	mutex_lock(&inode->i_mutex);
+	ret = generic_write_init_and_checks(file, pos, nbytes);
+	if (ret <= 0) {
+		goto out;
+	}
+
+	sb_start_write(inode->i_sb);
+	 
+	current->backing_dev_info = inode_to_bdi(inode);
+	ret = file_remove_privs(file);
+	if (ret)
+		goto out;
+
+	ret = file_update_time(file);
+	if (ret)
+		goto out;
+
+	blAggregate = should_do_aggregate(file, fd, pos, next_offset);
+	blBufferWrite = file->f_op->syno_recvfile?1:0;
+	if (unlikely(blAggregate)) {
+		do {
+			if (blAggregate) {
+				ret = do_aggregate_recvfile(file, sock, pos, (nbytes >= MAX_RECVFILE_BUF) ?
+							MAX_RECVFILE_BUF : nbytes, &bytes_received, &bytes_written, 0);
+				 
+				if (inode->aggregate_flag & AGGREGATE_RECVFILE_FLUSH &&
+				      !(inode->aggregate_flag & AGGREGATE_RECVFILE_DOING)) {
+					next_offset = pos;
+					atomic_dec(&syno_aggregate_recvfile_count);
+					blAggregate = 0;
+				}
+			} else {
+				ret = do_recvfile(file, sock, pos, (nbytes > MAX_RECVFILE_BUF) ?
+						   MAX_RECVFILE_BUF : nbytes, &bytes_received, &bytes_written);
+			}
+			total_received += bytes_received;
+			total_written += bytes_written;
+			if (0 >= ret) {
+				break;
+			}
+			nbytes -= bytes_written;
+			pos += bytes_written;
+		} while(nbytes > 0);
+		if (blAggregate) {
+			next_offset = pos;
+			atomic_dec(&syno_aggregate_recvfile_count);
+		}
+	} else {
+		if (blBufferWrite) {
+			do {
+				ret = file->f_op->syno_recvfile(file, sock, pos, (nbytes > MAX_RECVFILE_BUF) ?
+					   MAX_RECVFILE_BUF : nbytes, &bytes_received, &bytes_written);
+				total_received += bytes_received;
+				total_written += bytes_written;
+				if (0 >= ret) {
+					break;
+				}
+				nbytes -= bytes_written;
+				pos += bytes_written;
+			} while(nbytes > 0);
+		} else {
+			do {
+				ret = do_recvfile(file, sock, pos, (nbytes > MAX_RECVFILE_BUF) ?
+					   MAX_RECVFILE_BUF : nbytes, &bytes_received, &bytes_written);
+				total_received += bytes_received;
+				total_written += bytes_written;
+				if (0 >= ret) {
+					break;
+				}
+				nbytes -= bytes_written;
+				pos += bytes_written;
+			} while(nbytes > 0);
+		}
+	}
+	sb_end_write(inode->i_sb);
+	current->backing_dev_info = NULL;
+	mutex_unlock(&inode->i_mutex);
+
+	if(ret >= 0) {
+		fsnotify_modify(file);
+		ret = total_written;
+	} else if(rwbytes) {
+		if (copy_to_user(&rwbytes[0], &total_received, sizeof(size_t)) < 0) {
+			ret = -ENOMEM;
+			goto out;
+		}
+		if (copy_to_user(&rwbytes[1], &total_written, sizeof(size_t)) < 0) {
+			ret = -ENOMEM;
+			goto out;
+		}
+	}
+
+out:
+	if(file)
+		fput(file);
+	if(sock)
+		fput(sock->file);
+
+	return ret;
+}
+
+SYSCALL_DEFINE1(SYNOFlushAggregate, int, fd)
+{
+	return flush_aggregate_recvfile(fd);
+}
+#else
+SYSCALL_DEFINE5(recvfile, int, fd, int, s, loff_t *, offset, size_t, nbytes, size_t *, rwbytes)
+{
+	return -EOPNOTSUPP;
+}
+SYSCALL_DEFINE1(SYNOFlushAggregate, int, fd)
+{
+	return -EOPNOTSUPP;
+}
+#endif  
+#endif  

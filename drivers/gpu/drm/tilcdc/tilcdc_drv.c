@@ -46,7 +46,7 @@ void tilcdc_module_cleanup(struct tilcdc_module *mod)
 static struct of_device_id tilcdc_of_match[];
 
 static struct drm_framebuffer *tilcdc_fb_create(struct drm_device *dev,
-		struct drm_file *file_priv, struct drm_mode_fb_cmd2 *mode_cmd)
+		struct drm_file *file_priv, const struct drm_mode_fb_cmd2 *mode_cmd)
 {
 	return drm_fb_cma_create(dev, file_priv, mode_cmd);
 }
@@ -558,7 +558,6 @@ static struct drm_driver tilcdc_driver = {
 	.unload             = tilcdc_unload,
 	.preclose           = tilcdc_preclose,
 	.lastclose          = tilcdc_lastclose,
-	.set_busid          = drm_platform_set_busid,
 	.irq_handler        = tilcdc_irq,
 	.irq_preinstall     = tilcdc_irq_preinstall,
 	.irq_postinstall    = tilcdc_irq_postinstall,

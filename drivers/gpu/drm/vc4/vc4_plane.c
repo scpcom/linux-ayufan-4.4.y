@@ -103,7 +103,7 @@ static void vc4_plane_destroy_state(struct drm_plane *plane,
 	struct vc4_plane_state *vc4_state = to_vc4_plane_state(state);
 
 	kfree(vc4_state->dlist);
-	__drm_atomic_helper_plane_destroy_state(plane, &vc4_state->base);
+	__drm_atomic_helper_plane_destroy_state(&vc4_state->base);
 	kfree(state);
 }
 
@@ -317,7 +317,7 @@ struct drm_plane *vc4_plane_init(struct drm_device *dev,
 	ret = drm_universal_plane_init(dev, plane, 0xff,
 				       &vc4_plane_funcs,
 				       formats, ARRAY_SIZE(formats),
-				       type);
+				       type, NULL);
 
 	drm_plane_helper_add(plane, &vc4_plane_helper_funcs);
 

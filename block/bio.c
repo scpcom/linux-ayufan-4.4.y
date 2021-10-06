@@ -1,4 +1,7 @@
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/mm.h>
 #include <linux/swap.h>
 #include <linux/bio.h>
@@ -407,20 +410,21 @@ inline int bio_phys_segments(struct request_queue *q, struct bio *bio)
 }
 EXPORT_SYMBOL(bio_phys_segments);
 
-
 void __bio_clone_fast(struct bio *bio, struct bio *bio_src)
 {
 	BUG_ON(bio->bi_pool && BIO_POOL_IDX(bio) != BIO_POOL_NONE);
 
-	
 	bio->bi_bdev = bio_src->bi_bdev;
 	bio_set_flag(bio, BIO_CLONED);
 	bio->bi_rw = bio_src->bi_rw;
 	bio->bi_iter = bio_src->bi_iter;
 	bio->bi_io_vec = bio_src->bi_io_vec;
+#ifdef MY_ABC_HERE
+	 
+	bio->bi_vcnt = bio_src->bi_vcnt;
+#endif
 }
 EXPORT_SYMBOL(__bio_clone_fast);
-
 
 struct bio *bio_clone_fast(struct bio *bio, gfp_t gfp_mask, struct bio_set *bs)
 {

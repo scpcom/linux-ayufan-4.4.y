@@ -25,6 +25,7 @@
 #include "transaction.h"
 #include "volumes.h"
 #include "print-tree.h"
+#include "compression.h"
 
 #define __MAX_CSUM_ITEMS(r, size) ((unsigned long)(((BTRFS_LEAF_DATA_SIZE(r) - \
 				   sizeof(struct btrfs_item) * 2) / \
@@ -202,7 +203,7 @@ static int __btrfs_lookup_bio_sums(struct btrfs_root *root,
 	}
 
 	if (bio->bi_iter.bi_size > PAGE_CACHE_SIZE * 8)
-		path->reada = 2;
+		path->reada = READA_FORWARD;
 
 	WARN_ON(bio->bi_vcnt <= 0);
 
@@ -244,7 +245,7 @@ static int __btrfs_lookup_bio_sums(struct btrfs_root *root,
 				    BTRFS_DATA_RELOC_TREE_OBJECTID) {
 					set_extent_bits(io_tree, offset,
 						offset + bvec->bv_len - 1,
-						EXTENT_NODATASUM, GFP_NOFS);
+						EXTENT_NODATASUM);
 				} else {
 					btrfs_info(BTRFS_I(inode)->root->fs_info,
 						   "no csum found for inode %llu start %llu",
@@ -328,7 +329,7 @@ int btrfs_lookup_csums_range(struct btrfs_root *root, u64 start, u64 end,
 
 	if (search_commit) {
 		path->skip_locking = 1;
-		path->reada = 2;
+		path->reada = READA_FORWARD;
 		path->search_commit_root = 1;
 	}
 

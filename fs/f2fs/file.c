@@ -332,7 +332,7 @@ static loff_t f2fs_seek_block(struct file *file, loff_t offset, int whence)
 	loff_t isize;
 	int err = 0;
 
-	mutex_lock(&inode->i_mutex);
+	inode_lock(inode);
 
 	isize = i_size_read(inode);
 	if (offset >= isize)
@@ -387,10 +387,10 @@ static loff_t f2fs_seek_block(struct file *file, loff_t offset, int whence)
 found:
 	if (whence == SEEK_HOLE && data_ofs > isize)
 		data_ofs = isize;
-	mutex_unlock(&inode->i_mutex);
+	inode_unlock(inode);
 	return vfs_setpos(file, data_ofs, maxbytes);
 fail:
-	mutex_unlock(&inode->i_mutex);
+	inode_unlock(inode);
 	return -ENXIO;
 }
 
@@ -1226,7 +1226,7 @@ static long f2fs_fallocate(struct file *file, int mode,
 			FALLOC_FL_INSERT_RANGE))
 		return -EOPNOTSUPP;
 
-	mutex_lock(&inode->i_mutex);
+	inode_lock(inode);
 
 	if (mode & FALLOC_FL_PUNCH_HOLE) {
 		if (offset >= inode->i_size)
@@ -1249,7 +1249,7 @@ static long f2fs_fallocate(struct file *file, int mode,
 	}
 
 out:
-	mutex_unlock(&inode->i_mutex);
+	inode_unlock(inode);
 
 	trace_f2fs_fallocate(inode, mode, offset, len, ret);
 	return ret;
@@ -1313,13 +1313,13 @@ static int f2fs_ioc_setflags(struct file *filp, unsigned long arg)
 
 	flags = f2fs_mask_flags(inode->i_mode, flags);
 
-	mutex_lock(&inode->i_mutex);
+	inode_lock(inode);
 
 	oldflags = fi->i_flags;
 
 	if ((flags ^ oldflags) & (FS_APPEND_FL | FS_IMMUTABLE_FL)) {
 		if (!capable(CAP_LINUX_IMMUTABLE)) {
-			mutex_unlock(&inode->i_mutex);
+			inode_unlock(inode);
 			ret = -EPERM;
 			goto out;
 		}
@@ -1328,7 +1328,7 @@ static int f2fs_ioc_setflags(struct file *filp, unsigned long arg)
 	flags = flags & FS_FL_USER_MODIFIABLE;
 	flags |= oldflags & ~FS_FL_USER_MODIFIABLE;
 	fi->i_flags = flags;
-	mutex_unlock(&inode->i_mutex);
+	inode_unlock(inode);
 
 	f2fs_set_inode_flags(inode);
 	inode->i_ctime = CURRENT_TIME;

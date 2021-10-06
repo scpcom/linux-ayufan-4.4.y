@@ -1,7 +1,7 @@
-
-
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/interrupt.h>
 #include <linux/module.h>
 #include <linux/pci.h>
@@ -1136,6 +1136,10 @@ static int i801_probe(struct pci_dev *dev, const struct pci_device_id *id)
 				   i801_feature_names[i]);
 	}
 	priv->features &= ~disable_features;
+
+#ifdef MY_DEF_HERE
+	priv->features &= ~FEATURE_IRQ;
+#endif  
 
 	err = pcim_enable_device(dev);
 	if (err) {

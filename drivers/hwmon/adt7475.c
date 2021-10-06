@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * adt7475 - Thermal sensor driver for the ADT7475 chip and derivatives
  * Copyright (C) 2007-2008, Advanced Micro Devices, Inc.
@@ -85,6 +88,19 @@
 
 #define REG_TEMP_OFFSET_BASE	0x70
 
+#ifdef MY_ABC_HERE
+#define REG_CONFIG1				0x40	/* ADT7490 only */
+#define REG_PECI0				0x33	/* ADT7490 only */
+#define REG_PECI1_BASE			0x1A	/* ADT7490 only */
+#define REG_PECI_CONFIG			0x88	/* ADT7490 only */
+#define REG_PECI_MIN			0x3B	/* ADT7490 only */
+#define REG_PECI_RANGE			0x3C	/* ADT7490 only */
+#define REG_PECI_OFFSET_BASE	0x94	/* ADT7490 only */
+#define REG_PECI_LOW_LIMIT		0x34	/* ADT7490 only */
+#define REG_PECI_HIGH_LIMIT		0x35	/* ADT7490 only */
+#define REG_ACOUSTIC			0x62	/* ADT7490 only */
+#endif /* MY_ABC_HERE */
+
 #define REG_CONFIG2		0x73
 
 #define REG_EXTEND1		0x76
@@ -122,6 +138,10 @@
 #define ADT7475_TACH_COUNT	4
 #define ADT7475_PWM_COUNT	3
 
+#ifdef MY_ABC_HERE
+#define ADT7490_PECI_COUNT	4	/*ADT7490 only*/
+#define SYNO_IS_ADT7490(client) !strcmp(client->name, "adt7490")
+#endif /* MY_ABC_HERE */
 /* Macro to read the registers */
 
 #define adt7475_read(reg) i2c_smbus_read_byte_data(client, (reg))
@@ -139,6 +159,11 @@
 #define VOLTAGE_REG(idx) (REG_VOLTAGE_BASE + (idx))
 #define VOLTAGE_MIN_REG(idx) (REG_VOLTAGE_MIN_BASE + ((idx) * 2))
 #define VOLTAGE_MAX_REG(idx) (REG_VOLTAGE_MAX_BASE + ((idx) * 2))
+
+#ifdef MY_ABC_HERE
+#define PECI_REG(idx) (idx == 0 ? REG_PECI0:REG_PECI1_BASE + (idx-1))	/* ADT7490 only */
+#define PECI_OFFSET_REG(idx) (REG_PECI_OFFSET_BASE + (idx))
+#endif /* MY_ABC_HERE */
 
 #define TEMP_REG(idx) (REG_TEMP_BASE + (idx))
 #define TEMP_MIN_REG(idx) (REG_TEMP_MIN_BASE + ((idx) * 2))
@@ -187,6 +212,11 @@ struct adt7475_data {
 
 	u8 vid;
 	u8 vrm;
+#ifdef MY_ABC_HERE
+	u8 pwmsynoctl[4];
+	u16 peci[7][4];	/* ADT7490 only */
+	u8 peci_range[4];
+#endif /* MY_ABC_HERE */
 };
 
 static struct i2c_driver adt7475_driver;
@@ -474,6 +504,15 @@ static ssize_t set_temp(struct device *dev, struct device_attribute *attr,
 		val = clamp_val(val, temp - 15000, temp);
 		val = (temp - val) / 1000;
 
+#ifdef MY_ABC_HERE
+		if (sattr->index != 1) {
+			data->temp[HYSTERSIS][sattr->index] &= 0x0F;
+			data->temp[HYSTERSIS][sattr->index] |= (val & 0xF) << 4;
+		} else {
+			data->temp[HYSTERSIS][sattr->index] &= 0xF0;
+			data->temp[HYSTERSIS][sattr->index] |= (val & 0xF);
+		}
+#else /* MY_ABC_HERE */
 		if (sattr->index != 1) {
 			data->temp[HYSTERSIS][sattr->index] &= 0xF0;
 			data->temp[HYSTERSIS][sattr->index] |= (val & 0xF) << 4;
@@ -481,6 +520,7 @@ static ssize_t set_temp(struct device *dev, struct device_attribute *attr,
 			data->temp[HYSTERSIS][sattr->index] &= 0x0F;
 			data->temp[HYSTERSIS][sattr->index] |= (val & 0xF);
 		}
+#endif /* MY_ABC_HERE */
 
 		out = data->temp[HYSTERSIS][sattr->index];
 		break;
@@ -888,6 +928,497 @@ static ssize_t set_pwm_at_crit(struct device *dev,
 	return count;
 }
 
+#ifdef MY_ABC_HERE
+
+/* set peci */
+static ssize_t set_peci(struct device *dev, struct device_attribute *attr,
+			const char *buf, size_t count)
+{
+	struct sensor_device_attribute_2 *sattr = to_sensor_dev_attr_2(attr);
+	struct i2c_client *client = to_i2c_client(dev);
+	struct adt7475_data *data = i2c_get_clientdata(client);
+	unsigned char reg = 0;
+	u8 out = 0;
+	long val = 0;
+	long temp = 0;
+
+	if (!SYNO_IS_ADT7490(client)) {
+		return -EINVAL;
+	}
+
+	if (kstrtol(buf, 10, &val))
+		return -EINVAL;
+
+	mutex_lock(&data->lock);
+	/* We need the config register in all cases for temp <-> reg conv. */
+	data->config5 = adt7475_read(REG_CONFIG5);
+
+	switch (sattr->nr) {
+		case OFFSET:
+			val = clamp_val(val, -127000, 127000);
+			out = data->peci[OFFSET][sattr->index] = val / 1000;
+			break;
+
+		case HYSTERSIS:
+			/* The value will be given as an absolute value, turn it
+			   into an offset based on THERM */
+			/* Read fresh THERM and HYSTERSIS values from the chip */
+			/* in ADT7490 register 0x3D is for PECI Tcontrol*/
+			data->peci[THERM][sattr->index] = adt7475_read(REG_DEVID) << 2;
+			adt7475_read_hystersis(client);
+			temp = reg2temp(data, data->peci[THERM][sattr->index]);
+			val = clamp_val(val, temp - 15000, temp);
+			val = (temp - val) / 1000;
+
+			data->peci[HYSTERSIS][sattr->index] &= 0xF0;
+			data->peci[HYSTERSIS][sattr->index] |= (val & 0xF);
+
+			out = data->peci[HYSTERSIS][sattr->index];
+			break;
+
+		default:
+			data->peci[sattr->nr][sattr->index] = temp2reg(data, val);
+			/* We maintain an extra 2 digits of precision for simplicity
+			 * - shift those back off before writing the value */
+			out = (u8) (data->peci[sattr->nr][sattr->index] >> 2);
+	}
+
+	switch (sattr->nr) {
+	case MIN:
+		reg = REG_PECI_LOW_LIMIT;
+		break;
+	case MAX:
+		reg = REG_PECI_HIGH_LIMIT;
+		break;
+	case OFFSET:
+		reg = PECI_OFFSET_REG(sattr->index);
+		break;
+	case AUTOMIN:
+		reg = REG_PECI_MIN;
+		break;
+	case THERM:
+		reg = REG_DEVID;
+		break;
+	case HYSTERSIS:
+		reg = REG_REMOTE2_HYSTERSIS;
+		break;
+	}
+
+	i2c_smbus_write_byte_data(client, reg, out);
+
+	mutex_unlock(&data->lock);
+	return count;
+}
+/*
+ * Show temperature from PECI interface
+ */
+static ssize_t show_peci(struct device *dev, struct device_attribute *attr,
+			 char *buf)
+{
+	// this function is adt7490 only
+	struct adt7475_data *data = adt7475_update_device(dev);
+	struct i2c_client *client = to_i2c_client(dev);
+	struct sensor_device_attribute_2 *sattr = to_sensor_dev_attr_2(attr);
+	int out = 0;
+
+	if (!SYNO_IS_ADT7490(client)) {
+		return -EINVAL;
+	}
+
+	switch (sattr->nr) {
+		case OFFSET:
+			mutex_lock(&data->lock);
+			out = (s8)data->peci[sattr->nr][sattr->index] * 1000;
+			mutex_unlock(&data->lock);
+			break;
+
+		case HYSTERSIS:
+			mutex_lock(&data->lock);
+			out = data->peci[sattr->nr][sattr->index];
+			out &= 0xF;
+			out = reg2temp(data, data->peci[THERM][sattr->index]) - out * 1000;
+			mutex_unlock(&data->lock);
+			break;
+
+		default:
+			/* show peci temperature */
+			mutex_lock(&data->lock);
+			out = reg2temp(data, data->peci[sattr->nr][sattr->index]);
+			mutex_unlock(&data->lock);
+			break;
+	}
+
+	return sprintf(buf, "%d\n", out);
+}
+
+static ssize_t show_adt_full_duty_cycle(struct device *dev, struct device_attribute *attr,
+						char *buf)
+{
+	// this function is adt7490 only
+	struct i2c_client *client = to_i2c_client(dev);
+	u8 config1;
+
+	if (!SYNO_IS_ADT7490(client)) {
+		return -EINVAL;
+	}
+	config1 = adt7475_read(REG_CONFIG1);
+
+	return sprintf(buf, "%d\n", (config1 & 0x8) > 0 ? 1 : 0);
+}
+
+static ssize_t set_adt_full_duty_cycle(struct device *dev, struct device_attribute *attr,
+						const char *buf, size_t count)
+{
+	// this function is adt7490 only
+	struct i2c_client *client = to_i2c_client(dev);
+	u8 config1;
+	long val;
+
+	if (!SYNO_IS_ADT7490(client)) {
+		return -EINVAL;
+	}
+
+	if (kstrtol(buf, 10, &val))
+		return -EINVAL;
+
+	config1 = adt7475_read(REG_CONFIG1);
+	if (val) {
+		config1 |= 0x8;
+	} else {
+		config1 &= ~0x8;
+	}
+
+	i2c_smbus_write_byte_data(client, REG_CONFIG1, config1);
+
+	return count;
+}
+
+static ssize_t show_peci_error(struct device *dev, struct device_attribute *attr,
+						char *buf)
+{
+	// this function is adt7490 only
+	struct i2c_client *client = to_i2c_client(dev);
+	u8 config;
+
+	if (!SYNO_IS_ADT7490(client)) {
+		return -EINVAL;
+	}
+	config = adt7475_read(REG_VID);
+	return sprintf(buf, "%d\n", config);
+}
+
+static ssize_t show_enh_acou_reg(struct device *dev, struct device_attribute *attr,
+						char *buf)
+{
+	// this function is adt7490 only
+	struct i2c_client *client = to_i2c_client(dev);
+	u8 config;
+
+	if (!SYNO_IS_ADT7490(client)) {
+		return -EINVAL;
+	}
+	config = adt7475_read(REG_ACOUSTIC);
+	return sprintf(buf, "%d\n", config >> 5);
+}
+
+static ssize_t set_enh_acou_reg(struct device *dev, struct device_attribute *attr,
+						const char *buf, size_t count)
+{
+	// this function is adt7490 only
+	struct i2c_client *client = to_i2c_client(dev);
+	u8 config;
+	long val;
+
+	if (!SYNO_IS_ADT7490(client)) {
+		return -EINVAL;
+	}
+
+	if (kstrtol(buf, 10, &val))
+		return -EINVAL;
+
+	config = adt7475_read(REG_ACOUSTIC);
+	config &= ~0xE0;
+	config |= (val & 0x7) << 5;
+
+	i2c_smbus_write_byte_data(client, REG_ACOUSTIC, config);
+	return count;
+}
+
+static ssize_t show_adtenable(struct device *dev, struct device_attribute *attr,
+						char *buf)
+{
+	// this function is adt7490 only
+	struct i2c_client *client = to_i2c_client(dev);
+	u8 config1;
+
+	if (!SYNO_IS_ADT7490(client)) {
+		return -EINVAL;
+	}
+	config1 = adt7475_read(REG_CONFIG1);
+	return sprintf(buf, "%d\n", config1 & 0x1);
+}
+
+static ssize_t set_adtenable(struct device *dev, struct device_attribute *attr,
+						const char *buf, size_t count)
+{
+	// this function is adt7490 only
+	struct i2c_client *client = to_i2c_client(dev);
+	u8 config1;
+	long val;
+
+	if (!SYNO_IS_ADT7490(client)) {
+		return -EINVAL;
+	}
+
+	if (kstrtol(buf, 10, &val))
+		return -EINVAL;
+
+	config1 = adt7475_read(REG_CONFIG1);
+	if (val) {
+		config1 |= 0x1;
+	} else {
+		config1 &= ~0x1;
+	}
+	i2c_smbus_write_byte_data(client, REG_CONFIG1, config1);
+	return count;
+}
+
+/*
+ * Show high frequency configure of pwm
+ */
+static ssize_t show_pwmHighFreq(struct device *dev, struct device_attribute *attr,
+						char *buf)
+{
+	struct i2c_client *client = to_i2c_client(dev);
+	struct sensor_device_attribute_2 *sattr = to_sensor_dev_attr_2(attr);
+	struct adt7475_data *data = i2c_get_clientdata(client);
+	int out;
+
+	if (!SYNO_IS_ADT7490(client)) {
+		return -EINVAL;
+	}
+
+	mutex_lock(&data->lock);
+	out = (data->range[sattr->index] & 0x8) >> 3;
+	mutex_unlock(&data->lock);
+
+	return sprintf(buf, "%d\n", out);
+}
+
+/*
+ * Set pwm output as high frequency
+ */
+static ssize_t set_pwmHighFreq(struct device *dev, struct device_attribute *attr,
+						const char *buf, size_t count)
+{
+	struct i2c_client *client = to_i2c_client(dev);
+	struct sensor_device_attribute_2 *sattr = to_sensor_dev_attr_2(attr);
+	struct adt7475_data *data = i2c_get_clientdata(client);
+	long val;
+
+	if (!SYNO_IS_ADT7490(client)) {
+		return -EINVAL;
+	}
+
+	if (kstrtol(buf, 10, &val))
+		return -EINVAL;
+
+	mutex_lock(&data->lock);
+	data->range[sattr->index] =
+		adt7475_read(TEMP_TRANGE_REG(sattr->index));
+	if (val) {
+		data->range[sattr->index] |= 0x8;
+	} else {
+		data->range[sattr->index] &= ~0x8;
+	}
+
+	i2c_smbus_write_byte_data(client, TEMP_TRANGE_REG(sattr->index),
+				  data->range[sattr->index]);
+	mutex_unlock(&data->lock);
+	return count;
+}
+
+static ssize_t show_peci_point2(struct device *dev, struct device_attribute *attr,
+			   char *buf)
+{
+	struct i2c_client *client = to_i2c_client(dev);
+	struct adt7475_data *data = adt7475_update_device(dev);
+	struct sensor_device_attribute_2 *sattr = to_sensor_dev_attr_2(attr);
+	int out, val;
+
+	if (!SYNO_IS_ADT7490(client)) {
+		return -EINVAL;
+	}
+
+	mutex_lock(&data->lock);
+	out = (data->peci_range[sattr->index] >> 4) & 0x0F;
+	val = reg2temp(data, data->peci[AUTOMIN][sattr->index]);
+	mutex_unlock(&data->lock);
+
+	return sprintf(buf, "%d\n", val + autorange_table[out]);
+}
+
+static ssize_t set_peci_point2(struct device *dev, struct device_attribute *attr,
+			  const char *buf, size_t count)
+{
+	struct i2c_client *client = to_i2c_client(dev);
+	struct adt7475_data *data = i2c_get_clientdata(client);
+	struct sensor_device_attribute_2 *sattr = to_sensor_dev_attr_2(attr);
+	int temp;
+	long val;
+
+	if (!SYNO_IS_ADT7490(client)) {
+		return -EINVAL;
+	}
+
+	if (kstrtol(buf, 10, &val))
+		return -EINVAL;
+
+	mutex_lock(&data->lock);
+
+	/* Get a fresh copy of the needed registers */
+	data->config5 = adt7475_read(REG_CONFIG5);
+	data->peci[AUTOMIN][sattr->index] = adt7475_read(REG_PECI_MIN) << 2;
+	data->peci_range[sattr->index] = adt7475_read(REG_PECI_RANGE);
+
+	/* The user will write an absolute value, so subtract the start point
+	   to figure the range */
+	temp = reg2temp(data, data->peci[AUTOMIN][sattr->index]);
+	val = clamp_val(val, temp + autorange_table[0],
+		temp + autorange_table[ARRAY_SIZE(autorange_table) - 1]);
+	val -= temp;
+
+	/* Find the nearest table entry to what the user wrote */
+	val = find_nearest(val, autorange_table, ARRAY_SIZE(autorange_table));
+
+	data->peci_range[sattr->index] &= ~0xF0;
+	data->peci_range[sattr->index] |= val << 4;
+
+	i2c_smbus_write_byte_data(client, REG_PECI_RANGE,
+				  data->peci_range[sattr->index]);
+
+	mutex_unlock(&data->lock);
+	return count;
+}
+
+static ssize_t show_pwm_syno_control(struct device *dev, struct device_attribute *attr,
+			    char *buf)
+{
+	struct i2c_client *client = to_i2c_client(dev);
+	struct adt7475_data *data = i2c_get_clientdata(client);
+	struct sensor_device_attribute_2 *sattr = to_sensor_dev_attr_2(attr);
+
+	if (!SYNO_IS_ADT7490(client)) {
+		return -EINVAL;
+	}
+	mutex_lock(&data->lock);
+	/* Read Modify Write PWM values */
+	adt7475_read_pwm(client, sattr->index);
+	mutex_unlock(&data->lock);
+
+	return sprintf(buf, "%d\n", data->pwmsynoctl[sattr->index]);
+}
+
+/*
+ * This function is set the pwm control sensor,
+ * In ADT7490 spec, it could choose many way to control the pwm
+ * we implement all the valid control mapping in this fucntion
+ *
+ * We don't use pwm_enable and pwm_auto_channel to set pwm control source
+ */
+static ssize_t set_pwm_syno_control(struct device *dev, struct device_attribute *attr,
+			   const char *buf, size_t count)
+{
+	struct i2c_client *client = to_i2c_client(dev);
+	struct adt7475_data *data = i2c_get_clientdata(client);
+	struct sensor_device_attribute_2 *sattr = to_sensor_dev_attr_2(attr);
+	long val = 0;
+	long inputVal = 0;
+	long valt = 0;
+	int index = sattr->index;
+
+	if (!SYNO_IS_ADT7490(client)) {
+		return -EINVAL;
+	}
+
+	if (kstrtol(buf, 10, &inputVal))
+		return -EINVAL;
+
+	mutex_lock(&data->lock);
+	/* Read Modify Write PWM values */
+	data->pwm[CONTROL][index] = adt7475_read(PWM_CONFIG_REG(index));
+
+	switch (inputVal) {
+		case 1:
+			valt = 0;
+			val = 0x03;	/* Run at maximun duty cycle (set by pwmMax) */
+			break;
+		case 2:
+			valt = 0;
+			val = 0x07;	/* Manual mode*/
+			break;
+		case 3:
+			valt = 1;
+			val = 0x07;	/* Source from all peci and all sensor */
+			break;
+		case 4:
+			valt = 1;
+			val = 0x05;	/* Source from all peci */
+			break;
+		case 5:
+			valt = 1;
+			val = 0x00;	/* Source from peci0 */
+			break;
+		case 6:
+			valt = 1;
+			val = 0x01;	/* Source from peci1 */
+			break;
+		case 7:
+			valt = 1;
+			val = 0x02;	/* Source from peci2 */
+			break;
+		case 8:
+			valt = 1;
+			val = 0x03;	/* Source from peci3 */
+			break;
+		case 9:
+			valt = 0;
+			val = 0x06;	/* Source from all sensors */
+			break;
+		case 10:
+			valt = 0;
+			val = 0x05;	/* Source from local and remote2 */
+			break;
+		case 11:
+			valt = 0;
+			val = 0x00;	/* Source from remote1 */
+			break;
+		case 12:
+			valt = 0;
+			val = 0x01;	/* Source from local */
+			break;
+		case 13:
+			valt = 0;
+			val = 0x02;	/* Source from remote2 */
+			break;
+		default:
+			valt = 0;
+			val = 0x03;	/* Run at maximun duty cycle (set by pwmMax) */
+			break;
+	}
+
+	data->pwm[CONTROL][index] &= ~0xE8;
+	data->pwm[CONTROL][index] |= (valt & 1) << 3;
+	data->pwm[CONTROL][index] |= (val & 7) << 5;
+
+	i2c_smbus_write_byte_data(client, PWM_CONFIG_REG(index),
+				  data->pwm[CONTROL][index]);
+	mutex_unlock(&data->lock);
+
+	return count;
+}
+#endif /* MY_ABC_HERE */
+
 static ssize_t show_vrm(struct device *dev, struct device_attribute *devattr,
 			char *buf)
 {
@@ -1055,6 +1586,87 @@ static SENSOR_DEVICE_ATTR_2(pwm3_auto_point1_pwm, S_IRUGO | S_IWUSR, show_pwm,
 			    set_pwm, MIN, 2);
 static SENSOR_DEVICE_ATTR_2(pwm3_auto_point2_pwm, S_IRUGO | S_IWUSR, show_pwm,
 			    set_pwm, MAX, 2);
+#ifdef MY_ABC_HERE
+static SENSOR_DEVICE_ATTR_2(peci0_input, S_IRUGO, show_peci, NULL, INPUT, 0);
+static SENSOR_DEVICE_ATTR_2(peci0_auto_point1_temp, S_IRUGO | S_IWUSR,
+			    show_peci, set_peci, AUTOMIN, 0);
+static SENSOR_DEVICE_ATTR_2(peci0_auto_point2_temp, S_IRUGO | S_IWUSR,
+			    show_peci_point2, set_peci_point2, 0, 0);
+static SENSOR_DEVICE_ATTR_2(peci0_crit, S_IRUGO | S_IWUSR, show_peci, set_peci,
+			    THERM, 0);
+static SENSOR_DEVICE_ATTR_2(peci0_crit_hyst, S_IRUGO | S_IWUSR, show_peci,
+			    set_peci, HYSTERSIS, 0);
+static SENSOR_DEVICE_ATTR_2(peci0_offset, S_IRUGO | S_IWUSR, show_peci,
+			    set_peci, OFFSET, 0);
+static SENSOR_DEVICE_ATTR_2(peci0_min, S_IRUGO | S_IWUSR, show_peci, set_peci,
+				MIN, 0);
+static SENSOR_DEVICE_ATTR_2(peci0_max, S_IRUGO | S_IWUSR, show_peci, set_peci,
+				MAX, 0);
+static SENSOR_DEVICE_ATTR_2(peci1_input, S_IRUGO, show_peci, NULL, INPUT, 1);
+static SENSOR_DEVICE_ATTR_2(peci1_auto_point1_temp, S_IRUGO | S_IWUSR,
+			    show_peci, set_peci, AUTOMIN, 1);
+static SENSOR_DEVICE_ATTR_2(peci1_auto_point2_temp, S_IRUGO | S_IWUSR,
+			    show_peci_point2, set_peci_point2, 0, 1);
+static SENSOR_DEVICE_ATTR_2(peci1_crit, S_IRUGO | S_IWUSR, show_peci, set_peci,
+			    THERM, 1);
+static SENSOR_DEVICE_ATTR_2(peci1_crit_hyst, S_IRUGO | S_IWUSR, show_peci,
+			    set_peci, HYSTERSIS, 1);
+static SENSOR_DEVICE_ATTR_2(peci1_offset, S_IRUGO | S_IWUSR, show_peci,
+			    set_peci, OFFSET, 1);
+static SENSOR_DEVICE_ATTR_2(peci1_min, S_IRUGO | S_IWUSR, show_peci, set_peci,
+				MIN, 1);
+static SENSOR_DEVICE_ATTR_2(peci1_max, S_IRUGO | S_IWUSR, show_peci, set_peci,
+				MAX, 1);
+static SENSOR_DEVICE_ATTR_2(peci2_input, S_IRUGO, show_peci, NULL, INPUT, 2);
+static SENSOR_DEVICE_ATTR_2(peci2_auto_point1_temp, S_IRUGO | S_IWUSR,
+			    show_peci, set_peci, AUTOMIN, 2);
+static SENSOR_DEVICE_ATTR_2(peci2_auto_point2_temp, S_IRUGO | S_IWUSR,
+			    show_peci_point2, set_peci_point2, 0, 2);
+static SENSOR_DEVICE_ATTR_2(peci2_crit, S_IRUGO | S_IWUSR, show_peci, set_peci,
+			    THERM, 2);
+static SENSOR_DEVICE_ATTR_2(peci2_crit_hyst, S_IRUGO | S_IWUSR, show_peci,
+			    set_peci, HYSTERSIS, 2);
+static SENSOR_DEVICE_ATTR_2(peci2_offset, S_IRUGO | S_IWUSR, show_peci,
+			    set_peci, OFFSET, 2);
+static SENSOR_DEVICE_ATTR_2(peci2_min, S_IRUGO | S_IWUSR, show_peci, set_peci,
+				MIN, 2);
+static SENSOR_DEVICE_ATTR_2(peci2_max, S_IRUGO | S_IWUSR, show_peci, set_peci,
+				MAX, 2);
+static SENSOR_DEVICE_ATTR_2(peci3_input, S_IRUGO, show_peci, NULL, INPUT, 3);
+static SENSOR_DEVICE_ATTR_2(peci3_auto_point1_temp, S_IRUGO | S_IWUSR,
+			    show_peci, set_peci, AUTOMIN, 3);
+static SENSOR_DEVICE_ATTR_2(peci3_auto_point2_temp, S_IRUGO | S_IWUSR,
+			    show_peci_point2, set_peci_point2, 0, 3);
+static SENSOR_DEVICE_ATTR_2(peci3_crit, S_IRUGO | S_IWUSR, show_peci, set_peci,
+			    THERM, 3);
+static SENSOR_DEVICE_ATTR_2(peci3_crit_hyst, S_IRUGO | S_IWUSR, show_peci,
+			    set_peci, HYSTERSIS, 3);
+static SENSOR_DEVICE_ATTR_2(peci3_offset, S_IRUGO | S_IWUSR, show_peci,
+			    set_peci, OFFSET, 3);
+static SENSOR_DEVICE_ATTR_2(peci3_min, S_IRUGO | S_IWUSR, show_peci, set_peci,
+				MIN, 3);
+static SENSOR_DEVICE_ATTR_2(peci3_max, S_IRUGO | S_IWUSR, show_peci, set_peci,
+				MAX, 3);
+static SENSOR_DEVICE_ATTR_2(enable, S_IRUGO | S_IWUSR, show_adtenable,
+			    set_adtenable, INPUT, 0);
+static SENSOR_DEVICE_ATTR_2(pwm1_high_freq, S_IWUSR | S_IRUGO, show_pwmHighFreq, 
+				set_pwmHighFreq, INPUT, 0);
+static SENSOR_DEVICE_ATTR_2(pwm2_high_freq, S_IWUSR | S_IRUGO, show_pwmHighFreq, 
+				set_pwmHighFreq, INPUT, 1);
+static SENSOR_DEVICE_ATTR_2(pwm3_high_freq, S_IWUSR | S_IRUGO, show_pwmHighFreq, 
+				set_pwmHighFreq, INPUT, 2);
+static SENSOR_DEVICE_ATTR_2(pwm1_syno_control, S_IRUGO | S_IWUSR, show_pwm_syno_control,
+				set_pwm_syno_control, INPUT, 0);
+static SENSOR_DEVICE_ATTR_2(pwm2_syno_control, S_IRUGO | S_IWUSR, show_pwm_syno_control,
+				set_pwm_syno_control, INPUT, 1);
+static SENSOR_DEVICE_ATTR_2(pwm3_syno_control, S_IRUGO | S_IWUSR, show_pwm_syno_control,
+				set_pwm_syno_control, INPUT, 2);
+static SENSOR_DEVICE_ATTR_2(full_duty_cycle, S_IRUGO | S_IWUSR, show_adt_full_duty_cycle,
+			    set_adt_full_duty_cycle, INPUT, 0);
+static SENSOR_DEVICE_ATTR_2(peci_error, S_IRUGO, show_peci_error, NULL, INPUT, 0);
+static SENSOR_DEVICE_ATTR_2(enhanced_acoustic_register, S_IWUSR | S_IRUGO, show_enh_acou_reg,
+				set_enh_acou_reg, INPUT, 0);
+#endif /* MY_ABC_HERE */
 
 /* Non-standard name, might need revisiting */
 static DEVICE_ATTR(pwm_use_point2_pwm_at_crit, S_IWUSR | S_IRUGO,
@@ -1122,6 +1734,54 @@ static struct attribute *adt7475_attrs[] = {
 	&sensor_dev_attr_pwm3_auto_channels_temp.dev_attr.attr,
 	&sensor_dev_attr_pwm3_auto_point1_pwm.dev_attr.attr,
 	&sensor_dev_attr_pwm3_auto_point2_pwm.dev_attr.attr,
+#ifdef MY_ABC_HERE
+	&sensor_dev_attr_peci0_input.dev_attr.attr,
+	&sensor_dev_attr_peci0_auto_point1_temp.dev_attr.attr,
+	&sensor_dev_attr_peci0_auto_point2_temp.dev_attr.attr,
+	&sensor_dev_attr_peci0_crit.dev_attr.attr,
+	&sensor_dev_attr_peci0_crit_hyst.dev_attr.attr,
+	&sensor_dev_attr_peci0_offset.dev_attr.attr,
+	&sensor_dev_attr_peci0_min.dev_attr.attr,
+	&sensor_dev_attr_peci0_max.dev_attr.attr,
+
+	&sensor_dev_attr_peci1_input.dev_attr.attr,
+	&sensor_dev_attr_peci1_auto_point1_temp.dev_attr.attr,
+	&sensor_dev_attr_peci1_auto_point2_temp.dev_attr.attr,
+	&sensor_dev_attr_peci1_crit.dev_attr.attr,
+	&sensor_dev_attr_peci1_crit_hyst.dev_attr.attr,
+	&sensor_dev_attr_peci1_offset.dev_attr.attr,
+	&sensor_dev_attr_peci1_min.dev_attr.attr,
+	&sensor_dev_attr_peci1_max.dev_attr.attr,
+
+	&sensor_dev_attr_peci2_input.dev_attr.attr,
+	&sensor_dev_attr_peci2_auto_point1_temp.dev_attr.attr,
+	&sensor_dev_attr_peci2_auto_point2_temp.dev_attr.attr,
+	&sensor_dev_attr_peci2_crit.dev_attr.attr,
+	&sensor_dev_attr_peci2_crit_hyst.dev_attr.attr,
+	&sensor_dev_attr_peci2_offset.dev_attr.attr,
+	&sensor_dev_attr_peci2_min.dev_attr.attr,
+	&sensor_dev_attr_peci2_max.dev_attr.attr,
+
+	&sensor_dev_attr_peci3_input.dev_attr.attr,
+	&sensor_dev_attr_peci3_auto_point1_temp.dev_attr.attr,
+	&sensor_dev_attr_peci3_auto_point2_temp.dev_attr.attr,
+	&sensor_dev_attr_peci3_crit.dev_attr.attr,
+	&sensor_dev_attr_peci3_crit_hyst.dev_attr.attr,
+	&sensor_dev_attr_peci3_offset.dev_attr.attr,
+	&sensor_dev_attr_peci3_min.dev_attr.attr,
+	&sensor_dev_attr_peci3_max.dev_attr.attr,
+
+	&sensor_dev_attr_enable.dev_attr.attr,
+	&sensor_dev_attr_pwm1_high_freq.dev_attr.attr,
+	&sensor_dev_attr_pwm2_high_freq.dev_attr.attr,
+	&sensor_dev_attr_pwm3_high_freq.dev_attr.attr,
+	&sensor_dev_attr_pwm1_syno_control.dev_attr.attr,
+	&sensor_dev_attr_pwm2_syno_control.dev_attr.attr,
+	&sensor_dev_attr_pwm3_syno_control.dev_attr.attr,
+	&sensor_dev_attr_full_duty_cycle.dev_attr.attr,
+	&sensor_dev_attr_peci_error.dev_attr.attr,
+	&sensor_dev_attr_enhanced_acoustic_register.dev_attr.attr,
+#endif /* MY_ABC_HERE */
 	&dev_attr_pwm_use_point2_pwm_at_crit.attr,
 	NULL,
 };
@@ -1256,6 +1916,9 @@ static int adt7475_probe(struct i2c_client *client,
 		[adt7476] = "ADT7476",
 		[adt7490] = "ADT7490",
 	};
+#ifdef MY_ABC_HERE
+	u8 config1, configPECI;
+#endif /* MY_ABC_HERE */
 
 	struct adt7475_data *data;
 	int i, ret = 0, revision;
@@ -1284,6 +1947,24 @@ static int adt7475_probe(struct i2c_client *client,
 		data->has_voltage = 0x06;	/* in1, in2 */
 		revision = adt7475_read(REG_DEVID2) & 0x07;
 	}
+
+#ifdef MY_ABC_HERE
+	if (SYNO_IS_ADT7490(client)) {
+		config1 = adt7475_read(REG_CONFIG1);
+		// which means adt7490 is not been told to start
+		if (!(config1 & 0x1)) {
+			// which means adt7490 is ready to go...
+			if (config1 & 0x4) {
+				config1 |= 0x11;
+				i2c_smbus_write_byte_data(client, REG_CONFIG1, config1);
+			}
+		}
+
+		configPECI = adt7475_read(REG_PECI_CONFIG);
+		configPECI = 0x00;
+		i2c_smbus_write_byte_data(client, REG_PECI_CONFIG, configPECI);
+	}
+#endif /* MY_ABC_HERE */
 
 	config3 = adt7475_read(REG_CONFIG3);
 	/* Pin PWM2 may alternatively be used for ALERT output */
@@ -1443,7 +2124,76 @@ static void adt7475_read_hystersis(struct i2c_client *client)
 	data->temp[HYSTERSIS][0] = (u16) adt7475_read(REG_REMOTE1_HYSTERSIS);
 	data->temp[HYSTERSIS][1] = data->temp[HYSTERSIS][0];
 	data->temp[HYSTERSIS][2] = (u16) adt7475_read(REG_REMOTE2_HYSTERSIS);
+#ifdef MY_ABC_HERE
+	data->peci[HYSTERSIS][0] = (u16) adt7475_read(REG_REMOTE2_HYSTERSIS);
+	data->peci[HYSTERSIS][1] = (u16) adt7475_read(REG_REMOTE2_HYSTERSIS);
+	data->peci[HYSTERSIS][2] = (u16) adt7475_read(REG_REMOTE2_HYSTERSIS);
+	data->peci[HYSTERSIS][3] = (u16) adt7475_read(REG_REMOTE2_HYSTERSIS);
+#endif /* MY_ABC_HERE */
 }
+
+#ifdef MY_ABC_HERE
+static unsigned int adt7490_pwmctl_read(const unsigned int pwmReg)
+{
+	unsigned int valt = pwmReg & 0x8;
+	unsigned int pwmSource = (pwmReg >> 5) & 7;
+	unsigned int ret = 1;
+
+	if (valt) {
+		switch (pwmSource) {
+			case 0x0:
+				ret = 5;
+				break;
+			case 0x1:
+				ret = 6;
+				break;
+			case 0x2:
+				ret = 7;
+				break;
+			case 0x3:
+				ret = 8;
+				break;
+			case 0x5:
+				ret = 4;
+				break;
+			case 0x7:
+				ret = 3;
+				break;
+			default:
+				ret = 0;
+				break;
+		}
+	} else {
+		switch (pwmSource) {
+			case 0x0:
+				ret = 11;
+				break;
+			case 0x1:
+				ret = 12;
+				break;
+			case 0x2:
+				ret = 13;
+				break;
+			case 0x3:
+				ret = 1;
+				break;
+			case 0x5:
+				ret = 10;
+				break;
+			case 0x6:
+				ret = 9;
+				break;
+			case 0x7:
+				ret = 2;
+				break;
+			default:
+				ret = 0;
+				break;
+		}
+	}
+	return ret;
+}
+#endif /* MY_ABC_HERE */
 
 static void adt7475_read_pwm(struct i2c_client *client, int index)
 {
@@ -1457,6 +2207,9 @@ static void adt7475_read_pwm(struct i2c_client *client, int index)
 	 * based on the current settings
 	 */
 	v = (data->pwm[CONTROL][index] >> 5) & 7;
+#ifdef MY_ABC_HERE
+	data->pwmsynoctl[index] = adt7490_pwmctl_read(data->pwm[CONTROL][index]);
+#endif /* MY_ABC_HERE */
 
 	if (v == 3)
 		data->pwmctl[index] = 0;
@@ -1538,6 +2291,21 @@ static struct adt7475_data *adt7475_update_device(struct device *dev)
 			data->voltage[INPUT][5] = adt7475_read(REG_VTT) << 2 |
 				((ext >> 4) & 3);
 		}
+
+#ifdef MY_ABC_HERE
+		if (SYNO_IS_ADT7490(client)) {
+			for (i = 0; i < ADT7490_PECI_COUNT; i++) {
+				/* Adjust values so they match the input precision */
+				data->peci[MIN][i] = adt7475_read(REG_PECI_LOW_LIMIT) << 2;
+				data->peci[MAX][i] = adt7475_read(REG_PECI_HIGH_LIMIT) << 2;
+				data->peci[AUTOMIN][i] = adt7475_read(REG_PECI_MIN) << 2;
+				data->peci[THERM][i] = adt7475_read(REG_DEVID) << 2;
+				data->peci[INPUT][i] = adt7475_read(PECI_REG(i)) << 2;
+				data->peci[OFFSET][i] = adt7475_read(PECI_OFFSET_REG(i));
+				data->peci_range[i] = adt7475_read(REG_PECI_RANGE);
+			}
+		}
+#endif /* MY_ABC_HERE */
 
 		for (i = 0; i < ADT7475_TACH_COUNT; i++) {
 			if (i == 3 && !data->has_fan4)

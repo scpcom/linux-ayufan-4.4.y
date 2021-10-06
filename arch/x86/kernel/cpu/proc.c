@@ -1,9 +1,15 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/smp.h>
 #include <linux/timex.h>
 #include <linux/string.h>
 #include <linux/seq_file.h>
 #include <linux/cpufreq.h>
 
+#if defined(MY_DEF_HERE)
+char syno_cpu_model_name[64];
+#endif  
 
 static void show_cpuinfo_core(struct seq_file *m, struct cpuinfo_x86 *c,
 			      unsigned int cpu)
@@ -84,7 +90,10 @@ static int show_cpuinfo(struct seq_file *m, void *v)
 			   freq / 1000, (freq % 1000));
 	}
 
-	
+#if defined(MY_DEF_HERE)
+	strncpy(syno_cpu_model_name, c->x86_model_id, sizeof(c->x86_model_id));
+#endif  
+
 	if (c->x86_cache_size >= 0)
 		seq_printf(m, "cache size\t: %d KB\n", c->x86_cache_size);
 
@@ -152,6 +161,14 @@ static void *c_next(struct seq_file *m, void *v, loff_t *pos)
 static void c_stop(struct seq_file *m, void *v)
 {
 }
+
+#if defined(MY_DEF_HERE)
+static char *syno_get_cpu_model_name(void)
+{
+	return syno_cpu_model_name;
+}
+EXPORT_SYMBOL(syno_get_cpu_model_name);
+#endif  
 
 const struct seq_operations cpuinfo_op = {
 	.start	= c_start,

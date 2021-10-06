@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/fs.h>
 #include <linux/mm.h>
 #include <linux/gfp.h>
@@ -92,10 +94,16 @@ static const struct class_info clas_info[] = {
 	{USB_CLASS_MISC,		"misc"},
 	{USB_CLASS_APP_SPEC,		"app."},
 	{USB_CLASS_VENDOR_SPEC,		"vend."},
-	{-1,				"unk."}		
+	{-1,				"unk."}		 
 };
 
+#ifdef MY_ABC_HERE
+#define SDCOPY_PORT_LOCATION 98
+#endif  
 
+#ifdef MY_ABC_HERE
+#define USBCOPY_PORT_LOCATION 99
+#endif  
 
 void usbfs_conn_disc_event(void)
 {
@@ -403,10 +411,87 @@ static char *usb_dump_string(char *start, char *end,
 	return start;
 }
 
-#endif 
+#endif  
 
+#ifdef MY_ABC_HERE
+int blIsUSBDeviceAtFrontPort(struct usb_device *usbdev)
+{
+	char buf[256];
 
+	if(usbdev && usbdev->bus) {
+		memset(buf, 0, sizeof(buf));
+		sprintf(buf, "%s-%s", usbdev->bus->bus_name, usbdev->devpath);
+#if defined(MY_DEF_HERE)
+		if(!strcmp(buf,"0000:00:14.0-2")) {
+			return 1;
+		}
+#endif  
+#if defined(MY_DEF_HERE)
+		if(!strcmp(buf,"0000:00:15.0-3")) {
+			return 1;
+		}
+#endif  
+#if defined(MY_DEF_HERE)
+#if defined(CONFIG_ARCH_GEN3)
+		if(!strcmp(buf,"0000:01:0d.0-1")) {
+			return 1;
+		}
+#endif  
+#endif  
+#if defined(MY_ABC_HERE)
+#if defined(MY_DEF_HERE)
+		if(!strcmp(buf,"0000:00:1d.7-2")) {
+			return 1;
+		}
+#else
+		if(!strcmp(buf,"0000:00:1d.7-3") || !strcmp(buf,"0000:00:1d.1-1")) {
+			return 1;
+		}
+#endif  
+#endif  
+#if defined(MY_DEF_HERE) && defined(CONFIG_ARMADA_XP)
+		if(!strcmp(buf, "ehci_marvell.1-1") ||
+		   !strcmp(buf, "ehci_marvell.0-1")) {
+			return 1;
+		}
+#endif  
+	}
+	return 0;
+}
+#endif  
 
+#ifdef MY_ABC_HERE
+int blIsCardReader(struct usb_device *usbdev)
+{
+	char buf[256];
+
+	if(usbdev && usbdev->bus) {
+		memset(buf, 0, sizeof(buf));
+		sprintf(buf, "%s-%s", usbdev->bus->bus_name, usbdev->devpath);
+
+#if defined(MY_DEF_HERE)
+#if defined(CONFIG_ARCH_GEN3)
+		if (syno_is_hw_version(HW_DS214play)) {
+			if(!strcmp(buf,"0000:01:0d.1-1")) {
+			return 1;
+			}
+		}
+#endif  
+#endif  
+
+#if defined(MY_DEF_HERE)
+		if (syno_is_hw_version(HW_US3v10)) {
+			if (!strcmp(buf, "0000:00:00.0-1")) {
+				return 1;
+			}
+		}
+#endif  
+
+	}
+	return 0;
+}
+EXPORT_SYMBOL(blIsCardReader);
+#endif  
 
 static ssize_t usb_device_dump(char __user **buffer, size_t *nbytes,
 			       loff_t *skip_bytes, loff_t *file_offset,
@@ -420,28 +505,30 @@ static ssize_t usb_device_dump(char __user **buffer, size_t *nbytes,
 	unsigned int length;
 	ssize_t total_written = 0;
 	struct usb_device *childdev = NULL;
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+	int port = 0;
+#endif  
 
-	
 	if (*nbytes <= 0)
 		return 0;
 
 	if (level > MAX_TOPO_LEVEL)
 		return 0;
-	
+	 
 	pages_start = (char *)__get_free_pages(GFP_NOIO, 1);
 	if (!pages_start)
 		return -ENOMEM;
 
 	if (usbdev->parent && usbdev->parent->devnum != -1)
 		parent_devnum = usbdev->parent->devnum;
-	
+	 
 	switch (usbdev->speed) {
 	case USB_SPEED_LOW:
 		speed = "1.5"; break;
-	case USB_SPEED_UNKNOWN:		
+	case USB_SPEED_UNKNOWN:		 
 	case USB_SPEED_FULL:
 		speed = "12"; break;
-	case USB_SPEED_WIRELESS:	
+	case USB_SPEED_WIRELESS:	 
 	case USB_SPEED_HIGH:
 		speed = "480"; break;
 	case USB_SPEED_SUPER:
@@ -449,23 +536,42 @@ static ssize_t usb_device_dump(char __user **buffer, size_t *nbytes,
 	default:
 		speed = "??";
 	}
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#if defined(MY_ABC_HERE)
+	if(blIsUSBDeviceAtFrontPort(usbdev)) {
+		port = USBCOPY_PORT_LOCATION;
+	}
+#endif  
+#if defined(MY_ABC_HERE)
+	if(blIsCardReader(usbdev)) {
+		port = SDCOPY_PORT_LOCATION;
+	}
+#endif  
+
+	if (port) {
+		data_end = pages_start + sprintf(pages_start, format_topo,
+				bus->busnum, level, parent_devnum,
+				port, count, usbdev->devnum,
+				speed, usbdev->maxchild);
+	} else {
+#endif  
 	data_end = pages_start + sprintf(pages_start, format_topo,
 			bus->busnum, level, parent_devnum,
 			index, count, usbdev->devnum,
 			speed, usbdev->maxchild);
-	
-	
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+	}
+#endif  
+
 	if (level == 0) {
 		int	max;
 
-		
 		if (usbdev->speed == USB_SPEED_HIGH ||
 		    usbdev->speed == USB_SPEED_SUPER)
 			max = 800;
 		else
 			max = FRAME_TIME_MAX_USECS_ALLOC;
 
-		
 		data_end += sprintf(data_end, format_bandwidth,
 				bus->bandwidth_allocated, max,
 				(100 * bus->bandwidth_allocated + max / 2)
@@ -500,12 +606,21 @@ static ssize_t usb_device_dump(char __user **buffer, size_t *nbytes,
 
 	free_pages((unsigned long)pages_start, 1);
 
-	
 	usb_hub_for_each_child(usbdev, chix, childdev) {
 		usb_lock_device(childdev);
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+		if (port) {
+			ret = usb_device_dump(buffer, nbytes, skip_bytes, file_offset,
+					childdev, bus, level + 1, port, ++cnt);
+		} else {
+#endif  
 		ret = usb_device_dump(buffer, nbytes, skip_bytes,
 				      file_offset, childdev, bus,
 				      level + 1, chix - 1, ++cnt);
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+		}
+#endif  
+
 		usb_unlock_device(childdev);
 		if (ret == -EFAULT)
 			return total_written;

@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #ifndef __LINUX_SND_SOC_H
 #define __LINUX_SND_SOC_H
 
@@ -10,7 +12,10 @@
 #include <linux/workqueue.h>
 #include <linux/interrupt.h>
 #include <linux/kernel.h>
+#if defined(MY_ABC_HERE)
+#else  
 #include <linux/regmap.h>
+#endif  
 #include <linux/log2.h>
 #include <sound/core.h>
 #include <sound/pcm.h>

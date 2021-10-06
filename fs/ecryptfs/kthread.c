@@ -1,11 +1,12 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/kthread.h>
 #include <linux/freezer.h>
 #include <linux/slab.h>
 #include <linux/wait.h>
 #include <linux/mount.h>
-#include <linux/file.h>
 #include "ecryptfs_kernel.h"
 
 struct ecryptfs_open_req {
@@ -103,11 +104,13 @@ int ecryptfs_privileged_open(struct file **lower_file,
 	req.path.dentry = lower_dentry;
 	req.path.mnt = lower_mnt;
 
-	
 	flags |= IS_RDONLY(d_inode(lower_dentry)) ? O_RDONLY : O_RDWR;
+#ifdef MY_ABC_HERE
+	lower_dentry->d_inode->i_opflags |= IOP_ECRYPTFS_LOWER_INIT;
+#endif  
 	(*lower_file) = dentry_open(&req.path, flags, cred);
 	if (!IS_ERR(*lower_file))
-		goto have_file;
+		goto out;
 	if ((flags & O_ACCMODE) == O_RDONLY) {
 		rc = PTR_ERR((*lower_file));
 		goto out;
@@ -125,16 +128,8 @@ int ecryptfs_privileged_open(struct file **lower_file,
 	mutex_unlock(&ecryptfs_kthread_ctl.mux);
 	wake_up(&ecryptfs_kthread_ctl.wait);
 	wait_for_completion(&req.done);
-	if (IS_ERR(*lower_file)) {
+	if (IS_ERR(*lower_file))
 		rc = PTR_ERR(*lower_file);
-		goto out;
-	}
-have_file:
-	if ((*lower_file)->f_op->mmap == NULL) {
-		fput(*lower_file);
-		*lower_file = NULL;
-		rc = -EMEDIUMTYPE;
-	}
 out:
 	return rc;
 }

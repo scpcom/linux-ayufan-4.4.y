@@ -295,7 +295,7 @@ rcar_du_plane_atomic_duplicate_state(struct drm_plane *plane)
 static void rcar_du_plane_atomic_destroy_state(struct drm_plane *plane,
 					       struct drm_plane_state *state)
 {
-	__drm_atomic_helper_plane_destroy_state(plane, state);
+	__drm_atomic_helper_plane_destroy_state(state);
 	kfree(to_rcar_plane_state(state));
 }
 
@@ -410,7 +410,8 @@ int rcar_du_planes_init(struct rcar_du_group *rgrp)
 
 		ret = drm_universal_plane_init(rcdu->ddev, &plane->plane, crtcs,
 					       &rcar_du_plane_funcs, formats,
-					       ARRAY_SIZE(formats), type);
+					       ARRAY_SIZE(formats), type,
+					       NULL);
 		if (ret < 0)
 			return ret;
 

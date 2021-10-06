@@ -1,7 +1,7 @@
-
-
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/module.h>
 #include <linux/types.h>
 #include <linux/sched.h>
@@ -2198,8 +2198,10 @@ int vt_kmsg_redirect(int new)
 		return kmsg_con;
 }
 
-
-
+#ifdef MY_ABC_HERE
+ 
+#else  
+ 
 static void vt_console_print(struct console *co, const char *b, unsigned count)
 {
 	struct vc_data *vc = vc_cons[fg_console].d;
@@ -2299,11 +2301,8 @@ static struct console vt_console_driver = {
 	.flags		= CON_PRINTBUFFER,
 	.index		= -1,
 };
+#endif  
 #endif
-
-
-
-
 
 int tioclinux(struct tty_struct *tty, unsigned long arg)
 {
@@ -2627,7 +2626,11 @@ static int __init con_init(void)
 	console_unlock();
 
 #ifdef CONFIG_VT_CONSOLE
+#ifdef MY_ABC_HERE
+ 
+#else  
 	register_console(&vt_console_driver);
+#endif  
 #endif
 	return 0;
 }

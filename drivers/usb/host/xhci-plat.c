@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/clk.h>
 #include <linux/dma-mapping.h>
 #include <linux/module.h>
@@ -59,6 +61,9 @@ static int xhci_plat_start(struct usb_hcd *hcd)
 
 static int xhci_plat_probe(struct platform_device *pdev)
 {
+#if defined (MY_DEF_HERE)
+	u32 vbus_gpio_pin = 0;
+#endif  
 	struct device_node	*node = pdev->dev.of_node;
 	struct usb_xhci_pdata	*pdata = dev_get_platdata(&pdev->dev);
 	const struct hc_driver	*driver;
@@ -155,16 +160,45 @@ static int xhci_plat_probe(struct platform_device *pdev)
 			goto put_usb3_hcd;
 	}
 
+#if defined (MY_DEF_HERE)
+	if (node) {
+		if (of_property_read_bool(node, "power-control-capable")) {
+			hcd->power_control_support = 1;
+		} else {
+			hcd->power_control_support = 0;
+		}
+		if (of_property_read_bool(node, "vbus-gpio")) {
+			of_property_read_u32(node, "vbus-gpio", &vbus_gpio_pin);
+			 
+			hcd->vbus_gpio_pin = vbus_gpio_pin;
+		} else {
+			hcd->vbus_gpio_pin = -1;
+			dev_warn(&pdev->dev, "failed to get Vbus gpio\n");
+		}
+	}
+	dev_info(&pdev->dev, "USB2 Vbus gpio %d\n", hcd->vbus_gpio_pin);
+	dev_info(&pdev->dev, "power control %s\n", hcd->power_control_support ?
+			"enabled" : "disabled");
+#endif  
+
 	ret = usb_add_hcd(hcd, irq, IRQF_SHARED);
 	if (ret)
 		goto disable_usb_phy;
+
+#if defined (MY_DEF_HERE)
+	xhci->shared_hcd->vbus_gpio_pin = hcd->vbus_gpio_pin;
+	xhci->shared_hcd->power_control_support = hcd->power_control_support;
+	dev_info(&pdev->dev, "USB3 Vbus gpio %d\n",
+			xhci->shared_hcd->vbus_gpio_pin);
+	dev_info(&pdev->dev, "power control %s\n", hcd->power_control_support ?
+			"enabled" : "disabled");
+#endif  
 
 	ret = usb_add_hcd(xhci->shared_hcd, irq, IRQF_SHARED);
 	if (ret)
 		goto dealloc_usb2_hcd;
 
 	return 0;
-
 
 dealloc_usb2_hcd:
 	usb_remove_hcd(hcd);

@@ -806,6 +806,22 @@ config I2C_RK3X
 	  This driver can also be built as a module. If so, the module will
 	  be called i2c-rk3x.
 
+config I2C_RTK
+	tristate "Realtek I2C"
+	depends on I2C && SYNO_RTD1296
+	help
+	  This driver supports I2C Controller on Realtek SoC
+
+config I2C_RTK_BUS_JAM_RECOVER
+	bool "Do recover if i2c bus is jammed"
+	depends on I2C_RTK && SYNO_RTD1296
+	default 'y'
+	help
+	  Say Y here if you do recover procedure if i2c bus is jammed.
+	  The I2c driver will detect bus status before an i2c transfer.
+	  If the bus is jammed, the driver will force output 10 extra clocks
+	  on SCL to recover the bus jam problem.
+
 config HAVE_S3C2410_I2C
 	bool
 	help

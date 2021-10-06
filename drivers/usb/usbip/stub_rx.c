@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <asm/byteorder.h>
 #include <linux/kthread.h>
 #include <linux/usb.h>
@@ -474,13 +476,17 @@ static void stub_rx_pdu(struct usbip_device *ud)
 	case USBIP_CMD_UNLINK:
 		stub_recv_cmd_unlink(sdev, &pdu);
 		break;
+#ifdef MY_ABC_HERE
+	case USBIP_RESET_DEV:
+		printk("reset device\n");
+#endif  
 
 	case USBIP_CMD_SUBMIT:
 		stub_recv_cmd_submit(sdev, &pdu);
 		break;
 
 	default:
-		
+		 
 		dev_err(dev, "unknown pdu\n");
 		usbip_event_add(ud, SDEV_EVENT_ERROR_TCP);
 		break;

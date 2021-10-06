@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/device.h>
 #include <linux/file.h>
 #include <linux/kthread.h>
@@ -76,11 +78,15 @@ static ssize_t store_sockfd(struct device *dev, struct device_attribute *attr,
 	} else {
 		dev_info(dev, "stub down\n");
 
+#ifdef MY_ABC_HERE
+	 
+#else  
 		spin_lock_irq(&sdev->ud.lock);
 		if (sdev->ud.status != SDEV_ST_USED)
 			goto err;
 
 		spin_unlock_irq(&sdev->ud.lock);
+#endif  
 
 		usbip_event_add(&sdev->ud, SDEV_EVENT_DOWN);
 	}
@@ -405,10 +411,14 @@ static int stub_resume(struct usb_device *udev, pm_message_t message)
 	return 0;
 }
 
-#endif	
+#endif	 
 
 struct usb_device_driver stub_driver = {
+#ifdef MY_ABC_HERE
+	.name		= "usbip",
+#else  
 	.name		= "usbip-host",
+#endif  
 	.probe		= stub_probe,
 	.disconnect	= stub_disconnect,
 #ifdef CONFIG_PM

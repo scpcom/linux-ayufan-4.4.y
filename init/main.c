@@ -115,6 +115,10 @@ EXPORT_SYMBOL(system_state);
 #define MAX_INIT_ARGS CONFIG_INIT_ENV_ARG_LIMIT
 #define MAX_INIT_ENVS CONFIG_INIT_ENV_ARG_LIMIT
 
+#ifdef CONFIG_RTK_MEM_REMAP
+extern void rtk_mem_remap_of_init(void);
+#endif
+
 extern void time_init(void);
 /* Default late time init is NULL. archs can override this later. */
 void (*__initdata late_time_init)(void);
@@ -590,6 +594,9 @@ asmlinkage __visible void __init start_kernel(void)
 	softirq_init();
 	timekeeping_init();
 	time_init();
+#ifdef CONFIG_RTK_MEM_REMAP     //Realtek RTD1295 static ioremap, jamestai20151209
+        rtk_mem_remap_of_init();
+#endif
 	sched_clock_postinit();
 	perf_event_init();
 	profile_init();

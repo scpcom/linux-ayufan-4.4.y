@@ -1,6 +1,8 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_KERNEL_H
 #define _LINUX_KERNEL_H
-
 
 #include <stdarg.h>
 #include <linux/linkage.h>
@@ -53,6 +55,12 @@
 
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]) + __must_be_array(arr))
 
+#define u64_to_user_ptr(x) (		\
+{					\
+	typecheck(u64, x);		\
+	(void __user *)(uintptr_t)x;	\
+}					\
+)
 
 #define __round_mask(x, y) ((__typeof__(x))((y)-1))
 #define round_up(x, y) ((((x)-1) | __round_mask(x, y))+1)
@@ -521,8 +529,17 @@ ftrace_vprintk(const char *fmt, va_list ap)
 	return 0;
 }
 static inline void ftrace_dump(enum ftrace_dump_mode oops_dump_mode) { }
-#endif 
+#endif  
 
+#if defined(MY_ABC_HERE)
+ 
+#define NIPQUAD(addr) \
+	((unsigned char *)&addr)[0], \
+	((unsigned char *)&addr)[1], \
+	((unsigned char *)&addr)[2], \
+	((unsigned char *)&addr)[3]
+#define NIPQUAD_FMT "%u.%u.%u.%u"
+#endif  
 
 #define min(x, y) ({				\
 	typeof(x) _min1 = (x);			\

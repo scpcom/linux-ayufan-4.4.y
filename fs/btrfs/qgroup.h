@@ -1,11 +1,12 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #ifndef __BTRFS_QGROUP__
 #define __BTRFS_QGROUP__
 
 #include "ulist.h"
 #include "delayed-ref.h"
-
 
 struct btrfs_qgroup_extent_record {
 	struct rb_node node;
@@ -72,7 +73,12 @@ int btrfs_verify_qgroup_counts(struct btrfs_fs_info *fs_info, u64 qgroupid,
 			       u64 rfer, u64 excl);
 #endif
 
-
+#ifdef MY_ABC_HERE
+int btrfs_quota_reserve(struct btrfs_root *root, struct inode *inode,
+						 u64 num_bytes);
+void btrfs_quota_reserve_free(struct btrfs_root *root,
+						 struct inode *inode, u64 num_bytes);
+#endif  
 int btrfs_qgroup_reserve_data(struct inode *inode, u64 start, u64 len);
 int btrfs_qgroup_release_data(struct inode *inode, u64 start, u64 len);
 int btrfs_qgroup_free_data(struct inode *inode, u64 start, u64 len);
@@ -81,4 +87,10 @@ int btrfs_qgroup_reserve_meta(struct btrfs_root *root, int num_bytes);
 void btrfs_qgroup_free_meta_all(struct btrfs_root *root);
 void btrfs_qgroup_free_meta(struct btrfs_root *root, int num_bytes);
 void btrfs_qgroup_check_reserved_leak(struct inode *inode);
-#endif 
+
+#ifdef MY_ABC_HERE
+void btrfs_qgroup_query(struct btrfs_fs_info *fs_info, u64 qgroupid,
+                        struct btrfs_ioctl_qgroup_query_args *qqa);
+#endif  
+
+#endif  

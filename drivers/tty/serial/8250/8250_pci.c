@@ -1,4 +1,7 @@
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #undef DEBUG
 #include <linux/module.h>
 #include <linux/pci.h>
@@ -1559,25 +1562,41 @@ pci_xr17v35x_setup(struct serial_private *priv,
 
 	port->port.flags |= UPF_EXAR_EFR;
 
-	
 	if (xr17v35x_has_slave(priv) && idx >= 8)
 		port->port.uartclk = (7812500 * 16 / 2);
 
-	
+#ifdef MY_DEF_HERE
 	if (idx == 0) {
-		writeb(0x00, p + 0x8f); 
-		writeb(0x00, p + 0x90); 
-		writeb(0x00, p + 0x91); 
-		writeb(0x00, p + 0x92); 
-		writeb(0x00, p + 0x93); 
-		writeb(0x00, p + 0x94); 
-		writeb(0x00, p + 0x95); 
-		writeb(0x00, p + 0x96); 
-		writeb(0x00, p + 0x97); 
-		writeb(0x00, p + 0x98); 
-		writeb(0x00, p + 0x99); 
-		writeb(0x00, p + 0x9a); 
+		writeb(0x01, p + 0x8f);  
+		writeb(0x00, p + 0x90);  
+		writeb(0x00, p + 0x91);  
+		 
+		writeb(0x01, p + 0x92);  
+		writeb(0x01, p + 0x93);  
+		writeb(0x00, p + 0x94);  
+		writeb(0x00, p + 0x95);  
+		writeb(0x00, p + 0x96);  
+		writeb(0x00, p + 0x97);  
+		writeb(0x00, p + 0x98);  
+		writeb(0x00, p + 0x99);  
+		writeb(0x00, p + 0x9a);  
 	}
+#else  
+	if (idx == 0) {
+		writeb(0x00, p + 0x8f);  
+		writeb(0x00, p + 0x90);  
+		writeb(0x00, p + 0x91);  
+		writeb(0x00, p + 0x92);  
+		writeb(0x00, p + 0x93);  
+		writeb(0x00, p + 0x94);  
+		writeb(0x00, p + 0x95);  
+		writeb(0x00, p + 0x96);  
+		writeb(0x00, p + 0x97);  
+		writeb(0x00, p + 0x98);  
+		writeb(0x00, p + 0x99);  
+		writeb(0x00, p + 0x9a);  
+	}
+#endif  
 	writeb(0x00, p + UART_EXAR_8XMODE);
 	writeb(UART_FCTR_EXAR_TRGD, p + UART_EXAR_FCTR);
 	writeb(128, p + UART_EXAR_TXTRG);
@@ -3451,25 +3470,25 @@ static struct pciserial_board pci_boards[] = {
 };
 
 static const struct pci_device_id blacklist[] = {
-	
-	{ PCI_VDEVICE(AL, 0x5457), }, 
-	{ PCI_VDEVICE(MOTOROLA, 0x3052), }, 
-	{ PCI_DEVICE(0x1543, 0x3052), }, 
+	 
+	{ PCI_VDEVICE(AL, 0x5457), },  
+	{ PCI_VDEVICE(MOTOROLA, 0x3052), },  
+	{ PCI_DEVICE(0x1543, 0x3052), },  
 
-	
-	{ PCI_DEVICE(0x4348, 0x7053), }, 
-	{ PCI_DEVICE(0x4348, 0x5053), }, 
-	{ PCI_DEVICE(0x1c00, 0x3250), }, 
-	{ PCI_DEVICE(0x1c00, 0x3470), }, 
+	{ PCI_DEVICE(0x4348, 0x7053), },  
+	{ PCI_DEVICE(0x4348, 0x5053), },  
+	{ PCI_DEVICE(0x1c00, 0x3250), },  
+	{ PCI_DEVICE(0x1c00, 0x3470), },  
 
-	
 	{ PCI_VDEVICE(INTEL, 0x081b), },
 	{ PCI_VDEVICE(INTEL, 0x081c), },
 	{ PCI_VDEVICE(INTEL, 0x081d), },
 	{ PCI_VDEVICE(INTEL, 0x1191), },
+#if defined(MY_DEF_HERE)
+#else
 	{ PCI_VDEVICE(INTEL, 0x19d8), },
+#endif
 };
-
 
 static int
 serial_pci_guess_board(struct pci_dev *dev, struct pciserial_board *board)
@@ -3477,13 +3496,11 @@ serial_pci_guess_board(struct pci_dev *dev, struct pciserial_board *board)
 	const struct pci_device_id *bldev;
 	int num_iomem, num_port, first_port = -1, i;
 
-	
 	if ((((dev->class >> 8) != PCI_CLASS_COMMUNICATION_SERIAL) &&
 	     ((dev->class >> 8) != PCI_CLASS_COMMUNICATION_MODEM)) ||
 	    (dev->class & 0xff) > 6)
 		return -ENODEV;
 
-	
 	for (bldev = blacklist;
 	     bldev < blacklist + ARRAY_SIZE(blacklist);
 	     bldev++) {

@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #ifndef ECRYPTFS_KERNEL_H
 #define ECRYPTFS_KERNEL_H
 
@@ -16,7 +18,11 @@
 #include <linux/crypto.h>
 
 #define ECRYPTFS_DEFAULT_IV_BYTES 16
+#ifdef MY_DEF_HERE
+#define ECRYPTFS_DEFAULT_EXTENT_SIZE PAGE_SIZE
+#else  
 #define ECRYPTFS_DEFAULT_EXTENT_SIZE 4096
+#endif  
 #define ECRYPTFS_MINIMUM_HEADER_EXTENT_SIZE 8192
 #define ECRYPTFS_DEFAULT_MSG_CTX_ELEMS 32
 #define ECRYPTFS_DEFAULT_SEND_TIMEOUT HZ
@@ -253,6 +259,10 @@ struct ecryptfs_mount_crypt_stat {
 #define ECRYPTFS_GLOBAL_ENCFN_USE_MOUNT_FNEK   0x00000020
 #define ECRYPTFS_GLOBAL_ENCFN_USE_FEK          0x00000040
 #define ECRYPTFS_GLOBAL_MOUNT_AUTH_TOK_ONLY    0x00000080
+
+#ifdef MY_ABC_HERE
+#define ECRYPTFS_GLOBAL_FAST_LOOKUP_ENABLED    0x80000000
+#endif  
 	u32 flags;
 	struct list_head global_auth_tok_list;
 	struct mutex global_auth_tok_list_mutex;

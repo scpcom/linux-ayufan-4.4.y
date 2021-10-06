@@ -498,4 +498,13 @@ config CRYPTO_DEV_SUN4I_SS
 	  To compile this driver as a module, choose M here: the module
 	  will be called sun4i-ss.
 
+config CRYPTO_DEV_RTK_MCP
+	depends on SYNO_RTD1296
+	bool "Support for Realtek hw accelerator"
+
+
+config CRYPTO_DEV_RTK_MCP_INTERRUPT
+	bool "Support for Realtek hw accelerator in interrupt mode"
+	depends on CRYPTO_DEV_RTK_MCP && SYNO_RTD1296
+
 endif # CRYPTO_HW

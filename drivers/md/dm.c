@@ -1,7 +1,12 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include "dm.h"
 #include "dm-uevent.h"
+#ifdef MY_ABC_HERE
+#include "md.h"
+#endif  
 
 #include <linux/init.h>
 #include <linux/module.h>
@@ -26,16 +31,18 @@
 #define DM_MSG_PREFIX "core"
 
 #ifdef CONFIG_PRINTK
-
+ 
 DEFINE_RATELIMIT_STATE(dm_ratelimit_state,
 		       DEFAULT_RATELIMIT_INTERVAL,
 		       DEFAULT_RATELIMIT_BURST);
 EXPORT_SYMBOL(dm_ratelimit_state);
 #endif
 
-
 #define DM_COOKIE_ENV_VAR_NAME "DM_COOKIE"
 #define DM_COOKIE_LENGTH 24
+#ifdef MY_ABC_HERE
+void SynoMDWakeUpDevices(void *md);
+#endif  
 
 static const char *_name = DM_NAME;
 
@@ -43,6 +50,11 @@ static unsigned int major = 0;
 static unsigned int _major = 0;
 
 static DEFINE_IDR(_minor_idr);
+
+#ifdef MY_ABC_HERE
+extern sector_t (*funcSYNOLvLgSectorCount)(void *private, sector_t sector);
+sector_t SynoLvLgSectorCount(void *, sector_t);
+#endif  
 
 static DEFINE_SPINLOCK(_minor_lock);
 
@@ -128,43 +140,42 @@ struct mapped_device {
 
 	void *interface_ptr;
 
-	
 	atomic_t pending[2];
 	wait_queue_head_t wait;
 	struct work_struct work;
 	struct bio_list deferred;
 	spinlock_t deferred_lock;
 
-	
 	struct workqueue_struct *wq;
 
-	
 	mempool_t *io_pool;
 	mempool_t *rq_pool;
 
 	struct bio_set *bs;
 
-	
 	atomic_t event_nr;
 	wait_queue_head_t eventq;
 	atomic_t uevent_seq;
 	struct list_head uevent_list;
-	spinlock_t uevent_lock; 
+	spinlock_t uevent_lock;  
 
-	
 	struct super_block *frozen_sb;
 	struct block_device *bdev;
 
-	
 	struct hd_geometry geometry;
 
-	
 	struct dm_kobject_holder kobj_holder;
 
-	
 	struct bio flush_bio;
+#ifdef MY_ABC_HERE
+	 
+	int blActive;
 
-	
+	spinlock_t	ActLock;
+
+	unsigned long ulLastReq;
+#endif  
+
 	unsigned internal_suspend_count;
 
 	struct dm_stats stats;
@@ -349,6 +360,10 @@ static int __init dm_init(void)
 			goto bad;
 	}
 
+#ifdef MY_ABC_HERE
+	funcSYNOLvLgSectorCount = SynoLvLgSectorCount;
+#endif  
+
 	return 0;
 
       bad:
@@ -525,6 +540,84 @@ out:
 	return r;
 }
 
+#ifdef MY_ABC_HERE
+ 
+static int syno_dm_do_extra_ioctl(struct mapped_device *md,
+		struct dm_target **tgt, struct block_device **bdev,
+		fmode_t *mode, int *srcu_idx, unsigned int cmd, unsigned long arg)
+{
+	struct dm_table *map;
+	int r;
+
+retry:
+	r = -ENOTTY;
+	map = dm_get_live_table(md, srcu_idx);
+	if (!map || !dm_table_get_size(map))
+		goto out;
+
+	if (dm_table_get_num_targets(map) != 1)
+		goto out;
+
+	*tgt = dm_table_get_target(map, 0);
+
+	if (!(*tgt)->type->extra_ioctl) {
+		r = 1;
+		goto out;
+	}
+
+	if (dm_suspended_md(md)) {
+		r = -EAGAIN;
+		goto out;
+	}
+
+	r = (*tgt)->type->extra_ioctl(*tgt, cmd, arg);
+	if (r < 0) {
+		printk(KERN_ERR "%s: Invoke extra ioctl failed, cmd=%d", __FUNCTION__, cmd);
+	}
+	 
+out:
+	dm_put_live_table(md, *srcu_idx);
+	if ((r == -ENOTCONN && !fatal_signal_pending(current)) || (-EAGAIN == r)) {
+		msleep(10);
+		goto retry;
+	}
+	return r;
+}
+#endif  
+
+#ifdef MY_ABC_HERE
+static void syno_md_fast_volume_wakeup(struct mapped_device *md)
+{
+	struct dm_dev_internal *dd = NULL;
+	struct dm_table *map = NULL;
+	char b[BDEVNAME_SIZE] = {'\0'};
+	unsigned char blActive = 0;
+	int srcu_idx = 0;
+
+	if (time_after(jiffies, md->ulLastReq + CHECKINTERVAL)) {
+		spin_lock(&md->ActLock);
+		blActive = md->blActive;
+		md->blActive = 1;
+		spin_unlock(&md->ActLock);
+
+		map = dm_get_live_table(md, &srcu_idx);
+		if (map && !blActive) {
+			list_for_each_entry (dd, dm_table_get_devices(map), list) {
+
+				if (dd && dd->dm_dev->bdev && NULL != strstr(bdevname(dd->dm_dev->bdev, b), "md")) {
+					if (dd->dm_dev->bdev->bd_disk && dd->dm_dev->bdev->bd_disk->private_data) {
+						SynoMDWakeUpDevices(dd->dm_dev->bdev->bd_disk->private_data);
+					}
+				}
+			}
+		}
+		dm_put_live_table(md, srcu_idx);
+	}
+
+	md->ulLastReq = jiffies;
+}
+#endif  
+
 static int dm_blk_ioctl(struct block_device *bdev, fmode_t mode,
 			unsigned int cmd, unsigned long arg)
 {
@@ -533,12 +626,22 @@ static int dm_blk_ioctl(struct block_device *bdev, fmode_t mode,
 	struct block_device *tgt_bdev = NULL;
 	int srcu_idx, r;
 
+#ifdef MY_ABC_HERE
+	r = syno_dm_do_extra_ioctl(md, &tgt, &tgt_bdev, &mode, &srcu_idx, cmd, arg);
+	if (0 == r) {
+		goto out_no_put;
+	} else if (0 > r) {
+		printk(KERN_ERR "Do extra ioctl failed r=%d", r);
+		goto out_no_put;
+	}
+	 
+#endif  
 	r = dm_get_live_table_for_ioctl(md, &tgt, &tgt_bdev, &mode, &srcu_idx);
 	if (r < 0)
 		return r;
 
 	if (r > 0) {
-		
+		 
 		r = scsi_verify_blk_ioctl(NULL, cmd);
 		if (r)
 			goto out;
@@ -547,6 +650,9 @@ static int dm_blk_ioctl(struct block_device *bdev, fmode_t mode,
 	r =  __blkdev_driver_ioctl(tgt_bdev, mode, cmd, arg);
 out:
 	dm_put_live_table(md, srcu_idx);
+#ifdef MY_ABC_HERE
+out_no_put:
+#endif  
 	return r;
 }
 
@@ -1216,6 +1322,20 @@ void dm_accept_partial_bio(struct bio *bio, unsigned n_sectors)
 }
 EXPORT_SYMBOL_GPL(dm_accept_partial_bio);
 
+#ifdef MY_ABC_HERE
+sector_t SynoLvLgSectorCount(void *private, sector_t sector)
+{
+	struct dm_target *ti = (struct dm_target *)private;
+
+	if (ti && ti->type->lg_sector_get) {
+		return ti->type->lg_sector_get(sector, ti);
+	}
+
+	return 0;
+}
+EXPORT_SYMBOL(SynoLvLgSectorCount);
+#endif  
+
 static void __map_bio(struct dm_target_io *tio)
 {
 	int r;
@@ -1481,11 +1601,14 @@ static blk_qc_t dm_make_request(struct request_queue *q, struct bio *bio)
 	int srcu_idx;
 	struct dm_table *map;
 
+#ifdef MY_ABC_HERE
+	syno_md_fast_volume_wakeup(md);
+#endif  
+
 	map = dm_get_live_table(md, &srcu_idx);
 
 	generic_start_io_acct(rw, bio_sectors(bio), &dm_disk(md)->part0);
 
-	
 	if (unlikely(test_bit(DMF_BLOCK_IO_FOR_SUSPEND, &md->flags))) {
 		dm_put_live_table(md, srcu_idx);
 
@@ -1778,20 +1901,22 @@ static void dm_request_fn(struct request_queue *q)
 	struct dm_rq_target_io *tio;
 	sector_t pos;
 
-	
+#ifdef MY_ABC_HERE
+	syno_md_fast_volume_wakeup(md);
+#endif  
+
 	while (!blk_queue_stopped(q)) {
 		rq = blk_peek_request(q);
 		if (!rq)
 			goto out;
 
-		
 		pos = 0;
 		if (!(rq->cmd_flags & REQ_FLUSH))
 			pos = blk_rq_pos(rq);
 
 		ti = dm_table_find_target(map, pos);
 		if (!dm_target_is_valid(ti)) {
-			
+			 
 			DMERR_LIMIT("request attempted access beyond the end of device");
 			dm_start_request(md, rq);
 			dm_kill_unmapped_request(rq, -EIO);
@@ -2020,13 +2145,16 @@ static struct mapped_device *alloc_dev(int minor)
 
 	dm_stats_init(&md->stats);
 
-	
 	spin_lock(&_minor_lock);
 	old_md = idr_replace(&_minor_idr, md, minor);
 	spin_unlock(&_minor_lock);
 
 	BUG_ON(old_md != MINOR_ALLOCED);
-
+#ifdef MY_ABC_HERE
+	spin_lock_init(&md->ActLock);
+	md->blActive = 0;
+	md->ulLastReq = jiffies;
+#endif  
 	return md;
 
 bad:
@@ -2260,7 +2388,10 @@ static int dm_mq_queue_rq(struct blk_mq_hw_ctx *hctx,
 	struct dm_target *ti;
 	sector_t pos;
 
-	
+#ifdef MY_ABC_HERE
+	syno_md_fast_volume_wakeup(md);
+#endif  
+
 	pos = 0;
 	if (!(rq->cmd_flags & REQ_FLUSH))
 		pos = blk_rq_pos(rq);
@@ -2943,6 +3074,55 @@ int dm_suspended(struct dm_target *ti)
 	return dm_suspended_md(dm_table_get_md(ti->table));
 }
 EXPORT_SYMBOL_GPL(dm_suspended);
+
+#ifdef MY_ABC_HERE
+int dm_active_get(struct mapped_device *md)
+{
+	unsigned char blActive = 0;
+
+	spin_lock(&md->ActLock);
+	blActive = md->blActive;
+	spin_unlock(&md->ActLock);
+
+	return blActive;
+}
+
+int dm_active_set(struct mapped_device *md, int value)
+{
+	struct dm_table *map = NULL;
+	struct dm_dev_internal *dd = NULL;
+	char b[BDEVNAME_SIZE] = {'\0'};
+	int iNeedWake = 0;
+	int srcu_idx;
+
+	spin_lock(&md->ActLock);
+	if (!(md->blActive) && value) {
+		iNeedWake = 1;
+	}
+	md->blActive = value;
+	spin_unlock(&md->ActLock);
+
+	map = dm_get_live_table(md, &srcu_idx);
+	if (map) {
+		list_for_each_entry (dd, dm_table_get_devices(map), list) {
+			if (dd && dd->dm_dev->bdev && NULL != strstr(bdevname(dd->dm_dev->bdev, b), "md")) {
+				if (dd->dm_dev->bdev->bd_disk && dd->dm_dev->bdev->bd_disk->private_data) {
+					struct mddev *mddev = dd->dm_dev->bdev->bd_disk->private_data;
+					if (iNeedWake) {
+						SynoMDWakeUpDevices(mddev);
+					}
+					spin_lock(&mddev->ActLock);
+					mddev->blActive = value;
+					spin_unlock(&mddev->ActLock);
+				}
+			}
+		}
+	}
+	dm_put_live_table(md, srcu_idx);
+
+	return 0;
+}
+#endif  
 
 int dm_noflush_suspending(struct dm_target *ti)
 {

@@ -1,11 +1,13 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/module.h>
 #include <linux/moduleparam.h>
 #include <linux/string.h>
 #include <linux/bitops.h>
 #include <linux/slab.h>
-#include <linux/interrupt.h>  
+#include <linux/interrupt.h>   
 #include <linux/kmod.h>
 #include <linux/init.h>
 #include <linux/spinlock.h>
@@ -15,6 +17,9 @@
 #include <linux/mutex.h>
 #include <linux/workqueue.h>
 #include <linux/debugfs.h>
+#ifdef MY_ABC_HERE
+#include <linux/proc_fs.h>
+#endif  
 
 #include <asm/io.h>
 #include <linux/scatterlist.h>
@@ -178,6 +183,10 @@ static void usb_release_dev(struct device *dev)
 	usb_put_hcd(hcd);
 	kfree(udev->product);
 	kfree(udev->manufacturer);
+#if defined(MY_ABC_HERE)
+	if (udev->syno_old_serial != udev->serial)
+		kfree(udev->syno_old_serial);
+#endif  
 	kfree(udev->serial);
 	kfree(udev);
 }
@@ -660,6 +669,9 @@ struct dentry *usb_debug_root;
 EXPORT_SYMBOL_GPL(usb_debug_root);
 
 static struct dentry *usb_debug_devices;
+#ifdef MY_ABC_HERE
+static struct proc_dir_entry *usbdir = NULL;
+#endif  
 
 static int usb_debugfs_init(void)
 {
@@ -676,6 +688,14 @@ static int usb_debugfs_init(void)
 		return -ENOENT;
 	}
 
+#ifdef MY_ABC_HERE
+	 
+	usbdir = proc_mkdir("bus/usb", NULL);
+	if (!usbdir) {
+		printk(KERN_ERR "Fail to create /proc/bus/usb\n");
+	}
+#endif  
+
 	return 0;
 }
 
@@ -683,8 +703,11 @@ static void usb_debugfs_cleanup(void)
 {
 	debugfs_remove(usb_debug_devices);
 	debugfs_remove(usb_debug_root);
+#ifdef MY_ABC_HERE
+	if (usbdir)
+		remove_proc_entry("bus/usb", NULL);
+#endif  
 }
-
 
 static int __init usb_init(void)
 {
@@ -718,10 +741,19 @@ static int __init usb_init(void)
 	retval = usb_hub_init();
 	if (retval)
 		goto hub_init_failed;
+#if defined(CONFIG_USB_ETRON_HUB)
+	retval = ethub_init();
+	if (retval)
+		goto ethub_init_failed;
+#endif  
 	retval = usb_register_device_driver(&usb_generic_driver, THIS_MODULE);
 	if (!retval)
 		goto out;
 
+#if defined(CONFIG_USB_ETRON_HUB)
+	ethub_cleanup();
+ethub_init_failed:
+#endif  
 	usb_hub_cleanup();
 hub_init_failed:
 	usb_devio_cleanup();
@@ -750,6 +782,9 @@ static void __exit usb_exit(void)
 	usb_major_cleanup();
 	usb_deregister(&usbfs_driver);
 	usb_devio_cleanup();
+#if defined(CONFIG_USB_ETRON_HUB)
+	ethub_cleanup();
+#endif  
 	usb_hub_cleanup();
 	bus_unregister_notifier(&usb_bus_type, &usb_bus_nb);
 	bus_unregister(&usb_bus_type);

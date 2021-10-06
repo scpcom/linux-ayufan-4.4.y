@@ -173,4 +173,16 @@ config PCI_HISI
 	help
 	  Say Y here if you want PCIe controller support on HiSilicon HIP05 SoC
 
+config PCIE_RTD1295
+	bool "RTD129x PCIe host controller (slot1)"
+	depends on ARCH_RTD129X
+	help
+	  RTD129x PCIe host controller support (slot1).
+
+config PCIE2_RTD1295
+	bool "RTD129x PCIe host controller (slot2)"
+	depends on ARCH_RTD129X
+	help
+	  RTD129x PCIe host controller support (slot2).
+
 endmenu

@@ -30,7 +30,7 @@ config SND_SOC_GENERIC_DMAENGINE_PCM
 	select SND_DMAENGINE_PCM
 
 config SND_SOC_COMPRESS
-	bool
+	bool "sound SOC compress"
 	select SND_COMPRESS_OFFLOAD
 
 config SND_SOC_TOPOLOGY

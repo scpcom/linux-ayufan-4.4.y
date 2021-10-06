@@ -1,4 +1,7 @@
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/kernel.h>
 #include <linux/string.h>
 #include <linux/errno.h>
@@ -717,6 +720,64 @@ static int m88e1145_config_init(struct phy_device *phydev)
 	return 0;
 }
 
+#ifdef MY_DEF_HERE
+static int m88e1514_config_init(struct phy_device *phydev)
+{
+	int err;
+	int status = 0;
+	int page;
+
+	page = phy_read(phydev, MII_MARVELL_PHY_PAGE);
+	if (page < 0)
+		return page;
+	err = phy_write(phydev, MII_MARVELL_PHY_PAGE, 0x0003);
+	if (err < 0)
+		return err;
+
+	status = phy_read(phydev, 0x10);
+	if (status < 0)
+		return status;
+	status &= 0xf000;
+	status |= 0x0771;
+	err = phy_write(phydev, 0x10, status);
+	if (err < 0)
+		return err;
+
+	status = phy_read(phydev, 0x12);
+	status &= 0xf8ff;
+	status |= 0x0200;
+	status &= 0xff7f;
+	err = phy_write(phydev, 0x12, status);
+	if (err < 0)
+		return err;
+
+	err = phy_write(phydev, MII_MARVELL_PHY_PAGE, 0x0002);
+	if (err < 0)
+		return err;
+
+	status = phy_read(phydev, 0x10);
+	if (status < 0)
+		return status;
+	status |= 0x0004;
+	err = phy_write(phydev, 0x10, status);
+	if (err < 0)
+		return err;
+
+	err = phy_write(phydev, MII_MARVELL_PHY_PAGE, 0x0);
+	if (err < 0)
+		return err;
+
+	status = phy_read(phydev, 0x12);
+	status &= 0xff7f;
+	err = phy_write(phydev, 0x12, status);
+	if (err < 0)
+		return err;
+
+	err = phy_write(phydev, MII_MARVELL_PHY_PAGE, page);
+
+	return err;
+}
+#endif
 
 static int marvell_read_status(struct phy_device *phydev)
 {
@@ -1116,6 +1177,18 @@ static struct phy_driver marvell_drivers[] = {
 		.suspend = &genphy_suspend,
 		.driver = { .owner = THIS_MODULE },
 	},
+#ifdef MY_DEF_HERE
+	{
+		.phy_id = MARVELL_PHY_ID_88E1514,
+		.phy_id_mask = MARVELL_PHY_ID_MASK | 0xf,  
+		.name = "Marvell 88E1514",
+		.features = PHY_GBIT_FEATURES,
+		.flags = PHY_HAS_INTERRUPT,
+		.config_init = &m88e1514_config_init,
+ 
+		.driver = { .owner = THIS_MODULE },
+	},
+#endif
 };
 
 module_phy_driver(marvell_drivers);
@@ -1134,6 +1207,9 @@ static struct mdio_device_id __maybe_unused marvell_tbl[] = {
 	{ MARVELL_PHY_ID_88E1510, MARVELL_PHY_ID_MASK },
 	{ MARVELL_PHY_ID_88E1540, MARVELL_PHY_ID_MASK },
 	{ MARVELL_PHY_ID_88E3016, MARVELL_PHY_ID_MASK },
+#ifdef MY_DEF_HERE
+	{ MARVELL_PHY_ID_88E1514, 0xffffffff },
+#endif
 	{ }
 };
 

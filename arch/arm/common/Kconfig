@@ -17,3 +17,8 @@ config SHARP_PARAM
 
 config SHARP_SCOOP
 	bool
+
+config FIQ_GLUE
+	bool
+	depends on SYNO_LINARO_BACKPORT
+	select FIQ

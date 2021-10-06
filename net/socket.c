@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/mm.h>
 #include <linux/socket.h>
 #include <linux/file.h>
@@ -1341,15 +1343,11 @@ out:
 	return err;
 }
 
-
-
 SYSCALL_DEFINE4(send, int, fd, void __user *, buff, size_t, len,
 		unsigned int, flags)
 {
 	return sys_sendto(fd, buff, len, flags, NULL, 0);
 }
-
-
 
 SYSCALL_DEFINE6(recvfrom, int, fd, void __user *, ubuf, size_t, size,
 		unsigned int, flags, struct sockaddr __user *, addr,
@@ -1357,7 +1355,12 @@ SYSCALL_DEFINE6(recvfrom, int, fd, void __user *, ubuf, size_t, size,
 {
 	struct socket *sock;
 	struct iovec iov;
+#ifdef MY_ABC_HERE
+	 
+	struct msghdr msg = {0};
+#else
 	struct msghdr msg;
+#endif  
 	struct sockaddr_storage address;
 	int err, err2;
 	int fput_needed;

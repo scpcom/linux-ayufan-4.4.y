@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * (C) Copyright Linus Torvalds 1999
  * (C) Copyright Johannes Erdfelt 1999-2001
@@ -981,11 +984,59 @@ static int usb_register_bus(struct usb_bus *bus)
 	int busnum;
 
 	mutex_lock(&usb_bus_list_lock);
+#ifdef MY_DEF_HERE
+	/* This is a workaround for random order of bus number
+	 * assignment happened only on platform RTD1296.
+	 * The primary hcd should be USB2.0 hcd.
+	 */
+	struct usb_hcd *usb_hcd = bus_to_hcd(bus);
+
+	switch (usb_hcd->speed) {
+	case HCD_USB2:
+		if (0 == strncmp(bus->bus_name, "98013000.ehci", 13)) {
+			busnum = 1;
+		} else {
+			result = -EINVAL;
+			goto error_find_busnum;
+		}
+		break;
+	case HCD_USB3:
+	case HCD_USB31:
+		if (0 == strncmp(bus->bus_name, "xhci-hcd.4.auto", 15)) {
+			if (usb_hcd_is_primary_hcd(usb_hcd))
+				busnum = 2;
+			else
+				busnum = 3;
+		} else if (0 == strncmp(bus->bus_name, "xhci-hcd.7.auto", 15)) {
+			if (usb_hcd_is_primary_hcd(usb_hcd))
+				busnum = 4;
+			else
+				busnum = 5;
+		} else if (0 == strncmp(bus->bus_name, "xhci-hcd.8.auto", 15)) {
+			if (usb_hcd_is_primary_hcd(usb_hcd))
+				busnum = 6;
+			else
+				busnum = 7;
+		} else {
+			result = -EINVAL;
+			goto error_find_busnum;
+		}
+		break;
+	default:
+		busnum = find_next_zero_bit(busmap, USB_MAXBUS, 1);
+		if (busnum >= USB_MAXBUS) {
+			printk (KERN_ERR "%s: too many buses\n", usbcore_name);
+			goto error_find_busnum;
+		}
+	}
+
+#else /* MY_DEF_HERE */
 	busnum = find_next_zero_bit(busmap, USB_MAXBUS, 1);
 	if (busnum >= USB_MAXBUS) {
 		printk (KERN_ERR "%s: too many buses\n", usbcore_name);
 		goto error_find_busnum;
 	}
+#endif /* MY_DEF_HERE */
 	set_bit(busnum, busmap);
 	bus->busnum = busnum;
 

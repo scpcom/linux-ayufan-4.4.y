@@ -1,7 +1,7 @@
-
-
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/fs.h>
 #include <linux/init.h>
 #include <linux/kernel.h>
@@ -74,6 +74,16 @@ int fsnotify_add_event(struct fsnotify_group *group,
 			return ret;
 		}
 	}
+
+#ifdef MY_ABC_HERE
+	if (group->ops->fetch_name) {
+		ret = group->ops->fetch_name(event);
+		if (ret < 0) {
+			mutex_unlock(&group->notification_mutex);
+			return ret;
+		}
+	}
+#endif  
 
 queue:
 	group->q_len++;

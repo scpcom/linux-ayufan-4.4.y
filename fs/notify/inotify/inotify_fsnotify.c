@@ -1,16 +1,17 @@
-
-
-#include <linux/dcache.h> 
-#include <linux/fs.h> 
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
+#include <linux/dcache.h>  
+#include <linux/fs.h>  
 #include <linux/fsnotify_backend.h>
 #include <linux/inotify.h>
-#include <linux/path.h> 
-#include <linux/slab.h> 
+#include <linux/path.h>  
+#include <linux/slab.h>  
 #include <linux/types.h>
 #include <linux/sched.h>
 
 #include "inotify.h"
-
 
 static bool event_compare(struct fsnotify_event *old_fsn,
 			  struct fsnotify_event *new_fsn)
@@ -53,6 +54,11 @@ int inotify_handle_event(struct fsnotify_group *group,
 	int alloc_len = sizeof(struct inotify_event_info);
 
 	BUG_ON(vfsmount_mark);
+
+#ifdef MY_ABC_HERE
+	if (data_type == FSNOTIFY_EVENT_SYNO)
+		return 0;
+#endif  
 
 	if ((inode_mark->mask & FS_EXCL_UNLINK) &&
 	    (data_type == FSNOTIFY_EVENT_PATH)) {

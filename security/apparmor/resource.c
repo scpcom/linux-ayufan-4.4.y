@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * AppArmor security module
  *
@@ -95,7 +98,11 @@ int aa_task_setrlimit(struct aa_profile *profile, struct task_struct *task,
 	int error = 0;
 
 	rcu_read_lock();
+#ifdef MY_ABC_HERE
+	task_profile = aa_get_newest_cred_profile(__task_cred(task));
+#else
 	task_profile = aa_get_profile(aa_cred_profile(__task_cred(task)));
+#endif
 	rcu_read_unlock();
 
 	/* TODO: extend resource control to handle other (non current)

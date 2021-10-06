@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/string.h>
 #include <linux/pagemap.h>
 #include <linux/key.h>
@@ -9,13 +11,15 @@
 #include <linux/slab.h>
 #include "ecryptfs_kernel.h"
 
-
 static int process_request_key_err(long err_code)
 {
 	int rc = 0;
 
 	switch (err_code) {
 	case -ENOKEY:
+#ifdef MY_ABC_HERE
+		if (printk_ratelimit())
+#endif  
 		ecryptfs_printk(KERN_WARNING, "No key\n");
 		rc = -ENOENT;
 		break;
@@ -827,6 +831,9 @@ ecryptfs_parse_tag_70_packet(char **filename, size_t *filename_size,
 					    &s->auth_tok, mount_crypt_stat,
 					    s->fnek_sig_hex);
 	if (rc) {
+#ifdef MY_ABC_HERE
+		if (printk_ratelimit())
+#endif  
 		printk(KERN_ERR "%s: Error attempting to find auth tok for "
 		       "fnek sig [%s]; rc = [%d]\n", __func__, s->fnek_sig_hex,
 		       rc);
@@ -1365,6 +1372,9 @@ int ecryptfs_keyring_auth_tok_for_sig(struct key **auth_tok_key,
 	if (!(*auth_tok_key) || IS_ERR(*auth_tok_key)) {
 		(*auth_tok_key) = ecryptfs_get_encrypted_key(sig);
 		if (!(*auth_tok_key) || IS_ERR(*auth_tok_key)) {
+#ifdef MY_ABC_HERE
+			if (printk_ratelimit())
+#endif  
 			printk(KERN_ERR "Could not find key with description: [%s]\n",
 			      sig);
 			rc = process_request_key_err(PTR_ERR(*auth_tok_key));

@@ -1,7 +1,7 @@
-
-
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 struct match_token {
 	int token;
 	const char *pattern;
@@ -23,3 +23,7 @@ int match_hex(substring_t *, int *result);
 bool match_wildcard(const char *pattern, const char *str);
 size_t match_strlcpy(char *, const substring_t *, size_t);
 char *match_strdup(const substring_t *);
+
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+int SYNO_get_option_ul(substring_t *args, unsigned long *option);
+#endif

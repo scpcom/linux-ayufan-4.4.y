@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /**
  * debugfs.c - DesignWare USB3 DRD Controller DebugFS file
  *
@@ -217,6 +220,9 @@ static const struct debugfs_reg32 dwc3_regs[] = {
 	dump_register(DGCMDPAR),
 	dump_register(DGCMD),
 	dump_register(DALEPENA),
+#ifdef MY_DEF_HERE
+	dump_register(DEV_IMOD),
+#endif /* MY_DEF_HERE */
 
 	dump_register(DEPCMDPAR2(0)),
 	dump_register(DEPCMDPAR2(1)),

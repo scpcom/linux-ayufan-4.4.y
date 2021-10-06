@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/device.h>
 #include <linux/slab.h>
 #include <linux/export.h>
@@ -9,7 +11,32 @@
 
 #include "usb.h"
 
+#ifdef MY_ABC_HERE
+#include <linux/synobios.h>
 
+extern int (*funcSYNOGetHwCapability)(CAPABILITY *);
+extern int blIsCardReader(struct usb_device *usbdev);
+
+static unsigned char has_cardreader(void)
+{
+	CAPABILITY Capability;
+	unsigned char ret = 0;
+
+	Capability.id = CAPABILITY_CARDREADER;
+	Capability.support = 0;
+
+	if (funcSYNOGetHwCapability) {
+		if (funcSYNOGetHwCapability(&Capability)){
+			goto END;
+		}
+	}
+
+	ret = Capability.support;
+END:
+	return ret;
+}
+
+#endif  
 
 ssize_t usb_store_new_id(struct usb_dynids *dynids,
 			 const struct usb_device_id *id_table,
@@ -240,6 +267,22 @@ static int usb_unbind_device(struct device *dev)
 	return 0;
 }
 
+#ifdef MY_ABC_HERE
+ 
+static void syno_usb_shutdown_device(struct device *dev)
+{
+	struct usb_device *udev = to_usb_device(dev);
+	int retval = 0;
+
+	if (!udev->parent || 0 < udev->maxchild)
+		return;
+
+	retval = usb_unbind_device(dev);
+	if (retval) {
+		dev_warn(dev, "Fail to unbind device driver, ret %d\n", retval);
+	}
+}
+#endif  
 
 static int usb_probe_interface(struct device *dev)
 {
@@ -635,23 +678,29 @@ static int usb_uevent(struct device *dev, struct kobj_uevent_env *env)
 		return -ENODEV;
 	}
 
-	
 	if (add_uevent_var(env, "PRODUCT=%x/%x/%x",
 			   le16_to_cpu(usb_dev->descriptor.idVendor),
 			   le16_to_cpu(usb_dev->descriptor.idProduct),
 			   le16_to_cpu(usb_dev->descriptor.bcdDevice)))
 		return -ENOMEM;
 
-	
 	if (add_uevent_var(env, "TYPE=%d/%d/%d",
 			   usb_dev->descriptor.bDeviceClass,
 			   usb_dev->descriptor.bDeviceSubClass,
 			   usb_dev->descriptor.bDeviceProtocol))
 		return -ENOMEM;
 
+#ifdef MY_ABC_HERE
+	if(has_cardreader()) {
+		if (blIsCardReader(usb_dev)) {
+			if (add_uevent_var(env, "CARDREADER=1"))
+				return -ENOMEM;
+		}
+	}
+#endif  
+
 	return 0;
 }
-
 
 int usb_register_device_driver(struct usb_device_driver *new_udriver,
 		struct module *owner)
@@ -667,6 +716,9 @@ int usb_register_device_driver(struct usb_device_driver *new_udriver,
 	new_udriver->drvwrap.driver.probe = usb_probe_device;
 	new_udriver->drvwrap.driver.remove = usb_unbind_device;
 	new_udriver->drvwrap.driver.owner = owner;
+#ifdef MY_ABC_HERE
+	new_udriver->drvwrap.driver.shutdown = syno_usb_shutdown_device;
+#endif  
 
 	retval = driver_register(&new_udriver->drvwrap.driver);
 

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <asm/bitsperlong.h>
 
 /*
@@ -718,6 +721,86 @@ __SYSCALL(__NR_mlock2, sys_mlock2)
 
 #undef __NR_syscalls
 #define __NR_syscalls 285
+
+/*
+ * start - MY_ABC_HERE
+ * Synology defined system calls are listed here.
+ *
+ * 400 is available for reuse
+ * 401 is available for reuse
+ */
+#define __NR_SYNOUtime 402
+#define SYNOUtime(arg1, arg2)                     syscall(__NR_SYNOUtime, arg1, arg2)
+__SYSCALL(__NR_SYNOUtime, sys_SYNOUtime)
+#define __NR_SYNOArchiveBit 403
+#define SYNOArchiveBit(arg1, arg2)                syscall(__NR_SYNOArchiveBit, arg1, arg2)
+__SYSCALL(__NR_SYNOArchiveBit, sys_SYNOArchiveBit)
+#define __NR_recvfile 404
+#define recvfile(arg1, arg2, arg3, arg4, arg5)    syscall(__NR_recvfile, arg1, arg2, arg3, arg4, arg5)
+__SYSCALL(__NR_recvfile, sys_recvfile)
+#ifdef MY_DEF_HERE
+#define __NR_SYNOMTDAlloc 405
+#define SYNOMTDAlloc(arg1)                        syscall(__NR_SYNOMTDAlloc, arg1)
+__SYSCALL(__NR_SYNOMTDAlloc, sys_SYNOMTDAlloc)
+#endif /* MY_DEF_HERE */
+#define __NR_SYNOCaselessStat 406
+#define SYNOCaselessStat(arg1, arg2)              syscall(__NR_SYNOCaselessStat, arg1, arg2)
+__SYSCALL(__NR_SYNOCaselessStat, sys_SYNOCaselessStat)
+#define __NR_SYNOCaselessLStat 407
+#define SYNOCaselessLStat(arg1, arg2)             syscall(__NR_SYNOCaselessLStat, arg1, arg2)
+__SYSCALL(__NR_SYNOCaselessLStat, sys_SYNOCaselessLStat)
+//408	x32	SYNOCaselessStat64	sys_SYNOCaselessStat64		# not used
+//409	x32	SYNOCaselessLStat64	sys_SYNOCaselessLStat64		# not used
+#define __NR_SYNOEcryptName 410
+#define SYNOEcryptName(arg1, arg2)                syscall(__NR_SYNOEcryptName, arg1, arg2)
+__SYSCALL(__NR_SYNOEcryptName, sys_SYNOEcryptName)
+#define __NR_SYNODecryptName 411
+#define SYNODecryptName(arg1, arg2, arg3)         syscall(__NR_SYNODecryptName, arg1, arg2, arg3)
+__SYSCALL(__NR_SYNODecryptName, sys_SYNODecryptName)
+#define __NR_SYNOACLCheckPerm 412
+#define SYNOACLSysCheckPerm(arg1, arg2)           syscall(__NR_SYNOACLCheckPerm, arg1, arg2)
+__SYSCALL(__NR_SYNOACLCheckPerm, sys_SYNOACLCheckPerm)
+#define __NR_SYNOACLIsSupport 413
+#define SYNOACLSysIsSupport(arg1, arg2, arg3)     syscall(__NR_SYNOACLIsSupport, arg1, arg2, arg3)
+__SYSCALL(__NR_SYNOACLIsSupport, sys_SYNOACLIsSupport)
+#define __NR_SYNOACLGetPerm 414
+#define SYNOACLSysGetPerm(arg1, arg2)             syscall(__NR_SYNOACLGetPerm, arg1, arg2)
+__SYSCALL(__NR_SYNOACLGetPerm, sys_SYNOACLGetPerm)
+#define __NR_SYNOFlushAggregate 415
+#define SYNOFlushAggregate(arg1)                  syscall(__NR_SYNOFlushAggregate, arg1)
+__SYSCALL(__NR_SYNOFlushAggregate, sys_SYNOFlushAggregate)
+//416	# not used
+//417	# not used
+//418	# not used
+#define __NR_SYNOStat 419
+#define SYNOStat(arg1, arg2, arg3)                syscall(__NR_SYNOStat, arg1, arg2, arg3)
+__SYSCALL(__NR_SYNOStat, sys_SYNOStat)
+#define __NR_SYNOFStat 420
+#define SYNOFStat(arg1, arg2, arg3)               syscall(__NR_SYNOFStat, arg1, arg2, arg3)
+__SYSCALL(__NR_SYNOFStat, sys_SYNOFStat)
+#define __NR_SYNOLStat 421
+#define SYNOLStat(arg1, arg2, arg3)               syscall(__NR_SYNOLStat, arg1, arg2, arg3)
+__SYSCALL(__NR_SYNOLStat, sys_SYNOLStat)
+#define __NR_SYNONotifyInit 422
+#define SYNONotifyInit(arg1)                      syscall(__NR_SYNONotifyInit, arg1)
+__SYSCALL(__NR_SYNONotifyInit, sys_SYNONotifyInit)
+#define __NR_SYNONotifyAddWatch 423
+#define SYNONotifyAddWatch(arg1, arg2, arg3)      syscall(__NR_SYNONotifyAddWatch, arg1, arg2, arg3)
+__SYSCALL(__NR_SYNONotifyAddWatch, sys_SYNONotifyAddWatch)
+#define __NR_SYNONotifyRemoveWatch 424
+#define SYNONotifyRemoveWatch(arg1, arg2, arg3)   syscall(__NR_SYNONotifyRemoveWatch, arg1, arg2, arg3)
+__SYSCALL(__NR_SYNONotifyRemoveWatch, sys_SYNONotifyRemoveWatch)
+//425	x32	SYNONotifyAddWatch	sys_SYNONotifyAddWatch32			# not used
+//426	x32	SYNONotifyRemoveWatch	sys_SYNONotifyRemoveWatch32			# not used
+#define __NR_SYNOArchiveOverwrite 427
+#define SYNOArchiveOverwrite(arg1, arg2)          syscall(__NR_SYNOArchiveOverwrite, arg1, arg2)
+__SYSCALL(__NR_SYNOArchiveOverwrite, sys_SYNOArchiveOverwrite)
+
+#undef __NR_syscalls
+#define __NR_syscalls 428
+/*
+ * end - MY_ABC_HERE
+ */
 
 /*
  * All syscalls below here should go away really,

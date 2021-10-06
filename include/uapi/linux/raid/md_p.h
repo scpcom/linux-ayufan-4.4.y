@@ -1,13 +1,12 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #ifndef _MD_P_H
 #define _MD_P_H
 
 #include <linux/types.h>
 #include <asm/byteorder.h>
-
-
-
 
 #define MD_RESERVED_BYTES		(64 * 1024)
 #define MD_RESERVED_SECTORS		(MD_RESERVED_BYTES / 512)
@@ -33,107 +32,101 @@
 #define MD_SB_RESERVED_WORDS		(1024 - MD_SB_GENERIC_WORDS - MD_SB_PERSONALITY_WORDS - MD_SB_DISKS_WORDS - MD_SB_DESCRIPTOR_WORDS)
 #define MD_SB_EQUAL_WORDS		(MD_SB_GENERIC_WORDS + MD_SB_PERSONALITY_WORDS + MD_SB_DISKS_WORDS)
 
+#define MD_DISK_FAULTY		0  
+#define MD_DISK_ACTIVE		1  
+#define MD_DISK_SYNC		2  
+#define MD_DISK_REMOVED		3  
+#define MD_DISK_CLUSTER_ADD     4  
+#define MD_DISK_CANDIDATE	5  
 
-#define MD_DISK_FAULTY		0 
-#define MD_DISK_ACTIVE		1 
-#define MD_DISK_SYNC		2 
-#define MD_DISK_REMOVED		3 
-#define MD_DISK_CLUSTER_ADD     4 
-#define MD_DISK_CANDIDATE	5 
-
-#define	MD_DISK_WRITEMOSTLY	9 
-#define MD_DISK_JOURNAL		18 
+#define	MD_DISK_WRITEMOSTLY	9  
+#define MD_DISK_JOURNAL		18  
 
 #define MD_DISK_ROLE_SPARE	0xffff
 #define MD_DISK_ROLE_FAULTY	0xfffe
 #define MD_DISK_ROLE_JOURNAL	0xfffd
-#define MD_DISK_ROLE_MAX	0xff00 
+#define MD_DISK_ROLE_MAX	0xff00  
+
+#ifdef MY_ABC_HERE
+#define MD_DISK_ERROR		6  
+#endif  
 
 typedef struct mdp_device_descriptor_s {
-	__u32 number;		
-	__u32 major;		
-	__u32 minor;		
-	__u32 raid_disk;	
-	__u32 state;		
+	__u32 number;		 
+	__u32 major;		 
+	__u32 minor;		 
+	__u32 raid_disk;	 
+	__u32 state;		 
 	__u32 reserved[MD_SB_DESCRIPTOR_WORDS - 5];
 } mdp_disk_t;
 
 #define MD_SB_MAGIC		0xa92b4efc
 
-
 #define MD_SB_CLEAN		0
 #define MD_SB_ERRORS		1
 
-#define	MD_SB_CLUSTERED		5 
-#define	MD_SB_BITMAP_PRESENT	8 
-
-
-
+#define	MD_SB_CLUSTERED		5  
+#define	MD_SB_BITMAP_PRESENT	8  
 
 typedef struct mdp_superblock_s {
-	
-	__u32 md_magic;		
-	__u32 major_version;	
-	__u32 minor_version;	
-	__u32 patch_version;	
-	__u32 gvalid_words;	
-	__u32 set_uuid0;	
-	__u32 ctime;		
-	__u32 level;		
-	__u32 size;		
-	__u32 nr_disks;		
-	__u32 raid_disks;	
-	__u32 md_minor;		
-	__u32 not_persistent;	
-	__u32 set_uuid1;	
-	__u32 set_uuid2;	
-	__u32 set_uuid3;	
+	 
+	__u32 md_magic;		 
+	__u32 major_version;	 
+	__u32 minor_version;	 
+	__u32 patch_version;	 
+	__u32 gvalid_words;	 
+	__u32 set_uuid0;	 
+	__u32 ctime;		 
+	__u32 level;		 
+	__u32 size;		 
+	__u32 nr_disks;		 
+	__u32 raid_disks;	 
+	__u32 md_minor;		 
+	__u32 not_persistent;	 
+	__u32 set_uuid1;	 
+	__u32 set_uuid2;	 
+	__u32 set_uuid3;	 
 	__u32 gstate_creserved[MD_SB_GENERIC_CONSTANT_WORDS - 16];
 
-	
-	__u32 utime;		
-	__u32 state;		
-	__u32 active_disks;	
-	__u32 working_disks;	
-	__u32 failed_disks;	
-	__u32 spare_disks;	
-	__u32 sb_csum;		
+	__u32 utime;		 
+	__u32 state;		 
+	__u32 active_disks;	 
+	__u32 working_disks;	 
+	__u32 failed_disks;	 
+	__u32 spare_disks;	 
+	__u32 sb_csum;		 
 #if defined(__BYTE_ORDER) ? __BYTE_ORDER == __BIG_ENDIAN : defined(__BIG_ENDIAN)
-	__u32 events_hi;	
-	__u32 events_lo;	
-	__u32 cp_events_hi;	
-	__u32 cp_events_lo;	
+	__u32 events_hi;	 
+	__u32 events_lo;	 
+	__u32 cp_events_hi;	 
+	__u32 cp_events_lo;	 
 #elif defined(__BYTE_ORDER) ? __BYTE_ORDER == __LITTLE_ENDIAN : defined(__LITTLE_ENDIAN)
-	__u32 events_lo;	
-	__u32 events_hi;	
-	__u32 cp_events_lo;	
-	__u32 cp_events_hi;	
+	__u32 events_lo;	 
+	__u32 events_hi;	 
+	__u32 cp_events_lo;	 
+	__u32 cp_events_hi;	 
 #else
 #error unspecified endianness
 #endif
-	__u32 recovery_cp;	
-	
-	__u64 reshape_position;	
-	__u32 new_level;	
-	__u32 delta_disks;	
-	__u32 new_layout;	
-	__u32 new_chunk;	
+	__u32 recovery_cp;	 
+	 
+	__u64 reshape_position;	 
+	__u32 new_level;	 
+	__u32 delta_disks;	 
+	__u32 new_layout;	 
+	__u32 new_chunk;	 
 	__u32 gstate_sreserved[MD_SB_GENERIC_STATE_WORDS - 18];
 
-	
-	__u32 layout;		
-	__u32 chunk_size;	
-	__u32 root_pv;		
-	__u32 root_block;	
+	__u32 layout;		 
+	__u32 chunk_size;	 
+	__u32 root_pv;		 
+	__u32 root_block;	 
 	__u32 pstate_reserved[MD_SB_PERSONALITY_WORDS - 4];
 
-	
 	mdp_disk_t disks[MD_SB_DISKS];
 
-	
 	__u32 reserved[MD_SB_RESERVED_WORDS];
 
-	
 	mdp_disk_t this_disk;
 
 } mdp_super_t;

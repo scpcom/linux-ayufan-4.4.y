@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/interrupt.h>
@@ -564,12 +566,25 @@ static int intel_gpio_get(struct gpio_chip *chip, unsigned offset)
 {
 	struct intel_pinctrl *pctrl = gpiochip_to_pinctrl(chip);
 	void __iomem *reg;
+#ifdef MY_DEF_HERE
+	u32 cfg;
+#endif  
 
 	reg = intel_get_padcfg(pctrl, offset, PADCFG0);
 	if (!reg)
 		return -EINVAL;
 
+#ifdef MY_DEF_HERE
+	cfg = readl(reg);
+
+	if ((cfg & PADCFG0_GPIORXDIS) && !(cfg & PADCFG0_GPIOTXDIS)) {
+		return !!(cfg & PADCFG0_GPIOTXSTATE);
+	} else {
+		return !!(cfg & PADCFG0_GPIORXSTATE);
+	}
+#else  
 	return !!(readl(reg) & PADCFG0_GPIORXSTATE);
+#endif  
 }
 
 static void intel_gpio_set(struct gpio_chip *chip, unsigned offset, int value)
@@ -605,6 +620,27 @@ static int intel_gpio_direction_output(struct gpio_chip *chip, unsigned offset,
 	return pinctrl_gpio_direction_output(chip->base + offset);
 }
 
+#ifdef MY_DEF_HERE
+static int intel_gpio_get_direction(struct gpio_chip *chip, unsigned offset)
+{
+	struct intel_pinctrl *pctrl = gpiochip_to_pinctrl(chip);
+	void __iomem *reg;
+	unsigned long flags;
+	u32 padcfg0;
+
+	reg = intel_get_padcfg(pctrl, offset, PADCFG0);
+
+	if (!reg)
+		return -EINVAL;
+
+	spin_lock_irqsave(&pctrl->lock, flags);
+	padcfg0 = readl(reg);
+	spin_unlock_irqrestore(&pctrl->lock, flags);
+
+	return ((padcfg0 & PADCFG0_GPIORXDIS) > 0 ? 0 : 1);
+}
+#endif  
+
 static const struct gpio_chip intel_gpio_chip = {
 	.owner = THIS_MODULE,
 	.request = gpiochip_generic_request,
@@ -613,6 +649,9 @@ static const struct gpio_chip intel_gpio_chip = {
 	.direction_output = intel_gpio_direction_output,
 	.get = intel_gpio_get,
 	.set = intel_gpio_set,
+#ifdef MY_DEF_HERE
+	.get_direction = intel_gpio_get_direction,
+#endif  
 };
 
 static void intel_gpio_irq_ack(struct irq_data *d)

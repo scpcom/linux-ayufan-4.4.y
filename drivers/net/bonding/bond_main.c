@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/types.h>
@@ -255,8 +257,19 @@ static int bond_vlan_rx_kill_vid(struct net_device *bond_dev,
 	return 0;
 }
 
-
-
+#if defined(MY_ABC_HERE)
+static void default_operstate(struct net_device *dev)
+{
+	if (!netif_carrier_ok(dev)) {
+		dev->operstate = (dev->ifindex != dev_get_iflink(dev) ?
+			IF_OPER_LOWERLAYERDOWN : IF_OPER_DOWN);
+	} else if (netif_dormant(dev)) {
+		dev->operstate = IF_OPER_DORMANT;
+	} else {
+		dev->operstate = IF_OPER_UP;
+	}
+}
+#endif  
 
 int bond_set_carrier(struct bonding *bond)
 {
@@ -474,13 +487,28 @@ static void bond_hw_addr_swap(struct bonding *bond, struct slave *new_active,
 	}
 }
 
-
 static void bond_set_dev_addr(struct net_device *bond_dev,
 			      struct net_device *slave_dev)
 {
+#ifdef MY_ABC_HERE
+	    unsigned char szMac[MAX_ADDR_LEN];
+		    memset(szMac, 0, sizeof(szMac));
+#endif  
 	netdev_dbg(bond_dev, "bond_dev=%p slave_dev=%p slave_dev->addr_len=%d\n",
 		   bond_dev, slave_dev, slave_dev->addr_len);
+#ifdef MY_ABC_HERE
+	if (syno_get_dev_vendor_mac(slave_dev->name, szMac)) {
+		printk("%s:%s(%d) dev:[%s] get vendor mac fail\n",
+				__FILE__, __FUNCTION__, __LINE__, slave_dev->name);
+		 
+		memcpy(bond_dev->dev_addr, slave_dev->dev_addr, slave_dev->addr_len);
+	} else {
+		 
+		memcpy(bond_dev->dev_addr, szMac, ETH_ALEN);
+	}
+#else  
 	memcpy(bond_dev->dev_addr, slave_dev->dev_addr, slave_dev->addr_len);
+#endif  
 	bond_dev->addr_assign_type = NET_ADDR_STOLEN;
 	call_netdevice_notifiers(NETDEV_CHANGEADDR, bond_dev);
 }
@@ -1434,6 +1462,9 @@ int bond_enslave(struct net_device *bond_dev, struct net_device *slave_dev)
 	bond->slave_cnt++;
 	bond_compute_features(bond);
 	bond_set_carrier(bond);
+#if defined(MY_ABC_HERE)
+	default_operstate(bond->dev);
+#endif  
 
 	if (bond_uses_primary(bond)) {
 		block_netpoll_tx();
@@ -1803,14 +1834,26 @@ static void bond_miimon_commit(struct bonding *bond)
 
 			primary = rtnl_dereference(bond->primary_slave);
 			if (BOND_MODE(bond) == BOND_MODE_8023AD) {
-				
+				 
 				bond_set_backup_slave(slave);
 			} else if (BOND_MODE(bond) != BOND_MODE_ACTIVEBACKUP) {
-				
+				 
 				bond_set_active_slave(slave);
 			} else if (slave != primary) {
-				
+				 
 				bond_set_backup_slave(slave);
+#if defined(MY_ABC_HERE)
+				 
+				block_netpoll_tx();
+				if ((NULL != bond->curr_active_slave) &&
+					(slave != bond->curr_active_slave) &&
+					(((SPEED_UNKNOWN == bond->curr_active_slave->speed) &&
+					  (SPEED_UNKNOWN != slave->speed)) ||
+					 (!bond_is_active_slave(bond->curr_active_slave)))) {
+					bond_change_active_slave(bond, slave);
+				}
+				unblock_netpoll_tx();
+#endif  
 			}
 
 			netdev_info(bond->dev, "link status definitely up for interface %s, %u Mbps %s duplex\n",

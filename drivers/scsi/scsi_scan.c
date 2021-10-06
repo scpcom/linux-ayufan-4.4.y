@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/module.h>
 #include <linux/moduleparam.h>
 #include <linux/init.h>
@@ -23,17 +25,45 @@
 #include "scsi_priv.h"
 #include "scsi_logging.h"
 
+#ifdef MY_ABC_HERE
+#define SYNO_INQUIRY_TMP_LEN 32
+#define SZ_STAT_DISK_VENDOR "ATA     "
+#define SYNO_INQUIRY_VENDOR_LEN 8
+typedef struct _tag_SYNO_DISK_VENDOR {
+        const char *szName;     
+        const int iLength;  
+} SYNO_DISK_VENDOR;
+
+SYNO_DISK_VENDOR gDiskVendor[] = {
+	{"OCZ", 3},
+	{"Crucial", 7},
+	{"Micron", 6},
+	{"MICRON", 6},
+	{NULL, 0}
+};
+#endif  
+
+#ifdef MY_ABC_HERE
+#define SYNO_RESULT_LEN 512
+ 
+#define SYNO_IDENTIFY_DEVICE_TMP_LEN 40
+extern int syno_get_ata_identity(struct scsi_device *sdev, u16 *id);
+#endif  
+
+#ifdef MY_ABC_HERE
+#include <linux/libata.h>
+#define to_ata_port(d) container_of(d, struct ata_port, tdev)
+extern u8 syno_is_synology_pm(const struct ata_port *ap);
+#endif  
+
 #define ALLOC_FAILURE_MSG	KERN_ERR "%s: Allocation failure during" \
 	" SCSI scanning, some SCSI devices might not be configured\n"
-
 
 #define SCSI_TIMEOUT (2*HZ)
 #define SCSI_REPORT_LUNS_TIMEOUT (30*HZ)
 
-
 #define SCSI_UID_SER_NUM 'S'
 #define SCSI_UID_UNKNOWN 'Z'
-
 
 #define SCSI_SCAN_NO_RESPONSE		0
 #define SCSI_SCAN_TARGET_PRESENT	1
@@ -147,7 +177,9 @@ static struct scsi_device *scsi_alloc_sdev(struct scsi_target *starget,
 		goto out;
 
 	sdev->vendor = scsi_null_device_strs;
+#ifndef MY_ABC_HERE
 	sdev->model = scsi_null_device_strs;
+#endif  
 	sdev->rev = scsi_null_device_strs;
 	sdev->host = shost;
 	sdev->queue_ramp_up_period = SCSI_DEFAULT_RAMP_UP_PERIOD;
@@ -357,21 +389,175 @@ static struct scsi_target *scsi_alloc_target(struct device *parent,
 		put_device(dev);
 		return found_target;
 	}
-	
+	 
 	put_device(&found_target->dev);
-	
+	 
 	msleep(1);
 	goto retry;
 }
 
-
 void scsi_target_reap(struct scsi_target *starget)
 {
-	
+	 
 	BUG_ON(starget->state == STARGET_DEL);
 	scsi_target_reap_ref_put(starget);
 }
 
+#ifdef MY_ABC_HERE
+ 
+static void syno_standard_inquiry_string(unsigned char *szInqStr, unsigned int uiLen)
+{
+	char szRevStr[4] = {'\0'};
+	char szTmpStr[SYNO_INQUIRY_TMP_LEN] = {'\0'};
+	int iCharIdx;
+	int blPreIsSpace = 0, blSegmented = 0;
+	int blSpecialVendor = 0;
+	int i = 0;
+
+	if (NULL == szInqStr || 0 == uiLen) {
+		goto END;
+	}
+
+	if (uiLen > SYNO_INQUIRY_TMP_LEN) {
+		uiLen = SYNO_INQUIRY_TMP_LEN;
+	}
+
+	memcpy(szRevStr, szInqStr + uiLen - 4, 4);
+	memcpy(szTmpStr, szInqStr + 8, uiLen - 4 - 8);
+
+	for (i = 0; NULL != gDiskVendor[i].szName; i++) {
+		if (!strncmp(gDiskVendor[i].szName, szTmpStr, gDiskVendor[i].iLength)) {
+			blSpecialVendor = 1;
+			break;
+		}
+	}
+
+	if (1 == blSpecialVendor) {
+		iCharIdx = gDiskVendor[i].iLength;
+	} else {
+		for (iCharIdx = 0; iCharIdx < sizeof(szTmpStr); iCharIdx++) {
+			if ('\0' == szTmpStr[iCharIdx]) {
+				break;
+			}
+
+			if (' ' == szTmpStr[iCharIdx]) {
+				blPreIsSpace = 1;
+			} else {
+				if (blPreIsSpace) {
+					blSegmented = 1;
+					break;
+				}
+			}
+		}
+
+		if (!blSegmented) {
+			goto END;
+		}
+	}
+
+	memset(szInqStr, 0, uiLen);
+
+	memcpy(szInqStr, szTmpStr, iCharIdx);
+	memcpy(szInqStr + 8, szTmpStr + iCharIdx, strlen(szTmpStr) - iCharIdx);
+	memcpy(szInqStr + (uiLen - 4), szRevStr, 4);
+END:
+	return;
+}
+
+static void syno_standard_vendor_string(unsigned char *szInqStr, unsigned int uiLen)
+{
+	int i = 0;
+
+	if (NULL == szInqStr || 0 == uiLen) {
+		goto END;
+	}
+
+	if (uiLen > SYNO_INQUIRY_VENDOR_LEN) {
+		uiLen = SYNO_INQUIRY_VENDOR_LEN;
+	}
+
+	for (i = 0; NULL != gDiskVendor[i].szName; i++) {
+		if (!strncmp(gDiskVendor[i].szName, szInqStr, gDiskVendor[i].iLength)) {
+			memset(szInqStr, 0, uiLen);
+			memcpy(szInqStr, gDiskVendor[i].szName, gDiskVendor[i].iLength);
+			break;
+		}
+	}
+END:
+	return;
+}
+#endif  
+
+#ifdef MY_ABC_HERE
+ 
+static void scsi_ata_identify_device_get_model_name(struct scsi_device *sdev, unsigned char *szInqReturn)
+{
+	int i = 0;
+	int blSpecialVendor = 0;
+	int blPreIsSpace = 0;
+	int blSegmented = 0;
+	int iRes = 0;
+	u16 id[SYNO_RESULT_LEN / 2] = {0};
+	unsigned char szInqResult[SYNO_RESULT_LEN] = {0};
+
+	iRes = syno_get_ata_identity(sdev, id);
+	memcpy(szInqResult, id, SYNO_RESULT_LEN);
+
+	for (i = 0; i < SYNO_RESULT_LEN - 1; i += 2)
+	{
+		char tmp = szInqResult[i];
+		szInqResult[i] = szInqResult[i+1];
+		szInqResult[i+1] = tmp;
+	}
+
+	if (!iRes || '\0' == szInqResult[54]) {
+		return;
+	}
+
+	for (i = 0; NULL != gDiskVendor[i].szName; i++) {
+		 
+		if (!strncmp(gDiskVendor[i].szName, &szInqResult[54], gDiskVendor[i].iLength)) {
+			blSpecialVendor = 1;
+			break;
+		}
+	}
+
+	if (1 == blSpecialVendor) {
+		if (' ' == szInqResult[54 + gDiskVendor[i].iLength] ||
+				'-' == szInqResult[54 + gDiskVendor[i].iLength] ||
+				'_' == szInqResult[54 + gDiskVendor[i].iLength]) {
+			i = gDiskVendor[i].iLength + 1;
+		} else {
+			i = gDiskVendor[i].iLength;
+		}
+	} else {
+		 
+		for (i = 0; i < SYNO_IDENTIFY_DEVICE_TMP_LEN; i++) {
+			if ('\0' == szInqResult[54 + i]) {
+				break;
+			}
+
+			if (' ' == szInqResult[54 + i]) {
+				if (1 == blPreIsSpace){
+					break;
+				}
+				blPreIsSpace = 1;
+			} else if (blPreIsSpace) {
+				blSegmented = 1;
+				break;
+			}
+		}
+
+		if (!blSegmented){
+			i = 0;
+		}
+	}
+
+	memcpy(szInqReturn, &szInqResult[54 + i], CONFIG_SYNO_DISK_MODEL_NUM);
+
+	return;
+}
+#endif  
 
 static void sanitize_inquiry_string(unsigned char *s, int len)
 {
@@ -385,6 +571,115 @@ static void sanitize_inquiry_string(unsigned char *s, int len)
 	}
 }
 
+#ifdef MY_ABC_HERE
+static int syno_is_pmp_device(struct device *dev)
+{
+	struct ata_port *pPmPort = NULL;
+	int iRet = 0;
+
+	if (!dev || !dev->type) {
+		goto End;
+	}
+
+	while (strcmp(dev->type->name, "ata_port")) {
+		if (!dev->type->name || !dev->parent) {
+			goto End;
+		}
+		dev = dev->parent;
+	}
+
+	pPmPort = to_ata_port(dev);
+	if (!pPmPort || !syno_is_synology_pm(pPmPort)) {
+		goto End;
+	}
+
+	iRet = 1;
+End:
+	return iRet;
+}
+#endif  
+
+#ifdef MY_ABC_HERE
+#define SERIAL_RESULT_BUF_SIZE 252
+#define VPD_SUPPORTED_VPDS 0x00
+#define VPD_UNIT_SERIAL_NUM 0x80
+static int syno_fetch_unit_serial_num(struct scsi_device *sdev)
+{
+	int ret = -1, result = 0, k = 0, len = 0;
+	unsigned char scsi_cmd[MAX_COMMAND_SIZE];
+	struct scsi_sense_hdr sshdr;
+	unsigned char serial_num_result[SERIAL_RESULT_BUF_SIZE];
+
+	if (NULL == sdev) {
+		SCSI_LOG_SCAN_BUS(3, printk(KERN_INFO "scsi_device null pointer\n"));
+		goto END;
+	}
+
+	memset(scsi_cmd, 0, 6);
+	scsi_cmd[0] = INQUIRY;
+	scsi_cmd[1] = 0x01;
+	scsi_cmd[2] = VPD_SUPPORTED_VPDS;
+	scsi_cmd[4] = SERIAL_RESULT_BUF_SIZE;
+	memset(serial_num_result, 0, SERIAL_RESULT_BUF_SIZE);
+
+	result = scsi_execute_req(sdev,  scsi_cmd, DMA_FROM_DEVICE,
+				  serial_num_result, SERIAL_RESULT_BUF_SIZE, &sshdr,
+				  HZ / 2 + HZ * scsi_inq_timeout, 3,
+				  NULL);
+
+	if (result) {
+		SCSI_LOG_SCAN_BUS(3, printk(KERN_INFO "get serial num INQUIRY failed with code 0x%x\n", result));
+		goto END;
+	}
+
+	if (VPD_SUPPORTED_VPDS != serial_num_result[1] ||
+		0x00 != serial_num_result[2]) {
+		SCSI_LOG_SCAN_BUS(3, printk(KERN_INFO "bad supported VPDs page\n"));
+		goto END;
+	}
+
+	len = (serial_num_result[2] << 8) + serial_num_result[3];  
+	for (k = 0; k < len; ++k) {
+		if (VPD_UNIT_SERIAL_NUM == serial_num_result[k + 4])
+			break;
+	}
+	if (k >= len) {
+		SCSI_LOG_SCAN_BUS(3, printk(KERN_INFO "without serial num page\n"));
+		goto END;
+	}
+
+	memset(scsi_cmd, 0, 6);
+	scsi_cmd[0] = INQUIRY;
+	scsi_cmd[1] = 0x01;
+	scsi_cmd[2] = VPD_UNIT_SERIAL_NUM;
+	scsi_cmd[4] = SERIAL_RESULT_BUF_SIZE;
+	memset(serial_num_result, 0, SERIAL_RESULT_BUF_SIZE);
+
+	result = scsi_execute_req(sdev,  scsi_cmd, DMA_FROM_DEVICE,
+				  serial_num_result, SERIAL_RESULT_BUF_SIZE, &sshdr,
+				  HZ / 2 + HZ * scsi_inq_timeout, 3,
+				  NULL);
+
+	if (result) {
+		SCSI_LOG_SCAN_BUS(3, printk(KERN_INFO "get serial num INQUIRY failed with code 0x%x\n", result));
+		goto END;
+	}
+
+	len = (serial_num_result[2] << 8) + serial_num_result[3];  
+	len = (len > SERIAL_NUM_SIZE) ? SERIAL_NUM_SIZE : len;
+	if (VPD_UNIT_SERIAL_NUM != serial_num_result[1] ||
+		0 >= len) {
+		SCSI_LOG_SCAN_BUS(3, printk(KERN_INFO "bad serial number length VPD page\n"));
+		goto END;
+	}
+
+	sanitize_inquiry_string(serial_num_result + 4, len);
+	memcpy(sdev->syno_disk_serial, serial_num_result + 4, len);
+	ret = 0;
+END:
+	return ret;
+}
+#endif  
 
 static int scsi_probe_lun(struct scsi_device *sdev, unsigned char *inq_result,
 			  int result_len, int *bflags)
@@ -394,10 +689,20 @@ static int scsi_probe_lun(struct scsi_device *sdev, unsigned char *inq_result,
 	int response_len = 0;
 	int pass, count, result;
 	struct scsi_sense_hdr sshdr;
+#ifdef MY_ABC_HERE
+	 
+	unsigned char SYNO_INQUIRY_VIRTUALD_DATA[] = {
+					0x03,0x00,0x04,0x02,0x20,0x00,0x00,0x00,
+					'S', 'y', 'n', 'o', 'l', 'o', 'g', 'y',
+					'V', 'i', 'r', 't', 'u', 'a', 'l', ' ',
+					'D', 'e', 'v', 'i', 'c', 'e', ' ', ' ',
+					0x31,0x2E,0x30,0x30
+					};
+	int iVirtualInquiryLen = 36;
+#endif  
 
 	*bflags = 0;
 
-	
 	first_inquiry_len = sdev->inquiry_len ? sdev->inquiry_len : 36;
 	try_inquiry_len = first_inquiry_len;
 	pass = 1;
@@ -416,17 +721,30 @@ static int scsi_probe_lun(struct scsi_device *sdev, unsigned char *inq_result,
 
 		memset(inq_result, 0, try_inquiry_len);
 
+#ifdef MY_ABC_HERE
+		if (sdev->channel == SYNO_PM_VIRTUAL_SCSI_CHANNEL) {
+			result = 0;
+			if (syno_is_pmp_device(&sdev->sdev_gendev)) {
+				memset(inq_result, 0, iVirtualInquiryLen);
+				memcpy(inq_result, SYNO_INQUIRY_VIRTUALD_DATA, iVirtualInquiryLen);
+				sdev->inquiry_len = iVirtualInquiryLen;
+			}
+		} else {
+#endif  
 		result = scsi_execute_req(sdev,  scsi_cmd, DMA_FROM_DEVICE,
 					  inq_result, try_inquiry_len, &sshdr,
 					  HZ / 2 + HZ * scsi_inq_timeout, 3,
 					  &resid);
+#ifdef MY_ABC_HERE
+		}
+#endif  
 
 		SCSI_LOG_SCAN_BUS(3, sdev_printk(KERN_INFO, sdev,
 				"scsi scan: INQUIRY %s with code 0x%x\n",
 				result ? "failed" : "successful", result));
 
 		if (result) {
-			
+			 
 			if ((driver_byte(result) & DRIVER_SENSE) &&
 			    scsi_sense_valid(&sshdr)) {
 				if ((sshdr.sense_key == UNIT_ATTENTION) &&
@@ -444,19 +762,25 @@ static int scsi_probe_lun(struct scsi_device *sdev, unsigned char *inq_result,
 	}
 
 	if (result == 0) {
+#ifdef MY_ABC_HERE
+		 
+		if (!strncmp(&inq_result[8], SZ_STAT_DISK_VENDOR, 8)) {
+			syno_standard_inquiry_string(&inq_result[8], 28);
+		} else {
+			syno_standard_vendor_string(&inq_result[8], 8);
+		}
+#endif  
 		sanitize_inquiry_string(&inq_result[8], 8);
 		sanitize_inquiry_string(&inq_result[16], 16);
 		sanitize_inquiry_string(&inq_result[32], 4);
 
 		response_len = inq_result[4] + 5;
 		if (response_len > 255)
-			response_len = first_inquiry_len;	
+			response_len = first_inquiry_len;	 
 
-		
 		*bflags = scsi_get_device_flags(sdev, &inq_result[8],
 				&inq_result[16]);
 
-		
 		if (pass == 1) {
 			if (BLIST_INQUIRY_36 & *bflags)
 				next_inquiry_len = 36;
@@ -500,34 +824,33 @@ static int scsi_probe_lun(struct scsi_device *sdev, unsigned char *inq_result,
 		sdev->inquiry_len = 36;
 	}
 
-	
-
-	
 	sdev->scsi_level = inq_result[2] & 0x07;
 	if (sdev->scsi_level >= 2 ||
 	    (sdev->scsi_level == 1 && (inq_result[3] & 0x0f) == 1))
 		sdev->scsi_level++;
 	sdev->sdev_target->scsi_level = sdev->scsi_level;
 
-	
 	sdev->lun_in_cdb = 0;
 	if (sdev->scsi_level <= SCSI_2 &&
 	    sdev->scsi_level != SCSI_UNKNOWN &&
 	    !sdev->host->no_scsi2_lun_in_cdb)
 		sdev->lun_in_cdb = 1;
 
+#ifdef MY_ABC_HERE
+	memset(sdev->syno_disk_serial, 0, sizeof(sdev->syno_disk_serial));
+	syno_fetch_unit_serial_num(sdev);
+#endif  
 	return 0;
 }
-
 
 static int scsi_add_lun(struct scsi_device *sdev, unsigned char *inq_result,
 		int *bflags, int async)
 {
 	int ret;
+#ifdef MY_ABC_HERE
+	unsigned char szDiskModel[CONFIG_SYNO_DISK_MODEL_NUM + 4] = {'\0'};
+#endif  
 
-	
-
-	
 	sdev->inquiry = kmemdup(inq_result,
 				max_t(size_t, sdev->inquiry_len, 36),
 				GFP_ATOMIC);
@@ -535,11 +858,34 @@ static int scsi_add_lun(struct scsi_device *sdev, unsigned char *inq_result,
 		return SCSI_SCAN_NO_RESPONSE;
 
 	sdev->vendor = (char *) (sdev->inquiry + 8);
+#ifdef MY_ABC_HERE
+	if (!(SYNO_PORT_TYPE_USB == sdev->host->hostt->syno_port_type)) {
+#ifdef MY_ABC_HERE
+		if(sdev->channel != SYNO_PM_VIRTUAL_SCSI_CHANNEL ||
+				!syno_is_pmp_device(&sdev->sdev_gendev))
+#endif  
+		scsi_ata_identify_device_get_model_name(sdev, (unsigned char *)&szDiskModel);
+	}
+
+	if (0 != strlen(szDiskModel)) {
+		sdev->model = kmemdup(szDiskModel, CONFIG_SYNO_DISK_MODEL_NUM, GFP_ATOMIC);
+	} else {
+		 
+		memset (szDiskModel, ' ', CONFIG_SYNO_DISK_MODEL_NUM);
+		memcpy(szDiskModel, (char *) (sdev->inquiry + 16), 16);
+		sdev->model = kmemdup(szDiskModel, CONFIG_SYNO_DISK_MODEL_NUM, GFP_ATOMIC);
+	}
+	if (sdev->model == NULL)
+		return SCSI_SCAN_NO_RESPONSE;
+
+	sanitize_inquiry_string((unsigned char *) sdev->model, CONFIG_SYNO_DISK_MODEL_NUM);
+#else  
 	sdev->model = (char *) (sdev->inquiry + 16);
+#endif  
 	sdev->rev = (char *) (sdev->inquiry + 32);
 
 	if (strncmp(sdev->vendor, "ATA     ", 8) == 0) {
-		
+		 
 		sdev->allow_restart = 1;
 	}
 
@@ -577,7 +923,11 @@ static int scsi_add_lun(struct scsi_device *sdev, unsigned char *inq_result,
 	if (inq_result[7] & 0x10)
 		sdev->sdtr = 1;
 
+#ifdef MY_ABC_HERE
+	sdev_printk(KERN_NOTICE, sdev, "%s %.8s %."CONFIG_SYNO_DISK_MODEL_LEN"s %.4s PQ: %d "
+#else  
 	sdev_printk(KERN_NOTICE, sdev, "%s %.8s %.16s %.4s PQ: %d "
+#endif  
 			"ANSI: %d%s\n", scsi_device_type(sdev->type),
 			sdev->vendor, sdev->model, sdev->rev,
 			sdev->inq_periph_qual, inq_result[2] & 0x07,

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /**
  * host.c - DesignWare USB3 DRD Controller Host Glue
  *
@@ -26,6 +29,10 @@ int dwc3_host_init(struct dwc3 *dwc)
 	struct usb_xhci_pdata	pdata;
 	int			ret;
 
+#ifdef CONFIG_USB_RTK_DWC3_DRD_MODE
+	dev_info(dwc->dev, "%s\n", __func__);
+#endif
+
 	xhci = platform_device_alloc("xhci-hcd", PLATFORM_DEVID_AUTO);
 	if (!xhci) {
 		dev_err(dwc->dev, "couldn't allocate xHCI device\n");
@@ -39,6 +46,9 @@ int dwc3_host_init(struct dwc3 *dwc)
 	xhci->dev.dma_parms	= dwc->dev->dma_parms;
 
 	dwc->xhci = xhci;
+#ifdef CONFIG_USB_RTK_DWC3_DRD_MODE
+	dwc->has_xhci = true;
+#endif
 
 	ret = platform_device_add_resources(xhci, dwc->xhci_resources,
 						DWC3_XHCI_RESOURCES_NUM);
@@ -78,6 +88,9 @@ err1:
 	platform_device_put(xhci);
 	return ret;
 }
+#ifdef MY_DEF_HERE
+EXPORT_SYMBOL_GPL(dwc3_host_init);
+#endif
 
 void dwc3_host_exit(struct dwc3 *dwc)
 {
@@ -85,5 +98,11 @@ void dwc3_host_exit(struct dwc3 *dwc)
 			  dev_name(&dwc->xhci->dev));
 	phy_remove_lookup(dwc->usb3_generic_phy, "usb3-phy",
 			  dev_name(&dwc->xhci->dev));
+#ifdef CONFIG_USB_RTK_DWC3_DRD_MODE
+	dwc->has_xhci = false;
+#endif
 	platform_device_unregister(dwc->xhci);
 }
+#ifdef MY_DEF_HERE
+EXPORT_SYMBOL_GPL(dwc3_host_exit);
+#endif

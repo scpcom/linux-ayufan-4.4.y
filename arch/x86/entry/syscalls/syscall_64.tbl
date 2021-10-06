@@ -334,6 +334,42 @@
 325	common	mlock2			sys_mlock2
 
 #
+# start - CONFIG_SYNO_SYSTEM_CALL
+# Synology defined system calls are listed here.
+#
+# 400 is available for reuse
+# 401 is available for reuse
+402	common	SYNOUtime		sys_SYNOUtime
+403	common	SYNOArchiveBit		sys_SYNOArchiveBit
+404	common	recvfile		sys_recvfile
+#405	common	SYNOMTDAlloc		sys_SYNOMTDAlloc
+406	common	SYNOCaselessStat	sys_SYNOCaselessStat
+407	common	SYNOCaselessLStat	sys_SYNOCaselessLStat
+#408	x32	SYNOCaselessStat64	sys_SYNOCaselessStat64		# not used
+#409	x32	SYNOCaselessLStat64	sys_SYNOCaselessLStat64		# not used
+410	common	SYNOEcryptName		sys_SYNOEcryptName
+411	common	SYNODecryptName		sys_SYNODecryptName
+412	common	SYNOACLCheckPerm	sys_SYNOACLCheckPerm
+413	common	SYNOACLIsSupport	sys_SYNOACLIsSupport
+414	common	SYNOACLGetPerm		sys_SYNOACLGetPerm
+415	common	SYNOFlushAggregate	sys_SYNOFlushAggregate
+#416	# not used
+#417	# not used
+#418	# not used
+419	common	SYNOStat		sys_SYNOStat
+420	common	SYNOFStat		sys_SYNOFStat
+421	common	SYNOLStat		sys_SYNOLStat
+422	common	SYNONotifyInit		sys_SYNONotifyInit
+423	64	SYNONotifyAddWatch	sys_SYNONotifyAddWatch
+424	64	SYNONotifyRemoveWatch	sys_SYNONotifyRemoveWatch
+#425	x32	SYNONotifyAddWatch	sys_SYNONotifyAddWatch32			# not used
+#426	x32	SYNONotifyRemoveWatch	sys_SYNONotifyRemoveWatch32			# not used
+427	common	SYNOArchiveOverwrite	sys_SYNOArchiveOverwrite
+#
+# end - CONFIG_SYNO_SYSTEM_CALL
+#
+
+#
 # x32-specific system call numbers start at 512 to avoid cache impact
 # for native 64-bit operation.
 #

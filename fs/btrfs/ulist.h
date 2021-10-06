@@ -1,34 +1,34 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #ifndef __ULIST__
 #define __ULIST__
 
 #include <linux/list.h>
 #include <linux/rbtree.h>
 
-
 struct ulist_iterator {
 #ifdef CONFIG_BTRFS_DEBUG
 	int i;
 #endif
-	struct list_head *cur_list;  
+	struct list_head *cur_list;   
 };
 
-
 struct ulist_node {
-	u64 val;		
-	u64 aux;		
+	u64 val;		 
+	u64 aux;		 
 
 #ifdef CONFIG_BTRFS_DEBUG
-	int seqnum;		
+	int seqnum;		 
 #endif
 
-	struct list_head list;  
-	struct rb_node rb_node;	
+	struct list_head list;   
+	struct rb_node rb_node;	 
 };
 
 struct ulist {
-	
+	 
 	unsigned long nnodes;
 
 	struct list_head nodes;
@@ -61,5 +61,15 @@ struct ulist_node *ulist_next(struct ulist *ulist,
 			      struct ulist_iterator *uiter);
 
 #define ULIST_ITER_INIT(uiter) ((uiter)->cur_list = NULL)
+
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+#define ULIST_NODES_MAX 65536  
+int ulist_add_lru_adjust(struct ulist *ulist, u64 val, u64 aux, gfp_t gfp_mask);
+void ulist_remove_first(struct ulist *ulist);
+#endif  
+#if defined(MY_ABC_HERE) || \
+    defined(MY_ABC_HERE)
+struct ulist_node * ulist_search(struct ulist *ulist, u64 val);
+#endif  
 
 #endif

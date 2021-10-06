@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _SCSI_SCSI_HOST_H
 #define _SCSI_SCSI_HOST_H
 
@@ -33,167 +36,141 @@ struct blk_queue_tags;
 #define DISABLE_CLUSTERING 0
 #define ENABLE_CLUSTERING 1
 
+#ifdef MY_ABC_HERE
+enum {
+	SYNO_PORT_TYPE_SATA = 1,
+	SYNO_PORT_TYPE_USB = 2,
+	SYNO_PORT_TYPE_SAS = 3,
+};
+#endif  
+
 struct scsi_host_template {
 	struct module *module;
 	const char *name;
 
-	
 	int (* detect)(struct scsi_host_template *);
 
-	
 	int (* release)(struct Scsi_Host *);
 
-	
 	const char *(* info)(struct Scsi_Host *);
 
-	
 	int (* ioctl)(struct scsi_device *dev, int cmd, void __user *arg);
 
-
 #ifdef CONFIG_COMPAT
-	
+	 
 	int (* compat_ioctl)(struct scsi_device *dev, int cmd, void __user *arg);
 #endif
 
-	
 	int (* queuecommand)(struct Scsi_Host *, struct scsi_cmnd *);
 
-	
 	int (* eh_abort_handler)(struct scsi_cmnd *);
 	int (* eh_device_reset_handler)(struct scsi_cmnd *);
 	int (* eh_target_reset_handler)(struct scsi_cmnd *);
 	int (* eh_bus_reset_handler)(struct scsi_cmnd *);
 	int (* eh_host_reset_handler)(struct scsi_cmnd *);
 
-	
 	int (* slave_alloc)(struct scsi_device *);
 
-	
 	int (* slave_configure)(struct scsi_device *);
 
-	
 	void (* slave_destroy)(struct scsi_device *);
 
-	
 	int (* target_alloc)(struct scsi_target *);
 
-	
 	void (* target_destroy)(struct scsi_target *);
 
-	
 	int (* scan_finished)(struct Scsi_Host *, unsigned long);
 
-	
 	void (* scan_start)(struct Scsi_Host *);
 
-	
 	int (* change_queue_depth)(struct scsi_device *, int);
 
-	
 	int (* bios_param)(struct scsi_device *, struct block_device *,
 			sector_t, int []);
 
-	
 	void (*unlock_native_capacity)(struct scsi_device *);
 
-	
 	int (*show_info)(struct seq_file *, struct Scsi_Host *);
 	int (*write_info)(struct Scsi_Host *, char *, int);
 
-	
 	enum blk_eh_timer_return (*eh_timed_out)(struct scsi_cmnd *);
-
-	
 
 	int (*host_reset)(struct Scsi_Host *shost, int reset_type);
 #define SCSI_ADAPTER_RESET	1
 #define SCSI_FIRMWARE_RESET	2
 
-
-	
 	const char *proc_name;
 
-	
 	struct proc_dir_entry *proc_dir;
 
-	
 	int can_queue;
 
-	
 	int this_id;
 
-	
 	unsigned short sg_tablesize;
 	unsigned short sg_prot_tablesize;
 
-	
 	unsigned int max_sectors;
 
-	
 	unsigned long dma_boundary;
 
-	
 #define SCSI_DEFAULT_MAX_SECTORS	1024
 
-	
 	short cmd_per_lun;
 
-	
 	unsigned char present;
 
-	
 	int tag_alloc_policy;
 
-	
 	unsigned track_queue_depth:1;
 
-	
 	unsigned supported_mode:2;
 
-	
 	unsigned unchecked_isa_dma:1;
 
-	
 	unsigned use_clustering:1;
 
-	
 	unsigned emulated:1;
 
-	
 	unsigned skip_settle_delay:1;
 
-	
 	unsigned no_write_same:1;
 
-	
 	unsigned no_async_abort:1;
 
-	
 	unsigned int max_host_blocked;
 
-	
 #define SCSI_DEFAULT_HOST_BLOCKED	7
 
-	
 	struct device_attribute **shost_attrs;
 
-	
 	struct device_attribute **sdev_attrs;
 
-	
 	struct list_head legacy_hosts;
 
-	
+#ifdef MY_ABC_HERE
+	 
+	int  (* syno_index_get)(struct Scsi_Host *host, uint channel, uint id, uint lun);
+#endif  
+#ifdef MY_ABC_HERE
+	 
+	int  (* syno_host_power_ctl)(struct Scsi_Host *host, u8 blPowerOn);
+#endif  
+#ifdef MY_ABC_HERE
+	int  syno_port_type;
+#endif  
+
 	u64 vendor_id;
 
-	
 	unsigned int cmd_size;
 	struct scsi_host_cmd_pool *cmd_pool;
 
-	
 	bool disable_blk_mq;
-};
 
+#ifdef MY_DEF_HERE
+	int (*syno_set_sashost_disk_led)(struct scsi_device *, int);
+#endif
+};
 
 #define DEF_SCSI_QCMD(func_name) \
 	int func_name(struct Scsi_Host *shost, struct scsi_cmnd *cmd)	\
@@ -270,83 +247,68 @@ struct Scsi_Host {
 	short unsigned int sg_prot_tablesize;
 	unsigned int max_sectors;
 	unsigned long dma_boundary;
-	
+	 
 	unsigned nr_hw_queues;
-	
+	 
 	unsigned long cmd_serial_number;
 	
 	unsigned active_mode:2;
 	unsigned unchecked_isa_dma:1;
 	unsigned use_clustering:1;
 
-	
 	unsigned host_self_blocked:1;
     
-	
 	unsigned reverse_ordering:1;
 
-	
 	unsigned tmf_in_progress:1;
 
-	
 	unsigned async_scan:1;
 
-	
 	unsigned eh_noresume:1;
 
-	
 	unsigned no_write_same:1;
 
 	unsigned use_blk_mq:1;
 	unsigned use_cmd_list:1;
 
-	
 	unsigned short_inquiry:1;
 
-	
 	char work_q_name[20];
 	struct workqueue_struct *work_q;
 
-	
 	struct workqueue_struct *tmf_work_q;
 
-	
 	unsigned no_scsi2_lun_in_cdb:1;
 
-	
 	unsigned int max_host_blocked;
 
-	
 	unsigned int prot_capabilities;
 	unsigned char prot_guard_type;
 
-	
 	struct request_queue *uspace_req_q;
 
-	
 	unsigned long base;
 	unsigned long io_port;
 	unsigned char n_io_port;
 	unsigned char dma_channel;
 	unsigned int  irq;
 	
-
 	enum scsi_host_state shost_state;
 
-	
 	struct device		shost_gendev, shost_dev;
 
-	
 	struct list_head sht_legacy_list;
 
-	
 	void *shost_data;
 
-	
 	struct device *dma_dev;
 
-	
-	unsigned long hostdata[0]  
+#ifdef MY_DEF_HERE
+	 
+	int isCacheSSD;
+#endif
+
+	unsigned long hostdata[0]   
 		__attribute__ ((aligned (sizeof(unsigned long))));
 };
 

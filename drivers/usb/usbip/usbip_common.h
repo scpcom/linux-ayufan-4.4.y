@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #ifndef __USBIP_COMMON_H
 #define __USBIP_COMMON_H
 
@@ -87,15 +89,16 @@ extern struct device_attribute dev_attr_usbip_debug;
 #define usbip_dbg_stub_tx(fmt, args...) \
 	usbip_dbg_with_flag(usbip_debug_stub_tx, fmt , ##args)
 
-
 #define USBIP_CMD_SUBMIT	0x0001
 #define USBIP_CMD_UNLINK	0x0002
 #define USBIP_RET_SUBMIT	0x0003
 #define USBIP_RET_UNLINK	0x0004
+#ifdef MY_ABC_HERE
+#define USBIP_RESET_DEV     0xFFFF
+#endif  
 
 #define USBIP_DIR_OUT	0x00
 #define USBIP_DIR_IN	0x01
-
 
 struct usbip_header_basic {
 	__u32 command;

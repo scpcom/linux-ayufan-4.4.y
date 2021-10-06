@@ -29,8 +29,8 @@
 #include "inode-map.h"
 #include "volumes.h"
 
-#define BITS_PER_BITMAP		(PAGE_CACHE_SIZE * 8)
-#define MAX_CACHE_BYTES_PER_GIG	(32 * 1024)
+#define BITS_PER_BITMAP		(PAGE_CACHE_SIZE * 8UL)
+#define MAX_CACHE_BYTES_PER_GIG	SZ_32K
 
 struct btrfs_trim_range {
 	u64 start;
@@ -1086,14 +1086,11 @@ write_pinned_extent_entries(struct btrfs_root *root,
 static noinline_for_stack int
 write_bitmap_entries(struct btrfs_io_ctl *io_ctl, struct list_head *bitmap_list)
 {
-	struct list_head *pos, *n;
+	struct btrfs_free_space *entry, *next;
 	int ret;
 
 	/* Write out the bitmaps */
-	list_for_each_safe(pos, n, bitmap_list) {
-		struct btrfs_free_space *entry =
-			list_entry(pos, struct btrfs_free_space, list);
-
+	list_for_each_entry_safe(entry, next, bitmap_list, list) {
 		ret = io_ctl_add_bitmap(io_ctl, entry->bitmap);
 		if (ret)
 			return -ENOSPC;
@@ -1119,13 +1116,10 @@ static int flush_dirty_cache(struct inode *inode)
 static void noinline_for_stack
 cleanup_bitmap_list(struct list_head *bitmap_list)
 {
-	struct list_head *pos, *n;
+	struct btrfs_free_space *entry, *next;
 
-	list_for_each_safe(pos, n, bitmap_list) {
-		struct btrfs_free_space *entry =
-			list_entry(pos, struct btrfs_free_space, list);
+	list_for_each_entry_safe(entry, next, bitmap_list, list)
 		list_del_init(&entry->list);
-	}
 }
 
 static void noinline_for_stack
@@ -1261,7 +1255,7 @@ static int __btrfs_write_out_cache(struct btrfs_root *root, struct inode *inode,
 		goto out;
 
 	lock_extent_bits(&BTRFS_I(inode)->io_tree, 0, i_size_read(inode) - 1,
-			 0, &cached_state);
+			 &cached_state);
 
 	io_ctl_set_generation(io_ctl, trans->transid);
 
@@ -1421,11 +1415,11 @@ static inline u64 offset_to_bitmap(struct btrfs_free_space_ctl *ctl,
 				   u64 offset)
 {
 	u64 bitmap_start;
-	u32 bytes_per_bitmap;
+	u64 bytes_per_bitmap;
 
 	bytes_per_bitmap = BITS_PER_BITMAP * ctl->unit;
 	bitmap_start = offset - ctl->start;
-	bitmap_start = div_u64(bitmap_start, bytes_per_bitmap);
+	bitmap_start = div64_u64(bitmap_start, bytes_per_bitmap);
 	bitmap_start *= bytes_per_bitmap;
 	bitmap_start += ctl->start;
 
@@ -1644,10 +1638,10 @@ static void recalculate_thresholds(struct btrfs_free_space_ctl *ctl)
 	u64 bitmap_bytes;
 	u64 extent_bytes;
 	u64 size = block_group->key.offset;
-	u32 bytes_per_bg = BITS_PER_BITMAP * ctl->unit;
-	u32 max_bitmaps = div_u64(size + bytes_per_bg - 1, bytes_per_bg);
+	u64 bytes_per_bg = BITS_PER_BITMAP * ctl->unit;
+	u64 max_bitmaps = div64_u64(size + bytes_per_bg - 1, bytes_per_bg);
 
-	max_bitmaps = max_t(u32, max_bitmaps, 1);
+	max_bitmaps = max_t(u64, max_bitmaps, 1);
 
 	ASSERT(ctl->total_bitmaps <= max_bitmaps);
 
@@ -1656,11 +1650,10 @@ static void recalculate_thresholds(struct btrfs_free_space_ctl *ctl)
 	 * at or below 32k, so we need to adjust how much memory we allow to be
 	 * used by extent based free space tracking
 	 */
-	if (size < 1024 * 1024 * 1024)
+	if (size < SZ_1G)
 		max_bytes = MAX_CACHE_BYTES_PER_GIG;
 	else
-		max_bytes = MAX_CACHE_BYTES_PER_GIG *
-			div_u64(size, 1024 * 1024 * 1024);
+		max_bytes = MAX_CACHE_BYTES_PER_GIG * div_u64(size, SZ_1G);
 
 	/*
 	 * we want to account for 1 more bitmap than what we have so we can make
@@ -1990,7 +1983,7 @@ static bool use_bitmap(struct btrfs_free_space_ctl *ctl,
 		/*
 		 * If this block group has some small extents we don't want to
 		 * use up all of our free slots in the cache with them, we want
-		 * to reserve them to larger extents, however if we have plent
+		 * to reserve them to larger extents, however if we have plenty
 		 * of cache left then go ahead an dadd them, no sense in adding
 		 * the overhead of a bitmap if we don't have to.
 		 */
@@ -2016,7 +2009,7 @@ static bool use_bitmap(struct btrfs_free_space_ctl *ctl,
 	return true;
 }
 
-static struct btrfs_free_space_op free_space_op = {
+static const struct btrfs_free_space_op free_space_op = {
 	.recalc_thresholds	= recalculate_thresholds,
 	.use_bitmap		= use_bitmap,
 };
@@ -2489,8 +2482,7 @@ void btrfs_init_free_space_ctl(struct btrfs_block_group_cache *block_group)
 	 * track of free space, and if we pass 1/2 of that we want to
 	 * start converting things over to using bitmaps
 	 */
-	ctl->extents_thresh = ((1024 * 32) / 2) /
-				sizeof(struct btrfs_free_space);
+	ctl->extents_thresh = (SZ_32K / 2) / sizeof(struct btrfs_free_space);
 }
 
 /*
@@ -3670,7 +3662,7 @@ have_info:
 			if (tmp->offset + tmp->bytes < offset)
 				break;
 			if (offset + bytes < tmp->offset) {
-				n = rb_prev(&info->offset_index);
+				n = rb_prev(&tmp->offset_index);
 				continue;
 			}
 			info = tmp;
@@ -3684,7 +3676,7 @@ have_info:
 			if (offset + bytes < tmp->offset)
 				break;
 			if (tmp->offset + tmp->bytes < offset) {
-				n = rb_next(&info->offset_index);
+				n = rb_next(&tmp->offset_index);
 				continue;
 			}
 			info = tmp;

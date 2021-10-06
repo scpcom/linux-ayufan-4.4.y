@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/fs.h>
 #include <linux/time.h>
 #include <linux/highuid.h>
@@ -19,6 +21,9 @@
 #include <linux/printk.h>
 #include <linux/slab.h>
 #include <linux/bitops.h>
+#ifdef MY_ABC_HERE
+#include <linux/xattr.h>
+#endif  
 
 #include "ext4_jbd2.h"
 #include "xattr.h"
@@ -772,8 +777,14 @@ static int ext4_write_begin(struct file *file, struct address_space *mapping,
 	unsigned from, to;
 
 	trace_ext4_write_begin(inode, pos, len, flags);
-	
+	 
 	needed_blocks = ext4_writepage_trans_blocks(inode) + 1;
+#ifdef MY_ABC_HERE
+	 
+	if (flags & AOP_FLAG_RECVFILE) {
+		needed_blocks = needed_blocks + MAX_PAGES_PER_RECVFILE - 1;
+	}
+#endif  
 	index = pos >> PAGE_CACHE_SHIFT;
 	from = pos & (PAGE_CACHE_SIZE - 1);
 	to = from + len;
@@ -850,10 +861,18 @@ retry_journal:
 		page_cache_release(page);
 		return ret;
 	}
+#ifdef MY_ABC_HERE
+	if (flags & AOP_FLAG_RECVFILE) {
+		if (pos + len > inode->i_size) {
+			 
+			inode->i_size = pos + len;
+			ext4_mark_inode_dirty(handle, inode);
+		}
+	}
+#endif  
 	*pagep = page;
 	return ret;
 }
-
 
 static int write_end_fn(handle_t *handle, struct buffer_head *bh)
 {
@@ -2042,6 +2061,15 @@ static int ext4_da_write_begin(struct file *file, struct address_space *mapping,
 
 	index = pos >> PAGE_CACHE_SHIFT;
 
+#ifdef MY_ABC_HERE
+	if (flags & AOP_FLAG_RECVFILE) {
+		if (flags & AOP_FLAG_RECVFILE_NONDA) {
+			*fsdata = (void *)FALL_BACK_TO_NONDELALLOC;
+			return ext4_write_begin(file, mapping, pos,
+						len, flags, pagep, fsdata);
+		}
+	} else
+#endif  
 	if (ext4_nonda_switch(inode->i_sb)) {
 		*fsdata = (void *)FALL_BACK_TO_NONDELALLOC;
 		return ext4_write_begin(file, mapping, pos,
@@ -2060,15 +2088,18 @@ static int ext4_da_write_begin(struct file *file, struct address_space *mapping,
 			return 0;
 	}
 
-	
 retry_grab:
 	page = grab_cache_page_write_begin(mapping, index, flags);
 	if (!page)
 		return -ENOMEM;
 	unlock_page(page);
 
-	
 retry_journal:
+#ifdef MY_ABC_HERE
+	if (flags & AOP_FLAG_RECVFILE) {
+		handle = ext4_journal_start(inode, EXT4_HT_WRITE_PAGE, MAX_PAGES_PER_RECVFILE);
+	} else
+#endif  
 	handle = ext4_journal_start(inode, EXT4_HT_WRITE_PAGE,
 				ext4_da_write_credits(inode, pos, len));
 	if (IS_ERR(handle)) {
@@ -2108,10 +2139,18 @@ retry_journal:
 		return ret;
 	}
 
+#ifdef MY_ABC_HERE
+	if (flags & AOP_FLAG_RECVFILE) {
+		if (pos + len > inode->i_size) {
+			 
+			inode->i_size = pos + len;
+			ext4_mark_inode_dirty(handle, inode);
+		}
+	}
+#endif  
 	*pagep = page;
 	return ret;
 }
-
 
 static int ext4_da_should_update_i_disksize(struct page *page,
 					    unsigned long offset)
@@ -2372,25 +2411,21 @@ static ssize_t ext4_ext_direct_IO(struct kiocb *iocb, struct iov_iter *iter,
 	loff_t final_size = offset + count;
 	ext4_io_end_t *io_end = NULL;
 
-	
 	if (iov_iter_rw(iter) != WRITE || final_size > inode->i_size)
 		return ext4_ind_direct_IO(iocb, iter, offset);
 
 	BUG_ON(iocb->private == NULL);
 
-	
 	if (iov_iter_rw(iter) == WRITE)
 		inode_dio_begin(inode);
 
-	
 	overwrite = *((int *)iocb->private);
 
 	if (overwrite) {
 		down_read(&EXT4_I(inode)->i_data_sem);
-		mutex_unlock(&inode->i_mutex);
+		inode_unlock(inode);
 	}
 
-	
 	iocb->private = NULL;
 	ext4_inode_aio_set(inode, NULL);
 	if (!is_sync_kiocb(iocb)) {
@@ -2448,10 +2483,10 @@ static ssize_t ext4_ext_direct_IO(struct kiocb *iocb, struct iov_iter *iter,
 retake_lock:
 	if (iov_iter_rw(iter) == WRITE)
 		inode_dio_end(inode);
-	
+	 
 	if (overwrite) {
 		up_read(&EXT4_I(inode)->i_data_sem);
-		mutex_lock(&inode->i_mutex);
+		inode_lock(inode);
 	}
 
 	return ret;
@@ -2537,7 +2572,18 @@ static const struct address_space_operations ext4_da_aops = {
 	.migratepage		= buffer_migrate_page,
 	.is_partially_uptodate  = block_is_partially_uptodate,
 	.error_remove_page	= generic_error_remove_page,
+#ifdef MY_ABC_HERE
+	.recvfile_da_check	= ext4_nonda_switch,
+#endif  
 };
+
+#ifdef MY_ABC_HERE
+void ext4_set_writeback_aops(struct inode *inode)
+{
+	inode->i_mapping->a_ops = &ext4_aops;
+	ext4_clear_inode_state(inode, EXT4_STATE_ORDERED_MODE);
+}
+#endif  
 
 void ext4_set_aops(struct inode *inode)
 {
@@ -2770,13 +2816,11 @@ int ext4_punch_hole(struct inode *inode, loff_t offset, loff_t length)
 			return ret;
 	}
 
-	mutex_lock(&inode->i_mutex);
+	inode_lock(inode);
 
-	
 	if (offset >= inode->i_size)
 		goto out_mutex;
 
-	
 	if (offset + length > inode->i_size) {
 		length = inode->i_size +
 		   PAGE_CACHE_SIZE - (inode->i_size & (PAGE_CACHE_SIZE - 1)) -
@@ -2859,7 +2903,7 @@ out_dio:
 	up_write(&EXT4_I(inode)->i_mmap_sem);
 	ext4_inode_resume_unlocked_dio(inode);
 out_mutex:
-	mutex_unlock(&inode->i_mutex);
+	inode_unlock(inode);
 	return ret;
 }
 
@@ -2895,9 +2939,8 @@ void ext4_truncate(struct inode *inode)
 	handle_t *handle;
 	struct address_space *mapping = inode->i_mapping;
 
-	
 	if (!(inode->i_state & (I_NEW|I_FREEING)))
-		WARN_ON(!mutex_is_locked(&inode->i_mutex));
+		WARN_ON(!inode_is_locked(inode));
 	trace_ext4_truncate_enter(inode);
 
 	if (!ext4_can_truncate(inode))
@@ -3294,6 +3337,40 @@ struct inode *ext4_iget(struct super_block *sb, unsigned long ino)
 	EXT4_INODE_GET_XTIME(i_atime, inode, raw_inode);
 	EXT4_EINODE_GET_XTIME(i_crtime, ei, raw_inode);
 
+#ifdef MY_ABC_HERE
+	if (ext4_is_ext3_sb(inode->i_sb) && is_syno_ext(inode->i_sb)) {
+		inode->i_create_time.tv_sec = (signed)le32_to_cpu(raw_inode->i_ext3_create_time);
+		inode->i_create_time.tv_nsec = 0;
+		goto ext3_create_time;
+	}
+#endif  
+#ifdef MY_ABC_HERE
+	inode->i_create_time.tv_sec = raw_inode->i_crtime;
+	inode->i_create_time.tv_nsec = raw_inode->i_crtime_extra;
+#endif  
+#ifdef MY_ABC_HERE
+ext3_create_time:
+#endif  
+
+#ifdef MY_ABC_HERE
+	if (ext4_is_ext3_sb(sb)) {
+		inode->i_archive_bit = ((u32)le16_to_cpu(raw_inode->ext3_archive_bit_high) << 16 |
+			                     le16_to_cpu(raw_inode->ext3_archive_bit_lo));
+		goto not_ext4;
+	}
+#endif  
+#ifdef MY_ABC_HERE
+	if (!EXT4_HAS_RO_COMPAT_FEATURE(sb, EXT4_FEATURE_RO_COMPAT_METADATA_CSUM)) {
+		inode->i_archive_bit = le16_to_cpu(raw_inode->ext4_archive_bit);
+	}
+#endif  
+#ifdef MY_ABC_HERE
+not_ext4:
+#endif  
+
+#ifdef MY_ABC_HERE
+	if (!is_syno_ext(inode->i_sb))
+#endif  
 	if (likely(!test_opt2(inode->i_sb, HURD_COMPAT))) {
 		inode->i_version = le32_to_cpu(raw_inode->i_disk_version);
 		if (EXT4_INODE_SIZE(inode->i_sb) > EXT4_GOOD_OLD_INODE_SIZE) {
@@ -3516,7 +3593,37 @@ static int ext4_do_update_inode(handle_t *handle,
 	EXT4_INODE_SET_XTIME(i_ctime, inode, raw_inode);
 	EXT4_INODE_SET_XTIME(i_mtime, inode, raw_inode);
 	EXT4_INODE_SET_XTIME(i_atime, inode, raw_inode);
+
+#ifdef MY_ABC_HERE
+	if (ext4_is_ext3_sb(inode->i_sb) && is_syno_ext(inode->i_sb)) {
+		raw_inode->i_ext3_create_time = cpu_to_le32(inode->i_create_time.tv_sec);
+		goto ext3_create_time;
+	}
+#endif  
+#ifdef MY_ABC_HERE
+	raw_inode->i_crtime = cpu_to_le32(inode->i_create_time.tv_sec);
+	raw_inode->i_crtime_extra = cpu_to_le32(inode->i_create_time.tv_nsec);
+#endif  
 	EXT4_EINODE_SET_XTIME(i_crtime, ei, raw_inode);
+#ifdef MY_ABC_HERE
+ext3_create_time:
+#endif  
+
+#ifdef MY_ABC_HERE
+	if (ext4_is_ext3_sb(inode->i_sb)) {
+		raw_inode->ext3_archive_bit_high = cpu_to_le16(inode->i_archive_bit >> 16);
+		raw_inode->ext3_archive_bit_lo = cpu_to_le16(inode->i_archive_bit);
+		goto not_ext4;
+	}
+#endif  
+#ifdef MY_ABC_HERE
+	if (!EXT4_HAS_RO_COMPAT_FEATURE(inode->i_sb, EXT4_FEATURE_RO_COMPAT_METADATA_CSUM)) {
+		raw_inode->ext4_archive_bit = cpu_to_le16(inode->i_archive_bit);  
+	}
+#endif  
+#ifdef MY_ABC_HERE
+not_ext4:
+#endif  
 
 	err = ext4_inode_blocks_set(handle, raw_inode, ei);
 	if (err) {
@@ -3557,6 +3664,9 @@ static int ext4_do_update_inode(handle_t *handle,
 	}
 
 	if (likely(!test_opt2(inode->i_sb, HURD_COMPAT))) {
+#ifdef MY_ABC_HERE
+		if (!is_syno_ext(inode->i_sb))
+#endif  
 		raw_inode->i_disk_version = cpu_to_le32(inode->i_version);
 		if (ei->i_extra_isize) {
 			if (EXT4_FITS_IN_INODE(raw_inode, ei, i_version_hi))
@@ -3806,16 +3916,128 @@ int ext4_getattr(struct vfsmount *mnt, struct dentry *dentry,
 	inode = d_inode(dentry);
 	generic_fillattr(inode, stat);
 
-	
 	if (unlikely(ext4_has_inline_data(inode)))
 		stat->blocks += (stat->size + 511) >> 9;
 
-	
 	delalloc_blocks = EXT4_C2B(EXT4_SB(inode->i_sb),
 				   EXT4_I(inode)->i_reserved_data_blocks);
 	stat->blocks += delalloc_blocks << (inode->i_sb->s_blocksize_bits - 9);
 	return 0;
 }
+
+#ifdef MY_ABC_HERE
+int ext4_syno_getattr(struct dentry *d, struct kstat *stat, int flags)
+{
+	int err = 0;
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+	struct inode *inode = d->d_inode;
+#endif  
+#ifdef MY_ABC_HERE
+	if (flags & SYNOST_ARCHIVE_BIT) {
+		stat->syno_archive_bit = inode->i_archive_bit;
+	}
+#endif  
+
+#ifdef MY_ABC_HERE
+	if (flags & SYNOST_ARCHIVE_VER) {
+		err = ext4_syno_get_archive_ver(d, &stat->syno_archive_version);
+	}
+#endif  
+
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+	if (flags & SYNOST_CREATE_TIME) {
+		stat->syno_create_time = inode->i_create_time;
+	}
+#endif  
+
+	return err;
+}
+#endif  
+
+#ifdef MY_ABC_HERE
+int ext4_syno_set_archive_ver(struct dentry *dentry, u32 version)
+{
+	struct inode *inode = dentry->d_inode;
+	struct syno_xattr_archive_version value;
+	int err;
+
+	value.v_magic = cpu_to_le16(0x2552);
+	value.v_struct_version = cpu_to_le16(1);
+	value.v_archive_version = cpu_to_le32(version);
+
+	err = ext4_xattr_set(inode, EXT4_XATTR_INDEX_SYNO, XATTR_SYNO_ARCHIVE_VERSION,
+			             &value, sizeof(value), 0);
+	if (!err) {
+		inode->i_archive_version = version;
+		inode->i_flags |= S_ARCHIVE_VERSION_CACHED;
+	}
+	return err;
+}
+#ifdef MY_ABC_HERE
+static int ext3_syno_get_archive_ver(struct dentry *dentry, u32 *version)
+{
+	struct inode *inode = dentry->d_inode;
+	struct syno_xattr_archive_version value;
+	int err;
+	u32 archive_version = 0;
+	u32 archive_version_bad = 0;
+
+	err = ext4_xattr_get(inode, EXT3_XATTR_INDEX_SYNO_BAD, XATTR_SYNO_ARCHIVE_VERSION,
+						 &value, sizeof(value));
+	if (0 < err) {
+		archive_version_bad = le32_to_cpu(value.v_archive_version);
+	}
+
+	err = ext4_xattr_get(inode, EXT4_XATTR_INDEX_SYNO, XATTR_SYNO_ARCHIVE_VERSION,
+						 &value, sizeof(value));
+	if (0 < err) {
+		archive_version = le32_to_cpu(value.v_archive_version);
+	} else if (-ENODATA == err) {
+		archive_version = 0;
+	} else {
+		*version = 0;
+		return err;
+	}
+
+	inode->i_archive_version = (archive_version_bad > archive_version) ?
+								archive_version_bad : archive_version;
+	*version = inode->i_archive_version;
+	inode->i_flags |= S_ARCHIVE_VERSION_CACHED;
+	return 0;
+}
+#endif  
+int ext4_syno_get_archive_ver(struct dentry *dentry, u32 *version)
+{
+	struct inode *inode = dentry->d_inode;
+	struct syno_xattr_archive_version value;
+	int err;
+
+	if (IS_ARCHIVE_VERSION_CACHED(inode)) {
+		*version = inode->i_archive_version;
+		return 0;
+	}
+
+#ifdef MY_ABC_HERE
+	if (ext4_is_ext3_sb(inode->i_sb)) {
+		return ext3_syno_get_archive_ver(dentry, version);
+	}
+#endif  
+
+	err = ext4_xattr_get(inode, EXT4_XATTR_INDEX_SYNO, XATTR_SYNO_ARCHIVE_VERSION,
+			             &value, sizeof(value));
+	if (0 < err) {
+		inode->i_archive_version = le32_to_cpu(value.v_archive_version);
+	} else if (-ENODATA == err) {
+		inode->i_archive_version = 0;
+	} else {
+		*version = 0;
+		return err;
+	}
+	*version = inode->i_archive_version;
+	inode->i_flags |= S_ARCHIVE_VERSION_CACHED;
+	return 0;
+}
+#endif  
 
 static int ext4_index_trans_blocks(struct inode *inode, int lblocks,
 				   int pextents)

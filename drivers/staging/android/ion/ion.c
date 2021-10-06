@@ -40,6 +40,9 @@
 #include "ion.h"
 #include "ion_priv.h"
 #include "compat_ion.h"
+#if defined(CONFIG_ION_RTK_PHOENIX)
+#include "../uapi/rtk_phoenix_ion.h"
+#endif
 
 /**
  * struct ion_device - the metadata of the ion device node
@@ -1025,6 +1028,17 @@ static int ion_mmap(struct dma_buf *dmabuf, struct vm_area_struct *vma)
 		return 0;
 	}
 
+#if defined(CONFIG_ION_RTK_PHOENIX)
+#if 0
+    if (    buffer->heap->type == RTK_PHOENIX_ION_HEAP_TYPE_MEDIA ||
+            buffer->heap->type == RTK_PHOENIX_ION_HEAP_TYPE_AUDIO ||
+            buffer->heap->type == RTK_PHOENIX_ION_HEAP_TYPE_TILER)
+#else
+    if (buffer->flags & ION_FLAG_NONCACHED)
+#endif
+		vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot);
+    else
+#endif
 	if (!(buffer->flags & ION_FLAG_CACHED))
 		vma->vm_page_prot = pgprot_writecombine(vma->vm_page_prot);
 
@@ -1059,8 +1073,7 @@ static void ion_dma_buf_kunmap(struct dma_buf *dmabuf, unsigned long offset,
 {
 }
 
-static int ion_dma_buf_begin_cpu_access(struct dma_buf *dmabuf, size_t start,
-					size_t len,
+static int ion_dma_buf_begin_cpu_access(struct dma_buf *dmabuf,
 					enum dma_data_direction direction)
 {
 	struct ion_buffer *buffer = dmabuf->priv;
@@ -1078,15 +1091,16 @@ static int ion_dma_buf_begin_cpu_access(struct dma_buf *dmabuf, size_t start,
 	return PTR_ERR_OR_ZERO(vaddr);
 }
 
-static void ion_dma_buf_end_cpu_access(struct dma_buf *dmabuf, size_t start,
-				       size_t len,
-				       enum dma_data_direction direction)
+static int ion_dma_buf_end_cpu_access(struct dma_buf *dmabuf,
+				      enum dma_data_direction direction)
 {
 	struct ion_buffer *buffer = dmabuf->priv;
 
 	mutex_lock(&buffer->lock);
 	ion_buffer_kmap_put(buffer);
 	mutex_unlock(&buffer->lock);
+
+	return 0;
 }
 
 static struct dma_buf_ops dma_buf_ops = {
@@ -1251,6 +1265,9 @@ static long ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		struct ion_allocation_data allocation;
 		struct ion_handle_data handle;
 		struct ion_custom_data custom;
+#if defined(CONFIG_ION_RTK_PHOENIX)
+		struct ion_phys_data phys;
+#endif
 	} data;
 
 	dir = ion_ioctl_dir(cmd);
@@ -1290,6 +1307,37 @@ static long ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		ion_handle_put(handle);
 		break;
 	}
+#if defined(CONFIG_ION_RTK_PHOENIX)
+#if 1   //20130208 charleslin: add ioctl to get physical address
+	case ION_IOC_PHYS:
+	{
+		bool valid;
+		int ret;
+		ion_phys_addr_t addr;
+		size_t len;
+
+		if (copy_from_user(&data, (void __user *)arg, sizeof(data)))
+			return -EFAULT;
+
+		struct ion_handle *handle;
+
+		handle = ion_handle_get_by_id(client, data.phys.handle);
+		if (IS_ERR(handle))
+			return PTR_ERR(handle);
+		ret = ion_phys(client, handle, &addr, &len);
+
+		ion_handle_put(handle);
+		pr_debug("%s: addr:%lx len:%x\n", __func__, addr, len);
+		data.phys.addr = addr;
+		data.phys.len = len;
+		if(ret != 0)
+			return ret;
+		if (copy_to_user((void __user *)arg, &data.phys, sizeof(data.phys)))
+			return -EFAULT;
+		break;
+	}
+#endif
+#endif
 	case ION_IOC_SHARE:
 	case ION_IOC_MAP:
 	{

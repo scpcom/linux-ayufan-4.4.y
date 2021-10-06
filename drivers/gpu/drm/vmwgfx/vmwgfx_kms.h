@@ -181,16 +181,15 @@ struct vmw_display_unit {
 #define vmw_connector_to_du(x) \
 	container_of(x, struct vmw_display_unit, connector)
 
-
 /*
  * Shared display unit functions - vmwgfx_kms.c
  */
 void vmw_du_cleanup(struct vmw_display_unit *du);
 void vmw_du_crtc_save(struct drm_crtc *crtc);
 void vmw_du_crtc_restore(struct drm_crtc *crtc);
-void vmw_du_crtc_gamma_set(struct drm_crtc *crtc,
+int vmw_du_crtc_gamma_set(struct drm_crtc *crtc,
 			   u16 *r, u16 *g, u16 *b,
-			   uint32_t start, uint32_t size);
+			   uint32_t size);
 int vmw_du_crtc_cursor_set2(struct drm_crtc *crtc, struct drm_file *file_priv,
 			    uint32_t handle, uint32_t width, uint32_t height,
 			    int32_t hot_x, int32_t hot_y);

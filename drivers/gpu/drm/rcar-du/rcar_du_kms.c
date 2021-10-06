@@ -136,7 +136,7 @@ int rcar_du_dumb_create(struct drm_file *file, struct drm_device *dev,
 
 static struct drm_framebuffer *
 rcar_du_fb_create(struct drm_device *dev, struct drm_file *file_priv,
-		  struct drm_mode_fb_cmd2 *mode_cmd)
+		  const struct drm_mode_fb_cmd2 *mode_cmd)
 {
 	struct rcar_du_device *rcdu = dev->dev_private;
 	const struct rcar_du_format_info *format;
@@ -525,7 +525,7 @@ static int rcar_du_atomic_commit(struct drm_device *dev,
 	}
 
 	/* Swap the state, this is the point of no return. */
-	drm_atomic_helper_swap_state(dev, state);
+	drm_atomic_helper_swap_state(state, true);
 
 	if (async)
 		schedule_work(&commit->work);

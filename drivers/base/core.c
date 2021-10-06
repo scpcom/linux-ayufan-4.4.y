@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/device.h>
 #include <linux/err.h>
 #include <linux/fwnode.h>
@@ -280,6 +282,12 @@ static int dev_uevent(struct kset *kset, struct kobject *kobj,
 			kfree(tmp);
 		}
 	}
+#ifdef MY_ABC_HERE
+	 
+	else {
+		add_uevent_var(env, "DEVNAME=%s", dev_name(dev));
+	}
+#endif  
 
 	if (dev->type && dev->type->name)
 		add_uevent_var(env, "DEVTYPE=%s", dev->type->name);
@@ -287,10 +295,38 @@ static int dev_uevent(struct kset *kset, struct kobject *kobj,
 	if (dev->driver)
 		add_uevent_var(env, "DRIVER=%s", dev->driver->name);
 
-	
+#if defined(CONFIG_SYSFS_DEPRECATED) || defined(MY_ABC_HERE)
+	if (dev->class) {
+		struct device *parent = dev->parent;
+
+		while (parent && !parent->bus)
+			parent = parent->parent;
+		if (parent && parent->bus) {
+			const char *path;
+
+			path = kobject_get_path(&parent->kobj, GFP_KERNEL);
+			if (path) {
+				add_uevent_var(env, "PHYSDEVPATH=%s", path);
+				kfree(path);
+			}
+
+			add_uevent_var(env, "PHYSDEVBUS=%s", parent->bus->name);
+
+			if (parent->driver)
+				add_uevent_var(env, "PHYSDEVDRIVER=%s",
+								 parent->driver->name);
+		}
+	} else if (dev->bus) {
+		add_uevent_var(env, "PHYSDEVBUS=%s", dev->bus->name);
+
+		if (dev->driver)
+			add_uevent_var(env, "PHYSDEVDRIVER=%s",
+							 dev->driver->name);
+	}
+#endif  
+
 	of_device_uevent(dev, env);
 
-	
 	if (dev->bus && dev->bus->uevent) {
 		retval = dev->bus->uevent(dev, env);
 		if (retval)

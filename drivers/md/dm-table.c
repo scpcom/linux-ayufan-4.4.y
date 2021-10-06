@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include "dm.h"
 
 #include <linux/module.h>
@@ -359,6 +361,35 @@ int dm_get_device(struct dm_target *ti, const char *path, fmode_t mode,
 }
 EXPORT_SYMBOL(dm_get_device);
 
+#ifdef MY_ABC_HERE
+int dm_handle_4kn_target_support(struct dm_target *ti, struct dm_dev *dev,
+			 sector_t start, sector_t len, void *data)
+{
+	struct queue_limits *limits = data;
+	struct block_device *bdev = dev->bdev;
+	struct request_queue *target_queue = bdev_get_queue(bdev);
+	char b[BDEVNAME_SIZE];
+	unsigned short logical_block_size = 0;
+
+	if (unlikely(!target_queue)) {
+		DMWARN("%s: requset_queue should not be NULL (%s)",
+		       dm_device_name(ti->table->md), bdevname(bdev, b));
+		return 0;
+	}
+
+	logical_block_size = target_queue->limits.logical_block_size;
+
+	if (4096 == logical_block_size) {
+		 
+		syno_limits_logical_block_size(limits, logical_block_size);
+	}
+
+	return 0;
+}
+
+EXPORT_SYMBOL_GPL(dm_handle_4kn_target_support);
+#endif  
+
 static int dm_set_device_limits(struct dm_target *ti, struct dm_dev *dev,
 				sector_t start, sector_t len, void *data)
 {
@@ -637,6 +668,12 @@ int dm_table_add_target(struct dm_table *t, const char *type,
 	if (!tgt->num_discard_bios && tgt->discards_supported)
 		DMWARN("%s: %s: ignoring discards_supported because num_discard_bios is zero.",
 		       dm_device_name(t->md), type);
+
+#ifdef MY_ABC_HERE
+	if (tgt->type->lvinfoset){
+		tgt->type->lvinfoset(tgt);
+	}
+#endif  
 
 	return 0;
 
@@ -1074,21 +1111,24 @@ int dm_calculate_queue_limits(struct dm_table *table,
 		if (!ti->type->iterate_devices)
 			goto combine_limits;
 
-		
 		ti->type->iterate_devices(ti, dm_set_device_limits,
 					  &ti_limits);
 
-		
 		if (ti->type->io_hints)
 			ti->type->io_hints(ti, &ti_limits);
 
-		
 		if (ti->type->iterate_devices(ti, device_area_is_invalid,
 					      &ti_limits))
 			return -EINVAL;
 
 combine_limits:
-		
+#ifdef MY_ABC_HERE
+		if (ti->type->handle_4kn_target_support) {
+			ti->type->handle_4kn_target_support(ti, dm_handle_4kn_target_support,
+						  &ti_limits);
+		}
+#endif  
+		 
 		if (blk_stack_limits(limits, &ti_limits, 0) < 0)
 			DMWARN("%s: adding target device "
 			       "(start sect %llu len %llu) "

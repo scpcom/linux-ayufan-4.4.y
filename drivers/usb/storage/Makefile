@@ -8,6 +8,7 @@
 ccflags-y := -Idrivers/scsi
 
 obj-$(CONFIG_USB_UAS)		+= uas.o
+obj-$(CONFIG_USB_ETRON_UAS)		+= etuas.o
 obj-$(CONFIG_USB_STORAGE)	+= usb-storage.o
 
 usb-storage-y := scsiglue.o protocol.o transport.o usb.o

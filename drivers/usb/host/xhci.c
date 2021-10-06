@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/pci.h>
 #include <linux/irq.h>
 #include <linux/log2.h>
@@ -116,7 +118,10 @@ int xhci_reset(struct xhci_hcd *xhci)
 	command |= CMD_RESET;
 	writel(command, &xhci->op_regs->command);
 
-	
+#ifdef MY_DEF_HERE
+	mdelay(100);
+#endif
+
 	if (xhci->quirks & XHCI_INTEL_HOST)
 		udelay(1000);
 
@@ -127,7 +132,11 @@ int xhci_reset(struct xhci_hcd *xhci)
 
 	xhci_dbg_trace(xhci, trace_xhci_dbg_init,
 			 "Wait for controller to be ready for doorbell rings");
-	
+
+#ifdef MY_DEF_HERE
+	mdelay(100);
+#endif
+
 	ret = xhci_handshake(&xhci->op_regs->status,
 			STS_CNR, 0, 10 * 1000 * 1000);
 
@@ -441,8 +450,14 @@ int xhci_init(struct usb_hcd *hcd)
 	return retval;
 }
 
+#ifdef MY_ABC_HERE
+extern int gSynoFactoryUSB3Disable;
+#endif  
 
-
+#ifdef MY_ABC_HERE
+extern int gSynoFactoryUSBFastReset;
+extern unsigned int blk_timeout_factory;  
+#endif  
 
 static int xhci_run_finished(struct xhci_hcd *xhci)
 {
@@ -458,9 +473,22 @@ static int xhci_run_finished(struct xhci_hcd *xhci)
 
 	xhci_dbg_trace(xhci, trace_xhci_dbg_init,
 			"Finished xhci_run for USB3 roothub");
+
+#ifdef MY_ABC_HERE
+	if (1 == gSynoFactoryUSB3Disable) {
+		printk("xhci USB3 ports are disabled!\n");
+	}
+#endif  
+
+#ifdef MY_ABC_HERE
+	if (1 == gSynoFactoryUSBFastReset) {
+		printk("USB_FAST_RESET enabled!\n");
+		blk_timeout_factory = 1;
+	}
+#endif  
+
 	return 0;
 }
-
 
 int xhci_run(struct usb_hcd *hcd)
 {
@@ -578,8 +606,14 @@ void xhci_stop(struct usb_hcd *hcd)
 			"xhci_stop completed - status = %x",
 			readl(&xhci->op_regs->status));
 	mutex_unlock(&xhci->mutex);
-}
 
+#ifdef MY_ABC_HERE
+	if (1 == gSynoFactoryUSBFastReset) {
+		printk("USB_FAST_RESET disabled!\n");
+		blk_timeout_factory = 0;
+	}
+#endif  
+}
 
 void xhci_shutdown(struct usb_hcd *hcd)
 {
@@ -1130,6 +1164,13 @@ int xhci_urb_enqueue(struct usb_hcd *hcd, struct urb *urb, gfp_t mem_flags)
 					"not having streams.\n");
 			ret = -EINVAL;
 		} else {
+#ifdef MY_DEF_HERE
+			if (xhci->devs[slot_id]->disconnected) {
+					xhci_warn(xhci, "Ignore URB enqueuing while device "
+									"is disconnecting\n");
+					ret = -ENOTCONN;
+			} else
+#endif  
 			ret = xhci_queue_bulk_tx(xhci, GFP_ATOMIC, urb,
 					slot_id, ep_index);
 		}

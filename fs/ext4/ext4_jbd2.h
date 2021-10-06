@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #ifndef _EXT4_JBD2_H
 #define _EXT4_JBD2_H
 
@@ -71,20 +73,21 @@ static inline int ext4_jbd2_credits_xattr(struct inode *inode)
 #define EXT4_HT_MOVE_EXTENTS     9
 #define EXT4_HT_XATTR           10
 #define EXT4_HT_EXT_CONVERT     11
+#if defined(MY_ABC_HERE)
+#define EXT4_HT_SYNO            12
+#define EXT4_HT_MAX             13
+#else
 #define EXT4_HT_MAX             12
-
+#endif  
 
 struct ext4_journal_cb_entry {
-	
+	 
 	struct list_head jce_list;
 
-	
 	void (*jce_func)(struct super_block *sb,
 			 struct ext4_journal_cb_entry *jce, int error);
 
-	
 };
-
 
 static inline void ext4_journal_callback_add(handle_t *handle,
 			void (*func)(struct super_block *sb,

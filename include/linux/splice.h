@@ -41,6 +41,15 @@ struct splice_desc {
 	bool need_wakeup;		/* need to wake up writer */
 };
 
+#if defined(CONFIG_SENDFILE_PATCH)
+struct recvfile_ctl_blk {
+	struct page *rv_page;
+	loff_t rv_pos;
+	size_t rv_count;
+	void *rv_fsdata;
+};
+#endif
+
 struct partial_page {
 	unsigned int offset;
 	unsigned int len;
@@ -83,4 +92,12 @@ extern void splice_shrink_spd(struct splice_pipe_desc *);
 extern void spd_release_page(struct splice_pipe_desc *, unsigned int);
 
 extern const struct pipe_buf_operations page_cache_pipe_buf_ops;
+
+#ifdef CONFIG_AUFS_FHSM
+extern long do_splice_from(struct pipe_inode_info *pipe, struct file *out,
+			   loff_t *ppos, size_t len, unsigned int flags);
+extern long do_splice_to(struct file *in, loff_t *ppos,
+			 struct pipe_inode_info *pipe, size_t len,
+			 unsigned int flags);
+#endif /* CONFIG_AUFS_FHSM */
 #endif

@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #ifndef _UAPI_LINUX_BTRFS_H
 #define _UAPI_LINUX_BTRFS_H
 #include <linux/types.h>
@@ -7,7 +9,7 @@
 
 #define BTRFS_IOCTL_MAGIC 0x94
 #define BTRFS_VOL_NAME_MAX 255
-
+#define BTRFS_LABEL_SIZE 256
 
 #define BTRFS_PATH_NAME_MAX 4087
 struct btrfs_ioctl_vol_args {
@@ -20,11 +22,19 @@ struct btrfs_ioctl_vol_args {
 #define BTRFS_SUBVOL_CREATE_ASYNC	(1ULL << 0)
 #define BTRFS_SUBVOL_RDONLY		(1ULL << 1)
 #define BTRFS_SUBVOL_QGROUP_INHERIT	(1ULL << 2)
+#ifdef MY_ABC_HERE
+#define BTRFS_SUBVOL_HIDE (1ULL << 32)
+#endif  
 #define BTRFS_FSID_SIZE 16
 #define BTRFS_UUID_SIZE 16
 #define BTRFS_UUID_UNPARSED_SIZE	37
 
-#define BTRFS_QGROUP_INHERIT_SET_LIMITS	(1ULL << 0)
+#define BTRFS_QGROUP_LIMIT_MAX_RFER	(1ULL << 0)
+#define BTRFS_QGROUP_LIMIT_MAX_EXCL	(1ULL << 1)
+#define BTRFS_QGROUP_LIMIT_RSV_RFER	(1ULL << 2)
+#define BTRFS_QGROUP_LIMIT_RSV_EXCL	(1ULL << 3)
+#define BTRFS_QGROUP_LIMIT_RFER_CMPR	(1ULL << 4)
+#define BTRFS_QGROUP_LIMIT_EXCL_CMPR	(1ULL << 5)
 
 struct btrfs_qgroup_limit {
 	__u64	flags;
@@ -33,6 +43,8 @@ struct btrfs_qgroup_limit {
 	__u64	rsv_rfer;
 	__u64	rsv_excl;
 };
+
+#define BTRFS_QGROUP_INHERIT_SET_LIMITS	(1ULL << 0)
 
 struct btrfs_qgroup_inherit {
 	__u64	flags;
@@ -123,36 +135,50 @@ struct btrfs_ioctl_dev_replace_status_params {
 #define BTRFS_IOCTL_DEV_REPLACE_RESULT_ALREADY_STARTED		2
 #define BTRFS_IOCTL_DEV_REPLACE_RESULT_SCRUB_INPROGRESS		3
 struct btrfs_ioctl_dev_replace_args {
-	__u64 cmd;	
-	__u64 result;	
+	__u64 cmd;	 
+	__u64 result;	 
 
 	union {
 		struct btrfs_ioctl_dev_replace_start_params start;
 		struct btrfs_ioctl_dev_replace_status_params status;
-	};	
+	};	 
 
 	__u64 spare[64];
 };
 
 struct btrfs_ioctl_dev_info_args {
-	__u64 devid;				
-	__u8 uuid[BTRFS_UUID_SIZE];		
-	__u64 bytes_used;			
-	__u64 total_bytes;			
-	__u64 unused[379];			
-	__u8 path[BTRFS_DEVICE_PATH_NAME_MAX];	
+	__u64 devid;				 
+	__u8 uuid[BTRFS_UUID_SIZE];		 
+	__u64 bytes_used;			 
+	__u64 total_bytes;			 
+	__u64 unused[379];			 
+	__u8 path[BTRFS_DEVICE_PATH_NAME_MAX];	 
 };
 
 struct btrfs_ioctl_fs_info_args {
-	__u64 max_id;				
-	__u64 num_devices;			
-	__u8 fsid[BTRFS_FSID_SIZE];		
-	__u32 nodesize;				
-	__u32 sectorsize;			
-	__u32 clone_alignment;			
+	__u64 max_id;				 
+	__u64 num_devices;			 
+	__u8 fsid[BTRFS_FSID_SIZE];		 
+	__u32 nodesize;				 
+	__u32 sectorsize;			 
+	__u32 clone_alignment;			 
 	__u32 reserved32;
-	__u64 reserved[122];			
+	__u64 reserved[122];			 
 };
+
+#define BTRFS_FEATURE_INCOMPAT_MIXED_BACKREF	(1ULL << 0)
+#define BTRFS_FEATURE_INCOMPAT_DEFAULT_SUBVOL	(1ULL << 1)
+#define BTRFS_FEATURE_INCOMPAT_MIXED_GROUPS	(1ULL << 2)
+#define BTRFS_FEATURE_INCOMPAT_COMPRESS_LZO	(1ULL << 3)
+ 
+#define BTRFS_FEATURE_INCOMPAT_COMPRESS_LZOv2	(1ULL << 4)
+
+#define BTRFS_FEATURE_INCOMPAT_BIG_METADATA	(1ULL << 5)
+
+#define BTRFS_FEATURE_INCOMPAT_EXTENDED_IREF	(1ULL << 6)
+#define BTRFS_FEATURE_INCOMPAT_RAID56		(1ULL << 7)
+#define BTRFS_FEATURE_INCOMPAT_SKINNY_METADATA	(1ULL << 8)
+#define BTRFS_FEATURE_INCOMPAT_NO_HOLES		(1ULL << 9)
 
 struct btrfs_ioctl_feature_flags {
 	__u64 compat_flags;
@@ -160,10 +186,8 @@ struct btrfs_ioctl_feature_flags {
 	__u64 incompat_flags;
 };
 
-
 #define BTRFS_BALANCE_CTL_PAUSE		1
 #define BTRFS_BALANCE_CTL_CANCEL	2
-
 
 struct btrfs_balance_args {
 	__u64 profiles;
@@ -184,44 +208,76 @@ struct btrfs_balance_args {
 
 	__u64 flags;
 
-	
 	union {
-		__u64 limit;		
+		__u64 limit;		 
 		struct {
 			__u32 limit_min;
 			__u32 limit_max;
 		};
 	};
 
-	
 	__le32 stripes_min;
 	__le32 stripes_max;
 
 	__u64 unused[6];
 } __attribute__ ((__packed__));
 
-
 struct btrfs_balance_progress {
-	__u64 expected;		
-	__u64 considered;	
-	__u64 completed;	
+	__u64 expected;		 
+	__u64 considered;	 
+	__u64 completed;	 
 };
+
+#define BTRFS_BALANCE_DATA		(1ULL << 0)
+#define BTRFS_BALANCE_SYSTEM		(1ULL << 1)
+#define BTRFS_BALANCE_METADATA		(1ULL << 2)
+
+#define BTRFS_BALANCE_TYPE_MASK		(BTRFS_BALANCE_DATA |	    \
+					 BTRFS_BALANCE_SYSTEM |	    \
+					 BTRFS_BALANCE_METADATA)
+
+#define BTRFS_BALANCE_FORCE		(1ULL << 3)
+#define BTRFS_BALANCE_RESUME		(1ULL << 4)
+
+#define BTRFS_BALANCE_ARGS_PROFILES	(1ULL << 0)
+#define BTRFS_BALANCE_ARGS_USAGE	(1ULL << 1)
+#define BTRFS_BALANCE_ARGS_DEVID	(1ULL << 2)
+#define BTRFS_BALANCE_ARGS_DRANGE	(1ULL << 3)
+#define BTRFS_BALANCE_ARGS_VRANGE	(1ULL << 4)
+#define BTRFS_BALANCE_ARGS_LIMIT	(1ULL << 5)
+#define BTRFS_BALANCE_ARGS_LIMIT_RANGE	(1ULL << 6)
+#define BTRFS_BALANCE_ARGS_STRIPES_RANGE (1ULL << 7)
+#define BTRFS_BALANCE_ARGS_USAGE_RANGE	(1ULL << 10)
+
+#define BTRFS_BALANCE_ARGS_MASK			\
+	(BTRFS_BALANCE_ARGS_PROFILES |		\
+	 BTRFS_BALANCE_ARGS_USAGE |		\
+	 BTRFS_BALANCE_ARGS_DEVID | 		\
+	 BTRFS_BALANCE_ARGS_DRANGE |		\
+	 BTRFS_BALANCE_ARGS_VRANGE |		\
+	 BTRFS_BALANCE_ARGS_LIMIT |		\
+	 BTRFS_BALANCE_ARGS_LIMIT_RANGE |	\
+	 BTRFS_BALANCE_ARGS_STRIPES_RANGE |	\
+	 BTRFS_BALANCE_ARGS_USAGE_RANGE)
+
+#define BTRFS_BALANCE_ARGS_CONVERT	(1ULL << 8)
+#define BTRFS_BALANCE_ARGS_SOFT		(1ULL << 9)
 
 #define BTRFS_BALANCE_STATE_RUNNING	(1ULL << 0)
 #define BTRFS_BALANCE_STATE_PAUSE_REQ	(1ULL << 1)
 #define BTRFS_BALANCE_STATE_CANCEL_REQ	(1ULL << 2)
 
 struct btrfs_ioctl_balance_args {
-	__u64 flags;				
-	__u64 state;				
+	__u64 flags;				 
+	__u64 state;				 
 
-	struct btrfs_balance_args data;		
-	struct btrfs_balance_args meta;		
-	struct btrfs_balance_args sys;		
+	struct btrfs_balance_args data;		 
+	struct btrfs_balance_args meta;		 
+	struct btrfs_balance_args sys;		 
 
-	struct btrfs_balance_progress stat;	
+	struct btrfs_balance_progress stat;	 
 
-	__u64 unused[72];			
+	__u64 unused[72];			 
 };
 
 #define BTRFS_INO_LOOKUP_PATH_MAX 4080
@@ -284,25 +340,51 @@ struct btrfs_ioctl_clone_range_args {
   __u64 dest_offset;
 };
 
-
 #define BTRFS_DEFRAG_RANGE_COMPRESS 1
 #define BTRFS_DEFRAG_RANGE_START_IO 2
+#ifdef MY_ABC_HERE
+#define BTRFS_DEFRAG_RANGE_SYNO_DEFRAG (1ULL << 2)
+#endif  
+struct btrfs_ioctl_defrag_range_args {
+	 
+	__u64 start;
+
+	__u64 len;
+
+	__u64 flags;
+
+	__u32 extent_thresh;
+
+	__u32 compress_type;
+
+#ifdef MY_ABC_HERE
+	 
+	__u16 syno_thresh;
+	 
+	__u8 syno_ratio_denom;
+	__u8 syno_ratio_nom;
+	__u32 unused[3];
+#else
+	 
+	__u32 unused[4];
+#endif  
+};
 
 #define BTRFS_SAME_DATA_DIFFERS	1
-
+ 
 struct btrfs_ioctl_same_extent_info {
-	__s64 fd;		
-	__u64 logical_offset;	
-	__u64 bytes_deduped;	
-	
-	__s32 status;		
+	__s64 fd;		 
+	__u64 logical_offset;	 
+	__u64 bytes_deduped;	 
+	 
+	__s32 status;		 
 	__u32 reserved;
 };
 
 struct btrfs_ioctl_same_args {
-	__u64 logical_offset;	
-	__u64 length;		
-	__u16 dest_count;	
+	__u64 logical_offset;	 
+	__u64 length;		 
+	__u16 dest_count;	 
 	__u16 reserved1;
 	__u32 reserved2;
 	struct btrfs_ioctl_same_extent_info info[0];
@@ -392,44 +474,130 @@ struct btrfs_ioctl_qgroup_create_args {
 	__u64 create;
 	__u64 qgroupid;
 };
+
+#ifdef MY_ABC_HERE
+struct btrfs_ioctl_qgroup_query_args {
+	 
+	__u64 rfer;
+	__u64 rfer_cmpr;
+	__u64 excl;
+	__u64 excl_cmpr;
+
+	__u64 max_rfer;
+	__u64 max_excl;
+	__u64 rsv_rfer;
+	__u64 rsv_excl;
+
+	__u64 reserved;
+};
+#endif  
+
 struct btrfs_ioctl_timespec {
 	__u64 sec;
 	__u32 nsec;
 };
 
 struct btrfs_ioctl_received_subvol_args {
-	char	uuid[BTRFS_UUID_SIZE];	
-	__u64	stransid;		
-	__u64	rtransid;		
-	struct btrfs_ioctl_timespec stime; 
-	struct btrfs_ioctl_timespec rtime; 
-	__u64	flags;			
-	__u64	reserved[16];		
+	char	uuid[BTRFS_UUID_SIZE];	 
+	__u64	stransid;		 
+	__u64	rtransid;		 
+	struct btrfs_ioctl_timespec stime;  
+	struct btrfs_ioctl_timespec rtime;  
+	__u64	flags;			 
+#ifdef MY_ABC_HERE
+	struct btrfs_ioctl_timespec otime;  
+	__u64	reserved[14];		 
+#else
+	__u64	reserved[16];		 
+#endif  
 };
 
+#ifdef MY_ABC_HERE
+struct btrfs_ioctl_subvol_info_args {
+	 
+	__u64 root_id;
+	 
+	__u64 flags;
+	 
+	__u64 gen;
+	 
+	__u64 ogen;
+	__u8 uuid[BTRFS_UUID_SIZE];
+	__u8 puuid[BTRFS_UUID_SIZE];
+	__u8 ruuid[BTRFS_UUID_SIZE];
+};
+#endif  
+
+#ifdef MY_ABC_HERE
+struct btrfs_ioctl_snapshot_size_query_args {
+	__u64 snap_count;
+	__s64 fd;
+	__u64 __user *snap_id;
+	__u64 calc_size;
+};
+#endif  
 
 #define BTRFS_SEND_FLAG_NO_FILE_DATA		0x1
 
-
 #define BTRFS_SEND_FLAG_OMIT_STREAM_HEADER	0x2
 
-
 #define BTRFS_SEND_FLAG_OMIT_END_CMD		0x4
+
+#ifdef MY_ABC_HERE
+ 
+#define BTRFS_SEND_FLAG_CALCULATE_DATA_SIZE    0x8
 
 #define BTRFS_SEND_FLAG_MASK \
 	(BTRFS_SEND_FLAG_NO_FILE_DATA | \
 	 BTRFS_SEND_FLAG_OMIT_STREAM_HEADER | \
+	 BTRFS_SEND_FLAG_OMIT_END_CMD | \
+	 BTRFS_SEND_FLAG_CALCULATE_DATA_SIZE)
+#else
+#define BTRFS_SEND_FLAG_MASK \
+	(BTRFS_SEND_FLAG_NO_FILE_DATA | \
+	 BTRFS_SEND_FLAG_OMIT_STREAM_HEADER | \
 	 BTRFS_SEND_FLAG_OMIT_END_CMD)
+#endif  
 
 struct btrfs_ioctl_send_args {
-	__s64 send_fd;			
-	__u64 clone_sources_count;	
-	__u64 __user *clone_sources;	
-	__u64 parent_root;		
-	__u64 flags;			
-	__u64 reserved[4];		
+	__s64 send_fd;			 
+	__u64 clone_sources_count;	 
+	__u64 __user *clone_sources;	 
+	__u64 parent_root;		 
+	__u64 flags;			 
+#ifdef MY_ABC_HERE
+	__u64 total_data_size;    
+	__u32 g_verbose;
+#endif  
+#ifdef MY_ABC_HERE
+	__u64 skip_cmd_count;
+#endif  
+
+#if defined(MY_ABC_HERE) && defined(MY_ABC_HERE)
+	__u32 reserved_u32;
+	__u64 reserved[1];		 
+#elif defined(MY_ABC_HERE)
+	__u32 reserved_u32;
+	__u64 reserved[2];		 
+#elif defined(MY_ABC_HERE)
+	__u64 reserved[3];		 
+#else
+	__u64 reserved[4];		 
+#endif  
 };
 
+#ifdef MY_ABC_HERE
+ 
+#define BTRFS_COMPR_CTL_SET			0x1
+#define BTRFS_COMPR_CTL_COMPR_FL	0x2
+
+struct btrfs_ioctl_compr_ctl_args {
+	__u64	flags;				 
+	__u64	size;				 
+	__u64	compressed_size;	 
+	__u64	reserved[1];
+};
+#endif  
 
 enum btrfs_err_code {
 	BTRFS_ERROR_DEV_RAID1_MIN_NOT_MET = 1,
@@ -567,4 +735,24 @@ static inline char *btrfs_err_str(enum btrfs_err_code err_code)
 #define BTRFS_IOC_GET_SUPPORTED_FEATURES _IOR(BTRFS_IOCTL_MAGIC, 57, \
 				   struct btrfs_ioctl_feature_flags[3])
 
-#endif 
+#ifdef MY_ABC_HERE
+#define BTRFS_IOC_SNAPSHOT_SIZE_QUERY _IOWR(BTRFS_IOCTL_MAGIC, 247, \
+				   struct btrfs_ioctl_snapshot_size_query_args)
+#endif  
+
+#ifdef MY_ABC_HERE
+#define BTRFS_IOC_COMPR_CTL _IOR(BTRFS_IOCTL_MAGIC, 248, \
+									struct btrfs_ioctl_compr_ctl_args)
+#endif  
+
+#ifdef MY_ABC_HERE
+#define BTRFS_IOC_SUBVOL_GETINFO _IOR(BTRFS_IOCTL_MAGIC, 249, \
+				   struct btrfs_ioctl_subvol_info_args)
+#endif  
+
+#ifdef MY_ABC_HERE
+#define BTRFS_IOC_QGROUP_QUERY _IOR(BTRFS_IOCTL_MAGIC, 253, \
+                                    struct btrfs_ioctl_qgroup_query_args)
+#endif  
+
+#endif  

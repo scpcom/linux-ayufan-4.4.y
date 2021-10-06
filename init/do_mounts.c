@@ -1,4 +1,7 @@
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #ifdef __CHECKER__
 #undef __CHECKER__
 #warning "Sparse checking disabled for this file"
@@ -330,10 +333,39 @@ void __init mount_block_root(char *name, int flags)
 	const char *b = name;
 #endif
 
+#ifdef MY_ABC_HERE
+	char *mnt_opts = NULL;
+	size_t len;
+
+	if (!strcmp(name, "/dev/root")) {
+		if (root_mount_data) {
+			len = 1 + strlen(root_mount_data);
+			len += strlen("barrier=1,");
+			mnt_opts = kmalloc(len, GFP_KERNEL);
+			if (mnt_opts) {
+				strcpy(mnt_opts, "barrier=1,");
+				strcat(mnt_opts, root_mount_data);
+			}
+		} else {
+			len = 1 + strlen("barrier=1");
+			mnt_opts = kmalloc(len, GFP_KERNEL);
+			if (mnt_opts) {
+				strcpy(mnt_opts, "barrier=1");
+			}
+		}
+	} else {
+		mnt_opts = root_mount_data;
+	}
+#endif  
+
 	get_fs_names(fs_names);
 retry:
 	for (p = fs_names; *p; p += strlen(p)+1) {
+#ifdef MY_ABC_HERE
+		int err = do_mount_root(name, p, flags, mnt_opts);
+#else
 		int err = do_mount_root(name, p, flags, root_mount_data);
+#endif  
 		switch (err) {
 			case 0:
 				goto out;
@@ -372,6 +404,9 @@ retry:
 #endif
 	panic("VFS: Unable to mount root fs on %s", b);
 out:
+#ifdef MY_ABC_HERE
+	kfree(mnt_opts);
+#endif  
 	put_page(page);
 }
  

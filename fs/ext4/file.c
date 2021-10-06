@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/time.h>
 #include <linux/fs.h>
 #include <linux/mount.h>
@@ -77,12 +79,11 @@ ext4_file_write_iter(struct kiocb *iocb, struct iov_iter *from)
 		ext4_unwritten_wait(inode);
 	}
 
-	mutex_lock(&inode->i_mutex);
+	inode_lock(inode);
 	ret = generic_write_checks(iocb, from);
 	if (ret <= 0)
 		goto out;
 
-	
 	if (!(ext4_test_inode_flag(inode, EXT4_INODE_EXTENTS))) {
 		struct ext4_sb_info *sbi = EXT4_SB(inode->i_sb);
 
@@ -111,14 +112,14 @@ ext4_file_write_iter(struct kiocb *iocb, struct iov_iter *from)
 			len = map.m_len;
 
 			err = ext4_map_blocks(NULL, inode, &map, 0);
-			
+			 
 			if (err == len && (map.m_flags & EXT4_MAP_MAPPED))
 				overwrite = 1;
 		}
 	}
 
 	ret = __generic_file_write_iter(iocb, from);
-	mutex_unlock(&inode->i_mutex);
+	inode_unlock(inode);
 
 	if (ret > 0) {
 		ssize_t err;
@@ -135,7 +136,7 @@ ext4_file_write_iter(struct kiocb *iocb, struct iov_iter *from)
 	return ret;
 
 out:
-	mutex_unlock(&inode->i_mutex);
+	inode_unlock(inode);
 	if (aio_mutex)
 		mutex_unlock(aio_mutex);
 	return ret;
@@ -471,11 +472,11 @@ static loff_t ext4_seek_data(struct file *file, loff_t offset, loff_t maxsize)
 	int blkbits;
 	int ret = 0;
 
-	mutex_lock(&inode->i_mutex);
+	inode_lock(inode);
 
 	isize = i_size_read(inode);
 	if (offset >= isize) {
-		mutex_unlock(&inode->i_mutex);
+		inode_unlock(inode);
 		return -ENXIO;
 	}
 
@@ -514,7 +515,7 @@ static loff_t ext4_seek_data(struct file *file, loff_t offset, loff_t maxsize)
 		dataoff = (loff_t)last << blkbits;
 	} while (last <= end);
 
-	mutex_unlock(&inode->i_mutex);
+	inode_unlock(inode);
 
 	if (dataoff > isize)
 		return -ENXIO;
@@ -532,11 +533,11 @@ static loff_t ext4_seek_hole(struct file *file, loff_t offset, loff_t maxsize)
 	int blkbits;
 	int ret = 0;
 
-	mutex_lock(&inode->i_mutex);
+	inode_lock(inode);
 
 	isize = i_size_read(inode);
 	if (offset >= isize) {
-		mutex_unlock(&inode->i_mutex);
+		inode_unlock(inode);
 		return -ENXIO;
 	}
 
@@ -574,11 +575,10 @@ static loff_t ext4_seek_hole(struct file *file, loff_t offset, loff_t maxsize)
 			}
 		}
 
-		
 		break;
 	} while (last <= end);
 
-	mutex_unlock(&inode->i_mutex);
+	inode_unlock(inode);
 
 	if (holeoff > isize)
 		holeoff = isize;
@@ -625,10 +625,20 @@ const struct file_operations ext4_file_operations = {
 	.fsync		= ext4_sync_file,
 	.splice_read	= generic_file_splice_read,
 	.splice_write	= iter_file_splice_write,
+#if defined(CONFIG_SENDFILE_PATCH)
+	.splice_from_socket = generic_splice_from_socket,
+#endif
 	.fallocate	= ext4_fallocate,
 };
 
 const struct inode_operations ext4_file_inode_operations = {
+#ifdef MY_ABC_HERE
+	.syno_getattr	= ext4_syno_getattr,
+#endif  
+#ifdef MY_ABC_HERE
+	.syno_get_archive_ver	= ext4_syno_get_archive_ver,
+	.syno_set_archive_ver	= ext4_syno_set_archive_ver,
+#endif  
 	.setattr	= ext4_setattr,
 	.getattr	= ext4_getattr,
 	.setxattr	= generic_setxattr,

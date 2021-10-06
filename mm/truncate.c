@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/kernel.h>
 #include <linux/backing-dev.h>
 #include <linux/gfp.h>
@@ -478,6 +480,20 @@ void truncate_setsize(struct inode *inode, loff_t newsize)
 }
 EXPORT_SYMBOL(truncate_setsize);
 
+#ifdef MY_ABC_HERE
+void ecryptfs_truncate_setsize(struct inode *inode, loff_t newsize)
+{
+	loff_t oldsize;
+
+	oldsize = inode->i_size;
+	i_size_write(inode, newsize);
+
+	if (oldsize > newsize) {
+		truncate_pagecache(inode, newsize);
+	}
+}
+EXPORT_SYMBOL(ecryptfs_truncate_setsize);
+#endif  
 
 void pagecache_isize_extended(struct inode *inode, loff_t from, loff_t to)
 {

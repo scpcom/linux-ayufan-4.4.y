@@ -1,7 +1,7 @@
-
-
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/poll.h>
 #include <linux/slab.h>
 #include <linux/module.h>
@@ -11,6 +11,9 @@
 #include <linux/hid.h>
 #include <linux/hiddev.h>
 #include <linux/compat.h>
+#ifdef MY_ABC_HERE
+#include <linux/string.h>
+#endif  
 #include <linux/vmalloc.h>
 #include "usbhid.h"
 
@@ -803,13 +806,53 @@ static struct usb_class_driver hiddev_class = {
 	.minor_base =	HIDDEV_MINOR_BASE,
 };
 
-
 int hiddev_connect(struct hid_device *hid, unsigned int force)
 {
 	struct hiddev *hiddev;
 	struct usbhid_device *usbhid = hid->driver_data;
 	int retval;
 
+#ifdef MY_ABC_HERE
+#define UPS_USAGE		0x840004
+#define POWER_USAGE		0x840020	 
+	int minor_offset = 8;
+	unsigned int i = 0;
+
+	if (!force) {
+		for (i = 0; i < hid->maxcollection; i++){
+			if (hid->collection[i].type == HID_COLLECTION_APPLICATION) {
+				if ((((hid->collection[i].usage & 0xffff) == 2) ||
+					 ((hid->collection[i].usage & 0xffff) == 6)) &&
+					!(hid->name && !memcmp(hid->name, "Raytac Corporation "
+							"Wireless USB Device (2.4G)", 45)) &&
+					!(hid->name && !memcmp(hid->name,
+							"Synology Incorporated", 21))) {
+					continue;
+				}
+				break;
+			}
+		}
+
+		if (i == hid->maxcollection)
+			return -1;
+	}
+
+	if ((hid->collection[i].usage & HID_USAGE_PAGE) == HID_UP_GENDESK &&
+		(((hid->collection[i].usage & 0xffff) == 2) ||
+		 ((hid->collection[i].usage & 0xffff) == 6)) &&
+		(hid->name && !memcmp(hid->name,
+				"Raytac Corporation Wireless USB Device (2.4G)", 45))) {
+		 
+		minor_offset = 5;
+	} else if (((hid->collection[i].usage & 0xffff) == 6) &&
+               (hid->name && !memcmp(hid->name, "Synology Incorporated", 21))) {
+		minor_offset = 5;
+	} else if (hid->collection[i].usage == UPS_USAGE ||
+		   hid->collection[i].usage == POWER_USAGE) {
+		 
+		minor_offset = 0;
+	}
+#else  
 	if (!force) {
 		unsigned int i;
 		for (i = 0; i < hid->maxcollection; i++)
@@ -821,6 +864,7 @@ int hiddev_connect(struct hid_device *hid, unsigned int force)
 		if (i == hid->maxcollection)
 			return -1;
 	}
+#endif  
 
 	if (!(hiddev = kzalloc(sizeof(struct hiddev), GFP_KERNEL)))
 		return -1;
@@ -832,7 +876,11 @@ int hiddev_connect(struct hid_device *hid, unsigned int force)
 	hid->hiddev = hiddev;
 	hiddev->hid = hid;
 	hiddev->exist = 1;
+#ifdef MY_ABC_HERE
+	retval = usb_register_dev1(usbhid->intf, &hiddev_class, minor_offset);
+#else  
 	retval = usb_register_dev(usbhid->intf, &hiddev_class);
+#endif  
 	if (retval) {
 		hid_err(hid, "Not able to get a minor for this device\n");
 		hid->hiddev = NULL;

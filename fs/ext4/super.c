@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/module.h>
 #include <linux/string.h>
 #include <linux/fs.h>
@@ -39,7 +41,6 @@
 
 static struct ext4_lazy_init *ext4_li_info;
 static struct mutex ext4_li_mtx;
-static int ext4_mballoc_ready;
 static struct ratelimit_state ext4_mount_msg_ratelimit;
 
 static int ext4_load_journal(struct super_block *, struct ext4_super_block *,
@@ -63,6 +64,16 @@ static int ext4_feature_set_ok(struct super_block *sb, int readonly);
 static void ext4_destroy_lazyinit_thread(void);
 static void ext4_unregister_li_request(struct super_block *sb);
 static void ext4_clear_request_list(void);
+
+#ifdef MY_ABC_HERE
+struct kmem_cache *ext4_syno_caseless_cachep;
+extern struct dentry_operations ext4_dentry_operations;
+
+spinlock_t ext4_namei_buf_lock;   
+spinlock_t ext4_hash_buf_lock;    
+static int ext4_namei_lock_init = 0;
+static int ext4_hash_lock_init = 0;
+#endif  
 
 #if !defined(CONFIG_EXT2_FS) && !defined(CONFIG_EXT2_FS_MODULE) && defined(CONFIG_EXT4_USE_FOR_EXT2)
 static struct file_system_type ext2_fs_type = {
@@ -89,6 +100,13 @@ static struct file_system_type ext3_fs_type = {
 MODULE_ALIAS_FS("ext3");
 MODULE_ALIAS("ext3");
 #define IS_EXT3_SB(sb) ((sb)->s_bdev->bd_holder == &ext3_fs_type)
+
+#ifdef MY_ABC_HERE
+int ext4_is_ext3_sb(struct super_block *sb)
+{
+	return IS_EXT3_SB(sb);
+}
+#endif  
 
 static int ext4_verify_csum_type(struct super_block *sb,
 				 struct ext4_super_block *es)
@@ -262,11 +280,39 @@ void ext4_itable_unused_set(struct super_block *sb,
 		bg->bg_itable_unused_hi = cpu_to_le16(count >> 16);
 }
 
+#ifdef MY_ABC_HERE
+int (*funcSYNOSendErrorFsEvent)(const unsigned char*, const unsigned int) = NULL;
+static void syno_auto_error_fs_report(const unsigned char* dsm_version, const unsigned int error_count)
+{
+	if (NULL == funcSYNOSendErrorFsEvent) {
+		printk(KERN_ERR "EXT4-fs error: Can't reference to function 'funcSYNOSendErrorFsEvent', DSM(%s), error count(%d)\n", dsm_version, error_count);
+		return;
+	}
+
+	funcSYNOSendErrorFsEvent(dsm_version, error_count);
+}
+EXPORT_SYMBOL(funcSYNOSendErrorFsEvent);
+
+static void
+syno_ext4_get_dsm_version(const unsigned char *version_name, char *dsm_version)
+{
+	char *p;
+	 
+	p = strchr(version_name, '-');
+	if (p) {
+		strcpy(dsm_version, p+1);
+	}
+}
+#endif  
 
 static void __save_error_info(struct super_block *sb, const char *func,
 			    unsigned int line)
 {
 	struct ext4_super_block *es = EXT4_SB(sb)->s_es;
+#ifdef MY_ABC_HERE
+	struct ext4_sb_info *sbi = EXT4_SB(sb);
+	char dsm_version[8] = {'\0'};
+#endif  
 
 	EXT4_SB(sb)->s_mount_state |= EXT4_ERROR_FS;
 	if (bdev_read_only(sb->s_bdev))
@@ -283,10 +329,25 @@ static void __save_error_info(struct super_block *sb, const char *func,
 		es->s_first_error_ino = es->s_last_error_ino;
 		es->s_first_error_block = es->s_last_error_block;
 	}
-	
+	 
 	if (!es->s_error_count)
 		mod_timer(&EXT4_SB(sb)->s_err_report, jiffies + 24*60*60*HZ);
 	le32_add_cpu(&es->s_error_count, 1);
+#ifdef MY_ABC_HERE
+	 
+	if ((0 != strcmp(es->s_last_mounted, "/"))
+			&& (0 == sbi->s_new_error_fs_event_flag)
+			&& (0 == sbi->s_last_notify_time ||
+			    time_after(jiffies, sbi->s_last_notify_time + 24*60*60*HZ))
+			&& (es->s_syno_hash_magic == cpu_to_le32(SYNO_HASH_MAGIC))) {
+		sbi->s_new_error_fs_event_flag = 1;
+		sbi->s_last_notify_time = jiffies;
+		syno_ext4_get_dsm_version(es->s_volume_name, dsm_version);
+		if ('\0' != dsm_version[0]) {
+			syno_auto_error_fs_report(dsm_version ,(unsigned int)es->s_error_count);
+		}
+	}
+#endif  
 }
 
 static void save_error_info(struct super_block *sb, const char *func,
@@ -710,6 +771,11 @@ static void ext4_put_super(struct super_block *sb)
 
 	flush_workqueue(sbi->rsv_conversion_wq);
 	destroy_workqueue(sbi->rsv_conversion_wq);
+#ifdef MY_ABC_HERE
+	if (sbi->group_desc_readahead_wq) {
+		destroy_workqueue(sbi->group_desc_readahead_wq);
+	}
+#endif  
 
 	if (sbi->s_journal) {
 		err = jbd2_journal_destroy(sbi->s_journal);
@@ -724,7 +790,6 @@ static void ext4_put_super(struct super_block *sb)
 	ext4_release_system_zone(sb);
 	ext4_mb_release(sb);
 	ext4_ext_release(sb);
-	ext4_xattr_put_super(sb);
 
 	if (!(sb->s_flags & MS_RDONLY)) {
 		ext4_clear_feature_journal_needs_recovery(sb);
@@ -746,8 +811,12 @@ static void ext4_put_super(struct super_block *sb)
 	for (i = 0; i < EXT4_MAXQUOTAS; i++)
 		kfree(sbi->s_qf_names[i]);
 #endif
+#ifdef MY_ABC_HERE
+	if (sbi->s_mount_path) {
+		kfree(sbi->s_mount_path);
+	}
+#endif  
 
-	
 	if (!list_empty(&sbi->s_orphan))
 		dump_orphan_list(sb, sbi);
 	J_ASSERT(list_empty(&sbi->s_orphan));
@@ -946,6 +1015,97 @@ static int bdev_try_to_free_page(struct super_block *sb, struct page *page,
 	return try_to_free_buffers(page);
 }
 
+#ifdef MY_ABC_HERE
+static int ext4_syno_set_sb_archive_ver(struct super_block *sb, u32 archive_ver)
+{
+	struct ext4_super_block *es = EXT4_SB(sb)->s_es;
+	handle_t *handle;
+	int err = 0;
+	int err2;
+
+	sb->s_archive_version = archive_ver;
+	es->s_archive_version = cpu_to_le32(sb->s_archive_version);
+
+	if (!EXT4_HAS_COMPAT_FEATURE(sb, EXT4_FEATURE_COMPAT_HAS_JOURNAL)) {
+		err = ext4_commit_super(sb, 1);
+		goto exit;
+	}
+
+	handle = ext4_journal_start_sb(sb, EXT4_HT_SYNO, 1);
+	if (IS_ERR(handle)) {
+		err = PTR_ERR(handle);
+		goto exit;
+	}
+	err = ext4_journal_get_write_access(handle, EXT4_SB(sb)->s_sbh);
+	if (err) {
+		goto exit_journal;
+	}
+	err = ext4_handle_dirty_super(handle, sb);
+
+exit_journal:
+	if ((err2 = ext4_journal_stop(handle)) && !err) {
+		err = err2;
+	}
+exit:
+	return err;
+}
+
+static int ext4_syno_get_sb_archive_ver(struct super_block *sb, u32 *version)
+{
+	*version = sb->s_archive_version;
+	return 0;
+}
+#ifdef MY_ABC_HERE
+static int ext4_syno_set_sb_archive_ver1(struct super_block *sb, u32 archive_ver1)
+{
+	struct ext4_super_block *es = EXT4_SB(sb)->s_es;
+	handle_t *handle;
+	int err = 0;
+	int err2;
+
+	if (EXT4_HAS_RO_COMPAT_FEATURE(sb, EXT4_FEATURE_RO_COMPAT_QUOTA)) {
+		return -EOPNOTSUPP;
+	}
+
+	sb->s_archive_version1 = archive_ver1;
+	es->ext4_archive_version_bad = cpu_to_le32(sb->s_archive_version1);
+
+	if (!EXT4_HAS_COMPAT_FEATURE(sb, EXT4_FEATURE_COMPAT_HAS_JOURNAL)) {
+		err = ext4_commit_super(sb, 1);
+		goto exit;
+	}
+
+	handle = ext4_journal_start_sb(sb, EXT4_HT_SYNO, 1);
+	if (IS_ERR(handle)) {
+		err = PTR_ERR(handle);
+		goto exit;
+	}
+	err = ext4_journal_get_write_access(handle, EXT4_SB(sb)->s_sbh);
+	if (err) {
+		goto exit_journal;
+	}
+	err = ext4_handle_dirty_super(handle, sb);
+
+exit_journal:
+	if ((err2 = ext4_journal_stop(handle)) && !err) {
+		err = err2;
+	}
+exit:
+	return err;
+}
+
+static int ext4_syno_get_sb_archive_ver1(struct super_block *sb, u32 *version1)
+{
+	if (EXT4_HAS_RO_COMPAT_FEATURE(sb, EXT4_FEATURE_RO_COMPAT_QUOTA)) {
+		return -EOPNOTSUPP;
+	}
+
+	*version1 = sb->s_archive_version1;
+	return 0;
+}
+#endif  
+#endif  
+
 #ifdef CONFIG_QUOTA
 #define QTYPE2NAME(t) ((t) == USRQUOTA ? "user" : "group")
 #define QTYPE2MOPT(on, t) ((t) == USRQUOTA?((on)##USRJQUOTA):((on)##GRPJQUOTA))
@@ -993,8 +1153,15 @@ static const struct quotactl_ops ext4_qctl_operations = {
 	.set_dqblk	= dquot_set_dqblk
 };
 #endif
-
 static const struct super_operations ext4_sops = {
+#ifdef MY_ABC_HERE
+	.syno_set_sb_archive_ver = ext4_syno_set_sb_archive_ver,
+	.syno_get_sb_archive_ver = ext4_syno_get_sb_archive_ver,
+#ifdef MY_ABC_HERE
+	.syno_set_sb_archive_ver1 = ext4_syno_set_sb_archive_ver1,
+	.syno_get_sb_archive_ver1 = ext4_syno_get_sb_archive_ver1,
+#endif  
+#endif  
 	.alloc_inode	= ext4_alloc_inode,
 	.destroy_inode	= ext4_destroy_inode,
 	.write_inode	= ext4_write_inode,
@@ -1796,6 +1963,8 @@ static int ext4_setup_super(struct super_block *sb, struct ext4_super_block *es,
 		ext4_msg(sb, KERN_WARNING,
 			 "warning: mounting fs with errors, "
 			 "running e2fsck is recommended");
+#ifdef MY_ABC_HERE
+#else
 	else if ((__s16) le16_to_cpu(es->s_max_mnt_count) > 0 &&
 		 le16_to_cpu(es->s_mnt_count) >=
 		 (unsigned short) (__s16) le16_to_cpu(es->s_max_mnt_count))
@@ -1808,6 +1977,7 @@ static int ext4_setup_super(struct super_block *sb, struct ext4_super_block *es,
 		ext4_msg(sb, KERN_WARNING,
 			 "warning: checktime reached, "
 			 "running e2fsck is recommended");
+#endif  
 	if (!sbi->s_journal)
 		es->s_state &= cpu_to_le16(~EXT4_VALID_FS);
 	if (!(__s16) le16_to_cpu(es->s_max_mnt_count))
@@ -2107,10 +2277,10 @@ static void ext4_orphan_cleanup(struct super_block *sb,
 					__func__, inode->i_ino, inode->i_size);
 			jbd_debug(2, "truncating inode %lu to %lld bytes\n",
 				  inode->i_ino, inode->i_size);
-			mutex_lock(&inode->i_mutex);
+			inode_lock(inode);
 			truncate_inode_pages(inode->i_mapping, inode->i_size);
 			ext4_truncate(inode);
-			mutex_unlock(&inode->i_mutex);
+			inode_unlock(inode);
 			nr_truncates++;
 		} else {
 			if (test_opt(sb, DEBUG))
@@ -2376,7 +2546,11 @@ static int ext4_run_li_request(struct ext4_li_request *elr)
 		timeout = jiffies;
 		ret = ext4_init_inode_table(sb, group,
 					    elr->lr_timeout ? 0 : 1);
+#ifdef MY_ABC_HERE
+		if (elr->lr_timeout == 0 || ((elr->lr_next_group % 10) == 0)) {
+#else
 		if (elr->lr_timeout == 0) {
+#endif  
 			timeout = (jiffies - timeout) *
 				  elr->lr_sbi->s_li_wait_mult;
 			elr->lr_timeout = timeout;
@@ -2777,6 +2951,74 @@ static void ext4_set_resv_clusters(struct super_block *sb)
 	atomic64_set(&sbi->s_resv_clusters, resv_clusters);
 }
 
+#ifdef MY_ABC_HERE
+struct group_desc_reada_arg {
+	struct super_block *sb;
+	ext4_fsblk_t logical_sb_block;
+	unsigned int db_count;
+	unsigned int current_nr;
+};
+
+struct group_desc_reada {
+	struct super_block *sb;
+	ext4_fsblk_t logical_sb_block;
+	unsigned int nr;
+	struct work_struct work;
+};
+
+static void group_desc_reada_start(struct work_struct *work)
+{
+	struct group_desc_reada *group_desc_reada;
+	struct ext4_sb_info *sbi;
+	struct buffer_head *bh = NULL;
+	ext4_fsblk_t block;
+
+	group_desc_reada = container_of(work, struct group_desc_reada, work);
+	sbi = EXT4_SB(group_desc_reada->sb);
+	block = descriptor_loc(group_desc_reada->sb, group_desc_reada->logical_sb_block, group_desc_reada->nr);
+	bh = sb_bread(group_desc_reada->sb, block);
+	if (bh != NULL) {
+		brelse(bh);
+	}
+	kfree(group_desc_reada);
+	atomic_dec(&sbi->reada_group_desc_threads);
+}
+
+#define READA_GROUP_DESC_THREAD_MAX 30
+ 
+static void reada_group_desc_block(struct group_desc_reada_arg* group_desc_reada_arg)
+{
+	struct ext4_sb_info *sbi;
+	struct group_desc_reada *group_desc_reada;
+	int i;
+
+	if (group_desc_reada_arg->current_nr >= group_desc_reada_arg->db_count) {
+		return;
+	}
+
+	sbi = EXT4_SB(group_desc_reada_arg->sb);
+	for (i = 0; i + atomic_read(&sbi->reada_group_desc_threads) < READA_GROUP_DESC_THREAD_MAX; i++) {
+		group_desc_reada = kmalloc(sizeof(struct group_desc_reada), GFP_NOFS);
+		if (!group_desc_reada) {
+			return;
+		}
+
+		group_desc_reada->sb = group_desc_reada_arg->sb;
+		group_desc_reada->logical_sb_block = group_desc_reada_arg->logical_sb_block;
+		group_desc_reada->nr = group_desc_reada_arg->current_nr;
+
+		INIT_WORK(&group_desc_reada->work, group_desc_reada_start);
+		queue_work(sbi->group_desc_readahead_wq, &group_desc_reada->work);
+		atomic_inc(&sbi->reada_group_desc_threads);
+
+		group_desc_reada_arg->current_nr++;
+		if (group_desc_reada_arg->current_nr >= group_desc_reada_arg->db_count) {
+			return;
+		}
+	}
+}
+#endif  
+
 static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 {
 	char *orig_data = kstrdup(data, GFP_KERNEL);
@@ -2800,6 +3042,9 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 	int err = 0;
 	unsigned int journal_ioprio = DEFAULT_JOURNAL_IOPRIO;
 	ext4_group_t first_not_zeroed;
+#ifdef MY_ABC_HERE
+	struct group_desc_reada_arg group_desc_reada_arg;
+#endif  
 
 	sbi = kzalloc(sizeof(*sbi), GFP_KERNEL);
 	if (!sbi)
@@ -2891,14 +3136,19 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 		set_opt(sb, GRPID);
 	if (def_mount_opts & EXT4_DEFM_UID16)
 		set_opt(sb, NO_UID32);
-	
+	 
 	set_opt(sb, XATTR_USER);
 #ifdef CONFIG_EXT4_FS_POSIX_ACL
 	set_opt(sb, POSIX_ACL);
 #endif
-	
+
+#ifdef MY_ABC_HERE
+	set_opt(sb, JOURNAL_CHECKSUM);
+#else
+	 
 	if (ext4_has_metadata_csum(sb))
 		set_opt(sb, JOURNAL_CHECKSUM);
+#endif  
 
 	if ((def_mount_opts & EXT4_DEFM_JMODE) == EXT4_DEFM_JMODE_DATA)
 		set_opt(sb, JOURNAL_DATA);
@@ -2924,15 +3174,17 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 	sbi->s_min_batch_time = EXT4_DEF_MIN_BATCH_TIME;
 	sbi->s_max_batch_time = EXT4_DEF_MAX_BATCH_TIME;
 
+#ifdef MY_ABC_HERE
+	clear_opt(sb, BARRIER);
+#else
 	if ((def_mount_opts & EXT4_DEFM_NOBARRIER) == 0)
 		set_opt(sb, BARRIER);
+#endif  
 
-	
 	if (!IS_EXT3_SB(sb) && !IS_EXT2_SB(sb) &&
 	    ((def_mount_opts & EXT4_DEFM_NODELALLOC) == 0))
 		set_opt(sb, DELALLOC);
 
-	
 	sbi->s_li_wait_mult = EXT4_DEF_LI_WAIT_MULT;
 
 	if (!parse_options((char *) sbi->s_es->s_mount_opts, sb,
@@ -3124,7 +3376,12 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 	for (i = 0; i < 4; i++)
 		sbi->s_hash_seed[i] = le32_to_cpu(es->s_hash_seed[i]);
 	sbi->s_def_hash_version = es->s_def_hash_version;
+#ifdef MY_ABC_HERE
+	if (es->s_syno_hash_magic == cpu_to_le32(SYNO_HASH_MAGIC) ||
+	     ext4_has_feature_dir_index(sb)) {
+#else
 	if (ext4_has_feature_dir_index(sb)) {
+#endif  
 		i = le32_to_cpu(es->s_flags);
 		if (i & EXT2_FLAGS_UNSIGNED_HASH)
 			sbi->s_hash_unsigned = 3;
@@ -3254,7 +3511,23 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 
 	bgl_lock_init(sbi->s_blockgroup_lock);
 
+#ifdef MY_ABC_HERE
+	EXT4_SB(sb)->group_desc_readahead_wq =
+		alloc_workqueue("ext4-group-desc-readahead", WQ_MEM_RECLAIM | WQ_UNBOUND, min_t(unsigned long, num_online_cpus() + 2, 8));
+
+	group_desc_reada_arg.sb = sb;
+	group_desc_reada_arg.logical_sb_block = logical_sb_block;
+	group_desc_reada_arg.db_count = db_count;
+	group_desc_reada_arg.current_nr = 0;
+	atomic_set(&sbi->reada_group_desc_threads, 0);
+#endif  
+
 	for (i = 0; i < db_count; i++) {
+#ifdef MY_ABC_HERE
+		if (EXT4_SB(sb)->group_desc_readahead_wq) {
+			reada_group_desc_block(&group_desc_reada_arg);
+		}
+#endif  
 		block = descriptor_loc(sb, logical_sb_block, i);
 		sbi->s_group_desc[i] = sb_bread_unmovable(sb, block);
 		if (!sbi->s_group_desc[i]) {
@@ -3387,12 +3660,10 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 	sbi->s_journal->j_commit_callback = ext4_journal_commit_callback;
 
 no_journal:
-	if (ext4_mballoc_ready) {
-		sbi->s_mb_cache = ext4_xattr_create_cache(sb->s_id);
-		if (!sbi->s_mb_cache) {
-			ext4_msg(sb, KERN_ERR, "Failed to create an mb_cache");
-			goto failed_mount_wq;
-		}
+	sbi->s_mb_cache = ext4_xattr_create_cache();
+	if (!sbi->s_mb_cache) {
+		ext4_msg(sb, KERN_ERR, "Failed to create an mb_cache");
+		goto failed_mount_wq;
 	}
 
 	if ((DUMMY_ENCRYPTION_ENABLED(sbi) || ext4_has_feature_encrypt(sb)) &&
@@ -3436,6 +3707,9 @@ no_journal:
 		iput(root);
 		goto failed_mount4;
 	}
+#ifdef MY_ABC_HERE
+	sb->s_d_op = &ext4_dentry_operations;
+#endif  
 	sb->s_root = d_make_root(root);
 	if (!sb->s_root) {
 		ext4_msg(sb, KERN_ERR, "get root dentry failed");
@@ -3443,10 +3717,20 @@ no_journal:
 		goto failed_mount4;
 	}
 
+#ifdef MY_ABC_HERE
+	 
+	sb->s_root->d_op = &ext4_dentry_operations;
+#endif  
+#ifdef MY_ABC_HERE
+	sb->s_archive_version = le32_to_cpu(es->s_archive_version);
+#ifdef MY_ABC_HERE
+	sb->s_archive_version1 = le32_to_cpu(es->ext4_archive_version_bad);
+#endif  
+#endif  
+
 	if (ext4_setup_super(sb, es, sb->s_flags & MS_RDONLY))
 		sb->s_flags |= MS_RDONLY;
 
-	
 	if (sbi->s_inode_size > EXT4_GOOD_OLD_INODE_SIZE) {
 		sbi->s_want_extra_isize = sizeof(struct ext4_inode) -
 						     EXT4_GOOD_OLD_INODE_SIZE;
@@ -3551,6 +3835,17 @@ no_journal:
 	} else
 		descr = "out journal";
 
+#ifdef MY_ABC_HERE
+	if (!ext4_namei_lock_init) {
+		spin_lock_init(&ext4_namei_buf_lock);
+		ext4_namei_lock_init=1;
+	}
+	if (!ext4_hash_lock_init) {
+		spin_lock_init(&ext4_hash_buf_lock);
+		ext4_hash_lock_init=1;
+	}
+#endif  
+
 	if (test_opt(sb, DISCARD)) {
 		struct request_queue *q = bdev_get_queue(sb->s_bdev);
 		if (!blk_queue_discard(q))
@@ -3604,6 +3899,10 @@ failed_mount4:
 	if (EXT4_SB(sb)->rsv_conversion_wq)
 		destroy_workqueue(EXT4_SB(sb)->rsv_conversion_wq);
 failed_mount_wq:
+	if (sbi->s_mb_cache) {
+		ext4_xattr_destroy_cache(sbi->s_mb_cache);
+		sbi->s_mb_cache = NULL;
+	}
 	if (sbi->s_journal) {
 		jbd2_journal_destroy(sbi->s_journal);
 		sbi->s_journal = NULL;
@@ -3615,6 +3914,11 @@ failed_mount3:
 	if (sbi->s_mmp_tsk)
 		kthread_stop(sbi->s_mmp_tsk);
 failed_mount2:
+#ifdef MY_ABC_HERE
+	if (EXT4_SB(sb)->group_desc_readahead_wq) {
+		destroy_workqueue(EXT4_SB(sb)->group_desc_readahead_wq);
+	}
+#endif  
 	for (i = 0; i < db_count; i++)
 		brelse(sbi->s_group_desc[i]);
 	kvfree(sbi->s_group_desc);
@@ -4650,6 +4954,21 @@ static struct dentry *ext4_mount(struct file_system_type *fs_type, int flags,
 	return mount_bdev(fs_type, flags, dev_name, data, ext4_fill_super);
 }
 
+#ifdef MY_ABC_HERE
+void ext4_fill_mount_path(struct super_block *sb, char *path)
+{
+	struct ext4_sb_info *sbi = EXT4_SB(sb);
+
+	if (sbi->s_mount_path) {
+		strncpy(sbi->s_mount_path, path, SYNO_MOUNT_PATH_LEN);
+	} else {
+		sbi->s_mount_path = kmemdup(path, SYNO_MOUNT_PATH_LEN, GFP_KERNEL);
+	}
+	sbi->s_mount_path[SYNO_MOUNT_PATH_LEN - 1] = '\0';
+}
+EXPORT_SYMBOL(ext4_fill_mount_path);
+#endif  
+
 #if !defined(CONFIG_EXT2_FS) && !defined(CONFIG_EXT2_FS_MODULE) && defined(CONFIG_EXT4_USE_FOR_EXT2)
 static inline void register_as_ext2(void)
 {
@@ -4752,24 +5071,31 @@ static int __init ext4_init_fs(void)
 	err = ext4_init_mballoc();
 	if (err)
 		goto out2;
-	else
-		ext4_mballoc_ready = 1;
 	err = init_inodecache();
 	if (err)
 		goto out1;
 	register_as_ext3();
 	register_as_ext2();
+#ifdef MY_ABC_HERE
+	ext4_syno_caseless_cachep = kmem_cache_create("ext4_syno_caseless",
+			(NAME_MAX+1)*2, 0,
+			SLAB_RECLAIM_ACCOUNT | SLAB_MEM_SPREAD, NULL);
+	if (!ext4_syno_caseless_cachep)
+		goto out;
+#endif
 	err = register_filesystem(&ext4_fs_type);
 	if (err)
 		goto out;
 
 	return 0;
 out:
+#ifdef MY_ABC_HERE
+	kmem_cache_destroy(ext4_syno_caseless_cachep);
+#endif
 	unregister_as_ext2();
 	unregister_as_ext3();
 	destroy_inodecache();
 out1:
-	ext4_mballoc_ready = 0;
 	ext4_exit_mballoc();
 out2:
 	ext4_exit_sysfs();
@@ -4787,6 +5113,9 @@ static void __exit ext4_exit_fs(void)
 {
 	ext4_exit_crypto();
 	ext4_destroy_lazyinit_thread();
+#ifdef MY_ABC_HERE
+	kmem_cache_destroy(ext4_syno_caseless_cachep);
+#endif
 	unregister_as_ext2();
 	unregister_as_ext3();
 	unregister_filesystem(&ext4_fs_type);

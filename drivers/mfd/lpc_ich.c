@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
 #include <linux/kernel.h>
@@ -10,6 +12,10 @@
 #include <linux/mfd/core.h>
 #include <linux/mfd/lpc_ich.h>
 #include <linux/platform_data/itco_wdt.h>
+
+#if defined(MY_ABC_HERE) && defined(MY_DEF_HERE)
+#include <linux/synobios.h>
+#endif  
 
 #define ACPIBASE		0x40
 #define ACPIBASE_GPE_OFF	0x28
@@ -89,74 +95,74 @@ static struct mfd_cell lpc_ich_gpio_cell = {
 	.ignore_resource_conflicts = true,
 };
 
-
 enum lpc_chipsets {
-	LPC_ICH = 0,	
-	LPC_ICH0,	
-	LPC_ICH2,	
-	LPC_ICH2M,	
-	LPC_ICH3,	
-	LPC_ICH3M,	
-	LPC_ICH4,	
-	LPC_ICH4M,	
-	LPC_CICH,	
-	LPC_ICH5,	
-	LPC_6300ESB,	
-	LPC_ICH6,	
-	LPC_ICH6M,	
-	LPC_ICH6W,	
-	LPC_631XESB,	
-	LPC_ICH7,	
-	LPC_ICH7DH,	
-	LPC_ICH7M,	
-	LPC_ICH7MDH,	
-	LPC_NM10,	
-	LPC_ICH8,	
-	LPC_ICH8DH,	
-	LPC_ICH8DO,	
-	LPC_ICH8M,	
-	LPC_ICH8ME,	
-	LPC_ICH9,	
-	LPC_ICH9R,	
-	LPC_ICH9DH,	
-	LPC_ICH9DO,	
-	LPC_ICH9M,	
-	LPC_ICH9ME,	
-	LPC_ICH10,	
-	LPC_ICH10R,	
-	LPC_ICH10D,	
-	LPC_ICH10DO,	
-	LPC_PCH,	
-	LPC_PCHM,	
-	LPC_P55,	
-	LPC_PM55,	
-	LPC_H55,	
-	LPC_QM57,	
-	LPC_H57,	
-	LPC_HM55,	
-	LPC_Q57,	
-	LPC_HM57,	
-	LPC_PCHMSFF,	
-	LPC_QS57,	
-	LPC_3400,	
-	LPC_3420,	
-	LPC_3450,	
-	LPC_EP80579,	
-	LPC_CPT,	
-	LPC_CPTD,	
-	LPC_CPTM,	
-	LPC_PBG,	
-	LPC_DH89XXCC,	
-	LPC_PPT,	
-	LPC_LPT,	
-	LPC_LPT_LP,	
-	LPC_WBG,	
-	LPC_AVN,	
-	LPC_BAYTRAIL,   
-	LPC_COLETO,	
-	LPC_WPT_LP,	
-	LPC_BRASWELL,	
-	LPC_9S,		
+	LPC_ICH = 0,	 
+	LPC_ICH0,	 
+	LPC_ICH2,	 
+	LPC_ICH2M,	 
+	LPC_ICH3,	 
+	LPC_ICH3M,	 
+	LPC_ICH4,	 
+	LPC_ICH4M,	 
+	LPC_CICH,	 
+	LPC_ICH5,	 
+	LPC_6300ESB,	 
+	LPC_ICH6,	 
+	LPC_ICH6M,	 
+	LPC_ICH6W,	 
+	LPC_631XESB,	 
+	LPC_ICH7,	 
+	LPC_ICH7DH,	 
+	LPC_ICH7M,	 
+	LPC_ICH7MDH,	 
+	LPC_NM10,	 
+	LPC_ICH8,	 
+	LPC_ICH8DH,	 
+	LPC_ICH8DO,	 
+	LPC_ICH8M,	 
+	LPC_ICH8ME,	 
+	LPC_ICH9,	 
+	LPC_ICH9R,	 
+	LPC_ICH9DH,	 
+	LPC_ICH9DO,	 
+	LPC_ICH9M,	 
+	LPC_ICH9ME,	 
+	LPC_ICH10,	 
+	LPC_ICH10R,	 
+	LPC_ICH10D,	 
+	LPC_ICH10DO,	 
+	LPC_PCH,	 
+	LPC_PCHM,	 
+	LPC_P55,	 
+	LPC_PM55,	 
+	LPC_H55,	 
+	LPC_QM57,	 
+	LPC_H57,	 
+	LPC_HM55,	 
+	LPC_Q57,	 
+	LPC_HM57,	 
+	LPC_PCHMSFF,	 
+	LPC_QS57,	 
+	LPC_3400,	 
+	LPC_3420,	 
+	LPC_3450,	 
+	LPC_EP80579,	 
+	LPC_CPT,	 
+	LPC_CPTD,	 
+	LPC_CPTM,	 
+	LPC_PBG,	 
+	LPC_DH89XXCC,	 
+	LPC_PPT,	 
+	LPC_LPT,	 
+	LPC_LPT_LP,	 
+	LPC_WBG,	 
+	LPC_AVN,	 
+	LPC_BAYTRAIL,    
+	LPC_COLETO,	 
+	LPC_WPT_LP,	 
+	LPC_DVN,	 
+	LPC_BRASWELL,	 
+	LPC_9S,		 
 };
 
 static struct lpc_ich_info lpc_chipset_info[] = {
@@ -434,6 +440,9 @@ static struct lpc_ich_info lpc_chipset_info[] = {
 	[LPC_LPT] = {
 		.name = "Lynx Point",
 		.iTCO_version = 2,
+#ifdef MY_ABC_HERE
+		.gpio_version = ICH_V6_GPIO,
+#endif  
 	},
 	[LPC_LPT_LP] = {
 		.name = "Lynx Point_LP",
@@ -459,6 +468,10 @@ static struct lpc_ich_info lpc_chipset_info[] = {
 	[LPC_WPT_LP] = {
 		.name = "Wildcat Point_LP",
 		.iTCO_version = 2,
+	},
+	[LPC_DVN] = {
+		.name = "Denverton SoC",
+		.iTCO_version = 3,
 	},
 	[LPC_BRASWELL] = {
 		.name = "Braswell SoC",
@@ -694,7 +707,9 @@ static const struct pci_device_id lpc_ich_ids[] = {
 	{ PCI_VDEVICE(INTEL, 0x9cc6), LPC_WPT_LP},
 	{ PCI_VDEVICE(INTEL, 0x9cc7), LPC_WPT_LP},
 	{ PCI_VDEVICE(INTEL, 0x9cc9), LPC_WPT_LP},
-	{ 0, },			
+	{ PCI_VDEVICE(INTEL, 0x19dc), LPC_DVN},
+	{ PCI_VDEVICE(INTEL, 0x19de), LPC_DVN},
+	{ 0, },			 
 };
 MODULE_DEVICE_TABLE(pci, lpc_ich_ids);
 
@@ -810,6 +825,198 @@ static int lpc_ich_check_conflict_gpio(struct resource *res)
 	return use_gpio ? use_gpio : ret;
 }
 
+#ifdef MY_ABC_HERE
+static u32 gpiobase = 0;
+static u32 *writable_pin = NULL;
+static u32 SynoGpioCount = 0;
+
+static u32 ich9_writable_pin[] = {1, 6, 7, 10, 15, 16, 17, 18, 20, 21, 24, 25, 30, 31, 32, 33, 34, 35, 36, 37, 46, 47, 49, 55, 57};
+static u32 ich10_writable_pin[] = {1, 6, 7, 10, 15, 16, 17, 18, 20, 21, 24, 25, 29, 30, 31, 32, 33, 34, 35, 36, 37, 42, 43, 45, 46, 47, 49, 55, 57};
+static u32 c206_writable_pin[] = {0, 5, 16, 20, 21, 22, 34, 38, 48, 52, 54, 69, 70, 71};
+static u32 c226_writable_pin[] = {5, 16, 18, 19, 20, 21, 23, 32, 33, 34, 35, 36, 37, 45};
+static u32 avoton_writable_pin[] = {10, 15, 16, 17, 49, 50, 53, 54};
+static u32 broadwell_writable_pin[] = {3, 4, 5, 28, 45, 70, 71};
+
+#ifdef MY_DEF_HERE
+ 
+static u32 coreWellGpio = 0;
+static u32 susWellGpio = 0;
+static u32 avoton_corewell_gpioin_pin = 0x18041831;  
+static u32 avoton_suswell_gpioin_pin = 0xC181114;
+
+#define GPIO_MAX_PIN 63
+#else  
+ 
+#define GPIO_MAX_PIN 95
+#endif  
+
+u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite)
+{
+	static DEFINE_SPINLOCK(lock);
+	static unsigned long flags;
+	int ret = -1;
+    int i = 0;
+    u32 addr_use_select, addr_io_select, addr_lvl;
+	u32 val_lvl;
+#ifdef MY_DEF_HERE
+	u32 *pVal_lvl = NULL;
+	u32 gpioin_pin = 0;
+#else  
+    u32 val_use_select, val_io_select;
+#endif  
+    u32 mppPin = pin;
+    u32 tmpVal;
+
+    if (0 == gpiobase || ( pin < 0 || pin > GPIO_MAX_PIN )
+			|| NULL == pValue) {
+        printk("parameter error. gpiobase=%08X, pin=%d, pValue=%p\n", gpiobase, pin, pValue);
+        goto END;
+    }
+	spin_lock_irqsave(&lock, flags);
+
+    if (1 == isWrite) {
+		 
+		while (i < SynoGpioCount) {
+            if (pin == writable_pin[i]) {
+                break;
+            }
+			i++;
+        }
+        if (i == SynoGpioCount) {
+            printk("pin %d is protected by driver.\n", pin);
+            goto UNLOCK;
+        }
+    }
+
+    if (mppPin < 32) {
+        addr_use_select = gpiobase + 0x00;
+        addr_io_select = gpiobase + 0x04;
+#ifdef MY_DEF_HERE
+		addr_lvl = gpiobase + 0x08;
+		pVal_lvl = &coreWellGpio;
+		gpioin_pin = avoton_corewell_gpioin_pin;
+#else  
+        addr_lvl = gpiobase + 0x0c;
+#endif  
+    } else if (mppPin < 64) {
+        addr_use_select = gpiobase + 0x30;
+        addr_io_select = gpiobase + 0x34;
+#ifdef MY_DEF_HERE
+		addr_lvl = gpiobase + 0x88;
+		pVal_lvl = &susWellGpio;
+		gpioin_pin = avoton_suswell_gpioin_pin;
+#else  
+        addr_lvl = gpiobase + 0x38;
+#endif  
+        mppPin %= 32;
+    } else {
+        addr_use_select = gpiobase + 0x40;
+        addr_io_select = gpiobase + 0x44;
+        addr_lvl = gpiobase + 0x48;
+        mppPin %= 32;
+	}
+ 
+#ifdef MY_DEF_HERE
+	if (0 == isWrite) {
+         
+		if ((1 << mppPin) & gpioin_pin) {
+			 
+			val_lvl = inl(addr_lvl);
+			*pValue = (val_lvl & (1 << mppPin)) >> mppPin;
+		} else {
+			*pValue = (*pVal_lvl & (1 << mppPin)) >> mppPin;
+		}
+	} else {
+		if (1 == *pValue) {
+			tmpVal = 1 << mppPin;
+			*pVal_lvl |= tmpVal;
+			outl(*pVal_lvl, addr_lvl);
+		} else {
+			tmpVal = ~(1 << mppPin);
+			*pVal_lvl &= tmpVal;
+			outl(*pVal_lvl, addr_lvl);
+		}
+	}
+#else  
+    if (0 == isWrite) {
+         
+        val_use_select = inl(addr_use_select);
+        tmpVal = 1 << mppPin;
+        val_use_select |= tmpVal;
+        outl(val_use_select, addr_use_select);
+
+        val_lvl = inl(addr_lvl);
+
+        *pValue = (val_lvl & (1 << mppPin)) >> mppPin;
+    } else {
+         
+        val_use_select = inl(addr_use_select);
+        tmpVal = 1 << mppPin;
+        val_use_select |= tmpVal;
+        outl(val_use_select, addr_use_select);
+
+        val_io_select = inl(addr_io_select);
+        tmpVal = ~(1 << mppPin);
+        val_io_select &= tmpVal;
+        outl(val_io_select, addr_io_select);
+
+        val_lvl = inl(addr_lvl);
+        if (1 == *pValue) {
+            tmpVal = 1 << mppPin;
+            val_lvl |= tmpVal;
+            outl(val_lvl, addr_lvl);
+        } else {
+            tmpVal = ~(1 << mppPin);
+            val_lvl &= tmpVal;
+            outl(val_lvl, addr_lvl);
+        }
+    }
+#endif  
+    ret = 0;
+
+UNLOCK:
+	spin_unlock_irqrestore(&lock, flags);
+END:
+    return ret;
+}
+EXPORT_SYMBOL(syno_pch_lpc_gpio_pin);
+
+static int syno_gpio_init(struct pci_dev *dev)
+{
+	switch(dev->device) {
+		case PCI_DEVICE_ID_INTEL_COUGARPOINT_LPC_C206:
+			writable_pin = c206_writable_pin;
+			SynoGpioCount = ARRAY_SIZE(c206_writable_pin);
+			break;
+		case PCI_DEVICE_ID_INTEL_LYNXPOINT_LPC_C226:
+			writable_pin = c226_writable_pin;
+			SynoGpioCount = ARRAY_SIZE(c226_writable_pin);
+			break;
+		case PCI_DEVICE_ID_INTEL_AVOTON_LPC:
+			writable_pin = avoton_writable_pin;
+			SynoGpioCount = ARRAY_SIZE(avoton_writable_pin);
+			break;
+		case PCI_DEVICE_ID_INTEL_ICH9_7:    
+			writable_pin = ich9_writable_pin;
+			SynoGpioCount = ARRAY_SIZE(ich9_writable_pin);
+			break;
+		case PCI_DEVICE_ID_INTEL_ICH10_1:    
+			writable_pin = ich10_writable_pin;
+			SynoGpioCount = ARRAY_SIZE(ich10_writable_pin);
+			break;
+		case PCI_DEVICE_ID_INTEL_BROADWELL_LPC:
+			writable_pin = broadwell_writable_pin;
+			SynoGpioCount = ARRAY_SIZE(broadwell_writable_pin);
+			break;
+		default:
+			printk("Unknown LPC device %04x\n", dev->device);
+			break;
+	}
+
+	return 0;
+}
+#endif  
+
 static int lpc_ich_init_gpio(struct pci_dev *dev)
 {
 	struct lpc_ich_priv *priv = pci_get_drvdata(dev);
@@ -848,8 +1055,19 @@ gpe0_done:
 		ret = -ENODEV;
 		goto gpio_done;
 	}
+#ifdef MY_ABC_HERE
+	gpiobase = base_addr;
+	syno_gpio_init(dev);
+#ifdef MY_DEF_HERE
+	 
+	if (syno_is_hw_version(HW_DS415p)) {
+		susWellGpio = 0x640000;
+	} else {
+		susWellGpio = 0x440000;
+	}
+#endif  
+#endif  
 
-	
 	res = &gpio_ich_res[ICH_RES_GPIO];
 	res->start = base_addr;
 	switch (lpc_chipset_info[priv->chipset].gpio_version) {

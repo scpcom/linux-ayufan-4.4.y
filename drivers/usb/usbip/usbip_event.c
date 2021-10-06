@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/kthread.h>
 #include <linux/export.h>
 
@@ -92,8 +94,14 @@ int usbip_event_happened(struct usbip_device *ud)
 	int happened = 0;
 
 	spin_lock(&ud->lock);
+#ifdef MY_ABC_HERE
+	if (0 != ud->event && USBIP_EH_RESET != ud->event) {
+		happened = 1;
+	}
+#else  
 	if (ud->event != 0)
 		happened = 1;
+#endif  
 	spin_unlock(&ud->lock);
 
 	return happened;

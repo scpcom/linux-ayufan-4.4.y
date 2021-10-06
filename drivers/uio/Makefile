@@ -9,3 +9,7 @@ obj-$(CONFIG_UIO_NETX)	+= uio_netx.o
 obj-$(CONFIG_UIO_PRUSS)         += uio_pruss.o
 obj-$(CONFIG_UIO_MF624)         += uio_mf624.o
 obj-$(CONFIG_UIO_FSL_ELBC_GPCM)	+= uio_fsl_elbc_gpcm.o
+obj-$(CONFIG_UIO_RTK_RBUS)     += uio_rtk_rbus.o
+obj-$(CONFIG_UIO_RTK_REFCLK)   += uio_rtk_refclk.o
+obj-$(CONFIG_UIO_RTK_SE)       += uio_rtk_se.o
+obj-$(CONFIG_UIO_RTK_MD)       += uio_rtk_md.o

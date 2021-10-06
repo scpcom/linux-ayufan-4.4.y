@@ -557,6 +557,13 @@ config MEDIATEK_WATCHDOG
 	  To compile this driver as a module, choose M here: the
 	  module will be called mtk_wdt.
 
+config RTD129X_WATCHDOG
+	tristate "Realtek RTD129X watchdog support"
+	depends on ARCH_RTD129X
+	select WATCHDOG_CORE
+	help
+	  Realtek RTD1295 watchdog support.
+
 config DIGICOLOR_WATCHDOG
 	tristate "Conexant Digicolor SoCs watchdog support"
 	depends on ARCH_DIGICOLOR

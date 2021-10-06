@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_MATH64_H
 #define _LINUX_MATH64_H
 
@@ -194,15 +197,30 @@ static inline u64 mul_u64_u32_div(u64 a, u32 mul, u32 divisor)
 	rl.ll = (u64)u.l.low * mul;
 	rh.ll = (u64)u.l.high * mul + rl.l.high;
 
-	
 	rl.l.high = do_div(rh.ll, divisor);
 
-	
 	do_div(rl.ll, divisor);
 
 	rl.l.high = rh.l.low;
 	return rl.ll;
 }
-#endif 
+#endif  
 
-#endif 
+#ifdef MY_ABC_HERE
+static inline u64 mod_u64_rem64(u64 dividend, u64 divisor)
+{
+#ifdef CONFIG_32BIT
+        if (dividend < divisor) {
+                return dividend;
+        } else if (dividend == divisor) {
+                return (u64)0;
+        }
+
+        return dividend - (div64_u64(dividend, divisor) * divisor);
+#else
+        return dividend % divisor;
+#endif
+}
+#endif  
+
+#endif  

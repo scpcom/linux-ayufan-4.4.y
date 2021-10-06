@@ -23,7 +23,7 @@ nouveau_framebuffer(struct drm_framebuffer *fb)
 }
 
 int nouveau_framebuffer_init(struct drm_device *, struct nouveau_framebuffer *,
-			     struct drm_mode_fb_cmd2 *, struct nouveau_bo *);
+			     const struct drm_mode_fb_cmd2 *, struct nouveau_bo *);
 
 struct nouveau_page_flip_state {
 	struct list_head head;
@@ -48,7 +48,7 @@ struct nouveau_display {
 	struct drm_property *underscan_property;
 	struct drm_property *underscan_hborder_property;
 	struct drm_property *underscan_vborder_property;
-	
+	/* not really hue and saturation: */
 	struct drm_property *vibrant_hue_property;
 	struct drm_property *color_vibrance_property;
 };

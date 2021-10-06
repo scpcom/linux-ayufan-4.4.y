@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/fs.h>
 #include <linux/cryptohash.h>
 #include "ext4.h"
@@ -111,6 +113,10 @@ static void str2hashbuf_unsigned(const char *msg, int len, __u32 *buf, int num)
 		*buf++ = pad;
 }
 
+#ifdef MY_ABC_HERE
+static unsigned char ext4_utf8_hash_buf[UNICODE_UTF8_BUFSIZE];
+extern spinlock_t ext4_hash_buf_lock;   
+#endif  
 
 int ext4fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 {
@@ -121,14 +127,22 @@ int ext4fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 	__u32		in[8], buf[4];
 	void		(*str2hashbuf)(const char *, int, __u32 *, int) =
 				str2hashbuf_signed;
+#ifdef MY_ABC_HERE
 
-	
+	spin_lock(&ext4_hash_buf_lock);
+
+	if (name && (len > 0)) {
+		len = syno_utf8_toupper(ext4_utf8_hash_buf, name,
+								  UNICODE_UTF8_BUFSIZE - 1 , len, NULL);
+		name = ext4_utf8_hash_buf;
+	}
+#endif  
+
 	buf[0] = 0x67452301;
 	buf[1] = 0xefcdab89;
 	buf[2] = 0x98badcfe;
 	buf[3] = 0x10325476;
 
-	
 	if (hinfo->seed) {
 		for (i = 0; i < 4; i++) {
 			if (hinfo->seed[i]) {
@@ -173,6 +187,9 @@ int ext4fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 		break;
 	default:
 		hinfo->hash = 0;
+#ifdef MY_ABC_HERE
+		spin_unlock(&ext4_hash_buf_lock);
+#endif  
 		return -1;
 	}
 	hash = hash & ~1;
@@ -180,5 +197,8 @@ int ext4fs_dirhash(const char *name, int len, struct dx_hash_info *hinfo)
 		hash = (EXT4_HTREE_EOF_32BIT - 1) << 1;
 	hinfo->hash = hash;
 	hinfo->minor_hash = minor_hash;
+#ifdef MY_ABC_HERE
+	spin_unlock(&ext4_hash_buf_lock);
+#endif  
 	return 0;
 }

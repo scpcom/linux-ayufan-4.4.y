@@ -1,4 +1,7 @@
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/fs.h>
 #include <linux/slab.h>
 #include <linux/file.h>
@@ -16,29 +19,85 @@
 
 #include <asm/uaccess.h>
 
-
+#ifdef MY_ABC_HERE
+#include "synoacl_int.h"
+#include <linux/syno_acl_xattr_ds.h>
+#endif  
+ 
+#ifdef MY_ABC_HERE
+static int
+xattr_permission(struct dentry *dentry, const char *name, int mask)
+#else
 static int
 xattr_permission(struct inode *inode, const char *name, int mask)
+#endif  
 {
-	
+#ifdef MY_ABC_HERE
+	struct inode *inode = dentry->d_inode;
+	 
+	if (!strcmp(name, SYNO_ACL_XATTR_ACCESS)) {
+		if (inode->i_op->syno_bypass_is_synoacl) {
+			 
+			return inode->i_op->syno_bypass_is_synoacl(dentry,
+					        BYPASS_SYNOACL_SYNOACL_XATTR, -EOPNOTSUPP);
+		} else if (MAY_WRITE == mask || MAY_WRITE_PERMISSION == mask) {
+			return synoacl_check_xattr_perm(name, dentry, MAY_WRITE_PERMISSION);
+		} else if (MAY_READ == mask || MAY_READ_PERMISSION == mask) {
+			return synoacl_check_xattr_perm(name, dentry, MAY_READ_PERMISSION);
+		} else {
+			return -EPERM;
+		}
+	}
+
+	if (MAY_READ == mask) {
+		if (!strcmp(name, SYNO_ACL_XATTR_INHERIT)) {
+			if (inode->i_op->syno_bypass_is_synoacl) {
+				 
+				return inode->i_op->syno_bypass_is_synoacl(dentry,
+						        BYPASS_SYNOACL_SYNOACL_XATTR, -EOPNOTSUPP);
+			} else if (!IS_SYNOACL(dentry)) {
+				return -EOPNOTSUPP;
+			}
+			return synoacl_op_perm(dentry, MAY_READ_PERMISSION);
+		}
+		if (!strcmp(name, SYNO_ACL_XATTR_PSEUDO_INHERIT_ONLY)) {
+			if (inode->i_op->syno_bypass_is_synoacl) {
+				 
+				return inode->i_op->syno_bypass_is_synoacl(dentry,
+						        BYPASS_SYNOACL_SYNOACL_XATTR, -EOPNOTSUPP);
+			}
+			return synoacl_op_perm(dentry, MAY_READ_PERMISSION);
+		}
+	}
+
+	if (IS_SYNOACL(dentry) &&
+	    (!strncmp(name, SYNO_XATTR_EA_PREFIX, SYNO_XATTR_EA_PREFIX_LEN) ||
+	     !strncmp(name, SYNO_XATTR_NETATALK_PREFIX, SYNO_XATTR_NETATALK_PREFIX_LEN))) {
+		if (MAY_READ & mask) {
+			mask |= MAY_READ_ATTR;
+		}
+		if (MAY_WRITE & mask) {
+			mask |= MAY_WRITE_ATTR;
+		}
+		return synoacl_op_perm(dentry, mask);
+	}
+#endif  
+	 
 	if (mask & MAY_WRITE) {
 		if (IS_IMMUTABLE(inode) || IS_APPEND(inode))
 			return -EPERM;
 	}
 
-	
 	if (!strncmp(name, XATTR_SECURITY_PREFIX, XATTR_SECURITY_PREFIX_LEN) ||
 	    !strncmp(name, XATTR_SYSTEM_PREFIX, XATTR_SYSTEM_PREFIX_LEN))
 		return 0;
 
-	
 	if (!strncmp(name, XATTR_TRUSTED_PREFIX, XATTR_TRUSTED_PREFIX_LEN)) {
 		if (!capable(CAP_SYS_ADMIN))
 			return (mask & MAY_WRITE) ? -EPERM : -ENODATA;
 		return 0;
 	}
 
-	
 	if (!strncmp(name, XATTR_USER_PREFIX, XATTR_USER_PREFIX_LEN)) {
 		if (!S_ISREG(inode->i_mode) && !S_ISDIR(inode->i_mode))
 			return (mask & MAY_WRITE) ? -EPERM : -ENODATA;
@@ -47,9 +106,14 @@ xattr_permission(struct inode *inode, const char *name, int mask)
 			return -EPERM;
 	}
 
+#ifdef MY_ABC_HERE
+	if (IS_SYNOACL(dentry)) {
+		 
+		return synoacl_op_perm(dentry, mask);
+	} else
+#endif  
 	return inode_permission(inode, mask);
 }
-
 
 int __vfs_setxattr_noperm(struct dentry *dentry, const char *name,
 		const void *value, size_t size, int flags)
@@ -86,11 +150,15 @@ vfs_setxattr(struct dentry *dentry, const char *name, const void *value,
 	struct inode *inode = dentry->d_inode;
 	int error;
 
+#ifdef MY_ABC_HERE
+	error = xattr_permission(dentry, name, MAY_WRITE);
+#else
 	error = xattr_permission(inode, name, MAY_WRITE);
+#endif  
 	if (error)
 		return error;
 
-	mutex_lock(&inode->i_mutex);
+	inode_lock(inode);
 	error = security_inode_setxattr(dentry, name, value, size, flags);
 	if (error)
 		goto out;
@@ -98,10 +166,30 @@ vfs_setxattr(struct dentry *dentry, const char *name, const void *value,
 	error = __vfs_setxattr_noperm(dentry, name, value, size, flags);
 
 out:
-	mutex_unlock(&inode->i_mutex);
+	inode_unlock(inode);
 	return error;
 }
 EXPORT_SYMBOL_GPL(vfs_setxattr);
+#ifdef MY_ABC_HERE
+int
+vfs_setxattr_nolock(struct dentry *dentry, const char *name, const void *value,
+		size_t size, int flags)
+{
+	int error;
+	error = xattr_permission(dentry, name, MAY_WRITE);
+	if (error) {
+		goto out;
+	}
+	error = security_inode_setxattr(dentry, name, value, size, flags);
+	if (error) {
+		goto out;
+	}
+	error = __vfs_setxattr_noperm(dentry, name, value, size, flags);
+out:
+	return error;
+}
+EXPORT_SYMBOL(vfs_setxattr_nolock);
+#endif  
 
 ssize_t
 xattr_getsecurity(struct inode *inode, const char *name, void *value,
@@ -138,7 +226,11 @@ vfs_getxattr_alloc(struct dentry *dentry, const char *name, char **xattr_value,
 	char *value = *xattr_value;
 	int error;
 
+#ifdef MY_ABC_HERE
+	error = xattr_permission(dentry, name, MAY_READ);
+#else
 	error = xattr_permission(inode, name, MAY_READ);
+#endif  
 	if (error)
 		return error;
 
@@ -160,7 +252,9 @@ vfs_getxattr_alloc(struct dentry *dentry, const char *name, char **xattr_value,
 	*xattr_value = value;
 	return error;
 }
-
+#ifdef CONFIG_AUFS_FHSM
+EXPORT_SYMBOL_GPL(vfs_getxattr_alloc);
+#endif  
 
 int vfs_xattr_cmp(struct dentry *dentry, const char *xattr_name,
 		  const char *value, size_t size, gfp_t flags)
@@ -186,19 +280,32 @@ vfs_getxattr(struct dentry *dentry, const char *name, void *value, size_t size)
 	struct inode *inode = dentry->d_inode;
 	int error;
 
+#ifdef MY_ABC_HERE
+	error = xattr_permission(dentry, name, MAY_READ);
+#else
 	error = xattr_permission(inode, name, MAY_READ);
+#endif  
 	if (error)
 		return error;
 
 	error = security_inode_getxattr(dentry, name);
 	if (error)
 		return error;
-
+#ifdef MY_ABC_HERE
+	if (name && (!strcmp(name, SYNO_ACL_XATTR_INHERIT) || !strcmp(name, SYNO_ACL_XATTR_PSEUDO_INHERIT_ONLY))) {
+		if (!strcmp(name, SYNO_ACL_XATTR_INHERIT)) {
+			return synoacl_op_xattr_get(dentry, SYNO_ACL_INHERITED, value, size);
+		} else if (!strcmp(name, SYNO_ACL_XATTR_PSEUDO_INHERIT_ONLY)) {
+			 
+			return synoacl_op_xattr_get(dentry, SYNO_ACL_PSEUDO_INHERIT_ONLY, value, size);
+		}
+	}
+#endif  
 	if (!strncmp(name, XATTR_SECURITY_PREFIX,
 				XATTR_SECURITY_PREFIX_LEN)) {
 		const char *suffix = name + XATTR_SECURITY_PREFIX_LEN;
 		int ret = xattr_getsecurity(inode, suffix, value, size);
-		
+		 
 		if (ret == -EOPNOTSUPP)
 			goto nolsm;
 		return ret;
@@ -242,11 +349,15 @@ vfs_removexattr(struct dentry *dentry, const char *name)
 	if (!inode->i_op->removexattr)
 		return -EOPNOTSUPP;
 
+#ifdef MY_ABC_HERE
+	error = xattr_permission(dentry, name, MAY_WRITE);
+#else
 	error = xattr_permission(inode, name, MAY_WRITE);
+#endif  
 	if (error)
 		return error;
 
-	mutex_lock(&inode->i_mutex);
+	inode_lock(inode);
 	error = security_inode_removexattr(dentry, name);
 	if (error)
 		goto out;
@@ -259,12 +370,10 @@ vfs_removexattr(struct dentry *dentry, const char *name)
 	}
 
 out:
-	mutex_unlock(&inode->i_mutex);
+	inode_unlock(inode);
 	return error;
 }
 EXPORT_SYMBOL_GPL(vfs_removexattr);
-
-
 
 static long
 setxattr(struct dentry *d, const char __user *name, const void __user *value,
@@ -272,7 +381,7 @@ setxattr(struct dentry *d, const char __user *name, const void __user *value,
 {
 	int error;
 	void *kvalue = NULL;
-	void *vvalue = NULL;	
+	void *vvalue = NULL;	 
 	char kname[XATTR_NAME_MAX + 1];
 
 	if (flags & ~(XATTR_CREATE|XATTR_REPLACE))

@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/module.h>
 #include <linux/types.h>
 #include <linux/kernel.h>
@@ -367,12 +369,22 @@ static void cfi_fixup_major_minor(struct cfi_private *cfi,
 		}
 	}
 
-	
 	if (cfi->mfr == CFI_MFR_SST && (cfi->id >> 4) == 0x0536) {
 		extp->MajorVersion = '1';
 		extp->MinorVersion = '0';
 	}
 }
+#ifdef MY_DEF_HERE
+static int cfi_amdstd_unlock(struct mtd_info *mtd, loff_t ofs, uint64_t len)
+{
+	return 0;
+}
+
+static int cfi_amdstd_lock(struct mtd_info *mtd, loff_t ofs, uint64_t len)
+{
+	return 0;
+}
+#endif  
 
 static int is_m29ew(struct cfi_private *cfi)
 {
@@ -412,13 +424,16 @@ struct mtd_info *cfi_cmdset_0002(struct map_info *map, int primary)
 	mtd->priv = map;
 	mtd->type = MTD_NORFLASH;
 
-	
 	mtd->_erase   = cfi_amdstd_erase_varsize;
 	mtd->_write   = cfi_amdstd_write_words;
 	mtd->_read    = cfi_amdstd_read;
 	mtd->_sync    = cfi_amdstd_sync;
 	mtd->_suspend = cfi_amdstd_suspend;
 	mtd->_resume  = cfi_amdstd_resume;
+#ifdef MY_DEF_HERE
+	mtd->lock    = cfi_amdstd_lock;
+	mtd->unlock  = cfi_amdstd_unlock;
+#endif  
 	mtd->_read_user_prot_reg = cfi_amdstd_read_user_prot_reg;
 	mtd->_read_fact_prot_reg = cfi_amdstd_read_fact_prot_reg;
 	mtd->_get_fact_prot_info = cfi_amdstd_get_fact_prot_info;

@@ -1,12 +1,12 @@
-
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/kernel.h>
 #include <linux/string.h>
 #include <linux/usb.h>
 #include <linux/usb/quirks.h>
 #include "usb.h"
-
 
 #define usb_actconfig_show(field, format_string)			\
 static ssize_t field##_show(struct device *dev,				\
@@ -198,6 +198,34 @@ static ssize_t quirks_show(struct device *dev, struct device_attribute *attr,
 	return sprintf(buf, "0x%x\n", udev->quirks);
 }
 static DEVICE_ATTR_RO(quirks);
+
+#ifdef MY_ABC_HERE
+static ssize_t
+syno_quirks_show(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	struct usb_device *udev;
+
+	udev = to_usb_device(dev);
+	return sprintf(buf, "0x%x\n", udev->syno_quirks);
+}
+
+static ssize_t
+syno_quirks_store(struct device *dev, struct device_attribute *attr,
+		const char * buf, size_t count)
+{
+	struct usb_device *udev;
+	unsigned int val;
+
+	if (0 > kstrtouint(buf, 16, &val))
+		return -EINVAL;
+
+	udev = to_usb_device(dev);
+	udev->syno_quirks = val;
+
+	return count;
+}
+static DEVICE_ATTR_RW(syno_quirks);
+#endif  
 
 static ssize_t avoid_reset_quirk_show(struct device *dev,
 				      struct device_attribute *attr, char *buf)
@@ -719,6 +747,9 @@ static struct attribute *dev_attrs[] = {
 	&dev_attr_version.attr,
 	&dev_attr_maxchild.attr,
 	&dev_attr_quirks.attr,
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_quirks.attr,
+#endif  
 	&dev_attr_avoid_reset_quirk.attr,
 	&dev_attr_authorized.attr,
 	&dev_attr_remove.attr,

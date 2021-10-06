@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_MM_H
 #define _LINUX_MM_H
 
@@ -866,6 +869,9 @@ static inline void unmap_shared_mapping_range(struct address_space *mapping,
 
 extern void truncate_pagecache(struct inode *inode, loff_t new);
 extern void truncate_setsize(struct inode *inode, loff_t newsize);
+#ifdef MY_ABC_HERE
+extern void ecryptfs_truncate_setsize(struct inode *inode, loff_t newsize);
+#endif  
 void pagecache_isize_extended(struct inode *inode, loff_t from, loff_t to);
 void truncate_pagecache_range(struct inode *inode, loff_t offset, loff_t end);
 int truncate_inode_page(struct address_space *mapping, struct page *page);
@@ -890,11 +896,35 @@ static inline int fixup_user_fault(struct task_struct *tsk,
 		struct mm_struct *mm, unsigned long address,
 		unsigned int fault_flags)
 {
-	
+	 
 	BUG();
 	return -EFAULT;
 }
 #endif
+
+#ifdef CONFIG_AUFS_FHSM
+extern void vma_do_file_update_time(struct vm_area_struct *, const char[], int);
+extern struct file *vma_do_pr_or_file(struct vm_area_struct *, const char[],
+				      int);
+extern void vma_do_get_file(struct vm_area_struct *, const char[], int);
+extern void vma_do_fput(struct vm_area_struct *, const char[], int);
+
+#define vma_file_update_time(vma)	vma_do_file_update_time(vma, __func__, \
+								__LINE__)
+#define vma_pr_or_file(vma)		vma_do_pr_or_file(vma, __func__, \
+							  __LINE__)
+#define vma_get_file(vma)		vma_do_get_file(vma, __func__, __LINE__)
+#define vma_fput(vma)			vma_do_fput(vma, __func__, __LINE__)
+
+#ifndef CONFIG_MMU
+extern struct file *vmr_do_pr_or_file(struct vm_region *, const char[], int);
+extern void vmr_do_fput(struct vm_region *, const char[], int);
+
+#define vmr_pr_or_file(region)		vmr_do_pr_or_file(region, __func__, \
+							  __LINE__)
+#define vmr_fput(region)		vmr_do_fput(region, __func__, __LINE__)
+#endif  
+#endif  
 
 extern int access_process_vm(struct task_struct *tsk, unsigned long addr, void *buf, int len, int write);
 extern int access_remote_vm(struct mm_struct *mm, unsigned long addr,
@@ -904,6 +934,10 @@ long __get_user_pages(struct task_struct *tsk, struct mm_struct *mm,
 		      unsigned long start, unsigned long nr_pages,
 		      unsigned int foll_flags, struct page **pages,
 		      struct vm_area_struct **vmas, int *nonblocking);
+long get_user_pages_remote(struct task_struct *tsk, struct mm_struct *mm,
+			    unsigned long start, unsigned long nr_pages,
+			    int write, int force, struct page **pages,
+			    struct vm_area_struct **vmas);
 long get_user_pages(struct task_struct *tsk, struct mm_struct *mm,
 		    unsigned long start, unsigned long nr_pages,
 		    int write, int force, struct page **pages,
@@ -1452,6 +1486,7 @@ extern int __meminit init_per_zone_wmark_min(void);
 extern void mem_init(void);
 extern void __init mmap_init(void);
 extern void show_mem(unsigned int flags);
+extern long si_mem_available(void);
 extern void si_meminfo(struct sysinfo * val);
 extern void si_meminfo_node(struct sysinfo *val, int nid);
 
@@ -1607,24 +1642,24 @@ vm_unmapped_area(struct vm_unmapped_area_info *info)
 		return unmapped_area(info);
 }
 
-
 extern void truncate_inode_pages(struct address_space *, loff_t);
 extern void truncate_inode_pages_range(struct address_space *,
 				       loff_t lstart, loff_t lend);
 extern void truncate_inode_pages_final(struct address_space *);
 
-
 extern int filemap_fault(struct vm_area_struct *, struct vm_fault *);
 extern void filemap_map_pages(struct vm_area_struct *vma, struct vm_fault *vmf);
 extern int filemap_page_mkwrite(struct vm_area_struct *vma, struct vm_fault *vmf);
 
-
 int write_one_page(struct page *page, int wait);
 void task_dirty_inc(struct task_struct *tsk);
 
-
-#define VM_MAX_READAHEAD	128	
-#define VM_MIN_READAHEAD	16	
+#ifdef MY_ABC_HERE
+#define VM_MAX_READAHEAD        CONFIG_SYNO_MAX_READAHEAD_SIZE
+#else  
+#define VM_MAX_READAHEAD	128	 
+#endif  
+#define VM_MIN_READAHEAD	16	 
 
 int force_page_cache_readahead(struct address_space *mapping, struct file *filp,
 			pgoff_t offset, unsigned long nr_to_read);
@@ -1721,19 +1756,21 @@ static inline struct page *follow_page(struct vm_area_struct *vma,
 	return follow_page_mask(vma, address, foll_flags, &unused_page_mask);
 }
 
-#define FOLL_WRITE	0x01	
-#define FOLL_TOUCH	0x02	
-#define FOLL_GET	0x04	
-#define FOLL_DUMP	0x08	
-#define FOLL_FORCE	0x10	
-#define FOLL_NOWAIT	0x20	
-#define FOLL_POPULATE	0x40	
-#define FOLL_SPLIT	0x80	
-#define FOLL_HWPOISON	0x100	
-#define FOLL_NUMA	0x200	
-#define FOLL_MIGRATION	0x400	
-#define FOLL_TRIED	0x800	
-#define FOLL_MLOCK	0x1000	
+#define FOLL_WRITE	0x01	 
+#define FOLL_TOUCH	0x02	 
+#define FOLL_GET	0x04	 
+#define FOLL_DUMP	0x08	 
+#define FOLL_FORCE	0x10	 
+#define FOLL_NOWAIT	0x20	 
+#define FOLL_POPULATE	0x40	 
+#define FOLL_SPLIT	0x80	 
+#define FOLL_HWPOISON	0x100	 
+#define FOLL_NUMA	0x200	 
+#define FOLL_MIGRATION	0x400	 
+#define FOLL_TRIED	0x800	 
+#define FOLL_MLOCK	0x1000	 
+#define FOLL_REMOTE	0x2000	 
+#define FOLL_COW	0x4000	 
 
 typedef int (*pte_fn_t)(pte_t *pte, pgtable_t token, unsigned long addr,
 			void *data);

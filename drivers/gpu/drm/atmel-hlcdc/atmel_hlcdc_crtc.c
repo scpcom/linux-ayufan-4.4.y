@@ -317,6 +317,53 @@ void atmel_hlcdc_crtc_irq(struct drm_crtc *c)
 	atmel_hlcdc_crtc_finish_page_flip(drm_crtc_to_atmel_hlcdc_crtc(c));
 }
 
+void atmel_hlcdc_crtc_reset(struct drm_crtc *crtc)
+{
+	struct atmel_hlcdc_crtc_state *state;
+
+	if (crtc->state && crtc->state->mode_blob)
+		drm_property_unreference_blob(crtc->state->mode_blob);
+
+	if (crtc->state) {
+		state = drm_crtc_state_to_atmel_hlcdc_crtc_state(crtc->state);
+		kfree(state);
+	}
+
+	state = kzalloc(sizeof(*state), GFP_KERNEL);
+	if (state) {
+		crtc->state = &state->base;
+		crtc->state->crtc = crtc;
+	}
+}
+
+static struct drm_crtc_state *
+atmel_hlcdc_crtc_duplicate_state(struct drm_crtc *crtc)
+{
+	struct atmel_hlcdc_crtc_state *state, *cur;
+
+	if (WARN_ON(!crtc->state))
+		return NULL;
+
+	state = kmalloc(sizeof(*state), GFP_KERNEL);
+	if (state)
+		__drm_atomic_helper_crtc_duplicate_state(crtc, &state->base);
+
+	cur = drm_crtc_state_to_atmel_hlcdc_crtc_state(crtc->state);
+	state->output_mode = cur->output_mode;
+
+	return &state->base;
+}
+
+static void atmel_hlcdc_crtc_destroy_state(struct drm_crtc *crtc,
+					   struct drm_crtc_state *s)
+{
+	struct atmel_hlcdc_crtc_state *state;
+
+	state = drm_crtc_state_to_atmel_hlcdc_crtc_state(s);
+	__drm_atomic_helper_crtc_destroy_state(s);
+	kfree(state);
+}
+
 static const struct drm_crtc_funcs atmel_hlcdc_crtc_funcs = {
 	.page_flip = drm_atomic_helper_page_flip,
 	.set_config = drm_atomic_helper_set_config,
@@ -343,7 +390,7 @@ int atmel_hlcdc_crtc_create(struct drm_device *dev)
 	ret = drm_crtc_init_with_planes(dev, &crtc->base,
 				&planes->primary->base,
 				planes->cursor ? &planes->cursor->base : NULL,
-				&atmel_hlcdc_crtc_funcs);
+				&atmel_hlcdc_crtc_funcs, NULL);
 	if (ret < 0)
 		goto fail;
 

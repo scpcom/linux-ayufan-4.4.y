@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/string.h>
@@ -149,7 +151,11 @@ static int proc_print_scsidevice(struct device *dev, void *data)
 	}
 
 	seq_puts(s, " Model: ");
+#ifdef MY_ABC_HERE
+	for (i = 0; i < CONFIG_SYNO_DISK_MODEL_NUM; i++) {
+#else  
 	for (i = 0; i < 16; i++) {
+#endif  
 		if (sdev->model[i] >= 0x20)
 			seq_putc(s, sdev->model[i]);
 		else

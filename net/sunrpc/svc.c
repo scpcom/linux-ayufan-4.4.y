@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/linkage.h>
 #include <linux/sched.h>
 #include <linux/errno.h>
@@ -19,6 +21,10 @@
 #include <linux/sunrpc/bc_xprt.h>
 
 #include <trace/events/sunrpc.h>
+
+#ifdef MY_ABC_HERE
+#include <uapi/linux/nfs.h>
+#endif  
 
 #define RPCDBG_FACILITY	RPCDBG_SVCDSP
 
@@ -791,6 +797,12 @@ int svc_register(const struct svc_serv *serv, struct net *net,
 
 			if (vers->vs_hidden)
 				continue;
+
+#ifdef MY_ABC_HERE
+			if (NFS_PROGRAM == progp->pg_prog && 4 == i && IPPROTO_UDP == proto) {
+				continue;
+			}
+#endif  
 
 			error = __svc_register(net, progp->pg_name, progp->pg_prog,
 						i, family, proto, port);

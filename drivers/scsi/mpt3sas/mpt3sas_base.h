@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * This is the Fusion MPT base driver providing common API layer interface
  * for access to MPT (Message Passing Technology) firmware.
@@ -467,6 +470,9 @@ struct _sas_device {
 	u8	enclosure_level;
 	u8	connector_name[4];
 	struct kref refcount;
+#ifdef MY_DEF_HERE
+	u8   any_led_on;
+#endif /* MY_DEF_HERE */
 };
 
 static inline void sas_device_get(struct _sas_device *s)
@@ -1157,11 +1163,13 @@ struct MPT3SAS_ADAPTER {
 	struct SL_WH_EVENT_TRIGGERS_T diag_trigger_event;
 	struct SL_WH_SCSI_TRIGGERS_T diag_trigger_scsi;
 	struct SL_WH_MPI_TRIGGERS_T diag_trigger_mpi;
+#ifdef MY_DEF_HERE
+	u8		syno_ids;
+#endif /* MY_DEF_HERE */
 };
 
 typedef u8 (*MPT_CALLBACK)(struct MPT3SAS_ADAPTER *ioc, u16 smid, u8 msix_index,
 	u32 reply);
-
 
 /* base shared API */
 extern struct list_head mpt3sas_ioc_list;

@@ -1,5 +1,7 @@
-
-
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+ 
 #include <linux/kernel.h>
 #include <linux/gfp.h>
 #include <linux/module.h>
@@ -10,9 +12,24 @@
 #include <linux/device.h>
 #include <scsi/scsi_host.h>
 #include <scsi/scsi_cmnd.h>
+#ifdef MY_ABC_HERE
+#include <scsi/scsi_device.h>
+#endif  
 #include <linux/libata.h>
+#ifdef MY_DEF_HERE
+#include <linux/pci.h>
+#include <linux/leds.h>
+#endif  
 #include "ahci.h"
 #include "libata.h"
+
+#ifdef MY_DEF_HERE
+extern void syno_ledtrig_active_set(int iLedNum);
+extern int *gpGreenLedMap;
+#endif  
+#ifdef MY_ABC_HERE
+#include <linux/synolib.h>
+#endif  
 
 static int ahci_skip_host_reset;
 int ahci_ignore_sss;
@@ -83,6 +100,121 @@ static DEVICE_ATTR(ahci_host_caps, S_IRUGO, ahci_show_host_caps, NULL);
 static DEVICE_ATTR(ahci_host_cap2, S_IRUGO, ahci_show_host_cap2, NULL);
 static DEVICE_ATTR(ahci_host_version, S_IRUGO, ahci_show_host_version, NULL);
 static DEVICE_ATTR(ahci_port_cmd, S_IRUGO, ahci_show_port_cmd, NULL);
+#ifdef MY_ABC_HERE
+static ssize_t
+ata_ahci_locate_show(struct device *dev, struct device_attribute *attr,
+		char *buf)
+{
+	struct scsi_device *sdev = to_scsi_device(dev);
+	struct ata_port *ap = ata_shost_to_port(sdev->host);
+	struct ata_device *atadev = ata_scsi_find_dev(ap, sdev);
+	struct ahci_port_priv *pp = ap->private_data;
+	struct ahci_em_priv *emp = &pp->em_priv[atadev->link->pmp];
+
+	return sprintf(buf, "%ld\n", emp->locate);
+}
+
+static void ahci_sw_locate_set(struct ata_link *link, u8 blEnable);
+
+static ssize_t
+ata_ahci_locate_store(struct device *dev, struct device_attribute *attr,
+	const char *buf, size_t count)
+{
+	struct scsi_device *sdev = to_scsi_device(dev);
+	struct ata_port *ap = ata_shost_to_port(sdev->host);
+	struct ata_device *atadev = ata_scsi_find_dev(ap, sdev);
+	int val;
+
+	if (ap->flags & ATA_FLAG_SW_LOCATE) {
+		val = simple_strtoul(buf, NULL, 0);
+		switch (val) {
+		case 0:
+		case 1:
+			ahci_sw_locate_set(atadev->link, val);
+			return count;
+		default:
+			return -EIO;
+		}
+	}
+	return -EINVAL;
+}
+DEVICE_ATTR(sw_locate, S_IWUSR | S_IRUGO, ata_ahci_locate_show, ata_ahci_locate_store);
+
+static ssize_t
+ata_ahci_fault_show(struct device *dev, struct device_attribute *attr,
+		char *buf)
+{
+	struct scsi_device *sdev = to_scsi_device(dev);
+	struct ata_port *ap = ata_shost_to_port(sdev->host);
+	struct ata_device *atadev = ata_scsi_find_dev(ap, sdev);
+	struct ahci_port_priv *pp = ap->private_data;
+	struct ahci_em_priv *emp = &pp->em_priv[atadev->link->pmp];
+
+	return sprintf(buf, "%ld\n", emp->fault);
+}
+
+static void ahci_sw_fault_set(struct ata_link *link, u8 blEnable);
+
+void sata_syno_ahci_diskled_set(int iHostNum, int iPresent, int iFault)
+{
+	struct ata_port *pAp = NULL;
+	struct ata_device *pAtaDev = NULL;
+	struct Scsi_Host *pScsiHost = NULL;
+	struct ata_link *pAtaLink = NULL;
+
+	if (NULL == (pScsiHost = scsi_host_lookup(iHostNum))) {
+			goto END;
+	}
+
+	pAp = ata_shost_to_port(pScsiHost);
+	if (!pAp) {
+		goto RELEASESRC;
+	}
+
+	if (pAp->nr_pmp_links) {
+		goto RELEASESRC;
+	}
+
+	ata_for_each_link(pAtaLink, pAp, EDGE) {
+		ata_for_each_dev(pAtaDev, pAtaLink, ALL) {
+			 
+			ahci_sw_locate_set(pAtaDev->link, iPresent);
+			ahci_sw_fault_set(pAtaDev->link, iFault);
+		}
+	}
+
+RELEASESRC:
+	scsi_host_put(pScsiHost);
+END:
+	return;
+}
+EXPORT_SYMBOL(sata_syno_ahci_diskled_set);
+
+static ssize_t
+ata_ahci_fault_store(struct device *dev, struct device_attribute *attr,
+	const char *buf, size_t count)
+{
+	struct scsi_device *sdev = to_scsi_device(dev);
+	struct ata_port *ap = ata_shost_to_port(sdev->host);
+	struct ata_device *atadev = ata_scsi_find_dev(ap, sdev);
+	int val;
+
+	if (ap->flags & ATA_FLAG_SW_FAULT) {
+		val = simple_strtoul(buf, NULL, 0);
+		switch (val) {
+		case 0:
+		case 1:
+			ahci_sw_fault_set(atadev->link, val);
+			return count;
+		default:
+			return -EIO;
+		}
+	}
+	return -EINVAL;
+}
+DEVICE_ATTR(sw_fault, S_IWUSR | S_IRUGO, ata_ahci_fault_show, ata_ahci_fault_store);
+#endif  
+
 static DEVICE_ATTR(em_buffer, S_IWUSR | S_IRUGO,
 		   ahci_read_em_buffer, ahci_store_em_buffer);
 static DEVICE_ATTR(em_message_supported, S_IRUGO, ahci_show_em_supported, NULL);
@@ -97,6 +229,17 @@ struct device_attribute *ahci_shost_attrs[] = {
 	&dev_attr_ahci_port_cmd,
 	&dev_attr_em_buffer,
 	&dev_attr_em_message_supported,
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_manutil_power_disable,
+	&dev_attr_syno_pm_gpio,
+	&dev_attr_syno_pm_info,
+#endif  
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_diskname_trans,
+#endif  
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_sata_disk_led_ctrl,
+#endif  
 	NULL
 };
 EXPORT_SYMBOL_GPL(ahci_shost_attrs);
@@ -104,6 +247,13 @@ EXPORT_SYMBOL_GPL(ahci_shost_attrs);
 struct device_attribute *ahci_sdev_attrs[] = {
 	&dev_attr_sw_activity,
 	&dev_attr_unload_heads,
+#ifdef MY_ABC_HERE
+	&dev_attr_syno_wcache,
+#endif  
+#ifdef MY_ABC_HERE
+	&dev_attr_sw_locate,
+	&dev_attr_sw_fault,
+#endif  
 	NULL
 };
 EXPORT_SYMBOL_GPL(ahci_sdev_attrs);
@@ -653,17 +803,123 @@ static void ahci_power_down(struct ata_port *ap)
 	if (!(hpriv->cap & HOST_CAP_SSS))
 		return;
 
-	
 	scontrol = readl(port_mmio + PORT_SCR_CTL);
 	scontrol &= ~0xf;
 	writel(scontrol, port_mmio + PORT_SCR_CTL);
 
-	
 	cmd = readl(port_mmio + PORT_CMD) & ~PORT_CMD_ICC_MASK;
 	cmd &= ~PORT_CMD_SPIN_UP;
 	writel(cmd, port_mmio + PORT_CMD);
 }
 #endif
+
+#ifdef MY_DEF_HERE
+static int syno_need_ahci_software_activity(struct ata_port *ap)
+{
+	struct pci_dev *pdev = NULL;
+	int ret = 0;
+
+#ifdef MY_ABC_HERE
+	 
+	if (syno_is_hw_version(HW_DS2415p) || syno_is_hw_version(HW_RS2416p) || syno_is_hw_version(HW_RS2416rpp)) {
+		goto END;
+	}
+#endif  
+
+	if (ap != NULL) {
+		pdev = to_pci_dev(ap->dev);
+		if (pdev != NULL && pdev->vendor == 0x8086) {
+			switch (pdev->device) {
+				 
+				case 0x1f22:
+				case 0x1f32:
+					ret = 1;
+					break;
+				default:
+					break;
+			}
+		}
+	}
+
+END:
+	return ret;
+}
+
+static void syno_sw_activity(struct ata_port *ap)
+{
+	if (NULL == gpGreenLedMap) {
+		return;
+	}
+	syno_ledtrig_active_set(gpGreenLedMap[ap->syno_disk_index]);
+}
+
+int syno_ahci_disk_led_enable(const unsigned short hostnum, const int iValue)
+{
+	struct Scsi_Host *shost = scsi_host_lookup(hostnum);
+	struct ata_port *ap = NULL;
+	int ret = -EINVAL;
+	struct ahci_port_priv *pp = NULL;
+	struct ahci_em_priv *emp = NULL;
+	struct ata_link *link = NULL;
+	unsigned long flags;
+
+	if (NULL == shost) {
+		goto END;
+	}
+
+	if (NULL == (ap = ata_shost_to_port(shost))) {
+		goto END;
+	}
+
+	pp = ap->private_data;
+	spin_lock_irqsave(ap->lock, flags);
+	ata_for_each_link(link, ap, EDGE) {
+		emp = &pp->em_priv[link->pmp];
+		emp->saved_activity = emp->activity = 0;
+		del_timer(&emp->timer);
+	}
+
+	if (iValue) {
+		ap->flags |= ATA_FLAG_SW_ACTIVITY;
+		ata_for_each_link(link, ap, EDGE) {
+			ahci_init_sw_activity(link);
+		}
+	} else {
+		ap->flags &= ~ATA_FLAG_SW_ACTIVITY;
+		ata_for_each_link(link, ap, EDGE) {
+			link->flags &= ~ATA_LFLAG_SW_ACTIVITY;
+		}
+	}
+	spin_unlock_irqrestore(ap->lock, flags);
+	ret = 0;
+
+END:
+	if (shost) {
+		scsi_host_put(shost);
+	}
+	return ret;
+}
+EXPORT_SYMBOL(syno_ahci_disk_led_enable);
+
+#ifdef MY_ABC_HERE
+ 
+int syno_ahci_disk_led_enable_by_port(const unsigned short diskPort, const int iValue)
+{
+	int i = 0;
+	unsigned short scsiHostNum = 0;
+	 
+	for (i = 0; i < SATA_REMAP_MAX; i++) {
+		if ((unsigned short)syno_get_remap_idx(i) == (diskPort - 1)) {
+			scsiHostNum = (unsigned short) i;
+			break;
+		}
+	}
+
+	return syno_ahci_disk_led_enable(scsiHostNum, iValue);
+}
+EXPORT_SYMBOL(syno_ahci_disk_led_enable_by_port);
+#endif  
+#endif  
 
 static void ahci_start_port(struct ata_port *ap)
 {
@@ -695,6 +951,12 @@ static void ahci_start_port(struct ata_port *ap)
 			}
 		}
 	}
+
+#ifdef MY_DEF_HERE
+	if (syno_need_ahci_software_activity(ap)) {
+		ap->flags |= ATA_FLAG_SW_ACTIVITY;
+	}
+#endif  
 
 	if (ap->flags & ATA_FLAG_SW_ACTIVITY)
 		ata_for_each_link(link, ap, EDGE)
@@ -769,6 +1031,66 @@ static void ahci_sw_activity(struct ata_link *link)
 		mod_timer(&emp->timer, jiffies + msecs_to_jiffies(10));
 }
 
+#ifdef MY_ABC_HERE
+static void ahci_sw_locate_set(struct ata_link *link, u8 blEnable)
+{
+	struct ata_port *ap = link->ap;
+	struct ahci_port_priv *pp = ap->private_data;
+	struct ahci_em_priv *emp = &pp->em_priv[link->pmp];
+	unsigned long led_message = emp->led_state;
+	unsigned long flags;
+
+	led_message &= EM_MSG_LED_VALUE;
+
+	led_message |= ap->port_no | (link->pmp << 8);
+
+	emp->locate= blEnable;
+
+	spin_lock_irqsave(ap->lock, flags);
+	if (emp->saved_locate == emp->locate) {
+		spin_unlock_irqrestore(ap->lock, flags);
+		goto END;
+	}
+	emp->saved_locate = emp->locate;
+	led_message &= ~(EM_MSG_LOCATE_LED_MASK);
+	led_message |= (emp->locate << 19);
+	spin_unlock_irqrestore(ap->lock, flags);
+	ahci_transmit_led_message(ap, led_message, 4);
+	mdelay(10);
+END:
+	return;
+}
+
+static void ahci_sw_fault_set(struct ata_link *link, u8 blEnable)
+{
+	struct ata_port *ap = link->ap;
+	struct ahci_port_priv *pp = ap->private_data;
+	struct ahci_em_priv *emp = &pp->em_priv[link->pmp];
+	unsigned long led_message = emp->led_state;
+	unsigned long flags;
+
+	led_message &= EM_MSG_LED_VALUE;
+
+	led_message |= ap->port_no | (link->pmp << 8);
+
+	emp->fault= blEnable;
+
+	spin_lock_irqsave(ap->lock, flags);
+	if (emp->saved_fault == emp->fault) {
+		spin_unlock_irqrestore(ap->lock, flags);
+		goto END;
+	}
+	emp->saved_fault = emp->fault;
+	led_message &= ~(EM_MSG_FAULT_LED_MASK);
+	led_message |= (emp->fault << 22);
+	spin_unlock_irqrestore(ap->lock, flags);
+	ahci_transmit_led_message(ap, led_message, 4);
+	mdelay(10);
+END:
+	return;
+}
+#endif  
+
 static void ahci_sw_activity_blink(unsigned long arg)
 {
 	struct ata_link *link = (struct ata_link *)arg;
@@ -776,17 +1098,21 @@ static void ahci_sw_activity_blink(unsigned long arg)
 	struct ahci_port_priv *pp = ap->private_data;
 	struct ahci_em_priv *emp = &pp->em_priv[link->pmp];
 	unsigned long led_message = emp->led_state;
+#ifndef MY_DEF_HERE
 	u32 activity_led_state;
+#endif  
 	unsigned long flags;
 
 	led_message &= EM_MSG_LED_VALUE;
 	led_message |= ap->port_no | (link->pmp << 8);
 
-	
 	spin_lock_irqsave(ap->lock, flags);
 	if (emp->saved_activity != emp->activity) {
 		emp->saved_activity = emp->activity;
-		
+#ifdef MY_DEF_HERE
+		syno_sw_activity(ap);
+#else
+		 
 		activity_led_state = led_message & EM_MSG_LED_VALUE_ON;
 
 		if (activity_led_state)
@@ -794,20 +1120,23 @@ static void ahci_sw_activity_blink(unsigned long arg)
 		else
 			activity_led_state = 1;
 
-		
 		led_message &= ~EM_MSG_LED_VALUE_ACTIVITY;
 
-		
 		led_message |= (activity_led_state << 16);
+#endif  
 		mod_timer(&emp->timer, jiffies + msecs_to_jiffies(100));
+#ifndef MY_DEF_HERE
 	} else {
-		
+		 
 		led_message &= ~EM_MSG_LED_VALUE_ACTIVITY;
 		if (emp->blink_policy == BLINK_OFF)
 			led_message |= (1 << 16);
+#endif  
 	}
 	spin_unlock_irqrestore(ap->lock, flags);
+#ifndef MY_DEF_HERE
 	ap->ops->transmit_led_message(ap, led_message, 4);
+#endif  
 }
 
 static void ahci_init_sw_activity(struct ata_link *link)
@@ -816,12 +1145,16 @@ static void ahci_init_sw_activity(struct ata_link *link)
 	struct ahci_port_priv *pp = ap->private_data;
 	struct ahci_em_priv *emp = &pp->em_priv[link->pmp];
 
-	
 	emp->saved_activity = emp->activity = 0;
 	setup_timer(&emp->timer, ahci_sw_activity_blink, (unsigned long)link);
 
-	
+#ifdef CONFIG_ARCH_RTD129X
+	emp->blink_policy = 1;
+#endif
+
+#ifndef MY_DEF_HERE
 	if (emp->blink_policy)
+#endif  
 		link->flags |= ATA_LFLAG_SW_ACTIVITY;
 }
 
@@ -1170,27 +1503,40 @@ int ahci_do_softreset(struct ata_link *link, unsigned int *class,
 		goto fail;
 	}
 
-	
 	ata_msleep(ap, 1);
 
-	
 	tf.ctl &= ~ATA_SRST;
+#ifdef MY_ABC_HERE
+	if ((hpriv->flags & AHCI_HFLAG_YES_MV9235_FIX)) {
+		 
+		msecs = 0;
+		now = jiffies;
+		if (time_after(deadline, now))
+			msecs = jiffies_to_msecs(deadline - now);
+		if(ahci_exec_polled_cmd(ap, pmp, &tf, 0, 0, msecs)) {
+			rc = -EIO;
+			reason = "2nd FIS failed";
+			goto fail;
+		}
+	} else {
+#endif  
 	ahci_exec_polled_cmd(ap, pmp, &tf, 0, 0, 0);
+#ifdef MY_ABC_HERE
+	}
+#endif  
 
-	
 	rc = ata_wait_after_reset(link, deadline, check_ready);
 	if (rc == -EBUSY && hpriv->flags & AHCI_HFLAG_SRST_TOUT_IS_OFFLINE) {
-		
+		 
 		ata_link_info(link, "device not ready, treating as offline\n");
 		*class = ATA_DEV_NONE;
 	} else if (rc) {
-		
+		 
 		reason = "device not ready";
 		goto fail;
 	} else
 		*class = ahci_dev_classify(ap);
 
-	
 	if (fbs_disabled)
 		ahci_enable_fbs(ap);
 
@@ -1199,6 +1545,11 @@ int ahci_do_softreset(struct ata_link *link, unsigned int *class,
 
  fail:
 	ata_link_err(link, "softreset failed (%s)\n", reason);
+#ifdef MY_ABC_HERE
+	 
+	if (fbs_disabled)
+		ahci_enable_fbs(ap);
+#endif  
 	return rc;
 }
 
@@ -1332,6 +1683,60 @@ static unsigned int ahci_fill_sg(struct ata_queued_cmd *qc, void *cmd_tbl)
 
 	return si;
 }
+
+#ifdef MY_ABC_HERE
+int sata_syno_ahci_defer_cmd(struct ata_queued_cmd *qc)
+{
+	struct ata_link *link = qc->dev->link;
+	struct ata_port *ap = link->ap;
+	u8 prot = qc->tf.protocol;
+
+	int is_excl = (ata_is_atapi(prot) ||
+		       (qc->flags & ATA_QCFLAG_RESULT_TF));
+
+	if (unlikely(ap->excl_link)) {
+		if (link == ap->excl_link) {
+			if (ap->nr_active_links)
+				return ATA_DEFER_PORT;
+			qc->flags |= ATA_QCFLAG_CLEAR_EXCL;
+		} else {
+			if (!ap->nr_active_links) {
+				 
+				if (is_excl) {
+					ap->excl_link = link;
+					qc->flags |= ATA_QCFLAG_CLEAR_EXCL;
+				} else {
+					 
+					ap->excl_link = NULL;
+				}
+			} else {
+				return ATA_DEFER_PORT;
+			}
+		}
+	} else if (unlikely(is_excl)) {
+		ap->excl_link = link;
+		if (ap->nr_active_links)
+			return ATA_DEFER_PORT;
+		qc->flags |= ATA_QCFLAG_CLEAR_EXCL;
+	}
+
+	return ata_std_qc_defer(qc);
+}
+EXPORT_SYMBOL_GPL(sata_syno_ahci_defer_cmd);
+#endif  
+
+#ifdef MY_DEF_HERE
+int ahci_syno_pmp_3x26_qc_defer(struct ata_queued_cmd *qc)
+{
+	struct ata_port *ap = qc->ap;
+	if (sata_pmp_attached(ap) && (ap->uiStsFlags & SYNO_STATUS_IS_SIL3x26)) {
+		return sata_syno_ahci_defer_cmd(qc);
+	}
+	else
+		return ata_std_qc_defer(qc);
+}
+EXPORT_SYMBOL_GPL(ahci_syno_pmp_3x26_qc_defer);
+#endif  
 
 static int ahci_pmp_qc_defer(struct ata_queued_cmd *qc)
 {
@@ -1483,13 +1888,19 @@ static void ahci_error_intr(struct ata_port *ap, u32 irq_stat)
 	}
 
 	if (irq_stat & (PORT_IRQ_CONNECT | PORT_IRQ_PHYRDY)) {
+#ifdef MY_ABC_HERE
+		syno_ata_info_print(ap);
+#endif  
+#ifdef MY_ABC_HERE
+		if (irq_stat & PORT_IRQ_CONNECT) {
+			ap->pflags |= ATA_PFLAG_SYNO_BOOT_PROBE;
+		}
+#endif  
 		ata_ehi_hotplugged(host_ehi);
 		ata_ehi_push_desc(host_ehi, "%s",
 			irq_stat & PORT_IRQ_CONNECT ?
 			"connection status changed" : "PHY RDY changed");
 	}
-
-	
 
 	if (irq_stat & PORT_IRQ_FREEZE)
 		ata_port_freeze(ap);
@@ -2171,13 +2582,19 @@ void ahci_set_em_messages(struct ahci_host_priv *hpriv,
 	messages = (em_ctl & EM_CTRL_MSG_TYPE) >> 16;
 
 	if (messages) {
-		
+		 
 		hpriv->em_loc = ((em_loc >> 16) * 4);
 		hpriv->em_buf_sz = ((em_loc & 0xff) * 4);
 		hpriv->em_msg_type = messages;
 		pi->flags |= ATA_FLAG_EM;
 		if (!(em_ctl & EM_CTL_ALHD))
 			pi->flags |= ATA_FLAG_SW_ACTIVITY;
+#ifdef MY_ABC_HERE
+		if (em_ctl & EM_CTL_LED) {
+			pi->flags |= ATA_FLAG_SW_LOCATE;
+			pi->flags |= ATA_FLAG_SW_FAULT;
+		}
+#endif  
 	}
 }
 EXPORT_SYMBOL_GPL(ahci_set_em_messages);
