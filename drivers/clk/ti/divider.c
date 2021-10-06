@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * TI Divider Clock
  *
@@ -26,11 +29,11 @@
 #undef pr_fmt
 #define pr_fmt(fmt) "%s: " fmt, __func__
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 #define to_clk_divider(_hw) container_of(_hw, struct clk_divider, hw)
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 #define div_mask(d)	((1 << ((d)->width)) - 1)
 

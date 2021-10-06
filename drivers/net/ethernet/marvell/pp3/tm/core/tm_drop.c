@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -2865,4 +2868,4 @@ int tm_create_drop_profile_mixed_cbtd_100Mb_wred_10Mb(tm_handle hndl,
 	rc = tm_create_drop_profile(ctl, level, cos, &profile, prof_index);
 	return rc;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

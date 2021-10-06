@@ -4,7 +4,7 @@
 skip=0
 
 case "$BUILD_TARGET" in
-	APOLLOLAKE|DENVERTON|KVMX64|BROADWELLNK|PURLEY)
+	APOLLOLAKE|DENVERTON|KVMX64|BROADWELLNK|PURLEY|COFFEELAKE)
 		KERNEL_STRIP=${STRIP64}
 		;;
 	*)
@@ -23,7 +23,6 @@ ModCrypto=" \
 	${KernelDir}/crypto/md4.ko \
 	${KernelDir}/crypto/md5.ko \
 	${KernelDir}/crypto/sha256_generic.ko \
-	${KernelDir}/crypto/sha512_generic.ko \
 	${KernelDir}/crypto/cts.ko \
 	${KernelDir}/crypto/seqiv.ko \
 	${KernelDir}/crypto/gcm.ko \
@@ -40,8 +39,8 @@ ModCrypto=" \
 ModFS=" \
 	${KernelDir}/fs/fat/fat.ko \
 	${KernelDir}/fs/fat/vfat.ko \
-	${KernelDir}/lib/zlib_deflate/zlib_deflate.ko \
 	${KernelDir}/fs/hfsplus/hfsplus.ko \
+	${KernelDir}/drivers/md/dm-flakey.ko \
 	"
 ModEncFS=" \
 	${KernelDir}/fs/ecryptfs/ecryptfs.ko \
@@ -193,6 +192,10 @@ ModAlsa=" \
 ModDocker=" \
 	${KernelDir}/drivers/net/macvlan.ko \
 	${KernelDir}/drivers/net/veth.ko \
+	${KernelDir}/drivers/net/vxlan.ko \
+	${KernelDir}/net/bridge/br_netfilter.ko \
+	${KernelDir}/net/ipv4/udp_tunnel.ko \
+	${KernelDir}/net/ipv6/ip6_udp_tunnel.ko \
 	${KernelDir}/net/netfilter/xt_addrtype.ko \
 	${KernelDir}/net/netfilter/xt_conntrack.ko \
 	${KernelDir}/fs/aufs/aufs.ko \
@@ -387,6 +390,9 @@ ModDVB=" \
 ModI2C=" \
 	${KernelDir}/drivers/i2c/algos/i2c-algo-bit.ko \
 	"
+ModXFS=" \
+	${KernelDir}/fs/xfs/xfs.ko \
+	"
 ModBTRFS=" \
 	${KernelDir}/fs/btrfs/btrfs.ko \
 	"
@@ -503,6 +509,7 @@ case "$BUILD_TARGET" in
 		ModuleList="${ModuleList} ${ModOpenvswitch}"
 		ModuleList="${ModuleList} ${ModDVB}"
 		ModuleList="${ModuleList} ${ModDiskPwCtl}"
+		ModuleList="${ModuleList} ${KernelDir}/lib/zlib_deflate/zlib_deflate.ko"
 
 		;;
 	KVMX64)
@@ -530,11 +537,13 @@ case "$BUILD_TARGET" in
 		ModuleList="${ModuleList} ${ModNFQ}"
 		ModuleList="${ModuleList} ${ModDVB}"
 		ModuleList="${ModuleList} ${ModVirtio}"
+		ModuleList="${ModuleList} ${KernelDir}/lib/zlib_deflate/zlib_deflate.ko"
 
 		;;
 	REALTEK_RTD1296)
 		ModuleList="${ModuleList} ${KernelDir}/net/ipv4/netfilter/ipt_MASQUERADE.ko"
 		ModuleList="${ModuleList} ${KernelDir}/lib/zlib_deflate/zlib_deflate.ko"
+		ModuleList="${ModuleList} ${ModBTRFS}"
 		ModuleList="${ModuleList} ${KernelDir}/crypto/arc4.ko"
 		ModuleList="${ModuleList} ${KernelDir}/crypto/cryptd.ko"
 		ModuleList="${ModuleList} ${KernelDir}/crypto/ocf/cryptodev.ko"
@@ -631,6 +640,7 @@ case "$BUILD_TARGET" in
 		ModuleList="${ModuleList} ${ModOpenvswitch}"
 		ModuleList="${ModuleList} ${ModNFQ}"
 		ModuleList="${ModuleList} ${ModDVB}"
+		ModuleList="${ModuleList} ${KernelDir}/lib/zlib_deflate/zlib_deflate.ko"
 
 		;;
 	MARVELL_ARMADA37XX)
@@ -670,6 +680,33 @@ case "$BUILD_TARGET" in
 		ModuleList="${ModuleList} ${ModDiskPwCtl}"
 
 		;;
+	COFFEELAKE)
+		ModuleList="${ModuleList} ${ModBTRFS}"
+		ModuleList="${ModuleList} ${ModCryptoIntel}"
+		ModuleList="${ModuleList} ${ModI2C}"
+		ModuleList="${ModuleList} ${KernelDir}/drivers/i2c/busses/i2c-i801.ko"
+		ModuleList="${ModuleList} ${ModLP3943}"
+		ModuleList="${ModuleList} ${ModCPUFreq}"
+		ModuleList="${ModuleList} ${ModBridge} ${ModTC} ${ModFwSecurity}"
+		ModuleList="${ModuleList} ${ModVlan}"
+		ModuleList="${ModuleList} ${ModUSBserial}"
+		ModuleList="${ModuleList} ${ModIPsec}"
+		ModuleList="${ModuleList} ${ModUSBModem}"
+		ModuleList="${ModuleList} ${ModEtronUSB}"
+		ModuleList="${ModuleList} ${ModWirless}"
+		ModuleList="${ModuleList} ${ModBluetooth}"
+		ModuleList="${ModuleList} ${ModZram}"
+		ModuleList="${ModuleList} ${ModIPv6Tun}"
+		ModuleList="${ModuleList} ${ModVirtualization}"
+		ModuleList="${ModuleList} ${ModOpenvswitch}"
+		ModuleList="${ModuleList} ${ModNFQ}"
+		ModuleList="${ModuleList} ${ModDVB}"
+		ModuleList="${ModuleList} ${ModDiskPwCtl}"
+		ModuleList="${ModuleList} ${ModDCA}"
+		ModuleList="${ModuleList} ${ModADT}"
+		ModuleList="${ModuleList} ${KernelDir}/drivers/net/mdio.ko"
+
+		;;
 	*)
 		SkipThisProject
 		return
@@ -693,7 +730,7 @@ do
 done
 
 case ${BUILD_TARGET} in
-	APOLLOLAKE|DENVERTON|KVMX64|BROADWELLNK|PURLEY)
+	APOLLOLAKE|DENVERTON|KVMX64|BROADWELLNK|PURLEY|COFFEELAKE)
 		ZIMAGE="${KernelDir}/arch/x86_64/boot/bzImage"
 		;;
 	REALTEK_RTD1296)
@@ -705,6 +742,7 @@ case ${BUILD_TARGET} in
 		cp -vf ${KernelDir}/arch/arm64/boot/dts/realtek/rtd-1293-synology-DS418j.dtb ${DebDevBuild}/image/dtb_ds418j.bin
 		cp -vf ${KernelDir}/arch/arm64/boot/dts/realtek/rtd-1296-synology-DS218play.dtb ${DebDevBuild}/image/dtb_ds218play.bin
 		cp -vf ${KernelDir}/arch/arm64/boot/dts/realtek/rtd-1296-synology-DS118.dtb ${DebDevBuild}/image/dtb_ds118.bin
+		cp -vf ${KernelDir}/arch/arm64/boot/dts/realtek/rtd-1296-synology-DS218.dtb ${DebDevBuild}/image/dtb_ds218.bin
 		;;
 	MARVELL_ARMADA37XX)
 		lzma -z ${KernelDir}/arch/arm64/boot/Image
@@ -749,6 +787,8 @@ if [ -r "$VmLinux" ]; then
 	cp -fv $VmLinux ${DebDevBuild}/image/synodebug/
 	gzip -f9 ${DebDevBuild}/image/synodebug/vmlinux
 fi
+
+install -Dm755 "scripts/sign-file" "${DebDevBuild}/usr/syno/bin/sign-file"
 
 # shellcheck source=/dev/null
 source "$ScriptsDir/include/kernel-devel"

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * ve1.c
  *
@@ -1031,7 +1034,9 @@ static long vpu_ioctl(struct file *filp, u_int cmd, u_long arg)
     break;
     case VDI_IOCTL_GET_RTK_SUPPORT_TYPE:
     {
-        /* TODO */
+        ret = copy_to_user((void __user *)arg, &s_vpll_register, sizeof(vpudrv_buffer_t));
+        if (ret != 0)
+            ret = -EFAULT;
     }
     break;
     default:
@@ -1201,7 +1206,7 @@ static int vpu_map_to_register(struct file *fp, struct vm_area_struct *vm)
 
     vm->vm_flags |= VM_IO | VM_RESERVED;
     vm->vm_page_prot = pgprot_noncached(vm->vm_page_prot);
-    pfn = s_vpu_register.phys_addr >> PAGE_SHIFT;
+    pfn = vm->vm_pgoff;
 
     return remap_pfn_range(vm, vm->vm_start, pfn, vm->vm_end-vm->vm_start, vm->vm_page_prot) ? -EAGAIN : 0;
 }
@@ -1258,8 +1263,9 @@ static int vpu_mmap(struct file *fp, struct vm_area_struct *vm)
     if (vm->vm_pgoff == 0)
         return vpu_map_to_instance_pool_memory(fp, vm);
 
-    if (vm->vm_pgoff == (s_vpu_register.phys_addr>>PAGE_SHIFT))
+    if ((vm->vm_pgoff == (s_vpu_register.phys_addr>>PAGE_SHIFT)) || (vm->vm_pgoff == (s_vpll_register.phys_addr>>PAGE_SHIFT))){
         return vpu_map_to_register(fp, vm);
+    }
 
     return vpu_map_to_physical_memory(fp, vm);
 #else
@@ -1313,6 +1319,11 @@ static int vpu_probe(struct platform_device *pdev)
 
     of_address_to_resource(node, 1, &res);
     iobase = of_iomap(node, 1);
+
+#ifdef MY_DEF_HERE
+    /* overwrite dts reg node 1 buffer size for mpeg2 */
+    res.end = 0x98007fff;
+#endif /* MY_DEF_HERE */
 
     s_vpll_register.phys_addr = res.start;
     s_vpll_register.virt_addr = (unsigned long)iobase;

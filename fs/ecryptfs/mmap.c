@@ -298,7 +298,16 @@ static int ecryptfs_write_inode_size_to_header(struct inode *ecryptfs_inode)
 {
 	char *file_size_virt;
 	int rc;
+#ifdef MY_ABC_HERE
+	u8 file_size[ECRYPTFS_FILE_SIZE_BYTES];
 
+	rc = ecryptfs_read_lower(file_size, 0, ECRYPTFS_FILE_SIZE_BYTES, ecryptfs_inode);
+	if (rc == ECRYPTFS_FILE_SIZE_BYTES &&
+	    get_unaligned_be64(file_size) == i_size_read(ecryptfs_inode)) {
+		rc = 0;
+		goto out;
+	}
+#endif  
 	file_size_virt = kmalloc(sizeof(u64), GFP_KERNEL);
 	if (!file_size_virt) {
 		rc = -ENOMEM;
@@ -350,6 +359,14 @@ static int ecryptfs_write_inode_size_to_xattr(struct inode *ecryptfs_inode)
 					   xattr_virt, PAGE_CACHE_SIZE);
 	if (size < 0)
 		size = 8;
+#ifdef MY_ABC_HERE
+	else if (size >= 8 &&
+	    get_unaligned_be64(xattr_virt) == i_size_read(ecryptfs_inode)) {
+		kmem_cache_free(ecryptfs_xattr_cache, xattr_virt);
+		inode_unlock(lower_inode);
+		return 0;
+	}
+#endif  
 	put_unaligned_be64(i_size_read(ecryptfs_inode), xattr_virt);
 	rc = lower_inode->i_op->setxattr(lower_dentry, ECRYPTFS_XATTR_NAME,
 					 xattr_virt, size, 0);

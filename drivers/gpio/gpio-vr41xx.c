@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Driver for NEC VR4100 series General-purpose I/O Unit.
  *
@@ -139,11 +142,11 @@ static void unmask_giuint_low(struct irq_data *d)
 static unsigned int startup_giuint(struct irq_data *data)
 {
 	if (gpiochip_lock_as_irq(&vr41xx_gpio_chip, data->hwirq))
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		dev_err(vr41xx_gpio_chip.parent,
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		dev_err(vr41xx_gpio_chip.dev,
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 			"unable to lock HW IRQ %lu for IRQ\n",
 			data->hwirq);
 	/* Satisfy the .enable semantics by unmasking the line */
@@ -545,11 +548,11 @@ static int giu_probe(struct platform_device *pdev)
 	if (!giu_base)
 		return -ENOMEM;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	vr41xx_gpio_chip.parent = &pdev->dev;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	vr41xx_gpio_chip.dev = &pdev->dev;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	ret = gpiochip_add(&vr41xx_gpio_chip);
 	if (!ret) {

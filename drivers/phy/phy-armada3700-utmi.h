@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 #ifndef _ARMADA3700_UTMI_H
 #define _ARMADA3700_UTMI_H
 
@@ -56,4 +59,4 @@ enum a3700_utmi_phy_id {
 #define RB_USB2PHY_PU(usb32) (usb32 == 0 ? USB2_PHY2_PU : USB2_OTGPHY2_PU)
 
 #endif /* _ARMADA3700_UTMI_H */
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */

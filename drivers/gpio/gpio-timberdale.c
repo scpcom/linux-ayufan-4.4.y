@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Timberdale FPGA GPIO driver
  * Copyright (c) 2009 Intel Corporation
@@ -268,11 +271,11 @@ static int timbgpio_probe(struct platform_device *pdev)
 
 	gc->label = dev_name(&pdev->dev);
 	gc->owner = THIS_MODULE;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	gc->parent = &pdev->dev;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	gc->dev = &pdev->dev;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	gc->direction_input = timbgpio_gpio_direction_input;
 	gc->get = timbgpio_gpio_get;
 	gc->direction_output = timbgpio_gpio_direction_output;

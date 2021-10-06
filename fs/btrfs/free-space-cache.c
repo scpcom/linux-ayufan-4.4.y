@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2008 Red Hat.  All rights reserved.
  *
@@ -3113,6 +3116,18 @@ static int do_trimming(struct btrfs_block_group_cache *block_group,
 
 	spin_lock(&space_info->lock);
 	spin_lock(&block_group->lock);
+
+#ifdef MY_ABC_HERE
+	if (space_info->bytes_used + space_info->bytes_reserved +
+			space_info->bytes_pinned + space_info->bytes_readonly +
+			space_info->bytes_may_use + reserved_bytes > space_info->total_bytes) {
+		spin_unlock(&block_group->lock);
+		spin_unlock(&space_info->lock);
+		ret = 0;
+		goto end_trim;
+	}
+#endif /* MY_ABC_HERE */
+
 	if (!block_group->ro) {
 		block_group->reserved += reserved_bytes;
 		space_info->bytes_reserved += reserved_bytes;
@@ -3126,6 +3141,9 @@ static int do_trimming(struct btrfs_block_group_cache *block_group,
 	if (!ret)
 		*total_trimmed += trimmed;
 
+#ifdef MY_ABC_HERE
+end_trim:
+#endif /* MY_ABC_HERE */
 	mutex_lock(&ctl->cache_writeout_mutex);
 	btrfs_add_free_space(block_group, reserved_start, reserved_bytes);
 	list_del(&trim_entry->list);
@@ -3197,6 +3215,7 @@ static int trim_no_bitmap(struct btrfs_block_group_cache *block_group,
 		extent_bytes = entry->bytes;
 		start = max(start, extent_start);
 		bytes = min(extent_start + extent_bytes, end) - start;
+
 		if (bytes < minlen) {
 			spin_unlock(&ctl->tree_lock);
 			mutex_unlock(&ctl->cache_writeout_mutex);

@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*
 * ***************************************************************************
 * Copyright (C) 2016 Marvell International Ltd.
@@ -604,4 +607,4 @@ MODULE_ALIAS("platform:a3700_otg_phy");
 MODULE_AUTHOR("Terry Zhou <bjzhou@marvell.com>");
 MODULE_DESCRIPTION("Marvell Armada3700 otg phy driver");
 MODULE_LICENSE("GPL");
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */

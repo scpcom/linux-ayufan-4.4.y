@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Clk driver for NXP LPC18xx/LPC43xx Clock Control Unit (CCU)
  *
@@ -28,11 +31,11 @@
 #define CCU_BRANCH_IS_BUS	BIT(0)
 #define CCU_BRANCH_HAVE_DIV2	BIT(1)
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 #define to_clk_gate(_hw) container_of(_hw, struct clk_gate, hw)
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 struct lpc18xx_branch_clk_data {
 	const char **name;

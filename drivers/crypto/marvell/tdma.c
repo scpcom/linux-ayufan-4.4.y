@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Provide TDMA helper functions used by cipher and hash algorithm
  * implementations.
@@ -37,17 +40,17 @@ bool mv_cesa_req_dma_iter_next_transfer(struct mv_cesa_dma_iter *iter,
 	return true;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 void mv_cesa_dma_step(struct mv_cesa_req *dreq)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 void mv_cesa_dma_step(struct mv_cesa_tdma_req *dreq)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	struct mv_cesa_engine *engine = dreq->engine;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	struct mv_cesa_engine *engine = dreq->base.engine;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
 	writel_relaxed(0, engine->regs + CESA_SA_CFG);
 
@@ -61,32 +64,32 @@ void mv_cesa_dma_step(struct mv_cesa_tdma_req *dreq)
 		       engine->regs + CESA_SA_CFG);
 	writel_relaxed(dreq->chain.first->cur_dma,
 		       engine->regs + CESA_TDMA_NEXT_ADDR);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	BUG_ON(readl(engine->regs + CESA_SA_CMD) &
 	       CESA_SA_CMD_EN_CESA_SA_ACCL0);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	writel(CESA_SA_CMD_EN_CESA_SA_ACCL0, engine->regs + CESA_SA_CMD);
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 void mv_cesa_dma_cleanup(struct mv_cesa_req *dreq)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 void mv_cesa_dma_cleanup(struct mv_cesa_tdma_req *dreq)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 {
 	struct mv_cesa_tdma_desc *tdma;
 
 	for (tdma = dreq->chain.first; tdma;) {
 		struct mv_cesa_tdma_desc *old_tdma = tdma;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		u32 type = tdma->flags & CESA_TDMA_TYPE_MSK;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		if (type == CESA_TDMA_OP)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 		if (tdma->flags & CESA_TDMA_OP)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 			dma_pool_free(cesa_dev->dma->op_pool, tdma->op,
 				      le32_to_cpu(tdma->src));
 
@@ -99,11 +102,11 @@ void mv_cesa_dma_cleanup(struct mv_cesa_tdma_req *dreq)
 	dreq->chain.last = NULL;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 void mv_cesa_dma_prepare(struct mv_cesa_req *dreq,
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 void mv_cesa_dma_prepare(struct mv_cesa_tdma_req *dreq,
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 			 struct mv_cesa_engine *engine)
 {
 	struct mv_cesa_tdma_desc *tdma;
@@ -115,16 +118,16 @@ void mv_cesa_dma_prepare(struct mv_cesa_tdma_req *dreq,
 		if (tdma->flags & CESA_TDMA_SRC_IN_SRAM)
 			tdma->src = cpu_to_le32(tdma->src + engine->sram_dma);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		if ((tdma->flags & CESA_TDMA_TYPE_MSK) == CESA_TDMA_OP)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 		if (tdma->flags & CESA_TDMA_OP)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 			mv_cesa_adjust_op(engine, tdma->op);
 	}
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 void mv_cesa_tdma_chain(struct mv_cesa_engine *engine,
 			struct mv_cesa_req *dreq)
 {
@@ -218,28 +221,28 @@ int mv_cesa_tdma_process(struct mv_cesa_engine *engine, u32 status)
 	return res;
 }
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 static struct mv_cesa_tdma_desc *
 mv_cesa_dma_add_desc(struct mv_cesa_tdma_chain *chain, gfp_t flags)
 {
 	struct mv_cesa_tdma_desc *new_tdma = NULL;
 	dma_addr_t dma_handle;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	new_tdma = dma_pool_zalloc(cesa_dev->dma->tdma_desc_pool, flags,
 				   &dma_handle);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	new_tdma = dma_pool_alloc(cesa_dev->dma->tdma_desc_pool, flags,
 				  &dma_handle);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	if (!new_tdma)
 		return ERR_PTR(-ENOMEM);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	memset(new_tdma, 0, sizeof(*new_tdma));
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	new_tdma->cur_dma = dma_handle;
 	if (chain->last) {
 		chain->last->next_dma = cpu_to_le32(dma_handle);
@@ -253,7 +256,7 @@ mv_cesa_dma_add_desc(struct mv_cesa_tdma_chain *chain, gfp_t flags)
 	return new_tdma;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 int mv_cesa_dma_add_result_op(struct mv_cesa_tdma_chain *chain, dma_addr_t src,
 			  u32 size, u32 flags, gfp_t gfp_flags)
 {
@@ -288,7 +291,7 @@ int mv_cesa_dma_add_result_op(struct mv_cesa_tdma_chain *chain, dma_addr_t src,
 	return 0;
 }
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 struct mv_cesa_op_ctx *mv_cesa_dma_add_op(struct mv_cesa_tdma_chain *chain,
 					const struct mv_cesa_op_ctx *op_templ,
 					bool skip_ctx,
@@ -315,9 +318,9 @@ struct mv_cesa_op_ctx *mv_cesa_dma_add_op(struct mv_cesa_tdma_chain *chain,
 	tdma->op = op;
 	tdma->byte_cnt = cpu_to_le32(size | BIT(31));
 	tdma->src = cpu_to_le32(dma_handle);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	tdma->dst = CESA_SA_CFG_SRAM_OFFSET;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	tdma->flags = CESA_TDMA_DST_IN_SRAM | CESA_TDMA_OP;
 
 	return op;

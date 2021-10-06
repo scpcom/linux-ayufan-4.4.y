@@ -347,7 +347,8 @@ struct btrfs_ioctl_clone_range_args {
 #define BTRFS_DEFRAG_RANGE_COMPRESS 1
 #define BTRFS_DEFRAG_RANGE_START_IO 2
 #ifdef MY_ABC_HERE
-#define BTRFS_DEFRAG_RANGE_SYNO_DEFRAG (1ULL << 2)
+#define BTRFS_DEFRAG_RANGE_SYNO_DEFRAG  (1ULL << 2)
+#define BTRFS_DEFRAG_RANGE_PRINT_STDOUT (1ULL << 3)
 #endif  
 struct btrfs_ioctl_defrag_range_args {
 	 
@@ -533,11 +534,27 @@ struct btrfs_ioctl_subvol_info_args {
 #endif  
 
 #ifdef MY_ABC_HERE
+
+#define BTRFS_SNAP_SIZE_SHOW_EXCL_SIZE 0x1
+#define BTRFS_SNAP_SIZE_SHOW_PROCESSED_SIZE 0x2
+#define BTRFS_SNAP_SIZE_SHOW_MARGINAL_SIZE 0x4
+
+struct btrfs_ioctl_snapshot_size_id_size_map {
+	__u64 snap_id;
+	__u64 marginal_size;
+};
+
 struct btrfs_ioctl_snapshot_size_query_args {
+	 
 	__u64 snap_count;
+	__u64 flags;
+	 
 	__s64 fd;
-	__u64 __user *snap_id;
+	 
+	struct btrfs_ioctl_snapshot_size_id_size_map __user *id_maps;
+	 
 	__u64 calc_size;
+	__u64 processed_size;
 };
 #endif  
 

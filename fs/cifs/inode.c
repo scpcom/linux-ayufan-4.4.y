@@ -884,7 +884,7 @@ struct inode *cifs_root_iget(struct super_block *sb)
 	if ((cifs_sb->mnt_cifs_flags & CIFS_MOUNT_USE_PREFIX_PATH)
 	    && cifs_sb->prepath) {
 		len = strlen(cifs_sb->prepath);
-		path = kzalloc(len + 2 /* leading sep + null */, GFP_KERNEL);
+		path = kzalloc(len + 2  , GFP_KERNEL);
 		if (path == NULL)
 			return ERR_PTR(-ENOMEM);
 		path[0] = '/';
@@ -897,7 +897,7 @@ struct inode *cifs_root_iget(struct super_block *sb)
 
 	xid = get_xid();
 	if (tcon->unix_ext) {
-		rc = cifs_get_inode_info_unix(&inode, "", sb, xid);
+		rc = cifs_get_inode_info_unix(&inode, path, sb, xid);
 		 
 		if (rc != -EOPNOTSUPP)
 			goto iget_no_retry;
@@ -935,6 +935,7 @@ iget_no_retry:
 	}
 
 out:
+	kfree(path);
 	 
 	_free_xid(xid);
 	return inode;

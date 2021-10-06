@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /* Framework for MDIO devices, other than PHYs.
  *
  * Copyright (c) 2016 Andrew Lunn <andrew@lunn.ch>
@@ -168,4 +171,4 @@ void mdio_driver_unregister(struct mdio_driver *drv)
 	driver_unregister(&mdiodrv->driver);
 }
 EXPORT_SYMBOL(mdio_driver_unregister);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

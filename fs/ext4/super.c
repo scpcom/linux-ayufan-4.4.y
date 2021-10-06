@@ -2075,7 +2075,6 @@ static __le16 ext4_group_desc_csum(struct super_block *sb, __u32 block_group,
 
 	if (ext4_has_metadata_csum(sbi->s_sb)) {
 		 
-		__le16 save_csum;
 		__u32 csum32;
 		__u16 dummy_csum = 0;
 
@@ -2275,10 +2274,6 @@ static void ext4_orphan_cleanup(struct super_block *sb,
 	while (es->s_last_orphan) {
 		struct inode *inode;
 
-		/*
-		 * We may have encountered an error during cleanup; if
-		 * so, skip the rest.
-		 */
 		if (EXT4_SB(sb)->s_mount_state & EXT4_ERROR_FS) {
 			jbd_debug(1, "Skipping orphan recovery on fs with errors.\n");
 			es->s_last_orphan = 0;
@@ -3509,13 +3504,6 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 	}
 	sbi->s_cluster_ratio = clustersize / blocksize;
 
-	if (sbi->s_inodes_per_group > blocksize * 8) {
-		ext4_msg(sb, KERN_ERR,
-		       "#inodes per group too big: %lu",
-		       sbi->s_inodes_per_group);
-		goto failed_mount;
-	}
-
 	if (sbi->s_blocks_per_group == clustersize << 3)
 		set_opt2(sb, STD_GROUP_SIZE);
 
@@ -3566,7 +3554,7 @@ static int ext4_fill_super(struct super_block *sb, void *data, int silent)
 	db_count = (sbi->s_groups_count + EXT4_DESC_PER_BLOCK(sb) - 1) /
 		   EXT4_DESC_PER_BLOCK(sb);
 	if (ext4_has_feature_meta_bg(sb)) {
-		if (le32_to_cpu(es->s_first_meta_bg) >= db_count) {
+		if (le32_to_cpu(es->s_first_meta_bg) > db_count) {
 			ext4_msg(sb, KERN_WARNING,
 				 "first meta block group too large: %u "
 				 "(group descriptor block count %u)",

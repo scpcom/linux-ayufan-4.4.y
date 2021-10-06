@@ -115,6 +115,31 @@ END:
 }
 #endif  
 
+#ifdef MY_ABC_HERE
+static void syno_handle_failed_expand(struct r5conf *conf, struct stripe_head *sh,
+		struct stripe_head_state *s)
+{
+	int i;
+	int disks = sh->disks;
+
+	for (i = 0; i < disks; i++) {
+		struct r5dev *dev = &sh->dev[i];
+
+		if (test_bit(R5_Wantwrite, &dev->flags) ||
+				test_bit(R5_Wantread, &dev->flags) ||
+				test_bit(R5_ReWrite, &dev->flags)) {
+			continue;
+		}
+
+		if (test_and_clear_bit(R5_LOCKED, &dev->flags)) {
+			s->locked--;
+		}
+	}
+
+	clear_bit(STRIPE_EXPANDING, &sh->state);
+}
+#endif  
+
 static inline int raid5_bi_processed_stripes(struct bio *bio)
 {
 	atomic_t *segments = (atomic_t *)&bio->bi_phys_segments;
@@ -4500,6 +4525,12 @@ static void handle_stripe(struct stripe_head *sh)
 	       s.failed_num[0], s.failed_num[1]);
 	 
 	if (s.failed > conf->max_degraded || s.log_failed) {
+
+#ifdef MY_ABC_HERE
+		if (sh->reconstruct_state == reconstruct_state_result && s.expanded) {
+			syno_handle_failed_expand(conf, sh, &s);
+		}
+#endif  
 		sh->check_state = 0;
 		sh->reconstruct_state = 0;
 		break_stripe_batch_list(sh, 0);
@@ -7064,7 +7095,11 @@ static int run(struct mddev *mddev)
 			stripe = (stripe | (stripe-1)) + 1;
 		mddev->queue->limits.discard_alignment = stripe;
 		mddev->queue->limits.discard_granularity = stripe;
-		 
+
+		blk_queue_max_hw_sectors(mddev->queue, 0xfffe * STRIPE_SECTORS);
+		blk_queue_max_discard_sectors(mddev->queue,
+					      0xfffe * STRIPE_SECTORS);
+
 		mddev->queue->limits.discard_zeroes_data = 0;
 
 		blk_queue_max_write_same_sectors(mddev->queue, 0);
@@ -7402,6 +7437,12 @@ static int check_reshape(struct mddev *mddev)
 #ifdef MY_ABC_HERE
 	if (IsDiskErrorSet(mddev)) {
 		return -EINVAL;
+	}
+#endif  
+#ifdef MY_ABC_HERE
+	if (mddev->reshape_interrupt) {
+		mddev->reshape_interrupt = 0;
+		return 0;
 	}
 #endif  
 	if (mddev->delta_disks == 0 &&

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Symmetric Multi Processing (SMP) support for Armada XP
  *
@@ -54,11 +57,11 @@ static void set_secondary_cpu_clock(unsigned int cpu)
 	unsigned long rate;
 	struct clk *cpu_clk;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	/* Do not configure Msys SoC's secondary CPU clock */
 	if (of_machine_is_compatible("marvell,msys"))
 		return;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	thiscpu = get_cpu();
 

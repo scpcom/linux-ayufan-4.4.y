@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * MCP23S08 SPI/I2C GPIO gpio expander driver
  *
@@ -445,15 +448,15 @@ static int mcp23s08_irq_reqres(struct irq_data *data)
 	struct mcp23s08 *mcp = irq_data_get_irq_chip_data(data);
 
 	if (gpiochip_lock_as_irq(&mcp->chip, data->hwirq)) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		dev_err(mcp->chip.parent,
 			"unable to lock HW IRQ %lu for IRQ usage\n",
 			data->hwirq);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		dev_err(mcp->chip.dev,
 			"unable to lock HW IRQ %lu for IRQ usage\n",
 			data->hwirq);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		return -EINVAL;
 	}
 
@@ -486,14 +489,14 @@ static int mcp23s08_irq_setup(struct mcp23s08 *mcp)
 
 	mutex_init(&mcp->irq_lock);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	mcp->irq_domain = irq_domain_add_linear(chip->parent->of_node,
 						chip->ngpio,
 						&irq_domain_simple_ops, mcp);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	mcp->irq_domain = irq_domain_add_linear(chip->dev->of_node, chip->ngpio,
 						&irq_domain_simple_ops, mcp);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	if (!mcp->irq_domain)
 		return -ENODEV;
 
@@ -502,7 +505,7 @@ static int mcp23s08_irq_setup(struct mcp23s08 *mcp)
 	else
 		irqflags |= IRQF_TRIGGER_LOW;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	err = devm_request_threaded_irq(chip->parent, mcp->irq, NULL,
 					mcp23s08_irq,
 					irqflags, dev_name(chip->parent), mcp);
@@ -511,7 +514,7 @@ static int mcp23s08_irq_setup(struct mcp23s08 *mcp)
 			mcp->irq, err);
 		return err;
 	}
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	err = devm_request_threaded_irq(chip->dev, mcp->irq, NULL, mcp23s08_irq,
 					irqflags, dev_name(chip->dev), mcp);
 	if (err != 0) {
@@ -519,7 +522,7 @@ static int mcp23s08_irq_setup(struct mcp23s08 *mcp)
 			mcp->irq, err);
 		return err;
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	chip->to_irq = mcp23s08_gpio_to_irq;
 
@@ -660,11 +663,11 @@ static int mcp23s08_probe_one(struct mcp23s08 *mcp, struct device *dev,
 
 	mcp->chip.base = pdata->base;
 	mcp->chip.can_sleep = true;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	mcp->chip.parent = dev;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	mcp->chip.dev = dev;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	mcp->chip.owner = THIS_MODULE;
 
 	/* verify MCP_IOCON.SEQOP = 0, so sequential reads work,
@@ -678,13 +681,13 @@ static int mcp23s08_probe_one(struct mcp23s08 *mcp, struct device *dev,
 	mcp->irq_controller = pdata->irq_controller;
 	if (mcp->irq && mcp->irq_controller) {
 		mcp->irq_active_high =
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 			of_property_read_bool(mcp->chip.parent->of_node,
 					      "microchip,irq-active-high");
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 			of_property_read_bool(mcp->chip.dev->of_node,
 					      "microchip,irq-active-high");
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 		if (type == MCP_TYPE_017)
 			mirror = pdata->mirror;

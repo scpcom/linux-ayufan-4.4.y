@@ -134,7 +134,7 @@ extern u8 syno_is_synology_pm(const struct ata_port *ap);
 #ifdef MY_DEF_HERE
 static DEFINE_IDA(usb_index_ida);
 static DEFINE_IDA(sas_index_ida);
-#ifdef CONFIG_SYNO_SAS_DISK_NAME_ISCSI_DEVICE
+#ifdef MY_DEF_HERE
 static DEFINE_IDA(iscsi_index_ida);
 #endif  
 extern int g_is_sas_model;
@@ -162,15 +162,15 @@ static const char *sd_cache_types[] = {
 
 static void sd_set_flush_flag(struct scsi_disk *sdkp)
 {
-	unsigned flush = 0;
+	bool wc = false, fua = false;
 
 	if (sdkp->WCE) {
-		flush |= REQ_FLUSH;
+		wc = true;
 		if (sdkp->DPOFUA)
-			flush |= REQ_FUA;
+			fua = true;
 	}
 
-	blk_queue_flush(sdkp->disk->queue, flush);
+	blk_queue_write_cache(sdkp->disk->queue, wc, fua);
 }
 
 static ssize_t
@@ -2983,7 +2983,7 @@ static SYNO_DISK_TYPE syno_disk_type_get(struct device *dev)
 	}
 #endif  
 
-#ifdef MY_ABC_HERE
+#if defined(MY_ABC_HERE)
 	if (strcmp(sdp->host->hostt->name, "Virtio SCSI HBA") == 0){
 #ifdef MY_ABC_HERE
 		while (virtdev) {
@@ -3047,7 +3047,7 @@ static SYNO_DISK_TYPE syno_disk_type_get(struct device *dev)
 #endif  
 		 
 #ifdef MY_DEF_HERE
-		if (sdp->host->isCacheSSD) {
+		if (sdp->host->is_nvc_ssd) {
 			return SYNO_DISK_CACHE;
 		}
 #endif  
@@ -3121,7 +3121,7 @@ static int sd_probe(struct device *dev)
 		if (1 == g_is_sas_model) {
 			 
 			switch (sdkp->synodisktype) {
-#ifdef CONFIG_SYNO_SAS_DISK_NAME_ISCSI_DEVICE
+#ifdef MY_DEF_HERE
 				case SYNO_DISK_ISCSI:
 					if (!ida_pre_get(&iscsi_index_ida, GFP_KERNEL))
 						goto out_put;
@@ -3180,6 +3180,16 @@ static int sd_probe(struct device *dev)
 				break;
 #ifdef MY_DEF_HERE
 			case SYNO_DISK_CACHE:
+				if (sdp->host->hostt->syno_index_get) {
+					want_idx = sdp->host->hostt->syno_index_get(
+							sdp->host,
+							sdp->channel,
+							sdp->id,
+							sdp->lun);
+				} else {
+					want_idx = sdp->host->host_no;
+				}
+				break;
 #endif  
 			case SYNO_DISK_SAS:
 			case SYNO_DISK_SATA:
@@ -3209,7 +3219,11 @@ static int sd_probe(struct device *dev)
 
 		error = syno_ida_get_new(&sd_index_ida, want_idx, &index);
 #ifdef MY_DEF_HERE
-		if (1 == g_is_sas_model) {
+		if ((1 == g_is_sas_model)
+#ifdef MY_DEF_HERE
+			&& (SYNO_DISK_CACHE != sdkp->synodisktype)
+#endif  
+		) {
 			sdkp->synoindex = synoidx;
 			goto SYNO_SKIP_WANT_RETRY;
 		}
@@ -3368,7 +3382,7 @@ SYNO_SKIP_WANT_RETRY:
 #ifdef MY_DEF_HERE
 	if (1 == g_is_sas_model) {
 		switch (sdkp->synodisktype) {
-#ifdef CONFIG_SYNO_SAS_DISK_NAME_ISCSI_DEVICE
+#ifdef MY_DEF_HERE
 			case SYNO_DISK_ISCSI:
 				ida_remove(&iscsi_index_ida, synoidx);
 				break;
@@ -3435,7 +3449,7 @@ static void scsi_disk_release(struct device *dev)
 #ifdef MY_DEF_HERE
 	if (1 == g_is_sas_model) {
 		switch (sdkp->synodisktype) {
-#ifdef CONFIG_SYNO_SAS_DISK_NAME_ISCSI_DEVICE
+#ifdef MY_DEF_HERE
 			case SYNO_DISK_ISCSI:
 				ida_remove(&iscsi_index_ida, sdkp->synoindex);
 				break;
@@ -3688,7 +3702,7 @@ int SynoSCSIGetDeviceIndex(struct block_device *bdev)
 	BUG_ON(bdev == NULL);
 	disk = bdev->bd_disk;
 
-#ifdef CONFIG_SYNO_SAS_DISK_NAME_ISCSI_DEVICE
+#ifdef MY_DEF_HERE
 	if (g_is_sas_model) {
 		return container_of(disk->private_data, struct scsi_disk, driver)->synoindex;
 	}

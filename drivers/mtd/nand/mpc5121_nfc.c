@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright 2004-2008 Freescale Semiconductor, Inc.
  * Copyright 2009 Semihalf.
@@ -135,11 +138,11 @@ static void mpc5121_nfc_done(struct mtd_info *mtd);
 /* Read NFC register */
 static inline u16 nfc_read(struct mtd_info *mtd, uint reg)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct mpc5121_nfc_prv *prv = chip->priv;
 
 	return in_be16(prv->regs + reg);
@@ -148,11 +151,11 @@ static inline u16 nfc_read(struct mtd_info *mtd, uint reg)
 /* Write NFC register */
 static inline void nfc_write(struct mtd_info *mtd, uint reg, u16 val)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct mpc5121_nfc_prv *prv = chip->priv;
 
 	out_be16(prv->regs + reg, val);
@@ -222,11 +225,11 @@ static inline void mpc5121_nfc_send_read_status(struct mtd_info *mtd)
 static irqreturn_t mpc5121_nfc_irq(int irq, void *data)
 {
 	struct mtd_info *mtd = data;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct mpc5121_nfc_prv *prv = chip->priv;
 
 	nfc_set(mtd, NFC_CONFIG1, NFC_INT_MASK);
@@ -238,11 +241,11 @@ static irqreturn_t mpc5121_nfc_irq(int irq, void *data)
 /* Wait for operation complete */
 static void mpc5121_nfc_done(struct mtd_info *mtd)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct mpc5121_nfc_prv *prv = chip->priv;
 	int rv;
 
@@ -262,11 +265,11 @@ static void mpc5121_nfc_done(struct mtd_info *mtd)
 /* Do address cycle(s) */
 static void mpc5121_nfc_addr_cycle(struct mtd_info *mtd, int column, int page)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	u32 pagemask = chip->pagemask;
 
 	if (column != -1) {
@@ -301,11 +304,11 @@ static void mpc5121_nfc_select_chip(struct mtd_info *mtd, int chip)
 /* Init external chip select logic on ADS5121 board */
 static int ads5121_chipselect_init(struct mtd_info *mtd)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct mpc5121_nfc_prv *prv = chip->priv;
 	struct device_node *dn;
 
@@ -327,11 +330,11 @@ static int ads5121_chipselect_init(struct mtd_info *mtd)
 /* Control chips select signal on ADS5121 board */
 static void ads5121_select_chip(struct mtd_info *mtd, int chip)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct mpc5121_nfc_prv *prv = nand->priv;
 	u8 v;
 
@@ -361,11 +364,11 @@ static int mpc5121_nfc_dev_ready(struct mtd_info *mtd)
 static void mpc5121_nfc_command(struct mtd_info *mtd, unsigned command,
 							int column, int page)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct mpc5121_nfc_prv *prv = chip->priv;
 
 	prv->column = (column >= 0) ? column : 0;
@@ -438,11 +441,11 @@ static void mpc5121_nfc_command(struct mtd_info *mtd, unsigned command,
 static void mpc5121_nfc_copy_spare(struct mtd_info *mtd, uint offset,
 						u8 *buffer, uint size, int wr)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct mpc5121_nfc_prv *prv = nand->priv;
 	uint o, s, sbsize, blksize;
 
@@ -494,11 +497,11 @@ static void mpc5121_nfc_copy_spare(struct mtd_info *mtd, uint offset,
 static void mpc5121_nfc_buf_copy(struct mtd_info *mtd, u_char *buf, int len,
 									int wr)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct mpc5121_nfc_prv *prv = chip->priv;
 	uint c = prv->column;
 	uint l;
@@ -576,11 +579,11 @@ static u16 mpc5121_nfc_read_word(struct mtd_info *mtd)
  */
 static int mpc5121_nfc_read_hw_config(struct mtd_info *mtd)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct mpc5121_nfc_prv *prv = chip->priv;
 	struct mpc512x_reset_module *rm;
 	struct device_node *rmnode;
@@ -659,11 +662,11 @@ out:
 /* Free driver resources */
 static void mpc5121_nfc_free(struct device *dev, struct mtd_info *mtd)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct mpc5121_nfc_prv *prv = chip->priv;
 
 	if (prv->clk)
@@ -687,11 +690,11 @@ static int mpc5121_nfc_probe(struct platform_device *op)
 	int resettime = 0;
 	int retval = 0;
 	int rev, len;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct mtd_part_parser_data ppdata;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	/*
 	 * Check SoC revision. This driver supports only NFC
@@ -713,9 +716,9 @@ static int mpc5121_nfc_probe(struct platform_device *op)
 	mtd->priv = chip;
 	mtd->dev.parent = dev;
 	chip->priv = prv;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	nand_set_flash_node(chip, dn);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	prv->dev = dev;
 
 	/* Read NFC configuration from Reset Config Word */
@@ -758,11 +761,11 @@ static int mpc5121_nfc_probe(struct platform_device *op)
 	}
 
 	mtd->name = "MPC5121 NAND";
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	ppdata.of_node = dn;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	chip->dev_ready = mpc5121_nfc_dev_ready;
 	chip->cmdfunc = mpc5121_nfc_command;
 	chip->read_byte = mpc5121_nfc_read_byte;
@@ -874,11 +877,11 @@ static int mpc5121_nfc_probe(struct platform_device *op)
 	dev_set_drvdata(dev, mtd);
 
 	/* Register device in MTD */
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	retval = mtd_device_register(mtd, NULL, 0);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	retval = mtd_device_parse_register(mtd, NULL, &ppdata, NULL, 0);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	if (retval) {
 		dev_err(dev, "Error adding MTD device!\n");
 		goto error;

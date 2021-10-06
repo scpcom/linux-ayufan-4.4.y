@@ -144,7 +144,6 @@ static void __genwqe_del_mapping(struct genwqe_file *cfile,
 	spin_unlock_irqrestore(&cfile->map_lock, flags);
 }
 
-
 /**
  * __genwqe_search_mapping() - Search for the mapping for a userspace address
  * @cfile:	descriptor of opened file
@@ -349,7 +348,6 @@ static int genwqe_fasync(int fd, struct file *filp, int mode)
 
 	return fasync_helper(fd, filp, mode, &cdev->async_queue);
 }
-
 
 /**
  * genwqe_release() - file close
@@ -1396,7 +1394,7 @@ int genwqe_device_remove(struct genwqe_dev *cd)
 	 * application which will decrease this reference from
 	 * 1/unused to 0/illegal and not from 2/used 1/empty.
 	 */
-	rc = atomic_read(&cd->cdev_genwqe.kobj.kref.refcount);
+	rc = kref_read(&cd->cdev_genwqe.kobj.kref);
 	if (rc != 1) {
 		dev_err(&pci_dev->dev,
 			"[%s] err: cdev_genwqe...refcount=%d\n", __func__, rc);

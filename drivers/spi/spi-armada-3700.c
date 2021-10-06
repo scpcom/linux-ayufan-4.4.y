@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*
  * Marvell Armada-3700 SPI controller driver
  *
@@ -95,26 +98,26 @@
 #define A3700_SPI_INSTR_CNT_BIT		0
 #define A3700_SPI_INSTR_CNT_MASK		0x3
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 /* A3700_SPI_IF_TIME_REG */
 #define A3700_SPI_CLK_CAPT_EDGE		(1 << 7)
 
 #define DATA_CAP_CLOCK_CYCLE_NS		14	/*Minimum clock cycle of flash*/
 #define RVT_EDGE_FLASH_CAP_FREQ		(1000 * 1000 * 1000 / DATA_CAP_CLOCK_CYCLE_NS)
 #define A3700_SPI_MAX_OUTPUT_CLK_FREQ		(100 * 1000 * 1000)	/*100MHz*/
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 struct a3700_spi_initdata {
 	unsigned int cs_num;
 	unsigned int mode;
 	unsigned int bits_per_word_mask;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	unsigned int instr_cnt;
 	unsigned int addr_cnt;
 	unsigned int dummy_cnt;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 };
 
 /* struct a3700_spi .flags */
@@ -141,9 +144,9 @@ struct a3700_spi_status {
 	struct completion       done;
 };
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 struct a3700_max_hdr_cnt {
 	unsigned int            addr_cnt;
 	unsigned int            instr_cnt;
@@ -151,29 +154,29 @@ struct a3700_max_hdr_cnt {
 	unsigned int            hdr_cnt; /* addr_cnt + instr_cnt + dummy_cnt = hdr_cnt */
 };
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 struct a3700_spi {
 	struct spi_master      *master;
 	void __iomem           *base;
 	struct clk             *clk;
 	unsigned int	input_clk_freq;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	unsigned int	max_clk_freq;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	unsigned int            irq;
 	unsigned int            flags;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	unsigned int		spi_cfg;
 	unsigned int		spi_timing;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	enum a3700_spi_pin_mode  pin_mode;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	struct a3700_max_hdr_cnt max_cnt;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	struct a3700_spi_status  status;
 
 	int (*spi_pre_xfer)(struct spi_device *spi, struct spi_transfer *xfer);
@@ -278,42 +281,42 @@ static int a3700_spi_fifo_flush(struct a3700_spi *a3700_spi)
 }
 
 static void a3700_spi_mode_set(struct a3700_spi *a3700_spi,
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	u16 mode)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	unsigned int mode_bits)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 {
 	u32 val;
 
 	val = spireg_read(a3700_spi, A3700_SPI_IF_CFG_REG);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	val &= ~(A3700_SPI_CLK_POL | A3700_SPI_CLK_PHA);
 	if (mode & SPI_CPOL)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (mode_bits & SPI_CPOL)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		val |= A3700_SPI_CLK_POL;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (mode & SPI_CPHA)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (mode_bits & SPI_CPHA)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		val |= A3700_SPI_CLK_PHA;
 	spireg_write(a3700_spi, A3700_SPI_IF_CFG_REG, val);
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 static int a3700_spi_clock_set(struct a3700_spi *a3700_spi,
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 static int a3700_spi_baudrate_set(struct a3700_spi *a3700_spi,
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	unsigned int speed_hz)
 {
 	u32 val;
 	u32 prescale;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	/*
 	* SPI controller has a maximum output clock freq to flash,
 	* flash could not be working in higher freq than this.
@@ -322,10 +325,10 @@ static int a3700_spi_baudrate_set(struct a3700_spi *a3700_spi,
 		prescale = a3700_spi->input_clk_freq / A3700_SPI_MAX_OUTPUT_CLK_FREQ;
 	else
 		prescale = DIV_ROUND_UP(a3700_spi->input_clk_freq, speed_hz);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	/* calculate Prescaler = (spi_input_freq / spi_max_freq) */
 	prescale = a3700_spi->input_clk_freq / a3700_spi->max_clk_freq;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	val = spireg_read(a3700_spi, A3700_SPI_IF_CFG_REG);
 	val = val & ~A3700_SPI_CLK_PRESCALE_MASK;
@@ -333,7 +336,7 @@ static int a3700_spi_baudrate_set(struct a3700_spi *a3700_spi,
 	val = val | (prescale & A3700_SPI_CLK_PRESCALE_MASK);
 	spireg_write(a3700_spi, A3700_SPI_IF_CFG_REG, val);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	/*
 	* If the data output delay from the flash is greater than 1/2 of the clock cycle
 	* (this is usually the case when running at high frequency) needs to set negative
@@ -347,7 +350,7 @@ static int a3700_spi_baudrate_set(struct a3700_spi *a3700_spi,
 		spireg_write(a3700_spi, A3700_SPI_IF_TIME_REG, val);
 	}
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	return 0;
 }
 
@@ -420,13 +423,13 @@ static int a3700_spi_init(struct a3700_spi *a3700_spi)
 		goto out;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	/* Set SPI mode */
 	a3700_spi_mode_set(a3700_spi, master->mode_bits);
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	/* Reset counters */
 	spireg_write(a3700_spi, A3700_SPI_IF_HDR_CNT_REG, 0);
 	spireg_write(a3700_spi, A3700_SPI_IF_DIN_CNT_REG, 0);
@@ -550,25 +553,25 @@ static int a3700_spi_transfer_setup(struct spi_device *spi,
 
 	if (!(a3700_spi->flags & AUTO_CS) && !a3700_spi->status.cs_active) {
 		/* Set SPI clock prescaler */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		ret = a3700_spi_clock_set(a3700_spi, xfer->speed_hz);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		ret = a3700_spi_baudrate_set(a3700_spi, xfer->speed_hz);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		if (ret) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 			dev_err(&spi->dev, "set clock failed\n");
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 			dev_err(&spi->dev, "set baudrate failed\n");
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			goto out;
 		}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		/* Set SPI mode */
 		a3700_spi_mode_set(a3700_spi, spi->mode);
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		/* Set FIFO threshold */
 		a3700_spi_fifo_thres_set(a3700_spi);
 
@@ -717,29 +720,29 @@ static int a3700_spi_transfer_finish_legacy(struct spi_device *spi,
 static void a3700_spi_header_set(struct a3700_spi *a3700_spi)
 {
 	struct a3700_spi_status *status = &a3700_spi->status;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	unsigned int addr_cnt = 0;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	struct a3700_max_hdr_cnt *max_cnt = &a3700_spi->max_cnt;
 	unsigned int instr_cnt, addr_cnt, dummy_cnt;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	u32 val = 0;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	instr_cnt = addr_cnt = dummy_cnt = 0;
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	/* Clear the header registers */
 	spireg_write(a3700_spi, A3700_SPI_IF_INST_REG, 0);
 	spireg_write(a3700_spi, A3700_SPI_IF_ADDR_REG, 0);
 	spireg_write(a3700_spi, A3700_SPI_IF_RMODE_REG, 0);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	spireg_write(a3700_spi, A3700_SPI_IF_HDR_CNT_REG, 0);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	if (status->tx_buf && status->buf_len % 4) {
 		/* when tx data is not 4 bytes aligned, there will be unexpected
 		 * MSB bytes of SPI output register, since it always shifts out
@@ -749,7 +752,7 @@ static void a3700_spi_header_set(struct a3700_spi *a3700_spi)
 		 * 1 to 3 bytes to make the rest of data 4 bytes aligned.
 		 */
 		addr_cnt = status->buf_len % 4;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	/* Set header counters */
 	if (status->tx_buf) {
 
@@ -768,25 +771,25 @@ static void a3700_spi_header_set(struct a3700_spi *a3700_spi)
 
 		val |= ((instr_cnt & A3700_SPI_INSTR_CNT_MASK)
 			    << A3700_SPI_INSTR_CNT_BIT);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		val |= ((addr_cnt & A3700_SPI_ADDR_CNT_MASK)
 			    << A3700_SPI_ADDR_CNT_BIT);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		spireg_write(a3700_spi, A3700_SPI_IF_HDR_CNT_REG, val);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		val |= ((dummy_cnt & A3700_SPI_DUMMY_CNT_MASK)
 			    << A3700_SPI_DUMMY_CNT_BIT);
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		/* Update the buffer length to be transferred */
 		status->buf_len -= addr_cnt;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	spireg_write(a3700_spi, A3700_SPI_IF_HDR_CNT_REG, val);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		/* transfer 1~3 bytes by address count */
 		val = 0;
 		while (addr_cnt--) {
@@ -794,7 +797,7 @@ static void a3700_spi_header_set(struct a3700_spi *a3700_spi)
 			status->tx_buf++;
 		}
 		spireg_write(a3700_spi, A3700_SPI_IF_ADDR_REG, val);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	/* Update the buffer length to be transferred */
 	status->buf_len -= (instr_cnt + addr_cnt + dummy_cnt);
 
@@ -811,13 +814,13 @@ static void a3700_spi_header_set(struct a3700_spi *a3700_spi)
 	while (addr_cnt--) {
 		val = (val << 8) | status->tx_buf[0];
 		status->tx_buf++;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	}
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	spireg_write(a3700_spi, A3700_SPI_IF_ADDR_REG, val);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 }
 
 static int a3700_spi_transfer_start_non_legacy(struct spi_device *spi,
@@ -851,11 +854,11 @@ static int a3700_spi_transfer_start_non_legacy(struct spi_device *spi,
 		val |= A3700_SPI_XFER_START;
 		spireg_write(a3700_spi, A3700_SPI_IF_CFG_REG, val);
 	} else if (xfer->tx_buf) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		/* Start Write transfer for the reset 4 bytes aligned data */
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		/* Start Write transfer */
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		val = spireg_read(a3700_spi, A3700_SPI_IF_CFG_REG);
 		val |= (A3700_SPI_XFER_START | A3700_SPI_RW_EN);
 		spireg_write(a3700_spi, A3700_SPI_IF_CFG_REG, val);
@@ -926,17 +929,17 @@ static int a3700_spi_fifo_write(struct a3700_spi *a3700_spi)
 {
 	struct a3700_spi_status *status = &a3700_spi->status;
 	u32 val;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	int i = 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 
 	while (!a3700_is_wfifo_full(a3700_spi) && status->buf_len) {
 		/* Write bytes to data out register */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		val = 0;
 		if (status->buf_len >= 4) {
 			val |= status->tx_buf[3] << 24;
@@ -959,14 +962,14 @@ static int a3700_spi_fifo_write(struct a3700_spi *a3700_spi)
 				val |= *status->tx_buf++ << (8 * i);
 				i++;
 				status->buf_len--;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 
 				spireg_write(a3700_spi, A3700_SPI_DATA_OUT_REG, val);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
 		val = (status->tx_buf[3] << 24)
 		      | (status->tx_buf[2] << 16)
 		      | (status->tx_buf[1] << 8)
@@ -974,15 +977,15 @@ static int a3700_spi_fifo_write(struct a3700_spi *a3700_spi)
 		spireg_write(a3700_spi, A3700_SPI_DATA_OUT_REG, val);
 		status->buf_len -= 4;
 		status->tx_buf += 4;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 			}
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 			spireg_write(a3700_spi, A3700_SPI_DATA_OUT_REG, val);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			break;
 		}
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	}
 
 	return 0;
@@ -1067,12 +1070,12 @@ static int a3700_spi_transfer_finish_non_legacy(struct spi_device *spi,
 	/*
 	 * Stop a write transfer in fifo mode:
 	 *	- wait all the bytes in wfifo to be shifted out
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	 *	- wait spi ready for spi interface to be in idle
 	 *	- set XFER_STOP bit
-#else // CONFIG_SYNO_LSP_ARMADA_17_04_02
+#else // MY_DEF_HERE
 	 *	 - set XFER_STOP bit
-#endif // CONFIG_SYNO_LSP_ARMADA_17_04_02
+#endif // MY_DEF_HERE
 	 *	- wait XFER_START bit clear
 	 *	- clear XFER_STOP bit
 	 * Stop a read transfer in fifo mode:
@@ -1091,13 +1094,13 @@ static int a3700_spi_transfer_finish_non_legacy(struct spi_device *spi,
 				dev_err(&spi->dev, "wait write fifo empty timed out\n");
 				return -ETIMEDOUT;
 			}
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		}
 
 		if (!a3700_spi_transfer_wait(spi, A3700_SPI_XFER_RDY)) {
 			dev_err(&spi->dev, "wait transfer ready timed out\n");
 			return -ETIMEDOUT;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 		} else {
 			/*
 			 * If the instruction in SPI_INSTR does not require data to be
@@ -1108,7 +1111,7 @@ static int a3700_spi_transfer_finish_non_legacy(struct spi_device *spi,
 				dev_err(&spi->dev, "wait transfer ready timed out\n");
 				return -ETIMEDOUT;
 			}
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 		}
 
 		val = spireg_read(a3700_spi, A3700_SPI_IF_CFG_REG);
@@ -1184,13 +1187,13 @@ static const struct a3700_spi_initdata armada_3700_spi_initdata = {
 	.cs_num             = 4,
 	.mode               = SPI_CPHA | SPI_CPOL,
 	.bits_per_word_mask = SPI_BPW_MASK(8) | SPI_BPW_MASK(32),
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	.instr_cnt          = 1,
 	.addr_cnt           = 3,
 	.dummy_cnt      = 1,
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 };
 
 static const struct of_device_id a3700_spi_of_match_table[] = {
@@ -1268,7 +1271,7 @@ static int a3700_spi_probe(struct platform_device *pdev)
 		init_completion(&spi->status.done);
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	/* Enable SPI gating clock*/
 	spi->clk = devm_clk_get(&pdev->dev, NULL);
 	if (!IS_ERR(spi->clk)) {
@@ -1276,7 +1279,7 @@ static int a3700_spi_probe(struct platform_device *pdev)
 		if (ret)
 			goto error;
 		spi->input_clk_freq = clk_get_rate(spi->clk);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	of_property_read_u32(of_node, "max-frequency", &spi->max_clk_freq);
 	if (!spi->max_clk_freq) {
 		dev_err(&pdev->dev, "could not find spi-max-frequency\n");
@@ -1286,16 +1289,16 @@ static int a3700_spi_probe(struct platform_device *pdev)
 	if (!spi->input_clk_freq) {
 		dev_err(&pdev->dev, "could not find clock-frequency\n");
 		goto error_clk;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	}
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	/* TO-DO: there is no gating clock driver so far, and SPI clock
 	 * configuration has been done in boot rom. So we are good for now.
 	 * but when gating clock is ready, need to enable the clock here.
 	 */
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	if (of_find_property(of_node, "fifo-mode", NULL)) {
 		dev_err(&pdev->dev, "fifo mode\n");
@@ -1303,45 +1306,45 @@ static int a3700_spi_probe(struct platform_device *pdev)
 		spi->spi_pre_xfer  = a3700_spi_transfer_start_non_legacy;
 		spi->spi_do_xfer   = a3700_spi_do_transfer_non_legacy;
 		spi->spi_post_xfer = a3700_spi_transfer_finish_non_legacy;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 
 		spi->max_cnt.instr_cnt = initdata->instr_cnt;
 		spi->max_cnt.addr_cnt  = initdata->addr_cnt;
 		spi->max_cnt.dummy_cnt  = initdata->dummy_cnt;
 		spi->max_cnt.hdr_cnt   = initdata->instr_cnt
 				+ initdata->addr_cnt + initdata->dummy_cnt;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	} else {
 		dev_err(&pdev->dev, "legacy mode\n");
 		spi->spi_pre_xfer  = a3700_spi_transfer_start_legacy;
 		spi->spi_do_xfer   = a3700_spi_do_transfer_legacy;
 		spi->spi_post_xfer = a3700_spi_transfer_finish_legacy;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 
 		spi->max_cnt.instr_cnt = 0;
 		spi->max_cnt.addr_cnt  = 0;
 		spi->max_cnt.dummy_cnt  = 0;
 		spi->max_cnt.hdr_cnt   = 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	}
 
 	spi->pin_mode = A3700_SPI_SGL_PIN; /* fix-me: add device tree support */
 
 	ret = a3700_spi_init(spi);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (ret) {
 		dev_err(&pdev->dev, "Failed to init SPI\n");
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (ret)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		goto error_clk;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	if (!(spi->flags & XFER_POLL)) {
 		ret = devm_request_irq(&pdev->dev, spi->irq,
@@ -1353,27 +1356,27 @@ static int a3700_spi_probe(struct platform_device *pdev)
 	}
 
 	ret = spi_register_master(master);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (ret) {
 		dev_err(&pdev->dev, "failed to register SPI master\n");
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (ret)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		goto error_clk;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	}
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 out:
 	return ret;
 
 error_clk:
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	clk_disable_unprepare(spi->clk);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	/* TO-DO: when gating clock is ready, need to disable the clock. */
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 error:
 	spi_master_put(master);
@@ -1382,25 +1385,25 @@ error:
 
 static int a3700_spi_remove(struct platform_device *pdev)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	struct a3700_spi *a3700_spi;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	struct spi_master *master = platform_get_drvdata(pdev);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	a3700_spi = spi_master_get_devdata(master);
 	if (!a3700_spi->clk)
 		clk_disable_unprepare(a3700_spi->clk);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	/* TO-DO: when gating clock is ready, need to disable the clock. */
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	spi_unregister_master(master);
 
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_PM
 static int a3700_spi_suspend_noirq(struct device *dev)
 {
@@ -1464,16 +1467,16 @@ static const struct dev_pm_ops a3700_spi_pm_ops = {
 #define A3700_SPI_PM_OPS NULL
 #endif /* CONFIG_PM */
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 MODULE_ALIAS("platform:" DRIVER_NAME);
 
 static struct platform_driver a3700_spi_driver = {
 	.driver = {
 		.name	= DRIVER_NAME,
 		.owner	= THIS_MODULE,
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		.pm	= A3700_SPI_PM_OPS,
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 		.of_match_table = of_match_ptr(a3700_spi_of_match_table),
 	},
 	.probe		= a3700_spi_probe,
@@ -1485,4 +1488,4 @@ module_platform_driver(a3700_spi_driver);
 MODULE_DESCRIPTION("Armada-3700 SPI driver");
 MODULE_AUTHOR("Wilson Ding <dingwei@marvell.com>");
 MODULE_LICENSE("GPL");
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

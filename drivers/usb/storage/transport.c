@@ -608,6 +608,7 @@ int usb_stor_CB_transport(struct scsi_cmnd *srb, struct us_data *us)
 	unsigned int pipe = 0;
 	int result;
 
+	memcpy(us->iobuf, srb->cmnd, srb->cmd_len);
 	result = usb_stor_ctrl_transfer(us, us->send_ctrl_pipe,
 				      US_CBI_ADSC, 
 				      USB_TYPE_CLASS | USB_RECIP_INTERFACE, 0, 

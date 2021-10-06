@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * kirkwood-i2s.c
  *
@@ -37,7 +40,7 @@
 	(SNDRV_PCM_FMTBIT_S16_LE | \
 	 SNDRV_PCM_FMTBIT_S24_LE)
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 /* These registers are relative to the second register region -
  * audio pll configuration.
  */
@@ -156,7 +159,7 @@ static inline void armada_38x_set_pll(void __iomem *base, unsigned long rate)
 	reg_val |= A38X_PLL_FREQ_OFFSET_VALID;
 	writel(reg_val, base + A38X_PLL_CONF_REG1);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 static int kirkwood_i2s_set_fmt(struct snd_soc_dai *cpu_dai,
 		unsigned int fmt)
@@ -233,14 +236,14 @@ static void kirkwood_set_rate(struct snd_soc_dai *dai,
 		 * defined in kirkwood_i2s_dai */
 		dev_dbg(dai->dev, "%s: dco set rate = %lu\n",
 			__func__, rate);
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		if (priv->pll_config)
 			armada_38x_set_pll(priv->pll_config, rate);
 		else
 			kirkwood_set_dco(priv->io, rate);
 #else
 		kirkwood_set_dco(priv->io, rate);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 		clks_ctrl = KIRKWOOD_MCLK_SOURCE_DCO;
 	} else {
@@ -672,11 +675,11 @@ static int kirkwood_i2s_dev_probe(struct platform_device *pdev)
 	}
 	dev_set_drvdata(&pdev->dev, priv);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	mem = platform_get_resource_byname(pdev, IORESOURCE_MEM, "i2s_regs");
 #else
 	mem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	priv->io = devm_ioremap_resource(&pdev->dev, mem);
 	if (IS_ERR(priv->io))
 		return PTR_ERR(priv->io);
@@ -687,7 +690,7 @@ static int kirkwood_i2s_dev_probe(struct platform_device *pdev)
 		return -ENXIO;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	if (of_device_is_compatible(np, "marvell,armada-380-audio")) {
 		err = armada_38x_i2s_init_quirk(pdev, priv, soc_dai);
 		/* Set initial pll frequency */
@@ -696,7 +699,7 @@ static int kirkwood_i2s_dev_probe(struct platform_device *pdev)
 		if (err < 0)
 			return err;
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	if (np) {
 		priv->burst = 128;		/* might be 32 or 128 */
@@ -790,9 +793,9 @@ static const struct of_device_id mvebu_audio_of_match[] = {
 	{ .compatible = "marvell,kirkwood-audio" },
 	{ .compatible = "marvell,dove-audio" },
 	{ .compatible = "marvell,armada370-audio" },
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	{ .compatible = "marvell,armada-380-audio" },
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	{ }
 };
 MODULE_DEVICE_TABLE(of, mvebu_audio_of_match);

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * ASIX AX88172A based USB 2.0 Ethernet Devices
  * Copyright (C) 2012 OMICRON electronics GmbH
@@ -98,11 +101,11 @@ static void ax88172a_status(struct usbnet *dev, struct urb *urb)
 static int ax88172a_init_mdio(struct usbnet *dev)
 {
 	struct ax88172a_private *priv = dev->driver_priv;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	int ret;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	int ret, i;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	priv->mdio = mdiobus_alloc();
 	if (!priv->mdio) {
@@ -118,9 +121,9 @@ static int ax88172a_init_mdio(struct usbnet *dev)
 	snprintf(priv->mdio->id, MII_BUS_ID_SIZE, "usb-%03d:%03d",
 		 dev->udev->bus->busnum, dev->udev->devnum);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	priv->mdio->irq = kzalloc(sizeof(int) * PHY_MAX_ADDR, GFP_KERNEL);
 	if (!priv->mdio->irq) {
 		ret = -ENOMEM;
@@ -128,27 +131,27 @@ static int ax88172a_init_mdio(struct usbnet *dev)
 	}
 	for (i = 0; i < PHY_MAX_ADDR; i++)
 		priv->mdio->irq[i] = PHY_POLL;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	ret = mdiobus_register(priv->mdio);
 	if (ret) {
 		netdev_err(dev->net, "Could not register MDIO bus\n");
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		goto mfree;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		goto ifree;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	}
 
 	netdev_info(dev->net, "registered mdio bus %s\n", priv->mdio->id);
 	return 0;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 ifree:
 	kfree(priv->mdio->irq);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 mfree:
 	mdiobus_free(priv->mdio);
 	return ret;

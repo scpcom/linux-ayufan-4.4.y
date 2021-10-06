@@ -331,7 +331,7 @@ static struct scsi_dev_info_list *scsi_dev_info_list_find(const char *vendor,
 	if (IS_ERR(devinfo_table))
 		return (struct scsi_dev_info_list *) devinfo_table;
 
-	vmax = 8;	 
+	vmax = sizeof(devinfo->vendor);
 	vskip = vendor;
 	while (vmax > 0 && *vskip == ' ') {
 		vmax--;
@@ -341,7 +341,7 @@ static struct scsi_dev_info_list *scsi_dev_info_list_find(const char *vendor,
 	while (vmax > 0 && vskip[vmax - 1] == ' ')
 		--vmax;
 
-	mmax = 16;	 
+	mmax = sizeof(devinfo->model);
 	mskip = model;
 	while (mmax > 0 && *mskip == ' ') {
 		mmax--;

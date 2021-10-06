@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/module.h>
 #include <linux/platform_device.h>
 #include <linux/delay.h>
@@ -16,6 +19,11 @@
 #define WAIT_VBUSY_RETRY	3
 
 #define OFFEST_PHY_READ	0x20
+
+#ifdef MY_DEF_HERE
+#define RX_SENSITIVITY_MODE_ADDR		0xF7
+#define RX_SENSITIVITY_MODE_OLD_MODE	0x02
+#endif /* MY_DEF_HERE */
 
 #define USB_ST_BUSY		BIT(23)
 #define phy_write(addr, val)	do { smp_wmb(); __raw_writel(val, addr); } while(0)
@@ -109,6 +117,9 @@ static int rtk_usb2_phy_init(struct usb_phy *phy)
     struct phy_data *phy_data = rtk_phy->phy_data;
     struct rtk_usb_phy_data_s *phy_page0_default_setting = phy_data->page0;
     struct rtk_usb_phy_data_s *phy_page1_default_setting = phy_data->page1;
+#ifdef MY_DEF_HERE
+    bool rx_sensitivity_mode_is_set = false;
+#endif /* MY_DEF_HERE */
 
     dev_info(phy->dev, "%s Init RTK USB 2.0 PHY\n", __FILE__);
 
@@ -127,8 +138,31 @@ static int rtk_usb2_phy_init(struct usb_phy *phy)
                     __FUNCTION__, __LINE__,
                     (phy_page0_default_setting + i)->addr,
                     rtk_usb_phy_read(rtk_phy, (phy_page0_default_setting + i)->addr - OFFEST_PHY_READ));
+
+#ifdef MY_DEF_HERE
+            if((phy_page0_default_setting + i)->addr == RX_SENSITIVITY_MODE_ADDR) {
+                rx_sensitivity_mode_is_set = true;
+            }
+#endif /* MY_DEF_HERE */
         }
     }
+
+#ifdef MY_DEF_HERE
+    if(!rx_sensitivity_mode_is_set) {
+        if (rtk_usb_phy_write(rtk_phy, RX_SENSITIVITY_MODE_ADDR, RX_SENSITIVITY_MODE_OLD_MODE)) {
+            dev_err(phy->dev, "[%s:%d], page0 Error : addr = 0x%x, value = 0x%x\n",
+                    __FUNCTION__, __LINE__,
+                    RX_SENSITIVITY_MODE_ADDR,
+                    RX_SENSITIVITY_MODE_OLD_MODE);
+            return -1;
+        } else {
+            dev_dbg(phy->dev, "[%s:%d], page0 Good : addr = 0x%x, value = 0x%x\n",
+                    __FUNCTION__, __LINE__,
+                    RX_SENSITIVITY_MODE_ADDR,
+                    rtk_usb_phy_read(rtk_phy, RX_SENSITIVITY_MODE_ADDR - OFFEST_PHY_READ));
+        }
+    }
+#endif /* MY_DEF_HERE */
 
     /* Set page 1 */
     rtk_usb_phy_set_page(rtk_phy, 1);

@@ -40,7 +40,6 @@
  * and release on file close.
  */
 
-
 /**
  * struct ttm_object_file
  *
@@ -144,7 +143,6 @@ static void ttm_object_file_destroy(struct kref *kref)
 	kfree(tfile);
 }
 
-
 static inline void ttm_object_file_unref(struct ttm_object_file **p_tfile)
 {
 	struct ttm_object_file *tfile = *p_tfile;
@@ -152,7 +150,6 @@ static inline void ttm_object_file_unref(struct ttm_object_file **p_tfile)
 	*p_tfile = NULL;
 	kref_put(&tfile->refcount, ttm_object_file_destroy);
 }
-
 
 int ttm_base_object_init(struct ttm_object_file *tfile,
 			 struct ttm_base_object *base,
@@ -304,7 +301,7 @@ bool ttm_ref_object_exists(struct ttm_object_file *tfile,
 	 * Verify that the ref->obj pointer was actually valid!
 	 */
 	rmb();
-	if (unlikely(atomic_read(&ref->kref.refcount) == 0))
+	if (unlikely(kref_read(&ref->kref) == 0))
 		goto out_false;
 
 	rcu_read_unlock();

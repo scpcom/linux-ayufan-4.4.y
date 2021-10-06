@@ -18,7 +18,7 @@
 #include <linux/slab.h>
 #include <linux/btrfs.h>
 #include <linux/uio.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_SPLICE_FROM_SOCKET
 #include <net/sock.h>
 #endif
@@ -1692,6 +1692,8 @@ int btrfs_sync_file(struct file *file, loff_t start, loff_t end, int datasync)
 		 
 		clear_bit(BTRFS_INODE_NEEDS_FULL_SYNC,
 			  &BTRFS_I(inode)->runtime_flags);
+		 
+		ret = btrfs_inode_check_errors(inode);
 		inode_unlock(inode);
 		goto out;
 	}
@@ -2532,7 +2534,7 @@ out:
 	return offset;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_SPLICE_FROM_SOCKET
 static ssize_t btrfs_splice_from_socket(struct file *file, struct socket *sock,
 					loff_t __user *ppos, size_t write_bytes)
@@ -2822,7 +2824,7 @@ const struct file_operations btrfs_file_operations = {
 	.llseek		= btrfs_file_llseek,
 	.read_iter      = generic_file_read_iter,
 	.splice_read	= generic_file_splice_read,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_SPLICE_FROM_SOCKET
 	.splice_from_socket = btrfs_splice_from_socket,
 #endif
@@ -2837,6 +2839,10 @@ const struct file_operations btrfs_file_operations = {
 #ifdef CONFIG_COMPAT
 	.compat_ioctl	= btrfs_compat_ioctl,
 #endif
+	.clone_file_range = btrfs_clone_file_range,
+#ifdef MY_ABC_HERE
+	.clone_check_compr = btrfs_clone_check_compr,
+#endif  
 };
 
 void btrfs_auto_defrag_exit(void)

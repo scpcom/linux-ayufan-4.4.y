@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Driver for the MPC5200 Fast Ethernet Controller - MDIO bus driver
  *
@@ -22,11 +25,11 @@
 
 struct mpc52xx_fec_mdio_priv {
 	struct mpc52xx_fec __iomem *regs;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	int mdio_irqs[PHY_MAX_ADDR];
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 };
 
 static int mpc52xx_fec_mdio_transfer(struct mii_bus *bus, int phy_id,
@@ -87,12 +90,12 @@ static int mpc52xx_fec_mdio_probe(struct platform_device *of)
 	bus->read = mpc52xx_fec_mdio_read;
 	bus->write = mpc52xx_fec_mdio_write;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	/* setup irqs */
 	bus->irq = priv->mdio_irqs;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	/* setup registers */
 	err = of_address_to_resource(np, 0, &res);

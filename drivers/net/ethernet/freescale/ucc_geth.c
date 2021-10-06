@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2006-2009 Freescale Semicondutor, Inc. All rights reserved.
  *
@@ -1384,11 +1387,11 @@ static int adjust_enet_interface(struct ucc_geth_private *ugeth)
 		value &= ~0x1000;	/* Turn off autonegotiation */
 		phy_write(tbiphy, ENET_TBI_MII_CR, value);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		put_device(&tbiphy->mdio.dev);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		put_device(&tbiphy->dev);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	}
 
 	init_check_frame_length_mode(ug_info->lengthCheckRx, &ug_regs->maccfg2);
@@ -1708,11 +1711,11 @@ static void uec_configure_serdes(struct net_device *dev)
 	 * several seconds for it to come back.
 	 */
 	if (phy_read(tbiphy, ENET_TBI_MII_SR) & TBISR_LSTATUS) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		put_device(&tbiphy->mdio.dev);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		put_device(&tbiphy->dev);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		return;
 	}
 

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/include/linux/mmc/host.h
  *
@@ -289,16 +292,16 @@ struct mmc_host {
 #define MMC_CAP2_HSX00_1_2V	(MMC_CAP2_HS200_1_2V_SDR | MMC_CAP2_HS400_1_2V)
 #define MMC_CAP2_SDIO_IRQ_NOTHREAD (1 << 17)
 #define MMC_CAP2_NO_WRITE_PROTECT (1 << 18)	/* No physical write protect pin, assume that card is always read-write */
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
 #define MMC_CAP2_NO_SDIO	(1 << 19)	/* Do not send SDIO commands during initialization */
 #define MMC_CAP2_HS400_ES	(1 << 20)	/* Host supports enhanced strobe */
 #define MMC_CAP2_NO_SD		(1 << 21)	/* Do not send SD commands during initialization */
 #define MMC_CAP2_NO_MMC		(1 << 22)	/* Do not send (e)MMC commands during initialization */
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 #define MMC_CAP2_NO_DDR50_TUNING (1 << 20)	/* Do not execute tuning in DDR50 mode */
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
+#endif /* MY_DEF_HERE */
 
 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
 

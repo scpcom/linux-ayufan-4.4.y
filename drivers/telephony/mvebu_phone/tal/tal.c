@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*******************************************************************************
  * Copyright (C) 2016 Marvell International Ltd.
  *
@@ -211,4 +214,4 @@ enum tal_status tal_mmp_tx(u8 *buffer, int size)
 	return TAL_STAT_BAD_PARAM;
 }
 EXPORT_SYMBOL(tal_mmp_tx);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

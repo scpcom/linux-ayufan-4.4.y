@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright 2012 Freescale Semiconductor, Inc.
  * Copyright 2012 Linaro Ltd.
@@ -38,11 +41,11 @@ struct clk_busy_divider {
 
 static inline struct clk_busy_divider *to_clk_busy_divider(struct clk_hw *hw)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct clk_divider *div = to_clk_divider(hw);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct clk_divider *div = container_of(hw, struct clk_divider, hw);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	return container_of(div, struct clk_busy_divider, div);
 }
@@ -127,11 +130,11 @@ struct clk_busy_mux {
 
 static inline struct clk_busy_mux *to_clk_busy_mux(struct clk_hw *hw)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct clk_mux *mux = to_clk_mux(hw);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct clk_mux *mux = container_of(hw, struct clk_mux, hw);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	return container_of(mux, struct clk_busy_mux, mux);
 }

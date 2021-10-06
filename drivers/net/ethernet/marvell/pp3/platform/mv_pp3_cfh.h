@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*
 * ***************************************************************************
 * Copyright (C) 2015 Marvell International Ltd.
@@ -319,4 +322,4 @@ enum mv_pp3_l4_csum {
 
 #endif /* __mv_pp3_cfh_h__ */
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

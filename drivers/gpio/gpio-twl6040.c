@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Access to GPOs on TWL6040 chip
  *
@@ -36,11 +39,11 @@ static struct gpio_chip twl6040gpo_chip;
 
 static int twl6040gpo_get(struct gpio_chip *chip, unsigned offset)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct twl6040 *twl6040 = dev_get_drvdata(chip->parent->parent);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct twl6040 *twl6040 = dev_get_drvdata(chip->dev->parent);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	int ret = 0;
 
 	ret = twl6040_reg_read(twl6040, TWL6040_REG_GPOCTL);
@@ -59,11 +62,11 @@ static int twl6040gpo_direction_out(struct gpio_chip *chip, unsigned offset,
 
 static void twl6040gpo_set(struct gpio_chip *chip, unsigned offset, int value)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct twl6040 *twl6040 = dev_get_drvdata(chip->parent->parent);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct twl6040 *twl6040 = dev_get_drvdata(chip->dev->parent);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	int ret;
 	u8 gpoctl;
 
@@ -103,11 +106,11 @@ static int gpo_twl6040_probe(struct platform_device *pdev)
 	else
 		twl6040gpo_chip.ngpio = 1; /* twl6041 have 1 GPO */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	twl6040gpo_chip.parent = &pdev->dev;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	twl6040gpo_chip.dev = &pdev->dev;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 #ifdef CONFIG_OF_GPIO
 	twl6040gpo_chip.of_node = twl6040_core_dev->of_node;
 #endif

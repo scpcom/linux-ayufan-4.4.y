@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -242,4 +245,4 @@ int rm_port_drop_profile_status_cos(rmctl_t hndl,
 									uint8_t *status);
 
 #endif   /* RM_STATUS_H */
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

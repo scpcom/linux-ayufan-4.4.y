@@ -485,7 +485,7 @@ void msm_gem_describe(struct drm_gem_object *obj, struct seq_file *m)
 	seq_printf(m, "%08x: %c(r=%u,w=%u) %2d (%2d) %08llx %p %zu\n",
 			msm_obj->flags, is_active(msm_obj) ? 'A' : 'I',
 			msm_obj->read_fence, msm_obj->write_fence,
-			obj->name, obj->refcount.refcount.counter,
+			obj->name, kref_read(&obj->refcount),
 			off, msm_obj->vaddr, obj->size);
 }
 

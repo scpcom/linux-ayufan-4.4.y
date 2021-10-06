@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Definitions for Xilinx Axi Ethernet device driver.
  *
@@ -426,11 +429,11 @@ struct axienet_local {
 
 	/* MDIO bus data */
 	struct mii_bus *mii_bus;	/* MII bus reference */
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	int mdio_irqs[PHY_MAX_ADDR];	/* IRQs table for MDIO bus */
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	/* IO registers, dma functions and IRQs */
 	void __iomem *regs;

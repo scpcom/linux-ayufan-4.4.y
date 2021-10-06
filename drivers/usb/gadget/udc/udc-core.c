@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /**
  * udc.c - Core UDC Framework
  *
@@ -29,9 +32,9 @@
 #include <linux/usb/gadget.h>
 #include <linux/usb.h>
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 /**
  * struct usb_udc - describes one usb device controller
  * @driver - the gadget driver pointer. For use by the class code
@@ -51,7 +54,7 @@ struct usb_udc {
 	struct list_head		list;
 	bool				vbus;
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 static struct class *udc_class;
 static LIST_HEAD(udc_list);
@@ -531,17 +534,17 @@ int usb_udc_attach_driver(const char *name, struct usb_gadget_driver *driver)
 
 	mutex_lock(&udc_lock);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	udc = udc_detect(&udc_list, driver);
 	if (!udc) {
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	list_for_each_entry(udc, &udc_list, list) {
 		ret = strcmp(name, dev_name(&udc->dev));
 		if (!ret)
 			break;
 	}
 	if (ret) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		ret = -ENODEV;
 		goto out;
 	}
@@ -566,17 +569,17 @@ int usb_gadget_probe_driver(struct usb_gadget_driver *driver)
 
 	mutex_lock(&udc_lock);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	udc = udc_detect(&udc_list, driver);
 	if (udc)
 		goto found;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	list_for_each_entry(udc, &udc_list, list) {
 		/* For now we take the first one */
 		if (!udc->driver)
 			goto found;
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	pr_debug("couldn't find an available UDC\n");
 	mutex_unlock(&udc_lock);

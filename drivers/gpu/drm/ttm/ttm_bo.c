@@ -127,7 +127,6 @@ static struct kobj_type ttm_bo_glob_kobj_type  = {
 	.default_attrs = ttm_bo_global_attrs
 };
 
-
 static inline uint32_t ttm_bo_type_flags(unsigned type)
 {
 	return 1 << (type);
@@ -140,8 +139,8 @@ static void ttm_bo_release_list(struct kref *list_kref)
 	struct ttm_bo_device *bdev = bo->bdev;
 	size_t acc_size = bo->acc_size;
 
-	BUG_ON(atomic_read(&bo->list_kref.refcount));
-	BUG_ON(atomic_read(&bo->kref.refcount));
+	BUG_ON(kref_read(&bo->list_kref));
+	BUG_ON(kref_read(&bo->kref));
 	BUG_ON(atomic_read(&bo->cpu_writers));
 	BUG_ON(bo->mem.mm_node != NULL);
 	BUG_ON(!list_empty(&bo->lru));
@@ -1411,7 +1410,6 @@ out_no_drp:
 }
 EXPORT_SYMBOL(ttm_bo_global_init);
 
-
 int ttm_bo_device_release(struct ttm_bo_device *bdev)
 {
 	int ret = 0;
@@ -1532,7 +1530,6 @@ void ttm_bo_unmap_virtual(struct ttm_buffer_object *bo)
 	ttm_bo_unmap_virtual_locked(bo);
 	ttm_mem_io_unlock(man);
 }
-
 
 EXPORT_SYMBOL(ttm_bo_unmap_virtual);
 

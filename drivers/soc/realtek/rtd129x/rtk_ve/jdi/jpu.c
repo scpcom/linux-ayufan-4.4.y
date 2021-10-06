@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 
 #include <linux/kernel.h>
 #include <linux/mm.h>
@@ -765,6 +768,11 @@ static int jpu_probe(struct platform_device *pdev)
 
     of_address_to_resource(node, 1, &res);
     iobase = of_iomap(node, 1);
+
+#ifdef MY_DEF_HERE
+    /* overwrite dts reg node 1 buffer size for mpeg2 */
+    res.end = 0x98007fff;
+#endif /* MY_DEF_HERE */
 
     s_jpu_pll_phy_base = res.start;
     s_jpu_pll_virt_base = iobase;

@@ -24,24 +24,38 @@ btrfs_xattr_syno_set(const struct xattr_handler *handler,
 #ifdef MY_ABC_HERE
 	 
 	if (!strcmp(name, XATTR_SYNO_ARCHIVE_BIT)) {
-		const __le32 *archive_bit_le32 = value;
-		inode->i_archive_bit = le32_to_cpu(*archive_bit_le32);
+		 
+		if (value) {
+			const __le32 *archive_bit_le32 = value;
+			inode->i_archive_bit = le32_to_cpu(*archive_bit_le32);
+		} else {
+			inode->i_archive_bit = 0;
+		}
 		return ret;
 	}
 #endif  
 #ifdef MY_ABC_HERE
 	if (!strcmp(name, XATTR_SYNO_ARCHIVE_VERSION)) {
-		const struct syno_xattr_archive_version *arch_ver_le = value;
-		inode->i_archive_version = le32_to_cpu(arch_ver_le->v_archive_version);
+		if (value) {
+			const struct syno_xattr_archive_version *arch_ver_le = value;
+			inode->i_archive_version = le32_to_cpu(arch_ver_le->v_archive_version);
+		} else {
+			inode->i_archive_version = 0;
+		}
 		inode->i_flags |= S_ARCHIVE_VERSION_CACHED;
 		return ret;
 	}
 #endif  
 #ifdef MY_ABC_HERE
 	if (!strcmp(name, XATTR_SYNO_CREATE_TIME)) {
-		const struct btrfs_timespec *crtime_le = value;
-		inode->i_create_time.tv_sec = le64_to_cpu(crtime_le->sec);
-		inode->i_create_time.tv_nsec = le32_to_cpu(crtime_le->nsec);
+		if (value) {
+			const struct btrfs_timespec *crtime_le = value;
+			inode->i_create_time.tv_sec = le64_to_cpu(crtime_le->sec);
+			inode->i_create_time.tv_nsec = le32_to_cpu(crtime_le->nsec);
+		} else {
+			inode->i_create_time.tv_sec = 0;
+			inode->i_create_time.tv_nsec = 0;
+		}
 		inode->i_flags |= S_CREATE_TIME_CACHED;
 		return ret;
 	}

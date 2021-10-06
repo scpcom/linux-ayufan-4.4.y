@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * message.c - synchronous message handling
  */
@@ -32,7 +35,6 @@ static void usb_api_blocking_completion(struct urb *urb)
 	ctx->status = urb->status;
 	complete(&ctx->done);
 }
-
 
 /*
  * Starts urb and waits for completion or timeout. Note that this call
@@ -327,7 +329,6 @@ static void sg_complete(struct urb *urb)
 
 	spin_unlock(&io->lock);
 }
-
 
 /**
  * usb_sg_init - initializes scatterlist-based bulk/interrupt I/O request
@@ -1109,7 +1110,6 @@ void usb_reset_endpoint(struct usb_device *dev, unsigned int epaddr)
 }
 EXPORT_SYMBOL_GPL(usb_reset_endpoint);
 
-
 /**
  * usb_disable_interface -- Disable all endpoints for an interface
  * @dev: the device whose interface is being disabled
@@ -1313,6 +1313,11 @@ int usb_set_interface(struct usb_device *dev, int interface, int alternate)
 			 alternate);
 		return -EINVAL;
 	}
+
+#ifdef MY_ABC_HERE
+	/* Cancel URBs */
+	usb_disable_interface(dev, iface, false);
+#endif /* MY_ABC_HERE */
 
 	/* Make sure we have enough bandwidth for this alternate interface.
 	 * Remove the current alt setting and add the new alt setting.
@@ -1660,7 +1665,6 @@ static struct usb_interface_assoc_descriptor *find_iad(struct usb_device *dev,
 	return retval;
 }
 
-
 /*
  * Internal function to queue a device reset
  * See usb_queue_reset_device() for more details
@@ -1679,7 +1683,6 @@ static void __usb_queue_reset_device(struct work_struct *ws)
 	}
 	usb_put_intf(iface);	/* Undo _get_ in usb_queue_reset_device() */
 }
-
 
 /*
  * usb_set_configuration - Makes a particular device setting be current

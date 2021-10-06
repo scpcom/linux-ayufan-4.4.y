@@ -597,6 +597,12 @@ static int ovl_remove_upper(struct dentry *dentry, bool is_dir)
 	int err;
 
 	inode_lock_nested(dir, I_MUTEX_PARENT);
+	upper = lookup_one_len(dentry->d_name.name, upperdir,
+			       dentry->d_name.len);
+	err = PTR_ERR(upper);
+	if (IS_ERR(upper))
+		goto out_unlock;
+
 	err = -ESTALE;
 	if (upper == ovl_dentry_upper(dentry)) {
 		if (is_dir)
@@ -615,6 +621,7 @@ static int ovl_remove_upper(struct dentry *dentry, bool is_dir)
 	 */
 	if (!err)
 		d_drop(dentry);
+out_unlock:
 	inode_unlock(dir);
 
 	return err;
@@ -834,7 +841,6 @@ static int ovl_rename2(struct inode *olddir, struct dentry *old,
 	new_upperdir = ovl_dentry_upper(new->d_parent);
 
 	trap = lock_rename(new_upperdir, old_upperdir);
-
 
 	olddentry = lookup_one_len(old->d_name.name, old_upperdir,
 				   old->d_name.len);

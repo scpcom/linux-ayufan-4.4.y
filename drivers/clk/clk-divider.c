@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2011 Sascha Hauer, Pengutronix <s.hauer@pengutronix.de>
  * Copyright (C) 2011 Richard Zhao, Linaro <richard.zhao@linaro.org>
@@ -28,11 +31,11 @@
  * parent - fixed parent.  No clk_set_parent support
  */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 #define to_clk_divider(_hw) container_of(_hw, struct clk_divider, hw)
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 #define div_mask(width)	((1 << (width)) - 1)
 

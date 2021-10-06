@@ -51,14 +51,18 @@ config SYNO_RTD129X
 	depends on ARM64
 	select SYNO_LSP_RTD129X
 
-config SYNO_PURLEY
-	bool "Intel Purley"
-	depends on X86_64
-
 config SYNO_ARMADA37XX
 	bool "Marvell armada37xx"
 	depends on ARM64 && ARCH_MVEBU
 	select SYNO_LSP_ARMADA
+
+config SYNO_PURLEY
+	bool "Intel Purley"
+	depends on X86_64
+
+config SYNO_COFFEELAKE
+	bool "Intel Coffee Lake"
+	depends on X86_64
 
 endchoice
 
@@ -98,6 +102,6 @@ config SYNO_DUAL_HEAD
 config SYNO_SAS
 	bool "Synology SAS Support"
 	default y
-	depends on SYNO_BROMOLOW || SYNO_BROADWELL || SYNO_GRANTLEY || SYNO_PURLEY
+	depends on SYNO_BROMOLOW || SYNO_BROADWELL || SYNO_GRANTLEY || SYNO_PURLEY || SYNO_COFFEELAKE
 
 endmenu #Platform Selection

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *   fs/cifs/smb2pdu.c
  *
@@ -77,8 +80,11 @@ static const int smb2_req_struct_sizes[NUMBER_OF_SMB2_COMMANDS] = {
 	/* SMB2_OPLOCK_BREAK */ 24 /* BB this is 36 for LEASE_BREAK variant */
 };
 
-
+#ifdef MY_ABC_HERE
+void
+#else
 static void
+#endif /* MY_ABC_HERE */
 smb2_hdr_assemble(struct smb2_hdr *hdr, __le16 smb2_cmd /* command */ ,
 		  const struct cifs_tcon *tcon)
 {
@@ -162,6 +168,9 @@ smb2_reconnect(__le16 smb2_command, struct cifs_tcon *tcon)
 	struct nls_table *nls_codepage;
 	struct cifs_ses *ses;
 	struct TCP_Server_Info *server;
+#ifdef MY_ABC_HERE
+	u16 origin_dialect; /* dialect index that server chose */
+#endif /* MY_ABC_HERE */
 
 	/*
 	 * SMB2s NegProt, SessSetup, Logoff do not have tcon yet so
@@ -236,13 +245,20 @@ smb2_reconnect(__le16 smb2_command, struct cifs_tcon *tcon)
 	if (!tcon->ses->need_reconnect && !tcon->need_reconnect)
 		return rc;
 
+#ifdef MY_ABC_HERE
+	nls_codepage = load_nls("utf8");
+#else
 	nls_codepage = load_nls_default();
+#endif /* MY_ABC_HERE */
 
 	/*
 	 * need to prevent multiple threads trying to simultaneously reconnect
 	 * the same SMB session
 	 */
 	mutex_lock(&tcon->ses->session_mutex);
+#ifdef MY_ABC_HERE
+	origin_dialect = server->dialect;
+#endif /* MY_ABC_HERE */
 	rc = cifs_negotiate_protocol(0, tcon->ses);
 	if (!rc && tcon->ses->need_reconnect)
 		rc = cifs_setup_session(0, tcon->ses, nls_codepage);
@@ -253,12 +269,21 @@ smb2_reconnect(__le16 smb2_command, struct cifs_tcon *tcon)
 	}
 
 	cifs_mark_open_files_invalid(tcon);
+#ifdef MY_ABC_HERE
+	rc = ses->server->ops->tree_connect(0, tcon->ses, tcon->treeName, tcon, nls_codepage);
+#else
 	rc = SMB2_tcon(0, tcon->ses, tcon->treeName, tcon, nls_codepage);
+#endif /* MY_ABC_HERE */
 	mutex_unlock(&tcon->ses->session_mutex);
 	cifs_dbg(FYI, "reconnect tcon rc = %d\n", rc);
 	if (rc)
 		goto out;
 	atomic_inc(&tconInfoReconnectCount);
+#ifdef MY_ABC_HERE
+	if (server->dialect != origin_dialect) {
+		rc = -EAGAIN;
+	}
+#endif /* MY_ABC_HERE */
 out:
 	/*
 	 * Check if handle based operation so we know whether we can continue
@@ -323,7 +348,6 @@ small_smb2_init(__le16 smb2_command, struct cifs_tcon *tcon,
 /* offset is sizeof smb2_negotiate_req - 4 but rounded up to 8 bytes */
 #define OFFSET_OF_NEG_CONTEXT 0x68  /* sizeof(struct smb2_negotiate_req) - 4 */
 
-
 #define SMB2_PREAUTH_INTEGRITY_CAPABILITIES	cpu_to_le16(1)
 #define SMB2_ENCRYPTION_CAPABILITIES		cpu_to_le16(2)
 
@@ -370,7 +394,6 @@ static void assemble_neg_contexts(struct smb2_negotiate_req *req)
 	return;
 }
 #endif /* SMB311 */
-
 
 /*
  *
@@ -824,6 +847,11 @@ ssetup_exit:
 		mutex_lock(&server->srv_mutex);
 		if (server->sign && server->ops->generate_signingkey) {
 			rc = server->ops->generate_signingkey(ses);
+#ifdef MY_ABC_HERE
+			if (-EOPNOTSUPP == rc) {
+				rc = 0;
+			} else {
+#endif /* MY_ABC_HERE */
 			kfree(ses->auth_key.response);
 			ses->auth_key.response = NULL;
 			if (rc) {
@@ -832,6 +860,9 @@ ssetup_exit:
 				mutex_unlock(&server->srv_mutex);
 				goto keygen_exit;
 			}
+#ifdef MY_ABC_HERE
+			}
+#endif /* MY_ABC_HERE */
 		}
 		if (!server->session_estab) {
 			server->sequence_number = 0x2;
@@ -1067,7 +1098,6 @@ SMB2_tdis(const unsigned int xid, struct cifs_tcon *tcon)
 	return rc;
 }
 
-
 static struct create_durable *
 create_durable_buf(void)
 {
@@ -1133,7 +1163,13 @@ parse_lease_state(struct TCP_Server_Info *server, struct smb2_create_rsp *rsp,
 		name = le16_to_cpu(cc->NameOffset) + (char *)cc;
 		if (le16_to_cpu(cc->NameLength) == 4 &&
 		    strncmp(name, "RqLs", 4) == 0)
+#ifdef MY_ABC_HERE
+		{
+			return server->ops->parse_lease_buf(server, cc, epoch);
+		}
+#else
 			return server->ops->parse_lease_buf(cc, epoch);
+#endif /* MY_ABC_HERE */
 
 		next = le32_to_cpu(cc->Next);
 		if (!next)
@@ -1152,7 +1188,11 @@ add_lease_context(struct TCP_Server_Info *server, struct kvec *iov,
 	struct smb2_create_req *req = iov[0].iov_base;
 	unsigned int num = *num_iovec;
 
+#ifdef MY_ABC_HERE
+	iov[num].iov_base = server->ops->create_lease_buf(server, oplock+1, *oplock);
+#else
 	iov[num].iov_base = server->ops->create_lease_buf(oplock+1, *oplock);
+#endif /* MY_ABC_HERE */
 	if (iov[num].iov_base == NULL)
 		return -ENOMEM;
 	iov[num].iov_len = server->vals->create_lease_size;
@@ -1545,7 +1585,6 @@ SMB2_ioctl(const unsigned int xid, struct cifs_tcon *tcon, u64 persistent_fid,
 	} else
 		iov[0].iov_len = get_rfc1002_length(req) + 4;
 
-
 	rc = SendReceive2(xid, ses, iov, num_iovecs, &resp_buftype, 0);
 	rsp = (struct smb2_ioctl_rsp *)iov[0].iov_base;
 
@@ -1676,7 +1715,6 @@ validate_buf(unsigned int offset, unsigned int buffer_length,
 	char *end_of_smb = smb_len + 4 /* RFC1001 length field */ + (char *)hdr;
 	char *begin_of_buf = 4 /* RFC1001 len field */ + offset + (char *)hdr;
 	char *end_of_buf = begin_of_buf + buffer_length;
-
 
 	if (buffer_length < min_buf_size) {
 		cifs_dbg(VFS, "buffer length %d smaller than minimum size %d\n",

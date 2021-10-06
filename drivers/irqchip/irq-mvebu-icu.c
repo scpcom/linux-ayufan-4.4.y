@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*
 * ***************************************************************************
 * Copyright (C) 2016 Marvell International Ltd.
@@ -46,12 +49,12 @@
 
 #include <dt-bindings/interrupt-controller/mvebu-icu.h>
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 #define ICU_MAX_IRQS		207
 #define ICU_MAX_SPI_IRQ_IN_GIC	128
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 #define ICU_MAX_IRQ_SIZE	128
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 #define ICU_GIC_SPI_BASE0	64
 #define ICU_GIC_SPI_BASE1	288
 
@@ -75,25 +78,25 @@
 
 #define ICU_GET_GIC_IDX(x)	(ICU_GET_IDX_BY_GIC_BASE(x))
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 #define ICU_SATA0_IRQ_INT		109
 #define ICU_SATA1_IRQ_INT		107
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 struct mvebu_icu_irq_data {
 	void __iomem *base;	/* ICU register base */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	void __iomem *gicp_clr_spi_base;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	struct irq_domain *domain;
 };
 
 static DEFINE_SPINLOCK(icu_lock);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 static DECLARE_BITMAP(icu_irq_alloc, ICU_MAX_SPI_IRQ_IN_GIC);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 static DECLARE_BITMAP(icu_irq_alloc, ICU_MAX_IRQ_SIZE);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 static struct irq_chip mvebu_icu_irq_chip = {
 	.name			= "ICU",
@@ -118,13 +121,13 @@ static int mvebu_icu_irq_parent_domain_alloc(struct irq_domain *domain,
 
 	/* Find first free interrupt in ICU pool */
 	spin_lock(&icu_lock);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	*irq_msg_num = find_first_zero_bit(icu_irq_alloc, ICU_MAX_SPI_IRQ_IN_GIC);
 	if (*irq_msg_num == ICU_MAX_SPI_IRQ_IN_GIC) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	*irq_msg_num = find_first_zero_bit(icu_irq_alloc, ICU_MAX_IRQ_SIZE);
 	if (*irq_msg_num == ICU_MAX_IRQ_SIZE) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		pr_err("No free ICU interrupt found\n");
 		spin_unlock(&icu_lock);
 		return -EINVAL;
@@ -204,7 +207,7 @@ static int mvebu_icu_irq_domain_alloc(struct irq_domain *domain, unsigned int vi
 		return err;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	/*
 	 * Clear Non-Secure SPI in GICP,
 	 * in case it was asserted in bootloader.
@@ -212,7 +215,7 @@ static int mvebu_icu_irq_domain_alloc(struct irq_domain *domain, unsigned int vi
 	if (icu_group == ICU_GRP_NSR)
 		writel(irq_msg_num, icu->gicp_clr_spi_base);
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	/* Configure the ICU with irq number & type */
 	icu_int  = (irq_msg_num) | (1 << ICU_INT_ENABLE_OFFSET);
 	if (type & IRQ_TYPE_EDGE_RISING)
@@ -222,7 +225,7 @@ static int mvebu_icu_irq_domain_alloc(struct irq_domain *domain, unsigned int vi
 	icu_int |= icu_group << ICU_GROUP_OFFSET;
 	writel(icu_int, icu->base + ICU_INT_CFG(hwirq));
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	/* The SATA unit has 2 ports, and a dedicated ICU entry per port.
 	** The ahci sata driver supports only one irq interrupt per SATA unit.
 	** to solve this conflict, we configure the 2 SATA wired interrupts in the
@@ -236,7 +239,7 @@ static int mvebu_icu_irq_domain_alloc(struct irq_domain *domain, unsigned int vi
 		writel(icu_int, icu->base + ICU_INT_CFG(ICU_SATA1_IRQ_INT));
 	}
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	err = irq_domain_set_hwirq_and_chip(domain, virq, hwirq, &mvebu_icu_irq_chip, icu);
 	if (err) {
 		pr_err("ICU: failed to set the data to IRQ domain\n");
@@ -280,15 +283,15 @@ static const struct irq_domain_ops mvebu_icu_domain_ops = {
 static int __init mvebu_icu_of_init(struct device_node *node, struct device_node *parent)
 {
 	int ret;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	resource_size_t gicp_clr_spi_base;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	struct mvebu_icu_irq_data *icu;
 	struct irq_domain *parent_domain;
 	u32 gicp_spi_reg[4];
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	u32 i, icu_int;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	icu = kzalloc(sizeof(struct mvebu_icu_irq_data), GFP_KERNEL);
 	if (!icu)
@@ -316,11 +319,11 @@ static int __init mvebu_icu_of_init(struct device_node *node, struct device_node
 		goto err_iounmap;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	icu->domain = irq_domain_add_hierarchy(parent_domain, 0, ICU_MAX_SPI_IRQ_IN_GIC,
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	icu->domain = irq_domain_add_hierarchy(parent_domain, 0, ICU_MAX_IRQ_SIZE,
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			node, &mvebu_icu_domain_ops, icu);
 	if (!icu->domain) {
 		pr_err("Failed to create ICU domain\n");
@@ -335,7 +338,7 @@ static int __init mvebu_icu_of_init(struct device_node *node, struct device_node
 	writel(gicp_spi_reg[2], icu->base + ICU_CLRSPI_NSR_AH);
 	writel(gicp_spi_reg[3], icu->base + ICU_CLRSPI_NSR_AL);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	gicp_clr_spi_base = (u64)gicp_spi_reg[3];
 
 	icu->gicp_clr_spi_base = ioremap(gicp_clr_spi_base, 0x4);
@@ -354,7 +357,7 @@ static int __init mvebu_icu_of_init(struct device_node *node, struct device_node
 			writel(0x0, icu->base + ICU_INT_CFG(i));
 	}
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	pr_debug("ICU irq chip init successfully\n");
 
 	return 0;
@@ -368,4 +371,4 @@ err_free_icu:
 }
 
 IRQCHIP_DECLARE(mvebu_icu, "marvell,icu", mvebu_icu_of_init);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

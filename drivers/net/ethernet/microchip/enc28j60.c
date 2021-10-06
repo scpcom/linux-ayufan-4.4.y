@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Microchip ENC28J60 ethernet driver (MAC + PHY)
  *
@@ -1630,19 +1633,19 @@ static int enc28j60_remove(struct spi_device *spi)
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static struct of_device_id enc28j60_dt_ids[] = {
 	{ .compatible = "microchip,enc28j60", },
 	{}
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 static struct spi_driver enc28j60_driver = {
 	.driver = {
 		   .name = DRV_NAME,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		   .of_match_table = enc28j60_dt_ids,
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	 },
 	.probe = enc28j60_probe,
 	.remove = enc28j60_remove,

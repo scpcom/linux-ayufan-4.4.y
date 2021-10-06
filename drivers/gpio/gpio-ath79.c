@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Atheros AR71XX/AR724X/AR913X GPIO API support
  *
@@ -177,11 +180,11 @@ static int ath79_gpio_probe(struct platform_device *pdev)
 
 	spin_lock_init(&ctrl->lock);
 	memcpy(&ctrl->chip, &ath79_gpio_chip, sizeof(ctrl->chip));
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	ctrl->chip.parent = &pdev->dev;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	ctrl->chip.dev = &pdev->dev;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	ctrl->chip.ngpio = ath79_gpio_count;
 	if (oe_inverted) {
 		ctrl->chip.direction_input = ar934x_gpio_direction_input;

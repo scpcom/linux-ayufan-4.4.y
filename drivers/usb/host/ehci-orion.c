@@ -41,7 +41,7 @@
 #define USB_PHY_IVREF_CTRL	0x440
 #define USB_PHY_TST_GRP_CTRL	0x450
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 #define USB_SBUSCFG		0x90
 #define USB_SBUSCFG_BAWR_OFF	0x6
 #define USB_SBUSCFG_BARD_OFF	0x3
@@ -63,7 +63,7 @@
 struct orion_ehci_hcd {
 	struct clk *clk;
 	struct phy *phy;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	bool reset_on_resume;
 #endif  
 };
@@ -72,7 +72,7 @@ static const char hcd_name[] = "ehci-orion";
 
 static struct hc_driver __read_mostly ehci_orion_hc_driver;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static u32 usb_save[(USB_IPG - USB_CAUSE) +
 		    (USB_PHY_TST_GRP_CTRL - USB_PHY_PWR_CTRL)];
 #endif  
@@ -126,7 +126,7 @@ ehci_orion_conf_mbus_windows(struct usb_hcd *hcd,
 	}
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int ehci_orion_drv_reset(struct usb_hcd *hcd)
 {
 	struct device *dev = hcd->self.controller;
@@ -145,7 +145,7 @@ static int ehci_orion_drv_reset(struct usb_hcd *hcd)
 
 static const struct ehci_driver_overrides orion_overrides __initconst = {
 	.extra_priv_size =	sizeof(struct orion_ehci_hcd),
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	.reset = ehci_orion_drv_reset,
 #endif  
 };
@@ -230,7 +230,7 @@ static int ehci_orion_drv_probe(struct platform_device *pdev)
 	if (!IS_ERR(priv->clk))
 		clk_prepare_enable(priv->clk);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	if (of_property_read_bool(pdev->dev.of_node, "needs-reset-on-resume"))
 		priv->reset_on_resume = true;
 	else
@@ -323,12 +323,12 @@ static int ehci_orion_drv_remove(struct platform_device *pdev)
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int ehci_orion_drv_suspend(struct platform_device *pdev,
 				  pm_message_t state)
 {
 	struct usb_hcd *hcd = platform_get_drvdata(pdev);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	bool do_wakeup = device_may_wakeup(&pdev->dev);
 	int addr, i, rc;
 #else  
@@ -343,7 +343,7 @@ static int ehci_orion_drv_suspend(struct platform_device *pdev,
 	     addr += 0x4, i++)
 		usb_save[i] = readl_relaxed(hcd->regs + addr);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	rc = ehci_suspend(hcd, do_wakeup);
 	if (rc)
 		return rc;
@@ -367,7 +367,7 @@ static int ehci_orion_drv_suspend(struct platform_device *pdev,
 static int ehci_orion_drv_resume(struct platform_device *pdev)
 {
 	struct usb_hcd *hcd = platform_get_drvdata(pdev);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	struct orion_ehci_hcd *priv = hcd_to_orion_priv(hcd);
 	int addr, regVal, i, rc;
 
@@ -414,7 +414,7 @@ static int ehci_orion_drv_resume(struct platform_device *pdev)
 	regVal = MV_USB_CORE_MODE_HOST;
 	writel_relaxed(regVal, hcd->regs + 0x1A8);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	ehci_resume(hcd, priv->reset_on_resume);
 
 #endif  
@@ -446,7 +446,7 @@ static void ehci_orion_drv_shutdown(struct platform_device *pdev)
 
 static const struct of_device_id ehci_orion_dt_ids[] = {
 	{ .compatible = "marvell,orion-ehci", },
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	{ .compatible = "marvell,armada-3700-ehci", },
 #endif  
 	{},
@@ -456,7 +456,7 @@ MODULE_DEVICE_TABLE(of, ehci_orion_dt_ids);
 static struct platform_driver ehci_orion_driver = {
 	.probe		= ehci_orion_drv_probe,
 	.remove		= ehci_orion_drv_remove,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_PM
 	.suspend        = ehci_orion_drv_suspend,
 	.resume         = ehci_orion_drv_resume,

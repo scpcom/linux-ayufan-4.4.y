@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (c) 2003-2013 Broadcom Corporation
  *
@@ -850,11 +853,11 @@ static int spinand_probe(struct spi_device *spi_nand)
 	struct nand_chip *chip;
 	struct spinand_info *info;
 	struct spinand_state *state;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct mtd_part_parser_data ppdata;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	info  = devm_kzalloc(&spi_nand->dev, sizeof(struct spinand_info),
 			     GFP_KERNEL);
@@ -898,9 +901,9 @@ static int spinand_probe(struct spi_device *spi_nand)
 		pr_info("%s: disable ecc failed!\n", __func__);
 #endif
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	nand_set_flash_node(chip, spi_nand->dev.of_node);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	chip->priv	= info;
 	chip->read_buf	= spinand_read_buf;
 	chip->write_buf	= spinand_write_buf;
@@ -923,12 +926,12 @@ static int spinand_probe(struct spi_device *spi_nand)
 	if (nand_scan(mtd, 1))
 		return -ENXIO;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	return mtd_device_register(mtd, NULL, 0);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	ppdata.of_node = spi_nand->dev.of_node;
 	return mtd_device_parse_register(mtd, NULL, &ppdata, NULL, 0);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 }
 
 /*

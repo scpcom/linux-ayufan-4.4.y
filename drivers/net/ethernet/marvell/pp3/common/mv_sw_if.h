@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -444,4 +447,4 @@ int mv_pp3_max_check(int value, int limit, char *name);
 void mv_link_to_str(struct mv_port_link_status status, char *str);
 
 #endif /* __mv_sw_if_h__ */
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

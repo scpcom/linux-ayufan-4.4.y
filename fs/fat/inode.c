@@ -12,6 +12,10 @@
 #include <linux/blkdev.h>
 #include <linux/backing-dev.h>
 #include <asm/unaligned.h>
+#ifdef MY_DEF_HERE
+#include <linux/sched.h>
+#include <linux/string.h>
+#endif  
 #include "fat.h"
 
 #ifndef CONFIG_FAT_DEFAULT_IOCHARSET
@@ -523,6 +527,11 @@ static void fat_set_state(struct super_block *sb,
 	struct buffer_head *bh;
 	struct fat_boot_sector *b;
 	struct msdos_sb_info *sbi = MSDOS_SB(sb);
+
+#ifdef MY_DEF_HERE
+	if (NULL != strstr(sb->s_id, "synoboot"))
+		fat_msg(sb, KERN_NOTICE, "fat_set_state: set=%d process=%s pid=%d", set, current->comm, task_pid_nr(current));
+#endif  
 
 	if ((sb->s_flags & MS_RDONLY) && !force)
 		return;
@@ -1231,7 +1240,7 @@ out:
 
 static void fat_dummy_inode_init(struct inode *inode)
 {
-	/* Initialize this dummy inode to work as no-op. */
+	 
 	MSDOS_I(inode)->mmu_private = 0;
 	MSDOS_I(inode)->i_start = 0;
 	MSDOS_I(inode)->i_logstart = 0;

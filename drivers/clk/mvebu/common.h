@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Marvell EBU SoC common clock handling
  *
@@ -42,9 +45,9 @@ struct clk_gating_soc_desc {
 	const char *parent;
 	int bit_idx;
 	unsigned long flags;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	u8 clk_gate_flags;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 };
 
 void __init mvebu_coreclk_setup(struct device_node *np,

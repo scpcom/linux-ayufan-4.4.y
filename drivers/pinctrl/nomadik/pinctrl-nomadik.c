@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Generic GPIO driver for logic cells found in the Nomadik SoC
  *
@@ -436,11 +439,11 @@ nmk_gpio_disable_lazy_irq(struct nmk_gpio_chip *nmk_chip, unsigned offset)
 			       nmk_chip->addr + NMK_GPIO_FIMSC);
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	dev_dbg(nmk_chip->chip.parent, "%d: clearing interrupt mask\n", gpio);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	dev_dbg(nmk_chip->chip.dev, "%d: clearing interrupt mask\n", gpio);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 }
 
 static void nmk_write_masked(void __iomem *reg, u32 mask, u32 value)
@@ -1189,11 +1192,11 @@ static struct nmk_gpio_chip *nmk_gpio_populate_chip(struct device_node *np,
 	chip->base = id * NMK_GPIO_PER_CHIP;
 	chip->ngpio = NMK_GPIO_PER_CHIP;
 	chip->label = dev_name(&gpio_pdev->dev);
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	chip->parent = &gpio_pdev->dev;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	chip->dev = &gpio_pdev->dev;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	res = platform_get_resource(gpio_pdev, IORESOURCE_MEM, 0);
 	base = devm_ioremap_resource(&pdev->dev, res);
@@ -1895,7 +1898,7 @@ static int nmk_pin_config_set(struct pinctrl_dev *pctldev, unsigned pin,
 			if (slpm_val)
 				val = slpm_val - 1;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 			dev_dbg(nmk_chip->chip.parent,
 				"pin %d: sleep pull %s, dir %s, val %s\n",
 				pin,
@@ -1903,7 +1906,7 @@ static int nmk_pin_config_set(struct pinctrl_dev *pctldev, unsigned pin,
 				slpm_output ? (output ? "output" : "input")
 				: "same",
 				slpm_val ? (val ? "high" : "low") : "same");
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 			dev_dbg(nmk_chip->chip.dev,
 				"pin %d: sleep pull %s, dir %s, val %s\n",
 				pin,
@@ -1911,24 +1914,24 @@ static int nmk_pin_config_set(struct pinctrl_dev *pctldev, unsigned pin,
 				slpm_output ? (output ? "output" : "input")
 				: "same",
 				slpm_val ? (val ? "high" : "low") : "same");
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		dev_dbg(nmk_chip->chip.parent,
 			"pin %d [%#lx]: pull %s, slpm %s (%s%s), lowemi %s\n",
 			pin, cfg, pullnames[pull], slpmnames[slpm],
 			output ? "output " : "input",
 			output ? (val ? "high" : "low") : "",
 			lowemi ? "on" : "off");
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		dev_dbg(nmk_chip->chip.dev,
 			"pin %d [%#lx]: pull %s, slpm %s (%s%s), lowemi %s\n",
 			pin, cfg, pullnames[pull], slpmnames[slpm],
 			output ? "output " : "input",
 			output ? (val ? "high" : "low") : "",
 			lowemi ? "on" : "off");
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 		clk_enable(nmk_chip->clk);
 		bit = pin % NMK_GPIO_PER_CHIP;

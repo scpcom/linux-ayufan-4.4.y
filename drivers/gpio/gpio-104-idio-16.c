@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * GPIO driver for the ACCES 104-IDIO-16 family
  * Copyright (C) 2015 William Breathitt Gray
@@ -127,11 +130,11 @@ static int __init idio_16_probe(struct platform_device *pdev)
 	}
 
 	idio16gpio->chip.label = NAME;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	idio16gpio->chip.parent = dev;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	idio16gpio->chip.dev = dev;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	idio16gpio->chip.owner = THIS_MODULE;
 	idio16gpio->chip.base = -1;
 	idio16gpio->chip.ngpio = 32;

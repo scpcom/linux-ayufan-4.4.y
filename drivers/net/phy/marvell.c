@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
  
 #include <linux/kernel.h>
 #include <linux/string.h>
@@ -65,7 +68,7 @@
 #define MII_M1111_HWCFG_FIBER_COPPER_AUTO	0x8000
 #define MII_M1111_HWCFG_FIBER_COPPER_RES	0x2000
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 #define COPPER_BASE_T		1
 #define FIBER_BASE_R		2
 #define FIBER_BASE_X		3
@@ -92,7 +95,7 @@
 #define MII_88E1318S_PHY_LED_PAGE                           0x03
 #define MII_88E1318S_PHY_LED_TCR                            0x12
 #define MII_88E1318S_PHY_LED_TCR_FORCE_INT                  BIT(15)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 #define MII_88E1318S_PHY_LED_TCR_INTN_ENABLE                BIT(7)
 #else  
 #define MII_88E1318S_PHY_LED_TCR_INTn_ENABLE                BIT(7)
@@ -126,13 +129,13 @@
 #define MII_88E3016_DISABLE_SCRAMBLER	0x0200
 #define MII_88E3016_AUTO_MDIX_CROSSOVER	0x0030
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 #define MII_88E1510_PHY_INTERNAL_REG_1	16
 #define MII_88E1510_PHY_INTERNAL_REG_2	17
 #define MII_88E1510_PHY_GENERAL_CTRL_1	20
 #endif  
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 #define MV_XMDIO(mmd, reg)					\
 	((mmd << 16) | (reg & 0xffff))
 
@@ -180,7 +183,7 @@ MODULE_DESCRIPTION("Marvell PHY driver");
 MODULE_AUTHOR("Andy Fleming");
 MODULE_LICENSE("GPL");
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 struct marvell_hw_stat {
 	const char *string;
 	u8 page;
@@ -210,7 +213,7 @@ static int marvell_ack_interrupt(struct phy_device *phydev)
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 static int m88e3310_ack_interrupt(struct phy_device *phydev)
 {
 	 
@@ -237,7 +240,7 @@ static int marvell_config_intr(struct phy_device *phydev)
 	return err;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 static int m88e3310_config_intr(struct phy_device *phydev)
 {
 	if (phydev->interrupts == PHY_INTERRUPT_ENABLED) {
@@ -366,14 +369,14 @@ static int marvell_of_reg_init(struct phy_device *phydev)
 	const __be32 *paddr;
 	int len, i, saved_page, current_page, page_changed, ret;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	if (!phydev->mdio.dev.of_node)
 #else  
 	if (!phydev->dev.of_node)
 #endif  
 		return 0;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	paddr = of_get_property(phydev->mdio.dev.of_node,
 				"marvell,reg-init", &len);
 #else  
@@ -450,9 +453,9 @@ static int m88e1121_config_aneg(struct phy_device *phydev)
 		mscr = phy_read(phydev, MII_88E1121_PHY_MSCR_REG) &
 			MII_88E1121_PHY_MSCR_DELAY_MASK;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		if (phydev->interface == PHY_INTERFACE_MODE_RGMII_ID ||
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		    phydev->interface == PHY_INTERFACE_MODE_RGMII)
 #else  
 			phydev->interface == PHY_INTERFACE_MODE_RGMII)
@@ -527,14 +530,14 @@ static int m88e1510_config_aneg(struct phy_device *phydev)
 	if (err < 0)
 		return err;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	return 0;
 #else  
 	return marvell_of_reg_init(phydev);
 #endif  
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int marvell_config_init(struct phy_device *phydev)
 {
 	 
@@ -588,7 +591,7 @@ static int m88e1116r_config_init(struct phy_device *phydev)
 
 	mdelay(500);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	return marvell_config_init(phydev);
 #else  
 	return 0;
@@ -610,14 +613,14 @@ static int m88e3016_config_init(struct phy_device *phydev)
 	if (reg < 0)
 		return reg;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	return marvell_config_init(phydev);
 #else  
 	return 0;
 #endif  
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 int m88e3310_phy_update_link(struct phy_device *phydev)
 {
 	int status;
@@ -670,9 +673,9 @@ static int m88e1111_config_init(struct phy_device *phydev)
 		if (temp < 0)
 			return temp;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		if (phydev->interface == PHY_INTERFACE_MODE_RGMII_ID ||
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		    phydev->interface == PHY_INTERFACE_MODE_RGMII) {
 #else  
 			phydev->interface == PHY_INTERFACE_MODE_RGMII) {
@@ -773,7 +776,7 @@ static int m88e1111_config_init(struct phy_device *phydev)
 
 	return phy_write(phydev, MII_BMCR, BMCR_RESET);
 }
-#ifdef CONFIG_SYNO_PHY_INIT_88E151X
+#ifdef MY_DEF_HERE
 int syno_m88e151X_led_init(struct phy_device *phydev)
 {
 	int err = -1;
@@ -874,7 +877,7 @@ END:
 }
 #endif  
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int m88e1510_phy_writebits(struct phy_device *phydev,
 				  u8 reg_num, u16 offset, u16 len, u16 data)
 {
@@ -967,7 +970,7 @@ static int m88e1510_config_init(struct phy_device *phydev)
 		usleep_range(100, 200);
 	}
 
-#ifdef CONFIG_SYNO_PHY_INIT_88E151X
+#ifdef MY_DEF_HERE
 	err = syno_m88e151X_init(phydev);
 	if (err < 0)
 		return err;
@@ -1131,7 +1134,7 @@ static int m88e1145_config_init(struct phy_device *phydev)
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 int m88e3310_restart_aneg(struct phy_device *phydev)
 {
 	int ctl = phy_read(phydev, MV_XMDIO(MDIO_MMD_PCS, MII_BMCR));
@@ -1256,7 +1259,7 @@ static int marvell_read_status(struct phy_device *phydev)
 	if (err)
 		return err;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	if (phydev->autoneg == AUTONEG_ENABLE) {
 #else  
 	if (AUTONEG_ENABLE == phydev->autoneg) {
@@ -1288,7 +1291,7 @@ static int marvell_read_status(struct phy_device *phydev)
 			phydev->duplex = DUPLEX_HALF;
 
 		status = status & MII_M1011_PHY_STATUS_SPD_MASK;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		phydev->pause = 0;
 		phydev->asym_pause = 0;
 #else  
@@ -1331,7 +1334,7 @@ static int marvell_read_status(struct phy_device *phydev)
 		else
 			phydev->speed = SPEED_10;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		phydev->pause = 0;
 		phydev->asym_pause = 0;
 #else  
@@ -1339,7 +1342,7 @@ static int marvell_read_status(struct phy_device *phydev)
 #endif  
 		phydev->lp_advertising = 0;
 	}
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	if (!phydev->link) {
 		phydev->speed = SPEED_UNKNOWN;
 		phydev->duplex = DUPLEX_UNKNOWN;
@@ -1350,7 +1353,7 @@ static int marvell_read_status(struct phy_device *phydev)
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 static void m88e3310_copper_read_status(struct phy_device *phydev)
 {
 	int adv;
@@ -1528,7 +1531,7 @@ static int m88e3310_read_status(struct phy_device *phydev)
 static int marvell_aneg_done(struct phy_device *phydev)
 {
 	int retval = phy_read(phydev, MII_M1011_PHY_STATUS);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 
 	return (retval < 0) ? retval : (retval & MII_M1011_PHY_STATUS_RESOLVED);
 }
@@ -1560,7 +1563,7 @@ static int m88e1121_did_interrupt(struct phy_device *phydev)
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 static int m88e3310_did_interrupt(struct phy_device *phydev)
 {
 	int imask;
@@ -1630,7 +1633,7 @@ static int m88e1318_set_wol(struct phy_device *phydev, struct ethtool_wolinfo *w
 
 		temp = phy_read(phydev, MII_88E1318S_PHY_LED_TCR);
 		temp &= ~MII_88E1318S_PHY_LED_TCR_FORCE_INT;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		temp |= MII_88E1318S_PHY_LED_TCR_INTN_ENABLE;
 #else  
 		temp |= MII_88E1318S_PHY_LED_TCR_INTn_ENABLE;
@@ -1688,7 +1691,7 @@ static int m88e1318_set_wol(struct phy_device *phydev, struct ethtool_wolinfo *w
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int marvell_get_sset_count(struct phy_device *phydev)
 {
 	return ARRAY_SIZE(marvell_hw_stats);
@@ -1704,7 +1707,7 @@ static void marvell_get_strings(struct phy_device *phydev, u8 *data)
 	}
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 int m88e3310_suspend(struct phy_device *phydev)
 {
 	int value;
@@ -1817,7 +1820,7 @@ static int marvell_probe(struct phy_device *phydev)
 }
 #endif  
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 static int m88e1112_read_status(struct phy_device *phydev)
 {
 	int val, bmcr;
@@ -1841,11 +1844,11 @@ static struct phy_driver marvell_drivers[] = {
 		.phy_id_mask = MARVELL_PHY_ID_MASK,
 		.name = "Marvell 88E1101",
 		.features = PHY_GBIT_FEATURES,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		.probe = marvell_probe,
 #endif  
 		.flags = PHY_HAS_INTERRUPT,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		.config_init = &marvell_config_init,
 #endif  
 		.config_aneg = &marvell_config_aneg,
@@ -1854,7 +1857,7 @@ static struct phy_driver marvell_drivers[] = {
 		.config_intr = &marvell_config_intr,
 		.resume = &genphy_resume,
 		.suspend = &genphy_suspend,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		.get_sset_count = marvell_get_sset_count,
 		.get_strings = marvell_get_strings,
 		.get_stats = marvell_get_stats,
@@ -1868,12 +1871,12 @@ static struct phy_driver marvell_drivers[] = {
 		.name = "Marvell 88E1112",
 		.features = PHY_GBIT_FEATURES,
 		.flags = PHY_HAS_INTERRUPT,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		.probe = marvell_probe,
 #endif  
 		.config_init = &m88e1111_config_init,
 		.config_aneg = &marvell_config_aneg,
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		.read_status = &m88e1112_read_status,
 #else  
 		.read_status = &genphy_read_status,
@@ -1882,7 +1885,7 @@ static struct phy_driver marvell_drivers[] = {
 		.config_intr = &marvell_config_intr,
 		.resume = &genphy_resume,
 		.suspend = &genphy_suspend,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		.get_sset_count = marvell_get_sset_count,
 		.get_strings = marvell_get_strings,
 		.get_stats = marvell_get_stats,
@@ -1896,7 +1899,7 @@ static struct phy_driver marvell_drivers[] = {
 		.name = "Marvell 88E1111",
 		.features = PHY_GBIT_FEATURES,
 		.flags = PHY_HAS_INTERRUPT,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		.probe = marvell_probe,
 #endif  
 		.config_init = &m88e1111_config_init,
@@ -1906,7 +1909,7 @@ static struct phy_driver marvell_drivers[] = {
 		.config_intr = &marvell_config_intr,
 		.resume = &genphy_resume,
 		.suspend = &genphy_suspend,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		.get_sset_count = marvell_get_sset_count,
 		.get_strings = marvell_get_strings,
 		.get_stats = marvell_get_stats,
@@ -1920,7 +1923,7 @@ static struct phy_driver marvell_drivers[] = {
 		.name = "Marvell 88E1118",
 		.features = PHY_GBIT_FEATURES,
 		.flags = PHY_HAS_INTERRUPT,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		.probe = marvell_probe,
 #endif  
 		.config_init = &m88e1118_config_init,
@@ -1930,7 +1933,7 @@ static struct phy_driver marvell_drivers[] = {
 		.config_intr = &marvell_config_intr,
 		.resume = &genphy_resume,
 		.suspend = &genphy_suspend,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		.get_sset_count = marvell_get_sset_count,
 		.get_strings = marvell_get_strings,
 		.get_stats = marvell_get_stats,
@@ -1944,7 +1947,7 @@ static struct phy_driver marvell_drivers[] = {
 		.name = "Marvell 88E1121R",
 		.features = PHY_GBIT_FEATURES,
 		.flags = PHY_HAS_INTERRUPT,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		.probe = marvell_probe,
 		.config_init = &marvell_config_init,
 #endif  
@@ -1955,7 +1958,7 @@ static struct phy_driver marvell_drivers[] = {
 		.did_interrupt = &m88e1121_did_interrupt,
 		.resume = &genphy_resume,
 		.suspend = &genphy_suspend,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		.get_sset_count = marvell_get_sset_count,
 		.get_strings = marvell_get_strings,
 		.get_stats = marvell_get_stats,
@@ -1969,7 +1972,7 @@ static struct phy_driver marvell_drivers[] = {
 		.name = "Marvell 88E1318S",
 		.features = PHY_GBIT_FEATURES,
 		.flags = PHY_HAS_INTERRUPT,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		.probe = marvell_probe,
 		.config_init = &marvell_config_init,
 #endif  
@@ -1982,7 +1985,7 @@ static struct phy_driver marvell_drivers[] = {
 		.set_wol = &m88e1318_set_wol,
 		.resume = &genphy_resume,
 		.suspend = &genphy_suspend,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		.get_sset_count = marvell_get_sset_count,
 		.get_strings = marvell_get_strings,
 		.get_stats = marvell_get_stats,
@@ -1996,7 +1999,7 @@ static struct phy_driver marvell_drivers[] = {
 		.name = "Marvell 88E1145",
 		.features = PHY_GBIT_FEATURES,
 		.flags = PHY_HAS_INTERRUPT,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		.probe = marvell_probe,
 #endif  
 		.config_init = &m88e1145_config_init,
@@ -2006,7 +2009,7 @@ static struct phy_driver marvell_drivers[] = {
 		.config_intr = &marvell_config_intr,
 		.resume = &genphy_resume,
 		.suspend = &genphy_suspend,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		.get_sset_count = marvell_get_sset_count,
 		.get_strings = marvell_get_strings,
 		.get_stats = marvell_get_stats,
@@ -2020,7 +2023,7 @@ static struct phy_driver marvell_drivers[] = {
 		.name = "Marvell 88E1149R",
 		.features = PHY_GBIT_FEATURES,
 		.flags = PHY_HAS_INTERRUPT,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		.probe = marvell_probe,
 #endif  
 		.config_init = &m88e1149_config_init,
@@ -2030,7 +2033,7 @@ static struct phy_driver marvell_drivers[] = {
 		.config_intr = &marvell_config_intr,
 		.resume = &genphy_resume,
 		.suspend = &genphy_suspend,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		.get_sset_count = marvell_get_sset_count,
 		.get_strings = marvell_get_strings,
 		.get_stats = marvell_get_stats,
@@ -2044,7 +2047,7 @@ static struct phy_driver marvell_drivers[] = {
 		.name = "Marvell 88E1240",
 		.features = PHY_GBIT_FEATURES,
 		.flags = PHY_HAS_INTERRUPT,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		.probe = marvell_probe,
 #endif  
 		.config_init = &m88e1111_config_init,
@@ -2054,7 +2057,7 @@ static struct phy_driver marvell_drivers[] = {
 		.config_intr = &marvell_config_intr,
 		.resume = &genphy_resume,
 		.suspend = &genphy_suspend,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		.get_sset_count = marvell_get_sset_count,
 		.get_strings = marvell_get_strings,
 		.get_stats = marvell_get_stats,
@@ -2068,7 +2071,7 @@ static struct phy_driver marvell_drivers[] = {
 		.name = "Marvell 88E1116R",
 		.features = PHY_GBIT_FEATURES,
 		.flags = PHY_HAS_INTERRUPT,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		.probe = marvell_probe,
 #endif  
 		.config_init = &m88e1116r_config_init,
@@ -2078,7 +2081,7 @@ static struct phy_driver marvell_drivers[] = {
 		.config_intr = &marvell_config_intr,
 		.resume = &genphy_resume,
 		.suspend = &genphy_suspend,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		.get_sset_count = marvell_get_sset_count,
 		.get_strings = marvell_get_strings,
 		.get_stats = marvell_get_stats,
@@ -2092,7 +2095,7 @@ static struct phy_driver marvell_drivers[] = {
 		.name = "Marvell 88E1510",
 		.features = PHY_GBIT_FEATURES,
 		.flags = PHY_HAS_INTERRUPT,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		.config_init = &m88e1510_config_init,
 #endif  
 		.config_aneg = &m88e1510_config_aneg,
@@ -2102,7 +2105,7 @@ static struct phy_driver marvell_drivers[] = {
 		.did_interrupt = &m88e1121_did_interrupt,
 		.resume = &genphy_resume,
 		.suspend = &genphy_suspend,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
  
 #else  
 		.driver = { .owner = THIS_MODULE },
@@ -2114,7 +2117,7 @@ static struct phy_driver marvell_drivers[] = {
 		.name = "Marvell 88E1540",
 		.features = PHY_GBIT_FEATURES,
 		.flags = PHY_HAS_INTERRUPT,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		.probe = marvell_probe,
 		.config_init = &marvell_config_init,
 		.config_init = &marvell_config_init,
@@ -2126,7 +2129,7 @@ static struct phy_driver marvell_drivers[] = {
 		.did_interrupt = &m88e1121_did_interrupt,
 		.resume = &genphy_resume,
 		.suspend = &genphy_suspend,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		.get_sset_count = marvell_get_sset_count,
 		.get_strings = marvell_get_strings,
 		.get_stats = marvell_get_stats,
@@ -2143,7 +2146,7 @@ static struct phy_driver marvell_drivers[] = {
 		.name = "Marvell 88E3016",
 		.features = PHY_BASIC_FEATURES,
 		.flags = PHY_HAS_INTERRUPT,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		.probe = marvell_probe,
 #endif  
 		.config_aneg = &genphy_config_aneg,
@@ -2155,7 +2158,7 @@ static struct phy_driver marvell_drivers[] = {
 		.did_interrupt = &m88e1121_did_interrupt,
 		.resume = &genphy_resume,
 		.suspend = &genphy_suspend,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		.get_sset_count = marvell_get_sset_count,
 		.get_strings = marvell_get_strings,
 		.get_stats = marvell_get_stats,
@@ -2163,7 +2166,7 @@ static struct phy_driver marvell_drivers[] = {
 		.driver = { .owner = THIS_MODULE },
 #endif  
 	},
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	{
 		.phy_id = MARVELL_PHY_ID_88E3310,
 		.phy_id_mask = MARVELL_PHY_ID_MASK,
@@ -2204,7 +2207,7 @@ static struct mdio_device_id __maybe_unused marvell_tbl[] = {
 	{ MARVELL_PHY_ID_88E1510, MARVELL_PHY_ID_MASK },
 	{ MARVELL_PHY_ID_88E1540, MARVELL_PHY_ID_MASK },
 	{ MARVELL_PHY_ID_88E3016, MARVELL_PHY_ID_MASK },
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	{ MARVELL_PHY_ID_88E3310, MARVELL_PHY_ID_MASK },
 #endif  
 	{ }

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *	Driver for Broadcom 63xx SOCs integrated PHYs
  *
@@ -72,12 +75,12 @@ static struct phy_driver bcm63xx_driver[] = {
 	.config_aneg	= genphy_config_aneg,
 	.read_status	= genphy_read_status,
 	.ack_interrupt	= bcm_phy_ack_intr,
-	.config_intr	= bcm_phy_config_intr,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	.config_intr	= bcm63xx_config_intr,
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	.driver		= { .owner = THIS_MODULE },
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 }, {
 	/* same phy as above, with just a different OUI */
 	.phy_id		= 0x002bdc00,
@@ -89,12 +92,12 @@ static struct phy_driver bcm63xx_driver[] = {
 	.config_aneg	= genphy_config_aneg,
 	.read_status	= genphy_read_status,
 	.ack_interrupt	= bcm_phy_ack_intr,
-	.config_intr	= bcm_phy_config_intr,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	.config_intr	= bcm63xx_config_intr,
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	.driver		= { .owner = THIS_MODULE },
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 } };
 
 module_phy_driver(bcm63xx_driver);

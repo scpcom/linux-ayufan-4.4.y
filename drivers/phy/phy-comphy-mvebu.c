@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*
  * Marvell comphy driver
  *
@@ -22,9 +25,9 @@
 
 #include "phy-comphy-mvebu.h"
 #include "phy-comphy-cp110.h"
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 #include "phy-comphy-a3700.h"
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
 /* mvebu_comphy_set_mode: shared by all SoCs */
 int mvebu_comphy_set_mode(struct phy *phy, enum phy_mode mode)
@@ -35,7 +38,7 @@ int mvebu_comphy_set_mode(struct phy *phy, enum phy_mode mode)
 
 	dev_dbg(priv->dev, "%s: Enter\n", __func__);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	for (i = 0; i < MVEBU_COMPHY_FUNC_MAX; i++) {
 		/* We need to find a match between requested mode and
 		 * the SoC configuration which is stored in
@@ -45,14 +48,14 @@ int mvebu_comphy_set_mode(struct phy *phy, enum phy_mode mode)
 
 		if (COMPHY_GET_MODE(functions) == COMPHY_GET_MODE((int)mode) &&
 		    COMPHY_GET_ID(functions) == COMPHY_GET_ID((int)mode))
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	for (i = 0; i < MVEBU_COMPHY_FUNC_MAX; i++)
 		if (priv->soc_info->functions[comphy->index][i] == (int)mode)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 			break;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
 	if (i == MVEBU_COMPHY_FUNC_MAX) {
 		dev_err(priv->dev, "can't set mode 0x%x for COMPHY%d\n",
@@ -87,11 +90,11 @@ static const struct of_device_id mvebu_comphy_of_match[] = {
 #ifdef CONFIG_PHY_MVEBU_COMPHY_CP110
 	{ .compatible = "marvell,cp110-comphy", .data = &cp110_comphy },
 #endif /* CONFIG_PHY_MVEBU_COMPHY_CP110 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_PHY_MVEBU_COMPHY_A3700
 	{ .compatible = "marvell,armada-3700-comphy", .data = &a3700_comphy },
 #endif /* CONFIG_PHY_MVEBU_COMPHY_A3700 */
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	{ },
 };
 MODULE_DEVICE_TABLE(of, mvebu_comphy_of_match);
@@ -127,7 +130,7 @@ static struct phy *mvebu_comphy_of_xlate(struct device *dev,
 		return ERR_PTR(-ENODEV);
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	for (i = 0; i < MVEBU_COMPHY_FUNC_MAX; i++) {
 		/* We need to find a match between requested mode and
 		 * the SoC configuration which is stored in
@@ -137,14 +140,14 @@ static struct phy *mvebu_comphy_of_xlate(struct device *dev,
 
 		if (COMPHY_GET_MODE(functions) == COMPHY_GET_MODE(mode) &&
 		    COMPHY_GET_ID(functions) == COMPHY_GET_ID(mode))
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	for (i = 0; i < MVEBU_COMPHY_FUNC_MAX; i++)
 		if (priv->soc_info->functions[lane][i] == mode)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 			break;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
 	if (i == MVEBU_COMPHY_FUNC_MAX) {
 		dev_err(dev, "Wrong mode 0x%x for COMPHY\n", mode);
@@ -235,4 +238,4 @@ module_platform_driver(mvebu_comphy_driver);
 MODULE_AUTHOR("Igal Liberman <igall@marvell.com>");
 MODULE_DESCRIPTION("Marvell EBU COMPHY driver");
 MODULE_LICENSE("GPL");
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */

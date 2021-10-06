@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * DMA Engine test module
  *
@@ -21,9 +24,9 @@
 #include <linux/random.h>
 #include <linux/slab.h>
 #include <linux/wait.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 #include <linux/raid/xor.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 static unsigned int test_buf_size = 16384;
 module_param(test_buf_size, uint, S_IRUGO | S_IWUSR);
@@ -77,7 +80,7 @@ static bool verbose;
 module_param(verbose, bool, S_IRUGO | S_IWUSR);
 MODULE_PARM_DESC(verbose, "Enable \"success\" result messages (default: off)");
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static unsigned int caps_mask = 0x7;
 module_param(caps_mask, uint, S_IRUGO | S_IWUSR);
 MODULE_PARM_DESC(caps_mask, "Mask of required DMA capabilities to be tested. COPY=0x1, XOR=0x2, PQ=0x4  (default: 0x7 [all])");
@@ -99,7 +102,7 @@ module_param(cached_src, bool, S_IRUGO | S_IWUSR);
 MODULE_PARM_DESC(cached_src, "Use the same source buffer for all operations (default: off)");
 
 static int buf_pool_size = (4 << 20); /* 4MB */
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 /**
  * struct dmatest_params - test parameters.
@@ -353,15 +356,15 @@ static void dmatest_callback(void *arg)
 {
 	struct dmatest_done *done = arg;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	if (done) {
 		done->done = true;
 		wake_up_all(done->wait);
 	}
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	done->done = true;
 	wake_up_all(done->wait);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 }
 
 static unsigned int min_odd(unsigned int x, unsigned int y)
@@ -416,7 +419,7 @@ static unsigned long long dmatest_KBs(s64 runtime, unsigned long long len)
 	return dmatest_persec(runtime, len >> 10);
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int dmatest_perf_func(void *data)
 {
 	struct dmatest_thread	*thread = data;
@@ -427,11 +430,11 @@ static int dmatest_perf_func(void *data)
 	unsigned int		failed_tests = 0;
 	unsigned int		total_tests = 0;
 	unsigned int		outs_push = 0, outs_pop = 0;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	dma_cookie_t		*cookie = NULL;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	dma_cookie_t		*cookie;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	enum dma_status		status;
 	enum dma_ctrl_flags	flags;
 	u8			*pq_coefs = NULL;
@@ -442,23 +445,23 @@ static int dmatest_perf_func(void *data)
 	ktime_t			ktime;
 	s64			runtime = 0;
 	unsigned long long	total_len = 0;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	void			*buf_pool_addr, *buf_pool_ptr = NULL;
 	struct dmaengine_unmap_data *um;
 	struct dmaengine_unmap_data **um_list = NULL;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	void			*buf_pool_addr, *buf_pool_ptr;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
 	set_freezable();
 
 	ret = -ENOMEM;
 
 	smp_rmb();
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	thread->srcs = NULL;
 	thread->dsts = NULL;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	info = thread->info;
 	params = &info->params;
 	chan = thread->chan;
@@ -485,39 +488,39 @@ static int dmatest_perf_func(void *data)
 
 	cookie = kcalloc(outstanding_req, sizeof(dma_cookie_t), GFP_KERNEL);
 	if (!cookie)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		goto alloc_fail;
 
 	um_list = kcalloc(outstanding_req, sizeof(um), GFP_KERNEL);
 	if (!um_list)
 		goto alloc_fail;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 		goto err_thread_type;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
 	buf_pool_ptr = buf_pool_addr = kmalloc(buf_pool_size, GFP_KERNEL);
 	if (!buf_pool_addr)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		goto alloc_fail;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 		goto err_bufpool;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
 	thread->srcs = kcalloc(src_cnt+1, sizeof(u8 *), GFP_KERNEL);
 	if (!thread->srcs)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		goto alloc_fail;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 		goto err_srcs;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
 	thread->dsts = kcalloc(dst_cnt+1, sizeof(u8 *), GFP_KERNEL);
 	if (!thread->dsts)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		goto alloc_fail;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 		goto err_dsts;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
 	set_user_nice(current, 10);
 
@@ -530,11 +533,11 @@ static int dmatest_perf_func(void *data)
 	while (!kthread_should_stop()
 	       && !(params->iterations && total_tests >= params->iterations)) {
 		struct dma_async_tx_descriptor *tx = NULL;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 		struct dmaengine_unmap_data *um;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 		dma_addr_t srcs[src_cnt];
 		dma_addr_t *dsts;
 		unsigned int src_off = 0, dst_off = 0, len;
@@ -566,11 +569,11 @@ static int dmatest_perf_func(void *data)
 			for (i = 0; i < src_cnt; i++) {
 				thread->srcs[i] = buf_pool_ptr;
 				buf_pool_ptr += params->buf_size;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 				if ((buf_pool_ptr - buf_pool_addr + params->buf_size) >= buf_pool_size)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 				if ((buf_pool_ptr - buf_pool_addr) >= buf_pool_size)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 					buf_pool_ptr = buf_pool_addr;
 			}
 		}
@@ -578,11 +581,11 @@ static int dmatest_perf_func(void *data)
 		for (i = 0; i < dst_cnt; i++) {
 			thread->dsts[i] = buf_pool_ptr;
 			buf_pool_ptr += params->buf_size;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 			if ((buf_pool_ptr - buf_pool_addr + params->buf_size) >= buf_pool_size)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 			if ((buf_pool_ptr - buf_pool_addr) >= buf_pool_size)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 				buf_pool_ptr = buf_pool_addr;
 		}
 
@@ -674,9 +677,9 @@ static int dmatest_perf_func(void *data)
 		tx->callback = dmatest_callback;
 		tx->callback_param = NULL;
 		cookie[outs_push] = tx->tx_submit(tx);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		um_list[outs_push] = um;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
 		if (dma_submit_error(cookie[outs_push])) {
 			dmaengine_unmap_put(um);
@@ -691,13 +694,13 @@ static int dmatest_perf_func(void *data)
 		outs_push = (outs_push + 1) % outstanding_req;
 		while (1) {
 			status = dma_async_is_tx_complete(chan, cookie[outs_pop], NULL, NULL);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 			if (status == DMA_COMPLETE) {
 				dmaengine_unmap_put(um_list[outs_pop]);
 			} else {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 			if (status != DMA_COMPLETE) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 				if ((outs_push == outs_pop) || (total_tests == params->iterations))
 					continue;
 				break;
@@ -713,12 +716,12 @@ static int dmatest_perf_func(void *data)
 			continue;
 		}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 		dmaengine_unmap_put(um);
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 		verbose_result("test passed", total_tests, src_off,
 			       dst_off, len, 0);
 	}
@@ -726,31 +729,31 @@ static int dmatest_perf_func(void *data)
 
 	ret = 0;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 alloc_fail:
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	kfree(thread->dsts);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 err_dsts:
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	kfree(thread->srcs);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 err_srcs:
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	kfree(buf_pool_ptr);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 err_bufpool:
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	kfree(cookie);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	kfree(um_list);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 err_thread_type:
 	pr_info("%s: summary %u tests, %u failures %llu iops %llu KB/s (%d)\n",
 		current->comm, total_tests, failed_tests,
@@ -766,7 +769,7 @@ err_thread_type:
 
 	return ret;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 /*
  * This function repeatedly tests DMA transfers of various lengths and
@@ -1152,17 +1155,17 @@ static int dmatest_add_threads(struct dmatest_info *info,
 		thread->chan = dtc->chan;
 		thread->type = type;
 		smp_wmb();
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		if (performance)
 			thread->task = kthread_create(dmatest_perf_func, thread, "%s-%s%u",
 					dma_chan_name(chan), op, i);
 		else
 			thread->task = kthread_create(dmatest_func, thread, "%s-%s%u",
 					dma_chan_name(chan), op, i);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		thread->task = kthread_create(dmatest_func, thread, "%s-%s%u",
 				dma_chan_name(chan), op, i);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		if (IS_ERR(thread->task)) {
 			pr_warn("Failed to create thread %s-%s%u\n",
 				dma_chan_name(chan), op, i);
@@ -1196,30 +1199,30 @@ static int dmatest_add_channel(struct dmatest_info *info,
 	dtc->chan = chan;
 	INIT_LIST_HEAD(&dtc->threads);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	if ((caps_mask & (1 << DMA_MEMCPY)) &&
 	    dma_has_cap(DMA_MEMCPY, dma_dev->cap_mask)) {
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	if (dma_has_cap(DMA_MEMCPY, dma_dev->cap_mask)) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		cnt = dmatest_add_threads(info, dtc, DMA_MEMCPY);
 		thread_count += cnt > 0 ? cnt : 0;
 	}
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	if ((caps_mask & (1 << DMA_XOR)) &&
 	    dma_has_cap(DMA_XOR, dma_dev->cap_mask)) {
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	if (dma_has_cap(DMA_XOR, dma_dev->cap_mask)) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		cnt = dmatest_add_threads(info, dtc, DMA_XOR);
 		thread_count += cnt > 0 ? cnt : 0;
 	}
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	if ((caps_mask & (1 << DMA_PQ)) &&
 	    dma_has_cap(DMA_PQ, dma_dev->cap_mask)) {
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	if (dma_has_cap(DMA_PQ, dma_dev->cap_mask)) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		cnt = dmatest_add_threads(info, dtc, DMA_PQ);
 		thread_count += cnt > 0 ? cnt : 0;
 	}

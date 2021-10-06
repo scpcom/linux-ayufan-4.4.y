@@ -19,7 +19,7 @@
 #include <asm/dma.h>	 
 #include "pci.h"
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 #define _8M	0x00800000
 #define _64M	0x04000000
 #define MV_PCI_BAR_1	2
@@ -248,6 +248,14 @@ static void quirk_citrine(struct pci_dev *dev)
 	dev->cfg_size = 0xA0;
 }
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_IBM,	PCI_DEVICE_ID_IBM_CITRINE,	quirk_citrine);
+
+static void quirk_nfp6000(struct pci_dev *dev)
+{
+	dev->cfg_size = 0x600;
+}
+DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_NETRONOME,	PCI_DEVICE_ID_NETRONOME_NFP4000,	quirk_nfp6000);
+DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_NETRONOME,	PCI_DEVICE_ID_NETRONOME_NFP6000,	quirk_nfp6000);
+DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_NETRONOME,	PCI_DEVICE_ID_NETRONOME_NFP6000_VF,	quirk_nfp6000);
 
 static void quirk_extend_bar_to_page(struct pci_dev *dev)
 {
@@ -3069,6 +3077,10 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_JMICRON,
 DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_MARVELL_EXT, 0x9235,
 			 quirk_dma_func1_alias);
 #endif  
+#ifdef MY_ABC_HERE
+DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_MARVELL_EXT, 0x9170,
+                         quirk_dma_func1_alias);
+#endif  
 
 static const struct pci_device_id fixed_dma_alias_tbl[] = {
 	{ PCI_DEVICE_SUB(PCI_VENDOR_ID_ADAPTEC2, 0x0285,
@@ -3202,7 +3214,7 @@ static const u16 pci_quirk_intel_pch_acs_ids[] = {
 	0x8c90, 0x8c92, 0x8c94, 0x8c96, 0x8c98, 0x8c9a, 0x8c9c, 0x8c9e,
 };
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
  
 static const u16 pci_quirk_marvell_acs_ids[] = {
 	 
@@ -3237,7 +3249,7 @@ static int pci_quirk_intel_pch_acs(struct pci_dev *dev, u16 acs_flags)
 	return acs_flags & ~flags ? 0 : 1;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int pci_quirk_marvell_acs(struct pci_dev *dev, u16 acs_flags)
 {
 	int i;
@@ -3335,7 +3347,7 @@ static const struct pci_dev_acs_enabled {
 	{ PCI_VENDOR_ID_INTEL, PCI_ANY_ID, pci_quirk_intel_pch_acs },
 	{ 0x19a2, 0x710, pci_quirk_mf_endpoint_acs },  
 	{ 0x10df, 0x720, pci_quirk_mf_endpoint_acs },  
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	 
 	{ PCI_VENDOR_ID_MARVELL, PCI_ANY_ID, pci_quirk_marvell_acs },
 #endif  

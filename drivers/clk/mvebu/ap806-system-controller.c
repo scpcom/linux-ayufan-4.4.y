@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*
  * Marvell Armada AP806 System Controller
  *
@@ -25,11 +28,11 @@
 #define AP806_SAR_REG			0x400
 #define AP806_SAR_CLKFREQ_MODE_MASK	0x1f
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 #define AP806_CLK_NUM			8
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 #define AP806_CLK_NUM			6
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 static struct clk *ap806_clks[AP806_CLK_NUM];
 
@@ -40,13 +43,13 @@ static struct clk_onecell_data ap806_clk_data = {
 
 static void __init ap806_syscon_clk_init(struct device_node *np)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	unsigned int freq_mode, cpuclk_freq, dclk_freq, ringclk_freq;
 	const char *name, *fixedclk_name, *ringclk_name;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	unsigned int freq_mode, cpuclk_freq, dclk_freq;
 	const char *name, *fixedclk_name;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	struct regmap *regmap;
 	u32 reg;
 
@@ -63,45 +66,45 @@ static void __init ap806_syscon_clk_init(struct device_node *np)
 
 	freq_mode = reg & AP806_SAR_CLKFREQ_MODE_MASK;
 	switch (freq_mode) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	case 0x0 ... 0x1:
 		cpuclk_freq = 2000;
 		break;
 	case 0x6 ... 0x7:
 		cpuclk_freq = 1800;
 		break;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	case 0x4:
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	case 0xD:
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	case 0xB ... 0x12:
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		cpuclk_freq = 1600;
 		break;
 	case 0x1A:
 		cpuclk_freq = 1400;
 		break;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	case 0x14:
 	case 0x17:
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	case 0x14 ... 0x18:
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		cpuclk_freq = 1300;
 		break;
 	case 0x19:
 		cpuclk_freq = 1200;
 		break;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	case 0x13:
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	case 0x1D:
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	case 0x13:
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		cpuclk_freq = 1000;
 		break;
 	case 0x1C:
@@ -116,23 +119,23 @@ static void __init ap806_syscon_clk_init(struct device_node *np)
 		** baudrate of the UART
 		*/
 		cpuclk_freq = 0;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		pr_err("invalid Sample at Reset value\n");
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		pr_err("invalid SAR value\n");
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	/* Get DCLK frequency (DCLK = 0.5*DDR_CLK) */
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	/* Get DCLK frequency */
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	switch (freq_mode) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	case 0x0:
 	case 0x6:
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	case 0x4:
 	case 0x10:
 	case 0x14:
@@ -140,36 +143,36 @@ static void __init ap806_syscon_clk_init(struct device_node *np)
 		dclk_freq = 400;
 		break;
 	case 0xC:
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		dclk_freq = 600;
 		break;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	case 0x1:
 	case 0x7:
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	case 0xD:
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	case 0x16:
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		dclk_freq = 525;
 		break;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	case 0xB:
 	case 0xE:
 	case 0xF:
 		dclk_freq = 450;
 		break;
 	case 0x12:
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	case 0x13:
 	case 0x17:
 		dclk_freq = 325;
 		break;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	case 0x4:
 	case 0x14:
 	case 0x19:
@@ -178,33 +181,33 @@ static void __init ap806_syscon_clk_init(struct device_node *np)
 	case 0x1C:
 	case 0x1D:
 		dclk_freq = 400;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	case 0x11:
 	case 0x15:
 		dclk_freq = 800;
 		break;
 	case 0x18:
 		dclk_freq = 650;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		break;
 	default:
 		dclk_freq = 0;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		pr_err("invalid Sample at Reset value\n");
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		pr_err("invalid SAR value\n");
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	}
 
 	/* Convert to hertz */
 	cpuclk_freq *= 1000 * 1000;
 	dclk_freq *= 1000 * 1000;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	/* In all SAR values ring_clk is twice ddr clock */
 	ringclk_freq = 2 * dclk_freq;
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	/* CPU clocks depend on the Sample At Reset configuration */
 	of_property_read_string_index(np, "clock-output-names",
 				      0, &name);
@@ -239,7 +242,7 @@ static void __init ap806_syscon_clk_init(struct device_node *np)
 	ap806_clks[5] = clk_register_fixed_rate(NULL, name, NULL, CLK_IS_ROOT,
 						dclk_freq);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	of_property_read_string_index(np, "clock-output-names",
 				      6, &ringclk_name);
 	ap806_clks[6] = clk_register_fixed_rate(NULL, ringclk_name, NULL, CLK_IS_ROOT,
@@ -251,10 +254,10 @@ static void __init ap806_syscon_clk_init(struct device_node *np)
 	ap806_clks[7] = clk_register_fixed_factor(NULL, name, ringclk_name,
 						  0, 1, 2);
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	of_clk_add_provider(np, of_clk_src_onecell_get, &ap806_clk_data);
 }
 
 CLK_OF_DECLARE(ap806_syscon_clk, "marvell,ap806-system-controller",
 	       ap806_syscon_clk_init);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

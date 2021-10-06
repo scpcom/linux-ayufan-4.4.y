@@ -44,6 +44,26 @@ END:
 	return;
 }
 EXPORT_SYMBOL(syno_rtd_gpio_write);
+
+void syno_rtd_set_gpio_input(int pin)
+{
+	int iErr = 0;
+	iErr = gpio_request(pin, NULL);
+	if (iErr) {
+		printk("%s:%s(%d) gpio_request pin %d fail!\n", __FILE__, __FUNCTION__, __LINE__, pin);
+		goto END;
+	}
+	iErr = gpio_direction_input(pin);
+	if (iErr) {
+		printk("%s:%s(%d) set gpio pin %d input fail!\n", __FILE__, __FUNCTION__, __LINE__, pin);
+		goto UNLOCK;
+	}
+UNLOCK:
+	gpio_free(pin);
+END:
+	return;
+}
+EXPORT_SYMBOL(syno_rtd_set_gpio_input);
 #endif  
 
 int SYNO_GPIO_READ(int pin)

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright(c) 2004 - 2006 Intel Corporation. All rights reserved.
  *
@@ -195,7 +198,7 @@ enum dma_ctrl_flags {
 	DMA_PREP_CONTINUE = (1 << 4),
 	DMA_PREP_FENCE = (1 << 5),
 	DMA_CTRL_REUSE = (1 << 6),
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 /*
  * @DMA_PREP_PQ_MULT - tell the driver that this is a mult
  *						request
@@ -203,7 +206,7 @@ enum dma_ctrl_flags {
  */
 	DMA_PREP_PQ_MULT = (1 << 10),
 	DMA_PREP_PQ_SUM_PRODUCT = (1 << 11),
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 };
 
 /**

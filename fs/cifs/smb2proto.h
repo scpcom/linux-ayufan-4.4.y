@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *   fs/cifs/smb2proto.h
  *
@@ -101,6 +104,10 @@ extern void smb2_reconnect_server(struct work_struct *work);
  * SMB2 Worker functions - most of protocol specific implementation details
  * are contained within these calls.
  */
+#ifdef MY_ABC_HERE
+extern void smb2_hdr_assemble(struct smb2_hdr *hdr, __le16 smb2_cmd /* command */ ,
+		  const struct cifs_tcon *tcon);
+#endif /* MY_ABC_HERE */
 extern int SMB2_negotiate(const unsigned int xid, struct cifs_ses *ses);
 extern int SMB2_sess_setup(const unsigned int xid, struct cifs_ses *ses,
 			   const struct nls_table *nls_cp);

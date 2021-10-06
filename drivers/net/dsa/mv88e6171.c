@@ -1,4 +1,7 @@
-#if !defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if !defined(MY_DEF_HERE)
 /* net/dsa/mv88e6171.c - Marvell 88e6171 switch chip support
  * Copyright (c) 2008-2009 Marvell Semiconductor
  * Copyright (c) 2014 Claudio Leite <leitec@staticky.com>
@@ -122,4 +125,4 @@ MODULE_ALIAS("platform:mv88e6171");
 MODULE_ALIAS("platform:mv88e6175");
 MODULE_ALIAS("platform:mv88e6350");
 MODULE_ALIAS("platform:mv88e6351");
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

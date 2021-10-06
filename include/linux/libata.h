@@ -1363,9 +1363,7 @@ extern int syno_libata_index_get(struct Scsi_Host *host, uint channel, uint id, 
 
 #ifdef MY_ABC_HERE
 #define IS_SYNO_SPINUP_CMD(qc) (NULL == qc->scsicmd && !ata_tag_internal(qc->tag) && \
-			(ATA_CMD_FPDMA_READ == qc->tf.command || ATA_CMD_READ == qc->tf.command || \
-			 ATA_CMD_READ_EXT == qc->tf.command || ATA_CMD_PIO_READ == qc->tf.command || ATA_CMD_PIO_READ_EXT == qc->tf.command || \
-			 ATA_CMD_READ_MULTI == qc->tf.command || ATA_CMD_READ_MULTI_EXT == qc->tf.command))
+			ATA_CMD_IDLEIMMEDIATE == qc->tf.command)
 #endif  
 
 extern const struct ata_port_operations ata_base_port_ops;
@@ -1411,7 +1409,6 @@ extern char giDiskSeqReverse[];
 	.slave_destroy		= ata_scsi_slave_destroy,	\
 	.bios_param		= ata_std_bios_param,		\
 	SYNO_FIXED_DISK_NAME_MACRO \
-	MY_ABC_HERE \
 	.unlock_native_capacity	= ata_scsi_unlock_native_capacity, \
 	.sdev_attrs		= ata_common_sdev_attrs
 

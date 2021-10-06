@@ -10,7 +10,7 @@
 		bootargs = "earlycon=uart8250,mmio32,0x98007800 console=ttyS0,115200 androidboot.hardware=kylin loglevel=8";
 		linux,initrd-start = <ROOTFS_NORMAL_START>;
 		linux,initrd-end = <ROOTFS_NORMAL_END>;
-		syno_version = "SYNO-DTB-DSM6-1-15103";
+		syno_version = "SYNO-DTB-DSM6-2-22128";
 	};
 
 	memory {

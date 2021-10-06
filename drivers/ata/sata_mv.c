@@ -1971,14 +1971,14 @@ static struct ata_queued_cmd *mv_get_active_qc(struct ata_port *ap)
 {
 	struct mv_port_priv *pp = ap->private_data;
 	struct ata_queued_cmd *qc;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct ata_link *link = NULL;
 #endif  
 
 	if (pp->pp_flags & MV_PP_FLAG_NCQ_EN)
 		return NULL;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	ata_for_each_link(link, ap, EDGE)
 		if (ata_link_active(link))
 			break;

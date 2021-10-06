@@ -24,7 +24,36 @@
 
 #define PROC_BLOCK_SIZE (3*1024)
 
+#ifdef MY_DEF_HERE
+#define DISK_READY_MAX_WAIT_MSEC 120000  
+#define SZ_SYNO_PROC_DISK_READY "syno_disk_ready_check"
+
+atomic_t syno_disk_not_ready_count = ATOMIC_INIT(0);
+atomic_long_t syno_drive_start_time = ATOMIC_LONG_INIT(0);
+#endif  
+
 static struct proc_dir_entry *proc_scsi;
+
+#ifdef MY_DEF_HERE
+static void syno_disk_not_ready_count_increase(void)
+{
+	atomic_inc(&syno_disk_not_ready_count);
+}
+EXPORT_SYMBOL(syno_disk_not_ready_count_increase);
+
+static void syno_disk_not_ready_count_decrease(void)
+{
+	 
+	WARN_ON_ONCE(!atomic_add_unless(&syno_disk_not_ready_count, -1, 0));
+}
+EXPORT_SYMBOL(syno_disk_not_ready_count_decrease);
+
+static void syno_disk_start_time_set(void)
+{
+	atomic_long_set(&syno_drive_start_time, jiffies);
+}
+EXPORT_SYMBOL(syno_disk_start_time_set);
+#endif  
 
 static DEFINE_MUTEX(global_host_template_mutex);
 
@@ -72,6 +101,44 @@ static const struct file_operations proc_scsi_fops = {
 	.llseek = seq_lseek,
 	.write = proc_scsi_host_write
 };
+
+#ifdef MY_DEF_HERE
+
+static int syno_scsi_disk_ready_check(void)
+{
+	int ret = 0;
+	if (0 == atomic_read(&syno_disk_not_ready_count)) {
+		ret = 1;
+	} else {
+		if (time_before(jiffies,
+					(atomic_long_read(&syno_drive_start_time)) +
+					 msecs_to_jiffies(DISK_READY_MAX_WAIT_MSEC))) {
+			ret = 0;
+		} else {
+			ret = 1;
+		}
+	}
+	return ret;
+}
+
+static int syno_scsi_proc_disk_ready_show(struct seq_file *m, void *v)
+{
+	seq_printf(m, "%d\n", syno_scsi_disk_ready_check());
+	return 0;
+}
+
+static int syno_scsi_proc_disk_ready_open(struct inode *inode, struct file *file)
+{
+	return single_open(file, syno_scsi_proc_disk_ready_show, NULL);
+}
+
+static const struct file_operations syno_scsi_proc_disk_ready_fops = {
+	.open = syno_scsi_proc_disk_ready_open,
+	.release = single_release,
+	.read = seq_read,
+	.llseek = seq_lseek,
+};
+#endif  
 
 void scsi_proc_hostdir_add(struct scsi_host_template *sht)
 {
@@ -354,8 +421,23 @@ int __init scsi_init_procfs(void)
 	if (!pde)
 		goto err2;
 
-	return 0;
+#ifdef MY_DEF_HERE
+	 
+	atomic_long_set(&syno_drive_start_time, jiffies);
+	if (!proc_create_data(SZ_SYNO_PROC_DISK_READY,
+					S_IRUGO, proc_scsi,
+					&syno_scsi_proc_disk_ready_fops, NULL)) {
+		printk("%s: Failed to register %s\n", __func__,
+					 "scsi/"SZ_SYNO_PROC_DISK_READY);
+		goto err3;
+	}
+#endif  
 
+	return 0;
+#ifdef MY_DEF_HERE
+err3:
+	remove_proc_entry("scsi/scsi", NULL);
+#endif  
 err2:
 	remove_proc_entry("scsi", NULL);
 err1:
@@ -365,5 +447,8 @@ err1:
 void scsi_exit_procfs(void)
 {
 	remove_proc_entry("scsi/scsi", NULL);
+#ifdef MY_DEF_HERE
+	remove_proc_entry(SZ_SYNO_PROC_DISK_READY, proc_scsi);
+#endif  
 	remove_proc_entry("scsi", NULL);
 }

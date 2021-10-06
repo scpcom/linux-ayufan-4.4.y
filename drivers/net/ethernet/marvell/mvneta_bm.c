@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*
  * Driver for Marvell NETA network controller Buffer Manager.
  *
@@ -279,11 +282,11 @@ void mvneta_bm_pool_destroy(struct mvneta_bm *priv,
 
 	mvneta_bm_bufs_free(priv, bm_pool, port_map);
 	if (hwbm_pool->buf_num)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		WARN(1, "cannot free %d buffers in pool %d\n", hwbm_pool->buf_num, bm_pool->id);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		WARN(1, "cannot free all buffers in pool %d\n", bm_pool->id);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 
 	if (bm_pool->virt_addr) {
 		dma_free_coherent(&priv->pdev->dev,
@@ -511,4 +514,4 @@ module_platform_driver(mvneta_bm_driver);
 MODULE_DESCRIPTION("Marvell NETA Buffer Manager Driver - www.marvell.com");
 MODULE_AUTHOR("Marcin Wojtas <mw@semihalf.com>");
 MODULE_LICENSE("GPL v2");
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */

@@ -156,6 +156,12 @@ syno_pm_device_config(struct ata_port *ap)
 	if (IS_SYNOLOGY_DX517(ap->PMSynoUnique)) {
 		syno_pm_device_config_set(ap, 4, 0x91, 0xE7F);
 	}
+	if (IS_SYNOLOGY_RX418(ap->PMSynoUnique)) {
+		syno_pm_device_config_set(ap, 0, 0x91, 0xD75);
+		syno_pm_device_config_set(ap, 1, 0x91, 0xD75);
+		syno_pm_device_config_set(ap, 2, 0x91, 0xE75);
+		syno_pm_device_config_set(ap, 3, 0x91, 0xEF5);
+	}
 }
 
 void
@@ -527,7 +533,8 @@ u8 syno_pm_is_synology_9705(const struct ata_port *ap)
 		!IS_SYNOLOGY_RX1214(ap->PMSynoUnique) &&
 		!IS_SYNOLOGY_RX1217(ap->PMSynoUnique) &&
 		!IS_SYNOLOGY_DX1215(ap->PMSynoUnique) &&
-		!IS_SYNOLOGY_DX517(ap->PMSynoUnique)) {
+		!IS_SYNOLOGY_DX517(ap->PMSynoUnique) &&
+		!IS_SYNOLOGY_RX418(ap->PMSynoUnique)) {
 		goto END;
 	}
 
@@ -1540,6 +1547,7 @@ static void sata_pmp_detach(struct ata_device *dev)
 
 #ifdef MY_ABC_HERE
 	ap->pflags |= ATA_PFLAG_PMP_DISCONNECT;
+	ata_dev_printk(dev, KERN_WARNING, "flag ATA_PFLAG_PMP_DISCONNECT on (pflags=0x%x)\n", dev->link->ap->pflags);
 #endif  
 #ifdef MY_DEF_HERE
 	ap->uiStsFlags &= !SYNO_STATUS_IS_SIL3x26;
@@ -1609,6 +1617,9 @@ static int sata_pmp_revalidate(struct ata_device *dev, unsigned int new_class)
 	struct ata_port *ap = link->ap;
 	u32 *gscr = (void *)ap->sector_buf;
 	int rc;
+#if defined(MY_DEF_HERE)
+	struct ata_port *master_ap = NULL;
+#endif  
 
 	DPRINTK("ENTER\n");
 
@@ -1688,6 +1699,9 @@ static int sata_pmp_eh_recover_pmp(struct ata_port *ap,
 
 	if (dev->flags & ATA_DFLAG_DETACH) {
 		detach = 1;
+#ifdef MY_ABC_HERE
+		ata_dev_printk(dev, KERN_WARNING, "ATA_DFLAG_DETACH (flags=0x%x)\n", dev->flags);
+#endif  
 		goto fail;
 	}
 

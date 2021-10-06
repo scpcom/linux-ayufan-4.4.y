@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*
 * ***************************************************************************
 * Copyright (C) 2015 Marvell International Ltd.
@@ -110,12 +113,12 @@ enum {
 	A3700_TBG_TO_USB_CLK,
 	A3700_TBG_TO_GBE0_CLK,
 	A3700_TBG_TO_GBE1_CLK,
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	A3700_TBG_TO_SPI_CLK,
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
 	A3700_TBG_TO_GBE_BM_CLK,
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 };
 
 static const struct coreclk_ratio armada_3700_coreclk_ratios[] __initconst = {
@@ -126,12 +129,12 @@ static const struct coreclk_ratio armada_3700_coreclk_ratios[] __initconst = {
 	{ .id = A3700_TBG_TO_USB_CLK, .name = "usb32-ss-sys" },
 	{ .id = A3700_TBG_TO_GBE0_CLK, .name = "gbe0-core" },
 	{ .id = A3700_TBG_TO_GBE1_CLK, .name = "gbe1-core" },
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	{ .id = A3700_TBG_TO_SPI_CLK, .name = "spi-core" },
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
 	{ .id = A3700_TBG_TO_GBE_BM_CLK, .name = "gbe-bm-core" },
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 };
 
 /***************************************************************************************************
@@ -209,7 +212,7 @@ static void __init armada_3700_get_clk_ratio(
 		*div = (prscl1 * prscl2) << div2;
 		break;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	case A3700_TBG_TO_SPI_CLK:
 		*tbg = (clkr32(MVEBU_NORTH_CLOCK_TBG_SELECT_REG) >> TBG_SPI_PCLK_SEL_OFFSET) &
 					MVEBU_TBG_CLK_SEL_MASK;
@@ -219,8 +222,8 @@ static void __init armada_3700_get_clk_ratio(
 					MVEBU_TBG_CLK_PRSCL_MASK;
 		*div = prscl1 * prscl2;
 		break;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
 
 	case A3700_TBG_TO_GBE_BM_CLK:
 		*tbg = (clkr32(MVEBU_SOUTH_CLOCK_TBG_SELECT_REG) >> TBG_GBE_CORE_CLK_SEL_OFFSET) &
@@ -234,7 +237,7 @@ static void __init armada_3700_get_clk_ratio(
 		*div = (prscl1 * prscl2) << div2;
 		break;
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	default:
 		*div = 0;
 		break;
@@ -326,9 +329,9 @@ CLK_OF_DECLARE(armada_3700_core_clk, "marvell,armada-3700-core-clock",
  */
 static const struct clk_gating_soc_desc armada_3700_north_bridge_gating_desc[] __initconst = {
 	{ "sata-host-gate", "sata-host", 3, 0, CLK_GATE_SET_TO_DISABLE },
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	{ "spi-gate", "spi-core", 12, 0, CLK_GATE_SET_TO_DISABLE },
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	{ "twsi2", NULL, 16, 0, CLK_GATE_SET_TO_DISABLE },
 	{ "twsi1", NULL, 17, 0, CLK_GATE_SET_TO_DISABLE },
 	{ }
@@ -346,9 +349,9 @@ CLK_OF_DECLARE(armada_3700_north_bridge_clk_gating,
 static const struct clk_gating_soc_desc armada_3700_south_bridge_gating_desc[] __initconst = {
 	{ "gbe1-gate", "gbe1-core", 4, 0, CLK_GATE_SET_TO_DISABLE },
 	{ "gbe0-gate", "gbe0-core", 5, 0, CLK_GATE_SET_TO_DISABLE },
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	{ "gbe-bm-gate", "gbe-bm-core", 9, 0, CLK_GATE_SET_TO_DISABLE },
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	{ "pcie", NULL, 14, 0, CLK_GATE_SET_TO_DISABLE },
 	{ "usb32-ss-sys-gate", "usb32-ss-sys", 17, 0, CLK_GATE_SET_TO_DISABLE },
 	{ }
@@ -362,4 +365,4 @@ armada_3700_south_bridge_clk_gating_init(struct device_node *np)
 CLK_OF_DECLARE(armada_3700_south_bridge_clk_gating,
 	       "marvell,armada-3700-south-bridge-gating-clock",
 	       armada_3700_south_bridge_clk_gating_init);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

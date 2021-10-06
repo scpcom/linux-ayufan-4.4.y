@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Maxim (Dallas) MAX3107/8/9, MAX14830 serial driver
  *
@@ -1174,11 +1177,11 @@ static int max310x_probe(struct device *dev, struct max310x_devtype *devtype,
 #ifdef CONFIG_GPIOLIB
 	/* Setup GPIO cotroller */
 	s->gpio.owner		= THIS_MODULE;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	s->gpio.parent		= dev;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	s->gpio.dev		= dev;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	s->gpio.label		= dev_name(dev);
 	s->gpio.direction_input	= max310x_gpio_direction_input;
 	s->gpio.get		= max310x_gpio_get;

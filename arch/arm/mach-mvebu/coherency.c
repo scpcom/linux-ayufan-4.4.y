@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Coherency fabric (Aurora) support for Armada 370, 375, 38x and XP
  * platforms.
@@ -31,16 +34,16 @@
 #include <linux/mbus.h>
 #include <linux/pci.h>
 #include <asm/smp_plat.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 #include <asm/smp_scu.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 #include <asm/cacheflush.h>
 #include <asm/mach/map.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 #include "common.h"
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 #include <asm/dma-mapping.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 #include "coherency.h"
 #include "mvebu-soc-id.h"
 
@@ -98,7 +101,7 @@ static void armada_xp_clear_shared_l2(void)
 	writel(reg, cpu_config_base);
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static inline void mvebu_hwcc_sync_io_barrier(void)
 {
 	writel(0x1, coherency_cpu_base + IO_SYNC_BARRIER_CTL_OFFSET);
@@ -146,7 +149,7 @@ static struct dma_map_ops mvebu_hwcc_dma_ops = {
 	.sync_sg_for_device	= arm_dma_sync_sg_for_device,
 	.set_dma_mask		= arm_dma_set_mask,
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 static int mvebu_hwcc_notifier(struct notifier_block *nb,
 			       unsigned long event, void *__dev)
@@ -155,11 +158,11 @@ static int mvebu_hwcc_notifier(struct notifier_block *nb,
 
 	if (event != BUS_NOTIFY_ADD_DEVICE)
 		return NOTIFY_DONE;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	set_dma_ops(dev, &mvebu_hwcc_dma_ops);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	set_dma_ops(dev, &arm_coherent_dma_ops);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	return NOTIFY_OK;
 }
@@ -243,9 +246,9 @@ static void __init armada_375_380_coherency_init(struct device_node *np)
 	coherency_cpu_base = of_iomap(np, 0);
 	arch_ioremap_caller = armada_wa_ioremap_caller;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	pci_ioremap_set_mem_type(MT_UNCACHED);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	/*
 	 * We should switch the PL310 to I/O coherency mode only if
@@ -325,10 +328,10 @@ int set_cpu_coherent(void)
 		armada_xp_clear_shared_l2();
 		ll_add_cpu_to_smp_group();
 		return ll_enable_coherency();
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	} else if (type == COHERENCY_FABRIC_TYPE_ARMADA_380) {
 		scu_enable(mvebu_get_scu_base());
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	}
 
 	return 0;

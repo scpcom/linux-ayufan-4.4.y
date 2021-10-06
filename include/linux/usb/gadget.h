@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * <linux/usb/gadget.h>
  *
@@ -1255,7 +1258,7 @@ extern void usb_ep_autoconfig_release(struct usb_ep *);
 
 extern void usb_ep_autoconfig_reset(struct usb_gadget *);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 /**
  * struct usb_udc - describes one usb device controller
  * @driver - the gadget driver pointer. For use by the class code
@@ -1275,6 +1278,6 @@ struct usb_udc {
 };
 
 extern struct usb_udc *udc_detect(struct list_head *udc_list, struct usb_gadget_driver *driver);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 #endif /* __LINUX_USB_GADGET_H */

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2006, 2007 Eugene Konev
  *
@@ -316,11 +319,11 @@ static int cpmac_mdio_reset(struct mii_bus *bus)
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int mii_irqs[PHY_MAX_ADDR] = { PHY_POLL, };
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 static struct mii_bus *cpmac_mii;
 
@@ -1231,11 +1234,11 @@ int cpmac_init(void)
 	cpmac_mii->read = cpmac_mdio_read;
 	cpmac_mii->write = cpmac_mdio_write;
 	cpmac_mii->reset = cpmac_mdio_reset;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	cpmac_mii->irq = mii_irqs;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	cpmac_mii->priv = ioremap(AR7_REGS_MDIO, 256);
 

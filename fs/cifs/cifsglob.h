@@ -119,6 +119,9 @@ struct smb_rqst {
 
 enum smb_version {
 	Smb_1 = 1,
+#ifdef MY_ABC_HERE
+	Smb_Syno,
+#endif  
 	Smb_20,
 	Smb_21,
 	Smb_30,
@@ -333,14 +336,26 @@ struct smb_version_operations {
 				 struct cifs_sb_info *, const unsigned char *,
 				 char *, unsigned int *);
 	 
+#ifdef MY_ABC_HERE
+	bool (*is_read_op)(struct TCP_Server_Info *, __u32);
+#else
 	bool (*is_read_op)(__u32);
+#endif  
 	 
 	void (*set_oplock_level)(struct cifsInodeInfo *, __u32, unsigned int,
 				 bool *);
 	 
+#ifdef MY_ABC_HERE
+	char * (*create_lease_buf)(struct TCP_Server_Info *, u8 *, u8);
+#else
 	char * (*create_lease_buf)(u8 *, u8);
+#endif  
 	 
+#ifdef MY_ABC_HERE
+	__u8 (*parse_lease_buf)(struct TCP_Server_Info *, void *, unsigned int *);
+#else
 	__u8 (*parse_lease_buf)(void *, unsigned int *);
+#endif  
 	int (*clone_range)(const unsigned int, struct cifsFileInfo *src_file,
 			struct cifsFileInfo *target_file, u64 src_off, u64 len,
 			u64 dest_off);
@@ -502,6 +517,9 @@ struct TCP_Server_Info {
 	char server_RFC1001_name[RFC1001_NAME_LEN_WITH_NULL];
 	struct smb_version_operations	*ops;
 	struct smb_version_values	*vals;
+#ifdef MY_ABC_HERE
+	struct smb_version_values	values;
+#endif  
 	enum statusEnum tcpStatus;  
 	char *hostname;  
 	struct socket *ssocket;
@@ -1369,17 +1387,19 @@ GLOBAL_EXTERN atomic_t smBufAllocCount;
 GLOBAL_EXTERN atomic_t midCount;
 
 GLOBAL_EXTERN bool enable_oplocks;  
-GLOBAL_EXTERN unsigned int lookupCacheEnabled;
+GLOBAL_EXTERN bool lookupCacheEnabled;
 GLOBAL_EXTERN unsigned int global_secflags;	 
 GLOBAL_EXTERN unsigned int sign_CIFS_PDUs;   
-GLOBAL_EXTERN unsigned int linuxExtEnabled; 
 #ifdef MY_ABC_HERE
 GLOBAL_EXTERN unsigned int SynoPosixSemanticsEnabled; 
 #endif  
+GLOBAL_EXTERN bool linuxExtEnabled; 
 GLOBAL_EXTERN unsigned int CIFSMaxBufSize;   
 GLOBAL_EXTERN unsigned int cifs_min_rcv;     
 GLOBAL_EXTERN unsigned int cifs_min_small;   
 GLOBAL_EXTERN unsigned int cifs_max_pending;  
+
+GLOBAL_EXTERN unsigned short echo_retries;
 
 #ifdef CONFIG_CIFS_ACL
 GLOBAL_EXTERN struct rb_root uidtree;
@@ -1402,6 +1422,11 @@ extern mempool_t *cifs_mid_poolp;
 #define SMB1_VERSION_STRING	"1.0"
 extern struct smb_version_operations smb1_operations;
 extern struct smb_version_values smb1_values;
+#ifdef MY_ABC_HERE
+#define SYNO_VERSION_STRING	"syno"
+extern struct smb_version_operations synocifs_operations;
+extern struct smb_version_values synocifs_values;
+#endif  
 #define SMB20_VERSION_STRING	"2.0"
 extern struct smb_version_operations smb20_operations;
 extern struct smb_version_values smb20_values;

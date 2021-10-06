@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*
  * SBSA(Server Base System Architecture) Generic Watchdog driver
  *
@@ -407,4 +410,4 @@ MODULE_AUTHOR("Al Stone <al.stone@linaro.org>");
 MODULE_AUTHOR("Timur Tabi <timur@codeaurora.org>");
 MODULE_LICENSE("GPL v2");
 MODULE_ALIAS("platform:" DRV_NAME);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

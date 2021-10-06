@@ -311,7 +311,7 @@ static ssize_t snd_info_text_entry_write(struct file *file,
 	if (!valid_pos(pos, count))
 		return -EIO;
 	next = pos + count;
-	/* don't handle too large text inputs */
+	 
 	if (next > 16 * 1024)
 		return -EIO;
 	mutex_lock(&entry->access);
@@ -351,7 +351,9 @@ static int snd_info_seq_show(struct seq_file *seq, void *p)
 	struct snd_info_private_data *data = seq->private;
 	struct snd_info_entry *entry = data->entry;
 
-	if (entry->c.text.read) {
+	if (!entry->c.text.read) {
+		return -EIO;
+	} else {
 		data->rbuffer->buffer = (char *)seq;  
 		entry->c.text.read(entry, data->rbuffer);
 	}

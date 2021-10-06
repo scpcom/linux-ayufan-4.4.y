@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Broadcom specific AMBA
  * GPIO driver
@@ -188,11 +191,11 @@ int bcma_gpio_init(struct bcma_drv_cc *cc)
 	chip->direction_input	= bcma_gpio_direction_input;
 	chip->direction_output	= bcma_gpio_direction_output;
 	chip->owner		= THIS_MODULE;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	chip->parent		= bcma_bus_get_host_dev(bus);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	chip->dev		= bcma_bus_get_host_dev(bus);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 #if IS_BUILTIN(CONFIG_OF)
 	if (cc->core->bus->hosttype == BCMA_HOSTTYPE_SOC)
 		chip->of_node	= cc->core->dev.of_node;

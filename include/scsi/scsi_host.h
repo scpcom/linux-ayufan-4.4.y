@@ -308,7 +308,7 @@ struct Scsi_Host {
 
 #ifdef MY_DEF_HERE
 	 
-	int isCacheSSD;
+	int is_nvc_ssd;
 #endif
 
 	unsigned long hostdata[0]   

@@ -2717,39 +2717,39 @@ static void usb_put_invalidate_rhdev(struct usb_hcd *hcd)
 }
 
 /**
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
  * usb_add_hcd_with_phy_name - finish generic HCD structure initialization
  * and register with generic phy name
-#else // CONFIG_SYNO_LSP_ARMADA_17_04_02
+#else // MY_DEF_HERE
  * usb_add_hcd - finish generic HCD structure initialization and register
-#endif // CONFIG_SYNO_LSP_ARMADA_17_04_02
+#endif // MY_DEF_HERE
  * @hcd: the usb_hcd structure to initialize
  * @irqnum: Interrupt line to allocate
  * @irqflags: Interrupt type flags
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
  * @phy_name: generic phy name
-#endif // CONFIG_SYNO_LSP_ARMADA_17_04_02
+#endif // MY_DEF_HERE
  *
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
  * Finish the remaining parts of generic HCD initialization with generic phy
  * name: allocate the buffers of consistent memory, register the bus,
  * request the IRQ line, and call the driver's reset() and start() routines.
-#else // CONFIG_SYNO_LSP_ARMADA_17_04_02
+#else // MY_DEF_HERE
  * Finish the remaining parts of generic HCD initialization: allocate the
  * buffers of consistent memory, register the bus, request the IRQ line,
  * and call the driver's reset() and start() routines.
-#endif // CONFIG_SYNO_LSP_ARMADA_17_04_02
+#endif // MY_DEF_HERE
  */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 int usb_add_hcd_with_phy_name(struct usb_hcd *hcd,
 			      unsigned int irqnum,
 			      unsigned long irqflags,
 			      const char *phy_name)
 
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 int usb_add_hcd(struct usb_hcd *hcd,
 		unsigned int irqnum, unsigned long irqflags)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 {
 	int retval;
 	struct usb_device *rhdev;
@@ -2773,16 +2773,16 @@ int usb_add_hcd(struct usb_hcd *hcd,
 	}
 
 	if (IS_ENABLED(CONFIG_GENERIC_PHY) && !hcd->phy) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		struct phy *phy;
 
 		if (phy_name == NULL)
 			phy = phy_get(hcd->self.controller, "usb");
 		else
 			phy = phy_get(hcd->self.controller, phy_name);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 		struct phy *phy = phy_get(hcd->self.controller, "usb");
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
 		if (IS_ERR(phy)) {
 			retval = PTR_ERR(phy);
@@ -2981,7 +2981,7 @@ err_phy:
 	}
 	return retval;
 }
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 EXPORT_SYMBOL_GPL(usb_add_hcd_with_phy_name);
 
 /**
@@ -2999,7 +2999,7 @@ int usb_add_hcd(struct usb_hcd *hcd,
 {
 	return usb_add_hcd_with_phy_name(hcd, irqnum, irqflags, NULL);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 EXPORT_SYMBOL_GPL(usb_add_hcd);
 
 /**

@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*
 * ***************************************************************************
 * Copyright (C) 2017 Marvell International Ltd.
@@ -353,4 +356,4 @@ MODULE_PARM_DESC(nowayout, "Watchdog cannot be stopped once started (default="
 
 MODULE_LICENSE("GPL");
 MODULE_ALIAS("platform:armada3700_wdt");
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */

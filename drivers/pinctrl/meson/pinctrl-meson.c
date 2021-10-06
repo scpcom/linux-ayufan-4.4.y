@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Pin controller and GPIO driver for Amlogic Meson SoCs
  *
@@ -562,11 +565,11 @@ static int meson_gpiolib_register(struct meson_pinctrl *pc)
 		domain = &pc->domains[i];
 
 		domain->chip.label = domain->data->name;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		domain->chip.parent = pc->dev;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		domain->chip.dev = pc->dev;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		domain->chip.request = meson_gpio_request;
 		domain->chip.free = meson_gpio_free;
 		domain->chip.direction_input = meson_gpio_direction_input;

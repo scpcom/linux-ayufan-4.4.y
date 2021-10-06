@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * phy-core.c  --  Generic Phy framework.
  *
@@ -299,13 +302,13 @@ int phy_power_on(struct phy *phy)
 			dev_err(&phy->dev, "phy poweron failed --> %d\n", ret);
 			goto err_pwr_on;
 		}
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		++phy->power_count;
 	}
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	}
 	++phy->power_count;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	mutex_unlock(&phy->mutex);
 	return 0;
 
@@ -335,13 +338,13 @@ int phy_power_off(struct phy *phy)
 			mutex_unlock(&phy->mutex);
 			return ret;
 		}
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		--phy->power_count;
 	}
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	}
 	--phy->power_count;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	mutex_unlock(&phy->mutex);
 	phy_pm_runtime_put(phy);
 
@@ -352,7 +355,7 @@ int phy_power_off(struct phy *phy)
 }
 EXPORT_SYMBOL_GPL(phy_power_off);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 int phy_set_mode(struct phy *phy, enum phy_mode mode)
 {
 	int ret;
@@ -382,10 +385,10 @@ enum phy_mode phy_get_mode(struct phy *phy)
 	return ret;
 }
 EXPORT_SYMBOL_GPL(phy_get_mode);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
 int phy_send_command(struct phy *phy, u32 command)
 {
 	int ret;
@@ -401,7 +404,7 @@ int phy_send_command(struct phy *phy, u32 command)
 }
 EXPORT_SYMBOL_GPL(phy_send_command);
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 int phy_is_pll_locked(struct phy *phy)
 {
 	int ret;
@@ -416,7 +419,7 @@ int phy_is_pll_locked(struct phy *phy)
 	return ret;
 }
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 /**
  * _of_phy_get() - lookup and obtain a reference to a phy by phandle
  * @np: device_node for which to get the phy

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/kernel.h>
 #include <linux/netdevice.h>
 #include <linux/rtnetlink.h>
@@ -160,7 +163,7 @@ static struct net_bridge_vlan *br_vlan_get_master(struct net_bridge *br, u16 vid
 	return masterv;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static void br_master_vlan_rcu_free(struct rcu_head *rcu)
 {
 	struct net_bridge_vlan *v;
@@ -171,7 +174,7 @@ static void br_master_vlan_rcu_free(struct rcu_head *rcu)
 	v->stats = NULL;
 	kfree(v);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 static void br_vlan_put_master(struct net_bridge_vlan *masterv)
 {
@@ -185,11 +188,11 @@ static void br_vlan_put_master(struct net_bridge_vlan *masterv)
 		rhashtable_remove_fast(&vg->vlan_hash,
 				       &masterv->vnode, br_vlan_rht_params);
 		__vlan_del_list(masterv);
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		call_rcu(&masterv->rcu, br_master_vlan_rcu_free);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		kfree_rcu(masterv, rcu);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	}
 }
 
@@ -245,9 +248,9 @@ static int __vlan_add(struct net_bridge_vlan *v, u16 flags)
 		if (!masterv)
 			goto out_filt;
 		v->brvlan = masterv;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		v->stats = masterv->stats;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	}
 
 	/* Add the dev mac and count the vlan only if it's usable */
@@ -347,9 +350,9 @@ struct sk_buff *br_handle_vlan(struct net_bridge *br,
 			       struct net_bridge_vlan_group *vg,
 			       struct sk_buff *skb)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct br_vlan_stats *stats;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct net_bridge_vlan *v;
 	u16 vid;
 
@@ -376,7 +379,7 @@ struct sk_buff *br_handle_vlan(struct net_bridge *br,
 			return NULL;
 		}
 	}
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	if (br->vlan_stats_enabled) {
 		stats = this_cpu_ptr(v->stats);
 		u64_stats_update_begin(&stats->syncp);
@@ -384,7 +387,7 @@ struct sk_buff *br_handle_vlan(struct net_bridge *br,
 		stats->tx_packets++;
 		u64_stats_update_end(&stats->syncp);
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	if (v->flags & BRIDGE_VLAN_INFO_UNTAGGED)
 		skb->vlan_tci = 0;
@@ -394,21 +397,21 @@ out:
 }
 
 /* Called under RCU */
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static bool __allowed_ingress(const struct net_bridge *br,
 			      struct net_bridge_vlan_group *vg,
 			      struct sk_buff *skb, u16 *vid)
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static bool __allowed_ingress(struct net_bridge_vlan_group *vg, __be16 proto,
 			      struct sk_buff *skb, u16 *vid)
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct br_vlan_stats *stats;
 	struct net_bridge_vlan *v;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	const struct net_bridge_vlan *v;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	bool tagged;
 
 	BR_INPUT_SKB_CB(skb)->vlan_filtered = true;
@@ -416,13 +419,13 @@ static bool __allowed_ingress(struct net_bridge_vlan_group *vg, __be16 proto,
 	 * sent from vlan device on the bridge device, it does not have
 	 * HW accelerated vlan tag.
 	 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	if (unlikely(!skb_vlan_tag_present(skb) &&
 		     skb->protocol == br->vlan_proto)) {
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	if (unlikely(!skb_vlan_tag_present(skb) &&
 		     skb->protocol == proto)) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		skb = skb_vlan_untag(skb);
 		if (unlikely(!skb))
 			return false;
@@ -430,11 +433,11 @@ static bool __allowed_ingress(struct net_bridge_vlan_group *vg, __be16 proto,
 
 	if (!br_vlan_get_tag(skb, vid)) {
 		/* Tagged frame */
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		if (skb->vlan_proto != br->vlan_proto) {
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		if (skb->vlan_proto != proto) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 			/* Protocol-mismatch, empty out vlan_tci for new tag */
 			skb_push(skb, ETH_HLEN);
 			skb = vlan_insert_tag_set_proto(skb, skb->vlan_proto,
@@ -470,11 +473,11 @@ static bool __allowed_ingress(struct net_bridge_vlan_group *vg, __be16 proto,
 		*vid = pvid;
 		if (likely(!tagged))
 			/* Untagged Frame. */
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 			__vlan_hwaccel_put_tag(skb, br->vlan_proto, pvid);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 			__vlan_hwaccel_put_tag(skb, proto, pvid);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		else
 			/* Priority-tagged Frame.
 			 * At this point, We know that skb->vlan_tci had
@@ -483,22 +486,22 @@ static bool __allowed_ingress(struct net_bridge_vlan_group *vg, __be16 proto,
 			 */
 			skb->vlan_tci |= pvid;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		/* if stats are disabled we can avoid the lookup */
 		if (!br->vlan_stats_enabled)
 			return true;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		return true;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	/* Frame had a valid vlan tag.  See if vlan is allowed */
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	v = br_vlan_find(vg, *vid);
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	if (!v || !br_vlan_should_use(v))
 		goto drop;
 
@@ -512,10 +515,10 @@ static bool __allowed_ingress(struct net_bridge_vlan_group *vg, __be16 proto,
 
 	return true;
 
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	if (v && br_vlan_should_use(v))
 		return true;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 drop:
 	kfree_skb(skb);
 	return false;
@@ -533,11 +536,11 @@ bool br_allowed_ingress(const struct net_bridge *br,
 		return true;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	return __allowed_ingress(br, vg, skb, vid);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	return __allowed_ingress(vg, br->vlan_proto, skb, vid);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 }
 
 /* Called under RCU. */
@@ -627,13 +630,13 @@ int br_vlan_add(struct net_bridge *br, u16 vid, u16 flags)
 	if (!vlan)
 		return -ENOMEM;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	vlan->stats = netdev_alloc_pcpu_stats(struct br_vlan_stats);
 	if (!vlan->stats) {
 		kfree(vlan);
 		return -ENOMEM;
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	vlan->vid = vid;
 	vlan->flags = flags | BRIDGE_VLAN_INFO_MASTER;
 	vlan->flags &= ~BRIDGE_VLAN_INFO_PVID;
@@ -641,15 +644,15 @@ int br_vlan_add(struct net_bridge *br, u16 vid, u16 flags)
 	if (flags & BRIDGE_VLAN_INFO_BRENTRY)
 		atomic_set(&vlan->refcnt, 1);
 	ret = __vlan_add(vlan, flags);
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	if (ret) {
 		free_percpu(vlan->stats);
 		kfree(vlan);
 	}
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	if (ret)
 		kfree(vlan);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	return ret;
 }
@@ -725,7 +728,7 @@ void br_recalculate_fwd_mask(struct net_bridge *br)
 
 int __br_vlan_filter_toggle(struct net_bridge *br, unsigned long val)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct switchdev_attr attr = {
 		.orig_dev = br->dev,
 		.id = SWITCHDEV_ATTR_ID_BRIDGE_VLAN_FILTERING,
@@ -733,16 +736,16 @@ int __br_vlan_filter_toggle(struct net_bridge *br, unsigned long val)
 		.u.vlan_filtering = val,
 	};
 	int err;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	if (br->vlan_enabled == val)
 		return 0;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	err = switchdev_port_attr_set(br->dev, &attr);
 	if (err && err != -EOPNOTSUPP)
 		return err;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	br->vlan_enabled = val;
 	br_manage_promisc(br);
@@ -754,7 +757,7 @@ int __br_vlan_filter_toggle(struct net_bridge *br, unsigned long val)
 
 int br_vlan_filter_toggle(struct net_bridge *br, unsigned long val)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	int err;
 
 	if (!rtnl_trylock())
@@ -764,7 +767,7 @@ int br_vlan_filter_toggle(struct net_bridge *br, unsigned long val)
 	rtnl_unlock();
 
 	return err;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	if (!rtnl_trylock())
 		return restart_syscall();
 
@@ -772,7 +775,7 @@ int br_vlan_filter_toggle(struct net_bridge *br, unsigned long val)
 	rtnl_unlock();
 
 	return 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 }
 
 int __br_vlan_set_proto(struct net_bridge *br, __be16 proto)
@@ -840,7 +843,7 @@ int br_vlan_set_proto(struct net_bridge *br, unsigned long val)
 	return err;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 int br_vlan_set_stats(struct net_bridge *br, unsigned long val)
 {
 	switch (val) {
@@ -854,7 +857,7 @@ int br_vlan_set_stats(struct net_bridge *br, unsigned long val)
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 static bool vlan_default_pvid(struct net_bridge_vlan_group *vg, u16 vid)
 {
@@ -1036,14 +1039,14 @@ err_rhtbl:
 
 int nbp_vlan_init(struct net_bridge_port *p)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct switchdev_attr attr = {
 		.orig_dev = p->br->dev,
 		.id = SWITCHDEV_ATTR_ID_BRIDGE_VLAN_FILTERING,
 		.flags = SWITCHDEV_F_SKIP_EOPNOTSUPP,
 		.u.vlan_filtering = p->br->vlan_enabled,
 	};
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct net_bridge_vlan_group *vg;
 	int ret = -ENOMEM;
 
@@ -1051,11 +1054,11 @@ int nbp_vlan_init(struct net_bridge_port *p)
 	if (!vg)
 		goto out;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	ret = switchdev_port_attr_set(p->dev, &attr);
 	if (ret && ret != -EOPNOTSUPP)
 		goto err_vlan_enabled;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	ret = rhashtable_init(&vg->vlan_hash, &br_vlan_rht_params);
 	if (ret)
@@ -1076,9 +1079,9 @@ err_vlan_add:
 	RCU_INIT_POINTER(p->vlgrp, NULL);
 	synchronize_rcu();
 	rhashtable_destroy(&vg->vlan_hash);
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 err_vlan_enabled:
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 err_rhtbl:
 	kfree(vg);
 
@@ -1090,7 +1093,7 @@ err_rhtbl:
  */
 int nbp_vlan_add(struct net_bridge_port *port, u16 vid, u16 flags)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct switchdev_obj_port_vlan v = {
 		.obj.orig_dev = port->dev,
 		.obj.id = SWITCHDEV_OBJ_ID_PORT_VLAN,
@@ -1098,7 +1101,7 @@ int nbp_vlan_add(struct net_bridge_port *port, u16 vid, u16 flags)
 		.vid_begin = vid,
 		.vid_end = vid,
 	};
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct net_bridge_vlan *vlan;
 	int ret;
 
@@ -1106,12 +1109,12 @@ int nbp_vlan_add(struct net_bridge_port *port, u16 vid, u16 flags)
 
 	vlan = br_vlan_find(nbp_vlan_group(port), vid);
 	if (vlan) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		/* Pass the flags to the hardware bridge */
 		ret = switchdev_port_obj_add(port->dev, &v.obj);
 		if (ret && ret != -EOPNOTSUPP)
 			return ret;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		__vlan_add_flags(vlan, flags);
 		return 0;
 	}

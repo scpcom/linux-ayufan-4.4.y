@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -63,4 +66,4 @@ void set_default_node_elig_prio_func_table(struct tm_elig_prio_func_node *func_t
 void set_default_queue_elig_prio_func_table(struct tm_elig_prio_func_queue  *func_table);
 
 #endif   /* TM_SET_LOCAL_DB_DEFAULTS_H */
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

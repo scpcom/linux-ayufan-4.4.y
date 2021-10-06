@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*
  * PCIe host controller driver for Marvell Armada-8K SoCs
  *
@@ -310,4 +313,4 @@ MODULE_DESCRIPTION("Armada 8k PCIe host controller driver");
 MODULE_AUTHOR("Yehuda Yitshak <yehuday@marvell.com>");
 MODULE_AUTHOR("Shadi Ammouri <shadi@marvell.com>");
 MODULE_LICENSE("GPL v2");
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

@@ -156,10 +156,6 @@ struct i801_priv {
 #endif
 	struct platform_device *tco_pdev;
 
-	/*
-	 * If set to true the host controller registers are reserved for
-	 * ACPI AML use. Protected by acpi_lock.
-	 */
 	bool acpi_reserved;
 	struct mutex acpi_lock;
 };
@@ -1101,11 +1097,6 @@ i801_acpi_io_handler(u32 function, acpi_physical_address address, u32 bits,
 	struct pci_dev *pdev = priv->pci_dev;
 	acpi_status status;
 
-	/*
-	 * Once BIOS AML code touches the OpRegion we warn and inhibit any
-	 * further access from the driver itself. This device is now owned
-	 * by the system firmware.
-	 */
 	mutex_lock(&priv->acpi_lock);
 
 	if (!priv->acpi_reserved) {

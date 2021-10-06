@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * tps65010 - driver for tps6501x power management chips
  *
@@ -633,11 +636,11 @@ static int tps65010_probe(struct i2c_client *client,
 		tps->outmask = board->outmask;
 
 		tps->chip.label = client->name;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		tps->chip.parent = &client->dev;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		tps->chip.dev = &client->dev;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		tps->chip.owner = THIS_MODULE;
 
 		tps->chip.set = tps65010_gpio_set;

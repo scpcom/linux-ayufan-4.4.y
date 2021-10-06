@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*
  * ARM GIC pic MSI(-X) support
  * Support for Message Signaled Interrupts for systems that
@@ -230,4 +233,4 @@ err_free_pic:
 }
 
 IRQCHIP_DECLARE(mvebu_pic, "marvell,pic", mvebu_pic_of_init);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

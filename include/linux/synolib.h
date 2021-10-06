@@ -62,12 +62,14 @@ int syno_get_mv_14xx_remap_idx(int origin_idx);
 #define PCI_ADDR_NUM_MAX CONFIG_SYNO_MAX_PCI_SLOT
 extern char gszPciAddrList[PCI_ADDR_NUM_MAX][PCI_ADDR_LEN_MAX];
 extern int gPciAddrNum;
+extern int syno_check_on_option_pci_slot(struct pci_dev *pdev);
 #endif  
 
 #ifdef MY_DEF_HERE
  
 #define M2SATA_START_IDX 300
-extern int gPciDeferStart;
+extern int g_nvc_map_index;
+extern int g_syno_nvc_index_map[SATA_REMAP_MAX];
 void syno_insert_sata_index_remap(unsigned int idx, unsigned int num, unsigned int id_start);
 #endif  
 

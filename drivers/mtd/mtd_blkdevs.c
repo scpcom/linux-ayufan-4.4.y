@@ -72,7 +72,6 @@ static void blktrans_dev_put(struct mtd_blktrans_dev *dev)
 	mutex_unlock(&blktrans_ref_mutex);
 }
 
-
 static int do_blktrans_request(struct mtd_blktrans_ops *tr,
 			       struct mtd_blktrans_dev *dev,
 			       struct request *req)
@@ -409,7 +408,7 @@ int add_mtd_blktrans_dev(struct mtd_blktrans_dev *new)
 		goto error3;
 
 	if (tr->flush)
-		blk_queue_flush(new->rq, REQ_FLUSH);
+		blk_queue_write_cache(new->rq, true, false);
 
 	new->rq->queuedata = new;
 	blk_queue_logical_block_size(new->rq, tr->blksize);
@@ -532,7 +531,6 @@ int register_mtd_blktrans(struct mtd_blktrans_ops *tr)
 	   us over. */
 	if (!blktrans_notifier.list.next)
 		register_mtd_user(&blktrans_notifier);
-
 
 	mutex_lock(&mtd_table_mutex);
 

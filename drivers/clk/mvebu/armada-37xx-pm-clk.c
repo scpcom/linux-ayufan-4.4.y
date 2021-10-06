@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*
  * Marvell Armada3700 CPU Clock PM driver
  *
@@ -534,4 +537,4 @@ static int __init armada3700_clk_pm_init(void)
 }
 subsys_initcall(armada3700_clk_pm_init);
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */

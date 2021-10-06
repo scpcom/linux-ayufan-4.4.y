@@ -1359,7 +1359,7 @@ static void ahci_port_init(struct device *dev, struct ata_port *ap,
 	if (rc)
 		dev_warn(dev, "%s (%d)\n", emsg, rc);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	if (hpriv->comreset_u) {
 		u32 reg;
 
@@ -1877,7 +1877,12 @@ static void ahci_fbs_dec_intr(struct ata_port *ap)
 		dev_err(ap->host->dev, "failed to clear device error\n");
 }
 
+#if defined(MY_DEF_HERE)
+void ahci_error_intr(struct ata_port *ap, u32 irq_stat)
+#else  
 static void ahci_error_intr(struct ata_port *ap, u32 irq_stat)
+#endif  
+
 {
 	struct ahci_host_priv *hpriv = ap->host->private_data;
 	struct ahci_port_priv *pp = ap->private_data;
@@ -1986,6 +1991,9 @@ static void ahci_error_intr(struct ata_port *ap, u32 irq_stat)
 	} else
 		ata_port_abort(ap);
 }
+#if defined(MY_DEF_HERE)
+EXPORT_SYMBOL_GPL(ahci_error_intr);
+#endif  
 
 static void ahci_handle_port_interrupt(struct ata_port *ap,
 				       void __iomem *port_mmio, u32 status)

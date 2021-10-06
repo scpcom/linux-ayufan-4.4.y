@@ -99,6 +99,47 @@ static ssize_t ahci_rtk_transmit_led_message(struct ata_port *ap, u32 state,
 static void ahci_rtk_postreset(struct ata_link *link, unsigned int *class);
 static void ahci_rtk_host_stop(struct ata_host *host);
 
+void ahci_handle_port_interrupt(struct ata_port *ap, void __iomem *port_mmio, u32 status);
+void ahci_error_intr(struct ata_port *ap, u32 irq_stat);
+
+void ahci_rtk_issue_intr(int port_num)
+{
+	struct ata_host *host = dev_get_drvdata(ahci_dev->dev);
+	struct ata_port *ap;
+
+	spin_lock(&host->lock);
+	ap = host->ports[port_num];
+	ahci_error_intr(ap, 0x00400000);
+	spin_unlock(&host->lock);
+}
+EXPORT_SYMBOL_GPL(ahci_rtk_issue_intr);
+
+void ahci_rtk_reset_mac(int port_num)
+{
+	struct ata_host *host = dev_get_drvdata(ahci_dev->dev);
+	void __iomem *port_mmio;
+	struct ata_port *ap;
+
+	spin_lock(&host->lock);
+	ap = host->ports[port_num];
+	port_mmio = ahci_port_base(ap);
+
+	/* set port reg 0x18 to 0x4016*/
+	writel(0x4016, port_mmio + 0x18);
+
+	/* clear port reg 0x2c bit0*/
+	writel(readl(port_mmio + 0x2c) & (~0x1), port_mmio + 0x2c);
+
+	/* set port reg 0x2c bit0*/
+	writel(readl(port_mmio + 0x2c) | 0x1, port_mmio + 0x2c);
+
+	/* clear port reg 0x2c bit0*/
+	writel(readl(port_mmio + 0x2c) & (~0x1), port_mmio + 0x2c);
+
+	spin_unlock(&host->lock);
+}
+EXPORT_SYMBOL_GPL(ahci_rtk_reset_mac);
+
 static void ahci_rtk_host_stop(struct ata_host *host)
 {
 	struct ahci_host_priv *hpriv = host->private_data;
@@ -349,6 +390,23 @@ static void config_sata_phy(unsigned int port)
 	} else if(ahci_dev->tx_driving == 10) { // for DS118
 		printk("[SATA] set tx-driving to L (level 10)\n");
 		if(port==0) {
+			writel_delay(0x94a72011, base + 0xF60);
+			writel_delay(0x94a76011, base + 0xF60);
+			writel_delay(0x94a7a011, base + 0xF60);
+			writel_delay(0x383a2111, base + 0xF60);
+			writel_delay(0x383a6111, base + 0xF60);
+			writel_delay(0x383aa111, base + 0xF60);
+		}
+	} else if(ahci_dev->tx_driving == 9) { // for DS218
+		printk("[SATA] set tx-driving to L (level 9)\n");
+		if(port==0) {
+			writel_delay(0x94a32011, base + 0xF60);
+			writel_delay(0x94a36011, base + 0xF60);
+			writel_delay(0x94a3a011, base + 0xF60);
+			writel_delay(0x385a2111, base + 0xF60);
+			writel_delay(0x385a6111, base + 0xF60);
+			writel_delay(0x385aa111, base + 0xF60);
+		} else if(port==1) {
 			writel_delay(0x94a72011, base + 0xF60);
 			writel_delay(0x94a76011, base + 0xF60);
 			writel_delay(0x94a7a011, base + 0xF60);

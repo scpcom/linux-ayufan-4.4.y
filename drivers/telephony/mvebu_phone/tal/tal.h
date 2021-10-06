@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*******************************************************************************
  * Copyright (C) 2016 Marvell International Ltd.
  *
@@ -132,15 +135,15 @@ struct tal_stats {
 	u32 tx_miss;
 	u32 rx_over;
 	u32 tx_under;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	struct mv_phone_extended_stats tdm_ext_stats;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 #endif
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 };
 
 struct tal_mmp_ops {
@@ -173,4 +176,4 @@ enum tal_status tal_mmp_tx(u8 *buffer, int size);
 enum tal_status tal_write(u8 *buffer, int size);
 
 #endif /* _TAL_H */
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Marvell Orion SPI controller driver
  *
@@ -336,18 +339,18 @@ orion_spi_write_read_8bit(struct spi_device *spi,
 {
 	void __iomem *tx_reg, *rx_reg, *int_reg;
 	struct orion_spi *orion_spi;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	bool cs_single_byte;
 
 	cs_single_byte = spi->mode & SPI_1BYTE_CS;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	orion_spi = spi_master_get_devdata(spi->master);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	if (cs_single_byte)
 		orion_spi_set_cs(spi, 0);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	tx_reg = spi_reg(orion_spi, ORION_SPI_DATA_OUT_REG);
 	rx_reg = spi_reg(orion_spi, ORION_SPI_DATA_IN_REG);
@@ -362,13 +365,13 @@ orion_spi_write_read_8bit(struct spi_device *spi,
 		writel(0, tx_reg);
 
 	if (orion_spi_wait_till_ready(orion_spi) < 0) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		if (cs_single_byte) {
 			orion_spi_set_cs(spi, 1);
 			/* Satisfy some SLIC devices requirements */
 			udelay(4);
 		}
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		dev_err(&spi->dev, "TXS timed out\n");
 		return -1;
 	}
@@ -376,13 +379,13 @@ orion_spi_write_read_8bit(struct spi_device *spi,
 	if (rx_buf && *rx_buf)
 		*(*rx_buf)++ = readl(rx_reg);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	if (cs_single_byte) {
 		orion_spi_set_cs(spi, 1);
 		/* Satisfy some SLIC devices requirements */
 		udelay(4);
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	return 1;
 }
@@ -573,11 +576,11 @@ static int orion_spi_probe(struct platform_device *pdev)
 	}
 
 	/* we support only mode 0, and no options */
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	master->mode_bits = SPI_CPHA | SPI_CPOL | SPI_1BYTE_CS;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	master->mode_bits = SPI_CPHA | SPI_CPOL;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	master->set_cs = orion_spi_set_cs;
 	master->transfer_one = orion_spi_transfer_one;
 	master->num_chipselect = ORION_NUM_CHIPSELECTS;
@@ -640,9 +643,9 @@ static int orion_spi_probe(struct platform_device *pdev)
 	if (status < 0)
 		goto out_rel_pm;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	pm_runtime_get_sync(&pdev->dev);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	pm_runtime_mark_last_busy(&pdev->dev);
 	pm_runtime_put_autosuspend(&pdev->dev);
 

@@ -131,14 +131,18 @@ int notify_change(struct dentry * dentry, struct iattr * attr, struct inode **de
 			return -EPERM;
 	}
 
-	/*
-	 * If utimes(2) and friends are called with times == NULL (or both
-	 * times are UTIME_NOW), then we need to check for write permission
-	 */
 	if (ia_valid & ATTR_TOUCH) {
 		if (IS_IMMUTABLE(inode))
 			return -EPERM;
 
+#ifdef MY_ABC_HERE
+		if (IS_SYNOACL(dentry)) {
+			error = synoacl_op_perm(dentry, MAY_WRITE_ATTR | MAY_WRITE_EXT_ATTR);
+			if (error) {
+				return error;
+			}
+		} else
+#endif  
 		if (!inode_owner_or_capable(inode)) {
 			error = inode_permission(inode, MAY_WRITE);
 			if (error)

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2014 Marvell
  *
@@ -83,12 +86,12 @@ static int __init mvebu_cpu_reset_init(void)
 		 */
 		np = of_find_compatible_node(NULL, NULL,
 					     "marvell,armada-370-xp-pmsu");
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		if (!np)
 			np = of_find_compatible_node(NULL, NULL,
 						"marvell,msys-pmsu");
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		if (np) {
 			pr_warn(FW_WARN "deprecated pmsu binding\n");
 			res_idx = 1;

@@ -24,7 +24,6 @@
  *
  */
 
-
 #include <linux/module.h>
 #include <linux/fs.h>
 #include <linux/types.h>
@@ -38,7 +37,6 @@
 #include <linux/inet.h>
 #include <linux/spinlock.h>
 #include <linux/delay.h>
-
 
 #include "cluster/heartbeat.h"
 #include "cluster/nodemanager.h"
@@ -102,7 +100,6 @@ static int dlm_find_mle(struct dlm_ctxt *dlm,
 static int dlm_do_master_request(struct dlm_lock_resource *res,
 				 struct dlm_master_list_entry *mle, int to);
 
-
 static int dlm_wait_for_lock_mastery(struct dlm_ctxt *dlm,
 				     struct dlm_lock_resource *res,
 				     struct dlm_master_list_entry *mle,
@@ -128,7 +125,6 @@ static int dlm_mark_lockres_migrating(struct dlm_ctxt *dlm,
 static int dlm_pre_master_reco_lockres(struct dlm_ctxt *dlm,
 				       struct dlm_lock_resource *res);
 
-
 int dlm_is_host_down(int errno)
 {
 	switch (errno) {
@@ -153,11 +149,9 @@ int dlm_is_host_down(int errno)
 	return 0;
 }
 
-
 /*
  * MASTER LIST FUNCTIONS
  */
-
 
 /*
  * regarding master list entries and heartbeat callbacks:
@@ -183,14 +177,12 @@ static inline void __dlm_mle_attach_hb_events(struct dlm_ctxt *dlm,
 	list_add_tail(&mle->hb_events, &dlm->mle_hb_events);
 }
 
-
 static inline void __dlm_mle_detach_hb_events(struct dlm_ctxt *dlm,
 					      struct dlm_master_list_entry *mle)
 {
 	if (!list_empty(&mle->hb_events))
 		list_del_init(&mle->hb_events);
 }
-
 
 static inline void dlm_mle_detach_hb_events(struct dlm_ctxt *dlm,
 					    struct dlm_master_list_entry *mle)
@@ -233,7 +225,7 @@ static void __dlm_put_mle(struct dlm_master_list_entry *mle)
 
 	assert_spin_locked(&dlm->spinlock);
 	assert_spin_locked(&dlm->master_lock);
-	if (!atomic_read(&mle->mle_refs.refcount)) {
+	if (!kref_read(&mle->mle_refs)) {
 		/* this may or may not crash, but who cares.
 		 * it's a BUG. */
 		mlog(ML_ERROR, "bad mle: %p\n", mle);
@@ -242,7 +234,6 @@ static void __dlm_put_mle(struct dlm_master_list_entry *mle)
 	} else
 		kref_put(&mle->mle_refs, dlm_mle_release);
 }
-
 
 /* must not have any spinlocks coming in */
 static void dlm_put_mle(struct dlm_master_list_entry *mle)
@@ -400,7 +391,6 @@ static void dlm_mle_node_up(struct dlm_ctxt *dlm,
 	spin_unlock(&mle->spinlock);
 }
 
-
 int dlm_init_mle_cache(void)
 {
 	dlm_mle_cache = kmem_cache_create("o2dlm_mle",
@@ -444,7 +434,6 @@ static void dlm_mle_release(struct kref *kref)
 	 * if this is bad, we can move this to a freelist. */
 	kmem_cache_free(dlm_mle_cache, mle);
 }
-
 
 /*
  * LOCK RESOURCE FUNCTIONS
@@ -1017,7 +1006,6 @@ leave:
 	return res;
 }
 
-
 #define DLM_MASTERY_TIMEOUT_MS   5000
 
 static int dlm_wait_for_lock_mastery(struct dlm_ctxt *dlm,
@@ -1124,9 +1112,9 @@ recheck:
 		unsigned long timeo = msecs_to_jiffies(DLM_MASTERY_TIMEOUT_MS);
 
 		/*
-		if (atomic_read(&mle->mle_refs.refcount) < 2)
+		if (kref_read(&mle->mle_refs) < 2)
 			mlog(ML_ERROR, "mle (%p) refs=%d, name=%.*s\n", mle,
-			atomic_read(&mle->mle_refs.refcount),
+			kref_read(&mle->mle_refs),
 			res->lockname.len, res->lockname.name);
 		*/
 		atomic_set(&mle->woken, 0);
@@ -1231,7 +1219,6 @@ static int dlm_bitmap_diff_iter_next(struct dlm_bitmap_diff_iter *iter,
 	return bit;
 }
 
-
 static int dlm_restart_lock_mastery(struct dlm_ctxt *dlm,
 				    struct dlm_lock_resource *res,
 				    struct dlm_master_list_entry *mle,
@@ -1320,7 +1307,6 @@ static int dlm_restart_lock_mastery(struct dlm_ctxt *dlm,
 	}
 	return ret;
 }
-
 
 /*
  * DLM_MASTER_REQUEST_MSG
@@ -1679,7 +1665,6 @@ send_response:
  * DLM_ASSERT_MASTER_MSG
  */
 
-
 /*
  * NOTE: this can be used for debugging
  * can periodically run all locks owned by this node
@@ -1988,7 +1973,7 @@ ok:
 		 * on this mle. */
 		spin_lock(&dlm->master_lock);
 
-		rr = atomic_read(&mle->mle_refs.refcount);
+		rr = kref_read(&mle->mle_refs);
 		if (mle->inuse > 0) {
 			if (extra_ref && rr < 3)
 				err = 1;
@@ -2092,7 +2077,6 @@ int dlm_dispatch_assert_master(struct dlm_ctxt *dlm,
 	item = kzalloc(sizeof(*item), GFP_ATOMIC);
 	if (!item)
 		return -ENOMEM;
-
 
 	/* queue up work for dlm_assert_master_worker */
 	dlm_init_work_item(dlm, item, dlm_assert_master_worker, NULL);
@@ -2472,7 +2456,6 @@ static int dlm_is_lockres_migrateable(struct dlm_ctxt *dlm,
  * DLM_MIGRATE_LOCKRES
  */
 
-
 static int dlm_migrate_lockres(struct dlm_ctxt *dlm,
 			       struct dlm_lock_resource *res, u8 target)
 {
@@ -2610,7 +2593,6 @@ fail:
 	 * going on, some nodes could potentially see the target as the
 	 * master, so it is important that my recovery finds the migration
 	 * mle and sets the master to UNKNOWN. */
-
 
 	/* wait for new node to assert master */
 	while (1) {
@@ -2762,7 +2744,6 @@ static int dlm_lockres_is_dirty(struct dlm_ctxt *dlm,
 	spin_unlock(&res->spinlock);
 	return ret;
 }
-
 
 static int dlm_mark_lockres_migrating(struct dlm_ctxt *dlm,
 				       struct dlm_lock_resource *res,
@@ -3024,7 +3005,6 @@ static int dlm_do_migrate_request(struct dlm_ctxt *dlm,
 	mlog(0, "returning ret=%d\n", ret);
 	return ret;
 }
-
 
 /* if there is an existing mle for this lockres, we now know who the master is.
  * (the one who sent us *this* message) we can clear it up right away.

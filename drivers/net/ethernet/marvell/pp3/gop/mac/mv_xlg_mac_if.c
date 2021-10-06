@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -427,4 +430,4 @@ void mv_xlg_2_gig_mac_cfg(int mac_num)
 		(0 << MV_XLG_MAC_CTRL3_MACMODESELECT_OFFS));
 	mv_gop_reg_write(MV_XLG_PORT_MAC_CTRL3_REG(mac_num), reg_val);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

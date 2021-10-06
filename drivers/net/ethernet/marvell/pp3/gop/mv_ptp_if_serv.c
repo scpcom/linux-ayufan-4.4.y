@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*
 * ***************************************************************************
 * Copyright (C) 2016 Marvell International Ltd.
@@ -414,4 +417,4 @@ void mv_pp3_tai_reg_dump(void)
 	mv_pp3_ptp_reg_print("TIME_UPDATE_CNTR_MSB", MV_TAI_TIME_UPDATE_CNTR_MSB_REG);
 	mv_pp3_ptp_reg_print("INCOMING_CLOCKIN_CNTING_CFG_HIGH", MV_TAI_INCOMING_CLOCKIN_CNTING_CFG_HIGH_REG);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

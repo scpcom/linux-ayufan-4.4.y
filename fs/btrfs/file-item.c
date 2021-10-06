@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2007 Oracle.  All rights reserved.
  *
@@ -102,7 +105,11 @@ btrfs_lookup_csum(struct btrfs_trans_handle *trans,
 	file_key.objectid = BTRFS_EXTENT_CSUM_OBJECTID;
 	file_key.offset = bytenr;
 	file_key.type = BTRFS_EXTENT_CSUM_KEY;
+#ifdef MY_ABC_HERE
+	ret = btrfs_search_slot(trans, root, &file_key, path, cow ? csum_size : 0, cow);
+#else
 	ret = btrfs_search_slot(trans, root, &file_key, path, 0, cow);
+#endif /* MY_ABC_HERE */
 	if (ret < 0)
 		goto fail;
 	leaf = path->nodes[0];
@@ -618,7 +625,33 @@ int btrfs_del_csums(struct btrfs_trans_handle *trans,
 
 		/* delete the entire item, it is inside our range */
 		if (key.offset >= bytenr && csum_end <= end_byte) {
-			ret = btrfs_del_item(trans, root, path);
+			int del_nr = 1;
+
+			/*
+			 * Check how many csum items preceding this one in this
+			 * leaf correspond to our range and then delete them all
+			 * at once.
+			 */
+			if (key.offset > bytenr && path->slots[0] > 0) {
+				int slot = path->slots[0] - 1;
+
+				while (slot >= 0) {
+					struct btrfs_key pk;
+
+					btrfs_item_key_to_cpu(leaf, &pk, slot);
+					if (pk.offset < bytenr ||
+					    pk.type != BTRFS_EXTENT_CSUM_KEY ||
+					    pk.objectid !=
+					    BTRFS_EXTENT_CSUM_OBJECTID)
+						break;
+					path->slots[0] = slot;
+					del_nr++;
+					key.offset = pk.offset;
+					slot--;
+				}
+			}
+			ret = btrfs_del_items(trans, root, path,
+					      path->slots[0], del_nr);
 			if (ret)
 				goto out;
 			if (key.offset == bytenr)
@@ -764,6 +797,8 @@ again:
 	 * at this point, we know the tree has an item, but it isn't big
 	 * enough yet to put our csum in.  Grow it
 	 */
+#ifdef MY_ABC_HERE
+#else
 	btrfs_release_path(path);
 	ret = btrfs_search_slot(trans, root, &file_key, path,
 				csum_size, 1);
@@ -775,6 +810,7 @@ again:
 			goto insert;
 		path->slots[0]--;
 	}
+#endif /* MY_ABC_HERE */
 
 	leaf = path->nodes[0];
 	btrfs_item_key_to_cpu(leaf, &found_key, path->slots[0]);

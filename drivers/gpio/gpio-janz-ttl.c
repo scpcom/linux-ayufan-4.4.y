@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Janz MODULbus VMOD-TTL GPIO Driver
  *
@@ -59,11 +62,11 @@ struct ttl_module {
 
 static int ttl_get_value(struct gpio_chip *gpio, unsigned offset)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct ttl_module *mod = dev_get_drvdata(gpio->parent);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct ttl_module *mod = dev_get_drvdata(gpio->dev);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	u8 *shadow;
 	int ret;
 
@@ -85,11 +88,11 @@ static int ttl_get_value(struct gpio_chip *gpio, unsigned offset)
 
 static void ttl_set_value(struct gpio_chip *gpio, unsigned offset, int value)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct ttl_module *mod = dev_get_drvdata(gpio->parent);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct ttl_module *mod = dev_get_drvdata(gpio->dev);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	void __iomem *port;
 	u8 *shadow;
 
@@ -180,11 +183,11 @@ static int ttl_probe(struct platform_device *pdev)
 
 	/* Initialize the GPIO data structures */
 	gpio = &mod->gpio;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	gpio->parent = &pdev->dev;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	gpio->dev = &pdev->dev;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	gpio->label = pdev->name;
 	gpio->get = ttl_get_value;
 	gpio->set = ttl_set_value;

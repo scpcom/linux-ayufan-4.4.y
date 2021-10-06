@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2006-2007 PA Semi, Inc
  *
@@ -41,11 +44,11 @@ static void __iomem *gpio_regs;
 struct gpio_priv {
 	int mdc_pin;
 	int mdio_pin;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	int mdio_irqs[PHY_MAX_ADDR];
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 };
 
 #define MDC_PIN(bus)	(((struct gpio_priv *)bus->priv)->mdc_pin)
@@ -248,11 +251,11 @@ static int gpio_mdio_probe(struct platform_device *ofdev)
 	snprintf(new_bus->id, MII_BUS_ID_SIZE, "%x", *prop);
 	new_bus->priv = priv;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	new_bus->irq = priv->mdio_irqs;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	prop = of_get_property(np, "mdc-pin", NULL);
 	priv->mdc_pin = *prop;

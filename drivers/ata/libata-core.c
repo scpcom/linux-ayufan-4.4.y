@@ -63,6 +63,10 @@ static unsigned int ata_dev_set_xfermode(struct ata_device *dev);
 static void ata_dev_xfermask(struct ata_device *dev);
 static unsigned long ata_dev_blacklisted(const struct ata_device *dev);
 
+#if defined(MY_DEF_HERE)
+extern void ahci_rtk_issue_intr(int port_num);
+extern void ahci_rtk_reset_mac(int port_num);
+#endif  
 atomic_t ata_print_id = ATOMIC_INIT(0);
 
 struct ata_force_param {
@@ -198,6 +202,47 @@ static int __init early_hdd_enable(char *p)
 	return 1;
 }
 __setup("syno_hdd_enable=", early_hdd_enable);
+
+#if defined(MY_DEF_HERE)
+static void rtk_hdd_pwren_reset(int index, int value) {
+	int iLastGPIOstat = SYNO_GPIO_READ(HDD_ENABLE_PIN(index));
+
+	SYNO_GPIO_WRITE(HDD_ENABLE_PIN(index), value);
+
+	if(1 == iLastGPIOstat && 0 == value) {
+		if (syno_is_hw_version(HW_DS418j) || \
+				syno_is_hw_version(HW_DS418)) {
+			if (3 == index) {
+				msleep(200);
+				ahci_rtk_reset_mac(0);
+				ahci_rtk_issue_intr(0);
+			} else if (4 == index) {
+				msleep(200);
+				ahci_rtk_reset_mac(1);
+				ahci_rtk_issue_intr(1);
+			}
+		} else if (syno_is_hw_version(HW_DS218play) || \
+                syno_is_hw_version(HW_DS218)) {
+			if (1 == index) {
+				msleep(200);
+				ahci_rtk_reset_mac(0);
+				ahci_rtk_issue_intr(0);
+			} else if (2 == index) {
+				msleep(200);
+				ahci_rtk_reset_mac(1);
+				ahci_rtk_issue_intr(1);
+			}
+		} else if (syno_is_hw_version(HW_DS118)) {
+			if (1 == index) {
+				msleep(200);
+				ahci_rtk_reset_mac(0);
+				ahci_rtk_issue_intr(0);
+			}
+		}
+	}
+}
+#endif  
+
 int SYNO_CTRL_HDD_POWERON(int index, int value)
 {
 	if (!HAVE_HDD_ENABLE(index)) {  
@@ -205,8 +250,11 @@ int SYNO_CTRL_HDD_POWERON(int index, int value)
 		WARN_ON(1);
 		return -EINVAL;
 	}
-
+#if defined(MY_DEF_HERE)
+	rtk_hdd_pwren_reset(index, value);
+#else  
 	SYNO_GPIO_WRITE(HDD_ENABLE_PIN(index), value);
+#endif  
 
 	return 0;
 }
@@ -1667,7 +1715,33 @@ static inline u8 ata_dev_knobble(struct ata_device *dev)
 
 	return ((ap->cbl == ATA_CBL_SATA) && (!ata_id_is_sata(dev->id)));
 }
+#ifdef MY_ABC_HERE
+static int syno_ata_dev_ncq_compat(struct ata_device *dev) {
+	struct ata_port *ap = NULL;
+	struct pci_dev *pdev = NULL;
+	u16 vendor = 0;
+	u16 device = 0;
+	int ret = 1;
 
+	if (dev && dev->link) {
+		ap = dev->link->ap;
+	}
+
+	if (ap && ap->host) {
+		pdev = to_pci_dev(ap->host->dev);
+		vendor = sata_pmp_gscr_vendor(ap->link.device[0].gscr);
+		device = sata_pmp_gscr_devid(ap->link.device[0].gscr);
+	}
+
+	if (pdev && ((pdev->vendor == 0x1b4b && pdev->device == 0x9170)
+		|| (pdev->vendor == 0x1b4b && pdev->device == 0x9235))
+		&& syno_pm_is_3xxx(vendor, device)) {
+		ret = 0;
+	}
+
+	return ret;
+}
+#endif  
 static int ata_dev_config_ncq(struct ata_device *dev,
 			       char *desc, size_t desc_sz)
 {
@@ -1685,6 +1759,12 @@ static int ata_dev_config_ncq(struct ata_device *dev,
 		return 0;
 	}
 	if (ap->flags & ATA_FLAG_NCQ) {
+#ifdef MY_ABC_HERE
+		if(!syno_ata_dev_ncq_compat(dev)) {
+			snprintf(desc, desc_sz, "NCQ (not used)");
+			return 0;
+		}
+#endif  
 		hdepth = min(ap->scsi_host->can_queue, ATA_MAX_QUEUE - 1);
 		dev->flags |= ATA_DFLAG_NCQ;
 	}
@@ -3218,6 +3298,8 @@ static const struct ata_blacklist_entry ata_device_blacklist [] = {
 	{ "Slimtype DVD A  DS8A9SH", NULL,	ATA_HORKAGE_MAX_SEC_LBA48 },
 
 	{ "ST380013AS",		"3.20",		ATA_HORKAGE_MAX_SEC_1024 },
+
+	{ "LITEON CX1-JB*-HP",	NULL,		ATA_HORKAGE_MAX_SEC_1024 },
 
 	{ "WDC WD740ADFD-00",	NULL,		ATA_HORKAGE_NONCQ },
 	{ "WDC WD740ADFD-00NLR1", NULL,		ATA_HORKAGE_NONCQ, },

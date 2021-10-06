@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
  /***************************************************************************
  *
  * Copyright (C) 2007,2008  SMSC
@@ -78,11 +81,11 @@ struct smsc9420_pdata {
 
 	struct phy_device *phy_dev;
 	struct mii_bus *mii_bus;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	int phy_irq[PHY_MAX_ADDR];
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	int last_duplex;
 	int last_carrier;
 };
@@ -320,12 +323,12 @@ smsc9420_ethtool_getregs(struct net_device *dev, struct ethtool_regs *regs,
 		return;
 
 	for (i = 0; i <= 31; i++)
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		data[j++] = smsc9420_mii_read(phy_dev->mdio.bus,
 					      phy_dev->mdio.addr, i);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		data[j++] = smsc9420_mii_read(phy_dev->bus, phy_dev->addr, i);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 }
 
 static void smsc9420_eeprom_enable_access(struct smsc9420_pdata *pd)
@@ -1167,48 +1170,48 @@ static int smsc9420_mii_probe(struct net_device *dev)
 	BUG_ON(pd->phy_dev);
 
 	/* Device only supports internal PHY at address 1 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	phydev = mdiobus_get_phy(pd->mii_bus, 1);
 	if (!phydev) {
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	if (!pd->mii_bus->phy_map[1]) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		netdev_err(dev, "no PHY found at address 1\n");
 		return -ENODEV;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	phydev = phy_connect(dev, phydev_name(phydev),
 			     smsc9420_phy_adjust_link, PHY_INTERFACE_MODE_MII);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	phydev = pd->mii_bus->phy_map[1];
 	netif_info(pd, probe, pd->dev, "PHY addr %d, phy_id 0x%08X\n",
 		   phydev->addr, phydev->phy_id);
 
 	phydev = phy_connect(dev, dev_name(&phydev->dev),
 			     smsc9420_phy_adjust_link, PHY_INTERFACE_MODE_MII);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	if (IS_ERR(phydev)) {
 		netdev_err(dev, "Could not attach to PHY\n");
 		return PTR_ERR(phydev);
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	netdev_info(dev, "attached PHY driver [%s] (mii_bus:phy_addr=%s, irq=%d)\n",
 		    phydev->drv->name, dev_name(&phydev->dev), phydev->irq);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	/* mask with MAC supported features */
 	phydev->supported &= (PHY_BASIC_FEATURES | SUPPORTED_Pause |
 			      SUPPORTED_Asym_Pause);
 	phydev->advertising = phydev->supported;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	phy_attached_info(phydev);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	pd->phy_dev = phydev;
 	pd->last_duplex = -1;
@@ -1220,11 +1223,11 @@ static int smsc9420_mii_probe(struct net_device *dev)
 static int smsc9420_mii_init(struct net_device *dev)
 {
 	struct smsc9420_pdata *pd = netdev_priv(dev);
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	int err = -ENXIO;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	int err = -ENXIO, i;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	pd->mii_bus = mdiobus_alloc();
 	if (!pd->mii_bus) {
@@ -1237,13 +1240,13 @@ static int smsc9420_mii_init(struct net_device *dev)
 	pd->mii_bus->priv = pd;
 	pd->mii_bus->read = smsc9420_mii_read;
 	pd->mii_bus->write = smsc9420_mii_write;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	pd->mii_bus->irq = pd->phy_irq;
 	for (i = 0; i < PHY_MAX_ADDR; ++i)
 		pd->mii_bus->irq[i] = PHY_POLL;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	/* Mask all PHYs except ID 1 (internal) */
 	pd->mii_bus->phy_mask = ~(1 << 1);

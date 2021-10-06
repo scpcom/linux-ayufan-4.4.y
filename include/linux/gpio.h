@@ -38,6 +38,10 @@ extern u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite);
 #endif  
 
 #if defined(MY_DEF_HERE)
+extern void syno_rtd_set_gpio_input(int pin);
+#endif  
+
+#if defined(MY_DEF_HERE)
 extern int SYNO_GPIO_READ(int pin);
 extern void SYNO_GPIO_WRITE(int pin, int pValue);
 #endif  

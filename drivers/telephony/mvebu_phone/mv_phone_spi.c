@@ -1,4 +1,7 @@
-#if defined (CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined (MY_DEF_HERE)
 /*******************************************************************************
  * Copyright (C) 2016 Marvell International Ltd.
  *
@@ -102,36 +105,36 @@
 
 #undef MVEBU_PHONE_SPI_DEBUG
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 #define MAX_SLIC_DEVICES 32
 
 /* Global array of pointers to SLIC SPI devices */
 struct spi_device *slic_devs[MAX_SLIC_DEVICES];
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 struct spi_device *slic_spi;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
 /* Telephony register read via SPI interface. */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 void mv_phone_spi_read(u16 dev_id, u8 *cmd_buff, u8 cmd_size,
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 void mv_phone_spi_read(u16 line_id, u8 *cmd_buff, u8 cmd_size,
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 		       u8 *data_buff, u8 data_size, u32 spi_type)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	struct spi_device *slic_spi = slic_devs[dev_id];
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	int err;
 
 #ifdef MVEBU_PHONE_SPI_DEBUG
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	pr_info("%s():line(%d) Spi ID=%d dev_id=%d Spi CS=%d Spi type=%d\n",
 		__func__, __LINE__, slic_spi->master->bus_num, dev_id,
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	pr_info("%s():line(%d) Spi ID=%d line_id=%d Spi CS=%d Spi type=%d\n",
 		__func__, __LINE__, slic_spi->master->bus_num, line_id,
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 		slic_spi->chip_select, spi_type);
 #endif
 
@@ -147,31 +150,31 @@ void mv_phone_spi_read(u16 line_id, u8 *cmd_buff, u8 cmd_size,
 }
 
 /* Telephony register write via SPI interface. */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 void mv_phone_spi_write(u16 dev_id, u8 *cmd_buff, u8 cmd_size,
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 void mv_phone_spi_write(u16 line_id, u8 *cmd_buff, u8 cmd_size,
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 			u8 *data_buff, u8 data_size, u32 spi_type)
 {
 	int err;
 	struct spi_message m;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	struct spi_device *slic_spi = slic_devs[dev_id];
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	struct spi_transfer t[2] = { { .tx_buf = (const void *)cmd_buff,
 				       .len = cmd_size, },
 				     { .tx_buf = (const void *)data_buff,
 				       .len = data_size, }, };
 
 #ifdef MVEBU_PHONE_SPI_DEBUG
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	pr_info("%s():line(%d) Spi ID=%d dev_id=%d Spi CS=%d Spi type=%d\n",
 		__func__, __LINE__, slic_spi->master->bus_num, dev_id,
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	pr_info("%s():line(%d) Spi ID=%d line_id=%d Spi CS=%d Spi type=%d\n",
 		__func__, __LINE__, slic_spi->master->bus_num, line_id,
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 		slic_spi->chip_select, spi_type);
 	pr_info("CMD = 0x%x, cmd_size = 0x%x, DATA = 0x%x, data_size = 0x%x\n",
 		*cmd_buff, cmd_size, *data_buff, data_size);
@@ -189,7 +192,7 @@ void mv_phone_spi_write(u16 line_id, u8 *cmd_buff, u8 cmd_size,
 static int mvebu_phone_spi_probe(struct spi_device *spi)
 {
 	int err;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	u32 dev_id;
 
 	/* Obtain SLIC ID */
@@ -214,7 +217,7 @@ static int mvebu_phone_spi_probe(struct spi_device *spi)
 	}
 
 	slic_devs[dev_id] = spi;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
 	err = spi_setup(spi);
 	if (err) {
@@ -222,15 +225,15 @@ static int mvebu_phone_spi_probe(struct spi_device *spi)
 		return err;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	dev_info(&spi->dev, "registered slic spi device %d at bus #%d, CS #%d",
 		 dev_id, spi->master->bus_num, spi->chip_select);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	slic_spi = spi;
 
 	dev_info(&spi->dev, "registered slic spi device at bus #%d, CS #%d",
 		 spi->master->bus_num, spi->chip_select);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
 	return 0;
 }
@@ -260,4 +263,4 @@ module_spi_driver(mvebu_phone_spi_driver);
 
 MODULE_DESCRIPTION("Marvell Telephony SPI Driver");
 MODULE_AUTHOR("Marcin Wojtas <mw@semihalf.com>");
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

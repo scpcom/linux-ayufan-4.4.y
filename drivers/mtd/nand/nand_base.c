@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Overview:
  *   This is the generic MTD driver for NAND flash devices. It should be
@@ -3986,10 +3989,10 @@ int nand_scan_ident(struct mtd_info *mtd, int maxchips,
 	int ret;
 
 	if (chip->flash_node) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		/* MTD can automatically handle DT partitions, etc. */
 		mtd_set_of_node(mtd, chip->flash_node);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 		ret = nand_dt_init(mtd, chip, chip->flash_node);
 		if (ret)

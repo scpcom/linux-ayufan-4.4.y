@@ -2667,7 +2667,7 @@ static void init_loopback(struct net_device *dev)
 
 			if (sp_ifa->rt) {
 				 
-				if (sp_ifa->rt->dst.obsolete > 0) {
+				if (!atomic_read(&sp_ifa->rt->rt6i_ref)) {
 					ip6_rt_put(sp_ifa->rt);
 					sp_ifa->rt = NULL;
 				} else {

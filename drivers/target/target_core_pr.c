@@ -306,7 +306,6 @@ out:
 	return ret;
 }
 
-
 /*
  * Begin SPC-3/SPC-4 Persistent Reservations emulation support
  *
@@ -787,7 +786,7 @@ static struct t10_pr_registration *__core_scsi3_alloc_registration(
 			 * __core_scsi3_add_registration()
 			 */
 			dest_lun = rcu_dereference_check(deve_tmp->se_lun,
-				atomic_read(&deve_tmp->pr_kref.refcount) != 0);
+				kref_read(&deve_tmp->pr_kref) != 0);
 
 			pr_reg_atp = __core_scsi3_do_alloc_registration(dev,
 						nacl_tmp, dest_lun, deve_tmp,
@@ -1463,7 +1462,7 @@ static int core_scsi3_lunacl_depend_item(struct se_dev_entry *se_deve)
 	 * For nacl->dynamic_node_acl=1
 	 */
 	lun_acl = rcu_dereference_check(se_deve->se_lun_acl,
-				atomic_read(&se_deve->pr_kref.refcount) != 0);
+				kref_read(&se_deve->pr_kref) != 0);
 	if (!lun_acl)
 		return 0;
 
@@ -1482,7 +1481,7 @@ static void core_scsi3_lunacl_undepend_item(struct se_dev_entry *se_deve)
 	 * For nacl->dynamic_node_acl=1
 	 */
 	lun_acl = rcu_dereference_check(se_deve->se_lun_acl,
-				atomic_read(&se_deve->pr_kref.refcount) != 0);
+				kref_read(&se_deve->pr_kref) != 0);
 	if (!lun_acl) {
 		kref_put(&se_deve->pr_kref, target_pr_kref_release);
 		return;
@@ -1765,7 +1764,7 @@ core_scsi3_decode_spec_i_port(
 		 * 2nd loop which will never fail.
 		 */
 		dest_lun = rcu_dereference_check(dest_se_deve->se_lun,
-				atomic_read(&dest_se_deve->pr_kref.refcount) != 0);
+				kref_read(&dest_se_deve->pr_kref) != 0);
 
 		dest_pr_reg = __core_scsi3_alloc_registration(cmd->se_dev,
 					dest_node_acl, dest_lun, dest_se_deve,
@@ -3151,7 +3150,6 @@ core_scsi3_emulate_pro_preempt(struct se_cmd *cmd, int type, int scope,
 	}
 }
 
-
 static sense_reason_t
 core_scsi3_emulate_pro_register_and_move(struct se_cmd *cmd, u64 res_key,
 		u64 sa_res_key, int aptpl, int unreg)
@@ -3472,7 +3470,7 @@ after_iport_check:
 					iport_ptr);
 	if (!dest_pr_reg) {
 		struct se_lun *dest_lun = rcu_dereference_check(dest_se_deve->se_lun,
-				atomic_read(&dest_se_deve->pr_kref.refcount) != 0);
+				kref_read(&dest_se_deve->pr_kref) != 0);
 
 		spin_unlock(&dev->dev_reservation_lock);
 		if (core_scsi3_alloc_registration(cmd->se_dev, dest_node_acl,

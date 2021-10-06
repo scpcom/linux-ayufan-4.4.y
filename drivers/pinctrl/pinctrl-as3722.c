@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * ams AS3722 pin control and GPIO driver.
  *
@@ -582,11 +585,11 @@ static int as3722_pinctrl_probe(struct platform_device *pdev)
 	}
 
 	as_pci->gpio_chip = as3722_gpio_chip;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	as_pci->gpio_chip.parent = &pdev->dev;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	as_pci->gpio_chip.dev = &pdev->dev;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	as_pci->gpio_chip.of_node = pdev->dev.parent->of_node;
 	ret = gpiochip_add(&as_pci->gpio_chip);
 	if (ret < 0) {

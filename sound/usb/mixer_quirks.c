@@ -1765,9 +1765,7 @@ static void snd_dragonfly_quirk_db_scale(struct usb_mixer_interface *mixer,
 		kctl->vd[0].access &= ~SNDRV_CTL_ELEM_ACCESS_TLV_CALLBACK;
 
 	} else if (cval->min == 0 && cval->max <= 1000) {
-		/* Some other clearly broken DragonFly variant.
-		 * At least a 0..53 variant (hw v1.0) exists.
-		 */
+		 
 		usb_audio_info(mixer->chip, "ignoring too narrow dB range on a DragonFly device");
 		kctl->vd[0].access &= ~SNDRV_CTL_ELEM_ACCESS_TLV_CALLBACK;
 	}

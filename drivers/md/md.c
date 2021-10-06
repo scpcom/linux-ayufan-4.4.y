@@ -5021,7 +5021,7 @@ static int md_alloc(dev_t dev, char *name)
 	disk->fops = &md_fops;
 	disk->private_data = mddev;
 	disk->queue = mddev->queue;
-	blk_queue_flush(mddev->queue, REQ_FLUSH | REQ_FUA);
+	blk_queue_write_cache(mddev->queue, true, true);
 	 
 	disk->flags |= GENHD_FL_EXT_DEVT;
 	mddev->gendisk = disk;
@@ -7140,6 +7140,11 @@ void md_error(struct mddev *mddev, struct md_rdev *rdev)
 	sysfs_notify_dirent_safe(rdev->sysfs_state);
 	set_bit(MD_RECOVERY_INTR, &mddev->recovery);
 	set_bit(MD_RECOVERY_NEEDED, &mddev->recovery);
+#ifdef MY_ABC_HERE
+	if (test_bit(MD_RECOVERY_RESHAPE, &mddev->recovery)) {
+		mddev->reshape_interrupt = 1;
+	}
+#endif  
 	md_wakeup_thread(mddev->thread);
 	if (mddev->event_work.func)
 		queue_work(md_misc_wq, &mddev->event_work);
@@ -7513,7 +7518,7 @@ int md_setup_cluster(struct mddev *mddev, int nodes)
 	if (!md_cluster_ops)
 		request_module("md-cluster");
 	spin_lock(&pers_lock);
-	/* ensure module won't be unloaded */
+	 
 	if (!md_cluster_ops || !try_module_get(md_cluster_mod)) {
 		pr_err("can't find md-cluster module or get it's reference.\n");
 		spin_unlock(&pers_lock);
@@ -7930,6 +7935,11 @@ void md_do_sync(struct md_thread *thread)
 					   !atomic_read(&mddev->recovery_active));
 			}
 		}
+#ifdef MY_ABC_HERE
+		if (mddev->nodev_and_crashed) {
+			j = max_sectors;
+		}
+#endif  
 	}
 #ifdef MY_ABC_HERE
 	printk(KERN_WARNING "md: %s: %s %s.\n",mdname(mddev), desc,
@@ -9045,7 +9055,7 @@ blDenyDisks(const struct block_device *pBDev)
 		goto END;
 	}
 	 
-#ifdef MY_ABC_HERE
+#if defined(MY_ABC_HERE)
 	 
 #else
 	if (!(pBDev->bd_disk->systemDisk)) {
@@ -9250,6 +9260,11 @@ static void syno_md_error(struct mddev *mddev, struct md_rdev *rdev)
 	sysfs_notify_dirent_safe(rdev->sysfs_state);
 	set_bit(MD_RECOVERY_INTR, &mddev->recovery);
 	set_bit(MD_RECOVERY_NEEDED, &mddev->recovery);
+#ifdef MY_ABC_HERE
+	if (test_bit(MD_RECOVERY_RESHAPE, &mddev->recovery)) {
+		mddev->reshape_interrupt = 1;
+	}
+#endif  
 	md_wakeup_thread(mddev->thread);
 	if (mddev->event_work.func)
 		queue_work(md_misc_wq, &mddev->event_work);

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Aeroflex Gaisler GRETH 10/100/1G Ethernet MAC.
  *
@@ -1334,14 +1337,14 @@ static int greth_mdio_init(struct greth_private *greth)
 	greth->mdio->write = greth_mdio_write;
 	greth->mdio->priv = greth;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	greth->mdio->irq = greth->mdio_irqs;
 
 	for (phy = 0; phy < PHY_MAX_ADDR; phy++)
 		greth->mdio->irq[phy] = PHY_POLL;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	ret = mdiobus_register(greth->mdio);
 	if (ret) {

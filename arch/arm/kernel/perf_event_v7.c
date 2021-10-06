@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * ARMv7 Cortex-A8 and Cortex-A9 Performance Events handling code.
  *
@@ -600,12 +603,12 @@ static const unsigned scorpion_perf_cache_map[PERF_COUNT_HW_CACHE_MAX]
 #define	ARMV7_EXCLUDE_USER	(1 << 30)
 #define	ARMV7_INCLUDE_HYP	(1 << 27)
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 /*
  * Secure debug enable reg
  */
 #define ARMV7_SDER_SUNIDEN	BIT(1) /* Permit non-invasive debug */
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 static inline u32 armv7_pmnc_read(void)
 {
@@ -989,7 +992,7 @@ static int armv7pmu_set_event_filter(struct hw_perf_event *event,
 static void armv7pmu_reset(void *info)
 {
 	struct arm_pmu *cpu_pmu = (struct arm_pmu *)info;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	u32 idx, nb_cnt = cpu_pmu->num_events, val;
 
 	if (cpu_pmu->secure_access) {
@@ -997,9 +1000,9 @@ static void armv7pmu_reset(void *info)
 		val |= ARMV7_SDER_SUNIDEN;
 		asm volatile("mcr p15, 0, %0, c1, c1, 1" : : "r" (val));
 	}
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	u32 idx, nb_cnt = cpu_pmu->num_events;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	/* The counter and interrupt enable registers are unknown at reset. */
 	for (idx = ARMV7_IDX_CYCLE_COUNTER; idx < nb_cnt; ++idx) {

@@ -1522,18 +1522,11 @@ static noinline int find_dir_range(struct btrfs_root *root,
 next:
 	 
 	nritems = btrfs_header_nritems(path->nodes[0]);
-#ifdef MY_ABC_HERE
 	path->slots[0]++;
-#endif  
 	if (path->slots[0] >= nritems) {
 		ret = btrfs_next_leaf(root, path);
 		if (ret)
 			goto out;
-#ifdef MY_ABC_HERE
-#else
-	} else {
-		path->slots[0]++;
-#endif  
 	}
 
 	btrfs_item_key_to_cpu(path->nodes[0], &key, path->slots[0]);
@@ -2504,7 +2497,7 @@ int btrfs_sync_log(struct btrfs_trans_handle *trans,
 	mutex_unlock(&root->log_mutex);
 
 out_wake_log_root:
-	 
+	mutex_lock(&log_root_tree->log_mutex);
 	btrfs_remove_all_log_ctxs(log_root_tree, index2, ret);
 
 #ifdef MY_ABC_HERE
@@ -2513,8 +2506,8 @@ out_wake_log_root:
 
 	atomic_set(&log_root_tree->log_commit[index2], 0);
 	smp_mb();
+	mutex_unlock(&log_root_tree->log_mutex);
 #else
-	mutex_lock(&log_root_tree->log_mutex);
 	log_root_tree->log_transid_committed++;
 	atomic_set(&log_root_tree->log_commit[index2], 0);
 	mutex_unlock(&log_root_tree->log_mutex);
@@ -2523,15 +2516,13 @@ out_wake_log_root:
 	if (waitqueue_active(&log_root_tree->log_commit_wait[index2]))
 		wake_up(&log_root_tree->log_commit_wait[index2]);
 out:
-	 
-	btrfs_remove_all_log_ctxs(root, index1, ret);
-
 #ifdef MY_ABC_HERE
-	 
+	mutex_lock(&root->log_mutex);
+	btrfs_remove_all_log_ctxs(root, index1, ret);
 	smp_wmb();
-
 	atomic_set(&root->log_commit[index1], 0);
 	smp_mb();
+	mutex_unlock(&root->log_mutex);
 #else
 	mutex_lock(&root->log_mutex);
 	btrfs_remove_all_log_ctxs(root, index1, ret);

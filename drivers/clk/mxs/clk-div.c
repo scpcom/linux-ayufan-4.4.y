@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright 2012 Freescale Semiconductor, Inc.
  *
@@ -33,11 +36,11 @@ struct clk_div {
 
 static inline struct clk_div *to_clk_div(struct clk_hw *hw)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct clk_divider *divider = to_clk_divider(hw);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct clk_divider *divider = container_of(hw, struct clk_divider, hw);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	return container_of(divider, struct clk_div, divider);
 }

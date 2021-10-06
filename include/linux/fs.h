@@ -65,7 +65,7 @@ struct iov_iter;
 #ifdef CONFIG_SENDFILE_PATCH
 struct socket;
 #endif
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_SPLICE_FROM_SOCKET
 struct socket;
 #endif
@@ -185,6 +185,7 @@ enum bypass_synoacl_type {
 #define WRITE_FLUSH		(WRITE | REQ_SYNC | REQ_NOIDLE | REQ_FLUSH)
 #define WRITE_FUA		(WRITE | REQ_SYNC | REQ_NOIDLE | REQ_FUA)
 #define WRITE_FLUSH_FUA		(WRITE | REQ_SYNC | REQ_NOIDLE | REQ_FLUSH | REQ_FUA)
+#define WRITE_BG		(WRITE | REQ_NOIDLE | REQ_BG)
 
 #define ATTR_MODE	(1 << 0)
 #define ATTR_UID	(1 << 1)
@@ -1375,7 +1376,7 @@ struct file_operations {
 					loff_t *ppos, size_t count, bool ppage);
 					 
 #endif
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_SPLICE_FROM_SOCKET
 	ssize_t (*splice_from_socket)(struct file *file, struct socket *sock, loff_t __user *ppos, size_t count);
 #endif
@@ -1390,6 +1391,13 @@ struct file_operations {
 #ifdef MY_ABC_HERE
 	ssize_t (*syno_recvfile)(struct file *file, struct socket *sock,
 	                                              loff_t pos, size_t count, size_t * rbytes, size_t * wbytes);
+#endif  
+	ssize_t (*copy_file_range)(struct file *, loff_t, struct file *,
+			loff_t, size_t, unsigned int);
+	int (*clone_file_range)(struct file *, loff_t, struct file *, loff_t,
+			u64);
+#ifdef MY_ABC_HERE
+	int (*clone_check_compr)(struct file *, struct file *);
 #endif  
 };
 
@@ -1482,6 +1490,38 @@ extern ssize_t vfs_readv(struct file *, const struct iovec __user *,
 		unsigned long, loff_t *);
 extern ssize_t vfs_writev(struct file *, const struct iovec __user *,
 		unsigned long, loff_t *);
+extern ssize_t vfs_copy_file_range(struct file *, loff_t , struct file *,
+				   loff_t, size_t, unsigned int);
+#ifdef MY_ABC_HERE
+extern int vfs_clone_file_range(struct file *file_in, loff_t pos_in,
+		struct file *file_out, loff_t pos_out, u64 len, int check_compr);
+#else
+extern int vfs_clone_file_range(struct file *file_in, loff_t pos_in,
+		struct file *file_out, loff_t pos_out, u64 len);
+#endif  
+
+#ifdef MY_ABC_HERE
+static inline int do_clone_file_range(struct file *file_in, loff_t pos_in,
+				      struct file *file_out, loff_t pos_out,
+				      u64 len, int check_compr)
+#else
+static inline int do_clone_file_range(struct file *file_in, loff_t pos_in,
+				      struct file *file_out, loff_t pos_out,
+				      u64 len)
+#endif  
+{
+	int ret;
+
+	sb_start_write(file_inode(file_out)->i_sb);
+#ifdef MY_ABC_HERE
+	ret = vfs_clone_file_range(file_in, pos_in, file_out, pos_out, len, check_compr);
+#else
+	ret = vfs_clone_file_range(file_in, pos_in, file_out, pos_out, len);
+#endif  
+	sb_end_write(file_inode(file_out)->i_sb);
+
+	return ret;
+}
 
 struct super_operations {
 #ifdef MY_ABC_HERE
@@ -1761,12 +1801,9 @@ extern struct kobject *fs_kobj;
 
 #define MAX_RW_COUNT (INT_MAX & PAGE_CACHE_MASK)
 
-#define FLOCK_VERIFY_READ  1
-#define FLOCK_VERIFY_WRITE 2
-
 #ifdef CONFIG_FILE_LOCKING
 extern int locks_mandatory_locked(struct file *);
-extern int locks_mandatory_area(int, struct inode *, struct file *, loff_t, size_t);
+extern int locks_mandatory_area(struct inode *, struct file *, loff_t, loff_t, unsigned char);
 
 static inline int __mandatory_lock(struct inode *ino)
 {
@@ -1786,17 +1823,19 @@ static inline int locks_verify_locked(struct file *file)
 }
 
 static inline int locks_verify_truncate(struct inode *inode,
-				    struct file *filp,
+				    struct file *f,
 				    loff_t size)
 {
-	if (inode->i_flctx && mandatory_lock(inode))
-		return locks_mandatory_area(
-			FLOCK_VERIFY_WRITE, inode, filp,
-			size < inode->i_size ? size : inode->i_size,
-			(size < inode->i_size ? inode->i_size - size
-			 : size - inode->i_size)
-		);
-	return 0;
+	if (!inode->i_flctx || !mandatory_lock(inode))
+		return 0;
+
+	if (size < inode->i_size) {
+		return locks_mandatory_area(inode, f, size, inode->i_size - 1,
+				F_WRLCK);
+	} else {
+		return locks_mandatory_area(inode, f, inode->i_size, size - 1,
+				F_WRLCK);
+	}
 }
 
 static inline int break_lease(struct inode *inode, unsigned int mode)
@@ -1855,9 +1894,8 @@ static inline int locks_mandatory_locked(struct file *file)
 	return 0;
 }
 
-static inline int locks_mandatory_area(int rw, struct inode *inode,
-				       struct file *filp, loff_t offset,
-				       size_t count)
+static inline int locks_mandatory_area(struct inode *inode, struct file *filp,
+		loff_t start, loff_t end, unsigned char type)
 {
 	return 0;
 }

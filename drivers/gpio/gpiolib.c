@@ -165,7 +165,7 @@ static int gpiochip_add_to_list(struct gpio_chip *chip)
 	if (pos != &gpio_chips && pos->prev != &gpio_chips) {
 		_chip = list_entry(pos->prev, struct gpio_chip, list);
 		if (_chip->base + _chip->ngpio > chip->base) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 			dev_err(chip->parent,
 				"GPIO integer space overlap, cannot add chip\n");
 #else  
@@ -222,7 +222,7 @@ static int gpiochip_set_desc_names(struct gpio_chip *gc)
 
 		gpio = gpio_name_to_desc(gc->names[i]);
 		if (gpio)
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 			dev_warn(gc->parent, "Detected name collision for "
 #else  
 			dev_warn(gc->dev, "Detected name collision for "
@@ -283,7 +283,7 @@ int gpiochip_add(struct gpio_chip *chip)
 	INIT_LIST_HEAD(&chip->pin_ranges);
 #endif
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	if (!chip->owner && chip->parent && chip->parent->driver)
 		chip->owner = chip->parent->driver->owner;
 #else  
@@ -357,7 +357,7 @@ void gpiochip_remove(struct gpio_chip *chip)
 	spin_unlock_irqrestore(&gpio_lock, flags);
 
 	if (requested)
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		dev_crit(chip->parent,
 			 "REMOVING GPIOCHIP WITH GPIOS STILL REQUESTED\n");
 #else  
@@ -542,7 +542,7 @@ int _gpiochip_irqchip_add(struct gpio_chip *gpiochip,
 	if (!gpiochip || !irqchip)
 		return -EINVAL;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	if (!gpiochip->parent) {
 #else  
 	if (!gpiochip->dev) {
@@ -550,7 +550,7 @@ int _gpiochip_irqchip_add(struct gpio_chip *gpiochip,
 		pr_err("missing gpiochip .dev parent pointer\n");
 		return -EINVAL;
 	}
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	of_node = gpiochip->parent->of_node;
 #else  
 	of_node = gpiochip->dev->of_node;
@@ -739,12 +739,6 @@ static int __gpiod_request(struct gpio_desc *desc, const char *label)
 		spin_lock_irqsave(&gpio_lock, flags);
 	}
 done:
-	if (status < 0) {
-		 
-		clear_bit(FLAG_ACTIVE_LOW, &desc->flags);
-		clear_bit(FLAG_OPEN_DRAIN, &desc->flags);
-		clear_bit(FLAG_OPEN_SOURCE, &desc->flags);
-	}
 	spin_unlock_irqrestore(&gpio_lock, flags);
 	return status;
 }
@@ -1535,20 +1529,17 @@ struct gpio_desc *__must_check gpiod_get_optional(struct device *dev,
 }
 EXPORT_SYMBOL_GPL(gpiod_get_optional);
 
-static void gpiod_parse_flags(struct gpio_desc *desc, unsigned long lflags)
+static int gpiod_configure_flags(struct gpio_desc *desc, const char *con_id,
+		unsigned long lflags, enum gpiod_flags dflags)
 {
+	int status;
+
 	if (lflags & GPIO_ACTIVE_LOW)
 		set_bit(FLAG_ACTIVE_LOW, &desc->flags);
 	if (lflags & GPIO_OPEN_DRAIN)
 		set_bit(FLAG_OPEN_DRAIN, &desc->flags);
 	if (lflags & GPIO_OPEN_SOURCE)
 		set_bit(FLAG_OPEN_SOURCE, &desc->flags);
-}
-
-static int gpiod_configure_flags(struct gpio_desc *desc, const char *con_id,
-		unsigned long lflags, enum gpiod_flags dflags)
-{
-	int status;
 
 	if (!(dflags & GPIOD_FLAGS_BIT_DIR_SET)) {
 		pr_debug("no flags found for %s\n", con_id);
@@ -1867,7 +1858,7 @@ static int gpiolib_seq_show(struct seq_file *s, void *v)
 
 	seq_printf(s, "%sGPIOs %d-%d", (char *)s->private,
 			chip->base, chip->base + chip->ngpio - 1);
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	dev = chip->parent;
 #else  
 	dev = chip->dev;

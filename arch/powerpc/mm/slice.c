@@ -43,7 +43,6 @@
 
 static DEFINE_SPINLOCK(slice_convert_lock);
 
-
 #ifdef DEBUG
 int _slice_debug = 1;
 
@@ -105,7 +104,7 @@ static int slice_area_is_free(struct mm_struct *mm, unsigned long addr,
 	if ((mm->task_size - len) < addr)
 		return 0;
 	vma = find_vma(mm, addr);
-	return (!vma || (addr + len) <= vma->vm_start);
+	return (!vma || (addr + len) <= vm_start_gap(vma));
 }
 
 static int slice_low_has_vma(struct mm_struct *mm, unsigned long slice)
@@ -353,7 +352,6 @@ static unsigned long slice_find_area_topdown(struct mm_struct *mm,
 	 */
 	return slice_find_area_bottomup(mm, len, available, psize);
 }
-
 
 static unsigned long slice_find_area(struct mm_struct *mm, unsigned long len,
 				     struct slice_mask mask, int psize,
@@ -633,9 +631,6 @@ void slice_set_user_psize(struct mm_struct *mm, unsigned int psize)
 					  ~(0xf << (mask_index * 4))) |
 				(((unsigned long)psize) << (mask_index * 4));
 	}
-
-
-
 
 	slice_dbg(" lsps=%lx, hsps=%lx\n",
 		  mm->context.low_slices_psize,

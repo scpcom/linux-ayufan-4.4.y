@@ -281,7 +281,6 @@ static struct dlm_ctxt * __dlm_lookup_domain(const char *domain)
 	return __dlm_lookup_domain_full(domain, strlen(domain));
 }
 
-
 /* returns true on one of two conditions:
  * 1) the domain does not exist
  * 2) the domain exists and it's state is "joined" */
@@ -2065,7 +2064,7 @@ static struct dlm_ctxt *dlm_alloc_ctxt(const char *domain,
 	INIT_LIST_HEAD(&dlm->dlm_eviction_callbacks);
 
 	mlog(0, "context init: refcount %u\n",
-		  atomic_read(&dlm->dlm_refs.refcount));
+		  kref_read(&dlm->dlm_refs));
 
 leave:
 	if (ret < 0 && dlm) {

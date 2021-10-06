@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 #ifndef _COMPHY_MVEBU_H
 #define _COMPHY_MVEBU_H
 
@@ -8,13 +11,13 @@
 #define to_mvebu_comphy_priv(lane) \
 	container_of((lane), struct mvebu_comphy_priv, lanes[(lane)->index])
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 enum reg_width_type {
 	REG_16BIT = 0,
 	REG_32BIT,
 };
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 struct mvebu_comphy_priv {
 	struct device *dev;
 	void __iomem *comphy_regs;
@@ -44,7 +47,7 @@ static inline void __maybe_unused reg_set(void __iomem *addr, u32 data, u32 mask
 	writel(reg_data, addr);
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 static inline void __maybe_unused reg_set16(void __iomem *addr, u16 data, u16 mask)
 {
 	u16 reg_data;
@@ -55,29 +58,29 @@ static inline void __maybe_unused reg_set16(void __iomem *addr, u16 data, u16 ma
 	writew(reg_data, addr);
 }
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 static inline u32 __maybe_unused polling_with_timeout(void __iomem *addr,
 						      u32 val,
 						      u32 mask,
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 						      unsigned long usec_timout,
 						      enum reg_width_type type)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 						      unsigned long usec_timout)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 {
 	u32 data;
 
 	do {
 		udelay(1);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		if (type == REG_16BIT)
 			data = readw(addr) & mask;
 		else
 			data = readl(addr) & mask;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 		data = readl(addr) & mask;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	} while (data != val  && --usec_timout > 0);
 
 	if (usec_timout == 0)
@@ -91,4 +94,4 @@ int mvebu_comphy_set_mode(struct phy *phy, enum phy_mode mode);
 enum phy_mode mvebu_comphy_get_mode(struct phy *phy);
 
 #endif /* _COMPHY_MVEBU_H */
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */

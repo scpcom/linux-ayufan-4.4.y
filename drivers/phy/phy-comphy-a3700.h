@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 #ifndef _COMPHY_A3700_H
 #define _COMPHY_A3700_H
 
@@ -206,11 +209,11 @@ enum {
 #define CFG_PM_RXDLOZ_WAIT_12_UNIT		(0xC << CFG_PM_RXDLOZ_WAIT_OFF)
 
 /* SGMII */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 #define COMPHY_PHY_CFG1_OFFSET(lane)		((1 - (lane)) * 0x28)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 #define COMPHY_PHY_CFG1_OFFSET(lane)		((lane) * 0x28)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 #define PIN_PU_IVEREF_BIT			BIT(1)
 #define PIN_RESET_CORE_BIT			BIT(11)
 #define PIN_RESET_COMPHY_BIT			BIT(12)
@@ -230,11 +233,11 @@ enum {
  * lane0: PCIe/GbE0 PHY Status 1
  * lane1: USB3/GbE1 PHY Status 1
  */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 #define COMPHY_PHY_STATUS_OFFSET(lane)		(0x18 + (1 - (lane)) * 0x28)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 #define COMPHY_PHY_STATUS_OFFSET(lane)		(0x18 + (lane) * 0x28)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 #define PHY_RX_INIT_DONE_BIT			BIT(0)
 #define PHY_PLL_READY_RX_BIT			BIT(2)
 #define PHY_PLL_READY_TX_BIT			BIT(3)
@@ -243,4 +246,4 @@ enum {
 
 #endif /* _COMPHY_A3700_H */
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */

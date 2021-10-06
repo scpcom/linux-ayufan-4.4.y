@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*
  * Copyright (c) 2010 Imagination Technologies, Inc.
  *
@@ -1039,4 +1042,4 @@ module_spi_driver(spinand_driver);
 MODULE_DESCRIPTION("SPI NAND driver for GigaDevice flash");
 MODULE_AUTHOR("Ionela Voinescu <ionela.voinescu at imgtec.com>");
 MODULE_LICENSE("GPL v2");
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */

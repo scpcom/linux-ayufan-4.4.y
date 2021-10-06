@@ -382,7 +382,7 @@ xfs_submit_ioend_bio(
 	atomic_inc(&ioend->io_remaining);
 	bio->bi_private = ioend;
 	bio->bi_end_io = xfs_end_bio;
-	submit_bio(wbc->sync_mode == WB_SYNC_ALL ? WRITE_SYNC : WRITE, bio);
+	submit_bio(wbc_to_write_cmd(wbc), bio);
 }
 
 STATIC struct bio *
@@ -1171,7 +1171,6 @@ xfs_vm_writepage(
 		xfs_cluster_write(inode, page->index + 1, &imap, &ioend,
 				  wbc, end_index);
 	}
-
 
 	/*
 	 * Reserve log space if we might write beyond the on-disk inode size.

@@ -369,9 +369,6 @@ static const struct file_operations hung_up_tty_fops = {
 };
 
 static DEFINE_SPINLOCK(redirect_lock);
-#ifdef CONFIG_SYNO_TTY_COMMAND
-static DEFINE_SPINLOCK(ttyS1_lock);
-#endif  
 static struct file *redirect;
 
 void proc_clear_tty(struct task_struct *p)
@@ -2239,11 +2236,7 @@ void deinitialize_tty_struct(struct tty_struct *tty)
 
 int tty_put_char(struct tty_struct *tty, unsigned char ch)
 {
-#ifdef MY_ABC_HERE
-	if (tty->ops->put_char && 0 != strcmp(tty->name, "ttyS1"))
-#else  
 	if (tty->ops->put_char)
-#endif  
 		return tty->ops->put_char(tty, ch);
 	return tty->ops->write(tty, &ch, 1);
 }
@@ -2252,10 +2245,21 @@ EXPORT_SYMBOL_GPL(tty_put_char);
 #ifdef MY_ABC_HERE
 int syno_ttys_write(const int index, const char* szBuf)
 {
-	size_t i = 0;
+	int err = -1;
 	struct tty_driver *drv = NULL;
 	struct tty_struct *tty = NULL;
+#ifdef MY_ABC_HERE
+	char *szX64Buf = NULL;
+	size_t cbX64Buf = strlen(szBuf) + 2;
 
+	szX64Buf = kmalloc(cbX64Buf, GFP_KERNEL);
+	if (!szX64Buf) {
+		err = -ENOMEM;
+		goto Error;
+	}
+#endif  
+
+	mutex_lock(&tty_mutex);
 	list_for_each_entry(drv, &tty_drivers, tty_drivers) {
 		if (strcmp(drv->name, "ttyS")) {
 		    continue;
@@ -2267,15 +2271,38 @@ int syno_ttys_write(const int index, const char* szBuf)
 		    continue;
 		}
 		tty = drv->ttys[index];
-#ifdef MY_ABC_HERE
-		tty_put_char(tty, '-');
-#endif  
-		for (i = 0; i < strlen(szBuf); ++i) {
-		    tty_put_char(tty, szBuf[i]);
-		}
+	}
+	if (!IS_ERR(tty))
+		tty_kref_get(tty);
+	else
+		tty = NULL;
+	mutex_unlock(&tty_mutex);
+
+	if (!tty) {
+		err = -ENODEV;
+		goto Error;
 	}
 
-	return 0;
+#ifdef MY_ABC_HERE
+	memset(szX64Buf, 0, cbX64Buf);
+	snprintf(szX64Buf, cbX64Buf, "%c%s", '-', szBuf);
+
+	tty->ops->write(tty, szX64Buf, strlen(szX64Buf));
+#else  
+	tty->ops->write(tty, szBuf, strlen(szBuf));
+#endif  
+
+	mutex_lock(&tty_mutex);
+	tty_kref_put(tty);
+	mutex_unlock(&tty_mutex);
+
+	err = 0;
+Error:
+#ifdef MY_ABC_HERE
+	if (szX64Buf)
+		kfree(szX64Buf);
+#endif
+	return err;
 }
 EXPORT_SYMBOL(syno_ttys_write);
 #endif  

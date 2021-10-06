@@ -767,16 +767,10 @@ static inline struct kobject *get_glue_dir(struct device *dev)
 	return dev->kobj.parent;
 }
 
-/*
- * make sure cleaning up dir as the last step, we need to make
- * sure .release handler of kobject is run with holding the
- * global lock
- */
 static void cleanup_glue_dir(struct device *dev, struct kobject *glue_dir)
 {
 	 
-	if (!glue_dir || !dev->class ||
-	    glue_dir->kset != &dev->class->p->glue_dirs)
+	if (!live_in_glue_dir(glue_dir, dev))
 		return;
 
 	mutex_lock(&gdp_mutex);

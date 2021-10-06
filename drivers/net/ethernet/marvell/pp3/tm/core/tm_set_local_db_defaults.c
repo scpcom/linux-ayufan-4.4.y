@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -2088,4 +2091,4 @@ void set_default_node_elig_prio_func_table(struct tm_elig_prio_func_node *func_t
 
 	NODE_DEQ_DISABLE(TM_ELIG_DEQ_DISABLE);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

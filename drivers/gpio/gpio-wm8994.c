@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * gpiolib support for Wolfson WM8994
  *
@@ -259,11 +262,11 @@ static int wm8994_gpio_probe(struct platform_device *pdev)
 	wm8994_gpio->wm8994 = wm8994;
 	wm8994_gpio->gpio_chip = template_chip;
 	wm8994_gpio->gpio_chip.ngpio = WM8994_GPIO_MAX;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	wm8994_gpio->gpio_chip.parent = &pdev->dev;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	wm8994_gpio->gpio_chip.dev = &pdev->dev;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	if (pdata && pdata->gpio_base)
 		wm8994_gpio->gpio_chip.base = pdata->gpio_base;
 	else

@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*
  * Driver for the Aardvark PCIe controller, used on Marvell Armada
  * 3700.
@@ -21,10 +24,10 @@
 #include <linux/platform_device.h>
 #include <linux/of_address.h>
 #include <linux/of_pci.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 #include <linux/phy/phy.h>
 #include <linux/of_gpio.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
 /* PCIe core registers */
 #define PCIE_CORE_CMD_STATUS_REG				0x4
@@ -34,15 +37,15 @@
 #define PCIE_CORE_DEV_CTRL_STATS_REG				0xc8
 #define     PCIE_CORE_DEV_CTRL_STATS_RELAX_ORDER_DISABLE	(0 << 4)
 #define     PCIE_CORE_DEV_CTRL_STATS_MAX_PAYLOAD_SZ_SHIFT	5
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 #define     PCIE_CORE_DEV_CTRL_STATS_MAX_PAYLOAD_SZ		0x2
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 #define     PCIE_CORE_DEV_CTRL_STATS_SNOOP_DISABLE		(0 << 11)
 #define     PCIE_CORE_DEV_CTRL_STATS_MAX_RD_REQ_SIZE_SHIFT	12
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 #define     PCIE_CORE_DEV_CTRL_STATS_MAX_RD_REQ_SZ		0x2
 #define     PCIE_CORE_MPS_UNIT_BYTE				128
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 #define PCIE_CORE_LINK_CTRL_STAT_REG				0xd0
 #define     PCIE_CORE_LINK_L0S_ENTRY				BIT(0)
 #define     PCIE_CORE_LINK_TRAINING				BIT(5)
@@ -52,16 +55,16 @@
 #define     PCIE_CORE_ERR_CAPCTL_ECRC_CHK_TX_EN			BIT(6)
 #define     PCIE_CORE_ERR_CAPCTL_ECRC_CHCK			BIT(7)
 #define     PCIE_CORE_ERR_CAPCTL_ECRC_CHCK_RCV			BIT(8)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 #define PCIE_PHY_REF_CLOCK					0x4814
 #define     PCIE_PHY_CTRL_OFF					16
 #define     PCIE_PHY_BUF_CTRL_OFF				0
 #define     PCIE_PHY_BUF_CTRL_INIT_VAL				0x1342
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
+#endif /* MY_DEF_HERE */
 
 /* PIO registers base address and register offsets */
 #define PIO_BASE_ADDR				0x4000
@@ -114,12 +117,12 @@
 #define     PCIE_CORE_CTRL2_STRICT_ORDER_ENABLE	BIT(5)
 #define     PCIE_CORE_CTRL2_OB_WIN_ENABLE	BIT(6)
 #define     PCIE_CORE_CTRL2_MSI_ENABLE		BIT(10)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 #define PCIE_PHY_REF_CLOCK			(CONTROL_BASE_ADDR + 0x14)
 #define     PCIE_PHY_CTRL_OFF			16
 #define     PCIE_PHY_BUF_CTRL_OFF		0
 #define     PCIE_PHY_BUF_CTRL_INIT_VAL		0x1342
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 #define PCIE_ISR0_REG				(CONTROL_BASE_ADDR + 0x40)
 #define PCIE_ISR0_MASK_REG			(CONTROL_BASE_ADDR + 0x44)
 #define     PCIE_ISR0_MSI_INT_PENDING		BIT(24)
@@ -130,21 +133,21 @@
 #define PCIE_ISR1_MASK_REG			(CONTROL_BASE_ADDR + 0x4C)
 #define     PCIE_ISR1_POWER_STATE_CHANGE	BIT(4)
 #define     PCIE_ISR1_FLUSH			BIT(5)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 #define     PCIE_ISR1_INTX_ASSERT(val)		BIT(8 + (val))
 #define     PCIE_ISR1_ALL_MASK			GENMASK(11, 4)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 #define     PCIE_ISR1_ALL_MASK			GENMASK(5, 4)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 #define PCIE_MSI_ADDR_LOW_REG			(CONTROL_BASE_ADDR + 0x50)
 #define PCIE_MSI_ADDR_HIGH_REG			(CONTROL_BASE_ADDR + 0x54)
 #define PCIE_MSI_STATUS_REG			(CONTROL_BASE_ADDR + 0x58)
 #define PCIE_MSI_MASK_REG			(CONTROL_BASE_ADDR + 0x5C)
 #define PCIE_MSI_PAYLOAD_REG			(CONTROL_BASE_ADDR + 0x9C)
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 /* PCIe window configuration */
 #define OB_WIN_BASE_ADDR			0x4c00
 #define OB_WIN_BLOCK_SIZE			0x20
@@ -163,7 +166,7 @@
 #define OB_PCIE_MEM				0x0
 #define OB_PCIE_IO				0x4
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 /* LMI registers base address and register offsets */
 #define LMI_BASE_ADDR				0x6000
 #define CFG_REG					(LMI_BASE_ADDR + 0x0)
@@ -223,9 +226,9 @@
 struct advk_pcie {
 	struct platform_device *pdev;
 	void __iomem *base;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	struct phy *phy;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	struct list_head resources;
 	struct irq_domain *irq_domain;
 	struct irq_chip irq_chip;
@@ -236,14 +239,14 @@ struct advk_pcie {
 	struct mutex msi_used_lock;
 	u16 msi_msg;
 	int root_bus_nr;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	char *reset_name;
 	struct gpio_desc *reset_gpio;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
 	enum of_gpio_flags flags;
 	struct clk *clk;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 };
 
 static inline void advk_writel(struct advk_pcie *pcie, u32 val, u64 reg)
@@ -284,9 +287,9 @@ static int advk_pcie_wait_for_link(struct advk_pcie *pcie)
 	return -ETIMEDOUT;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 /*
  * Set PCIe address window register which could be used for memory
  * mapping.
@@ -307,24 +310,24 @@ static void advk_pcie_set_ob_win(struct advk_pcie *pcie,
 	advk_writel(pcie, match_ls | BIT(0), OB_WIN_MATCH_LS(win_num));
 }
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 static void advk_pcie_setup_hw(struct advk_pcie *pcie)
 {
 	u32 reg;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	phys_addr_t msi_msg_phys;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	int i;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	/* Set HW Reference Clock Buffer Control */
 	advk_writel(pcie, PCIE_PHY_BUF_CTRL_INIT_VAL, PCIE_PHY_REF_CLOCK);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	/* Point PCIe unit MBUS decode windows to DRAM space */
 	for (i = 0; i < 8; i++)
 		advk_pcie_set_ob_win(pcie, i, 0, 0, 0, 0, 0, 0, 0);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 
 	/* Set to Direct mode */
 	reg = advk_readl(pcie, CTRL_CONFIG_REG);
@@ -346,17 +349,17 @@ static void advk_pcie_setup_hw(struct advk_pcie *pcie)
 
 	/* Set PCIe Device Control and Status 1 PF0 register */
 	reg = PCIE_CORE_DEV_CTRL_STATS_RELAX_ORDER_DISABLE |
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		(PCIE_CORE_DEV_CTRL_STATS_MAX_PAYLOAD_SZ << PCIE_CORE_DEV_CTRL_STATS_MAX_PAYLOAD_SZ_SHIFT) |
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		(7 << PCIE_CORE_DEV_CTRL_STATS_MAX_PAYLOAD_SZ_SHIFT) |
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		PCIE_CORE_DEV_CTRL_STATS_SNOOP_DISABLE |
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		(PCIE_CORE_DEV_CTRL_STATS_MAX_RD_REQ_SZ << PCIE_CORE_DEV_CTRL_STATS_MAX_RD_REQ_SIZE_SHIFT);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		PCIE_CORE_DEV_CTRL_STATS_MAX_RD_REQ_SIZE_SHIFT;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	advk_writel(pcie, reg, PCIE_CORE_DEV_CTRL_STATS_REG);
 
 	/* Program PCIe Control 2 to disable strict ordering */
@@ -381,7 +384,7 @@ static void advk_pcie_setup_hw(struct advk_pcie *pcie)
 	reg |= LINK_TRAINING_EN;
 	advk_writel(pcie, reg, PCIE_CORE_CTRL0_REG);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	/* Set MSI Address in RC mode */
 	msi_msg_phys = virt_to_phys(&pcie->msi_msg);
 	advk_writel(pcie, lower_32_bits(msi_msg_phys),
@@ -389,7 +392,7 @@ static void advk_pcie_setup_hw(struct advk_pcie *pcie)
 	advk_writel(pcie, upper_32_bits(msi_msg_phys),
 		    PCIE_MSI_ADDR_HIGH_REG);
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	/* Enable MSI */
 	reg = advk_readl(pcie, PCIE_CORE_CTRL2_REG);
 	reg |= PCIE_CORE_CTRL2_MSI_ENABLE;
@@ -430,12 +433,12 @@ static void advk_pcie_setup_hw(struct advk_pcie *pcie)
 
 	advk_pcie_wait_for_link(pcie);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	reg = (1 << PCIE_CORE_LINK_WIDTH_SHIFT);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	reg = PCIE_CORE_LINK_L0S_ENTRY |
 		(1 << PCIE_CORE_LINK_WIDTH_SHIFT);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	advk_writel(pcie, reg, PCIE_CORE_LINK_CTRL_STAT_REG);
 
 	reg = advk_readl(pcie, PCIE_CORE_CMD_STATUS_REG);
@@ -709,15 +712,15 @@ static void advk_pcie_irq_mask(struct irq_data *d)
 	irq_hw_number_t hwirq = irqd_to_hwirq(d);
 	u32 mask;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	mask = advk_readl(pcie, PCIE_ISR1_MASK_REG);
 	mask |= PCIE_ISR1_INTX_ASSERT(hwirq);
 	advk_writel(pcie, mask, PCIE_ISR1_MASK_REG);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	mask = advk_readl(pcie, PCIE_ISR0_MASK_REG);
 	mask |= PCIE_ISR0_INTX_ASSERT(hwirq);
 	advk_writel(pcie, mask, PCIE_ISR0_MASK_REG);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 }
 
 static void advk_pcie_irq_unmask(struct irq_data *d)
@@ -726,15 +729,15 @@ static void advk_pcie_irq_unmask(struct irq_data *d)
 	irq_hw_number_t hwirq = irqd_to_hwirq(d);
 	u32 mask;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	mask = advk_readl(pcie, PCIE_ISR1_MASK_REG);
 	mask &= ~PCIE_ISR1_INTX_ASSERT(hwirq);
 	advk_writel(pcie, mask, PCIE_ISR1_MASK_REG);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	mask = advk_readl(pcie, PCIE_ISR0_MASK_REG);
 	mask &= ~PCIE_ISR0_INTX_ASSERT(hwirq);
 	advk_writel(pcie, mask, PCIE_ISR0_MASK_REG);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 }
 
 static int advk_pcie_irq_map(struct irq_domain *h,
@@ -762,11 +765,11 @@ static int advk_pcie_init_msi_irq_domain(struct advk_pcie *pcie)
 	struct device_node *node = dev->of_node;
 	struct irq_chip *msi_irq_chip;
 	struct msi_controller *msi;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	phys_addr_t msi_msg_phys;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	int ret;
 
 	msi_irq_chip = &pcie->msi_irq_chip;
@@ -789,9 +792,9 @@ static int advk_pcie_init_msi_irq_domain(struct advk_pcie *pcie)
 
 	mutex_init(&pcie->msi_used_lock);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	msi_msg_phys = virt_to_phys(&pcie->msi_msg);
 
 	advk_writel(pcie, lower_32_bits(msi_msg_phys),
@@ -799,7 +802,7 @@ static int advk_pcie_init_msi_irq_domain(struct advk_pcie *pcie)
 	advk_writel(pcie, upper_32_bits(msi_msg_phys),
 		    PCIE_MSI_ADDR_HIGH_REG);
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	pcie->msi_domain =
 		irq_domain_add_linear(NULL, MSI_IRQ_NUM,
 				      &advk_pcie_msi_irq_ops, pcie);
@@ -889,28 +892,28 @@ static void advk_pcie_handle_msi(struct advk_pcie *pcie)
 static void advk_pcie_handle_int(struct advk_pcie *pcie)
 {
 	u32 val, mask, status;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	u32 val2, mask2, status2;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	int i, virq;
 
 	val = advk_readl(pcie, PCIE_ISR0_REG);
 	mask = advk_readl(pcie, PCIE_ISR0_MASK_REG);
 	status = val & ((~mask) & PCIE_ISR0_ALL_MASK);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	val2 = advk_readl(pcie, PCIE_ISR1_REG);
 	mask2 = advk_readl(pcie, PCIE_ISR1_MASK_REG);
 	status2 = val2 & ((~mask2) & PCIE_ISR1_ALL_MASK);
 
 	if (!status && !status2) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	if (!status) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		advk_writel(pcie, val, PCIE_ISR0_REG);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		advk_writel(pcie, val2, PCIE_ISR1_REG);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		return;
 	}
 
@@ -920,20 +923,20 @@ static void advk_pcie_handle_int(struct advk_pcie *pcie)
 
 	/* Process legacy interrupts */
 	for (i = 0; i < LEGACY_IRQ_NUM; i++) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		if (!(status2 & PCIE_ISR1_INTX_ASSERT(i)))
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		if (!(status & PCIE_ISR0_INTX_ASSERT(i)))
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 			continue;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		advk_writel(pcie, PCIE_ISR1_INTX_ASSERT(i),
 			    PCIE_ISR1_REG);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		advk_writel(pcie, PCIE_ISR0_INTX_ASSERT(i),
 			    PCIE_ISR0_REG);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 
 		virq = irq_find_mapping(pcie->irq_domain, i);
 		generic_handle_irq(virq);
@@ -979,16 +982,16 @@ static int advk_pcie_parse_request_of_pci_ranges(struct advk_pcie *pcie)
 		switch (resource_type(res)) {
 		case IORESOURCE_IO:
 			parent = &ioport_resource;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 			advk_pcie_set_ob_win(pcie, 1,
 					     upper_32_bits(res->start),
 					     lower_32_bits(res->start),
 					     0,	0xF8000000, 0,
 					     lower_32_bits(res->start),
 					     OB_PCIE_IO);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 			err = pci_remap_iospace(res, iobase);
 			if (err) {
 				dev_warn(dev, "error %d: failed to map resource %pR\n",
@@ -998,16 +1001,16 @@ static int advk_pcie_parse_request_of_pci_ranges(struct advk_pcie *pcie)
 			break;
 		case IORESOURCE_MEM:
 			parent = &iomem_resource;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 			advk_pcie_set_ob_win(pcie, 0,
 					     upper_32_bits(res->start),
 					     lower_32_bits(res->start),
 					     0x0, 0xF8000000, 0,
 					     lower_32_bits(res->start),
 					     (2 << 20) | OB_PCIE_MEM);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 			res_valid |= !(res->flags & IORESOURCE_PREFETCH);
 			break;
 		case IORESOURCE_BUS:
@@ -1037,7 +1040,7 @@ out_release_res:
 	return err;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 static int advk_pcie_find_smpss(struct pci_dev *dev, void *data)
 {
 	u8 *smpss = data;
@@ -1112,7 +1115,7 @@ static int advk_pcie_clk_enable_then_reset(struct advk_pcie *pcie)
 	return ret;
 }
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 static int advk_pcie_probe(struct platform_device *pdev)
 {
 	struct advk_pcie *pcie;
@@ -1120,24 +1123,24 @@ static int advk_pcie_probe(struct platform_device *pdev)
 	struct pci_bus *bus, *child;
 	struct msi_controller *msi;
 	struct device_node *msi_node;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	struct clk *clk;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
 	struct phy *comphy;
 	struct device_node *dn = pdev->dev.of_node;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	int ret, irq;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	enum of_gpio_flags flags;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	int reset_gpio;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
 	pcie = devm_kzalloc(&pdev->dev, sizeof(struct advk_pcie),
 			    GFP_KERNEL);
@@ -1154,16 +1157,16 @@ static int advk_pcie_probe(struct platform_device *pdev)
 		return PTR_ERR(pcie->base);
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	/* Get comphy and init if there is */
 	comphy = devm_of_phy_get(&pdev->dev, dn, "comphy");
 	if (!IS_ERR(comphy)) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		/* Set HW Reference Clock Buffer Control */
 		advk_writel(pcie, PCIE_PHY_BUF_CTRL_INIT_VAL, PCIE_PHY_REF_CLOCK);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		pcie->phy = comphy;
 		ret = phy_init(pcie->phy);
 		if (ret)
@@ -1176,7 +1179,7 @@ static int advk_pcie_probe(struct platform_device *pdev)
 		}
 	}
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	irq = platform_get_irq(pdev, 0);
 	ret = devm_request_irq(&pdev->dev, irq, advk_pcie_irq_handler,
 			       IRQF_SHARED | IRQF_NO_THREAD, "advk-pcie",
@@ -1186,40 +1189,40 @@ static int advk_pcie_probe(struct platform_device *pdev)
 		return ret;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	pcie->clk = devm_clk_get(&pdev->dev, NULL);
 	if (IS_ERR(pcie->clk)) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	clk = devm_clk_get(&pdev->dev, NULL);
 	if (IS_ERR(clk)) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		dev_err(&pdev->dev, "Failed to obtain clock from DT\n");
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		return PTR_ERR(pcie->clk);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		return PTR_ERR(clk);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	/* Config reset gpio for pcie */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	reset_gpio = of_get_named_gpio_flags(dn, "reset-gpios", 0, &pcie->flags);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	reset_gpio = of_get_named_gpio_flags(dn, "reset-gpios", 0, &flags);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	if (reset_gpio != -EPROBE_DEFER) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		pcie->reset_gpio = gpio_to_desc(reset_gpio);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		if (gpio_is_valid(reset_gpio)) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 			pcie->reset_gpio = gpio_to_desc(reset_gpio);
 			ret = advk_pcie_clk_enable_then_reset(pcie);
 			if (ret)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 			unsigned long gpio_flags;
 
 			/* WA: to avoid reset fail, set the reset gpio to low first */
@@ -1239,17 +1242,17 @@ static int advk_pcie_probe(struct platform_device *pdev)
 			if (!pcie->reset_name) {
 				ret = -ENOMEM;
 				dev_err(&pdev->dev, "devm_kasprintf failed\n");
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 				return ret;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 			}
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 			if (flags & OF_GPIO_ACTIVE_LOW) {
 				dev_info(&pdev->dev, "%s: reset gpio is active low\n",
 					 of_node_full_name(dn));
@@ -1267,25 +1270,25 @@ static int advk_pcie_probe(struct platform_device *pdev)
 					ret);
 				return ret;
 			}
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 			/* continue init flow after pcie reset */
 			goto after_pcie_reset;
 		}
 	}
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
 	ret = clk_prepare_enable(pcie->clk);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	ret = clk_prepare_enable(clk);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	if (ret) {
 		dev_err(&pdev->dev, "Failed to enable clock\n");
 		return ret;
 	}
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 after_pcie_reset:
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	ret = advk_pcie_parse_request_of_pci_ranges(pcie);
 	if (ret) {
 		dev_err(&pdev->dev, "Failed to parse resources\n");
@@ -1327,31 +1330,31 @@ after_pcie_reset:
 	list_for_each_entry(child, &bus->children, node)
 		pcie_bus_configure_settings(child);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	/* Configure the MAX pay load size */
 	advk_pcie_configure_mps(bus, pcie);
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	pci_bus_add_devices(bus);
 
 	return 0;
 
 err_clk:
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	clk_disable_unprepare(pcie->clk);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	clk_disable_unprepare(clk);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
 err_exit_phy:
 	if (pcie->phy)
 		phy_exit(pcie->phy);
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	return ret;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 static int advk_pcie_suspend_noirq(struct device *dev)
 {
 	struct advk_pcie *pcie;
@@ -1397,28 +1400,28 @@ static int advk_pcie_resume_noirq(struct device *dev)
 	return 0;
 }
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 static const struct of_device_id advk_pcie_of_match_table[] = {
 	{ .compatible = "marvell,armada-3700-pcie", },
 	{},
 };
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 static const struct dev_pm_ops advk_pcie_pm_ops = {
 	.suspend_noirq = advk_pcie_suspend_noirq,
 	.resume_noirq = advk_pcie_resume_noirq,
 };
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 static struct platform_driver advk_pcie_driver = {
 	.driver = {
 		.name = "advk-pcie",
 		.of_match_table = advk_pcie_of_match_table,
 		/* Driver unloading/unbinding currently not supported */
 		.suppress_bind_attrs = true,
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		.pm = &advk_pcie_pm_ops,
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	},
 	.probe = advk_pcie_probe,
 };
@@ -1427,4 +1430,4 @@ module_platform_driver(advk_pcie_driver);
 MODULE_AUTHOR("Hezi Shahmoon <hezi.shahmoon@marvell.com>");
 MODULE_DESCRIPTION("Aardvark PCIe driver");
 MODULE_LICENSE("GPL v2");
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Driver for Broadcom BCM2835 GPIO unit (pinctrl + GPIO)
  *
@@ -337,22 +340,22 @@ static int bcm2835_gpio_direction_input(struct gpio_chip *chip, unsigned offset)
 
 static int bcm2835_gpio_get(struct gpio_chip *chip, unsigned offset)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct bcm2835_pinctrl *pc = dev_get_drvdata(chip->parent);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct bcm2835_pinctrl *pc = dev_get_drvdata(chip->dev);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	return bcm2835_gpio_get_bit(pc, GPLEV0, offset);
 }
 
 static void bcm2835_gpio_set(struct gpio_chip *chip, unsigned offset, int value)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct bcm2835_pinctrl *pc = dev_get_drvdata(chip->parent);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct bcm2835_pinctrl *pc = dev_get_drvdata(chip->dev);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	bcm2835_gpio_set_bit(pc, value ? GPSET0 : GPCLR0, offset);
 }
@@ -366,11 +369,11 @@ static int bcm2835_gpio_direction_output(struct gpio_chip *chip,
 
 static int bcm2835_gpio_to_irq(struct gpio_chip *chip, unsigned offset)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct bcm2835_pinctrl *pc = dev_get_drvdata(chip->parent);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct bcm2835_pinctrl *pc = dev_get_drvdata(chip->dev);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	return irq_linear_revmap(pc->irq_domain, offset);
 }
@@ -976,11 +979,11 @@ static int bcm2835_pinctrl_probe(struct platform_device *pdev)
 		return PTR_ERR(pc->base);
 
 	pc->gpio_chip = bcm2835_gpio_chip;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	pc->gpio_chip.parent = dev;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	pc->gpio_chip.dev = dev;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	pc->gpio_chip.of_node = np;
 
 	pc->irq_domain = irq_domain_add_linear(np, BCM2835_NUM_GPIOS,

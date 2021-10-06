@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
  
 #include <linux/fs.h>
 #include <linux/backing-dev.h>
@@ -257,7 +260,11 @@ cifs_new_fileinfo(struct cifs_fid *fid, struct file *file,
 
 	cifs_sb_active(inode->i_sb);
 
+#ifdef MY_ABC_HERE
+	if (server->ops->is_read_op(server, oplock) && cifs_has_mand_locks(cinode)) {
+#else
 	if (server->ops->is_read_op(oplock) && cifs_has_mand_locks(cinode)) {
+#endif  
 		cifs_dbg(FYI, "Reset oplock val from read to None due to mand locks\n");
 		oplock = 0;
 	}
@@ -271,7 +278,7 @@ cifs_new_fileinfo(struct cifs_fid *fid, struct file *file,
 	server->ops->set_fid(cfile, fid, oplock);
 
 	list_add(&cfile->tlist, &tcon->openFileList);
-	 
+
 	if (file->f_mode & FMODE_READ)
 		list_add(&cfile->flist, &cinode->openFileList);
 	else

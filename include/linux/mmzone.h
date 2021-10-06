@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #ifndef _LINUX_MMZONE_H
 #define _LINUX_MMZONE_H
 
@@ -40,11 +43,11 @@ enum {
 	MIGRATE_MOVABLE,
 	MIGRATE_RECLAIMABLE,
 	MIGRATE_PCPTYPES,	/* the number of types on the pcp lists */
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	MIGRATE_RESERVE = MIGRATE_PCPTYPES,
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	MIGRATE_HIGHATOMIC = MIGRATE_PCPTYPES,
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 #ifdef CONFIG_CMA
 	/*
 	 * MIGRATE_CMA migration type is designed to mimic the way
@@ -338,11 +341,11 @@ struct zone {
 	/* zone watermarks, access with *_wmark_pages(zone) macros */
 	unsigned long watermark[NR_WMARK];
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	unsigned long nr_reserved_highatomic;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	/*
 	 * We don't know if the memory that we're going to allocate will be
@@ -440,13 +443,13 @@ struct zone {
 
 	const char		*name;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	/*
 	 * Number of MIGRATE_RESERVE page block. To maintain for just
 	 * optimization. Protected by zone->lock.
 	 */
 	int			nr_migrate_reserve_block;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 #ifdef CONFIG_MEMORY_ISOLATION
 	/*

@@ -133,7 +133,7 @@ config SYNO_DISPLAY_CPUINFO
 	bool "Support display CPU Infomation"
 	default y
 
-config SYNO_GRANTLEY_MAX_CPU_NUM
+config SYNO_MULTI_CPU_NUM
 	int "Support display CPU Number Information"
 	default 2
 	depends on (SYNO_GRANTLEY || SYNO_PURLEY) && SYNO_DISPLAY_CPUINFO
@@ -164,6 +164,8 @@ config SYNO_KVM_IGNORE_MSRS
 	depends on KVM
 
 config SYNO_EXPORT_GET_CMDLINE
+	bool "export the helper function to get the cmdline of a task_struct"
+	default y
 
 config SYNO_GPIO
 	  bool "Employ refactored GPIO-functions"

@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -93,4 +96,4 @@ int mv_tm_dp_set(enum mv_tm_level level, uint32_t node_index, int cos, uint32_t 
 int mv_tm_queue_length_get(enum mv_tm_level level, uint32_t index, uint32_t *av_queue_length);
 
 #endif /* MV_TM_DROP__H */
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

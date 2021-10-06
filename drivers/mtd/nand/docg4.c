@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Copyright © 2012 Mike Dunn <mikedunn@newsguy.com>
  *
@@ -242,11 +245,11 @@ static inline void write_nop(void __iomem *docptr)
 static void docg4_read_buf(struct mtd_info *mtd, uint8_t *buf, int len)
 {
 	int i;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	uint16_t *p = (uint16_t *) buf;
 	len >>= 1;
 
@@ -257,11 +260,11 @@ static void docg4_read_buf(struct mtd_info *mtd, uint8_t *buf, int len)
 static void docg4_write_buf16(struct mtd_info *mtd, const uint8_t *buf, int len)
 {
 	int i;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	uint16_t *p = (uint16_t *) buf;
 	len >>= 1;
 
@@ -325,11 +328,11 @@ static void docg4_select_chip(struct mtd_info *mtd, int chip)
 	 * Select among multiple cascaded chips ("floors").  Multiple floors are
 	 * not yet supported, so the only valid non-negative value is 0.
 	 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct docg4_priv *doc = nand->priv;
 	void __iomem *docptr = doc->virtadr;
 
@@ -348,11 +351,11 @@ static void reset(struct mtd_info *mtd)
 {
 	/* full device reset */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct docg4_priv *doc = nand->priv;
 	void __iomem *docptr = doc->virtadr;
 
@@ -390,11 +393,11 @@ static int correct_data(struct mtd_info *mtd, uint8_t *buf, int page)
 	 * Up to four bitflips can be corrected.
 	 */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct docg4_priv *doc = nand->priv;
 	void __iomem *docptr = doc->virtadr;
 	int i, numerrs, errpos[4];
@@ -483,11 +486,11 @@ static int correct_data(struct mtd_info *mtd, uint8_t *buf, int page)
 
 static uint8_t docg4_read_byte(struct mtd_info *mtd)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct docg4_priv *doc = nand->priv;
 
 	dev_dbg(doc->dev, "%s\n", __func__);
@@ -568,11 +571,11 @@ static int pageprog(struct mtd_info *mtd)
 	 * internal buffer out to the flash array, or some such.
 	 */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct docg4_priv *doc = nand->priv;
 	void __iomem *docptr = doc->virtadr;
 	int retval = 0;
@@ -609,11 +612,11 @@ static void sequence_reset(struct mtd_info *mtd)
 {
 	/* common starting sequence for all operations */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct docg4_priv *doc = nand->priv;
 	void __iomem *docptr = doc->virtadr;
 
@@ -630,11 +633,11 @@ static void read_page_prologue(struct mtd_info *mtd, uint32_t docg4_addr)
 {
 	/* first step in reading a page */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct docg4_priv *doc = nand->priv;
 	void __iomem *docptr = doc->virtadr;
 
@@ -661,11 +664,11 @@ static void write_page_prologue(struct mtd_info *mtd, uint32_t docg4_addr)
 {
 	/* first step in writing a page */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct docg4_priv *doc = nand->priv;
 	void __iomem *docptr = doc->virtadr;
 
@@ -730,11 +733,11 @@ static void docg4_command(struct mtd_info *mtd, unsigned command, int column,
 {
 	/* handle standard nand commands */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct docg4_priv *doc = nand->priv;
 	uint32_t g4_addr = mtd_to_docg4_address(page_addr, column);
 
@@ -916,11 +919,11 @@ static int docg4_read_oob(struct mtd_info *mtd, struct nand_chip *nand,
 
 static int docg4_erase_block(struct mtd_info *mtd, int page)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct docg4_priv *doc = nand->priv;
 	void __iomem *docptr = doc->virtadr;
 	uint16_t g4_page;
@@ -1062,11 +1065,11 @@ static int __init read_factory_bbt(struct mtd_info *mtd)
 	 * update the memory-based bbt accordingly.
 	 */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct docg4_priv *doc = nand->priv;
 	uint32_t g4_addr = mtd_to_docg4_address(DOCG4_FACTORY_BBT_PAGE, 0);
 	uint8_t *buf;
@@ -1139,11 +1142,11 @@ static int docg4_block_markbad(struct mtd_info *mtd, loff_t ofs)
 
 	int ret, i;
 	uint8_t *buf;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct docg4_priv *doc = nand->priv;
 	struct nand_bbt_descr *bbtd = nand->badblock_pattern;
 	int page = (int)(ofs >> nand->page_shift);
@@ -1256,11 +1259,11 @@ static void __init init_mtd_structs(struct mtd_info *mtd)
 	 * things as well, such as call nand_set_defaults().
 	 */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct docg4_priv *doc = nand->priv;
 
 	mtd->size = DOCG4_CHIP_SIZE;
@@ -1319,11 +1322,11 @@ static void __init init_mtd_structs(struct mtd_info *mtd)
 
 static int __init read_id_reg(struct mtd_info *mtd)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct docg4_priv *doc = nand->priv;
 	void __iomem *docptr = doc->virtadr;
 	uint16_t id1, id2;
@@ -1419,11 +1422,11 @@ static int __init probe_docg4(struct platform_device *pdev)
 	iounmap(virtadr);
 	if (mtd) {
 		/* re-declarations avoid compiler warning */
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		struct nand_chip *nand = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		struct nand_chip *nand = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		struct docg4_priv *doc = nand->priv;
 		nand_release(mtd); /* deletes partitions and mtd devices */
 		free_bch(doc->bch);

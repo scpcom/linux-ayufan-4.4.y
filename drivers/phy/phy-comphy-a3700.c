@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*
  * Marvell comphy driver
  *
@@ -41,17 +44,17 @@ static void mvebu_a3700_comphy_set_phy_selector(struct mvebu_comphy_priv *priv,
 
 	case (COMPHY_SGMII_MODE):
 	case (COMPHY_HS_SGMII_MODE):
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		if (comphy->index == COMPHY_LANE0)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		if (comphy->index == COMPHY_LANE1)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 			reg &= ~COMPHY_SELECTOR_USB3_GBE1_SEL_BIT;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		else if (comphy->index == COMPHY_LANE1)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		else if (comphy->index == COMPHY_LANE0)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 			reg &= ~COMPHY_SELECTOR_PCIE_GBE0_SEL_BIT;
 		else
 			dev_err(priv->dev, "COMPHY[%d] mode[%d] is invalid\n", comphy->index, mode);
@@ -62,24 +65,24 @@ static void mvebu_a3700_comphy_set_phy_selector(struct mvebu_comphy_priv *priv,
 	case (COMPHY_USB3_MODE):
 		if (comphy->index == COMPHY_LANE2)
 			reg |= COMPHY_SELECTOR_USB3_PHY_SEL_BIT;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		else if (comphy->index == COMPHY_LANE0)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		else if (comphy->index == COMPHY_LANE1)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 			reg |= COMPHY_SELECTOR_USB3_GBE1_SEL_BIT;
 		else
 			dev_err(priv->dev, "COMPHY[%d] mode[%d] is invalid\n", comphy->index, mode);
 		break;
 
 	case (COMPHY_PCIE_MODE):
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		/* PCIE must be in Lane1 */
 		if (comphy->index == COMPHY_LANE1)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		/* PCIE must be in Lane0 */
 		if (comphy->index == COMPHY_LANE0)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 			reg |= COMPHY_SELECTOR_PCIE_GBE0_SEL_BIT;
 		else
 			dev_err(priv->dev, "COMPHY[%d] mode[%d] is invalid\n", comphy->index, mode);
@@ -301,19 +304,19 @@ static int mvebu_a3700_comphy_sgmii_power_on(struct mvebu_comphy_priv *priv,
 	mvebu_a3700_comphy_set_phy_selector(priv, comphy);
 
 	/* Serdes IP Base address
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	 * COMPHY Lane0 -- USB3/GBE1
 	 * COMPHY Lane1 -- PCIe/GBE0
-#else  //CONFIG_SYNO_LSP_ARMADA_17_06_01
+#else  //MY_DEF_HERE
 	 * COMPHY Lane0 -- PCIe/GBE0
 	 * COMPHY Lane1 -- USB3/GBE1
-#endif //CONFIG_SYNO_LSP_ARMADA_17_06_01
+#endif //MY_DEF_HERE
 	 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	if (comphy->index == COMPHY_LANE0) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	if (comphy->index == COMPHY_LANE1) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		/* Get usb3 and gbe register resource and map */
 		res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "usb3_gbe1_phy");
 		if (res) {
@@ -485,11 +488,11 @@ static int mvebu_a3700_comphy_sgmii_power_on(struct mvebu_comphy_priv *priv,
 		dev_err(priv->dev, "Failed to init RX of SGMII PHY %d\n", comphy->index);
 
 	/* Unmap resource */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	if (comphy->index == COMPHY_LANE0) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	if (comphy->index == COMPHY_LANE1) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		devm_iounmap(&pdev->dev, sd_ip_addr);
 		devm_release_mem_region(&pdev->dev, res->start, resource_size(res));
 	}
@@ -747,12 +750,12 @@ static int mvebu_a3700_comphy_usb3_power_on(struct mvebu_comphy_priv *priv,
 	/* Unmap resource */
 	if (comphy->index == COMPHY_LANE2) {
 		devm_iounmap(&pdev->dev, comphy_indir_regs);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		devm_release_mem_region(&pdev->dev, res_indirect->start,
 					resource_size(res_indirect));
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		devm_release_mem_region(&pdev->dev, res->start, resource_size(res_indirect));
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	} else {
 		devm_iounmap(&pdev->dev, usb3_gbe1_phy_regs);
 		devm_release_mem_region(&pdev->dev, res->start, resource_size(res));
@@ -933,15 +936,15 @@ static int mvebu_a3700_comphy_power_off(struct phy *phy)
 		break;
 
 	default:
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		dev_dbg(priv->dev,
 			"comphy%d: power off is not implemented for mode %d\n",
 			comphy->index, mode);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		dev_err(priv->dev, "comphy%d: unsupported comphy mode\n",
 			comphy->index);
 		err = -EINVAL;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		break;
 	}
 
@@ -1041,21 +1044,21 @@ const struct mvebu_comphy_soc_info a3700_comphy = {
 	.num_of_lanes = 3,
 	.functions = {
 		/* Lane 0 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		{COMPHY_UNUSED, COMPHY_PCIE0, COMPHY_SGMII0},
 		/* Lane 1 */
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		{COMPHY_UNUSED, COMPHY_SGMII1, COMPHY_HS_SGMII1, COMPHY_USB3},
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		/* Lane 1 */
 		{COMPHY_UNUSED, COMPHY_PCIE0, COMPHY_SGMII0},
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		/* Lane 2 */
 		{COMPHY_UNUSED, COMPHY_SATA0, COMPHY_USB3},
 	},
 	.comphy_ops = &a3700_comphy_ops,
 };
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */

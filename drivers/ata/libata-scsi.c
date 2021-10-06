@@ -581,7 +581,8 @@ void SynoEunitFlagSet(struct ata_port *pAp_master, bool blset, unsigned int flag
 				IS_SYNOLOGY_DX213(ap->PMSynoUnique) ||
 				IS_SYNOLOGY_RX413(ap->PMSynoUnique) ||
 				IS_SYNOLOGY_RX415(ap->PMSynoUnique) ||
-				IS_SYNOLOGY_DX517(ap->PMSynoUnique)) {
+				IS_SYNOLOGY_DX517(ap->PMSynoUnique) ||
+				IS_SYNOLOGY_RX418(ap->PMSynoUnique)) {
 			if (ap->host == pAp_master->host && ap->port_no == pAp_master->port_no) {
 				unsigned long flags;
 				spin_lock_irqsave(ap->lock, flags);
@@ -740,7 +741,7 @@ syno_trans_host_to_disk_show(struct device *dev, struct device_attribute *attr, 
 	}
 
 #ifdef MY_DEF_HERE
-	if (pShost->isCacheSSD) {
+	if (pShost->is_nvc_ssd) {
 		iStartIdx = syno_libata_index_get(pShost, 0, 0, 0);
 		snprintf(szTmp, sizeof(szTmp), "%s%d\n",
 			CONFIG_SYNO_CACHE_DEVICE_PREFIX, (iStartIdx - M2SATA_START_IDX) + 1);
@@ -965,6 +966,14 @@ syno_pm_info_show(struct device *dev, struct device_attribute *attr, char *buf)
 					EBOX_INFO_UNIQUE_DX517,
 					EBOX_INFO_EMID_KEY,
 					ap->PMSynoEMID);
+		} else if (IS_SYNOLOGY_RX418(ap->PMSynoUnique)) {
+			snprintf(szTmp,
+					BDEVNAME_SIZE,
+					"%s=\"%s\"\n%s=\"%d\"\n",
+					EBOX_INFO_UNIQUE_KEY,
+					EBOX_INFO_UNIQUE_RX418,
+					EBOX_INFO_EMID_KEY,
+					ap->PMSynoEMID);
 		} else {
 			snprintf(szTmp,
 					BDEVNAME_SIZE,
@@ -1141,54 +1150,6 @@ syno_sata_disk_led_store(struct device *device,
 DEVICE_ATTR(syno_sata_disk_led_ctrl, S_IWUSR,
 			NULL, syno_sata_disk_led_store);
 EXPORT_SYMBOL_GPL(dev_attr_syno_sata_disk_led_ctrl);
-#endif  
-
-#ifdef MY_DEF_HERE
- 
-static int syno_shift_remap_table(struct ata_host *host)
-{
-	int i = 0;
-	int iRet = -1;
-	char szPciAddress[PCI_ADDR_LEN_MAX + 1];
-	struct pci_dev *pdev = NULL;
-	struct pci_dev *pdev_cur = NULL;
-
-	if (NULL == host) {
-		printk("Bad parameter!\n");
-		goto END;
-	}
-
-	if (0 == host->n_ports || NULL == host->ports) {
-		printk("Error: ata port informaion is needed.");
-		goto END;
-	}
-
-	pdev = to_pci_dev(host->dev);
-	pdev_cur = pdev;
-
-	while (NULL != pdev_cur) {
-		snprintf(szPciAddress, sizeof(szPciAddress),"%04x%02x%02x%x",
-				pci_domain_nr(pdev_cur->bus), pdev_cur->bus->number,
-				PCI_SLOT(pdev_cur->devfn), PCI_FUNC(pdev_cur->devfn));
-
-		for (i = 0; i < gPciAddrNum; i++) {
-			if (0 == strncmp(szPciAddress, gszPciAddrList[i], PCI_ADDR_LEN_MAX)) {
-				syno_insert_sata_index_remap(
-					host->ports[0]->print_id - 1,
-					host->n_ports,
-					gPciDeferStart);
-
-				gPciDeferStart += host->n_ports;
-				iRet = 1;
-				goto END;
-			}
-		}
-		pdev_cur = pdev_cur->bus->self;
-	}
-	iRet = 0;
-END:
-	return iRet;
-}
 #endif  
 
 static ssize_t ata_scsi_park_show(struct device *device,
@@ -2120,7 +2081,7 @@ int __ata_change_queue_depth(struct ata_port *ap, struct scsi_device *sdev,
 	}
 	spin_unlock_irqrestore(ap->lock, flags);
 	
-#ifdef MY_ABC_HERE	
+#if defined(MY_DEF_HERE) || defined(MY_ABC_HERE)
 	 
 	if (!ata_ncq_enabled(dev) && 1 == sdev->queue_depth) {
 		return sdev->queue_depth;
@@ -2592,8 +2553,8 @@ static int SynoIssueWakeUpCmd(struct ata_device *dev, struct scsi_cmnd *cmd)
 	struct scatterlist *psg = NULL;
 	int rc;
 	u16 *buf = (void *)dev->link->ap->sector_buf;
-#ifdef MY_DEF_HERE
-#else
+#if defined(MY_ABC_HERE)
+#else  
 	u64 block;
 #endif  
 
@@ -2615,9 +2576,13 @@ static int SynoIssueWakeUpCmd(struct ata_device *dev, struct scsi_cmnd *cmd)
 	psg = kmalloc(ATA_SECT_SIZE, GFP_ATOMIC); 
 	sg_init_one(psg, buf, ATA_SECT_SIZE);
 	ata_sg_init(qc, psg, 1);
-#ifdef MY_DEF_HERE
+#if defined(MY_ABC_HERE)
 	 
 	qc->tf.command = ATA_CMD_IDLEIMMEDIATE;
+	qc->tf.flags |= ATA_TFLAG_DEVICE | ATA_TFLAG_ISADDR;
+	qc->tf.protocol = ATA_PROT_NODATA;
+	qc->flags |= ATA_QCFLAG_RESULT_TF;
+	qc->dma_dir = DMA_NONE;
 #else  
 	qc->flags |= ATA_QCFLAG_IO;
 	qc->nbytes = ATA_SECT_SIZE;
@@ -4235,10 +4200,16 @@ int ata_scsi_add_hosts(struct ata_host *host, struct scsi_host_template *sht)
 {
 	int i, rc;
 #ifdef MY_DEF_HERE
-	int isCacheSSD = 0;
+	int is_nvc_ssd = 0;
 
-	if (1 == syno_shift_remap_table(host)) {
-		isCacheSSD = 1;
+	if (1 == syno_check_on_option_pci_slot(to_pci_dev(host->dev))) {
+		is_nvc_ssd = 1;
+		if (1 == g_use_sata_remap) {
+			syno_insert_sata_index_remap(
+						host->ports[0]->print_id - 1,
+						host->n_ports,
+						0);
+		}
 	}
 #endif  
 
@@ -4266,7 +4237,11 @@ int ata_scsi_add_hosts(struct ata_host *host, struct scsi_host_template *sht)
 		shost->max_host_blocked = 1;
 
 #ifdef MY_DEF_HERE
-		shost->isCacheSSD = isCacheSSD;
+		shost->is_nvc_ssd = is_nvc_ssd;
+		if (is_nvc_ssd) {
+			g_syno_nvc_index_map[g_nvc_map_index] = shost->host_no;
+			g_nvc_map_index++;
+		}
 #endif
 		rc = scsi_add_host_with_dma(ap->scsi_host,
 						&ap->tdev, ap->host->dev);
@@ -4912,8 +4887,11 @@ int syno_libata_index_get(struct Scsi_Host *host, uint channel, uint id, uint lu
 #ifdef MY_ABC_HERE
 	struct ata_host *pAtaHost = ap->host;
 #endif  
-#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE) || defined(MY_DEF_HERE)
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE) || defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	bool blMapped = false;  
+#endif  
+#ifdef MY_DEF_HERE
+	int i = 0;
 #endif  
 
 #ifdef MY_ABC_HERE
@@ -4930,6 +4908,18 @@ int syno_libata_index_get(struct Scsi_Host *host, uint channel, uint id, uint lu
 	}
 #else
 	mapped_idx = host->host_no;
+#endif  
+
+#ifdef MY_DEF_HERE
+	if (host->is_nvc_ssd) {
+		for(i = 0; i < g_nvc_map_index; i++) {
+			if(g_syno_nvc_index_map[i] == host->host_no) {
+				mapped_idx = i + M2SATA_START_IDX;
+				blMapped = true;
+				break;
+			}
+		}
+	}
 #endif  
 
 #ifdef MY_ABC_HERE

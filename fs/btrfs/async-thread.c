@@ -52,12 +52,7 @@ void btrfs_##name(struct work_struct *arg)				\
 
 bool btrfs_workqueue_normal_congested(struct btrfs_workqueue *wq)
 {
-	/*
-	 * We could compare wq->normal->pending with num_online_cpus()
-	 * to support "thresh == NO_THRESHOLD" case, but it requires
-	 * moving up atomic_inc/dec in thresh_queue/exec_hook. Let's
-	 * postpone it until someone needs the support of that case.
-	 */
+	 
 	if (wq->normal->thresh == NO_THRESHOLD)
 		return false;
 
@@ -72,6 +67,9 @@ BTRFS_WORK_HELPER(submit_helper);
 BTRFS_WORK_HELPER(fixup_helper);
 BTRFS_WORK_HELPER(endio_helper);
 BTRFS_WORK_HELPER(endio_meta_helper);
+#ifdef MY_ABC_HERE
+BTRFS_WORK_HELPER(endio_meta_fix_helper);
+#endif  
 BTRFS_WORK_HELPER(endio_meta_write_helper);
 BTRFS_WORK_HELPER(endio_raid56_helper);
 BTRFS_WORK_HELPER(endio_repair_helper);

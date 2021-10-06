@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*******************************************************************************
   STMMAC Ethernet Driver -- MDIO bus implementation
   Provides Bus interface for MII registers
@@ -196,11 +199,11 @@ int stmmac_mdio_register(struct net_device *ndev)
 {
 	int err = 0;
 	struct mii_bus *new_bus;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	int *irqlist;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct stmmac_priv *priv = netdev_priv(ndev);
 	struct stmmac_mdio_bus_data *mdio_bus_data = priv->plat->mdio_bus_data;
 	int addr, found;
@@ -212,10 +215,10 @@ int stmmac_mdio_register(struct net_device *ndev)
 	if (new_bus == NULL)
 		return -ENOMEM;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	if (mdio_bus_data->irqs)
 		memcpy(new_bus->irq, mdio_bus_data, sizeof(new_bus->irq));
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	if (mdio_bus_data->irqs) {
 		irqlist = mdio_bus_data->irqs;
 	} else {
@@ -223,7 +226,7 @@ int stmmac_mdio_register(struct net_device *ndev)
 			priv->mii_irq[addr] = PHY_POLL;
 		irqlist = priv->mii_irq;
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 #ifdef CONFIG_OF
 	if (priv->device->of_node)
@@ -237,11 +240,11 @@ int stmmac_mdio_register(struct net_device *ndev)
 	snprintf(new_bus->id, MII_BUS_ID_SIZE, "%s-%x",
 		 new_bus->name, priv->plat->bus_id);
 	new_bus->priv = ndev;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	new_bus->irq = irqlist;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	new_bus->phy_mask = mdio_bus_data->phy_mask;
 	new_bus->parent = priv->device;
 	err = mdiobus_register(new_bus);
@@ -252,11 +255,11 @@ int stmmac_mdio_register(struct net_device *ndev)
 
 	found = 0;
 	for (addr = 0; addr < PHY_MAX_ADDR; addr++) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		struct phy_device *phydev = mdiobus_get_phy(new_bus, addr);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		struct phy_device *phydev = new_bus->phy_map[addr];
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		if (phydev) {
 			int act = 0;
 			char irq_num[4];
@@ -268,12 +271,12 @@ int stmmac_mdio_register(struct net_device *ndev)
 			 */
 			if ((mdio_bus_data->irqs == NULL) &&
 			    (mdio_bus_data->probed_phy_irq > 0)) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 				new_bus->irq[addr] =
 					mdio_bus_data->probed_phy_irq;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 				irqlist[addr] = mdio_bus_data->probed_phy_irq;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 				phydev->irq = mdio_bus_data->probed_phy_irq;
 			}
 
@@ -300,11 +303,11 @@ int stmmac_mdio_register(struct net_device *ndev)
 			}
 			pr_info("%s: PHY ID %08x at %d IRQ %s (%s)%s\n",
 				ndev->name, phydev->phy_id, addr,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 				irq_str, phydev_name(phydev),
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 				irq_str, dev_name(&phydev->dev),
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 				act ? " active" : "");
 			found = 1;
 		}

@@ -100,17 +100,6 @@ queue:
 	return ret;
 }
 
-void fsnotify_remove_event(struct fsnotify_group *group,
-			   struct fsnotify_event *event)
-{
-	mutex_lock(&group->notification_mutex);
-	if (!list_empty(&event->list)) {
-		list_del_init(&event->list);
-		group->q_len--;
-	}
-	mutex_unlock(&group->notification_mutex);
-}
-
 struct fsnotify_event *fsnotify_remove_first_event(struct fsnotify_group *group)
 {
 	struct fsnotify_event *event;

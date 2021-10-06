@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * drivers/net/ethernet/nxp/lpc_eth.c
  *
@@ -797,15 +800,15 @@ static int lpc_mii_probe(struct net_device *ndev)
 		netdev_info(ndev, "using MII interface\n");
 	else
 		netdev_info(ndev, "using RMII interface\n");
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	phydev = phy_connect(ndev, phydev_name(phydev),
 			     &lpc_handle_link_change,
 			     lpc_phy_interface_mode(&pldat->pdev->dev));
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	phydev = phy_connect(ndev, dev_name(&phydev->dev),
 			     &lpc_handle_link_change,
 			     lpc_phy_interface_mode(&pldat->pdev->dev));
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	if (IS_ERR(phydev)) {
 		netdev_err(ndev, "Could not attach to PHY\n");
@@ -822,14 +825,14 @@ static int lpc_mii_probe(struct net_device *ndev)
 	pldat->duplex = -1;
 	pldat->phy_dev = phydev;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	phy_attached_info(phydev);
 
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	netdev_info(ndev,
 		"attached PHY driver [%s] (mii_bus:phy_addr=%s, irq=%d)\n",
 		phydev->drv->name, dev_name(&phydev->dev), phydev->irq);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	return 0;
 }
 
@@ -862,9 +865,9 @@ static int lpc_mii_init(struct netdata_local *pldat)
 	pldat->mii_bus->priv = pldat;
 	pldat->mii_bus->parent = &pldat->pdev->dev;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	pldat->mii_bus->irq = kmalloc(sizeof(int) * PHY_MAX_ADDR, GFP_KERNEL);
 	if (!pldat->mii_bus->irq) {
 		err = -ENOMEM;
@@ -873,16 +876,16 @@ static int lpc_mii_init(struct netdata_local *pldat)
 
 	for (i = 0; i < PHY_MAX_ADDR; i++)
 		pldat->mii_bus->irq[i] = PHY_POLL;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	platform_set_drvdata(pldat->pdev, pldat->mii_bus);
 
 	if (mdiobus_register(pldat->mii_bus))
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		goto err_out_unregister_bus;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		goto err_out_free_mdio_irq;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	if (lpc_mii_probe(pldat->ndev) != 0)
 		goto err_out_unregister_bus;
@@ -891,12 +894,12 @@ static int lpc_mii_init(struct netdata_local *pldat)
 
 err_out_unregister_bus:
 	mdiobus_unregister(pldat->mii_bus);
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 err_out_free_mdio_irq:
 	kfree(pldat->mii_bus->irq);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 err_out_1:
 	mdiobus_free(pldat->mii_bus);
 err_out:

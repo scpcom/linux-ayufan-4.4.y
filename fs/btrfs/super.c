@@ -331,7 +331,10 @@ int btrfs_parse_options(struct btrfs_root *root, char *options)
 	struct btrfs_fs_info *info = root->fs_info;
 	substring_t args[MAX_OPT_ARGS];
 	char *p, *num, *orig = NULL;
+#ifdef MY_ABC_HERE
+#else
 	u64 cache_gen;
+#endif  
 	int intarg;
 	int ret = 0;
 	char *compress_type;
@@ -340,11 +343,19 @@ int btrfs_parse_options(struct btrfs_root *root, char *options)
 	bool saved_compress_force;
 	int no_compress = 0;
 
+#ifdef MY_ABC_HERE
+#else
 	cache_gen = btrfs_super_cache_generation(root->fs_info->super_copy);
+#endif  
 	if (btrfs_fs_compat_ro(root->fs_info, FREE_SPACE_TREE))
 		btrfs_set_opt(info->mount_opt, FREE_SPACE_TREE);
+#ifdef MY_ABC_HERE
+	else if (btrfs_fs_compat_ro(root->fs_info, FREE_SPACE_TREE_VALID))
+		btrfs_set_opt(info->mount_opt, FREE_SPACE_TREE);
+#else
 	else if (cache_gen)
 		btrfs_set_opt(info->mount_opt, SPACE_CACHE);
+#endif  
 
 	if (!options)
 		goto out;
@@ -755,8 +766,9 @@ out:
 	if (btrfs_fs_compat_ro(root->fs_info, FREE_SPACE_TREE) &&
 	    !btrfs_test_opt(root, FREE_SPACE_TREE) &&
 	    !btrfs_test_opt(root, CLEAR_CACHE)) {
-		 
-		btrfs_set_and_info(root, FREE_SPACE_TREE, "enabling free space tree");
+		btrfs_err(root->fs_info, "cannot disable free space tree");
+		ret = -EINVAL;
+
 	}
 	if (!ret && btrfs_test_opt(root, SPACE_CACHE))
 		btrfs_info(root->fs_info, "disk space caching is enabled");

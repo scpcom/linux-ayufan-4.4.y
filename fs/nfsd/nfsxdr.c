@@ -20,7 +20,6 @@ static u32	nfs_ftypes[] = {
 	NFSOCK, NFBAD,  NFLNK, NFBAD,
 };
 
-
 /*
  * XDR functions for basic NFS types
  */
@@ -301,6 +300,8 @@ nfssvc_decode_writeargs(struct svc_rqst *rqstp, __be32 *p,
 	 * bytes.
 	 */
 	hdr = (void*)p - rqstp->rq_arg.head[0].iov_base;
+	if (hdr > rqstp->rq_arg.head[0].iov_len)
+		return 0;
 	dlen = rqstp->rq_arg.head[0].iov_len + rqstp->rq_arg.page_len
 		- hdr;
 

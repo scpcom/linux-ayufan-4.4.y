@@ -2096,7 +2096,7 @@ void register_console(struct console *newcon)
 }
 EXPORT_SYMBOL(register_console);
 
-#ifdef MY_DEF_HERE
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 static void __ref pci_console_unmap_memory(void __iomem *addr, u32 size)
 {
 	if (!addr || !size)
@@ -2150,7 +2150,7 @@ int unregister_console(struct console *console)
 	console->flags &= ~CON_ENABLED;
 	console_unlock();
 	console_sysfs_notify();
-#ifdef MY_DEF_HERE
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	if (console->pcimapaddress) {
 		pci_console_unmap_memory(console->pcimapaddress, console->pcimapsize);
 	}

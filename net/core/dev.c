@@ -1232,7 +1232,6 @@ EXPORT_SYMBOL_GPL(net_dec_ingress_queue);
 
 static struct static_key netstamp_needed __read_mostly;
 #ifdef HAVE_JUMP_LABEL
- 
 static atomic_t netstamp_needed_deferred;
 static atomic_t netstamp_wanted;
 static void netstamp_clear(struct work_struct *work)
@@ -3011,6 +3010,13 @@ static inline struct sk_buff *handle_ing(struct sk_buff *skb,
 #endif  
 	return skb;
 }
+
+bool netdev_is_rx_handler_busy(struct net_device *dev)
+{
+	ASSERT_RTNL();
+	return dev && rtnl_dereference(dev->rx_handler);
+}
+EXPORT_SYMBOL_GPL(netdev_is_rx_handler_busy);
 
 int netdev_rx_handler_register(struct net_device *dev,
 			       rx_handler_func_t *rx_handler,

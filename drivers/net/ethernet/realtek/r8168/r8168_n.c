@@ -1,6 +1,3 @@
-#ifndef MY_ABC_HERE
-#define MY_ABC_HERE
-#endif
 /*
 ################################################################################
 #
@@ -7517,11 +7514,7 @@ rtl8168_hw_ephy_config(struct net_device *dev)
                 rtl8168_ephy_write(ioaddr, 0x05, 0x2089);
                 rtl8168_ephy_write(ioaddr, 0x06, 0x5881);
 
-#ifdef MY_DEF_HERE
-                rtl8168_ephy_write(ioaddr, 0x04, 0x854A);
-#else /* MY_DEF_HERE */
                 rtl8168_ephy_write(ioaddr, 0x04, 0x154A);
-#endif /* MY_DEF_HERE */
                 rtl8168_ephy_write(ioaddr, 0x01, 0x068B);
         }
 }

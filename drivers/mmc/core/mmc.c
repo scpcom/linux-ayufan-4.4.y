@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/drivers/mmc/core/mmc.c
  *
@@ -2004,7 +2007,7 @@ static const struct mmc_bus_ops mmc_ops = {
 };
 
 /*
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
  * Parse mmc-card dt sub-node and set eMMC common caps
  * if mmc-card exists.
  * If mmc-card is detected, return true.
@@ -2029,7 +2032,7 @@ bool mmc_of_parse_mmc_card(struct mmc_host *host)
 EXPORT_SYMBOL_GPL(mmc_of_parse_mmc_card);
 
 /*
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
  * Starting point for MMC card init.
  */
 int mmc_attach_mmc(struct mmc_host *host)

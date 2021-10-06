@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Copyright (C) 2009  Red Hat, Inc.
  *
@@ -115,11 +118,11 @@ static void set_recommended_min_free_kbytes(void)
 	for_each_populated_zone(zone)
 		nr_zones++;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	/* Make sure at least 2 hugepages are free for MIGRATE_RESERVE */
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	/* Ensure 2 pageblocks are free to assist fragmentation avoidance */
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	recommended_min = pageblock_nr_pages * nr_zones * 2;
 
 	/*

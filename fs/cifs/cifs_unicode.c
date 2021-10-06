@@ -96,6 +96,15 @@ convert_sfm_char(const __u16 src_char, char *target)
 	case SFM_PERIOD:
 		*target = '.';
 		break;
+#ifdef MY_ABC_HERE
+	 
+	case UNI_DIVSLASH:
+		*target = '/';
+		break;
+	case UNI_CRGRET:
+		*target = '\r';
+		break;
+#endif  
 	default:
 		return false;
 	}
@@ -426,6 +435,15 @@ static __le16 convert_to_sfm_char(char src_char, bool end_of_string)
 		else
 			dest_char = 0;
 		break;
+#ifdef MY_ABC_HERE
+	 
+	case '/':
+		dest_char = cpu_to_le16(UNI_DIVSLASH);
+		break;
+	case '\r':
+		dest_char = cpu_to_le16(UNI_CRGRET);
+		break;
+#endif  
 	default:
 		dest_char = 0;
 	}

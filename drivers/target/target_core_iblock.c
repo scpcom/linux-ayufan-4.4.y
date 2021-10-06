@@ -51,7 +51,6 @@ static inline struct iblock_dev *IBLOCK_DEV(struct se_device *dev)
 	return container_of(dev, struct iblock_dev, dev);
 }
 
-
 static int iblock_attach_hba(struct se_hba *hba, u32 host_id)
 {
 	pr_debug("CORE_HBA[%d] - TCM iBlock HBA Driver %s on"
@@ -652,10 +651,10 @@ iblock_execute_rw(struct se_cmd *cmd, struct scatterlist *sgl, u32 sgl_nents,
 		 * Force writethrough using WRITE_FUA if a volatile write cache
 		 * is not enabled, or if initiator set the Force Unit Access bit.
 		 */
-		if (q->flush_flags & REQ_FUA) {
+		if (test_bit(QUEUE_FLAG_FUA, &q->queue_flags)) {
 			if (cmd->se_cmd_flags & SCF_FUA)
 				rw = WRITE_FUA;
-			else if (!(q->flush_flags & REQ_FLUSH))
+			else if (!test_bit(QUEUE_FLAG_WC, &q->queue_flags))
 				rw = WRITE_FUA;
 			else
 				rw = WRITE;
@@ -801,7 +800,7 @@ static bool iblock_get_write_cache(struct se_device *dev)
 	struct block_device *bd = ib_dev->ibd_bd;
 	struct request_queue *q = bdev_get_queue(bd);
 
-	return q->flush_flags & REQ_FLUSH;
+	return test_bit(QUEUE_FLAG_WC, &q->queue_flags);
 }
 
 static const struct target_backend_ops iblock_ops = {

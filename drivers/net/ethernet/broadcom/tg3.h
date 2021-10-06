@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* $Id: tg3.h,v 1.37.2.32 2002/03/11 12:18:18 davem Exp $
  * tg3.h: Definitions for Broadcom Tigon3 ethernet driver.
  *
@@ -3243,11 +3246,11 @@ struct tg3 {
 	int				pcie_readrq;
 
 	struct mii_bus			*mdio_bus;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	int				mdio_irq[PHY_MAX_ADDR];
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	int				old_link;
 
 	u8				phy_addr;

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* Copyright (c) 2014, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -2706,13 +2709,13 @@ static struct amba_id etm4_ids[] = {
 		.mask	= 0x000fffff,
 		.data	= "ETM 4.0",
 	},
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	{       /* ETM 4.0 - CA-72 ID */
 		.id	= 0x000bb95a,
 		.mask	= 0x000fffff,
 		.data	= "ETM 4.0",
 	},
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	{ 0, 0},
 };
 

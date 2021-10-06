@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * TI/National Semiconductor LP3943 GPIO driver
  *
@@ -205,11 +208,11 @@ static int lp3943_gpio_probe(struct platform_device *pdev)
 
 	lp3943_gpio->lp3943 = lp3943;
 	lp3943_gpio->chip = lp3943_gpio_chip;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	lp3943_gpio->chip.parent = &pdev->dev;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	lp3943_gpio->chip.dev = &pdev->dev;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	platform_set_drvdata(pdev, lp3943_gpio);
 

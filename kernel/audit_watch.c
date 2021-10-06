@@ -2,6 +2,7 @@
 #define MY_ABC_HERE
 #endif
  
+#include <linux/file.h>
 #include <linux/kernel.h>
 #include <linux/audit.h>
 #include <linux/kthread.h>

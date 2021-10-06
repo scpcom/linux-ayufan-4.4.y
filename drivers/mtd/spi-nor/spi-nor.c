@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Based on m25p80.c, by Mike Lavender (mike@steroidmicros.com), with
  * influence from lart.c (Abraham Van Der Merwe) and mtd_dataflash.c
@@ -1212,9 +1215,9 @@ int spi_nor_scan(struct spi_nor *nor, const char *name, enum read_mode mode)
 		mtd->flags |= MTD_NO_ERASE;
 
 	mtd->dev.parent = dev;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	mtd_set_of_node(mtd, np);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	nor->page_size = info->page_size;
 	mtd->writebufsize = nor->page_size;
 

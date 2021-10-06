@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
  /*
  * ***************************************************************************
  * Copyright (C) 2016 Marvell International Ltd.
@@ -38,14 +41,14 @@
 #include <linux/of_address.h>
 #include <linux/of_device.h>
 #include <linux/phy/phy.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 #include <linux/if_vlan.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
 #include <linux/cpu.h>
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 #include <linux/phy.h>
 #include <linux/clk.h>
 #include <linux/hrtimer.h>
@@ -56,11 +59,11 @@
 #include <net/busy_poll.h>
 #include <asm/cacheflush.h>
 #include <linux/dma-mapping.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 #include <dt-bindings/phy/phy-comphy-mvebu.h>
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 #include <dt-bindings/phy/phy-mvebu-comphy.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 #include "mv_pp2x.h"
 #include "mv_pp2x_hw.h"
@@ -81,11 +84,11 @@
 
 #define MVPP2_SKB_TEST_SIZE 64
 #define MVPP2_ADDRESS 0xf2000000
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 #define CPN110_ADDRESS_SPACE_SIZE (16 * 1024 * 1024)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 #define CPN110_ADDRESS_SPACE_SIZE (16*1024*1024)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 /* Declaractions */
 #if defined(CONFIG_NETMAP) || defined(CONFIG_NETMAP_MODULE)
@@ -222,11 +225,11 @@ static inline int mv_pp2x_txq_free_count(struct mv_pp2x_txq_pcpu *txq_pcpu)
 	int index_modulo = (txq_pcpu->txq_get_index - txq_pcpu->txq_put_index +
 				txq_pcpu->size) % txq_pcpu->size;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (unlikely(index_modulo == 0))
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (index_modulo == 0)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		return txq_pcpu->size;
 
 	return index_modulo;
@@ -234,33 +237,33 @@ static inline int mv_pp2x_txq_free_count(struct mv_pp2x_txq_pcpu *txq_pcpu)
 
 static void mv_pp2x_txq_inc_get(struct mv_pp2x_txq_pcpu *txq_pcpu)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (unlikely(txq_pcpu->txq_get_index == txq_pcpu->size - 1))
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	txq_pcpu->txq_get_index++;
 	if (txq_pcpu->txq_get_index == txq_pcpu->size)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		txq_pcpu->txq_get_index = 0;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	else
 		txq_pcpu->txq_get_index++;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 }
 
 void mv_pp2x_txq_inc_error(struct mv_pp2x_txq_pcpu *txq_pcpu, int num)
 {
 	for (; num > 0; num--) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		if (unlikely(txq_pcpu->txq_put_index < 1))
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		txq_pcpu->txq_put_index--;
 		if (txq_pcpu->txq_put_index < 0)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			txq_pcpu->txq_put_index = txq_pcpu->size - 1;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		else
 			txq_pcpu->txq_put_index--;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		txq_pcpu->tx_skb[txq_pcpu->txq_put_index] = 0;
 		txq_pcpu->data_size[txq_pcpu->txq_put_index] = 0;
 		txq_pcpu->tx_buffs[txq_pcpu->txq_put_index] = 0;
@@ -276,17 +279,17 @@ void mv_pp2x_txq_inc_put(enum mvppv2_version pp2_ver,
 	txq_pcpu->data_size[txq_pcpu->txq_put_index] = tx_desc->data_size;
 	txq_pcpu->tx_buffs[txq_pcpu->txq_put_index] =
 				mv_pp2x_txdesc_phys_addr_get(pp2_ver, tx_desc);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (unlikely(txq_pcpu->txq_put_index == txq_pcpu->size - 1))
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	txq_pcpu->txq_put_index++;
 	if (txq_pcpu->txq_put_index == txq_pcpu->size)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		txq_pcpu->txq_put_index = 0;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	else
 		txq_pcpu->txq_put_index++;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 #if defined(__BIG_ENDIAN)
 	if (pp2_ver == PPV21)
 		mv_pp21_tx_desc_swap(tx_desc);
@@ -297,17 +300,17 @@ void mv_pp2x_txq_inc_put(enum mvppv2_version pp2_ver,
 
 static void mv_pp2x_txq_dec_put(struct mv_pp2x_txq_pcpu *txq_pcpu)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (unlikely(txq_pcpu->txq_put_index == 0))
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (txq_pcpu->txq_put_index == 0)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		txq_pcpu->txq_put_index = txq_pcpu->size - 1;
 	else
 		txq_pcpu->txq_put_index--;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 static void mv_pp2x_extra_pool_inc(struct mv_pp2x_ext_buf_pool *ext_buf_pool)
 {
 	if (unlikely(ext_buf_pool->buf_pool_next_free == ext_buf_pool->buf_pool_size - 1))
@@ -316,7 +319,7 @@ static void mv_pp2x_extra_pool_inc(struct mv_pp2x_ext_buf_pool *ext_buf_pool)
 		ext_buf_pool->buf_pool_next_free++;
 }
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 static u8 mv_pp2x_first_pool_get(struct mv_pp2x *priv)
 {
 	return priv->pp2_cfg.first_bm_pool;
@@ -390,11 +393,11 @@ static int mv_pp2x_bm_pool_create(struct device *dev,
 	/* Driver enforces size= x16 both for PPv21 and for PPv22, even though
 	 *    PPv22 HW allows size= x8
 	 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (!IS_ALIGNED(size, (1 << MVPP21_BM_POOL_SIZE_OFFSET)))
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (!IS_ALIGNED(size, (1<<MVPP21_BM_POOL_SIZE_OFFSET)))
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		return -EINVAL;
 
 	/*YuvalC: Two pointers per buffer, existing bug fixed. */
@@ -570,11 +573,11 @@ err_unroll_pools:
 
 static int mv_pp2x_bm_init(struct platform_device *pdev, struct mv_pp2x *priv)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	int i, err, cpu;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	int i, err;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	u8 first_pool = mv_pp2x_first_pool_get(priv);
 	u8 num_pools = MVPP2_BM_SWF_NUM_POOLS;
 
@@ -592,23 +595,23 @@ static int mv_pp2x_bm_init(struct platform_device *pdev, struct mv_pp2x *priv)
 	if (!priv->bm_pools)
 		return -ENOMEM;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	/* On PPV22 high virtual and physical address buffer manager register should be
 	 * initialized to 0 to avoid writing to the random addresses an 32 Bit systems.
 	 */
 	if (priv->pp2_version == PPV22) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		for_each_present_cpu(cpu) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		for_each_online_cpu(cpu) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 			/* Reset the BM virtual and physical address high register */
 			mv_pp2x_relaxed_write(&priv->hw, MVPP22_BM_PHY_VIRT_HIGH_RLS_REG,
 					      0, cpu);
 		}
 	}
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	err = mv_pp2x_bm_pools_init(pdev, priv, first_pool, num_pools);
 	if (err < 0)
 		return err;
@@ -726,11 +729,11 @@ static struct mv_pp2x_bm_pool *mv_pp2x_bm_pool_stop_use(
 int mv_pp2x_swf_bm_pool_assign(struct mv_pp2x_port *port, u32 rxq,
 			       u32 long_id, u32 short_id)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	struct mv_pp2x_hw *hw = &port->priv->hw;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	struct mv_pp2x_hw *hw = &(port->priv->hw);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	if (rxq >= port->num_rx_queues)
 		return -ENOMEM;
@@ -746,38 +749,38 @@ int mv_pp2x_swf_bm_pool_assign(struct mv_pp2x_port *port, u32 rxq,
 static int mv_pp2x_swf_bm_pool_init(struct mv_pp2x_port *port)
 {
 	int rxq;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	enum mv_pp2x_bm_pool_log_num long_log_pool, short_log_pool;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	enum mv_pp2x_bm_pool_log_num long_log_pool;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
 	struct mv_pp2x_hw *hw = &port->priv->hw;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	struct mv_pp2x_hw *hw = &(port->priv->hw);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	/* If port pkt_size is higher than 1518B:
 	* HW Long pool - SW Jumbo pool, HW Short pool - SW Short pool
 	* esle: HW Long pool - SW Long pool, HW Short pool - SW Short pool
 	*/
 	if (port->pkt_size > MVPP2_BM_LONG_PKT_SIZE) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	if (port->pkt_size > MVPP2_BM_LONG_PKT_SIZE)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		long_log_pool = MVPP2_BM_SWF_JUMBO_POOL;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		short_log_pool = MVPP2_BM_SWF_LONG_POOL;
 	} else {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	else
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		long_log_pool = MVPP2_BM_SWF_LONG_POOL;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		short_log_pool = MVPP2_BM_SWF_SHORT_POOL;
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 
 	if (!port->pool_long) {
 		port->pool_long =
@@ -794,11 +797,11 @@ static int mv_pp2x_swf_bm_pool_init(struct mv_pp2x_port *port)
 
 	if (!port->pool_short) {
 		port->pool_short =
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 			mv_pp2x_bm_pool_use(port, short_log_pool);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 			mv_pp2x_bm_pool_use(port, MVPP2_BM_SWF_SHORT_POOL);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		if (!port->pool_short)
 			return -ENOMEM;
 
@@ -815,30 +818,30 @@ static int mv_pp2x_swf_bm_pool_init(struct mv_pp2x_port *port)
 static int mv_pp2x_bm_update_mtu(struct net_device *dev, int mtu)
 {
 	struct mv_pp2x_port *port = netdev_priv(dev);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	struct mv_pp2x_bm_pool *old_long_port_pool = port->pool_long;
 	struct mv_pp2x_bm_pool *old_short_port_pool = port->pool_short;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	struct mv_pp2x_bm_pool *old_port_pool = port->pool_long;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	struct mv_pp2x_hw *hw = &port->priv->hw;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	enum mv_pp2x_bm_pool_log_num new_long_pool, old_long_pool;
 	enum mv_pp2x_bm_pool_log_num new_short_pool, old_short_pool;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	enum mv_pp2x_bm_pool_log_num new_log_pool;
 	enum mv_pp2x_bm_pool_log_num old_log_pool;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	int rxq;
 	int pkt_size = MVPP2_RX_PKT_SIZE(mtu);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	old_long_pool = old_long_port_pool->log_id;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	old_log_pool = old_port_pool->log_id;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	/* If port MTU is higher than 1518B:
 	* HW Long pool - SW Jumbo pool, HW Short pool - SW Short pool
 	* esle: HW Long pool - SW Long pool, HW Short pool - SW Short pool
@@ -850,22 +853,22 @@ static int mv_pp2x_bm_update_mtu(struct net_device *dev, int mtu)
 		new_long_pool = MVPP2_BM_SWF_LONG_POOL;
 		new_short_pool = MVPP2_BM_SWF_SHORT_POOL;
 	}
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	if (pkt_size > MVPP2_BM_LONG_PKT_SIZE)
 		new_log_pool = MVPP2_BM_SWF_JUMBO_POOL;
 	else
 		new_log_pool = MVPP2_BM_SWF_LONG_POOL;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	if (new_long_pool != old_long_pool) {
 		/* Add port to new short&long pool */
 		port->pool_long = mv_pp2x_bm_pool_use(port, new_long_pool);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	if (new_log_pool != old_log_pool) {
 		/* Add port to new pool */
 		port->pool_long = mv_pp2x_bm_pool_use(port, new_log_pool);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		if (!port->pool_long)
 			return -ENOMEM;
 		port->pool_long->port_map |= (1 << port->id);
@@ -873,7 +876,7 @@ static int mv_pp2x_bm_update_mtu(struct net_device *dev, int mtu)
 			port->priv->pp2xdata->mv_pp2x_rxq_long_pool_set(hw,
 			port->rxqs[rxq]->id, port->pool_long->id);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		port->pool_short = mv_pp2x_bm_pool_use(port, new_short_pool);
 		if (!port->pool_short)
 			return -ENOMEM;
@@ -888,18 +891,18 @@ static int mv_pp2x_bm_update_mtu(struct net_device *dev, int mtu)
 
 		mv_pp2x_bm_pool_stop_use(port, old_short_pool);
 		old_short_port_pool->port_map &= ~(1 << port->id);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		/* Remove port from old pool */
 		mv_pp2x_bm_pool_stop_use(port, old_log_pool);
 		old_port_pool->port_map &= ~(1 << port->id);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 
 		/* Update L4 checksum when jumbo enable/disable on port */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		if (new_long_pool == MVPP2_BM_SWF_JUMBO_POOL) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		if (new_log_pool == MVPP2_BM_SWF_JUMBO_POOL) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 			if (port->id != port->priv->l4_chksum_jumbo_port) {
 				dev->features &=
 					~(NETIF_F_IP_CSUM | NETIF_F_IPV6_CSUM);
@@ -984,13 +987,13 @@ static inline void *mv_pp2_extra_pool_get(struct mv_pp2x_port *port)
 	struct mv_pp2x_ext_buf_struct *ext_buf_struct;
 
 	if (!list_empty(&port_pcpu->ext_buf_port_list)) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		ext_buf_struct = list_last_entry(&port_pcpu->ext_buf_port_list,
 						 struct mv_pp2x_ext_buf_struct, ext_buf_list);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 		ext_buf_struct = list_first_entry(&port_pcpu->ext_buf_port_list,
 				struct mv_pp2x_ext_buf_struct, ext_buf_list);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 		list_del(&ext_buf_struct->ext_buf_list);
 		port_pcpu->ext_buf_pool->buf_pool_in_use--;
 
@@ -1003,45 +1006,45 @@ static inline void *mv_pp2_extra_pool_get(struct mv_pp2x_port *port)
 	return ext_buf;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 static inline int mv_pp2_extra_pool_put(struct mv_pp2x_port *port, void *ext_buf,
 					int cpu)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 static inline int mv_pp2_extra_pool_put(struct mv_pp2x_port *port, void *ext_buf)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	struct mv_pp2x_port_pcpu *port_pcpu = per_cpu_ptr(port->pcpu, cpu);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	struct mv_pp2x_port_pcpu *port_pcpu = this_cpu_ptr(port->pcpu);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	struct mv_pp2x_ext_buf_struct *ext_buf_struct;
 
 	if (port_pcpu->ext_buf_pool->buf_pool_in_use >= port_pcpu->ext_buf_pool->buf_pool_size) {
 		kfree(ext_buf);
 		return 1;
 	}
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	port_pcpu->ext_buf_pool->buf_pool_in_use++;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
 	ext_buf_struct =
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		&port_pcpu->ext_buf_pool->ext_buf_struct[port_pcpu->ext_buf_pool->buf_pool_next_free];
 	mv_pp2x_extra_pool_inc(port_pcpu->ext_buf_pool);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 		&port_pcpu->ext_buf_pool->ext_buf_struct[port_pcpu->ext_buf_pool->buf_pool_in_use];
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	ext_buf_struct->ext_buf_data = ext_buf;
 
 	list_add(&ext_buf_struct->ext_buf_list,
 				&port_pcpu->ext_buf_port_list);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	port_pcpu->ext_buf_pool->buf_pool_in_use++;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
 	return 0;
 }
@@ -1055,7 +1058,7 @@ int mv_pp2x_txq_reserved_desc_num_proc(
 					struct mv_pp2x_txq_pcpu *txq_pcpu,
 					int num, int cpu)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	int req;
 
 	if (likely(txq_pcpu->reserved_num >= num))
@@ -1088,7 +1091,7 @@ int mv_pp2x_tso_txq_reserved_desc_num_proc(
 					struct mv_pp2x_txq_pcpu *txq_pcpu,
 					int num, int cpu)
 {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	int req, cpu_desc, desc_count;
 
 	if (txq_pcpu->reserved_num >= num)
@@ -1105,19 +1108,19 @@ int mv_pp2x_tso_txq_reserved_desc_num_proc(
 
 	req = MVPP2_CPU_DESC_CHUNK;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (unlikely((num - txq_pcpu->reserved_num) > req)) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if ((num - txq_pcpu->reserved_num) > req) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		req = num - txq_pcpu->reserved_num;
 		desc_count = 0;
 		/* Compute total of used descriptors */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		for_each_present_cpu(cpu_desc) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		for_each_online_cpu(cpu_desc) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 			int txq_count;
 			struct mv_pp2x_txq_pcpu *txq_pcpu_aux;
 
@@ -1127,11 +1130,11 @@ int mv_pp2x_tso_txq_reserved_desc_num_proc(
 		}
 		desc_count += req;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		if (unlikely(desc_count > txq->size))
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		if (desc_count > txq->size)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			return -ENOMEM;
 	}
 
@@ -1139,11 +1142,11 @@ int mv_pp2x_tso_txq_reserved_desc_num_proc(
 							req, cpu);
 
 	/* OK, the descriptor cound has been updated: check again. */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (unlikely(txq_pcpu->reserved_num < num))
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (txq_pcpu->reserved_num < num)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		return -ENOMEM;
 
 	return 0;
@@ -1166,75 +1169,75 @@ static void mv_pp2x_txq_bufs_free(struct mv_pp2x_port *port,
 		uintptr_t skb = (uintptr_t)txq_pcpu->tx_skb[txq_pcpu->txq_get_index];
 		int data_size = txq_pcpu->data_size[txq_pcpu->txq_get_index];
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		dma_unmap_single(port->dev->dev.parent, buf_phys_addr,
 				 data_size, DMA_TO_DEVICE);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		mv_pp2x_txq_inc_get(txq_pcpu);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 		if (skb & MVPP2_ETH_SHADOW_EXT) {
 			skb &= ~MVPP2_ETH_SHADOW_EXT;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 			mv_pp2_extra_pool_put(port, (void *)skb, txq_pcpu->cpu);
 			mv_pp2x_txq_inc_get(txq_pcpu);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 			mv_pp2_extra_pool_put(port, (void *)skb);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			continue;
 		}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		dma_unmap_single(port->dev->dev.parent, buf_phys_addr,
 				 data_size, DMA_TO_DEVICE);
 
 		if (!skb)
 			continue;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		if (skb & MVPP2_ETH_SHADOW_SKB) {
 			skb &= ~MVPP2_ETH_SHADOW_SKB;
 			dev_kfree_skb_any((struct sk_buff *)skb);
 		}
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		mv_pp2x_txq_inc_get(txq_pcpu);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	}
 }
 
 static void mv_pp2x_txq_buf_free(struct mv_pp2x_port *port, uintptr_t skb,
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 				 dma_addr_t  buf_phys_addr, int data_size,
 				 int cpu)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 				 dma_addr_t  buf_phys_addr, int data_size)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	dma_unmap_single(port->dev->dev.parent, buf_phys_addr,
 			 data_size, DMA_TO_DEVICE);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	if (skb & MVPP2_ETH_SHADOW_EXT) {
 		skb &= ~MVPP2_ETH_SHADOW_EXT;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		mv_pp2_extra_pool_put(port, (void *)skb, cpu);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		mv_pp2_extra_pool_put(port, (void *)skb);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		return;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	dma_unmap_single(port->dev->dev.parent, buf_phys_addr,
 			 data_size, DMA_TO_DEVICE);
 
 	if (!skb)
 		return;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	if (skb & MVPP2_ETH_SHADOW_SKB) {
 		skb &= ~MVPP2_ETH_SHADOW_SKB;
 		dev_kfree_skb_any((struct sk_buff *)skb);
@@ -1246,12 +1249,12 @@ static void mv_pp2x_txq_done(struct mv_pp2x_port *port,
 				   struct mv_pp2x_tx_queue *txq,
 				   struct mv_pp2x_txq_pcpu *txq_pcpu)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	struct netdev_queue *nq = netdev_get_tx_queue(port->dev, (txq->log_id +
 						     (txq_pcpu->cpu * mv_pp2x_txq_number)));
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	struct netdev_queue *nq = netdev_get_tx_queue(port->dev, txq->log_id);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	int tx_done;
 
 #ifdef DEV_NETMAP
@@ -1270,11 +1273,11 @@ static void mv_pp2x_txq_done(struct mv_pp2x_port *port,
 	mv_pp2x_txq_bufs_free(port, txq_pcpu, tx_done);
 
 	if (netif_tx_queue_stopped(nq))
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		if (mv_pp2x_txq_free_count(txq_pcpu) >= port->txq_stop_limit)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		if (mv_pp2x_txq_free_count(txq_pcpu) >= (MAX_SKB_FRAGS + 2))
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			netif_tx_wake_queue(nq);
 }
 
@@ -1433,11 +1436,11 @@ static void mv_pp2x_rxq_drop_pkts(struct mv_pp2x_port *port,
 static void mv_pp2x_rxq_deinit(struct mv_pp2x_port *port,
 				   struct mv_pp2x_rx_queue *rxq)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	struct mv_pp2x_hw *hw = &port->priv->hw;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	struct mv_pp2x_hw *hw = &(port->priv->hw);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	mv_pp2x_rxq_drop_pkts(port, rxq);
 
@@ -1468,11 +1471,11 @@ static int mv_pp2x_txq_init(struct mv_pp2x_port *port,
 {
 	u32 val;
 	int cpu, desc, desc_per_txq, tx_port_num;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	struct mv_pp2x_hw *hw = &port->priv->hw;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	struct mv_pp2x_hw *hw = &(port->priv->hw);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	struct mv_pp2x_txq_pcpu *txq_pcpu;
 	dma_addr_t first_desc_phy;
 
@@ -1515,11 +1518,11 @@ static int mv_pp2x_txq_init(struct mv_pp2x_port *port,
 
 	mv_pp2x_write(hw, MVPP2_TXQ_PREF_BUF_REG,
 		      MVPP2_PREF_BUF_PTR(desc) | MVPP2_PREF_BUF_SIZE_16 |
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		      MVPP2_PREF_BUF_THRESH(desc_per_txq / 2));
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		      MVPP2_PREF_BUF_THRESH(desc_per_txq/2));
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* WRR / EJP configuration - indirect access */
 	tx_port_num = mv_pp2x_egress_port(port);
@@ -1535,11 +1538,11 @@ static int mv_pp2x_txq_init(struct mv_pp2x_port *port,
 	mv_pp2x_write(hw, MVPP2_TXQ_SCHED_TOKEN_SIZE_REG(txq->log_id),
 		      val);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	for_each_present_cpu(cpu) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	for_each_online_cpu(cpu) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		txq_pcpu = per_cpu_ptr(txq->pcpu, cpu);
 		txq_pcpu->size = txq->size;
 		txq_pcpu->tx_skb = kmalloc(txq_pcpu->size *
@@ -1558,11 +1561,11 @@ static int mv_pp2x_txq_init(struct mv_pp2x_port *port,
 		if (!txq_pcpu->data_size)
 			goto error;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 		txq_pcpu->count = 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 		txq_pcpu->reserved_num = 0;
 		txq_pcpu->txq_put_index = 0;
 		txq_pcpu->txq_get_index = 0;
@@ -1571,17 +1574,17 @@ static int mv_pp2x_txq_init(struct mv_pp2x_port *port,
 	return 0;
 
 error:
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	for_each_present_cpu(cpu) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	for_each_online_cpu(cpu) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		txq_pcpu = per_cpu_ptr(txq->pcpu, cpu);
 		kfree(txq_pcpu->tx_skb);
 		kfree(txq_pcpu->tx_buffs);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		kfree(txq_pcpu->data_size);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	}
 
 	dma_free_coherent(port->dev->dev.parent,
@@ -1599,19 +1602,19 @@ static void mv_pp2x_txq_deinit(struct mv_pp2x_port *port,
 	struct mv_pp2x_hw *hw = &port->priv->hw;
 	int cpu;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	for_each_present_cpu(cpu) {
 		preempt_disable();
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	for_each_online_cpu(cpu) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		txq_pcpu = per_cpu_ptr(txq->pcpu, cpu);
 		kfree(txq_pcpu->tx_skb);
 		kfree(txq_pcpu->tx_buffs);
 		kfree(txq_pcpu->data_size);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		preempt_enable();
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	}
 
 	if (txq->desc_mem)
@@ -1691,16 +1694,16 @@ static void mv_pp2x_txq_clean(struct mv_pp2x_port *port,
 	val &= ~MVPP2_TXQ_DRAIN_EN_MASK;
 	mv_pp2x_write(hw, MVPP2_TXQ_PREF_BUF_REG, val);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	for_each_present_cpu(cpu) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	for_each_online_cpu(cpu) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		int txq_count;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		preempt_disable();
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		txq_pcpu = per_cpu_ptr(txq->pcpu, cpu);
 
 		/* Release all packets */
@@ -1710,9 +1713,9 @@ static void mv_pp2x_txq_clean(struct mv_pp2x_port *port,
 		/* Reset queue */
 		txq_pcpu->txq_put_index = 0;
 		txq_pcpu->txq_get_index = 0;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		preempt_enable();
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	}
 }
 
@@ -1720,11 +1723,11 @@ static void mv_pp2x_txq_clean(struct mv_pp2x_port *port,
 void mv_pp2x_cleanup_txqs(struct mv_pp2x_port *port)
 {
 	struct mv_pp2x_tx_queue *txq;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	int queue, cpu;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	int queue;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	u32 val;
 	struct mv_pp2x_hw *hw = &port->priv->hw;
 
@@ -1740,7 +1743,7 @@ void mv_pp2x_cleanup_txqs(struct mv_pp2x_port *port)
 		mv_pp2x_txq_deinit(port, txq);
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	/* Mvpp21 and Mvpp22 has different per cpu register access.
 	* Mvpp21 - to access CPUx should run on CPUx
 	* Mvpp22 - CPUy can access CPUx from CPUx address space
@@ -1753,9 +1756,9 @@ void mv_pp2x_cleanup_txqs(struct mv_pp2x_port *port)
 							   port->txqs[queue]->id);
 	else
 		on_each_cpu(mv_pp2x_txq_sent_counter_clear, port, 1);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	on_each_cpu(mv_pp2x_txq_sent_counter_clear, port, 1);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 
 	val &= ~MVPP2_TX_PORT_FLUSH_MASK(port->id);
 	mv_pp2x_write(hw, MVPP2_TX_PORT_FLUSH_REG, val);
@@ -1791,11 +1794,11 @@ err_cleanup:
 int mv_pp2x_setup_txqs(struct mv_pp2x_port *port)
 {
 	struct mv_pp2x_tx_queue *txq;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	int queue, err, cpu;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	int queue, err;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 
 	for (queue = 0; queue < port->num_tx_queues; queue++) {
 		txq = port->txqs[queue];
@@ -1803,15 +1806,15 @@ int mv_pp2x_setup_txqs(struct mv_pp2x_port *port)
 		if (err)
 			goto err_cleanup;
 	}
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (port->priv->pp2xdata->interrupt_tx_done) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (port->priv->pp2xdata->interrupt_tx_done == true) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		mv_pp2x_tx_done_time_coal_set(port, port->tx_time_coal);
 		on_each_cpu(mv_pp2x_tx_done_pkts_coal_set, port, 1);
 	}
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 
 	/* Mvpp21 and Mvpp22 has different per cpu register access.
 	* Mvpp21 - to access CPUx should run on CPUx
@@ -1827,9 +1830,9 @@ int mv_pp2x_setup_txqs(struct mv_pp2x_port *port)
 	else
 		on_each_cpu(mv_pp2x_txq_sent_counter_clear, port, 1);
 
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	on_each_cpu(mv_pp2x_txq_sent_counter_clear, port, 1);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	return 0;
 
 err_cleanup:
@@ -1860,11 +1863,11 @@ static irqreturn_t mv_pp2x_isr(int irq, void *dev_id)
 	mv_pp2x_qvector_interrupt_disable(q_vec);
 	pr_debug("%s cpu_id(%d) port_id(%d) q_vec(%d), qv_type(%d)\n",
 		__func__, smp_processor_id(), q_vec->parent->id,
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		(int)(q_vec - q_vec->parent->q_vector), q_vec->qv_type);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		(int)(q_vec-q_vec->parent->q_vector), q_vec->qv_type);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	napi_schedule(&q_vec->napi);
 
 	return IRQ_HANDLED;
@@ -2046,10 +2049,10 @@ static void mv_pp22_link_event(struct net_device *dev)
 	if (phydev->link) {
 		if ((port->mac_data.speed != phydev->speed) ||
 		    (port->mac_data.duplex != phydev->duplex)) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 			if (port->comphy)
 				mv_gop110_update_comphy(port, phydev->speed);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 			port->mac_data.duplex = phydev->duplex;
 			port->mac_data.speed  = phydev->speed;
 		}
@@ -2071,42 +2074,42 @@ static void mv_pp22_link_event(struct net_device *dev)
 			mv_gop110_port_events_mask(&port->priv->hw.gop,
 						   &port->mac_data);
 			mv_gop110_port_enable(&port->priv->hw.gop,
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 					      &port->mac_data, port->comphy);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 					      &port->mac_data);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 			mv_pp2x_egress_enable(port);
 			mv_pp2x_ingress_enable(port);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 			netif_carrier_on(dev);
 			netif_tx_wake_all_queues(dev);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			mv_gop110_port_events_unmask(&port->priv->hw.gop,
 						     &port->mac_data);
 			port->mac_data.flags |= MV_EMAC_F_LINK_UP;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 			netdev_info(dev, "link up\n");
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		} else {
 			mv_pp2x_ingress_disable(port);
 			mv_pp2x_egress_disable(port);
 			mv_gop110_port_events_mask(&port->priv->hw.gop,
 						   &port->mac_data);
 			mv_gop110_port_disable(&port->priv->hw.gop,
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 					       &port->mac_data, port->comphy);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 					       &port->mac_data);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
 			netif_carrier_off(dev);
 			netif_tx_stop_all_queues(dev);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			port->mac_data.flags &= ~MV_EMAC_F_LINK_UP;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 			netdev_info(dev, "link down\n");
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		}
 	}
 }
@@ -2164,9 +2167,9 @@ static enum hrtimer_restart mv_pp2x_hr_timer_cb(struct hrtimer *timer)
 	return HRTIMER_NORESTART;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 /* The function get the number of cpu online */
 static int mv_pp2x_num_online_cpu_get(struct mv_pp2x *pp2)
 {
@@ -2181,7 +2184,7 @@ static int mv_pp2x_num_online_cpu_get(struct mv_pp2x *pp2)
 	return num_online_cpus;
 }
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 /* The function calculate the width, such as cpu width, cos queue width */
 static void mv_pp2x_width_calc(struct mv_pp2x_port *port, u32 *cpu_width,
 			       u32 *cos_width, u32 *port_rxq_width)
@@ -2192,11 +2195,11 @@ static void mv_pp2x_width_calc(struct mv_pp2x_port *port, u32 *cpu_width,
 		/* Calculate CPU width */
 		if (cpu_width)
 			*cpu_width = ilog2(roundup_pow_of_two(
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 				num_online_cpus()));
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 				mv_pp2x_num_online_cpu_get(pp2)));
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		/* Calculate cos queue width */
 		if (cos_width)
 			*cos_width = ilog2(roundup_pow_of_two(
@@ -2223,22 +2226,22 @@ int mv_pp2x_cos_classifier_set(struct mv_pp2x_port *port,
 {
 	int index, flow_idx, lkpid;
 	int data[MVPP2_LKP_PTR_NUM];
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	struct mv_pp2x_hw *hw = &port->priv->hw;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	struct mv_pp2x_hw *hw = &(port->priv->hw);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	struct mv_pp2x_cls_flow_info *flow_info;
 
 	for (index = 0; index < (MVPP2_PRS_FL_LAST - MVPP2_PRS_FL_START);
 		index++) {
 		int i, j;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		flow_info = &hw->cls_shadow->flow_info[index];
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		flow_info = &(hw->cls_shadow->flow_info[index]);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		/* Init data[] as invalid value */
 		for (i = 0; i < MVPP2_LKP_PTR_NUM; i++)
 			data[i] = MVPP2_FLOW_TBL_SIZE;
@@ -2378,11 +2381,11 @@ static int mv_pp22_cpu_id_from_indir_tbl_get(struct mv_pp2x *pp2,
 		return -EINVAL;
 
 	for (i = 0; i < 16; i++) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		if ((*cpumask_bits(cpu_online_mask)) & (1 << i)) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		if (pp2->cpu_map & (1 << i)) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 			if (seq == cpu_seq) {
 				*cpu_id = i;
 				return 0;
@@ -2409,13 +2412,13 @@ int mv_pp22_rss_rxfh_indir_set(struct mv_pp2x_port *port)
 
 	memset(&rss_entry, 0, sizeof(struct mv_pp22_rss_entry));
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	if (!port->priv->cpu_map)
 		return -1;
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	/* Calculate cpu and cos width */
 	mv_pp2x_width_calc(port, &cpu_width, &cos_width, NULL);
 
@@ -2486,11 +2489,11 @@ int mv_pp22_rss_mode_set(struct mv_pp2x_port *port, int rss_mode)
 {
 	int index, flow_idx, flow_idx_rss, lkpid, lkpid_attr;
 	int data[3];
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	struct mv_pp2x_hw *hw = &port->priv->hw;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	struct mv_pp2x_hw *hw = &(port->priv->hw);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	struct mv_pp2x_cls_flow_info *flow_info;
 
 	if (port->priv->pp2_cfg.queue_mode == MVPP2_QDIST_SINGLE_MODE)
@@ -2504,11 +2507,11 @@ int mv_pp22_rss_mode_set(struct mv_pp2x_port *port, int rss_mode)
 
 	for (index = 0; index < (MVPP2_PRS_FL_LAST - MVPP2_PRS_FL_START);
 		index++) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		flow_info = &hw->cls_shadow->flow_info[index];
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		flow_info = &(hw->cls_shadow->flow_info[index]);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		data[0] = MVPP2_FLOW_TBL_SIZE;
 		data[1] = MVPP2_FLOW_TBL_SIZE;
 		data[2] = MVPP2_FLOW_TBL_SIZE;
@@ -2571,20 +2574,20 @@ int mv_pp22_rss_default_cpu_set(struct mv_pp2x_port *port, int default_cpu)
 {
 	u8 index, queue, q_cpu_mask;
 	u32 cpu_width = 0, cos_width = 0;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	struct mv_pp2x_hw *hw = &port->priv->hw;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	struct mv_pp2x_hw *hw = &(port->priv->hw);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	if (port->priv->pp2_cfg.queue_mode == MVPP2_QDIST_SINGLE_MODE)
 		return -1;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	if (!(*cpumask_bits(cpu_online_mask) & (1 << default_cpu))) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	if (!(port->priv->cpu_map & (1 << default_cpu))) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		pr_err("Invalid default cpu id %d\n", default_cpu);
 		return -EINVAL;
 	}
@@ -2620,9 +2623,9 @@ int mv_pp22_rss_default_cpu_set(struct mv_pp2x_port *port, int default_cpu)
 EXPORT_SYMBOL(mv_pp22_rss_default_cpu_set);
 
 /* Main RX/TX processing routines */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 #if 0
 
 /* Reuse skb if possible, or allocate a new skb and add it to BM pool */
@@ -2642,7 +2645,7 @@ static int mv_pp2x_rx_refill(struct mv_pp2x_port *port,
 	return 0;
 }
 #endif
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 /* Handle tx checksum */
 static u32 mv_pp2x_skb_tx_csum(struct mv_pp2x_port *port, struct sk_buff *skb)
@@ -2720,11 +2723,11 @@ static void mv_pp2x_set_skb_hash(struct mv_pp2x_rx_desc *rx_desc, u32 rx_status,
 {
 	u32 hash;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	hash = (u32)(rx_desc->u.pp22.buf_phys_addr_key_hash >> 40);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	hash = (u32) (rx_desc->u.pp22.buf_phys_addr_key_hash >> 40);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	if ((rx_status & MVPP2_RXD_L4_UDP) || (rx_status & MVPP2_RXD_L4_TCP))
 		skb_set_hash(skb, hash, PKT_HASH_TYPE_L4);
 	else
@@ -2739,10 +2742,10 @@ static int mv_pp2x_rx(struct mv_pp2x_port *port, struct napi_struct *napi,
 	int rx_received, rx_filled, i;
 	u32 rcvd_pkts = 0;
 	u32 rcvd_bytes = 0;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	u32 refill_array[MVPP2_BM_POOLS_NUM] = {0};
 	u8  num_pool = MVPP2_BM_SWF_NUM_POOLS;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	u8  first_bm_pool = port->priv->pp2_cfg.first_bm_pool;
 	int cpu = smp_processor_id();
 
@@ -2773,11 +2776,11 @@ static int mv_pp2x_rx(struct mv_pp2x_port *port, struct napi_struct *napi,
 		int rx_bytes;
 		dma_addr_t buf_phys_addr;
 		unsigned char *data;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 		int err;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
 #if defined(__BIG_ENDIAN)
 		if (port->priv->pp2_version == PPV21)
@@ -2793,11 +2796,11 @@ static int mv_pp2x_rx(struct mv_pp2x_port *port, struct napi_struct *napi,
 		pool = MVPP2_RX_DESC_POOL(rx_desc);
 		bm_pool = &port->priv->bm_pools[pool - first_bm_pool];
 		/* Check if buffer header is used */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		if (unlikely(rx_status & MVPP2_RXD_BUF_HDR)) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		if (rx_status & MVPP2_RXD_BUF_HDR) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			mv_pp2x_buff_hdr_rx(port, rx_desc, cpu);
 			continue;
 		}
@@ -2820,11 +2823,11 @@ static int mv_pp2x_rx(struct mv_pp2x_port *port, struct napi_struct *napi,
 		 * by the hardware, and the information about the buffer is
 		 * comprised by the RX descriptor.
 		 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		if (unlikely(rx_status & MVPP2_RXD_ERR_SUMMARY)) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		if (rx_status & MVPP2_RXD_ERR_SUMMARY) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			netdev_warn(port->dev, "MVPP2_RXD_ERR_SUMMARY\n");
 err_drop_frame:
 			dev->stats.rx_errors++;
@@ -2835,91 +2838,91 @@ err_drop_frame:
 
 		skb = build_skb(data, bm_pool->frag_size > PAGE_SIZE ? 0 :
 				bm_pool->frag_size);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		if (unlikely(!skb)) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		if (!skb) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			netdev_warn(port->dev, "skb build failed\n");
 			goto err_drop_frame;
 		}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 		err = mv_pp2x_rx_refill_new(port, bm_pool,
 			bm_pool->log_id, 0, cpu);
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 		if (unlikely(err))
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
+#else /* MY_DEF_HERE */
 		if (err)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 			netdev_err(port->dev, "failed to refill BM pools\n");
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 		dma_unmap_single(dev->dev.parent, buf_phys_addr,
 				 MVPP2_RX_BUF_SIZE(bm_pool->pkt_size),
 				 DMA_FROM_DEVICE);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		refill_array[bm_pool->log_id]++;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
 #ifdef MVPP2_VERBOSE
 		mv_pp2x_skb_dump(skb, rx_desc->data_size, 4);
 #endif
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 // do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 #if 0
 		dma_sync_single_for_cpu(dev->dev.parent, buf_phys_addr,
 					MVPP2_RX_BUF_SIZE(rx_desc->data_size),
 					DMA_FROM_DEVICE);
 #endif
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		rcvd_pkts++;
 		rcvd_bytes += rx_bytes;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		skb_reserve(skb, MVPP2_MH_SIZE + NET_SKB_PAD);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		skb_reserve(skb, MVPP2_MH_SIZE+NET_SKB_PAD);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 #ifdef CONFIG_MV_PTP_SERVICE
 		/* If packet is PTP fetch timestamp info and built into packet data */
 		mv_pp2_is_pkt_ptp_rx_proc(port, rx_desc, rx_bytes, skb->data, rcvd_pkts);
 #endif
 		skb_put(skb, rx_bytes);
 		skb->protocol = eth_type_trans(skb, dev);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 
 		if (likely(dev->features & NETIF_F_RXCSUM))
 			mv_pp2x_rx_csum(port, rx_status, skb);
 
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		mv_pp2x_rx_csum(port, rx_status, skb);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
 		skb_record_rx_queue(skb, (u16)rxq->log_id);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		skb_record_rx_queue(skb, (u16)rxq->id);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		mv_pp2x_set_skb_hash(rx_desc, rx_status, skb);
 		skb_mark_napi_id(skb, napi);
 
 		napi_gro_receive(napi, skb);
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
 	/* Refill pool */
 	for (i = 0; i < num_pool; i++) {
 		int err;
@@ -2941,11 +2944,11 @@ err_drop_frame:
 		}
 	}
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	if (likely(rcvd_pkts)) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (rcvd_pkts) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		struct mv_pp2x_pcpu_stats *stats = this_cpu_ptr(port->stats);
 
 		u64_stats_update_begin(&stats->syncp);
@@ -3006,11 +3009,11 @@ static int mv_pp2x_tx_frag_process(struct mv_pp2x_port *port,
 			/* Last descriptor */
 			tx_desc->command = MVPP2_TXD_L_DESC;
 			mv_pp2x_txq_inc_put(port->priv->pp2_version, txq_pcpu,
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 					    (struct sk_buff *)((uintptr_t)skb | MVPP2_ETH_SHADOW_SKB),
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 				(struct sk_buff *)((uintptr_t) skb | MVPP2_ETH_SHADOW_SKB),
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 				tx_desc);
 
 		} else {
@@ -3064,11 +3067,11 @@ static inline int mv_pp2_tso_validate(struct sk_buff *skb, struct net_device *de
 		pr_err("skb_is_gso(skb) returns true but features is not NETIF_F_TSO\n");
 		return 1;
 	}
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (skb_shinfo(skb)->frag_list) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (skb_shinfo(skb)->frag_list != NULL) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		pr_err("frag_list is not null\n");
 		return 1;
 	}
@@ -3081,13 +3084,13 @@ static inline int mv_pp2_tso_validate(struct sk_buff *skb, struct net_device *de
 			skb->len, skb_shinfo(skb)->gso_size);
 		return 1;
 	}
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if ((htons(ETH_P_IP) != skb->protocol) || (ip_hdr(skb)->protocol != IPPROTO_TCP) ||
 	    (!tcp_hdr(skb))) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if ((htons(ETH_P_IP) != skb->protocol) || (ip_hdr(skb)->protocol != IPPROTO_TCP)
 		|| (tcp_hdr(skb) == NULL)) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		pr_err("Protocol is not TCP over IP\n");
 		return 1;
 	}
@@ -3161,11 +3164,11 @@ static inline int mv_pp2_tso_build_hdr_desc(struct mv_pp2x_tx_desc *tx_desc,
 
 	mv_pp2x_txq_inc_put(port->priv->pp2_version,
 				txq_pcpu,
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 				(struct sk_buff *)((uintptr_t)data_orig |
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 				(struct sk_buff *)((uintptr_t) data_orig |
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 				MVPP2_ETH_SHADOW_EXT), tx_desc);
 
 	return hdr_len;
@@ -3206,11 +3209,11 @@ static inline int mv_pp2_tso_build_data_desc(struct mv_pp2x_port *port,
 
 		if (total_left == 0) {
 			/* last descriptor in SKB */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 			val = ((uintptr_t)skb | MVPP2_ETH_SHADOW_SKB);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 			val = ((uintptr_t) skb | MVPP2_ETH_SHADOW_SKB);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		}
 	}
 	mv_pp2x_txq_inc_put(port->priv->pp2_version, txq_pcpu,
@@ -3236,35 +3239,35 @@ static inline int mv_pp2_tx_tso(struct sk_buff *skb, struct net_device *dev,
 	skb_frag_t *skb_frag_ptr;
 	const struct tcphdr *th = tcp_hdr(skb);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (unlikely(mv_pp2_tso_validate(skb, dev)))
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (mv_pp2_tso_validate(skb, dev))
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		return 0;
 
 	/* Calculate expected number of TX descriptors */
 	max_desc_num = skb_shinfo(skb)->gso_segs * 2 + skb_shinfo(skb)->nr_frags;
 
 	/* Check number of available descriptors */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (unlikely(mv_pp2x_aggr_desc_num_check(port->priv, aggr_txq, max_desc_num, cpu) ||
 		     mv_pp2x_tso_txq_reserved_desc_num_proc(port->priv, txq,
 							    txq_pcpu, max_desc_num, cpu))) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (mv_pp2x_aggr_desc_num_check(port->priv, aggr_txq, max_desc_num, cpu) ||
 	    mv_pp2x_txq_reserved_desc_num_proc(port->priv, txq,
 					     txq_pcpu, max_desc_num, cpu)) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		return 0;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (unlikely(max_desc_num > port->txq_stop_limit))
 		if (likely(mv_pp2x_txq_free_count(txq_pcpu) < max_desc_num))
 			return 0;
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	total_len = skb->len;
 	hdr_len = (skb_transport_offset(skb) + tcp_hdrlen(skb));
 
@@ -3275,11 +3278,11 @@ static inline int mv_pp2_tx_tso(struct sk_buff *skb, struct net_device *dev,
 	frag_size = skb_headlen(skb);
 	frag_ptr = skb->data;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (unlikely(frag_size < hdr_len)) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (frag_size < hdr_len) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		pr_err("frag_size=%d, hdr_len=%d\n", frag_size, hdr_len);
 		return 0;
 	}
@@ -3300,51 +3303,51 @@ static inline int mv_pp2_tx_tso(struct sk_buff *skb, struct net_device *dev,
 	total_desc_num = 0;
 
 	/* Each iteration - create new TCP segment */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	while (likely(total_len > 0)) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	while (total_len > 0) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		u8 *data;
 
 		data_left = min((int)(skb_shinfo(skb)->gso_size), total_len);
 
 		/* Sanity check */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		if (unlikely(total_desc_num >= max_desc_num)) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		if (total_desc_num >= max_desc_num) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			pr_err("%s: Used TX descriptors number %d is larger than allocated %d\n",
 				__func__, total_desc_num, max_desc_num);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 			goto out_no_tx_desc;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 			goto outNoTxDesc;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		}
 
 		data = mv_pp2_extra_pool_get(port);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		if (unlikely(!data)) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		if (!data) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			pr_err("Can't allocate extra buffer for TSO\n");
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 			goto out_no_tx_desc;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 			goto outNoTxDesc;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		}
 		tx_desc = mv_pp2x_txq_next_desc_get(aggr_txq);
 		tx_desc->phys_txq = txq->id;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		total_desc_num++;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		total_len -= data_left;
 
 		/* prepare packet headers: MAC + IP + TCP */
@@ -3352,39 +3355,39 @@ static inline int mv_pp2_tx_tso(struct sk_buff *skb, struct net_device *dev,
 						 txq_pcpu, mh, hdr_len,
 						 data_left, tcp_seq, ip_id,
 						 total_len);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		if (unlikely(size < 0))
 			goto out_no_tx_desc;
 		total_desc_num++;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		if (size < 0)
 			goto outNoTxDesc;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 		total_bytes += size;
 
 		/* Update packet's IP ID */
 		ip_id++;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		while (likely(data_left > 0)) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		while (data_left > 0) {
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			/* Sanity check */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 			if (unlikely(total_desc_num >= max_desc_num)) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 			if (total_desc_num >= max_desc_num) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 				pr_err("%s: Used TX descriptors number %d is larger than allocated %d\n",
 					__func__, total_desc_num, max_desc_num);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 				goto out_no_tx_desc;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 				goto outNoTxDesc;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			}
 			tx_desc = mv_pp2x_txq_next_desc_get(aggr_txq);
 			tx_desc->phys_txq = txq->id;
@@ -3392,13 +3395,13 @@ static inline int mv_pp2_tx_tso(struct sk_buff *skb, struct net_device *dev,
 			size = mv_pp2_tso_build_data_desc(port, tx_desc, skb, txq_pcpu,
 							  frag_ptr, frag_size, data_left, total_len);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 			if (unlikely(size < 0))
 				goto out_no_tx_desc;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 			if (size < 0)
 				goto outNoTxDesc;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 			total_desc_num++;
 			total_bytes += size;
@@ -3421,7 +3424,7 @@ static inline int mv_pp2_tx_tso(struct sk_buff *skb, struct net_device *dev,
 			}
 		}
 	}
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 
 	aggr_txq->xmit_bulk += total_desc_num;
 	if (!skb->xmit_more) {
@@ -3429,26 +3432,26 @@ static inline int mv_pp2_tx_tso(struct sk_buff *skb, struct net_device *dev,
 		mv_pp2x_aggr_txq_pend_desc_add(port, aggr_txq->xmit_bulk);
 		aggr_txq->xmit_bulk = 0;
 	}
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	/* TCP segment is ready - transmit it */
 	mv_pp2x_aggr_txq_pend_desc_add(port, total_desc_num);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	txq_pcpu->reserved_num -= total_desc_num;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	txq_pcpu->count += total_desc_num;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	aggr_txq->count += total_desc_num;
 
 	return total_desc_num;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 out_no_tx_desc:
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 outNoTxDesc:
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	/* No enough memory for packet header - rollback */
 	pr_err("%s: No TX descriptors - rollback %d, txq_count=%d, nr_frags=%d, skb=%p, len=%d, gso_segs=%d\n",
 			__func__, total_desc_num, aggr_txq->count, skb_shinfo(skb)->nr_frags,
@@ -3463,19 +3466,19 @@ outNoTxDesc:
 
 		shadow_skb = txq_pcpu->tx_skb[txq_pcpu->txq_put_index];
 		shadow_buf = txq_pcpu->tx_buffs[txq_pcpu->txq_put_index];
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		data_size = txq_pcpu->data_size[txq_pcpu->txq_put_index];
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		data_size = txq_pcpu->data_size[txq_pcpu->txq_get_index];
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 		mv_pp2x_txq_buf_free(port, (uintptr_t)shadow_skb, shadow_buf,
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 				     data_size, cpu);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 					data_size);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 		mv_pp2x_txq_prev_desc_get(aggr_txq);
 	}
@@ -3498,18 +3501,18 @@ static int mv_pp2x_tx(struct sk_buff *skb, struct net_device *dev)
 	u32 tx_cmd;
 	int cpu = smp_processor_id();
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	/* Set relevant physical TxQ and Linux netdev queue */
 	txq_id = skb_get_queue_mapping(skb) % mv_pp2x_txq_number;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	txq_id = skb_get_queue_mapping(skb);
 	nq = netdev_get_tx_queue(dev, txq_id);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	txq = port->txqs[txq_id];
 	txq_pcpu = this_cpu_ptr(txq->pcpu);
 	aggr_txq = &port->priv->aggr_txqs[cpu];
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	/* Prevent shadow_q override, stop tx_queue until tx_done is called*/
 	if (unlikely(mv_pp2x_txq_free_count(txq_pcpu) < port->txq_stop_limit)) {
 		if ((txq->log_id + (cpu * mv_pp2x_txq_number)) == skb_get_queue_mapping(skb)) {
@@ -3520,7 +3523,7 @@ static int mv_pp2x_tx(struct sk_buff *skb, struct net_device *dev)
 		goto out;
 	}
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	/* GSO/TSO */
 	if (skb_is_gso(skb)) {
 		frags = mv_pp2_tx_tso(skb, dev, txq, aggr_txq, cpu);
@@ -3531,18 +3534,18 @@ static int mv_pp2x_tx(struct sk_buff *skb, struct net_device *dev)
 	pr_debug("txq_id=%d, frags=%d\n", txq_id, frags);
 
 	/* Check number of available descriptors */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (unlikely(mv_pp2x_aggr_desc_num_check(port->priv, aggr_txq, frags, cpu) ||
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (mv_pp2x_aggr_desc_num_check(port->priv, aggr_txq, frags, cpu) ||
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	    mv_pp2x_txq_reserved_desc_num_proc(port->priv, txq,
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 							txq_pcpu, frags, cpu))) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 					     txq_pcpu, frags, cpu)) {
 		netif_tx_stop_queue(nq);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		frags = 0;
 		goto out;
 	}
@@ -3566,7 +3569,7 @@ static int mv_pp2x_tx(struct sk_buff *skb, struct net_device *dev)
 #ifdef MVPP2_VERBOSE
 		mv_pp2x_skb_dump(skb, tx_desc->data_size, 4);
 #endif
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	/* Mandatory tx_desc fields are always initialized, but
 	 * service-specific fields are NOT cleared => old tx_desc impacts
 	 * new TX by irrelevant data inside. Clear these fields before usage.
@@ -3582,7 +3585,7 @@ static int mv_pp2x_tx(struct sk_buff *skb, struct net_device *dev)
 	*((u32 *)tx_desc + 2) = 0;
 	*((u32 *)tx_desc + 5) = 0;
 #endif
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	buf_phys_addr = dma_map_single(dev->dev.parent, skb->data,
 				       tx_desc->data_size, DMA_TO_DEVICE);
@@ -3604,11 +3607,11 @@ static int mv_pp2x_tx(struct sk_buff *skb, struct net_device *dev)
 		tx_cmd |= MVPP2_TXD_F_DESC | MVPP2_TXD_L_DESC;
 		tx_desc->command = tx_cmd;
 		mv_pp2x_txq_inc_put(port->priv->pp2_version,
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 				    txq_pcpu, (struct sk_buff *)((uintptr_t)skb |
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 			txq_pcpu, (struct sk_buff *)((uintptr_t) skb |
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			MVPP2_ETH_SHADOW_SKB), tx_desc);
 	} else {
 		/* First but not Last */
@@ -3618,11 +3621,11 @@ static int mv_pp2x_tx(struct sk_buff *skb, struct net_device *dev)
 			txq_pcpu, NULL, tx_desc);
 
 		/* Continue with other skb fragments */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		if (unlikely(mv_pp2x_tx_frag_process(port, skb, aggr_txq, txq))) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		if (mv_pp2x_tx_frag_process(port, skb, aggr_txq, txq)) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			mv_pp2x_txq_inc_error(txq_pcpu, 1);
 			tx_desc_unmap_put(port->dev->dev.parent, txq, tx_desc);
 			frags = 0;
@@ -3638,29 +3641,29 @@ static int mv_pp2x_tx(struct sk_buff *skb, struct net_device *dev)
 	mv_pp2_is_pkt_ptp_tx_proc(port, tx_desc, skb);
 #endif
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	/* Prevent shadow_q override, stop tx_queue until tx_done is called*/
 
 	if (mv_pp2x_txq_free_count(txq_pcpu) < (MAX_SKB_FRAGS + 2))
 		netif_tx_stop_queue(nq);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	/* Enable transmit */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (!skb->xmit_more) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (!skb->xmit_more || netif_xmit_stopped(nq)) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		mv_pp2x_aggr_txq_pend_desc_add(port, aggr_txq->xmit_bulk);
 		aggr_txq->xmit_bulk = 0;
 	}
 out:
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (likely(frags > 0)) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (frags > 0) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		struct mv_pp2x_pcpu_stats *stats = this_cpu_ptr(port->stats);
 
 		u64_stats_update_begin(&stats->syncp);
@@ -3668,23 +3671,23 @@ out:
 		stats->tx_bytes += skb->len;
 		u64_stats_update_end(&stats->syncp);
 	} else {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		/* Transmit bulked descriptors*/
 		if (aggr_txq->xmit_bulk > 0) {
 			mv_pp2x_aggr_txq_pend_desc_add(port, aggr_txq->xmit_bulk);
 			aggr_txq->xmit_bulk = 0;
 		}
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		dev->stats.tx_dropped++;
 		dev_kfree_skb_any(skb);
 	}
 	/* PPV22 TX Post-Processing */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (!port->priv->pp2xdata->interrupt_tx_done)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (port->priv->pp2xdata->interrupt_tx_done == false)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		mv_pp2x_tx_done_post_proc(txq, txq_pcpu, port, frags);
 
 	return NETDEV_TX_OK;
@@ -3866,47 +3869,47 @@ static void mv_serdes_port_init(struct mv_pp2x_port *port)
 	case PHY_INTERFACE_MODE_SGMII:
 	case PHY_INTERFACE_MODE_QSGMII:
 		if (port->mac_data.flags & MV_EMAC_F_SGMII2_5)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 			mode = COMPHY_DEF(COMPHY_HS_SGMII_MODE, port->id,
 					  COMPHY_SPEED_3_125G, COMPHY_POLARITY_NO_INVERT);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 			mode = COMPHY_DEF(COMPHY_HS_SGMII_MODE, port->id);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 		else
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 			mode = COMPHY_DEF(COMPHY_SGMII_MODE, port->id,
 					  COMPHY_SPEED_1_25G, COMPHY_POLARITY_NO_INVERT);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 			mode = COMPHY_DEF(COMPHY_SGMII_MODE, port->id);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 		phy_set_mode(port->comphy, mode);
 	break;
 	case PHY_INTERFACE_MODE_XAUI:
 	case PHY_INTERFACE_MODE_RXAUI:
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		mode = COMPHY_DEF(COMPHY_RXAUI_MODE, port->id,
 				  COMPHY_SPEED_10_3125G, COMPHY_POLARITY_NO_INVERT);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 		mode = COMPHY_DEF(COMPHY_RXAUI_MODE, port->id);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 		phy_set_mode(port->comphy, mode);
 	break;
 	case PHY_INTERFACE_MODE_KR:
 	case PHY_INTERFACE_MODE_SFI:
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		if (port->mac_data.flags & MV_EMAC_F_5G)
 			mode = COMPHY_DEF(COMPHY_SFI_MODE, port->id,
 					  COMPHY_SPEED_5_15625G, COMPHY_POLARITY_NO_INVERT);
 		else
 			mode = COMPHY_DEF(COMPHY_SFI_MODE, port->id,
 					  COMPHY_SPEED_10_3125G, COMPHY_POLARITY_NO_INVERT);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 		mode = COMPHY_DEF(COMPHY_SFI_MODE, port->id);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 		phy_set_mode(port->comphy, mode);
 	break;
 	case PHY_INTERFACE_MODE_XFI:
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		if (port->mac_data.flags & MV_EMAC_F_5G)
 			mode = COMPHY_DEF(COMPHY_XFI_MODE, port->id,
 					  COMPHY_SPEED_5_15625G, COMPHY_POLARITY_NO_INVERT);
@@ -3914,9 +3917,9 @@ static void mv_serdes_port_init(struct mv_pp2x_port *port)
 			mode = COMPHY_DEF(COMPHY_XFI_MODE, port->id,
 					  COMPHY_SPEED_10_3125G, COMPHY_POLARITY_NO_INVERT);
 
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 		mode = COMPHY_DEF(COMPHY_XFI_MODE, port->id);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 		phy_set_mode(port->comphy, mode);
 	break;
 	default:
@@ -3966,17 +3969,17 @@ void mv_pp2x_start_dev(struct mv_pp2x_port *port)
 				__func__);
 	}
 #endif /* DEV_NETMAP */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (port->priv->pp2_version == PPV21) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (port->priv->pp2_version == PPV21)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		mv_pp21_gmac_max_rx_size_set(port);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	} else {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	else {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		switch (mac->phy_mode) {
 		case PHY_INTERFACE_MODE_RGMII:
 		case PHY_INTERFACE_MODE_SGMII:
@@ -4004,11 +4007,11 @@ void mv_pp2x_start_dev(struct mv_pp2x_port *port)
 	mv_pp2x_port_interrupts_enable(port);
 
 	if (port->comphy) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		mv_gop110_port_disable(gop, mac, port->comphy);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 		mv_gop110_port_disable(gop, mac);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 		phy_power_on(port->comphy);
 		}
 
@@ -4016,24 +4019,24 @@ void mv_pp2x_start_dev(struct mv_pp2x_port *port)
 		mv_pp21_port_enable(port);
 	} else {
 		mv_gop110_port_events_mask(gop, mac);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		mv_gop110_port_enable(gop, mac, port->comphy);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 		mv_gop110_port_enable(gop, mac);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (port->mac_data.phy_dev) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (port->mac_data.phy_dev)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		phy_start(port->mac_data.phy_dev);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	} else {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	else {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		mv_pp22_dev_link_event(port->dev);
 		tasklet_init(&port->link_change_tasklet, mv_pp2_link_change_tasklet,
 				(unsigned long)(port->dev));
@@ -4079,11 +4082,11 @@ void mv_pp2x_stop_dev(struct mv_pp2x_port *port)
 		mv_pp21_port_disable(port);
 	} else {
 		mv_gop110_port_events_mask(gop, mac);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		mv_gop110_port_disable(gop, mac, port->comphy);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 		mv_gop110_port_disable(gop, mac);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 		port->mac_data.flags &= ~MV_EMAC_F_LINK_UP;
 		port->mac_data.flags &= ~MV_EMAC_F_PORT_UP;
 	}
@@ -4215,11 +4218,11 @@ int mv_pp2x_open_cls(struct net_device *dev)
 	struct mv_pp2x_port *port = netdev_priv(dev);
 	unsigned char mac_bcast[ETH_ALEN] = {
 			0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	struct mv_pp2x_hw *hw = &port->priv->hw;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	struct mv_pp2x_hw *hw = &(port->priv->hw);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	int err;
 	u32 cpu_width = 0, cos_width = 0, port_rxq_width = 0;
 	u8 bound_cpu_first_rxq;
@@ -4342,13 +4345,13 @@ int mv_pp2x_open(struct net_device *dev)
 		netdev_err(port->dev, "cannot allocate irq's\n");
 		goto err_cleanup_txqs;
 	}
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 
 	/* Only Mvpp22 support hot plug feature */
 	if (port->priv->pp2_version == PPV22)
 		register_hotcpu_notifier(&port->port_hotplug_nb);
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	/* In default link is down */
 	netif_carrier_off(port->dev);
 
@@ -4397,21 +4400,21 @@ int mv_pp2x_stop(struct net_device *dev)
 	mv_pp2x_shared_thread_interrupts_mask(port);
 	mv_pp2x_cleanup_irqs(port);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
 	if (port->priv->pp2_version == PPV22)
 		unregister_hotcpu_notifier(&port->port_hotplug_nb);
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	if (!port->priv->pp2xdata->interrupt_tx_done) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (port->priv->pp2xdata->interrupt_tx_done == false) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
 		for_each_present_cpu(cpu) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		for_each_online_cpu(cpu) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 			port_pcpu = per_cpu_ptr(port->pcpu, cpu);
 			hrtimer_cancel(&port_pcpu->tx_done_timer);
 			port_pcpu->timer_scheduled = false;
@@ -4460,11 +4463,11 @@ static void mv_pp2x_set_rx_mode(struct net_device *dev)
 {
 	struct mv_pp2x_port *port = netdev_priv(dev);
 	struct netdev_hw_addr *ha;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	struct mv_pp2x_hw *hw = &port->priv->hw;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	struct mv_pp2x_hw *hw = &(port->priv->hw);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	int id = port->id;
 	int err;
 
@@ -4622,7 +4625,7 @@ error:
 	return err;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 static int mv_pp2x_rx_add_vid(struct net_device *dev, u16 proto, u16 vid)
 {
 	int err;
@@ -4645,7 +4648,7 @@ static int mv_pp2x_rx_kill_vid(struct net_device *dev, u16 proto, u16 vid)
 	return err;
 }
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 static struct rtnl_link_stats64 *
 mv_pp2x_get_stats64(struct net_device *dev, struct rtnl_link_stats64 *stats)
 {
@@ -4653,11 +4656,11 @@ mv_pp2x_get_stats64(struct net_device *dev, struct rtnl_link_stats64 *stats)
 	unsigned int start;
 	int cpu;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	for_each_online_cpu(cpu) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	for_each_possible_cpu(cpu) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		struct mv_pp2x_pcpu_stats *cpu_stats;
 		u64 rx_packets;
 		u64 rx_bytes;
@@ -4732,7 +4735,7 @@ static int mv_pp2x_netdev_set_features(struct net_device *dev,
 		}
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (changed & NETIF_F_TSO) {
 		if (features & NETIF_F_TSO)
 			port->txq_stop_limit = TSO_TXQ_LIMIT;
@@ -4740,7 +4743,7 @@ static int mv_pp2x_netdev_set_features(struct net_device *dev,
 			port->txq_stop_limit = TXQ_LIMIT;
 	}
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	dev->features = features;
 
 	return 0;
@@ -4750,25 +4753,25 @@ u16 mv_pp2x_select_queue(struct net_device *dev, struct sk_buff *skb,
 		       void *accel_priv, select_queue_fallback_t fallback)
 
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	int val;
 
 	/* If packet in coming from Rx -> RxQ = TxQ, callback function used for packets from CPU Tx */
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	if (skb->queue_mapping)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		val = skb->queue_mapping - 1;
 	else
 		val = fallback(dev, skb);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		return skb->napi_id - 1;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	return (val % mv_pp2x_txq_number) + (smp_processor_id() * mv_pp2x_txq_number);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	return fallback(dev, skb) % mv_pp2x_txq_number;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 }
 
 /* Device ops */
@@ -4784,10 +4787,10 @@ static const struct net_device_ops mv_pp2x_netdev_ops = {
 	.ndo_get_stats64	= mv_pp2x_get_stats64,
 	.ndo_do_ioctl		= mv_pp2x_ioctl,
 	.ndo_set_features	= mv_pp2x_netdev_set_features,
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	.ndo_vlan_rx_add_vid	= mv_pp2x_rx_add_vid,
 	.ndo_vlan_rx_kill_vid	= mv_pp2x_rx_kill_vid,
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 };
 
 /* Driver initialization */
@@ -4825,11 +4828,11 @@ static int  mv_pp2x_port_txqs_init(struct device *dev,
 		txq->log_id = queue;
 		txq->pkts_coal = MVPP2_TXDONE_COAL_PKTS;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		for_each_present_cpu(cpu) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		for_each_online_cpu(cpu) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 			txq_pcpu = per_cpu_ptr(txq->pcpu, cpu);
 			txq_pcpu->cpu = cpu;
 		}
@@ -4874,11 +4877,11 @@ static void mv_pp21_port_queue_vectors_init(struct mv_pp2x_port *port)
 	q_vec[0].pending_cause_rx = 0;
 	q_vec[0].qv_type = MVPP2_SHARED;
 	q_vec[0].sw_thread_id = 0;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	q_vec[0].sw_thread_mask = *cpumask_bits(cpu_online_mask);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	q_vec[0].sw_thread_mask = port->priv->cpu_map;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	q_vec[0].irq = port->of_irqs[0];
 	netif_napi_add(port->dev, &q_vec[0].napi, mv_pp21_poll,
 		NAPI_POLL_WEIGHT);
@@ -4911,17 +4914,17 @@ static void mv_pp22_queue_vectors_init(struct mv_pp2x_port *port)
 		q_vec[cpu].parent = port;
 		q_vec[cpu].qv_type = MVPP2_PRIVATE;
 		q_vec[cpu].sw_thread_id = sw_thread_index++;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		q_vec[cpu].sw_thread_mask = (1 << q_vec[cpu].sw_thread_id);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		q_vec[cpu].sw_thread_mask = (1<<q_vec[cpu].sw_thread_id);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		q_vec[cpu].pending_cause_rx = 0;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		if (port->priv->pp2xdata->interrupt_tx_done ||
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		if (port->priv->pp2xdata->interrupt_tx_done == true ||
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		    mv_pp2x_queue_mode == MVPP2_QDIST_MULTI_MODE)
 			q_vec[cpu].irq = port->of_irqs[irq_index++];
 		netif_napi_add(net_dev, &q_vec[cpu].napi, mv_pp22_poll,
@@ -4929,11 +4932,11 @@ static void mv_pp22_queue_vectors_init(struct mv_pp2x_port *port)
 		napi_hash_add(&q_vec[cpu].napi);
 		if (mv_pp2x_queue_mode == MVPP2_QDIST_MULTI_MODE) {
 			q_vec[cpu].num_rx_queues = mv_pp2x_num_cos_queues;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 			q_vec[cpu].first_rx_queue = cpu * mv_pp2x_num_cos_queues;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 			q_vec[cpu].first_rx_queue = cpu*mv_pp2x_num_cos_queues;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		} else {
 			q_vec[cpu].first_rx_queue = 0;
 			q_vec[cpu].num_rx_queues = 0;
@@ -4945,11 +4948,11 @@ static void mv_pp22_queue_vectors_init(struct mv_pp2x_port *port)
 		q_vec[cpu].parent = port;
 		q_vec[cpu].qv_type = MVPP2_SHARED;
 		q_vec[cpu].sw_thread_id = irq_index;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		q_vec[cpu].sw_thread_mask = (1 << q_vec[cpu].sw_thread_id);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		q_vec[cpu].sw_thread_mask = (1<<q_vec[cpu].sw_thread_id);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		q_vec[cpu].pending_cause_rx = 0;
 		q_vec[cpu].irq = port->of_irqs[irq_index];
 		netif_napi_add(net_dev, &q_vec[cpu].napi, mv_pp22_poll,
@@ -5006,11 +5009,11 @@ static void mv_pp22_port_isr_rx_group_cfg(struct mv_pp2x_port *port)
 {
 	int i;
 /*	u8 cur_rx_queue; */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	struct mv_pp2x_hw *hw = &port->priv->hw;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	struct mv_pp2x_hw *hw = &(port->priv->hw);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	for (i = 0; i < port->num_qvector; i++) {
 		if (port->q_vector[i].num_rx_queues != 0) {
@@ -5055,29 +5058,29 @@ static int mv_pp2_init_emac_data(struct mv_pp2x_port *port,
 			/* check phy speed */
 			of_property_read_u32(emac_node, "phy-speed", &speed);
 			switch (speed) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 			case SPEED_1000:
 				port->mac_data.speed = SPEED_1000; /* sgmii */
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 			case 1000:
 				port->mac_data.speed = 1000; /* sgmii */
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 				break;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 			case SPEED_2500:
 				port->mac_data.speed = SPEED_2500; /* sgmii */
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 			case 2500:
 				port->mac_data.speed = 2500; /* sgmii */
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 				port->mac_data.flags |= MV_EMAC_F_SGMII2_5;
 				break;
 			default:
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 				port->mac_data.speed = SPEED_1000; /* sgmii */
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 				port->mac_data.speed = 1000; /* sgmii */
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 			}
 			break;
 		case PHY_INTERFACE_MODE_RXAUI:
@@ -5089,7 +5092,7 @@ static int mv_pp2_init_emac_data(struct mv_pp2x_port *port,
 		case PHY_INTERFACE_MODE_KR:
 		case PHY_INTERFACE_MODE_SFI:
 		case PHY_INTERFACE_MODE_XFI:
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 			speed = 0;
 			/* check phy speed */
 			of_property_read_u32(emac_node, "phy-speed", &speed);
@@ -5104,7 +5107,7 @@ static int mv_pp2_init_emac_data(struct mv_pp2x_port *port,
 			default:
 				port->mac_data.speed = SPEED_10000;
 			}
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 			break;
 
 		default:
@@ -5176,16 +5179,16 @@ static void mv_pp2x_get_port_stats(struct mv_pp2x_port *port)
 
 	link_is_up = mv_gop110_port_is_link_up(gop, &port->mac_data);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	if (link_is_up) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	if (link_is_up)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		mv_gop110_mib_counters_stat_update(gop, gop_port, gop_statistics);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		mv_pp2x_counters_stat_update(port, gop_statistics);
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 }
 
 static void mv_pp2x_get_device_stats(struct work_struct *work)
@@ -5218,11 +5221,11 @@ static int mv_pp2x_port_init(struct mv_pp2x_port *port)
 	if (port->priv->pp2_version == PPV21)
 		mv_pp21_port_disable(port);
 	else
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		mv_gop110_port_disable(gop, mac, port->comphy);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 		mv_gop110_port_disable(gop, mac);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Allocate queues */
 	port->txqs = devm_kcalloc(dev, port->num_tx_queues, sizeof(*port->txqs),
@@ -5303,7 +5306,7 @@ static void mv_pp2x_port_init_config(struct mv_pp2x_port *port)
 	port->rss_cfg.rss_mode = rss_mode;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 /* Routine called by port CPU hot plug notifier. If port up callback set irq affinity for private interrupts,
 *  unmask private interrupt, set packet coalescing and clear counters.
 */
@@ -5341,7 +5344,7 @@ static int mv_pp2x_port_cpu_callback(struct notifier_block *nfb,
 	return NOTIFY_OK;
 }
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 /* Ports initialization */
 static int mv_pp2x_port_probe(struct platform_device *pdev,
 			    struct device_node *port_node,
@@ -5366,11 +5369,11 @@ static int mv_pp2x_port_probe(struct platform_device *pdev,
 	struct phy *comphy;
 
 	dev = alloc_etherdev_mqs(sizeof(struct mv_pp2x_port),
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 				 mv_pp2x_txq_number * num_active_cpus(), mv_pp2x_rxq_number);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		mv_pp2x_txq_number, mv_pp2x_rxq_number);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	if (!dev)
 		return -ENOMEM;
 
@@ -5484,18 +5487,18 @@ static int mv_pp2x_port_probe(struct platform_device *pdev,
 	mv_pp2x_set_ethtool_ops(dev);
 
 	if (priv->pp2_version == PPV21)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		port->first_rxq = (port->id) * mv_pp2x_rxq_number +
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		port->first_rxq = (port->id)*mv_pp2x_rxq_number +
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			first_log_rxq_queue;
 	else
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		port->first_rxq = (port->id) * priv->pp2xdata->pp2x_max_port_rxqs +
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		port->first_rxq = (port->id)*(priv->pp2xdata->pp2x_max_port_rxqs) +
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			first_log_rxq_queue;
 
 	if (priv->pp2_version == PPV21) {
@@ -5521,11 +5524,11 @@ static int mv_pp2x_port_probe(struct platform_device *pdev,
 	mv_pp2x_check_queue_size_valid(port);
 
 	if (mv_pp2_num_cpu_irqs(port) < num_active_cpus() &&
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	    port->priv->pp2xdata->interrupt_tx_done) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	    port->priv->pp2xdata->interrupt_tx_done == true) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		port->priv->pp2xdata->interrupt_tx_done = false;
 		dev_info(&pdev->dev, "mvpp2x: interrupt_tx_done override to false\n");
 	}
@@ -5543,16 +5546,16 @@ static int mv_pp2x_port_probe(struct platform_device *pdev,
 		err = -ENOMEM;
 		goto err_free_txq_pcpu;
 	}
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (!port->priv->pp2xdata->interrupt_tx_done) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (port->priv->pp2xdata->interrupt_tx_done == false) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
 		for_each_present_cpu(cpu) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		for_each_online_cpu(cpu) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 			port_pcpu = per_cpu_ptr(port->pcpu, cpu);
 
 			hrtimer_init(&port_pcpu->tx_done_timer, CLOCK_MONOTONIC,
@@ -5565,11 +5568,11 @@ static int mv_pp2x_port_probe(struct platform_device *pdev,
 		}
 	}
 	/* Init pool of external buffers for TSO, fragmentation, etc */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	for_each_present_cpu(cpu) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	for_each_online_cpu(cpu) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		port_pcpu = per_cpu_ptr(port->pcpu, cpu);
 		port_pcpu->ext_buf_size = MVPP2_EXTRA_BUF_SIZE;
 
@@ -5585,20 +5588,20 @@ static int mv_pp2x_port_probe(struct platform_device *pdev,
 			u8 *ext_buf = kmalloc(MVPP2_EXTRA_BUF_SIZE, GFP_ATOMIC);
 
 			port_pcpu->ext_buf_pool->ext_buf_struct[i].ext_buf_data = ext_buf;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 			if (!ext_buf) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 			if (ext_buf == NULL) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 				pr_warn("\to %s Warning: %d of %d extra buffers allocated\n",
 					__func__, i, MVPP2_EXTRA_BUF_NUM);
 				break;
 			}
 			list_add(&port_pcpu->ext_buf_pool->ext_buf_struct[i].ext_buf_list,
 				&port_pcpu->ext_buf_port_list);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 			mv_pp2x_extra_pool_inc(port_pcpu->ext_buf_pool);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 			port_pcpu->ext_buf_pool->buf_pool_in_use++;
 		}
 	}
@@ -5612,21 +5615,21 @@ static int mv_pp2x_port_probe(struct platform_device *pdev,
 	/* Only when multi queue mode, rxhash is supported */
 	if (mv_pp2x_queue_mode)
 		dev->hw_features |= NETIF_F_RXHASH;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 
 	if (dev->features & NETIF_F_TSO)
 		port->txq_stop_limit = TSO_TXQ_LIMIT;
 	else
 		port->txq_stop_limit = TXQ_LIMIT;
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	dev->vlan_features |= features;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	/* Add support for VLAN filtering */
 	dev->features |= NETIF_F_HW_VLAN_CTAG_FILTER;
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	dev->priv_flags |= IFF_UNICAST_FLT;
 
 	err = register_netdev(dev);
@@ -5635,25 +5638,25 @@ static int mv_pp2x_port_probe(struct platform_device *pdev,
 		goto err_free_port_pcpu;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
 	/* Clear MIB and mvpp2 counters statistic */
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	/* Clear MIB counters statistic */
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	mv_gop110_mib_counters_clear(&port->priv->hw.gop, port->mac_data.gop_index);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	mv_pp2x_counters_stat_clear(port);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	mv_pp2x_port_irq_names_update(port);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	if (priv->pp2_version == PPV22)
 		port->port_hotplug_nb.notifier_call = mv_pp2x_port_cpu_callback;
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	netdev_info(dev, "Using %s mac address %pM\n", mac_from, dev->dev_addr);
 
 	priv->port_list[priv->num_ports] = port;
@@ -5837,11 +5840,11 @@ static int mv_pp2x_init(struct platform_device *pdev, struct mv_pp2x *priv)
 	priv->num_aggr_qs = num_active_cpus();
 
 	i = 0;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	for_each_present_cpu(cpu) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	for_each_online_cpu(cpu) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		priv->aggr_txqs[i].id = cpu;
 		priv->aggr_txqs[i].size = MVPP2_AGGR_TXQ_SIZE;
 
@@ -5949,21 +5952,21 @@ static int mv_pp2x_init_config(struct mv_pp2x_param_config *pp2_cfg,
 static void mv_pp22_init_rxfhindir(struct mv_pp2x *pp2)
 {
 	int i;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	int online_cpus = num_online_cpus();
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	int online_cpus = mv_pp2x_num_online_cpu_get(pp2);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 
 	if (!online_cpus)
 		return;
 
 	for (i = 0; i < MVPP22_RSS_TBL_LINE_NUM; i++)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		pp2->rx_indir_table[i] = i % online_cpus;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		pp2->rx_indir_table[i] = i%online_cpus;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 }
 
 static int mv_pp2x_platform_data_get(struct platform_device *pdev,
@@ -5982,26 +5985,26 @@ static int mv_pp2x_platform_data_get(struct platform_device *pdev,
 	if (!match)
 		return -ENODEV;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	priv->pp2xdata = (struct mv_pp2x_platform_data *)match->data;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	priv->pp2xdata = (struct mv_pp2x_platform_data *) match->data;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	if (of_property_read_u32(dn, "cell-index", cell_index)) {
 		*cell_index = auto_cell_index;
 		auto_cell_index++;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	} else {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	}
 
 	else
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		cell_index_dts_flag = true;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	if (auto_cell_index && cell_index_dts_flag)
 		return -ENXIO;
@@ -6079,11 +6082,11 @@ static int mv_pp2x_platform_data_get(struct platform_device *pdev,
 			return -ENXIO;
 		hw->gop.gop_110.xpcs_base =
 			(void *)(hw->gop.gop_110.mspg_base +
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 				(res->start - mspg_base));
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 				(res->start-mspg_base));
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 		hw->gop.gop_110.ptp.base =
 			(void *)(hw->gop.gop_110.mspg_base + 0x0800);
@@ -6095,11 +6098,11 @@ static int mv_pp2x_platform_data_get(struct platform_device *pdev,
 			return -ENXIO;
 		hw->gop.gop_110.gmac.base =
 			(void *)(hw->gop.gop_110.mspg_base +
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 			(res->start - mspg_base));
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 			(res->start-mspg_base));
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		hw->gop.gop_110.gmac.obj_size = 0x1000;
 
 		/* FCA - flow control*/
@@ -6109,11 +6112,11 @@ static int mv_pp2x_platform_data_get(struct platform_device *pdev,
 			return -ENXIO;
 		hw->gop.gop_110.fca.base =
 			(void *)(hw->gop.gop_110.mspg_base +
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 			(res->start - mspg_base));
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 			(res->start-mspg_base));
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		hw->gop.gop_110.fca.obj_size = 0x1000;
 
 		/* MSPG - xlg */
@@ -6123,11 +6126,11 @@ static int mv_pp2x_platform_data_get(struct platform_device *pdev,
 			return -ENXIO;
 		hw->gop.gop_110.xlg_mac.base =
 			(void *)(hw->gop.gop_110.mspg_base +
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 			(res->start - mspg_base));
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 			(res->start-mspg_base));
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		hw->gop.gop_110.xlg_mac.obj_size = 0x1000;
 
 		/* Jumbo L4_checksum port */
@@ -6178,16 +6181,16 @@ static int mv_pp2x_platform_data_get(struct platform_device *pdev,
 	*port_count = of_get_available_child_count(dn);
 	if (*port_count == 0) {
 		dev_err(&pdev->dev, "no ports enabled\n");
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		return -ENODEV;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		err = -ENODEV;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	}
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 /* Initialize Rx FIFO's */
 static void mv_pp22_rx_fifo_init(struct mv_pp2x *priv)
 {
@@ -6223,7 +6226,7 @@ static void mv_pp22_rx_fifo_init(struct mv_pp2x *priv)
 }
 
 /* Initialize Tx FIFO's */
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 static void mv_pp22_tx_fifo_init(struct mv_pp2x *priv)
 {
 	int i;
@@ -6330,7 +6333,7 @@ void mv_pp22_set_net_comp(struct mv_pp2x *priv)
 	mv_gop110_netc_init(&priv->hw.gop, net_comp_config, MV_NETC_SECOND_PHASE);
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 /* Routine called by CP CPU hot plug notifier. Callback reconfigure RSS RX flow hash indir'n table */
 static int mv_pp2x_cp_cpu_callback(struct notifier_block *nfb,
 				   unsigned long action, void *hcpu)
@@ -6361,7 +6364,7 @@ static int mv_pp2x_cp_cpu_callback(struct notifier_block *nfb,
 	return NOTIFY_OK;
 }
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 
 static int mv_pp2x_probe(struct platform_device *pdev)
 {
@@ -6369,11 +6372,11 @@ static int mv_pp2x_probe(struct platform_device *pdev)
 	struct mv_pp2x_hw *hw;
 	int port_count = 0, cpu;
 	int i, err;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	u16 cpu_map;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	u32 cell_index = 0;
 	struct device_node *dn = pdev->dev.of_node;
 	struct device_node *port_node;
@@ -6404,42 +6407,42 @@ static int mv_pp2x_probe(struct platform_device *pdev)
 	}
 
 	/* Save cpu_present_mask + populate the per_cpu address space */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	cpu_map = 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	i = 0;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	for_each_present_cpu(cpu) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	for_each_online_cpu(cpu) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		cpu_map |= (1 << cpu);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
+#else /* MY_DEF_HERE */
 		cpu_map |= (1<<cpu);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		hw->cpu_base[cpu] = hw->base;
 		if (priv->pp2xdata->multi_addr_space) {
 			hw->cpu_base[cpu] +=
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 				(first_addr_space + i) * MVPP2_ADDR_SPACE_SIZE;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 				(first_addr_space + i)*MVPP2_ADDR_SPACE_SIZE;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			i++;
 		}
 	}
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	priv->cpu_map = cpu_map;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 
 	/*Init PP2 Configuration */
 	err = mv_pp2x_init_config(&priv->pp2_cfg, cell_index);
@@ -6463,9 +6466,9 @@ static int mv_pp2x_probe(struct platform_device *pdev)
 		goto err_clk;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	priv->workqueue = create_singlethread_workqueue("mv_pp2x");
 
 	if (!priv->workqueue) {
@@ -6474,18 +6477,18 @@ static int mv_pp2x_probe(struct platform_device *pdev)
 	}
 	INIT_DELAYED_WORK(&priv->stats_task, mv_pp2x_get_device_stats);
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	/* Init PP22 rxfhindir table evenly in probe */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	if (priv->pp2_version == PPV22) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	if (priv->pp2_version == PPV22)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		mv_pp22_init_rxfhindir(priv);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		priv->num_rss_tables = mv_pp2x_queue_mode * mv_pp2x_num_cos_queues;
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 
 	/* Initialize ports */
 	for_each_available_child_of_node(dn, port_node) {
@@ -6495,30 +6498,30 @@ static int mv_pp2x_probe(struct platform_device *pdev)
 	}
 
 	if (priv->pp2_version == PPV22) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		/* Init tx&rx fifo for each port */
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		/* Init tx fifo for each port */
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		mv_pp22_tx_fifo_init(priv);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		mv_pp22_rx_fifo_init(priv);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		mv_pp22_set_net_comp(priv);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	} else {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	}
 
 	else
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		mv_pp21_fifo_init(priv);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	platform_set_drvdata(pdev, priv);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 
 	priv->workqueue = create_singlethread_workqueue("mv_pp2x");
 
@@ -6526,7 +6529,7 @@ static int mv_pp2x_probe(struct platform_device *pdev)
 		err = -ENOMEM;
 		goto err_clk;
 	}
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 
 	/* Only Mvpp22 support hot plug feature */
 	if (priv->pp2_version == PPV22 && mv_pp2x_queue_mode == MVPP2_QDIST_MULTI_MODE) {
@@ -6534,10 +6537,10 @@ static int mv_pp2x_probe(struct platform_device *pdev)
 		register_hotcpu_notifier(&priv->cp_hotplug_nb);
 	}
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	INIT_DELAYED_WORK(&priv->stats_task, mv_pp2x_get_device_stats);
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	queue_delayed_work(priv->workqueue, &priv->stats_task, stats_delay);
 	pr_debug("Platform Device Name : %s\n", kobject_name(&pdev->dev.kobj));
 	return 0;
@@ -6559,11 +6562,11 @@ static int mv_pp2x_remove(struct platform_device *pdev)
 	struct mv_pp2x_hw *hw = &priv->hw;
 	int i, num_of_ports;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	if (priv->pp2_version == PPV22 && mv_pp2x_queue_mode == MVPP2_QDIST_MULTI_MODE)
 		unregister_hotcpu_notifier(&priv->cp_hotplug_nb);
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	cancel_delayed_work(&priv->stats_task);
 	flush_workqueue(priv->workqueue);
 	destroy_workqueue(priv->workqueue);
@@ -6582,11 +6585,11 @@ static int mv_pp2x_remove(struct platform_device *pdev)
 		mv_pp2x_bm_pool_destroy(&pdev->dev, priv, bm_pool);
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	for_each_present_cpu(i) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	for_each_online_cpu(i) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		struct mv_pp2x_aggr_tx_queue *aggr_txq = &priv->aggr_txqs[i];
 
 		dma_free_coherent(&pdev->dev,
@@ -6658,4 +6661,4 @@ module_exit(mpp2_module_exit);
 MODULE_DESCRIPTION("Marvell PPv2x Ethernet Driver - www.marvell.com");
 MODULE_AUTHOR("Marvell");
 MODULE_LICENSE("GPL v2");
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Driver for ICPlus PHYs
  *
@@ -53,71 +56,71 @@ static int ip175c_config_init(struct phy_device *phydev)
 	if (full_reset_performed == 0) {
 
 		/* master reset */
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		err = mdiobus_write(phydev->mdio.bus, 30, 0, 0x175c);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		err = mdiobus_write(phydev->bus, 30, 0, 0x175c);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		if (err < 0)
 			return err;
 
 		/* ensure no bus delays overlap reset period */
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		err = mdiobus_read(phydev->mdio.bus, 30, 0);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		err = mdiobus_read(phydev->bus, 30, 0);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 		/* data sheet specifies reset period is 2 msec */
 		mdelay(2);
 
 		/* enable IP175C mode */
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		err = mdiobus_write(phydev->mdio.bus, 29, 31, 0x175c);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		err = mdiobus_write(phydev->bus, 29, 31, 0x175c);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		if (err < 0)
 			return err;
 
 		/* Set MII0 speed and duplex (in PHY mode) */
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		err = mdiobus_write(phydev->mdio.bus, 29, 22, 0x420);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		err = mdiobus_write(phydev->bus, 29, 22, 0x420);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		if (err < 0)
 			return err;
 
 		/* reset switch ports */
 		for (i = 0; i < 5; i++) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 			err = mdiobus_write(phydev->mdio.bus, i,
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 			err = mdiobus_write(phydev->bus, i,
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 					    MII_BMCR, BMCR_RESET);
 			if (err < 0)
 				return err;
 		}
 
 		for (i = 0; i < 5; i++)
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 			err = mdiobus_read(phydev->mdio.bus, i, MII_BMCR);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 			err = mdiobus_read(phydev->bus, i, MII_BMCR);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 		mdelay(2);
 
 		full_reset_performed = 1;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	if (phydev->mdio.addr != 4) {
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	if (phydev->addr != 4) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		phydev->state = PHY_RUNNING;
 		phydev->speed = SPEED_100;
 		phydev->duplex = DUPLEX_FULL;
@@ -212,11 +215,11 @@ static int ip101a_g_config_init(struct phy_device *phydev)
 
 static int ip175c_read_status(struct phy_device *phydev)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	if (phydev->mdio.addr == 4) /* WAN port */
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	if (phydev->addr == 4) /* WAN port */
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		genphy_read_status(phydev);
 	else
 		/* Don't need to read status for switch ports */
@@ -227,11 +230,11 @@ static int ip175c_read_status(struct phy_device *phydev)
 
 static int ip175c_config_aneg(struct phy_device *phydev)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	if (phydev->mdio.addr == 4) /* WAN port */
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	if (phydev->addr == 4) /* WAN port */
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		genphy_config_aneg(phydev);
 
 	return 0;
@@ -257,11 +260,11 @@ static struct phy_driver icplus_driver[] = {
 	.read_status	= &ip175c_read_status,
 	.suspend	= genphy_suspend,
 	.resume		= genphy_resume,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	.driver		= { .owner = THIS_MODULE,},
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 }, {
 	.phy_id		= 0x02430d90,
 	.name		= "ICPlus IP1001",
@@ -273,11 +276,11 @@ static struct phy_driver icplus_driver[] = {
 	.read_status	= &genphy_read_status,
 	.suspend	= genphy_suspend,
 	.resume		= genphy_resume,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	.driver		= { .owner = THIS_MODULE,},
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 }, {
 	.phy_id		= 0x02430c54,
 	.name		= "ICPlus IP101A/G",
@@ -291,11 +294,11 @@ static struct phy_driver icplus_driver[] = {
 	.read_status	= &genphy_read_status,
 	.suspend	= genphy_suspend,
 	.resume		= genphy_resume,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	.driver		= { .owner = THIS_MODULE,},
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 } };
 
 module_phy_driver(icplus_driver);

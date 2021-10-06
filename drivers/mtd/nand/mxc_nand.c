@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright 2004-2007 Freescale Semiconductor, Inc. All Rights Reserved.
  * Copyright 2008 Sascha Hauer, kernel@pengutronix.de
@@ -532,11 +535,11 @@ static void send_addr_v1_v2(struct mxc_nand_host *host, uint16_t addr, int islas
 
 static void send_page_v3(struct mtd_info *mtd, unsigned int ops)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand_chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand_chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct mxc_nand_host *host = nand_chip->priv;
 	uint32_t tmp;
 
@@ -552,11 +555,11 @@ static void send_page_v3(struct mtd_info *mtd, unsigned int ops)
 
 static void send_page_v2(struct mtd_info *mtd, unsigned int ops)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand_chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand_chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct mxc_nand_host *host = nand_chip->priv;
 
 	/* NANDFC buffer 0 is used for page read/write */
@@ -570,11 +573,11 @@ static void send_page_v2(struct mtd_info *mtd, unsigned int ops)
 
 static void send_page_v1(struct mtd_info *mtd, unsigned int ops)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand_chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand_chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct mxc_nand_host *host = nand_chip->priv;
 	int bufs, i;
 
@@ -675,11 +678,11 @@ static void mxc_nand_enable_hwecc(struct mtd_info *mtd, int mode)
 static int mxc_nand_correct_data_v1(struct mtd_info *mtd, u_char *dat,
 				 u_char *read_ecc, u_char *calc_ecc)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand_chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand_chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct mxc_nand_host *host = nand_chip->priv;
 
 	/*
@@ -700,11 +703,11 @@ static int mxc_nand_correct_data_v1(struct mtd_info *mtd, u_char *dat,
 static int mxc_nand_correct_data_v2_v3(struct mtd_info *mtd, u_char *dat,
 				 u_char *read_ecc, u_char *calc_ecc)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand_chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand_chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct mxc_nand_host *host = nand_chip->priv;
 	u32 ecc_stat, err;
 	int no_subpages = 1;
@@ -742,11 +745,11 @@ static int mxc_nand_calculate_ecc(struct mtd_info *mtd, const u_char *dat,
 
 static u_char mxc_nand_read_byte(struct mtd_info *mtd)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand_chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand_chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct mxc_nand_host *host = nand_chip->priv;
 	uint8_t ret;
 
@@ -770,11 +773,11 @@ static u_char mxc_nand_read_byte(struct mtd_info *mtd)
 
 static uint16_t mxc_nand_read_word(struct mtd_info *mtd)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand_chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand_chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct mxc_nand_host *host = nand_chip->priv;
 	uint16_t ret;
 
@@ -790,11 +793,11 @@ static uint16_t mxc_nand_read_word(struct mtd_info *mtd)
 static void mxc_nand_write_buf(struct mtd_info *mtd,
 				const u_char *buf, int len)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand_chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand_chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct mxc_nand_host *host = nand_chip->priv;
 	u16 col = host->buf_start;
 	int n = mtd->oobsize + mtd->writesize - col;
@@ -812,11 +815,11 @@ static void mxc_nand_write_buf(struct mtd_info *mtd,
  */
 static void mxc_nand_read_buf(struct mtd_info *mtd, u_char *buf, int len)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand_chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand_chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct mxc_nand_host *host = nand_chip->priv;
 	u16 col = host->buf_start;
 	int n = mtd->oobsize + mtd->writesize - col;
@@ -832,11 +835,11 @@ static void mxc_nand_read_buf(struct mtd_info *mtd, u_char *buf, int len)
  * deselect of the NAND chip */
 static void mxc_nand_select_chip_v1_v3(struct mtd_info *mtd, int chip)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand_chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand_chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct mxc_nand_host *host = nand_chip->priv;
 
 	if (chip == -1) {
@@ -857,11 +860,11 @@ static void mxc_nand_select_chip_v1_v3(struct mtd_info *mtd, int chip)
 
 static void mxc_nand_select_chip_v2(struct mtd_info *mtd, int chip)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand_chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand_chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct mxc_nand_host *host = nand_chip->priv;
 
 	if (chip == -1) {
@@ -894,11 +897,11 @@ static void mxc_nand_select_chip_v2(struct mtd_info *mtd, int chip)
  */
 static void copy_spare(struct mtd_info *mtd, bool bfrom)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *this = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *this = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct mxc_nand_host *host = this->priv;
 	u16 i, oob_chunk_size;
 	u16 num_chunks = mtd->writesize / 512;
@@ -941,11 +944,11 @@ static void copy_spare(struct mtd_info *mtd, bool bfrom)
  */
 static void mxc_do_addr_cycle(struct mtd_info *mtd, int column, int page_addr)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand_chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand_chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct mxc_nand_host *host = nand_chip->priv;
 
 	/* Write out column address, if necessary */
@@ -1031,11 +1034,11 @@ static void ecc_8bit_layout_4k(struct nand_ecclayout *layout)
 
 static void preset_v1(struct mtd_info *mtd)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand_chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand_chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct mxc_nand_host *host = nand_chip->priv;
 	uint16_t config1 = 0;
 
@@ -1063,11 +1066,11 @@ static void preset_v1(struct mtd_info *mtd)
 
 static void preset_v2(struct mtd_info *mtd)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand_chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand_chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct mxc_nand_host *host = nand_chip->priv;
 	uint16_t config1 = 0;
 
@@ -1113,11 +1116,11 @@ static void preset_v2(struct mtd_info *mtd)
 
 static void preset_v3(struct mtd_info *mtd)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct mxc_nand_host *host = chip->priv;
 	uint32_t config2, config3;
 	int i, addr_phases;
@@ -1189,11 +1192,11 @@ static void preset_v3(struct mtd_info *mtd)
 static void mxc_nand_command(struct mtd_info *mtd, unsigned command,
 				int column, int page_addr)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand_chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand_chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct mxc_nand_host *host = nand_chip->priv;
 
 	pr_debug("mxc_nand_command (cmd = 0x%x, col = 0x%x, page = 0x%x)\n",
@@ -1592,9 +1595,9 @@ static int mxcnd_probe(struct platform_device *pdev)
 	this->chip_delay = 5;
 
 	this->priv = host;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	nand_set_flash_node(this, pdev->dev.of_node),
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	this->dev_ready = mxc_nand_dev_ready;
 	this->cmdfunc = mxc_nand_command;
 	this->read_byte = mxc_nand_read_byte;
@@ -1754,13 +1757,13 @@ static int mxcnd_probe(struct platform_device *pdev)
 
 	/* Register the partitions */
 	mtd_device_parse_register(mtd, part_probes,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 			NULL,
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 			&(struct mtd_part_parser_data){
 				.of_node = pdev->dev.of_node,
 			},
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 			host->pdata.parts,
 			host->pdata.nr_parts);
 

@@ -2250,6 +2250,7 @@ static void nvme_alloc_ns(struct nvme_dev *dev, unsigned nsid)
 	struct nvme_ns *ns;
 	struct gendisk *disk;
 	int node = dev_to_node(dev->dev);
+	bool vwc = false;
 
 	ns = kzalloc_node(sizeof(*ns), GFP_KERNEL, node);
 	if (!ns)
@@ -2267,6 +2268,9 @@ static void nvme_alloc_ns(struct nvme_dev *dev, unsigned nsid)
 	if (!disk)
 		goto out_free_queue;
 
+#ifdef MY_ABC_HERE
+	disk->systemDisk = 1;
+#endif /* MY_ABC_HERE */
 	kref_init(&ns->kref);
 	ns->ns_id = nsid;
 	ns->disk = disk;
@@ -2281,9 +2285,10 @@ static void nvme_alloc_ns(struct nvme_dev *dev, unsigned nsid)
 	}
 	if (dev->stripe_size)
 		blk_queue_chunk_sectors(ns->queue, dev->stripe_size >> 9);
-	if (dev->vwc & NVME_CTRL_VWC_PRESENT)
-		blk_queue_flush(ns->queue, REQ_FLUSH | REQ_FUA);
 	blk_queue_virt_boundary(ns->queue, dev->page_size - 1);
+	if (dev->vwc & NVME_CTRL_VWC_PRESENT)
+		vwc = true;
+	blk_queue_write_cache(ns->queue, vwc, vwc);
 
 	disk->major = nvme_major;
 	disk->first_minor = 0;

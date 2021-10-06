@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * clkgen-mux.c: ST GEN-MUX Clock driver
  *
@@ -822,18 +825,18 @@ err:
 		if (!clk_data->clks[i])
 			continue;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		composite = to_clk_composite(__clk_get_hw(clk_data->clks[i]));
 		kfree(to_clk_gate(composite->gate_hw));
 		kfree(to_clk_divider(composite->rate_hw));
 		kfree(to_clk_mux(composite->mux_hw));
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		composite = container_of(__clk_get_hw(clk_data->clks[i]),
 					 struct clk_composite, hw);
 		kfree(container_of(composite->gate_hw, struct clk_gate, hw));
 		kfree(container_of(composite->rate_hw, struct clk_divider, hw));
 		kfree(container_of(composite->mux_hw, struct clk_mux, hw));
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	}
 
 	kfree(clk_data->clks);

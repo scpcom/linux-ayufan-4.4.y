@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Nano River Technologies viperboard GPIO lib driver
  *
@@ -173,11 +176,11 @@ static void vprbrd_gpioa_set(struct gpio_chip *chip,
 		mutex_unlock(&vb->lock);
 
 		if (ret != sizeof(struct vprbrd_gpioa_msg))
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 			dev_err(chip->parent, "usb error setting pin value\n");
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 			dev_err(chip->dev, "usb error setting pin value\n");
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	}
 }
 
@@ -349,11 +352,11 @@ static void vprbrd_gpiob_set(struct gpio_chip *chip,
 		mutex_unlock(&vb->lock);
 
 		if (ret != sizeof(struct vprbrd_gpiob_msg))
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 			dev_err(chip->parent, "usb error setting pin value\n");
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 			dev_err(chip->dev, "usb error setting pin value\n");
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	}
 }
 
@@ -374,11 +377,11 @@ static int vprbrd_gpiob_direction_input(struct gpio_chip *chip,
 	mutex_unlock(&vb->lock);
 
 	if (ret)
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		dev_err(chip->parent, "usb error setting pin to input\n");
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		dev_err(chip->dev, "usb error setting pin to input\n");
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	return ret;
 }
@@ -397,11 +400,11 @@ static int vprbrd_gpiob_direction_output(struct gpio_chip *chip,
 
 	ret = vprbrd_gpiob_setdir(vb, offset, 1);
 	if (ret)
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		dev_err(chip->parent, "usb error setting pin to output\n");
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		dev_err(chip->dev, "usb error setting pin to output\n");
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	mutex_unlock(&vb->lock);
 
@@ -425,11 +428,11 @@ static int vprbrd_gpio_probe(struct platform_device *pdev)
 	vb_gpio->vb = vb;
 	/* registering gpio a */
 	vb_gpio->gpioa.label = "viperboard gpio a";
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	vb_gpio->gpioa.parent = &pdev->dev;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	vb_gpio->gpioa.dev = &pdev->dev;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	vb_gpio->gpioa.owner = THIS_MODULE;
 	vb_gpio->gpioa.base = -1;
 	vb_gpio->gpioa.ngpio = 16;
@@ -440,21 +443,21 @@ static int vprbrd_gpio_probe(struct platform_device *pdev)
 	vb_gpio->gpioa.direction_output = vprbrd_gpioa_direction_output;
 	ret = gpiochip_add(&vb_gpio->gpioa);
 	if (ret < 0) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		dev_err(vb_gpio->gpioa.parent, "could not add gpio a");
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		dev_err(vb_gpio->gpioa.dev, "could not add gpio a");
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		goto err_gpioa;
 	}
 
 	/* registering gpio b */
 	vb_gpio->gpiob.label = "viperboard gpio b";
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	vb_gpio->gpiob.parent = &pdev->dev;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	vb_gpio->gpiob.dev = &pdev->dev;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	vb_gpio->gpiob.owner = THIS_MODULE;
 	vb_gpio->gpiob.base = -1;
 	vb_gpio->gpiob.ngpio = 16;
@@ -465,11 +468,11 @@ static int vprbrd_gpio_probe(struct platform_device *pdev)
 	vb_gpio->gpiob.direction_output = vprbrd_gpiob_direction_output;
 	ret = gpiochip_add(&vb_gpio->gpiob);
 	if (ret < 0) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		dev_err(vb_gpio->gpiob.parent, "could not add gpio b");
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		dev_err(vb_gpio->gpiob.dev, "could not add gpio b");
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		goto err_gpiob;
 	}
 

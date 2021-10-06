@@ -1655,10 +1655,7 @@ static int fuse_setattr(struct dentry *entry, struct iattr *attr)
 
 		attr->ia_valid &= ~(ATTR_KILL_SUID | ATTR_KILL_SGID |
 				    ATTR_MODE);
-		/*
-		 * ia_mode calculation may have used stale i_mode.  Refresh and
-		 * recalculate.
-		 */
+		 
 		ret = fuse_do_getattr(inode, NULL, file);
 		if (ret)
 			return ret;
@@ -1679,7 +1676,7 @@ static int fuse_setattr(struct dentry *entry, struct iattr *attr)
 
 	ret = fuse_do_setattr(inode, attr, file);
 	if (!ret) {
-		/* Directory mode changed, may need to revalidate access */
+		 
 		if (d_is_dir(entry) && (attr->ia_valid & ATTR_MODE))
 			fuse_invalidate_entry_cache(entry);
 	}

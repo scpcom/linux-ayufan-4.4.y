@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*******************************************************************************t
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -1520,4 +1523,4 @@ void pp3_dbg_cfh_rx_dump(struct mv_cfh_common *rx_cfh)
 			MV_CFH_MACME_BIT_GET(rx_cfh->l3_l4_info));
 }
 /*---------------------------------------------------------------------------*/
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

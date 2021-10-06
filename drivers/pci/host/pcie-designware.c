@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Synopsys Designware PCIe host controller driver
  *
@@ -408,11 +411,11 @@ int dw_pcie_host_init(struct pcie_port *pp)
 	struct pci_bus *bus, *child;
 	struct resource *cfg_res;
 	u32 val;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	int i, ret, has_msi = 0;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	int i, ret;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	LIST_HEAD(res);
 	struct resource_entry *win;
 
@@ -508,20 +511,20 @@ int dw_pcie_host_init(struct pcie_port *pp)
 				dev_err(pp->dev, "irq domain init failed\n");
 				return -ENXIO;
 			}
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 			has_msi = 1;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 			for (i = 0; i < MAX_MSI_IRQS; i++)
 				irq_create_mapping(pp->irq_domain, i);
 		} else {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 			has_msi = (pp->ops->msi_host_init(pp, &dw_pcie_msi_chip) == 0);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 			ret = pp->ops->msi_host_init(pp, &dw_pcie_msi_chip);
 			if (ret < 0)
 				return ret;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		}
 	}
 
@@ -543,11 +546,11 @@ int dw_pcie_host_init(struct pcie_port *pp)
 	dw_pcie_wr_own_conf(pp, PCIE_LINK_WIDTH_SPEED_CONTROL, 4, val);
 
 	pp->root_bus_nr = pp->busn->start;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	if (IS_ENABLED(CONFIG_PCI_MSI) && has_msi) {
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	if (IS_ENABLED(CONFIG_PCI_MSI)) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		bus = pci_scan_root_bus_msi(pp->dev, pp->root_bus_nr,
 					    &dw_pcie_ops, pp, &res,
 					    &dw_pcie_msi_chip);

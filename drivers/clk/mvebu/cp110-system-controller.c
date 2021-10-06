@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*
  * Marvell Armada CP110 System Controller
  *
@@ -12,26 +15,26 @@
  */
 
 /*
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
  * CP110 has 6 core clocks:
-#else // CONFIG_SYNO_LSP_ARMADA_17_04_02
+#else // MY_DEF_HERE
  * CP110 has 5 core clocks:
-#endif // CONFIG_SYNO_LSP_ARMADA_17_04_02
+#endif // MY_DEF_HERE
  *
  *  - APLL		(1 Ghz)
  *    - PPv2 core	(1/3 APLL)
  *    - EIP		(1/2 APLL)
  *      - Core		(1/2 EIP)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
  *    - MMC		(2/5 APLL)
-#endif // CONFIG_SYNO_LSP_ARMADA_17_04_02
+#endif // MY_DEF_HERE
  *
  *  - NAND clock, which is either:
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
  *    - Equal to MMC clock
-#else // CONFIG_SYNO_LSP_ARMADA_17_04_02
+#else // MY_DEF_HERE
  *    - Equal to the core clock
-#endif // CONFIG_SYNO_LSP_ARMADA_17_04_02
+#endif // MY_DEF_HERE
  *    - 2/5 APLL
  *
  * CP110 has 32 gatable clocks, for the various peripherals in the
@@ -59,11 +62,11 @@ enum {
 	CP110_CLK_TYPE_GATABLE,
 };
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 #define CP110_MAX_CORE_CLOCKS		6
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 #define CP110_MAX_CORE_CLOCKS		5
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 #define CP110_MAX_GATABLE_CLOCKS	32
 
 #define CP110_CLK_NUM \
@@ -74,9 +77,9 @@ enum {
 #define CP110_CORE_EIP			2
 #define CP110_CORE_CORE			3
 #define CP110_CORE_NAND			4
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 #define CP110_CORE_MMC			5
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
 /* A number of gatable clocks need special handling */
 #define CP110_GATE_AUDIO		0
@@ -209,11 +212,11 @@ static int cp110_syscon_clk_probe(struct platform_device *pdev)
 {
 	struct regmap *regmap;
 	struct device_node *np = pdev->dev.of_node;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	const char *ppv2_name, *apll_name, *core_name, *eip_name, *nand_name, *mmc_name;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	const char *ppv2_name, *apll_name, *core_name, *eip_name, *nand_name;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	struct clk_onecell_data *cp110_clk_data;
 	struct clk *clk, **cp110_clks;
 	u32 nand_clk_ctrl;
@@ -303,7 +306,7 @@ static int cp110_syscon_clk_probe(struct platform_device *pdev)
 
 	cp110_clks[CP110_CORE_NAND] = clk;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	/* MMC clock is APLL/2.5 */
 	of_property_read_string_index(np, "core-clock-output-names",
 				      CP110_CORE_MMC, &mmc_name);
@@ -318,7 +321,7 @@ static int cp110_syscon_clk_probe(struct platform_device *pdev)
 
 	cp110_clks[CP110_CORE_MMC] = clk;
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	for (i = 0; i < CP110_MAX_GATABLE_CLOCKS; i++) {
 		const char *parent, *name;
 		int ret;
@@ -350,13 +353,13 @@ static int cp110_syscon_clk_probe(struct platform_device *pdev)
 			parent = ppv2_name;
 			break;
 		case CP110_GATE_SDIO:
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 			parent = mmc_name;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 			of_property_read_string_index(np,
 						      "gate-clock-output-names",
 						      CP110_GATE_SDMMC, &parent);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 			break;
 		case CP110_GATE_XOR1:
 		case CP110_GATE_XOR0:
@@ -406,11 +409,11 @@ fail_gate:
 			cp110_unregister_gate(clk);
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 
 	clk_unregister_fixed_factor(cp110_clks[CP110_CORE_MMC]);
 fail5:
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	clk_unregister_fixed_factor(cp110_clks[CP110_CORE_NAND]);
 fail4:
 	clk_unregister_fixed_factor(cp110_clks[CP110_CORE_CORE]);
@@ -438,9 +441,9 @@ static int cp110_syscon_clk_remove(struct platform_device *pdev)
 			cp110_unregister_gate(clk);
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	clk_unregister_fixed_factor(cp110_clks[CP110_CORE_MMC]);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	clk_unregister_fixed_factor(cp110_clks[CP110_CORE_NAND]);
 	clk_unregister_fixed_factor(cp110_clks[CP110_CORE_CORE]);
 	clk_unregister_fixed_factor(cp110_clks[CP110_CORE_EIP]);
@@ -470,4 +473,4 @@ module_platform_driver(cp110_syscon_driver);
 MODULE_DESCRIPTION("Marvell CP110 System Controller 0 driver");
 MODULE_AUTHOR("Thomas Petazzoni <thomas.petazzoni@free-electrons.com>");
 MODULE_LICENSE("GPL");
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

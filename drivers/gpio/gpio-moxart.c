@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * MOXA ART SoCs GPIO driver.
  *
@@ -61,11 +64,11 @@ static int moxart_gpio_probe(struct platform_device *pdev)
 	bgc->data = bgc->read_reg(bgc->reg_set);
 	bgc->gc.base = 0;
 	bgc->gc.ngpio = 32;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	bgc->gc.parent = dev;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	bgc->gc.dev = dev;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	bgc->gc.owner = THIS_MODULE;
 
 	ret = gpiochip_add(&bgc->gc);

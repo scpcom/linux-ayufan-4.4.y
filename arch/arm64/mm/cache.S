@@ -140,15 +140,15 @@ USER(9f, dc	cvau, x4	)		// clean D line to PoU
 	icache_line_size x2, x3
 	sub	x3, x2, #1
 	bic	x4, x0, x3
-#if defined(CONFIG_SYNO_ARMADA37XX)
+#if defined(MY_DEF_HERE)
 	ic	ialluis
-#else /* CONFIG_SYNO_ARMADA37XX */
+#else /* MY_DEF_HERE */
 1:
 USER(9f, ic	ivau, x4	)		// invalidate I line PoU
 	add	x4, x4, x2
 	cmp	x4, x1
 	b.lo	1b
-#endif /* CONFIG_SYNO_ARMADA37XX */
+#endif /* MY_DEF_HERE */
 	dsb	ish
 	isb
 	mov	x0, #0

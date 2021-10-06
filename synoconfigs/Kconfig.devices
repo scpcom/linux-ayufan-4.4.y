@@ -122,15 +122,25 @@ config SYNO_MD_LESS_DELAY_RESYNC_MESSAGE
 	bool "Avoid md write same delay resync message too much"
 	default y
 
-config SYNO_MD_SYNC_STATUS_REPORT
-	bool "Report sync status to user space"
-	default y
-
 config SYNO_MD_DISKSTATS
 	bool "Show md's util in iostat"
 	default y
 
+config SYNO_MD_SYNC_STATUS_REPORT
+	bool "Report sync status to user space"
+	default y
+
+config SYNO_MD_FIX_RAID5_RESHAPE_HANG
+        bool "Resolve the raid 5 hang problem during expansion with disk error or hotplug out."
+        default y
+
 endmenu #MD
+
+menu "SCSI"
+
+config SYNO_SCSI_WAIT_DISK_READY
+	bool "Wait for SCSI device ready when boot up"
+	default y
 
 menu "SATA"
 
@@ -395,7 +405,7 @@ config SYNO_FORCE_EH_FULL_RECOVER_RETRY
 
 config SYNO_SATA_AHCI_FBS_NONCQ
 	bool "Disable NCQ of some SATA AHCI controllers"
-	default y
+	default n
 
 config SYNO_MV_9170_PORTING
 	bool "Marvell 88SE9170 specific initialize steps"
@@ -477,19 +487,32 @@ config SYNO_EUNIT_SPD_UNKNOWN_RESCAN
 
 config SYNO_ASMEDIA_AMP_ADJUST
 	bool "adjust amplitude and de-emphasis for asmedia 1061 sata signal"
-	depends on SYNO_RTD129X || SYNO_APOLLOLAKE
-	default y
+	default n
 
 config SYNO_LINK_RETRY_AFTER_COMRESET
 	bool "sata link retry after COMRESET"
 	default y
 
-config SYNO_ATA_IDLE_IMMEDIATE
-	bool "Issue idle immediate cmd instead of read cmd to wake up disk"
+config SYNO_PMP_NCQ_COMPATIBILITY
+	bool "Disable ncq on combination of SIL3xxx and MV9170"
 	default y
+
+config SYNO_WAKEUPCMD_IDLEIMMED
+	bool "change disk wakeup command to idle immediate"
+	depends on SYNO_SPINUP_DELAY
+	default y
+
+config SYNO_RTD129X_INTERNAL_HDD_RESET
+	bool "RTD129X sata SoC need to reset phy for compatibility enhancement"
+	depends on SYNO_LSP_RTD129X && SYNO_RTD129X
+	default n
 
 config SYNO_EUNIT_SCSI_HOST_RECOVERY
 	bool "Prevent eunit scsi host stuck in recovery state"
+	default y
+
+config SYNO_NONCQ_BASH_ERROR_FIX
+	bool "Fix error return while setting devices which is not supported ncq"
 	default y
 
 endmenu #SATA
@@ -530,11 +553,6 @@ config SYNO_SAS_ISCSI_DEVICE_PREFIX
 	string "SAS Iscsi Name Prefix"
 	default "iscsi"
 	depends on SYNO_SAS_DISK_NAME_ISCSI_DEVICE
-
-config SYNO_ISCSI_LOOPBACK_DEVICE
-	bool "Loopback Iscsi device name"
-	default y
-	depends on SYNO_FIXED_DISK_NAME
 
 config SYNO_SAS_FIX_TRIM_GRANULARITY
 	bool "Correct TRIM granularity in SAS model"
@@ -601,7 +619,7 @@ config SYNO_SCSI_MAX_QUEUE_DEPTH_LOCK
 
 config SYNO_SAS_HBA_IDX
 	bool "Indexing Synology SAS HBA"
-	depends on SYNO_GRANTLEY || SYNO_BROADWELL || SYNO_PURLEY
+	depends on SYNO_GRANTLEY || SYNO_BROADWELL || SYNO_PURLEY || SYNO_COFFEELAKE
 	default n
 
 config SYNO_SAS_MAX_HBA_SLOT
@@ -620,6 +638,8 @@ config SYNO_SAS_HOST_DISK_LED_CTRL
 
 endmenu #SAS
 
+endmenu #SCSI
+
 menu "Network"
 
 config SYNO_NET_BOND_ALB_INFO
@@ -637,6 +657,11 @@ config SYNO_AVOTON_PHY_OPS
 
 config SYNO_ARMADA37XX_WOL
         bool "Support WOL on Armada 37xx Platform"
+        default y
+        depends on SYNO_ARMADA37XX
+
+config SYNO_ARMADA37XX_TESTSWBM
+        bool "TEST SWBM patches from Marvell"
         default y
         depends on SYNO_ARMADA37XX
 
@@ -790,11 +815,6 @@ config SYNO_USB_VBUS_NUM_GPIO
 	depends on SYNO_USB_VBUS_GPIO_CONTROL
 	default "5"
 
-config SYNO_USB_VBUS_GPIO_POLARITY_INVERT
-        bool "Invert USB VBUS GPIO POLARITY"
-        default n
-        depends on SYNO_USB_VBUS_GPIO_CONTROL
-
 config SYNO_USB_UNBIND_DRIVER_BEFORE_SHUTDOWN_QUIRKS
 	bool "Unbind all USB device drivers before system shutdown"
 	default y
@@ -823,6 +843,14 @@ config SYNO_USB_EXTERNAL_USB2_HUB_VID
 config SYNO_USB_EXTERNAL_USB2_HUB_PID
         hex "External USB2.0 Hub's pid hex number"
         depends on SYNO_USB_HAS_EXTERNAL_USB2_HUB
+
+config SYNO_USB_EXT_HUB_PARENT_SERIAL
+        string "USB host serial for parent of external hub"
+        depends on SYNO_USB_HAS_EXTERNAL_USB3_HUB || SYNO_USB_HAS_EXTERNAL_USB2_HUB
+
+config SYNO_USB_FIX_SET_INTERFACE
+	bool "Fix usb_set_interface hang"
+	default y
 
 endmenu #USB
 
@@ -863,9 +891,24 @@ config SYNO_TTY_APL_EARLYPRINTK
 	default y
 	depends on SYNO_APOLLOLAKE
 
+config SYNO_FIX_TTYS_FUNCTIONS
+	bool "Fixed console at ttyS0, uP at ttyS1"
+	select CONFIG_EARLY_PRINTK
+	default n
+
+config SYNO_TTYS_FUN_NUM
+	int "Number of syno ttyS functions"
+	depends on SYNO_FIX_TTYS_FUNCTIONS
+	default 2
+
 config SYNO_RTD129X_UART1
 	bool "Send uP command via UART1"
 	depends on SYNO_RTD129X
+	default y
+
+config SYNO_LSP_ARMADA_UART_FIX
+	bool "Fix uart2 interrupt issue"
+	depends on SYNO_LSP_ARMADA_17_04_02
 	default y
 
 endmenu #Serial/TTYs

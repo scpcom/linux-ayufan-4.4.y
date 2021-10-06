@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*
 * ***************************************************************************
 * Copyright (C) 2016 Marvell International Ltd.
@@ -39,11 +42,11 @@
 #include <net/ip.h>
 #include <net/ipv6.h>
 #include <linux/phy/phy.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 #include <dt-bindings/phy/phy-comphy-mvebu.h>
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 #include <dt-bindings/phy/phy-mvebu-comphy.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 #include "mv_pp2x.h"
 #include "mv_pp2x_hw.h"
@@ -69,18 +72,18 @@ static const char mv_pp2x_gstrings_stats[][ETH_GSTRING_LEN] = {
 	/* device-specific stats */
 	"rx_bytes", "rx_frames", "rx_unicast", "rx_mcast", "rx_bcast",
 	"tx_bytes", "tx_frames", "tx_unicast", "tx_mcast", "tx_bcast",
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	"rx_pause", "tx_pause", "rx_mac_overrun", "rx_crc", "rx_runt",
 	"rx_giant", "rx_fragments_err", "rx_mac_err", "rx_jabber", "rx_ppv2_overrun",
 	"rx_cls_drop", "rx_fullq_drop", "rx_early_drop", "rx_bm_drop",
 	"rx_total_err",	"rx_sw_drop", "rx_hw_drop", "tx_crc_sent",
 	"tx_drop", "collision",	"late_collision", "frames_64", "frames_65_to_127",
 	"frames_128_to_255", "frames_256_to_511", "frames_512_to_1023", "frames_1024_to_max",
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	"rx_pause", "tx_pause", "rx_overrun", "rx_crc", "rx_runt", "rx_giant",
 	"rx_fragments_err", "rx_mac_err", "rx_jabber", "rx_sw_drop", "rx_total_err",
 	"tx_drop", "tx_crc_sent", "collision", "late_collision",
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 };
 
 int mv_pp2x_check_speed_duplex_valid(struct ethtool_cmd *cmd,
@@ -94,17 +97,17 @@ int mv_pp2x_check_speed_duplex_valid(struct ethtool_cmd *cmd,
 		pstatus->duplex = MV_PORT_DUPLEX_HALF;
 		break;
 	case DUPLEX_UNKNOWN:
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		if (cmd->speed == SPEED_1000) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		if (cmd->speed == SPEED_1000)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			pstatus->duplex = MV_PORT_DUPLEX_FULL;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		} else {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		else {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			pstatus->duplex = MV_PORT_DUPLEX_FULL;
 			pr_err("Unknown duplex configuration, full duplex set\n");
 		}
@@ -220,9 +223,9 @@ static void mv_pp2x_eth_tool_get_ethtool_stats(struct net_device *dev,
 		return;
 
 	mv_gop110_mib_counters_stat_update(gop, gop_port, gop_statistics);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	mv_pp2x_counters_stat_update(port, gop_statistics);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 
 	data[i++] = gop_statistics->rx_byte;
 	data[i++] = gop_statistics->rx_frames;
@@ -236,18 +239,18 @@ static void mv_pp2x_eth_tool_get_ethtool_stats(struct net_device *dev,
 	data[i++] = gop_statistics->tx_bcast;
 	data[i++] = gop_statistics->rx_pause;
 	data[i++] = gop_statistics->tx_pause;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	data[i++] = gop_statistics->rx_mac_overrun;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	data[i++] = gop_statistics->rx_overrun;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	data[i++] = gop_statistics->rx_crc;
 	data[i++] = gop_statistics->rx_runt;
 	data[i++] = gop_statistics->rx_giant;
 	data[i++] = gop_statistics->rx_fragments_err;
 	data[i++] = gop_statistics->rx_mac_err;
 	data[i++] = gop_statistics->rx_jabber;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	data[i++] = gop_statistics->rx_ppv2_overrun;
 	data[i++] = gop_statistics->rx_cls_drop;
 	data[i++] = gop_statistics->rx_fullq_drop;
@@ -256,25 +259,25 @@ static void mv_pp2x_eth_tool_get_ethtool_stats(struct net_device *dev,
 	data[i++] = gop_statistics->rx_total_err;
 	data[i++] = gop_statistics->rx_sw_drop;
 	data[i++] = gop_statistics->rx_hw_drop;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	data[i++] = dev->stats.rx_dropped;
 	data[i++] = gop_statistics->rx_total_err + dev->stats.rx_dropped;
 	data[i++] = dev->stats.tx_dropped;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	data[i++] = gop_statistics->tx_crc_sent;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	data[i++] = dev->stats.tx_dropped;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	data[i++] = gop_statistics->collision;
 	data[i++] = gop_statistics->late_collision;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	data[i++] = gop_statistics->frames_64;
 	data[i++] = gop_statistics->frames_65_to_127;
 	data[i++] = gop_statistics->frames_128_to_255;
 	data[i++] = gop_statistics->frames_256_to_511;
 	data[i++] = gop_statistics->frames_512_to_1023;
 	data[i++] = gop_statistics->frames_1024_to_max;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 
 }
 
@@ -476,17 +479,17 @@ static int mv_pp2x_set_pauseparam(struct net_device *dev,
 		else
 			mv_gop110_xlg_mac_fc_set(gop, gop_port, MV_PORT_FC_RX_DISABLE);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		if (pause->tx_pause) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		if (pause->tx_pause)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			mv_gop110_fca_tx_enable(gop, gop_port, false);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		} else	{
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		else	{
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			mv_gop110_xlg_mac_fc_set(gop, gop_port, MV_PORT_FC_TX_DISABLE);
 			mv_gop110_fca_tx_enable(gop, gop_port, true);
 			}
@@ -522,11 +525,11 @@ static int mv_pp2x_ethtool_get_settings(struct net_device *dev,
 		mv_gop110_port_link_status(&port->priv->hw.gop,
 					   &port->mac_data, &status);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		if (status.linkup) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		if (status.linkup == true) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			switch (status.speed) {
 			case MV_PORT_SPEED_10000:
 				cmd->speed = SPEED_10000;
@@ -602,29 +605,29 @@ void mv_pp2x_ethtool_set_gmac_config(struct mv_port_link_status status, struct g
 {
 	mv_gop110_force_link_mode_set(gop, mac, false, true);
 	mv_gop110_gmac_set_autoneg(gop, mac, cmd->autoneg);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (cmd->autoneg) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (cmd->autoneg)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		mv_gop110_autoneg_restart(gop, mac);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		mv_gop110_gmac_fc_set(gop, gop_port, MV_PORT_FC_AN_SYM);
 	} else {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	else
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		mv_gop110_gmac_speed_duplex_set(gop, gop_port, status.speed, status.duplex);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		mv_gop110_gmac_fc_set(gop, gop_port, MV_PORT_FC_AN_NO);
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	mv_gop110_force_link_mode_set(gop, mac, false, false);
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 int mv_pp2x_get_new_comphy_mode(struct ethtool_cmd *cmd, int port_id)
 {
 	if (cmd->speed == SPEED_10000 && port_id == 0)
@@ -640,17 +643,17 @@ int mv_pp2x_get_new_comphy_mode(struct ethtool_cmd *cmd, int port_id)
 
 void mv_pp2x_set_new_phy_mode(struct ethtool_cmd *cmd, struct mv_mac_data *mac)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (cmd->speed == SPEED_10000) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (cmd->speed == SPEED_10000)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		mac->phy_mode = PHY_INTERFACE_MODE_SFI;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	} else if (cmd->speed == SPEED_2500) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	else if (cmd->speed == SPEED_2500) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		mac->phy_mode = PHY_INTERFACE_MODE_SGMII;
 		mac->speed = SPEED_2500;
 		mac->flags |= MV_EMAC_F_SGMII2_5;
@@ -661,7 +664,7 @@ void mv_pp2x_set_new_phy_mode(struct ethtool_cmd *cmd, struct mv_mac_data *mac)
 	}
 }
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 /* Set settings (phy address, speed) for ethtools */
 static int mv_pp2x_ethtool_set_settings(struct net_device *dev,
 					struct ethtool_cmd *cmd)
@@ -672,39 +675,39 @@ static int mv_pp2x_ethtool_set_settings(struct net_device *dev,
 	struct gop_hw *gop = &port->priv->hw.gop;
 	struct mv_mac_data *mac = &port->mac_data;
 	int gop_port = mac->gop_index;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	bool phy_mode_update = false;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	/* PPv21 - only PHY should be configured
 	*  PPv22 - set Serdes&GoP configuration and then configure PHY
 	*/
 	if (port->priv->pp2_version == PPV21) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (port->priv->pp2_version == PPV21)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		if (!port->mac_data.phy_dev)
 			return -ENODEV;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		else
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 
 	if (port->mac_data.phy_dev)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		return phy_ethtool_sset(port->mac_data.phy_dev, cmd);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	if (port->comphy) {
 		err = mv_gop110_update_comphy(port, (u32)cmd->speed);
 		if (err < 0)
 			return err;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	if (port->comphy)  {
 		int comphy_old_mode, comphy_new_mode;
 
@@ -748,7 +751,7 @@ static int mv_pp2x_ethtool_set_settings(struct net_device *dev,
 			mv_gop110_port_enable(gop, mac);
 			phy_power_on(port->comphy);
 		}
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	}
 
 	switch (mac->phy_mode) {
@@ -775,11 +778,11 @@ static int mv_pp2x_ethtool_set_settings(struct net_device *dev,
 		return -1;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (port->mac_data.phy_dev)
 		return phy_ethtool_sset(port->mac_data.phy_dev, cmd);
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	return 0;
 }
 
@@ -829,11 +832,11 @@ static int mv_pp2x_ethtool_set_coalesce(struct net_device *dev,
 
 		txq->pkts_coal = c->tx_max_coalesced_frames;
 	}
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (port->priv->pp2xdata->interrupt_tx_done) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (port->priv->pp2xdata->interrupt_tx_done == true) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		mv_pp2x_tx_done_time_coal_set(port, port->tx_time_coal);
 		on_each_cpu(mv_pp2x_tx_done_pkts_coal_set, port, 1);
 	}
@@ -1363,4 +1366,4 @@ void mv_pp2x_set_ethtool_ops(struct net_device *netdev)
 {
 	netdev->ethtool_ops = &mv_pp2x_eth_tool_ops;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

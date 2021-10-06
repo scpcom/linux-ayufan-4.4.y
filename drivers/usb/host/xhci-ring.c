@@ -165,18 +165,12 @@ static struct xhci_command *xhci_next_queued_cmd(struct xhci_hcd *xhci)
 					cmd_list);
 }
 
-/*
- * Turn all commands on command ring with status set to "aborted" to no-op trbs.
- * If there are other commands waiting then restart the ring and kick the timer.
- * This must be called with command ring stopped and xhci->lock held.
- */
 static void xhci_handle_stopped_cmd_ring(struct xhci_hcd *xhci,
 					 struct xhci_command *cur_cmd)
 {
 	struct xhci_command *i_cmd;
 	u32 cycle_state;
 
-	/* Turn all aborted commands in list to no-ops, then restart */
 	list_for_each_entry(i_cmd, &xhci->cmd_list, cmd_list) {
 
 		if (i_cmd->status != COMP_CMD_ABORT)
@@ -186,25 +180,20 @@ static void xhci_handle_stopped_cmd_ring(struct xhci_hcd *xhci,
 
 		xhci_dbg(xhci, "Turn aborted command %p to no-op\n",
 			 i_cmd->command_trb);
-		/* get cycle state from the original cmd trb */
+		 
 		cycle_state = le32_to_cpu(
 			i_cmd->command_trb->generic.field[3]) &	TRB_CYCLE;
-		/* modify the command trb to no-op command */
+		 
 		i_cmd->command_trb->generic.field[0] = 0;
 		i_cmd->command_trb->generic.field[1] = 0;
 		i_cmd->command_trb->generic.field[2] = 0;
 		i_cmd->command_trb->generic.field[3] = cpu_to_le32(
 			TRB_TYPE(TRB_CMD_NOOP) | cycle_state);
 
-		/*
-		 * caller waiting for completion is called when command
-		 *  completion event is received for these no-op commands
-		 */
 	}
 
 	xhci->cmd_ring_state = CMD_RING_STATE_RUNNING;
 
-	/* ring command ring doorbell to restart the command ring */
 	if ((xhci->cmd_ring->dequeue != xhci->cmd_ring->enqueue) &&
 	    !(xhci->xhc_state & XHCI_STATE_DYING)) {
 		xhci->current_cmd = cur_cmd;
@@ -213,7 +202,6 @@ static void xhci_handle_stopped_cmd_ring(struct xhci_hcd *xhci,
 	}
 }
 
-/* Must be called with xhci->lock held, releases and aquires lock back */
 static int xhci_abort_cmd_ring(struct xhci_hcd *xhci, unsigned long flags)
 {
 	u64 temp_64;
@@ -245,12 +233,7 @@ static int xhci_abort_cmd_ring(struct xhci_hcd *xhci, unsigned long flags)
 			return -ESHUTDOWN;
 		}
 	}
-	/*
-	 * Writing the CMD_RING_ABORT bit should cause a cmd completion event,
-	 * however on some host hw the CMD_RING_RUNNING bit is correctly cleared
-	 * but the completion event in never sent. Wait 2 secs (arbitrary
-	 * number) to handle those cases after negation of CMD_RING_RUNNING.
-	 */
+	 
 	spin_unlock_irqrestore(&xhci->lock, flags);
 	ret = wait_for_completion_timeout(&xhci->cmd_ring_stop_completion,
 					  msecs_to_jiffies(2000));

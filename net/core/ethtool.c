@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * net/core/ethtool.c - Ethtool ioctl handler
  * Copyright (c) 2003 Matthew Wilcox <matthew@wil.cx>
@@ -191,7 +194,7 @@ static int ethtool_set_features(struct net_device *dev, void __user *useraddr)
 	return ret;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int phy_get_sset_count(struct phy_device *phydev)
 {
 	int ret;
@@ -208,7 +211,7 @@ static int phy_get_sset_count(struct phy_device *phydev)
 
 	return -EOPNOTSUPP;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 static int __ethtool_get_sset_count(struct net_device *dev, int sset)
 {
@@ -223,14 +226,14 @@ static int __ethtool_get_sset_count(struct net_device *dev, int sset)
 	if (sset == ETH_SS_TUNABLES)
 		return ARRAY_SIZE(tunable_strings);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	if (sset == ETH_SS_PHY_STATS) {
 		if (dev->phydev)
 			return phy_get_sset_count(dev->phydev);
 		else
 			return -EOPNOTSUPP;
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	if (ops->get_sset_count && ops->get_strings)
 		return ops->get_sset_count(dev, sset);
@@ -251,7 +254,7 @@ static void __ethtool_get_strings(struct net_device *dev,
 		       sizeof(rss_hash_func_strings));
 	else if (stringset == ETH_SS_TUNABLES)
 		memcpy(data, tunable_strings, sizeof(tunable_strings));
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	else if (stringset == ETH_SS_PHY_STATS) {
 		struct phy_device *phydev = dev->phydev;
 
@@ -265,11 +268,11 @@ static void __ethtool_get_strings(struct net_device *dev,
 	} else
 		/* ops->get_strings is valid because checked earlier */
 		ops->get_strings(dev, stringset, data);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	else
 		/* ops->get_strings is valid because checked earlier */
 		ops->get_strings(dev, stringset, data);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 }
 
 static netdev_features_t ethtool_get_feature_mask(u32 eth_cmd)
@@ -1445,7 +1448,7 @@ static int ethtool_get_stats(struct net_device *dev, void __user *useraddr)
 	return ret;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int ethtool_get_phy_stats(struct net_device *dev, void __user *useraddr)
 {
 	struct ethtool_stats stats;
@@ -1486,7 +1489,7 @@ static int ethtool_get_phy_stats(struct net_device *dev, void __user *useraddr)
 	kfree(data);
 	return ret;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 static int ethtool_get_perm_addr(struct net_device *dev, void __user *useraddr)
 {
@@ -1866,9 +1869,9 @@ int dev_ethtool(struct net *net, struct ifreq *ifr)
 	case ETHTOOL_GSSET_INFO:
 	case ETHTOOL_GSTRINGS:
 	case ETHTOOL_GSTATS:
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	case ETHTOOL_GPHYSTATS:
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	case ETHTOOL_GTSO:
 	case ETHTOOL_GPERMADDR:
 	case ETHTOOL_GUFO:
@@ -2081,11 +2084,11 @@ int dev_ethtool(struct net *net, struct ifreq *ifr)
 	case ETHTOOL_STUNABLE:
 		rc = ethtool_set_tunable(dev, useraddr);
 		break;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	case ETHTOOL_GPHYSTATS:
 		rc = ethtool_get_phy_stats(dev, useraddr);
 		break;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	default:
 		rc = -EOPNOTSUPP;
 	}

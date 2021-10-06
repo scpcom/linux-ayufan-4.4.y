@@ -1,3 +1,11 @@
+BUG ID: <DSM> #99714 - iov_iter: constify {csum_and_,}copy_to_iter()
+Commit Hashes:
+	36f7a8a4cd2e99b7172ab8ed2130c5c841466824
+
+BUG ID: <DSM> #99714 - locking/atomic, kref: Add kref_read()
+Commit Hashes:
+	2c935bc57221cc2edc787c72ea0e2d30cdcd3d5e
+
 BUG ID: <DSM> # - configfs backport for lio-4.x
 Commit Hashes:
 	1ae1602de028acaa42a0f6ff18d19756f8e825c6

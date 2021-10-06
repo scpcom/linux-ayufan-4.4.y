@@ -635,7 +635,7 @@ static int isofs_fill_super(struct super_block *s, void *data, int silent)
 	pri_bh = NULL;
 
 root_found:
-	/* We don't support read-write mounts */
+	 
 	if (!(s->s_flags & MS_RDONLY)) {
 		error = -EACCES;
 		goto out_freebh;
@@ -1327,9 +1327,6 @@ struct inode *__isofs_iget(struct super_block *sb,
 static struct dentry *isofs_mount(struct file_system_type *fs_type,
 	int flags, const char *dev_name, void *data)
 {
-	 
-	if (!(flags & MS_RDONLY))
-		return ERR_PTR(-EACCES);
 	return mount_bdev(fs_type, flags, dev_name, data, isofs_fill_super);
 }
 

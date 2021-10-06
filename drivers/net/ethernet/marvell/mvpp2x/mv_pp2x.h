@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*
 * ***************************************************************************
 * Copyright (C) 2016 Marvell International Ltd.
@@ -36,11 +39,11 @@
 
 #define STATS_DELAY	250
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 #define TSO_TXQ_LIMIT 100
 #define TXQ_LIMIT (MAX_SKB_FRAGS + 2)
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 #define MV_ETH_SKB_SHINFO_SIZE	SKB_DATA_ALIGN(sizeof(struct skb_shared_info))
 
 /* START - Taken from mvPp2Commn.h, need to order TODO */
@@ -112,18 +115,18 @@
 	pr_info("Passed: %s(%d)\n", __func__, __LINE__)
 
 #define MVPP2_PRINT_VAR(var) \
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	pr_info("%s (%d): " #var "=0x%lx\n", __func__, __LINE__, (u64)var)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	pr_info("%s(%d): "#var"=0x%lx\n", __func__, __LINE__,\
 		(u64)var)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 #define MVPP2_PRINT_VAR_NAME(var, name) \
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	pr_info("%s (%d): %s = 0x%lx\n", __func__, __LINE__, name, var)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	pr_info("%s(%d): %s=0x%lx\n", __func__, __LINE__, name, var)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 #else
 #define MVPP2_PRINT_LINE()
 #define MVPP2_PRINT_VAR(var)
@@ -145,11 +148,11 @@
 /* Coalescing */
 #define MVPP2_TXDONE_COAL_PKTS		64
 #define MVPP2_TXDONE_HRTIMER_PERIOD_NS	1000000UL
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 #define MVPP2_TXDONE_COAL_USEC		1000
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 #define MVPP2_TXDONE_COAL_USEC		10000
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 #define MVPP2_RX_COAL_PKTS		32
 #define MVPP2_RX_COAL_USEC		64
@@ -177,9 +180,9 @@ extern  u32 debug_param;
 #define QV_THR_2_CPU(sw_thread_id)	(sw_thread_id - first_addr_space)
 #define QV_CPU_2_THR(cpu_id)		(first_addr_space + cpu_id)
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 /* TX FIFO constants */
 #define MVPP2_TX_FIFO_DATA_SIZE_10KB		0xa
 #define MVPP2_TX_FIFO_DATA_SIZE_3KB		0x3
@@ -190,17 +193,17 @@ extern  u32 debug_param;
 #define MVPP2_TX_FIFO_THRESHOLD_3KB	(MVPP2_TX_FIFO_DATA_SIZE_3KB * 1024 - \
 					MVPP2_TX_FIFO_MINIMUM_THRESHOLD)
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 /* Used for define type of data saved in shadow: SKB or extended buffer or nothing */
 #define MVPP2_ETH_SHADOW_SKB		0x1
 #define MVPP2_ETH_SHADOW_EXT		0x2
 
 #define MVPP2_EXTRA_BUF_SIZE	120
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 #define MVPP2_EXTRA_BUF_NUM	(MVPP2_MAX_TXD * MVPP2_MAX_TXQ)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 #define MVPP2_EXTRA_BUF_NUM	MVPP2_MAX_TXD
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 enum mvppv2_version {
 	PPV21 = 21,
@@ -246,29 +249,29 @@ struct gop_stat {
 	u64 rx_bcast;
 	u64 rx_frames;
 	u64 rx_pause;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	u64 rx_mac_overrun;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	u64 rx_overrun;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	u64 rx_crc;
 	u64 rx_runt;
 	u64 rx_giant;
 	u64 rx_fragments_err;
 	u64 rx_mac_err;
 	u64 rx_jabber;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	u64 rx_ppv2_overrun;
 	u64 rx_cls_drop;
 	u64 rx_fullq_drop;
 	u64 rx_early_drop;
 	u64 rx_bm_drop;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	u64 rx_total_err;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	u64 rx_hw_drop;
 	u64 rx_sw_drop;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	u64 tx_byte;
 	u64 tx_unicast;
 	u64 tx_mcast;
@@ -278,14 +281,14 @@ struct gop_stat {
 	u64 tx_crc_sent;
 	u64 collision;
 	u64 late_collision;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	u64 frames_64;
 	u64 frames_65_to_127;
 	u64 frames_128_to_255;
 	u64 frames_256_to_511;
 	u64 frames_512_to_1023;
 	u64 frames_1024_to_max;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 };
 
 struct mv_mac_data {
@@ -311,25 +314,25 @@ struct mv_mac_data {
 #define MV_EMAC_F_INIT_BIT	1
 #define MV_EMAC_F_SGMII2_5_BIT	2
 #define MV_EMAC_F_PORT_UP_BIT	3
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 #define MV_EMAC_F_5G_BIT	4
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 #define MV_EMAC_F_LINK_UP	BIT(MV_EMAC_F_LINK_UP_BIT)
 #define MV_EMAC_F_INIT		BIT(MV_EMAC_F_INIT_BIT)
 #define MV_EMAC_F_SGMII2_5	BIT(MV_EMAC_F_SGMII2_5_BIT)
 #define MV_EMAC_F_PORT_UP	BIT(MV_EMAC_F_PORT_UP_BIT)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 #define MV_EMAC_F_5G		BIT(MV_EMAC_F_5G_BIT)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
+#else /* MY_DEF_HERE */
 #define MV_EMAC_F_LINK_UP	(1 << MV_EMAC_F_LINK_UP_BIT)
 #define MV_EMAC_F_INIT		(1 << MV_EMAC_F_INIT_BIT)
 #define MV_EMAC_F_SGMII2_5	(1 << MV_EMAC_F_SGMII2_5_BIT)
 #define MV_EMAC_F_PORT_UP	(1 << MV_EMAC_F_PORT_UP_BIT)
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 #define MVPP2_NO_LINK_IRQ	0
 
@@ -340,15 +343,15 @@ struct mv_pp2x_txq_pcpu {
 	/* Number of Tx DMA descriptors in the descriptor ring */
 	int size;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	/* Number of currently used Tx DMA descriptor in the
 	 * descriptor ring
 	 */
 	int count;
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	/* Number of Tx DMA descriptors reserved for each CPU */
 	int reserved_num;
 
@@ -576,12 +579,12 @@ struct mv_pp2x {
 	struct	mv_pp2x_hw hw;
 	struct mv_pp2x_platform_data *pp2xdata;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	u16 cpu_map; /* Bitmap of the participating cpu's */
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	struct mv_pp2x_param_config pp2_cfg;
 
 	/* List of pointers to port structures */
@@ -599,17 +602,17 @@ struct mv_pp2x {
 	/* RX flow hash indir'n table, in pp22, the table contains the
 	* CPU idx according to weight
 	*/
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	u8 num_rss_tables; /* created for sysfs usage */
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	u32 rx_indir_table[MVPP22_RSS_TBL_LINE_NUM];
 	u32 l4_chksum_jumbo_port;
 
 	struct delayed_work stats_task;
 	struct workqueue_struct *workqueue;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	struct notifier_block	cp_hotplug_nb;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 };
 
 struct mv_pp2x_pcpu_stats {
@@ -697,9 +700,9 @@ struct mv_pp2x_port {
 	struct mv_pp2x_bm_pool *pool_short; /* Pointer to the short pool_id */
 
 	struct phy *comphy; /* comphy handler */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	int txq_stop_limit;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	u32 num_qvector;
 	/* q_vector is the parameter that will be passed to
@@ -710,9 +713,9 @@ struct mv_pp2x_port {
 	struct mv_pp2x_ptp_desc *ptp_desc;
 	struct mv_pp2x_cos cos_cfg;
 	struct mv_pp2x_rss rss_cfg;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	struct notifier_block	port_hotplug_nb;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 };
 
 struct pp2x_hw_params {
@@ -893,4 +896,4 @@ int mv_pp2x_txq_reserved_desc_num_proc(struct mv_pp2x *priv,
 
 #endif /*_MVPP2_H_*/
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -63,4 +66,4 @@ char *pp3_dbg_l2_info_str(unsigned int l2_info);
 char *pp3_dbg_vlan_info_str(unsigned int vlan_info);
 char *pp3_dbg_l3_info_str(unsigned int l3_info);
 char *pp3_dbg_l4_info_str(unsigned int l4_info);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -144,4 +147,4 @@ unsigned int	get_TM_max_frequency() { return TM_MAX_FREQUENCY; }
 #define PROFILE_TD_THRESHOLD	0x7FFFF /* 19 bits */
 
 unsigned int	get_drop_threshold_definition() { return PROFILE_TD_THRESHOLD; }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

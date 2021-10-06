@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Keystone GBE and XGBE subsystem code
  *
@@ -2177,13 +2180,13 @@ static int gbe_slave_open(struct gbe_intf *gbe_intf)
 				slave->slave_num);
 			return -ENODEV;
 		}
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		dev_dbg(priv->dev, "phy found: id is: 0x%s\n",
 			phydev_name(slave->phy));
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		dev_dbg(priv->dev, "phy found: id is: 0x%s\n",
 			dev_name(&slave->phy->dev));
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		phy_start(slave->phy);
 		phy_read_status(slave->phy);
 	}
@@ -2685,13 +2688,13 @@ static void init_secondary_ports(struct gbe_priv *gbe_dev,
 				slave->slave_num);
 			slave->phy = NULL;
 		} else {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 			dev_dbg(dev, "phy found: id is: 0x%s\n",
 				phydev_name(slave->phy));
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 			dev_dbg(dev, "phy found: id is: 0x%s\n",
 				dev_name(&slave->phy->dev));
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 			phy_start(slave->phy);
 			phy_read_status(slave->phy);
 		}

@@ -413,7 +413,11 @@ static struct btrfs_path *alloc_path_for_send(void)
 	return path;
 }
 
+#if defined(MY_ABC_HERE) || defined(MY_ABC_HERE)
+int write_buf(struct file *filp, const void *buf, u32 len, loff_t *off)
+#else
 static int write_buf(struct file *filp, const void *buf, u32 len, loff_t *off)
+#endif  
 {
 	int ret;
 	mm_segment_t old_fs;

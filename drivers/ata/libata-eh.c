@@ -412,7 +412,7 @@ void ata_scsi_error(struct Scsi_Host *host)
 
 	ata_scsi_port_error_handler(host, ap);
 
-	WARN_ON(host->host_failed || !list_empty(&eh_work_q));
+	WARN_ON(!list_empty(&eh_work_q));
 
 	DPRINTK("EXIT\n");
 }
@@ -978,7 +978,15 @@ void ata_eh_qc_retry(struct ata_queued_cmd *qc)
 void ata_dev_disable(struct ata_device *dev)
 {
 	if (!ata_dev_enabled(dev))
+#ifdef MY_ABC_HERE
+	{
+		if (ata_dev_disabled(dev))
+			ata_dev_printk(dev, KERN_WARNING, "already disabled (class=0x%x)\n", dev->class);
 		return;
+	}
+#else  
+		return;
+#endif  
 
 	if (ata_msg_drv(dev->link->ap))
 		ata_dev_warn(dev, "disabled\n");

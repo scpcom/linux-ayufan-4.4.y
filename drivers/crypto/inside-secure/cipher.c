@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*
  * Copyright (C) 2016 Marvell
  *
@@ -23,23 +26,23 @@ struct safexcel_cipher_ctx {
 	struct safexcel_context base;
 	struct safexcel_crypto_priv *priv;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	enum safexcel_cipher_direction direction;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	u32 mode;
 
 	__le32 key[8];
 	unsigned int key_len;
 };
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 struct safexcel_cipher_reqctx {
 	enum safexcel_cipher_direction direction;
 };
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 /* Build cipher token */
 static void safexcel_cipher_token(struct safexcel_cipher_ctx *ctx,
 				  struct crypto_async_request *async,
@@ -98,23 +101,23 @@ static int safexcel_aes_setkey(struct crypto_ablkcipher *ctfm, const u8 *key,
 
 /* Build cipher context control data */
 static int safexcel_context_control(struct safexcel_cipher_ctx *ctx,
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 				    struct crypto_async_request *async,
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 				    struct safexcel_command_desc *cdesc)
 {
 	struct safexcel_crypto_priv *priv = ctx->priv;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	struct ablkcipher_request *req = ablkcipher_request_cast(async);
 	struct safexcel_cipher_reqctx *rctx = ablkcipher_request_ctx(req);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	int ctrl_size;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	if (rctx->direction == SAFEXCEL_ENCRYPT)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	if (ctx->direction == SAFEXCEL_ENCRYPT)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		cdesc->control_data.control0 |= CONTEXT_CONTROL_TYPE_CRYPTO_OUT;
 	else
 		cdesc->control_data.control0 |= CONTEXT_CONTROL_TYPE_CRYPTO_IN;
@@ -208,11 +211,11 @@ static int safexcel_aes_send(struct crypto_async_request *async,
 	struct safexcel_command_desc *cdesc;
 	struct safexcel_result_desc *rdesc;
 	struct scatterlist *sg;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	phys_addr_t ctxr_phys;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	int nr_src, nr_dst, n_cdesc = 0, n_rdesc = 0, queued = req->nbytes;
 	int i, ret = 0;
 
@@ -236,23 +239,23 @@ static int safexcel_aes_send(struct crypto_async_request *async,
 		}
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	ctxr_phys = dma_to_phys(priv->dev, ctx->base.ctxr_dma);
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	memcpy(ctx->base.ctxr->data, ctx->key, ctx->key_len);
 
 	spin_lock_bh(&priv->ring[ring].egress_lock);
 
 	/* command descriptors */
 	for_each_sg(req->src, sg, nr_src, i) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		phys_addr_t sg_phys = dma_to_phys(priv->dev, sg_dma_address(sg));
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		int len = sg_dma_len(sg);
 
 		/* Do not overflow the request */
@@ -260,13 +263,13 @@ static int safexcel_aes_send(struct crypto_async_request *async,
 			len = queued;
 
 		cdesc = safexcel_add_cdesc(priv, ring, !n_cdesc, !(queued - len),
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 					   sg_dma_address(sg), len, req->nbytes,
 					   ctx->base.ctxr_dma);
 
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 					   sg_phys, len, req->nbytes, ctxr_phys);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		if (IS_ERR(cdesc)) {
 			/* No space left in the command descriptor ring */
 			ret = PTR_ERR(cdesc);
@@ -275,11 +278,11 @@ static int safexcel_aes_send(struct crypto_async_request *async,
 		n_cdesc++;
 
 		if (n_cdesc == 1) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 			safexcel_context_control(ctx, async, cdesc);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 			safexcel_context_control(ctx, cdesc);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 			safexcel_cipher_token(ctx, async, cdesc, req->nbytes);
 		}
 
@@ -291,19 +294,19 @@ static int safexcel_aes_send(struct crypto_async_request *async,
 	/* result descriptors */
 	for_each_sg(req->dst, sg, nr_dst, i) {
 		bool first = !i, last = (i == nr_dst - 1);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		phys_addr_t sg_phys = dma_to_phys(priv->dev, sg_dma_address(sg));
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		u32 len = sg_dma_len(sg);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		rdesc = safexcel_add_rdesc(priv, ring, first, last,
 					   sg_dma_address(sg), len);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		rdesc = safexcel_add_rdesc(priv, ring, first, last, sg_phys, len);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 		if (IS_ERR(rdesc)) {
 			/* No space left in the result descriptor ring */
 			ret = PTR_ERR(rdesc);
@@ -390,23 +393,23 @@ static int safexcel_handle_inv_result(struct safexcel_crypto_priv *priv,
 	ctx->base.send = safexcel_aes_send;
 
 	spin_lock_bh(&priv->ring[ctx->base.ring].queue_lock);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	enq_ret = ablkcipher_enqueue_request(&priv->ring[ctx->base.ring].queue, req);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	enq_ret = crypto_enqueue_request(&priv->ring[ctx->base.ring].queue, async);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	spin_unlock_bh(&priv->ring[ctx->base.ring].queue_lock);
 
 	if (enq_ret != -EINPROGRESS)
 		*ret = enq_ret;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	queue_work(priv->ring[ctx->base.ring].workqueue,
 		   &priv->ring[ctx->base.ring].work_data.work);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	if (!priv->ring[ctx->base.ring].need_dequeue)
 		safexcel_dequeue(priv, ctx->base.ring);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 
 	*should_complete = false;
 
@@ -458,20 +461,20 @@ static int safexcel_cipher_exit_inv(struct crypto_tfm *tfm)
 	ctx->base.send = safexcel_cipher_send_inv;
 
 	spin_lock_bh(&priv->ring[ctx->base.ring].queue_lock);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	ret = ablkcipher_enqueue_request(&priv->ring[ctx->base.ring].queue, &req);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	ret = crypto_enqueue_request(&priv->ring[ctx->base.ring].queue, &req.base);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	spin_unlock_bh(&priv->ring[ctx->base.ring].queue_lock);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	queue_work(priv->ring[ctx->base.ring].workqueue,
 		   &priv->ring[ctx->base.ring].work_data.work);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	if (!priv->ring[ctx->base.ring].need_dequeue)
 		safexcel_dequeue(priv, ctx->base.ring);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 
 	wait_for_completion_interruptible(&result.completion);
 
@@ -485,29 +488,29 @@ static int safexcel_cipher_exit_inv(struct crypto_tfm *tfm)
 	return ret;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 /* Encrypt/Decrypt operation - Insert request to Crypto API queue */
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 /* Encrypt/Decrypt operation - Insert request to Crypro API queue */
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 static int safexcel_aes(struct ablkcipher_request *req,
 			enum safexcel_cipher_direction dir, u32 mode)
 {
 	struct safexcel_cipher_ctx *ctx = crypto_tfm_ctx(req->base.tfm);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	struct safexcel_cipher_reqctx *rctx = ablkcipher_request_ctx(req);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	struct safexcel_crypto_priv *priv = ctx->priv;
 	int ret;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	rctx->direction = dir;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	ctx->direction = dir;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	ctx->mode = mode;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	/*
 	 * Check if the context exists, if yes:
 	 *	- EIP197: check if it needs to be invalidated
@@ -516,13 +519,13 @@ static int safexcel_aes(struct ablkcipher_request *req,
 	 * and set the send routine for the new allocated context.
 	 * If it's EIP97 with existing context, the send routine is already set.
 	 */
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	if (ctx->base.ctxr) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		if (priv->eip_type == EIP197 && ctx->base.needs_inv)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		if (ctx->base.needs_inv)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 			ctx->base.send = safexcel_cipher_send_inv;
 	} else {
 		ctx->base.ring = safexcel_select_ring(priv);
@@ -535,20 +538,20 @@ static int safexcel_aes(struct ablkcipher_request *req,
 	}
 
 	spin_lock_bh(&priv->ring[ctx->base.ring].queue_lock);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	ret = ablkcipher_enqueue_request(&priv->ring[ctx->base.ring].queue, req);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	ret = crypto_enqueue_request(&priv->ring[ctx->base.ring].queue, &req->base);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	spin_unlock_bh(&priv->ring[ctx->base.ring].queue_lock);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	queue_work(priv->ring[ctx->base.ring].workqueue,
 		   &priv->ring[ctx->base.ring].work_data.work);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	if (!priv->ring[ctx->base.ring].need_dequeue)
 		safexcel_dequeue(priv, ctx->base.ring);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 
 	return ret;
 }
@@ -573,10 +576,10 @@ static int safexcel_ablkcipher_cra_init(struct crypto_tfm *tfm)
 
 	ctx->priv = tmpl->priv;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	tfm->crt_ablkcipher.reqsize = sizeof(struct safexcel_cipher_reqctx);
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	return 0;
 }
 
@@ -590,7 +593,7 @@ static void safexcel_ablkcipher_cra_exit(struct crypto_tfm *tfm)
 	if (!ctx->base.ctxr)
 		return;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	/*
 	 * EIP197 has internal cache which needs to be invalidated
 	 * when the context is closed.
@@ -608,11 +611,11 @@ static void safexcel_ablkcipher_cra_exit(struct crypto_tfm *tfm)
 		dma_pool_free(priv->context_pool, ctx->base.ctxr,
 			      ctx->base.ctxr_dma);
 	}
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	ret = safexcel_cipher_exit_inv(tfm);
 	if (ret != -EINPROGRESS)
 		dev_warn(priv->dev, "cipher: invalidation error %d\n", ret);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 }
 
 struct safexcel_alg_template safexcel_alg_ecb_aes = {
@@ -681,4 +684,4 @@ struct safexcel_alg_template safexcel_alg_cbc_aes = {
 		},
 	},
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */

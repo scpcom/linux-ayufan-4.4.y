@@ -5,6 +5,12 @@
 #include <linux/kernel.h>
 #include <linux/synolib.h>
 
+#ifdef MY_DEF_HERE
+extern int setup_early_printk(char *);
+extern char gszSynoTtyS0[50];
+extern char gszSynoTtyS1[50];
+#endif  
+
 #ifdef MY_ABC_HERE
 extern char gszDiskIdxMap[16];
 #endif  
@@ -68,7 +74,7 @@ extern int gSynoFactoryUSB3Disable;
 extern int gSynoMemMode;
 #endif  
 
-#ifdef CONFIG_SYNO_SAS
+#ifdef MY_DEF_HERE
 extern long g_is_sas_model;
 #endif  
 
@@ -105,6 +111,7 @@ extern unsigned int gSynoCastratedXhcPortBitmap[CONFIG_SYNO_USB_NUM_CASTRATED_XH
 extern char gSynoUsbVbusHostAddr[CONFIG_SYNO_USB_VBUS_NUM_GPIO][20];
 extern int gSynoUsbVbusPort[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
 extern unsigned gSynoUsbVbusGpp[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
+extern unsigned gSynoUsbVbusGppPol[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
 #endif  
 
 #ifdef MY_ABC_HERE
@@ -424,7 +431,7 @@ static int __init early_opt_pci_slot(char *p)
 		if (',' ==  *ptr) {
 			index = 0;
 			gPciAddrNum ++;
-			if (PCI_ADDR_NUM_MAX >= gPciAddrNum){
+			if (PCI_ADDR_NUM_MAX <= gPciAddrNum){
 				goto FMT_ERR;
 			}
 		} else {
@@ -548,7 +555,7 @@ __setup("sas_reservation_write_conflict=", early_sas_reservation_write_conflict)
 #ifdef MY_DEF_HERE
 static int __init early_sas_hba_idx(char *p)
 {
-        char iCount = 0;
+        int iCount = 0;
         char *pBegin = p;
         char *pEnd = NULL;
 
@@ -663,11 +670,27 @@ static int __init early_usb_vbus_gpio(char *p)
 		*pSeparator = '\0';
 		snprintf(gSynoUsbVbusHostAddr[iCount],
 				sizeof(gSynoUsbVbusHostAddr[iCount]), "%s", pBegin);
-		printk(" - Host:%s", gSynoUsbVbusHostAddr[iCount]);
+		printk(" - Host: %-20s", gSynoUsbVbusHostAddr[iCount]);
 
 		gSynoUsbVbusPort[iCount] = simple_strtoul(pSeparator + 1, NULL, 10);
 		printk(" - Port:%d", gSynoUsbVbusPort[iCount]);
 
+		pSeparator = strstr(pSeparator + 1, "@");
+		if (NULL == pSeparator) {
+			printk(" - Polarity: ACTIVE_HIGH\n");
+			gSynoUsbVbusGppPol[iCount] = 1;
+		} else {
+			gSynoUsbVbusGppPol[iCount] = simple_strtoul(pSeparator + 1, NULL, 10);
+			if (1 == gSynoUsbVbusGppPol[iCount])
+				printk(" - Polarity: ACTIVE_HIGH\n");
+			else if (0 == gSynoUsbVbusGppPol[iCount])
+				printk(" - Polarity: ACTIVE_LOW\n");
+			else {
+				printk("\nUSB Vbus GPIO Control - Parameter format not correct\n");
+				error = 1;
+				break;
+			}
+		}
 		if (NULL == pEnd)
 			break;
 
@@ -689,4 +712,21 @@ static int __init early_usb_vbus_gpio(char *p)
 	return 1;
 }
 __setup("syno_usb_vbus_gpio=", early_usb_vbus_gpio);
+#endif  
+#ifdef MY_DEF_HERE
+static int __init early_syno_set_ttyS0(char *p)
+{
+	snprintf(gszSynoTtyS0, strlen(p) + 1, "%s", p);
+	setup_early_printk(p);
+	return 1;
+}
+__setup("syno_ttyS0=", early_syno_set_ttyS0);
+
+static int __init early_syno_set_ttyS1(char *p)
+{
+	snprintf(gszSynoTtyS1, strlen(p) + 1, "%s", p);
+	return 1;
+}
+__setup("syno_ttyS1=", early_syno_set_ttyS1);
+
 #endif  

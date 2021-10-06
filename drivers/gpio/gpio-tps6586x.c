@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * TI TPS6586x GPIO driver
  *
@@ -104,11 +107,11 @@ static int tps6586x_gpio_probe(struct platform_device *pdev)
 
 	tps6586x_gpio->gpio_chip.owner = THIS_MODULE;
 	tps6586x_gpio->gpio_chip.label = pdev->name;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	tps6586x_gpio->gpio_chip.parent = &pdev->dev;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	tps6586x_gpio->gpio_chip.dev = &pdev->dev;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	tps6586x_gpio->gpio_chip.ngpio = 4;
 	tps6586x_gpio->gpio_chip.can_sleep = true;
 

@@ -68,14 +68,7 @@ static int page_cache_tree_insert(struct address_space *mapping,
 	mapping->nrpages++;
 	if (node) {
 		workingset_node_pages_inc(node);
-		/*
-		 * Don't track node that contains actual pages.
-		 *
-		 * Avoid acquiring the list_lru lock if already
-		 * untracked.  The list_empty() test is safe as
-		 * node->private_list is protected by
-		 * mapping->tree_lock.
-		 */
+		 
 		if (!list_empty(&node->private_list))
 			list_lru_del(&workingset_shadow_nodes,
 				     &node->private_list);
@@ -97,10 +90,7 @@ static void page_cache_tree_delete(struct address_space *mapping,
 	__radix_tree_lookup(&mapping->page_tree, page->index, &node, &slot);
 
 	if (!node) {
-		/*
-		 * We need a node to properly account shadow
-		 * entries. Don't plant any without. XXX
-		 */
+		 
 		shadow = NULL;
 	}
 

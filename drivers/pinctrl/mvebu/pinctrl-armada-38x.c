@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Marvell Armada 380/385 pinctrl driver based on mvebu pinctrl core
  *
@@ -22,16 +25,16 @@
 
 #include "pinctrl-mvebu.h"
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 #define MVEBU_MPPS_PER_REG	8
 #define MVEBU_MPP_BITS		4
 #define MVEBU_MPP_MASK		0xf
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 static void __iomem *mpp_base;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static u32 *mpp_saved_regs;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 static int armada_38x_mpp_ctrl_get(unsigned pid, unsigned long *config)
 {
@@ -433,9 +436,9 @@ static int armada_38x_pinctrl_probe(struct platform_device *pdev)
 	const struct of_device_id *match =
 		of_match_device(armada_38x_pinctrl_of_match, &pdev->dev);
 	struct resource *res;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	int nregs;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	if (!match)
 		return -ENODEV;
@@ -453,21 +456,21 @@ static int armada_38x_pinctrl_probe(struct platform_device *pdev)
 	soc->modes = armada_38x_mpp_modes;
 	soc->nmodes = armada_38x_mpp_controls[0].npins;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	nregs = DIV_ROUND_UP(soc->nmodes, MVEBU_MPPS_PER_REG);
 
 	mpp_saved_regs = devm_kcalloc(&pdev->dev, nregs, sizeof(u32),
 				      GFP_KERNEL);
 	if (!mpp_saved_regs)
 		return -ENOMEM;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	pdev->dev.platform_data = soc;
 
 	return mvebu_pinctrl_probe(pdev);
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 int armada_38x_pinctrl_suspend(struct platform_device *pdev, pm_message_t state)
 {
 	struct mvebu_pinctrl_soc_info *soc = platform_get_drvdata(pdev);
@@ -493,7 +496,7 @@ int armada_38x_pinctrl_resume(struct platform_device *pdev)
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 static int armada_38x_pinctrl_remove(struct platform_device *pdev)
 {
@@ -507,10 +510,10 @@ static struct platform_driver armada_38x_pinctrl_driver = {
 	},
 	.probe = armada_38x_pinctrl_probe,
 	.remove = armada_38x_pinctrl_remove,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	.suspend = armada_38x_pinctrl_suspend,
 	.resume = armada_38x_pinctrl_resume,
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 };
 
 module_platform_driver(armada_38x_pinctrl_driver);

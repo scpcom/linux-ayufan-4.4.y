@@ -1270,9 +1270,7 @@ int scsi_sysfs_add_sdev(struct scsi_device *sdev)
 
 	error = scsi_dh_add_device(sdev);
 	if (error)
-		/*
-		 * device_handler is optional, so any error can be ignored
-		 */
+		 
 		sdev_printk(KERN_INFO, sdev,
 				"failed to add device handler: %d\n", error);
 

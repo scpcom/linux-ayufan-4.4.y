@@ -117,7 +117,7 @@ static int syno_hddmon_unplug_monitor(void *args)
 
 		uiTimeout = SYNO_HDDMON_POLL_SEC * HZ;
 		do {
-			set_current_state(TASK_UNINTERRUPTIBLE);
+			set_current_state(TASK_INTERRUPTIBLE);
 			uiTimeout = schedule_timeout(uiTimeout);
 		} while (uiTimeout);
 	}
@@ -162,7 +162,7 @@ static void syno_hddmon_task(SynoHddMonData_t *pData)
 			if (iPrzPinVal) {
 				uiTimeout = SYNO_HDDMON_EN_WAIT_SEC * HZ;
 				do {
-					set_current_state(TASK_UNINTERRUPTIBLE);
+					set_current_state(TASK_INTERRUPTIBLE);
 					uiTimeout = schedule_timeout(uiTimeout);
 				} while (uiTimeout);
 			}
@@ -229,7 +229,7 @@ static int syno_hddmon_routine(void *args)
 
 		uiTimeout = SYNO_HDDMON_POLL_SEC * HZ;
 		do {
-			set_current_state(TASK_UNINTERRUPTIBLE);
+			set_current_state(TASK_INTERRUPTIBLE);
 			uiTimeout = schedule_timeout(uiTimeout);
 		} while (uiTimeout);
 	}

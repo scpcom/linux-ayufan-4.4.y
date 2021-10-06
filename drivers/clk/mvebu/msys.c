@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*
  * Marvell MSYS SoC clocks
  *
@@ -139,4 +142,4 @@ static void __init msys_clk_init(struct device_node *np)
 }
 CLK_OF_DECLARE(msys_clk, "marvell,msys-core-clock", msys_clk_init);
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

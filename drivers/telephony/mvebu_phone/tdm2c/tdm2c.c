@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*******************************************************************************
  * Copyright (C) 2016 Marvell International Ltd.
  *
@@ -97,7 +100,7 @@
 
 #include "mv_phone.h"
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 /* Main TDM structure definition */
 struct tdm2c_dev {
 	/* Resources */
@@ -137,7 +140,7 @@ struct tdm2c_dev {
 	u32 int_rx1_miss;
 	u32 int_tx1_miss;
 	u32 pcm_restart_count;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 /* Defines */
 #define INT_SAMPLE			2
 #define BUFF_IS_FULL			1
@@ -157,12 +160,12 @@ struct tdm2c_ch_info {
 	u8 rxBuffFull[TOTAL_BUFFERS], txBuffFull[TOTAL_BUFFERS];
 	u8 rxCurrBuff, txCurrBuff;
 	u8 rxFirst;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 };
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 struct tdm2c_dev *tdm2c;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 /* Globals */
 static u8 *rx_aggr_buff_virt, *tx_aggr_buff_virt;
 static u8 rx_int, tx_int;
@@ -190,39 +193,39 @@ static u32 int_tx0_miss;
 static u32 int_rx1_miss;
 static u32 int_tx1_miss;
 static u32 pcm_restart_count;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 static void tdm2c_daisy_chain_mode_set(void)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	while ((readl(tdm2c->regs + SPI_CTRL_REG) & SPI_STAT_MASK) == SPI_ACTIVE)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	while ((readl(regs + SPI_CTRL_REG) & SPI_STAT_MASK) == SPI_ACTIVE)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		continue;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	writel((0x80 << 8) | 0, tdm2c->regs + SPI_CODEC_CMD_LO_REG);
 	writel(TRANSFER_BYTES(2) | ENDIANNESS_MSB_MODE | WR_MODE | CLK_SPEED_LO_DIV,
 	       tdm2c->regs + SPI_CODEC_CTRL_REG);
 	writel(readl(tdm2c->regs + SPI_CTRL_REG) | SPI_ACTIVE, tdm2c->regs + SPI_CTRL_REG);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	writel((0x80 << 8) | 0, regs + SPI_CODEC_CMD_LO_REG);
 	writel(TRANSFER_BYTES(2) | ENDIANNESS_MSB_MODE | WR_MODE | CLK_SPEED_LO_DIV, regs + SPI_CODEC_CTRL_REG);
 	writel(readl(regs + SPI_CTRL_REG) | SPI_ACTIVE, regs + SPI_CTRL_REG);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	/* Poll for ready indication */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	while ((readl(tdm2c->regs + SPI_CTRL_REG) & SPI_STAT_MASK) == SPI_ACTIVE)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	while ((readl(regs + SPI_CTRL_REG) & SPI_STAT_MASK) == SPI_ACTIVE)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		continue;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	dev_dbg(tdm2c->dev, "%s: Exit\n", __func__);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	dev_dbg(pdev, "%s: Exit\n", __func__);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 }
 
 static int tdm2c_ch_init(u8 ch)
@@ -230,57 +233,57 @@ static int tdm2c_ch_init(u8 ch)
 	struct tdm2c_ch_info *ch_info;
 	u32 buff;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	dev_dbg(tdm2c->dev, "%s: Enter, ch%d\n", __func__, ch);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	dev_dbg(pdev, "%s: Enter, ch%d\n", __func__, ch);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	if (ch >= MV_TDM2C_TOTAL_CHANNELS) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		dev_err(tdm2c->dev, "%s: error, channel(%d) exceeds maximum(%d)\n",
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		dev_err(pdev, "%s: error, channel(%d) exceeds maximum(%d)\n",
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			__func__, ch, MV_TDM2C_TOTAL_CHANNELS);
 		return -EINVAL;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	tdm2c->ch_info[ch] = kmalloc(sizeof(struct tdm2c_ch_info), GFP_ATOMIC);
 	if (!tdm2c->ch_info) {
 		dev_err(tdm2c->dev, "%s: error malloc failed\n", __func__);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	tdm_ch_info[ch] = ch_info = kmalloc(sizeof(struct tdm2c_ch_info),
 					    GFP_ATOMIC);
 	if (!ch_info) {
 		dev_err(pdev, "%s: error malloc failed\n", __func__);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		return -ENOMEM;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	ch_info = tdm2c->ch_info[ch];
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	ch_info->ch = ch;
 
 	/* Per channel TDM init */
 	/* Disable channel (enable in pcm start) */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	writel(CH_DISABLE, tdm2c->regs + CH_ENABLE_REG(ch));
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	writel(CH_DISABLE, regs + CH_ENABLE_REG(ch));
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	/* Set total samples and int sample */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	writel(CONFIG_CH_SAMPLE(tdm2c->band_mode, tdm2c->factor), tdm2c->regs + CH_SAMPLE_REG(ch));
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	writel(CONFIG_CH_SAMPLE(tdm_band_mode, factor), regs + CH_SAMPLE_REG(ch));
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	for (buff = 0; buff < TOTAL_BUFFERS; buff++) {
 		/* Buffers must be 32B aligned */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		ch_info->rx_buff_virt[buff] = dma_alloc_coherent(tdm2c->dev,
 				MV_TDM_CH_BUFF_SIZE(tdm2c->pcm_format, tdm2c->band_mode, tdm2c->factor),
 				&(ch_info->rx_buff_phys[buff]), GFP_KERNEL);
@@ -297,7 +300,7 @@ static int tdm2c_ch_init(u8 ch)
 		if (((ulong) ch_info->rx_buff_virt[buff] | ch_info->rx_buff_phys[buff] |
 		     (ulong) ch_info->tx_buff_virt[buff] | ch_info->tx_buff_phys[buff]) & 0x1f) {
 			dev_err(tdm2c->dev, "%s: error, unaligned buffer allocation\n", __func__);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		ch_info->rxBuffVirt[buff] = dma_alloc_coherent(pdev,
 							      MV_TDM_CH_BUFF_SIZE(pcm_format, tdm_band_mode, factor),
 							      &(ch_info->rxBuffPhys[buff]), GFP_KERNEL);
@@ -313,7 +316,7 @@ static int tdm2c_ch_init(u8 ch)
 		if (((ulong) ch_info->rxBuffVirt[buff] | ch_info->rxBuffPhys[buff] |
 		     (ulong) ch_info->txBuffVirt[buff] | ch_info->txBuffPhys[buff]) & 0x1f) {
 			dev_err(pdev, "%s: error, unaligned buffer allocation\n", __func__);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		}
 	}
 
@@ -323,121 +326,121 @@ static int tdm2c_ch_init(u8 ch)
 static inline int tdm2c_ch_tx_low(u8 ch)
 {
 	u32 max_poll = 0;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	struct tdm2c_ch_info *ch_info = tdm2c->ch_info[ch];
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	struct tdm2c_ch_info *ch_info = tdm_ch_info[ch];
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	dev_dbg(tdm2c->dev, "%s: Enter, ch%d\n", __func__, ch);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	dev_dbg(pdev, "%s: Enter, ch%d\n", __func__, ch);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Count tx interrupts */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	tdm2c->tx_int++;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	tx_int++;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (ch_info->tx_buff_empty[ch_info->tx_curr_buff] == BUFF_IS_FULL)
 		dev_dbg(tdm2c->dev, "curr buff full for hw [MMP ok]\n");
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (ch_info->txBuffFull[ch_info->txCurrBuff] == BUFF_IS_FULL)
 		dev_dbg(pdev, "curr buff full for hw [MMP ok]\n");
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	else
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		dev_warn(tdm2c->dev, "curr buf is empty [MMP miss write]\n");
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		dev_warn(pdev, "curr buf is empty [MMP miss write]\n");
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Change buffers */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	ch_info->tx_curr_buff = MV_TDM_NEXT_BUFFER(ch_info->tx_curr_buff);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	ch_info->txCurrBuff = MV_TDM_NEXT_BUFFER(ch_info->txCurrBuff);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/*
 	 * Mark next buff to be transmitted by HW as empty. Give it to the HW
 	 * for next frame. The app need to write the data before HW takes it.
 	 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	ch_info->tx_buff_empty[ch_info->tx_curr_buff] = BUFF_IS_EMPTY;
 	dev_dbg(tdm2c->dev, "->%s clear buf(%d) for channel(%d)\n", __func__, ch_info->tx_curr_buff, ch);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	ch_info->txBuffFull[ch_info->txCurrBuff] = BUFF_IS_EMPTY;
 	dev_dbg(pdev, "->%s clear buf(%d) for channel(%d)\n", __func__, ch_info->txCurrBuff, ch);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Poll on SW ownership (single check) */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	dev_dbg(tdm2c->dev, "start poll for SW ownership\n");
 	while (((readb(tdm2c->regs + CH_BUFF_OWN_REG(ch_info->ch) + TX_OWN_BYTE_OFFS) & OWNER_MASK) == OWN_BY_HW)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	dev_dbg(pdev, "start poll for SW ownership\n");
 	while (((readb(regs + CH_BUFF_OWN_REG(ch_info->ch) + TX_OWN_BYTE_OFFS) & OWNER_MASK) == OWN_BY_HW)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	       && (max_poll < 2000)) {
 		udelay(1);
 		max_poll++;
 	}
 	if (max_poll == 2000) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		dev_err(tdm2c->dev, "poll timeout (~2ms)\n");
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		dev_err(pdev, "poll timeout (~2ms)\n");
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		return -ETIME;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	dev_dbg(tdm2c->dev, "ch%d, start tx buff %d\n", ch, ch_info->tx_curr_buff);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	dev_dbg(pdev, "ch%d, start tx buff %d\n", ch, ch_info->txCurrBuff);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Set TX buff address (must be 32 byte aligned) */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	writel(ch_info->tx_buff_phys[ch_info->tx_curr_buff], tdm2c->regs + CH_TX_ADDR_REG(ch_info->ch));
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	writel(ch_info->txBuffPhys[ch_info->txCurrBuff], regs + CH_TX_ADDR_REG(ch_info->ch));
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Set HW ownership */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	writeb(OWN_BY_HW, tdm2c->regs + CH_BUFF_OWN_REG(ch_info->ch) + TX_OWN_BYTE_OFFS);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	writeb(OWN_BY_HW, regs + CH_BUFF_OWN_REG(ch_info->ch) + TX_OWN_BYTE_OFFS);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Enable Tx */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	writeb(CH_ENABLE, tdm2c->regs + CH_ENABLE_REG(ch_info->ch) + TX_ENABLE_BYTE_OFFS);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	writeb(CH_ENABLE, regs + CH_ENABLE_REG(ch_info->ch) + TX_ENABLE_BYTE_OFFS);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Did we get the required amount of irqs for Tx wakeup ? */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (tdm2c->tx_int < MV_TDM_INT_COUNTER)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (tx_int < MV_TDM_INT_COUNTER)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		return -EBUSY;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	tdm2c->tx_int = 0;
 	tdm2c->tx_empty = ch_info->tx_curr_buff;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	tx_int = 0;
 	tx_empty = ch_info->txCurrBuff;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	return 0;
 }
@@ -445,129 +448,129 @@ static inline int tdm2c_ch_tx_low(u8 ch)
 static inline int tdm2c_ch_rx_low(u8 ch)
 {
 	u32 max_poll = 0;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	struct tdm2c_ch_info *ch_info = tdm2c->ch_info[ch];
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	struct tdm2c_ch_info *ch_info = tdm_ch_info[ch];
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	dev_dbg(tdm2c->dev, "%s: Enter, ch%d\n", __func__, ch);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	dev_dbg(pdev, "%s: Enter, ch%d\n", __func__, ch);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (ch_info->rx_first)
 		ch_info->rx_first = !FIRST_INT;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (ch_info->rxFirst)
 		ch_info->rxFirst = !FIRST_INT;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	else
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		tdm2c->rx_int++;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		rx_int++;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (ch_info->rx_buff_full[ch_info->rx_curr_buff] == BUFF_IS_EMPTY)
 		dev_dbg(tdm2c->dev, "curr buff empty for hw [MMP ok]\n");
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (ch_info->rxBuffFull[ch_info->rxCurrBuff] == BUFF_IS_EMPTY)
 		dev_dbg(pdev, "curr buff empty for hw [MMP ok]\n");
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	else
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		dev_warn(tdm2c->dev, "curr buf is full [MMP miss read]\n");
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		dev_warn(pdev, "curr buf is full [MMP miss read]\n");
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/*
 	 * Mark last buff that was received by HW as full. Give next buff to HW for
 	 * next frame. The app need to read the data before next irq
 	 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	ch_info->rx_buff_full[ch_info->rx_curr_buff] = BUFF_IS_FULL;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	ch_info->rxBuffFull[ch_info->rxCurrBuff] = BUFF_IS_FULL;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Change buffers */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	ch_info->rx_curr_buff = MV_TDM_NEXT_BUFFER(ch_info->rx_curr_buff);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	ch_info->rxCurrBuff = MV_TDM_NEXT_BUFFER(ch_info->rxCurrBuff);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Poll on SW ownership (single check) */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	dev_dbg(tdm2c->dev, "start poll for ownership\n");
 	while (((readb(tdm2c->regs + CH_BUFF_OWN_REG(ch_info->ch) + RX_OWN_BYTE_OFFS) & OWNER_MASK) == OWN_BY_HW)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	dev_dbg(pdev, "start poll for ownership\n");
 	while (((readb(regs + CH_BUFF_OWN_REG(ch_info->ch) + RX_OWN_BYTE_OFFS) & OWNER_MASK) == OWN_BY_HW)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	       && (max_poll < 2000)) {
 		udelay(1);
 		max_poll++;
 	}
 
 	if (max_poll == 2000) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		dev_err(tdm2c->dev, "poll timeout (~2ms)\n");
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		dev_err(pdev, "poll timeout (~2ms)\n");
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		return -ETIME;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	dev_dbg(tdm2c->dev, "ch%d, start rx buff %d\n", ch, ch_info->rx_curr_buff);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	dev_dbg(pdev, "ch%d, start rx buff %d\n", ch, ch_info->rxCurrBuff);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Set RX buff address (must be 32 byte aligned) */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	writel(ch_info->rx_buff_phys[ch_info->rx_curr_buff], tdm2c->regs + CH_RX_ADDR_REG(ch_info->ch));
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	writel(ch_info->rxBuffPhys[ch_info->rxCurrBuff], regs + CH_RX_ADDR_REG(ch_info->ch));
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Set HW ownership */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	writeb(OWN_BY_HW, tdm2c->regs + CH_BUFF_OWN_REG(ch_info->ch) + RX_OWN_BYTE_OFFS);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	writeb(OWN_BY_HW, regs + CH_BUFF_OWN_REG(ch_info->ch) + RX_OWN_BYTE_OFFS);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Enable Rx */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	writeb(CH_ENABLE, tdm2c->regs + CH_ENABLE_REG(ch_info->ch) + RX_ENABLE_BYTE_OFFS);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	writeb(CH_ENABLE, regs + CH_ENABLE_REG(ch_info->ch) + RX_ENABLE_BYTE_OFFS);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Did we get the required amount of irqs for Rx wakeup ? */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (tdm2c->rx_int < MV_TDM_INT_COUNTER)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (rx_int < MV_TDM_INT_COUNTER)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		return -EBUSY;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	tdm2c->rx_int = 0;
 	tdm2c->rx_full = MV_TDM_PREV_BUFFER(ch_info->rx_curr_buff, 2);
 	dev_dbg(tdm2c->dev, "buff %d is FULL for ch0/1\n", tdm2c->rx_full);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	rx_int = 0;
 	rx_full = MV_TDM_PREV_BUFFER(ch_info->rxCurrBuff, 2);
 	dev_dbg(pdev, "buff %d is FULL for ch0/1\n", rx_full);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	return 0;
 }
@@ -577,40 +580,40 @@ static int tdm2c_ch_remove(u8 ch)
 	struct tdm2c_ch_info *ch_info;
 	u8 buff;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	dev_dbg(tdm2c->dev, "%s: Enter, ch%d\n", __func__, ch);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	dev_dbg(pdev, "%s: Enter, ch%d\n", __func__, ch);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	if (ch >= MV_TDM2C_TOTAL_CHANNELS) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		dev_err(tdm2c->dev, "%s: error, channel(%d) exceeds maximum(%d)\n",
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		dev_err(pdev, "%s: error, channel(%d) exceeds maximum(%d)\n",
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			__func__, ch, MV_TDM2C_TOTAL_CHANNELS);
 		return -EINVAL;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	ch_info = tdm2c->ch_info[ch];
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	ch_info = tdm_ch_info[ch];
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	for (buff = 0; buff < TOTAL_BUFFERS; buff++) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		dma_free_coherent(tdm2c->dev, MV_TDM_CH_BUFF_SIZE(tdm2c->pcm_format, tdm2c->band_mode, tdm2c->factor),
 				  ch_info->rx_buff_virt[buff], (dma_addr_t)ch_info->rx_buff_phys[buff]);
 		dma_free_coherent(tdm2c->dev, MV_TDM_CH_BUFF_SIZE(tdm2c->pcm_format, tdm2c->band_mode, tdm2c->factor),
 				  ch_info->tx_buff_virt[buff], (dma_addr_t)ch_info->tx_buff_phys[buff]);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		dma_free_coherent(pdev, MV_TDM_CH_BUFF_SIZE(pcm_format, tdm_band_mode, factor),
 				  ch_info->rxBuffVirt[buff], (dma_addr_t)ch_info->rxBuffPhys[buff]);
 		dma_free_coherent(pdev, MV_TDM_CH_BUFF_SIZE(pcm_format, tdm_band_mode, factor),
 				  ch_info->txBuffVirt[buff], (dma_addr_t)ch_info->txBuffPhys[buff]);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	}
 
 	kfree(ch_info);
@@ -623,69 +626,69 @@ static void tdm2c_reset(void)
 	struct tdm2c_ch_info *ch_info;
 	u8 buff, ch;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	dev_dbg(tdm2c->dev, "%s: Enter, ch%d\n", __func__, ch);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	dev_dbg(pdev, "%s: Enter, ch%d\n", __func__, ch);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Reset globals */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	tdm2c->rx_int = 0;
 	tdm2c->tx_int = 0;
 	tdm2c->rx_full = BUFF_INVALID;
 	tdm2c->tx_empty = BUFF_INVALID;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	rx_int = tx_int = 0;
 	rx_full = tx_empty = BUFF_INVALID;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	for (ch = 0; ch < MV_TDM2C_TOTAL_CHANNELS; ch++) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		ch_info = tdm2c->ch_info[ch];
 		ch_info->rx_first = FIRST_INT;
 		ch_info->tx_curr_buff = ch_info->rx_curr_buff = 0;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		ch_info = tdm_ch_info[ch];
 		ch_info->rxFirst = FIRST_INT;
 		ch_info->txCurrBuff = ch_info->rxCurrBuff = 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		for (buff = 0; buff < TOTAL_BUFFERS; buff++) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 			ch_info->rx_buff_full[buff] = BUFF_IS_EMPTY;
 			ch_info->tx_buff_empty[buff] = BUFF_IS_FULL;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 			ch_info->rxBuffFull[buff] = BUFF_IS_EMPTY;
 			ch_info->txBuffFull[buff] = BUFF_IS_FULL;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 		}
 	}
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 void __iomem *get_tdm_base(void)
 {
 	return regs;
 }
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 int tdm2c_init(void __iomem *base, struct device *dev,
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	       struct mv_phone_params *tdm_params, enum mv_phone_frame_ts frame_ts,
 	       enum mv_phone_spi_mode spi_mode, bool use_pclk_external)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	       struct mv_phone_params *tdmParams, struct mv_phone_data *halData)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 {
 	u8 ch;
 	u32 pcm_ctrl_reg, nb_delay = 0, wb_delay = 0;
 	u32 ch_delay[4] = { 0, 0, 0, 0 };
 	int ret;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	/* Initialize or reset main structure */
 	if (!tdm2c) {
 		tdm2c = devm_kzalloc(dev, sizeof(struct tdm2c_dev), GFP_KERNEL);
@@ -702,15 +705,15 @@ int tdm2c_init(void __iomem *base, struct device *dev,
 	tdm2c->tx_empty = BUFF_INVALID;
 	tdm2c->dev = dev;
 
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	regs = base;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	dev_info(dev, "TDM dual channel device rev 0x%x\n",
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		 readl(tdm2c->regs + TDM_REV_REG));
 
 	if (tdm_params->sampling_period > MV_TDM_MAX_SAMPLING_PERIOD)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		 readl(regs + TDM_REV_REG));
 
 	/* Init globals */
@@ -728,40 +731,40 @@ int tdm2c_init(void __iomem *base, struct device *dev,
 	pdev = dev;
 
 	if (tdmParams->sampling_period > MV_TDM_MAX_SAMPLING_PERIOD)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		/* Use base sample period(10ms) */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		tdm2c->factor = 1;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		factor = 1;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	else
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		tdm2c->factor = (tdm_params->sampling_period / MV_TDM_BASE_SAMPLING_PERIOD);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		factor = (tdmParams->sampling_period / MV_TDM_BASE_SAMPLING_PERIOD);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Extract pcm format & band mode */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (tdm2c->pcm_format == MV_PCM_FORMAT_4BYTES) {
 		tdm2c->pcm_format = MV_PCM_FORMAT_2BYTES;
 		tdm2c->band_mode = MV_WIDE_BAND;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (pcm_format == MV_PCM_FORMAT_4BYTES) {
 		pcm_format = MV_PCM_FORMAT_2BYTES;
 		tdm_band_mode = MV_WIDE_BAND;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	} else {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		tdm2c->band_mode = MV_NARROW_BAND;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		tdm_band_mode = MV_NARROW_BAND;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	}
 
 	/* Allocate aggregated buffers for data transport */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	dev_dbg(tdm2c->dev, "allocate %d bytes for aggregated buffer\n",
 		MV_TDM_AGGR_BUFF_SIZE(tdm2c->pcm_format, tdm2c->band_mode, tdm2c->factor));
 	tdm2c->rx_aggr_buff_virt = alloc_pages_exact(
@@ -772,197 +775,197 @@ int tdm2c_init(void __iomem *base, struct device *dev,
 			GFP_KERNEL);
 	if (!tdm2c->rx_aggr_buff_virt || !tdm2c->tx_aggr_buff_virt) {
 		dev_err(tdm2c->dev, "%s: Error malloc failed\n", __func__);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	dev_dbg(pdev, "allocate %d bytes for aggregated buffer\n",
 		MV_TDM_AGGR_BUFF_SIZE(pcm_format, tdm_band_mode, factor));
 	rx_aggr_buff_virt = alloc_pages_exact(MV_TDM_AGGR_BUFF_SIZE(pcm_format, tdm_band_mode, factor), GFP_KERNEL);
 	tx_aggr_buff_virt = alloc_pages_exact(MV_TDM_AGGR_BUFF_SIZE(pcm_format, tdm_band_mode, factor), GFP_KERNEL);
 	if (!rx_aggr_buff_virt || !tx_aggr_buff_virt) {
 		dev_err(pdev, "%s: Error malloc failed\n", __func__);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		return -ENOMEM;
 	}
 
 	/* Clear buffers */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	memset(tdm2c->rx_aggr_buff_virt, 0,
 	       MV_TDM_AGGR_BUFF_SIZE(tdm2c->pcm_format, tdm2c->band_mode, tdm2c->factor));
 	memset(tdm2c->tx_aggr_buff_virt, 0,
 	       MV_TDM_AGGR_BUFF_SIZE(tdm2c->pcm_format, tdm2c->band_mode, tdm2c->factor));
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	memset(rx_aggr_buff_virt, 0, MV_TDM_AGGR_BUFF_SIZE(pcm_format, tdm_band_mode, factor));
 	memset(tx_aggr_buff_virt, 0, MV_TDM_AGGR_BUFF_SIZE(pcm_format, tdm_band_mode, factor));
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Calculate CH(0/1) Delay Control for narrow/wideband modes */
 	for (ch = 0; ch < MV_TDM2C_TOTAL_CHANNELS; ch++) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		nb_delay = ((tdm_params->pcm_slot[ch] * PCM_SLOT_PCLK) + 1);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		nb_delay = ((tdmParams->pcm_slot[ch] * PCM_SLOT_PCLK) + 1);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		/* Offset required by ZARLINK VE880 SLIC */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		wb_delay = (nb_delay + ((frame_ts / 2) * PCM_SLOT_PCLK));
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		wb_delay = (nb_delay + ((halData->frame_ts / 2) * PCM_SLOT_PCLK));
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		ch_delay[ch] = ((nb_delay << CH_RX_DELAY_OFFS) | (nb_delay << CH_TX_DELAY_OFFS));
 		ch_delay[(ch + 2)] = ((wb_delay << CH_RX_DELAY_OFFS) | (wb_delay << CH_TX_DELAY_OFFS));
 	}
 
 	/* Enable TDM/SPI interface */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	mv_phone_reset_bit(tdm2c->regs + TDM_SPI_MUX_REG, 0x00000001);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	mv_phone_reset_bit(regs + TDM_SPI_MUX_REG, 0x00000001);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	/* Interrupt cause is not clear on read */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	writel(CLEAR_ON_ZERO, tdm2c->regs + INT_RESET_SELECT_REG);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	writel(CLEAR_ON_ZERO, regs + INT_RESET_SELECT_REG);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	/* All interrupt bits latched in status */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	writel(0x3ffff, tdm2c->regs + INT_EVENT_MASK_REG);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	writel(0x3ffff, regs + INT_EVENT_MASK_REG);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	/* Disable interrupts */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	writel(0, tdm2c->regs + INT_STATUS_MASK_REG);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	writel(0, regs + INT_STATUS_MASK_REG);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	/* Clear int status register */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	writel(0, tdm2c->regs + INT_STATUS_REG);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	writel(0, regs + INT_STATUS_REG);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Bypass clock divider - PCM PCLK freq */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	writel(PCM_DIV_PASS, tdm2c->regs + PCM_CLK_RATE_DIV_REG);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	writel(PCM_DIV_PASS, regs + PCM_CLK_RATE_DIV_REG);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Padding on Rx completion */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	writel(0, tdm2c->regs + DUMMY_RX_WRITE_DATA_REG);
 	writeb(readl(tdm2c->regs + SPI_GLOBAL_CTRL_REG) | SPI_GLOBAL_ENABLE,
 	       tdm2c->regs + SPI_GLOBAL_CTRL_REG);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	writel(0, regs + DUMMY_RX_WRITE_DATA_REG);
 	writeb(readl(regs + SPI_GLOBAL_CTRL_REG) | SPI_GLOBAL_ENABLE, regs + SPI_GLOBAL_CTRL_REG);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	/* SPI SCLK freq */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	writel(SPI_CLK_2MHZ, tdm2c->regs + SPI_CLK_PRESCALAR_REG);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	writel(SPI_CLK_2MHZ, regs + SPI_CLK_PRESCALAR_REG);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	/* Number of timeslots (PCLK) */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	writel((u32)frame_ts, tdm2c->regs + FRAME_TIMESLOT_REG);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	writel((u32)halData->frame_ts, regs + FRAME_TIMESLOT_REG);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (tdm2c->band_mode == MV_NARROW_BAND) {
 		pcm_ctrl_reg = (CONFIG_PCM_CRTL | (((u8)tdm2c->pcm_format - 1) << PCM_SAMPLE_SIZE_OFFS));
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (tdm_band_mode == MV_NARROW_BAND) {
 		pcm_ctrl_reg = (CONFIG_PCM_CRTL | (((u8)pcm_format - 1) << PCM_SAMPLE_SIZE_OFFS));
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 		if (use_pclk_external)
 			pcm_ctrl_reg |= MASTER_PCLK_EXTERNAL;
 
 		/* PCM configuration */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		writel(pcm_ctrl_reg, tdm2c->regs + PCM_CTRL_REG);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		writel(pcm_ctrl_reg, regs + PCM_CTRL_REG);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		/* CH0 delay control register */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		writel(ch_delay[0], tdm2c->regs + CH_DELAY_CTRL_REG(0));
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		writel(ch_delay[0], regs + CH_DELAY_CTRL_REG(0));
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		/* CH1 delay control register */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		writel(ch_delay[1], tdm2c->regs + CH_DELAY_CTRL_REG(1));
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		writel(ch_delay[1], regs + CH_DELAY_CTRL_REG(1));
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	} else {		/* MV_WIDE_BAND */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		pcm_ctrl_reg = (CONFIG_WB_PCM_CRTL | (((u8)tdm2c->pcm_format - 1) << PCM_SAMPLE_SIZE_OFFS));
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		pcm_ctrl_reg = (CONFIG_WB_PCM_CRTL | (((u8)pcm_format - 1) << PCM_SAMPLE_SIZE_OFFS));
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 		if (use_pclk_external)
 			pcm_ctrl_reg |= MASTER_PCLK_EXTERNAL;
 
 		/* PCM configuration - WB support */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		writel(pcm_ctrl_reg, tdm2c->regs + PCM_CTRL_REG);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		writel(pcm_ctrl_reg, regs + PCM_CTRL_REG);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		/* CH0 delay control register */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		writel(ch_delay[0], tdm2c->regs + CH_DELAY_CTRL_REG(0));
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		writel(ch_delay[0], regs + CH_DELAY_CTRL_REG(0));
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		/* CH1 delay control register */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		writel(ch_delay[1], tdm2c->regs + CH_DELAY_CTRL_REG(1));
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		writel(ch_delay[1], regs + CH_DELAY_CTRL_REG(1));
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		/* CH0 WB delay control register */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		writel(ch_delay[2], tdm2c->regs + CH_WB_DELAY_CTRL_REG(0));
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		writel(ch_delay[2], regs + CH_WB_DELAY_CTRL_REG(0));
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		/* CH1 WB delay control register */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		writel(ch_delay[3], tdm2c->regs + CH_WB_DELAY_CTRL_REG(1));
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		writel(ch_delay[3], regs + CH_WB_DELAY_CTRL_REG(1));
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	}
 
 	/* Issue reset to codec(s) */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	dev_dbg(tdm2c->dev, "resetting voice unit(s)\n");
 	writel(0, tdm2c->regs + MISC_CTRL_REG);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	dev_dbg(pdev, "resetting voice unit(s)\n");
 	writel(0, regs + MISC_CTRL_REG);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	mdelay(1);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	writel(1, tdm2c->regs + MISC_CTRL_REG);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	writel(1, regs + MISC_CTRL_REG);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (spi_mode == MV_SPI_MODE_DAISY_CHAIN) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (spi_mode) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		/* Configure TDM to work in daisy chain mode */
 		tdm2c_daisy_chain_mode_set();
 	}
@@ -971,21 +974,21 @@ int tdm2c_init(void __iomem *base, struct device *dev,
 	for (ch = 0; ch < MV_TDM2C_TOTAL_CHANNELS; ch++) {
 		ret = tdm2c_ch_init(ch);
 		if (ret) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 			dev_err(tdm2c->dev, "tdm2c_ch_init(%d) failed !\n", ch);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 			dev_err(pdev, "tdm2c_ch_init(%d) failed !\n", ch);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			return ret;
 		}
 	}
 
 	/* Enable SLIC/DAA interrupt detection(before pcm is active) */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	writel((readl(tdm2c->regs + INT_STATUS_MASK_REG) | TDM_INT_SLIC), tdm2c->regs + INT_STATUS_MASK_REG);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	writel((readl(regs + INT_STATUS_MASK_REG) | TDM_INT_SLIC), regs + INT_STATUS_MASK_REG);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	return 0;
 }
@@ -995,26 +998,26 @@ void tdm2c_release(void)
 	u8 ch;
 
 	/* Free Rx/Tx aggregated buffers */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	free_pages_exact(tdm2c->rx_aggr_buff_virt,
 			 MV_TDM_AGGR_BUFF_SIZE(tdm2c->pcm_format, tdm2c->band_mode, tdm2c->factor));
 	free_pages_exact(tdm2c->tx_aggr_buff_virt,
 			 MV_TDM_AGGR_BUFF_SIZE(tdm2c->pcm_format, tdm2c->band_mode, tdm2c->factor));
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	free_pages_exact(rx_aggr_buff_virt, MV_TDM_AGGR_BUFF_SIZE(pcm_format, tdm_band_mode, factor));
 	free_pages_exact(tx_aggr_buff_virt, MV_TDM_AGGR_BUFF_SIZE(pcm_format, tdm_band_mode, factor));
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Release HW channel resources */
 	for (ch = 0; ch < MV_TDM2C_TOTAL_CHANNELS; ch++)
 		tdm2c_ch_remove(ch);
 
 	/* Disable TDM/SPI interface */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	mv_phone_set_bit(tdm2c->regs + TDM_SPI_MUX_REG, 0x00000001);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	mv_phone_set_bit(regs + TDM_SPI_MUX_REG, 0x00000001);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 }
 
 void tdm2c_pcm_start(void)
@@ -1023,92 +1026,92 @@ void tdm2c_pcm_start(void)
 	u8 ch;
 
 	/* TDM is enabled */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	tdm2c->enable = true;
 	tdm2c->int_lock = false;
 	tdm2c->chan_stop_count = 0;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	tdm_enable = 1;
 	int_lock = 0;
 	chan_stop_count = 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	tdm2c_reset();
 
 	for (ch = 0; ch < MV_TDM2C_TOTAL_CHANNELS; ch++) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		ch_info = tdm2c->ch_info[ch];
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		ch_info = tdm_ch_info[ch];
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 		/* Set Tx buff */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		writel(ch_info->tx_buff_phys[ch_info->tx_curr_buff], tdm2c->regs + CH_TX_ADDR_REG(ch));
 		writeb(OWN_BY_HW, tdm2c->regs + CH_BUFF_OWN_REG(ch) + TX_OWN_BYTE_OFFS);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		writel(ch_info->txBuffPhys[ch_info->txCurrBuff], regs + CH_TX_ADDR_REG(ch));
 		writeb(OWN_BY_HW, regs + CH_BUFF_OWN_REG(ch) + TX_OWN_BYTE_OFFS);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 		/* Set Rx buff */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		writel(ch_info->rx_buff_phys[ch_info->rx_curr_buff], tdm2c->regs + CH_RX_ADDR_REG(ch));
 		writeb(OWN_BY_HW, tdm2c->regs + CH_BUFF_OWN_REG(ch) + RX_OWN_BYTE_OFFS);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		writel(ch_info->rxBuffPhys[ch_info->rxCurrBuff], regs + CH_RX_ADDR_REG(ch));
 		writeb(OWN_BY_HW, regs + CH_BUFF_OWN_REG(ch) + RX_OWN_BYTE_OFFS);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	}
 
 	/* Enable Tx */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	writeb(CH_ENABLE, tdm2c->regs + CH_ENABLE_REG(0) + TX_ENABLE_BYTE_OFFS);
 	writeb(CH_ENABLE, tdm2c->regs + CH_ENABLE_REG(1) + TX_ENABLE_BYTE_OFFS);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	writeb(CH_ENABLE, regs + CH_ENABLE_REG(0) + TX_ENABLE_BYTE_OFFS);
 	writeb(CH_ENABLE, regs + CH_ENABLE_REG(1) + TX_ENABLE_BYTE_OFFS);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Enable Rx */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	writeb(CH_ENABLE, tdm2c->regs + CH_ENABLE_REG(0) + RX_ENABLE_BYTE_OFFS);
 	writeb(CH_ENABLE, tdm2c->regs + CH_ENABLE_REG(1) + RX_ENABLE_BYTE_OFFS);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	writeb(CH_ENABLE, regs + CH_ENABLE_REG(0) + RX_ENABLE_BYTE_OFFS);
 	writeb(CH_ENABLE, regs + CH_ENABLE_REG(1) + RX_ENABLE_BYTE_OFFS);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Enable Tx interrupts */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	writel(readl(tdm2c->regs + INT_STATUS_REG) & (~(TDM_INT_TX(0) | TDM_INT_TX(1))),
 	       tdm2c->regs + INT_STATUS_REG);
 	writel((readl(tdm2c->regs + INT_STATUS_MASK_REG) | TDM_INT_TX(0) | TDM_INT_TX(1)),
 	       tdm2c->regs + INT_STATUS_MASK_REG);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	writel(readl(regs + INT_STATUS_REG) & (~(TDM_INT_TX(0) | TDM_INT_TX(1))), regs + INT_STATUS_REG);
 	writel((readl(regs + INT_STATUS_MASK_REG) | TDM_INT_TX(0) | TDM_INT_TX(1)), regs + INT_STATUS_MASK_REG);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Enable Rx interrupts */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	writel((readl(tdm2c->regs + INT_STATUS_REG) & (~(TDM_INT_RX(0) | TDM_INT_RX(1)))),
 	       tdm2c->regs + INT_STATUS_REG);
 	writel((readl(tdm2c->regs + INT_STATUS_MASK_REG) | TDM_INT_RX(0) | TDM_INT_RX(1)),
 	       tdm2c->regs + INT_STATUS_MASK_REG);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	writel((readl(regs + INT_STATUS_REG) & (~(TDM_INT_RX(0) | TDM_INT_RX(1)))), regs + INT_STATUS_REG);
 	writel((readl(regs + INT_STATUS_MASK_REG) | TDM_INT_RX(0) | TDM_INT_RX(1)), regs + INT_STATUS_MASK_REG);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 }
 
 void tdm2c_pcm_stop(void)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	tdm2c->enable = false;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	tdm_enable = 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	tdm2c_reset();
 }
@@ -1120,38 +1123,38 @@ int tdm2c_tx(u8 *tdm_tx_buff)
 	u8 *tx_buff;
 
 	/* Sanity check */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (tdm_tx_buff != tdm2c->tx_aggr_buff_virt) {
 		dev_err(tdm2c->dev, "%s: Error, invalid Tx buffer !!!\n", __func__);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (tdm_tx_buff != tx_aggr_buff_virt) {
 		dev_err(pdev, "%s: Error, invalid Tx buffer !!!\n", __func__);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		return -EINVAL;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (!tdm2c->enable) {
 		dev_err(tdm2c->dev, "%s: Error, no active Tx channels are available\n", __func__);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (!tdm_enable) {
 		dev_err(pdev, "%s: Error, no active Tx channels are available\n", __func__);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		return -EINVAL;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (tdm2c->tx_empty == BUFF_INVALID) {
 		dev_err(tdm2c->dev, "%s: Tx not ready\n", __func__);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (tx_empty == BUFF_INVALID) {
 		dev_err(pdev, "%s: Tx not ready\n", __func__);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		return -EINVAL;
 	}
 
 	for (ch = 0; ch < MV_TDM2C_TOTAL_CHANNELS; ch++) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		ch_info = tdm2c->ch_info[ch];
 		dev_dbg(tdm2c->dev, "ch%d: fill buf %d with %d bytes\n",
 			ch, tdm2c->tx_empty,
@@ -1159,30 +1162,30 @@ int tdm2c_tx(u8 *tdm_tx_buff)
 		ch_info->tx_buff_empty[tdm2c->tx_empty] = BUFF_IS_FULL;
 		tx_buff = tdm_tx_buff +
 			  (ch * MV_TDM_CH_BUFF_SIZE(tdm2c->pcm_format, tdm2c->band_mode, tdm2c->factor));
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		ch_info = tdm_ch_info[ch];
 		dev_dbg(pdev, "ch%d: fill buf %d with %d bytes\n",
 			ch, tx_empty,
 			MV_TDM_CH_BUFF_SIZE(pcm_format, tdm_band_mode, factor));
 		ch_info->txBuffFull[tx_empty] = BUFF_IS_FULL;
 		tx_buff = tdm_tx_buff + (ch * MV_TDM_CH_BUFF_SIZE(pcm_format, tdm_band_mode, factor));
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 		/* Copy data from voice engine buffer to DMA */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		memcpy(ch_info->tx_buff_virt[tdm2c->tx_empty], tx_buff,
 		       MV_TDM_CH_BUFF_SIZE(tdm2c->pcm_format, tdm2c->band_mode, tdm2c->factor));
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		memcpy(ch_info->txBuffVirt[tx_empty], tx_buff,
 		       MV_TDM_CH_BUFF_SIZE(pcm_format, tdm_band_mode, factor));
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	tdm2c->tx_empty = BUFF_INVALID;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	tx_empty = BUFF_INVALID;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	return 0;
 }
@@ -1194,67 +1197,67 @@ int tdm2c_rx(u8 *tdm_rx_buff)
 	u8 *rx_buff;
 
 	/* Sanity check */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (tdm_rx_buff != tdm2c->rx_aggr_buff_virt) {
 		dev_err(tdm2c->dev, "%s: invalid Rx buffer !!!\n", __func__);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (tdm_rx_buff != rx_aggr_buff_virt) {
 		dev_err(pdev, "%s: invalid Rx buffer !!!\n", __func__);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		return -EINVAL;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (!tdm2c->enable) {
 		dev_err(tdm2c->dev, "%s: Error, no active Rx channels are available\n", __func__);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (!tdm_enable) {
 		dev_err(pdev, "%s: Error, no active Rx channels are available\n", __func__);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		return -EINVAL;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (tdm2c->rx_full == BUFF_INVALID) {
 		dev_err(tdm2c->dev, "%s: Rx not ready\n", __func__);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (rx_full == BUFF_INVALID) {
 		dev_err(pdev, "%s: Rx not ready\n", __func__);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		return -EINVAL;
 	}
 
 	for (ch = 0; ch < MV_TDM2C_TOTAL_CHANNELS; ch++) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		ch_info = tdm2c->ch_info[ch];
 		ch_info->rx_buff_full[tdm2c->rx_full] = BUFF_IS_EMPTY;
 		dev_dbg(tdm2c->dev, "%s get Rx buffer(%d) for channel(%d)\n",
 			__func__, tdm2c->rx_full, ch);
 		rx_buff = tdm_rx_buff +
 			  (ch * MV_TDM_CH_BUFF_SIZE(tdm2c->pcm_format, tdm2c->band_mode, tdm2c->factor));
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		ch_info = tdm_ch_info[ch];
 		ch_info->rxBuffFull[rx_full] = BUFF_IS_EMPTY;
 		dev_dbg(pdev, "%s get Rx buffer(%d) for channel(%d)\n",
 			__func__, rx_full, ch);
 		rx_buff = tdm_rx_buff + (ch * MV_TDM_CH_BUFF_SIZE(pcm_format, tdm_band_mode, factor));
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 		/* Copy data from DMA to voice engine buffer */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		memcpy(rx_buff, ch_info->rx_buff_virt[tdm2c->rx_full],
 		       MV_TDM_CH_BUFF_SIZE(tdm2c->pcm_format, tdm2c->band_mode, tdm2c->factor));
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		memcpy(rx_buff, ch_info->rxBuffVirt[rx_full],
 		       MV_TDM_CH_BUFF_SIZE(pcm_format, tdm_band_mode, factor));
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	tdm2c->rx_full = BUFF_INVALID;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	rx_full = BUFF_INVALID;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	return 0;
 }
@@ -1263,13 +1266,13 @@ int tdm2c_pcm_stop_int_miss(void)
 {
 	u32 status_reg, mask_reg, status_stop_int, status_mask = 0, int_mask = 0;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	status_reg = readl(tdm2c->regs + INT_STATUS_REG);
 	mask_reg = readl(tdm2c->regs + INT_STATUS_MASK_REG);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	status_reg = readl(regs + INT_STATUS_REG);
 	mask_reg = readl(regs + INT_STATUS_MASK_REG);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Refer only to unmasked bits */
 	status_stop_int = status_reg & mask_reg;
@@ -1295,17 +1298,17 @@ int tdm2c_pcm_stop_int_miss(void)
 	}
 
 	if (int_mask != 0) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		dev_err(tdm2c->dev, "Stop Interrupt missing found STATUS=%x, MASK=%x\n", status_reg, mask_reg);
 		writel(~(status_mask), tdm2c->regs + INT_STATUS_REG);
 		writel(readl(tdm2c->regs + INT_STATUS_MASK_REG) & (~(int_mask)),
 		       tdm2c->regs + INT_STATUS_MASK_REG);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		dev_err(pdev, "Stop Interrupt missing found STATUS=%x, MASK=%x\n", status_reg, mask_reg);
 		writel(~(status_mask), regs + INT_STATUS_REG);
 		writel(readl(regs + INT_STATUS_MASK_REG) & (~(int_mask)),
 		       regs + INT_STATUS_MASK_REG);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 		return -EINVAL;
 	}
@@ -1323,15 +1326,15 @@ int tdm2c_intr_low(struct mv_phone_intr_info *tdm_intr_info)
 	u8 ch;
 
 	/* Read Status & mask registers */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	status_reg = readl(tdm2c->regs + INT_STATUS_REG);
 	mask_reg = readl(tdm2c->regs + INT_STATUS_MASK_REG);
 	dev_dbg(tdm2c->dev, "CAUSE(0x%x), MASK(0x%x)\n", status_reg, mask_reg);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	status_reg = readl(regs + INT_STATUS_REG);
 	mask_reg = readl(regs + INT_STATUS_MASK_REG);
 	dev_dbg(pdev, "CAUSE(0x%x), MASK(0x%x)\n", status_reg, mask_reg);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Refer only to unmasked bits */
 	status_and_mask = status_reg & mask_reg;
@@ -1344,84 +1347,84 @@ int tdm2c_intr_low(struct mv_phone_intr_info *tdm_intr_info)
 
 	/* Handle SLIC/DAA int */
 	if (status_and_mask & SLIC_INT_BIT) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		dev_dbg(tdm2c->dev, "Phone interrupt !!!\n");
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		dev_dbg(pdev, "Phone interrupt !!!\n");
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		tdm_intr_info->int_type |= MV_PHONE_INT;
 	}
 
 	if (status_and_mask & DMA_ABORT_BIT) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		dev_err(tdm2c->dev, "DMA data abort. Address: 0x%08x, Info: 0x%08x\n",
 			readl(tdm2c->regs + DMA_ABORT_ADDR_REG),
 			readl(tdm2c->regs + DMA_ABORT_INFO_REG));
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		dev_err(pdev, "DMA data abort. Address: 0x%08x, Info: 0x%08x\n",
 			readl(regs + DMA_ABORT_ADDR_REG),
 			readl(regs + DMA_ABORT_INFO_REG));
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		tdm_intr_info->int_type |= MV_DMA_ERROR_INT;
 	}
 
 	for (ch = 0; ch < MV_TDM2C_TOTAL_CHANNELS; ch++) {
 
 		/* Give next buff to TDM and set curr buff as empty */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		if ((status_and_mask & TX_BIT(ch)) && tdm2c->enable && !tdm2c->int_lock) {
 			dev_dbg(tdm2c->dev, "Tx interrupt(ch%d)\n", ch);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		if ((status_and_mask & TX_BIT(ch)) && tdm_enable && !int_lock) {
 			dev_dbg(pdev, "Tx interrupt(ch%d)\n", ch);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 			tdm2c->int_tx_count++;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 			int_tx_count++;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			if (ch == 0) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 				tdm2c->int_tx0_count++;
 				if (tdm2c->int_tx0_count <= tdm2c->int_tx1_count) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 				int_tx0_count++;
 				if (int_tx0_count <= int_tx1_count) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 					int_tx_miss = 0;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 					tdm2c->int_tx0_miss++;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 					int_tx0_miss++;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 				}
 			} else {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 				tdm2c->int_tx1_count++;
 				if (tdm2c->int_tx1_count < tdm2c->int_tx0_count) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 				int_tx1_count++;
 				if (int_tx1_count < int_tx0_count) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 					int_tx_miss = 1;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 					tdm2c->int_tx1_miss++;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 					int_tx1_miss++;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 				}
 			}
 
 			/* 0 -> Tx is done for both channels */
 			if (tdm2c_ch_tx_low(ch) == 0) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 				dev_dbg(tdm2c->dev, "Assign Tx aggregate buffer for further processing\n");
 				tdm_intr_info->tdm_tx_buff = tdm2c->tx_aggr_buff_virt;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 				dev_dbg(pdev, "Assign Tx aggregate buffer for further processing\n");
 				tdm_intr_info->tdm_tx_buff = tx_aggr_buff_virt;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 				tdm_intr_info->int_type |= MV_TX_INT;
 			}
 		}
@@ -1429,60 +1432,60 @@ int tdm2c_intr_low(struct mv_phone_intr_info *tdm_intr_info)
 
 	for (ch = 0; ch < MV_TDM2C_TOTAL_CHANNELS; ch++) {
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		if ((status_and_mask & RX_BIT(ch)) && tdm2c->enable && !tdm2c->int_lock) {
 			dev_dbg(tdm2c->dev, "Rx interrupt(ch%d)\n", ch);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		if ((status_and_mask & RX_BIT(ch)) && tdm_enable && !int_lock) {
 			dev_dbg(pdev, "Rx interrupt(ch%d)\n", ch);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 			tdm2c->int_rx_count++;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 			int_rx_count++;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			if (ch == 0) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 				tdm2c->int_rx0_count++;
 				if (tdm2c->int_rx0_count <= tdm2c->int_rx1_count) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 				int_rx0_count++;
 				if (int_rx0_count <= int_rx1_count) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 					int_rx_miss = 0;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 					tdm2c->int_rx0_miss++;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 					int_rx0_miss++;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 				}
 			} else {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 				tdm2c->int_rx1_count++;
 				if (tdm2c->int_rx1_count < tdm2c->int_rx0_count) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 				int_rx1_count++;
 				if (int_rx1_count < int_rx0_count) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 					int_rx_miss = 1;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 					tdm2c->int_rx1_miss++;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 					int_rx1_miss++;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 				}
 			}
 
 			/* 0 -> Rx is done for both channels */
 			if (tdm2c_ch_rx_low(ch) == 0) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 				dev_dbg(tdm2c->dev, "Assign Rx aggregate buffer for further processing\n");
 				tdm_intr_info->tdm_rx_buff = tdm2c->rx_aggr_buff_virt;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 				dev_dbg(pdev, "Assign Rx aggregate buffer for further processing\n");
 				tdm_intr_info->tdm_rx_buff = rx_aggr_buff_virt;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 				tdm_intr_info->int_type |= MV_RX_INT;
 			}
 		}
@@ -1492,158 +1495,158 @@ int tdm2c_intr_low(struct mv_phone_intr_info *tdm_intr_info)
 
 		if (status_and_mask & TX_UNDERFLOW_BIT(ch)) {
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 			dev_dbg(tdm2c->dev, "Tx underflow(ch%d) - checking for root cause...\n",
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 			dev_dbg(pdev, "Tx underflow(ch%d) - checking for root cause...\n",
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 				    ch);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 			if (tdm2c->enable) {
 				dev_dbg(tdm2c->dev, "Tx underflow ERROR\n");
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 			if (tdm_enable) {
 				dev_dbg(pdev, "Tx underflow ERROR\n");
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 				tdm_intr_info->int_type |= MV_TX_ERROR_INT;
 				if (!(status_and_mask & TX_BIT(ch))) {
 					ret = -1;
 					/* 0 -> Tx is done for both channels */
 					if (tdm2c_ch_tx_low(ch) == 0) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 						dev_dbg(tdm2c->dev, "Assign Tx aggregate buffer for further processing\n");
 						tdm_intr_info->tdm_tx_buff = tdm2c->tx_aggr_buff_virt;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 						dev_dbg(pdev, "Assign Tx aggregate buffer for further processing\n");
 						tdm_intr_info->tdm_tx_buff = tx_aggr_buff_virt;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 						tdm_intr_info->int_type |= MV_TX_INT;
 					}
 				}
 			} else {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 				dev_dbg(tdm2c->dev, "Expected Tx underflow(not an error)\n");
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 				dev_dbg(pdev, "Expected Tx underflow(not an error)\n");
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 				tdm_intr_info->int_type |= MV_CHAN_STOP_INT;
 				/* Update number of channels already stopped */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 				tdm_intr_info->data = ++tdm2c->chan_stop_count;
 				writel(readl(tdm2c->regs + INT_STATUS_MASK_REG) & (~(TDM_INT_TX(ch))),
 				       tdm2c->regs + INT_STATUS_MASK_REG);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 				tdm_intr_info->data = ++chan_stop_count;
 				writel(readl(regs + INT_STATUS_MASK_REG) & (~(TDM_INT_TX(ch))),
 				       regs + INT_STATUS_MASK_REG);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			}
 		}
 
 		if (status_and_mask & RX_OVERFLOW_BIT(ch)) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 			dev_dbg(tdm2c->dev, "Rx overflow(ch%d) - checking for root cause...\n", ch);
 			if (tdm2c->enable) {
 				dev_dbg(tdm2c->dev, "Rx overflow ERROR\n");
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 			dev_dbg(pdev, "Rx overflow(ch%d) - checking for root cause...\n", ch);
 			if (tdm_enable) {
 				dev_dbg(pdev, "Rx overflow ERROR\n");
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 				tdm_intr_info->int_type |= MV_RX_ERROR_INT;
 				if (!(status_and_mask & RX_BIT(ch))) {
 					ret = -1;
 					/* 0 -> Rx is done for both channels */
 					if (tdm2c_ch_rx_low(ch) == 0) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 						dev_dbg(tdm2c->dev, "Assign Rx aggregate buffer for further processing\n");
 						tdm_intr_info->tdm_rx_buff = tdm2c->rx_aggr_buff_virt;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 						dev_dbg(pdev, "Assign Rx aggregate buffer for further processing\n");
 						tdm_intr_info->tdm_rx_buff = rx_aggr_buff_virt;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 						tdm_intr_info->int_type |= MV_RX_INT;
 					}
 				}
 			} else {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 				dev_dbg(tdm2c->dev, "Expected Rx overflow(not an error)\n");
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 				dev_dbg(pdev, "Expected Rx overflow(not an error)\n");
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 				tdm_intr_info->int_type |= MV_CHAN_STOP_INT;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 				/* Update number of channels already stopped */
 				tdm_intr_info->data = ++tdm2c->chan_stop_count;
 				writel(readl(tdm2c->regs + INT_STATUS_MASK_REG) & (~(TDM_INT_RX(ch))),
 				       tdm2c->regs + INT_STATUS_MASK_REG);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 				tdm_intr_info->data = ++chan_stop_count; /* Update number of channels already stopped */
 				writel(readl(regs + INT_STATUS_MASK_REG) & (~(TDM_INT_RX(ch))),
 				       regs + INT_STATUS_MASK_REG);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			}
 		}
 	}
 
 	/* clear TDM interrupts */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	writel(~status_reg, tdm2c->regs + INT_STATUS_REG);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	writel(~status_reg, regs + INT_STATUS_REG);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Check if interrupt was missed -> restart */
 	if  (int_tx_miss != -1)  {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		dev_err(tdm2c->dev, "Missing Tx Interrupt Detected ch%d!!!\n", int_tx_miss);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		dev_err(pdev, "Missing Tx Interrupt Detected ch%d!!!\n", int_tx_miss);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		if (int_tx_miss)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 			tdm2c->int_tx1_count = tdm2c->int_tx0_count;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 			int_tx1_count = int_tx0_count;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		else
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 			tdm2c->int_tx0_count  = (tdm2c->int_tx1_count + 1);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 			int_tx0_count  = (int_tx1_count + 1);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		ret = -1;
 	}
 
 	if  (int_rx_miss != -1)  {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		dev_err(tdm2c->dev, "Missing Rx Interrupt Detected ch%d!!!\n", int_rx_miss);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		dev_err(pdev, "Missing Rx Interrupt Detected ch%d!!!\n", int_rx_miss);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		if (int_rx_miss)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 			tdm2c->int_rx1_count = tdm2c->int_rx0_count;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 			int_rx1_count = int_rx0_count;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		else
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 			tdm2c->int_rx0_count  = (tdm2c->int_rx1_count + 1);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 			int_rx0_count  = (int_rx1_count + 1);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		ret = -1;
 	}
 
 	if (ret == -1) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		tdm2c->int_lock = true;
 		tdm2c->pcm_restart_count++;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		int_lock = 1;
 		pcm_restart_count++;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	}
 
 	return ret;
@@ -1651,64 +1654,64 @@ int tdm2c_intr_low(struct mv_phone_intr_info *tdm_intr_info)
 
 void tdm2c_intr_enable(void)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	writel((readl(tdm2c->regs + INT_STATUS_MASK_REG) | TDM_INT_SLIC),
 	       tdm2c->regs + INT_STATUS_MASK_REG);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	writel((readl(regs + INT_STATUS_MASK_REG) | TDM_INT_SLIC),
 	       regs + INT_STATUS_MASK_REG);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 }
 
 void tdm2c_intr_disable(void)
 {
 	u32 val = ~TDM_INT_SLIC;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	writel((readl(tdm2c->regs + INT_STATUS_MASK_REG) & val),
 	       tdm2c->regs + INT_STATUS_MASK_REG);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	writel((readl(regs + INT_STATUS_MASK_REG) & val),
 	       regs + INT_STATUS_MASK_REG);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 }
 
 void tdm2c_pcm_if_reset(void)
 {
 	/* SW PCM reset assert */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	mv_phone_reset_bit(tdm2c->regs + TDM_MISC_REG, 0x00000001);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	mv_phone_reset_bit(regs + TDM_MISC_REG, 0x00000001);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	mdelay(10);
 
 	/* SW PCM reset de-assert */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	mv_phone_set_bit(tdm2c->regs + TDM_MISC_REG, 0x00000001);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	mv_phone_set_bit(regs + TDM_MISC_REG, 0x00000001);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Wait a bit more - might be fine tuned */
 	mdelay(50);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	dev_dbg(tdm2c->dev, "%s: Exit\n", __func__);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	dev_dbg(pdev, "%s: Exit\n", __func__);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 }
 
 /* Debug routines */
 void tdm2c_reg_dump(u32 offset)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	dev_info(tdm2c->dev, "0x%05x: %08x\n", offset, readl(tdm2c->regs + offset));
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	dev_info(pdev, "0x%05x: %08x\n", offset, readl(regs + offset));
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 }
 
 void tdm2c_regs_dump(void)
@@ -1716,11 +1719,11 @@ void tdm2c_regs_dump(void)
 	u8 i;
 	struct tdm2c_ch_info *ch_info;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	dev_info(tdm2c->dev, "TDM Control:\n");
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	dev_info(pdev, "TDM Control:\n");
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	tdm2c_reg_dump(TDM_SPI_MUX_REG);
 	tdm2c_reg_dump(INT_RESET_SELECT_REG);
 	tdm2c_reg_dump(INT_STATUS_MASK_REG);
@@ -1732,11 +1735,11 @@ void tdm2c_regs_dump(void)
 	tdm2c_reg_dump(FRAME_TIMESLOT_REG);
 	tdm2c_reg_dump(DUMMY_RX_WRITE_DATA_REG);
 	tdm2c_reg_dump(MISC_CTRL_REG);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	dev_info(tdm2c->dev, "TDM Channel Control:\n");
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	dev_info(pdev, "TDM Channel Control:\n");
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	for (i = 0; i < MV_TDM2C_TOTAL_CHANNELS; i++) {
 		tdm2c_reg_dump(CH_DELAY_CTRL_REG(i));
 		tdm2c_reg_dump(CH_SAMPLE_REG(i));
@@ -1748,16 +1751,16 @@ void tdm2c_regs_dump(void)
 		tdm2c_reg_dump(CH_TX_ADDR_REG(i));
 		tdm2c_reg_dump(CH_RX_ADDR_REG(i));
 	}
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	dev_info(tdm2c->dev, "TDM interrupts:\n");
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	dev_info(pdev, "TDM interrupts:\n");
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	tdm2c_reg_dump(INT_EVENT_MASK_REG);
 	tdm2c_reg_dump(INT_STATUS_MASK_REG);
 	tdm2c_reg_dump(INT_STATUS_REG);
 	for (i = 0; i < MV_TDM2C_TOTAL_CHANNELS; i++) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		dev_info(tdm2c->dev, "ch%d info:\n", i);
 		ch_info = tdm2c->ch_info[i];
 		dev_info(tdm2c->dev, "RX buffs:\n");
@@ -1770,7 +1773,7 @@ void tdm2c_regs_dump(void)
 			 ch_info->tx_buff_virt[0], (u32 *) (ch_info->tx_buff_phys[0]));
 		dev_info(tdm2c->dev, "buff1: virt=%p phys=%p\n",
 			 ch_info->tx_buff_virt[1], (u32 *) (ch_info->tx_buff_phys[1]));
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		dev_info(pdev, "ch%d info:\n", i);
 		ch_info = tdm_ch_info[i];
 		dev_info(pdev, "RX buffs:\n");
@@ -1783,20 +1786,20 @@ void tdm2c_regs_dump(void)
 			 ch_info->txBuffVirt[0], (u32 *) (ch_info->txBuffPhys[0]));
 		dev_info(pdev, "buff1: virt=%p phys=%p\n",
 			 ch_info->txBuffVirt[1], (u32 *) (ch_info->txBuffPhys[1]));
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	}
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#else /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
 void tdm2c_ext_stats_get(struct mv_phone_extended_stats *tdm_ext_stats)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 void tdm2c_ext_stats_get(struct mv_phone_extended_stats *tdmExtStats)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	tdm_ext_stats->int_rx_count = tdm2c->int_rx_count;
 	tdm_ext_stats->int_tx_count = tdm2c->int_tx_count;
 	tdm_ext_stats->int_rx0_count = tdm2c->int_rx0_count;
@@ -1808,7 +1811,7 @@ void tdm2c_ext_stats_get(struct mv_phone_extended_stats *tdmExtStats)
 	tdm_ext_stats->int_rx1_miss = tdm2c->int_rx1_miss;
 	tdm_ext_stats->int_tx1_miss = tdm2c->int_tx1_miss;
 	tdm_ext_stats->pcm_restart_count = tdm2c->pcm_restart_count;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	tdmExtStats->int_rx_count = int_rx_count;
 	tdmExtStats->int_tx_count = int_tx_count;
 	tdmExtStats->int_rx0_count = int_rx0_count;
@@ -1820,15 +1823,15 @@ void tdm2c_ext_stats_get(struct mv_phone_extended_stats *tdmExtStats)
 	tdmExtStats->int_rx1_miss = int_rx1_miss;
 	tdmExtStats->int_tx1_miss = int_tx1_miss;
 	tdmExtStats->pcm_restart_count = pcm_restart_count;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 }
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 #endif
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#endif /* MY_DEF_HERE */
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
 
 /* Initialize decoding windows */
 int tdm2c_set_mbus_windows(struct device *dev, void __iomem *regs,
@@ -1860,4 +1863,4 @@ int tdm2c_set_mbus_windows(struct device *dev, void __iomem *regs,
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */

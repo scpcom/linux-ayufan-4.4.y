@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (c) 2012-2014, The Linux Foundation. All rights reserved.
  *
@@ -760,11 +763,11 @@ static int pmic_gpio_probe(struct platform_device *pdev)
 	}
 
 	state->chip = pmic_gpio_gpio_template;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	state->chip.parent = dev;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	state->chip.dev = dev;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	state->chip.base = -1;
 	state->chip.ngpio = npins;
 	state->chip.label = dev_name(dev);

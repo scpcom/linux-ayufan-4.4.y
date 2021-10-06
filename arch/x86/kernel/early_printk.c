@@ -204,6 +204,17 @@ static unsigned int mem32_serial_in(unsigned long addr, int offset)
 	return readl(vaddr + offset);
 }
 
+static struct console early_serial_console = {
+	.name =		"earlyser",
+	.write =	early_serial_write,
+	.flags =	CON_PRINTBUFFER,
+	.index =	-1,
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+	.pcimapaddress = 0,
+	.pcimapsize = 0,
+#endif  
+};
+
 static __init void early_pci_serial_init(char *s)
 {
 	unsigned divisor;
@@ -239,11 +250,15 @@ static __init void early_pci_serial_init(char *s)
 	classcode = read_pci_config(bus, slot, func, PCI_CLASS_REVISION);
 	bar0 = read_pci_config(bus, slot, func, PCI_BASE_ADDRESS_0);
 
+#ifdef MY_DEF_HERE
+#else
 	if (((classcode >> 16 != PCI_CLASS_COMMUNICATION_MODEM) &&
 	     (classcode >> 16 != PCI_CLASS_COMMUNICATION_SERIAL)) ||
 	   (((classcode >> 8) & 0xff) != 0x02))  
 		return;
 
+#endif
+	 
 	if (bar0 & 0x01) {
 		 
 		serial_in = io_serial_in;
@@ -262,6 +277,12 @@ static __init void early_pci_serial_init(char *s)
 						cmdreg|PCI_COMMAND_MEMORY);
 	}
 
+#ifdef MY_DEF_HERE
+	early_serial_console.pcimapaddress = (void __iomem *)early_serial_base;
+	 
+	early_serial_console.pcimapsize = 0x10;
+#endif
+	 
 	if (*s) {
 		if (strcmp(s, "nocfg") == 0)
 			 
@@ -275,17 +296,6 @@ static __init void early_pci_serial_init(char *s)
 	early_serial_hw_init(divisor);
 }
 #endif
-
-static struct console early_serial_console = {
-	.name =		"earlyser",
-	.write =	early_serial_write,
-	.flags =	CON_PRINTBUFFER,
-	.index =	-1,
-#ifdef MY_DEF_HERE
-	.pcimapaddress = 0,
-	.pcimapsize = 0,
-#endif  
-};
 
 #ifdef MY_DEF_HERE
 static __init void apl_serial_hw_init(unsigned divisor)
@@ -349,7 +359,11 @@ static void early_console_register(struct console *con, int keep_early)
 	register_console(early_console);
 }
 
+#ifdef MY_DEF_HERE
+int __init setup_early_printk(char *buf)
+#else
 static int __init setup_early_printk(char *buf)
+#endif  
 {
 	int keep;
 
@@ -411,4 +425,7 @@ static int __init setup_early_printk(char *buf)
 	return 0;
 }
 
+#ifdef MY_DEF_HERE
+EXPORT_SYMBOL(setup_early_printk);
+#endif  
 early_param("earlyprintk", setup_early_printk);

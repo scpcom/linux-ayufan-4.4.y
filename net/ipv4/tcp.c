@@ -437,10 +437,7 @@ ssize_t tcp_splice_read(struct socket *sock, loff_t *ppos,
 				ret = -EAGAIN;
 				break;
 			}
-			/* if __tcp_splice_read() got nothing while we have
-			 * an skb in receive queue, we do not want to loop.
-			 * This might happen with URG data.
-			 */
+			 
 			if (!skb_queue_empty(&sk->sk_receive_queue))
 				break;
 			sk_wait_data(sk, &timeo, NULL);
@@ -2586,7 +2583,7 @@ void __init tcp_init(void)
 	sysctl_tcp_rmem[0] = SK_MEM_QUANTUM;
 	sysctl_tcp_rmem[1] = 87380;
 	sysctl_tcp_rmem[2] = max(87380, max_rshare);
-#ifdef MY_ABC_HERE
+#if defined(MY_ABC_HERE)
 	sysctl_tcp_rmem[0] *= 2;
 	sysctl_tcp_rmem[1] *= 2;
 #endif  

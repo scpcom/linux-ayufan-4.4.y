@@ -366,7 +366,6 @@ static void xenvbd_sysfs_delif(struct xenbus_device *dev)
 	device_remove_file(&dev->dev, &dev_attr_physical_device);
 }
 
-
 static void xen_vbd_free(struct xen_vbd *vbd)
 {
 	if (vbd->bdev)
@@ -413,7 +412,7 @@ static int xen_vbd_create(struct xen_blkif *blkif, blkif_vdev_t handle,
 		vbd->type |= VDISK_REMOVABLE;
 
 	q = bdev_get_queue(bdev);
-	if (q && q->flush_flags)
+	if (q && test_bit(QUEUE_FLAG_WC, &q->queue_flags))
 		vbd->flush_support = true;
 
 	if (q && blk_queue_secdiscard(q))
@@ -578,7 +577,6 @@ fail:
 	return err;
 }
 
-
 /*
  * Callback received when the hotplug scripts have placed the physical-device
  * node.  Read it and the mode node, and create a vbd.  If the frontend is
@@ -667,7 +665,6 @@ static void backend_changed(struct xenbus_watch *watch,
 	}
 }
 
-
 /*
  * Callback received when the frontend's state changes.
  */
@@ -735,9 +732,7 @@ static void frontend_changed(struct xenbus_device *dev,
 	}
 }
 
-
 /* ** Connection ** */
-
 
 /*
  * Write the physical details regarding the block device to the store, and
@@ -824,7 +819,6 @@ again:
  abort:
 	xenbus_transaction_end(xbt, 1);
 }
-
 
 static int connect_ring(struct backend_info *be)
 {

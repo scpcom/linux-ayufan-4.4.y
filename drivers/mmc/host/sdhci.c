@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/drivers/mmc/host/sdhci.c - Secure Digital Host Controller Interface driver
  *
@@ -51,11 +54,11 @@ static unsigned int debug_quirks2;
 static void sdhci_finish_data(struct sdhci_host *);
 
 static void sdhci_finish_command(struct sdhci_host *);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
 static int sdhci_pre_dma_transfer(struct sdhci_host *host,
 					struct mmc_data *data);
@@ -227,12 +230,12 @@ static void sdhci_do_reset(struct sdhci_host *host, u8 mask)
 	}
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 static void sdhci_init(struct sdhci_host *host, int soft)
 {
 	if (soft)
@@ -1470,7 +1473,7 @@ void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
 	else if (timing == MMC_TIMING_MMC_HS400)
 		ctrl_2 |= SDHCI_CTRL_HS400; /* Non-standard */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	/* Some host controller separates HS200 and HS400 definitions,
 	 * and may have different defitition with the non-standard one
 	 * defined in original SDHCI.
@@ -1482,7 +1485,7 @@ void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
 		else if (timing == MMC_TIMING_MMC_HS400)
 			ctrl_2 |= SDHCI_CTRL_HS400_ONLY;
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
 }
@@ -1646,11 +1649,11 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
 	spin_unlock_irqrestore(&host->lock, flags);
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 {
 	struct sdhci_host *host = mmc_priv(mmc);
 
@@ -1658,9 +1661,9 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 	sdhci_do_set_ios(host, ios);
 	sdhci_runtime_pm_put(host);
 }
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 EXPORT_SYMBOL_GPL(sdhci_set_ios);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 static int sdhci_do_get_cd(struct sdhci_host *host)
 {
@@ -1774,11 +1777,11 @@ static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int enable)
 	}
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 {
 	struct sdhci_host *host = mmc_priv(mmc);
 	unsigned long flags;
@@ -1796,9 +1799,9 @@ static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
 
 	sdhci_runtime_pm_put(host);
 }
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 EXPORT_SYMBOL_GPL(sdhci_enable_sdio_irq);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
 						struct mmc_ios *ios)
@@ -1891,13 +1894,13 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
 	}
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
 	struct mmc_ios *ios)
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
 	struct mmc_ios *ios)
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 {
 	struct sdhci_host *host = mmc_priv(mmc);
 	int err;
@@ -1909,9 +1912,9 @@ static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
 	sdhci_runtime_pm_put(host);
 	return err;
 }
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 EXPORT_SYMBOL_GPL(sdhci_start_signal_voltage_switch);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 static int sdhci_card_busy(struct mmc_host *mmc)
 {
@@ -1938,11 +1941,11 @@ static int sdhci_prepare_hs400_tuning(struct mmc_host *mmc, struct mmc_ios *ios)
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 {
 	struct sdhci_host *host = mmc_priv(mmc);
 	u16 ctrl;
@@ -2161,9 +2164,9 @@ out_unlock:
 
 	return err;
 }
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 EXPORT_SYMBOL_GPL(sdhci_execute_tuning);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 static int sdhci_select_drive_strength(struct mmc_card *card,
 				       unsigned int max_dtr, int host_drv,
@@ -2290,7 +2293,7 @@ static void sdhci_card_event(struct mmc_host *mmc)
 	spin_unlock_irqrestore(&host->lock, flags);
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static void sdhci_init_card(struct mmc_host *mmc, struct mmc_card *card)
 {
 	struct sdhci_host *host = mmc_priv(mmc);
@@ -2298,7 +2301,7 @@ static void sdhci_init_card(struct mmc_host *mmc, struct mmc_card *card)
 	if (host->ops->init_card)
 		host->ops->init_card(host, card);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 static const struct mmc_host_ops sdhci_ops = {
 	.request	= sdhci_request,
@@ -2315,9 +2318,9 @@ static const struct mmc_host_ops sdhci_ops = {
 	.select_drive_strength		= sdhci_select_drive_strength,
 	.card_event			= sdhci_card_event,
 	.card_busy	= sdhci_card_busy,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	.init_card	= sdhci_init_card,
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 };
 
 /*****************************************************************************\

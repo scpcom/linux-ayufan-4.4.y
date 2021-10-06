@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * drivers/mtd/nand/gpio.c
  *
@@ -208,11 +211,11 @@ static int gpio_nand_probe(struct platform_device *pdev)
 	struct gpiomtd *gpiomtd;
 	struct nand_chip *chip;
 	struct resource *res;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct mtd_part_parser_data ppdata = {};
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	int ret = 0;
 
 	if (!pdev->dev.of_node && !dev_get_platdata(&pdev->dev))
@@ -271,9 +274,9 @@ static int gpio_nand_probe(struct platform_device *pdev)
 		chip->dev_ready = gpio_nand_devready;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	nand_set_flash_node(chip, pdev->dev.of_node);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	chip->IO_ADDR_W		= chip->IO_ADDR_R;
 	chip->ecc.mode		= NAND_ECC_SOFT;
 	chip->options		= gpiomtd->plat.options;
@@ -297,15 +300,15 @@ static int gpio_nand_probe(struct platform_device *pdev)
 		gpiomtd->plat.adjust_parts(&gpiomtd->plat,
 					   gpiomtd->mtd_info.size);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	ret = mtd_device_register(&gpiomtd->mtd_info, gpiomtd->plat.parts,
 				  gpiomtd->plat.num_parts);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	ppdata.of_node = pdev->dev.of_node;
 	ret = mtd_device_parse_register(&gpiomtd->mtd_info, NULL, &ppdata,
 					gpiomtd->plat.parts,
 					gpiomtd->plat.num_parts);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	if (!ret)
 		return 0;
 

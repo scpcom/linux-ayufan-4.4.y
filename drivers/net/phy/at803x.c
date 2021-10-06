@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * drivers/net/phy/at803x.c
  *
@@ -190,11 +193,11 @@ static int at803x_resume(struct phy_device *phydev)
 
 static int at803x_probe(struct phy_device *phydev)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct device *dev = &phydev->mdio.dev;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct device *dev = &phydev->dev;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct at803x_priv *priv;
 	struct gpio_desc *gpiod_reset;
 
@@ -285,13 +288,13 @@ static void at803x_link_change_notify(struct phy_device *phydev)
 
 				at803x_context_restore(phydev, &context);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 				phydev_dbg(phydev, "%s(): phy was reset\n",
 					   __func__);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 				dev_dbg(&phydev->dev, "%s(): phy was reset\n",
 					__func__);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 				priv->phy_reset = true;
 			}
 		} else {
@@ -319,13 +322,13 @@ static struct phy_driver at803x_driver[] = {
 	.read_status		= genphy_read_status,
 	.ack_interrupt		= at803x_ack_interrupt,
 	.config_intr		= at803x_config_intr,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	.driver			= {
 		.owner = THIS_MODULE,
 	},
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 }, {
 	/* ATHEROS 8030 */
 	.phy_id			= ATH8030_PHY_ID,
@@ -344,13 +347,13 @@ static struct phy_driver at803x_driver[] = {
 	.read_status		= genphy_read_status,
 	.ack_interrupt		= at803x_ack_interrupt,
 	.config_intr		= at803x_config_intr,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	.driver			= {
 		.owner = THIS_MODULE,
 	},
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 }, {
 	/* ATHEROS 8031 */
 	.phy_id			= ATH8031_PHY_ID,
@@ -369,13 +372,13 @@ static struct phy_driver at803x_driver[] = {
 	.read_status		= genphy_read_status,
 	.ack_interrupt		= &at803x_ack_interrupt,
 	.config_intr		= &at803x_config_intr,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	.driver			= {
 		.owner = THIS_MODULE,
 	},
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 } };
 
 module_phy_driver(at803x_driver);

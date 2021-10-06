@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*
  * Marvell Armada AP806 core clocks
  *
@@ -111,4 +114,4 @@ static void __init ap806_core_clk_init(struct device_node *np)
 
 CLK_OF_DECLARE(ap806_core_clk, "marvell,armada-ap806-core-clock",
 	       ap806_core_clk_init);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

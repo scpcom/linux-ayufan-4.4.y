@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -300,4 +303,4 @@ static inline void mv_pp3_ptp_reg_write(u32 reg_addr, u32 reg_data)
 
 #endif/*__KERNEL__*/
 #endif /* _mv_ptp_regs_h_ */
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

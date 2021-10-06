@@ -53,7 +53,6 @@ static const struct sysfs_ops odev_attr_ops = {
 	.store = odev_attr_store,
 };
 
-
 static struct kset *exofs_kset;
 
 static ssize_t osdname_show(struct exofs_dev *edp, char *buf)
@@ -122,7 +121,7 @@ void exofs_sysfs_dbg_print(void)
 	list_for_each_entry_safe(k_name, k_tmp, &exofs_kset->list, entry) {
 		printk(KERN_INFO "%s: name %s ref %d\n",
 			__func__, kobject_name(k_name),
-			(int)atomic_read(&k_name->kref.refcount));
+			(int)kref_read(&k_name->kref));
 	}
 #endif
 }

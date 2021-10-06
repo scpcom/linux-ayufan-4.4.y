@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Based on arch/arm/mm/flush.c
  *
@@ -98,7 +101,7 @@ EXPORT_SYMBOL(flush_dcache_page);
 /*
  * Additional functions defined in assembly.
  */
-#ifdef CONFIG_SYNO_RTD296
+#ifdef MY_DEF_HERE
 EXPORT_SYMBOL(flush_cache_all);
 #endif
 EXPORT_SYMBOL(flush_icache_range);

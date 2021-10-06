@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*
 * ***************************************************************************
 * Copyright (C) 2016 Marvell International Ltd.
@@ -135,13 +138,13 @@ static inline void mv_gop_gen_write(void __iomem *base, u32 offset, u32 data)
 /* GOP port configuration functions */
 int mv_gop110_port_init(struct gop_hw *gop, struct mv_mac_data *mac);
 int mv_gop110_port_reset(struct gop_hw *gop, struct mv_mac_data *mac);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 void mv_gop110_port_enable(struct gop_hw *gop, struct mv_mac_data *mac, struct phy *comphy);
 void mv_gop110_port_disable(struct gop_hw *gop, struct mv_mac_data *mac, struct phy *comphy);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 void mv_gop110_port_enable(struct gop_hw *gop, struct mv_mac_data *mac);
 void mv_gop110_port_disable(struct gop_hw *gop, struct mv_mac_data *mac);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 void mv_gop110_port_periodic_xon_set(struct gop_hw *gop,
 				     struct mv_mac_data *mac,
 				     int enable);
@@ -439,9 +442,9 @@ u64 mv_gop110_mib_read64(struct gop_hw *gop, int port, unsigned int offset);
 void mv_gop110_mib_counters_show(struct gop_hw *gop, int port);
 void mv_gop110_mib_counters_stat_update(struct gop_hw *gop, int port,
 					struct gop_stat *gop_statistics);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 void mv_gop110_mib_counters_clear(struct gop_hw *gop, int port);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 /* PTP Functions */
 void mv_gop110_ptp_enable(struct gop_hw *gop, int port, bool state);
@@ -478,9 +481,9 @@ static inline void mv_gop110_fca_write(struct gop_hw *gop, int mac_num,
 void mv_gop110_gmac_registers_dump(struct mv_pp2x_port *port, u32 *regs_buff);
 void mv_gop110_xlg_registers_dump(struct mv_pp2x_port *port, u32 *regs_buff);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 int mv_gop110_update_comphy(struct mv_pp2x_port *port, u32 speed);
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 #endif /* _MV_GOP_HW_H_ */
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

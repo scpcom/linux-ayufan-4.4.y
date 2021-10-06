@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Broadcom Starfighter2 private context
  *
@@ -51,9 +54,9 @@ struct bcm_sf2_port_status {
 
 	u32 vlan_ctl_mask;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct net_device *bridge_dev;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 };
 
 struct bcm_sf2_arl_entry {

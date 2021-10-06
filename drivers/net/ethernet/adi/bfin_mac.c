@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Blackfin On-Chip MAC Driver
  *
@@ -418,11 +421,11 @@ static int mii_probe(struct net_device *dev, int phy_mode)
 		return -EINVAL;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	phydev = phy_connect(dev, phydev_name(phydev),
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	phydev = phy_connect(dev, dev_name(&phydev->dev),
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 			     &bfin_mac_adjust_link, phy_mode);
 
 	if (IS_ERR(phydev)) {
@@ -447,15 +450,15 @@ static int mii_probe(struct net_device *dev, int phy_mode)
 	lp->old_duplex = -1;
 	lp->phydev = phydev;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	phy_attached_print(phydev, "mdc_clk=%dHz(mdc_div=%d)@sclk=%dMHz)\n",
 			   MDC_CLK, mdc_div, sclk / 1000000);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	pr_info("attached PHY driver [%s] "
 	        "(mii_bus:phy_addr=%s, irq=%d, mdc_clk=%dHz(mdc_div=%d)@sclk=%dMHz)\n",
 	        phydev->drv->name, dev_name(&phydev->dev), phydev->irq,
 	        MDC_CLK, mdc_div, sclk/1000000);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	return 0;
 }
@@ -1847,16 +1850,16 @@ static int bfin_mii_bus_probe(struct platform_device *pdev)
 
 	snprintf(miibus->id, MII_BUS_ID_SIZE, "%s-%x",
 		pdev->name, pdev->id);
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	miibus->irq = kmalloc(sizeof(int)*PHY_MAX_ADDR, GFP_KERNEL);
 	if (!miibus->irq)
 		goto out_err_irq_alloc;
 
 	for (i = rc; i < PHY_MAX_ADDR; ++i)
 		miibus->irq[i] = PHY_POLL;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	rc = clamp(mii_bus_pd->phydev_number, 0, PHY_MAX_ADDR);
 	if (rc != mii_bus_pd->phydev_number)
@@ -1875,22 +1878,22 @@ static int bfin_mii_bus_probe(struct platform_device *pdev)
 	rc = mdiobus_register(miibus);
 	if (rc) {
 		dev_err(&pdev->dev, "Cannot register MDIO bus!\n");
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		goto out_err_alloc;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		goto out_err_mdiobus_register;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	}
 
 	platform_set_drvdata(pdev, miibus);
 	return 0;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 out_err_mdiobus_register:
 	kfree(miibus->irq);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 out_err_irq_alloc:
 	mdiobus_free(miibus);
 out_err_alloc:
@@ -1906,11 +1909,11 @@ static int bfin_mii_bus_remove(struct platform_device *pdev)
 		dev_get_platdata(&pdev->dev);
 
 	mdiobus_unregister(miibus);
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	kfree(miibus->irq);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	mdiobus_free(miibus);
 	peripheral_free_list(mii_bus_pd->mac_peripherals);
 

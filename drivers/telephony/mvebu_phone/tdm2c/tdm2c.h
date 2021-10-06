@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*******************************************************************************
  * Copyright (C) 2016 Marvell International Ltd.
  *
@@ -127,9 +130,9 @@
 #define CH_TX_CUR_ADDR_REG(ch)	(0x60 | ((ch) << 3))
 #define CH_RX_CUR_ADDR_REG(ch)	(0x64 | ((ch) << 3))
 #define CH_ENABLE_REG(ch)	(((ch) + 1) << 4)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 #define CH_RXTX_EN_MASK		0x101
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 #define CH_BUFF_OWN_REG(ch)	(0x04 | (((ch) + 1) << 4))
 #define CH_TX_ADDR_REG(ch)	(0x08 | (((ch) + 1) << 4))
 #define CH_RX_ADDR_REG(ch)	(0x0c | (((ch) + 1) << 4))
@@ -258,9 +261,9 @@
 #define MV_TDM_MAX_SAMPLING_PERIOD		30	/* ms */
 #define MV_TDM_BASE_SAMPLING_PERIOD		10	/* ms */
 #define MV_TDM_TOTAL_CH_SAMPLES			80	/* samples */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 #define MV_TDM_STOP_POLLING_TIMEOUT		30	/* ms */
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 /* TDM IRQ types */
 #define MV_EMPTY_INT		0
@@ -320,7 +323,7 @@
 	((SAMPLES_BUFF_SIZE(bandMode, factor)<<TOTAL_CNT_OFFS) |	\
 	(INT_SAMPLE<<INT_CNT_OFFS))
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 /* Defines */
 #define INT_SAMPLE			2
 #define BUFF_IS_FULL			1
@@ -331,12 +334,12 @@
 #define MV_TDM_PREV_BUFFER(buf, step)	((TOTAL_BUFFERS + buf - step) % TOTAL_BUFFERS)
 #define MV_TDM_CS			0
 #define BUFF_INVALID			-1
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 /* APIs */
 void __iomem *get_tdm_base(void);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 /* TDM channel info structure */
 struct tdm2c_ch_info {
 	u8 ch;
@@ -352,7 +355,7 @@ struct tdm2c_ch_info {
 };
 
 /* APIs */
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 void tdm2c_release(void);
 int tdm2c_pcm_stop_int_miss(void);
 void tdm2c_pcm_start(void);
@@ -363,10 +366,10 @@ void tdm2c_regs_dump(void);
 void tdm2c_intr_enable(void);
 void tdm2c_intr_disable(void);
 void tdm2c_pcm_if_reset(void);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 int tdm2c_set_mbus_windows(struct device *dev, void __iomem *regs,
 			   const struct mbus_dram_target_info *dram);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 #endif /* _TDM2C_H_ */
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

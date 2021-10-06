@@ -6,3 +6,4 @@ obj-$(CONFIG_PINCTRL_INTEL)		+= pinctrl-intel.o
 obj-$(CONFIG_PINCTRL_BROXTON)		+= pinctrl-broxton.o
 obj-$(CONFIG_PINCTRL_SUNRISEPOINT)	+= pinctrl-sunrisepoint.o
 obj-$(CONFIG_SYNO_DENVERTON)		+= pinctrl-denverton.o
+obj-$(CONFIG_SYNO_PINCTRL_LEWISBURG) 	+= pinctrl-lewisburg.o

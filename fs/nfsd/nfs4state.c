@@ -1908,7 +1908,6 @@ static bool is_gss_cred(struct svc_cred *cr)
 	return (cr->cr_flavor > RPC_AUTH_MAXFLAVOR);
 }
 
-
 static bool
 same_creds(struct svc_cred *cr1, struct svc_cred *cr2)
 {
@@ -3135,7 +3134,6 @@ out:
 		expire_client(unconf);
 	return status;
 }
-
 
 __be32
 nfsd4_setclientid_confirm(struct svc_rqst *rqstp,
@@ -4784,10 +4782,9 @@ nfs4_check_file(struct svc_rqst *rqstp, struct svc_fh *fhp, struct nfs4_stid *s,
  */
 __be32
 nfs4_preprocess_stateid_op(struct svc_rqst *rqstp,
-		struct nfsd4_compound_state *cstate, stateid_t *stateid,
-		int flags, struct file **filpp, bool *tmp_file)
+		struct nfsd4_compound_state *cstate, struct svc_fh *fhp,
+		stateid_t *stateid, int flags, struct file **filpp, bool *tmp_file)
 {
-	struct svc_fh *fhp = &cstate->current_fh;
 	struct inode *ino = d_inode(fhp->fh_dentry);
 	struct net *net = SVC_NET(rqstp);
 	struct nfsd_net *nn = net_generic(net, nfsd_net_id);

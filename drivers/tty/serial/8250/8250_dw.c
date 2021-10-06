@@ -201,7 +201,10 @@ static int dw8250_handle_irq(struct uart_port *p)
 	if (serial8250_handle_irq(p, iir)) {
 #ifdef MY_DEF_HERE
 		if (d->isr_reg)
+		{
 			writel(d->isr_st_mask, d->isr_reg);
+			wmb();
+		}
 #endif /* MY_DEF_HERE */
 		return 1;
 	} else if ((iir & UART_IIR_BUSY) == UART_IIR_BUSY) {
@@ -211,7 +214,10 @@ static int dw8250_handle_irq(struct uart_port *p)
 		//p->serial_out(p, UART_LCR, d->last_lcr);
 
 		if (d->isr_reg)
+		{
 			writel(d->isr_st_mask, d->isr_reg);
+			wmb();
+		}
 #else
 		/* Clear the USR */
 		(void)p->serial_in(p, d->usr_reg);

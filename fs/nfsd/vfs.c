@@ -25,6 +25,7 @@
 #endif  
 
 #ifdef CONFIG_NFSD_V4
+#include "../internal.h"
 #include "acl.h"
 #include "idmap.h"
 #endif  
@@ -341,13 +342,6 @@ nfsd_setattr(struct svc_rqst *rqstp, struct svc_fh *fhp, struct iattr *iap,
 	if (check_guard && guardtime != inode->i_ctime.tv_sec)
 		return nfserr_notsync;
 
-	/*
-	 * The size case is special, it changes the file in addition to the
-	 * attributes, and file systems don't expect it to be mixed with
-	 * "random" attribute changes.  We thus split out the size change
-	 * into a separate call to ->setattr, and do the rest as a separate
-	 * setattr call.
-	 */
 	if (size_change) {
 		err = nfsd_get_write_access(rqstp, fhp, iap);
 		if (err)
@@ -356,13 +350,7 @@ nfsd_setattr(struct svc_rqst *rqstp, struct svc_fh *fhp, struct iattr *iap,
 
 	fh_lock(fhp);
 	if (size_change) {
-		/*
-		 * RFC5661, Section 18.30.4:
-		 *   Changing the size of a file with SETATTR indirectly
-		 *   changes the time_modify and change attributes.
-		 *
-		 * (and similar for the older RFCs)
-		 */
+		 
 		struct iattr size_attr = {
 			.ia_valid	= ATTR_SIZE | ATTR_CTIME | ATTR_MTIME,
 			.ia_size	= iap->ia_size,
@@ -373,11 +361,6 @@ nfsd_setattr(struct svc_rqst *rqstp, struct svc_fh *fhp, struct iattr *iap,
 			goto out_unlock;
 		iap->ia_valid &= ~ATTR_SIZE;
 
-		/*
-		 * Avoid the additional setattr call below if the only other
-		 * attribute that the client sends is the mtime, as we update
-		 * it as part of the size change above.
-		 */
 		if ((iap->ia_valid & ~ATTR_MTIME) == 0)
 			goto out_unlock;
 	}
@@ -439,6 +422,16 @@ __be32 nfsd4_set_nfs4_label(struct svc_rqst *rqstp, struct svc_fh *fhp,
 	return nfserr_notsupp;
 }
 #endif
+
+__be32 nfsd4_clone_file_range(struct file *src, u64 src_pos, struct file *dst,
+		u64 dst_pos, u64 count)
+{
+#ifdef MY_ABC_HERE
+	return nfserrno(do_clone_file_range(src, src_pos, dst, dst_pos, count, 1));
+#else
+	return nfserrno(do_clone_file_range(src, src_pos, dst, dst_pos, count));
+#endif  
+}
 
 __be32 nfsd4_vfs_fallocate(struct svc_rqst *rqstp, struct svc_fh *fhp,
 			   struct file *file, loff_t offset, loff_t len,

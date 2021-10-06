@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Combined Ethernet driver for Motorola MPC8xx and MPC82xx.
  *
@@ -172,35 +175,35 @@ static int fs_enet_mdio_probe(struct platform_device *ofdev)
 		goto out_free_bus;
 
 	new_bus->phy_mask = ~0;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	new_bus->irq = kmalloc(sizeof(int) * PHY_MAX_ADDR, GFP_KERNEL);
 	if (!new_bus->irq) {
 		ret = -ENOMEM;
 		goto out_unmap_regs;
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	new_bus->parent = &ofdev->dev;
 	platform_set_drvdata(ofdev, new_bus);
 
 	ret = of_mdiobus_register(new_bus, ofdev->dev.of_node);
 	if (ret)
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		goto out_unmap_regs;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		goto out_free_irqs;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	return 0;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 out_free_irqs:
 	kfree(new_bus->irq);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 out_unmap_regs:
 	iounmap(bitbang->dir);
 out_free_bus:
@@ -217,11 +220,11 @@ static int fs_enet_mdio_remove(struct platform_device *ofdev)
 	struct bb_info *bitbang = bus->priv;
 
 	mdiobus_unregister(bus);
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	kfree(bus->irq);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	free_mdio_bitbang(bus);
 	iounmap(bitbang->dir);
 	kfree(bitbang);

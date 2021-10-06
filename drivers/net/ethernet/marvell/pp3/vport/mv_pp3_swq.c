@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*
 * ***************************************************************************
 * Copyright (C) 2015 Marvell International Ltd.
@@ -331,4 +334,4 @@ void mv_pp3_swq_stats_clear(struct pp3_swq *swq)
 }
 /*---------------------------------------------------------------------------*/
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

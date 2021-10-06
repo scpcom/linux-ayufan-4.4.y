@@ -107,6 +107,15 @@ config SYNO_CIFS_FORCE_UMOUNT
 	bool ""
 	default y
 
+config SYNO_CIFS_INCREASE_SENDMSG_TIMEOUT
+	bool "increase the kernel_sendmsg EAGAIN timeout for more stability"
+	default y
+
+config SYNO_CIFS_SMB_OPS
+	bool "add vers=syno for switch SMB1~3 from negotiate"
+	default y
+	depends on SYNO_CIFS_REPLACE_NATIVE_OS
+
 endmenu #CIFS
 
 menu "FAT"
@@ -125,6 +134,11 @@ config SYNO_FAT_CREATE_TIME
 	bool "FAT syno create time"
 	default y
 	depends on SYNO_FS_CREATE_TIME && FAT_FS
+
+config SYNO_FAT_SYNOBOOT_LOG
+	bool "synoboot access log"
+	default y
+	depends on FAT_FS
 
 endmenu
 
@@ -543,8 +557,28 @@ config SYNO_BTRFS_FIX_DELAYED_DATA_REF_OOM
 	default y
 	depends on BTRFS_FS
 
+config SYNO_BTRFS_DEFAULT_SAPCE_CACHE_V2
+	bool "default space cache v2"
+	default y
+	depends on BTRFS_FS
+
+config SYNO_BTRFS_REDUCE_LOCK_CONTENTION_IMPROVE_IOPS
+	bool "reduce lock contention for fs-tree and csum-tree with random write IOPS"
+	default y
+	depends on BTRFS_FS
+
 config SYNO_BTRFS_FIX_MOUNT_OPTION_COMMIT_1S_NO_EFFECT
 	bool "fix mount option commit=1 no effect, when race transaction blocked, will sleep 5s"
+	default y
+	depends on BTRFS_FS
+
+config SYNO_BTRFS_CHECK_INTEGRITY
+	bool "Auto fix error in check_leaf()."
+	default y
+	depends on BTRFS_FS
+
+config SYNO_BTRFS_FIX_TRIM_ENOSPC
+	bool "Fix trim will lead to ENOSPC and lose data."
 	default y
 	depends on BTRFS_FS
 
@@ -617,6 +651,11 @@ config SYNO_ECRYPTFS_FAST_LOOKUP
 	default y
 	depends on ECRYPT_FS
 
+config SYNO_ECRYPTFS_SKIP_EQUAL_ISIZE_UPDATE
+	bool "Update ecryptfs i_size only when they are different"
+	default y
+	depends on ECRYPT_FS
+
 endmenu #ECRYPT
 menu "NFS"
 
@@ -657,10 +696,6 @@ config SYNO_NFSD_HIDDEN_FILE
 
 config SYNO_NFSD_AVOID_HUNG_TASK_WHEN_UNLINK_BIG_FILE
 	bool "Avoid parent mutex hung task when unlink big file"
-	default y
-
-config SYNO_NFSD_SQUASH_TO_ADMIN
-	bool "Grant permission of administrators group to admin user"
 	default y
 
 endmenu #NFS

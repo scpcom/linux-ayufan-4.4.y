@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*
  * Driver for Marvell NETA network controller Buffer Manager.
  *
@@ -189,4 +192,4 @@ static inline u32 mvneta_bm_pool_get_bp(struct mvneta_bm *priv,
 { return 0; }
 #endif /* CONFIG_MVNETA_BM */
 #endif
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */

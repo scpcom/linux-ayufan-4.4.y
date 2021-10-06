@@ -47,6 +47,10 @@
 int ovs_net_id __read_mostly;
 EXPORT_SYMBOL_GPL(ovs_net_id);
 
+#ifdef MY_ABC_HERE
+static DEFINE_MUTEX(syno_ovs_mutex);
+#endif
+
 static struct genl_family dp_packet_genl_family;
 static struct genl_family dp_flow_genl_family;
 static struct genl_family dp_datapath_genl_family;
@@ -2104,11 +2108,11 @@ error:
 
 #ifdef MY_ABC_HERE
 static ssize_t syno_ovs_show_bonds(struct class *cls,
-								   struct class_attribute *attr,
-								   char *buf)
+				   struct class_attribute *attr,
+				   char *buf)
 {
 	struct ovs_net *ovs_net =
-			container_of(attr, struct ovs_net, class_attr_syno_ovs_bonds);
+		container_of(attr, struct ovs_net, class_attr_syno_ovs_bonds);
 	int res = 0;
 	struct syno_ovs_bond_list *bondp;
 	struct syno_ovs_bond_slave_list *slavep;
@@ -2117,6 +2121,7 @@ static ssize_t syno_ovs_show_bonds(struct class *cls,
 	if (list_empty(&ovs_net->bond_list))
 		return 0;
 
+	mutex_lock(&syno_ovs_mutex);
 	list_for_each_entry(bondp, &ovs_net->bond_list, next) {
 		if ((PAGE_SIZE - IFNAMSIZ) < res) {
 			full = true;
@@ -2135,6 +2140,7 @@ static ssize_t syno_ovs_show_bonds(struct class *cls,
 		}
 		buf[res - 1] = '\n';
 	}
+	mutex_unlock(&syno_ovs_mutex);
 
 	if (full)
 		pr_warn("Not enough space for another interface name\n");
@@ -2178,10 +2184,8 @@ static ssize_t syno_ovs_store_bonds(struct class *cls,
 				   struct class_attribute *attr,
 				   const char *buf, size_t count)
 {
-	struct syno_ovs_bond_list *bondp;
-	struct syno_ovs_bond_slave_list *slavep;
-	char *bond_master = NULL;
-	char *p, *temp;
+	struct syno_ovs_bond_list *bondp = NULL;
+	char *p, *temp, *orig_temp;
 	int res = count;
 	int i = 0;
 	struct ovs_net *ovs_net =
@@ -2190,33 +2194,50 @@ static ssize_t syno_ovs_store_bonds(struct class *cls,
 	if (NULL != (p = strchr(buf, '\n')))
 		*p = '\0';
 
-	temp = kstrdup(buf, GFP_KERNEL);
+	orig_temp = temp = kstrdup(buf, GFP_KERNEL);
+	if (temp == NULL)
+		return -ENOMEM;
 
+	mutex_lock(&syno_ovs_mutex);
 	while (NULL != (p = strsep(&temp, " "))) {
-		if (!dev_valid_name(p))
-			pr_err("%s: %s is not a valid name of net_device\n", __func__, p);
+		if (!dev_valid_name(p)) {
+			pr_err("%s: \"%s\" is not a valid name of net_device\n", __func__, p);
+		}
 
-		if (!bond_master) {
-			bond_master = p;
-
-			bondp = syno_ovs_bond_master_lookup(ovs_net, bond_master);
+		if (!bondp) {
+			bondp = syno_ovs_bond_master_lookup(ovs_net, p);
 
 			if (!bondp) {
 				bondp = kzalloc(sizeof(struct syno_ovs_bond_list), GFP_KERNEL);
-
+				if (bondp == NULL) {
+					res = -ENOMEM;
+					goto END;
+				}
 				bondp->name = kstrdup(p, GFP_KERNEL);
+				if (bondp->name == NULL) {
+					res = -ENOMEM;
+					goto END;
+				}
 				INIT_LIST_HEAD(&bondp->slaves);
-
 				list_add_tail(&bondp->next, &ovs_net->bond_list);
-			} else
+			} else {
 				 
 				syno_ovs_bond_slaves_clean(bondp);
-
+			}
+		 
 		} else {
+			struct syno_ovs_bond_slave_list *slavep;
 			slavep = kzalloc(sizeof(struct syno_ovs_bond_slave_list),
 							 GFP_KERNEL);
-
+			if (slavep == NULL) {
+				res = -ENOMEM;
+				goto END;
+			}
 			slavep->name = kstrdup(p, GFP_KERNEL);
+			if (slavep->name == NULL) {
+				res = -ENOMEM;
+				goto END;
+			}
 			list_add_tail(&slavep->next, &bondp->slaves);
 		}
 		i++;
@@ -2228,6 +2249,11 @@ static ssize_t syno_ovs_store_bonds(struct class *cls,
 		kfree(bondp);
 	}
 
+END:
+	mutex_unlock(&syno_ovs_mutex);
+	if (orig_temp) {
+		kfree(orig_temp);
+	}
 	return res;
 }
 
@@ -2321,6 +2347,7 @@ static void __net_exit ovs_exit_net(struct net *dnet)
 
 #ifdef MY_ABC_HERE
 	syno_ovs_destroy_sysfs(ovs_net);
+	mutex_lock(&syno_ovs_mutex);
 	if (!list_empty(&ovs_net->bond_list)) {
 		list_for_each_safe(pos, n, &ovs_net->bond_list) {
 			bondp = list_entry(pos, struct syno_ovs_bond_list, next);
@@ -2330,6 +2357,7 @@ static void __net_exit ovs_exit_net(struct net *dnet)
 			kfree(bondp);
 		}
 	}
+	mutex_unlock(&syno_ovs_mutex);
 #endif  
 
 	ovs_ct_exit(dnet);

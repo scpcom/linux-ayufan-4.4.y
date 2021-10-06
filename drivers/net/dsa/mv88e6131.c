@@ -1,4 +1,7 @@
-#if !defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if !defined(MY_DEF_HERE)
 /*
  * net/dsa/mv88e6131.c - Marvell 88e6095/6095f/6131 switch chip support
  * Copyright (c) 2008-2009 Marvell Semiconductor
@@ -176,4 +179,4 @@ MODULE_ALIAS("platform:mv88e6085");
 MODULE_ALIAS("platform:mv88e6095");
 MODULE_ALIAS("platform:mv88e6095f");
 MODULE_ALIAS("platform:mv88e6131");
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

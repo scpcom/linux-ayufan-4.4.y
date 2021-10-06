@@ -601,15 +601,6 @@ static const struct chv_community *chv_communities[] = {
 	&southeast_community,
 };
 
-/*
- * Lock to serialize register accesses
- *
- * Due to a silicon issue, a shared lock must be used to prevent
- * concurrent accesses across the 4 GPIO controllers.
- *
- * See Intel Atom Z8000 Processor Series Specification Update (Rev. 005),
- * errata #CHT34, for further information.
- */
 static DEFINE_RAW_SPINLOCK(chv_lock);
 
 static void __iomem *chv_padreg(struct chv_pinctrl *pctrl, unsigned offset,
@@ -808,7 +799,7 @@ static int chv_gpio_request_enable(struct pinctrl_dev *pctldev,
 		value = readl(chv_padreg(pctrl, offset, CHV_PADCTRL0));
 		if (!(value & CHV_PADCTRL0_GPIOEN)) {
 			 
-			raw_spin_unlock_irqrestore(&pctrl->lock, flags);
+			raw_spin_unlock_irqrestore(&chv_lock, flags);
 			return -EBUSY;
 		}
 	} else {
@@ -1155,7 +1146,7 @@ static void chv_gpio_set(struct gpio_chip *chip, unsigned offset, int value)
 	}
 #endif  
 
-	raw_spin_unlock_irqrestore(&pctrl->lock, flags);
+	raw_spin_unlock_irqrestore(&chv_lock, flags);
 }
 
 static int chv_gpio_get_direction(struct gpio_chip *chip, unsigned offset)
@@ -1420,7 +1411,7 @@ static int chv_gpio_probe(struct chv_pinctrl *pctrl, int irq)
 
 	chip->ngpio = pctrl->community->ngpios;
 	chip->label = dev_name(pctrl->dev);
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	chip->parent = pctrl->dev;
 #else
 	chip->dev = pctrl->dev;
@@ -1450,7 +1441,6 @@ static int chv_gpio_probe(struct chv_pinctrl *pctrl, int irq)
 		offset += range->npins;
 	}
 
-	chv_writel(0, pctrl->regs + CHV_INTMASK);
 	chv_writel(0xffff, pctrl->regs + CHV_INTSTAT);
 
 	ret = gpiochip_irqchip_add(chip, &chv_gpio_irqchip, 0,
@@ -1587,6 +1577,8 @@ static int chv_pinctrl_resume_noirq(struct device *dev)
 	struct chv_pinctrl *pctrl = platform_get_drvdata(pdev);
 	unsigned long flags;
 	int i;
+
+	raw_spin_lock_irqsave(&chv_lock, flags);
 
 	chv_writel(0, pctrl->regs + CHV_INTMASK);
 

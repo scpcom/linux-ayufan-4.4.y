@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Driver for One Laptop Per Child ‘CAFÉ’ controller, aka Marvell 88ALP01
  *
@@ -101,12 +104,12 @@ static const char *part_probes[] = { "cmdlinepart", "RedBoot", NULL };
 
 static int cafe_device_ready(struct mtd_info *mtd)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *chip = mtd_to_nand(mtd);
 	struct cafe_priv *cafe = chip->priv;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct cafe_priv *cafe = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	int result = !!(cafe_readl(cafe, NAND_STATUS) & 0x40000000);
 	uint32_t irqs = cafe_readl(cafe, NAND_IRQ);
 
@@ -121,12 +124,12 @@ static int cafe_device_ready(struct mtd_info *mtd)
 
 static void cafe_write_buf(struct mtd_info *mtd, const uint8_t *buf, int len)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *chip = mtd_to_nand(mtd);
 	struct cafe_priv *cafe = chip->priv;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct cafe_priv *cafe = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	if (usedma)
 		memcpy(cafe->dmabuf + cafe->datalen, buf, len);
@@ -141,12 +144,12 @@ static void cafe_write_buf(struct mtd_info *mtd, const uint8_t *buf, int len)
 
 static void cafe_read_buf(struct mtd_info *mtd, uint8_t *buf, int len)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *chip = mtd_to_nand(mtd);
 	struct cafe_priv *cafe = chip->priv;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct cafe_priv *cafe = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	if (usedma)
 		memcpy(buf, cafe->dmabuf + cafe->datalen, len);
@@ -160,12 +163,12 @@ static void cafe_read_buf(struct mtd_info *mtd, uint8_t *buf, int len)
 
 static uint8_t cafe_read_byte(struct mtd_info *mtd)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *chip = mtd_to_nand(mtd);
 	struct cafe_priv *cafe = chip->priv;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct cafe_priv *cafe = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	uint8_t d;
 
 	cafe_read_buf(mtd, &d, 1);
@@ -177,12 +180,12 @@ static uint8_t cafe_read_byte(struct mtd_info *mtd)
 static void cafe_nand_cmdfunc(struct mtd_info *mtd, unsigned command,
 			      int column, int page_addr)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *chip = mtd_to_nand(mtd);
 	struct cafe_priv *cafe = chip->priv;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct cafe_priv *cafe = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	int adrbytes = 0;
 	uint32_t ctl1;
 	uint32_t doneint = 0x80000000;
@@ -337,12 +340,12 @@ static void cafe_nand_cmdfunc(struct mtd_info *mtd, unsigned command,
 
 static void cafe_select_chip(struct mtd_info *mtd, int chipnr)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *chip = mtd_to_nand(mtd);
 	struct cafe_priv *cafe = chip->priv;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct cafe_priv *cafe = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	cafe_dev_dbg(&cafe->pdev->dev, "select_chip %d\n", chipnr);
 
@@ -357,12 +360,12 @@ static void cafe_select_chip(struct mtd_info *mtd, int chipnr)
 static irqreturn_t cafe_nand_interrupt(int irq, void *id)
 {
 	struct mtd_info *mtd = id;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *chip = mtd_to_nand(mtd);
 	struct cafe_priv *cafe = chip->priv;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct cafe_priv *cafe = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	uint32_t irqs = cafe_readl(cafe, NAND_IRQ);
 	cafe_writel(cafe, irqs & ~0x90000000, NAND_IRQ);
 	if (!irqs)
@@ -411,11 +414,11 @@ static int cafe_nand_read_oob(struct mtd_info *mtd, struct nand_chip *chip,
 static int cafe_nand_read_page(struct mtd_info *mtd, struct nand_chip *chip,
 			       uint8_t *buf, int oob_required, int page)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct cafe_priv *cafe = chip->priv;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct cafe_priv *cafe = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	unsigned int max_bitflips = 0;
 
 	cafe_dev_dbg(&cafe->pdev->dev, "ECC result %08x SYN1,2 %08x\n",
@@ -555,11 +558,11 @@ static int cafe_nand_write_page_lowlevel(struct mtd_info *mtd,
 					  const uint8_t *buf, int oob_required,
 					  int page)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct cafe_priv *cafe = chip->priv;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct cafe_priv *cafe = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	chip->write_buf(mtd, buf, mtd->writesize);
 	chip->write_buf(mtd, chip->oob_poi, mtd->oobsize);
@@ -644,12 +647,12 @@ static int cafe_nand_probe(struct pci_dev *pdev,
 	cafe = (void *)(&mtd[1]);
 
 	mtd->dev.parent = &pdev->dev;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	mtd->priv = &cafe->nand;
 	cafe->nand.priv = cafe;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	mtd->priv = cafe;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	cafe->pdev = pdev;
 	cafe->mmio = pci_iomap(pdev, 0, 0);
@@ -837,12 +840,12 @@ static int cafe_nand_probe(struct pci_dev *pdev,
 static void cafe_nand_remove(struct pci_dev *pdev)
 {
 	struct mtd_info *mtd = pci_get_drvdata(pdev);
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *chip = mtd_to_nand(mtd);
 	struct cafe_priv *cafe = chip->priv;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct cafe_priv *cafe = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	/* Disable NAND IRQ in global IRQ mask register */
 	cafe_writel(cafe, ~1 & cafe_readl(cafe, GLOBAL_IRQ_MASK), GLOBAL_IRQ_MASK);
@@ -869,12 +872,12 @@ static int cafe_nand_resume(struct pci_dev *pdev)
 {
 	uint32_t ctrl;
 	struct mtd_info *mtd = pci_get_drvdata(pdev);
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *chip = mtd_to_nand(mtd);
 	struct cafe_priv *cafe = chip->priv;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct cafe_priv *cafe = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
        /* Start off by resetting the NAND controller completely */
 	cafe_writel(cafe, 1, NAND_RESET);

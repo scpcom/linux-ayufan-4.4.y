@@ -307,7 +307,6 @@ long compat_vpu_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 
     case VDI_IOCTL_SET_CLOCK_GATE:
     case VDI_IOCTL_RESET:
-    case VDI_IOCTL_GET_RTK_SUPPORT_TYPE:
     {
         return filp->f_op->unlocked_ioctl(filp, cmd,
                                           (unsigned long)compat_ptr(arg));
@@ -479,6 +478,25 @@ long compat_vpu_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
             return err;
         ret = filp->f_op->unlocked_ioctl(filp, VDI_IOCTL_GET_RTK_CLK_PLL, (unsigned long)data);
         err = compat_put_ve1_clock_info(data32, data);
+        return ret ? ret : err;
+    }
+
+    case COMPAT_VDI_IOCTL_GET_RTK_SUPPORT_TYPE:
+    {
+        compat_vpudrv_buffer_t __user *data32;
+        vpudrv_buffer_t __user *data;
+        int err;
+
+        data32 = compat_ptr(arg);
+        data = compat_alloc_user_space(sizeof(*data));
+        if (data == NULL)
+            return -EFAULT;
+
+        err = compat_get_ve1_buffer_data(data32, data);
+        if (err)
+            return err;
+        ret = filp->f_op->unlocked_ioctl(filp, VDI_IOCTL_GET_RTK_SUPPORT_TYPE, (unsigned long)data);
+        err = compat_put_ve1_buffer_data(data32, data);
         return ret ? ret : err;
     }
 

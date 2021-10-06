@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * SC16IS7xx tty serial driver - Copyright (C) 2014 GridPoint
  * Author: Jon Ringle <jringle@gridpoint.com>
@@ -1180,11 +1183,11 @@ static int sc16is7xx_probe(struct device *dev,
 	if (devtype->nr_gpio) {
 		/* Setup GPIO cotroller */
 		s->gpio.owner		 = THIS_MODULE;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		s->gpio.parent		 = dev;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		s->gpio.dev		 = dev;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		s->gpio.label		 = dev_name(dev);
 		s->gpio.direction_input	 = sc16is7xx_gpio_direction_input;
 		s->gpio.get		 = sc16is7xx_gpio_get;

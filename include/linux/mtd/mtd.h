@@ -162,7 +162,7 @@ struct mtd_info {
 	int usecount;
 };
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static inline void mtd_set_of_node(struct mtd_info *mtd,
 				   struct device_node *np)
 {

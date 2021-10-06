@@ -172,7 +172,6 @@ config CIFS_SMB2
 	depends on CIFS && INET
 	select NLS
 	select KEYS
-	select FSCACHE
 	select DNS_RESOLVER
 
 	help

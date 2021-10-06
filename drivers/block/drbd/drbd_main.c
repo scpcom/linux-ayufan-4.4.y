@@ -262,7 +262,6 @@ bail:
 	conn_request_state(connection, NS(conn, C_PROTOCOL_ERROR), CS_HARD);
 }
 
-
 /**
  * _tl_restart() - Walks the transfer log, and applies an action to all requests
  * @connection:	DRBD connection to operate on.
@@ -446,7 +445,6 @@ int drbd_thread_start(struct drbd_thread *thi)
 
 	return true;
 }
-
 
 void _drbd_thread_stop(struct drbd_thread *thi, int restart, int wait)
 {
@@ -2018,7 +2016,6 @@ void drbd_device_cleanup(struct drbd_device *device)
 	drbd_set_defaults(device);
 }
 
-
 static void drbd_destroy_mempools(void)
 {
 	struct page *page;
@@ -2769,7 +2766,7 @@ enum drbd_ret_code drbd_create_device(struct drbd_config_context *adm_ctx, unsig
 	q->backing_dev_info.congested_data = device;
 
 	blk_queue_make_request(q, drbd_make_request);
-	blk_queue_flush(q, REQ_FLUSH | REQ_FUA);
+	blk_queue_write_cache(q, true, true);
 	/* Setting the max_hw_sectors to an odd value of 8kibyte here
 	   This triggers a max_bio_size message upon first attach or connect */
 	blk_queue_max_hw_sectors(q, DRBD_MAX_BIO_SIZE_SAFE >> 8);
@@ -3049,8 +3046,6 @@ struct meta_data_on_disk {
 	u8 reserved_u8[4096 - (7*8 + 10*4)];
 } __packed;
 
-
-
 void drbd_md_write(struct drbd_device *device, void *b)
 {
 	struct meta_data_on_disk *buffer = b;
@@ -3248,7 +3243,6 @@ err:
 	return -EINVAL;
 }
 
-
 /**
  * drbd_md_read() - Reads in the meta data super block
  * @device:	DRBD device.
@@ -3310,7 +3304,6 @@ int drbd_md_read(struct drbd_device *device, struct drbd_backing_dev *bdev)
 		    be32_to_cpu(buffer->bm_bytes_per_bit), BM_BLOCK_SIZE);
 		goto err;
 	}
-
 
 	/* convert to in_core endian */
 	bdev->md.la_size_sect = be64_to_cpu(buffer->la_size_sect);

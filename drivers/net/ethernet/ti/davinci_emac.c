@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * DaVinci Ethernet Medium Access Controller
  *
@@ -1642,14 +1645,14 @@ static int emac_dev_open(struct net_device *ndev)
 		priv->speed = 0;
 		priv->duplex = ~0;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		phy_attached_info(priv->phydev);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		dev_info(emac_dev, "attached PHY driver [%s] "
 			"(mii_bus:phy_addr=%s, id=%x)\n",
 			priv->phydev->drv->name, dev_name(&priv->phydev->dev),
 			priv->phydev->phy_id);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	}
 
 	if (!priv->phydev) {

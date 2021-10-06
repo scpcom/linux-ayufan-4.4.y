@@ -2410,10 +2410,6 @@ ext4_mb_normalize_request(struct ext4_allocation_context *ac,
 	if (ar->pright && start + size - 1 >= ar->lright)
 		size -= start + size - ar->lright;
 
-	/*
-	 * Trim allocation request for filesystems with artificially small
-	 * groups.
-	 */
 	if (size > EXT4_BLOCKS_PER_GROUP(ac->ac_sb))
 		size = EXT4_BLOCKS_PER_GROUP(ac->ac_sb);
 
@@ -3578,15 +3574,7 @@ repeat:
 	}
 	if (likely(ac->ac_status == AC_STATUS_FOUND)) {
 		*errp = ext4_mb_mark_diskspace_used(ac, handle, reserv_clstrs);
-		if (*errp == -EAGAIN) {
-			 
-			ext4_mb_release_context(ac);
-			ac->ac_b_ex.fe_group = 0;
-			ac->ac_b_ex.fe_start = 0;
-			ac->ac_b_ex.fe_len = 0;
-			ac->ac_status = AC_STATUS_CONTINUE;
-			goto repeat;
-		} else if (*errp) {
+		if (*errp) {
 			ext4_discard_allocated_blocks(ac);
 			goto errout;
 		} else {
@@ -3847,7 +3835,6 @@ do_more:
 #endif
 	trace_ext4_mballoc_free(sb, inode, block_group, bit, count_clusters);
 
-	/* __GFP_NOFAIL: retry infinitely, ignore TIF_MEMDIE and memcg limit. */
 	err = ext4_mb_load_buddy_gfp(sb, block_group, &e4b,
 				     GFP_NOFS|__GFP_NOFAIL);
 	if (err)

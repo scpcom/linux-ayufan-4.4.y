@@ -265,8 +265,6 @@ struct ttm_mem_type_manager_func {
  * It's set up by the ttm_bo_driver::init_mem_type method.
  */
 
-
-
 struct ttm_mem_type_manager {
 	struct ttm_bo_device *bdev;
 
@@ -487,7 +485,6 @@ struct ttm_bo_global {
 	 */
 	atomic_t bo_count;
 };
-
 
 #define TTM_NUM_MEM_TYPES 8
 
@@ -852,7 +849,7 @@ static inline int ttm_bo_reserve(struct ttm_buffer_object *bo,
 {
 	int ret;
 
-	WARN_ON(!atomic_read(&bo->kref.refcount));
+	WARN_ON(!kref_read(&bo->kref));
 
 	ret = __ttm_bo_reserve(bo, interruptible, no_wait, use_ticket, ticket);
 	if (likely(ret == 0))
@@ -877,7 +874,7 @@ static inline int ttm_bo_reserve_slowpath(struct ttm_buffer_object *bo,
 {
 	int ret = 0;
 
-	WARN_ON(!atomic_read(&bo->kref.refcount));
+	WARN_ON(!kref_read(&bo->kref));
 
 	if (interruptible)
 		ret = ww_mutex_lock_slow_interruptible(&bo->resv->lock,

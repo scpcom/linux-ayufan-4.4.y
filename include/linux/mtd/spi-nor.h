@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2014 Freescale Semiconductor, Inc.
  *
@@ -185,7 +188,7 @@ struct spi_nor {
 	void *priv;
 };
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static inline void spi_nor_set_flash_node(struct spi_nor *nor,
 					  struct device_node *np)
 {
@@ -196,7 +199,7 @@ static inline struct device_node *spi_nor_get_flash_node(struct spi_nor *nor)
 {
 	return nor->flash_node;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 /**
  * spi_nor_scan() - scan the SPI NOR

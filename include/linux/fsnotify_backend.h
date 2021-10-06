@@ -106,7 +106,7 @@ struct fsnotify_group {
 	#define FS_PRIO_1	1  
 	#define FS_PRIO_2	2  
 	unsigned int priority;
-	bool shutdown;		/* group is being shut down, don't queue more events */
+	bool shutdown;		 
 
 	struct mutex mark_mutex;	 
 	atomic_t num_marks;		 
@@ -138,7 +138,6 @@ struct fsnotify_group {
 			spinlock_t access_lock;
 			struct list_head access_list;
 			wait_queue_head_t access_waitq;
-			atomic_t bypass_perm;
 #endif  
 			int f_flags;
 			unsigned int max_marks;
@@ -235,6 +234,8 @@ extern void fsnotify_get_group(struct fsnotify_group *group);
  
 extern void fsnotify_put_group(struct fsnotify_group *group);
  
+extern void fsnotify_group_stop_queueing(struct fsnotify_group *group);
+ 
 extern void fsnotify_destroy_group(struct fsnotify_group *group);
  
 extern int fsnotify_fasync(int fd, struct file *file, int on);
@@ -246,8 +247,6 @@ extern int fsnotify_add_event(struct fsnotify_group *group,
 			      struct fsnotify_event *event,
 			      int (*merge)(struct list_head *,
 					   struct fsnotify_event *));
- 
-extern void fsnotify_remove_event(struct fsnotify_group *group, struct fsnotify_event *event);
  
 extern bool fsnotify_notify_queue_is_empty(struct fsnotify_group *group);
  

@@ -47,7 +47,7 @@ enum board_ids {
 	board_ahci_noncq,
 	board_ahci_nosntf,
 	board_ahci_yes_fbs,
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	board_ahci_yes_fbs_no_ncq,
 #endif  
 
@@ -153,7 +153,7 @@ static const struct ata_port_info ahci_port_info[] = {
 		.udma_mask	= ATA_UDMA6,
 		.port_ops	= &ahci_ops,
 	},
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	[board_ahci_yes_fbs_no_ncq] = {
 		AHCI_HFLAGS	(AHCI_HFLAG_YES_FBS | AHCI_HFLAG_NO_NCQ),
 		.flags		= AHCI_FLAG_COMMON,
@@ -554,7 +554,7 @@ static const struct pci_device_id ahci_pci_tbl[] = {
 	{ PCI_DEVICE(PCI_VENDOR_ID_MARVELL_EXT, 0x9215),
 	  .driver_data = board_ahci_yes_fbs },			 
 #endif  
-#ifdef MY_ABC_HERE
+#ifdef MY_DEF_HERE
 	{ PCI_DEVICE(PCI_VENDOR_ID_MARVELL_EXT, 0x9170),
 	  .driver_data = board_ahci_yes_fbs_no_ncq },    
 #endif  
@@ -628,7 +628,7 @@ void syno_mv_9170_gpio_active_init(struct ata_host *host)
 {
 	 
 	syno_mv_9170_gpio_reg_set(host, MV_9170_GPIO_DATA_OUT_ENABLE, 0x0);
-#if defined(CONFIG_SYNO_MV_9170_GPIO_ACTIVE_LOW)
+#if defined(MY_DEF_HERE)
 	 
 	syno_mv_9170_gpio_reg_set(host, MV_9170_GPIO_DATA_OUT, 0x00000021);
 #else
@@ -680,7 +680,7 @@ int syno_mv_9170_disk_led_get(const unsigned short hostnum)
 	} else {
 		ret = 0;
 	}
-#if defined(CONFIG_SYNO_MV_9170_GPIO_ACTIVE_LOW)
+#if defined(MY_DEF_HERE)
 	ret = !ret;
 #endif  
 END:
@@ -695,7 +695,7 @@ static u32 syno_mv_9170_prepare_value_by_polarity(u32 orig_reg_value, int iValue
 {
 	u32 target_reg_value = orig_reg_value;
 	int new_bit_value;
-#if defined(CONFIG_SYNO_MV_9170_GPIO_ACTIVE_LOW)
+#if defined(MY_DEF_HERE)
         new_bit_value = !iValue;
 #else  
         new_bit_value = iValue;
@@ -889,10 +889,54 @@ void syno_mv_9xxx_amp_adjust(struct ata_host *host, struct pci_dev *pdev)
 		port = 1;
 		syno_mv_9xxx_amp_adjust_by_port(host, 0xE3E, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
 	} else if (syno_is_hw_version(HW_RS2418p) || syno_is_hw_version(HW_RS2418rpp)) {
-		if (0x9215 == pdev->device) {
+		if (0x09 == PCI_SLOT(pdev->bus->self->devfn)) {
 			 
 			port = 0;
-			syno_mv_9xxx_amp_adjust_by_port(host, 0xFBE, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xF7F, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xAA62, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+			port = 1;
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xF75, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xAA62, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+			port = 2;
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xE75, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xAA62, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+			port = 3;
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xE75, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xAA62, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+		} else if (0x0A == PCI_SLOT(pdev->bus->self->devfn)) {
+			 
+			port = 0;
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xF7F, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xAA62, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+			port = 1;
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xDF5, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xAA62, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+			port = 2;
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xE75, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xAA62, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+			port = 3;
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xE75, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xAA62, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+		} else if (0x0B == PCI_SLOT(pdev->bus->self->devfn)) {
+			 
+			port = 0;
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xF7F, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xAA62, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+			port = 1;
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xDF5, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xAA62, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+			port = 2;
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xE75, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xAA62, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+			port = 3;
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xE75, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+			syno_mv_9xxx_amp_adjust_by_port(host, 0xAA62, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+		} else if (0x0E == PCI_SLOT(pdev->bus->self->devfn)) {
+			 
+			for (port = 0; port < 4; port++) {
+				syno_mv_9xxx_amp_adjust_by_port(host, 0xA75, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+				syno_mv_9xxx_amp_adjust_by_port(host, 0xAA62, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+			}
 		}
 	} else if (syno_is_hw_version(HW_DS218p)) {
 		 
@@ -982,16 +1026,6 @@ void syno_mv_9xxx_amp_adjust(struct ata_host *host, struct pci_dev *pdev)
 		syno_mv_9xxx_amp_adjust_by_port(host, 0xC962, mv_port_addr[port], mv_port_data[port], mv_sata_gen[0]);
 		syno_mv_9xxx_amp_adjust_by_port(host, 0xAA7E, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
 		syno_mv_9xxx_amp_adjust_by_port(host, 0xE7F, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
-	} else if (syno_is_hw_version(HW_DS219j)) {
-		port = 0;
-		syno_mv_9xxx_amp_adjust_by_port(host, 0xAA64, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
-		port = 1;
-		syno_mv_9xxx_amp_adjust_by_port(host, 0xD75, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
-	} else if (syno_is_hw_version(HW_DS218se)) {
-		port = 0;
-		syno_mv_9xxx_amp_adjust_by_port(host, 0xAA64, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
-		port = 1;
-		syno_mv_9xxx_amp_adjust_by_port(host, 0xD75, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
 	} else if (syno_is_hw_version(HW_FS1018)) {
 		if (0x03 == PCI_SLOT(pdev->bus->self->devfn) && (0x00 == PCI_FUNC(pdev->bus->self->devfn) || 0x01 == PCI_FUNC(pdev->bus->self->devfn))) {
 			 
@@ -1004,6 +1038,16 @@ void syno_mv_9xxx_amp_adjust(struct ata_host *host, struct pci_dev *pdev)
 			port = 3;
 			syno_mv_9xxx_amp_adjust_by_port(host, 0xF77, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
 		}
+	} else if (syno_is_hw_version(HW_DS219j)) {
+		port = 0;
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xAA64, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+		port = 1;
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xD75, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+	} else if (syno_is_hw_version(HW_DS219se)) {
+		port = 0;
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xAA64, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+		port = 1;
+		syno_mv_9xxx_amp_adjust_by_port(host, 0xD75, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
 	} else if (syno_is_hw_version(HW_RS818p) || syno_is_hw_version(HW_RS818rpp)) {
 		if (0x02 == PCI_SLOT(pdev->bus->self->devfn)) {
 			 
@@ -1018,6 +1062,20 @@ void syno_mv_9xxx_amp_adjust(struct ata_host *host, struct pci_dev *pdev)
 			port = 1;
 			syno_mv_9xxx_amp_adjust_by_port(host, 0xB75, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
 			syno_mv_9xxx_amp_adjust_by_port(host, 0xAA62, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+		}
+	} else if (syno_is_hw_version(HW_RS2818rpp)) {
+		if (0x9215 == pdev->device) {
+			 
+			for (port = 0; port < 4; port++) {
+				syno_mv_9xxx_amp_adjust_by_port(host, 0xE7F, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+				syno_mv_9xxx_amp_adjust_by_port(host, 0xAA62, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+			}
+		} else if (0x9235 == pdev->device && 0x0E == PCI_SLOT(pdev->bus->self->devfn)) {
+			 
+			for (port = 0; port < 4; port++) {
+				syno_mv_9xxx_amp_adjust_by_port(host, 0xA75, mv_port_addr[port], mv_port_data[port], mv_sata_gen[2]);
+				syno_mv_9xxx_amp_adjust_by_port(host, 0xAA62, mv_port_addr[port], mv_port_data[port], mv_sata_gen[1]);
+			}
 		}
 	}
 }
@@ -2083,39 +2141,6 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 			ap->ops->qc_defer = &ahci_syno_pmp_3x26_qc_defer;
 		}
 	}
-#endif  
-
-#ifdef MY_ABC_HERE
-	if (syno_is_hw_version(HW_RS815p) || syno_is_hw_version(HW_RS815rpp)) {
-		if (0x1b4b == pdev->vendor && 0x9170 == pdev->device) {
-			host->ports[0]->flags &= ~ATA_FLAG_NCQ;
-			host->ports[0]->flags &= ~ATA_FLAG_FPDMA_AA;
-			host->ports[1]->flags &= ~ATA_FLAG_NCQ;
-			host->ports[1]->flags &= ~ATA_FLAG_FPDMA_AA;
-		}
-	}
-#ifdef MY_DEF_HERE
-	if (syno_is_hw_version(HW_DS1517p)) {
-		if (0x1b4b == pdev->vendor && 0x9235 == pdev->device && 0x02 == PCI_SLOT(pdev->bus->self->devfn)) {
-			 
-			host->ports[0]->flags &= ~ATA_FLAG_NCQ;
-			host->ports[0]->flags &= ~ATA_FLAG_FPDMA_AA;
-		}
-		if (0x1b4b == pdev->vendor && 0x9170 == pdev->device && 0x03 == PCI_SLOT(pdev->bus->self->devfn)) {
-			host->ports[0]->flags &= ~ATA_FLAG_NCQ;
-			host->ports[0]->flags &= ~ATA_FLAG_FPDMA_AA;
-		}
-	}
-	if (syno_is_hw_version(HW_DS1817p)) {
-		if (0x1b4b == pdev->vendor && 0x9235 == pdev->device) {
-			if (NULL == pdev_cur) {
-				 
-				host->ports[0]->flags &= ~ATA_FLAG_NCQ;
-				host->ports[0]->flags &= ~ATA_FLAG_FPDMA_AA;
-			}
-		}
-	}
-#endif  
 #endif  
 
 #ifdef MY_DEF_HERE

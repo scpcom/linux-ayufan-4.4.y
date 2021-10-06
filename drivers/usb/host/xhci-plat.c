@@ -15,7 +15,7 @@
 #include "xhci.h"
 #include "xhci-mvebu.h"
 #include "xhci-rcar.h"
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 #include <linux/usb/otg.h>
 #endif  
 
@@ -34,7 +34,7 @@ static void xhci_plat_quirks(struct device *dev, struct xhci_hcd *xhci)
 {
 	 
 	xhci->quirks |= XHCI_PLAT;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 
 	if (of_property_read_bool(dev->of_node, "needs-reset-on-resume"))
 		xhci->quirks |= XHCI_RESET_ON_RESUME;
@@ -67,7 +67,7 @@ static int xhci_plat_start(struct usb_hcd *hcd)
 	return xhci_run(hcd);
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
  
 int xhci_phy_init(struct usb_hcd *hcd, const char *phy_name)
 {
@@ -216,9 +216,9 @@ static int xhci_plat_probe(struct platform_device *pdev)
 			"enabled" : "disabled");
 #endif  
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	if (of_device_is_compatible(pdev->dev.of_node,
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 				    "marvell,armada-3700-xhci")) {
 #else  
 				    "marvell,armada-3700-xhci-otg")) {
@@ -231,7 +231,7 @@ static int xhci_plat_probe(struct platform_device *pdev)
 
 		hcd->irq = irq;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		 
 		if (of_property_read_bool(pdev->dev.of_node, "separated-phys-for-usb2-usb3")) {
 			if (xhci_phy_init(hcd, "usb2")) {
@@ -251,7 +251,7 @@ static int xhci_plat_probe(struct platform_device *pdev)
 			goto disable_usb_phy;
 		}
 	} else {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		 
 		if (of_property_read_bool(pdev->dev.of_node, "separated-phys-for-usb2-usb3")) {
 			ret = usb_add_hcd_with_phy_name(hcd, irq, IRQF_SHARED, "usb2");
@@ -285,7 +285,10 @@ static int xhci_plat_probe(struct platform_device *pdev)
 				"enabled" : "disabled");
 #endif  
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+		if (HCC_MAX_PSA(xhci->hcc_params) >= 4)
+			xhci->shared_hcd->can_do_streams = 1;
+
+#if defined(MY_DEF_HERE)
  
 #else  
 		ret = usb_add_hcd(xhci->shared_hcd, irq, IRQF_SHARED);
@@ -306,6 +309,9 @@ static int xhci_plat_probe(struct platform_device *pdev)
 	dev_info(&pdev->dev, "power control %s\n", hcd->power_control_support ?
 			"enabled" : "disabled");
 #endif  
+
+	if (HCC_MAX_PSA(xhci->hcc_params) >= 4)
+		xhci->shared_hcd->can_do_streams = 1;
 
 	ret = usb_add_hcd(xhci->shared_hcd, irq, IRQF_SHARED);
 	if (ret)
@@ -339,9 +345,11 @@ static int xhci_plat_remove(struct platform_device *dev)
 	struct xhci_hcd	*xhci = hcd_to_xhci(hcd);
 	struct clk *clk = xhci->clk;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+	xhci->xhc_state |= XHCI_STATE_REMOVING;
+
+#if defined(MY_DEF_HERE)
 	if (of_device_is_compatible(dev->dev.of_node,
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 				    "marvell,armada-3700-xhci")) {
 #else  
 				    "marvell,armada-3700-xhci-otg")) {
@@ -369,7 +377,7 @@ static int xhci_plat_remove(struct platform_device *dev)
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 void xhci_plat_shutdown(struct platform_device *dev)
 {
 	xhci_plat_remove(dev);
@@ -381,11 +389,11 @@ static int xhci_plat_suspend(struct device *dev)
 {
 	struct usb_hcd	*hcd = dev_get_drvdata(dev);
 	struct xhci_hcd	*xhci = hcd_to_xhci(hcd);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	int ret;
 #endif  
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	ret = xhci_suspend(xhci, device_may_wakeup(dev));
 	if (ret) {
 		dev_err(dev, "unable to suspend xhci\n");
@@ -410,7 +418,7 @@ static int xhci_plat_resume(struct device *dev)
 {
 	struct usb_hcd	*hcd = dev_get_drvdata(dev);
 	struct xhci_hcd	*xhci = hcd_to_xhci(hcd);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	int ret;
 
 	ret = phy_init(hcd->phy);
@@ -458,8 +466,8 @@ static const struct of_device_id usb_xhci_of_match[] = {
 	{ .compatible = "marvell,armada-380-xhci"},
 	{ .compatible = "renesas,xhci-r8a7790"},
 	{ .compatible = "renesas,xhci-r8a7791"},
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
 	{ .compatible = "marvell,armada-3700-xhci"},
 #else  
 	{ .compatible = "marvell,armada-3700-xhci-otg"},
@@ -478,7 +486,7 @@ static const struct acpi_device_id usb_xhci_acpi_match[] = {
 MODULE_DEVICE_TABLE(acpi, usb_xhci_acpi_match);
 
 static struct platform_driver usb_xhci_driver = {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	.probe		= xhci_plat_probe,
 	.remove		= xhci_plat_remove,
 	.shutdown	= xhci_plat_shutdown,

@@ -36,6 +36,10 @@
 #define USB_VENDOR_GENESYS_LOGIC		0x05e3
 #define HUB_QUIRK_CHECK_PORT_AUTOSUSPEND	0x01
 
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+#define SYNO_SERIAL_EXT_HUB "syno.ext.hub"
+#endif  
+
 static DEFINE_SPINLOCK(device_state_lock);
 
 static struct workqueue_struct *hub_wq;
@@ -77,7 +81,8 @@ DEFINE_MUTEX(hub_init_mutex);
 
 static void hub_release(struct kref *kref);
 static int usb_reset_and_verify_device(struct usb_device *udev);
-#if defined (CONFIG_SYNO_USB_HAS_EXTERNAL_USB3_HUB) || defined (CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
+static int hub_port_disable(struct usb_hub *hub, int port1, int set_state);
+#if defined (MY_DEF_HERE) || defined (MY_DEF_HERE)
 static int is_syno_ext_hub(struct usb_device *udev);
 #endif  
 
@@ -693,49 +698,6 @@ static int hub_set_port_link_state(struct usb_hub *hub, int port1,
 			USB_PORT_FEAT_LINK_STATE);
 }
 
-static int hub_usb3_port_disable(struct usb_hub *hub, int port1)
-{
-	int ret;
-	int total_time;
-	u16 portchange, portstatus;
-
-	if (!hub_is_superspeed(hub->hdev))
-		return -EINVAL;
-
-	ret = hub_port_status(hub, port1, &portstatus, &portchange);
-	if (ret < 0)
-		return ret;
-
-	if ((portstatus & USB_PORT_STAT_LINK_STATE) ==
-				USB_SS_PORT_LS_RX_DETECT) {
-		dev_dbg(&hub->ports[port1 - 1]->dev,
-			 "Not disabling port; link state is RxDetect\n");
-		return ret;
-	}
-
-	ret = hub_set_port_link_state(hub, port1, USB_SS_PORT_LS_SS_DISABLED);
-	if (ret)
-		return ret;
-
-	for (total_time = 0; ; total_time += HUB_DEBOUNCE_STEP) {
-		ret = hub_port_status(hub, port1, &portstatus, &portchange);
-		if (ret < 0)
-			return ret;
-
-		if ((portstatus & USB_PORT_STAT_LINK_STATE) ==
-				USB_SS_PORT_LS_SS_DISABLED)
-			break;
-		if (total_time >= HUB_DEBOUNCE_TIMEOUT)
-			break;
-		msleep(HUB_DEBOUNCE_STEP);
-	}
-	if (total_time >= HUB_DEBOUNCE_TIMEOUT)
-		dev_warn(&hub->ports[port1 - 1]->dev,
-				"Could not disable after %d ms\n", total_time);
-
-	return hub_set_port_link_state(hub, port1, USB_SS_PORT_LS_RX_DETECT);
-}
-
 #if defined (MY_ABC_HERE)	\
 	 || defined (MY_ABC_HERE)
 #define IS_XHCI(hcd) (hcd->driver->flags & HCD_USB3)
@@ -764,20 +726,23 @@ static inline int get_vbus_gpio(struct usb_hub *hub, int port) {
 static inline int
 syno_usb_set_power(struct usb_hub *hub, int enable, int port) {
 	int usb_vbus_gpio = get_vbus_gpio(hub, port);
-
-	if (0 <= usb_vbus_gpio) {
-#ifdef MY_ABC_HERE
-		syno_pch_lpc_gpio_pin(usb_vbus_gpio, &enable, 1);
-#else  
-#ifdef CONFIG_SYNO_USB_VBUS_GPIO_POLARITY_INVERT
-	enable = !enable;
-#endif  
-		SYNO_GPIO_WRITE(usb_vbus_gpio, enable);
-#endif  
-	} else {
-		return -EINVAL;
+	int ret = -EINVAL;
+	if (0 > usb_vbus_gpio) {
+		dev_err(hub->intfdev,
+			"cannot find VBUS gpio for port %d\n", port);
+		goto END;
 	}
-	return 0;
+	 
+	enable = !(enable ^ hub->ports[port-1]->syno_vbus_gpp_pol);
+
+#ifdef MY_ABC_HERE
+	syno_pch_lpc_gpio_pin(usb_vbus_gpio, &enable, 1);
+#else  
+	SYNO_GPIO_WRITE(usb_vbus_gpio, enable);
+#endif  
+	ret = 0;
+END:
+	return ret;
 }
 
 static inline unsigned int
@@ -791,6 +756,36 @@ static inline unsigned int
 syno_get_power_on_time_ms(void) {
 	return CONFIG_SYNO_USB_POWER_ON_TIME;
 }
+
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+ 
+static int syno_usb_power_set_children(struct usb_hub *hub, int port, int enable)
+{
+	int i;
+	struct usb_device *hdev = hub->hdev;
+	extern char gSynoUsbVbusHostAddr[CONFIG_SYNO_USB_VBUS_NUM_GPIO][20];
+	extern unsigned gSynoUsbVbusGpp[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
+	extern unsigned gSynoUsbVbusGppPol[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
+	int ret = -EINVAL;
+	if (strncmp(hdev->serial, CONFIG_SYNO_USB_EXT_HUB_PARENT_SERIAL, strlen(hdev->serial))) {
+		printk(KERN_INFO "This host %s has no children hub(%s).\n",hdev->serial,
+			CONFIG_SYNO_USB_EXT_HUB_PARENT_SERIAL);
+		goto END;
+	}
+	for (i = 0; i < CONFIG_SYNO_USB_VBUS_NUM_GPIO; i++) {
+		if (!strncmp(SYNO_SERIAL_EXT_HUB, gSynoUsbVbusHostAddr[i],
+				strlen(SYNO_SERIAL_EXT_HUB))) {
+			printk(KERN_INFO "Turn %s children hub %s vbus gpio %d(%s)\n",
+				enable ? "ON" : "OFF", gSynoUsbVbusHostAddr[i], gSynoUsbVbusGpp[i],
+				gSynoUsbVbusGppPol[i] ? "ACTIVE_HIGH" : "ACTIVE_LOW");
+			SYNO_GPIO_WRITE(gSynoUsbVbusGpp[i], !(enable ^ gSynoUsbVbusGppPol[i]));
+		}
+	}
+	ret = 0;
+END:
+	return ret;
+}
+#endif  
 
 static int
 __syno_usb_power_cycle(struct usb_hub *hub, int port) {
@@ -811,6 +806,9 @@ __syno_usb_power_cycle(struct usb_hub *hub, int port) {
 		hub->ports[port - 1]->power_cycle_counter,
 		SYNO_POWER_CYCLE_TRIES,
 		power_cycle_delay_time, port);
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+	syno_usb_power_set_children(hub, port, 0);
+#endif  
 	ret = syno_usb_set_power(hub, 0, port);
 	if (0 > ret)
 		return -EINVAL;
@@ -825,6 +823,11 @@ __syno_usb_power_cycle(struct usb_hub *hub, int port) {
 	ret = syno_usb_set_power(hub, 1, port);
 	if (0 > ret)
 		return -EINVAL;
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
+	 
+	msleep(power_cycle_delay_time);
+	syno_usb_power_set_children(hub, port, 1);
+#endif  
 	msleep(power_cycle_delay_time);
 	hub->ports[port - 1]->power_cycle_counter--;
 	return 0;
@@ -849,26 +852,6 @@ syno_usb_power_cycle(struct usb_hub *hub, int port, int status) {
 	}
 }
 #endif  
-
-static int hub_port_disable(struct usb_hub *hub, int port1, int set_state)
-{
-	struct usb_port *port_dev = hub->ports[port1 - 1];
-	struct usb_device *hdev = hub->hdev;
-	int ret = 0;
-
-	if (port_dev->child && set_state)
-		usb_set_device_state(port_dev->child, USB_STATE_NOTATTACHED);
-	if (!hub->error) {
-		if (hub_is_superspeed(hub->hdev))
-			ret = hub_usb3_port_disable(hub, port1);
-		else
-			ret = usb_clear_port_feature(hdev, port1,
-					USB_PORT_FEAT_ENABLE);
-	}
-	if (ret && ret != -ENODEV)
-		dev_err(&port_dev->dev, "cannot disable (err = %d)\n", ret);
-	return ret;
-}
 
 static void hub_port_logical_disconnect(struct usb_hub *hub, int port1)
 {
@@ -1117,8 +1100,6 @@ static void hub_quiesce(struct usb_hub *hub, enum hub_quiescing_type type)
 {
 	struct usb_device *hdev = hub->hdev;
 	int i;
-
-	cancel_delayed_work_sync(&hub->init_work);
 
 	hub->quiescing = 1;
 
@@ -2029,7 +2010,7 @@ static int device_serial_match(struct usb_device *dev, struct usb_device *udev_s
 	usb_hub_for_each_child(dev, child, childdev) {
 		if (childdev && childdev != udev_search && childdev->serial) {
 
-#if defined(CONFIG_SYNO_USB_HAS_EXTERNAL_USB3_HUB) || defined(CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 			if (0 == is_syno_ext_hub(childdev)) {
 				continue;
 			}
@@ -2145,8 +2126,7 @@ int usb_new_device(struct usb_device *udev)
 		if (NULL != udev->serial) {
 			const int cProductLen = strlen(udev->product);
 
-#if defined(CONFIG_SYNO_USB_HAS_EXTERNAL_USB3_HUB) || defined(CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
-#define SYNO_SERIAL_EXT_HUB "syno.ext.hub"
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 			if (0 == is_syno_ext_hub(udev)) {
 				snprintf(udev->serial, SERIAL_LEN, "%s", SYNO_SERIAL_EXT_HUB);
 				printk("Set serial number \"%s\" for Synology External hub.\n",udev->serial);
@@ -2161,7 +2141,7 @@ int usb_new_device(struct usb_device *udev)
 					   "%02x", (seed ^= udev->product[cProductLen-i-1]));
 			}
 			udev->serial[SERIAL_LEN-1] = '\0';
-#if defined(CONFIG_SYNO_USB_HAS_EXTERNAL_USB3_HUB) || defined(CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 			}
 #endif  
 		}
@@ -3479,6 +3459,26 @@ void usb_unlocked_enable_lpm(struct usb_device *udev)
 }
 EXPORT_SYMBOL_GPL(usb_unlocked_enable_lpm);
 
+static void hub_usb3_port_prepare_disable(struct usb_hub *hub,
+					  struct usb_port *port_dev)
+{
+	struct usb_device *udev = port_dev->child;
+	int ret;
+
+	if (udev && udev->port_is_suspended && udev->do_remote_wakeup) {
+		ret = hub_set_port_link_state(hub, port_dev->portnum,
+					      USB_SS_PORT_LS_U0);
+		if (!ret) {
+			msleep(USB_RESUME_TIMEOUT);
+			ret = usb_disable_remote_wakeup(udev);
+		}
+		if (ret)
+			dev_warn(&udev->dev,
+				 "Port disable: can't disable remote wake\n");
+		udev->do_remote_wakeup = 0;
+	}
+}
+
 #else	 
 
 #define hub_suspend		NULL
@@ -3522,6 +3522,29 @@ static int hub_handle_remote_wakeup(struct usb_hub *hub, unsigned int port,
 }
 
 #endif	 
+
+static int hub_port_disable(struct usb_hub *hub, int port1, int set_state)
+{
+	struct usb_port *port_dev = hub->ports[port1 - 1];
+	struct usb_device *hdev = hub->hdev;
+	int ret = 0;
+
+	if (!hub->error) {
+		if (hub_is_superspeed(hub->hdev)) {
+			hub_usb3_port_prepare_disable(hub, port_dev);
+			ret = hub_set_port_link_state(hub, port_dev->portnum,
+						      USB_SS_PORT_LS_U3);
+		} else {
+			ret = usb_clear_port_feature(hdev, port1,
+					USB_PORT_FEAT_ENABLE);
+		}
+	}
+	if (port_dev->child && set_state)
+		usb_set_device_state(port_dev->child, USB_STATE_NOTATTACHED);
+	if (ret && ret != -ENODEV)
+		dev_err(&port_dev->dev, "cannot disable (err = %d)\n", ret);
+	return ret;
+}
 
 int hub_port_debounce(struct usb_hub *hub, int port1, bool must_be_connected)
 {
@@ -3603,12 +3626,12 @@ static int hub_set_address(struct usb_device *udev, int devnum)
 	return retval;
 }
 
-#if defined (CONFIG_SYNO_USB_HAS_EXTERNAL_USB3_HUB) || defined (CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
+#if defined (MY_DEF_HERE) || defined (MY_DEF_HERE)
 static int is_syno_ext_hub(struct usb_device *udev)
 {
 	int ret = -1;
 	if (udev->level == 1) {
-#if defined (CONFIG_SYNO_USB_HAS_EXTERNAL_USB3_HUB)
+#if defined (MY_DEF_HERE)
 		if (USB_SPEED_SUPER == udev->speed) {
 			if ((CONFIG_SYNO_USB_EXTERNAL_USB3_HUB_VID ==
 				udev->descriptor.idVendor) &&
@@ -3618,7 +3641,7 @@ static int is_syno_ext_hub(struct usb_device *udev)
 			}
 		}
 #endif  
-#if defined (CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
+#if defined (MY_DEF_HERE)
 		if (USB_SPEED_HIGH == udev->speed) {
 			if ((CONFIG_SYNO_USB_EXTERNAL_USB2_HUB_VID ==
 				udev->descriptor.idVendor) &&
@@ -3639,7 +3662,7 @@ static int check_superspeed(struct usb_hub *hub, struct usb_device *udev)
 {
 	struct usb_device *hdev = hub->hdev;
 	int retval = -EINVAL;
-#if defined (CONFIG_SYNO_USB_HAS_EXTERNAL_USB3_HUB) || defined (CONFIG_SYNO_USB_HAS_EXTERNAL_USB2_HUB)
+#if defined (MY_DEF_HERE) || defined (MY_DEF_HERE)
 	 
 	if (0 == is_syno_ext_hub(udev)) {
 		dev_info(&udev->dev, "This is Synology external hub. Skip %s\n", __func__);
@@ -3730,7 +3753,7 @@ port_speed_morph:
 			break;
 	} while (--reset_retry);
 #else  
-	 
+
 	retval = hub_port_reset(hub, port1, udev, delay, false);
 #endif  
 	if (retval < 0)		 
@@ -3738,7 +3761,6 @@ port_speed_morph:
 	 
 	retval = -ENODEV;
 
-	/* Don't allow speed changes at reset, except usb 3.0 to faster */
 	if (oldspeed != USB_SPEED_UNKNOWN && oldspeed != udev->speed &&
 	    !(oldspeed == USB_SPEED_SUPER && udev->speed > oldspeed)) {
 		dev_dbg(&udev->dev, "device reset changed speed!\n");
@@ -3905,7 +3927,7 @@ port_speed_morph:
 	if (retval)
 		goto fail;
 
-	if ((udev->speed == USB_SPEED_SUPER) &&
+	if ((udev->speed >= USB_SPEED_SUPER) &&
 			(le16_to_cpu(udev->descriptor.bcdUSB) < 0x0300)) {
 		dev_err(&udev->dev, "got a wrong device descriptor, "
 				"warm reset device\n");

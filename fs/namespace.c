@@ -506,24 +506,6 @@ struct mount *__lookup_mnt(struct vfsmount *mnt, struct dentry *dentry)
 	return NULL;
 }
 
-struct mount *__lookup_mnt_last(struct vfsmount *mnt, struct dentry *dentry)
-{
-	struct mount *p, *res = NULL;
-	p = __lookup_mnt(mnt, dentry);
-	if (!p)
-		goto out;
-	if (!(p->mnt.mnt_flags & MNT_UMOUNT))
-		res = p;
-	hlist_for_each_entry_continue(p, mnt_hash) {
-		if (&p->mnt_parent->mnt != mnt || p->mnt_mountpoint != dentry)
-			break;
-		if (!(p->mnt.mnt_flags & MNT_UMOUNT))
-			res = p;
-	}
-out:
-	return res;
-}
-
 struct vfsmount *lookup_mnt(struct path *path)
 {
 	struct mount *child_mnt;
@@ -596,20 +578,15 @@ mountpoint:
 	if (!new)
 		return ERR_PTR(-ENOMEM);
 
-
-	/* Exactly one processes may set d_mounted */
 	ret = d_set_mounted(dentry);
 
-	/* Someone else set d_mounted? */
 	if (ret == -EBUSY)
 		goto mountpoint;
 
-	/* The dentry is not available as a mountpoint? */
 	mp = ERR_PTR(ret);
 	if (ret)
 		goto done;
 
-	/* Add the new mountpoint to the hash table */
 	read_seqlock_excl(&mount_lock);
 	new->m_dentry = dentry;
 	new->m_count = 1;
@@ -724,17 +701,6 @@ void mnt_change_mountpoint(struct mount *parent, struct mountpoint *mp, struct m
 
 	put_mountpoint(old_mp);
 
-	/*
-	 * Safely avoid even the suggestion this code might sleep or
-	 * lock the mount hash by taking advantage of the knowledge that
-	 * mnt_change_mountpoint will not release the final reference
-	 * to a mountpoint.
-	 *
-	 * During mounting, the mount passed in as the parent mount will
-	 * continue to use the old mountpoint and during unmounting, the
-	 * old mountpoint will continue to exist until namespace_unlock,
-	 * which happens well after mnt_change_mountpoint.
-	 */
 	spin_lock(&old_mountpoint->d_lock);
 	old_mountpoint->d_lockref.count--;
 	spin_unlock(&old_mountpoint->d_lock);
@@ -1582,9 +1548,6 @@ static int attach_recursive_mnt(struct mount *source_mnt,
 	struct hlist_node *n;
 	int err;
 
-	/* Preallocate a mountpoint in case the new mounts need
-	 * to be tucked under other mounts.
-	 */
 	smp = get_mountpoint(source_mnt->mnt.mnt_root);
 	if (IS_ERR(smp))
 		return PTR_ERR(smp);
@@ -1831,7 +1794,7 @@ static int change_mount_flags(struct vfsmount *mnt, int ms_flags)
 }
 
 #ifdef MY_ABC_HERE
-static struct syno_mnt_options {
+struct syno_mnt_options {
 	long relatime_period;
 };
 
@@ -2887,6 +2850,9 @@ static bool fs_fully_visible(struct file_system_type *type, int *new_mnt_flags)
 		if (mnt->mnt.mnt_sb->s_iflags & SB_I_NOEXEC)
 			mnt_flags &= ~(MNT_LOCK_NOSUID | MNT_LOCK_NOEXEC);
 
+		if (mnt->mnt.mnt_sb->s_flags & MS_RDONLY)
+			mnt_flags |= MNT_LOCK_READONLY;
+
 		if ((mnt_flags & MNT_LOCK_READONLY) &&
 		    !(new_flags & MNT_READONLY))
 			continue;
@@ -2906,7 +2872,7 @@ static bool fs_fully_visible(struct file_system_type *type, int *new_mnt_flags)
 		list_for_each_entry(child, &mnt->mnt_mounts, mnt_child) {
 			struct inode *inode = child->mnt_mountpoint->d_inode;
 			 
-			if (!(mnt_flags & MNT_LOCKED))
+			if (!(child->mnt.mnt_flags & MNT_LOCKED))
 				continue;
 			 
 			if (!is_empty_dir_inode(inode))

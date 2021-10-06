@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * rt5677.c  --  RT5677 ALSA SoC audio codec driver
  *
@@ -4692,11 +4695,11 @@ static void rt5677_init_gpio(struct i2c_client *i2c)
 
 	rt5677->gpio_chip = rt5677_template_chip;
 	rt5677->gpio_chip.ngpio = RT5677_GPIO_NUM;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	rt5677->gpio_chip.parent = &i2c->dev;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	rt5677->gpio_chip.dev = &i2c->dev;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	rt5677->gpio_chip.base = -1;
 
 	ret = gpiochip_add(&rt5677->gpio_chip);

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* Copyright 2013 Google Inc. All Rights Reserved. */
 
 #include "ve3.h"
@@ -934,6 +937,11 @@ static int ve3_probe(struct platform_device *pdev)
 
     of_address_to_resource(node, 1, &res);
     iobase = of_iomap(node, 1);
+
+#ifdef MY_DEF_HERE
+    /* overwrite dts reg node 1 buffer size for mpeg2 */
+    res.end = 0x98007fff;
+#endif /* MY_DEF_HERE */
 
     s_pll_phy_register = res.start;
     s_pll_virt_register = (unsigned long)iobase;

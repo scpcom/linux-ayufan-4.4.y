@@ -29,6 +29,16 @@
 
 #include "8250.h"
 
+#ifdef MY_DEF_HERE
+#include <linux/pci_regs.h>
+#include <asm/pci-direct.h>
+
+extern char gszSynoTtyS0[50];
+extern char gszSynoTtyS1[50];
+
+static unsigned long syno_parse_ttys_port(char* s);
+#endif  
+
 static unsigned int share_irqs = SERIAL8250_SHARE_IRQS;
 
 static unsigned int nr_uarts = CONFIG_SERIAL_8250_RUNTIME_UARTS;
@@ -452,8 +462,27 @@ static void __init serial8250_isa_init_ports(void)
 	     i < ARRAY_SIZE(old_serial_port) && i < nr_uarts;
 	     i++, up++) {
 		struct uart_port *port = &up->port;
-
+#ifdef MY_DEF_HERE
+		 
+		char *str;
+		if ((0 == i) && (!strncmp(gszSynoTtyS0, "serial", 6))) {
+			str = &gszSynoTtyS0[6];
+			if (syno_parse_ttys_port(str)) {
+				port->iobase = syno_parse_ttys_port(str);
+			} else {
+				port->iobase = old_serial_port[i].port;
+			}
+		} else if ((1 == i) && (!strncmp(gszSynoTtyS1, "serial", 6))) {
+			str = &gszSynoTtyS1[6];
+			if (syno_parse_ttys_port(str)) {
+				port->iobase = syno_parse_ttys_port(str);
+			} else {
+				port->iobase = old_serial_port[i].port;
+			}
+		}
+#else  
 		port->iobase   = old_serial_port[i].port;
+#endif  
 		port->irq      = irq_canonicalize(old_serial_port[i].irq);
 		port->irqflags = old_serial_port[i].irqflags;
 		port->uartclk  = old_serial_port[i].baud_base * 16;
@@ -565,7 +594,7 @@ static int __init univ8250_console_init(void)
 	if (nr_uarts == 0)
 		return -ENODEV;
 
-#ifdef MY_DEF_HERE
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
 	return -ENODEV;
 #endif  
 
@@ -758,25 +787,144 @@ static struct platform_device *serial8250_isa_devs;
 
 static DEFINE_MUTEX(serial_mutex);
 
+#ifdef MY_DEF_HERE
+static unsigned long syno_parse_ttys_port(char* s)
+{
+	unsigned long Ret = 0;
+	char *e;
+
+	if (*s == ',')
+                ++s;
+
+	if (!strncmp(s, "0x", 2)) {
+		Ret = simple_strtoul(s, &e, 16);
+	}	
+	
+	return Ret;
+}
+
+static unsigned long syno_parse_ttys_pci(char *s)
+{
+	unsigned long Ret = 0;
+	u8 bus, slot, func;
+	u32 bar0;
+	char *e;
+
+	if (*s == ',')
+                ++s;
+
+        if (*s == 0)
+                goto End;
+        bus = (u8)simple_strtoul(s, &e, 16);
+        s = e;
+        if (*s != ':')
+                goto End;
+        ++s;
+        slot = (u8)simple_strtoul(s, &e, 16);
+        s = e;
+        if (*s != '.')
+                goto End;
+        ++s;
+        func = (u8)simple_strtoul(s, &e, 16);
+        s = e;
+
+        if (*s == ',')
+                s++;
+
+	bar0 = read_pci_config(bus, slot, func, PCI_BASE_ADDRESS_0);		
+	
+	if (bar0 & 0x01) {
+                 
+		Ret = bar0 & 0xfffffffc;
+        } else if (!(bar0 & 0x01)) {
+                 
+		Ret = bar0 & 0xfffffff0;
+        }		
+
+End:	
+	return Ret;	
+}
+#endif  
+
 static struct uart_8250_port *serial8250_find_match_or_unused(struct uart_port *port)
 {
 	int i;
 
+#ifdef MY_DEF_HERE
+	char *str;
+	switch (port->iotype) {
+		case UPIO_PORT:
+		case UPIO_HUB6:
+			if (!strncmp(gszSynoTtyS0, "serial", 6)) {
+				str = &gszSynoTtyS0[6];
+				if (port->iobase == syno_parse_ttys_port(str)) {
+					return &serial8250_ports[0];
+				}
+			}
+
+			if (!strncmp(gszSynoTtyS1, "serial", 6)){
+				str = &gszSynoTtyS1[6];
+				if (port->iobase == syno_parse_ttys_port(str)) {
+					return &serial8250_ports[1];
+				}
+			} 
+
+			break;
+		case UPIO_MEM:
+		case UPIO_MEM32:
+		case UPIO_MEM32BE:
+		case UPIO_AU:
+		case UPIO_TSI:
+			if (!strncmp(gszSynoTtyS0, "pciserial", 9)) {
+				str = &gszSynoTtyS0[9];
+				if ((virt_to_phys((volatile void *)port->mapbase) & 0xffffffff) == syno_parse_ttys_pci(str)) {
+					return &serial8250_ports[0];
+				}
+			}
+			if (!strncmp(gszSynoTtyS1, "pciserial", 9)) {
+				str = &gszSynoTtyS1[9];
+				if ((virt_to_phys((volatile void *)port->mapbase) & 0xffffffff) == syno_parse_ttys_pci(str)) {
+					return &serial8250_ports[1];
+				}
+			}
+			break;
+		default:
+			break;	
+	}
+ 
+#endif  
+	 
+#ifdef MY_DEF_HERE
+	for (i = CONFIG_SYNO_TTYS_FUN_NUM; i < nr_uarts; i++)
+#else  
 	for (i = 0; i < nr_uarts; i++)
+#endif  
 		if (uart_match_port(&serial8250_ports[i].port, port))
 			return &serial8250_ports[i];
 
 	i = port->line;
 	if (i < nr_uarts && serial8250_ports[i].port.type == PORT_UNKNOWN &&
-			serial8250_ports[i].port.iobase == 0)
+			serial8250_ports[i].port.iobase == 0
+#ifdef MY_DEF_HERE
+			&& i > (CONFIG_SYNO_TTYS_FUN_NUM - 1)
+#endif  
+	)
 		return &serial8250_ports[i];
 	 
+#ifdef MY_DEF_HERE
+	for (i = CONFIG_SYNO_TTYS_FUN_NUM; i < nr_uarts; i++)
+#else  
 	for (i = 0; i < nr_uarts; i++)
+#endif  
 		if (serial8250_ports[i].port.type == PORT_UNKNOWN &&
 		    serial8250_ports[i].port.iobase == 0)
 			return &serial8250_ports[i];
 
+#ifdef MY_DEF_HERE
+	for (i = CONFIG_SYNO_TTYS_FUN_NUM; i < nr_uarts; i++)
+#else  
 	for (i = 0; i < nr_uarts; i++)
+#endif  
 		if (serial8250_ports[i].port.type == PORT_UNKNOWN)
 			return &serial8250_ports[i];
 

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  Copyright © 2003 Rick Bronson
  *
@@ -182,11 +185,11 @@ static void atmel_nand_disable(struct atmel_nand_host *host)
  */
 static void atmel_nand_cmd_ctrl(struct mtd_info *mtd, int cmd, unsigned int ctrl)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand_chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand_chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct atmel_nand_host *host = nand_chip->priv;
 
 	if (ctrl & NAND_CTRL_CHANGE) {
@@ -209,11 +212,11 @@ static void atmel_nand_cmd_ctrl(struct mtd_info *mtd, int cmd, unsigned int ctrl
  */
 static int atmel_nand_device_ready(struct mtd_info *mtd)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand_chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand_chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct atmel_nand_host *host = nand_chip->priv;
 
 	return gpio_get_value(host->board.rdy_pin) ^
@@ -223,11 +226,11 @@ static int atmel_nand_device_ready(struct mtd_info *mtd)
 /* Set up for hardware ready pin and enable pin. */
 static int atmel_nand_set_enable_ready_pins(struct mtd_info *mtd)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct atmel_nand_host *host = chip->priv;
 	int res = 0;
 
@@ -279,11 +282,11 @@ static int atmel_nand_set_enable_ready_pins(struct mtd_info *mtd)
  */
 static void atmel_read_buf8(struct mtd_info *mtd, u8 *buf, int len)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip	*nand_chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip	*nand_chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct atmel_nand_host *host = nand_chip->priv;
 
 	if (host->nfc && host->nfc->use_nfc_sram && host->nfc->data_in_sram) {
@@ -296,11 +299,11 @@ static void atmel_read_buf8(struct mtd_info *mtd, u8 *buf, int len)
 
 static void atmel_read_buf16(struct mtd_info *mtd, u8 *buf, int len)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip	*nand_chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip	*nand_chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct atmel_nand_host *host = nand_chip->priv;
 
 	if (host->nfc && host->nfc->use_nfc_sram && host->nfc->data_in_sram) {
@@ -313,22 +316,22 @@ static void atmel_read_buf16(struct mtd_info *mtd, u8 *buf, int len)
 
 static void atmel_write_buf8(struct mtd_info *mtd, const u8 *buf, int len)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip	*nand_chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip	*nand_chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	__raw_writesb(nand_chip->IO_ADDR_W, buf, len);
 }
 
 static void atmel_write_buf16(struct mtd_info *mtd, const u8 *buf, int len)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip	*nand_chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip	*nand_chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	__raw_writesw(nand_chip->IO_ADDR_W, buf, len / 2);
 }
@@ -380,11 +383,11 @@ static int atmel_nand_dma_op(struct mtd_info *mtd, void *buf, int len,
 	dma_addr_t dma_src_addr, dma_dst_addr, phys_addr;
 	struct dma_async_tx_descriptor *tx = NULL;
 	dma_cookie_t cookie;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct atmel_nand_host *host = chip->priv;
 	void *p = buf;
 	int err = -EIO;
@@ -457,11 +460,11 @@ err_buf:
 
 static void atmel_read_buf(struct mtd_info *mtd, u8 *buf, int len)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct atmel_nand_host *host = chip->priv;
 
 	if (use_dma && len > mtd->oobsize)
@@ -477,11 +480,11 @@ static void atmel_read_buf(struct mtd_info *mtd, u8 *buf, int len)
 
 static void atmel_write_buf(struct mtd_info *mtd, const u8 *buf, int len)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct atmel_nand_host *host = chip->priv;
 
 	if (use_dma && len > mtd->oobsize)
@@ -573,11 +576,11 @@ static int pmecc_data_alloc(struct atmel_nand_host *host)
 
 static void pmecc_gen_syndrome(struct mtd_info *mtd, int sector)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand_chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand_chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct atmel_nand_host *host = nand_chip->priv;
 	int i;
 	uint32_t value;
@@ -594,11 +597,11 @@ static void pmecc_gen_syndrome(struct mtd_info *mtd, int sector)
 
 static void pmecc_substitute(struct mtd_info *mtd)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand_chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand_chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct atmel_nand_host *host = nand_chip->priv;
 	int16_t __iomem *alpha_to = host->pmecc_alpha_to;
 	int16_t __iomem *index_of = host->pmecc_index_of;
@@ -640,11 +643,11 @@ static void pmecc_substitute(struct mtd_info *mtd)
 
 static void pmecc_get_sigma(struct mtd_info *mtd)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand_chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand_chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct atmel_nand_host *host = nand_chip->priv;
 
 	int16_t *lmu = host->pmecc_lmu;
@@ -802,11 +805,11 @@ static void pmecc_get_sigma(struct mtd_info *mtd)
 
 static int pmecc_err_location(struct mtd_info *mtd)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand_chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand_chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct atmel_nand_host *host = nand_chip->priv;
 	unsigned long end_time;
 	const int cap = host->pmecc_corr_cap;
@@ -858,11 +861,11 @@ static int pmecc_err_location(struct mtd_info *mtd)
 static void pmecc_correct_data(struct mtd_info *mtd, uint8_t *buf, uint8_t *ecc,
 		int sector_num, int extra_bytes, int err_nbr)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand_chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand_chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct atmel_nand_host *host = nand_chip->priv;
 	int i = 0;
 	int byte_pos, bit_pos, sector_size, pos;
@@ -908,11 +911,11 @@ static void pmecc_correct_data(struct mtd_info *mtd, uint8_t *buf, uint8_t *ecc,
 static int pmecc_correction(struct mtd_info *mtd, u32 pmecc_stat, uint8_t *buf,
 	u8 *ecc)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand_chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand_chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct atmel_nand_host *host = nand_chip->priv;
 	int i, err_nbr;
 	uint8_t *buf_pos;
@@ -1056,11 +1059,11 @@ static int atmel_nand_pmecc_write_page(struct mtd_info *mtd,
 
 static void atmel_pmecc_core_init(struct mtd_info *mtd)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand_chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand_chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct atmel_nand_host *host = nand_chip->priv;
 	uint32_t val = 0;
 	struct nand_ecclayout *ecc_layout;
@@ -1376,11 +1379,11 @@ err:
 static int atmel_nand_calculate(struct mtd_info *mtd,
 		const u_char *dat, unsigned char *ecc_code)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand_chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand_chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct atmel_nand_host *host = nand_chip->priv;
 	unsigned int ecc_value;
 
@@ -1484,11 +1487,11 @@ static int atmel_nand_read_page(struct mtd_info *mtd, struct nand_chip *chip,
 static int atmel_nand_correct(struct mtd_info *mtd, u_char *dat,
 		u_char *read_ecc, u_char *isnull)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand_chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand_chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct atmel_nand_host *host = nand_chip->priv;
 	unsigned int ecc_status;
 	unsigned int ecc_word, ecc_bit;
@@ -1554,11 +1557,11 @@ static int atmel_nand_correct(struct mtd_info *mtd, u_char *dat,
  */
 static void atmel_nand_hwctl(struct mtd_info *mtd, int mode)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand_chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand_chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct atmel_nand_host *host = nand_chip->priv;
 
 	if (host->board.need_reset_workaround)
@@ -1851,11 +1854,11 @@ static int nfc_send_command(struct atmel_nand_host *host,
 static int nfc_device_ready(struct mtd_info *mtd)
 {
 	u32 status, mask;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand_chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand_chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct atmel_nand_host *host = nand_chip->priv;
 
 	status = nfc_read_status(host);
@@ -1871,11 +1874,11 @@ static int nfc_device_ready(struct mtd_info *mtd)
 
 static void nfc_select_chip(struct mtd_info *mtd, int chip)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *nand_chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *nand_chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct atmel_nand_host *host = nand_chip->priv;
 
 	if (chip == -1)
@@ -1887,11 +1890,11 @@ static void nfc_select_chip(struct mtd_info *mtd, int chip)
 static int nfc_make_addr(struct mtd_info *mtd, int command, int column,
 		int page_addr, unsigned int *addr1234, unsigned int *cycle0)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	int acycle = 0;
 	unsigned char addr_bytes[8];
@@ -1931,11 +1934,11 @@ static int nfc_make_addr(struct mtd_info *mtd, int command, int column,
 static void nfc_nand_command(struct mtd_info *mtd, unsigned int command,
 				int column, int page_addr)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct atmel_nand_host *host = chip->priv;
 	unsigned long timeout;
 	unsigned int nfc_addr_cmd = 0;
@@ -2122,11 +2125,11 @@ static int nfc_sram_write_page(struct mtd_info *mtd, struct nand_chip *chip,
 
 static int nfc_sram_init(struct mtd_info *mtd)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *chip = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *chip = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct atmel_nand_host *host = chip->priv;
 	int res = 0;
 
@@ -2193,11 +2196,11 @@ static int atmel_nand_probe(struct platform_device *pdev)
 	struct mtd_info *mtd;
 	struct nand_chip *nand_chip;
 	struct resource *mem;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct mtd_part_parser_data ppdata = {};
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	int res, irq;
 
 	/* Allocate memory for the device structure (and zero it) */
@@ -2221,9 +2224,9 @@ static int atmel_nand_probe(struct platform_device *pdev)
 	nand_chip = &host->nand_chip;
 	host->dev = &pdev->dev;
 	if (IS_ENABLED(CONFIG_OF) && pdev->dev.of_node) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		nand_set_flash_node(nand_chip, pdev->dev.of_node);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		/* Only when CONFIG_OF is enabled of_node can be parsed */
 		res = atmel_of_init_port(host, pdev->dev.of_node);
 		if (res)
@@ -2366,14 +2369,14 @@ static int atmel_nand_probe(struct platform_device *pdev)
 	}
 
 	mtd->name = "atmel_nand";
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	res = mtd_device_register(mtd, host->board.parts,
 				  host->board.num_parts);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	ppdata.of_node = pdev->dev.of_node;
 	res = mtd_device_parse_register(mtd, NULL, &ppdata,
 			host->board.parts, host->board.num_parts);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	if (!res)
 		return res;
 

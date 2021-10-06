@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Driver for the Atmel PIO4 controller
  *
@@ -290,11 +293,11 @@ static void atmel_gpio_irq_handler(struct irq_desc *desc)
 
 static int atmel_gpio_direction_input(struct gpio_chip *chip, unsigned offset)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct atmel_pioctrl *atmel_pioctrl = dev_get_drvdata(chip->parent);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct atmel_pioctrl *atmel_pioctrl = dev_get_drvdata(chip->dev);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct atmel_pin *pin = atmel_pioctrl->pins[offset];
 	unsigned reg;
 
@@ -309,11 +312,11 @@ static int atmel_gpio_direction_input(struct gpio_chip *chip, unsigned offset)
 
 static int atmel_gpio_get(struct gpio_chip *chip, unsigned offset)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct atmel_pioctrl *atmel_pioctrl = dev_get_drvdata(chip->parent);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct atmel_pioctrl *atmel_pioctrl = dev_get_drvdata(chip->dev);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct atmel_pin *pin = atmel_pioctrl->pins[offset];
 	unsigned reg;
 
@@ -325,11 +328,11 @@ static int atmel_gpio_get(struct gpio_chip *chip, unsigned offset)
 static int atmel_gpio_direction_output(struct gpio_chip *chip, unsigned offset,
 				       int value)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct atmel_pioctrl *atmel_pioctrl = dev_get_drvdata(chip->parent);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct atmel_pioctrl *atmel_pioctrl = dev_get_drvdata(chip->dev);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct atmel_pin *pin = atmel_pioctrl->pins[offset];
 	unsigned reg;
 
@@ -348,11 +351,11 @@ static int atmel_gpio_direction_output(struct gpio_chip *chip, unsigned offset,
 
 static void atmel_gpio_set(struct gpio_chip *chip, unsigned offset, int val)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct atmel_pioctrl *atmel_pioctrl = dev_get_drvdata(chip->parent);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct atmel_pioctrl *atmel_pioctrl = dev_get_drvdata(chip->dev);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct atmel_pin *pin = atmel_pioctrl->pins[offset];
 
 	atmel_gpio_write(atmel_pioctrl, pin->bank,
@@ -362,11 +365,11 @@ static void atmel_gpio_set(struct gpio_chip *chip, unsigned offset, int val)
 
 static int atmel_gpio_to_irq(struct gpio_chip *chip, unsigned offset)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct atmel_pioctrl *atmel_pioctrl = dev_get_drvdata(chip->parent);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct atmel_pioctrl *atmel_pioctrl = dev_get_drvdata(chip->dev);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	return irq_find_mapping(atmel_pioctrl->irq_domain, offset);
 }
@@ -991,11 +994,11 @@ static int atmel_pinctrl_probe(struct platform_device *pdev)
 	atmel_pioctrl->gpio_chip->of_node = dev->of_node;
 	atmel_pioctrl->gpio_chip->ngpio = atmel_pioctrl->npins;
 	atmel_pioctrl->gpio_chip->label = dev_name(dev);
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	atmel_pioctrl->gpio_chip->parent = dev;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	atmel_pioctrl->gpio_chip->dev = dev;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	atmel_pioctrl->gpio_chip->names = atmel_pioctrl->group_names;
 
 	atmel_pioctrl->pm_wakeup_sources = devm_kzalloc(dev,

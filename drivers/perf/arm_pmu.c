@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #undef DEBUG
 
 /*
@@ -13,9 +16,9 @@
 
 #include <linux/bitmap.h>
 #include <linux/cpumask.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 #include <linux/cpu_pm.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 #include <linux/export.h>
 #include <linux/kernel.h>
 #include <linux/of_device.h>
@@ -554,9 +557,9 @@ static void armpmu_init(struct arm_pmu *armpmu)
 	};
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 int armpmu_register(struct arm_pmu *armpmu, int type)
 {
 	armpmu_init(armpmu);
@@ -564,7 +567,7 @@ int armpmu_register(struct arm_pmu *armpmu, int type)
 			armpmu->name, armpmu->num_events);
 	return perf_pmu_register(&armpmu->pmu, armpmu->name, type);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 /* Set at runtime when we know what CPU type we are. */
 static struct arm_pmu *__oprofile_cpu_pmu;
@@ -725,7 +728,7 @@ static int cpu_pmu_notify(struct notifier_block *b, unsigned long action,
 	return NOTIFY_OK;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_CPU_PM
 static void cpu_pm_pmu_setup(struct arm_pmu *armpmu, unsigned long cmd)
 {
@@ -823,7 +826,7 @@ static void cpu_pm_pmu_unregister(struct arm_pmu *cpu_pmu)
 static inline int cpu_pm_pmu_register(struct arm_pmu *cpu_pmu) { return 0; }
 static inline void cpu_pm_pmu_unregister(struct arm_pmu *cpu_pmu) { }
 #endif
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 static int cpu_pmu_init(struct arm_pmu *cpu_pmu)
 {
@@ -840,11 +843,11 @@ static int cpu_pmu_init(struct arm_pmu *cpu_pmu)
 	if (err)
 		goto out_hw_events;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	err = cpu_pm_pmu_register(cpu_pmu);
 	if (err)
 		goto out_unregister;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	for_each_possible_cpu(cpu) {
 		struct pmu_hw_events *events = per_cpu_ptr(cpu_hw_events, cpu);
@@ -867,10 +870,10 @@ static int cpu_pmu_init(struct arm_pmu *cpu_pmu)
 
 	return 0;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 out_unregister:
 	unregister_cpu_notifier(&cpu_pmu->hotplug_nb);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 out_hw_events:
 	free_percpu(cpu_hw_events);
 	return err;
@@ -878,9 +881,9 @@ out_hw_events:
 
 static void cpu_pmu_destroy(struct arm_pmu *cpu_pmu)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	cpu_pm_pmu_unregister(cpu_pmu);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	unregister_cpu_notifier(&cpu_pmu->hotplug_nb);
 	free_percpu(cpu_pmu->hw_events);
 }
@@ -1008,9 +1011,9 @@ int arm_pmu_device_probe(struct platform_device *pdev,
 		return -ENOMEM;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	armpmu_init(pmu);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	if (!__oprofile_cpu_pmu)
 		__oprofile_cpu_pmu = pmu;
@@ -1020,7 +1023,7 @@ int arm_pmu_device_probe(struct platform_device *pdev,
 	if (node && (of_id = of_match_node(of_table, pdev->dev.of_node))) {
 		init_fn = of_id->data;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		pmu->secure_access = of_property_read_bool(pdev->dev.of_node,
 							   "secure-reg-access");
 
@@ -1029,7 +1032,7 @@ int arm_pmu_device_probe(struct platform_device *pdev,
 			pr_warn("ignoring \"secure-reg-access\" property for arm64\n");
 			pmu->secure_access = false;
 		}
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 		ret = of_pmu_irq_cfg(pmu);
 		if (!ret)
@@ -1040,11 +1043,11 @@ int arm_pmu_device_probe(struct platform_device *pdev,
 	}
 
 	if (ret) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		pr_info("%s: failed to probe PMU!\n", of_node_full_name(node));
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		pr_info("failed to probe PMU!\n");
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		goto out_free;
 	}
 
@@ -1052,30 +1055,30 @@ int arm_pmu_device_probe(struct platform_device *pdev,
 	if (ret)
 		goto out_free;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	ret = perf_pmu_register(&pmu->pmu, pmu->name, -1);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	ret = armpmu_register(pmu, -1);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	if (ret)
 		goto out_destroy;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	pr_info("enabled with %s PMU driver, %d counters available\n",
 			pmu->name, pmu->num_events);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	return 0;
 
 out_destroy:
 	cpu_pmu_destroy(pmu);
 out_free:
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	pr_info("%s: failed to register PMU devices!\n",
 		of_node_full_name(node));
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	pr_info("failed to register PMU devices!\n");
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	kfree(pmu);
 	return ret;
 }

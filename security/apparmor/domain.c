@@ -626,12 +626,8 @@ int aa_change_hat(const char *hats[], int count, u64 token, bool permtest)
 	/* released below */
 	cred = get_current_cred();
 	cxt = cred_cxt(cred);
-#ifdef MY_ABC_HERE
-	profile = aa_get_newest_cred_profile(cred);
-#else
-	profile = aa_cred_profile(cred);
-#endif
-	previous_profile = cxt->previous;
+	profile = aa_get_newest_profile(aa_cred_profile(cred));
+	previous_profile = aa_get_newest_profile(cxt->previous);
 
 	if (unconfined(profile)) {
 		info = "unconfined";
@@ -726,9 +722,6 @@ audit:
 
 out:
 	aa_put_profile(hat);
-#ifdef MY_ABC_HERE
-	aa_put_profile(profile);
-#endif
 	kfree(name);
 	aa_put_profile(profile);
 	aa_put_profile(previous_profile);

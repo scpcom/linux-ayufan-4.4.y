@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Marvell Armada 370/XP thermal sensor driver
  *
@@ -23,15 +26,15 @@
 #include <linux/platform_device.h>
 #include <linux/of_device.h>
 #include <linux/thermal.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 #include <linux/interrupt.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 #define THERMAL_VALID_MASK		0x1
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 #define MCELSIUS(temp)			((temp) * 1000)
 #define CELSIUS(temp)			((temp) / 1000)
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 /* Thermal Manager Control and Status Register */
 #define PMU_TDC0_SW_RST_MASK		(0x1 << 1)
@@ -47,7 +50,7 @@
 #define A375_READOUT_INVERT		BIT(15)
 #define A375_HW_RESETn			BIT(8)
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 #define TSEN_HW_RESET			BIT(8)
 #define TSEN_CONTROL_MSB_OFFSET		4
 #define TSEN_TSEN_TC_TRIM_MASK		0x7
@@ -76,9 +79,9 @@
 #define EXT_TSEN_THRESH_OFFSET		3
 #define EXT_TSEN_THRESH_HYST_MASK	0x3
 #define EXT_TSEN_THRESH_HYST_OFFSET	19
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 #define A380_HW_RESET			BIT(8)
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 struct armada_thermal_data;
 
@@ -86,13 +89,13 @@ struct armada_thermal_data;
 struct armada_thermal_priv {
 	void __iomem *sensor;
 	void __iomem *control;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	void __iomem *dfx;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct armada_thermal_data *data;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct platform_device *pdev;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 };
 
 struct armada_thermal_data {
@@ -103,10 +106,10 @@ struct armada_thermal_data {
 	/* Test for a valid sensor value (optional) */
 	bool (*is_valid)(struct armada_thermal_priv *);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	/* overheat interrupt handler */
 	irqreturn_t (*temp_irq_handler)(int irq, void *data);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	/* Formula coefficients: temp = (b + m * reg) / div */
 	unsigned long coef_b;
@@ -119,23 +122,23 @@ struct armada_thermal_data {
 	unsigned int temp_mask;
 	unsigned int is_valid_shift;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	/* DFX interrupt support (optional) */
 	bool dfx_interrupt;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	/* for handling non-DT based thermal zones */
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	struct thermal_zone_device_ops *ops;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
 
 	/* for handling DT based thermal zones */
 	struct thermal_zone_of_device_ops *ops_of;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 };
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 inline unsigned int tsen_thresh_val_calc(unsigned int celsius_temp,
 					 struct armada_thermal_data *data)
 {
@@ -281,7 +284,7 @@ static void ap806_temp_set_threshold(struct platform_device *pdev,
 		ap806_thresh_celsius_calc(temp, -hyst, data),
 		ap806_thresh_celsius_calc(temp, hyst, data));
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 static void armadaxp_init_sensor(struct platform_device *pdev,
 				 struct armada_thermal_priv *priv)
@@ -347,7 +350,7 @@ static void armada375_init_sensor(struct platform_device *pdev,
 	mdelay(50);
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static void tsen_init_sensor(struct armada_thermal_priv *priv)
 {
 	unsigned long reg = readl_relaxed(priv->control +
@@ -444,7 +447,7 @@ static void cp110_init_sensor(struct platform_device *pdev,
 	reg |= TSEN_INT_SUM_MASK;
 	writel(reg, priv->dfx + 0x4);
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static void armada380_init_sensor(struct platform_device *pdev,
 				  struct armada_thermal_priv *priv)
 {
@@ -457,7 +460,7 @@ static void armada380_init_sensor(struct platform_device *pdev,
 		mdelay(10);
 	}
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 static bool armada_is_valid(struct armada_thermal_priv *priv)
 {
@@ -471,11 +474,11 @@ static int armada_get_temp(struct thermal_zone_device *thermal,
 {
 	struct armada_thermal_priv *priv = thermal->devdata;
 	unsigned long reg;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	long m, b, div;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	unsigned long m, b, div;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Valid check */
 	if (priv->data->is_valid && !priv->data->is_valid(priv)) {
@@ -493,43 +496,43 @@ static int armada_get_temp(struct thermal_zone_device *thermal,
 	div = priv->data->coef_div;
 
 	if (priv->data->inverted)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		*temp = ((m * (long)reg) - b) / div;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		*temp = ((m * reg) - b) / div;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	else
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		*temp = (b - (m * (long)reg)) / div;
 
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		*temp = (b - (m * reg)) / div;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
 static int armada_ap806_get_temp(void *thermal_priv, int *temp)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 static int armada_ap806_get_temp(struct thermal_zone_device *thermal, int *temp)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	struct armada_thermal_priv *priv = (struct armada_thermal_priv *)thermal_priv;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	struct armada_thermal_priv *priv = thermal->devdata;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	unsigned long reg;
 	unsigned long m, b, div;
 
 	/* Valid check */
 	if (priv->data->is_valid && !priv->data->is_valid(priv)) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 		dev_err(&(priv->pdev->dev),
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 		dev_err(&thermal->device,
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 			"Temperature sensor reading not valid\n");
 		return -EIO;
 	}
@@ -557,11 +560,11 @@ static int armada_cp110_get_temp(struct thermal_zone_device *thermal, int *temp)
 {
 	struct armada_thermal_priv *priv = thermal->devdata;
 	unsigned long reg;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	long m, b, div;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	unsigned long m, b, div;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Valid check */
 	if (priv->data->is_valid && !priv->data->is_valid(priv)) {
@@ -578,11 +581,11 @@ static int armada_cp110_get_temp(struct thermal_zone_device *thermal, int *temp)
 	m = priv->data->coef_m;
 	div = priv->data->coef_div;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	*temp = ((m * (long)reg) - b) / div;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	*temp = ((m * reg) - b) / div;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	return 0;
 }
@@ -591,18 +594,18 @@ static struct thermal_zone_device_ops armada_ops = {
 	.get_temp = armada_get_temp,
 };
 
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static struct thermal_zone_device_ops ops = {
 	.get_temp = armada_get_temp,
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
 static struct thermal_zone_of_device_ops armada_ap806_ops = {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 static struct thermal_zone_device_ops armada_ap806_ops = {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	.get_temp = armada_ap806_get_temp,
 };
 
@@ -685,7 +688,7 @@ irqreturn_t cp110_temp_irq_handler(int irq, void *data)
 
 	return IRQ_HANDLED;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 static const struct armada_thermal_data armadaxp_data = {
 	.init_sensor = armadaxp_init_sensor,
@@ -694,9 +697,9 @@ static const struct armada_thermal_data armadaxp_data = {
 	.coef_b = 3153000000UL,
 	.coef_m = 10000000UL,
 	.coef_div = 13825,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	.ops = &armada_ops,
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 };
 
 static const struct armada_thermal_data armada370_data = {
@@ -708,9 +711,9 @@ static const struct armada_thermal_data armada370_data = {
 	.coef_b = 3153000000UL,
 	.coef_m = 10000000UL,
 	.coef_div = 13825,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	.ops = &armada_ops,
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 };
 
 static const struct armada_thermal_data armada375_data = {
@@ -722,17 +725,17 @@ static const struct armada_thermal_data armada375_data = {
 	.coef_b = 3171900000UL,
 	.coef_m = 10000000UL,
 	.coef_div = 13616,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	.ops = &armada_ops,
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 };
 
 static const struct armada_thermal_data armada380_data = {
 	.is_valid = armada_is_valid,
 	.init_sensor = armada380_init_sensor,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	.temp_irq_handler = a38x_temp_irq_handler,
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	.is_valid_shift = 10,
 	.temp_shift = 0,
 	.temp_mask = 0x3ff,
@@ -740,13 +743,13 @@ static const struct armada_thermal_data armada380_data = {
 	.coef_m = 2000096UL,
 	.coef_div = 4201,
 	.inverted = true,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	.dfx_interrupt = 1,
 	.ops = &armada_ops,
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 };
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static const struct armada_thermal_data armada_ap806_data = {
 	.is_valid = armada_is_valid,
 	.init_sensor = armada_ap806_init_sensor,
@@ -759,11 +762,11 @@ static const struct armada_thermal_data armada_ap806_data = {
 	.coef_div = 1,
 	.inverted = true,
 	.dfx_interrupt = 1,
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	.ops_of = &armada_ap806_ops,
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	.ops = &armada_ap806_ops,
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 };
 
 static const struct armada_thermal_data armada_cp110_data = {
@@ -780,7 +783,7 @@ static const struct armada_thermal_data armada_cp110_data = {
 	.dfx_interrupt = 1,
 	.ops = &armada_cp110_ops,
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 static const struct of_device_id armada_thermal_id_table[] = {
 	{
@@ -800,7 +803,7 @@ static const struct of_device_id armada_thermal_id_table[] = {
 		.data       = &armada380_data,
 	},
 	{
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		.compatible = "marvell,armada-ap806-thermal",
 		.data       = &armada_ap806_data,
 	},
@@ -809,7 +812,7 @@ static const struct of_device_id armada_thermal_id_table[] = {
 		.data	    = &armada_cp110_data,
 	},
 	{
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		/* sentinel */
 	},
 };
@@ -821,9 +824,9 @@ static int armada_thermal_probe(struct platform_device *pdev)
 	const struct of_device_id *match;
 	struct armada_thermal_priv *priv;
 	struct resource *res;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	int irq;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	match = of_match_device(armada_thermal_id_table, &pdev->dev);
 	if (!match)
@@ -845,7 +848,7 @@ static int armada_thermal_probe(struct platform_device *pdev)
 
 	priv->data = (struct armada_thermal_data *)match->data;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	if (priv->data->dfx_interrupt) {
 		/* DFX interrupts are supported by some of the devices */
 		res = platform_get_resource(pdev, IORESOURCE_MEM, 2);
@@ -857,7 +860,7 @@ static int armada_thermal_probe(struct platform_device *pdev)
 	/* Init sensor */
 	priv->data->init_sensor(pdev, priv);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	/*
 	 * AP806 thermal sensor registers as a sensor of a Device Tree thermal zone,
 	 * so it's binded differently from rest of thermal sensors supported by this driver.
@@ -868,16 +871,16 @@ static int armada_thermal_probe(struct platform_device *pdev)
 	else
 		thermal = thermal_zone_device_register("armada_thermal", 0, 0,
 						       priv, priv->data->ops, NULL, 0, 0);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	thermal = thermal_zone_device_register("armada_thermal", 0, 0,
 					       priv, priv->data->ops, NULL, 0, 0);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
+#else /* MY_DEF_HERE */
 	priv->data->init_sensor(pdev, priv);
 
 	thermal = thermal_zone_device_register("armada_thermal", 0, 0,
 					       priv, &ops, NULL, 0, 0);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	if (IS_ERR(thermal)) {
 		dev_err(&pdev->dev,
@@ -885,7 +888,7 @@ static int armada_thermal_probe(struct platform_device *pdev)
 		return PTR_ERR(thermal);
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	/* Register device in thermal data structure */
 	priv->pdev = pdev;
 
@@ -902,7 +905,7 @@ static int armada_thermal_probe(struct platform_device *pdev)
 	} else {
 		pr_debug("armada_thermal: no irq was assigned\n");
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	platform_set_drvdata(pdev, thermal);
 
@@ -919,7 +922,7 @@ static int armada_thermal_exit(struct platform_device *pdev)
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int armada_thermal_resume(struct platform_device *pdev)
 {
 	struct thermal_zone_device *thermal =
@@ -930,16 +933,16 @@ static int armada_thermal_resume(struct platform_device *pdev)
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 static struct platform_driver armada_thermal_driver = {
 	.probe = armada_thermal_probe,
 	.remove = armada_thermal_exit,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_PM
 	.resume = armada_thermal_resume,
 #endif
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	.driver = {
 		.name = "armada_thermal",
 		.of_match_table = armada_thermal_id_table,
@@ -949,9 +952,9 @@ static struct platform_driver armada_thermal_driver = {
 module_platform_driver(armada_thermal_driver);
 
 MODULE_AUTHOR("Ezequiel Garcia <ezequiel.garcia@free-electrons.com>");
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 MODULE_DESCRIPTION("Armada 370/380/XP/70x0/80x0 thermal driver");
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 MODULE_DESCRIPTION("Armada 370/XP thermal driver");
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 MODULE_LICENSE("GPL v2");

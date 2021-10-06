@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Marvell MVEBU pinctrl driver
  *
@@ -173,13 +176,13 @@ struct mvebu_pinctrl_soc_info {
 		.npins = _npins,				\
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 int default_mpp_ctrl_get(void __iomem *base, unsigned int pid,
 				       unsigned long *config);
 int default_mpp_ctrl_set(void __iomem *base, unsigned int pid,
 				       unsigned long config);
 int mvebu_pinctrl_set_mpps(unsigned int npins);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 #define MVEBU_MPPS_PER_REG	8
 #define MVEBU_MPP_BITS		4
 #define MVEBU_MPP_MASK		0xf
@@ -208,7 +211,7 @@ static inline int default_mpp_ctrl_set(void __iomem *base, unsigned int pid,
 	return 0;
 }
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 int mvebu_pinctrl_probe(struct platform_device *pdev);
 int mvebu_pinctrl_remove(struct platform_device *pdev);
 

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 #include <linux/efi.h>
 #include <linux/module.h>
 #include <linux/pstore.h>
@@ -394,8 +397,11 @@ static __init int efivars_pstore_init(void)
 static __exit void efivars_pstore_exit(void)
 {
 }
-
+#ifdef MY_DEF_HERE
+subsys_initcall(efivars_pstore_init);
+#else
 module_init(efivars_pstore_init);
+#endif /* MY_DEF_HERE */
 module_exit(efivars_pstore_exit);
 
 MODULE_DESCRIPTION("EFI variable backend for pstore");

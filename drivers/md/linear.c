@@ -31,24 +31,19 @@ static inline struct dev_info *which_dev(struct mddev *mddev, sector_t sector)
 	return conf->disks + lo;
 }
 
-/*
- * In linear_congested() conf->raid_disks is used as a copy of
- * mddev->raid_disks to iterate conf->disks[], because conf->raid_disks
- * and conf->disks[] are created in linear_conf(), they are always
- * consitent with each other, but mddev->raid_disks does not.
- */
 static int linear_congested(struct mddev *mddev, int bits)
 {
 	struct linear_conf *conf;
 	int i, ret = 0;
 
-	conf = mddev->private;
+	rcu_read_lock();
+	conf = rcu_dereference(mddev->private);
 #ifdef MY_ABC_HERE
 	if (mddev->degraded) {
 		return ret;
 	}
 
-	for (i = 0; i < mddev->raid_disks && !ret ; i++) {
+	for (i = 0; i < conf->raid_disks && !ret ; i++) {
 		struct md_rdev *rdev = rcu_dereference(conf->disks[i].rdev);
 		struct request_queue *q = NULL;
 
@@ -60,7 +55,7 @@ static int linear_congested(struct mddev *mddev, int bits)
 		ret |= bdi_congested(&q->backing_dev_info, bits);
 	}
 #else  
-	for (i = 0; i < mddev->raid_disks && !ret ; i++) {
+	for (i = 0; i < conf->raid_disks && !ret ; i++) {
 		struct request_queue *q = bdev_get_queue(conf->disks[i].rdev->bdev);
 		ret |= bdi_congested(&q->backing_dev_info, bits);
 	}
@@ -154,17 +149,6 @@ static struct linear_conf *linear_conf(struct mddev *mddev, int raid_disks)
 			conf->disks[i-1].end_sector +
 			conf->disks[i].rdev->sectors;
 
-	/*
-	 * conf->raid_disks is copy of mddev->raid_disks. The reason to
-	 * keep a copy of mddev->raid_disks in struct linear_conf is,
-	 * mddev->raid_disks may not be consistent with pointers number of
-	 * conf->disks[] when it is updated in linear_add() and used to
-	 * iterate old conf->disks[] earray in linear_congested().
-	 * Here conf->raid_disks is always consitent with number of
-	 * pointers in conf->disks[] array, and mddev->private is updated
-	 * with rcu_assign_pointer() in linear_addr(), such race can be
-	 * avoided.
-	 */
 	conf->raid_disks = raid_disks;
 
 	return conf;
@@ -215,12 +199,6 @@ static int linear_add(struct mddev *mddev, struct md_rdev *rdev)
 	if (!newconf)
 		return -ENOMEM;
 
-	/* newconf->raid_disks already keeps a copy of * the increased
-	 * value of mddev->raid_disks, WARN_ONCE() is just used to make
-	 * sure of this. It is possible that oldconf is still referenced
-	 * in linear_congested(), therefore kfree_rcu() is used to free
-	 * oldconf until no one uses it anymore.
-	 */
 	mddev_suspend(mddev);
 	oldconf = rcu_dereference(mddev->private);
 	mddev->raid_disks++;

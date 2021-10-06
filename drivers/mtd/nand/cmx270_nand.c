@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/drivers/mtd/nand/cmx270-nand.c
  *
@@ -53,11 +56,11 @@ static struct mtd_partition partition_info[] = {
 
 static u_char cmx270_read_byte(struct mtd_info *mtd)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *this = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *this = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	return (readl(this->IO_ADDR_R) >> 16);
 }
@@ -65,11 +68,11 @@ static u_char cmx270_read_byte(struct mtd_info *mtd)
 static void cmx270_write_buf(struct mtd_info *mtd, const u_char *buf, int len)
 {
 	int i;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *this = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *this = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	for (i=0; i<len; i++)
 		writel((*buf++ << 16), this->IO_ADDR_W);
@@ -78,11 +81,11 @@ static void cmx270_write_buf(struct mtd_info *mtd, const u_char *buf, int len)
 static void cmx270_read_buf(struct mtd_info *mtd, u_char *buf, int len)
 {
 	int i;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *this = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip *this = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	for (i=0; i<len; i++)
 		*buf++ = readl(this->IO_ADDR_R) >> 16;
@@ -106,11 +109,11 @@ static void nand_cs_off(void)
 static void cmx270_hwcontrol(struct mtd_info *mtd, int dat,
 			     unsigned int ctrl)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct nand_chip *this = mtd_to_nand(mtd);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct nand_chip* this = mtd->priv;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	unsigned int nandaddr = (unsigned int)this->IO_ADDR_W;
 
 	dsb();

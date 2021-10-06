@@ -2010,7 +2010,8 @@ static int make_indexed_dir(handle_t *handle, struct ext4_filename *fname,
 	retval = add_dirent_to_buf(handle, fname, dir, inode, de, bh2);
 out_frames:
 	 
-	ext4_mark_inode_dirty(handle, dir);
+	if (retval)
+		ext4_mark_inode_dirty(handle, dir);
 	dx_release(frames);
 	brelse(bh2);
 	return retval;

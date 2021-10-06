@@ -246,6 +246,10 @@ struct mddev {
 
 	unsigned long			recovery;
 	 
+#ifdef MY_ABC_HERE
+	 
+	int     reshape_interrupt;
+#endif  
 	int				recovery_disabled;
 
 	int				in_sync;	 

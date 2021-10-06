@@ -27,7 +27,6 @@
 #include <asm/ps3stor.h>
 #include <asm/firmware.h>
 
-
 #define DEVICE_NAME		"ps3disk"
 
 #define BOUNCE_SIZE		(64*1024)
@@ -35,9 +34,7 @@
 #define PS3DISK_MAX_DISKS	16
 #define PS3DISK_MINORS		16
 
-
 #define PS3DISK_NAME		"ps3d%c"
-
 
 struct ps3disk_private {
 	spinlock_t lock;		/* Request queue spinlock */
@@ -48,7 +45,6 @@ struct ps3disk_private {
 	u64 raw_capacity;
 	unsigned char model[ATA_ID_PROD_LEN+1];
 };
-
 
 #define LV1_STORAGE_SEND_ATA_COMMAND	(2)
 #define LV1_STORAGE_ATA_HDDOUT		(0x23)
@@ -83,11 +79,9 @@ enum lv1_ata_in_out {
 
 static int ps3disk_major;
 
-
 static const struct block_device_operations ps3disk_fops = {
 	.owner		= THIS_MODULE,
 };
-
 
 static void ps3disk_scatter_gather(struct ps3_storage_device *dev,
 				   struct request *req, int gather)
@@ -299,7 +293,6 @@ static int ps3disk_sync_cache(struct ps3_storage_device *dev)
 	return 0;
 }
 
-
 /* ATA helpers copied from drivers/ata/libata-core.c */
 
 static void swap_buf_le16(u16 *buf, unsigned int buf_words)
@@ -468,7 +461,7 @@ static int ps3disk_probe(struct ps3_system_bus_device *_dev)
 	blk_queue_dma_alignment(queue, dev->blk_size-1);
 	blk_queue_logical_block_size(queue, dev->blk_size);
 
-	blk_queue_flush(queue, REQ_FLUSH);
+	blk_queue_write_cache(queue, true, false);
 
 	blk_queue_max_segments(queue, -1);
 	blk_queue_max_segment_size(queue, dev->bounce_size);
@@ -547,7 +540,6 @@ static struct ps3_system_bus_driver ps3disk = {
 	.remove		= ps3disk_remove,
 	.shutdown	= ps3disk_remove,
 };
-
 
 static int __init ps3disk_init(void)
 {

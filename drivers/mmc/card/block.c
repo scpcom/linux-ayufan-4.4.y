@@ -1767,13 +1767,8 @@ static void mmc_blk_packed_hdr_wrq_prep(struct mmc_queue_req *mqrq,
 
 	packed_cmd_hdr = packed->cmd_hdr;
 	memset(packed_cmd_hdr, 0, sizeof(packed->cmd_hdr));
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 	packed_cmd_hdr[0] = cpu_to_le32((packed->nr_entries << 16) |
 		(PACKED_CMD_WR << 8) | PACKED_CMD_VER);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
-	packed_cmd_hdr[0] = (packed->nr_entries << 16) |
-		(PACKED_CMD_WR << 8) | PACKED_CMD_VER;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	hdr_blocks = mmc_large_sector(card) ? 8 : 1;
 
 	/*
@@ -1786,31 +1781,15 @@ static void mmc_blk_packed_hdr_wrq_prep(struct mmc_queue_req *mqrq,
 			(rq_data_dir(prq) == WRITE) &&
 			((brq->data.blocks * brq->data.blksz) >=
 			 card->ext_csd.data_tag_unit_size);
-
 		/* Argument of CMD23 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		packed_cmd_hdr[(i * 2)] = cpu_to_le32(
 			(do_rel_wr ? MMC_CMD23_ARG_REL_WR : 0) |
 			(do_data_tag ? MMC_CMD23_ARG_TAG_REQ : 0) |
 			blk_rq_sectors(prq));
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
-		packed_cmd_hdr[(i * 2)] =
-			(do_rel_wr ? MMC_CMD23_ARG_REL_WR : 0) |
-			(do_data_tag ? MMC_CMD23_ARG_TAG_REQ : 0) |
-			blk_rq_sectors(prq);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
-
 		/* Argument of CMD18 or CMD25 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
 		packed_cmd_hdr[((i * 2)) + 1] = cpu_to_le32(
 			mmc_card_blockaddr(card) ?
 			blk_rq_pos(prq) : blk_rq_pos(prq) << 9);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
-		packed_cmd_hdr[((i * 2)) + 1] =
-			mmc_card_blockaddr(card) ?
-			blk_rq_pos(prq) : blk_rq_pos(prq) << 9;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
-
 		packed->blocks += blk_rq_sectors(prq);
 		i++;
 	}
@@ -2312,7 +2291,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
 	    ((card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN) ||
 	     card->ext_csd.rel_sectors)) {
 		md->flags |= MMC_BLK_REL_WR;
-		blk_queue_flush(md->queue.queue, REQ_FLUSH | REQ_FUA);
+		blk_queue_write_cache(md->queue.queue, true, true);
 	}
 
 	if (mmc_card_mmc(card) &&

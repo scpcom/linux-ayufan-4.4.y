@@ -19,16 +19,20 @@
 #endif  
 #ifdef MY_DEF_HERE
 #include <linux/gpio.h>
+#include <linux/delay.h>
 #ifdef MY_ABC_HERE
 extern u32 syno_pch_lpc_gpio_pin(int pin, int *pValue, int isWrite);
-#elif defined(MY_DEF_HERE)
-#include <linux/syno_gpio.h>
-extern SYNO_GPIO syno_gpio;
-extern void SYNO_GPIO_WRITE(int pin, int pValue);
 #endif  
 extern char gSynoUsbVbusHostAddr[CONFIG_SYNO_USB_VBUS_NUM_GPIO][13];
 extern int gSynoUsbVbusPort[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
 extern unsigned gSynoUsbVbusGpp[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
+extern unsigned gSynoUsbVbusGppPol[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
+#endif  
+
+#ifdef MY_DEF_HERE
+#include <linux/syno_gpio.h>
+extern SYNO_GPIO syno_gpio;
+extern void SYNO_GPIO_WRITE(int pin, int pValue);
 #endif  
 
 int C_A_D = 1;
@@ -64,16 +68,21 @@ static void syno_turnoff_all_usb_vbus_gpio(void)
         for (i = 0; i < CONFIG_SYNO_USB_VBUS_NUM_GPIO; i++) {
                 if (0 != gSynoUsbVbusGpp[i]) {
 #ifdef MY_ABC_HERE
+                        gpio_off_value = !(gpio_off_value ^ gSynoUsbVbusGppPol[i]);
                         syno_pch_lpc_gpio_pin(gSynoUsbVbusGpp[i],
                                               &gpio_off_value, 1);
 #elif defined(MY_DEF_HERE)
                         SYNO_GPIO_WRITE(gSynoUsbVbusGpp[i],
-                                gpio_off_value);
+                                !(gpio_off_value ^ gSynoUsbVbusGppPol[i]));
 #endif  
-                        printk(KERN_INFO "Turned off USB vbus gpio %u\n",
-                               gSynoUsbVbusGpp[i]);
+                        printk(KERN_INFO "Turned off USB vbus gpio %u (%s)\n",
+                               gSynoUsbVbusGpp[i],
+			       gSynoUsbVbusGppPol[i] ? "ACTIVE_HIGH" : "ACTIVE_LOW");
                 }
         }
+#ifdef CONFIG_SYNO_USB_POWER_OFF_TIME
+	mdelay(CONFIG_SYNO_USB_POWER_OFF_TIME);
+#endif  
 }
 #endif  
 
@@ -171,7 +180,7 @@ static void kernel_shutdown_prepare(enum system_states state)
 	if (SYSTEM_POWER_OFF == system_state)
 		syno_turnoff_all_usb_vbus_gpio();
 #endif  
-#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE) && defined(MY_ABC_HERE)
 	 
 	if (syno_is_hw_version(HW_DS718p) || syno_is_hw_version(HW_DS218p)) {
 		SYNO_GPIO_WRITE (PHY_LED_CTRL_PIN(), 0);

@@ -1,7 +1,10 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 #ifndef _MVEBU_COMPHY_H
 #define _MVEBU_COMPHY_H
 
@@ -153,5 +156,5 @@
 
 #endif /* _MVEBU_COMPHY_H */
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
+#endif /* MY_DEF_HERE */

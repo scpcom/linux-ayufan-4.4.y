@@ -693,6 +693,7 @@ static int truncate_upper(struct dentry *dentry, struct iattr *ia,
 	struct ecryptfs_crypt_stat *crypt_stat;
 	loff_t i_size = i_size_read(inode);
 #ifdef MY_ABC_HERE
+	size_t num_zeros;
 	 
 #else
 	loff_t lower_size_before_truncate;
@@ -736,8 +737,12 @@ static int truncate_upper(struct dentry *dentry, struct iattr *ia,
 		}
 #ifdef MY_ABC_HERE
 		 
+		num_zeros = (PAGE_CACHE_SIZE
+				    - (ia->ia_size & ~PAGE_CACHE_MASK));
+		if (ia->ia_size < i_size && num_zeros) {
 #else
 		if (num_zeros) {
+#endif  
 			char *zeros_virt;
 
 			zeros_virt = kzalloc(num_zeros, GFP_KERNEL);
@@ -755,7 +760,6 @@ static int truncate_upper(struct dentry *dentry, struct iattr *ia,
 				goto out;
 			}
 		}
-#endif  
 #ifdef MY_ABC_HERE
 		ecryptfs_truncate_setsize(inode, ia->ia_size);
 #else

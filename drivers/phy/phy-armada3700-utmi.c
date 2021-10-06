@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*
  * Copyright (C) 2016 Marvell
  *
@@ -270,4 +273,4 @@ MODULE_DESCRIPTION("Armada 3700 UTMI PHY driver");
 MODULE_AUTHOR("Evan Wang <xswang@marvell.com>");
 MODULE_LICENSE("GPL");
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */

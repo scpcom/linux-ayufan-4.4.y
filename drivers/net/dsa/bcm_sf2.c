@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Broadcom Starfighter 2 DSA switch driver
  *
@@ -135,7 +138,7 @@ static int bcm_sf2_sw_get_sset_count(struct dsa_switch *ds)
 	return BCM_SF2_STATS_SIZE;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static const char *bcm_sf2_sw_drv_probe(struct device *dsa_dev,
 					struct device *host_dev, int sw_addr,
 					void **_priv)
@@ -149,12 +152,12 @@ static const char *bcm_sf2_sw_drv_probe(struct device *dsa_dev,
 
 	return "Broadcom Starfighter 2";
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static char *bcm_sf2_sw_probe(struct device *host_dev, int sw_addr)
 {
 	return "Broadcom Starfighter 2";
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 static void bcm_sf2_imp_vlan_setup(struct dsa_switch *ds, int cpu_port)
 {
@@ -167,11 +170,11 @@ static void bcm_sf2_imp_vlan_setup(struct dsa_switch *ds, int cpu_port)
 	 * the same VLAN.
 	 */
 	for (i = 0; i < priv->hw_params.num_ports; i++) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		if (!((1 << i) & ds->enabled_port_mask))
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		if (!((1 << i) & ds->phys_port_mask))
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 			continue;
 
 		reg = core_readl(priv, CORE_PORT_VLAN_CTL_PORT(i));
@@ -502,29 +505,29 @@ static int bcm_sf2_sw_fast_age_port(struct dsa_switch  *ds, int port)
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int bcm_sf2_sw_br_join(struct dsa_switch *ds, int port,
 			      struct net_device *bridge)
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int bcm_sf2_sw_br_join(struct dsa_switch *ds, int port,
 			      u32 br_port_mask)
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 {
 	struct bcm_sf2_priv *priv = ds_to_priv(ds);
 	unsigned int i;
 	u32 reg, p_ctl;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	priv->port_sts[port].bridge_dev = bridge;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	p_ctl = core_readl(priv, CORE_PORT_VLAN_CTL_PORT(port));
 
 	for (i = 0; i < priv->hw_params.num_ports; i++) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		if (priv->port_sts[i].bridge_dev != bridge)
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		if (!((1 << i) & br_port_mask))
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 			continue;
 
 		/* Add this local port to the remote port VLAN control
@@ -547,17 +550,17 @@ static int bcm_sf2_sw_br_join(struct dsa_switch *ds, int port,
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static void bcm_sf2_sw_br_leave(struct dsa_switch *ds, int port)
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int bcm_sf2_sw_br_leave(struct dsa_switch *ds, int port,
 			       u32 br_port_mask)
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 {
 	struct bcm_sf2_priv *priv = ds_to_priv(ds);
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct net_device *bridge = priv->port_sts[port].bridge_dev;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	unsigned int i;
 	u32 reg, p_ctl;
 
@@ -565,11 +568,11 @@ static int bcm_sf2_sw_br_leave(struct dsa_switch *ds, int port,
 
 	for (i = 0; i < priv->hw_params.num_ports; i++) {
 		/* Don't touch the remaining ports */
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		if (priv->port_sts[i].bridge_dev != bridge)
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		if (!((1 << i) & br_port_mask))
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 			continue;
 
 		reg = core_readl(priv, CORE_PORT_VLAN_CTL_PORT(i));
@@ -584,28 +587,28 @@ static int bcm_sf2_sw_br_leave(struct dsa_switch *ds, int port,
 
 	core_writel(priv, p_ctl, CORE_PORT_VLAN_CTL_PORT(port));
 	priv->port_sts[port].vlan_ctl_mask = p_ctl;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	priv->port_sts[port].bridge_dev = NULL;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	return 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static void bcm_sf2_sw_br_set_stp_state(struct dsa_switch *ds, int port,
 					u8 state)
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int bcm_sf2_sw_br_set_stp_state(struct dsa_switch *ds, int port,
 				       u8 state)
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 {
 	struct bcm_sf2_priv *priv = ds_to_priv(ds);
 	u8 hw_state, cur_hw_state;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	int ret = 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	u32 reg;
 
 	reg = core_readl(priv, CORE_G_PCTL_PORT(port));
@@ -629,11 +632,11 @@ static int bcm_sf2_sw_br_set_stp_state(struct dsa_switch *ds, int port,
 		break;
 	default:
 		pr_err("%s: invalid STP state: %d\n", __func__, state);
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		return;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		return -EINVAL;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	}
 
 	/* Fast-age ARL entries if we are moving a port from Learning or
@@ -643,18 +646,18 @@ static int bcm_sf2_sw_br_set_stp_state(struct dsa_switch *ds, int port,
 	if (cur_hw_state != hw_state) {
 		if (cur_hw_state >= G_MISTP_LEARN_STATE &&
 		    hw_state <= G_MISTP_LISTEN_STATE) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 			if (bcm_sf2_sw_fast_age_port(ds, port)) {
 				pr_err("%s: fast-ageing failed\n", __func__);
 				return;
 			}
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 			ret = bcm_sf2_sw_fast_age_port(ds, port);
 			if (ret) {
 				pr_err("%s: fast-ageing failed\n", __func__);
 				return ret;
 			}
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		}
 	}
 
@@ -663,11 +666,11 @@ static int bcm_sf2_sw_br_set_stp_state(struct dsa_switch *ds, int port,
 	reg |= hw_state;
 	core_writel(priv, reg, CORE_G_PCTL_PORT(port));
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	return 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 }
 
 /* Address Resolution Logic routines */
@@ -798,24 +801,24 @@ static int bcm_sf2_sw_fdb_prepare(struct dsa_switch *ds, int port,
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static void bcm_sf2_sw_fdb_add(struct dsa_switch *ds, int port,
 			       const struct switchdev_obj_port_fdb *fdb,
 			       struct switchdev_trans *trans)
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int bcm_sf2_sw_fdb_add(struct dsa_switch *ds, int port,
 			      const struct switchdev_obj_port_fdb *fdb,
 			      struct switchdev_trans *trans)
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 {
 	struct bcm_sf2_priv *priv = ds_to_priv(ds);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	if (bcm_sf2_arl_op(priv, 0, port, fdb->addr, fdb->vid, true))
 		pr_err("%s: failed to add MAC address\n", __func__);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	return bcm_sf2_arl_op(priv, 0, port, fdb->addr, fdb->vid, true);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 }
 
 static int bcm_sf2_sw_fdb_del(struct dsa_switch *ds, int port,
@@ -879,11 +882,11 @@ static int bcm_sf2_sw_fdb_dump(struct dsa_switch *ds, int port,
 			       int (*cb)(struct switchdev_obj *obj))
 {
 	struct bcm_sf2_priv *priv = ds_to_priv(ds);
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct net_device *dev = ds->ports[port].netdev;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct net_device *dev = ds->ports[port];
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct bcm_sf2_arl_entry results[2];
 	unsigned int count = 0;
 	int ret;
@@ -1028,13 +1031,13 @@ static int bcm_sf2_sw_setup(struct dsa_switch *ds)
 	/* All the interesting properties are at the parent device_node
 	 * level
 	 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	dn = ds->cd->of_node->parent;
 	bcm_sf2_identify_ports(priv, ds->cd->of_node);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	dn = ds->pd->of_node->parent;
 	bcm_sf2_identify_ports(priv, ds->pd->of_node);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	priv->irq0 = irq_of_parse_and_map(dn, 0);
 	priv->irq1 = irq_of_parse_and_map(dn, 1);
@@ -1093,11 +1096,11 @@ static int bcm_sf2_sw_setup(struct dsa_switch *ds)
 	/* Enable all valid ports and disable those unused */
 	for (port = 0; port < priv->hw_params.num_ports; port++) {
 		/* IMP port receives special treatment */
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		if ((1 << port) & ds->enabled_port_mask)
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		if ((1 << port) & ds->phys_port_mask)
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 			bcm_sf2_port_setup(ds, port, NULL);
 		else if (dsa_is_cpu_port(ds, port))
 			bcm_sf2_imp_setup(ds, port);
@@ -1347,11 +1350,11 @@ static void bcm_sf2_sw_fixed_link_update(struct dsa_switch *ds, int port,
 		 * state machine and make it go in PHY_FORCING state instead.
 		 */
 		if (!status->link)
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 			netif_carrier_off(ds->ports[port].netdev);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 			netif_carrier_off(ds->ports[port]);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		status->duplex = 1;
 	} else {
 		status->link = 1;
@@ -1388,11 +1391,11 @@ static int bcm_sf2_sw_suspend(struct dsa_switch *ds)
 	 * bcm_sf2_sw_setup
 	 */
 	for (port = 0; port < DSA_MAX_PORTS; port++) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		if ((1 << port) & ds->enabled_port_mask ||
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		if ((1 << port) & ds->phys_port_mask ||
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		    dsa_is_cpu_port(ds, port))
 			bcm_sf2_port_disable(ds, port, NULL);
 	}
@@ -1416,11 +1419,11 @@ static int bcm_sf2_sw_resume(struct dsa_switch *ds)
 		bcm_sf2_gphy_enable_set(ds, true);
 
 	for (port = 0; port < DSA_MAX_PORTS; port++) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		if ((1 << port) & ds->enabled_port_mask)
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		if ((1 << port) & ds->phys_port_mask)
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 			bcm_sf2_port_setup(ds, port, NULL);
 		else if (dsa_is_cpu_port(ds, port))
 			bcm_sf2_imp_setup(ds, port);
@@ -1483,12 +1486,12 @@ static int bcm_sf2_sw_set_wol(struct dsa_switch *ds, int port,
 
 static struct dsa_switch_driver bcm_sf2_switch_driver = {
 	.tag_protocol		= DSA_TAG_PROTO_BRCM,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	.probe			= bcm_sf2_sw_drv_probe,
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	.priv_size		= sizeof(struct bcm_sf2_priv),
 	.probe			= bcm_sf2_sw_probe,
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	.setup			= bcm_sf2_sw_setup,
 	.set_addr		= bcm_sf2_sw_set_addr,
 	.get_phy_flags		= bcm_sf2_sw_get_phy_flags,
@@ -1507,15 +1510,15 @@ static struct dsa_switch_driver bcm_sf2_switch_driver = {
 	.port_disable		= bcm_sf2_port_disable,
 	.get_eee		= bcm_sf2_sw_get_eee,
 	.set_eee		= bcm_sf2_sw_set_eee,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	.port_bridge_join	= bcm_sf2_sw_br_join,
 	.port_bridge_leave	= bcm_sf2_sw_br_leave,
 	.port_stp_state_set	= bcm_sf2_sw_br_set_stp_state,
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	.port_join_bridge	= bcm_sf2_sw_br_join,
 	.port_leave_bridge	= bcm_sf2_sw_br_leave,
 	.port_stp_update	= bcm_sf2_sw_br_set_stp_state,
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	.port_fdb_prepare	= bcm_sf2_sw_fdb_prepare,
 	.port_fdb_add		= bcm_sf2_sw_fdb_add,
 	.port_fdb_del		= bcm_sf2_sw_fdb_del,

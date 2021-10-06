@@ -10,7 +10,7 @@
 #include <linux/quotaops.h>
 #include <linux/pagevec.h>
 #include <linux/uio.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_SPLICE_FROM_SOCKET
 #include <linux/backing-dev.h>
 #include <linux/fsnotify.h>
@@ -358,7 +358,7 @@ static int ext4_file_open(struct inode * inode, struct file * filp)
 	return dquot_file_open(inode, filp);
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_SPLICE_FROM_SOCKET
 ssize_t ext4_splice_from_socket(struct file *file, struct socket *sock,
 				loff_t __user *ppos, size_t count_req)
@@ -855,7 +855,7 @@ const struct file_operations ext4_file_operations = {
 #if defined(CONFIG_SENDFILE_PATCH)
 	.splice_from_socket = generic_splice_from_socket,
 #endif
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 #ifdef CONFIG_SPLICE_FROM_SOCKET
 	.splice_from_socket = ext4_splice_from_socket,
 #endif

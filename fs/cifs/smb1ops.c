@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  SMB1 (CIFS) version specific operations
  *
@@ -998,7 +1001,11 @@ out:
 }
 
 static bool
+#ifdef MY_ABC_HERE
+cifs_is_read_op(struct TCP_Server_Info *server, __u32 oplock)
+#else
 cifs_is_read_op(__u32 oplock)
+#endif /* MY_ABC_HERE */
 {
 	return oplock == OPLOCK_READ;
 }

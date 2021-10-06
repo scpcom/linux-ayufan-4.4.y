@@ -4,6 +4,29 @@
 
 obj-$(CONFIG_SYSTEM_TRUSTED_KEYRING) += system_keyring.o system_certificates.o
 
+ifeq ($(CONFIG_SYNO_KEY),y)
+
+$(eval $(call config_filename,SYSTEM_TRUSTED_KEYS))
+$(eval $(call config_filename,MODULE_SIG_KEY))
+
+targets += signing_key.x509 x509_certificate_list
+$(obj)/system_certificates.o: $(obj)/signing_key.x509 $(obj)/x509_certificate_list
+$(obj)/signing_key.x509: $(MODULE_SIG_KEY_SRCPREFIX)$(MODULE_SIG_KEY_FILENAME)
+	$(call cmd,shipped,$(MODULE_SIG_KEY_SRCPREFIX)$(CONFIG_MODULE_SIG_KEY),$@)
+$(obj)/x509_certificate_list: $(SYSTEM_TRUSTED_KEYS_SRCPREFIX)$(SYSTEM_TRUSTED_KEYS_FILENAME)
+	$(call cmd,shipped,$(SYSTEM_TRUSTED_KEYS_SRCPREFIX)$(CONFIG_SYSTEM_TRUSTED_KEYS),$@)
+
+ifeq ($(CONFIG_SYNO_SYSTEM_UNTRUSTED_KEYRING),y)
+
+$(eval $(call config_filename,SYNO_SYSTEM_UNTRUSTED_KEYS))
+targets += x509_certificate_list_untrusted
+$(obj)/system_certificates.o: $(obj)/x509_certificate_list_untrusted
+$(obj)/x509_certificate_list_untrusted: $(SYSTEM_UNTRUSTED_KEYS_SRCPREFIX)$(SYNO_SYSTEM_UNTRUSTED_KEYS_FILENAME)
+	$(call cmd,shipped,$(SYSTEM_UNTRUSTED_KEYS_SRCPREFIX)$(CONFIG_SYNO_SYSTEM_UNTRUSTED_KEYS),$@)
+endif
+
+else
+
 ifeq ($(CONFIG_SYSTEM_TRUSTED_KEYRING),y)
 
 $(eval $(call config_filename,SYSTEM_TRUSTED_KEYS))
@@ -91,4 +114,5 @@ $(obj)/system_certificates.o: $(obj)/signing_key.x509
 targets += signing_key.x509
 $(obj)/signing_key.x509: scripts/extract-cert $(X509_DEP) FORCE
 	$(call if_changed,extract_certs,$(MODULE_SIG_KEY_SRCPREFIX)$(CONFIG_MODULE_SIG_KEY))
+endif
 endif

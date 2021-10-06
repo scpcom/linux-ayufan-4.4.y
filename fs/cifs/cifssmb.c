@@ -84,6 +84,9 @@ cifs_reconnect_tcon(struct cifs_tcon *tcon, int smb_command)
 	struct cifs_ses *ses;
 	struct TCP_Server_Info *server;
 	struct nls_table *nls_codepage;
+#ifdef MY_ABC_HERE
+	u16 origin_dialect;  
+#endif  
 
 	if (!tcon)
 		return 0;
@@ -124,6 +127,9 @@ cifs_reconnect_tcon(struct cifs_tcon *tcon, int smb_command)
 #endif  
 
 	mutex_lock(&ses->session_mutex);
+#ifdef MY_ABC_HERE
+	origin_dialect = server->dialect;
+#endif  
 	rc = cifs_negotiate_protocol(0, ses);
 	if (rc == 0 && ses->need_reconnect)
 		rc = cifs_setup_session(0, ses, nls_codepage);
@@ -134,7 +140,11 @@ cifs_reconnect_tcon(struct cifs_tcon *tcon, int smb_command)
 	}
 
 	cifs_mark_open_files_invalid(tcon);
+#ifdef MY_ABC_HERE
+	rc = ses->server->ops->tree_connect(0, ses, tcon->treeName, tcon, nls_codepage);
+#else
 	rc = CIFSTCon(0, ses, tcon->treeName, tcon, nls_codepage);
+#endif  
 	mutex_unlock(&ses->session_mutex);
 	cifs_dbg(FYI, "reconnect tcon rc = %d\n", rc);
 
@@ -145,6 +155,12 @@ cifs_reconnect_tcon(struct cifs_tcon *tcon, int smb_command)
 
 	if (ses->capabilities & CAP_UNIX)
 		reset_cifs_unix_caps(0, tcon, NULL, NULL);
+
+#ifdef MY_ABC_HERE
+	if (server->dialect != origin_dialect) {
+		rc = -EAGAIN;
+	}
+#endif  
 
 out:
 	 

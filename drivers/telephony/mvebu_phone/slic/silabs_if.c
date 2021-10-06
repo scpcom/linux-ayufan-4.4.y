@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*******************************************************************************
  * Copyright (C) 2016 Marvell International Ltd.
  *
@@ -162,4 +165,4 @@ void silabs_if_spi_write(u32 line, u8 *cmd, u8 cmd_size,
 				   data_size, SPI_TYPE_SLIC_ZARLINK_SILABS);
 }
 EXPORT_SYMBOL(silabs_if_spi_write);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

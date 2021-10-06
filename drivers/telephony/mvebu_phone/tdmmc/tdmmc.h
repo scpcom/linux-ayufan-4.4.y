@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*******************************************************************************
  * Copyright (C) 2016 Marvell International Ltd.
  *
@@ -344,7 +347,7 @@
 #define	CONFIG_TDM_DATA_DELAY_AND_CLK_CTRL \
 	(TX_CLK_OUT_ENABLE_MASK | RX_CLK_OUT_ENABLE_MASK)
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 /* Defines */
 #define TOTAL_CHAINS		2
 #define CONFIG_RBSZ		16
@@ -356,22 +359,22 @@
 #define MV_TDM_PCM_CLK_8MHZ	1
 
 /* Enums */
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 /* SoC ID's */
 #define MV_65XX_DEV_ID		0x6500	/* MV88F6500 family */
 #define MV_78XX0		0x78000	/* Armada XP Family */
 #define MV_88F66X0		0x6600	/* Avanta LP Family */
 #define MV_88F67X0		0x6700	/* Armada 375 Family */
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 enum tdmmc_ip_version {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	TDMMC_REV0 = 0,
 	TDMMC_REV1
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	MV_COMMUNIT_IP_VER_ORIGIN   = 0,
 	MV_COMMUNIT_IP_VER_REVISE_1,
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 };
 
 /* Structures */
@@ -405,7 +408,7 @@ struct tdmmc_dram_entry {
 	u32 reserved31_27:5;
 };
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 /* Main TDM structure definition */
 struct tdmmc_dev {
 	/* Resources */
@@ -439,7 +442,7 @@ struct tdmmc_dev {
 	u16 total_channels;
 };
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 /* TDMMC APIs */
 void tdmmc_pcm_start(void);
 void tdmmc_pcm_stop(void);
@@ -451,10 +454,10 @@ void tdmmc_intr_enable(u8 device_id);
 void tdmmc_intr_disable(u8 device_id);
 int tdmmc_reset_slic(void);
 int tdmmc_set_mbus_windows(struct device *dev, void __iomem *regs);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 int tdmmc_set_a8k_windows(struct device *dev, void __iomem *regs);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 #endif /* _TDMMC_H_ */
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

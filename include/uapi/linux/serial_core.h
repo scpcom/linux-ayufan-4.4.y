@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/drivers/char/serial_core.h
  *
@@ -261,9 +264,9 @@
 /* STM32 USART */
 #define PORT_STM32	113
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 /* MVEBU UART */
 #define PORT_MVEBU	114
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 #endif /* _UAPILINUX_SERIAL_CORE_H */

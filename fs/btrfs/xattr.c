@@ -294,7 +294,8 @@ ssize_t btrfs_listxattr(struct dentry *dentry, char *buffer, size_t size)
 
 #ifdef MY_ABC_HERE
 			 
-			if (!strncmp(buffer, XATTR_SYNO_PREFIX, XATTR_SYNO_PREFIX_LEN)) {
+			if (!strncmp(buffer, XATTR_SYNO_PREFIX, XATTR_SYNO_PREFIX_LEN) ||
+					!strncmp(buffer, XATTR_BTRFS_PREFIX, XATTR_BTRFS_PREFIX_LEN)) {
 				total_size -= name_len + 1;
 				goto next;
 			}

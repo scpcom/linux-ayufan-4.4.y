@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*
 * ***************************************************************************
 * Copyright (C) 2016 Marvell International Ltd.
@@ -37,11 +40,11 @@
 
 int mv_pp2x_ptr_validate(const void *ptr)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (!ptr) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (ptr == NULL) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		pr_err("%s: null pointer.\n", __func__);
 		return MV_ERROR;
 	}
@@ -642,7 +645,7 @@ static void mv_pp2x_prs_match_etype(struct mv_pp2x_prs_entry *pe, int offset,
 	mv_pp2x_prs_tcam_data_byte_set(pe, offset + 1, ethertype & 0xff, 0xff);
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 /* Set vid in tcam sw entry */
 static void mv_pp2x_prs_match_vid(struct mv_pp2x_prs_entry *pe, int offset, unsigned short vid)
 {
@@ -651,7 +654,7 @@ static void mv_pp2x_prs_match_vid(struct mv_pp2x_prs_entry *pe, int offset, unsi
 	mv_pp2x_prs_tcam_data_byte_set(pe, offset + 1, vid & MVPP2_PRS_VID_L_WORD_MASK, MVPP2_PRS_VID_L_WORD_MASK);
 }
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 /* Set bits in sram sw entry */
 static void mv_pp2x_prs_sram_bits_set(struct mv_pp2x_prs_entry *pe, int bit_num,
 				      int val)
@@ -934,11 +937,11 @@ void mv_pp2x_prs_mac_promisc_set(struct mv_pp2x_hw *hw, int port, bool add)
 {
 	struct mv_pp2x_prs_entry pe;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	/* Promiscuous mode - Accept unknown packets */
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	/* Promiscous mode - Accept unknown packets */
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	if (hw->prs_shadow[MVPP2_PE_MAC_PROMISCUOUS].valid) {
 		/* Entry exist - update port only */
@@ -1252,17 +1255,17 @@ static int mv_pp2x_prs_vlan_add(struct mv_pp2x_hw *hw, unsigned short tpid,
 
 		mv_pp2x_prs_match_etype(pe, 0, tpid);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		mv_pp2x_prs_sram_next_lu_set(pe, MVPP2_PRS_LU_VID);
 
 		/* Do not shift now, will be shifted after VID is checked*/
 
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 		mv_pp2x_prs_sram_next_lu_set(pe, MVPP2_PRS_LU_L2);
 		/* Shift 4 bytes - skip 1 vlan tag */
 		mv_pp2x_prs_sram_shift_set(pe, MVPP2_VLAN_TAG_LEN,
 					   MVPP2_PRS_SRAM_OP_SEL_SHIFT_ADD);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 		/* Clear all ai bits for next iteration */
 		mv_pp2x_prs_sram_ai_update(pe, 0, MVPP2_PRS_SRAM_AI_MASK);
 
@@ -1327,13 +1330,13 @@ static struct mv_pp2x_prs_entry *mv_pp2x_prs_double_vlan_find(
 		pe->index = tid;
 		mv_pp2x_prs_hw_read(hw, pe);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		match = mv_pp2x_prs_tcam_data_cmp(pe, 0, swab16(tpid1))	&&
 			mv_pp2x_prs_tcam_data_cmp(pe, 4, swab16(tpid2));
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		match = mv_pp2x_prs_tcam_data_cmp(pe, 0, swab16(tpid1))
 			&& mv_pp2x_prs_tcam_data_cmp(pe, 4, swab16(tpid2));
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 		if (!match)
 			continue;
@@ -1409,13 +1412,13 @@ static int mv_pp2x_prs_double_vlan_add(struct mv_pp2x_hw *hw,
 		mv_pp2x_prs_match_etype(pe, 4, tpid2);
 
 		mv_pp2x_prs_sram_next_lu_set(pe, MVPP2_PRS_LU_VLAN);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		/* Shift 4 bytes - skip outer vlan tags */
 		mv_pp2x_prs_sram_shift_set(pe, MVPP2_VLAN_TAG_LEN,
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 		/* Shift 8 bytes - skip 2 vlan tags */
 		mv_pp2x_prs_sram_shift_set(pe, 2 * MVPP2_VLAN_TAG_LEN,
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 					   MVPP2_PRS_SRAM_OP_SEL_SHIFT_ADD);
 		mv_pp2x_prs_sram_ri_update(pe, MVPP2_PRS_RI_VLAN_DOUBLE,
 					   MVPP2_PRS_RI_VLAN_MASK);
@@ -2066,14 +2069,14 @@ static int mv_pp2x_prs_vlan_init(struct platform_device *pdev,
 	mv_pp2x_prs_tcam_lu_set(&pe, MVPP2_PRS_LU_VLAN);
 	pe.index = MVPP2_PE_VLAN_DBL;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	mv_pp2x_prs_sram_next_lu_set(&pe, MVPP2_PRS_LU_VID);
 
 	/* Do not update offset, it is already positioned to inner vlan by double vlan parser entry*/
 
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	mv_pp2x_prs_sram_next_lu_set(&pe, MVPP2_PRS_LU_L2);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	/* Clear ai for next iterations */
 	mv_pp2x_prs_sram_ai_update(&pe, 0, MVPP2_PRS_SRAM_AI_MASK);
 	mv_pp2x_prs_sram_ri_update(&pe, MVPP2_PRS_RI_VLAN_DOUBLE,
@@ -2107,7 +2110,7 @@ static int mv_pp2x_prs_vlan_init(struct platform_device *pdev,
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 /* Initialize parser entries for VID filtering */
 static void mv_pp2x_prs_vid_init(struct mv_pp2x_hw *hw)
 {
@@ -2132,7 +2135,7 @@ static void mv_pp2x_prs_vid_init(struct mv_pp2x_hw *hw)
 	mv_pp2x_prs_hw_write(hw, &pe);
 }
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 /* Set entries for PPPoE ethertype */
 static int mv_pp2x_prs_pppoe_init(struct mv_pp2x_hw *hw)
 {
@@ -2335,11 +2338,11 @@ static int mv_pp2x_prs_ip4_init(struct mv_pp2x_hw *hw)
 static int mv_pp2x_prs_ip6_init(struct mv_pp2x_hw *hw)
 {
 	struct mv_pp2x_prs_entry pe;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	int err;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	int tid, err;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 
 	/* Set entries for TCP, UDP and ICMP over IPv6 */
 	err = mv_pp2x_prs_ip6_proto(hw, IPPROTO_TCP,
@@ -2375,9 +2378,9 @@ static int mv_pp2x_prs_ip6_init(struct mv_pp2x_hw *hw)
 	if (err)
 		return err;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#else /* MY_DEF_HERE */
 	/* Entry for checking hop limit */
 	tid = mv_pp2x_prs_tcam_first_free(hw, MVPP2_PE_FIRST_FREE_TID,
 					  MVPP2_PE_LAST_FREE_TID);
@@ -2404,7 +2407,7 @@ static int mv_pp2x_prs_ip6_init(struct mv_pp2x_hw *hw)
 	mv_pp2x_prs_shadow_set(hw, pe.index, MVPP2_PRS_LU_IP4);
 	mv_pp2x_prs_hw_write(hw, &pe);
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	/* Default IPv6 entry for unknown protocols */
 	memset(&pe, 0, sizeof(struct mv_pp2x_prs_entry));
 	mv_pp2x_prs_tcam_lu_set(&pe, MVPP2_PRS_LU_IP6);
@@ -2735,7 +2738,7 @@ void mv_pp2x_prs_mac_entry_del(struct mv_pp2x_port *port,
 	}
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 /* Write parser entry for default VID filtering */
 static int mv_pp2x_prs_vid_drop_entry_accept(struct net_device *dev, unsigned int tid, bool add)
 {
@@ -2939,7 +2942,7 @@ int mv_pp2x_prs_vid_entry_accept(struct net_device *dev, u16 proto, u16 vid, boo
 	return 0;
 }
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 int mv_pp2x_prs_tag_mode_set(struct mv_pp2x_hw *hw, int port, int type)
 {
 	switch (type) {
@@ -3032,24 +3035,24 @@ int mv_pp2x_prs_def_flow(struct mv_pp2x_port *port)
 }
 
 /* Set prs dedicated flow for the port */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 int mv_pp2x_prs_flow_id_gen(struct mv_pp2x_port *port, u32 flow_id,
 			    u32 res, u32 res_mask)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 int mv_pp2x_prs_flow_id_gen(struct mv_pp2x_port *port, u32 flowId,
 			    u32 res, u32 resMask)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 {
 	struct mv_pp2x_prs_entry *pe;
 	struct mv_pp2x_hw *hw = &port->priv->hw;
 	int tid;
 	unsigned int pmap = 0;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	pe = mv_pp2x_prs_flow_find(hw, flow_id, res, res_mask);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	pe = mv_pp2x_prs_flow_find(hw, flowId, res, resMask);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Such entry not exist */
 	if (!pe) {
@@ -3069,22 +3072,22 @@ int mv_pp2x_prs_flow_id_gen(struct mv_pp2x_port *port, u32 flowId,
 		mv_pp2x_prs_tcam_lu_set(pe, MVPP2_PRS_LU_FLOWS);
 		pe->index = tid;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		mv_pp2x_prs_sram_ai_update(pe, flow_id, MVPP2_PRS_FLOW_ID_MASK);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		mv_pp2x_prs_sram_ai_update(pe, flowId, MVPP2_PRS_FLOW_ID_MASK);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		mv_pp2x_prs_sram_bits_set(pe, MVPP2_PRS_SRAM_LU_DONE_BIT, 1);
 
 		/* Update shadow table */
 		mv_pp2x_prs_shadow_set(hw, pe->index, MVPP2_PRS_LU_FLOWS);
 
 		/*update result data and mask*/
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		mv_pp2x_prs_tcam_data_dword_set(pe, 0, res, res_mask);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		mv_pp2x_prs_tcam_data_dword_set(pe, 0, res, resMask);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	} else {
 		pmap = mv_pp2x_prs_tcam_port_map_get(pe);
 	}
@@ -3240,11 +3243,11 @@ int mv_pp2x_cls_sw_flow_hek_set(struct mv_pp2x_cls_flow_entry *fe,
 	num_of_fields = ((fe->data[1] &
 		MVPP2_FLOW_FIELDS_NUM_MASK) >> MVPP2_FLOW_FIELDS_NUM);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (num_of_fields < (field_index + 1)) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	if (num_of_fields < (field_index+1)) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		pr_debug("%s:num of heks=%d ,idx(%d) out of range\n",
 			 __func__, num_of_fields, field_index);
 		return -1;
@@ -3511,11 +3514,11 @@ EXPORT_SYMBOL(mv_pp2x_cls_lkp_port_way_set);
 int mv_pp2x_cls_hw_udf_set(struct mv_pp2x_hw *hw, int udf_no, int offs_id,
 			   int offs_bits, int size_bits)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	unsigned int reg_val;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	unsigned int regVal;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	if (mv_pp2x_range_validate(offs_id, 0,
 	    MVPP2_CLS_UDF_OFFSET_ID_MAX) == MV_ERROR)
@@ -3533,33 +3536,33 @@ int mv_pp2x_cls_hw_udf_set(struct mv_pp2x_hw *hw, int udf_no, int offs_id,
 	    MVPP2_CLS_UDF_REGS_NUM - 1) == MV_ERROR)
 		return MV_ERROR;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	reg_val = mv_pp2x_read(hw, MVPP2_CLS_UDF_REG(udf_no));
 	reg_val &= ~MVPP2_CLS_UDF_OFFSET_ID_MASK;
 	reg_val &= ~MVPP2_CLS_UDF_REL_OFFSET_MASK;
 	reg_val &= ~MVPP2_CLS_UDF_SIZE_MASK;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	regVal = mv_pp2x_read(hw, MVPP2_CLS_UDF_REG(udf_no));
 	regVal &= ~MVPP2_CLS_UDF_OFFSET_ID_MASK;
 	regVal &= ~MVPP2_CLS_UDF_REL_OFFSET_MASK;
 	regVal &= ~MVPP2_CLS_UDF_SIZE_MASK;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	reg_val |= (offs_id << MVPP2_CLS_UDF_OFFSET_ID_OFFS);
 	reg_val |= (offs_bits << MVPP2_CLS_UDF_REL_OFFSET_OFFS);
 	reg_val |= (size_bits << MVPP2_CLS_UDF_SIZE_OFFS);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	regVal |= (offs_id << MVPP2_CLS_UDF_OFFSET_ID_OFFS);
 	regVal |= (offs_bits << MVPP2_CLS_UDF_REL_OFFSET_OFFS);
 	regVal |= (size_bits << MVPP2_CLS_UDF_SIZE_OFFS);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	mv_pp2x_write(hw, MVPP2_CLS_UDF_REG(udf_no), reg_val);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	mv_pp2x_write(hw, MVPP2_CLS_UDF_REG(udf_no), regVal);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	return MV_OK;
 }
@@ -3581,11 +3584,11 @@ void mv_pp2x_cls_lookup_tbl_config(struct mv_pp2x_hw *hw)
 		index++) {
 		int i, j;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		flow_info = &hw->cls_shadow->flow_info[index];
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		flow_info = &(hw->cls_shadow->flow_info[index]);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		/* Init data[] as invalid value */
 		for (i = 0; i < MVPP2_LKP_PTR_NUM; i++)
 			data[i] = MVPP2_FLOW_TBL_SIZE;
@@ -4275,11 +4278,11 @@ void mv_pp2x_egress_enable(struct mv_pp2x_port *port)
 	for (queue = 0; queue < port->num_tx_queues; queue++) {
 		struct mv_pp2x_tx_queue *txq = port->txqs[queue];
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		if (txq->first_desc)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		if (txq->first_desc != NULL)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			qmap |= (1 << queue);
 	}
 
@@ -4377,11 +4380,11 @@ int mv_pp2x_prs_default_init(struct platform_device *pdev,
 	err = mv_pp2x_prs_vlan_init(pdev, hw);
 	if (err)
 		return err;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 
 	mv_pp2x_prs_vid_init(hw);
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	err = mv_pp2x_prs_pppoe_init(hw);
 	if (err)
 		return err;
@@ -4619,25 +4622,25 @@ int mv_pp2x_prs_sw_sram_next_lu_get(struct mv_pp2x_prs_entry *pe,
 }
 EXPORT_SYMBOL(mv_pp2x_prs_sw_sram_next_lu_get);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 int mv_pp2x_prs_sram_bit_get(struct mv_pp2x_prs_entry *pe, int bit_num,
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 int mv_pp2x_prs_sram_bit_get(struct mv_pp2x_prs_entry *pe, int bitNum,
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			     unsigned int *bit)
 {
 	if (mv_pp2x_ptr_validate(pe) == MV_ERROR)
 		return MV_ERROR;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	*bit = pe->sram.byte[SRAM_BIT_TO_BYTE(bit_num)]  &
 		(1 << (bit_num % 8));
 	*bit = (*bit) >> (bit_num % 8);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	*bit = pe->sram.byte[SRAM_BIT_TO_BYTE(bitNum)]  &
 		(1 << (bitNum % 8));
 	*bit = (*bit) >> (bitNum % 8);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	return MV_OK;
 }
 
@@ -4692,13 +4695,13 @@ int mv_pp2x_prs_sw_sram_ri_get(struct mv_pp2x_prs_entry *pe,
 	if (mv_pp2x_ptr_validate(enable) == MV_ERROR)
 		return MV_ERROR;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	*bits = pe->sram.word[MVPP2_PRS_SRAM_RI_OFFS / 32];
 	*enable = pe->sram.word[MVPP2_PRS_SRAM_RI_CTRL_OFFS / 32];
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	*bits = pe->sram.word[MVPP2_PRS_SRAM_RI_OFFS/32];
 	*enable = pe->sram.word[MVPP2_PRS_SRAM_RI_CTRL_OFFS/32];
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	return MV_OK;
 }
 EXPORT_SYMBOL(mv_pp2x_prs_sw_sram_ri_get);
@@ -4748,11 +4751,11 @@ EXPORT_SYMBOL(mv_pp2x_prs_sw_sram_ai_get);
 int mv_pp2x_cls_hw_lkp_read(struct mv_pp2x_hw *hw, int lkpid, int way,
 			    struct mv_pp2x_cls_lookup_entry *fe)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	unsigned int reg_val = 0;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	unsigned int regVal = 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	if (mv_pp2x_ptr_validate(fe) == MV_ERROR)
 		return MV_ERROR;
@@ -4765,17 +4768,17 @@ int mv_pp2x_cls_hw_lkp_read(struct mv_pp2x_hw *hw, int lkpid, int way,
 		return MV_ERROR;
 
 	/* write index reg */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	reg_val = (way << MVPP2_CLS_LKP_INDEX_WAY_OFFS) |
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	regVal = (way << MVPP2_CLS_LKP_INDEX_WAY_OFFS) |
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		(lkpid << MVPP2_CLS_LKP_INDEX_LKP_OFFS);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	mv_pp2x_write(hw, MVPP2_CLS_LKP_INDEX_REG, reg_val);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	mv_pp2x_write(hw, MVPP2_CLS_LKP_INDEX_REG, regVal);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	fe->way = way;
 	fe->lkpid = lkpid;
@@ -4789,11 +4792,11 @@ EXPORT_SYMBOL(mv_pp2x_cls_hw_lkp_read);
 int mv_pp2x_cls_hw_lkp_write(struct mv_pp2x_hw *hw, int lkpid,
 			     int way, struct mv_pp2x_cls_lookup_entry *fe)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	unsigned int reg_val = 0;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	unsigned int regVal = 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	if (mv_pp2x_ptr_validate(fe) == MV_ERROR)
 		return MV_ERROR;
@@ -4806,17 +4809,17 @@ int mv_pp2x_cls_hw_lkp_write(struct mv_pp2x_hw *hw, int lkpid,
 		return MV_ERROR;
 
 	/* write index reg */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	reg_val = (way << MVPP2_CLS_LKP_INDEX_WAY_OFFS) |
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	regVal = (way << MVPP2_CLS_LKP_INDEX_WAY_OFFS) |
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		(lkpid << MVPP2_CLS_LKP_INDEX_LKP_OFFS);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	mv_pp2x_write(hw, MVPP2_CLS_LKP_INDEX_REG, reg_val);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	mv_pp2x_write(hw, MVPP2_CLS_LKP_INDEX_REG, regVal);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* write flowId reg */
 	mv_pp2x_write(hw, MVPP2_CLS_LKP_TBL_REG, fe->data);
@@ -5292,11 +5295,11 @@ int mv_pp2x_cls_c2_qos_hw_read(struct mv_pp2x_hw *hw, int tbl_id,
 			       int tbl_sel, int tbl_line,
 			       struct mv_pp2x_cls_c2_qos_entry *qos)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	unsigned int reg_val = 0;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	unsigned int regVal = 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	if (mv_pp2x_ptr_validate(qos) == MV_ERROR)
 		return MV_ERROR;
@@ -5329,21 +5332,21 @@ int mv_pp2x_cls_c2_qos_hw_read(struct mv_pp2x_hw *hw, int tbl_id,
 	qos->tbl_line = tbl_line;
 
 	/* write index reg */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	reg_val |= (tbl_line << MVPP2_CLS2_DSCP_PRI_INDEX_LINE_OFF);
 	reg_val |= (tbl_sel << MVPP2_CLS2_DSCP_PRI_INDEX_SEL_OFF);
 	reg_val |= (tbl_id << MVPP2_CLS2_DSCP_PRI_INDEX_TBL_ID_OFF);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	regVal |= (tbl_line << MVPP2_CLS2_DSCP_PRI_INDEX_LINE_OFF);
 	regVal |= (tbl_sel << MVPP2_CLS2_DSCP_PRI_INDEX_SEL_OFF);
 	regVal |= (tbl_id << MVPP2_CLS2_DSCP_PRI_INDEX_TBL_ID_OFF);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	mv_pp2x_write(hw, MVPP2_CLS2_DSCP_PRI_INDEX_REG, reg_val);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	mv_pp2x_write(hw, MVPP2_CLS2_DSCP_PRI_INDEX_REG, regVal);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* read data reg*/
 	qos->data = mv_pp2x_read(hw, MVPP2_CLS2_QOS_TBL_REG);
@@ -5354,11 +5357,11 @@ EXPORT_SYMBOL(mv_pp2x_cls_c2_qos_hw_read);
 
 /*----------------------------------------------------------------------*/
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 int mv_pp2_cls_c2_qos_prio_get(struct mv_pp2x_cls_c2_qos_entry *qos, int *prio)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 int mvPp2ClsC2QosPrioGet(struct mv_pp2x_cls_c2_qos_entry *qos, int *prio)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 {
 	if (mv_pp2x_ptr_validate(qos) == MV_ERROR)
 		return MV_ERROR;
@@ -5370,19 +5373,19 @@ int mvPp2ClsC2QosPrioGet(struct mv_pp2x_cls_c2_qos_entry *qos, int *prio)
 		MVPP2_CLS2_QOS_TBL_PRI_OFF;
 	return MV_OK;
 }
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 EXPORT_SYMBOL(mv_pp2_cls_c2_qos_prio_get);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 EXPORT_SYMBOL(mvPp2ClsC2QosPrioGet);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 /*----------------------------------------------------------------------*/
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 int mv_pp2_cls_c2_qos_dscp_get(struct mv_pp2x_cls_c2_qos_entry *qos, int *dscp)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 int mvPp2ClsC2QosDscpGet(struct mv_pp2x_cls_c2_qos_entry *qos, int *dscp)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 {
 	if (mv_pp2x_ptr_validate(qos) == MV_ERROR)
 		return MV_ERROR;
@@ -5394,19 +5397,19 @@ int mvPp2ClsC2QosDscpGet(struct mv_pp2x_cls_c2_qos_entry *qos, int *dscp)
 		MVPP2_CLS2_QOS_TBL_DSCP_OFF;
 	return MV_OK;
 }
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 EXPORT_SYMBOL(mv_pp2_cls_c2_qos_dscp_get);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 EXPORT_SYMBOL(mvPp2ClsC2QosDscpGet);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 /*----------------------------------------------------------------------*/
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 int mv_pp2_cls_c2_qos_color_get(struct mv_pp2x_cls_c2_qos_entry *qos, int *color)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 int mvPp2ClsC2QosColorGet(struct mv_pp2x_cls_c2_qos_entry *qos, int *color)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 {
 	if (mv_pp2x_ptr_validate(qos) == MV_ERROR)
 		return MV_ERROR;
@@ -5418,19 +5421,19 @@ int mvPp2ClsC2QosColorGet(struct mv_pp2x_cls_c2_qos_entry *qos, int *color)
 		MVPP2_CLS2_QOS_TBL_COLOR_OFF;
 	return MV_OK;
 }
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 EXPORT_SYMBOL(mv_pp2_cls_c2_qos_color_get);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 EXPORT_SYMBOL(mvPp2ClsC2QosColorGet);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 /*----------------------------------------------------------------------*/
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 int mv_pp2_cls_c2_qos_gpid_get(struct mv_pp2x_cls_c2_qos_entry *qos, int *gpid)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 int mvPp2ClsC2QosGpidGet(struct mv_pp2x_cls_c2_qos_entry *qos, int *gpid)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 {
 	if (mv_pp2x_ptr_validate(qos) == MV_ERROR)
 		return MV_ERROR;
@@ -5442,19 +5445,19 @@ int mvPp2ClsC2QosGpidGet(struct mv_pp2x_cls_c2_qos_entry *qos, int *gpid)
 		MVPP2_CLS2_QOS_TBL_GEMPORT_OFF;
 	return MV_OK;
 }
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 EXPORT_SYMBOL(mv_pp2_cls_c2_qos_gpid_get);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 EXPORT_SYMBOL(mvPp2ClsC2QosGpidGet);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 /*----------------------------------------------------------------------*/
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 int mv_pp2_cls_c2_qos_queue_get(struct mv_pp2x_cls_c2_qos_entry *qos, int *queue)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 int mvPp2ClsC2QosQueueGet(struct mv_pp2x_cls_c2_qos_entry *qos, int *queue)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 {
 	if (mv_pp2x_ptr_validate(qos) == MV_ERROR)
 		return MV_ERROR;
@@ -5466,11 +5469,11 @@ int mvPp2ClsC2QosQueueGet(struct mv_pp2x_cls_c2_qos_entry *qos, int *queue)
 		MVPP2_CLS2_QOS_TBL_QUEUENUM_OFF;
 	return MV_OK;
 }
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 EXPORT_SYMBOL(mv_pp2_cls_c2_qos_queue_get);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 EXPORT_SYMBOL(mvPp2ClsC2QosQueueGet);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 /*----------------------------------------------------------------------*/
 /*	Classifier C2 engine TCAM table Public APIs			*/
@@ -5482,13 +5485,13 @@ EXPORT_SYMBOL(mvPp2ClsC2QosQueueGet);
 int mv_pp2x_cls_c2_hw_read(struct mv_pp2x_hw *hw, int index,
 			   struct mv_pp2x_cls_c2_entry *c2)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	unsigned int reg_val;
 	int	tcm_idx;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	unsigned int regVal;
 	int	TcmIdx;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	if (mv_pp2x_ptr_validate(c2) == MV_ERROR)
 		return MV_ERROR;
@@ -5499,27 +5502,27 @@ int mv_pp2x_cls_c2_hw_read(struct mv_pp2x_hw *hw, int index,
 	mv_pp2x_write(hw, MVPP2_CLS2_TCAM_IDX_REG, index);
 
 	/* read inValid bit*/
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	reg_val = mv_pp2x_read(hw, MVPP2_CLS2_TCAM_INV_REG);
 	c2->inv = (reg_val & MVPP2_CLS2_TCAM_INV_INVALID_MASK) >>
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	regVal = mv_pp2x_read(hw, MVPP2_CLS2_TCAM_INV_REG);
 	c2->inv = (regVal & MVPP2_CLS2_TCAM_INV_INVALID_MASK) >>
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		MVPP2_CLS2_TCAM_INV_INVALID_OFF;
 
 	if (c2->inv)
 		return MV_OK;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	for (tcm_idx = 0; tcm_idx < MVPP2_CLS_C2_TCAM_WORDS; tcm_idx++)
 		c2->tcam.words[tcm_idx] = mv_pp2x_read(hw,
 					MVPP2_CLS2_TCAM_DATA_REG(tcm_idx));
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	for (TcmIdx = 0; TcmIdx < MVPP2_CLS_C2_TCAM_WORDS; TcmIdx++)
 		c2->tcam.words[TcmIdx] = mv_pp2x_read(hw,
 					MVPP2_CLS2_TCAM_DATA_REG(TcmIdx));
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* read action_tbl 0x1B30 */
 	c2->sram.regs.action_tbl = mv_pp2x_read(hw, MVPP2_CLS2_ACT_DATA_REG);
@@ -5545,11 +5548,11 @@ EXPORT_SYMBOL(mv_pp2x_cls_c2_hw_read);
 
 /*----------------------------------------------------------------------*/
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 int mv_pp2_cls_c2_tcam_byte_get(struct mv_pp2x_cls_c2_entry *c2,
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 int mvPp2ClsC2TcamByteGet(struct mv_pp2x_cls_c2_entry *c2,
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			  unsigned int offs, unsigned char *byte,
 			  unsigned char *enable)
 {
@@ -5578,27 +5581,27 @@ int mvPp2ClsC2TcamByteGet(struct mv_pp2x_cls_c2_entry *c2,
 
 int mv_pp2x_cls_c2_hit_cntr_is_busy(struct mv_pp2x_hw *hw)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	unsigned int reg_val;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	unsigned int regVal;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	reg_val = mv_pp2x_read(hw, MVPP2_CLS2_HIT_CTR_REG);
 	reg_val &= MVPP2_CLS2_HIT_CTR_CLR_DONE_MASK;
 	reg_val >>= MVPP2_CLS2_HIT_CTR_CLR_DONE_OFF;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	regVal = mv_pp2x_read(hw, MVPP2_CLS2_HIT_CTR_REG);
 	regVal &= MVPP2_CLS2_HIT_CTR_CLR_DONE_MASK;
 	regVal >>= MVPP2_CLS2_HIT_CTR_CLR_DONE_OFF;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	return (1 - (int)reg_val);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	return (1 - (int)regVal);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 }
 
 /*----------------------------------------------------------------------*/
@@ -5678,11 +5681,11 @@ void mv_pp2x_cls_flow_tbl_temp_copy(struct mv_pp2x_hw *hw, int lkpid,
 	int flow_start = hw->cls_shadow->flow_free_start;
 	struct mv_pp2x_cls_flow_info *flow_info;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	flow_info = &hw->cls_shadow->flow_info[index];
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	flow_info = &(hw->cls_shadow->flow_info[index]);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	if (flow_info->flow_entry_dflt) {
 		mv_pp2x_cls_flow_read(hw, flow_info->flow_entry_dflt, &fe);
@@ -5717,11 +5720,11 @@ void mv_pp2x_cls_flow_tbl_temp_copy(struct mv_pp2x_hw *hw, int lkpid,
 int mv_pp2x_cls_c2_hw_write(struct mv_pp2x_hw *hw, int index,
 			    struct mv_pp2x_cls_c2_entry *c2)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	int tcm_idx;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	int TcmIdx;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	if (!c2 || index >= MVPP2_CLS_C2_TCAM_SIZE)
 		return -EINVAL;
@@ -5731,28 +5734,28 @@ int mv_pp2x_cls_c2_hw_write(struct mv_pp2x_hw *hw, int index,
 	/* write index reg */
 	mv_pp2x_write(hw, MVPP2_CLS2_TCAM_IDX_REG, index);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	/* write valid bit*/
 	c2->inv = 0;
 	mv_pp2x_write(hw, MVPP2_CLS2_TCAM_INV_REG,
 		((c2->inv) << MVPP2_CLS2_TCAM_INV_INVALID_OFF));
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
 	mv_pp2x_cls_c2_hw_inv(hw, index);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	for (tcm_idx = 0; tcm_idx < MVPP2_CLS_C2_TCAM_WORDS; tcm_idx++)
 		mv_pp2x_write(hw, MVPP2_CLS2_TCAM_DATA_REG(tcm_idx),
 			      c2->tcam.words[tcm_idx]);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
+#else /* MY_DEF_HERE */
 	for (TcmIdx = 0; TcmIdx < MVPP2_CLS_C2_TCAM_WORDS; TcmIdx++)
 		mv_pp2x_write(hw, MVPP2_CLS2_TCAM_DATA_REG(TcmIdx),
 			c2->tcam.words[TcmIdx]);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* write action_tbl CLSC2_ACT_DATA */
 	mv_pp2x_write(hw, MVPP2_CLS2_ACT_DATA_REG, c2->sram.regs.action_tbl);
@@ -5769,7 +5772,7 @@ int mv_pp2x_cls_c2_hw_write(struct mv_pp2x_hw *hw, int index,
 	/* write rss_attr CLSC2_ATTR2 */
 	mv_pp2x_write(hw, MVPP2_CLS2_ACT_DUP_ATTR_REG, c2->sram.regs.rss_attr);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	/* write valid bit*/
 	c2->inv = 0;
 	mv_pp2x_write(hw, MVPP2_CLS2_TCAM_INV_REG,
@@ -5779,7 +5782,7 @@ int mv_pp2x_cls_c2_hw_write(struct mv_pp2x_hw *hw, int index,
 		mv_pp2x_write(hw, MVPP2_CLS2_TCAM_DATA_REG(tcm_idx),
 			      c2->tcam.words[tcm_idx]);
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	return 0;
 }
 EXPORT_SYMBOL(mv_pp2x_cls_c2_hw_write);
@@ -5787,11 +5790,11 @@ EXPORT_SYMBOL(mv_pp2x_cls_c2_hw_write);
 int mv_pp2x_cls_c2_qos_hw_write(struct mv_pp2x_hw *hw,
 				struct mv_pp2x_cls_c2_qos_entry *qos)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	unsigned int reg_val = 0;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	unsigned int regVal = 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	if (!qos || qos->tbl_sel > MVPP2_QOS_TBL_SEL_DSCP)
 		return -EINVAL;
@@ -5808,17 +5811,17 @@ int mv_pp2x_cls_c2_qos_hw_write(struct mv_pp2x_hw *hw,
 			return -EINVAL;
 	}
 	/* write index reg */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	reg_val |= (qos->tbl_line << MVPP2_CLS2_DSCP_PRI_INDEX_LINE_OFF);
 	reg_val |= (qos->tbl_sel << MVPP2_CLS2_DSCP_PRI_INDEX_SEL_OFF);
 	reg_val |= (qos->tbl_id << MVPP2_CLS2_DSCP_PRI_INDEX_TBL_ID_OFF);
 	mv_pp2x_write(hw, MVPP2_CLS2_DSCP_PRI_INDEX_REG, reg_val);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	regVal |= (qos->tbl_line << MVPP2_CLS2_DSCP_PRI_INDEX_LINE_OFF);
 	regVal |= (qos->tbl_sel << MVPP2_CLS2_DSCP_PRI_INDEX_SEL_OFF);
 	regVal |= (qos->tbl_id << MVPP2_CLS2_DSCP_PRI_INDEX_TBL_ID_OFF);
 	mv_pp2x_write(hw, MVPP2_CLS2_DSCP_PRI_INDEX_REG, regVal);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* write data reg*/
 	mv_pp2x_write(hw, MVPP2_CLS2_QOS_TBL_REG, qos->data);
@@ -6267,11 +6270,11 @@ static int mv_pp2x_c2_rule_add(struct mv_pp2x_port *port,
 	bool first_free_update = false;
 	struct mv_pp2x_c2_rule_idx *rule_idx;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	rule_idx = &port->priv->hw.c2_shadow->rule_idx_info[port->id];
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	rule_idx = &(port->priv->hw.c2_shadow->rule_idx_info[port->id]);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	if (!port || !c2_add_entry)
 		return -EINVAL;
@@ -6467,24 +6470,24 @@ EXPORT_SYMBOL(mv_pp2x_cls_c2_rule_set);
 /* The function get the queue in the C2 rule with input index */
 u8 mv_pp2x_cls_c2_rule_queue_get(struct mv_pp2x_hw *hw, u32 rule_idx)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	u32 reg_val;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	u32 regVal;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	u8 queue;
 
 	/* Write index reg */
 	mv_pp2x_write(hw, MVPP2_CLS2_TCAM_IDX_REG, rule_idx);
 
 	/* Read Reg CLSC2_ATTR0 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	reg_val = mv_pp2x_read(hw, MVPP2_CLS2_ACT_QOS_ATTR_REG);
 	queue = (reg_val & (MVPP2_CLS2_ACT_QOS_ATTR_QL_MASK |
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	regVal = mv_pp2x_read(hw, MVPP2_CLS2_ACT_QOS_ATTR_REG);
 	queue = (regVal & (MVPP2_CLS2_ACT_QOS_ATTR_QL_MASK |
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			MVPP2_CLS2_ACT_QOS_ATTR_QH_MASK)) >>
 			MVPP2_CLS2_ACT_QOS_ATTR_QL_OFF;
 	return queue;
@@ -6494,40 +6497,40 @@ u8 mv_pp2x_cls_c2_rule_queue_get(struct mv_pp2x_hw *hw, u32 rule_idx)
 void mv_pp2x_cls_c2_rule_queue_set(struct mv_pp2x_hw *hw, u32 rule_idx,
 				   u8 queue)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	u32 reg_val;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	u32 regVal;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Write index reg */
 	mv_pp2x_write(hw, MVPP2_CLS2_TCAM_IDX_REG, rule_idx);
 
 	/* Read Reg CLSC2_ATTR0 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	reg_val = mv_pp2x_read(hw, MVPP2_CLS2_ACT_QOS_ATTR_REG);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	regVal = mv_pp2x_read(hw, MVPP2_CLS2_ACT_QOS_ATTR_REG);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	/* Update Value */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	reg_val &= (~(MVPP2_CLS2_ACT_QOS_ATTR_QL_MASK |
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	regVal &= (~(MVPP2_CLS2_ACT_QOS_ATTR_QL_MASK |
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			MVPP2_CLS2_ACT_QOS_ATTR_QH_MASK));
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	reg_val |= (((u32)queue) << MVPP2_CLS2_ACT_QOS_ATTR_QL_OFF);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	regVal |= (((u32)queue) << MVPP2_CLS2_ACT_QOS_ATTR_QL_OFF);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Write Reg CLSC2_ATTR0 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	mv_pp2x_write(hw, MVPP2_CLS2_ACT_QOS_ATTR_REG, reg_val);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	mv_pp2x_write(hw, MVPP2_CLS2_ACT_QOS_ATTR_REG, regVal);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 }
 
 /* The function get the queue in the pbit table entry */
@@ -6535,36 +6538,36 @@ u8 mv_pp2x_cls_c2_pbit_tbl_queue_get(struct mv_pp2x_hw *hw, u8 tbl_id,
 				     u8 tbl_line)
 {
 	u8 queue;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	u32 reg_val = 0;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	u32 regVal = 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* write index reg */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	reg_val |= (tbl_line << MVPP2_CLS2_DSCP_PRI_INDEX_LINE_OFF);
 	reg_val |= (MVPP2_QOS_TBL_SEL_PRI <<
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	regVal |= (tbl_line << MVPP2_CLS2_DSCP_PRI_INDEX_LINE_OFF);
 	regVal |= (MVPP2_QOS_TBL_SEL_PRI <<
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			MVPP2_CLS2_DSCP_PRI_INDEX_SEL_OFF);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	reg_val |= (tbl_id << MVPP2_CLS2_DSCP_PRI_INDEX_TBL_ID_OFF);
 	mv_pp2x_write(hw, MVPP2_CLS2_DSCP_PRI_INDEX_REG, reg_val);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	regVal |= (tbl_id << MVPP2_CLS2_DSCP_PRI_INDEX_TBL_ID_OFF);
 	mv_pp2x_write(hw, MVPP2_CLS2_DSCP_PRI_INDEX_REG, regVal);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	/* Read Reg CLSC2_DSCP_PRI */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	reg_val = mv_pp2x_read(hw, MVPP2_CLS2_QOS_TBL_REG);
 	queue = (reg_val &  MVPP2_CLS2_QOS_TBL_QUEUENUM_MASK) >>
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	regVal = mv_pp2x_read(hw, MVPP2_CLS2_QOS_TBL_REG);
 	queue = (regVal &  MVPP2_CLS2_QOS_TBL_QUEUENUM_MASK) >>
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 			MVPP2_CLS2_QOS_TBL_QUEUENUM_OFF;
 
 	return queue;
@@ -6574,46 +6577,46 @@ u8 mv_pp2x_cls_c2_pbit_tbl_queue_get(struct mv_pp2x_hw *hw, u8 tbl_id,
 void mv_pp2x_cls_c2_pbit_tbl_queue_set(struct mv_pp2x_hw *hw,
 				       u8 tbl_id, u8 tbl_line, u8 queue)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	u32 reg_val = 0;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	u32 regVal = 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* write index reg */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	reg_val |= (tbl_line << MVPP2_CLS2_DSCP_PRI_INDEX_LINE_OFF);
 	reg_val |=
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	regVal |= (tbl_line << MVPP2_CLS2_DSCP_PRI_INDEX_LINE_OFF);
 	regVal |=
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		(MVPP2_QOS_TBL_SEL_PRI << MVPP2_CLS2_DSCP_PRI_INDEX_SEL_OFF);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	reg_val |= (tbl_id << MVPP2_CLS2_DSCP_PRI_INDEX_TBL_ID_OFF);
 	mv_pp2x_write(hw, MVPP2_CLS2_DSCP_PRI_INDEX_REG, reg_val);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	regVal |= (tbl_id << MVPP2_CLS2_DSCP_PRI_INDEX_TBL_ID_OFF);
 	mv_pp2x_write(hw, MVPP2_CLS2_DSCP_PRI_INDEX_REG, regVal);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Read Reg CLSC2_DSCP_PRI */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	reg_val = mv_pp2x_read(hw, MVPP2_CLS2_QOS_TBL_REG);
 	reg_val &= (~MVPP2_CLS2_QOS_TBL_QUEUENUM_MASK);
 	reg_val |= (((u32)queue) << MVPP2_CLS2_QOS_TBL_QUEUENUM_OFF);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	regVal = mv_pp2x_read(hw, MVPP2_CLS2_QOS_TBL_REG);
 	regVal &= (~MVPP2_CLS2_QOS_TBL_QUEUENUM_MASK);
 	regVal |= (((u32)queue) << MVPP2_CLS2_QOS_TBL_QUEUENUM_OFF);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Write Reg CLSC2_DSCP_PRI */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	mv_pp2x_write(hw, MVPP2_CLS2_QOS_TBL_REG, reg_val);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	mv_pp2x_write(hw, MVPP2_CLS2_QOS_TBL_REG, regVal);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 }
 
 /* RSS */
@@ -6621,11 +6624,11 @@ void mv_pp2x_cls_c2_pbit_tbl_queue_set(struct mv_pp2x_hw *hw,
 int mv_pp22_rss_tbl_entry_set(struct mv_pp2x_hw *hw,
 			      struct mv_pp22_rss_entry *rss)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	unsigned int reg_val = 0;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	unsigned int regVal = 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	if (!rss || rss->sel > MVPP22_RSS_ACCESS_TBL)
 		return -EINVAL;
@@ -6634,65 +6637,65 @@ int mv_pp22_rss_tbl_entry_set(struct mv_pp2x_hw *hw,
 		if (rss->u.pointer.rss_tbl_ptr >= MVPP22_RSS_TBL_NUM)
 			return -EINVAL;
 		/* Write index */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		reg_val |= rss->u.pointer.rxq_idx <<
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		regVal |= rss->u.pointer.rxq_idx <<
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 				MVPP22_RSS_IDX_RXQ_NUM_OFF;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		mv_pp2x_write(hw, MVPP22_RSS_IDX_REG, reg_val);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		mv_pp2x_write(hw, MVPP22_RSS_IDX_REG, regVal);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		/* Write entry */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		reg_val &= (~MVPP22_RSS_RXQ2RSS_TBL_POINT_MASK);
 		reg_val |= rss->u.pointer.rss_tbl_ptr <<
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		regVal &= (~MVPP22_RSS_RXQ2RSS_TBL_POINT_MASK);
 		regVal |= rss->u.pointer.rss_tbl_ptr <<
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 				MVPP22_RSS_RXQ2RSS_TBL_POINT_OFF;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		mv_pp2x_write(hw, MVPP22_RSS_RXQ2RSS_TBL_REG, reg_val);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		mv_pp2x_write(hw, MVPP22_RSS_RXQ2RSS_TBL_REG, regVal);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	} else if (rss->sel == MVPP22_RSS_ACCESS_TBL) {
 		if (rss->u.entry.tbl_id >= MVPP22_RSS_TBL_NUM ||
 		    rss->u.entry.tbl_line >= MVPP22_RSS_TBL_LINE_NUM ||
 		    rss->u.entry.width >= MVPP22_RSS_WIDTH_MAX)
 			return -EINVAL;
 		/* Write index */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		reg_val |= (rss->u.entry.tbl_line <<
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		regVal |= (rss->u.entry.tbl_line <<
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 				MVPP22_RSS_IDX_ENTRY_NUM_OFF |
 			   rss->u.entry.tbl_id << MVPP22_RSS_IDX_TBL_NUM_OFF);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		mv_pp2x_write(hw, MVPP22_RSS_IDX_REG, reg_val);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		mv_pp2x_write(hw, MVPP22_RSS_IDX_REG, regVal);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		/* Write entry */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		reg_val &= (~MVPP22_RSS_TBL_ENTRY_MASK);
 		reg_val |= (rss->u.entry.rxq << MVPP22_RSS_TBL_ENTRY_OFF);
 		mv_pp2x_write(hw, MVPP22_RSS_TBL_ENTRY_REG, reg_val);
 		reg_val &= (~MVPP22_RSS_WIDTH_MASK);
 		reg_val |= (rss->u.entry.width << MVPP22_RSS_WIDTH_OFF);
 		mv_pp2x_write(hw, MVPP22_RSS_WIDTH_REG, reg_val);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		regVal &= (~MVPP22_RSS_TBL_ENTRY_MASK);
 		regVal |= (rss->u.entry.rxq << MVPP22_RSS_TBL_ENTRY_OFF);
 		mv_pp2x_write(hw, MVPP22_RSS_TBL_ENTRY_REG, regVal);
 		regVal &= (~MVPP22_RSS_WIDTH_MASK);
 		regVal |= (rss->u.entry.width << MVPP22_RSS_WIDTH_OFF);
 		mv_pp2x_write(hw, MVPP22_RSS_WIDTH_REG, regVal);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	}
 	return 0;
 }
@@ -6701,11 +6704,11 @@ int mv_pp22_rss_tbl_entry_set(struct mv_pp2x_hw *hw,
 int mv_pp22_rss_tbl_entry_get(struct mv_pp2x_hw *hw,
 			      struct mv_pp22_rss_entry *rss)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	unsigned int reg_val = 0;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	unsigned int regVal = 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	if (!rss || rss->sel > MVPP22_RSS_ACCESS_TBL)
 		return -EINVAL;
@@ -6720,19 +6723,19 @@ int mv_pp22_rss_tbl_entry_get(struct mv_pp2x_hw *hw,
 		    rss->u.entry.tbl_line >= MVPP22_RSS_TBL_LINE_NUM)
 			return -EINVAL;
 		/* Read index */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		reg_val |= (rss->u.entry.tbl_line <<
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		regVal |= (rss->u.entry.tbl_line <<
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 				MVPP22_RSS_IDX_ENTRY_NUM_OFF |
 			   rss->u.entry.tbl_id <<
 				MVPP22_RSS_IDX_TBL_NUM_OFF);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 		mv_pp2x_write(hw, MVPP22_RSS_IDX_REG, reg_val);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 		mv_pp2x_write(hw, MVPP22_RSS_IDX_REG, regVal);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 		/* Read entry */
 		rss->u.entry.rxq = mv_pp2x_read(hw,
 						MVPP22_RSS_TBL_ENTRY_REG) &
@@ -6794,11 +6797,11 @@ void mv_pp22_rss_c2_enable(struct mv_pp2x_port *port, bool en)
 	int c2_index[MVPP2_CLS_LKP_MAX];
 	struct mv_pp2x_c2_rule_idx *rule_idx;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	rule_idx = &port->priv->hw.c2_shadow->rule_idx_info[port->id];
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	rule_idx = &(port->priv->hw.c2_shadow->rule_idx_info[port->id]);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Get the C2 index from shadow */
 	c2_index[MVPP2_CLS_LKP_VLAN_PRI] = rule_idx->vlan_pri_idx;
@@ -6847,8 +6850,8 @@ int mv_pp2x_check_hw_buf_num(struct mv_pp2x *priv, struct mv_pp2x_bm_pool *bm_po
 	else
 		return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#endif /* MY_DEF_HERE */
+#if defined(MY_DEF_HERE)
 
 /*  Update Mvpp2x counter statistic */
 void mv_pp2x_counters_stat_update(struct mv_pp2x_port *port,
@@ -6904,4 +6907,4 @@ void mv_pp2x_counters_stat_clear(struct mv_pp2x_port *port)
 	}
 	preempt_enable();
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */

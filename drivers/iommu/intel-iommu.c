@@ -757,8 +757,7 @@ static struct intel_iommu *device_to_iommu(struct device *dev, u8 *bus, u8 *devf
 		struct pci_dev *pf_pdev;
 
 		pdev = to_pci_dev(dev);
-		/* VFs aren't listed in scope tables; we need to look up
-		 * the PF instead to find the IOMMU. */
+		 
 		pf_pdev = pci_physfn(pdev);
 		dev = &pf_pdev->dev;
 		segment = pci_domain_nr(pdev->bus);
@@ -773,10 +772,7 @@ static struct intel_iommu *device_to_iommu(struct device *dev, u8 *bus, u8 *devf
 		for_each_active_dev_scope(drhd->devices,
 					  drhd->devices_cnt, i, tmp) {
 			if (tmp == dev) {
-				/* For a VF use its original BDF# not that of the PF
-				 * which we used for the IOMMU lookup. Strictly speaking
-				 * we could do this for all PCI devices; we only need to
-				 * get the BDF# from the scope table for ACPI matches. */
+				 
 				if (pdev && pdev->is_virtfn)
 					goto got_pdev;
 
@@ -1513,12 +1509,7 @@ again:
 		__dmar_remove_one_dev_info(info);
 
 		if (!domain_type_is_vm_or_si(domain)) {
-			/*
-			 * The domain_exit() function  can't be called under
-			 * device_domain_lock, as it takes this lock itself.
-			 * So release the lock here and re-run the loop
-			 * afterwards.
-			 */
+			 
 			spin_unlock_irqrestore(&device_domain_lock, flags);
 			domain_exit(domain);
 			goto again;
@@ -1795,15 +1786,6 @@ static int domain_context_mapping_one(struct dmar_domain *domain,
 	if (context_present(context))
 		goto out_unlock;
 
-	/*
-	 * For kdump cases, old valid entries may be cached due to the
-	 * in-flight DMA and copied pgtable, but there is no unmapping
-	 * behaviour for them, thus we need an explicit cache flush for
-	 * the newly-mapped device. For kdump, at this point, the device
-	 * is supposed to finish reset at its driver probe stage, so no
-	 * in-flight DMA will exist, and we don't need to worry anymore
-	 * hereafter.
-	 */
 	if (context_copied(context)) {
 		u16 did_old = context_domain_id(context);
 
@@ -2857,11 +2839,6 @@ static int __init init_dmars(void)
 #endif
 	}
 
-	/*
-	 * Now that qi is enabled on all iommus, set the root entry and flush
-	 * caches. This is required on some Intel X58 chipsets, otherwise the
-	 * flush_context function will loop forever and the boot hangs.
-	 */
 	for_each_active_iommu(iommu, drhd) {
 		iommu_flush_write_buffer(iommu);
 		iommu_set_root_entry(iommu);
@@ -2886,7 +2863,6 @@ static int __init init_dmars(void)
 		if (ret)
 			goto free_iommu;
 	}
-
 
 	if (copied_tables)
 		goto domains_done;
@@ -4567,18 +4543,10 @@ static void intel_iommu_remove_device(struct device *dev)
 #define MAX_NR_PASID_BITS (20)
 static inline unsigned long intel_iommu_get_pts(struct intel_iommu *iommu)
 {
-	/*
-	 * Convert ecap_pss to extend context entry pts encoding, also
-	 * respect the soft pasid_max value set by the iommu.
-	 * - number of PASID bits = ecap_pss + 1
-	 * - number of PASID table entries = 2^(pts + 5)
-	 * Therefore, pts = ecap_pss - 4
-	 * e.g. KBL ecap_pss = 0x13, PASID has 20 bits, pts = 15
-	 */
+	 
 	if (ecap_pss(iommu->ecap) < 5)
 		return 0;
 
-	/* pasid_max is encoded as actual number of entries not the bits */
 	return find_first_bit((unsigned long *)&iommu->pasid_max,
 			MAX_NR_PASID_BITS) - 5;
 }

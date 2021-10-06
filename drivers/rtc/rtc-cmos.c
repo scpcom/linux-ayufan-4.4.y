@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * RTC class driver for "CMOS RTC":  PCs, ACPI, etc
  *
@@ -976,10 +979,28 @@ static SIMPLE_DEV_PM_OPS(cmos_pm_ops, cmos_suspend, cmos_resume);
 static u32 rtc_handler(void *context)
 {
 	struct device *dev = context;
+#ifdef MY_ABC_HERE
+	unsigned char   rtc_ctrl;
+	unsigned long   flags;
+
+	spin_lock_irqsave(&rtc_lock, flags);
+	// read to clear irq status
+	CMOS_READ(RTC_INTR_FLAGS);
+	rtc_ctrl = CMOS_READ(RTC_CONTROL);
+	spin_unlock_irqrestore(&rtc_lock, flags);
+#endif /* MY_ABC_HERE */
 
 	pm_wakeup_event(dev, 0);
 	acpi_clear_event(ACPI_EVENT_RTC);
+#ifdef MY_ABC_HERE
+	if (rtc_ctrl & RTC_AIE) {
+		acpi_enable_event(ACPI_EVENT_RTC, 0);
+	} else {
+		acpi_disable_event(ACPI_EVENT_RTC, 0);
+	}
+#else /* MY_ABC_HERE */
 	acpi_disable_event(ACPI_EVENT_RTC, 0);
+#endif /* MY_ABC_HERE */
 	return ACPI_INTERRUPT_HANDLED;
 }
 
@@ -1259,7 +1280,6 @@ static void __exit cmos_exit(void)
 		platform_driver_unregister(&cmos_platform_driver);
 }
 module_exit(cmos_exit);
-
 
 MODULE_AUTHOR("David Brownell");
 MODULE_DESCRIPTION("Driver for PC-style 'CMOS' RTCs");

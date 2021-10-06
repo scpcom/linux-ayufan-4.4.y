@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*
  * Copyright (C) 2015-2016 Marvell International Ltd.
 
@@ -43,10 +46,10 @@
 #define DMA_IMSG_THRD_OFF	0x018
 #define   DMA_IMSG_THRD_MASK			0x7FFF
 #define   DMA_IMSG_THRD_SHIFT			0x0
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 #define   DMA_IMSG_TIMER_MASK			0x1
 #define   DMA_IMSG_TIMER_SHIFT			18
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 #define DMA_DESQ_AWATTR_OFF	0x01C
   /* Same flags as DMA_DESQ_ARATTR_OFF */
 #define DMA_DESQ_ALLOC_OFF	0x04C
@@ -60,11 +63,11 @@
 #define DMA_DESQ_STOP_OFF	0x800
 #define DMA_DESQ_DEALLOC_OFF	0x804
 #define DMA_DESQ_ADD_OFF	0x808
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 #define DMA_IMSG_TMOT		0x810
 #define   DMA_IMSG_TIMER_THRD_MASK		0x1FFF
 #define   DMA_IMSG_TIMER_THRD_SHIFT		0x0
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 
 /* XOR Global registers */
 #define GLOB_BW_CTRL		0x4
@@ -74,18 +77,18 @@
 #define   GLOB_BW_CTRL_NUM_OSTD_WR_VAL		8
 #define   GLOB_BW_CTRL_RD_BURST_LEN_SHIFT	12
 #define   GLOB_BW_CTRL_RD_BURST_LEN_VAL		4
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 #define   GLOB_BW_CTRL_RD_BURST_LEN_VAL_Z1	2
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 #define   GLOB_BW_CTRL_WR_BURST_LEN_SHIFT	16
 #define   GLOB_BW_CTRL_WR_BURST_LEN_VAL      	4
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 #define   GLOB_BW_CTRL_WR_BURST_LEN_VAL_Z1     	2
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 #define GLOB_PAUSE		0x014
 #define   GLOB_PAUSE_AXI_TIME_DIS_VAL		0x8
 #define GLOB_SYS_INT_CAUSE	0x200
@@ -104,14 +107,14 @@
 /* descriptors queue size */
 #define MV_XOR_V2_MAX_DESC_NUM	1024
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 /* Threshold values for descriptors and timeout
 ** got this values after runnig benchmarks with RAID5
 */
 #define MV_XOR_DONE_IMSG_THRD	0x14
 #define MV_XOR_TIMER_THRD	0xB0
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 /**
  * struct mv_xor_v2_descriptor - DMA HW descriptor
  * @desc_id: used by S/W and is not affected by H/W.
@@ -119,13 +122,13 @@
  * @crc32_result: CRC32 calculation result
  * @desc_ctrl: operation mode and control flags
  * @buff_size: amount of bytes to be processed
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
  * @fill_pattern_src_addr: Source-Address, or Q-Buffer-Address
  * @fill_pattern_dst_addr: Destination-Address, or P-Buffer-Address
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
  * @fill_pattern_src_addr: Fill-Pattern or Source-Address and
  * AW-Attributes
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
  * @data_buff_addr: Source (and might be RAID6 destination)
  * addresses of data buffers in RAID5 and RAID6
  * @reserved: reserved
@@ -153,12 +156,12 @@ struct mv_xor_v2_descriptor {
 #define DESC_IOD			BIT(27)
 
 	u32 buff_size;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	u32 fill_pattern_src_addr[2];
 	u32 fill_pattern_dst_addr[2];
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	u32 fill_pattern_src_addr[4];
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	u32 data_buff_addr[MV_XOR_V2_DESC_BUFF_D_ADDR_SIZE];
 	u32 reserved[MV_XOR_V2_DESC_RESERVED_SIZE];
 };
@@ -180,11 +183,11 @@ struct mv_xor_v2_descriptor {
  * @hw_desq_virt: virtual address of DESCQ
  * @sw_desq: SW descriptors queue
  * @desc_size: HW descriptor size
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
  * @npendings: number of pending descriptors (for which tx_submit has
  * been called, but not yet issue_pending)
  * @hw_queue_idx: index of next HW descriptor to push to the queue
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 */
 struct mv_xor_v2_device {
 	spinlock_t sw_ll_lock;
@@ -202,10 +205,10 @@ struct mv_xor_v2_device {
 	struct mv_xor_v2_descriptor *hw_desq_virt;
 	struct mv_xor_v2_sw_desc *sw_desq;
 	int desc_size;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	unsigned int npendings;
 	int hw_queue_idx;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 };
 
 /**
@@ -223,9 +226,9 @@ struct mv_xor_v2_sw_desc {
 };
 
 /*
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
  * Hold XOR engine parameters depending on the matched
  * compatible string.
  */
@@ -237,7 +240,7 @@ struct mv_xor_v2_compat_data {
 static const struct of_device_id mv_xor_v2_dt_ids[];
 
 /*
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
  * Fill the data buffers to a HW descriptor
  */
 static void mv_xor_v2_set_data_buffers(struct mv_xor_v2_device *xor_dev,
@@ -279,9 +282,9 @@ static void mv_xor_v2_set_data_buffers(struct mv_xor_v2_device *xor_dev,
 }
 
 /*
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
  * Return the next available index in the DESQ.
  */
 static inline int mv_xor_v2_get_desq_write_ptr(struct mv_xor_v2_device *xor_dev)
@@ -294,7 +297,7 @@ static inline int mv_xor_v2_get_desq_write_ptr(struct mv_xor_v2_device *xor_dev)
 }
 
 /*
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
  * notify the engine of new descriptors, and update the available index.
  */
 static void mv_xor_v2_add_desc_to_desq(struct mv_xor_v2_device *xor_dev,
@@ -347,55 +350,55 @@ void mv_xor_v2_free_chan_resources(struct dma_chan *chan)
  * Set the IMSG threshold
  */
 static inline
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 void mv_xor_v2_enable_imsg_thrd(struct mv_xor_v2_device *xor_dev)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 void mv_xor_v2_set_imsg_thrd(struct mv_xor_v2_device *xor_dev, int thrd_val)
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 {
 	u32 reg;
 
 	reg = readl(xor_dev->dma_base + DMA_IMSG_THRD_OFF);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	/* Configure threshold for IMSG */
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	reg &= (~DMA_IMSG_THRD_MASK << DMA_IMSG_THRD_SHIFT);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	reg |= (MV_XOR_DONE_IMSG_THRD << DMA_IMSG_THRD_SHIFT);
 	/* Enable IMSG-timer */
 	reg &= ~(DMA_IMSG_TIMER_MASK << DMA_IMSG_TIMER_SHIFT);
 	reg |= (0x1 << DMA_IMSG_TIMER_SHIFT);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	reg |= (thrd_val << DMA_IMSG_THRD_SHIFT);
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	writel(reg, xor_dev->dma_base + DMA_IMSG_THRD_OFF);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 
 	/* Configure Timer Threshold */
 	reg = readl(xor_dev->dma_base + DMA_IMSG_TMOT);
 	reg &= (~DMA_IMSG_TIMER_THRD_MASK << DMA_IMSG_TIMER_THRD_SHIFT);
 	reg |= (MV_XOR_TIMER_THRD << DMA_IMSG_TIMER_THRD_SHIFT);
 	writel(reg, xor_dev->dma_base + DMA_IMSG_TMOT);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 }
 
 static irqreturn_t mv_xor_v2_interrupt_handler(int irq, void *data)
 {
 	struct mv_xor_v2_device *xor_dev = data;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	/*
 	 * Update IMSG threshold, to disable new IMSG interrupts until
 	 * end of the tasklet
 	 */
 	mv_xor_v2_set_imsg_thrd(xor_dev, MV_XOR_V2_MAX_DESC_NUM);
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	/* schedule a tasklet to handle descriptors callbacks */
 	tasklet_schedule(&xor_dev->irq_tasklet);
 
@@ -408,11 +411,11 @@ static irqreturn_t mv_xor_v2_interrupt_handler(int irq, void *data)
 static dma_cookie_t
 mv_xor_v2_tx_submit(struct dma_async_tx_descriptor *tx)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	int desq_ptr;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	void *dest_hw_desc;
 	dma_cookie_t cookie;
 	struct mv_xor_v2_sw_desc *sw_desc =
@@ -429,16 +432,16 @@ mv_xor_v2_tx_submit(struct dma_async_tx_descriptor *tx)
 	/* assign coookie */
 	cookie = dma_cookie_assign(tx);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	/* get the next available slot in the DESQ */
 	desq_ptr = mv_xor_v2_get_desq_write_ptr(xor_dev);
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	/* copy the HW descriptor from the SW descriptor to the DESQ */
 	dest_hw_desc = ((void *)xor_dev->hw_desq_virt +
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 			(xor_dev->desc_size * xor_dev->hw_queue_idx));
 	/*
 	 * Increase the push index for the HW queue and check if reach
@@ -446,18 +449,18 @@ mv_xor_v2_tx_submit(struct dma_async_tx_descriptor *tx)
 	 */
 	if (++xor_dev->hw_queue_idx >= MV_XOR_V2_MAX_DESC_NUM)
 		xor_dev->hw_queue_idx = 0;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 			(xor_dev->desc_size * desq_ptr));
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
 	memcpy(dest_hw_desc, &sw_desc->hw_desc, xor_dev->desc_size);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	xor_dev->npendings++;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	/* update the DMA Engine with the new descriptor */
 	mv_xor_v2_add_desc_to_desq(xor_dev, 1);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
 	/* unlock enqueue DESCQ */
 	spin_unlock_bh(&xor_dev->push_lock);
@@ -523,11 +526,11 @@ mv_xor_v2_prep_dma_memcpy(struct dma_chan *chan, dma_addr_t dest, dma_addr_t src
 
 	sw_desc = mv_xor_v2_prep_sw_desc(xor_dev);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	/* If there's no empty discriptor, return NULL to dma stack */
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	/* did we get a valid descriptor? */
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	if (!sw_desc)
 		return NULL;
 
@@ -543,11 +546,11 @@ mv_xor_v2_prep_dma_memcpy(struct dma_chan *chan, dma_addr_t dest, dma_addr_t src
 	hw_descriptor->desc_ctrl =
 		DESC_OP_MODE_MEMCPY << DESC_OP_MODE_SHIFT;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (flags & DMA_PREP_INTERRUPT)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	/* Enable interrupt for all descriptions, as preparation for coalescing feature */
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	hw_descriptor->desc_ctrl |= DESC_IOD;
 
 	/* Set source address */
@@ -560,25 +563,25 @@ mv_xor_v2_prep_dma_memcpy(struct dma_chan *chan, dma_addr_t dest, dma_addr_t src
 		hw_descriptor->fill_pattern_src_addr[1] = 0;
 
 	/* Set Destination address */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	hw_descriptor->fill_pattern_dst_addr[0] = lower_32_bits(dest);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	hw_descriptor->fill_pattern_src_addr[2] = lower_32_bits(dest);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
 	if (IS_ENABLED(CONFIG_ARCH_DMA_ADDR_T_64BIT))
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		hw_descriptor->fill_pattern_dst_addr[1] =
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 		hw_descriptor->fill_pattern_src_addr[3] =
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 			upper_32_bits(dest) & 0xFFFF;
 	else
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		hw_descriptor->fill_pattern_dst_addr[1] = 0;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 		hw_descriptor->fill_pattern_src_addr[3] = 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Set buffers size */
 	hw_descriptor->buff_size = len;
@@ -599,11 +602,11 @@ mv_xor_v2_prep_dma_xor(struct dma_chan *chan, dma_addr_t dest, dma_addr_t *src,
 	struct mv_xor_v2_device		*xor_dev;
 	int i;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	WARN_ON(src_cnt > MV_XOR_V2_CMD_LINE_NUM_MAX_D_BUF || src_cnt < 1);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	BUG_ON(src_cnt > MV_XOR_V2_CMD_LINE_NUM_MAX_D_BUF || src_cnt < 1);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
 	xor_dev = container_of(chan, struct mv_xor_v2_device, dmachan);
 
@@ -611,19 +614,19 @@ mv_xor_v2_prep_dma_xor(struct dma_chan *chan, dma_addr_t dest, dma_addr_t *src,
 		"%s src_cnt: %d len: %zu dest %pad flags: %ld\n",
 		__func__, src_cnt, len, &dest, flags);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	WARN_ON(xor_dev->desc_size != MV_XOR_V2_EXT_DESC_SIZE);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	BUG_ON(xor_dev->desc_size != MV_XOR_V2_EXT_DESC_SIZE);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
 	sw_desc = mv_xor_v2_prep_sw_desc(xor_dev);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	/* If there's no empty discriptor, return NULL to dma stack */
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	/* did we get a valid descriptor? */
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	if (!sw_desc)
 		return NULL;
 
@@ -640,11 +643,11 @@ mv_xor_v2_prep_dma_xor(struct dma_chan *chan, dma_addr_t dest, dma_addr_t *src,
 		DESC_OP_MODE_XOR << DESC_OP_MODE_SHIFT;
 	hw_descriptor->desc_ctrl |= DESC_P_BUFFER_ENABLE;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	if (flags & DMA_PREP_INTERRUPT)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 	/* Enable interrupt for all descriptions, as preparation for coalescing feature */
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	hw_descriptor->desc_ctrl |= DESC_IOD;
 
 	/* Set the data buffers */
@@ -655,20 +658,20 @@ mv_xor_v2_prep_dma_xor(struct dma_chan *chan, dma_addr_t dest, dma_addr_t *src,
 		src_cnt << DESC_NUM_ACTIVE_D_BUF_SHIFT;
 
 	/* Set Destination address */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	hw_descriptor->fill_pattern_dst_addr[0] = lower_32_bits(dest);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	hw_descriptor->fill_pattern_src_addr[2] = lower_32_bits(dest);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	if (IS_ENABLED(CONFIG_ARCH_DMA_ADDR_T_64BIT))
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		hw_descriptor->fill_pattern_dst_addr[1] =
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 		hw_descriptor->fill_pattern_src_addr[3] =
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 			upper_32_bits(dest) & 0xFFFF;
 	else
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		hw_descriptor->fill_pattern_dst_addr[1] = 0;
 
 	/* Set buffers size */
@@ -764,9 +767,9 @@ mv_xor_v2_prep_dma_pq(struct dma_chan *chan, dma_addr_t *dest, dma_addr_t *src,
 	/* Set the data buffers */
 	for (i = 0; i < src_cnt; i++)
 		mv_xor_v2_set_data_buffers(xor_dev, hw_descriptor, src[i], i);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 		hw_descriptor->fill_pattern_src_addr[3] = 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
 	/* Set buffers size */
 	hw_descriptor->buff_size = len;
@@ -789,11 +792,11 @@ mv_xor_v2_prep_dma_interrupt(struct dma_chan *chan, unsigned long flags)
 
 	sw_desc = mv_xor_v2_prep_sw_desc(xor_dev);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	/* If there's no empty discriptor, return NULL to dma stack */
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	/* did we get a valid descriptor? */
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	if (!sw_desc)
 		return NULL;
 
@@ -823,19 +826,19 @@ static enum dma_status mv_xor_v2_tx_status(struct dma_chan *chan,
 }
 
 /*
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
  * issue all the pending descriptors (update the DMA Engine with
  * the ready descriptors)
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
  * push pending transactions to hardware
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
  */
 static void mv_xor_v2_issue_pending(struct dma_chan *chan)
 {
 	struct mv_xor_v2_device *xor_dev =
 		container_of(chan, struct mv_xor_v2_device, dmachan);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	/* Lock the channel */
 	spin_lock_bh(&xor_dev->push_lock);
 	if (xor_dev->npendings > 0) {
@@ -844,10 +847,10 @@ static void mv_xor_v2_issue_pending(struct dma_chan *chan)
 	}
 	/* Release the channel */
 	spin_unlock_bh(&xor_dev->push_lock);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	/* Activate the channel */
 	writel(0, xor_dev->dma_base + DMA_DESQ_STOP_OFF);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 }
 
 static inline
@@ -880,20 +883,20 @@ static void mv_xor_v2_tasklet(unsigned long data)
 
 	dev_dbg(xor_dev->dmadev.dev, "%s %d\n", __func__, __LINE__);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	/* Lock the channel */
 	spin_lock_bh(&xor_dev->sw_ll_lock);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	/* free the compeleted descriptors (check the ctrl ack flag) */
 	list_for_each_entry_safe(iter, _iter, &xor_dev->complete_sw_desc,
 				 node) {
 		if (async_tx_test_ack(&iter->async_tx))
 			list_move_tail(&iter->node, &xor_dev->free_sw_desc);
 	}
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	/* Release the channel */
 	spin_unlock_bh(&xor_dev->sw_ll_lock);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
 	/* get thepending descriptors parameters */
 	num_of_pending = mv_xor_v2_get_pending_params(xor_dev, &pending_ptr);
@@ -953,13 +956,13 @@ static void mv_xor_v2_tasklet(unsigned long data)
 		/* free the descriptores */
 		mv_xor_v2_free_desc_from_desq(xor_dev, num_of_pending);
 	}
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#else /* MY_DEF_HERE */
 
 	/* Update IMSG threshold, to enable new IMSG interrupts */
 	mv_xor_v2_set_imsg_thrd(xor_dev, 0);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 }
 
 /*
@@ -977,12 +980,12 @@ static void mv_xor_v2_set_msi_msg(struct msi_desc *desc, struct msi_msg *msg)
 static int mv_xor_v2_descq_init(struct mv_xor_v2_device *xor_dev)
 {
 	u32 reg;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	const struct of_device_id *match;
 	struct mv_xor_v2_compat_data *data;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
 	/* write the DESQ size to the DMA engine */
 	writel(MV_XOR_V2_MAX_DESC_NUM, xor_dev->dma_base + DMA_DESQ_SIZE_OFF);
@@ -993,13 +996,13 @@ static int mv_xor_v2_descq_init(struct mv_xor_v2_device *xor_dev)
 	writel((xor_dev->hw_desq & 0xFFFF00000000) >> 32,
 	       xor_dev->dma_base + DMA_DESQ_BAHR_OFF);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	/* enable the DMA engine */
 	writel(0, xor_dev->dma_base + DMA_DESQ_STOP_OFF);
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	/*
 	 * This is a temporary solution, until we activate the
 	 * SMMU. Set the attributes for reading & writing data buffers
@@ -1026,24 +1029,24 @@ static int mv_xor_v2_descq_init(struct mv_xor_v2_device *xor_dev)
 	 * -  Limit the number of outstanding write & read data
 	 *    (OBB/IBB) requests to the maximal value.
 	*/
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	match = of_match_node(mv_xor_v2_dt_ids, xor_dev->dmadev.dev->of_node);
 	if (WARN_ON(!match))
 		return -1;
 	data = (struct mv_xor_v2_compat_data *)match->data;
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	reg = (GLOB_BW_CTRL_NUM_OSTD_RD_VAL << GLOB_BW_CTRL_NUM_OSTD_RD_SHIFT) |
 		(GLOB_BW_CTRL_NUM_OSTD_WR_VAL << GLOB_BW_CTRL_NUM_OSTD_WR_SHIFT) |
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		(GLOB_BW_CTRL_RD_BURST_LEN_VAL << GLOB_BW_CTRL_RD_BURST_LEN_SHIFT) |
 		(GLOB_BW_CTRL_WR_BURST_LEN_VAL << GLOB_BW_CTRL_WR_BURST_LEN_SHIFT);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 		(data->rd_burst_len << GLOB_BW_CTRL_RD_BURST_LEN_SHIFT) |
 		(data->wr_burst_len << GLOB_BW_CTRL_WR_BURST_LEN_SHIFT);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	writel(reg, xor_dev->glob_base + GLOB_BW_CTRL);
 
 	/* Disable the AXI timer feature */
@@ -1051,7 +1054,7 @@ static int mv_xor_v2_descq_init(struct mv_xor_v2_device *xor_dev)
 	reg |= GLOB_PAUSE_AXI_TIME_DIS_VAL;
 	writel(reg, xor_dev->glob_base + GLOB_PAUSE);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	/* enable the DMA engine */
 	writel(0, xor_dev->dma_base + DMA_DESQ_STOP_OFF);
 
@@ -1083,7 +1086,7 @@ static int mv_xor_v2_resume(struct platform_device *dev)
 	/* Init the descriptors in the engine */
 	mv_xor_v2_descq_init(xor_dev);
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	return 0;
 }
 
@@ -1096,9 +1099,9 @@ static int mv_xor_v2_probe(struct platform_device *pdev)
 	struct mv_xor_v2_sw_desc *sw_desc;
 	struct msi_desc *msi_desc;
 	struct device *dev = &pdev->dev;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	u32 dma_bus_width;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 
 	dev_notice(&pdev->dev, "Marvell Version 2 XOR driver\n");
 
@@ -1135,7 +1138,7 @@ static int mv_xor_v2_probe(struct platform_device *pdev)
 	if (ret)
 		goto disable_clk;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_06_01)
+#if defined(MY_DEF_HERE)
 	/* Read the DMA bus width from the device-tree and configure it */
 	ret = of_property_read_u32(pdev->dev.of_node, "dma-bus-width",
 				   &dma_bus_width);
@@ -1148,7 +1151,7 @@ static int mv_xor_v2_probe(struct platform_device *pdev)
 	if (ret)
 		goto disable_clk;
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_06_01 */
+#endif /* MY_DEF_HERE */
 	msi_desc = first_msi_entry(&pdev->dev);
 	if (!msi_desc)
 		goto free_msi_irqs;
@@ -1163,10 +1166,10 @@ static int mv_xor_v2_probe(struct platform_device *pdev)
 		     (unsigned long) xor_dev);
 
 	xor_dev->desc_size = mv_xor_v2_set_desc_size(xor_dev);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	xor_dev->npendings = 0;
 	xor_dev->hw_queue_idx = 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
 	dma_cookie_init(&xor_dev->dmachan);
 
@@ -1215,9 +1218,9 @@ static int mv_xor_v2_probe(struct platform_device *pdev)
 	dma_cap_set(DMA_MEMCPY, dma_dev->cap_mask);
 	dma_cap_set(DMA_XOR, dma_dev->cap_mask);
 	dma_cap_set(DMA_INTERRUPT, dma_dev->cap_mask);
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	dma_cap_set(DMA_PQ, dma_dev->cap_mask);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
 	/* init dma link list */
 	INIT_LIST_HEAD(&dma_dev->channels);
@@ -1233,26 +1236,26 @@ static int mv_xor_v2_probe(struct platform_device *pdev)
 
 	dma_dev->device_prep_dma_memcpy = mv_xor_v2_prep_dma_memcpy;
 	dma_dev->device_prep_dma_interrupt = mv_xor_v2_prep_dma_interrupt;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	dma_dev->max_xor = MV_XOR_V2_CMD_LINE_NUM_MAX_D_BUF;
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	dma_dev->max_xor = 8;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	dma_dev->device_prep_dma_xor = mv_xor_v2_prep_dma_xor;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	dma_set_maxpq(dma_dev, MV_XOR_V2_CMD_LINE_NUM_MAX_D_BUF, 0);
 	dma_dev->device_prep_dma_pq = mv_xor_v2_prep_dma_pq;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
 	xor_dev->dmachan.device = dma_dev;
 
 	list_add_tail(&xor_dev->dmachan.device_node,
 		      &dma_dev->channels);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_02_02)
+#if defined(MY_DEF_HERE)
 	mv_xor_v2_enable_imsg_thrd(xor_dev);
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_02_02 */
+#endif /* MY_DEF_HERE */
 	mv_xor_v2_descq_init(xor_dev);
 
 	ret = dma_async_device_register(dma_dev);
@@ -1289,9 +1292,9 @@ static int mv_xor_v2_remove(struct platform_device *pdev)
 }
 
 #ifdef CONFIG_OF
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 
 struct mv_xor_v2_compat_data xor_compat_data = {
 	.rd_burst_len = GLOB_BW_CTRL_RD_BURST_LEN_VAL,
@@ -1303,16 +1306,16 @@ struct mv_xor_v2_compat_data xor_compat_data_z1 = {
 	.wr_burst_len = GLOB_BW_CTRL_WR_BURST_LEN_VAL_Z1
 };
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 static const struct of_device_id mv_xor_v2_dt_ids[] = {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	{ .compatible = "marvell,mv-xor-v2", },
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	{ .compatible = "marvell,mv-xor-v2",
 	  .data = &xor_compat_data},
 	{ .compatible = "marvell,mv-xor-v2-z1",
 	  .data = &xor_compat_data_z1 },
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	{},
 };
 
@@ -1321,10 +1324,10 @@ MODULE_DEVICE_TABLE(of, mv_xor_v2_dt_ids);
 
 static struct platform_driver mv_xor_v2_driver = {
 	.probe		= mv_xor_v2_probe,
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	.suspend	= mv_xor_v2_suspend,
 	.resume		= mv_xor_v2_resume,
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	.remove		= mv_xor_v2_remove,
 	.driver		= {
 		.owner	= THIS_MODULE,
@@ -1338,4 +1341,4 @@ module_platform_driver(mv_xor_v2_driver);
 MODULE_DESCRIPTION("DMA engine driver for Marvell's Version 2 of XOR engine");
 MODULE_LICENSE("GPL");
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

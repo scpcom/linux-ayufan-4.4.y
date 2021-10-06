@@ -83,6 +83,32 @@ config SYNO_DISABL_HAVE_ARCH_HUGE_VMAP
 	bool "diable HAVE_ARCH_HUGE_VMAP in 4.4 kernel"
 	default n
 
+config SYNO_PSTORE
+	bool "Synology enhancement of Pstore mechanism"
+	default n
+	depends on PSTORE
+
+config SYNO_FIX_RTC_WAKE_AFTER_POWER_FAILURE
+	bool "fix rtc wake after power failure"
+	default y
+	depends on SYNO_X64
+
+config SYNO_KEY
+	bool "use keys supply by our system"
+	depends on KEYS
+
+config SYNO_SYSTEM_UNTRUSTED_KEYRING
+	bool "Provide system-wide ring of untrusted keys"
+	depends on KEYS
+
+config SYNO_SYSTEM_UNTRUSTED_KEYS
+	string "Additional X.509 keys for default system untrusted keyring"
+	depends on SYNO_SYSTEM_UNTRUSTED_KEYRING
+
+config SYNO_REMOVE_X509_DATE_VALIDATION_CONSTRAIN
+	bool "Remote x509 date validation constrain"
+	depends on KEYS
+
 endmenu #MISC Features
 
 menu "Encryption"

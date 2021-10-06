@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  This program is free software; you can redistribute it and/or modify it
  *  under the terms of the GNU General Public License version 2 as published
@@ -139,11 +142,11 @@ static int xway_stp_request(struct gpio_chip *gc, unsigned gpio)
 		container_of(gc, struct xway_stp, gc);
 
 	if ((gpio < 8) && (chip->reserved & BIT(gpio))) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		dev_err(gc->parent, "GPIO %d is driven by hardware\n", gpio);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		dev_err(gc->dev, "GPIO %d is driven by hardware\n", gpio);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		return -ENODEV;
 	}
 
@@ -218,11 +221,11 @@ static int xway_stp_probe(struct platform_device *pdev)
 	if (IS_ERR(chip->virt))
 		return PTR_ERR(chip->virt);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	chip->gc.parent = &pdev->dev;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	chip->gc.dev = &pdev->dev;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	chip->gc.label = "stp-xway";
 	chip->gc.direction_output = xway_stp_dir_out;
 	chip->gc.set = xway_stp_set;

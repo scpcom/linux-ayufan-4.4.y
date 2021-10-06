@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Cadence MACB/GEM Ethernet Controller driver
  *
@@ -439,15 +442,15 @@ static int macb_mii_init(struct macb *bp)
 	bp->mii_bus->parent = &bp->dev->dev;
 	pdata = dev_get_platdata(&bp->pdev->dev);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	bp->mii_bus->irq = kmalloc(sizeof(int)*PHY_MAX_ADDR, GFP_KERNEL);
 	if (!bp->mii_bus->irq) {
 		err = -ENOMEM;
 		goto err_out_free_mdiobus;
 	}
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	dev_set_drvdata(&bp->dev->dev, bp->mii_bus);
 
@@ -473,12 +476,12 @@ static int macb_mii_init(struct macb *bp)
 				goto err_out_unregister_bus;
 		}
 	} else {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		for (i = 0; i < PHY_MAX_ADDR; i++)
 			bp->mii_bus->irq[i] = PHY_POLL;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 		if (pdata)
 			bp->mii_bus->phy_mask = pdata->phy_mask;
@@ -487,11 +490,11 @@ static int macb_mii_init(struct macb *bp)
 	}
 
 	if (err)
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		goto err_out_free_mdiobus;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		goto err_out_free_mdio_irq;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	err = macb_mii_probe(bp->dev);
 	if (err)
@@ -501,12 +504,12 @@ static int macb_mii_init(struct macb *bp)
 
 err_out_unregister_bus:
 	mdiobus_unregister(bp->mii_bus);
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 err_out_free_mdio_irq:
 	kfree(bp->mii_bus->irq);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 err_out_free_mdiobus:
 	mdiobus_free(bp->mii_bus);
 err_out:
@@ -2953,12 +2956,12 @@ static int macb_probe(struct platform_device *pdev)
 		    dev->base_addr, dev->irq, dev->dev_addr);
 
 	phydev = bp->phy_dev;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	phy_attached_info(phydev);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	netdev_info(dev, "attached PHY driver [%s] (mii_bus:phy_addr=%s, irq=%d)\n",
 		    phydev->drv->name, dev_name(&phydev->dev), phydev->irq);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	return 0;
 
@@ -2988,11 +2991,11 @@ static int macb_remove(struct platform_device *pdev)
 		if (bp->phy_dev)
 			phy_disconnect(bp->phy_dev);
 		mdiobus_unregister(bp->mii_bus);
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		kfree(bp->mii_bus->irq);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		mdiobus_free(bp->mii_bus);
 		unregister_netdev(dev);
 		clk_disable_unprepare(bp->tx_clk);

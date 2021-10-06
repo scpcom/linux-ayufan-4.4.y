@@ -170,6 +170,52 @@ static int ioctl_fiemap(struct file *filp, unsigned long arg)
 	return error;
 }
 
+#ifdef MY_ABC_HERE
+static long ioctl_file_clone(struct file *dst_file, unsigned long srcfd,
+			     u64 off, u64 olen, u64 destoff, int check_compr)
+#else
+static long ioctl_file_clone(struct file *dst_file, unsigned long srcfd,
+			     u64 off, u64 olen, u64 destoff)
+#endif  
+{
+	struct fd src_file = fdget(srcfd);
+	int ret;
+
+	if (!src_file.file)
+		return -EBADF;
+	ret = -EXDEV;
+	if (src_file.file->f_path.mnt != dst_file->f_path.mnt)
+		goto fdput;
+#ifdef MY_ABC_HERE
+	ret = do_clone_file_range(src_file.file, off, dst_file, destoff, olen, check_compr);
+#else
+	ret = do_clone_file_range(src_file.file, off, dst_file, destoff, olen);
+#endif  
+fdput:
+	fdput(src_file);
+	return ret;
+}
+
+static long ioctl_file_clone_range(struct file *file, void __user *argp)
+{
+	struct file_clone_range args;
+#ifdef MY_ABC_HERE
+	int check_compr = 1;
+#endif  
+
+	if (copy_from_user(&args, argp, sizeof(args)))
+		return -EFAULT;
+#ifdef MY_ABC_HERE
+	if (!args.src_offset && !args.src_length && !args.dest_offset)
+		check_compr = 0;
+	return ioctl_file_clone(file, args.src_fd, args.src_offset,
+				args.src_length, args.dest_offset, check_compr);
+#else
+	return ioctl_file_clone(file, args.src_fd, args.src_offset,
+				args.src_length, args.dest_offset);
+#endif  
+}
+
 #ifdef CONFIG_BLOCK
 
 static inline sector_t logical_to_blk(struct inode *inode, loff_t offset)
@@ -685,6 +731,16 @@ int do_vfs_ioctl(struct file *filp, unsigned int fd, unsigned int cmd,
 		break;
 #endif  
 #endif  
+
+	case FICLONE:
+#ifdef MY_ABC_HERE
+		return ioctl_file_clone(filp, arg, 0, 0, 0, 1);
+#else
+		return ioctl_file_clone(filp, arg, 0, 0, 0);
+#endif  
+
+	case FICLONERANGE:
+		return ioctl_file_clone_range(filp, argp);
 
 	default:
 		if (S_ISREG(inode->i_mode))

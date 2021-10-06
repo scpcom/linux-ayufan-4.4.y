@@ -28,6 +28,11 @@
 #include "transaction.h"
 #include "print-tree.h"
 #include "locking.h"
+#ifdef MY_ABC_HERE
+#include <linux/file.h>
+#include "ulist.h"
+extern int write_buf(struct file *filp, const void *buf, u32 len, loff_t *off);
+#endif /* MY_ABC_HERE */
 
 static int split_node(struct btrfs_trans_handle *trans, struct btrfs_root
 		      *root, struct btrfs_path *path, int level);
@@ -5712,11 +5717,14 @@ static int snap_entry_insert(struct btrfs_snapshot_size_ctx *ctx,
 		} else {
 			/*
 			 * If the newly added entry shares the same key with the existing node in
-			 * rbtree, and the added entry has smaller subvolume id. We need to keep
+			 * rbtree, and the added entry has larger subvolume id. We need to keep
 			 * that entry, and advance the exsiting node in rbtree.
+			 * If this behavior changes, make sure to change all the highest_root_id
+			 * under btrfs_find_shared_root in backref.c
 			 */
-			if (replace && (*insert)->root_id < entry->root_id) {
-				rb_replace_node(*p, &(*insert)->node, &ctx->root);
+			if (replace && (*insert)->root_id > entry->root_id) {
+				rb_replace_node(parent_node, &(*insert)->node, &ctx->root);
+				RB_CLEAR_NODE(parent_node);
 				*insert = entry;
 			}
 			return 1;
@@ -5728,11 +5736,71 @@ static int snap_entry_insert(struct btrfs_snapshot_size_ctx *ctx,
 	return 0;
 }
 
+static int show_calculate_progress(struct ulist *snap_ulist,
+                                   struct btrfs_ioctl_snapshot_size_query_args *snap_args,
+                                   struct btrfs_snapshot_size_ctx *ctx, u64 skip_bytes)
+{
+	int ret = 0;
+	loff_t off;
+	struct rb_node *node;
+	struct ulist_node *list_node;
+	struct btrfs_snapshot_size_entry *size_ent;
+	char buf[256];
+	u64 flags = ctx->flags;
+	u64 snap_id, marginal_size;
+	static time_t last_show;
+	static u64 last_calc_size;
+
+	if (snap_args->calc_size - last_calc_size < skip_bytes)
+		goto out;
+
+	if (get_seconds() - last_show < 2)
+		goto out;
+
+	if (!(flags & (BTRFS_SNAP_SIZE_SHOW_PROCESSED_SIZE|BTRFS_SNAP_SIZE_SHOW_EXCL_SIZE|BTRFS_SNAP_SIZE_SHOW_PROCESSED_SIZE)))
+		goto out;
+
+	if (flags & BTRFS_SNAP_SIZE_SHOW_MARGINAL_SIZE) {
+		node = rb_first(&snap_ulist->root);
+		while (node) {
+			list_node = rb_entry(node, struct ulist_node, rb_node);
+			size_ent = (struct btrfs_snapshot_size_entry*)(uintptr_t)list_node->aux;
+			snap_id = list_node->val;
+			marginal_size = size_ent->snap_exclusive_size;
+			snprintf(buf, sizeof(buf), "subvol(%llu) %llu bytes\n", snap_id, marginal_size);
+			ret = write_buf(ctx->out_filp, (__force const char __user *)buf, strlen(buf), &off);
+			if (ret)
+				goto out;
+			node = rb_next(node);
+		}
+	}
+	if (flags & BTRFS_SNAP_SIZE_SHOW_EXCL_SIZE) {
+		/* show exclusize size by each entry*/
+		snprintf(buf, sizeof(buf), "exclusive %llu bytes\n", snap_args->calc_size);
+		ret = write_buf(ctx->out_filp, (__force const char __user *)buf, strlen(buf), &off);
+		if (ret)
+			goto out;
+		last_calc_size = snap_args->calc_size;
+	}
+	if (flags & BTRFS_SNAP_SIZE_SHOW_PROCESSED_SIZE) {
+		snprintf(buf, sizeof(buf), "processed %llu bytes\n", snap_args->processed_size);
+		ret = write_buf(ctx->out_filp, (__force const char __user *)buf, strlen(buf), &off);
+		if (ret)
+			goto out;
+	}
+	ret = write_buf(ctx->out_filp, (__force const char __user *)"\n", 1, &off);
+	if (ret)
+		goto out;
+
+	last_show = get_seconds();
+out:
+	return ret;
+}
+
 int btrfs_snapshot_size_query(struct file *file,
 		struct btrfs_ioctl_snapshot_size_query_args *snap_args,
-		struct ulist *roots,
 		int (*cb)(struct btrfs_fs_info *, u64,
-			      u64, struct ulist *,
+			      u64, u64, u64 *, struct ulist *,
 			      struct btrfs_snapshot_size_entry *,
 			      struct btrfs_snapshot_size_ctx *))
 {
@@ -5740,13 +5808,19 @@ int btrfs_snapshot_size_query(struct file *file,
 	int ret = 0;
 	int level;
 	int nritems;
+	u8 type;
 	u64 snap_count = snap_args->snap_count;
+	u64 counted_root = 0;
+	u64 datao;
 	struct btrfs_root *snap_root = NULL;
 	struct btrfs_key location;
 	struct btrfs_fs_info *fs_info = BTRFS_I(file_inode(file))->root->fs_info;
 	struct rb_node *node;
 	struct btrfs_snapshot_size_ctx *ctx;
 	struct btrfs_snapshot_size_entry *entry;
+	struct ulist *roots = NULL;
+	struct ulist_node *ulist_node;
+	struct btrfs_file_extent_item *ei;
 
 	ctx = kzalloc(sizeof(*ctx) + sizeof(struct btrfs_snapshot_size_entry) * snap_count, GFP_KERNEL);
 	if (!ctx) {
@@ -5754,9 +5828,22 @@ int btrfs_snapshot_size_query(struct file *file,
 		goto out;
 	}
 	ctx->root = RB_ROOT;
+	ctx->flags = snap_args->flags;
+
+	ctx->out_filp = fget(snap_args->fd);
+	if (!ctx->out_filp) {
+		ret = -EBADF;
+		goto out;
+	}
+
+	roots = ulist_alloc(GFP_NOFS);
+	if (!roots) {
+		ret = -ENOMEM;
+		goto out;
+	}
 
 	for (i = 0; i < snap_count; ++i) {
-		location.objectid = snap_args->snap_id[i];
+		location.objectid = snap_args->id_maps[i].snap_id;
 		location.type = BTRFS_ROOT_ITEM_KEY;
 		location.offset = (u64) -1;
 		snap_root = btrfs_read_fs_root_no_name(fs_info, &location);
@@ -5773,8 +5860,15 @@ int btrfs_snapshot_size_query(struct file *file,
 			goto out;
 		}
 		entry = &ctx->snaps[i];
-		entry->root_id = snap_args->snap_id[i];
+		entry->root_id = snap_args->id_maps[i].snap_id;
 		entry->root = snap_root;
+		ret = ulist_add(roots, entry->root_id, (u64)entry, GFP_KERNEL);
+		if (ret <= 0) {
+			if (ret == 0)
+				ret = -EINVAL;
+			goto out;
+		}
+
 		spin_lock(&snap_root->root_item_lock);
 		snap_root->send_in_progress++;
 		spin_unlock(&snap_root->root_item_lock);
@@ -5809,24 +5903,34 @@ int btrfs_snapshot_size_query(struct file *file,
 		}
 	}
 
+	/*
+	 * The whole while loop could break into 3 parts.
+	 */
 	while (!RB_EMPTY_ROOT(&ctx->root)) {
 		u64 bytenr;
 		int advance = ADVANCE;
-		int node_removed = 0;
 		struct btrfs_snapshot_size_entry *next_entry;
 		struct rb_node *next_node;
 
+		if (signal_pending(current)) {
+			ret = -EAGAIN;
+			break;
+		}
+
+		/*
+		 * 1st part:
+		 * Check if a given node is shared or not. Share here means that this node is pointed by
+		 * subvolumes other than the ones provided to this ioctl. If the callback function returns
+		 * >0, we know this node is shared. All the descendants must be shared as well.
+		 * In this case, We don't need to go down the tree.
+		 */
 		ret = 0;
 		node = rb_first(&ctx->root);
 		entry = rb_entry(node, struct btrfs_snapshot_size_entry, node);
-		/*
-		 * Only skip level > 2. If we could skip one node at level 3,
-		 * due to shared node, we could save time traversing level 0~2.
-		 * Shared nodes usually happen at higher level.
-		 */
-		if (entry->path->slots[entry->level] == 0 && entry->level > 2) {
+		if (entry->level != entry->root_level && entry->path->slots[entry->level] == 0) {
 			bytenr = entry->path->nodes[entry->level]->start;
-			ret = cb(fs_info, bytenr, 0, roots, entry, ctx);
+			ret = cb(fs_info, bytenr, entry->path->nodes[entry->level+1]->start, 0, NULL, roots, entry, ctx);
+			snap_args->processed_size += entry->root->nodesize;
 			if (ret < 0) {
 				goto out;
 			} else if (ret > 0) {
@@ -5835,73 +5939,108 @@ int btrfs_snapshot_size_query(struct file *file,
 			}
 		}
 
-		nritems = btrfs_header_nritems(entry->path->nodes[entry->level]);
-		while (entry->level == 0 && entry->key.type != BTRFS_EXTENT_DATA_KEY) {
-			if (0 > tree_advance_with_mode(entry->root, entry->path, &entry->level,
-					entry->root_level, ADVANCE, &entry->key)) {
-				rb_erase(node, &ctx->root);
-				node_removed = 1;
-				break;
-			}
-			if (entry->path->slots[entry->level] == nritems - 1)
-				break;
-		}
-		if (node_removed)
-			continue;
-
 		/*
-		 * OK the leaf containing BTRFS_EXTENT_DATA_KEY is not shared.
-		 * Now we check EXTENT_ITEM itself.
+		 * 2nd part:
+		 * If this node is leaf, we will process all the slots in it at once.
+		 * We only care about EXTENT_DATA that is not hole(bytenr == 0).
+		 * When EXTENT_ITEM is found to be not shared, add to largest
+		 * subvolume that holds it.
 		 */
-		if (entry->level == 0 && entry->key.type == BTRFS_EXTENT_DATA_KEY) {
-			struct btrfs_file_extent_item *ei;
-			u64 datao;
-			u8 type;
+		nritems = btrfs_header_nritems(entry->path->nodes[entry->level]);
+		while (entry->level == 0 && entry->path->slots[entry->level] < nritems) {
+			btrfs_item_key_to_cpu(entry->path->nodes[0], &entry->key,
+					entry->path->slots[0]);
+			if (entry->key.type != BTRFS_EXTENT_DATA_KEY)
+				goto next;
 
 			ei = btrfs_item_ptr(entry->path->nodes[0], entry->path->slots[0],
-					    struct btrfs_file_extent_item);
-			bytenr = btrfs_file_extent_disk_bytenr(entry->path->nodes[0], ei);
-			datao = btrfs_file_extent_offset(entry->path->nodes[0], ei);
+						struct btrfs_file_extent_item);
 			type = btrfs_file_extent_type(entry->path->nodes[0], ei);
 			if (type == BTRFS_FILE_EXTENT_PREALLOC ||
-			    (type == BTRFS_FILE_EXTENT_REG && bytenr != 0)) {
-				ret = cb(fs_info, bytenr, datao, roots, entry, ctx);
+				type == BTRFS_FILE_EXTENT_REG) {
+				bytenr = btrfs_file_extent_disk_bytenr(entry->path->nodes[0], ei);
+				if (bytenr == 0)
+					goto next;
+				datao = btrfs_file_extent_offset(entry->path->nodes[0], ei);
+				counted_root = entry->root_id;
+				ret = cb(fs_info, bytenr, entry->path->nodes[0]->start,
+						datao, &counted_root, roots, entry, ctx);
 				if (0 > ret)
 					goto out;
-				if (ret == 0)
-					ctx->size += btrfs_file_extent_disk_num_bytes(entry->path->nodes[0], ei);
+				if (ret == 0) {
+					u64 num_bytes = btrfs_file_extent_disk_num_bytes(entry->path->nodes[0], ei);
+					if (entry->root_id == counted_root)
+						entry->snap_exclusive_size += num_bytes;
+					else {
+						struct ulist_node *counted_node;
+						struct btrfs_snapshot_size_entry *counted_entry;
+
+						counted_node = ulist_search(roots, counted_root);
+						counted_entry = (struct btrfs_snapshot_size_entry *) counted_node->aux;
+						counted_entry->snap_exclusive_size += num_bytes;
+					}
+					snap_args->calc_size += num_bytes;
+				}
 			}
+next:
+			entry->path->slots[0]++;
 		}
+		/* do verbose display */
+		show_calculate_progress(roots, snap_args, ctx, 100*1024*1024);
 advance:
+		/*
+		 * 3rd part:
+		 * Now we've done processing this node, advance the tree node.
+		 * There's a subtlety here: After tree advacne, if there's a subvolume
+		 * whose next node to be processed is the same as this node.
+		 * We'll keep only one subolume to handle this node. The other one
+		 * needs to keep advancing until the next node to be processed for that
+		 * subvolume is not overlapped with the existing one.
+		 */
 		next_node = rb_next(node);
-		if (next_node)
-			next_entry = rb_entry(next_node, struct btrfs_snapshot_size_entry, node);
-		do {
-			int cmp = 0;
+		if (0 > tree_advance_with_mode(entry->root, entry->path,
+				&entry->level, entry->root_level, advance, &entry->key)) {
+			rb_erase(&entry->node, &ctx->root);
+			continue;
+		}
+
+		if (!next_node)
+			continue;
+
+		next_entry = rb_entry(next_node, struct btrfs_snapshot_size_entry, node);
+		advance = ADVANCE_ONLY_NEXT;
+		/*
+		 * After advance if this entry is still the lowest key in the tree,
+		 * don't move it out and insert again. Is's just waste of time.
+		 */
+		if (0 > compare_snapshot_entry(entry, next_entry))
+			continue;
+		rb_erase(&entry->node, &ctx->root);
+		RB_CLEAR_NODE(&entry->node);
+
+		while (snap_entry_insert(ctx, &entry, 1)) {
 			if (0 > tree_advance_with_mode(entry->root, entry->path,
 					&entry->level, entry->root_level, advance, &entry->key)) {
-				rb_erase(node, &ctx->root);
+				/*
+				 * This node is not in the tree anymore, so don't call rb_erase on it.
+				 */
 				break;
 			}
-			if (!next_node)
-				break;
-			advance = ADVANCE_ONLY_NEXT;
-			if (node_removed)
-				continue;
-			cmp = compare_snapshot_entry(entry, next_entry);
-			/*
-			 * After advance if this entry is still the lowest key in the tree,
-			 * don't move it out and insert again. Is's just waste of time.
-			 */
-			if (cmp < 0)
-				break;
-			rb_erase(node, &ctx->root);
-			node_removed = 1;
-		} while (snap_entry_insert(ctx, &entry, 1));
+		}
+	}
+
+	// store the result
+	i = 0;
+	node = rb_first(&roots->root);
+	while (node) {
+		ulist_node = rb_entry(node, struct ulist_node, rb_node);
+		entry = (struct btrfs_snapshot_size_entry*)(uintptr_t)ulist_node->aux;
+		snap_args->id_maps[i].snap_id = ulist_node->val;
+		snap_args->id_maps[i++].marginal_size = entry->snap_exclusive_size;
+		node = rb_next(node);
 	}
 out:
 	if (ctx) {
-		snap_args->calc_size = ctx->size;
 		for (i = 0; i < snap_count; ++i) {
 			btrfs_free_path(ctx->snaps[i].path);
 			if (ctx->snaps[i].root) {
@@ -5911,6 +6050,10 @@ out:
 			}
 		}
 	}
+	ulist_free(roots);
+
+	if (ctx->out_filp)
+		fput(ctx->out_filp);
 	kfree(ctx);
 	return ret;
 }

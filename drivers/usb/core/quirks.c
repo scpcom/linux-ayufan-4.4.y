@@ -14,6 +14,9 @@ static const struct usb_device_id usb_quirk_list[] = {
 	 
 	{ USB_DEVICE(0x0204, 0x6025), .driver_info = USB_QUIRK_RESET_RESUME },
 
+	{ USB_DEVICE(0x0218, 0x0401), .driver_info =
+			USB_QUIRK_CONFIG_INTF_STRINGS },
+
 	{ USB_DEVICE(0x03f0, 0x0701), .driver_info =
 			USB_QUIRK_STRING_FETCH_255 },
 
@@ -108,6 +111,13 @@ static const struct usb_device_id usb_quirk_list[] = {
 	{ USB_DEVICE(0x0763, 0x0192), .driver_info = USB_QUIRK_RESET_RESUME },
 
 	{ USB_DEVICE(0x08ec, 0x1000), .driver_info = USB_QUIRK_RESET_RESUME },
+
+	{ USB_DEVICE(0x0904, 0x6101), .driver_info =
+			USB_QUIRK_LINEAR_FRAME_INTR_BINTERVAL },
+	{ USB_DEVICE(0x0904, 0x6102), .driver_info =
+			USB_QUIRK_LINEAR_FRAME_INTR_BINTERVAL },
+	{ USB_DEVICE(0x0904, 0x6103), .driver_info =
+			USB_QUIRK_LINEAR_FRAME_INTR_BINTERVAL },
 
 	{ USB_DEVICE(0x0926, 0x3333), .driver_info =
 			USB_QUIRK_CONFIG_INTF_STRINGS },

@@ -6,7 +6,7 @@ void syno_insert_sata_index_remap(unsigned int idx, unsigned int num, unsigned i
 {
 	int i = 0;
 
-	if ((idx < 0) || (num < 0) || (id_start < 0)){
+	if ((idx < 0) || (num < 0) || (id_start < 0)) {
 		printk("Bad parameter, idx:%d, num:%d, id_start:%d\n", idx, num, id_start);
 		return;
 	}

@@ -60,7 +60,7 @@ typedef enum __syno_disk_type {
 	SYNO_DISK_ISCSI,
 	SYNO_DISK_SAS,
 #ifdef MY_DEF_HERE
-	SYNO_DISK_CACHE,
+	SYNO_DISK_CACHE,  
 #endif  
 	SYNO_DISK_END,  
 } SYNO_DISK_TYPE;

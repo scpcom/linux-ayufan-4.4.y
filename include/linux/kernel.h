@@ -168,20 +168,20 @@ extern int _cond_resched(void);
 
 #define might_sleep_if(cond) do { if (cond) might_sleep(); } while (0)
 
-#define abs(x) __builtin_choose_expr(sizeof(x) == sizeof(s64), ({	\
-		s64 __x = (x);						\
-		(__x < 0) ? -__x : __x;					\
-	}), ({								\
-		long ret;						\
-		if (sizeof(x) == sizeof(long)) {			\
-			long __x = (x);					\
-			ret = (__x < 0) ? -__x : __x;			\
-		} else {						\
-			int __x = (x);					\
-			ret = (__x < 0) ? -__x : __x;			\
-		}							\
-		ret;							\
-	}))
+#define abs(x)	__abs_choose_expr(x, long long,				\
+		__abs_choose_expr(x, long,				\
+		__abs_choose_expr(x, int,				\
+		__abs_choose_expr(x, short,				\
+		__abs_choose_expr(x, char,				\
+		__builtin_choose_expr(					\
+			__builtin_types_compatible_p(typeof(x), char),	\
+			(char)({ signed char __x = (x); __x<0?-__x:__x; }), \
+			((void)0)))))))
+
+#define __abs_choose_expr(x, type, other) __builtin_choose_expr(	\
+	__builtin_types_compatible_p(typeof(x),   signed type) ||	\
+	__builtin_types_compatible_p(typeof(x), unsigned type),		\
+	({ signed type __x = (x); __x < 0 ? -__x : __x; }), other)
 
 static inline u32 reciprocal_scale(u32 val, u32 ep_ro)
 {

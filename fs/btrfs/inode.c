@@ -1305,16 +1305,6 @@ next_slot:
 				goto out_check;
 #endif  
 #ifdef MY_ABC_HERE
-			if (test_bit(BTRFS_INODE_IN_SYNO_DEFRAG, &BTRFS_I(inode)->runtime_flags) &&
-				test_range_bit(&BTRFS_I(inode)->io_tree, found_key.offset,
-				        extent_end - 1, EXTENT_DEFRAG, 1, NULL)) {
-				if (!nolock) {
-					btrfs_end_write_no_snapshoting(root);
-				}
-				goto out_check;
-			}
-#endif  
-#ifdef MY_ABC_HERE
 			if (!btrfs_inc_nocow_writers(root->fs_info, disk_bytenr)) {
 				if (!nolock) {
 					btrfs_end_write_no_snapshoting(root);
@@ -4578,6 +4568,7 @@ static void evict_inode_truncate_pages(struct inode *inode)
 		 
 		if (unlikely(test_bit(BTRFS_FS_STATE_ERROR, &fs_info->fs_state))) {
 			rb_erase(node, &io_tree->state);
+			RB_CLEAR_NODE(node);
 			free_extent_state(state);
 			continue;
 		}
@@ -6321,7 +6312,7 @@ insert:
 		existing = search_extent_mapping(em_tree, start, len);
 		 
 		if (existing->start == em->start &&
-		    extent_map_end(existing) == extent_map_end(em) &&
+		    extent_map_end(existing) >= extent_map_end(em) &&
 		    em->block_start == existing->block_start) {
 			 
 			free_extent_map(em);
@@ -6804,11 +6795,14 @@ static void adjust_dio_outstanding_extents(struct inode *inode,
 	num_extents = (unsigned) div64_u64(len + BTRFS_MAX_EXTENT_SIZE - 1,
 					   BTRFS_MAX_EXTENT_SIZE);
 	 
-	if (dio_data->outstanding_extents) {
+	if (dio_data->outstanding_extents >= num_extents) {
 		dio_data->outstanding_extents -= num_extents;
 	} else {
+		 
+		u64 num_needed = num_extents - dio_data->outstanding_extents;
+
 		spin_lock(&BTRFS_I(inode)->lock);
-		BTRFS_I(inode)->outstanding_extents += num_extents;
+		BTRFS_I(inode)->outstanding_extents += num_needed;
 		spin_unlock(&BTRFS_I(inode)->lock);
 	}
 }
@@ -7861,7 +7855,8 @@ static void btrfs_invalidatepage(struct page *page, unsigned int offset,
 		}
 	}
 
-	btrfs_qgroup_free_data(inode, page_start, PAGE_CACHE_SIZE);
+	if (PageDirty(page))
+		btrfs_qgroup_free_data(inode, page_start, PAGE_SIZE);
 	if (!inode_evicting) {
 		clear_extent_bit(tree, page_start, page_end,
 				 EXTENT_LOCKED | EXTENT_DIRTY |

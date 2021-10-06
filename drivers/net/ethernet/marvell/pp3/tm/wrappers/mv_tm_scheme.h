@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -90,4 +93,4 @@ int mv_tm_scheme_parent_node_get(enum tm_level level, int node_id, int *parent);
 int mv_tm_scheme_queue_path_get(int q_id, int *anode, int *bnode, int *cnode, int *port);
 
 #endif /* MV_TM_SCHEME__H */
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright (C) 2015 Maxime Ripard <maxime.ripard@free-electrons.com>
  *
@@ -14,11 +17,11 @@
 #include <linux/of.h>
 #include <linux/slab.h>
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 #define to_clk_multiplier(_hw) container_of(_hw, struct clk_multiplier, hw)
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 static unsigned long __get_mult(struct clk_multiplier *mult,
 				unsigned long rate,

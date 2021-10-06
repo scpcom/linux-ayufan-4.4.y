@@ -433,29 +433,4 @@ static inline void fsnotify_change(struct dentry *dentry, unsigned int ia_valid)
 	}
 }
 
-#if defined(CONFIG_FSNOTIFY)	 
-
-static inline const unsigned char *fsnotify_oldname_init(const unsigned char *name)
-{
-	return kstrdup(name, GFP_KERNEL);
-}
-
-static inline void fsnotify_oldname_free(const unsigned char *old_name)
-{
-	kfree(old_name);
-}
-
-#else	 
-
-static inline const char *fsnotify_oldname_init(const unsigned char *name)
-{
-	return NULL;
-}
-
-static inline void fsnotify_oldname_free(const unsigned char *old_name)
-{
-}
-
-#endif	 
-
 #endif	 

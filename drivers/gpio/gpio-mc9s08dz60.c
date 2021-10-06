@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Copyright 2009-2012 Freescale Semiconductor, Inc. All Rights Reserved.
  *
@@ -97,11 +100,11 @@ static int mc9s08dz60_probe(struct i2c_client *client,
 
 	mc9s->chip.label = client->name;
 	mc9s->chip.base = -1;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	mc9s->chip.parent = &client->dev;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	mc9s->chip.dev = &client->dev;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	mc9s->chip.owner = THIS_MODULE;
 	mc9s->chip.ngpio = GPIO_NUM;
 	mc9s->chip.can_sleep = true;

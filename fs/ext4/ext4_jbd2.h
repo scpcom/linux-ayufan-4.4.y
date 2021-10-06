@@ -288,17 +288,19 @@ static inline int ext4_inode_journal_mode(struct inode *inode)
 		return EXT4_INODE_WRITEBACK_DATA_MODE;	 
 	 
 	if (!S_ISREG(inode->i_mode) ||
-	    test_opt(inode->i_sb, DATA_FLAGS) == EXT4_MOUNT_JOURNAL_DATA)
+	    test_opt(inode->i_sb, DATA_FLAGS) == EXT4_MOUNT_JOURNAL_DATA ||
+	    (ext4_test_inode_flag(inode, EXT4_INODE_JOURNAL_DATA) &&
+	    !test_opt(inode->i_sb, DELALLOC))) {
+		 
+		if (S_ISREG(inode->i_mode) && ext4_encrypted_inode(inode))
+			return EXT4_INODE_ORDERED_DATA_MODE;   
 		return EXT4_INODE_JOURNAL_DATA_MODE;	 
-	if (ext4_test_inode_flag(inode, EXT4_INODE_JOURNAL_DATA) &&
-	    !test_opt(inode->i_sb, DELALLOC))
-		return EXT4_INODE_JOURNAL_DATA_MODE;	 
+	}
 	if (test_opt(inode->i_sb, DATA_FLAGS) == EXT4_MOUNT_ORDERED_DATA)
 		return EXT4_INODE_ORDERED_DATA_MODE;	 
 	if (test_opt(inode->i_sb, DATA_FLAGS) == EXT4_MOUNT_WRITEBACK_DATA)
 		return EXT4_INODE_WRITEBACK_DATA_MODE;	 
-	else
-		BUG();
+	BUG();
 }
 
 static inline int ext4_should_journal_data(struct inode *inode)

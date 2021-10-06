@@ -14,7 +14,6 @@
  * (at your option) any later version.
  */
 
-
 /* #define DEBUG */
 /* #define VERBOSE_DEBUG */
 
@@ -57,7 +56,6 @@ __ffs_data_got_descs(struct ffs_data *ffs, char *data, size_t len);
 static int __must_check
 __ffs_data_got_strings(struct ffs_data *ffs, char *data, size_t len);
 
-
 /* The function structure ***************************************************/
 
 struct ffs_ep;
@@ -74,12 +72,10 @@ struct ffs_function {
 	struct usb_function		function;
 };
 
-
 static struct ffs_function *ffs_func_from_usb(struct usb_function *f)
 {
 	return container_of(f, struct ffs_function, function);
 }
-
 
 static inline enum ffs_setup_state
 ffs_setup_state_clear_cancelled(struct ffs_data *ffs)
@@ -87,7 +83,6 @@ ffs_setup_state_clear_cancelled(struct ffs_data *ffs)
 	return (enum ffs_setup_state)
 		cmpxchg(&ffs->setup_state, FFS_SETUP_CANCELLED, FFS_NO_SETUP);
 }
-
 
 static void ffs_func_eps_disable(struct ffs_function *func);
 static int __must_check ffs_func_eps_enable(struct ffs_function *func);
@@ -101,10 +96,8 @@ static int ffs_func_setup(struct usb_function *,
 static void ffs_func_suspend(struct usb_function *);
 static void ffs_func_resume(struct usb_function *);
 
-
 static int ffs_func_revmap_ep(struct ffs_function *func, u8 num);
 static int ffs_func_revmap_intf(struct ffs_function *func, u8 intf);
-
 
 /* The endpoints structures *************************************************/
 
@@ -191,7 +184,6 @@ static int ffs_mutex_lock(struct mutex *mutex, unsigned nonblock)
 	__attribute__((warn_unused_result, nonnull));
 static char *ffs_prepare_buffer(const char __user *buf, size_t len)
 	__attribute__((warn_unused_result, nonnull));
-
 
 /* Control file aka ep0 *****************************************************/
 
@@ -626,7 +618,6 @@ static const struct file_operations ffs_ep0_operations = {
 	.unlocked_ioctl =	ffs_ep0_ioctl,
 	.poll =		ffs_ep0_poll,
 };
-
 
 /* "Normal" endpoints operations ********************************************/
 
@@ -1067,7 +1058,6 @@ static const struct file_operations ffs_epfile_operations = {
 	.unlocked_ioctl =	ffs_epfile_ioctl,
 };
 
-
 /* File system and super block operations ***********************************/
 
 /*
@@ -1345,7 +1335,6 @@ static struct file_system_type ffs_fs_type = {
 };
 MODULE_ALIAS_FS("functionfs");
 
-
 /* Driver's main init/cleanup functions *************************************/
 
 static int functionfs_init(void)
@@ -1370,7 +1359,6 @@ static void functionfs_cleanup(void)
 	pr_info("unloading\n");
 	unregister_filesystem(&ffs_fs_type);
 }
-
 
 /* ffs_data and ffs_function construction and destruction code **************/
 
@@ -1505,7 +1493,6 @@ static void ffs_data_reset(struct ffs_data *ffs)
 	ffs->setup_state = FFS_NO_SETUP;
 	ffs->flags = 0;
 }
-
 
 static int functionfs_bind(struct ffs_data *ffs, struct usb_composite_dev *cdev)
 {
@@ -1693,7 +1680,6 @@ static int ffs_func_eps_enable(struct ffs_function *func)
 
 	return ret;
 }
-
 
 /* Parsing and building descriptors and strings *****************************/
 
@@ -2388,7 +2374,6 @@ error:
 	return -EINVAL;
 }
 
-
 /* Events handling and management *******************************************/
 
 static void __ffs_event_add(struct ffs_data *ffs,
@@ -2929,7 +2914,6 @@ static int ffs_func_bind(struct usb_configuration *c,
 	return ret;
 }
 
-
 /* Other USB function hooks *************************************************/
 
 static void ffs_reset_work(struct work_struct *work)
@@ -3051,7 +3035,6 @@ static void ffs_func_resume(struct usb_function *f)
 	ffs_event_add(ffs_func_from_usb(f)->ffs, FUNCTIONFS_RESUME);
 }
 
-
 /* Endpoint and interface numbers reverse mapping ***************************/
 
 static int ffs_func_revmap_ep(struct ffs_function *func, u8 num)
@@ -3072,7 +3055,6 @@ static int ffs_func_revmap_intf(struct ffs_function *func, u8 intf)
 
 	return -EDOM;
 }
-
 
 /* Devices management *******************************************************/
 
@@ -3145,7 +3127,6 @@ static struct config_item_type ffs_func_type = {
 	.ct_item_ops	= &ffs_item_ops,
 	.ct_owner	= THIS_MODULE,
 };
-
 
 /* Function registration interface ******************************************/
 
@@ -3483,7 +3464,7 @@ static void ffs_closed(struct ffs_data *ffs)
 		goto done;
 
 	if (opts->no_configfs || !opts->func_inst.group.cg_item.ci_parent
-	    || !atomic_read(&opts->func_inst.group.cg_item.ci_kref.refcount))
+	    || !kref_read(&opts->func_inst.group.cg_item.ci_kref))
 		goto done;
 
 	unregister_gadget_item(ffs_obj->opts->

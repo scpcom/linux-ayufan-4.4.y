@@ -11,6 +11,9 @@
 #include <linux/usb/hcd.h>
 #include <linux/mutex.h>
 #include <linux/uaccess.h>
+#if defined(MY_DEF_HERE)
+#include <linux/synobios.h>
+#endif
 
 #include "usb.h"
 
@@ -453,6 +456,13 @@ int blIsUSBDeviceAtFrontPort(struct usb_device *usbdev)
 		if(!strcmp(buf, "ehci_marvell.1-1") ||
 		   !strcmp(buf, "ehci_marvell.0-1")) {
 			return 1;
+		}
+#endif  
+#if defined(MY_DEF_HERE)
+		if(syno_is_hw_version(HW_DS218)) {
+			if(!strcmp(buf, "xhci-hcd.5.auto-1")) {
+				return 1;
+			}
 		}
 #endif  
 	}

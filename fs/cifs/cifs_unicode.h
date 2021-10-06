@@ -19,7 +19,6 @@
 #define UNI_PIPE        (__u16) ('|' + 0xF000)
 #define UNI_SLASH       (__u16) ('\\' + 0xF000)
 #ifdef MY_ABC_HERE
- 
 #define UNI_DQUOT       (__u16) ('"' + 0xF000)
 #define UNI_DIVSLASH    (__u16) ('/' + 0xF000)
 #define UNI_CRGRET      (__u16) ('\r' + 0xF000)

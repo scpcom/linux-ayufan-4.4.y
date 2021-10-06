@@ -50,3 +50,13 @@ config PINCTRL_SUNRISEPOINT
 	  Sunrisepoint is the PCH of Intel Skylake. This pinctrl driver
 	  provides an interface that allows configuring of PCH pins and
 	  using them as GPIOs.
+
+config SYNO_PINCTRL_LEWISBURG
+	tristate "Intel Lweisburg pinctrl and GPIO driver"
+	depends on ACPI
+	depends on SYNO_PURLEY
+	select PINCTRL_INTEL
+	help
+	  LEWISBURG pinctrl driver provides an interface that allows
+	  configuring of SoC pins and using them as GPIOs.
+

@@ -270,6 +270,9 @@ static const match_table_t cifs_smb_version_tokens = {
 	{ Smb_311, SMB311_VERSION_STRING },
 	{ Smb_311, ALT_SMB311_VERSION_STRING },
 #endif  
+#ifdef MY_ABC_HERE
+	{ Smb_Syno, SYNO_VERSION_STRING },
+#endif  
 	{ Smb_version_err, NULL }
 };
 
@@ -385,7 +388,8 @@ cifs_echo_request(struct work_struct *work)
 	struct TCP_Server_Info *server = container_of(work,
 					struct TCP_Server_Info, echo.work);
 
-	if (!server->ops->need_neg || server->ops->need_neg(server) ||
+	if (server->tcpStatus == CifsNeedReconnect ||
+	    server->tcpStatus == CifsExiting || server->tcpStatus == CifsNew ||
 	    (server->ops->can_echo && !server->ops->can_echo(server)) ||
 	    time_before(jiffies, server->lstrp + SMB_ECHO_INTERVAL - HZ))
 		goto requeue_echo;
@@ -435,11 +439,12 @@ allocate_buffers(struct TCP_Server_Info *server)
 static bool
 server_unresponsive(struct TCP_Server_Info *server)
 {
-	 
-	if (server->tcpStatus == CifsGood &&
-	    time_after(jiffies, server->lstrp + 2 * SMB_ECHO_INTERVAL)) {
-		cifs_dbg(VFS, "Server %s has not responded in %d seconds. Reconnecting...\n",
-			 server->hostname, (2 * SMB_ECHO_INTERVAL) / HZ);
+	if (echo_retries > 0 && server->tcpStatus == CifsGood &&
+	    time_after(jiffies, server->lstrp +
+				(echo_retries * SMB_ECHO_INTERVAL))) {
+		cifs_dbg(VFS, "Server %s has not responded in %d seconds. "
+			  "Reconnecting...", server->hostname,
+			  (echo_retries * SMB_ECHO_INTERVAL / HZ));
 		cifs_reconnect(server);
 		wake_up(&server->response_q);
 		return true;
@@ -1001,6 +1006,12 @@ cifs_parse_smb_version(char *value, struct smb_vol *vol)
 		vol->ops = &smb1_operations;
 		vol->vals = &smb1_values;
 		break;
+#ifdef MY_ABC_HERE
+	case Smb_Syno:
+		vol->ops = &synocifs_operations;
+		vol->vals = &synocifs_values;
+		break;
+#endif  
 #ifdef CONFIG_CIFS_SMB2
 	case Smb_20:
 		vol->ops = &smb20_operations;
@@ -1910,12 +1921,7 @@ cifs_put_tcp_session(struct TCP_Server_Info *server, int from_reconnect)
 
 #ifdef CONFIG_CIFS_SMB2
 	if (from_reconnect)
-		/*
-		 * Avoid deadlock here: reconnect work calls
-		 * cifs_put_tcp_session() at its end. Need to be sure
-		 * that reconnect work does nothing with server pointer after
-		 * that step.
-		 */
+		 
 		cancel_delayed_work(&server->reconnect);
 	else
 		cancel_delayed_work_sync(&server->reconnect);
@@ -1957,6 +1963,12 @@ cifs_get_tcp_session(struct smb_vol *volume_info)
 
 	tcp_ses->ops = volume_info->ops;
 	tcp_ses->vals = volume_info->vals;
+#ifdef MY_ABC_HERE
+	if (0 == strcmp(volume_info->vals->version_string, SYNO_VERSION_STRING)) {
+		tcp_ses->vals = &(tcp_ses->values);
+		tcp_ses->values = *(volume_info->vals);
+	}
+#endif  
 	cifs_set_net_ns(tcp_ses, get_net(current->nsproxy->net_ns));
 	tcp_ses->hostname = extract_hostname(volume_info->UNC);
 	if (IS_ERR(tcp_ses->hostname)) {
@@ -3216,19 +3228,15 @@ cifs_are_all_path_components_accessible(struct TCP_Server_Info *server,
 
 	rc = server->ops->is_path_accessible(xid, tcon, cifs_sb, "");
 	while (rc == 0) {
-		/* skip separators */
+		 
 		while (*s == sep)
 			s++;
 		if (!*s)
 			break;
-		/* next separator */
+		 
 		while (*s && *s != sep)
 			s++;
 
-		/*
-		 * temporarily null-terminate the path at the end of
-		 * the current component
-		 */
 		tmp = *s;
 		*s = 0;
 		rc = server->ops->is_path_accessible(xid, tcon, cifs_sb,

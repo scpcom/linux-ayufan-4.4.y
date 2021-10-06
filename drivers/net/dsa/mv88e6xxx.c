@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * net/dsa/mv88e6xxx.c - Marvell 88e6xxx switch chip support
  * Copyright (c) 2008 Marvell Semiconductor
@@ -22,21 +25,21 @@
 #include <linux/list.h>
 #include <linux/module.h>
 #include <linux/netdevice.h>
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 #include <linux/mdio.h>
 #include <linux/of_mdio.h>
 #include <linux/gpio/consumer.h>
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 #include <linux/phy.h>
 #include <net/dsa.h>
 #include <net/switchdev.h>
 #include "mv88e6xxx.h"
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
 static int REG_PORT_BASE = REG_PORT_BASE_LEGACY;
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 static void assert_smi_lock(struct mv88e6xxx_priv_state *ps)
 {
 	if (unlikely(!mutex_is_locked(&ps->smi_mutex))) {
@@ -44,7 +47,7 @@ static void assert_smi_lock(struct mv88e6xxx_priv_state *ps)
 		dump_stack();
 	}
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static void assert_smi_lock(struct dsa_switch *ds)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -54,7 +57,7 @@ static void assert_smi_lock(struct dsa_switch *ds)
 		dump_stack();
 	}
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 /* If the switch's ADDR[4:0] strap pins are strapped to zero, it will
  * use all 32 SMI bus addresses on its SMI bus, and all switch registers
@@ -113,7 +116,7 @@ static int __mv88e6xxx_reg_read(struct mii_bus *bus, int sw_addr, int addr,
 	return ret & 0xffff;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int _mv88e6xxx_reg_read(struct mv88e6xxx_priv_state *ps,
 			       int addr, int reg)
 {
@@ -130,7 +133,7 @@ static int _mv88e6xxx_reg_read(struct mv88e6xxx_priv_state *ps,
 
 	return ret;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int _mv88e6xxx_reg_read(struct dsa_switch *ds, int addr, int reg)
 {
 	struct mii_bus *bus = dsa_host_dev_to_mii_bus(ds->master_dev);
@@ -150,9 +153,9 @@ static int _mv88e6xxx_reg_read(struct dsa_switch *ds, int addr, int reg)
 
 	return ret;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 int mv88e6xxx_reg_read(struct mv88e6xxx_priv_state *ps, int addr, int reg)
 {
 	int ret;
@@ -163,7 +166,7 @@ int mv88e6xxx_reg_read(struct mv88e6xxx_priv_state *ps, int addr, int reg)
 
 	return ret;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 int mv88e6xxx_reg_read(struct dsa_switch *ds, int addr, int reg)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -175,7 +178,7 @@ int mv88e6xxx_reg_read(struct dsa_switch *ds, int addr, int reg)
 
 	return ret;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 static int __mv88e6xxx_reg_write(struct mii_bus *bus, int sw_addr, int addr,
 				 int reg, u16 val)
@@ -209,7 +212,7 @@ static int __mv88e6xxx_reg_write(struct mii_bus *bus, int sw_addr, int addr,
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int _mv88e6xxx_reg_write(struct mv88e6xxx_priv_state *ps, int addr,
 				int reg, u16 val)
 {
@@ -220,7 +223,7 @@ static int _mv88e6xxx_reg_write(struct mv88e6xxx_priv_state *ps, int addr,
 
 	return __mv88e6xxx_reg_write(ps->bus, ps->sw_addr, addr, reg, val);
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int _mv88e6xxx_reg_write(struct dsa_switch *ds, int addr, int reg,
 				u16 val)
 {
@@ -236,9 +239,9 @@ static int _mv88e6xxx_reg_write(struct dsa_switch *ds, int addr, int reg,
 
 	return __mv88e6xxx_reg_write(bus, ds->pd->sw_addr, addr, reg, val);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 int mv88e6xxx_reg_write(struct mv88e6xxx_priv_state *ps, int addr,
 			int reg, u16 val)
 {
@@ -250,7 +253,7 @@ int mv88e6xxx_reg_write(struct mv88e6xxx_priv_state *ps, int addr,
 
 	return ret;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 int mv88e6xxx_reg_write(struct dsa_switch *ds, int addr, int reg, u16 val)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -262,9 +265,9 @@ int mv88e6xxx_reg_write(struct dsa_switch *ds, int addr, int reg, u16 val)
 
 	return ret;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_set_addr_direct(struct dsa_switch *ds, u8 *addr)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -283,7 +286,7 @@ static int mv88e6xxx_set_addr_direct(struct dsa_switch *ds, u8 *addr)
 	return mv88e6xxx_reg_write(ps, REG_GLOBAL, GLOBAL_MAC_45,
 				   (addr[4] << 8) | addr[5]);
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 int mv88e6xxx_set_addr_direct(struct dsa_switch *ds, u8 *addr)
 {
 	REG_WRITE(REG_GLOBAL, GLOBAL_MAC_01, (addr[0] << 8) | addr[1]);
@@ -292,9 +295,9 @@ int mv88e6xxx_set_addr_direct(struct dsa_switch *ds, u8 *addr)
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_set_addr_indirect(struct dsa_switch *ds, u8 *addr)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -326,7 +329,7 @@ static int mv88e6xxx_set_addr_indirect(struct dsa_switch *ds, u8 *addr)
 
 	return 0;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 int mv88e6xxx_set_addr_indirect(struct dsa_switch *ds, u8 *addr)
 {
 	int i;
@@ -351,9 +354,9 @@ int mv88e6xxx_set_addr_indirect(struct dsa_switch *ds, u8 *addr)
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 int mv88e6xxx_set_addr(struct dsa_switch *ds, u8 *addr)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -363,9 +366,9 @@ int mv88e6xxx_set_addr(struct dsa_switch *ds, u8 *addr)
 	else
 		return mv88e6xxx_set_addr_direct(ds, addr);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_mdio_read_direct(struct mv88e6xxx_priv_state *ps,
 				      int addr, int regnum)
 {
@@ -373,16 +376,16 @@ static int mv88e6xxx_mdio_read_direct(struct mv88e6xxx_priv_state *ps,
 		return _mv88e6xxx_reg_read(ps, addr, regnum);
 	return 0xffff;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int _mv88e6xxx_phy_read(struct dsa_switch *ds, int addr, int regnum)
 {
 	if (addr >= 0)
 		return _mv88e6xxx_reg_read(ds, addr, regnum);
 	return 0xffff;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_mdio_write_direct(struct mv88e6xxx_priv_state *ps,
 				       int addr, int regnum, u16 val)
 {
@@ -390,7 +393,7 @@ static int mv88e6xxx_mdio_write_direct(struct mv88e6xxx_priv_state *ps,
 		return _mv88e6xxx_reg_write(ps, addr, regnum, val);
 	return 0;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int _mv88e6xxx_phy_write(struct dsa_switch *ds, int addr, int regnum,
 				u16 val)
 {
@@ -398,9 +401,9 @@ static int _mv88e6xxx_phy_write(struct dsa_switch *ds, int addr, int regnum,
 		return _mv88e6xxx_reg_write(ds, addr, regnum, val);
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_ppu_disable(struct mv88e6xxx_priv_state *ps)
 {
 	int ret;
@@ -549,7 +552,7 @@ static int mv88e6xxx_mdio_write_ppu(struct mv88e6xxx_priv_state *ps, int addr,
 
 	return ret;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 #ifdef CONFIG_NET_DSA_MV88E6XXX_NEED_PPU
 static int mv88e6xxx_ppu_disable(struct dsa_switch *ds)
 {
@@ -687,14 +690,14 @@ int mv88e6xxx_phy_write_ppu(struct dsa_switch *ds, int addr,
 	return ret;
 }
 #endif /* CONFIG_NET_DSA_MV88E6XXX_NEED_PPU */
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static bool mv88e6xxx_6065_family(struct mv88e6xxx_priv_state *ps)
 {
 	return ps->info->family == MV88E6XXX_FAMILY_6065;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static bool mv88e6xxx_6065_family(struct dsa_switch *ds)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -708,14 +711,14 @@ static bool mv88e6xxx_6065_family(struct dsa_switch *ds)
 	}
 	return false;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static bool mv88e6xxx_6095_family(struct mv88e6xxx_priv_state *ps)
 {
 	return ps->info->family == MV88E6XXX_FAMILY_6095;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static bool mv88e6xxx_6095_family(struct dsa_switch *ds)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -727,14 +730,14 @@ static bool mv88e6xxx_6095_family(struct dsa_switch *ds)
 	}
 	return false;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static bool mv88e6xxx_6097_family(struct mv88e6xxx_priv_state *ps)
 {
 	return ps->info->family == MV88E6XXX_FAMILY_6097;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static bool mv88e6xxx_6097_family(struct dsa_switch *ds)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -748,14 +751,14 @@ static bool mv88e6xxx_6097_family(struct dsa_switch *ds)
 	}
 	return false;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static bool mv88e6xxx_6165_family(struct mv88e6xxx_priv_state *ps)
 {
 	return ps->info->family == MV88E6XXX_FAMILY_6165;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static bool mv88e6xxx_6165_family(struct dsa_switch *ds)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -768,14 +771,14 @@ static bool mv88e6xxx_6165_family(struct dsa_switch *ds)
 	}
 	return false;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static bool mv88e6xxx_6185_family(struct mv88e6xxx_priv_state *ps)
 {
 	return ps->info->family == MV88E6XXX_FAMILY_6185;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static bool mv88e6xxx_6185_family(struct dsa_switch *ds)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -793,14 +796,14 @@ static bool mv88e6xxx_6185_family(struct dsa_switch *ds)
 	}
 	return false;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static bool mv88e6xxx_6320_family(struct mv88e6xxx_priv_state *ps)
 {
 	return ps->info->family == MV88E6XXX_FAMILY_6320;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static bool mv88e6xxx_6320_family(struct dsa_switch *ds)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -812,9 +815,9 @@ static bool mv88e6xxx_6320_family(struct dsa_switch *ds)
 	}
 	return false;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static bool mv88e6xxx_6351_family(struct mv88e6xxx_priv_state *ps)
 {
 	return ps->info->family == MV88E6XXX_FAMILY_6351;
@@ -824,7 +827,7 @@ static bool mv88e6xxx_6352_family(struct mv88e6xxx_priv_state *ps)
 {
 	return ps->info->family == MV88E6XXX_FAMILY_6352;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static bool mv88e6xxx_6351_family(struct dsa_switch *ds)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -838,16 +841,16 @@ static bool mv88e6xxx_6351_family(struct dsa_switch *ds)
 	}
 	return false;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
 static bool mv88e6xxx_6390_family(struct mv88e6xxx_priv_state *ps)
 {
 	return ps->info->family == MV88E6XXX_FAMILY_6390;
 }
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 static unsigned int mv88e6xxx_num_databases(struct mv88e6xxx_priv_state *ps)
 {
 	return ps->info->num_databases;
@@ -857,17 +860,17 @@ static bool mv88e6xxx_has_fid_reg(struct mv88e6xxx_priv_state *ps)
 {
 	/* Does the device have dedicated FID registers for ATU and VTU ops? */
 	if (mv88e6xxx_6097_family(ps) || mv88e6xxx_6165_family(ps) ||
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	    mv88e6xxx_6351_family(ps) || mv88e6xxx_6352_family(ps) ||
 	    mv88e6xxx_6390_family(ps))
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	    mv88e6xxx_6351_family(ps) || mv88e6xxx_6352_family(ps))
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 		return true;
 
 	return false;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static bool mv88e6xxx_6352_family(struct dsa_switch *ds)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -881,19 +884,19 @@ static bool mv88e6xxx_6352_family(struct dsa_switch *ds)
 	}
 	return false;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 /* We expect the switch to perform auto negotiation if there is a real
  * phy. However, in the case of a fixed link phy, we force the port
  * settings from the fixed link settings.
  */
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static void mv88e6xxx_adjust_link(struct dsa_switch *ds, int port,
 				  struct phy_device *phydev)
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 void mv88e6xxx_adjust_link(struct dsa_switch *ds, int port,
 			   struct phy_device *phydev)
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
 	u32 reg;
@@ -904,11 +907,11 @@ void mv88e6xxx_adjust_link(struct dsa_switch *ds, int port,
 
 	mutex_lock(&ps->smi_mutex);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	ret = _mv88e6xxx_reg_read(ps, REG_PORT(port), PORT_PCS_CTRL);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	ret = _mv88e6xxx_reg_read(ds, REG_PORT(port), PORT_PCS_CTRL);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	if (ret < 0)
 		goto out;
 
@@ -922,11 +925,11 @@ void mv88e6xxx_adjust_link(struct dsa_switch *ds, int port,
 	if (phydev->link)
 			reg |= PORT_PCS_CTRL_LINK_UP;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	if (mv88e6xxx_6065_family(ps) && phydev->speed > SPEED_100)
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	if (mv88e6xxx_6065_family(ds) && phydev->speed > SPEED_100)
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		goto out;
 
 	switch (phydev->speed) {
@@ -948,18 +951,18 @@ void mv88e6xxx_adjust_link(struct dsa_switch *ds, int port,
 	if (phydev->duplex == DUPLEX_FULL)
 		reg |= PORT_PCS_CTRL_DUPLEX_FULL;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
+#if defined(MY_DEF_HERE)
 	if ((mv88e6xxx_6352_family(ps) || mv88e6xxx_6351_family(ps) ||
 	     mv88e6xxx_6390_family(ps)) && (port >= ps->info->num_ports - 2)) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	if ((mv88e6xxx_6352_family(ps) || mv88e6xxx_6351_family(ps)) &&
 	    (port >= ps->info->num_ports - 2)) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
+#else /* MY_DEF_HERE */
 	if ((mv88e6xxx_6352_family(ds) || mv88e6xxx_6351_family(ds)) &&
 	    (port >= ps->num_ports - 2)) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		if (phydev->interface == PHY_INTERFACE_MODE_RGMII_RXID)
 			reg |= PORT_PCS_CTRL_RGMII_DELAY_RXCLK;
 		if (phydev->interface == PHY_INTERFACE_MODE_RGMII_TXID)
@@ -968,31 +971,31 @@ void mv88e6xxx_adjust_link(struct dsa_switch *ds, int port,
 			reg |= (PORT_PCS_CTRL_RGMII_DELAY_RXCLK |
 				PORT_PCS_CTRL_RGMII_DELAY_TXCLK);
 	}
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	_mv88e6xxx_reg_write(ps, REG_PORT(port), PORT_PCS_CTRL, reg);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	_mv88e6xxx_reg_write(ds, REG_PORT(port), PORT_PCS_CTRL, reg);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 out:
 	mutex_unlock(&ps->smi_mutex);
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int _mv88e6xxx_stats_wait(struct mv88e6xxx_priv_state *ps)
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int _mv88e6xxx_stats_wait(struct dsa_switch *ds)
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 {
 	int ret;
 	int i;
 
 	for (i = 0; i < 10; i++) {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		ret = _mv88e6xxx_reg_read(ps, REG_GLOBAL, GLOBAL_STATS_OP);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		ret = _mv88e6xxx_reg_read(ds, REG_GLOBAL, GLOBAL_STATS_OP);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		if ((ret & GLOBAL_STATS_OP_BUSY) == 0)
 			return 0;
 	}
@@ -1000,18 +1003,18 @@ static int _mv88e6xxx_stats_wait(struct dsa_switch *ds)
 	return -ETIMEDOUT;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int _mv88e6xxx_stats_snapshot(struct mv88e6xxx_priv_state *ps,
 				     int port)
 {
 	int ret;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	if (mv88e6xxx_6320_family(ps) || mv88e6xxx_6352_family(ps) ||
 	    mv88e6xxx_6390_family(ps))
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	if (mv88e6xxx_6320_family(ps) || mv88e6xxx_6352_family(ps))
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 		port = (port + 1) << 5;
 
 	/* Snapshot the hardware statistics counters for this port. */
@@ -1028,7 +1031,7 @@ static int _mv88e6xxx_stats_snapshot(struct mv88e6xxx_priv_state *ps,
 
 	return 0;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int _mv88e6xxx_stats_snapshot(struct dsa_switch *ds, int port)
 {
 	int ret;
@@ -1050,9 +1053,9 @@ static int _mv88e6xxx_stats_snapshot(struct dsa_switch *ds, int port)
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static void _mv88e6xxx_stats_read(struct mv88e6xxx_priv_state *ps,
 				  int stat, u32 *val)
 {
@@ -1083,7 +1086,7 @@ static void _mv88e6xxx_stats_read(struct mv88e6xxx_priv_state *ps,
 
 	*val = _val | ret;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static void _mv88e6xxx_stats_read(struct dsa_switch *ds, int stat, u32 *val)
 {
 	u32 _val;
@@ -1113,10 +1116,10 @@ static void _mv88e6xxx_stats_read(struct dsa_switch *ds, int stat, u32 *val)
 
 	*val = _val | ret;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 static struct mv88e6xxx_hw_stat mv88e6xxx_hw_stats[] = {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	{ "in_good_octets",	8, 0x00, BANK0, },
 	{ "in_bad_octets",	4, 0x02, BANK0, },
 	{ "in_unicast",		4, 0x04, BANK0, },
@@ -1176,7 +1179,7 @@ static struct mv88e6xxx_hw_stat mv88e6xxx_hw_stats[] = {
 	{ "out_octets_a",	4, 0x1a | GLOBAL_STATS_OP_BANK_1, BANK1, },
 	{ "out_octets_b",	4, 0x1b | GLOBAL_STATS_OP_BANK_1, BANK1, },
 	{ "out_management",	4, 0x1f | GLOBAL_STATS_OP_BANK_1, BANK1, },
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	{ "in_good_octets", 8, 0x00, },
 	{ "in_bad_octets", 4, 0x02, },
 	{ "in_unicast", 4, 0x04, },
@@ -1211,10 +1214,10 @@ static struct mv88e6xxx_hw_stat mv88e6xxx_hw_stats[] = {
 	{ "sw_in_discards", 4, 0x110, },
 	{ "sw_in_filtered", 2, 0x112, },
 	{ "sw_out_filtered", 2, 0x113, },
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 };
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static bool mv88e6xxx_has_stat(struct mv88e6xxx_priv_state *ps,
 			       struct mv88e6xxx_hw_stat *stat)
 {
@@ -1229,16 +1232,16 @@ static bool mv88e6xxx_has_stat(struct mv88e6xxx_priv_state *ps,
 			mv88e6xxx_6097_family(ps) ||
 			mv88e6xxx_6165_family(ps) ||
 			mv88e6xxx_6351_family(ps) ||
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 			mv88e6xxx_6352_family(ps) ||
 			mv88e6xxx_6390_family(ps);
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 			mv88e6xxx_6352_family(ps);
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	}
 	return false;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static bool have_sw_in_discards(struct dsa_switch *ds)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -1267,9 +1270,9 @@ static void _mv88e6xxx_get_strings(struct dsa_switch *ds,
 		       stats[i].string, ETH_GSTRING_LEN);
 	}
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static uint64_t _mv88e6xxx_get_ethtool_stat(struct mv88e6xxx_priv_state *ps,
 					    struct mv88e6xxx_hw_stat *s,
 					    int port)
@@ -1303,7 +1306,7 @@ static uint64_t _mv88e6xxx_get_ethtool_stat(struct mv88e6xxx_priv_state *ps,
 	value = (((u64)high) << 16) | low;
 	return value;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static uint64_t _mv88e6xxx_get_ethtool_stat(struct dsa_switch *ds,
 					    int stat,
 					    struct mv88e6xxx_hw_stat *stats,
@@ -1337,9 +1340,9 @@ static uint64_t _mv88e6xxx_get_ethtool_stat(struct dsa_switch *ds,
 	value = (((u64)high) << 16) | low;
 	return value;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static void mv88e6xxx_get_strings(struct dsa_switch *ds, int port,
 				  uint8_t *data)
 {
@@ -1370,9 +1373,9 @@ static int mv88e6xxx_get_sset_count(struct dsa_switch *ds)
 	}
 	return j;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static void mv88e6xxx_get_ethtool_stats(struct dsa_switch *ds, int port,
 					uint64_t *data)
 {
@@ -1398,7 +1401,7 @@ static void mv88e6xxx_get_ethtool_stats(struct dsa_switch *ds, int port,
 
 	mutex_unlock(&ps->smi_mutex);
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static void _mv88e6xxx_get_ethtool_stats(struct dsa_switch *ds,
 					 int nr_stats,
 					 struct mv88e6xxx_hw_stat *stats,
@@ -1422,14 +1425,14 @@ static void _mv88e6xxx_get_ethtool_stats(struct dsa_switch *ds,
 
 	mutex_unlock(&ps->smi_mutex);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_get_regs_len(struct dsa_switch *ds, int port)
 {
 	return 32 * sizeof(u16);
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 /* All the statistics in the table */
 void
 mv88e6xxx_get_strings(struct dsa_switch *ds, int port, uint8_t *data)
@@ -1467,9 +1470,9 @@ int mv88e6xxx_get_regs_len(struct dsa_switch *ds, int port)
 {
 	return 32 * sizeof(u16);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static void mv88e6xxx_get_regs(struct dsa_switch *ds, int port,
 			       struct ethtool_regs *regs, void *_p)
 {
@@ -1493,7 +1496,7 @@ static void mv88e6xxx_get_regs(struct dsa_switch *ds, int port,
 
 	mutex_unlock(&ps->smi_mutex);
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 void mv88e6xxx_get_regs(struct dsa_switch *ds, int port,
 			struct ethtool_regs *regs, void *_p)
 {
@@ -1512,26 +1515,26 @@ void mv88e6xxx_get_regs(struct dsa_switch *ds, int port,
 			p[i] = ret;
 	}
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int _mv88e6xxx_wait(struct mv88e6xxx_priv_state *ps, int reg, int offset,
 			   u16 mask)
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int _mv88e6xxx_wait(struct dsa_switch *ds, int reg, int offset,
 			   u16 mask)
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 {
 	unsigned long timeout = jiffies + HZ / 10;
 
 	while (time_before(jiffies, timeout)) {
 		int ret;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		ret = _mv88e6xxx_reg_read(ps, reg, offset);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		ret = _mv88e6xxx_reg_read(ds, reg, offset);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		if (ret < 0)
 			return ret;
 		if (!(ret & mask))
@@ -1542,7 +1545,7 @@ static int _mv88e6xxx_wait(struct dsa_switch *ds, int reg, int offset,
 	return -ETIMEDOUT;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_wait(struct mv88e6xxx_priv_state *ps, int reg,
 			  int offset, u16 mask)
 {
@@ -1554,7 +1557,7 @@ static int mv88e6xxx_wait(struct mv88e6xxx_priv_state *ps, int reg,
 
 	return ret;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int mv88e6xxx_wait(struct dsa_switch *ds, int reg, int offset, u16 mask)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -1566,23 +1569,23 @@ static int mv88e6xxx_wait(struct dsa_switch *ds, int reg, int offset, u16 mask)
 
 	return ret;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_mdio_wait(struct mv88e6xxx_priv_state *ps)
 {
 	return _mv88e6xxx_wait(ps, REG_GLOBAL2, GLOBAL2_SMI_OP,
 			       GLOBAL2_SMI_OP_BUSY);
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int _mv88e6xxx_phy_wait(struct dsa_switch *ds)
 {
 	return _mv88e6xxx_wait(ds, REG_GLOBAL2, GLOBAL2_SMI_OP,
 			       GLOBAL2_SMI_OP_BUSY);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_eeprom_load_wait(struct dsa_switch *ds)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -1590,22 +1593,22 @@ static int mv88e6xxx_eeprom_load_wait(struct dsa_switch *ds)
 	return mv88e6xxx_wait(ps, REG_GLOBAL2, GLOBAL2_EEPROM_OP,
 			      GLOBAL2_EEPROM_OP_LOAD);
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 int mv88e6xxx_eeprom_load_wait(struct dsa_switch *ds)
 {
 	return mv88e6xxx_wait(ds, REG_GLOBAL2, GLOBAL2_EEPROM_OP,
 			      GLOBAL2_EEPROM_OP_LOAD);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_eeprom_busy_wait(struct dsa_switch *ds)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
 	return mv88e6xxx_wait(ps, REG_GLOBAL2, GLOBAL2_EEPROM_OP,
 			      GLOBAL2_EEPROM_OP_BUSY);
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 int mv88e6xxx_eeprom_busy_wait(struct dsa_switch *ds)
 {
 	return mv88e6xxx_wait(ds, REG_GLOBAL2, GLOBAL2_EEPROM_OP,
@@ -1617,9 +1620,9 @@ static int _mv88e6xxx_atu_wait(struct dsa_switch *ds)
 	return _mv88e6xxx_wait(ds, REG_GLOBAL, GLOBAL_ATU_OP,
 			       GLOBAL_ATU_OP_BUSY);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_read_eeprom_word(struct dsa_switch *ds, int addr)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -1642,7 +1645,7 @@ error:
 	mutex_unlock(&ps->eeprom_mutex);
 	return ret;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int _mv88e6xxx_phy_read_indirect(struct dsa_switch *ds, int addr,
 					int regnum)
 {
@@ -1660,9 +1663,9 @@ static int _mv88e6xxx_phy_read_indirect(struct dsa_switch *ds, int addr,
 
 	return _mv88e6xxx_reg_read(ds, REG_GLOBAL2, GLOBAL2_SMI_DATA);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_get_eeprom_len(struct dsa_switch *ds)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -1672,7 +1675,7 @@ static int mv88e6xxx_get_eeprom_len(struct dsa_switch *ds)
 
 	return 0;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int _mv88e6xxx_phy_write_indirect(struct dsa_switch *ds, int addr,
 					 int regnum, u16 val)
 {
@@ -1688,9 +1691,9 @@ static int _mv88e6xxx_phy_write_indirect(struct dsa_switch *ds, int addr,
 
 	return _mv88e6xxx_phy_wait(ds);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_get_eeprom(struct dsa_switch *ds,
 				struct ethtool_eeprom *eeprom, u8 *data)
 {
@@ -1755,7 +1758,7 @@ static int mv88e6xxx_get_eeprom(struct dsa_switch *ds,
 
 	return 0;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 int mv88e6xxx_get_eee(struct dsa_switch *ds, int port, struct ethtool_eee *e)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -1807,9 +1810,9 @@ out:
 
 	return ret;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_eeprom_is_readonly(struct dsa_switch *ds)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -1824,7 +1827,7 @@ static int mv88e6xxx_eeprom_is_readonly(struct dsa_switch *ds)
 
 	return 0;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int _mv88e6xxx_atu_cmd(struct dsa_switch *ds, u16 cmd)
 {
 	int ret;
@@ -1835,9 +1838,9 @@ static int _mv88e6xxx_atu_cmd(struct dsa_switch *ds, u16 cmd)
 
 	return _mv88e6xxx_atu_wait(ds);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_write_eeprom_word(struct dsa_switch *ds, int addr,
 				       u16 data)
 {
@@ -1861,7 +1864,7 @@ error:
 	mutex_unlock(&ps->eeprom_mutex);
 	return ret;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int _mv88e6xxx_atu_data_write(struct dsa_switch *ds,
 				     struct mv88e6xxx_atu_entry *entry)
 {
@@ -1884,9 +1887,9 @@ static int _mv88e6xxx_atu_data_write(struct dsa_switch *ds,
 
 	return _mv88e6xxx_reg_write(ds, REG_GLOBAL, GLOBAL_ATU_DATA, data);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_set_eeprom(struct dsa_switch *ds,
 				struct ethtool_eeprom *eeprom, u8 *data)
 {
@@ -2147,7 +2150,7 @@ static int _mv88e6xxx_atu_flush_move(struct mv88e6xxx_priv_state *ps,
 
 	return _mv88e6xxx_atu_cmd(ps, entry->fid, op);
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int _mv88e6xxx_atu_flush_move(struct dsa_switch *ds,
 				     struct mv88e6xxx_atu_entry *entry,
 				     bool static_too)
@@ -2178,9 +2181,9 @@ static int _mv88e6xxx_atu_flush_move(struct dsa_switch *ds,
 
 	return _mv88e6xxx_atu_cmd(ds, op);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int _mv88e6xxx_atu_flush(struct mv88e6xxx_priv_state *ps,
 				u16 fid, bool static_too)
 {
@@ -2191,7 +2194,7 @@ static int _mv88e6xxx_atu_flush(struct mv88e6xxx_priv_state *ps,
 
 	return _mv88e6xxx_atu_flush_move(ps, &entry, static_too);
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int _mv88e6xxx_atu_flush(struct dsa_switch *ds, u16 fid, bool static_too)
 {
 	struct mv88e6xxx_atu_entry entry = {
@@ -2201,15 +2204,15 @@ static int _mv88e6xxx_atu_flush(struct dsa_switch *ds, u16 fid, bool static_too)
 
 	return _mv88e6xxx_atu_flush_move(ds, &entry, static_too);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int _mv88e6xxx_atu_move(struct mv88e6xxx_priv_state *ps, u16 fid,
 			       int from_port, int to_port, bool static_too)
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int _mv88e6xxx_atu_move(struct dsa_switch *ds, u16 fid, int from_port,
 			       int to_port, bool static_too)
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 {
 	struct mv88e6xxx_atu_entry entry = {
 		.trunk = false,
@@ -2223,39 +2226,39 @@ static int _mv88e6xxx_atu_move(struct dsa_switch *ds, u16 fid, int from_port,
 	entry.portv_trunkid = (to_port & 0x0f) << 4;
 	entry.portv_trunkid |= from_port & 0x0f;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	return _mv88e6xxx_atu_flush_move(ps, &entry, static_too);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	return _mv88e6xxx_atu_flush_move(ds, &entry, static_too);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int _mv88e6xxx_atu_remove(struct mv88e6xxx_priv_state *ps, u16 fid,
 				 int port, bool static_too)
 {
 	/* Destination port 0xF means remove the entries */
 	return _mv88e6xxx_atu_move(ps, fid, port, 0x0f, static_too);
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int _mv88e6xxx_atu_remove(struct dsa_switch *ds, u16 fid, int port,
 				 bool static_too)
 {
 	/* Destination port 0xF means remove the entries */
 	return _mv88e6xxx_atu_move(ds, fid, port, 0x0f, static_too);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static const char * const mv88e6xxx_port_state_names[] = {
 	[PORT_CONTROL_STATE_DISABLED] = "Disabled",
 	[PORT_CONTROL_STATE_BLOCKING] = "Blocking/Listening",
 	[PORT_CONTROL_STATE_LEARNING] = "Learning",
 	[PORT_CONTROL_STATE_FORWARDING] = "Forwarding",
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int _mv88e6xxx_port_state(struct mv88e6xxx_priv_state *ps, int port,
 				 u8 state)
 {
@@ -2296,7 +2299,7 @@ static int _mv88e6xxx_port_state(struct mv88e6xxx_priv_state *ps, int port,
 
 	return ret;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int mv88e6xxx_set_port_state(struct dsa_switch *ds, int port, u8 state)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -2332,9 +2335,9 @@ abort:
 	mutex_unlock(&ps->smi_mutex);
 	return ret;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int _mv88e6xxx_port_based_vlan_map(struct mv88e6xxx_priv_state *ps,
 					  int port)
 {
@@ -2372,7 +2375,7 @@ static int _mv88e6xxx_port_based_vlan_map(struct mv88e6xxx_priv_state *ps,
 
 	return _mv88e6xxx_reg_write(ps, REG_PORT(port), PORT_BASE_VLAN, reg);
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int _mv88e6xxx_port_vlan_map_set(struct dsa_switch *ds, int port,
 					u16 output_ports)
 {
@@ -2389,23 +2392,23 @@ static int _mv88e6xxx_port_vlan_map_set(struct dsa_switch *ds, int port,
 
 	return _mv88e6xxx_reg_write(ds, REG_PORT(port), PORT_BASE_VLAN, reg);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static void mv88e6xxx_port_stp_state_set(struct dsa_switch *ds, int port,
 					 u8 state)
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 int mv88e6xxx_port_stp_update(struct dsa_switch *ds, int port, u8 state)
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
 	int stp_state;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	int err;
 
 	if (!mv88e6xxx_has(ps, MV88E6XXX_FLAG_PORTSTATE))
 		return;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	switch (state) {
 	case BR_STATE_DISABLED:
@@ -2424,7 +2427,7 @@ int mv88e6xxx_port_stp_update(struct dsa_switch *ds, int port, u8 state)
 		break;
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	mutex_lock(&ps->smi_mutex);
 	err = _mv88e6xxx_port_state(ps, port, stp_state);
 	mutex_unlock(&ps->smi_mutex);
@@ -2433,7 +2436,7 @@ int mv88e6xxx_port_stp_update(struct dsa_switch *ds, int port, u8 state)
 		netdev_err(ds->ports[port].netdev,
 			   "failed to update state to %s\n",
 			   mv88e6xxx_port_state_names[stp_state]);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	netdev_dbg(ds->ports[port], "port state %d [%d]\n", state, stp_state);
 
 	/* mv88e6xxx_port_stp_update may be called with softirqs disabled,
@@ -2444,10 +2447,10 @@ int mv88e6xxx_port_stp_update(struct dsa_switch *ds, int port, u8 state)
 	schedule_work(&ps->bridge_work);
 
 	return 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int _mv88e6xxx_port_pvid(struct mv88e6xxx_priv_state *ps, int port,
 				u16 *new, u16 *old)
 {
@@ -2478,15 +2481,15 @@ static int _mv88e6xxx_port_pvid(struct mv88e6xxx_priv_state *ps, int port,
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int _mv88e6xxx_port_pvid_get(struct mv88e6xxx_priv_state *ps,
 				    int port, u16 *pvid)
 {
 	return _mv88e6xxx_port_pvid(ps, port, NULL, pvid);
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 int mv88e6xxx_port_pvid_get(struct dsa_switch *ds, int port, u16 *pvid)
 {
 	int ret;
@@ -2499,37 +2502,37 @@ int mv88e6xxx_port_pvid_get(struct dsa_switch *ds, int port, u16 *pvid)
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int _mv88e6xxx_port_pvid_set(struct mv88e6xxx_priv_state *ps,
 				    int port, u16 pvid)
 {
 	return _mv88e6xxx_port_pvid(ps, port, &pvid, NULL);
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int _mv88e6xxx_port_pvid_set(struct dsa_switch *ds, int port, u16 pvid)
 {
 	return _mv88e6xxx_reg_write(ds, REG_PORT(port), PORT_DEFAULT_VLAN,
 				   pvid & PORT_DEFAULT_VLAN_MASK);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int _mv88e6xxx_vtu_wait(struct mv88e6xxx_priv_state *ps)
 {
 	return _mv88e6xxx_wait(ps, REG_GLOBAL, GLOBAL_VTU_OP,
 			       GLOBAL_VTU_OP_BUSY);
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int _mv88e6xxx_vtu_wait(struct dsa_switch *ds)
 {
 	return _mv88e6xxx_wait(ds, REG_GLOBAL, GLOBAL_VTU_OP,
 			       GLOBAL_VTU_OP_BUSY);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int _mv88e6xxx_vtu_cmd(struct mv88e6xxx_priv_state *ps, u16 op)
 {
 	int ret;
@@ -2540,7 +2543,7 @@ static int _mv88e6xxx_vtu_cmd(struct mv88e6xxx_priv_state *ps, u16 op)
 
 	return _mv88e6xxx_vtu_wait(ps);
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int _mv88e6xxx_vtu_cmd(struct dsa_switch *ds, u16 op)
 {
 	int ret;
@@ -2551,9 +2554,9 @@ static int _mv88e6xxx_vtu_cmd(struct dsa_switch *ds, u16 op)
 
 	return _mv88e6xxx_vtu_wait(ds);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int _mv88e6xxx_vtu_stu_flush(struct mv88e6xxx_priv_state *ps)
 {
 	int ret;
@@ -2564,7 +2567,7 @@ static int _mv88e6xxx_vtu_stu_flush(struct mv88e6xxx_priv_state *ps)
 
 	return _mv88e6xxx_vtu_cmd(ps, GLOBAL_VTU_OP_FLUSH_ALL);
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int _mv88e6xxx_vtu_stu_flush(struct dsa_switch *ds)
 {
 	int ret;
@@ -2575,9 +2578,9 @@ static int _mv88e6xxx_vtu_stu_flush(struct dsa_switch *ds)
 
 	return _mv88e6xxx_vtu_cmd(ds, GLOBAL_VTU_OP_FLUSH_ALL);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int _mv88e6xxx_vtu_stu_data_read(struct mv88e6xxx_priv_state *ps,
 					struct mv88e6xxx_vtu_stu_entry *entry,
 					unsigned int nibble_offset)
@@ -2604,7 +2607,7 @@ static int _mv88e6xxx_vtu_stu_data_read(struct mv88e6xxx_priv_state *ps,
 
 	return 0;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int _mv88e6xxx_vtu_stu_data_read(struct dsa_switch *ds,
 					struct mv88e6xxx_vtu_stu_entry *entry,
 					unsigned int nibble_offset)
@@ -2632,9 +2635,9 @@ static int _mv88e6xxx_vtu_stu_data_read(struct dsa_switch *ds,
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_vtu_data_read(struct mv88e6xxx_priv_state *ps,
 				   struct mv88e6xxx_vtu_stu_entry *entry)
 {
@@ -2646,9 +2649,9 @@ static int mv88e6xxx_stu_data_read(struct mv88e6xxx_priv_state *ps,
 {
 	return _mv88e6xxx_vtu_stu_data_read(ps, entry, 2);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int _mv88e6xxx_vtu_stu_data_write(struct mv88e6xxx_priv_state *ps,
 					 struct mv88e6xxx_vtu_stu_entry *entry,
 					 unsigned int nibble_offset)
@@ -2673,7 +2676,7 @@ static int _mv88e6xxx_vtu_stu_data_write(struct mv88e6xxx_priv_state *ps,
 
 	return 0;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int _mv88e6xxx_vtu_stu_data_write(struct dsa_switch *ds,
 					 struct mv88e6xxx_vtu_stu_entry *entry,
 					 unsigned int nibble_offset)
@@ -2699,9 +2702,9 @@ static int _mv88e6xxx_vtu_stu_data_write(struct dsa_switch *ds,
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_vtu_data_write(struct mv88e6xxx_priv_state *ps,
 				    struct mv88e6xxx_vtu_stu_entry *entry)
 {
@@ -2713,23 +2716,23 @@ static int mv88e6xxx_stu_data_write(struct mv88e6xxx_priv_state *ps,
 {
 	return _mv88e6xxx_vtu_stu_data_write(ps, entry, 2);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int _mv88e6xxx_vtu_vid_write(struct mv88e6xxx_priv_state *ps, u16 vid)
 {
 	return _mv88e6xxx_reg_write(ps, REG_GLOBAL, GLOBAL_VTU_VID,
 				    vid & GLOBAL_VTU_VID_MASK);
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int _mv88e6xxx_vtu_vid_write(struct dsa_switch *ds, u16 vid)
 {
 	return _mv88e6xxx_reg_write(ds, REG_GLOBAL, GLOBAL_VTU_VID,
 				    vid & GLOBAL_VTU_VID_MASK);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int _mv88e6xxx_vtu_getnext(struct mv88e6xxx_priv_state *ps,
 				  struct mv88e6xxx_vtu_stu_entry *entry)
 {
@@ -2789,7 +2792,7 @@ static int _mv88e6xxx_vtu_getnext(struct mv88e6xxx_priv_state *ps,
 	*entry = next;
 	return 0;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int _mv88e6xxx_vtu_getnext(struct dsa_switch *ds,
 				  struct mv88e6xxx_vtu_stu_entry *entry)
 {
@@ -2837,9 +2840,9 @@ static int _mv88e6xxx_vtu_getnext(struct dsa_switch *ds,
 	*entry = next;
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_port_vlan_dump(struct dsa_switch *ds, int port,
 				    struct switchdev_obj_port_vlan *vlan,
 				    int (*cb)(struct switchdev_obj *obj))
@@ -2893,9 +2896,9 @@ unlock:
 
 	return err;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int _mv88e6xxx_vtu_loadpurge(struct mv88e6xxx_priv_state *ps,
 				    struct mv88e6xxx_vtu_stu_entry *entry)
 {
@@ -2943,7 +2946,7 @@ loadpurge:
 
 	return _mv88e6xxx_vtu_cmd(ps, op);
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int _mv88e6xxx_vtu_loadpurge(struct dsa_switch *ds,
 				    struct mv88e6xxx_vtu_stu_entry *entry)
 {
@@ -2984,9 +2987,9 @@ loadpurge:
 
 	return _mv88e6xxx_vtu_cmd(ds, GLOBAL_VTU_OP_VTU_LOAD_PURGE);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int _mv88e6xxx_stu_getnext(struct mv88e6xxx_priv_state *ps, u8 sid,
 				  struct mv88e6xxx_vtu_stu_entry *entry)
 {
@@ -3027,7 +3030,7 @@ static int _mv88e6xxx_stu_getnext(struct mv88e6xxx_priv_state *ps, u8 sid,
 	*entry = next;
 	return 0;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int _mv88e6xxx_stu_getnext(struct dsa_switch *ds, u8 sid,
 				  struct mv88e6xxx_vtu_stu_entry *entry)
 {
@@ -3068,9 +3071,9 @@ static int _mv88e6xxx_stu_getnext(struct dsa_switch *ds, u8 sid,
 	*entry = next;
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int _mv88e6xxx_stu_loadpurge(struct mv88e6xxx_priv_state *ps,
 				    struct mv88e6xxx_vtu_stu_entry *entry)
 {
@@ -3102,7 +3105,7 @@ loadpurge:
 
 	return _mv88e6xxx_vtu_cmd(ps, GLOBAL_VTU_OP_STU_LOAD_PURGE);
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int _mv88e6xxx_stu_loadpurge(struct dsa_switch *ds,
 				    struct mv88e6xxx_vtu_stu_entry *entry)
 {
@@ -3134,9 +3137,9 @@ loadpurge:
 
 	return _mv88e6xxx_vtu_cmd(ds, GLOBAL_VTU_OP_STU_LOAD_PURGE);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int _mv88e6xxx_port_fid(struct mv88e6xxx_priv_state *ps, int port,
 			       u16 *new, u16 *old)
 {
@@ -3272,12 +3275,12 @@ static int _mv88e6xxx_vtu_new(struct mv88e6xxx_priv_state *ps, u16 vid,
 			: GLOBAL_VTU_DATA_MEMBER_TAG_NON_MEMBER;
 
 	if (mv88e6xxx_6097_family(ps) || mv88e6xxx_6165_family(ps) ||
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	    mv88e6xxx_6351_family(ps) || mv88e6xxx_6352_family(ps) ||
 	    mv88e6xxx_6390_family(ps)) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	    mv88e6xxx_6351_family(ps) || mv88e6xxx_6352_family(ps)) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 		struct mv88e6xxx_vtu_stu_entry vstp;
 
 		/* Adding a VTU entry requires a valid STU entry. As VSTP is not
@@ -3303,7 +3306,7 @@ static int _mv88e6xxx_vtu_new(struct mv88e6xxx_priv_state *ps, u16 vid,
 	*entry = vlan;
 	return 0;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int _mv88e6xxx_vlan_init(struct dsa_switch *ds, u16 vid,
 				struct mv88e6xxx_vtu_stu_entry *entry)
 {
@@ -3354,9 +3357,9 @@ static int _mv88e6xxx_vlan_init(struct dsa_switch *ds, u16 vid,
 	*entry = vlan;
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int _mv88e6xxx_vtu_get(struct mv88e6xxx_priv_state *ps, u16 vid,
 			      struct mv88e6xxx_vtu_stu_entry *entry, bool creat)
 {
@@ -3385,7 +3388,7 @@ static int _mv88e6xxx_vtu_get(struct mv88e6xxx_priv_state *ps, u16 vid,
 
 	return err;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 int mv88e6xxx_port_vlan_prepare(struct dsa_switch *ds, int port,
 				const struct switchdev_obj_port_vlan *vlan,
 				struct switchdev_trans *trans)
@@ -3399,9 +3402,9 @@ int mv88e6xxx_port_vlan_prepare(struct dsa_switch *ds, int port,
 	 */
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_port_check_hw_vlan(struct dsa_switch *ds, int port,
 					u16 vid_begin, u16 vid_end)
 {
@@ -3543,7 +3546,7 @@ static int _mv88e6xxx_port_vlan_add(struct mv88e6xxx_priv_state *ps, int port,
 
 	return _mv88e6xxx_vtu_loadpurge(ps, &vlan);
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int _mv88e6xxx_port_vlan_add(struct dsa_switch *ds, int port, u16 vid,
 				    bool untagged)
 {
@@ -3570,9 +3573,9 @@ static int _mv88e6xxx_port_vlan_add(struct dsa_switch *ds, int port, u16 vid,
 
 	return _mv88e6xxx_vtu_loadpurge(ds, &vlan);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static void mv88e6xxx_port_vlan_add(struct dsa_switch *ds, int port,
 				    const struct switchdev_obj_port_vlan *vlan,
 				    struct switchdev_trans *trans)
@@ -3599,7 +3602,7 @@ static void mv88e6xxx_port_vlan_add(struct dsa_switch *ds, int port,
 
 	mutex_unlock(&ps->smi_mutex);
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 int mv88e6xxx_port_vlan_add(struct dsa_switch *ds, int port,
 			    const struct switchdev_obj_port_vlan *vlan,
 			    struct switchdev_trans *trans)
@@ -3626,9 +3629,9 @@ unlock:
 
 	return err;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int _mv88e6xxx_port_vlan_del(struct mv88e6xxx_priv_state *ps,
 				    int port, u16 vid)
 {
@@ -3664,7 +3667,7 @@ static int _mv88e6xxx_port_vlan_del(struct mv88e6xxx_priv_state *ps,
 
 	return _mv88e6xxx_atu_remove(ps, vlan.fid, port, false);
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int _mv88e6xxx_port_vlan_del(struct dsa_switch *ds, int port, u16 vid)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -3703,9 +3706,9 @@ static int _mv88e6xxx_port_vlan_del(struct dsa_switch *ds, int port, u16 vid)
 
 	return _mv88e6xxx_atu_remove(ds, vlan.fid, port, false);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_port_vlan_del(struct dsa_switch *ds, int port,
 				   const struct switchdev_obj_port_vlan *vlan)
 {
@@ -3739,7 +3742,7 @@ unlock:
 
 	return err;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 int mv88e6xxx_port_vlan_del(struct dsa_switch *ds, int port,
 			    const struct switchdev_obj_port_vlan *vlan)
 {
@@ -3770,9 +3773,9 @@ unlock:
 
 	return err;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int _mv88e6xxx_atu_mac_write(struct mv88e6xxx_priv_state *ps,
 				    const unsigned char *addr)
 {
@@ -3788,7 +3791,7 @@ static int _mv88e6xxx_atu_mac_write(struct mv88e6xxx_priv_state *ps,
 
 	return 0;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 int mv88e6xxx_vlan_getnext(struct dsa_switch *ds, u16 *vid,
 			   unsigned long *ports, unsigned long *untagged)
 {
@@ -3850,9 +3853,9 @@ static int _mv88e6xxx_atu_mac_write(struct dsa_switch *ds,
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int _mv88e6xxx_atu_mac_read(struct mv88e6xxx_priv_state *ps,
 				   unsigned char *addr)
 {
@@ -3869,7 +3872,7 @@ static int _mv88e6xxx_atu_mac_read(struct mv88e6xxx_priv_state *ps,
 
 	return 0;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int _mv88e6xxx_atu_mac_read(struct dsa_switch *ds, unsigned char *addr)
 {
 	int i, ret;
@@ -3885,9 +3888,9 @@ static int _mv88e6xxx_atu_mac_read(struct dsa_switch *ds, unsigned char *addr)
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int _mv88e6xxx_atu_load(struct mv88e6xxx_priv_state *ps,
 			       struct mv88e6xxx_atu_entry *entry)
 {
@@ -3907,7 +3910,7 @@ static int _mv88e6xxx_atu_load(struct mv88e6xxx_priv_state *ps,
 
 	return _mv88e6xxx_atu_cmd(ps, entry->fid, GLOBAL_ATU_OP_LOAD_DB);
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int _mv88e6xxx_atu_load(struct dsa_switch *ds,
 			       struct mv88e6xxx_atu_entry *entry)
 {
@@ -3931,9 +3934,9 @@ static int _mv88e6xxx_atu_load(struct dsa_switch *ds,
 
 	return _mv88e6xxx_atu_cmd(ds, GLOBAL_ATU_OP_LOAD_DB);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int _mv88e6xxx_port_fdb_load(struct mv88e6xxx_priv_state *ps, int port,
 				    const unsigned char *addr, u16 vid,
 				    u8 state)
@@ -3960,7 +3963,7 @@ static int _mv88e6xxx_port_fdb_load(struct mv88e6xxx_priv_state *ps, int port,
 
 	return _mv88e6xxx_atu_load(ps, &entry);
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int _mv88e6xxx_port_fdb_load(struct dsa_switch *ds, int port,
 				    const unsigned char *addr, u16 vid,
 				    u8 state)
@@ -3977,9 +3980,9 @@ static int _mv88e6xxx_port_fdb_load(struct dsa_switch *ds, int port,
 
 	return _mv88e6xxx_atu_load(ds, &entry);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_port_fdb_prepare(struct dsa_switch *ds, int port,
 				      const struct switchdev_obj_port_fdb *fdb,
 				      struct switchdev_trans *trans)
@@ -3994,7 +3997,7 @@ static int mv88e6xxx_port_fdb_prepare(struct dsa_switch *ds, int port,
 	 */
 	return 0;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 int mv88e6xxx_port_fdb_prepare(struct dsa_switch *ds, int port,
 			       const struct switchdev_obj_port_fdb *fdb,
 			       struct switchdev_trans *trans)
@@ -4008,9 +4011,9 @@ int mv88e6xxx_port_fdb_prepare(struct dsa_switch *ds, int port,
 	 */
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static void mv88e6xxx_port_fdb_add(struct dsa_switch *ds, int port,
 				   const struct switchdev_obj_port_fdb *fdb,
 				   struct switchdev_trans *trans)
@@ -4029,7 +4032,7 @@ static void mv88e6xxx_port_fdb_add(struct dsa_switch *ds, int port,
 			   "failed to load MAC address\n");
 	mutex_unlock(&ps->smi_mutex);
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 int mv88e6xxx_port_fdb_add(struct dsa_switch *ds, int port,
 			   const struct switchdev_obj_port_fdb *fdb,
 			   struct switchdev_trans *trans)
@@ -4046,9 +4049,9 @@ int mv88e6xxx_port_fdb_add(struct dsa_switch *ds, int port,
 
 	return ret;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_port_fdb_del(struct dsa_switch *ds, int port,
 				  const struct switchdev_obj_port_fdb *fdb)
 {
@@ -4065,7 +4068,7 @@ static int mv88e6xxx_port_fdb_del(struct dsa_switch *ds, int port,
 
 	return ret;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 int mv88e6xxx_port_fdb_del(struct dsa_switch *ds, int port,
 			   const struct switchdev_obj_port_fdb *fdb)
 {
@@ -4079,9 +4082,9 @@ int mv88e6xxx_port_fdb_del(struct dsa_switch *ds, int port,
 
 	return ret;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int _mv88e6xxx_atu_getnext(struct mv88e6xxx_priv_state *ps, u16 fid,
 				  struct mv88e6xxx_atu_entry *entry)
 {
@@ -4126,7 +4129,7 @@ static int _mv88e6xxx_atu_getnext(struct mv88e6xxx_priv_state *ps, u16 fid,
 	*entry = next;
 	return 0;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int _mv88e6xxx_atu_getnext(struct dsa_switch *ds, u16 fid,
 				  struct mv88e6xxx_atu_entry *entry)
 {
@@ -4175,9 +4178,9 @@ static int _mv88e6xxx_atu_getnext(struct dsa_switch *ds, u16 fid,
 	*entry = next;
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int _mv88e6xxx_port_fdb_dump_one(struct mv88e6xxx_priv_state *ps,
 					u16 fid, u16 vid, int port,
 					struct switchdev_obj_port_fdb *fdb,
@@ -4218,9 +4221,9 @@ static int _mv88e6xxx_port_fdb_dump_one(struct mv88e6xxx_priv_state *ps,
 
 	return err;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_port_fdb_dump(struct dsa_switch *ds, int port,
 				   struct switchdev_obj_port_fdb *fdb,
 				   int (*cb)(struct switchdev_obj *obj))
@@ -4270,7 +4273,7 @@ unlock:
 
 	return err;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 int mv88e6xxx_port_fdb_dump(struct dsa_switch *ds, int port,
 			    struct switchdev_obj_port_fdb *fdb,
 			    int (*cb)(struct switchdev_obj *obj))
@@ -4335,9 +4338,9 @@ unlock:
 
 	return err;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_port_bridge_join(struct dsa_switch *ds, int port,
 				      struct net_device *bridge)
 {
@@ -4364,7 +4367,7 @@ static int mv88e6xxx_port_bridge_join(struct dsa_switch *ds, int port,
 
 	return err;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 int mv88e6xxx_port_bridge_join(struct dsa_switch *ds, int port, u32 members)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -4379,9 +4382,9 @@ int mv88e6xxx_port_bridge_join(struct dsa_switch *ds, int port, u32 members)
 	mutex_unlock(&ps->smi_mutex);
 	return err;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static void mv88e6xxx_port_bridge_leave(struct dsa_switch *ds, int port)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -4404,7 +4407,7 @@ static void mv88e6xxx_port_bridge_leave(struct dsa_switch *ds, int port)
 
 	mutex_unlock(&ps->smi_mutex);
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 int mv88e6xxx_port_bridge_leave(struct dsa_switch *ds, int port, u32 members)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -4419,9 +4422,9 @@ int mv88e6xxx_port_bridge_leave(struct dsa_switch *ds, int port, u32 members)
 	mutex_unlock(&ps->smi_mutex);
 	return err;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int _mv88e6xxx_mdio_page_write(struct mv88e6xxx_priv_state *ps,
 				      int port, int page, int reg, int val)
 {
@@ -4534,7 +4537,7 @@ static int mv88e6xxx_power_on_serdes(struct mv88e6xxx_priv_state *ps)
 
 	return ret;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static void mv88e6xxx_bridge_work(struct work_struct *work)
 {
 	struct mv88e6xxx_priv_state *ps;
@@ -4550,9 +4553,9 @@ static void mv88e6xxx_bridge_work(struct work_struct *work)
 		mv88e6xxx_set_port_state(ds, port, ps->port_state[port]);
 	}
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_setup_port(struct mv88e6xxx_priv_state *ps, int port)
 {
 	struct dsa_switch *ds = ps->ds;
@@ -4562,12 +4565,12 @@ static int mv88e6xxx_setup_port(struct mv88e6xxx_priv_state *ps, int port)
 	if (mv88e6xxx_6352_family(ps) || mv88e6xxx_6351_family(ps) ||
 	    mv88e6xxx_6165_family(ps) || mv88e6xxx_6097_family(ps) ||
 	    mv88e6xxx_6185_family(ps) || mv88e6xxx_6095_family(ps) ||
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	    mv88e6xxx_6065_family(ps) || mv88e6xxx_6320_family(ps) ||
 	    mv88e6xxx_6390_family(ps)) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	    mv88e6xxx_6065_family(ps) || mv88e6xxx_6320_family(ps)) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 		/* MAC Forcing register: don't force link, speed,
 		 * duplex or flow control state to any particular
 		 * values on physical ports, but force the CPU port
@@ -4619,12 +4622,12 @@ static int mv88e6xxx_setup_port(struct mv88e6xxx_priv_state *ps, int port)
 	if (mv88e6xxx_6352_family(ps) || mv88e6xxx_6351_family(ps) ||
 	    mv88e6xxx_6165_family(ps) || mv88e6xxx_6097_family(ps) ||
 	    mv88e6xxx_6095_family(ps) || mv88e6xxx_6065_family(ps) ||
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	    mv88e6xxx_6185_family(ps) || mv88e6xxx_6320_family(ps) ||
 	    mv88e6xxx_6390_family(ps))
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	    mv88e6xxx_6185_family(ps) || mv88e6xxx_6320_family(ps))
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 		reg = PORT_CONTROL_IGMP_MLD_SNOOP |
 		PORT_CONTROL_USE_TAG | PORT_CONTROL_USE_IP |
 		PORT_CONTROL_STATE_FORWARDING;
@@ -4633,11 +4636,11 @@ static int mv88e6xxx_setup_port(struct mv88e6xxx_priv_state *ps, int port)
 			reg |= PORT_CONTROL_DSA_TAG;
 		if (mv88e6xxx_6352_family(ps) || mv88e6xxx_6351_family(ps) ||
 		    mv88e6xxx_6165_family(ps) || mv88e6xxx_6097_family(ps) ||
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		    mv88e6xxx_6320_family(ps) || mv88e6xxx_6390_family(ps)) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 		    mv88e6xxx_6320_family(ps)) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 			reg |= PORT_CONTROL_FRAME_ETHER_TYPE_DSA |
 				PORT_CONTROL_FORWARD_UNKNOWN |
 				PORT_CONTROL_FORWARD_UNKNOWN_MC;
@@ -4646,12 +4649,12 @@ static int mv88e6xxx_setup_port(struct mv88e6xxx_priv_state *ps, int port)
 		if (mv88e6xxx_6352_family(ps) || mv88e6xxx_6351_family(ps) ||
 		    mv88e6xxx_6165_family(ps) || mv88e6xxx_6097_family(ps) ||
 		    mv88e6xxx_6095_family(ps) || mv88e6xxx_6065_family(ps) ||
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		    mv88e6xxx_6185_family(ps) || mv88e6xxx_6320_family(ps) ||
 		    mv88e6xxx_6390_family(ps)) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 		    mv88e6xxx_6185_family(ps) || mv88e6xxx_6320_family(ps)) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 				reg |= PORT_CONTROL_EGRESS_ADD_TAG;
 		}
 	}
@@ -4660,11 +4663,11 @@ static int mv88e6xxx_setup_port(struct mv88e6xxx_priv_state *ps, int port)
 			reg |= PORT_CONTROL_DSA_TAG;
 		if (mv88e6xxx_6352_family(ps) || mv88e6xxx_6351_family(ps) ||
 		    mv88e6xxx_6165_family(ps) || mv88e6xxx_6097_family(ps) ||
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		    mv88e6xxx_6320_family(ps) || mv88e6xxx_6390_family(ps)) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 		    mv88e6xxx_6320_family(ps)) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 			reg |= PORT_CONTROL_FRAME_MODE_DSA;
 		}
 
@@ -4682,11 +4685,11 @@ static int mv88e6xxx_setup_port(struct mv88e6xxx_priv_state *ps, int port)
 	/* If this port is connected to a SerDes, make sure the SerDes is not
 	 * powered down.
 	 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	if (mv88e6xxx_6352_family(ps) || mv88e6xxx_6390_family(ps)) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	if (mv88e6xxx_6352_family(ps)) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 		ret = _mv88e6xxx_reg_read(ps, REG_PORT(port), PORT_STATUS);
 		if (ret < 0)
 			return ret;
@@ -4713,20 +4716,20 @@ static int mv88e6xxx_setup_port(struct mv88e6xxx_priv_state *ps, int port)
 	if (mv88e6xxx_6352_family(ps) || mv88e6xxx_6351_family(ps) ||
 	    mv88e6xxx_6165_family(ps) || mv88e6xxx_6097_family(ps) ||
 	    mv88e6xxx_6095_family(ps) || mv88e6xxx_6320_family(ps) ||
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	    mv88e6xxx_6185_family(ps) || mv88e6xxx_6390_family(ps))
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	    mv88e6xxx_6185_family(ps))
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 		reg = PORT_CONTROL_2_MAP_DA;
 
 	if (mv88e6xxx_6352_family(ps) || mv88e6xxx_6351_family(ps) ||
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	    mv88e6xxx_6165_family(ps) || mv88e6xxx_6320_family(ps) ||
 	    mv88e6xxx_6390_family(ps))
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	    mv88e6xxx_6165_family(ps) || mv88e6xxx_6320_family(ps))
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 		reg |= PORT_CONTROL_2_JUMBO_10240;
 
 	if (mv88e6xxx_6095_family(ps) || mv88e6xxx_6185_family(ps)) {
@@ -4770,11 +4773,11 @@ static int mv88e6xxx_setup_port(struct mv88e6xxx_priv_state *ps, int port)
 
 	if (mv88e6xxx_6352_family(ps) || mv88e6xxx_6351_family(ps) ||
 	    mv88e6xxx_6165_family(ps) || mv88e6xxx_6097_family(ps) ||
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	    mv88e6xxx_6320_family(ps) || mv88e6xxx_6390_family(ps)) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	    mv88e6xxx_6320_family(ps)) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 		/* Do not limit the period of time that this port can
 		 * be paused for by the remote end or the period of
 		 * time that this port can pause the remote end.
@@ -4825,11 +4828,11 @@ static int mv88e6xxx_setup_port(struct mv88e6xxx_priv_state *ps, int port)
 	if (mv88e6xxx_6352_family(ps) || mv88e6xxx_6351_family(ps) ||
 	    mv88e6xxx_6165_family(ps) || mv88e6xxx_6097_family(ps) ||
 	    mv88e6xxx_6185_family(ps) || mv88e6xxx_6095_family(ps) ||
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	    mv88e6xxx_6320_family(ps) || mv88e6xxx_6390_family(ps)) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	    mv88e6xxx_6320_family(ps)) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 		/* Rate Control: disable ingress rate limiting. */
 		ret = _mv88e6xxx_reg_write(ps, REG_PORT(port),
 					   PORT_RATE_CONTROL, 0x0001);
@@ -4870,7 +4873,7 @@ static int mv88e6xxx_setup_port(struct mv88e6xxx_priv_state *ps, int port)
 
 	return 0;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int mv88e6xxx_setup_port(struct dsa_switch *ds, int port)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -5144,9 +5147,9 @@ int mv88e6xxx_setup_ports(struct dsa_switch *ds)
 	}
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_setup_global(struct mv88e6xxx_priv_state *ps)
 {
 	struct dsa_switch *ds = ps->ds;
@@ -5280,11 +5283,11 @@ static int mv88e6xxx_setup_global(struct mv88e6xxx_priv_state *ps)
 
 	if (mv88e6xxx_6352_family(ps) || mv88e6xxx_6351_family(ps) ||
 	    mv88e6xxx_6165_family(ps) || mv88e6xxx_6097_family(ps) ||
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	    mv88e6xxx_6320_family(ps) || mv88e6xxx_6390_family(ps)) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	    mv88e6xxx_6320_family(ps)) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 		/* Send all frames with destination addresses matching
 		 * 01:80:c2:00:00:2x to the CPU port.
 		 */
@@ -5314,11 +5317,11 @@ static int mv88e6xxx_setup_global(struct mv88e6xxx_priv_state *ps)
 	if (mv88e6xxx_6352_family(ps) || mv88e6xxx_6351_family(ps) ||
 	    mv88e6xxx_6165_family(ps) || mv88e6xxx_6097_family(ps) ||
 	    mv88e6xxx_6185_family(ps) || mv88e6xxx_6095_family(ps) ||
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	    mv88e6xxx_6320_family(ps) || mv88e6xxx_6390_family(ps)) {
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	    mv88e6xxx_6320_family(ps)) {
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 		/* Disable ingress rate limiting by resetting all
 		 * ingress rate limit registers to their initial
 		 * state.
@@ -5355,7 +5358,7 @@ static int mv88e6xxx_setup_global(struct mv88e6xxx_priv_state *ps)
 
 	return err;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 int mv88e6xxx_setup_common(struct dsa_switch *ds)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -5488,9 +5491,9 @@ unlock:
 
 	return ret;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_setup(struct dsa_switch *ds)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -5524,7 +5527,7 @@ unlock:
 
 	return err;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 int mv88e6xxx_switch_reset(struct dsa_switch *ds, bool ppu_active)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -5564,9 +5567,9 @@ int mv88e6xxx_switch_reset(struct dsa_switch *ds, bool ppu_active)
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 int mv88e6xxx_mdio_page_read(struct dsa_switch *ds, int port, int page, int reg)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -5578,7 +5581,7 @@ int mv88e6xxx_mdio_page_read(struct dsa_switch *ds, int port, int page, int reg)
 
 	return ret;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 int mv88e6xxx_phy_page_read(struct dsa_switch *ds, int port, int page, int reg)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -5595,9 +5598,9 @@ error:
 
 	return ret;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 int mv88e6xxx_mdio_page_write(struct dsa_switch *ds, int port, int page, int reg, int val)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -5609,7 +5612,7 @@ int mv88e6xxx_mdio_page_write(struct dsa_switch *ds, int port, int page, int reg
 
 	return ret;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 int mv88e6xxx_phy_page_write(struct dsa_switch *ds, int port, int page,
 			     int reg, int val)
 {
@@ -5628,9 +5631,9 @@ error:
 
 	return ret;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_port_to_mdio_addr(struct mv88e6xxx_priv_state *ps, int port)
 {
 	if (port >= 0 && port < ps->info->num_ports) {
@@ -5641,7 +5644,7 @@ static int mv88e6xxx_port_to_mdio_addr(struct mv88e6xxx_priv_state *ps, int port
 	}
 	return -EINVAL;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int mv88e6xxx_port_to_phy_addr(struct dsa_switch *ds, int port)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -5650,9 +5653,9 @@ static int mv88e6xxx_port_to_phy_addr(struct dsa_switch *ds, int port)
 		return port;
 	return -EINVAL;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_mdio_read(struct mii_bus *bus, int port, int regnum)
 {
 	struct mv88e6xxx_priv_state *ps = bus->priv;
@@ -5674,7 +5677,7 @@ static int mv88e6xxx_mdio_read(struct mii_bus *bus, int port, int regnum)
 	mutex_unlock(&ps->smi_mutex);
 	return ret;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 int
 mv88e6xxx_phy_read(struct dsa_switch *ds, int port, int regnum)
 {
@@ -5690,9 +5693,9 @@ mv88e6xxx_phy_read(struct dsa_switch *ds, int port, int regnum)
 	mutex_unlock(&ps->smi_mutex);
 	return ret;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_mdio_write(struct mii_bus *bus, int port, int regnum, u16 val)
 {
 	struct mv88e6xxx_priv_state *ps = bus->priv;
@@ -5714,7 +5717,7 @@ static int mv88e6xxx_mdio_write(struct mii_bus *bus, int port, int regnum, u16 v
 	mutex_unlock(&ps->smi_mutex);
 	return ret;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 int
 mv88e6xxx_phy_write(struct dsa_switch *ds, int port, int regnum, u16 val)
 {
@@ -5730,9 +5733,9 @@ mv88e6xxx_phy_write(struct dsa_switch *ds, int port, int regnum, u16 val)
 	mutex_unlock(&ps->smi_mutex);
 	return ret;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_mdio_register(struct mv88e6xxx_priv_state *ps, struct device_node *np)
 {
 	static int index;
@@ -5781,7 +5784,7 @@ out:
 
 	return err;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 int
 mv88e6xxx_phy_read_indirect(struct dsa_switch *ds, int port, int regnum)
 {
@@ -5797,9 +5800,9 @@ mv88e6xxx_phy_read_indirect(struct dsa_switch *ds, int port, int regnum)
 	mutex_unlock(&ps->smi_mutex);
 	return ret;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static void mv88e6xxx_mdio_unregister(struct mv88e6xxx_priv_state *ps)
 {
 	struct mii_bus *bus = ps->mdio_bus;
@@ -5809,7 +5812,7 @@ static void mv88e6xxx_mdio_unregister(struct mv88e6xxx_priv_state *ps)
 	if (ps->mdio_np)
 		of_node_put(ps->mdio_np);
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 int
 mv88e6xxx_phy_write_indirect(struct dsa_switch *ds, int port, int regnum,
 			     u16 val)
@@ -5826,7 +5829,7 @@ mv88e6xxx_phy_write_indirect(struct dsa_switch *ds, int port, int regnum,
 	mutex_unlock(&ps->smi_mutex);
 	return ret;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 #ifdef CONFIG_NET_DSA_HWMON
 
@@ -5840,82 +5843,82 @@ static int mv88e61xx_get_temp(struct dsa_switch *ds, int *temp)
 
 	mutex_lock(&ps->smi_mutex);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	ret = mv88e6xxx_mdio_write_direct(ps, 0x0, 0x16, 0x6);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	ret = _mv88e6xxx_phy_write(ds, 0x0, 0x16, 0x6);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	if (ret < 0)
 		goto error;
 
 	/* Enable temperature sensor */
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	ret = mv88e6xxx_mdio_read_direct(ps, 0x0, 0x1a);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	ret = _mv88e6xxx_phy_read(ds, 0x0, 0x1a);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	if (ret < 0)
 		goto error;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	ret = mv88e6xxx_mdio_write_direct(ps, 0x0, 0x1a, ret | (1 << 5));
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	ret = _mv88e6xxx_phy_write(ds, 0x0, 0x1a, ret | (1 << 5));
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	if (ret < 0)
 		goto error;
 
 	/* Wait for temperature to stabilize */
 	usleep_range(10000, 12000);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	val = mv88e6xxx_mdio_read_direct(ps, 0x0, 0x1a);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	val = _mv88e6xxx_phy_read(ds, 0x0, 0x1a);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	if (val < 0) {
 		ret = val;
 		goto error;
 	}
 
 	/* Disable temperature sensor */
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	ret = mv88e6xxx_mdio_write_direct(ps, 0x0, 0x1a, ret & ~(1 << 5));
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	ret = _mv88e6xxx_phy_write(ds, 0x0, 0x1a, ret & ~(1 << 5));
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	if (ret < 0)
 		goto error;
 
 	*temp = ((val & 0x1f) - 5) * 5;
 
 error:
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	mv88e6xxx_mdio_write_direct(ps, 0x0, 0x16, 0x0);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	_mv88e6xxx_phy_write(ds, 0x0, 0x16, 0x0);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	mutex_unlock(&ps->smi_mutex);
 	return ret;
 }
 
 static int mv88e63xx_get_temp(struct dsa_switch *ds, int *temp)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
 	int phy = mv88e6xxx_6320_family(ps) ? 3 : 0;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	int phy = mv88e6xxx_6320_family(ds) ? 3 : 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	int ret;
 
 	*temp = 0;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	ret = mv88e6xxx_mdio_page_read(ds, phy, 6, 27);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	ret = mv88e6xxx_phy_page_read(ds, phy, 6, 27);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	if (ret < 0)
 		return ret;
 
@@ -5924,7 +5927,7 @@ static int mv88e63xx_get_temp(struct dsa_switch *ds, int *temp)
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_get_temp(struct dsa_switch *ds, int *temp)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -5932,17 +5935,17 @@ static int mv88e6xxx_get_temp(struct dsa_switch *ds, int *temp)
 	if (!mv88e6xxx_has(ps, MV88E6XXX_FLAG_TEMP))
 		return -EOPNOTSUPP;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	if (mv88e6xxx_6320_family(ps) || mv88e6xxx_6352_family(ps) ||
 	    mv88e6xxx_6390_family(ps))
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	if (mv88e6xxx_6320_family(ps) || mv88e6xxx_6352_family(ps))
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 		return mv88e63xx_get_temp(ds, temp);
 
 	return mv88e61xx_get_temp(ds, temp);
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 int mv88e6xxx_get_temp(struct dsa_switch *ds, int *temp)
 {
 	if (mv88e6xxx_6320_family(ds) || mv88e6xxx_6352_family(ds))
@@ -5950,9 +5953,9 @@ int mv88e6xxx_get_temp(struct dsa_switch *ds, int *temp)
 
 	return mv88e61xx_get_temp(ds, temp);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_get_temp_limit(struct dsa_switch *ds, int *temp)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -5972,7 +5975,7 @@ static int mv88e6xxx_get_temp_limit(struct dsa_switch *ds, int *temp)
 
 	return 0;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 int mv88e6xxx_get_temp_limit(struct dsa_switch *ds, int *temp)
 {
 	int phy = mv88e6xxx_6320_family(ds) ? 3 : 0;
@@ -5991,9 +5994,9 @@ int mv88e6xxx_get_temp_limit(struct dsa_switch *ds, int *temp)
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_set_temp_limit(struct dsa_switch *ds, int temp)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -6010,7 +6013,7 @@ static int mv88e6xxx_set_temp_limit(struct dsa_switch *ds, int temp)
 	return mv88e6xxx_mdio_page_write(ds, phy, 6, 26,
 					 (ret & 0xe0ff) | (temp << 8));
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 int mv88e6xxx_set_temp_limit(struct dsa_switch *ds, int temp)
 {
 	int phy = mv88e6xxx_6320_family(ds) ? 3 : 0;
@@ -6026,9 +6029,9 @@ int mv88e6xxx_set_temp_limit(struct dsa_switch *ds, int temp)
 	return mv88e6xxx_phy_page_write(ds, phy, 6, 26,
 					(ret & 0xe0ff) | (temp << 8));
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int mv88e6xxx_get_temp_alarm(struct dsa_switch *ds, bool *alarm)
 {
 	struct mv88e6xxx_priv_state *ps = ds_to_priv(ds);
@@ -6048,7 +6051,7 @@ static int mv88e6xxx_get_temp_alarm(struct dsa_switch *ds, bool *alarm)
 
 	return 0;
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 int mv88e6xxx_get_temp_alarm(struct dsa_switch *ds, bool *alarm)
 {
 	int phy = mv88e6xxx_6320_family(ds) ? 3 : 0;
@@ -6067,10 +6070,10 @@ int mv88e6xxx_get_temp_alarm(struct dsa_switch *ds, bool *alarm)
 
 	return 0;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 #endif /* CONFIG_NET_DSA_HWMON */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static const struct mv88e6xxx_info mv88e6xxx_table[] = {
 	[MV88E6085] = {
 		.prod_num = PORT_SWITCH_ID_PROD_NUM_6085,
@@ -6232,7 +6235,7 @@ static const struct mv88e6xxx_info mv88e6xxx_table[] = {
 		.num_ports = 6,
 		.flags = MV88E6XXX_FLAGS_FAMILY_6352 | MV88E6XXX_FLAG_PHY_ADDR,
 	},
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	[MV88E6390] = {
 		.prod_num = PORT_SWITCH_ID_PROD_NUM_6390,
 		.family = MV88E6XXX_FAMILY_6390,
@@ -6259,11 +6262,11 @@ static const struct mv88e6xxx_info mv88e6xxx_table[] = {
 		.num_ports = 11,
 		.flags = MV88E6XXX_FLAGS_FAMILY_6390 | MV88E6XXX_FLAG_PHY_ADDR,
 	},
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static const struct mv88e6xxx_info *
 mv88e6xxx_lookup_info(unsigned int prod_num, const struct mv88e6xxx_info *table,
 		      unsigned int num)
@@ -6396,12 +6399,12 @@ int mv88e6xxx_probe(struct mdio_device *mdiodev)
 
 	prod_num = (id & 0xfff0) >> 4;
 	rev = id & 0x000f;
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	if ((prod_num == PORT_SWITCH_ID_PROD_NUM_6190) ||
 	    (prod_num == PORT_SWITCH_ID_PROD_NUM_6290) ||
 	    (prod_num == PORT_SWITCH_ID_PROD_NUM_6390))
 		REG_PORT_BASE = REG_PORT_BASE_PERIDOT;
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 
 	ps->info = mv88e6xxx_lookup_info(prod_num, mv88e6xxx_table,
 					 ARRAY_SIZE(mv88e6xxx_table));
@@ -6453,7 +6456,7 @@ static void mv88e6xxx_remove(struct mdio_device *mdiodev)
 
 	mv88e6xxx_mdio_unregister(ps);
 }
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 char *mv88e6xxx_lookup_name(struct device *host_dev, int sw_addr,
 			    const struct mv88e6xxx_switch_id *table,
 			    unsigned int num)
@@ -6485,15 +6488,15 @@ char *mv88e6xxx_lookup_name(struct device *host_dev, int sw_addr,
 
 	return NULL;
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static const struct of_device_id mv88e6xxx_of_match[] = {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 	{ .compatible = "marvell,mv88e6xxx" },
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 	{ .compatible = "marvell,mv88e6085" },
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 	{ /* sentinel */ },
 };
 
@@ -6503,22 +6506,22 @@ static struct mdio_driver mv88e6xxx_driver = {
 	.probe	= mv88e6xxx_probe,
 	.remove = mv88e6xxx_remove,
 	.mdiodrv.driver = {
-#if defined(CONFIG_SYNO_LSP_ARMADA_17_04_02)
+#if defined(MY_DEF_HERE)
 		.name = "mv88e6xxx",
-#else /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#else /* MY_DEF_HERE */
 		.name = "mv88e6085",
-#endif /* CONFIG_SYNO_LSP_ARMADA_17_04_02 */
+#endif /* MY_DEF_HERE */
 		.of_match_table = mv88e6xxx_of_match,
 	},
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 static int __init mv88e6xxx_init(void)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	register_switch_driver(&mv88e6xxx_switch_driver);
 	return mdio_driver_register(&mv88e6xxx_driver);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 #if IS_ENABLED(CONFIG_NET_DSA_MV88E6131)
 	register_switch_driver(&mv88e6131_switch_driver);
 #endif
@@ -6532,16 +6535,16 @@ static int __init mv88e6xxx_init(void)
 	register_switch_driver(&mv88e6171_switch_driver);
 #endif
 	return 0;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 }
 module_init(mv88e6xxx_init);
 
 static void __exit mv88e6xxx_cleanup(void)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	mdio_driver_unregister(&mv88e6xxx_driver);
 	unregister_switch_driver(&mv88e6xxx_switch_driver);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 #if IS_ENABLED(CONFIG_NET_DSA_MV88E6171)
 	unregister_switch_driver(&mv88e6171_switch_driver);
 #endif
@@ -6554,7 +6557,7 @@ static void __exit mv88e6xxx_cleanup(void)
 #if IS_ENABLED(CONFIG_NET_DSA_MV88E6131)
 	unregister_switch_driver(&mv88e6131_switch_driver);
 #endif
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 }
 module_exit(mv88e6xxx_cleanup);
 

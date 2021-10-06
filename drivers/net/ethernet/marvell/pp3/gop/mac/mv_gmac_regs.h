@@ -1,4 +1,7 @@
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
+#if defined(MY_DEF_HERE)
 /*******************************************************************************
 Copyright (C) Marvell International Ltd. and its affiliates
 
@@ -746,4 +749,4 @@ disclaimer.
 #define MV_GMAC_INTERRUPT_SUM_CAUSE_LINK_CHANGE_MASK		(0x1 << MV_GMAC_INTERRUPT_SUM_CAUSE_LINK_CHANGE_OFFS)
 
 #endif /* __mv_gmac_regs_h__ */
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */

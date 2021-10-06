@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * include/net/dsa.h - Driver for Distributed Switch Architecture switch chips
  * Copyright (c) 2008-2009 Marvell Semiconductor
@@ -26,9 +29,9 @@ enum dsa_tag_protocol {
 	DSA_TAG_PROTO_TRAILER,
 	DSA_TAG_PROTO_EDSA,
 	DSA_TAG_PROTO_BRCM,
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	DSA_TAG_LAST,		/* MUST BE LAST */
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 };
 
 #define DSA_MAX_SWITCHES	4
@@ -60,14 +63,14 @@ struct dsa_chip_data {
 	char		*port_names[DSA_MAX_PORTS];
 	struct device_node *port_dn[DSA_MAX_PORTS];
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	/*
 	 * An array of which element [a] indicates which port on this
 	 * switch should be used to send packets to that are destined
 	 * for switch a. Can be NULL if there is only one switch chip.
 	 */
 	s8		rtable[DSA_MAX_SWITCHES];
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	/*
 	 * An array (with nr_chips elements) of which element [a]
 	 * indicates which port on this switch should be used to
@@ -75,7 +78,7 @@ struct dsa_chip_data {
 	 * NULL if there is only one switch chip.
 	 */
 	s8		*rtable;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 };
 
 struct dsa_platform_data {
@@ -97,7 +100,7 @@ struct dsa_platform_data {
 struct packet_type;
 
 struct dsa_switch_tree {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct list_head	list;
 
 	/* Tree identifier */
@@ -108,7 +111,7 @@ struct dsa_switch_tree {
 
 	/* Has this tree been applied to the hardware? */
 	bool applied;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	/*
 	 * Configuration data for the platform device that owns
@@ -126,15 +129,15 @@ struct dsa_switch_tree {
 				       struct packet_type *pt,
 				       struct net_device *orig_dev);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	/*
 	 * Original copy of the master netdev ethtool_ops
 	 */
 	struct ethtool_ops	master_ethtool_ops;
 	const struct ethtool_ops *master_orig_ethtool_ops;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	enum dsa_tag_protocol	tag_protocol;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	/*
 	 * The switch and port to which the CPU is attached.
@@ -142,7 +145,7 @@ struct dsa_switch_tree {
 	s8			cpu_switch;
 	s8			cpu_port;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	/*
 	 * Data for the individual switch chips.
 	 */
@@ -153,7 +156,7 @@ struct dsa_switch_tree {
 	 * encapsulation tag.
 	 */
 	const struct dsa_device_ops *tag_ops;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	/*
 	 * Link state polling.
 	 */
@@ -165,20 +168,20 @@ struct dsa_switch_tree {
 	 * Data for the individual switch chips.
 	 */
 	struct dsa_switch	*ds[DSA_MAX_SWITCHES];
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 };
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 struct dsa_port {
 	struct net_device	*netdev;
 	struct device_node	*dn;
 };
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 struct dsa_switch {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct device *dev;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	/*
 	 * Parent switch tree, and switch index.
@@ -186,46 +189,46 @@ struct dsa_switch {
 	struct dsa_switch_tree	*dst;
 	int			index;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	/*
 	 * Give the switch driver somewhere to hang its private data
 	 * structure.
 	 */
 	void *priv;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	/*
 	 * Tagging protocol understood by this switch
 	 */
 	enum dsa_tag_protocol	tag_protocol;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	/*
 	 * Configuration data for this switch.
 	 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct dsa_chip_data	*cd;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct dsa_chip_data	*pd;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	/*
 	 * The used switch driver.
 	 */
 	struct dsa_switch_driver	*drv;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	/*
 	 * An array of which element [a] indicates which port on this
 	 * switch should be used to send packets to that are destined
 	 * for switch a. Can be NULL if there is only one switch chip.
 	 */
 	s8		rtable[DSA_MAX_SWITCHES];
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	/*
 	 * Reference to host device to use.
 	 */
 	struct device		*master_dev;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 #ifdef CONFIG_NET_DSA_HWMON
 	/*
@@ -235,29 +238,29 @@ struct dsa_switch {
 	struct device		*hwmon_dev;
 #endif
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	/*
 	 * The lower device this switch uses to talk to the host
 	 */
 	struct net_device *master_netdev;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	/*
 	 * Slave mii_bus and devices for the individual ports.
 	 */
 	u32			dsa_port_mask;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	u32			cpu_port_mask;
 	u32			enabled_port_mask;
 	u32			phys_mii_mask;
 	struct dsa_port		ports[DSA_MAX_PORTS];
 	struct mii_bus		*slave_mii_bus;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	u32			phys_port_mask;
 	u32			phys_mii_mask;
 	struct mii_bus		*slave_mii_bus;
 	struct net_device	*ports[DSA_MAX_PORTS];
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 };
 
 static inline bool dsa_is_cpu_port(struct dsa_switch *ds, int p)
@@ -272,11 +275,11 @@ static inline bool dsa_is_dsa_port(struct dsa_switch *ds, int p)
 
 static inline bool dsa_is_port_initialized(struct dsa_switch *ds, int p)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	return ds->enabled_port_mask & (1 << p) && ds->ports[p].netdev;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	return ds->phys_port_mask & (1 << p) && ds->ports[p];
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 }
 
 static inline u8 dsa_upstream_port(struct dsa_switch *ds)
@@ -292,11 +295,11 @@ static inline u8 dsa_upstream_port(struct dsa_switch *ds)
 	if (dst->cpu_switch == ds->index)
 		return dst->cpu_port;
 	else
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		return ds->rtable[dst->cpu_switch];
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		return ds->pd->rtable[dst->cpu_switch];
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 }
 
 struct switchdev_trans;
@@ -308,22 +311,22 @@ struct dsa_switch_driver {
 	struct list_head	list;
 
 	enum dsa_tag_protocol	tag_protocol;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	int			priv_size;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	/*
 	 * Probing and setup.
 	 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	const char	*(*probe)(struct device *dsa_dev,
 				  struct device *host_dev, int sw_addr,
 				  void **priv);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	char	*(*probe)(struct device *host_dev, int sw_addr);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	int	(*setup)(struct dsa_switch *ds);
 	int	(*set_addr)(struct dsa_switch *ds, u8 *addr);
 	u32	(*get_phy_flags)(struct dsa_switch *ds, int port);
@@ -335,14 +338,14 @@ struct dsa_switch_driver {
 	int	(*phy_write)(struct dsa_switch *ds, int port,
 			     int regnum, u16 val);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#if defined(MY_DEF_HERE)
+#else /* MY_DEF_HERE */
 //do nothing
 	/*
 	 * Link state polling and IRQ handling.
 	 */
 	void	(*poll_link)(struct dsa_switch *ds);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	/*
 	 * Link state adjustment (called from libphy)
@@ -416,32 +419,32 @@ struct dsa_switch_driver {
 	/*
 	 * Bridge integration
 	 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	int	(*port_bridge_join)(struct dsa_switch *ds, int port,
 				    struct net_device *bridge);
 	void	(*port_bridge_leave)(struct dsa_switch *ds, int port);
 	void	(*port_stp_state_set)(struct dsa_switch *ds, int port,
 				      u8 state);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	int	(*port_join_bridge)(struct dsa_switch *ds, int port,
 				    u32 br_port_mask);
 	int	(*port_leave_bridge)(struct dsa_switch *ds, int port,
 				     u32 br_port_mask);
 	int	(*port_stp_update)(struct dsa_switch *ds, int port,
 				   u8 state);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	/*
 	 * VLAN support
 	 */
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	int	(*port_vlan_filtering)(struct dsa_switch *ds, int port,
 				       bool vlan_filtering);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	int	(*port_vlan_prepare)(struct dsa_switch *ds, int port,
 				     const struct switchdev_obj_port_vlan *vlan,
 				     struct switchdev_trans *trans);
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	void	(*port_vlan_add)(struct dsa_switch *ds, int port,
 				 const struct switchdev_obj_port_vlan *vlan,
 				 struct switchdev_trans *trans);
@@ -450,7 +453,7 @@ struct dsa_switch_driver {
 	int	(*port_vlan_dump)(struct dsa_switch *ds, int port,
 				  struct switchdev_obj_port_vlan *vlan,
 				  int (*cb)(struct switchdev_obj *obj));
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	int	(*port_vlan_add)(struct dsa_switch *ds, int port,
 				 const struct switchdev_obj_port_vlan *vlan,
 				 struct switchdev_trans *trans);
@@ -459,7 +462,7 @@ struct dsa_switch_driver {
 	int	(*port_pvid_get)(struct dsa_switch *ds, int port, u16 *pvid);
 	int	(*vlan_getnext)(struct dsa_switch *ds, u16 *vid,
 				unsigned long *ports, unsigned long *untagged);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	/*
 	 * Forwarding database
@@ -467,15 +470,15 @@ struct dsa_switch_driver {
 	int	(*port_fdb_prepare)(struct dsa_switch *ds, int port,
 				    const struct switchdev_obj_port_fdb *fdb,
 				    struct switchdev_trans *trans);
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	void	(*port_fdb_add)(struct dsa_switch *ds, int port,
 				const struct switchdev_obj_port_fdb *fdb,
 				struct switchdev_trans *trans);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	int	(*port_fdb_add)(struct dsa_switch *ds, int port,
 				const struct switchdev_obj_port_fdb *fdb,
 				struct switchdev_trans *trans);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	int	(*port_fdb_del)(struct dsa_switch *ds, int port,
 				const struct switchdev_obj_port_fdb *fdb);
 	int	(*port_fdb_dump)(struct dsa_switch *ds, int port,
@@ -489,11 +492,11 @@ struct mii_bus *dsa_host_dev_to_mii_bus(struct device *dev);
 
 static inline void *ds_to_priv(struct dsa_switch *ds)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	return ds->priv;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	return (void *)(ds + 1);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 }
 
 static inline bool dsa_uses_tagged_protocol(struct dsa_switch_tree *dst)
@@ -501,8 +504,8 @@ static inline bool dsa_uses_tagged_protocol(struct dsa_switch_tree *dst)
 	return dst->rcv != NULL;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 void dsa_unregister_switch(struct dsa_switch *ds);
 int dsa_register_switch(struct dsa_switch *ds, struct device_node *np);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 #endif

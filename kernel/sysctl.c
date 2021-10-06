@@ -81,6 +81,13 @@
 
 #if defined(CONFIG_SYSCTL)
 
+#ifdef MY_DEF_HERE
+char gszSynoTtyS0[50] = {0};
+EXPORT_SYMBOL(gszSynoTtyS0);
+char gszSynoTtyS1[50] = {0};
+EXPORT_SYMBOL(gszSynoTtyS1);
+#endif  
+
 #ifdef MY_ABC_HERE
 int gSynoDebugFlag = 0;
 EXPORT_SYMBOL(gSynoDebugFlag);
@@ -212,8 +219,8 @@ EXPORT_SYMBOL(gPciAddrNum);
 #endif  
 
 #ifdef MY_DEF_HERE
-int gPciDeferStart = M2SATA_START_IDX;
-EXPORT_SYMBOL(gPciDeferStart);
+int g_nvc_map_index = 0;
+EXPORT_SYMBOL(g_nvc_map_index);
 #endif  
 
 #ifdef MY_ABC_HERE
@@ -232,7 +239,7 @@ char gszSkipVenderMacInterfaces[256] = {'\0'};
 EXPORT_SYMBOL(gszSkipVenderMacInterfaces);
 #endif  
 
-#ifdef CONFIG_SYNO_SAS
+#ifdef MY_DEF_HERE
 long g_is_sas_model = 0;
 EXPORT_SYMBOL(g_is_sas_model);
 #endif  
@@ -240,12 +247,8 @@ EXPORT_SYMBOL(g_is_sas_model);
 #ifdef MY_ABC_HERE
 unsigned int gSynoCPUInfoCore = 0;
 EXPORT_SYMBOL(gSynoCPUInfoCore);
-#ifdef MY_DEF_HERE 
-unsigned int gSynoMultiCPUInfoCore[CONFIG_SYNO_GRANTLEY_MAX_CPU_NUM];
-EXPORT_SYMBOL(gSynoMultiCPUInfoCore);
-#endif
-#ifdef CONFIG_SYNO_PURLEY
-unsigned int gSynoMultiCPUInfoCore[CONFIG_SYNO_GRANTLEY_MAX_CPU_NUM];
+#ifdef CONFIG_SYNO_MULTI_CPU_NUM
+unsigned int gSynoMultiCPUInfoCore[CONFIG_SYNO_MULTI_CPU_NUM];
 EXPORT_SYMBOL(gSynoMultiCPUInfoCore);
 #endif
 char gSynoCPUInfoClock[16];
@@ -291,9 +294,11 @@ EXPORT_SYMBOL(gSynoCastratedXhcPortBitmap);
 char gSynoUsbVbusHostAddr[CONFIG_SYNO_USB_VBUS_NUM_GPIO][20] = {{0}};
 int gSynoUsbVbusPort[CONFIG_SYNO_USB_VBUS_NUM_GPIO] = {0};
 unsigned gSynoUsbVbusGpp[CONFIG_SYNO_USB_VBUS_NUM_GPIO] = {0};
+unsigned gSynoUsbVbusGppPol[CONFIG_SYNO_USB_VBUS_NUM_GPIO] = {0};
 EXPORT_SYMBOL(gSynoUsbVbusHostAddr);
 EXPORT_SYMBOL(gSynoUsbVbusPort);
 EXPORT_SYMBOL(gSynoUsbVbusGpp);
+EXPORT_SYMBOL(gSynoUsbVbusGppPol);
 #endif  
 
 #ifdef MY_DEF_HERE
@@ -322,6 +327,10 @@ int (*syno_disk_map_table_gen_mv14xx)(int *iDiskMapTable, int iPortMax);
 EXPORT_SYMBOL(syno_disk_map_table_gen_mv14xx);
 #endif  
 
+#ifdef MY_DEF_HERE
+int g_syno_nvc_index_map[SATA_REMAP_MAX] = {-1};
+EXPORT_SYMBOL(g_syno_nvc_index_map);
+#endif  
 #ifdef MY_ABC_HERE
 int giSynoDsikEhFlag = 0;
 EXPORT_SYMBOL(giSynoDsikEhFlag);
@@ -1590,7 +1599,7 @@ static struct ctl_table kern_table[] = {
             .mode           = 0644,
             .proc_handler   = proc_dointvec,
         },
-#if defined(MY_DEF_HERE) || defined(CONFIG_SYNO_PURLEY)
+#if defined(MY_DEF_HERE) || defined(MY_DEF_HERE)
         {
             .procname       = "syno_CPU_info_multicore_1",
             .data           = &gSynoMultiCPUInfoCore[0],
@@ -2612,19 +2621,6 @@ int proc_dointvec(struct ctl_table *table, int write,
 	return do_proc_dointvec(table, write, buffer, lenp, ppos, NULL, NULL);
 }
 
-/**
- * proc_douintvec - read a vector of unsigned integers
- * @table: the sysctl table
- * @write: %TRUE if this is a write to the sysctl file
- * @buffer: the user buffer
- * @lenp: the size of the user buffer
- * @ppos: file position
- *
- * Reads/writes up to table->maxlen/sizeof(unsigned int) unsigned integer
- * values from/to the user buffer, treated as an ASCII string.
- *
- * Returns 0 on success.
- */
 int proc_douintvec(struct ctl_table *table, int write,
 		     void __user *buffer, size_t *lenp, loff_t *ppos)
 {

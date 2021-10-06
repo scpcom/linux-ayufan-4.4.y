@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * wm8903.c  --  WM8903 ALSA SoC Audio driver
  *
@@ -1851,11 +1854,11 @@ static void wm8903_init_gpio(struct wm8903_priv *wm8903)
 
 	wm8903->gpio_chip = wm8903_template_chip;
 	wm8903->gpio_chip.ngpio = WM8903_NUM_GPIO;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	wm8903->gpio_chip.parent = wm8903->dev;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	wm8903->gpio_chip.dev = wm8903->dev;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	if (pdata->gpio_base)
 		wm8903->gpio_chip.base = pdata->gpio_base;

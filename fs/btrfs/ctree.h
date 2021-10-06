@@ -497,6 +497,14 @@ enum btrfs_orphan_cleanup_state {
 	ORPHAN_CLEANUP_DONE	= 2,
 };
 
+#ifdef MY_ABC_HERE
+enum btrfs_fix_meta_key_state {
+	STOP_FIX_META_KEY = 0,  
+	CAN_FIX_META_KEY = 1,  
+	DOING_FIX_META_KEY = 2,  
+};
+#endif  
+
 struct btrfs_stripe_hash {
 	struct list_head hash_list;
 	wait_queue_head_t wait;
@@ -656,6 +664,9 @@ struct btrfs_fs_info {
 	struct btrfs_workqueue *flush_workers;
 	struct btrfs_workqueue *endio_workers;
 	struct btrfs_workqueue *endio_meta_workers;
+#ifdef MY_ABC_HERE
+	struct btrfs_workqueue *endio_meta_fix_workers;
+#endif  
 	struct btrfs_workqueue *endio_raid56_workers;
 	struct btrfs_workqueue *endio_repair_workers;
 	struct btrfs_workqueue *rmw_workers;
@@ -780,7 +791,7 @@ struct btrfs_fs_info {
 	struct btrfs_workqueue *qgroup_rescan_workers;
 	struct completion qgroup_rescan_completion;
 	struct btrfs_work qgroup_rescan_work;
-	bool qgroup_rescan_running;	/* protected by qgroup_rescan_lock */
+	bool qgroup_rescan_running;	 
 
 	unsigned long fs_state;
 
@@ -804,6 +815,10 @@ struct btrfs_fs_info {
 
 	struct percpu_counter bio_counter;
 	wait_queue_head_t replace_wait;
+
+#ifdef MY_ABC_HERE
+	unsigned long can_fix_meta_key;
+#endif  
 
 	struct semaphore uuid_tree_rescan_sem;
 	unsigned int update_uuid_tree_gen:1;
@@ -965,10 +980,12 @@ struct btrfs_snapshot_size_entry {
 	struct rb_node node;
 	int root_level;
 	int level;
+	u64 snap_exclusive_size;
 };
 
 struct btrfs_snapshot_size_ctx {
-	u64 size;
+	u64 flags;
+	struct file *out_filp;
 	struct rb_root root;
 	struct btrfs_snapshot_size_entry snaps[0];
 };
@@ -2145,13 +2162,13 @@ u64 btrfs_csum_bytes_to_leaves(struct btrfs_root *root, u64 csum_bytes);
 static inline u64 btrfs_calc_trans_metadata_size(struct btrfs_root *root,
 						 unsigned num_items)
 {
-	return root->nodesize * BTRFS_MAX_LEVEL * 2 * num_items;
+	return (u64)root->nodesize * BTRFS_MAX_LEVEL * 2 * num_items;
 }
 
 static inline u64 btrfs_calc_trunc_metadata_size(struct btrfs_root *root,
 						 unsigned num_items)
 {
-	return root->nodesize * BTRFS_MAX_LEVEL * num_items;
+	return (u64)root->nodesize * BTRFS_MAX_LEVEL * num_items;
 }
 
 int btrfs_should_throttle_delayed_refs(struct btrfs_trans_handle *trans,
@@ -2381,9 +2398,8 @@ int btrfs_compare_trees(struct btrfs_root *left_root,
 #ifdef MY_ABC_HERE
 int btrfs_snapshot_size_query(struct file *file,
 				  struct btrfs_ioctl_snapshot_size_query_args *snap_args,
-				  struct ulist *root_list,
 				  int (*cb)(struct btrfs_fs_info *, u64,
-				            u64, struct ulist *,
+				            u64, u64, u64 *, struct ulist *,
 				            struct btrfs_snapshot_size_entry *,
 				            struct btrfs_snapshot_size_ctx *));
 #endif  
@@ -2815,6 +2831,11 @@ int btrfs_dirty_pages(struct btrfs_root *root, struct inode *inode,
 		      loff_t pos, size_t write_bytes,
 		      struct extent_state **cached);
 int btrfs_fdatawrite_range(struct inode *inode, loff_t start, loff_t end);
+int btrfs_clone_file_range(struct file *file_in, loff_t pos_in,
+			   struct file *file_out, loff_t pos_out, u64 len);
+#ifdef MY_ABC_HERE
+int btrfs_clone_check_compr(struct file *file, struct file *file_src);
+#endif  
 
 int btrfs_defrag_leaves(struct btrfs_trans_handle *trans,
 			struct btrfs_root *root);

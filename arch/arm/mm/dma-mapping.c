@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  *  linux/arch/arm/mm/dma-mapping.c
  *
@@ -145,9 +148,9 @@ struct dma_map_ops arm_dma_ops = {
 };
 EXPORT_SYMBOL(arm_dma_ops);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static void *arm_coherent_dma_alloc(struct device *dev, size_t size,
 	dma_addr_t *handle, gfp_t gfp, struct dma_attrs *attrs);
 static void arm_coherent_dma_free(struct device *dev, size_t size, void *cpu_addr,
@@ -166,7 +169,7 @@ struct dma_map_ops arm_coherent_dma_ops = {
 	.set_dma_mask		= arm_dma_set_mask,
 };
 EXPORT_SYMBOL(arm_coherent_dma_ops);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 static int __dma_supported(struct device *dev, u64 mask, bool warn)
 {
@@ -229,11 +232,11 @@ static u64 get_coherent_dma_mask(struct device *dev)
 	return mask;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static void __dma_clear_buffer(struct page *page, size_t size, bool is_coherent)
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static void __dma_clear_buffer(struct page *page, size_t size)
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 {
 	/*
 	 * Ensure that the allocated pages are zeroed, and that any data
@@ -250,22 +253,22 @@ static void __dma_clear_buffer(struct page *page, size_t size)
 			page++;
 			size -= PAGE_SIZE;
 		}
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		if (!is_coherent)
 			outer_flush_range(base, end);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		outer_flush_range(base, end);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	} else {
 		void *ptr = page_address(page);
 		memset(ptr, 0, size);
 		dmac_flush_range(ptr, ptr + size);
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		if (!is_coherent)
 			outer_flush_range(__pa(ptr), __pa(ptr) + size);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		outer_flush_range(__pa(ptr), __pa(ptr) + size);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	}
 }
 
@@ -273,12 +276,12 @@ static void __dma_clear_buffer(struct page *page, size_t size)
  * Allocate a DMA buffer for 'dev' of size 'size' using the
  * specified gfp mask.  Note that 'size' must be page aligned.
  */
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static struct page *__dma_alloc_buffer(struct device *dev, size_t size,
 				gfp_t gfp, bool is_coherent)
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static struct page *__dma_alloc_buffer(struct device *dev, size_t size, gfp_t gfp)
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 {
 	unsigned long order = get_order(size);
 	struct page *page, *p, *e;
@@ -294,11 +297,11 @@ static struct page *__dma_alloc_buffer(struct device *dev, size_t size, gfp_t gf
 	for (p = page + (size >> PAGE_SHIFT), e = page + (1 << order); p < e; p++)
 		__free_page(p);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	__dma_clear_buffer(page, size, is_coherent);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	__dma_clear_buffer(page, size);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	return page;
 }
@@ -318,16 +321,16 @@ static void __dma_free_buffer(struct page *page, size_t size)
 
 #ifdef CONFIG_MMU
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static void *__alloc_from_contiguous(struct device *dev, size_t size,
 				     pgprot_t prot, struct page **ret_page,
 				     const void *caller, bool want_vaddr,
 				     bool is_coherent);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static void *__alloc_from_contiguous(struct device *dev, size_t size,
 				     pgprot_t prot, struct page **ret_page,
 				     const void *caller, bool want_vaddr);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 static void *__alloc_remap_buffer(struct device *dev, size_t size, gfp_t gfp,
 				 pgprot_t prot, struct page **ret_page,
@@ -393,20 +396,20 @@ static int __init atomic_pool_init(void)
 	if (!atomic_pool)
 		goto out;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	/*
 	 * The atomic pool is only used for non-coherent allocations
 	 * so we must pass false for is_coherent.
 	 */
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	if (dev_get_cma_area(NULL))
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		ptr = __alloc_from_contiguous(NULL, atomic_pool_size, prot,
 					&page, atomic_pool_init, true, false);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		ptr = __alloc_from_contiguous(NULL, atomic_pool_size, prot,
 					      &page, atomic_pool_init, true);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	else
 		ptr = __alloc_remap_buffer(NULL, atomic_pool_size, gfp, prot,
 					   &page, atomic_pool_init, true);
@@ -520,15 +523,15 @@ static void *__alloc_remap_buffer(struct device *dev, size_t size, gfp_t gfp,
 {
 	struct page *page;
 	void *ptr = NULL;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	/*
 	 * __alloc_remap_buffer is only called when the device is
 	 * non-coherent
 	 */
 	page = __dma_alloc_buffer(dev, size, gfp, false);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	page = __dma_alloc_buffer(dev, size, gfp);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	if (!page)
 		return NULL;
 	if (!want_vaddr)
@@ -581,16 +584,16 @@ static int __free_from_pool(void *start, size_t size)
 	return 1;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static void *__alloc_from_contiguous(struct device *dev, size_t size,
 				     pgprot_t prot, struct page **ret_page,
 				     const void *caller, bool want_vaddr,
 				     bool is_coherent)
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static void *__alloc_from_contiguous(struct device *dev, size_t size,
 				     pgprot_t prot, struct page **ret_page,
 				     const void *caller, bool want_vaddr)
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 {
 	unsigned long order = get_order(size);
 	size_t count = size >> PAGE_SHIFT;
@@ -601,11 +604,11 @@ static void *__alloc_from_contiguous(struct device *dev, size_t size,
 	if (!page)
 		return NULL;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	__dma_clear_buffer(page, size, is_coherent);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	__dma_clear_buffer(page, size);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	if (!want_vaddr)
 		goto out;
@@ -655,11 +658,11 @@ static inline pgprot_t __get_dma_pgprot(struct dma_attrs *attrs, pgprot_t prot)
 #define __get_dma_pgprot(attrs, prot)				__pgprot(0)
 #define __alloc_remap_buffer(dev, size, gfp, prot, ret, c, wv)	NULL
 #define __alloc_from_pool(size, ret_page)			NULL
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 #define __alloc_from_contiguous(dev, size, prot, ret, c, wv, is_coherent)   NULL
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 #define __alloc_from_contiguous(dev, size, prot, ret, c, wv)	NULL
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 #define __free_from_pool(cpu_addr, size)			0
 #define __free_from_contiguous(dev, page, cpu_addr, size, wv)	do { } while (0)
 #define __dma_free_remap(cpu_addr, size)			do { } while (0)
@@ -670,12 +673,12 @@ static void *__alloc_simple_buffer(struct device *dev, size_t size, gfp_t gfp,
 				   struct page **ret_page)
 {
 	struct page *page;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	/* __alloc_simple_buffer is only called when the device is coherent */
 	page = __dma_alloc_buffer(dev, size, gfp, true);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	page = __dma_alloc_buffer(dev, size, gfp);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	if (!page)
 		return NULL;
 
@@ -723,13 +726,13 @@ static void *__dma_alloc(struct device *dev, size_t size, dma_addr_t *handle,
 	if (nommu())
 		addr = __alloc_simple_buffer(dev, size, gfp, &page);
 	else if (dev_get_cma_area(dev) && (gfp & __GFP_DIRECT_RECLAIM))
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		addr = __alloc_from_contiguous(dev, size, prot, &page,
 					caller, want_vaddr, is_coherent);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		addr = __alloc_from_contiguous(dev, size, prot, &page,
 					       caller, want_vaddr);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	else if (is_coherent)
 		addr = __alloc_simple_buffer(dev, size, gfp, &page);
 	else if (!gfpflags_allow_blocking(gfp))
@@ -757,13 +760,13 @@ void *arm_dma_alloc(struct device *dev, size_t size, dma_addr_t *handle,
 			   attrs, __builtin_return_address(0));
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 void *arm_coherent_dma_alloc(struct device *dev, size_t size,
 	dma_addr_t *handle, gfp_t gfp, struct dma_attrs *attrs)
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static void *arm_coherent_dma_alloc(struct device *dev, size_t size,
 	dma_addr_t *handle, gfp_t gfp, struct dma_attrs *attrs)
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 {
 	return __dma_alloc(dev, size, handle, gfp, PAGE_KERNEL, true,
 			   attrs, __builtin_return_address(0));
@@ -849,13 +852,13 @@ void arm_dma_free(struct device *dev, size_t size, void *cpu_addr,
 	__arm_dma_free(dev, size, cpu_addr, handle, attrs, false);
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 void arm_coherent_dma_free(struct device *dev, size_t size, void *cpu_addr,
 				  dma_addr_t handle, struct dma_attrs *attrs)
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static void arm_coherent_dma_free(struct device *dev, size_t size, void *cpu_addr,
 				  dma_addr_t handle, struct dma_attrs *attrs)
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 {
 	__arm_dma_free(dev, size, cpu_addr, handle, attrs, true);
 }
@@ -1208,14 +1211,14 @@ static inline void __free_iova(struct dma_iommu_mapping *mapping,
 	spin_unlock_irqrestore(&mapping->lock, flags);
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static struct page **__iommu_alloc_buffer(struct device *dev, size_t size,
 					gfp_t gfp, struct dma_attrs *attrs,
 					bool is_coherent)
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static struct page **__iommu_alloc_buffer(struct device *dev, size_t size,
 					  gfp_t gfp, struct dma_attrs *attrs)
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 {
 	struct page **pages;
 	int count = size >> PAGE_SHIFT;
@@ -1238,11 +1241,11 @@ static struct page **__iommu_alloc_buffer(struct device *dev, size_t size,
 		if (!page)
 			goto error;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		__dma_clear_buffer(page, size, is_coherent);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		__dma_clear_buffer(page, size);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 		for (i = 0; i < count; i++)
 			pages[i] = page + i;
@@ -1286,11 +1289,11 @@ static struct page **__iommu_alloc_buffer(struct device *dev, size_t size,
 				pages[i + j] = pages[i] + j;
 		}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		__dma_clear_buffer(pages[i], PAGE_SIZE << order, is_coherent);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		__dma_clear_buffer(pages[i], PAGE_SIZE << order);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		i += 1 << order;
 		count -= 1 << order;
 	}
@@ -1425,25 +1428,25 @@ static struct page **__iommu_get_pages(void *cpu_addr, struct dma_attrs *attrs)
 	return NULL;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static void *__iommu_alloc_simple(struct device *dev, size_t size, gfp_t gfp,
 				  dma_addr_t *handle, bool is_coherent)
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static void *__iommu_alloc_atomic(struct device *dev, size_t size,
 				  dma_addr_t *handle)
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 {
 	struct page *page;
 	void *addr;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	if (is_coherent)
 		addr = __alloc_simple_buffer(dev, size, gfp, &page);
 	else
 		addr = __alloc_from_pool(size, &page);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	addr = __alloc_from_pool(size, &page);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	if (!addr)
 		return NULL;
 
@@ -1458,33 +1461,33 @@ err_mapping:
 	return NULL;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static void __iommu_free_simple(struct device *dev, void *cpu_addr,
 	    dma_addr_t handle, size_t size, bool is_coherent)
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static void __iommu_free_atomic(struct device *dev, void *cpu_addr,
 				dma_addr_t handle, size_t size)
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 {
 	__iommu_remove_mapping(dev, handle, size);
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	if (is_coherent)
 		__dma_free_buffer(virt_to_page(cpu_addr), size);
 	else
 		__free_from_pool(cpu_addr, size);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	__free_from_pool(cpu_addr, size);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static void *__arm_iommu_alloc_attrs(struct device *dev, size_t size,
 	    dma_addr_t *handle, gfp_t gfp, struct dma_attrs *attrs,
 	    bool is_coherent)
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static void *arm_iommu_alloc_attrs(struct device *dev, size_t size,
 	    dma_addr_t *handle, gfp_t gfp, struct dma_attrs *attrs)
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 {
 	pgprot_t prot = __get_dma_pgprot(attrs, PAGE_KERNEL);
 	struct page **pages;
@@ -1493,13 +1496,13 @@ static void *arm_iommu_alloc_attrs(struct device *dev, size_t size,
 	*handle = DMA_ERROR_CODE;
 	size = PAGE_ALIGN(size);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	if (is_coherent || !gfpflags_allow_blocking(gfp))
 		return __iommu_alloc_simple(dev, size, gfp, handle, is_coherent);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	if (!gfpflags_allow_blocking(gfp))
 		return __iommu_alloc_atomic(dev, size, handle);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	/*
 	 * Following is a work-around (a.k.a. hack) to prevent pages
@@ -1510,11 +1513,11 @@ static void *arm_iommu_alloc_attrs(struct device *dev, size_t size,
 	 */
 	gfp &= ~(__GFP_COMP);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	pages = __iommu_alloc_buffer(dev, size, gfp, attrs, is_coherent);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	pages = __iommu_alloc_buffer(dev, size, gfp, attrs);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	if (!pages)
 		return NULL;
 
@@ -1539,7 +1542,7 @@ err_buffer:
 	return NULL;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static void *arm_iommu_alloc_attrs(struct device *dev, size_t size,
 	    dma_addr_t *handle, gfp_t gfp, struct dma_attrs *attrs)
 {
@@ -1555,11 +1558,11 @@ static void *arm_coherent_iommu_alloc_attrs(struct device *dev, size_t size,
 static int __arm_iommu_mmap_attrs(struct device *dev, struct vm_area_struct *vma,
 			void *cpu_addr, dma_addr_t dma_addr, size_t size,
 		    struct dma_attrs *attrs)
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 static int arm_iommu_mmap_attrs(struct device *dev, struct vm_area_struct *vma,
 			void *cpu_addr, dma_addr_t dma_addr, size_t size,
 		    struct dma_attrs *attrs)
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 {
 	unsigned long uaddr = vma->vm_start;
 	unsigned long usize = vma->vm_end - vma->vm_start;
@@ -1567,11 +1570,11 @@ static int arm_iommu_mmap_attrs(struct device *dev, struct vm_area_struct *vma,
 	unsigned long nr_pages = PAGE_ALIGN(size) >> PAGE_SHIFT;
 	unsigned long off = vma->vm_pgoff;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	vma->vm_page_prot = __get_dma_pgprot(attrs, vma->vm_page_prot);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	if (!pages)
 		return -ENXIO;
@@ -1594,7 +1597,7 @@ static int arm_iommu_mmap_attrs(struct device *dev, struct vm_area_struct *vma,
 	return 0;
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 static int arm_iommu_mmap_attrs(struct device *dev,
 		    struct vm_area_struct *vma, void *cpu_addr,
 		    dma_addr_t dma_addr, size_t size, struct dma_attrs *attrs)
@@ -1610,30 +1613,30 @@ static int arm_coherent_iommu_mmap_attrs(struct device *dev,
 {
 	return __arm_iommu_mmap_attrs(dev, vma, cpu_addr, dma_addr, size, attrs);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 /*
  * free a page as defined by the above mapping.
  * Must not be called with IRQs disabled.
  */
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 void __arm_iommu_free_attrs(struct device *dev, size_t size, void *cpu_addr,
 	dma_addr_t handle, struct dma_attrs *attrs, bool is_coherent)
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 void arm_iommu_free_attrs(struct device *dev, size_t size, void *cpu_addr,
 			  dma_addr_t handle, struct dma_attrs *attrs)
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 {
 	struct page **pages;
 	size = PAGE_ALIGN(size);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	if (is_coherent || __in_atomic_pool(cpu_addr, size)) {
 		__iommu_free_simple(dev, cpu_addr, handle, size, is_coherent);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	if (__in_atomic_pool(cpu_addr, size)) {
 		__iommu_free_atomic(dev, cpu_addr, handle, size);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 		return;
 	}
 
@@ -1652,7 +1655,7 @@ void arm_iommu_free_attrs(struct device *dev, size_t size, void *cpu_addr,
 	__iommu_free_buffer(dev, pages, size, attrs);
 }
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 void arm_iommu_free_attrs(struct device *dev, size_t size,
 	    void *cpu_addr, dma_addr_t handle, struct dma_attrs *attrs)
 {
@@ -1664,7 +1667,7 @@ void arm_coherent_iommu_free_attrs(struct device *dev, size_t size,
 {
 	__arm_iommu_free_attrs(dev, size, cpu_addr, handle, attrs, true);
 }
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 static int arm_iommu_get_sgtable(struct device *dev, struct sg_table *sgt,
 				 void *cpu_addr, dma_addr_t dma_addr,
@@ -2071,15 +2074,15 @@ struct dma_map_ops iommu_ops = {
 };
 
 struct dma_map_ops iommu_coherent_ops = {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	.alloc		= arm_coherent_iommu_alloc_attrs,
 	.free		= arm_coherent_iommu_free_attrs,
 	.mmap		= arm_coherent_iommu_mmap_attrs,
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	.alloc		= arm_iommu_alloc_attrs,
 	.free		= arm_iommu_free_attrs,
 	.mmap		= arm_iommu_mmap_attrs,
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	.get_sgtable	= arm_iommu_get_sgtable,
 
 	.map_page	= arm_coherent_iommu_map_page,
@@ -2330,7 +2333,7 @@ static void arm_teardown_iommu_dma_ops(struct device *dev) { }
 
 #endif	/* CONFIG_ARM_DMA_USE_IOMMU */
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 struct dma_map_ops arm_coherent_dma_ops = {
 	.alloc		= arm_coherent_dma_alloc,
 	.free		= arm_coherent_dma_free,
@@ -2341,7 +2344,7 @@ struct dma_map_ops arm_coherent_dma_ops = {
 	.set_dma_mask	= arm_dma_set_mask,
 };
 EXPORT_SYMBOL(arm_coherent_dma_ops);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 static struct dma_map_ops *arm_get_dma_map_ops(bool coherent)
 {

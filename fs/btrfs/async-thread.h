@@ -35,6 +35,9 @@ BTRFS_WORK_HELPER_PROTO(submit_helper);
 BTRFS_WORK_HELPER_PROTO(fixup_helper);
 BTRFS_WORK_HELPER_PROTO(endio_helper);
 BTRFS_WORK_HELPER_PROTO(endio_meta_helper);
+#ifdef MY_ABC_HERE
+BTRFS_WORK_HELPER_PROTO(endio_meta_fix_helper);
+#endif  
 BTRFS_WORK_HELPER_PROTO(endio_meta_write_helper);
 BTRFS_WORK_HELPER_PROTO(endio_raid56_helper);
 BTRFS_WORK_HELPER_PROTO(endio_repair_helper);

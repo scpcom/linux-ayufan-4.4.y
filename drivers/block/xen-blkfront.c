@@ -851,7 +851,8 @@ static const char *flush_info(unsigned int feature_flush)
 
 static void xlvbd_flush(struct blkfront_info *info)
 {
-	blk_queue_flush(info->rq, info->feature_flush);
+	blk_queue_write_cache(info->rq, info->feature_flush & REQ_FLUSH,
+				info->feature_flush & REQ_FUA);
 	pr_info("blkfront: %s: %s %s %s %s %s\n",
 		info->gd->disk_name, flush_info(info->feature_flush),
 		"persistent grants:", info->feature_persistent ?
@@ -1406,7 +1407,6 @@ static irqreturn_t blkif_interrupt(int irq, void *dev_id)
 	return IRQ_HANDLED;
 }
 
-
 static int setup_blkring(struct xenbus_device *dev,
 			 struct blkfront_info *info)
 {
@@ -1454,7 +1454,6 @@ fail:
 	blkif_free(info, 0);
 	return err;
 }
-
 
 /* Common code used when first setting up, and when resuming. */
 static int talk_to_blkback(struct xenbus_device *dev,
@@ -1902,7 +1901,6 @@ static int blkfront_setup_indirect(struct blkfront_info *info)
 		sg_init_table(info->shadow[i].sg, psegs);
 	}
 
-
 	return 0;
 
 out_of_memory:
@@ -2263,7 +2261,6 @@ static const struct block_device_operations xlvbd_block_fops =
 	.ioctl = blkif_ioctl,
 };
 
-
 static const struct xenbus_device_id blkfront_ids[] = {
 	{ "vbd" },
 	{ "" }
@@ -2309,7 +2306,6 @@ static int __init xlblk_init(void)
 	return 0;
 }
 module_init(xlblk_init);
-
 
 static void __exit xlblk_exit(void)
 {

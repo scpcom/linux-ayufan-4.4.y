@@ -485,7 +485,6 @@ EXPORT_SYMBOL_GPL(inet_csk_route_child_sock);
 /* Only thing we need from tcp.h */
 extern int sysctl_tcp_synack_retries;
 
-
 /* Decide when to expire the request and when to resend SYN-ACK */
 static inline void syn_ack_recalc(struct request_sock *req, const int thresh,
 				  const int max_retries,
@@ -668,6 +667,8 @@ struct sock *inet_csk_clone_lock(const struct sock *sk,
 		inet_sk(newsk)->inet_num = inet_rsk(req)->ir_num;
 		inet_sk(newsk)->inet_sport = htons(inet_rsk(req)->ir_num);
 		newsk->sk_write_space = sk_stream_write_space;
+
+		inet_sk(newsk)->mc_list = NULL;
 
 		newsk->sk_mark = inet_rsk(req)->ir_mark;
 		atomic64_set(&newsk->sk_cookie,

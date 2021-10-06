@@ -346,7 +346,10 @@ int usb_hub_create_port_device(struct usb_hub *hub, int port1)
 	extern char gSynoUsbVbusHostAddr[CONFIG_SYNO_USB_VBUS_NUM_GPIO][20];
 	extern int gSynoUsbVbusPort[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
 	extern unsigned gSynoUsbVbusGpp[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
+	extern unsigned gSynoUsbVbusGppPol[CONFIG_SYNO_USB_VBUS_NUM_GPIO];
+#ifdef MY_ABC_HERE
 	int vbusGPIOValue = 0;
+#endif  
 #endif  
 
 	port_dev = kzalloc(sizeof(*port_dev), GFP_KERNEL);
@@ -392,31 +395,35 @@ int usb_hub_create_port_device(struct usb_hub *hub, int port1)
 	if (hdev && hdev->serial) {
 		for (i = 0; i < CONFIG_SYNO_USB_VBUS_NUM_GPIO; i++) {
 			if (0 == strcmp(gSynoUsbVbusHostAddr[i], hdev->serial)) {
+				 
 #ifdef MY_ABC_HERE
 				vbusGPIOValue = 0;
-				if (0 == syno_pch_lpc_gpio_pin(gSynoUsbVbusGpp[i], &vbusGPIOValue, 0) && 0 == vbusGPIOValue) {
-					vbusGPIOValue = 1;
+				if (0 == syno_pch_lpc_gpio_pin(gSynoUsbVbusGpp[i], &vbusGPIOValue, 0) &&
+				    gSynoUsbVbusGppPol[i] != vbusGPIOValue) {
+					vbusGPIOValue = gSynoUsbVbusGppPol[i];
 					if (0 == syno_pch_lpc_gpio_pin(gSynoUsbVbusGpp[i], &vbusGPIOValue, 1)) {
 						printk(KERN_INFO " port%d is going to power up Vbus by "
-								"GPIO#%d\n", port1, gSynoUsbVbusGpp[i]);
+							"GPIO#%d(%s)\n", port1, gSynoUsbVbusGpp[i],
+							gSynoUsbVbusGppPol[i] ? "ACTIVE_HIGH" : "ACTIVE_LOW");
 						mdelay(100);
 					}
 				}
 #else  
-#ifdef CONFIG_SYNO_USB_VBUS_GPIO_POLARITY_INVERT
-				if (1 == SYNO_GPIO_READ(gSynoUsbVbusGpp[i])) {
-					SYNO_GPIO_WRITE(gSynoUsbVbusGpp[i], 0);
-#else   
-				if (0 == SYNO_GPIO_READ(gSynoUsbVbusGpp[i])) {
-					SYNO_GPIO_WRITE(gSynoUsbVbusGpp[i], 1);
-#endif  
+				if (gSynoUsbVbusGppPol[i] != SYNO_GPIO_READ(gSynoUsbVbusGpp[i])) {
+					SYNO_GPIO_WRITE(gSynoUsbVbusGpp[i], gSynoUsbVbusGppPol[i]);
 					printk(KERN_INFO " port%d is going to power up Vbus by "
-							"GPIO#%d\n", port1, gSynoUsbVbusGpp[i]);
+							"GPIO#%d(%s)\n", port1, gSynoUsbVbusGpp[i],
+							gSynoUsbVbusGppPol[i] ? "ACTIVE_HIGH" : "ACTIVE_LOW");
 					mdelay(100);
 				}
 #endif  
-				if (port1 == gSynoUsbVbusPort[i])
+				if (port1 == gSynoUsbVbusPort[i]) {
 					port_dev->syno_vbus_gpp = gSynoUsbVbusGpp[i];
+					port_dev->syno_vbus_gpp_pol = gSynoUsbVbusGppPol[i];
+					printk(KERN_INFO "host %s port %d has Vbus GPIO#%d with polarity "
+							"%s\n",hdev->serial, port1, port_dev->syno_vbus_gpp,
+							port_dev->syno_vbus_gpp_pol ? "ACTIVE_HIGH" : "ACTIVE_LOW");
+				}
 			}
 		}
 	}

@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /*
  * Allwinner A1X SoCs pinctrl driver.
  *
@@ -454,11 +457,11 @@ static int sunxi_pinctrl_gpio_direction_input(struct gpio_chip *chip,
 
 static int sunxi_pinctrl_gpio_get(struct gpio_chip *chip, unsigned offset)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct sunxi_pinctrl *pctl = dev_get_drvdata(chip->parent);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct sunxi_pinctrl *pctl = dev_get_drvdata(chip->dev);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	u32 reg = sunxi_data_reg(offset);
 	u8 index = sunxi_data_offset(offset);
 	u32 set_mux = pctl->desc->irq_read_needs_mux &&
@@ -479,11 +482,11 @@ static int sunxi_pinctrl_gpio_get(struct gpio_chip *chip, unsigned offset)
 static void sunxi_pinctrl_gpio_set(struct gpio_chip *chip,
 				unsigned offset, int value)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct sunxi_pinctrl *pctl = dev_get_drvdata(chip->parent);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct sunxi_pinctrl *pctl = dev_get_drvdata(chip->dev);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	u32 reg = sunxi_data_reg(offset);
 	u8 index = sunxi_data_offset(offset);
 	unsigned long flags;
@@ -530,11 +533,11 @@ static int sunxi_pinctrl_gpio_of_xlate(struct gpio_chip *gc,
 
 static int sunxi_pinctrl_gpio_to_irq(struct gpio_chip *chip, unsigned offset)
 {
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	struct sunxi_pinctrl *pctl = dev_get_drvdata(chip->parent);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	struct sunxi_pinctrl *pctl = dev_get_drvdata(chip->dev);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	struct sunxi_desc_function *desc;
 	unsigned pinnum = pctl->desc->pin_base + offset;
 	unsigned irqnum;
@@ -548,13 +551,13 @@ static int sunxi_pinctrl_gpio_to_irq(struct gpio_chip *chip, unsigned offset)
 
 	irqnum = desc->irqbank * IRQ_PER_BANK + desc->irqnum;
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	dev_dbg(chip->parent, "%s: request IRQ for GPIO %d, return %d\n",
 		chip->label, offset + chip->base, irqnum);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	dev_dbg(chip->dev, "%s: request IRQ for GPIO %d, return %d\n",
 		chip->label, offset + chip->base, irqnum);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	return irq_find_mapping(pctl->domain, irqnum);
 }
@@ -977,11 +980,11 @@ int sunxi_pinctrl_init(struct platform_device *pdev,
 	pctl->chip->ngpio = round_up(last_pin, PINS_PER_BANK) -
 			    pctl->desc->pin_base;
 	pctl->chip->label = dev_name(&pdev->dev);
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	pctl->chip->parent = &pdev->dev;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	pctl->chip->dev = &pdev->dev;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	pctl->chip->base = pctl->desc->pin_base;
 
 	ret = gpiochip_add(pctl->chip);

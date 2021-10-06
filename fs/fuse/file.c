@@ -422,11 +422,6 @@ int fuse_fsync_common(struct file *file, loff_t start, loff_t end,
 
 	fuse_sync_writes(inode);
 
-	/*
-	 * Due to implementation of fuse writeback
-	 * filemap_write_and_wait_range() does not catch errors.
-	 * We have to do this directly after fuse_sync_writes()
-	 */
 	if (test_bit(AS_ENOSPC, &file->f_mapping->flags) &&
 	    test_and_clear_bit(AS_ENOSPC, &file->f_mapping->flags))
 		err = -ENOSPC;
@@ -1922,7 +1917,6 @@ static int fuse_write_end(struct file *file, struct address_space *mapping,
 {
 	struct inode *inode = page->mapping->host;
 
-	/* Haven't copied anything?  Skip zeroing, size extending, dirtying. */
 	if (!copied)
 		goto unlock;
 

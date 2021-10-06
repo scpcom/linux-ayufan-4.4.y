@@ -1,3 +1,6 @@
+#ifndef MY_ABC_HERE
+#define MY_ABC_HERE
+#endif
 /* b44.c: Broadcom 44xx/47xx Fast Ethernet device driver.
  *
  * Copyright (C) 2002 David S. Miller (davem@redhat.com)
@@ -2261,9 +2264,9 @@ static int b44_register_phy_one(struct b44 *bp)
 	mii_bus->parent = sdev->dev;
 	mii_bus->phy_mask = ~(1 << bp->phy_addr);
 	snprintf(mii_bus->id, MII_BUS_ID_SIZE, "%x", instance);
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	mii_bus->irq = kmalloc(sizeof(int) * PHY_MAX_ADDR, GFP_KERNEL);
 	if (!mii_bus->irq) {
 		dev_err(sdev->dev, "mii_bus irq allocation failed\n");
@@ -2272,25 +2275,25 @@ static int b44_register_phy_one(struct b44 *bp)
 	}
 
 	memset(mii_bus->irq, PHY_POLL, sizeof(int) * PHY_MAX_ADDR);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	bp->mii_bus = mii_bus;
 
 	err = mdiobus_register(mii_bus);
 	if (err) {
 		dev_err(sdev->dev, "failed to register MII bus\n");
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 		goto err_out_mdiobus;
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 		goto err_out_mdiobus_irq;
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	}
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	if (!mdiobus_is_registered_device(bp->mii_bus, bp->phy_addr) &&
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	if (!bp->mii_bus->phy_map[bp->phy_addr] &&
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	    (sprom->boardflags_lo & (B44_BOARDFLAG_ROBO | B44_BOARDFLAG_ADM))) {
 
 		dev_info(sdev->dev,
@@ -2323,29 +2326,29 @@ static int b44_register_phy_one(struct b44 *bp)
 
 	bp->phydev = phydev;
 	bp->old_link = 0;
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 	bp->phy_addr = phydev->mdio.addr;
 
 	phy_attached_info(phydev);
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	bp->phy_addr = phydev->addr;
 
 	dev_info(sdev->dev, "attached PHY driver [%s] (mii_bus:phy_addr=%s)\n",
 		 phydev->drv->name, dev_name(&phydev->dev));
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 
 	return 0;
 
 err_out_mdiobus_unregister:
 	mdiobus_unregister(mii_bus);
 
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 err_out_mdiobus_irq:
 	kfree(mii_bus->irq);
 
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 err_out_mdiobus:
 	mdiobus_free(mii_bus);
 
@@ -2359,11 +2362,11 @@ static void b44_unregister_phy_one(struct b44 *bp)
 
 	phy_disconnect(bp->phydev);
 	mdiobus_unregister(mii_bus);
-#if defined(CONFIG_SYNO_LSP_ARMADA_16_12)
+#if defined(MY_DEF_HERE)
 //do nothing
-#else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#else /* MY_DEF_HERE */
 	kfree(mii_bus->irq);
-#endif /* CONFIG_SYNO_LSP_ARMADA_16_12 */
+#endif /* MY_DEF_HERE */
 	mdiobus_free(mii_bus);
 }
 
