@@ -4276,6 +4276,8 @@ static void page_flip_completed(struct intel_crtc *intel_crtc)
 
 	trace_i915_flip_complete(intel_crtc->plane,
 				 work->pending_flip_obj);
+
+	queue_work(dev_priv->wq, &work->work);
 }
 
 static int intel_crtc_wait_for_pending_flips(struct drm_crtc *crtc)

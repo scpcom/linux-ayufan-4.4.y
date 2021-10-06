@@ -487,10 +487,11 @@ int audit_exe_compare(struct task_struct *tsk, struct audit_fsnotify_mark *mark)
 	unsigned long ino;
 	dev_t dev;
 
-	rcu_read_lock();
-	exe_file = rcu_dereference(tsk->mm->exe_file);
+	exe_file = get_task_exe_file(tsk);
+	if (!exe_file)
+		return 0;
 	ino = exe_file->f_inode->i_ino;
 	dev = exe_file->f_inode->i_sb->s_dev;
-	rcu_read_unlock();
+	fput(exe_file);
 	return audit_mark_compare(mark, ino, dev);
 }

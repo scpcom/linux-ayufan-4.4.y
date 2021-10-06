@@ -611,7 +611,7 @@ int usb_stor_CB_transport(struct scsi_cmnd *srb, struct us_data *us)
 	result = usb_stor_ctrl_transfer(us, us->send_ctrl_pipe,
 				      US_CBI_ADSC, 
 				      USB_TYPE_CLASS | USB_RECIP_INTERFACE, 0, 
-				      us->ifnum, srb->cmnd, srb->cmd_len);
+				      us->ifnum, us->iobuf, srb->cmd_len);
 
 	usb_stor_dbg(us, "Call to usb_stor_ctrl_transfer() returned %d\n",
 		     result);

@@ -11,7 +11,11 @@
 
 #include <linux/pci.h>
 #include <linux/acpi.h>
+#include <linux/delay.h>
+#include <linux/dmi.h>
 #include <linux/pci_ids.h>
+#include <linux/bcma/bcma.h>
+#include <linux/bcma/bcma_regs.h>
 #include <drm/i915_drm.h>
 #include <asm/pci-direct.h>
 #include <asm/dma.h>
@@ -21,6 +25,9 @@
 #include <asm/iommu.h>
 #include <asm/gart.h>
 #include <asm/irq_remapping.h>
+#include <asm/early_ioremap.h>
+
+#define dev_err(msg)  pr_err("pci 0000:%02x:%02x.%d: %s", bus, slot, func, msg)
 
 static void __init fix_hypertransport_config(int num, int slot, int func)
 {
@@ -74,6 +81,13 @@ static void __init nvidia_bugs(int num, int slot, int func)
 {
 #ifdef CONFIG_ACPI
 #ifdef CONFIG_X86_IO_APIC
+	/*
+	 * Only applies to Nvidia root ports (bus 0) and not to
+	 * Nvidia graphics cards with PCI ports on secondary buses.
+	 */
+	if (num)
+		return;
+
 	/*
 	 * All timer overrides on Nvidia are
 	 * wrong unless HPET is enabled.
@@ -567,12 +581,6 @@ struct chipset {
 	void (*f)(int num, int slot, int func);
 };
 
-/*
- * Only works for devices on the root bus. If you add any devices
- * not on bus 0 readd another loop level in early_quirks(). But
- * be careful because at least the Nvidia quirk here relies on
- * only matching on bus 0.
- */
 static struct chipset early_qrk[] __initdata = {
 	{ PCI_VENDOR_ID_NVIDIA, PCI_ANY_ID,
 	  PCI_CLASS_BRIDGE_PCI, PCI_ANY_ID, QFLAG_APPLY_ONCE, nvidia_bugs },
@@ -602,8 +610,12 @@ static struct chipset early_qrk[] __initdata = {
 	 */
 	{ PCI_VENDOR_ID_INTEL, 0x0f00,
 		PCI_CLASS_BRIDGE_HOST, PCI_ANY_ID, 0, force_disable_hpet},
+	{ PCI_VENDOR_ID_BROADCOM, 0x4331,
+	  PCI_CLASS_NETWORK_OTHER, PCI_ANY_ID, 0, apple_airport_reset},
 	{}
 };
+
+static void __init early_pci_scan_bus(int bus);
 
 /**
  * check_dev_quirk - apply early quirks to a given PCI device
@@ -613,7 +625,7 @@ static struct chipset early_qrk[] __initdata = {
  *
  * Check the vendor & device ID against the early quirks table.
  *
- * If the device is single function, let early_quirks() know so we don't
+ * If the device is single function, let early_pci_scan_bus() know so we don't
  * poke at this device again.
  */
 static int __init check_dev_quirk(int num, int slot, int func)
@@ -622,6 +634,7 @@ static int __init check_dev_quirk(int num, int slot, int func)
 	u16 vendor;
 	u16 device;
 	u8 type;
+	u8 sec;
 	int i;
 
 	class = read_pci_config_16(num, slot, func, PCI_CLASS_DEVICE);
@@ -649,25 +662,36 @@ static int __init check_dev_quirk(int num, int slot, int func)
 
 	type = read_pci_config_byte(num, slot, func,
 				    PCI_HEADER_TYPE);
+
+	if ((type & 0x7f) == PCI_HEADER_TYPE_BRIDGE) {
+		sec = read_pci_config_byte(num, slot, func, PCI_SECONDARY_BUS);
+		if (sec > num)
+			early_pci_scan_bus(sec);
+	}
+
 	if (!(type & 0x80))
 		return -1;
 
 	return 0;
 }
 
-void __init early_quirks(void)
+static void __init early_pci_scan_bus(int bus)
 {
 	int slot, func;
 
-	if (!early_pci_allowed())
-		return;
-
 	/* Poor man's PCI discovery */
-	/* Only scan the root bus */
 	for (slot = 0; slot < 32; slot++)
 		for (func = 0; func < 8; func++) {
 			/* Only probe function 0 on single fn devices */
-			if (check_dev_quirk(0, slot, func))
+			if (check_dev_quirk(bus, slot, func))
 				break;
 		}
+}
+
+void __init early_quirks(void)
+{
+	if (!early_pci_allowed())
+		return;
+
+	early_pci_scan_bus(0);
 }

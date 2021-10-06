@@ -555,7 +555,12 @@ static int omap_rng_probe(struct platform_device *pdev)
 		 omap_rng_read(priv, RNG_REV_REG));
 #else /* CONFIG_SYNO_LSP_ARMADA_16_12 */
 	pm_runtime_enable(&pdev->dev);
-	pm_runtime_get_sync(&pdev->dev);
+	ret = pm_runtime_get_sync(&pdev->dev);
+	if (ret < 0) {
+		dev_err(&pdev->dev, "Failed to runtime_get device: %d\n", ret);
+		pm_runtime_put_noidle(&pdev->dev);
+		goto err_ioremap;
+	}
 
 	ret = (dev->of_node) ? of_get_omap_rng_device_details(priv, pdev) :
 				get_omap_rng_device_details(priv);

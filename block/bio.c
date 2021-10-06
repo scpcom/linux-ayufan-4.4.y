@@ -489,6 +489,8 @@ integrity_clone:
 		}
 	}
 
+	bio_clone_blkcg_association(bio, bio_src);
+
 	return bio;
 }
 EXPORT_SYMBOL(bio_clone_bioset);

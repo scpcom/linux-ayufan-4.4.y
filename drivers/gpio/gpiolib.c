@@ -1546,7 +1546,7 @@ static void gpiod_parse_flags(struct gpio_desc *desc, unsigned long lflags)
 }
 
 static int gpiod_configure_flags(struct gpio_desc *desc, const char *con_id,
-				 enum gpiod_flags dflags)
+		unsigned long lflags, enum gpiod_flags dflags)
 {
 	int status;
 
@@ -1596,13 +1596,11 @@ struct gpio_desc *__must_check gpiod_get_index(struct device *dev,
 		return desc;
 	}
 
-	gpiod_parse_flags(desc, lookupflags);
-
 	status = gpiod_request(desc, con_id);
 	if (status < 0)
 		return ERR_PTR(status);
 
-	status = gpiod_configure_flags(desc, con_id, flags);
+	status = gpiod_configure_flags(desc, con_id, lookupflags, flags);
 	if (status < 0) {
 		dev_dbg(dev, "setup of GPIO %s failed\n", con_id);
 		gpiod_put(desc);
@@ -1644,6 +1642,10 @@ struct gpio_desc *fwnode_get_named_gpiod(struct fwnode_handle *fwnode,
 	if (IS_ERR(desc))
 		return desc;
 
+	ret = gpiod_request(desc, NULL);
+	if (ret)
+		return ERR_PTR(ret);
+
 	if (active_low)
 		set_bit(FLAG_ACTIVE_LOW, &desc->flags);
 
@@ -1653,10 +1655,6 @@ struct gpio_desc *fwnode_get_named_gpiod(struct fwnode_handle *fwnode,
 		else
 			set_bit(FLAG_OPEN_SOURCE, &desc->flags);
 	}
-
-	ret = gpiod_request(desc, NULL);
-	if (ret)
-		return ERR_PTR(ret);
 
 	return desc;
 }
@@ -1690,8 +1688,6 @@ int gpiod_hog(struct gpio_desc *desc, const char *name,
 	chip = gpiod_to_chip(desc);
 	hwnum = gpio_chip_hwgpio(desc);
 
-	gpiod_parse_flags(desc, lflags);
-
 	local_desc = gpiochip_request_own_desc(chip, hwnum, name);
 	if (IS_ERR(local_desc)) {
 		pr_err("requesting hog GPIO %s (chip %s, offset %d) failed\n",
@@ -1699,7 +1695,7 @@ int gpiod_hog(struct gpio_desc *desc, const char *name,
 		return PTR_ERR(local_desc);
 	}
 
-	status = gpiod_configure_flags(desc, name, dflags);
+	status = gpiod_configure_flags(desc, name, lflags, dflags);
 	if (status < 0) {
 		pr_err("setup of hog GPIO %s (chip %s, offset %d) failed\n",
 		       name, chip->label, hwnum);

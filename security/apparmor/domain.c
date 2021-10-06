@@ -730,6 +730,8 @@ out:
 	aa_put_profile(profile);
 #endif
 	kfree(name);
+	aa_put_profile(profile);
+	aa_put_profile(previous_profile);
 	put_cred(cred);
 
 	return error;

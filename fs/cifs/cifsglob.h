@@ -723,6 +723,7 @@ cap_unix(struct cifs_ses *ses)
 struct cifs_tcon {
 	struct list_head tcon_list;
 	int tc_count;
+	struct list_head rlist; /* reconnect list */
 	struct list_head openFileList;
 	struct cifs_ses *ses;	 
 	char treeName[MAX_TREE_SIZE + 1];  
@@ -925,7 +926,6 @@ struct cifsFileInfo {
 	  ;
 	 
 	struct dentry *dentry;
-	unsigned int f_flags;
 	struct tcon_link *tlink;
 	bool invalidHandle:1;	 
 	bool oplock_break_cancelled:1;

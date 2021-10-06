@@ -106,6 +106,7 @@ struct fsnotify_group {
 	#define FS_PRIO_1	1  
 	#define FS_PRIO_2	2  
 	unsigned int priority;
+	bool shutdown;		/* group is being shut down, don't queue more events */
 
 	struct mutex mark_mutex;	 
 	atomic_t num_marks;		 

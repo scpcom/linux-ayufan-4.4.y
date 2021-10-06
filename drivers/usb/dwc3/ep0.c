@@ -65,17 +65,10 @@ static int dwc3_ep0_start_trans(struct dwc3 *dwc, u8 epnum, dma_addr_t buf_dma,
 		u32 len, u32 type, bool chain)
 #endif /* MY_DEF_HERE */
 {
-	struct dwc3_gadget_ep_cmd_params params;
 	struct dwc3_trb			*trb;
 	struct dwc3_ep			*dep;
 
-	int				ret;
-
 	dep = dwc->eps[epnum];
-	if (dep->flags & DWC3_EP_BUSY) {
-		dwc3_trace(trace_dwc3_ep0, "%s still busy", dep->name);
-		return 0;
-	}
 
 #ifdef MY_DEF_HERE
 	trb = dwc->ep0_trb;
@@ -106,15 +99,24 @@ static int dwc3_ep0_start_trans(struct dwc3 *dwc, u8 epnum, dma_addr_t buf_dma,
 		trb->ctrl |= (DWC3_TRB_CTRL_IOC
 				| DWC3_TRB_CTRL_LST);
 
-	if (chain)
+	trace_dwc3_prepare_trb(dep, trb);
+}
+
+static int dwc3_ep0_start_trans(struct dwc3 *dwc, u8 epnum)
+{
+	struct dwc3_gadget_ep_cmd_params params;
+	struct dwc3_ep			*dep;
+	int				ret;
+
+	dep = dwc->eps[epnum];
+	if (dep->flags & DWC3_EP_BUSY) {
+		dwc3_trace(trace_dwc3_ep0, "%s still busy", dep->name);
 		return 0;
 #endif /* MY_DEF_HERE */
 
 	memset(&params, 0, sizeof(params));
 	params.param0 = upper_32_bits(dwc->ep0_trb_addr);
 	params.param1 = lower_32_bits(dwc->ep0_trb_addr);
-
-	trace_dwc3_prepare_trb(dep, trb);
 
 	ret = dwc3_send_gadget_ep_cmd(dwc, dep->number,
 			DWC3_DEPCMD_STARTTRANSFER, &params);
@@ -1015,7 +1017,7 @@ static void __dwc3_ep0_do_control_data(struct dwc3 *dwc,
 	req->direction = !!dep->number;
 
 	if (req->request.length == 0) {
-		ret = dwc3_ep0_start_trans(dwc, dep->number,
+		dwc3_ep0_prepare_one_trb(dwc, dep->number,
 				dwc->ctrl_req_addr, 0,
 #ifdef MY_DEF_HERE
 				DWC3_TRBCTL_CONTROL_DATA);
@@ -1051,7 +1053,7 @@ static void __dwc3_ep0_do_control_data(struct dwc3 *dwc,
 		if (req->request.length > DWC3_EP0_BOUNCE_SIZE) {
 			transfer_size = ALIGN(req->request.length - maxpacket,
 					      maxpacket);
-			ret = dwc3_ep0_start_trans(dwc, dep->number,
+			dwc3_ep0_prepare_one_trb(dwc, dep->number,
 						   req->request.dma,
 						   transfer_size,
 						   DWC3_TRBCTL_CONTROL_DATA,

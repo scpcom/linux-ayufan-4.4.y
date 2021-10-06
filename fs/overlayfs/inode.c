@@ -272,7 +272,8 @@ ssize_t ovl_listxattr(struct dentry *dentry, char *list, size_t size)
 	struct path realpath;
 	enum ovl_path_type type = ovl_path_real(dentry, &realpath);
 	ssize_t res;
-	int off;
+	size_t len;
+	char *s;
 
 	res = vfs_listxattr(realpath.dentry, list, size);
 	if (res <= 0 || size == 0)
@@ -282,17 +283,19 @@ ssize_t ovl_listxattr(struct dentry *dentry, char *list, size_t size)
 		return res;
 
 	/* filter out private xattrs */
-	for (off = 0; off < res;) {
-		char *s = list + off;
-		size_t slen = strlen(s) + 1;
+	for (s = list, len = res; len;) {
+		size_t slen = strnlen(s, len) + 1;
 
-		BUG_ON(off + slen > res);
+		/* underlying fs providing us with an broken xattr list? */
+		if (WARN_ON(slen > len))
+			return -EIO;
 
+		len -= slen;
 		if (ovl_is_private_xattr(s)) {
 			res -= slen;
-			memmove(s, s + slen, res - off);
+			memmove(s, s + slen, len);
 		} else {
-			off += slen;
+			s += slen;
 		}
 	}
 
@@ -410,12 +413,11 @@ struct inode *ovl_new_inode(struct super_block *sb, umode_t mode,
 	if (!inode)
 		return NULL;
 
-	mode &= S_IFMT;
-
 	inode->i_ino = get_next_ino();
 	inode->i_mode = mode;
 	inode->i_flags |= S_NOATIME | S_NOCMTIME;
 
+	mode &= S_IFMT;
 	switch (mode) {
 	case S_IFDIR:
 		inode->i_private = oe;

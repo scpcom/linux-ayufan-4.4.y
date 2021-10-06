@@ -317,9 +317,18 @@ int build_ntlmssp_auth_blob(unsigned char *pbuffer,
 				   const struct nls_table *nls_cp)
 {
 	int rc;
-	AUTHENTICATE_MESSAGE *sec_blob = (AUTHENTICATE_MESSAGE *)pbuffer;
+	AUTHENTICATE_MESSAGE *sec_blob;
 	__u32 flags;
 	unsigned char *tmp;
+
+	rc = setup_ntlmv2_rsp(ses, nls_cp);
+	if (rc) {
+		cifs_dbg(VFS, "Error %d during NTLMSSP authentication\n", rc);
+		*buflen = 0;
+		goto setup_ntlmv2_ret;
+	}
+	*pbuffer = kmalloc(size_of_ntlmssp_blob(ses), GFP_KERNEL);
+	sec_blob = (AUTHENTICATE_MESSAGE *)*pbuffer;
 
 	memcpy(sec_blob->Signature, NTLMSSP_SIGNATURE, 8);
 	sec_blob->MessageType = NtLmAuthenticate;
@@ -335,7 +344,7 @@ int build_ntlmssp_auth_blob(unsigned char *pbuffer,
 			flags |= NTLMSSP_NEGOTIATE_KEY_XCH;
 	}
 
-	tmp = pbuffer + sizeof(AUTHENTICATE_MESSAGE);
+	tmp = *pbuffer + sizeof(AUTHENTICATE_MESSAGE);
 	sec_blob->NegotiateFlags = cpu_to_le32(flags);
 
 	sec_blob->LmChallengeResponse.BufferOffset =
@@ -343,13 +352,9 @@ int build_ntlmssp_auth_blob(unsigned char *pbuffer,
 	sec_blob->LmChallengeResponse.Length = 0;
 	sec_blob->LmChallengeResponse.MaximumLength = 0;
 
-	sec_blob->NtChallengeResponse.BufferOffset = cpu_to_le32(tmp - pbuffer);
+	sec_blob->NtChallengeResponse.BufferOffset =
+				cpu_to_le32(tmp - *pbuffer);
 	if (ses->user_name != NULL) {
-		rc = setup_ntlmv2_rsp(ses, nls_cp);
-		if (rc) {
-			cifs_dbg(VFS, "Error %d during NTLMSSP authentication\n", rc);
-			goto setup_ntlmv2_ret;
-		}
 		memcpy(tmp, ses->auth_key.response + CIFS_SESS_KEY_SIZE,
 				ses->auth_key.len - CIFS_SESS_KEY_SIZE);
 		tmp += ses->auth_key.len - CIFS_SESS_KEY_SIZE;
@@ -365,7 +370,7 @@ int build_ntlmssp_auth_blob(unsigned char *pbuffer,
 	}
 
 	if (ses->domainName == NULL) {
-		sec_blob->DomainName.BufferOffset = cpu_to_le32(tmp - pbuffer);
+		sec_blob->DomainName.BufferOffset = cpu_to_le32(tmp - *pbuffer);
 		sec_blob->DomainName.Length = 0;
 		sec_blob->DomainName.MaximumLength = 0;
 		tmp += 2;
@@ -381,7 +386,7 @@ int build_ntlmssp_auth_blob(unsigned char *pbuffer,
 	}
 
 	if (ses->user_name == NULL) {
-		sec_blob->UserName.BufferOffset = cpu_to_le32(tmp - pbuffer);
+		sec_blob->UserName.BufferOffset = cpu_to_le32(tmp - *pbuffer);
 		sec_blob->UserName.Length = 0;
 		sec_blob->UserName.MaximumLength = 0;
 		tmp += 2;
@@ -396,7 +401,7 @@ int build_ntlmssp_auth_blob(unsigned char *pbuffer,
 		tmp += len;
 	}
 
-	sec_blob->WorkstationName.BufferOffset = cpu_to_le32(tmp - pbuffer);
+	sec_blob->WorkstationName.BufferOffset = cpu_to_le32(tmp - *pbuffer);
 	sec_blob->WorkstationName.Length = 0;
 	sec_blob->WorkstationName.MaximumLength = 0;
 	tmp += 2;
@@ -405,19 +410,19 @@ int build_ntlmssp_auth_blob(unsigned char *pbuffer,
 		(ses->ntlmssp->server_flags & NTLMSSP_NEGOTIATE_EXTENDED_SEC))
 			&& !calc_seckey(ses)) {
 		memcpy(tmp, ses->ntlmssp->ciphertext, CIFS_CPHTXT_SIZE);
-		sec_blob->SessionKey.BufferOffset = cpu_to_le32(tmp - pbuffer);
+		sec_blob->SessionKey.BufferOffset = cpu_to_le32(tmp - *pbuffer);
 		sec_blob->SessionKey.Length = cpu_to_le16(CIFS_CPHTXT_SIZE);
 		sec_blob->SessionKey.MaximumLength =
 				cpu_to_le16(CIFS_CPHTXT_SIZE);
 		tmp += CIFS_CPHTXT_SIZE;
 	} else {
-		sec_blob->SessionKey.BufferOffset = cpu_to_le32(tmp - pbuffer);
+		sec_blob->SessionKey.BufferOffset = cpu_to_le32(tmp - *pbuffer);
 		sec_blob->SessionKey.Length = 0;
 		sec_blob->SessionKey.MaximumLength = 0;
 	}
 
+	*buflen = tmp - *pbuffer;
 setup_ntlmv2_ret:
-	*buflen = tmp - pbuffer;
 	return rc;
 }
 
@@ -1142,7 +1147,7 @@ sess_auth_rawntlmssp_authenticate(struct sess_data *sess_data)
 	struct cifs_ses *ses = sess_data->ses;
 	__u16 bytes_remaining;
 	char *bcc_ptr;
-	char *ntlmsspblob = NULL;
+	unsigned char *ntlmsspblob = NULL;
 	u16 blob_len;
 
 	cifs_dbg(FYI, "rawntlmssp session setup authenticate phase\n");

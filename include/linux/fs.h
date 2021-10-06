@@ -203,6 +203,7 @@ enum bypass_synoacl_type {
 #define ATTR_KILL_PRIV	(1 << 14)
 #define ATTR_OPEN	(1 << 15)  
 #define ATTR_TIMES_SET	(1 << 16)
+#define ATTR_TOUCH	(1 << 17)
 
 #define WHITEOUT_MODE 0
 #define WHITEOUT_DEV 0
